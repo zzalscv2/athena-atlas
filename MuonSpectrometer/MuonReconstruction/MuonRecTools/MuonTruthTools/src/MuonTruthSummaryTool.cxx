@@ -92,9 +92,11 @@ namespace Muon {
                 PRD_MultiTruthCollection::const_iterator it_end = col->end();
                 for (; it != it_end; ++it) {
                     const HepMcParticleLink& link = it->second;
-                    if (link.cptr() && (abs(link.cptr()->pdg_id()) == m_selectedPdgId || std::abs(link.cptr()->pdg_id()) == 13)) {
-                        m_truthHits[it->first] = HepMC::barcode(link.cptr());
-                        m_pdgIdLookupFromBarcode[HepMC::barcode(link.cptr())] = link.cptr()->pdg_id();
+                    if (link.cptr() && (std::abs(link.cptr()->pdg_id()) == m_selectedPdgId || std::abs(link.cptr()->pdg_id()) == 13)) {
+                        int bc = link.barcode();
+                        m_truthHits[it->first] = bc;
+                        m_pdgIdLookupFromBarcode[bc] = link.cptr()->pdg_id();
+
                     }
                 }
             }

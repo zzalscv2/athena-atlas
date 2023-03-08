@@ -26,7 +26,7 @@ namespace LArSamples {
   
   enum CombinationType { AverageValue = 0, MaxValue = 1, MinValue = 2, TotalValue = 3, RMSValue = 4 };
 
-  class MonitorBase : public AbsLArCells
+  class ATLAS_NOT_THREAD_SAFE MonitorBase : public AbsLArCells
   {
   
     public:

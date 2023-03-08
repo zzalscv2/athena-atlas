@@ -1,20 +1,18 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.CFElements import seqAND
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsPool
 from AthenaCommon.Logging import logging
 
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
-
 logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
 
 
-def UTTJetRecoSequence():
+def UTTJetRecoSequence(flags):
 
         from TriggerMenuMT.HLT.CommonSequences.CaloSequences import caloClusterRecoSequence
         topoClusterSequence, clustersKey = RecoFragmentsPool.retrieve(
-                caloClusterRecoSequence, flags=ConfigFlags, RoIs='')
+                caloClusterRecoSequence, flags, RoIs='')
  
         from TrigStreamerHypo.TrigStreamerHypoConf   import TrigStreamerHypoAlg
         from TrigStreamerHypo.TrigStreamerHypoConfig import StreamerHypoToolGenerator
@@ -32,7 +30,7 @@ def UTTJetRecoSequence():
 
         JetSeq, jetName, jetDef = RecoFragmentsPool.retrieve(
             jetRecoSequence,
-            ConfigFlags,
+            flags,
             clustersKey=clustersKey,
             **trkcolls,
             **jetRecoDict,
@@ -43,25 +41,27 @@ def UTTJetRecoSequence():
         from TrigT2CaloCommon.CaloDef import clusterFSInputMaker
         IMalg = clusterFSInputMaker()
 
-        return MenuSequence( Sequence    = seqAND("UTTJetRecoSeq", [IMalg,topoClusterSequence,JetSeq]),
+        return MenuSequence( flags,
+                             Sequence    = seqAND("UTTJetRecoSeq", [IMalg,topoClusterSequence,JetSeq]),
                              Maker       = IMalg,
                              Hypo        = HypoAlg,
                              HypoToolGen = StreamerHypoToolGenerator
                      )
 
 
-def HitDVHypoSequence():
+def HitDVHypoSequence(flags):
         from TrigLongLivedParticlesHypo.TrigHitDVHypoConfig import TrigHitDVHypoToolFromDict
         from TrigLongLivedParticlesHypo.TrigHitDVHypoConfig import createTrigHitDVHypoAlg
 
-        theHitDVHypo = createTrigHitDVHypoAlg("HitDV")
+        theHitDVHypo = createTrigHitDVHypoAlg(flags, "HitDV")
 
         from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable
         from AthenaConfiguration.ComponentFactory import CompFactory
         DummyInputMakerAlg = conf2toConfigurable(CompFactory.InputMakerForRoI( "IM_HitDV_HypoOnlyStep" ))
         DummyInputMakerAlg.RoITool = conf2toConfigurable(CompFactory.ViewCreatorInitialROITool())
 
-        return MenuSequence( Sequence    = seqAND("HitDVEmptyStep",[DummyInputMakerAlg]),
+        return MenuSequence( flags,
+                             Sequence    = seqAND("HitDVEmptyStep",[DummyInputMakerAlg]),
                              Maker       = DummyInputMakerAlg,
                              Hypo        = theHitDVHypo,
                              HypoToolGen = TrigHitDVHypoToolFromDict,

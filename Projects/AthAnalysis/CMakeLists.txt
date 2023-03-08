@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Set up the project.
 cmake_minimum_required( VERSION 3.6 )
@@ -32,6 +32,7 @@ find_package( BLAS )
 find_package( VDT )
 find_package( requests )
 find_package( libffi )
+find_package( gl2ps )
 
 # Compile flag(s).
 add_definitions( -DXAOD_ANALYSIS )
@@ -90,6 +91,15 @@ install( FILES
 # Install graphviz output if available.
 install( FILES ${CMAKE_BINARY_DIR}/packages.dot
    DESTINATION . OPTIONAL )
+
+# Setup IDE integration:
+set( ATLAS_ENABLE_IDE_HELPERS OFF CACHE BOOL "Enable IDE helpers" )
+if( ATLAS_ENABLE_IDE_HELPERS )
+   set( ATLAS_IDEHELPERSCRIPTS_SETUP
+      "${CMAKE_SOURCE_DIR}/../../.vscode/IDEHelperScripts/Setup.cmake"
+      CACHE FILEPATH "Setup file for the IDE / VS Code helpers" )
+   include( "${ATLAS_IDEHELPERSCRIPTS_SETUP}" )
+endif()
 
 # Package up the release using CPack.
 atlas_cpack_setup()

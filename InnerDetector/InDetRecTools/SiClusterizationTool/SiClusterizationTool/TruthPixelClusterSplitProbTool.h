@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -29,22 +29,24 @@ namespace InDet {
 
   class TruthClusterizationFactory;
 
-  class TruthPixelClusterSplitProbTool : public extends<AthAlgTool, IPixelClusterSplitProbTool>
+  class TruthPixelClusterSplitProbTool final: public extends<AthAlgTool, IPixelClusterSplitProbTool>
   {
   public:
     
     TruthPixelClusterSplitProbTool(const std::string& t, const std::string& n, const IInterface*  p);
 
     virtual ~TruthPixelClusterSplitProbTool() = default;
-    
-    StatusCode initialize();
 
-    virtual InDet::PixelClusterSplitProb splitProbability(const InDet::PixelCluster& origCluster ) const;
+    virtual StatusCode initialize() override;
 
-    virtual InDet::PixelClusterSplitProb splitProbability(const InDet::PixelCluster& origCluster, const Trk::TrackParameters& trackParameters ) const;
+    virtual InDet::PixelClusterSplitProb splitProbability(
+        const InDet::PixelCluster& origCluster) const override;
 
+    virtual InDet::PixelClusterSplitProb splitProbability(
+        const InDet::PixelCluster& origCluster,
+        const Trk::TrackParameters& trackParameters) const override;
 
-  private:
+   private:
     
     InDet::PixelClusterSplitProb compileSplitProbability(std::vector<double>& vectorOfProbs ) const;
     

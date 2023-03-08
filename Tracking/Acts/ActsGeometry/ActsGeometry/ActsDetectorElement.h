@@ -10,7 +10,8 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 
 // ATHENA INCLUDES
-
+#include "HGTD_ReadoutGeometry/HGTD_DetectorElement.h"
+#include "HGTD_Identifier/HGTD_ID.h"
 #include "InDetIdentifier/PixelID.h"
 #include "InDetIdentifier/SCT_ID.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
@@ -48,8 +49,14 @@ public:
       const Identifier &id // we need explicit ID here b/c of straws
   );
 
+  /// Constructor for an HGTD surface.
+  ActsDetectorElement(
+      const InDetDD::HGTD_DetectorElement &detElem,
+      const Identifier &id // explicit id is needed for HGTD
+  );
+
   ///  Destructor
-  virtual ~ActsDetectorElement() {}
+  virtual ~ActsDetectorElement() = default;
 
   /// Identifier
   Identifier identify() const;

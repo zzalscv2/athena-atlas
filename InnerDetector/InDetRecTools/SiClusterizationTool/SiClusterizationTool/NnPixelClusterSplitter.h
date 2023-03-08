@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -27,7 +27,7 @@ namespace InDet
     /** @class NnPixelClusterSplitter
         @author Andreas.Salzburger@cern.ch
     */
-    class NnPixelClusterSplitter : public extends<AthAlgTool, IPixelClusterSplitter> {
+    class NnPixelClusterSplitter final: public extends<AthAlgTool, IPixelClusterSplitter> {
     public :
       /** Constructor*/
       NnPixelClusterSplitter(const std::string &type,
@@ -38,18 +38,19 @@ namespace InDet
       ~NnPixelClusterSplitter() = default;
       
       /** AthAlgTool interface methods */
-      StatusCode initialize();            
-      StatusCode finalize();            
+      virtual StatusCode initialize() override;            
+      virtual StatusCode finalize() override;            
       
       /** take one, give zero or many */
-      std::vector<InDet::PixelClusterParts> splitCluster(const InDet::PixelCluster& origCluster ) const;
-      
-      /** take one, give zero or many - with split probability object */
-      std::vector<InDet::PixelClusterParts> splitCluster(const InDet::PixelCluster& origCluster, 
-                                                         const InDet::PixelClusterSplitProb& spo) const;
-      
-    private:
+      virtual std::vector<InDet::PixelClusterParts> splitCluster(
+          const InDet::PixelCluster& origCluster) const override;
 
+      /** take one, give zero or many - with split probability object */
+      virtual std::vector<InDet::PixelClusterParts> splitCluster(
+          const InDet::PixelCluster& origCluster,
+          const InDet::PixelClusterSplitProb& spo) const override;
+
+     private:
       ToolHandle<NnClusterizationFactory> m_NnClusterizationFactory { this, "NnClusterizationFactory", "InDet::NnClusterizationFactory/NnClusterizationFactory" };
       SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey { this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot" };
       DoubleProperty m_thresholdSplittingIntoTwoClusters { this, "ThresholdSplittingIntoTwoClusters", 0.95 };

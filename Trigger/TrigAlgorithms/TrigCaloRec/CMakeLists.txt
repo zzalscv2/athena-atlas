@@ -11,3 +11,8 @@ atlas_add_component( TrigCaloRec
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} --extend-select=ATL900,ATL901 )
+
+atlas_add_test( TrigCaloRecConfig
+                 SCRIPT python -m TrigCaloRec.TrigCaloRecConfig
+                 POST_EXEC_SCRIPT noerror.sh)
+

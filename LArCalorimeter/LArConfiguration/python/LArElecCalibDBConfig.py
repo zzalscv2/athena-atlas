@@ -29,26 +29,30 @@ LArMphysOverMcalCondAlg    =  CompFactory.getComp("LArFlatConditionsAlg<LArMphys
 LArOFCCondAlg              =  CompFactory.getComp("LArFlatConditionsAlg<LArOFCFlat>")
 LArShapeCondAlg            =  CompFactory.getComp("LArFlatConditionsAlg<LArShapeFlat>")
 
-LArDAC2uASCCondAlg = CompFactory.getComp("LArFlatConditionsAlg<LArDAC2uASC>")
-LArRampSCCondAlg = CompFactory.getComp("LArFlatConditionsAlg<LArRampSC>")
-LAruA2MeVSCCondAlg = CompFactory.getComp("LArFlatConditionsAlg<LAruA2MeVSC>")
-LArfSamplSCCondAlg     =  CompFactory.getComp("LArFlatConditionsAlg<LArfSamplSC>")
-LArShapeSCCondAlg      =  CompFactory.getComp("LArFlatConditionsAlg<LArShapeSC>")
-LArPedestalSCCondAlg   =  CompFactory.getComp("LArFlatConditionsAlg<LArPedestalSC>")
-LArNoiseSCCondAlg       =  CompFactory.getComp("LArFlatConditionsAlg<LArNoiseSC>")
-LArMinBiasSCCondAlg       =  CompFactory.getComp("LArFlatConditionsAlg<LArMinBiasSC>")
-LArAutoCorrSCCondAlg      =  CompFactory.getComp("LArFlatConditionsAlg<LArAutoCorrSC>")
-LArPileupAverageSCCondAlg = CompFactory.getComp("LArFlatConditionsAlg<LArMinBiasAverageSC>")
+LArHVScaleCorrSCCondFlatAlg  =  CompFactory.getComp("LArFlatConditionsAlg<LArHVScaleCorrSC>")
+LArDAC2uASCCondAlg           =  CompFactory.getComp("LArFlatConditionsAlg<LArDAC2uASC>")
+LArRampSCCondAlg             =  CompFactory.getComp("LArFlatConditionsAlg<LArRampSC>")
+LAruA2MeVSCCondAlg           =  CompFactory.getComp("LArFlatConditionsAlg<LAruA2MeVSC>")
+LArfSamplSCCondAlg           =  CompFactory.getComp("LArFlatConditionsAlg<LArfSamplSC>")
+LArShapeSCCondAlg            =  CompFactory.getComp("LArFlatConditionsAlg<LArShapeSC>")
+LArPedestalSCCondAlg         =  CompFactory.getComp("LArFlatConditionsAlg<LArPedestalSC>")
+LArNoiseSCCondAlg            =  CompFactory.getComp("LArFlatConditionsAlg<LArNoiseSC>")
+LArMinBiasSCCondAlg          =  CompFactory.getComp("LArFlatConditionsAlg<LArMinBiasSC>")
+LArAutoCorrSCCondAlg         =  CompFactory.getComp("LArFlatConditionsAlg<LArAutoCorrSC>")
+LArPileupAverageSCCondAlg    =  CompFactory.getComp("LArFlatConditionsAlg<LArMinBiasAverageSC>")
+LArMphysOverMcalSCCondAlg    =  CompFactory.getComp("LArFlatConditionsAlg<LArHVScaleCorrSC>")
 
 
 def LArElecCalibDbCfg(ConfigFlags,condObjs):
-
+    
     #Check MC case
     if ConfigFlags.Input.isMC:
         return LArElecCalibDBMCCfg(ConfigFlags,condObjs)
     
-    #Check run 1 case:
-    if "COMP200" in ConfigFlags.IOVDb.DatabaseInstance:
+    from AthenaConfiguration.Enums import LHCPeriod
+
+    #Check run 1 case:    
+    if ConfigFlags.GeoModel.Run < LHCPeriod.Run2 :
         return LArElecCalibDBRun1Cfg(ConfigFlags,condObjs)
 
     #Everything else, eg run 2 (and 3?) data
@@ -110,6 +114,43 @@ def LArElecCalibDBRun2Cfg(ConfigFlags,condObjs):
 
     return result
 
+def LArElecCalibDBSCCfg(ConfigFlags,condObjs):
+
+    _larCondDBFoldersDataSC = {"Ramp":("LArRamp","/LAR/ElecCalibFlatSC/Ramp", LArRampSCCondAlg ),
+                               "DAC2uA":("LArDAC2uA","/LAR/ElecCalibFlatSC/DAC2uA",LArDAC2uASCCondAlg),
+                               "Pedestal":("LArPedestal","/LAR/ElecCalibFlatSC/Pedestal",LArPedestalSCCondAlg),
+                               "uA2MeV":("LAruA2MeV","/LAR/ElecCalibFlatSC/uA2MeV", LAruA2MeVSCCondAlg),
+                               "MphysOverMcal":("LArMphysOverMcal","/LAR/ElecCalibFlatSC/MphysOverMcal",LArMphysOverMcalSCCondAlg),
+                               "OFC":("LArOFC","/LAR/ElecCalibFlatSC/OFC",LArOFCCondAlg),
+                               "Shape":("LArShape","/LAR/ElecCalibFlatSC/Shape",LArShapeSCCondAlg),
+                               "HVScaleCorr":("LArHVScaleCorr","/LAR/ElecCalibFlatSC/HVScaleCorr",LArHVScaleCorrSCCondFlatAlg),
+                               "fSampl":("LArfSampl","/LAR/ElecCalibMCSC/fSampl",LArfSamplSCCondAlg),
+                           }
+
+    result=IOVDbSvcCfg(ConfigFlags)
+    iovDbSvc=result.getService("IOVDbSvc")
+    condLoader=result.getCondAlgo("CondInputLoader")
+
+
+    for condData in condObjs:
+        try:
+            outputKey,fldr,calg=_larCondDBFoldersDataSC[condData]
+        except KeyError:
+            raise ConfigurationError("No conditions data %s found for SCdata" % condData)
+            
+        dbString="<db>COOLONL_LAR/CONDBR2</db>"
+        persClass="CondAttrListCollection"
+        if condData == "fSampl":
+            dbString="<db>COOLOFL_LAR/OFLP200</db>"
+            result.addCondAlgo(calg(ReadKey="LArfSampl", WriteKey=outputKey))
+            calg = None
+
+        iovDbSvc.Folders.append(fldr+dbString)# (addFolder(ConfigFlags,fldr,"LAR_ONL",'CondAttrListCollection'))
+        condLoader.Load.append((persClass,fldr))
+        if calg is not None:
+            result.addCondAlgo(calg (ReadKey=fldr, WriteKey=outputKey))
+
+    return result
 
 
 
@@ -121,8 +162,8 @@ def LArElecCalibDBRun1Cfg(ConfigFlags,condObjs):
                                "uA2MeV":("/LAR/ElecCalibOfl/uA2MeV/Symmetry","LAR_OFL", "LAruA2MeVMC",LAruA2MeVSymAlg),
                                "MphysOverMcal":("/LAR/ElecCalibOfl/MphysOverMcal/RTM","LAR_OFL","LArMphysOverMcalComplete",None),
                                "HVScaleCorr":("/LAR/ElecCalibOnl/HVScaleCorr","LAR_ONL","LArHVScaleCorrComplete",None),
-                               "OFC":("/LAR/ElecCalibOfl/OFC/PhysWave/RTM/"+ ConfigFlags.LAr.OFCShapeFolder if len(ConfigFlags.LAr.OFCShapeFolder)>0 else "5samples1phase","LAR_OFL","LArOFCComplete",None),
-                               "Shape":("/LAR/ElecCalibOfl/Shape/RTM/"+ ConfigFlags.LAr.OFCShapeFolder if len(ConfigFlags.LAr.OFCShapeFolder)>0 else "5samples1phase","LAR_OFL","LArShapeComplete",None),
+                               "OFC":("/LAR/ElecCalibOfl/OFC/PhysWave/RTM/"+ ConfigFlags.LAr.OFCShapeFolder if len(ConfigFlags.LAr.OFCShapeFolder)>0 else "/LAR/ElecCalibOfl/OFC/PhysWave/RTM/5samples1phase","LAR_OFL","LArOFCComplete",None),
+                               "Shape":("/LAR/ElecCalibOfl/Shape/RTM/"+ ConfigFlags.LAr.OFCShapeFolder if len(ConfigFlags.LAr.OFCShapeFolder)>0 else "/LAR/ElecCalibOfl/Shape/RTM/5samples1phase","LAR_OFL","LArShapeComplete",None),
                            }
 
 
@@ -177,7 +218,7 @@ def LArElecCalibDBMCCfg(ConfigFlags,folders):
         if calg is not None:
             result.addCondAlgo(calg(ReadKey=key,WriteKey=key+"Sym"))
 
-    result.merge(addFolderList(ConfigFlags,folderlist))
+    result.merge(addFolderList(ConfigFlags,folderlist,db="OFLP200"))
     return result
 
 
@@ -207,16 +248,16 @@ def LArElecCalibDBMCSCCfg(ConfigFlags,folders):
         if calg is not None:
             result.addCondAlgo(calg(ReadKey=fldr,WriteKey=key))
 
-    result.merge(addFolderList(ConfigFlags,folderlist))
+    result.merge(addFolderList(ConfigFlags,folderlist,db="OFLP200"))
     return result
 
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
 
     print ('--- run2')
-    flags1 = ConfigFlags.clone()
+    flags1 = initConfigFlags()
     flags1.Input.Files = defaultTestFiles.RAW
     flags1.lock()
     acc1 = LArElecCalibDbCfg (flags1, ['Ramp', 'Pedestal'])
@@ -225,9 +266,10 @@ if __name__ == "__main__":
     acc1.wasMerged()
 
     print ('--- run1')
-    flags2 = ConfigFlags.clone()
+    flags2 = initConfigFlags()
     flags2.Input.Files = defaultTestFiles.RAW
-    flags2.Input.ProjectName = 'data12_8TeV'
+    from AthenaConfiguration.Enums import LHCPeriod
+    flags2.GeoModel.Run=LHCPeriod.Run1
     flags2.lock()
     acc2 = LArElecCalibDbCfg (flags2, ['Ramp', 'Pedestal'])
     acc2.printCondAlgs(summariseProps=True)
@@ -235,7 +277,7 @@ if __name__ == "__main__":
     acc2.wasMerged()
 
     print ('--- mc')
-    flags3 = ConfigFlags.clone()
+    flags3 = initConfigFlags()
     flags3.Input.Files = defaultTestFiles.ESD
     flags3.lock()
     acc3 = LArElecCalibDbCfg (flags3, ['Ramp', 'Pedestal'])

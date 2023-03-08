@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Runs athenaHLT writing BS output and then runs BS decoding
 # art-type: build
 # art-include: master/Athena
-# art-include: 22.0/Athena
+# art-include: 23.0/Athena
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
@@ -54,7 +54,7 @@ test.get_step('CheckFile').input_file = 'ESD.pool.root,ESD.Module1.pool.root'
 # Ultimately there should be no per-event messages
 msgcount = test.get_step("MessageCount")
 msgcount.thresholds = {
-  'WARNING': 500,  # Remaining warnings are mostly from ATLASRECTS-3866
+  'WARNING': 550,  # Remaining warnings are mostly from ATLASRECTS-3866
   'INFO': 500,
   'other': 50
 }

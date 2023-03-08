@@ -30,7 +30,7 @@ class HWIdentifier;
 class Identifier;
 class LArOnlineID;
 
-class LArShapeCompleteMaker : public AthAlgorithm
+class ATLAS_NOT_THREAD_SAFE LArShapeCompleteMaker : public AthAlgorithm
 {
  public:
   LArShapeCompleteMaker(const std::string & name, ISvcLocator* pSvcLocator);

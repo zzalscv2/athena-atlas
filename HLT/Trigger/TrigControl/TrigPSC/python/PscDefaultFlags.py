@@ -1,7 +1,9 @@
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 '''Functions setting default flags for generating online HLT python configuration'''
+
+_flags = None
 
 def setDefaultOnlineFlagsOldStyle():
     from AthenaCommon.AthenaCommonFlags import athenaCommonFlags as acf
@@ -19,11 +21,20 @@ def setDefaultOnlineFlagsNewStyle(flags):
     flags.Input.isMC = False
     flags.Input.Format = Format.BS
     flags.Trigger.doHLT = True  # This distinguishes the HLT setup from online reco (GM, EventDisplay)
+    flags.Trigger.Online.isPartition = True  # athenaHLT and partition at P1
+    flags.Scheduler.ShowDataDeps = False
+    flags.Scheduler.ShowControlFlow = False
+    flags.Scheduler.ShowDataFlow = False
+    flags.Scheduler.EnableVerboseViews = False
 
 
-def defaultOnlineFlags(flags = None):
-    setDefaultOnlineFlagsOldStyle()
-    if not flags:
-        from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
-    setDefaultOnlineFlagsNewStyle(flags)
-    return flags
+def defaultOnlineFlags():
+    """On first call will create ConfigFlags and return instance. This is only to be used within
+    TrigPSC/TrigServices/athenaHLT as we cannot explicitly pass flags everywhere."""
+    global _flags
+    if _flags is None:
+        setDefaultOnlineFlagsOldStyle()
+        from AthenaConfiguration.AllConfigFlags import ConfigFlags
+        _flags = ConfigFlags
+        setDefaultOnlineFlagsNewStyle(_flags)
+    return _flags

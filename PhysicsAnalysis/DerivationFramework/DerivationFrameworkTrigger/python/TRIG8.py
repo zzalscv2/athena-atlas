@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # TRIG8.py
@@ -112,6 +112,7 @@ def TRIG8KernelCfg(ConfigFlags, name='TRIG8Kernel', **kwargs):
     from TriggerMenuMT.TriggerAPI.TriggerEnums import TriggerPeriod
 
     allperiods = TriggerPeriod.y2015 | TriggerPeriod.y2016 | TriggerPeriod.y2017 | TriggerPeriod.y2018 | TriggerPeriod.future2e34
+    TriggerAPI.setConfigFlags(ConfigFlags)
     trig_all = TriggerAPI.getAllHLT(allperiods)
     
     # Pieces of trigger names to keep
@@ -160,7 +161,7 @@ def TRIG8Cfg(ConfigFlags):
     # for actually configuring the matching, so we create it here and pass it down
     # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    TRIG8TriggerListsHelper = TriggerListsHelper()
+    TRIG8TriggerListsHelper = TriggerListsHelper(ConfigFlags)
 
     # Common augmentations
     acc.merge(TRIG8KernelCfg(ConfigFlags, name="TRIG8Kernel", StreamName = 'StreamDAOD_TRIG8', TriggerListsHelper = TRIG8TriggerListsHelper))

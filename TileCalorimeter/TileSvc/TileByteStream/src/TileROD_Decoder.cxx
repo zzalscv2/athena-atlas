@@ -1100,14 +1100,13 @@ void TileROD_Decoder::unpack_frag6(uint32_t /*version*/,
   int frag =  (*(p+1)) & 0xFFFF; /* (*(data +3)>>16) & 0xFF;*/
   bool remap = std::binary_search(m_demoFragIDs.begin(),m_demoFragIDs.end(), frag);
   const std::vector<int> & chmap = (frag<0x300) ? m_demoChanLB : m_demoChanEB;
-  
+
   HWIdentifier adcID;
   HWIdentifier drawerID = m_tileHWID->drawer_id(frag);
 
-
   uint32_t all00 = TileFragStatus::ALL_00;
   uint32_t allFF = TileFragStatus::ALL_FF;
-   
+
   for (int i = 0; i < size; ++i) {
     uint32_t w = data[i];
     if (allFF && w!=0xFFFFFFFF) {
@@ -1133,67 +1132,64 @@ void TileROD_Decoder::unpack_frag6(uint32_t /*version*/,
   unsigned int runType[4] = {0};
 
   unsigned int runNumber[4] = {0};
-  
+
   unsigned int pedestalHi[4] = {0};
   unsigned int pedestalLo[4] = {0};
-  
+
   unsigned int chargeInjected[4] = {0};
   unsigned int timeInjected[4] = {0};
   unsigned int capacitor[4] = {0};
-  
-  
+
   uint32_t bcid[4] = {0};
   uint32_t l1id[4] = {0};
 
-
-  float samples[2][48][16] = {{{0}}};
+  int sampleNumber = (size-40)/48;
+  int delta = size - (sampleNumber*48+40);
+  if (delta!=0) {
+    ATH_MSG_WARNING( "FRAG6: Unexpected fragment size " << size << " => "<< sampleNumber << " samples will be unpacked and last "
+                     << delta << " words will be ignored ");
+  }
+  std :: vector< std :: vector< std :: vector< float > > > samples(2, std ::vector<std::vector<float>>(48,std::vector<float>(sampleNumber)));
 
   const uint32_t* const end_data = data + size; 
   while (data < end_data) {
     if (*data == 0x12345678 ) {
       unsigned int miniDrawer = *(data+5) & 0xFF;
       if ((++data < end_data)) {
-	unsigned int fragSize   = *data & 0xFF;
-        unsigned int paramsSize = (*data >> 8 ) & 0xFF;      
+        int fragSize   = *data & 0xFF;
+        unsigned int paramsSize = (*data >> 8 ) & 0xFF;
         moduleID[miniDrawer]    = (*data >> 16) & 0xFF;
         runType[miniDrawer]     = (*data >> 24) & 0xFF;
-        if (fragSize != 192) {
-          ATH_MSG_ERROR("FRAG6: Unpacking minidrawer [" << miniDrawer 
-                        << "] with fragment size: " << fragSize 
-                        << " not implemented => skip it!!!");
-          continue;
+        if (fragSize != sampleNumber*6) {
+          ATH_MSG_WARNING("FRAG6: Minidrawer [" << miniDrawer
+                          << "] has unexpected fragment size: " << fragSize
+                          << " correct value for " << sampleNumber
+                          << " samples is " << sampleNumber*6);
         }
-        
-        // check trailer
-        const uint32_t* trailer = data + paramsSize + 3 + fragSize; // 2 = (BCID + L1ID)
 
-        if ((trailer + 1) <= end_data // 3 = (trailer size)
-            && *trailer == 0x87654321
-            ) {
+        // check trailer
+        const uint32_t* trailer = data + (size/4)-4; 
+        if (trailer < end_data && *trailer == 0x87654321) {
 
           if (paramsSize == 3){
             runNumber[miniDrawer]  = *(++data);
-            
+
             pedestalHi[miniDrawer] = *(++data)      & 0xFFF;
             pedestalLo[miniDrawer] = (*data >> 12 ) & 0xFFF;
-            
+
             chargeInjected[miniDrawer] = *(++data)     & 0xFFF;
             timeInjected[miniDrawer]   = (*data >> 12) & 0xFF;
             capacitor[miniDrawer]      = (*data >> 20) & 0x1;
           } else {
 
-            ATH_MSG_WARNING("FRAG6: Unpacking minidrawer [" << miniDrawer 
-                            << "] parameters with size: " << paramsSize
-                            << " not implemented!!!");
-            
+            ATH_MSG_WARNING("FRAG6: Minidrawer [" << miniDrawer
+                            << "] has unexpected number of parameter words: " << paramsSize
+                            << " => ignore them !!!");
             data += paramsSize;
           }
 
           bcid[miniDrawer] = (*(++data) >> 16) & 0xFFFF;
           l1id[miniDrawer] = *(++data);
-
-	  
-
           if (msgLvl(MSG::VERBOSE)) {
             msg(MSG::VERBOSE) << "FRAG6: Found MD[" << miniDrawer << "] fragment"
                               << ", Run type: " << runType[miniDrawer]
@@ -1212,19 +1208,16 @@ void TileROD_Decoder::unpack_frag6(uint32_t /*version*/,
             }
           }
 
-
           const uint16_t* sample = (const uint16_t *) (++data);
 
-          std::vector<int> gains = {1, 0}; // HG seems to be first
-          for (int gain : gains) {
+          for (int gain = 1; gain > -1; --gain) { // HG seems to be first
             int start_channel(miniDrawer * 12);
             int end_channel(start_channel + 12);
             for (int channel = start_channel; channel < end_channel; ++channel) {
 
-              for (int samplesIdx = 15; samplesIdx >= 0; --samplesIdx) {
+              for (int samplesIdx = 0; samplesIdx<sampleNumber; ++samplesIdx) {
                 samples[gain][channel][samplesIdx] = (*sample & 0x0FFF);
                 ++sample;
-               
               }
 
             }
@@ -1238,22 +1231,19 @@ void TileROD_Decoder::unpack_frag6(uint32_t /*version*/,
       }
     } else {
       ++data;
-      
     }
   }
 
-
   pDigits.reserve(96);
-  
+
   // always two gains
   for (int gain = 0; gain < 2; ++gain) {
     // always 48 channels
     for (int channel = 0; channel < 48; ++channel) {
       int ch1 = (remap) ? chmap[channel] : channel;
      
-       adcID = m_tileHWID->adc_id(drawerID, ch1, gain);
-      // always 16 samples
-      std::vector<float> digiVec(&samples[gain][channel][0], &samples[gain][channel][16]);
+      adcID = m_tileHWID->adc_id(drawerID, ch1, gain);
+      std::vector<float> digiVec(&samples[gain][channel][0], &samples[gain][channel][sampleNumber]);
       pDigits.push_back(new TileDigits(adcID, digiVec));
       
       ATH_MSG_VERBOSE("FRAG6: " << (std::string) *(pDigits.back()));
@@ -4326,7 +4316,7 @@ while (data < end_data) { // iterator over all words for a robid
     if ((*data) == 0xff1234ff) {
       uint32_t count = *(data + 1); // first word is frag size
       uint32_t idAndType = *(data + 2); // second word is frag ID and frag type
-      int frag = (idAndType &  0xFFFF);
+      int frag = (idAndType &  0x0FFF); // remove the offset
       int type = (idAndType>>16)& 0xFF; // note special mask, we ignore one digit, keep only 0x10, 0x20, 0x30, ...
       if (type == 0x06 &&  (frag == coll.identify())) {
         ++data;
@@ -4624,8 +4614,8 @@ void TileROD_Decoder::unpack_frag42( uint32_t sourceid, uint32_t version, const 
   //               32nd bit -> |         results2 [16:31]            ||           results1 [0:15]           | <- 1st bit
   //               32nd bit -> |            0x0   [16:31]            ||           results3 [0:15]           | <- 1st bit
   //
-  //               32nd bit -> | 0x0 [12:15] | m-5 | m-4 | m-3 | m-2 || 0x0 [12:15] | m-3 | m-2 | m-1 | m-0 | <- 1st bit
-  //                           |          0x0 [16:31]                || 0x0 [12:15] | m-7 | m-6 | m-5 | m-4 |
+  //               32nd bit -> | bcid1 [12:15] | m-5 | m-4 | m-3 | m-2 || bcid0 [12:15] | m-3 | m-2 | m-1 | m-0 | <- 1st bit
+  //                           |          0x0 [16:31]                  || bcid2 [12:15] | m-7 | m-6 | m-5 | m-4 |
   //
   // For each module m-X there is a 3-bit word with the results for a threshold
   //
@@ -4636,6 +4626,7 @@ void TileROD_Decoder::unpack_frag42( uint32_t sourceid, uint32_t version, const 
   int nbit=0;
   int nmod=0;
   uint32_t word=0x0;
+  uint32_t bcid=0x0;
 
   int drawer = (sourceid & 0xf0000) >> 8; // get ROS number from source ID
   if (drawer<0x300) { // barrel
@@ -4647,12 +4638,18 @@ void TileROD_Decoder::unpack_frag42( uint32_t sourceid, uint32_t version, const 
     nbit = 4;
     nmod = 8;
     drawer |= ((sourceid & 0x0000f) << 3);
-    if (m_runPeriod<=2) {
-       word = (datasize > 1) ? (p[1] << 20) | ((p[0] >> 8) & 0xff000) | ((p[0] >> 4) & 0xfff) : 0;
-    } else {
-       word = (datasize > 1) ? (p[1] << 12) | (p[0] & 0xfff) : 0;
+    if (datasize > 1) {
+      if (m_runPeriod<=2) {
+        word = (p[1] << 20) | ((p[0] >> 8) & 0xff000) | ((p[0] >> 4) & 0xfff);
+      } else {
+        word = ((p[1] & 0xfff) << 12) | (p[0] & 0xfff);
+        // keeping all 12 bits of information (just for cross check) |bcid2|bcid1|bcid0|
+        bcid = ((p[1] >> 4) & 0xf00) | ((p[0] >> 24) & 0xf0) | ((p[0] >> 12) & 0xf);
+      }
     }
   }
+
+  drawer |= (bcid<<16) ;
 
   std::vector<bool> result(nbit);
   for (int j = 0; j < nmod; ++j) { // loop over modules
@@ -4679,7 +4676,7 @@ void TileROD_Decoder::unpack_frag42( uint32_t sourceid, uint32_t version, const 
     else msg(MSG::DEBUG) << "TMDB version for RUN3 simulation (2020)" <<endmsg;
 
     msg(MSG::DEBUG) << " TileROD_Decoder::unpack_frag42  source ID: 0x" << MSG::hex << sourceid << MSG::dec
-                    << " version: " << version << endmsg;
+                    << " version: " << version << " bcid | drawer " << MSG::hex << drawer << endmsg;
 
     for (size_t j = v.size() - nmod; j < v.size(); ++j) {
       const std::vector<bool> & r = v[j]->GetDecision();

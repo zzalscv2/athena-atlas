@@ -45,7 +45,7 @@ def _gen_jobo(dct):
         from RecExConfig.InputFilePeeker import inputFileSummary
         file_geo = inputFileSummary.get('geometry')
         if file_geo and file_geo.find('-GEO-') >= 0:
-            inputFileSummary['geometry'] = 'ATLAS-R1-2012-02-00-00'
+            inputFileSummary['geometry'] = 'ATLAS-R1-2012-03-02-00'
 
         from RecExConfig.RecFlags import rec
         # Don't try to rebuild truth.
@@ -147,7 +147,7 @@ def _gen_jobo(dct):
         from RecExConfig.InputFilePeeker import inputFileSummary
         file_geo = inputFileSummary.get('geometry')
         if file_geo and file_geo.find('-GEO-') >= 0:
-            inputFileSummary['geometry'] = 'ATLAS-R1-2012-02-00-00'
+            inputFileSummary['geometry'] = 'ATLAS-R1-2012-03-02-00'
 
         # disable (most of) auto-cfg
         #from RecExConfig.RecFlags import rec

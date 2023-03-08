@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -31,6 +31,7 @@
 #include "TrkMaterialOnTrack/ScatteringAngles.h"
 #include "TrkSurfaces/Surface.h"
 #include "TrkTrack/TrackStateOnSurface.h"
+#include "AthenaKernel/RNGWrapper.h"
 // CLHEP
 #include "CLHEP/Random/RandFlat.h"
 #include "CLHEP/Random/RandGauss.h"
@@ -1194,8 +1195,7 @@ propagateRungeKuttaImpl(Cache& cache,
         , m_maxSteps(10000)     // Maximum number of allowed steps (to avoid infinite loops).
         , m_layXmax(1.)         // maximal layer thickness for multiple scattering calculations
         , m_simulation(false)   // flag for simulation mode
-        , m_rndGenSvc("AtDSFMTGenSvc", n)
-        , m_randomEngine(nullptr)
+        , m_rndGenSvc("AthRNGSvc", n)
         , m_randomEngineName("FatrasRnd")
       {
         declareInterface<Trk::IPropagator>(this);
@@ -1248,16 +1248,8 @@ propagateRungeKuttaImpl(Cache& cache,
 
         if (m_simulation) {
           // get the random generator serice
-          if (m_rndGenSvc.retrieve().isFailure()) {
-            ATH_MSG_WARNING("Could not retrieve " << m_rndGenSvc << ", no smearing done.");
-            m_randomEngine = nullptr;
-          } else {
-            // Get own engine with own seeds:
-            m_randomEngine = m_rndGenSvc->GetEngine(m_randomEngineName);
-            if (!m_randomEngine) {
-              ATH_MSG_WARNING("Could not get random engine '" << m_randomEngineName << "', no smearing done.");
-            }
-          }
+          ATH_CHECK( m_rndGenSvc.retrieve() );
+          m_rngWrapper = m_rndGenSvc->getEngine (this, m_randomEngineName);
         }
 
         return StatusCode::SUCCESS;
@@ -1296,7 +1288,7 @@ propagateRungeKuttaImpl(Cache& cache,
         // ATH_MSG_WARNING( "[STEP_Propagator] enter 1");
 
         double Jacobian[25];
-        Cache cache{};
+        Cache cache (ctx);
 
         // Get field cache object
         getFieldCacheObject(cache, ctx);
@@ -1348,7 +1340,7 @@ propagateRungeKuttaImpl(Cache& cache,
         const Trk::TrackingVolume* tVol) const
       {
 
-        Cache cache{};
+        Cache cache (ctx);
 
         // Get field cache object
         getFieldCacheObject(cache, ctx);
@@ -1415,7 +1407,7 @@ propagateRungeKuttaImpl(Cache& cache,
         std::vector<Trk::HitInfo>*& hitVector) const
       {
 
-        Cache cache{};
+        Cache cache (ctx);
 
         // Get field cache object
         getFieldCacheObject(cache, ctx);
@@ -1519,7 +1511,7 @@ propagateRungeKuttaImpl(Cache& cache,
         Trk::ExtrapolationCache* extrapCache) const
       {
 
-        Cache cache{};
+        Cache cache (ctx);
 
         // Get field cache object
         getFieldCacheObject(cache, ctx);
@@ -1589,7 +1581,7 @@ propagateRungeKuttaImpl(Cache& cache,
       {
 
         double Jacobian[25];
-        Cache cache{};
+        Cache cache (ctx);
 
         // Get field cache object
         getFieldCacheObject(cache, ctx);
@@ -1653,7 +1645,7 @@ propagateRungeKuttaImpl(Cache& cache,
       {
 
         double Jacobian[25];
-        Cache cache{};
+        Cache cache (ctx);
 
         // Get field cache object
         getFieldCacheObject(cache, ctx);
@@ -1700,7 +1692,7 @@ propagateRungeKuttaImpl(Cache& cache,
 
         double Jacobian[25];
 
-        Cache cache{};
+        Cache cache (ctx);
 
         // Get field cache object
         getFieldCacheObject(cache, ctx);
@@ -1746,15 +1738,13 @@ propagateRungeKuttaImpl(Cache& cache,
       /////////////////////////////////////////////////////////////////////////////////
       // Function for finding the intersection point with a surface
       /////////////////////////////////////////////////////////////////////////////////
-      const Trk::IntersectionSolution* Trk::STEP_Propagator::intersect(const EventContext& ctx,
-                                                                       const Trk::TrackParameters& trackParameters,
-                                                                       const Trk::Surface& targetSurface,
-                                                                       const Trk::MagneticFieldProperties& mft,
-                                                                       ParticleHypothesis particle,
-                                                                       const Trk::TrackingVolume* tVol) const
-      {
+      Trk::IntersectionSolution Trk::STEP_Propagator::intersect(
+          const EventContext& ctx, const Trk::TrackParameters& trackParameters,
+          const Trk::Surface& targetSurface,
+          const Trk::MagneticFieldProperties& mft, ParticleHypothesis particle,
+          const Trk::TrackingVolume* tVol) const {
 
-        Cache cache{};
+        Cache cache (ctx);
 
         // Get field cache object
         getFieldCacheObject(cache, ctx);
@@ -1778,12 +1768,14 @@ propagateRungeKuttaImpl(Cache& cache,
         mft.magneticFieldMode() == Trk::FastField ? cache.m_solenoid = true : cache.m_solenoid = false;
 
         // Check inputvalues
-        if (cache.m_tolerance <= 0.)
-          return nullptr;
-        if (cache.m_momentumCutOff < 0.)
-          return nullptr;
+        if (cache.m_tolerance <= 0.){
+          return {};
+        }
+        if (cache.m_momentumCutOff < 0.){
+          return {};
+        }
         if (std::abs(1. / trackParameters.parameters()[Trk::qOverP]) <= cache.m_momentumCutOff) {
-          return nullptr;
+          return {};
         }
 
         // Check for empty volumes. If x != x then x is not a number.
@@ -1793,8 +1785,9 @@ propagateRungeKuttaImpl(Cache& cache,
         }
 
         // double P[45];
-        if (!Trk::RungeKuttaUtils::transformLocalToGlobal(false, trackParameters, cache.m_P))
-          return nullptr;
+        if (!Trk::RungeKuttaUtils::transformLocalToGlobal(false, trackParameters, cache.m_P)){
+          return {};
+        }
         double path = 0.;
 
         const Amg::Transform3D& T = targetSurface.transform();
@@ -1816,14 +1809,15 @@ propagateRungeKuttaImpl(Cache& cache,
             s[3] = -d;
           }
           if (!propagateWithJacobianImpl(cache, false, ty, s, cache.m_P, path))
-            return nullptr;
+            return {};
         }
 
         else if (ty == Trk::SurfaceType::Line) {
 
           double s[6] = { T(0, 3), T(1, 3), T(2, 3), T(0, 2), T(1, 2), T(2, 2) };
-          if (!propagateWithJacobianImpl(cache, false, ty, s, cache.m_P, path))
-            return nullptr;
+          if (!propagateWithJacobianImpl(cache, false, ty, s, cache.m_P, path)){
+            return {};
+          }
         }
 
         else if (ty == Trk::SurfaceType::Cylinder) {
@@ -1831,8 +1825,9 @@ propagateRungeKuttaImpl(Cache& cache,
           const Trk::CylinderSurface* cyl = static_cast<const Trk::CylinderSurface*>(&targetSurface);
           double s[9] = { T(0, 3), T(1, 3), T(2, 3), T(0, 2), T(1, 2), T(2, 2), cyl->bounds().r(), Trk::alongMomentum,
                           0. };
-          if (!propagateWithJacobianImpl(cache, false, ty, s, cache.m_P, path))
-            return nullptr;
+          if (!propagateWithJacobianImpl(cache, false, ty, s, cache.m_P, path)){
+            return {};
+          }
         }
 
         else if (ty == Trk::SurfaceType::Cone) {
@@ -1840,15 +1835,17 @@ propagateRungeKuttaImpl(Cache& cache,
           double k = static_cast<const Trk::ConeSurface*>(&targetSurface)->bounds().tanAlpha();
           k = k * k + 1.;
           double s[9] = { T(0, 3), T(1, 3), T(2, 3), T(0, 2), T(1, 2), T(2, 2), k, Trk::alongMomentum, 0. };
-          if (!propagateWithJacobianImpl(cache, false, ty, s, cache.m_P, path))
-            return nullptr;
+          if (!propagateWithJacobianImpl(cache, false, ty, s, cache.m_P, path)){
+            return {};
+          }
         }
 
         else if (ty == Trk::SurfaceType::Perigee) {
 
           double s[6] = { T(0, 3), T(1, 3), T(2, 3), 0., 0., 1. };
-          if (!propagateWithJacobianImpl(cache, false, ty, s, cache.m_P, path))
-            return nullptr;
+          if (!propagateWithJacobianImpl(cache, false, ty, s, cache.m_P, path)){
+            return {};
+          }
         }
 
         else { // presumably curvilinear
@@ -1867,14 +1864,15 @@ propagateRungeKuttaImpl(Cache& cache,
             s[2] = -T(2, 2);
             s[3] = -d;
           }
-          if (!propagateWithJacobianImpl(cache, false, ty, s, cache.m_P, path))
-            return nullptr;
+          if (!propagateWithJacobianImpl(cache, false, ty, s, cache.m_P, path)){
+            return {};
+          }
         }
 
         Amg::Vector3D globalPosition(cache.m_P[0], cache.m_P[1], cache.m_P[2]);
         Amg::Vector3D direction(cache.m_P[3], cache.m_P[4], cache.m_P[5]);
-        Trk::IntersectionSolution* intersectionSolution = new Trk::IntersectionSolution();
-        intersectionSolution->push_back(
+        auto intersectionSolution = Trk::IntersectionSolution();
+        intersectionSolution.push_back(
           std::make_unique<Trk::TrackSurfaceIntersection>(globalPosition, direction, path));
         return intersectionSolution;
       }
@@ -1891,25 +1889,29 @@ propagateRungeKuttaImpl(Cache& cache,
         const Amg::Vector3D& origin = trackIntersection->position();
         const Amg::Vector3D& direction = trackIntersection->direction();
 
-        PerigeeSurface* perigeeSurface = new PerigeeSurface(origin);
-        auto trackParameters =
-          perigeeSurface->createUniqueTrackParameters(0., 0., direction.phi(), direction.theta(), qOverP, std::nullopt);
+        auto perigeeSurface = PerigeeSurface(origin);
+        perigeeSurface.setOwner(Trk::userOwn); //tmp ones
 
-        const Trk::IntersectionSolution* solution =
-          qOverP == 0 ? intersect(ctx, *trackParameters, surface, Trk::MagneticFieldProperties(Trk::NoField), particle)
-                      : intersect(ctx, *trackParameters, surface, mft, particle, nullptr);
+        auto tmpTrackParameters =
+            Trk::Perigee(0., 0., direction.phi(), direction.theta(), qOverP,
+                         perigeeSurface, std::nullopt);
 
-        delete perigeeSurface;
-        if (!solution)
+        Trk::IntersectionSolution solution =
+            qOverP == 0 ? intersect(ctx, tmpTrackParameters, surface,
+                                    Trk::MagneticFieldProperties(Trk::NoField),
+                                    particle)
+                        : intersect(ctx, tmpTrackParameters, surface, mft,
+                                    particle, nullptr);
+
+        if (solution.empty()){
           return nullptr;
+        }
 
-        Trk::IntersectionSolutionIter output_iter = solution->begin();
+        Trk::IntersectionSolutionIter output_iter = solution.begin();
         if (*output_iter) {
           Trk::TrackSurfaceIntersection* result = new Trk::TrackSurfaceIntersection(*(*output_iter));
-          delete solution;
           return result;
         }
-        delete solution;
         return nullptr;
       }
 
@@ -1918,7 +1920,7 @@ propagateRungeKuttaImpl(Cache& cache,
       // if max step allowed > 0 -> propagate along momentum else propagate opposite momentum
       /////////////////////////////////////////////////////////////////////////////////
       void Trk::STEP_Propagator::globalPositions(const EventContext& ctx,
-                                                 std::list<Amg::Vector3D>& positionsList,
+                                                 std::deque<Amg::Vector3D>& positionsList,
                                                  const Trk::TrackParameters& trackParameters,
                                                  const Trk::MagneticFieldProperties& mft,
                                                  const Trk::CylinderBounds& cylinderBounds,
@@ -1926,7 +1928,7 @@ propagateRungeKuttaImpl(Cache& cache,
                                                  ParticleHypothesis particle,
                                                  const Trk::TrackingVolume* tVol) const
       {
-        Cache cache{};
+        Cache cache (ctx);
 
         // Get field cache object
         getFieldCacheObject(cache, ctx);
@@ -2102,7 +2104,7 @@ propagateRungeKuttaImpl(Cache& cache,
         double path = 0.;
 
         // activate brem photon emission if required
-        cache.m_brem = m_simulation && particle == Trk::electron && m_simMatUpdator && m_randomEngine;
+        cache.m_brem = m_simulation && particle == Trk::electron && m_simMatUpdator;
 
         // loop while valid solutions
         bool validStep = true;
@@ -2181,7 +2183,7 @@ propagateRungeKuttaImpl(Cache& cache,
             }
             ++iSol;
           }
-          solutions = valid_solutions;
+          solutions = std::move(valid_solutions);
           if (solution)
             break;
         }
@@ -2191,7 +2193,7 @@ propagateRungeKuttaImpl(Cache& cache,
         }
 
         // simulation mode : smear momentum
-        if (m_simulation && cache.m_matPropOK && m_randomEngine) {
+        if (m_simulation && cache.m_matPropOK) {
           double radDist = totalPath / cache.m_material->x0();
           smear(cache, localp[2], localp[3], trackParameters.get(), radDist);
         }
@@ -2940,6 +2942,10 @@ propagateRungeKuttaImpl(Cache& cache,
         if (!parms)
           return;
 
+        if (!cache.m_randomEngine) {
+          cache.m_randomEngine = getRandomEngine (cache.m_ctx);
+        }
+
         // Calculate polar angle
         double particleMass = Trk::ParticleMasses::mass[cache.m_particle]; // Get particle mass from
                                                                            // ParticleHypothesis
@@ -2947,12 +2953,12 @@ propagateRungeKuttaImpl(Cache& cache,
         double energy = std::sqrt(momentum * momentum + particleMass * particleMass);
         double beta = momentum / energy;
         double th = std::sqrt(2.) * 15. * std::sqrt(radDist) / (beta * momentum) *
-                    CLHEP::RandGauss::shoot(m_randomEngine); // Moliere
+                    CLHEP::RandGauss::shoot(cache.m_randomEngine); // Moliere
         // double th = (sqrt(2.)*13.6*std::sqrt(radDist)/(beta*momentum)) *
         // (1.+0.038*log(radDist/(beta*beta))) * m_gaussian->shoot(); //Highland
 
         // Calculate azimuthal angle
-        double ph = 2. * M_PI * CLHEP::RandFlat::shoot(m_randomEngine);
+        double ph = 2. * M_PI * CLHEP::RandFlat::shoot(cache.m_randomEngine);
 
         Amg::Transform3D rot(Amg::AngleAxis3D(-theta, Amg::Vector3D(0., 1., 0.)) *
                              Amg::AngleAxis3D(-phi, Amg::Vector3D(0., 0., 1.)));
@@ -2969,8 +2975,11 @@ propagateRungeKuttaImpl(Cache& cache,
       void
       Trk::STEP_Propagator::sampleBrem(Cache& cache, double mom) const
       {
-        double rndx = CLHEP::RandFlat::shoot(m_randomEngine);
-        double rnde = CLHEP::RandFlat::shoot(m_randomEngine);
+        if (!cache.m_randomEngine) {
+          cache.m_randomEngine = getRandomEngine (cache.m_ctx);
+        }
+        double rndx = CLHEP::RandFlat::shoot(cache.m_randomEngine);
+        double rnde = CLHEP::RandFlat::shoot(cache.m_randomEngine);
 
         // sample visible fraction of the mother momentum taken according to 1/f
         double eps = cache.m_momentumCutOff / mom;
@@ -2992,3 +3001,17 @@ propagateRungeKuttaImpl(Cache& cache,
         fieldCondObj->getInitializedCache(cache.m_fieldCache);
       }
 
+CLHEP::HepRandomEngine*
+Trk::STEP_Propagator::getRandomEngine (const EventContext& ctx) const
+{
+  if (!m_simulation || !m_rngWrapper) {
+    return nullptr;
+  }
+  if (m_rngWrapper->evtSeeded(ctx) != ctx.evt()) {
+    // Ok, the wrappers are unique to this algorithm and a given slot,
+    // so cannot be accessed concurrently.
+    ATHRNG::RNGWrapper* wrapper_nc ATLAS_THREAD_SAFE = m_rngWrapper;
+    wrapper_nc->setSeed (this->name(), ctx);
+  }
+  return m_rngWrapper->getEngine (ctx);
+}

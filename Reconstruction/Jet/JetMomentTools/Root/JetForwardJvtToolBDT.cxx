@@ -1,6 +1,6 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 // JetForwardJvtToolBDT.cxx
 // Implementation file for class JetForwardJvtToolBDT
@@ -180,7 +180,7 @@ StatusCode JetForwardJvtToolBDT::decorate(const xAOD::JetContainer& jetCont) con
 }
 
 
-float JetForwardJvtToolBDT::getFJVT(const xAOD::Jet *jet, int pvind, std::vector<TVector2> pileupMomenta) const {
+float JetForwardJvtToolBDT::getFJVT(const xAOD::Jet *jet, int pvind, const std::vector<TVector2>& pileupMomenta) const {
 
   TVector2 fjet(-jet->pt()*cos(jet->phi()),-jet->pt()*sin(jet->phi()));
   double fjvt = 0;
@@ -195,7 +195,7 @@ float JetForwardJvtToolBDT::getFJVT(const xAOD::Jet *jet, int pvind, std::vector
 }
 
 
-float JetForwardJvtToolBDT::getMVfJVT(const xAOD::Jet *jet, int pvind, std::vector<TVector2> pileupMomenta) const {
+float JetForwardJvtToolBDT::getMVfJVT(const xAOD::Jet *jet, int pvind, const std::vector<TVector2>& pileupMomenta) const {
 
   if(m_isAna && !m_getTagger) return jet->auxdata<float>("DFCommonJets_MVfJVT");
 

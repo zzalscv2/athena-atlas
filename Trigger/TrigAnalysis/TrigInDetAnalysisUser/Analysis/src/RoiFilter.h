@@ -5,7 +5,7 @@
  **     @author  mark sutton
  **     @date    Sun 31 Jul 2016 05:22:41 CEST 
  **
- **     Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -22,12 +22,12 @@ class RoiFilter {
 
 public:
 
-  RoiFilter( double eta=0, bool comp=false, size_t m=1 ) : meta(eta), mcomp(comp), mmult(m) { } 
-  RoiFilter(TIDARoiDescriptor) { } 
+  RoiFilter( double eta=0, bool comp=false, size_t m=1 ) : m_eta(eta), m_comp(comp), m_mult(m) { }
+  RoiFilter(TIDARoiDescriptor): m_eta(0.0),m_comp(false),m_mult(0) { }
 
-  double       eta() const { return meta; }
-  bool   composite() const { return mcomp; }
-  size_t       size() const { return mmult; }
+  double       eta() const { return m_eta; }
+  bool   composite() const { return m_comp; }
+  size_t       size() const { return m_mult; }
 
   bool filter( const TIDARoiDescriptor* roi ) { 
 
@@ -52,9 +52,9 @@ public:
 
 private:
 
-  double  meta;
-  bool    mcomp;
-  size_t  mmult;
+  double  m_eta;
+  bool    m_comp;
+  size_t  m_mult;
 
 
 };

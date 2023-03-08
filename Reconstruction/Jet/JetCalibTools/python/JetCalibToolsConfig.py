@@ -23,7 +23,7 @@ all = ['getJetCalibTool']
 pflowcontexts = {
     "T0":("JES_MC15cRecommendation_PFlow_Aug2016_rel21.config","00-04-77","JetArea_Residual_EtaJES"),
     # Omit smearing, to avoid any efficiency loss
-    "AnalysisLatest":("JES_data2017_2016_2015_Consolidated_PFlow_2018_Rel21.config","00-04-82","JetArea_Residual_EtaJES_GSC_Insitu"),
+    "AnalysisLatest":("PreRec_R22_PFlow_ResPU_EtaJES_GSC_February23_230215.config","00-04-82","JetArea_Residual_EtaJES_GSC_Insitu"),
     "TrigLS2":("JES_MC16Recommendation_Consolidated_PFlow_Apr2019_Rel21_Trigger.config","00-04-82","JetArea_Residual_EtaJES_GSC_Insitu"),
     "Trigger":("JES_MC16Recommendation_Consolidated_PFlow_30May2022_Rel22_Trigger.config","00-04-82","JetArea_Residual_EtaJES_GSC_Insitu"),
 }
@@ -31,7 +31,7 @@ pflowcontexts = {
 topocontexts = {
     "T0":("JES_MC15cRecommendation_May2016_rel21.config","00-04-77","JetArea_Residual_EtaJES"),
     # Omit smearing, to avoid any efficiency loss
-    "AnalysisLatest":("JES_data2017_2016_2015_Consolidated_EMTopo_2018_Rel21.config","00-04-82","JetArea_Residual_EtaJES_GSC_Insitu"),
+    "AnalysisLatest":("JES_MC16Recommendation_Consolidated_EMTopo_Apr2019_Rel21.config","00-04-82","JetArea_Residual_EtaJES_GSC_Insitu"),
     "TrigRun2":("JES_MC15cRecommendation_May2016_Trigger.config","00-04-77","JetArea_EtaJES_GSC_Insitu"),
     "TrigRun2GSC":("JES_data2016_data2015_Recommendation_Dec2016_rel21.config","00-04-77","JetArea_EtaJES_GSC_Insitu"),
     "TrigLS2":("JES_MC16Recommendation_Consolidated_EMTopo_Apr2019_Rel21_Trigger.config","00-04-82","JetArea_Residual_EtaJES_GSC_Insitu"),
@@ -55,14 +55,15 @@ fatjetcontexts = {
     "TrigUngroomed": ("JES_Full2012dataset_Rscan_June2014.config","00-04-77","JetArea_EtaJES"),
     "TrigTrimmed":   ("JES_MC15recommendation_FatJet_June2015_PtFrac4.config","00-04-82","EtaJES_JMS"),
     "TrigSoftDrop":  ("JES_MC16recommendation_R10_UFO_CSSK_SoftDrop_JMS_01April2020.config","00-04-82","EtaJES_JMS"),
+    "LargeRDNN":     ("JES_JMS_MC20dnnc_R10_UFO_CSSK_SoftDrop_Feb2023.config","00-04-82","LargeRDNN"),
 }
 
 # List AFII config files separately, to avoid needing to specify a different context
 af2configs = {
-    "AntiKt4EMPFlow": "JES_MC16Recommendation_AFII_PFlow_April2018_rel21.config",
-    "AntiKt4GPFlow": "JES_MC16Recommendation_AFII_PFlow_April2018_rel21.config",
-    "AntiKt4EMTopo":  "JES_MC16Recommendation_AFII_EMTopo_April2018_rel21.config",
-    "AntiKt4LCTopo":  "JES_MC16Recommendation_AFII_EMTopo_April2018_rel21.config",
+    "AntiKt4EMPFlow": "JES_MC16Recommendation_AFII_PFlow_Apr2019_Rel21.config",
+    "AntiKt4GPFlow": "JES_MC16Recommendation_AFII_PFlow_Apr2019_Rel21.config",
+    "AntiKt4EMTopo":  "JES_MC16Recommendation_AFII_EMTopo_Apr2019_Rel21.config",
+    "AntiKt4LCTopo":  "JES_MC16Recommendation_AFII_EMTopo_Apr2019_Rel21.config",
 }
 
 calibcontexts = {
@@ -135,7 +136,7 @@ def getJetCalibTool(jetdef, context, data_type, calibseq = "", rhoname = "", pvn
         if context == "T0":
             _data_type = "data"
         _pvname = ""
-        if "Residual" in _calibseq or "GSC" in _calibseq and gscdepth!="EM3":
+        if "Residual" in _calibseq or "GSC" in _calibseq and gscdepth!="EM3" or "LargeRDNN" in _calibseq:
             _pvname = pvname
         # HACK: For testing while we don't have finalised calibrations for trigger PF jets
         _jetcollection = jetcollection
@@ -189,6 +190,10 @@ def getJetCalibToolPrereqs(modspec,jetdef):
                         "ghost:MuonSegment"]
     if "CombinedMass" in calibcontext:
         prereqs += ["mod:TrackSumMoments"]
+    if "LargeRDNN" in calibseq:
+        prereqs += ["mod:CaloEnergiesLargeR","mod:ConstitFrac","mod:groomMRatio","mod:Width",
+                    "mod:nsubjettiness","mod:nsubjettinessR","mod:ktsplitter","mod:ecorr",
+                    "mod:ecorrR","mod:qw"]
     jetcaliblog.debug("Prereqs for calibseq '{0}': {1}".format(calibseq,str(prereqs)))
     return prereqs
 

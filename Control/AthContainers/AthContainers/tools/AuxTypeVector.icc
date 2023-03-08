@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/tools/AuxTypeVector.icc
@@ -169,11 +169,8 @@ template <class T, class CONT>
 inline
 std::unique_ptr<IAuxTypeVector> AuxTypeVectorHolder<T, CONT>::clone() const
 {
-  if (m_ownFlag) {
-    vector_type* vecPtr = new vector_type (*m_vecPtr);
-    return std::make_unique<AuxTypeVectorHolder<T, CONT> > (vecPtr, true);
-  }
-  return std::make_unique<AuxTypeVectorHolder<T, CONT> > (m_vecPtr, false);
+  vector_type* vecPtr = new vector_type (*m_vecPtr);
+  return std::make_unique<AuxTypeVectorHolder<T, CONT> > (vecPtr, true);
 }
 
 
@@ -340,13 +337,19 @@ void AuxTypeVectorHolder<T, CONT>::shift (size_t pos, ptrdiff_t offs)
   }
   else if (offs > 0) {
     size_t oldsz = vec.size();
-    vec.resize (vec.size() + offs*SCALE);
-    std::copy (vec.rbegin() + offs*SCALE,
-               vec.rbegin() + (offs+oldsz-pos)*SCALE,
-               vec.rbegin());
-    std::fill (vec.begin() + pos*SCALE,
-               vec.begin() + (pos+offs)*SCALE,
-               Zero<typename AuxDataTraits<T>::element_type>::zero());
+    // Add to the end, zero-filled.
+    vec.resize (vec.size() + offs*SCALE,
+                Zero<typename AuxDataTraits<T>::element_type>::zero());
+    if (oldsz != pos) {
+      // Shift existing elements.  If we're just extending,
+      // then we can skip this.
+      std::copy (vec.rbegin() + offs*SCALE,
+                 vec.rbegin() + (offs+oldsz-pos)*SCALE,
+                 vec.rbegin());
+      std::fill (vec.begin() + pos*SCALE,
+                 vec.begin() + (pos+offs)*SCALE,
+                 Zero<typename AuxDataTraits<T>::element_type>::zero());
+    }
   }
 }
 

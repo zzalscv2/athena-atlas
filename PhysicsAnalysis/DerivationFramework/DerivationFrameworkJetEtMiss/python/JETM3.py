@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # DAOD_JETM3.py
@@ -13,8 +13,8 @@ def JETM3SkimmingToolCfg(ConfigFlags):
     acc = ComponentAccumulator()
 
     from DerivationFrameworkJetEtMiss import TriggerLists
-    electronTriggers = TriggerLists.single_el_Trig()
-    muonTriggers = TriggerLists.single_mu_Trig()
+    electronTriggers = TriggerLists.single_el_Trig(ConfigFlags)
+    muonTriggers = TriggerLists.single_mu_Trig(ConfigFlags)
 
     elofflinesel = '(count((Electrons.pt > 20*GeV) && (Electrons.DFCommonElectronsLHMedium)) >= 2)'
     muofflinesel = '(count((Muons.pt > 20*GeV) && (Muons.DFCommonMuonPassPreselection)) >= 2)'
@@ -209,7 +209,7 @@ def JETM3Cfg(ConfigFlags):
     # for actually configuring the matching, so we create it here and pass it down
     # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    JETM3TriggerListsHelper = TriggerListsHelper()
+    JETM3TriggerListsHelper = TriggerListsHelper(ConfigFlags)
 
     # Skimming, thinning, augmentation, extra content
     acc.merge(JETM3KernelCfg(ConfigFlags, name="JETM3Kernel", StreamName = 'StreamDAOD_JETM3', TriggerListsHelper = JETM3TriggerListsHelper))
@@ -222,31 +222,22 @@ def JETM3Cfg(ConfigFlags):
     
     JETM3SlimmingHelper = SlimmingHelper("JETM3SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
 
-    JETM3SlimmingHelper.SmartCollections = ["EventInfo",
-                                        "Electrons", "Photons", "Muons", "TauJets",
-                                        "InDetTrackParticles", "PrimaryVertices",
-                                        "MET_Baseline_AntiKt4EMTopo",
-                                        "MET_Baseline_AntiKt4EMPFlow",
-                                        "AntiKt4EMPFlowJets",
-                                        "AntiKt4EMTopoJets",
-                                        "AntiKt4TruthJets",
-                                        "AntiKt4TruthWZJets",
-                                        "AntiKt10TruthJets",
-                                        "AntiKt10TruthTrimmedPtFrac5SmallR20Jets",
-                                        "AntiKt10TruthSoftDropBeta100Zcut10Jets",
-                                        "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets",
-                                        "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
-                                        "BTagging_AntiKt4EMPFlow"]
+    JETM3SlimmingHelper.SmartCollections = ["EventInfo","InDetTrackParticles", "PrimaryVertices",
+                                            "Electrons", "Photons", "Muons", "TauJets",
+                                            "MET_Baseline_AntiKt4EMTopo","MET_Baseline_AntiKt4EMPFlow",
+                                            "AntiKt4EMPFlowJets","AntiKt4EMTopoJets",
+                                            "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets",
+                                            "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
+                                            "BTagging_AntiKt4EMPFlow"]
     
     JETM3SlimmingHelper.AllVariables = ["CaloCalTopoClusters",
                                         "GlobalChargedParticleFlowObjects", "GlobalNeutralParticleFlowObjects",
                                         "CHSGChargedParticleFlowObjects", "CHSGNeutralParticleFlowObjects",
                                         "MuonSegments",
                                         "LVL1JetRoIs",
-                                        "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape","Kt4EMPFlowPUSBEventShape","Kt4EMPFlowNeutEventShape",
-                                    ]
+                                        "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape","Kt4EMPFlowPUSBEventShape","Kt4EMPFlowNeutEventShape"]
 
-    JETM3SlimmingHelper.ExtraVariables = ["AntiKt4EMPFlowJets.passOnlyBJVT","AntiKt4EMPFlowJets.DFCommonJets_bJvt",
+    JETM3SlimmingHelper.ExtraVariables = ["AntiKt4EMPFlowJets.passOnlyBJVT.DFCommonJets_bJvt",
                                           "Muons.energyLossType.EnergyLoss.ParamEnergyLoss.MeasEnergyLoss.EnergyLossSigma.MeasEnergyLossSigma.ParamEnergyLossSigmaPlus.ParamEnergyLossSigmaMinus"]
     
     # Truth containers
@@ -261,7 +252,9 @@ def JETM3Cfg(ConfigFlags):
         JETM3SlimmingHelper.AllVariables += ["AntiKt4TruthJets", "InTimeAntiKt4TruthJets", "OutOfTimeAntiKt4TruthJets", 
                                              "TruthParticles", "TruthEvents", "TruthVertices", 
                                              "MuonTruthParticles", "egammaTruthParticles",]
-        JETM3SlimmingHelper.SmartCollections += ["AntiKt4TruthWZJets"]
+        JETM3SlimmingHelper.SmartCollections += ["AntiKt4TruthWZJets","AntiKt4TruthJets","AntiKt10TruthJets",
+                                                 "AntiKt10TruthTrimmedPtFrac5SmallR20Jets",
+                                                 "AntiKt10TruthSoftDropBeta100Zcut10Jets"]
 
     # Trigger content
     JETM3SlimmingHelper.IncludeTriggerNavigation = False

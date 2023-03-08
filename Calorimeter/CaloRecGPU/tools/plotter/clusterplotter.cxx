@@ -134,10 +134,10 @@ struct ProgArgs
     in_paths.clear();
     names.clear();
     out_path = "./plots/";
-    min_similarity = default_min_similarity;
-    term_weight = default_term_weight;
-    grow_weight = default_grow_weight;
-    seed_weight = default_seed_weight;
+    min_similarity = CaloRecGPU::default_min_similarity;
+    term_weight = CaloRecGPU::default_term_weight;
+    grow_weight = CaloRecGPU::default_grow_weight;
+    seed_weight = CaloRecGPU::default_seed_weight;
     place_titles = false;
     plot_label = "";
     plot_reqs.clear();

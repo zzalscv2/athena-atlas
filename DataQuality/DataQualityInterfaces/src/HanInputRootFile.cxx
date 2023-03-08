@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DataQualityInterfaces/HanInputRootFile.h"
@@ -27,27 +27,21 @@ namespace dqi {
 HanInputRootFile::
 HanInputRootFile( std::string& rootFileName, const std::string& path )
   : dqm_core::InputRootFile::InputRootFile(rootFileName)
-  , m_rootFile( TFile::Open(rootFileName.c_str()) )
   , m_basedir(0)
   , m_histNamesBuilt(false)
 {
-	if( m_rootFile.get() == 0 ) {
-    std::cerr << "HanInputRootFile -> "<< rootFileName << " is not readable.\n";
-    throw dqm_core::FileNotReadable(ERS_HERE, rootFileName);
-	}
-
   if( path != "" ) {
     std::cout << "Using path \"" << path << "\" in input file\n";
     std::string pathForSearch = path;
     pathForSearch += "/dummyName";
-    m_basedir = changeInputDir( m_rootFile.get(), pathForSearch );
+    m_basedir = changeInputDir( m_file.get(), pathForSearch );
     if( m_basedir == 0 ) {
       std::cerr << "Cannot find \"" << path << "\" in input file\n";
     }
   }
   
   if( m_basedir == 0 )
-    m_basedir = m_rootFile.get();
+    m_basedir = m_file.get();
 }
 
 

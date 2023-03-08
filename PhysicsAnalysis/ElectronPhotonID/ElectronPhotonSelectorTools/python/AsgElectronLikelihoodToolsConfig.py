@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 __doc__ = """Configure the AsgElectronLikelihoodTool with the quality
              cuts and allow for (re-)setting of all provided cuts."""
@@ -36,7 +36,7 @@ def AsgElectronLikelihoodToolCfg(
     # Create an instance of the tool
     tool = AsgElectronLikelihoodTool(name)
 
-    tool.usePVContainer = flag.InDet.PriVertex.doVertexFinding
+    tool.usePVContainer = flag.Tracking.doVertexFinding
 
     # Call the function and configure it with the standard configuration
     ntuple[1](tool)

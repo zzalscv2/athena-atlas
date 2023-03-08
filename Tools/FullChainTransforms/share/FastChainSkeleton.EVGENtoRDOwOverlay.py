@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 #=============================================================================
 # Skeleton file for running simulation and MC-overlay in one job for FastChain
@@ -70,16 +70,6 @@ if hasattr(runArgs, 'preInclude'):
     for cmd in runArgs.preInclude:
         include(cmd)
 
-# Post-include
-if hasattr(runArgs, "postInclude"):
-    for fragment in runArgs.postInclude:
-        include(fragment)
-
-# Post-exec
-if hasattr(runArgs, "postExec") and runArgs.postExec != 'NONE':
-    for cmd in runArgs.postExec:
-        exec(cmd)
-
 # Pre-exec for simulation
 if hasattr(runArgs, "preSimExec"):
     FastChainLog.info("transform pre-sim exec")
@@ -124,6 +114,12 @@ elif hasattr(runArgs,'jobNumber'):
 else:
     #FastChainLog.info( 'Run number should be defined!' )
     raise RuntimeError("No run number defined!")
+
+# runNumber is MC channel number in reco
+if hasattr(runArgs, 'runNumber'):
+    # always set it in legacy config
+    athenaCommonFlags.MCChannelNumber.set_Value(runArgs.runNumber)
+    FastChainLog.info('Got MC channel number %d from runNumber', athenaCommonFlags.MCChannelNumber())
 
 # Handle cosmics track record
 if beamFlags.Beam.beamType.get_Value() == 'cosmics':
@@ -403,6 +399,34 @@ if len(globalflags.ConditionsTag()):
 # BeamEffectsAlg
 topSequence += CfgGetter.getAlgorithm("BeamEffectsAlg")
 
+def checkxAODEventInfo(inputEVNTfile):
+    """ Check for xAOD::EventInfo """
+    import PyUtils.AthFile as af
+    f = af.fopen(inputEVNTfile)
+    inputlist = f.infos['eventdata_items']
+    present = False
+    for entry in inputlist:
+        if entry[0] != 'xAOD::EventInfo':
+            continue
+        if entry[1] !='EventInfo':
+            continue
+        present = True
+        print("Accepted")
+        break
+    return present
+
+from OverlayCommonAlgs.OverlayFlags import overlayFlags
+overlayFlags.processLegacyEventInfo = not checkxAODEventInfo(athenaCommonFlags.PoolEvgenInput.get_Value()[0])
+if overlayFlags.processLegacyEventInfo():
+    FastChainLog.info("Dealing with Legacy EventInfo in inputs")
+    if not hasattr(job, "EventInfoCnvAlg"):
+        alg = CfgMgr.xAODMaker__EventInfoCnvAlg("EventInfoCnvAlg")
+        alg.AODKey = 'McEventInfo'
+        alg.xAODKey = 'Input_EventInfo'
+        job += alg
+job += CfgGetter.getAlgorithm("EventInfoUpdateFromContextAlg")
+job.EventInfoUpdateFromContextAlg.OutputKey = f"{overlayFlags.sigPrefix()}EventInfo"
+
 # CopyMcEventCollection
 job += CfgGetter.getAlgorithm("CopyMcEventCollection")
 
@@ -517,14 +541,6 @@ import MagFieldServices.SetupField
 # xAOD::EventInfo setup
 #------------------------------------------------------------
 
-overlayFlags.processLegacyEventInfo.set_Value_and_Lock(True)
-if overlayFlags.processLegacyEventInfo() and not hasattr(job, "xAODMaker::EventInfoCnvAlg"):
-    from xAODEventInfoCnv.xAODEventInfoCreator import xAODMaker__EventInfoCnvAlg
-    alg = xAODMaker__EventInfoCnvAlg("EventInfoCnvAlg")
-    alg.AODKey = overlayFlags.sigPrefix() + 'McEventInfo'
-    alg.xAODKey = overlayFlags.sigPrefix() + 'EventInfo'
-    job += alg
-
 # Run the xAOD::EventInfo overlay
 job += CfgGetter.getAlgorithm("EventInfoOverlay")
 
@@ -552,9 +568,11 @@ if 'FPEAuditor/FPEAuditor' not in theAuditorSvc.Auditors:
 FastChainLog.info("================ Configure ================= ")
 
 # Load the input properly
-include("EventOverlayJobTransforms/OverlayInput_jobOptions.py")
-# Collections in EventInfo container are renamed (e.g. McEventInfo to Sig_McEventInfo) because EventInfo is in the EVNT input file
-# Collections in McEventCollection, TrackRecordCollection etc are not renamed because these containers are not in the EVNT input file (e.g. TruthEvent remains named TruthEvent and MuonEntryLayer remains named MuonEntryLayer)
+include.block("EventOverlayJobTransforms/OverlayInput_jobOptions.py")
+# Truth
+if DetFlags.overlay.Truth_on():
+    from SGComps import AddressRemappingSvc
+    AddressRemappingSvc.addInputRename('McEventCollection', 'TruthEvent', 'Sig_TruthEvent')
 
 # Beam overlay
 if DetFlags.overlay.BCM_on() or DetFlags.overlay.Lucid_on():
@@ -613,3 +631,15 @@ digitizationFlags.rndmSeedList.printSeeds()
 
 ServiceMgr.MessageSvc.OutputLevel = INFO
 ServiceMgr.MessageSvc.Format = "% F%45W%S%5W%e%s%7W%R%T %0W%M"
+
+# Post-include
+if hasattr(runArgs, "postInclude"):
+    for fragment in runArgs.postInclude:
+        include(fragment)
+
+# Post-exec
+if hasattr(runArgs, "postExec"):
+    FastChainLog.info("transform post-exec")
+    for cmd in runArgs.postExec:
+        exec(cmd)
+

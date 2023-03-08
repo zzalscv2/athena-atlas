@@ -82,40 +82,41 @@ if __name__=="__main__":
         print("ERROR, unhandled argument(s):",leftover)
         sys.exit(-1)
     
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from LArCalibProcessing.LArCalibConfigFlags import addLArCalibFlags
-    addLArCalibFlags(ConfigFlags)
+    flags=initConfigFlags()
+    addLArCalibFlags(flags)
 
-    ConfigFlags.Input.isMC = False
-    ConfigFlags.IOVDb.DatabaseInstance="CONDBR2"
-    ConfigFlags.LAr.doAlign=False
-    ConfigFlags.Input.RunNumber=args.runnumber
-    ConfigFlags.IOVDb.GlobalTag="CONDBR2-ES1PA-2022-06"
-    ConfigFlags.GeoModel.AtlasVersion="ATLAS-R3S-2021-03-00-00"
-    ConfigFlags.LArCalib.isSC=args.SC
+    flags.Input.isMC = False
+    flags.IOVDb.DatabaseInstance="CONDBR2"
+    flags.LAr.doAlign=False
+    flags.Input.RunNumber=args.runnumber
+    flags.IOVDb.GlobalTag="CONDBR2-ES1PA-2022-06"
+    flags.GeoModel.AtlasVersion="ATLAS-R3S-2021-03-00-00"
+    flags.LArCalib.isSC=args.SC
     
     if args.loglevel:
         from AthenaCommon import Constants
         if hasattr(Constants,args.loglevel):
-            ConfigFlags.Exec.OutputLevel=getattr(Constants,args.loglevel)
+            flags.Exec.OutputLevel=getattr(Constants,args.loglevel)
         else:
             raise ValueError("Unknown log-level, allowed values are ALL, VERBOSE, DEBUG,INFO, WARNING, ERROR, FATAL")
 
-    ConfigFlags.lock()
+    flags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    cfg=MainServicesCfg(ConfigFlags)
+    cfg=MainServicesCfg(flags)
     #MC Event selector since we have no input data file
     from McEventSelector.McEventSelectorConfig import McEventSelectorCfg
-    cfg.merge(McEventSelectorCfg(ConfigFlags,
-                                 RunNumber=ConfigFlags.Input.RunNumber,
+    cfg.merge(McEventSelectorCfg(flags,
+                                 RunNumber=flags.Input.RunNumber,
                                  FirstLB=args.lbnumber,
                                  EventsPerRun      = 1,
                                  FirstEvent        = 1,
                                  InitialTimeStamp  = 0,
                                  TimeStampInterval = 1))
 
-    cfg.merge(LArBadChannel2AsciiCfg(ConfigFlags,args.output, 
+    cfg.merge(LArBadChannel2AsciiCfg(flags,args.output, 
                                      dbname=args.database,
                                      folder=args.folder,
                                      tag=args.tag,

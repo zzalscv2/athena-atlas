@@ -222,22 +222,20 @@ AlongStepGetPhysicalInteractionLength( const G4Track&  track,
   G4FieldManager* fieldMgr=0;
   G4bool          fieldExertsForce = false ;
   if( (particleElCharge != 0.0) || (particleMagCharge!=0.0) )        //  SB
-    {
+  {
+     G4FieldManager* oldFieldMgr= fFieldPropagator->GetCurrentFieldManager();
 
-      //      fFieldPropagator->SetVerboseLevel(4);
+     fieldMgr= fFieldPropagator->FindAndSetFieldManager( track.GetVolume() );
 
-      G4FieldManager* OldFieldMgr=0;
-      OldFieldMgr = fFieldPropagator->GetCurrentFieldManager();
+     // if fieldMgr changed, need to flush it's association with our ChordFinder
+     //     and then below to update stepper and chord finder
+     if (fieldMgr != oldFieldMgr) {
+        fEquationSetup->ResetIntegration( oldFieldMgr );
+        // Now ensure that it is configured for the new field-manager
+        fEquationSetup->InitialiseForField( fieldMgr );
+     }
 
-      fieldMgr= fFieldPropagator->FindAndSetFieldManager( track.GetVolume() );
-
-      //      fieldMgr->SetVerboseLevel(4);
-
-      // if fieldMgr changed, need to update stepper and chord finder
-      if (fieldMgr != OldFieldMgr)
-        fEquationSetup->SwitchStepperAndChordFinder( (particleMagCharge != 0.0), fieldMgr );
-
-      if (fieldMgr != 0) {
+     if (fieldMgr != nullptr) {
         // Message the field Manager, to configure it for this track
         fieldMgr->ConfigureForTrack( &track );
         // Moved here, in order to allow a transition
@@ -247,10 +245,15 @@ AlongStepGetPhysicalInteractionLength( const G4Track&  track,
         if (particleMagCharge!=0.0) fieldMgr->SetFieldChangesEnergy(true);
 
         // If the field manager has no field, there is no field !
-        fieldExertsForce = (fieldMgr->GetDetectorField() != 0);
+        fieldExertsForce = (fieldMgr->GetDetectorField() != nullptr);
 
-      }
-    }
+        if( fieldExertsForce)
+          fEquationSetup->SwitchStepperAndChordFinder( (particleMagCharge != 0.0), fieldMgr );
+        // else ...
+        // Is there extra safety measure to take if the fieldMgr has no field attached ??
+     }
+     // oldFieldMgr= fieldMgr;
+  }
 
   // Choose the calculation of the transportation: Field or not
   //
@@ -807,10 +810,6 @@ G4mplAtlasTransportation::StartTracking(G4Track* aTrack)
 
   //  G4cout << "SB:  G4mplAtlasTransportation:  StartTracking" << G4endl;
 
-
-// The actions here are those that were taken in AlongStepGPIL
-//   when track.GetCurrentStepNumber()==1
-
   // reset safety value and center
   //
   fPreviousSafety    = 0.0 ;
@@ -839,20 +838,25 @@ G4mplAtlasTransportation::StartTracking(G4Track* aTrack)
   // Set up the Field Propagation to integrate time in case of magnetic charge
   G4double   particleMagCharge = mplParticle->MagneticCharge();
 
-  // To be sure that equations are created *after* a global field manager
-  // is registered, we initialise here.
-  // This can be moved to a different location, so long as the global field
-  // manager is not changed after this point.
-  G4FieldManager* fieldMgr=0;
-  fieldMgr = fFieldPropagator->GetCurrentFieldManager();
+  // To be certain that equations etc are created *after* the field managers (global + other/s)
+  //   are constructed and registered, we initialise here.
+  G4FieldManager* fieldMgr= fFieldPropagator->GetCurrentFieldManager();
+
+  // Set up the equation of motion for monopole  
   fEquationSetup->InitialiseForField( fieldMgr );
 
-  // Set up the equation of motion for monopole or usual matter
   fEquationSetup->SwitchStepperAndChordFinder( (particleMagCharge != 0.0), fieldMgr );
-  //  If local fields exist, a similar call must be made for each local field
-  //  manager, every time the track enters a volume which has a different one.
+  //  If local fields exist, this done again for each local field manager, 
+  //   when the track enters a volume which has it.
 
   // Update the current touchable handle  (from the track's)
   //
   fCurrentTouchableHandle = aTrack->GetTouchableHandle();
+}
+
+void
+G4mplAtlasTransportation::EndTracking()
+{
+  G4VProcess::EndTracking();
+  fEquationSetup->ResetIntegration( fFieldPropagator->GetCurrentFieldManager() );
 }

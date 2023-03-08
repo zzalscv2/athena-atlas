@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MergeMcEventCollTool.h"
@@ -447,7 +447,8 @@ StatusCode MergeMcEventCollTool::processUnfilteredEvent(const McEventCollection 
 #ifdef HEPMC3
   if ( HepMC::signal_process_vertex(&currentBackgroundEvent) ) pCopyOfGenVertex = std::make_shared<HepMC3::GenVertex> ( HepMC::signal_process_vertex(&currentBackgroundEvent)->data() );
   //insert the GenEvent into the overlay McEventCollection.
-  HepMC::GenEvent* evt= new HepMC::GenEvent();
+  //for configs with pile-up truth, also need to propagate barcodes to GenEvent
+  HepMC::GenEvent* evt = m_onlySaveSignalTruth ? new HepMC::GenEvent() : new HepMC::GenEvent(currentBackgroundEvent);
   //AV Not sure if one should add the vertex here
   evt->set_event_number(currentBkgEventIndex);
   evt->add_vertex(pCopyOfGenVertex);
@@ -547,10 +548,7 @@ bool MergeMcEventCollTool::isInitialCollisionVertex(const HepMC::ConstGenVertexP
 #ifdef HEPMC3
 for (const auto& pCurrentVertexParticle: pCurrentVertex->particles_in())
       {  
-         if ( (4==pCurrentVertexParticle->status()) ||  (2212==pCurrentVertexParticle->pdg_id()
-           && (1==HepMC::barcode(pCurrentVertexParticle) || 2==HepMC::barcode(pCurrentVertexParticle)) ) ) {
-           return true;
-         }
+         if (4==pCurrentVertexParticle->status()) return true;
       }
 #else
   HepMC::GenVertex::particles_in_const_iterator currentVertexParticleIter(pCurrentVertex->particles_in_const_begin());

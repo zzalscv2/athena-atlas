@@ -181,6 +181,7 @@ StatusCode Herwig7::fillEvt(HepMC::GenEvent* evt) {
   ATH_MSG_DEBUG("Converting ThePEG::Event to HepMC::GenEvent");
 #ifdef HEPMC3
   if (!evt->run_info()) evt->set_run_info(m_runinfo);
+  evt->set_units(HepMC3::Units::MEV, HepMC3::Units::MM);
 #endif
   convert_to_HepMC(*m_event, *evt, false, ThePEG::MeV, ThePEG::millimeter);
   ATH_MSG_DEBUG("Converted ThePEG::Event to HepMC::GenEvent");

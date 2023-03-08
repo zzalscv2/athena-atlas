@@ -1,6 +1,6 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-def ITkStripGeoModelCfg(flags):
+def ITkStripGeoModelCfg(flags,setGeometryAlignable=False):
     from AtlasGeoModel.GeoModelConfig import GeoModelCfg
     acc = GeoModelCfg(flags)
     geoModelSvc = acc.getPrimary()
@@ -8,7 +8,7 @@ def ITkStripGeoModelCfg(flags):
     from AthenaConfiguration.ComponentFactory import CompFactory
     ITkStripDetectorTool = CompFactory.ITk.StripDetectorTool()
     # ITkStripDetectorTool.useDynamicAlignFolders = flags.GeoModel.Align.Dynamic #Will we need to do dynamic alignment for ITk?
-    ITkStripDetectorTool.Alignable = False # make this a flag? Set true as soon as decided on folder structure
+    ITkStripDetectorTool.Alignable = setGeometryAlignable # make this a flag? Set true as soon as decided on folder structure
     ITkStripDetectorTool.DetectorName = "ITkStrip"
     if flags.ITk.Geometry.StripLocal:
         # Setting this filename triggers reading from local file rather than DB

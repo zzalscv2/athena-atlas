@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #define CylinderLayerMaterial_cxx
@@ -232,7 +232,7 @@ void CylinderLayerMaterial::Init(TTree *tree)
    fChain->SetBranchAddress("LayerReferenceBinsTotal", &LayerReferenceBinsTotal, &b_cylRefBinsTotal);
    fChain->SetBranchAddress("LayerReferenceX0", &LayerReferenceX0, &b_LayerReferenceX0);
    fChain->SetBranchAddress("LayerReferenceZARho", &LayerReferenceZARho, &b_LayerReferenceZARho);
-   Notify();
+   CylinderLayerMaterial::Notify();
 }
 
 Bool_t CylinderLayerMaterial::Notify()

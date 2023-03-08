@@ -12,7 +12,7 @@ if not 'OutputFile' in dir():
     OutputFile = '%s.pool.root' % File
 
 if not 'ConddbTag' in dir():
-    ConddbTag = 'OFLCOND-MC21-SDR-RUN3-08'
+    ConddbTag = 'OFLCOND-MC23-SDR-RUN3-01'
 
 if not 'DetDescrVersion' in dir():
     DetDescrVersion = 'ATLAS-R3S-2021-03-00-00'
@@ -138,11 +138,12 @@ if 'GDML' in dir():
 from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
 athenaCommonFlags.PoolEvgenInput.set_Off()
 athenaCommonFlags.SkipEvents.set_Off()
+svcMgr.EventSelector.FirstEvent=1
 
 ## Use single particle generator
 import AthenaCommon.AtlasUnixGeneratorJob
 import ParticleGun as PG
-pg = PG.ParticleGun(randomSvcName=simFlags.RandomSvc.get_Value(), randomStream="SINGLE")
+pg = PG.ParticleGun(randomStream = "SINGLE", randomSeed = simFlags.RandomSeedOffset.get_Value())
 
 if not 'PID' in dir():
     PID=211

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -36,8 +36,7 @@ CaloTTDescriptor::CaloTTDescriptor(float eta_min,   float eta_max,   float deta,
 {
 }
 
-CaloTTDescriptor::~CaloTTDescriptor()
-{}
+
 
 void	
 CaloTTDescriptor::print	() const
@@ -60,8 +59,6 @@ CaloTTDescriptor::print	() const
 	      << std::setw(9) << std::setprecision(4) << m_dphi    << " "
 	      << std::setw(9) << std::setprecision(4) << m_nLay    << " "
 	      << std::endl;	    
-    
-    return;
 }
 
     
@@ -82,7 +79,16 @@ CaloTTDescriptor::set (float               eta_min,
   m_phi_max  = phi_max;
   m_dphi     = dphi;
   m_nEta     = (short) ((eta_max - eta_min)/deta + 0.501);
-  m_nPhi     = (short) ((phi_max - phi_min)/dphi + 0.501);
+  // Dummy conditional to prevent these two statements from being
+  // evaluated using a vectorized instruction.  Otherwise, we can
+  // get a FPE in the clang build from the division because there
+  // are two unused vector lanes.
+  if (m_nEta > 0) {
+    m_nPhi     = (short) ((phi_max - phi_min)/dphi + 0.501);
+  }
+  else {
+    m_nPhi = 0;
+  }
   m_sign_eta = sign_eta;
   m_nLay = n_lay;
 }

@@ -1,9 +1,9 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # define histograms for monitoring of HLT jets
-def getMonTool_TrigJetAlgorithm(path):
+def getMonTool_TrigJetAlgorithm(flags, path):
   from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-  monTool = GenericMonitoringTool('MonTool')
+  monTool = GenericMonitoringTool(flags, 'MonTool')
   monTool.HistPath = path
   monTool.defineHistogram( 'TIME_jetreco', path='EXPERT', type='TH1F', title='Counts',
                            xbins=100, xmin=0, xmax=200 )

@@ -1,44 +1,47 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
-def LArCollisionTimeMonConfigOld(inputFlags):
+def LArCollisionTimeMonConfigOld(dqFlags):
     from AthenaMonitoring.AthMonitorCfgHelper import AthMonitorCfgHelperOld
     from LArMonitoring.LArMonitoringConf import LArCollisionTimeMonAlg
     
     larColTime_hist_path='LArCollisionTime'
 
-    helper = AthMonitorCfgHelperOld(inputFlags, 'LArCollisionTimeMonAlgOldCfg')
-    LArCollisionTimeMonConfigCore(helper, LArCollisionTimeMonAlg,inputFlags,larColTime_hist_path)
+    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+
+    helper = AthMonitorCfgHelperOld(dqFlags, 'LArCollisionTimeMonAlgOldCfg')
+    LArCollisionTimeMonConfigCore(ConfigFlags, helper, LArCollisionTimeMonAlg, larColTime_hist_path)
 
     larColTime_hist_path='LArClusterCollisionTime'
-    LArCollisionTimeMonConfigCore(helper, LArCollisionTimeMonAlg,inputFlags,larColTime_hist_path)
+    LArCollisionTimeMonConfigCore(ConfigFlags, helper, LArCollisionTimeMonAlg, larColTime_hist_path)
     helper.monSeq.LArClusterCollisionTimeMonAlg.Key = "ClusterCollTime"
     helper.monSeq.LArClusterCollisionTimeMonAlg.nCells = 0
 
     return helper.result()
 
-def LArCollisionTimeMonConfig(inputFlags):
+
+def LArCollisionTimeMonConfig(flags):
     '''Function to configures some algorithms in the monitoring system.'''
 
     # The following class will make a sequence, configure algorithms, and link them to GenericMonitoringTools                                                                                                                                                
 
     from AthenaMonitoring.AthMonitorCfgHelper import AthMonitorCfgHelper
-    helper = AthMonitorCfgHelper(inputFlags,'LArCollisionTimeMonAlgCfg')
+    helper = AthMonitorCfgHelper(flags,'LArCollisionTimeMonAlgCfg')
 
     from LArCellRec.LArCollisionTimeConfig import LArCollisionTimeCfg
-    cfg = LArCollisionTimeCfg(inputFlags)
+    cfg = LArCollisionTimeCfg(flags)
 
     from LArClusterRec.LArClusterCollisionTimeConfig import LArClusterCollisionTimeCfg
-    cfg.merge(LArClusterCollisionTimeCfg(inputFlags))
+    cfg.merge(LArClusterCollisionTimeCfg(flags))
 
     larColTime_hist_path='LArCollisionTime'
 
     from AthenaConfiguration.ComponentFactory import CompFactory
-    LArCollisionTimeMonConfigCore(helper, CompFactory.LArCollisionTimeMonAlg,inputFlags,larColTime_hist_path)
+    LArCollisionTimeMonConfigCore(flags, helper, CompFactory.LArCollisionTimeMonAlg, larColTime_hist_path)
 
     larClusColTime_hist_path='LArClusterCollisionTime'
-    LArCollisionTimeMonConfigCore(helper, CompFactory.LArCollisionTimeMonAlg('LArClusterCollisionTimeMonAlg'),inputFlags,larClusColTime_hist_path)
+    LArCollisionTimeMonConfigCore(flags, helper, CompFactory.LArCollisionTimeMonAlg('LArClusterCollisionTimeMonAlg'), larClusColTime_hist_path)
     for algo in helper.monSeq.Members:
        if algo.name == 'LArClusterCollisionTimeMonAlg':
            algo.Key = "ClusterCollTime"
@@ -47,11 +50,9 @@ def LArCollisionTimeMonConfig(inputFlags):
     cfg.merge(helper.result())
     return cfg
 
-def LArCollisionTimeMonConfigCore(helper, algoinstance,inputFlags,larColTime_hist_path):
 
-
+def LArCollisionTimeMonConfigCore(flags, helper, algoinstance, larColTime_hist_path):
     larCollTimeMonAlg = helper.addAlgorithm(algoinstance,larColTime_hist_path+'MonAlg')
-
 
     collTimeGroupName="LArCollisionTimeMonGroup"
 
@@ -152,8 +153,7 @@ def LArCollisionTimeMonConfigCore(helper, algoinstance,inputFlags,larColTime_his
 
     
     #in train monitoring, only done offline
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    if ConfigFlags.Common.isOnline:
+    if flags.Common.isOnline:
 
         collTimeGroupName_intrain=collTimeGroupName+"_intrain"
         collTimeGroup_intrain = helper.addGroup( 
@@ -251,26 +251,27 @@ if __name__=='__main__':
     log.setLevel(DEBUG)
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from LArMonitoring.LArMonConfigFlags import createLArMonConfigFlags
     createLArMonConfigFlags()
 
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.DQ.enableLumiAccess = False #copied from LArRecoFromRaw
-    ConfigFlags.DQ.useTrigger = False #copied from LArRecoFromRaw 
-    ConfigFlags.Output.HISTFileName = 'LArCollTimeMonitoringOutput.root'
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.DQ.enableLumiAccess = False #copied from LArRecoFromRaw
+    flags.DQ.useTrigger = False #copied from LArRecoFromRaw 
+    flags.Output.HISTFileName = 'LArCollTimeMonitoringOutput.root'
+    flags.lock()
 
     ## Cell building
     from CaloRec.CaloRecoConfig import CaloRecoCfg
-    cfg=CaloRecoCfg(ConfigFlags)
+    cfg=CaloRecoCfg(flags)
 
     from LumiBlockComps.BunchCrossingCondAlgConfig import BunchCrossingCondAlgCfg
-    cfg.merge(BunchCrossingCondAlgCfg(ConfigFlags))
+    cfg.merge(BunchCrossingCondAlgCfg(flags))
 
     import AthenaCommon.SystemOfUnits as Units
-    collmon=LArCollisionTimeMonConfig(ConfigFlags)
+    collmon=LArCollisionTimeMonConfig(flags)
     collmon.getEventAlgo("LArCollisionTimeMonAlg").timeDiffCut=5.0*Units.nanosecond
     collmon.getEventAlgo("LArCollisionTimeMonAlg").nCells=1
     collmon.getEventAlgo("LArCollisionTimeMonAlg").TrainFrontDistance=int(30*Units.nanosecond)
@@ -278,9 +279,6 @@ if __name__=='__main__':
     collmon.getEventAlgo("LArClusterCollisionTimeMonAlg").TrainFrontDistance=int(30*Units.nanosecond)
     cfg.merge(collmon) 
 
-    ConfigFlags.dump()
-    f=open("CollTimeMonMaker.pkl","wb")
-    cfg.store(f)
-    f.close()
-   
-    
+    flags.dump()
+    with open("CollTimeMonMaker.pkl", "wb") as f:
+        cfg.store(f)

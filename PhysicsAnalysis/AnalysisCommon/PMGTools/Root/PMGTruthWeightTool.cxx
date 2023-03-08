@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // EDM include(s):
@@ -37,19 +37,18 @@ namespace PMGTools
     // Clear cached weights
     clearWeightLocationCaches();
 
-    // Set the MC channel number to an impossible number (max-uint) to force meta data updating
-    m_mcChannelNumber = uint32_t(-1);
+    CP::SystematicSet affSysts = CP::SystematicSet();
+    m_calibCache.initialize (std::move (affSysts),
+                             [this] (const CP::SystematicSet& sys,
+                                     std::size_t& idx) {
+                               ATH_MSG_WARNING("Mapping for " << sys.name() << " missing, setting to index 0.");
+                               idx = 0;
+                               return StatusCode::SUCCESS;
+                             });
 
     // Try to load MC channel number from file metadata
-    ATH_MSG_INFO("Attempting to retrieve MC channel number...");
-    const xAOD::FileMetaData *fmd = nullptr;
-    if (inputMetaStore()->contains<xAOD::FileMetaData>("FileMetaData")) {
-      ATH_CHECK(inputMetaStore()->retrieve(fmd, "FileMetaData"));
-      float fltChannelNumber(-1);
-      if (fmd->value(xAOD::FileMetaData::mcProcID, fltChannelNumber)) {
-        m_mcChannelNumber = uint32_t(fltChannelNumber);
-      }
-    }
+    ATH_CHECK(getMCChannelNumber(m_mcChannelNumber));
+    
     if (m_mcChannelNumber == uint32_t(-1)) {
       ATH_MSG_WARNING("... MC channel number could not be loaded");
     } else {
@@ -90,7 +89,7 @@ namespace PMGTools
         return StatusCode::FAILURE;
       }
     }
-
+    
     // Add the affecting systematics to the global registry
     CP::SystematicRegistry& registry = CP::SystematicRegistry::getInstance();
     if (!registry.registerSystematics(*this)) {
@@ -109,16 +108,10 @@ namespace PMGTools
   }
 
 
-  float PMGTruthWeightTool::getWeight(const std::string& weightName) const {
-    // Check that we have loaded event weights
-    if (m_weights.size() == 0) {
-      ATH_MSG_FATAL("No MC weights found!");
-      throw std::runtime_error(name() + ": No MC weights found!");
-    }
-
+  float PMGTruthWeightTool::getWeight(const xAOD::EventInfo* evtInfo, const std::string& weightName) const {
     // Return appropriate weight from EventInfo: this should be identical to the TruthEvent
     try {
-      return m_weights.at(m_weightIndices.at(weightName));
+      return evtInfo->mcEventWeight(m_weightIndices.at(weightName));
     } catch (const std::out_of_range& e) {
       // Before throwing an exception, try to recover with bad naming conventions
       std::string strippedName = RCU::substitute (weightName, " ", "_");
@@ -130,7 +123,7 @@ namespace PMGTools
           [](unsigned char c){ return std::tolower(c); });
         if (strippedName == modifiedName){
           ATH_MSG_WARNING("Using weight name \"" << weight << "\" instead of requested \"" << weightName << "\"");
-          return getWeight(weight);
+          return getWeight(evtInfo, weight);
         }
       }
       ATH_MSG_FATAL("Weight \"" + weightName + "\" could not be found");
@@ -144,27 +137,25 @@ namespace PMGTools
   }
 
 
-  float PMGTruthWeightTool::getSysWeight() const
+  float PMGTruthWeightTool::getSysWeight(const xAOD::EventInfo* evtInfo, const CP::SystematicSet& sys) const
   {
-    return m_currentWeightData->weight;
+    const std::size_t *res;
+    ANA_CHECK_THROW (m_calibCache.get(sys,res));
+    return evtInfo->mcEventWeight(*res);
   }
 
 
-  size_t PMGTruthWeightTool::getSysWeightIndex() const
+  size_t PMGTruthWeightTool::getSysWeightIndex(const CP::SystematicSet& sys) const
   {
-    return m_currentWeightData->index;
-  }
-
-
-  bool PMGTruthWeightTool::isAffectedBySystematic(const CP::SystematicVariation& systematic) const
-  {
-    return m_systematicsSet.find( systematic ) != m_systematicsSet.end();
+    const std::size_t *res;
+    ANA_CHECK_THROW (m_calibCache.get(sys,res));
+    return *res;
   }
 
 
   CP::SystematicSet PMGTruthWeightTool::affectingSystematics() const
   {
-    return m_systematicsSet;
+    return m_calibCache.affectingSystematics();
   }
 
 
@@ -174,48 +165,29 @@ namespace PMGTools
   }
 
 
-  StatusCode PMGTruthWeightTool::applySystematicVariation(const CP::SystematicSet& systConfig)
-  {
-    auto iter = m_weightData.find (systConfig);
-    if (iter != m_weightData.end())
-    {
-      m_currentWeightData = &iter->second;
-      return StatusCode::SUCCESS;
-    }
-
-    CP::SystematicSet currentSys;
-    ANA_CHECK_SET_TYPE (StatusCode);
-    ANA_CHECK (CP::SystematicSet::filterForAffectingSystematics (systConfig, m_systematicsSet, currentSys));
-
-    WeightData currentWeight{};
-    currentWeight.index = m_weightIndicesSys.at(currentSys.name());
-    if (!m_weights.empty())
-    {
-      currentWeight.weight = m_weights.at(currentWeight.index);
-    }
-
-    auto insert = m_weightData.emplace(systConfig, std::move(currentWeight));
-    m_currentWeightData = &insert.first->second;
-
-    return StatusCode::SUCCESS;
-  }
-
-
-  StatusCode PMGTruthWeightTool::beginInputFile()
-  {
-    // Detect possible MC channel number change
-    uint32_t mcChannelNumber(-1);
+  StatusCode PMGTruthWeightTool::getMCChannelNumber(uint32_t &mcChannelNumber) {
+    mcChannelNumber = static_cast<uint32_t>(-1);
 
     // Try to load MC channel number from file metadata
-    ATH_MSG_DEBUG("Attempting to retrieve MC channel number...");
+    ATH_MSG_INFO("Attempting to retrieve MC channel number...");
     const xAOD::FileMetaData *fmd = nullptr;
     if (inputMetaStore()->contains<xAOD::FileMetaData>("FileMetaData")) {
       ATH_CHECK(inputMetaStore()->retrieve(fmd, "FileMetaData"));
       float fltChannelNumber(-1);
       if (fmd->value(xAOD::FileMetaData::mcProcID, fltChannelNumber)) {
-        mcChannelNumber = uint32_t(fltChannelNumber);
+        mcChannelNumber = static_cast<uint32_t>(fltChannelNumber);
+        return StatusCode::SUCCESS;
       }
     }
+    return StatusCode::FAILURE;
+  }
+
+  StatusCode PMGTruthWeightTool::beginInputFile()
+  {
+    // Detect possible MC channel number change
+    uint32_t mcChannelNumber;
+    ATH_CHECK(getMCChannelNumber(mcChannelNumber));
+
     if (m_mcChannelNumber != uint32_t(-1) && mcChannelNumber != uint32_t(-1) && mcChannelNumber != m_mcChannelNumber) {
       ATH_MSG_ERROR("MC channel number from a new file does not match the previously processed files.");
       return StatusCode::FAILURE;
@@ -225,59 +197,7 @@ namespace PMGTools
   }
 
 
-  StatusCode PMGTruthWeightTool::beginEvent() {
-    // Clear weights and channel number from previous event
-    m_weights.clear();
-    m_weightData.clear();
-
-    // Try to read information about weights and channel number from EventInfo
-    // 1. try the xAOD::EventInfo object
-    if (evtStore()->contains<xAOD::EventInfo>("EventInfo")) {
-      const xAOD::EventInfo* evtInfo;
-      ATH_CHECK(evtStore()->retrieve(evtInfo, "EventInfo"));
-      m_weights = evtInfo->mcEventWeights();
-
-    // 2. otherwise, if we're not in AnalysisBase, see if there's an EventInfo object
-#ifndef XAOD_STANDALONE
-    } else if (evtStore()->contains<EventInfo>("McEventInfo")) {
-      const EventInfo* evtInfo;
-      ATH_CHECK(evtStore()->retrieve(evtInfo, "McEventInfo"));
-      for (unsigned int idx = 0; idx < evtInfo->event_type()->n_mc_event_weights(); ++idx) {
-        m_weights.push_back(evtInfo->event_type()->mc_event_weight(idx));
-      }
-#endif // not XAOD_STANDALONE
-
-    // 3. otherwise let's bail here
-    } else {
-      ATH_MSG_ERROR("No event information is available in this file!");
-      return StatusCode::FAILURE;
-    }
-
-    // Validate weight caches against event information
-    if (m_weightNames.size() != m_weights.size()) {
-      // Special case to allow nominal weight to be used when this is the only weight in the event
-      if ((m_weightNames.size() == 0) && (m_weights.size() == 1)) {
-        ATH_MSG_WARNING("No weight names were available in this sample! Proceeding under the assumption that the single available weight should be 'nominal'");
-        m_weightNames.push_back("nominal");
-        m_weightIndices["nominal"] = 0;
-        m_weightIndicesSys[""] = 0;
-      } else {
-        ATH_MSG_ERROR("Expected " << m_weightNames.size() << " weights from the metadata but found " << m_weights.size() << " in this event");
-        ATH_MSG_ERROR("Perhaps this sample was made using a release which did not correctly propagate the event weights.");
-      }
-    }
-
-    // Apply nominal systematics by default
-    ANA_CHECK (applySystematicVariation (CP::SystematicSet()));
-
-    return StatusCode::SUCCESS;
-  }
-
-
   StatusCode PMGTruthWeightTool::loadMetaData() {
-    // Clear cached weight names and positions
-    this->clearWeightLocationCaches();
-
     // Find the correct truth meta data object
     uint32_t targetChannelNumber = (m_useChannelZeroInMetaData ? 0 : m_mcChannelNumber);
     ATH_MSG_INFO("Attempting to load weight meta data from xAOD TruthMetaData for channel " << targetChannelNumber);
@@ -299,14 +219,10 @@ namespace PMGTools
 
       std::string sysName = MC::weightNameWithPrefix(truthWeightNames.at(idx));
       if (!sysName.empty()) {
-        m_systematicsSet.insert(CP::SystematicVariation(sysName));
+        ANA_CHECK (m_calibCache.add(CP::SystematicVariation(sysName),idx));
       }
-
+      
       ANA_MSG_VERBOSE("    " << truthWeightNames.at(idx) << " " << sysName);
-
-      if (m_weightIndicesSys.find(sysName) == m_weightIndicesSys.end()) {
-        m_weightIndicesSys[sysName] = idx;
-      }
     }
     return this->validateWeightLocationCaches();
   }
@@ -324,9 +240,6 @@ namespace PMGTools
       return StatusCode::FAILURE;
     }
 
-    // Clear cached weight names and positions
-    this->clearWeightLocationCaches();
-
     // Use input map to fill the index map and the weight names
     ATH_MSG_INFO("Attempting to load weight meta data from HepMC IOVMetaData container");
     for (auto& kv : hepMCWeightNamesMap) {
@@ -335,14 +248,10 @@ namespace PMGTools
 
       std::string sysName = MC::weightNameWithPrefix(kv.first);
       if (!sysName.empty()) {
-        m_systematicsSet.insert(CP::SystematicVariation(sysName));
+        ANA_CHECK (m_calibCache.add(CP::SystematicVariation(sysName), kv.second));
       }
 
       ANA_MSG_VERBOSE("    " << kv.first << " " << sysName);
-
-      if (m_weightIndicesSys.find(sysName) == m_weightIndicesSys.end()) {
-        m_weightIndicesSys[sysName] = kv.second;
-      }
     }
     return this->validateWeightLocationCaches();
 #endif // XAOD_STANDALONE
@@ -355,12 +264,6 @@ namespace PMGTools
       ATH_MSG_ERROR("Found " << m_weightNames.size() << " but " << m_weightIndices.size() << " weight indices!");
       return StatusCode::FAILURE;
     }
-    // Check if we can work with systematics
-    auto it = m_weightIndicesSys.find("");
-    if (it == m_weightIndicesSys.end()) {
-      ATH_MSG_WARNING("Could not detect nominal weight automatically. The first weight will also be considered nominal.");
-      m_weightIndicesSys[""] = 0;
-    }
 
     ATH_MSG_INFO("Successfully loaded information about " << m_weightNames.size() << " weights");
     return StatusCode::SUCCESS;
@@ -370,8 +273,6 @@ namespace PMGTools
   void PMGTruthWeightTool::clearWeightLocationCaches() {
     m_weightNames.clear();
     m_weightIndices.clear();
-    m_weightIndicesSys.clear();
-    m_systematicsSet.clear();
   }
 
 } // namespace PMGTools

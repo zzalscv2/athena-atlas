@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -52,7 +52,7 @@
 QList<VP1StdCollection*> VP1VertexCollection::createCollections(VertexSysController*controller)
 {
   QList<VP1StdCollection*> l;
-  foreach (QString key, VP1SGContentsHelper(controller->systemBase()).getKeys<VxContainer>()) {
+  for (QString key : VP1SGContentsHelper(controller->systemBase()).getKeys<VxContainer>()) {
     VP1VertexCollection * col = new VP1VertexCollection(controller,key);
     col->init();
     l << col;
@@ -288,7 +288,7 @@ VP1VertexCollection::VP1VertexCollection(VertexSysController*controller,const QS
 //____________________________________________________________________
 VP1VertexCollection::~VP1VertexCollection()
 {
-  foreach(Imp::VertexHandle* vh,m_d->vertices)
+  for (Imp::VertexHandle* vh : m_d->vertices)
     delete vh;
     
   // delete m_d->comboBox_colourby; DONE by baseclass
@@ -355,7 +355,7 @@ void VP1VertexCollection::setColourBy( VP1VertexCollection::COLOURBY cb )
   QList<const Trk::Track*> tracks;
   QList<const Trk::TrackParticleBase*> trackparticles;
   QList< std::pair<const SoMaterial*, QList< const Trk::Track*> > > colAndTracks;
-  foreach(Imp::VertexHandle* vh,m_d->vertices){
+  for (Imp::VertexHandle* vh : m_d->vertices){
     m_d->findAssociatedTracks(vh->vertex(),tracks,trackparticles);
     const SoMaterial* mat = vh->attached()?vh->determineMaterial():0; // store either the material, or 0 for hidden vertices
     colAndTracks.append(std::pair<const SoMaterial*, QList< const Trk::Track*> >(mat, tracks));
@@ -439,7 +439,7 @@ void VP1VertexCollection::recheckAllCuts()
   QList<const Trk::Track*> tracks;
   QList<const Trk::TrackParticleBase*> trackparticles;
   QList< std::pair<const SoMaterial*, QList< const Trk::Track*> > > colAndTracks;
-  foreach(Imp::VertexHandle* vh,m_d->vertices){
+  for (Imp::VertexHandle* vh : m_d->vertices){
     m_d->recheckCut(vh);
     m_d->findAssociatedTracks(vh->vertex(),tracks,trackparticles);
     const SoMaterial* mat = vh->attached()?vh->determineMaterial():0; // store either the material, or 0 for hidden vertices
@@ -455,7 +455,7 @@ void VP1VertexCollection::updateAllShapes()
   messageVerbose("VP1VertexCollection::updateAllShapes()");
   
   largeChangesBegin();
-  foreach(Imp::VertexHandle* vh,m_d->vertices)
+  for (Imp::VertexHandle* vh : m_d->vertices)
     vh->updateShapes(m_d->controller);
   largeChangesEnd();
 }
@@ -498,7 +498,7 @@ QStringList VP1VertexCollection::infoOnClicked(SoPath* pickedPath)
   SoSeparator * pickedSep = static_cast<SoSeparator *>(pickedPath->getNodeFromTail(0));
 
   Imp::VertexHandle*vertexHandle(0);
-  foreach (Imp::VertexHandle*vh,m_d->vertices) {
+  for (Imp::VertexHandle*vh : m_d->vertices) {
     if (vh->sep()==pickedSep) {
       vertexHandle = vh;
       break;
@@ -563,7 +563,7 @@ void VP1VertexCollection::rerandomiseRandomVertexColours()
     return;
   messageVerbose("rerandomiseRandomVertexColours start");
   largeChangesBegin();
-  foreach(Imp::VertexHandle* vh,m_d->vertices)
+  for (Imp::VertexHandle* vh : m_d->vertices)
     vh->rerandomiseRandomMaterial();
   largeChangesEnd();
   messageVerbose("rerandomiseRandomVertexColours end");

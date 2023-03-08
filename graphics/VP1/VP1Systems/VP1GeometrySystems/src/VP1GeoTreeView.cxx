@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -47,11 +47,11 @@ void VP1GeoTreeView::updateAllNonHiddenIndices()
   QModelIndexList oldselection = selectionModel()->selectedIndexes();
   selectAll();
   QModelIndexList allindexes = selectionModel()->selectedIndexes();
-  foreach ( QModelIndex idx, allindexes) {
+  for ( QModelIndex idx :  allindexes) {
     update(idx);
   }
   selectionModel()->clearSelection();
-  foreach ( QModelIndex idx, oldselection )
+  for ( QModelIndex idx :  oldselection )
     selectionModel()->select(idx,QItemSelectionModel::Select);
 
 

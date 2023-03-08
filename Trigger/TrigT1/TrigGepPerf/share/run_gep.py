@@ -1,14 +1,17 @@
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 if __name__ == '__main__':
+    import sys
+    
     ##################################################
     # Add an argument parser
     ##################################################
     from AthenaCommon.Logging import logging
     local_log = logging.getLogger('run_gep')
     info = local_log.info
+    error = local_log.error
     
     import argparse
     p = argparse.ArgumentParser()
@@ -45,16 +48,18 @@ if __name__ == '__main__':
 
     clusterAlgNames = args.clusterAlgs.split(',')
     jetAlgNames = args.jetAlgs.split(',')
-    info('clusterAlgs: ' + str(clusterAlgNames))
-    info('jetAlgs: ' + str(jetAlgNames))
+    info('GEP clusterAlgs: ' + str(clusterAlgNames))
+    info('GEP jetAlgs: ' + str(jetAlgNames))
 
     ##################################################
     # Configure all the flags
     ##################################################
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from TrigValTools.TrigValSteering import Input
 
     assert not (args.gepInput and args.gepInputRun3)
+
+    flags = initConfigFlags()
     
     if args.gepInput:
          ifile = (
@@ -85,13 +90,10 @@ if __name__ == '__main__':
     flags.Trigger.EDMVersion = 3
     flags.Trigger.doLVL1 = True
     flags.Trigger.enableL1CaloPhase1 = True
-    if flags.Common.isOnline:
-        flags.IOVDb.GlobalTag = flags.Trigger.OnlineCondTag
 
-    # TODO 1: Reverse this into a special setting for Run-2 data input when the default geo tag is changed to Run-3
-    # TODO 2: Any better way of figuring this out than run number?
-    if not flags.Input.isMC and flags.Input.RunNumber[0] > 400000:
-        flags.GeoModel.AtlasVersion = 'ATLAS-R3S-2021-02-00-00'
+    from AthenaConfiguration.Enums import LHCPeriod
+    if not flags.Input.isMC and flags.GeoModel.Run is LHCPeriod.Run2:
+        flags.GeoModel.AtlasVersion = 'ATLAS-R2-2016-01-00-01'
 
     # Enable only calo for this test
     from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
@@ -139,7 +141,6 @@ if __name__ == '__main__':
         'xAOD::gFexGlobalRoIContainer#L1_gMETComponentsRms','xAOD::gFexGlobalRoIAuxContainer#L1_gMETComponentsRmsAux.',
         'xAOD::gFexGlobalRoIContainer#L1_gScalarENoiseCut','xAOD::gFexGlobalRoIAuxContainer#L1_gScalarENoiseCutAux.',
         'xAOD::gFexGlobalRoIContainer#L1_gScalarERms','xAOD::gFexGlobalRoIAuxContainer#L1_gScalarERmsAux.',
-
     ]
     acc.merge(OutputStreamCfg(flags, 'AOD', ItemList=FexEDMList))
 
@@ -155,22 +156,76 @@ if __name__ == '__main__':
     acc.merge(CaloCellMakerCfg(flags))
 
 
-    # PS I think CaloTopoClusterToolCfg does 420 out of the box,
-    # and not 422. Need to investigate how to control this
-    # Further: expected that CaloClustering would be needed
-    # only if we are not running Gep clusteeing algs. However,
-    # when adding the Clustering config as an _alternative_ to
-    # Gep clustring, I get Calo errors such as:
-    # ERROR Unresolved conditions dependency:
-    #        ( 'CaloNoise' , 'ConditionStore+totalNoise' ) 
-    from CaloRec.CaloTopoClusterConfig import CaloTopoClusterCfg
+
+    # add the creation of standard 420 Topoclusters
+    from CaloRec.CaloTopoClusterConfig import CaloTopoClusterCfg    
+    calo_acc420 = CaloTopoClusterCfg(flags)  # default clusters: 420
+    acc.merge(calo_acc420)
+
+    # Also create 422 topoclusters
+    # PS: cannot find a "civilised" way to set the calorimeter cell energy
+    # cut at 2*sigma cell noise, so do it by force.
+    # Note:
+    # Executing <ComponentAccumator>,printConfig(withDetails=True,
+    #                                            summariseProps=True)
+    # helped to work this out.
+
+    # 1. set up cluster making with cell energy cut.
+    # 2. avoid container name clashes
+
+    doLCCalib = flags.Calo.TopoCluster.doTopoClusterLocalCalib
+    clustersname = 'CaloCalTopoClusters422' if doLCCalib else 'CaloTopoClusters422'
+    calo_acc422 = CaloTopoClusterCfg(flags,
+                                     clustersname=clustersname)
+
+    def getAlg422(cfg):
+        for comp in cfg.getSequence().Members:
+            if comp.name == 'CaloCalTopoClusters422Maker':
+                return comp
+        return None
+        
+    def fixMakerTool422(alg):
+        if not hasattr(alg, 'ClusterMakerTools'):
+            return False
+        
+        for tool in alg.ClusterMakerTools:
+            if tool.name == 'TopoMaker':
+                assert tool.CellThresholdOnEorAbsEinSigma == 0
+                tool.CellThresholdOnEorAbsEinSigma = 2.0
+                return True
+
+        return False
     
-    calo_acc = CaloTopoClusterCfg(flags)
+    def fixSnapshotTool422(alg):
+        if not hasattr(alg, 'ClusterCorrectionTools'):
+            return False
+
+        for tool in alg.ClusterCorrectionTools:
+            
+            if tool.name == 'CaloClusterSnapshot':
+                assert tool.OutputName == 'CaloTopoClusters'
+                if doLCCalib:
+                    tool.OutputName = 'CaloCalTopoClusters422Snap'
+                else:
+                    tool.OutputName = 'CaloTopoClusters422Snap'
+                return True
+
+        return False
+    
+
+    alg = getAlg422(calo_acc422)
+    if  alg is None:
+        error('no 422 cluster alg')
+        sys.exit(1)
+
+    assert fixMakerTool422(alg)
+    assert fixSnapshotTool422(alg)
+    
+    acc.merge(calo_acc422)
 
     from AthenaCommon.Constants import DEBUG,INFO
     gepAlgs_output_level = DEBUG
 
-    acc.merge(CaloTopoClusterCfg(flags))
     from TrigGepPerf.GepClusterTimingAlgConfig import GepClusterTimingAlgCfg
     acc.merge(GepClusterTimingAlgCfg(flags,
                                      OutputLevel=gepAlgs_output_level))
@@ -181,9 +236,17 @@ if __name__ == '__main__':
     # Run clustering and jet finding algorithms
     # These may be produced by statndard ATLAS Alorithms, or by
     # GEP Algorithms.
+
+    from TrigGepPerf.GepPi0AlgConfig import GepPi0AlgCfg
+    # currently caloCellsProducer can be caloCellsFromCaloCells or
+    # caloCellsFromCaloClusters
+    acc.merge(GepPi0AlgCfg(flags,
+                           name='GepPi0Alg',
+                           caloCellsProducer="caloCellsFromCaloCells",
+                           OutputLevel=gepAlgs_output_level))
     
     # PS not yet tested: topoclAlgs = ['Calo422'] 
-    known_cluster_algs = ['WFS', 'Calo420']
+    known_cluster_algs = ['WFS', 'Calo420', 'Calo422']
     for a in clusterAlgNames:
         assert a in known_cluster_algs
 
@@ -194,10 +257,16 @@ if __name__ == '__main__':
     # Create a number of Algorithms equal to the size of the product
     # len(ClusterAlgs) x len(JetAlgs). Will eventually add in
     # > 1 MET alg, and pileup suppression Algs.
+
+    caloclustercolls = {('Calo420', False) : 'CaloTopoClusters',
+                        ('Calo420', True) : 'CaloCalTopoClusters',
+                        ('Calo422', False) : 'CaloTopoClusters422',
+                        ('Calo422', True) : 'CaloCalTopoClusters422'}
+
+                    
     for cluster_alg in clusterAlgNames:
-        if cluster_alg == 'Calo420':
-            caloClustersKey='CaloTopoClusters' # from config dump
-        else:
+        caloClustersKey = caloclustercolls.get((cluster_alg, doLCCalib), None)
+        if caloClustersKey is None:
             from TrigGepPerf.GepClusteringAlgConfig import GepClusteringAlgCfg
             
             caloClustersKey='GEP'+cluster_alg+'Clusters'

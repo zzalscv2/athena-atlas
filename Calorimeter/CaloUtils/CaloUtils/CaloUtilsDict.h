@@ -5,6 +5,5 @@
 #include "CaloUtils/CaloClusterSignalState.h"
 #include "CaloUtils/CaloClusterStoreHelper.h"
 #include "CaloUtils/CaloCellDetPos.h"
-#include "CaloUtils/ToolWithConstantsTestTool.h"
 #include "CaloUtils/CaloClusterCollectionProcessor.h"
 #include "CaloUtils/CaloClusterProcessor.h"

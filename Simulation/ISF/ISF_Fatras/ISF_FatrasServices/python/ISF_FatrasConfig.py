@@ -11,11 +11,15 @@ from ISF_Services.ISF_ServicesConfig import (
     AFIIParticleBrokerSvcCfg, TruthServiceCfg
 )
 from ISF_Geant4Tools.ISF_Geant4ToolsConfig import G4RunManagerHelperCfg
-from RngComps.RandomServices import dSFMT
+from RngComps.RandomServices import dSFMT, AthRNGSvcCfg
 
 def TrkExRndSvcCfg(flags):
     seed = 'TrkExRnd OFFSET 0 12412330 37849324'
     return dSFMT(seed)
+
+
+def TrkExRndSvcMTCfg(flags):
+    return AthRNGSvcCfg(flags)
 
 
 def FatrasRndSvcCfg(flags):

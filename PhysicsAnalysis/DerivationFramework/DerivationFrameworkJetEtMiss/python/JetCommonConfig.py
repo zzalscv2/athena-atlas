@@ -38,7 +38,7 @@ def StandardJetsInDerivCfg(ConfigFlags):
     )
 
     AntiKt4EMPFlow_deriv = AntiKt4EMPFlow.clone(
-        modifiers = AntiKt4EMPFlow.modifiers+("JetPtAssociation","QGTagging","fJVT","NNJVT")
+        modifiers = AntiKt4EMPFlow.modifiers+("JetPtAssociation","QGTagging","fJVT","NNJVT","CaloEnergiesClus")
     )
 
     jetList = [AntiKt4EMTopo_deriv, AntiKt4EMPFlow_deriv,
@@ -84,7 +84,7 @@ def AddSidebandEventShapeCfg(ConfigFlags):
 
     acc = ComponentAccumulator()
 
-    constit_algs = getInputAlgs(cst.GPFlow, configFlags=ConfigFlags)
+    constit_algs = getInputAlgs(cst.GPFlow, flags=ConfigFlags)
     constit_algs = reOrderAlgs( [a for a in constit_algs if a is not None])
 
     for a in constit_algs:

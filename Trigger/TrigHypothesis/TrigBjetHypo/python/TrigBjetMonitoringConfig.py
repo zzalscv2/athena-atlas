@@ -1,8 +1,8 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
-def TrigBjetBtagHypoToolMonitoring(histPath):
-    montool = GenericMonitoringTool("MonTool", HistPath = histPath)
+def TrigBjetBtagHypoToolMonitoring(flags, histPath):
+    montool = GenericMonitoringTool(flags, "MonTool", HistPath = histPath)
     montool.defineHistogram('btag_pb', title=': Probability jets are B-jets', xbins=100, xmin=0, xmax=1, path='EXPERT', type='TH1F' )
     montool.defineHistogram('btag_pc', title=': Probability jets are Charm-jets', xbins=100, xmin=0, xmax=1, path='EXPERT', type='TH1F' )
     montool.defineHistogram('btag_pu', title=': Probability jets are Light-jets', xbins=100, xmin=0, xmax=1, path='EXPERT', type='TH1F' )
@@ -31,7 +31,7 @@ def TrigBjetBtagHypoToolMonitoring(histPath):
     return montool
 
 
-def TrigBjetOnlineMonitoring(name="TrigBjetOnlineMonitoring"):
+def TrigBjetOnlineMonitoring(flags, name="TrigBjetOnlineMonitoring"):
 
     def make_flavor_hists(montool, tagger):
         montool.defineHistogram('btag_'+tagger+'_pb', title=tagger+': Probability jets are B-jets', type='TH1F', path='EXPERT', xbins=100, xmin=0, xmax=1)
@@ -44,7 +44,7 @@ def TrigBjetOnlineMonitoring(name="TrigBjetOnlineMonitoring"):
         montool.defineHistogram('bbtag_'+tagger+'_pbb', title=tagger+': Probability jets are BB-jets', type='TH1F', path='EXPERT', xbins=100, xmin=0, xmax=1)
 
 
-    montool = GenericMonitoringTool(name, HistPath = name)
+    montool = GenericMonitoringTool(flags, name, HistPath = name)
     default_bin_count = 100
 
         # Event Histograms

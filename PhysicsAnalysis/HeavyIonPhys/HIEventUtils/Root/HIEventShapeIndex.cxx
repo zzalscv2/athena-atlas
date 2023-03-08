@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HIEventUtils/HIEventShapeIndex.h"
@@ -11,8 +11,7 @@
 #include <algorithm>
 #include <iterator>
 
-HIEventShapeIndex::HIEventShapeIndex() : m_shape_container(nullptr),
-					 m_size(0)
+HIEventShapeIndex::HIEventShapeIndex() : m_size(0)
 {
 }
 
@@ -20,41 +19,6 @@ HIEventShapeIndex::~HIEventShapeIndex()
 {
 }
 
-unsigned int HIEventShapeIndex::setBinning(const xAOD::HIEventShapeContainer* shape)
-{
-	if(shape!=nullptr && shape!=m_shape_container)
-	{
-		//ATH_MSG_WARNING("Resetting binning on different HIEventShapeContainer");
-	}
-	else if(shape==nullptr)
-	{
-		//ATH_MSG_ERROR("Bad HIEventShapePointer.");
-		return 0;
-	}
-	else if(getNumBins()==shape->size())
-	{
-		//ATH_MSG_INFO("Binning already synched this with HIEventShapeContainer.");
-		return getNumBins();
-	}
-
-	//assume contiguous non-overlapping eta bins
-	unsigned int index=0;
-	for(; index<shape->size(); index++)
-	{
-		const xAOD::HIEventShape* s=shape->at(index);
-		int layer=s->layer();
-		float eta_min=s->etaMin();
-		float eta_max=s->etaMax();
-
-		auto mItr=m_edges.emplace_hint(m_edges.end(),layer,std::vector<range_index_t>());
-		mItr->second.push_back(range_index_t(eta_min,eta_max,index));
-	}
-	for(auto pp : m_edges) std::sort( pp.second.begin(),pp.second.end() );
-	m_shape_container=shape;
-	m_size=index;
-	return index;
-
-}
 
 unsigned int HIEventShapeIndex::setBinning(const TH2* h2, bool asMask)
 {
@@ -189,7 +153,6 @@ unsigned int HIEventShapeIndex::getEtaBin(float eta, int layer) const
 
 xAOD::HIEventShape* HIEventShapeIndex::getShape(float eta, int layer, xAOD::HIEventShapeContainer* shape_container) const
 {
-
 	if(shape_container==nullptr)
 	{
 		//ATH_MSG_WARNING("No default HIEventShapeContainer to query. Returning nullptr_t.");
@@ -204,12 +167,21 @@ xAOD::HIEventShape* HIEventShapeIndex::getShape(float eta, int layer, xAOD::HIEv
 
 const xAOD::HIEventShape* HIEventShapeIndex::getShape(float eta, int layer, const xAOD::HIEventShapeContainer* shape_container) const
 {
-
 	if(shape_container==nullptr)
 	{
 		//ATH_MSG_WARNING("No default HIEventShapeContainer to query. Returning nullptr_t.");
 		return nullptr;
 	}
+	unsigned int bin=getIndex(eta,layer);
+	//correct for round-off errors in cell eta values, just need to make sure they end up in the right bin
+	if( bin >= shape_container->size() )  bin=getIndex(eta-std::copysign(1e-2,eta),layer);
+
+	return shape_container->at(bin);
+}
+
+
+xAOD::HIEventShape* HIEventShapeIndex::getShape(float eta, int layer, std::unique_ptr<xAOD::HIEventShapeContainer>& shape_container) const
+{
 	unsigned int bin=getIndex(eta,layer);
 	//correct for round-off errors in cell eta values, just need to make sure they end up in the right bin
 	if( bin >= shape_container->size() )  bin=getIndex(eta-std::copysign(1e-2,eta),layer);
@@ -230,13 +202,8 @@ std::map<int,std::vector<HIEventShapeIndex::range_index_t> >::const_iterator HIE
 	return mItr;
 }
 
-void HIEventShapeIndex::initializeEventShapeContainer(xAOD::HIEventShapeContainer* shape_container, unsigned int num_harmonics) const
+void HIEventShapeIndex::initializeEventShapeContainer(std::unique_ptr<xAOD::HIEventShapeContainer>& shape_container, unsigned int num_harmonics) const
 {
-	if(shape_container==nullptr)
-	{
-		//ATH_MSG_WARNING("Bad pointer to HIEventShapeContainer. Cannot inititalize its elements.");
-		return;
-	}
 	if(getNumBins()==0)
 	{
 		//ATH_MSG_WARNING("Cannot initialize HIEventShapeContainer. Index has not been initialized.");
@@ -274,13 +241,6 @@ void HIEventShapeIndex::initializeEventShapeContainer(xAOD::HIEventShapeContaine
 	}
 }
 
-// HIEventShapeIndex& HIEventShapeIndex::operator=(const HIEventShapeIndex& in)
-// {
-//   m_edges=in.m_edges;
-//   m_shape_container=in.m_shape_container;
-//   m_size=in.m_size;
-//   return (*this);
-// }
 
 std::string HIEventShapeIndex::print() const
 {

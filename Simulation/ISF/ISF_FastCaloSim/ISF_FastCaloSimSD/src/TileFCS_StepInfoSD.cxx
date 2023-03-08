@@ -14,6 +14,8 @@
 //************************************************************
 
 // class header
+#include <utility>
+
 #include "TileFCS_StepInfoSD.h"
 /// Geant4 headers
 #include "G4Step.hh"
@@ -25,7 +27,7 @@
 #include "TileG4Interfaces/ITileCalculator.h"
 
 TileFCS_StepInfoSD::TileFCS_StepInfoSD(G4String name, const FCS_Param::Config & config)
-  : FCS_StepInfoSD(name, config)
+  : FCS_StepInfoSD(std::move(name), config)
   , m_calculator(config.m_TileCalculator)
 {
 }

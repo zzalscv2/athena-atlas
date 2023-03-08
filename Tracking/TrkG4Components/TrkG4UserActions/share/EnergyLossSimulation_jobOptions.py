@@ -45,7 +45,7 @@ if 'myPt' not in dir() :
     myPt = 'pt'  # values are 'p' or 'pt'
 
 if 'myGeo' not in dir() :
-    myGeo = 'ATLAS-R1-2012-02-01-00_VALIDATION'
+    myGeo = 'ATLAS-R1-2012-03-02-00_VALIDATION'
 
 print 'Random seeds and offset as calcluated by jobOptions ', myRandomSeed1, ' ', myRandomSeed2, ' offset - ', myRandomOffset
 

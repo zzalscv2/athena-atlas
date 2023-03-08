@@ -1,7 +1,5 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """Make chain dicts for testing jet hypo config modules"""
-
-from __future__ import print_function
 
 from TriggerMenuMT.HLT.Menu.Physics_pp_run3_v1 import (
     SingleJetGroup,
@@ -20,6 +18,10 @@ from AthenaCommon.Constants import DEBUG
 logger = logging.getLogger( __name__)
 
 logger.setLevel(DEBUG)
+
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
+flags = initConfigFlags()
+flags.lock()
 
 class HypoToolStructure(unittest.TestCase):
     def test_structure(self):
@@ -224,7 +226,7 @@ class HypoToolStructure(unittest.TestCase):
         ]
         
         for td in testData:
-            chain_dict =chain_dict = dictFromChainName(td['prop'])
+            chain_dict =chain_dict = dictFromChainName(flags, td['prop'])
             # set chain part indices (kludge)
             cpi = 0
             for cp in chain_dict['chainParts']:

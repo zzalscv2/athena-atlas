@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-/*
- */
 
 // Tile includes
 #include "TileRecUtils/TileRawChannelOF1Corrector.h"
@@ -36,30 +34,26 @@ StatusCode TileRawChannelOF1Corrector::initialize() {
 
   ATH_CHECK( detStore()->retrieve(m_tileHWID) );
 
+  ATH_CHECK( m_sampleNoiseKey.initialize(m_correctPedestalDifference) );
+  ATH_CHECK( m_onlineSampleNoiseKey.initialize(m_correctPedestalDifference) );
 
   if (m_correctPedestalDifference) {
     //=== get TileCondToolOfc
     ATH_CHECK( m_tileCondToolOfc.retrieve() );
 
-    //=== get TileCondToolNoiseSample
-    ATH_CHECK( m_tileToolNoiseSample.retrieve() );
-
     //=== get TileToolTiming
     ATH_CHECK( m_tileToolTiming.retrieve() );
   } else {
     m_tileCondToolOfc.disable();
-    m_tileToolNoiseSample.disable();
     m_tileToolTiming.disable();
   }
 
-  //=== TileCondToolEmscale
-  if (m_zeroAmplitudeWithoutDigits) {
-    ATH_CHECK( m_tileToolEms.retrieve() );
+  ATH_CHECK( m_emScaleKey.initialize(m_zeroAmplitudeWithoutDigits || m_correctPedestalDifference) );
 
+  if (m_zeroAmplitudeWithoutDigits) {
     //=== get TileToolTiming
     ATH_CHECK( m_tileDspThreshold.retrieve() );
   } else {
-    m_tileToolEms.disable();
     m_tileDspThreshold.disable();
   }
 
@@ -91,12 +85,32 @@ TileRawChannelOF1Corrector::process (TileMutableRawChannelContainer& rchCont, co
     TileRawChannelUnit::UNIT rawChannelUnit = rchCont.get_unit();
     ATH_MSG_VERBOSE( "Units in container is " << rawChannelUnit );
 
+    const TileEMScale* emScale{nullptr};
     const TileDigitsContainer* digitsContainer(nullptr);
 
-    if (m_zeroAmplitudeWithoutDigits) {
-      SG::ReadHandle<TileDigitsContainer> allDigits(m_digitsContainerKey, ctx);
-      digitsContainer = allDigits.cptr();
+    if (m_zeroAmplitudeWithoutDigits || m_correctPedestalDifference) {
+      SG::ReadCondHandle<TileEMScale> emScaleHandle(m_emScaleKey, ctx);
+      ATH_CHECK( emScaleHandle.isValid() );
+      emScale = emScaleHandle.cptr();
+
+      if (m_zeroAmplitudeWithoutDigits) {
+        SG::ReadHandle<TileDigitsContainer> allDigits(m_digitsContainerKey, ctx);
+        digitsContainer = allDigits.cptr();
+      }
     }
+
+    const TileSampleNoise* sampleNoise = nullptr;
+    const TileSampleNoise* onlineSampleNoise = nullptr;
+    if (m_correctPedestalDifference) {
+      SG::ReadCondHandle<TileSampleNoise> sampleNoiseHandle(m_sampleNoiseKey, ctx);
+      ATH_CHECK( sampleNoiseHandle.isValid() );
+      sampleNoise = sampleNoiseHandle.retrieve();
+
+      SG::ReadCondHandle<TileSampleNoise> onlineSampleNoiseHandle(m_onlineSampleNoiseKey, ctx);
+      ATH_CHECK( onlineSampleNoiseHandle.isValid() );
+      onlineSampleNoise = onlineSampleNoiseHandle.retrieve();
+    }
+
 
     for (IdentifierHash hash : rchCont.GetAllCurrentHashes()) {
       TileRawChannelCollection* rawChannelCollection = rchCont.indexFindPtr (hash);
@@ -131,7 +145,9 @@ TileRawChannelOF1Corrector::process (TileMutableRawChannelContainer& rchCont, co
 
         if (m_correctPedestalDifference) {
 
-          float onlinePedestalDifference = m_tileToolNoiseSample->getOnlinePedestalDifference(drawerIdx, channel, gain, rawChannelUnit, ctx);
+          float pedestal = sampleNoise->getPed(drawerIdx, channel, gain);
+          float onlinePedestal = onlineSampleNoise->getPed(drawerIdx, channel, gain);
+          float onlinePedestalDifference = emScale->calibrateOnlineChannel(drawerIdx, channel, gain, (onlinePedestal - pedestal), rawChannelUnit);
           float phase = -m_tileToolTiming->getSignalPhase(drawerIdx, channel, gain);
           TileOfcWeightsStruct weights;
           ATH_CHECK( m_tileCondToolOfc->getOfcWeights(drawerIdx, channel, gain, phase, false, weights, ctx) );
@@ -150,7 +166,7 @@ TileRawChannelOF1Corrector::process (TileMutableRawChannelContainer& rchCont, co
 
         if (checkDigits && noDigits[channel]) {
 
-          float amplitude = m_tileToolEms->undoOnlCalib(drawerIdx, channel, gain, rawChannel->amplitude(), rawChannelUnit);
+          float amplitude = emScale->undoOnlineChannelCalibration(drawerIdx, channel, gain, rawChannel->amplitude(), rawChannelUnit);
           float minimuAmplitudeThreshold(-99999.0);
           float maximumAmplitudeThreshold(99999.0);
           m_tileDspThreshold->getAmplitudeThresholds(drawerIdx, channel, gain, minimuAmplitudeThreshold, maximumAmplitudeThreshold);

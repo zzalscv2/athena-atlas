@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 __author__ =   "Mark Sutton and Lukas Novotny"
 __doc__    =   "vertexFinder_builder"
@@ -19,7 +19,7 @@ __all__    = [ "vertexFinder_builder", "makeInDetTrigVertices" ]
 
 # old function for backwards compatability
 #TODO inputTrackCollection is obsolete, remove in the next MR iteration
-def makeInDetTrigVertices( whichSignature, inputTrackCollection, outputVtxCollection=None, config=None, adaptiveVertex=None ) :
+def makeInDetTrigVertices( flags, whichSignature, inputTrackCollection, outputVtxCollection=None, config=None, adaptiveVertex=None ) :
 
     if config is None:
         from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
@@ -31,7 +31,8 @@ def makeInDetTrigVertices( whichSignature, inputTrackCollection, outputVtxCollec
     if adaptiveVertex is None:
         adaptiveVertex = config.adaptiveVertex 
 
-    return vertexFinder_builder( signature         = whichSignature, 
+    return vertexFinder_builder( flags,
+                                 signature         = whichSignature,
                                  config            = config,
                                  inputTracks       = inputTrackCollection,
                                  outputVertices    = outputVtxCollection,
@@ -44,7 +45,7 @@ def makeInDetTrigVertices( whichSignature, inputTrackCollection, outputVtxCollec
 # needs the tool to actually create the vertices, plus the 
 # tool to sort them into the desired order, and some monitoring
 # here the vertex finder tool is chosen (iterative vs adaptive)
-def vertexFinder_builder( signature, config, inputTracks, outputVertices, adaptiveVertexing ) :
+def vertexFinder_builder( flags, signature, config, inputTracks, outputVertices, adaptiveVertexing ) :
 
     from AthenaCommon.Logging import logging
     log = logging.getLogger("InDetVtx")
@@ -62,7 +63,7 @@ def vertexFinder_builder( signature, config, inputTracks, outputVertices, adapti
     vertexSortingTool = vertexSortingTool_builder( signature, config )
 
     # and finally some monitoring ...
-    vertexMonitoringTool = vertexMonitoringTool_builder( signature, config )
+    vertexMonitoringTool = vertexMonitoringTool_builder( flags, signature, config )
 
     # no create the vertex finder ...
     from InDetPriVxFinder.InDetPriVxFinderConf import InDet__InDetPriVxFinder
@@ -283,9 +284,9 @@ def vertexSortingTool_builder( signature, config ) :
     return vertexSortingTool
     
 # create online vertex monitoring histograms
-def vertexMonitoringTool_builder( signature, config ) : 
+def vertexMonitoringTool_builder( flags, signature, config ) :
     from InDetPriVxFinder.InDetPriVxFinderMonitoring import InDetPriVxFinderMonitoringTool
-    return  InDetPriVxFinderMonitoringTool()
+    return InDetPriVxFinderMonitoringTool(flags)
 
 
 

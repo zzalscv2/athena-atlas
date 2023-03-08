@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -183,8 +183,8 @@ private:
     std::vector<std::vector<TH1F*>> m_pileup_AmpDists; //!< Matrix of PU amplitude distribution histograms (PU per partition and channel)
 
     //Internal methods
-    bool makeDist(TFile*& file, TH1F*& hist, std::string fileName, std::string histName="h_Eopt_hi"); //!< Method to read distribution from file
-    bool makeDist(TFile*& file, std::vector<std::vector<TH1F*>>& hists, std::string fileName);
+    bool makeDist(TFile*& file, TH1F*& hist, const std::string& fileName, const std::string& histName="h_Eopt_hi"); //!< Method to read distribution from file
+    bool makeDist(TFile*& file, std::vector<std::vector<TH1F*>>& hists, const std::string& fileName);
 
 };
 

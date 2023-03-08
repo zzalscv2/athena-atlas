@@ -1,21 +1,17 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUPATCANDIDATEBASE_H
 #define MUPATCANDIDATEBASE_H
 
 #include <set>
-#include <vector>
 
 #include "Identifier/Identifier.h"
 #include "MuPatPrimitives/MuPatHit.h"
 #include "MuonStationIndex/MuonStationIndex.h"
 #include "TrkParameters/TrackParameters.h"
-
-namespace Trk {
-    class MeasurementBase;
-}
+#include "TrkMeasurementBase/MeasurementBase.h"
 
 namespace Muon {
 
@@ -117,6 +113,10 @@ namespace Muon {
         /** @brief checks whether the two entries contain the same chamber */
         bool shareChambers(const MuPatCandidateBase& entry) const;
 
+        /** @brief adds the measurement to the garbage container. */
+        void addToTrash(std::unique_ptr<const Trk::MeasurementBase> meas);
+        void addToTrash(const std::vector<std::shared_ptr<const Trk::MeasurementBase>>& measurements);
+        const std::vector<std::shared_ptr<const Trk::MeasurementBase>>& garbage() const;
     protected:
         // all non-const functions protected, only accessible by derived classes and MCTBEntryHandler and MuPatHitHandler
 
@@ -187,6 +187,8 @@ namespace Muon {
         bool m_hasSmallChamber{false};
         bool m_hasLargeChamber{false};
         bool m_hasSLOverlap{false};
+
+        std::vector<std::shared_ptr<const Trk::MeasurementBase>> m_garbage{};
     };
 
 }  // namespace Muon

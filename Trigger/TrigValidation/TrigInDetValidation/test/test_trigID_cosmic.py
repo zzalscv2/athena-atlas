@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # art-description: art job for cosmic
 # art-type: grid
 # art-include: master/Athena
-# art-include: 22.0/Athena
+# art-include: 23.0/Athena
 # art-athena-mt: 8
 # art-html: https://idtrigger-val.web.cern.ch/idtrigger-val/TIDAWeb/TIDAart/?jobdir=
 # art-output: *.txt
@@ -34,6 +34,8 @@ Threads = 8
 Slots   = 8
 Release = "current"
 preexec_reco = [
+  "from AthenaCommon.BeamFlags import jobproperties",
+  "jobproperties.Beam.beamType.set_Value_and_Lock('cosmics')",
   "from InDetRecExample.InDetJobProperties import InDetFlags",
   "InDetFlags.doCosmics.set_Value_and_Lock(True)",
   "InDetFlags.doTRTStandalone.set_Value_and_Lock(False)",

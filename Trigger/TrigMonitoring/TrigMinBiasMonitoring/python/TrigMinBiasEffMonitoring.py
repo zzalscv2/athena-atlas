@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -168,17 +168,18 @@ def TrigMinBiasEff(flags):
 
 if __name__ == '__main__':
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    ConfigFlags.Output.HISTFileName = 'TestMinBiasMonitorOutput.root'
-    ConfigFlags.fillFromArgs()
-    ConfigFlags.lock()
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    flags.Output.HISTFileName = 'TestMinBiasMonitorOutput.root'
+    flags.fillFromArgs()
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
-    cfg.merge(TrigMinBiasEff(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
+    cfg.merge(TrigMinBiasEff(flags))
 
 
     #    cfg.getEventAlgo('HLTMinBiasEffMonitoringAlg').OutputLevel = DEBUG  # DEBUG

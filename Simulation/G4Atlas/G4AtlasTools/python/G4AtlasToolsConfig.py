@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType
@@ -9,8 +9,10 @@ def FastSimulationToolListCfg(flags):
     result = ComponentAccumulator()
     tools = []
     if flags.Detector.GeometryBpipe:
-        #if hasattr(simFlags, 'ForwardDetectors') and simFlags.ForwardDetectors.statusOn and simFlags.ForwardDetectors() == 2:
-        #    FastSimulationList += ['ForwardTransportModel']
+        if  not flags.Detector.GeometryFwdRegion and (flags.Detector.GeometryAFP or flags.Detector.GeometryALFA or flags.Detector.GeometryZDC):
+            # equivalent of simFlags.ForwardDetectors() == 2:
+            from ForwardTransport.ForwardTransportConfig import ForwardTransportModelCfg
+            tools += [ result.popToolsAndMerge(ForwardTransportModelCfg(flags)) ]
         if flags.Sim.BeamPipeSimMode is not BeamPipeSimMode.Normal:
             from G4FastSimulation.G4FastSimulationConfig import SimpleFastKillerCfg
             tools += [ result.popToolsAndMerge(SimpleFastKillerCfg(flags)) ]
@@ -29,8 +31,7 @@ def FastSimulationToolListCfg(flags):
         else:
             print( "getFastSimulationMasterTool INFO No Frozen Showers" )
     if flags.Detector.GeometryMuon:
-        if flags.Sim.CavernBackground not in [CavernBackground.Off, CavernBackground.Read]:
-            # and not (hasattr(simFlags, 'RecordFlux') and simFlags.RecordFlux.statusOn and simFlags.RecordFlux()):
+        if flags.Sim.CavernBackground not in [CavernBackground.Off, CavernBackground.Read] and not flags.Sim.RecordFlux:
             from TrackWriteFastSim.TrackWriteFastSimConfig import NeutronFastSimCfg
             tools += [ result.popToolsAndMerge(NeutronFastSimCfg(flags)) ]
     result.setPrivateTools(tools)
@@ -57,18 +58,24 @@ def FwdSensitiveDetectorListCfg(flags):
     # TODO: migrate to CA
     result = ComponentAccumulator()
     tools = []
-    if flags.Detector.EnableForward:
-        print ('G4AtlasToolsConfig.FwdSensitiveDetectorListCfg ERROR Forward Detector SD configuration has not been migrated to CA yet!')
     if flags.Detector.EnableLucid:
-        tools += [ 'LUCID_SensitiveDetector' ]
+        from LUCID_G4_SD.LUCID_G4_SDConfig import LUCID_SensitiveDetectorCfg
+        tools += [ result.popToolsAndMerge(LUCID_SensitiveDetectorCfg(flags)) ]
     if flags.Detector.EnableForward:
         if flags.Detector.EnableZDC:
-            tools += [ 'ZDC_PixelSD', 'ZDC_StripSD' ]
+            from ZDC_SD.ZDC_SDConfig import ZDC_PixelSDCfg, ZDC_StripSDCfg
+            tools += [ result.popToolsAndMerge(ZDC_PixelSDCfg(flags)) ]
+            tools += [ result.popToolsAndMerge(ZDC_StripSDCfg(flags)) ]
         if flags.Detector.EnableALFA:
-            tools += [ 'ALFA_SensitiveDetector' ]
+            from ALFA_G4_SD.ALFA_G4_SDConfig import ALFA_SensitiveDetectorCfg
+            tools += [ result.popToolsAndMerge(ALFA_SensitiveDetectorCfg(flags)) ]
         if flags.Detector.EnableAFP:
-            tools += [ 'AFP_SensitiveDetector' ]
-            #tools += [ 'AFP_SiDSensitiveDetector', 'AFP_TDSensitiveDetector' ]
+            from AFP_G4_SD.AFP_G4_SDConfig import AFP_SensitiveDetectorCfg
+            tools += [ result.popToolsAndMerge(AFP_SensitiveDetectorCfg(flags)) ]
+            # Alternative implementations
+            # from AFP_G4_SD.AFP_G4_SDConfig import AFP_SiDSensitiveDetectorCfg, AFP_TDSensitiveDetectorCfg
+            # tools += [ result.popToolsAndMerge(AFP_SiDSensitiveDetectorCfg(flags)) ]
+            # tools += [ result.popToolsAndMerge(AFP_TDSensitiveDetectorCfg(flags)) ]
     result.setPrivateTools(tools)
     return result
 
@@ -246,22 +253,26 @@ def SensitiveDetectorListCfg(flags):
     return result
 
 
-def TestBeamSensitiveDetectorListCfg(flags):
+def TileTestBeamSensitiveDetectorListCfg(flags):
     result = ComponentAccumulator()
     tools = []
 
-    if "tb_Tile2000_2003" in flags.GeoModel.AtlasVersion:
-        if flags.Detector.EnableTile:
-            if flags.Sim.CalibrationRun in [CalibrationRun.Tile, CalibrationRun.LArTile]:
-                from TileGeoG4Calib.TileGeoG4CalibConfig import TileCTBGeoG4CalibSDCfg
-                tools += [ result.popToolsAndMerge(TileCTBGeoG4CalibSDCfg(flags)) ] # mode 1 : With CaloCalibrationHits
-            else:
-                from TileGeoG4SD.TileGeoG4SDToolConfig import TileCTBGeoG4SDCfg
-                tools += [ result.popToolsAndMerge(TileCTBGeoG4SDCfg(flags)) ]      # mode 0 : No CaloCalibrationHits
-                tools += [ 'MuonWallSD' ]
-        result.setPrivateTools(tools)
-        return result
+    if flags.Detector.EnableTile:
+        if flags.Sim.CalibrationRun in [CalibrationRun.Tile, CalibrationRun.LArTile]:
+            from TileGeoG4Calib.TileGeoG4CalibConfig import TileCTBGeoG4CalibSDCfg
+            tools += [ result.popToolsAndMerge(TileCTBGeoG4CalibSDCfg(flags)) ] # mode 1 : With CaloCalibrationHits
+        else:
+            from TileGeoG4SD.TileGeoG4SDToolConfig import TileCTBGeoG4SDCfg
+            tools += [ result.popToolsAndMerge(TileCTBGeoG4SDCfg(flags)) ]      # mode 0 : No CaloCalibrationHits
+            from MuonWall.MuonWallConfig import MuonWallSDCfg
+            tools += [ result.popToolsAndMerge(MuonWallSDCfg(flags)) ]
+    result.setPrivateTools(tools)
+    return result
 
+
+def CombinedTestBeamSensitiveDetectorListCfg(flags):
+    result = ComponentAccumulator()
+    tools = []
     if flags.Detector.EnablePixel:
         from PixelG4_SD.PixelG4_SDToolConfig import PixelSensor_CTBCfg
         tools += [ result.popToolsAndMerge(PixelSensor_CTBCfg(flags)) ]
@@ -294,14 +305,15 @@ def TestBeamSensitiveDetectorListCfg(flags):
 
 def SensitiveDetectorMasterToolCfg(flags, name="SensitiveDetectorMasterTool", **kwargs):
     result = ComponentAccumulator()
-    if "ATLAS" in flags.GeoModel.AtlasVersion:
+    # NB Currently only supporting the standard ATLAS dector and the Tile Test Beam
+    if flags.Beam.Type is BeamType.TestBeam:
+        kwargs.setdefault("SensitiveDetectors", result.popToolsAndMerge(TileTestBeamSensitiveDetectorListCfg(flags)))
+    elif "ATLAS" in flags.GeoModel.AtlasVersion:
         kwargs.setdefault("SensitiveDetectors", result.popToolsAndMerge(SensitiveDetectorListCfg(flags)))
-    elif "tb_Tile2000_2003" in flags.GeoModel.AtlasVersion:
-        kwargs.setdefault("SensitiveDetectors", result.popToolsAndMerge(TestBeamSensitiveDetectorListCfg(flags)))
     elif "tb_LArH6" in flags.GeoModel.AtlasVersion:
         pass
     elif "ctbh8" in flags.GeoModel.AtlasVersion:
-        kwargs.setdefault("SensitiveDetectors", result.popToolsAndMerge(TestBeamSensitiveDetectorListCfg(flags)))
+        kwargs.setdefault("SensitiveDetectors", result.popToolsAndMerge(CombinedTestBeamSensitiveDetectorListCfg(flags)))
 
     result.setPrivateTools(CompFactory.SensitiveDetectorMasterTool(name, **kwargs))
     return result

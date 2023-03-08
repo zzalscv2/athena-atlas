@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILERECUTILS_TILERAWCHANNELBUILDERFITFILTER_H
@@ -39,11 +39,11 @@ class TileRawChannelBuilderFitFilter: public TileRawChannelBuilder {
     ~TileRawChannelBuilderFitFilter();
 
     // virtual methods
-    virtual StatusCode initialize();
-    virtual StatusCode finalize();
+    virtual StatusCode initialize() override;
+    virtual StatusCode finalize() override;
 
     // Inherited from TileRawChannelBuilder
-    virtual TileRawChannel * rawChannel(const TileDigits* digits);
+    virtual TileRawChannel * rawChannel(const TileDigits* digits, const EventContext& ctx) override;
 
     /**
      * AlgTool InterfaceID
@@ -51,6 +51,8 @@ class TileRawChannelBuilderFitFilter: public TileRawChannelBuilder {
     static const InterfaceID& interfaceID();
 
   private:
+
+    Gaudi::Property<bool> m_bestPhase{this, "BestPhase", false, "Use best phase from DB"};
 
     void pulseFit(const TileDigits *digit, double &amplitude, double &time, double &pedestal, double &chi2, const EventContext &ctx);
 

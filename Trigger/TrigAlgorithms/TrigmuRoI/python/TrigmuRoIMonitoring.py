@@ -1,10 +1,10 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
-def TrigmuRoIMonitoring(name = "TrigmuRoIMonitoring"):
+def TrigmuRoIMonitoring(flags, name = "TrigmuRoIMonitoring"):
 
-    montool = GenericMonitoringTool(name, HistPath = name)
+    montool = GenericMonitoringTool(flags, name, HistPath = name)
 
     montool.defineHistogram('RpcOutOfTime', type='TH1F', path='EXPERT', title="Distribution of the BCID difference for the Rpc RoI out of Time; (Muon RoI BCID - Event BCID)",xbins=21, xmin=-10.5, xmax=10.5)
     montool.defineHistogram('TgcOutOfTime', type='TH1F', path='EXPERT', title="Distribution of the BCID difference for the Tgc RoI out of Time; (Muon RoI BCID - Event BCID)",xbins=21, xmin=-10.5, xmax=10.5)

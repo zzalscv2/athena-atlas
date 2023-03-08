@@ -29,10 +29,9 @@ StatusCode TrigTauMonitorAlgorithm::initialize() {
   ATH_CHECK( m_phase1l1cTauRoIKey.initialize() );
   ATH_CHECK( m_hltTauJetKey.initialize() );
   ATH_CHECK( m_hltTauJetCaloMVAOnlyKey.initialize() );
-  ATH_CHECK( m_hltSeedJetKey.initialize());
   ATH_CHECK( m_trigDecTool.retrieve() );
   ATH_CHECK( m_truthParticleKey.initialize(m_isMC) );
-  ATH_CHECK( m_eventInfoKey.initialize() );
+  ATH_CHECK( m_eventInfoDecorKey.initialize() );
 
   for(const auto& trigName:m_trigInputList)
   {
@@ -60,7 +59,8 @@ StatusCode TrigTauMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
  
 
   // Protect against noise bursts
-  SG::ReadDecorHandle<xAOD::EventInfo,uint32_t> currEvent(m_eventInfoKey, ctx);
+  SG::ReadHandle<xAOD::EventInfo> currEvent(GetEventInfo(ctx));
+  ATH_CHECK(currEvent.isValid());
   if ( currEvent->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::NOISEBURSTVETO)) 
     return StatusCode::SUCCESS;
 
@@ -127,7 +127,9 @@ StatusCode TrigTauMonitorAlgorithm::executeNavigation( const EventContext& ctx,
   std::string tauContainerName = "HLT_TrigTauRecMerged_MVA";
   if(trigItem.find("LLP_") != std::string::npos){
      tauContainerName="HLT_TrigTauRecMerged_LLP";
-  }else if(trigItem.find("ptonly") != std::string::npos) 
+  } else if(trigItem.find("LRT_") != std::string::npos){
+     tauContainerName="HLT_TrigTauRecMerged_LRT";
+  } else if(trigItem.find("ptonly") != std::string::npos) 
      tauContainerName="HLT_TrigTauRecMerged_CaloMVAOnly";
 
   auto vec =  m_trigDecTool->features<xAOD::TauJetContainer>(trigItem,TrigDefs::Physics , tauContainerName );
@@ -206,18 +208,22 @@ void TrigTauMonitorAlgorithm::fillDistributions(const EventContext& ctx, const s
   std::string tauContainerName = "HLT_TrigTauRecMerged_MVA";
   if(trigger.find("LLP_") != std::string::npos){
      tauContainerName="HLT_TrigTauRecMerged_LLP";
-  }else if(trigger.find("ptonly") != std::string::npos) 
+  } else if (trigger.find("LRT_") != std::string::npos){
+     tauContainerName="HLT_TrigTauRecMerged_LRT";
+  } else if(trigger.find("ptonly") != std::string::npos) 
      tauContainerName="HLT_TrigTauRecMerged_CaloMVAOnly";
 
   ATH_MSG_DEBUG("Tau ContainerName is: " << tauContainerName);
 
   auto vec =  m_trigDecTool->features<xAOD::TauJetContainer>(trigger,TrigDefs::Physics , tauContainerName );
   for( auto &featLinkInfo : vec ){
+
     const auto *feat = *(featLinkInfo.link);
     if(!feat) continue;
     // If not pass, continue
     int nTracks=-1;
     feat->detail(xAOD::TauJetParameters::nChargedTracks, nTracks);
+
     ATH_MSG_DEBUG("NTracks Online: " << nTracks);
     online_tau_vec_all.push_back(feat);online_tau_vec.push_back(feat->p4());
     if(nTracks==0){
@@ -1008,36 +1014,10 @@ void TrigTauMonitorAlgorithm::fillRNNCluster(const std::string& trigger, const s
 
     std::vector<const xAOD::CaloCluster *> clusters;
 
-    float max_cluster_dr = 1.0;
-    
-    if(!tau->jetLink().isValid()) {
-      continue;
-    }
-
-    const xAOD::Jet *jetSeed = tau->jet();
-    if (jetSeed==nullptr) {
-      ATH_MSG_ERROR("Tau jet link is invalid.");
-      continue;
+    for (const xAOD::IParticle* particle : tau->clusters()) {
+      const xAOD::CaloCluster* cluster = static_cast<const xAOD::CaloCluster*>(particle);
+      clusters.push_back(cluster); 
     } 
-
-    if(!jetSeed->getConstituents().isValid()) {
-      continue;
-    }
-
-    ATH_MSG_DEBUG("Link to constituents is valid");
-
-    for (const auto *const jc : jetSeed->getConstituents()) {
-      const auto *cl = dynamic_cast<const xAOD::CaloCluster *>(jc->rawConstituent());
-      if (!cl) {
-        ATH_MSG_ERROR("Calorimeter cluster is invalid.");
-        continue;
-      }
-
-      const auto lc_p4 = tau->p4(xAOD::TauJetParameters::DetectorAxis);
-      if (lc_p4.DeltaR(cl->p4()) < max_cluster_dr) {
-	clusters.push_back(cl);
-      }
-    }
   
     auto et_cmp = [](const xAOD::CaloCluster *lhs,
 		     const xAOD::CaloCluster *rhs) {

@@ -114,6 +114,7 @@ class TrigInDetReco(ExecStep):
             if (i=='tau') :
                 chains +=  "'HLT_tau25_idperf_tracktwoMVA_L1TAU12IM',"
                 chains +=  "'HLT_tau25_idperf_tracktwoMVABDT_L1TAU12IM',"
+                chains +=  "'HLT_mu24_ivarmedium_tau25_idperf_tracktwoMVA_probe_03dRAB_L1MU14FCH',"
                 flags += 'doTauSlice=True;'
             if (i=='tauLRT') :
                 chains +=  "'HLT_tau25_idperf_tracktwoMVA_L1TAU12IM',"

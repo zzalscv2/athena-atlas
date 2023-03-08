@@ -149,37 +149,36 @@ namespace InDet {
     inline int getExclusiveOrigin(int origin) {
       /*
         The input origin is a bitwise flag.
-        Here we use the inclusive origin to build exclusive origin labels.
+        Here we use the inclusive origin to build an exclusive origin label as an integer.
       */
 
-      int exclusive_track_label = -2;
-
       if ( InDet::TrkOrigin::isPileup(origin) ) {
-        exclusive_track_label = InDet::ExclusiveOrigin::Pileup;
+        return InDet::ExclusiveOrigin::Pileup;
       }
       else if ( InDet::TrkOrigin::isFake(origin) ) {
-        exclusive_track_label = InDet::ExclusiveOrigin::Fake;
+        return InDet::ExclusiveOrigin::Fake;
       }
       else if ( InDet::TrkOrigin::isFromBNotFromD(origin) ) {
-        exclusive_track_label = InDet::ExclusiveOrigin::FromB;
+        return InDet::ExclusiveOrigin::FromB;
       }
       else if ( InDet::TrkOrigin::isFromDfromB(origin) ) {
-        exclusive_track_label = InDet::ExclusiveOrigin::FromBC;
+        return InDet::ExclusiveOrigin::FromBC;
       }
       else if ( InDet::TrkOrigin::isFromDNotFromB(origin) ) {
-        exclusive_track_label = InDet::ExclusiveOrigin::FromC;
+        return InDet::ExclusiveOrigin::FromC;
       }
       else if ( InDet::TrkOrigin::isFromTau(origin) ) {
-        exclusive_track_label = InDet::ExclusiveOrigin::FromTau;
+        return InDet::ExclusiveOrigin::FromTau;
       }
       else if ( InDet::TrkOrigin::isSecondary(origin) ) {
-        exclusive_track_label = InDet::ExclusiveOrigin::OtherSecondary;
+        return InDet::ExclusiveOrigin::OtherSecondary;
       }
       else if ( InDet::TrkOrigin::isPrimary(origin) ) {
-        exclusive_track_label = InDet::ExclusiveOrigin::Primary;
+        return InDet::ExclusiveOrigin::Primary;
       }
 
-      return exclusive_track_label;
+      // in _extremely_ rare cases, handle tracks with unknown origin (OtherOrigin) 
+      return InDet::ExclusiveOrigin::OtherSecondary;
     }
   }
 

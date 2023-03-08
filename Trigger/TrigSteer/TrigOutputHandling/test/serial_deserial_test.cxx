@@ -28,6 +28,8 @@
 #include "CxxUtils/ubsan_suppress.h"
 #include "TInterpreter.h"
 
+#include "eformat/StreamTag.h"
+
 void testTrigEMContainer(  const EventContext &ctx );
 void testTrigCompositeContainer(  const EventContext &ctx );
 
@@ -85,6 +87,15 @@ int main() {
     testRoIDescriptorInsert(pStore);
 
     auto hltres = new HLT::HLTResultMT();
+    std::vector<eformat::helper::StreamTag> v;
+
+    eformat::helper::StreamTag tag;
+    tag.name = "Main";
+    tag.type = "physics";
+    tag.obeys_lumiblock = true;
+    v.push_back(tag);
+    VALUE( hltres->setStreamTags( v ) ) EXPECTED ( StatusCode::SUCCESS );
+
     VALUE( ser->fill( *hltres, ctx ) ) EXPECTED ( StatusCode::SUCCESS );
 
     pStore->clearStore().ignore();
@@ -99,7 +110,7 @@ int main() {
     // see if we have ownership issues
     pStore->clearStore().ignore();
   }
-
+  VALUE( deser.sysFinalize() ) EXPECTED ( StatusCode::SUCCESS );
   delete ser;
   std::cout <<"ok"<< std::endl;
   return 0;

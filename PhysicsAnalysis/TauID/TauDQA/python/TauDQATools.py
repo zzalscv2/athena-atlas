@@ -33,7 +33,7 @@ def TauDQANominalTauSelectionToolCfg(flags, **kwargs):
     kwargs.setdefault("JetIDWP", TauAnalysisTools.JETIDNONE)
     kwargs.setdefault("NTracks", (0, 1, 2, 3, 4, 5))
     kwargs.setdefault("AbsCharges", (0, 1, 2, 3))
-    kwargs.setdefault("AbsEtaRegion", (0.0, 1.37, 1.52, 2.5))
+    kwargs.setdefault("AbsEtaRegion", (0.0, 1.37, 1.52, flags.Tau.SeedMaxEta))
     from TauAnalysisTools.TauAnalysisToolsConfig import TauSelectionToolCfg
     nominalseltool = acc.popToolsAndMerge(TauSelectionToolCfg(flags, "NominalTauSelectionTool", **kwargs))
 

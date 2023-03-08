@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Test of Trigger config flags autoconfiguration
 # Exercised on BS data and MC POOL file formats
@@ -37,14 +37,14 @@ tcf_log.setLevel(DEBUG)
 
 def test_TriggerFlags(sample):
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     input_file = inputfiles[sample]
     if not input_file or not os.path.isfile(input_file):
         log.warning('Skipping %s because cannot access the input file', sample)
         return
 
-    acf = ConfigFlags.clone()
-    acf.Input.Files = [inputfiles[sample]]
+    flags = initConfigFlags()
+    flags.Input.Files = [inputfiles[sample]]
 
     def __isAnalysis():
         import os
@@ -52,7 +52,7 @@ def test_TriggerFlags(sample):
 
     def __trigger():
         return createTriggerFlags(not __isAnalysis())
-    acf.addFlagsCategory("Trigger", __trigger)
+    flags.addFlagsCategory("Trigger", __trigger)
     
     # Test EDMVersion
     EDMDecode_ref = {
@@ -60,8 +60,8 @@ def test_TriggerFlags(sample):
         "Run2": 2,
         "Run3": 3
     }[sample[:4]]
-    log.info("EDMVersion: expected {}, configured {}".format(EDMDecode_ref, acf.Trigger.EDMVersion))
-    assert( acf.Trigger.EDMVersion == EDMDecode_ref )
+    log.info("EDMVersion: expected {}, configured {}".format(EDMDecode_ref, flags.Trigger.EDMVersion))
+    assert( flags.Trigger.EDMVersion == EDMDecode_ref )
 
     return
     

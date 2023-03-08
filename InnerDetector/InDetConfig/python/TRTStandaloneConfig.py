@@ -37,6 +37,13 @@ def TRTStandaloneCfg(flags, InputCollections = None):
         acc.merge(TRT_StandaloneTrackFinderCfg(flags,
                                                InputSegmentsLocation = 'TRTSegments',
                                                PRDtoTrackMap = prd_to_track_map))
+        if flags.Tracking.doTruth:
+            from InDetConfig.TrackTruthConfig import InDetTrackTruthCfg
+            acc.merge(InDetTrackTruthCfg(
+                flags,
+                Tracks = "TRTStandaloneTracks",
+                DetailedTruth = "TRTStandaloneTracksDetailedTruth",
+                TracksTruth = "TRTStandaloneTracksTruthCollection"))
 
     return acc
 
@@ -66,7 +73,9 @@ def TRT_TrackSegment_Cfg(flags):
 
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     flags.Input.Files=defaultTestFiles.RDO_RUN2
 

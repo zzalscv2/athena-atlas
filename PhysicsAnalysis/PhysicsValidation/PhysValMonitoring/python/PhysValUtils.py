@@ -52,11 +52,11 @@ def addOriginCorrectedClusters(algseq,doLC,doEM):
 
     if doLC:
         logger.info( '    * LCOriginTopoClusters' )
-        constit_algs = getInputAlgs(cst.LCTopoOrigin, configFlags=ConfigFlags)
+        constit_algs = getInputAlgs(cst.LCTopoOrigin, flags=ConfigFlags)
         sortJetAlgs(algseq, constit_algs)
     if doEM:
         logger.info( '    * EMOriginTopoClusters' )
-        constit_algs = getInputAlgs(cst.EMTopoOrigin, configFlags=ConfigFlags)
+        constit_algs = getInputAlgs(cst.EMTopoOrigin, flags=ConfigFlags)
         sortJetAlgs(algseq, constit_algs)
 
 ################################################################################################

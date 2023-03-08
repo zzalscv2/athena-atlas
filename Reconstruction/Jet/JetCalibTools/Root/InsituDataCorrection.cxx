@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetCalibTools/CalibrationMethods/InsituDataCorrection.h"
@@ -323,7 +323,7 @@ StatusCode InsituDataCorrection::calibrate(xAOD::Jet& jet, JetEventInfo& jetEven
   return StatusCode::SUCCESS;
 }
 
-double InsituDataCorrection::getInsituCorr(double pt, double eta, std::string calibstep) const {
+double InsituDataCorrection::getInsituCorr(double pt, double eta, const std::string& calibstep) const {
   if (m_insituCorr==NULL && m_insituCorr_ResidualMCbased==NULL) return 1.0;
   double myEta = eta, myPt = pt/m_GeV;
 
@@ -342,7 +342,7 @@ double InsituDataCorrection::getInsituCorr(double pt, double eta, std::string ca
   else if ( myPt >= ptMax ) myPt = ptMax - 1e-6;
   if (calibstep == "ResidualMCbased" && m_applyEtaRestrictionResidualMCbased) {
     if(myEta>=etaMax) return 1.0;
-    return m_insituCorr_ResidualMCbased->Interpolate(myPt,myEta);
+    return m_insituCorr_ResidualMCbased? (m_insituCorr_ResidualMCbased->Interpolate(myPt,myEta)) : 1.0;
   }
   if (calibstep == "RelativeAbs" && m_applyEtaRestrictionRelativeandAbsolute) {
     if(myEta>=etaMax) return 1.0;
@@ -351,12 +351,12 @@ double InsituDataCorrection::getInsituCorr(double pt, double eta, std::string ca
   if (myEta <= -etaMax) myEta = 1e-6 - etaMax;
   else if (myEta >= etaMax) myEta = etaMax - 1e-6;
   if (calibstep == "ResidualMCbased" && !m_applyEtaRestrictionResidualMCbased){
-    return m_insituCorr_ResidualMCbased->Interpolate(myPt,myEta);
+    return m_insituCorr_ResidualMCbased? (m_insituCorr_ResidualMCbased->Interpolate(myPt,myEta)) : 1.0;
   }
-  return m_insituCorr->Interpolate(myPt,myEta);
+  return m_insituCorr? (m_insituCorr->Interpolate(myPt,myEta)):1.0;
 }
 
-double InsituDataCorrection::getInsituCorr_JMS(double pt, double mass, double eta, std::string calibstep, bool isTAmass) const {
+double InsituDataCorrection::getInsituCorr_JMS(double pt, double mass, double eta, const std::string& calibstep, bool isTAmass) const {
 
   if(!isTAmass){
     if (!m_insituCorr_JMS) return 1.0;

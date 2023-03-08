@@ -18,6 +18,8 @@
 #include "../GfexInputMonitorAlgorithm.h"
 #include "../JfexInputMonitorAlgorithm.h"
 
+#include "../EfexSimMonitorAlgorithm.h"
+
 // Run 3
 DECLARE_COMPONENT( CpmMonitorAlgorithm )
 DECLARE_COMPONENT( CpmSimMonitorAlgorithm )
@@ -37,3 +39,5 @@ DECLARE_COMPONENT( JfexMonitorAlgorithm )
 DECLARE_COMPONENT( EfexInputMonitorAlgorithm )
 DECLARE_COMPONENT( GfexInputMonitorAlgorithm )
 DECLARE_COMPONENT( JfexInputMonitorAlgorithm )
+
+DECLARE_COMPONENT( EfexSimMonitorAlgorithm )

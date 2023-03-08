@@ -41,6 +41,9 @@ StatusCode  EventInfoAttListTool::initialize() {
   ATH_MSG_DEBUG("in initialize()");
 
   m_attribListSpec  = new coral::AttributeListSpecification();
+  // Note: for any attribute added here, please confirm the corresponding EventInfo member being
+  // retained in DAOD smart slimming:
+  // PhysicsAnalysis/DerivationFramework/DerivationFrameworkCore/python/EventInfoContent.py
   m_attribListSpec->extend("IsSimulation",    "bool");
   m_attribListSpec->extend("IsCalibration",   "bool");
   m_attribListSpec->extend("IsTestBeam",      "bool");
@@ -113,6 +116,9 @@ EventInfoAttListTool::getAttributeListPtr(const xAOD::EventInfo& eventInfo)
 StatusCode EventInfoAttListTool::eventTag(AthenaAttributeList& eventTag, 
                                           const xAOD::EventInfo& eventInfo) 
 {
+  // Note: for any attribute added here, please confirm the corresponding EventInfo member being
+  // retained in DAOD smart slimming:
+  // PhysicsAnalysis/DerivationFramework/DerivationFrameworkCore/python/EventInfoContent.py
 
   /** Event Type */
   bool isSimulation  = eventInfo.eventType(xAOD::EventInfo::IS_SIMULATION);

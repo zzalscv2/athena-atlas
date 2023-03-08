@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CaloLumiConditions/CaloBCIDLumi_test.cxx
@@ -61,8 +61,7 @@ LArOnlineIDTest::LArOnlineIDTest()
 
 
 LArOnlineIDTest::~LArOnlineIDTest()
-{
-}
+= default;
 
 
 //************************************************************************
@@ -103,9 +102,9 @@ LArVectorProxy TestData::data (const HWIdentifier& id) const
 {
   auto it = m_data.find (id);
   if (it != m_data.end()) {
-    return LArVectorProxy (it->second.data(), it->second.data()+it->second.size());
+    return {it->second.data(), it->second.data()+it->second.size()};
   }
-  return LArVectorProxy();
+  return {};
 }
 
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  CaloCellContainer_test.cxx
@@ -22,8 +22,8 @@
 
 
 
-typedef std::vector<CaloCell*> CellVector;
-typedef CaloCellContainer CellContainer;
+using CellVector = std::vector<CaloCell *>;
+using CellContainer = CaloCellContainer;
 
 
 #include "CaloCellContainerTestCommon.icc"
@@ -88,7 +88,7 @@ void test5 (const CaloCell_ID& helper, const std::vector<CaloCell*>& cells,
     std::vector<CaloCell*> selected_cells[CaloCell_ID::NSUBCALO];
     select_cells2 (stlrand, cells, selected_cells);
     CaloCellContainer cont (SG::VIEW_ELEMENTS);
-    assert (selected_cells[0].size() > 0);
+    assert (!selected_cells[0].empty());
     assert (!selected_cells[0].empty());
     selected_cells[0].push_back (selected_cells[0][0]);
     fill_cells1 (selected_cells, cont, stlrand);
@@ -99,7 +99,7 @@ void test5 (const CaloCell_ID& helper, const std::vector<CaloCell*>& cells,
     std::vector<CaloCell*> selected_cells[CaloCell_ID::NSUBCALO];
     select_cells2a (stlrand, cells, selected_cells);
     CaloCellContainer cont (SG::VIEW_ELEMENTS);
-    assert (selected_cells[0].size() > 0);
+    assert (!selected_cells[0].empty());
     assert (!selected_cells[0].empty());
     selected_cells[0].push_back (selected_cells[0][0]);
     fill_cells1 (selected_cells, cont, stlrand);

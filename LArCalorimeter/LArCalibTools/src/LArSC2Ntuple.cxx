@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArSC2Ntuple.h"
@@ -28,6 +28,7 @@ StatusCode LArSC2Ntuple::initialize() {
 
   ATH_CHECK( m_cablingKeyAdditional.initialize(m_fillRawChan));
   ATH_CHECK( m_eventInfoKey.initialize() );
+  ATH_CHECK( m_eventInfoDecorKey.initialize() );
 
   StatusCode sc=m_nt->addItem("latomeChannel",m_latomeChannel);
   if (sc.isFailure()) {
@@ -35,13 +36,6 @@ StatusCode LArSC2Ntuple::initialize() {
     return sc;
   }
 
-  sc=m_nt->addItem("LB",m_LB);
-  if (sc.isFailure()) {
-    ATH_MSG_ERROR( "addItem 'LB' failed" );
-    return sc;
-  }
-  
-  
   sc = m_nt->addItem("bcidVec",m_Nsamples, m_bcidVec);//here - > define length?
   if (sc.isFailure()) {
     ATH_MSG_ERROR( "addItem 'bcidVec' failed" );
@@ -176,6 +170,8 @@ StatusCode LArSC2Ntuple::execute()
   ATH_MSG_DEBUG( "LArSC2Ntuple in execute" ); 
 
   SG::ReadHandle<xAOD::EventInfo>evt (m_eventInfoKey, ctx);
+  ATH_CHECK(evt.isValid());
+
   unsigned long long thisevent	  = evt->eventNumber();
   unsigned short thislb           = evt->lumiBlock();
 
@@ -569,7 +565,7 @@ void LArSC2Ntuple::fillRODEnergy(HWIdentifier SCId, rawChanMap_t &rawChanMap, co
  std::fill(m_ROD_energy.begin(), m_ROD_energy.end(), 0.);
  for(unsigned i=0; i<cellIds.size(); ++i ) {
     const HWIdentifier hwcell=cablingROD->createSignalChannelID(cellIds[i]);
-    if (hwcell.is_valid()) {
+    if (hwcell.is_valid()  && (rawChanMap.count(hwcell) != 0) ) {
        m_ROD_energy[i] = rawChanMap[hwcell]->energy();
     } else {
        ATH_MSG_WARNING(i<<"-th cell invalid Id");

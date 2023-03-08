@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PANTAUALGS_TAUCONSTITUENT_H
@@ -70,7 +70,7 @@ namespace PanTau {
      */
     TauConstituent(TLorentzVector   itsMomentum,
                    int              itsCharge,
-                   std::vector<int> itsType,
+                   const std::vector<int>& itsType,
                    double           itsBDTValue,
                    const xAOD::PFO* itsPFO);
     

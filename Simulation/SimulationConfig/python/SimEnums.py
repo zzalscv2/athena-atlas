@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.Enums import FlagEnum
 
 
@@ -33,6 +33,10 @@ class LArParameterization(FlagEnum):
     FrozenShowersFCalOnly = 3
     FastCaloSim = 4
 
+class PixelRadiationDamageSimulationType(FlagEnum):
+    NoRadiationDamage = 0
+    RamoPotential = 1
+    TemplateCorrection = 2
 
 class SimulationFlavour(FlagEnum):
     Unknown = 'Unknown'
@@ -52,6 +56,9 @@ class SimulationFlavour(FlagEnum):
 
     def usesFastCaloSim(self):
         return 'ATLFAST' in self.value
+
+    def usesFatras(self):
+        return 'ATLFASTIIF' in self.value or 'ATLFAST3F' in self.value # TODO Extend for Acts::Fatras in the future
 
     def isQuasiStable(self):
         return 'QS' in self.value
@@ -83,3 +90,4 @@ class VertexSource(FlagEnum):
     VertexOverrideFile = 'VertexOverrideFile'
     VertexOverrideEventFile = 'VertexOverrideEventFile'
     LongBeamspotVertexPositioner = 'LongBeamspotVertexPositioner'
+    AsGenerated = 'AsGenerated' # I.e. no shift

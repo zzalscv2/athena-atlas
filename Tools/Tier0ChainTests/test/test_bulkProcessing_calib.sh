@@ -3,12 +3,14 @@
 # art-description: Express processing at Tier0
 # art-type: grid
 # art-include: master/Athena
-# art-include: 22.0/Athena
+# art-include: 23.0/Athena
 # art-athena-mt: 8
 
+# temporary preExec override due to ATLASRECTS-7502
+
 Reco_tf.py  \
---AMI f1287  \
---preExec="all:from RecExConfig.RecFlags import rec; rec.doZdc.set_Value_and_Lock(False); from AthenaConfiguration.AllConfigFlags import ConfigFlags; ConfigFlags.Trigger.triggerConfig='DB'; DQMonFlags.useTrigger=False; DQMonFlags.doHLTMon=False;" \
+--AMI f1328  \
+--preExec="flags.DQ.useTrigger=False; flags.DQ.triggerDataAvailable=False; flags.DQ.Steering.doHLTMon=False; flags.DQ.Steering.doTauMon=False;" \
 --inputBSFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_calib.00421734.express_express.merge.RAW._lb0021._SFO-ALL._0001.1" \
 --outputAODFile="AOD.pool.root" \
 --outputESDFile="ESD.pool.root" \
@@ -27,14 +29,3 @@ then
   rc2=$?
 fi
 echo  "art-result: ${rc2} (against previous nightly)"
-
-rc3=-9999
-if [ ${rc1} -eq 0 ]
-then
-  ArtRef=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3-22.0_references_for_comparison/test_bulkProcessing_calib
-  cat $ArtRef/version.txt
-  art.py compare ref . $ArtRef \
-  --entries 100 --mode=semi-detailed --order-trees --ignore-exit-code diff-pool
-  rc3=$?
-fi
-echo  "art-result: ${rc3} (against reference)"

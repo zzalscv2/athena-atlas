@@ -1,6 +1,7 @@
 #!/bin/sh
 #
 # art-description: Run simulation outside ISF, reading lead ions peripheral simulation (low multiplicity) events, writing HITS, using 2015 geometry and conditions
+# art-include: 23.0/Athena
 # art-include: master/Athena
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
@@ -15,7 +16,7 @@ AtlasG4_tf.py \
 --maxEvents '1' \
 --skipEvents '4' \
 --randomSeed '10' \
---geometryVersion 'ATLAS-R1-2012-03-00-00' \
+--geometryVersion 'ATLAS-R1-2012-03-02-00' \
 --conditionsTag 'OFLCOND-RUN12-SDR-19' \
 --DataRunNumber '210184' \
 --physicsList 'FTFP_BERT' \
@@ -35,7 +36,7 @@ AtlasG4_tf.py \
 --maxEvents '1' \
 --skipEvents '4' \
 --randomSeed '10' \
---geometryVersion 'ATLAS-R1-2012-03-00-00_VALIDATION' \
+--geometryVersion 'ATLAS-R1-2012-03-02-00_VALIDATION' \
 --conditionsTag 'OFLCOND-RUN12-SDR-19' \
 --DataRunNumber '210184' \
 --physicsList 'FTFP_BERT' \
@@ -50,7 +51,7 @@ AtlasG4_tf.py \
 --maxEvents '1' \
 --skipEvents '4' \
 --randomSeed '10' \
---geometryVersion 'ATLAS-R1-2012-03-00-00_VALIDATION' \
+--geometryVersion 'ATLAS-R1-2012-03-02-00_VALIDATION' \
 --conditionsTag 'OFLCOND-RUN12-SDR-19' \
 --DataRunNumber '210184' \
 --physicsList 'FTFP_BERT' \

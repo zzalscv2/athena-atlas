@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaKernel/RCUObject.h
@@ -52,7 +52,7 @@
  * whereby if objects are being updated frequently and one is relying
  * on RCUSvc to mark them as quiescent, then it's possible that one will
  * never be out of the grace period for all event slots simultaneously,
- * preventing objects from being cleaned up.  This is addressed my maintaining
+ * preventing objects from being cleaned up.  This is addressed by maintaining
  * both a `current' and `old' set of grace periods.  If an object is updated
  * while there are still objects pending deletion, the pending objects
  * are moved to an `old' list, and we reset the grace periods only for

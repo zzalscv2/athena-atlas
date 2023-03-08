@@ -69,6 +69,10 @@ class MuonCalibrationConfig (ConfigBlock):
         config.addSelection (self.containerName, '', alg.selectionDecoration,
                              bits=2, preselection = self.ptSelectionOutput)
 
+        config.addOutputVar (self.containerName, 'pt', 'pt')
+        config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True)
+        config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True)
+        config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True)
 
 
 class MuonWorkingPointConfig (ConfigBlock) :
@@ -154,6 +158,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
                 alg.efficiencyScaleFactorTool.CalibrationRelease = '220817_Preliminary_r22run3'
             alg.muons = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
+            config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'effSF' + postfix)
 
         # Set up an algorithm used for decorating baseline muon selection:
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg',
@@ -161,6 +166,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
         alg.selectionDecoration = 'baselineSelection' + postfix + ',as_char'
         alg.particles = config.readName (self.containerName)
         alg.preselection = config.getFullSelection (self.containerName, self.selectionName)
+        config.addOutputVar (self.containerName, 'baselineSelection' + postfix, 'select' + postfix)
 
 
 

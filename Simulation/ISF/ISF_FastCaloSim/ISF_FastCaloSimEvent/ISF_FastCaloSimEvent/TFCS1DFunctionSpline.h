@@ -40,7 +40,7 @@ class ATLAS_NOT_THREAD_SAFE TFCS1DFunctionSpline:public TFCS1DFunction
 
     static void unit_test ATLAS_NOT_THREAD_SAFE (TH1* hist=nullptr);
   protected:
-    double optimize(TSpline3& sp_best,std::vector<double>& nprop,const TH1* hist,TFCS1DFunctionInt32Histogram& hist_fct,double maxdevgoal=0.01,double maxeffsiggoal=3);
+    static double optimize(TSpline3& sp_best,std::vector<double>& nprop,const TH1* hist,TFCS1DFunctionInt32Histogram& hist_fct,double maxdevgoal=0.01,double maxeffsiggoal=3);
 
     TSpline3 m_spline;    
 

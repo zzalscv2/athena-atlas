@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -11,11 +11,11 @@ def TCAL1TrackToolsCfg(flags, **kwargs):
     """ Configure the TrackTools tool """
 
     acc = ComponentAccumulator()
-    from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
-    extrapolator = acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags))
-    caloExtentionTool = CompFactory.Trk.ParticleCaloExtensionTool(Extrapolator=extrapolator)
 
-    kwargs.setdefault('ParticleCaloExtensionTool', caloExtentionTool)
+    from TrackToCalo.TrackToCaloConfig import ParticleCaloExtensionToolCfg
+    kwargs.setdefault('ParticleCaloExtensionTool', acc.popToolsAndMerge(
+        ParticleCaloExtensionToolCfg(flags)))
+
     kwargs.setdefault('IsCollision', flags.Beam.Type is BeamType.Collisions)
 
     TrackTools = CompFactory.TileCal.TrackTools
@@ -124,7 +124,7 @@ def TCAL1Cfg(ConfigFlags):
 
     TCAL1Prefix = 'TCAL1_'
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    TCAL1TriggerListsHelper = TriggerListsHelper()
+    TCAL1TriggerListsHelper = TriggerListsHelper(ConfigFlags)
     
     acc = ComponentAccumulator()
     acc.merge(TCAL1KernelCfg(ConfigFlags, name="TCAL1Kernel", StreamName="OutputStreamDAOD_TCAL1", Prefix=TCAL1Prefix,  TriggerListsHelper=TCAL1TriggerListsHelper))

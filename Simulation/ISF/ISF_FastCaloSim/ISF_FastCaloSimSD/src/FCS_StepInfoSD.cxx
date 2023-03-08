@@ -2,6 +2,8 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
+#include <utility>
+
 #include "FCS_StepInfoSD.h"
 
 #include "CaloIdentifier/CaloIdManager.h"
@@ -19,7 +21,7 @@
 #include "G4ThreeVector.hh"
 
 FCS_StepInfoSD::FCS_StepInfoSD(G4String a_name, const FCS_Param::Config& config)
-  : G4VSensitiveDetector(a_name)
+  : G4VSensitiveDetector(std::move(a_name))
   , m_config(config)
   , m_calo_dd_man(nullptr)
 {
@@ -179,7 +181,7 @@ void FCS_StepInfoSD::update_map(const CLHEP::Hep3Vector & l_vec, const Identifie
     const CaloCell_ID::CaloSample& layer = m_calo_dd_man.get()->get_element(l_identifier)->getSampling();
     const double tsame(this->getMaxTime(layer));
     bool match = false;
-    for (auto map_it : * map_item->second) {
+    for (auto *map_it : * map_item->second) {
       // Time check ... both a global flag and a check on the layer
       const double delta_t = std::fabs(map_it->time()-l_time);
       if ( delta_t >= tsame ) { continue; }
@@ -208,7 +210,7 @@ void FCS_StepInfoSD::EndOfAthenaEvent( ISF_FCS_Parametrization::FCS_StepInfoColl
 {
   // Unpack map into vector
   for (auto it : m_hit_map) {
-    for (auto a_s : * it.second) {
+    for (auto *a_s : * it.second) {
       // Giving away ownership of the objects!
       hitContainer->push_back( a_s );
     }

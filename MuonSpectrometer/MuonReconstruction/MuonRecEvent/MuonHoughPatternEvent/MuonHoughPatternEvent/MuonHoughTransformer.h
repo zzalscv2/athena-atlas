@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONHOUGHPATTERNEVENT_MUONHOUGHTRANSFORMER_H
@@ -9,16 +9,16 @@
 #include <map>
 
 #include "MuonHoughPatternEvent/MuonHoughHisto2DContainer.h"
-#include "MuonHoughPatternEvent/MuonHoughHit.h"
+#include "MuonHoughPatternEvent/MuonHoughHitContainer.h"
 #include "MuonHoughPatternEvent/MuonHoughMathUtils.h"
 #include "MuonHoughPatternEvent/MuonHoughPattern.h"
 
-class MuonHoughHitContainer;
+
 
 /** Abstract base class, Strategy pattern */
 /** from this class, algorithms inherit and do the houghtransformation and searches for a houghpattern */
 
-class MuonHoughTransformer {
+class MuonHoughTransformer: public AthMessaging {
 public:
     /** destructor */
     virtual ~MuonHoughTransformer();
@@ -26,25 +26,24 @@ public:
     /** weight houghtransform, give more importance to houghtransforms close to origin */
     virtual float weightHoughTransform(double r0) const = 0;
     /** fill histograms with hitcontainer */
-    virtual void fill(const MuonHoughHitContainer* event, bool subtract = false);
+    virtual void fill(const MuonHoughHitContainer& event, bool subtract = false);
     /** fill histograms with hit */
-    virtual void fillHit(MuonHoughHit* hit, double weight = 1.) = 0;
+    virtual void fillHit(const std::shared_ptr<MuonHoughHit>& hit, double weight = 1.) = 0;
     /** fill histogram with certain coordinate */
     virtual int fillHisto(double coord1, double coord2, double weight = 1., int sector = 0) = 0;
 
     /** associate hits to certain maximum number of histograms */
-    MuonHoughPattern* associateHitsToMaximum(const MuonHoughHitContainer* event, double residu_mm, double residu_grad, int maximum_number,
-                                             bool which_segment = 0, int printlevel = 0) const;
+    std::unique_ptr<MuonHoughPattern> associateHitsToMaximum(const MuonHoughHitContainer& event, double residu_mm,
+                                                             double residu_grad, int maximum_number) const;
 
     /** associate hits to certain coordinates and sector */
-    MuonHoughPattern* associateHitsToCoords(const MuonHoughHitContainer* event, std::pair<double, double> coords, double residu_mm,
-                                            double residu_angle, int sector = 0, bool which_segment = 0,
-                                            int printlevel = 0) const;  // residu_mm for id=0,1,2 ; residu_angle for id=3,4
+    std::unique_ptr<MuonHoughPattern> associateHitsToCoords(const MuonHoughHitContainer& event, std::pair<double, double> coords, double residu_mm,
+                                            double residu_angle, int sector = 0) const;  
+                                            // residu_mm for id=0,1,2 ; residu_angle for id=3,4
 
     /** associate hits to certain binnumber and sector */
-    MuonHoughPattern* associateHitsToBinnumber(const MuonHoughHitContainer* event, int binnumber, double maximum_residu_mm,
-                                               double maximum_residu_angle, int sector = 0, bool which_segment = 0,
-                                               int printlevel = 0) const;
+    std::unique_ptr<MuonHoughPattern> associateHitsToBinnumber(const MuonHoughHitContainer& event, int binnumber, double maximum_residu_mm,
+                                               double maximum_residu_angle, int sector = 0) const;
 
     /** reset histograms */
     void resetHisto();
@@ -62,24 +61,19 @@ public:
 
 protected:
     /** constructor, input values are those of histograms */
-    MuonHoughTransformer(int nbins, int nbins_angle, double detectorsize, double detectorsize_angle, double threshold_histo,
+    MuonHoughTransformer(const std::string& tr_name, 
+                         int nbins, int nbins_angle, double detectorsize, double detectorsize_angle, double threshold_histo,
                          int number_of_sectors = 1);
 
     /** pure virtual method for derived class implementation of associateHitsToMaximum method */
-    virtual MuonHoughPattern* hookAssociateHitsToMaximum(const MuonHoughHitContainer* event, std::pair<double, double> coordsmaximum,
-                                                         double residu_mm, double residu_angle, int sector = 0, bool which_segment = 0,
-                                                         int printlevel = 0) const = 0;
+    virtual std::unique_ptr<MuonHoughPattern> hookAssociateHitsToMaximum(const MuonHoughHitContainer& event, std::pair<double, double> coordsmaximum,
+                                                         double residu_mm, double residu_angle, int sector) const = 0;
 
     /** returns begin and end value of the filling loop */
-    std::pair<double, double> getEndPointsFillLoop(double radius, double stepsize, int sector = 0) const;
+    std::pair<double, double> getEndPointsFillLoop(double radius, double stepsize, int sector) const;
 
     /** returns sector for coords */
-    virtual int sector(MuonHoughHit* hit) const = 0;
-
-    /** returns sinus from lookup table */
-    double sinus(double angle) const;
-    /** returns cosinus from lookup table */
-    double cosinus(double angle) const;
+    virtual int sector(const std::shared_ptr<MuonHoughHit>& hit) const = 0;
 
     /** histogram container */
     MuonHoughHisto2DContainer m_histos;
@@ -134,14 +128,7 @@ protected:
     const int m_number_of_sectors;
 
 private:
-    /** initialize sinus and cosinus tables */
-    void initTables();
-
-    /** lookup table <angle in rad, sinus value> for sin */
-    std::map<double, double> m_sin;
-    /** lookup table <angle in rad, cosinus value> for con */
-    std::map<double, double> m_cos;
-
+    
     class maximaCompare {
     public:
         bool operator()(const std::pair<std::pair<int, int>, double>& lhs, const std::pair<std::pair<int, int>, double>& rhs) const {

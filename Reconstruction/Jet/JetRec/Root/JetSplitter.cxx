@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetSplitter.cxx
@@ -27,7 +27,7 @@ using jet::JetConstituentFiller;
 
 //**********************************************************************
 
-JetSplitter::JetSplitter(std::string name)
+JetSplitter::JetSplitter(const std::string& name)
   : AsgTool(name), m_bld("",this),
   m_pdmp(new JetDumper(name+"Dumper")) {
   declareProperty("MuMax", m_mumax =1.0);

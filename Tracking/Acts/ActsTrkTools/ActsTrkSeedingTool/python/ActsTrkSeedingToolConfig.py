@@ -5,16 +5,17 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from ActsInterop import UnitConstants
 from ActsInterop.ActsConfigFlags import SeedingStrategy 
 
-def ActsTrkITkPixelSeedingToolCfg(ConfigFlags) -> ComponentAccumulator:
+def ActsTrkITkPixelSeedingToolCfg(flags,
+                                  **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     ## For ITkPixel, use default values for ActsTrk::SeedingTool
-    acc.setPrivateTools(CompFactory.ActsTrk.SeedingTool(name = "ActsSeedingTool_ITkPixel"))
+    acc.setPrivateTools(CompFactory.ActsTrk.SeedingTool(name = "ActsSeedingTool_ITkPixel", **kwargs))
     return acc
 
-def ActsTrkITkStripSeedingToolCfg(ConfigFlags) -> ComponentAccumulator:
+def ActsTrkITkStripSeedingToolCfg(flags,
+                                  **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     ## For ITkStrip, change properties that have to be modified w.r.t. the default values
-    kwargs = {}
     # For SpacePointGridConfig
     kwargs.setdefault("gridRMax" , 1000. * UnitConstants.mm)
     kwargs.setdefault("deltaRMax" , 600. * UnitConstants.mm)
@@ -48,16 +49,17 @@ def ActsTrkITkStripSeedingToolCfg(ConfigFlags) -> ComponentAccumulator:
     acc.setPrivateTools(CompFactory.ActsTrk.SeedingTool(name = "ActsSeedingTool_ITkStrip", **kwargs))
     return acc
 
-def ActsTrkITkPixelOrthogonalSeedingToolCfg(ConfigFlags) -> ComponentAccumulator:
+def ActsTrkITkPixelOrthogonalSeedingToolCfg(flags,
+                                            **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     ## For ITkPixel, use default values for ActsTrk::OrthogonalSeedingTool 
-    acc.setPrivateTools(CompFactory.ActsTrk.OrthogonalSeedingTool(name = "OrthogonalSeedingTool_ITkPixel"))
+    acc.setPrivateTools(CompFactory.ActsTrk.OrthogonalSeedingTool(name = "OrthogonalSeedingTool_ITkPixel", **kwargs))
     return acc
 
-def ActsTrkITkStripOrthogonalSeedingToolCfg(ConfigFlags) -> ComponentAccumulator:
+def ActsTrkITkStripOrthogonalSeedingToolCfg(flags,
+                                            **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     ## For ITkStrip, change properties that have to be modified w.r.t. the default values 
-    kwargs = {}
     kwargs.setdefault("impactMax" , 20. * UnitConstants.mm)
     kwargs.setdefault('rMax', 1200. * UnitConstants.mm)
     kwargs.setdefault("deltaRMinTopSP" , 20. * UnitConstants.mm)
@@ -82,7 +84,7 @@ def ActsTrkITkStripOrthogonalSeedingToolCfg(ConfigFlags) -> ComponentAccumulator
     acc.setPrivateTools(CompFactory.ActsTrk.OrthogonalSeedingTool(name = "OrthogonalSeedingTool_ITkStrip", **kwargs))
     return acc
 
-def  ActsTrkSiSpacePointsSeedMakerCfg(ConfigFlags,
+def  ActsTrkSiSpacePointsSeedMakerCfg(flags,
                                       name: str = 'ActsTrkSiSpacePointsSeedMaker',
                                       **kwargs) -> ComponentAccumulator:
     assert isinstance(name, str)
@@ -92,49 +94,47 @@ def  ActsTrkSiSpacePointsSeedMakerCfg(ConfigFlags,
     kwargs['name'] = name
 
     # Main properties
-    from InDetConfig.ITkConfigFlags  import TrackingComponent
-
-    doSpacePointFormationActs = TrackingComponent.ActsChain in ConfigFlags.ITk.Tracking.recoChain or TrackingComponent.ValidateActsSpacePoints in ConfigFlags.ITk.Tracking.recoChain or TrackingComponent.ValidateActsSeeds in ConfigFlags.ITk.Tracking.recoChain
-    convertInDetClusters = TrackingComponent.ValidateActsSpacePoints in ConfigFlags.ITk.Tracking.recoChain or TrackingComponent.ValidateActsSeeds in ConfigFlags.ITk.Tracking.recoChain
+    from ActsInterop.TrackingComponentConfigurer import TrackingComponentConfigurer
+    configuration_settings = TrackingComponentConfigurer(flags) 
 
     kwargs.setdefault('SpacePointsPixelName', 'ITkPixelSpacePoints')
     kwargs.setdefault('SpacePointsStripName', 'ITkStripSpacePoints')
     kwargs.setdefault('SpacePointsOverlapName', 'ITkOverlapSpacePoints')
-    kwargs.setdefault('usePixel', ConfigFlags.ITk.Tracking.ActiveConfig.useITkPixel and ConfigFlags.ITk.Tracking.ActiveConfig.useITkPixelSeeding)
-    kwargs.setdefault('useStrip', ConfigFlags.ITk.Tracking.ActiveConfig.useITkStrip and ConfigFlags.ITk.Tracking.ActiveConfig.useITkStripSeeding)
-    kwargs.setdefault('useOverlapSpCollection', ConfigFlags.ITk.Tracking.ActiveConfig.useITkStrip and ConfigFlags.ITk.Tracking.ActiveConfig.useITkStripSeeding)
-    kwargs.setdefault('doSpacePointConversion', not (convertInDetClusters and doSpacePointFormationActs))
+    kwargs.setdefault('usePixel', flags.ITk.Tracking.ActiveConfig.useITkPixel and flags.ITk.Tracking.ActiveConfig.useITkPixelSeeding)
+    kwargs.setdefault('useStrip', flags.ITk.Tracking.ActiveConfig.useITkStrip and flags.ITk.Tracking.ActiveConfig.useITkStripSeeding)
+    kwargs.setdefault('useOverlapSpCollection', flags.ITk.Tracking.ActiveConfig.useITkStrip and flags.ITk.Tracking.ActiveConfig.useITkStripSeeding)
+    kwargs.setdefault('doSpacePointConversion', not (configuration_settings.doActsSpacePoint and configuration_settings.doAthenaToActsCluster))
     kwargs.setdefault('ActsTrkSpacePointsPixelName'    , "ITkPixelSpacePoints")
     kwargs.setdefault('ActsTrkSpacePointsStripName'    , "ITkStripSpacePoints")
     kwargs.setdefault('ActsTrkSpacePointsOverlapName'  , "ITkStripOverlapSpacePoints")
     kwargs.setdefault('PixelClusterContainerKey', "ITkPixelClusters")
     kwargs.setdefault('StripClusterContainerKey', "ITkStripClusters")
 
-    if ConfigFlags.ITk.Tracking.ActiveConfig.usePrdAssociationTool:
+    if flags.ITk.Tracking.ActiveConfig.usePrdAssociationTool:
         # not all classes have that property !!!
-        kwargs.setdefault('PRDtoTrackMap', 'ITkPRDtoTrackMap'+ ConfigFlags.ITk.Tracking.ActiveConfig.extension)
+        kwargs.setdefault('PRDtoTrackMap', 'ITkPRDtoTrackMap'+ flags.ITk.Tracking.ActiveConfig.extension)
 
     # Acts Seed Tools
     # Do not overwrite if already present in `kwargs`
     seedTool_pixel = None
     if 'SeedToolPixel' not in kwargs:
-        if ConfigFlags.Acts.SeedingStrategy is SeedingStrategy.Orthogonal:
-            seedTool_pixel = acc.popToolsAndMerge(ActsTrkITkPixelOrthogonalSeedingToolCfg(ConfigFlags))
+        if flags.Acts.SeedingStrategy is SeedingStrategy.Orthogonal:
+            seedTool_pixel = acc.popToolsAndMerge(ActsTrkITkPixelOrthogonalSeedingToolCfg(flags))
         else:
-            seedTool_pixel = acc.popToolsAndMerge(ActsTrkITkPixelSeedingToolCfg(ConfigFlags))
+            seedTool_pixel = acc.popToolsAndMerge(ActsTrkITkPixelSeedingToolCfg(flags))
 
     seedTool_strip = None
     if 'SeedToolStrip' not in kwargs:
-        if ConfigFlags.Acts.SeedingStrategy is SeedingStrategy.Orthogonal:
-            seedTool_strip = acc.popToolsAndMerge(ActsTrkITkStripOrthogonalSeedingToolCfg(ConfigFlags))
+        if flags.Acts.SeedingStrategy is SeedingStrategy.Orthogonal:
+            seedTool_strip = acc.popToolsAndMerge(ActsTrkITkStripOrthogonalSeedingToolCfg(flags))
         else:
-            seedTool_strip = acc.popToolsAndMerge(ActsTrkITkStripSeedingToolCfg(ConfigFlags))
+            seedTool_strip = acc.popToolsAndMerge(ActsTrkITkStripSeedingToolCfg(flags))
 
     kwargs.setdefault('SeedToolPixel', seedTool_pixel)
     kwargs.setdefault('SeedToolStrip', seedTool_strip)
 
     # Validation
-    if ConfigFlags.ITk.Tracking.writeSeedValNtuple:
+    if flags.ITk.Tracking.writeSeedValNtuple:
         kwargs.setdefault('WriteNtuple', True)
         HistService = CompFactory.THistSvc(Output = ["valNtuples DATAFILE='SeedMakerValidation.root' OPT='RECREATE'"])
         acc.addService(HistService)

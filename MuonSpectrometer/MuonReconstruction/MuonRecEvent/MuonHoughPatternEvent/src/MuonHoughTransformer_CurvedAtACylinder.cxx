@@ -11,15 +11,15 @@
 MuonHoughTransformer_CurvedAtACylinder::MuonHoughTransformer_CurvedAtACylinder(int nbins, int nbins_angle, double detectorsize,
                                                                                double detectorsize_angle, double threshold_histo,
                                                                                int number_of_sectors) :
-    MuonHoughTransformer(nbins, nbins_angle, detectorsize, detectorsize_angle, threshold_histo, number_of_sectors) {
+    MuonHoughTransformer("MuonHoughTransformer_CurvedAtACylinder", nbins, nbins_angle, detectorsize, detectorsize_angle, threshold_histo, number_of_sectors) {
     m_add_weight_radius = false;
     m_weight_constant_radius = 0.;
     m_add_weight_angle = false;
 
     // fill array with scanned curvatures
 
-    m_invcurvature = new double[m_nbins / 2];
-    m_weightcurvature = new double[m_nbins / 2];
+    m_invcurvature.reset(new double[m_nbins / 2]);
+    m_weightcurvature.reset(new double[m_nbins / 2]);
 
     for (int i = 0; i < m_nbins / 2; i++) {
         double x0 = -i + 24;                      // 24 ... -55
@@ -37,12 +37,8 @@ MuonHoughTransformer_CurvedAtACylinder::MuonHoughTransformer_CurvedAtACylinder(i
     }
 }
 
-MuonHoughTransformer_CurvedAtACylinder::~MuonHoughTransformer_CurvedAtACylinder() {
-    delete[] m_invcurvature;
-    delete[] m_weightcurvature;
-}
 
-void MuonHoughTransformer_CurvedAtACylinder::fillHit(MuonHoughHit* hit, double weight) {
+void MuonHoughTransformer_CurvedAtACylinder::fillHit(const std::shared_ptr<MuonHoughHit>& hit, double weight) {
     // MuonHough transform studies
 
     // cylinder for extrapolation planes in muon system endcap/barrel transition
@@ -58,7 +54,7 @@ void MuonHoughTransformer_CurvedAtACylinder::fillHit(MuonHoughHit* hit, double w
 
         // positive curvature (for positive i):
         double thetas[2];
-        MuonHoughMathUtils::thetasForCurvedHit(ratio, hit, thetas[0], thetas[1]);
+        MuonHoughMathUtils::thetasForCurvedHit(ratio, hit.get(), thetas[0], thetas[1]);
 
         const double weight_curvature =
             weight * 1. /
@@ -134,20 +130,16 @@ int MuonHoughTransformer_CurvedAtACylinder::fillHisto(double xbin, double theta_
     return filled_binnumber;
 }
 
-MuonHoughPattern* MuonHoughTransformer_CurvedAtACylinder::hookAssociateHitsToMaximum(const MuonHoughHitContainer* event,
+std::unique_ptr<MuonHoughPattern> MuonHoughTransformer_CurvedAtACylinder::hookAssociateHitsToMaximum(const MuonHoughHitContainer& event,
                                                                                      std::pair<double, double> coordsmaximum,
                                                                                      double max_residu_mm, double /*max_residu_grad */,
-                                                                                     int maxsector, bool /*which_segment */,
-                                                                                     int printlevel) const {
-    MsgStream log(Athena::getMessageSvc(), "MuonHoughTransformer_CurvedAtACylinder::hookAssociateHitsToMaximum");
-    MuonHoughPattern* houghpattern = new MuonHoughPattern(MuonHough::hough_curved_at_a_cylinder);
+                                                                                     int maxsector) const {
+    std::unique_ptr<MuonHoughPattern> houghpattern = std::make_unique<MuonHoughPattern>(MuonHough::hough_curved_at_a_cylinder);
 
     // double ecurvature=0. // todo: recalculate estimated curvature for hits associated to maximum
-    double etheta = 0., sin_phi = 0., cos_phi = 0., sin_theta = 0., cos_theta = 0., ephi = 0.;
+    double etheta{0.}, sin_phi{0.}, cos_phi{0.}, sin_theta{0.}, cos_theta{0.}, ephi{0.};
     const double theta = m_muonhoughmathutils.angleFromGradToRadial(coordsmaximum.second);
-
-    double invcurvature = 0.;
-    double curvature = 0.;
+    double invcurvature{0.}, curvature{0.};
     if (m_nbins < 40) {
         curvature = MuonHoughMathUtils::sgn(coordsmaximum.first) / (coordsmaximum.first * coordsmaximum.first);
         invcurvature = 1. / curvature;
@@ -156,7 +148,7 @@ MuonHoughPattern* MuonHoughTransformer_CurvedAtACylinder::hookAssociateHitsToMax
         int index = static_cast<int>(std::floor(std::abs(coordsmaximum.first)));
         if (index >= m_nbins / 2) {
             index = m_nbins / 2 - 1;
-            if (printlevel >= 4 || log.level() <= MSG::VERBOSE) log << MSG::VERBOSE << "warning overflow maximum found" << endmsg;
+           ATH_MSG_VERBOSE("warning overflow maximum found "<<index<<" vs. "<<m_nbins / 2 );
         }
         invcurvature = MuonHoughMathUtils::sgn(coordsmaximum.first) * m_invcurvature[index];
         curvature = 1. / invcurvature;
@@ -173,35 +165,27 @@ MuonHoughPattern* MuonHoughTransformer_CurvedAtACylinder::hookAssociateHitsToMax
         sector_3 = m_number_of_sectors / 2 - 1;
     }  // if sector_3 smaller than 0 -> 15
 
-    if (printlevel >= 4 || log.level() <= MSG::VERBOSE) {
-        log << MSG::VERBOSE << "sector: " << maxsector << endmsg;
-        log << MSG::VERBOSE << "coordsmaximumfirst: " << coordsmaximum.first << " curvature: " << curvature << endmsg;
-        log << MSG::VERBOSE << "coordsmaximumsecond: " << coordsmaximum.second << " coordsmaximumsecondinrad: " << theta << endmsg;
-        log << MSG::VERBOSE << "MuonHoughTransformer_CurvedAtACylinder::size of event: " << event->size() << endmsg;
-        log << MSG::VERBOSE << "allowed sectors: " << sector_1 << " , " << sector_2 << " & " << sector_3 << endmsg;
-    }
+    ATH_MSG_VERBOSE("sector: " << maxsector
+         << " coordsmaximumfirst: " << coordsmaximum.first << " curvature: " << curvature 
+         << " coordsmaximumsecond: " << coordsmaximum.second << " coordsmaximumsecondinrad: " << theta 
+         << " MuonHoughTransformer_CurvedAtACylinder::size of event: " << event.size() 
+         << " allowed sectors: " << sector_1 << " , " << sector_2 << " & " << sector_3 );
 
-    for (unsigned int i = 0; i < event->size(); i++) {
-        MuonHoughHit* hit = event->getHit(i);
+    for (unsigned int i = 0; i < event.size(); i++) {
+        std::shared_ptr<MuonHoughHit> hit = event.getHit(i);
         int sectorhit = sector(hit);
         if (sectorhit == sector_1 || sectorhit == sector_2 || sectorhit == sector_3) {
-            double z0 = 0.;  // offset from IP on z-axis
+            double z0{0.};  // offset from IP on z-axis
             const double sdis = MuonHoughMathUtils::signedDistanceCurvedToHit(z0, theta, invcurvature, hit->getPosition());
 
-            double radius3d = hit->getAbs();
-            if (radius3d < 5000.)
-                radius3d = 5000.;
-            else if (radius3d > 15000.)
-                radius3d = 15000.;
+            double radius3d = std::min(15000.,std::max(5000.,hit->getAbs()));
             double scale = radius3d / 5000.;
 
             double residu_distance_mm = std::abs(sdis);
 
-            if (printlevel >= 4 || log.level() <= MSG::VERBOSE) {
-                log << MSG::VERBOSE << "MuonHoughTransformer_CurvedAtACylinder:: " << hit->getPosition() << endmsg;
-                log << MSG::VERBOSE << "MuonHoughTransformer_CurvedAtACylinder::residu_distance: " << sdis
-                    << " max_residu_mm*scale: " << max_residu_mm * scale << endmsg;
-            }
+           
+            ATH_MSG_VERBOSE(" hit position " << hit->getPosition() <<" residu_distance: " << sdis
+                                << " max_residu_mm*scale: " << max_residu_mm * scale);
 
             if (std::abs(residu_distance_mm) < max_residu_mm * scale)  // here no circular effect
             {
@@ -210,16 +194,12 @@ MuonHoughPattern* MuonHoughTransformer_CurvedAtACylinder::hookAssociateHitsToMax
                 sin_phi += scphi.sn;
                 cos_phi += scphi.cs;
 
-                const double theta = MuonHoughMathUtils::thetaForCurvedHit(invcurvature, event->getHit(i));
+                const double theta = MuonHoughMathUtils::thetaForCurvedHit(invcurvature, event.getHit(i).get());
                 if (theta > 0 && theta < M_PI) {
-                    if (printlevel >= 4 || log.level() <= MSG::VERBOSE) {
-                        log << MSG::VERBOSE
-                            << "MuonHoughTransformer_CurvedAtACylinder::hit added to houghpattern! Sector number: " << sectorhit << endmsg;
-                        if (event->getHit(i)->getAssociated())
-                            log << MSG::VERBOSE << " hit already earlier associated to pattern!" << endmsg;
-                    }
-                    houghpattern->addHit(event->getHit(i));
-                    event->getHit(i)->setAssociated(true);
+                    ATH_MSG_VERBOSE("hit added to houghpattern! Sector number: " << sectorhit 
+                                    <<" associated earlier "<<event.getHit(i)->getAssociated());
+                    houghpattern->addHit(event.getHit(i));
+                    event.getHit(i)->setAssociated(true);
                     CxxUtils::sincos sctheta(theta);
                     sin_theta += sctheta.sn;
                     cos_theta += sctheta.cs;
@@ -236,13 +216,7 @@ MuonHoughPattern* MuonHoughTransformer_CurvedAtACylinder::hookAssociateHitsToMax
     houghpattern->setEPhi(ephi);
     houghpattern->setECurvature(curvature);
 
-    if (printlevel >= 4 || log.level() <= MSG::VERBOSE) {
-        log << MSG::VERBOSE << " number of hits added to pattern: " << houghpattern->size() << endmsg;
-    }
-    if (houghpattern->empty() && (printlevel >= 1 || log.level() <= MSG::WARNING)) {
-        log << MSG::WARNING << "MuonHoughTransformer_CurvedAtACylinder::WARNING : no hits found on pattern" << endmsg;
-    }
-
+    ATH_MSG_VERBOSE(" number of hits added to pattern: " << houghpattern->size());
     return houghpattern;
 }
 

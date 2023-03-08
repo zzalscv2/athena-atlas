@@ -17,7 +17,7 @@ from copy import deepcopy
 # make a list of all possible cut items for the simple scenario
 
 all_elemental_keys = ('etaRange', 'jvt', 'smc',
-                      'threshold', 'momCuts', 'bdips', 'timing')
+                      'threshold', 'momCuts', 'bsel', 'timing')
 
 # Extract moment cuts
 def _cuts_from_momCuts(momCuts):
@@ -78,28 +78,68 @@ def get_condition_args_from_chainpart(cp):
             vals = defaults(key, lo=lo)
             condargs.append((key, deepcopy(vals)))
 
-        if k == 'bdips':
-            key = 'bdips'
-            values = v.split(key)
-            assert values[1] == '','bdips condition takes only one argument, two were given' # protection when an upper (not supported) cut is requested
-            
-            #This dictionary maps the bdips efficiency into the WP cut to be applied to the DIPS output
-            dips_WPs = {
-                '':   float('-inf'),
-                '95': -1.6495,
-                '90': -0.8703,
-                '85': -0.0295,
-                '80': 0.7470,
-                '77': 1.1540,
-                '75': 1.4086,
-                '60': 3.0447,
-            }
+        if k == 'bsel':
+            if 'bgnone' in v:
+                key = 'bgnone'
+                values = v.split(key)
+                assert values[1] == '', 'bgn1 condition takes only one argument, two were given'
+                
+                gn1_WPs = {
+                    '': float('-inf'),
+                    "95": -1.7035,
+                    "90": -0.7806,
+                    "85": 0.0764,
+                    "80": 0.9087,
+                    "77": 1.3844,
+                    "75": 1.6777,
+                    "60": 3.6329,
+                }
 
-            assert (values[0] in dips_WPs.keys()),f"The efficiency of the specified dips cut \'{v}\' can not be found in the WP dictionary. Please add or remove the WP from the dips WP dictionary."
+                assert (values[0] in gn1_WPs.keys()),f"The efficiency of the specified GN1 cut \'{v}\' can not be found in the WP dictionary. Please add or remove the WP from the GN1 WP dictionary."
+                
+                lo   = gn1_WPs[values[0]]
+                vals = {
+                    'min': str(lo),
+                    'max': '',
+                    'cfrac': '0.018',
+                    'namePb': 'fastGN120230130_pb', 
+                    'namePc': 'fastGN120230130_pc', 
+                    'namePu': 'fastGN120230130_pu',
+                    'nameValid': 'TracksForMinimalJetTag_isValid'
+                }
+                condargs.append((k, deepcopy(vals)))
+            elif 'bdips' in v:
+                key = 'bdips'
+                values = v.split(key)
+                assert values[1] == '','bdips condition takes only one argument, two were given' # protection when an upper (not supported) cut is requested
+                
+                #This dictionary maps the bdips efficiency into the WP cut to be applied to the DIPS output
+                dips_WPs = {
+                    '':   float('-inf'),
+                    '95': -1.6495,
+                    '90': -0.8703,
+                    '85': -0.0295,
+                    '80': 0.7470,
+                    '77': 1.1540,
+                    '75': 1.4086,
+                    '60': 3.0447,
+                }
 
-            lo   = dips_WPs[values[0]]
-            vals = defaults(key, lo=lo)
-            condargs.append((key, deepcopy(vals)))
+                assert (values[0] in dips_WPs.keys()),f"The efficiency of the specified dips cut \'{v}\' can not be found in the WP dictionary. Please add or remove the WP from the dips WP dictionary."
+
+                lo   = dips_WPs[values[0]]
+                vals = {
+                    'min': str(lo),
+                    'max': '',
+                    'cfrac': '0.018',
+                    'namePb': 'fastDips_pb', 
+                    'namePc': 'fastDips_pc', 
+                    'namePu': 'fastDips_pu',
+                    'nameValid': 'TracksForMinimalJetTag_isValid'
+                }
+                condargs.append((k, deepcopy(vals)))
+            else:
+                raise ValueError(f'btagger {v.split("b")[1]} not supportted')
 
         if k == 'momCuts':
             from TrigHLTJetHypo.FastReductionAlgToolFactory import jetMoments

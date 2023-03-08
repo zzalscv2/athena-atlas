@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //TileTBBeamMonTool.h
@@ -85,6 +85,21 @@ class ATLAS_NOT_THREAD_SAFE TileTBBeamMonTool: public TileFatherMonTool {  // de
     TH1F* m_PMT11 = nullptr;
     TH1F* m_PMT12 = nullptr;
     TH2F* m_PMTHitMap = nullptr;
+    TH1F* m_TOF1 = nullptr;
+    TH1F* m_TOF2 = nullptr;
+    TH1F* m_TOF3 = nullptr;
+    TH1F* m_TOF21 = nullptr;
+    TH1F* m_TOF23 = nullptr;
+    TH1F* m_TOF31 = nullptr;
+    TH2F* m_Cher1TOF1 = nullptr;
+    TH2F* m_Cher1TOF2 = nullptr;
+    TH2F* m_Cher1TOF3 = nullptr;
+    TH2F* m_Cher2TOF1 = nullptr;
+    TH2F* m_Cher2TOF2 = nullptr;
+    TH2F* m_Cher2TOF3 = nullptr;
+    TH2F* m_Cher3TOF1 = nullptr;
+    TH2F* m_Cher3TOF2 = nullptr;
+    TH2F* m_Cher3TOF3 = nullptr;
 
     bool m_isFirstEvent{};
 
@@ -101,6 +116,7 @@ class ATLAS_NOT_THREAD_SAFE TileTBBeamMonTool: public TileFatherMonTool {  // de
 
     float m_muBack[16]={0}; // MUON/MuBack
 
+    int m_tof[16]={0};
     int m_btdc[16]={0};
     bool m_btdcFirstHit[16]={};
 

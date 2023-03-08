@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "APReweightND.h"
@@ -48,8 +48,7 @@ int main(int argc, char **argv) {
   tOUT -> Branch( "passes", &nPassDilepTrig );
   tOUT -> Branch( "weightSum", &SumOfWeights );
   for( unsigned int i = 0; i < configuration.size(); ++i ) {
-    char name[100];
-    sprintf( name, "config_%i", i );
+    std::string name = "config_" + std::to_string(i);
     tOUT -> Branch( name, &configuration.at(i) );
   }
 

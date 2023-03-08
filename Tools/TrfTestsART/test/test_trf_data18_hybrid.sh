@@ -19,7 +19,7 @@ timeout 64800 Reco_tf.py \
   --postExec 'FPEAuditor.NStacktracesOnFPE=10' \
   --autoConfiguration='everything' \
   --conditionsTag 'all:CONDBR2-BLKPA-RUN2-09' --geometryVersion='default:ATLAS-R2-2016-01-00-01' \
-  --runNumber='357750' --steering='doRAWtoALL' --maxEvents='100'
+  --runNumber='357750' --maxEvents='100'
 
 rc1=$?
 echo "art-result: ${rc1} Reco_tf_data18_hybrid"

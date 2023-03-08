@@ -6,7 +6,7 @@ from BTagging.BTagToolConfig import BTagToolCfg
 from BTagging.BTagLightSecVertexingConfig import BTagLightSecVtxToolCfg
 
 
-def JetBTaggingAlgCfg(ConfigFlags,
+def JetBTaggingAlgCfg(flags,
                       BTaggingCollection,
                       JetCollection,
                       JetColNoJetsSuffix,
@@ -20,16 +20,16 @@ def JetBTaggingAlgCfg(ConfigFlags,
                       OutgoingTracks="BTagTrackToJetAssociator",
                       OutgoingMuons="Muons"):
 
-    SetupScheme = ConfigFlags.BTagging.databaseScheme
+    SetupScheme = flags.BTagging.databaseScheme
 
     acc = ComponentAccumulator()
 
     options = {}
     options['BTagTool'] = acc.popToolsAndMerge(BTagToolCfg(
-        ConfigFlags, TaggerList, PrimaryVertexCollectionName, SetupScheme))
+        flags, TaggerList, PrimaryVertexCollectionName, SetupScheme))
 
     # setup the secondary vertexing tool
-    options['BTagSecVertexing'] = acc.popToolsAndMerge(BTagLightSecVtxToolCfg(ConfigFlags, 'LightSecVx'+ConfigFlags.BTagging.GeneralToolSuffix, JetCollection, VxSecVertexInfoNameList, secVtxFinderxAODBaseNameList, secVtxFinderTrackNameList, PrimaryVertexCollectionName))
+    options['BTagSecVertexing'] = acc.popToolsAndMerge(BTagLightSecVtxToolCfg(flags, 'LightSecVx'+flags.BTagging.GeneralToolSuffix, JetCollection, VxSecVertexInfoNameList, secVtxFinderxAODBaseNameList, secVtxFinderTrackNameList, PrimaryVertexCollectionName))
 
     # Set remaining options
     options['JetCollectionName'] = JetCollection
@@ -38,19 +38,19 @@ def JetBTaggingAlgCfg(ConfigFlags,
     options['IncomingMuons'] = Muons
     options['OutgoingMuons'] = OutgoingMuons
     options['JetCalibrationName'] = (
-        ConfigFlags.BTagging.forcedCalibrationChannel or JetColNoJetsSuffix
+        flags.BTagging.forcedCalibrationChannel or JetColNoJetsSuffix
     )
     options['BTagSVCollectionName'] = BTaggingCollection + 'SecVtx'
     options['BTagJFVtxCollectionName'] = BTaggingCollection + 'JFVtx'
 
-    if ConfigFlags.BTagging.RunFlipTaggers is True:
+    if flags.BTagging.RunFlipTaggers is True:
         options['BTagSVFlipCollectionName'] = BTaggingCollection + 'SecVtxFlip'
         options['BTagJFVtxFlipCollectionName'] = BTaggingCollection + 'JFVtxFlip'
 
     options['BTaggingLinkName'] = options['JetCollectionName'] + '.btaggingLink'
     options['BTaggingCollectionName'] = BTaggingCollection
     options['JetLinkName'] = options['BTaggingCollectionName'] + '.jetLink'
-    options['name'] = (options['BTaggingCollectionName'] + "_" + options['JetCollectionName'] + ConfigFlags.BTagging.GeneralToolSuffix).lower()
+    options['name'] = (options['BTaggingCollectionName'] + "_" + options['JetCollectionName'] + flags.BTagging.GeneralToolSuffix).lower()
 
     # -- create main BTagging algorithm
     acc.addEventAlgo(CompFactory.Analysis.JetBTaggingAlg(**options))

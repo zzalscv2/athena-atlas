@@ -8,8 +8,6 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 # ------------------------------------------------------------
 
 def BackTrackingCfg(flags, InputCollections = None,
-                    TrackCollectionKeys=[] ,
-                    TrackCollectionTruthKeys=[],
                     ClusterSplitProbContainer=''):
     acc = ComponentAccumulator()
     # ------------------------------------------------------------
@@ -21,6 +19,15 @@ def BackTrackingCfg(flags, InputCollections = None,
     from InDetConfig.TRT_SeededTrackFinderConfig import TRT_SeededTrackFinderCfg
     acc.merge(TRT_SeededTrackFinderCfg(flags,
                                        InputCollections = InputCollections))
+
+    from InDetConfig.TrackTruthConfig import InDetTrackTruthCfg
+    if flags.Tracking.doTruth:
+        acc.merge(InDetTrackTruthCfg(
+            flags,
+            Tracks = "TRTSeededTracks",
+            DetailedTruth = "TRTSeededTracksDetailedTruth",
+            TracksTruth = "TRTSeededTracksTruthCollection"))
+
     # ------------------------------------------------------------
     #
     # --- Resolve back tracking tracks
@@ -31,11 +38,20 @@ def BackTrackingCfg(flags, InputCollections = None,
     acc.merge(TrkAmbiguitySolver_TRT_Cfg(flags,
                                          ClusterSplitProbContainer = ClusterSplitProbContainer))
 
+    if flags.Tracking.doTruth:
+        acc.merge(InDetTrackTruthCfg(
+            flags,
+            Tracks = "ResolvedTRTSeededTracks",
+            DetailedTruth = "ResolvedTRTSeededTracksDetailedTruth",
+            TracksTruth = "ResolvedTRTSeededTracksTruthCollection"))
+
     return acc
 
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     flags.Input.Files=defaultTestFiles.RDO_RUN2
 

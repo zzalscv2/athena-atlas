@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -20,9 +20,17 @@
 #include <mutex>
 
 // Forward declarations
+namespace ROOT { namespace Experimental { class RNTupleReader; } }
+using RNTupleReader = ROOT::Experimental::RNTupleReader;
+
 class TFile;
 class TTree;
+class TBranch;
 class IFileMgr;
+namespace RootAuxDynIO {
+   class IRootAuxDynReader;
+   class IRNTupleWriter;
+}
 
 /*
  * POOL namespace declaration
@@ -44,6 +52,7 @@ namespace pool  {
    {
   public:
     enum { READ_COUNTER = 0, WRITE_COUNTER = 1, OTHER_COUNTER = 2 };
+
   private:
     /// Parent Database handle
     DbDatabase    m_dbH;
@@ -82,7 +91,7 @@ namespace pool  {
     long long     m_indexMasterID;
 
     /// marks if the index (for index Containers) was rebuilt for given TTree
-    std::set< std::string> m_indexRebuilt;
+    std::set< std::string > m_indexRebuilt;
 
     /* ---  variables used with TREE_AUTO_FLUSH option for
             managing combined TTree::Fill for branch containers
@@ -100,6 +109,9 @@ namespace pool  {
 
     // mutex to prevent concurrent read I/O from AuxDynReader
     std::recursive_mutex  m_iomutex;
+
+    std::map<std::string, std::unique_ptr<RootAuxDynIO::IRNTupleWriter> >  m_ntupleWriterMap;
+    std::map<std::string, std::unique_ptr<RNTupleReader> >                 m_ntupleReaderMap;
 
   public:
     /// Standard Constuctor
@@ -198,6 +210,25 @@ namespace pool  {
 
     /// Execute Database Transaction action
     virtual DbStatus transAct(Transaction::Action action);
-  };
+
+    std::unique_ptr<RootAuxDynIO::IRootAuxDynReader> getNTupleAuxDynReader(const std::string& ntuple_name, const std::string& field_name);
+    RNTupleReader*      getNTupleReader(std::string ntuple_name);
+
+    /// return NTupleWriter for a given ntuple_name
+    /// create a new one if needed when create==true
+    RootAuxDynIO::IRNTupleWriter*  getNTupleWriter(std::string ntuple_name, bool create=false);
+
+  protected:
+    // Execute any pending Fills before commit or flush
+    DbStatus            fillBranchContainerTrees();
+
+    // Reduce branches' baskets' size to m_maxBufferSize for a give TTree
+    void                reduceBasketsSize(TTree* tree);
+
+    void                increaseBasketsSize(TTree* tree);
+
+    DbStatus close();
+   };
+
 }       // End namespace pool
 #endif  /* POOL_ROOTSTORAGESVC_ROOTDBASE_H */

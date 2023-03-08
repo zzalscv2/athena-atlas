@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/ConcurrentHashmapImpl.h
@@ -84,7 +84,7 @@ bool CHMTableIterator<ENTRIES_PER_CACHELINE>::next()
   // We've finished a cache line if the low bits are back to 0.
   if ((m_nprobes & ENTRIES_PER_CACHELINE_MASK) == 0) {
     // Move to a different cacheline.  
-    // cf knuth AOCP exercise 6.4.20.
+    // cf. knuth AOCP exercise 6.4.20.
     // By construction, the low bits (within the cacheline) of
     // m_bucket, m_nprobes, and m_stride should all be 0.
     m_bucket = (m_bucket + m_nprobes + m_stride) & m_mask;
@@ -100,9 +100,10 @@ bool CHMTableIterator<ENTRIES_PER_CACHELINE>::next()
   template <template <class> class UPDATER_,     \
             typename HASHER_,                    \
             typename MATCHER_,                   \
-            uintptr_t NULLVAL_>
+            uintptr_t NULLVAL_,                  \
+            uintptr_t TOMBSTONE_>
 
-#define CHMIMPL ConcurrentHashmapImpl<UPDATER_, HASHER_, MATCHER_, NULLVAL_>
+#define CHMIMPL ConcurrentHashmapImpl<UPDATER_, HASHER_, MATCHER_, NULLVAL_, TOMBSTONE_>
 
 
 /**
@@ -284,7 +285,8 @@ CHMIMPL::ConcurrentHashmapImpl (Updater_t&& updater,
   : m_updater (std::move (updater)),
     m_hasher (hasher),
     m_matcher (matcher),
-    m_size (0)
+    m_size (0),
+    m_erased (0)
 {
   // Round up capacity to a power of 2.
   size_t capacity = round_up (capacity_in);
@@ -313,7 +315,7 @@ std::pair<typename CHMIMPL::const_iterator, bool>
 CHMIMPL::put (val_t key, size_t hash, val_t val, bool overwrite,
               const typename Updater_t::Context_t& ctx)
 {
-  assert (key != nullval);
+  assert (key != nullval && key != tombstone);
   lock_t lock (m_mutex);
 
   do {
@@ -365,6 +367,40 @@ typename CHMIMPL::const_iterator CHMIMPL::get (val_t key, size_t hash) const
 
 
 /**
+ * @brief Erase an entry from the table.
+ * @param key The key to find.
+ * @param hash The hash of the key.
+ *
+ * Mark the corresponding entry as deleted.
+ * Return true on success, false on failure (key not found).
+ *
+ * The tombstone value must be different from the null value.
+ *
+ * Take care if the key or value types require memory allocation.
+ *
+ * This may cause the key type returned by an iterator to change
+ * asynchronously to the tombstone value.
+ **/
+T_CHMIMPL
+bool
+CHMIMPL::erase (val_t key, size_t hash)
+{
+  static_assert (nullval != tombstone);
+  lock_t lock (m_mutex);
+  const Table& table = m_updater.get();
+  size_t offset = table.probeRead (key, hash);
+  if (offset != INVALID) {
+    entry_t& ent = m_table->entry (offset);
+    ++m_erased;
+    --m_size;
+    ent.m_key = tombstone;
+    return true;
+  }
+  return false;
+}
+
+
+/**
  * @brief Return the number of items currently stored.
  */
 T_CHMIMPL
@@ -382,6 +418,16 @@ size_t CHMIMPL::capacity() const
 {
   const Table& table = m_updater.get();
   return table.capacity();
+}
+
+
+/**
+ * @brief The number of erased elements in the current table.
+ */
+T_CHMIMPL
+size_t CHMIMPL::erased() const
+{
+  return m_erased;
 }
 
 
@@ -449,13 +495,15 @@ T_CHMIMPL
 inline
 void CHMIMPL::const_iterator::next()
 {
+  val_t key;
   do {
     ++m_offset;
     if (m_offset >= m_table.capacity()) {
       m_offset = INVALID;
       break;
     }
-  } while (m_table.entry (m_offset).m_key == nullval);
+    key = m_table.entry (m_offset).m_key;
+  } while (key == nullval || key == tombstone);
 }
 
 
@@ -469,18 +517,22 @@ void CHMIMPL::const_iterator::prev()
   if (m_offset == INVALID) {
     m_offset = m_table.capacity();
   }
+  val_t key;
   do {
     --m_offset;
     if (m_offset >= m_table.capacity()) {
       m_offset = INVALID;
       break;
     }
-  } while (m_table.entry (m_offset).m_key == nullval);
+    key = m_table.entry (m_offset).m_key;
+  } while (key == nullval || key == tombstone);
 }
 
 
 /**
  * @brief Return the key for this iterator.
+ *        If deletions are allowed, then the key may change asynchronously
+ *        to the tombstone value.
  */
 T_CHMIMPL
 inline
@@ -585,6 +637,7 @@ CHMIMPL::clear (size_t capacity,
 
   // Publish the new table.
   m_size = 0;
+  m_erased = 0;
   m_table = new_table.get();
   m_updater.update (std::move (new_table), ctx);
   return it;
@@ -606,6 +659,27 @@ CHMIMPL::clear (const typename Updater_t::Context_t& ctx)
   // before we take out the lock in clear().  In practice, this should
   // not actually be a problem.
   return clear (table.capacity(), ctx);
+}
+
+
+/**
+ * @brief Erase the table by filling it with nulls.
+ *
+ * This method is not safe to use concurrently --- no other threads
+ * may be accessing the container at the same time, either for read
+ * or write.
+ */
+T_CHMIMPL
+void CHMIMPL::forceClear()
+{
+  lock_t lock (m_mutex);
+  size_t cap = m_table->capacity();
+  for (size_t i = 0; i < cap; i++) {
+    m_table->entry(i).m_key.store (nullval, std::memory_order_relaxed);
+  }
+  m_size = 0;
+  m_erased = 0;
+  std::atomic_thread_fence (std::memory_order_seq_cst);
 }
 
 
@@ -640,6 +714,41 @@ void CHMIMPL::quiescent (const typename Updater_t::Context_t& ctx)
 
 
 /**
+ * @brief Swap this container with another.
+ * @param other The container with which to swap.
+ *
+ * This will also call swap on the Updater object; hence, the Updater
+ * object must also support swap.  The Hasher and Matcher instances
+ * are NOT swapped.
+ *
+ * This operation is NOT thread-safe.  No other threads may be accessing
+ * either container during this operation.
+ */
+T_CHMIMPL
+void CHMIMPL::swap (ConcurrentHashmapImpl& other)
+{
+  // Shouldn't be needed since we specified that no other threads can be
+  // accessing this...
+  lock_t lock (m_mutex);
+  lock_t lock_other (other.m_mutex);
+
+  m_updater.swap (other.m_updater);
+  std::swap (m_table, other.m_table);
+
+  auto swap_atomic = [] (std::atomic<size_t>& a, std::atomic<size_t>& b)
+  {
+    size_t tmp = a.load (std::memory_order_relaxed);
+    a.store (b.load (std::memory_order_relaxed),
+             std::memory_order_relaxed);
+    b.store (tmp, std::memory_order_relaxed);
+  };
+
+  swap_atomic (m_size, other.m_size);
+  swap_atomic (m_erased, other.m_erased);
+}
+
+
+/**
  * @brief Make the table larger.
  * @param ctx Execution context.
  *
@@ -648,8 +757,11 @@ void CHMIMPL::quiescent (const typename Updater_t::Context_t& ctx)
 T_CHMIMPL
 bool CHMIMPL::grow (lock_t& lock, const typename Updater_t::Context_t& ctx)
 {
-  // Allocate a new table with twice the capacity.
-  return grow (lock, 2*m_table->capacity(), ctx);
+  // Allocate a new table with twice the capacity, unless there
+  // have been many erasures.
+  size_t new_capacity = m_erased >= m_table->capacity()/2 ?
+    m_table->capacity() : 2*m_table->capacity();
+  return grow (lock, new_capacity, ctx);
 }
 
 
@@ -688,6 +800,8 @@ bool CHMIMPL::grow (lock_t& /*lock*/,
       new_entry.m_val = static_cast<val_t> (ent.m_val);
     }
   }
+
+  m_erased = 0;
 
   // Publish the new table.
   m_table = new_table.get();

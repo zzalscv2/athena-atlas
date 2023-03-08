@@ -27,9 +27,8 @@ namespace Trk {
   TrackToVtxLink::TrackToVtxLink() : m_vertices(nullptr) {}
                              
   //constructor with pointers to vertices
-  TrackToVtxLink::TrackToVtxLink(std::vector<xAOD::Vertex*>* ptrToVertices) {
-    m_vertices=ptrToVertices;
-  }
+  TrackToVtxLink::TrackToVtxLink(std::vector<xAOD::Vertex*>* ptrToVertices)
+      : m_vertices(ptrToVertices) {}
 
   TrackToVtxLink::~TrackToVtxLink() 
   {   

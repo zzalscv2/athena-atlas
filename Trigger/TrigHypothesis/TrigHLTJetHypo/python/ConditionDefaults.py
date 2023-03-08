@@ -32,7 +32,7 @@ class ConditionDefaults:
             'ht': {'min': '0', 'max': 'inf'},
             'smc': {'min': '0', 'max': 'inf'},
             'jvt': {'min': '0', 'max': 'inf'},
-            'bdips': {'min': '-inf', 'max': 'inf'},
+            'bsel': {'min': '-inf', 'max': 'inf'},
             'momCuts': {'min': '-inf', 'max': 'inf'},
             'timing': {'min': '0', 'max': 'inf'},
         }
@@ -53,7 +53,6 @@ class ConditionDefaults:
             'ht': 1000.,
             'smc': 1000.,
             'jvt': 0.01,
-            'bdips': 1.,
             'momCuts': 0.01,
             'timing': 1.0,
         }

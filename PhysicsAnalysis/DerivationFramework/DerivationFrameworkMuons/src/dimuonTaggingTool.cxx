@@ -27,18 +27,10 @@ namespace DerivationFramework {
         ATH_MSG_VERBOSE("initialize() ...");
 
         // trigger decision tool, needed when there is trigger requirement
-        if (m_orTrigs.size() > 0 || m_andTrigs.size() > 0) {
-            if (m_trigDecisionTool.retrieve().isFailure()) {
-                ATH_MSG_FATAL("Failed to retrieve tool: " << m_trigDecisionTool);
-                return StatusCode::FAILURE;
-            }
-            ATH_MSG_INFO("Retrieved tool: " << m_trigDecisionTool);
-        }
-
-        // load the matching tool
-        ATH_CHECK(m_matchTool.retrieve());
-        ATH_MSG_INFO("Successfully retrived the TrigMatchTool!");
-
+        const bool has_trigs = m_orTrigs.size() || m_andTrigs.size();
+        ATH_CHECK(m_trigDecisionTool.retrieve(DisableTool{!has_trigs}));
+        ATH_CHECK(m_matchTool.retrieve(DisableTool{!has_trigs}));
+        
         ATH_CHECK(m_evtKey.initialize());
         ATH_CHECK(m_muonSGKey.initialize());
         ATH_CHECK(m_trackSGKey.initialize());
@@ -100,7 +92,7 @@ namespace DerivationFramework {
         if (!keepEvent && !m_andTrigs.empty()) {
             bool passAndTriggers = true;
             for (const std::string& and_trig : m_andTrigs) {
-                if (m_trigDecisionTool->isPassed(and_trig)) {
+                if (!m_trigDecisionTool->isPassed(and_trig)) {
                     passAndTriggers = false;
                     break;
                 }

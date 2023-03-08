@@ -84,7 +84,7 @@ StatusCode ISF::PunchThroughTool::initialize()
 
   // resolving lookuptable file
   std::string resolvedFileName = PathResolverFindCalibFile (m_filenameLookupTable);
-  if (resolvedFileName == "") {
+  if (resolvedFileName.empty()) {
     ATH_MSG_ERROR( "[ punchthrough ] Parameterisation file not found" );
     return StatusCode::FAILURE;
   }
@@ -372,7 +372,7 @@ const ISF::ISFParticleVector* ISF::PunchThroughTool::computePunchThroughParticle
   int nTries = 0;
 
   // loop over all particle pdgs
-  while(isfpCont->size() < 1 && nTries < maxTries) { //ensure we always create at least one punch through particle, maxTries to catch very rare cases
+  while(isfpCont->empty() && nTries < maxTries) { //ensure we always create at least one punch through particle, maxTries to catch very rare cases
 
       for (const auto& currentParticle : m_particles)
         {
@@ -427,7 +427,7 @@ const ISF::ISFParticleVector* ISF::PunchThroughTool::computePunchThroughParticle
         } // for-loop over all particle pdgs
   }
 
-  if (isfpCont->size() > 0)  ATH_MSG_DEBUG( "[ punchthrough ] returning ISFparticle vector , size: "<<isfpCont->size() );
+  if (!isfpCont->empty())  ATH_MSG_DEBUG( "[ punchthrough ] returning ISFparticle vector , size: "<<isfpCont->size() );
 
   for (ISF::ISFParticle *particle : *isfpCont) {
     ATH_MSG_DEBUG("codes of produced punch through particle: pdg = "<< particle->pdgCode());
@@ -534,7 +534,7 @@ int ISF::PunchThroughTool::getCorrelatedParticles(const ISF::ISFParticle &isfp, 
   // (2.) if this point is reached, we do correlation
   // decide which 2d correlation histogram to use
   double *histDomains = p->getCorrelationHistDomains();
-  TH2F *hist2d = 0;
+  TH2F *hist2d = nullptr;
   // compute the center values of the lowE and highE
   // correlation histogram domains
   if ( initEnergy <  histDomains[1])
@@ -713,15 +713,16 @@ ISF::ISFParticle *ISF::PunchThroughTool::getOneParticle(const ISF::ISFParticle &
   return par;
 }
 
-double ISF::PunchThroughTool::normal_cdf(double x) const{
+double ISF::PunchThroughTool::normal_cdf(double x) {
 
     return  0.5 * TMath::Erfc(-x * m_SQRT_0p5);
 }
 
-std::vector<double> ISF::PunchThroughTool::dotProduct(const std::vector<std::vector<double>> &m, const std::vector<double> &v) const
+std::vector<double> ISF::PunchThroughTool::dotProduct(const std::vector<std::vector<double>> &m, const std::vector<double> &v) 
 {
     std::vector<double> result;
-    for (auto& r : m){
+    result.reserve(m.size());
+    for (const auto& r : m){
         result.push_back(std::inner_product(v.begin(), v.end(), r.begin(), 0.0));
     }
 
@@ -830,7 +831,7 @@ std::map<double, double> ISF::PunchThroughTool::getVariableCDFmappings(xmlNodePt
     return mappings;
 }
 
-double ISF::PunchThroughTool::inverseCdfTransform(double variable, std::map<double, double> inverse_cdf_map) const{
+double ISF::PunchThroughTool::inverseCdfTransform(double variable, std::map<double, double> inverse_cdf_map) {
 
     double norm_cdf = normal_cdf(variable);
 
@@ -1128,7 +1129,7 @@ std::unique_ptr<ISF::PDFcreator> ISF::PunchThroughTool::readLookuptablePDF(int p
           if(! dir)
           {
             ATH_MSG_ERROR( "[ punchthrough ] unable to retrieve directory object ("<< folderName << pdg << ")" );
-            return 0;
+            return nullptr;
           }
 
 
@@ -1149,7 +1150,7 @@ std::unique_ptr<ISF::PDFcreator> ISF::PunchThroughTool::readLookuptablePDF(int p
             }
 
             //extract energy and eta from hist name 6 and 1 to position delimeters correctly
-            std::string strEnergy = histName.substr( histName.find_first_of('E') + 1, histName.find_first_of("_")-histName.find_first_of('E') - 1 );
+            std::string strEnergy = histName.substr( histName.find_first_of('E') + 1, histName.find_first_of('_')-histName.find_first_of('E') - 1 );
             histName.erase(0, histName.find_first_of('_') + 1);
             std::string strEtaMin = histName.substr( histName.find("etaMin") + 6, histName.find_first_of('_') - histName.find("etaMin") - 6 );
             histName.erase(0, histName.find('_') + 1);

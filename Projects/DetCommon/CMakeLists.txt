@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Set up the project.
 cmake_minimum_required( VERSION 3.10 )
@@ -34,6 +34,7 @@ find_package( tdaq-common REQUIRED )
 # Find some auxiliary packages:
 find_package( XercesC )
 find_package( libffi )
+find_package( gl2ps )
 
 # Set up the build/runtime environment:
 set( DetCommonReleaseEnvironment_DIR ${CMAKE_SOURCE_DIR}/cmake CACHE PATH
@@ -90,6 +91,15 @@ install( FILES
    ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/PreConfig.cmake
    ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/PostConfig.cmake
    DESTINATION ${CMAKE_INSTALL_CMAKEDIR} )
+
+# Setup IDE integration:
+set( ATLAS_ENABLE_IDE_HELPERS OFF CACHE BOOL "Enable IDE helpers" )
+if( ATLAS_ENABLE_IDE_HELPERS )
+   set( ATLAS_IDEHELPERSCRIPTS_SETUP
+      "${CMAKE_SOURCE_DIR}/../../.vscode/IDEHelperScripts/Setup.cmake"
+      CACHE FILEPATH "Setup file for the IDE / VS Code helpers" )
+   include( "${ATLAS_IDEHELPERSCRIPTS_SETUP}" )
+endif()
 
 # Package up the release using CPack:
 atlas_cpack_setup()

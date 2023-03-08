@@ -36,6 +36,8 @@ def LVL1CaloMonitoringConfig(flags):
         from AthenaConfiguration.AutoConfigFlags import GetFileMD
         md = GetFileMD(flags.Input.Files)
         inputContainsRun3FormatConfigMetadata = ("metadata_items" in md and any(('TriggerMenuJson' in key) for key in md["metadata_items"].keys()))
+        result.merge(PprMonitoringConfig(flags))
+        result.merge(JepJemMonitoringConfig(flags))
         if flags.Input.Format is not Format.POOL or inputContainsRun3FormatConfigMetadata:
             # L1 menu available in the POOL file
             from TrigT1CaloMonitoring.CpmMonitorAlgorithm import CpmMonitoringConfig
@@ -48,21 +50,31 @@ def LVL1CaloMonitoringConfig(flags):
             result.merge(CpmMonitoringConfig(flags))
             result.merge(CpmSimMonitoringConfig(flags))
             result.merge(JepCmxMonitoringConfig(flags))
-            result.merge(OverviewMonitoringConfig(flags))
             result.merge(PPMSimBSMonitoringConfig(flags))
             result.merge(JetEfficiencyMonitoringConfig(flags))
+            result.merge(OverviewMonitoringConfig(flags))
 
             if  flags.Input.TriggerStream == "physics_Mistimed":
                 from TrigT1CaloMonitoring.MistimedStreamMonitorAlgorithm import MistimedStreamMonitorConfig
                 result.merge(MistimedStreamMonitorConfig(flags))
 
-        result.merge(PprMonitoringConfig(flags))
-        result.merge(JepJemMonitoringConfig(flags))
-
         # For running on bytestream data
         if flags.Input.Format is Format.BS:
             from TrigT1CaloByteStream.LVL1CaloRun2ByteStreamConfig import LVL1CaloRun2ReadBSCfg
             result.merge(LVL1CaloRun2ReadBSCfg(flags))
+
+        # Phase 1 monitoring
+        if flags.Trigger.enableL1CaloPhase1:
+            from TrigT1CaloMonitoring.EfexMonitorAlgorithm import EfexMonitoringConfig
+            EfexMonitorCfg = EfexMonitoringConfig(flags)
+            result.merge(EfexMonitorCfg)
+
+            #  Need to pass the algorithm to the histogram booking
+            EfexMonAlg = result.getEventAlgo('EfexMonAlg')  
+            from TrigT1CaloMonitoring.EfexMonitorAlgorithm import EfexMonitoringHistConfig
+            EfexMonitorHistCfg = EfexMonitoringHistConfig(flags,EfexMonAlg)
+            result.merge(EfexMonitorHistCfg)
+
 
     # algorithms for validation checks
     if validation:
@@ -70,7 +82,16 @@ def LVL1CaloMonitoringConfig(flags):
         result.merge(L1CaloLegacyEDMMonitoringConfig(flags))
         # Phase 1 systems
         from TrigT1CaloMonitoring.EfexMonitorAlgorithm import EfexMonitoringConfig
-        result.merge(EfexMonitoringConfig(flags))
+        EfexMonitorCfg = EfexMonitoringConfig(flags)
+        result.merge(EfexMonitorCfg)
+        # algorithm required for dynamic histogram booking
+        EfexMonAlg = result.getEventAlgo('EfexMonAlg')
+        EfexMonAlg.eFexEMTobKeyList = ['L1_eEMRoI', 'L1_eEMxRoI']
+        EfexMonAlg.eFexTauTobKeyList = ['L1_eTauRoI', 'L1_eTauxRoI'] 
+        from TrigT1CaloMonitoring.EfexMonitorAlgorithm import EfexMonitoringHistConfig
+        EfexMonitorHistCfg = EfexMonitoringHistConfig(flags,EfexMonAlg)
+        result.merge(EfexMonitorHistCfg)
+        #
         from TrigT1CaloMonitoring.GfexMonitorAlgorithm import GfexMonitoringConfig
         result.merge(GfexMonitoringConfig(flags))
         from TrigT1CaloMonitoring.JfexMonitorAlgorithm import JfexMonitoringConfig

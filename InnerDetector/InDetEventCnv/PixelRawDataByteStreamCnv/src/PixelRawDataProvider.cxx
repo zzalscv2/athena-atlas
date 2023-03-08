@@ -145,7 +145,7 @@ StatusCode PixelRawDataProvider::execute(const EventContext& ctx) const {
   }
 
   // ask PixelRawDataProviderTool to decode it and to fill the IDC
-  if (m_rawDataTool->convert(listOfRobf,  containerInterface, *decodingErrors).isFailure())
+  if (m_rawDataTool->convert(listOfRobf,  containerInterface, *decodingErrors, ctx).isFailure())
     ATH_MSG_ERROR("BS conversion into RDOs failed");
 
   if(tempcont) ATH_CHECK(tempcont->MergeToRealContainer(rdoContainer.ptr()));

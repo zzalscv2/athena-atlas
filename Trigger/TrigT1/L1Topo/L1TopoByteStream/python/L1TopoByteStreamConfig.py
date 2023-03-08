@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 '''
 Functions creating ComponentAccumulator with ByteStream converters for L1Topo objects
 '''
@@ -45,11 +45,12 @@ def L1TopoByteStreamCfg(flags):
 if __name__ == '__main__':
     '''Run a functional unit test if module is executed'''
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from AthenaCommon.Constants import DEBUG
 
+    flags = initConfigFlags()
     flags.Exec.OutputLevel = DEBUG  # noqa: ATL900 - fine for short unit test
     flags.Input.Files = defaultTestFiles.RAW
     flags.lock()

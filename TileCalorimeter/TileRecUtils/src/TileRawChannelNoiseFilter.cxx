@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Tile includes
@@ -14,6 +14,8 @@
 // Atlas includes
 #include "AthenaKernel/errorcheck.h"
 #include "Identifier/Identifier.h"
+#include "StoreGate/ReadHandle.h"
+#include "StoreGate/ReadCondHandle.h"
 #include "GaudiKernel/ThreadLocalContext.h"
 
 
@@ -56,14 +58,11 @@ StatusCode TileRawChannelNoiseFilter::initialize() {
 
   ATH_CHECK( detStore()->retrieve(m_tileHWID) );
 
-  //=== get TileCondToolEmscale
-  ATH_CHECK( m_tileToolEmscale.retrieve() );
+  ATH_CHECK( m_emScaleKey.initialize() );
 
-  //=== get TileCondToolNoiseSample
-  ATH_CHECK( m_tileToolNoiseSample.retrieve() );
+  ATH_CHECK( m_sampleNoiseKey.initialize() );
 
-  //=== get TileBadChanTool
-  ATH_CHECK( m_tileBadChanTool.retrieve() );
+  ATH_CHECK( m_badChannelsKey.initialize() );
 
   //=== get TileInfo
   CHECK( detStore()->retrieve(m_tileInfo, m_infoName) );
@@ -100,6 +99,15 @@ TileRawChannelNoiseFilter::process (TileMutableRawChannelContainer& rchCont, con
 
   // Now retrieve the TileDQStatus
   const TileDQstatus* DQstatus = SG::makeHandle (m_DQstatusKey, ctx).get();
+
+  SG::ReadCondHandle<TileEMScale> emScale(m_emScaleKey, ctx);
+  ATH_CHECK( emScale.isValid() );
+
+  SG::ReadCondHandle<TileBadChannels> badChannels(m_badChannelsKey, ctx);
+  ATH_CHECK( badChannels.isValid() );
+
+  SG::ReadCondHandle<TileSampleNoise> sampleNoise(m_sampleNoiseKey, ctx);
+  ATH_CHECK( sampleNoise.isValid() );
 
   for (IdentifierHash hash : rchCont.GetAllCurrentHashes()) {
     TileRawChannelCollection* coll = rchCont.indexFindPtr (hash);
@@ -145,7 +153,7 @@ TileRawChannelNoiseFilter::process (TileMutableRawChannelContainer& rchCont, con
       // use only good channel
       float ped=rch->pedestal();
       if (empty || ped > 59500. || (ped > m_ADCmaskValueMinusEps && ped < 39500.) // all bad patterns, ped=m_tileInfo->ADCmaskValue(), underflow, overflow (see TileRawChannelMaker.cxx for the logic)
-          || m_tileBadChanTool->getAdcStatus(drawerIdx, chan, gain).isBad()
+          || badChannels->getAdcStatus(adc_id).isBad()
           || (!DQstatus->isAdcDQgood(ros, drawer, chan, gain))) continue;
 
 
@@ -162,7 +170,7 @@ TileRawChannelNoiseFilter::process (TileMutableRawChannelContainer& rchCont, con
 
       float amp = rch->amplitude();
       if (undoOnlCalib) {
-        calib[chan] = m_tileToolEmscale->undoOnlCalib(drawerIdx, chan, gain, 1.0, rChUnit);
+        calib[chan] = emScale->undoOnlineChannelCalibration(drawerIdx, chan, gain, 1.0, rChUnit);
         amp *= calib[chan];
       } else {
         calib[chan] = 1.0;
@@ -180,7 +188,7 @@ TileRawChannelNoiseFilter::process (TileMutableRawChannelContainer& rchCont, con
           // noise_sigma = ...
         } else {
           // take single gauss noise sigma from DB (high frequency noise)
-          noise_sigma = m_tileToolNoiseSample->getHfn(drawerIdx, chan, gain, TileRawChannelUnit::ADCcounts, ctx);
+          noise_sigma = sampleNoise->getHfn(drawerIdx, chan, gain);
         }
         
         float significance = 999.999;

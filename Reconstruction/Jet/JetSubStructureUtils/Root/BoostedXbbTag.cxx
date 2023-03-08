@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetSubStructureUtils/BoostedXbbTag.h"
@@ -42,12 +42,12 @@ const SG::AuxElement::ConstAccessor<float>    BoostedXbbTag::s_ECF2 ("ECF2");
 const SG::AuxElement::ConstAccessor<float>    BoostedXbbTag::s_ECF3 ("ECF3");
 const SG::AuxElement::ConstAccessor<ElementLink<xAOD::JetContainer>> BoostedXbbTag::s_parent("Parent");
 
-BoostedXbbTag::BoostedXbbTag( std::string working_point,
-                              std::string recommendations_file,
-                              std::string boson_type,
-                              std::string algorithm_name,
+BoostedXbbTag::BoostedXbbTag( const std::string& working_point,
+                              const std::string& recommendations_file,
+                              const std::string& boson_type,
+                              const std::string& algorithm_name,
                               int num_bTags,
-                              std::string decor_prefix,
+                              const std::string& decor_prefix,
                               bool debug,
                               bool verbose) :
   m_working_point(working_point),
@@ -349,7 +349,7 @@ int BoostedXbbTag::result(const xAOD::Jet& jet, const xAOD::MuonContainer* muons
   return result(jet, res.second, muons);
 }
 
-int BoostedXbbTag::result(const xAOD::Jet& jet, std::string algorithm_name, const xAOD::MuonContainer* muons) const {
+int BoostedXbbTag::result(const xAOD::Jet& jet, const std::string& algorithm_name, const xAOD::MuonContainer* muons) const {
   // bad configuration
   if(m_bad_configuration){
     if(m_debug) printf("<%s>: BoostedXbbTag has a bad configuration!\r\n", APP_NAME);

@@ -906,7 +906,7 @@ setFile( const std::string & fileName )
 
 void
 MonitoringFile::
-printDirectories() const
+printDirectories()
 {
   if( m_file == 0 ) {
     std::cerr << "MonitoringFile::printDirectories(): "
@@ -928,7 +928,7 @@ printDirectories() const
 
 void
 MonitoringFile::
-printStatistics() const
+printStatistics()
 {
   if( m_file == 0 ) {
     std::cerr << "MonitoringFile::printStatistics(): "
@@ -1191,7 +1191,7 @@ getHanResults( const std::string & hanResultsDir, const std::string & input,
 
 void
 MonitoringFile::
-printHanConfig() const
+printHanConfig()
 {
   if( m_file == 0 ) {
     std::cerr << "MonitoringFile::printHanConfig(): "

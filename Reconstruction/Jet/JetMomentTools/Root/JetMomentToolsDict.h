@@ -25,5 +25,7 @@
 #include "JetMomentTools/JetQGTaggerVariableTool.h"
 #include "JetMomentTools/JetEMScaleMomTool.h"
 #include "JetMomentTools/JetCaloEnergies.h"
+#include "JetMomentTools/JetConstituentFrac.h"
+#include "JetMomentTools/JetGroomMRatio.h"
 
 #endif

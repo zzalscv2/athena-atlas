@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGRECTOOLS_MUONTGMEASUREMENTTOOL_H
@@ -53,7 +53,7 @@ namespace Muon {
         typedef std::pair<const Trk::Layer*, std::vector<const Trk::PrepRawData*>*> PairOfLayerPrd;
 
         /** Constructor with AlgTool parameters */
-        MuonTGMeasurementTool(const std::string& name, const std::string&, const IInterface*);
+        MuonTGMeasurementTool(const std::string& type, const std::string& name, const IInterface*);
 
         virtual ~MuonTGMeasurementTool() = default;
 

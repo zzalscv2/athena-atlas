@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -38,7 +38,7 @@ public:
 
     SCT_ResidualPullCalculator(const std::string& type, const std::string& name, const IInterface* parent);
     virtual ~SCT_ResidualPullCalculator() = default;
-    virtual StatusCode initialize();
+    virtual StatusCode initialize() override;
 
 
     /** This function returns (creates!) a Trk::ResidualPull object, which contains the values
@@ -53,18 +53,16 @@ public:
         const Trk::MeasurementBase* measurement,
         const Trk::TrackParameters* trkPar,
         const Trk::ResidualPull::ResidualType resType,
-        const Trk::TrackState::MeasurementType) const;
+        const Trk::TrackState::MeasurementType) const override;
 
     /** This function is a light-weight version of the function above, designed for track fitters
-     * where speed is critical. The user has to provide a std::vector of size 5, which gets
-     * filled with the residuals. If the size of the vector is not 5, it will be resized
+     * where speed is critical. 
      */
-    virtual void residuals(
-        std::vector<double>& residuals,
+    virtual std::array<double,5> residuals(
         const Trk::MeasurementBase* measurement,
         const Trk::TrackParameters* trkPar,
         const Trk::ResidualPull::ResidualType resType,
-        const Trk::TrackState::MeasurementType) const;
+        const Trk::TrackState::MeasurementType) const override;
 
 private:
     static double calcPull(

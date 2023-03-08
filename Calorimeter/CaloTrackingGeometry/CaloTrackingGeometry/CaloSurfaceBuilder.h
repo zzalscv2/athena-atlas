@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // ***************************************************************************
@@ -94,7 +94,7 @@ public:
   virtual bool get_cylinder_surface(
     CaloCell_ID::CaloSample sample,
     int side,
-    Amg::Transform3D* htrans,
+    Amg::Transform3D& htrans,
     double& radius,
     double& hphi,
     double& hlength,
@@ -104,7 +104,7 @@ public:
   virtual bool get_disk_surface(
     CaloCell_ID::CaloSample sample,
     int side,
-    Amg::Transform3D* htrans,
+    Amg::Transform3D& htrans,
     double& z,
     double& rmin,
     double& rmax,
@@ -114,19 +114,19 @@ public:
 
   virtual bool get_cylinder_surface(
     CaloSubdetNames::ALIGNVOL alvol,
-    Amg::Transform3D* htrans,
+    Amg::Transform3D& htrans,
     double& hphi,
     std::vector<double>& radius,
     std::vector<double>& depth,
     std::vector<double>& hlength) const override final;
 
-  virtual bool get_disk_surface(CaloSubdetNames::ALIGNVOL alvol,
-                                Amg::Transform3D* htrans,
-                                double& hphi,
-                                std::vector<double>& z,
-                                std::vector<double>& depth,
-                                std::vector<double>& rmin,
-                                std::vector<double>& rmax) const override final;
+  virtual bool get_disk_surface(
+    CaloSubdetNames::ALIGNVOL alvol,
+    Amg::Transform3D& htrans, double& hphi,
+    std::vector<double>& z,
+    std::vector<double>& depth,
+    std::vector<double>& rmin,
+    std::vector<double>& rmax) const override final;
 
   virtual std::vector<std::pair<const Trk::Surface*, const Trk::Surface*>>
   entrySurfaces(const CaloDetDescrManager* calo_dd) const override final;

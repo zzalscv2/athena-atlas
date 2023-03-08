@@ -236,7 +236,7 @@ StatusCode Trk::TrackValidationNtupleWriter::initialize() {
     // create tree for each given track collection and register it to THistSvc
     std::vector<std::string>::const_iterator trackColNameIter = m_inputTrackCollection.begin();
     //for (unsigned int trackColIndex = 0; trackColIndex<m_inputTrackCollection.size(); trackColIndex++) {
-    for (; trackColNameIter != m_inputTrackCollection.end(); trackColNameIter++ ) {
+    for (; trackColNameIter != m_inputTrackCollection.end(); ++trackColNameIter) {
         TTree* tree = new TTree((*trackColNameIter).c_str(), ((*trackColNameIter)+" Validation").c_str());
         m_trees.push_back(tree);
         std::string fullNtupleName =  "/"+m_ntupleFileName+"/"+m_ntupleDirName+"/"+(*trackColNameIter);
@@ -263,7 +263,7 @@ StatusCode Trk::TrackValidationNtupleWriter::initialize() {
     // create tree for each given track particle collection and register it to THistSvc
     std::vector<std::string>::const_iterator trackParticleColNameIter = m_inputTrackParticleCollection.begin();
     
-    for (; trackParticleColNameIter != m_inputTrackParticleCollection.end(); trackParticleColNameIter++ ) {
+    for (; trackParticleColNameIter != m_inputTrackParticleCollection.end(); ++trackParticleColNameIter ) {
         TTree* tree = new TTree((*trackParticleColNameIter).c_str(), ((*trackParticleColNameIter)+" Validation").c_str());
         m_trees.push_back(tree); 
         std::string fullNtupleName =  "/"+m_ntupleFileName+"/"+m_ntupleDirName+"/"+(*trackParticleColNameIter);
@@ -518,7 +518,7 @@ StatusCode Trk::TrackValidationNtupleWriter::execute() {
     delete selecParticles;
     delete genParticleJets;
     std::vector<Trk::ValidationTrackTruthData>::iterator truthDataIter = truthData.begin();
-    for (; truthDataIter != truthData.end(); truthDataIter++) {
+    for (; truthDataIter != truthData.end(); ++truthDataIter) {
         delete (*truthDataIter).truthPerigee;
         (*truthDataIter).truthPerigee = nullptr;
     }
@@ -623,14 +623,14 @@ StatusCode Trk::TrackValidationNtupleWriter::writeTrackData(unsigned int trackCo
                   int truthIndex = -1;
                   // TODO: do the search somehow better:
                   std::vector<Trk::ValidationTrackTruthData>::iterator matchedPartIter = truthData.begin();
-                  for (; matchedPartIter != truthData.end(); matchedPartIter++) {
+                  for (; matchedPartIter != truthData.end(); ++matchedPartIter) {
                     truthIndex++;
                     if ((*matchedPartIter).genParticle == genParticle) break;
                   }
                   if (matchedPartIter == truthData.end()) {
                     // did not find particle in list of selected particles
                     truthIndex = -1;
-                    if (msgLvl(MSG::VERBOSE)) msg(MSG::VERBOSE) << "Matched particle with barcode " << HepMC::barcode(genParticle) << " is not in list of selected particles" << endmsg;
+                    if (msgLvl(MSG::VERBOSE)) msg(MSG::VERBOSE) << "Matched particle " << genParticle << " is not in list of selected particles" << endmsg;
                     if ( genParticle->production_vertex() ) {
                       newTrackPerigee = m_truthToTrack->makePerigeeParameters( genParticle );
                       generatedTrackPerigee = newTrackPerigee;

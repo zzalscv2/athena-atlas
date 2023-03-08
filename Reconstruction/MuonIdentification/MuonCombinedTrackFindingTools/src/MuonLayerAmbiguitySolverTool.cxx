@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonLayerAmbiguitySolverTool.h"
@@ -233,8 +233,9 @@ namespace Muon {
                 if (!m_segmentMatchingTool->match(ctx, *layerIntersection1.segment, *layerIntersection2.segment)) continue;
 
                 // build new segment
+                static const IMuonSegmentTrackBuilder::PrepVec emptyVec{};
                 std::shared_ptr<const MuonSegment> newseg{
-                    m_muonTrackBuilder->combineToSegment(ctx, *layerIntersection1.segment, *layerIntersection2.segment, nullptr)};
+                    m_muonTrackBuilder->combineToSegment(ctx, *layerIntersection1.segment, *layerIntersection2.segment, emptyVec)};
                 if (!newseg) {
                     ATH_MSG_DEBUG(" Fit of combination of segments failed ");
                     continue;

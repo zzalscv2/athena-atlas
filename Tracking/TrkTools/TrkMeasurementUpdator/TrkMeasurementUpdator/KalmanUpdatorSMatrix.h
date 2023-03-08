@@ -78,7 +78,7 @@ enum RangeCheckDef
 
     @author Wolfgang Liebig <http://consult.cern.ch/xwho/people/54608>
  */
-class KalmanUpdatorSMatrix
+class KalmanUpdatorSMatrix final
   : virtual public IUpdator
   , public AthAlgTool
 {
@@ -207,7 +207,7 @@ public:
     const AmgSymMatrix(5) &,
     const Amg::VectorX&,
     const Amg::MatrixX&,
-    const int&,
+    int,
     Trk::FitQualityOnSurface*&,
     bool) const override final
   {
@@ -232,8 +232,8 @@ private:
     const TrackParameters&,
     const SParVector5&,
     const SCovMatrix5&,
-    const double&,
-    const int&,
+    double,
+    int,
     const Amg::MatrixX&,
     const int,
     FitQualityOnSurface*&,
@@ -245,7 +245,7 @@ private:
     const SParVector5&,
     const SCovMatrix5&,
     const SParVector2&,
-    const int&,
+    int,
     const Amg::MatrixX&,
     const int,
     FitQualityOnSurface*&,
@@ -294,8 +294,8 @@ private:
     const TrackParameters&,
     const SParVector5&,
     const SCovMatrix5&,
-    const int&,
-    const bool&,
+    int,
+    bool,
     std::string_view) const;
   /** also the chi2 calculation and FitQuality object creation is
       combined in an extra method. It is called by all the XXX-FitQuality()
@@ -306,40 +306,40 @@ private:
       (sign=+1) or smoothed/updated input track state (sign=-1).
   */
   FitQualityOnSurface  makeChi2_1D(const SParVector5&,
-                                   const Amg::MatrixX&,
-                                   const double&,
-                                   const double&,
-                                   const int&,
-                                   const int&) const;
+                                   const AmgSymMatrix(5)&,
+                                   double,
+                                   double,
+                                   int,
+                                   int) const;
   FitQualityOnSurface  makeChi2_2D(const SParVector5&,
-                                   const Amg::MatrixX&,
+                                   const AmgSymMatrix(5)&,
                                    const SParVector2&,
                                    const SCovMatrix2&,
-                                   const int&,
-                                   const int&) const;
+                                   int,
+                                   int) const;
   FitQualityOnSurface  makeChi2_5D(const SParVector5&,
-                                   const Amg::MatrixX&,
+                                   const AmgSymMatrix(5)&,
                                    const SParVector5&,
-                                   const Amg::MatrixX&,
-                                   const int&) const;
+                                   const AmgSymMatrix(5)&,
+                                   int) const;
   FitQualityOnSurface  makeChi2Object(const Amg::VectorX&,
+                                      const AmgSymMatrix(5)&,
                                       const Amg::MatrixX&,
                                       const Amg::MatrixX&,
-                                      const Amg::MatrixX&,
-                                      const int&) const;
+                                      int) const;
 
   //! Avoid multiplications with sparse H matrices by cutting 2D rows&columns
   //! out of the full cov matrix.
-  static SCovMatrix2 projection_2D(const SCovMatrix5&, const int&) ;
+  static SCovMatrix2 projection_2D(const SCovMatrix5&, int) ;
   //! Avoid multiplications with sparse H matrices by cutting 2D rows&columns
   //! out of the full cov matrix.
-  static SCovMatrix2 projection_2D(const Amg::MatrixX&, const int&) ;
+  static SCovMatrix2 projection_2D(const Amg::MatrixX&, int) ;
   //! Avoid multiplications with sparse H matrices by cutting 3D rows&columns
   //! out of the full cov matrix.
-  static SCovMatrix3 projection_3D(const SCovMatrix5&, const int&) ;
+  static SCovMatrix3 projection_3D(const SCovMatrix5&, int) ;
   //! Avoid multiplications with sparse H matrices by cutting 4D rows&columns
   //! out of the full cov matrix.
-  static SCovMatrix4 projection_4D(const SCovMatrix5&, const int&) ;
+  static SCovMatrix4 projection_4D(const SCovMatrix5&, int) ;
 
   // === note: any of the following log... method is only called if
   // the msgstream level has been set appropriately.
@@ -360,7 +360,7 @@ private:
                  const AmgSymMatrix(5) &) const;
 
   //! method testing correct use of LocalParameters
-  bool consistentParamDimensions(const LocalParameters&, const int&) const;
+  bool consistentParamDimensions(const LocalParameters&, int) const;
 
   //! Test if angles are inside boundaries.
   /** Absolute phi values should be in [-pi, pi] (how about endpoints?)

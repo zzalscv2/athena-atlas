@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from TriggerMenuMT.HLT.Electron.ElectronRecoSequences import l2CaloRecoCfg
 from TriggerMenuMT.HLT.Photon.PhotonRecoSequences import l2PhotonRecoCfg, l2PhotonHypoCfg
@@ -24,7 +24,7 @@ def _fastCaloSeq(flags):
                                               CaloClusters=recordable('HLT_FastCaloEMClusters'))
     selAcc.mergeHypo(l2CaloHypo)
 
-    fastCaloSequence = MenuSequenceCA(selAcc,
+    fastCaloSequence = MenuSequenceCA(flags, selAcc,
                                       HypoToolGen=TrigEgammaFastCaloHypoToolFromDict)
 
     return (selAcc , fastCaloSequence)
@@ -46,7 +46,7 @@ def _fastPhotonSeq(flags):
                                     RunInView = True )
     selAcc.addHypoAlgo(l2PhotonHypo)
 
-    l2PhotonSequence = MenuSequenceCA(selAcc,
+    l2PhotonSequence = MenuSequenceCA(flags, selAcc,
                                       HypoToolGen = TrigEgammaFastPhotonHypoToolFromDict)
 
     return (selAcc , l2PhotonSequence)

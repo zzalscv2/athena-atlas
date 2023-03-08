@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <utility>
+#include <algorithm>
 
 #include "NewCorePlots.h"
 #include "xAODCaloEvent/CaloVertexedTopoCluster.h"
@@ -201,10 +202,10 @@ namespace Tau{
     m_logSeedJetPt->Fill(logTauSeedPt, weight);
 
     // tracks
-    static const SG::AuxElement::ConstAccessor<float> idScoreCharged("rnn_chargedScore");
-    static const SG::AuxElement::ConstAccessor<float> idScoreIso("rnn_isolationScore");
-    static const SG::AuxElement::ConstAccessor<float> idScoreConv("rnn_conversionScore");
-    static const SG::AuxElement::ConstAccessor<float> idScoreFake("rnn_fakeScore");
+    static const SG::AuxElement::ConstAccessor<float> acc_trackScoreCharged("rnn_chargedScore");
+    static const SG::AuxElement::ConstAccessor<float> acc_trackScoreIso("rnn_isolationScore");
+    static const SG::AuxElement::ConstAccessor<float> acc_trackScoreConv("rnn_conversionScore");
+    // rnn_fakeScore may not be available (it is not provided by the TauJets smart slimming list), it can be obtained from unitarity
 
     for(const xAOD::TauTrack* track : tau.allTracks()) {
 
@@ -287,11 +288,18 @@ namespace Tau{
       m_track_eProbabilityNN->Fill(eProbabilityNN, weight);
       m_track_eProbabilityHTorNN->Fill(eProbabilityHTorNN);
 
-      if(track->isAvailable<float>("rnn_chargedScore")) {
-	m_track_idScoreCharged->Fill(idScoreCharged(*track), weight);
-	m_track_idScoreIso->Fill(idScoreIso(*track), weight);
-	m_track_idScoreConv->Fill(idScoreConv(*track), weight);
-	m_track_idScoreFake->Fill(idScoreFake(*track), weight);
+      if (acc_trackScoreCharged.isAvailable(*track)) {
+	float chargedScore = acc_trackScoreCharged(*track);
+	float isolationScore = acc_trackScoreIso(*track);
+	float conversionScore = acc_trackScoreConv(*track);
+	float fakeScore = 1. - chargedScore - isolationScore - conversionScore;
+	// ensure the probability is within [0.,1.]
+	fakeScore = std::max(0.f, fakeScore);
+	fakeScore = std::min(1.f, fakeScore);
+	m_track_idScoreCharged->Fill(chargedScore, weight);
+	m_track_idScoreIso->Fill(isolationScore, weight);
+	m_track_idScoreConv->Fill(conversionScore, weight);
+	m_track_idScoreFake->Fill(fakeScore, weight);
       }
     }
 

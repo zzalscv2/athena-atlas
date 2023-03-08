@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -244,22 +244,12 @@ bool psc::Psc::configure(const ptree& config)
       }
       Py_DECREF(pModule);
     }
-
-    // Setup the file inclusion
-    std::vector<std::string> pyCmds;
-    pyCmds.push_back("from AthenaCommon.Include import include");
-    // have C++ bool representation be recognized in python:
-    pyCmds.push_back("true, false = True, False");
-    if ( !psc::Utils::execPython(pyCmds) ) {
-      ERS_PSC_ERROR("Athena 'include' setup failed.");
-      return false;
-    }       
   }
 
   if ( jobOptConfig ) {
     // Do the python setup (including user job options)
     std::string pyBasicFile = m_config->getOption("PYTHONSETUPFILE") ;
-    if ( !psc::Utils::pyInclude(pyBasicFile) ) {
+    if ( !psc::Utils::execFile(pyBasicFile) ) {
       ERS_PSC_ERROR("Basic Python configuration failed.");
       return false;
     }  
@@ -292,8 +282,8 @@ bool psc::Psc::configure(const ptree& config)
     if ( needPython ) {
       // only used in athenaHLT, but not in partition running
       std::string pyBasicFile = m_config->getOption("PYTHONSETUPFILE", /*quiet*/true) ;
-      if ( pyBasicFile != "" ) {
-        if ( !psc::Utils::pyInclude(pyBasicFile) ) {
+      if ( !pyBasicFile.empty() ) {
+        if ( !psc::Utils::execFile(pyBasicFile) ) {
           ERS_PSC_ERROR("Basic Python configuration failed.");
           return false;
         }

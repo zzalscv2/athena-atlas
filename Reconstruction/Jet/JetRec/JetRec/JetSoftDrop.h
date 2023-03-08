@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetSoftDrop.h
@@ -31,7 +31,7 @@ ASG_TOOL_CLASS(JetSoftDrop, IJetGroomer)
 public:
 
   // Ctor.
-  JetSoftDrop(std::string name);
+  JetSoftDrop(const std::string& name);
 
   // Dtor.
   ~JetSoftDrop();

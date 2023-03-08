@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # EGAM5.py
@@ -316,7 +316,7 @@ def EGAM5Cfg(ConfigFlags):
     # multiple times in a train.
     # DODO: restrict it to relevant triggers
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    EGAM5TriggerListsHelper = TriggerListsHelper()
+    EGAM5TriggerListsHelper = TriggerListsHelper(ConfigFlags)
     #EGAM5TriggerListsHelper.Run3TriggerNames = EGAM5TriggerListsHelper.Run3TriggerNamesNoTau
     #EGAM5TriggerListsHelper.Run3TriggerNamesTau = []
     #EGAM5TriggerListsHelper.Run2TriggerNamesTau = []
@@ -414,25 +414,15 @@ def EGAM5Cfg(ConfigFlags):
     EGAM5SlimmingHelper.ExtraVariables += PhotonsCPDetailedContent
 
     # photons and electrons: gain and cluster energy per layer
-    from DerivationFrameworkCalo.DerivationFrameworkCaloFactories import ( 
+    from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import (
         getGainDecorations, getClusterEnergyPerLayerDecorations )
-    GainDecoratorTool = None
-    ClusterEnergyPerLayerDecorators = []  
-    for toolStr in acc.getEventAlgo('EGAM5Kernel').AugmentationTools:
-        toolStr  = f'{toolStr}'
-        splitStr = toolStr.split('/')
-        tool =  acc.getPublicTool(splitStr[1])
-        if splitStr[0] == 'DerivationFramework::GainDecorator':
-            GainDecoratorTool = tool
-        elif splitStr[0] == 'DerivationFramework::ClusterEnergyPerLayerDecorator':
-            ClusterEnergyPerLayerDecorators.append( tool )
-
-    if GainDecoratorTool : 
-        EGAM5SlimmingHelper.ExtraVariables.extend( 
-            getGainDecorations(GainDecoratorTool) )
-    for tool in ClusterEnergyPerLayerDecorators:
-        EGAM5SlimmingHelper.ExtraVariables.extend( 
-            getClusterEnergyPerLayerDecorations( tool ) )
+    gainDecorations = getGainDecorations(acc, 'EGAM5Kernel')
+    print('EGAM5 gain decorations: ', gainDecorations)
+    EGAM5SlimmingHelper.ExtraVariables.extend(gainDecorations)
+    clusterEnergyDecorations = getClusterEnergyPerLayerDecorations(
+        acc, 'EGAM5Kernel' )
+    print('EGAM5 cluster energy decorations: ', clusterEnergyDecorations)
+    EGAM5SlimmingHelper.ExtraVariables.extend(clusterEnergyDecorations)
 
     # energy density
     EGAM5SlimmingHelper.ExtraVariables += [ 

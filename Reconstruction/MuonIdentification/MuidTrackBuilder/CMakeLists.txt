@@ -8,11 +8,7 @@ find_package( CLHEP )
 
 # Component(s) in the package:
 atlas_add_component( MuidTrackBuilder
-                     src/CombinedMuonTrackBuilder.cxx
-                     src/MuidMuonRecovery.cxx
-                     src/MuonMatchQuality.cxx
-                     src/MuonTrackQuery.cxx
-                     src/OutwardsCombinedMuonTrackBuilder.cxx
+                     src/*.cxx                   
                      src/components/*.cxx
                      INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
                      LINK_LIBRARIES ${CLHEP_LIBRARIES} AthenaBaseComps AthenaKernel EventPrimitives FourMomUtils GaudiKernel InDetRIO_OnTrack MagFieldConditions MuidEvent MuidInterfaces 

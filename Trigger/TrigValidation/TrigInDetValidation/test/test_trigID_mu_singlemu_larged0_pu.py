@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # art-description: art job for mu_singlemu_larged0_pu
 # art-type: grid
 # art-include: master/Athena
-# art-include: 22.0/Athena
+# art-include: 23.0/Athena
 # art-input: mc15_13TeV.107237.ParticleGenerator_mu_Pt4to100_vertxy20.recon.RDO.e3603_s2726_r7772
 # art-input-nfiles: 10
 # art-athena-mt: 8

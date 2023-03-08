@@ -1,13 +1,14 @@
 #!/bin/sh
 #
 # art-description: heavy ion reconstruction test from Sebastian Tapia
-# art-athena-mt: 4
+# art-athena-mt: 8
 # art-type: grid
 # art-include: master/Athena
-# art-include: 22.0/Athena
+# art-include: 23.0/Athena
 
-export TRF_ECHO=True; Reco_tf.py \
---athenaopts="--threads=8" \
+export ATHENA_CORE_NUMBER=8
+export TRF_ECHO=True; Reco_tf.py  \
+--multithreaded \
 --inputHITSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecJobTransformTests/mc16_5TeV.420000.Hijing_PbPb_5p02TeV_MinBias_Flow_JJFV6.merge.HITS.e4962_a890_s3136/HITS.17784755._001903.pool.root.1 \
 --outputESDFile=ESD.pool.root \
 --outputAODFile=AOD.pool.root \

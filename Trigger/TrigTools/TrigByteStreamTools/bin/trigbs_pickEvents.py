@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from __future__ import print_function
 import eformat
 import sys
 import libpyevent_storage as EventStorage
@@ -19,14 +18,17 @@ def usage():
   print("       -1  - select on l1 id instead of event number")
   print("       -g  - select on global id instead of event number")
   print("       -v  - verbose")
+  print("       -h  - help")
   sys.exit(1)
   
 try:
-  opts, args = getopt.getopt(sys.argv[1:], "1gv")
+  opts, args = getopt.getopt(sys.argv[1:], "1ghv")
   if len(args)<3:
-    raise 'notEnoughPars'
-except (getopt.GetoptError, 'notEnoughPars'):
+    raise getopt.GetoptError("not enough arguments provided")
+except getopt.GetoptError as err:
+  print(err)
   usage()
+  sys.exit(2)
 
 useL1ID=False
 useGlobalID=False

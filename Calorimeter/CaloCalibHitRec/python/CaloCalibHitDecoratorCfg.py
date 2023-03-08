@@ -3,7 +3,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def CaloCalibHitDecoratorCfg():
+def CaloCalibHitDecoratorCfg(flags):
     result=ComponentAccumulator()
 
     result.addEventAlgo(CompFactory.CaloCalibClusterTruthMapMakerAlgorithm())
@@ -11,6 +11,7 @@ def CaloCalibHitDecoratorCfg():
     CaloCalibClusterDecoratorAlgorithm = CompFactory.CaloCalibClusterDecoratorAlgorithm()
 
     CaloCalibClusterDecoratorAlgorithm.TruthAttributerTool = CompFactory.CaloCalibClusterTruthAttributerTool()
+    CaloCalibClusterDecoratorAlgorithm.CaloClusterWriteDecorHandleKey_NLeadingTruthParticles="CaloCalTopoClusters."+flags.Calo.TopoCluster.CalibrationHitDecorationName
     result.addEventAlgo(CaloCalibClusterDecoratorAlgorithm)
 
     return result

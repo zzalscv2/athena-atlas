@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -20,39 +20,62 @@ DerivationFramework::TruthNavigationDecorator::TruthNavigationDecorator(const st
     AthAlgTool(t,n,p)
 {
   declareInterface<DerivationFramework::IAugmentationTool>(this);
-  declareProperty ("InputCollections", m_inputKeys = {});
 }
 
 // Destructor
 DerivationFramework::TruthNavigationDecorator::~TruthNavigationDecorator() {
 }
 
+// Initialise
+StatusCode DerivationFramework::TruthNavigationDecorator::initialize() {
+
+  // Initialise input keys
+  ATH_CHECK( m_inputKeys.initialize() ); 
+  ATH_CHECK( m_truthEventKey.initialize() );  
+
+  // Decorations - dependent on the name of the input keys 
+  // Loop over the container names provided by the user
+  for (auto key : m_inputKeys) {
+    m_parentLinksDecorKeys.emplace_back(key.key()+".parentLinks");   
+    m_childLinksDecorKeys.emplace_back(key.key()+".childLinks");  
+  }
+  
+  ATH_CHECK( m_parentLinksDecorKeys.initialize() );
+  ATH_CHECK( m_childLinksDecorKeys.initialize() );
+
+  return StatusCode::SUCCESS;
+
+}
+
 // Function to do dressing, implements interface in IAugmentationTool
 StatusCode DerivationFramework::TruthNavigationDecorator::addBranches() const
 {
+  // Event context 
+  const EventContext& ctx = Gaudi::Hive::currentContext();   
+
   // Retrieve the truth collections
-  const xAOD::TruthEventContainer* truthEvents(nullptr);
-  CHECK(evtStore()->retrieve(truthEvents, "TruthEvents"));
+  SG::ReadHandle<xAOD::TruthEventContainer> truthEvents(m_truthEventKey, ctx);
+  if (!truthEvents.isValid()) {
+    ATH_MSG_ERROR("Couldn't retrieve TruthEvent collection with name " << m_truthEventKey);
+    return StatusCode::FAILURE;
+  }
 
   // Retrieve all the individual particle collections
-  std::vector<const xAOD::TruthParticleContainer*> inputParticles(m_inputKeys.size());
-  for (size_t k=0;k<m_inputKeys.size();++k){
-    CHECK(evtStore()->retrieve(inputParticles[k],m_inputKeys[k]));
-  }
+  std::vector<SG::ReadHandle<xAOD::TruthParticleContainer> > inputParticles;
+  inputParticles.reserve(m_inputKeys.size());
+  for (const SG::ReadHandleKey<xAOD::TruthParticleContainer>& inputKey : m_inputKeys) {
+    inputParticles.push_back(SG::ReadHandle<xAOD::TruthParticleContainer>(inputKey, ctx));
+  }  
 
   // Build a dictionary of barcodes and element links
   std::map<int,ElementLink<xAOD::TruthParticleContainer> > linkMap;
-  for (const auto& coll : inputParticles){
-    for (size_t p=0;p<coll->size();++p){
-      if (!coll->at(p)) continue; // Protection against null ptrs
-      if (linkMap.find(coll->at(p)->barcode())!=linkMap.end()) continue; // Particle in multiple collections
-      linkMap[coll->at(p)->barcode()] = ElementLink<xAOD::TruthParticleContainer>(*coll,p);
+  for (auto& coll : inputParticles){
+    for (size_t p=0;p<coll.ptr()->size();++p){
+      if (!coll.ptr()->at(p)) continue; // Protection against null ptrs
+      if (linkMap.find(coll.ptr()->at(p)->barcode())!=linkMap.end()) continue; // Particle in multiple collections
+      linkMap[coll.ptr()->at(p)->barcode()] = ElementLink<xAOD::TruthParticleContainer>(*coll,p);
     } // Loop over particles in the collection
   } // Loop over collections
-
-  // Naming to be consistent with xAOD::TruthParticle
-  SG::AuxElement::Decorator< std::vector<ElementLink<xAOD::TruthParticleContainer> > > parent_decorator("parentLinks");
-  SG::AuxElement::Decorator< std::vector<ElementLink<xAOD::TruthParticleContainer> > > child_decorator("childLinks");
 
   // Now loop over the collections and for each one decorate children and parents
   // The list of particles we keep is small-ish, and the list of particles in the
@@ -85,12 +108,19 @@ StatusCode DerivationFramework::TruthNavigationDecorator::addBranches() const
   } // Loop over truth particles in the big truth collection
 
   // Now final loop over the collections and setting all the decorators
-  for (const auto& coll : inputParticles){
-    for (size_t p=0;p<coll->size();++p){
-      if (!coll->at(p)) continue; // Protection against null ptrs
-      parent_decorator(*coll->at(p)) = parentMap[ coll->at(p)->barcode() ];
-      child_decorator(*coll->at(p)) = childMap[ coll->at(p)->barcode() ];
+  unsigned int pCntr{0};
+  for (auto coll : inputParticles){
+    // Create the decorators in the loop over the particle containers; Naming to be consistent with xAOD::TruthParticle
+    SG::WriteDecorHandle< xAOD::TruthParticleContainer, std::vector<ElementLink<xAOD::TruthParticleContainer> > > 
+      parent_decorator(m_parentLinksDecorKeys.at(pCntr), ctx);
+    SG::WriteDecorHandle< xAOD::TruthParticleContainer, std::vector<ElementLink<xAOD::TruthParticleContainer> > >
+     child_decorator(m_childLinksDecorKeys.at(pCntr), ctx); 
+    for (size_t p=0;p<coll.ptr()->size();++p){
+      if (!coll.ptr()->at(p)) continue; // Protection against null ptrs
+      parent_decorator(*coll.ptr()->at(p)) = parentMap[ coll->at(p)->barcode() ];
+      child_decorator(*coll.ptr()->at(p)) = childMap[ coll->at(p)->barcode() ];
     } // Loop over the particles in each collection
+    ++pCntr;
   } // Loop over the collections
 
   return StatusCode::SUCCESS;

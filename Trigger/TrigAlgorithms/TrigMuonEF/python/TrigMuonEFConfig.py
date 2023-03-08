@@ -1,43 +1,59 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
-
-# TrigMuonEF configurables
 #
-from TrigMuonEF import TrigMuonEFConf
-from AthenaCommon.SystemOfUnits import mm
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#
 
-def TMEF_TrackIsolationTool(name='TMEF_isolationTool',**kwargs):
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory import CompFactory
+
+def TrigMuonEFTrackIsolationToolCfg(flags, name = "TrigMuonTrackIsoTool", **kwargs):
+
+    acc = ComponentAccumulator()
+    trackIsolation = CompFactory.TrigMuonEFTrackIsolationTool
+    from AthenaCommon.SystemOfUnits import mm
     kwargs.setdefault('deltaZCut', 2.0*mm)
     kwargs.setdefault('removeSelf',True)
     kwargs.setdefault('useAnnulus',False)
     kwargs.setdefault('useVarIso',True)
-    # Get the track selection tool
-    from InDetTrackSelectionTool.InDetTrackSelectionToolConf import InDet__InDetTrackSelectionTool
-    trkseltool = InDet__InDetTrackSelectionTool()
-    kwargs.setdefault('TrackSelectionTool',trkseltool)
-    return TrigMuonEFConf.TrigMuonEFTrackIsolationTool(name, **kwargs)
+    isoTool = trackIsolation(name=name, **kwargs)
+    acc.setPrivateTools(isoTool)
+    return acc
 
 
+def TrigMuonEFTrackIsolationAlgCfg(flags, name = "TrigMuonEFTrackIsolation", **kwargs):
 
-class TrigMuonEFTrackIsolationConfig (TrigMuonEFConf.TrigMuonEFTrackIsolationAlg):
-    __slots__ = ()
+    trackIsolationAlg = CompFactory.TrigMuonEFTrackIsolationAlg
+    acc = TrigMuonEFTrackIsolationToolCfg(flags)
 
-    def __init__( self, name="TrigMuonEFTrackIsolationConfig" ):
-        super( TrigMuonEFTrackIsolationConfig, self ).__init__( name )
+    kwargs.setdefault('OnlineIsolationTool', acc.popPrivateTools())
+    kwargs.setdefault('IdTrackParticles', 'InDetTrigTrackingxAODCnv_Muon_IDTrig')
+    kwargs.setdefault('requireCombinedMuon', True)
+    kwargs.setdefault('useVarIso', True)
+    kwargs.setdefault('MuonContName', 'MuonsIso')
+    kwargs.setdefault('ptcone02Name', 'MuonsIso.ptcone02')
+    kwargs.setdefault('ptcone02Name', 'MuonsIso.ptcone03')
 
-        # configure the isolation tool
-        TMEF_IsolationTool = TMEF_TrackIsolationTool('TMEF_IsolationTool',useVarIso=True)
+    isoAlg = trackIsolationAlg(name, **kwargs)
+    acc.addEventAlgo(isoAlg)
 
-        # Isolation tool
-        self.OnlineIsolationTool = TMEF_IsolationTool
+    return acc
 
-        # ID tracks
-        self.IdTrackParticles = "InDetTrigTrackingxAODCnv_Muon_IDTrig"
+def MuonFilterAlgCfg(flags, name="FilterZeroMuons", **kwargs):
 
-        # Only run algo on combined muons
-        self.requireCombinedMuon = True
+    filterZeroMuons = CompFactory.MuonFilterAlg
+    acc = ComponentAccumulator()
+    kwargs.setdefault("MuonContainerLocation", "MuonsCB")
 
-        # Use offline isolation variables
-        self.useVarIso = True
-        self.MuonContName = "Muons"
-        self.ptcone02Name = "Muons.ptcone02"
-        self.ptcone03Name = "Muons.ptcone03"
+    acc.addEventAlgo(filterZeroMuons(name, **kwargs))
+
+    return acc
+
+def MergeEFMuonsAlgCfg(flags, name="MergeEFMuonsAlg", **kwargs):
+
+    mergeMuons = CompFactory.MergeEFMuonsAlg
+    acc = ComponentAccumulator()
+    kwargs.setdefault("MuonCBContainerLocation", "MuonsCB_outsideIn")
+    kwargs.setdefault("MuonInsideOutContainerLocation", "MuonsCB_insideOut")
+    kwargs.setdefault("MuonOutputLocation", "MuonsCB")
+
+    acc.addEventAlgo(mergeMuons(name, **kwargs))
+    return acc

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ROOTAUXDYNSTORE_H
@@ -10,13 +10,13 @@
 #include <string>
 #include <mutex>
 
-class RootAuxDynReader;
+namespace RootAuxDynIO { class IRootAuxDynReader; }
 
 class RootAuxDynStore : public SG::AuxStoreInternal
 {
 public:
-  RootAuxDynStore(RootAuxDynReader& reader, long long entry, bool standalone,
-                  std::recursive_mutex* iomtx = nullptr);
+   RootAuxDynStore(RootAuxDynIO::IRootAuxDynReader& reader, long long entry,
+                   bool standalone, std::recursive_mutex* iomtx = nullptr);
   
   virtual ~RootAuxDynStore() {}
 
@@ -55,13 +55,11 @@ public:
      
 protected:
   /// read data from ROOT and store it in m_vecs. Returns False on error
-  bool readData(SG::auxid_t auxid);
+  virtual bool readData(SG::auxid_t auxid) = 0;
      
 protected:
-  RootAuxDynReader&  m_reader;
   long long          m_entry;
 
-private:
   /// Mutex used to synchronize modifications to the cache vector.
   typedef AthContainers_detail::mutex mutex_t;
   typedef AthContainers_detail::lock_guard<mutex_t> guard_t;

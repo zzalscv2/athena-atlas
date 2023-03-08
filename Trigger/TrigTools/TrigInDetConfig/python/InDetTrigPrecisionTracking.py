@@ -2,15 +2,13 @@
 #
 #           Setup of precision tracking
 
-from __future__ import print_function
-
-from AthenaCommon.Logging import logging 
+from AthenaCommon.Logging import logging
 log = logging.getLogger("InDetTrigPrecisionTracking")
 
-from InDetTrigRecExample.InDetTrigCommonTools import CAtoLegacyPublicToolDecorator
+from InDetTrigRecExample.InDetTrigCommonTools import CAtoLegacyPublicToolWrapper
 
 
-def makeInDetTrigPrecisionTracking( config=None, verifier=False, rois='EMViewRoIs', prefix="InDetTrigMT" ) :      
+def makeInDetTrigPrecisionTracking( flags, config=None, verifier=False, rois='EMViewRoIs', prefix="InDetTrigMT" ) :
     
     log.info( "makeInDetTrigPrecisionTracking:: {} {} doTRT: {} ".format(  config.input_name, config.name, config.doTRT ) )
 
@@ -20,12 +18,11 @@ def makeInDetTrigPrecisionTracking( config=None, verifier=False, rois='EMViewRoI
     if config is None:
         raise ValueError('PrecisionTracking No configuration provided!')
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
     from InDetTrigRecExample import InDetTrigCA
-    InDetTrigCA.InDetTrigConfigFlags = ConfigFlags.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking."+config.name)
+    InDetTrigCA.InDetTrigConfigFlags = flags.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking."+config.name)
     
     from TrkConfig.TrkTrackSummaryToolConfig import InDetTrigTrackSummaryToolCfg
-    summaryTool = CAtoLegacyPublicToolDecorator(InDetTrigTrackSummaryToolCfg)
+    summaryTool = CAtoLegacyPublicToolWrapper(InDetTrigTrackSummaryToolCfg)
 
     doTRT = config.doTRT
 
@@ -86,7 +83,8 @@ def makeInDetTrigPrecisionTracking( config=None, verifier=False, rois='EMViewRoI
     if config.electronPID:
       creatorTool = InDetTrigParticleCreatorToolWithSummaryTRTPid
     
-    trackParticleCnvAlg = trackParticleCnv_builder( name                 = prefix+'xAODParticleCreatorAlg'+config.input_name+'_IDTrig',
+    trackParticleCnvAlg = trackParticleCnv_builder( flags,
+                                                    name                 = prefix+'xAODParticleCreatorAlg'+config.input_name+'_IDTrig',
                                                     config               = config,
                                                     inTrackCollectionKey = finalTrackCollection,
                                                     outTrackParticlesKey = outTrackParticles,
@@ -313,7 +311,7 @@ def scoringTool_builder( signature, config, summaryTool, prefix=None, SiOnly=Tru
     kwargs = setDefaults(kwargs, minTRTonTrk = config.minTRTonTrk)
 
   from InDetConfig.InDetTrackScoringToolsConfig import InDetAmbiScoringToolCfg
-  scoringTool = CAtoLegacyPublicToolDecorator(InDetAmbiScoringToolCfg, **kwargs)
+  scoringTool = CAtoLegacyPublicToolWrapper(InDetAmbiScoringToolCfg, **kwargs)
   return scoringTool
 
 

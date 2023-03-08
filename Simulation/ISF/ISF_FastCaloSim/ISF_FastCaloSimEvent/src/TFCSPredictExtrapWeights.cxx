@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ISF_FastCaloSimEvent/TFCSPredictExtrapWeights.h"
@@ -7,6 +7,7 @@
 #include "ISF_FastCaloSimEvent/TFCSTruthState.h"
 #include "ISF_FastCaloSimEvent/TFCSExtrapolationState.h"
 #include "ISF_FastCaloSimEvent/TFCSCenterPositionCalculation.h"
+#include "CxxUtils/as_const_ptr.h"
 
 #include "TFile.h"
 #include "TClass.h"
@@ -121,7 +122,7 @@ bool TFCSPredictExtrapWeights::getNormInputs(const std::string& etaBin, const st
         getline(ss, substr, ' ');
 	if(counter == 0){ // Get index (#layer or -1 if var == etrue)
           if(substr != "etrue"){
-            int index = std::stoi(substr.substr(substr.find("_")+1));
+            int index = std::stoi(substr.substr(substr.find('_')+1));
 	    m_normLayers->push_back(index);
 	  } else { // etrue
 	    m_normLayers->push_back(-1);
@@ -184,17 +185,21 @@ FCSReturnCode TFCSPredictExtrapWeights::simulate(TFCSSimulationState& simulstate
 
   // Get predicted extrapolation weights
   auto outputs            = m_nn->compute(inputVariables);
-  for (unsigned int i = 0; i < m_relevantLayers->size(); i++) {
-    const int ilayer = std::as_const(m_relevantLayers)->at(i);
-    ATH_MSG_DEBUG("TFCSPredictExtrapWeights::simulate: layer: " << ilayer << " weight: " << outputs["extrapWeight_"+std::to_string(ilayer)]);
-    float weight = outputs["extrapWeight_"+std::to_string(ilayer)];
-    // Protections
-    if(weight < 0){
-      weight = 0;
-    } else if(weight > 1){
-      weight = 1;
+  for(int ilayer=0; ilayer < CaloCell_ID_FCS::MaxSample; ++ilayer) {
+    if(std::find(m_relevantLayers->cbegin(), m_relevantLayers->cend(), ilayer) != m_relevantLayers->cend()){
+      ATH_MSG_DEBUG("TFCSPredictExtrapWeights::simulate: layer: " << ilayer << " weight: " << outputs["extrapWeight_"+std::to_string(ilayer)]);
+      float weight = outputs["extrapWeight_"+std::to_string(ilayer)];
+      // Protections
+      if(weight < 0){
+        weight = 0;
+      } else if(weight > 1){
+        weight = 1;
+      }
+      simulstate.setAuxInfo<float>(ilayer, weight);
+    } else { // use weight=0.5 for non-relevant layers
+      ATH_MSG_DEBUG("Setting weight=0.5 for layer = " << std::to_string(ilayer));
+      simulstate.setAuxInfo<float>(ilayer, float(0.5));
     }
-    simulstate.setAuxInfo<float>(ilayer, weight);
   }
   return FCSSuccess;
 }
@@ -210,7 +215,7 @@ FCSReturnCode TFCSPredictExtrapWeights::simulate_hit(Hit& hit, TFCSSimulationSta
    if(simulstate.hasAuxInfo(cs)){
      extrapWeight = simulstate.getAuxInfo<float>(cs);
    } else{ // missing AuxInfo
-     ATH_MSG_FATAL("Simulstate is not decorated with extrapolation weights");
+     ATH_MSG_FATAL("Simulstate is not decorated with extrapolation weights for cs = " << std::to_string(cs));
      return FCSFatal;
    }
 
@@ -434,6 +439,6 @@ void TFCSPredictExtrapWeights::Print(Option_t* option) const
    TString optprint=opt;optprint.ReplaceAll("short","");
    TFCSLateralShapeParametrizationHitBase::Print(option);
 
-   if(longprint) ATH_MSG_INFO(optprint << "  m_input (TFCSPredictExtrapWeights): " << m_input);
+   if(longprint) ATH_MSG_INFO(optprint << "  m_input (TFCSPredictExtrapWeights): " << CxxUtils::as_const_ptr(m_input));
    if(longprint) ATH_MSG_INFO(optprint << "  Address of m_nn: " << (void *)m_nn);
 }

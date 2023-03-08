@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from sys import exit
 
@@ -27,7 +27,7 @@ def main():
     elif options.simulation:
         if not options.workflow or options.workflow is WorkflowType.FullSim:
             ami_tag = "s4006" if not options.ami_tag else options.ami_tag
-            tests_to_run.append(SimulationTest(ami_tag, run, WorkflowType.FullSim, ["EVNTtoHITS"], setup, options.extra_args))
+            tests_to_run.append(SimulationTest(ami_tag, run, WorkflowType.FullSim, ["EVNTtoHITS"], setup, options.extra_args + " --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' --geometryVersion 'default:ATLAS-R3S-2021-03-02-00'"))
         if options.workflow is WorkflowType.AF3:
             log.error("AF3 not supported yet")
         if options.workflow is WorkflowType.HitsMerge:
@@ -49,17 +49,18 @@ def main():
         if not options.workflow or options.workflow is WorkflowType.MCPileUpReco:
             tests_to_run.append(QTest("q446", run, WorkflowType.MCPileUpReco, ["Overlay", "RAWtoALL"], setup, options.extra_args))
     elif options.derivation:
-        tests_to_run.append(DerivationTest("p5205", run, WorkflowType.Derivation, ["Derivation"], setup, options.extra_args))
+        test_id = "MC_PHYS" if not options.ami_tag else options.ami_tag
+        tests_to_run.append(DerivationTest(test_id, run, WorkflowType.Derivation, ["Derivation"], setup, options.extra_args))
     else:
         if not options.workflow or options.workflow is WorkflowType.MCReco:
             ami_tag = "q445" if not options.ami_tag else options.ami_tag
             if "--CA" in options.extra_args:
-                tests_to_run.append(QTest(ami_tag, run, WorkflowType.MCReco, ["HITtoRDO", "RAWtoALL"], setup, options.extra_args + " --steering doRAWtoALL"))
+                tests_to_run.append(QTest(ami_tag, run, WorkflowType.MCReco, ["HITtoRDO", "RAWtoALL"], setup, options.extra_args + " --steering no"))
             else:
                 tests_to_run.append(QTest(ami_tag, run, WorkflowType.MCReco, ["HITtoRDO", "RDOtoRDOTrigger", "RAWtoALL"], setup, options.extra_args))
         if not options.workflow or options.workflow is WorkflowType.DataReco:
             ami_tag = "q449" if not options.ami_tag else options.ami_tag
-            tests_to_run.append(QTest(ami_tag, run, WorkflowType.DataReco, ["RAWtoALL"], setup, options.extra_args))
+            tests_to_run.append(QTest(ami_tag, run, WorkflowType.DataReco, ["RAWtoALL", "DQHistogramMerge"], setup, options.extra_args))
 
     # Define which perfomance checks to run
     performance_checks = get_standard_performance_checks(setup)

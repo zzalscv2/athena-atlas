@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetPseudojetRetriever.cxx
@@ -13,7 +13,7 @@ using jet::PseudoJetMap;
 
 //**********************************************************************
 
-JetPseudojetRetriever::JetPseudojetRetriever(std::string name)
+JetPseudojetRetriever::JetPseudojetRetriever(const std::string& name)
 : AsgTool(name) {
   //declareProperty("Attributes", m_atts);
 }

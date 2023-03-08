@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ers/ers.h"
@@ -16,8 +16,7 @@ Muon::nsw::NSWPadTriggerL1a::NSWPadTriggerL1a(const uint32_t* bs, const uint32_t
   const std::vector<uint32_t> words(bs, bs + remaining);
 
   if (checkSize(words)) {
-    const auto nbytes = std::to_string(words.size());
-    throw std::runtime_error("Packet too small. N(bytes) = " + nbytes);
+    return;
   }
 
   // NSW header
@@ -34,7 +33,7 @@ Muon::nsw::NSWPadTriggerL1a::NSWPadTriggerL1a(const uint32_t* bs, const uint32_t
   m_decoded.orbitid = getOrbitid(words);
   m_decoded.orbit1  = getOrbit1(words);
   if (m_decoded.orbit1 != 1) {
-    throw std::runtime_error("Orbit1 check failed");
+    return;
   }
 
   // debug
@@ -61,9 +60,15 @@ Muon::nsw::NSWPadTriggerL1a::NSWPadTriggerL1a(const uint32_t* bs, const uint32_t
   const auto& numberOfChannels   = (isLarge(m_decoded.secid)) ? m_numberOfChannelsL   : m_numberOfChannelsS;
   m_decoded.data.clear();
   while (true) {
-    m_decoded.data.push_back(
-      getOneBcOfCompressedData(words, bitIndex, relbcid, mapPadTriggerToTds, numberOfChannels)
-    );
+    try {
+      m_decoded.data.push_back(
+        getOneBcOfCompressedData(words, bitIndex, relbcid, mapPadTriggerToTds, numberOfChannels)
+      );
+    } catch (const std::exception& ex) {
+      ERS_INFO(ex.what());
+      m_decoded.data.clear();
+      break;
+    }
     if (m_decoded.data.back().last) {
       m_decoded.status = m_decoded.data.back().status;
       break;
@@ -78,6 +83,7 @@ Muon::nsw::NSWPadTriggerL1a::NSWPadTriggerL1a(const uint32_t* bs, const uint32_t
     m_bcid_rel.push_back(databc.relbcid);
     m_bcid_status.push_back(databc.status);
     m_bcid_multzero.push_back(databc.mult0);
+    m_bcid_multiplicity.push_back(databc.multiplicity);
     m_bcid_n++;
 
     for (size_t trig = 0; trig < databc.bandids.size(); trig++) {
@@ -142,12 +148,6 @@ uint32_t Muon::nsw::NSWPadTriggerL1a::roundUpIfOdd(const uint32_t nbytes) const
     return nbytes;
   }
   return nbytes + 1;
-}
-
-bool Muon::nsw::NSWPadTriggerL1a::isLarge(const uint32_t secid) const
-{
-  // NB: secid=0 = A01 = Large
-  return secid % 2 == 0;
 }
 
 Muon::nsw::NSWPadTriggerL1a::OneBCOfData

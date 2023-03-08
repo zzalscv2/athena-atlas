@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -75,6 +75,7 @@ StatusCode TileMuonReceiverDecision::initialize() {
   bool doTileMuonReceiverCnt = (m_runPeriod > 1);
   ATH_CHECK( m_rawChannelContainerKey.initialize(doTileMuonReceiverCnt) );
   ATH_CHECK( m_muonReceiverContainerKey.initialize(doTileMuonReceiverCnt) );
+  ATH_CHECK( m_emScaleKey.initialize(m_runPeriod != 0) );
 
   if (m_runPeriod == 0) {
      ATH_MSG_INFO("Stopping ... TileMuonReceiverDecision should not be used for RUN1 simulations");
@@ -84,11 +85,9 @@ StatusCode TileMuonReceiverDecision::initialize() {
   }
 
   //=== retrieve TileID helper from det store
-  CHECK( detStore()->retrieve(m_tileID) );
-  CHECK( detStore()->retrieve(m_tileHWID) );
-  CHECK(detStore()->retrieve(m_tileInfo, m_infoName));
-
-  CHECK(m_tileToolEmscale.retrieve());
+  ATH_CHECK( detStore()->retrieve(m_tileID) );
+  ATH_CHECK( detStore()->retrieve(m_tileHWID) );
+  ATH_CHECK(detStore()->retrieve(m_tileInfo, m_infoName));
 
   ATH_MSG_INFO("TileMuonReceiverDecision initialization completed" );
   return StatusCode::SUCCESS;
@@ -119,6 +118,9 @@ StatusCode TileMuonReceiverDecision::execute(const EventContext &ctx) const {
      thresholds.push_back(m_threshold_d6);
      thresholds.push_back(m_threshold_d5d6);
   }
+
+  SG::ReadCondHandle<TileEMScale> emScale(m_emScaleKey, ctx);
+  ATH_CHECK( emScale.isValid() );
 
   // Get the container with the matched filter reconstructed raw channels in MeV
   //
@@ -211,9 +213,9 @@ StatusCode TileMuonReceiverDecision::execute(const EventContext &ctx) const {
       // TILE channel is the Tile HW channel
       int TILEchan = (eb_ros) ? EBchan[TMDBchan] : LBchan[TMDBchan];
       
-      float ADC2MeV_factor = m_tileToolEmscale->channelCalib(drawerIdx, TILEchan, TileID::LOWGAIN, 1.
-                                                                      , TileRawChannelUnit::PicoCoulombs
-                                                                      , TileRawChannelUnit::MegaElectronVolts) 
+      float ADC2MeV_factor = emScale->calibrateChannel(drawerIdx, TILEchan, TileID::LOWGAIN, 1.
+                                                       , TileRawChannelUnit::PicoCoulombs
+                                                       , TileRawChannelUnit::MegaElectronVolts)
                            / m_tileInfo->MuRcvCalib(adc_id);
 
       float energy = rawChannel->amplitude()*ADC2MeV_factor;

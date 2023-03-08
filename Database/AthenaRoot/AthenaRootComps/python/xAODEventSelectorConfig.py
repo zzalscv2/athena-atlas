@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # @file xAODHybridSelectorConfig
 # @purpose make the Athena framework read a set of xAOD files to emulate the
@@ -32,7 +32,7 @@ class xAODAccessMode(IntEnum):
     ATHENA_ACCESS = 2
 
 # Default to the most efficient access method
-def xAODReadCfg(configFlags,AccessMode=xAODAccessMode.CLASS_ACCESS):
+def xAODReadCfg(flags, AccessMode=xAODAccessMode.CLASS_ACCESS):
     """
     Creates a ComponentAccumulator instance containing the 
     athena services required for xAOD file reading
@@ -45,7 +45,7 @@ def xAODReadCfg(configFlags,AccessMode=xAODAccessMode.CLASS_ACCESS):
     result=ComponentAccumulator()
     
     result.addService(CompFactory.EvtPersistencySvc("EventPersistencySvc",)) #No service handle yet???
-    result.merge(MetaDataSvcCfg(configFlags))
+    result.merge(MetaDataSvcCfg(flags))
 
     result.addService(CompFactory.StoreGateSvc("MetaDataStore"))
     # Suppress some uninformative messages
@@ -57,8 +57,8 @@ def xAODReadCfg(configFlags,AccessMode=xAODAccessMode.CLASS_ACCESS):
     result.addService(CompFactory.ProxyProviderSvc("ProxyProviderSvc",ProviderNames=[ "MetaDataSvc"]))
     result.addService(
         CompFactory.Athena.xAODEventSelector('EventSelector',
-            InputCollections = configFlags.Input.Files,
-            SkipEvents=configFlags.Exec.SkipEvents,
+            InputCollections=flags.Input.Files,
+            SkipEvents=flags.Exec.SkipEvents,
             AccessMode=AccessMode,
             ReadMetaDataWithPool=True
             ))
@@ -73,22 +73,23 @@ def xAODReadCfg(configFlags,AccessMode=xAODAccessMode.CLASS_ACCESS):
 
 
 if __name__=="__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     import os
     asg_test_file_mc = os.environ['ASG_TEST_FILE_MC']
-    ConfigFlags.Input.Files=[asg_test_file_mc]
+    flags = initConfigFlags()
+    flags.Input.Files=[asg_test_file_mc]
 
     import sys
     if len(sys.argv)>1:
-        ConfigFlags.Input.Files=[sys.argv[1]]
-    ConfigFlags.lock()
+        flags.Input.Files=[sys.argv[1]]
+    flags.lock()
 
     AccessMode = xAODAccessMode.CLASS_ACCESS
     if len(sys.argv)>2:
         AccessMode = xAODAccessMode(int(sys.argv[2]))
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(xAODReadCfg(ConfigFlags,AccessMode))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(xAODReadCfg(flags,AccessMode))
 
     cfg.run(10)

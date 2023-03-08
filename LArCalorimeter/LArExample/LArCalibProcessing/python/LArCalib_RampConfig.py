@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory 
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -37,27 +37,47 @@ def LArRampCfg(flags):
     result.merge(addFolders(flags,flags.LArCalib.OFCCali.Folder,detDb=flags.LArCalib.Input.Database2, tag=caliOFCTag, modifiers=chanSelStr(flags)))
     
 
-    result.addEventAlgo(CompFactory.LArRawCalibDataReadingAlg(LArAccCalibDigitKey=digKey,
+    if not flags.LArCalib.isSC:
+       result.addEventAlgo(CompFactory.LArRawCalibDataReadingAlg(LArAccCalibDigitKey=digKey,
                                                               LArFebHeaderKey="LArFebHeader",
                                                               SubCaloPreselection=flags.LArCalib.Input.SubDet,
                                                               PosNegPreselection=flags.LArCalib.Preselection.Side,
                                                               BEPreselection=flags.LArCalib.Preselection.BEC,
                                                               FTNumPreselection=flags.LArCalib.Preselection.FT))
     
-    from LArROD.LArFebErrorSummaryMakerConfig import LArFebErrorSummaryMakerCfg
-    result.merge(LArFebErrorSummaryMakerCfg(flags))
-    result.getEventAlgo("LArFebErrorSummaryMaker").CheckAllFEB=False
+       from LArROD.LArFebErrorSummaryMakerConfig import LArFebErrorSummaryMakerCfg
+       result.merge(LArFebErrorSummaryMakerCfg(flags))
+       result.getEventAlgo("LArFebErrorSummaryMaker").CheckAllFEB=False
+
+       if flags.LArCalib.Input.SubDet == "EM":
+          from LArCalibProcessing.LArStripsXtalkCorrConfig import LArStripsXtalkCorrCfg
+          result.merge(LArStripsXtalkCorrCfg(flags,[digKey,]))
+
+          theLArCalibShortCorrector = CompFactory.LArCalibShortCorrector(KeyList = [digKey,])
+          result.addEventAlgo(theLArCalibShortCorrector)
+    else:   
+       digKey="SC"
+       theLArLATOMEDecoder = CompFactory.LArLATOMEDecoder("LArLATOMEDecoder")
+       if flags.LArCalib.Input.isRawData:
+          result.addEventAlgo(CompFactory.LArRawSCDataReadingAlg(adcCollKey = digKey, adcBasCollKey = "", etCollKey = "",
+                                                               etIdCollKey = "", LATOMEDecoder = theLArLATOMEDecoder))
+          result.addEventAlgo(CompFactory.LArDigitsAccumulator("LArDigitsAccumulator", KeyList = [digKey], 
+                                                             LArAccuDigitContainerName = "", NTriggersPerStep = 100,
+                                                             isSC = flags.LArCalib.isSC, DropPercentTrig = 20))
 
 
-    if flags.LArCalib.Input.SubDet == "EM":
-        from LArCalibProcessing.LArStripsXtalkCorrConfig import LArStripsXtalkCorrCfg
-        result.merge(LArStripsXtalkCorrCfg(flags,[digKey,]))
+       else:   
+          # this needs also legacy  maps
+          from LArCabling.LArCablingConfig import LArCalibIdMappingCfg,LArOnOffIdMappingCfg
+          result.merge(LArOnOffIdMappingCfg(flags))
+          result.merge(LArCalibIdMappingCfg(flags))
 
-        theLArCalibShortCorrector = CompFactory.LArCalibShortCorrector(KeyList = [digKey,])
-        result.addEventAlgo(theLArCalibShortCorrector)
+          result.addEventAlgo(CompFactory.LArRawSCCalibDataReadingAlg(LArSCAccCalibDigitKey = digKey, LATOMEDecoder = theLArLATOMEDecoder))
+
     pass
 
 
+    bcKey = "LArBadChannelSC" if flags.LArCalib.isSC else "LArBadChannel"     
 
 
     theLArRampBuilder = CompFactory.LArRampBuilder()
@@ -82,6 +102,7 @@ def LArRampCfg(flags):
     #theLArRampBuilder.LongNtuple = False
 
     theLArRampBuilder.isSC = flags.LArCalib.isSC
+    theLArRampBuilder.BadChanKey = bcKey
 
     if flags.LArCalib.Input.SubDet == "HEC":
         theLArRampBuilder.isHEC = True
@@ -96,6 +117,7 @@ def LArRampCfg(flags):
         LArRampPatcher=CompFactory.getComp("LArCalibPatchingAlg<LArRampComplete>")
         theLArRampPatcher=LArRampPatcher("LArRampPatcher")
         theLArRampPatcher.ContainerKey="LArRamp"
+        theLArRampPatcher.BadChanKey=bcKey
         theLArRampPatcher.PatchMethod="PhiAverage"
    
         theLArRampPatcher.ProblemsToPatch=["deadCalib","deadReadout","deadPhys","almostDead","short"]
@@ -108,7 +130,9 @@ def LArRampCfg(flags):
     result.merge(OutputConditionsAlgCfg(flags,
                                         outputFile=flags.LArCalib.Output.POOLFile,
                                         ObjectList=["LArRampComplete#LArRamp#"+flags.LArCalib.Ramp.Folder,],
-                                        IOVTagList=[rampTag,]
+                                        IOVTagList=[rampTag,],
+                                        Run1=flags.LArCalib.IOVStart,
+                                        Run2=flags.LArCalib.IOVEnd
                                     ))
 
     #RegistrationSvc    
@@ -123,6 +147,7 @@ def LArRampCfg(flags):
                                                         AddFEBTempInfo = False,
                                                         RawRamp = True,
                                                         SaveAllSamples =  True,
+                                                        BadChanKey = bcKey,
                                                         ApplyCorr=True,
                                                     ))
 
@@ -141,23 +166,18 @@ def LArRampCfg(flags):
 
 
 if __name__ == "__main__":
-
-
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from LArCalibProcessing.LArCalibConfigFlags import addLArCalibFlags
+    ConfigFlags=initConfigFlags()
     addLArCalibFlags(ConfigFlags)
 
-
-    ConfigFlags.LArCalib.Input.Dir = "/scratch/wlampl/calib21/Sept10"
+    ConfigFlags.LArCalib.Input.Dir = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/LArCalibProcessing"
     ConfigFlags.LArCalib.Input.Type="calibration_LArElec-Ramp"
-    ConfigFlags.LArCalib.Input.RunNumbers=[401351,]
-    ConfigFlags.LArCalib.Input.Database="db.sqlite"
+    ConfigFlags.LArCalib.Input.RunNumbers=[441252,]
     ConfigFlags.LArCalib.Input.SubDet="EM"
     ConfigFlags.Input.Files=ConfigFlags.LArCalib.Input.Files
-    ConfigFlags.LArCalib.Preselection.BEC=[1]
-    ConfigFlags.LArCalib.Preselection.Side=[0]
-    ConfigFlags.LArCalib.BadChannelDB="/afs/cern.ch/user/l/larcalib/w0/data/WorkingDirectory/00401338_00401349_00401351_EndCap-EMB-EMEC_HIGH_40_21.0.20_1/poolFiles/SnapshotBadChannel_00401338_00401349_00401351_EB-EMECA.db"
-    ConfigFlags.LArCalib.BadChannelTag="-RUN2-UPD3-00"
+    ConfigFlags.LArCalib.Input.Database="output.sqlite"
+    ConfigFlags.LArCalib.Output.POOLFile="larramp.pool.root"
     ConfigFlags.LArCalib.Output.ROOTFile="larramp.root"
 
     ConfigFlags.IOVDb.DBConnection="sqlite://;schema=output.sqlite;dbname=CONDBR2"

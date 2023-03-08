@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration  
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration  
 */
 //***************************************************************************  
 //		jFEXtauAlgo - Algorithm for Tau Algorithm in jFEX
@@ -16,12 +16,12 @@
 #include "L1CaloFEXToolInterfaces/IjFEXtauAlgo.h"
 #include "AthenaKernel/CLASS_DEF.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
-
 #include "CaloEvent/CaloCellContainer.h"
 #include "CaloIdentifier/CaloIdManager.h" 
 #include "CaloIdentifier/CaloCell_SuperCell_ID.h"
 #include "AthenaBaseComps/AthAlgorithm.h" 
 #include "StoreGate/StoreGateSvc.h" 
+#include "PathResolver/PathResolver.h"
 
 
 namespace LVL1 {
@@ -39,16 +39,13 @@ namespace LVL1 {
     virtual ~jFEXtauAlgo();
 
     virtual StatusCode safetyTest() override;
-    virtual void setup(int TTwindow[5][5], int seed[3][3]) override;
-    virtual int getTTowerET(unsigned int TTID ) override; 
-    virtual int getRealPhi(unsigned int TTID  ) override; 
-    virtual int getRealEta(unsigned int TTID  ) override;  
+    virtual void setup(int seed[3][3]) override;
+    
 
-    virtual void buildSeeds() override; 
     virtual bool isSeedLocalMaxima() override;
+    virtual bool isSeedLocalMaxima_fwd(unsigned int TTID) override;
     virtual void setFirstEtRing(int First_ETring[36])  override;
     virtual int getClusterEt() override;
-    virtual int getIsLocalMaxima() override;
     virtual int getFirstEtRing()  override;
     virtual void setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map)  override;
     
@@ -58,15 +55,20 @@ protected:
         SG::ReadHandleKey<LVL1::jTowerContainer> m_jTowerContainerKey {this, "MyjTowers", "jTowerContainer", "Input container for jTowers"};
         SG::ReadHandle<jTowerContainer> m_jTowerContainer;
         
-        int realValue(int ID, int eta);
-        int m_SeedIDs[3][3]={{0}};
-        int m_SeedConditions_ET[3][3]={{0}};
-        int m_SeedCluster_ET[3][3]={{0}};
-        int m_TTwindow[5][5]={{0}};
+        Gaudi::Property<std::string> m_IsoRingStr  {this, "IsolationRingMap" , "Run3L1CaloSimulation/JetMaps/2023_02_10/jFEX_FWD_1stRing.dat" , "Contains Trigger tower for the isolation"};
+        Gaudi::Property<std::string> m_SearchGStr  {this, "SearchGTauMap"    , "Run3L1CaloSimulation/JetMaps/2023_02_10/jFEX_FWD_searchGTau.dat" , "Contains Trigger tower to find local max (greater than)"};
+        Gaudi::Property<std::string> m_SearchGeStr {this, "SearchGeTauMap"   , "Run3L1CaloSimulation/JetMaps/2023_02_10/jFEX_FWD_searchGeTau.dat", "Contains Trigger tower to find local max (greater or equal than)"};
+
+        std::unordered_map<unsigned int, std::vector<unsigned int> > m_IsoRingMap;
+        std::unordered_map<unsigned int, std::vector<unsigned int> > m_SearchGMap;
+        std::unordered_map<unsigned int, std::vector<unsigned int> > m_SearchGeMap;     
+        
+        StatusCode ReadfromFile(const std::string& , std::unordered_map<unsigned int, std::vector<unsigned int> >&);  
+        int getTTowerET(unsigned int TTID );  
+        
+        int m_TTwindow[3][3]={{0}};
         int m_ClusterEt = 0;
         int m_TauIsolation = 0;
-	    bool m_seedSet=false;
-	    bool m_isLocalMaxima=false;
           
         std::unordered_map<int,std::vector<int> > m_map_Etvalues;
 

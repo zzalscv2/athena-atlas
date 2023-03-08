@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 // FrontPanelCTP.h 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 // Header file for class FrontPanelCTP
 // Author: S.Binet<binet@cern.ch>
@@ -74,7 +74,7 @@ public:
    uint32_t cableWord2(unsigned int clock) const;
 
    /** @brief return the data that is sent on the optical cables by index */
-   std::bitset<128> optcableWord(std::string conn) const { return m_optcableWord.find(conn)->second; }
+   std::bitset<128> optcableWord(const std::string& conn) const { return m_optcableWord.find(conn)->second; }
   
    /////////////////////////////////////////////////////////////////// 
    // Private data: 

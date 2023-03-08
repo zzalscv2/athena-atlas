@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -166,7 +166,7 @@ void CaloTowerVecMon::initHists() {
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
-CaloTowerVecMon::~CaloTowerVecMon() {}
+CaloTowerVecMon::~CaloTowerVecMon() = default;
 
 ////////////////////////////////////////////////////////////////////////////////////
 StatusCode CaloTowerVecMon::initialize() {
@@ -321,7 +321,7 @@ StatusCode CaloTowerVecMon::checkTimeGran(bool isNewEventsBlock, bool isNewLumiB
 
 void CaloTowerVecMon::bookTwrPreHists(const Interval_t theinterval){
   std::string TheTrigger;
-  if (m_triggerChainProp == "")  TheTrigger="";
+  if (m_triggerChainProp.empty())  TheTrigger="";
   else TheTrigger = m_triggerChainProp;
 
   std::string TheTowerDir("/CaloMonitoring/");
@@ -338,7 +338,7 @@ void CaloTowerVecMon::bookTwrPreHists(const Interval_t theinterval){
 
 void CaloTowerVecMon::bookCellHists(const Interval_t theinterval){
   std::string TheTrigger;
-  if (m_triggerChainProp == "")  TheTrigger="";
+  if (m_triggerChainProp.empty())  TheTrigger="";
   else TheTrigger = m_triggerChainProp;
 
   std::string TheTowerDir("/CaloMonitoring/");
@@ -363,7 +363,7 @@ void CaloTowerVecMon::bookCellHists(const Interval_t theinterval){
 
 void CaloTowerVecMon::bookNothrEnHists(const Interval_t theinterval){
   std::string TheTrigger;
-  if (m_triggerChainProp == "")  TheTrigger="";
+  if (m_triggerChainProp.empty())  TheTrigger="";
   else TheTrigger = m_triggerChainProp;
 
   std::string TheTowerDir("/CaloMonitoring/");
@@ -426,7 +426,7 @@ void CaloTowerVecMon::bookNothrEnHists(const Interval_t theinterval){
 
 void CaloTowerVecMon::bookMuthrHists(const Interval_t theinterval){
   std::string TheTrigger;
-  if (m_triggerChainProp == "")  TheTrigger="";
+  if (m_triggerChainProp.empty())  TheTrigger="";
   else TheTrigger = m_triggerChainProp;
 
   std::string TheTowerDir("/CaloMonitoring/");
@@ -638,7 +638,7 @@ void CaloTowerVecMon::bookMuthrHists(const Interval_t theinterval){
 
 void CaloTowerVecMon::bookTwrStatHists(const Interval_t theinterval){
   std::string TheTrigger;
-  if (m_triggerChainProp == "")  TheTrigger="";
+  if (m_triggerChainProp.empty())  TheTrigger="";
   else TheTrigger = m_triggerChainProp;
 
   std::string TheTowerDir("/CaloMonitoring/");

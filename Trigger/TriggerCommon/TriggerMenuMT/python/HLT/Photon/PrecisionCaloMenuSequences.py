@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 # menu components   
@@ -7,8 +7,7 @@ from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsP
 from AthenaCommon.CFElements import seqAND
 from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
 from DecisionHandling.DecisionHandlingConf import ViewCreatorPreviousROITool
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
-   
+
 
 def tag(ion):
     return 'precision' + ('HI' if ion is True else '') + 'CaloPhoton'
@@ -46,7 +45,7 @@ def precisionCaloSequence(flags, ion=False):
         # event views in this sequence. the egammaFSRecoSequence is thus placed
         # before the precisionCaloInViewSequence.
         from TriggerMenuMT.HLT.Egamma.TrigEgammaFactories import egammaFSCaloRecoSequence
-        egammaFSRecoSequence = egammaFSCaloRecoSequence()
+        egammaFSRecoSequence = egammaFSCaloRecoSequence(flags)
         theSequence += egammaFSRecoSequence
 
     # connect EVC and reco
@@ -58,7 +57,7 @@ def precisionCaloSequence(flags, ion=False):
 def precisionCaloMenuSequence(flags, name, is_probe_leg=False, ion=False):
     """ Creates precisionCalo MENU sequence """
 
-    (sequence, precisionCaloViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(precisionCaloSequence, ConfigFlags, ion=ion)
+    (sequence, precisionCaloViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(precisionCaloSequence, flags, ion=ion)
 
     #Hypo
     from TrigEgammaHypo.TrigEgammaHypoConf import TrigEgammaPrecisionCaloHypoAlg
@@ -67,7 +66,8 @@ def precisionCaloMenuSequence(flags, name, is_probe_leg=False, ion=False):
     thePrecisionCaloHypo = TrigEgammaPrecisionCaloHypoAlg(name + tag(ion) + 'Hypo')
     thePrecisionCaloHypo.CaloClusters = sequenceOut
 
-    return MenuSequence( Sequence    = sequence,
+    return MenuSequence( flags,
+                         Sequence    = sequence,
                          Maker       = precisionCaloViewsMaker, 
                          Hypo        = thePrecisionCaloHypo,
                          HypoToolGen = TrigEgammaPrecisionCaloHypoToolFromDict,

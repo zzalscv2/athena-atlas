@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TriggerMenuMT )
@@ -19,6 +19,7 @@ atlas_install_scripts( scripts/generateL1MenuRun3.py
                        scripts/runTriggerAPIExample.py
                        scripts/generateUnprescaledLists.py
                        scripts/test_menu_dump.py
+		       scripts/test_menu_CA.py
                        POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 # Shell scripts without flake8 checking:
@@ -42,11 +43,6 @@ atlas_add_test( manual_menu_cf
                 SCRIPT test_manual_menu_cf.sh
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT noerror.sh )
-
-atlas_add_test( emu_step_processing_cf_newJO
-                SCRIPT python -m TriggerMenuMT.CFtest.test_menu_cf_newJO
-                LOG_SELECT_PATTERN "TrigSignatureMoni.*INFO HLT_.*|TrigSignatureMoni.*-- #[0-9]+ (Events|Features).*|TriggerSummaryStep.* chains passed:|TriggerSummaryStep.*+++ HLT_.*|TriggerSummaryStep.*+++ leg.*"
-                PRIVATE_WORKING_DIRECTORY  )
 
 # Unit tests:
 atlas_add_test( ViewCFTest
@@ -107,12 +103,18 @@ atlas_test_hlt_trigger_menu( Dev_pp_run4_v1_HLTReprocessing_prescale )
 atlas_test_l1defined_menu( PhysicsP1_pp_run3_v1 )
 atlas_test_l1defined_menu( PhysicsP1_pp_lowMu_run3_v1 )
 
-# New job options test:
-atlas_add_test(generateMenuMT_newJO
-   SCRIPT python -m TriggerMenuMT.HLT.Menu.Dev_pp_run3_v1_newJO 
+function( atlas_test_ca_trigger_menu menu )
+   atlas_add_test( "menu_CA_${menu}"
+   SCRIPT test_menu_CA.py Trigger.triggerMenuSetup=${menu}
    PRIVATE_WORKING_DIRECTORY
    PROPERTIES TIMEOUT 500
-   POST_EXEC_SCRIPT noerror.sh )
+   POST_EXEC_SCRIPT "check_log.py --errors --config checklogTriggerTest.conf ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/unitTestRun_menu_CA_${menu}/menu_CA_${menu}.log" )
+endfunction()
+
+# test for CA menu
+atlas_test_ca_trigger_menu( Dev_pp_run3_v1 )
+atlas_test_ca_trigger_menu( PhysicsP1_pp_lowMu_run3_v1 )
+atlas_test_ca_trigger_menu( Dev_HI_run3_v1 )
 
 # test for menu name consistency
 atlas_add_test( test_menu_dump

@@ -1,20 +1,22 @@
 #!/bin/sh
 #
-# art-description: MC21-style simulation using FullG4_QS (13 TeV Zprime input - needs updating)
+# art-description: MC23-style simulation using FullG4_QS (13 TeV Zprime input - needs updating)
 # art-type: build
 # art-include: 22.0/Athena
 # art-include: 22.0/AthSimulation
+# art-include: 23.0/Athena
+# art-include: 23.0/AthSimulation
 # art-include: master/Athena
 # art-include: master/AthSimulation
 
 # RUN3 setup - Frozen Showers currently off by default
-# ATLAS-R3S-2021-02-00-00 and OFLCOND-MC21-SDR-RUN3-03
+# ATLAS-R3S-2021-03-02-00 and OFLCOND-MC21-SDR-RUN3-07
 Sim_tf.py \
---conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-03' \
---simulator 'FullG4_QS' \
+--conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
+--simulator 'FullG4MT_QS' \
 --postInclude 'default:PyJobTransforms/UseFrontier.py' \
---preInclude 'EVNTtoHITS:Campaigns/MC21Simulation.py,SimulationJobOptions/preInclude.FrozenShowersFCalOnly.py' \
---geometryVersion 'default:ATLAS-R3S-2021-02-00-00_VALIDATION' \
+--preInclude 'EVNTtoHITS:Campaigns/MC23SimulationSingleIoV.py' \
+--geometryVersion 'default:ATLAS-R3S-2021-03-02-00_VALIDATION' \
 --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ISF_Validation/EVNT.04607198._000001.pool.root.1" \
 --outputHITSFile "test.HITS.pool.root" \
 --maxEvents 2

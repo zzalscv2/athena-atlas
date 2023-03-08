@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILERECUTILS_TILERAWCHANNELBUILDERQIEFILTER_H
@@ -50,7 +50,7 @@ class TileRawChannelBuilderQIEFilter: public TileRawChannelBuilder {
     virtual StatusCode finalize(); //!< Finalize method
 
     // Inherited from TileRawChannelBuilder
-    virtual TileRawChannel* rawChannel(const TileDigits* digits);
+    virtual TileRawChannel* rawChannel(const TileDigits* digits, const EventContext& ctx);
 
     /**
      * AlgTool InterfaceID

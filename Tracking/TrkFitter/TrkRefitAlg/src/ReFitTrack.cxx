@@ -218,10 +218,10 @@ StatusCode Trk::ReFitTrack::execute()
 
          ATH_MSG_VERBOSE ("Creating measurement for beamspot.");
          // extrapolate the track to the vertex -- for consistent Measurement frame
-         std::unique_ptr<const Trk::TrackParameters> tp( m_extrapolator->extrapolate(ctx,
-                                                                                     **itr,
-                                                                                     *constrainSf,
-                                                                                     Trk::anyDirection) );
+         std::unique_ptr<const Trk::TrackParameters> tp( m_extrapolator->extrapolateTrack(ctx,
+                                                                                          **itr,
+                                                                                          *constrainSf,
+                                                                                          Trk::anyDirection) );
          const Trk::Perigee* tpConstrainedSf = dynamic_cast<const Trk::Perigee*>(tp.get());
          // create the vertex/beamsptOnTrack
          std::unique_ptr<Trk::VertexOnTrack> bsvxOnTrack( tpConstrainedSf ? new Trk::VertexOnTrack(*constrainVx,*tpConstrainedSf) : nullptr );

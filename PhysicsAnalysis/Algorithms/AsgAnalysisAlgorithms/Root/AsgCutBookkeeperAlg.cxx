@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -236,11 +236,9 @@ namespace CP
 
       ANA_MSG_INFO ("CutBookkeeper information will be stored in " << name);
 
-      ANA_CHECK (m_truthWeightTool->applySystematicVariation (sys));
+      ANA_MSG_VERBOSE ("Running systematics " << sys.name() << " with index " << m_truthWeightTool->getSysWeightIndex(sys));
 
-      ANA_MSG_VERBOSE ("Running systematics " << sys.name() << " with index " << m_truthWeightTool->getSysWeightIndex());
-
-      const WeightsGroup &weights = m_weights.at (m_truthWeightTool->getSysWeightIndex());
+      const WeightsGroup &weights = m_weights.at (m_truthWeightTool->getSysWeightIndex(sys));
       h->SetBinContent (1, weights.nEventsProcessed);
       h->SetBinContent (2, weights.sumOfWeights);
       h->SetBinContent (3, weights.sumOfWeightsSquared);

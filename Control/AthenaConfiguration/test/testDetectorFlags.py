@@ -1,21 +1,21 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.DetectorConfigFlags import setupDetectorsFromList, enableDetectors, disableDetectors
-
-ConfigFlags.Input.isMC = True
-ConfigFlags._loadDynaFlags('GeoModel')
-ConfigFlags._loadDynaFlags('Detector')
+flags = initConfigFlags()
+flags.Input.isMC = True
+flags._loadDynaFlags('GeoModel')
+flags._loadDynaFlags('Detector')
 
 test_tags = [
-    'ATLAS-R1-2012-03-01-00',   # example Run 1
-    'ATLAS-R2-2016-01-00-01',   # example Run 2
-    'ATLAS-R3S-2021-01-00-01',  # example Run 3
+    'ATLAS-R1-2012-03-02-00',   # example Run 1
+    'ATLAS-R2-2016-01-02-01',   # example Run 2
+    'ATLAS-R3S-2021-03-01-00',  # example Run 3
     'ATLAS-P2-RUN4-01-00-00'     # example Run 4
 ]
 
-flags_runs = {t: ConfigFlags.clone() for t in test_tags}
+flags_runs = {t: flags.clone() for t in test_tags}
 
 for tag in test_tags:
     flags = flags_runs[tag]
@@ -33,13 +33,13 @@ for tag in test_tags:
     assert flags.Detector.EnableITkPixel == (tag == 'ATLAS-P2-RUN4-01-00-00')
     assert flags.Detector.EnableITkStrip == (tag == 'ATLAS-P2-RUN4-01-00-00')
     assert flags.Detector.EnableHGTD == (tag == 'ATLAS-P2-RUN4-01-00-00')
-    assert flags.Detector.EnableCSC == (tag in ['ATLAS-R1-2012-03-01-00', 'ATLAS-R2-2016-01-00-01'])
-    assert flags.Detector.EnablesTGC == (tag in ['ATLAS-R3S-2021-01-00-01', 'ATLAS-P2-RUN4-01-00-00'])
-    assert flags.Detector.EnableMM == (tag in ['ATLAS-R3S-2021-01-00-01', 'ATLAS-P2-RUN4-01-00-00'])
+    assert flags.Detector.EnableCSC == (tag in ['ATLAS-R1-2012-03-02-00', 'ATLAS-R2-2016-01-02-01'])
+    assert flags.Detector.EnablesTGC == (tag in ['ATLAS-R3S-2021-03-01-00', 'ATLAS-P2-RUN4-01-00-00'])
+    assert flags.Detector.EnableMM == (tag in ['ATLAS-R3S-2021-03-01-00', 'ATLAS-P2-RUN4-01-00-00'])
 
 
 # test setup for Run 2
-flags = flags_runs['ATLAS-R2-2016-01-00-01']
+flags = flags_runs['ATLAS-R2-2016-01-02-01']
 
 print("Test: validate ['ID', 'Calo', 'Muon']")
 assert not setupDetectorsFromList(flags, ['ID', 'Calo', 'Muon'], validate_only=True)

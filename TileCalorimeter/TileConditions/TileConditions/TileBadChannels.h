@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILECONDITIONS_TILEBADCHANNELS_H
@@ -76,6 +76,8 @@ class TileBadChannels {
     */
     const std::vector<int>& getMaskedDrawers(void) const {return m_maskedDrawers;};
 
+    static uint32_t encodeStatus(const TileBchStatus& status);
+    uint32_t encodeAdcStatus(const HWIdentifier adc_id) const;
 
   private:
 

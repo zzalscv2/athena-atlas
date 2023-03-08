@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ISF_FastCaloSimEvent/TFCSEnergyAndHitGAN.h"
@@ -8,6 +8,7 @@
 #include "ISF_FastCaloSimEvent/TFCSTruthState.h"
 #include "ISF_FastCaloSimEvent/TFCSExtrapolationState.h"
 #include "ISF_FastCaloSimEvent/TFCSCenterPositionCalculation.h"
+#include "CxxUtils/as_const_ptr.h"
 
 #include "TFile.h"
 
@@ -142,9 +143,9 @@ void TFCSEnergyAndHitGAN::GetBinning(int pid,int etaMid,const std::string& FastC
    std::vector<int> EtaMaxList;
    
    xmlDocPtr doc = xmlParseFile( xmlFullFileName.c_str() );
-   for( xmlNodePtr nodeRoot = doc->children; nodeRoot != NULL; nodeRoot = nodeRoot->next) {
+   for( xmlNodePtr nodeRoot = doc->children; nodeRoot != nullptr; nodeRoot = nodeRoot->next) {
       if (xmlStrEqual( nodeRoot->name, BAD_CAST "Bins" )) {
-         for( xmlNodePtr nodeBin = nodeRoot->children; nodeBin != NULL; nodeBin = nodeBin->next ) {
+         for( xmlNodePtr nodeBin = nodeRoot->children; nodeBin != nullptr; nodeBin = nodeBin->next ) {
             if (xmlStrEqual( nodeBin->name, BAD_CAST "Bin" )) {
                int nodePid = atof( (const char*) xmlGetProp( nodeBin, BAD_CAST "pid" ) );
                //int nodeEtaMin = atof( (const char*) xmlGetProp( nodeBin, BAD_CAST "etaMin" ) );
@@ -154,7 +155,7 @@ void TFCSEnergyAndHitGAN::GetBinning(int pid,int etaMid,const std::string& FastC
                bool correctentry=true;
 	             if(nodePid!=pid) correctentry=false;
                
-               for( xmlNodePtr nodeLayer = nodeBin->children; nodeLayer != NULL; nodeLayer = nodeLayer->next ) {
+               for( xmlNodePtr nodeLayer = nodeBin->children; nodeLayer != nullptr; nodeLayer = nodeLayer->next ) {
                   if( xmlStrEqual( nodeLayer->name, BAD_CAST "Layer" ) ) {
                      std::vector<double> edges; 
                      std::string s( (const char*)xmlGetProp( nodeLayer, BAD_CAST "r_edges" ) );
@@ -179,7 +180,7 @@ void TFCSEnergyAndHitGAN::GetBinning(int pid,int etaMid,const std::string& FastC
                        edges.push_back(1);
                      }  
                      binsInLayer[layer] = TH2D(name.c_str(), name.c_str(), xBins, &edges[0], binsInAlpha, -TMath::Pi(), TMath::Pi());
-                     binsInLayer[layer].SetDirectory(0);
+                     binsInLayer[layer].SetDirectory(nullptr);
                   }
                }
                
@@ -530,8 +531,8 @@ void TFCSEnergyAndHitGAN::Print(Option_t *option) const
   TString optprint=opt;optprint.ReplaceAll("short","");
 
   if(longprint) {
-    ATH_MSG_INFO(optprint<<"  "<<"Graph="<<m_graph<<"; json input="<<m_input<<"; free mem="<<GANfreemem()<<"; latent space="<<m_GANLatentSize<<"; Binning size="<<m_Binning.size());
-    for(auto& l : m_Binning) if(is_match_calosample(l.first)) {
+    ATH_MSG_INFO(optprint<<"  "<<"Graph="<<CxxUtils::as_const_ptr(m_graph)<<"; json input="<<CxxUtils::as_const_ptr(m_input)<<"; free mem="<<GANfreemem()<<"; latent space="<<m_GANLatentSize<<"; Binning size="<<m_Binning.size());
+    for(const auto& l : m_Binning) if(is_match_calosample(l.first)) {
       ATH_MSG_INFO(optprint<<"    "<<"layer="<<l.first<<" nR="<<l.second.GetNbinsX()<<" nalpha="<<l.second.GetNbinsY());
     }
   }  

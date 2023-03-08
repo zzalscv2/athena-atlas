@@ -28,8 +28,9 @@ TCS::cTauMultiplicity::~cTauMultiplicity() {}
 TCS::StatusCode
 TCS::cTauMultiplicity::initialize() {
 
-  m_threshold = getThreshold();
-  
+  m_threshold = getThreshold(); 
+  m_isoFW_CTAU = isolationFW_CTAU();
+ 
   // book histograms
   std::string hname_accept = "cTauMultiplicity_accept_EtaPt_"+m_threshold->name();
   bookHistMult(m_histAccept, hname_accept, "Mult_"+m_threshold->name(), "#eta#times40", "E_{t} [GeV]", 200, -200, 200, 100, 0, 100);
@@ -76,7 +77,7 @@ TCS::cTauMultiplicity::process( const TCS::InputTOBArray & input, Count & count 
     bool isMatched  = false; // Is the eTau matched to a jTau?
     bool isIsolated = false; // If matched: does the resulting cTau pass the isolation cut?
     float isolation = 0;              // cTau isolation (0 if no match is found)
-    unsigned int isolation_score = 0; // cTau isolation score (0 if no match is found)
+    unsigned int isoScore = 0; // cTau isolation score (0 if no match is found)
 
     // Loop over jTau candidates
     for(cTauTOBArray::const_iterator jtauCand = cTaus.begin(); jtauCand != cTaus.end(); ++jtauCand ) {
@@ -86,11 +87,10 @@ TCS::cTauMultiplicity::process( const TCS::InputTOBArray & input, Count & count 
       isMatched = cTauMatching( *etauCand, *jtauCand );
 
       if (isMatched) {
-        // Isolation condition coded as in firmware https://indico.cern.ch/event/1079697/contributions/4541419/attachments/2315137/3940824/cTAU_FirmwareAlgoProposal.pdf page 8. 
-        // Using physics values for the cut 
+        // Isolation condition coded as in firmware https://indico.cern.ch/event/1079697/contributions/4541419/attachments/2315137/3940824/cTAU_FirmwareAlgoProposal.pdf page 8
         isolation = static_cast<float>((*jtauCand)->EtIso()) / static_cast<float>((*etauCand)->Et()); // Internal variable for checks
-        isolation_score = convertIsoToBit( *etauCand, *jtauCand );
-        isIsolated = isocut( TrigConf::Selection::wpToString(cTauThr.isolation()), isolation_score );
+        isoScore = convertIsoToBit( *etauCand, *jtauCand );
+        isIsolated = isocut( TrigConf::Selection::wpToString(cTauThr.isolation()), isoScore );
         break; // Break loop when a match is found
       }
 
@@ -102,7 +102,7 @@ TCS::cTauMultiplicity::process( const TCS::InputTOBArray & input, Count & count 
       fillHist2D( m_histcTauPhiEta[0], (*etauCand)->eta(), (*etauCand)->phi() );
       fillHist2D( m_histcTauEtEta[0], (*etauCand)->eta(), (*etauCand)->EtDouble() );
       fillHist1D( m_histcTauIso[0], isolation );
-      fillHist1D( m_histcTauIsoScore[0], isolation_score );
+      fillHist1D( m_histcTauIsoScore[0], isoScore );
     }
 
     // This is a good cTau
@@ -140,9 +140,9 @@ TCS::cTauMultiplicity::convertIsoToBit(const TCS::cTauTOB * etauCand, const TCS:
   unsigned int bit = 0;
 
   // Assign the tightest accept WP as default bit
-  if( jtauCand->EtIso() < etauCand->Et() * 0.4 ) bit = 1; // Loose
-  if( jtauCand->EtIso() < etauCand->Et() * 0.35) bit = 2; // Medium
-  if( jtauCand->EtIso() < etauCand->Et() * 0.3 ) bit = 3; // Tight 
+  if( jtauCand->EtIso()*1024 < etauCand->Et()*m_isoFW_CTAU.at("Loose") ) bit = 1;
+  if( jtauCand->EtIso()*1024 < etauCand->Et()*m_isoFW_CTAU.at("Medium") ) bit = 2;
+  if( jtauCand->EtIso()*1024 < etauCand->Et()*m_isoFW_CTAU.at("Tight") ) bit = 3;
   
   return bit;
 }
@@ -209,12 +209,12 @@ TCS::cTauMultiplicity::cTauMatching(const xAOD::eFexTauRoI & eTau, const xAOD::j
 }
 
 unsigned int
-TCS::cTauMultiplicity::convertIsoToBit( float jtauIso, float etauPt ){ 
+TCS::cTauMultiplicity::convertIsoToBit(const std::map<std::string, int> & isoFW_CTAU, const float jtauIso, const float etauEt){ 
   unsigned int bit = 0;
   // Assign the tightest accept WP as default bit
-  if( jtauIso < etauPt * 0.4 ) bit = 1; // Loose
-  if( jtauIso < etauPt * 0.35) bit = 2; // Medium
-  if( jtauIso < etauPt * 0.3 ) bit = 3; // Tight 
+  if( jtauIso*1024 < etauEt*isoFW_CTAU.at("Loose") ) bit = 1;
+  if( jtauIso*1024 < etauEt*isoFW_CTAU.at("Medium") ) bit = 2;
+  if( jtauIso*1024 < etauEt*isoFW_CTAU.at("Tight") ) bit = 3;
   return bit;
 }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TgcDigitMaker.h"
@@ -561,7 +561,7 @@ StatusCode TgcDigitMaker::readFileOfEnergyThreshold() {
 
   // Find path to the TGC_Digitization_energyThreshold.dat file 
   const std::string fileName = "TGC_Digitization_energyThreshold.dat";
-  std::string fileWithPath = PathResolver::find_file(fileName.c_str(), "DATAPATH");
+  std::string fileWithPath = PathResolver::find_file(fileName, "DATAPATH");
   if(fileWithPath.empty()) {
     ATH_MSG_FATAL("readFileOfEnergyThreshold(): Could not find file " << fileName);
     return StatusCode::FAILURE;
@@ -639,7 +639,7 @@ StatusCode TgcDigitMaker::readFileOfDeadChamber() {
     ATH_MSG_ERROR("Run Period " << m_runperiod << " is unexpected in TgcDigitMaker - using NOdeadChamber configuration.");
     return StatusCode::FAILURE;
   }
-  std::string fileWithPath = PathResolver::find_file(fileName.c_str(), "DATAPATH");
+  std::string fileWithPath = PathResolver::find_file(fileName, "DATAPATH");
   if(fileWithPath.empty()) {
     ATH_MSG_FATAL("readFileOfDeadChamber(): Could not find file " << fileName);
     return StatusCode::FAILURE;
@@ -710,7 +710,7 @@ StatusCode TgcDigitMaker::readFileOfStripPosition() {
 
   // Find path to the TGC_Digitization_StripPosition.dat file                                                                         
   const std::string fileName = "TGC_Digitization_StripPosition.dat";
-  std::string fileWithPath = PathResolver::find_file(fileName.c_str(), "DATAPATH");
+  std::string fileWithPath = PathResolver::find_file(fileName, "DATAPATH");
   if(fileWithPath == "") {
     ATH_MSG_FATAL("readFileOfStripPosition(): Could not find file " << fileName);
     return StatusCode::FAILURE;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************************
@@ -112,6 +112,8 @@ StatusCode TilePulseForTileMuonReceiver::initialize() {
   ATH_CHECK( m_muRcvRawChannelContainerKey.initialize(m_runPeriod != 0) );
   ATH_CHECK( m_inputDigitContainerKey.initialize(!m_onlyUseContainerName && m_rndmEvtOverlay && m_runPeriod != 0) );
   ATH_CHECK( m_samplingFractionKey.initialize(m_runPeriod != 0) );
+  ATH_CHECK( m_emScaleKey.initialize(m_runPeriod != 0) );
+  ATH_CHECK( m_sampleNoiseKey.initialize((m_runPeriod != 0) && (m_tilePedestal || m_tileNoise)) );
 
   if ( m_runPeriod == 0) {
     ATH_MSG_INFO("TilePulseForTileMuonReceiver should not be used for RUN1 simulations");
@@ -121,15 +123,11 @@ StatusCode TilePulseForTileMuonReceiver::initialize() {
   }
 
   //=== retrieve TileID helper and TileInfo from det store
-  CHECK(detStore()->retrieve(m_tileID));
-  CHECK(detStore()->retrieve(m_tileHWID));
-  CHECK(detStore()->retrieve(m_tileInfo, m_infoName));
-  //=== get TileCondToolEmscale
-  CHECK(m_tileToolEmscale.retrieve());
-  //=== get TileCondToolNoiseSample
-  CHECK(m_tileToolNoiseSample.retrieve());
+  ATH_CHECK(detStore()->retrieve(m_tileID));
+  ATH_CHECK(detStore()->retrieve(m_tileHWID));
+  ATH_CHECK(detStore()->retrieve(m_tileInfo, m_infoName));
 
-  CHECK(m_MuRcvBuildTool.retrieve());
+  ATH_CHECK(m_MuRcvBuildTool.retrieve());
 
   m_nSamples = m_tileInfo->NdigitSamples();    // number of time slices for each chan
   m_iTrig = m_tileInfo->ItrigSample();      // index of the triggering time slice
@@ -160,23 +158,17 @@ StatusCode TilePulseForTileMuonReceiver::initialize() {
   //
   --m_nShape;
 
+  ATH_CHECK( m_pulseShapeKey.initialize((m_runPeriod != 0) && m_useCoolPulseShapes) );
   if (m_useCoolPulseShapes) {
     ATH_MSG_INFO( "Using pulse from database.");
-
-    CHECK(m_tileToolPulseShape.retrieve());
   } else {
     ATH_MSG_INFO( "Using pulse from TileInfo.");
 
     m_shapeMuonReceiver = m_tileInfo->MuRcvFullShape();
     m_shapeMuonReceiver.push_back(0.0);
-    m_tileToolPulseShape.disable();
   }
 
-  if (m_maskBadChannels) {
-    CHECK(m_tileBadChanTool.retrieve());
-  } else {
-    m_tileBadChanTool.disable();
-  }
+  ATH_CHECK( m_badChannelsKey.initialize((m_runPeriod != 0) && m_maskBadChannels) );
 
   ATH_MSG_INFO( "Integer digits: \t" << ((m_integerDigits)?"true":"false"));
   ATH_MSG_INFO( "Tile Pedestal: \t" << ((m_tilePedestal)?"true":"false"));
@@ -253,6 +245,30 @@ StatusCode TilePulseForTileMuonReceiver::execute() {
   double muRcv_Ped;
   double muRcv_Calib;
   double muRcv_Max;
+
+  SG::ReadCondHandle<TileEMScale> emScale(m_emScaleKey, ctx);
+  ATH_CHECK( emScale.isValid() );
+
+  const TileBadChannels* badChannels = nullptr;
+  if (m_maskBadChannels) {
+    SG::ReadCondHandle<TileBadChannels> badChannelsHandle(m_badChannelsKey, ctx);
+    ATH_CHECK( badChannelsHandle.isValid() );
+    badChannels = *badChannelsHandle;
+  }
+
+  const TilePulse* pulse = nullptr;
+  if (m_useCoolPulseShapes) {
+    SG::ReadCondHandle<TilePulse> pulseShape(m_pulseShapeKey, ctx);
+    ATH_CHECK( pulseShape.isValid() );
+    pulse = pulseShape.retrieve();
+  }
+
+  const TileSampleNoise* sampleNoise = nullptr;
+  if (m_tilePedestal || m_tileNoise) {
+    SG::ReadCondHandle<TileSampleNoise> sampleNoiseHandle(m_sampleNoiseKey, ctx);
+    ATH_CHECK( sampleNoiseHandle.isValid() );
+    sampleNoise = sampleNoiseHandle.retrieve();
+  }
 
   // Get hit container from TES
   //
@@ -552,7 +568,7 @@ StatusCode TilePulseForTileMuonReceiver::execute() {
 
             ATH_MSG_VERBOSE( "(C.02.04)   phase : " << k << "-" << m_binTime0 << "*" << m_timeStep << " = " << phase);
 
-            m_tileToolPulseShape->getPulseShapeYDY(drawerIdx, TMDBchan, TileID::LOWGAIN, phase, y, dy, ctx);
+            pulse->getPulseShapeYDY(drawerIdx, TMDBchan, TileID::LOWGAIN, phase, y, dy);
             shape = (double) y;
             pDigitSamples[js] += e_pmt * shape; // MeV
 
@@ -627,17 +643,17 @@ StatusCode TilePulseForTileMuonReceiver::execute() {
       //
       muRcv_Max   = m_tileInfo->MuRcvMax(adc_id);             // [adc]
       muRcv_Calib = m_tileInfo->MuRcvCalib(adc_id);           // pCb->[adc]
-      double mev2ADC_factor = muRcv_Calib / m_tileToolEmscale->channelCalib(drawerIdx,TILEchan,TileID::LOWGAIN, 1.
+      double mev2ADC_factor = muRcv_Calib / emScale->calibrateChannel(drawerIdx,TILEchan,TileID::LOWGAIN, 1.
                                                                       , TileRawChannelUnit::PicoCoulombs
                                                                       , TileRawChannelUnit::MegaElectronVolts);
       ATH_MSG_VERBOSE( "(D.01)   Channel: "<<ros<<'/'<<drawer<<'/'<< TMDBchan
                 << " adc/pCb: "<< muRcv_Calib
-                << " Mev/pCb: "<< m_tileToolEmscale->channelCalib( drawerIdx,
-                                                                   TILEchan,
-                                                                   TileID::LOWGAIN,
-                                                                   1.,
-                                                                   TileRawChannelUnit::PicoCoulombs,
-                                                                   TileRawChannelUnit::MegaElectronVolts)
+                << " Mev/pCb: "<< emScale->calibrateChannel( drawerIdx,
+                                                             TILEchan,
+                                                             TileID::LOWGAIN,
+                                                             1.,
+                                                             TileRawChannelUnit::PicoCoulombs,
+                                                             TileRawChannelUnit::MegaElectronVolts)
                 << " final calibration factor adc/MeV: "<< mev2ADC_factor);
 
       ATH_MSG_VERBOSE( "(D.02)      Pulse digits [MeV]:"
@@ -694,7 +710,7 @@ StatusCode TilePulseForTileMuonReceiver::execute() {
         // Collecting pedestal from the database
         //
         if (m_tilePedestal) {
-          pedSim = m_tileToolNoiseSample->getPed(idhash, TMDBchan, TileID::LOWGAIN, TileRawChannelUnit::ADCcounts, ctx);
+          pedSim = sampleNoise->getPed(idhash, TMDBchan, TileID::LOWGAIN);
           // As in TileDigitsMaker bug fix for wrong ped value in DB
           //
           if (pedSim == 0.0) pedSim = 30.;
@@ -708,12 +724,12 @@ StatusCode TilePulseForTileMuonReceiver::execute() {
           //
           RandGaussQ::shootArray(*rngWrapper, m_nSamples, Rndm, 0.0, 1.0);
           RandFlat::shootArray(*rngWrapper, 1, Rndm_dG, 0.0, 1.0);
-          sigma_Hfn1 = m_tileToolNoiseSample->getHfn1(idhash, TMDBchan, TileID::LOWGAIN, ctx);
-          sigma_Hfn2 = m_tileToolNoiseSample->getHfn2(idhash, TMDBchan, TileID::LOWGAIN, ctx);
+          sigma_Hfn1 = sampleNoise->getHfn1(idhash, TMDBchan, TileID::LOWGAIN);
+          sigma_Hfn2 = sampleNoise->getHfn2(idhash, TMDBchan, TileID::LOWGAIN);
           if (sigma_Hfn1 > 0 || sigma_Hfn2) {
-            sigma_Norm = sigma_Hfn1 / (sigma_Hfn1 + sigma_Hfn2 * m_tileToolNoiseSample->getHfnNorm(idhash, TMDBchan, TileID::LOWGAIN, ctx));
+            sigma_Norm = sigma_Hfn1 / (sigma_Hfn1 + sigma_Hfn2 * sampleNoise->getHfnNorm(idhash, TMDBchan, TileID::LOWGAIN));
           } else {
-            sigma_Hfn1 = m_tileToolNoiseSample->getHfn(idhash, TMDBchan, TileID::LOWGAIN, TileRawChannelUnit::ADCcounts, ctx);
+            sigma_Hfn1 = sampleNoise->getHfn(idhash, TMDBchan, TileID::LOWGAIN);
             sigma_Norm = 1.;
           }
           if (Rndm_dG[0] < sigma_Norm) sigmaSim = sigma_Hfn1;
@@ -753,7 +769,7 @@ StatusCode TilePulseForTileMuonReceiver::execute() {
       bool chanIsBad = false;
 
       if (m_maskBadChannels) {
-        TileBchStatus status = m_tileBadChanTool->getAdcStatus(drawerIdx, TILEchan, TileID::LOWGAIN);
+        TileBchStatus status = badChannels->getAdcStatus( m_tileHWID->adc_id(drawer_id, TILEchan, TileID::LOWGAIN) );
         chanIsBad = status.isBad();
       }
 
@@ -769,7 +785,7 @@ StatusCode TilePulseForTileMuonReceiver::execute() {
       ATH_MSG_VERBOSE( "++ Changed to TMDB adc_id: " << m_tileHWID->to_string(adc_id) << " and save a TileDigits object into a container." );
       std::unique_ptr<TileDigits> muonReceiverDigits = std::make_unique<TileDigits>(adc_id, digitsBuffer);
       ATH_MSG_VERBOSE( "++ Create a TileRawChannelObject object and set it into a container " );
-      TileRawChannel* muRcvRawChannel = m_MuRcvBuildTool->rawChannel(muonReceiverDigits.get());
+      TileRawChannel* muRcvRawChannel = m_MuRcvBuildTool->rawChannel(muonReceiverDigits.get(), ctx);
       ATH_CHECK( muRcvDigitsContainer->push_back(std::move(muonReceiverDigits)) );
       ATH_CHECK( muRcvRawChannelContainer->push_back(muRcvRawChannel) );
       if (msgLvl(MSG::DEBUG)){

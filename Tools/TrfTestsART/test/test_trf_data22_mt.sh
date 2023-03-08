@@ -15,12 +15,11 @@ timeout 64800 Reco_tf.py \
   --outputDRAW_EGZFile=myDRAW_EGZ.data \
   --outputDAOD_IDTIDEFile=myIDTIDE.pool.root \
   --multithreaded='True' \
-  --preExec "all:from RecExConfig.RecFlags import rec; rec.doZdc.set_Value_and_Lock(False); from AthenaConfiguration.AllConfigFlags import ConfigFlags; ConfigFlags.Trigger.triggerConfig=\"DB\";  ConfigFlags.DQ.Steering.HLT.doBjet=True; ConfigFlags.DQ.Steering.HLT.doInDet=True; ConfigFlags.DQ.Steering.HLT.doBphys=True; ConfigFlags.DQ.Steering.HLT.doCalo=True; ConfigFlags.DQ.Steering.HLT.doEgamma=True; ConfigFlags.DQ.Steering.HLT.doMET=True; ConfigFlags.DQ.Steering.HLT.doJet=True; ConfigFlags.DQ.Steering.HLT.doMinBias=True; ConfigFlags.DQ.Steering.HLT.doMuon=True; ConfigFlags.DQ.Steering.HLT.doTau=True;" \
+  --preExec "all:from RecExConfig.RecFlags import rec; rec.doZdc.set_Value_and_Lock(False);ConfigFlags.Trigger.triggerConfig=\"DB\";  ConfigFlags.DQ.Steering.HLT.doBjet=True; ConfigFlags.DQ.Steering.HLT.doInDet=True; ConfigFlags.DQ.Steering.HLT.doBphys=True; ConfigFlags.DQ.Steering.HLT.doCalo=True; ConfigFlags.DQ.Steering.HLT.doEgamma=True; ConfigFlags.DQ.Steering.HLT.doMET=True; ConfigFlags.DQ.Steering.HLT.doJet=True; ConfigFlags.DQ.Steering.HLT.doMinBias=True; ConfigFlags.DQ.Steering.HLT.doMuon=True; ConfigFlags.DQ.Steering.HLT.doTau=True;" \
   --autoConfiguration="everything" \
   --conditionsTag "all:CONDBR2-BLKPA-2022-07" \
   --geometryVersion="all:ATLAS-R3S-2021-03-00-00" \
   --runNumber="429782" \
-  --steering="doRAWtoALL" \
   --postExec 'FPEAuditor.NStacktracesOnFPE=10' \
   --maxEvents='-1'
 

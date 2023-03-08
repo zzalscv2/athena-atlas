@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file SCTLorentzMonAlg.py
@@ -8,7 +8,7 @@
 @brief Based on AthenaMonitoring/ExampleMonitorAlgorithm.py
 '''
 
-def SCTLorentzMonAlgConfig(inputFlags):
+def SCTLorentzMonAlgConfig(flags):
     
     ### STEP 1 ###
     # Define one top-level monitoring algorithm. The new configuration 
@@ -19,20 +19,26 @@ def SCTLorentzMonAlgConfig(inputFlags):
     # The following class will make a sequence, configure algorithms, and link
     # them to GenericMonitoringTools
     from AthenaMonitoring import AthMonitorCfgHelper
-    helper = AthMonitorCfgHelper(inputFlags, 'SCTLorentzMonCfg')
+    helper = AthMonitorCfgHelper(flags, 'SCTLorentzMonCfg')
 
 
     ### STEP 2 ###
     # Adding an algorithm to the helper. Here, we will use the example 
     # algorithm in the AthenaMonitoring package. Just pass the type to the 
     # helper. Then, the helper will instantiate an instance and set up the 
-    # base class configuration following the inputFlags. The returned object 
+    # base class configuration following the flags. The returned object 
     # is the algorithm.
     from AthenaConfiguration.ComponentFactory import CompFactory
     from InDetConfig.InDetAssociationToolsConfig import InDetPRDtoTrackMapToolGangedPixelsCfg
-    myMonAlg = helper.addAlgorithm(CompFactory.SCTLorentzMonAlg,
-                                   'SCTLorentzMonAlg',
-                                   AssociationTool = result.popToolsAndMerge(InDetPRDtoTrackMapToolGangedPixelsCfg(inputFlags)) )
+    from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
+
+    myMonAlg = helper.addAlgorithm(
+        CompFactory.SCTLorentzMonAlg,
+        'SCTLorentzMonAlg',
+        AssociationTool = result.popToolsAndMerge(
+            InDetPRDtoTrackMapToolGangedPixelsCfg(flags)),
+        TrackSummaryTool = result.popToolsAndMerge(
+            InDetTrackSummaryToolCfg(flags)))
 
     # # If for some really obscure reason you need to instantiate an algorithm
     # # yourself, the AddAlgorithm method will still configure the base 
@@ -45,22 +51,14 @@ def SCTLorentzMonAlgConfig(inputFlags):
     myMonAlg.TriggerChain = ''
     # myMonAlg.RandomHist = True
 
-    # Set InDetTrackSummaryTool to TrackSummaryTool of SCTLorentzMonAlg
-    from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
-    myMonAlg.TrackSummaryTool = result.popToolsAndMerge(InDetTrackSummaryToolCfg(inputFlags))
-
     ### STEP 4 ###
     # Add some tools. N.B. Do not use your own trigger decion tool. Use the
     # standard one that is included with AthMonitorAlgorithm.
 
 
-    # set up geometry / conditions / magnetic field
-    from BeamPipeGeoModel.BeamPipeGMConfig import BeamPipeGeometryCfg
-    result.merge(BeamPipeGeometryCfg(inputFlags))
-    from InDetConfig.InDetGeometryConfig import InDetGeometryCfg
-    result.merge(InDetGeometryCfg(inputFlags))
-    from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
-    result.merge(AtlasFieldCacheCondAlgCfg(inputFlags))
+    # set up conditions
+    from SCT_ConditionsAlgorithms.SCT_ConditionsAlgorithmsConfig import SCT_DetectorElementCondAlgCfg
+    result.merge(SCT_DetectorElementCondAlgCfg(flags))
 
     # # Then, add a tool that doesn't have its own configuration function. In
     # # this example, no accumulator is returned, so no merge is necessary.
@@ -115,26 +113,25 @@ if __name__ == "__main__":
     log.setLevel(INFO)
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    ConfigFlags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecExRecoTest/mc16_13TeV.361022.Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ2W.recon.ESD.e3668_s3170_r10572_homeMade.pool.root"]
-    #ConfigFlags.Input.Files = [" /afs/cern.ch/user/e/ebergeas/work/public/triggermonitoring/nigtly_2019-08-24T2130/AOD.pool.root "]
-    ConfigFlags.Input.isMC = True
-    ConfigFlags.Output.HISTFileName = 'SCTLorentzMonOutput.root'
-    ConfigFlags.GeoModel.Align.Dynamic = False
-    ConfigFlags.Detector.GeometryPixel = True
-    ConfigFlags.Detector.GeometrySCT = True
-    ConfigFlags.Detector.GeometryTRT = True
-    ConfigFlags.Detector.GeometryCalo = False
-    ConfigFlags.Detector.GeometryMuon = True
-    ConfigFlags.lock()
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecExRecoTest/mc16_13TeV.361022.Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ2W.recon.ESD.e3668_s3170_r10572_homeMade.pool.root"]
+    flags.Input.isMC = True
+    flags.Output.HISTFileName = 'SCTLorentzMonOutput.root'
+    flags.GeoModel.Align.Dynamic = False
+    flags.Detector.GeometryPixel = True
+    flags.Detector.GeometrySCT = True
+    flags.Detector.GeometryTRT = True
+    flags.Detector.GeometryCalo = False
+    flags.Detector.GeometryMuon = True
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
-    sctLorentzMonAcc = SCTLorentzMonAlgConfig(ConfigFlags)
-    cfg.merge(sctLorentzMonAcc)
+    cfg.merge(SCTLorentzMonAlgConfig(flags))
 
     cfg.run()

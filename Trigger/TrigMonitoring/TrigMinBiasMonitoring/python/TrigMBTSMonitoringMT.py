@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -75,18 +75,19 @@ if __name__ == '__main__':
     # Setup logs
     from AthenaCommon.Constants import DEBUG
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
 
-    ConfigFlags.Output.HISTFileName = 'TestMBTSMonitorOutput.root'
-    ConfigFlags.fillFromArgs()
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Output.HISTFileName = 'TestMBTSMonitorOutput.root'
+    flags.fillFromArgs()
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
-    cfg.merge(TrigMBTS(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
+    cfg.merge(TrigMBTS(flags))
 
     cfg.getEventAlgo('HLTMBTSMonitoringAlgMT').OutputLevel = DEBUG  # DEBUG
     cfg.printConfig(withDetails=True)  # set True for exhaustive info

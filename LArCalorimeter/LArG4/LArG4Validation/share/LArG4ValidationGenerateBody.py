@@ -76,7 +76,7 @@ else:
         svcMgr.EventSelector.FirstEvent = options['firstEvent']
 
     import ParticleGun as PG
-    topSequence += PG.ParticleGun(randomSvcName=simFlags.RandomSvc.get_Value(), randomStream="SINGLE")
+    topSequence += PG.ParticleGun(randomStream = "SINGLE", randomSeed = simFlags.RandomSeedOffset.get_Value())
     topSequence.ParticleGun.sampler.pid = int(options["pid"])
     if options["configFileName"] != "" :
         energy={}

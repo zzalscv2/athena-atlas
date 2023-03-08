@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -28,7 +28,7 @@ DataScoutingInfo.DataScoutingIdentifiers['ElectronDSPEBTest'] = 3
 DataScoutingInfo.TruncationThresholds[3] = 5*(1024**2) # 5 MB
 
 # Override the setupMenu function from Dev_pp_run3_v1
-def myMenu():
+def myMenu(menu_name):
     log.debug('Executing myMenu')
 
     from TriggerMenuMT.HLT.Menu.SignatureDicts import ChainStore

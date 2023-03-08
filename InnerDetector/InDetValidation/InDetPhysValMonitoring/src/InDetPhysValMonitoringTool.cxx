@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -256,6 +256,23 @@ InDetRttPlotConfig InDetPhysValMonitoringTool::getFilledPlotConfig() const{
     rttConfig.doTrkInJetPlots_truthFromB = false;
   }
 
+  // For IDTIDE derivation
+  // disable the vertex plots since no covariance from IDTIDE
+  if (m_doIDTIDEPlots){ 
+    rttConfig.doVertexPlots = false;
+    rttConfig.doVerticesVsMuPlots = false;
+    rttConfig.doHardScatterVertexPlots = false;
+    rttConfig.doTrkInJetPlots = true;
+    rttConfig.doTrkInJetPlots_bjets = true;
+    rttConfig.doTrkInJetPlots_matched = true;
+    rttConfig.doTrkInJetPlots_matched_bjets = true;
+    rttConfig.doTrkInJetPlots_fake = true;
+    rttConfig.doTrkInJetPlots_fake_bjets = true;
+    rttConfig.doTrkInJetPlots_unlinked = true;
+    rttConfig.doTrkInJetPlots_unlinked_bjets = true;
+    rttConfig.doTrkInJetPlots_truthFromB = true;
+  }
+
   /// account for detail level 
   if (m_detailLevel < 200){
     rttConfig.doResolutionPlotSecd = false;
@@ -473,7 +490,7 @@ InDetPhysValMonitoringTool::fillHistograms() {
       }
       else {
         // Fill track only entries with dummy truth values
-        m_monPlots->fillNtuple(*thisTrack);
+        m_monPlots->fillNtuple(*thisTrack, primaryvertex);
       }
     }
   }
@@ -497,7 +514,7 @@ InDetPhysValMonitoringTool::fillHistograms() {
           const xAOD::TrackParticle* thisTrack = cachedAssoc.second[itrack];
           
           // Fill track entries with truth association
-          m_monPlots->fillNtuple(*thisTrack, *thisTruth, itrack);
+          m_monPlots->fillNtuple(*thisTrack, *thisTruth, primaryvertex, itrack);
       }
     }
   }
@@ -805,7 +822,9 @@ InDetPhysValMonitoringTool::getTruthParticles() const {
           ATH_MSG_VERBOSE("Adding " << ntruth << " truth particles from TruthPileupEvents container");
           const auto& links = eventPileup->truthParticleLinks();
           for (const auto& link : links) {
-            tempVec.push_back(*link);
+            if (link.isValid()){
+              tempVec.push_back(*link);
+            }
           }
         }
       } else {

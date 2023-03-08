@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 //
 
 #ifndef CALORECGPU_TOOLS_CLUSTERPLOTTERPLOTS_H
@@ -123,7 +123,7 @@ void ClusterPlotter::populate_plots()
             count[i].resize(ev.ref_clusters.size(), 0);
           }
 
-        for (int i = 0; i < NCaloCells; ++i)
+        for (int i = 0; i < CaloRecGPU::NCaloCells; ++i)
           {
             const int ref_idx = ev.ref_tag_array[i];
             const int test_idx = ev.test_tag_array[i];
@@ -164,7 +164,7 @@ void ClusterPlotter::populate_plots()
             count[i].resize(ev.test_clusters.size(), 0);
           }
 
-        for (int i = 0; i < NCaloCells; ++i)
+        for (int i = 0; i < CaloRecGPU::NCaloCells; ++i)
           {
             const int ref_idx = ev.ref_tag_array[i];
             const int test_idx = ev.test_tag_array[i];
@@ -209,7 +209,7 @@ void ClusterPlotter::populate_plots()
             count[i].resize(ev.ref_clusters.size(), 0);
           }
 
-        for (int i = 0; i < NCaloCells; ++i)
+        for (int i = 0; i < CaloRecGPU::NCaloCells; ++i)
           {
             const int ref_idx = ev.ref_tag_array[i];
             const int test_idx = ev.test_tag_array[i];
@@ -253,7 +253,7 @@ void ClusterPlotter::populate_plots()
             count[i].resize(ev.test_clusters.size(), 0);
           }
 
-        for (int i = 0; i < NCaloCells; ++i)
+        for (int i = 0; i < CaloRecGPU::NCaloCells; ++i)
           {
             const int ref_idx = ev.ref_tag_array[i];
             const int test_idx = ev.test_tag_array[i];
@@ -301,7 +301,7 @@ void ClusterPlotter::populate_plots()
             count[i].resize(ev.ref_clusters.size(), 0);
           }
 
-        for (int i = 0; i < NCaloCells; ++i)
+        for (int i = 0; i < CaloRecGPU::NCaloCells; ++i)
           {
             const int ref_idx = ev.ref_tag_array[i];
             const int test_idx = ev.test_tag_array[i];
@@ -342,7 +342,7 @@ void ClusterPlotter::populate_plots()
             count[i].resize(ev.test_clusters.size(), 0);
           }
 
-        for (int i = 0; i < NCaloCells; ++i)
+        for (int i = 0; i < CaloRecGPU::NCaloCells; ++i)
           {
             const int ref_idx = ev.ref_tag_array[i];
             const int test_idx = ev.test_tag_array[i];
@@ -387,7 +387,7 @@ void ClusterPlotter::populate_plots()
             count[i].resize(ev.ref_clusters.size(), 0);
           }
 
-        for (int i = 0; i < NCaloCells; ++i)
+        for (int i = 0; i < CaloRecGPU::NCaloCells; ++i)
           {
             const int ref_idx = ev.ref_tag_array[i];
             const int test_idx = ev.test_tag_array[i];
@@ -431,7 +431,7 @@ void ClusterPlotter::populate_plots()
             count[i].resize(ev.test_clusters.size(), 0);
           }
 
-        for (int i = 0; i < NCaloCells; ++i)
+        for (int i = 0; i < CaloRecGPU::NCaloCells; ++i)
           {
             const int ref_idx = ev.ref_tag_array[i];
             const int test_idx = ev.test_tag_array[i];
@@ -482,7 +482,7 @@ void ClusterPlotter::populate_plots()
             count[i].resize(ev.test_clusters.size(), 0);
           }
 
-        for (int i = 0; i < NCaloCells; ++i)
+        for (int i = 0; i < CaloRecGPU::NCaloCells; ++i)
           {
             const int ref_idx = ev.ref_tag_array[i];
             const int test_idx = ev.test_tag_array[i];
@@ -540,7 +540,7 @@ void ClusterPlotter::populate_plots()
              {
                num_cells[1][j].resize(ev.test_clusters.size());
              }
-           for (int i = 0; i < NCaloCells; ++i)
+           for (int i = 0; i < CaloRecGPU::NCaloCells; ++i)
              {
                const int ref_idx = ev.ref_tag_array[i];
                const int test_idx = ev.test_tag_array[i];
@@ -920,7 +920,7 @@ void ClusterPlotter::populate_plots()
           {
             num_cells[1][j].resize(ev.test_clusters.size());
           }
-        for (int i = 0; i < NCaloCells; ++i)
+        for (int i = 0; i < CaloRecGPU::NCaloCells; ++i)
           {
             const int ref_idx = ev.ref_tag_array[i];
             const int test_idx = ev.test_tag_array[i];
@@ -1451,7 +1451,7 @@ void ClusterPlotter::populate_plots()
     for (const auto & ev : events)
       {
         std::vector<double> ref_termE(ev.ref_clusters.size(), 0.);
-        for (int i = 0; i < NCaloCells; ++i)
+        for (int i = 0; i < CaloRecGPU::NCaloCells; ++i)
           {
             const double this_energy = ev.energy_array[i];
             const double this_absenergy = std::abs(this_energy);
@@ -1485,7 +1485,7 @@ void ClusterPlotter::populate_plots()
     for (const auto & ev : events)
       {
         std::vector<double> test_termE(ev.test_clusters.size(), 0.);
-        for (int i = 0; i < NCaloCells; ++i)
+        for (int i = 0; i < CaloRecGPU::NCaloCells; ++i)
           {
             const double this_energy = ev.energy_array[i];
             const double this_absenergy = std::abs(this_energy);
@@ -1522,7 +1522,7 @@ void ClusterPlotter::populate_plots()
     for (const auto & ev : events)
       {
         std::vector<double> ref_termE(ev.ref_clusters.size(), 0.);
-        for (int i = 0; i < NCaloCells; ++i)
+        for (int i = 0; i < CaloRecGPU::NCaloCells; ++i)
           {
             const double this_energy = ev.energy_array[i];
             const double this_absenergy = std::abs(this_energy);
@@ -1559,7 +1559,7 @@ void ClusterPlotter::populate_plots()
     for (const auto & ev : events)
       {
         std::vector<double> test_termE(ev.test_clusters.size(), 0.);
-        for (int i = 0; i < NCaloCells; ++i)
+        for (int i = 0; i < CaloRecGPU::NCaloCells; ++i)
           {
             const double this_energy = ev.energy_array[i];
             const double this_absenergy = std::abs(this_energy);
@@ -2859,7 +2859,7 @@ void ClusterPlotter::populate_plots()
   {
     for (const auto & ev : events)
       {
-        for (int i = 0; i < NCaloCells; ++i)
+        for (int i = 0; i < CaloRecGPU::NCaloCells; ++i)
           {
             fill_regions(group, geometry->eta[i], ev.energy_array[i] * 1e-3);
           }

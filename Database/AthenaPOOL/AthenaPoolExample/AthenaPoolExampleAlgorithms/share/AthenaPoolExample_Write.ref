@@ -7,6 +7,7 @@ AthDictLoaderSvc     INFO acquired Dso-registry
 AthenaEventLoopMgr   INFO Initializing AthenaEventLoopMgr
 MetaDataSvc          INFO Initializing MetaDataSvc
 PoolSvc             DEBUG OutputLevel is 2
+AthenaPoolCnvSvc    DEBUG Setting StorageType to ROOTTREEINDEX
 AthenaPoolCnvSvc    DEBUG Registering all Tools in ToolHandleArray OutputStreamingTool
 WriteData            INFO in initialize()
   + OUTPUT  ( 'ExampleHitContainer' , 'StoreGateSvc+MyHits' ) 
@@ -201,6 +202,7 @@ POOLCollectionT...  DEBUG Branch container 'MagicNumber'
 POOLCollectionT...  DEBUG Opened container POOLCollectionTree(MagicNumber) of type ROOT_Tree
 SimplePoolFile1...  DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/POOLCollectionTree(MagicNumber) [202]  (a , ffffffffffffffff)
 SimplePoolFile1...  DEBUG ---->ClassID:BBACA313-D7B0-3A4C-9161-089CACF4B1CC
+SimplePoolFile1...  DEBUG DB Action Commit
 Stream1.FileMet...  DEBUG beam energy "" tag could not be converted to float
 Stream1.FileMet...  DEBUG Failed to retrieve  'SimInfoKey':'/Simulation/Parameters' => cannot set: xAOD::FileMetaData::simFlavour, and xAOD::FileMetaData::isDataOverlay
 Stream1.FileMet...  DEBUG retrieved existing list of runNumbers
@@ -304,6 +306,7 @@ POOLCollectionT...  DEBUG Branch container 'MagicNumber'
 POOLCollectionT...  DEBUG Opened container POOLCollectionTree(MagicNumber) of type ROOT_Tree
 SimplePoolFile2...  DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/POOLCollectionTree(MagicNumber) [202]  (9 , ffffffffffffffff)
 SimplePoolFile2...  DEBUG ---->ClassID:BBACA313-D7B0-3A4C-9161-089CACF4B1CC
+SimplePoolFile2...  DEBUG DB Action Commit
 Stream2.FileMet...  DEBUG beam energy "" tag could not be converted to float
 Stream2.FileMet...  DEBUG Failed to retrieve  'SimInfoKey':'/Simulation/Parameters' => cannot set: xAOD::FileMetaData::simFlavour, and xAOD::FileMetaData::isDataOverlay
 Stream2.FileMet...  DEBUG retrieved existing list of runNumbers
@@ -343,6 +346,7 @@ Stream1             DEBUG  Collected objects:
 Stream1             DEBUG  Object/count: EventInfo_McEventInfo, 2
 Stream1             DEBUG  Object/count: ExampleHitContainer_MyHits, 2
 Stream1             DEBUG connectOutput done for SimplePoolFile1.root
+SimplePoolFile1...  DEBUG DB Action Commit
 Stream1.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream1.FileMet...  DEBUG retrieved existing list of lumiBlocks
 Stream2             DEBUG addItemObjects(2101,"*") called
@@ -357,6 +361,7 @@ Stream2             DEBUG      Comp Attr 0 with 15 mantissa bits.
 Stream2             DEBUG  Collected objects:
 Stream2             DEBUG  Object/count: EventInfo_McEventInfo, 2
 Stream2             DEBUG connectOutput done for SimplePoolFile2.root
+SimplePoolFile2...  DEBUG DB Action Commit
 Stream2.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream2.FileMet...  DEBUG retrieved existing list of lumiBlocks
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #2, run #1 2 events processed so far  <<<===
@@ -388,6 +393,7 @@ Stream1             DEBUG  Collected objects:
 Stream1             DEBUG  Object/count: EventInfo_McEventInfo, 3
 Stream1             DEBUG  Object/count: ExampleHitContainer_MyHits, 3
 Stream1             DEBUG connectOutput done for SimplePoolFile1.root
+SimplePoolFile1...  DEBUG DB Action Commit
 Stream1.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream1.FileMet...  DEBUG retrieved existing list of lumiBlocks
 Stream2             DEBUG addItemObjects(2101,"*") called
@@ -402,6 +408,7 @@ Stream2             DEBUG      Comp Attr 0 with 15 mantissa bits.
 Stream2             DEBUG  Collected objects:
 Stream2             DEBUG  Object/count: EventInfo_McEventInfo, 3
 Stream2             DEBUG connectOutput done for SimplePoolFile2.root
+SimplePoolFile2...  DEBUG DB Action Commit
 Stream2.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream2.FileMet...  DEBUG retrieved existing list of lumiBlocks
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #3, run #1 3 events processed so far  <<<===
@@ -433,6 +440,7 @@ Stream1             DEBUG  Collected objects:
 Stream1             DEBUG  Object/count: EventInfo_McEventInfo, 4
 Stream1             DEBUG  Object/count: ExampleHitContainer_MyHits, 4
 Stream1             DEBUG connectOutput done for SimplePoolFile1.root
+SimplePoolFile1...  DEBUG DB Action Commit
 Stream1.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream1.FileMet...  DEBUG retrieved existing list of lumiBlocks
 Stream2             DEBUG addItemObjects(2101,"*") called
@@ -447,6 +455,7 @@ Stream2             DEBUG      Comp Attr 0 with 15 mantissa bits.
 Stream2             DEBUG  Collected objects:
 Stream2             DEBUG  Object/count: EventInfo_McEventInfo, 4
 Stream2             DEBUG connectOutput done for SimplePoolFile2.root
+SimplePoolFile2...  DEBUG DB Action Commit
 Stream2.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream2.FileMet...  DEBUG retrieved existing list of lumiBlocks
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #4, run #1 4 events processed so far  <<<===
@@ -478,6 +487,7 @@ Stream1             DEBUG  Collected objects:
 Stream1             DEBUG  Object/count: EventInfo_McEventInfo, 5
 Stream1             DEBUG  Object/count: ExampleHitContainer_MyHits, 5
 Stream1             DEBUG connectOutput done for SimplePoolFile1.root
+SimplePoolFile1...  DEBUG DB Action Commit
 Stream1.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream1.FileMet...  DEBUG retrieved existing list of lumiBlocks
 Stream2             DEBUG addItemObjects(2101,"*") called
@@ -492,6 +502,7 @@ Stream2             DEBUG      Comp Attr 0 with 15 mantissa bits.
 Stream2             DEBUG  Collected objects:
 Stream2             DEBUG  Object/count: EventInfo_McEventInfo, 5
 Stream2             DEBUG connectOutput done for SimplePoolFile2.root
+SimplePoolFile2...  DEBUG DB Action Commit
 Stream2.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream2.FileMet...  DEBUG retrieved existing list of lumiBlocks
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #5, run #1 5 events processed so far  <<<===
@@ -523,6 +534,7 @@ Stream1             DEBUG  Collected objects:
 Stream1             DEBUG  Object/count: EventInfo_McEventInfo, 6
 Stream1             DEBUG  Object/count: ExampleHitContainer_MyHits, 6
 Stream1             DEBUG connectOutput done for SimplePoolFile1.root
+SimplePoolFile1...  DEBUG DB Action Commit
 Stream1.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream1.FileMet...  DEBUG retrieved existing list of lumiBlocks
 Stream2             DEBUG addItemObjects(2101,"*") called
@@ -537,6 +549,7 @@ Stream2             DEBUG      Comp Attr 0 with 15 mantissa bits.
 Stream2             DEBUG  Collected objects:
 Stream2             DEBUG  Object/count: EventInfo_McEventInfo, 6
 Stream2             DEBUG connectOutput done for SimplePoolFile2.root
+SimplePoolFile2...  DEBUG DB Action Commit
 Stream2.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream2.FileMet...  DEBUG retrieved existing list of lumiBlocks
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #6, run #1 6 events processed so far  <<<===
@@ -568,6 +581,7 @@ Stream1             DEBUG  Collected objects:
 Stream1             DEBUG  Object/count: EventInfo_McEventInfo, 7
 Stream1             DEBUG  Object/count: ExampleHitContainer_MyHits, 7
 Stream1             DEBUG connectOutput done for SimplePoolFile1.root
+SimplePoolFile1...  DEBUG DB Action Commit
 Stream1.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream1.FileMet...  DEBUG retrieved existing list of lumiBlocks
 Stream2             DEBUG addItemObjects(2101,"*") called
@@ -582,6 +596,7 @@ Stream2             DEBUG      Comp Attr 0 with 15 mantissa bits.
 Stream2             DEBUG  Collected objects:
 Stream2             DEBUG  Object/count: EventInfo_McEventInfo, 7
 Stream2             DEBUG connectOutput done for SimplePoolFile2.root
+SimplePoolFile2...  DEBUG DB Action Commit
 Stream2.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream2.FileMet...  DEBUG retrieved existing list of lumiBlocks
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #7, run #1 7 events processed so far  <<<===
@@ -613,6 +628,7 @@ Stream1             DEBUG  Collected objects:
 Stream1             DEBUG  Object/count: EventInfo_McEventInfo, 8
 Stream1             DEBUG  Object/count: ExampleHitContainer_MyHits, 8
 Stream1             DEBUG connectOutput done for SimplePoolFile1.root
+SimplePoolFile1...  DEBUG DB Action Commit
 Stream1.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream1.FileMet...  DEBUG retrieved existing list of lumiBlocks
 Stream2             DEBUG addItemObjects(2101,"*") called
@@ -627,6 +643,7 @@ Stream2             DEBUG      Comp Attr 0 with 15 mantissa bits.
 Stream2             DEBUG  Collected objects:
 Stream2             DEBUG  Object/count: EventInfo_McEventInfo, 8
 Stream2             DEBUG connectOutput done for SimplePoolFile2.root
+SimplePoolFile2...  DEBUG DB Action Commit
 Stream2.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream2.FileMet...  DEBUG retrieved existing list of lumiBlocks
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #8, run #1 8 events processed so far  <<<===
@@ -658,6 +675,7 @@ Stream1             DEBUG  Collected objects:
 Stream1             DEBUG  Object/count: EventInfo_McEventInfo, 9
 Stream1             DEBUG  Object/count: ExampleHitContainer_MyHits, 9
 Stream1             DEBUG connectOutput done for SimplePoolFile1.root
+SimplePoolFile1...  DEBUG DB Action Commit
 Stream1.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream1.FileMet...  DEBUG retrieved existing list of lumiBlocks
 Stream2             DEBUG addItemObjects(2101,"*") called
@@ -672,6 +690,7 @@ Stream2             DEBUG      Comp Attr 0 with 15 mantissa bits.
 Stream2             DEBUG  Collected objects:
 Stream2             DEBUG  Object/count: EventInfo_McEventInfo, 9
 Stream2             DEBUG connectOutput done for SimplePoolFile2.root
+SimplePoolFile2...  DEBUG DB Action Commit
 Stream2.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream2.FileMet...  DEBUG retrieved existing list of lumiBlocks
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #9, run #1 9 events processed so far  <<<===
@@ -703,6 +722,7 @@ Stream1             DEBUG  Collected objects:
 Stream1             DEBUG  Object/count: EventInfo_McEventInfo, 10
 Stream1             DEBUG  Object/count: ExampleHitContainer_MyHits, 10
 Stream1             DEBUG connectOutput done for SimplePoolFile1.root
+SimplePoolFile1...  DEBUG DB Action Commit
 Stream1.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream1.FileMet...  DEBUG retrieved existing list of lumiBlocks
 Stream2             DEBUG addItemObjects(2101,"*") called
@@ -717,6 +737,7 @@ Stream2             DEBUG      Comp Attr 0 with 15 mantissa bits.
 Stream2             DEBUG  Collected objects:
 Stream2             DEBUG  Object/count: EventInfo_McEventInfo, 10
 Stream2             DEBUG connectOutput done for SimplePoolFile2.root
+SimplePoolFile2...  DEBUG DB Action Commit
 Stream2.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream2.FileMet...  DEBUG retrieved existing list of lumiBlocks
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #10, run #1 10 events processed so far  <<<===
@@ -748,6 +769,7 @@ Stream1             DEBUG  Collected objects:
 Stream1             DEBUG  Object/count: EventInfo_McEventInfo, 11
 Stream1             DEBUG  Object/count: ExampleHitContainer_MyHits, 11
 Stream1             DEBUG connectOutput done for SimplePoolFile1.root
+SimplePoolFile1...  DEBUG DB Action Commit
 Stream1.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream1.FileMet...  DEBUG retrieved existing list of lumiBlocks
 Stream2             DEBUG addItemObjects(2101,"*") called
@@ -762,6 +784,7 @@ Stream2             DEBUG      Comp Attr 0 with 15 mantissa bits.
 Stream2             DEBUG  Collected objects:
 Stream2             DEBUG  Object/count: EventInfo_McEventInfo, 11
 Stream2             DEBUG connectOutput done for SimplePoolFile2.root
+SimplePoolFile2...  DEBUG DB Action Commit
 Stream2.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream2.FileMet...  DEBUG retrieved existing list of lumiBlocks
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #11, run #1 11 events processed so far  <<<===
@@ -793,6 +816,7 @@ Stream1             DEBUG  Collected objects:
 Stream1             DEBUG  Object/count: EventInfo_McEventInfo, 12
 Stream1             DEBUG  Object/count: ExampleHitContainer_MyHits, 12
 Stream1             DEBUG connectOutput done for SimplePoolFile1.root
+SimplePoolFile1...  DEBUG DB Action Commit
 Stream1.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream1.FileMet...  DEBUG retrieved existing list of lumiBlocks
 Stream2             DEBUG addItemObjects(2101,"*") called
@@ -807,6 +831,7 @@ Stream2             DEBUG      Comp Attr 0 with 15 mantissa bits.
 Stream2             DEBUG  Collected objects:
 Stream2             DEBUG  Object/count: EventInfo_McEventInfo, 12
 Stream2             DEBUG connectOutput done for SimplePoolFile2.root
+SimplePoolFile2...  DEBUG DB Action Commit
 Stream2.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream2.FileMet...  DEBUG retrieved existing list of lumiBlocks
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #12, run #1 12 events processed so far  <<<===
@@ -838,6 +863,7 @@ Stream1             DEBUG  Collected objects:
 Stream1             DEBUG  Object/count: EventInfo_McEventInfo, 13
 Stream1             DEBUG  Object/count: ExampleHitContainer_MyHits, 13
 Stream1             DEBUG connectOutput done for SimplePoolFile1.root
+SimplePoolFile1...  DEBUG DB Action Commit
 Stream1.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream1.FileMet...  DEBUG retrieved existing list of lumiBlocks
 Stream2             DEBUG addItemObjects(2101,"*") called
@@ -852,6 +878,7 @@ Stream2             DEBUG      Comp Attr 0 with 15 mantissa bits.
 Stream2             DEBUG  Collected objects:
 Stream2             DEBUG  Object/count: EventInfo_McEventInfo, 13
 Stream2             DEBUG connectOutput done for SimplePoolFile2.root
+SimplePoolFile2...  DEBUG DB Action Commit
 Stream2.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream2.FileMet...  DEBUG retrieved existing list of lumiBlocks
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #13, run #1 13 events processed so far  <<<===
@@ -883,6 +910,7 @@ Stream1             DEBUG  Collected objects:
 Stream1             DEBUG  Object/count: EventInfo_McEventInfo, 14
 Stream1             DEBUG  Object/count: ExampleHitContainer_MyHits, 14
 Stream1             DEBUG connectOutput done for SimplePoolFile1.root
+SimplePoolFile1...  DEBUG DB Action Commit
 Stream1.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream1.FileMet...  DEBUG retrieved existing list of lumiBlocks
 Stream2             DEBUG addItemObjects(2101,"*") called
@@ -897,6 +925,7 @@ Stream2             DEBUG      Comp Attr 0 with 15 mantissa bits.
 Stream2             DEBUG  Collected objects:
 Stream2             DEBUG  Object/count: EventInfo_McEventInfo, 14
 Stream2             DEBUG connectOutput done for SimplePoolFile2.root
+SimplePoolFile2...  DEBUG DB Action Commit
 Stream2.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream2.FileMet...  DEBUG retrieved existing list of lumiBlocks
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #14, run #1 14 events processed so far  <<<===
@@ -927,6 +956,7 @@ Stream1             DEBUG  Collected objects:
 Stream1             DEBUG  Object/count: EventInfo_McEventInfo, 15
 Stream1             DEBUG  Object/count: ExampleHitContainer_MyHits, 15
 Stream1             DEBUG connectOutput done for SimplePoolFile1.root
+SimplePoolFile1...  DEBUG DB Action Commit
 Stream1.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream1.FileMet...  DEBUG retrieved existing list of lumiBlocks
 Stream2             DEBUG addItemObjects(2101,"*") called
@@ -941,6 +971,7 @@ Stream2             DEBUG      Comp Attr 0 with 15 mantissa bits.
 Stream2             DEBUG  Collected objects:
 Stream2             DEBUG  Object/count: EventInfo_McEventInfo, 15
 Stream2             DEBUG connectOutput done for SimplePoolFile2.root
+SimplePoolFile2...  DEBUG DB Action Commit
 Stream2.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream2.FileMet...  DEBUG retrieved existing list of lumiBlocks
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #15, run #1 15 events processed so far  <<<===
@@ -971,6 +1002,7 @@ Stream1             DEBUG  Collected objects:
 Stream1             DEBUG  Object/count: EventInfo_McEventInfo, 16
 Stream1             DEBUG  Object/count: ExampleHitContainer_MyHits, 16
 Stream1             DEBUG connectOutput done for SimplePoolFile1.root
+SimplePoolFile1...  DEBUG DB Action Commit
 Stream1.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream1.FileMet...  DEBUG retrieved existing list of lumiBlocks
 Stream2             DEBUG addItemObjects(2101,"*") called
@@ -985,6 +1017,7 @@ Stream2             DEBUG      Comp Attr 0 with 15 mantissa bits.
 Stream2             DEBUG  Collected objects:
 Stream2             DEBUG  Object/count: EventInfo_McEventInfo, 16
 Stream2             DEBUG connectOutput done for SimplePoolFile2.root
+SimplePoolFile2...  DEBUG DB Action Commit
 Stream2.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream2.FileMet...  DEBUG retrieved existing list of lumiBlocks
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #16, run #1 16 events processed so far  <<<===
@@ -1015,6 +1048,7 @@ Stream1             DEBUG  Collected objects:
 Stream1             DEBUG  Object/count: EventInfo_McEventInfo, 17
 Stream1             DEBUG  Object/count: ExampleHitContainer_MyHits, 17
 Stream1             DEBUG connectOutput done for SimplePoolFile1.root
+SimplePoolFile1...  DEBUG DB Action Commit
 Stream1.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream1.FileMet...  DEBUG retrieved existing list of lumiBlocks
 Stream2             DEBUG addItemObjects(2101,"*") called
@@ -1029,6 +1063,7 @@ Stream2             DEBUG      Comp Attr 0 with 15 mantissa bits.
 Stream2             DEBUG  Collected objects:
 Stream2             DEBUG  Object/count: EventInfo_McEventInfo, 17
 Stream2             DEBUG connectOutput done for SimplePoolFile2.root
+SimplePoolFile2...  DEBUG DB Action Commit
 Stream2.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream2.FileMet...  DEBUG retrieved existing list of lumiBlocks
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #17, run #1 17 events processed so far  <<<===
@@ -1059,6 +1094,7 @@ Stream1             DEBUG  Collected objects:
 Stream1             DEBUG  Object/count: EventInfo_McEventInfo, 18
 Stream1             DEBUG  Object/count: ExampleHitContainer_MyHits, 18
 Stream1             DEBUG connectOutput done for SimplePoolFile1.root
+SimplePoolFile1...  DEBUG DB Action Commit
 Stream1.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream1.FileMet...  DEBUG retrieved existing list of lumiBlocks
 Stream2             DEBUG addItemObjects(2101,"*") called
@@ -1073,6 +1109,7 @@ Stream2             DEBUG      Comp Attr 0 with 15 mantissa bits.
 Stream2             DEBUG  Collected objects:
 Stream2             DEBUG  Object/count: EventInfo_McEventInfo, 18
 Stream2             DEBUG connectOutput done for SimplePoolFile2.root
+SimplePoolFile2...  DEBUG DB Action Commit
 Stream2.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream2.FileMet...  DEBUG retrieved existing list of lumiBlocks
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #18, run #1 18 events processed so far  <<<===
@@ -1103,6 +1140,7 @@ Stream1             DEBUG  Collected objects:
 Stream1             DEBUG  Object/count: EventInfo_McEventInfo, 19
 Stream1             DEBUG  Object/count: ExampleHitContainer_MyHits, 19
 Stream1             DEBUG connectOutput done for SimplePoolFile1.root
+SimplePoolFile1...  DEBUG DB Action Commit
 Stream1.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream1.FileMet...  DEBUG retrieved existing list of lumiBlocks
 Stream2             DEBUG addItemObjects(2101,"*") called
@@ -1117,6 +1155,7 @@ Stream2             DEBUG      Comp Attr 0 with 15 mantissa bits.
 Stream2             DEBUG  Collected objects:
 Stream2             DEBUG  Object/count: EventInfo_McEventInfo, 19
 Stream2             DEBUG connectOutput done for SimplePoolFile2.root
+SimplePoolFile2...  DEBUG DB Action Commit
 Stream2.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream2.FileMet...  DEBUG retrieved existing list of lumiBlocks
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #19, run #1 19 events processed so far  <<<===
@@ -1147,6 +1186,7 @@ Stream1             DEBUG  Collected objects:
 Stream1             DEBUG  Object/count: EventInfo_McEventInfo, 20
 Stream1             DEBUG  Object/count: ExampleHitContainer_MyHits, 20
 Stream1             DEBUG connectOutput done for SimplePoolFile1.root
+SimplePoolFile1...  DEBUG DB Action Commit
 Stream1.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream1.FileMet...  DEBUG retrieved existing list of lumiBlocks
 Stream2             DEBUG addItemObjects(2101,"*") called
@@ -1161,6 +1201,7 @@ Stream2             DEBUG      Comp Attr 0 with 15 mantissa bits.
 Stream2             DEBUG  Collected objects:
 Stream2             DEBUG  Object/count: EventInfo_McEventInfo, 20
 Stream2             DEBUG connectOutput done for SimplePoolFile2.root
+SimplePoolFile2...  DEBUG DB Action Commit
 Stream2.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream2.FileMet...  DEBUG retrieved existing list of lumiBlocks
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #20, run #1 20 events processed so far  <<<===
@@ -1268,9 +1309,7 @@ MetaDataHdrForm...  DEBUG Branch container 'DataHeaderForm'
 MetaDataHdrForm...  DEBUG Opened container MetaDataHdrForm(DataHeaderForm) of type ROOT_Tree
 SimplePoolFile1...  DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaDataHdrForm(DataHeaderForm) [203]  (11 , ffffffffffffffff)
 SimplePoolFile1...  DEBUG ---->ClassID:7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD
-MetaData(xAOD::...  DEBUG  SG::IAuxStoreIO* detected in xAOD::FileMetaDataAuxInfo_v1_FileMetaDataAux.
-MetaData(xAOD::...  DEBUG        Attributes= 1
-MetaData(xAOD::...  DEBUG createBasicAuxBranch: xAOD::FileMetaDataAuxInfo_v1_FileMetaDataAuxDyn.mcProcID, leaf:mcProcID/F
+SimplePoolFile1...  DEBUG DB Action Commit
 Stream1              INFO Metadata records written: 21
 Stream1             DEBUG Leaving incident handler for MetaDataStop
 Stream2             DEBUG slot 0  handle() incident type: MetaDataStop
@@ -1364,9 +1403,7 @@ MetaDataHdrForm...  DEBUG Branch container 'DataHeaderForm'
 MetaDataHdrForm...  DEBUG Opened container MetaDataHdrForm(DataHeaderForm) of type ROOT_Tree
 SimplePoolFile2...  DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/MetaDataHdrForm(DataHeaderForm) [203]  (10 , ffffffffffffffff)
 SimplePoolFile2...  DEBUG ---->ClassID:7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD
-MetaData(xAOD::...  DEBUG  SG::IAuxStoreIO* detected in xAOD::FileMetaDataAuxInfo_v1_FileMetaDataAux.
-MetaData(xAOD::...  DEBUG        Attributes= 1
-MetaData(xAOD::...  DEBUG createBasicAuxBranch: xAOD::FileMetaDataAuxInfo_v1_FileMetaDataAuxDyn.mcProcID, leaf:mcProcID/F
+SimplePoolFile2...  DEBUG DB Action Commit
 Stream2              INFO Metadata records written: 21
 Stream2             DEBUG Leaving incident handler for MetaDataStop
 EmptyPoolFile.root  DEBUG --> Access   DbContainer  CREATE    [ROOT_All] ##Shapes
@@ -1456,23 +1493,27 @@ EmptyPoolFile.root  DEBUG ---->ClassID:7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD
 EmptyPoolFile.root  DEBUG --->Adding Shape[6 , 7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD]:  [1 Column(s)] 
 EmptyPoolFile.root  DEBUG ---->Class:DataHeaderForm_p6
 EmptyPoolFile.root  DEBUG ---->[0]:DataHeaderForm_p6 Typ:DataHeaderForm_p6 [21] Size:0 Offset:0 #Elements:1
-MetaData(xAOD::...  DEBUG  SG::IAuxStoreIO* detected in xAOD::FileMetaDataAuxInfo_v1_FileMetaDataAux.
-MetaData(xAOD::...  DEBUG        Attributes= 1
-MetaData(xAOD::...  DEBUG createBasicAuxBranch: xAOD::FileMetaDataAuxInfo_v1_FileMetaDataAuxDyn.mcProcID, leaf:mcProcID/F
+EmptyPoolFile.root  DEBUG DB Action Commit
 Stream3              INFO Metadata records written: 1
 PoolSvc             DEBUG Disconnect request for contextId=0
 PoolSvc             DEBUG Disconnected PersistencySvc session
 PoolSvc             DEBUG Disconnect request for contextId=1
+SimplePoolFile1...  DEBUG DB Action Commit
 StorageSvc          DEBUG Disconnect request for database: FID=F2313678-C96A-964F-89E8-08BAB39F2DA7 PFN=SimplePoolFile1.root
 StorageSvc          DEBUG Closing database: FID=F2313678-C96A-964F-89E8-08BAB39F2DA7
+RootDatabase.close  DEBUG Closing DB SimplePoolFile1.root
 PoolSvc             DEBUG Disconnected PersistencySvc session
 PoolSvc             DEBUG Disconnect request for contextId=2
+SimplePoolFile2...  DEBUG DB Action Commit
 StorageSvc          DEBUG Disconnect request for database: FID=73F77177-D136-9344-B64D-29693F68D6C2 PFN=SimplePoolFile2.root
 StorageSvc          DEBUG Closing database: FID=73F77177-D136-9344-B64D-29693F68D6C2
+RootDatabase.close  DEBUG Closing DB SimplePoolFile2.root
 PoolSvc             DEBUG Disconnected PersistencySvc session
 PoolSvc             DEBUG Disconnect request for contextId=3
+EmptyPoolFile.root  DEBUG DB Action Commit
 StorageSvc          DEBUG Disconnect request for database: FID=C7040C30-3363-7D42-B1B7-E3F3B1881030 PFN=EmptyPoolFile.root
 StorageSvc          DEBUG Closing database: FID=C7040C30-3363-7D42-B1B7-E3F3B1881030
+RootDatabase.close  DEBUG Closing DB EmptyPoolFile.root
 PoolSvc             DEBUG Disconnected PersistencySvc session
 ApplicationMgr       INFO Application Manager Stopped successfully
 AllExecutedEvents    INFO accepted 20 out of 20 events for filter AllExecutedEvents (Number of processed events before any cut)

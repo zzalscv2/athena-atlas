@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 # menu components   
@@ -7,8 +7,6 @@ from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsP
 from AthenaCommon.CFElements import seqAND
 from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
 from DecisionHandling.DecisionHandlingConf import ViewCreatorPreviousROITool
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
-      
 
 
 def tag(ion):
@@ -51,11 +49,11 @@ def precisionCaloSequence(flags, ion=False, variant=''):
         # event views in this sequence. the egammaFSRecoSequence is thus placed
         # before the precisionCaloInViewSequence.
         from TriggerMenuMT.HLT.Egamma.TrigEgammaFactories import egammaFSCaloRecoSequence
-        egammaFSRecoSequence = egammaFSCaloRecoSequence()
+        egammaFSRecoSequence = egammaFSCaloRecoSequence(flags)
         theSequence += egammaFSRecoSequence
 
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Calo
-    robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Calo, ConfigFlags, nameSuffix=precisionCaloViewsMaker.name())[0]
+    robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Calo, flags, nameSuffix=precisionCaloViewsMaker.name())[0]
 
     # connect EVC and reco
     theSequence += [precisionCaloViewsMaker, robPrefetchAlg, precisionCaloInViewSequence]
@@ -63,10 +61,10 @@ def precisionCaloSequence(flags, ion=False, variant=''):
 
 
 
-def precisionCaloMenuSequence(name, is_probe_leg=False, ion=False, variant=''):
+def precisionCaloMenuSequence(flags, name, is_probe_leg=False, ion=False, variant=''):
     """ Creates precisionCalo MENU sequence """
 
-    (sequence, precisionCaloViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(precisionCaloSequence, ConfigFlags, ion=ion, variant=variant)
+    (sequence, precisionCaloViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(precisionCaloSequence, flags, ion=ion, variant=variant)
 
     #Hypo
     from TrigEgammaHypo.TrigEgammaHypoConf import TrigEgammaPrecisionCaloHypoAlg
@@ -75,12 +73,13 @@ def precisionCaloMenuSequence(name, is_probe_leg=False, ion=False, variant=''):
     thePrecisionCaloHypo = TrigEgammaPrecisionCaloHypoAlg(name + tag(ion) + 'Hypo'+ variant)
     thePrecisionCaloHypo.CaloClusters = sequenceOut
 
-    return MenuSequence( Sequence    = sequence,
+    return MenuSequence( flags,
+                         Sequence    = sequence,
                          Maker       = precisionCaloViewsMaker, 
                          Hypo        = thePrecisionCaloHypo,
                          HypoToolGen = TrigEgammaPrecisionCaloHypoToolFromDict,
                          IsProbe     = is_probe_leg)
 
 
-def precisionCaloMenuSequence_LRT(name, is_probe_leg=False):
-    return precisionCaloMenuSequence(name, is_probe_leg=is_probe_leg, ion=False, variant='_LRT')
+def precisionCaloMenuSequence_LRT(flags, name, is_probe_leg=False):
+    return precisionCaloMenuSequence(flags, name, is_probe_leg=is_probe_leg, ion=False, variant='_LRT')

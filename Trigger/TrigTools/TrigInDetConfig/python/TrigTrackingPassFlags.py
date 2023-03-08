@@ -23,7 +23,6 @@ def __flagsFromConfigSettings(settings):
     flags.addFlag("tracks_IDTrig", f"HLT_IDTrack_{flags.suffix}_IDTrig")
     flags.addFlag("refitROT", False) # should likely be moved to ConfigSettingsBase
     flags.addFlag("trtExtensionType", "xf") # should likely be moved to ConfigSettingsBase
-    flags.input_name = flags.name
     flags.minPT = flags.pTmin # hack to sync pT threshold used in offline and trigger
     return flags
 
@@ -45,6 +44,8 @@ def createTrigTrackingPassFlags():
       factory = flagsFactory(getInDetTrigConfig(i))     
       flags.addFlagsCategory(category,factory,prefix=True)
 
+    flags.addFlag('Trigger.InDetTracking.RoiZedWidthDefault', 180.0)
+
     return flags
 
 
@@ -52,7 +53,8 @@ import unittest
 
 class FlagsCopiedTest(unittest.TestCase):
     def setUp(self):
-        from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+        from AthenaConfiguration.AllConfigFlags import initConfigFlags
+        flags = initConfigFlags()
         flags.Trigger.doID
         flags.Trigger.InDetTracking.Muon
         flags.Trigger.InDetTracking.Electron.minPT = 2.0 * Units.GeV

@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "TrigT1NSWSimTools/MMT_Hit.h"
@@ -10,15 +10,15 @@
 #include "MuonReadoutGeometry/MMReadoutElement.h"
 #include <cmath>
 
-MMT_Hit::MMT_Hit(char wedge, const hitData_entry &entry, const MuonGM::MuonDetectorManager* detManager, const std::shared_ptr<MMT_Parameters> par, const std::vector<ROOT::Math::XYZVector> &planeCoordinates) {
-  m_sector = wedge;
+MMT_Hit::MMT_Hit(const hitData_entry &entry, const MuonGM::MuonDetectorManager* detManager, const std::shared_ptr<MMT_Parameters> par, const std::vector<ROOT::Math::XYZVector> &planeCoordinates) {
+  m_sector = par->getSector();
 
-  std::string module(1, wedge);
+  std::string module(1, m_sector);
   module += (std::abs(entry.station_eta) == 1) ? "M1" : "M2";
   m_module = module;
 
   m_station_name = "MM";
-  m_station_name += wedge;
+  m_station_name += m_sector;
   m_VMM_chip = entry.VMM_chip;
   m_MMFE_VMM = entry.MMFE_VMM;
   m_ART_ASIC = std::ceil(1.*entry.MMFE_VMM/2);
@@ -34,7 +34,7 @@ MMT_Hit::MMT_Hit(char wedge, const hitData_entry &entry, const MuonGM::MuonDetec
   m_Y = -1.;
   m_Z = -1.;
   m_R = -1.;
-  m_Ri = -1.;
+  m_Rp = -1.;
   m_isNoise = false;
   m_time = entry.gtime;
 
@@ -46,20 +46,14 @@ MMT_Hit::MMT_Hit(char wedge, const hitData_entry &entry, const MuonGM::MuonDetec
   int region = int(float(m_strip)/(64*8));
   // map of mmfe8s layer,radius(MMFE8 index on sector)
   unsigned int mmfe8s[8][16];
-  unsigned int R;
   // loop on layers
   for( unsigned int L=0; L<8; L++){
     // loop on pcbs
     for(unsigned int p=1; p<9; p++){
       // loop on sides
       for(unsigned int s=0; s<2; s++){ //loop on 0 (Left) and 1 (Right), same convention used also later
-	if(L%2==s){
-	  R=(p-1)*2;
-	}
-	else{
-	  R=(p-1)*2+1;
-	}
-	mmfe8s[L][R]=s;
+        unsigned int R = (L%2==s) ? (p-1)*2 : (p-1)*2+1;
+        mmfe8s[L][R]=s;
       }
     }
   }
@@ -86,54 +80,57 @@ MMT_Hit::MMT_Hit(char wedge, const hitData_entry &entry, const MuonGM::MuonDetec
   Identifier strip_id = detManager->mmIdHelper()->channelID(m_station_name, m_station_eta, m_station_phi, m_multiplet, m_gasgap, m_strip);
   const MuonGM::MMReadoutElement* readout = detManager->getMMReadoutElement(strip_id);
   Amg::Vector3D globalPos(0.0, 0.0, 0.0);
-  readout->stripGlobalPosition(strip_id, globalPos);
+  if(readout->stripGlobalPosition(strip_id, globalPos)) {
 
-  MMDetectorHelper aHelper;
-  char side = (globalPos.z() > 0.) ? 'A' : 'C';
-  MMDetectorDescription* mm = aHelper.Get_MMDetector(wedge, std::abs(m_station_eta), m_station_phi, m_multiplet, side);
-  MMReadoutParameters roP   = mm->GetReadoutParameters();
+    MMDetectorHelper aHelper;
+    char side = (globalPos.z() > 0.) ? 'A' : 'C';
+    MMDetectorDescription* mm = aHelper.Get_MMDetector(m_sector, std::abs(m_station_eta), m_station_phi, m_multiplet, side);
+    MMReadoutParameters roP   = mm->GetReadoutParameters();
 
-  m_R = globalPos.perp();
-  m_Z = globalPos.z();
-  m_oneOverZ = 1./m_Z;
-  m_Ri = m_strip*roP.stripPitch;
-  m_RZslope = m_R / m_Z;
+    m_R = globalPos.perp();
+    m_Z = globalPos.z();
+    m_PitchOverZ = roP.stripPitch/m_Z;
+    m_RZslope = m_R / m_Z;
 
-  int eta = std::abs(m_station_eta)-1;
-  double base = par->ybases[m_plane][eta];
-  m_Y = base + m_strip*roP.stripPitch - roP.stripPitch/2.;
-  m_YZslope = m_Y / m_Z;
+    int eta = std::abs(m_station_eta)-1;
+    double base = par->ybases[m_plane][eta];
+    m_Y = base + m_strip*roP.stripPitch - roP.stripPitch/2.;
+    m_YZslope = m_Y / m_Z;
 
-  double index = std::round((std::abs(m_RZslope)-0.1)/5e-04); // 0.0005 is approx. the step in slope achievable with a road size of 8 strips
-  double roundedSlope = 0.1 + index*((0.6 - 0.1)/1000.);
-  m_shift = roundedSlope*(planeCoordinates[m_plane].Z() - planeCoordinates[0].Z());
+    double index = std::round((std::abs(m_RZslope)-0.1)/5e-04); // 0.0005 is approx. the step in slope achievable with a road size of 8 strips
+    double roundedSlope = 0.1 + index*((0.6 - 0.1)/1000.);
+    m_Rp = roP.distanceFromZAxis + roundedSlope*(planeCoordinates[m_plane].Z() - planeCoordinates[0].Z());
+    m_shift = m_Rp / m_Z;
+  }
 }
 
-MMT_Hit::MMT_Hit(const MMT_Hit* hit) {
-  m_sector = hit->m_sector;
-  m_module = hit->m_module;
-  m_station_name = hit->m_station_name;
-  m_VMM_chip = hit->m_VMM_chip;
-  m_MMFE_VMM = hit->m_MMFE_VMM;
-  m_ART_ASIC = hit->m_ART_ASIC;
-  m_station_eta = hit->m_station_eta;
-  m_station_phi = hit->m_station_phi;
-  m_multiplet = hit->m_multiplet;
-  m_gasgap = hit->m_gasgap;
-  m_plane = hit->m_plane;
-  m_strip = hit->m_strip;
-  m_localX = hit->m_localX;
-  m_BC_time = hit->m_BC_time;
-  m_age = hit->m_age;
-  m_Y = hit->m_Y;
-  m_Z = hit->m_Z;
-  m_R = hit->m_R;
-  m_Ri = hit->m_Ri;
-  m_RZslope = hit->m_RZslope;
-  m_YZslope = hit->m_YZslope;
-  m_isNoise = hit->m_isNoise;
-  m_time = hit->m_time;
-  m_shift = hit->m_shift;
+MMT_Hit::MMT_Hit(const MMT_Hit* hit)
+  : m_sector (hit->m_sector),
+    m_module (hit->m_module),
+    m_station_name (hit->m_station_name),
+    m_VMM_chip (hit->m_VMM_chip),
+    m_MMFE_VMM (hit->m_MMFE_VMM),
+    m_ART_ASIC (hit->m_ART_ASIC),
+    m_plane (hit->m_plane),
+    m_station_eta (hit->m_station_eta),
+    m_station_phi (hit->m_station_phi),
+    m_multiplet (hit->m_multiplet),
+    m_gasgap (hit->m_gasgap),
+    m_strip (hit->m_strip),
+    m_localX (hit->m_localX),
+    m_RZslope (hit->m_RZslope),
+    m_YZslope (hit->m_YZslope),
+    m_BC_time (hit->m_BC_time),
+    m_age (hit->m_age),
+    m_Y (hit->m_Y),
+    m_Z (hit->m_Z),
+    m_PitchOverZ (hit->m_PitchOverZ),
+    m_R (hit->m_R),
+    m_Rp (hit->m_Rp),
+    m_isNoise (hit->m_isNoise),
+    m_time (hit->m_time),
+    m_shift (hit->m_shift)
+{
 }
 
 bool MMT_Hit::isX() const {

@@ -103,6 +103,7 @@ class FTagConfig (ConfigBlock):
         alg.preselection = config.getPreselection (self.containerName, selectionName)
         alg.selectionDecoration = 'ftag_select_' + selectionName + ',as_char'
         alg.particles = config.readName (self.containerName)
+        config.addOutputVar (self.containerName, 'ftag_select_' + selectionName, selectionName + '_select', noSys=True)
 
         if self.btagWP == 'Continuous':
             alg = config.createAlgorithm( 'CP::BTaggingInformationDecoratorAlg', 'FTagInfoAlg' + postfix )
@@ -139,6 +140,7 @@ class FTagConfig (ConfigBlock):
             alg.outOfValidityDeco = 'no_ftag_' + selectionName
             alg.preselection = config.getPreselection (self.containerName, selectionName)
             alg.jets = config.readName (self.containerName)
+            config.addOutputVar (self.containerName, alg.scaleFactorDecoration, selectionName + '_eff')
 
 
 def makeFTagAnalysisConfig( seq, containerName,

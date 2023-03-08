@@ -26,7 +26,7 @@
 #include <boost/tokenizer.hpp>
 #include <boost/foreach.hpp>
 #include "LArRecEvent/LArEventBitInfo.h"
-#include "StoreGate/ReadDecorHandle.h"
+#include "StoreGate/ReadHandle.h"
 
 //**********************************************************************
 using namespace Trig;
@@ -51,7 +51,7 @@ StatusCode TrigEgammaMonitorTagAndProbeAlgorithm::initialize() {
 
     ATH_CHECK(m_offElectronKey.initialize());
     ATH_CHECK(m_jetKey.initialize());
-    ATH_CHECK( m_eventInfoKey.initialize() );
+    ATH_CHECK( m_eventInfoDecorKey.initialize() );
     
     ATH_MSG_INFO("Now configuring chains for analysis: " << name() );
     for(auto& trigName : m_trigInputList)
@@ -90,7 +90,8 @@ StatusCode TrigEgammaMonitorTagAndProbeAlgorithm::fillHistograms( const EventCon
     }
 
     // Noise burst protection 
-    SG::ReadDecorHandle<xAOD::EventInfo,uint32_t> thisEvent(m_eventInfoKey, ctx);
+    SG::ReadHandle<xAOD::EventInfo> thisEvent(GetEventInfo(ctx));
+    ATH_CHECK(thisEvent.isValid());
     if ( thisEvent->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::NOISEBURSTVETO)) {
         ATH_MSG_DEBUG("LAr Noise Burst Veto, skip trigger analysis");
         return StatusCode::SUCCESS;

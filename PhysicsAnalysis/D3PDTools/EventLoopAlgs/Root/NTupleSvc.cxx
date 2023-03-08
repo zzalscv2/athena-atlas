@@ -108,7 +108,7 @@ namespace EL
       while (!line.empty() && isspace (line[0]))
 	line = line.substr (1);
       while (!line.empty() && isspace (line[line.size()-1]))
-	line = line.substr (0, line.size()-1);
+	line.pop_back();
       if (!line.empty() && line[0] != '#')
 	copyBranch (line);
     }

@@ -1,7 +1,5 @@
 #!/bin/bash 
 # 
-# $Id: athenarun_test.sh.in 740489 2016-04-15 09:17:00Z krasznaa $ 
-# 
 # This script template is used to create the scripts for the package that 
 # executes its integration tests. 
 # 
@@ -14,7 +12,7 @@ s/0\\\\{8\\\\}-0\\\\{4\\\\}-0\\\\{4\\\\}-0\\\\{4\\\\}-0\\\\{12\\\\}/!!!!/g
 s/TTree [0-9]\\\\{3\\\\}[0-9]*/TTree ????/g
 s/^.*Py:Athena /Athena    /g
 s/-[0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F]0/-0/g
-s/=[0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F]0/=0/g
+s/[:=][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F]0/=0/g
 s/0x[0-9a-f]\\\\{7,12\\\\}/0x????/g
 s/[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]00*//g
 EOF

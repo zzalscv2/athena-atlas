@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Trigger BS->RDO_TRIG athena test without any HLT chains and without L1Sim (only tests L1 decoding)
 # art-type: build
 # art-include: master/Athena
-# art-include: 22.0/Athena
+# art-include: 23.0/Athena
 # Skipping art-output which has no effect for build tests.
 # If you create a grid version, check art-output in existing grid tests.
 
@@ -39,7 +39,8 @@ test.check_steps.remove(test.get_step("ZeroCounts"))
 msgcount = test.get_step("MessageCount")
 msgcount.thresholds = {
   'INFO': 400,
-  'other': 10
+  'other': 10,
+  'WARNING': 10
 }
 msgcount.required = True # make the test exit code depend on this step
 

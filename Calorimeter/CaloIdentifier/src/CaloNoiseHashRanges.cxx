@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include "CaloIdentifier/CaloNoiseHashRanges.h"
 #include "CaloIdentifier/CaloCell_ID.h"
@@ -39,6 +39,4 @@ CaloNoiseHashRanges::CaloNoiseHashRanges(const CaloCell_ID* caloCellID) {
   caloCellID->calo_cell_hash_range(CaloCell_ID::TILE,from,to);
   m_hashOffsets[TILE]=from;
   m_maxTileCells=to-from;
-
-  return;
 }

@@ -21,6 +21,7 @@
 #include "MagFieldElements/AtlasFieldCache.h"
 
 #include <list>
+#include <deque>
 
 class MsgStream;
 
@@ -66,7 +67,7 @@ namespace InDet {
       /// @param[in,out] roadMakerData: event data object used to cache information during an event in a thread-safe way 
       //@{
       virtual void detElementsRoad
-      ( std::list<Amg::Vector3D>& globalPositions,
+      ( std::deque<Amg::Vector3D>& globalPositions,
 	      std::list<const InDetDD::SiDetectorElement*>& Road,
         bool testDirection, 
         InDet::SiDetElementRoadMakerData_xk & roadMakerData,

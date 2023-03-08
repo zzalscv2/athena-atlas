@@ -202,7 +202,7 @@ StatusCode GetLCDeadMaterialTree::execute()
   const McEventCollection* truthEvent=nullptr;
   ATH_CHECK( evtStore()->retrieve(truthEvent, "TruthEvent") );
 #ifdef HEPMC3
-  HepMC::ConstGenParticlePtr gen  = truthEvent->at(0)->particles().front();
+  const HepMC::ConstGenParticlePtr& gen  = truthEvent->at(0)->particles().front();
 #else
   HepMC::GenEvent::particle_const_iterator pit  = truthEvent->at(0)->particles_begin();
   const HepMC::GenParticle * gen  = *pit;

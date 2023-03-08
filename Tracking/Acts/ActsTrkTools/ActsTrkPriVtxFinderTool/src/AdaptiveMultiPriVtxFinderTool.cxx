@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/AdaptiveMultiPriVtxFinderTool.h"
@@ -73,7 +73,8 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::initialize()
     ipEstCfg.precision = m_ipEstPrecision;
     IPEstimator ipEst(ipEstCfg);
 
-    Acts::AnnealingUtility::Config annealingConfig(m_annealingTemps);
+    Acts::AnnealingUtility::Config annealingConfig;
+    annealingConfig.setOfTemperatures = m_annealingTemps;
     annealingConfig.cutOff = m_annealingCutOff;
     Acts::AnnealingUtility annealingUtility(annealingConfig);
 
@@ -107,7 +108,7 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::initialize()
     seedFinderConfig.trackDensityEstimator = trackDensity;
     VertexSeedFinder seedFinder(seedFinderConfig, extractParameters);
     VertexFinder::Config finderConfig(std::move(fitter), seedFinder,
-      ipEst, linearizer, bField);
+        ipEst, std::move(linearizer), bField);
 
     // Vertex finder config
     finderConfig.useBeamSpotConstraint = m_useBeamConstraint;

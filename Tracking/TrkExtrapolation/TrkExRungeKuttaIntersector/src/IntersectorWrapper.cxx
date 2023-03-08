@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 //////////////////////////////////////////////////////////////////////
@@ -149,7 +149,7 @@ IntersectorWrapper::propagateParameters (const EventContext&              /*ctx*
   return std::move(cache.m_parameters);
 }
 
-const IntersectionSolution*
+IntersectionSolution
 IntersectorWrapper::intersect (const EventContext&              /*ctx*/,
                                const TrackParameters&		parameters,
                                const Surface&			surface,
@@ -159,9 +159,9 @@ IntersectorWrapper::intersect (const EventContext&              /*ctx*/,
 {
   Cache cache{};
   findIntersection(cache,parameters,surface);
-  IntersectionSolution* solution = new IntersectionSolution;
+  auto solution = IntersectionSolution();
   if (cache.m_intersection) {
-    solution->push_back(std::move(cache.m_intersection));
+    solution.push_back(std::move(cache.m_intersection));
   }
   return solution;
 }

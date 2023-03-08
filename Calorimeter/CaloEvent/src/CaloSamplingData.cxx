@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -25,10 +25,9 @@ CaloSamplingData::CaloSamplingData(unsigned int varTypePattern)
 }
 
 CaloSamplingData::CaloSamplingData(const CaloSamplingData& rData)
-  : m_dataStore (rData.m_dataStore),
-    m_varTypePattern (rData.m_varTypePattern)
-{
-}
+  
+    
+= default;
 
 CaloSamplingData::CaloSamplingData(const CaloSamplingData* pData)
   : m_dataStore (pData->m_dataStore),
@@ -46,7 +45,7 @@ CaloSamplingData& CaloSamplingData::operator= (const CaloSamplingData& other)
 }
 
 CaloSamplingData::~CaloSamplingData()
-{ }
+= default;
 
 
 void CaloSamplingData::swap (CaloSamplingData& other)

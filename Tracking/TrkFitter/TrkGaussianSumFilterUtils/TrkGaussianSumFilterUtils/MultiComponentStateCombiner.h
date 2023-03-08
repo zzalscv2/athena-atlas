@@ -22,9 +22,9 @@ namespace MultiComponentStateCombiner {
 
 /** @bried Calculate combined state of many components */
 std::unique_ptr<Trk::TrackParameters>
-combine(const MultiComponentState&,
-        const bool useMode = false,
-        const double fractionPDFused = 1.0);
+combineToSingle(const MultiComponentState&,
+                const bool useMode = false,
+                const double fractionPDFused = 1.0);
 
 /** @brief Combined/merge a component to another one */
 void
@@ -50,9 +50,9 @@ combineCovWithWeight(const AmgVector(5) & firstParameters,
 /** @brief Helper to combine forward with  smoother MultiComponentStates
  */
 Trk::MultiComponentState
-combine(const Trk::MultiComponentState& forwardsMultiState,
-        const Trk::MultiComponentState& smootherMultiState,
-        unsigned int maximumNumberOfComponents);
+combineWithSmoother(const Trk::MultiComponentState& forwardsMultiState,
+                    const Trk::MultiComponentState& smootherMultiState,
+                    unsigned int maximumNumberOfComponents);
 
 }//end of MultiComponentStateCombiner namespace
 } // end Trk namespace

@@ -36,8 +36,6 @@ class TileMu {
   /** Constructor */
   TileMu ( float eta, float phi, const std::vector<float> & ener, float qual );
 
-  /** Destructor */
-  ~TileMu() {}
 
   void Set( float eta, float phi, const std::vector<float> & ener, float qual ); 
 

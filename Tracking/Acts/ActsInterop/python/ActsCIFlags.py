@@ -16,8 +16,7 @@ def actsWorkflowFlags(flags):
 def actsValidateClustersFlags(flags):
     """flags for Reco_tf with CA used in CI tests: use cluster conversion [xAOD -> InDet] with both Athena and Acts sequences"""
     flags.Reco.EnableHGTDExtension = False
-    flags.ITk.Tracking.recoChain = [TrackingComponent.ActsChain,
-                                    TrackingComponent.ValidateActsClusters]
+    flags.ITk.Tracking.recoChain = [TrackingComponent.ValidateActsClusters]
 
 def actsValidateSpacePointsFlags(flags):
     """flags for Reco_tf with CA used in CI tests: use for validating space point formation with Acts"""
@@ -35,3 +34,16 @@ def actsValidateOrthogonalSeedsFlags(flags):
     from ActsInterop.ActsConfigFlags import SeedingStrategy
     flags.Acts.SeedingStrategy = SeedingStrategy.Orthogonal
     actsValidateSeedsFlags(flags)
+
+def actsValidateTracksFlags(flags):
+    """flags for Reco_tf with CA used in CI tests: use ActsTrkFinding during reconstruction"""
+    flags.Reco.EnableHGTDExtension = False
+    flags.ITk.Tracking.MainPass.doAmbiguityProcessorTrackFit = False
+    flags.ITk.Tracking.recoChain = [TrackingComponent.ValidateActsTracks]
+
+def actsArtFlags(flags):
+    """flags for Reco_tf with CA used in ART test: add Acts workflow to reco sequence"""
+    flags.Reco.EnableHGTDExtension = False
+    flags.Acts.doMonitoring = True
+    flags.ITk.Tracking.recoChain = [TrackingComponent.AthenaChain,
+                                    TrackingComponent.ActsChain]

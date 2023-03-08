@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetBottomUpSoftDrop.h
@@ -32,7 +32,7 @@ ASG_TOOL_CLASS(JetBottomUpSoftDrop, IJetGroomer)
 public:
 
   // Ctor.
-  JetBottomUpSoftDrop(std::string name);
+  JetBottomUpSoftDrop(const std::string& name);
 
   // Dtor.
   ~JetBottomUpSoftDrop();

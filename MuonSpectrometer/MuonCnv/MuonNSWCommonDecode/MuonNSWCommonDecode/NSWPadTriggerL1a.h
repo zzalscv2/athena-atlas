@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef NSWPADTRIGGERL1A_H_
@@ -10,7 +10,10 @@
 #include <array>
 #include <bitset>
 #include <numeric>
+#include <algorithm>
 
+#include "eformat/eformat.h"
+#include "MuonNSWCommonDecode/MapperSTG.h"
 #include "MuonNSWCommonDecode/NSWTriggerElink.h"
 
 namespace Muon
@@ -30,6 +33,8 @@ namespace Muon
       // NSW trigger general
       constexpr uint32_t NPFEBS            = 24;
       constexpr uint32_t NPADS             = 104;
+      constexpr uint32_t NLAYERS           = 8;
+      constexpr uint32_t NLAYERS_PER_QUAD  = 4;
       constexpr uint32_t N_BITS_IN_PHIID   = 6;
       constexpr uint32_t N_BITS_IN_BANDID  = 8;
       constexpr uint32_t N_SEGMENTS_IN_BC  = 4;
@@ -139,30 +144,30 @@ namespace Muon
 
       NSWPadTriggerL1a(const uint32_t* bs, const uint32_t remaining);
       virtual ~NSWPadTriggerL1a() = default;
-      bool isLarge(uint32_t secid) const;
 
       /*
         Public interface
       */
-      uint32_t getNumberOfHits()                   const { return m_hit_n; };
-      uint32_t getNumberOfPfebs()                  const { return m_pfeb_n; };
-      uint32_t getNumberOfTriggers()               const { return m_trigger_n; };
-      uint32_t getNumberOfBcids()                  const { return m_bcid_n; };
-      std::vector<uint32_t> getHitRelBcids()       const { return m_hit_relbcid; };
-      std::vector<uint32_t> getHitPfebs()          const { return m_hit_pfeb; };
-      std::vector<uint32_t> getHitTdsChannels()    const { return m_hit_tdschannel; };
-      std::vector<uint32_t> getHitVmmChannels()    const { return m_hit_vmmchannel; };
-      std::vector<uint32_t> getHitVmms()           const { return m_hit_vmm; };
-      std::vector<uint32_t> getHitPadChannels()    const { return m_hit_padchannel; };
-      std::vector<uint32_t> getPfebAddresses()     const { return m_pfeb_addr; };
-      std::vector<uint32_t> getPfebNChannels()     const { return m_pfeb_nchan; };
-      std::vector<uint32_t> getPfebDisconnecteds() const { return m_pfeb_disconnected; };
-      std::vector<uint32_t> getTriggerBandIds()    const { return m_trigger_bandid; };
-      std::vector<uint32_t> getTriggerPhiIds()     const { return m_trigger_phiid; };
-      std::vector<uint32_t> getTriggerRelBcids()   const { return m_trigger_relbcid; };
-      std::vector<uint32_t> getBcidRels()          const { return m_bcid_rel; };
-      std::vector<uint32_t> getBcidStatuses()      const { return m_bcid_status; };
-      std::vector<uint32_t> getBcidMultZeros()     const { return m_bcid_multzero; };
+      uint32_t getNumberOfHits()     const { return m_hit_n; };
+      uint32_t getNumberOfPfebs()    const { return m_pfeb_n; };
+      uint32_t getNumberOfTriggers() const { return m_trigger_n; };
+      uint32_t getNumberOfBcids()    const { return m_bcid_n; };
+      const std::vector<uint32_t>& getHitRelBcids()        const { return m_hit_relbcid; };
+      const std::vector<uint32_t>& getHitPfebs()           const { return m_hit_pfeb; };
+      const std::vector<uint32_t>& getHitTdsChannels()     const { return m_hit_tdschannel; };
+      const std::vector<uint32_t>& getHitVmmChannels()     const { return m_hit_vmmchannel; };
+      const std::vector<uint32_t>& getHitVmms()            const { return m_hit_vmm; };
+      const std::vector<uint32_t>& getHitPadChannels()     const { return m_hit_padchannel; };
+      const std::vector<uint32_t>& getPfebAddresses()      const { return m_pfeb_addr; };
+      const std::vector<uint32_t>& getPfebNChannels()      const { return m_pfeb_nchan; };
+      const std::vector<uint32_t>& getPfebDisconnecteds()  const { return m_pfeb_disconnected; };
+      const std::vector<uint32_t>& getTriggerBandIds()     const { return m_trigger_bandid; };
+      const std::vector<uint32_t>& getTriggerPhiIds()      const { return m_trigger_phiid; };
+      const std::vector<uint32_t>& getTriggerRelBcids()    const { return m_trigger_relbcid; };
+      const std::vector<uint32_t>& getBcidRels()           const { return m_bcid_rel; };
+      const std::vector<uint32_t>& getBcidStatuses()       const { return m_bcid_status; };
+      const std::vector<uint32_t>& getBcidMultZeros()      const { return m_bcid_multzero; };
+      const std::vector<uint32_t>& getBcidMultiplicities() const { return m_bcid_multiplicity; };
 
       /*
         Public interface: NSW header
@@ -182,6 +187,141 @@ namespace Muon
       uint32_t getOrbitid() const { return m_decoded.orbitid; };
       uint32_t getOrbit1()  const { return m_decoded.orbit1; };
       uint32_t getStatus()  const { return m_decoded.status; };
+
+      /*
+        Decode large sector from sector [0x0-0xf]
+        NB: sector=0 = A01 = Large
+      */
+      static bool isLarge(const uint32_t sec) {
+        return sec % 2 == 0;
+      }
+
+      /*
+        Decode small sector from sector [0x0-0xf]
+      */
+      static bool isSmall(const uint32_t sec) {
+        return not isLarge(sec);
+      }
+
+      /*
+        Decode A-side from sourceid
+      */
+      static bool isA(const uint32_t sourceid) {
+        return static_cast<eformat::SubDetector>((sourceid >> 16) & 0xff)
+          == eformat::MUON_STGC_ENDCAP_A_SIDE;
+      }
+
+      /*
+        Decode C-side from sourceid
+      */
+      static bool isC(const uint32_t sourceid) {
+        return not isA(sourceid);
+      }
+
+      /*
+        Decode radius [0-2] from pfeb index [0-23]
+      */
+      static uint32_t radius(const uint32_t pfeb) {
+        return pfeb / Constants::NLAYERS;
+      }
+
+      /*
+        Decode layer [0-7] from pfeb index [0-23]
+      */
+      static uint32_t layer(const uint32_t pfeb) {
+        return pfeb % Constants::NLAYERS;
+      }
+
+      /*
+        Decode sector [0x0-0xf] from sourceid [0xXXXXXXX0-0xXXXXXXXf]
+      */
+      static uint32_t sector(const uint32_t sourceid) {
+        return sourceid & 0xf;
+      }
+
+      /*
+        Decode quad [0-1] from pfeb [0-23]
+      */
+      static uint32_t quad(const uint32_t pfeb) {
+        return layer(pfeb) / Constants::NLAYERS_PER_QUAD;
+      }
+
+      /*
+        Decode quad layer [0-3] from pfeb [0-23]
+      */
+      static uint32_t quadlayer(const uint32_t pfeb) {
+        return layer(pfeb) % Constants::NLAYERS_PER_QUAD;
+      }
+
+      /*
+        Decode offline gasgap [1-4] from pfeb [0-23]
+      */
+      static uint32_t offlineGasgap(const uint32_t pfeb) {
+        return quadlayer(layer(pfeb)) + 1;
+      }
+
+      /*
+        Decode offline multilayer [1-2] from pfeb [0-23]
+      */
+      static uint32_t offlineMultilayer(const uint32_t pfeb) {
+        return quad(layer(pfeb)) + 1;
+      }
+
+      /*
+        Decode offline channel number from electronics numbering
+      */
+      static uint32_t offlineChannelNumber(const uint32_t sec,
+                                           const uint32_t pfeb,
+                                           const uint32_t vmm,
+                                           const uint32_t vmmchan) {
+        static const Muon::nsw::MapperSTG mapper;
+        return mapper.channel_number(Muon::nsw::OFFLINE_CHANNEL_TYPE_PAD, isLarge(sec), radius(pfeb), layer(pfeb), vmm, vmmchan);
+      }
+
+      /*
+        Decode offline station eta [1-3] from pfeb index [0-23]
+      */
+      static uint32_t offlineStationAbsEta(const uint32_t pfeb) {
+        return radius(pfeb) + 1;
+      }
+
+      /*
+        Decode offline station phi [1-8] from sourceid [0xXXXXXXX0-0xXXXXXXXf]
+      */
+      static uint32_t offlineStationPhi(const uint32_t sourceid) {
+        return sector(sourceid) / 2 + 1;
+      }
+
+      /*
+        Decode offline station name/type [STL, STS] from sector [0x0-0xf]
+      */
+      static std::string offlineStationName(const uint32_t sec) {
+        return isLarge(sec) ? "STL" : "STS";
+      }
+
+      /*
+        Convert from pad trigger channel to TDS channel
+      */
+      static uint8_t getPadTriggerToTds(const size_t pfeb,
+                                        const size_t chan,
+                                        const std::string& size) {
+        const auto& chans = (size == "S") ?
+          m_mapPadTriggerToTdsS:
+          m_mapPadTriggerToTdsL;
+        return chans.at(pfeb).at(chan);
+      }
+
+      /*
+        Convert from TDS channel to pad trigger channel
+      */
+      static uint8_t getTdsToPadTrigger(const size_t pfeb,
+                                        const uint8_t tdschan,
+                                        const std::string& size) {
+        const auto& chans = (size == "S") ?
+          m_mapPadTriggerToTdsS.at(pfeb) :
+          m_mapPadTriggerToTdsL.at(pfeb);
+        return std::distance(chans.begin(), std::find(chans.begin(), chans.end(), tdschan));
+      }
 
     private:
 
@@ -367,6 +507,7 @@ namespace Muon
       std::vector<uint32_t> m_bcid_rel{};
       std::vector<uint32_t> m_bcid_status{};
       std::vector<uint32_t> m_bcid_multzero{};
+      std::vector<uint32_t> m_bcid_multiplicity{};
 
       /*
         Configurable parameters

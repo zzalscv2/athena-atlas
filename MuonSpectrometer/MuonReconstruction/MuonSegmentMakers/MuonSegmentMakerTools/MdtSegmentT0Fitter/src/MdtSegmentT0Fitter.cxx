@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtSegmentT0Fitter/MdtSegmentT0Fitter.h"
@@ -28,9 +28,6 @@ namespace {
   // number of fit parameters
   constexpr unsigned int NUMPAR=3;
  
-  // prints a message if a radius is bigger than this
-  constexpr double MAX_RAD=16.;
-
   // time corresponding to r=15 mm for internal rt
   //constexpr double TUBE_TIME = 757.22;
 
@@ -54,17 +51,28 @@ namespace {
             w(w_coord),
             r(r_coord),
             rt(rt_rel){}
-        double z;
-        double t;
-        double y;
-        double w;
-        double r;
-        const MuonCalib::IRtRelation *rt;
+        /// Z coordinate
+        double z{0.};
+        /// Drift time
+        double t{0.};
+        /// Y coordinate
+        double y{0.};
+        /// Inverse error
+        double w{0.};
+        /// Drift radius
+        double r{0.};
+        /// Drift error
+        double dr{0.};
+        /// Rt relation function
+        const MuonCalib::IRtRelation *rt{nullptr};
+        /// Flag whether the hit is rejected
+        bool rejected{false};
   };
+  template <typename T> constexpr T sq(const T a) {return a * a;}
   
   class FunctionToMinimize : public ROOT::Math::IMultiGenFunction {
     public:      
-      FunctionToMinimize(const int used) : m_data(),m_used(used),m_t0Error(-1) {}
+      FunctionToMinimize(const int used) :m_used{used} {}
      
       double DoEval(const double* xx) const override {
         const double ang = xx[0];
@@ -90,12 +98,12 @@ namespace {
                    
           // Penalty for t<lowercut and t >uppercut
           if (t> uppercut ) { // too large
-            fval += (t-uppercut)* (t-uppercut)*0.1;
+            fval += sq(t-uppercut)*0.1;
           } else if (t < lowercut) {// too small
-            fval += (t-lowercut)*(t-lowercut)*0.1;
+            fval += sq(t-lowercut)*0.1;
           }
           const double r = t< lowercut ?  m_data[i].rt->radius(lowercut) : t > uppercut ? m_data[i].rt->radius(uppercut) :  m_data[i].rt->radius(t);
-          fval += (dist - r)*(dist - r)*w;
+          fval += sq(dist - r)*w;
         }
         
         return fval;
@@ -103,13 +111,13 @@ namespace {
       ROOT::Math::IBaseFunctionMultiDim* Clone() const override {return new FunctionToMinimize(m_used);}
       unsigned int NDim() const override {return 3;}
       void setT0Error(const int t0Error){m_t0Error=t0Error;}
-      void addCoords(const double z, const double t, const double y, const double w, const double r, const MuonCalib::IRtRelation *rt){
-        m_data.emplace_back(z,t,y,w,r,rt);
+      void addCoords(HitCoords coord){
+        m_data.emplace_back(std::move(coord));
       }
     private:
-      std::vector<HitCoords> m_data;
-      int m_used;
-      int m_t0Error;
+      std::vector<HitCoords> m_data{};
+      int m_used{0};
+      int m_t0Error{-1};
   };
   
    /***********************************************************************************/
@@ -121,8 +129,7 @@ namespace {
 
   
 
-  double r2t_ext(std::vector<const MuonCalib::IRtRelation*> *rtpointers, double r, int i) {
-    const MuonCalib::IRtRelation* rtrel = rtpointers->at(i);
+  double r2t_ext(const MuonCalib::IRtRelation* rtrel, double r) {
     double ta = rtrel->tLower();
     double tb = rtrel->tUpper();
     if(r<rtrel->radius(ta) ) {
@@ -159,13 +166,7 @@ namespace TrkDriftCircleMath {
 
   MdtSegmentT0Fitter::MdtSegmentT0Fitter(const std::string& ty,const std::string& na,const IInterface* pa)
   : AthAlgTool(ty,na,pa),
-    DCSLFitter(),
-    m_ntotalCalls(0),
-    m_npassedNHits(0),
-    m_npassedSelectionConsistency(0),
-    m_npassedNSelectedHits(0),
-    m_npassedMinHits(0),
-    m_npassedMinuitFit(0) {
+    DCSLFitter() {
     declareInterface <IDCSLFitProvider> (this);
   }
 
@@ -247,8 +248,8 @@ namespace TrkDriftCircleMath {
             double tUp = rtInfo->rt()->tUpper();
             double tLow = rtInfo->rt()->tLower();
             
-            if(t<tLow) chi2p += (t-tLow)*(t-tLow)*0.1;
-            else if(t>tUp) chi2p += (t-tUp)*(t-tUp)*0.1;
+            if(t<tLow) chi2p += sq(t-tLow)*0.1;
+            else if(t>tUp) chi2p += sq(t-tUp)*0.1;
             }
       }
       
@@ -276,69 +277,36 @@ namespace TrkDriftCircleMath {
     ATH_MSG_DEBUG("in fit "<<result.hasT0Shift()<< " " <<result.t0Shift());
     
 
-    double Zc(0);
-    double Yc(0);
-    double S(0);
-    double Sz(0);
-    double Sy(0);
-    std::vector<double> y(N);
-    std::vector<double> z(N);
-    std::vector<double> w(N);
-    std::vector<double> r(N);
-    std::vector<double> dr(N);
-    std::vector<double> t(N);
-    std::vector<const MuonCalib::IRtRelation*> rtpointers(N);
+    double Zc{0.}, Yc{0.}, S{0.}, Sz{0.}, Sy{0};
 
+    std::vector<HitCoords> hits{};
+    hits.reserve(N);
     FunctionToMinimize minFunct(used);
 
     {
-      DCOnTrackVec::const_iterator it = dcs_keep.begin();
-      DCOnTrackVec::const_iterator it_end = dcs_keep.end();
-      for(int ii=0 ;it!=it_end; ++it, ++ii ){
-        const Muon::MdtDriftCircleOnTrack *roto = it->rot();
-        if (!roto) {
-          ATH_MSG_ERROR("MdtSegmentT0Fitter: NO DC ROT pointer found");
-          return false;
-        }
-        ATH_MSG_DEBUG("hit # "<<ii );
-        y[ii] = it->y();
-        z[ii] = it->x();
-        r[ii] = std::abs(roto->driftRadius());
-        dr[ii] = it->dr();
-        const Muon::MdtPrepData *peerd;
-        peerd = dynamic_cast<const Muon::MdtPrepData*>(roto->prepRawData());
-        if(!peerd) {
-          ATH_MSG_ERROR("MdtSegmentT0Fitter: Can't convert to MdtPrepData* !! Not fitting for t0");
-          return false;
-        }
-        Identifier id = roto->identify();
-        const MuonCalib::MdtRtRelation *rtInfo = m_calibrationDbTool->getRtCalibration(id);
-        rtpointers[ii] = rtInfo->rt();
-        t[ii] = roto->driftTime();
+      unsigned int ii{0};
+      for(const DCOnTrack& keep_me : dcs_keep ){
+        const Muon::MdtDriftCircleOnTrack *roto = keep_me.rot();
+        const MuonCalib::MdtRtRelation *rtInfo = m_calibrationDbTool->getRtCalibration(roto->identify());
 
-        double newerror = m_scaleErrors ? it->drPrecise() : it->dr();
-
-        if( newerror > 0.) w[ii] = 1./(newerror);
-        else w[ii] = 0.;
-        w[ii]*=w[ii];
-        if(r[ii]<0){
-          r[ii] = 0.;
-          ATH_MSG_DEBUG("MdtSegmentT0Fitter (using times) ERROR: <Negative r> " << r[ii]);
+        const double newerror = m_scaleErrors ? keep_me.drPrecise() : keep_me.dr();
+        const double w = newerror >0. ? sq(1./newerror) : 0.;
+        hits.emplace_back(keep_me.x(), roto->driftTime(), keep_me.y(), w, std::abs(roto->driftRadius()), rtInfo->rt());
+        HitCoords& coords = hits.back();
+        coords.dr = keep_me.dr();
+        coords.rejected = selection[ii];
+        ATH_MSG_DEBUG("DC:  (" << coords.y << "," << coords.z << ") R = " << coords.r << " W " << coords.w 
+                               <<" t " <<coords.t<< " id: "<<keep_me.id()<<" sel " <<coords.rejected);
+        if (!coords.rejected) {          
+           S += coords.w;
+           Sz+= coords.z* coords.w;
+           Sy+= coords.y * coords.w;
         }
-
-        ATH_MSG_DEBUG("DC:  (" << y[ii] << "," << z[ii] << ") R = " << r[ii] << " W " << w[ii] <<" t " <<t[ii]<< " id: "<<it->id()<<" sel " << selection[ii]);
-
-        if( selection[ii] == 0 ){
-          S+=w[ii];
-          Sz+= w[ii]*z[ii];
-          Sy+= w[ii]*y[ii];
-          if(r[ii] > MAX_RAD ) {
-            ATH_MSG_DEBUG("Radius is too big");
-          }
-        }
+        ++ii;
       }
     }
     
+    /// Normalize the mean positions
     const double inv_S = 1. / S;
     Zc = Sz*inv_S;
     Yc = Sy*inv_S;
@@ -346,54 +314,44 @@ namespace TrkDriftCircleMath {
     ATH_MSG_DEBUG("Yc " << Yc << " Zc " << Zc);
 
     /// go to coordinates centered at the average of the hits
-    for(unsigned int i=0;i<N;++i) {
-      y[i]  -= Yc;
-      z[i]  -= Zc;
+    for(HitCoords& coords : hits) {
+      coords.y -= Yc;
+      coords.z -= Zc;
     }
 
-    int selcount(0);
-    DCOnTrackVec::const_iterator it = dcs_keep.begin();
-    DCOnTrackVec::const_iterator it_end = dcs_keep.end();
-
+    int selcount{0};
+  
     // replicate for the case where the external rt is used...
     // each hit has an rt function with some range...we want to fit such that
     // tlower_i < ti - t0 < tupper_i
-    double min_tlower=1e10;
-    double max_tupper=-1e10;
+    double min_tlower{std::numeric_limits<float>::max()}, max_tupper{-std::numeric_limits<float>::max()};
 
     double t0seed=0; // the average t0 of the hit
     double st0 = 0; // the std deviation of the hit t0s
     double min_t0 = 1e10; // the smallest t0 seen
-    double tee0, tl, th;
+  
+    for(HitCoords& coords : hits) {
+      if(coords.rejected) continue;
+      
+      double r2tval = r2t_ext(coords.rt, coords.r) ;
+      const double tl = coords.rt->tLower();
+      const double th = coords.rt->tUpper();
+      const double tee0 = coords.t - r2tval;
 
+      min_tlower = std::min(min_tlower, coords.t - tl);
+      max_tupper = std::max(max_tupper, coords.t - th);
+      
+      
+      ATH_MSG_DEBUG(" z "<<coords.z <<" y "<<coords.y<<" r "<<coords.r
+                  <<" t "<<coords.t<<" t0 "<<tee0<<" tLower "<<tl<<" tUpper "<<th);
+      t0seed += tee0;
+      st0 += sq(tee0);
+      if(tee0 < min_t0 && std::abs(r2tval) < R2TSPURIOUS) min_t0 = tee0;
 
-    for(int ii=0 ;it!=it_end; ++it, ++ii ){
-      if( selection[ii] == 0 ) {
-        double r2tval = r2t_ext(&rtpointers,  r[ii], ii) ;
-        tl = rtpointers[ii]->tLower();
-        th = rtpointers[ii]->tUpper();
-        if(t[ii] - tl < min_tlower) min_tlower = t[ii] - tl;
-        if(t[ii] - th > max_tupper) max_tupper = t[ii] - th;
-        tee0 = t[ii] - r2tval;
+      minFunct.addCoords(coords);
 
-        
-        ATH_MSG_DEBUG(" z "<<z[ii]
-             <<" y "<<y[ii]
-             <<" r "<<r[ii]
-             <<" t "<<t[ii]
-             <<" t0 "<<tee0
-             <<" tLower "<<tl
-             <<" tUpper "<<th);
-          
-        
-        t0seed += tee0;
-        st0 += tee0*tee0;
-        if(tee0 < min_t0 && std::abs(r2tval) < R2TSPURIOUS) min_t0 = tee0;
-
-        minFunct.addCoords(z[ii], t[ii], y[ii], w[ii], r[ii], rtpointers[ii]);
-
-        selcount++;
-      }
+      selcount++;
+      
     }
     t0seed /= selcount;
     st0 = st0/selcount - t0seed*t0seed;
@@ -425,19 +383,17 @@ namespace TrkDriftCircleMath {
     
 // Calculate signed radii
 
-    int nml1p = 0;
-    int nml2p = 0;
-    int nml1n = 0;
-    int nml2n = 0;
-    double sdist;
-    it = dcs_keep.begin();
-    for(int ii=0 ;it!=it_end; ++it, ++ii ){
-      if( selection[ii] != 0 ) continue;
-      sdist = d*cosin + z[ii]*sinus - y[ii]*cosin; // same thing as |a*z - y + b|/sqrt(1. + a*a);
-      if(it->id().ml()==0&&sdist > 0) nml1p++;
-      if(it->id().ml()==0&&sdist < 0) nml1n++;
-      if(it->id().ml()==1&&sdist > 0) nml2p++;
-      if(it->id().ml()==1&&sdist < 0) nml2n++;
+    int nml1p{0}, nml2p{0}, nml1n{0}, nml2n{0};
+    int ii{-1};
+    for(const DCOnTrack& keep_me : dcs_keep){
+      ++ii;
+      const HitCoords& coords = hits[ii];
+      if(coords.rejected) continue;
+      const double sdist = d*cosin + coords.z*sinus - coords.y*cosin; // same thing as |a*z - y + b|/sqrt(1. + a*a);
+      nml1p+=(keep_me.id().ml()==0&&sdist > 0);
+      nml1n+=(keep_me.id().ml()==0&&sdist < 0);
+      nml2p+=(keep_me.id().ml()==1&&sdist > 0);
+      nml2n+=(keep_me.id().ml()==1&&sdist < 0);
     }
 
 // Define t0 constraint in Minuit
@@ -449,25 +405,25 @@ namespace TrkDriftCircleMath {
 // Reject topologies where in one of the Multilayers no +- combination is present
     if((nml1p<1||nml1n<1)&&(nml2p<1||nml2n<1)&&m_rejectWeakTopologies) {
        ATH_MSG_DEBUG("Combination rejected for positive radii ML1 " <<  nml1p << " ML2 " <<  nml2p << " negative radii ML1 " << nml1n << " ML " << nml2n << " used hits " << used << " t0 Error " << t0Error);
-      it = dcs.begin();
-      it_end = dcs.end();
+      DCOnTrackVec::const_iterator it = dcs.begin();
+      DCOnTrackVec::const_iterator it_end = dcs.end();
       double chi2p = 0.;
       DCOnTrackVec dcs_new;
       dcs_new.reserve(dcs.size());
       for(int i=0; it!=it_end; ++it, ++i ){
-	const DriftCircle* ds  = & dcs[i];
+	      const DriftCircle* ds  = & dcs[i];
         if(std::abs(ds->r()-ds->rot()->driftRadius())>m_dRTol) ATH_MSG_DEBUG("Different radii on dc " << ds->r() << " rot " << ds->rot()->driftRadius());
         DriftCircle dc_keep(ds->position(), ds->rot()->driftRadius(), ds->dr(), ds->drPrecise(), ds->driftState(), ds->id(), ds->index(),ds->rot() );
-        DCOnTrack dc_new(dc_keep, 0., 0.);
+        DCOnTrack dc_new(std::move(dc_keep), 0., 0.);
         dc_new.state(dcs[i].state());
-        dcs_new.push_back( dc_new );
+        dcs_new.push_back( std::move(dc_new) );
         if( selection[i] == 0 ){
           double t = ds->rot()->driftTime();
           const MuonCalib::MdtRtRelation *rtInfo = m_calibrationDbTool->getRtCalibration(ds->rot()->identify());
           double tUp = rtInfo->rt()->tUpper();
           double tLow = rtInfo->rt()->tLower();
-          if(t<tLow) chi2p += (t-tLow)*(t-tLow)*0.1;
-          if(t>tUp) chi2p += (t-tUp)*(t-tUp)*0.1;
+          if(t<tLow) chi2p += sq(t-tLow)*0.1;
+          if(t>tUp) chi2p += sq(t-tUp)*0.1;
         }
       }
       if(chi2p>0) ATH_MSG_DEBUG(" Rejected weak topology Chi2 penalty " << chi2p);
@@ -480,9 +436,9 @@ namespace TrkDriftCircleMath {
 
     ATH_MSG_DEBUG("positive radii ML1 " <<  nml1p << " ML2 " <<  nml2p << " negative radii ML1 " << nml1n << " ML " << nml2n << " used hits " << used << " t0 Error " << t0Error);
 
-    constexpr Double_t step[3] = {0.01 , 0.01 , 0.1 };
+    constexpr std::array<Double_t,3> step{0.01 , 0.01 , 0.1 };
     // starting point
-    Double_t variable[3] = {theta,d,0};
+    std::array<Double_t,3> variable{theta,d,0};
     // if t0Seed value from outside use this
     if(t0Seed > -999.) variable[2] = t0Seed;
 
@@ -492,9 +448,14 @@ namespace TrkDriftCircleMath {
     minimum.SetPrintLevel(-1);
     if(msgLvl(MSG::VERBOSE)) minimum.SetPrintLevel(1);
 
+    if (m_floatDir){
+      minimum.SetVariable(0,"a",variable[0], step[0]);
+      minimum.SetVariable(1,"b",variable[1], step[1]);
+    } else {
+      minimum.SetFixedVariable(0,"a", variable[0]);
+      minimum.SetFixedVariable(1,"b", variable[1]);
+    }
     
-    minimum.SetFixedVariable(0,"a", variable[0]);
-    minimum.SetFixedVariable(1,"b", variable[1]);
     minimum.SetVariable(2,"t0",variable[2], step[2]);
     
     minimum.SetFunction(minFunct);
@@ -529,8 +490,7 @@ namespace TrkDriftCircleMath {
     double t0Err=errors[2];
     double dy0 = cosin * bErr - b * sinus * aErr;
 
-    double del_t;
-    del_t = std::abs(rtpointers[0]->radius((t0+t0Err)) - rtpointers[0]->radius(t0)) ;
+    const double del_t = std::abs(hits[0].rt->radius((t0+t0Err)) - hits[0].rt->radius(t0)) ;
 
     
     ATH_MSG_DEBUG("____________FINAL VALUES________________" );
@@ -556,33 +516,32 @@ namespace TrkDriftCircleMath {
 
     double chi2 = 0;
     unsigned int nhits(0);
-    double yl;
-
+    
     // calculate predicted hit positions from track parameters
-    it = dcs_keep.begin();
-    it_end = dcs_keep.end();
+  
     ATH_MSG_DEBUG("------NEW HITS------");
-
-    for(int i=0; it!=it_end; ++it, ++i ){
-      double rad, drad;
-
-      double uppercut = rtpointers[i]->tUpper();
-      double lowercut = rtpointers[i]->tLower();
-      rad = rtpointers[i]->radius(t[i]-t0);
-      if(t[i]-t0<lowercut) rad = rtpointers[i]->radius(lowercut);
-      if(t[i]-t0>uppercut) rad = rtpointers[i]->radius(uppercut);
-      if (w[i]==0) {
-        ATH_MSG_WARNING("w[i]==0, continuing");
+    int i{-1};
+    for(const HitCoords& coords : hits){
+      ++i;
+      const DCOnTrack& keep_me{dcs_keep[i]};
+      const double uppercut = coords.rt->tUpper();
+      const double lowercut = coords.rt->tLower();
+      
+      double rad = coords.rt->radius(coords.t-t0);
+      if(coords.t-t0<lowercut) rad = coords.rt->radius(lowercut);
+      if(coords.t-t0>uppercut) rad = coords.rt->radius(uppercut);
+      if (coords.w==0) {
+        ATH_MSG_WARNING("coords.w==0, continuing");
         continue;
       }
-      drad = 1.0/std::sqrt(w[i]) ;
+      double drad = 1.0/std::sqrt(coords.w) ;
 
-      yl = (y[i] -  tana*z[i] - b);
+      double yl = (coords.y -  tana*coords.z - b);
       
       ATH_MSG_DEBUG("i "<<i<<" ");
       
 
-      double dth = -(sinus*y[i] + cosin*z[i])*dtheta;
+      double dth = -(sinus*coords.y + cosin*coords.z)*dtheta;
       double residuals = std::abs(yl)/std::sqrt(1+tana*tana) - rad;
       
       ATH_MSG_DEBUG(" dth "<<dth<<" dy0 "<<dy0<<" del_t "<<del_t);
@@ -591,15 +550,15 @@ namespace TrkDriftCircleMath {
       double errorResiduals = std::hypot(dth, dy0, del_t);
 
       // derivatives of the residual 'R'
-      double deriv[3];
+      std::array<double,3> deriv{};
       // del R/del theta
-      double dd = z[i] * sinus + b *cosin - y[i] * cosin;
-      deriv[0] = sign(dd) * (z[i] * cosin - b * sinus + y[i] * sinus);
+      double dd = coords.z * sinus + b *cosin - coords.y * cosin;
+      deriv[0] = sign(dd) * (coords.z * cosin - b * sinus + coords.y * sinus);
       // del R / del b
       deriv[1] = sign(dd) * cosin ;
       // del R / del t0
 
-      deriv[2] = -1* rtpointers[i]->driftvelocity(t[i]-t0);
+      deriv[2] = -1* coords.rt->driftvelocity(coords.t-t0);
 
       double covsq=0;
       for(int rr=0; rr<3; rr++) {
@@ -608,7 +567,7 @@ namespace TrkDriftCircleMath {
         }
       }
       ATH_MSG_DEBUG(" covsquared " << covsq);
-      if( covsq < 0. && msg().level() <=MSG::DEBUG){
+      if( covsq < 0. && msgLvl(MSG::DEBUG)){
         for(int rr=0; rr<3; rr++) {
             for(int cc=0; cc<3; cc++) {
                 double dot = deriv[rr]*minimum.CovMatrix(rr,cc)* deriv[cc];
@@ -618,28 +577,28 @@ namespace TrkDriftCircleMath {
       }
       
       covsq = covsq > 0. ? std::sqrt(covsq) : 0.;
-      const DriftCircle* ds  = & dcs_keep[i];
-      if (m_propagateErrors) drad = dr[i];
+      const DriftCircle* ds  = & keep_me;
+      if (m_propagateErrors) drad = coords.dr;
       
-      DriftCircle dc_newrad(dcs_keep[i].position(), rad, drad, ds->driftState(), dcs_keep[i].id(), dcs_keep[i].index(),ds->rot() );
-      DCOnTrack dc_new(dc_newrad, residuals, covsq);
-      dc_new.state(dcs_keep[i].state());
+      DriftCircle dc_newrad(keep_me.position(), rad, drad, ds->driftState(), keep_me.id(), keep_me.index(),ds->rot() );
+      DCOnTrack dc_new(std::move(dc_newrad), residuals, covsq);
+      dc_new.state(keep_me.state());
 
-      ATH_MSG_DEBUG("T0 Segment hit res "<<residuals<<" eres "<<errorResiduals<<" covsq "<<covsq<<" ri " << r[i]<<" ro "<<rad<<" drad "<<drad << " sel "<<selection[i]<< " inv error " << w[i]);
+      ATH_MSG_DEBUG("T0 Segment hit res "<<residuals<<" eres "<<errorResiduals<<" covsq "<<covsq<<" ri " << coords.r<<" ro "<<rad<<" drad "<<drad << " sel "<<selection[i]<< " inv error " << coords.w);
 
-      if( selection[i] == 0 ) {
+      if(!coords.rejected) {
         ++nhits;
         if (!m_propagateErrors) {
-          chi2 += residuals*residuals*w[i];
+          chi2 += sq(residuals)*coords.w;
         } else {
-          chi2 += residuals*residuals/(drad*drad);
+          chi2 += sq(residuals)/sq(drad);
         }
-        ATH_MSG_DEBUG("T0 Segment hit res "<<residuals<<" eres "<<errorResiduals<<" covsq "<<covsq<<" ri " << r[i]<<" radius after t0 "<<rad<<" radius error "<< drad <<  " original error " << dr[i]);
+        ATH_MSG_DEBUG("T0 Segment hit res "<<residuals<<" eres "<<errorResiduals<<" covsq "<<covsq<<" ri " << coords.r<<" radius after t0 "<<rad<<" radius error "<< drad <<  " original error " << coords.dr);
 // Put chi2 penalty for drift times outside window
-        if (t[i]-t0> uppercut ) { // too large
-	  chi2  += (t[i]-t0-uppercut)* (t[i]-t0-uppercut)*0.1;
-        }else if (t[i]-t0 < lowercut ) {// too small
-	  chi2 += ((t[i]-t0-lowercut)*(t[i]-t0-lowercut))*0.1;
+        if (coords.t-t0> uppercut ) { // too large
+	          chi2  += sq(coords.t-t0-uppercut)*0.1;
+        }else if (coords.t-t0 < lowercut ) {// too small
+	          chi2 += sq(coords.t-t0-lowercut)*0.1;
         }
       }
       result.dcs().push_back( dc_new );

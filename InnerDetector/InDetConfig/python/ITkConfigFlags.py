@@ -1,8 +1,7 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import BeamType, FlagEnum
-from InDetConfig.InDetConfigFlags import TrackFitterType
 
 class TrackingComponent(FlagEnum):
     AthenaChain = "AthenaChain"  # full Athena Chain (default)
@@ -11,6 +10,7 @@ class TrackingComponent(FlagEnum):
     ValidateActsClusters = "ValidateActsClusters"
     ValidateActsSpacePoints = "ValidateActsSpacePoints" 
     ValidateActsSeeds = "ValidateActsSeeds"
+    ValidateActsTracks = "ValidateActsTracks"
 
 # TODO : Add some exta levels?
 
@@ -43,39 +43,36 @@ def createITkConfigFlags():
   itkcf.addFlag("ITk.Conditions.PixelOfflineCalibTag", "PixelITkError_v5")
   itkcf.addFlag("ITk.Conditions.PixelOfflineCalibFile", "")
 
+  # Turn on running of PRD MultiTruthMaker
+  itkcf.addFlag("ITk.doTruth", lambda prevFlags: prevFlags.Input.isMC)
+
   itkcf.addFlag("ITk.doStripModuleVeto", False) # Turn on SCT_ModuleVetoSvc, allowing it to be configured later
   itkcf.addFlag("ITk.checkDeadPixelsOnTrack", True) # Enable check for dead modules and FEs
   itkcf.addFlag("ITk.selectStripIntimeHits", lambda prevFlags: not(prevFlags.Beam.Type is BeamType.Cosmics) ) # defines if the X1X mode is used for the offline or not
 
-  itkcf.addFlag("ITk.Tracking.doStoreTrackSeeds", False) # Turn on to save the Track Seeds in a xAOD track collecting for development studies
   itkcf.addFlag("ITk.Tracking.doDigitalClustering", False)
-  itkcf.addFlag("ITk.Tracking.trackFitterType", TrackFitterType.GlobalChi2Fitter) # control which fitter to be used: 'DistributedKalmanFilter', 'GlobalChi2Fitter', 'GaussianSumFilter'
   itkcf.addFlag("ITk.Tracking.doFastTracking", False) # Turn running of ITk FastTracking on and off
   itkcf.addFlag("ITk.Tracking.doConversionFinding",True) # Turn running of ConversionFinding second pass on and off
-  itkcf.addFlag("ITk.Tracking.doLargeD0", False)
-  itkcf.addFlag("ITk.Tracking.storeSeparateLargeD0Container", True)
   itkcf.addFlag("ITk.Tracking.doBremRecovery", True) # Turn on running of Brem Recover in tracking
   itkcf.addFlag("ITk.Tracking.doCaloSeededBrem", True) # Brem Recover in tracking restricted to Calo ROIs
   itkcf.addFlag("ITk.Tracking.doHadCaloSeededSSS", False) # Use Recover SSS to Calo ROIs
   itkcf.addFlag("ITk.Tracking.doCaloSeededAmbi", lambda prevFlags: prevFlags.Detector.EnableCalo) # Use Calo ROIs to seed specific cuts for the ambi
-  itkcf.addFlag("ITk.Tracking.doTruth", lambda f: f.Input.isMC) # Turn running of truth matching on and off (by default on for MC off for data)
-  itkcf.addFlag("ITk.Tracking.kalmanUpdator", "smatrix") # control which updator to load for KalmanFitter ("None"/"fast"/"smatrix"/"weight"/"amg
   itkcf.addFlag("ITk.Tracking.doPixelClusterSplitting", True) # Try to split pixel clusters
   itkcf.addFlag("ITk.Tracking.pixelClusterSplittingType", "Truth") # choose splitter type: NeuralNet, AnalogClus or Truth
   itkcf.addFlag("ITk.Tracking.pixelClusterSplitProb1", 0.55) # Cut value for splitting clusters into two parts
   itkcf.addFlag("ITk.Tracking.pixelClusterSplitProb2", 0.45) # Cut value for splitting clusters into three parts
-  itkcf.addFlag("ITk.Tracking.perigeeExpression", "BeamLine"   ) # Express track parameters wrt. to : 'BeamLine','BeamSpot','Vertex' (first primary vertex)
-  itkcf.addFlag("ITk.Tracking.doSharedHits", True) # control if the shared hits are recorded in TrackParticles
-  itkcf.addFlag("ITk.Tracking.materialInteractions", True)
   itkcf.addFlag("ITk.Tracking.writeSeedValNtuple", False) # Turn writing of seed validation ntuple on and off
   itkcf.addFlag("ITk.Tracking.writeExtendedPRDInfo", False)
+  # Turn running of doLowPt second pass on and off
+  itkcf.addFlag("ITk.Tracking.doLowPt", False)
+
   
   # config flags for tracking geometry configuration
   from InDetConfig.TrackingGeometryFlags import createITkTrackingGeometryFlags
   itkcf.addFlagsCategory ("ITk.trackingGeometry", createITkTrackingGeometryFlags, prefix=True)
 
   # config flags for tracking cuts
-  from InDetConfig.TrackingPassFlags import createITkTrackingPassFlags, createITkLargeD0TrackingPassFlags, createITkConversionFindingTrackingPassFlags, createITkFastTrackingPassFlags, createITkLargeD0FastTrackingPassFlags, createITkFTFPassFlags
+  from InDetConfig.TrackingPassFlags import createITkTrackingPassFlags, createITkLargeD0TrackingPassFlags, createITkConversionFindingTrackingPassFlags, createITkFastTrackingPassFlags, createITkLargeD0FastTrackingPassFlags, createITkFTFPassFlags, createITkLowPtTrackingPassFlags
 
   itkcf.addFlagsCategory ("ITk.Tracking.MainPass", createITkTrackingPassFlags, prefix=True)
   itkcf.addFlagsCategory ("ITk.Tracking.LargeD0Pass", createITkLargeD0TrackingPassFlags, prefix=True)
@@ -83,9 +80,7 @@ def createITkConfigFlags():
   itkcf.addFlagsCategory ("ITk.Tracking.FastPass", createITkFastTrackingPassFlags, prefix=True)
   itkcf.addFlagsCategory ("ITk.Tracking.LargeD0FastPass", createITkLargeD0FastTrackingPassFlags, prefix=True)
   itkcf.addFlagsCategory ("ITk.Tracking.FTFPass", createITkFTFPassFlags, prefix=True)
-
-  from InDetConfig.VertexFindingFlags import createITkPriVertexingFlags
-  itkcf.addFlagsCategory("ITk.PriVertex", createITkPriVertexingFlags, prefix=True)
+  itkcf.addFlagsCategory ("ITk.Tracking.LowPt", createITkLowPtTrackingPassFlags, prefix=True)
 
   # enable reco steps 
   itkcf.addFlag("ITk.Tracking.recoChain", [TrackingComponent.AthenaChain])

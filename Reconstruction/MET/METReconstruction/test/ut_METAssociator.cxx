@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifdef ROOTCORE
@@ -67,6 +67,7 @@ struct perTestSetup
   }
 };
 
+// cppcheck-suppress unknownMacro
 BOOST_GLOBAL_FIXTURE( globalxAODSetup )
 
 BOOST_FIXTURE_TEST_SUITE(Test_Met_Association_Tool , perTestSetup)

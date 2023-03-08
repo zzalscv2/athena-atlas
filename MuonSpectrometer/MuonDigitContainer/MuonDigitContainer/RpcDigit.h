@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // RpcDigit.h
@@ -7,9 +7,6 @@
 #ifndef RpcDigitUH
 #define RpcDigitUH
 
-// David Adams
-// November 2001
-//
 // RPC digitization. Holds a channel ID.
 
 #include <iosfwd>
@@ -21,28 +18,22 @@ class RpcDigit : public MuonDigit {
 private:  // data
 
   // Time.
-  float m_time;
+  float m_time{0.f};
+  float m_ToT{-1.f};
 
 public:  // functions
 
   // Default constructor.
-  RpcDigit();
+  RpcDigit()=default;
 
   // Full constructor from Identifier.
-  RpcDigit(const Identifier& id, float time);
-
-  // Is this a valid digit?
-  bool is_valid(const RpcIdHelper& rpcHelper) const {
-    return (rpcHelper.valid(m_muonId));
-  }
-  
-  // Is this a valid digit?
-  bool is_valid(const RpcIdHelper* rpcHelper) const {
-    return is_valid(*rpcHelper);
-  }
+  RpcDigit(const Identifier& id, float time, float ToT=-1.);
 
   // Return the Time.
   float time() const { return m_time; }
+
+  // Return the Time over Threshold.
+  float ToT() const { return m_ToT; }
 
 };
 

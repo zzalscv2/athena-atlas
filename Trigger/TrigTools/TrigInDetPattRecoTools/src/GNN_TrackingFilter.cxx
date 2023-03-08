@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include<iostream>
@@ -24,7 +24,7 @@ void TrigFTF_GNN_EdgeState::initialize(TrigFTF_GNN_Edge* pS) {
 
   float dx = pS->m_n1->m_sp.x() - pS->m_n2->m_sp.x();
   float dy = pS->m_n1->m_sp.y() - pS->m_n2->m_sp.y();
-  float L  = sqrt(dx*dx + dy*dy);
+  float L  = std::sqrt(dx*dx + dy*dy);
 
   m_s = dy/L;
   m_c = dx/L;
@@ -211,7 +211,7 @@ bool TrigFTF_GNN_TrackingFilter::update(TrigFTF_GNN_Edge* pS, TrigFTF_GNN_EDGE_S
   float s1 = sigmaMS*t2;
   float s2 = s1*s1;
 
-  s2 *= sqrt(t2);
+  s2 *= std::sqrt(t2);
 
   ts.m_Cy[1][1] += s2;  
 

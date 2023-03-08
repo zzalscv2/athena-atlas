@@ -1,12 +1,15 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import LHCPeriod
 from SimulationConfig.SimEnums import BeamPipeSimMode
 
 RegionCreator=CompFactory.RegionCreator
 
+
 # Beampipe Regions
 def BeampipeFwdCutPhysicsRegionToolCfg(flags, name='BeampipeFwdCutPhysicsRegionTool', **kwargs):
+    result = ComponentAccumulator()
     kwargs.setdefault("RegionName", 'BeampipeFwdCut')
     volumeList = []
     if flags.GeoModel.Run is LHCPeriod.Run1:
@@ -37,9 +40,12 @@ def BeampipeFwdCutPhysicsRegionToolCfg(flags, name='BeampipeFwdCutPhysicsRegionT
             kwargs.setdefault("PositronCut", flags.Sim.BeamPipeCut)
             kwargs.setdefault("GammaCut", flags.Sim.BeamPipeCut)
             kwargs.setdefault("ProtonCut", flags.Sim.BeamPipeCut)
-    return RegionCreator(name, **kwargs)
+    result.setPrivateTools(RegionCreator(name, **kwargs))
+    return result
+
 
 def FWDBeamLinePhysicsRegionToolCfg(flags, name='FWDBeamLinePhysicsRegionTool', **kwargs):
+    result = ComponentAccumulator()
     kwargs.setdefault("RegionName", 'FWDBeamLine')
     if flags.GeoModel.Run is LHCPeriod.Run1:
         volumeList = ['BeamPipe::SectionF46']
@@ -48,20 +54,26 @@ def FWDBeamLinePhysicsRegionToolCfg(flags, name='FWDBeamLinePhysicsRegionTool', 
         if flags.GeoModel.Run > LHCPeriod.Run4:
             print('FWDBeamLinePhysicsRegionToolCfg: WARNING check that RUN2 beampipe volume names are correct for this geometry tag')
     kwargs.setdefault("VolumeList",  volumeList)
-    return RegionCreator(name, **kwargs)
+    result.setPrivateTools(RegionCreator(name, **kwargs))
+    return result
+
 
 # Forward Regions
 def FwdRegionPhysicsRegionToolCfg(flags, name='FwdRegionPhysicsRegionTool', **kwargs):
+    result = ComponentAccumulator()
     kwargs.setdefault("RegionName", 'FwdRegion')
     volumeList = ['FwdRegion::ForwardRegionGeoModel']
     kwargs.setdefault("VolumeList",  volumeList)
     kwargs.setdefault("ElectronCut", 200.)
     kwargs.setdefault("PositronCut", 200.)
     kwargs.setdefault("GammaCut",    200.)
-    return RegionCreator(name, **kwargs)
+    result.setPrivateTools(RegionCreator(name, **kwargs))
+    return result
+
 
 # Inner Detector Regions
 def PixelPhysicsRegionToolCfg(flags, name='PixelPhysicsRegionTool', **kwargs):
+    result = ComponentAccumulator()
     kwargs.setdefault("RegionName", 'Pixel')
     volumeList = ['Pixel::siLog', 'Pixel::siBLayLog']
     if flags.GeoModel.Run in [LHCPeriod.Run2, LHCPeriod.Run3]:
@@ -71,23 +83,29 @@ def PixelPhysicsRegionToolCfg(flags, name='PixelPhysicsRegionTool', **kwargs):
     # The range cuts used here are directly linked to the minimum energy of delta rays.
     # The minimum energy of delta rays in an input to the digitisation when using Bichsel charge deposition model.
     # The range cut is equated to an energy threshold in the simulation log file
-    # If these change please update the digitisation cuts appropriately. 
+    # If these change please update the digitisation cuts appropriately.
     kwargs.setdefault("ElectronCut", 0.05)
     kwargs.setdefault("PositronCut", 0.05)
     kwargs.setdefault("GammaCut",    0.05)
-    return RegionCreator(name, **kwargs)
+    result.setPrivateTools(RegionCreator(name, **kwargs))
+    return result
+
 
 def SCTPhysicsRegionToolCfg(flags, name='SCTPhysicsRegionTool', **kwargs):
+    result = ComponentAccumulator()
     kwargs.setdefault("RegionName", 'SCT')
-    volumeList = ['SCT::BRLSensor', 'SCT::ECSensor0', 'SCT::ECSensor1', 
+    volumeList = ['SCT::BRLSensor', 'SCT::ECSensor0', 'SCT::ECSensor1',
                   'SCT::ECSensor2','SCT::ECSensor3']
     kwargs.setdefault("VolumeList",  volumeList)
     kwargs.setdefault("ElectronCut", 0.05)
     kwargs.setdefault("PositronCut", 0.05)
     kwargs.setdefault("GammaCut",    0.05)
-    return RegionCreator(name, **kwargs)
+    result.setPrivateTools(RegionCreator(name, **kwargs))
+    return result
+
 
 def ITkPixelPhysicsRegionToolCfg(flags, name='ITkPixelPhysicsRegionTool', **kwargs):
+    result = ComponentAccumulator()
     kwargs.setdefault("RegionName", 'ITkPixel')
     volumeList = ['ITkPixel::InnerBarrelSingleMod_Sensor',
                   'ITkPixel::InnerRingSingleMod_Sensor',
@@ -98,9 +116,12 @@ def ITkPixelPhysicsRegionToolCfg(flags, name='ITkPixelPhysicsRegionTool', **kwar
     kwargs.setdefault("ElectronCut", 0.05)
     kwargs.setdefault("PositronCut", 0.05)
     kwargs.setdefault("GammaCut",    0.05)
-    return RegionCreator(name, **kwargs)
+    result.setPrivateTools(RegionCreator(name, **kwargs))
+    return result
+
 
 def ITkStripPhysicsRegionToolCfg(flags, name='ITkStripPhysicsRegionTool', **kwargs):
+    result = ComponentAccumulator()
     kwargs.setdefault("RegionName", 'ITkStrip')
     volumeList = ['ITkStrip::BRLSensorSS', 'ITkStrip::BRLSensorMS',
                   'ITkStrip::ECSensor0', 'ITkStrip::ECSensor1', 'ITkStrip::ECSensor2',
@@ -111,19 +132,32 @@ def ITkStripPhysicsRegionToolCfg(flags, name='ITkStripPhysicsRegionTool', **kwar
     kwargs.setdefault("ElectronCut", 0.05)
     kwargs.setdefault("PositronCut", 0.05)
     kwargs.setdefault("GammaCut",    0.05)
-    return RegionCreator(name, **kwargs)
+    result.setPrivateTools(RegionCreator(name, **kwargs))
+    return result
+
 
 def HGTDPhysicsRegionToolCfg(flags, name='HGTDPhysicsRegionTool', **kwargs):
+    result = ComponentAccumulator()
     kwargs.setdefault("RegionName", 'HGTD')
-    volumeList = ['HGTD::HGTDSiSensor0', 'HGTD::HGTDSiSensor1',
-                  'HGTD::HGTDSiSensor2', 'HGTD::HGTDSiSensor3']
+    if flags.HGTD.Geometry.useGeoModelXml:
+        volumeList = ['HGTD::HGTDSiSensorPosL0',"HGTD::HGTDSiSensorPosL1",
+                      'HGTD::HGTDSiSensorPosL2','HGTD::HGTDSiSensorPosL3',
+                      'HGTD::HGTDSiSensorNegL0','HGTD::HGTDSiSensorNegL1',
+                      'HGTD::HGTDSiSensorNegL2','HGTD::HGTDSiSensorNegL3',
+                      'HGTD::HGTDSiSensor']
+    else:
+        volumeList = ['HGTD::HGTDSiSensor0', 'HGTD::HGTDSiSensor1',
+                      'HGTD::HGTDSiSensor2', 'HGTD::HGTDSiSensor3']
     kwargs.setdefault("VolumeList",  volumeList)
     kwargs.setdefault("ElectronCut", 0.05)
     kwargs.setdefault("PositronCut", 0.05)
     kwargs.setdefault("GammaCut",    0.05)
-    return RegionCreator(name, **kwargs)
+    result.setPrivateTools(RegionCreator(name, **kwargs))
+    return result
+
 
 def TRTPhysicsRegionToolCfg(flags, name='TRTPhysicsRegionTool', **kwargs):
+    result = ComponentAccumulator()
     rangeCut = flags.Sim.TRTRangeCut
     kwargs.setdefault("RegionName", 'TRT')
     volumeList = ['TRT::Gas', 'TRT::GasMA']
@@ -132,28 +166,37 @@ def TRTPhysicsRegionToolCfg(flags, name='TRTPhysicsRegionTool', **kwargs):
     kwargs.setdefault("PositronCut", rangeCut)
     # The photon range cut is meant to stay small
     kwargs.setdefault("GammaCut",    0.05)
-    return RegionCreator(name, **kwargs)
+    result.setPrivateTools(RegionCreator(name, **kwargs))
+    return result
+
 
 def TRT_ArPhysicsRegionToolCfg(flags, name='TRT_ArPhysicsRegionTool', **kwargs):
+    result = ComponentAccumulator()
     kwargs.setdefault("RegionName", 'TRT_Ar')
     volumeList = ['TRT::Gas_Ar', 'TRT::GasMA_Ar']
     kwargs.setdefault("VolumeList",  volumeList)
     kwargs.setdefault("ElectronCut", 30.0)
     kwargs.setdefault("PositronCut", 30.0)
     kwargs.setdefault("GammaCut",    0.05)
-    return RegionCreator(name, **kwargs)
+    result.setPrivateTools(RegionCreator(name, **kwargs))
+    return result
+
 
 def TRT_KrPhysicsRegionToolCfg(flags, name='TRT_KrPhysicsRegionTool', **kwargs):
+    result = ComponentAccumulator()
     kwargs.setdefault("RegionName", 'TRT_Kr')
     volumeList = ['TRT::Gas_Kr', 'TRT::GasMA_Kr']
     kwargs.setdefault("VolumeList",  volumeList)
     kwargs.setdefault("ElectronCut", 15.0)
     kwargs.setdefault("PositronCut", 15.0)
     kwargs.setdefault("GammaCut",    0.05)
-    return RegionCreator(name, **kwargs)
+    result.setPrivateTools(RegionCreator(name, **kwargs))
+    return result
+
 
 # Calo Regions
 def EMBPhysicsRegionToolCfg(flags, name='EMBPhysicsRegionTool', **kwargs):
+    result = ComponentAccumulator()
     kwargs.setdefault("RegionName", 'EMB')
     volumeList = ['LArMgr::LAr::EMB::STAC']
     kwargs.setdefault("VolumeList",  volumeList)
@@ -163,9 +206,12 @@ def EMBPhysicsRegionToolCfg(flags, name='EMBPhysicsRegionTool', **kwargs):
     kwargs.setdefault("ElectronCut", rangeEMB)
     kwargs.setdefault("PositronCut", rangeEMB)
     kwargs.setdefault("GammaCut",    rangeEMB)
-    return RegionCreator(name, **kwargs)
+    result.setPrivateTools(RegionCreator(name, **kwargs))
+    return result
+
 
 def EMECPhysicsRegionToolCfg(flags, name='EMECPhysicsRegionTool', **kwargs):
+    result = ComponentAccumulator()
     kwargs.setdefault("RegionName", 'EMEC')
     volumeList = ['LArMgr::LAr::EMEC::Mother']
     kwargs.setdefault("VolumeList",  volumeList)
@@ -175,9 +221,12 @@ def EMECPhysicsRegionToolCfg(flags, name='EMECPhysicsRegionTool', **kwargs):
     kwargs.setdefault("ElectronCut", rangeEMEC)
     kwargs.setdefault("PositronCut", rangeEMEC)
     kwargs.setdefault("GammaCut",    rangeEMEC)
-    return RegionCreator(name, **kwargs)
+    result.setPrivateTools(RegionCreator(name, **kwargs))
+    return result
+
 
 def HECPhysicsRegionToolCfg(flags, name='HECPhysicsRegionTool', **kwargs):
+    result = ComponentAccumulator()
     kwargs.setdefault("RegionName", 'HEC')
     volumeList = ['LArMgr::LAr::HEC::LiquidArgon']
     kwargs.setdefault("VolumeList",  volumeList)
@@ -187,18 +236,24 @@ def HECPhysicsRegionToolCfg(flags, name='HECPhysicsRegionTool', **kwargs):
     kwargs.setdefault("ElectronCut", rangeHEC)
     kwargs.setdefault("PositronCut", rangeHEC)
     kwargs.setdefault("GammaCut",    rangeHEC)
-    return RegionCreator(name, **kwargs)
+    result.setPrivateTools(RegionCreator(name, **kwargs))
+    return result
+
 
 def FCALPhysicsRegionToolCfg(flags, name='FCALPhysicsRegionTool', **kwargs):
+    result = ComponentAccumulator()
     kwargs.setdefault("RegionName", 'FCAL')
     volumeList = ['LArMgr::LAr::FCAL::LiquidArgonC']
     kwargs.setdefault("VolumeList",  volumeList)
     kwargs.setdefault("ElectronCut", 0.03)
     kwargs.setdefault("PositronCut", 0.03)
     kwargs.setdefault("GammaCut",    0.03)
-    return RegionCreator(name, **kwargs)
+    result.setPrivateTools(RegionCreator(name, **kwargs))
+    return result
+
 
 def EMECParaPhysicsRegionToolCfg(flags, name='EMECParaPhysicsRegionTool', **kwargs):
+    result = ComponentAccumulator()
     kwargs.setdefault("RegionName", 'EMECPara')
     volumeList = ['LArMgr::LAr::EMEC::Pos::InnerWheel', 'LArMgr::LAr::EMEC::Pos::OuterWheel',
                   'LArMgr::LAr::EMEC::Neg::InnerWheel', 'LArMgr::LAr::EMEC::Neg::OuterWheel']
@@ -209,33 +264,45 @@ def EMECParaPhysicsRegionToolCfg(flags, name='EMECParaPhysicsRegionTool', **kwar
     kwargs.setdefault("ElectronCut", rangeEMEC)
     kwargs.setdefault("PositronCut", rangeEMEC)
     kwargs.setdefault("GammaCut",    rangeEMEC)
-    return RegionCreator(name, **kwargs)
+    result.setPrivateTools(RegionCreator(name, **kwargs))
+    return result
+
 
 def FCALParaPhysicsRegionToolCfg(flags, name='FCALParaPhysicsRegionTool', **kwargs):
+    result = ComponentAccumulator()
     kwargs.setdefault("RegionName", 'FCALPara')
     volumeList = ['LArMgr::LAr::FCAL::Module1::Absorber']
     kwargs.setdefault("VolumeList",  volumeList)
     kwargs.setdefault("ElectronCut", 0.03)
     kwargs.setdefault("PositronCut", 0.03)
     kwargs.setdefault("GammaCut",    0.03)
-    return RegionCreator(name, **kwargs)
+    result.setPrivateTools(RegionCreator(name, **kwargs))
+    return result
+
 
 def FCAL2ParaPhysicsRegionToolCfg(flags, name='FCAL2ParaPhysicsRegionTool', **kwargs):
+    result = ComponentAccumulator()
     kwargs.setdefault("RegionName", 'FCAL2Para')
     volumeList = ['LArMgr::LAr::FCAL::Module2::Absorber', 'LArMgr::LAr::FCAL::Module3::Absorber']
     kwargs.setdefault("VolumeList",  volumeList)
     kwargs.setdefault("ElectronCut", 0.03)
     kwargs.setdefault("PositronCut", 0.03)
     kwargs.setdefault("GammaCut",    0.03)
-    return RegionCreator(name, **kwargs)
+    result.setPrivateTools(RegionCreator(name, **kwargs))
+    return result
+
 
 def PreSampLArPhysicsRegionToolCfg(flags, name='PreSampLArPhysicsRegionTool', **kwargs):
+    result = ComponentAccumulator()
     kwargs.setdefault("RegionName", 'PreSampLAr')
     volumeList = ['LArMgr::LAr::Endcap::Presampler::LiquidArgon']
     kwargs.setdefault("VolumeList",  volumeList)
-    return RegionCreator(name, **kwargs)
+    result.setPrivateTools(RegionCreator(name, **kwargs))
+    return result
+
 
 def DeadMaterialPhysicsRegionToolCfg(flags, name='DeadMaterialPhysicsRegionTool', **kwargs):
+    result = ComponentAccumulator()
     kwargs.setdefault("RegionName", 'DeadMaterial')
     volumeList = []
     sectionList = []
@@ -258,34 +325,46 @@ def DeadMaterialPhysicsRegionToolCfg(flags, name='DeadMaterialPhysicsRegionTool'
     kwargs.setdefault("ElectronCut", 1.0)
     kwargs.setdefault("PositronCut", 1.0)
     kwargs.setdefault("GammaCut",    1.0)
-    return RegionCreator(name, **kwargs)
+    result.setPrivateTools(RegionCreator(name, **kwargs))
+    return result
+
 
 #Muon Regions
 def DriftWallPhysicsRegionToolCfg(flags, name='DriftWallPhysicsRegionTool', **kwargs):
+    result = ComponentAccumulator()
     kwargs.setdefault("RegionName", 'DriftWall')
     volumeList = ['Muon::MDTDriftWall']
     kwargs.setdefault("VolumeList",  volumeList)
     kwargs.setdefault("ElectronCut", 0.05)
     kwargs.setdefault("PositronCut", 0.05)
-    return RegionCreator(name, **kwargs)
+    result.setPrivateTools(RegionCreator(name, **kwargs))
+    return result
+
 
 def DriftWall1PhysicsRegionToolCfg(flags, name='DriftWall1PhysicsRegionTool', **kwargs):
+    result = ComponentAccumulator()
     kwargs.setdefault("RegionName", 'DriftWall1')
     volumeList = ['Muon::Endplug']
     kwargs.setdefault("VolumeList",  volumeList)
     kwargs.setdefault("ElectronCut", 1.0)
     kwargs.setdefault("PositronCut", 1.0)
-    return RegionCreator(name, **kwargs)
+    result.setPrivateTools(RegionCreator(name, **kwargs))
+    return result
+
 
 def DriftWall2PhysicsRegionToolCfg(flags, name='DriftWall2PhysicsRegionTool', **kwargs):
+    result = ComponentAccumulator()
     kwargs.setdefault("RegionName", 'DriftWall2')
     volumeList = ['Muon::SensitiveGas']
     kwargs.setdefault("VolumeList",  volumeList)
     kwargs.setdefault("ElectronCut", 1.0)
     kwargs.setdefault("PositronCut", 1.0)
-    return RegionCreator(name, **kwargs)
+    result.setPrivateTools(RegionCreator(name, **kwargs))
+    return result
+
 
 def MuonSystemFastPhysicsRegionToolCfg(flags, name='MuonSystemFastPhysicsRegionTool', **kwargs):
+    result = ComponentAccumulator()
     kwargs.setdefault("RegionName", 'MuonSystemFastRegion')
     volumeList = []
     from SimulationConfig.SimEnums import CavernBackground
@@ -298,59 +377,78 @@ def MuonSystemFastPhysicsRegionToolCfg(flags, name='MuonSystemFastPhysicsRegionT
     kwargs.setdefault("VolumeList",  volumeList)
     kwargs.setdefault("ElectronCut", 1.0)
     kwargs.setdefault("PositronCut", 1.0)
-    return RegionCreator(name, **kwargs)
+    result.setPrivateTools(RegionCreator(name, **kwargs))
+    return result
+
 
 def MuonPhysicsRegionToolCfg(flags, name="MuonPhysicsRegionTool", **kwargs):
+    result = ComponentAccumulator()
     kwargs.setdefault("RegionName", 'MuonSys')
     volumeList = ['Muon::MuonSys']
     kwargs.setdefault("VolumeList",  volumeList)
     kwargs.setdefault("ElectronCut", 0.1)
     kwargs.setdefault("PositronCut", 0.1)
     kwargs.setdefault("GammaCut",    0.1)
-    return RegionCreator(name, **kwargs)
+    result.setPrivateTools(RegionCreator(name, **kwargs))
+    return result
+
 
 # Cavern Regions
 def SX1PhysicsRegionToolCfg(flags, name='SX1PhysicsRegionTool', **kwargs):
+    result = ComponentAccumulator()
     kwargs.setdefault("RegionName", 'SX1')
     volumeList = ['CavernInfra::SX1Air']
     kwargs.setdefault("VolumeList",  volumeList)
     kwargs.setdefault("ElectronCut", 2000.)
     kwargs.setdefault("PositronCut", 2000.)
     kwargs.setdefault("GammaCut",    2000.)
-    return RegionCreator(name, **kwargs)
+    result.setPrivateTools(RegionCreator(name, **kwargs))
+    return result
+
 
 def BedrockPhysicsRegionToolCfg(flags, name='BedrockPhysicsRegionTool', **kwargs):
+    result = ComponentAccumulator()
     kwargs.setdefault("RegionName", 'BEDROCK')
     volumeList = ['CavernInfra::BEDROCK']
     kwargs.setdefault("VolumeList",  volumeList)
     kwargs.setdefault("ElectronCut", 1000000.)
     kwargs.setdefault("PositronCut", 1000000.)
     kwargs.setdefault("GammaCut",    1000000.)
-    return RegionCreator(name, **kwargs)
+    result.setPrivateTools(RegionCreator(name, **kwargs))
+    return result
+
 
 def CavernShaftsConcretePhysicsRegionToolCfg(flags, name='CavernShaftsConcretePhysicsRegionTool', **kwargs):
+    result = ComponentAccumulator()
     kwargs.setdefault("RegionName", 'CAV_SHAFTS_CONC')
     volumeList = ['CavernInfra::CAV_SHAFTS_CONC']
     kwargs.setdefault("VolumeList",  volumeList)
     kwargs.setdefault("ElectronCut", 150.)
     kwargs.setdefault("PositronCut", 150.)
     kwargs.setdefault("GammaCut",    150.)
-    return RegionCreator(name, **kwargs)
+    result.setPrivateTools(RegionCreator(name, **kwargs))
+    return result
 
-##def getCavernShaftsAirPhysicsRegionTool(name='CavernShaftsAirPhysicsRegionTool', **kwargs):
+
+## Deliberately leaving this commented out for now as it may be needed in the future
+##def CavernShaftsAirPhysicsRegionToolCfg(flags, name='CavernShaftsAirPhysicsRegionTool', **kwargs):
+##    result = ComponentAccumulator()
 ##    kwargs.setdefault("RegionName", 'CAV_SHAFTS_AIR')
 ##    volumeList = ['CavernInfra::CAV_SHAFTS_AIR']
 ##    kwargs.setdefault("VolumeList",  volumeList)
 ##    kwargs.setdefault("ElectronCut", 2000.)
 ##    kwargs.setdefault("PositronCut", 2000.)
 ##    kwargs.setdefault("GammaCut",    2000.)
-##    return CfgMgr.RegionCreator(name, **kwargs)
+##    result.setPrivateTools(RegionCreator(name, **kwargs))
+##    return result
+
 
 # CTB Regions
-
 def SCTSiliconPhysicsRegionToolCfg(flags, name='SCTSiliconPhysicsRegionTool', **kwargs):
+    result = ComponentAccumulator()
     kwargs.setdefault("RegionName", 'SCTSiliconRegion')
     volumeList = ['SCT::ECSensor0']
     kwargs.setdefault("VolumeList",  volumeList)
     kwargs.setdefault("ElectronCut", 0.01)
-    return RegionCreator(name, **kwargs)
+    result.setPrivateTools(RegionCreator(name, **kwargs))
+    return result

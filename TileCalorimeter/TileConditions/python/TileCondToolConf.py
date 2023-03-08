@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 #file: TileCondToolConf.py
 #author: nils.gollub@cern.ch
@@ -33,6 +33,16 @@ def bookTileCalibCondAlg(calibData, proxy):
         condSequence += TileCalibFltCondAlg( name = calibCondAlg,
                                              ConditionsProxy = proxy,
                                              TileCalibData = calibData)
+
+def bookTileCondAlg(CondAlg, calibData, proxy):
+    from AthenaCommon.AlgSequence import AthSequencer
+    condSequence = AthSequencer("AthCondSeq")
+
+    condAlgName = calibData + 'CondAlg'
+    if not hasattr(condSequence, condAlgName):
+        condSequence += CondAlg( name = condAlgName,
+                                 ConditionsProxy = proxy,
+                                 TileCondData = calibData)
 
 #
 #____________________________________________________________________________
@@ -329,7 +339,8 @@ def getTileCondToolTiming(source = 'FILE', runType = 'PHY', online = False, name
         else:
             raise(Exception("Invalid source: %s" %source ))
 
-    bookTileCalibCondAlg(timing, adcOffsetProxy)
+    from TileConditions.TileConditionsConf import TileCondAlg_TileTiming_TileCalibDrawerFlt_ as TileTimingCondAlg
+    bookTileCondAlg(TileTimingCondAlg, timing, adcOffsetProxy)
     tool = TileCondToolTiming(name, TileTiming = timing)
 
     #=== set the arguments passed and return tool
@@ -392,7 +403,8 @@ def getTileCondToolPulseShape(source = 'FILE', runType = 'PHY', name = 'TileCond
         else:
             raise(Exception("Invalid source: %s" %source ))
 
-    bookTileCalibCondAlg(pulseShape, pulseShapeProxy)
+    from TileConditions.TileConditionsConf import TileCondAlg_TilePulse_TileCalibDrawerFlt_ as TilePulseShapeCondAlg
+    bookTileCondAlg(TilePulseShapeCondAlg, pulseShape, pulseShapeProxy)
     tool = TileCondToolPulseShape(name, TilePulseShape = pulseShape)
 
     #=== set the arguments passed and return tool
@@ -430,7 +442,8 @@ def getTileCondToolMuRcvPulseShape(source = 'FILE', name = 'TileCondToolMuRcvPul
         else:
             raise(Exception("Invalid source: %s" %source ))
 
-    bookTileCalibCondAlg(muRcvPulseShape, muRcvPulseShapeProxy)
+    from TileConditions.TileConditionsConf import TileCondAlg_TilePulse_TileCalibDrawerFlt_ as TilePulseShapeCondAlg
+    bookTileCondAlg(TilePulseShapeCondAlg, muRcvPulseShape, muRcvPulseShapeProxy)
     tool = TileCondToolPulseShape(name, TilePulseShape = muRcvPulseShape)
 
     #=== set the arguments passed and return tool
@@ -519,9 +532,10 @@ def getTileCondToolNoiseSample(source = 'FILE', name = 'TileCondToolNoiseSample'
         #========================================================
         sampleNoiseProxy = getTileCondProxy('FILE','Flt','TileDefault.ped','TileCondProxyFile_NoiseSample')
 
-    bookTileCalibCondAlg(sampleNoise, sampleNoiseProxy)
+    from TileConditions.TileConditionsConf import TileCondAlg_TileSampleNoise_TileCalibDrawerFlt_ as TileSampleNoiseCondAlg
+    bookTileCondAlg(TileSampleNoiseCondAlg, sampleNoise, sampleNoiseProxy)
     if (onlineSampleNoiseProxy):
-        bookTileCalibCondAlg(onlineSampleNoise, onlineSampleNoiseProxy)
+        bookTileCondAlg(TileSampleNoiseCondAlg, onlineSampleNoise, onlineSampleNoiseProxy)
 
     tool = TileCondToolNoiseSample(name,
                                    TileSampleNoise = sampleNoise,

@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // METTrackFilterTool.h 
@@ -87,16 +87,16 @@ namespace met{
 			     const std::vector<const xAOD::Muon*>& selMuons,
 			     const std::vector<const xAOD::TrackParticle*>& softTracks) const;
 
-    bool isElTrack(const xAOD::TrackParticle &trk, const std::vector<const xAOD::Electron*>& electrons, size_t &el_index ) const;
-    bool isMuTrack(const xAOD::TrackParticle &trk, const std::vector<const xAOD::Muon*>& muons) const;
+    static bool isElTrack(const xAOD::TrackParticle &trk, const std::vector<const xAOD::Electron*>& electrons, size_t &el_index ) ;
+    static bool isMuTrack(const xAOD::TrackParticle &trk, const std::vector<const xAOD::Muon*>& muons) ;
 
     ToolHandle<InDet::IInDetTrackSelectionTool> m_trkseltool{this,"TrackSelectorTool","",""};
     ToolHandle<CP::ITrackVertexAssociationTool> m_trkToVertexTool{this,"TrackVxAssocTool","",""};
     ToolHandle<xAOD::ITrackIsolationTool> m_trkIsolationTool{this,"TrackIsolationTool","",""};
     ToolHandle<xAOD::ICaloTopoClusterIsolationTool> m_caloIsolationTool{this,"CaloIsolationTool","",""};
 
-    void selectElectrons(const xAOD::ElectronContainer &elCont, std::vector<const xAOD::Electron*>& electrons) const;
-    void selectMuons(const xAOD::MuonContainer &muCont, std::vector<const xAOD::Muon*>& muons) const;
+    static void selectElectrons(const xAOD::ElectronContainer &elCont, std::vector<const xAOD::Electron*>& electrons) ;
+    static void selectMuons(const xAOD::MuonContainer &muCont, std::vector<const xAOD::Muon*>& muons) ;
 
     bool m_trk_doPVsel;
 

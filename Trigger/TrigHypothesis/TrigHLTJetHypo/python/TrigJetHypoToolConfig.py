@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.SystemOfUnits import GeV
@@ -18,7 +18,7 @@ if debug:
     logger.setLevel(DEBUG)
 
 
-def  trigJetHypoToolFromDict(chain_dict):
+def trigJetHypoToolFromDict(flags, chain_dict):
     
     from DecisionHandling.TrigCompositeUtils import isLegId, getLegIndexInt
     chain_name = chain_dict['chainName']
@@ -79,7 +79,7 @@ def  trigJetHypoToolFromDict(chain_dict):
         histFlags = []
         for cp in cpl:
             histFlags += [ cp['recoAlg'] ] + [ cp['hypoScenario']] 
-        hypo_tool.MonTool = TrigJetHypoToolMonitoring("HLTJetHypo/"+chain_name, histFlags)        
+        hypo_tool.MonTool = TrigJetHypoToolMonitoring(flags, "HLTJetHypo/"+chain_name, histFlags)
     return hypo_tool
 
     
@@ -146,11 +146,15 @@ class TestStringMethods(unittest.TestCase):
 
         chain_names = (
             'HLT_j0_FBDJNOSHARED10etXX20etXX34massXX50fbet_L1J20',)
-        
+
+        from AthenaConfiguration.AllConfigFlags import initConfigFlags
+        flags = initConfigFlags()
+        flags.lock()
+
         wid = max(len(c) for c in chain_names)
         for chain_name in chain_names:
-            chain_dict = dictFromChainName(chain_name)
-            tool = trigJetHypoToolFromDict(chain_dict)
+            chain_dict = dictFromChainName(flags, chain_name)
+            tool = trigJetHypoToolFromDict(flags, chain_dict)
             self.assertIsNotNone(tool)
             logger.debug(chain_name.rjust(wid), str(tool))
 

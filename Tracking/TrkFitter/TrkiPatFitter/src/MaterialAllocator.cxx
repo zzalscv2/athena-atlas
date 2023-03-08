@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 /***************************************************************************
@@ -1874,7 +1874,7 @@ void MaterialAllocator::materialAggregation(
     double scattererDistance =
         std::abs(referenceDirection.dot(scattererPosition - referencePosition));
     for (std::vector<Trk::FitMeasurement*>::iterator m = measurements.begin();
-         m != measurements.end(); ++m) {
+         m != measurements.end(); ) {
       // insert scatterers from aggregrate vector
       Amg::Vector3D position = (**m).intersection(FittedTrajectory).position();
       double distance =
@@ -1893,9 +1893,10 @@ void MaterialAllocator::materialAggregation(
         if ((**m).isOutlier())
           delete *m;
         // in any case it must be removed from the list to avoid double counting
-        std::vector<Trk::FitMeasurement*>::iterator n = m;
-        --m;
-        measurements.erase(n);
+        m = measurements.erase(m);
+      }
+      else {
+        ++m;
       }
     }
   }

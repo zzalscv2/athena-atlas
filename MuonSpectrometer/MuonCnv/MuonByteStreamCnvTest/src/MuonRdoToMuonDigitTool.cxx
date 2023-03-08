@@ -1,63 +1,37 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
-// Author: Ketevi A. Assamagan
-// BNL, January 24 2004
 
 // algorithm to decode RDO into digits
 
 #include "MuonByteStreamCnvTest/MuonRdoToMuonDigitTool.h"
 
-#include "MuonDigitContainer/CscDigit.h"
-#include "MuonDigitContainer/CscDigitCollection.h"
 #include "MuonDigitContainer/CscDigitContainer.h"
-#include "MuonDigitContainer/MdtDigit.h"
-#include "MuonDigitContainer/MdtDigitCollection.h"
 #include "MuonDigitContainer/MdtDigitContainer.h"
-#include "MuonDigitContainer/MmDigit.h"
-#include "MuonDigitContainer/MmDigitCollection.h"
 #include "MuonDigitContainer/MmDigitContainer.h"
-#include "MuonDigitContainer/RpcDigit.h"
-#include "MuonDigitContainer/RpcDigitCollection.h"
 #include "MuonDigitContainer/RpcDigitContainer.h"
-#include "MuonDigitContainer/TgcDigit.h"
-#include "MuonDigitContainer/TgcDigitCollection.h"
 #include "MuonDigitContainer/TgcDigitContainer.h"
-#include "MuonDigitContainer/sTgcDigit.h"
-#include "MuonDigitContainer/sTgcDigitCollection.h"
 #include "MuonDigitContainer/sTgcDigitContainer.h"
-#include "MuonRDO/CscRawData.h"
-#include "MuonRDO/CscRawDataCollection.h"
 #include "MuonRDO/CscRawDataContainer.h"
-#include "MuonRDO/MM_RawData.h"
-#include "MuonRDO/MM_RawDataCollection.h"
 #include "MuonRDO/MM_RawDataContainer.h"
-#include "MuonRDO/MdtAmtHit.h"
-#include "MuonRDO/MdtCsm.h"
 #include "MuonRDO/MdtCsmContainer.h"
-#include "MuonRDO/RpcCoinMatrix.h"
-#include "MuonRDO/RpcFiredChannel.h"
 #include "MuonRDO/RpcPad.h"
 #include "MuonRDO/RpcPadContainer.h"
-#include "MuonRDO/STGC_RawData.h"
-#include "MuonRDO/STGC_RawDataCollection.h"
 #include "MuonRDO/STGC_RawDataContainer.h"
 #include "MuonRDO/TgcRawData.h"
 #include "MuonRDO/TgcRdo.h"
 #include "MuonRDO/TgcRdoContainer.h"
+#include "MuonReadoutGeometry/RpcReadoutElement.h"
 #include "TGCcablingInterface/ITGCcablingServerSvc.h"
-
+#include "GaudiKernel/PhysicalConstants.h"
+namespace {
+    constexpr double inverseSpeedOfLight = 1 / Gaudi::Units::c_light; 
+}
 MuonRdoToMuonDigitTool::MuonRdoToMuonDigitTool(const std::string& type, const std::string& name, const IInterface* pIID) :
     AthAlgTool(type, name, pIID), m_tgcCabling(nullptr), m_is12foldTgc(true) {
     declareInterface<IMuonDigitizationTool>(this);
 
-    declareProperty("DecodeMdtRDO", m_decodeMdtRDO = true);
-    declareProperty("DecodeCscRDO", m_decodeCscRDO = true);
-    declareProperty("DecodeRpcRDO", m_decodeRpcRDO = true);
-    declareProperty("DecodeTgcRDO", m_decodeTgcRDO = true);
-    declareProperty("DecodeSTGC_RDO", m_decodesTgcRDO = true);
-    declareProperty("DecodeMM_RDO", m_decodeMmRDO = true);
+   
 
     declareProperty("show_warning_level_invalid_TGC_A09_SSW6_hit", m_show_warning_level_invalid_TGC_A09_SSW6_hit = false);
 }
@@ -68,25 +42,38 @@ StatusCode MuonRdoToMuonDigitTool::initialize() {
 
     ATH_CHECK(m_mdtRdoKey.initialize(m_decodeMdtRDO));
     ATH_CHECK(m_mdtDigitKey.initialize(m_decodeMdtRDO));
+
     ATH_CHECK(m_cscRdoKey.initialize(m_decodeCscRDO));
     ATH_CHECK(m_cscDigitKey.initialize(m_decodeCscRDO));
+    
     ATH_CHECK(m_rpcRdoKey.initialize(m_decodeRpcRDO));
+    ATH_CHECK(m_rpcReadKey.initialize(m_decodeRpcRDO));
+    /// Only intialize the NRPC conversion if RPC & BIS78 are explicitly activated
+    ATH_CHECK(m_nRpcRdoKey.initialize(m_decodeRpcRDO && m_decodeNrpcRDO));    
+    ATH_CHECK(m_nRpcCablingKey.initialize(m_decodeRpcRDO && m_decodeNrpcRDO));
+    
+
     ATH_CHECK(m_rpcDigitKey.initialize(m_decodeRpcRDO));
+    
     ATH_CHECK(m_tgcRdoKey.initialize(m_decodeTgcRDO));
     ATH_CHECK(m_tgcDigitKey.initialize(m_decodeTgcRDO));
+    
     ATH_CHECK(m_stgcRdoKey.initialize(m_decodesTgcRDO));
     ATH_CHECK(m_stgcDigitKey.initialize(m_decodesTgcRDO));
+    
     ATH_CHECK(m_mmRdoKey.initialize(m_decodeMmRDO));
     ATH_CHECK(m_mmDigitKey.initialize(m_decodeMmRDO));
 
-    if (m_decodeMdtRDO) ATH_CHECK(m_mdtRdoDecoderTool.retrieve());
-    if (m_decodeCscRDO) ATH_CHECK(m_cscRdoDecoderTool.retrieve());
-    if (m_decodeCscRDO) ATH_CHECK(m_cscCalibTool.retrieve());
-    if (m_decodeRpcRDO) ATH_CHECK(m_rpcRdoDecoderTool.retrieve());
-    if (m_decodeTgcRDO) ATH_CHECK(m_tgcRdoDecoderTool.retrieve());
-    if (m_decodesTgcRDO) ATH_CHECK(m_stgcRdoDecoderTool.retrieve());
-    if (m_decodeMmRDO) ATH_CHECK(m_mmRdoDecoderTool.retrieve());
-    ATH_CHECK(m_rpcReadKey.initialize());
+    ATH_CHECK(m_mdtRdoDecoderTool.retrieve(DisableTool{!m_decodeMdtRDO}));
+    ATH_CHECK(m_cscRdoDecoderTool.retrieve(DisableTool{!m_decodeCscRDO}));
+    ATH_CHECK(m_cscCalibTool.retrieve(DisableTool{!m_decodeCscRDO}));
+    ATH_CHECK(m_rpcRdoDecoderTool.retrieve(DisableTool{!m_decodeRpcRDO}));
+    ATH_CHECK(m_tgcRdoDecoderTool.retrieve(DisableTool{!m_decodeTgcRDO}));
+    ATH_CHECK(m_stgcRdoDecoderTool.retrieve(DisableTool{!m_decodesTgcRDO}));
+    ATH_CHECK(m_mmRdoDecoderTool.retrieve(DisableTool{!m_decodeMmRDO}));
+
+   ATH_CHECK(m_DetectorManagerKey.initialize());
+   
 
     return StatusCode::SUCCESS;
 }
@@ -113,6 +100,7 @@ StatusCode MuonRdoToMuonDigitTool::digitize(const EventContext& ctx) {
         SG::WriteHandle<RpcDigitContainer> wh_rpcDigit(m_rpcDigitKey, ctx);
         ATH_CHECK(wh_rpcDigit.record(std::make_unique<RpcDigitContainer>(m_idHelperSvc->rpcIdHelper().module_hash_max())));
         ATH_CHECK(decodeRpcRDO(ctx, wh_rpcDigit.ptr()));
+        ATH_CHECK(decodeNRpcRDO(ctx, wh_rpcDigit.ptr()));
     }
 
     if (!m_tgcCabling && getTgcCabling().isFailure()) return StatusCode::FAILURE;
@@ -697,3 +685,85 @@ StatusCode MuonRdoToMuonDigitTool::getTgcCabling() {
 
     return StatusCode::SUCCESS;
 }
+StatusCode MuonRdoToMuonDigitTool::decodeNRpcRDO(const EventContext& ctx, RpcDigitContainer* container ) const {
+    if (!m_decodeNrpcRDO) {
+        ATH_MSG_VERBOSE("NRPC rdo decoding has been switched off ");
+        return StatusCode::SUCCESS;
+    }
+    
+    SG::ReadHandle<xAOD::NRPCRDOContainer> rdoContainer{m_nRpcRdoKey, ctx};
+    if (!rdoContainer.isValid()) {
+        ATH_MSG_FATAL("Failed to retrieve "<<m_nRpcRdoKey.fullKey());
+        return StatusCode::FAILURE;
+    }
+    SG::ReadCondHandle<MuonNRPC_CablingMap> cabling{m_nRpcCablingKey, ctx};
+    if (!cabling.isValid()) {
+        ATH_MSG_FATAL("Failed to retrieve "<<m_nRpcCablingKey.fullKey());
+        return StatusCode::FAILURE;
+    }
+    SG::ReadCondHandle<MuonGM::MuonDetectorManager> muonDetMgr{m_DetectorManagerKey,ctx};
+    if (!muonDetMgr.isValid()) {
+        ATH_MSG_FATAL("Failed to retrieve the readout geometry "<<muonDetMgr.fullKey());
+        return StatusCode::FAILURE;
+    }    
+    using CablingData = MuonNRPC_CablingMap::CablingData;
+    const RpcIdHelper& id_helper = m_idHelperSvc->rpcIdHelper();
+        
+    /// Prepare the ouput container map
+    std::map<IdentifierHash, std::unique_ptr<RpcDigitCollection>> digit_map{};
+    
+    /// Loop over the container
+    for (const xAOD::NRPCRDO* rdo : *rdoContainer) {
+        ATH_MSG_VERBOSE("Convert RDO tdcSector: "<< static_cast<int>(rdo->tdcsector())<<", tdc:"
+                <<static_cast<int>(rdo->tdc())<<" channel: "<<static_cast<int>(rdo->channel()) <<", time: "<<
+                rdo->time()<<", ToT: "<<rdo->timeoverthr());
+        
+        /// Fill the cabling object
+        CablingData conv_obj{};
+        conv_obj.tdcSector = rdo->tdcsector();
+        conv_obj.tdc = rdo->tdc();
+        conv_obj.channelId = rdo->channel();
+        
+        if (!cabling->getOfflineId(conv_obj, msgStream())) {
+            ATH_MSG_FATAL("Failed to convert online -> offline");
+            return StatusCode::FAILURE;
+        }
+        Identifier chanId{0};
+        if (!cabling->convert(conv_obj, chanId)) {
+            return StatusCode::FAILURE;
+        }
+        /// Find the proper Digit collection
+        IdentifierHash modHash{0};
+        if (id_helper.get_module_hash(chanId, modHash)) {
+            ATH_MSG_FATAL("Invalid hash built from "<<m_idHelperSvc->toString(chanId));
+            return StatusCode::FAILURE;
+        }
+        std::unique_ptr<RpcDigitCollection>& coll = digit_map[modHash];
+        /// The collection has not been made thus far
+        if (!coll) {
+            coll = std::make_unique<RpcDigitCollection>(id_helper.elementID(chanId), modHash);
+            if (container->indexFindPtr(modHash)) {
+                ATH_MSG_FATAL("The module "<<m_idHelperSvc->toString(chanId)<<" has already been processed");
+                return StatusCode::FAILURE;
+            }
+        }
+        /// We can fill the digit
+        /// Need to add the correction
+        const float digit_time = rdo->time();
+        const float ToT = m_patch_for_rpc_time ? rdo->timeoverthr() 
+                                            + inverseSpeedOfLight * (muonDetMgr->getRpcReadoutElement(chanId)->stripPos(chanId)).mag() : rdo->timeoverthr() ;
+        
+        std::unique_ptr<RpcDigit> digit = std::make_unique<RpcDigit>(chanId, digit_time, ToT);
+        coll->push_back(std::move(digit));
+    }
+
+
+    
+    /// Copy the newly created digits to the map
+    for ( auto& [hash, coll] : digit_map) {
+        if (coll->empty()) continue;
+        ATH_CHECK(container->addOrDelete(std::move(coll), hash));
+    }
+    return StatusCode::SUCCESS;
+}
+    

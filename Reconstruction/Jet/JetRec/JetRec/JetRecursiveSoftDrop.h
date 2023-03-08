@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetRecursiveSoftDrop.h
@@ -32,7 +32,7 @@ ASG_TOOL_CLASS(JetRecursiveSoftDrop, IJetGroomer)
 public:
 
   // Ctor.
-  JetRecursiveSoftDrop(std::string name);
+  JetRecursiveSoftDrop(const std::string& name);
 
   // Dtor.
   ~JetRecursiveSoftDrop();

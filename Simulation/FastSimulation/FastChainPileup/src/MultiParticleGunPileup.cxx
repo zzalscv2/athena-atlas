@@ -140,6 +140,7 @@ StatusCode MultiParticleGunPileup::callGenerator() {
       HepMC::set_signal_process_id(evt,pid+10000*bcid);
       ATH_MSG_DEBUG("Signal process ID " << pid << " set to " <<
 		    HepMC::signal_process_id(evt) << " for BCID " << bcid);
+      HepMC::fillBarcodesAttribute(evt);
       m_evts.push_back(evt);
       ++m_ngen;
     }

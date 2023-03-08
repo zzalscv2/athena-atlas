@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -49,6 +49,8 @@ namespace NSWL1 {
                                        std::vector<std::unique_ptr<PadTrigger>> &triggers) override;
     private:
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
+        Gaudi::Property<bool> m_dumpSectorGeometry {this, "DumpSectorGeometry", false, "Record sector pad geometry into an ASCII file (1L/1S by default). Use it for debugging"};
+
         /// load the 4o4 coincidence table
          StatusCode loadCoincidenceTable(const std::string&);
         // inflates the table by appending 3o4s //empty hits/missing layers are -9999 (const value of the 'nullPadNumber' variable. Never use any nonsense number for non existing values it will break some rules )
@@ -60,7 +62,6 @@ namespace NSWL1 {
 
         const MuonGM::MuonDetectorManager* m_detManager;
 
-        BooleanProperty m_dumpSectorGeometry;                   //used to dump whole sectors' pad geometry (1L/1S by default)
         std::vector<std::shared_ptr<PadOfflineData>> fetchSectorPads(bool isSmall,int side=1,int sector=1);//use sector number as coming ids
         std::vector<std::shared_ptr<PadOfflineData>> fetchSmallSectorPads(int side=1,int sector=1);
         std::vector<std::shared_ptr<PadOfflineData>> fetchLargeSectorPads(int side=1,int sector=1);

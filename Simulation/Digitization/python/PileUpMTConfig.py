@@ -68,7 +68,7 @@ def BatchedMinbiasSvcCfg(flags, name="LowPtMinbiasSvc", kind=PUBkgKind.LOWPT, **
         kwargs.setdefault("OnDemandMB", False)
         # load enough events that the probability of running out for any given event is no more than 1e-5
         kwargs.setdefault(
-            "MBBatchSize", 8 * flags.Digitization.PU.NumberOfHighPtMinBias * n_bc
+            "MBBatchSize", 8 * max(flags.Digitization.PU.NumberOfHighPtMinBias, 1) * n_bc
         )
         kwargs.setdefault("NSimultaneousBatches", flags.Concurrency.NumConcurrentEvents)
         kwargs.setdefault("SkippedHSEvents", skip)

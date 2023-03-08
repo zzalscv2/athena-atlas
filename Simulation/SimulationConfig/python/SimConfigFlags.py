@@ -1,9 +1,10 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags, isGaudiEnv
 from AthenaConfiguration.AutoConfigFlags import GetFileMD
 from SimulationConfig.SimEnums import BeamPipeSimMode, CalibrationRun, CavernBackground, \
     LArParameterization, SimulationFlavour, TruthStrategy, VertexSource
+from AthenaCommon.SystemOfUnits import m
 
 #todo? add in the explanatory text from previous implementation
 
@@ -46,7 +47,6 @@ def createSimConfigFlags():
     def _checkRegenerationIncrementConf(prevFlags):
         regenInc  = 0
         if prevFlags.Input.Files:
-            
             mdstring = GetFileMD(prevFlags.Input.Files).get("RegenerationIncrement", "0")
             regenInc = eval(mdstring)
             if not regenInc:
@@ -61,10 +61,10 @@ def createSimConfigFlags():
     # Forward region
     scf.addFlag("Sim.TwissFileBeam1", False)
     scf.addFlag("Sim.TwissFileBeam2", False)
-    scf.addFlag("Sim.TwissEnergy", 8000000.)
-    scf.addFlag("Sim.TwissFileBeta", 550.)
-    scf.addFlag("Sim.TwissFileNomReal", False)  # "nominal", "real" / default to one of these?!
-    scf.addFlag("Sim.TwissFileVersion", "v01")
+    scf.addFlag("Sim.TwissEnergy", lambda prevFlags : float(prevFlags.Beam.Energy)) # energy of each beam
+    scf.addFlag("Sim.TwissFileBeta", 90.*m)
+    scf.addFlag("Sim.TwissFileNomReal", 'nominal')  # "nominal", "real" / default to one of these?!
+    scf.addFlag("Sim.TwissFileVersion", "v02")
 
     # G4AtlasAlg
     scf.addFlag("Sim.ReleaseGeoModel", False)
@@ -80,13 +80,22 @@ def createSimConfigFlags():
     scf.addFlag("Sim.DoFullChain", False)
 
     def _check_G4_version(prevFlags):
+        # Determine the Geant4 version which will be used by the
+        # configuration.  In jobs where we are running simulation,
+        # then the G4Version should reflect the version in the
+        # release, so the version in environment should take
+        # precedence over any input file metadata.  In jobs where
+        # simulation is not run, then the G4Version from the input
+        # file metadata should take precedence.
         version = ""
-        if prevFlags.Input.Files:
-            version = GetFileMD(prevFlags.Input.Files).get("G4Version", "")
+        from AthenaConfiguration.Enums import ProductionStep
+        if prevFlags.Common.ProductionStep not in [ProductionStep.Simulation, ProductionStep.FastChain]:
+            if prevFlags.Input.Files:
+                version = GetFileMD(prevFlags.Input.Files).get("G4Version", "")
         if not version:
             from os import environ
             version = str(environ.get("G4VERS", ""))
-        if isGaudiEnv() and not version:
+        if prevFlags.Input.isMC and isGaudiEnv() and not version:
             raise ValueError("Unknown G4 version")
         return version
 
@@ -182,24 +191,23 @@ def createSimConfigFlags():
     scf.addFlag("Sim.ISF.UseTrackingGeometryCond", False) # Using Condition for tracking Geometry
 
     def _decideHITSMerging(prevFlags):
-        simulator = prevFlags.Sim.ISF.Simulator
         # Further specialization possible in future
-        if simulator in [SimulationFlavour.FullG4MT, SimulationFlavour.FullG4MT_QS, SimulationFlavour.PassBackG4MT, SimulationFlavour.AtlasG4]:
+        if prevFlags.Sim.ISF.Simulator.isFullSim():
             doID = False
             doITk = False
             doCALO = False
             doMUON = False
-        elif simulator in [SimulationFlavour.ATLFASTIIF_G4MS, SimulationFlavour.ATLFASTIIFMT, SimulationFlavour.ATLFAST3F_G4MS]:
+        elif prevFlags.Sim.ISF.Simulator.usesFatras() and prevFlags.Sim.ISF.Simulator.usesFastCaloSim():
             doID = True
             doITk = True
             doCALO = True
             doMUON = True
-        elif simulator in [SimulationFlavour.ATLFASTIIMT, SimulationFlavour.ATLFAST3MT, SimulationFlavour.ATLFAST3MT_QS]:
+        elif prevFlags.Sim.ISF.Simulator.usesFastCaloSim():
             doID = False
             doITk = False
             doCALO = True
             doMUON = False
-        elif simulator in [SimulationFlavour.Unknown]:
+        elif prevFlags.Sim.ISF.Simulator in [SimulationFlavour.Unknown]:
             doID = True
             doITk = True
             doCALO = True
@@ -236,6 +244,8 @@ def createSimConfigFlags():
 
     scf.addFlag("Sim.BeamPipeCut", 100.0)
     scf.addFlag("Sim.TightMuonStepping", False)
+
+    scf.addFlag('Sim.GenerationConfiguration', 'NONE') # TODO replace this property with something more central for all Generator configuration
 
     return scf
 

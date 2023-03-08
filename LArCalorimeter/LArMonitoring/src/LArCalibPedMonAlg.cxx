@@ -35,7 +35,8 @@ StatusCode LArCalibPedMonAlg::initialize() {
   
   ATH_CHECK( m_hdrContKey.initialize() );
   ATH_CHECK( m_lArFebErrorSummaryKey.initialize() );
-  
+  ATH_CHECK( m_eventInfoDecorKey.initialize() );
+
   m_histoGroups.reserve(m_SubDetNames.size());
   for (unsigned i=0; i<m_SubDetNames.size(); ++i) {
     std::vector<std::string> part;
@@ -79,7 +80,8 @@ StatusCode LArCalibPedMonAlg::fillHistograms( const EventContext& ctx ) const {
     fill(m_MonGroupName,nbchan);
   }
 
-  SG::ReadDecorHandle<xAOD::EventInfo,uint32_t> thisEvent(m_eventInfoKey, ctx);
+  SG::ReadHandle<xAOD::EventInfo> thisEvent(GetEventInfo(ctx));
+  ATH_CHECK(thisEvent.isValid());
   unsigned lumi_block = thisEvent->lumiBlock();
   bool lar_inerror = (thisEvent->errorState(xAOD::EventInfo::LAr)==xAOD::EventInfo::Error);
   ATH_MSG_DEBUG( "LArFEBMonAlg Lumi block: "<<lumi_block);

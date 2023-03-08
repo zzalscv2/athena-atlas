@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetReclusterer.h
@@ -31,7 +31,7 @@ ASG_TOOL_CLASS(JetReclusterer, IJetGroomer)
 public:
 
   // Ctor.
-  JetReclusterer(std::string name);
+  JetReclusterer(const std::string& name);
 
   // Dtor.
   ~JetReclusterer();

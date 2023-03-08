@@ -73,13 +73,13 @@ public:
 
 private:
     //  EventSource* p_eventSource;
-    Gaudi::CheckedProperty<int>          m_runNo;
+    Gaudi::CheckedProperty<unsigned>          m_runNo;
     Gaudi::CheckedProperty<unsigned long long> m_firstEventNo;
     Gaudi::CheckedProperty<unsigned long long> m_eventsPerRun;
-    Gaudi::CheckedProperty<int>          m_firstLBNo;
-    Gaudi::CheckedProperty<int>          m_eventsPerLB;
-    Gaudi::CheckedProperty<int>          m_initTimeStamp;
-    Gaudi::Property<int>          m_timeStampInterval;
+    Gaudi::CheckedProperty<unsigned>          m_firstLBNo;
+    Gaudi::CheckedProperty<unsigned>          m_eventsPerLB;
+    Gaudi::CheckedProperty<unsigned>          m_initTimeStamp;
+    Gaudi::Property<unsigned>          m_timeStampInterval;
 
     /// Flags to indicate override of run/event/time
     ///  These are always true and are here for consistency

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ActsGeometry )
@@ -17,6 +17,7 @@ atlas_add_library( ActsGeometryLib
                    src/ActsDetectorElement.cxx
                    src/ActsLayerBuilder.cxx
                    src/ActsStrawLayerBuilder.cxx
+                   src/ActsHGTDLayerBuilder.cxx
                    src/ActsTrackingGeometrySvc.cxx
                    src/ATLASSourceLink.cxx
                    src/util/*.cxx
@@ -34,6 +35,8 @@ atlas_add_library( ActsGeometryLib
                    GaudiKernel
                    GeoModelUtilities
                    GeoPrimitives
+                   HGTD_Identifier
+                   HGTD_ReadoutGeometry
                    Identifier
                    InDetIdentifier
                    InDetReadoutGeometry
@@ -98,6 +101,6 @@ atlas_add_component( ActsGeometry
                      TrkFitterInterfaces)
 
 # Install files from the package:
-atlas_install_joboptions( share/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
+atlas_install_joboptions( scripts/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_scripts( test/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

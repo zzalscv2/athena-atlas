@@ -16,11 +16,26 @@ Hence they have jetdef and modspec arguments even if not needed in every case.
 from AthenaCommon import Logging
 jetmomentlog = Logging.logging.getLogger('JetMomentToolsConfig')
 
-from JetRecTools import JetRecToolsConfig
 from AthenaConfiguration.ComponentFactory import CompFactory
 from JetRecConfig.StandardJetContext import jetContextDic
 
 from xAODBase.xAODType import xAODType
+
+
+def idTrackSelToolFromJetCtx(trkOpt="default"):
+    """returns a InDetTrackSelectionTool configured with the jet context corresponding to trkOpt
+      (technically wrapped inside a JetTrackSelectionTool) 
+    """
+    # JetTrackSelectionTool is still used by trk moment tools.
+    # it should be deprecated in favor of simply the InDet tool
+    from JetRecConfig.StandardJetContext import jetContextDic
+    from JetRecTools.JetRecToolsConfig import getIDTrackSelectionTool #
+
+    return  CompFactory.JetTrackSelectionTool(
+        f"tracsel{trkOpt}",
+        Selector        = getIDTrackSelectionTool(f"trackSel{trkOpt}", **jetContextDic[trkOpt]["trackSelOptions"])
+    )
+
 
 
 def getEMScaleMomTool(jetdef, modspec=""):
@@ -82,7 +97,6 @@ def getConstitFourMomTool(jetdef, modspec=""):
 
 # Jet vertex fraction with selection.
 def getJVFTool(jetdef, modspec):
-    jettrackselloose = JetRecToolsConfig.getTrackSelTool(modspec or jetdef.context)
     # retrieve the tracking keys to be used with modspec :
     trackingKeys = jetContextDic[modspec or jetdef.context]
     jvf = CompFactory.JetVertexFractionTool(
@@ -91,7 +105,7 @@ def getJVFTool(jetdef, modspec):
         AssociatedTracks = trackingKeys["GhostTracksLabel"],
         TrackVertexAssociation = trackingKeys["TVA"],
         TrackParticleContainer  = trackingKeys["Tracks"],
-        TrackSelector = jettrackselloose,
+        TrackSelector = idTrackSelToolFromJetCtx(modspec or jetdef.context),
         SuppressInputDependence = True
     )
     return jvf
@@ -117,7 +131,6 @@ def getNNJvtTool(jetdef, modspec):
 
 
 def getTrackMomentsTool(jetdef, modspec):
-    jettrackselloose = JetRecToolsConfig.getTrackSelTool(modspec or jetdef.context)
     # retrieve the tracking keys to be used with modspec : 
     trackingKeys = jetContextDic[modspec or jetdef.context]
 
@@ -127,13 +140,13 @@ def getTrackMomentsTool(jetdef, modspec):
         AssociatedTracks = trackingKeys["GhostTracksLabel"],
         TrackVertexAssociation = trackingKeys["TVA"],
         TrackMinPtCuts = [500, 1000],
-        TrackSelector = jettrackselloose,
+        TrackSelector = idTrackSelToolFromJetCtx(modspec or jetdef.context), 
         DoPFlowMoments = 'PFlow' in jetdef.fullname() or 'UFO' in jetdef.fullname() ,
     )
     return trackmoments
 
 def getTrackSumMomentsTool(jetdef, modspec):
-    jettrackselloose = JetRecToolsConfig.getTrackSelTool(modspec)
+    jettrackselloose = idTrackSelToolFromJetCtx(modspec or jetdef.context)
     # retrieve the tracking keys to be used with modspec : 
     trackingKeys = jetContextDic[modspec or jetdef.context]
     tracksummoments = CompFactory.JetTrackSumMomentsTool(
@@ -173,14 +186,12 @@ def getJetPtAssociationTool(jetdef, modspec):
 
 def getQGTaggingTool(jetdef, modspec):
 
-    jettrackselloose = JetRecToolsConfig.getTrackSelTool(modspec or jetdef.context)
-
     trackingKeys = jetContextDic[modspec or jetdef.context]
 
     qgtagging = CompFactory.JetQGTaggerVariableTool('qgtagging',
                                                     VertexContainer = trackingKeys["Vertices"],
                                                     TrackVertexAssociation = trackingKeys["TVA"],
-                                                    TrackSelector = jettrackselloose
+                                                    TrackSelector = idTrackSelToolFromJetCtx(modspec or jetdef.context),
                                                    )
 
     return qgtagging

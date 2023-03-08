@@ -1,7 +1,6 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from TrigTRTHighTHitCounter.TrigTRTHighTHitCounterConf import TrigTRTHTHCounter
-#from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
 class TrigTRTHTHCounterFex(TrigTRTHTHCounter):
     __slots__ = []
@@ -16,6 +15,3 @@ class TrigTRTHTHCounterFex(TrigTRTHTHCounter):
         self.WedgeMinEta = 0
         self.RoadMaxEta = 1.06
         self.WedgeNBin = 5
-        
-        #monTool = GenericMonitoringTool('MonTool')
-        #self.MonTool = monTool

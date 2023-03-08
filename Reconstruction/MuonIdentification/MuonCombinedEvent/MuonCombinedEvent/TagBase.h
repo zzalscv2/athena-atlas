@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCOMBINEDEVENT_TAGBASE_H
@@ -27,7 +27,7 @@ namespace MuonCombined {
         if (a == xAOD::Muon::MuTag) return 3;
         if (a == xAOD::Muon::CaloTag) return 4;
         if (a == xAOD::Muon::CaloLikelihood) return 5;
-        if (a == xAOD::Muon::CaloLikelihood) return 6;
+        //if (a == xAOD::Muon::CaloLikelihood) return 6;  //duplicate
         if (a == xAOD::Muon::MuidSA) return 7;
         if (a == xAOD::Muon::STACO) return 8;
         return xAOD::Muon::NumberOfMuonAuthors;

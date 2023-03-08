@@ -53,7 +53,8 @@ baseParser.add_argument(
         "EventStore",
         "NeededResources",
         "GeoModelSvc",
-        "MetaDataStore"
+        "MetaDataStore",
+        "wallTimeOffset" # perfmon Svc property, is timestamp of stating the job, different by construction
     ],
     help="Ignore properties",
 )

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRKSPACEPOINTFORMATION_PIXELSPACEPOINTFORMATIONALG_H
@@ -13,12 +13,13 @@
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/ReadCondHandleKey.h"
 
-#include "ActsTrkEvent/SpacePoint.h"
 #include "ActsTrkToolInterfaces/IPixelSpacePointFormationTool.h"
 
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
+#include "xAODInDetMeasurement/SpacePointContainer.h"
+#include "xAODInDetMeasurement/SpacePointAuxContainer.h"
 
 #include <string>
 
@@ -64,8 +65,7 @@ namespace ActsTrk {
 
         ///@name Output data using SG::WriteHandleKey
         //@{
-        SG::WriteHandleKey<ActsTrk::SpacePointContainer> m_pixelSpacePointContainerKey{this, "PixelSpacePoints", "ITkPixelSpacePoints", "name of the output pixel space point container"};
-        SG::WriteHandleKey<ActsTrk::SpacePointData> m_pixelSpacePointDataKey {this,"PixelSpacePointData","ITkPixelSpacePointData","name of the output pixel space point data"};
+	SG::WriteHandleKey<xAOD::SpacePointContainer> m_pixelSpacePointContainerKey {this, "PixelSpacePoints", "ITkPixelSpacePoints", "name of the output pixel space point container"};
         //@}
 
         /// @name ToolHandle

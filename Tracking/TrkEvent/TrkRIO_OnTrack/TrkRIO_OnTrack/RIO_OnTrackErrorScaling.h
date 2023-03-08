@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /* Dear emacs, this is -*-c++-*- */
 #ifndef _RIO_OnTrackErrorScaling_H_
@@ -13,16 +13,25 @@
 class RIO_OnTrackErrorScaling
 {
 public:
-  RIO_OnTrackErrorScaling();
-  virtual ~RIO_OnTrackErrorScaling();
+ enum Type {
+   Pixel = 0,
+   SCT = 1,
+   TRT = 2,
+   MuonEtaPhi = 3,
+   Unknown = 99
+ };
+ RIO_OnTrackErrorScaling();
+ virtual ~RIO_OnTrackErrorScaling();
 
-  // CLID of the actual implementation
-  virtual CLID clid() const;
+ // CLID of the actual implementation
+ virtual CLID clid() const;
 
-  std::vector<std::vector<double> >       &params()       { return m_params; }
-  const std::vector<std::vector<double> > &params() const { return m_params; }
+ std::vector<std::vector<double> > &params() { return m_params; }
+ const std::vector<std::vector<double> > &params() const { return m_params; }
 
-  virtual bool postProcess()  {return true; }
+ virtual bool postProcess() { return true; }
+ 
+ virtual Type type() const {return Unknown;}
 
 protected :
   /// Convenience function to check whether the number of parameters is correct.
@@ -30,9 +39,12 @@ protected :
   /// @param n_paramter_sets the number of parameter sets
   /// @param param_names the names of the parameter sets
   /// @param n_paramters the number of parameters per set.
-  void checkParameters(const char *label, unsigned int n_paramter_sets, const char* const* param_names, unsigned int n_paramters) const;
+ void checkParameters(const char *label, unsigned int n_paramter_sets,
+                      const char *const *param_names,
+                      unsigned int n_paramters) const;
+
 private:
-  std::vector<std::vector<double> > m_params;
+ std::vector<std::vector<double> > m_params;
 };
 
 CLASS_DEF( RIO_OnTrackErrorScaling, 167367682 , 1 )

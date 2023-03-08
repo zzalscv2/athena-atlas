@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -44,67 +44,14 @@ namespace InDet {
      */
     ~SiCombinatorialTrackFinderData_xk() = default;
 
-    /**
-     * Set tools, service and magnetic field properties
-     */
-    void setTools(const Trk::IPatternParametersPropagator* propTool,
-                  const Trk::IPatternParametersUpdator* updatorTool,
-                  const Trk::IRIO_OnTrackCreator* rioTool,
-                  const IInDetConditionsTool* pixCondTool,
-                  const IInDetConditionsTool* sctCondTool,
-                  const Trk::MagneticFieldProperties* fieldProp,
-                  const Trk::IBoundaryCheckTool* boundaryCheckTool);
-
-    void setTools(const IInDetConditionsTool* pixCondTool,
-                  const IInDetConditionsTool* sctCondTool) {
-       m_tools.setTools(pixCondTool,
-                        sctCondTool);
-    }
-
-    /**
-     * Set magnetif field cache
-     */
-    void setFieldCondObj(const  AtlasFieldCacheCondObj* fieldCondObj);
-
-    /**
-     * Set cached pointer to Pixel cluster collection in StoreGate
-     */
-    void setPixContainer(const InDet::PixelClusterContainer* pixcont);
-    /**
-     * Set cached pointer to SCT cluster collection in StoreGate
-     */
-    void setSctContainer(const InDet::SCT_ClusterContainer* sctcont);
-
-    /**
-     * Get cached pointer to Pixel cluster collection in StoreGate
-     */
-    const InDet::PixelClusterContainer* pixContainer() const;
-    /**
-     * Get cached pointer to SCT cluster collection in StoreGate
-     */
-    const InDet::SCT_ClusterContainer* sctContainer() const;
-
-    /**
-     * Get PRD to track map
-     */
-    const Trk::PRDtoTrackMap* PRDtoTrackMap() const;
-
-    void setPixelDetectorElementStatus( const InDet::SiDetectorElementStatus *pixelDetElStatus) { m_tools.setPixelDetectorElementStatus(pixelDetElStatus); }
-    void setSCTDetectorElementStatus( const InDet::SiDetectorElementStatus *sctDetElStatus)     { m_tools.setSCTDetectorElementStatus(sctDetElStatus); }
-
-    /**
-     * Check if this object is initialized by the setTools method
-     */
-    bool isInitialized() const;
-
     //enum used in Track Maker tools for summary statistics table
-    typedef enum summaryStatArraySizes{       
-      kNStatAllTypes = 15,        
+    typedef enum summaryStatArraySizes{
+      kNStatAllTypes = 15,
       kNStatEtaTypes = 2,
       kNSeedTypes = 4,
       kNRapidityRanges = 8,
-      kNCombStats = 6 
-    } summaryStatArraySizes;     
+      kNCombStats = 6
+    } summaryStatArraySizes;
 
     /**
      * enum to indicate fit result status (for disappearing track trigger that wants not only for successful tracks)
@@ -127,50 +74,142 @@ namespace InDet {
        RecoverableForDisTrk = 4,
     };
 
+
+    ////////////////////////////////////////////////////////
+    ///////                  Setters                 ///////
+    ////////////////////////////////////////////////////////
+
+    /**
+     * Set tools, service and magnetic field properties
+     */
+    void setTools(const Trk::IPatternParametersPropagator* propTool,
+                  const Trk::IPatternParametersUpdator* updatorTool,
+                  const Trk::IRIO_OnTrackCreator* rioTool,
+                  const IInDetConditionsTool* pixCondTool,
+                  const IInDetConditionsTool* sctCondTool,
+                  const Trk::MagneticFieldProperties* fieldProp,
+                  const Trk::IBoundaryCheckTool* boundaryCheckTool);
+
+    void setTools(const IInDetConditionsTool* pixCondTool,
+                  const IInDetConditionsTool* sctCondTool) {
+       m_tools.setTools(pixCondTool,
+                        sctCondTool);
+    }
+
+    /**
+     * Set magnetif field cache
+     */
+    void setFieldCondObj(const  AtlasFieldCacheCondObj* fieldCondObj)
+    {m_tools.setFieldCondObj(fieldCondObj);}
+
+    /**
+     * Set cached pointer to Pixel cluster collection in StoreGate
+     */
+    void setPixContainer(const InDet::PixelClusterContainer* pixcont)
+    {m_pixcontainer = pixcont;}
+    /**
+     * Set cached pointer to SCT cluster collection in StoreGate
+     */
+    void setSctContainer(const InDet::SCT_ClusterContainer* sctcont)
+    {m_sctcontainer = sctcont;}
+
+    void setPixelDetectorElementStatus( const InDet::SiDetectorElementStatus *pixelDetElStatus) { m_tools.setPixelDetectorElementStatus(pixelDetElStatus); }
+    void setSCTDetectorElementStatus( const InDet::SiDetectorElementStatus *sctDetElStatus)     { m_tools.setSCTDetectorElementStatus(sctDetElStatus); }
+
     /**
      * Setter for ResultCode (for disappearing track trigger)
      */
-    void setResultCode(const ResultCode);
+    void setResultCode(const ResultCode code) {m_resultCode = code;}
 
     /**
      * Setter for flagToReturnFailedTrack (for disappearing track trigger)
      */
     void setFlagToReturnFailedTrack(const bool);
 
+    void setHeavyIon(bool);
+    void setITkGeometry(bool);
+    void setFastTracking(bool);
+
+    void setCosmicTrack(int value) {m_cosmicTrack = value;}
+    void setNclusmin(int value)    {m_nclusmin = value;}
+    void setNclusminb(int value)   {m_nclusminb = value;}
+    void setNwclusmin(int value)   {m_nwclusmin = value;}
+    void setNholesmax(int value)   {m_nholesmax = value;}
+    void setDholesmax(int value)   {m_dholesmax = value;}
+    void setSimpleTrack(bool value){m_simpleTrack = value;}
+
+    void setPTmin(double value)      {m_pTmin = value;}
+    void setPTminBrem(double value)  {m_pTminBrem = value;}
+    void setXi2max(double value)     {m_xi2max = value;}
+    void setXi2maxNoAdd(double value){m_xi2maxNoAdd = value;}
+    void setXi2maxlink(double value) {m_xi2maxlink = value;}
+
+    ////////////////////////////////////////////////////////
+    ///////                  Getters                 ///////
+    ////////////////////////////////////////////////////////
+
+
+    /**
+     * Get cached pointer to Pixel cluster collection in StoreGate
+     */
+    const InDet::PixelClusterContainer* pixContainer() const
+    {return m_pixcontainer;}
+    /**
+     * Get cached pointer to SCT cluster collection in StoreGate
+     */
+    const InDet::SCT_ClusterContainer* sctContainer() const
+    {return m_sctcontainer;}
+
+    /**
+     * Get PRD to track map
+     */
+    const Trk::PRDtoTrackMap* PRDtoTrackMap() const
+    {return m_tools.PRDtoTrackMap();}
+
+    /**
+     * Check if this object is initialized by the setTools method
+     */
+    bool isInitialized() const {return m_initialized;}
+
+    // flag to tell whether to return tracks even in case fit is un-successful (for disappearing track trigger)
+    bool flagToReturnFailedTrack() const {return m_flagToReturnFailedTrack;}
+    // code to tell the fit result (code includes non-succesful cases for disappearing track trigger)
+    SiCombinatorialTrackFinderData_xk::ResultCode resultCode() const {return m_resultCode;}
+
+    bool heavyIon() const        {return m_heavyIon;}
+    bool isITkGeometry() const   {return m_ITkGeometry;}
+    bool useFastTracking() const {return m_doFastTracking;}
+
+    int cosmicTrack()    const {return m_cosmicTrack;}
+    int nclusmin()       const {return m_nclusmin;}
+    int nclusminb()      const {return m_nclusminb;}
+    int nwclusmin()      const {return m_nwclusmin;}
+    int nholesmax()      const {return m_nholesmax;}
+    int dholesmax()      const {return m_dholesmax;}
+    bool simpleTrack()   const {return m_simpleTrack;}
+
+    double pTmin()       const {return m_pTmin;}
+    double pTminBrem()   const {return m_pTminBrem;}
+    double xi2max()      const {return m_xi2max;}
+    double xi2maxNoAdd() const {return m_xi2maxNoAdd;}
+    double xi2maxlink()  const {return m_xi2maxlink;}
+
     /**
      * @name Getter methods using references
      */
     //@{
-    SiTrajectory_xk& trajectory();
-    Trk::TrackInfo& trackinfo();
-    InDet::SiTools_xk& tools();
-    std::list<Trk::Track*>& tracks();
-    int& nprint();
-    int& inputseeds();
-    int& goodseeds();
-    int& findtracks();
-    int& inittracks();
-    int& roadbug();
-    std::array<bool,kNCombStats>& statistic();
-    bool& heavyIon();
-    int& cosmicTrack();
-    int& nclusmin();
-    int& nclusminb();
-    int& nwclusmin();
-    int& nholesmax();
-    int& dholesmax();
-    bool& simpleTrack();
-    // flag to tell whether to return tracks even in case fit is un-successful (for disappearing track trigger)
-    bool  flagToReturnFailedTrack() const;
-    // code to tell the fit result (code includes non-succesful cases for disappearing track trigger)
-    SiCombinatorialTrackFinderData_xk::ResultCode resultCode();
-    double& pTmin();
-    double& pTminBrem();
-    double& xi2max();
-    double& xi2maxNoAdd();
-    double& xi2maxlink();
-    bool& isITkGeometry();
-    bool& useFastTracking();
+    SiTrajectory_xk& trajectory()   {return m_trajectory;}
+    Trk::TrackInfo& trackinfo()     {return m_trackinfo;}
+    InDet::SiTools_xk& tools()      {return m_tools;}
+    std::list<Trk::Track*>& tracks(){return m_tracks;}
+
+    int& nprint()     {return m_nprint;}
+    int& inputseeds() {return m_inputseeds;}
+    int& goodseeds()  {return m_goodseeds;}
+    int& findtracks() {return m_findtracks;}
+    int& inittracks() {return m_inittracks;}
+    int& roadbug()    {return m_roadbug;}
+    std::array<bool,kNCombStats>& statistic() {return m_statistic;}
 
     /// Methods used to associate the hole search outcome to tracks without having to modify the EDM.
 
@@ -190,7 +229,8 @@ namespace InDet {
     /**
      * Set PRD to track map
      */
-    void setPRDtoTrackMap(const Trk::PRDtoTrackMap* prd_to_track_map);
+    void setPRDtoTrackMap(const Trk::PRDtoTrackMap* prd_to_track_map)
+    {m_tools.setPRDtoTrackMap(prd_to_track_map);}
 
   private:
 

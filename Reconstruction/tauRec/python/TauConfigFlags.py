@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import unittest
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
@@ -10,16 +10,6 @@ def createTauConfigFlags():
 
     tau_cfg.addFlag("Tau.doTauRec", True)
     tau_cfg.addFlag("Tau.ThinTaus", True)
-
-    # Output containers
-    tau_cfg.addFlag("Tau.outputType", "xAOD::TauJetContainer")
-    tau_cfg.addFlag("Tau.outputKey", "TauJets")
-
-    # Input containers
-    tau_cfg.addFlag("Tau.VertexCollection", "PrimaryVertices")
-    tau_cfg.addFlag("Tau.TrackCollection", "InDetTrackParticles")
-    tau_cfg.addFlag("Tau.SeedJetCollection", "AntiKt4LCTopoJets")
-    tau_cfg.addFlag("Tau.LargeD0TrackCollection", "InDetLargeD0TrackParticles")
 
     # Switches for enabling/disabling some tools
     tau_cfg.addFlag("Tau.doTJVA", True)
@@ -62,15 +52,97 @@ def createTauConfigFlags():
     tau_cfg.addFlag("Tau.TauEleRNNConfig", ["taueveto_rnn_config_1P_r22.json", "taueveto_rnn_config_3P_r22.json"])
     tau_cfg.addFlag("Tau.TauEleRNNWPConfig", ["taueveto_rnn_flat_1P_r22.root", "taueveto_rnn_flat_3P_r22.root"])
     tau_cfg.addFlag("Tau.DecayModeNNClassifierConfig", "NNDecayMode_R22_v1.json")
+    tau_cfg.addFlag("Tau.TauEleRNNWPfix", ["rnneveto_mc16d_flat_1p_fix.root", "rnneveto_mc16d_flat_3p_fix.root"])
+    tau_cfg.addFlag("Tau.TauJetDeepSetConfig", ["tauid_R22_1p_trk_dpst_notrkfakeRNN.json", "tauid_R22_2p_trk_dpst.json", "tauid_R22_3p_trk_dpst.json"])
+    tau_cfg.addFlag("Tau.TauJetDeepSetWP", ["model_R22_1p_trk_dpst_notrkfakeRNN.root", "model_R22_2p_trk_dpst.root", "model_R22_3p_trk_dpst.root"])
 
-    # DiTau config
+    # create 2 flag categories, for standard taus and electron-subtracted taus
+    tau_cfg.addFlagsCategory("Tau.TauRec", createTauRecConfigFlags, prefix=True)
+    tau_cfg.addFlagsCategory("Tau.TauEleRM", createTauEleRMConfigFlags, prefix=True)
+    # define ActiveConfig in TauConfigFlags.py so it exists for client code like DerivationFramework that don't want to define it via cloneAndReplace
+    # FIXME: this looks more like a hack than good design, maybe dropping Tau.ActiveConfig and using Tau.TauRec as active config would be better?
+    tau_cfg.addFlagsCategory("Tau.ActiveConfig", createTauRecConfigFlags, prefix=True)
+
+    # e-had boosted ditaus, aka electron-subtracted taus
+    # FIXME: keep this switched off until missing algorithm and tool are implemented
+    tau_cfg.addFlag("Tau.doTauEleRMRec", False)
+    # had-had boosted ditaus
     tau_cfg.addFlag("Tau.doDiTauRec", True)
 
     return tau_cfg
 
 
-# Self test
+def createTauRecConfigFlags():
+    from AthenaConfiguration.AthConfigFlags import AthConfigFlags
+    flags = AthConfigFlags()
 
+    flags.addFlag("prefix", "")
+
+    # Output containers
+    flags.addFlag("TauJets", "TauJets")
+    flags.addFlag("TauTracks", "TauTracks")
+    flags.addFlag("TauShotClusters", "TauShotClusters")
+    flags.addFlag("TauShotClustersLinks", "TauShotClusters_links")
+    flags.addFlag("TauShotPFOs", "TauShotParticleFlowObjects")
+    flags.addFlag("TauPi0Clusters", "TauPi0Clusters")
+    flags.addFlag("TauPi0ClustersLinks", "TauPi0Clusters_links")
+    flags.addFlag("TauHadronicPFOs", "TauHadronicParticleFlowObjects")
+    flags.addFlag("TauNeutralPFOs", "TauNeutralParticleFlowObjects")
+    flags.addFlag("TauChargedPFOs", "TauChargedParticleFlowObjects")
+    flags.addFlag("TauSecondaryVertices", "TauSecondaryVertices")
+    flags.addFlag("TauFinalPi0s", "TauFinalPi0s")
+
+    # Transient containers
+    flags.addFlag("TauJets_tmp", "TauJets_tmp")
+    flags.addFlag("TauCommonPi0Cells", "TauCommonPi0Cells")
+    flags.addFlag("TauPi0Clusters_tmp", "TauPi0Clusters_tmp")
+
+    # Input containers
+    flags.addFlag("VertexCollection", "PrimaryVertices")
+    flags.addFlag("TrackCollection", "InDetTrackParticles")
+    flags.addFlag("SeedJetCollection", "AntiKt4LCTopoJets")
+    flags.addFlag("LargeD0TrackCollection", "InDetLargeD0TrackParticles")
+
+    # Electron-subtracted tau
+    # FIXME: improve naming
+    flags.addFlag("doTauEleRM", False)
+    flags.addFlag("ElectronDirections", "")
+    flags.addFlag("CaloCalTopoClusters_EleRM", "")
+
+    return flags
+
+
+def createTauEleRMConfigFlags():
+    flags = createTauRecConfigFlags()
+
+    flags.prefix                    = "EleRM_"
+    flags.SeedJetCollection         = "AntiKt4LCTopoJets_ElecRM"
+    flags.TrackCollection           = "InDetTrackParticles_ElecRM"
+    flags.TauJets                   = "TauJets_EleRM"
+    flags.TauTracks                 = "TauTracks_EleRM"
+    flags.TauShotClusters           = "TauShotClusters_EleRM"
+    # FIXME: check the double underscore doesn't cause trouble for cell links
+    flags.TauShotClustersLinks      = "TauShotClusters_EleRM_links"
+    flags.TauShotPFOs               = "TauShotParticleFlowObjects_EleRM"
+    flags.TauJets_tmp               = "TauJets_tmp_EleRM"
+    flags.TauCommonPi0Cells         = "TauCommonPi0Cells_EleRM"
+    flags.TauPi0Clusters_tmp        = "TauPi0Clusters_tmp_EleRM"
+    flags.TauPi0Clusters            = "TauPi0Clusters_EleRM"
+    # FIXME: check the double underscore doesn't cause trouble for cell links
+    flags.TauPi0ClustersLinks       = "TauPi0Clusters_EleRM_links"
+    flags.TauHadronicPFOs           = "TauHadronicParticleFlowObjects_EleRM"
+    flags.TauNeutralPFOs            = "TauNeutralParticleFlowObjects_EleRM"
+    flags.TauChargedPFOs            = "TauChargedParticleFlowObjects_EleRM"
+    flags.TauSecondaryVertices      = "TauSecondaryVertices_EleRM"
+    flags.TauFinalPi0s              = "TauFinalPi0s_EleRM"
+    flags.doTauEleRM                = True
+    flags.ElectronDirections        = "RemovalDirections_ElecRM"
+    flags.CaloCalTopoClusters_EleRM = "CaloCalTopoClusters_EleRM"
+
+    return flags
+
+
+# Self test
 
 class TestTauRecConfigFlags(unittest.TestCase):
     def runTest(self):

@@ -1,13 +1,10 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
  /////////////////////////////////////////////////////////////////// 	 
 // BCM_RawDataProviderTool.cxx 	 
 //   Implementation file for class BCM_RawDataProviderTool 	 
-/////////////////////////////////////////////////////////////////// 	 
-// (c) ATLAS BCM Detector software 	 
-/////////////////////////////////////////////////////////////////// 	 
 /////////////////////////////////////////////////////////////////// 	 
 //  Version 00-00-01 12/05/2008 Daniel Dobos 	 
 //  Version 00-00-02 19/05/2008 Daniel Dobos 	 
@@ -17,24 +14,10 @@
 #include "BCM_RawDataByteStreamCnv/BCM_RawDataProviderTool.h"
 
 #include "InDetBCM_RawData/BCM_RDO_Container.h"
-#include "BCM_RawDataByteStreamCnv/BCM_RodDecoder.h"
 
 static const InterfaceID IID_IBCM_RawCollByteStreamTool("BCM_RawDataProviderTool", 1, 0);
 const InterfaceID& BCM_RawDataProviderTool::interfaceID( )
 { return IID_IBCM_RawCollByteStreamTool; }
-
-////////////////////////
-// constructor
-////////////////////////
-BCM_RawDataProviderTool::BCM_RawDataProviderTool
-( const std::string& type, const std::string& name,const IInterface* parent )
-  :  AthAlgTool(type,name,parent),
-     m_decoder("BCM_RodDecoder")
-{
-  declareProperty ("Decoder", m_decoder);
-  declareInterface<BCM_RawDataProviderTool>(this);   
-  m_DecodeErrCount =0;
-}
 
 ////////////////////////
 // destructor 
@@ -77,12 +60,12 @@ StatusCode BCM_RawDataProviderTool::convert( std::vector<const OFFLINE_FRAGMENTS
 
     StatusCode sc = m_decoder->fillCollection(&**rob_it, rdoCont);
     if (sc != StatusCode::SUCCESS) {
-       if (m_DecodeErrCount < 100) {
+       if (m_decodeErrCount < 100) {
           ATH_MSG_INFO( "Problem with BCM ByteStream Decoding!" );
-       } else if (100 == m_DecodeErrCount) {
+       } else if (100 == m_decodeErrCount) {
           ATH_MSG_INFO( "Too many Problems with BCM Decoding. Turning message off." );
        }
-        m_DecodeErrCount++;
+        m_decodeErrCount++;
       }
   }
 

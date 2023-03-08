@@ -1,15 +1,14 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 #------------------------------------------------------------------------#
-# PhysicsP1_pp_lowMu_run3_v1.py menu cosmics running with MT framework
+# PhysicsP1_pp_lowMu_run3_v1.py menu
 #------------------------------------------------------------------------#
 
 # This defines the input format of the chain and it's properties with the defaults set
 # always required are: name, stream and groups
 #['name', 'L1chainParts'=[], 'stream', 'groups', 'merging'=[], 'topoStartFrom'=False],
-from TriggerMenuMT.HLT.Config.Utility.ChainDefInMenu import ChainProp
+from ..Config.Utility.ChainDefInMenu import ChainProp
 from .SignatureDicts import ChainStore
-from .PhysicsP1_pp_run3_v1 import addP1Signatures
 from .Physics_pp_run3_v1 import (
     PhysicsStream,
     SingleMuonGroup,
@@ -24,13 +23,14 @@ from .Physics_pp_run3_v1 import (
     EgammaStreamersGroup,
     Topo3Group
 )
+from . import P1_run3_v1
 
 LowMuGroup = ['LowMu']
 LowMuGroupPhI = ['LowMuPhaseI']
 LowMuGroupLeg = ['LowMuLegacy']
 
 
-def setupMenu():
+def getLowMuPhysicsSignatures():
 
     chains = ChainStore()
 
@@ -333,16 +333,22 @@ def setupMenu():
 
         
     ]
+    return chains
 
+def setupMenu(menu_name):
     # Add all standard monitoring chains from addP1Signatures function
-    tempChains = ChainStore()
-    addP1Signatures(tempChains)
-    for sig, chainsInSig in tempChains.items():
+    final_chains = ChainStore()
+
+    chains = getLowMuPhysicsSignatures()
+    P1_run3_v1.addCommonP1Signatures(chains)
+    P1_run3_v1.addLowMuP1Signatures(chains)
+    for sig, chainsInSig in chains.items():
         for c in chainsInSig:
                 if "EM3" in c.name: # EM3 without VTE or AFP is removed from HI L1 menu to avoid L1Calo EM overflow
-                        continue
+                    raise RuntimeError(f"EM3 not available in HI L1 menu, requested by chain {c.name}")
                 if "EM7" in c.name: # EM7 without VTE or AFP is removed from HI L1 menu to avoid L1Calo EM overflow
-                        continue
+                    raise RuntimeError(f"EM7 not available in HI L1 menu, requested by chain {c.name}")
                 else:
-                        chains[sig].append(c)
-    return chains
+                    final_chains[sig].append(c)
+
+    return final_chains

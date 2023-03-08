@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRKANALYSIS_SPACEPOINTANALYSISALG_H
@@ -12,9 +12,9 @@
 #include "InDetIdentifier/PixelID.h"
 #include "InDetIdentifier/SCT_ID.h"
 
-#include "ActsTrkEvent/SpacePoint.h"
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "xAODInDetMeasurement/StripClusterContainer.h"
+#include "xAODInDetMeasurement/SpacePointContainer.h"
 
 namespace ActsTrk {
 
@@ -29,7 +29,7 @@ namespace ActsTrk {
     virtual StatusCode fillHistograms(const EventContext& ctx) const override;
 
   private:
-    SG::ReadHandleKey< ActsTrk::SpacePointContainer > m_spacePointContainerKey {this, "SpacePointContainerKey", "ITkPixelSpacePoints", "Key of input space points"};
+    SG::ReadHandleKey< xAOD::SpacePointContainer > m_spacePointContainerKey {this, "SpacePointContainerKey", "ITkPixelSpacePoints", "Key of input space points"};
     SG::ReadHandleKey< xAOD::PixelClusterContainer > m_pixelClusterContainerKey {this, "PixelClusterContainerKey", "ITkPixelClusters", "Key of input pixel clusters"};
     SG::ReadHandleKey< xAOD::StripClusterContainer > m_stripClusterContainerKey {this, "StripClusterContainerKey", "ITkStripClusters", "Key of input strip clusters"};
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -267,7 +267,9 @@ namespace LVL1 {
       tmp_jTowersIDs_subset_FPGA[myrow][mycol] = tmp_jTowersIDs_subset[myrow+24][mycol]; // For columns 8-END: Fills target rows 8-31 with source rows 32-55
     }
   }
-  ATH_CHECK(m_jFEXFPGATool->init(2, m_id));
+
+  //FPGA 2 correcponds to U4, index 3
+  ATH_CHECK(m_jFEXFPGATool->init(3, m_id));
   m_jFEXFPGATool->SetTowersAndCells_SG(tmp_jTowersIDs_subset_FPGA);
   ATH_CHECK(m_jFEXFPGATool->execute(inputOutputCollection));
   m_smallRJet_tobWords.push_back(m_jFEXFPGATool->getSmallRJetTOBs());
@@ -322,7 +324,8 @@ namespace LVL1 {
       tmp_jTowersIDs_subset_FPGA[myrow][mycol] = tmp_jTowersIDs_subset[myrow-24][mycol]; // For columns 24-END: Fills target rows 24-31 with source rows 0-8
     }
   }
-  ATH_CHECK(m_jFEXFPGATool->init(3, m_id));
+  //FPGA 3 correcponds to U3, index 2
+  ATH_CHECK(m_jFEXFPGATool->init(2, m_id));
   m_jFEXFPGATool->SetTowersAndCells_SG(tmp_jTowersIDs_subset_FPGA);
   ATH_CHECK(m_jFEXFPGATool->execute(inputOutputCollection));
   m_smallRJet_tobWords.push_back(m_jFEXFPGATool->getSmallRJetTOBs());
@@ -511,7 +514,8 @@ namespace LVL1 {
 	tmp_jTowersIDs_subset_FPGA[myrow][mycol] = tmp_jTowersIDs_subset[myrow+24][mycol]; // For columns 8-END (mirrored for CSide however): Fills target rows 8-31 with source rows 32-55
       }
     }
-    ATH_CHECK(m_jFEXFPGATool->init(2, m_id));
+    //FPGA 2 correcponds to U4, index 3
+    ATH_CHECK(m_jFEXFPGATool->init(3, m_id));
     m_jFEXFPGATool->SetTowersAndCells_SG(tmp_jTowersIDs_subset_FPGA);
     ATH_CHECK(m_jFEXFPGATool->execute(inputOutputCollection));
     m_smallRJet_tobWords.push_back(m_jFEXFPGATool->getSmallRJetTOBs());
@@ -566,7 +570,8 @@ namespace LVL1 {
 	tmp_jTowersIDs_subset_FPGA[myrow][mycol] = tmp_jTowersIDs_subset[myrow-24][mycol]; // For columns 24-END (mirrored for CSide however): Fills target rows 24-31 with source rows 0-8
       }
     }
-    ATH_CHECK(m_jFEXFPGATool->init(3, m_id));
+    //FPGA 3 correcponds to U3, index 2
+    ATH_CHECK(m_jFEXFPGATool->init(2, m_id));
     m_jFEXFPGATool->SetTowersAndCells_SG(tmp_jTowersIDs_subset_FPGA);
     ATH_CHECK(m_jFEXFPGATool->execute(inputOutputCollection));
     m_smallRJet_tobWords.push_back(m_jFEXFPGATool->getSmallRJetTOBs());
@@ -649,7 +654,8 @@ StatusCode jFEXSim::ExecuteBarrel(int tmp_jTowersIDs_subset[FEXAlgoSpaceDefs::jF
       tmp_jTowersIDs_subset_FPGA[myrow][mycol] = tmp_jTowersIDs_subset[24+myrow][mycol]; // fills target rows 0-31 with source rows 24-55
     }
   }
-  ATH_CHECK(m_jFEXFPGATool->init(2, m_id));
+  //FPGA 2 correcponds to U4, index 3
+  ATH_CHECK(m_jFEXFPGATool->init(3, m_id));
   m_jFEXFPGATool->SetTowersAndCells_SG(tmp_jTowersIDs_subset_FPGA);
   ATH_CHECK(m_jFEXFPGATool->execute(inputOutputCollection));
   m_smallRJet_tobWords.push_back(m_jFEXFPGATool->getSmallRJetTOBs());
@@ -674,7 +680,8 @@ StatusCode jFEXSim::ExecuteBarrel(int tmp_jTowersIDs_subset[FEXAlgoSpaceDefs::jF
       tmp_jTowersIDs_subset_FPGA[myrow][mycol] = tmp_jTowersIDs_subset[myrow-24][mycol]; // fills target rows 24-31 with source rows 0-8
     }
   }
-  ATH_CHECK(m_jFEXFPGATool->init(3, m_id));
+  //FPGA 3 correcponds to U3, index 2
+  ATH_CHECK(m_jFEXFPGATool->init(2, m_id));
   m_jFEXFPGATool->SetTowersAndCells_SG(tmp_jTowersIDs_subset_FPGA);
   ATH_CHECK(m_jFEXFPGATool->execute(inputOutputCollection));
   m_smallRJet_tobWords.push_back(m_jFEXFPGATool->getSmallRJetTOBs());

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration  
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration  
 */
 //***************************************************************************  
 //		jFEXPileupAndNoise - Algorithm for Pileup and Noise in jFEX
@@ -353,7 +353,6 @@ std::unordered_map<int,std::vector<int> > LVL1::jFEXPileupAndNoise::Get_EM_Et_va
                 m_map_Etvalues_EM.insert(std::make_pair(TTID, v_energies));
             }
         }
-           
     }
     else{
         
@@ -383,10 +382,8 @@ std::unordered_map<int,std::vector<int> > LVL1::jFEXPileupAndNoise::Get_EM_Et_va
 
                 m_map_Etvalues_EM.insert(std::make_pair(TTID, v_energies));                
                 
-                
             }
         }
-                   
     }
 
     if(m_apply_noise2jets || m_apply_noise2met) ApplyNoiseCuts(m_map_Etvalues_EM,0);
@@ -476,32 +473,26 @@ std::unordered_map<int,std::vector<int> > LVL1::jFEXPileupAndNoise::Get_HAD_Et_v
     return m_map_Etvalues_HAD;
 }
 
-void LVL1::jFEXPileupAndNoise::ApplyNoiseCuts(std::unordered_map<int,std::vector<int> > & map_Etvalues,int /*layer*/ ){
+void LVL1::jFEXPileupAndNoise::ApplyNoiseCuts(std::unordered_map<int,std::vector<int> > & map_Etvalues,int layer ){
     
-    //const LVL1::jTower *tmpTower;
+    const LVL1::jTower *tmpTower;
     
     for(auto [key,vec] : map_Etvalues){
         
-        // - for now commented until agreement with performance group -
-        //tmpTower = m_jTowerContainer->findTower(key);
-        //float Jet_NoiseCut = tmpTower->getNoiseForJet(layer);
-        //float Met_NoiseCut = tmpTower->getNoiseForMet(layer);
-        int Jet_NoiseCut = 0;
-        int Met_NoiseCut = 0;
+        tmpTower = m_jTowerContainer->findTower(key);
+        int Jet_NoiseCut = tmpTower->getNoiseForJet(layer);
+        int Met_NoiseCut = tmpTower->getNoiseForMet(layer);
         
-        if(m_apply_noise2jets && map_Etvalues[key][0]<Jet_NoiseCut){ // Et for jets
+        if(m_apply_noise2jets && map_Etvalues[key][0]<=Jet_NoiseCut){ // Et for jets
             map_Etvalues[key][0]=0.;
         }        
-        if(m_apply_noise2met && map_Etvalues[key][1]<Met_NoiseCut){ // Et for Met
+        if(m_apply_noise2met && map_Etvalues[key][1]<=Met_NoiseCut){ // Et for Met
             map_Etvalues[key][1]=0.;
-        }
+        }            
 
     }
     
 }
-
-
-
 
 std::unordered_map<int,std::vector<int> > LVL1::jFEXPileupAndNoise::GetEt_values(){
     

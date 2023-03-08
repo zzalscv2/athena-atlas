@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file TrigCaloMonitorAlgorithm.py
@@ -499,25 +499,26 @@ if __name__=='__main__':
     log.setLevel(DEBUG)
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
 
     # Input
     file = '/afs/cern.ch/work/j/joheinri/public/TestAOD/AOD.pool.root'
-    ConfigFlags.Input.Files = [file]
-    ConfigFlags.Input.isMC = True
+    flags = initConfigFlags()
+    flags.Input.Files = [file]
+    flags.Input.isMC = True
 
     # Output
-    ConfigFlags.Output.HISTFileName = 'TrigCaloMonitorOutput.root'
+    flags.Output.HISTFileName = 'TrigCaloMonitorOutput.root'
     
-    ConfigFlags.lock()
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
-    trigCaloMonitorAcc = TrigCaloMonConfig(ConfigFlags)
+    trigCaloMonitorAcc = TrigCaloMonConfig(flags)
     cfg.merge(trigCaloMonitorAcc)
 
     # If you want to turn on more detailed messages ...

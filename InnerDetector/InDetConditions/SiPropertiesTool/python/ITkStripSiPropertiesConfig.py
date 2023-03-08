@@ -22,7 +22,7 @@ def ITkStripSiPropertiesCondAlgCfg(flags, name="ITkStripSiPropertiesCondAlg", **
 
     kwargs.setdefault("SCTDetEleCollKey", "ITkStripDetectorElementCollection")
     kwargs.setdefault("WriteKey", "ITkStripSiliconPropertiesVector")
-
+    kwargs.setdefault("ForceUseGeoModel", True)
     acc.merge(ITkStripReadoutGeometryCfg(flags))
     acc.addCondAlgo(CompFactory.SCTSiPropertiesCondAlg(name, **kwargs))
     return acc

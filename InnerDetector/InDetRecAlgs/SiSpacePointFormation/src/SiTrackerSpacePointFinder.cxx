@@ -334,7 +334,6 @@ StatusCode SiTrackerSpacePointFinder::execute (const EventContext& ctx) const
 //---------------------------------------------------------------------------
 StatusCode SiTrackerSpacePointFinder::finalize()
 {
-  ATH_MSG_INFO( "SiTrackerSpacePointFinder::finalize()" );
   ATH_MSG_INFO( m_numberOfEvents << " events processed" );
   ATH_MSG_INFO( m_numberOfPixel << " pixel collections processed" );
   ATH_MSG_INFO( m_numberOfSCT << " sct collections processed" );

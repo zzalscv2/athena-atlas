@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -28,7 +28,7 @@ class NSubjettinessTool :
 
     public:
       // Constructor and destructor
-      NSubjettinessTool(std::string name);
+      NSubjettinessTool(const std::string& name);
 
       StatusCode initialize();
 
@@ -87,11 +87,10 @@ struct NSubjettinessTool::moments_t {
   std::unique_ptr< SG::AuxElement::Decorator<float> > dec_Tau3_wta_ungroomed;
   std::unique_ptr< SG::AuxElement::Decorator<float> > dec_Tau4_wta_ungroomed;
 
-  moments_t (float Alpha, std::string Prefix) {
-
-    prefix = Prefix;
-    alpha = Alpha;
-
+  moments_t (float Alpha, const std::string& Prefix)
+    : prefix (Prefix),
+      alpha (Alpha)
+  {
     std::string suffix = GetAlphaSuffix(alpha);
 
     dec_Tau1 = std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"Tau1"+suffix);

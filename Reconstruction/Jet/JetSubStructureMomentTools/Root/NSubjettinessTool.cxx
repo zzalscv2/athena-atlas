@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetSubStructureMomentTools/NSubjettinessTool.h"
@@ -9,7 +9,7 @@
 #include "fastjet/contrib/Nsubjettiness.hh"
 #include "fastjet/contrib/AxesDefinition.hh"
 
-NSubjettinessTool::NSubjettinessTool(std::string name) :
+NSubjettinessTool::NSubjettinessTool(const std::string& name) :
   JetSubStructureMomentToolsBase(name)
 {
   declareProperty("Alpha",      m_Alpha = 1.0);

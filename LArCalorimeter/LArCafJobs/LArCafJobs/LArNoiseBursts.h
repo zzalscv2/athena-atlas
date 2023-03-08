@@ -53,7 +53,7 @@ class TTree;
 
 class LArHVLineID;
 
-class LArNoiseBursts : public AthAlgorithm  {
+class ATLAS_NOT_THREAD_SAFE LArNoiseBursts : public AthAlgorithm  {
 
  public:
 

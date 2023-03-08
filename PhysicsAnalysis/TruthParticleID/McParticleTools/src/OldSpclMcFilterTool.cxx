@@ -634,8 +634,8 @@ StatusCode OldSpclMcFilterTool::rebuildLinks( const HepMC::GenEvent * mcEvt,
 		// so we skip it
 		if ( msgLvl(MSG::VERBOSE) ) {
 		  msg(MSG::VERBOSE)
-		    << "found a particle [bc,pdgId]= "
-		    << HepMC::barcode(itrPart) << ", "
+		    << "found a particle = "
+		    << itrPart << ", "
 		    << "but its production vertex has incoming particles !"
 		    << endmsg;
 		  continue;

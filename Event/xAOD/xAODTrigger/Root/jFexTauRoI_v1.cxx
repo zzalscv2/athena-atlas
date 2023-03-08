@@ -11,6 +11,7 @@
 
 // Local include(s):
 #include "xAODTrigger/jFexTauRoI.h"
+#include "getQuadrant.h"
 
 namespace xAOD {
 
@@ -137,10 +138,12 @@ namespace xAOD {
     return globalEta;
   }
 
-  uint jFexTauRoI_v1::unpackGlobalPhi() const{
-     uint globalPhi = tobLocalPhi() + (fpgaNumber() * 16); 
-     return globalPhi; 
-  
-  }
+    uint jFexTauRoI_v1::unpackGlobalPhi() const {
+        const unsigned int quadrant = ::getQuadrant(fpgaNumber());
+        
+        uint globalPhi = tobLocalPhi() + (quadrant * 16);
+        return globalPhi;
+
+    }
 } // namespace xAOD
 

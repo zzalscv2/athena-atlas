@@ -35,7 +35,7 @@ static const bool dontUseRealDatabase=true;
 
 BOOST_AUTO_TEST_SUITE(CrestFunctionsTest)
   BOOST_AUTO_TEST_CASE(urlBase_test){
-    const std::string baseUrl=urlBase();
+    auto baseUrl=urlBase();
     BOOST_TEST(baseUrl == "http://crest-02.cern.ch:8080");
   }
   
@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_SUITE(CrestFunctionsTest)
   BOOST_AUTO_TEST_CASE(getIovsForTag_test){
     const std::string tag{"LARIdentifierFebRodMap-RUN2-000"};
     const std::string referenceReply{"99331506eefbe6783a8d5d5bc8b9a44828a325adfcaac32f62af212e9642db71"};
-    BOOST_TEST(getIovsForTag(tag, dontUseRealDatabase) == referenceReply);
+    BOOST_TEST(getLastHashForTag(tag, dontUseRealDatabase) == referenceReply);
   }
   
   BOOST_AUTO_TEST_CASE(getPayloadForHash_test){

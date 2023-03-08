@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -79,7 +79,7 @@ class TileHit;
 class TileTBAANtuple: public AthAlgorithm {
   public:
     //Constructor
-    TileTBAANtuple(std::string name, ISvcLocator* pSvcLocator);
+    TileTBAANtuple(const std::string& name, ISvcLocator* pSvcLocator);
 
     //Destructor 
     virtual ~TileTBAANtuple() = default;
@@ -191,6 +191,23 @@ class TileTBAANtuple: public AthAlgorithm {
       else
         return 1; //error
     }
+
+    void checkIsPropertySetup(float property, std::string name) {
+      if (property < NOT_SETUP) {
+        ATH_MSG_ERROR("The following property should be set up via JO: " << name);
+      }
+    }
+
+    void setupPropertyDefaultValue(float property, float defaultValue, std::string name) {
+      if (property < NOT_SETUP) {
+        property = defaultValue;
+        ATH_MSG_INFO("The following property is not set up via JO, using default value: " << name << "=" << defaultValue);
+      }
+    }
+
+    void setupBeamChambersBeforeTB2015(void);
+    void setupBeamChambersTB2015(void);
+    void setupBeamChambersTB2016_2020(void);
 
     // If data should be put in calib mode
     bool m_calibMode;
@@ -312,6 +329,7 @@ class TileTBAANtuple: public AthAlgorithm {
     uint32_t m_s3cou;
     uint32_t m_cher1;
     uint32_t m_cher2;
+    uint32_t m_cher3;
     uint32_t m_muTag;
     uint32_t m_muHalo;
     uint32_t m_muVeto;
@@ -556,6 +574,7 @@ class TileTBAANtuple: public AthAlgorithm {
     std::map<int, int> m_nSamplesInDrawerMap;
 
     static const int MAX_MINIDRAWERS = 4;
+    static const int NOT_SETUP = -9999;
 };
 
 #endif

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -16,7 +16,7 @@
 
 #include "TrkSurfaces/RectangleBounds.h"
 #include "TrkSurfaces/TrapezoidBounds.h"
-#include "TrkRIO_OnTrack/check_cast.h"
+#include "TrkRIO_OnTrack/ErrorScalingCast.h"
 
 #include <cmath>
 
@@ -235,15 +235,16 @@ InDet::SCT_ClusterOnTrackTool::correct
     if (!m_sctErrorScalingKey.key().empty()) {
       //SG::ReadCondHandle<SCTRIO_OnTrackErrorScaling> error_scaling( m_sctErrorScalingKey );
       SG::ReadCondHandle<RIO_OnTrackErrorScaling> error_scaling( m_sctErrorScalingKey );
-      cov = check_cast<SCTRIO_OnTrackErrorScaling>(*error_scaling)->getScaledCovariance( cov,  false, 0.0);
+      cov = Trk::ErrorScalingCast<SCTRIO_OnTrackErrorScaling>(*error_scaling)
+                ->getScaledCovariance(std::move(cov), false, 0.0);
     }
   }else {                                           // endcap
     locpar = Trk::LocalParameters(SC->localPosition());
     if (!m_sctErrorScalingKey.key().empty()) {
-      //      SG::ReadCondHandle<SCTRIO_OnTrackErrorScaling> error_scaling( m_sctErrorScalingKey );
       SG::ReadCondHandle<RIO_OnTrackErrorScaling> error_scaling( m_sctErrorScalingKey );
-      cov = check_cast<SCTRIO_OnTrackErrorScaling>(*error_scaling)->getScaledCovariance( cov,   true,
-                                                EL->sinStereoLocal(SC->localPosition()));
+      cov = Trk::ErrorScalingCast<SCTRIO_OnTrackErrorScaling>(*error_scaling)
+                ->getScaledCovariance(std::move(cov), true,
+                                      EL->sinStereoLocal(SC->localPosition()));
     }
     double Sn = EL->sinStereoLocal(SC->localPosition());
     double Sn2 = Sn * Sn;

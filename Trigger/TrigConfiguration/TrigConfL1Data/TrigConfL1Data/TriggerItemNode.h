@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigConf_TriggerItemNode
@@ -56,7 +56,7 @@ namespace TrigConf {
       unsigned int       internalTriggerNumber() const { return m_InternalTrigger.second; }
 
       void getAllFinalNodes(std::vector<const TriggerItemNode*>&) const;
-      void getAllThresholds(std::vector<TriggerThreshold*>&) const;
+      void getAllThresholds(std::vector<const TriggerThreshold*>&) const;
       void getAllBunchGroups(std::vector<bool>&) const; // vector of size 16 that describes the BGRPs used
       void getBunchGroupsMask(uint16_t & bgmask) const; // uint16 that describes the BGRPs used
       void getAllBunchGroups(std::vector<unsigned int>&) const;

@@ -153,7 +153,7 @@ void TileHid2RESrcID::setROD2ROBmap(const std::vector<std::string> & ROD2ROB,
   for (int i=1; i<size; i+=2) {
     uint32_t frag = strtol(ROD2ROB[i-1].data(),NULL,0);
     uint32_t rob = strtol(ROD2ROB[i].data(),NULL,0) & 0xFFFFFF;
-    if ( frag < 0x1000 ) { 
+    if ( frag < 0x2000 ) { 
       // this is actually remapping for fragments inside ROB, bypassing ROD ID
       m_frag2ROD[frag] = rob;
       log << MSG::INFO << "TileHid2RESrcID:: mapping frag 0x"<< MSG::hex 

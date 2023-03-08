@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -34,8 +34,7 @@ const unsigned int CaloSamplingHelper::m_EndCapMask = 0x00e00ff0;
 const unsigned int CaloSamplingHelper::m_LArMask    = 0x00e00fff;
 const unsigned int CaloSamplingHelper::m_TileMask   = 0x001ff000;
 
-CaloSamplingHelper::CaloSamplingHelper() {
-}
+CaloSamplingHelper::CaloSamplingHelper() = default;
 
 CaloSamplingHelper::CaloSample
 CaloSamplingHelper::getSampling( const CaloCell& cell ) {

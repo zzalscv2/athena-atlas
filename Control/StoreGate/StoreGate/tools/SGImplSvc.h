@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STOREGATE_SGIMPLSVC_H
@@ -179,11 +179,6 @@ public:
   /////////////////////////////////////////////////////////////////////////
   /// \name Advanced Client Interface: data object access
   //@{
-
-  /// readPrivateCopy implementation (possibly useful from python hence public)
-  DataObject*
-  typeless_readPrivateCopy(const CLID& clid, const std::string& key);
-
 
   DataObject*
   typeless_retrievePrivateCopy (const CLID clid, const std::string& key);

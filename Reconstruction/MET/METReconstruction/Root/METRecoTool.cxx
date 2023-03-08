@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // METRecoTool.cxx 
@@ -58,7 +58,6 @@ namespace met {
     declareProperty( "METComponentMap",    m_mapname  = "METMap" );
     declareProperty( "WarnIfDuplicate",    m_warnOfDupes = true  );
     declareProperty( "METFinalName",       m_metfinalname = ""   );
-    declareProperty( "TimingDetail",       m_timedetail = 0      );
   }
 
   // Athena algtool's Hooks
@@ -67,12 +66,12 @@ namespace met {
   {
     ATH_MSG_INFO ("Initializing " << name() << "...");
 
-    if( m_contname.key().size()==0 ) {
+    if( m_contname.key().empty() ) {
       ATH_MSG_FATAL("Output MissingETContainer name must be provided.");
       return StatusCode::FAILURE;
     }
 
-    if( m_mapname.key().size()==0 ) {
+    if( m_mapname.key().empty() ) {
       ATH_MSG_FATAL("Output MissingETComponentMap name must be provided.");
       return StatusCode::FAILURE;
     }
@@ -85,7 +84,7 @@ namespace met {
 
     // Do we need a flag to toggle the summation?
     // Or will we require the summation to be made 
-    if( m_metfinalname.size()>0 ) {
+    if( !m_metfinalname.empty() ) {
       m_doMetSum = true;
       ATH_MSG_INFO ("Will produce final MET sum \"" << m_metfinalname << "\"");
     } else {
@@ -94,15 +93,6 @@ namespace met {
 
     ATH_CHECK( m_metbuilders.retrieve() );
     ATH_CHECK( m_metrefiners.retrieve() );
-
-    // generate clocks
-    unsigned int ntool = m_metbuilders.size()+m_metrefiners.size();
-    m_toolclocks.resize(ntool);
-    for ( unsigned int itool=0; itool<ntool; ++itool ) {
-      m_toolclocks[itool].Reset();
-    }
-    m_clock.Reset();
-
     return StatusCode::SUCCESS;
   }
 
@@ -136,49 +126,6 @@ namespace met {
   StatusCode METRecoTool::finalize()
   {
     ATH_MSG_INFO ("Finalizing " << name() << "...");
-    if ( m_timedetail > 0 ) {
-      double ctime = m_clock.CpuTime()*1000;
-      double wtime = m_clock.RealTime()*1000;
-      double actime = 0.0;
-      double awtime = 0.0;
-      if ( m_nevt > 0 ) {
-	actime = ctime/double(m_nevt);
-	awtime = wtime/double(m_nevt);
-      }
-      ATH_MSG_INFO("  Total CPU/wall time: " << ctime << "/" << wtime << " ms");
-      ATH_MSG_INFO("   Avg. CPU/wall time: " << actime << "/" << awtime << " ms");
-    }
-
-    if ( m_timedetail > 1 && m_nevt > 0 ) {
-      unsigned int ntool = m_metbuilders.size()+m_metrefiners.size();
-      ATH_MSG_INFO("  CPU/wall time [ms] for " << ntool << " tools:");
-      unsigned int itool=0;
-
-      // time builders
-      for(ToolHandleArray<IMETToolBase>::const_iterator iBuilder=m_metbuilders.begin();
-	  iBuilder != m_metbuilders.end(); ++iBuilder) {
-	ToolHandle<IMETToolBase> th = *iBuilder;
-	double tctime = m_toolclocks[itool].CpuTime()/double(m_nevt)*1000;
-	double twtime = m_toolclocks[itool].RealTime()/double(m_nevt)*1000;
-	ATH_MSG_INFO("    " << setw(30) << th.typeAndName()
-		     << fixed << setprecision(3) << setw(10) << tctime
-		     << fixed << setprecision(3) << setw(10) << twtime);
-	++itool;
-      }
-
-      // time refiners
-      for(ToolHandleArray<IMETToolBase>::const_iterator iRefiner=m_metrefiners.begin();
-	  iRefiner != m_metrefiners.end(); ++iRefiner) {
-	ToolHandle<IMETToolBase> th = *iRefiner;
-	double tctime = m_toolclocks[itool].CpuTime()/double(m_nevt)*1000;
-	double twtime = m_toolclocks[itool].RealTime()/double(m_nevt)*1000;
-	ATH_MSG_INFO("    " << setw(30) << th.typeAndName()
-		     << fixed << setprecision(3) << setw(10) << tctime
-		     << fixed << setprecision(3) << setw(10) << twtime);
-	++itool;
-      }
-
-    }
     return StatusCode::SUCCESS;
   }
 
@@ -190,19 +137,15 @@ namespace met {
   StatusCode METRecoTool::buildMET(xAOD::MissingETContainer* metCont, xAOD::MissingETComponentMap* metMap) const
   {
 
-    if ( m_timedetail > 0 ) m_clock.Start(false);
 
-    MissingET* metFinal = 0;
+    MissingET* metFinal = nullptr;
     if( m_doMetSum ) {
       ATH_MSG_DEBUG("Building final MET sum: " << m_metfinalname);
       metFinal = new MissingET(0.,0.,0., m_metfinalname, MissingETBase::Source::total());
     }
 
-    unsigned int itool=0;
     // Run the MET reconstruction tools in sequence
-    for(ToolHandleArray<IMETToolBase>::const_iterator iBuilder=m_metbuilders.begin();
-	iBuilder != m_metbuilders.end(); ++iBuilder) {
-      ToolHandle<IMETToolBase> tool = *iBuilder;
+    for(auto tool : m_metbuilders) {
       ATH_MSG_VERBOSE("Building new MET term with: " << tool->name() );
       MissingET* metTerm = new MissingET(0.,0.,0.);
       ATH_MSG_VERBOSE("Insert MET object into container");
@@ -210,34 +153,22 @@ namespace met {
       ATH_MSG_VERBOSE("Insert MET object into ComponentMap");
       MissingETComposition::add(metMap,metTerm);
       ATH_MSG_VERBOSE("Execute tool");
-      if ( m_timedetail > 1 ) m_toolclocks[itool].Start(false);
       if( tool->execute(metTerm, metMap).isFailure() ) {
-	ATH_MSG_WARNING("Failed to execute tool: " << tool->name());
-	if ( m_timedetail > 0 ) m_clock.Stop();
-	if ( m_timedetail > 1 ) m_toolclocks[itool].Stop();
-	// return StatusCode::SUCCESS;
+        ATH_MSG_WARNING("Failed to execute tool: " << tool->name());
+        // return StatusCode::SUCCESS;
       }
-      if ( m_timedetail > 1 ) {
-	m_toolclocks[itool].Stop();
-	ATH_MSG_VERBOSE("  " << tool->name() << " CPU/wall time: " << m_clock.CpuTime()*1000
-			<< "/" << m_clock.RealTime()*1000 << " ms");
-      }
-
       ///////////////////////////////////////////////////
       // FIXME: Make a genuine decision about whether
       //        to include terms in the sum here.
       ///////////////////////////////////////////////////
       if( m_doMetSum && MissingETBase::Source::hasCategory(metTerm->source(),MissingETBase::Source::Refined) ) {
-	ATH_MSG_DEBUG("Adding constructed term: " << metTerm->name() << " to sum" );
-	(*metFinal) += (*metTerm);
+        ATH_MSG_DEBUG("Adding constructed term: " << metTerm->name() << " to sum" );
+        (*metFinal) += (*metTerm);
       }
-      ++itool;
     }
 
     // Run the MET reconstruction tools in sequence
-    for(ToolHandleArray<IMETToolBase>::const_iterator iRefiner=m_metrefiners.begin();
-	iRefiner != m_metrefiners.end(); ++iRefiner) {
-      ToolHandle<IMETToolBase> tool = *iRefiner;
+    for(auto tool : m_metrefiners) {
       ATH_MSG_VERBOSE("Refining MET with: " << tool->name() );
       MissingET* metTerm = new MissingET(0.,0.,0.);
       ATH_MSG_VERBOSE("Insert MET object into container");
@@ -245,19 +176,10 @@ namespace met {
       ATH_MSG_VERBOSE("Insert MET object into ComponentMap");
       MissingETComposition::add(metMap,metTerm);
       ATH_MSG_VERBOSE("Execute tool");
-      if ( m_timedetail > 1 ) m_toolclocks[itool].Start(false);
       if( tool->execute(metTerm, metMap).isFailure() ) {
-	ATH_MSG_WARNING("Failed to execute tool: " << tool->name());
-	// if ( m_timedetail > 0 ) m_clock.Stop();
-	// if ( m_timedetail > 1 ) m_toolclocks[itool].Stop();
-	// return StatusCode::SUCCESS;
+        ATH_MSG_WARNING("Failed to execute tool: " << tool->name());
+        // return StatusCode::SUCCESS;
       }
-      if ( m_timedetail > 1 ) {
-	m_toolclocks[itool].Stop();
-	ATH_MSG_DEBUG("  " << tool->name() << " CPU/wall time: " << m_toolclocks[itool].CpuTime()*1000
-		      << "/" << m_toolclocks[itool].RealTime()*1000 << " ms");
-      }
-      ++itool;
     }
 
     if( m_doMetSum ) {
@@ -265,10 +187,6 @@ namespace met {
       metFinal->setSource(source);
       metCont->push_back(metFinal);
     }
-
-    if ( m_timedetail > 0 ) m_clock.Stop();
-    ATH_MSG_DEBUG("  " << this->name() << " total CPU/wall time: " << m_clock.CpuTime()*1000
-		  << "/" << m_clock.RealTime()*1000 << " ms");
     ++m_nevt;
     return StatusCode::SUCCESS;
   }

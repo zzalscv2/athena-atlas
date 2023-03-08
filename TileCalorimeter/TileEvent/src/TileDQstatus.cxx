@@ -66,9 +66,6 @@ void TileDQstatus::setAllGood() {
   memset(m_DoubleStrobeErrArray, 0, sizeof(m_DoubleStrobeErrArray));
 }
 
-// Destructor
-TileDQstatus::~TileDQstatus() {
-}
 
 // Function to fill error arrays from DQ fragment stores in DSP RawChannelContainer
 // If monogain run, both gains contain the same results

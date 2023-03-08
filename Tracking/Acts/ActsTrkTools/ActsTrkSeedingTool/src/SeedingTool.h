@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRKSEEDINGTOOL_SEEDINGTOOL_H
-#define ACTSTRKSEEDINGTOOL_SEEDINGTOOL_H 1
+#define ACTSTRKSEEDINGTOOL_SEEDINGTOOL_H
 
 // ATHENA
 #include "ActsTrkToolInterfaces/ISeedingTool.h"
@@ -25,13 +25,16 @@
 #include <cmath> //for M_PI
 
 namespace ActsTrk {
-  
+
   class SeedingTool :
     public extends<AthAlgTool, ActsTrk::ISeedingTool> {
-    
   public:
-    SeedingTool(const std::string& type, const std::string& name,
-		    const IInterface* parent);
+    using value_type = xAOD::SpacePoint;
+    using seed_type = Acts::Seed< xAOD::SpacePoint >;
+    
+    SeedingTool(const std::string& type, 
+		const std::string& name,
+		const IInterface* parent);
     virtual ~SeedingTool() = default;
     
     virtual StatusCode initialize() override;
@@ -39,12 +42,12 @@ namespace ActsTrk {
     // Interface
     virtual StatusCode
       createSeeds(const EventContext& ctx,
-		  const std::vector<const ActsTrk::SpacePoint*>& spContainer,
+		  const std::vector<const xAOD::SpacePoint*>& spContainer,
 		  const Acts::Vector3& beamSpotPos,
 		  const Acts::Vector3& bField,
 		  ActsTrk::SeedContainer& seedContainer) const override;
     
-  private:        
+  protected:
     // metafunction to obtain correct type in iterated container given the iterator type
     template<typename spacepoint_iterator_t>
     struct external_spacepoint {
@@ -55,26 +58,23 @@ namespace ActsTrk {
                        >::type;
     };
 
-    template< typename spacepoint_iterator_t >
+    template< typename external_iterator_t >
       StatusCode
-      createSeeds( spacepoint_iterator_t spBegin,
-		   spacepoint_iterator_t spEnd,
+      createSeeds( external_iterator_t spBegin,
+		   external_iterator_t spEnd,
 		   const Acts::Vector3& beamSpotPos,
 		   const Acts::Vector3& bField,
-       std::vector< Acts::Seed< typename external_spacepoint<spacepoint_iterator_t>::type > >&  seeds) const;
+		   std::vector< seed_type >& seeds) const;
     
-    template< typename external_spacepoint_t >
-      const std::pair< 
-                   Acts::SpacePointGridConfig, 
-                   Acts::SeedFinderConfig< external_spacepoint_t > 
-      > 
-      prepareConfiguration(const Acts::Vector2& beamPos, 
-			   const Acts::Vector3& bField) const;
-    
+    StatusCode prepareConfiguration();
+
     // *********************************************************************
     // *********************************************************************
 
-  private:
+  protected:
+    Acts::SeedFinder< value_type > m_finder;
+    Acts::SeedFinderConfig< value_type > m_finderCfg;
+    Acts::SpacePointGridConfig m_gridCfg;
 
     // Properties to set SpacePointGridConfig
     Gaudi::Property< float > m_minPt {this, "minPt", 900. * Acts::UnitConstants::MeV,
@@ -98,8 +98,6 @@ namespace ActsTrk {
       "phi min for space point grid formation"};
     Gaudi::Property< float > m_gridPhiMax {this, "gridPhiMax", 2*M_PI,
       "phi max for space point grid formation"};
-    Gaudi::Property< float > m_bFieldInZ {this, "bFieldInZ", 2. * Acts::UnitConstants::T,
-      "z component of magnetic field to be used in grid building"};
     Gaudi::Property< int > m_phiBinDeflectionCoverage {this, "phiBinDeflectionCoverage", 3,
       "sets of consecutive phi bins to cover full deflection of minimum pT particle"};
 
@@ -246,9 +244,8 @@ namespace ActsTrk {
       "vector containing the map of z bins in the top layers"};
     Gaudi::Property< int > m_numPhiNeighbors {this, "numPhiNeighbors", 1,
       "number of phi bin neighbors at each side of the current bin that will be used to search for SPs"};
-
   };
-  
+
 } // namespace
 
 #endif

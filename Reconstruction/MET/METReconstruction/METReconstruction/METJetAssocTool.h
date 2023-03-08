@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // METJetAssocTool.h 
@@ -76,11 +76,11 @@ namespace met{
     /// Default constructor: 
     METJetAssocTool();
     SG::ReadHandleKey<xAOD::JetContainer> m_jetContKey{this, "InputCollection", "AntiKt4EMPFlowJets", "jets input key"};
-    void getPFOs(const xAOD::Jet *jet,
+    static void getPFOs(const xAOD::Jet *jet,
                  std::vector<const xAOD::IParticle*> &consts,
                  const met::METAssociator::ConstitHolder& constits,
-                 std::map<const xAOD::IParticle*,MissingETBase::Types::constvec_t> &momenta) const;
-    void getClus(const xAOD::Jet *jet,std::vector<const xAOD::IParticle*> &consts) const;
+                 std::map<const xAOD::IParticle*,MissingETBase::Types::constvec_t> &momenta) ;
+    static void getClus(const xAOD::Jet *jet,std::vector<const xAOD::IParticle*> &consts) ;
     void getOther(const xAOD::Jet *jet,
                   std::vector<const xAOD::IParticle*> &consts,
                   std::set<const xAOD::IParticle*> *newConst) const;

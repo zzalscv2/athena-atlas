@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -10,6 +10,7 @@
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
 #include <AsgServices/ServiceHandle.h>
+#include <PATInterfaces/SystematicSet.h>
 #include <PMGAnalysisInterfaces/IPMGTruthWeightTool.h>
 #include <SystematicsHandles/ISystematicsSvc.h>
 #include <xAODCutFlow/CutBookkeeper.h>

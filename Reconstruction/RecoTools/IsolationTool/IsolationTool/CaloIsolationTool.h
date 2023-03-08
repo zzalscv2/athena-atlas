@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISOLATIONTOOL_CALOISOLATIONTOOL_H
@@ -68,7 +68,7 @@ namespace xAOD {
       bool caloTopoClusterIsolation( CaloIsolation& result, 
 				     const IParticle& tp, 
 				     const std::vector<Iso::IsolationType>& cones, 
-				     CaloCorrection corrections, 
+				     const CaloCorrection& corrections, 
 				     const CaloClusterContainer* container = 0) const override; 
       using ICaloTopoClusterIsolationTool::caloTopoClusterIsolation;
 
@@ -76,7 +76,7 @@ namespace xAOD {
       virtual
       bool caloCellIsolation(CaloIsolation& result, const IParticle& particle, 
             const std::vector<Iso::IsolationType>& cones, 
-            CaloCorrection corrections, 
+            const CaloCorrection& corrections, 
             const CaloCellContainer* container = 0) const override;
       using ICaloCellIsolationTool::caloCellIsolation;
    
@@ -86,7 +86,7 @@ namespace xAOD {
       bool neutralEflowIsolation( CaloIsolation& result, 
 				  const IParticle& tp, 
 				  const std::vector<Iso::IsolationType>& cones, 
-				  CaloCorrection corrections) const override;
+				  const CaloCorrection& corrections) const override;
 
       using INeutralEFlowIsolationTool::neutralEflowIsolation;
 
@@ -100,7 +100,7 @@ namespace xAOD {
 #ifndef XAOD_ANALYSIS
 			      const Muon& muon,
 #endif
-			      const std::vector<Iso::IsolationType>& cones, CaloCorrection corrections
+			      const std::vector<Iso::IsolationType>& cones, const CaloCorrection& corrections
 #ifndef XAOD_ANALYSIS
 			      , double coneCoreSize
 			      , const derefMap_t& derefMap
@@ -108,7 +108,7 @@ namespace xAOD {
 			      ) const;
 
       /** cast for egamma (etcone egamma)*/    
-      bool caloCellIsolation( CaloIsolation& result, const Egamma& tp, const std::vector<Iso::IsolationType>& cones, CaloCorrection corrections
+      bool caloCellIsolation( CaloIsolation& result, const Egamma& tp, const std::vector<Iso::IsolationType>& cones, const CaloCorrection& corrections
 #ifndef XAOD_ANALYSIS
       , const CaloCellContainer* container
 #endif
@@ -119,7 +119,7 @@ namespace xAOD {
         CaloIsolation& result,
         const TrackParticle& tp,
         const std::vector<Iso::IsolationType>& cones,
-        CaloCorrection corrections,
+        const CaloCorrection& corrections,
         const CaloClusterContainer* container,
         double coneCoreSize,
         derefMap_t& derefMap) const;
@@ -129,7 +129,7 @@ namespace xAOD {
         CaloIsolation& result,
         const Egamma& tp,
         const std::vector<Iso::IsolationType>& cones,
-        CaloCorrection corrections,
+        const CaloCorrection& corrections,
         const CaloClusterContainer* container,
         double coreConeSize) const;
 
@@ -137,14 +137,14 @@ namespace xAOD {
       bool neutralEflowIsolation(CaloIsolation& result,
                                  const Egamma& eg,
                                  const std::vector<Iso::IsolationType>& cones,
-                                 CaloCorrection corrections,
+                                 const CaloCorrection& corrections,
                                  double coneCoreSize) const ;
 
       /** cast for egamma (pflowetcone egamma)*/
       bool neutralEflowIsolation(CaloIsolation& result,
                                  const TrackParticle& tp,
                                  const std::vector<Iso::IsolationType>& cones,
-                                 CaloCorrection corrections,
+                                 const CaloCorrection& corrections,
                                  double coneCoreSize,
                                  derefMap_t& derefMap) const;
 
@@ -259,7 +259,7 @@ namespace xAOD {
                         const CaloCluster* fwdClus) const;
 
       // init result structure
-      void initresult(CaloIsolation& result, CaloCorrection corrlist, unsigned int typesize) const;
+      void initresult(CaloIsolation& result, const CaloCorrection& corrlist, unsigned int typesize) const;
 
       /** get reference particle */
       const IParticle* getReferenceParticle(const IParticle& particle) const;

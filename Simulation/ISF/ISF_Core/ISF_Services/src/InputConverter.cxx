@@ -321,7 +321,8 @@ ISF::InputConverter::convertParticle(HepMC::GenParticlePtr genPartPtr, EBC_EVCOL
   // rather than a constant '1' (e.g. could use GenEvent index for that?)
   const int bcid = (kindOfCollection==EBC_MAINEVCOLL) ? 0 : 1;
 
-  auto hmpl = std::make_unique<HepMcParticleLink>(genPartPtr, parentEvent->event_number(), kindOfCollection);
+  auto hmpl = std::make_unique<HepMcParticleLink>(pBarcode, parentEvent->event_number(), kindOfCollection);
+  
   auto sParticle = std::make_unique<ISF::ISFParticle>( std::move(pos),
                                                        std::move(mom),
                                                        pMass,
@@ -663,14 +664,14 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(HepMC::GenParticle&
     for ( auto daughterIter=genpart.end_vertex()->particles_out_const_begin();
           daughterIter!=genpart.end_vertex()->particles_out_const_end(); ++daughterIter ) {
       if(m_quasiStableParticlesIncluded) {
-        ATH_MSG_VERBOSE ( "Attempting to add daughter particle of "<<HepMC::barcode(genpart)<<": " << **daughterIter );
+        ATH_MSG_VERBOSE ( "Attempting to add daughter particle of "<<bcgenpart<<": " << **daughterIter );
       }
       else {
-        ATH_MSG_WARNING ( "Attempting to add daughter particle of "<<HepMC::barcode(genpart)<<": " << **daughterIter );
+        ATH_MSG_WARNING ( "Attempting to add daughter particle of "<<bcgenpart<<": " << **daughterIter );
       }
       G4PrimaryParticle *daughterG4Particle = this->getG4PrimaryParticle( **daughterIter );
       if(!daughterG4Particle) {
-        ATH_MSG_ERROR("Bailing out of loop over daughters of particle with barcode: "<<HepMC::barcode(genpart) <<
+        ATH_MSG_ERROR("Bailing out of loop over daughters of particle with barcode: "<<bcgenpart <<
                       " due to errors - will not return G4Particle.");
         return nullptr;
       }

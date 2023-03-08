@@ -89,11 +89,6 @@ class doMuGirlLowBeta(JobProperty):
 # Switch on/off algorithms that do not end up in any MuonCollection
 #
 
-class doLArMuId(JobProperty):
-    statusOn=True
-    allowedTypes=['bool']
-    StoredValue=False
-
 class doAOD(JobProperty):
     statusOn=True
     allowedTypes=['bool']
@@ -183,10 +178,11 @@ class MuonCombinedRec(JobPropertyContainer):
             setDefault(self.doMuGirlLowBeta,self.doAOD())
 
         if jobproperties.Beam.beamType()=='cosmics':
-            setDefault(self.doLArMuId,True)
             setDefault(self.doStatisticalCombination, False)
-        else:
-            setDefault(self.doLArMuId,False)
+            setDefault(self.doMuGirl, False)
+            setDefault(self.doCombinedFit, False)
+            setDefault(self.doMuonSegmentTagger, False)
+            setDefault(self.doCaloTrkMuId, False)
 
 
         # tracking performance algorithms, take defaults from muonRecFlags
@@ -263,7 +259,6 @@ class Enabled(SummaryJobProperty):
     
     _properties = [ muonCombinedRecFlags.doMuonCollection,
                     muonCombinedRecFlags.doMuGirlLowBetaMuonCollection,
-                    muonCombinedRecFlags.doLArMuId,
                     muonCombinedRecFlags.doAOD,
                     muonCombinedRecFlags.doxAOD,
                     muonCombinedRecFlags.doTrackPerformance,

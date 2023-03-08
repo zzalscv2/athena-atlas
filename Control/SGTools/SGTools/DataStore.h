@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STOREGATE_DATASTORE_H
@@ -50,9 +50,7 @@ namespace SG {
    * Second, m_keyMap stores proxies indexed by the hashed CLID/key.
    * A proxy may be entered here multiple times in the case of symlinks
    * or alias; however, the entry corresponding to what proxy->sgkey()
-   * returns is called the `primary' entry.  The mapped value  is actually
-   * an int/DataProxy* pair.  For the primary entry, the integer is the
-   * index of the proxy in m_proxies; for other entries, it is -1.
+   * returns is called the `primary' entry.
    *
    * Third, proxies are stored by CLID/key in m_storeMap.  This is a map
    * indexed by CLID; the values are maps indexed by key.  A proxy may again
@@ -175,10 +173,7 @@ namespace SG {
     StoreMap m_storeMap;
 
     /// Map of hashed sgkey -> DataProxy.
-    /// For the primary entry, the integer is in the index of this proxy
-    /// in m_proxies; otherwise, it is -1.
-    typedef std::pair<int, DataProxy*> KeyPayload_t;
-    typedef SGKeyMap<KeyPayload_t> KeyMap_t;
+    typedef SGKeyMap<DataProxy*> KeyMap_t;
     KeyMap_t m_keyMap;
 
     StoreID::type m_storeID;
@@ -219,6 +214,20 @@ namespace SG {
      * Returns either the matching proxy or 0.
      */
     DataProxy* findDummy (CLID id, const std::string& key);
+
+
+    /**
+     * @brief Helper for removing a proxy.
+     * @param proxy The Proxy being removed.
+     * @param forceRemove If true, remove the proxy regardless of the proxy's
+     *                    resetOnly setting.
+     * @param hard If true, then bound objects should also clear any data
+     *             that depends on the identity of the current event store.
+     * @param index The index of this proxy in m_proxies.
+     */
+    StatusCode
+    removeProxyImpl (DataProxy* proxy, bool forceRemove, bool hard,
+                     int index);
   };
   //////////////////////////////////////////////////////////////////
   inline void

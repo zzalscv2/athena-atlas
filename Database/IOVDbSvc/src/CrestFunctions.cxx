@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 // @file CrestFunctions.cxx
 // Implementation for CrestFunctions utilities
@@ -12,22 +12,64 @@
 #include <exception>
 #include <regex>
 #include "IOVDbStringFunctions.h"
+#include <string>
+#include <algorithm>
+#include <map>
 
 namespace IOVDbNamespace{
-  const std::string
+  const std::string_view
   urlBase(){
-    return  "http://crest-02.cern.ch:8080";
+    return "http://crest-02.cern.ch:8080";
+  }
+
+  std::vector<IovHashPair>
+  extractIovAndHash(const std::string_view jsonReply){
+    std::vector<IovHashPair> iovHashPairs;
+    bool all_ok = true;
+    std::string_view iovSignature = "since\":";
+    std::string_view hashSignature = "payloadHash\":\"";
+    size_t startpoint = jsonReply.find(hashSignature);
+    size_t endpoint = 0;
+
+    while(startpoint!=std::string::npos) {
+      startpoint+=hashSignature.size();
+      endpoint = jsonReply.find('\"',startpoint);
+      if(endpoint==std::string::npos) {
+	all_ok = false;
+	break;
+      }
+      std::string_view hashString = jsonReply.substr(startpoint,endpoint-startpoint);
+      startpoint= jsonReply.find(iovSignature,endpoint);
+      if(startpoint==std::string::npos) {
+	all_ok = false;
+	break;
+      }
+      startpoint+=iovSignature.size();
+      endpoint = jsonReply.find(',',startpoint);
+      if(endpoint==std::string::npos) {
+	all_ok = false;
+	break;
+      }
+      std::string_view iovString = jsonReply.substr(startpoint,endpoint-startpoint);
+      iovHashPairs.emplace_back(iovString,hashString);
+      startpoint= jsonReply.find(hashSignature,endpoint);
+    }
+    if(!all_ok) {
+      std::cerr<<__FILE__<<":"<<__LINE__<< ": Formatting error found while trying to extract IOVs and Hashes from "<<jsonReply<<std::endl;
+      iovHashPairs.clear();
+    }
+    return iovHashPairs;
   }
 
   std::string
   extractHashFromJson(const std::string & jsonReply){
     std::string hash{};
     try{
-      std::string signature="payloadHash\":\"";
+      std::string_view signature="payloadHash\":\"";
       auto signaturePosition=jsonReply.rfind(signature);
-      if (signaturePosition == std::string::npos) throw std::runtime_error("signature "+signature+" not found");
+      if (signaturePosition == std::string::npos) throw std::runtime_error("signature "+std::string(signature)+" not found");
       auto startOfHash=signaturePosition + signature.size();
-      auto endOfHash=jsonReply.find("\"",startOfHash);
+      auto endOfHash=jsonReply.find('\"',startOfHash);
       auto len=endOfHash-startOfHash;
       if (startOfHash > jsonReply.size()) throw std::runtime_error("Hash start is beyond end of string");
       hash=jsonReply.substr(startOfHash, len);
@@ -36,9 +78,27 @@ namespace IOVDbNamespace{
     }
     return hash;
   }
-  //N.B. Returns ONE hash for now, the last one.
-  std::string 
+
+  std::vector<IovHashPair>
   getIovsForTag(const std::string & tag, const bool testing){
+    std::string reply{R"delim([{"insertionTime":"2022-05-26T12:10:58+0000","payloadHash":"99331506eefbe6783a8d5d5bc8b9a44828a325adfcaac32f62af212e9642db71","since":0,"tagName":"LARIdentifierFebRodMap-RUN2-000"}])delim"};
+    if (not testing){
+      //...CrestApi returns Iovs as a json object
+      auto myCrestClient = Crest::CrestClient(urlBase());
+      try{
+        reply = myCrestClient.findAllIovs(tag).dump();
+      } catch (std::exception & e){
+        std::cout<<__FILE__<<":"<<__LINE__<< ": "<<e.what()<<" while trying to find the IOVs"<<std::endl;
+        return std::vector<IovHashPair>();
+      }
+    }
+    return extractIovAndHash(reply);
+  }
+
+  std::string 
+  getLastHashForTag(const std::string & tag, const bool testing){
+    char tu[] = "";
+    strfry(tu);
     std::string reply{R"delim([{"insertionTime":"2022-05-26T12:10:58+0000","payloadHash":"99331506eefbe6783a8d5d5bc8b9a44828a325adfcaac32f62af212e9642db71","since":0,"tagName":"LARIdentifierFebRodMap-RUN2-000"}])delim"};
     if (not testing){
       //...CrestApi returns Iovs as a json object
@@ -52,6 +112,7 @@ namespace IOVDbNamespace{
     }
     return extractHashFromJson(reply);
   }
+
 
   std::string 
   getPayloadForHash(const std::string & hash, const bool testing){
@@ -71,20 +132,20 @@ namespace IOVDbNamespace{
   
   std::string 
   getPayloadForTag(const std::string & tag, const bool testing){
-    return getPayloadForHash(getIovsForTag(tag, testing), testing);
+    return getPayloadForHash(getLastHashForTag(tag, testing), testing);
   }
   
   std::string 
   extractDescriptionFromJson(const std::string & jsonReply){
     std::string description{};
     try{
-      const std::string signature="node_description\\\":\\\"";
+      const std::string_view signature="node_description\\\":\\\"";
       const auto signaturePosition = jsonReply.find(signature);
-      if (signaturePosition == std::string::npos) throw std::runtime_error("signature "+signature+" not found");
+      if (signaturePosition == std::string::npos) throw std::runtime_error("signature "+std::string(signature)+" not found");
       const auto startOfDescription= signaturePosition + signature.size();
-      const std::string endSignature = "\\\",\\\"payload_spec";
+      const std::string_view endSignature = "\\\",\\\"payload_spec";
       const auto endOfDescription=jsonReply.find(endSignature);
-      if (endOfDescription == std::string::npos) throw std::runtime_error("end signature "+endSignature+" not found");
+      if (endOfDescription == std::string::npos) throw std::runtime_error("end signature "+std::string(endSignature)+" not found");
       const auto len=endOfDescription-startOfDescription;
       description=jsonReply.substr(startOfDescription, len);
     } catch (std::exception & e){
@@ -98,9 +159,9 @@ namespace IOVDbNamespace{
   extractSpecificationFromJson(const std::string & jsonReply){
     std::string spec{};
     try{
-      const std::string signature="payload_spec\\\":\\\"";
+      const std::string_view signature="payload_spec\\\":\\\"";
       const auto signaturePosition = jsonReply.find(signature);
-      if (signaturePosition == std::string::npos) throw std::runtime_error("signature "+signature+" not found");
+      if (signaturePosition == std::string::npos) throw std::runtime_error("signature "+std::string(signature)+" not found");
       const auto startOfSpec= signaturePosition + signature.size();
       const auto endOfSpec=jsonReply.find("\\\"}\"",startOfSpec);
       const auto len=endOfSpec-startOfSpec;
@@ -117,9 +178,9 @@ namespace IOVDbNamespace{
     std::vector<std::string> names;
     std::string textRep;
     try{
-      const std::string signature="channel_list\\\":[";
+      const std::string_view signature="channel_list\\\":[";
       const auto startOfList=jsonReply.find(signature) + signature.size();
-      const auto endOfList=jsonReply.find("]", startOfList);
+      const auto endOfList=jsonReply.find(']', startOfList);
       const auto len=endOfList-startOfList;
       textRep=jsonReply.substr(startOfList, len);
     } catch (std::exception & e){
@@ -136,18 +197,18 @@ namespace IOVDbNamespace{
         list.push_back(std::stoll(m[1].str()));
         //chomp the last backslash
         std::string s = m[2].str();
-        names.push_back(s.substr(0,s.size()-1));
+        s.pop_back();
+        names.emplace_back(std::move(s));
       }
     }
     // if all the names are empty, these are unnamed channels, and can just return an empty vector for the names
     auto isEmpty=[](const std::string & s){return s.empty();};
     if ( std::all_of(names.begin(), names.end(), isEmpty)) names.clear();
-    return std::make_pair(list, names);
+    return std::make_pair(std::move(list), std::move(names));
   }
   
   std::string 
   folderDescriptionForTag(const std::string & tag, const bool testing){
-    //std::string jsonReply{R"delim({"node_description": "<timeStamp>run-lumi</timeStamp><addrHeader><address_header service_type=\"71\" clid=\"1170039409\" /></addrHeader><typeName>AlignableTransformContainer</typeName>"})delim"};
     std::string jsonReply{R"delim({"format":"TagMetaSetDto","resources":[{"tagName":"LARAlign-RUN2-UPD4-03","description":"{\"dbname\":\"CONDBR2\",\"nodeFullpath\":\"/LAR/Align\",\"schemaName\":\"COOLONL_LAR\"}","chansize":1,"colsize":1,"tagInfo":"{\"channel_list\":[{\"0\":\"\"}],\"node_description\":\"<timeStamp>run-lumi</timeStamp><addrHeader><address_header service_type=\\\"256\\\" clid=\\\"1238547719\\\" /></addrHeader><typeName>CondAttrListCollection</typeName><updateMode>UPD1</updateMode>\",\"payload_spec\":\"PoolRef:String4k\"}","insertionTime":"2022-05-26T12:10:38+0000"}],"size":1,"datatype":"tagmetas","format":null,"page":null,"filter":null})delim"};
     if (not testing){
       auto myCrestClient = Crest::CrestClient(urlBase());

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 # Configuration of InDetTrackSelectionTool package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -81,11 +81,6 @@ def IDAlignMonTrackSelectionToolCfg(flags, name="IDAlignMonTrackSelectionTool", 
 ###############################################
 
 def VtxInDetTrackSelectionCfg(flags, name="VertexInDetTrackSelectionTool", **kwargs):
-    if flags.Detector.GeometryITk:
-        vtxFlags = flags.ITk.PriVertex
-    else:
-        vtxFlags = flags.InDet.PriVertex
-
     for key in (
         "maxAbsEta",
         "maxD0",
@@ -101,10 +96,21 @@ def VtxInDetTrackSelectionCfg(flags, name="VertexInDetTrackSelectionTool", **kwa
         "minNTrtHits",
         "minPt",
     ):
-        kwargs.setdefault(key, getattr(vtxFlags, key))
+        kwargs.setdefault(key, getattr(flags.Tracking.PriVertex, key))
 
     kwargs.setdefault("UseTrkTrackTools", False)
-    return InDetTrackSelectionTool_TightPrimary_Cfg(flags, name, **kwargs)
+
+    # Cut level = NoCut for a few modes
+    if flags.Reco.EnableHI or \
+       flags.Tracking.doMinBias or \
+       flags.Tracking.doLowMu:
+        acc = ComponentAccumulator()
+        acc.setPrivateTools(CompFactory.InDet.InDetTrackSelectionTool(name, **kwargs))
+        return acc
+
+    # Default is TightPrimary
+    else:
+        return InDetTrackSelectionTool_TightPrimary_Cfg(flags, name, **kwargs)
 
 
 def TrigVtxInDetTrackSelectionCfg(flags, name="InDetTrigDetailedTrackSelectionTool", **kwargs):
@@ -150,4 +156,31 @@ def Tau_InDetTrackSelectionToolForTJVACfg(flags, name="tauRec_InDetTrackSelectio
 def InDetGlobalLRTMonAlg_TrackSelectionToolCfg(flags, name="InDetGlobalLRTMonAlg_TrackSelectionTool", **kwargs):
     kwargs.setdefault("minPt", 1000.)
     kwargs.setdefault("maxNPixelHoles", 1)
+    return InDetTrackSelectionTool_TrackTools_Cfg(flags, name, **kwargs)
+
+
+
+###############################################
+#####  Configs for Sec Vtx  #####
+###############################################
+
+
+def InDetTrackSelectionTool_AMSVF_Cfg(flags, name='InDetTrackSelectionTool_AMSVF', **kwargs):
+
+    kwargs.setdefault("CutLevel", "NoCut")
+    kwargs.setdefault("minPt", 1000.)
+    kwargs.setdefault("maxD0", 500.0)
+    kwargs.setdefault("maxZ0", 1500.)
+    kwargs.setdefault("maxSigmaD0", -1.0)
+    kwargs.setdefault("maxSigmaZ0SinTheta", -1.0)
+    kwargs.setdefault("maxChiSqperNdf", 5.0)
+    kwargs.setdefault("maxAbsEta", 2.5)
+    kwargs.setdefault("minNInnermostLayerHits", 0)
+    kwargs.setdefault("minNPixelHits", 0)
+    kwargs.setdefault("maxNPixelHoles", 1)
+    kwargs.setdefault("minNSctHits", 2)
+    kwargs.setdefault("minNTrtHits", 0)
+    kwargs.setdefault("minNSiHits", 0)
+    kwargs.setdefault("maxNSiSharedHits", 6)
+
     return InDetTrackSelectionTool_TrackTools_Cfg(flags, name, **kwargs)

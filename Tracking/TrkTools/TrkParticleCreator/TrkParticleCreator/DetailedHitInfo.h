@@ -25,11 +25,6 @@ namespace Trk {
   /** This class containes the detailed information on the contributing layers and regions to the hit count. */
     
     public:
-      DetailedHitInfo() {};
-      ~DetailedHitInfo() {};
-      
-      DetailedHitInfo( const DetailedHitInfo& ph );
-      DetailedHitInfo& operator=(const DetailedHitInfo& ph);
       
       void addHit(Trk::DetectorRegion region, int layer, int etaModule, int hit=1);
       int getHits(Trk::DetectorRegion region, int layer);
@@ -47,8 +42,8 @@ namespace Trk {
       
     private:
       // the tuple elements are: layer number, # contributing layers, # hits
-      std::vector < std::pair < Trk::DetectorRegion, std::vector < std::tuple <int , int , int> > > > m_detailedHitInfo;
-      int m_prevEta;
+      std::vector < std::pair < Trk::DetectorRegion, std::vector < std::tuple <int , int , int> > > > m_detailedHitInfo{};
+      int m_prevEta{};
   };
   
 }

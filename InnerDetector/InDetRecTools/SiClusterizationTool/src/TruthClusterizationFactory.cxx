@@ -93,8 +93,8 @@ namespace InDet {
           for( const auto& deposit : simData.getdeposits() ){
             //If deposit exists
             if (!deposit.first){ATH_MSG_WARNING("No deposits found"); continue;}
-             if(!(m_usePUHits || deposit.first.eventIndex()==0)) continue;
-              int bc = HepMC::barcode(deposit.first);
+             if(!m_usePUHits && deposit.first.eventIndex()!=0) continue;
+              int bc = deposit.first.barcode();
               barcodes.insert(bc);
           }
         }

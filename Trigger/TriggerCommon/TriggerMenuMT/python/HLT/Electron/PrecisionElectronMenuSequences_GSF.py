@@ -1,10 +1,8 @@
 #
-#  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
-
-# menu components   
+# menu components
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsPool
 from AthenaCommon.CFElements import parOR, seqAND
 from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
@@ -15,7 +13,7 @@ from AthenaCommon.Configurable import ConfigurableCABehavior
 def tag(ion):
     return 'precision' + ('HI' if ion is True else '') + 'Electron'
 
-def precisionElectronSequence_GSF(ConfigFlags, ion=False, variant=''):
+def precisionElectronSequence_GSF(flags, ion=False, variant=''):
     """ 
     Similar setup as ../PrecisionElectronMenuSequences.py; tailored for GSF chains
     """
@@ -32,7 +30,7 @@ def precisionElectronSequence_GSF(ConfigFlags, ion=False, variant=''):
     # Configure the reconstruction algorithm sequence
     from TriggerMenuMT.HLT.Electron.PrecisionElectronRecoSequences import precisionElectronRecoSequence
     
-    (electronPrecisionRec, sequenceOut, sequenceOut_dummy) = precisionElectronRecoSequence(InViewRoIs, ion, doGSF='GSF' in variant, doLRT = 'LRT' in variant)
+    (electronPrecisionRec, sequenceOut, sequenceOut_dummy) = precisionElectronRecoSequence(flags, InViewRoIs, ion, doGSF='GSF' in variant, doLRT = 'LRT' in variant)
 
     electronPrecisionInViewAlgs = parOR(tag(ion) + "InViewAlgs" + variant, [electronPrecisionRec])
     precisionElectronViewsMaker.ViewNodeName = tag(ion) + "InViewAlgs" + variant
@@ -41,14 +39,14 @@ def precisionElectronSequence_GSF(ConfigFlags, ion=False, variant=''):
     return (electronPrecisionAthSequence, precisionElectronViewsMaker, sequenceOut, sequenceOut_dummy)
 
 
-def precisionElectronMenuSequence_GSF(is_probe_leg=False, ion=False,  variant='_GSF'):
+def precisionElectronMenuSequence_GSF(flags, is_probe_leg=False, ion=False,  variant='_GSF'):
     # retrieve the reco seuqence+EVC
-    (electronPrecisionAthSequence, precisionElectronViewsMaker, sequenceOut, sequenceOut_dummy) = RecoFragmentsPool.retrieve(precisionElectronSequence_GSF, ConfigFlags, ion=ion, variant=variant)
+    (electronPrecisionAthSequence, precisionElectronViewsMaker, sequenceOut, sequenceOut_dummy) = RecoFragmentsPool.retrieve(precisionElectronSequence_GSF, flags, ion=ion, variant=variant)
 
     # make the Hypo
     from TrigEgammaHypo.TrigEgammaPrecisionElectronHypoTool import createTrigEgammaPrecisionElectronHypoAlg
     with ConfigurableCABehavior():
-        hypo_tuple = createTrigEgammaPrecisionElectronHypoAlg("TrigEgamma" + tag(ion) + "HypoAlg"+ variant, sequenceOut)
+        hypo_tuple = createTrigEgammaPrecisionElectronHypoAlg(flags, "TrigEgamma" + tag(ion) + "HypoAlg"+ variant, sequenceOut)
 
     thePrecisionElectronHypo = conf2toConfigurable(hypo_tuple[0])
     hypo_acc = hypo_tuple[1]
@@ -56,11 +54,12 @@ def precisionElectronMenuSequence_GSF(is_probe_leg=False, ion=False,  variant='_
 
     from TrigEgammaHypo.TrigEgammaPrecisionElectronHypoTool import TrigEgammaPrecisionElectronHypoToolFromDict
 
-    return  MenuSequence( Maker       = precisionElectronViewsMaker,
+    return  MenuSequence( flags,
+                          Maker       = precisionElectronViewsMaker,
                           Sequence    = electronPrecisionAthSequence,
                           Hypo        = thePrecisionElectronHypo,
                           HypoToolGen = TrigEgammaPrecisionElectronHypoToolFromDict,
                           IsProbe     = is_probe_leg )
 
-def precisionElectronMenuSequence_LRTGSF(is_probe_leg=False ):
-    return precisionElectronMenuSequence_GSF(is_probe_leg=is_probe_leg, ion=False, variant='_LRTGSF')
+def precisionElectronMenuSequence_LRTGSF(flags, is_probe_leg=False ):
+    return precisionElectronMenuSequence_GSF(flags, is_probe_leg=is_probe_leg, ion=False, variant='_LRTGSF')

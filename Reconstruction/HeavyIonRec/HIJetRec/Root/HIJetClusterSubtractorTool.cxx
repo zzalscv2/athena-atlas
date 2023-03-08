@@ -171,6 +171,7 @@ StatusCode HIJetClusterSubtractorTool::initializeTool()
   {
     std::string local_path=static_cast<std::string>(m_configDir)+m_inputFile;
     std::string full_path=PathResolverFindCalibFile(local_path);
+    ATH_MSG_INFO("Reading input file "<< m_inputFile << " from " << full_path);
     TFile* f=TFile::Open(full_path.c_str());
     if(f==nullptr)
     {

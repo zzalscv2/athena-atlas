@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 #********************************************************************
 # InDetCommonConfig.py
@@ -67,10 +67,11 @@ def InDetCommonCfg(ConfigFlags, **kwargs):
         #====================================================================
         # DECORATE THE HARDSCATTER VERTEX WITH A FLAG
         #====================================================================
-        from InDetHardScatterSelectionTool.InDetHardScatterSelectionToolConfig import InDetHardScatterSelectionToolCfg
-        DFCommonHSSelectionTool = acc.popToolsAndMerge(InDetHardScatterSelectionToolCfg(
-            ConfigFlags, 
-            name = "DFCommonHSSelectionTool"))
+        from InDetConfig.InDetHardScatterSelectionToolConfig import (
+            InDetHardScatterSelectionToolCfg)
+        DFCommonHSSelectionTool = acc.popToolsAndMerge(
+            InDetHardScatterSelectionToolCfg(ConfigFlags,
+                                             name = "DFCommonHSSelectionTool"))
         acc.addPublicTool(DFCommonHSSelectionTool)    
 
         from DerivationFrameworkInDet.InDetToolsConfig import HardScatterVertexDecoratorCfg
@@ -84,14 +85,16 @@ def InDetCommonCfg(ConfigFlags, **kwargs):
         #====================================================================
         # DECORATE THE TRACKS WITH USED-IN-FIT TTVA VARIABLES
         #====================================================================
-        from InDetUsedInFitTrackDecoratorTool.InDetUsedInFitTrackDecoratorToolConfig import InDetUsedInFitTrackDecoratorToolCfg
-        DFCommonUsedInFitDecoratorTool = acc.popToolsAndMerge(InDetUsedInFitTrackDecoratorToolCfg(
-            ConfigFlags,
-            name                 = "DFCommonUsedInFitDecoratorTool",
-            AMVFVerticesDecoName = "TTVA_AMVFVertices",
-            AMVFWeightsDecoName  = "TTVA_AMVFWeights",
-            TrackContainer       = "InDetTrackParticles",
-            VertexContainer      = "PrimaryVertices" ))
+        from InDetConfig.InDetUsedInFitTrackDecoratorToolConfig import (
+            InDetUsedInFitTrackDecoratorToolCfg)
+        DFCommonUsedInFitDecoratorTool = acc.popToolsAndMerge(
+            InDetUsedInFitTrackDecoratorToolCfg(
+                ConfigFlags,
+                name                 = "DFCommonUsedInFitDecoratorTool",
+                AMVFVerticesDecoName = "TTVA_AMVFVertices",
+                AMVFWeightsDecoName  = "TTVA_AMVFWeights",
+                TrackContainer       = "InDetTrackParticles",
+                VertexContainer      = "PrimaryVertices" ))
         acc.addPublicTool(DFCommonUsedInFitDecoratorTool)
     
         from DerivationFrameworkInDet.InDetToolsConfig import UsedInVertexFitTrackDecoratorCfg
@@ -115,13 +118,15 @@ def InDetCommonCfg(ConfigFlags, **kwargs):
             ]
             PseudoTrackDecorators = []
             for t in PseudoTrackContainers:
-                InDetDecorator = acc.getPrimaryAndMerge(InDetUsedInFitTrackDecoratorToolCfg(
-                    ConfigFlags,
-                    name = "DFCommonUsedInFitDecoratorTool"+t.replace('InDetPseudo','Pseudo').replace('InDet','Reco').replace('TrackParticles',''),
-                    AMVFVerticesDecoName = "TTVA_AMVFVertices",
-                    AMVFWeightsDecoName  = "TTVA_AMVFWeights",
-                    TrackContainer       = t,
-                    VertexContainer      = "PrimaryVertices" ))
+                InDetDecorator = acc.popToolsAndMerge(
+                    InDetUsedInFitTrackDecoratorToolCfg(
+                        ConfigFlags,
+                        name = "DFCommonUsedInFitDecoratorTool"+ \
+                        t.replace('InDetPseudo','Pseudo').replace('InDet','Reco').replace('TrackParticles',''),
+                        AMVFVerticesDecoName = "TTVA_AMVFVertices",
+                        AMVFWeightsDecoName  = "TTVA_AMVFWeights",
+                        TrackContainer       = t,
+                        VertexContainer      = "PrimaryVertices" ))
                 DerivDecorator = acc.getPrimaryAndMerge(UsedInVertexFitTrackDecoratorCfg(
                     ConfigFlags,
                     name = "DFCommonUsedInFitDecorator"+t.replace('InDetPseudo','Pseudo').replace('InDet','Reco').replace('TrackParticles',''),
@@ -134,13 +139,14 @@ def InDetCommonCfg(ConfigFlags, **kwargs):
             #====================================================================
             # DECORATE THE LRT TRACKS WITH USED-IN-FIT TTVA VARIABLES
             #====================================================================
-            DFCommonUsedInFitDecoratorToolLRT = acc.getPrimaryAndMerge(InDetUsedInFitTrackDecoratorToolCfg(
-                ConfigFlags,
-                name                 = "DFCommonUsedInFitDecoratorToolLRT",
-                AMVFVerticesDecoName = "TTVA_AMVFVertices",
-                AMVFWeightsDecoName  = "TTVA_AMVFWeights",
-                TrackContainer       = "InDetLargeD0TrackParticles",
-                VertexContainer      = "PrimaryVertices" ))
+            DFCommonUsedInFitDecoratorToolLRT = acc.popToolsAndMerge(
+                InDetUsedInFitTrackDecoratorToolCfg(
+                    ConfigFlags,
+                    name                 = "DFCommonUsedInFitDecoratorToolLRT",
+                    AMVFVerticesDecoName = "TTVA_AMVFVertices",
+                    AMVFWeightsDecoName  = "TTVA_AMVFWeights",
+                    TrackContainer       = "InDetLargeD0TrackParticles",
+                    VertexContainer      = "PrimaryVertices" ))
 
             DFCommonUsedInFitDecoratorLRT = acc.getPrimaryAndMerge(UsedInVertexFitTrackDecoratorCfg(
                 ConfigFlags,

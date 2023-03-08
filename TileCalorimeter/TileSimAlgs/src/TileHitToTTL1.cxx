@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -77,11 +77,9 @@ StatusCode TileHitToTTL1::initialize() {
   //=== Get Tile Info
   ATH_CHECK( detStore()->retrieve(m_tileInfo, m_infoName) );
 
-  //=== Get Tile Bad channel tool
-  ATH_CHECK( m_tileBadChanTool.retrieve() );
+  ATH_CHECK( m_badChannelsKey.initialize(m_maskBadChannels) );
 
-  //=== get TileCondToolEmscale
-  ATH_CHECK( m_tileToolEmscale.retrieve() );
+  ATH_CHECK( m_emScaleKey.initialize() );
 
   //=== Get rndm number service
   ATH_CHECK( m_rndmSvc.retrieve() );
@@ -186,6 +184,16 @@ StatusCode TileHitToTTL1::execute(const EventContext &ctx) const {
   // Prepare RNG Service
   ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this, m_randomStreamName);
   rngWrapper->setSeed( m_randomStreamName, ctx );
+
+  SG::ReadCondHandle<TileEMScale> emScale(m_emScaleKey, ctx);
+  ATH_CHECK( emScale.isValid() );
+
+  const TileBadChannels* badChannels = nullptr;
+  if (m_maskBadChannels) {
+    SG::ReadCondHandle<TileBadChannels> badChannelsHandle(m_badChannelsKey, ctx);
+    ATH_CHECK( badChannelsHandle.isValid() );
+    badChannels = *badChannelsHandle;
+  }
 
   /*........................................................................*/
   // Get hit container from TES and create TTL1 and MBTS container
@@ -323,15 +331,16 @@ StatusCode TileHitToTTL1::execute(const EventContext &ctx) const {
       hit_calib = std::round(hit_calib * 1000) / 1000;
       // conversion to charge measured by digitizer
       // The trigger always uses the low gain
-      double qfactor = hit_calib / m_tileToolEmscale->channelCalib(drawerIdx, channel
-                                                                   , TileID::LOWGAIN, 1.
-                                                                   , TileRawChannelUnit::PicoCoulombs
-                                                                   , TileRawChannelUnit::MegaElectronVolts);
+      double qfactor = hit_calib / emScale->calibrateChannel(drawerIdx, channel
+                                                             , TileID::LOWGAIN, 1.
+                                                             , TileRawChannelUnit::PicoCoulombs
+                                                             , TileRawChannelUnit::MegaElectronVolts);
 
       // determine if the channel is good from the channel status DB
       bool is_good = true;
       if (m_maskBadChannels) {
-        TileBchStatus status = m_tileBadChanTool->getAdcStatus(drawerIdx, channel, TileID::LOWGAIN);
+        HWIdentifier adc_id = m_tileHWID->adc_id(pmt_HWid, TileID::LOWGAIN);
+        TileBchStatus status = badChannels->getAdcStatus(adc_id);
 
         // if channel is bad, set qfactor to zero
         if (status.isNoGainL1()) {

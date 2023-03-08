@@ -38,12 +38,9 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const McEventCollection *truthContai
       for(const auto it : *truthContainer) {
         const HepMC::GenEvent *subEvent = it;
 #ifdef HEPMC3
-        for(auto particle : subEvent->particles())
+        for(const auto& particle : subEvent->particles()){
 #else
-        for(const auto pit : subEvent->particle_range())
-#endif
-        {
-#ifndef HEPMC3
+        for(const auto pit : subEvent->particle_range()){
           const HepMC::GenParticle *particle = pit;
 #endif
           const HepMC::FourVector momentum = particle->momentum();
@@ -64,20 +61,18 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const McEventCollection *truthContai
             }//muentry loop
             } // trackRecordCollection is not null
 #ifdef HEPMC3
-            for(auto vertex1 : subEvent->vertices())
+            vertex_tmp = subEvent->vertices().front()->position();
 #else
             int l=0;
             for(const auto vit : subEvent->vertex_range())
-#endif              
             {
-#ifndef HEPMC3
               if(l!=0){break;}//get first vertex of iteration, may want to change this
               l++;
               const HepMC::GenVertex *vertex1 = vit;
-#endif
               const HepMC::FourVector& position = vertex1->position();
               vertex_tmp.SetXYZ(position.x(),position.y(),position.z());
             }//end vertex loop
+#endif
           }
           j++;
 

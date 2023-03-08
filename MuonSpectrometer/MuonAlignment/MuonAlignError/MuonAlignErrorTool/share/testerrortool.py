@@ -20,7 +20,7 @@ theApp.EvtMax = -1
 # Detector flags and tags
 from AthenaCommon.GlobalFlags import globalflags
 globalflags.DataSource.set_Value_and_Lock('data')
-globalflags.DetDescrVersion.set_Value_and_Lock('ATLAS-R1-2012-02-00-00')
+globalflags.DetDescrVersion.set_Value_and_Lock('ATLAS-R1-2012-03-02-00')
 globalflags.ConditionsTag.set_Value_and_Lock('COMCOND-BLKPA-RUN1-06')
 globalflags.DatabaseInstance.set_Value_and_Lock('COMP200')
 

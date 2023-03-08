@@ -1,8 +1,7 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from AthenaConfiguration.AthConfigFlags import AthConfigFlags
-from AthenaConfiguration.AccumulatorCache import AccumulatorCache
+from AthenaConfiguration.AthConfigFlags import AthConfigFlags, isGaudiEnv
 from AthenaConfiguration.Enums import Format
 
 import unittest
@@ -46,6 +45,11 @@ class BasicTests(FlagsSetup):
 
     def test_hash(self):
         """Test flag hashing"""
+        if not isGaudiEnv():
+            return
+
+        from AthenaConfiguration.AccumulatorCache import AccumulatorCache
+
         self.assertEqual(self.flags.locked() , False)
         with self.assertRaises(RuntimeError):
             self.flags.athHash()
@@ -108,7 +112,7 @@ class BasicTests(FlagsSetup):
         """Test that enums are properly validated (incorrect flags)"""
         self.flags.addFlag("FormatWrong", lambda flags : "ABC", enum=Format)
         with self.assertRaises(RuntimeError) as _:
-            x=self.flags.FormatWrong 
+            x = self.flags.FormatWrong  # noqa: F841
 
 
 class TestFlagsSetupDynamic(FlagsSetup):
@@ -213,13 +217,15 @@ class FlagsFromArgsTest(unittest.TestCase):
         self.flags.addFlag("detA.flagC","")
 
     def test(self):
-        argline="-l VERBOSE --debug exec --evtMax=10 --skipEvents=3 --filesInput=bla1.data,bla2.data detA.flagB=7 detA.flagC=a.2"
+        argline="-l VERBOSE --evtMax=10 --skipEvents=3 --filesInput=bla1.data,bla2.data detA.flagB=7 detA.flagC=a.2"
+        if isGaudiEnv():
+            argline += " --debug exec"
         print (f"Interpreting arguments: '{argline}'")
         self.flags.fillFromArgs(argline.split())
         self.assertEqual(self.flags.Exec.OutputLevel,1,"Failed to set output level from args")
         self.assertEqual(self.flags.Exec.MaxEvents,10,"Failed to set MaxEvents from args")
         self.assertEqual(self.flags.Exec.SkipEvents,3,"Failed to set SkipEvents from args")
-        self.assertEqual(self.flags.Exec.DebugStage,"exec","Failed to set DebugStage from args")
+        self.assertEqual(self.flags.Exec.DebugStage,"exec" if isGaudiEnv() else "","Failed to set DebugStage from args")
         self.assertEqual(self.flags.Input.Files,["bla1.data","bla2.data"],"Failed to set FileInput from args")
         self.assertEqual(self.flags.detA.flagB,7,"Failed to set arbitrary from args")
         self.assertEqual(self.flags.detA.flagC,"a.2","Failed to set arbitrary unquoted string from args")

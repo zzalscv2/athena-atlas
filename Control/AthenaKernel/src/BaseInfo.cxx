@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -13,6 +13,7 @@
 
 #include "AthenaKernel/BaseInfo.h"
 #include "AthenaKernel/CLIDRegistry.h"
+#include "CxxUtils/CachedValue.h"
 #include "GaudiKernel/System.h"
 #include <mutex>
 #include <map>
@@ -102,6 +103,11 @@ struct BaseInfoBaseImpl {
   mutable mutex_t m_mutex;  // For the class members.
 
 
+  /// CLIDs of known bases, including the class itself.
+  /// This can be read without acquiring the mutex.
+  CxxUtils::CachedValue<std::vector<CLID> > m_bases;
+
+  
   /**
    * @brief Find a base by @c type_info.
    * @param tinfo The @c type_info to find.
@@ -295,18 +301,21 @@ BaseInfoBase::castfnTo (const std::type_info& tinfo) const
  * @brief Return the class IDs of all known bases of @a T (that
  *        have class IDs).  The list will include @a T itself.
  */
-std::vector<CLID> BaseInfoBase::get_bases() const
+const std::vector<CLID>& BaseInfoBase::get_bases() const
 {
-  BaseInfoBaseImpl::lock_t lock (m_impl->m_mutex);
-  const BaseInfoBaseImpl::ti_map_type& map = m_impl->m_timap;
-  std::vector<CLID> v;
-  v.reserve (map.size());
-  for (const auto& p : map) {
-    CLID clid = CLIDRegistry::typeinfoToCLID (*p.first);
-    if (clid != CLID_NULL)
-      v.push_back (clid);
+  if (!m_impl->m_bases.isValid()) {
+    BaseInfoBaseImpl::lock_t lock (m_impl->m_mutex);
+    const BaseInfoBaseImpl::ti_map_type& map = m_impl->m_timap;
+    std::vector<CLID> v;
+    v.reserve (map.size());
+    for (const auto& p : map) {
+      CLID clid = CLIDRegistry::typeinfoToCLID (*p.first);
+      if (clid != CLID_NULL)
+        v.push_back (clid);
+    }
+    m_impl->m_bases.set (std::move (v));
   }
-  return v;
+  return *m_impl->m_bases.ptr();
 }
 
 

@@ -2,7 +2,7 @@
 # art-description: Generation test Powheg LHE-only single top s-channel
 # art-type: build
 # art-include: master/AthGeneration
-# art-include: master--HepMC3/Athena
+# art-include: master--HepMC2/Athena
 # art-include: 22.0/Athena
 # art-output: *.root
 # art-output: log.generate

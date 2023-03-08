@@ -54,15 +54,6 @@ private:
     void useIPMuons();
 
     /**
-     * @brief fills the hough histograms
-     * @param[in] id_number The enum number corresponding to the HoughTransform
-     * @param[in] level The iteration number
-     * @param[in] event_to_analyse The hitcontainer which fills the histogram
-     * @param[in] houghtransform The HoughTransform
-     */
-    void fillHistos(int id_number, int level, const MuonHoughHitContainer* event_to_analyse,
-                    MuonHoughTransformSteering* houghtransform) const;
-    /**
      * @brief analyses the hough histograms
      * @param[in] id_number The enum number corresponding to the HoughTransform
      * @param[in] level The iteration number
@@ -79,7 +70,7 @@ private:
     int numberOfHits(const MuonHoughHitContainer& event) const;
 
     /** checks if hit is already in one of the found houghpatterns (unused) */
-    bool hitInHoughPattern(MuonHoughHit* hit, const MuonHoughPatternContainer& houghpattern) const;
+    bool hitInHoughPattern(const std::shared_ptr<MuonHoughHit>& hit, const MuonHoughPatternContainer& houghpattern) const;
 
     /** returns a hitcontainer with hits not yet used in pattern */
     static std::unique_ptr<MuonHoughHitContainer> hitsNotInPattern(const MuonHoughHitContainer& event, int id_number);
@@ -134,7 +125,7 @@ private:
     void setWeightMdtCutValue(const MuonHoughHitContainer& event, double& weightmdt) const;
 
     /** hit through weight cut? */
-    bool hitThroughCut(MuonHoughHit* hit, double weightmdt) const;
+    bool hitThroughCut(const std::shared_ptr<MuonHoughHit>& hit, double weightmdt) const;
 
     /** pointer to the file name for the hough histograms */
     std::unique_ptr<TFile> m_file;

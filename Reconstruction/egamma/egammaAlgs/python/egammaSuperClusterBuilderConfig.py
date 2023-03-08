@@ -46,7 +46,8 @@ def electronSuperClusterBuilderCfg(flags,
     kwargs.setdefault(
         "egammaCheckEnergyDepositTool",
         CompFactory.egammaCheckEnergyDepositTool())
-    kwargs.setdefault("EtThresholdCut", 1000)
+    kwargs.setdefault("EtThresholdCut",
+                      1000 if not flags.Egamma.doLowMu else 300)
     kwargs.setdefault("UseExtendedTG3", flags.GeoModel.Run is LHCPeriod.Run3)
     elscAlg = CompFactory.electronSuperClusterBuilder(name, **kwargs)
 

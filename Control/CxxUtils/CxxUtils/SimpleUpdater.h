@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/SimpleUpdater.h
@@ -17,6 +17,7 @@
 #include <atomic>
 #include <vector>
 #include <memory>
+#include <algorithm>
 
 
 namespace CxxUtils {
@@ -83,6 +84,25 @@ public:
    * A no-op for @c SimpleUpdater.
    */
   void quiescent (const Context_t&);
+
+
+  /**
+   * @brief Delete all objects we're managing except for the current one.
+   *
+   * This is NOT concurrency-safe.  No other threads may be accessing
+   * the objects managed here.
+   */
+  void clean();
+
+
+  /**
+   * @brief Swap this object with another.
+   * @param other The other object with which to swap.
+   *
+   * This operation is NOT concurrency-safe.  No other threads may be accessing
+   * either container during this operation.
+   */
+  void swap (SimpleUpdater& other);
 
 
   /**

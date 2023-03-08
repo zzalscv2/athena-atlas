@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.SystemOfUnits import MeV
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -152,8 +152,11 @@ def UserActionSvcCfg(flags, name="G4UA::UserActionSvc", **kwargs):
     """
     result = ComponentAccumulator()
 
-    # new user action tools
-    kwargs.setdefault("UserActionTools", result.popToolsAndMerge(getDefaultActions(flags)))
+    generalActions = ( result.popToolsAndMerge(getDefaultActions(flags)) +
+                       result.popToolsAndMerge(OptionalUserActionCfg(flags)) )
+
+    # New user action tools
+    kwargs.setdefault("UserActionTools", generalActions)
 
     # placeholder for more advanced config, if needed
     result.addService(CompFactory.G4UA.UserActionSvc(name, **kwargs), primary = True)
@@ -164,7 +167,8 @@ def UserActionSvcCfg(flags, name="G4UA::UserActionSvc", **kwargs):
 def CTBUserActionSvcCfg(flags, name="G4UA::CTBUserActionSvc", **kwargs):
     result = ComponentAccumulator()
     # FIXME migrate an alternative to this
-    generalActions = result.popToolsAndMerge(getDefaultActions(flags))
+    generalActions = ( result.popToolsAndMerge(getDefaultActions(flags)) +
+                       result.popToolsAndMerge(OptionalUserActionCfg(flags)) )
     # This comment carried over from old style:
     # FIXME: ADS these actions are not yet migrated to Hive
     #if simFlags.SimLayout.get_Value()=="tb_LArH6_2004":

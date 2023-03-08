@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from TriggerMenuMT.HLT.Config.MenuComponents import Chain
 from .ConfigHelpers import AlgConfig
 from .METChainConfiguration import extractMETRecoDict
@@ -14,7 +14,7 @@ def generateChains(flags, chainDict):
         if subDict["signature"] != "MET":
             raise ValueError(f"Non-MET signature '{subDict['signature']}' received!")
         recoDict = extractMETRecoDict(subDict)
-        config = AlgConfig.fromRecoDict(**recoDict)
+        config = AlgConfig.fromRecoDict(flags, **recoDict)
         parts.append(
             Chain(
                 name=chainDict["chainName"],

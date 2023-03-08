@@ -209,7 +209,7 @@ StatusCode CompactHardTruth::execute() {
   std::vector<HepMC::GenVertexPtr> hadVertices;
 
 #ifdef HEPMC3
-  for (auto hadv:thinEvt->vertices()) {
+  for (auto& hadv: thinEvt->vertices()) {
     if (!hadv) continue;
     if (hadv->particles_in().size() < 2) continue;
     if (hadv->particles_out().size() < 1) continue;
@@ -218,10 +218,10 @@ StatusCode CompactHardTruth::execute() {
     // q qbar -> pi is allowed, but q qbar -> W... is not
     bool isHadVtx = true;
     bool isHadOut = false;
-    for (auto inp:  hadv->particles_in() ) {
+    for (const auto& inp:  hadv->particles_in() ) {
       if (!isParton(inp)) { isHadVtx = false; break;}
     }
-    for (auto vp:  hadv->particles_out()) {
+    for (const auto& vp:  hadv->particles_out()) {
       if (isParton(vp)) isHadVtx = false;
       if (isHadron(vp)) isHadOut = true;
     }
@@ -497,8 +497,7 @@ StatusCode CompactHardTruth::execute() {
       // ppvtx -> pp -> pvtx -> fp
       if (pvtx->particles_in().size() == 1 && pvtx->particles_out().size() == 1) {
         // Incoming particle to parent vertex
-        auto pitr = pvtx->particles_in().begin();
-        HepMC::GenParticlePtr pp = *pitr;
+        HepMC::GenParticlePtr pp = pvtx->particles_in().front();
         if (!pp || HepMC::barcode(pp) == 0) {
           ATH_MSG_DEBUG("1->1: missing pp for fp " << fp);
           ++m_missCount;
@@ -530,10 +529,8 @@ StatusCode CompactHardTruth::execute() {
       // Recombination should not affect hard physics!
       if (pvtx->particles_in().size() == 2 && pvtx->particles_out().size() == 1) {
         // Incoming particles to parent vertex
-        auto pitr = pvtx->particles_in().begin();
-        HepMC::GenParticlePtr pp1 = *pitr;
-        ++pitr;
-        HepMC::GenParticlePtr pp2 = *pitr;
+        HepMC::GenParticlePtr pp1 = pvtx->particles_in().front();
+        HepMC::GenParticlePtr pp2 = pvtx->particles_in().back();
         // Check for 2->1->2 initial state interactions in Herwig++
         // Initial partons have pt=0, use pt<0.001MeV
         if (std::abs(pp1->momentum().perp()) < 1.e-3) continue;
@@ -571,10 +568,8 @@ StatusCode CompactHardTruth::execute() {
       // Drop only if mass is below cut
       // ppvtx -> pp -> pvtx -> pout1,pout2/fp
       if (pvtx->particles_in().size() == 1 && pvtx->particles_out().size() == 2) {
-        auto poutitr = pvtx->particles_out().begin();
-        HepMC::GenParticlePtr pout1 = *poutitr;
-        ++poutitr;
-        HepMC::GenParticlePtr pout2 = *poutitr;
+        HepMC::GenParticlePtr pout1 = pvtx->particles_out().front();
+        HepMC::GenParticlePtr pout2 = pvtx->particles_out().back();
         // Require two final partons and avoid duplication
         if (fp == pout1) {
           if (!isFinalParton(pout2)) {
@@ -592,8 +587,7 @@ StatusCode CompactHardTruth::execute() {
         }
         if (fp != pout1) continue;
         // Incoming particle
-        auto pitr = pvtx->particles_in().begin();
-        HepMC::GenParticlePtr pp = *pitr;
+        HepMC::GenParticlePtr pp = pvtx->particles_in().front();
         // Do not merge initial partons (pt<1MeV or m<-1MeV)
         if (pout1->momentum().m() < -1.0 || pout1->momentum().perp() < 1.0) continue;
         if (pout2->momentum().m() < -1.0 || pout2->momentum().perp() < 1.0) continue;
@@ -643,8 +637,7 @@ StatusCode CompactHardTruth::execute() {
       // Do nothing
       if (pvtx->particles_in().size() == 1) {
         // Incoming particle to parent vertex
-        auto pitr = pvtx->particles_in().begin();
-        HepMC::GenParticlePtr pp = *pitr;
+        HepMC::GenParticlePtr pp = pvtx->particles_in().front();
         if (std::abs(pp->pdg_id()) == 2212) iCase = -1;
       }
       // Case not found

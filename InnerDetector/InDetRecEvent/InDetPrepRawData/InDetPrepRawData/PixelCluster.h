@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -256,9 +256,9 @@ inline bool PixelCluster::isAmbiguous() const
 }
 // pack the split information
 inline void PixelCluster::packSplitInformation(bool split, float prob1, float prob2){
-  m_splitInfo  =  int(prob1*SPLITMASK);
-  m_splitInfo |= (int(prob2*SPLITMASK)<<SPLITPREC);
-  m_splitInfo |= (int(split)<<(2*SPLITPREC+1));
+  m_splitInfo  =  static_cast<unsigned int>(prob1*SPLITMASK);
+  m_splitInfo |= (static_cast<unsigned int>(prob2*SPLITMASK)<<SPLITPREC);
+  m_splitInfo |= (static_cast<unsigned int>(split)<<(2*SPLITPREC+1));
 }
 
 // return the isSplit flag

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -14,16 +14,16 @@
 #include "StoreGate/WriteHandleKey.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h"
 
-class IROBDataProviderSvc;
 class BCM_RawDataProviderTool;
 
 class BCM_RawDataProvider : public AthReentrantAlgorithm
 {
 public:
 
-  //! Constructor.
-  BCM_RawDataProvider(const std::string &name, ISvcLocator *pSvcLocator);
+  //! delegate to base-class constructor.
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
   //! Initialize
   virtual StatusCode initialize() override;
@@ -40,10 +40,9 @@ public:
 
 private:
 
-  ServiceHandle<IROBDataProviderSvc>   m_robDataProvider;
-  ToolHandle<BCM_RawDataProviderTool>  m_rawDataTool;
-  SG::WriteHandleKey<BCM_RDO_Container> m_RDO_Key
-  { this, "RDOKey", "BDM_RDOs", "" };
+  ServiceHandle<IROBDataProviderSvc>   m_robDataProvider{this,"ROBDataProviderSvc","ROBDataProviderSvc"};
+  ToolHandle<BCM_RawDataProviderTool>  m_rawDataTool{this,"ProviderTool","BCM_RawDataProviderTool"};
+  SG::WriteHandleKey<BCM_RDO_Container> m_RDO_Key{this, "RDOKey", "BCM_RDOs", "" };
 };
 
 #endif

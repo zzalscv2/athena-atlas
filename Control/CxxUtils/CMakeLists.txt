@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( CxxUtils )
@@ -111,6 +111,16 @@ if ( IS_DIRECTORY /usr/include/ck )
 endif()
 
 
+atlas_add_test( ConcurrentMap_test
+  SOURCES test/ConcurrentMap_test.cxx
+  INCLUDE_DIRS ${TBB_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${CK_INCLUDE}
+  LINK_LIBRARIES CxxUtils TestTools ${TBB_LIBRARIES} ${Boost_LIBRARIES} ${CK_LIBRARIES} )
+if ( IS_DIRECTORY /usr/include/ck )
+  target_compile_definitions(CxxUtils_ConcurrentMap_test
+    PRIVATE "-DHAVE_CK" )
+endif()
+
+
 atlas_add_test( ConcurrentPtrSet_test
   SOURCES test/ConcurrentPtrSet_test.cxx
   INCLUDE_DIRS ${TBB_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${CK_INCLUDE}
@@ -145,7 +155,8 @@ foreach( test sincos_test ArrayScanner_test Arrayrep_test
       vec_int_test vec_float_test vec_fb_int_test vec_fb_float_test
       ConcurrentHashmapImpl_test SimpleUpdater_test hexdump_test
       FPControl_test LockedPointer_test nodiscard_test span_test
-      reverse_wrapper_test )
+      reverse_wrapper_test atomic_bounded_decrement_test
+      releasing_iterator_test SizedUInt_test UIntConv_test )
    atlas_add_test( ${test}
       SOURCES test/${test}.cxx
       LINK_LIBRARIES CxxUtils TestTools )

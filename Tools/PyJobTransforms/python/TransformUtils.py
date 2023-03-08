@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaCommon.Logging import logging
 
 
@@ -38,38 +38,41 @@ def executeFromFragment(fragment_string, flags, cfg=None):
         function_def(flags, cfg)
 
 
-def processPreExec(runArgs, ConfigFlags):
+def processPreExec(runArgs, flags):
     """Process preExec from runtime arguments."""
     if hasattr(runArgs, 'preExec') and runArgs.preExec and runArgs.preExec != 'NONE':
+        ConfigFlags = flags  # noqa: F841
         for cmd in runArgs.preExec:
             exec(cmd)
 
 
-def processPostExec(runArgs, ConfigFlags, cfg):
+def processPostExec(runArgs, flags, cfg):
     """Process postExec from runtime arguments."""
-    if not ConfigFlags.locked():
+    if not flags.locked():
         raise RuntimeError('Running a postExec before locking ConfigFlags')
 
     if hasattr(runArgs, 'postExec') and runArgs.postExec and runArgs.postExec != 'NONE':
+        ConfigFlags = flags  # noqa: F841
+        from AthenaConfiguration.ComponentFactory import CompFactory # noqa: F401
         for cmd in runArgs.postExec:
             exec(cmd)
 
 
-def processPreInclude(runArgs, ConfigFlags):
+def processPreInclude(runArgs, flags):
     """Process preInclude from runtime arguments."""
     if hasattr(runArgs, 'preInclude') and runArgs.preInclude and runArgs.preInclude != 'NONE':
         for fragment in runArgs.preInclude:
-            executeFromFragment(fragment, ConfigFlags)
+            executeFromFragment(fragment, flags)
 
 
-def processPostInclude(runArgs, ConfigFlags, cfg):
+def processPostInclude(runArgs, flags, cfg):
     """Process postInclude from runtime arguments."""
-    if not ConfigFlags.locked():
+    if not flags.locked():
         raise RuntimeError('Running a postInclude before locking ConfigFlags')
 
     if hasattr(runArgs, 'postInclude') and runArgs.postInclude and runArgs.postInclude != 'NONE':
         for fragment in runArgs.postInclude:
-            executeFromFragment(fragment, ConfigFlags, cfg)
+            executeFromFragment(fragment, flags, cfg)
 
 
 def UseFrontier(flags):

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -35,7 +35,7 @@ SecVtxInfo::SecVtxInfo() : BaseTagInfo(),
       }
 
 /** constructor with infotype */
-SecVtxInfo::SecVtxInfo(TagInfoType tagJetInfoType) : BaseTagInfo(tagJetInfoType),
+SecVtxInfo::SecVtxInfo(const TagInfoType& tagJetInfoType) : BaseTagInfo(tagJetInfoType),
         m_numSelTracksForFit(-1),
         m_dist(-1.),
         m_rphidist(-1.),

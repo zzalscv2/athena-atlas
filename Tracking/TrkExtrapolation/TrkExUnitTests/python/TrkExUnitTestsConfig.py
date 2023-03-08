@@ -20,8 +20,6 @@ def ExtrapolationEngineTestCfg(configFlags, name = "ExtrapolationEngineTest", **
   
   result=ComponentAccumulator()  
 
-  from TrkConfig.AtlasTrackingGeometrySvcConfig import TrackingGeometrySvcCfg
-  result.merge(TrackingGeometrySvcCfg(configFlags))
   
   histSvc = CompFactory.THistSvc(Output = ["val DATAFILE='ExtrapolationEngineTest.root' TYPE='ROOT' OPT='RECREATE'"])
   result.addService( histSvc )    

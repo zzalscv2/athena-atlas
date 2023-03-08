@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ActsTrkEvent )
@@ -15,7 +15,7 @@ atlas_add_library( ActsTrkEvent
                    LINK_LIBRARIES ${Boost_LIBRARIES} ${EIGEN_LIBRARIES} 
 		   AthenaBaseComps GaudiKernel AtlasDetDescr CxxUtils 
 		   xAODCore ActsCore ActsFatras ActsGeometryLib BeamSpotConditionsData
-		   MagFieldConditions MagFieldElements GeoPrimitives xAODTracking
+		   MagFieldConditions MagFieldElements GeoPrimitives xAODTracking xAODInDetMeasurement
 		   )
 
 atlas_add_dictionary( ActsTrkEventDict
@@ -23,9 +23,6 @@ atlas_add_dictionary( ActsTrkEventDict
 		      ActsTrkEvent/selection.xml
 		      LINK_LIBRARIES xAODCore ActsTrkEvent
 		      DATA_LINKS 
-		      ActsTrk::SpacePointData
-		      ActsTrk::SpacePointMeasurementDetails
-		      ActsTrk::SpacePointContainer 
 		      ActsTrk::SeedContainer 
 		      ActsTrk::BoundTrackParametersContainer
 		      )

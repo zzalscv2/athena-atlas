@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 """Run a test on Tile conditions algorithms configuration on data online
 
-Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 
 if __name__ == "__main__":
 
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG
@@ -15,15 +15,16 @@ if __name__ == "__main__":
     # test setup
     log.setLevel(DEBUG)
 
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.Common.isOnline = True
-    ConfigFlags.Tile.RunType = 'PHY'
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.Common.isOnline = True
+    flags.Tile.RunType = 'PHY'
+    flags.lock()
 
     acc = ComponentAccumulator()
 
     from TileConditions.TileCondToolsTestConfig import TileCondToolsTestCfg
-    acc.merge( TileCondToolsTestCfg(ConfigFlags) )
+    acc.merge( TileCondToolsTestCfg(flags) )
 
     acc.printConfig(withDetails = True, summariseProps = True)
     print(acc.getService('IOVDbSvc'))

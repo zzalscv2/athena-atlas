@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArPedestals2Ntuple.h"
@@ -75,10 +75,7 @@ StatusCode LArPedestals2Ntuple::stop()
 
  unsigned cellCounter=0;
  for(long igain=CaloGain::LARHIGHGAIN; igain<CaloGain::LARNGAIN; igain++) {
-   std::vector<HWIdentifier>::const_iterator itOnId = m_onlineId->channel_begin();
-   std::vector<HWIdentifier>::const_iterator itOnIdEnd = m_onlineId->channel_end();
-   for(; itOnId!=itOnIdEnd;++itOnId){
-     const HWIdentifier hwid = *itOnId;
+   for (const HWIdentifier hwid: m_onlineId->channel_range()) {
      if (larPedestal->pedestal(hwid,igain)>ILArPedestal::ERRORCODE) {
        fillFromIdentifier(hwid);       
        cellIndex = cellCounter;

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 if __name__=="__main__":
     from AthenaConfiguration.AllConfigFlags import ConfigFlags
@@ -30,7 +30,7 @@ if __name__=="__main__":
         from CaloRec.CaloTopoClusterConfig import CaloTopoClusterCfg
         acc.merge(CaloTopoClusterCfg(ConfigFlags))
 
-    if ConfigFlags.InDet.doTruth :
+    if ConfigFlags.Tracking.doTruth :
         from xAODTruthCnv.RedoTruthLinksConfig import RedoTruthLinksAlgCfg
         acc.merge( RedoTruthLinksAlgCfg(ConfigFlags) )
 

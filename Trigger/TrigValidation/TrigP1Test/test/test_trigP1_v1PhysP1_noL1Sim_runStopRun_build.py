@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # art-description: start/stop/start transition test with PhysicsP1_pp_run3_v1 menu
 # art-type: build
 # art-include: master/Athena
-# art-include: 22.0/Athena
+# art-include: 23.0/Athena
 # Skipping art-output which has no effect for build tests.
 # If you create a grid version, check art-output in existing grid tests.
 
@@ -18,7 +18,7 @@ ex.input = 'data'
 precommand = ''.join([
   "setMenu='PhysicsP1_pp_run3_v1_HLTReprocessing_prescale';",
   "forceEnableAllChains=True;",
-  "enableCostMonitoring=False;",
+  "flags.Trigger.CostMonitoring.doCostMonitoring=False;",
   "disableChains=['HLT_cosmic_id_L1MU3V_EMPTY','HLT_cosmic_id_L1MU8VF_EMPTY']", # Temporary workaround for ATR-25459
 ])
 ex.args = f'-i -M -ul -c "{precommand}"'

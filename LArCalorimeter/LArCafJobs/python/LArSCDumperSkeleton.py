@@ -41,101 +41,102 @@ def fromRunArgs(runArgs):
     from AthenaCommon.Logging import logging
     mlog_SCD = logging.getLogger( 'LArSCDumpSkeleton' )
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags    
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags    
+    flags=initConfigFlags()
 
     from LArCafJobs.LArSCDumperFlags import addSCDumpFlags
-    addSCDumpFlags(ConfigFlags)
+    addSCDumpFlags(flags)
 
-    commonRunArgsToFlags(runArgs, ConfigFlags)
+    commonRunArgsToFlags(runArgs, flags)
 
-    processPreInclude(runArgs, ConfigFlags)
-    processPreExec(runArgs, ConfigFlags)
+    processPreInclude(runArgs, flags)
+    processPreExec(runArgs, flags)
 
-    ConfigFlags.Input.Files=runArgs.inputBSFile
-    ConfigFlags.LArSCDump.outputNtup=runArgs.outputNTUP_SCMONFile
+    flags.Input.Files=runArgs.inputBSFile
+    flags.LArSCDump.outputNtup=runArgs.outputNTUP_SCMONFile
 
     # real geom not working yet
-    ConfigFlags.LArSCDump.doGeom=False
+    flags.LArSCDump.doGeom=False
 
     from LArConditionsCommon.LArRunFormat import getLArDTInfoForRun
     try:
-       runinfo=getLArDTInfoForRun(ConfigFlags.Input.RunNumber[0], connstring="COOLONL_LAR/CONDBR2")
+       runinfo=getLArDTInfoForRun(flags.Input.RunNumber[0], connstring="COOLONL_LAR/CONDBR2")
     except Exception:
        mlog_SCD.warning("Could not get DT run info, using defaults !")   
-       ConfigFlags.LArSCDump.doEt=True
-       ConfigFlags.LArSCDump.nSamples=5
-       ConfigFlags.LArSCDump.nEt=1
+       flags.LArSCDump.doEt=True
+       flags.LArSCDump.nSamples=5
+       flags.LArSCDump.nEt=1
        CKeys=["SC_ET"]    
     else:   
        CKeys=[]
-       ConfigFlags.LArSCDump.digitsKey=""
+       flags.LArSCDump.digitsKey=""
        for i in range(0,len(runinfo.streamTypes())):
           if runinfo.streamTypes()[i] ==  "SelectedEnergy":
                 CKeys += ["SC_ET_ID"]
-                ConfigFlags.LArSCDump.doEt=True
-                ConfigFlags.LArSCDump.nEt=runinfo.streamLengths()[i]
+                flags.LArSCDump.doEt=True
+                flags.LArSCDump.nEt=runinfo.streamLengths()[i]
           elif runinfo.streamTypes()[i] ==  "Energy":
                 CKeys += ["SC_ET"]
-                ConfigFlags.LArSCDump.doEt=True
-                ConfigFlags.LArSCDump.nEt=runinfo.streamLengths()[i]
+                flags.LArSCDump.doEt=True
+                flags.LArSCDump.nEt=runinfo.streamLengths()[i]
           elif runinfo.streamTypes()[i] ==  "RawADC":
-                ConfigFlags.LArSCDump.digitsKey="SC"
-                ConfigFlags.LArSCDump.nSamples=runinfo.streamLengths()[i]
+                flags.LArSCDump.digitsKey="SC"
+                flags.LArSCDump.nSamples=runinfo.streamLengths()[i]
           elif runinfo.streamTypes()[i] ==  "ADC":
                 CKeys += ["SC_ADC_BAS"]
-                ConfigFlags.LArSCDump.nSamples=runinfo.streamLengths()[i]
+                flags.LArSCDump.nSamples=runinfo.streamLengths()[i]
                 
     finally:
-       ConfigFlags.LArSCDump.doRawChan=True
-       ConfigFlags.LArSCDump.fillNoisyRO=False
+       flags.LArSCDump.doRawChan=True
+       flags.LArSCDump.fillNoisyRO=False
        CKeys+=["LArRawChannels"]
 
     mlog_SCD.debug("CKeys generated %s",str(CKeys))   
 
-    ConfigFlags.Trigger.triggerConfig = 'DB'
-    ConfigFlags.Trigger.L1.doCTP = True
-    ConfigFlags.Trigger.L1.doMuon = False
-    ConfigFlags.Trigger.L1.doCalo = False
-    ConfigFlags.Trigger.L1.doTopo = False
+    flags.Trigger.triggerConfig = 'DB'
+    flags.Trigger.L1.doCTP = True
+    flags.Trigger.L1.doMuon = False
+    flags.Trigger.L1.doCalo = False
+    flags.Trigger.L1.doTopo = False
 
-    ConfigFlags.Trigger.enableL1CaloLegacy = True
-    ConfigFlags.Trigger.enableL1CaloPhase1 = True
+    flags.Trigger.enableL1CaloLegacy = True
+    flags.Trigger.enableL1CaloPhase1 = True
 
-    ConfigFlags.lock()
+    flags.lock()
     
-    cfg=MainServicesCfg(ConfigFlags)
-    cfg.merge(L1CaloMenuCfg(ConfigFlags))
+    cfg=MainServicesCfg(flags)
+    cfg.merge(L1CaloMenuCfg(flags))
 
     from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
-    tdt = cfg.getPrimaryAndMerge(TrigDecisionToolCfg(ConfigFlags))
+    tdt = cfg.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
 
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
-    cfg.merge(LArGMCfg(ConfigFlags))
+    cfg.merge(LArGMCfg(flags))
 
-    if ConfigFlags.LArSCDump.doBC:
+    if flags.LArSCDump.doBC:
        # FIXME should be SC version
        from LArBadChannelTool.LArBadChannelConfig import  LArBadFebCfg, LArBadChannelCfg
-       cfg.merge(LArBadChannelCfg(ConfigFlags))
-       cfg.merge(LArBadFebCfg(ConfigFlags))
+       cfg.merge(LArBadChannelCfg(flags))
+       cfg.merge(LArBadFebCfg(flags))
 
-    cfg.merge(LArSC2NtupleCfg(ConfigFlags, AddBadChannelInfo=ConfigFlags.LArSCDump.doBC, AddFEBTempInfo=False, isSC=True, isFlat=False,
-                            OffId=ConfigFlags.LArSCDump.doOfflineId, AddHash=ConfigFlags.LArSCDump.doHash, AddCalib=ConfigFlags.LArSCDump.doCalib, RealGeometry=ConfigFlags.LArSCDump.doGeom, ExpandId=ConfigFlags.LArSCDump.expandId, # from LArCond2NtupleBase 
-                            NSamples=ConfigFlags.LArSCDump.nSamples, FTlist={}, FillBCID=ConfigFlags.LArSCDump.doBCID, ContainerKey=ConfigFlags.LArSCDump.digitsKey,  # from LArDigits2Ntuple
-                            SCContainerKeys=CKeys, OverwriteEventNumber = ConfigFlags.LArSCDump.overwriteEvN, Net=ConfigFlags.LArSCDump.nEt, # from LArSC2Ntuple
-                            FillRODEnergy = ConfigFlags.LArSCDump.doRawChan, FillLB = True, FillTriggerType = True,
+    cfg.merge(LArSC2NtupleCfg(flags, AddBadChannelInfo=flags.LArSCDump.doBC, AddFEBTempInfo=False, isSC=True, isFlat=False,
+                            OffId=flags.LArSCDump.doOfflineId, AddHash=flags.LArSCDump.doHash, AddCalib=flags.LArSCDump.doCalib, RealGeometry=flags.LArSCDump.doGeom, ExpandId=flags.LArSCDump.expandId, # from LArCond2NtupleBase 
+                            NSamples=flags.LArSCDump.nSamples, FTlist={}, FillBCID=flags.LArSCDump.doBCID, ContainerKey=flags.LArSCDump.digitsKey,  # from LArDigits2Ntuple
+                            SCContainerKeys=CKeys, OverwriteEventNumber = flags.LArSCDump.overwriteEvN, Net=flags.LArSCDump.nEt, # from LArSC2Ntuple
+                            FillRODEnergy = flags.LArSCDump.doRawChan, FillLB = True, FillTriggerType = True,
                             TrigNames=["L1_EM3","L1_EM7","L1_EM15","L1_EM22VHI","L1_eEM5","L1_eEM15","L1_eEM22M"],
                             TrigDecisionTool=tdt,
                             OutputLevel=3))
 
-    if os.path.exists(ConfigFlags.LArSCDump.outputNtup):
-          os.remove(ConfigFlags.LArSCDump.outputNtup)
+    if os.path.exists(flags.LArSCDump.outputNtup):
+          os.remove(flags.LArSCDump.outputNtup)
     from AthenaConfiguration.ComponentFactory import CompFactory
-    cfg.addService(CompFactory.NTupleSvc(Output = [ "FILE1 DATAFILE='"+ConfigFlags.LArSCDump.outputNtup+"' OPT='NEW'" ]))
+    cfg.addService(CompFactory.NTupleSvc(Output = [ "FILE1 DATAFILE='"+flags.LArSCDump.outputNtup+"' OPT='NEW'" ]))
     cfg.setAppProperty("HistogramPersistency","ROOT")
 
 
-    processPostInclude(runArgs, ConfigFlags, cfg)
-    processPostExec(runArgs, ConfigFlags, cfg)
+    processPostInclude(runArgs, flags, cfg)
+    processPostExec(runArgs, flags, cfg)
 
     #example how to dump the stores
     #cfg.getService("StoreGateSvc").Dump=True

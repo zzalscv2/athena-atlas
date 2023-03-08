@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef L1TOPOONLINEMONITORING_L1TopoOnlineMonitor_h
@@ -90,6 +90,8 @@ private:
     this, "doHwMon", true, "Enable L1Topo HW readout from RAW"};
   Gaudi::Property<bool> m_doComp {
     this, "doComp", true, "Enable L1Topo HW/Sim comparison"};
+  Gaudi::Property<bool> m_doMultComp {
+    this, "doMultComp", false, "Enable L1Topo Multiplicity HW/Sim comparison"};
   Gaudi::Property<bool> m_forceCTPasHdw {
     this, "forceCTPasHdw", false, "Force to CTP monitoring as primary in Sim/Hdw comparison"};
 
@@ -119,7 +121,10 @@ private:
   StatusCode doHwMon(DecisionBits& decisionBits, std::vector<std::vector<unsigned>> &multWeights, const EventContext& ctx) const;
   
   /// Compare hardware and simulation
-  StatusCode doComp(DecisionBits& decisionBits, std::vector<std::vector<unsigned>> &multWeightsSim, std::vector<std::vector<unsigned>> &multWeightsHdw) const;
+  StatusCode doComp(DecisionBits& decisionBits) const;
+
+  /// Compare hardware and simulation for the multiplicity algorithms
+  StatusCode doMultComp(std::vector<std::vector<unsigned>> &multWeightsSim, std::vector<std::vector<unsigned>> &multWeightsHdw) const;
     
   /// Get CTP ids from menu
   std::vector<unsigned> getCtpIds(const TrigConf::L1Menu& l1menu);

@@ -65,7 +65,7 @@ namespace MuonCalib {
 
         SG::ReadHandleKey<MuonSegmentCombinationCollection> m_CombSegKey{this, "CombiSegmentKey", "MooreSegmentCombinations"};
 
-        SG::ReadHandleKey<MuonSegmentCombinationCollection> m_CscSegKey{this, "CombiSegmentKey", "Csc4dSegmentCombinations"};
+        SG::ReadHandleKey<MuonSegmentCombinationCollection> m_CscSegKey{this, "CscSegmentKey", "Csc4dSegmentCombinations"};
 
         SG::ReadHandleKeyArray<Trk::SegmentCollection> m_TrkSegKey{this, "SegmentLocations", {"MooreSegments", "ConvertedMBoySegments"}};
 

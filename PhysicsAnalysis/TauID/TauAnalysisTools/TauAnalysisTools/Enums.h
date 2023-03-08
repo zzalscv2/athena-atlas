@@ -1,14 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAUANALYSISTOOLS_ENUMS_H
 #define TAUANALYSISTOOLS_ENUMS_H
 
-/*
-  author: Dirk Duschinger
-  mail: dirk.duschinger@cern.ch
-*/
 
 namespace TauAnalysisTools
 {
@@ -23,7 +19,11 @@ namespace TauAnalysisTools
     JETIDRNNVERYLOOSE      = 6,
     JETIDRNNLOOSE          = 7,
     JETIDRNNMEDIUM         = 8,
-    JETIDRNNTIGHT          = 9
+    JETIDRNNTIGHT          = 9,
+    JETIDDEEPSETVERYLOOSE  = 10,
+    JETIDDEEPSETLOOSE      = 11,
+    JETIDDEEPSETMEDIUM     = 12,
+    JETIDDEEPSETTIGHT      = 13,
   };
 
   enum EleID

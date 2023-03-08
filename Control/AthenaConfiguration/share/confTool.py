@@ -46,8 +46,8 @@ def parse_args():
     parser.add_argument(
         "--diff", dest="diff", action="store_true", help="Diffs two files"
     )
-    parser.add_argument("--toJSON", action="store_true", help="Convert to JSON file")
-    parser.add_argument("--toPickle", help="Convert to pickle file")
+    parser.add_argument("--toJSON", action="store_true", help="Convert pickle to JSON file")
+    parser.add_argument("--toPickle", action="store_true", help="Convert JSON to pickle file")
 
     parser.add_argument("file", nargs="+", help="Files to work with")
     parser.add_argument(
@@ -134,7 +134,7 @@ knownDifferences={}
 
 def main(args):
     if not args.quiet and args.ignoreIrrelevant:
-        print(f"Components to ignore: {args.ignore}")
+        print(f"Properties to ignore: {args.ignore}")
     color = fullColor()
     if not sys.stdout.isatty() and not args.color: #Remove colors when writing to a file unless forced
         color = noColor()
@@ -159,8 +159,12 @@ def main(args):
             sys.exit(
                 "ERROR, can convert single file at a time, got: %s" % args.file
             )
-        from TrigConfIO.JsonUtils import create_joboptions_json
-        create_joboptions_json(args.file[0], args.file[0].replace("pkl","json"))
+        conf = loadConfigFile(args.file[0], args)
+        oFileName = args.file[0].replace(".pkl", ".json")
+        with open(oFileName, "w") as oFile:
+            json.dump(conf, oFile, indent=4, sort_keys=True, ensure_ascii=True)
+        print("Wrote " + args.file[0] + " to " + oFileName)
+
 
     if args.toPickle:
         if len(args.file) != 1:
@@ -168,9 +172,11 @@ def main(args):
                 "ERROR, can convert single file at a time, got: %s" % args.file
             )
         conf = loadConfigFile(args.file[0], args)
-        with open(args.toPickle, "wb") as oFile:
+        oFileName = args.file[0].replace(".json", ".pkl")
+        with open(oFileName, "wb") as oFile:
             for item in conf:
                 pickle.dump(item, oFile)
+        print("Wrote " + args.file[0] + " to " + oFileName)
 
     if args.diff:
         if len(args.file) != 2:

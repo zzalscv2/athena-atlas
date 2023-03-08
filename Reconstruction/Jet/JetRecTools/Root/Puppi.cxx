@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include "Math/ProbFunc.h"
 #include "TMath.h"
@@ -11,7 +11,7 @@ using namespace std;
 
 //PuppiUserInfo can be used to include additional information in algorithm
 PuppiUserInfo::PuppiUserInfo(): otherChi2Vec(std::vector<double>()) {}
-PuppiUserInfo::PuppiUserInfo(std::vector<double> v): otherChi2Vec(v) {}
+PuppiUserInfo::PuppiUserInfo(const std::vector<double>& v): otherChi2Vec(v) {}
 PuppiUserInfo::PuppiUserInfo(double v): otherChi2Vec(std::vector<double>({v})) {}
 
 //=================================================================================================================================
@@ -23,7 +23,7 @@ Puppi::Puppi(double R0, double Rmin, double beta, double centralPTCutOffset, dou
 //---------------------------------------------------------------------------------------------------------------------------------
 
 //Sets the particles used for calculations, and calculates the median and RMS for the PU distribution
-void Puppi::setParticles(const std::vector<fastjet::PseudoJet> chargedHS, const std::vector<fastjet::PseudoJet> chargedPU, const std::vector<fastjet::PseudoJet> neutral, const std::vector<fastjet::PseudoJet> forward, int nPV){
+void Puppi::setParticles(const std::vector<fastjet::PseudoJet>& chargedHS, const std::vector<fastjet::PseudoJet>& chargedPU, const std::vector<fastjet::PseudoJet>& neutral, const std::vector<fastjet::PseudoJet>& forward, int nPV){
 
   m_chargedHS=chargedHS;
   m_chargedPU=chargedPU;

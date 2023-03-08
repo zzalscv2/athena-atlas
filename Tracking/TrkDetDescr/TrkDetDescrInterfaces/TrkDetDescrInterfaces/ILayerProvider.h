@@ -36,14 +36,12 @@ public:
   /**Virtual destructor*/
   virtual ~ILayerProvider() {}
 
-  /** LayerBuilder interface method - returning the layers at negative side */
-  virtual const std::vector<Layer*> negativeLayers() const = 0;
+  /** LayerBuilder interface method - returning the endcap layer */
+  virtual std::pair<const std::vector<Layer*>, const std::vector<Layer*> >
+  endcapLayer() const = 0;
 
   /** LayerBuilder interface method - returning the central layers */
   virtual const std::vector<Layer*> centralLayers() const = 0;
-
-  /** LayerBuilder interface method - returning the layers at negative side */
-  virtual const std::vector<Layer*> positiveLayers() const = 0;
 
   /** Name identification */
   virtual const std::string& identification() const = 0;

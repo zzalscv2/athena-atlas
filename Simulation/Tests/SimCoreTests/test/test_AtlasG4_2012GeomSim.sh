@@ -1,6 +1,8 @@
 #!/bin/sh
 #
 # art-description: Run simulation outside ISF, using 2012 geometry and conditions, reading single muon events, writing HITS
+# art-include: 23.0/Athena
+# art-include: 23.0/AthSimulation
 # art-include: master/Athena
 # art-include: master/AthSimulation
 # art-type: grid
@@ -15,7 +17,7 @@ AtlasG4_tf.py \
 --physicsList 'FTFP_BERT' \
 --postInclude 'PyJobTransforms.TransformUtils.UseFrontier' \
 --DataRunNumber '212272' \
---geometryVersion 'ATLAS-R1-2012-03-00-00' \
+--geometryVersion 'ATLAS-R1-2012-03-02-00' \
 --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/mu_E200_eta0-25.evgen.pool.root' \
 --outputHITSFile 'test.CA.HITS.pool.root' \
 --maxEvents '10' \
@@ -34,7 +36,7 @@ AtlasG4_tf.py \
 --physicsList 'FTFP_BERT' \
 --postInclude 'default:PyJobTransforms/UseFrontier.py' \
 --DataRunNumber '212272' \
---geometryVersion 'ATLAS-R1-2012-03-00-00' \
+--geometryVersion 'ATLAS-R1-2012-03-02-00_VALIDATION' \
 --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/mu_E200_eta0-25.evgen.pool.root' \
 --outputHITSFile 'test.CA.HITS.pool.root' \
 --maxEvents '10' \
@@ -49,7 +51,7 @@ AtlasG4_tf.py \
 --physicsList 'FTFP_BERT' \
 --postInclude 'default:PyJobTransforms/UseFrontier.py' \
 --DataRunNumber '212272' \
---geometryVersion 'ATLAS-R1-2012-03-00-00' \
+--geometryVersion 'ATLAS-R1-2012-03-02-00_VALIDATION' \
 --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/mu_E200_eta0-25.evgen.pool.root' \
 --outputHITSFile 'test.HITS.pool.root' \
 --maxEvents '10' \

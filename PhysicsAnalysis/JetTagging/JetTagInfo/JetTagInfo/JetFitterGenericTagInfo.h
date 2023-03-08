@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /*****************************-*-c++-*-*************************************
@@ -105,12 +105,12 @@ public:
   int clearTemporary(); 
 
   /** returns numeric_limits::min() for unset values */
-  double getDouble(std::string) const; 
-  int getInt(std::string) const; 
+  double getDouble(const std::string&) const; 
+  int getInt(const std::string&) const; 
 
   /** these versions will throw a range_error if the value isn't set*/
-  double getDoubleOrThrow(std::string) const; // <- may throw range_error
-  int getIntOrThrow(std::string) const; // <- may throw range_error
+  double getDoubleOrThrow(const std::string&) const; // <- may throw range_error
+  int getIntOrThrow(const std::string&) const; // <- may throw range_error
 
   DoubleMap::const_iterator getDoublesBegin() const; 
   DoubleMap::const_iterator getDoublesEnd() const; 

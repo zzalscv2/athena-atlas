@@ -420,7 +420,7 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2022_prerec()
     {
       if (m_sInputFilePathJetIDHadTau.empty()) {
         if (m_sAFII) ATH_MSG_WARNING("No fast-sim recommendation for Tau RNN, using FullSim");
-	m_sInputFilePathJetIDHadTau = sDirectory + "RNNID_TrueHadTau_2022-prerecommendation.root";
+	m_sInputFilePathJetIDHadTau = sDirectory + "RNNID_TrueHadTau_2022-prerecommendation_v2.root";
       }
       if (m_sVarNameJetIDHadTau.empty()) m_sVarNameJetIDHadTau = "TauScaleFactorJetIDHadTau";
 

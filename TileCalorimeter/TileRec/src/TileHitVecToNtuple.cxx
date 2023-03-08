@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -34,12 +34,11 @@
 TileHitVecToNtuple::TileHitVecToNtuple(const std::string& name, ISvcLocator* pSvcLocator)
   : AthAlgorithm(name, pSvcLocator)
   , m_ntuplePtr(0)
+  , m_ntupleID("h32")
+  , m_ntupleLoc("/FILE1/TileRec")
+  , m_hitVector("TileHitVec")
   , m_tileID(0)
 {
-  m_hitVector = "TileHitVec";
-  m_ntupleLoc="/FILE1/TileRec";
-  m_ntupleID="h32";
-  
   declareProperty("TileHitVector", m_hitVector);
   declareProperty("NTupleLoc", m_ntupleLoc);
   declareProperty("NTupleID", m_ntupleID);

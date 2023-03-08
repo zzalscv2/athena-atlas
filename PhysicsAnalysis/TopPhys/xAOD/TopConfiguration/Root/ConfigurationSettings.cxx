@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TopConfiguration/ConfigurationSettings.h"
@@ -154,6 +154,7 @@ namespace top {
     registerParameter("MuonDoSmearing2stationHighPt", "True/False, to turn on/off spacial corrections for 2-station muons reconstruction with missing inner MS station allowed for abs(eta)<1.3, only with MuonQuality HighPt. - Default: True", "True");
     registerParameter("MuonDoExtraSmearingHighPt", "True/False, To be used by analyses using willing to check their sensitivity to momentum resolution effects at large muon momenta and in case move to the HighPt WP - Default: false", "false");
     registerParameter("MuonCalibrationMode", "Calibration method for muon momentum.", "correctData_CB", {"correctData_CB", "correctData_IDMS", "notCorrectData_IDMS"});
+    registerParameter("MuonSmearingSystematicModel", "Systematic scheme for momentum scale and resolution.", "Corr_Scale", {"Corr_Scale", "Decorr_Scale"});
     registerParameter("UseAntiMuons", "Use AntiMuons for fake estimate. Default: false", "false");
     registerParameter("UseSoftMuons", "True to use soft muons, False (default) otherwise", "False");
     registerParameter("SoftMuonPt", "Soft Muon pT cut for object selection (in MeV). Default 4 GeV.", "4000");
@@ -205,7 +206,7 @@ namespace top {
     registerParameter("JVTinMETCalculation",
                       "Perfom a JVT cut on the jets in the MET recalculation? True (default) or False.", "True");
     registerParameter("SaveFailJVTJets", "Save the jets that failed the JVT cut? False (default) or True.", "False");
-    registerParameter("JVTWP", "Set JVT WP, default is set to \'Default\' (Tight for PFlow and Medium for Topo).",
+    registerParameter("JVTWP", "Set JVT WP, default is set to \'Default\' (FixedEffPt for PFlow NNJvt, Tight for PFlow Jvt, and Medium for Topo Jvt).",
                       "Default");
     registerParameter("ForwardJVTWP", "Set fJVT Working Point for selecting forward jets (|eta|>2.5 & 20GeV<pT<60GeV)"
 		      "\'None\': No fJVT (doesn't run tool for selection) - use this if you don't have forward jets in your selection or if using using PFlow jets with a derivation older than p4173, \'Tight\' (fJVT<0.4, recommended), \'Medium\': (fJVT<0.5, if combined with ForwardJVTinMETCalculation this will set MET WP to Tenacious with stricter JVTinMET requirements",
@@ -220,6 +221,9 @@ namespace top {
     registerParameter("METSignificanceSoftTermParam",
                       "String that sets the type of resolutions that are used for the soft term, Random(met::Random), PthardParam(met::PthardParam), TSTParam(met::TSTParam)",
                       "Random", {"Random", "PthardParam", "TSTParam"});
+    registerParameter("METJetSelectionWP",
+                      "Set JetSelection WP to use within MetMaker with NNJvt, by default \'Tight\' is used.",
+                      "Tight", {"Loose", "Tight", "Tighter"});
     registerParameter("JetPtGhostTracks",
                       "Jet pT threshold for ghost track systematic variations calculation (in MeV). Default 25 GeV.",
                       "25000.");
@@ -234,7 +238,11 @@ namespace top {
     registerParameter("GhostTracksQuality",
                       "WP of the ghost track quality. Option: TightPrimary, LoosePrimary. Loose, NoCut. Default TightPrimary.","TightPrimary");
     registerParameter("JetUncertainties_NPModel",
-                      "AllNuisanceParameters, CategoryReduction (default), GlobalReduction, StrongReduction - for JetUncertainties",
+                      "Model used for JetUncertainties. Possible choices:"
+                      " \"AllNuisanceParameters\", \"CategoryReduction\" (default and only option for R22 pre-recs),"
+                      " \"GlobalReduction\", \"StrongReduction\","
+                      " \"SR_Scenario1\" (ONLY to be used for FTAG calibrations!),"
+                      " or other specific StrongReduction scenarios.",
                       "CategoryReduction");
     registerParameter("JetUncertainties_QGFracFile", "To specify a root file with quark/gluon fractions,"
                                                      " in order to reduce FlavourComposition and response uncertainties."
@@ -247,12 +255,15 @@ namespace top {
                                                          " Default: None (i.e. no specific pattern is looked for in the name of the provided histograms).",
                       "None");
     registerParameter("JetJERSmearingModel",
-                      "All (inc. data smearing), All_PseudoData (use MC as pseudo-data), Full (inc. data smearing), Full_PseudoData (use MC as pseudo-data) or Simple (MC only - default)",
+                      "JER smearing model to use. Possible choices (\"Full\" is the only R22 pre-rec option):"
+                      " \"All\" (inc. data smearing), \"All_PseudoData\" (use MC as pseudo-data),"
+                      " \"Full\" (inc. data smearing), \"Full_PseudoData\" (use MC as pseudo-data - default),"
+                      " or \"Simple\" (MC only).",
                       "Full_PseudoData", {"All", "All_PseudoData", "Full", "Full_PseudoData", "Simple"});
     registerParameter("JetJMSOption",
-		      "None (default),"
-                      "JMS_frozen (The shape and magnitude of the uncertainties at m/pT = 0.25 are also used for m/pT > 0.25),"
-                       "JMS_scaled (The magnitude of the uncertainties at m/pT = 0.25 was scaled linearly with increasing m/pT)",
+                      "None (default),"
+                      " JMS_frozen (The shape and magnitude of the uncertainties at m/pT = 0.25 are also used for m/pT > 0.25),"
+                      " JMS_scaled (The magnitude of the uncertainties at m/pT = 0.25 was scaled linearly with increasing m/pT).",
                       "None");
     registerParameter("DoLargeRPseudodataJER",
                       "If set to True, produce additional JER smearing systematics treating MC as pseudo-data, provided FullJER or AllJER is specified with LargeRJetUncertainties_JESJERJMS_NPModel.",
@@ -456,7 +467,7 @@ namespace top {
     registerParameter("ApplyElectronInJetSubtraction",
                       "Subtract electrons close to jets for boosted analysis : True or False(top default)", "False");
     registerParameter("TopPartonHistory", "Topology to be assumed when reconstructing parton-level history.", "False",
-                      {"ttbar", "ttbarlight", "tb", "Wtb", "tchannel", "ttz", "ttgamma", "tHq", "tZq", "False"});
+                      {"ttbar", "ttH", "ttbarlight", "tb", "Wtb", "tchannel", "ttz", "ttgamma", "tHq", "tZq", "False"});
     registerParameter("TopPartonLevel", "Perform parton level analysis (stored in truth tree)? True or False", "True");
     
     registerParameter("TopParticleLevel", "Perform particle level selection (stored in particleLevel tree)? True or False", "False");
@@ -624,8 +635,6 @@ namespace top {
                       "False",
                       {"True", "False"});
 
-    registerParameter("MuonTriggerSF", "Muon trigger SFs to calculate", "HLT_mu20_iloose_L1MU15_OR_HLT_mu50");
-
     registerParameter("KLFitterTransferFunctionsPath", "Select the transfer functions to use", "mc12a/akt4_LCtopo_PP6");
     registerParameter("KLFitterOutput", "Select the KLFitter output (FULL, FITTEDTOPS_ONLY, JETPERM_ONLY)", "FULL");
     registerParameter("KLFitterJetSelectionMode",
@@ -748,7 +757,7 @@ namespace top {
             --commentpos; // the position of the '#' shifted after removing '\'
             continue;
         } else {
-          newstring = newstring.substr(0, commentpos);
+          newstring.resize(commentpos);
           break;
         }
       }

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # EGAM10.py
@@ -136,6 +136,28 @@ def EGAM10KernelCfg(ConfigFlags, name='EGAM10Kernel', **kwargs):
     augmentationTools += [EGAM10_PhotonVertexSelectionWrapper]
 
 
+    # ====================================================================
+    # Gain and cluster energies per layer decoration tool
+    # ====================================================================
+    from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import (
+        GainDecoratorCfg, ClusterEnergyPerLayerDecoratorCfg )
+    GainDecoratorTool = acc.popToolsAndMerge(GainDecoratorCfg(ConfigFlags))
+    acc.addPublicTool(GainDecoratorTool)
+    augmentationTools.append(GainDecoratorTool)
+
+    cluster_sizes = (3,7), (5,5), (7,11)
+    for neta, nphi in cluster_sizes:
+        cename = 'ClusterEnergyPerLayerDecorator_%sx%s' % (neta, nphi)
+        ClusterEnergyPerLayerDecorator = acc.popToolsAndMerge(
+            ClusterEnergyPerLayerDecoratorCfg(
+                ConfigFlags,
+                neta = neta,
+                nphi=nphi,
+                name=cename ))
+        acc.addPublicTool(ClusterEnergyPerLayerDecorator)
+        augmentationTools.append(ClusterEnergyPerLayerDecorator)
+
+
     # thinning tools
     thinningTools = []
 
@@ -219,7 +241,7 @@ def EGAM10Cfg(ConfigFlags):
     # multiple times in a train.
     # TODO: restrict it to relevant triggers
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    EGAM10TriggerListsHelper = TriggerListsHelper()
+    EGAM10TriggerListsHelper = TriggerListsHelper(ConfigFlags)
 
     # configure skimming/thinning/augmentation tools
     acc.merge(EGAM10KernelCfg(ConfigFlags,
@@ -327,25 +349,15 @@ def EGAM10Cfg(ConfigFlags):
     EGAM10SlimmingHelper.ExtraVariables += PhotonsCPDetailedContent
     
     # photons: gain and cluster energy per layer
-    from DerivationFrameworkCalo.DerivationFrameworkCaloFactories import (
+    from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import (
         getGainDecorations, getClusterEnergyPerLayerDecorations )
-    GainDecoratorTool = None
-    ClusterEnergyPerLayerDecorators = []  
-    for toolStr in acc.getEventAlgo('EGAM10Kernel').AugmentationTools:
-        toolStr  = f'{toolStr}'
-        splitStr = toolStr.split('/')
-        tool =  acc.getPublicTool(splitStr[1])
-        if splitStr[0] == 'DerivationFramework::GainDecorator':
-            GainDecoratorTool = tool
-        elif splitStr[0] == 'DerivationFramework::ClusterEnergyPerLayerDecorator':
-            ClusterEnergyPerLayerDecorators.append( tool )
-
-    if GainDecoratorTool : 
-        EGAM10SlimmingHelper.ExtraVariables.extend(
-            getGainDecorations(GainDecoratorTool) )
-    for tool in ClusterEnergyPerLayerDecorators:
-        EGAM10SlimmingHelper.ExtraVariables.extend(
-            getClusterEnergyPerLayerDecorations( tool ) )
+    gainDecorations = getGainDecorations(acc, 'EGAM10Kernel')
+    print('EGAM10 gain decorations: ', gainDecorations)
+    EGAM10SlimmingHelper.ExtraVariables.extend(gainDecorations)
+    clusterEnergyDecorations = getClusterEnergyPerLayerDecorations(
+        acc, 'EGAM10Kernel' )
+    print('EGAM10 cluster energy decorations: ', clusterEnergyDecorations)
+    EGAM10SlimmingHelper.ExtraVariables.extend(clusterEnergyDecorations)
 
     # energy density
     EGAM10SlimmingHelper.ExtraVariables += [ 

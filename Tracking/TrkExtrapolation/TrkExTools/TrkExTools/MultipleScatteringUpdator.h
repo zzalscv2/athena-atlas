@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -11,7 +11,7 @@
 
 #include "TrkExInterfaces/IMultipleScatteringUpdator.h"
 // Trk
-#include "AthenaKernel/IAtRndmGenSvc.h"
+#include "AthenaKernel/IAthRNGSvc.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "TrkEventPrimitives/ParticleHypothesis.h"
 #include "TrkEventPrimitives/PropDirection.h"
@@ -71,9 +71,9 @@ private:
 
   //========== used for Gaussian mixture model =================================================
   /** Random Generator service  */
-  ServiceHandle<IAtRndmGenSvc> m_rndGenSvc;
+  ServiceHandle<IAthRNGSvc> m_rndGenSvc;
   /** Random engine  */
-  CLHEP::HepRandomEngine* m_randomEngine;
+  ATHRNG::RNGWrapper* m_rngWrapper;
   std::string m_randomEngineName; //!< Name of the random number stream
 };
 

@@ -17,8 +17,30 @@ namespace xAOD{
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( eFexTower_v1, uint8_t , module , setModule )
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( eFexTower_v1, uint8_t , fpga , setFpga )
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( eFexTower_v1, uint32_t , em_status , setEm_status )
-  AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( eFexTower_v1, uint32_t , had_status , setHad_status ) 
-  AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( eFexTower_v1, uint32_t , eFEXtowerID , seteFEXtowerID ) 
+  AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( eFexTower_v1, uint32_t , had_status , setHad_status )
+
+
+  uint32_t eFexTower_v1::eFEXtowerID() const {
+      // Calculate ID by hand from coordinate
+      float eta = this->eta(); float phi = this->phi();
+      int posneg = (eta >= 0 ? 1 : -1);
+      int towereta = std::abs(eta+0.025)/0.1;
+      if (phi < 0) phi += 2*M_PI;
+      int towerphi = int(32*(phi+0.025)/M_PI);
+      unsigned int tower_id = towerphi + 64*towereta;
+
+      if (towereta < 14) {
+          tower_id += (posneg > 0 ? 200000 : 100000);
+      }
+      else if (towereta == 14) {
+          tower_id += (posneg > 0 ? 400000 : 300000);
+      }
+      else {
+          tower_id += (posneg > 0 ? 600000 : 500000);
+      }
+
+      return tower_id;
+  }
   
   
   /// initialize
@@ -51,5 +73,39 @@ namespace xAOD{
       int fpgaIndex = ( fpga() > 3 ) ? 9 : fpga(); //from runs from 0 to 3 or otherwise takes value 9
       return (std::abs(etaIndex)*100000 + phiIndex*1000 + modIndex*10 +fpgaIndex)*(etaIndex<0 ? -1 : 1);
   }
+
+  bool eFexTower_v1::disconnectedCount(size_t idx) const {
+      if(idx>11) return true;
+      int mod = eFexTower_v1::module();
+      double eta = eFexTower_v1::eta() + 0.025;
+      double phi = eFexTower_v1::phi() + 0.025;
+
+      if ( std::abs(eta)>1.8 && idx==0 ) return true; // no PS beyond 1.8
+      if ( std::abs(eta)>2.4 && idx>0 && idx<5 ) return idx!=4; // only the 'last' l1 is connected
+
+      if (mod>23) return false; // all emulated towers are connected
+
+      // extremities of the real modules are disconnected
+      // em inputs at most extreme phi of module are all disconnected
+      // as well as the last two in eta of each module (modules centered at eta = -1.6,0,1.6 ... extent in em inputs is +/- 1.0 (1.1 ish for the A/C modules) )
+      // exception is the eta=+/-2.45 inputs at the extreme of efex environment, which are present in the most extreme phi still.
+      // meaning |eta|>2.4 is all connected
+
+      double module_central_eta = 1.6*(mod%3-1);
+
+      if( std::abs(eta)<2.4 &&
+          idx!=11 &&
+          (std::abs(std::remainder(phi - (M_PI/32)*(8*(mod/3) + 6 - (mod>11)*64),2*M_PI)) >  5.*M_PI/32 || std::abs( module_central_eta - (eta) ) > 1.0 )
+              ) {
+          return true;
+      }
+
+      // finally, we also treat any input tower that is too far away from the centre of the module it is feeding as 'disconnected'
+      // it shouldn't be in use by any algorithm at least
+      double fpga_central_eta = module_central_eta + 0.4*(int(fpga())-2) + 0.2;
+      if ( std::abs(fpga_central_eta - eta) > 0.3 ) return true;
+
+      return false;
+  };
 
 } // namespace xAOD

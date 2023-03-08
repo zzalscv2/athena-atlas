@@ -1,8 +1,7 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 # TriggerListsHelper: helper class which retrieves the full set of triggers needed for
 # trigger matching in the DAODs and can then return them when needed. 
 
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
 from TriggerMenuMT.TriggerAPI.TriggerAPI import TriggerAPI
 from TriggerMenuMT.TriggerAPI.TriggerEnums import TriggerPeriod, TriggerType
 from PathResolver import PathResolver
@@ -23,7 +22,9 @@ def read_trig_list_file(fname):
 
 
 class TriggerListsHelper:
-    def __init__(self):
+    def __init__(self, flags):
+        self.flags = flags
+        TriggerAPI.setConfigFlags(flags)
         self.Run2TriggerNamesTau = []
         self.Run2TriggerNamesNoTau = []
         self.Run3TriggerNames = []
@@ -60,12 +61,12 @@ class TriggerListsHelper:
         trigger_names_tau = []
         from AthenaConfiguration.AutoConfigFlags import GetFileMD
 
-        if ConfigFlags.Reco.EnableTrigger or ConfigFlags.Trigger.InputContainsConfigMetadata:
+        if self.flags.Reco.EnableTrigger or self.flags.Trigger.triggerConfig == 'INFILE':
 
-            if ConfigFlags.Trigger.EDMVersion == 3:
+            if self.flags.Trigger.EDMVersion == 3:
                 r_tau = re.compile("HLT_.*tau.*")
                 r_notau = re.compile("HLT_[1-9]*(e|mu|g).*")
-                for chain_name in GetFileMD(ConfigFlags.Input.Files)['TriggerMenu']['HLTChains']:
+                for chain_name in GetFileMD(self.flags.Input.Files)['TriggerMenu']['HLTChains']:
                     result_tau = r_tau.match(chain_name)
                     result_notau = r_notau.match(chain_name)
                     if result_tau is not None: trigger_names_tau.append(chain_name)
@@ -80,12 +81,10 @@ class TriggerListsHelper:
             else:
             # Note: ['TriggerMenu']['HLTChains'] python access is maintained for compatibility with Run 2 MC
             # POOL inputs (containing xAOD::TriggerMenu).
-                for chain_name in GetFileMD(ConfigFlags.Input.Files)['TriggerMenu']['HLTChains']:
+                for chain_name in GetFileMD(self.flags.Input.Files)['TriggerMenu']['HLTChains']:
                     if chain_name in trigger_names_full_notau: trigger_names_notau.append(chain_name)
                     if chain_name in trigger_names_full_tau:   trigger_names_tau.append(chain_name)
                 self.Run2TriggerNamesNoTau = trigger_names_notau
                 self.Run2TriggerNamesTau = trigger_names_tau
 
         return
-
-

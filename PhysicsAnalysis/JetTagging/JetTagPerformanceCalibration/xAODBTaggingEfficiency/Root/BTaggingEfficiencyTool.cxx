@@ -156,11 +156,9 @@ BTaggingEfficiencyTool::BTaggingEfficiencyTool( const std::string & name) : asg:
   declareProperty("ExtendedFlavourLabel",                m_extFlavourLabel = false,     "specify whether or not to use an 'extended' flavour labelling (allowing for multiple HF hadrons or perhaps partons)");
   declareProperty("OldConeFlavourLabel",                 m_oldConeFlavourLabel = false, "when using cone-based flavour labelling, specify whether or not to use the (deprecated) Run-1 legacy labelling");
   declareProperty("IgnoreOutOfValidityRange",            m_ignoreOutOfValidityRange = false, "ignore out-of-extrapolation-range errors as returned by the underlying tool");
-  declareProperty("VerboseCDITool",                      m_verboseCDITool = true,       "specify whether or not to retain 'normal' printout from the underlying tool");
   declareProperty( "useCTagging",                        m_useCTag=false,       "Enabled only for FixedCut or Continuous WPs: define wether the cuts refer to b-tagging or c-tagging");
   // if it is empty, the onnx tool won't be initialised
   declareProperty( "pathToONNX",                         m_pathToONNX = "",             "path to the onnx file that will be used for inference");
-  
   // initialise some variables needed for caching
   // TODO : add configuration of the mapIndices - rather than just using the default of 0
   //m_mapIndices["Light"] = m_mapIndices["T"] = m_mapIndices["C"] = m_mapIndices["B"] = 0;
@@ -301,13 +299,14 @@ StatusCode BTaggingEfficiencyTool::initialize() {
       prepend = "dev/";
     }
     prepend += "xAODBTaggingEfficiency/";
-    m_SFFile = PathResolverFindCalibFile(prepend + m_SFFile);
-    if (m_SFFile == "")
+    m_SFFile = prepend + m_SFFile;
+    m_SFFileFull = PathResolverFindCalibFile(m_SFFile);
+    if (m_SFFileFull == "")
       ATH_MSG_WARNING(" Unable to retrieve b-tagging scale factor calibration file!");
     else
       ATH_MSG_DEBUG(" Retrieving b-tagging scale factor calibration file as " << m_SFFile);
   } else {
-    m_SFFile = location;
+    m_SFFileFull = location;
   }
   // The situation for the efficiency file is a bit simpler since it need not reside under "xAODBTaggingEfficiency"
   m_EffFile = trim(m_EffFile);
@@ -316,7 +315,7 @@ StatusCode BTaggingEfficiencyTool::initialize() {
   // Note that the instantiation below does not leave a choice: the Eigenvector variations and generator-specific scale factors are always used
   std::vector<std::string> jetAliases;
   m_CDI = std::shared_ptr<Analysis::CalibrationDataInterfaceROOT>( new Analysis::CalibrationDataInterfaceROOT(m_taggerName,                              // tagger name: always needed
-						     m_SFFile.c_str(),                          // full pathname of the SF calibration file: always needed
+						     m_SFFileFull.c_str(),                          // full pathname of the SF calibration file: always needed
 						     (m_EffFile == "") ? 0 : m_EffFile.c_str(), // full pathname of optional efficiency file
 						     jetAliases,                                // since we configure the jet "collection name" by hand, we don't need this
 						     m_SFNames,                                 // names of the scale factor calibrations to be used
@@ -327,17 +326,16 @@ StatusCode BTaggingEfficiencyTool::initialize() {
                  (m_systStrategy=="SFEigen") ? Analysis::SFEigen : Analysis::Uncertainty::SFGlobalEigen,
 						     true,                                      // use MC/MC scale factors
 						     false,                                     // do not use topology rescaling (only relevant for pseudo-continuous tagging)
-						     true,//m_useRecommendedEVExclusions,              // if true, add pre-set lists of uncertainties to be excluded from EV decomposition
-						     //m_verboseCDITool);                         // if false, suppress any non-error/warning messages
-                 true) ); // set verbose
+						     m_useRecommendedEVExclusions,              // if true, add pre-set lists of uncertainties to be excluded from EV decomposition
+                                                     msgLvl(MSG::INFO)));                         // if false, suppress any non-error/warning messages
 
-  std::cout << "BTEffTool->initialize : setMapIndex(Light)" << std::endl;
+  ATH_MSG_INFO("BTEffTool->initialize : setMapIndex(Light)");
   setMapIndex("Light",0);
-  std::cout << "BTEffTool->initialize : setMapIndex(C)" << std::endl;
+  ATH_MSG_INFO("BTEffTool->initialize : setMapIndex(C)");
   setMapIndex("C",0);
-  std::cout << "BTEffTool->initialize : setMapIndex(B)" << std::endl;
+  ATH_MSG_INFO("BTEffTool->initialize : setMapIndex(B)");
   setMapIndex("B",0);
-  std::cout << "BTEffTool->initialize : setMapIndex(T)" << std::endl;
+  ATH_MSG_INFO("BTEffTool->initialize : setMapIndex(T)");
   setMapIndex("T",0);
 
   ATH_MSG_INFO( "Using systematics model " << m_systStrategy);
@@ -1035,6 +1033,18 @@ BTaggingEfficiencyTool::getEigenRecompositionCoefficientMap(const std::string &l
 // WARNING the behaviour of future calls to getEfficiency and friends are modified by this
 // method - it indicates which systematic shifts are to be applied for all future calls
 StatusCode BTaggingEfficiencyTool::applySystematicVariation( const SystematicSet & systConfig) {
+  // If the user is doing the right thing, no need to use the costly filterForAffectingSystematics
+  // i.e if only 1 variation passed and this variation is in the map. Else, resort to full logic.
+  if (systConfig.size() == 1 ) {
+    auto mapIter = m_systematicsInfo.find(*(systConfig.begin()));
+    if (mapIter != m_systematicsInfo.end()) {
+      m_applySyst = true;
+      m_applyThisSyst = mapIter->second;
+      ATH_MSG_VERBOSE("variation '" << systConfig.begin()->name() << "' applied successfully");
+      return StatusCode::SUCCESS;
+    }
+  }
+
   // First filter out any systematics that do not apply to us
   SystematicSet filteredSysts;
   if (SystematicSet::filterForAffectingSystematics(systConfig, affectingSystematics(), filteredSysts) != StatusCode::SUCCESS) {

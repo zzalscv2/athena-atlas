@@ -3804,10 +3804,6 @@ int MissingMassCalculator::DitauMassCalculatorV9lfv()
   m_iang1low = 0;
   m_iang1high = 0;
 
-  int nsuccesses = 0;
-  int isol = 0;
-
-
   //   double Mvis=(tau_vec1+tau_vec2).M();
   //   TLorentzVector met4vec(0.0,0.0,0.0,0.0);
   //   met4vec.SetPxPyPzE(met_vec.X(),met_vec.Y(),0.0,met_vec.Mod());
@@ -3895,7 +3891,7 @@ int MissingMassCalculator::DitauMassCalculatorV9lfv()
 
                   if(solution<1) continue;
                   ++m_iter1;
-                  ++isol;
+
                   // if fast sin cos, result to not match exactly nupsolutionv2, so skip test
                   //SpeedUp no nested loop to compute individual probability
                   int ngoodsol1=0;
@@ -3963,7 +3959,6 @@ int MissingMassCalculator::DitauMassCalculatorV9lfv()
                   if (ngoodsol1==0) continue;
                   m_iter2+=1;
 
-                  ++nsuccesses;
                   m_iter3+=1;
 
                 }
@@ -4038,7 +4033,7 @@ int MissingMassCalculator::DitauMassCalculatorV9lfv()
 
               if(solution<1) continue;
               ++m_iter1;
-              ++isol;
+
               // if fast sin cos, result to not match exactly nupsolutionv2, so skip test
               //SpeedUp no nested loop to compute individual probability
               int ngoodsol1=0;
@@ -4115,7 +4110,6 @@ int MissingMassCalculator::DitauMassCalculatorV9lfv()
               if (ngoodsol1==0) continue;
               m_iter2+=1;
 
-              ++nsuccesses;
               m_iter3+=1;
 
             }
@@ -6122,9 +6116,8 @@ void MissingMassCalculator::SpaceWalkerInit() {
     m_randomGen->SetSeed(m_seed);
     //   std::cout << " DRDR : seed before warmup aux " << aux << " seed " << m_seed << " altering " <<  RndmSeedAltering << std::endl;
     // warm up the random generator
-    double xgen=0;
     for (int igen=0;igen<1000;++igen){
-      xgen+=m_randomGen->Rndm();
+      m_randomGen->Rndm();
     }
     // std::cout << " DRDR : seed after warmup " << randomGen->GetSeed() << std::endl;
 

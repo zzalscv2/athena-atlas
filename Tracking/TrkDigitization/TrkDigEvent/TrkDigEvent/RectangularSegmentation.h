@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -44,7 +44,10 @@ namespace Trk {
                                     size_t numCellsX, double longY, size_t numCellsY, double numOfChips); 
                                     
             /** TODO contructor from BinUtilities for more complex readouts */                        
-            
+
+            RectangularSegmentation (const RectangularSegmentation&) = delete;
+            RectangularSegmentation& operator= (const RectangularSegmentation&) = delete;
+
             /** Virtual Destructor */
             virtual ~RectangularSegmentation();
             

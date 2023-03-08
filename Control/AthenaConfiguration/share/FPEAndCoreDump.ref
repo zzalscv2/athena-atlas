@@ -15,24 +15,6 @@ ClassIDSvc                                           INFO getRegistryEntries: re
 EventSelector                                        INFO  Enter McEventSelector Initialization 
 AthenaEventLoopMgr                                   INFO Setup EventSelector service EventSelector
 ApplicationMgr                                       INFO Application Manager Initialized successfully
-ApplicationMgr                                    SUCCESS ****************************** Algorithm Sequence ****************************
-ApplicationMgr                                    SUCCESS AthSequencer/AthMasterSeq
-ApplicationMgr                                    SUCCESS      AthSequencer/AthAlgEvtSeq
-ApplicationMgr                                    SUCCESS           AthSequencer/AthBeginSeq
-ApplicationMgr                                    SUCCESS                AthIncFirerAlg/BeginIncFiringAlg
-ApplicationMgr                                    SUCCESS                IncidentProcAlg/IncidentProcAlg1
-ApplicationMgr                                    SUCCESS           AthSequencer/AthAllAlgSeq
-ApplicationMgr                                    SUCCESS                AthSequencer/AthCondSeq
-ApplicationMgr                                    SUCCESS                AthSequencer/AthAlgSeq
-ApplicationMgr                                    SUCCESS                     xAODMaker::EventInfoCnvAlg/xAODMaker::EventInfoCnvAlg
-ApplicationMgr                                    SUCCESS                     AthExAlgWithFPE/AthExAlgWithFPE
-ApplicationMgr                                    SUCCESS           AthSequencer/AthEndSeq
-ApplicationMgr                                    SUCCESS                AthIncFirerAlg/EndIncFiringAlg
-ApplicationMgr                                    SUCCESS                IncidentProcAlg/IncidentProcAlg2
-ApplicationMgr                                    SUCCESS      AthSequencer/AthOutSeq
-ApplicationMgr                                    SUCCESS      AthIncFirerAlg/EndAlgorithmsFiringAlg
-ApplicationMgr                                    SUCCESS      IncidentProcAlg/IncidentProcAlg3
-ApplicationMgr                                    SUCCESS ******************************************************************************
 ApplicationMgr                                       INFO Application Manager Started successfully
 EventPersistencySvc                                  INFO Added successfully Conversion service:McCnvSvc
 AthenaEventLoopMgr                                   INFO   ===>>>  start of run 284500    <<<===

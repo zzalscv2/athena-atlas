@@ -9,7 +9,8 @@
 #include "GaudiKernel/DataObject.h"
 #include "GaudiKernel/IRegistry.h"
 #include "AthenaKernel/CLASS_DEF.h"
-
+// For LATOME while no Condition alg exists
+#include "LArLATOMEROBIDs.h"
 
 LArLATOMEHeaderContByteStreamCnv::LArLATOMEHeaderContByteStreamCnv(ISvcLocator* svcloc) :
   AthConstConverter(storageType(), classID(),svcloc,"LArLATOMEHeaderContByteStreamCnv"),
@@ -43,11 +44,8 @@ LArLATOMEHeaderContByteStreamCnv::createObjConst(IOpaqueAddress* pAddr, DataObje
      return StatusCode::FAILURE;
     }
 
-  const RawEvent* re = m_rdpSvc->getEvent();
-  if (!re)
-    {ATH_MSG_ERROR("Could not get raw event from ByteStreamInputSvc");
-     return StatusCode::FAILURE;
-    }
+  std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> robFrags;
+  m_rdpSvc->getROBData( LArByteStream::s_allROBIDs_LATOME, robFrags );
   const std::string& key = *(pAddr->par()); // Get key used in the StoreGateSvc::retrieve function
   // get gain and pass to convert function.
   std::unique_ptr<LArLATOMEHeaderContainer> header_coll=std::make_unique<LArLATOMEHeaderContainer>(); 
@@ -57,7 +55,7 @@ LArLATOMEHeaderContByteStreamCnv::createObjConst(IOpaqueAddress* pAddr, DataObje
   
 
   //Supercell readout
-  StatusCode sc=m_scTool->convert(re,nullptr,nullptr, nullptr, nullptr, nullptr, header_coll.get());
+  StatusCode sc=m_scTool->convert(robFrags,nullptr,nullptr, nullptr, nullptr, nullptr, header_coll.get());
   if (sc!=StatusCode::SUCCESS) {
     ATH_MSG_WARNING("Conversion tool returned an error. LAr SC containers might be empty.");
   }

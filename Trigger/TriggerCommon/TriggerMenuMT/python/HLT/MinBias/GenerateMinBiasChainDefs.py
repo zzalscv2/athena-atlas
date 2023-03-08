@@ -11,7 +11,7 @@ log.info("Importing %s",__name__)
 
 
 
-def generateChainConfigs( chainDict ):
+def generateChainConfigs(flags,  chainDict ):
     
     listOfChainDicts = splitChainDict(chainDict)
     log.debug("Implement case for minbias chain with %d legs ",len(listOfChainDicts))
@@ -20,7 +20,7 @@ def generateChainConfigs( chainDict ):
 
     for subChainDict in listOfChainDicts:
 
-        MinBias = MinBiasChainConfig(subChainDict).assembleChain()
+        MinBias = MinBiasChainConfig(subChainDict).assembleChain(flags)
 
         listOfChainDefs += [MinBias]
         log.debug('length of chaindefs %s', len(listOfChainDefs) )

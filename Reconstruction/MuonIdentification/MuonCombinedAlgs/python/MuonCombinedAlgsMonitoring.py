@@ -1,12 +1,12 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 # Author: Laurynas Mince
 # Created on 26.07.2019
 
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
-def MuonCreatorAlgMonitoring(name="MuonCreatorAlgMonitoring"):
+def MuonCreatorAlgMonitoring(flags, name="MuonCreatorAlgMonitoring"):
 
-    montool = GenericMonitoringTool(name, HistPath = name)
+    montool = GenericMonitoringTool(flags, name, HistPath = name)
 
     montool.defineHistogram( "muon_n", type="TH1F", path="EXPERT", title="Number of muons; N of muons", xbins=50, xmin=0, xmax=50)
     montool.defineHistogram( "muon_pt", type="TH1F", path="EXPERT", title="Muon pT; p_T", xbins=100, xmin=0, xmax=300)

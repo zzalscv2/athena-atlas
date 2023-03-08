@@ -127,7 +127,7 @@ TrigConf::HLTSequenceLoader::loadSequences( HLTSequenceList& seqlist ) {
          seqlist.addHLTSequence(seq);
          if(hasTopoStartsFrom) {
             string topo_start_from = rmtilde(row["TE.HTE_TOPO_START_FROM"].data<string>());
-            if( topo_start_from != "")
+            if( !topo_start_from.empty())
                seq->set_topoStartTE(new HLTTriggerElement(topo_start_from));
          }
       }
@@ -140,26 +140,26 @@ TrigConf::HLTSequenceLoader::loadSequences( HLTSequenceList& seqlist ) {
       if( alg_list.size() < alg_pos+1 )
          alg_list.resize( alg_pos+1, "" );
 
-      if(alg_list[alg_pos] == "") {
-         alg_list[alg_pos] = alg_name;
+      if(auto &algitem = alg_list[alg_pos]; algitem.empty()) {
+         algitem = alg_name;
       } else {
-         if(alg_list[alg_pos] != alg_name) {
+         if(algitem != alg_name) {
             cerr << "Two different algs in the same position " << alg_pos << endl;
          }
       }
 
       string input_te = rmtilde(row["TE2TE.HTE2TE_TE_INP_ID"].data<string>());
-      if(input_te!="") {
+      if(!input_te.empty()) {
          unsigned int input_te_pos = row["TE2TE.HTE2TE_TE_COUNTER"].data<int>();
          
          vector<HLTTriggerElement*>& inp_list = seq->inputTEs();
          if( inp_list.size() < input_te_pos+1 )
             inp_list.resize( input_te_pos+1, (HLTTriggerElement*)0 );
          
-         if(inp_list[input_te_pos] == 0) {
-            inp_list[input_te_pos] = new HLTTriggerElement(input_te);
+         if(auto &item = inp_list[input_te_pos]; item == 0) {
+            item = new HLTTriggerElement(input_te);
          } else {
-            if(inp_list[input_te_pos]->name() != input_te ) {
+            if(item->name() != input_te ) {
                cerr << "Two different input TE's at the same position " << input_te_pos << endl;
             }
          }

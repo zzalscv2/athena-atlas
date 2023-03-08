@@ -70,7 +70,7 @@ def InDetGlobalChi2FitterBaseCfg(flags,
     kwargs.setdefault("MaxIterations", 40)
     kwargs.setdefault("Acceleration", True)
     kwargs.setdefault("RecalculateDerivatives",
-                      flags.InDet.Tracking.doMinBias or
+                      flags.Tracking.doMinBias or
                       flags.Beam.Type is BeamType.Cosmics or
                       flags.InDet.Tracking.doBeamGas)
     kwargs.setdefault("TRTExtensionCuts", True)
@@ -117,8 +117,7 @@ def InDetGlobalChi2FitterCfg(flags,
             flags.InDet.Tracking.doBeamGas):
         kwargs.setdefault('Acceleration', False)
 
-    if (flags.InDet.Tracking.materialInteractions and not
-            flags.BField.solenoidOn):
+    if flags.Tracking.materialInteractions and not flags.BField.solenoidOn:
         kwargs.setdefault('Momentum', 1000.*Units.MeV)
 
     InDetGlobalChi2Fitter = acc.popToolsAndMerge(
@@ -152,10 +151,10 @@ def InDetGlobalChi2FitterTRTCfg(flags,
     kwargs.setdefault("RecalculateDerivatives", False)
     kwargs.setdefault("TRTExtensionCuts", True)
     kwargs.setdefault("TrackChi2PerNDFCut", 999999)
-    kwargs.setdefault(
-        "Momentum", 1000.*Units.MeV
-        if flags.InDet.Tracking.materialInteractions
-        and not flags.BField.solenoidOn else 0)
+
+    if flags.Tracking.materialInteractions and not flags.BField.solenoidOn:
+        kwargs.setdefault('Momentum', 1000.*Units.MeV)
+
     kwargs.setdefault("OutlierCut", 5)
     kwargs.setdefault(
         "MaxOutliers", 99 if flags.InDet.Tracking.doRobustReco or
@@ -212,7 +211,6 @@ def MuonChi2TrackFitterCfg(flags,
                            name='MuonChi2TrackFitter',
                            **kwargs):
     result = ComponentAccumulator()
-    from TrkConfig.AtlasExtrapolatorToolsConfig import AtlasMultipleScatteringUpdatorCfg
 
     from TrkConfig.TrkRIO_OnTrackCreatorConfig import MuonRotCreatorCfg
     rotcreator = result.popToolsAndMerge(MuonRotCreatorCfg(flags))
@@ -223,7 +221,12 @@ def MuonChi2TrackFitterCfg(flags,
     if 'ExtrapolationTool' not in kwargs:
         from TrkConfig.AtlasExtrapolatorConfig import MuonExtrapolatorCfg
         kwargs.setdefault("ExtrapolationTool", result.popToolsAndMerge(MuonExtrapolatorCfg(flags)))
-    kwargs.setdefault("MultipleScatteringTool", result.popToolsAndMerge(AtlasMultipleScatteringUpdatorCfg(flags, UseTrkUtils=True)))
+
+    from TrkConfig.AtlasExtrapolatorToolsConfig import (
+        AtlasMultipleScatteringUpdatorCfg)
+    kwargs.setdefault("MultipleScatteringTool", result.popToolsAndMerge(
+        AtlasMultipleScatteringUpdatorCfg(flags, UseTrkUtils=True)))
+
     kwargs.setdefault("RotCreatorTool", rotcreator)
     kwargs.setdefault("MeasurementUpdateTool", measurement_updater)
     kwargs.setdefault("StraightLine", False)
@@ -311,10 +314,8 @@ def MuonCombinedTrackFitterCfg(flags,
         MuonRotCreatorCfg(flags)))
     kwargs.setdefault("EnergyLossTool", result.popToolsAndMerge(
         AtlasEnergyLossUpdatorCfg(flags)))
-    kwargs.setdefault("MeasurementUpdateTool",
-                      result.popToolsAndMerge(
-                          KalmanUpdatorCfg(flags,
-                                           name="MuonMeasUpdator")))
+    kwargs.setdefault("MeasurementUpdateTool", result.popToolsAndMerge(
+        KalmanUpdatorCfg(flags, name="MuonMeasUpdator")))
 
     from TrackingGeometryCondAlg.AtlasTrackingGeometryCondAlgConfig import (
         TrackingGeometryCondAlgCfg)
@@ -370,7 +371,10 @@ def InDetTrigGlobalChi2FitterCfg(flags, name='InDetTrigTrackFitter', **kwargs):
         InDetExtrapolatorCfg(flags, name="InDetTrigExtrapolator"))
     InDetNavigator = acc.popToolsAndMerge(
         AtlasNavigatorCfg(flags, name="InDetTrigNavigator"))
-    ELossUpdator = acc.popToolsAndMerge(AtlasEnergyLossUpdatorCfg(flags))
+    ELossUpdator = acc.popToolsAndMerge(AtlasEnergyLossUpdatorCfg(flags,
+                                                                  UseBetheBlochForElectrons=True,    #revisit after mc23a
+                                                                  )
+                                        )
     MaterialEffectsUpdator = acc.popToolsAndMerge(
         AtlasMaterialEffectsUpdatorCfg(flags,
                                        name="InDetTrigMaterialEffectsUpdator"))
@@ -378,7 +382,11 @@ def InDetTrigGlobalChi2FitterCfg(flags, name='InDetTrigTrackFitter', **kwargs):
     from TrkConfig.TrkExRungeKuttaPropagatorConfig import (
         RungeKuttaPropagatorCfg)
     InDetTrigRKPropagator = acc.popToolsAndMerge(
-        RungeKuttaPropagatorCfg(flags, name="InDetTrigRKPropagator"))
+        RungeKuttaPropagatorCfg(flags, name="InDetTrigRKPropagator",
+                                AccuracyParameter = 0.0001,           #revisit after mc23a
+                                MaxStraightLineStep = 0.004,          #revisit after mc23a
+                                ),
+    )
     from TrkConfig.TrkMeasurementUpdatorConfig import KalmanUpdatorCfg
     InDetTrigUpdator = acc.popToolsAndMerge(
         KalmanUpdatorCfg(flags, name="InDetTrigUpdator"))
@@ -402,6 +410,7 @@ def InDetTrigGlobalChi2FitterCfg(flags, name='InDetTrigTrackFitter', **kwargs):
     kwargs.setdefault("TRTExtensionCuts", True)
     kwargs.setdefault("MaxIterations", 40)
     kwargs.setdefault("Acceleration", True)
+    kwargs.setdefault("MaxOutliers", 10)
 
     # TODO come back to these settings
     # if InDetTrigFlags.useBroadClusterErrors():
@@ -422,6 +431,16 @@ def InDetTrigGlobalChi2FitterCfg(flags, name='InDetTrigTrackFitter', **kwargs):
     GlobalChi2Fitter = CompFactory.Trk.GlobalChi2Fitter(name, **kwargs)
     acc.setPrivateTools(GlobalChi2Fitter)
     return acc
+
+def InDetTrigGlobalChi2FitterCosmicsCfg(flags, name='InDetTrigTrackFitterCosmics', **kwargs):
+
+    kwargs.setdefault("Acceleration", False)
+    kwargs.setdefault("OutlierCut", 10)
+    kwargs.setdefault("TrackChi2PerNDFCut", 20)
+    kwargs.setdefault("MaxOutliers", 99)
+    kwargs.setdefault("TRTExtensionCuts", False)
+
+    return InDetTrigGlobalChi2FitterCfg(flags, name, **kwargs)
 
 
 #########################
@@ -476,7 +495,7 @@ def ITkGlobalChi2FitterBaseCfg(flags,
                       flags.Beam.Type is BeamType.Cosmics)
     kwargs.setdefault("TrackChi2PerNDFCut", 7)
 
-    GlobalChi2Fitter = CompFactory.Trk.GlobalChi2Fitter(name=name, **kwargs)
+    GlobalChi2Fitter = CompFactory.Trk.GlobalChi2Fitter(name, **kwargs)
     acc.setPrivateTools(GlobalChi2Fitter)
     return acc
 
@@ -500,7 +519,7 @@ def ITkGlobalChi2FitterCfg(flags,
         kwargs.setdefault('MaxOutliers', 99)
         kwargs.setdefault('Acceleration', False)
 
-    if flags.ITk.Tracking.materialInteractions and not flags.BField.solenoidOn:
+    if flags.Tracking.materialInteractions and not flags.BField.solenoidOn:
         kwargs.setdefault('Momentum', 1000.*Units.MeV)
 
     ITkGlobalChi2Fitter = acc.popToolsAndMerge(

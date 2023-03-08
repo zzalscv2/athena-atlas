@@ -9,11 +9,13 @@ def TRTSegmentFindingCfg(flags, InputCollections = None):
     # --- get list of already associated hits (always do this, even if no other tracking ran before)
     #
     if InputCollections is not None:
-        from InDetConfig.InDetTrackPRD_AssociationConfig import InDetTrackPRD_AssociationCfg
-        acc.merge(InDetTrackPRD_AssociationCfg(flags,
-                                               name = 'InDetSegmentTrackPRD_Association',
-                                               AssociationMapName = 'InDetSegmentPRDtoTrackMap',
-                                               TracksName = list(InputCollections)))
+        from InDetConfig.InDetTrackPRD_AssociationConfig import (
+            InDetTrackPRD_AssociationCfg)
+        acc.merge(InDetTrackPRD_AssociationCfg(
+            flags,
+            name = 'InDetSegmentTrackPRD_Association',
+            AssociationMapName = 'InDetSegmentPRDtoTrackMap',
+            TracksName = list(InputCollections)))
 
     #
     # --- TRT track reconstruction
@@ -30,7 +32,7 @@ def TRTSegmentFindingCfg(flags, InputCollections = None):
         #
         # --- load TRT validation alg
         #
-        if flags.InDet.doTruth:
+        if flags.Tracking.doTruth:
             from InDetConfig.InDetSegmentDriftCircleAssValidationConfig import (
                 SegmentDriftCircleAssValidationCfg)
             acc.merge(SegmentDriftCircleAssValidationCfg(flags))
@@ -46,8 +48,10 @@ def TRTSegmentFinding_Phase_Cfg(flags):
     if flags.Beam.Type is BeamType.Cosmics:
         from InDetConfig.TRT_TrackSegmentsFinderConfig import (
             TRT_TrackSegmentsFinder_Cosmics_Cfg)
-        acc.merge(TRT_TrackSegmentsFinder_Cosmics_Cfg(flags, name='InDetTRT_TrackSegmentsFinder_Phase_Cosmics',
-                                                      SegmentsLocation = 'TRTSegments_Phase'))
+        acc.merge(TRT_TrackSegmentsFinder_Cosmics_Cfg(
+            flags,
+            name='InDetTRT_TrackSegmentsFinder_Phase_Cosmics',
+            SegmentsLocation = 'TRTSegments_Phase'))
     else:
         from InDetConfig.TRT_TrackSegmentsFinderConfig import (
             TRT_TrackSegmentsFinder_Phase_Cfg)
@@ -56,10 +60,12 @@ def TRTSegmentFinding_Phase_Cfg(flags):
         #
         # --- load TRT validation alg
         #
-        if flags.InDet.doTruth:
-            from InDetConfig.InDetSegmentDriftCircleAssValidationConfig import SegmentDriftCircleAssValidationCfg
-            acc.merge(SegmentDriftCircleAssValidationCfg(flags,
-                                                         name = "InDetSegmentDriftCircleAssValidation_Phase"))
+        if flags.Tracking.doTruth:
+            from InDetConfig.InDetSegmentDriftCircleAssValidationConfig import (
+                SegmentDriftCircleAssValidationCfg)
+            acc.merge(SegmentDriftCircleAssValidationCfg(
+                flags,
+                name = "InDetSegmentDriftCircleAssValidation_Phase"))
 
     return acc
 
@@ -72,8 +78,10 @@ def TRTSegmentFinding_TrackSegments_Cfg(flags):
     if flags.Beam.Type is BeamType.Cosmics:
         from InDetConfig.TRT_TrackSegmentsFinderConfig import (
             TRT_TrackSegmentsFinder_Cosmics_Cfg)
-        acc.merge(TRT_TrackSegmentsFinder_Cosmics_Cfg(flags, name='InDetTRT_TrackSegmentsFinder_TrackSegments_Cosmics',
-                                                      SegmentsLocation = 'TRTSegmentsTRT'))
+        acc.merge(TRT_TrackSegmentsFinder_Cosmics_Cfg(
+            flags,
+            name='InDetTRT_TrackSegmentsFinder_TrackSegments_Cosmics',
+            SegmentsLocation = 'TRTSegmentsTRT'))
     else:
         from InDetConfig.TRT_TrackSegmentsFinderConfig import (
             TRT_TrackSegmentsFinder_TrackSegments_Cfg)
@@ -83,15 +91,18 @@ def TRTSegmentFinding_TrackSegments_Cfg(flags):
         # --- load TRT validation alg
         #
     
-        if flags.InDet.doTruth:
-            from InDetConfig.InDetSegmentDriftCircleAssValidationConfig import SegmentDriftCircleAssValidation_TrackSegments_Cfg
+        if flags.Tracking.doTruth:
+            from InDetConfig.InDetSegmentDriftCircleAssValidationConfig import (
+                SegmentDriftCircleAssValidation_TrackSegments_Cfg)
             acc.merge(SegmentDriftCircleAssValidation_TrackSegments_Cfg(flags))
 
     return acc
 
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     flags.Input.Files=defaultTestFiles.RDO_RUN2
 

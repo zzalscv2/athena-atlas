@@ -163,12 +163,14 @@ std::unique_ptr<MuonSegmentCombinationCollection> Muon::MuonCurvedSegmentCombine
         for (unsigned int i = 0; i < combi->numberOfStations(); ++i) {
             const std::vector<std::unique_ptr<Muon::MuonSegment> >& segs = *combi->stationSegments(i);
             if (m_debug) std::cout << " station " << i << " has MDT segments: " << segs.size() << std::endl;
+            
             for (unsigned int si = 0; si < segs.size(); ++si) {
                 if (m_debug)
                     std::cout << " Store Mdt segment " << si << " pointer " << segs[si].get() << " Rios "
                               << segs[si]->numberOfContainedROTs() << std::endl;
                 bool is_mdt = true;
                 for (unsigned int ri = 0; ri < segs[si]->numberOfContainedROTs(); ri++) {
+                    if (!segs[si]->rioOnTrack(ri)) continue;
                     if (m_idHelperSvc->isMdt(segs[si]->rioOnTrack(ri)->identify()) == true) break;
                     if (m_idHelperSvc->isCsc(segs[si]->rioOnTrack(ri)->identify()) == true) {
                         is_mdt = false;
@@ -241,11 +243,10 @@ std::unique_ptr<MuonSegmentCombinationCollection> Muon::MuonCurvedSegmentCombine
 
                 if (m_debug) std::cout << " handling combi " << combi << " associated pattern " << pattern1 << std::endl;
 
-                double patternPhi, patternPhi1;
-                double patternTheta, patternTheta1;
-                double patternMom = 0., patternMom1 = 0.;
-                Amg::Vector3D patternDir;
-                Amg::Vector3D patternDir1;
+                double patternPhi{0}, patternPhi1{0};
+                double patternTheta{0}, patternTheta1{0};
+                double patternMom{0}, patternMom1{0};
+                Amg::Vector3D patternDir{Amg::Vector3D::Zero()}, patternDir1{Amg::Vector3D::Zero()};
 
                 const Trk::TrackParameters* trkparameters = pattern->trackParameter();
                 if (trkparameters) {
@@ -288,7 +289,7 @@ std::unique_ptr<MuonSegmentCombinationCollection> Muon::MuonCurvedSegmentCombine
                 if ((cos(patternPhi) * cos(patternPhi1) + sin(patternPhi) * sin(patternPhi1)) < 0.955) continue;
 
                 // for (cosmics) patterns that are split and have flipped direction:
-                if (fabs(patternTheta - patternTheta1) > 1.5) continue;
+                if (std::abs(patternTheta - patternTheta1) > 1.5) continue;
 
                 // Cosmics can be rotated in theta
 
@@ -332,7 +333,7 @@ std::unique_ptr<MuonSegmentCombinationCollection> Muon::MuonCurvedSegmentCombine
                 }
 
                 const MuonPatternCombination* patternSelect = pattern;
-                if (!m_doCosmics && fabs(patternMom1) > fabs(patternMom)) patternSelect = pattern1;
+                if (!m_doCosmics && std::abs(patternMom1) > std::abs(patternMom)) patternSelect = pattern1;
                 if (m_doCosmics && pattern1->chamberData().size() > pattern->chamberData().size()) patternSelect = pattern1;
 
                 // Take 2D Csc segments
@@ -358,6 +359,7 @@ std::unique_ptr<MuonSegmentCombinationCollection> Muon::MuonCurvedSegmentCombine
                                       << segs[si]->numberOfContainedROTs() << std::endl;
                         bool is_mdt = true;
                         for (unsigned int ri = 0; ri < segs[si]->numberOfContainedROTs(); ri++) {
+                            if (!segs[si]->rioOnTrack(ri)) continue;
                             if (m_idHelperSvc->isMdt(segs[si]->rioOnTrack(ri)->identify()) == true) break;
                             if (m_idHelperSvc->isCsc(segs[si]->rioOnTrack(ri)->identify()) == true) {
                                 is_mdt = false;
@@ -389,6 +391,7 @@ std::unique_ptr<MuonSegmentCombinationCollection> Muon::MuonCurvedSegmentCombine
                                       << segs[si]->numberOfContainedROTs() << std::endl;
                         bool is_mdt = true;
                         for (unsigned int ri = 0; ri < segs[si]->numberOfContainedROTs(); ri++) {
+                            if (!segs[si]->rioOnTrack(ri)) continue;
                             if (m_idHelperSvc->isMdt(segs[si]->rioOnTrack(ri)->identify()) == true) break;
                             if (m_idHelperSvc->isCsc(segs[si]->rioOnTrack(ri)->identify()) == true) {
                                 is_mdt = false;
@@ -708,7 +711,7 @@ void Muon::MuonCurvedSegmentCombiner::muonCurvedSegmentCombinations(
         if (missedh > 10) missedh = 10;
 
         double invc = info.invcurvature;
-        double p = fabs(1. / invc) / 10.;
+        double p = std::abs(1. / invc) / 10.;
         int ip = (int)sqrt(p / 1000.);
         if (ip > 10) ip = 10;
         ip = 10 - ip;
@@ -780,7 +783,7 @@ void Muon::MuonCurvedSegmentCombiner::muonCurvedSegmentCombinations(
         missedLay[i] = (int)info.layMissed;
         nHots[i] = info.nHots;
         double invc = info.invcurvature;
-        double p = fabs(1. / invc) / 10.;
+        double p = std::abs(1. / invc) / 10.;
         momentum[i] = p;
 
         if (m_debug) {
@@ -922,7 +925,7 @@ void Muon::MuonCurvedSegmentCombiner::muonCurvedSegmentCombinations(
                         }
                     }
                 }
-                if (fabs(cos(theta)) < 0.2) continue;
+                if (std::abs(cos(theta)) < 0.2) continue;
                 double z_cylinder = 5000.;
                 int sign = 1;
                 if (hitz < 0) sign = -1;
@@ -932,7 +935,7 @@ void Muon::MuonCurvedSegmentCombiner::muonCurvedSegmentCombinations(
                 if (m_debug)
                     std::cout << " CSC extrapolation r0 " << r0 << " z0 " << z0 << " theta " << theta << " inv curvature " << invcurvature
                               << " distance " << sdistance << std::endl;
-                if (fabs(sdistance) > 500.) continue;
+                if (std::abs(sdistance) > 500.) continue;
             }
 
             // Skip segment combi with too many missed hits
@@ -1008,14 +1011,14 @@ void Muon::MuonCurvedSegmentCombiner::muonCurvedSegmentCombinations(
                 }
                 // Recuperate split patterns
                 // Phi measured for both segments
-                //                double pest = fabs(momentum[i]);
-                //                if (fabs(momentum[j]) < pest ) pest = fabs(momentum[j]);
+                //                double pest = std::abs(momentum[i]);
+                //                if (std::abs(momentum[j]) < pest ) pest = std::abs(momentum[j]);
                 //                if( pest < 5000) pest = 5000.;
                 //                      // phi cut not used for association
                 //                double phicut = m_phiAssociationCut2 * 5000. / pest;
                 //                if (patPhi[i] == patPhi[j] ) selectPair = true;
                 //                      // Phi measured for one of the segment
-                //                if (fabs (cdphis) <   m_phiAssociationCut2 && (iPhiPatHits[i] == 0 || iPhiPatHits[j]
+                //                if (std::abs (cdphis) <   m_phiAssociationCut2 && (iPhiPatHits[i] == 0 || iPhiPatHits[j]
                 //                ==  0) ) selectPair = true; if (selectPair && m_debug) std::cout<< " Split pattern
                 //                dphi " << cdphis << " momentum estimate " << pest << " phi cut " << phicut <<
                 //                std::endl;
@@ -1039,8 +1042,8 @@ void Muon::MuonCurvedSegmentCombiner::muonCurvedSegmentCombinations(
                     if (m_doCosmics) {
                         if (dphis > 0.) {
                             fit2SegmentsC(*segment[i], *segment[j], Res, Pull, segInfoMap);
-                            if (fabs(Pull[0]) > m_pullAssociationCut || fabs(Pull[1]) > m_pullAssociationCut ||
-                                fabs(Pull[2]) > m_pullAssociationCut || fabs(Pull[3]) > m_pullAssociationCut) {
+                            if (std::abs(Pull[0]) > m_pullAssociationCut || std::abs(Pull[1]) > m_pullAssociationCut ||
+                                std::abs(Pull[2]) > m_pullAssociationCut || std::abs(Pull[3]) > m_pullAssociationCut) {
                                 fit2SegmentsSL(*segment[i], *segment[j], Res, Pull, segInfoMap);
                             }
                         } else {
@@ -1054,8 +1057,8 @@ void Muon::MuonCurvedSegmentCombiner::muonCurvedSegmentCombinations(
                               << " station 2 " << st2 << " theta " << theta2 << std::endl;
 
                 // Good match
-                if (fabs(Pull[0]) < m_pullAssociationCut && fabs(Pull[1]) < m_pullAssociationCut && fabs(Pull[2]) < m_pullAssociationCut &&
-                    fabs(Pull[3]) < m_pullAssociationCut) {
+                if (std::abs(Pull[0]) < m_pullAssociationCut && std::abs(Pull[1]) < m_pullAssociationCut && std::abs(Pull[2]) < m_pullAssociationCut &&
+                    std::abs(Pull[3]) < m_pullAssociationCut) {
                     if (m_debug)
                         std::cout << " Segment nr i,j associated  " << i << " "
                                   << " station " << st1 << " j " << j << " station " << st2 << " theta " << theta1 << " station 2 " << st2
@@ -1371,7 +1374,7 @@ Muon::MCSCSegmentInfo Muon::MuonCurvedSegmentCombiner::segInfo(
         double posAlongTube = 0;
         if (mdtShortest) {
             posAlongTube = (mdtShortest->associatedSurface().transform().inverse() * seg->globalPosition()).z();
-            if (0.5 * shortestTube - fabs(posAlongTube) < 100.) closeToChamberEdge = true;
+            if (0.5 * shortestTube - std::abs(posAlongTube) < 100.) closeToChamberEdge = true;
         } else {
             ATH_MSG_WARNING(" shorest tube not set ");
         }
@@ -1615,7 +1618,7 @@ void Muon::MuonCurvedSegmentCombiner::trackParameters(Muon::MuonSegment& seg, do
         Model(1, 0) = 1;
         Model(1, 1) = 2 * sign * (zs - sign * z_cylinder);
 
-        if (fabs(zs) > z_end) {
+        if (std::abs(zs) > z_end) {
             Model(0, 1) = -z_end * z_end + z_cylinder * z_cylinder + 2 * zs * sign * (z_end - z_cylinder);
             Model(1, 1) = 2 * (sign * z_end - sign * z_cylinder);
         }
@@ -1737,7 +1740,7 @@ void Muon::MuonCurvedSegmentCombiner::fit2SegmentsSL(Muon::MuonSegment& seg, Muo
               sege.globalPosition().y() * std::sin(sege.globalDirection().phi());
         rs = seg.globalPosition().x() * std::cos(seg.globalDirection().phi()) +
              seg.globalPosition().y() * std::sin(seg.globalDirection().phi());
-        if (fabs(dphi) > 0.5 || fabs(dphie) > 0.5) {
+        if (std::abs(dphi) > 0.5 || std::abs(dphie) > 0.5) {
             // Phi direction unreliable
             rse = sege.globalPosition().x() * std::cos(phiSegments) + sege.globalPosition().y() * std::sin(phiSegments);
             rs = seg.globalPosition().x() * std::cos(phiSegments) + seg.globalPosition().y() * std::sin(phiSegments);
@@ -1753,8 +1756,8 @@ void Muon::MuonCurvedSegmentCombiner::fit2SegmentsSL(Muon::MuonSegment& seg, Muo
     double ic2 = info2.invcurvature;
     if (m_doCosmics) ic1 = 1. / 15000.;
     if (m_doCosmics) ic2 = 1. / 15000.;
-    double scf = 20 * fabs(ic1) * 50000.;
-    if (fabs(ic2) > fabs(ic1)) scf = 20 * fabs(ic2) * 50000.;
+    double scf = 20 * std::abs(ic1) * 50000.;
+    if (std::abs(ic2) > std::abs(ic1)) scf = 20 * std::abs(ic2) * 50000.;
     if (scf < 1.) scf = 1.;
     if (scf > 100.) scf = 100.;
     if (m_debug) std::cout << " error scaling in SL fit " << scf << std::endl;
@@ -1869,7 +1872,7 @@ void Muon::MuonCurvedSegmentCombiner::fit2SegmentsSL(Muon::MuonSegment& seg, Muo
         if (i == 1) Pull[i] = Res[i] / sqrt(ets21);
         if (i == 2) Pull[i] = Res[i] / sqrt(ers2);
         if (i == 3) Pull[i] = Res[i] / sqrt(ets22);
-        if (fabs(Pull[i]) > 5) toobig = true;
+        if (std::abs(Pull[i]) > 5) toobig = true;
     }
     if (toobig && m_debug) {
         std::cout << " SL Pull too BIG "
@@ -1944,8 +1947,8 @@ void Muon::MuonCurvedSegmentCombiner::fit2Segments(Muon::MuonSegment& seg, Muon:
     // Get momenta
     double ic1 = info1.invcurvature;
     double ic2 = info2.invcurvature;
-    double scf = 20 * fabs(ic1) * 50000.;
-    if (fabs(ic2) > fabs(ic1)) scf = 20 * fabs(ic2) * 50000.;
+    double scf = 20 * std::abs(ic1) * 50000.;
+    if (std::abs(ic2) > std::abs(ic1)) scf = 20 * std::abs(ic2) * 50000.;
     if (scf < 1.) scf = 1.;
     if (scf > 100.) scf = 100.;
     if (m_debug) std::cout << " error scaling in Curved fit " << scf << std::endl;
@@ -1970,7 +1973,7 @@ void Muon::MuonCurvedSegmentCombiner::fit2Segments(Muon::MuonSegment& seg, Muon:
     // Error definitions
     //  double scf = 1; // pt = 100 GeV scf = 1;  pt 5 GeV scf = 20*20
     double ers2 = 0.1 * 0.1 + scf * scf + scfn * scfn;                       // error squared position
-    double ebs2 = 50 * 50 * fabs(sin(thetas) * sin(thetase)) + ers2;         // error squared beam position
+    double ebs2 = 50 * 50 * std::abs(sin(thetas) * sin(thetase)) + ers2;         // error squared beam position
     double ets21 = era1 * era1 + 0.002 * 0.002 * (scf * scf + scfn * scfn);  // error squared angle
     double ets22 = era2 * era2 + 0.002 * 0.002 * (scf * scf + scfn + scfn);  // error squared angle
 
@@ -2014,12 +2017,12 @@ void Muon::MuonCurvedSegmentCombiner::fit2Segments(Muon::MuonSegment& seg, Muon:
         Model(4, 1) = 1;
         Model(4, 2) = sign * 2 * (zse - sign * z_cylinder);
 
-        if (fabs(zs) > z_end + 2000) {
+        if (std::abs(zs) > z_end + 2000) {
             Model(1, 2) = sign * (-z_end * z_end + z_cylinder * z_cylinder + 2 * zs * sign * (z_end - z_cylinder) +
                                   (zs - sign * z_end) * (zs - sign * z_end) / 5.);
             Model(2, 2) = sign * (2 * (sign * z_end - sign * z_cylinder) + (zs - sign * z_end) / 5.);
         }
-        if (fabs(zse) > z_end + 2000) {
+        if (std::abs(zse) > z_end + 2000) {
             Model(3, 2) = sign * (-z_end * z_end + z_cylinder * z_cylinder + 2 * zse * sign * (z_end - z_cylinder) +
                                   (zse - sign * z_end) * (zse - sign * z_end) / 5.);
             Model(4, 2) = sign * (2 * (sign * z_end - sign * z_cylinder) + (zse - sign * z_end) / 5.);
@@ -2065,7 +2068,7 @@ void Muon::MuonCurvedSegmentCombiner::fit2Segments(Muon::MuonSegment& seg, Muon:
         invcurvature = T(2, 0) * sin(theta);
     } else if (imeth == 1) {
         theta = atan2(1., 1. / T(1, 0));
-        invcurvature = -T(2, 0) * fabs(cos(theta));
+        invcurvature = -T(2, 0) * std::abs(cos(theta));
     }
 
     if (m_debug) std::cout << " Momentum in MeV " << (1. / invcurvature) / 10. << " theta fit " << theta << std::endl;
@@ -2093,7 +2096,7 @@ void Muon::MuonCurvedSegmentCombiner::fit2Segments(Muon::MuonSegment& seg, Muon:
         if (i == 1) Pull[i] = Res[i] / sqrt(ets21);
         if (i == 2) Pull[i] = Res[i] / sqrt(ers2);
         if (i == 3) Pull[i] = Res[i] / sqrt(ets22);
-        if (fabs(Pull[i]) > 5) toobig = true;
+        if (std::abs(Pull[i]) > 5) toobig = true;
     }
 
     if (toobig && m_debug) {
@@ -2186,7 +2189,7 @@ void Muon::MuonCurvedSegmentCombiner::fit2SegmentsC(Muon::MuonSegment& seg, Muon
                sege.globalPosition().y() * std::sin(sege.globalDirection().phi());
         rsc = seg.globalPosition().x() * std::cos(seg.globalDirection().phi()) +
               seg.globalPosition().y() * std::sin(seg.globalDirection().phi());
-        if (fabs(dphi) > 0.5 || fabs(dphie) > 0.5) {
+        if (std::abs(dphi) > 0.5 || std::abs(dphie) > 0.5) {
             // Phi direction unreliable
             rsec = sege.globalPosition().x() * std::cos(phiSegments) + sege.globalPosition().y() * std::sin(phiSegments);
             rsc = seg.globalPosition().x() * std::cos(phiSegments) + seg.globalPosition().y() * std::sin(phiSegments);
@@ -2197,7 +2200,7 @@ void Muon::MuonCurvedSegmentCombiner::fit2SegmentsC(Muon::MuonSegment& seg, Muon
     double invcurvature = 1. / 15000.;
     for (int iter = 0; iter < 2; ++iter) {
         double scf = 1;
-        if (iter == 0) scf = 20 * fabs(invcurvature) * 50000;
+        if (iter == 0) scf = 20 * std::abs(invcurvature) * 50000;
         if (scf < 1.) scf = 1.;
         if (scf > 100.) scf = 100.;
         if (m_debug) std::cout << " error scaling in Cosmics Curved fit " << scf << std::endl;
@@ -2266,12 +2269,12 @@ void Muon::MuonCurvedSegmentCombiner::fit2SegmentsC(Muon::MuonSegment& seg, Muon
             Model(4, 1) = 1;
             Model(4, 2) = sign * 2 * (zse - sign * z_cylinder);
 
-            if (fabs(zs) > z_end + 2000) {
+            if (std::abs(zs) > z_end + 2000) {
                 Model(1, 2) = sign * (-z_end * z_end + z_cylinder * z_cylinder + 2 * zs * sign * (z_end - z_cylinder) +
                                       (zs - sign * z_end) * (zs - sign * z_end) / 5.);
                 Model(2, 2) = sign * (2 * (sign * z_end - sign * z_cylinder) + (zs - sign * z_end) / 5.);
             }
-            if (fabs(zse) > z_end + 2000) {
+            if (std::abs(zse) > z_end + 2000) {
                 Model(3, 2) = sign * (-z_end * z_end + z_cylinder * z_cylinder + 2 * zse * sign * (z_end - z_cylinder) +
                                       (zse - sign * z_end) * (zse - sign * z_end) / 5.);
                 Model(4, 2) = sign * (2 * (sign * z_end - sign * z_cylinder) + (zse - sign * z_end) / 5.);
@@ -2344,7 +2347,7 @@ void Muon::MuonCurvedSegmentCombiner::fit2SegmentsC(Muon::MuonSegment& seg, Muon
             if (i == 1) Pull[i] = Res[i] / sqrt(ets21);
             if (i == 2) Pull[i] = Res[i] / sqrt(ers2);
             if (i == 3) Pull[i] = Res[i] / sqrt(ets22);
-            if (fabs(Pull[i]) > 5) toobig = true;
+            if (std::abs(Pull[i]) > 5) toobig = true;
         }
 
         if (toobig && m_debug) {
@@ -2454,7 +2457,7 @@ void Muon::MuonCurvedSegmentCombiner::extrapolateSegment(Muon::MuonSegment& seg,
         ModelE(2, 1) = 1;
         Model(2, 2) = sign * 2 * (zse - sign * z_cylinder);
 
-        if (fabs(zs) > z_end) {
+        if (std::abs(zs) > z_end) {
             Model(1, 2) = sign * (-z_end * z_end + z_cylinder * z_cylinder + 2 * zs * sign * (z_end - z_cylinder));
             Model(2, 2) = sign * 2 * (sign * z_end - sign * z_cylinder);
             ModelE(1, 2) = sign * (-z_end * z_end + z_cylinder * z_cylinder + 2 * zse * sign * (z_end - z_cylinder));

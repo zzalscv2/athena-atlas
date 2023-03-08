@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file DataHeaderCnv.cxx
@@ -302,14 +302,20 @@ std::unique_ptr<DataHeader_p5> DataHeaderCnv::poolReadObject_p5()
 std::unique_ptr<DataHeader_p6> DataHeaderCnv::poolReadObject_p6()
 {
    void* voidPtr1 = nullptr;
-   m_athenaPoolCnvSvc->setObjPtr(voidPtr1, m_i_poolToken);
+   std::string error_message;
+   try {
+      m_athenaPoolCnvSvc->setObjPtr(voidPtr1, m_i_poolToken);
+   } catch(const std::exception& err) {
+      voidPtr1 = nullptr;
+      error_message = err.what();
+   }
    if (voidPtr1 == nullptr) {
-      throw std::runtime_error("Could not get object for token = " + m_i_poolToken->toString());
+      throw std::runtime_error("Could not get object for token = " + m_i_poolToken->toString() + ", " + error_message);
    }
    std::unique_ptr<DataHeader_p6> header( reinterpret_cast<DataHeader_p6*>(voidPtr1) );
 
    // see if the DataHeaderForm is already cached
-   const std::string &dhFormToken =  header->dhFormToken();
+   std::string dhFormToken =  header->dhFormToken();
    if( dhFormToken.empty() || m_inputDHForms.find(dhFormToken) == m_inputDHForms.end() ) {
       // no cached DHForm
       size_t dbpos = dhFormToken.find("[DB=");
@@ -332,10 +338,55 @@ std::unique_ptr<DataHeader_p6> DataHeaderCnv::poolReadObject_p6()
          mapToken.setAuxString( m_i_poolToken->auxString() );  // set PersSvc context
       }
       if (mapToken.classID() != Guid::null()) {
-         m_athenaPoolCnvSvc->setObjPtr(voidPtr2, &mapToken);
+         try {
+            m_athenaPoolCnvSvc->setObjPtr(voidPtr2, &mapToken);
+         } catch(const std::exception& err) {
+            voidPtr2 = nullptr;
+            error_message = err.what();
+         }
+         if (voidPtr2 == nullptr) {
+            // if there is no good lastGoodDHFRef then try reading DataHeaderForm Token from the first DataHeader
+            if( m_lastGoodDHFRef.find(m_i_poolToken->contID()) == m_lastGoodDHFRef.end() ) {
+               Token firstToken;
+               m_i_poolToken->setData(&firstToken);
+               firstToken.setOid(Token::OID_t(firstToken.oid().first, 0));
+               void* firstPtr1 = nullptr;
+               try {
+                  m_athenaPoolCnvSvc->setObjPtr(firstPtr1, &firstToken);
+               } catch(const std::exception& err) {
+                  firstPtr1 = nullptr;
+                  error_message = err.what();
+               }
+               if (firstPtr1 == nullptr) throw std::runtime_error("Could not get first DataHeader for token = " + firstToken.toString() + ", " + error_message);
+
+               // Get DataHeaderForm Token from the first DataHeader
+               std::unique_ptr<DataHeader_p6> firstHeader( reinterpret_cast<DataHeader_p6*>(firstPtr1) );
+               dhFormToken = firstHeader->dhFormToken();
+
+               // Read DataHeaderForm and insert it to the cache
+               mapToken.fromString( dhFormToken );
+               mapToken.setAuxString( m_i_poolToken->auxString() );  // set PersSvc context
+               try {
+                  m_athenaPoolCnvSvc->setObjPtr(voidPtr2, &mapToken);
+               } catch(const std::exception& err) {
+                  voidPtr2 = nullptr;
+                  error_message = err.what();
+               }
+               if (voidPtr2 == nullptr) throw std::runtime_error("Could not get DataHeaderForm for token = " + mapToken.toString() + ", " + error_message);
+               m_lastGoodDHFRef[m_i_poolToken->contID()] = dhFormToken;
+               m_inputDHForms[dhFormToken].reset( reinterpret_cast<DataHeaderForm_p6*>(voidPtr2) );
+               ATH_MSG_WARNING("DataHeaderForm read exception: " << error_message << " - reusing the last good DHForm");
+            } else {
+               // try to reuse the last good DHForm Ref (object is already cached)
+               ATH_MSG_WARNING("DataHeaderForm read exception: " << error_message << " - reusing the last good DHForm");
+            }
+            header->setDhFormToken(m_lastGoodDHFRef[m_i_poolToken->contID()]);
+            return header;
+         }
          if (voidPtr2 == nullptr) {
             throw std::runtime_error("Could not get object for token = " + mapToken.toString());
          }
+         m_lastGoodDHFRef[m_i_poolToken->contID()] = dhFormToken;
       }
       m_inputDHForms[dhFormToken].reset( reinterpret_cast<DataHeaderForm_p6*>(voidPtr2) );
    }
@@ -346,6 +397,29 @@ std::unique_ptr<DataHeader_p6> DataHeaderCnv::poolReadObject_p6()
 DataHeader_p6* DataHeaderCnv::createPersistent(DataHeader* transObj, DataHeaderForm_p6* dh_form)
 {
    return m_tpOutConverter.createPersistent( transObj, *dh_form );
+}
+
+//______________________________________________________________________________
+void DataHeaderCnv::removeBadElements(DataHeader* dh)
+{
+   auto iter = dh->m_dataHeader.begin();
+   while( iter != dh->m_dataHeader.end() ) {
+      if( iter->getToken()->dbID() == Guid::null() ) {
+         ATH_MSG_WARNING("Removed incomplete DataObject Element");
+         iter = dh->m_dataHeader.erase(iter);
+      } else {
+         ++iter;
+      }
+   }
+   iter = dh->m_inputDataHeader.begin();
+   while( iter != dh->m_inputDataHeader.end() ) {
+      if( iter->getToken()->dbID() == Guid::null() ) {
+         ATH_MSG_WARNING("Removed incomplete Input Element");
+         iter = dh->m_inputDataHeader.erase(iter);
+      } else {
+         ++iter;
+      }
+   }
 }
 
 //______________________________________________________________________________
@@ -371,6 +445,7 @@ DataHeader* DataHeaderCnv::createTransient() {
          std::unique_ptr<DataHeader_p6> header( poolReadObject_p6() );
          auto dh = m_tpInConverter.createTransient( header.get(), *(m_inputDHForms[ header->dhFormToken() ]) );
          dh->setEvtRefTokenStr( m_i_poolToken->toString() );
+         removeBadElements(dh);
          // To dump the DataHeader uncomment below
          // std::ostringstream ss;  dh->dump(ss); std::cout << ss.str() << std::endl;
          return dh;

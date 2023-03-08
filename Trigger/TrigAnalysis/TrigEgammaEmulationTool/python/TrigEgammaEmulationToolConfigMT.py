@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -13,11 +13,12 @@ class TrigEgammaEmulationToolConfig:
     #
     # Constructor
     #
-    def __init__(self, name, triggerList         = [], 
+    def __init__(self, flags, name, triggerList         = [],
                              OutputLevel         = 0, 
                              ElectronTriggerList = single_electron_triggers, 
                              PhotonTriggerList   = single_photon_triggers):
 
+        self.flags = flags
         self.name = name
         self.__chains = []
         self.TriggerList = triggerList
@@ -84,7 +85,7 @@ class TrigEgammaEmulationToolConfig:
         cppyy.load_library('libElectronPhotonSelectorToolsDict')
 
         from TriggerMenuMT.HLT.Config.Utility.DictFromChainName import dictFromChainName
-        d = dictFromChainName(trigger)
+        d = dictFromChainName(self.flags, trigger)
 
         signature = d['signatures'][0]
 
@@ -203,7 +204,7 @@ def TrigEgammaEmulationToolTestConfig(inputFlags):
     EgammaMatchTool.DeltaR=0.4
     acc.addPublicTool(EgammaMatchTool)
 
-    emulator = TrigEgammaEmulationToolConfig("EmulatorTool")
+    emulator = TrigEgammaEmulationToolConfig(inputFlags, "EmulatorTool")
     emulator.configure()
 
     emulator.TriggerList += triggerList

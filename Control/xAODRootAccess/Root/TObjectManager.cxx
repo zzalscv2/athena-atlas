@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -138,7 +138,12 @@ namespace xAOD {
    ///
    /// @return A typeless pointer to the object being managed
    ///
-   void* TObjectManager::object() const {
+   const void* TObjectManager::object() const {
+
+      return std::as_const(*m_holder).get();
+   }
+
+   void* TObjectManager::object() {
 
       return m_holder->get();
    }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -59,7 +59,7 @@ QByteArray VP1CustomTourEditor::state() const
 {
   VP1Serialise s(0/*version*/);
   QList<QByteArray> frameStates;
-  foreach(VP1CustomTourFrameWidget*frame,m_d->frames) {
+  for (VP1CustomTourFrameWidget*frame : m_d->frames) {
     frameStates << frame->serialise();
     s.ignoreWidget(frame);
   }
@@ -74,7 +74,7 @@ QByteArray VP1CustomTourEditor::state() const
 //____________________________________________________________________
 void VP1CustomTourEditor::setState(QByteArray ba)
 {
-  foreach(VP1CustomTourFrameWidget*frame,m_d->frames)
+  for (VP1CustomTourFrameWidget*frame : m_d->frames)
     frame->deleteLater();
   m_d->frames.clear();
 
@@ -89,7 +89,7 @@ void VP1CustomTourEditor::setState(QByteArray ba)
 
   m_d->ui.widget_utilityZoomContents->setVisible(m_d->ui.groupBox_utilityZoom->isChecked());
 
-  foreach(QByteArray ba2, frameStates)
+  for (QByteArray ba2 : frameStates)
     m_d->addFrame(new VP1CustomTourFrameWidget(ba2));
   m_d->updateFrameListVisuals();
   enabledFrameListChanged();
@@ -128,7 +128,7 @@ VP1CustomTourEditor::VP1CustomTourEditor(VP1ExaminerViewer* viewer)
 VP1CustomTourEditor::~VP1CustomTourEditor()
 {
   m_d->frameHolderWidget->deleteLater();
-  foreach(VP1CustomTourFrameWidget*frame,m_d->frames)
+  for (VP1CustomTourFrameWidget*frame : m_d->frames)
     frame->deleteLater();
   delete m_d;
 }
@@ -161,7 +161,7 @@ void VP1CustomTourEditor::Imp::updateFrameListVisuals()
   if (save)
     frameHolderWidget->setUpdatesEnabled(false);
   int sliderpos=ui.scrollArea->verticalScrollBar()->value();
-  foreach(QObject * o, frameHolderWidget->children()) {
+  for (QObject * o : frameHolderWidget->children()) {
     if (o->isWidgetType()) {
       static_cast<QWidget*>(o)->setVisible(false);
       o->setParent(0);
@@ -169,7 +169,7 @@ void VP1CustomTourEditor::Imp::updateFrameListVisuals()
   }
   delete frameHolderWidget->layout();
   QVBoxLayout * vlayout = new QVBoxLayout;
-  foreach(VP1CustomTourFrameWidget*frame,frames) {
+  for (VP1CustomTourFrameWidget*frame : frames) {
     vlayout->addWidget(frame);
    frame->setParent(frameHolderWidget);
     frame->setVisible(true);
@@ -305,7 +305,7 @@ void VP1CustomTourEditor::buttonClicked()
     m_d->updateFrameSnapshot(frame);
     m_d->updateFrameListVisuals();
   } else if (m_d->ui.pushButton_refreshPreviews==sender()) {
-    foreach(VP1CustomTourFrameWidget*frame,m_d->frames)
+    for (VP1CustomTourFrameWidget*frame : m_d->frames)
       m_d->updateFrameSnapshot(frame);
   } else if (m_d->ui.pushButton_execute==sender()) {
     m_d->viewer->startCustomTour();
@@ -350,7 +350,7 @@ int VP1CustomTourEditor::Imp::countEnabledFrames( int& nEnabledPerspectiveFrames
 {
   nEnabledPerspectiveFrames = 0;
   nEnabledOrthographicFrames = 0;
-  foreach(VP1CustomTourFrameWidget*frame,frames) {
+  for (VP1CustomTourFrameWidget*frame : frames) {
     if (frame->frameIsEnabled()) {
       if (frame->camStateIsPerspective())
 	++nEnabledPerspectiveFrames;
@@ -386,7 +386,7 @@ void VP1CustomTourEditor::enabledFrameListChanged()
   }
   m_d->ui.label_statustext->setText(s);
 
-  foreach (QObject * o, m_d->objectsToDisableWhenTourUnavailable) {
+  for (QObject * o : m_d->objectsToDisableWhenTourUnavailable) {
     if (o->isWidgetType())
       static_cast<QWidget*>(o)->setEnabled(enable);
     else
@@ -421,7 +421,7 @@ void VP1CustomTourEditor::addTourToAnimationSequencer(AnimationSequencer& as,boo
   if (!tourAvailable())
     return;
   bool firstInDirectJump(jumpDirectlyToFirstFrame);
-  foreach(VP1CustomTourFrameWidget*frame,m_d->frames) {
+  for (VP1CustomTourFrameWidget*frame : m_d->frames) {
     if (frame->frameIsEnabled()) {
       double t(frame->zoomToFrameTime());
       if (firstInDirectJump) {

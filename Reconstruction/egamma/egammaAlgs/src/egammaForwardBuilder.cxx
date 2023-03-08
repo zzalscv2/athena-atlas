@@ -24,8 +24,7 @@ egammaForwardBuilder::egammaForwardBuilder(const std::string& name,
   : AthReentrantAlgorithm(name, pSvcLocator)
 {}
 
-egammaForwardBuilder::~egammaForwardBuilder()
-= default;
+egammaForwardBuilder::~egammaForwardBuilder() = default;
 
 StatusCode egammaForwardBuilder::initialize()
 {
@@ -177,7 +176,7 @@ egammaForwardBuilder::ExecObjectQualityTool(
   //
   // protection in case tool is not available
   // return success as algorithm can run without it
-  if (m_objectQualityTool.name().empty()) return StatusCode::SUCCESS;
+  if (!m_objectQualityTool.isEnabled()) return StatusCode::SUCCESS;
   // execute the tool
   return m_objectQualityTool->execute(ctx,*eg);
 }

@@ -1,9 +1,9 @@
 # Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 
-def addLArCalibFlags(flags):
+def addLArCalibFlags(flags, isSC=False):
     
     flags.Input.isMC=False
-    flags.addFlag("LArCalib.isSC",False)
+    flags.addFlag("LArCalib.isSC",isSC)
     flags.addFlag("LArCalib.BadChannelDB","LAR_OFL")
     flags.addFlag("LArCalib.BadChannelTag","-RUN2-UPD3-00")
 
@@ -54,11 +54,18 @@ def addLArCalibFlags(flags):
 
     flags.addFlag("LArCalib.Input.ChannelSelection","") #Read only a subset of COOL channels. Format like '3,4,5:10' 
 
+    flags.addFlag("LArCalib.IOVStart", lambda pF: min(pF.LArCalib.Input.RunNumbers) if len(pF.LArCalib.Input.RunNumbers)>0 else 0) #Output IOV start (runnumber)
+    flags.addFlag("LArCalib.IOVEnd", 0x7FFFFFFF) #Output IOV end (runnumber)
+    
+    
+
     flags.addFlag("LArCalib.Preselection.Side",[])
     flags.addFlag("LArCalib.Preselection.BEC",[])
     flags.addFlag("LArCalib.Preselection.FT",[])
     flags.addFlag("LArCalib.Preselection.Slot",[])
 
+    flags.addFlag("LArCalib.SCIgnoreBarrelChannels",False)
+    flags.addFlag("LArCalib.SCIgnoreEndcapChannels",False)
 
     flags.addFlag("LArCalib.RTM.ExtractAll",True) # False = extract only tauR 
     flags.addFlag("LArCalib.RTM.DumpOmegaScan",False)

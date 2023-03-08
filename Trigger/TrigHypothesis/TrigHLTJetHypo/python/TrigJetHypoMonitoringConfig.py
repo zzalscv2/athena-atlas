@@ -1,9 +1,9 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
-def TrigJetHypoToolMonitoring(histPath, histFlags):
-    montool = GenericMonitoringTool("MonTool", HistPath = histPath)
+def TrigJetHypoToolMonitoring(flags, histPath, histFlags):
+    montool = GenericMonitoringTool(flags, "MonTool", HistPath = histPath)
     # Always make these. Timing plots are 100 ms bins (expect everything in 0 bin)
     montool.defineHistogram('Et', title='Jet E_{T};E_{T} (GeV)', xbins=100, xmin=0, xmax=500, path='EXPERT', type='TH1F' )
     montool.defineHistogram('TIME_jetHypo,NJetsIn', title='JetHypo time vs input jets;time (ms) ;N(jets)', xbins=50, xmin=0, xmax=5000, ybins=60, ymin=0, ymax=120, path='EXPERT', type='TH2F' )

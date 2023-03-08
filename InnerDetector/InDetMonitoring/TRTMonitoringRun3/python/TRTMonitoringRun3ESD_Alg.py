@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 '''@file TRTMonitoringRun3ESD_Alg.py
 @author N. Belyaev
@@ -8,46 +8,42 @@
 AthenaMonitoring package
 '''
 
-def TRTMonitoringRun3ESD_AlgConfig(inputFlags):
+def TRTMonitoringRun3ESD_AlgConfig(flags):
     '''Function to configures some algorithms in the monitoring system.'''
 
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     result = ComponentAccumulator()
 
     from AthenaMonitoring import AthMonitorCfgHelper
-    helper = AthMonitorCfgHelper(inputFlags, 'TRTMonitoringCfg')
+    helper = AthMonitorCfgHelper(flags, 'TRTMonitoringCfg')
 
     from AthenaConfiguration.ComponentFactory import CompFactory
-    have_trt_phase = inputFlags.InDet.doTRTPhase  or 'TRT_Phase' in inputFlags.Input.Collections
+    have_trt_phase = flags.InDet.doTRTPhase  or 'TRT_Phase' in flags.Input.Collections
     algTRTMonitoringRun3ESD = helper.addAlgorithm(CompFactory.TRTMonitoringRun3ESD_Alg,
                                                   'AlgTRTMonitoringRun3',
                                                   ComTimeObjectName = 'TRT_Phase' if have_trt_phase else '')
 
     from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_Loose_Cfg
-    algTRTMonitoringRun3ESD.TrackSelectionTool = result.popToolsAndMerge(InDetTrackSelectionTool_Loose_Cfg(inputFlags))
+    algTRTMonitoringRun3ESD.TrackSelectionTool = result.popToolsAndMerge(InDetTrackSelectionTool_Loose_Cfg(flags))
 
     # trigger flag
-    if not inputFlags.DQ.triggerDataAvailable:
+    if not flags.DQ.triggerDataAvailable:
         algTRTMonitoringRun3ESD.TrigDecisionObjectName = ''
-
-    from InDetConfig.InDetGeometryConfig import InDetGeometryCfg
-    result.merge(InDetGeometryCfg(inputFlags))
 
     from IOVDbSvc.IOVDbSvcConfig import addFoldersSplitOnline
 
-    result.merge(addFoldersSplitOnline(inputFlags, "TRT","/TRT/Onl/Calib/errors2d","/TRT/Calib/errors2d",className="TRTCond::RtRelationMultChanContainer"))
-    result.merge(addFoldersSplitOnline(inputFlags, "TRT","/TRT/Onl/Calib/slopes","/TRT/Calib/slopes",className="TRTCond::RtRelationMultChanContainer"))
-    result.merge(addFoldersSplitOnline(inputFlags, "TRT","/TRT/Onl/Calib/RT","/TRT/Calib/RT",className="TRTCond::RtRelationMultChanContainer"))
-    result.merge(addFoldersSplitOnline(inputFlags, "TRT","/TRT/Onl/Calib/T0","/TRT/Calib/T0",className="TRTCond::StrawT0MultChanContainer"))
+    result.merge(addFoldersSplitOnline(flags, "TRT","/TRT/Onl/Calib/errors2d","/TRT/Calib/errors2d",className="TRTCond::RtRelationMultChanContainer"))
+    result.merge(addFoldersSplitOnline(flags, "TRT","/TRT/Onl/Calib/slopes","/TRT/Calib/slopes",className="TRTCond::RtRelationMultChanContainer"))
+    result.merge(addFoldersSplitOnline(flags, "TRT","/TRT/Onl/Calib/RT","/TRT/Calib/RT",className="TRTCond::RtRelationMultChanContainer"))
+    result.merge(addFoldersSplitOnline(flags, "TRT","/TRT/Onl/Calib/T0","/TRT/Calib/T0",className="TRTCond::StrawT0MultChanContainer"))
 
     from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
-    algTRTMonitoringRun3ESD.TrackSummaryTool = result.popToolsAndMerge(InDetTrackSummaryToolCfg(inputFlags))
+    algTRTMonitoringRun3ESD.TrackSummaryTool = result.popToolsAndMerge(InDetTrackSummaryToolCfg(flags))
 
 #     # To run job only with ID
 #    if hasattr(inputFlags, "Detector") and hasattr(inputFlags.Detector, "GeometryMuon") and hasattr(inputFlags.Detector, "GeometryID"):
-#        TrkEventCnvSuperTool = CompFactory.Trk.EventCnvSuperTool(name = "EventCnvSuperTool",
-#                                                                 DoMuons = inputFlags.Detector.GeometryMuon,
-#                                                                 DoID = inputFlags.Detector.GeometryID)
+#        from TrkEventCnvTools.TrkEventCnvToolsConfigCA import TrkEventCnvSuperToolCfg
+#        TrkEventCnvSuperTool = result.getPrimaryAndMerge(TrkEventCnvSuperToolCfg(inputFlags))
 #        result.addPublicTool(TrkEventCnvSuperTool)
 
     barrelOrEndcap     = ('Barrel', 'EndCap')
@@ -228,32 +224,31 @@ if __name__ == '__main__':
     log.setLevel(DEBUG)
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    file = '/afs/cern.ch/work/y/ysmirnov/public/NikitasEsdToFeedToTrtMonitoring/data18_13TeV.00349944.physics_Main.daq.ESD._lb0244._f1138._0001.root'
-    ConfigFlags.Input.Files = [file]
-    ConfigFlags.Input.isMC = False
-    ConfigFlags.Output.HISTFileName = 'TRTMonitoringRun3_ToolOutput.root'
-    ConfigFlags.GeoModel.Align.Dynamic = False
-    ConfigFlags.Detector.GeometryPixel = True
-    ConfigFlags.Detector.GeometrySCT = True
-    ConfigFlags.Detector.GeometryTRT = True
-    ConfigFlags.Detector.GeometryMuon = False
-    ConfigFlags.IOVDb.GlobalTag = "CONDBR2-BLKPA-RUN2-03"
-    ConfigFlags.lock()
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    flags.Input.Files = ['/afs/cern.ch/work/y/ysmirnov/public/NikitasEsdToFeedToTrtMonitoring/data18_13TeV.00349944.physics_Main.daq.ESD._lb0244._f1138._0001.root']
+    flags.Input.isMC = False
+    flags.Output.HISTFileName = 'TRTMonitoringRun3_ToolOutput.root'
+    flags.GeoModel.Align.Dynamic = False
+    flags.Detector.GeometryPixel = True
+    flags.Detector.GeometrySCT = True
+    flags.Detector.GeometryTRT = True
+    flags.IOVDb.GlobalTag = "CONDBR2-BLKPA-RUN2-03"
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     from AthenaCommon.AppMgr import ServiceMgr
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
     # Force special handling of converters
     from TrkConfig.TrackCollectionReadConfig import TrackCollectionReadCfg
-    cfg.merge (TrackCollectionReadCfg (ConfigFlags, 'CombinedInDetTracks'))
-    cfg.merge (TrackCollectionReadCfg (ConfigFlags, 'Tracks'))
+    cfg.merge (TrackCollectionReadCfg (flags, 'CombinedInDetTracks'))
+    cfg.merge (TrackCollectionReadCfg (flags, 'Tracks'))
 
-    TRTMonitoringRun3Acc = TRTMonitoringRun3ESD_AlgConfig(ConfigFlags)
+    TRTMonitoringRun3Acc = TRTMonitoringRun3ESD_AlgConfig(flags)
     ServiceMgr.Dump = False
 
     cfg.merge(TRTMonitoringRun3Acc)

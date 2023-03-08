@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include "RoIsUnpackingEmulationTool.h"
 #include "TrigT1Interfaces/TrigT1CaloDefs.h"
@@ -134,6 +134,8 @@ RoIsUnpackingEmulationTool::parseInputRoI(const std::string& roi, unsigned lineN
   while (getline(inputRoi, roiElement, ','))        {
     if (roiElementNumber > 2) { roiElementNumber = 3; }
     try{
+      //cppcheck bug: https://trac.cppcheck.net/ticket/11530
+      //cppcheck-suppress containerOutOfBounds
       fillResultFunctors[roiElementNumber++](roiElement);
     }
     catch (const std::exception& ex) {

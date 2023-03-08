@@ -13,7 +13,7 @@ from JetRecConfig import JetRecConfig
 from JetRecConfig.DependencyHelper import solveDependencies
 
 def HIJetRecCfg(flags):
-    """Configures Heavy IOn Jet reconestruction """
+    """Configures Heavy IOn Jet reconstruction """
     acc = ComponentAccumulator()
 
     clustersKey = "HICluster"
@@ -42,7 +42,7 @@ def HIJetRecCfg(flags):
     for i in range(len(jetRlist)):
         jetDef[i] = solveDependencies(jetDef[i])
         jetname.append(jetDef[i].fullname())
-        print("HIJETCONFIG: Jet Collection name: " + jetname[i])
+        print("HIJETCONFIG: Jet Collection for Reco: " + jetname[i])
 
     #get calo pseudojets
     pjcs = acc.getPrimaryAndMerge(JetInputCfg(flags))
@@ -75,39 +75,7 @@ def HIJetRecCfg(flags):
     modulator0=iter0.Modulator #get modulator from iter0
     subtractor0=iter0.Subtractor #get subtractor from iter0
 
-    #for egamma
-    iter0_egamma = acc.popToolsAndMerge(
-        AddIterationCfg(
-            flags,
-            jetname_seed0, 
-            eventshapeKey_egamma, 
-            clustersKey, 
-            map_tool=theMapTool, 
-            assoc_name=associationName, 
-            useClusters=False, 
-            suffix="iter0")
-    )
-
-    acc.merge(RunToolsCfg(flags,[iter0_egamma], "jetalgHI_iter0_egamma")) #this run iter0_egamma and produce the new shape
-
-    cluster_key_eGamma_deep=clustersKey+"_eGamma_deep"
-
-    subtocelltool = acc.popToolsAndMerge(
-        ApplySubtractionToClustersCfg(
-        flags,
-        name="HIClusterSubtraction_egamma", 
-        EventShapeKey=iter0_egamma.OutputEventShapeKey, 
-        ClusterKey=clustersKey, 
-        ClusterKey_out=cluster_key_eGamma_deep, 
-        modulator=modulator0, 
-        map_tool=theMapTool, 
-        CalculateMoments=True, 
-        useClusters=False, 
-        apply_origin_correction=False)
-    )
-    acc.merge(RunToolsCfg(flags,[subtocelltool], "jetalgHI_subtocelltool")) #this run iter0 and produce the new shape
-
-    #Seeting subtraction 0
+    #Seeting subtraction 0 and Jet energy calibration
     stdJetModifiers.update(
     subtr0 = JetModifier(
         "HIJetConstituentSubtractionTool",
@@ -118,14 +86,29 @@ def HIJetRecCfg(flags):
         EventShapeKey=iter0.OutputEventShapeKey,
         MomentName="JetSubtractedScaleMomentum",
         SetMomentOnly=False,
-        ApplyOriginCorrection=True)  
+        ApplyOriginCorrection=True),
+    HIJetCalib = JetModifier(
+        "JetCalibrationTool",
+        "HICalibTool_{modspec}",
+        JetCollection="AntiKt4HI",
+        PrimaryVerticesContainerName="",
+        ConfigFile='JES_MC15c_HI_Nov2016.config',
+        CalibSequence=lambda _, modspec: modspec.split('___')[0],
+        IsData=lambda _, modspec: modspec.split('___')[1] == 'True') 
     )
+
+    #Jet energy scale configuration
+    JES_is_data=False
+    calib_seq = "EtaJES"
+    if not flags.Input.isMC :
+        JES_is_data=True
+        calib_seq = "EtaJES"+"_Insitu"
     
     # Copy unsubtracted jets: seed1
     jetDef_seed1 = jetDef_seed0.clone()
     jetDef_seed1.suffix = jetDef_seed0.suffix.replace("_seed0","_seed1")
     jetname_seed1 = jetDef_seed1.fullname()
-    jetDef_seed1.modifiers=["HIJetAssoc", "subtr0", "EMScaleMom", "Filter:25000"]
+    jetDef_seed1.modifiers=["HIJetAssoc", "subtr0", "EMScaleMom", "Filter:{}".format(flags.HeavyIon.Jet.SeedPtMin),"HIJetCalib:{}___{}".format(calib_seq, JES_is_data)]
     jetDef_seed1 = solveDependencies(jetDef_seed1)
     #adding seed1 to CA
     acc.merge(JetCopyAlgCfg(flags,jetname2, jetDef_seed1))
@@ -133,10 +116,10 @@ def HIJetRecCfg(flags):
  ######## configuring TRACKJETS: seeds for second iteration
     if flags.HeavyIon.Jet.doTrackJetSeed : 
         jetdef_trk = defineHITrackJets(jetradius=4)
-        jetdef_trk.modifiers=["HIJetAssoc", "Filter:7000"]
+        jetdef_trk.modifiers=["HIJetAssoc", "Filter:{}".format(flags.HeavyIon.Jet.TrackJetPtMin)]
         jetdef_trk = solveDependencies(jetdef_trk)
         import JetRecTools.JetRecToolsConfig as jrtcfg
-        inputtracks = jrtcfg.getTrackSelAlg(trackSelOpt=False )
+        inputtracks = jrtcfg.getTrackSelAlg(trackSelOpt=False )# here we need HI tracking selection
         acc.addEventAlgo(inputtracks)
  
         pjcs_trk = CompFactory.PseudoJetAlgorithm(
@@ -181,6 +164,44 @@ def HIJetRecCfg(flags):
     modulator1=iter1.Modulator
     subtractor1=iter1.Subtractor
 
+#####EGAMMA iteration and subtration layer level (useClusters=False)
+#///////////////////////////////////////////////
+
+    #for egamma
+    iter1_egamma = acc.popToolsAndMerge(
+        AddIterationCfg(
+            flags,
+            jetname_seed1,
+            eventshapeKey_egamma,
+            clustersKey,
+            map_tool=theMapTool,
+            assoc_name=associationName,
+            useClusters=False,
+            suffix="iter_egamma")
+    )
+
+    acc.merge(RunToolsCfg(flags,[iter1_egamma], "jetalgHI_iter1_egamma")) #this run iter1_egamma and produce the new shape
+
+    #Constituents subtraction for egamma, cell-level
+    cluster_key_eGamma_deep=clustersKey+"_eGamma_deep"
+
+    subtocelltool = acc.popToolsAndMerge(
+        ApplySubtractionToClustersCfg(
+        flags,
+        name="HIClusterSubtraction_egamma",
+        EventShapeKey=iter1_egamma.OutputEventShapeKey,
+         ClusterKey=clustersKey,
+         ClusterKey_out=cluster_key_eGamma_deep,
+         modulator=modulator1,
+         map_tool=theMapTool,
+         CalculateMoments=True,
+         useClusters=False,
+         apply_origin_correction=False)
+     )
+    acc.merge(RunToolsCfg(flags,[subtocelltool], "jetalgHI_subtocelltool"))
+
+#///////////////////////////////////////////////
+
     #setting subtraction 1 ( final )
     stdJetModifiers.update(
     subtr1 = JetModifier(
@@ -195,7 +216,7 @@ def HIJetRecCfg(flags):
         ApplyOriginCorrection=True)
     )
 
-    #Constituents subtraction
+    #Constituents subtraction for jets, tower-level
     cluster_key_final_deep=cluster_key_eGamma_deep+"_Cluster_deep"
     subtoclustertool = acc.popToolsAndMerge(
         ApplySubtractionToClustersCfg(
@@ -203,7 +224,7 @@ def HIJetRecCfg(flags):
         EventShapeKey=iter1.OutputEventShapeKey, 
         ClusterKey=cluster_key_eGamma_deep, 
         ClusterKey_out=cluster_key_final_deep, 
-        modulator=modulator0, 
+        modulator=modulator1, 
         map_tool=theMapTool, 
         CalculateMoments=False, 
         useClusters=True, 
@@ -222,13 +243,13 @@ def HIJetRecCfg(flags):
     )
 
 
-    #COnfigure final jets
+    #Configure final jets
     jetDefList_final = []
     jetNameList_final = []
     for i in range(len(jetRlist)):
         jetDefList_final.append(jetDef[i].clone())
         jetDefList_final[i].suffix = jetDef[i].suffix.replace("_Unsubtracted","")
-        jetDefList_final[i].modifiers=["subtr0", "subtr1","consmod"]
+        jetDefList_final[i].modifiers=["subtr0","subtr1","consmod","Filter:{}".format(flags.HeavyIon.Jet.RecoOutputPtMin),"HIJetCalib:{}___{}".format(calib_seq, JES_is_data)]
         jetNameList_final.append(jetDefList_final[i].fullname())
         jetDefList_final[i] = solveDependencies(jetDefList_final[i])
 
@@ -294,7 +315,7 @@ def HIEventShapeCfg(flags, clustersKey= "HICluster", suffix="_Weighted", **kwarg
 
     #Add weight tool to filler tool
     TWTool = CompFactory.HITowerWeightTool("WeightTool",
-        ApplyCorrection=True,
+        ApplyCorrection=flags.HeavyIon.Jet.ApplyTowerEtaPhiCorrection,
         ConfigDir='HIJetCorrection/',
         InputFile='cluster.geo.HIJING_2018.root')
 
@@ -422,6 +443,7 @@ def AddIterationCfg(flags,seed_container,shape_name,clustersKey, **kwargs) :
     acc = ComponentAccumulator()
 
     useClusters = kwargs.pop('useClusters', True)
+    harmicsforSub = flags.HeavyIon.Jet.HarmonicsForSubtraction 
 
     out_shape_name=shape_name
     if 'suffix' in kwargs.keys() : out_shape_name+='_' + kwargs['suffix']
@@ -430,7 +452,7 @@ def AddIterationCfg(flags,seed_container,shape_name,clustersKey, **kwargs) :
     if remodulate :
         if 'modulator' in kwargs.keys() : mod_tool=kwargs['modulator']
         else :
-            mod_tool=MakeModulatorTool(mod_shape_key,**kwargs)
+            mod_tool=MakeModulatorTool(mod_shape_key,harmonics=harmicsforSub,**kwargs)
 
     if useClusters :
         HIJetClusterSubtractorTool = CompFactory.HIJetClusterSubtractorTool

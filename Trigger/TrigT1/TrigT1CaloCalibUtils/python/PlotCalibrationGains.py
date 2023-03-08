@@ -96,7 +96,7 @@ class L1CaloGeometryConvertor:
          endUtime = int(time.time())
          startValKey = startUtime * self.UNIX2COOL
          endValKey = endUtime * self.UNIX2COOL
-         chsel = cool.ChannelSelection(0,sys.maxint)
+         chsel = cool.ChannelSelection(0,sys.maxsize)
 
          try:
            itr=folder.browseObjects(startValKey, endValKey, chsel)
@@ -358,7 +358,7 @@ class GainReader:
        endUtime = int(time.time())
        startValKey = startUtime * self.UNIX2COOL
        endValKey = endUtime * self.UNIX2COOL
-       chsel = cool.ChannelSelection(0,sys.maxint)
+       chsel = cool.ChannelSelection(0,sys.maxsize)
 
        try:
          itr=folder.browseObjects(startValKey, endValKey, chsel)
@@ -412,7 +412,7 @@ class GainReader:
        endUtime = int(time.time())
        startValKey = startUtime * self.UNIX2COOL
        endValKey = endUtime * self.UNIX2COOL
-       chsel = cool.ChannelSelection(0,sys.maxint)
+       chsel = cool.ChannelSelection(0,sys.maxsize)
 
        try:
          itr=folder.browseObjects(startValKey, endValKey, chsel)
@@ -449,7 +449,7 @@ class GainReader:
        endUtime = int(time.time())
        startValKey = startUtime * self.UNIX2COOL
        endValKey = endUtime * self.UNIX2COOL
-       chsel = cool.ChannelSelection(0,sys.maxint)
+       chsel = cool.ChannelSelection(0,sys.maxsize)
 
        try:
          itr=folder.browseObjects(startValKey, endValKey, chsel)

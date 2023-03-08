@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RPCRAWDATAMONITORING_RPCTRACKANAALG_H
@@ -16,6 +16,7 @@
 #include "AthenaMonitoring/AthMonitorAlgorithm.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "StoreGate/ReadDecorHandleKey.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "xAODEventInfo/EventInfo.h"
 
@@ -24,6 +25,7 @@
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "xAODTrigger/MuonRoIContainer.h"
 #include "MuonTrigCoinData/RpcCoinDataContainer.h"
+#include "xAODTracking/VertexContainer.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "MuonPrepRawData/RpcPrepDataContainer.h"
 #include "TrkExInterfaces/IExtrapolator.h"
@@ -88,21 +90,27 @@ class RpcTrackAnaAlg : public AthMonitorAlgorithm
 
     StringProperty   m_elementsFileName{this,"ElementsFileName", "Element.xml", "Elements xml file"};
 
-    StringProperty   m_trigTagList{this,"TagTrigList","HLT_mu26_ivarmedium_L1MU20","list of triggers to be used for trigger matching"};
+    StringProperty   m_trigTagList{this,"TagTrigList","HLT_mu_ivarmedium;HLT_mu50","list of triggers to be used for trigger matching"};
     DoubleProperty   m_trigMatchWindow{this,"TrigMatchingWindow",0.005,"Window size in R for trigger matching"};
     BooleanProperty  m_TagAndProbe{this,"TagAndProbe",false,"switch to perform tag-and-probe method"};
     BooleanProperty  m_TagAndProbeZmumu{this,"TagAndProbeZmumu",false,"switch to perform tag-and-probe method Z->mumu"};
 
-    DoubleProperty   m_minPt{this,"minPt",2.5e3,"minmum pT of muon"};
+    // cuts for muons
+    DoubleProperty   m_minPt{this,"minPt",25.0e3,"minmum pT of muon"};
+    DoubleProperty   m_maxEta{this,"maxEta",2.5,"max eta absolute value of muon"};
+
+    // cuts for barrel muons
+    DoubleProperty   m_barrelMinPt {this, "barrelMinPt",  2.0e3};
+    DoubleProperty   m_barrelMinEta{this, "barrelMinEta", 0.1};
+    DoubleProperty   m_barrelMaxEta{this, "barrelMaxEta", 1.05};
+
     DoubleProperty   m_muonMass{this,"MuonMass",105.6583755,"muon invariant mass in MeV"};
-    DoubleProperty   m_zMass{this,"ZMass",91187.6,"muon invariant mass in MeV"};
-    DoubleProperty   m_zMassWindow{this,"ZMassWindow",10000,"muon invariant mass half-window in MeV"};
     DoubleProperty   m_zMass_lowLimit{this,"zMass_lowLimit",50000.,"2 muon invariant mass low limit in Zmumu event"};
     DoubleProperty   m_zMass_upLimit{this,"zMass_upLimit",  150000.,"2 muon invariant mass up limit in Zmumu event"};
 
     DoubleProperty   m_isolationWindow{this,"IsolationWindow",0.1,"Window size in R for isolation with other muons"};
     DoubleProperty   m_l1trigMatchWindow{this,"L1TrigMatchingWindow",0.3,"Window size in R for L1 trigger matching"};
-    StringProperty   m_MuonEFContainerName{this,"MuonEFContainerName","HLT_MuonsCBOutsideIn","HLT RoI-based muon track container"};
+    // StringProperty   m_MuonEFContainerName{this,"MuonEFContainerName","HLT_MuonsCBOutsideIn","HLT RoI-based muon track container"};
     DoubleProperty   m_minDRTrackToGasGap{this, "minDRTrackToGasGap", 0.02, "minimum of DR between track and gasgap"};
 
     DoubleProperty   m_boundsToleranceReadoutElement{this, "boundsToleranceReadoutElement", 100.0, "boundsToleranceReadoutElement"};
@@ -113,7 +121,6 @@ class RpcTrackAnaAlg : public AthMonitorAlgorithm
 
     ///////////////////////////////////////////////////////////////////
     ServiceHandle<Muon::IMuonIdHelperSvc>         m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
-    SG::ReadHandleKey<xAOD::EventInfo>            m_eventInfo {this,"EventInfo","EventInfo","event info"};
     
     const RpcIdHelper                             *m_rpcIdHelper = nullptr;
     const MuonGM::MuonDetectorManager             *m_muonMgr = nullptr;
@@ -122,6 +129,14 @@ class RpcTrackAnaAlg : public AthMonitorAlgorithm
     SG::ReadHandleKey<xAOD::MuonRoIContainer>     m_MuonRoIContainerKey {this, "MuonRoIContainerName", "LVL1MuonRoIs", "Key for L1 ROIs" };
     SG::ReadHandleKey<xAOD::MuonContainer>        m_MuonContainerKey { this, "MuonContainerKey", "Muons", "Key for Offline muon track Containers" };
     SG::ReadHandleKey<Muon::RpcPrepDataContainer> m_rpcPrdKey {this,"RpcPrepDataContainer","RPC_Measurements","RPC PRDs"};
+    SG::ReadHandleKey<xAOD::VertexContainer>      m_PrimaryVertexContainerKey{this,"PrimaryVertexContainerName","PrimaryVertices","Primary Vertex Container"};
+
+    // accessors for beam spot uncertainty
+    SG::ReadDecorHandleKey<xAOD::EventInfo> m_beamSigmaX{this, "beamPosSigmaX", "EventInfo.beamPosSigmaX", "Beam spot position sigma in X"};
+    SG::ReadDecorHandleKey<xAOD::EventInfo> m_beamSigmaY{this, "beamPosSigmaY", "EventInfo.beamPosSigmaY", "Beam spot position sigma in Y"};
+    // note that this last entry is a covariance: the units are mm^2,
+    // whereas the above have units of mm
+    SG::ReadDecorHandleKey<xAOD::EventInfo> m_beamSigmaXY{this, "beamPosSigmaXY", "EventInfo.beamPosSigmaXY", "Beam spot covariance in XY"};
 
     RpcPanelMap              m_rpcPanelMap;
 
@@ -134,6 +149,7 @@ class RpcTrackAnaAlg : public AthMonitorAlgorithm
     std::map<std::string, int>                    m_elementIndex;
 
     std::map<std::string,int>                     m_SectorGroup;
+    std::map<std::string,int>                     m_TriggerThrGroup;
 };
 
 #endif

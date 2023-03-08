@@ -6,6 +6,7 @@
 #include "MuonRoIByteStreamTool.h"
 
 // Trigger includes
+#include "TrigConfData/L1Menu.h"
 #include "TrigT1MuctpiBits/HelpersPhase1.h"
 #include "xAODTrigger/MuonRoI.h"
 #include "xAODTrigger/MuonRoIAuxContainer.h"
@@ -105,8 +106,8 @@ StatusCode MuonRoIByteStreamTool::initialize() {
     const std::string side0LUTFileName = PathResolverFindCalibFile( m_side0LUTFile );
     const std::string side1LUTFileName = PathResolverFindCalibFile( m_side1LUTFile );
     
-    CHECK( m_l1topoLUT.initializeBarrelLUT(side0LUTFileName,
-					   side1LUTFileName) );
+    //CHECK( m_l1topoLUT.initializeBarrelLUT(side0LUTFileName,
+		//			   side1LUTFileName) );
     CHECK( m_l1topoLUT.initializeLUT(barrelFileName,
 				     ecfFileName,
 				     side0LUTFileName,
@@ -492,10 +493,14 @@ StatusCode MuonRoIByteStreamTool::decodeTopoSlices(const uint32_t* data,
   int nomBCID_slice = slices.size() / 2 ;
   int topobcidOffset = 0;
   unsigned short subsystem = 0;
-  float eta_barrel = 0.;
-  float phi_barrel = 0.;
   //in case something is found to not be correctly decoded by the L1Topo group - can clean this extra-debug printouts later if wished
   constexpr static bool local_topo_debug{false};
+
+  const TrigConf::L1Menu * l1menu = nullptr;
+  ATH_CHECK( detStore()->retrieve(l1menu) );
+ 
+  const auto & exMU = l1menu->thrExtraInfo().MU();
+  auto tgcPtValues = exMU.knownTgcPtValues();
 
   //the cand usage should be optimised!
   LVL1::MuCTPIL1TopoCandidate cand;
@@ -510,8 +515,6 @@ StatusCode MuonRoIByteStreamTool::decodeTopoSlices(const uint32_t* data,
       cand = LVL1::MuCTPIL1TopoCandidate{};
       std::stringstream sectorName;
       subsystem = 0;
-      eta_barrel = 0.;
-      phi_barrel = 0.;
 
       topobcidOffset = toposliceiterator - nomBCID_slice;
       ATH_MSG_DEBUG("MuCTPIL1Topo: Decoding Topo word 0x" << std::hex << word << std::dec << " into the " << outputIt->key() << " container");
@@ -557,33 +560,35 @@ StatusCode MuonRoIByteStreamTool::decodeTopoSlices(const uint32_t* data,
 
       if (subsystem == 0) // Barrel
         {
-          eta_barrel = m_l1topoLUT.getBarrelEta(topoheader.hemi, topoheader.sec, topoheader.barrel_eta_lookup);
-          phi_barrel = m_l1topoLUT.getBarrelPhi(topoheader.hemi, topoheader.sec, topoheader.barrel_phi_lookup);
+          //for barrel topoheader.roi is always 0, so we need to reconstruct it...
+          unsigned short roi = m_l1topoLUT.getBarrelROI(topoheader.hemi, topoheader.sec, topoheader.barrel_eta_lookup, topoheader.barrel_phi_lookup);
+          LVL1MUCTPIPHASE1::L1TopoCoordinates coord = m_l1topoLUT.getCoordinates(topoheader.hemi ,subsystem ,topoheader.sec ,roi);
           if (local_topo_debug) {
             ATH_MSG_DEBUG("MuCTPIL1Topo: Barrel decoding");
             ATH_MSG_DEBUG("MuCTPIL1Topo barrel_eta_lookup:     " << topoheader.barrel_eta_lookup );
             ATH_MSG_DEBUG("MuCTPIL1Topo barrel_phi_lookup:     " << topoheader.barrel_phi_lookup );
-            ATH_MSG_DEBUG("MuCTPIL1Topo eta value: " <<  eta_barrel);
-            ATH_MSG_DEBUG("MuCTPIL1Topo phi value: " <<  phi_barrel);
+            ATH_MSG_DEBUG("MuCTPIL1Topo eta value: " <<  coord.eta);
+            ATH_MSG_DEBUG("MuCTPIL1Topo phi value: " <<  coord.phi);
           }
+          
           // See: TrigT1Interfaces/MuCTPIL1TopoCandidate.h
           cand.setCandidateData(sectorName.str(),
-                                0,//roiID,      -- always ZERO for Barrel as it is not contained in the word
+                                roi, //0 in topoheader, but reconstructed via L1TopoLUT above
                                 topobcidOffset,
                                 0,//ptThresholdID
                                 0,//ptCode,       removed Run3
-                                topoheader.pt,
-                                eta_barrel,
-                                phi_barrel,
+                                tgcPtValues[topoheader.pt],
+                                coord.eta,
+                                coord.phi,
                                 0,//etacode,      removed Run3
                                 0,//phicode,      removed Run3
-                                0,//coord.eta_min, -- could be added for barrel but would need more code
-                                0,//coord.eta_max,
-                                0,//coord.phi_min,
-                                0,//coord.phi_max,
+                                coord.eta_min,
+                                coord.eta_max,
+                                coord.phi_min,
+                                coord.phi_max,
                                 0,//mioctID,      removed Run3
-                                0,//coord.ieta,
-                                0);//coord.iphi
+                                coord.ieta,
+                                coord.iphi);
           // Documentation / translation for the flag setting below
           if (local_topo_debug) {
             ATH_MSG_DEBUG("MuCTPIL1Topo phiOvl(0): " << topoheader.flag0);
@@ -611,7 +616,7 @@ StatusCode MuonRoIByteStreamTool::decodeTopoSlices(const uint32_t* data,
                               topobcidOffset,
                               0,//ptThresholdID,
                               0,//ptCode,       removed Run3
-                              topoheader.pt,
+                              tgcPtValues[topoheader.pt],
                               coord.eta,
                               coord.phi,
                               0,//etacode,      removed Run3

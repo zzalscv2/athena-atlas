@@ -1,20 +1,42 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
-from TrigMinBias.TrigMinBiasConf import MbtsFex
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from TrigMinBias.TrigMinBiasMonitoring import MbtsFexMonitoring
+from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 
-def MbtsFexCfg(flags=None, name="MbtsFex", **kwargs):
-    alg = MbtsFex(name, **kwargs)
-    alg.MonTool =  MbtsFexMonitoring()
+def MbtsFexCfg(flags, name="MbtsFex", MbtsBitsKey=None):
+    """Configures MBTS Fex with monitoring"""
+    acc = ComponentAccumulator()
     from TrigT2CaloCommon.TrigCaloDataAccessConfig import CaloDataAccessSvcDependencies
-    alg.ExtraInputs = CaloDataAccessSvcDependencies
 
-    # Tell SGInputLoader to get TileTBID from the DetectorStore
-    from AthenaCommon.AlgSequence import AlgSequence
-    topSequence = AlgSequence()
-    if hasattr(topSequence,"SGInputLoader"):
-        topSequence.SGInputLoader.Load += [('TileTBID','DetectorStore+TileTBID')]
+    alg = CompFactory.MbtsFex(name,
+        MbtsBitsKey=MbtsBitsKey,
+        MonTool = MbtsFexMonitoring(flags), 
+        ExtraInputs = CaloDataAccessSvcDependencies)
+    acc.addEventAlgo(alg, primary=True)
+    return acc
+    
+def MbtsSGInputCfg(flags):
+    """Configures SG Input needed for MBTS Fex"""
+    from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+    return SGInputLoaderCfg(flags, [('TileTBID','DetectorStore+TileTBID' )])
 
-    return alg
 
+if __name__ == '__main__':
+    from AthenaCommon.Configurable import Configurable
+    Configurable.configurableRun3Behavior=1
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    from AthenaConfiguration.TestDefaults import defaultTestFiles
 
+    flags = initConfigFlags()
+    flags.Input.Files=defaultTestFiles.RAW # or ESD or AOD or ...
+    flags.lock()
+
+    acc=ComponentAccumulator()
+
+    acc.merge(MbtsFexCfg(flags, MbtsBitsKey="some"))
+    acc.merge(MbtsSGInputCfg(flags))
+
+    acc.printConfig(withDetails=True, summariseProps=True)
+
+    acc.wasMerged()

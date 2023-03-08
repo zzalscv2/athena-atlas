@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 // ROOT include(s):
 #include <TClass.h>
@@ -15,7 +15,7 @@
 namespace xAOD {
 
    TAuxVector::TAuxVector( const SG::IAuxTypeVectorFactory* factory,
-                           ::TClass* cl, size_t size, size_t )
+                           const ::TClass* cl, size_t size, size_t )
       : m_factory( factory ),
         m_proxy( cl->GetCollectionProxy() ), m_vec( cl->New() ) {
 

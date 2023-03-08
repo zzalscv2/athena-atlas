@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from eflowRec import eflowRecConf
 from InDetTrackSelectionTool import InDetTrackSelectionToolConf
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -121,7 +121,7 @@ def muonIsoTagSeq(flags, tracktype, tracksin, extcache, clustersin):
 # This handles the track selection (including lepton veto)
 # and extrapolation into the calorimeter.
 # Parameters: track & vertex container names (offline, HLT, FTK)
-def getPFTrackSel(tracktype, extensionCache="", trackname=None):
+def getPFTrackSel(flags, tracktype, extensionCache="", trackname=None):
 
     tracksin, verticesin = trackvtxcontainers[tracktype]
     if trackname is not None:
@@ -135,7 +135,7 @@ def getPFTrackSel(tracktype, extensionCache="", trackname=None):
     
     # Set monitoring tool
     from eflowRec import PFOnlineMon
-    monTool_extrapolator = PFOnlineMon.getMonTool_eflowTrackCaloExtensionTool()
+    monTool_extrapolator = PFOnlineMon.getMonTool_eflowTrackCaloExtensionTool(flags)
     monTool_extrapolator.HistPath = 'TrackExtrapolator'
     TrackCaloExtensionTool.MonTool_TrackCaloExtension = monTool_extrapolator
     
@@ -156,7 +156,7 @@ def getPFTrackSel(tracktype, extensionCache="", trackname=None):
     PFTrackSelector.tracksName = tracksin
     PFTrackSelector.VertexContainer = verticesin
 
-    monTool_selector = PFOnlineMon.getMonTool_PFTrackSelector()
+    monTool_selector = PFOnlineMon.getMonTool_PFTrackSelector(flags)
     monTool_selector.HistPath = 'PFTrackSelector'
     PFTrackSelector.MonTool = monTool_selector
 
@@ -189,7 +189,7 @@ def getPFAlg(flags, clustersin, tracktype):
 
     from eflowRec import PFOnlineMon
     PFTrackClusterMatchingTool_1 = CompFactory.PFTrackClusterMatchingTool("CalObjBldMatchingTool")
-    monTool_matching = PFOnlineMon.getMonTool_PFTrackClusterMatching()
+    monTool_matching = PFOnlineMon.getMonTool_PFTrackClusterMatching(flags)
     monTool_matching.HistPath = 'PFTrackClusterMatchingTool_1'
     PFTrackClusterMatchingTool_1.MonTool_ClusterMatching = monTool_matching
 
@@ -250,7 +250,7 @@ def getPFAlg(flags, clustersin, tracktype):
         BaseToolList=[PFMomentCalculatorTool],
     )
 
-    monTool_pfalg = PFOnlineMon.getMonTool_PFAlgorithm()
+    monTool_pfalg = PFOnlineMon.getMonTool_PFAlgorithm(flags)
     monTool_pfalg.HistPath = 'PFAlgorithm'
     PFAlgorithm.MonTool = monTool_pfalg
     
@@ -296,7 +296,7 @@ def PFHLTSequence(flags, clustersin, tracktype, cellsin=None):
             raise ValueError(f"Invalid muon removal mode '{muon_mode}'")
         algs.append(tag_alg)
     
-    PFTrkSel = getPFTrackSel(tracktype, extension, tracks)
+    PFTrkSel = getPFTrackSel(flags, tracktype, extension, tracks)
     PFAlg = getPFAlg(flags,clustersin, tracktype)
     PFCCreator, PFNCreator = getPFOCreators(flags,tracktype)
 

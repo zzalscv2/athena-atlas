@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 if __name__=='__main__':
@@ -65,12 +65,13 @@ if __name__=='__main__':
   ROOT6Setup()
 
   # Set the Athena configuration flags
-  from AthenaConfiguration.AllConfigFlags import ConfigFlags
+  from AthenaConfiguration.AllConfigFlags import initConfigFlags
+  flags = initConfigFlags()
 
   if args.inputFiles is not None:
-    ConfigFlags.Input.Files = args.inputFiles.split(',')
-  ConfigFlags.Input.isMC = True
-  ConfigFlags.Output.HISTFileName = args.outputFile
+    flags.Input.Files = args.inputFiles.split(',')
+  flags.Input.isMC = True
+  flags.Output.HISTFileName = args.outputFile
 
 
   if args.preExec:
@@ -78,20 +79,20 @@ if __name__=='__main__':
     from AthenaMonitoring.DQConfigFlags import allSteeringFlagsOff
     exec(args.preExec)
 
-  ConfigFlags.lock()
+  flags.lock()
 
 
   # Initialize configuration object, add accumulator, merge, and run.
   from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
   from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-  cfg = MainServicesCfg(ConfigFlags)
-  cfg.merge(PoolReadCfg(ConfigFlags))
+  cfg = MainServicesCfg(flags)
+  cfg.merge(PoolReadCfg(flags))
 
   emulator=None
   if args.emulate:
     # create and configure emulator tool
     from TrigEgammaEmulationTool.TrigEgammaEmulationToolConfigMT import TrigEgammaEmulationToolConfig
-    emulator = TrigEgammaEmulationToolConfig("EgammaEmulation") 
+    emulator = TrigEgammaEmulationToolConfig(flags, "EgammaEmulation")
 
     # configure all selectors
     emulator.PhotonCBConfigFilePath    = args.pidConfigPath # Cut-based
@@ -105,7 +106,7 @@ if __name__=='__main__':
 
   # create the e/g monitoring tool and add into the component accumulator
   from TrigEgammaMonitoring.TrigEgammaMonitorAlgorithm import TrigEgammaMonConfig
-  trigEgammaMonitorAcc = TrigEgammaMonConfig(ConfigFlags, emulator=emulator)
+  trigEgammaMonitorAcc = TrigEgammaMonConfig(flags, emulator=emulator)
   cfg.merge(trigEgammaMonitorAcc)
 
 

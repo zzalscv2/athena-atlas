@@ -157,21 +157,14 @@ namespace Muon {
                     m_truthTrajectoryBuilder->buildTruthTrajectory(truthTrajectory.get(), genParticle);
                     if (!truthTrajectory->empty()) {
                         // always use barcode of the 'final' particle in chain in map
-                        barcode = HepMC::barcode(truthTrajectory->front());
+                        barcode = truthTrajectory->front().barcode();
 
                         if (msgLvl(MSG::VERBOSE)) {
-#ifdef HEPMC3
-                            ATH_MSG_VERBOSE(" found GenParticle: size " << truthTrajectory->size() << " fs barcode " << barcode << " pdg "
-                                                                        << truthTrajectory->front()->pdg_id() << " p "
-                                                                        << truthTrajectory->front()->momentum().length());
-#else
-                            ATH_MSG_VERBOSE(" found GenParticle: size " << truthTrajectory->size() << " fs barcode " << barcode << " pdg "
-                                                                        << truthTrajectory->front()->pdg_id() << " p "
-                                                                        << truthTrajectory->front()->momentum().rho());
-#endif
-                            if (truthTrajectory->front()->production_vertex()) {
-                                ATH_MSG_VERBOSE(" vertex: r  " << truthTrajectory->front()->production_vertex()->position().perp() << " z "
-                                                               << truthTrajectory->front()->production_vertex()->position().z());
+                            auto particle = truthTrajectory->front().cptr();
+                            ATH_MSG_VERBOSE(" found GenParticle: size " << truthTrajectory->size() << " fs barcode " << barcode << "particle "<< particle);
+                            if (particle->production_vertex()) {
+                                ATH_MSG_VERBOSE(" vertex: r  " << particle->production_vertex()->position().perp() << " z "
+                                                               << particle->production_vertex()->position().z());
                             }
                         }
 
@@ -179,19 +172,14 @@ namespace Muon {
                         std::vector<HepMcParticleLink>::const_iterator pit = truthTrajectory->begin();
                         std::vector<HepMcParticleLink>::const_iterator pit_end = truthTrajectory->end();
                         for (; pit != pit_end; ++pit) {
-                            int code = HepMC::barcode(*pit);
+                            int code = (*pit).barcode();
 
                             if (msgLvl(MSG::VERBOSE) && code != barcode) {
-#ifdef HEPMC3
-                                ATH_MSG_VERBOSE("  secondary barcode: " << code << " pdg " << (*pit)->pdg_id() << " p "
-                                                                        << (*pit)->momentum().length());
-#else
-                                ATH_MSG_VERBOSE("  secondary barcode: " << code << " pdg " << (*pit)->pdg_id() << " p "
-                                                                        << (*pit)->momentum().rho());
-#endif
-                                if ((*pit)->production_vertex())
-                                    ATH_MSG_VERBOSE(" vertex: r  " << (*pit)->production_vertex()->position().perp() << " z "
-                                                                   << (*pit)->production_vertex()->position().z());
+                                auto particle = (*pit).cptr();
+                                ATH_MSG_VERBOSE("  secondary barcode: " << code << "particle "<< particle);
+                                if (particle->production_vertex())
+                                    ATH_MSG_VERBOSE(" vertex: r  " <<particle->production_vertex()->position().perp() << " z "
+                                                                   << particle->production_vertex()->position().z());
                                 // sanity check
                                 if (barcode_map.count(code)) ATH_MSG_VERBOSE("  pre-existing barcode " << code);
                             }
@@ -681,19 +669,19 @@ namespace Muon {
 
     HepMC::ConstGenParticlePtr MuonTrackTruthTool::getMother(const TruthTrajectory& traj, const int barcodeIn) const {
         ATH_MSG_DEBUG("getMother() : size = " << traj.size());
-        int pdgFinal = ((traj.size() == 0) ? -999 : traj.front()->pdg_id());
+        int pdgFinal = ((traj.size() == 0) ? -999 : traj.front().cptr()->pdg_id());
         bool foundBC = false;
         for (const auto& pit : traj) {
             if (!pit) continue;
-            if (HepMC::barcode(pit) == barcodeIn || foundBC) {
+            if (pit.barcode() == barcodeIn || foundBC) {
                 foundBC = true;
                 ATH_MSG_DEBUG("getMother() : " << pit );
-                if (pit->pdg_id() != pdgFinal) {  // the first case a track had a different flavour
 #ifdef HEPMC3
-                    return pit.scptr();
+                auto particle = pit.scptr();
 #else
-                    return pit.cptr();
+                auto particle = pit.cptr();
 #endif
+                if (particle->pdg_id() != pdgFinal) {  // the first case a track had a different flavour
                     break;
                 }
             }
@@ -705,15 +693,15 @@ namespace Muon {
         bool foundBC = false;
         for (const auto& pit : traj) {
             if (!pit) continue;
-            if (HepMC::barcode(pit) == barcodeIn || foundBC) {
+            if (pit.barcode() == barcodeIn || foundBC) {
                 foundBC = true;
-                if (pit->status() > 1) {  // first non final state particle
 #ifdef HEPMC3
-                    return pit.scptr();
+                auto particle = pit.scptr();
 #else
-                    return pit.cptr();
+                auto particle = pit.cptr();
 #endif
-                    break;
+                if (particle->status() > 1) {  // first non final state particle
+                  return particle;
                 }
             }
         }
@@ -730,16 +718,17 @@ namespace Muon {
         double ePrev = 0.;
         HepMC::ConstGenParticlePtr theFirst{nullptr};
         for (auto pit = traj.begin(); pit != traj.end(); ++pit) {
-            if (HepMC::barcode(*pit) == barcodeIn || foundBC) {
+            if ((*pit).barcode() == barcodeIn || foundBC) {
+              auto particle = (*pit).scptr();
 #ifdef HEPMC3
                 if (!foundBC) {
                     foundBC = true;
-                    theFirst = (*pit).scptr();
-                    pdgFinal = (*pit)->pdg_id();
+                    theFirst = particle;
+                    pdgFinal = particle->pdg_id();
                 } else {
-                    if ((*pit)->pdg_id() == pdgFinal) {
+                    if (particle->pdg_id() == pdgFinal) {
                         auto pit_p = *pit;
-                        if ((theFirst != pit_p.scptr()) && ((*pit)->momentum().t() != ePrev))
+                        if ((theFirst != pit_p.scptr()) && (particle->momentum().t() != ePrev))
                             ++scat;  // if the particle has not changed pdgid after the first step count as scatter. also avoid counting
                                      // pure interface changes as scatter
                     } else {         // the first time this particle appears
@@ -756,7 +745,7 @@ namespace Muon {
                 } else {
                     if ((*pit)->pdg_id() == pdgFinal) {
                         auto pit_p = *pit;
-                        if ((theFirst != pit_p.cptr()) && ((*pit)->momentum().t() != ePrev))
+                        if ((theFirst != pit_p.cptr()) && ((*pit).cptr()->momentum().t() != ePrev))
                             ++scat;  // if the particle has not changed pdgid after the first step count as scatter. also avoid counting
                                      // pure interface changes as scatter
                     } else {         // the first time this particle appears
@@ -766,8 +755,8 @@ namespace Muon {
                     }
                 }
 #endif
-                ATH_MSG_DEBUG("getFirst() : pt = " << (*pit)->momentum().perp() << " scat = " << scat);
-                ePrev = (*pit)->momentum().t();  // prepare for comparing this entry with the next one
+                ATH_MSG_DEBUG("getFirst() : pt = " << particle->momentum().perp() << " scat = " << scat);
+                ePrev = particle->momentum().t();  // prepare for comparing this entry with the next one
             }
         }
         // sanity check

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTrackingGeometry/SiLayerBuilderCond.h"
@@ -130,28 +130,4 @@ InDet::SiLayerBuilderCond::createRingLayers(const EventContext& ctx,
 }
 
 
-void InDet::SiLayerBuilderCond::registerSurfacesToLayer(Trk::BinnedArraySpan<Trk::Surface * const >& layerSurfaces, Trk::Layer& lay) const
-{
-  if (!m_setLayerAssociation) return;
 
-  const auto *laySurfIter    = layerSurfaces.begin();
-  const auto *laySurfIterEnd = layerSurfaces.end();
-  // register the surfaces to the layer
-  for (; laySurfIter != laySurfIterEnd; ++laySurfIter){
-    if (*laySurfIter) {
-      // register the current surface --------------------------------------------------------
-      // Needs care for Athena MT
-      Trk::ILayerBuilderCond::associateLayer(lay, (**laySurfIter));
-      const InDetDD::SiDetectorElement* detElement
-        = dynamic_cast<const InDetDD::SiDetectorElement*>((*laySurfIter)->associatedDetectorElement());
-      // register the backise if necessary ---------------------------------------------------
-      const InDetDD::SiDetectorElement* otherSideElement = detElement ?  detElement->otherSide() : nullptr;
-      const Trk::Surface* otherSideSurface = otherSideElement ? &(otherSideElement->surface()) : nullptr;
-      if (otherSideSurface) {
-        // Needs care for Athena MT
-        // we bind again to the detElement owned surface
-        Trk::ILayerBuilderCond::associateLayer(lay, const_cast<Trk::Surface&>(*otherSideSurface));
-      }
-    }
-  }
-}

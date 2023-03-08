@@ -11,7 +11,7 @@ log.info("Importing %s",__name__)
 
 
 
-def generateChainConfigs( chainDict ):
+def generateChainConfigs(flags,  chainDict ):
 
     listOfChainDicts = splitChainDict(chainDict)
     log.debug("Will generate Config for streamer: %s", chainDict['chainName'])
@@ -22,7 +22,7 @@ def generateChainConfigs( chainDict ):
     #needed to move to the correct format [{}]->{}
     for subChainDict in listOfChainDicts:
         
-        Streaming = StreamingChainConfiguration(subChainDict).assembleChain() 
+        Streaming = StreamingChainConfiguration(subChainDict).assembleChain(flags) 
 
         listOfChainDefs += [Streaming]
         log.debug('length of chaindefs %s', len(listOfChainDefs) )

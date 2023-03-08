@@ -1,10 +1,8 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
-from AthenaConfiguration.AllConfigFlags import ConfigFlags 
-
-# menu components   
+# menu components
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsPool, algorithmCAToGlobalWrapper
 from AthenaCommon.CFElements import parOR, seqAND
 from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
@@ -12,7 +10,7 @@ from DecisionHandling.DecisionHandlingConf import ViewCreatorPreviousROITool
 from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
 
 
-def fastElectronSequence(ConfigFlags, variant=''):
+def fastElectronSequence(flags, variant=''):
     """ second step:  tracking....."""
     InViewRoIs = "EMFastElectronRoIs"+variant
   
@@ -27,7 +25,7 @@ def fastElectronSequence(ConfigFlags, variant=''):
 
     # Configure the reconstruction algorithm sequence
     from TriggerMenuMT.HLT.Electron.FastElectronRecoSequences import fastElectronRecoSequence
-    (fastElectronRec, sequenceOut) = fastElectronRecoSequence(InViewRoIs, variant)
+    (fastElectronRec, sequenceOut) = fastElectronRecoSequence(flags, InViewRoIs, variant)
     
     # Suffix to distinguish probe leg sequences
     fastElectronInViewAlgs = parOR("fastElectronInViewAlgs" + variant, [fastElectronRec])
@@ -35,23 +33,23 @@ def fastElectronSequence(ConfigFlags, variant=''):
 
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
 
-    robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Si, ConfigFlags, nameSuffix=fastElectronViewsMaker.name())[0]
+    robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Si, flags, nameSuffix=fastElectronViewsMaker.name())[0]
     fastElectronAthSequence = seqAND("fastElectronAthSequence" + variant, [fastElectronViewsMaker, robPrefetchAlg, fastElectronInViewAlgs] )
     return (fastElectronAthSequence, fastElectronViewsMaker, sequenceOut)
 
-def fastElectronSequence_LRT(ConfigFlags):
+def fastElectronSequence_LRT(flags):
     # This is SAME as fastElectronSequence but for variant "_LRT"
-    return fastElectronSequence(ConfigFlags,"_LRT")
+    return fastElectronSequence(flags,"_LRT")
 
 
-def fastElectronMenuSequence(is_probe_leg=False, variant=''):
+def fastElectronMenuSequence(flags, is_probe_leg=False, variant=''):
     """ Creates 2nd step Electron  MENU sequence"""
     # retrieve the reco sequence+EVC
     theSequence = {
             ''      : fastElectronSequence,
             '_LRT'  : fastElectronSequence_LRT
             }
-    (fastElectronAthSequence, fastElectronViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(theSequence[variant], ConfigFlags)
+    (fastElectronAthSequence, fastElectronViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(theSequence[variant], flags)
     # make the Hypo
     from TrigEgammaHypo.TrigEgammaHypoConf import TrigEgammaFastElectronHypoAlg
     TrigEgammaKeys = getTrigEgammaKeys(variant)
@@ -63,13 +61,14 @@ def fastElectronMenuSequence(is_probe_leg=False, variant=''):
 
     from TrigEgammaHypo.TrigEgammaFastElectronHypoTool import TrigEgammaFastElectronHypoToolFromDict
 
-    return  MenuSequence( Maker       = fastElectronViewsMaker,                                        
+    return  MenuSequence( flags,
+                          Maker       = fastElectronViewsMaker,
                           Sequence    = fastElectronAthSequence,
                           Hypo        = theElectronHypo,
                           HypoToolGen = TrigEgammaFastElectronHypoToolFromDict,
                           IsProbe=is_probe_leg)
 
 
-def fastElectronMenuSequence_LRT(is_probe_leg=False):
+def fastElectronMenuSequence_LRT(flags, is_probe_leg=False):
     # This is to call fastElectronMenuSequence for the _LRT variant
-    return fastElectronMenuSequence(is_probe_leg=is_probe_leg, variant='_LRT')
+    return fastElectronMenuSequence(flags, is_probe_leg=is_probe_leg, variant='_LRT')

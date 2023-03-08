@@ -10,7 +10,7 @@ include("InDetTrigRecExample/InDetTrigRec_jobOptions.py") # this is needed to ge
 from AthenaCommon.Logging import logging 
 log = logging.getLogger("EFIDTracking")
 
-from InDetTrigRecExample.InDetTrigCommonTools import CAtoLegacyPublicToolDecorator
+from InDetTrigRecExample.InDetTrigCommonTools import CAtoLegacyPublicToolWrapper
 
 #Create a view verifier for necessary data collections
 def get_idtrig_view_verifier(name):
@@ -33,7 +33,6 @@ def get_idtrig_view_verifier(name):
                                        ( 'InDet::PixelGangedClusterAmbiguities' , 'StoreGateSvc+TrigPixelClusterAmbiguitiesMap' ),
                                        ( 'InDet::SCT_ClusterContainer',   TrigSCTKeys.Clusters ),
                                        ( 'InDet::PixelClusterContainer',  TrigPixelKeys.Clusters ),
-                                       ( 'IDCInDetBSErrContainer',        'StoreGateSvc+SCT_FlaggedCondData_TRIG' ),
                                       ]
       if globalflags.InputFormat.is_bytestream():
          viewDataVerifier.DataObjects += [
@@ -51,7 +50,6 @@ def get_idtrig_view_verifier(name):
                                      ( 'SpacePointCache' , InDetCacheNames.SpacePointCacheSCT ),
                                      ( 'IDCInDetBSErrContainer_Cache' , InDetCacheNames.PixBSErrCacheKey ),
                                      ( 'IDCInDetBSErrContainer_Cache' , InDetCacheNames.SCTBSErrCacheKey ),
-                                     ( 'IDCInDetBSErrContainer_Cache' , InDetCacheNames.SCTFlaggedCondCacheKey ),
                                      ( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' ),
                                      ( 'TagInfo' , 'DetectorStore+ProcessingTags' )]
 
@@ -80,7 +78,7 @@ def remapToOffline( name ):
    else:
        return name
 
-def makeInDetPatternRecognition( config, verifier = 'IDTrigViewDataVerifier'  ):
+def makeInDetPatternRecognition( flags, config, verifier = 'IDTrigViewDataVerifier' ):
       viewAlgs = [] #list of all algs running in this module
 
       dataVerifier = None
@@ -99,13 +97,12 @@ def makeInDetPatternRecognition( config, verifier = 'IDTrigViewDataVerifier'  ):
          trackingCuts = ConfiguredNewTrackingCuts( mode_name ) 
       #trackingCuts.printInfo() 
 
-      from AthenaConfiguration.AllConfigFlags import ConfigFlags
       from InDetTrigRecExample import InDetTrigCA
 
-      InDetTrigCA.InDetTrigConfigFlags = ConfigFlags.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking."+config.name)
+      InDetTrigCA.InDetTrigConfigFlags = flags.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking."+config.name)
 
       from TrkConfig.TrkTrackSummaryToolConfig import InDetTrigTrackSummaryToolCfg
-      summaryTool = CAtoLegacyPublicToolDecorator(InDetTrigTrackSummaryToolCfg)
+      summaryTool = CAtoLegacyPublicToolWrapper(InDetTrigTrackSummaryToolCfg)
       
       # --- decide if use the association tool
       usePrdAssociationTool = False 
@@ -184,7 +181,8 @@ def makeInDetPatternRecognition( config, verifier = 'IDTrigViewDataVerifier'  ):
 
       #Verifier should not be necessary when both patt. rec. and PT runs in the same view -> None
       #Also provides particle cnv alg inside
-      precisionAlgs = ambiguitySolverForIDPatternRecognition(config      = config,
+      precisionAlgs = ambiguitySolverForIDPatternRecognition(flags,
+                                                             config      = config,
                                                              inputTracks = config.trkTracks_IDTrig(), 
                                                              verifier    = None, 
                                                              summaryTool = summaryTool )
@@ -197,7 +195,7 @@ def makeInDetPatternRecognition( config, verifier = 'IDTrigViewDataVerifier'  ):
 
 
 # This could potentially be unified with makeInDetTrigPrecisionTracking in the InDetTrigPrecisionTracking.py?
-def ambiguitySolverForIDPatternRecognition( config, summaryTool, inputTracks,verifier=None ):
+def ambiguitySolverForIDPatternRecognition( flags, config, summaryTool, inputTracks,verifier=None ):
    ptAlgs = [] #List containing all the precision tracking algorithms hence every new added alg has to be appended to the list
    
    #-----------------------------------------------------------------------------
@@ -248,7 +246,8 @@ def ambiguitySolverForIDPatternRecognition( config, summaryTool, inputTracks,ver
    from InDetTrigRecExample.InDetTrigConfigRecLoadToolsPost import InDetTrigParticleCreatorToolWithSummary
    creatorTool = InDetTrigParticleCreatorToolWithSummary
    
-   trackParticleCnvAlg = trackParticleCnv_builder(name                 = add_prefix( 'xAODParticleCreatorAlg', config.name + '_IDTrig' ), 
+   trackParticleCnvAlg = trackParticleCnv_builder(flags,
+                                                  name                 = add_prefix( 'xAODParticleCreatorAlg', config.name + '_IDTrig' ),
                                                   config               = config,
                                                   inTrackCollectionKey = config.trkTracks_IDTrig()+"_Amb",
                                                   outTrackParticlesKey = config.tracks_IDTrig(),

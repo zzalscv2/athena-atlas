@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IDENTIFIER_EXPANDEDIDENTIFIER_H
 #define IDENTIFIER_EXPANDEDIDENTIFIER_H
 
-#include <vector>
 #include <string>
+#include <boost/container/small_vector.hpp>
 
 //-----------------------------------------------
 //
@@ -109,17 +109,17 @@ class ExpandedIdentifier
 public:
 
 
-    //----------------------------------------------------------------
-    // Define public typedefs
-    //----------------------------------------------------------------
+  //----------------------------------------------------------------
+  // Define public typedefs
+  //----------------------------------------------------------------
   typedef ExpandedIdentifier 		id_type;
   typedef int  				element_type;
-  typedef std::vector<element_type> 	element_vector;
+  typedef boost::container::small_vector<element_type,12> element_vector;
 #ifdef __CPPCHECK__
   // Otherwise cppcheck warns about passing this type by value.
   typedef size_t size_type;
 #else
-  typedef std::vector<element_type>::size_type 	size_type;
+  typedef boost::container::small_vector<element_type,12>::size_type size_type;
 #endif
 
   typedef enum

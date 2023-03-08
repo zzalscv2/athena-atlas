@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TGC_ResidualPullCalculator.h"
@@ -26,14 +26,13 @@ StatusCode Muon::TGC_ResidualPullCalculator::initialize()
 }
 
 //================ calculate residuals for TGC ==================================
-void Muon::TGC_ResidualPullCalculator::residuals(
-    std::vector<double>& residuals,
+std::array<double,5> 
+Muon::TGC_ResidualPullCalculator::residuals(
     const Trk::MeasurementBase* measurement,
     const Trk::TrackParameters* trkPar,
     const Trk::ResidualPull::ResidualType /*resType*/,
     const Trk::TrackState::MeasurementType) const {
-
-  if (residuals.size()<1) residuals.resize(1);
+  std::array<double,5> residuals{};
   const Trk::RIO_OnTrack* rot = dynamic_cast<const Trk::RIO_OnTrack*>(measurement);
   if (!rot) {
     const Muon::CompetingMuonClustersOnTrack* muonCompClusters =
@@ -44,7 +43,7 @@ void Muon::TGC_ResidualPullCalculator::residuals(
   if (!trkPar || !rot) {
     if( !trkPar ) ATH_MSG_WARNING ("No TrackParameters, cannot calculate residual/pull ");
     if( !rot )    ATH_MSG_WARNING ("No ROT, cannot calculate residual/pull ");
-    return;
+    return residuals;
   }
   Identifier ID = rot->identify();
   
@@ -60,7 +59,7 @@ void Muon::TGC_ResidualPullCalculator::residuals(
       if (measurement->localParameters().parameterKey() !=3) {
         ATH_MSG_WARNING ( "TGC ClusterOnTrack does not carry the expected "
                           << "LocalParameters structure!");
-        return;
+        return residuals;
       }
       // get orientation angle of strip to rotate back from local frame to strip
       const Amg::MatrixX &covmat=measurement->localCovariance();
@@ -81,7 +80,7 @@ void Muon::TGC_ResidualPullCalculator::residuals(
       if (measurement->localParameters().parameterKey() != 1) {
         ATH_MSG_WARNING ("TGC ClusterOnTrack does not carry the expected "
                          << "LocalParameters structure!" );
-        return;
+        return residuals;
       } else {
         // convention to be interpreted by TrkValTools: 2nd coordinate codes orientation of TGC
         residuals[Trk::loc1] = measurement->localParameters()[Trk::loc1]
@@ -90,8 +89,9 @@ void Muon::TGC_ResidualPullCalculator::residuals(
     }
   } else {
     ATH_MSG_DEBUG ( "Input problem measurement is not TGC." );
-    return;
+    return residuals;
   }
+  return residuals;
 }
 
 //================ calculate residuals and pulls for TGC ==================================

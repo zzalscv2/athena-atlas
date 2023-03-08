@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -48,3 +48,65 @@ def CaloClusterThinningCfg(ConfigFlags,**kwargs):
     CaloClusterThinning = CompFactory.DerivationFramework.CaloClusterThinning
     acc.addPublicTool(CaloClusterThinning(**kwargs),primary=True)
     return acc
+
+
+#### 
+# additional utilities to return the list of decorations
+# added by the tools
+
+from egammaRec.Factories import getPropertyValue
+from egammaRec import egammaKeys
+
+def getGainLayerNames( tool ):
+    """getGainLayerNames( tool ) -> return a list of names of the decorations added to the
+    egamma tool, given the GainDecorator tool"""
+    return [getPropertyValue(tool, "decoration_pattern").format(info=info, layer=layer, gain=gain) \
+        for info in ["E", "nCells"] \
+        for layer in getPropertyValue(tool, "layers") \
+        for gain in getPropertyValue(tool, "gain_names").values() ]
+
+def getGainDecorations(acc, kernel,
+    collections=[egammaKeys.outputElectronKey(), egammaKeys.outputPhotonKey()],
+    info = ["E", "nCells"] ):
+    """getGainDecorations( acc, kernel collections=["Electrons", "Photons"] ) -> 
+    Return a list with the 'ExtraContent' to be added to the decorations to save the gain
+    information per layer"""
+
+    GainDecoratorTool = None
+    for toolStr in (acc.getEventAlgo(kernel).AugmentationTools):
+        toolStr  = f'{toolStr}'
+        splitStr = toolStr.split('/')
+        tool =  acc.getPublicTool(splitStr[1])
+        if splitStr[0] == 'DerivationFramework::GainDecorator':
+            GainDecoratorTool = tool
+
+    if GainDecoratorTool : 
+        return ["{part}.{info}".format(part=part, info=info) for part in collections \
+                for info in getGainLayerNames(GainDecoratorTool) ]
+    else:
+        return ""
+
+
+def getClusterEnergyPerLayerDecorations( acc, kernel ):
+    """getClusterEnergyPerLayerDecorationsLegacy( acc, kernel ) -> return a list of names of the
+    decorations added to the egamma object, given the ClusterEnergyPerLayerDecorations
+    object (e.g. Photons.E7x11_Lr0, ...)"""
+    properties = 'SGKey_photons', 'SGKey_electrons'
+    ClusterEnergyPerLayerDecorators = []  
+    for toolStr in acc.getEventAlgo(kernel).AugmentationTools:
+        toolStr  = f'{toolStr}'
+        splitStr = toolStr.split('/')
+        tool =  acc.getPublicTool(splitStr[1])
+        if splitStr[0] == 'DerivationFramework::ClusterEnergyPerLayerDecorator':
+            ClusterEnergyPerLayerDecorators.append( tool )
+
+    decorations = []
+    for tool in ClusterEnergyPerLayerDecorators:
+        collections = filter(bool, (getPropertyValue(tool, x) for x in properties) )
+        for part in collections:
+            for layer in getPropertyValue(tool, "layers"):
+                decorations.extend(['{part}.E{neta}x{nphi}_Lr{layer}'.format(part=part, 
+                    neta=getPropertyValue(tool, 'neta'),
+                    nphi=getPropertyValue(tool, 'nphi'),
+                    layer=layer)])
+    return decorations

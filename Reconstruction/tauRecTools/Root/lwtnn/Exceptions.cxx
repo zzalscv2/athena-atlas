@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/lwtnn/Exceptions.h"
@@ -9,16 +9,16 @@ namespace lwtDev {
 
   // ______________________________________________________________________
   // excpetions
-  LightweightNNException::LightweightNNException(std::string problem):
+  LightweightNNException::LightweightNNException(const std::string& problem):
     std::logic_error(problem)
   {}
-  NNConfigurationException::NNConfigurationException(std::string problem):
+  NNConfigurationException::NNConfigurationException(const std::string& problem):
     LightweightNNException(problem)
   {}
-  NNEvaluationException::NNEvaluationException(std::string problem):
+  NNEvaluationException::NNEvaluationException(const std::string& problem):
     LightweightNNException(problem)
   {}
-  OutputRankException::OutputRankException(std::string problem):
+  OutputRankException::OutputRankException(const std::string& problem):
     NNEvaluationException(problem)
   {}
 }

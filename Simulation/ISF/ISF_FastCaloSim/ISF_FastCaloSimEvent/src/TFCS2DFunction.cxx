@@ -120,7 +120,7 @@ void TFCS2DFunction::unit_test ATLAS_NOT_THREAD_SAFE (TH2* hist,TFCS2DFunction* 
   }
   
   std::unique_ptr<TFile> outputfile(TFile::Open( outfilename, "UPDATE" ));
-  if (outputfile != NULL) {
+  if (outputfile != nullptr) {
     hist->Write();
     hist_val->Write();
     hist_pull->Write();

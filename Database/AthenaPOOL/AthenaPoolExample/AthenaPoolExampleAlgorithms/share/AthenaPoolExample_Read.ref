@@ -61,12 +61,13 @@ EmptyPoolFile.root  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Param
 EmptyPoolFile.root  DEBUG --->Reading Param:FID=[C7040C30-3363-7D42-B1B7-E3F3B1881030]
 EmptyPoolFile.root  DEBUG --->Reading Param:PFN=[EmptyPoolFile.root]
 EmptyPoolFile.root  DEBUG --->Reading Param:POOL_VSN=[1.1]
-EmptyPoolFile.root  DEBUG --->Reading Param:FORMAT_VSN=[1.1]
+EmptyPoolFile.root  DEBUG --->Reading Param:FORMAT_VSN=[2.0]
 ##Params            DEBUG No objects passing selection criteria... Container has 4 Entries in total.
 PoolSvc             DEBUG createCollection() type=ImplicitCollection, connection=PFN:EmptyPoolFile.root, name=POOLContainer_DataHeader, contextID=0
 EventSelector       DEBUG No events found in: EmptyPoolFile.root skipped!!!
 StorageSvc          DEBUG Disconnect request for database: FID=C7040C30-3363-7D42-B1B7-E3F3B1881030 PFN=EmptyPoolFile.root
 StorageSvc          DEBUG Closing database: FID=C7040C30-3363-7D42-B1B7-E3F3B1881030
+RootDatabase.close  DEBUG Closing DB EmptyPoolFile.root
 EventSelector       DEBUG Try item: "SimplePoolFile1.root" from the collection list.
 PoolSvc             DEBUG createCollection() type=RootCollection, connection=PFN:SimplePoolFile1.root, name=SimplePoolFile1.root, contextID=0
 MetaDataSvc         DEBUG handle() FirstInputFile for FID:F2313678-C96A-964F-89E8-08BAB39F2DA7
@@ -142,7 +143,7 @@ SimplePoolFile1...  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Param
 SimplePoolFile1...  DEBUG --->Reading Param:FID=[F2313678-C96A-964F-89E8-08BAB39F2DA7]
 SimplePoolFile1...  DEBUG --->Reading Param:PFN=[SimplePoolFile1.root]
 SimplePoolFile1...  DEBUG --->Reading Param:POOL_VSN=[1.1]
-SimplePoolFile1...  DEBUG --->Reading Param:FORMAT_VSN=[1.1]
+SimplePoolFile1...  DEBUG --->Reading Param:FORMAT_VSN=[2.0]
 ##Params            DEBUG No objects passing selection criteria... Container has 4 Entries in total.
 SimplePoolFile1...  DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] MetaDataHdr(DataHeader)
 MetaDataHdr(Dat...  DEBUG Opening
@@ -217,7 +218,7 @@ EmptyPoolFile.root  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Param
 EmptyPoolFile.root  DEBUG --->Reading Param:FID=[C7040C30-3363-7D42-B1B7-E3F3B1881030]
 EmptyPoolFile.root  DEBUG --->Reading Param:PFN=[EmptyPoolFile.root]
 EmptyPoolFile.root  DEBUG --->Reading Param:POOL_VSN=[1.1]
-EmptyPoolFile.root  DEBUG --->Reading Param:FORMAT_VSN=[1.1]
+EmptyPoolFile.root  DEBUG --->Reading Param:FORMAT_VSN=[2.0]
 ##Params            DEBUG No objects passing selection criteria... Container has 4 Entries in total.
 PoolSvc             DEBUG createCollection() type=ImplicitCollection, connection=PFN:EmptyPoolFile.root, name=POOLContainer_DataHeader, contextID=0
 EventSelector       DEBUG No events found in: EmptyPoolFile.root skipped!!!
@@ -239,6 +240,7 @@ MetaDataSvc         DEBUG handle() EndInputFile for eventless EmptyPoolFile.root
 MetaDataSvc         DEBUG retireMetadataSource: eventless EmptyPoolFile.root
 StorageSvc          DEBUG Disconnect request for database: FID=C7040C30-3363-7D42-B1B7-E3F3B1881030 PFN=EmptyPoolFile.root
 StorageSvc          DEBUG Closing database: FID=C7040C30-3363-7D42-B1B7-E3F3B1881030
+RootDatabase.close  DEBUG Closing DB EmptyPoolFile.root
 EventSelector       DEBUG Try item: "SimplePoolFile1.root" from the collection list.
 PoolSvc             DEBUG createCollection() type=RootCollection, connection=PFN:SimplePoolFile1.root, name=SimplePoolFile1.root, contextID=0
 ApplicationMgr       INFO Application Manager Started successfully
@@ -635,6 +637,7 @@ MetaDataSvc         DEBUG handle() EndInputFile for FID:F2313678-C96A-964F-89E8-
 MetaDataSvc         DEBUG retireMetadataSource: FID:F2313678-C96A-964F-89E8-08BAB39F2DA7
 StorageSvc          DEBUG Disconnect request for database: FID=F2313678-C96A-964F-89E8-08BAB39F2DA7 PFN=SimplePoolFile1.root
 StorageSvc          DEBUG Closing database: FID=F2313678-C96A-964F-89E8-08BAB39F2DA7
+RootDatabase.close  DEBUG Closing DB SimplePoolFile1.root
 EventSelector       DEBUG Try item: "EmptyPoolFile.root" from the collection list.
 PoolSvc             DEBUG createCollection() type=RootCollection, connection=PFN:EmptyPoolFile.root, name=EmptyPoolFile.root, contextID=0
 PoolSvc             DEBUG createCollection() type=ImplicitCollection, connection=PFN:EmptyPoolFile.root, name=POOLContainer(DataHeader), contextID=0
@@ -685,7 +688,7 @@ EmptyPoolFile.root  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Param
 EmptyPoolFile.root  DEBUG --->Reading Param:FID=[C7040C30-3363-7D42-B1B7-E3F3B1881030]
 EmptyPoolFile.root  DEBUG --->Reading Param:PFN=[EmptyPoolFile.root]
 EmptyPoolFile.root  DEBUG --->Reading Param:POOL_VSN=[1.1]
-EmptyPoolFile.root  DEBUG --->Reading Param:FORMAT_VSN=[1.1]
+EmptyPoolFile.root  DEBUG --->Reading Param:FORMAT_VSN=[2.0]
 ##Params            DEBUG No objects passing selection criteria... Container has 4 Entries in total.
 PoolSvc             DEBUG createCollection() type=ImplicitCollection, connection=PFN:EmptyPoolFile.root, name=POOLContainer_DataHeader, contextID=0
 EventSelector       DEBUG No events found in: EmptyPoolFile.root skipped!!!
@@ -707,6 +710,7 @@ MetaDataSvc         DEBUG handle() EndInputFile for eventless EmptyPoolFile.root
 MetaDataSvc         DEBUG retireMetadataSource: eventless EmptyPoolFile.root
 StorageSvc          DEBUG Disconnect request for database: FID=C7040C30-3363-7D42-B1B7-E3F3B1881030 PFN=EmptyPoolFile.root
 StorageSvc          DEBUG Closing database: FID=C7040C30-3363-7D42-B1B7-E3F3B1881030
+RootDatabase.close  DEBUG Closing DB EmptyPoolFile.root
 EventSelector       DEBUG Try item: "SimplePoolFile2.root" from the collection list.
 PoolSvc             DEBUG createCollection() type=RootCollection, connection=PFN:SimplePoolFile2.root, name=SimplePoolFile2.root, contextID=0
 SimplePoolFile2...  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
@@ -776,7 +780,7 @@ SimplePoolFile2...  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Param
 SimplePoolFile2...  DEBUG --->Reading Param:FID=[73F77177-D136-9344-B64D-29693F68D6C2]
 SimplePoolFile2...  DEBUG --->Reading Param:PFN=[SimplePoolFile2.root]
 SimplePoolFile2...  DEBUG --->Reading Param:POOL_VSN=[1.1]
-SimplePoolFile2...  DEBUG --->Reading Param:FORMAT_VSN=[1.1]
+SimplePoolFile2...  DEBUG --->Reading Param:FORMAT_VSN=[2.0]
 ##Params            DEBUG No objects passing selection criteria... Container has 4 Entries in total.
 RootDatabase.se...  DEBUG Request tree cache 
 RootDatabase.se...  DEBUG File name SimplePoolFile2.root
@@ -1270,6 +1274,7 @@ MetaDataSvc         DEBUG handle() EndInputFile for FID:73F77177-D136-9344-B64D-
 MetaDataSvc         DEBUG retireMetadataSource: FID:73F77177-D136-9344-B64D-29693F68D6C2
 StorageSvc          DEBUG Disconnect request for database: FID=73F77177-D136-9344-B64D-29693F68D6C2 PFN=SimplePoolFile2.root
 StorageSvc          DEBUG Closing database: FID=73F77177-D136-9344-B64D-29693F68D6C2
+RootDatabase.close  DEBUG Closing DB SimplePoolFile2.root
 EventSelector       DEBUG Try item: "SimplePoolFile3.root" from the collection list.
 PoolSvc             DEBUG createCollection() type=RootCollection, connection=PFN:SimplePoolFile3.root, name=SimplePoolFile3.root, contextID=0
 SimplePoolFile3...  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
@@ -1343,7 +1348,7 @@ SimplePoolFile3...  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Param
 SimplePoolFile3...  DEBUG --->Reading Param:FID=[A811B014-0297-AD47-AF4C-B75EF418982D]
 SimplePoolFile3...  DEBUG --->Reading Param:PFN=[SimplePoolFile3.root]
 SimplePoolFile3...  DEBUG --->Reading Param:POOL_VSN=[1.1]
-SimplePoolFile3...  DEBUG --->Reading Param:FORMAT_VSN=[1.1]
+SimplePoolFile3...  DEBUG --->Reading Param:FORMAT_VSN=[2.0]
 ##Params            DEBUG No objects passing selection criteria... Container has 4 Entries in total.
 RootDatabase.se...  DEBUG Request tree cache 
 RootDatabase.se...  DEBUG File name SimplePoolFile3.root
@@ -1962,6 +1967,7 @@ MetaDataSvc         DEBUG handle() EndInputFile for FID:A811B014-0297-AD47-AF4C-
 MetaDataSvc         DEBUG retireMetadataSource: FID:A811B014-0297-AD47-AF4C-B75EF418982D
 StorageSvc          DEBUG Disconnect request for database: FID=A811B014-0297-AD47-AF4C-B75EF418982D PFN=SimplePoolFile3.root
 StorageSvc          DEBUG Closing database: FID=A811B014-0297-AD47-AF4C-B75EF418982D
+RootDatabase.close  DEBUG Closing DB SimplePoolFile3.root
 AthenaEventLoopMgr   INFO No more events in event selection 
 MetaDataSvc         DEBUG MetaDataSvc::stop()
 PoolSvc             DEBUG Disconnect request for contextId=0

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # DAOD_JETM12.py
@@ -13,8 +13,8 @@ def JETM12SkimmingToolCfg(ConfigFlags):
     acc = ComponentAccumulator()
 
     from DerivationFrameworkJetEtMiss import TriggerLists
-    metTriggers = TriggerLists.MET_Trig()
-    muTriggers = TriggerLists.single_mu_Trig()
+    metTriggers = TriggerLists.MET_Trig(ConfigFlags)
+    muTriggers = TriggerLists.single_mu_Trig(ConfigFlags)
     orstr  = ' || '
     andstr = ' && '
     trackRequirements = '(InDetTrackParticles.pt > 10.*GeV && InDetTrackParticles.TrkIsoPt1000_ptcone20 < 0.12*InDetTrackParticles.pt && InDetTrackParticles.DFCommonTightPrimary && abs(DFCommonInDetTrackZ0AtPV) < 5.0*mm )'
@@ -205,7 +205,7 @@ def JETM12Cfg(ConfigFlags):
     # for actually configuring the matching, so we create it here and pass it down
     # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    JETM12TriggerListsHelper = TriggerListsHelper()
+    JETM12TriggerListsHelper = TriggerListsHelper(ConfigFlags)
 
     # Skimming, thinning, augmentation, extra content
     acc.merge(JETM12KernelCfg(ConfigFlags, name="JETM12Kernel", PreselectionName="JETM12PreselectionKernel", StreamName = 'StreamDAOD_JETM12', TriggerListsHelper = JETM12TriggerListsHelper))
@@ -223,7 +223,7 @@ def JETM12Cfg(ConfigFlags):
                                              "InDetTrackParticles", "PrimaryVertices",
                                              "MET_Baseline_AntiKt4EMTopo",
                                              "MET_Baseline_AntiKt4EMPFlow",
-                                             "AntiKt4EMTopoJets","AntiKt4EMPFlowJets","AntiKt4TruthJets",
+                                             "AntiKt4EMTopoJets","AntiKt4EMPFlowJets",
                                              "BTagging_AntiKt4EMPFlow"]
 
     JETM12SlimmingHelper.AllVariables = ["MuonSegments","InDetTrackParticles",
@@ -232,13 +232,14 @@ def JETM12Cfg(ConfigFlags):
     JETM12SlimmingHelper.ExtraVariables = ["InDetTrackParticles.TrkIsoPt1000_ptcone40.TrkIsoPt1000_ptcone30.TrkIsoPt1000_ptcone20.TrkIsoPt500_ptcone40.TrkIsoPt500_ptcone30.TrkIsoPt500_ptcone20"]
 
     if ConfigFlags.Input.isMC:
+        from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
+        addTruth3ContentToSlimmerTool(JETM12SlimmingHelper)
+
         JETM12SlimmingHelper.AppendToDictionary.update({'TruthParticles': 'xAOD::TruthParticleContainer',
                                                        'TruthParticlesAux': 'xAOD::TruthParticleAuxContainer'})
 
         JETM12SlimmingHelper.SmartCollections += ["AntiKt4TruthJets"]
-        JETM12SlimmingHelper.AllVariables += ["MuonTruthParticles", "TruthParticles", "TruthVertices", 
-                                              "TruthMuons","TruthElectrons","TruthPhotons","TruthTaus","TruthNeutrinos",
-                                              "MET_Truth"]
+        JETM12SlimmingHelper.AllVariables += ["MuonTruthParticles", "TruthParticles", "TruthVertices"]
 
     # Trigger content
     JETM12SlimmingHelper.IncludeTriggerNavigation = False

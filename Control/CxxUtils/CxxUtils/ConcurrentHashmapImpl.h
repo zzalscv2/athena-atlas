@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/ConcurrentHashmapImpl.h
@@ -17,6 +17,7 @@
 
 #include "CxxUtils/bitscan.h"
 #include "CxxUtils/atomic_fetch_minmax.h"
+#include "CxxUtils/concepts.h"
 #include <functional>
 #include <cstdint>
 #include <cstdlib>
@@ -38,6 +39,23 @@ namespace detail {
 /// in order to avoid instantiation circularities, as the HASHER_ and MATCHER_
 /// classes will probably want to use it.
 using ConcurrentHashmapVal_t = uintptr_t;
+
+
+#if HAVE_CONCEPTS
+
+
+/**
+ * @brief Concept for a value that can be saved in a concurrent hash map.
+ *
+ * Must be a trivial type that can fit in a uintptr_t
+ */
+template <class T>
+concept IsConcurrentHashmapPayload = std::is_standard_layout_v<T> &&
+  std::is_trivial_v<T> &&
+  sizeof (T) <= sizeof (ConcurrentHashmapVal_t);
+
+
+#endif
 
 
 /**
@@ -120,9 +138,22 @@ private:
  * with uintptr_t values, the hash and comparison operations are templated.
  * This allows for handling more complex types, where the values
  * stored in the map are pointers to the actual objects.  We support
- * inserting new items and modifying existing ones, but not deletion.
+ * inserting new items and modifying existing ones, and, with caveats,
+ * deletion.
  * One value of the key must be reserved to indicate null; no keys with
  * that value may be inserted.
+ * For deletion, a second distinct (tombstone) value of the key must be reserved
+ * to mark deleted entries.
+ *
+ * Further caveats for deletion:
+ *  - Deleted entries continue to occupy space in the table until the next
+ *    time the table is reallocated.
+ *  - Care must be taken if the key or value types require memory
+ *    allocation.  Additional functionality may be required here to
+ *    really support this.
+ *  - An item may be deleted while there is a valid iterator referencing it.
+ *    In that case, the key returned by the iterator will change to the
+ *    tombstone value.
  *
  * There can be only one writer at a time; this is enforced with internal locks.
  * However, there can be any number of concurrent readers at any time.
@@ -137,8 +168,10 @@ private:
  *             Defaults to std::hash.
  *  MATCHER_ - Functional to compare two keys for equality.
  *             Defaults to std::equal_to.
- *  NULLVAL_ -  Value of the key to be considered null.
- *              A key with this value may not be inserted.
+ *  NULLVAL_ - Value of the key to be considered null.
+ *             A key with this value may not be inserted.
+ *  TOMBSTONE_ - Value of the key used to mark a deleted entry.
+ *               If identical to NULLVAL_, then deletions are not allowed.
  *
  * Implementation notes:
  *  We use open addressing (see, eg, knuth AOCP 6.4), in which the payloads
@@ -157,7 +190,8 @@ private:
 template <template <class> class UPDATER_,
           typename HASHER_ = std::hash<uintptr_t>,
           typename MATCHER_ = std::equal_to<uintptr_t>,
-          uintptr_t NULLVAL_ = 0>
+          uintptr_t NULLVAL_ = 0,
+          uintptr_t TOMBSTONE_ = NULLVAL_>
 class ConcurrentHashmapImpl
 {
 public:
@@ -169,6 +203,8 @@ public:
   using Matcher_t = MATCHER_;
   /// Null key value.
   static constexpr uintptr_t nullval = NULLVAL_;
+  /// Tombstone key value.  Must be different from nullval to allow erasures.
+  static constexpr uintptr_t tombstone = TOMBSTONE_;
   /// Used to represent an invalid table index.
   static constexpr size_t INVALID = static_cast<size_t>(-1);
 
@@ -245,7 +281,7 @@ private:
      * @param key The key for which to search.
      * @param hash The hash of the key.
      *
-     * Returns the matching entry, or nullptr.  xxx
+     * Returns the matching entry, or nullptr.
      */
     size_t probeRead (val_t key, size_t hash) const;
 
@@ -347,6 +383,12 @@ public:
   size_t capacity() const;
 
 
+  /**
+   * @brief The number of erased elements in the current table.
+   */
+  size_t erased() const;
+
+
   /** 
    * @brief Return the hasher object.
    */
@@ -400,6 +442,8 @@ public:
 
     /**
      * @brief Return the key for this iterator.
+     *        If deletions are allowed, then the key may change asynchronously
+     *        to the tombstone value.
      */
     val_t key() const;
     
@@ -460,6 +504,24 @@ public:
   const_iterator get (val_t key, size_t hash) const;
 
 
+  /**
+   * @brief Erase an entry from the table.
+   * @param key The key to erase.
+   * @param hash The hash of the key.
+   *
+   * Mark the corresponding entry as deleted.
+   * Return true on success, false on failure (key not found).
+   *
+   * The tombstone value must be different from the null value.
+   *
+   * Take care if the key or value types require memory allocation.
+   *
+   * This may cause the key type returned by an iterator to change
+   * asynchronously to the tombstone value.
+   **/
+  bool erase (val_t key, size_t hash);
+
+
   /// Two iterators defining a range.
   using const_iterator_range = std::pair<const_iterator, const_iterator>;
 
@@ -503,6 +565,16 @@ public:
 
 
   /**
+   * @brief Erase the table by filling it with nulls.
+   *
+   * This method is not safe to use concurrently --- no other threads
+   * may be accessing the container at the same time, either for read
+   * or write.
+   */
+  void forceClear();
+
+
+  /**
    * @brief Increase the table capacity.
    * @param capacity The new table capacity.
    * @param ctx Execution context.
@@ -520,6 +592,20 @@ public:
    * @param ctx Execution context.
    */
   void quiescent (const typename Updater_t::Context_t& ctx);
+
+
+  /**
+   * @brief Swap this container with another.
+   * @param other The container with which to swap.
+   *
+   * This will also call swap on the Updater object; hence, the Updater
+   * object must also support swap.  The Hasher and Matcher instances
+   * are NOT swapped.
+   *
+   * This operation is NOT thread-safe.  No other threads may be accessing
+   * either container during this operation.
+   */
+  void swap (ConcurrentHashmapImpl& other);
 
 
 private:
@@ -559,6 +645,8 @@ private:
   Table* m_table;
   /// Number of entries in the map.
   std::atomic<size_t> m_size;
+  /// Number of entries that have been erased.
+  std::atomic<size_t> m_erased;
   /// Mutex to serialize changes to the map.
   std::mutex m_mutex;
 };

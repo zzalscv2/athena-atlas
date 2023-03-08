@@ -76,13 +76,10 @@ def ITkSiSPSeededTrackFinderCfg(flags, name="ITkSiSpTrackFinder", **kwargs) :
     if "SeedsTool" not in kwargs:
         ITkSiSpacePointsSeedMaker = None
 
-        from InDetConfig.ITkConfigFlags  import TrackingComponent
-        useActsSiSpacePointSeedMaker = TrackingComponent.AthenaChain not in flags.ITk.Tracking.recoChain and \
-                                       TrackingComponent.ValidateActsClusters not in flags.ITk.Tracking.recoChain and \
-                                       (TrackingComponent.ValidateActsSpacePoints in flags.ITk.Tracking.recoChain or \
-                                        TrackingComponent.ValidateActsSeeds in flags.ITk.Tracking.recoChain)
+        from ActsInterop.TrackingComponentConfigurer import TrackingComponentConfigurer
+        configuration_settings = TrackingComponentConfigurer(flags)
 
-        if flags.ITk.Tracking.ActiveConfig.extension != "ConversionFinding" and useActsSiSpacePointSeedMaker:
+        if flags.ITk.Tracking.ActiveConfig.extension != "ConversionFinding" and configuration_settings.ActsToAthenaSeedConverter:
             from ActsTrkSeedingTool.ActsTrkSeedingToolConfig import ActsTrkSiSpacePointsSeedMakerCfg
             ITkSiSpacePointsSeedMaker = acc.popToolsAndMerge(ActsTrkSiSpacePointsSeedMakerCfg(flags))
         else:

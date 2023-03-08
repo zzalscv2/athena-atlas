@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -251,8 +251,7 @@ def getMETRecoTool(topconfig):
                                        METRefiners = topconfig.reflist,
                                        METContainer = topconfig.outputCollection(),
                                        METComponentMap = topconfig.outputMap(),
-                                       WarnIfDuplicate = topconfig.duplicateWarning,
-                                       TimingDetail=0)
+                                       WarnIfDuplicate = topconfig.duplicateWarning)
     if topconfig.doSum:
         recoTool.METFinalName = defaultOutputKey['Total']    
 

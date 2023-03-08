@@ -1,10 +1,10 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import importlib
 import string
 
-from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import NoCAmigration
+ 
 
 
 from AthenaCommon.Logging import logging
@@ -87,7 +87,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
             self.chainFilter = f
 
 
-    def getChainDicts(self):
+    def getChainDicts(self, flags):
 
         def validSignature(currentSig, chainSig):
             """Check if chain is assigned to the correct signature"""
@@ -106,7 +106,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
             for chain in chains:
                 log.debug("Now processing chain: %s from signature %s", chain, sig)
                 chainCounter += 1
-                chainDict = dictFromChainName(chain)
+                chainDict = dictFromChainName(flags, chain)
                 chainDict['chainCounter'] = chainCounter
                 chainDict['prescale'] = 1  # set default chain prescale
 
@@ -150,7 +150,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
         return
 
     def generateChains(self, flags):
-
+        from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import isCAMenu
         all_chains = []
         combinations_in_menu = []
         alignmentGroups_to_align = set()
@@ -159,7 +159,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
         for chainDict in self.chainDicts:
             log.debug("Next: getting chain configuration for chain %s ", chainDict['chainName'])
             chainConfig,lengthOfChainConfigs = self.__generateChainConfig(flags, chainDict)
-            if isComponentAccumulatorCfg():
+            if isCAMenu():
                 # skip chain generation if no ChainConfig was found
                 if chainConfig is None:
                     continue
@@ -208,7 +208,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
 
         # decoding of the chain name
         log.info("Will now get chain dictionaries for each chain")
-        self.getChainDicts()
+        self.getChainDicts(flags)
         
         if flags.Trigger.disableCPS:
             log.warning('Removing all CPS group because the flag Trigger.disableCPS is set')
@@ -340,6 +340,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
         from TriggerMenuMT.HLT.Config.Utility.ComboHypoHandling import addTopoInfo, comboConfigurator, topoLegIndices
         from TriggerMenuMT.HLT.Config.Utility.ChainMerging import mergeChainDefs
         from TriggerMenuMT.HLT.CommonSequences import EventBuildingSequences, TLABuildingSequences
+        from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import isCAMenu
 
         # split the the chainDictionaries for each chain and print them in a pretty way
         chainDicts = splitInterSignatureChainDict(mainChainDict)
@@ -351,7 +352,8 @@ class GenerateMenuMT(object, metaclass=Singleton):
 
         # Loop over all chainDicts and send them off to their respective assembly code
         listOfChainConfigs = []
-        tmp_lengthOfChainConfigs = []
+        perSig_lengthOfChainConfigs = []
+        not_migrated=False
 
         for chainPartDict in chainDicts:
             chainPartConfig = None
@@ -366,7 +368,12 @@ class GenerateMenuMT(object, metaclass=Singleton):
             if currentSig in self.availableSignatures:
                 try:
                     log.debug("[__generateChainConfigs] Trying to get chain config for %s", currentSig)
-                    chainPartConfig = self.chainDefModule[currentSig].generateChainConfigs(chainPartDict)
+                    if currentSig in ['Electron', 'Photon', 'Muon', 'Tau', 'Bphysics'] :
+                        chainPartConfig, perSig_lengthOfChainConfigs = self.chainDefModule[currentSig].generateChainConfigs(flags, chainPartDict, perSig_lengthOfChainConfigs)
+                    else:
+                        chainPartConfig = self.chainDefModule[currentSig].generateChainConfigs(flags, chainPartDict)
+                        if currentSig == 'Test' and isinstance(chainPartConfig, tuple):
+                            chainPartConfig = chainPartConfig[0]
                 except Exception:
                     log.error('[__generateChainConfigs] Problems creating ChainDef for chain %s ', chainName)
                     log.error('[__generateChainConfigs] I am in chain part\n %s ', chainPartDict)
@@ -377,43 +384,52 @@ class GenerateMenuMT(object, metaclass=Singleton):
                 log.error('Available signature(s): %s', self.availableSignatures)
                 raise Exception('Stopping the execution. Please correct the configuration.')
 
-            log.debug("Chain %s \n chain configs: %s",chainPartDict['chainName'],chainPartConfig)
-            if isComponentAccumulatorCfg() and \
-                (chainPartConfig is None or (any(["_MissingCA" in step.name for step in chainPartConfig.steps]) \
-                    and "_MissingCA" not in chainPartConfig.steps[-1].name )):      
-                    # if a MissingCA step exist and it's not the last one, do not build the chain because it's incomplete              
-                log.warning(str(NoCAmigration("[__generateChainConfigs] Chain {0} removed because is incomplete".format(chainPartDict['chainName'])) ))       
+            log.debug("Chain %s \n chain configs: %s",chainPartDict['chainName'],chainPartConfig)            
+            import itertools   
+            
+            # check if there are not migrated steps between migrated ones
+            # if built-up steps are not consecutive, do not build the chain because it's incomplete  
+            not_migrated |= (chainPartConfig is None or  \
+                len([k for k, g in itertools.groupby(["_MissingCA" in step.name for step in chainPartConfig.steps]) if k==0])!=1)                    
+            if isCAMenu() and not_migrated:                      
+                log.debug(str(NoCAmigration("[__generateChainConfigs] Chain {0} removed leg because is incomplete".format(chainPartDict['chainName'])) ))       
             else:
                 listOfChainConfigs.append(chainPartConfig)
-                tmp_lengthOfChainConfigs.append((chainPartConfig.nSteps,chainPartConfig.alignmentGroups))
-
+                perSig_lengthOfChainConfigs.append((chainPartConfig.nSteps,chainPartConfig.alignmentGroups))
+                
         # this will be a list of lists for inter-sig combined chains and a list with one 
         # multi-element list for intra-sig combined chains
         # here, we flatten it accordingly (works for both cases!)
         lengthOfChainConfigs = []
-        for nSteps, aGrps in tmp_lengthOfChainConfigs:
-            if len(nSteps) != len(aGrps):
-                log.error("Chain part has %s steps and %s alignment groups - these don't match!",nSteps,aGrps)
-            else:
-                for a,b in zip(nSteps,aGrps):
-                    lengthOfChainConfigs.append((a,b))
+        if isCAMenu() and not_migrated: 
+             log.debug(str(NoCAmigration("[__generateChainConfigs] Chain {0} removed because is incomplete".format(chainPartDict['chainName'])) ))       
+        else:        
+            for nSteps, aGrps in perSig_lengthOfChainConfigs:
+                if len(nSteps) != len(aGrps):
+                    log.error("Chain part has %s steps and %s alignment groups - these don't match!",nSteps,aGrps)
+                else:
+                    for a,b in zip(nSteps,aGrps):
+                        lengthOfChainConfigs.append((a,b))
             
-        ## if log.isEnabledFor(logging.DEBUG):
-        ##     import pprint
-        ##     pp = pprint.PrettyPrinter(indent=4, depth=8)
-        ##     log.debug('mainChainDict dictionary: %s', pp.pformat(mainChainDict))
-
-
+       
         # This part is to deal with combined chains between different signatures
         try:
+            if isCAMenu() and not_migrated:
+                raise NoCAmigration("[__generateChainConfigs] chain {0} generation missed configuration".format(mainChainDict['chainName']))                               
+
             if len(listOfChainConfigs) == 0:
-                if isComponentAccumulatorCfg():
-                    raise NoCAmigration("[__generateChainConfigs] chain {0} generation missed configuration".format(mainChainDict['chainName']))                               
                 raise Exception('[__generateChainConfigs] No Chain Configuration found for {0}'.format(mainChainDict['chainName']))                    
             else:
                 if len(listOfChainConfigs)>1:
                     log.debug("Merging strategy from dictionary: %s", mainChainDict["mergingStrategy"])
-                    theChainConfig = mergeChainDefs(listOfChainConfigs, mainChainDict)
+                    theChainConfig, perSig_lengthOfChainConfigs = mergeChainDefs(listOfChainConfigs, mainChainDict, perSig_lengthOfChainConfigs)
+                    lengthOfChainConfigs = [] 
+                    for nSteps, aGrps in perSig_lengthOfChainConfigs:
+                        if len(nSteps) != len(aGrps):
+                            log.error("Chain part has %s steps and %s alignment groups - these don't match!",nSteps,aGrps)
+                        else:
+                            for a,b in zip(nSteps,aGrps):
+                                lengthOfChainConfigs.append((a,b))
                 else:
                     theChainConfig = listOfChainConfigs[0]
                 
@@ -431,7 +447,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
             log.exception('[__generateChainConfigs] Full chain dictionary is\n %s ', mainChainDict)
             raise Exception('[__generateChainConfigs] Stopping menu generation. Please investigate the exception shown above.')
         except AttributeError:                    
-            if isComponentAccumulatorCfg():
+            if isCAMenu():
                 log.warning(str(NoCAmigration("[__generateChainConfigs] addTopoInfo failed with CA configurables") )  )  
                 return None,[]                       
             raise Exception('[__generateChainConfigs] Stopping menu generation. Please investigate the exception shown above.')
@@ -445,12 +461,12 @@ class GenerateMenuMT(object, metaclass=Singleton):
             try:
                 if 'PhysicsTLA' in eventBuildType:
                     log.debug("Adding TLA Step for chain %s", mainChainDict['chainName'])
-                    TLABuildingSequences.addTLAStep(theChainConfig, mainChainDict)
+                    TLABuildingSequences.addTLAStep(flags, theChainConfig, mainChainDict)
             
                 log.debug('Configuring event building sequence %s for chain %s', eventBuildType, mainChainDict['chainName'])
                 EventBuildingSequences.addEventBuildingSequence(flags, theChainConfig, eventBuildType, mainChainDict)
             except TypeError as ex:
-                if isComponentAccumulatorCfg():
+                if isCAMenu():
                     log.warning(str(NoCAmigration("[__generateChainConfigs] EventBuilding/TLA sequences failed with CA configurables")) )                                  
                 else:
                     log.error(ex)
@@ -482,7 +498,13 @@ class GenerateMenuMT(object, metaclass=Singleton):
         if len(empty_step_indices) == 0:
             return chainConfigs
         
-        if len(self.availableSignatures) != 1 and not (self.chainFilter and hasattr(self.chainFilter,'selectChains') and self.chainFilter.selectChains):
+        special_test_menu = self.chainFilter and (  getattr(self.chainFilter, "selectChains", False) or \
+                                                    getattr(self.chainFilter, "disableChains", False) or \
+                                                    getattr(self.chainFilter, "disabledSignatures", False) or \
+                                                    getattr(self.chainFilter, "enabledSignatures", False) )
+                                                
+        
+        if len(self.availableSignatures) != 1 and not special_test_menu:                
             raise Exception("[resolveEmptySteps] Please find the reason for this empty step and resolve it / remove it from the menu: %s", emptySteps)  
 
         log.info("Will now delete steps %s (indexed from zero)",empty_step_indices)

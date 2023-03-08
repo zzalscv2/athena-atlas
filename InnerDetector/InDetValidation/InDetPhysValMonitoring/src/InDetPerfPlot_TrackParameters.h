@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETPHYSVALMONITORING_INDETPERFPLOT_TRACKPARAMETERS
@@ -27,40 +27,41 @@ public:
   void fill(const xAOD::TruthParticle& particle, float weight);
 private:
 
-  TH1* m_reco_d0;
-  TH1* m_reco_z0;
-  TH1* m_reco_z0sin;
-  TH1* m_reco_phi;
-  TH1* m_reco_theta;
-  TH1* m_reco_eta;
-  TH1* m_reco_qoverp;
-  TH1* m_reco_pt;
-  TH1* m_reco_lowpt;
-  TH1* m_reco_chi2;
-  TH1* m_reco_ndof;
-  TH1* m_reco_chi2Overndof;
-  TH1* m_reco_author;
+  TH1* m_reco_d0{};
+  TH1* m_reco_z0{};
+  TH1* m_reco_z0sin{};
+  TH1* m_reco_phi{};
+  TH1* m_reco_theta{};
+  TH1* m_reco_eta{};
+  TH1* m_reco_qoverp{};
+  TH1* m_reco_pt{};
+  TH1* m_reco_lowpt{};
+  TH1* m_reco_chi2{};
+  TH1* m_reco_ndof{};
+  TH1* m_reco_chi2Overndof{};
+  TH1* m_reco_author{};
+  TH1* m_reco_time{};
 
-  TH1* m_truth_d0;
-  TH1* m_truth_z0;
-  TH1* m_truth_z0sin;
-  TH1* m_truth_phi;
-  TH1* m_truth_theta;
-  TH1* m_truth_eta;
-  TH1* m_truth_qoverp;
-  TH1* m_truth_pt;
-  TH1* m_truth_lowpt;
-  TH1* m_truth_prodR;
-  TH1* m_truth_prodZ;
+  TH1* m_truth_d0{};
+  TH1* m_truth_z0{};
+  TH1* m_truth_z0sin{};
+  TH1* m_truth_phi{};
+  TH1* m_truth_theta{};
+  TH1* m_truth_eta{};
+  TH1* m_truth_qoverp{};
+  TH1* m_truth_pt{};
+  TH1* m_truth_lowpt{};
+  TH1* m_truth_prodR{};
+  TH1* m_truth_prodZ{};
 
-  TH2* m_reco_pt_vs_eta;
-  TH2* m_reco_phi_vs_eta;
+  TH2* m_reco_pt_vs_eta{};
+  TH2* m_reco_phi_vs_eta{};
 
-  TH2* m_reco_d0_z0;
-  TH2* m_reco_d0_z0sin;
+  TH2* m_reco_d0_z0{};
+  TH2* m_reco_d0_z0sin{};
 
-  TH2* m_truth_pt_vs_eta;
-  TH2* m_truth_phi_vs_eta;
+  TH2* m_truth_pt_vs_eta{};
+  TH2* m_truth_phi_vs_eta{};
 
 
 

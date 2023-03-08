@@ -13,6 +13,7 @@ MissingEtFilter::MissingEtFilter(const std::string& name, ISvcLocator* pSvcLocat
   declareProperty("METCut",m_METmin = 10000.);
   // Normally we'd include them, but this is unstable if using EvtGen
   declareProperty("UseNeutrinosFromHadrons",m_useHadronicNu = false);
+  declareProperty("UseChargedNonShowering",m_useChargedNonShowering = false);
 }
 
 
@@ -23,11 +24,19 @@ StatusCode MissingEtFilter::filterEvent() {
     const HepMC::GenEvent* genEvt = (*itr);
     for (auto pitr: *genEvt) {
       if (!MC::isGenStable(pitr)) continue;
-      if (!MC::isNonInteracting(pitr)) continue;
-      if(!m_useHadronicNu && MC::PID::isNeutrino(pitr->pdg_id()) && !(fromWZ(pitr) || fromTau(pitr)) ) continue;
-      ATH_MSG_VERBOSE("Found noninteracting particle: ID = " << pitr->pdg_id() << " PX = " << pitr->momentum().px() << " PY = "<< pitr->momentum().py());
-      sumx += pitr->momentum().px();
-      sumy += pitr->momentum().py();
+      // Consider all non-interacting particles
+      // We want Missing Transverse Momentum, not "Missing Transverse Energy"
+      if (MC::isNonInteracting(pitr) || (m_useChargedNonShowering && MC::isChargedNonShowering(pitr->pdg_id()))) {
+        bool addpart = true;
+        if(!m_useHadronicNu && MC::isNeutrino(pitr->pdg_id()) && !(fromWZ(pitr) || fromTau(pitr)) ) {
+          addpart = false; // ignore neutrinos from hadron decays
+        }
+        if(addpart) {
+          ATH_MSG_VERBOSE("Found noninteracting particle: ID = " << pitr->pdg_id() << " PX = " << pitr->momentum().px() << " PY = "<< pitr->momentum().py());
+          sumx += pitr->momentum().px();
+          sumy += pitr->momentum().py();
+        }
+      }
     }
   }
 

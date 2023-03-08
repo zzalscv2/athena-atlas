@@ -1,16 +1,18 @@
 #
-#  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 # Set input file to new-style flags
 from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
-ConfigFlags.Input.Files = athenaCommonFlags.FilesInput()
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
+flags = initConfigFlags()
+flags.Input.Files = athenaCommonFlags.FilesInput()
+flags.lock()
 
 # Use new-style config of ByteStream reading and import here into old-style JO
 from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
 from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-CAtoGlobalWrapper(ByteStreamReadCfg,ConfigFlags)
+CAtoGlobalWrapper(ByteStreamReadCfg,flags)
 
 # Define the decoding/analysis sequence
 from TrigHLTResultByteStream.TrigHLTResultByteStreamConf import HLTResultMTByteStreamDecoderAlg

@@ -52,6 +52,7 @@ bool SUSYObjDef_xAOD::IsMETTrigPassed(unsigned int runnumber, bool j400_OR) cons
   else if(year == 2017 && rn >= 332303 )                 return IsMETTrigPassed("HLT_xe110_pufit_L1XE50", false); // 2017 D6-(open)
   else if(year == 2018 && rn >= 348885 && rn <= 350013 ) return IsMETTrigPassed("HLT_xe110_pufit_xe70_L1XE50", false); // 2018 B-C5
   else if(year == 2018 && rn >= 350067 )                 return IsMETTrigPassed("HLT_xe110_pufit_xe65_L1XE50", false); // 2018 C5-(open)
+  else if(year == 2022)                                  return IsMETTrigPassed("HLT_xe65_cell_xe90_pfopufit_L1XE50",false); // 2022
   return false; 
 }
 

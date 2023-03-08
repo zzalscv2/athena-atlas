@@ -79,7 +79,7 @@ namespace Simulation
     return StatusCode::SUCCESS;
   }
 
-  void GenEventRotator::rotateParticle(HepMC::GenParticlePtr p,
+  void GenEventRotator::rotateParticle(HepMC::GenParticlePtr& p,
                                        const CLHEP::HepLorentzRotation& transform) const
   {
     // Apply the same transformation for EVERY HepMC::GenParticle

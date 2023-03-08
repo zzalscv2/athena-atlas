@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -434,6 +434,7 @@ protected:
 
   // matcher to check if the given McEventCollection contains one HepMC::GenEvent that's
   // equal to the given expectedGenEvent
+  // cppcheck-suppress syntaxError
   MATCHER_P(ContainsOneGenEventEq, expectedGenEvent, "is equal to expected HepMC::GenEvent") {
     const auto& actualMcEventCollection = arg;
 
@@ -528,7 +529,7 @@ protected:
 
     auto inputEvgen = std::make_unique<McEventCollection>();
     auto* genEvent = new HepMC::GenEvent{};
-
+    HepMC::fillBarcodesAttribute(genEvent);
     inputEvgen->push_back(genEvent);
     SG::WriteHandleKey<McEventCollection> testInputEvgenKey{"testInputEvgenCollection"};
     ASSERT_TRUE(testInputEvgenKey.initialize().isSuccess());
@@ -561,7 +562,7 @@ protected:
     genVertex->add_particle_out(genPart);
     genVertex->add_particle_out(genPart2);
     genEvent->add_vertex(genVertex);
-
+    HepMC::fillBarcodesAttribute(genEvent);
     auto inputEvgen = std::make_unique<McEventCollection>();
     inputEvgen->push_back(genEvent);
     SG::WriteHandleKey<McEventCollection> testInputEvgenKey{"testInputEvgenCollection"};
@@ -783,7 +784,7 @@ protected:
     auto genVertex = HepMC::newGenVertexPtr(pos);
     genVertex->add_particle_out(genPart);
     genEvent->add_vertex(genVertex);
-
+    HepMC::fillBarcodesAttribute(genEvent);
     auto inputEvgen = std::make_unique<McEventCollection>();
     inputEvgen->push_back(genEvent);
     SG::WriteHandleKey<McEventCollection> testInputEvgenKey{"testInputEvgenCollection"};

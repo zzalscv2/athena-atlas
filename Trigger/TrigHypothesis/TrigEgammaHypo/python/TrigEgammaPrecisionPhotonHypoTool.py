@@ -1,18 +1,18 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.SystemOfUnits import GeV
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
+from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 from ROOT import egammaPID
 
 #
 # photon hypo alg
 #
-def createTrigEgammaPrecisionPhotonHypoAlg(name, sequenceOut):
+def createTrigEgammaPrecisionPhotonHypoAlg(flags, name, sequenceOut):
 
   from TrigEgammaHypo.TrigEgammaHypoConf import TrigEgammaPrecisionPhotonHypoAlg
   thePrecisionPhotonHypo = TrigEgammaPrecisionPhotonHypoAlg(name)
   thePrecisionPhotonHypo.IsEMNames = ['tight','medium','loose']
-  thePrecisionPhotonHypo.PhotonIsEMSelectorTools = createTrigEgammaPrecisionPhotonSelectors()
+  thePrecisionPhotonHypo.PhotonIsEMSelectorTools = createTrigEgammaPrecisionPhotonSelectors(flags)
   thePrecisionPhotonHypo.Photons = sequenceOut
   return thePrecisionPhotonHypo
 
@@ -86,7 +86,7 @@ class TrigEgammaPrecisionPhotonHypoToolConfig:
   #
   # Compile the chain
   #
-  def compile(self):
+  def compile(self, flags):
 
     if 'etcut' == self.pidname():
       self.etcut()
@@ -96,56 +96,53 @@ class TrigEgammaPrecisionPhotonHypoToolConfig:
 
     if hasattr(self.tool(), "MonTool"):
       
-      doValidationMonitoring = ConfigFlags.Trigger.doValidationMonitoring # True to monitor all chains for validation purposes
+      doValidationMonitoring = flags.Trigger.doValidationMonitoring # True to monitor all chains for validation purposes
       monGroups = self.__monGroups
 
       if (any('egammaMon:online' in group for group in monGroups) or doValidationMonitoring):
-        self.addMonitoring()
+        self.addMonitoring(flags)
 
 
   #
   # Monitoring code
   #
-  def addMonitoring(self):
-    
-    from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool, defineHistogram
-    monTool = GenericMonitoringTool("MonTool_"+self.__name)
-    monTool.Histograms = [ defineHistogram('dEta', type='TH1F', path='EXPERT', title="PrecisionPhoton Hypo #Delta#eta_{EF L1}; #Delta#eta_{EF L1}", xbins=80, xmin=-0.01, xmax=0.01),
-                           defineHistogram('dPhi', type='TH1F', path='EXPERT', title="PrecisionPhoton Hypo #Delta#phi_{EF L1}; #Delta#phi_{EF L1}", xbins=80, xmin=-0.01, xmax=0.01),
-                           defineHistogram('Et_em', type='TH1F', path='EXPERT', title="PrecisionPhoton Hypo cluster E_{T}^{EM};E_{T}^{EM} [MeV]", xbins=50, xmin=-2000, xmax=100000),
-                           defineHistogram('Eta', type='TH1F', path='EXPERT', title="PrecisionPhoton Hypo entries per Eta;Eta", xbins=100, xmin=-2.5, xmax=2.5),
-                           defineHistogram('Phi', type='TH1F', path='EXPERT', title="PrecisionPhoton Hypo entries per Phi;Phi", xbins=128, xmin=-3.2, xmax=3.2),
-                           defineHistogram('EtaBin', type='TH1I', path='EXPERT', title="PrecisionPhoton Hypo entries per Eta bin;Eta bin no.", xbins=11, xmin=-0.5, xmax=10.5)]
+  def addMonitoring(self, flags):
+
+    monTool = GenericMonitoringTool(flags, "MonTool_"+self.__name,
+                                    HistPath = 'PrecisionPhotonHypo/'+self.__name)
+    monTool.defineHistogram('dEta', type='TH1F', path='EXPERT', title="PrecisionPhoton Hypo #Delta#eta_{EF L1}; #Delta#eta_{EF L1}", xbins=80, xmin=-0.01, xmax=0.01)
+    monTool.defineHistogram('dPhi', type='TH1F', path='EXPERT', title="PrecisionPhoton Hypo #Delta#phi_{EF L1}; #Delta#phi_{EF L1}", xbins=80, xmin=-0.01, xmax=0.01)
+    monTool.defineHistogram('Et_em', type='TH1F', path='EXPERT', title="PrecisionPhoton Hypo cluster E_{T}^{EM};E_{T}^{EM} [MeV]", xbins=50, xmin=-2000, xmax=100000)
+    monTool.defineHistogram('Eta', type='TH1F', path='EXPERT', title="PrecisionPhoton Hypo entries per Eta;Eta", xbins=100, xmin=-2.5, xmax=2.5)
+    monTool.defineHistogram('Phi', type='TH1F', path='EXPERT', title="PrecisionPhoton Hypo entries per Phi;Phi", xbins=128, xmin=-3.2, xmax=3.2)
+    monTool.defineHistogram('EtaBin', type='TH1I', path='EXPERT', title="PrecisionPhoton Hypo entries per Eta bin;Eta bin no.", xbins=11, xmin=-0.5, xmax=10.5)
 
     cuts=['Input','#Delta #eta EF-L1', '#Delta #phi EF-L1','eta','E_{T}^{EM}']
 
-    monTool.Histograms += [ defineHistogram('CutCounter', type='TH1I', path='EXPERT', title="PrecisionPhoton Hypo Passed Cuts;Cut",
-                                            xbins=13, xmin=-1.5, xmax=12.5,  opt="kCumulative", xlabels=cuts) ]
+    monTool.defineHistogram('CutCounter', type='TH1I', path='EXPERT', title="PrecisionPhoton Hypo Passed Cuts;Cut",
+                            xbins=13, xmin=-1.5, xmax=12.5,  opt="kCumulative", xlabels=cuts)
 
-    if ConfigFlags.Trigger.doValidationMonitoring:
-      monTool.defineHistogram('etcone20',type='TH1F',path='EXPERT',title= "PrecisionPhoton Hypo etcone20; etcone20;", xbins=50, xmin=0, xmax=5.0),
-      monTool.defineHistogram('topoetcone20',type='TH1F',path='EXPERT',title= "PrecisionPhoton Hypo; topoetcone20;", xbins=50, xmin=-10, xmax=10),
-      monTool.defineHistogram('reletcone20',type='TH1F',path='EXPERT',title= "PrecisionPhoton Hypo etcone20/et; etcone20/et;", xbins=50, xmin=-0.5, xmax=0.5),
+    if flags.Trigger.doValidationMonitoring:
+      monTool.defineHistogram('etcone20',type='TH1F',path='EXPERT',title= "PrecisionPhoton Hypo etcone20; etcone20;", xbins=50, xmin=0, xmax=5.0)
+      monTool.defineHistogram('topoetcone20',type='TH1F',path='EXPERT',title= "PrecisionPhoton Hypo; topoetcone20;", xbins=50, xmin=-10, xmax=10)
+      monTool.defineHistogram('reletcone20',type='TH1F',path='EXPERT',title= "PrecisionPhoton Hypo etcone20/et; etcone20/et;", xbins=50, xmin=-0.5, xmax=0.5)
       monTool.defineHistogram('reltopoetcone20',type='TH1F',path='EXPERT',title= "PrecisionPhoton Hypo; topoetcone20/pt;", xbins=50, xmin=-0.5, xmax=0.5)
 
-    monTool.HistPath = 'PrecisionPhotonHypo/'+self.__name
     self.tool().MonTool = monTool
 
 
 
-def _IncTool( name,monGroups, cpart, tool=None ):
+def _IncTool( flags, name, monGroups, cpart, tool=None ):
     config = TrigEgammaPrecisionPhotonHypoToolConfig(name, monGroups, cpart, tool=tool)
-    config.compile()
+    config.compile(flags)
     return config.tool()
 
  
 
-def TrigEgammaPrecisionPhotonHypoToolFromDict( d , tool=None):
+def TrigEgammaPrecisionPhotonHypoToolFromDict(flags, d , tool=None):
     """ Use menu decoded chain dictionary to configure the tool """
     cparts = [i for i in d['chainParts'] if ((i['signature']=='Electron') or (i['signature']=='Photon'))] 
-    name = d['chainName']
-    monGroups = d['monGroups'] 
-    return _IncTool( name, monGroups, cparts[0], tool=tool )
+    return _IncTool( flags, d['chainName'], d['monGroups'], cparts[0], tool=tool )
                    
     
 
@@ -153,12 +150,12 @@ def TrigEgammaPrecisionPhotonHypoToolFromDict( d , tool=None):
 #
 # Photon IsEM selectors
 #
-def createTrigEgammaPrecisionPhotonSelectors(ConfigFilePath=None):
+def createTrigEgammaPrecisionPhotonSelectors(flags, ConfigFilePath=None):
 
     from ElectronPhotonSelectorTools.ConfiguredAsgPhotonIsEMSelectors import ConfiguredAsgPhotonIsEMSelector
 
     if not ConfigFilePath:
-      ConfigFilePath = ConfigFlags.Trigger.egamma.photonPidVersion
+      ConfigFilePath = flags.Trigger.egamma.photonPidVersion
 
     import collections.abc
     # Configure the IsEM selectors

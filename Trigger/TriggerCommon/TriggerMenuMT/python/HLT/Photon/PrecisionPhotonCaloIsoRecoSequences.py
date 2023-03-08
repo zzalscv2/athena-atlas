@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.CFElements import parOR
 from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
@@ -9,7 +9,7 @@ log = logging.getLogger(__name__)
 
 
 
-def precisionPhotonCaloIsoRecoSequence(RoIs, ion=False):
+def precisionPhotonCaloIsoRecoSequence(flags, RoIs, ion=False):
     """ With this function we will setup the sequence of Calo isolation to be executed after PrecisionPhoton in  TrigEgamma 
 
     """
@@ -59,7 +59,7 @@ def precisionPhotonCaloIsoRecoSequence(RoIs, ion=False):
 
     #online monitoring for topoEgammaBuilder
     from TriggerMenuMT.HLT.Photon.TrigPhotonFactories import PrecisionPhotonCaloIsoMonitorCfg
-    PrecisionPhotonCaloIsoRecoMonAlgo = PrecisionPhotonCaloIsoMonitorCfg('PrecisionPhotonCaloIsoEgammaBuilderMon' + tag)
+    PrecisionPhotonCaloIsoRecoMonAlgo = PrecisionPhotonCaloIsoMonitorCfg(flags, 'PrecisionPhotonCaloIsoEgammaBuilderMon' + tag)
     PrecisionPhotonCaloIsoRecoMonAlgo.PhotonKey = TrigEgammaKeys.precisionPhotonContainer 
     PrecisionPhotonCaloIsoRecoMonAlgo.IsoVarKeys = [ '%s.topoetcone20' % collectionIn, '%s.topoetcone40' % collectionIn]
     thesequence += PrecisionPhotonCaloIsoRecoMonAlgo

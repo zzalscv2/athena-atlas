@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/ConcurrentPtrSet.icc
@@ -12,7 +12,10 @@
 namespace CxxUtils {
 
 
-#define T_CONCURRENTPTRSET template <class VALUE, template <class> class UPDATER>
+#define T_CONCURRENTPTRSET template <class VALUE, template <class> class UPDATER> \
+  ATH_REQUIRES (detail::IsUpdater<UPDATER>)
+
+
 #define CONCURRENTPTRSET ConcurrentPtrSet<VALUE, UPDATER>
 
 
@@ -447,6 +450,23 @@ inline
 void CONCURRENTPTRSET::quiescent (const Context_t& ctx)
 {
   return m_impl.quiescent (ctx);
+}
+
+
+/**
+ * @brief Swap this container with another.
+ * @param other The container with which to swap.
+ *
+ * This will also call swap on the Updater object; hence, the Updater
+ * object must also support swap.
+ *
+ * This operation is NOT thread-safe.  No other threads may be accessing
+ * either container during this operation.
+ */
+T_CONCURRENTPTRSET
+void CONCURRENTPTRSET::swap (ConcurrentPtrSet& other)
+{
+  m_impl.swap (other.m_impl);
 }
 
 

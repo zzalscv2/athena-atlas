@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -18,7 +18,7 @@
 #include "TrkSurfaces/AnnulusBoundsPC.h"
 #include "SCT_ReadoutGeometry/StripStereoAnnulusDesign.h"
 #include "ReadoutGeometryBase/SiCellId.h"
-#include "TrkRIO_OnTrack/check_cast.h"
+#include "TrkRIO_OnTrack/ErrorScalingCast.h"
 
 #include <cmath>
 
@@ -264,15 +264,17 @@ ITk::StripClusterOnTrackTool::correct
 
     if (!m_stripErrorScalingKey.key().empty()) {
       SG::ReadCondHandle<RIO_OnTrackErrorScaling> error_scaling( m_stripErrorScalingKey );
-      cov = check_cast<SCTRIO_OnTrackErrorScaling>(*error_scaling)->getScaledCovariance( cov,  false, 0.0);
+      cov = Trk::ErrorScalingCast<SCTRIO_OnTrackErrorScaling>(*error_scaling)
+                ->getScaledCovariance(std::move(cov), false, 0.0);
     }
   // } else if (designShape == InDetDD::PolarAnnulus) { // polar specialisation
   } else {                                           // endcap
     locpar = Trk::LocalParameters(SC->localPosition());
     if (!m_stripErrorScalingKey.key().empty()) {
-      SG::ReadCondHandle<RIO_OnTrackErrorScaling> error_scaling( m_stripErrorScalingKey );
-      cov = check_cast<SCTRIO_OnTrackErrorScaling>(*error_scaling)->getScaledCovariance( cov,   true,
-											 EL->sinStereoLocal(SC->localPosition()));
+      SG::ReadCondHandle<RIO_OnTrackErrorScaling> error_scaling(m_stripErrorScalingKey);
+      cov = Trk::ErrorScalingCast<SCTRIO_OnTrackErrorScaling>(*error_scaling)
+                ->getScaledCovariance(std::move(cov), true,
+                                      EL->sinStereoLocal(SC->localPosition()));
     }
     double Sn = EL->sinStereoLocal(SC->localPosition());
     double Sn2 = Sn * Sn;

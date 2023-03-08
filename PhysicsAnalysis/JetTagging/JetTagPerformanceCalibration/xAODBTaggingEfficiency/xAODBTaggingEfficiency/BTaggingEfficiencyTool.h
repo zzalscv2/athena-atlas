@@ -307,6 +307,7 @@ private:
 
   /// name of the data/MC efficiency scale factor calibration file (may be changed by the @c PathResolver)
   std::string m_SFFile;
+  std::string m_SFFileFull;
   /// name of the optional MC efficiency file (may be changed by the @c PathResolver)
   std::string m_EffFile;
   std::string m_EffConfigFile;
@@ -346,7 +347,6 @@ private:
   /// if true, ignore out-of-extrapolation range errors (i.e., return CorrectionCode::Ok if these are encountered)
   bool m_ignoreOutOfValidityRange;
   /// if false, suppress any non-error/warning printout from the underlying tool
-  bool m_verboseCDITool;
   /// 1D tagging only: define wether the cuts refer to b-tagging or c-tagging
   bool m_useCTag = false;
   /// if this string is empty, the onnx tool won't be created

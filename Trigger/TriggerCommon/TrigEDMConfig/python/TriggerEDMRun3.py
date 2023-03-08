@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # ------------------------------------------------------------
 # Definition of trigger EDM for Run 3
@@ -94,6 +94,7 @@ JetCopyVars = '.'.join(JetCopyVarsToKeep)
 
 JetFastFTagVarsToKeep = JetCopyVarsToKeep
 JetFastFTagVarsToKeep += [f'fastDips_p{x}' for x in 'cub']
+JetFastFTagVarsToKeep += [f'fastGN120230130_p{x}' for x in 'cub']
 JetFastFTagVars = '.'.join(JetFastFTagVarsToKeep)
 
 
@@ -524,8 +525,11 @@ TriggerHLTListRun3 = [
     ('xAOD::PhotonAuxContainer#HLT_egamma_Iso_PhotonsAux.'+PhVars,         'BS ESD AODFULL AODSLIM', 'Egamma'),
 
     ('TrigRoiDescriptorCollection#HLT_Roi_FastElectron',            'BS ESD AODFULL', 'Egamma'),
-    ('TrigRoiDescriptorCollection#HLT_Roi_FastElectron_LRT',            'BS ESD AODFULL', 'Egamma'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_FastElectron_probe',      'BS ESD AODFULL', 'Egamma'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_FastElectron_LRT',        'BS ESD AODFULL', 'Egamma'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_FastElectron_LRT_probe',  'BS ESD AODFULL', 'Egamma'),
     ('TrigRoiDescriptorCollection#HLT_Roi_FastPhoton',              'BS ESD AODFULL', 'Egamma'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_FastPhoton_probe',        'BS ESD AODFULL', 'Egamma'),
 
     # hipTRT
     ('xAOD::TrigRNNOutputContainer#HLT_TrigTRTHTCounts',            'BS ESD AODFULL', 'Egamma', 'inViews:TRTHitGeneratorViews'),
@@ -684,9 +688,13 @@ TriggerHLTListRun3 = [
     ('xAOD::L2IsoMuonAuxContainer#HLT_MuonL2ISInfoAux.',        'BS ESD', 'Muon'),
 
     ('TrigRoiDescriptorCollection#HLT_Roi_L2SAMuon',                   'BS ESD AODFULL', 'Muon'),
-    ('TrigRoiDescriptorCollection#HLT_Roi_L2SAMuon_LRT',                   'BS ESD AODFULL', 'Muon'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_L2SAMuon_probe',             'BS ESD AODFULL', 'Muon'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_L2SAMuon_LRT',               'BS ESD AODFULL', 'Muon'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_L2SAMuon_LRT_probe',         'BS ESD AODFULL', 'Muon'),
     ('TrigRoiDescriptorCollection#HLT_Roi_L2SAMuonForEF',              'BS ESD AODFULL', 'Muon'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_L2SAMuonForEF_probe',        'BS ESD AODFULL', 'Muon'),
     ('TrigRoiDescriptorCollection#HLT_Roi_MuonIso',                    'BS ESD AODFULL', 'Muon'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_MuonIso_probe',              'BS ESD AODFULL', 'Muon'),
 
     # Tau
 
@@ -709,10 +717,15 @@ TriggerHLTListRun3 = [
     ('xAOD::VertexAuxContainer#HLT_IDVertex_TauAux.',           'BS ESD AODFULL', 'Tau'),
 
     ('TrigRoiDescriptorCollection#HLT_Roi_Tau',              'BS ESD AODFULL',  'Tau'),
-    ('TrigRoiDescriptorCollection#HLT_Roi_TauCore',             'BS ESD AODFULL',  'Tau'),
-    ('TrigRoiDescriptorCollection#HLT_Roi_TauLRT',              'BS ESD AODFULL',  'Tau'),
-    ('TrigRoiDescriptorCollection#HLT_Roi_TauIso',             'BS ESD AODFULL',  'Tau'),
-    ('TrigRoiDescriptorCollection#HLT_Roi_TauIsoBDT',             'BS ESD AODFULL',  'Tau'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_Tau_probe',        'BS ESD AODFULL',  'Tau'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_TauCore',          'BS ESD AODFULL',  'Tau'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_TauCore_probe',    'BS ESD AODFULL',  'Tau'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_TauLRT',           'BS ESD AODFULL',  'Tau'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_TauLRT_probe',     'BS ESD AODFULL',  'Tau'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_TauIso',           'BS ESD AODFULL',  'Tau'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_TauIso_probe',     'BS ESD AODFULL',  'Tau'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_TauIsoBDT',        'BS ESD AODFULL',  'Tau'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_TauIsoBDT_probe',  'BS ESD AODFULL',  'Tau'),
 
     ('xAOD::JetContainer#HLT_jet_seed',                         'BS ESD AODCOMM', 'Tau', 'inViews:TAUCaloMVAViews'),
     ('xAOD::JetAuxContainer#HLT_jet_seedAux.',                  'BS ESD AODCOMM', 'Tau'),
@@ -765,6 +778,9 @@ TriggerHLTListRun3 = [
 
     ('xAOD::JetContainer#HLT_AntiKt10EMTopoRCJets_subjesIS',                      'BS ESD AODFULL', 'Jet'),
     ('xAOD::JetAuxContainer#HLT_AntiKt10EMTopoRCJets_subjesISAux.'+JetVars,       'BS ESD AODFULL', 'Jet'),
+
+    ('xAOD::JetContainer#HLT_AntiKt10EMTopoRCJets_subjesIS_ftf',                      'BS ESD AODFULL', 'Jet'),
+    ('xAOD::JetAuxContainer#HLT_AntiKt10EMTopoRCJets_subjesIS_ftfAux.'+JetVars,       'BS ESD AODFULL', 'Jet'),
 
     ('xAOD::JetContainer#HLT_AntiKt10LCTopoTrimmedPtFrac4SmallR20Jets_jes',                'BS ESD AODFULL AODSLIM', 'Jet'),
     ('xAOD::JetAuxContainer#HLT_AntiKt10LCTopoTrimmedPtFrac4SmallR20Jets_jesAux.'+JetVars, 'BS ESD AODFULL AODSLIM', 'Jet'),
@@ -1187,7 +1203,7 @@ def tpMap():
     return l
 
 
-def addHLTNavigationToEDMList(edmList, allDecisions, hypoDecisions):
+def addHLTNavigationToEDMList(flags, edmList, allDecisions, hypoDecisions):
     """
     Extend TriggerHLTListRun3 with HLT Navigation objects
     """
@@ -1195,8 +1211,7 @@ def addHLTNavigationToEDMList(edmList, allDecisions, hypoDecisions):
     # HLTNav_* object list is built dynamically during job configuration, here we only define its output targets
     HLTNavEDMTargets = ''
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    if not ConfigFlags.Trigger.doOnlineNavigationCompactification:
+    if not flags.Trigger.doOnlineNavigationCompactification:
         # If we are not compacting the online EDM, then we must write out all of the individual collections
         # ESD is added for MC support
         HLTNavEDMTargets = 'BS ESD'

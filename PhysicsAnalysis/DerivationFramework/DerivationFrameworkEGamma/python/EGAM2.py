@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # EGAM2.py
@@ -331,7 +331,7 @@ def EGAM2Cfg(ConfigFlags):
     # multiple times in a train.
     # TODO: restrict it to relevant triggers
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    EGAM2TriggerListsHelper = TriggerListsHelper()
+    EGAM2TriggerListsHelper = TriggerListsHelper(ConfigFlags)
 
     # configure skimming/thinning/augmentation tools
     acc.merge(EGAM2KernelCfg(ConfigFlags,
@@ -424,25 +424,16 @@ def EGAM2Cfg(ConfigFlags):
     EGAM2SlimmingHelper.ExtraVariables += PhotonsCPDetailedContent
     
     # photons: gain and cluster energy per layer
-    from DerivationFrameworkCalo.DerivationFrameworkCaloFactories import (
+    from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import (
         getGainDecorations, getClusterEnergyPerLayerDecorations )
-    GainDecoratorTool = None
-    ClusterEnergyPerLayerDecorators = []  
-    for toolStr in acc.getEventAlgo('EGAM2Kernel').AugmentationTools:
-        toolStr  = f'{toolStr}'
-        splitStr = toolStr.split('/')
-        tool =  acc.getPublicTool(splitStr[1])
-        if splitStr[0] == 'DerivationFramework::GainDecorator':
-            GainDecoratorTool = tool
-        elif splitStr[0] == 'DerivationFramework::ClusterEnergyPerLayerDecorator':
-            ClusterEnergyPerLayerDecorators.append( tool )
+    gainDecorations = getGainDecorations(acc, 'EGAM2Kernel')
+    print('EGAM2 gain decorations: ', gainDecorations)
+    EGAM2SlimmingHelper.ExtraVariables.extend(gainDecorations)
+    clusterEnergyDecorations = getClusterEnergyPerLayerDecorations(
+        acc, 'EGAM2Kernel' )
+    print('EGAM2 cluster energy decorations: ', clusterEnergyDecorations)
+    EGAM2SlimmingHelper.ExtraVariables.extend(clusterEnergyDecorations)
 
-    if GainDecoratorTool : 
-        EGAM2SlimmingHelper.ExtraVariables.extend( 
-            getGainDecorations(GainDecoratorTool) )
-    for tool in ClusterEnergyPerLayerDecorators:
-        EGAM2SlimmingHelper.ExtraVariables.extend(
-            getClusterEnergyPerLayerDecorations( tool ) )
 
     # energy density
     EGAM2SlimmingHelper.ExtraVariables += [ 

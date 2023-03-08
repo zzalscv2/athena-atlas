@@ -23,7 +23,7 @@ namespace LArSamples {
   
   enum Chi2Params { DefaultChi2 = 0, NoCorrs = 1, BasicChi2 = 2, OFCChi2 = 4 };
   
-  class Chi2Calc : public IndexRange {
+  class ATLAS_NOT_THREAD_SAFE Chi2Calc : public IndexRange {
   
    public:
    

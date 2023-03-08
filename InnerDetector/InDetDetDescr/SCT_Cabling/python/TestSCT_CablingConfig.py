@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # https://twiki.cern.ch/twiki/bin/viewauth/AtlasComputing/AthenaJobConfigRun3
 
@@ -6,14 +6,14 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 
-def SCT_TestCablingAlgCfg(configFlags):
+def SCT_TestCablingAlgCfg(flags):
     cfg=ComponentAccumulator()
 
     from SCT_Cabling.SCT_CablingConfig import SCT_CablingCondAlgCfg
-    cfg.merge(SCT_CablingCondAlgCfg(configFlags))
+    cfg.merge(SCT_CablingCondAlgCfg(flags))
 
     from AtlasGeoModel.GeoModelConfig import GeoModelCfg
-    geoCfg=GeoModelCfg(configFlags)
+    geoCfg=GeoModelCfg(flags)
     cfg.merge(geoCfg)
 
     from AthenaCommon.Constants import INFO
@@ -34,24 +34,25 @@ if __name__=="__main__":
     from AthenaCommon.Constants import DEBUG
     log.setLevel(DEBUG)
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    ConfigFlags.Input.Files = []
-    ConfigFlags.Input.isMC = True
-    ConfigFlags.Input.RunNumber = [300000]
-    ConfigFlags.Input.TimeStamp = 1500000000
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    flags.Input.Files = []
+    flags.Input.isMC = True
+    flags.Input.RunNumber = [300000]
+    flags.Input.TimeStamp = 1500000000
     # https://twiki.cern.ch/twiki/bin/viewauth/AtlasComputing/ConditionsRun1RunNumbers
-    ConfigFlags.IOVDb.GlobalTag = "OFLCOND-RUN12-SDR-25"
-    ConfigFlags.GeoModel.AtlasVersion = "ATLAS-R2-2015-03-01-00"
-    ConfigFlags.Detector.GeometrySCT = True
-    ConfigFlags.lock()
+    flags.IOVDb.GlobalTag = "OFLCOND-RUN12-SDR-25"
+    flags.GeoModel.AtlasVersion = "ATLAS-R2-2015-03-01-00"
+    flags.Detector.GeometrySCT = True
+    flags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    cfg=MainServicesCfg(ConfigFlags)
+    cfg=MainServicesCfg(flags)
 
     from McEventSelector.McEventSelectorConfig import McEventSelectorCfg
-    cfg.merge(McEventSelectorCfg(ConfigFlags))
+    cfg.merge(McEventSelectorCfg(flags))
 
-    cfg.merge(SCT_TestCablingAlgCfg(ConfigFlags))
+    cfg.merge(SCT_TestCablingAlgCfg(flags))
 
     # IOVDbSvc = cfg.getService("IOVDbSvc")
     #
@@ -59,7 +60,7 @@ if __name__=="__main__":
     # IOVDbSvc.OutputToFile = True
     #
     ## To use CREST database (c.f. TestSCT_CablingFromCrest.py in the old job configuration)
-    ## together with ConfigFlags.IOVDb.GlobalTag="CREST-RUN12-SDR-25-MC" for MC
+    ## together with flags.IOVDb.GlobalTag="CREST-RUN12-SDR-25-MC" for MC
     # IOVDbSvc.Source = "CREST"
 
     cfg.run(maxEvents=20)

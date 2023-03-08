@@ -1,8 +1,7 @@
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
 
 # standard b-tagging
 from BTagging.JetParticleAssociationAlgConfig import JetParticleAssociationAlgCfg
@@ -13,19 +12,17 @@ from BTagging.BTagConfig import BTagAlgsCfg
 from FlavorTagDiscriminants.FlavorTagNNConfig import getStaticTrackVars
 from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
 
-def getFlavourTagging( inputJets, inputVertex, inputTracks, BTagName,
+def getFlavourTagging( flags, inputJets, inputVertex, inputTracks, BTagName,
                        inputMuons = ""):
 
     # because Cfg functions internally re-append the 'Jets' string
     inputJetsPrefix = inputJets.replace("bJets","b")
 
-    trigFlags = ConfigFlags
-
     acc = ComponentAccumulator()
 
     #Track Augmenter
     acc.merge(BTagTrackAugmenterAlgCfg(
-        trigFlags,
+        flags,
         TrackCollection=inputTracks,
         PrimaryVertexCollectionName=inputVertex
     ))
@@ -45,7 +42,7 @@ def getFlavourTagging( inputJets, inputVertex, inputTracks, BTagName,
     ]
 
     acc.merge(BTagAlgsCfg(
-        inputFlags=trigFlags,
+        inputFlags=flags,
         JetCollection=inputJetsPrefix,
         nnList=nnList,
         trackCollection=inputTracks,
@@ -89,7 +86,7 @@ def getFastFlavourTagging( flags, inputJets, inputVertex, inputTracks, isPFlow=F
     # now we associate the tracks to the jet
     ## JetParticleAssociationAlgCfg uses a shrinking cone.
     tracksOnJetDecoratorName = "TracksForMinimalJetTag"
-    pass_flag = 'fastDips_isValid'
+    pass_flag = f'{tracksOnJetDecoratorName}_isValid'
     ca.merge(
         JetParticleAssociationAlgCfg(
             flags,
@@ -130,6 +127,14 @@ def getFastFlavourTagging( flags, inputJets, inputVertex, inputTracks, isPFlow=F
                     **{f'fastDIPSnoPV20220211_p{x}': f'fastDips_p{x}' for x in 'cub'},
                     'btagIp_': trackIpPrefix,
                 }
+            ],
+            [
+                'BTagging/20230130/FastGN1/antikt4empflow/fastGN1_20230130.onnx',
+                {
+                    'BTagTrackToJetAssociator': tracksOnJetDecoratorName,
+                    **{f'GN120230130_p{x}': f'fastGN120230130_p{x}' for x in 'cub'},
+                    'btagIp_': trackIpPrefix,
+                }
             ]
         ]
 
@@ -139,8 +144,13 @@ def getFastFlavourTagging( flags, inputJets, inputVertex, inputTracks, isPFlow=F
     missingKeys = getStaticTrackVars(inputTracks)
 
     for nnFile, variableRemapping in dl2_configs:
-        nnAlgoKey = nnFile.replace('/','_').split('.')[0]
-
+        nnAlgo = nnFile.replace('/','_').split('.')
+        nnAlgoKey = nnAlgo[0]
+        nnAlgoext = nnAlgo[1]
+        toolDict = {
+            "json": CompFactory.FlavorTagDiscriminants.DL2Tool,
+            "onnx": CompFactory.FlavorTagDiscriminants.GNNTool
+        }
         ca.addEventAlgo(
             CompFactory.FlavorTagDiscriminants.JetTagConditionalDecoratorAlg(
                 name='_'.join([
@@ -153,7 +163,7 @@ def getFastFlavourTagging( flags, inputJets, inputVertex, inputTracks, isPFlow=F
                 constituentContainer=inputTracks,
                 undeclaredReadDecorKeys=missingKeys,
                 tagFlag=pass_flag,
-                decorator=CompFactory.FlavorTagDiscriminants.DL2Tool(
+                decorator=toolDict[nnAlgoext](
                     name='_'.join([
                         'simpleDipsToJet',
                         nnAlgoKey,

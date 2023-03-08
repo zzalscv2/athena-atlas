@@ -1,24 +1,23 @@
 #!/bin/sh
 
 # art-include: master/Athena
-# art-include: master/AthDerivation
 # art-description: DAOD building PHYS and PHYSLITE data18 MP w/ SharedWriter
 # art-type: grid
 # art-output: *.pool.root
 # art-output: checkFile*.txt
 # art-output: checkxAOD*.txt
 # art-output: checkIndexRefs*.txt
-# art-athena-mt: 8
+# art-output: readDataHeader*.txt
+# art-athena-mt: 4
 
-ATHENA_CORE_NUMBER=8 Reco_tf.py \
+ATHENA_CORE_NUMBER=4 Derivation_tf.py \
+  --CA True \
   --inputAODFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/data18_13TeV.00357772.physics_Main.recon.AOD.r13286/AOD.27654050._000557.pool.root.1 \
   --outputDAODFile art.pool.root \
-  --reductionConf PHYS PHYSLITE \
+  --formats PHYS PHYSLITE \
   --maxEvents -1 \
   --sharedWriter True \
   --multiprocess True \
-  --preExec 'from AthenaCommon.DetFlags import DetFlags; DetFlags.detdescr.all_setOff(); DetFlags.BField_setOn(); DetFlags.digitize.all_setOff(); DetFlags.detdescr.Calo_setOn(); DetFlags.simulate.all_setOff(); DetFlags.pileup.all_setOff(); DetFlags.overlay.all_setOff();' \
-  --postExec 'from DerivationFrameworkJetEtMiss.JetCommon import swapAlgsInSequence; swapAlgsInSequence(topSequence,"jetalg_ConstitModCorrectPFOCSSKCHS_GPFlowCSSK", "UFOInfoAlgCSSK" )'
 
 echo "art-result: $? reco"
 
@@ -45,3 +44,13 @@ echo "art-result: $?  checkIndexRefs PHYS"
 checkIndexRefs.py DAOD_PHYSLITE.art.pool.root > checkIndexRefs_PHYSLITE.txt 2>&1
 
 echo "art-result: $?  checkIndexRefs PHYSLITE"
+
+readDataHeader.py --filesInput=DAOD_PHYS.art.pool.root > readDataHeader_PHYS.txt 2>&1
+tail readDataHeader_PHYS.txt | grep -q "Application Manager Terminated successfully"
+
+echo "art-result: $? readDataHeader PHYS"
+
+readDataHeader.py --filesInput=DAOD_PHYSLITE.art.pool.root > readDataHeader_PHYSLITE.txt 2>&1
+tail readDataHeader_PHYSLITE.txt | grep -q "Application Manager Terminated successfully"
+
+echo "art-result: $? readDataHeader PHYSLITE"

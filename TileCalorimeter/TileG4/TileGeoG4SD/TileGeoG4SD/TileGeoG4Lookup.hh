@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //************************************************************
@@ -96,7 +96,7 @@ public:
   void AddModuleToCell(bool negative = 0);
 
   //Prints scin-cell correspondance information
-  void PrintScinToCell(std::string section_name);
+  void PrintScinToCell(const std::string& section_name);
 
 private:
   //for each scintillator in the module contains pointer to the corresponding cell

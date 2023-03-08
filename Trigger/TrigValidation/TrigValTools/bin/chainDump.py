@@ -104,6 +104,10 @@ def get_parser():
                             'L1/CTPSimulation/output/tavById:L1AV'],
                         help='Dictionary defining names of output text files for each '
                              'histogram, default = %(default)s')
+    parser.add_argument('--printHeader',
+                        action='store_true',
+                        default=False,
+                        help='Add title of columns to the output txt (just for readability)')
     return parser
 
 
@@ -309,7 +313,7 @@ def format_txt_count(count):
     return '{val:>{w}s}'.format(val=count, w=column_width)
 
 
-def write_txt_output(json_dict, diff_only=False):
+def write_txt_output(json_dict, diff_only=False, printHeader=False):
     for text_name in sorted(json_dict.keys()):
         if text_name == total_events_key:
             logging.info('Writing total event count to file %s.txt', text_name)
@@ -325,6 +329,13 @@ def write_txt_output(json_dict, diff_only=False):
                 no_ref = False
                 break
         with open('{:s}.txt'.format(text_name), 'w') as outfile:
+            if printHeader:
+                line = '{name:{nw}s}'.format(name='chain', nw=name_width)
+                if not no_ref:
+                    line += '{name:{cw}s}'.format(name='test', cw=column_width) + 'ref \n'
+                else:
+                    line += 'test \n'
+                outfile.write(line)
             for item_name, item_counts in counts.items():
                 v = item_counts['count']
                 line = '{name:{nw}s} '.format(name=item_name, nw=name_width) + format_txt_count(v)
@@ -480,7 +491,7 @@ def main():
         print_counts(json_dict)
 
     if not args.printOnly:
-        write_txt_output(json_dict, args.diffOnly)
+        write_txt_output(json_dict, args.diffOnly, args.printHeader)
 
     if args.json:
         logging.info('Writing results to %s', args.json)

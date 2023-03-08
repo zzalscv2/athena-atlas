@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -87,7 +87,7 @@ if (msgLvl(MSG::DEBUG))                                                 \
  *  @brief class to produce TileCal commissioning ntuples
  */
 
-TileTBAANtuple::TileTBAANtuple(std::string name, ISvcLocator* pSvcLocator)
+TileTBAANtuple::TileTBAANtuple(const std::string& name, ISvcLocator* pSvcLocator)
   : AthAlgorithm(name, pSvcLocator)
   , m_thistSvc("THistSvc", name)
   , m_ntuplePtr(0)
@@ -164,6 +164,7 @@ TileTBAANtuple::TileTBAANtuple(std::string name, ISvcLocator* pSvcLocator)
   , m_s3cou(0)
   , m_cher1(0)
   , m_cher2(0)
+  , m_cher3(0)
   , m_muTag(0)
   , m_muHalo(0)
   , m_muVeto(0)
@@ -263,7 +264,7 @@ TileTBAANtuple::TileTBAANtuple(std::string name, ISvcLocator* pSvcLocator)
   declareProperty("NTupleID", m_ntupleID = "h1000");
   declareProperty("TreeSize", m_treeSize = 16000000000LL);
 
-  declareProperty("NSamples", m_nSamples = 9);
+  declareProperty("NSamples", m_nSamples = NOT_SETUP);
   declareProperty("NDrawers", m_nDrawers = 6);
 
   declareProperty("EventsPerFile", m_eventsPerFile = 200000);
@@ -320,23 +321,23 @@ TileTBAANtuple::TileTBAANtuple(std::string name, ISvcLocator* pSvcLocator)
   declareProperty("BC0Y2",m_beamBC0Y2 = 0.2);
   declareProperty("BC0Z", m_beamBC0Z  = 17138.0);
 
-  declareProperty("BC1X1",m_beamBC1X1 =-0.938);
-  declareProperty("BC1X2",m_beamBC1X2 = 0.1747);
-  declareProperty("BC1Y1",m_beamBC1Y1 = 0.125);
-  declareProperty("BC1Y2",m_beamBC1Y2 = 0.1765);
-  declareProperty("BC1Z", m_beamBC1Z  = 13788.0);
-  declareProperty("BC1Z_0", m_beamBC1Z_0  = 13788.0);
-  declareProperty("BC1Z_90", m_beamBC1Z_90  = 13788.0);
-  declareProperty("BC1Z_min90", m_beamBC1Z_min90  = 13788.0);
+  declareProperty("BC1X1",m_beamBC1X1 = NOT_SETUP - 1);
+  declareProperty("BC1X2",m_beamBC1X2 = NOT_SETUP - 1);
+  declareProperty("BC1Y1",m_beamBC1Y1 = NOT_SETUP - 1);
+  declareProperty("BC1Y2",m_beamBC1Y2 = NOT_SETUP - 1);
+  declareProperty("BC1Z", m_beamBC1Z  = NOT_SETUP - 1);
+  declareProperty("BC1Z_0", m_beamBC1Z_0  = NOT_SETUP - 1);
+  declareProperty("BC1Z_90", m_beamBC1Z_90  = NOT_SETUP - 1);
+  declareProperty("BC1Z_min90", m_beamBC1Z_min90  = NOT_SETUP - 1);
 
-  declareProperty("BC2X1",m_beamBC2X1 =-0.9369);
-  declareProperty("BC2X2",m_beamBC2X2 = 0.191);
-  declareProperty("BC2Y1",m_beamBC2Y1 =-1.29);
-  declareProperty("BC2Y2",m_beamBC2Y2 = 0.187);
-  declareProperty("BC2Z", m_beamBC2Z  = 9411.0);
-  declareProperty("BC2Z_0", m_beamBC2Z_0  = 9411.0);
-  declareProperty("BC2Z_90", m_beamBC2Z_90  = 9411.0);
-  declareProperty("BC2Z_min90", m_beamBC2Z_min90  = 9411.0);
+  declareProperty("BC2X1",m_beamBC2X1 = NOT_SETUP - 1);
+  declareProperty("BC2X2",m_beamBC2X2 = NOT_SETUP - 1);
+  declareProperty("BC2Y1",m_beamBC2Y1 = NOT_SETUP - 1);
+  declareProperty("BC2Y2",m_beamBC2Y2 = NOT_SETUP - 1);
+  declareProperty("BC2Z", m_beamBC2Z  = NOT_SETUP - 1);
+  declareProperty("BC2Z_0", m_beamBC2Z_0  = NOT_SETUP - 1);
+  declareProperty("BC2Z_90", m_beamBC2Z_90  = NOT_SETUP - 1);
+  declareProperty("BC2Z_min90", m_beamBC2Z_min90  = NOT_SETUP - 1);
 
   // for CTB 2004 only
   declareProperty("BC2Zperiod1", m_beamBC2Zperiod1 = 9411.0);
@@ -378,16 +379,19 @@ StatusCode TileTBAANtuple::ntuple_initialize() {
   //=== get TileCondToolEmscale
   CHECK( m_tileToolEmscale.retrieve() );
 
+  if (m_nSamples < 0) {
+    m_nSamples = 7;
+  }
+
   if (m_TBperiod >= 2015)  {
     m_unpackAdder = false;
 
-    m_nSamples = 7;
     if (m_TBperiod == 2015) {
       m_nDrawers = 2;
       m_drawerList.resize(m_nDrawers);    m_drawerType.resize(m_nDrawers);
       m_drawerList[0] = "0x200"; m_drawerType[0] = 2; // barrel neg
       m_drawerList[1] = "0x401"; m_drawerType[1] = 4; // ext.barrel neg
-    } else if (m_TBperiod == 2016 || m_TBperiod == 2018 || m_TBperiod == 2021) {
+    } else if (m_TBperiod == 2016 || m_TBperiod == 2018 || m_TBperiod == 2021 || m_TBperiod == 2022) {
       m_nDrawers = 5;
       m_drawerList.resize(m_nDrawers);    m_drawerType.resize(m_nDrawers);
       m_drawerList[0] = "0x100"; m_drawerType[0] = 1; // M0 pos
@@ -413,177 +417,38 @@ StatusCode TileTBAANtuple::ntuple_initialize() {
       m_drawerList[3] = "0x201"; m_drawerType[3] = 2; // barrel neg
       m_drawerList[4] = "0x203"; m_drawerType[4] = 2; // barrel neg
       m_drawerList[5] = "0x402"; m_drawerType[5] = 4; // ext.barrel neg
-      m_drawerList[7] = "0x405"; m_drawerType[6] = 4; // ext.barrel neg
+      m_drawerList[6] = "0x405"; m_drawerType[6] = 4; // ext.barrel neg
     }
 
-//      m_beamFragList.resize(5);
-//      m_beamFragList[0] = "0x01";
-//      m_beamFragList[1] = "0x02";
-//      m_beamFragList[2] = "0x03";
-//      m_beamFragList[3] = "0x13";
-//      m_beamFragList[4] = "0x1F";
+    if (m_TBperiod < 2016) {
+      setupBeamChambersTB2015();
+    } else if (m_TBperiod < 2021) {
+      setupBeamChambersTB2016_2020();
+    } else {
+      // Strating from 2021 the following properties should be setup via JO
+      checkIsPropertySetup(m_beamBC1X1, "BC1X1");
+      checkIsPropertySetup(m_beamBC1X2, "BC1X2");
+      checkIsPropertySetup(m_beamBC1Y1, "BC1Y1");
+      checkIsPropertySetup(m_beamBC1Y2, "BC1Y2");
+      checkIsPropertySetup(m_beamBC1Z, "BC1Z");
+      checkIsPropertySetup(m_beamBC1Z_0, "BC1Z_0");
+      checkIsPropertySetup(m_beamBC1Z_90, "BC1Z_90");
+      checkIsPropertySetup(m_beamBC1Z_min90, "BC1Z_min90");
 
-//      For BC1
-//      -------
-//      m_xCha1 = -0.0462586 + (-0.175666)*(m_btdc1[1] - m_btdc1[0]);
-//      m_yCha1 = -0.051923 + (-0.176809)*(m_btdc1[2] - m_btdc1[3]);
-//
-//      For BC2
-//      -------
-//      m_xCha2 = 0.25202 + (-0.18053)*(m_btdc1[5] - m_btdc1[4]);
-//      m_yCha2 = 0.0431688 + (-0.181128)*(m_btdc1[6] - m_btdc1[7]);
-
-    m_beamBC1X1 = -0.0462586;
-    m_beamBC1X2 = -0.175666;
-    m_beamBC1Y1 = -0.051923 ;
-    m_beamBC1Y2 = -0.176809;
-    m_beamBC1Z  = 13000. + 2760 /* 2600. */;
-
-    m_beamBC2X1 = 0.25202;
-    m_beamBC2X2 = -0.18053;
-    m_beamBC2Y1 = 0.0431688;
-    m_beamBC2Y2 = -0.181128;
-    m_beamBC2Z  = 2760 /* 2600. */;
-
-// 2016 settings:
-//
-// https://pcata007.cern.ch/elog/TB2016/88
-//
-//
-// The calibration has been done with the following runs :
-// BC1:
-// Center : 610212
-// Left/up : 610210
-// Right/down : 610209
-//
-// BC2:
-// Center : 610256
-// Left/up : 610321
-// Right/down : 610320
-//
-// Here are the new constants :
-//
-// BC1
-// horizontal slope = -0.171928
-// horizontal offset = -0.047624
-//
-// vertical slope = -0.172942
-// vertical offset = -0.0958677
-//
-// BC2
-// horizontal slope = -0.175698
-// horizontal offset = -1.04599
-//
-// vertical slope = -0.174535
-// vertical offset = -3.10666
-
-    if (m_TBperiod >= 2016) {
-
-      // June 2016 calibration
-      //m_beamBC1X1 = -0.047624;
-      //m_beamBC1X2 = -0.171928;
-      //m_beamBC1Y1 = -0.0958677;
-      //m_beamBC1Y2 = -0.172942;
-      //m_beamBC1Z  = 13000. + 2760 /* 2600. */;
-
-      //m_beamBC2X1 = -1.04599;
-      //m_beamBC2X2 = -0.175698;
-      //m_beamBC2Y1 = -3.10666;
-      //m_beamBC2Y2 = -0.174535;
-      //m_beamBC2Z  = 2760 /* 2600. */;
-
-      // September 2016 calibration, https://pcata007.cern.ch/elog/TB2016/300 (joakim.olsson@cern.ch)
-      //m_beamBC1X1 = 0.100857923042;
-      //m_beamBC1X2 = -0.172098;
-      //m_beamBC1Y1 = -0.133045996607;
-      //m_beamBC1Y2 = -0.172855178323;
-      //m_beamBC1Z  = 13000. + 2760 /* 2600. */;
-      //
-      //m_beamBC2X1 = 0.271555258578 ;
-      //m_beamBC2X2 = -0.173463 ;
-      //m_beamBC2Y1 = 0.305483228502;
-      //m_beamBC2Y2 = -0.173805131744 ;
-      //m_beamBC2Z  = 2760 /* 2600. */;
-
-      // June 2017 calibration, https://pcata007.cern.ch/elog/TB2017/550 (schae@cern.ch)
-      //m_beamBC1X1 =  0.153584934082;
-      //m_beamBC1X2 = -0.175220;
-      //m_beamBC1Y1 = -0.493246053303;
-      //m_beamBC1Y2 = -0.176567356723;
-      //m_beamBC1Z  = 13000. + 2760 /* 2600. */;
-      //
-      //m_beamBC2X1 = 0.414611893278;
-      //m_beamBC2X2 = -0.176122;
-      //m_beamBC2Y1 = 0.150807740888;
-      //m_beamBC2Y2 = -0.173472808704;
-      //m_beamBC2Z  = 2760 /* 2600. */;
-
-      // August 2017 calibration, https://pcata007.cern.ch/elog/TB2017/550 (schae@cern.ch)
-      //m_beamBC1X1 =  0.181797;
-      //m_beamBC1X2 = -0.175657;
-      //m_beamBC1Y1 = -0.128910;
-      //m_beamBC1Y2 = -0.175965;
-      //m_beamBC1Z  = 13000. + 2760 /* 2600. */;
-      //
-      //m_beamBC2X1 = 0.611502;
-      //m_beamBC2X2 = -0.183116;
-      //m_beamBC2Y1 = 0.541212;
-      //m_beamBC2Y2 = -0.183115;
-      //m_beamBC2Z  = 2760 /* 2600. */;
-
-    // September 2017 calibration, https://pcata007.cern.ch/elog/TB2017/550 (schae@cern.ch)
-    //m_beamBC1X1 =  0.181797;
-    //m_beamBC1X2 = -0.175657;
-    //m_beamBC1Y1 = -0.128910;
-    //m_beamBC1Y2 = -0.175965;
-    //m_beamBC1Z  = 13000. + 2760 /* 2600. */;
-
-    //m_beamBC2X1 = 0.622896039922;
-    //m_beamBC2X2 = -0.176735;
-    //m_beamBC2Y1 = 0.195954125116;
-    //m_beamBC2Y2 = -0.176182117624;
-    //m_beamBC2Z  = 2760 /* 2600. */;
-
-      if (m_TBperiod == 2021) {
-	m_beamBC1X1 = -0.156736;
-	m_beamBC1X2 = -0.178455;
-	m_beamBC1Y1 = -0.452977;
-	m_beamBC1Y2 = -0.17734;
-	m_beamBC1Z  = 12839.6  + 105. + 4470.7 - 50. + 36. -35. -17.5 /* 2600. */; // Results from Survey
-	m_beamBC1Z_0  = 12839.6  + 105. + 4470.7 - 50. + 36. -35. -17.5 /* 2600. */; // Results from Survey
-	m_beamBC1Z_90  = 12839.6  + 105. + 2665.95 + 36. - 35. -17.5 /* 2600. */; // Results from Survey
-	m_beamBC1Z_min90  = 12839.6  + 105. + 2643.7 + 36. - 35. -17.5 /* 2600. */; // Results from Survey bc1_bc2_dist + bc1_bc2_corr + tile_corr + bc2_corr
-
-	m_beamBC2X1 = 2.88152;
-	m_beamBC2X2 = -0.187192;
-	m_beamBC2Y1 = -1.79832;
-	m_beamBC2Y2 = -0.190846;
-	m_beamBC2Z  = 4470.7 - 50. + 36. -35. -17.5 /* 2600. */;
-	m_beamBC2Z_0  = 4470.7 - 50. ;
-	m_beamBC2Z_90  = 2665.95 + 36. - 35. - 17.5;
-	m_beamBC2Z_min90  = 2643.7 + 36. - 35. - 17.5; // Results from Survey tile_bc2_dist + bc1_bc2_corr + tile_corr + bc2_corr
-      } else {
-	// September 2017 calibration with additional precision from Survey
-	m_beamBC1X1 =  0.181797 + 0.5;  // Results from Survey
-	m_beamBC1X2 = -0.175657;
-	m_beamBC1Y1 = -0.128910 - 1.9;  // Results from Survey
-	m_beamBC1Y2 = -0.175965;
-	m_beamBC1Z  = 12839.6  + 105. + 4470.7 - 50. + 36. -35. -17.5 /* 2600. */; // Results from Survey
-	m_beamBC1Z_0  = 12839.6  + 105. + 4470.7 - 50. + 36. -35. -17.5 /* 2600. */; // Results from Survey
-	m_beamBC1Z_90  = 12839.6  + 105. + 2665.95 + 36. - 35. -17.5 /* 2600. */; // Results from Survey
-	m_beamBC1Z_min90  = 12839.6  + 105. + 2643.7 + 36. - 35. -17.5 /* 2600. */; // Results from Survey bc1_bc2_dist + bc1_bc2_corr + tile_corr + bc2_corr
-
-	m_beamBC2X1 = 0.622896039922 - 25. ; // Results from Survey
-	m_beamBC2X2 = -0.176735;
-	m_beamBC2Y1 = 0.195954125116 + 17.7; // Results from Survey
-	m_beamBC2Y2 = -0.176182117624;
-	m_beamBC2Z  = 4470.7 - 50. + 36. -35. -17.5 /* 2600. */;
-	m_beamBC2Z_0  = 4470.7 - 50. ;
-	m_beamBC2Z_90  = 2665.95 + 36. - 35. - 17.5;
-	m_beamBC2Z_min90  = 2643.7 + 36. - 35. - 17.5; // Results from Survey tile_bc2_dist + bc1_bc2_corr + tile_corr + bc2_corr
-      }
+      checkIsPropertySetup(m_beamBC2X1, "BC2X1");
+      checkIsPropertySetup(m_beamBC2X2, "BC2X2");
+      checkIsPropertySetup(m_beamBC2Y1, "BC2Y1");
+      checkIsPropertySetup(m_beamBC2Y2, "BC2Y2");
+      checkIsPropertySetup(m_beamBC2Z, "BC2Z");
+      checkIsPropertySetup(m_beamBC2Z_0, "BC2Z_0");
+      checkIsPropertySetup(m_beamBC2Z_90, "BC2Z_90");
+      checkIsPropertySetup(m_beamBC2Z_min90, "BC2Z_min90");
     }
+
+  } else {
+    setupBeamChambersBeforeTB2015();
   }
+
 
   if (m_unpackAdder) {
     // get TileRawChannelBuilderFlatFilter for adder energy calculation
@@ -767,6 +632,38 @@ StatusCode TileTBAANtuple::execute() {
   if (m_evtNr % 1000 == 0)
     ATH_MSG_INFO( m_evtNr << " events processed so far" );
 
+  if (m_beamCnv) {
+    try {
+      m_evTime = m_beamCnv->eventFragment()->bc_time_seconds();
+      m_evt = m_beamCnv->eventFragment()->global_id();
+      // m_runNo = m_beamCnv->eventFragment()->run_no();  // run_no is 0 here
+    } catch (...) {
+      m_evTime = 0;
+      m_evt = m_evtNr;
+    }
+    if ( m_beamCnv->validBeamFrag() )
+      m_run = m_beamCnv->robFragment()->rod_run_no();   // take it from beam ROD header
+    else
+      m_run = 0;
+  } else {
+    m_evTime = 0;
+    m_evt = m_evtNr;
+    m_run = 0;
+  }
+
+
+  // new way to set run/event/lumi block
+  // Retrieve eventInfo from StoreGate
+  const xAOD::EventInfo* eventInfo(nullptr);
+  if (evtStore()->retrieve(eventInfo).isSuccess()){
+    //Get run and event numbers
+    m_run = eventInfo->runNumber();
+    m_evt = eventInfo->eventNumber();
+    //Get timestamp of the event
+    if (eventInfo->timeStamp() > 0) {
+      m_evTime = eventInfo->timeStamp();
+    }
+  }
 
 
   // store BeamElements
@@ -800,39 +697,6 @@ StatusCode TileTBAANtuple::execute() {
   if ( m_completeNtuple && m_TBperiod < 2015) {
     // store energy per sampling from all calorimeters
     empty &= (storeCells().isFailure());
-  }
-
-  if (m_beamCnv) {
-    try {
-      m_evTime = m_beamCnv->eventFragment()->bc_time_seconds();
-      m_evt = m_beamCnv->eventFragment()->global_id();
-      // m_runNo = m_beamCnv->eventFragment()->run_no();  // run_no is 0 here
-    } catch (...) {
-      m_evTime = 0;
-      m_evt = m_evtNr;
-    }
-    if ( m_beamCnv->validBeamFrag() )
-      m_run = m_beamCnv->robFragment()->rod_run_no();   // take it from beam ROD header
-    else
-      m_run = 0;
-  } else {
-    m_evTime = 0;
-    m_evt = m_evtNr;
-    m_run = 0;
-  }
-
-
-  // new way to set run/event/lumi block
-  // Retrieve eventInfo from StoreGate
-  const xAOD::EventInfo* eventInfo(nullptr);
-  if (evtStore()->retrieve(eventInfo).isSuccess()){
-    //Get run and event numbers
-    m_run = eventInfo->runNumber();
-    m_evt = eventInfo->eventNumber();
-    //Get timestamp of the event
-    if (eventInfo->timeStamp() > 0) {
-      m_evTime = eventInfo->timeStamp();
-    }
   }
 
 
@@ -1008,7 +872,7 @@ StatusCode TileTBAANtuple::storeBeamElements() {
         } else if ( dsize != 1              && frag != ADD_FADC_FRAG    &&
                     frag != BEAM_TDC_FRAG   && frag != COMMON_TDC1_FRAG &&
                     frag != COMMON_TOF_FRAG && frag != COMMON_TDC2_FRAG &&
-                    !(frag == ECAL_ADC_FRAG && cha == 15)) {
+                    !(frag == ECAL_ADC_FRAG)) {
 
           WRONG_SAMPLE(frag,cha,dsize);
 
@@ -1035,7 +899,7 @@ StatusCode TileTBAANtuple::storeBeamElements() {
                 case 0: m_s1cou = amplitude; break;
                 case 1: m_s2cou = amplitude; break;
                 case 2: m_s3cou = amplitude; break;
-	        case 3: m_cher1 = amplitude; break; // ATH_MSG_VERBOSE("load beam adc " << m_cher1); break;
+                case 3: m_cher1 = amplitude; break; // ATH_MSG_VERBOSE("load beam adc " << m_cher1); break;
                 case 4: m_cher2 = amplitude; break;
                 case 5: m_muTag = amplitude; break;
                 case 6: m_muHalo= amplitude; break;
@@ -1149,11 +1013,11 @@ StatusCode TileTBAANtuple::storeBeamElements() {
 
               if(cha < 15) {
                 m_qdc[cha] = amplitude;
-		ATH_MSG_VERBOSE( "QDC: " << cha << " amp: " << amplitude);
+                ATH_MSG_VERBOSE( "QDC: " << cha << " amp: " << amplitude);
               } else if (cha == 15) {
                 for (int idx = 0; idx < dsize && idx < 18; ++idx) {
                   m_qdc[idx + 15] = digits[idx];
-		  ATH_MSG_VERBOSE("QDC2: " << cha << " amp: " << amplitude);
+                  ATH_MSG_VERBOSE("QDC2: " << cha << " amp: " << amplitude);
                 }
               } else {
                 WRONG_CHANNEL(frag, cha);
@@ -1173,35 +1037,71 @@ StatusCode TileTBAANtuple::storeBeamElements() {
             break;
 
           case COMMON_ADC1_FRAG:
-
-            switch(cha) {
-              // BEAM
-              case 0: m_s1cou = amplitude; break;
-              case 1: m_s2cou = amplitude; break;
-              case 2: m_s3cou = amplitude; break;
-              case 3: m_muTag = amplitude; break;
-              case 4: m_cher1 = amplitude; break;
-              case 5: m_cher2 = amplitude; break;
-              case 6: m_muHalo= amplitude; break;
-              case 7: m_muVeto= amplitude; break;
-              default: WRONG_CHANNEL(frag, cha);
+            if (m_TBperiod > 2015) {
+              if (cha < 16) {
+                if (m_run > 2211444) {
+                  switch(cha) {
+                    // BEAM
+                    case 0: m_s1cou = amplitude; break;
+                    case 1: m_s2cou = amplitude; break;
+                    case 2: m_muBack[10] = amplitude; break;
+                    case 3: m_cher1 = amplitude; break;
+                    case 4: m_cher2 = amplitude; break;
+                    case 5: m_cher3 = amplitude; break;
+                    default: m_muBack[cha - 6] = amplitude;
+                  }
+                } else {
+                  switch(cha) {
+                    // BEAM
+                    case 0: m_s1cou = amplitude; break;
+                    case 1: m_s2cou = amplitude; break;
+                    case 2: m_s3cou = amplitude; break;
+                    case 3: m_cher1 = amplitude; break;
+                    case 4: m_cher2 = amplitude; break;
+                    case 5: m_cher3 = amplitude; break;
+                  }
+                }
+              } else {
+                WRONG_CHANNEL(frag, cha);
+              }
+            } else {
+              switch(cha) {
+                // BEAM
+                case 0: m_s1cou = amplitude; break;
+                case 1: m_s2cou = amplitude; break;
+                case 2: m_s3cou = amplitude; break;
+                case 3: m_muTag = amplitude; break;
+                case 4: m_cher1 = amplitude; break;
+                case 5: m_cher2 = amplitude; break;
+                case 6: m_muHalo= amplitude; break;
+                case 7: m_muVeto= amplitude; break;
+                default: WRONG_CHANNEL(frag, cha);
+              }
             }
             break;
 
           case COMMON_ADC2_FRAG:
 
-            if ( ! m_unpackAdder ) {
-              switch(cha) {
-                // BEAM
-                case 0: break;
-                case 1: m_s2extra = amplitude; break;
-                case 2: m_s3extra = amplitude; break;
-                case 3:
-                case 4:
-                case 5:
-                case 6:
-                case 7: break;
-                default: WRONG_CHANNEL(frag, cha);
+            if (m_TBperiod > 2015) {
+              if(cha < 14) {
+                m_muBack[cha] = amplitude;
+              } else {
+                WRONG_CHANNEL(frag, cha);
+              }
+            } else {
+              if ( ! m_unpackAdder ) {
+                switch(cha) {
+                  // BEAM
+                  case 0: break;
+                  case 1: m_s2extra = amplitude; break;
+                  case 2: m_s3extra = amplitude; break;
+                  case 3:
+                  case 4:
+                  case 5:
+                  case 6:
+                  case 7: break;
+                  default: WRONG_CHANNEL(frag, cha);
+                }
               }
             }
             break;
@@ -1214,15 +1114,42 @@ StatusCode TileTBAANtuple::storeBeamElements() {
 
           case COMMON_TOF_FRAG:
 
-            if(cha < 8) m_tof[cha] = amplitude;
-            else WRONG_CHANNEL(frag,cha);
-            break;
+            if (m_TBperiod >= 2022) {
+              if (cha > 11) { // The first 12 channels are (can be) connected to BC1 and BC2, the last 4 channels are supposed to be TOF
+                if(cha < 16) {
+                  m_tof[cha] = amplitude;
+                  ATH_MSG_VERBOSE( "TOF: " << cha << " amp: " << amplitude);
+                } else {
+                  WRONG_CHANNEL(frag, cha);
+                }
+                break;
+              }
+              // Fall through to case COMMON_TDC1_FRAG to unpack the first 12 channels of BC1 and BC2
+              [[fallthrough]]; // silent the warning on fall through
+            } else if (m_TBperiod > 2015) {
+
+              if(cha < 16) {
+                m_tof[cha] = amplitude;
+                ATH_MSG_VERBOSE( "TOF: " << cha << " amp: " << amplitude);
+              } else {
+                WRONG_CHANNEL(frag, cha);
+              }
+              break;
+            } else {
+              if(cha < 8) m_tof[cha] = amplitude;
+              else WRONG_CHANNEL(frag, cha);
+              break;
+            }
 
           case COMMON_TDC1_FRAG:
 
             FRAG_FOUND(frag,cha,dsize);
-            if(cha < 16) {
+            if ((cha > 11) && (cha < 16) && (m_run > 2211136)) {
+              m_tof[cha] = amplitude;
+              ATH_MSG_VERBOSE( "TOF: " << cha << " amp: " << amplitude);
+            } if(cha < 16) {
               m_btdc1[cha] = amplitude;
+              ATH_MSG_VERBOSE( "TDC: " << cha << " amp: " << amplitude);
               if (m_btdcNhit[cha]==0) {
                 m_btdc2[cha] = amplitude;
               }
@@ -1366,20 +1293,29 @@ StatusCode TileTBAANtuple::storeBeamElements() {
 //      m_xCha2 = 0.25202 + (-0.18053)*(m_btdc1[5] - m_btdc1[4]);
 //      m_yCha2 = 0.0431688 + (-0.181128)*(m_btdc1[6] - m_btdc1[7]);
 
-      m_xCha1 = m_beamBC1X1 + m_beamBC1X2*(m_btdc1[1] - m_btdc1[0]);
-      m_yCha1 = m_beamBC1Y1 + m_beamBC1Y2*(m_btdc1[2] - m_btdc1[3]);
-      if (m_run > 612543 && m_run< 614141) {
-      m_xCha2 = m_beamBC2X1 + m_beamBC2X2*(m_btdc1[5] - m_btdc1[6]);
-      m_yCha2 = m_beamBC2Y1 + m_beamBC2Y2*(m_btdc1[4] - m_btdc1[7]);
+      if (m_run > 2211444) {
+        m_xCha1 = m_beamBC1X1 + m_beamBC1X2*(m_btdc1[8] - m_btdc1[0]);
+        m_yCha1 = m_beamBC1Y1 + m_beamBC1Y2*(m_btdc1[9] - m_btdc1[3]);
+      } else {
+        m_xCha1 = m_beamBC1X1 + m_beamBC1X2*(m_btdc1[1] - m_btdc1[0]);
+        m_yCha1 = m_beamBC1Y1 + m_beamBC1Y2*(m_btdc1[2] - m_btdc1[3]);
       }
-      else {
-      m_xCha2 = m_beamBC2X1 + m_beamBC2X2*(m_btdc1[5] - m_btdc1[4]);
-      m_yCha2 = m_beamBC2Y1 + m_beamBC2Y2*(m_btdc1[6] - m_btdc1[7]);
+      if (m_run > 612543 && m_run< 614141) {
+        m_xCha2 = m_beamBC2X1 + m_beamBC2X2*(m_btdc1[5] - m_btdc1[6]);
+        m_yCha2 = m_beamBC2Y1 + m_beamBC2Y2*(m_btdc1[4] - m_btdc1[7]);
+      } else {
+        m_xCha2 = m_beamBC2X1 + m_beamBC2X2*(m_btdc1[5] - m_btdc1[4]);
+        m_yCha2 = m_beamBC2Y1 + m_beamBC2Y2*(m_btdc1[6] - m_btdc1[7]);
       }
 
       // Using the first value from the TDC
-      m_xCha1_0 = m_beamBC1X1 + m_beamBC1X2*(m_btdc2[1] - m_btdc2[0]);
-      m_yCha1_0 = m_beamBC1Y1 + m_beamBC1Y2*(m_btdc2[2] - m_btdc2[3]);
+      if (m_run > 2211444) {
+        m_xCha1_0 = m_beamBC1X1 + m_beamBC1X2*(m_btdc2[8] - m_btdc2[0]);
+        m_yCha1_0 = m_beamBC1Y1 + m_beamBC1Y2*(m_btdc2[9] - m_btdc2[3]);
+      } else {
+        m_xCha1_0 = m_beamBC1X1 + m_beamBC1X2*(m_btdc2[1] - m_btdc2[0]);
+        m_yCha1_0 = m_beamBC1Y1 + m_beamBC1Y2*(m_btdc2[2] - m_btdc2[3]);
+      }
       m_xCha2_0 = m_beamBC2X1 + m_beamBC2X2*(m_btdc2[5] - m_btdc2[4]);
       m_yCha2_0 = m_beamBC2Y1 + m_beamBC2Y2*(m_btdc2[6] - m_btdc2[7]);
 
@@ -1399,10 +1335,15 @@ StatusCode TileTBAANtuple::storeBeamElements() {
       m_yImp_min90  = m_yCha2_0 + (m_yCha2_0 - m_yCha1_0)*m_beamBC2Z_min90/(m_beamBC1Z_min90 - m_beamBC2Z_min90);
 ////////////////////
 
-      ATH_MSG_DEBUG( "BC1x  : ( "<< m_btdc1[0] <<" - "<< m_btdc1[1] <<" )\t" <<m_xCha1 );
-      ATH_MSG_DEBUG( "BC1y  : ( "<< m_btdc1[2] <<" - "<< m_btdc1[3] <<" )\t" <<m_yCha1 );
-      ATH_MSG_DEBUG( "BC2x  : ( "<< m_btdc1[4] <<" - "<< m_btdc1[5] <<" )\t" <<m_xCha2 );
-      ATH_MSG_DEBUG( "BC2y  : ( "<< m_btdc1[6] <<" - "<< m_btdc1[7] <<" )\t" <<m_yCha2 );
+      if (m_run > 2211444) {
+        ATH_MSG_DEBUG( "BC1x  : ( "<< m_btdc1[0] <<" - "<< m_btdc1[8] <<" )\t" << m_xCha1 );
+        ATH_MSG_DEBUG( "BC1y  : ( "<< m_btdc1[2] <<" - "<< m_btdc1[9] <<" )\t" << m_yCha1 );
+      } else {
+        ATH_MSG_DEBUG( "BC1x  : ( "<< m_btdc1[0] <<" - "<< m_btdc1[1] <<" )\t" << m_xCha1 );
+        ATH_MSG_DEBUG( "BC1y  : ( "<< m_btdc1[2] <<" - "<< m_btdc1[3] <<" )\t" << m_yCha1 );
+      }
+      ATH_MSG_DEBUG( "BC2x  : ( "<< m_btdc1[4] <<" - "<< m_btdc1[5] <<" )\t" << m_xCha2 );
+      ATH_MSG_DEBUG( "BC2y  : ( "<< m_btdc1[6] <<" - "<< m_btdc1[7] <<" )\t" << m_yCha2 );
 
   } else if ( m_unpackAdder ) { // this is 2003 data
 
@@ -1610,10 +1551,11 @@ StatusCode TileTBAANtuple::storeRawChannels(std::string containerId
         // cabling for testbeam (convert to pmt#-1)
         if ((m_TBperiod < 2015 ||
              (m_TBperiod==2015 && fragType<3) ||
-	     ((m_TBperiod==2016 || m_TBperiod==2021) && ((fragId&0xFF)<4 && fragId != 0x201)) ||
-	     (m_TBperiod==2017 && ((fragId&0xFF)<4 && !(fragId == 0x201 || fragId == 0x203))) ||
-	     (m_TBperiod==2018 && ((fragId&0xFF)<4 && !(fragId == 0x201 || fragId == 0x402))) ||
-	     (m_TBperiod==2019 && ((fragId&0xFF)<5 && !(fragId == 0x201 || fragId == 0x203 || fragId >= 0x402))))
+             ((m_TBperiod==2016 || m_TBperiod==2021) && ((fragId&0xFF)<4 && fragId != 0x201)) ||
+             (m_TBperiod==2017 && ((fragId&0xFF)<4 && !(fragId == 0x201 || fragId == 0x203))) ||
+             (m_TBperiod==2018 && ((fragId&0xFF)<4 && !(fragId == 0x201 || fragId == 0x402))) ||
+             (m_TBperiod==2019 && ((fragId&0xFF)<5 && !(fragId == 0x201 || fragId == 0x203 || fragId >= 0x402))) ||
+             (m_TBperiod==2022 && ((fragId&0xFF)<4 && !(fragId == 0x201 || (m_run >= 2210456 && fragId == 0x402)))))
             && fragType > 0 && m_pmtOrder)
           channel = digiChannel2PMT(fragType, channel);
 
@@ -1829,11 +1771,12 @@ StatusCode TileTBAANtuple::storeDigits() {
 
             if ((m_TBperiod < 2015 ||
                  (m_TBperiod==2015 && fragType<3) ||
-		 ((m_TBperiod==2016 || m_TBperiod==2021) && ((fragId&0xFF)<4 && fragId != 0x201)) ||
-		 (m_TBperiod==2017 && ((fragId&0xFF)<4 && !(fragId == 0x201 || fragId == 0x203))) ||
-		 (m_TBperiod==2018 && ((fragId&0xFF)<4 && !(fragId == 0x201 || fragId == 0x402))) ||
-		 (m_TBperiod==2019 && ((fragId&0xFF)<5 && !(fragId == 0x201 || fragId == 0x203 || fragId >= 0x402))))
-		&& fragType > 0 && m_pmtOrder)
+                 ((m_TBperiod==2016 || m_TBperiod==2021) && ((fragId&0xFF)<4 && fragId != 0x201)) ||
+                 (m_TBperiod==2017 && ((fragId&0xFF)<4 && !(fragId == 0x201 || fragId == 0x203))) ||
+                 (m_TBperiod==2018 && ((fragId&0xFF)<4 && !(fragId == 0x201 || fragId == 0x402))) ||
+                 (m_TBperiod==2019 && ((fragId&0xFF)<5 && !(fragId == 0x201 || fragId == 0x203 || fragId >= 0x402))) ||
+                 (m_TBperiod==2022 && ((fragId&0xFF)<4 && !(fragId == 0x201 || (m_run >= 2210456 && fragId == 0x402)))))
+                && fragType > 0 && m_pmtOrder)
 
               channel = digiChannel2PMT(fragType, channel);
 
@@ -1905,20 +1848,20 @@ StatusCode TileTBAANtuple::storeDigits() {
         (m_slinkCRCVec.at(type))[1] = (*itColl)->getFragCRC() & 0xffff;
         (m_dmuMaskVec.at(type))[1] = (*itColl)->getFragDMUMask() & 0xffff;
 
-	if (m_mdL1idVec.at(type)) {
-	  std::vector<uint32_t> extraWords = (*itColl)->getFragExtraWords();
-	  if (extraWords.size() >= 8 * MAX_MINIDRAWERS) {
-	    
-	    int* md[] = {m_mdL1idVec.at(type), m_mdBcidVec.at(type), 
-			 m_mdModuleVec.at(type), m_mdRunTypeVec.at(type), m_mdRunVec.at(type),  
-			 m_mdChargeVec.at(type), m_mdChargeTimeVec.at(type), m_mdCapacitorVec.at(type)}; 
+        if (m_mdL1idVec.at(type)) {
+          std::vector<uint32_t> extraWords = (*itColl)->getFragExtraWords();
+          if (extraWords.size() >= 8 * MAX_MINIDRAWERS) {
 
-	    auto it = extraWords.begin();
-	    for (int i = 0; i < 8; ++i) {
-	      std::copy(it + i * MAX_MINIDRAWERS, it + (i + 1) * MAX_MINIDRAWERS, md[i]);
-	    }
-	  }
-	}
+            int* md[] = {m_mdL1idVec.at(type), m_mdBcidVec.at(type),
+                         m_mdModuleVec.at(type), m_mdRunTypeVec.at(type), m_mdRunVec.at(type),
+                         m_mdChargeVec.at(type), m_mdChargeTimeVec.at(type), m_mdCapacitorVec.at(type)};
+
+            auto it = extraWords.begin();
+            for (int i = 0; i < 8; ++i) {
+              std::copy(it + i * MAX_MINIDRAWERS, it + (i + 1) * MAX_MINIDRAWERS, md[i]);
+            }
+          }
+        }
 
 
         // go through all TileDigits in collection
@@ -1935,10 +1878,11 @@ StatusCode TileTBAANtuple::storeDigits() {
           // cabling for testbeam
           if ((m_TBperiod < 2015 ||
                (m_TBperiod==2015 && fragType<3) ||
-	       ((m_TBperiod==2016 || m_TBperiod==2021) && ((fragId&0xFF)<4 && fragId != 0x201)) ||
-	       (m_TBperiod==2017 && ((fragId&0xFF)<4 && !(fragId == 0x201 || fragId == 0x203))) ||
-	       (m_TBperiod==2018 && ((fragId&0xFF)<4 && !(fragId == 0x201 || fragId == 0x402))) ||
-	       (m_TBperiod==2019 && ((fragId&0xFF)<5 && !(fragId == 0x201 || fragId == 0x203 || fragId >= 0x402))))
+               ((m_TBperiod==2016 || m_TBperiod==2021) && ((fragId&0xFF)<4 && fragId != 0x201)) ||
+               (m_TBperiod==2017 && ((fragId&0xFF)<4 && !(fragId == 0x201 || fragId == 0x203))) ||
+               (m_TBperiod==2018 && ((fragId&0xFF)<4 && !(fragId == 0x201 || fragId == 0x402))) ||
+               (m_TBperiod==2019 && ((fragId&0xFF)<5 && !(fragId == 0x201 || fragId == 0x203 || fragId >= 0x402))) ||
+               (m_TBperiod==2022 && ((fragId&0xFF)<4 && !(fragId == 0x201 || (m_run >= 2210456 && fragId == 0x402)))))
               && fragType > 0 && m_pmtOrder)
             channel = digiChannel2PMT(fragType, channel);
 
@@ -1997,17 +1941,11 @@ StatusCode TileTBAANtuple::storeHitVector() {
   SG::ReadCondHandle<TileSamplingFraction> samplingFraction(m_samplingFractionKey);
   ATH_CHECK( samplingFraction.isValid() );
 
-  // Get iterator for all hits in hit vector
-  TileHitVecConstIterator it = hitVec->begin();
-  TileHitVecConstIterator itEnd = hitVec->end();
-  bool emptyColl = (it==itEnd);
-
   // Go through all TileHit
-  for(; it != itEnd; it++) {
+  for (const TileHit& cinp : *hitVec) {
 
     // get hits
-    const TileHit * cinp = &(*it);
-    HWIdentifier hwid = cinp->pmt_HWID();
+    HWIdentifier hwid = cinp.pmt_HWID();
 
     // determine type of frag
     int fragId = m_tileHWID->frag(hwid);
@@ -2019,11 +1957,11 @@ StatusCode TileTBAANtuple::storeHitVector() {
 
     } else {
       int fragType = m_drawerType[type];
-      storeHit(cinp,fragType,fragId,m_ehitVec.at(type),m_thitVec.at(type), *samplingFraction);
+      storeHit(&cinp,fragType,fragId,m_ehitVec.at(type),m_thitVec.at(type), *samplingFraction);
     }
   }
 
-  if (emptyColl)
+  if (hitVec->empty())
     return StatusCode::FAILURE;
   else
     return StatusCode::SUCCESS;
@@ -2142,7 +2080,8 @@ void TileTBAANtuple::storeHit(const TileHit *cinp, int fragType, int fragId, flo
        ((m_TBperiod==2016 || m_TBperiod==2021) && ((fragId&0xFF)<4 && fragId != 0x201)) ||
        (m_TBperiod==2017 && ((fragId&0xFF)<4 && !(fragId == 0x201 || fragId == 0x203))) ||
        (m_TBperiod==2018 && ((fragId&0xFF)<4 && !(fragId == 0x201 || fragId == 0x402))) ||
-       (m_TBperiod==2019 && ((fragId&0xFF)<5 && !(fragId == 0x201 || fragId == 0x203 || fragId >= 0x402))))
+       (m_TBperiod==2019 && ((fragId&0xFF)<5 && !(fragId == 0x201 || fragId == 0x203 || fragId >= 0x402))) ||
+       (m_TBperiod==2022 && ((fragId&0xFF)<4 && !(fragId == 0x201 || (m_run >= 2210456 && fragId == 0x402)))))
       && fragType > 0 && m_pmtOrder)
     channel = digiChannel2PMT(fragType, channel);
 
@@ -2181,7 +2120,8 @@ StatusCode TileTBAANtuple::ntuple_clear() {
   }
 
   if (((m_TBperiod >= 2015 || m_unpackAdder) && m_beamIdList[BEAM_ADC_FRAG])
-      || (!m_unpackAdder && m_beamIdList[COMMON_ADC1_FRAG])) {
+      || (!m_unpackAdder && m_beamIdList[COMMON_ADC1_FRAG])
+      || (m_TBperiod >= 2022 && m_beamIdList[COMMON_TOF_FRAG])) {
     BEAM_clearBranch();
     ATH_MSG_VERBOSE( "clear branch");
   }
@@ -2470,7 +2410,7 @@ StatusCode TileTBAANtuple::initList() {
       for (; itColl != itCollEnd; ++itColl) {
         if ((*itColl)->begin() != (*itColl)->end()) {
           int siz = (*(*itColl)->begin())->samples().size();
-	  m_nSamplesInDrawerMap[(*itColl)->identify()] = siz;
+          m_nSamplesInDrawerMap[(*itColl)->identify()] = siz;
           if (siz > m_nSamples && m_nSamples != 0) {
             ATH_MSG_WARNING( "Increasing number of digit samples in ntuple from " << m_nSamples << " to " << siz );
             m_nSamples = siz;
@@ -2936,11 +2876,11 @@ void TileTBAANtuple::CISPAR_clearBranch(void)
 void TileTBAANtuple::BEAM_addBranch(void) {
 
     if (((m_TBperiod >= 2015 || m_unpackAdder) && m_beamIdList[BEAM_ADC_FRAG])
-      || (!m_unpackAdder && m_beamIdList[COMMON_ADC1_FRAG])) {
+	|| ((!m_unpackAdder || m_TBperiod >= 2022) && m_beamIdList[COMMON_ADC1_FRAG])) {
 
     m_ntuplePtr->Branch("S1cou", &m_s1cou, "S1cou/S");
     m_ntuplePtr->Branch("S2cou", &m_s2cou, "S2cou/S");
-    if (m_TBperiod >= 2016) {
+    if (m_TBperiod >= 2016 && m_TBperiod < 2022) {
       m_ntuplePtr->Branch("Cher3", &m_s3cou, "Cher3/S"); // dropped S3 in favor of Cher3 in September 2016 TB
      // m_ntuplePtr->Branch("SpmFinger", &m_muVeto, "SmpFinger/S"); //  muVeto replaced by SPM for testing
       m_ntuplePtr->Branch("SiPM1", &m_muTag, "SiPM1/S"); //  muTag replaced by SiPM1 for testing
@@ -2961,11 +2901,13 @@ void TileTBAANtuple::BEAM_addBranch(void) {
       m_ntuplePtr->Branch("SCalo1", &m_muTag, "SCalo1/S");
       m_ntuplePtr->Branch("SCalo2", &m_muHalo, "SCalo2/S");
       //m_ntuplePtr->Branch("SCalo3", &m_muVeto, "SCalo3/S");
+    } else if (m_TBperiod >= 2022) {
+      m_ntuplePtr->Branch("Cher3", &m_cher3, "Cher3/S");
     }
   }
 
   if (m_TBperiod >= 2015) {
-    if (m_beamIdList[COMMON_TDC1_FRAG]) {
+    if (m_beamIdList[COMMON_TDC1_FRAG] || (m_TBperiod >= 2022 && m_beamIdList[COMMON_TOF_FRAG])) {
       m_btdc1 = new int[16];
       m_btdc2 = new int[16];
       m_btdc = new std::vector<std::vector<int> >(16);
@@ -2976,6 +2918,10 @@ void TileTBAANtuple::BEAM_addBranch(void) {
       m_ntuplePtr->Branch("tscTOF", &m_tscTOF, "tscTOF/I");
       m_ntuplePtr->Branch("btdcNhit", m_btdcNhit, "btdcNhit[16]/I");
       m_ntuplePtr->Branch("btdcNchMultiHit", m_btdcNchMultiHit, "btdcNchMultiHit[2]/I");
+    }
+    if (m_beamIdList[COMMON_TOF_FRAG]) {
+      m_tof = new int[16];
+      m_ntuplePtr->Branch("tof", m_tof, "m_tof[16]/I");
     }
   } else if (!m_unpackAdder) {
     if (m_beamIdList[COMMON_ADC2_FRAG]) {
@@ -3023,7 +2969,8 @@ void TileTBAANtuple::BEAM_addBranch(void) {
 
   if ((m_TBperiod >= 2015 && m_beamIdList[COMMON_TDC1_FRAG])
       || (m_unpackAdder && m_beamIdList[BEAM_TDC_FRAG])
-      || (!m_unpackAdder && m_beamIdList[COMMON_TDC2_FRAG])) {
+      || (!m_unpackAdder && m_beamIdList[COMMON_TDC2_FRAG])
+      || (m_TBperiod >= 2022 && m_beamIdList[COMMON_TOF_FRAG])) {
 
     m_ntuplePtr->Branch("Xcha1", &m_xCha1, "Xcha1/F");
     m_ntuplePtr->Branch("Ycha1", &m_yCha1, "Ycha1/F");
@@ -3061,6 +3008,7 @@ void TileTBAANtuple::BEAM_clearBranch(void) {
     m_s3cou = 0;
     m_cher1 = 0;
     m_cher2 = 0;
+    m_cher3 = 0;
     m_muTag = 0;
     m_muHalo = 0;
     m_muVeto = 0;
@@ -3092,7 +3040,8 @@ void TileTBAANtuple::BEAM_clearBranch(void) {
 
   if ((m_TBperiod >= 2015 && m_beamIdList[COMMON_TDC1_FRAG])
       || (m_unpackAdder && m_beamIdList[BEAM_TDC_FRAG])
-      || (!m_unpackAdder && m_beamIdList[COMMON_TDC2_FRAG])) {
+      || (!m_unpackAdder && m_beamIdList[COMMON_TDC2_FRAG])
+      || (m_TBperiod >= 2022 && m_beamIdList[COMMON_TOF_FRAG])) {
 
     m_xCha1 = 0.;
     m_yCha1 = 0.;
@@ -3104,6 +3053,13 @@ void TileTBAANtuple::BEAM_clearBranch(void) {
     m_yCha2_0 = 0.;
     m_xImp = 0.;
     m_yImp = 0.;
+  }
+
+  if (m_tof) {
+    for (int i=0; i<16; i+=2) {
+      m_tof[i] = +0xFFFF;
+      m_tof[i+1] = -0xFFFF;
+    }
   }
 
   if (m_btdc1) {
@@ -3841,3 +3797,162 @@ void TileTBAANtuple::clear_intint(std::vector<int**> & vec, int nchan)
   }
 }
 
+void TileTBAANtuple::setupBeamChambersBeforeTB2015(void) {
+  // Setup default value for the following properties, if they are not setup via JO
+  setupPropertyDefaultValue(m_beamBC1X1, -0.938, "BC1X1");
+  setupPropertyDefaultValue(m_beamBC1X2, 0.1747, "BC1X2");
+  setupPropertyDefaultValue(m_beamBC1Y1, 0.125, "BC1Y1");
+  setupPropertyDefaultValue(m_beamBC1Y2, 0.1765, "BC1Y2");
+  setupPropertyDefaultValue(m_beamBC1Z, 13788.0, "BC1Z");
+  setupPropertyDefaultValue(m_beamBC1Z_0, 13788.0, "BC1Z_0");
+  setupPropertyDefaultValue(m_beamBC1Z_90, 13788.0, "BC1Z_90");
+  setupPropertyDefaultValue(m_beamBC1Z_min90, 13788.0, "BC1Z_min90");
+
+  setupPropertyDefaultValue(m_beamBC2X1, -0.9369, "BC2X1");
+  setupPropertyDefaultValue(m_beamBC2X2, 0.191, "BC2X2");
+  setupPropertyDefaultValue(m_beamBC2Y1, -1.29, "BC2Y1");
+  setupPropertyDefaultValue(m_beamBC2Y2, 0.187, "BC2Y2");
+  setupPropertyDefaultValue(m_beamBC2Z, 9411.0, "BC2Z");
+  setupPropertyDefaultValue(m_beamBC2Z_0, 9411.0, "BC2Z_0");
+  setupPropertyDefaultValue(m_beamBC2Z_90, 9411.0, "BC2Z_90");
+  setupPropertyDefaultValue(m_beamBC2Z_min90, 9411.0, "BC2Z_min90");
+}
+
+void TileTBAANtuple::setupBeamChambersTB2015(void) {
+  setupPropertyDefaultValue(m_beamBC1X1, -0.0462586, "BC1X1");
+  setupPropertyDefaultValue(m_beamBC1X2, -0.175666, "BC1X2");
+  setupPropertyDefaultValue(m_beamBC1Y1, -0.051923, "BC1Y1");
+  setupPropertyDefaultValue(m_beamBC1Y2, -0.176809, "BC1Y2");
+  setupPropertyDefaultValue(m_beamBC1Z, 13000. + 2760, "BC1Z");
+  setupPropertyDefaultValue(m_beamBC1Z_0, 13788.0, "BC1Z_0");
+  setupPropertyDefaultValue(m_beamBC1Z_90, 13788.0, "BC1Z_90");
+  setupPropertyDefaultValue(m_beamBC1Z_min90, 13788.0, "BC1Z_min90");
+
+  setupPropertyDefaultValue(m_beamBC2X1, 0.25202, "BC2X1");
+  setupPropertyDefaultValue(m_beamBC2X2, -0.18053, "BC2X2");
+  setupPropertyDefaultValue(m_beamBC2Y1, 0.0431688, "BC2Y1");
+  setupPropertyDefaultValue(m_beamBC2Y2, -0.181128, "BC2Y2");
+  setupPropertyDefaultValue(m_beamBC2Z, 2760, "BC2Z");
+  setupPropertyDefaultValue(m_beamBC2Z_0, 9411.0, "BC2Z_0");
+  setupPropertyDefaultValue(m_beamBC2Z_90, 9411.0, "BC2Z_90");
+  setupPropertyDefaultValue(m_beamBC2Z_min90, 9411.0, "BC2Z_min90");
+}
+
+void TileTBAANtuple::setupBeamChambersTB2016_2020(void) {
+  // 2016 settings:
+  //
+  // https://pcata007.cern.ch/elog/TB2016/88
+  //
+  //
+  // The calibration has been done with the following runs :
+  // BC1:
+  // Center : 610212
+  // Left/up : 610210
+  // Right/down : 610209
+  //
+  // BC2:
+  // Center : 610256
+  // Left/up : 610321
+  // Right/down : 610320
+  //
+  // Here are the new constants :
+  //
+  // BC1
+  // horizontal slope = -0.171928
+  // horizontal offset = -0.047624
+  //
+  // vertical slope = -0.172942
+  // vertical offset = -0.0958677
+  //
+  // BC2
+  // horizontal slope = -0.175698
+  // horizontal offset = -1.04599
+  //
+  // vertical slope = -0.174535
+  // vertical offset = -3.10666
+
+  // June 2016 calibration
+  //m_beamBC1X1 = -0.047624;
+  //m_beamBC1X2 = -0.171928;
+  //m_beamBC1Y1 = -0.0958677;
+  //m_beamBC1Y2 = -0.172942;
+  //m_beamBC1Z  = 13000. + 2760 /* 2600. */;
+
+  //m_beamBC2X1 = -1.04599;
+  //m_beamBC2X2 = -0.175698;
+  //m_beamBC2Y1 = -3.10666;
+  //m_beamBC2Y2 = -0.174535;
+  //m_beamBC2Z  = 2760 /* 2600. */;
+
+  // September 2016 calibration, https://pcata007.cern.ch/elog/TB2016/300 (joakim.olsson@cern.ch)
+  //m_beamBC1X1 = 0.100857923042;
+  //m_beamBC1X2 = -0.172098;
+  //m_beamBC1Y1 = -0.133045996607;
+  //m_beamBC1Y2 = -0.172855178323;
+  //m_beamBC1Z  = 13000. + 2760 /* 2600. */;
+  //
+  //m_beamBC2X1 = 0.271555258578 ;
+  //m_beamBC2X2 = -0.173463 ;
+  //m_beamBC2Y1 = 0.305483228502;
+  //m_beamBC2Y2 = -0.173805131744 ;
+  //m_beamBC2Z  = 2760 /* 2600. */;
+
+  // June 2017 calibration, https://pcata007.cern.ch/elog/TB2017/550 (schae@cern.ch)
+  //m_beamBC1X1 =  0.153584934082;
+  //m_beamBC1X2 = -0.175220;
+  //m_beamBC1Y1 = -0.493246053303;
+  //m_beamBC1Y2 = -0.176567356723;
+  //m_beamBC1Z  = 13000. + 2760 /* 2600. */;
+  //
+  //m_beamBC2X1 = 0.414611893278;
+  //m_beamBC2X2 = -0.176122;
+  //m_beamBC2Y1 = 0.150807740888;
+  //m_beamBC2Y2 = -0.173472808704;
+  //m_beamBC2Z  = 2760 /* 2600. */;
+
+  // August 2017 calibration, https://pcata007.cern.ch/elog/TB2017/550 (schae@cern.ch)
+  //m_beamBC1X1 =  0.181797;
+  //m_beamBC1X2 = -0.175657;
+  //m_beamBC1Y1 = -0.128910;
+  //m_beamBC1Y2 = -0.175965;
+  //m_beamBC1Z  = 13000. + 2760 /* 2600. */;
+  //
+  //m_beamBC2X1 = 0.611502;
+  //m_beamBC2X2 = -0.183116;
+  //m_beamBC2Y1 = 0.541212;
+  //m_beamBC2Y2 = -0.183115;
+  //m_beamBC2Z  = 2760 /* 2600. */;
+
+  // September 2017 calibration, https://pcata007.cern.ch/elog/TB2017/550 (schae@cern.ch)
+  //m_beamBC1X1 =  0.181797;
+  //m_beamBC1X2 = -0.175657;
+  //m_beamBC1Y1 = -0.128910;
+  //m_beamBC1Y2 = -0.175965;
+  //m_beamBC1Z  = 13000. + 2760 /* 2600. */;
+
+  //m_beamBC2X1 = 0.622896039922;
+  //m_beamBC2X2 = -0.176735;
+  //m_beamBC2Y1 = 0.195954125116;
+  //m_beamBC2Y2 = -0.176182117624;
+  //m_beamBC2Z  = 2760 /* 2600. */;
+
+	// September 2017 calibration with additional precision from Survey
+  setupPropertyDefaultValue(m_beamBC1X1, 0.681797, "BC1X1");
+  setupPropertyDefaultValue(m_beamBC1X2, -0.175657, "BC1X2");
+  setupPropertyDefaultValue(m_beamBC1Y1, -2.02891, "BC1Y1");
+  setupPropertyDefaultValue(m_beamBC1Y2, -0.175965, "BC1Y2");
+  setupPropertyDefaultValue(m_beamBC1Z, 17348.8, "BC1Z");
+  setupPropertyDefaultValue(m_beamBC1Z_0, 17348.8, "BC1Z_0");
+  setupPropertyDefaultValue(m_beamBC1Z_90, 15594.05, "BC1Z_90");
+  setupPropertyDefaultValue(m_beamBC1Z_min90, 15571.8, "BC1Z_min90");
+
+  setupPropertyDefaultValue(m_beamBC2X1, -24.377104, "BC2X1");
+  setupPropertyDefaultValue(m_beamBC2X2, -0.176735, "BC2X2");
+  setupPropertyDefaultValue(m_beamBC2Y1, 17.895954, "BC2Y1");
+  setupPropertyDefaultValue(m_beamBC2Y2, -0.176182117624, "BC2Y2");
+  setupPropertyDefaultValue(m_beamBC2Z, 4404.2, "BC2Z");
+  setupPropertyDefaultValue(m_beamBC2Z_0, 4420.7, "BC2Z_0");
+  setupPropertyDefaultValue(m_beamBC2Z_90, 2649.45, "BC2Z_90");
+  setupPropertyDefaultValue(m_beamBC2Z_min90, 2627.2, "BC2Z_min90");
+
+}

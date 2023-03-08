@@ -19,41 +19,30 @@ namespace PFO {
     {
       m_CFE_tau_dR=nullptr;
       m_CFE_tau_NMatchedTau=nullptr;
-      m_CFE_tau_tauNMatchedFE=nullptr;
 
       m_NFE_tau_dR=nullptr;
       m_NFE_tau_NMatchedTau=nullptr;
-      m_NFE_tau_tauNMatchedFE=nullptr;
-
 
       m_CFE_muon_dR=nullptr;
       m_CFE_muon_NMatchedMuon=nullptr;
-      m_CFE_muon_muonNMatchedFE=nullptr;
       m_CFE_muon_largeDR_debug_author=nullptr;
       m_CFE_muon_largeDR_debug_type=nullptr;
 
       m_NFE_muon_dR=nullptr;
       m_NFE_muon_NMatchedMuon=nullptr;
-      m_NFE_muon_muonNMatchedFE=nullptr;
-      
       
       m_CFE_photon_dR=nullptr;
       m_CFE_photon_NMatchedPhoton=nullptr;
-      m_CFE_photon_photonNMatchedFE=nullptr;
 
       m_NFE_photon_dR=nullptr;
       m_NFE_photon_NMatchedPhoton=nullptr;
-      m_NFE_photon_photonNMatchedFE=nullptr;
-
 
       m_CFE_electron_dR=nullptr;
       m_CFE_electron_NMatchedElectron=nullptr;
-      m_CFE_electron_electronNMatchedFE=nullptr;
 
       m_NFE_electron_dR=nullptr;
       m_NFE_electron_NMatchedElectron=nullptr;
-      m_NFE_electron_electronNMatchedFE=nullptr;
-      
+
 
     }
 
@@ -64,49 +53,41 @@ namespace PFO {
       return;
     }
     if(!m_doNeutralFE){
-      m_CFE_tau_dR=Book1D("_CFE_tau_dR",m_sFEContainerName+"_CFE_tau_dR",40,0,5); 
-      m_CFE_tau_NMatchedTau=Book1D("_CFE_tau_NMatchedTau",m_sFEContainerName+"_CFE_tau_NMatchedTau",20,0,20);
-      m_CFE_tau_tauNMatchedFE=Book1D("_CFE_tau_tauNMatchedFE",m_sFEContainerName+"_CFE_tau_tauNMatchedFE",20,0,20);
+      m_CFE_tau_dR=Book1D("_CFE_tau_dR",m_sFEContainerName+"_CFE_tau_dR",10,0,1); 
+      m_CFE_tau_NMatchedTau=Book1D("_CFE_tau_NMatchedTau",m_sFEContainerName+"_CFE_tau_NMatchedTau",5,0,5);
     }
     else{
-      m_NFE_tau_dR=Book1D("_NFE_tau_dR",m_sFEContainerName+"_NFE_tau_dR",40,0,5); 
-      m_NFE_tau_NMatchedTau=Book1D("_NFE_tau_NMatchedTau",m_sFEContainerName+"_NFE_tau_NMatchedTau",20,0,20);
-      m_NFE_tau_tauNMatchedFE=Book1D("_NFE_tau_tauNMatchedFE",m_sFEContainerName+"_NFE_tau_tauNMatchedFE",20,0,20);
+      m_NFE_tau_dR=Book1D("_NFE_tau_dR",m_sFEContainerName+"_NFE_tau_dR",10,0,1); 
+      m_NFE_tau_NMatchedTau=Book1D("_NFE_tau_NMatchedTau",m_sFEContainerName+"_NFE_tau_NMatchedTau",5,0,5);
     }
     //electron
     if(!m_doNeutralFE){
-      m_CFE_electron_dR=Book1D("_CFE_electron_dR",m_sFEContainerName+"_CFE_electron_dR",40,0,5); 
-      m_CFE_electron_NMatchedElectron=Book1D("_CFE_electron_NMatchedElectron",m_sFEContainerName+"_CFE_electron_NMatchedElectron",20,0,20);
-      m_CFE_electron_electronNMatchedFE=Book1D("_CFE_electron_electronNMatchedFE",m_sFEContainerName+"_CFE_electron_electronNMatchedFE",20,0,20);
+      m_CFE_electron_dR=Book1D("_CFE_electron_dR",m_sFEContainerName+"_CFE_electron_dR",15,0,1.5); 
+      m_CFE_electron_NMatchedElectron=Book1D("_CFE_electron_NMatchedElectron",m_sFEContainerName+"_CFE_electron_NMatchedElectron",10,0,10);
     }
     else{
-      m_NFE_electron_dR=Book1D("_NFE_electron_dR",m_sFEContainerName+"_NFE_electron_dR",40,0,5); 
-      m_NFE_electron_NMatchedElectron=Book1D("_NFE_electron_NMatchedElectron",m_sFEContainerName+"_NFE_electron_NMatchedElectron",20,0,20);
-      m_NFE_electron_electronNMatchedFE=Book1D("_NFE_electron_electronNMatchedFE",m_sFEContainerName+"_NFE_electron_electronNMatchedFE",20,0,20);
+      m_NFE_electron_dR=Book1D("_NFE_electron_dR",m_sFEContainerName+"_NFE_electron_dR",10,0,1); 
+      m_NFE_electron_NMatchedElectron=Book1D("_NFE_electron_NMatchedElectron",m_sFEContainerName+"_NFE_electron_NMatchedElectron",5,0,5);
     }
     //muon
     if(!m_doNeutralFE){
-      m_CFE_muon_dR=Book1D("_CFE_muon_dR",m_sFEContainerName+"_CFE_muon_dR",40,0,5); 
-      m_CFE_muon_NMatchedMuon=Book1D("_CFE_muon_NMatchedMuon",m_sFEContainerName+"_CFE_muon_NMatchedMuon",20,0,20);
-      m_CFE_muon_muonNMatchedFE=Book1D("_CFE_muon_muonNMatchedFE",m_sFEContainerName+"_CFE_muon_muonNMatchedFE",20,0,20);
+      m_CFE_muon_dR=Book1D("_CFE_muon_dR",m_sFEContainerName+"_CFE_muon_dR",10,0,1); 
+      m_CFE_muon_NMatchedMuon=Book1D("_CFE_muon_NMatchedMuon",m_sFEContainerName+"_CFE_muon_NMatchedMuon",5,0,5);
       m_CFE_muon_largeDR_debug_author=Book1D("_CFE_muon_largeDR_debug_author",m_sFEContainerName+"_CFE_muon_largeDR_debug_author",20,0,20);
       m_CFE_muon_largeDR_debug_type=Book1D("_CFE_muon_largeDR_debug_type",m_sFEContainerName+"_CFE_muon_largeDR_debug_type",20,0,20);
     }
     else{
-      m_NFE_muon_dR=Book1D("_NFE_muon_dR",m_sFEContainerName+"_NFE_muon_dR",40,0,5); 
-      m_NFE_muon_NMatchedMuon=Book1D("_NFE_muon_NMatchedMuon",m_sFEContainerName+"_NFE_muon_NMatchedMuon",20,0,20);
-      m_NFE_muon_muonNMatchedFE=Book1D("_NFE_muon_muonNMatchedFE",m_sFEContainerName+"_NFE_muon_muonNMatchedFE",20,0,20);
+      m_NFE_muon_dR=Book1D("_NFE_muon_dR",m_sFEContainerName+"_NFE_muon_dR",10,0,1); 
+      m_NFE_muon_NMatchedMuon=Book1D("_NFE_muon_NMatchedMuon",m_sFEContainerName+"_NFE_muon_NMatchedMuon",10,0,10);
     }
     //photon
     if(!m_doNeutralFE){
-      m_CFE_photon_dR=Book1D("_CFE_photon_dR",m_sFEContainerName+"_CFE_photon_dR",40,0,5); 
-      m_CFE_photon_NMatchedPhoton=Book1D("_CFE_photon_NMatchedPhoton",m_sFEContainerName+"_CFE_photon_NMatchedPhoton",20,0,20);
-      m_CFE_photon_photonNMatchedFE=Book1D("_CFE_photon_photonNMatchedFE",m_sFEContainerName+"_CFE_photon_photonNMatchedFE",20,0,20);
+      m_CFE_photon_dR=Book1D("_CFE_photon_dR",m_sFEContainerName+"_CFE_photon_dR",10,0,1); 
+      m_CFE_photon_NMatchedPhoton=Book1D("_CFE_photon_NMatchedPhoton",m_sFEContainerName+"_CFE_photon_NMatchedPhoton",5,0,5);
     }
     else{
-      m_NFE_photon_dR=Book1D("_NFE_photon_dR",m_sFEContainerName+"_NFE_photon_dR",40,0,5); 
-      m_NFE_photon_NMatchedPhoton=Book1D("_NFE_photon_NMatchedPhoton",m_sFEContainerName+"_NFE_photon_NMatchedPhoton",20,0,20);
-      m_NFE_photon_photonNMatchedFE=Book1D("_NFE_photon_photonNMatchedFE",m_sFEContainerName+"_NFE_photon_photonNMatchedFE",20,0,20);
+      m_NFE_photon_dR=Book1D("_NFE_photon_dR",m_sFEContainerName+"_NFE_photon_dR",10,0,1); 
+      m_NFE_photon_NMatchedPhoton=Book1D("_NFE_photon_NMatchedPhoton",m_sFEContainerName+"_NFE_photon_NMatchedPhoton",5,0,5);
     }
   }
   void FlowElement_LinkerPlots::fill(const xAOD::FlowElement& FE, const xAOD::EventInfo& eventInfo){

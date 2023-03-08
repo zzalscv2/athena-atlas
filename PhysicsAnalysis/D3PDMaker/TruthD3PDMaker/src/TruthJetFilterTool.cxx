@@ -284,13 +284,13 @@ TruthJetFilterTool::addVertex (HepMC::ConstGenVertexPtr v,HepMC::GenEvent* ev)
     HepMC::suggest_barcode (vnew,HepMC::barcode(v));
     //AV: here should be code to copy the weights, but these are never used. Skip. Please don't remove this comment. vnew->weights() = v->weights();
     // Fill in the existing relations of the new vertex.
-    for (auto  p : v->particles_in())
+    for (const auto&  p : v->particles_in())
     {
       HepMC::GenParticlePtr pnew = HepMC::barcode_to_particle (ev,HepMC::barcode(p));
       if (pnew) vnew->add_particle_in (pnew);
     }
 
-    for (auto p : v->particles_out())
+    for (const auto& p : v->particles_out())
     {
       HepMC::GenParticlePtr pnew = HepMC::barcode_to_particle (ev,HepMC::barcode(p));
       if (pnew) vnew->add_particle_out (pnew);
@@ -416,7 +416,7 @@ TruthJetFilterTool::acceptParticle (HepMC::ConstGenParticlePtr p)
 			// Ascend decay chain looking for when actual decay occurs (not jsut evolution of particle)
 			while (pdg_id == mom_pdg_id) {
 #ifdef HEPMC3
-				HepMC::ConstGenParticlePtr mother = vprod->particles_in().at(0);
+				const HepMC::ConstGenParticlePtr& mother = vprod->particles_in().front();
 #else
 				HepMC::ConstGenParticlePtr mother = *(vprod->particles_in_const_begin());
 #endif
@@ -501,7 +501,7 @@ TruthJetFilterTool::acceptParticle (HepMC::ConstGenParticlePtr p)
     HepMC::ConstGenVertexPtr vprod = p->production_vertex();
     if ( HepMC::particles_in_size(vprod) > 0) {
 #ifdef HEPMC3
-      HepMC::ConstGenParticlePtr mother = vprod->particles_in().at(0);
+      const HepMC::ConstGenParticlePtr& mother = vprod->particles_in().front();
 #else
       const HepMC::GenParticle* mother = *vprod->particles_in_const_begin();
 #endif

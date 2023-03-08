@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArWheelSolid.h"
@@ -43,16 +43,28 @@ G4bool LArWheelSolid::check_D(
 ) const
 {
 	// G4bool out is to be set true if the point is surface-outside
-    // then have to discard first intersection
+	// then have to discard first intersection
 
 	const G4double D = B*B - A*C;
 	LWSDBG(8, std::cout << "check D=" << D << " out=" << out << std::endl);
 	if(D < 0.) return false;
-
-	const G4double D1 = sqrt(D);
-	t1 = (-B + D1) / A;
-	const G4double t2 = (-B - D1) / A;
-	LWSDBG(8, std::cout << "t1=" << t1 << " t2=" << t2 << std::endl);
+	G4double t2 = 0.;
+	if(A == 0) {
+		if(B == 0) {
+			LWSDBG(8, std::cout << "Case A=B=0" << std::endl);
+			return false;
+		}
+		t1= -C / (2 * B);
+		LWSDBG(8, std::cout << "t1=" << t1 << " - only one solution" << std::endl);
+		t2 = t1;
+	} else {
+		const G4double D1 = sqrt(D);
+		const G4double inv_A = 1.0 / A;
+		t1 = (-B + D1) * inv_A;
+		t2 = (-B - D1) * inv_A;
+		LWSDBG(8, std::cout << "t1=" << t1 << " t2=" << t2 << std::endl);		
+	}
+	
 	if(t1 > 0.){
 		if(t2 > 0.){
 			if(out){
@@ -97,7 +109,8 @@ bool LArWheelSolid::fs_cross_lower(
 	const G4double B = p.x()*v.x() + p.y()*v.y()
                      - m_fs->Amin2*p.z()*v.z() - m_fs->ABmin*v.z();
 	const G4double C = p.perp2() - m_fs->Amin2*p.z()*p.z()
-                     - 2.*m_fs->ABmin*p.z() - m_fs->Bmin2;
+                     - 2.*m_fs->ABmin*p.z() - m_fs->Bmin2; 
+                     
 	G4double t1(0.0);
 	const G4double out_dist = m_fs->Amin*p.z() + m_fs->Bmin - p.perp();
 	LWSDBG(8, std::cout << "fcl out_dist(p)=" << out_dist << " Tolerance=" << s_Tolerance << std::endl);
@@ -161,6 +174,7 @@ bool LArWheelSolid::fs_cross_upper(
 	if(m_IsOuter){
 		const G4double &Af = A, &Bf = B;
 		const G4double Cf = C - m_fs->Cflat2;
+		
 		G4double b1;
 		if(check_D(b1, Af, Bf, Cf, Cf >= 0.)){
 			const G4double zz1 = p.z() + v.z() * b1;

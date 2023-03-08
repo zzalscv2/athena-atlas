@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """Define method to construct configured base Tile raw channel builder tool"""
 
@@ -11,7 +11,7 @@ def TileRawChannelBuilderCfg(flags, name, TileRawChannelBuilder, **kwargs):
     """Return component accumulator with configured private base Tile raw channel builder tool
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
         name -- name of Tile raw channel builder
         TileRawChannelbuilder -- concrete Tile raw channel builder tool.
     """
@@ -66,7 +66,7 @@ def TileRawChannelBuilderCfg(flags, name, TileRawChannelBuilder, **kwargs):
 
 if __name__ == "__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG
@@ -74,23 +74,24 @@ if __name__ == "__main__":
     # Test setup
     log.setLevel(DEBUG)
 
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.Tile.RunType = 'PHY'
-    ConfigFlags.Tile.NoiseFilter = 1
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.Tile.RunType = 'PHY'
+    flags.Tile.NoiseFilter = 1
+    flags.lock()
 
-    ConfigFlags.dump()
+    flags.dump()
 
     acc = ComponentAccumulator()
 
     TileRawChannelBuilderFitFilter=CompFactory.TileRawChannelBuilderFitFilter
-    rchBuilderFitAcc = TileRawChannelBuilderCfg(ConfigFlags,
+    rchBuilderFitAcc = TileRawChannelBuilderCfg(flags,
                                                 name = 'TileRawChannelBuilderFit',
                                                 TileRawChannelBuilder = TileRawChannelBuilderFitFilter)
     print( acc.popToolsAndMerge(rchBuilderFitAcc) )
 
     TileRawChannelBuilderOpt2Filter=CompFactory.TileRawChannelBuilderOpt2Filter
-    rchBuilderOpt2Acc = TileRawChannelBuilderCfg(ConfigFlags,
+    rchBuilderOpt2Acc = TileRawChannelBuilderCfg(flags,
                                                  name = 'TileRawChannelBuilderOpt2',
                                                  TileRawChannelBuilder = TileRawChannelBuilderOpt2Filter)
     print( acc.popToolsAndMerge(rchBuilderOpt2Acc) )

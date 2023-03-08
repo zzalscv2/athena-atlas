@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloCalibClusterDecoratorAlgorithm.h"
@@ -36,7 +36,7 @@ StatusCode CaloCalibClusterDecoratorAlgorithm::execute(const EventContext& ctx) 
   SG::WriteDecorHandle<xAOD::CaloClusterContainer, std::vector< std::pair<unsigned int, double> > > caloClusterWriteDecorHandleNLeadingTruthParticles(m_caloClusterWriteDecorHandleKeyNLeadingTruthParticles, ctx);
   StatusCode sc;
   
-  for (auto thisCaloCluster : *caloClusterWriteDecorHandleNLeadingTruthParticles){
+  for (const auto *thisCaloCluster : *caloClusterWriteDecorHandleNLeadingTruthParticles){
 
     std::vector<std::pair<unsigned int, double > > newBarCodeTruthPairs;
     sc = m_truthAttributerTool->calculateTruthEnergies(*thisCaloCluster, m_numTruthParticles, *mapIdentifierToCalibHitsReadHandle, *mapTruthBarcodeToTruthParticleReadHandle, newBarCodeTruthPairs);

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef ANALYSISTOP_TOPCONFIGURATION_TOPCONFIG_H
@@ -1115,6 +1115,7 @@ namespace top {
     std::string const& muonIsolationSF() const {return m_muonIsolationSF;}
     std::string const& muonIsolationSFLoose() const {return m_muonIsolationSFLoose;}
     std::string const& muonCalibMode() const {return m_muonCalibMode;}
+    std::string const& muonSmearingSystematicModel() const {return m_muonSmearingSystematicModel;}
     inline virtual bool muonMuonDoSmearing2stationHighPt() const {return m_muonMuonDoSmearing2stationHighPt;}
     inline virtual bool muonMuonDoExtraSmearingHighPt() const {return m_muonMuonDoExtraSmearingHighPt;}
 
@@ -1607,6 +1608,9 @@ namespace top {
     inline virtual const std::string& METSignifSoftTermParam() const {return m_METSignifSoftTermParam;}
     inline virtual bool METSignificance() const {return m_METSignif;}
 
+    // With NNJvt it is now possible to define different JetSelections for the MET Jvt. This selects them
+    inline const std::string& getMETJetSelectionWP() {return m_METJetSelectionWP;};
+    inline void setMETJetSelectionWP(const std::string& value) {m_METJetSelectionWP = value;};
 
     // Tau configuration setters
     inline virtual void tauPtcut(const float pt) {
@@ -1984,8 +1988,6 @@ namespace top {
 
     inline bool isRun3() const {return m_isRun3;}
     inline void setIsRun3(const bool isRun3) {m_isRun3 = isRun3;}
-
-    inline const std::string& muonTriggerSF() const {return m_muon_trigger_SF;}
 
     inline bool demandPriVtx() const {return m_demandPriVtx;}
 
@@ -2468,6 +2470,7 @@ namespace top {
     int m_muon_d0SigCut;
     float m_muon_delta_z0;
     std::string m_muonCalibMode; // calibration mode for the muon calibration tool
+    std::string m_muonSmearingSystematicModel;
     bool m_muonMuonDoSmearing2stationHighPt; //to turn on/off special correction for the reco with 2-station muons with missing inner MS station allowed for abs(eta)<1.3, only HighPt WP
     bool m_muonMuonDoExtraSmearingHighPt; //to turn on/off a special correction for the muon with high momenta.
     bool m_muonBreakDownSystematics; //to turn on/off a more complex systematic model
@@ -2516,6 +2519,7 @@ namespace top {
     std::string m_METUncertaintiesConfigDir; //Path prefix for directory with MET calibration configs
     bool m_METSignif; // METSignificance turn on/off 
     std::string m_METSignifSoftTermParam; // METSignificance Soft term parameter
+    std::string m_METJetSelectionWP;  // WP for JetSelection in MetMaker
 
     
     //Ghost tracks quality
@@ -2793,10 +2797,6 @@ namespace top {
       // Name of the underlying photon tools, to be accessed and passes CP::SystematicSet
       std::vector<std::string> photon_trigger_tool_names;
     } m_trigGlobalConfiguration;
-
-    // Muon Trigger SF configuration
-    std::string m_muon_trigger_SF;
-
 
     // Selections
     std::shared_ptr<std::vector<std::string> > m_allSelectionNames;

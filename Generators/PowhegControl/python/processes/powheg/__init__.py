@@ -24,6 +24,7 @@ from .HZj import HZj
 from .HZj_EW import HZj_EW
 from .jj import jj
 from .jjj import jjj
+from .LQ_s_chan import LQ_s_chan
 from .ssWWjj import ssWWjj
 from .t_sch import t_sch
 from .t_tch_4FS import t_tch_4FS

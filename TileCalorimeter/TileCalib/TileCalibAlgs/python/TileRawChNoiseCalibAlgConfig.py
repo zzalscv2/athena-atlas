@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 '''
 @file TileRawChNoiseCalibAlgConfig.py
@@ -54,36 +54,36 @@ if __name__=='__main__':
     log.setLevel(INFO)
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.Exec.MaxEvents = 3
-    ConfigFlags.fillFromArgs()
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.Exec.MaxEvents = 3
+    flags.fillFromArgs()
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    cfg = MainServicesCfg(ConfigFlags)
+    cfg = MainServicesCfg(flags)
 
     from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
     tileTypeNames = ['TileRawChannelContainer/TileRawChannelCnt',
                      'TileBeamElemContainer/TileBeamElemCnt',
                      'TileDigitsContainer/TileDigitsCnt']
-    cfg.merge( ByteStreamReadCfg(ConfigFlags, type_names = tileTypeNames) )
+    cfg.merge( ByteStreamReadCfg(flags, type_names = tileTypeNames) )
     cfg.getService('ByteStreamCnvSvc').ROD2ROBmap = [ "-1" ]
 
-    runNumber = ConfigFlags.Input.RunNumber[0]
+    runNumber = flags.Input.RunNumber[0]
     from AthenaConfiguration.ComponentFactory import CompFactory
     cfg.addPublicTool( CompFactory.TileROD_Decoder(fullTileMode = runNumber) )
 
     from TileRecUtils.TileRawChannelMakerConfig import TileRawChannelMakerCfg
-    cfg.merge( TileRawChannelMakerCfg(ConfigFlags) )
+    cfg.merge( TileRawChannelMakerCfg(flags) )
 
-    cfg.merge( TileRawChNoiseCalibAlgCfg(ConfigFlags, ) )
+    cfg.merge( TileRawChNoiseCalibAlgCfg(flags, ) )
 
     cfg.printConfig(withDetails = True, summariseProps = True)
-    ConfigFlags.dump()
+    flags.dump()
 
     cfg.store( open('TileRawChNoiseCalibAlg.pkl','wb') )
 

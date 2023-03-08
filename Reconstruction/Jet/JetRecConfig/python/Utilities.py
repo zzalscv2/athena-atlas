@@ -145,13 +145,14 @@ class ldict(dict):
         # make key aivailable as attribute
         for k,v in args.items():
             super().__setattr__(k,v)
-            
         
     def __setitem__(self, k, v):
         if k in self:
-            raise KeyError("Can't override key "+k)
-        super().__setitem__(k,v)
-        super().__setattr__(k,v)
+            if v!=self[k]:
+                raise KeyError(f"Can't override self[{k}] == {self[k]} with new value {v}")
+        else:
+            super().__setitem__(k,v)
+            super().__setattr__(k,v)
 
     def update(self, **args): # we need to redefine it
         for k,v in args.items():

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -704,17 +704,6 @@ namespace Athena_test {
     assert(rSG.tryConstRetrieve<Foo> ("UnLockedxxx") == 0);
 
     cout << "*** StoreGateSvcClient_test tryRetrieve OK ***\n\n" <<endl;
-  }
-
-
-  void testReadPrivateCopy(::StoreGateSvc& rSG) {
-    cout << "*** StoreGateSvcClient_test readPrivateCopy BEGINS ***" <<endl;
-    const Foo *cFoo(0);
-    assert(rSG.retrieve<Foo>(cFoo,"silly").isSuccess());
-    std::unique_ptr<Foo> apFoo(rSG.readUniquePrivateCopy<Foo>("silly"));
-    assert(cFoo != apFoo.get());
-    assert(rSG.retrieve(cFoo, "silly").isSuccess());
-    cout << "*** StoreGateSvcClient_test readPrivateCopy OK ***" <<endl;
   }
 
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -80,6 +80,14 @@ namespace pool  {
     RootOOTreeIndex() : RootOODb(ROOTTREEINDEX_StorageType)   {  }
     /// Label of the specific class
     static const char* catalogLabel()  {   return "ROOT_Tree";        }
+  };
+
+  class RootOORNTuple : public RootOODb {
+  public:
+    /// Standard Constructor
+    RootOORNTuple() : RootOODb(ROOTRNTUPLE_StorageType)   {  }
+    /// Label of the specific class
+    static const char* catalogLabel()  {   return "ROOT_RNTuple";      }
   };
 
 }       // end namespace pool

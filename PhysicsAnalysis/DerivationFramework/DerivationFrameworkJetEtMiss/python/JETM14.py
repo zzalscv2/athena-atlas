@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # DAOD_JETM14.py
@@ -13,7 +13,7 @@ def JETM14TriggerSkimmingToolCfg(ConfigFlags):
     acc = ComponentAccumulator()
 
     from DerivationFrameworkJetEtMiss import TriggerLists
-    singleMuTriggers = TriggerLists.single_mu_Trig()
+    singleMuTriggers = TriggerLists.single_mu_Trig(ConfigFlags)
 
     JETM14TrigSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool( name                   = "JETM14TrigSkimmingTool1",
                                                                                   TriggerListOR          = singleMuTriggers)
@@ -67,7 +67,7 @@ def JETM14Cfg(ConfigFlags):
     # for actually configuring the matching, so we create it here and pass it down
     # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    JETM14TriggerListsHelper = TriggerListsHelper()
+    JETM14TriggerListsHelper = TriggerListsHelper(ConfigFlags)
 
     # Skimming, thinning, augmentation
     acc.merge(JETM14KernelCfg(ConfigFlags, name="JETM14Kernel", StreamName = 'StreamDAOD_JETM14', TriggerListsHelper = JETM14TriggerListsHelper))

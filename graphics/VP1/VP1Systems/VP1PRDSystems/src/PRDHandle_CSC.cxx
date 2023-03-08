@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1PRDSystems/PRDHandle_CSC.h"
@@ -156,7 +156,7 @@ QStringList PRDHandle_CSC::clicked() const
   Identifier id = m_csc->identify();
   std::ostringstream os;
   os << "CscPrepData with Identifier ["<<id.get_compact()  ;
-  os << "] = [" << (idhelper->print_to_string(id)).c_str()  ;
+  os << "] = [" << (idhelper->print_to_string(id))  ;
   os << "]\n at global position = [" << m_csc->globalPosition()<<"], local position = ["<<m_csc->localPosition()<<"].";
   os << ". Charge="<<m_csc->charge()<<", time="<< m_csc->time()<<", status="<<Muon::toString(m_csc->status());
   os << ". RDO list= [";

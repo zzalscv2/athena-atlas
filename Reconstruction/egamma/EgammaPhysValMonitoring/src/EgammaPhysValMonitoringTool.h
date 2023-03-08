@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // EgammaPhysValMonitoringTool.h 
@@ -22,6 +22,7 @@
 
 // Root includes
 #include "ElectronValidationPlots.h"
+#include "LRTElectronValidationPlots.h"
 #include "PhotonValidationPlots.h"
 #include "xAODEgamma/PhotonContainer.h"
 #include "xAODEgamma/Photon.h"
@@ -39,12 +40,13 @@
 #include "StoreGate/ReadHandleKey.h"
 
 #include "CLHEP/Units/SystemOfUnits.h"
+#include "CxxUtils/checker_macros.h"
 
 class IMCTruthClassifier;
 namespace EgammaPhysValMonitoring {
 
 
-class EgammaPhysValMonitoringTool
+class ATLAS_NOT_THREAD_SAFE EgammaPhysValMonitoringTool
   : public ManagedMonitorToolBase
 { 
   /////////////////////////////////////////////////////////////////// 
@@ -79,6 +81,7 @@ class EgammaPhysValMonitoringTool
   StatusCode fillRecoElecHistograms(const xAOD::TruthParticleContainer* truthParticles, const xAOD::EventInfo* eventInfo);
   StatusCode fillRecoFrwdElecHistograms(const xAOD::TruthParticleContainer* truthParticles, const xAOD::EventInfo* eventInfo);
   StatusCode fillRecoPhotHistograms(const xAOD::TruthParticleContainer* truthParticles, const xAOD::EventInfo* eventInfo);
+  StatusCode fillLRTElecHistograms(const xAOD::TruthParticleContainer* truthParticles, const xAOD::EventInfo* eventInfo);
 
   static const xAOD::TruthParticle* Match(const xAOD::Egamma* particle, int pdg,
 				   const xAOD::TruthParticleContainer* truthParticles) ;
@@ -91,6 +94,8 @@ class EgammaPhysValMonitoringTool
       "PhotonContainerName", "Photons", "Input photon container"};
   SG::ReadHandleKey<xAOD::ElectronContainer> m_electronContainerKey {this,
       "ElectronContainerName", "Electrons", "Input electron container"};
+  SG::ReadHandleKey<xAOD::ElectronContainer> m_lrtelectronContainerKey {this,
+      "LRTElectronContainerName", "", "Input LRT electron container"};
   SG::ReadHandleKey<xAOD::ElectronContainer> m_electronContainerFrwdKey {this,
       "ElectronContainerFrwdName", "ForwardElectrons", "Input forward electron container"};
   SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthParticleContainerKey {this,
@@ -103,6 +108,7 @@ class EgammaPhysValMonitoringTool
   // Hists
   ElectronValidationPlots m_oElectronValidationPlots;
   PhotonValidationPlots m_oPhotonValidationPlots;
+  LRTElectronValidationPlots m_oLRTElectronValidationPlots;
   
   ToolHandle<IMCTruthClassifier>  m_truthClassifier {this,
       "MCTruthClassifier", "EMMCTruthClassifier", "Handle of MCTruthClassifier"};

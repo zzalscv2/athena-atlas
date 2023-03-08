@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 '''@file SCTHitEffMonAlg.py
 @author Ken Kreul
@@ -16,7 +16,7 @@ def dedicatedTitle(i, isub):
     else:
         return "Disk " + str(m_layerStr) + " Side " + str((m_element % 2 + 1) % 2)
 
-def SCTHitEffMonAlgConfig(inputFlags):
+def SCTHitEffMonAlgConfig(flags):
     '''Function to configures some algorithms in the monitoring system.'''
     ### STEP 1 ###
     # Define one top-level monitoring algorithm. The new configuration 
@@ -27,20 +27,29 @@ def SCTHitEffMonAlgConfig(inputFlags):
     # The following class will make a sequence, configure algorithms, and link
     # them to GenericMonitoringTools
     from AthenaMonitoring import AthMonitorCfgHelper
-    helper = AthMonitorCfgHelper(inputFlags, 'SCTHitEffMonCfg')
+    helper = AthMonitorCfgHelper(flags, 'SCTHitEffMonCfg')
 
 
     ### STEP 2 ###
     # Adding an algorithm to the helper. Here, we will use the example 
     # algorithm in the AthenaMonitoring package. Just pass the type to the 
     # helper. Then, the helper will instantiate an instance and set up the 
-    # base class configuration following the inputFlags. The returned object 
+    # base class configuration following the flags. The returned object
     # is the algorithm.
     from AthenaConfiguration.ComponentFactory import CompFactory
+    from InDetConfig.InDetTrackHoleSearchConfig import (
+        InDetTrackHoleSearchToolCfg)
+    from InDetConfig.SiClusterOnTrackTool_SCTStripConfig import (
+        InDetSCT_ClusterOnTrackToolCfg)
 
-    from InDetConfig.InDetTrackHoleSearchConfig import InDetTrackHoleSearchToolCfg
-    InDetTrackHoleSearchTool = result.popToolsAndMerge(InDetTrackHoleSearchToolCfg(inputFlags))
-    myMonAlg = helper.addAlgorithm(CompFactory.SCTHitEffMonAlg, 'SCTHitEffMonAlg', HoleSearch=InDetTrackHoleSearchTool)
+    myMonAlg = helper.addAlgorithm(
+        CompFactory.SCTHitEffMonAlg,
+        'SCTHitEffMonAlg',
+        HoleSearch = result.popToolsAndMerge(
+            InDetTrackHoleSearchToolCfg(flags)),
+        ROTCreator = result.popToolsAndMerge(
+            InDetSCT_ClusterOnTrackToolCfg(flags)))
+
     # # If for some really obscure reason you need to instantiate an algorithm
     # # yourself, the AddAlgorithm method will still configure the base 
     # # properties and add the algorithm to the monitoring sequence.
@@ -51,19 +60,17 @@ def SCTHitEffMonAlgConfig(inputFlags):
     # Edit properties of a algorithm
     myMonAlg.TriggerChain = ''
 
-    from LumiBlockComps.BunchCrossingCondAlgConfig import BunchCrossingCondAlgCfg
-    result.merge(BunchCrossingCondAlgCfg(inputFlags))
-
-    from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
-    result.merge(AtlasFieldCacheCondAlgCfg(inputFlags))
-
     ### STEP 4 ###
     # Add some tools. N.B. Do not use your own trigger decion tool. Use the
     # standard one that is included with AthMonitorAlgorithm.
 
     # set up geometry / conditions
-    from InDetConfig.InDetGeometryConfig import InDetGeometryCfg
-    result.merge(InDetGeometryCfg(inputFlags))
+    from LumiBlockComps.BunchCrossingCondAlgConfig import BunchCrossingCondAlgCfg
+    result.merge(BunchCrossingCondAlgCfg(flags))
+    from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
+    result.merge(AtlasFieldCacheCondAlgCfg(flags))
+    from SCT_ConditionsAlgorithms.SCT_ConditionsAlgorithmsConfig import SCT_DetectorElementCondAlgCfg
+    result.merge(SCT_DetectorElementCondAlgCfg(flags))
 
     # Add a generic monitoring tool (a "group" in old language). The returned 
     # object here is the standard GenericMonitoringTool.
@@ -239,24 +246,24 @@ if __name__ == "__main__":
     log.setLevel(INFO)
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    ConfigFlags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecExRecoTest/mc16_13TeV.361022.Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ2W.recon.ESD.e3668_s3170_r10572_homeMade.pool.root"]
-    ConfigFlags.Input.isMC = True
-    ConfigFlags.Output.HISTFileName = 'SCTHitEffMonOutput.root'
-    ConfigFlags.GeoModel.Align.Dynamic = False
-    ConfigFlags.Detector.GeometryID = True
-    ConfigFlags.Detector.GeometryPixel = True
-    ConfigFlags.Detector.GeometrySCT = True
-    ConfigFlags.Detector.GeometryTRT = True
-    ConfigFlags.lock()
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecExRecoTest/mc16_13TeV.361022.Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ2W.recon.ESD.e3668_s3170_r10572_homeMade.pool.root"]
+    flags.Input.isMC = True
+    flags.Output.HISTFileName = 'SCTHitEffMonOutput.root'
+    flags.GeoModel.Align.Dynamic = False
+    flags.Detector.GeometryID = True
+    flags.Detector.GeometryPixel = True
+    flags.Detector.GeometrySCT = True
+    flags.Detector.GeometryTRT = True
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
-    sctHitEffMonAcc = SCTHitEffMonAlgConfig(ConfigFlags)
-    cfg.merge(sctHitEffMonAcc)
+    cfg.merge(SCTHitEffMonAlgConfig(flags))
 
     cfg.run()

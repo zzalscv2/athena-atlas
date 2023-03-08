@@ -29,18 +29,18 @@ class TFCSGANXMLParameters
   TFCSGANXMLParameters();
   virtual  ~TFCSGANXMLParameters();
   
-  void InitialiseFromXML(int pid,int etaMid,std::string FastCaloGANInputFolderName);
+  void InitialiseFromXML(int pid,int etaMid,const std::string& FastCaloGANInputFolderName);
   void Print() const;
 
   std::vector<int> GetRelevantLayers() const {return m_relevantlayers;};
-  Binning GetBinning() const {return m_binning;};
+  const Binning& GetBinning() const {return m_binning;};
   int GetLatentSpaceSize() const {return m_latentDim;};
   int GetGANVersion() const {return m_ganVersion;};
   bool IsSymmetrisedAlpha() const {return m_symmetrisedAlpha;};
   std::string GetInputFolder() const {return m_fastCaloGANInputFolderName;}; 
 
   private:
-  bool ReadBooleanAttribute(std::string name, xmlNodePtr node);
+  static bool ReadBooleanAttribute(const std::string& name, xmlNodePtr node);
 
   bool m_symmetrisedAlpha;
   Binning m_binning;

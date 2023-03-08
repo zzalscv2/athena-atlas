@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -47,7 +47,7 @@ PileupReweightingTool::PileupReweightingTool( const std::string& name ) :CP::TPi
 
    declareProperty("ConfigFiles", m_prwFiles, "List of prw config files"); //array of files
    declareProperty("ConfigFilesPathPrefix", m_prwFilesPathPrefix="", "Path of additional folder structure in prw config files"); //string prefix
-   declareProperty("LumiCalcFiles", m_lumicalcFiles, "List of lumicalc files, in the format '<filename>:<trigger>' .. if no trigger given, 'None' is assumed"); //array of files
+   declareProperty("LumiCalcFiles", m_toolLumicalcFiles, "List of lumicalc files, in the format '<filename>:<trigger>' .. if no trigger given, 'None' is assumed"); //array of files
    declareProperty("Prefix",m_prefix="","Prefix to attach to all decorations ... only used in the 'apply' method");
    declareProperty("UnrepresentedDataAction",m_unrepresentedDataAction=3,"1 = remove unrepresented data, 2 = leave it there, 3 = reassign it to nearest represented bin");
    declareProperty("UnrepresentedDataThreshold",m_unrepDataTolerance=0.05,"When unrepresented data is above this level, will require the PRW config file to be repaired");
@@ -84,7 +84,6 @@ PileupReweightingTool::PileupReweightingTool( const std::string& name ) :CP::TPi
       break;
    }
 #endif
-
 }
 
 #ifndef XAOD_STANDALONE
@@ -170,6 +169,7 @@ StatusCode PileupReweightingTool::initialize() {
 
    //set debugging if debugging is on:
    EnableDebugging(this->msgLvl(MSG::DEBUG));
+   PrintInfo(msgLvl(MSG::INFO));
 
    //convert custom periods vector to a vector of vectors (length 3) ...
    std::vector<std::vector<int>> customPeriods;
@@ -187,15 +187,17 @@ StatusCode PileupReweightingTool::initialize() {
    }
 
    //see if we need variations 
-   if(m_upVariation && (m_prwFiles.size()+m_lumicalcFiles.size())!=0) {
+   if(m_upVariation && (m_prwFiles.size()+m_toolLumicalcFiles.size())!=0) {
       m_upTool.reset( new TPileupReweighting((name()+"_upVariation").c_str()) );
+      m_upTool->PrintInfo(msgLvl(MSG::INFO));
       m_upTool->SetParentTool(this);
       m_upTool->CopyProperties(this);
       m_upTool->SetDataScaleFactors(m_upVariation);
       for(auto& period : customPeriods) m_upTool->AddPeriod(period[0],period[1],period[2]); //already checked sizes above
    }
-   if(m_downVariation && (m_prwFiles.size()+m_lumicalcFiles.size())!=0) {
+   if(m_downVariation && (m_prwFiles.size()+m_toolLumicalcFiles.size())!=0) {
       m_downTool.reset( new TPileupReweighting((name()+"_downVariation").c_str()) );
+      m_downTool->PrintInfo(msgLvl(MSG::INFO));
       m_downTool->SetParentTool(this);
       m_downTool->CopyProperties(this);
       m_downTool->SetDataScaleFactors(m_downVariation);
@@ -206,7 +208,7 @@ StatusCode PileupReweightingTool::initialize() {
 
 
    //should we set the period config (file maker mode)
-   if(m_prwFiles.size()+m_lumicalcFiles.size()==0) {
+   if(m_prwFiles.size()+m_toolLumicalcFiles.size()==0) {
       m_inConfigMode=true;
       ATH_MSG_INFO("In Config file making mode."); 
       if(m_usePeriodConfig!="auto" && m_usePeriodConfig!="") {
@@ -240,7 +242,7 @@ StatusCode PileupReweightingTool::initialize() {
       }
 
       //have we any lumicalc files to load? .. if we do and had no prwFiles then the user must specify the period configuration
-      if(m_lumicalcFiles.size()>0 && m_prwFiles.size()==0) {
+      if(m_toolLumicalcFiles.size()>0 && m_prwFiles.size()==0) {
          if(m_usePeriodConfig!="auto" && m_usePeriodConfig!="") {
             ATH_MSG_INFO("Setting up without a PRW config file, but with period config " << m_usePeriodConfig << ". You will only be able to use random run number and data weight functionality... no reweighting!");
             if(UsePeriodConfig(m_usePeriodConfig)!=0) {
@@ -250,7 +252,7 @@ StatusCode PileupReweightingTool::initialize() {
             if(m_upTool) m_upTool->UsePeriodConfig(m_usePeriodConfig);
             if(m_downTool) m_downTool->UsePeriodConfig(m_usePeriodConfig);
          } else {
-            ATH_MSG_WARNING("No config files provided, but " << m_lumicalcFiles.size() << " lumicalc file provided. Assuming a period config of MC16 ");
+           ATH_MSG_WARNING("No config files provided, but " << m_toolLumicalcFiles.size() << " lumicalc file provided. Assuming a period config of MC16 ");
             UsePeriodConfig("MC16");
             m_noWeightsMode=true; //will stop the prw weight being decorated in apply method
             if(m_upTool) m_upTool->UsePeriodConfig("MC16");
@@ -258,9 +260,9 @@ StatusCode PileupReweightingTool::initialize() {
          }
       }
    
-      for(unsigned int j=0;j<m_lumicalcFiles.size();j++) {
+      for(unsigned int j=0;j<m_toolLumicalcFiles.size();j++) {
             //see if there's a trigger at the end of the filename .. format is "file:trigger" 
-            TString myFile = m_lumicalcFiles[j];
+            TString myFile = m_toolLumicalcFiles[j];
             TString myTrigger = (myFile.Contains(':')) ? TString(myFile(myFile.Last(':')+1,myFile.Length()-myFile.Last(':'))) : TString("None");
             myFile = (myFile.Contains(':')) ? TString(myFile(0,myFile.Last(':'))) : myFile;
             ATH_MSG_VERBOSE("Locating File: " << myFile);
@@ -468,7 +470,7 @@ StatusCode PileupReweightingTool::apply(const xAOD::EventInfo& eventInfo, bool m
       eventInfo.auxdecor<unsigned int>(m_prefix+"RandomRunNumber") = (rrn==0) ? getRandomRunNumber(eventInfo, false) : rrn;
    }
    if(!eventInfo.isAvailable<unsigned int>(m_prefix+"RandomLumiBlockNumber"))
-      eventInfo.auxdecor<unsigned int>(m_prefix+"RandomLumiBlockNumber") = (eventInfo.auxdecor<unsigned int>(m_prefix+"RandomRunNumber")==0) ? 0 : /*m_tool->*/GetRandomLumiBlockNumber(  eventInfo.auxdecor<unsigned int>(m_prefix+"RandomRunNumber")  );
+      eventInfo.auxdecor<unsigned int>(m_prefix+"RandomLumiBlockNumber") = (eventInfo.auxdataConst<unsigned int>(m_prefix+"RandomRunNumber")==0) ? 0 : /*m_tool->*/GetRandomLumiBlockNumber(  eventInfo.auxdataConst<unsigned int>(m_prefix+"RandomRunNumber")  );
    if(!eventInfo.isAvailable<ULong64_t>(m_prefix+"PRWHash"))
       eventInfo.auxdecor<ULong64_t>(m_prefix+"PRWHash") = getPRWHash( eventInfo );
 
@@ -476,7 +478,7 @@ StatusCode PileupReweightingTool::apply(const xAOD::EventInfo& eventInfo, bool m
    if(!m_noWeightsMode && !eventInfo.isAvailable<float>(m_prefix+"PileupWeight"))
       eventInfo.auxdecor<float>(m_prefix+"PileupWeight") = getCombinedWeight(eventInfo, true);
       
-   ATH_MSG_VERBOSE("PileupWeight = " << eventInfo.auxdecor<float>(m_prefix+"PileupWeight") << " RandomRunNumber = " << eventInfo.auxdecor<unsigned int>(m_prefix+"RandomRunNumber") << " RandomLumiBlockNumber = " << eventInfo.auxdecor<unsigned int>(m_prefix+"RandomLumiBlockNumber"));
+   ATH_MSG_VERBOSE("PileupWeight = " << eventInfo.auxdataConst<float>(m_prefix+"PileupWeight") << " RandomRunNumber = " << eventInfo.auxdataConst<unsigned int>(m_prefix+"RandomRunNumber") << " RandomLumiBlockNumber = " << eventInfo.auxdataConst<unsigned int>(m_prefix+"RandomLumiBlockNumber"));
 
    return StatusCode::SUCCESS;
 }

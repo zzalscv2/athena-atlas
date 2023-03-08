@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //===========================
@@ -23,9 +23,9 @@ public:
   ROIMon(ComTime* comtime, float distance);
   ~ROIMon();
   StatusCode initialize();
-  int Accept(CLHEP::Hep3Vector Point);
+  int Accept(const CLHEP::Hep3Vector& Point);
   int AcceptTime();
-  float GetDistance(CLHEP::Hep3Vector Point);
+  float GetDistance(const CLHEP::Hep3Vector& Point);
   float GetTime();
   
  private:

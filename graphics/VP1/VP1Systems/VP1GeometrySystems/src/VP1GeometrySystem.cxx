@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////
@@ -314,7 +314,7 @@ void VP1GeometrySystem::systemuncreate()
   delete m_d->detVisAttributes; m_d->detVisAttributes = 0;
   delete m_d->volVisAttributes; m_d->volVisAttributes = 0;
 
-  foreach (Imp::SubSystemInfo * subsys, m_d->subsysInfoList)
+  for (Imp::SubSystemInfo * subsys :  m_d->subsysInfoList)
     delete subsys;
   m_d->subsysInfoList.clear();
 
@@ -551,7 +551,7 @@ void VP1GeometrySystem::buildPermanentSceneGraph(StoreGateSvc*/*detstore*/, SoSe
     qDebug() << "Configuring the default systems... - subsysInfoList len:" << (m_d->subsysInfoList).length();
   }
   // we switch on the systems flagged to be turned on at start
-  foreach (Imp::SubSystemInfo * subsys, m_d->subsysInfoList)
+  for (Imp::SubSystemInfo * subsys :  m_d->subsysInfoList)
   {
 	VP1Msg::messageDebug("Switching on this system: " + QString::fromStdString(subsys->matname) + " - " + subsys->flag);
     bool on(m_d->initialSubSystemsTurnedOn & subsys->flag);
@@ -581,7 +581,7 @@ void VP1GeometrySystem::buildPermanentSceneGraph(StoreGateSvc*/*detstore*/, SoSe
 
 	  //Let us see if we recognize this volume:
 	  bool found = false;
-	  foreach (Imp::SubSystemInfo * subsys, m_d->subsysInfoList) {
+	  for (Imp::SubSystemInfo * subsys :  m_d->subsysInfoList) {
 		  if (subsys->negatetreetopregexp!=subsys->geomodeltreetopregexp.exactMatch(name.c_str()))
 		  {
 			  if (subsys->checkbox==checkBoxOther&&found) {
@@ -627,7 +627,7 @@ void VP1GeometrySystem::buildPermanentSceneGraph(StoreGateSvc*/*detstore*/, SoSe
     checkBoxOther->setVisible(false);
 
   //Build the geometry for those (available) subsystems that starts out being turned on:
-  foreach (Imp::SubSystemInfo * subsys, m_d->subsysInfoList) {
+  for (Imp::SubSystemInfo * subsys :  m_d->subsysInfoList) {
     if (!subsys->soswitch||!subsys->checkbox->isChecked())
       continue;
     m_d->buildSystem(subsys);
@@ -765,7 +765,7 @@ void VP1GeometrySystem::checkboxChanged()
 {
   QCheckBox * cb = static_cast<QCheckBox*>(sender());
   Imp::SubSystemInfo * subsys(0);
-  foreach (Imp::SubSystemInfo * ss, m_d->subsysInfoList) {
+  for (Imp::SubSystemInfo * ss :  m_d->subsysInfoList) {
     if (cb==ss->checkbox) {
       subsys=ss;
       break;
@@ -965,13 +965,13 @@ void VP1GeometrySystem::userPickedNode(SoNode* , SoPath *pickedPath)
   message("===> Selected Node: "+volhandle->getName());
   // std::cout<<"VolHandle = "<<volhandle<<std::endl;
   if (m_d->controller->printInfoOnClick_Shape()) {
-    foreach (QString str, DumpShape::shapeToStringList(volhandle->geoPVConstLink()->getLogVol()->getShape()))
+    for (QString str :  DumpShape::shapeToStringList(volhandle->geoPVConstLink()->getLogVol()->getShape()))
       message(str);
   }
 
   if (m_d->controller->printInfoOnClick_Material()) {
     message("===> Material:");
-    foreach (QString line, VP1GeomUtils::geoMaterialToStringList(volhandle->geoMaterial()))
+    for (QString line :  VP1GeomUtils::geoMaterialToStringList(volhandle->geoMaterial()))
       message("     "+line);
   }
 
@@ -1014,7 +1014,7 @@ void VP1GeometrySystem::userPickedNode(SoNode* , SoPath *pickedPath)
     GeoPrintGraphAction pg(str);
     volhandle->geoPVConstLink()->exec(&pg);
     message("===> Tree:");
-    foreach (QString line, QString(str.str().c_str()).split("\n"))
+    for (QString line :  QString(str.str().c_str()).split("\n"))
       message("     "+line);
   }
 
@@ -1099,7 +1099,7 @@ void VP1GeometrySystem::Imp::buildSystem(SubSystemInfo* si)
     #endif
 
 //  // DEBUG
-//  foreach(Imp::SubSystemInfo*si,m_d->subsysInfoList) {
+//  for (Imp::SubSystemInfo*si : m_d->subsysInfoList) {
 //	  VP1Msg::messageDebug("vol: " + QString((si->flag).str_c()) );
 //	}
   
@@ -1297,7 +1297,7 @@ QByteArray VP1GeometrySystem::saveState() {
 
   //Subsystem checkboxes:
   QMap<QString,bool> subsysstate;
-  foreach (Imp::SubSystemInfo * subsys, m_d->subsysInfoList) {
+  for (Imp::SubSystemInfo * subsys : m_d->subsysInfoList) {
     serialise.widgetHandled(subsys->checkbox);
     subsysstate.insert(subsys->checkbox->text(),subsys->checkbox->isChecked());
   }
@@ -1305,7 +1305,7 @@ QByteArray VP1GeometrySystem::saveState() {
 
   //Volume states:
   QMap<quint32,QByteArray> topvolstates;
-  foreach (Imp::SubSystemInfo * subsys, m_d->subsysInfoList) {
+  for (Imp::SubSystemInfo * subsys : m_d->subsysInfoList) {
     if (m_d->controller->autoAdaptMuonChambersToEventData()&&subsys->hasMuonChambers())
       continue;//No need to store muon chamber data which will anyway be auto-adapted away.
     VolumeHandle::VolumeHandleListItr it(subsys->vollist.begin()),itE(subsys->vollist.end());
@@ -1344,7 +1344,7 @@ void VP1GeometrySystem::restoreFromState(QByteArray ba) {
   //Subsystem checkboxes:
   VP1GeoFlags::SubSystemFlags flags;
   QMap<QString,bool> subsysstate = state.restore<QMap<QString,bool> >();
-  foreach (Imp::SubSystemInfo * subsys, m_d->subsysInfoList) {
+  for (Imp::SubSystemInfo * subsys : m_d->subsysInfoList) {
     state.widgetHandled(subsys->checkbox);
     if (subsysstate.contains(subsys->checkbox->text())&&subsysstate[subsys->checkbox->text()])
       flags |= subsys->flag;
@@ -1379,7 +1379,7 @@ void VP1GeometrySystem::Imp::applyTopVolStates(const QMap<quint32,QByteArray>&to
   if (disablenotif)
     phisectormanager->largeChangesBegin();
   QMap<quint32,QByteArray>::const_iterator topvolstatesItr;
-  foreach (Imp::SubSystemInfo * subsys, subsysInfoList) {
+  for (Imp::SubSystemInfo * subsys : subsysInfoList) {
     VolumeHandle::VolumeHandleListItr it(subsys->vollist.begin()),itE(subsys->vollist.end());
     for (;it!=itE;++it) {
       topvolstatesItr = topvolstates.find((*it)->hashID());
@@ -1506,7 +1506,7 @@ void VP1GeometrySystem::resetSubSystems(VP1GeoFlags::SubSystemFlags f)
   }
 
   deselectAll();
-  foreach(Imp::SubSystemInfo*si,m_d->subsysInfoList) {
+  for (Imp::SubSystemInfo*si : m_d->subsysInfoList) {
     if (si->flag & f) {
         if (!si->isbuilt) {
 	        continue;
@@ -1736,7 +1736,7 @@ VP1GeometrySystem::Imp::SubSystemInfo * VP1GeometrySystem::Imp::chamberPVToMuonS
 
   VP1Msg::messageDebug("name: " + QString::fromStdString(name) );
 
-  foreach (SubSystemInfo * subsys, subsysInfoList) {
+  for (SubSystemInfo * subsys : subsysInfoList) {
     if (!subsys->hasMuonChambers())
       continue;
     if (subsys->childrenRegExpNameCompatible(name)) {
@@ -2170,7 +2170,7 @@ void VP1GeometrySystem::autoAdaptPixelsOrSCT(bool pixel,bool brl, bool ecA, bool
   ////////////////////////////////////////////////////////////////
   //Find subsystem:
   Imp::SubSystemInfo* subsys(0);
-  foreach(Imp::SubSystemInfo*si,m_d->subsysInfoList) {
+  for (Imp::SubSystemInfo*si : m_d->subsysInfoList) {
     if (si->flag == subSysFlag) {
       subsys = si;
       break;
@@ -2269,7 +2269,7 @@ void VP1GeometrySystem::autoAdaptMuonNSW(bool reset, bool stgc, bool mm)
   ////////////////////////////////////////////////////////////////
   //Find subsystem:
   Imp::SubSystemInfo* subsys(0);
-  foreach(Imp::SubSystemInfo*si,m_d->subsysInfoList) {
+  for (Imp::SubSystemInfo*si : m_d->subsysInfoList) {
     if (si->flag == subSysFlag) {
       subsys = si;
       break;

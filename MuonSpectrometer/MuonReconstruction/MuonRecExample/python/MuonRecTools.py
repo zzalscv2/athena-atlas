@@ -344,7 +344,7 @@ def MdtMathSegmentFinder(name="MdtMathSegmentFinder",extraFlags=None,**kwargs):
     doSegmentT0Fit = getattr(extraFlags,"doSegmentT0Fit",muonRecFlags.doSegmentT0Fit())
     enableCurvedSegmentFinding = getattr(extraFlags,"enableCurvedSegmentFinding", muonStandaloneFlags.enableCurvedSegmentFinding())
 
-    if doSegmentT0Fit:
+    if doSegmentT0Fit and not (ConfigFlags.Muon.MuonTrigger and (beamType =="cosmics" or globalflags.DataSource()=="data")):
         kwargs.setdefault("AssociationRoadWidth", 3.)
         kwargs.setdefault("MDTAssocationPullcut", 3.)
         kwargs.setdefault("RecoverMdtOutliers", False)
@@ -354,6 +354,7 @@ def MdtMathSegmentFinder(name="MdtMathSegmentFinder",extraFlags=None,**kwargs):
         kwargs.setdefault("AssociationRoadWidth", 2.)
         kwargs.setdefault("MDTAssocationPullcut", 4.)
         kwargs.setdefault("RecoverMdtOutliers", True )
+
 
     if enableCurvedSegmentFinding:
         kwargs.setdefault("DoCurvedSegmentFinder",True)
@@ -397,12 +398,6 @@ def DCMathSegmentMaker(name='DCMathSegmentMaker',extraFlags=None,**kwargs):
     #kwargs.setdefault("CurvedErrorScaling", False)
     kwargs.setdefault("UsePreciseError", True)
     kwargs.setdefault("SinAngleCut", 0.4)
-
-    kwargs.setdefault("TgcPrepDataContainer", 
-                      'TGC_MeasurementsAllBCs' if not muonRecFlags.useTGCPriorNextBC else 'TGC_Measurements')
-   
-    # MuonCompetingClustersCreator apparently just takes default
-    kwargs.setdefault("MuonClusterCreator", getPrivateTool("MuonClusterOnTrackCreator") )
 
     if (beamType == 'singlebeam' or beamType == 'cosmics'):
         kwargs.setdefault("SinAngleCut", 0.9)

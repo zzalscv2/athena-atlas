@@ -23,9 +23,9 @@ namespace {
 // Actual implementation method for combining
 // a multi component state.
 std::unique_ptr<Trk::ComponentParameters>
-computeImpl(const Trk::MultiComponentState* uncombinedState,
-            const bool useMode,
-            const double fractionPDFused)
+combineToSingleImpl(const Trk::MultiComponentState* uncombinedState,
+                    const bool useMode,
+                    const double fractionPDFused)
 {
   if (uncombinedState->empty()) {
     return nullptr;
@@ -220,13 +220,13 @@ computeImpl(const Trk::MultiComponentState* uncombinedState,
 } // end anonymous namespace
 
 std::unique_ptr<Trk::TrackParameters>
-Trk::MultiComponentStateCombiner::combine(
+Trk::MultiComponentStateCombiner::combineToSingle(
   const Trk::MultiComponentState& uncombinedState,
   const bool useMode,
   const double fractionPDFused)
 {
   std::unique_ptr<Trk::ComponentParameters> combinedComponent =
-    computeImpl(&uncombinedState, useMode, fractionPDFused);
+    combineToSingleImpl(&uncombinedState, useMode, fractionPDFused);
   return std::move(combinedComponent->first);
 }
 
@@ -332,7 +332,7 @@ Trk::MultiComponentStateCombiner::combineCovWithWeight(
 [[gnu::flatten]]
 #endif
 Trk::MultiComponentState
-Trk::MultiComponentStateCombiner::combine(
+Trk::MultiComponentStateCombiner::combineWithSmoother(
   const Trk::MultiComponentState& forwardsMultiState,
   const Trk::MultiComponentState& smootherMultiState,
   unsigned int maximumNumberOfComponents)

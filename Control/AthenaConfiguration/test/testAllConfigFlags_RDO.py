@@ -1,37 +1,26 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.TestDefaults import defaultTestFiles
-ConfigFlags.Input.Files = defaultTestFiles.RDO_RUN2
-ConfigFlags._loadDynaFlags("Detector")
+flags = initConfigFlags()
+flags.Input.Files = defaultTestFiles.RDO_RUN2
 
-# Don't fail just because G4AtlasApps isn't present in this build.
-havesim = True
-try:
-    import G4AtlasApps # noqa: F401
-except ImportError:
-    havesim = False
-if havesim:
-    ConfigFlags._loadDynaFlags("Sim")
+# Load Detector flags
+flags._loadDynaFlags("Detector")
 
-# Don't fail just because Digitization isn't present in this build.
-haveDigi = True
-try:
-    import Digitization # noqa: F401
-except ImportError:
-    haveDigi = False
-if haveDigi:
-    ConfigFlags._loadDynaFlags("Digitization")
+# Load Sim flags
+flags._loadDynaFlags("Sim")
 
-# Don't fail just because OverlayConfiguration isn't present in this build.
-haveOverlay = True
-try:
-    import OverlayConfiguration # noqa: F401
-except ImportError:
-    haveOverlay = False
-if haveOverlay:
-    ConfigFlags._loadDynaFlags("Overlay")
+# Load GeoModel flags
+flags._loadDynaFlags("GeoModel")
 
-ConfigFlags.initAll()
-ConfigFlags.lock()
-ConfigFlags.dump()
+# Load Digitization flags
+flags._loadDynaFlags("Digitization")
+
+# Load Overlay flags
+flags._loadDynaFlags("Overlay")
+
+# Init and print
+flags.initAll()
+flags.lock()
+flags.dump()

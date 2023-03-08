@@ -1,0 +1,118 @@
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Configuration of InDetPriVxFinder package
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory import CompFactory
+
+
+def InDetPriVxFinderCfg(flags, name="InDetPriVxFinder", **kwargs):
+    acc = ComponentAccumulator()
+
+    if "VertexCollectionSortingTool" not in kwargs:
+        from TrkConfig.TrkVertexToolsConfig import (
+            VertexCollectionSortingToolCfg)
+        kwargs.setdefault("VertexCollectionSortingTool", acc.popToolsAndMerge(
+            VertexCollectionSortingToolCfg(flags)))
+
+    if "VertexFinderTool" not in kwargs:
+        from InDetConfig.InDetPriVxFinderToolConfig import (
+            VertexFinderToolCfg)
+        kwargs.setdefault("VertexFinderTool", acc.popToolsAndMerge(
+            VertexFinderToolCfg(flags)))
+
+    kwargs.setdefault("doVertexSorting", True)
+
+    if flags.Tracking.perigeeExpression == "Vertex":
+        from xAODTrackingCnv.xAODTrackingCnvConfig import (
+            BeamLineTrackParticleCnvAlgCfg)
+        from InDetConfig.TrackRecoConfig import (
+            ClusterSplitProbabilityContainerName)
+        acc.merge(BeamLineTrackParticleCnvAlgCfg(
+            flags,
+            ClusterSplitProbabilityName = \
+            ClusterSplitProbabilityContainerName(flags),
+            AssociationMapName = "PRDtoTrackMapCombinedInDetTracks",
+            xAODTrackParticlesFromTracksContainerName = \
+            "InDetTrackParticlesTemporary"))
+        kwargs["TracksName"]="InDetTrackParticlesTemporary"
+
+    acc.addEventAlgo(CompFactory.InDet.InDetPriVxFinder(name, **kwargs))
+    return acc
+
+def InDetTrigPriVxFinderCfg(flags, name="InDetTrigPriVxFinder",
+                            signature="",
+                            **kwargs):
+
+    acc = ComponentAccumulator()
+
+    if "VertexFinderTool" not in kwargs:
+        from InDetConfig.InDetPriVxFinderToolConfig import (
+            TrigVertexFinderToolCfg)
+        kwargs.setdefault("VertexFinderTool", acc.popToolsAndMerge(
+            TrigVertexFinderToolCfg(flags, signature=signature)))
+
+    if "VertexCollectionSortingTool" not in kwargs:
+        from TrkConfig.TrkVertexToolsConfig import (
+            SumPt2VertexCollectionSortingToolCfg)
+        kwargs.setdefault("VertexCollectionSortingTool", acc.popToolsAndMerge(
+            SumPt2VertexCollectionSortingToolCfg(flags)))
+
+    if "PriVxMonTool" not in kwargs:
+        from InDetPriVxFinder.InDetPriVxFinderMonitoring import (
+            InDetPriVxFinderMonitoringTool)
+        kwargs.setdefault("PriVxMonTool", InDetPriVxFinderMonitoringTool(flags))
+
+    kwargs.setdefault("doVertexSorting", True)
+
+    acc.addEventAlgo(CompFactory.InDet.InDetPriVxFinder(name, **kwargs))
+    return acc
+
+
+def primaryVertexFindingCfg(flags, **kwargs):
+    acc = InDetPriVxFinderCfg(flags)
+
+    from OutputStreamAthenaPool.OutputStreamConfig import addToESD, addToAOD
+
+    excludedVtxAuxData = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV"
+    verticesContainer = [
+        "xAOD::VertexContainer#PrimaryVertices",
+        "xAOD::VertexAuxContainer#PrimaryVerticesAux." + excludedVtxAuxData,
+    ]
+
+    acc.merge(addToAOD(flags, verticesContainer))
+    acc.merge(addToESD(flags, verticesContainer))
+
+    return acc
+
+if __name__ == "__main__":
+    from AthenaCommon.Logging import logging
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+
+    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    from AthenaConfiguration.ComponentAccumulator import printProperties
+    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+    from TrkConfig.VertexFindingFlags import VertexSetup
+
+    flags.Input.Files = defaultTestFiles.RDO_RUN2
+    import sys
+    if 'ActsGaussAdaptiveMultiFinding' in sys.argv:
+        flags.Tracking.PriVertex.setup = VertexSetup.ActsGaussAMVF
+    elif "IterativeFinding" in sys.argv:
+        flags.Tracking.PriVertex.setup = VertexSetup.IVF
+    elif "FastIterativeFinding" in sys.argv:
+        flags.Tracking.PriVertex.setup = VertexSetup.FastIVF
+    flags.lock()
+
+    acc = MainServicesCfg(flags)
+    acc.merge(primaryVertexFindingCfg(flags))
+
+    mlog = logging.getLogger("primaryVertexFindingConfigTest")
+    mlog.info("Configuring  primaryVertexFinding: ")
+
+    printProperties(
+        mlog,
+        acc.getEventAlgo("InDetPriVxFinder"),
+        nestLevel=2,
+        printDefaults=True,
+    )
+

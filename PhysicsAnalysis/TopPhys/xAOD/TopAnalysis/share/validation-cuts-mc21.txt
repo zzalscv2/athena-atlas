@@ -21,7 +21,7 @@ ElectronCollectionName Electrons
 MuonCollectionName Muons
 JetCollectionName AntiKt4EMPFlowJets
 LargeJetCollectionName AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets 
-TauCollectionName None #TauJets
+TauCollectionName TauJets
 PhotonCollectionName Photons
 TrackJetCollectionName AntiKtVR30Rmax4Rmin02PV0TrackJets
 
@@ -54,11 +54,11 @@ Systematics Nominal
 
 ### Electron configuration
 ElectronID TightLH
-ElectronIDLoose LooseAndBLayerLH
+ElectronIDLoose TightLH
 ElectronIsolationWPs HighPtCaloOnly TightTrackOnly_VarRad TightTrackOnly_FixedRad Tight_VarRad Loose_VarRad 
 ElectronIsolation Tight_VarRad
-ElectronIsolationLoose None
-ElectronTriggerEfficiencyConfig SINGLE_E_2022_e26_lhtight_ivarloose_L1EM22VHI_OR_e60_lhmedium_L1EM22VHI_OR_e140_lhloose_L1EM22VHI_OR_HLT_e300_etcut_L1EM22VHI
+ElectronIsolationLoose Tight_VarRad
+ElectronTriggerEfficiencyConfig 2022_e26_lhtight_ivarloose_L1EM22VHI_OR_e60_lhmedium_L1EM22VHI_OR_e140_lhloose_L1EM22VHI
 
 ### Photon configuration
 PhotonPt 25000
@@ -83,7 +83,6 @@ MuonIsolationLoose None
 MuonDoExtraSmearingHighPt False
 MuonDoSmearing2stationHighPt False
 MuonCalibrationMode correctData_IDMS
-MuonForceTrigger HLT_mu26_ivarmedium_L1MU14FCH_OR_HLT_mu50_L1MU14FCH
 
 ### Tau configuration
 TauPt 25000

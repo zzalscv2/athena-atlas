@@ -43,7 +43,7 @@ if DetFlags.readRDOBS.LAr_on():
     else:   
        lri=None
     if lri is not None and lri.runType() is not None and lri.runType()==0:
-       topSequence+=LArRawDataReadingAlg(LArRawChannelKey="",OutputLevel=DEBUG) 
+       topSequence+=LArRawDataReadingAlg(LArRawChannelKey="") 
     else:   
        topSequence+=LArRawDataReadingAlg() 
         

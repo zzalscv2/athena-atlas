@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 /*
-   Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef __TELECTRONEFFICIENCYCORRECTIONTOOL__
@@ -10,10 +10,9 @@
   @class TElectronEfficiencyCorrectionTool
   @brief Calculate the egamma scale factors
   Implementation class for the e/gamma Efficiency Scale Factors. This code
-  implements the underlying logic of accessign the ROOT files containing the
+  implements the underlying logic of accessing the ROOT files containing the
   recommendations.
   @authors Kristin Lohwasser, Karsten Koeneke, Felix Buehrer
-  @date   January 2013
   @updated by Christos Anastopoulos 2017-2018
   */
 
@@ -36,17 +35,19 @@ namespace Root {
 class TElectronEfficiencyCorrectionTool : public asg::AsgMessaging
 {
 public:
+  //We want to have unique ownership of the Histos
   using HistArray = std::vector<std::unique_ptr<TH1>>;
-  /**
-   * The position of each result
-   */
-  enum struct Position
-  {
-    SF = 0,
-    Total = 1,
-    Stat = 2,
-    UnCorr = 3,
-    End = 4
+
+  // The Result
+  struct Result {
+    double SF = 0;
+    double Total = 0;
+    double Stat = 0;
+    double UnCorr = 0;
+    std::vector<double> Corr{};
+    std::vector<double> toys{};
+    int histIndex = -1;
+    int histBinNum = -1;
   };
 
   /** Standard constructor */
@@ -54,10 +55,28 @@ public:
     const char* name = "TElectronEfficiencyCorrectionTool");
 
   /** Standard destructor */
-  ~TElectronEfficiencyCorrectionTool();
+  ~TElectronEfficiencyCorrectionTool() = default;
 
-  // Main methods
-  /** Initialize this class */
+  /// This is more of an utility
+  /// so the initialize is different wrt
+  /// to an athena component
+  ///
+  ///  Add an input file with the auxiliary measurement
+  ///  needed before we call initialize
+  inline void addFileName(const std::string& val) {
+    m_corrFileNameList.push_back(val);
+  }
+  /// Running these before the initialize
+  /// will setup the booking of toys
+  inline void bookToyMCScaleFactors(const int nToyMC) {
+    m_doToyMC = true;
+    m_nToyMC = nToyMC;
+  }
+  inline void bookCombToyMCScaleFactors(const int nToyMC) {
+    m_doCombToyMC = true;
+    m_nToyMC = nToyMC;
+  }
+  /// Initialize this class
   int initialize();
 
   /** The main calculate method: the actual cuts are applied here
@@ -65,41 +84,23 @@ public:
    *  @ runnumber the run number 1st dimension of the stored measurements
    *  @ cluster_eta the cluster eta 2nd dimension of the stored measurements
    *  @ et third dimension of the stored measurments
-   *  @ result the vector with the results. The first
-   *  @ Position::End entries are filled with the
+   *  @ result struct filled with
    *  SF, Total uncertainty, Stat uncertainty, Uncorr uncertainty
-   *  @ index_of_corr this is where the correlated syst start
-   *  @ index_of_toys this is where the potential toys start
+   *  @ index_of_corr systematic
    *  returns 0 in failure
+   *
+   *  Toy production is controlled by internal flags
+   *  set by the Asg Tool. As toys are special.
    */
   int calculate(const PATCore::ParticleDataType::DataType dataType,
-                const unsigned int runnumber,
+                const unsigned int runnumber, 
                 const double cluster_eta,
                 const double et, /* in MeV */
-                std::vector<double>& result,
-                size_t& index_of_corr,
-                size_t& index_of_toys) const;
-
-  /// Add an input file with the auxiliary measurement
-  inline void addFileName(const std::string& val)
-  {
-    m_corrFileNameList.push_back(val);
-  }
-  /// Running these book toys
-  inline void bookToyMCScaleFactors(const int nToyMC)
-  {
-    m_doToyMC = true;
-    m_nToyMC = nToyMC;
-  }
-
-  inline void bookCombToyMCScaleFactors(const int nToyMC)
-  {
-    m_doCombToyMC = true;
-    m_nToyMC = nToyMC;
-  }
+                Result& result,
+                const bool onlyTotal = false) const;
 
   /// Helpers to get the binning of the uncertainties
-  // in a std::map (pt, eta)
+  /// in a std::map (pt, eta)
   int getNbins(std::map<float, std::vector<float>>& ptEta) const;
 
   /// get number of systematics
@@ -153,38 +154,52 @@ private:
             const int runNumBegin,
             const int runNumEnd) const;
 
-private:
-  /// Flag to control Toys
-  bool m_doToyMC;
-  bool m_doCombToyMC;
-  /// The number of toys
-  int m_nToyMC;
-  /// The Random seed
-  unsigned long int m_seed;
-  /// Maximum number of systematics
-  int m_nSysMax;
-  // The representation of the prepared toy SF tables
-  std::vector<std::vector<HistArray>> m_uncorrToyMCSystFull;
-  std::vector<std::vector<HistArray>> m_uncorrToyMCSystFast;
-  /// The list of file name(s)
-  std::vector<std::string> m_corrFileNameList;
-  /// List of run numbers where histograms become valid for full simulation
-  std::vector<unsigned int> m_begRunNumberList;
-  /// List of run numbers where histograms stop being valid for full simulation
-  std::vector<unsigned int> m_endRunNumberList;
-  /// List of run numbers where histograms become valid for fast simulation
-  std::vector<unsigned int> m_begRunNumberListFastSim;
-  /// List of run numbers where histograms stop being valid for fast simulation
-  std::vector<unsigned int> m_endRunNumberListFastSim;
-  /// List of histograms for full Geant4 simulation
-  std::vector<std::vector<HistArray>> m_histList;
-  std::vector<std::vector<HistArray>> m_sysList;
-  /// List of histograms for fast simulation
-  std::vector<std::vector<HistArray>> m_fastHistList;
-  std::vector<std::vector<HistArray>> m_fastSysList;
-  // The Random generator class
-  TRandom3 m_Rndm;
-}; // End: class definition
+  struct HistEdge {
+    double etaMax = 0;
+    double etaMin = 0;
+    double etMax = 0;
+    double etMin = 0;
+    bool isLowPt = false;
+  };
+
+  void fillHistEdges(const std::vector<HistArray>& sfPerPeriodHist,
+                     std::vector<std::vector<HistEdge>>& sfPerPeriodEdges) const;
+
+    /// Flag to control Toys
+    bool m_doToyMC;
+    bool m_doCombToyMC;
+    /// The number of toys
+    int m_nToyMC;
+    /// The Random seed
+    unsigned long int m_seed;
+    /// Maximum number of systematics
+    int m_nSysMax;
+    // The representation of the prepared toy SF tables
+    std::vector<std::vector<HistArray>> m_uncorrToyMCSystFull;
+    std::vector<std::vector<HistArray>> m_uncorrToyMCSystFast;
+    /// The list of file name(s)
+    std::vector<std::string> m_corrFileNameList;
+    /// List of run numbers where histograms become valid for full simulation
+    std::vector<unsigned int> m_begRunNumberList;
+    /// List of run numbers where histograms stop being valid for full
+    /// simulation
+    std::vector<unsigned int> m_endRunNumberList;
+    /// List of run numbers where histograms become valid for fast simulation
+    std::vector<unsigned int> m_begRunNumberListFastSim;
+    /// List of run numbers where histograms stop being valid for fast
+    /// simulation
+    std::vector<unsigned int> m_endRunNumberListFastSim;
+    /// List of histograms for full Geant4 simulation
+    std::vector<std::vector<HistArray>> m_histList;
+    std::vector<std::vector<HistEdge>> m_histEdges;
+    std::vector<std::vector<HistArray>> m_sysList;
+    /// List of histograms for fast simulation
+    std::vector<std::vector<HistArray>> m_fastHistList;
+    std::vector<std::vector<HistEdge>> m_fastHistEdges;
+    std::vector<std::vector<HistArray>> m_fastSysList;
+    // The Random generator class
+    TRandom3 m_Rndm;
+  };  // End: class definition
 } // End: namespace Root
 
 #endif

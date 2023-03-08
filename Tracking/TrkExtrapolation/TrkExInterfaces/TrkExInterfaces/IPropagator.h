@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -28,6 +28,7 @@
 #include "TrkSurfaces/BoundaryCheck.h"
 // STL
 #include <utility>
+#include <deque>
 
 namespace Trk {
 
@@ -185,7 +186,7 @@ public:
      The intersection interface might be used by the material service as well
      to estimate the surfaces (sensitive and nonesensitive) while propagation
     */
-  virtual const IntersectionSolution* intersect(
+  virtual IntersectionSolution intersect(
     const EventContext& ctx,
     const TrackParameters& parm,
     const Surface& sf,
@@ -213,7 +214,7 @@ public:
      signature and a void method has been chosen.
      */
   virtual void globalPositions(const EventContext& ctx,
-                               std::list<Amg::Vector3D>& positionslist,
+                               std::deque<Amg::Vector3D>& positionslist,
                                const TrackParameters& parm,
                                const MagneticFieldProperties& mprop,
                                const CylinderBounds& cylbo,

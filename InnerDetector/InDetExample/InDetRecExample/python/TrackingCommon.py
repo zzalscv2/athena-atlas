@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.GlobalFlags import globalflags
 from AthenaCommon.Logging import logging
@@ -705,7 +705,6 @@ def getConstPRD_AssociationTool(name='ConstPRD_AssociationTool',**kwargs) :
     the_name,prefix,suffix=makeNameGetPreAndSuffix(name,kwargs)
 
     kwargs = setDefaults( kwargs,
-                          SetupCorrect     = True,
                           PRDtoTrackMap    = prefix+'PRDtoTrackMap'+suffix)
 
     from TrkAssociationTools.TrkAssociationToolsConf import Trk__PRD_AssociationTool
@@ -736,7 +735,7 @@ def getInDetPrdAssociationTool_setup(name='InDetPrdAssociationTool_setup',**kwar
     '''
     Provide an instance for all clients which set the tool explicitely
     '''
-    return getInDetPrdAssociationTool(name, **setDefaults(kwargs, SetupCorrect                   = True) )
+    return getInDetPrdAssociationTool(name, **kwargs)
 
 def getInDetPixelConditionsSummaryTool(name = "PixelConditionsSummaryTool",**kwargs) :
     the_name = makeName( name, kwargs)
@@ -751,11 +750,8 @@ def getInDetPixelConditionsSummaryTool(name = "PixelConditionsSummaryTool",**kwa
                                                                                UseByteStreamFEI4=has_bytestream_errors,
                                                                                UseByteStreamFEI3=has_bytestream_errors) )
     if InDetFlags.usePixelDCS():
-        pixelConditionsSummaryToolSetup.IsActiveStates  = [ 'READY', 'ON', 'UNKNOWN', 'TRANSITION', 'UNDEFINED' ]
-        pixelConditionsSummaryToolSetup.IsActiveStates += [ 'DISABLED', 'LOCKED_OUT' , 'OFF' ] # to be compatible with run2
-                                                                                               # reprocessing in 22.0-mc20
-
-        pixelConditionsSummaryToolSetup.IsActiveStatus  = [ 'OK', 'WARNING', 'ERROR', 'FATAL' ]
+        pixelConditionsSummaryToolSetup.IsActiveStates  = [ 'READY', 'ON' ]   # 'UNKNOWN', 'TRANSITION', 'UNDEFINED', 'DISABLED', 'LOCKED_OUT' , 'OFF' should be masked.
+        pixelConditionsSummaryToolSetup.IsActiveStatus  = [ 'OK', 'WARNING', 'ERROR', 'FATAL' ]   # they are already used in ActiveStatus, thus accept all.
 
     return pixelConditionsSummaryToolSetup
 

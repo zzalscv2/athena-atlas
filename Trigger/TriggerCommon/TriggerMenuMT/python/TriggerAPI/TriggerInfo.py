@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 __author__  = 'Javier Montejo'
 __version__="$Revision: 2.0 $"
@@ -15,14 +15,14 @@ class TriggerInfo:
     ''' Object containing all the HLT information related to a given period.
         Stores a list of TriggerChain objects and the functions to skim them
     '''
-    def __init__(self,period=0, customGRL=None, release=None):
+    def __init__(self,period=0, customGRL=None, release=None, flags=None):
         self.triggerChains = []
         self.period = period
         self.totalLB = 0
 
         if not period: return
         from .TriggerDataAccess import getHLTlist
-        HLTlist, totalLB = getHLTlist(period, customGRL, release)
+        HLTlist, totalLB = getHLTlist(period, customGRL, release, flags)
         self.totalLB = totalLB
         for hlt, l1, livefraction, activeLB, hasRerun in HLTlist:
             self.triggerChains.append( TriggerChain(hlt, l1, livefraction, activeLB, hasRerun))

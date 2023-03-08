@@ -176,8 +176,6 @@ unsigned int SUSY::finalState(const int SUSY_Spart1_pdgId, const int SUSY_Spart2
   int nsmunuL = 0;
   int nstaunuL = 0;
 
-  int nother = 0;
-
   //Classification of the event follows (gg, sq...):
 
   if      (abs(SUSY_Spart1_pdgId) == 1000022) nchi01++;
@@ -216,9 +214,6 @@ unsigned int SUSY::finalState(const int SUSY_Spart1_pdgId, const int SUSY_Spart2
   else if (SUSY_Spart1_pdgId == 2000015) nstau2minus++;
   else if (SUSY_Spart1_pdgId == -2000015) nstau2plus++;
   else if (abs(SUSY_Spart1_pdgId) == 1000016) nstaunuL++;
-  else nother++;
-
-
 
 
   if (abs(SUSY_Spart2_pdgId) == 1000022) nchi01++;
@@ -259,7 +254,6 @@ unsigned int SUSY::finalState(const int SUSY_Spart1_pdgId, const int SUSY_Spart2
   else if (SUSY_Spart2_pdgId == 2000015) nstau2minus++;
   else if (SUSY_Spart2_pdgId == -2000015) nstau2plus++;
   else if (abs(SUSY_Spart2_pdgId) == 1000016) nstaunuL++;
-  else nother++;
 
 
   ///Final classification

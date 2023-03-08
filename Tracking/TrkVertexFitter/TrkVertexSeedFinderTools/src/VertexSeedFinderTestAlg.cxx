@@ -322,6 +322,9 @@ VertexSeedFinderTestAlg::makeMcEventCollection (const EventContext& ctx) const
   }
 
   auto evtcoll = std::make_unique<McEventCollection>();
+  HepMC::fillBarcodesAttribute(evt1);
+  HepMC::fillBarcodesAttribute(evt2);
+  HepMC::fillBarcodesAttribute(evt3);
   evtcoll->push_back (evt1);
   evtcoll->push_back (evt2);
   evtcoll->push_back (evt3);

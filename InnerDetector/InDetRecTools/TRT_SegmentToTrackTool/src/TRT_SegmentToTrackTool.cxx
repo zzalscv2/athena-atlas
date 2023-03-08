@@ -769,7 +769,7 @@ namespace InDet {
     int nShared = 0;  // Shared drift circles in segment
     int nHits   = 0;  // Number of TRT measurements
 
-    if (!m_assoTool.name().empty() && !prd_to_track_map) ATH_MSG_ERROR("PRDtoTrackMap to be used but not provided by the client");
+    if (m_assoTool.isEnabled()&& !prd_to_track_map) ATH_MSG_ERROR("PRDtoTrackMap to be used but not provided by the client");
     // loop over the track states
     for(int it=0; it<int(tS.numberOfMeasurementBases()); ++it){
 
@@ -788,7 +788,7 @@ namespace InDet {
       // count up number of hits
       nHits++;
 
-      if(!m_assoTool.name().empty() && prd_to_track_map && prd_to_track_map->isUsed(*RawDataClus)) nShared++;
+      if(m_assoTool.isEnabled() && prd_to_track_map && prd_to_track_map->isUsed(*RawDataClus)) nShared++;
     }
 
     if(nShared >= int(m_sharedFrac * nHits)) {
@@ -876,10 +876,9 @@ namespace InDet {
 
     ATH_MSG_DEBUG ("Resolving the TRT tracks in score map...");
 
-    //    if (m_assoTool.name().empty() && !prd_to_track_map_in) ATH_MSG_ERROR("PRDtoTrackMap to be used but not provided by the client");
 
     std::unique_ptr<Trk::PRDtoTrackMap> prd_to_track_map;
-    if (!m_assoTool.name().empty()) {
+    if (m_assoTool.isEnabled()) {
       prd_to_track_map=m_assoTool->createPRDtoTrackMap();
       if (prd_to_track_map_in) {
         *prd_to_track_map = *prd_to_track_map_in;
@@ -909,23 +908,29 @@ namespace InDet {
       // loop over vector of TSOS
       for ( const Trk::TrackStateOnSurface *a_tsos : *tsos) {
 
-	// get measurment from TSOS
-	const Trk::MeasurementBase* meas = a_tsos->measurementOnTrack();
-	if (!meas) continue;
+        // get measurment from TSOS
+        const Trk::MeasurementBase* meas = a_tsos->measurementOnTrack();
+        if (!meas)
+          continue;
 
-	// make sure it is a TRT_DC and not a pseudo measurement
-	const InDet::TRT_DriftCircleOnTrack* rot = dynamic_cast <const InDet::TRT_DriftCircleOnTrack*> (meas);
-	if( !rot ) continue;
+        // make sure it is a TRT_DC and not a pseudo measurement
+        const InDet::TRT_DriftCircleOnTrack* rot =
+            dynamic_cast<const InDet::TRT_DriftCircleOnTrack*>(meas);
+        if (!rot)
+          continue;
 
-	// get to the PRD object
-	const InDet::TRT_DriftCircle* RawDataClus=dynamic_cast<const InDet::TRT_DriftCircle*>(rot->prepRawData());
-	if(!RawDataClus) continue;
+        // get to the PRD object
+        const InDet::TRT_DriftCircle* RawDataClus =
+            dynamic_cast<const InDet::TRT_DriftCircle*>(rot->prepRawData());
+        if (!RawDataClus)
+          continue;
 
-	// count up number of hits
-	nHits++;
+        // count up number of hits
+        nHits++;
 
-	// count up number of shared hits
-	if(!m_assoTool.name().empty() && prd_to_track_map->isUsed(*RawDataClus)) nShared++;
+        // count up number of shared hits
+        if (m_assoTool.isEnabled() && prd_to_track_map->isUsed(*RawDataClus))
+          nShared++;
       }
 
       ATH_MSG_DEBUG ("TRT-only has " << nHits << " hits and " << nShared << " of them are shared");
@@ -946,7 +951,7 @@ namespace InDet {
       ATH_MSG_DEBUG ("TRT-only is accepted");
 
       //Register the track with the association tool
-      if(!m_assoTool.name().empty()) {
+      if(m_assoTool.isEnabled()) {
         if(m_assoTool->addPRDs(*prd_to_track_map,*(track_score.second)).isFailure()) {
 	  ATH_MSG_WARNING ("addPRDs() failed!");
 	}

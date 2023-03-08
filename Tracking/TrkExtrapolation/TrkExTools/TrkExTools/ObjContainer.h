@@ -214,7 +214,7 @@ class ObjContainer : public ObjContainerBase
 public:
    ObjContainer(unsigned int min_size=0) { m_objs.reserve(min_size); }
 
-   ~ObjContainer() {
+   ~ObjContainer() noexcept(false) {
       for (std::pair<T_Obj *, short> &elm : m_objs) {
          if (elm.second>0) {
             this->throwObjectStillAlive(elm.first,static_cast<size_t>(elm.second));
@@ -511,8 +511,7 @@ public:
      , m_ref(ref ? container.share(ref) : ref)
    {}
 
-   ~ObjPtr()
-   {
+   ~ObjPtr() noexcept(false){
      if (m_ref) {
        m_container->drop(m_ref);
      }

@@ -24,7 +24,7 @@ LArAutoCorrTotalCondAlg::LArAutoCorrTotalCondAlg(const std::string &name,
       m_LArfSamplObjKey("LArfSamplSym"),
       m_LArMinBiasObjKey("LArMinBiasSym"),
       m_LArAutoCorrTotalObjKey("LArAutoCorrTotal"),
-      m_Nminbias(0), m_NoPile(false), m_isMC(true),
+      m_NoPile(false), m_isMC(true),
       m_isSuperCell(false), m_Nsamples(5),
       m_firstSample(0), m_deltaBunch(1) {
   declareProperty("LArADC2MeVObjKey", m_LArADC2MeVObjKey,
@@ -45,8 +45,7 @@ LArAutoCorrTotalCondAlg::LArAutoCorrTotalCondAlg(const std::string &name,
                   "Key to read LArMinBias object");
   declareProperty("LArAutoCorrTotalObjKey", m_LArAutoCorrTotalObjKey,
                   "Key to write LArAutoCorrTotal object");
-  declareProperty("Nminbias", m_Nminbias);
-  declareProperty("NoPile", m_NoPile);
+  declareProperty("NoPileUp", m_NoPile);
   declareProperty("isMC", m_isMC);
   declareProperty("isSuperCell", m_isSuperCell);
   declareProperty("Nsamples", m_Nsamples, "Max number of samples to use");
@@ -70,10 +69,6 @@ StatusCode LArAutoCorrTotalCondAlg::initialize() {
 
   ATH_CHECK(m_LArAutoCorrTotalObjKey.initialize());
 
-  m_NoPile = false;
-  if (m_Nminbias <= 0)
-    m_NoPile = true;
-
   ATH_CHECK(m_LArNoiseObjKey.initialize(!m_NoPile && m_isMC));
   ATH_CHECK(m_LArPedestalObjKey.initialize(!m_NoPile && !m_isMC));
   ATH_CHECK(m_LArfSamplObjKey.initialize(!m_NoPile));
@@ -86,7 +81,7 @@ StatusCode LArAutoCorrTotalCondAlg::initialize() {
     m_nGains = 3;
   }
 
-  ATH_MSG_DEBUG("settings: m_Nminbias " << m_Nminbias << " m_NoPile " << m_NoPile);
+  ATH_MSG_DEBUG("settings: m_NoPile " << m_NoPile);
   return StatusCode::SUCCESS;
 }
 
@@ -180,14 +175,12 @@ StatusCode LArAutoCorrTotalCondAlg::execute() {
   std::unique_ptr<LArAutoCorrTotal> larAutoCorrTotal =
       std::make_unique<LArAutoCorrTotal>(larOnlineID, larOnOffIdMapping, m_nGains);
 
-  std::vector<HWIdentifier>::const_iterator it = larOnlineID->channel_begin();
-  std::vector<HWIdentifier>::const_iterator it_e = larOnlineID->channel_end();
   int count = 0;
   int count2 = 0;
+  int count3 =0;
 
-  for (; it != it_e; ++it) {
+  for (const HWIdentifier chid : larOnlineID->channel_range()) {
     count++;
-    const HWIdentifier chid = *it;
     const IdentifierHash hid = larOnlineID->channel_Hash(chid);
     // const unsigned int id32 = chid.get_identifier32().get_compact();
 
@@ -201,6 +194,12 @@ StatusCode LArAutoCorrTotalCondAlg::execute() {
         const ILArAutoCorr::AutoCorrRef_t AC =
             larAutoCorr->autoCorr(chid, igain);
 
+	if (AC.size() == 0) {
+	  ATH_MSG_INFO("No ElecCalib AC for channel " << larOnlineID->channel_name(chid) << ", gain "<<igain << ". Skip.");
+	  continue;
+	}
+	    
+	count3++;
         int nsamples_AC_OFC = AC.size() + 1;
 
         if (nsamples_AC_OFC > m_Nsamples) {
@@ -325,6 +324,7 @@ StatusCode LArAutoCorrTotalCondAlg::execute() {
   }
 
   ATH_MSG_INFO("LArAutoCorrTotal Ncell " << count);
+  ATH_MSG_INFO("LArAutoCorrTotal Ncell * Ngain " << count3);
   ATH_MSG_INFO("LArAutoCorrTotal Nconnected " << count2);
 
   ATH_MSG_INFO("LArAutoCorrTotal record with key" << m_LArAutoCorrTotalObjKey);

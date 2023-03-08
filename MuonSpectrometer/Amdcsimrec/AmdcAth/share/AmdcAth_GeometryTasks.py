@@ -76,7 +76,7 @@ if DoNSWDBlob :
    # GeoModel is needed to make a test build of the volumes - in case of bugs it crashes
    include("MuonGeoModel/MuonGeoModel_MinimalSetup.py")
    # after the above include, GeoModelSvc should be setup, now use a recent layout to start from
-   GeoModelSvc.AtlasVersion='ATLAS-R3S-2021-01-00-00'
+   GeoModelSvc.AtlasVersion='ATLAS-R3S-2021-03-01-00'
    # since we have chosen a symmetric NSW layout and we execute this jobOptions file outside of a 
    # standard job transform, set the MuonDetectorTool and DetDescrCnvSvc properties by hand
    GeoModelSvc.DetectorTools[ "MuonDetectorTool" ].HasCSC = False
@@ -107,7 +107,7 @@ if CheckNSWDBlob :
    # to get the AGDD blob from a dedicated layout (needs database_layout to be defined)
    include("MuonGeoModel/MuonGeoModel_MinimalSetup.py")
    # after the above include, GeoModelSvc should be setup, now use a recent layout to start from
-   GeoModelSvc.AtlasVersion='ATLAS-R3S-2021-01-00-00'
+   GeoModelSvc.AtlasVersion='ATLAS-R3S-2021-03-01-00'
    # since we have chosen a symmetric NSW layout and we execute this jobOptions file outside of a 
    # standard job transform, set the MuonDetectorTool and DetDescrCnvSvc properties by hand
    GeoModelSvc.DetectorTools[ "MuonDetectorTool" ].HasCSC = False

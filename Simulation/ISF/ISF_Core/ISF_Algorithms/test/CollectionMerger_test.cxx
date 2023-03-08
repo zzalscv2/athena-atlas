@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -76,6 +76,7 @@ class CollectionMerger_test : public ::testing::Test {
 };  // CollectionMerger_test fixture
 
 
+// cppcheck-suppress syntaxError
 TEST_F(CollectionMerger_test, empty_alg_execute) {
   ASSERT_TRUE( m_alg->initialize().isSuccess() );
   EventContext ctx(0,0);

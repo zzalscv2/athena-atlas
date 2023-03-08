@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/IterativePriVtxFinderTool.h"
@@ -100,7 +100,7 @@ ActsTrk::IterativePriVtxFinderTool::initialize()
   VertexSeedFinder seedFinder(seedFinderConfig, extractParameters);
     
   // Iterative Vertex Finder setup
-  VertexFinder::Config finderConfig(fitter, linearizer, std::move(seedFinder), ipEst);
+  VertexFinder::Config finderConfig(fitter, std::move(linearizer), std::move(seedFinder), ipEst);
   finderConfig.useBeamConstraint = m_useBeamConstraint;
   finderConfig.significanceCutSeeding = m_significanceCutSeeding;
   finderConfig.maximumChi2cutForSeeding = m_maximumChi2cutForSeeding;

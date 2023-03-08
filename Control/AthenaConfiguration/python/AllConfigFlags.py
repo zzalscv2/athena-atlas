@@ -1,6 +1,6 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from AthenaCommon.SystemOfUnits import TeV
+from AthenaCommon.SystemOfUnits import GeV, TeV
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags, isGaudiEnv
 from AthenaConfiguration.AutoConfigFlags import GetFileMD, getInitialTimeStampsFromRunNumbers, getRunToTimestampDict, getSpecialConfigurationMetadata
 from AthenaConfiguration.Enums import BeamType, Format, ProductionStep, BunchStructureSource, Project
@@ -9,9 +9,11 @@ from PyUtils.moduleExists import moduleExists
 
 
 def _addFlagsCategory (acf, name, generator, modName = None):
+    """Add flags category and return True/False on success/failure"""
     if moduleExists (modName):
-        return acf.addFlagsCategory (name, generator)
-    return None
+        acf.addFlagsCategory (name, generator)
+        return True
+    return False
 
 
 def initConfigFlags():
@@ -21,6 +23,7 @@ def initConfigFlags():
     #Flags steering the job execution:
     from AthenaCommon.Constants import INFO
     acf.addFlag('Exec.OutputLevel',INFO) #Global Output Level
+    acf.addFlag('Exec.PrintAlgsSequence', False) # Allows AppMgr to print the algorithm sequence
     acf.addFlag('Exec.MaxEvents',-1)
     acf.addFlag('Exec.SkipEvents',0)
     acf.addFlag('Exec.DebugStage','')
@@ -81,7 +84,7 @@ def initConfigFlags():
         return GetFileMD(inputFile).get("metadata_items", {})
 
     acf.addFlag('Input.MetadataItems', lambda prevFlags : _metadataItems(prevFlags.Input.Files) )
-    acf.addFlag('Input.Release',  lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("AtlasRelease", None))
+    acf.addFlag('Input.Release',  lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("AtlasRelease", ""))
     acf.addFlag('Input.AODFixesDone', lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("AODFixVersion", ""))
 
     acf.addFlag('Concurrency.NumProcs', 0)
@@ -91,9 +94,9 @@ def initConfigFlags():
 
     acf.addFlag('Scheduler.CheckDependencies', True)
     acf.addFlag('Scheduler.CheckOutputUsage', False)
-    acf.addFlag('Scheduler.ShowDataDeps', True)
-    acf.addFlag('Scheduler.ShowDataFlow', True)
-    acf.addFlag('Scheduler.ShowControlFlow', True)
+    acf.addFlag('Scheduler.ShowDataDeps', False)
+    acf.addFlag('Scheduler.ShowDataFlow', False)
+    acf.addFlag('Scheduler.ShowControlFlow', False)
     acf.addFlag('Scheduler.EnableVerboseViews', True)
     acf.addFlag('Scheduler.AutoLoadUnmetDependencies', True)
 
@@ -120,6 +123,8 @@ def initConfigFlags():
     acf.addFlag('MP.UseParallelCompression', True)
 
     acf.addFlag('Common.MsgSourceLength',50) #Length of the source-field in the format str of MessageSvc
+    acf.addFlag('Common.ShowMsgStats',False) #Print stats about WARNINGs, etc at the end of the job
+
     acf.addFlag('Common.isOnline', False ) #  Job runs in an online environment (access only to resources available at P1) # former global.isOnline
     acf.addFlag('Common.useOnlineLumi', lambda prevFlags : prevFlags.Common.isOnline ) #  Use online version of luminosity. ??? Should just use isOnline?
     acf.addFlag('Common.isOverlay', lambda prevFlags: (prevFlags.Common.ProductionStep == ProductionStep.Overlay or
@@ -133,13 +138,84 @@ def initConfigFlags():
     acf.addFlag('Beam.BunchSpacing', 25) # former global.BunchSpacing
     acf.addFlag('Beam.Type', lambda prevFlags : BeamType(GetFileMD(prevFlags.Input.Files).get('beam_type', 'collisions')), enum=BeamType)# former global.BeamType
     acf.addFlag("Beam.NumberOfCollisions", lambda prevFlags : 2. if prevFlags.Beam.Type is BeamType.Collisions else 0.) # former global.NumberOfCollisions
-    acf.addFlag('Beam.Energy', lambda prevFlags : GetFileMD(prevFlags.Input.Files).get('beam_energy',7*TeV)) # former global.BeamEnergy
+
+    def _configureBeamEnergy(prevFlags):
+        metadata = GetFileMD(prevFlags.Input.Files)
+        default = 6.8 * TeV
+        # pool files
+        if prevFlags.Input.Format == Format.POOL:
+            return float(metadata.get("beam_energy", default))
+        # BS files
+        elif prevFlags.Input.Format == Format.BS:
+            if metadata.get("eventTypes", [""])[0] == "IS_DATA":
+                # special option for online running
+                if prevFlags.Common.isOnline:
+                    from PyUtils.OnlineISConfig import GetRunType
+
+                    return float(GetRunType()[1] or default)
+
+                # configure Beam energy depending on beam type:
+                if prevFlags.Beam.Type.value == "cosmics":
+                    return 0.0
+                elif prevFlags.Beam.Type.value == "singlebeam":
+                    return 450.0 * GeV
+                elif prevFlags.Beam.Type.value == "collisions":
+                    projectName = prevFlags.Input.ProjectName
+                    beamEnergy = None
+
+                    if "GeV" in projectName:
+                        beamEnergy = (
+                            float(
+                                (str(projectName).split("_")[1]).replace("GeV", "", 1)
+                            )
+                            / 2
+                            * GeV
+                        )
+                    elif "TeV" in projectName:
+                        if "hip5TeV" in projectName:
+                            # Approximate 'beam energy' here as sqrt(sNN)/2.
+                            beamEnergy = 1.577 * TeV
+                        elif "hip8TeV" in projectName:
+                            # Approximate 'beam energy' here as sqrt(sNN)/2.
+                            beamEnergy = 2.51 * TeV
+                        else:
+                            beamEnergy = (
+                                float(
+                                    (str(projectName).split("_")[1])
+                                    .replace("TeV", "", 1)
+                                    .replace("p", ".")
+                                )
+                                / 2
+                                * TeV
+                            )
+                            if "5TeV" in projectName:
+                                # these are actually sqrt(s) = 5.02 TeV
+                                beamEnergy = 2.51 * TeV
+                    elif projectName.endswith("_hi") or projectName.endswith("_hip"):
+                        if projectName in ("data10_hi", "data11_hi"):
+                            beamEnergy = 1.38 * TeV  # 1.38 TeV (=3.5 TeV * (Z=82/A=208))
+                        elif projectName == "data12_hi":
+                            beamEnergy = 1.577 * TeV  # 1.577 TeV (=4 TeV * (Z=82/A=208))
+                        elif projectName in ("data12_hip", "data13_hip"):
+                            # Pb (p) Beam energy in p-Pb collisions in 2012/3 was 1.577 (4) TeV.
+                            # Approximate 'beam energy' here as sqrt(sNN)/2.
+                            beamEnergy = 2.51 * TeV
+                        elif projectName in ("data15_hi", "data18_hi"):
+                            beamEnergy = 2.51 * TeV  # 2.51 TeV (=6.37 TeV * (Z=82/A=208)) - lowered to 6.37 to match s_NN = 5.02 in Pb-p runs.
+                        elif projectName == "data17_hi":
+                            beamEnergy = 2.721 * TeV  # 2.72 TeV for Xe-Xe (=6.5 TeV * (Z=54/A=129))
+                    return beamEnergy or default
+            elif metadata.get("eventTypes", [""])[0] == "IS_SIMULATION":
+                return float(metadata.get("beam_energy", default))
+        return default
+
+
+    acf.addFlag('Beam.Energy', lambda prevFlags : _configureBeamEnergy(prevFlags)) # former global.BeamEnergy
     acf.addFlag('Beam.estimatedLuminosity', lambda prevFlags : ( 1E33*(prevFlags.Beam.NumberOfCollisions)/2.3 ) *\
         (25./prevFlags.Beam.BunchSpacing)) # former flobal.estimatedLuminosity
     acf.addFlag('Beam.BunchStructureSource', lambda prevFlags: BunchStructureSource.MC if prevFlags.Input.isMC else BunchStructureSource.TrigConf)
 
-
-
+    # output
     acf.addFlag('Output.EVNTFileName', '')
     acf.addFlag('Output.EVNT_TRFileName', '')
     acf.addFlag('Output.HITSFileName', '')
@@ -149,13 +225,15 @@ def initConfigFlags():
     acf.addFlag('Output.AODFileName',  '')
     acf.addFlag('Output.HISTFileName', '')
 
-
     acf.addFlag('Output.doWriteRDO', lambda prevFlags: bool(prevFlags.Output.RDOFileName)) # write out RDO file
     acf.addFlag('Output.doWriteRDO_SGNL', lambda prevFlags: bool(prevFlags.Output.RDO_SGNLFileName)) # write out RDO_SGNL file
     acf.addFlag('Output.doWriteESD', lambda prevFlags: bool(prevFlags.Output.ESDFileName)) # write out ESD file
     acf.addFlag('Output.doWriteAOD', lambda prevFlags: bool(prevFlags.Output.AODFileName)) # write out AOD file
     acf.addFlag('Output.doWriteBS',  False) # write out RDO ByteStream file
     acf.addFlag('Output.doWriteDAOD',  False) # write out at least one DAOD file
+
+    acf.addFlag('Output.TreeAutoFlush', {})  # {} = automatic for all streams, otherwise {'STREAM': 123}
+    acf.addFlag('Output.StorageTechnology', 'ROOTTREEINDEX')  # Set the underlying POOL storage technology
 
     # Might move this elsewhere in the future.
     # Some flags from https://gitlab.cern.ch/atlas/athena/blob/master/Tracking/TrkDetDescr/TrkDetDescrSvc/python/TrkDetDescrJobProperties.py
@@ -175,6 +253,12 @@ def initConfigFlags():
         return createSimConfigFlags()
     _addFlagsCategory (acf, "Sim", __simulation, 'SimulationConfig' )
 
+#Test Beam Simulation Flags:
+    def __testbeam():
+        from SimulationConfig.TestBeamConfigFlags import createTestBeamConfigFlags
+        return createTestBeamConfigFlags()
+    _addFlagsCategory (acf, "TestBeam", __testbeam, 'SimulationConfig' )
+
 #Digitization Flags:
     def __digitization():
         from Digitization.DigitizationConfigFlags import createDigitizationCfgFlags
@@ -190,7 +274,7 @@ def initConfigFlags():
 #Geo Model Flags:
     def __geomodel():
         from AthenaConfiguration.GeoModelConfigFlags import createGeoModelConfigFlags
-        return createGeoModelConfigFlags()
+        return createGeoModelConfigFlags(not isGaudiEnv() or acf.Common.Project is Project.AthAnalysis)
     acf.addFlagsCategory( "GeoModel", __geomodel )
 
 #Reco Flags:
@@ -202,8 +286,17 @@ def initConfigFlags():
 #IOVDbSvc Flags:
     if isGaudiEnv():
         from IOVDbSvc.IOVDbAutoCfgFlags import getLastGlobalTag, getDatabaseInstanceDefault
-        acf.addFlag("IOVDb.GlobalTag", getLastGlobalTag) # Retrieve last global tag used from metadata
+
+        def __getTrigTag(flags):
+            from TriggerJobOpts.TriggerConfigFlags import trigGlobalTag
+            return trigGlobalTag(flags)
+
+        acf.addFlag("IOVDb.GlobalTag", lambda flags :
+                    (__getTrigTag(flags) if flags.Trigger.doLVL1 or flags.Trigger.doHLT else None) or
+                    getLastGlobalTag(flags))
+
         acf.addFlag("IOVDb.DatabaseInstance",getDatabaseInstanceDefault)
+
         # Run dependent simulation
         # map from runNumber to timestamp; migrated from RunDMCFlags.py
         acf.addFlag("IOVDb.RunToTimestampDict", lambda prevFlags: getRunToTimestampDict())
@@ -237,12 +330,18 @@ def initConfigFlags():
 
 #Random engine Flags:
     acf.addFlag("Random.Engine", "dSFMT") # Random service used in {"dSFMT", "Ranlux64", "Ranecu"}
+    acf.addFlag("Random.SeedOffset", 0) # TODO replace usage of Digitization.RandomSeedOffset with this flag
 
     def __trigger():
         from TriggerJobOpts.TriggerConfigFlags import createTriggerFlags
         return createTriggerFlags(acf.Common.Project is not Project.AthAnalysis)
-    if isGaudiEnv():
-        _addFlagsCategory(acf, "Trigger", __trigger, 'TriggerJobOpts' )
+
+    added = _addFlagsCategory(acf, "Trigger", __trigger, 'TriggerJobOpts' )
+    if not added:
+        # If TriggerJobOpts is not available, we add at least these basic flags
+        # to indicate Trigger is not available:
+        acf.addFlag('Trigger.doLVL1', False)
+        acf.addFlag('Trigger.doHLT', False)
 
     def __indet():
         from InDetConfig.InDetConfigFlags import createInDetConfigFlags
@@ -253,6 +352,11 @@ def initConfigFlags():
         from InDetConfig.ITkConfigFlags import createITkConfigFlags
         return createITkConfigFlags()
     _addFlagsCategory(acf, "ITk", __itk, 'InDetConfig' )
+
+    def __tracking():
+        from TrkConfig.TrkConfigFlags import createTrackingConfigFlags
+        return createTrackingConfigFlags()
+    _addFlagsCategory(acf, "Tracking", __tracking, 'TrkConfig')
 
     def __acts():
         from ActsInterop.ActsConfigFlags import createActsConfigFlags
@@ -356,13 +460,16 @@ def initConfigFlags():
 
 ConfigFlags=initConfigFlags()
 
-if __name__=="__main__":
-    import sys
-    if len(sys.argv)>1:
-        ConfigFlags.Input.Files = sys.argv[1:]
-    else:
-        ConfigFlags.Input.Files = [ "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CommonInputs/data16_13TeV.00311321.physics_Main.recon.AOD.r9264/AOD.11038520._000001.pool.root.1",]
 
-    ConfigFlags.loadAllDynamicFlags()
-    ConfigFlags.initAll()
-    ConfigFlags.dump()
+if __name__=="__main__":
+    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    flags = initConfigFlags()
+    import sys
+    if len(sys.argv) > 1:
+        flags.Input.Files = sys.argv[1:]
+    else:
+        flags.Input.Files = defaultTestFiles.AOD_RUN3_DATA
+
+    flags.loadAllDynamicFlags()
+    flags.initAll()
+    flags.dump()

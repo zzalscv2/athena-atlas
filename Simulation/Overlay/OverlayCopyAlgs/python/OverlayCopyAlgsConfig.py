@@ -252,7 +252,7 @@ def CopyTrackCollectionAlgCfg(flags, collectionName, **kwargs):
     kwargs.setdefault("OutputKey", flags.Overlay.BkgPrefix + collectionName)
     kwargs.setdefault("InputKey", collectionName)
 
-    alg = CompFactory.CopyTrackCollection("CopyTrackCollection"+collectionName)
+    alg = CompFactory.CopyTrackCollection("CopyTrackCollection"+collectionName, **kwargs)
     acc.addEventAlgo(alg)
 
     if flags.Output.doWriteRDO:
@@ -438,21 +438,19 @@ def CopyTrackCollectionsCfg(flags, **kwargs):
         "CombinedInDetTracks",
         "DisappearingTracks",
         "ResolvedForwardTracks",
-        "ResolvedLargeD0Tracks"
+        "ExtendedLargeD0Tracks"
     ]
 
     availableContainers = []
-
     # Detect the list of track collections
     for container in allowedContainers:
         if flags.Common.ProductionStep == ProductionStep.FastChain:
             availableContainers = allowedContainers
         else:
-            hardScatterInputCollections = flags.Input.Collections if flags.Overlay.DataOverlay else flags.Input.SecondaryCollections
+            hardScatterInputCollections = flags.Input.Collections
             for container in allowedContainers:
                 if container in hardScatterInputCollections:
                     availableContainers.append(container)
-
     for container in availableContainers:
         acc.merge(CopyTrackCollectionAlgCfg(flags, container, **kwargs))
 
@@ -468,7 +466,7 @@ def CopyDetailedTrackTruthCollectionsCfg(flags, **kwargs):
         "DisappearingTracksDetailedTruth",
         "ResolvedForwardTracksDetailedTruth",
         "CombinedInDetTracksDetailedTruth",
-        "ResolvedLargeD0TracksDetailedTruth"
+        "ExtendedLargeD0TracksDetailedTruth"
     ]
 
     availableContainers = []
@@ -478,7 +476,7 @@ def CopyDetailedTrackTruthCollectionsCfg(flags, **kwargs):
         if flags.Common.ProductionStep == ProductionStep.FastChain:
             availableContainers = allowedContainers
         else:
-            hardScatterInputCollections = flags.Input.Collections if flags.Overlay.DataOverlay else flags.Input.SecondaryCollections
+            hardScatterInputCollections = flags.Input.Collections
             for container in allowedContainers:
                 if container in hardScatterInputCollections:
                     availableContainers.append(container)
@@ -507,7 +505,7 @@ def CopyPRD_MultiTruthCollectionsCfg(flags, **kwargs):
         if flags.Common.ProductionStep == ProductionStep.FastChain:
             availableContainers = allowedContainers
         else:
-            hardScatterInputCollections = flags.Input.Collections if flags.Overlay.DataOverlay else flags.Input.SecondaryCollections
+            hardScatterInputCollections = flags.Input.Collections
             for container in allowedContainers:
                 if container in hardScatterInputCollections:
                     availableContainers.append(container)

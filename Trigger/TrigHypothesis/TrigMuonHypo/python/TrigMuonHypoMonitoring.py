@@ -1,9 +1,9 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
-def TrigMufastHypoMonitoring(histPath):
-    montool = GenericMonitoringTool(HistPath = histPath)
+def TrigMufastHypoMonitoring(flags, histPath):
+    montool = GenericMonitoringTool(flags, HistPath = histPath)
     montool.defineHistogram('Pt', type='TH1F', path='EXPERT', title="P_{T} reconstruction from #muFast; P_{T} (GeV)",
                             xbins=200, xmin=-100, xmax=100)
     montool.defineHistogram('PtFL', type='TH1F', path='EXPERT', title="P_{T} of not selected muons from #muFast; p_{T} (GeV)",
@@ -25,8 +25,8 @@ def TrigMufastHypoMonitoring(histPath):
     return montool
 
 
-def TrigL2MuonOverlapRemoverMonitoringMufast(histPath):
-    montool = TrigMufastHypoMonitoring(histPath)
+def TrigL2MuonOverlapRemoverMonitoringMufast(flags, histPath):
+    montool = TrigMufastHypoMonitoring(flags, histPath)
     montool.defineHistogram('MufastError',  type='TH1F', path='EXPERT', title="error in #muFast based overlap removal; error code",
                          xbins=10, xmin=0, xmax=10)
     montool.defineHistogram('DR',  type='TH1F', path='EXPERT', title="#muFast objects dR; dR",
@@ -52,8 +52,8 @@ def TrigL2MuonOverlapRemoverMonitoringMufast(histPath):
     return montool
 
 
-def TrigmuCombHypoMonitoring(histPath):
-    montool = GenericMonitoringTool(HistPath = histPath)
+def TrigmuCombHypoMonitoring(flags, histPath):
+    montool = GenericMonitoringTool(flags, HistPath = histPath)
     montool.defineHistogram('Pt', type='TH1F', path='EXPERT', title="p_{T} reconstruction from #muComb; p_{T} (GeV)",
                             xbins=210, xmin=-105, xmax=105)
     montool.defineHistogram('PtFL', type='TH1F', path='EXPERT', title="p_{T} of not selected muons from #muComb; p_{T} (GeV)",
@@ -71,8 +71,8 @@ def TrigmuCombHypoMonitoring(histPath):
     return montool
 
 
-def TrigL2MuonOverlapRemoverMonitoringMucomb(histPath):
-    montool = TrigmuCombHypoMonitoring(histPath)
+def TrigL2MuonOverlapRemoverMonitoringMucomb(flags, histPath):
+    montool = TrigmuCombHypoMonitoring(flags, histPath)
     montool.defineHistogram('MucombError',  type='TH1F', path='EXPERT', title="error in #muComb based overlap removal; error code",
                             xbins=10, xmin=0, xmax=10)
     montool.defineHistogram('DR',  type='TH1F', path='EXPERT', title="#muComb objects dR; dR",
@@ -98,8 +98,8 @@ def TrigL2MuonOverlapRemoverMonitoringMucomb(histPath):
     return montool
 
 
-def TrigMuonEFHypoMonitoring(histPath):
-    montool = GenericMonitoringTool(HistPath = histPath)
+def TrigMuonEFHypoMonitoring(flags, histPath):
+    montool = GenericMonitoringTool(flags, HistPath = histPath)
     montool.defineHistogram('Pt', type='TH1F', path='EXPERT', title="P_{T} reconstruction from #TrigMuonEFHypo; P_{T} (GeV)",
                             xbins=200, xmin=-100, xmax=100)
     montool.defineHistogram('Eta', type='TH1F', path='EXPERT', title="Eta reconstruction from #TrigMuonEFHypo; Eta",
@@ -115,8 +115,8 @@ def TrigMuonEFHypoMonitoring(histPath):
     return montool
 
 
-def TrigMuonEFInvMassHypoMonitoring(histPath):
-    montool = GenericMonitoringTool(HistPath = histPath)
+def TrigMuonEFInvMassHypoMonitoring(flags, histPath):
+    montool = GenericMonitoringTool(flags, HistPath = histPath)
     montool.defineHistogram('Mass', type='TH1F', path='EXPERT', title="Dimuon mass from #TrigMuonEFInvMHypo; Mass (GeV)",
                             xbins=200, xmin=0, xmax=200)
     montool.defineHistogram('Mass_sel', type='TH1F', path='EXPERT', title="Dimuon mass for selected events from #TrigMuonEFInvMHypo; Mass (GeV)",
@@ -124,8 +124,8 @@ def TrigMuonEFInvMassHypoMonitoring(histPath):
     return montool
 
 
-def TrigMuonEFIdtpHypoMonitoring(histPath):
-    montool = GenericMonitoringTool(HistPath = histPath)
+def TrigMuonEFIdtpHypoMonitoring(flags, histPath):
+    montool = GenericMonitoringTool(flags, HistPath = histPath)
     montool.defineHistogram('SA_pt', type='TH1F', path='EXPERT', title="SA p_{T} at EFIdperfHypo; SA p_{T} (GeV); N entries",
                             xbins=50, xmin=0, xmax=100)
     montool.defineHistogram('SA_eta', type='TH1F', path='EXPERT', title="SA #eta at EFIdperfHypo; SA #eta; N entries",
@@ -141,8 +141,8 @@ def TrigMuonEFIdtpHypoMonitoring(histPath):
     return montool
 
 
-def TrigMuonEFIdtpInvMassHypoMonitoring(histPath):
-    montool = GenericMonitoringTool(HistPath = histPath)
+def TrigMuonEFIdtpInvMassHypoMonitoring(flags, histPath):
+    montool = GenericMonitoringTool(flags, HistPath = histPath)
     montool.defineHistogram('Mass', type='TH1F', path='EXPERT', title="Dimuon mass from IdperfInvMassHypo; Mass (GeV); N entries",
                             xbins=198, xmin=2, xmax=200)
 
@@ -186,11 +186,25 @@ def TrigMuonEFIdtpInvMassHypoMonitoring(histPath):
     montool.defineHistogram('FTF_effi_pt1_eta2', type='TH1F', path='EXPERT', title="FTF track efficiency for p_{T} > 20 GeV, |#eta|>2; PT found wrt MStrack; N entries",
                             xbins=2, xmin=0, xmax=2)
 
+    # test
+    montool.defineHistogram('probePhiEfficiency, FTFfound', type='TProfile', path='EXPERT', title="FTF Efficiency Profile wrt Probe SA muon Phi; probe SA muon #phi",
+                            xbins=9, xmin=-3.14, xmax=3.14, ymin=-0.1, ymax=1.1)
+    montool.defineHistogram('probeEtaEfficiency, FTFfound', type='TProfile', path='EXPERT', title="FTF Efficiency Profile wrt Probe SA muon Eta; probe SA muon #eta",
+                            xbins=15, xmin=-3, xmax=3, ymin=-0.1, ymax=1.1)
+    montool.defineHistogram('probePhiEfficiency, PTfound', type='TProfile', path='EXPERT', title="PT Efficiency Profile wrt Probe SA muon Phi; probe SA muon #phi",
+                            xbins=9, xmin=-3.14, xmax=3.14, ymin=-0.1, ymax=1.1)
+    montool.defineHistogram('probeEtaEfficiency, PTfound', type='TProfile', path='EXPERT', title="PT Efficiency Profile wrt Probe SA muon Eta; probe SA muon #eta",
+                            xbins=15, xmin=-3, xmax=3, ymin=-0.1, ymax=1.1)
+    montool.defineHistogram('PTphi, PTpixelFound', type='TProfile', path='EXPERT', title="Expected && Found hit (IBL) for PT vs phi; #phi",
+                            xbins=14, xmin=-3.14, xmax=3.14, ymin=-0.1, ymax=1.1)
+    montool.defineHistogram('PTphi, PTpixelNextToFound', type='TProfile', path='EXPERT', title="Next to innermost layer of detector - Expected && Found hit (L0) for PT vs phi; #phi",
+                            xbins=22, xmin=-3.14, xmax=3.14, ymin=-0.1, ymax=1.1)
+
     return montool
 
 
-def TrigMuonTLAHypoMonitoring(histPath):
-    montool = GenericMonitoringTool(HistPath = histPath)
+def TrigMuonTLAHypoMonitoring(flags, histPath):
+    montool = GenericMonitoringTool(flags, HistPath = histPath)
     montool.defineHistogram('Pt', type='TH1F', path='EXPERT', title="P_{T} reconstruction from #TrigMuonTLAHypo; q*P_{T} (GeV)",
                             xbins=200, xmin=-100, xmax=100)
     montool.defineHistogram('Eta', type='TH1F', path='EXPERT', title="Eta reconstruction from #TrigMuonTLAHypo; Eta",
@@ -203,8 +217,8 @@ def TrigMuonTLAHypoMonitoring(histPath):
                             xbins=50, xmin=0, xmax=50)
     return montool
 
-def TrigMuonEFTrackIsolationMonitoring(histPath):
-    montool = GenericMonitoringTool(HistPath = histPath)
+def TrigMuonEFTrackIsolationMonitoring(flags, histPath):
+    montool = GenericMonitoringTool(flags, HistPath = histPath)
     montool.defineHistogram('PtCone03', type = 'TH1F', path='EXPERT', title = "PtCone03 from #TrigMuonEFHypo;  P_{T} Cone(0.3) [GeV]",
                             xbins=40, xmin=0.0, xmax=20.0)
     montool.defineHistogram('PtConeRel03', type = 'TH1F', path='EXPERT', title = "PtCone03/Pt from #TrigMuonEFHypo;  P_{T} Cone(0.3)/P_{T}",

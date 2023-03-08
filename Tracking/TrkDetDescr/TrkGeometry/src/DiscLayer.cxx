@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -45,35 +45,35 @@ Trk::DiscLayer::DiscLayer(Trk::DiscSurface* disc,
 
 Trk::DiscLayer::DiscLayer(const Amg::Transform3D& transform,
                           Trk::DiscBounds* dbounds,
-                          Trk::SurfaceArray* surfaceArray,
+                          std::unique_ptr<Trk::SurfaceArray> surfaceArray,
                           double thickness,
                           std::unique_ptr<Trk::OverlapDescriptor> olap,
                           Trk::IApproachDescriptor* ades,
                           int laytyp)
   : DiscSurface(transform, dbounds)
-  , Layer(surfaceArray, thickness, std::move(olap), laytyp)
+  , Layer(std::move(surfaceArray), thickness, std::move(olap), laytyp)
   , m_approachDescriptor(ades)
 {
   DiscSurface::associateLayer(*this);
-  if (!ades && surfaceArray) buildApproachDescriptor();
+  if (!ades && m_surfaceArray) buildApproachDescriptor();
   // register the layer
   if (ades) m_approachDescriptor->registerLayer(*this);
 }
 
 Trk::DiscLayer::DiscLayer(const Amg::Transform3D& transform,
                           Trk::DiscBounds* dbounds,
-                          Trk::SurfaceArray* surfaceArray,
+                          std::unique_ptr<Trk::SurfaceArray> surfaceArray,
                           const Trk::LayerMaterialProperties& laymatprop,
                           double thickness,
                           std::unique_ptr<Trk::OverlapDescriptor> olap,
                           Trk::IApproachDescriptor* ades,
                           int laytyp)
   : DiscSurface(transform, dbounds)
-  , Layer(surfaceArray, laymatprop, thickness, std::move(olap), laytyp)
+  , Layer(std::move(surfaceArray), laymatprop, thickness, std::move(olap), laytyp)
   , m_approachDescriptor(ades)
 {
   DiscSurface::associateLayer(*this);
-  if (!ades && surfaceArray)
+  if (!ades && m_surfaceArray)
     buildApproachDescriptor();
   // register the layer
   if (ades)
@@ -120,7 +120,7 @@ Trk::DiscLayer::surfaceRepresentation()
 
 double Trk::DiscLayer::preUpdateMaterialFactor(const Trk::TrackParameters& parm,
                                                Trk::PropDirection dir) const {
-  if (!Trk::Layer::m_layerMaterialProperties.get()) return 0.;
+  if (!Trk::Layer::m_layerMaterialProperties) return 0.;
   // const Amg::Vector3D& parmPos = parm.position();
   if (Trk::DiscSurface::normal().dot(dir * parm.momentum().normalized()) > 0.)
     return Trk::Layer::m_layerMaterialProperties->alongPreFactor();
@@ -129,7 +129,7 @@ double Trk::DiscLayer::preUpdateMaterialFactor(const Trk::TrackParameters& parm,
 
 double Trk::DiscLayer::postUpdateMaterialFactor(
     const Trk::TrackParameters& parm, Trk::PropDirection dir) const {
-  if (!Trk::Layer::m_layerMaterialProperties.get()) return 0.;
+  if (!Trk::Layer::m_layerMaterialProperties) return 0.;
   // const Amg::Vector3D& parmPos = parm.position();
   if (Trk::DiscSurface::normal().dot(dir * parm.momentum().normalized()) > 0.)
     return Trk::Layer::m_layerMaterialProperties->alongPostFactor();
@@ -161,7 +161,7 @@ void Trk::DiscLayer::resizeLayer(const VolumeBounds& bounds, double envelope) {
         Trk::SharedObject<const Trk::SurfaceBounds>(rDiscBounds);
     // (1) resize the material properties by updating the BinUtility, assuming
     // r/phi binning
-    if (Trk::Layer::m_layerMaterialProperties.get()) {
+    if (Trk::Layer::m_layerMaterialProperties) {
       const BinUtility* layerMaterialBU =
           Trk::Layer::m_layerMaterialProperties->binUtility();
       if (layerMaterialBU && layerMaterialBU->binningValue(0) == Trk::binR) {

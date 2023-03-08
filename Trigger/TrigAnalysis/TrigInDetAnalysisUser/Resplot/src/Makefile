@@ -177,6 +177,7 @@ archive :
 install : dirs all 
 	cp $(HEADERS) $(HOME)/include
 	cp $(LIBDIR)/libResplot.{a,so} $(HOME)/lib
+	cp $(SRCDIR)/*.pcm $(HOME)/bin 
 
 dirs : $(OBJDIR)/.d $(LIBDIR)/.d $(EXEDIR)/.d 
 

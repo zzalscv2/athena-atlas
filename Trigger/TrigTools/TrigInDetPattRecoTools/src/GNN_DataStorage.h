@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGINDETPATTRECOTOOLS_GNN_DATA_STORAGE_H
@@ -9,9 +9,9 @@
 #include<map>
 #include<algorithm>
 
-#define MAX_SEG_PER_NODE 30 //was 30
+#define MAX_SEG_PER_NODE 1000 //was 30
 #define N_SEG_CONNS  6 //was 6
-#define N_PHI_BINS 60
+
 
 #include "TrigInDetEvent/TrigSiSpacePointBase.h"
 
@@ -82,7 +82,7 @@ public:
 
 class TrigFTF_GNN_DataStorage {
 public:
-  TrigFTF_GNN_DataStorage(const TrigFTF_GNN_Geometry&, float);
+  TrigFTF_GNN_DataStorage(const TrigFTF_GNN_Geometry&);
   ~TrigFTF_GNN_DataStorage();
 
   int addSpacePoint(const TrigSiSpacePointBase&, bool);
@@ -100,7 +100,6 @@ public:
 protected:
 
   const TrigFTF_GNN_Geometry& m_geo;
-  float m_phiBinWidth;
 
   std::vector<TrigFTF_GNN_EtaBin> m_etaBins; 
 
@@ -116,7 +115,9 @@ public:
     }
   };
 
-  TrigFTF_GNN_Edge() = default;
+ TrigFTF_GNN_Edge() : m_n1(nullptr), m_n2(nullptr), m_level(-1), m_next(-1), m_nNei(0) {};
+
+ TrigFTF_GNN_Edge(const TrigFTF_GNN_Edge& e) : m_n1(e.m_n1), m_n2(e.m_n2) {};
 
   inline void initialize(TrigFTF_GNN_Node* n1, TrigFTF_GNN_Node* n2) {
     m_n1 = n1; 

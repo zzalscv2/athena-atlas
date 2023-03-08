@@ -555,8 +555,8 @@ namespace CP {
     float clast   = 1.;
     float sigma = 0.;
 
-    if(&appliedSystematics()!=0){ //nomimal value
-      sigma = appliedSystematics().getParameterByBaseName("JET_TILECORR_Uncertainty");
+    if(m_appliedSystematics!=nullptr){ //nomimal value
+      sigma = m_appliedSystematics->getParameterByBaseName("JET_TILECORR_Uncertainty");
     }
 
     for(const auto& region : m_position_masked){

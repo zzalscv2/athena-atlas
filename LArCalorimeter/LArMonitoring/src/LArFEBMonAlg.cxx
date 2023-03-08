@@ -69,7 +69,7 @@ StatusCode LArFEBMonAlg::initialize() {
 
   ATH_CHECK( m_run1DSPThresholdsKey.initialize (SG::AllowEmpty) );
   ATH_CHECK( m_run2DSPThresholdsKey.initialize (SG::AllowEmpty) );
-  ATH_CHECK( m_eventInfoKey.initialize() );
+  ATH_CHECK( m_eventInfoDecorKey.initialize() );
 
   return AthMonitorAlgorithm::initialize();
 }
@@ -86,8 +86,8 @@ StatusCode LArFEBMonAlg::fillHistograms(const EventContext& ctx) const {
   // Retrieve event info to get event time,trigger type...
   // Retrieved at beg of method now to get the LVL1 type
   // to check consistency with DSP trigger type
-  SG::ReadDecorHandle<xAOD::EventInfo,uint32_t> thisEvent(m_eventInfoKey, ctx);
-
+  SG::ReadHandle<xAOD::EventInfo> thisEvent(GetEventInfo(ctx));
+  ATH_CHECK(thisEvent.isValid());
   unsigned int l1Trig = thisEvent->level1TriggerType();
   auto l1 = Monitored::Scalar<int>("LVL1Trig",l1Trig);
   fill(m_monGroupName,l1); 

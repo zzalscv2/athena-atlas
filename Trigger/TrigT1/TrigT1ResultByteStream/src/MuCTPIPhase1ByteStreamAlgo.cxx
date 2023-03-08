@@ -6,6 +6,8 @@
 #include "TrigT1Result/MuCTPI_Phase1_RDO.h"
 #include "TrigT1MuctpiBits/MuCTPI_Bits.h"
 #include "TrigT1MuctpiBits/HelpersPhase1.h"
+#include "PathResolver/PathResolver.h"
+
 
 //also inspired by Rafal's word decoding code from:
 //https://gitlab.cern.ch/atlas/athena/blob/release/22.0.91/Trigger/TrigT1/TrigT1ResultByteStream/src/MuonRoIByteStreamTool.cxx
@@ -23,9 +25,25 @@ StatusCode MuCTPIPhase1ByteStreamAlgo::initialize()
 
     ATH_CHECK( m_MuCTPI_Phase1_RDOKey.initialize(/*m_processMuctpi=*/true) );
 
+    //needed to enable the decoding of eta and phi
+	ATH_MSG_INFO("--- ENABLING THE DECODING");
+	const std::string barrelFileName   = PathResolverFindCalibFile( m_barrelRoIFile );
+	ATH_MSG_INFO("--- - CHECK BARREL FILE NAME" << barrelFileName);
+	const std::string ecfFileName      = PathResolverFindCalibFile( m_ecfRoIFile );
+	ATH_MSG_INFO("--- - CHECK ECF FILE NAME" << ecfFileName);
+	const std::string side0LUTFileName = PathResolverFindCalibFile( m_side0LUTFile );
+	ATH_MSG_INFO("--- - CHECK SIDE0 LUT FILE NAME" << side0LUTFileName);
+	const std::string side1LUTFileName = PathResolverFindCalibFile( m_side1LUTFile );
+	ATH_MSG_INFO("--- - INFO SIDE1 LUT FILE NAME" << side1LUTFileName);
+
+	CHECK( m_l1topoLUT.initializeLUT(barrelFileName,
+									 ecfFileName,
+									 side0LUTFileName,
+									 side1LUTFileName) );
+
     //return here while looking for fix for this
     return StatusCode::SUCCESS;
-
+	
     //this didn't work yet locally (offline). Waiting for feedback and should cleanup or reinclude soon.
     //not critical; can run without it.
     /**
@@ -233,15 +251,44 @@ StatusCode MuCTPIPhase1ByteStreamAlgo::convert( const IROBDataProviderSvc::ROBF*
         ATH_MSG_DEBUG("This is a RoI candidate word");
 
         LVL1::MuCTPIBits::Candidate thiscand(word);
+
+		// We calculate eta/phi coordinates for each candidate with the 
+		// full resolution available.
+		if(thiscand.type == LVL1::MuCTPIBits::SubsysID::Barrel)
+		{
+			thiscand.eta = m_l1topoLUT.getCoordinates(thiscand.side, thiscand.subsystem, thiscand.num, thiscand.roi).eta;
+			thiscand.phi = m_l1topoLUT.getCoordinates(thiscand.side, thiscand.subsystem, thiscand.num, thiscand.roi).phi;
+		}
+		else if(thiscand.type == LVL1::MuCTPIBits::SubsysID::Endcap)
+		{
+			thiscand.eta = m_l1topoLUT.getCoordinates(thiscand.side, thiscand.subsystem, thiscand.num, thiscand.roi).eta;
+			thiscand.phi = m_l1topoLUT.getCoordinates(thiscand.side, thiscand.subsystem, thiscand.num, thiscand.roi).phi;
+		}
+		else if(thiscand.type == LVL1::MuCTPIBits::SubsysID::Forward)
+		{
+			thiscand.eta = m_l1topoLUT.getCoordinates(thiscand.side, thiscand.subsystem, thiscand.num, thiscand.roi).eta;
+			thiscand.phi = m_l1topoLUT.getCoordinates(thiscand.side, thiscand.subsystem, thiscand.num, thiscand.roi).phi;
+		}
         slice.cand.push_back(thiscand);
         break;
       }
       case LVL1::MuCTPIBits::WordType::Topo: {
-        ATH_MSG_DEBUG("This is a Topo TOB word "<< std::hex << word);
-
+		ATH_MSG_DEBUG("This is a Topo TOB word "<< std::hex << word);
         LVL1::MuCTPIBits::TopoTOB thistob(word);
 
-        slice.tob.push_back(thistob);
+		if(thistob.det == 0) // BA
+		{
+		  thistob.roi = m_l1topoLUT.getBarrelROI(thistob.side, thistob.sec, thistob.barrel_eta_lookup, thistob.barrel_phi_lookup);
+		  thistob.etaDecoded = m_l1topoLUT.getCoordinates(thistob.side, thistob.subsystem, thistob.sec, thistob.roi).eta;
+		  thistob.phiDecoded = m_l1topoLUT.getCoordinates(thistob.side, thistob.subsystem, thistob.sec, thistob.roi).phi;
+		}
+		else // FW or EC
+		{
+		  // FW and EC have the ROI initialized in the constructor of the Topo word, because it is encoded in eta_raw and phi_raw 
+		  thistob.etaDecoded = m_l1topoLUT.getCoordinates(thistob.side, thistob.subsystem, thistob.sec, thistob.roi).eta;
+		  thistob.phiDecoded = m_l1topoLUT.getCoordinates(thistob.side, thistob.subsystem, thistob.sec, thistob.roi).phi;
+		}        
+		slice.tob.push_back(thistob);
         break;
       }
       case LVL1::MuCTPIBits::WordType::Status: {

@@ -19,177 +19,177 @@ def select( selInd, valuesmap ):
     raise RuntimeError("No value can be selected from ranges {} given key {}".format( valuesmap.keys(), selInd ))
 
 def minPT_ranges( inflags ):
-    return select( inflags.InDet.Tracking.cutLevel,
+    return select( inflags.Tracking.cutLevel,
     {'-1':   0.1 * Units.GeV,
     '2-13': 0.4 * Units.GeV,
     '14-':  0.5 * Units.GeV } )
 
 def minSecondaryPT_ranges( inflags ):
-    return select( inflags.InDet.Tracking.cutLevel,
+    return select( inflags.Tracking.cutLevel,
     {'-1':   0.4 * Units.GeV,
     '2-18': 1.0 * Units.GeV,
     '19-': 3.0 * Units.GeV } )
 
 def minTRTonlyPt_ranges( inflags ):
-    return select( inflags.InDet.Tracking.cutLevel,
+    return select( inflags.Tracking.cutLevel,
     {'-1':   0.4 * Units.GeV,
     '2-5': 1.0 * Units.GeV,
     '6-': 2.0 * Units.GeV, } )
 
 def minClusters_ranges( inflags ):
-    return select( inflags.InDet.Tracking.cutLevel,
+    return select( inflags.Tracking.cutLevel,
     {'-14':  7,
     '15-':  8 } )
 
 def maxHoles_ranges( inflags ):
-    return select( inflags.InDet.Tracking.cutLevel,
+    return select( inflags.Tracking.cutLevel,
     {'-7':  3,
     '8-':  2 } )
 
 def maxPixelHoles_ranges( inflags ):
-    return select( inflags.InDet.Tracking.cutLevel,
+    return select( inflags.Tracking.cutLevel,
     {'-7':  2,
     '8-':  1 } )
 
 def maxPrimaryImpact_ranges( inflags ):
-    return select( inflags.InDet.Tracking.cutLevel,
+    return select( inflags.Tracking.cutLevel,
     {'-15':  10.0 * Units.mm,
     '16-':  5.0 * Units.mm } )
 
 def maxZImpact_ranges( inflags ):
-    return select( inflags.InDet.Tracking.cutLevel,
+    return select( inflags.Tracking.cutLevel,
     {'-8':  320.0 * Units.mm,
     '9-16':  250 * Units.mm,
     '17-':  200.0 * Units.mm } )
 
 def nHolesMax_ranges( inflags ):
-    return select( inflags.InDet.Tracking.cutLevel,
+    return select( inflags.Tracking.cutLevel,
     {'-11':  3,
     '12-':  2 } )
 
 def nHolesGapMax_ranges( inflags ):
-    return select( inflags.InDet.Tracking.cutLevel,
+    return select( inflags.Tracking.cutLevel,
     {'-11':  3,
     '12-':  2 } )
 
 def Xi2max_ranges( inflags ):
-    return select( inflags.InDet.Tracking.cutLevel,
+    return select( inflags.Tracking.cutLevel,
     {'-11':  15.0,
     '12-':  9.0 } )
 
 def Xi2maxNoAdd_ranges( inflags ):
-    return select( inflags.InDet.Tracking.cutLevel,
+    return select( inflags.Tracking.cutLevel,
     {'-11':  35.0,
     '12-':  25.0 } )
 
 def seedFilterLevel_ranges( inflags ):
-    return select( inflags.InDet.Tracking.cutLevel,
+    return select( inflags.Tracking.cutLevel,
     {'-4':  1,
     '5-':  2 } )
 
 def maxdImpactPPSSeeds_ranges( inflags ):
-    return select( inflags.InDet.Tracking.cutLevel,
+    return select( inflags.Tracking.cutLevel,
     {'-3':  1.7,
     '4-':  2.0 } )
 
 def maxdImpactSSSSeeds_ranges( inflags ):
-    return select( inflags.InDet.Tracking.cutLevel,
+    return select( inflags.Tracking.cutLevel,
     {'-3':  1000.0,
     '4-16':  20.0,
     '17-': 5.0 * Units.mm } )
 
 def doZBoundary_ranges( inflags ):
-    return select( inflags.InDet.Tracking.cutLevel,
+    return select( inflags.Tracking.cutLevel,
     {'-9':  False,
     '10-':  True } )
 
 def TRTSegFinderPtBins_ranges( inflags ):
-    return select( inflags.InDet.Tracking.cutLevel,
+    return select( inflags.Tracking.cutLevel,
     {'-1':  70,
     '2-':  50 } )
 
 def excludeUsedTRToutliers_ranges( inflags ):
-    return select( inflags.InDet.Tracking.cutLevel,
+    return select( inflags.Tracking.cutLevel,
     {'-5':  False,
     '6-':  True } )
 
 def useParameterizedTRTCuts_ranges( inflags ):
-    return select( inflags.InDet.Tracking.cutLevel,
+    return select( inflags.Tracking.cutLevel,
                    {'-2':  False,
                     '3-':  True } )
 
 def useNewParameterizationTRT_ranges( inflags ):
-    return select( inflags.InDet.Tracking.cutLevel,
+    return select( inflags.Tracking.cutLevel,
     {'-2':  False,
     '3-':  True } )
 
 def minSecondaryTRTonTrk_ranges( inflags ):
-    return select( inflags.InDet.Tracking.cutLevel,
+    return select( inflags.Tracking.cutLevel,
     {'-6':  10,
     '7-':  15 } )
 
 def minSecondaryTRTPrecFrac_ranges( inflags ):
-    return select( inflags.InDet.Tracking.cutLevel,
+    return select( inflags.Tracking.cutLevel,
     {'-6':  0.0,
     '7-':  0.3 } )
 
 def maxSecondaryHoles_ranges( inflags ):
-    return select( inflags.InDet.Tracking.cutLevel,
+    return select( inflags.Tracking.cutLevel,
     {'-6':  2,
     '7-':  1 } )
 
 def maxSecondaryPixelHoles_ranges( inflags ):
-    return select( inflags.InDet.Tracking.cutLevel,
+    return select( inflags.Tracking.cutLevel,
     {'-6':  2,
     '7-':  1 } )
 
 def maxSecondarySCTHoles_ranges( inflags ):
-    return select( inflags.InDet.Tracking.cutLevel,
+    return select( inflags.Tracking.cutLevel,
     {'-6':  2,
     '7-':  1 } )
 
 def maxSecondaryDoubleHoles_ranges( inflags ):
-    return select( inflags.InDet.Tracking.cutLevel,
+    return select( inflags.Tracking.cutLevel,
     {'-6':  1,
     '7-':  0 } )
 
 def rejectShortExtensions_ranges( inflags ):
-    return select( inflags.InDet.Tracking.cutLevel,
+    return select( inflags.Tracking.cutLevel,
     {'-6':  False,
     '7-':  True } )
 
 def SiExtensionCuts_ranges( inflags ):
-    return select( inflags.InDet.Tracking.cutLevel,
+    return select( inflags.Tracking.cutLevel,
     {'-6':  False,
     '7-':  True } )
 
 def RoISeededBackTracking_ranges( inflags ):
-    return select( inflags.InDet.Tracking.cutLevel,
+    return select( inflags.Tracking.cutLevel,
     {'-12':  False,
     '13-':  True } )
 
 def roadWidth_ranges( inflags ):
-    return select( inflags.InDet.Tracking.cutLevel,
+    return select( inflags.Tracking.cutLevel,
     {'-16':  20.0,
     '17-':  12.0 } )
 
 def keepAllConfirmedPixelSeeds_ranges( inflags ):
-    return select( inflags.InDet.Tracking.cutLevel,
+    return select( inflags.Tracking.cutLevel,
     {'-17':  False,
     '18-':  True } )
 
 def minRoIClusterEt_ranges( inflags ):
-    return select( inflags.InDet.Tracking.cutLevel,
+    return select( inflags.Tracking.cutLevel,
     {'-18':  0.0,
     '19-':  6000. * Units.MeV } )
 
 def maxSeedsPerSP_Pixels_ranges( inflags ):
-    return select( inflags.InDet.Tracking.cutLevel,
+    return select( inflags.Tracking.cutLevel,
     {'-17':  5,
     '18-':   1 } )
 
 def maxSeedsPerSP_Strips_ranges( inflags ):
-    return select( inflags.InDet.Tracking.cutLevel,
+    return select( inflags.Tracking.cutLevel,
     {'-17':  5,
     '18-':   5 } )
 
@@ -207,6 +207,7 @@ def createTrackingPassFlags():
     icf.addFlag("useTIDE_Ambi", lambda pcf: pcf.InDet.Tracking.doTIDE_Ambi)
     icf.addFlag("useTRTExtension", lambda pcf: pcf.InDet.Tracking.doTRTExtension)
     icf.addFlag("storeSeparateContainer", False)
+    icf.addFlag("doAmbiguityProcessorTrackFit", True)
 
     icf.addFlag("minPT", minPT_ranges )
     icf.addFlag("minSecondaryPt", minSecondaryPT_ranges ) #Pt cut for back tracking + segment finding for these
@@ -221,14 +222,13 @@ def createTrackingPassFlags():
 
     # --- cluster cuts
     icf.addFlag("minClusters", lambda pcf:
-                    3 if (pcf.Detector.EnablePixel and not pcf.Detector.EnableSCT) else
-                    6  if (pcf.Detector.EnableSCT and not pcf.Detector.EnablePixel) else
-                    6 if pcf.InDet.Tracking.doInnerDetectorCommissioning else
-                    minClusters_ranges( pcf ) )
+                3 if (pcf.Detector.EnablePixel and not pcf.Detector.EnableSCT) else
+                6  if (pcf.Detector.EnableSCT and not pcf.Detector.EnablePixel) else
+                6 if pcf.Beam.Type is BeamType.Cosmics else
+                minClusters_ranges( pcf ) )
 
     icf.addFlag("minSiNotShared", lambda pcf:
-                    5 if pcf.InDet.Tracking.doInnerDetectorCommissioning else
-                    6)
+                5 if pcf.Beam.Type is BeamType.Cosmics else 6)
     
     icf.addFlag("maxShared", 1) # cut is now on number of shared modules
     icf.addFlag("minPixel", 0)
@@ -308,8 +308,8 @@ def createTrackingPassFlags():
     icf.addFlag("SecondarynHolesGapMax"     , 2 )
 
     icf.addFlag("rejectShortExtensions"     , lambda pcf:
-                    False if pcf.InDet.Tracking.doInnerDetectorCommissioning else
-                    rejectShortExtensions_ranges( pcf ) ) # extension finder in back tracking
+                False if pcf.Beam.Type is BeamType.Cosmics else
+                rejectShortExtensions_ranges( pcf ) ) # extension finder in back tracking
                     
     icf.addFlag("SiExtensionCuts"           , SiExtensionCuts_ranges) # cut in Si Extensions before fit
 
@@ -381,21 +381,28 @@ def createITkTrackingPassFlags():
     icf.addFlag("usePrdAssociationTool"     , False)
     icf.addFlag("storeSeparateContainer"    , False)
     icf.addFlag("doZBoundary"               , True)
+    icf.addFlag("doAmbiguityProcessorTrackFit", True)
 
     icf.addFlag("useEtaDepCuts"             , True)
     # Maximum bin set to 9999 instead of four to prevent out of bounds lookups
     icf.addFlag("etaBins"                   , [-1.0, 2.0, 2.6, 9999.0])
     icf.addFlag("maxEta"                    , 4.0)
-    icf.addFlag("minPT"                     , [0.9 * Units.GeV, 0.4 * Units.GeV, 0.4 * Units.GeV])
+    icf.addFlag("minPT"                     , lambda pcf :
+                [0.2 * Units.GeV] if pcf.Tracking.doLowMu
+                else [0.9 * Units.GeV, 0.4 * Units.GeV, 0.4 * Units.GeV])
 
-    icf.addFlag("minPTSeed"                 , 0.9 * Units.GeV)
+    icf.addFlag("minPTSeed"                 , lambda pcf :
+                0.2 * Units.GeV if pcf.Tracking.doLowMu
+                else 0.9 * Units.GeV)
     icf.addFlag("maxPrimaryImpactSeed"      , 2.0 * Units.mm)
     icf.addFlag("maxZImpactSeed"            , 200.0 * Units.mm)
     icf.addFlag("seedFilterLevel"           , 2)
 
     # --- cluster cuts
-    icf.addFlag("minClusters"             , [9, 8, 7])
-    icf.addFlag("minSiNotShared"          , [7, 6, 5])
+    icf.addFlag("minClusters"             , lambda pcf :
+                [6, 5, 4] if pcf.Tracking.doLowMu else [9, 8, 7])
+    icf.addFlag("minSiNotShared"          , lambda pcf :
+                [6, 5, 4] if pcf.Tracking.doLowMu else [7, 6, 5])
     icf.addFlag("maxShared"               , [2])
     icf.addFlag("minPixel"                , [1])
     icf.addFlag("maxHoles"                , [2])
@@ -457,7 +464,7 @@ def createITkLargeD0TrackingPassFlags():
     icf = createITkTrackingPassFlags()
     icf.extension             = "LargeD0"
     icf.usePrdAssociationTool = True
-    icf.storeSeparateContainer = lambda pcf : pcf.ITk.Tracking.storeSeparateLargeD0Container
+    icf.storeSeparateContainer = lambda pcf : pcf.Tracking.storeSeparateLargeD0Container
 
     icf.useEtaDepCuts      = True
     icf.minPT              = [1000 * Units.MeV]
@@ -521,6 +528,16 @@ def createITkLargeD0FastTrackingPassFlags():
 
     return icf
 
+### ITk LowPt mode ####################
+def createITkLowPtTrackingPassFlags():
+
+    icf = createITkTrackingPassFlags()
+    icf.extension          = "LowPt"
+    icf.minPT              = [0.4 * Units.GeV]
+    icf.minPTSeed          = 0.4 * Units.GeV
+
+    return icf
+
 ### HighPileUP mode ####################
 def createHighPileupTrackingPassFlags():
     icf = createTrackingPassFlags()
@@ -554,7 +571,7 @@ def createLargeD0TrackingPassFlags():
     icf = createTrackingPassFlags()
     icf.extension          = "LargeD0"
     icf.usePrdAssociationTool = True
-    icf.storeSeparateContainer = lambda pcf : pcf.InDet.Tracking.storeSeparateLargeD0Container
+    icf.storeSeparateContainer = lambda pcf : pcf.Tracking.storeSeparateLargeD0Container
     icf.maxPT              = 1.0 * Units.TeV
     icf.minPT              = 900 * Units.MeV
     icf.maxEta             = 5
@@ -587,7 +604,7 @@ def createR3LargeD0TrackingPassFlags():
     icf = createTrackingPassFlags()
     icf.extension          = "R3LargeD0"
     icf.usePrdAssociationTool = True
-    icf.storeSeparateContainer = lambda pcf : pcf.InDet.Tracking.storeSeparateLargeD0Container
+    icf.storeSeparateContainer = lambda pcf : pcf.Tracking.storeSeparateLargeD0Container
     icf.maxPT              = 1.0 * Units.TeV
     icf.minPT              = 1.0 * Units.GeV                                                                                    
     icf.maxEta             = 3                                                                                                        
@@ -628,7 +645,7 @@ def createLowPtLargeD0TrackingPassFlags():
     icf = createTrackingPassFlags()
     icf.extension          = "LowPtLargeD0"
     icf.usePrdAssociationTool = True
-    icf.storeSeparateContainer = lambda pcf : pcf.InDet.Tracking.storeSeparateLargeD0Container
+    icf.storeSeparateContainer = lambda pcf : pcf.Tracking.storeSeparateLargeD0Container
     icf.maxPT              = 1.0 * Units.TeV
     icf.minPT              = 100 * Units.MeV
     icf.maxEta             = 5
@@ -661,7 +678,7 @@ def createLowPtTrackingPassFlags():
     icf.extension        = "LowPt"
     icf.usePrdAssociationTool = True
     icf.isLowPt          = True
-    icf.maxPT = lambda pcf: (1e6  if pcf.InDet.Tracking.doMinBias else pcf.InDet.Tracking.MainPass.minPT + 0.3) * Units.GeV
+    icf.maxPT = lambda pcf: (1e6 if pcf.Tracking.doMinBias else pcf.InDet.Tracking.MainPass.minPT + 0.3) * Units.GeV
     icf.minPT            = 0.050 * Units.GeV
     icf.minClusters      = 5
     icf.minSiNotShared   = 4
@@ -674,7 +691,7 @@ def createLowPtTrackingPassFlags():
     icf.radMax           = 600. * Units.mm
     icf.nHolesMax        = icf.maxHoles
     icf.nHolesGapMax     = icf.maxHoles # not as tight as 2*maxDoubleHoles
-    icf.maxPrimaryImpact = lambda pcf: 100.0 * Units.mm if pcf.InDet.Tracking.doMinBias else maxPrimaryImpact_ranges( pcf )
+    icf.maxPrimaryImpact = lambda pcf: 100.0 * Units.mm if pcf.Tracking.doMinBias else maxPrimaryImpact_ranges( pcf )
     
     return icf
 
@@ -720,7 +737,7 @@ def createVeryLowPtTrackingPassFlags():
     icf.usePrdAssociationTool = True
     icf.isLowPt          = True
     icf.useTRTExtension  = False
-    icf.maxPT            = lambda pcf : (1e6 if pcf.InDet.Tracking.doMinBias  else  pcf.InDet.Tracking.MainPass.minPT + 0.3) * Units.GeV # some overlap
+    icf.maxPT            = lambda pcf : (1e6 if pcf.Tracking.doMinBias  else  pcf.InDet.Tracking.MainPass.minPT + 0.3) * Units.GeV # some overlap
     icf.minPT            = 0.050 * Units.GeV
     icf.minClusters      = 3
     icf.minSiNotShared   = 3
@@ -856,28 +873,28 @@ def createHeavyIonTrackingPassFlags():
     # CutLevel 3 MinBias
     # CutLevel 4  # ==CutLevel 2 with loosened hole cuts and chi^2 cuts
     # CutLevel 5 # ==CutLevel 3 with loosened hole cuts and chi^2 cuts    
-    icf.seedFilterLevel = lambda pcf: 2 if pcf.InDet.Tracking.cutLevel >= 2 else 1
+    icf.seedFilterLevel = lambda pcf: 2 if pcf.Tracking.cutLevel >= 2 else 1
     
     icf.maxdImpactSSSSeeds =  lambda pcf: \
-                              20. if pcf.InDet.Tracking.cutLevel >= 2 else 1000.
+                              20. if pcf.Tracking.cutLevel >= 2 else 1000.
     
     icf.minPT              = lambda pcf: \
-                             0.3 *Units.GeV  if pcf.InDet.Tracking.cutLevel in [3, 5] else 0.5 * Units.GeV
+                             0.3 *Units.GeV  if pcf.Tracking.cutLevel in [3, 5] else 0.5 * Units.GeV
     icf.useParameterizedTRTCuts = lambda pcf: \
-                                  False if pcf.InDet.Tracking.cutLevel >= 3 else True #Make these false on all HI cut levels >=3, since standard cut levels set it true from levels >=3
+                                  False if pcf.Tracking.cutLevel >= 3 else True #Make these false on all HI cut levels >=3, since standard cut levels set it true from levels >=3
     icf.useNewParameterizationTRT = lambda pcf: \
-                                    False if pcf.InDet.Tracking.cutLevel >= 3 else True
+                                    False if pcf.Tracking.cutLevel >= 3 else True
 
     #set this to 1.7 for all HI cut levels >=4, since standard cut levels set it to 2.0 from levels >=4. Not sure it has any effect, since we don't usually run mixed seeds (also true for HI?)
     icf.maxdImpactPPSSeeds = lambda pcf: \
-                             1.7 if pcf.InDet.Tracking.cutLevel >= 4 else True
+                             1.7 if pcf.Tracking.cutLevel >= 4 else True
     
-    icf.maxHoles = lambda pcf: 2 if pcf.InDet.Tracking.cutLevel in [4, 5] else 0
-    icf.maxPixelHoles = lambda pcf: 1 if pcf.InDet.Tracking.cutLevel in [4, 5] else 0
-    icf.maxSctHoles = lambda pcf: 1 if pcf.InDet.Tracking.cutLevel in [4, 5] else 0
+    icf.maxHoles = lambda pcf: 2 if pcf.Tracking.cutLevel in [4, 5] else 0
+    icf.maxPixelHoles = lambda pcf: 1 if pcf.Tracking.cutLevel in [4, 5] else 0
+    icf.maxSctHoles = lambda pcf: 1 if pcf.Tracking.cutLevel in [4, 5] else 0
     icf.maxDoubleHoles   = 0    
-    icf.Xi2max           = lambda pcf: 9. if pcf.InDet.Tracking.cutLevel in [4, 5] else 6.
-    icf.Xi2maxNoAdd      = lambda pcf: 25. if pcf.InDet.Tracking.cutLevel in [4, 5] else 10.
+    icf.Xi2max           = lambda pcf: 9. if pcf.Tracking.cutLevel in [4, 5] else 6.
+    icf.Xi2maxNoAdd      = lambda pcf: 25. if pcf.Tracking.cutLevel in [4, 5] else 10.
     icf.radMax           = 600. * Units.mm # restrict to pixels + first SCT layer
     icf.useTRT           = False
 
@@ -887,14 +904,14 @@ def createHeavyIonTrackingPassFlags():
 def createPixelTrackingPassFlags():
     icf = createTrackingPassFlags()
     icf.extension        = "Pixel"
-    icf.isLowPt          = lambda pcf : pcf.InDet.Tracking.doMinBias
+    icf.isLowPt          = lambda pcf : pcf.Tracking.doMinBias
 
     def _minPt( pcf ):
         if pcf.Beam.Type is BeamType.Cosmics:
             return 0.5 * Units.GeV
         if pcf.Reco.EnableHI:
             return 0.1 * Units.GeV
-        if pcf.InDet.Tracking.doMinBias:
+        if pcf.Tracking.doMinBias:
             if pcf.InDet.Tracking.doHIP300:
                 return 0.300 * Units.GeV
             else:
@@ -980,7 +997,7 @@ def createSCTTrackingPassFlags():
         def _internal( pcf ):
             if pcf.Beam.Type is BeamType.Cosmics:
                 return cosmics
-            if pcf.InDet.Tracking.doMinBias:
+            if pcf.Tracking.doMinBias:
                 if pcf.InDet.Tracking.doHIP300:
                     return hion
                 else:
@@ -1016,11 +1033,11 @@ def createSCTTrackingPassFlags():
                            else Xi2max_ranges( pcf )
     icf.Xi2maxNoAdd      = lambda pcf: 100.0 if pcf.Beam.Type is BeamType.Cosmics \
                            else Xi2maxNoAdd_ranges( pcf )
-    icf.nWeightedClustersMin = lambda pcf: 4 if pcf.InDet.Tracking.doInnerDetectorCommissioning and pcf.Beam.Type is BeamType.Cosmics \
+    icf.nWeightedClustersMin = lambda pcf: 4 if pcf.Beam.Type is BeamType.Cosmics \
                                else 6
-    icf.minClusters      = lambda pcf: 4 if pcf.InDet.Tracking.doInnerDetectorCommissioning and pcf.Beam.Type is BeamType.Cosmics \
+    icf.minClusters      = lambda pcf: 4 if pcf.Beam.Type is BeamType.Cosmics \
                            else minClusters_ranges( pcf )
-    icf.minSiNotShared   = lambda pcf: 4 if pcf.InDet.Tracking.doInnerDetectorCommissioning and pcf.Beam.Type is BeamType.Cosmics \
+    icf.minSiNotShared   = lambda pcf: 4 if pcf.Beam.Type is BeamType.Cosmics \
                            else 5
     
     icf.RunPixelPID      = False
@@ -1064,30 +1081,31 @@ def createTRTStandaloneTrackingPassFlags():
 
 if __name__ == "__main__":
 
-  from AthenaConfiguration.AllConfigFlags import ConfigFlags
+  from AthenaConfiguration.AllConfigFlags import initConfigFlags
+  flags = initConfigFlags()
+
   from AthenaConfiguration.TestDefaults import defaultTestFiles
-  ConfigFlags.Input.Files=defaultTestFiles.RAW
+  flags.Input.Files=defaultTestFiles.RAW
   
   from AthenaCommon.Logging import logging
-  l = logging.getLogger('AthConfigFlags')
-  from AthenaCommon.Constants import WARNING
-  l.setLevel(WARNING)
+  l = logging.getLogger('TrackingPassFlags')
+  from AthenaCommon.Constants import INFO
+  l.setLevel(INFO)
 
-  ConfigFlags = ConfigFlags.cloneAndReplace("InDet.Tracking.ActiveConfig","InDet.Tracking.MainPass")
+  flags = flags.cloneAndReplace("InDet.Tracking.ActiveConfig","InDet.Tracking.MainPass")
 
-  assert ConfigFlags.InDet.Tracking.cutLevel == 19 , "default cut level is wrong"
-  assert ConfigFlags.InDet.Tracking.ActiveConfig.minRoIClusterEt == 6000.0 * Units.MeV, "wrong cut value {} ".format(ConfigFlags.InDet.Tracking.ActiveConfig.minRoIClusterEt)
-  ConfigFlags.InDet.Tracking.cutLevel = 2
-  assert ConfigFlags.InDet.Tracking.ActiveConfig.minRoIClusterEt == 0.0, "wrong cut value {} ".format(ConfigFlags.InDet.Tracking.ActiveConfig.minRoIClusterEt)
-  assert ConfigFlags.InDet.Tracking.BeamGasPass.minRoIClusterEt == 0.0, "wrong cut value {}, not following cutLevel setting ".format(ConfigFlags.InDet.Tracking.BeamGasPass.minRoIClusterEt)
+  assert flags.Tracking.cutLevel == 19 , "default cut level is wrong"
+  assert flags.InDet.Tracking.ActiveConfig.minRoIClusterEt == 6000.0 * Units.MeV, "wrong cut value {} ".format(flags.InDet.Tracking.ActiveConfig.minRoIClusterEt)
+  flags.Tracking.cutLevel = 2
+  assert flags.InDet.Tracking.ActiveConfig.minRoIClusterEt == 0.0, "wrong cut value {} ".format(flags.InDet.Tracking.ActiveConfig.minRoIClusterEt)
+  assert flags.InDet.Tracking.BeamGasPass.minRoIClusterEt == 0.0, "wrong cut value {}, not following cutLevel setting ".format(flags.InDet.Tracking.BeamGasPass.minRoIClusterEt)
 
-  assert ConfigFlags.InDet.Tracking.HeavyIonPass.minSiNotShared == 7, "wrong cut value, overwrite"
-  assert ConfigFlags.InDet.Tracking.HeavyIonPass.minRoIClusterEt == 0.0, "wrong cut value, overwrite"
+  assert flags.InDet.Tracking.HeavyIonPass.minSiNotShared == 7, "wrong cut value, overwrite"
+  assert flags.InDet.Tracking.HeavyIonPass.minRoIClusterEt == 0.0, "wrong cut value, overwrite"
 
-  print("ConfigFlags.InDet.Tracking.ActiveConfig.minSecondaryPt",ConfigFlags.InDet.Tracking.ActiveConfig.minSecondaryPt * 1.0)
-  print("type(ConfigFlags.InDet.Tracking.ActiveConfig.minSecondaryPt)",type(ConfigFlags.InDet.Tracking.ActiveConfig.minSecondaryPt))
+  l.info("flags.InDet.Tracking.ActiveConfig.minSecondaryPt %f", flags.InDet.Tracking.ActiveConfig.minSecondaryPt * 1.0)
+  l.info("type(flags.InDet.Tracking.ActiveConfig.minSecondaryPt) " + str(type(flags.InDet.Tracking.ActiveConfig.minSecondaryPt)))
 
-  #ConfigFlags.dump()
-  print( "allok" )   
+
 
 

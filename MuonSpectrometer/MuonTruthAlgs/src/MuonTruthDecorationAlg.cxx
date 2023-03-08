@@ -464,7 +464,7 @@ namespace Muon {
             // loop over trajectories
             for (const auto& trajectory : *col) {
                 // check if gen particle same as input
-                if ((HepMC::barcode(trajectory.second)) % m_barcodeOffset != barcode) continue;
+                if ((trajectory.second.barcode()) % m_barcodeOffset != barcode) continue;
 
                 const Identifier& id = trajectory.first;
                 bool measPhi = m_idHelperSvc->measuresPhi(id);

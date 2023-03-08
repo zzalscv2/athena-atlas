@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/test/ConcurrentHashmapImpl_test.cxx
@@ -95,6 +95,21 @@ public:
   }
 
   static Context_t defaultContext() { return 0; }
+
+  void swap (TestUpdater& other)
+  {
+    auto swap_atomic = [] (std::atomic<T*>& a, std::atomic<T*>& b)
+    {
+      T* tmp = a.load (std::memory_order_relaxed);
+      a.store (b.load (std::memory_order_relaxed),
+               std::memory_order_relaxed);
+      b.store (tmp, std::memory_order_relaxed);
+    };
+
+    swap_atomic (m_p, other.m_p);
+    m_garbage.swap (other.m_garbage);
+    std::swap (m_inGrace, other.m_inGrace);
+  }
 
 
 private:
@@ -339,6 +354,170 @@ void test3()
 }
 
 
+void test_erase()
+{
+  std::cout << "test_erase\n";
+
+  using CHMImplDel = CxxUtils::detail::ConcurrentHashmapImpl<TestUpdater,
+    TestHash,
+    std::equal_to<uintptr_t>,
+    0, static_cast<uintptr_t>(-1)>;
+
+  CHMImplDel chm (CHMImplDel::Updater_t(), 50,
+                  CHMImplDel::Hasher_t(),
+                  CHMImplDel::Matcher_t(),
+                  CHMImplDel::Context_t());
+
+  for (size_t i = 0; i < 1000; i++) {
+    size_t key = 23*i + 100;
+    size_t hash = TestHash() (key);
+
+    auto [it, flag] = chm.put (key, hash, key+1, true, Context_t());
+    assert (flag);
+    assert (it.valid());
+    assert (it.key() == key);
+    assert (it.value() == key+1);
+  }
+  assert (chm.size() == 1000);
+  assert (chm.capacity() == 1024);
+  assert (chm.erased() == 0);
+
+  for (size_t i = 0; i < 1000; i+=2) {
+    size_t key = 23*i + 100;
+    size_t hash = TestHash() (key);
+    assert (chm.erase (key, hash));
+  }
+  assert (chm.size() == 500);
+  assert (chm.capacity() == 1024);
+  assert (chm.erased() == 500);
+
+  for (size_t i = 0; i < 1000; i+=2) {
+    size_t key = 23*i + 100;
+    size_t hash = TestHash() (key);
+    CHMImplDel::const_iterator it2 = chm.get (key, hash);
+    if (i%2 == 0) {
+      assert (!it2.valid());
+    }
+    else {
+      assert (it2.valid());
+      assert (it2.key() == key);
+      assert (it2.value() == key+1);
+    }
+  }
+
+  for (size_t i = 2; i < 1000; i+=4) {
+    size_t key = 23*i + 100;
+    size_t hash = TestHash() (key);
+    auto [it, flag] = chm.put (key, hash, key+1, true, Context_t());
+    assert (flag);
+    assert (it.valid());
+  }
+  assert (chm.size() == 750);
+  assert (chm.capacity() == 2048);
+  assert (chm.erased() == 0);
+
+  for (size_t i = 0; i < 1000; i+=2) {
+    size_t key = 23*i + 100;
+    size_t hash = TestHash() (key);
+    CHMImplDel::const_iterator it2 = chm.get (key, hash);
+    if (i%4 == 0) {
+      assert (!it2.valid());
+    }
+    else {
+      assert (it2.valid());
+      assert (it2.key() == key);
+      assert (it2.value() == key+1);
+    }
+  }
+
+  chm.forceClear();
+  assert (chm.size() == 0);
+  assert (chm.capacity() == 2048);
+  assert (chm.erased() == 0);
+  for (size_t i = 0; i < 1000; i++) {
+    size_t key = 23*i + 100;
+    size_t hash = TestHash() (key);
+    CHMImplDel::const_iterator it2 = chm.get (key, hash);
+    assert (!it2.valid());
+  }
+}
+
+
+void test_swap()
+{
+  std::cout << "test_swap\n";
+
+  using CHMImplDel = CxxUtils::detail::ConcurrentHashmapImpl<TestUpdater,
+    TestHash,
+    std::equal_to<uintptr_t>,
+    0, static_cast<uintptr_t>(-1)>;
+
+  CHMImplDel chm1 (CHMImplDel::Updater_t(), 50,
+                   CHMImplDel::Hasher_t(),
+                   CHMImplDel::Matcher_t(),
+                   CHMImplDel::Context_t());
+  CHMImplDel chm2 (CHMImplDel::Updater_t(), 50,
+                   CHMImplDel::Hasher_t(),
+                   CHMImplDel::Matcher_t(),
+                   CHMImplDel::Context_t());
+
+  for (size_t i = 0; i < 1000; i++) {
+    size_t key = 23*i + 100;
+    size_t hash = TestHash() (key);
+    auto [it, flag] = chm1.put (key, hash, key+1, true, Context_t());
+    assert (flag);
+  }
+  for (size_t i = 0; i < 1000; i++) {
+    size_t key = 47*i + 100;
+    size_t hash = TestHash() (key);
+    auto [it, flag] = chm2.put (key, hash, key+1, true, Context_t());
+    assert (flag);
+  }
+  for (size_t i = 0; i < 1000; i+=2) {
+    size_t key = 47*i + 100;
+    size_t hash = TestHash() (key);
+    assert (chm2.erase (key, hash));
+  }
+
+  assert (chm1.size() == 1000);
+  assert (chm1.capacity() == 1024);
+  assert (chm1.erased() == 0);
+  assert (chm2.size() == 500);
+  assert (chm2.capacity() == 1024);
+  assert (chm2.erased() == 500);
+
+  chm1.swap (chm2);
+
+  assert (chm1.size() == 500);
+  assert (chm1.capacity() == 1024);
+  assert (chm1.erased() == 500);
+  assert (chm2.size() == 1000);
+  assert (chm2.capacity() == 1024);
+  assert (chm2.erased() == 0);
+
+  for (size_t i = 0; i < 1000; i++) {
+    size_t key = 23*i + 100;
+    size_t hash = TestHash() (key);
+    CHMImplDel::const_iterator it = chm2.get (key, hash);
+    assert (it.valid());
+    assert (it.value() == key+1);
+  }
+
+  for (size_t i = 0; i < 1000; i++) {
+    size_t key = 47*i + 100;
+    size_t hash = TestHash() (key);
+    CHMImplDel::const_iterator it = chm1.get (key, hash);
+    if ((i%2) == 0) {
+      assert (!it.valid());
+    }
+    else {
+      assert (it.valid());
+      assert (it.value() == key+1);
+    }
+  }
+}
+
+
 //***************************************************************************
 // Threaded test.
 //
@@ -566,6 +745,8 @@ int main()
   test1();
   ConcurrentHashmapImplTest::test2();
   test3();
+  test_erase();
+  test_swap();
   test4();
   return 0;
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef VTUNE_PROFILERUNNER_H
@@ -8,7 +8,10 @@
 // VTune include(s)
 #include <ittnotify.h>
 
-class VTuneProfileRunner {
+// Athena include(s)
+#include "CxxUtils/checker_macros.h"
+
+class ATLAS_NOT_THREAD_SAFE VTuneProfileRunner {
 
   public:
 

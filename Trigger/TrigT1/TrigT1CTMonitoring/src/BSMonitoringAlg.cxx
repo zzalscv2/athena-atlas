@@ -348,7 +348,7 @@ StatusCode TrigT1CTMonitoring::BSMonitoringAlgorithm::fillHistograms( const Even
     }
     else
     {
-        //todo
+		//todo doCtpMuctpi
     }
 
     if(!m_isRun3)
@@ -369,36 +369,35 @@ StatusCode TrigT1CTMonitoring::BSMonitoringAlgorithm::fillHistograms( const Even
             doMuctpi(theMuCTPI_Phase1_RDO,bcidFirstInTrain, ctx);
         }
     }
-    ATH_MSG_DEBUG( "end fillHistograms()");
+    ATH_MSG_DEBUG("end fillHistograms()");
     return StatusCode::SUCCESS;
   }
   catch(const std::exception & e) {
     std::cerr << "Caught standard C++ exception: " << e.what() << " from fillHistograms()" << std::endl;
     return StatusCode::FAILURE;
   }
-  }
+}
 
 
 void
 TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* theMuCTPI_Phase1_RDO,
-                                                    const std::vector<uint>& bcidFirstInTrain,
-                                                    //const RpcSectorLogicContainer* theRPCContainer,    to be re-included and compare
-                                                    //const Muon::TgcCoinDataContainer* theTGCContainer, to be re-included and compare
-                                                    const EventContext& ctx) const
+                                                     const std::vector<uint>& bcidFirstInTrain,
+                                                     //const RpcSectorLogicContainer* theRPCContainer,//    to be re-included and compare
+                                                     //const Muon::TgcCoinDataContainer* theTGCContainer,// to be re-included and compare
+                                                     const EventContext& ctx) const
 {
   ATH_MSG_DEBUG( "CTPMON begin doMuctpi()");
   //ERROR vector  - COMMON
   auto errorPerLumiBlockX = Monitored::Scalar<int>("errorPerLumiBlockX",0);
   //ERROR vectors - MUCTPI
-  auto errorSummaryMUCTPIX = Monitored::Scalar<int>("errorSummaryMUCTPIX",0);
-  auto errorSummaryMUCTPIY = Monitored::Scalar<int>("errorSummaryMUCTPIY",0);
+  auto errorSummaryMUCTPI = Monitored::Scalar<int>("errorSummaryMUCTPI",0);
   auto errorSummaryPerLumiBlockMUCTPIX = Monitored::Scalar<int>("errorSummaryPerLumiBlockMUCTPIX",0);
   auto errorSummaryPerLumiBlockMUCTPIY = Monitored::Scalar<int>("errorSummaryPerLumiBlockMUCTPIY",0);
-  auto statusDataWordMUCTPIX = Monitored::Scalar<int>("statusDataWordMUCTPIX",0);
-  auto statusDataWordMUCTPIY = Monitored::Scalar<int>("statusDataWordMUCTPIY",0);
+  auto statusDataWordMUCTPI = Monitored::Scalar<int>("statusDataWordMUCTPI",0);
   auto statusDataWordPerLumiBlockMUCTPIX = Monitored::Scalar<int>("statusDataWordPerLumiBlockMUCTPIX",0);
   auto statusDataWordPerLumiBlockMUCTPIY = Monitored::Scalar<int>("statusDataWordPerLumiBlockMUCTPIY",0);
   // MUCTPI-specific
+  auto candCount = Monitored::Scalar<int>("candCount",0);
   auto candPtBAX = Monitored::Scalar<int>("candPtBAX",0);
   auto candPtECX = Monitored::Scalar<int>("candPtECX",0);
   auto candPtFWX = Monitored::Scalar<int>("candPtFWX",0);
@@ -414,6 +413,12 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
   auto candVetoFlag_RoiVsSLECY = Monitored::Scalar<int>("candVetoFlag_RoiVsSLECY",0);
   auto candVetoFlag_RoiVsSLFWX = Monitored::Scalar<int>("candVetoFlag_RoiVsSLFWX",0);
   auto candVetoFlag_RoiVsSLFWY = Monitored::Scalar<int>("candVetoFlag_RoiVsSLFWY",0);
+  auto candVetoFlag_EtaPhiBAX = Monitored::Scalar<float>("candVetoFlag_EtaPhiBAX",0.);
+  auto candVetoFlag_EtaPhiBAY = Monitored::Scalar<float>("candVetoFlag_EtaPhiBAY",0.);
+  auto candVetoFlag_EtaPhiECX = Monitored::Scalar<float>("candVetoFlag_EtaPhiECX",0.);
+  auto candVetoFlag_EtaPhiECY = Monitored::Scalar<float>("candVetoFlag_EtaPhiECY",0.);
+  auto candVetoFlag_EtaPhiFWX = Monitored::Scalar<float>("candVetoFlag_EtaPhiFWX",0.);
+  auto candVetoFlag_EtaPhiFWY = Monitored::Scalar<float>("candVetoFlag_EtaPhiFWY",0.);
   auto candRoiVsSLBACentralSliceX = Monitored::Scalar<int>("candRoiVsSLBACentralSliceX",0);
   auto candRoiVsSLBACentralSliceY = Monitored::Scalar<int>("candRoiVsSLBACentralSliceY",0);
   auto candRoiVsSLECCentralSliceX = Monitored::Scalar<int>("candRoiVsSLECCentralSliceX",0);
@@ -444,12 +449,29 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
   auto candSliceVsSLECY = Monitored::Scalar<int>("candSliceVsSLECY",0);
   auto candSliceVsSLFWX = Monitored::Scalar<int>("candSliceVsSLFWX",0);
   auto candSliceVsSLFWY = Monitored::Scalar<int>("candSliceVsSLFWY",0);
+  auto candSliceCandTobDifferenceX = Monitored::Scalar<int>("candSliceCandTobDifferenceX");
+  auto candSliceCandTobDifferenceY = Monitored::Scalar<int>("candSliceCandTobDifferenceY");
+  auto candEtaPhi_NSWMonFlagX_EC = Monitored::Scalar<int>("candEtaPhi_NSWMonitoringFlagX_EC",0);
+  auto candEtaPhi_NSWMonFlagY_EC = Monitored::Scalar<int>("candEtaPhi_NSWMonitoringFlagY_EC",0);
+  auto candEtaPhi_NSWMonFlagX_FW = Monitored::Scalar<int>("candEtaPhi_NSWMonitoringFlagX_FW",0);
+  auto candEtaPhi_NSWMonFlagY_FW = Monitored::Scalar<int>("candEtaPhi_NSWMonitoringFlagY_FW",0);
+  auto candEtaPhi_Gt1CandRoiX_BA = Monitored::Scalar<int>("candEtaPhi_Gt1CandRoiX_BA",0);
+  auto candEtaPhi_Gt1CandRoiY_BA = Monitored::Scalar<int>("candEtaPhi_Gt1CandRoiY_BA",0);
+  auto candEtaPhi_PhiOverlapX_BA = Monitored::Scalar<int>("candEtaPhi_PhiOverlapX_BA",0);
+  auto candEtaPhi_PhiOverlapY_BA = Monitored::Scalar<int>("candEtaPhi_PhiOverlapY_BA",0);
+  auto candEtaPhi_SectorFlagGtNX_BA = Monitored::Scalar<int>("candEtaPhi_SectorFlagGtNX_BA",0); // BA: N>2, EC,FW: N>4
+  auto candEtaPhi_SectorFlagGtNY_BA = Monitored::Scalar<int>("candEtaPhi_SectorFlagGtNY_BA",0);
+  auto candEtaPhi_SectorFlagGtNX_EC = Monitored::Scalar<int>("candEtaPhi_SectorFlagGtNX_EC",0);
+  auto candEtaPhi_SectorFlagGtNY_EC = Monitored::Scalar<int>("candEtaPhi_SectorFlagGtNY_EC",0);
+  auto candEtaPhi_SectorFlagGtNX_FW = Monitored::Scalar<int>("candEtaPhi_SectorFlagGtNX_FW",0);
+  auto candEtaPhi_SectorFlagGtNY_FW = Monitored::Scalar<int>("candEtaPhi_SectorFlagGtNY_FW",0);
   auto candSliceVsSLBAFirstInTrainX = Monitored::Scalar<int>("candSliceVsSLBAFirstInTrainX",0);
   auto candSliceVsSLBAFirstInTrainY = Monitored::Scalar<int>("candSliceVsSLBAFirstInTrainY",0);
   auto candSliceVsSLECFirstInTrainX = Monitored::Scalar<int>("candSliceVsSLECFirstInTrainX",0);
   auto candSliceVsSLECFirstInTrainY = Monitored::Scalar<int>("candSliceVsSLECFirstInTrainY",0);
   auto candSliceVsSLFWFirstInTrainX = Monitored::Scalar<int>("candSliceVsSLFWFirstInTrainX",0);
   auto candSliceVsSLFWFirstInTrainY = Monitored::Scalar<int>("candSliceVsSLFWFirstInTrainY",0);
+
   //TOB
   auto tobEtaPhiAX = Monitored::Scalar<int>("tobEtaPhiAX",0);
   auto tobEtaPhiAY = Monitored::Scalar<int>("tobEtaPhiAY",0);
@@ -479,16 +501,51 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
   auto tobPtVsEtaCY = Monitored::Scalar<int>("tobPtVsEtaCY",0);
   auto tobPtVsPhiCX = Monitored::Scalar<int>("tobPtVsPhiCX",0);
   auto tobPtVsPhiCY = Monitored::Scalar<int>("tobPtVsPhiCY",0);
+  auto tobEtaPhiXdecoded_BA = Monitored::Scalar<float>("tobEtaPhiXdecoded_BA",0.);
+  auto tobEtaPhiXdecoded_EC = Monitored::Scalar<float>("tobEtaPhiXdecoded_EC",0.);
+  auto tobEtaPhiXdecoded_FW = Monitored::Scalar<float>("tobEtaPhiXdecoded_FW",0.);
+  auto tobEtaPhiYdecoded_BA = Monitored::Scalar<float>("tobEtaPhiYdecoded_BA",0.);
+  auto tobEtaPhiYdecoded_EC = Monitored::Scalar<float>("tobEtaPhiYdecoded_EC",0.);
+  auto tobEtaPhiYdecoded_FW = Monitored::Scalar<float>("tobEtaPhiYdecoded_FW",0.);
+  auto tobEtaPhi_GoodMFXdecoded_EC = Monitored::Scalar<float>("tobEtaPhi_GoodMFXdecoded_EC",0);
+  auto tobEtaPhi_GoodMFXdecoded_FW = Monitored::Scalar<float>("tobEtaPhi_GoodMFXdecoded_FW",0);
+  auto tobEtaPhi_GoodMFYdecoded_EC = Monitored::Scalar<float>("tobEtaPhi_GoodMFYdecoded_EC",0);
+  auto tobEtaPhi_GoodMFYdecoded_FW = Monitored::Scalar<float>("tobEtaPhi_GoodMFYdecoded_FW",0);
+  auto tobEtaPhi_InnerCoinXdecoded_EC = Monitored::Scalar<float>("tobEtaPhi_InnerCoinXdecoded_EC",0);
+  auto tobEtaPhi_InnerCoinXdecoded_FW = Monitored::Scalar<float>("tobEtaPhi_InnerCoinXdecoded_FW",0);
+  auto tobEtaPhi_InnerCoinYdecoded_EC = Monitored::Scalar<float>("tobEtaPhi_InnerCoinYdecoded_EC",0);
+  auto tobEtaPhi_InnerCoinYdecoded_FW = Monitored::Scalar<float>("tobEtaPhi_InnerCoinYdecoded_FW",0);
+  auto tobEtaPhi_BW23Xdecoded_EC = Monitored::Scalar<float>("tobEtaPhi_BW23Xdecoded_EC",0);
+  auto tobEtaPhi_BW23Xdecoded_FW = Monitored::Scalar<float>("tobEtaPhi_BW23Xdecoded_FW",0);
+  auto tobEtaPhi_BW23Ydecoded_EC = Monitored::Scalar<float>("tobEtaPhi_BW23Ydecoded_EC",0);
+  auto tobEtaPhi_BW23Ydecoded_FW = Monitored::Scalar<float>("tobEtaPhi_BW23Ydecoded_FW",0);
+  auto tobEtaPhi_ChargeXdecoded_EC = Monitored::Scalar<float>("tobEtaPhi_ChargeXdecoded_EC",0);
+  auto tobEtaPhi_ChargeXdecoded_FW = Monitored::Scalar<float>("tobEtaPhi_ChargeXdecoded_FW",0);
+  auto tobEtaPhi_ChargeYdecoded_EC = Monitored::Scalar<float>("tobEtaPhi_ChargeYdecoded_EC",0);
+  auto tobEtaPhi_ChargeYdecoded_FW = Monitored::Scalar<float>("tobEtaPhi_ChargeYdecoded_FW",0);
+  auto tobPtVsEtaXdecoded_BA = Monitored::Scalar<float>("tobPtVsEtaXdecoded_BA",0);
+  auto tobPtVsEtaXdecoded_EC = Monitored::Scalar<float>("tobPtVsEtaXdecoded_EC",0);
+  auto tobPtVsEtaXdecoded_FW = Monitored::Scalar<float>("tobPtVsEtaXdecoded_FW",0);
+  auto tobPtVsEtaYdecoded_BA = Monitored::Scalar<float>("tobPtVsEtaYdecoded_BA",0);
+  auto tobPtVsEtaYdecoded_EC = Monitored::Scalar<float>("tobPtVsEtaYdecoded_EC",0);
+  auto tobPtVsEtaYdecoded_FW = Monitored::Scalar<float>("tobPtVsEtaYdecoded_FW",0);
+  auto tobPtVsPhiXdecoded_BA = Monitored::Scalar<float>("tobPtVsPhiXdecoded_BA",0);
+  auto tobPtVsPhiXdecoded_EC = Monitored::Scalar<float>("tobPtVsPhiXdecoded_EC",0);
+  auto tobPtVsPhiXdecoded_FW = Monitored::Scalar<float>("tobPtVsPhiXdecoded_FW",0);
+  auto tobPtVsPhiYdecoded_BA = Monitored::Scalar<float>("tobPtVsPhiYdecoded_BA",0);
+  auto tobPtVsPhiYdecoded_EC = Monitored::Scalar<float>("tobPtVsPhiYdecoded_EC",0);
+  auto tobPtVsPhiYdecoded_FW = Monitored::Scalar<float>("tobPtVsPhiYdecoded_FW",0);
+  auto tobCount = Monitored::Scalar<int>("tobCount");
+  auto tobCandDifferenceX = Monitored::Scalar<int>("tobCandDifferenceX",0);
+  auto tobCandDifferenceY = Monitored::Scalar<int>("tobCandDifferenceY",0);
+
   //mlt
-  auto multThrX       = Monitored::Scalar<int>("multThrX",0);
-  auto multBitsX      = Monitored::Scalar<int>("multBitsX",0);
+  auto multThrX      = Monitored::Scalar<int>("multThrX",0);
+  auto multBitsX     = Monitored::Scalar<int>("multBitsX",0);
   auto multThrVsLBX  = Monitored::Scalar<int>("multThrVsLBX",0);
   auto multThrVsLBY  = Monitored::Scalar<int>("multThrVsLBY",0);
   auto multBitsVsLBX = Monitored::Scalar<int>("multBitsVsLBX",0);
   auto multBitsVsLBY = Monitored::Scalar<int>("multBitsVsLBY",0);
-
-
-
 
   //get event info
   auto eventInfo = GetEventInfo(ctx);
@@ -500,7 +557,6 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
 
   //https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TrigT1/TrigT1Result/src/MuCTPI_DataWord_Decoder.cxx
   //https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TrigT1/TrigT1Result/TrigT1Result/MuCTPI_DataWord_Decoder.h
-
 
   //data is grouped in slices:
   uint nSlices=theMuCTPI_Phase1_RDO->slices().size();
@@ -524,7 +580,7 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
       uint header_candCount = slices[iSlice].nCand;//check during cand/topo section below
 
       ///bcid check: header against RDO bcid
-      // actually skipping this, since it is checked online by HLT (MUCTPI_BCIDOffsetsWrtROB)
+      //actually skipping this, since it is checked online by HLT (MUCTPI_BCIDOffsetsWrtROB)
 
       //-------------------------------------------------
       // MULTIPLICITY
@@ -563,70 +619,98 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
           }
       }
 
+	  //-------------------------------------------------
+	  // CANDIDATES
+	  //-------------------------------------------------
 
-      ///NSW mon trigger    todo?
-      ///cand overflow flag todo?
+	  if(header_candCount != slices[iSlice].cand.size())
+	  {
+		  errorSummaryMUCTPI=2;
+		  fill(m_packageName, errorSummaryMUCTPI);
+		  errorSummaryPerLumiBlockMUCTPIX=2;
+		  errorSummaryPerLumiBlockMUCTPIY=currentLumiBlock;
+		  fill(m_packageName, errorSummaryPerLumiBlockMUCTPIX, errorSummaryPerLumiBlockMUCTPIY);
+	  }
 
-      //-------------------------------------------------
-      // CANDIDATES
-      //-------------------------------------------------
-      //Errors:
-      ///if candCount!=candidate words
-      if(header_candCount != slices[iSlice].cand.size())
-      {
-          errorSummaryMUCTPIX=2;
-          fill(m_packageName, errorSummaryMUCTPIX);
-          errorSummaryPerLumiBlockMUCTPIX=2;
-          errorSummaryPerLumiBlockMUCTPIY=currentLumiBlock;
-          fill(m_packageName, errorSummaryPerLumiBlockMUCTPIX, errorSummaryPerLumiBlockMUCTPIY);
-      }
+	  // Fill the histogram of distribution of candidates count
+	  // with info from central time slice
+	  if(isCentralSlice)
+	  {
+		  candCount = header_candCount;
+		  fill(m_packageName,candCount);
+	  }
 
+	  for(uint iCand=0;iCand<slices[iSlice].cand.size();iCand++)
+	  {
+		  /// 1D pT stats x3
 
-      for(uint iCand=0;iCand<slices[iSlice].cand.size();iCand++)
-      {
-          /// 1D pT stats x3
+		  /// 2D roi vs SL (    central slice) x3
+		  /// 2D roi vs SL (non-central slice) x3
 
-          /// 2D roi vs SL (    central slice) x3
-          /// 2D roi vs SL (non-central slice) x3
+		  /// 2D cand flags vs SL BA (2)
+		  /// 2D cand flags vs SL EC (4)
+		  /// 2D cand flags vs SL FW (4)
 
-          /// 2D cand flags vs SL BA (2)
-          /// 2D cand flags vs SL EC (4)
-          /// 2D cand flags vs SL FW (4)
+		  /// 2D sec err flag per LB x3
 
-          /// 2D sec err flag per LB x3
-
-          /// 2D fill SL (central "VS" non-central slice) x3
-          /// todo: 1D fill ratio (central / non-central slice) x3 (hopefully can make the ratio on Han?)
-
+		  /// 2D fill SL (central "VS" non-central slice) x3
 
           ATH_MSG_DEBUG( "MUCTPI DQ DEBUG: iCand="<<iCand << " type="<<(int)slices[iSlice].cand[iCand].type<< " num="<<(int)slices[iSlice].cand[iCand].num<< " pt="<<slices[iSlice].cand[iCand].pt);
 
-          if(slices[iSlice].cand[iCand].type==LVL1::MuCTPIBits::SubsysID::Barrel)
-          {
-              uint num = slices[iSlice].cand[iCand].num + 32*(1-slices[iSlice].cand[iCand].side);//offset side C;
-              candPtBAX = slices[iSlice].cand[iCand].pt;
-              fill(m_packageName, candPtBAX);
+		  float candEta = slices[iSlice].cand[iCand].eta;
+		  float candPhi = slices[iSlice].cand[iCand].phi;
+		  bool vetoFlag = slices[iSlice].cand[iCand].vetoFlag;
+		  
+		  if(slices[iSlice].cand[iCand].type==LVL1::MuCTPIBits::SubsysID::Barrel)
+		  {
+			  uint num = slices[iSlice].cand[iCand].num + 32*(1-slices[iSlice].cand[iCand].side);//offset side C;
+			  candPtBAX = slices[iSlice].cand[iCand].pt;
+			  fill(m_packageName, candPtBAX);
 
-              candSLVsLBBAX = currentLumiBlock;
-              candSLVsLBBAY = num;
-              fill(m_packageName, candSLVsLBBAX, candSLVsLBBAY);
+			  candSLVsLBBAX = currentLumiBlock;
+			  candSLVsLBBAY = num;
+			  fill(m_packageName, candSLVsLBBAX, candSLVsLBBAY);
 
-              bool vetoFlag = slices[iSlice].cand[iCand].vetoFlag;
-              if(vetoFlag)
-              {
-                  candVetoFlag_RoiVsSLBAX = slices[iSlice].cand[iCand].roi;
-                  candVetoFlag_RoiVsSLBAY = num;
-                  fill(m_packageName, candVetoFlag_RoiVsSLBAX, candVetoFlag_RoiVsSLBAY);
-              }
+			  if(vetoFlag)
+			  {
+				  candVetoFlag_RoiVsSLBAX = num;
+				  candVetoFlag_RoiVsSLBAY = slices[iSlice].cand[iCand].roi;
+				  fill(m_packageName, candVetoFlag_RoiVsSLBAX, candVetoFlag_RoiVsSLBAY);
 
-              candSliceVsSLBAX = num;
-              uint sliceIndex;
-              if(nSlices==7)      sliceIndex = iSlice;   //aligning the iSlice index for the 7-bin histo
-              else if(nSlices==5) sliceIndex = iSlice+1; //aligning the iSlice index for the 7-bin histo
-              else if(nSlices==3) sliceIndex = iSlice+2; //aligning the iSlice index for the 7-bin histo
-              else /*if(nSlices==1)*/ sliceIndex = 3; //central bin in a 7-bin histo
-              candSliceVsSLBAY=sliceIndex;
-              fill(m_packageName, candSliceVsSLBAX, candSliceVsSLBAY);
+				  candVetoFlag_EtaPhiBAX = candEta;
+				  candVetoFlag_EtaPhiBAY = candPhi;
+				  fill(m_packageName, candVetoFlag_EtaPhiBAX, candVetoFlag_EtaPhiBAY);
+			  }
+
+			  if(slices[iSlice].cand[iCand].candFlag_phiOverlap)
+			  {
+				  candEtaPhi_PhiOverlapX_BA = candEta;
+				  candEtaPhi_PhiOverlapY_BA = candPhi;
+				  fill(m_packageName, candEtaPhi_PhiOverlapX_BA, candEtaPhi_PhiOverlapY_BA);
+			  }
+
+			  if(slices[iSlice].cand[iCand].candFlag_gt1CandRoi)
+			  {
+				  candEtaPhi_Gt1CandRoiX_BA = candEta;
+				  candEtaPhi_Gt1CandRoiY_BA = candPhi;
+				  fill(m_packageName,candEtaPhi_Gt1CandRoiX_BA,candEtaPhi_Gt1CandRoiY_BA);
+			  }
+
+			  if(slices[iSlice].cand[iCand].sectorFlag_gtN)
+			  {
+				  candEtaPhi_SectorFlagGtNX_BA = candEta;
+				  candEtaPhi_SectorFlagGtNY_BA = candPhi;
+				  fill(m_packageName,candEtaPhi_SectorFlagGtNX_BA,candEtaPhi_SectorFlagGtNY_BA);
+			  }
+
+			  candSliceVsSLBAX = num;
+			  uint sliceIndex;
+			  if(nSlices==7)      sliceIndex = iSlice;   //aligning the iSlice index for the 7-bin histo
+			  else if(nSlices==5) sliceIndex = iSlice+1; //aligning the iSlice index for the 7-bin histo
+			  else if(nSlices==3) sliceIndex = iSlice+2; //aligning the iSlice index for the 7-bin histo
+			  else sliceIndex = 3; //central bin in a 7-bin histo
+			  candSliceVsSLBAY=sliceIndex;
+			  fill(m_packageName, candSliceVsSLBAX, candSliceVsSLBAY);
 
               //same but checking BG match
               //if currentBCID is in vector: bcidFirstInTrain, then fill histo
@@ -637,60 +721,78 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
                   fill(m_packageName, candSliceVsSLBAFirstInTrainX, candSliceVsSLBAFirstInTrainY);
               }
 
-              if(isCentralSlice)
-              {
-                  candRoiVsSLBACentralSliceX = num;
-                  candRoiVsSLBACentralSliceY = slices[iSlice].cand[iCand].roi;
-                  fill(m_packageName, candRoiVsSLBACentralSliceX, candRoiVsSLBACentralSliceY);
+			  if(isCentralSlice)
+			  {
+				  candRoiVsSLBACentralSliceX = num;
+				  candRoiVsSLBACentralSliceY = slices[iSlice].cand[iCand].roi;
+				  fill(m_packageName, candRoiVsSLBACentralSliceX, candRoiVsSLBACentralSliceY);
 
-                  candCandFlagsVsSLBACentralSliceX = num;
-                  candCandFlagsVsSLBACentralSliceY = 0;
-                  if(slices[iSlice].cand[iCand].candFlag_gt1CandRoi)
-                      fill(m_packageName, candCandFlagsVsSLBACentralSliceX, candCandFlagsVsSLBACentralSliceY);
+				  candCandFlagsVsSLBACentralSliceX = num;
+				  candCandFlagsVsSLBACentralSliceY = 0;
+				  if(slices[iSlice].cand[iCand].candFlag_gt1CandRoi)
+					  fill(m_packageName, candCandFlagsVsSLBACentralSliceX, candCandFlagsVsSLBACentralSliceY);
 
-                  candCandFlagsVsSLBACentralSliceY = 1;
-                  if(slices[iSlice].cand[iCand].candFlag_phiOverlap)
-                      fill(m_packageName, candCandFlagsVsSLBACentralSliceX, candCandFlagsVsSLBACentralSliceY);
+				  candCandFlagsVsSLBACentralSliceY = 1;
+				  if(slices[iSlice].cand[iCand].candFlag_phiOverlap)
+					  fill(m_packageName, candCandFlagsVsSLBACentralSliceX, candCandFlagsVsSLBACentralSliceY);
 
-                  candErrorFlagVsSLBACentralSlicePerLBX = num;
-                  candErrorFlagVsSLBACentralSlicePerLBY = currentLumiBlock;
-                  if(slices[iSlice].cand[iCand].errorFlag)
-                      fill(m_packageName, candErrorFlagVsSLBACentralSlicePerLBX, candErrorFlagVsSLBACentralSlicePerLBY);
-              }
-              else
-              {
-                  candRoiVsSLBAOtherSliceX = slices[iSlice].cand[iCand].num + 32*(1-slices[iSlice].cand[iCand].side);//offset side C
-                  candRoiVsSLBAOtherSliceY = slices[iSlice].cand[iCand].roi;
-                  fill(m_packageName, candRoiVsSLBAOtherSliceX, candRoiVsSLBAOtherSliceY);
-              }
-          }
-          else if(slices[iSlice].cand[iCand].type==LVL1::MuCTPIBits::SubsysID::Endcap)
-          {
-              uint num = slices[iSlice].cand[iCand].num + 48*(1-slices[iSlice].cand[iCand].side);//offset side C;
+				  candErrorFlagVsSLBACentralSlicePerLBX = currentLumiBlock;
+				  candErrorFlagVsSLBACentralSlicePerLBY = num;
+				  if(slices[iSlice].cand[iCand].errorFlag)
+					  fill(m_packageName, candErrorFlagVsSLBACentralSlicePerLBX, candErrorFlagVsSLBACentralSlicePerLBY);
+			  }
+			  else
+			  {
+				  candRoiVsSLBAOtherSliceX = slices[iSlice].cand[iCand].num + 32*(1-slices[iSlice].cand[iCand].side);//offset side C
+				  candRoiVsSLBAOtherSliceY = slices[iSlice].cand[iCand].roi;
+				  fill(m_packageName, candRoiVsSLBAOtherSliceX, candRoiVsSLBAOtherSliceY);
+			  }
+		  } // if barrel end
+		  else if(slices[iSlice].cand[iCand].type==LVL1::MuCTPIBits::SubsysID::Endcap)
+		  {
+			  uint num = slices[iSlice].cand[iCand].num + 48*(1-slices[iSlice].cand[iCand].side);//offset side C;
 
-              candPtECX = slices[iSlice].cand[iCand].pt;
-              fill(m_packageName, candPtECX);
+			  candPtECX = slices[iSlice].cand[iCand].pt;
+			  fill(m_packageName, candPtECX);
 
-              candSLVsLBECX = currentLumiBlock;
-              candSLVsLBECY = num;
-              fill(m_packageName, candSLVsLBECX, candSLVsLBECY);
+			  candSLVsLBECX = currentLumiBlock;
+			  candSLVsLBECY = num;
+			  fill(m_packageName, candSLVsLBECX, candSLVsLBECY);
 
-              bool vetoFlag = slices[iSlice].cand[iCand].vetoFlag;
-              if(vetoFlag)
-              {
-                  candVetoFlag_RoiVsSLECX = slices[iSlice].cand[iCand].roi;
-                  candVetoFlag_RoiVsSLECY = num;
-                  fill(m_packageName, candVetoFlag_RoiVsSLECX, candVetoFlag_RoiVsSLECY);
-              }
+			  bool vetoFlag = slices[iSlice].cand[iCand].vetoFlag;
+			  if(vetoFlag)
+			  {
+				  candVetoFlag_RoiVsSLECX = num;
+				  candVetoFlag_RoiVsSLECY = slices[iSlice].cand[iCand].roi;
+				  fill(m_packageName, candVetoFlag_RoiVsSLECX, candVetoFlag_RoiVsSLECY);
 
-              candSliceVsSLECX = num;
-              uint sliceIndex;
-              if(nSlices==7)      sliceIndex = iSlice;   //aligning the iSlice index for the 7-bin histo
-              else if(nSlices==5) sliceIndex = iSlice+1; //aligning the iSlice index for the 7-bin histo
-              else if(nSlices==3) sliceIndex = iSlice+2; //aligning the iSlice index for the 7-bin histo
-              else /*if(nSlices==1)*/ sliceIndex = 3; //central bin in a 7-bin histo
-              candSliceVsSLECY=sliceIndex;
-              fill(m_packageName, candSliceVsSLECX, candSliceVsSLECY);
+				  candVetoFlag_EtaPhiECX = candEta;
+				  candVetoFlag_EtaPhiECY = candPhi;
+				  fill(m_packageName, candVetoFlag_EtaPhiECX, candVetoFlag_EtaPhiECY);
+			  }
+
+			  if(slices[iSlice].cand[iCand].sectorFlag_nswMon)
+			  {
+				  candEtaPhi_NSWMonFlagX_EC = candEta;
+				  candEtaPhi_NSWMonFlagY_EC = candPhi;
+				  fill(m_packageName,candEtaPhi_NSWMonFlagX_EC,candEtaPhi_NSWMonFlagY_EC);
+			  }
+
+			  if(slices[iSlice].cand[iCand].sectorFlag_gtN)
+			  {
+				  candEtaPhi_SectorFlagGtNX_EC = candEta;
+				  candEtaPhi_SectorFlagGtNY_EC = candPhi;
+				  fill(m_packageName,candEtaPhi_SectorFlagGtNX_EC,candEtaPhi_SectorFlagGtNY_EC);
+			  }
+
+			  candSliceVsSLECX = num;
+			  uint sliceIndex;
+			  if(nSlices==7)      sliceIndex = iSlice;   //aligning the iSlice index for the 7-bin histo
+			  else if(nSlices==5) sliceIndex = iSlice+1; //aligning the iSlice index for the 7-bin histo
+			  else if(nSlices==3) sliceIndex = iSlice+2; //aligning the iSlice index for the 7-bin histo
+			  else sliceIndex = 3; //central bin in a 7-bin histo
+			  candSliceVsSLECY=sliceIndex;
+			  fill(m_packageName, candSliceVsSLECX, candSliceVsSLECY);
 
               //same but checking BG match
               //if currentBCID is in vector: bcidFirstInTrain, then fill histo
@@ -701,65 +803,83 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
                   fill(m_packageName, candSliceVsSLECFirstInTrainX, candSliceVsSLECFirstInTrainY);
               }
 
-              if(isCentralSlice)
-              {
-                  candRoiVsSLECCentralSliceX = num;
-                  candRoiVsSLECCentralSliceY = slices[iSlice].cand[iCand].roi;
-                  fill(m_packageName, candRoiVsSLECCentralSliceX, candRoiVsSLECCentralSliceY);
+			  if(isCentralSlice)
+			  {
+				  candRoiVsSLECCentralSliceX = num;
+				  candRoiVsSLECCentralSliceY = slices[iSlice].cand[iCand].roi;
+				  fill(m_packageName, candRoiVsSLECCentralSliceX, candRoiVsSLECCentralSliceY);
 
-                  candCandFlagsVsSLECCentralSliceX = num;
-                  candCandFlagsVsSLECCentralSliceY = 0;
-                  if(slices[iSlice].cand[iCand].candFlag_Charge)
-                      fill(m_packageName, candCandFlagsVsSLECCentralSliceX, candCandFlagsVsSLECCentralSliceY);
+				  candCandFlagsVsSLECCentralSliceX = num;
+				  candCandFlagsVsSLECCentralSliceY = 0;
+				  if(slices[iSlice].cand[iCand].candFlag_Charge)
+					  fill(m_packageName, candCandFlagsVsSLECCentralSliceX, candCandFlagsVsSLECCentralSliceY);
 
-                  candCandFlagsVsSLECCentralSliceY = 1;
-                  if(slices[iSlice].cand[iCand].candFlag_BW23)
-                      fill(m_packageName, candCandFlagsVsSLECCentralSliceX, candCandFlagsVsSLECCentralSliceY);
+				  candCandFlagsVsSLECCentralSliceY = 1;
+				  if(slices[iSlice].cand[iCand].candFlag_BW23)
+					  fill(m_packageName, candCandFlagsVsSLECCentralSliceX, candCandFlagsVsSLECCentralSliceY);
 
-                  candCandFlagsVsSLECCentralSliceY = 2;
-                  if(slices[iSlice].cand[iCand].candFlag_InnerCoin)
-                      fill(m_packageName, candCandFlagsVsSLECCentralSliceX, candCandFlagsVsSLECCentralSliceY);
+				  candCandFlagsVsSLECCentralSliceY = 2;
+				  if(slices[iSlice].cand[iCand].candFlag_InnerCoin)
+					  fill(m_packageName, candCandFlagsVsSLECCentralSliceX, candCandFlagsVsSLECCentralSliceY);
 
-                  candCandFlagsVsSLECCentralSliceY = 3;
-                  if(slices[iSlice].cand[iCand].candFlag_GoodMF)
-                      fill(m_packageName, candCandFlagsVsSLECCentralSliceX, candCandFlagsVsSLECCentralSliceY);
+				  candCandFlagsVsSLECCentralSliceY = 3;
+				  if(slices[iSlice].cand[iCand].candFlag_GoodMF)
+					  fill(m_packageName, candCandFlagsVsSLECCentralSliceX, candCandFlagsVsSLECCentralSliceY);
 
-                  candErrorFlagVsSLECCentralSlicePerLBX = num;
-                  candErrorFlagVsSLECCentralSlicePerLBY = currentLumiBlock;
-                  if(slices[iSlice].cand[iCand].errorFlag)
-                      fill(m_packageName, candErrorFlagVsSLECCentralSlicePerLBX, candErrorFlagVsSLECCentralSlicePerLBY);
-              }
-              else
-              {
-                  candRoiVsSLECOtherSliceX = slices[iSlice].cand[iCand].num + 48*(1-slices[iSlice].cand[iCand].side);//offset side C
-                  candRoiVsSLECOtherSliceY = slices[iSlice].cand[iCand].roi;
-                  fill(m_packageName, candRoiVsSLECOtherSliceX, candRoiVsSLECOtherSliceY);
-              }
-          }
-          else if(slices[iSlice].cand[iCand].type==LVL1::MuCTPIBits::SubsysID::Forward)
-          {
-              uint num = slices[iSlice].cand[iCand].num + 24*(1-slices[iSlice].cand[iCand].side);//offset side C;
-              candPtFWX = slices[iSlice].cand[iCand].pt;
-              fill(m_packageName, candPtFWX);
+				  candErrorFlagVsSLECCentralSlicePerLBX = currentLumiBlock;
+				  candErrorFlagVsSLECCentralSlicePerLBY = num;
+				  if(slices[iSlice].cand[iCand].errorFlag)
+					  fill(m_packageName, candErrorFlagVsSLECCentralSlicePerLBX, candErrorFlagVsSLECCentralSlicePerLBY);
+			  }
+			  else
+			  {
+				  candRoiVsSLECOtherSliceX = slices[iSlice].cand[iCand].num + 48*(1-slices[iSlice].cand[iCand].side);//offset side C
+				  candRoiVsSLECOtherSliceY = slices[iSlice].cand[iCand].roi;
+				  fill(m_packageName, candRoiVsSLECOtherSliceX, candRoiVsSLECOtherSliceY);
+			  }
+		  } // if endcap end
+		  else if(slices[iSlice].cand[iCand].type==LVL1::MuCTPIBits::SubsysID::Forward)
+		  {
+			  uint num = slices[iSlice].cand[iCand].num + 24*(1-slices[iSlice].cand[iCand].side);//offset side C;
+			  candPtFWX = slices[iSlice].cand[iCand].pt;
+			  fill(m_packageName, candPtFWX);
 
-              candSLVsLBFWX = currentLumiBlock;
-              candSLVsLBFWY = num;
-              fill(m_packageName, candSLVsLBFWX, candSLVsLBFWY);
+			  candSLVsLBFWX = currentLumiBlock;
+			  candSLVsLBFWY = num;
+			  fill(m_packageName, candSLVsLBFWX, candSLVsLBFWY);
 
-              bool vetoFlag = slices[iSlice].cand[iCand].vetoFlag;
-              if(vetoFlag)
-              {
-                  candVetoFlag_RoiVsSLFWX = slices[iSlice].cand[iCand].roi;
-                  candVetoFlag_RoiVsSLFWY = num;
-                  fill(m_packageName, candVetoFlag_RoiVsSLFWX, candVetoFlag_RoiVsSLFWY);
-              }
+			  bool vetoFlag = slices[iSlice].cand[iCand].vetoFlag;
+			  if(vetoFlag)
+			  {
+				  candVetoFlag_RoiVsSLFWX = num;
+				  candVetoFlag_RoiVsSLFWY = slices[iSlice].cand[iCand].roi;
+				  fill(m_packageName, candVetoFlag_RoiVsSLFWX, candVetoFlag_RoiVsSLFWY);
+
+				  candVetoFlag_EtaPhiFWX = candEta;
+				  candVetoFlag_EtaPhiFWY = candPhi;
+				  fill(m_packageName, candVetoFlag_EtaPhiFWX, candVetoFlag_EtaPhiFWY);
+			  }
+
+			  if(slices[iSlice].cand[iCand].sectorFlag_nswMon)
+			  {
+				  candEtaPhi_NSWMonFlagX_FW = candEta;
+				  candEtaPhi_NSWMonFlagY_FW = candPhi;
+				  fill(m_packageName,candEtaPhi_NSWMonFlagX_FW,candEtaPhi_NSWMonFlagY_FW);
+			  }
+
+			  if(slices[iSlice].cand[iCand].sectorFlag_gtN)
+			  {
+				  candEtaPhi_SectorFlagGtNX_FW = candEta;
+				  candEtaPhi_SectorFlagGtNY_FW = candPhi;
+				  fill(m_packageName,candEtaPhi_SectorFlagGtNX_FW,candEtaPhi_SectorFlagGtNY_FW);
+			  }
 
               candSliceVsSLFWX = num;
               uint sliceIndex;
               if(nSlices==7)      sliceIndex = iSlice;   //aligning the iSlice index for the 7-bin histo
               else if(nSlices==5) sliceIndex = iSlice+1; //aligning the iSlice index for the 7-bin histo
               else if(nSlices==3) sliceIndex = iSlice+2; //aligning the iSlice index for the 7-bin histo
-              else /*if(nSlices==1)*/ sliceIndex = 3; //central bin in a 7-bin histo
+              else sliceIndex = 3; //central bin in a 7-bin histo
               candSliceVsSLFWY=sliceIndex;
               fill(m_packageName, candSliceVsSLFWX, candSliceVsSLFWY);
 
@@ -772,179 +892,456 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
                   fill(m_packageName, candSliceVsSLFWFirstInTrainX, candSliceVsSLFWFirstInTrainY);
               }
 
-              if(isCentralSlice)
-              {
-                  candRoiVsSLFWCentralSliceX = num;
-                  candRoiVsSLFWCentralSliceY = slices[iSlice].cand[iCand].roi;
-                  fill(m_packageName, candRoiVsSLFWCentralSliceX, candRoiVsSLFWCentralSliceY);
+			  if(isCentralSlice)
+			  {
+				  candRoiVsSLFWCentralSliceX = num;
+				  candRoiVsSLFWCentralSliceY = slices[iSlice].cand[iCand].roi;
+				  fill(m_packageName, candRoiVsSLFWCentralSliceX, candRoiVsSLFWCentralSliceY);
 
-                  candCandFlagsVsSLFWCentralSliceX = num;
-                  candCandFlagsVsSLFWCentralSliceY = 0;
-                  if(slices[iSlice].cand[iCand].candFlag_Charge)
-                      fill(m_packageName, candCandFlagsVsSLFWCentralSliceX, candCandFlagsVsSLFWCentralSliceY);
+				  candCandFlagsVsSLFWCentralSliceX = num;
+				  candCandFlagsVsSLFWCentralSliceY = 0;
+				  if(slices[iSlice].cand[iCand].candFlag_Charge)
+					  fill(m_packageName, candCandFlagsVsSLFWCentralSliceX, candCandFlagsVsSLFWCentralSliceY);
 
-                  candCandFlagsVsSLFWCentralSliceY = 1;
-                  if(slices[iSlice].cand[iCand].candFlag_BW23)
-                      fill(m_packageName, candCandFlagsVsSLFWCentralSliceX, candCandFlagsVsSLFWCentralSliceY);
+				  candCandFlagsVsSLFWCentralSliceY = 1;
+				  if(slices[iSlice].cand[iCand].candFlag_BW23)
+					  fill(m_packageName, candCandFlagsVsSLFWCentralSliceX, candCandFlagsVsSLFWCentralSliceY);
 
-                  candCandFlagsVsSLFWCentralSliceY = 2;
-                  if(slices[iSlice].cand[iCand].candFlag_InnerCoin)
-                      fill(m_packageName, candCandFlagsVsSLFWCentralSliceX, candCandFlagsVsSLFWCentralSliceY);
+				  candCandFlagsVsSLFWCentralSliceY = 2;
+				  if(slices[iSlice].cand[iCand].candFlag_InnerCoin)
+					  fill(m_packageName, candCandFlagsVsSLFWCentralSliceX, candCandFlagsVsSLFWCentralSliceY);
 
-                  candCandFlagsVsSLFWCentralSliceY = 3;
-                  if(slices[iSlice].cand[iCand].candFlag_GoodMF)
-                      fill(m_packageName, candCandFlagsVsSLFWCentralSliceX, candCandFlagsVsSLECCentralSliceY);
+				  candCandFlagsVsSLFWCentralSliceY = 3;
+				  if(slices[iSlice].cand[iCand].candFlag_GoodMF)
+					  fill(m_packageName, candCandFlagsVsSLFWCentralSliceX, candCandFlagsVsSLECCentralSliceY);
 
-                  candErrorFlagVsSLFWCentralSlicePerLBX = num;
-                  candErrorFlagVsSLFWCentralSlicePerLBY = currentLumiBlock;
-                  if(slices[iSlice].cand[iCand].errorFlag)
-                      fill(m_packageName, candErrorFlagVsSLFWCentralSlicePerLBX, candErrorFlagVsSLFWCentralSlicePerLBY);
-              }
-              else
-              {
-                  candRoiVsSLFWOtherSliceX = slices[iSlice].cand[iCand].num + 24*(1-slices[iSlice].cand[iCand].side);//offset side C
-                  candRoiVsSLFWOtherSliceY = slices[iSlice].cand[iCand].roi;
-                  fill(m_packageName, candRoiVsSLFWOtherSliceX, candRoiVsSLFWOtherSliceY);
-              }
-          }
-
-      }
+				  candErrorFlagVsSLFWCentralSlicePerLBX = currentLumiBlock;
+				  candErrorFlagVsSLFWCentralSlicePerLBY = num;
+				  if(slices[iSlice].cand[iCand].errorFlag)
+					  fill(m_packageName, candErrorFlagVsSLFWCentralSlicePerLBX, candErrorFlagVsSLFWCentralSlicePerLBY);
+			  }
+			  else
+			  {
+				  candRoiVsSLFWOtherSliceX = slices[iSlice].cand[iCand].num + 24*(1-slices[iSlice].cand[iCand].side);//offset side C
+				  candRoiVsSLFWOtherSliceY = slices[iSlice].cand[iCand].roi;
+				  fill(m_packageName, candRoiVsSLFWOtherSliceX, candRoiVsSLFWOtherSliceY);
+			  }
+		  } // if forward end
+	  } // for cand loop end
 
       //-------------------------------------------------
-      //TOBs
-      //-------------------------------------------------
+	  //TOBs
+	  //-------------------------------------------------
 
-      ///per Side
-      {
-          /// 2D eta-phi hits
-          /// (clarify eta bits)
+	  ///per Side
+	  /// 2D eta-phi hits
+	  /// (clarify eta bits)
+	  
+	  /// 2D eta/phi - fill when GoodMF    (EF only)
+	  /// 2D eta/phi - fill when InnerCoin (EF only)
+	  /// 2D eta/phi - fill when BW23      (EF only)
+	  /// 2D eta/phi - fill when charge    (EF only)
+	  
+	  /// 2D pT VS phi
+	  /// 2D pT VS eta
 
-          /// 2D eta/phi - fill when GoodMF    (EF only)
-          /// 2D eta/phi - fill when InnerCoin (EF only)
-          /// 2D eta/phi - fill when BW23      (EF only)
-          /// 2D eta/phi - fill when charge    (EF only)
+	  ///if tobCount!=tob words
+	  if(header_tobCount != slices[iSlice].tob.size())
+	  {
+		  errorSummaryMUCTPI=3;
+		  fill(m_packageName, errorSummaryMUCTPI);
+		  errorSummaryPerLumiBlockMUCTPIX=3;
+		  errorSummaryPerLumiBlockMUCTPIY=currentLumiBlock;
+		  fill(m_packageName, errorSummaryPerLumiBlockMUCTPIX, errorSummaryPerLumiBlockMUCTPIY);
+	  }
 
-          /// 2D pT VS phi
-          /// 2D pT VS eta
-      }
+	  //Fill histogram of distribution of TOBs
+	  //with information from central time slice
+	  if(isCentralSlice)
+	  {
+		  tobCount  = slices[iSlice].tob.size();
+		  fill(m_packageName,tobCount);
 
-      ///if tobCount!=tob words
-      if(header_tobCount != slices[iSlice].tob.size())
-      {
-          errorSummaryMUCTPIX=3;
-          fill(m_packageName, errorSummaryMUCTPIX);
-          errorSummaryPerLumiBlockMUCTPIX=3;
-          errorSummaryPerLumiBlockMUCTPIY=currentLumiBlock;
-          fill(m_packageName, errorSummaryPerLumiBlockMUCTPIX, errorSummaryPerLumiBlockMUCTPIY);
-      }
+		  //Histogramming the difference between candidates and TOBs for each side per lumiblock
+		  tobCandDifferenceX = currentLumiBlock;
+		  tobCandDifferenceY = slices[iSlice].cand.size() - slices[iSlice].tob.size();
+		  fill(m_packageName, tobCandDifferenceX, tobCandDifferenceY);
 
-      for(uint iTOB=0;iTOB<slices[iSlice].tob.size();iTOB++)
-      {
+		  if(slices[iSlice].bcid != currentBCID)
+		  {
+			  errorSummaryMUCTPI=1;
+			  fill(m_packageName, errorSummaryMUCTPI);
+			  errorSummaryPerLumiBlockMUCTPIX=1;
+			  errorSummaryPerLumiBlockMUCTPIY=currentLumiBlock;
+			  fill(m_packageName, errorSummaryPerLumiBlockMUCTPIX, errorSummaryPerLumiBlockMUCTPIY);
+		  }
+	  }
+		
+	  for(uint iTOB=0;iTOB<slices[iSlice].tob.size();iTOB++)
+	  {
 
-          uint eta = slices[iSlice].tob[iTOB].etaRaw;
-          uint phi = slices[iSlice].tob[iTOB].phiRaw;
-          uint pt = slices[iSlice].tob[iTOB].pt;
+		  uint eta = slices[iSlice].tob[iTOB].etaRaw;
+		  uint phi = slices[iSlice].tob[iTOB].phiRaw;
+		  uint pt  = slices[iSlice].tob[iTOB].pt;
+		  float etaDecoded = slices[iSlice].tob[iTOB].etaDecoded;
+		  float phiDecoded = slices[iSlice].tob[iTOB].phiDecoded;
 
-          if(slices[iSlice].tob[iTOB].side==1)//A
-          {
-              tobEtaPhiAX = phi;
-              tobEtaPhiAY = eta;
-              fill(m_packageName, tobEtaPhiAX, tobEtaPhiAY);
+		  if(slices[iSlice].tob[iTOB].side==1)//A
+		  {
+			  // Filling the histogram without decoding
+			  tobEtaPhiAX = eta;
+			  tobEtaPhiAY = phi;
+			  fill(m_packageName, tobEtaPhiAX, tobEtaPhiAY);
 
-              if(slices[iSlice].tob[iTOB].candFlag_GoodMF)
-              {
-                  tobEtaPhiA_GoodMFX = phi;
-                  tobEtaPhiA_GoodMFY = eta;
-                  fill(m_packageName, tobEtaPhiA_GoodMFX, tobEtaPhiA_GoodMFY);
-              }
-              if(slices[iSlice].tob[iTOB].candFlag_InnerCoin)
-              {
-                  tobEtaPhiA_InnerCoinX = phi;
-                  tobEtaPhiA_InnerCoinY = eta;
-                  fill(m_packageName, tobEtaPhiA_InnerCoinX, tobEtaPhiA_InnerCoinY);
-              }
-              if(slices[iSlice].tob[iTOB].candFlag_BW23)
-              {
-                  tobEtaPhiA_BW23X = phi;
-                  tobEtaPhiA_BW23Y = eta;
-                  fill(m_packageName, tobEtaPhiA_BW23X, tobEtaPhiA_BW23Y);
-              }
-              if(slices[iSlice].tob[iTOB].candFlag_Charge)
-              {
-                  tobEtaPhiA_ChargeX = phi;
-                  tobEtaPhiA_ChargeY = eta;
-                  fill(m_packageName, tobEtaPhiA_ChargeX, tobEtaPhiA_ChargeY);
-              }
+			  tobPtVsEtaAX = eta;
+			  tobPtVsEtaAY = pt;
+			  fill(m_packageName, tobPtVsEtaAX, tobPtVsEtaAY);
+              
+			  tobPtVsPhiAX = phi;
+			  tobPtVsPhiAY = pt;
+			  fill(m_packageName, tobPtVsPhiAX, tobPtVsPhiAY);
 
-              tobPtVsEtaAX = eta;
-              tobPtVsEtaAY = pt;
-              fill(m_packageName, tobPtVsEtaAX, tobPtVsEtaAY);
-              tobPtVsPhiAX = eta;
-              tobPtVsPhiAY = pt;
-              fill(m_packageName, tobPtVsPhiAX, tobPtVsPhiAY);
-          }//side A
-          else
-          {
-              tobEtaPhiCX = phi;
-              tobEtaPhiCY = eta;
-              fill(m_packageName, tobEtaPhiCX, tobEtaPhiCY);
+			  if(slices[iSlice].tob[iTOB].candFlag_GoodMF) {
+				  tobEtaPhiA_GoodMFX = eta;
+				  tobEtaPhiA_GoodMFY = phi;
+				  fill(m_packageName, tobEtaPhiA_GoodMFX, tobEtaPhiA_GoodMFY);
+			  }
 
-              if(slices[iSlice].tob[iTOB].candFlag_GoodMF)
-              {
-                  tobEtaPhiC_GoodMFX = phi;
-                  tobEtaPhiC_GoodMFY = eta;
-                  fill(m_packageName, tobEtaPhiC_GoodMFX, tobEtaPhiC_GoodMFY);
-              }
-              if(slices[iSlice].tob[iTOB].candFlag_InnerCoin)
-              {
-                  tobEtaPhiC_InnerCoinX = phi;
-                  tobEtaPhiC_InnerCoinY = eta;
-                  fill(m_packageName, tobEtaPhiC_InnerCoinX, tobEtaPhiC_InnerCoinY);
-              }
-              if(slices[iSlice].tob[iTOB].candFlag_BW23)
-              {
-                  tobEtaPhiC_BW23X = phi;
-                  tobEtaPhiC_BW23Y = eta;
-                  fill(m_packageName, tobEtaPhiC_BW23X, tobEtaPhiC_BW23Y);
-              }
-              if(slices[iSlice].tob[iTOB].candFlag_Charge)
-              {
-                  tobEtaPhiC_ChargeX = phi;
-                  tobEtaPhiC_ChargeY = eta;
-                  fill(m_packageName, tobEtaPhiC_ChargeX, tobEtaPhiC_ChargeY);
-              }
+			  if(slices[iSlice].tob[iTOB].candFlag_InnerCoin) {
+				  tobEtaPhiA_InnerCoinX = eta;
+				  tobEtaPhiA_InnerCoinY = phi;
+				  fill(m_packageName, tobEtaPhiA_InnerCoinX, tobEtaPhiA_InnerCoinY);
+			  }
 
-              tobPtVsEtaCX = eta;
-              tobPtVsEtaCY = pt;
-              fill(m_packageName, tobPtVsEtaCX, tobPtVsEtaCY);
-              tobPtVsPhiCX = eta;
-              tobPtVsPhiCY = pt;
-              fill(m_packageName, tobPtVsPhiCX, tobPtVsPhiCY);
-          }//side C
+			  if(slices[iSlice].tob[iTOB].candFlag_BW23) {
+				  tobEtaPhiA_BW23X = eta;
+				  tobEtaPhiA_BW23Y = phi;
+				  fill(m_packageName, tobEtaPhiA_BW23X, tobEtaPhiA_BW23Y);	
+			  }
 
-      }//TOB for loop
+			  if(slices[iSlice].tob[iTOB].candFlag_Charge) {
+				  tobEtaPhiA_ChargeX = eta;
+				  tobEtaPhiA_ChargeY = phi;
+				  fill(m_packageName, tobEtaPhiA_ChargeX, tobEtaPhiA_ChargeY);
+			  }
 
+			  // Filling the histogram with decoded eta/phi
+			  switch(slices[iSlice].tob[iTOB].det)
+			  {
+			  case 0: // BA
+			  {				  
+				  tobEtaPhiXdecoded_BA = etaDecoded;
+				  tobEtaPhiYdecoded_BA = phiDecoded;
+				  fill(m_packageName, tobEtaPhiXdecoded_BA, tobEtaPhiYdecoded_BA);
+
+				  tobPtVsEtaXdecoded_BA = etaDecoded;
+				  tobPtVsEtaYdecoded_BA = pt;
+				  fill(m_packageName, tobPtVsEtaXdecoded_BA, tobPtVsEtaYdecoded_BA);
+
+				  tobPtVsPhiXdecoded_BA = phiDecoded;
+				  tobPtVsPhiYdecoded_BA = pt;
+				  fill(m_packageName, tobPtVsPhiXdecoded_BA, tobPtVsPhiYdecoded_BA);
+
+				  break;
+			  }
+			  case 1: // FW
+			  {
+				  tobEtaPhiXdecoded_FW = etaDecoded;
+				  tobEtaPhiYdecoded_FW = phiDecoded;
+				  fill(m_packageName, tobEtaPhiXdecoded_FW, tobEtaPhiYdecoded_FW);
+
+				  tobPtVsEtaXdecoded_FW = etaDecoded;
+				  tobPtVsEtaYdecoded_FW = pt;
+				  fill(m_packageName, tobPtVsEtaXdecoded_FW, tobPtVsEtaYdecoded_FW);
+
+				  tobPtVsPhiXdecoded_FW = phiDecoded;
+				  tobPtVsPhiYdecoded_FW = pt;
+				  fill(m_packageName, tobPtVsPhiXdecoded_FW, tobPtVsPhiYdecoded_FW);
+
+				  if(slices[iSlice].tob[iTOB].candFlag_GoodMF) {
+					  tobEtaPhi_GoodMFXdecoded_FW = etaDecoded;
+					  tobEtaPhi_GoodMFYdecoded_FW = phiDecoded;
+					  fill(m_packageName, tobEtaPhi_GoodMFXdecoded_FW, tobEtaPhi_GoodMFYdecoded_FW);
+				  }
+
+				  if(slices[iSlice].tob[iTOB].candFlag_InnerCoin) {
+					  tobEtaPhi_InnerCoinXdecoded_FW = etaDecoded;
+					  tobEtaPhi_InnerCoinYdecoded_FW = phiDecoded;
+					  fill(m_packageName, tobEtaPhi_InnerCoinXdecoded_FW, tobEtaPhi_InnerCoinYdecoded_FW);
+				  }
+
+				  if(slices[iSlice].tob[iTOB].candFlag_BW23) {
+					  tobEtaPhi_BW23Xdecoded_FW = etaDecoded;
+					  tobEtaPhi_BW23Ydecoded_FW = phiDecoded;
+					  fill(m_packageName, tobEtaPhi_BW23Xdecoded_FW, tobEtaPhi_BW23Ydecoded_FW);
+				  }
+
+				  if(slices[iSlice].tob[iTOB].candFlag_Charge) {
+					  tobEtaPhi_ChargeXdecoded_FW = etaDecoded;
+					  tobEtaPhi_ChargeYdecoded_FW = phiDecoded;
+					  fill(m_packageName, tobEtaPhi_ChargeXdecoded_FW, tobEtaPhi_ChargeYdecoded_FW);
+				  }
+
+				  break;
+			  }
+			  case 2: // EC
+			  {
+				  tobEtaPhiXdecoded_EC = etaDecoded;
+				  tobEtaPhiYdecoded_EC = phiDecoded;
+				  fill(m_packageName, tobEtaPhiXdecoded_EC, tobEtaPhiYdecoded_EC);
+
+				  tobPtVsEtaXdecoded_EC = etaDecoded;
+				  tobPtVsEtaYdecoded_EC = pt;
+				  fill(m_packageName, tobPtVsEtaXdecoded_EC, tobPtVsEtaYdecoded_EC);
+
+				  tobPtVsPhiXdecoded_EC = phiDecoded;
+				  tobPtVsPhiYdecoded_EC = pt;
+				  fill(m_packageName, tobPtVsPhiXdecoded_EC, tobPtVsPhiYdecoded_EC);
+
+				  if(slices[iSlice].tob[iTOB].candFlag_GoodMF) {
+					  tobEtaPhi_GoodMFXdecoded_EC = etaDecoded;
+					  tobEtaPhi_GoodMFYdecoded_EC = phiDecoded;
+					  fill(m_packageName, tobEtaPhi_GoodMFXdecoded_EC, tobEtaPhi_GoodMFYdecoded_EC);
+				  }
+
+				  if(slices[iSlice].tob[iTOB].candFlag_InnerCoin) {
+					  tobEtaPhi_InnerCoinXdecoded_EC = etaDecoded;
+					  tobEtaPhi_InnerCoinYdecoded_EC = phiDecoded;
+					  fill(m_packageName, tobEtaPhi_InnerCoinXdecoded_EC, tobEtaPhi_InnerCoinYdecoded_EC);
+				  }
+
+				  if(slices[iSlice].tob[iTOB].candFlag_BW23) {
+					  tobEtaPhi_BW23Xdecoded_EC = etaDecoded;
+					  tobEtaPhi_BW23Ydecoded_EC = phiDecoded;
+					  fill(m_packageName, tobEtaPhi_BW23Xdecoded_EC, tobEtaPhi_BW23Ydecoded_EC);
+				  }
+
+				  if(slices[iSlice].tob[iTOB].candFlag_Charge) {
+					  tobEtaPhi_ChargeXdecoded_EC = etaDecoded;
+					  tobEtaPhi_ChargeYdecoded_EC = phiDecoded;
+					  fill(m_packageName, tobEtaPhi_ChargeXdecoded_EC, tobEtaPhi_ChargeYdecoded_EC);
+				  }
+				  break;
+			  }
+			  }
+		  }//side A
+		  else
+		  {
+			  tobEtaPhiCX = eta;
+			  tobEtaPhiCY = phi;
+			  fill(m_packageName, tobEtaPhiCX, tobEtaPhiCY);
+
+			  tobPtVsEtaCX = eta;
+			  tobPtVsEtaCY = pt;
+			  fill(m_packageName, tobPtVsEtaCX, tobPtVsEtaCY);
+
+			  tobPtVsPhiCX = phi;
+			  tobPtVsPhiCY = pt;
+			  fill(m_packageName, tobPtVsPhiCX, tobPtVsPhiCY);
+
+			  if(slices[iSlice].tob[iTOB].candFlag_GoodMF) {
+				  tobEtaPhiC_GoodMFX = eta;
+				  tobEtaPhiC_GoodMFY = phi;
+				  fill(m_packageName, tobEtaPhiC_GoodMFX, tobEtaPhiC_GoodMFY);
+			  }
+
+			  if(slices[iSlice].tob[iTOB].candFlag_InnerCoin) {
+				  tobEtaPhiC_InnerCoinX = eta;
+				  tobEtaPhiC_InnerCoinY = phi;
+				  fill(m_packageName, tobEtaPhiC_InnerCoinX, tobEtaPhiC_InnerCoinY);
+			  }
+
+			  if(slices[iSlice].tob[iTOB].candFlag_BW23) {
+				  tobEtaPhiC_BW23X = eta;
+				  tobEtaPhiC_BW23Y = phi;
+				  fill(m_packageName, tobEtaPhiC_BW23X, tobEtaPhiC_BW23Y);
+			  }
+
+			  if(slices[iSlice].tob[iTOB].candFlag_Charge) {
+				  tobEtaPhiC_ChargeX = eta;
+				  tobEtaPhiC_ChargeY = phi;
+				  fill(m_packageName, tobEtaPhiC_ChargeX, tobEtaPhiC_ChargeY);
+			  }
+
+			  // filling histograms with decoded values of eta/phi
+			  switch(slices[iSlice].tob[iTOB].det)
+			  {
+		      // BA
+			  case 0:
+			  {
+				  tobEtaPhiXdecoded_BA = etaDecoded;
+				  tobEtaPhiYdecoded_BA = phiDecoded;
+				  fill(m_packageName, tobEtaPhiXdecoded_BA, tobEtaPhiYdecoded_BA);
+
+				  tobPtVsEtaXdecoded_BA = etaDecoded;
+				  tobPtVsEtaYdecoded_BA = pt;
+				  fill(m_packageName, tobPtVsEtaXdecoded_BA, tobPtVsEtaYdecoded_BA);
+
+				  tobPtVsPhiXdecoded_BA = phiDecoded;
+				  tobPtVsPhiYdecoded_BA = pt;
+				  fill(m_packageName, tobPtVsPhiXdecoded_BA, tobPtVsPhiYdecoded_BA);
+
+				  break;
+			  }
+
+			  // FW
+			  case 1:
+			  {
+				  tobEtaPhiXdecoded_FW = etaDecoded;
+				  tobEtaPhiYdecoded_FW = phiDecoded;
+				  fill(m_packageName, tobEtaPhiXdecoded_FW, tobEtaPhiYdecoded_FW);
+
+				  tobPtVsEtaXdecoded_FW = etaDecoded;
+				  tobPtVsEtaYdecoded_FW = pt;
+				  fill(m_packageName, tobPtVsEtaXdecoded_FW, tobPtVsEtaYdecoded_FW);
+
+				  tobPtVsPhiXdecoded_FW = phiDecoded;
+				  tobPtVsPhiYdecoded_FW = pt;
+				  fill(m_packageName, tobPtVsPhiXdecoded_FW, tobPtVsPhiYdecoded_FW);
+				  
+				  if(slices[iSlice].tob[iTOB].candFlag_GoodMF) {
+					  tobEtaPhi_GoodMFXdecoded_FW = etaDecoded;
+					  tobEtaPhi_GoodMFYdecoded_FW = phiDecoded;
+					  fill(m_packageName, tobEtaPhi_GoodMFXdecoded_FW, tobEtaPhi_GoodMFYdecoded_FW);
+				  }
+
+				  if(slices[iSlice].tob[iTOB].candFlag_InnerCoin) {
+					  tobEtaPhi_InnerCoinXdecoded_FW = etaDecoded;
+					  tobEtaPhi_InnerCoinYdecoded_FW = phiDecoded;
+					  fill(m_packageName, tobEtaPhi_InnerCoinXdecoded_FW, tobEtaPhi_InnerCoinYdecoded_FW);
+				  }
+
+				  if(slices[iSlice].tob[iTOB].candFlag_BW23) {
+					  tobEtaPhi_BW23Xdecoded_FW = etaDecoded;
+					  tobEtaPhi_BW23Ydecoded_FW = phiDecoded;
+					  fill(m_packageName, tobEtaPhi_BW23Xdecoded_FW, tobEtaPhi_BW23Ydecoded_FW);
+				  }
+
+				  if(slices[iSlice].tob[iTOB].candFlag_Charge) {
+					  tobEtaPhi_ChargeXdecoded_FW = etaDecoded;
+					  tobEtaPhi_ChargeYdecoded_FW = phiDecoded;
+					  fill(m_packageName, tobEtaPhi_ChargeXdecoded_FW, tobEtaPhi_ChargeYdecoded_FW);
+				  }
+
+				  break;
+			  }
+				
+			  // EC
+			  case 2:
+			  {
+				  tobEtaPhiXdecoded_EC = etaDecoded;
+				  tobEtaPhiYdecoded_EC = phiDecoded;
+				  fill(m_packageName, tobEtaPhiXdecoded_EC, tobEtaPhiYdecoded_EC);
+
+				  tobPtVsEtaXdecoded_EC = etaDecoded;
+				  tobPtVsEtaYdecoded_EC = pt;
+				  fill(m_packageName, tobPtVsEtaXdecoded_EC, tobPtVsEtaYdecoded_EC);
+
+				  tobPtVsPhiXdecoded_EC = phiDecoded;
+				  tobPtVsPhiYdecoded_EC = pt;
+				  fill(m_packageName, tobPtVsPhiXdecoded_EC, tobPtVsPhiYdecoded_EC);
+
+				  if(slices[iSlice].tob[iTOB].candFlag_GoodMF) {
+					  tobEtaPhi_GoodMFXdecoded_EC = etaDecoded;
+					  tobEtaPhi_GoodMFYdecoded_EC = phiDecoded;
+					  fill(m_packageName, tobEtaPhi_GoodMFXdecoded_EC, tobEtaPhi_GoodMFYdecoded_EC);
+				  }
+
+				  if(slices[iSlice].tob[iTOB].candFlag_InnerCoin) {
+					  tobEtaPhi_InnerCoinXdecoded_EC = etaDecoded;
+					  tobEtaPhi_InnerCoinYdecoded_EC = phiDecoded;
+					  fill(m_packageName, tobEtaPhi_InnerCoinXdecoded_EC, tobEtaPhi_InnerCoinYdecoded_EC);
+				  }
+
+				  if(slices[iSlice].tob[iTOB].candFlag_BW23) {
+					  tobEtaPhi_BW23Xdecoded_EC = etaDecoded;
+					  tobEtaPhi_BW23Ydecoded_EC = phiDecoded;
+					  fill(m_packageName, tobEtaPhi_BW23Xdecoded_EC, tobEtaPhi_BW23Ydecoded_EC);
+				  }
+
+				  if(slices[iSlice].tob[iTOB].candFlag_Charge) {
+					  tobEtaPhi_ChargeXdecoded_EC = etaDecoded;
+					  tobEtaPhi_ChargeYdecoded_EC = phiDecoded;
+					  fill(m_packageName, tobEtaPhi_ChargeXdecoded_EC, tobEtaPhi_ChargeYdecoded_EC);
+				  }
+
+				  break;
+			  }
+			  }
+		  }//side C
+		  
+
+		  // We loop over the vector of tobs and check that every tob has its
+		  // counterpart in the candidates vector, which has been filled 
+		  // with non-vetoed candidates only.
+		  // Once a good candidate is found we remove it from the vector of
+		  // candidates. Once the vector of candidates is zero we stop the loop.
+		  for(uint j=0; j<slices[iSlice].cand.size(); ++j)
+		  {
+			  if( slices[iSlice].tob[iTOB].side      == slices[iSlice].cand[j].side      &&
+			      slices[iSlice].tob[iTOB].subsystem == slices[iSlice].cand[j].subsystem &&
+				  slices[iSlice].tob[iTOB].sec       == slices[iSlice].cand[j].num       &&
+				  slices[iSlice].tob[iTOB].pt        == slices[iSlice].cand[j].mappedPt )
+			  {
+				  if( slices[iSlice].tob[iTOB].etaDecoded == slices[iSlice].cand[j].eta &&
+					  slices[iSlice].tob[iTOB].phiDecoded == slices[iSlice].cand[j].phi )
+				  {
+					  ATH_MSG_DEBUG("Found the correspondence tob/cand");
+				  }
+				  else 
+				  {
+					  ATH_MSG_WARNING("(Eta,Phi) coordinates not matching between TOB word and Candidate word.  LB="<<std::dec<<currentLumiBlock);
+					  ATH_MSG_WARNING("TOB  (Eta,Phi): (" << slices[iSlice].tob[iTOB].etaDecoded << "," << slices[iSlice].tob[iTOB].phiDecoded << ")");
+					  ATH_MSG_WARNING("cand (Eta,Phi): (" << slices[iSlice].cand[j].eta << "," << slices[iSlice].cand[j].phi << ")");
+
+					  errorSummaryMUCTPI=5;
+					  fill(m_packageName, errorSummaryMUCTPI);
+					  errorSummaryPerLumiBlockMUCTPIX=currentLumiBlock;
+					  errorSummaryPerLumiBlockMUCTPIY=5;
+					  fill(m_packageName, errorSummaryPerLumiBlockMUCTPIX, errorSummaryPerLumiBlockMUCTPIY);
+				  }
+			  }
+		  }
+
+
+	  }//TOB for loop
 
       //-------------------------------------------------
       //combined
       //-------------------------------------------------
 
-      ///if cand<=32 && topo<=32, check if equal
-      /// todo: maybe should move this check in the RDO building actually...?
-      if(slices[iSlice].cand.size()<=32 && slices[iSlice].tob.size()<=32)
-          if(slices[iSlice].cand.size()!=slices[iSlice].tob.size())
-          {
-              ATH_MSG_DEBUG( "MUCTPI DQ DEBUG: Cand & TOB #words not equal. LB="<<std::dec<<currentLumiBlock);
+      ///if topo<=32, check if equal number of words
+      ///todo: maybe should move this check in the RDO building actually...?
+      if(slices[iSlice].tob.size()<=32) {
+		  if(slices[iSlice].cand.size()!=slices[iSlice].tob.size())
+		  {
+			  ATH_MSG_DEBUG("MUCTPI DQ DEBUG: Cand & TOB #words not equal. LB="<<std::dec<<currentLumiBlock);
+			  errorSummaryMUCTPI=4;
+			  fill(m_packageName, errorSummaryMUCTPI);
+			  errorSummaryPerLumiBlockMUCTPIY=4;
+			  errorSummaryPerLumiBlockMUCTPIX=currentLumiBlock;
+			  fill(m_packageName, errorSummaryPerLumiBlockMUCTPIX, errorSummaryPerLumiBlockMUCTPIY);
+		  }
+	  }
 
-              errorSummaryMUCTPIX=4;
-              fill(m_packageName, errorSummaryMUCTPIX);
-              errorSummaryPerLumiBlockMUCTPIX=4;
-              errorSummaryPerLumiBlockMUCTPIY=currentLumiBlock;
-              fill(m_packageName, errorSummaryPerLumiBlockMUCTPIX, errorSummaryPerLumiBlockMUCTPIY);
-          }
+	  // Check if Muon candidate count in the Timeslice header matches
+	  // the number of candidate words.
+	  // The same check is done also for TOBs.
+	  if(slices[iSlice].nCand != slices[iSlice].cand.size())
+	  {
+		  errorSummaryMUCTPI = 2;
+		  fill(m_packageName,errorSummaryMUCTPI);
+	  }
+
+	  if(slices[iSlice].nTOB != slices[iSlice].tob.size())
+	  {
+		  errorSummaryMUCTPI = 3;
+		  fill(m_packageName,errorSummaryMUCTPI);
+	  }
 
 
   }// slice for loop
+
 
   //-------------------------------------------------
   //status data word (last word in data words)
@@ -952,7 +1349,6 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
 
   /// 1D status word errors (16 bits)
   /// 2D status word errors VS LB
-  /// todo: need to add 1D TProfile to make ratios?
 
   //get muctpi fragment data in the form of a vector of timeslices
   const std::vector< size_t > &errorBits = theMuCTPI_Phase1_RDO->errorBits();
@@ -961,8 +1357,8 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
   {
       if(errorBits[iBit])
       {
-          statusDataWordMUCTPIX=iBit;
-          fill(m_packageName, statusDataWordMUCTPIX);
+          statusDataWordMUCTPI=iBit;
+          fill(m_packageName, statusDataWordMUCTPI);
           statusDataWordPerLumiBlockMUCTPIX=iBit;
           statusDataWordPerLumiBlockMUCTPIY=currentLumiBlock;
           fill(m_packageName, statusDataWordPerLumiBlockMUCTPIX, statusDataWordPerLumiBlockMUCTPIY);
@@ -973,7 +1369,7 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
 
 
 void
-TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_RDO* theMuCTPI_RDO, //const MuCTPI_RIO* theMuCTPI_RIO,
+TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_RDO* theMuCTPI_RDO,
 						    const RpcSectorLogicContainer* theRPCContainer,
 						    const Muon::TgcCoinDataContainer* theTGCContainer,
 						    const EventContext& ctx) const
@@ -2022,7 +2418,7 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doCtp(const CTP_RDO* theCTP_RDO,
 void
 TrigT1CTMonitoring::BSMonitoringAlgorithm::doCtpMuctpi( const CTP_RDO* theCTP_RDO, 
 							//const CTP_RIO* theCTP_RIO,
-							const MuCTPI_RDO* theMuCTPI_RDO, 
+							const MuCTPI_RDO* theMuCTPI_RDO,
 							//const MuCTPI_RIO* theMuCTPI_RIO,
 							const EventContext& ctx) const
 {
@@ -2039,6 +2435,8 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doCtpMuctpi( const CTP_RDO* theCTP_RD
   auto bcidDifferenceX = Monitored::Scalar<int>("bcidDifferenceX",0);
 
   auto eventInfo = GetEventInfo(ctx);
+
+
   /*
   if (theCTP_RIO && theMuCTPI_RIO) {
     uint32_t ctp_evid = theCTP_RIO->getLvl1Id();
@@ -2092,6 +2490,8 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doCtpMuctpi( const CTP_RDO* theCTP_RD
       static_cast < int >(bunch.getBCID() & 7);
     fill(m_packageName, bcidDifferenceX);
   }
+
+
 }
 
 void

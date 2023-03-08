@@ -125,7 +125,6 @@ if DQMonFlags.doMonitoring():
             # give all the tools the trigger translator
             if DQMonFlags.useTrigger():
                tool.TrigDecisionTool = getattr(ToolSvc, DQMonFlags.nameTrigDecTool())
-               tool.TriggerTranslatorTool = getattr(ToolSvc, DQMonFlags.nameTrigTransTool())
 
             if DQMonFlags.monToolPostExec():
                postprocfunc = eval(DQMonFlags.monToolPostExec())
@@ -135,9 +134,10 @@ if DQMonFlags.doMonitoring():
 
    if not DQMonFlags.doNewMonitoring():
       if DQMonFlags.useTrigger():
-         if not hasattr(ToolSvc, DQMonFlags.nameTrigDecTool()):
-            local_logger.debug("trigger decision tool not found, including it now")
-            include("AthenaMonitoring/TrigDecTool_jobOptions.py")
+         from AthenaConfiguration.AllConfigFlags import ConfigFlags
+         from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
+         from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
+         CAtoGlobalWrapper(TrigDecisionToolCfg, ConfigFlags)
 
       doOldStylePreSetup()
 
@@ -165,19 +165,10 @@ if DQMonFlags.doMonitoring():
       #--------------------#
 
       if DQMonFlags.doCTPMon():
-         try:
-            local_logger.info("CTPMonitoring: including (TrigT1CTMonitoring/TrigT1CTMonitoringJobOptions_forRecExCommission.py")
-            include("TrigT1CTMonitoring/TrigT1CTMonitoringJobOptions_forRecExCommission.py")
-         except Exception:
-            local_logger.info("CTPMonitoring: including (TrigT1CTMonitoring/TrigT1CTMonitoringJobOptions_forRecExCommission.py FAILED")
-            treatException("DataQualitySteering_jobOptions.py: exception when setting up central trigger monitoring")
+         local_logger.warning("The legacy Run-2 CTP monitoring is no longer supported")
 
       if DQMonFlags.doLVL1CaloMon():
-         try:
-            include("TrigT1CaloMonitoring/TrigT1CaloMonitoring_forRecExCommission.py")
-            include("TrigT1Monitoring/TrigT1Monitoring_forRecExCommission.py")
-         except Exception:
-            treatException("DataQualitySteering_jobOptions.py: exception when setting up L1 Calo monitoring")
+         local_logger.warning("The legacy L1Calo monitoring is no longer supported")
 
       if DQMonFlags.doHLTMon():
          local_logger.warning("The legacy Run-2 HLT monitoring is no longer supported")

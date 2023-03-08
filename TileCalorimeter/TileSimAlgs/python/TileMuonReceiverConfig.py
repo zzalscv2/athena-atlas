@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """Define method to construct configured Tile pulse for muon receiver algorithm"""
 
@@ -10,7 +10,7 @@ def TilePulseForTileMuonReceiverCfg(flags, **kwargs):
     """Return component accumulator with configured Tile muon receiver algorithm
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
     """
 
     kwargs.setdefault('name', 'TilePulseForTileMuonReceiver')
@@ -19,6 +19,8 @@ def TilePulseForTileMuonReceiverCfg(flags, **kwargs):
     kwargs.setdefault('MaskBadChannels', False)
     kwargs.setdefault('UseCoolPulseShapes', True)
     kwargs.setdefault('UseCoolPedestal', False)
+    kwargs.setdefault('UseCoolNoise', False)
+    kwargs.setdefault('TilePulseShape', 'TileMuRcvPulseShape')
 
     acc = TileHitVecToCntCfg(flags)
 
@@ -37,33 +39,25 @@ def TilePulseForTileMuonReceiverCfg(flags, **kwargs):
         from RngComps.RandomServices import AthRNGSvcCfg
         kwargs['RndmSvc'] = acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name
 
-    if 'TileCondToolNoiseSample' not in kwargs:
-        from TileConditions.TileSampleNoiseConfig import TileCondToolNoiseSampleCfg
-        kwargs['TileCondToolNoiseSample'] = acc.popToolsAndMerge(TileCondToolNoiseSampleCfg(flags))
+    if kwargs['UseCoolNoise'] or kwargs['UseCoolPedestal']:
+        from TileConditions.TileSampleNoiseConfig import TileSampleNoiseCondAlgCfg
+        acc.merge( TileSampleNoiseCondAlgCfg(flags) )
 
-    if 'TileCondToolEmscale' not in kwargs:
-        from TileConditions.TileEMScaleConfig import TileCondToolEmscaleCfg
-        kwargs['TileCondToolEmscale'] = acc.popToolsAndMerge(TileCondToolEmscaleCfg(flags))
+    from TileConditions.TileEMScaleConfig import TileEMScaleCondAlgCfg
+    acc.merge( TileEMScaleCondAlgCfg(flags) )
 
     if kwargs['MaskBadChannels']:
-        if 'TileBadChanTool' not in kwargs:
-            from TileConditions.TileBadChannelsConfig import TileBadChanToolCfg
-            badChannelsTool = acc.popToolsAndMerge( TileBadChanToolCfg(flags) )
-            kwargs['TileBadChanTool'] = badChannelsTool
-    else:
-        kwargs['TileBadChanTool'] = None
+        from TileConditions.TileBadChannelsConfig import TileBadChannelsCondAlgCfg
+        acc.merge( TileBadChannelsCondAlgCfg(flags) )
 
-    if 'TileCondToolPulseShape' not in kwargs:
-        from TileConditions.TilePulseShapeConfig import TileCondToolMuRcvPulseShapeCfg
-        pulseShapeTool = acc.popToolsAndMerge( TileCondToolMuRcvPulseShapeCfg(flags) )
-        if kwargs['UseCoolPulseShapes']:
-            kwargs['TileCondToolPulseShape'] = pulseShapeTool
-        else:
-            kwargs['TileCondToolPulseShape'] = None
-    else:
-        pulseShapeTool = kwargs['TileCondToolPulseShape']
+    if kwargs['UseCoolPulseShapes']:
+        from TileConditions.TilePulseShapeConfig import TilePulseShapeCondAlgCfg
+        acc.merge( TilePulseShapeCondAlgCfg(flags, Source='FILE', TilePulseShape=kwargs['TilePulseShape'], PulseType='MURCV') )
 
     if 'TileRawChannelBuilderMF' not in kwargs:
+        from TileConditions.TilePulseShapeConfig import TileCondToolMuRcvPulseShapeCfg
+        pulseShapeTool = acc.popToolsAndMerge( TileCondToolMuRcvPulseShapeCfg(flags) )
+
         from TileConditions.TileOFCConfig import TileCondToolOfcCfg
         ofcTool = acc.popToolsAndMerge( TileCondToolOfcCfg(flags,
                                                            OptFilterDeltaCorrelation = True,
@@ -100,7 +94,7 @@ def TilePulseForTileMuonReceiverOutputCfg(flags, **kwargs):
     """Return component accumulator with configured Tile muon receiver algorithm and Output stream
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
     """
 
     acc = TilePulseForTileMuonReceiverCfg(flags, **kwargs)
@@ -131,7 +125,7 @@ def TilePulseForTileMuonReceiverOutputCfg(flags, **kwargs):
 
 if __name__ == "__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG
@@ -139,32 +133,33 @@ if __name__ == "__main__":
     # Test setup
     log.setLevel(DEBUG)
 
-    ConfigFlags.Input.Files = defaultTestFiles.HITS_RUN2
-    ConfigFlags.Output.RDOFileName = 'myRDO-TileMuonReceiver.pool.root'
-    ConfigFlags.IOVDb.GlobalTag = 'OFLCOND-MC16-SDR-16'
-    ConfigFlags.Digitization.PileUp = False
-    ConfigFlags.Exec.MaxEvents = 3
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.HITS_RUN2
+    flags.Output.RDOFileName = 'myRDO-TileMuonReceiver.pool.root'
+    flags.IOVDb.GlobalTag = 'OFLCOND-MC16-SDR-16'
+    flags.Digitization.PileUp = False
+    flags.Exec.MaxEvents = 3
 
-    ConfigFlags.fillFromArgs()
-    ConfigFlags.lock()
+    flags.fillFromArgs()
+    flags.lock()
 
     # Construct our accumulator to run
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    acc = MainServicesCfg(ConfigFlags)
+    acc = MainServicesCfg(flags)
 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    acc.merge(PoolReadCfg(ConfigFlags))
+    acc.merge(PoolReadCfg(flags))
 
-    if 'EventInfo' not in ConfigFlags.Input.Collections:
+    if 'EventInfo' not in flags.Input.Collections:
         from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
-        acc.merge(EventInfoCnvAlgCfg(ConfigFlags,
+        acc.merge(EventInfoCnvAlgCfg(flags,
                                      inputKey='McEventInfo',
                                      outputKey='EventInfo'))
 
-    acc.merge( TilePulseForTileMuonReceiverOutputCfg(ConfigFlags) )
+    acc.merge( TilePulseForTileMuonReceiverOutputCfg(flags) )
 
     acc.printConfig(withDetails = True, summariseProps = True)
-    ConfigFlags.dump()
+    flags.dump()
     acc.store( open('TileMuonReceiver.pkl','wb') )
 
     sc = acc.run()

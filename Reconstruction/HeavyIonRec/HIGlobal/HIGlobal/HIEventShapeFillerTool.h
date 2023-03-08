@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef HIGLOBAL_HIEVENTSHAPEFILLERTOOL_H
@@ -27,23 +27,19 @@ class HIEventShapeFillerTool : public asg::AsgTool, virtual public IHIEventShape
 public:
   HIEventShapeFillerTool(const std::string& myname);
 
-  virtual StatusCode initializeCollection(xAOD::HIEventShapeContainer* evtShape_) override;
-  virtual StatusCode fillCollectionFromTowers(const SG::ReadHandleKey<xAOD::CaloClusterContainer>& tower_container_key,
-    const SG::ReadHandleKey<INavigable4MomentumCollection>& navi_container_key) override;
-  virtual StatusCode fillCollectionFromCells(const SG::ReadHandleKey<CaloCellContainer>& cell_container_key) override;
+  virtual StatusCode initializeIndex() override;
+  virtual StatusCode initializeEventShapeContainer(std::unique_ptr<xAOD::HIEventShapeContainer>& evtShape) const override;
+  virtual StatusCode fillCollectionFromTowers(std::unique_ptr<xAOD::HIEventShapeContainer>& evtShape, const SG::ReadHandleKey<xAOD::CaloClusterContainer>& tower_container_key, const SG::ReadHandleKey<INavigable4MomentumCollection>& navi_container_key, const EventContext& ctx) const override;
+  virtual StatusCode fillCollectionFromCells(std::unique_ptr<xAOD::HIEventShapeContainer>& evtShape, const SG::ReadHandleKey<CaloCellContainer>& cell_container_key, const EventContext& ctx) const override;
 
-  virtual StatusCode fillCollectionFromTowerContainer(const INavigable4MomentumCollection* navInColl);
-  virtual StatusCode fillCollectionFromCellContainer(const CaloCellContainer* CellContainer);
-  virtual StatusCode fillCollectionFromClusterContainer(const xAOD::CaloClusterContainer* theClusters);
-  virtual const xAOD::HIEventShapeContainer* getHIEventShapeContainer() const override { return m_evtShape; }
+  virtual StatusCode fillCollectionFromTowerContainer(std::unique_ptr<xAOD::HIEventShapeContainer>& evtShape, const INavigable4MomentumCollection* navInColl) const;
+  virtual StatusCode fillCollectionFromCellContainer(std::unique_ptr<xAOD::HIEventShapeContainer>& evtShape, const CaloCellContainer* CellContainer) const;
+  virtual StatusCode fillCollectionFromClusterContainer(std::unique_ptr<xAOD::HIEventShapeContainer>& evtShape, const xAOD::CaloClusterContainer* theClusters, const EventContext& ctx) const;
 
 private:
-  xAOD::HIEventShapeContainer* m_evtShape;
-
-
   const HIEventShapeIndex* m_index;
 
-  void updateShape(xAOD::HIEventShapeContainer* shape, const HIEventShapeIndex* index, const CaloCell* theCell, float geoWeight, float eta0, float phi0, bool isNeg = false) const;
+  void updateShape(std::unique_ptr<xAOD::HIEventShapeContainer>& shape, const HIEventShapeIndex* index, const CaloCell* theCell, float geoWeight, float eta0, float phi0, bool isNeg = false) const;
 
   ToolHandle<IHITowerWeightTool>   m_towerWeightTool{ this, "TowerWeightTool", "HITowerWeightTool", "Handle to Tower Weight Tool" };
   ToolHandle<IHIEventShapeMapTool> m_eventShapeMapTool{ this, "EventShapeMapTool", "HIEventShapeMapTool", "Handle to Event Shape Map Tool" };

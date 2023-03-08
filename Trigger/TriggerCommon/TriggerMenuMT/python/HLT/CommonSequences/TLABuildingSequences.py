@@ -1,17 +1,15 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 from TriggerMenuMT.HLT.Config.MenuComponents import ChainStep, RecoFragmentsPool
 from AthenaCommon.Logging import logging
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
 from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 from ..Jet.JetChainConfiguration import JetChainConfiguration
 from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import NoCAmigration
 log = logging.getLogger(__name__)
 
 
-
-def addTLAStep(chain, chainDict):
+def addTLAStep(flags, chain, chainDict):
     '''
     Add one extra chain step for TLA Activities
     '''
@@ -24,9 +22,9 @@ def addTLAStep(chain, chainDict):
         
         log.debug("addTLAStep: processing signature: %s", cPart['signature'] )
         # call the sequence from their respective signatures
-        tlaSequencesList.append(getTLASignatureSequence(ConfigFlags, chainDict=chainDict, chainPart=cPart)), #signature=cPart['signature'])),
+        tlaSequencesList.append(getTLASignatureSequence(flags, chainDict=chainDict, chainPart=cPart)), #signature=cPart['signature'])),
             
-    log.debug("addTLAStep: About to add a step with: %d, parallel sequences.", len(tlaSequencesList))            
+    log.debug("addTLAStep: About to add a step with: %d parallel sequences.", len(tlaSequencesList))            
     
     # we add one step per TLA chain, with sequences matching the list of signatures
     # and multiplicities matching those of the previous step of the chain (already merged if combined)
@@ -42,18 +40,18 @@ def addTLAStep(chain, chainDict):
 
 
 
-def getTLASignatureSequence(ConfigFlags, chainDict, chainPart):
+def getTLASignatureSequence(flags, chainDict, chainPart):
     # Here we simply retrieve the TLA sequence from the existing signature code 
     signature= chainPart['signature']
     
     if signature == 'Photon':    
         from ..Photon.PrecisionPhotonTLAMenuSequences import TLAPhotonMenuSequence
         photonOutCollectionName = "HLT_egamma_Photons"
-        return RecoFragmentsPool.retrieve(TLAPhotonMenuSequence, ConfigFlags, photonsIn=photonOutCollectionName)
+        return RecoFragmentsPool.retrieve(TLAPhotonMenuSequence, flags, photonsIn=photonOutCollectionName)
     
     elif signature == 'Muon':    
         from ..Muon.TLAMuonSequence import TLAMuonMenuSequence        
-        return TLAMuonMenuSequence (ConfigFlags, muChainPart=chainPart)       
+        return TLAMuonMenuSequence (flags, muChainPart=chainPart)
     
     elif signature  == 'Jet' or signature  == 'Bjet':   
         from ..Jet.JetTLASequences import TLAJetMenuSequence
@@ -67,7 +65,7 @@ def getTLASignatureSequence(ConfigFlags, chainDict, chainPart):
         # Thus, BTag recording will always run for PFlow jets, creating an empty container if no btagging exists. 
         attachBtag = True
         if jetDef.recoDict["trkopt"] == "notrk": attachBtag = False
-        return RecoFragmentsPool.retrieve(TLAJetMenuSequence, ConfigFlags, jetsIn=jetInputCollectionName, attachBtag=attachBtag)
+        return RecoFragmentsPool.retrieve(TLAJetMenuSequence, flags, jetsIn=jetInputCollectionName, attachBtag=attachBtag)
 
 
 def findTLAStep(chainConfig):

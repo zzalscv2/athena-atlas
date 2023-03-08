@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 /**
@@ -83,18 +83,11 @@ Root::TElectronEfficiencyCorrectionTool::TElectronEfficiencyCorrectionTool(
 {
 }
 
-Root::TElectronEfficiencyCorrectionTool::~TElectronEfficiencyCorrectionTool() =
-  default;
-
 int
 Root::TElectronEfficiencyCorrectionTool::initialize()
 {
   // use an int as a StatusCode
   int sc(1);
-
-  ATH_MSG_DEBUG(" (file: " << __FILE__ << ", line: " << __LINE__ << ")\n"
-                           << "Debug flag set. Printing verbose output!");
-
   // Check if files are present
   if (m_corrFileNameList.empty()) {
     ATH_MSG_ERROR(" No file added!");
@@ -161,30 +154,12 @@ Root::TElectronEfficiencyCorrectionTool::calculate(
   const unsigned int runnumber,
   const double cluster_eta,
   const double et, /* in MeV */
-  std::vector<double>& result,
-  size_t& index_of_corr,
-  size_t& index_of_toys) const
+  Result& result,
+  const bool onlyTotal) const
 {
-  /*
-   * At this point, we know the size of the vector.
-   * Position::End + m_nSysMax + m_nToyMC
-   * The starting index of the sys is Position::End
-   * The starting point of the toys is Position::End+m_nSysMax
-   */
-  ATH_MSG_DEBUG("Max number of systematics seen : "
-                << m_nSysMax << " number of toys " << m_nToyMC);
-  result.resize(static_cast<size_t>(Position::End) + m_nSysMax + m_nToyMC);
-  const size_t position_corrSys = static_cast<size_t>(Position::End);
-  const size_t position_uncorrToyMCSF = position_corrSys + m_nSysMax;
   // Set up the non-0 defaults
-  result[static_cast<size_t>(Position::SF)] = -999;
-  result[static_cast<size_t>(Position::Total)] = 1;
-  if (m_nSysMax) {
-    index_of_corr = position_corrSys;
-  }
-  if (m_nToyMC) {
-    index_of_toys = position_uncorrToyMCSF;
-  }
+  result.SF = -999;
+  result.Total = 1;
   /*
    * Determine Simulation flavour and find the run period
    */
@@ -208,11 +183,6 @@ Root::TElectronEfficiencyCorrectionTool::calculate(
     }
   }
   if (runnumberIndex < 0) {
-    ATH_MSG_DEBUG(
-      "(file: "
-      << __FILE__ << ", line: " << __LINE__ << ")\n"
-      << "No valid run number period  found for the current run number: "
-      << runnumber << " for simulation type: " << dataType);
     return 0;
   }
   /* What we have is a vector<vector<HistArray>> acting as a map:
@@ -231,18 +201,16 @@ Root::TElectronEfficiencyCorrectionTool::calculate(
    * for the run period.
    */
   if (sfVector.empty() || runnumberIndex >= static_cast<int>(sfVector.size())) {
-    ATH_MSG_DEBUG("(file: "
-                  << __FILE__ << ", line: " << __LINE__ << ")\n"
-                  << "No valid  sf ObjArray found for the current run number "
-                  << runnumber << " for simulation type: " << dataType);
     return 0;
   }
   /*
-   * At this stage we have found the relevant TObjArray
+   * At this stage we have found the relevant period
    * So we need to locate the right histogram.
    */
   const HistArray& sfObjectArray = sfVector[runnumberIndex];
-  const int entries = sfObjectArray.size();
+  const auto& edges = (isFastSim) ? m_fastHistEdges[runnumberIndex]
+                                  : m_histEdges[runnumberIndex];
+  const int entries = edges.size();
   /*
    * Now the logic of finding the histogram
    * Some parts of the code can be perhaps improved ...
@@ -255,26 +223,22 @@ Root::TElectronEfficiencyCorrectionTool::calculate(
   bool invalid = false;
   bool changedEt = false;
   int index = -1;
-  TH2* tmpHist(nullptr);
 
   for (int i = 0; i < entries; ++i) {
     invalid = false;
-
-    tmpHist = static_cast<TH2*>(sfObjectArray[i].get());
-    const auto * const xAxis = tmpHist->GetXaxis();
+    const HistEdge& histEdge = edges[i];
     // invalid if we are below minimum et
-    if (et < xAxis->GetXmin()) {
+    if (et < histEdge.etMin) {
       smallEt++;
       invalid = true;
     }
-    const auto* yAxis = tmpHist->GetYaxis();
     // invalid if we are above max eta
-    if (std::abs(yValue) >= yAxis->GetXmax()) {
+    if (std::abs(yValue) >= histEdge.etaMax) {
       etaCov++;
       invalid = true;
     }
     // invalid if we are less than minimum eta (forward electrons)
-    if (std::abs(yValue) < yAxis->GetXmin()) {
+    if (std::abs(yValue) < histEdge.etaMin) {
       etaCov++;
       invalid = true;
     }
@@ -284,11 +248,11 @@ Root::TElectronEfficiencyCorrectionTool::calculate(
      * availabe Et of ths histogram. As we assume that the  SF stays the same
      * for very high Et
      */
-    if (et > xAxis->GetXmax()) {
-      if (std::strstr(tmpHist->GetName(), LowPt_string) != nullptr) {
+    if (et > histEdge.etMax) {
+      if (histEdge.isLowPt) {
         invalid = true;
       } else {
-        xValue = xAxis->GetBinCenter(tmpHist->GetNbinsX());
+        xValue = histEdge.etMax - 1000 ; //1000 is 1 GeV
         changedEt = true;
       }
     }
@@ -305,15 +269,9 @@ Root::TElectronEfficiencyCorrectionTool::calculate(
     }
   }
   if (smallEt == entries) {
-    ATH_MSG_DEBUG("(file: " << __FILE__ << ", line: " << __LINE__ << ")\n"
-                            << "No correction factor provided for et "
-                            << xValue);
     return 0;
   }
   if (etaCov == entries) {
-    ATH_MSG_DEBUG("(file: " << __FILE__ << ", line: " << __LINE__ << ")\n"
-                            << "No correction factor provided for eta "
-                            << yValue);
     return 0;
   }
   if (nSF > 1) {
@@ -321,41 +279,39 @@ Root::TElectronEfficiencyCorrectionTool::calculate(
                     << yValue << " , et = " << et << " , run number = "
                     << runnumber << ". Please check your input files!");
   }
+  if (index < 0) {
+    return 0;
+  }
+
   /*
    * Now we have the index of the histogram
    */
-  TH2* currentHist(nullptr);
-  if (index >= 0) {
-    currentHist = static_cast<TH2*>(sfObjectArray[index].get());
-  } else {
-    ATH_MSG_DEBUG("(file: "
-                  << __FILE__ << ", line: " << __LINE__ << ")\n"
-                  << "No correction factor provided because of an invalid index"
-                  << yValue);
-    return 0;
-  }
+  const HistEdge& currentEdge = edges[index];
   /*
    * If SF is only given in Abs(eta) convert eta input to std::abs()
    */
   constexpr double epsilon = 1e-6;
-  if (currentHist->GetYaxis()->GetBinLowEdge(1) >= 0 - epsilon) {
-    if (yValue < -1) {
-      ATH_MSG_DEBUG(
-        " (file: "
-        << __FILE__ << ", line: " << __LINE__ << ")\n"
-        << "Scale factor only measured in Abs(eta) changing eta from " << yValue
-        << " to " << std::abs(yValue));
-    }
+  if (currentEdge.etaMin >= (0 - epsilon)) {
     yValue = std::abs(yValue);
   }
+
+  const TH2* currentHist = static_cast<TH2*>(sfObjectArray[index].get()) ;
   const int globalBinNumber = currentHist->FindFixBin(xValue, yValue);
   const double scaleFactor = currentHist->GetBinContent(globalBinNumber);
   const double scaleFactorErr = currentHist->GetBinError(globalBinNumber);
   /*
    * Write the retrieved values to the output
-   * */
-  result[static_cast<size_t>(Position::SF)] = scaleFactor;
-  result[static_cast<size_t>(Position::Total)] = scaleFactorErr;
+   */
+  result.SF= scaleFactor;
+  result.Total = scaleFactorErr;
+  result.histIndex = index;
+  result.histBinNum = globalBinNumber;
+  /*
+   * if we only wanted the Total we can exit here
+   */
+  if (onlyTotal) {
+    return 1;
+  }
   /*
    * Do the stat error using the available info from the above (SF)
    */
@@ -365,7 +321,7 @@ Root::TElectronEfficiencyCorrectionTool::calculate(
     if (!statVector[runnumberIndex].empty()) {
       statErr = static_cast<TH1*>(statVector[runnumberIndex][index].get())
                   ->GetBinContent(globalBinNumber);
-      result[static_cast<size_t>(Position::Stat)] = statErr;
+      result.Stat = statErr;
     }
   }
   /*
@@ -381,48 +337,44 @@ Root::TElectronEfficiencyCorrectionTool::calculate(
       val = sqrt(val * val + valAdd * valAdd);
     }
   }
-  result[static_cast<size_t>(Position::UnCorr)] = val;
+  result.UnCorr = val;
   /*
+   * Do the correlated part
    * The previous setup is becoming cumbersome
    * for the N~16 systematic variations.
    * So we keep them in a vector of vector of HistArray
    * The first vector index being the runnumber
    * The second the systematic
    * And them the HistArray for high low etc.
-   * We invert the order in the output
    */
+  result.Corr.resize(m_nSysMax);
   const std::vector<std::vector<HistArray>>& sysList =
-    (isFastSim) ? m_fastSysList : m_sysList;
+      (isFastSim) ? m_fastSysList : m_sysList;
   if (sysList.size() > static_cast<unsigned int>(index)) {
     if (sysList.at(index).size() > static_cast<unsigned int>(runnumberIndex)) {
       const int sys_entries = sysList.at(index).at(runnumberIndex).size();
       for (int sys = 0; sys < sys_entries; ++sys) {
         double sysVal =
-          static_cast<TH2*>(
-            sysList[index][runnumberIndex][sys_entries - 1 - sys].get())
-            ->GetBinContent(globalBinNumber);
-        result[position_corrSys + sys_entries - 1 - sys] = sysVal;
-      }
-      if (m_nSysMax > 0 && sys_entries <= 1) {
-        if (result[position_corrSys] == 0) {
-          result[position_corrSys] = scaleFactorErr;
-        }
+            static_cast<TH2*>(sysList[index][runnumberIndex][sys].get())
+                ->GetBinContent(globalBinNumber);
+        result.Corr[sys] = sysVal;
       }
     }
   }
   /*
-   * Do the toys
+   * Do the toys if requested  and exit early
    */
   if (m_doToyMC || m_doCombToyMC) {
+    result.toys.resize(static_cast<size_t>(m_nToyMC));
     const std::vector<std::vector<HistArray>>& toyMCList =
-      ((isFastSim) ? m_uncorrToyMCSystFast : m_uncorrToyMCSystFull);
+        ((isFastSim) ? m_uncorrToyMCSystFast : m_uncorrToyMCSystFull);
     if (toyMCList.size() > (unsigned int)runnumberIndex) {
-      for (int toy = 0; toy < m_nToyMC; toy++) {
+      for (int toy = 0; toy < m_nToyMC; ++toy) {
         if (toyMCList[runnumberIndex][toy].size() >
             static_cast<unsigned int>(index)) {
-          result[position_uncorrToyMCSF + toy] =
-            static_cast<TH2*>(toyMCList[runnumberIndex][toy][index].get())
-              ->GetBinContent(globalBinNumber);
+          result.toys[toy] =
+              static_cast<TH2*>(toyMCList[runnumberIndex][toy][index].get())
+                  ->GetBinContent(globalBinNumber);
         }
       }
     }
@@ -442,7 +394,6 @@ Root::TElectronEfficiencyCorrectionTool::buildSingleToyMC(
   const std::vector<TH1*>& corr,
   int& randomCounter)
 {
-
   ATH_MSG_DEBUG(" (file: " << __FILE__ << ", line: " << __LINE__ << ")! "
                            << "Entering function buildSingleToyMC");
   std::vector<TH2*> tmpHists;
@@ -579,11 +530,6 @@ Root::TElectronEfficiencyCorrectionTool::buildToyMCTable(
       tmpVec.emplace_back(std::move(tmpArray));
     }
   }
-  ATH_MSG_DEBUG(" (file: " << __FILE__ << ", line: " << __LINE__ << ")\n"
-                           << "m_Rndm->Uniform(0, 1) after throwing "
-                           << randomCounter
-                           << " random numbers: " << m_Rndm.Uniform(0, 1));
-
   return tmpVec;
 }
 /*
@@ -594,7 +540,10 @@ Root::TElectronEfficiencyCorrectionTool::getNbins(
   std::map<float, std::vector<float>>& pt_eta1) const
 {
   // Get sf histograms
-  const std::vector<HistArray>& tmpVec = m_histList.at(mapkey::sf);
+  const std::vector<HistArray>& tmpVec = (!m_histList[mapkey::sf].empty())
+                                             ? m_histList[mapkey::sf]
+                                             : m_fastHistList[mapkey::sf];
+
   int nbinsTotal = 0;
   pt_eta1.clear();
   std::vector<float> eta1;
@@ -763,11 +712,8 @@ Root::TElectronEfficiencyCorrectionTool::setupHistogramsInFolder(
   ATH_MSG_DEBUG(" (file: " << __FILE__ << ", line: " << __LINE__ << ")\n"
                            << "Setting up histograms for Run range  "
                            << runNumEnd);
-  /*
-   * Copy from the temporaries to the actual member variables
-   * via the setup function
-   */
-
+  // Copy from the temporaries to the actual member variables
+  // via the setup function
   for (int key : s_keys) {
     if (!objsFull.at(key).empty()) {
       if (0 == setup(objsFull.at(key),
@@ -817,6 +763,10 @@ Root::TElectronEfficiencyCorrectionTool::setupHistogramsInFolder(
       return 0;
     }
   }
+  //Histogram edges
+  fillHistEdges(m_histList.at(mapkey::sf), m_histEdges);
+  fillHistEdges(m_fastHistList.at(mapkey::sf), m_fastHistEdges);
+
   // Toys
   if (m_doToyMC || m_doCombToyMC) {
     bool fullToysBooked =
@@ -868,25 +818,18 @@ Root::TElectronEfficiencyCorrectionTool::setupTempMapsHelper(
   // See if we are dealing with correlated
   if (tmpName.Contains("_corr")) {
     /*
-     * This is the worse part ...
-     * corr0 triggers a few things
+     * corr0 in the name triggers a few things
      * We assume that 0 is the 1st
      * histogram in a series of corr(i) that
      * we see for each of the vector entries that
      * can be one for LowPt,Standard,Forward etc
      */
     if (tmpName.EndsWith("corr0")) {
-      /*
-       * 1st create a TObjectArray
-       */
+      // 1st create a TObjectArray
       std::vector<TH1*> tmpArray;
-      /*
-       * Register it to the vector
-       */
+      // Register it to the vector
       sysObjs.emplace_back(tmpArray);
-      /*
-       * Reset the counter here
-       */
+      // Reset the counter here
       seenSystematics = 0;
     }
     /*
@@ -894,7 +837,7 @@ Root::TElectronEfficiencyCorrectionTool::setupTempMapsHelper(
      * This can be Low Pt or high Pt
      */
     sysObjs.back().emplace_back(obj);
-    /*Increase the counter*/
+    //Increase the counter
     seenSystematics++;
   }
 
@@ -921,10 +864,6 @@ Root::TElectronEfficiencyCorrectionTool::setupUncorrToySyst(
         uncorrToyMCSyst.push_back(buildToyMCTable(
           objs.at(mapkey::sf), {}, objs.at(mapkey::stat), {}, sysObjs));
         toysBooked = true;
-      } else {
-        ATH_MSG_DEBUG("! Toy MC error propagation booked, but not all needed"
-                      << "Histograms found in the output (For full sim). "
-                         "Skipping toy creation!");
       }
     } else {
       uncorrToyMCSyst.push_back(buildToyMCTable(objs.at(mapkey::sf),
@@ -935,10 +874,8 @@ Root::TElectronEfficiencyCorrectionTool::setupUncorrToySyst(
       toysBooked = true;
     }
   }
-
   return toysBooked;
 }
-
 /*
  * Fill and interpret the setup, depending
  * on which histograms are found in the input file(s)
@@ -958,7 +895,7 @@ Root::TElectronEfficiencyCorrectionTool::setup(
   }
   TH1* tmpHist(nullptr);
   HistArray tmpArray;
-  for (auto& hist : hists) {
+  for (const auto& hist : hists) {
     tmpHist = static_cast<TH1*>(hist);
     tmpHist->SetDirectory(nullptr);
     tmpArray.emplace_back(tmpHist);
@@ -981,3 +918,31 @@ Root::TElectronEfficiencyCorrectionTool::setup(
   }
   return 1;
 }
+
+
+void Root::TElectronEfficiencyCorrectionTool::fillHistEdges(
+    const std::vector<HistArray>& sfPerPeriodHist,
+    std::vector<std::vector<HistEdge>>& sfPerPeriodEdges) const{
+
+  for (const auto& vec : sfPerPeriodHist) {
+    const size_t vecSize = vec.size();
+    std::vector<HistEdge> periodVec;
+    periodVec.reserve(vecSize);
+    for (size_t i = 0; i < vecSize; ++i) {
+      const auto* tmpHist = static_cast<TH2*>(vec[i].get());
+      const auto* const xAxis = tmpHist->GetXaxis();
+      const auto* yAxis = tmpHist->GetYaxis();
+      HistEdge histEdge;
+      histEdge.etaMax = yAxis->GetXmax();
+      histEdge.etaMin = yAxis->GetXmin();
+      histEdge.etMax = xAxis->GetXmax();
+      histEdge.etMin = xAxis->GetXmin();
+      histEdge.isLowPt =
+          (std::strstr(tmpHist->GetName(), LowPt_string) != nullptr);
+
+      periodVec.emplace_back(histEdge);
+    }
+    sfPerPeriodEdges.emplace_back(std::move(periodVec));
+  }
+}
+

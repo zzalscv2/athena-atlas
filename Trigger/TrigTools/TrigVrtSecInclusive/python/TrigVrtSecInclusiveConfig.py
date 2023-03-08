@@ -1,10 +1,10 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
-def TrigVrtSecInclusiveMonitoring(name):
+def TrigVrtSecInclusiveMonitoring(flags, name):
 
     def addTrackPairHistograms(montool):
         montool.defineHistogram('pair_dphi',     path='EXPERT',type='TH1F',title="Delta phi of track pair",        xbins = 132, xmin=-0.1, xmax=3.2)
@@ -41,13 +41,13 @@ def TrigVrtSecInclusiveMonitoring(name):
         montool.defineHistogram('TIME_MergeSimple',    path='EXPERT',type='TH1F',title="Time spent in simple vertex merging (us) / N-track vertexing",              xbins = 200, xmin=0.0, xmax=1000.0)
 
 
-    montool = GenericMonitoringTool(HistPath = f"TrigVrtSecInclusive_{name}")
+    montool = GenericMonitoringTool(flags, HistPath = f"TrigVrtSecInclusive_{name}")
     addTrackPairHistograms(montool)
     addTimingHistograms(montool)
 
     return montool
 
-def TrigVrtSecInclusive_VSIMonitoring(name):
+def TrigVrtSecInclusive_VSIMonitoring(flags, name):
 
     def addTrackPairHistograms(montool):
         montool.defineHistogram('pair_dphi',     path='EXPERT',type='TH1F',title="Delta phi of track pair",        xbins = 132, xmin=-0.1, xmax=3.2)
@@ -84,14 +84,14 @@ def TrigVrtSecInclusive_VSIMonitoring(name):
         montool.defineHistogram('TIME_MergeSimple',    path='EXPERT',type='TH1F',title="Time spent in simple vertex merging (us) / N-track vertexing",              xbins = 200, xmin=0.0, xmax=1000.0)
 
 
-    montool = GenericMonitoringTool(HistPath = f"TrigVrtSecInclusive_{name}")
+    montool = GenericMonitoringTool(flags, HistPath = f"TrigVrtSecInclusive_{name}")
     addTrackPairHistograms(montool)
     addTimingHistograms(montool)
 
     return montool
 
 
-def TrigVrtSecInclusiveCfg(name, FirstPassTracksName, SecondPassTracksName, PrimaryVertexInputName, VxCandidatesOutputName, TrkPairOutputName):
+def TrigVrtSecInclusiveCfg(flags, name, FirstPassTracksName, SecondPassTracksName, PrimaryVertexInputName, VxCandidatesOutputName, TrkPairOutputName):
 
     from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigExtrapolator
 
@@ -125,6 +125,6 @@ def TrigVrtSecInclusiveCfg(name, FirstPassTracksName, SecondPassTracksName, Prim
         VertexPointEstimator   = VertexPointEstimator)
 
     # monitoring
-    tool.MonTool = TrigVrtSecInclusive_VSIMonitoring('jet')
+    tool.MonTool = TrigVrtSecInclusive_VSIMonitoring(flags, 'jet')
 
     return tool

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetPseudojetCopier.h
@@ -50,7 +50,7 @@ public:
 
   /// Copy the pseudojets from srcjets to container with name dstname.
   int copy(const xAOD::JetContainer& srcjets,
-           std::string dstname, std::string label ="PseudojetMap") const;
+           const std::string& dstname, const std::string& label ="PseudojetMap") const;
 
   // Process the input jets using the
   int process(const xAOD::JetContainer& srcjets) const;

@@ -30,7 +30,7 @@ class LArOnline_SuperCellID;
 class LArRawChannelBuilderSCAlg : public AthReentrantAlgorithm {
 
  public:
-  LArRawChannelBuilderSCAlg(const std::string& name, ISvcLocator* pSvcLocator);
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
   StatusCode initialize() override;
   StatusCode execute(const EventContext& ctx) const override;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EVENTPRIMITIVES_AMGMATRIXPLUGIN_H
@@ -30,8 +30,15 @@
     /**pseudorapidity method */
     inline Scalar eta() const {
         EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Matrix, 3)
-        double m = std::sqrt((*this).x() * (*this).x() + (*this).y() * (*this).y() + (*this).z() * (*this).z());
-        return 0.5*std::log((m+(*this).z())/(m-(*this).z()));
+        const Scalar rho2 = (*this).x() * (*this).x() + (*this).y() * (*this).y();
+        const Scalar z = (*this).z();
+        if ( rho2 > 0. ) { // rho^2 >0.
+          const double m = std::sqrt(rho2 + z * z);
+          return 0.5 * std::log(( m + z) / (m - z));
+        }
+        if ( z ==  0   ) { return  0.0; }
+        constexpr Scalar s_etaMax = static_cast<Scalar>(22756.0); // Following math/genvector/inc/Math/GenVector/etaMax.h in ROOT 6.26
+        return (z > 0) ? z + s_etaMax :  z - s_etaMax; // Following math/genvector/inc/Math/GenVector/eta.h in ROOT 6.26
     }
 
 

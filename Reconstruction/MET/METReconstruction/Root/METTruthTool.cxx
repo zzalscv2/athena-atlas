@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // METTruthTool.cxx 
@@ -30,7 +30,7 @@
 #include "AthContainers/ConstDataVector.h"
 
 // Truth Utilities
-#include "TruthUtils/TruthParticleHelpers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 namespace met {
 
@@ -121,9 +121,7 @@ namespace met {
   {
     ATH_MSG_VERBOSE("Check nonint");
     // stable and non-interacting
-    if (MC::isGenStable(truth->status(),truth->barcode()) && MC::isNonInteracting(truth->pdgId())) return true;
-
-    return false;
+    return truth->isGenStable() && MC::isNonInteracting(truth->pdgId());
   }
 
   bool METTruthTool::accept_int(const xAOD::TruthParticle* truth) const
@@ -132,7 +130,7 @@ namespace met {
     // not muon
     if(truth->isMuon()) return false;
     // stable
-    if(!MC::isGenStable(truth->status(),truth->barcode())) return false;
+    if(!truth->isGenStable()) return false;
     // interacting
     if(MC::isNonInteracting(truth->pdgId())) return false;
     // in acceptance
@@ -152,7 +150,7 @@ namespace met {
       if( (fabs(truth->eta())<m_det_maxEta) ) return false;
     }
     // stable
-    if(!MC::isGenStable(truth->status(),truth->barcode())) return false;
+    if(!truth->isGenStable()) return false;
     // interacting
     if(MC::isNonInteracting(truth->pdgId())) return false;
 
@@ -165,7 +163,7 @@ namespace met {
     // muon
     if(!truth->isMuon()) return false;
     // stable
-    if(!MC::isGenStable(truth->status(),truth->barcode())) return false;
+    if(!truth->isGenStable()) return false;
     // in acceptance
     if(truth->pt()<m_truthmu_minPt || fabs(truth->eta())>m_truthmu_maxEta) return false;
 
@@ -209,13 +207,12 @@ namespace met {
     MissingETBase::Types::weight_t unitWeight(1.,1.,1.);
     MissingETBase::Types::weight_t minusWeight(-1.,-1.,1.);
     vector<const IParticle*> dummyList;
-    for( vector<const IParticle*>::const_iterator iPart=signalList.begin();
-	 iPart!=signalList.end(); ++iPart) {
+    for(const auto *iPart : signalList) {
       if(m_truth_type==MissingETBase::Source::NonInt) {
 	// flip direction for nonint
-	this->addToMET(*iPart,dummyList,metTerm,metMap,minusWeight);
+	this->addToMET(iPart,dummyList,metTerm,metMap,minusWeight);
       } else {
-	this->addToMET(*iPart,dummyList,metTerm,metMap,unitWeight);
+	this->addToMET(iPart,dummyList,metTerm,metMap,unitWeight);
       }
     }
 

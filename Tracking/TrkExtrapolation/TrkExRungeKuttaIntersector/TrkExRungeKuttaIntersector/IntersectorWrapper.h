@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 //////////////////////////////////////////////////////////////////////
@@ -148,7 +148,7 @@ public:
     The intersection interface might be used by the material service as well to
     estimate the surfaces (sensitive and nonesensitive) while propagation
     */
-  virtual const IntersectionSolution* intersect(
+  virtual IntersectionSolution intersect(
     const EventContext& ctx,
     const TrackParameters& parm,
     const Surface& sf,
@@ -158,7 +158,7 @@ public:
 
   // unimplemented globalPositions
   virtual void globalPositions(const EventContext&,
-                               std::list<Amg::Vector3D>&,
+                               std::deque<Amg::Vector3D>&,
                                const TrackParameters&,
                                const MagneticFieldProperties&,
                                const CylinderBounds&,

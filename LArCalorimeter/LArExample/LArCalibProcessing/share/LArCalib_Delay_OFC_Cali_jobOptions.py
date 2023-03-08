@@ -33,6 +33,9 @@ if not 'SCIgnoreBarrelChannels' in dir():
 if not 'SCIgnoreEndcapChannels' in dir():
    SCIgnoreEndcapChannels=False
 
+if not 'SCProtectSourceId' in dir():
+   SCProtectSourceId=True
+
 if not SuperCells: include("LArCalibProcessing/LArCalib_Flags.py")
 if SuperCells:     include("LArCalibProcessing/LArCalib_FlagsSC.py")
 include("LArCalibProcessing/GetInputFiles.py")
@@ -468,26 +471,40 @@ if ( runAccumulator ) :
       topSequence+=theLArRawCalibDataReadingAlg
    include("./LArCalib_CalibrationPatterns_"+str(IOVBegin)+".py")
 
-
 else:   
-   from LArByteStream.LArByteStreamConf import LArRawCalibDataReadingAlg
 
-   theLArRawCalibDataReadingAlg=LArRawCalibDataReadingAlg()
-   theLArRawCalibDataReadingAlg.LArAccCalibDigitKey=Gain
-   theLArRawCalibDataReadingAlg.LArFebHeaderKey="LArFebHeader"
+   if SuperCells:
+      from LArByteStream.LArByteStreamConf import LArLATOMEDecoder 
+      from LArByteStream.LArByteStreamConf import LArRawSCCalibDataReadingAlg
+      LArRawSCCalibDataReadingAlg = LArRawSCCalibDataReadingAlg()
+      LArRawSCCalibDataReadingAlg.LArSCAccCalibDigitKey = Gain
+      LArRawSCCalibDataReadingAlg.LATOMEDecoder = LArLATOMEDecoder("LArLATOMEDecoder")
+      LArRawSCCalibDataReadingAlg.LATOMEDecoder.DumpFile = SC_DumpFile
+      LArRawSCCalibDataReadingAlg.LATOMEDecoder.RawDataFile = SC_RawDataFile
+      LArRawSCCalibDataReadingAlg.LATOMEDecoder.ProtectSourceId = SCProtectSourceId
+      LArRawSCCalibDataReadingAlg.LATOMEDecoder.IgnoreBarrelChannels = SCIgnoreBarrelChannels
+      LArRawSCCalibDataReadingAlg.LATOMEDecoder.IgnoreEndcapChannels = SCIgnoreEndcapChannels
+      LArRawSCCalibDataReadingAlg.LATOMEDecoder.OutputLevel = WARNING
+      topSequence+=LArRawSCCalibDataReadingAlg
 
-   # These are examples, how to use preselection:
-   #theLArRawCalibDataReadingAlg.BEPreselection     = [0]                                                   ## : [Barrel=0,Endcap=1]
-   #theLArRawCalibDataReadingAlg.PosNegPreselection = [1]                                                   ## : [C-side (negative eta)=0, A-side (positive eta)=1]
-   #theLArRawCalibDataReadingAlg.FTNumPreselection  = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]               ## : first half of [EM barrel feedthrough numbers]
-   #theLArRawCalibDataReadingAlg.FTNumPreselection  = [16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31]     ## : second half of [EM barrel feedthrough numbers]
-   #theLArRawCalibDataReadingAlg.FTNumPreselection  = [0,1,4,7,8,11,12,13,14,17,18,19,20,23,24]             ## : [EMEC Standard feedthrough numbers]
-   #theLArRawCalibDataReadingAlg.FTNumPreselection  = [2,9,15,21]                                           ## : [EMEC Special feedthrough numbers]
-   #theLArRawCalibDataReadingAlg.FTNumPreselection  = [3,10,16,22]                                          ## : [HEC feedthrough numbers]  (note: slots 1&2 are EMEC slots)
-   #theLArRawCalibDataReadingAlg.FTNumPreselection  = [6]                                                   ## : [FCAL feedthrough number]
-
-   topSequence+=theLArRawCalibDataReadingAlg
-
+   else:   
+      from LArByteStream.LArByteStreamConf import LArRawCalibDataReadingAlg
+ 
+      theLArRawCalibDataReadingAlg=LArRawCalibDataReadingAlg()
+      theLArRawCalibDataReadingAlg.LArAccCalibDigitKey=Gain
+      theLArRawCalibDataReadingAlg.LArFebHeaderKey="LArFebHeader"
+ 
+      # These are examples, how to use preselection:
+      #theLArRawCalibDataReadingAlg.BEPreselection     = [0]                                                   ## : [Barrel=0,Endcap=1]
+      #theLArRawCalibDataReadingAlg.PosNegPreselection = [1]                                                   ## : [C-side (negative eta)=0, A-side (positive eta)=1]
+      #theLArRawCalibDataReadingAlg.FTNumPreselection  = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]               ## : first half of [EM barrel feedthrough numbers]
+      #theLArRawCalibDataReadingAlg.FTNumPreselection  = [16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31]     ## : second half of [EM barrel feedthrough numbers]
+      #theLArRawCalibDataReadingAlg.FTNumPreselection  = [0,1,4,7,8,11,12,13,14,17,18,19,20,23,24]             ## : [EMEC Standard feedthrough numbers]
+      #theLArRawCalibDataReadingAlg.FTNumPreselection  = [2,9,15,21]                                           ## : [EMEC Special feedthrough numbers]
+      #theLArRawCalibDataReadingAlg.FTNumPreselection  = [3,10,16,22]                                          ## : [HEC feedthrough numbers]  (note: slots 1&2 are EMEC slots)
+      #theLArRawCalibDataReadingAlg.FTNumPreselection  = [6]                                                   ## : [FCAL feedthrough number]
+ 
+      topSequence+=theLArRawCalibDataReadingAlg
    
 
 ## This algorithm verifies that no FEBs are dropping out of the run

@@ -1,11 +1,10 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 ## @package trf
 #
 #  @brief Main package containing the @em JobTransform class.
 #  @details Main module of @em PyJobTransformsCore package containing the base class @em JobTransform.
 
-from __future__ import with_statement, print_function
 from past.builtins import execfile
 import os, sys, time, stat, re, math, subprocess, signal, inspect
 import stat as statconsts
@@ -979,47 +978,11 @@ class JobTransform(TransformLogger):
     def _makeMessageSvcJobOptions(self):
         with open( self.messageSvcFilename(), 'w'  ) as joFile:
             jo = [  CommentLine("Replacing MessageSvc with LoggedMessageSvc").bigComment() ,
-                    "try:",
-                    "   from AthenaServices import SummarySvc",
-                    "except:",
-                    "   printfunc ('Could not import AthenaServices.SummarySvc')",
-                    "   try:",
-                    "      from AthenaCommon.AppMgr import ServiceMgr, theApp",
-                    "      import AthenaCommon.ConfigurableDb as ConfDb",
-                    "      from AthenaServices.AthenaServicesConf import AthenaSummarySvc",
-                    "      from AthenaCommon.OldStyleConfig import Service",
-                    "   except:",
-                    "      printfunc ('Could not import required modules to enable use of LoggedMessageSvc.')",
-                    "   else:",
-                    "      printfunc ('Using AthenaServices...')",
-                    "      from AthenaServices.AthenaServicesConf import AthenaSummarySvc",
-                    "      AthenaSummarySvc.SummaryFile = 'AthenaSummary_%s.txt'" % self.name(),
-                    "      theApp.CreateSvc += ['AthenaSummarySvc']",
-                    "      AthenaSummarySvc = Service('AthenaSummarySvc')",
-                    "      ServiceMgr += AthenaSummarySvc",
-                    "      theApp.MessageSvcType = 'LoggedMessageSvc'",
-                    "      try:",
-                    "         oldMsgSvcName = ServiceMgr.MessageSvc.name()",
-                    "      except AttributeError:",
-                    "         oldMsgSvcName = 'MessageSvc'",
-                    "         oldMsgSvcItems = []",
-                    "      else:",
-                    "         oldMsgSvcItems = ServiceMgr.MessageSvc.getValuedProperties().items()",
-                    "         del ServiceMgr.MessageSvc",
-                    "      try:",
-                    "         del ServiceMgr.allConfigurables[ oldMsgSvcName ]",
-                    "      except KeyError:",
-                    "         pass",
-                    "      newMsgSvc = ConfDb.getConfigurable( theApp.MessageSvcType )( oldMsgSvcName )",
-                    "      for name, value in oldMsgSvcItems:",
-                    "         setattr( newMsgSvc, name, value )",
-                    "      ServiceMgr += newMsgSvc",
-                    "      MessageSvc = ServiceMgr.MessageSvc",
-                    "else:",
-                    "   printfunc ('Using AthenaServices.SummarySvc...')",
-                    "   from AthenaServices.AthenaServicesConf import AthenaSummarySvc",
-                    "   AthenaSummarySvc.SummaryFile = 'AthenaSummary_%s.txt'" % self.name(),
-                    "   SummarySvc.useAthenaSummarySvc()" ]
+                    "print ('Using AthenaServices.SummarySvc...')",
+                    "from AthenaServices import SummarySvc",
+                    "from AthenaServices.AthenaServicesConf import AthenaSummarySvc",
+                    "AthenaSummarySvc.SummaryFile = 'AthenaSummary_%s.txt'" % self.name(),
+                    "SummarySvc.useAthenaSummarySvc()" ]
             joFile.write( os.linesep.join(jo) + os.linesep )
 
     ## Setter function for option arguments.

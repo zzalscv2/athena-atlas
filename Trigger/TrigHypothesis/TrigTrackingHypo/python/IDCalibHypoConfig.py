@@ -1,9 +1,9 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
-def createIDCalibHypoAlg(name):
+def createIDCalibHypoAlg(flags, name):
     # make the Hypo
     from TrigTrackingHypo.TrigTrackingHypoConf import (IDCalibHypoAlg)
 
@@ -11,7 +11,7 @@ def createIDCalibHypoAlg(name):
     theHypo = IDCalibHypoAlg(name)
     
     # monioring
-    monTool = GenericMonitoringTool("IM_MonTool"+name)
+    monTool = GenericMonitoringTool(flags, "IM_MonTool"+name)
     monTool.defineHistogram('pt', type='TH1F', path='EXPERT', title="p_{T};p_{T} [GeV];Nevents", xbins=50, xmin=0, xmax=100) 
     #
     monTool.HistPath = 'IDCalibHypoAlg'

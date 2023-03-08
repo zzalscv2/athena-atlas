@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRKSPACEPOINTFORMATION_STRIPSPACEPOINTFORMATIONALG_H
@@ -13,7 +13,6 @@
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/ReadCondHandleKey.h"
 
-#include "ActsTrkEvent/SpacePoint.h"
 #include "ActsTrkToolInterfaces/IStripSpacePointFormationTool.h"
 
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
@@ -21,11 +20,12 @@
 #include "BeamSpotConditionsData/BeamSpotData.h"
 
 #include "xAODInDetMeasurement/StripClusterContainer.h"
+#include "xAODInDetMeasurement/SpacePointContainer.h"
+#include "xAODInDetMeasurement/SpacePointAuxContainer.h"
 
 #include <string>
 
 namespace ActsTrk {
-
     /// @class StripSpacePointFormationAlg
     /// This version of StripSpacePointFormationAlg uses xAOD strip clusters
     /// to find space points in the ITk strip detectors.
@@ -76,12 +76,8 @@ namespace ActsTrk {
 
         ///@name Output data using SG::WriteHandleKey
         //@{
-        SG::WriteHandleKey<ActsTrk::SpacePointContainer> m_stripSpacePointContainerKey{this, "StripSpacePoints", "ITkStripSpacePoints", "name of the output strip space point container"};
-        SG::WriteHandleKey<ActsTrk::SpacePointData> m_stripSpacePointDataKey {this,"StripSpacePointData","ITkStripSpacePointData","name of the output strip space point data"};
-        SG::WriteHandleKey<ActsTrk::SpacePointMeasurementDetails> m_stripSpacePointsDetailsKey {this,"StripSpacePointDetails","ITkStripSpacePointDetails","name of the output strip space point measurement details"};
-        SG::WriteHandleKey<ActsTrk::SpacePointContainer> m_stripOverlapSpacePointContainerKey{this, "StripOverlapSpacePoints", "ITkStripOverlapSpacePoints", "name of the strip overlap strip space point container"};
-        SG::WriteHandleKey<ActsTrk::SpacePointData> m_stripOverlapSpacePointDataKey {this,"StripOverlapSpacePointData","ITkStripOverlapSpacePointData","name of the output strip overlap space point data"};
-        SG::WriteHandleKey<ActsTrk::SpacePointMeasurementDetails> m_stripOverlapSpacePointsDetailsKey {this,"StripOverlapSpacePointDetails","ITkStripOverlapSpacePointDetails","name of the output strip overlap space point measurement details"};
+	SG::WriteHandleKey<xAOD::SpacePointContainer> m_stripSpacePointContainerKey{this, "StripSpacePoints", "ITkStripSpacePoints", "name of the output strip space point container"};
+	SG::WriteHandleKey<xAOD::SpacePointContainer> m_stripOverlapSpacePointContainerKey{this, "StripOverlapSpacePoints", "ITkStripOverlapSpacePoints", "name of the strip overlap strip space point container"};
         //@}
 
         /// @name ToolHandle

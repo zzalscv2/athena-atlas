@@ -1,7 +1,7 @@
 #!/bin/sh
 # -*- mode: python -*-
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 # This is a script that is born as shell to setup the preloading and then
 # resurrected as python script for the actual athenaHLT.py application.
@@ -122,9 +122,6 @@ def update_pcommands(args, cdict):
       cdict['trigger']['precommand'].append('_run_number=%d' % args.run_number)
    if args.lb_number is not None:
       cdict['trigger']['precommand'].append('_lb_number=%d' % args.lb_number)
-
-   if args.perfmon:
-      cdict['trigger']['precommand'].insert(0, "include('TrigCommon/PerfMon.py')")
 
    if args.leak_check:
       doLeakCheck = [] if args.leak_check=='all' else [args.leak_check]
@@ -289,11 +286,11 @@ def HLTMPPy_cfgdict(args):
       })
       # Special case for running from a json file
       if os.path.splitext(args.jobOptions)[1].lower()=='.json':
-         cdict['trigger']['pythonSetupFile'] = 'TrigPSC/TrigPSCPythonDbSetup.py'
+         cdict['trigger']['pythonSetupFile'] = 'TrigPSC.TrigPSCPythonDbSetup'
    else:
       cdict['trigger'].update({
          'module': 'DBPython',
-         'pythonSetupFile' : 'TrigPSC/TrigPSCPythonDbSetup.py',
+         'pythonSetupFile' : 'TrigPSC.TrigPSCPythonDbSetup',
          'db_alias': args.db_server,
          'coral_server': args.db_server,
          'use_coral': True,
@@ -431,6 +428,7 @@ def main():
    # set default OutputLevels and file inclusion
    import AthenaCommon.Logging
    AthenaCommon.Logging.log.setLevel(getattr(logging, args.log_level[0]))
+   AthenaCommon.Logging.log.setFormat("%(asctime)s  Py:%(name)-31s %(levelname)7s %(message)s")
    from AthenaCommon.Include import include
    include.setShowIncludes( args.show_includes )
 
@@ -461,14 +459,16 @@ def main():
    update_pcommands(args, cdict)
 
    # Extra Psc configuration
+   from TrigPSC.PscDefaultFlags import defaultOnlineFlags
+   flags = defaultOnlineFlags()
+
    PscConfig.interactive = args.interactive
    PscConfig.dumpJobProperties = args.dump_config or args.dump_config_exit or args.dump_config_reload
    PscConfig.exitAfterDump = args.dump_config_exit
    PscConfig.reloadAfterDump = args.dump_config_reload
 
-   # Select the correct THistSvc
-   from TrigServices.TriggerUnixStandardSetup import _Conf
-   _Conf.useOnlineTHistSvc = args.oh_monitoring
+   flags.PerfMon.doFastMonMT = args.perfmon
+   flags.Trigger.Online.useOnlineTHistSvc = args.oh_monitoring
 
    # Run HLTMPPU
    from HLTMPPy.runner import runHLTMPPy

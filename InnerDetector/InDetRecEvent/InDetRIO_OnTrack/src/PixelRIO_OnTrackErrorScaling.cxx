@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include "InDetRIO_OnTrack/PixelRIO_OnTrackErrorScaling.h"
 #include "InDetIdentifier/PixelID.h"
@@ -69,12 +69,12 @@ bool PixelRIO_OnTrackErrorScaling::postProcess() {
   return true;
 }
 
-Amg::MatrixX PixelRIO_OnTrackErrorScaling::getScaledCovariance(const Amg::MatrixX& cov_input,
+Amg::MatrixX PixelRIO_OnTrackErrorScaling::getScaledCovariance(Amg::MatrixX&& cov_input,
                                                                const PixelID &pixel_id,
                                                                const Identifier& id) const
 {
 
-  Amg::MatrixX newCov(cov_input);
+  Amg::MatrixX newCov = std::move(cov_input);
 
   // from SiDetectorElement::isEndcap
   bool is_endcap = !(pixel_id.is_barrel(id) || pixel_id.is_dbm(id));
@@ -96,12 +96,10 @@ Amg::MatrixX PixelRIO_OnTrackErrorScaling::getScaledCovariance(const Amg::Matrix
   }
 
   // checked in postprocess
-  assert( params().size()>idx+1);
-  assert(   params()[idx].size()>1
-         && params()[idx+1].size()>1 );
+  assert(params().size() > idx + 1);
+  assert(params()[idx].size() > 1 && params()[idx + 1].size() > 1);
 
   scale2by2(newCov,params()[idx] /* phi */ ,params()[idx+1] /* eta */);
-  // std::cout << "DEBUG createScaledPixelCovariance region:" << s_names[idx] << " " << cov_input << " -> " << newCov << std::endl;
   return newCov;
 }
 

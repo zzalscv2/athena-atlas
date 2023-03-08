@@ -18,7 +18,7 @@ atlas_add_root_dictionary( EventLoop
    EventLoop/LLDriver.h EventLoop/LSFDriver.h EventLoop/LocalDriver.h
    EventLoop/OutputStream.h EventLoop/MetricsSvc.h EventLoop/SoGEDriver.h
    EventLoop/StatusCode.h EventLoop/TorqueDriver.h
-   EventLoop/VomsProxySvc.h EventLoop/SlurmDriver.h
+   EventLoop/VomsProxySvc.h EventLoop/SlurmDriver.h EventLoop/WorkerConfig.h
    Root/LinkDef.h
    EXTERNAL_PACKAGES ROOT )
 
@@ -28,7 +28,7 @@ atlas_add_library( EventLoop
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} AnaAlgorithmLib AsgServicesLib AsgMessagingLib AsgTools SampleHandler
-   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} PathResolver RootCoreUtils xAODCore xAODRootAccess )
+   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} PathResolver RootCoreUtils RootUtils xAODCore xAODRootAccess )
 
 target_compile_definitions (EventLoop PUBLIC USE_CMAKE)
 

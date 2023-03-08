@@ -14,6 +14,7 @@ InDetPerfPlot_FakeRate::InDetPerfPlot_FakeRate(InDetPlotBase* pParent, const std
   InDetPlotBase(pParent, sDir),
   m_fakerate_vs_eta{},
   m_fakerate_vs_pt{},
+  m_fakerate_vs_lowpt{},
   m_fakerate_vs_phi{},
   m_fakerate_vs_d0{},
   m_fakerate_vs_z0{},
@@ -26,6 +27,7 @@ InDetPerfPlot_FakeRate::initializePlots() {
 
   book(m_fakerate_vs_eta, "fakerate_vs_eta");
   book(m_fakerate_vs_pt, "fakerate_vs_pt");
+  book(m_fakerate_vs_lowpt, "fakerate_vs_lowpt");
   book(m_fakerate_vs_phi, "fakerate_vs_phi");
   book(m_fakerate_vs_d0, "fakerate_vs_d0");
   book(m_fakerate_vs_z0, "fakerate_vs_z0");
@@ -44,6 +46,7 @@ InDetPerfPlot_FakeRate::fill(const xAOD::TrackParticle& track, const bool isFake
 
   fillHisto(m_fakerate_vs_eta, eta, isFake, weight);
   fillHisto(m_fakerate_vs_pt, pt, isFake, weight);
+  fillHisto(m_fakerate_vs_lowpt, pt, isFake, weight);
   fillHisto(m_fakerate_vs_phi, phi, isFake, weight); 
   fillHisto(m_fakerate_vs_d0, d0, isFake, weight);
   fillHisto(m_fakerate_vs_z0, z0, isFake, weight);

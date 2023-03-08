@@ -38,7 +38,7 @@ StatusCode HLTCalo_TopoCaloClustersMonitor::initialize() {
   ATH_CHECK(m_HLT_cont_key.initialize());
   ATH_CHECK(m_OFF_cont_key.initialize());
   ATH_CHECK( m_bunchCrossingKey.initialize());
-  ATH_CHECK( m_eventInfoKey.initialize() );
+  ATH_CHECK( m_eventInfoDecorKey.initialize() );
 
   return AthMonitorAlgorithm::initialize();
 }
@@ -48,7 +48,9 @@ StatusCode HLTCalo_TopoCaloClustersMonitor::fillHistograms( const EventContext& 
   using namespace Monitored;
 
   // Protect against noise bursts
-  SG::ReadDecorHandle<xAOD::EventInfo,uint32_t> thisEvent(m_eventInfoKey, ctx);
+  SG::ReadHandle<xAOD::EventInfo> thisEvent(GetEventInfo(ctx));
+  ATH_CHECK(thisEvent.isValid());
+
   if ( thisEvent->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::NOISEBURSTVETO))
 	return StatusCode::SUCCESS;
   // Get HLT cluster collections
@@ -85,26 +87,25 @@ StatusCode HLTCalo_TopoCaloClustersMonitor::fillHistograms( const EventContext& 
   // prepare HLT clusters
   std::vector<clus_kin> vec_hlt_clusters;
   std::vector<const xAOD::CaloCluster*> accepted_hlt_clusters = ifStepPassed(m_hltChainsT0);
-  
-  // For monitoring all hlt clusters
-  if(m_hltChainsT0 == "All"){
-    for (const auto hlt_cluster : *hltCluster_readHandle) {
-	auto hlt_clus_et = hlt_cluster->et();
-	if (hlt_clus_et < m_HLT_min_et) continue;
 
-	bool HLT_type_match = false;
+  // For monitoring signature specific clusters
+   if (accepted_hlt_clusters.size()>0){
+    for (const auto* hlt_cluster : accepted_hlt_clusters) {
+        auto hlt_clus_et = hlt_cluster->et();
+        if (hlt_clus_et < m_HLT_min_et) continue;
 
-	for (unsigned int n = 0; n < m_HLT_types.size(); ++n) {
-		if (hlt_cluster->clusterSize() == m_HLT_types[n]) { HLT_type_match = true; break; }
-	}
+        bool HLT_type_match = false;
+
+        for (unsigned int n = 0; n < m_HLT_types.size(); ++n) {
+                if (hlt_cluster->clusterSize() == m_HLT_types[n]) { HLT_type_match = true; break; }
+        }
 
 	if (!m_HLT_types.empty() && !HLT_type_match) continue;
-	vec_hlt_clusters.push_back({hlt_clus_et*0.001, hlt_cluster->eta(), hlt_cluster->phi(), hlt_cluster});
+        vec_hlt_clusters.push_back({hlt_clus_et*0.001, hlt_cluster->eta(), hlt_cluster->phi(), hlt_cluster});
     }
   }
-  // For monitoring signature specific clusters
-  else if (accepted_hlt_clusters.size()>0){
-    for (const auto* hlt_cluster : accepted_hlt_clusters) {
+   else{
+    for (const auto hlt_cluster : *hltCluster_readHandle) {
         auto hlt_clus_et = hlt_cluster->et();
         if (hlt_clus_et < m_HLT_min_et) continue;
 
@@ -371,32 +372,8 @@ StatusCode HLTCalo_TopoCaloClustersMonitor::fillHistograms( const EventContext& 
   }
   const std::string chain = m_hltChainsT0;
 
-   if(m_hltChainsT0 == "All") {
-
-        ATH_MSG_DEBUG(" Filling histograms for: "<<m_hltChainsT0);
-        fill(m_mongroup_name,
-        // HLT clusters
-        HLT_num, HLT_et, HLT_eta, HLT_phi, HLT_time, HLT_type, HLT_size, HLT_barrel_high_et_num, HLT_bc,
-
-        // HLT cutmasks
-        HLT_barrel_high_et, HLT_no_OFF_match, HLT_with_OFF_match,
-
-        // OFF clusters
-        OFF_num, OFF_et, OFF_eta, OFF_phi, OFF_time, OFF_type,
-
-        // OFF cutmasks
-        OFF_no_HLT_match, OFF_with_HLT_match,
-
-        // HLT matched to OFF
-        HLT_matched_fraction, HLT_no_OFF_match_num, HLT_vs_OFF_minimum_delta_r, HLT_with_OFF_match_num,
-        OFF_match_et, HLT_vs_OFF_resolution, HLT_vs_OFF_delta_eta, HLT_vs_OFF_delta_phi, HLT_vs_OFF_delta_time,
-
-        // OFF matched to HLT
-        OFF_matched_fraction, OFF_no_HLT_match_num, OFF_vs_HLT_minimum_delta_r, OFF_with_HLT_match_num,
-        HLT_match_et, OFF_vs_HLT_resolution, OFF_vs_HLT_delta_eta, OFF_vs_HLT_delta_phi, OFF_vs_HLT_delta_time
-        );
-   }
-   else if(accepted_hlt_clusters.size()>0){
+  if(m_hltChainsT0 != "All"){
+   if(accepted_hlt_clusters.size()>0){
      ATH_MSG_DEBUG("Filling for : "<<m_hltChainsT0);
     
      fill(m_mongroup_name,
@@ -422,7 +399,56 @@ StatusCode HLTCalo_TopoCaloClustersMonitor::fillHistograms( const EventContext& 
         );
    
    }
+   else if(getTrigDecisionTool()->isPassed(m_hltChainsT0)){
+     ATH_MSG_DEBUG("Filling for : "<<m_hltChainsT0);
+     fill(m_mongroup_name,
+     // HLT clusters
+        HLT_num, HLT_et, HLT_eta, HLT_phi, HLT_time, HLT_type, HLT_size, HLT_barrel_high_et_num, HLT_bc,
 
+        // HLT cutmasks
+        HLT_barrel_high_et, HLT_no_OFF_match, HLT_with_OFF_match,
+
+        // OFF clusters
+        OFF_num, OFF_et, OFF_eta, OFF_phi, OFF_time, OFF_type,
+
+        // OFF cutmasks
+        OFF_no_HLT_match, OFF_with_HLT_match,
+
+        // HLT matched to OFF
+        HLT_matched_fraction, HLT_no_OFF_match_num, HLT_vs_OFF_minimum_delta_r, HLT_with_OFF_match_num,
+        OFF_match_et, HLT_vs_OFF_resolution, HLT_vs_OFF_delta_eta, HLT_vs_OFF_delta_phi, HLT_vs_OFF_delta_time,
+
+        // OFF matched to HLT
+        OFF_matched_fraction, OFF_no_HLT_match_num, OFF_vs_HLT_minimum_delta_r, OFF_with_HLT_match_num,
+        HLT_match_et, OFF_vs_HLT_resolution, OFF_vs_HLT_delta_eta, OFF_vs_HLT_delta_phi, OFF_vs_HLT_delta_time
+        );
+    }
+   }
+   else {
+    ATH_MSG_DEBUG("Filling for : "<<m_hltChainsT0);
+     fill(m_mongroup_name,
+     // HLT clusters
+        HLT_num, HLT_et, HLT_eta, HLT_phi, HLT_time, HLT_type, HLT_size, HLT_barrel_high_et_num, HLT_bc,
+
+        // HLT cutmasks
+        HLT_barrel_high_et, HLT_no_OFF_match, HLT_with_OFF_match,
+
+        // OFF clusters
+        OFF_num, OFF_et, OFF_eta, OFF_phi, OFF_time, OFF_type,
+
+        // OFF cutmasks
+        OFF_no_HLT_match, OFF_with_HLT_match,
+
+        // HLT matched to OFF
+        HLT_matched_fraction, HLT_no_OFF_match_num, HLT_vs_OFF_minimum_delta_r, HLT_with_OFF_match_num,
+        OFF_match_et, HLT_vs_OFF_resolution, HLT_vs_OFF_delta_eta, HLT_vs_OFF_delta_phi, HLT_vs_OFF_delta_time,
+
+        // OFF matched to HLT
+        OFF_matched_fraction, OFF_no_HLT_match_num, OFF_vs_HLT_minimum_delta_r, OFF_with_HLT_match_num,
+        HLT_match_et, OFF_vs_HLT_resolution, OFF_vs_HLT_delta_eta, OFF_vs_HLT_delta_phi, OFF_vs_HLT_delta_time
+        );
+
+  }
   return StatusCode::SUCCESS;
 }
 
@@ -455,3 +481,5 @@ std::vector<const xAOD::CaloCluster*> HLTCalo_TopoCaloClustersMonitor::ifStepPas
     ATH_MSG_DEBUG("clustersToMonitorForChain->et(): "<<p->et());
   return clustersToMonitorForChain;
 }
+
+

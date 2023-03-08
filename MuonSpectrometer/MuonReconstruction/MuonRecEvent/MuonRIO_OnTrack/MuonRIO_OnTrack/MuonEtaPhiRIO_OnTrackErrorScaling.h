@@ -11,8 +11,8 @@ class MuonEtaPhiRIO_OnTrackErrorScaling final : public RIO_OnTrackErrorScaling
 {
 public:
   virtual CLID clid() const override final;
-
-  Amg::MatrixX getScaledCovariance(const Amg::MatrixX& cov_input,
+  static constexpr RIO_OnTrackErrorScaling::Type s_type = RIO_OnTrackErrorScaling::MuonEtaPhi;
+  Amg::MatrixX getScaledCovariance(Amg::MatrixX&& cov_input,
                                    const Trk::ParamDefs measuredCoord) const;
 
   enum EMuonEtaPhiErrorScalingRegions
@@ -23,6 +23,7 @@ public:
   };
 
   static const char* const* paramNames() { return s_names; }
+  virtual Type type() const override final {return s_type;}
   virtual bool postProcess() override final;
 
 protected:

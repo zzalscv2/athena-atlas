@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 """
@@ -25,13 +25,14 @@ def TrigMinBias(configFlags):
 
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
 
+    flags = initConfigFlags()
     flags.DQ.Environment = "AOD"
     flags.Output.HISTFileName = 'TestMinBiasMonitorOutput.root'
     from AthenaConfiguration.TestDefaults import defaultTestFiles
 
-    flags.Input.Files = defaultTestFiles.AOD
+    flags.Input.Files = defaultTestFiles.AOD_RUN3_DATA
     flags.Exec.MaxEvents = -1
     # flags.Common.doExpressProcessing=True # enable for express stream data processing
     flags.fillFromArgs()

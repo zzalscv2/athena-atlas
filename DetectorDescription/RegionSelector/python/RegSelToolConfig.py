@@ -7,7 +7,7 @@
 #
 #   @date    Sun  8 Mar 2020 03:27:57 GMT
 #                 
-#   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration#                 
+#   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration#                 
 #
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory # CompFactory creates old or new configs depending on the enva
@@ -355,12 +355,13 @@ def regSelToolsCfg(flags, detNames):
 # unit test
 if __name__=='__main__':
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaConfiguration import DetectorConfigFlags
     from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
     import sys
 
+    flags = initConfigFlags()
     flags.Input.Files = defaultTestFiles.RAW_RUN3
     flags.Exec.MaxEvents = 1
     flags.Concurrency.NumThreads = 1

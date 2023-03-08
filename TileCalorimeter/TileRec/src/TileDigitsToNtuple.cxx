@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -36,7 +36,7 @@
 #include "TileIdentifier/TileHWID.h"
 
 
-TileDigitsToNtuple::TileDigitsToNtuple(const std::string name, ISvcLocator* pSvcLocator)
+TileDigitsToNtuple::TileDigitsToNtuple(const std::string& name, ISvcLocator* pSvcLocator)
   : AthAlgorithm(name, pSvcLocator)
   , m_tileID(0)
   , m_tileHWID(0)

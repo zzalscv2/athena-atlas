@@ -31,7 +31,7 @@ public:
    * @param digits Pointer to TileDigitsContainer
    *
    */
-  virtual TileRawChannel* rawChannel (const TileDigits* digits) override;
+  virtual TileRawChannel* rawChannel (const TileDigits* digits, const EventContext& ctx) override;
 };
 
 

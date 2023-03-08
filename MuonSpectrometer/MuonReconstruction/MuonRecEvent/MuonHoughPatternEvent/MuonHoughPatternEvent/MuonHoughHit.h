@@ -18,7 +18,7 @@ namespace MuonHough {
     /** number of phi sectors */
     constexpr int phisectors = 16;
     /** angle of half a sector in rad */
-    const double half_phisector = M_PI / phisectors;
+    constexpr double half_phisector = M_PI / phisectors;
 }  // namespace MuonHough
 
 namespace Trk {
@@ -101,9 +101,9 @@ protected:
     /** Pointer to preprawdata */
     const Trk::PrepRawData* m_prd{nullptr};
 
-    Amg::Vector3D m_pos{};
+    Amg::Vector3D m_pos{Amg::Vector3D::Zero()};
     /** unique id */
-    int m_id = 0;
+    int m_id{0};
 
     /** radius of hit*/
     double m_radius{0.};
@@ -134,7 +134,7 @@ protected:
     bool m_measures_phi{false};
 
     /** hit associated to pattern */
-    bool m_associated = false;
+    bool m_associated{false};
 
 private:
     /** method that calculates phi sector of hit */

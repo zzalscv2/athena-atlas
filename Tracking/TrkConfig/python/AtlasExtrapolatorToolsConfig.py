@@ -1,7 +1,8 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 # Configuration of tools needed by the Extrapolator
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
 
 # Configured Energy Loss  uses the TrkUtils parametrization for
@@ -66,6 +67,7 @@ def ITkMaterialEffectsUpdatorCfg(flags,
 # Navigator used in order to  handle the
 # navigation inside the Tracking Geometry
 # i.e search for the next TrackingVolume
+@AccumulatorCache
 def AtlasNavigatorCfg(flags,
                       name='AtlasNavigator',
                       **kwargs):
@@ -138,9 +140,9 @@ def fatrasMultipleScatteringUpdatorCfg(flags,
                                        **kwargs):
     result = ComponentAccumulator()
 
-    from ISF_FatrasServices.ISF_FatrasConfig import TrkExRndSvcCfg
+    from ISF_FatrasServices.ISF_FatrasConfig import TrkExRndSvcMTCfg
     kwargs.setdefault("RandomNumberService",
-                      result.getPrimaryAndMerge(TrkExRndSvcCfg(flags)).name)
+                      result.getPrimaryAndMerge(TrkExRndSvcMTCfg(flags)).name)
     kwargs.setdefault("RandomStreamName",
                       flags.Sim.Fatras.TrkExRandomStreamName)
     kwargs.setdefault("GaussianMixtureModel",

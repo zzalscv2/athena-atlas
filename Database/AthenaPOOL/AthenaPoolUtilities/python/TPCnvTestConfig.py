@@ -1,13 +1,14 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import os
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import LHCPeriod
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 from AthenaPoolUtilities.DumperConfig import Dumper, find_file
 from IOVDbSvc.IOVDbSvcConfig import IOVDbSvcCfg
+
 
 def TPCnvTest(infile, keys, useGeoModelSvc=False, useIOVDbSvc=False, doPixel=False, doSCT=False, doTRT=False, doLAr=False, doTile=False, doMuon=False, doTracks=False, configOnly=False, adjustMessageSvc=True):
 
@@ -33,59 +34,61 @@ def TPCnvTest(infile, keys, useGeoModelSvc=False, useIOVDbSvc=False, doPixel=Fal
     infile = find_file (infile, refpaths)
 
     # Provide MC input
-    ConfigFlags.Input.Files = [infile]
-    ConfigFlags.GeoModel.AtlasVersion = 'ATLAS-R1-2012-03-01-00'
-    ConfigFlags.GeoModel.Align.Dynamic = False
-    ConfigFlags.GeoModel.Run = LHCPeriod.Run1
-    ConfigFlags.Detector.GeometryPixel = doPixel
-    ConfigFlags.Detector.GeometrySCT = doSCT
-    ConfigFlags.Detector.GeometryTRT = doTRT
-    ConfigFlags.Detector.GeometryLAr = doLAr
-    ConfigFlags.Detector.GeometryTile = doTile
-    ConfigFlags.Detector.GeometryMuon = doMuon
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = [infile]
+    flags.GeoModel.Run = LHCPeriod.Run1
+    flags.GeoModel.AtlasVersion = 'ATLAS-R1-2012-03-02-00'
+    if useGeoModelSvc:
+        flags.GeoModel.Align.Dynamic = False
+        flags.Detector.GeometryPixel = doPixel
+        flags.Detector.GeometrySCT = doSCT
+        flags.Detector.GeometryTRT = doTRT
+        flags.Detector.GeometryLAr = doLAr
+        flags.Detector.GeometryTile = doTile
+        flags.Detector.GeometryMuon = doMuon
+    flags.lock()
 
     # Construct ComponentAccumulator
-    acc = MainServicesCfg(ConfigFlags)
+    acc = MainServicesCfg(flags)
     acc.setAppProperty('PrintAlgsSequence', False, overwrite=True)
-    acc.merge(PoolReadCfg(ConfigFlags))
+    acc.merge(PoolReadCfg(flags))
     if useIOVDbSvc:
-        acc.merge(IOVDbSvcCfg(ConfigFlags))
+        acc.merge(IOVDbSvcCfg(flags))
     EventCnvSuperTool = None
     if useGeoModelSvc:
-        if ConfigFlags.Detector.GeometryPixel:
+        if flags.Detector.GeometryPixel:
             from PixelGeoModel.PixelGeoModelConfig import PixelReadoutGeometryCfg
-            acc.merge(PixelReadoutGeometryCfg(ConfigFlags))
-        if ConfigFlags.Detector.GeometrySCT:
+            acc.merge(PixelReadoutGeometryCfg(flags))
+        if flags.Detector.GeometrySCT:
             from SCT_GeoModel.SCT_GeoModelConfig import SCT_ReadoutGeometryCfg
-            acc.merge(SCT_ReadoutGeometryCfg(ConfigFlags))
-        if ConfigFlags.Detector.GeometryTRT:
+            acc.merge(SCT_ReadoutGeometryCfg(flags))
+        if flags.Detector.GeometryTRT:
             from TRT_GeoModel.TRT_GeoModelConfig import TRT_ReadoutGeometryCfg
-            acc.merge(TRT_ReadoutGeometryCfg(ConfigFlags))
-        if ConfigFlags.Detector.GeometryITkPixel:
+            acc.merge(TRT_ReadoutGeometryCfg(flags))
+        if flags.Detector.GeometryITkPixel:
             from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
-            acc.merge(ITkPixelReadoutGeometryCfg(ConfigFlags))
-        if ConfigFlags.Detector.GeometryITkStrip:
+            acc.merge(ITkPixelReadoutGeometryCfg(flags))
+        if flags.Detector.GeometryITkStrip:
             from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
-            acc.merge(ITkStripReadoutGeometryCfg(ConfigFlags))
-        if ConfigFlags.Detector.GeometryLAr:
+            acc.merge(ITkStripReadoutGeometryCfg(flags))
+        if flags.Detector.GeometryLAr:
             from LArGeoAlgsNV.LArGMConfig import LArGMCfg
-            acc.merge(LArGMCfg(ConfigFlags))
-        if ConfigFlags.Detector.GeometryTile:
+            acc.merge(LArGMCfg(flags))
+        if flags.Detector.GeometryTile:
             from TileGeoModel.TileGMConfig import TileGMCfg
-            acc.merge(TileGMCfg(ConfigFlags))
-        if ConfigFlags.Detector.GeometryMuon:
+            acc.merge(TileGMCfg(flags))
+        if flags.Detector.GeometryMuon:
             from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
-            acc.merge(MuonGeoModelCfg(ConfigFlags))
-        #acc.merge(ForDetGeometryCfg(ConfigFlags))
+            acc.merge(MuonGeoModelCfg(flags))
+        #acc.merge(ForDetGeometryCfg(flags))
         from AtlasGeoModel.GeoModelConfig import GeoModelCfg
-        acc.merge(GeoModelCfg(ConfigFlags))
+        acc.merge(GeoModelCfg(flags))
         acc.getService("GeoModelSvc").IgnoreTagDifference = True
         if doTracks:
             # Doing this here as Trk.EventCnvSuperTool isn't part of all projects
             Trk_EventCnvSuperTool=CompFactory.Trk.EventCnvSuperTool
             EventCnvSuperTool = Trk_EventCnvSuperTool('EventCnvSuperTool', MaxErrorCount=10)
-    acc.addEventAlgo(Dumper ('dumper', ConfigFlags.Input.Files[0], keys, refpaths), 'AthAlgSeq')
+    acc.addEventAlgo(Dumper ('dumper', flags.Input.Files[0], keys, refpaths), 'AthAlgSeq')
     if adjustMessageSvc:
         acc.getService("MessageSvc").enableSuppression = True
         acc.getService("MessageSvc").Format = "% F%18W%S%7W%R%T %0W%M"

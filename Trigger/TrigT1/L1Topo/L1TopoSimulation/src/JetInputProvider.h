@@ -6,19 +6,14 @@
 #define L1TopoSimulation_JetInputProvider
 
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "AthenaMonitoringKernel/Monitored.h"
 #include "L1TopoSimulation/IInputTOBConverter.h"
-#include "GaudiKernel/IIncidentListener.h"
 #include "GaudiKernel/LockedHandle.h"
 #include "TrigT1CaloEvent/JetCMXTopoDataCollection.h"
 
-#include "TH1.h"
-#include "TH2.h"
-
-class ITHistSvc;
-
 namespace LVL1 {
 
-   class JetInputProvider : public extends2<AthAlgTool, IInputTOBConverter, IIncidentListener> {
+   class JetInputProvider : public extends<AthAlgTool, IInputTOBConverter> {
    public:
       JetInputProvider(const std::string& type, const std::string& name, 
                          const IInterface* parent);
@@ -29,17 +24,12 @@ namespace LVL1 {
 
       virtual StatusCode fillTopoInputEvent(TCS::TopoInputEvent& ) const; 
 
-      virtual void handle(const Incident&);
-
    private:
 
-      ServiceHandle<ITHistSvc> m_histSvc;
+      ToolHandle<GenericMonitoringTool> m_monTool {this, "MonTool", "", "Monitoring tool to create online histograms"};
 
       SG::ReadHandleKey< DataVector<JetCMXTopoData> >  m_jetLocation;    //!<  Jet ROIs SG key
 
-      mutable LockedHandle<TH1> m_hPt1 ATLAS_THREAD_SAFE;
-      mutable LockedHandle<TH1> m_hPt2 ATLAS_THREAD_SAFE;
-      mutable LockedHandle<TH2> m_hPhiEta ATLAS_THREAD_SAFE;
    };
 }
 

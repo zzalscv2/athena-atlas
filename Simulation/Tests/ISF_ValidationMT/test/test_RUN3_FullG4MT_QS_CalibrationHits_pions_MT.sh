@@ -1,8 +1,10 @@
 #!/bin/sh
 #
-# art-description: Run simulation using ISF with the FullG4 simulator, reading single pion events, writing HITS including full CaloCalibrationHit information, using 2015 geometry and conditions
-# art-include: 22.0/Athena
+# art-description: MC23-style RUN3 simulation using FullG4MT_QS in AthenaMT, reading single pion events, writing HITS including full CaloCalibrationHit information
+# art-include: 23.0/Athena
+# art-include: 23.0/AthSimulation
 # art-include: master/Athena
+# art-include: master/AthSimulation
 # art-type: grid
 # art-athena-mt: 8
 # art-architecture:  '#x86_64-intel'
@@ -13,7 +15,7 @@
 export ATHENA_CORE_NUMBER=8
 
 # RUN3 setup
-# ATLAS-R3S-2021-03-00-00 and OFLCOND-MC16-SDR-RUN3-05
+# ATLAS-R3S-2021-03-01-00 and OFLCOND-MC16-SDR-RUN3-05
 Sim_tf.py \
     --CA \
     --multithreaded \
@@ -22,9 +24,9 @@ Sim_tf.py \
     --outputHITSFile 'test.CA.HITS.pool.root' \
     --maxEvents '10' \
     --skipEvents '0' \
-    --geometryVersion 'default:ATLAS-R3S-2021-03-00-00' \
-    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-05' \
-    --preInclude 'EVNTtoHITS:Campaigns.MC21SimulationCalibrationHits' \
+    --geometryVersion 'default:ATLAS-R3S-2021-03-01-00' \
+    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
+    --preInclude 'EVNTtoHITS:Campaigns.MC23SimulationSingleIoVCalibrationHits' \
     --postInclude 'PyJobTransforms.TransformUtils.UseFrontier' \
     --postExec 'EVNTtoHITS:with open("ConfigSimCA.pkl", "wb") as f: cfg.store(f)' \
     --imf False
@@ -41,10 +43,10 @@ Sim_tf.py \
     --outputHITSFile 'test.CA.HITS.pool.root' \
     --maxEvents '10' \
     --skipEvents '0' \
-    --geometryVersion 'default:ATLAS-R3S-2021-03-00-00' \
-    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-05' \
+    --geometryVersion 'default:ATLAS-R3S-2021-03-01-00' \
+    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --preExec 'EVNTtoHITS:simFlags.ReleaseGeoModel=False;' \
-    --preInclude 'EVNTtoHITS:Campaigns/MC21SimulationCalibrationHits.py' \
+    --preInclude 'EVNTtoHITS:Campaigns/MC23SimulationSingleIoVCalibrationHits.py' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
     --imf False \
     --athenaopts '"--config-only=ConfigSimCG.pkl"'
@@ -56,10 +58,10 @@ Sim_tf.py \
     --outputHITSFile 'test.HITS.pool.root' \
     --maxEvents '10' \
     --skipEvents '0' \
-    --geometryVersion 'default:ATLAS-R3S-2021-03-00-00' \
-    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-05' \
+    --geometryVersion 'default:ATLAS-R3S-2021-03-01-00' \
+    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --preExec 'EVNTtoHITS:simFlags.ReleaseGeoModel=False;' \
-    --preInclude 'EVNTtoHITS:Campaigns/MC21SimulationCalibrationHits.py' \
+    --preInclude 'EVNTtoHITS:Campaigns/MC23SimulationSingleIoVCalibrationHits.py' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
     --imf False
 
@@ -74,7 +76,7 @@ fi
 rc3=-9999
 if [ $status -eq 0 ]
 then
-    acmd.py diff-root test.HITS.pool.root test.CA.HITS.pool.root --error-mode resilient --mode=semi-detailed --order-trees --ignore-leaves RecoTimingObj_p1_EVNTtoHITS_timings index_ref
+    acmd.py diff-root test.HITS.pool.root test.CA.HITS.pool.root --error-mode resilient --mode=semi-detailed --order-trees
     rc3=$?
     status=$rc3
 fi
@@ -85,7 +87,7 @@ if [ $rc2 -eq 0 ]
 then
     ArtPackage=$1
     ArtJobName=$2
-    art.py compare grid --entries 10 ${ArtPackage} ${ArtJobName} --order-trees --diff-root --mode=semi-detailed --file=test.HITS.pool.root
+    art.py compare grid --entries 10 ${ArtPackage} ${ArtJobName} --order-trees --mode=semi-detailed --diff-root --file=test.HITS.pool.root
     rc4=$?
     status=$rc4
 fi

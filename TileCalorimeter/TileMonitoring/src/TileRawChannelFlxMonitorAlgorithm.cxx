@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Tile includes
@@ -7,19 +7,10 @@
 #include "TileIdentifier/TileHWID.h"
 #include "TileCalibBlobObjs/TileCalibUtils.h"
 
-#include <math.h> 
 // Athena includes
 #include "StoreGate/ReadHandle.h"
 
-
-TileRawChannelFlxMonitorAlgorithm::TileRawChannelFlxMonitorAlgorithm( const std::string& name, ISvcLocator* pSvcLocator )
-  :AthMonitorAlgorithm(name, pSvcLocator)
-  , m_tileHWID(nullptr)
-{}
-
-
-TileRawChannelFlxMonitorAlgorithm::~TileRawChannelFlxMonitorAlgorithm() {
-}
+#include <cstring>
 
 
 StatusCode TileRawChannelFlxMonitorAlgorithm::initialize() {
@@ -29,13 +20,24 @@ StatusCode TileRawChannelFlxMonitorAlgorithm::initialize() {
   ATH_MSG_INFO("in initialize()");
 
   ATH_CHECK( detStore()->retrieve(m_tileHWID) );
-
-  ATH_CHECK( m_digitsContainerKey.initialize() );
-
+  ATH_CHECK( m_rawChannelContainerKeyLegacy.initialize() );
   ATH_CHECK( m_rawChannelContainerKeyFlx.initialize() );
 
-  ATH_CHECK( m_rawChannelContainerKeyLegacy.initialize() );
+  std::ostringstream os;
 
+  if ( m_fragIDsToCompare.size() != 0) {
+    std::sort(m_fragIDsToCompare.begin(), m_fragIDsToCompare.end());
+    for (int fragID : m_fragIDsToCompare) {
+      unsigned int ros    = fragID >> 8;
+      unsigned int drawer = fragID & 0xFF;
+      std::string module = TileCalibUtils::getDrawerString(ros, drawer);
+      os << " " << module << "/0x" << std::hex << fragID << std::dec;
+    }
+  } else {
+    os << "NONE";
+  }
+
+  ATH_MSG_INFO("Monitored modules/frag ID:" << os.str());
 
   return StatusCode::SUCCESS;
 }
@@ -46,108 +48,95 @@ StatusCode TileRawChannelFlxMonitorAlgorithm::fillHistograms( const EventContext
   // In case you want to measure the execution time
   auto timer = Monitored::Timer("TIME_execute");
 
-  std::array<std::string, 2> gainName{"LG", "HG"};
-
-  SG::ReadHandle<TileDigitsContainer> digitsContainer(m_digitsContainerKey, ctx);
-  ATH_CHECK( digitsContainer.isValid() );
-
-  float amplitude[TileCalibUtils::MAX_CHAN][TileCalibUtils::MAX_GAIN];
-  float amplitudeFlx[TileCalibUtils::MAX_CHAN][TileCalibUtils::MAX_GAIN];
+  SG::ReadHandle<TileRawChannelContainer> rawChannelContainerLegacy(m_rawChannelContainerKeyLegacy, ctx);
+  ATH_CHECK( rawChannelContainerLegacy.isValid() );
 
   SG::ReadHandle<TileRawChannelContainer> rawChannelContainerFlx(m_rawChannelContainerKeyFlx, ctx);
   ATH_CHECK( rawChannelContainerFlx.isValid() );
 
-  SG::ReadHandle<TileRawChannelContainer> rawChannelContainerLegacy(m_rawChannelContainerKeyLegacy, ctx);
-  ATH_CHECK( rawChannelContainerLegacy.isValid() );
+  std::array<std::string, 2> gainName{"_LG", "_HG"};
+
+  float amplitude[TileCalibUtils::MAX_CHAN][TileCalibUtils::MAX_GAIN];
+  float amplitudeFlx[TileCalibUtils::MAX_CHAN][TileCalibUtils::MAX_GAIN];
+  int found[TileCalibUtils::MAX_CHAN][TileCalibUtils::MAX_GAIN];
 
   const TileFragHash& hashFunc = rawChannelContainerFlx->hashFunc();
- 
+
   for (int fragID : m_fragIDsToCompare) {
 
-    IdentifierHash hash = static_cast<IdentifierHash>(hashFunc(fragID));
+    memset(found,0,sizeof(found));
 
+    IdentifierHash hash = static_cast<IdentifierHash>(hashFunc(fragID));
     unsigned int drawer = (fragID & 0x3F);
     unsigned int ros = fragID >> 8;
+    std::string module = TileCalibUtils::getDrawerString(ros, drawer);
+    std::array<std::string, 2> moduleName{module+gainName[0], module+gainName[1]};
 
-    // Legacy (FIT) amplitude calculation
+    // Legacy amplitudes
     const TileRawChannelCollection* rawChannelCollectionLegacy = rawChannelContainerLegacy->indexFindPtr(hash);
     for (const TileRawChannel* rawChannel : *rawChannelCollectionLegacy) {
-  
+
       HWIdentifier adcId = rawChannel->adc_HWID();
       int channel = m_tileHWID->channel(adcId);
       int gain = m_tileHWID->adc(adcId);
 
-      std::string channelName = TileCalibUtils::getDrawerString(ros, drawer) + "_" + gainName[gain] + "_channel";
-      auto monitoredChannel = Monitored::Scalar<float>(channelName, channel);
-  
+      found[channel][gain] |= 1;
       amplitude[channel][gain] = rawChannel->amplitude();
-      
 
-      std::string Summary_name_Legacy = TileCalibUtils::getDrawerString(ros, drawer) + "_" + gainName[gain] + "_Summary_Legacy";
-      auto Summary_sample_Legacy = Monitored::Scalar<float>(Summary_name_Legacy, amplitude[channel][gain]);
-      fill("TileRawChannelLegacySummary", monitoredChannel, Summary_sample_Legacy);
+      std::string channelName = moduleName[gain] + "_channel";
+      auto monitoredChannel = Monitored::Scalar<float>(channelName, channel);
 
-  
+      std::string summaryName = moduleName[gain] + "_Summary_Legacy";
+      auto summaryRawChannel = Monitored::Scalar<float>(summaryName, rawChannel->amplitude());
+      fill("TileRawChannelLegacySummary", monitoredChannel, summaryRawChannel);
     }
- 
-    // Felix (Opt2) amplitude calcualtion
+
+    // FELIX amplitudes
     const TileRawChannelCollection* rawChannelCollectionFlx = rawChannelContainerFlx->indexFindPtr(hash);
     for (const TileRawChannel* rawChannel : *rawChannelCollectionFlx) {
-  
+
       HWIdentifier adcId = rawChannel->adc_HWID();
       int channel = m_tileHWID->channel(adcId);
       int gain = m_tileHWID->adc(adcId);
-  
-      std::string channelName = TileCalibUtils::getDrawerString(ros, drawer) + "_" + gainName[gain] + "_channel";
+
+      found[channel][gain] |= 2;
+      amplitudeFlx[channel][gain] = rawChannel->amplitude();
+
+      std::string channelName = moduleName[gain] + "_channel";
       auto monitoredChannel = Monitored::Scalar<float>(channelName, channel);
 
-      amplitudeFlx[channel][gain] = rawChannel->amplitude();
-     
-      std::string Summary_name_Felix = TileCalibUtils::getDrawerString(ros, drawer) + "_" + gainName[gain] + "_Summary_Felix";
-      auto Summary_sample_Felix = Monitored::Scalar<float>(Summary_name_Felix, amplitudeFlx[channel][gain]);
-      fill("TileRawChannelFlxSummary", monitoredChannel, Summary_sample_Felix);
-
+      std::string summaryName = moduleName[gain] + "_Summary_Felix";
+      auto summaryRawChannel = Monitored::Scalar<float>(summaryName, rawChannel->amplitude());
+      fill("TileRawChannelFlxSummary", monitoredChannel, summaryRawChannel);
     }
 
- 
-  // Compare amplitude and amplitudeFlx arrays here and put results into histograms
-  for(int i = 0; i<2; i++){
-    for(int j = 0; j<48; j++){
+    // Compare amplitude and amplitudeFlx arrays and put results into histograms
+    for(unsigned int gain = 0; gain<TileCalibUtils::MAX_GAIN; ++gain) {
 
-      std::string channelName = TileCalibUtils::getDrawerString(ros, drawer) + "_" + gainName[i] + "_channel";
-      auto monitoredChannel = Monitored::Scalar<float>(channelName, j);
+      std::string channelName = moduleName[gain] + "_channel";
+      std::string diffName    = moduleName[gain] + "_Diff";
+      std::string legacyName  = moduleName[gain] + "_Legacy";
 
-      double diff_abs = amplitude[j][i]-amplitudeFlx[j][i];
+      auto monitoredChannel = Monitored::Scalar<float>(channelName, 0.0F);
+      auto rawChannelDiff = Monitored::Scalar<float>(diffName, 0.0F);
+      auto rawChannelLegacyAmp = Monitored::Scalar<float>(legacyName, 0.0F);
 
+      for(unsigned int channel = 0; channel<TileCalibUtils::MAX_CHAN; ++channel) {
 
-      std::string Diff_name = TileCalibUtils::getDrawerString(ros, drawer) + "_" + gainName[i] + "_Diff";
-      auto Diff_sample = Monitored::Scalar<float>(Diff_name, diff_abs);
-      
+        if (found[channel][gain] == 3) {
 
-      std::string Legacy_name = TileCalibUtils::getDrawerString(ros, drawer) + "_" + gainName[i] + "_Legacy";
-      auto Legacy_sample = Monitored::Scalar<float>(Legacy_name, amplitude[j][i]);
+          monitoredChannel = channel;
+          rawChannelLegacyAmp = amplitude[channel][gain];
+          rawChannelDiff = amplitudeFlx[channel][gain] - amplitude[channel][gain]*m_felixScale;
 
-      fill("TileRawChannelDiffLegacyFlx", monitoredChannel, Diff_sample);
-
-      fill("TileRawChannelDiffLegacyFlx_Legacy", Legacy_sample, Diff_sample);
+          fill("TileRawChannelDiffLegacyFlx", monitoredChannel, rawChannelDiff);
+          fill("TileRawChannelDiffLegacyFlx_Legacy", rawChannelLegacyAmp, rawChannelDiff);
+        }
+      }
     }
-
   }
 
+  fill("TileRawChannelFlxMonExecuteTime", timer);
 
-
-
-
-
-
-  }
-
-
-
-
-
-  
-  fill("TileDigitsFlxMonExecuteTime", timer);
-    
   return StatusCode::SUCCESS;
 }

@@ -5,7 +5,6 @@
 
 #include "EgammaMonitoring.h"
 
-#include "MCTruthClassifier/IMCTruthClassifier.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include "IHistograms.h"
 
@@ -97,7 +96,6 @@ StatusCode EgammaMonitoring::initialize() {
   } // electron Hists
 
   if ("gamma" == m_sampleType) {
-
 
     recoPhotonAll = std::unique_ptr<egammaMonitoring::IHistograms>(new egammaMonitoring::RecoPhotonHistograms(
         "recoPhotonAll","Reco Photon", "/MONITORING/recoPhotonAll/", rootHistSvc));
@@ -374,20 +372,6 @@ StatusCode EgammaMonitoring::initialize() {
   ATH_CHECK(m_GSFTrackParticlesKey.initialize());
   return StatusCode::SUCCESS;
 }
-
-// ******
-
-StatusCode EgammaMonitoring::beginInputFile() {
-  return StatusCode::SUCCESS;
-}
-
-// ******
-
-StatusCode EgammaMonitoring::firstExecute() {
-  return StatusCode::SUCCESS;
-}
-
-// ******
 
 StatusCode EgammaMonitoring::execute() {
 

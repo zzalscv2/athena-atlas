@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTrackingGeometry/SiLayerBuilder.h"
@@ -31,15 +31,15 @@ StatusCode InDet::SiLayerBuilder::initialize()
 
 
 /** LayerBuilder interface method - returning Barrel-like layers */
-const std::vector<Trk::CylinderLayer*>* InDet::SiLayerBuilder::cylindricalLayers() const
+std::unique_ptr<const std::vector<Trk::CylinderLayer*> > InDet::SiLayerBuilder::cylindricalLayers() const
 {
   const InDetDD::SiDetectorElementCollection* siDetElementCollectionPtr = m_siMgr->getDetectorElementCollection();
-  return cylindricalLayersImpl(*siDetElementCollectionPtr).release();
+  return cylindricalLayersImpl(*siDetElementCollectionPtr);
 }
 
 
 /** LayerBuilder interface method - returning Endcap-like layers */
-const std::vector<Trk::DiscLayer* >* InDet::SiLayerBuilder::discLayers() const
+std::unique_ptr<const std::vector<Trk::DiscLayer* > > InDet::SiLayerBuilder::discLayers() const
 {
   // sanity check for ID Helper
   if (!m_pixIdHelper && !m_sctIdHelper){
@@ -49,7 +49,7 @@ const std::vector<Trk::DiscLayer* >* InDet::SiLayerBuilder::discLayers() const
 
   // check for DBMS
   int nDBMLayers = m_siMgr->numerology().numEndcapsDBM();
-  if (!nDBMLayers) return ((m_pixelCase and m_useRingLayout) ? createRingLayers().release() : createDiscLayers().release());
+  if (!nDBMLayers) return ((m_pixelCase and m_useRingLayout) ? createRingLayers() : createDiscLayers());
 
   ATH_MSG_DEBUG( "Found " << m_siMgr->numerology().numEndcapsDBM() << " DBM layers active, building first ECs, then DBMS");
   std::unique_ptr<std::vector<Trk::DiscLayer*> > ecLayers = createDiscLayers();
@@ -58,7 +58,7 @@ const std::vector<Trk::DiscLayer* >* InDet::SiLayerBuilder::discLayers() const
     ecLayers = createDiscLayers(std::move(ecLayers));
     ATH_MSG_VERBOSE( "Created " << ecLayers->size() << " endcap layers with DBM.");
   }
-  return ecLayers.release();
+  return ecLayers;
 
 }
 
@@ -81,32 +81,4 @@ InDet::SiLayerBuilder::createRingLayers() const {
   const InDetDD::SiDetectorElementCollection* siDetElementCollectionPtr = m_siMgr->getDetectorElementCollection();
   return createRingLayersImpl(*siDetElementCollectionPtr);
 }
-
-
-void InDet::SiLayerBuilder::registerSurfacesToLayer(Trk::BinnedArraySpan<Trk::Surface * const >& layerSurfaces, Trk::Layer& lay) const
-{
-  if (!m_setLayerAssociation) return;
-
-  Trk::BinnedArraySpan<Trk::Surface * const >::const_iterator laySurfIter    = layerSurfaces.begin();
-  Trk::BinnedArraySpan<Trk::Surface * const >::const_iterator laySurfIterEnd = layerSurfaces.end();
-  // register the surfaces to the layer
-  for (; laySurfIter != laySurfIterEnd; ++laySurfIter){
-    if (*laySurfIter) {
-      // register the current surface --------------------------------------------------------
-      // Needs care in Athena MT
-      Trk::ILayerBuilder::associateLayer(lay, (**laySurfIter));
-      const InDetDD::SiDetectorElement* detElement
-        = dynamic_cast<const InDetDD::SiDetectorElement*>((*laySurfIter)->associatedDetectorElement());
-      // register the backise if necessary ---------------------------------------------------
-      const InDetDD::SiDetectorElement* otherSideElement = detElement ?  detElement->otherSide() : nullptr;
-      const Trk::Surface* otherSideSurface = otherSideElement ? &(otherSideElement->surface()) : nullptr;
-      if (otherSideSurface) {
-        //Needs care in Athena MT
-        //Note that we again couple directly to the det element surface not a
-        Trk::ILayerBuilder::associateLayer(lay, const_cast<Trk::Surface&>(*otherSideSurface));
-      }
-    }
-  }
-}
-
 

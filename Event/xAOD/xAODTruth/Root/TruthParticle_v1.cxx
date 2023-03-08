@@ -13,6 +13,7 @@
 
 // Utility include(s):
 #include "TruthUtils/PIDHelpers.h"
+#include "TruthUtils/MagicNumbers.h"
 
 // xAOD include(s):
 #include "xAODCore/AuxStoreAccessorMacros.h"
@@ -306,6 +307,10 @@ namespace xAOD {
 
 // Forget about this macro:
 #undef MC_PID_HELPER
+   bool TruthParticle_v1::isGenStable() const {
+    if (status() != 1) return false;
+    return !HepMC::is_simulation_particle(barcode());   
+   };
 
    //
    /////////////////////////////////////////////////////////////////////////////

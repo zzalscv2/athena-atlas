@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETCALIBTOOLS_GLOBALSEQUENTIALCORRECTION_H
@@ -31,7 +31,7 @@ class GlobalSequentialCorrection
   typedef unsigned int uint;
 
   GlobalSequentialCorrection();
-  GlobalSequentialCorrection(const std::string& name, TEnv * config, TString jetAlgo, std::string depth, TString calibAreaTag, bool dev); //Apply the full GS calibration by default
+  GlobalSequentialCorrection(const std::string& name, TEnv * config, TString jetAlgo, const std::string& depth, TString calibAreaTag, bool dev); //Apply the full GS calibration by default
 
   virtual StatusCode initialize() override;
   virtual StatusCode calibrate(xAOD::Jet& jet, JetEventInfo&) const override;
@@ -61,7 +61,7 @@ class GlobalSequentialCorrection
     else return 1;
   }
 
-  void setPunchThroughEtaBins(VecD etabins) { 
+  void setPunchThroughEtaBins(const VecD& etabins) { 
     if (etabins.size()==0) ATH_MSG_ERROR("Please check that the punch through eta binning is properly set in your config file");
     m_punchThroughEtaBins=etabins;
   }
@@ -90,12 +90,12 @@ class GlobalSequentialCorrection
   uint m_depth, m_trackWIDTHMaxEtaBin, m_nTrkMaxEtaBin, m_Tile0MaxEtaBin, m_EM3MaxEtaBin, m_chargedFractionMaxEtaBin, m_caloWIDTHMaxEtaBin, m_N90ConstituentsMaxEtaBin, m_TileGap3MaxEtaBin;
   VecD m_punchThroughEtaBins;
   double m_punchThroughMinPt;
-  bool m_turnOffTrackCorrections;
-  bool m_PFlow;
-  bool m_caloBased;
-  bool m_pTResponseRequirementOff;
-  bool m_nTrkwTrk_4PFlow;
-  double m_turnOffStartingpT, m_turnOffEndpT;
+  bool m_turnOffTrackCorrections{false};
+  bool m_PFlow{false};
+  bool m_caloBased{false};
+  bool m_pTResponseRequirementOff{false};
+  bool m_nTrkwTrk_4PFlow{false};
+  double m_turnOffStartingpT{1200.}, m_turnOffEndpT{2000};
 
 };
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # EGAM8.py
@@ -341,7 +341,7 @@ def EGAM8Cfg(ConfigFlags):
     # multiple times in a train
     
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    EGAM8TriggerListsHelper = TriggerListsHelper()
+    EGAM8TriggerListsHelper = TriggerListsHelper(ConfigFlags)
 
     # configure skimming/thinning/augmentation tools
     acc.merge(EGAM8KernelCfg(ConfigFlags,
@@ -435,25 +435,15 @@ def EGAM8Cfg(ConfigFlags):
     EGAM8SlimmingHelper.ExtraVariables += PhotonsCPDetailedContent
 
     # photons: gain and cluster energy per layer
-    from DerivationFrameworkCalo.DerivationFrameworkCaloFactories import (
+    from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import (
         getGainDecorations, getClusterEnergyPerLayerDecorations )
-    GainDecoratorTool = None
-    ClusterEnergyPerLayerDecorators = []  
-    for toolStr in acc.getEventAlgo('EGAM8Kernel').AugmentationTools:
-        toolStr  = f'{toolStr}'
-        splitStr = toolStr.split('/')
-        tool =  acc.getPublicTool(splitStr[1])
-        if splitStr[0] == 'DerivationFramework::GainDecorator':
-            GainDecoratorTool = tool
-        elif splitStr[0] == 'DerivationFramework::ClusterEnergyPerLayerDecorator':
-            ClusterEnergyPerLayerDecorators.append( tool )
-
-    if GainDecoratorTool : 
-        EGAM8SlimmingHelper.ExtraVariables.extend( 
-            getGainDecorations(GainDecoratorTool) )
-    for tool in ClusterEnergyPerLayerDecorators:
-        EGAM8SlimmingHelper.ExtraVariables.extend(
-            getClusterEnergyPerLayerDecorations( tool ) )
+    gainDecorations = getGainDecorations(acc, 'EGAM8Kernel')
+    print('EGAM8 gain decorations: ', gainDecorations)
+    EGAM8SlimmingHelper.ExtraVariables.extend(gainDecorations)
+    clusterEnergyDecorations = getClusterEnergyPerLayerDecorations(
+        acc, 'EGAM8Kernel' )
+    print('EGAM8 cluster energy decorations: ', clusterEnergyDecorations)
+    EGAM8SlimmingHelper.ExtraVariables.extend(clusterEnergyDecorations)
 
     # truth
     if ConfigFlags.Input.isMC:

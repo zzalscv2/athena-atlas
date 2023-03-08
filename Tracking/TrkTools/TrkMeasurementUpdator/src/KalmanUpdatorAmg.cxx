@@ -50,7 +50,7 @@ StatusCode Trk::KalmanUpdatorAmg::initialize()
 {
     // covariance setting
     if (m_cov_stdvec.size() < 5) {
-      ATH_MSG_VERBOSE("Wrong-sized initial covariance given, so set to default");
+      ATH_MSG_WARNING("Wrong-sized initial covariance given, so set to default");
       m_cov_stdvec.clear(); // reset
       m_cov_stdvec = std::vector<double>{250.,250.,0.25,0.25,0.000001};
     }
@@ -59,20 +59,18 @@ StatusCode Trk::KalmanUpdatorAmg::initialize()
         m_cov0Vec[it]           =  m_cov_stdvec[it];
         (*m_covariance0)(it,it) =  m_cov_stdvec[it];
     }
-    if (m_useFruehwirth8a)
+    if (m_useFruehwirth8a){
       ATH_MSG_INFO("Fast computation will be used for track state cov matrices (Fruehwirth-1987 eq. 8a).");
-    else
+    }
+    else{
       ATH_MSG_INFO("Track state cov matrix will be calculated according to Gelb-1975 p305.");
-
-    ATH_MSG_INFO("initialize() successful in " << name());
-
+    }
     return StatusCode::SUCCESS;
 }
 
 // finalize
 StatusCode Trk::KalmanUpdatorAmg::finalize()
 {
-    ATH_MSG_INFO("finalize() successful in " << name());
     return StatusCode::SUCCESS;
 }
 
@@ -489,7 +487,7 @@ std::unique_ptr<Trk::TrackParameters> Trk::KalmanUpdatorAmg::prepareFilterStep (
 // updator interface for reference-track KF on pure AMG matrices
 std::pair<AmgVector(5), AmgSymMatrix(5)>* Trk::KalmanUpdatorAmg::updateParameterDifference(
     const AmgVector(5)&  trkParV, const AmgSymMatrix(5)& trkCov,
-    const Amg::VectorX&  parRio, const Amg::MatrixX& covRio, const int& paramKey,
+    const Amg::VectorX&  parRio, const Amg::MatrixX& covRio, int paramKey,
     Trk::FitQualityOnSurface*& fitQoS, bool createFQoS ) const {
 
     if (msgLvl(MSG::VERBOSE)) logStart("updateParDiff(TP5,Cov5,LparX,CovX)",trkParV);
@@ -836,7 +834,7 @@ const AmgSymMatrix(5)* Trk::KalmanUpdatorAmg::getStartCov(const Trk::TrackParame
 }
 
 bool Trk::KalmanUpdatorAmg::consistentParamDimensions(const Trk::LocalParameters& P,
-                                                      const int& dimCov) const {
+                                                      int dimCov) const {
   if (P.dimension() != dimCov ) {
     ATH_MSG_WARNING ("Inconsistency in dimension of local coord - problem with LocalParameters object?");
     ATH_MSG_WARNING ("dim of local parameters: "<<P.dimension()<<" vs. dim of error matrix: "<<dimCov);

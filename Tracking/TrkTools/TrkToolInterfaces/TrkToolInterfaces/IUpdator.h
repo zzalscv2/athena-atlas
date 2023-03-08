@@ -164,7 +164,7 @@ public:
     const AmgSymMatrix(5) &,
     const Amg::VectorX&,
     const Amg::MatrixX&,
-    const int&,
+    int,
     Trk::FitQualityOnSurface*&,
     bool) const = 0;
 

@@ -21,6 +21,8 @@
 #include "EgammaAnalysisInterfaces/IAsgDeadHVCellRemovalTool.h"
 #include "EgammaAnalysisInterfaces/IElectronPhotonShowerShapeFudgeTool.h"
 #include "EgammaAnalysisInterfaces/IEGammaAmbiguityTool.h"
+#include "EgammaAnalysisInterfaces/IElectronLRTOverlapRemovalTool.h"
+#include "xAODEgamma/ElectronAuxContainer.h"
 
 #include "IsolationCorrections/IIsolationCorrectionTool.h"
 #include "IsolationSelection/IIsolationSelectionTool.h"
@@ -53,15 +55,88 @@ namespace ST {
   const static SG::AuxElement::ConstAccessor<float> acc_z0sinTheta("z0sinTheta");
   const static SG::AuxElement::Decorator<float>     dec_d0sig("d0sig");
   const static SG::AuxElement::ConstAccessor<float> acc_d0sig("d0sig");
+  const static SG::AuxElement::Decorator<ElementLink<xAOD::ElectronContainer>> dec_originalElectronLink("originalElectronLink");
+  const static SG::AuxElement::Decorator<char> dec_isLRT("isLRT");
 
   const static SG::AuxElement::ConstAccessor<float> acc_topoetcone20("topoetcone20");
   const static SG::AuxElement::ConstAccessor<char> acc_passECIDS("DFCommonElectronsECIDS"); // Loose 97% WP
 
-StatusCode SUSYObjDef_xAOD::GetElectrons(xAOD::ElectronContainer*& copy, xAOD::ShallowAuxContainer*& copyaux, bool recordSG, const std::string& elekey, const xAOD::ElectronContainer* containerToBeCopied)
+
+StatusCode SUSYObjDef_xAOD::MergeElectrons(const xAOD::ElectronContainer & electrons, xAOD::ElectronContainer* outputCol, const std::set<const xAOD::Electron *> &ElectronsToRemove) const{
+
+    if (electrons.empty()) return StatusCode::SUCCESS;
+    for (const xAOD::Electron* electron: electrons) {
+        if (ElectronsToRemove.find(electron) != ElectronsToRemove.end()){
+            ATH_MSG_DEBUG( "Removing electron from output collection (isLRT?) : ("<< static_cast<int>(electron->auxdecor<char>("isLRT")) << ")" );
+            ATH_MSG_DEBUG( "ELECTRON cl eta: "                                    << electron->caloCluster()->eta());
+            ATH_MSG_DEBUG( "ELECTRON cl phi: "                                    << electron->caloCluster()->phi());
+            continue;
+        // add electron into output 
+        } else {
+            ATH_MSG_DEBUG( "Adding electron to output collection (isLRT?) : ("    << static_cast<int>(electron->auxdecor<char>("isLRT")) << ")" );
+            ATH_MSG_DEBUG( "ELECTRON cl eta: "                                    << electron->caloCluster()->eta());
+            ATH_MSG_DEBUG( "ELECTRON cl phi: "                                    << electron->caloCluster()->phi());
+            newElectron = new xAOD::Electron(*electron);
+
+            ElementLink<xAOD::ElectronContainer> eleLink;
+            eleLink.toIndexedElement(electrons, electron->index());
+            dec_originalElectronLink(*newElectron) = eleLink;
+
+            outputCol->push_back(newElectron); 
+        }
+    }
+    return StatusCode::SUCCESS;
+}
+
+StatusCode SUSYObjDef_xAOD::GetElectrons(xAOD::ElectronContainer*& copy, xAOD::ShallowAuxContainer*& copyaux, bool recordSG, const std::string& elekey, const std::string& lrtelekey, const xAOD::ElectronContainer* containerToBeCopied)
 {
   if (!m_tool_init) {
     ATH_MSG_ERROR("SUSYTools was not initialized!!");
     return StatusCode::FAILURE;
+  }
+
+   // Initializing prompt/LRT OR procedure
+  auto outputCol = std::make_unique<xAOD::ElectronContainer>();
+  std::unique_ptr<xAOD::ElectronAuxContainer> outputAuxCol;
+  outputAuxCol = std::make_unique<xAOD::ElectronAuxContainer>();
+  outputCol->setStore(outputAuxCol.get());
+  ATH_CHECK( m_outElectronLocation.initialize() );
+
+  if (bool(m_eleLRT) && evtStore()->contains<xAOD::ElectronContainer>(lrtelekey)){
+    ATH_MSG_DEBUG("Applying prompt/LRT electron OR procedure"); 
+
+    // First identify if merged container has already been made (for instances where GetMuons() is called more than once)
+    if (evtStore()->contains<xAOD::ElectronContainer>("StdWithLRTElectrons")) {
+      ATH_MSG_DEBUG("Merged prompt/LRT container already created in TStore");  
+    } else {
+      ATH_MSG_DEBUG("Creating merged prompt/LRT container in TStore");
+
+      // Retrieve prompt and LRT muons from TStore
+      ATH_CHECK( evtStore()->retrieve(prompt_electrons, elekey) );
+      ATH_CHECK( evtStore()->retrieve(lrt_electrons, lrtelekey) );
+
+      // Check overlap between prompt and LRT collections
+      std::set<const xAOD::Electron *> ElectronsToRemove;
+      m_elecLRTORTool->checkOverlap(*prompt_electrons, *lrt_electrons, ElectronsToRemove);
+    
+      // Decorate muons with prompt/LRT
+      for (const xAOD::Electron* el : *prompt_electrons)  dec_isLRT(*el) = 0;
+      for (const xAOD::Electron* el : *lrt_electrons)     dec_isLRT(*el) = 1;
+
+      // Create merged StdWithLRTElectrons container
+      outputCol->reserve(prompt_electrons->size() + lrt_electrons->size());
+      ATH_MSG_DEBUG("Merging Prompt Electrons");
+      ATH_CHECK(MergeElectrons(*prompt_electrons, outputCol.get(), ElectronsToRemove ));
+      ATH_MSG_DEBUG("Merging LRT Electrons");
+      ATH_CHECK(MergeElectrons(*lrt_electrons, outputCol.get(), ElectronsToRemove ));
+
+      // Save merged StdWithLRTMuons container to TStore
+      ATH_CHECK(evtStore()->record(std::move(outputCol), m_outElectronLocation.key())); 
+      ATH_CHECK(evtStore()->record(std::move(outputAuxCol), m_outElectronLocation.key() + "Aux.") );
+    }
+  } else {
+    if(evtStore()->contains<xAOD::ElectronContainer>(lrtelekey) == false && bool(m_eleLRT) == true) ATH_MSG_WARNING("prompt/LRT OR procedure attempted but " << lrtelekey << " not in ROOT file, check config!");
+    ATH_MSG_DEBUG("Not applying prompt/LRT electron OR procedure"); 
   }
 
   if (m_isPHYSLITE && elekey.find("AnalysisElectrons")==std::string::npos){
@@ -70,20 +145,30 @@ StatusCode SUSYObjDef_xAOD::GetElectrons(xAOD::ElectronContainer*& copy, xAOD::S
   }
 
   const xAOD::ElectronContainer* electrons = nullptr;
-  if (copy==nullptr) { // empty container provided
-    if (containerToBeCopied != nullptr) {
-      electrons = containerToBeCopied;
+  if (bool(m_eleLRT) && evtStore()->contains<xAOD::ElectronContainer>(lrtelekey)){
+      ATH_MSG_DEBUG("Using container: " << m_outElectronLocation.key());
+      ATH_CHECK( evtStore()->retrieve(electrons, m_outElectronLocation.key())); 
+  }
+  else { 
+    if (copy==nullptr) { // empty container provided
+        ATH_MSG_DEBUG("Empty container provided");
+      if (containerToBeCopied != nullptr) {
+        ATH_MSG_DEBUG("Containter to be copied not nullptr");
+        electrons = containerToBeCopied;
+      }
+      else {
+        ATH_MSG_DEBUG("Getting Electrons collection");
+        ATH_CHECK( evtStore()->retrieve(electrons, elekey) );
+      }
     }
-    else {
-      ATH_CHECK( evtStore()->retrieve(electrons, elekey) );
-    }
-    std::pair<xAOD::ElectronContainer*, xAOD::ShallowAuxContainer*> shallowcopy = xAOD::shallowCopyContainer(*electrons);
-    copy = shallowcopy.first;
-    copyaux = shallowcopy.second;
-    bool setLinks = xAOD::setOriginalObjectLink(*electrons, *copy);
-    if (!setLinks) {
-      ATH_MSG_WARNING("Failed to set original object links on " << elekey);
-    }
+  }
+
+  std::pair<xAOD::ElectronContainer*, xAOD::ShallowAuxContainer*> shallowcopy = xAOD::shallowCopyContainer(*electrons);
+  copy = shallowcopy.first;
+  copyaux = shallowcopy.second;
+  bool setLinks = xAOD::setOriginalObjectLink(*electrons, *copy);
+  if (!setLinks) {
+    ATH_MSG_WARNING("Failed to set original object links on " << elekey);
   } else { // use the user-supplied collection instead
     ATH_MSG_DEBUG("Not retrieving electron collecton, using existing one provided by user");
     electrons=copy;
@@ -150,18 +235,18 @@ StatusCode SUSYObjDef_xAOD::FillElectron(xAOD::Electron& input, float etcut, flo
     input.trackParticle()->summaryValue(el_nPixHits, xAOD::numberOfPixelHits);
     input.trackParticle()->summaryValue(el_nSCTHits, xAOD::numberOfSCTHits);
 
-    ATH_MSG_INFO( "ELECTRON eta: " << input.eta() );
-    ATH_MSG_INFO( "ELECTRON phi: " << input.phi() );
-    ATH_MSG_INFO( "ELECTRON cl eta: " << input.caloCluster()->eta() );
-    ATH_MSG_INFO( "ELECTRON cl phi: " << input.caloCluster()->phi() );
-    ATH_MSG_INFO( "ELECTRON cl e: " << input.caloCluster()->e() );
-    ATH_MSG_INFO( "ELECTRON trk eta: " << input.trackParticle()->eta() );
-    ATH_MSG_INFO( "ELECTRON trk phi: " << input.trackParticle()->phi() );
-    ATH_MSG_INFO( "ELECTRON author: " << input.author() );
-    ATH_MSG_INFO( "ELECTRON OQ: " << acc_OQ(input) );
-    ATH_MSG_INFO( "ELECTRON nPixHits: " << (int) el_nPixHits );
-    ATH_MSG_INFO( "ELECTRON nSCTHits: " << (int) el_nSCTHits );
-    ATH_MSG_INFO( "ELECTRON deadHVTools: " << pass_deadHVTool );
+    ATH_MSG_INFO( "ELECTRON eta: "         << input.eta());
+    ATH_MSG_INFO( "ELECTRON phi: "         << input.phi());
+    ATH_MSG_INFO( "ELECTRON cl eta: "      << input.caloCluster()->eta());
+    ATH_MSG_INFO( "ELECTRON cl phi: "      << input.caloCluster()->phi());
+    ATH_MSG_INFO( "ELECTRON cl e: "        << input.caloCluster()->e());
+    ATH_MSG_INFO( "ELECTRON trk eta: "     << input.trackParticle()->eta());
+    ATH_MSG_INFO( "ELECTRON trk phi: "     << input.trackParticle()->phi());
+    ATH_MSG_INFO( "ELECTRON author: "      << input.author());
+    ATH_MSG_INFO( "ELECTRON OQ: "          << acc_OQ(input));
+    ATH_MSG_INFO( "ELECTRON nPixHits: "    << static_cast<int>(el_nPixHits));
+    ATH_MSG_INFO( "ELECTRON nSCTHits: "    << static_cast<int>(el_nSCTHits));
+    ATH_MSG_INFO( "ELECTRON deadHVTools: " << static_cast<bool>(pass_deadHVTool));
   }
 
   if (!pass_deadHVTool) return StatusCode::SUCCESS;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -122,7 +122,7 @@ void StatInt::print(const char* s, bool minMaxOnly) {
   std::cout << std::endl;
 }
 
-TileTBStat::TileTBStat(std::string name, ISvcLocator* pSvcLocator)
+TileTBStat::TileTBStat(const std::string& name, ISvcLocator* pSvcLocator)
   : AthAlgorithm(name, pSvcLocator)
   , m_RobSvc("ROBDataProviderSvc", name)
   , m_beamCnv(0)

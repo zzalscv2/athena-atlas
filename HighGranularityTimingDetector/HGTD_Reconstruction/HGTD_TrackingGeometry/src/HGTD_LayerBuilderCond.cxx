@@ -1,6 +1,6 @@
  
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -131,7 +131,7 @@ HGTD_LayerBuilderCond::discLayers(const EventContext& ctx,
   // and evaluates the number of discs
   // assuming you have the same number of modules on both sides
   int nlayers = 0;
-  for (; hgtdDetIter != readCdo->end(); hgtdDetIter++){
+  for (; hgtdDetIter != readCdo->end(); ++hgtdDetIter){
     Identifier    currentId((*hgtdDetIter)->identify());
     // skipping negative side
     if (m_hgtdHelper->endcap(currentId)<0) continue;
@@ -155,7 +155,7 @@ HGTD_LayerBuilderCond::discLayers(const EventContext& ctx,
   
   // get the missing dimensions by loop over DetElements
   hgtdDetIter = readCdo->begin();
-  for (; hgtdDetIter != readCdo->end(); hgtdDetIter++){
+  for (; hgtdDetIter != readCdo->end(); ++hgtdDetIter){
   // take it - if 
   // a) you have a detector element ... protection
   if ( (*hgtdDetIter) ) {
@@ -254,8 +254,9 @@ HGTD_LayerBuilderCond::discLayers(const EventContext& ctx,
     }
     
     // prepare the binned array, it can be with one to several rings
-    Trk::BinnedArray<Trk::Surface>* currentBinnedArray =
-      new Trk::BinnedArray1D1D<Trk::Surface>(discSurfaces[discCounter], BinUtilityR, subBinUtilitiesPhi);
+    auto currentBinnedArray =
+        std::make_unique<Trk::BinnedArray1D1D<Trk::Surface>>(
+            discSurfaces[discCounter], BinUtilityR, subBinUtilitiesPhi);
 
     ATH_MSG_DEBUG( "... done!" ); 
     
@@ -305,19 +306,19 @@ HGTD_LayerBuilderCond::discLayers(const EventContext& ctx,
     Trk::DiscBounds* activeLayerBounds = new Trk::DiscBounds(minRmin, maxRmax);
 
     auto olDescriptor = std::make_unique<HGTD_OverlapDescriptor>(
-        currentBinnedArray, rBins, phiBins);
+        currentBinnedArray.get(), rBins, phiBins);
 
+    // register the layer to the surfaces
+    Trk::BinnedArraySpan<Trk::Surface * const> layerSurfaces = currentBinnedArray->arrayObjects();
     // layer creation; deletes currentBinnedArray in baseclass 'Layer' upon destruction
     // activeLayerTransform deleted in 'Surface' baseclass
     Trk::DiscLayer* activeLayer = new Trk::DiscLayer(activeLayerTransform,
                                                      activeLayerBounds,
-                                                     currentBinnedArray,
+                                                     std::move(currentBinnedArray),
                                                      layerMaterial,
                                                      thickness,
                                                      std::move(olDescriptor));
     
-    // register the layer to the surfaces
-    Trk::BinnedArraySpan<Trk::Surface * const> layerSurfaces = currentBinnedArray->arrayObjects();
     registerSurfacesToLayer(layerSurfaces,*activeLayer);
     discLayers->push_back(activeLayer);
     // increase the disc counter by one
@@ -353,12 +354,11 @@ void HGTD_LayerBuilderCond::registerSurfacesToLayer(Trk::BinnedArraySpan<Trk::Su
    // register the surfaces to the layer
    for (const auto & surfaces : layerSurfaces) {
      if (surfaces) { 
-       // register the current surfaces --------------------------------------------------------
-       // Needs care for Athena MT 
-       Trk::ILayerBuilderCond::associateLayer(lay, (*surfaces));
+       // register the current surfaces
+       (*surfaces).associateLayer(lay);
      }
    }
-   }
+}
 
 void HGTD_LayerBuilderCond::evaluateBestBinning(std::vector<Trk::SurfaceOrderPosition>& surfaces,
                                                 std::vector<float>& rBins, float& maxRadius,

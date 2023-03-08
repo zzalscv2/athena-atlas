@@ -44,8 +44,11 @@ private:
   TH1* m_nTRTHighThresholdHitsXe{nullptr};
   TH1* m_nTRTHighThresholdHitsAr{nullptr};
   TH1* m_nInnerMostPixelOutliers{nullptr};
+  TH1* m_nInnerMostPixelEndcapOutliers{nullptr};
   TH1* m_nInnerMostPixelSharedHits{nullptr};
+  TH1* m_nInnerMostPixelSharedEndcapHits{nullptr};
   TH1* m_nInnerMostPixelSplitHits{nullptr};
+  TH1* m_nInnerMostPixelSplitEndcapHits{nullptr};
   TH1* m_nExpectedInnerMostPixelHits{nullptr};
   TH1* m_nExpectedNextToInnerMostPixelHits{nullptr};
   TH1* m_nPixelOutliers{nullptr};
@@ -80,8 +83,11 @@ private:
   TProfile* m_nTRTHighThresholdHitsXe_vs_eta{nullptr};
   TProfile* m_nTRTHighThresholdHitsAr_vs_eta{nullptr};
   TProfile* m_nInnerMostPixelOutliers_vs_eta{nullptr};
+  TProfile* m_nInnerMostPixelEndcapOutliers_vs_eta{nullptr};
   TProfile* m_nInnerMostPixelSharedHits_vs_eta{nullptr};
+  TProfile* m_nInnerMostPixelSharedEndcapHits_vs_eta{nullptr};
   TProfile* m_nInnerMostPixelSplitHits_vs_eta{nullptr};
+  TProfile* m_nInnerMostPixelSplitEndcapHits_vs_eta{nullptr};
   TProfile* m_nExpectedInnerMostPixelHits_vs_eta{nullptr};
   TProfile* m_nExpectedNextToInnerMostPixelHits_vs_eta{nullptr};
   TProfile* m_nPixelOutliers_vs_eta{nullptr};
@@ -111,8 +117,11 @@ private:
   TProfile* m_nSCTHoles_vs_phi{nullptr};
   TProfile* m_nTRTHighThresholdHits_vs_phi{nullptr};
   TProfile* m_nInnerMostPixelOutliers_vs_phi{nullptr};
+  TProfile* m_nInnerMostPixelEndcapOutliers_vs_phi{nullptr};
   TProfile* m_nInnerMostPixelSharedHits_vs_phi{nullptr};
+  TProfile* m_nInnerMostPixelSharedEndcapHits_vs_phi{nullptr};
   TProfile* m_nInnerMostPixelSplitHits_vs_phi{nullptr};
+  TProfile* m_nInnerMostPixelSplitEndcapHits_vs_phi{nullptr};
   TProfile* m_nExpectedInnerMostPixelHits_vs_phi{nullptr};
   TProfile* m_nExpectedNextToInnerMostPixelHits_vs_phi{nullptr};
   TProfile* m_nPixelOutliers_vs_phi{nullptr};
@@ -172,8 +181,11 @@ private:
   TProfile* m_nTRTHighThresholdHitsAr_vs_mu_ECsideA{nullptr};
   TProfile* m_nTRTHighThresholdHitsAr_vs_mu_ECsideC{nullptr};
   TProfile* m_nInnerMostPixelOutliers_vs_mu{nullptr};
+  TProfile* m_nInnerMostPixelEndcapOutliers_vs_mu{nullptr};
   TProfile* m_nInnerMostPixelSharedHits_vs_mu{nullptr};
+  TProfile* m_nInnerMostPixelSharedEndcapHits_vs_mu{nullptr};
   TProfile* m_nInnerMostPixelSplitHits_vs_mu{nullptr};
+  TProfile* m_nInnerMostPixelSplitEndcapHits_vs_mu{nullptr};
   TProfile* m_nExpectedInnerMostPixelHits_vs_mu{nullptr};
   TProfile* m_nExpectedNextToInnerMostPixelHits_vs_mu{nullptr};
   TProfile* m_nPixelOutliers_vs_mu{nullptr};

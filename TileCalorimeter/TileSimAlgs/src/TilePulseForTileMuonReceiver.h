@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -40,10 +40,10 @@
 #include "TileEvent/TileHitContainer.h"
 #include "TileEvent/TileDigitsContainer.h"
 #include "TileEvent/TileRawChannelContainer.h"
-#include "TileConditions/TileCondToolPulseShape.h"
-#include "TileConditions/TileCondToolEmscale.h"
-#include "TileConditions/TileCondToolNoiseSample.h"
-#include "TileConditions/ITileBadChanTool.h"
+#include "TileConditions/TilePulse.h"
+#include "TileConditions/TileEMScale.h"
+#include "TileConditions/TileSampleNoise.h"
+#include "TileConditions/TileBadChannels.h"
 #include "TileConditions/TileCablingSvc.h"
 #include "TileConditions/TileSamplingFraction.h"
 #include "TileRecUtils/TileRawChannelBuilderMF.h"
@@ -117,17 +117,29 @@ class TilePulseForTileMuonReceiver: public AthAlgorithm {
     /// Random Stream Name
     Gaudi::Property<std::string> m_randomStreamName{this, "RandomStreamName", "Tile_PulseForTileMuonReceiver", ""};
 
-    ToolHandle<TileCondToolNoiseSample> m_tileToolNoiseSample{this,
-        "TileCondToolNoiseSample", "TileCondToolNoiseSample", "Tile sample noise tool"};
+    /**
+     * @brief Name of TileSampleNoise in condition store
+     */
+    SG::ReadCondHandleKey<TileSampleNoise> m_sampleNoiseKey{this,
+        "TileSampleNoise", "TileSampleNoise", "Input Tile sample noise"};
 
-    ToolHandle<TileCondToolEmscale> m_tileToolEmscale{this,
-        "TileCondToolEmscale", "TileCondToolEmscale", "Tile EM scale calibration tool"};
+   /**
+     * @brief Name of TileEMScale in condition store
+     */
+    SG::ReadCondHandleKey<TileEMScale> m_emScaleKey{this,
+        "TileEMScale", "TileEMScale", "Input Tile EMS calibration constants"};
 
-    ToolHandle<TileCondToolPulseShape> m_tileToolPulseShape{this,
-        "TileCondToolPulseShape", "TileCondToolPulseShape", "Tile pulse shape tool"};
+    /**
+     * @brief Name of TilePulseShape in condition store
+     */
+    SG::ReadCondHandleKey<TilePulse> m_pulseShapeKey{this,
+        "TilePulseShape", "TileMuRcvPulseShape", "Input Tile Muon Receiver pulse shape"};
 
-    ToolHandle<ITileBadChanTool> m_tileBadChanTool{this,
-        "TileBadChanTool", "TileBadChanTool", "Tile bad channel tool"};
+    /**
+     * @brief Name of TileBadChannels in condition store
+     */
+    SG::ReadCondHandleKey<TileBadChannels> m_badChannelsKey{this,
+        "TileBadChannels", "TileBadChannels", "Input Tile bad channel status"};
 
     ToolHandle<TileRawChannelBuilderMF> m_MuRcvBuildTool{this,
         "TileRawChannelBuilderMF", "TileRawChannelBuilderMF", "Reconstruction tool, default: the Matched Filter"};

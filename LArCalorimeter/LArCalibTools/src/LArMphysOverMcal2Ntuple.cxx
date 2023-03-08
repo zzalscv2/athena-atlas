@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArMphysOverMcal2Ntuple.h"
@@ -14,7 +14,6 @@
 LArMphysOverMcal2Ntuple::LArMphysOverMcal2Ntuple(const std::string& name, ISvcLocator* pSvcLocator): 
   LArCond2NtupleBase(name, pSvcLocator) { 
   declareProperty("ContainerKey",m_contKey);
-  declareProperty("IsMC",m_isMC = false);
   m_ntTitle="MphysOverMcal";
   m_ntpath="/NTUPLES/FILE1/MPMC";
 
@@ -103,10 +102,7 @@ StatusCode LArMphysOverMcal2Ntuple::stop() {
  unsigned cellCounter=0;
  unsigned filledCell=0;
  for(long igain=CaloGain::LARHIGHGAIN; igain<CaloGain::LARNGAIN; igain++) {
-   std::vector<HWIdentifier>::const_iterator itOnId = m_onlineId->channel_begin();
-   std::vector<HWIdentifier>::const_iterator itOnIdEnd = m_onlineId->channel_end();
-   for(; itOnId!=itOnIdEnd;++itOnId){
-     const HWIdentifier hwid = *itOnId;
+   for (const HWIdentifier hwid: m_onlineId->channel_range()) {
      if ( cabling->isOnlineConnected(hwid) && !m_onlineId->isFCALchannel(hwid)) {
 	 fillFromIdentifier(hwid);       
 	 cellIndex = cellCounter;

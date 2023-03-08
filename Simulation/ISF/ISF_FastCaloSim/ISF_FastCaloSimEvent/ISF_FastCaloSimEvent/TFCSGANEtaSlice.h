@@ -27,7 +27,7 @@
 class TFCSGANEtaSlice {
   public:
   TFCSGANEtaSlice();
-  TFCSGANEtaSlice(int pid, int etaMin, int etaMax, const TFCSGANXMLParameters param);
+  TFCSGANEtaSlice(int pid, int etaMin, int etaMax, const TFCSGANXMLParameters& param);
   virtual ~TFCSGANEtaSlice();
 
   typedef std::map<int, std::vector<double>> FitResultsPerLayer ;

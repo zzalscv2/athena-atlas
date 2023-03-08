@@ -5,10 +5,7 @@ from AnaAlgorithm.AnaAlgSequence import AnaAlgSequence
 from AnaAlgorithm.DualUseConfig import createAlgorithm, addPrivateTool
 from Campaigns.Utils import Campaign
 
-try:
-    from AthenaCommon.Logging import logging
-except ImportError:
-    import logging
+import logging
 log = logging.getLogger('makePileupAnalysisSequence')
 
 def makePileupAnalysisSequence( dataType, campaign=None, files=None, useDefaultConfig=False, userLumicalcFiles=None, userPileupConfigs=None ):
@@ -39,12 +36,15 @@ def makePileupAnalysisSequence( dataType, campaign=None, files=None, useDefaultC
 
         if campaign:
             if userPileupConfigs is None:
-                from PileupReweighting.AutoconfigurePRW import getConfigurationFiles
-                toolConfigFiles = getConfigurationFiles(campaign=campaign, files=files, useDefaultConfig=useDefaultConfig)
-                log.info('Setting PRW configuration based on input files')
+                if dataType == 'data':
+                    log.info('Data needs no configuration files')
+                else:
+                    from PileupReweighting.AutoconfigurePRW import getConfigurationFiles
+                    toolConfigFiles = getConfigurationFiles(campaign=campaign, files=files, useDefaultConfig=useDefaultConfig)
+                    log.info('Setting PRW configuration based on input files')
 
-                if toolConfigFiles:
-                    log.info(f'Using PRW configuration: {", ".join(toolConfigFiles)}')
+                    if toolConfigFiles:
+                        log.info(f'Using PRW configuration: {", ".join(toolConfigFiles)}')
             else:
                 log.info('Using user provided PRW configuration')
 

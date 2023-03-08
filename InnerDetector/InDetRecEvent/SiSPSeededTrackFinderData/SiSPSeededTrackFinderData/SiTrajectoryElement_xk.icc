@@ -684,6 +684,12 @@ bool InDet::SiTrajectoryElement_xk::ForwardPropagationForClusterSeach
  const T& sb, 
  const T& se)
 {
+  // remove case if you have trajectory element without actual detector element
+  // this happens if you have added a dead cylinder
+  if(!m_detelement) {
+    return false;
+  }
+
   if      (std::is_same<T, InDet::SiClusterCollection::const_iterator>::value)    m_itType = SiClusterColl;
   else if (std::is_same<T, InDet::PixelClusterCollection::const_iterator>::value) m_itType = PixelClusterColl;
   else if (std::is_same<T, InDet::SCT_ClusterCollection::const_iterator>::value)  m_itType = SCT_ClusterColl;

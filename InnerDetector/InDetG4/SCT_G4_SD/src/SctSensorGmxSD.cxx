@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -24,8 +24,15 @@
 #include "G4Geantino.hh"
 #include "G4ChargedGeantino.hh"
 
-SctSensorGmxSD::SctSensorGmxSD(const std::string& name, const std::string& hitCollectionName)
-  : SctSensorSD( name, hitCollectionName) { }
+#include <GeoModelKernel/GeoFullPhysVol.h>
+#include <GeoModelRead/ReadGeoModel.h>
+
+#include <InDetSimEvent/SiHitIdHelper.h>
+
+SctSensorGmxSD::SctSensorGmxSD(const std::string& name, const std::string& hitCollectionName,GeoModelIO::ReadGeoModel * sqlreader)
+  : SctSensorSD( name, hitCollectionName) {
+      m_sqlreader = sqlreader;
+   }
 
 SctSensorGmxSD::~SctSensorGmxSD() { }
 
@@ -62,13 +69,32 @@ G4bool SctSensorGmxSD::ProcessHits(G4Step *aStep, G4TouchableHistory * /* not us
   lP2[SiHit::xPhi] = localPosition2[1]*CLHEP::mm;
   lP2[SiHit::xDep] = localPosition2[0]*CLHEP::mm;
 
+  
+  // get the HepMcParticleLink from the TrackHelper
+  TrackHelper trHelp(aStep->GetTrack());
+
+  if(m_sqlreader){
+    //if sqlite inputs, Identifier indices come from PhysVol Name  
+    std::string physVolName = myTouch->GetVolume(0)->GetName();
+  
+    int hitIdOfWafer = SiHitIdHelper::GetHelper()->buildHitIdFromStringITk(1,physVolName);                                                   
+ 
+    m_HitColl->Emplace(lP1,
+                    lP2,
+                    edep,
+                    aStep->GetPreStepPoint()->GetGlobalTime(),//use the global time. i.e. the time from the beginning of the event
+                    trHelp.GetParticleLink(),
+                    hitIdOfWafer);
+    return true;
+  }
+
+  // if not from SQLite, we assume that the Identifier has already been written in as the copy number 
+  // (it should hsave done if GeoModel building ran within Athena)
   //
   //    Get the indexes of which detector the hit is in
   //
   const int id = myTouch->GetVolume(0)->GetCopyNo();
 
-  // get the HepMcParticleLink from the TrackHelper
-  TrackHelper trHelp(aStep->GetTrack());
   m_HitColl->Emplace(lP1, lP2, edep, aStep->GetPreStepPoint()->GetGlobalTime(), trHelp.GetParticleLink(), id);
 
   return true;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RPC_ResidualPullCalculator.h"
@@ -25,16 +25,16 @@ StatusCode Muon::RPC_ResidualPullCalculator::initialize()
 }
 
 //================ calculate residuals for RPC ==================================
-void Muon::RPC_ResidualPullCalculator::residuals(
-    std::vector<double> &residuals,
+std::array<double,5>
+Muon::RPC_ResidualPullCalculator::residuals(
     const Trk::MeasurementBase* measurement,
     const Trk::TrackParameters* trkPar,
     const Trk::ResidualPull::ResidualType /*resType*/,
     const Trk::TrackState::MeasurementType) const {
-
-  if (!trkPar || !measurement) return;
-  if (residuals.size()<1) residuals.resize(1);
+  std::array<double, 5> residuals{};
+  if (!trkPar || !measurement) return residuals;
   Identifier ID = Trk::IdentifierExtractor::extract(measurement);
+  
   if( ID.is_valid() && m_idHelperSvc->isRpc(ID) ) {
 
     if (measurement->localParameters().parameterKey() == 1) {
@@ -44,13 +44,14 @@ void Muon::RPC_ResidualPullCalculator::residuals(
     } else {
       ATH_MSG_WARNING ( "RPC ClusterOnTrack does not carry the expected "
                         << "LocalParameters structure!" );
-      return;
+      return residuals;
     }
     
   } else {
     ATH_MSG_DEBUG ( "Input problem measurement is not RPC." );
-    return;
+    return residuals;
   }
+  return residuals;
 }
 
 //================ calculate residuals and pulls for RPC ==================================

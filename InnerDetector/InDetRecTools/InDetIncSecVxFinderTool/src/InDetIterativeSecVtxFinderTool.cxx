@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 //Author: Lianyou Shan <lianyou.shan@cern.ch>
 
@@ -12,7 +12,7 @@
 
 #define MONITORTUNES  // UNcomment this line to get more output, unfortunately in an ugly way
 
-#include "Root/InDetIterativeSecVtxFinderTool.h"
+#include "src/InDetIterativeSecVtxFinderTool.h"
 
 #include "CLHEP/Matrix/SymMatrix.h"
 #include "CLHEP/Matrix/Vector.h"
@@ -66,63 +66,8 @@ namespace InDet
 {
 
 InDetIterativeSecVtxFinderTool::InDetIterativeSecVtxFinderTool(const std::string& t, const std::string& n, const IInterface*  p)
-        : AthAlgTool(t,n,p),
-          m_filterLevel(0),
-          m_privtxRef( -99999999.9 ),
-          m_minVtxDist( 0.0 ),
-          m_iVertexFitter("Trk::AdaptiveVertexFitter", this ),
-          m_trkFilter("InDet::InDetTrackSelection", this ),
-          m_SVtrkFilter("InDet::InDetSecVtxTrackSelection", this ),
-          m_SeedFinder("Trk::IndexedCrossDistancesSeedFinder", this ),
-          m_ImpactPoint3dEstimator("Trk::ImpactPoint3dEstimator", this ),
-          m_LinearizedTrackFactory("Trk::FullLinearizedTrackFactory", this ),
-          m_useBeamConstraint(false),
-          m_significanceCutSeeding(10),
-          m_maximumChi2cutForSeeding(6.*6.),
-          m_minWghtAtVtx( 0. ),
-          m_maxVertices(25),
-          m_CutHitsFilter(0.8),
-          m_createSplitVertices(false),
-          m_splitVerticesTrkInvFraction(2),
-          m_reassignTracksAfterFirstFit(true),
-          m_doMaxTracksCut(false), 
-          m_maxTracks(5000)
-{
-    declareInterface<ISecVertexFinder>(this);
+        : base_class(t,n,p){}
 
-    declareProperty("reassignTracksAfterFirstFit",m_reassignTracksAfterFirstFit);
-    declareProperty( "VertexFilterLevel",  m_filterLevel );
-//  0 : nothing to filter
-//  1 : no hits insider the 2'nd vertex, having hits in closest layers
-//  2 : mimimum distance betwen vertex.
-//  3 : DV momentum relative to its direction
-//  4 : V0 removal
-
-    declareProperty( "MomentumProjectionOnDirection",  m_privtxRef );
-    declareProperty( "SeedsMinimumDistance",  m_minVtxDist );
-
-    declareProperty("VertexFitterTool", m_iVertexFitter);
-    declareProperty("BaseTrackSelector",m_trkFilter);
-    declareProperty("SecVtxTrackSelector",m_SVtrkFilter);
-    declareProperty("SeedFinder"       , m_SeedFinder);
-    declareProperty("ImpactPoint3dEstimator",m_ImpactPoint3dEstimator);
-    declareProperty("LinearizedTrackFactory",m_LinearizedTrackFactory);
-
-    
-    declareProperty("significanceCutSeeding",m_significanceCutSeeding);
-    declareProperty("maxCompatibilityCutSeeding",m_maximumChi2cutForSeeding);
-    declareProperty("minTrackWeightAtVtx", m_minWghtAtVtx );
-    declareProperty("maxVertices",m_maxVertices);
-    declareProperty("TrackInnerOuterFraction",m_CutHitsFilter);
-    declareProperty("createSplitVertices",m_createSplitVertices);
-    declareProperty("splitVerticesTrkInvFraction", m_splitVerticesTrkInvFraction, "inverse fraction to split tracks (1:N)");
-    declareProperty( "doMaxTracksCut", m_doMaxTracksCut); 
-    declareProperty( "MaxTracks",  m_maxTracks);
-
-}
-
-InDetIterativeSecVtxFinderTool::~InDetIterativeSecVtxFinderTool()
-= default;
 
 void InDetIterativeSecVtxFinderTool::setPriVtxPosition( double vx, double vy, double vz )
 { 
@@ -137,32 +82,21 @@ std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer*> InDetIterativeSecVt
 
   std::vector<Trk::ITrackLink*> selectedTracks;
 
-  xAOD::Vertex beamposition;
-  beamposition.makePrivateStore();
-
-  SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey };
-  beamposition.setPosition(beamSpotHandle->beamVtx().position());
-  beamposition.setCovariancePosition(beamSpotHandle->beamVtx().covariancePosition());
 
   using TrackParticleDataVecIter = DataVector<xAOD::TrackParticle>::const_iterator;
 
   bool selectionPassed;
   m_trkdefiPars.clear() ;
-
+  xAOD::Vertex null;
+  null.makePrivateStore();
+  null.setPosition(Amg::Vector3D(0,0,0));
+  AmgSymMatrix(3) vertexError;
+  vertexError.setZero();
+  null.setCovariancePosition(vertexError);
   for (TrackParticleDataVecIter itr  = trackParticles->begin(); itr != trackParticles->end(); ++itr) {
-    
-    
-    xAOD::Vertex null;
-    null.makePrivateStore();
-    null.setPosition(Amg::Vector3D(0,0,0));
-    AmgSymMatrix(3) vertexError;
-    vertexError.setZero();
-    null.setCovariancePosition(vertexError);
+        
     selectionPassed=static_cast<bool>(m_trkFilter->accept(**itr,&null));
     if ( selectionPassed ) selectionPassed =static_cast<bool>(m_SVtrkFilter->accept(**itr,&null));
-      
-    
- 
     if (selectionPassed)
     {
       Amg::VectorX par = (*itr)->definingParameters();
@@ -180,7 +114,6 @@ std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer*> InDetIterativeSecVt
 
   ATH_MSG_DEBUG("Of " << trackParticles->size() << " tracks " << selectedTracks.size() << " survived the preselection.");
 
-  //beamposition.releasePrivateStore(); //TODO: should I add this here? it was in InDetPriVxFinderTool method
 
   std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer*> returnContainers 
      =findVertex( selectedTracks    );
@@ -199,32 +132,22 @@ std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer*>
 
   std::vector<Trk::ITrackLink*> selectedTracks;
 
-  xAOD::Vertex beamposition;
-  beamposition.makePrivateStore();
-  SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey };
-  beamposition.setPosition(beamSpotHandle->beamVtx().position());
-  beamposition.setCovariancePosition(beamSpotHandle->beamVtx().covariancePosition());
-
 
   bool selectionPassed;
   m_trkdefiPars.clear() ;
-
+  xAOD::Vertex null;
+  null.makePrivateStore();
+  null.setPosition(Amg::Vector3D(0,0,0));
+  AmgSymMatrix(3) vertexError;
+  vertexError.setZero();
+  null.setCovariancePosition(vertexError);
   std::vector<const xAOD::IParticle*>::const_iterator   trk_iter;
   for (trk_iter= inputTracks.begin(); trk_iter != inputTracks.end(); ++trk_iter)
   {
     const xAOD::TrackParticle * tmp=dynamic_cast<const xAOD::TrackParticle *> ((*trk_iter));
     
-    
-    xAOD::Vertex null;
-    null.makePrivateStore();
-    null.setPosition(Amg::Vector3D(0,0,0));
-    AmgSymMatrix(3) vertexError;
-    vertexError.setZero();
-    null.setCovariancePosition(vertexError);
     selectionPassed=static_cast<bool>(m_trkFilter->accept( *tmp, &null));
     if ( selectionPassed ) selectionPassed =static_cast<bool>(m_SVtrkFilter->accept(*tmp,&null));
-    
-    
  
     if (selectionPassed)
     {
@@ -1588,41 +1511,13 @@ StatusCode InDetIterativeSecVtxFinderTool::initialize()
     StatusCode sc;
 
     m_evtNum = 0 ;
+    ATH_CHECK(m_iVertexFitter.retrieve());
+    ATH_CHECK(m_SeedFinder.retrieve());
+    ATH_CHECK(m_LinearizedTrackFactory.retrieve());
+    ATH_CHECK(m_ImpactPoint3dEstimator.retrieve());
 
-    /* Get the right vertex fitting tool from ToolSvc */
-    if ( m_iVertexFitter.retrieve().isFailure() ) {
-      ATH_MSG_FATAL( "Failed to retrieve tool " << m_iVertexFitter );
-      return StatusCode::FAILURE;
-    } 
-
-    if ( m_SeedFinder.retrieve().isFailure() ) {
-      ATH_MSG_FATAL( "Failed to retrieve tool " << m_SeedFinder );
-      return StatusCode::FAILURE;
-    }
-    
-    if ( m_LinearizedTrackFactory.retrieve().isFailure() ) {
-      ATH_MSG_FATAL( "Failed to retrieve tool " << m_LinearizedTrackFactory 
-         << " InDetIterativeSecVtxFinderTool " );
-      return StatusCode::FAILURE;
-    }
-
-    if ( m_ImpactPoint3dEstimator.retrieve().isFailure() ) {
-      ATH_MSG_FATAL( "Failed to retrieve tool " << m_ImpactPoint3dEstimator );
-      return StatusCode::FAILURE;
-    }
-
-    ATH_CHECK(m_beamSpotKey.initialize());
-
-    if(m_trkFilter.retrieve().isFailure()) {
-      ATH_MSG_ERROR(" Unable to retrieve "<<m_trkFilter );
-      return StatusCode::FAILURE;
-    }
-
-    if(m_SVtrkFilter.retrieve().isFailure()) {
-      ATH_MSG_ERROR(" Unable to retrieve "<<m_SVtrkFilter );
-      return StatusCode::FAILURE;
-    }
-
+    ATH_CHECK(m_trkFilter.retrieve());
+    ATH_CHECK(m_SVtrkFilter.retrieve());
 
     // since some parameters special to an inherited class this method
     // will be overloaded by the inherited class
@@ -1656,19 +1551,19 @@ StatusCode InDetIterativeSecVtxFinderTool::initialize()
 
     m_OTree = new TTree( "IncSecVtxUnder", "TTree of underlying/upstream techinfo for InclusiveSecVtx" ) ;
 
-// the number of event processed ( calling of this tool )
+    // the number of event processed ( calling of this tool )
     m_OTree->Branch("EvtNum", &m_evtNum, "EvtNum/I"  ) ;
 
     m_OTree->Branch("IteraNum", &m_iterations, "IteraNum/I"  ) ;
 
-// the minumal number of FsmwModes ( candidates ) for each seed
-// for each searching one has one or more modes, data type of vector<vecvtot<float>> :
+    // the minumal number of FsmwModes ( candidates ) for each seed
+    // for each searching one has one or more modes, data type of vector<vecvtot<float>> :
     m_OTree->Branch("ModeNum",     &m_leastmodes  ) ;
     m_OTree->Branch("sdFsmwX",    &m_sdFsmwX ) ;
     m_OTree->Branch("sdFsmwY",    &m_sdFsmwY ) ;
     m_OTree->Branch("sdFsmwZ",    &m_sdFsmwZ ) ;
     m_OTree->Branch("crossingWght",    &m_sdcrsWght ) ;
-//  seeds as candidate ( number of trials ) of SecVtx
+    //  seeds as candidate ( number of trials ) of SecVtx
     m_OTree->Branch("nperigeeseed",    &m_nperiseed  ) ;
     m_OTree->Branch("seedX",    &m_seedX ) ;
     m_OTree->Branch("seedY",    &m_seedY ) ;
@@ -1677,9 +1572,9 @@ StatusCode InDetIterativeSecVtxFinderTool::initialize()
     m_OTree->Branch("seedZdist",    &m_seedZdist ) ;
     m_OTree->Branch("seedaccepted",    &m_seedac ) ;
 
-//  seeds filter
+    //  seeds filter
 
-//  seeds compatibility ( after fit )
+    //  seeds compatibility ( after fit )
       
     ATH_CHECK( hist_root->regTree("/AANT/SecVtxIncunder", m_OTree ) ) ;
 #endif
@@ -1693,26 +1588,15 @@ std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer*> InDetIterativeSecVt
 
   ATH_MSG_DEBUG( " Number of input tracks before track selection: " << trackTES->size() );
 
-
-  SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey };
-  Trk::RecVertex beamposition(beamSpotHandle->beamVtx());
-
   std::vector<Trk::ITrackLink*> selectedTracks;
 
   typedef DataVector<Trk::Track>::const_iterator TrackDataVecIter;
 
   bool selectionPassed;
   for (TrackDataVecIter itr  = (*trackTES).begin(); itr != (*trackTES).end(); ++itr) {
-    if (m_useBeamConstraint) {
-      selectionPassed=static_cast<bool>(m_trkFilter->accept(**itr,&beamposition));
-      if ( selectionPassed ) selectionPassed=static_cast<bool>(m_SVtrkFilter->accept(**itr,&beamposition));
-    }
-    else
-    {
-      Trk::Vertex null(Amg::Vector3D(0,0,0));
-      selectionPassed=static_cast<bool>(m_trkFilter->accept(**itr,&null));
-      if ( selectionPassed ) selectionPassed=static_cast<bool>(m_SVtrkFilter->accept(**itr,&null));
-    }
+    Trk::Vertex null(Amg::Vector3D(0,0,0));
+    selectionPassed=static_cast<bool>(m_trkFilter->accept(**itr,&null));
+    if ( selectionPassed ) selectionPassed=static_cast<bool>(m_SVtrkFilter->accept(**itr,&null));
     if (selectionPassed)
     {
       ElementLink<TrackCollection> link;
@@ -1740,32 +1624,15 @@ std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer*> InDetIterativeSecVt
 
   std::vector<Trk::ITrackLink*> selectedTracks;
 
-  // TODO: change trkFilter to allow for this replacement
-
-  SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey };
-  Trk::RecVertex beamposition(beamSpotHandle->beamVtx());
 
   typedef DataVector<Trk::TrackParticleBase>::const_iterator TrackParticleDataVecIter;
 
   bool selectionPassed;
   for (TrackParticleDataVecIter itr  = (*trackTES).begin(); itr != (*trackTES).end(); ++itr) {
-    if (m_useBeamConstraint) {
-      selectionPassed=static_cast<bool>(m_trkFilter->accept( *((*itr)->originalTrack()), &beamposition));
-      if ( selectionPassed ) selectionPassed 
-			       =static_cast<bool>(m_SVtrkFilter->accept( *((*itr)->originalTrack()), &beamposition));
-    }
-    else
-    {
-      Trk::Vertex null(Amg::Vector3D(0,0,0));
-      selectionPassed=static_cast<bool>(m_trkFilter->accept( *((*itr)->originalTrack()), &null));
-      if ( selectionPassed ) selectionPassed =static_cast<bool>( m_SVtrkFilter->accept( *((*itr)->originalTrack()), &null));
-    }
-    
     
     Trk::Vertex null(Amg::Vector3D(0,0,0));
     selectionPassed=static_cast<bool>(m_trkFilter->accept( *((*itr)->originalTrack()), &null));
     if ( selectionPassed ) selectionPassed =static_cast<bool>( m_SVtrkFilter->accept( *((*itr)->originalTrack()), &null));
-  
     
     if (selectionPassed)
     {

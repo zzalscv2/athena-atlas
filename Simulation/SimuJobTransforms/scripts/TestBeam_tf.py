@@ -46,7 +46,7 @@ def main():
     sys.exit(trf.exitCode)
 
 def getTransform():
-    trf = transform(executor = athenaExecutor(name = 'TestBeamTf', skeletonFile = 'SimuJobTransforms/skeleton.TestBeam.py',
+    trf = transform(executor = athenaExecutor(name = 'TestBeamTf', skeletonFile = 'SimuJobTransforms/skeleton.TestBeam.py', skeletonCA = 'SimuJobTransforms.TestBeam_Skeleton',
                                               substep = 'TBsim', tryDropAndReload = False, perfMonFile = 'ntuple.pmon.gz', inData=['NULL','Evgen'], outData=['HITS','NULL'] )) #may have to add evgen to outData if cosmics/cavern background jobs don't work.
     addAthenaArguments(trf.parser)
     addDetectorArguments(trf.parser)

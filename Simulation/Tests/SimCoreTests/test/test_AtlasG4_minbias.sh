@@ -2,8 +2,7 @@
 #
 # art-description: Tests inner detector response to minbias events, using 2015 geometry and conditions
 # art-include: 21.0/Athena
-# art-include: 21.3/Athena
-# art-include: 21.9/Athena
+# art-include: 23.0/Athena
 # art-include: master/Athena
 # art-type: grid
 # art-architecture:  '#x86_64-intel'

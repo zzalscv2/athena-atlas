@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -15,42 +15,9 @@
 using namespace IDPVM;
 
 InDetPerfPlot_TrackParameters::InDetPerfPlot_TrackParameters(InDetPlotBase* pParent, const std::string& sDir) :
-  InDetPlotBase(pParent, sDir),
-  m_reco_d0{},
-  m_reco_z0{},
-  m_reco_z0sin{},
-  m_reco_phi{},
-  m_reco_theta{},
-  m_reco_eta{},
-  m_reco_qoverp{},
-  m_reco_pt{},
-  m_reco_lowpt{},
-  m_reco_chi2{},
-  m_reco_ndof{},
-  m_reco_chi2Overndof{},
-  m_reco_author{},
-
-  m_truth_d0{},
-  m_truth_z0{},
-  m_truth_z0sin{},
-  m_truth_phi{},
-  m_truth_theta{},
-  m_truth_eta{},
-  m_truth_qoverp{},
-  m_truth_pt{},
-  m_truth_lowpt{},
-  m_truth_prodR{},
-  m_truth_prodZ{},
-
-  m_reco_pt_vs_eta{},
-  m_reco_phi_vs_eta{},
-
-  m_reco_d0_z0{},
-  m_reco_d0_z0sin{},
-
-
-  m_truth_pt_vs_eta{},
-  m_truth_phi_vs_eta{} {
+  InDetPlotBase(pParent, sDir){
+  //nop
+  //variable initialised at declaration
 }
 
 void
@@ -69,6 +36,7 @@ InDetPerfPlot_TrackParameters::initializePlots() {
   book(m_reco_ndof,   "reco_ndof");
   book(m_reco_chi2Overndof, "reco_chi2Overndof");
   book(m_reco_author,  "reco_author");
+  book(m_reco_time,    "reco_time");
 
   book(m_truth_d0,     "truth_d0");
   book(m_truth_z0,     "truth_z0");
@@ -163,6 +131,11 @@ InDetPerfPlot_TrackParameters::fill(const xAOD::TrackParticle& particle, float w
   std::bitset<xAOD::TrackPatternRecoInfo::NumberOfTrackRecoInfo>  patternInfo = particle.patternRecoInfo();
   for(unsigned int i = 0; i < xAOD::TrackPatternRecoInfo::NumberOfTrackRecoInfo; i++){
     if(patternInfo.test(i)) fillHisto(m_reco_author, i, weight);
+  }
+
+  static const SG::AuxElement::Accessor< float > acc("time");
+  if( acc.isAvailable(particle) ) {
+    fillHisto(m_reco_time, particle.time(), weight);
   }
 
 }

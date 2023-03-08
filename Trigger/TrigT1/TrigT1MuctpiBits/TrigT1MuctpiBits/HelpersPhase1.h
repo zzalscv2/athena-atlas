@@ -6,14 +6,18 @@
 #define TRIGT1MUCTPIBITS_HELPERSPHASE1_H
 
 #include "MuCTPI_Bits.h"
-#include <vector>
 #include <array>
+#include <vector>
 #include <string_view>
+#include <iostream>
 
 namespace LVL1::MuCTPIBits {
   // Helper types
   enum class WordType : uint8_t {Undefined=0, Timeslice, Multiplicity, Candidate, Topo, Status, MAX};
   enum class SubsysID : uint8_t {Undefined=0, Barrel, Forward, Endcap, MAX};
+  
+  // Mapping of the six RPC indexes into the 15 TGC indexes
+  const uint32_t RPCtoTGC_pt_map[6] = {2, 4, 6, 8, 10, 12};
 
   // Status data word error definitions
   static constexpr std::array<std::string_view,16> DataStatusWordErrors = {
@@ -185,7 +189,7 @@ namespace LVL1::MuCTPIBits {
     std::vector<size_t> errors;
     for (size_t bit=0; bit<DataStatusWordErrors.size(); ++bit) {
       if (wordEquals(status, bit, 1u, 1u)) {
-	errors.push_back(bit);
+		  errors.push_back(bit);
       }
     }
     return errors;
@@ -214,6 +218,13 @@ namespace LVL1::MuCTPIBits {
       uint32_t num{0};
       uint32_t pt{0};//1-15
       uint32_t roi{0};
+	  uint32_t subsystem{0};
+	  // if the candidate is in barrel the word will have a 6 pt indexes,
+	  // but we need them mapped over 15, because the TOB words have the
+	  // pt indexes mapped this way, otherwise we cannot compare the pt
+	  uint32_t mappedPt{0};
+	  float eta{0.};
+	  float phi{0.};
       bool errorFlag           = false;
       bool vetoFlag            = false;
       bool sectorFlag_gtN      = false;//BA: gt2, EC/FW: gt4
@@ -229,54 +240,152 @@ namespace LVL1::MuCTPIBits {
           errorFlag = maskedWord(word, RUN3_CAND_WORD_SECTORERRORFLAG_SHIFT, RUN3_CAND_WORD_SECTORERRORFLAG_MASK);
           type = getSubsysID(word);
           side = maskedWord(word, RUN3_SUBSYS_HEMISPHERE_SHIFT, RUN3_SUBSYS_HEMISPHERE_MASK);
-          if(type==SubsysID::Endcap)
-              num = maskedWord(word, RUN3_CAND_SECTORID_SHIFT, ENDCAP_SECTORID_MASK);
-          else
-              num = maskedWord(word, RUN3_CAND_SECTORID_SHIFT, BARREL_SECTORID_MASK);//same as FW
           vetoFlag = maskedWord(word, RUN3_CAND_WORD_VETO_SHIFT, RUN3_CAND_WORD_VETO_MASK);
-          if(type==SubsysID::Barrel)
+		  sectorFlag_gtN = maskedWord(word, RUN3_CAND_WORD_SECTORFLAGS_SHIFT, RUN3_CAND_WORD_SECTORFLAGS_MASK);
+          pt = maskedWord(word, RUN3_CAND_WORD_PT_SHIFT, RUN3_CAND_WORD_PT_MASK);
+          roi = maskedWord(word, RUN3_CAND_WORD_ROI_SHIFT, RUN3_CAND_WORD_ROI_MASK);
+          if(type==SubsysID::Endcap) {
+              num = maskedWord(word, RUN3_CAND_SECTORID_SHIFT, ENDCAP_SECTORID_MASK);
+			  subsystem = 1;
+			  mappedPt = pt;
+		  }
+		  else if(type==SubsysID::Barrel)
           {
               candFlag_phiOverlap = maskedWord(word, RUN3_CAND_WORD_CANDFLAGS_BA_PHIOVERLAP_SHIFT, RUN3_CAND_WORD_CANDFLAGS_BA_PHIOVERLAP_MASK);
               candFlag_gt1CandRoi = maskedWord(word, RUN3_CAND_WORD_CANDFLAGS_BA_GT1ROI_SHIFT, RUN3_CAND_WORD_CANDFLAGS_BA_GT1ROI_MASK);
+			  subsystem = 0;
+              num = maskedWord(word, RUN3_CAND_SECTORID_SHIFT, BARREL_SECTORID_MASK);//same as FW
+			  mappedPt = RPCtoTGC_pt_map[pt-1];
           }
           else
-          {
-              candFlag_GoodMF = maskedWord(word, RUN3_CAND_WORD_CANDFLAGS_ECFW_GOODMF_SHIFT, RUN3_CAND_WORD_CANDFLAGS_ECFW_GOODMF_MASK);
+          {  
+			  sectorFlag_nswMon  = maskedWord(word, RUN3_CAND_WORD_CANDFLAGS_NSWMON_SHIFT, RUN3_CAND_WORD_CANDFLAGS_NSWMON_MASK);
+              candFlag_GoodMF    = maskedWord(word, RUN3_CAND_WORD_CANDFLAGS_ECFW_GOODMF_SHIFT, RUN3_CAND_WORD_CANDFLAGS_ECFW_GOODMF_MASK);
               candFlag_InnerCoin = maskedWord(word, RUN3_CAND_WORD_CANDFLAGS_ECFW_INNERCOIN_SHIFT, RUN3_CAND_WORD_CANDFLAGS_ECFW_INNERCOIN_MASK);
-              candFlag_BW23 = maskedWord(word, RUN3_CAND_WORD_CANDFLAGS_ECFW_BW23_SHIFT, RUN3_CAND_WORD_CANDFLAGS_ECFW_BW23_MASK);
-              candFlag_Charge = maskedWord(word, RUN3_CAND_WORD_CANDFLAGS_ECFW_CHARGE_SHIFT, RUN3_CAND_WORD_CANDFLAGS_ECFW_CHARGE_MASK);
+              candFlag_BW23      = maskedWord(word, RUN3_CAND_WORD_CANDFLAGS_ECFW_BW23_SHIFT, RUN3_CAND_WORD_CANDFLAGS_ECFW_BW23_MASK);
+              candFlag_Charge    = maskedWord(word, RUN3_CAND_WORD_CANDFLAGS_ECFW_CHARGE_SHIFT, RUN3_CAND_WORD_CANDFLAGS_ECFW_CHARGE_MASK);
+              num = maskedWord(word, RUN3_CAND_SECTORID_SHIFT, BARREL_SECTORID_MASK);//same as FW
+			  subsystem = 2;
+			  mappedPt = pt;
           }
-          pt = maskedWord(word, RUN3_CAND_WORD_PT_SHIFT, RUN3_CAND_WORD_PT_MASK);
-          roi = maskedWord(word, RUN3_CAND_WORD_ROI_SHIFT, RUN3_CAND_WORD_ROI_MASK);
       }
+	  void print() //this function has only debug purposes
+	  {
+		  std::cout << "Muon word content (cand): ";
+		  std::cout << (side?"Side A, ":"Side C, ");
+		  if(type == SubsysID::Barrel)
+			  std::cout << "BA" << num << " ";
+		  else
+			  std::cout << (type==SubsysID::Forward?"FW":"EC") << num << " ";
+		  std::cout << "Eta = " << eta << " ";
+		  std::cout << "Phi = " << phi << " ";
+		  std::cout << "pT = " << pt << " "; //Remember the internal mapping. RPC has 6 thresholds and TGC has 15.
+		  std::cout << "pTmapped = " << mappedPt << " ";
+		  std::cout << "CF: ";
+		  if(type != SubsysID::Barrel) {
+			  std::cout << " GMF: " << (candFlag_GoodMF?"1":"0");     
+			  std::cout << " InC: " << (candFlag_InnerCoin?"1":"0");  
+			  std::cout << " -BW: " << (candFlag_BW23?"1":"0");       
+			  std::cout << " Chg: " << (candFlag_Charge?"1":"0");     
+		  }
+		  else {
+			  std::cout << " PhO: " << (candFlag_phiOverlap?"1":"0");
+			  std::cout << " 1Ro: " << (candFlag_gt1CandRoi?"1":"0");
+		  }		  
+		  std::cout << "SF: " << std::endl;
+		  if(type != SubsysID::Barrel) {
+			  std::cout << " NSM: " << (sectorFlag_nswMon?"1":"0");
+			  std::cout << " 4SL: " << (sectorFlag_gtN?"1":"0");
+		  }
+		  else {
+			  std::cout << " 2SL: " << (sectorFlag_gtN?"1":"0");
+		  }
+		  std::cout << " Veto = " << (vetoFlag?"1":"0") << " ";
+		  std::cout << std::endl;
+	  }
   };
   struct TopoTOB {
-      bool     side = false;//C=0 A=1
+	  bool     side = false;//C=0 A=1
       uint32_t pt{0};//1-15
       uint32_t etaRaw{0};
       uint32_t phiRaw{0};
+	  uint32_t roi{0};
+	  uint32_t barrel_eta_lookup{0};
+      uint32_t barrel_phi_lookup{0};
+      uint32_t det{0};
+      uint32_t sec{0};
+	  uint32_t subsystem{0};
+	  float    etaDecoded{0.};
+	  float    phiDecoded{0.};
       bool candFlag_GoodMF     = false;//EC/FW only
       bool candFlag_InnerCoin  = false;//EC/FW only
       bool candFlag_BW23       = false;//EC/FW only
       bool candFlag_Charge     = false;//EC/FW only
-      TopoTOB(uint32_t word)
+	  void setTopoRoI()
+	  {
+		// BA
+		if (det == 0){
+		  sec = phiRaw >> 3;
+		  barrel_eta_lookup = (etaRaw >> 1) & 0xf;
+		  barrel_phi_lookup = phiRaw & 0x7;
+		}
+		// FWD
+		else if (det == 1){
+		  sec = phiRaw >> 3 ;
+		  roi = ((etaRaw & 0x1f) << 2) | ((phiRaw >> 1) & 0x3) ;
+		}
+		// EC
+		else if (det == 2){
+		  sec = phiRaw >> 2 ;
+		  roi = ((etaRaw & 0x3f) << 2) | (phiRaw & 0x3) ;
+		}
+	  }
+	  TopoTOB(uint32_t word)
       {
           side = maskedWord(word, RUN3_TOPO_WORD_HEMI_SHIFT, RUN3_TOPO_WORD_HEMI_MASK);
-          candFlag_GoodMF = maskedWord(word, RUN3_CAND_WORD_CANDFLAGS_ECFW_GOODMF_SHIFT, RUN3_CAND_WORD_CANDFLAGS_ECFW_GOODMF_MASK);
-          candFlag_InnerCoin = maskedWord(word, RUN3_CAND_WORD_CANDFLAGS_ECFW_INNERCOIN_SHIFT, RUN3_CAND_WORD_CANDFLAGS_ECFW_INNERCOIN_MASK);
-          candFlag_BW23 = maskedWord(word, RUN3_CAND_WORD_CANDFLAGS_ECFW_BW23_SHIFT, RUN3_CAND_WORD_CANDFLAGS_ECFW_BW23_MASK);
-          candFlag_Charge = maskedWord(word, RUN3_CAND_WORD_CANDFLAGS_ECFW_CHARGE_SHIFT, RUN3_CAND_WORD_CANDFLAGS_ECFW_CHARGE_MASK);
+          det  = maskedWord(word, RUN3_TOPO_WORD_DET_SHIFT, RUN3_TOPO_WORD_DET_MASK);
+		  // Barrel:00 - EC:1X - FW:01 - see: https://indico.cern.ch/event/864390/contributions/3642129/attachments/1945776/3234220/ctp_topo_encoding.pdf
+		  // set EC to 2 instead of sometimes 3 - see above why
+		  if(det > 2) det = 2;
+		  if(det == 0) subsystem = 0;
+		  else if(det == 1) subsystem = 2;
+		  else if(det == 2) subsystem = 1;
+		  candFlag_GoodMF    = maskedWord(word, RUN3_TOPO_WORD_CANDFLAGS_ECFW_GOODMF_SHIFT, RUN3_TOPO_WORD_CANDFLAGS_ECFW_GOODMF_MASK);
+          candFlag_InnerCoin = maskedWord(word, RUN3_TOPO_WORD_CANDFLAGS_ECFW_INNERCOIN_SHIFT, RUN3_TOPO_WORD_CANDFLAGS_ECFW_INNERCOIN_MASK);
+          candFlag_BW23      = maskedWord(word, RUN3_TOPO_WORD_CANDFLAGS_ECFW_BW23_SHIFT, RUN3_TOPO_WORD_CANDFLAGS_ECFW_BW23_MASK);
+          candFlag_Charge    = maskedWord(word, RUN3_TOPO_WORD_CANDFLAGS_ECFW_CHARGE_SHIFT, RUN3_TOPO_WORD_CANDFLAGS_ECFW_CHARGE_MASK);
           pt = maskedWord(word, RUN3_TOPO_WORD_PT_SHIFT, RUN3_TOPO_WORD_PT_MASK);
           etaRaw = maskedWord(word, RUN3_TOPO_WORD_ETA_SHIFT, RUN3_TOPO_WORD_ETA_MASK);
           phiRaw = maskedWord(word, RUN3_TOPO_WORD_PHI_SHIFT, RUN3_TOPO_WORD_PHI_MASK);
+		  setTopoRoI();
       }
+	  void print() //this function is just for debug purposes
+	  {
+		  std::cout << "Muon word content (TOB) : ";
+		  std::cout << (side?"Side A, ":"Side C, ");
+		  if(det == 0)
+			  std::cout << "BA" << sec << " ";
+		  else
+			  std::cout << (det==1?"FW":"EC") << sec << " ";
+		  std::cout << "Eta = " << etaDecoded << " ";
+		  std::cout << "Phi = " << phiDecoded << " ";
+		  std::cout << "pT = " << pt << std::endl;
+		  std::cout << "CF:";
+		  if(det == 1 || det == 2) {
+			  std::cout << " GMF: " << (candFlag_GoodMF?"1":"0");
+			  std::cout << " InC: " << (candFlag_InnerCoin?"1":"0");
+			  std::cout << " -BW: " << (candFlag_BW23?"1":"0");
+			  std::cout << " Chg: " << (candFlag_Charge?"1":"0");
+		  }
+		  std::cout << std::endl;
+	  }
   };
 
   struct Slice {
       uint32_t bcid{0},nTOB{0},nCand{0};
       Multiplicity           mlt;
       std::vector<Candidate> cand       = {};
-      std::vector<TopoTOB>       tob        = {};
+      std::vector<TopoTOB>   tob        = {};
   };
 
 } // namespace LVL1::MuCTPIBits

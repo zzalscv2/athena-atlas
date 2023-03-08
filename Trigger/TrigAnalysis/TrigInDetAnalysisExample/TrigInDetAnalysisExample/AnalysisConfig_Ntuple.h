@@ -5,7 +5,7 @@
  **     @author  mark sutton
  **     @date    Fri 11 Jan 2019 07:06:37 CET 
  **
- **     Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -50,8 +50,8 @@ public:
 				   0,
 				   0 ),
     m_event(0),
-    mFile(0),
-    mTree(0),
+    m_File(0),
+    m_Tree(0),
     m_doOffline(false),
     m_doVertices(false),
     m_doMuons(false),
@@ -71,8 +71,7 @@ public:
     m_finalised(true),
     m_printInfo(true),
     m_ptmin(0),
-    m_parentTruthPdgId(parentTruthPdgId),
-    m_tida_first(true)
+    m_parentTruthPdgId(parentTruthPdgId)
   {  
     /// leave in this debug printout ...
     /// std::cout << "AnalysisConfig_Ntuple::AnalysisConfig_Ntuple() " << chainNames.size() << std::endl;
@@ -156,9 +155,9 @@ protected:
 
   TIDA::Event*  m_event;
 
-  TFile*      mFile;  
-  TTree*      mTree;
-  TDirectory* mDir;
+  TFile*      m_File;
+  TTree*      m_Tree;
+  TDirectory* m_Dir;
 
   std::vector<ChainString> m_chainNames;
 
@@ -197,8 +196,6 @@ protected:
 
   int m_parentTruthPdgId;
 
-  bool m_tida_first;
-  
 };
 
 

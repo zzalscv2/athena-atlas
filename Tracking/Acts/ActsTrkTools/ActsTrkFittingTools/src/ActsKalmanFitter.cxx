@@ -1,6 +1,6 @@
-// /*
-//   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-// */
+/*
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+*/
 
 #include "ActsKalmanFitter.h"
 
@@ -24,6 +24,8 @@
 #include "Acts/Utilities/Helpers.hpp"
 #include "Acts/Utilities/Logger.hpp"
 #include "Acts/Utilities/CalibrationContext.hpp"
+#include "Acts/EventData/VectorMultiTrajectory.hpp"
+#include "Acts/EventData/VectorTrackContainer.hpp"
 
 // PACKAGE
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
@@ -38,27 +40,7 @@
 
 ActsKalmanFitter::ActsKalmanFitter(const std::string& t,const std::string& n,
                                 const IInterface* p) :
-  AthAlgTool (t,n,p),
-  m_trkSummaryTool("")
-{
-  declareInterface<ITrackFitter>( this );
-  // Get parameter values from jobOptions file
-  declareProperty("SummaryTool" , m_trkSummaryTool, "ToolHandle for track summary tool");  
-
-  // -- job options - 
-  declareProperty("OutlierChi2Cut",m_option_outlierChi2Cut=12.5,
-		              "Chi2 cut used by the outlier finder");
-  declareProperty("ReverseFilteringPt",m_option_ReverseFilteringPt=1.0,
-		              "Pt cut used for the ReverseFiltering logic");
-  declareProperty("MaxPropagationStep",m_option_maxPropagationStep=5000,
-                  "Maximum number of steps for one propagate call");
-  declareProperty("SeedCovarianceScale",m_option_seedCovarianceScale=100.,
-                  "Scale factor for the input seed covariance when doing refitting");
-
-}
-
-// destructor
-ActsKalmanFitter::~ActsKalmanFitter()
+  base_class(t,n,p)
 {}
 
 StatusCode ActsKalmanFitter::initialize() {
@@ -69,12 +51,17 @@ StatusCode ActsKalmanFitter::initialize() {
   ATH_CHECK(m_ATLASConverterTool.retrieve());
   ATH_CHECK(m_trkSummaryTool.retrieve());
 
-  auto field = std::make_shared<ATLASMagneticFieldWrapper>();
-  Acts::EigenStepper<> stepper(field);
-  Acts::Navigator navigator( Acts::Navigator::Config{ m_trackingGeometryTool->trackingGeometry() } );     
-  Acts::Propagator<Acts::EigenStepper<>, Acts::Navigator> propagator(std::move(stepper), std::move(navigator));
+  m_logger = makeActsAthenaLogger(this, "Acts Kalman Refit");
 
-  m_fitter = std::make_unique<Fitter>(std::move(propagator));
+  auto field = std::make_shared<ATLASMagneticFieldWrapper>();
+  Acts::EigenStepper<> stepper(field, m_overstepLimit);
+  Acts::Navigator navigator( Acts::Navigator::Config{ m_trackingGeometryTool->trackingGeometry() } );     
+  Acts::Propagator<Acts::EigenStepper<>, Acts::Navigator> propagator(std::move(stepper), 
+								     std::move(navigator),
+								     logger().cloneWithSuffix("Prop"));
+
+  m_fitter = std::make_unique<Fitter>(std::move(propagator),
+				      logger().cloneWithSuffix("KalmanFitter"));
 
 
   m_kfExtensions.updater.connect<&ActsKalmanFitter::gainMatrixUpdate<traj_Type>>();
@@ -87,10 +74,6 @@ StatusCode ActsKalmanFitter::initialize() {
   m_reverseFilteringLogic.momentumMax = m_option_ReverseFilteringPt;
   m_kfExtensions.reverseFilteringLogic.connect<&ReverseFilteringLogic::operator()<traj_Type>>(&m_reverseFilteringLogic);
 
-
-
-
-  m_logger = makeActsAthenaLogger(this, "Acts Kalman Refit");
   return StatusCode::SUCCESS;
 }
 
@@ -140,9 +123,12 @@ ActsKalmanFitter::fit(const EventContext& ctx,
   Acts::KalmanFitterOptions
       kfOptions(tgContext, mfContext, calContext,
                 m_kfExtensions,
-                Acts::LoggerWrapper{logger()}, propagationOption,
+		propagationOption,
                 &(*pSurface));
-  std::vector<ATLASSourceLink> trackSourceLinks = m_ATLASConverterTool->ATLASTrackToSourceLink(tgContext,inputTrack);
+
+  std::vector<ATLASSourceLink::ElementsType> elementCollection;
+
+  std::vector<ATLASSourceLink> trackSourceLinks = m_ATLASConverterTool->ATLASTrackToSourceLink(tgContext,inputTrack,elementCollection);
   // protection against error in the conversion from Atlas masurement to Acts source link
   if (trackSourceLinks.empty()) {
     ATH_MSG_INFO("input contain measurement but no source link created, probable issue with the converter, reject fit ");
@@ -163,11 +149,19 @@ ActsKalmanFitter::fit(const EventContext& ctx,
                                                        initialParams.parameters(),
                                                        scaledCov);
 
+  Acts::TrackContainer tracks{
+    Acts::VectorTrackContainer{},
+    Acts::VectorMultiTrajectory{}};
+  
+  // Convert to Acts::SourceLink during iteration
+  Acts::SourceLinkAdapterIterator begin{trackSourceLinks.begin()};
+  Acts::SourceLinkAdapterIterator end{trackSourceLinks.end()};
+
   // Perform the fit
-  auto result = m_fitter->fit(trackSourceLinks.begin(), 
-      trackSourceLinks.end(), scaledInitialParams, kfOptions);
+  auto result = m_fitter->fit(begin, end,			      
+    scaledInitialParams, kfOptions, tracks);
   if (result.ok()) {
-    track = makeTrack<traj_Type>(ctx, tgContext, result);
+    track = makeTrack<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail_tc::ValueHolder>(ctx, tgContext, tracks, result);
   }
   return track;
 }
@@ -204,13 +198,17 @@ ActsKalmanFitter::fit(const EventContext& ctx,
   Acts::KalmanFitterOptions
       kfOptions(tgContext, mfContext, calContext,
                 m_kfExtensions,
-                Acts::LoggerWrapper{logger()}, propagationOption,
+		propagationOption,
                 &(*pSurface));
 
   std::vector<ATLASSourceLink> trackSourceLinks;
   trackSourceLinks.reserve(inputMeasSet.size());
+
+  std::vector< ATLASSourceLink::ElementsType > elementCollection;
+  elementCollection.reserve(inputMeasSet.size());
+
   for (auto it = inputMeasSet.begin(); it != inputMeasSet.end(); ++it){
-    trackSourceLinks.push_back(m_ATLASConverterTool->ATLASMeasurementToSourceLink(tgContext, *it));
+    trackSourceLinks.push_back(m_ATLASConverterTool->ATLASMeasurementToSourceLink(tgContext, *it, elementCollection));
   }
   // protection against error in the conversion from Atlas masurement to Acts source link
   if (trackSourceLinks.empty()) {
@@ -220,11 +218,19 @@ ActsKalmanFitter::fit(const EventContext& ctx,
 
   const auto& initialParams = m_ATLASConverterTool->ATLASTrackParameterToActs(&estimatedStartParameters); 
 
+  Acts::TrackContainer tracks{
+    Acts::VectorTrackContainer{},
+    Acts::VectorMultiTrajectory{}};
+
+  // Convert to Acts::SourceLink during iteration
+  Acts::SourceLinkAdapterIterator begin{trackSourceLinks.begin()};
+  Acts::SourceLinkAdapterIterator end{trackSourceLinks.end()};
+
   // Perform the fit
-  auto result = m_fitter->fit(trackSourceLinks.begin(), 
-      trackSourceLinks.end(), initialParams, kfOptions);
+  auto result = m_fitter->fit(begin, end,
+    initialParams, kfOptions, tracks);
   if (result.ok()) {
-    track = makeTrack<traj_Type>(ctx, tgContext, result);
+    track = makeTrack<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail_tc::ValueHolder>(ctx, tgContext, tracks, result);
   }
   return track;
 }
@@ -291,14 +297,21 @@ ActsKalmanFitter::fit(const EventContext& ctx,
   Acts::KalmanFitterOptions
       kfOptions(tgContext, mfContext, calContext,
                 m_kfExtensions,
-                Acts::LoggerWrapper{logger()}, propagationOption,
+		propagationOption,
                 &(*pSurface));
 
-  std::vector<ATLASSourceLink> trackSourceLinks = m_ATLASConverterTool->ATLASTrackToSourceLink(tgContext, inputTrack);
+  std::vector<ATLASSourceLink::ElementsType> elementCollection;
+
+  std::vector<ATLASSourceLink> trackSourceLinks = m_ATLASConverterTool->ATLASTrackToSourceLink(tgContext, inputTrack, elementCollection);
   const auto& initialParams = m_ATLASConverterTool->ATLASTrackParameterToActs(inputTrack.perigeeParameters());
+
+
+  std::vector< ATLASSourceLink::ElementsType > atlasElementCollection;
+  atlasElementCollection.reserve(addMeasColl.size());
+
   for (auto it = addMeasColl.begin(); it != addMeasColl.end(); ++it)
   {
-    trackSourceLinks.push_back(m_ATLASConverterTool->ATLASMeasurementToSourceLink(tgContext, *it));
+    trackSourceLinks.push_back(m_ATLASConverterTool->ATLASMeasurementToSourceLink(tgContext, *it, atlasElementCollection));
   }
   // protection against error in the conversion from Atlas masurement to Acts source link
   if (trackSourceLinks.empty()) {
@@ -306,11 +319,19 @@ ActsKalmanFitter::fit(const EventContext& ctx,
     return track;
   }
 
+  Acts::TrackContainer tracks{
+    Acts::VectorTrackContainer{},
+    Acts::VectorMultiTrajectory{}};
+
+  // Convert to Acts::SourceLink during iteration
+  Acts::SourceLinkAdapterIterator begin{trackSourceLinks.begin()};
+  Acts::SourceLinkAdapterIterator end{trackSourceLinks.end()};
+
   // Perform the fit
-  auto result = m_fitter->fit(trackSourceLinks.begin(), 
-      trackSourceLinks.end(), initialParams, kfOptions);
+  auto result = m_fitter->fit(begin, end,
+    initialParams, kfOptions, tracks);
   if (result.ok()) {
-    track = makeTrack<traj_Type>(ctx, tgContext, result);
+    track = makeTrack<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail_tc::ValueHolder>(ctx, tgContext, tracks, result);
   }
   return track;
 }
@@ -377,11 +398,14 @@ ActsKalmanFitter::fit(const EventContext& ctx,
   Acts::KalmanFitterOptions
       kfOptions(tgContext, mfContext, calContext,
                 m_kfExtensions,
-                Acts::LoggerWrapper{logger()}, propagationOption,
+		propagationOption,
                 &(*pSurface));
 
-  std::vector<ATLASSourceLink> trackSourceLinks = m_ATLASConverterTool->ATLASTrackToSourceLink(tgContext, intrk1);
-  std::vector<ATLASSourceLink> trackSourceLinks2 = m_ATLASConverterTool->ATLASTrackToSourceLink(tgContext, intrk2);
+  std::vector<ATLASSourceLink::ElementsType> elementCollection1;
+  std::vector<ATLASSourceLink::ElementsType> elementCollection2;
+
+  std::vector<ATLASSourceLink> trackSourceLinks = m_ATLASConverterTool->ATLASTrackToSourceLink(tgContext, intrk1, elementCollection1);
+  std::vector<ATLASSourceLink> trackSourceLinks2 = m_ATLASConverterTool->ATLASTrackToSourceLink(tgContext, intrk2, elementCollection2);
   trackSourceLinks.insert(trackSourceLinks.end(), trackSourceLinks2.begin(), trackSourceLinks2.end());
   // protection against error in the conversion from Atlas masurement to Acts source link
   if (trackSourceLinks.empty()) {
@@ -403,11 +427,20 @@ ActsKalmanFitter::fit(const EventContext& ctx,
                                                        initialParams.parameters(),
                                                        scaledCov);
 
+
+  Acts::TrackContainer tracks{
+    Acts::VectorTrackContainer{},
+    Acts::VectorMultiTrajectory{}};
+
+  // Convert to Acts::SourceLink during iteration
+  Acts::SourceLinkAdapterIterator begin{trackSourceLinks.begin()};
+  Acts::SourceLinkAdapterIterator end{trackSourceLinks.end()};
+
   // Perform the fit
-  auto result = m_fitter->fit(trackSourceLinks.begin(), 
-      trackSourceLinks.end(), scaledInitialParams, kfOptions);
+  auto result = m_fitter->fit(begin, end,
+    scaledInitialParams, kfOptions, tracks);
   if (result.ok()) {
-    track = makeTrack<traj_Type>(ctx, tgContext, result);
+    track = makeTrack<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail_tc::ValueHolder>(ctx, tgContext, tracks, result);
   }
   return track;
 }

@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 def JfexMonitoringConfig(inputFlags):
     '''Function to configure LVL1 Jfex algorithm in the monitoring system.'''
@@ -216,26 +216,27 @@ def JfexMonitoringConfig(inputFlags):
 
 if __name__=='__main__':
     # set input file and config options
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     import glob
     inputs = glob.glob('../../Monitoring/run/valid1.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.AOD.e8453_e8455_s3873_s3874_r14022/*.root*')
-    
-    ConfigFlags.Input.Files = inputs
-    ConfigFlags.Output.HISTFileName = 'ExampleMonitorOutput_LVL1.root'
 
-    ConfigFlags.Exec.MaxEvents=10
+    flags = initConfigFlags()
+    flags.Input.Files = inputs
+    flags.Output.HISTFileName = 'ExampleMonitorOutput_LVL1.root'
 
-    ConfigFlags.lock()
-    ConfigFlags.dump() # print all the configs
+    flags.Exec.MaxEvents=10
+
+    flags.lock()
+    flags.dump() # print all the configs
 
     from AthenaCommon.AppMgr import ServiceMgr
     ServiceMgr.Dump = False
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
-    JfexMonitorCfg = JfexMonitoringConfig(ConfigFlags)
+    JfexMonitorCfg = JfexMonitoringConfig(flags)
     cfg.merge(JfexMonitorCfg)
     cfg.run()

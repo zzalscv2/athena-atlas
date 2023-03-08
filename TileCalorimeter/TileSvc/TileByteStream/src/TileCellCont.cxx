@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloIdentifier/CaloCell_ID.h"
@@ -79,6 +79,7 @@ StatusCode TileCellCont::initialize() {
 
   if ( !m_src ){ // if nothing set, use 2017
        std::cout << "TileCellCont::initialize ERROR : TileHid2RESrc has to be initialized before this" << std::endl;
+       return StatusCode::FAILURE;
   }
 
   // Get pointer to TileCablingService

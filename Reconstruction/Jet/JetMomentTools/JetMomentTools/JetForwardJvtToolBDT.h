@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetForwardJvtToolBDT.h
@@ -66,8 +66,8 @@ class JetForwardJvtToolBDT
 
   // MVfJVT
   StatusCode  getInputs    ( const xAOD::Jet *jet ) const;
-  float       getMVfJVT    ( const xAOD::Jet *jet, int pvind , std::vector<TVector2> pileupMomenta ) const;
-  float       getFJVT      ( const xAOD::Jet *jet, int pvind , std::vector<TVector2> pileupMomenta ) const;
+  float       getMVfJVT    ( const xAOD::Jet *jet, int pvind , const std::vector<TVector2>& pileupMomenta ) const;
+  float       getFJVT      ( const xAOD::Jet *jet, int pvind , const std::vector<TVector2>& pileupMomenta ) const;
   bool        forwardJet   ( const xAOD::Jet *jet ) const;
   bool        centralJet   ( const xAOD::Jet *jet ) const;
   float       getDrpt      ( const xAOD::Jet *jet ) const;

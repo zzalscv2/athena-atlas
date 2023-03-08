@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigMuonEFHypoAlg.h"
@@ -94,8 +94,8 @@ StatusCode TrigMuonEFHypoAlg::execute( const EventContext& context ) const
 	//and if so whether it matches the SA track from the previous decision's muon
 	//This won't work for inside-out muons
 	if(muon->author()!=6){
-	  auto trk1 = muon->trackParticle(xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle);
-	  auto trk2 = muonPrev->trackParticle(xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle);
+	  auto trk1 = muon->trackParticle(xAOD::Muon::TrackParticleType::MuonSpectrometerTrackParticle);
+	  auto trk2 = muonPrev->trackParticle(xAOD::Muon::TrackParticleType::MuonSpectrometerTrackParticle);
 	  if(trk1 && trk2){
 	    if(trk1->p4()==trk2->p4()){
 	      matchedToDec = true;

@@ -85,9 +85,7 @@ log.debug('Dumping of ConfigFlags now.')
 ConfigFlags.dump()
 
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-from AthenaPoolCnvSvc.PoolWriteConfig import PoolWriteCfg
 acc.merge(PoolReadCfg(ConfigFlags))
-acc.merge(PoolWriteCfg(ConfigFlags))
 
 # add BeamEffectsAlg
 from BeamEffects.BeamEffectsAlgConfig import BeamEffectsAlgCfg
@@ -146,6 +144,3 @@ acc.printConfig(withDetails = True, summariseProps = True)
 
 acc.run(maxEvents=args.maxEvents)
 
-f=open("GeantinoStepRecordingITk.pkl","wb")
-acc.store(f)
-f.close()

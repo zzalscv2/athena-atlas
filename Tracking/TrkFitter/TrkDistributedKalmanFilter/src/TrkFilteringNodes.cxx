@@ -206,14 +206,16 @@ namespace Trk
     //printf("EC hit error=%f\n",m_V);
   }
 
-  TrkEndCapClusterNode::TrkEndCapClusterNode(TrkPlanarSurface* pS, double chi2Cut, const PrepRawData* pPRD, double Rc) {
+  TrkEndCapClusterNode::TrkEndCapClusterNode(TrkPlanarSurface* pS,
+                                             double chi2Cut,
+                                             const PrepRawData* pPRD, double Rc)
+      : m_Rc(Rc) {
     m_pSurface = pS;
     m_chi2Cut = chi2Cut;
     m_m = pPRD->localPosition()[0];
     m_V = pPRD->localCovariance()(0, 0);
     m_pPRD = pPRD;
 
-    m_Rc = Rc;
     m_nodeType = 2;
     m_ndof = 1;
     double C[2][2];
@@ -224,14 +226,16 @@ namespace Trk
     //printf("EC hit error=%f\n",m_V);
   }
 
-  TrkEndCapClusterNode::TrkEndCapClusterNode(TrkPlanarSurface* pS, double chi2Cut, double Rc,
-                                             double pos, double cov) {
+  TrkEndCapClusterNode::TrkEndCapClusterNode(TrkPlanarSurface* pS,
+                                             double chi2Cut, double Rc,
+                                             double pos, double cov)
+      : m_Rc(Rc) {
     m_pSurface = pS;
     m_chi2Cut = chi2Cut;
     m_m = pos;
     m_V = cov;
     m_pPRD = nullptr;
-    m_Rc = Rc;
+
     m_nodeType = 2;
     m_ndof = 1;
   }
@@ -403,16 +407,14 @@ namespace Trk
     // printf("new errors: %f %f %f\n",sqrt(m_V[0][0]),m_V[0][1],sqrt(m_V[1][1]));
   }
 
-  TrkTrtNode::TrkTrtNode(TrkPlanarSurface* pS, double chi2Cut, double lmin, double lmax,
-                         const PrepRawData* pPRD) {
+  TrkTrtNode::TrkTrtNode(TrkPlanarSurface* pS, double chi2Cut, double lmin,
+                         double lmax, const PrepRawData* pPRD)
+      : m_minBound(lmin), m_maxBound(lmax), m_lrSign(0), m_freezeLR(false) {
     m_pSurface = pS;
     m_chi2Cut = chi2Cut;
     m_m = pPRD->localPosition()[0];
     m_V = pPRD->localCovariance()(0, 0);
-    m_minBound = lmin;
-    m_maxBound = lmax;
-    m_lrSign = 0;
-    m_freezeLR = false;
+
     m_pPRD = pPRD;
     m_nodeType = 3;
     m_ndof = 1;

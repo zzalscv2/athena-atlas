@@ -193,15 +193,15 @@ bool Config::initialize(int argc, char* argv[])
   ANA_CHECK( tool.setProperty("UseRandomRunNumber", true) );
 
   run_number = 0;
-  std::vector<char> eta_flags(eta_edges.size()-1, 0);
-  std::vector<char> pt_flags(pt_edges.size()-1, 0);
+  std::vector<int8_t> eta_flags(eta_edges.size()-1, 0);
+  std::vector<int8_t> pt_flags(pt_edges.size()-1, 0);
 
   for (int i=1; i<argc; ++i) {
     std::string key{argv[i]};
     const std::size_t pos{key.find('=')};
     if (pos == std::string::npos) help();
     std::string val(key.substr(pos + 1));
-    key = key.substr(0, pos);
+    key.resize(pos);
     if (!key.length() || !val.length()) help();
     if (key == "CorrectionFileNameList") {
       std::vector<std::string> files{val};
@@ -335,17 +335,17 @@ bool scanPhaseSpace(Config& cfg, map_t& affected_bins)
     if (multi_np) {
       std::string w("several uncorrelated NPs seem to affect the bin at "
         + dom.str() + ".");
-      Warning(MSGSOURCE, w.c_str());
+      Warning(MSGSOURCE, "%s", w.c_str());
     } else if (nonzero_uncorr.count() > 1) {
       std::string w{"the binning used for the scan is unadapted at " + 
         dom.str() + " (too coarse?)."};
-      Warning(MSGSOURCE, w.c_str());
+      Warning(MSGSOURCE, "%s", w.c_str());
     }
     if ((zero_uncorr & nonzero_uncorr).any() ||  
         (zero_corr & nonzero_corr).any()) {
       std::string w("the binning used for the scan is unadapted at " + 
         dom.str() + " (wrong boundaries?).");
-      Warning(MSGSOURCE, w.c_str());
+      Warning(MSGSOURCE, "%s", w.c_str());
     }
     if ((nonzero_uncorr!=expected_uncorr) && nonzero_uncorr.any()) {
       std::string snz, se;
@@ -393,9 +393,9 @@ bool displayFindings(const Config& cfg, const map_t& affected_bins)
     if (holes) txt += "subdomain of ";
     txt += bounds.str(abs_eta) + '.';
     if (!holes) {
-      Info(MSGSOURCE, txt.c_str());
+      Info(MSGSOURCE, "%s", txt.c_str());
     } else {
-      Warning(MSGSOURCE, txt.c_str());
+      Warning(MSGSOURCE, "%s", txt.c_str());
     }
   }
   return true;
@@ -429,7 +429,7 @@ bool displayFindings_analysis(const Config& cfg, const map_t& affected_bins)
     std::string s("   ++ " + std::get<std::string>(x));
     const int i{std::get<int>(x)};
     if (i >= 0) s += " to " + std::to_string(i);
-    Info(MSGSOURCE, s.c_str());
+    Info(MSGSOURCE, "%s", s.c_str());
   }
   return true;
 }
@@ -437,7 +437,9 @@ bool displayFindings_analysis(const Config& cfg, const map_t& affected_bins)
 
 bool find_boundaries(const Config& cfg,
                      const map_t::mapped_type& affected_bins,
-                     Domain& bounds, bool& abs_eta, bool& holes)
+                     Domain& bounds,
+                     bool& abs_eta,
+                     bool& holes)
 {
   if (affected_bins.empty()) return false;
   constexpr float inf{std::numeric_limits<float>::max()};
@@ -515,11 +517,12 @@ bool parse_csv_token(const float x, std::vector<float>& bins)
 }
 
 
-bool parse_csv_token(std::string s, std::vector<char>& flags, 
+bool parse_csv_token(std::string s,
+                     std::vector<int8_t>& flags, 
                      const std::vector<float>& edges)
 {
   const bool accept_aliases{&edges == &eta_edges};
-  if (flags.size() != edges.size()-1) return false;
+  if (flags.size() != edges.size() - 1) return false;
   int alias{0};
   if (s == "nocrack") alias = 1;
   else if (s == "barrel") alias = 2;
@@ -560,7 +563,7 @@ bool parse_csv_list(std::string val, Args&... args)
 {
   std::replace(val.begin(), val.end(), ',', ' ');
   std::stringstream ss{val};
-  while(true) {
+  while (true) {
     std::conditional_t<(sizeof...(Args)<2), float, std::string> x;
     ss >> x;
     if (ss.fail()) break;

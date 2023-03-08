@@ -41,10 +41,15 @@ LArRAWtoSuperCell::execute(const EventContext& context) const
 
 	SG::ReadCondHandle<CaloSuperCellDetDescrManager> caloMgrHandle{m_caloMgrKey, context};
         const CaloSuperCellDetDescrManager* sem_mgr = *caloMgrHandle;;
+
+        SG::WriteHandle<CaloCellContainer> scellContainerHandle( m_sCellContainerOutKey, context);
+        auto new_scell_cont = std::make_unique<CaloCellContainer> ();
 	
         auto cellsHandle = SG::makeHandle( m_sCellContainerInKey, context );
         if ( not cellsHandle.isValid() ) {
           ATH_MSG_ERROR("Did not get CaloCellContainer input");
+	  // to avoid crash
+	  ATH_CHECK( scellContainerHandle.record( std::move(new_scell_cont) ) );
           return StatusCode::FAILURE;
         }
 	const LArOnOffIdMapping* cabling;
@@ -59,9 +64,13 @@ LArRAWtoSuperCell::execute(const EventContext& context) const
         
         const LArRawSCContainer* scells_from_sg = cellsHandle.cptr();
         ATH_MSG_DEBUG("Got a CaloCellContainer input with size : "<<scells_from_sg->size());
-
-        SG::WriteHandle<CaloCellContainer> scellContainerHandle( m_sCellContainerOutKey, context);
-        auto new_scell_cont = std::make_unique<CaloCellContainer> ();
+	if ( scells_from_sg->size() == 0 ) {
+	  ATH_MSG_WARNING("Got an empty input collection, maybe the key is wrong : "
+		<< m_sCellContainerInKey );
+	  // to avoid crash
+	  ATH_CHECK( scellContainerHandle.record( std::move(new_scell_cont) ) );
+	  return StatusCode::SUCCESS;
+	}
 
 	const EventIDBase& EIHandle = context.eventID();
         const unsigned int bcid = EIHandle.bunch_crossing_id();

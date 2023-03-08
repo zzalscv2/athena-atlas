@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -96,7 +96,7 @@ class ITHistSvc;
 class TileAANtuple : public AthAlgorithm {
   public:
     //Constructor
-    TileAANtuple(std::string name, ISvcLocator* pSvcLocator);
+    TileAANtuple(const std::string& name, ISvcLocator* pSvcLocator);
 
     //Destructor
     virtual ~TileAANtuple();
@@ -325,6 +325,7 @@ class TileAANtuple : public AthAlgorithm {
       float m_eTMDB[N_ROS][N_MODULES][N_TMDBCHANS] = {{{0}}}; // TMDB
       unsigned char *m_sampleTMDB = 0;
       unsigned char m_decisionTMDB[N_ROS][N_MODULES][N_TMDBDECISIONS] = {{{0}}}; // TMDB
+      unsigned char m_bcidTMDB[N_ROS][N_MODULES][3] = {{{0}}};
  
       float m_TEMP[4][64][7] = {{{0}}};
       float m_HV[4][64][48] = {{{0}}};

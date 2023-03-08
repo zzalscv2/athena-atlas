@@ -119,7 +119,7 @@ namespace NSWL1 {
     std::vector<unsigned int>* m_trigger_diamond_UVbkgCount ATLAS_THREAD_SAFE;
     std::vector<unsigned int>* m_trigger_diamond_XmuonCount ATLAS_THREAD_SAFE;
     std::vector<unsigned int>* m_trigger_diamond_UVmuonCount ATLAS_THREAD_SAFE;
-    std::vector<double>* m_trigger_diamond_age ATLAS_THREAD_SAFE;
+    std::vector<int>* m_trigger_diamond_age ATLAS_THREAD_SAFE;
     std::vector<double>* m_trigger_diamond_mx ATLAS_THREAD_SAFE;
     std::vector<double>* m_trigger_diamond_my ATLAS_THREAD_SAFE;
     std::vector<double>* m_trigger_diamond_Uavg ATLAS_THREAD_SAFE;

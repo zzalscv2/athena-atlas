@@ -15,6 +15,6 @@ atlas_add_library( MuonHoughPatternEvent
                    src/*.cxx
                    PUBLIC_HEADERS MuonHoughPatternEvent
                    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                   LINK_LIBRARIES AthContainers GeoPrimitives
+                   LINK_LIBRARIES AthContainers GeoPrimitives AthenaBaseComps
                    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} CxxUtils TrkDetElementBase TrkSurfaces TrkPrepRawData GeoPrimitives )
 

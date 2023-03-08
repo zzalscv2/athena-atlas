@@ -1,70 +1,65 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from TrigOnlineMonitor.TrigOnlineMonitorConf import TrigOpMonitor as _TrigOpMonitor
-from AthenaCommon.AlgSequence import AthSequencer
-
-class TrigOpMonitor(_TrigOpMonitor):
-   __slots__ = ()
-
-   def __init__(self, name='TrigOpMonitor', **kwargs):
-      super(TrigOpMonitor, self).__init__(name, **kwargs)
-
-      # Only monitor lumi and field if available
-      condSeq = AthSequencer('AthCondSeq')
-      for a in condSeq:
-         if a.getType()=='LuminosityCondAlg':
-            self.LuminosityCondDataKey = a.LuminosityOutputKey
-         elif a.getType()=='MagField::AtlasFieldMapCondAlg':
-            self.AtlasFieldMapCondDataKey = a.AtlasFieldMapCondObj
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory import CompFactory
 
 
-def TrigALFAROBMonitor():
-   from AthenaConfiguration.ComponentFactory import CompFactory
+def trigOpMonitorCfg(flags):
+   cfg = ComponentAccumulator()
+   opmon = CompFactory.TrigOpMonitor(
+      LuminosityCondDataKey = 'LuminosityCondData',
+      AtlasFieldMapCondDataKey = 'fieldMapCondObj' )
+
+   cfg.addEventAlgo( opmon )
+   return cfg
+
+
+def TrigALFAROBMonitor(flags):
    from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
-   monToolTrackingElast = GenericMonitoringTool('MonTool_trackingElast', HistPath='ALFAROBMonitor'+'/MTtracking/elast/current')
-   monToolTrackingAny = GenericMonitoringTool('MonTool_trackingAny', HistPath='ALFAROBMonitor'+'/MTtracking/any/current')
-   monToolTrackingElast_1LB = GenericMonitoringTool('MonTool_trackingElast_1LB', HistPath='ALFAROBMonitor'+'/MTtracking/elast/1LB')
-   monToolTrackingAny_1LB = GenericMonitoringTool('MonTool_trackingAny_1LB', HistPath='ALFAROBMonitor'+'/MTtracking/any/1LB')
-   monToolTrackingElast_10LB = GenericMonitoringTool('MonTool_trackingElast_10LB', HistPath='ALFAROBMonitor'+'/MTtracking/elast/10LB')
-   monToolTrackingAny_10LB = GenericMonitoringTool('MonTool_trackingAny_10LB', HistPath='ALFAROBMonitor'+'/MTtracking/any/10LB')
-   monToolTrackingElast_60LB = GenericMonitoringTool('MonTool_trackingElast_60LB', HistPath='ALFAROBMonitor'+'/MTtracking/elast/60LB')
-   monToolTrackingAny_60LB = GenericMonitoringTool('MonTool_trackingAny_60LB', HistPath='ALFAROBMonitor'+'/MTtracking/any/60LB')
-   monToolTrackingElast_SB = GenericMonitoringTool('MonTool_trackingElast_SB', HistPath='ALFAROBMonitor'+'/MTtracking/elast/SB')
-   monToolTrackingAny_SB = GenericMonitoringTool('MonTool_trackingAny_SB', HistPath='ALFAROBMonitor'+'/MTtracking/any/SB')
+   monToolTrackingElast = GenericMonitoringTool(flags, 'MonTool_trackingElast', HistPath='ALFAROBMonitor'+'/MTtracking/elast/current')
+   monToolTrackingAny = GenericMonitoringTool(flags, 'MonTool_trackingAny', HistPath='ALFAROBMonitor'+'/MTtracking/any/current')
+   monToolTrackingElast_1LB = GenericMonitoringTool(flags, 'MonTool_trackingElast_1LB', HistPath='ALFAROBMonitor'+'/MTtracking/elast/1LB')
+   monToolTrackingAny_1LB = GenericMonitoringTool(flags, 'MonTool_trackingAny_1LB', HistPath='ALFAROBMonitor'+'/MTtracking/any/1LB')
+   monToolTrackingElast_10LB = GenericMonitoringTool(flags, 'MonTool_trackingElast_10LB', HistPath='ALFAROBMonitor'+'/MTtracking/elast/10LB')
+   monToolTrackingAny_10LB = GenericMonitoringTool(flags, 'MonTool_trackingAny_10LB', HistPath='ALFAROBMonitor'+'/MTtracking/any/10LB')
+   monToolTrackingElast_60LB = GenericMonitoringTool(flags, 'MonTool_trackingElast_60LB', HistPath='ALFAROBMonitor'+'/MTtracking/elast/60LB')
+   monToolTrackingAny_60LB = GenericMonitoringTool(flags, 'MonTool_trackingAny_60LB', HistPath='ALFAROBMonitor'+'/MTtracking/any/60LB')
+   monToolTrackingElast_SB = GenericMonitoringTool(flags, 'MonTool_trackingElast_SB', HistPath='ALFAROBMonitor'+'/MTtracking/elast/SB')
+   monToolTrackingAny_SB = GenericMonitoringTool(flags, 'MonTool_trackingAny_SB', HistPath='ALFAROBMonitor'+'/MTtracking/any/SB')
 
-   monToolCommon = GenericMonitoringTool('MonTool_common', HistPath='ALFAROBMonitor'+'/MTcommon')
+   monToolCommon = GenericMonitoringTool(flags, 'MonTool_common', HistPath='ALFAROBMonitor'+'/MTcommon')
 
-   monToolOD_B7L1U = GenericMonitoringTool('MonTool_OD_B7L1U', HistPath='ALFAROBMonitor'+'/MTOD/B7L1U')
-   monToolOD_B7L1L = GenericMonitoringTool('MonTool_OD_B7L1L', HistPath='ALFAROBMonitor'+'/MTOD/B7L1L')
-   monToolOD_A7L1U = GenericMonitoringTool('MonTool_OD_A7L1U', HistPath='ALFAROBMonitor'+'/MTOD/A7L1U')
-   monToolOD_A7L1L = GenericMonitoringTool('MonTool_OD_A7L1L', HistPath='ALFAROBMonitor'+'/MTOD/A7L1L')
-   monToolOD_A7R1U = GenericMonitoringTool('MonTool_OD_A7R1U', HistPath='ALFAROBMonitor'+'/MTOD/A7R1U')
-   monToolOD_A7R1L = GenericMonitoringTool('MonTool_OD_A7R1L', HistPath='ALFAROBMonitor'+'/MTOD/A7R1L')
-   monToolOD_B7R1U = GenericMonitoringTool('MonTool_OD_B7R1U', HistPath='ALFAROBMonitor'+'/MTOD/B7R1U')
-   monToolOD_B7R1L = GenericMonitoringTool('MonTool_OD_B7R1L', HistPath='ALFAROBMonitor'+'/MTOD/B7R1L')
+   monToolOD_B7L1U = GenericMonitoringTool(flags, 'MonTool_OD_B7L1U', HistPath='ALFAROBMonitor'+'/MTOD/B7L1U')
+   monToolOD_B7L1L = GenericMonitoringTool(flags, 'MonTool_OD_B7L1L', HistPath='ALFAROBMonitor'+'/MTOD/B7L1L')
+   monToolOD_A7L1U = GenericMonitoringTool(flags, 'MonTool_OD_A7L1U', HistPath='ALFAROBMonitor'+'/MTOD/A7L1U')
+   monToolOD_A7L1L = GenericMonitoringTool(flags, 'MonTool_OD_A7L1L', HistPath='ALFAROBMonitor'+'/MTOD/A7L1L')
+   monToolOD_A7R1U = GenericMonitoringTool(flags, 'MonTool_OD_A7R1U', HistPath='ALFAROBMonitor'+'/MTOD/A7R1U')
+   monToolOD_A7R1L = GenericMonitoringTool(flags, 'MonTool_OD_A7R1L', HistPath='ALFAROBMonitor'+'/MTOD/A7R1L')
+   monToolOD_B7R1U = GenericMonitoringTool(flags, 'MonTool_OD_B7R1U', HistPath='ALFAROBMonitor'+'/MTOD/B7R1U')
+   monToolOD_B7R1L = GenericMonitoringTool(flags, 'MonTool_OD_B7R1L', HistPath='ALFAROBMonitor'+'/MTOD/B7R1L')
 
-   monToolDetectors = GenericMonitoringTool('MonTool_detectors', HistPath='ALFAROBMonitor'+'/MTdetectors')
+   monToolDetectors = GenericMonitoringTool(flags, 'MonTool_detectors', HistPath='ALFAROBMonitor'+'/MTdetectors')
 
-   monToolBackgroundElast15 = GenericMonitoringTool('MonTool_backgroundElast15', HistPath='ALFAROBMonitor'+'/MTbackground/elast15/current')
-   monToolBackgroundElast18 = GenericMonitoringTool('MonTool_backgroundElast18', HistPath='ALFAROBMonitor'+'/MTbackground/elast18/current')
-   monToolBackgroundSyst17 = GenericMonitoringTool('MonTool_backgroundSyst17', HistPath='ALFAROBMonitor'+'/MTbackground/syst17/current')
-   monToolBackgroundSyst18 = GenericMonitoringTool('MonTool_backgroundSyst18', HistPath='ALFAROBMonitor'+'/MTbackground/syst18/current')
+   monToolBackgroundElast15 = GenericMonitoringTool(flags, 'MonTool_backgroundElast15', HistPath='ALFAROBMonitor'+'/MTbackground/elast15/current')
+   monToolBackgroundElast18 = GenericMonitoringTool(flags, 'MonTool_backgroundElast18', HistPath='ALFAROBMonitor'+'/MTbackground/elast18/current')
+   monToolBackgroundSyst17 = GenericMonitoringTool(flags, 'MonTool_backgroundSyst17', HistPath='ALFAROBMonitor'+'/MTbackground/syst17/current')
+   monToolBackgroundSyst18 = GenericMonitoringTool(flags, 'MonTool_backgroundSyst18', HistPath='ALFAROBMonitor'+'/MTbackground/syst18/current')
 
-   monToolBackgroundElast15_1LB = GenericMonitoringTool('MonTool_backgroundElast15_1LB', HistPath='ALFAROBMonitor'+'/MTbackground/elast15/1LB')
-   monToolBackgroundElast18_1LB = GenericMonitoringTool('MonTool_backgroundElast18_1LB', HistPath='ALFAROBMonitor'+'/MTbackground/elast18/1LB')
-   monToolBackgroundSyst17_1LB = GenericMonitoringTool('MonTool_backgroundSyst17_1LB', HistPath='ALFAROBMonitor'+'/MTbackground/syst17/1LB')
-   monToolBackgroundSyst18_1LB = GenericMonitoringTool('MonTool_backgroundSyst18_1LB', HistPath='ALFAROBMonitor'+'/MTbackground/syst18/1LB')
+   monToolBackgroundElast15_1LB = GenericMonitoringTool(flags, 'MonTool_backgroundElast15_1LB', HistPath='ALFAROBMonitor'+'/MTbackground/elast15/1LB')
+   monToolBackgroundElast18_1LB = GenericMonitoringTool(flags, 'MonTool_backgroundElast18_1LB', HistPath='ALFAROBMonitor'+'/MTbackground/elast18/1LB')
+   monToolBackgroundSyst17_1LB = GenericMonitoringTool(flags, 'MonTool_backgroundSyst17_1LB', HistPath='ALFAROBMonitor'+'/MTbackground/syst17/1LB')
+   monToolBackgroundSyst18_1LB = GenericMonitoringTool(flags, 'MonTool_backgroundSyst18_1LB', HistPath='ALFAROBMonitor'+'/MTbackground/syst18/1LB')
 
-   monToolBackgroundElast15_10LB = GenericMonitoringTool('MonTool_backgroundElast15_10LB', HistPath='ALFAROBMonitor'+'/MTbackground/elast15/10LB')
-   monToolBackgroundElast18_10LB = GenericMonitoringTool('MonTool_backgroundElast18_10LB', HistPath='ALFAROBMonitor'+'/MTbackground/elast18/10LB')
-   monToolBackgroundSyst17_10LB = GenericMonitoringTool('MonTool_backgroundSyst17_10LB', HistPath='ALFAROBMonitor'+'/MTbackground/syst17/10LB')
-   monToolBackgroundSyst18_10LB = GenericMonitoringTool('MonTool_backgroundSyst18_10LB', HistPath='ALFAROBMonitor'+'/MTbackground/syst18/10LB')
+   monToolBackgroundElast15_10LB = GenericMonitoringTool(flags, 'MonTool_backgroundElast15_10LB', HistPath='ALFAROBMonitor'+'/MTbackground/elast15/10LB')
+   monToolBackgroundElast18_10LB = GenericMonitoringTool(flags, 'MonTool_backgroundElast18_10LB', HistPath='ALFAROBMonitor'+'/MTbackground/elast18/10LB')
+   monToolBackgroundSyst17_10LB = GenericMonitoringTool(flags, 'MonTool_backgroundSyst17_10LB', HistPath='ALFAROBMonitor'+'/MTbackground/syst17/10LB')
+   monToolBackgroundSyst18_10LB = GenericMonitoringTool(flags, 'MonTool_backgroundSyst18_10LB', HistPath='ALFAROBMonitor'+'/MTbackground/syst18/10LB')
 
-   monToolBackgroundElast15_60LB = GenericMonitoringTool('MonTool_backgroundElast15_60LB', HistPath='ALFAROBMonitor'+'/MTbackground/elast15/60LB')
-   monToolBackgroundElast18_60LB = GenericMonitoringTool('MonTool_backgroundElast18_60LB', HistPath='ALFAROBMonitor'+'/MTbackground/elast18/60LB')
-   monToolBackgroundSyst17_60LB = GenericMonitoringTool('MonTool_backgroundSyst17_60LB', HistPath='ALFAROBMonitor'+'/MTbackground/syst17/60LB')
-   monToolBackgroundSyst18_60LB = GenericMonitoringTool('MonTool_backgroundSyst18_60LB', HistPath='ALFAROBMonitor'+'/MTbackground/syst18/60LB')
+   monToolBackgroundElast15_60LB = GenericMonitoringTool(flags, 'MonTool_backgroundElast15_60LB', HistPath='ALFAROBMonitor'+'/MTbackground/elast15/60LB')
+   monToolBackgroundElast18_60LB = GenericMonitoringTool(flags, 'MonTool_backgroundElast18_60LB', HistPath='ALFAROBMonitor'+'/MTbackground/elast18/60LB')
+   monToolBackgroundSyst17_60LB = GenericMonitoringTool(flags, 'MonTool_backgroundSyst17_60LB', HistPath='ALFAROBMonitor'+'/MTbackground/syst17/60LB')
+   monToolBackgroundSyst18_60LB = GenericMonitoringTool(flags, 'MonTool_backgroundSyst18_60LB', HistPath='ALFAROBMonitor'+'/MTbackground/syst18/60LB')
 
    # common
    monToolCommon.defineHistogram("com_LB,goodDataAssessmentLB15", type='TH2F', path='EXPERT', title='goodDataAssessmentLB15', xbins=1000, xmin=-0.5, xmax=999.5, ybins=2, ymin=0.5, ymax=2.5 )

@@ -202,8 +202,11 @@ JetChainParts = {
        'preselcHT500',
        'preseljHT600',
        'preselcHT600',
+       'preselcHT650',
+       'preselcHT850',
        #b-jet preselections
        'presel2c20XX2c20b85',
+       'presel2c20XX2c20bg85',
        'presel2c20XX2c20b90',
        'preselj20b95',
        'preselj2b77',
@@ -260,6 +263,9 @@ JetChainParts = {
                       'HT300',
                       'HT500',
                       'HT50',
+                      'HT500XX0eta240',
+                      'HT650XX0eta240',
+                      'HT850XX0eta240',
                       'HT1000XX0eta240',
                       'HT1000XX020jvt',
                       'HT1000XX0eta240XX020jvt',
@@ -292,7 +298,7 @@ JetChainParts = {
      # jets by ordering by pt, and selecting those with indices in [X,Y]
      'PTRANGE0r1',
      'PTRANGE2r3'],
-    'bdips': ['95bdips','90bdips','85bdips','80bdips','77bdips'],
+    'bsel': ['95bdips','90bdips','85bdips','80bdips','77bdips','95bgnone','90bgnone','85bgnone','80bgnone','77bgnone' ],
     'smc'           : # "Single mass condition" -- rename?
       ['30smcINF', '35smcINF', '40smcINF', '50smcINF', '60smcINF', 'nosmc'],
     # Setup for alternative data stream readout
@@ -347,7 +353,7 @@ JetChainParts_Default = {
     'momCuts'       : '',
     'timing'       : '',
     'prefilters'    : [],
-    'bdips'         : '',
+    'bsel'         : '',
     'hypoScenario'  : 'simple',
     'exotHypo'      : [],
     'smc'           : 'nosmc',
@@ -446,7 +452,7 @@ AllowedTopos_Bphysics = [
 
     ##### TO BE REMOVED ONCE IMPLEMENTED IN SIGNATURE CODE
     # topoVariants
-    'BsmumuPhi','BpmumuKp','BcmumuPi','BdmumuKst','LbPqKm','BcmumuDsloose','BcmumuDploose','BcmumuD0Xloose','BcmumuDstarloose',
+    'Bidperf','BsmumuPhi','BpmumuKp','BcmumuPi','BdmumuKst','LbPqKm','BcmumuDsloose','BcmumuDploose','BcmumuD0Xloose','BcmumuDstarloose',
     'BpmuD0X','BdmuDpX','BdmuDstarX','BsmuDsX','LbmuLcX',
     # topoExtras
     'Lxy0','noos','nocut','lowpt'
@@ -454,7 +460,7 @@ AllowedTopos_Bphysics = [
 
 ]
 AllowedTopos_Bphysics_topoVariant = [
-    'BsmumuPhi','BpmumuKp','BcmumuPi','BdmumuKst','LbPqKm','BcmumuDsloose','BcmumuDploose','BcmumuD0Xloose','BcmumuDstarloose',
+    'Bidperf','BsmumuPhi','BpmumuKp','BcmumuPi','BdmumuKst','LbPqKm','BcmumuDsloose','BcmumuDploose','BcmumuD0Xloose','BcmumuDstarloose',
     'BpmuD0X','BdmuDpX','BdmuDstarX','BsmuDsX','LbmuLcX'
 ]
 AllowedTopos_Bphysics_topoExtra = ['Lxy0','noos','nocut','lowpt']
@@ -1151,7 +1157,7 @@ UnconventionalTrackingChainParts_Default = {
 #==========================================================
 AllowedTopos_comb = [
     'idZmumu','idJpsimumu',
-    'dRAA12', 'dRAB15', '03dRAB','03dRAB30','dRAB03','dRAB04','02dRAB','02dRAC','02dRBC','50invmAB','60invmAB','afpdijet','18dphiAB','18dphiAC','80mTAC','80mTAD',
+    'dRAA12', 'dRAB15', '03dRAB','02dRAB10','03dRAB10','03dRAB30','dRAB03','dRAB04','02dRAB','02dRAC','02dRBC','50invmAB','60invmAB','afpdijet','18dphiAB','18dphiAC','80mTAC','80mTAD',
     '90invmAB',# TEST
     '1invmAB5','50invmAB130', # Jpsiee, Zee/Zeg
     '25dphiAA','invmAA80', # Low-mass diphoton

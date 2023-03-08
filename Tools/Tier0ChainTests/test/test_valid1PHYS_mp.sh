@@ -1,9 +1,7 @@
 #!/bin/sh
 
-# art-include: master/Athena
-# art-include: 22.0/Athena
-# art-include: 22.0-mc20/Athena
-# art-description: DAOD building PHYS valid1 MP
+# art-include: 21.2/AthDerivation
+# art-description: DAOD building PHYS valid1 MP (DISABLED)
 # art-type: grid
 # art-output: *.pool.root
 # art-output: checkFile.txt

@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file TrigTLAMonitorAlgorithm.py
@@ -401,31 +401,32 @@ if __name__=='__main__':
     # log.setLevel(INFO)
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
 
     # Set execute flags (number of events to process)
-    ConfigFlags.Exec.MaxEvents = args.nevents
+    flags.Exec.MaxEvents = args.nevents
 
     # Input files (AOD or other files, e.g. costumized RAW file, to be defined 
-    ConfigFlags.Input.Files = [args.input]
-    ConfigFlags.Input.isMC = not args.data
+    flags.Input.Files = [args.input]
+    flags.Input.isMC = not args.data
 
     # Output file (root)
-    ConfigFlags.Output.HISTFileName = 'TrigTLAMonitorOutput.root'
+    flags.Output.HISTFileName = 'TrigTLAMonitorOutput.root'
 
-    # ConfigFlags.Trigger.triggerMenuSetup="Physics_pp_v7_primaries"
-    ConfigFlags.Trigger.triggerMenuSetup = 'Physics_pp_run3_v1'
-    ConfigFlags.Trigger.triggerConfig = 'DB'                   
+    # flags.Trigger.triggerMenuSetup="Physics_pp_v7_primaries"
+    flags.Trigger.triggerMenuSetup = 'Physics_pp_run3_v1'
+    flags.Trigger.triggerConfig = 'DB'
     
-    ConfigFlags.lock()
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
-    trigTLAMonitorAcc = TrigTLAMonConfig(ConfigFlags)
+    trigTLAMonitorAcc = TrigTLAMonConfig(flags)
     cfg.merge(trigTLAMonitorAcc)
 
     # If you want to turn on more detailed messages ...

@@ -89,7 +89,7 @@ bool ISF::GenParticleSimWhiteList::pass(HepMC::ConstGenParticlePtr particle) con
   // Test all parent particles
   const int id_of_particle = particle->id();
   if (so_far_so_good && particle->production_vertex() && m_qs){
-    for (auto pit: particle->production_vertex()->particles_in()){
+    for (auto& pit: particle->production_vertex()->particles_in()){
       // Loop breaker
       if ( pit->id() == id_of_particle ) continue;
       // Check this particle
@@ -148,9 +148,9 @@ bool ISF::GenParticleSimWhiteList::pass(HepMC::ConstGenParticlePtr particle , st
     passFilter = passFilter && ( (m_minDecayRadiusQS < particle->end_vertex()->position().perp()) || (m_minDecayRadiusQS < particle->production_vertex()->position().perp()) );
     if (passFilter) {
       // Break loops
-      if ( std::find( used_vertices.begin() , used_vertices.end() , HepMC::barcode(particle->end_vertex()) )==used_vertices.end() ){
-        used_vertices.push_back( HepMC::barcode(particle->end_vertex()) );
-        for (auto pit: particle->end_vertex()->particles_out()){
+      if ( std::find( used_vertices.begin() , used_vertices.end() , particle->end_vertex()->id() )==used_vertices.end() ){
+        used_vertices.push_back( particle->end_vertex()->id() );
+        for (auto& pit: particle->end_vertex()->particles_out()){
           passFilter = passFilter && pass( pit , used_vertices );
           if (!passFilter) {
             ATH_MSG_VERBOSE( "Daughter particle " << pit << " does not pass." );

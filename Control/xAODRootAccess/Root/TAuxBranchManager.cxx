@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 // ROOT include(s):
 #include <TBranch.h>
@@ -109,7 +109,12 @@ namespace xAOD {
       return m_branch->GetEntry( entry, getall );
    }
 
-   void* TAuxBranchManager::object() const {
+   const void* TAuxBranchManager::object() const {
+
+      return std::as_const(*m_holder).get();
+   }
+
+   void* TAuxBranchManager::object() {
 
       return m_holder->get();
    }

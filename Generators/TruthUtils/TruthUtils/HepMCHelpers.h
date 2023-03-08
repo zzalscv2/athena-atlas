@@ -9,11 +9,11 @@
 /// ATLAS-specific HepMC functions not suitable for MCUtils.
 
 #include "TruthUtils/PIDHelpers.h"
-#include "TruthUtils/TruthParticleHelpers.h"
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/Relatives.h"
+#include "AtlasHepMC/MagicNumbers.h"
 namespace MC
 {
 using namespace MCUtils::PID;
@@ -98,9 +98,9 @@ template <class T> inline bool fromDecay(T p)  {
       auto v=p->production_vertex();
       if (!v) return false;
 #ifdef HEPMC3
-      for ( auto anc: v->particles_in())
+      for ( const auto& anc: v->particles_in())
       if (isDecayed(anc) && (PID::isTau(anc->pdg_id()) || PID::isHadron(anc->pdg_id()))) return true;
-      for ( auto anc: v->particles_in())
+      for ( const auto& anc: v->particles_in())
       if (fromDecay<T>(anc)) return true;
 #else
       for (auto  anc=v->particles_in_const_begin(); anc != v->particles_in_const_end(); ++anc)
@@ -117,7 +117,7 @@ template <class T>  std::vector<T> findChildren(T p)
       auto v=p->end_vertex();
       if (!v) return ret;
 #ifdef HEPMC3
-      for (auto pp: v->particles_out()) ret.push_back(pp);
+      for (const auto& pp: v->particles_out()) ret.push_back(pp);
 #else
       for (auto pp=v->particles_out_const_begin();pp!=v->particles_out_const_end();++pp) ret.push_back(*pp);
 #endif
@@ -138,10 +138,6 @@ namespace MC {
   //@{
 
   /// @brief Determine if the particle is stable at the generator (not det-sim) level,
-  ///
-  /// The receipe for this is barcode < 200k and status = 1. Gen-stable particles decayed by
-  /// G4 are not set to have status = 2 in ATLAS, but simply have more status = 1 children,
-  /// with barcodes > 200k.
   inline bool isGenStable(HepMC::ConstGenParticlePtr p) {
     // Retrieving the barcode is relatively expensive with HepMC3,
     // so test status first.

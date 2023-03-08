@@ -18,6 +18,7 @@
 #include "TMatrixDSymEigen.h"
 #include "TMath.h"
 #include "TH1.h"
+#include "CxxUtils/restrict.h"
 
 //=============================================
 //======= TFCSPCAEnergyParametrization =========
@@ -133,9 +134,7 @@ FCSReturnCode TFCSPCAEnergyParametrization::simulate(TFCSSimulationState& simuls
    TVectorD* Gauss_rms     =m_Gauss_rms[pcabin-1];
    std::vector<TFCS1DFunction*> cumulative=m_cumulative[pcabin-1];
 
-   std::vector<int> layerNr;
-   for(unsigned int i=0;i<m_RelevantLayers.size();i++)
-    layerNr.push_back(m_RelevantLayers[i]);
+   const std::vector<int> &layerNr = m_RelevantLayers;
    
    double* vals_gauss_means=(double*)Gauss_means->GetMatrixArray();
    double* vals_gauss_rms  =Gauss_rms->GetMatrixArray();
@@ -167,8 +166,10 @@ FCSReturnCode TFCSPCAEnergyParametrization::simulate(TFCSSimulationState& simuls
    
    double scalefactor=1.0/sum_fraction;
    if(!do_rescale) scalefactor=1.0;
-  
-   for(unsigned int l=0;l<layerNr.size();l++)
+
+   //Using signed int for better loop optimization and vectorization where possible
+   int layerNrsize = static_cast<int>(layerNr.size());
+   for(int l=0;l<layerNrsize;l++)
    {
     simdata[l]*=scalefactor;
    }
@@ -218,7 +219,7 @@ FCSReturnCode TFCSPCAEnergyParametrization::simulate(TFCSSimulationState& simuls
   return FCSSuccess;
 }
 
-void TFCSPCAEnergyParametrization::P2X(TVectorD* SigmaValues, TVectorD* MeanValues, TMatrixD *EV, int gNVariables, double *p, double *x, int nTest) const
+void TFCSPCAEnergyParametrization::P2X(TVectorD* SigmaValues, TVectorD* MeanValues, TMatrixD *EV, int gNVariables, const double *p, double * ATH_RESTRICT x, int nTest) 
 {
 
   const double* gSigmaValues  = SigmaValues->GetMatrixArray();
@@ -247,7 +248,7 @@ bool TFCSPCAEnergyParametrization::loadInputs(TFile* file, const std::string& fo
   
   int trynext=1;
   TString x;
-  if(folder=="") x="bin";
+  if(folder.empty()) x="bin";
    else x=folder+"/bin";
   while(trynext)
     {
@@ -264,7 +265,7 @@ bool TFCSPCAEnergyParametrization::loadInputs(TFile* file, const std::string& fo
 
   file->cd(x+"1/pca");
   IntArray* RelevantLayers=(IntArray*)gDirectory->Get("RelevantLayers");
-  if(RelevantLayers == NULL)
+  if(RelevantLayers == nullptr)
   {
     ATH_MSG_ERROR("TFCSPCAEnergyParametrization::m_RelevantLayers in first pcabin is null!");
     load_ok=false;
@@ -286,11 +287,11 @@ bool TFCSPCAEnergyParametrization::loadInputs(TFile* file, const std::string& fo
       TVectorD* Gauss_means   =(TVectorD*)gDirectory->Get("Gauss_means");
       TVectorD* Gauss_rms     =(TVectorD*)gDirectory->Get("Gauss_rms");
       
-      if(symCov == NULL)       {ATH_MSG_WARNING("TFCSPCAEnergyParametrization::symCov in pcabin "<<bin<<" is null!"); load_ok=false;}
-      if(MeanValues == NULL)   {ATH_MSG_WARNING("TFCSPCAEnergyParametrization::MeanValues in pcabin "<<bin<<" is null!"); load_ok=false;}
-      if(SigmaValues == NULL)  {ATH_MSG_WARNING("TFCSPCAEnergyParametrization::SigmaValues in pcabin "<<bin<<" is null!"); load_ok=false;}
-      if(Gauss_means == NULL)  {ATH_MSG_WARNING("TFCSPCAEnergyParametrization::Gauss_means in pcabin "<<bin<<" is null!"); load_ok=false;}
-      if(Gauss_rms == NULL)    {ATH_MSG_WARNING("TFCSPCAEnergyParametrization::Gause_rms in pcabin "<<bin<<" is null!"); load_ok=false;}
+      if(symCov == nullptr)       {ATH_MSG_WARNING("TFCSPCAEnergyParametrization::symCov in pcabin "<<bin<<" is null!"); load_ok=false;}
+      if(MeanValues == nullptr)   {ATH_MSG_WARNING("TFCSPCAEnergyParametrization::MeanValues in pcabin "<<bin<<" is null!"); load_ok=false;}
+      if(SigmaValues == nullptr)  {ATH_MSG_WARNING("TFCSPCAEnergyParametrization::SigmaValues in pcabin "<<bin<<" is null!"); load_ok=false;}
+      if(Gauss_means == nullptr)  {ATH_MSG_WARNING("TFCSPCAEnergyParametrization::Gauss_means in pcabin "<<bin<<" is null!"); load_ok=false;}
+      if(Gauss_rms == nullptr)    {ATH_MSG_WARNING("TFCSPCAEnergyParametrization::Gause_rms in pcabin "<<bin<<" is null!"); load_ok=false;}
       
       if(!load_ok) return false;
       
@@ -303,19 +304,16 @@ bool TFCSPCAEnergyParametrization::loadInputs(TFile* file, const std::string& fo
       m_Gauss_rms.push_back(Gauss_rms);
       
       std::vector<std::string> layer;
-      std::vector<int> layerNr;
+      const std::vector<int> &layerNr = m_RelevantLayers;
       
-      for(unsigned int i=0;i<m_RelevantLayers.size();i++)
-        layerNr.push_back(m_RelevantLayers[i]);
-
       for(unsigned int i=0;i<layerNr.size();i++)
         {
-          std::string thislayer=Form("layer%i",layerNr[i]);
-          layer.push_back(thislayer);
+          layer.emplace_back(Form("layer%i",layerNr[i]));
         }
-      layer.push_back("totalE");
+      layer.emplace_back("totalE");
 
       std::vector<TFCS1DFunction*> cumulative;
+      cumulative.reserve(layer.size());
 
       for(unsigned int l=0;l<layer.size();l++)
         {
@@ -331,7 +329,7 @@ bool TFCSPCAEnergyParametrization::loadInputs(TFile* file, const std::string& fo
 
         }
 
-      m_cumulative.push_back(cumulative);
+      m_cumulative.emplace_back(std::move(cumulative));
       
    }
    m_totalE_probability_ratio.resize(m_numberpcabins-1,nullptr);

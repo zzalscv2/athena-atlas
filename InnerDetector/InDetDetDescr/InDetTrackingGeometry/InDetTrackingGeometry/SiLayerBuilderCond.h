@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETTRACKINGGEOMETRY_SILAYERBUILDERCOND_H
@@ -86,11 +86,6 @@ namespace InDet {
     std::unique_ptr<std::vector<Trk::DiscLayer*> >
       createRingLayers(const EventContext& ctx,
                        SG::WriteCondHandle<Trk::TrackingGeometry>& whandle) const;
-
-    virtual void registerSurfacesToLayer(Trk::BinnedArraySpan<Trk::Surface * const >& surfaces, Trk::Layer& layer) const override; //!< layer association
-
-    SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_SCT_ReadKey{this, "SCT_ReadKey", "SCT_DetectorElementCollection", "Key of output SiDetectorElementCollection for SCT"};
-    SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_PixelReadKey{this, "PixelReadKey", "PixelDetectorElementCollection", "Key of output SiDetectorElementCollection for Pixel"};
 
   };
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -86,10 +86,6 @@ prepareStateForAssembly(Cache& cache)
       validWeightFraction < cache.minimumValidFraction) {
     return false;
   }
-  // Check to see assembly has not already been done
-  if (cache.assemblyDone) {
-    return true;
-  }
   // Sort Multi-Component State by weights
   std::sort(cache.multiComponentState.begin(),
             cache.multiComponentState.end(),
@@ -100,7 +96,6 @@ prepareStateForAssembly(Cache& cache)
 
     // ordered in descending order
     // return the 1st element where (element<value)
-
     const double minimumWeight =
       std::max(cache.minimumFractionalWeight * totalWeight,
                std::numeric_limits<double>::min());
@@ -125,45 +120,10 @@ prepareStateForAssembly(Cache& cache)
     return false;
   }
 
-  // Set assembly flag
-  cache.assemblyDone = true;
   return true;
 }
 
 } // end anonymous namespace
-
-bool
-Trk::MultiComponentStateAssembler::addComponent(
-  Cache& cache,
-  ComponentParameters&& componentParameters)
-{
-  if (cache.assemblyDone) {
-    return false;
-  }
-  cache.validWeightSum += componentParameters.second;
-  cache.multiComponentState.emplace_back(std::move(componentParameters.first),
-                                         componentParameters.second);
-  return true;
-}
-
-bool
-Trk::MultiComponentStateAssembler::addMultiState(
-  Cache& cache,
-  Trk::MultiComponentState&& multiComponentState)
-{
-  if (cache.assemblyDone) {
-    return false;
-  }
-  double sumW(0.);
-  for (auto& component : multiComponentState) {
-    sumW += component.second;
-    cache.multiComponentState.emplace_back(std::move(component.first),
-                                           component.second);
-  }
-  multiComponentState.clear();
-  cache.validWeightSum += sumW;
-  return true;
-}
 
 Trk::MultiComponentState
 Trk::MultiComponentStateAssembler::assembledState(

@@ -1,7 +1,9 @@
 #
 #  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 #
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
+@AccumulatorCache
 def TRT_GeoModelCfg(flags):
     from AtlasGeoModel.GeometryDBConfig import InDetGeometryDBSvcCfg
     db = InDetGeometryDBSvcCfg(flags)
@@ -17,7 +19,7 @@ def TRT_GeoModelCfg(flags):
     # Use default TRT active gas in geo model unless in simulation.
     from AthenaConfiguration.Enums import Project, ProductionStep
     if (flags.Common.Project is not Project.AthSimulation
-            and flags.Common.ProductionStep is not ProductionStep.Simulation):
+            and flags.Common.ProductionStep not in [ProductionStep.Simulation, ProductionStep.FastChain]):
         trtDetectorTool.DoXenonArgonMixture = False
         trtDetectorTool.DoKryptonMixture = False
 

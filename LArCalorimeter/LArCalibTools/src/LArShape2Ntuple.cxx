@@ -26,84 +26,57 @@ LArShape2Ntuple::~LArShape2Ntuple()
 StatusCode LArShape2Ntuple::initialize() {
   m_ntTitle="Pulse Shape";
   m_ntpath=std::string("/NTUPLES/")+m_ntFile+std::string("/")+m_ntName;
-  ATH_CHECK(m_cablingKey.initialize());
   return LArCond2NtupleBase::initialize();
 }
 
 
 StatusCode LArShape2Ntuple::stop() {
-  StatusCode sc;
+  const EventContext& ctx = Gaudi::Hive::currentContext();
   // Ntuple booking: Specific
   NTuple::Item<long> gain, phase, nSamples;
   NTuple::Item<float> timeOffset, phasetime;
   NTuple::Array<float> Shape, ShapeDer;
 
   
-  sc=m_nt->addItem("Gain",gain,-1,2);
-  if (sc!=StatusCode::SUCCESS) {
-    ATH_MSG_ERROR( "addItem 'gain' failed" );
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK(m_nt->addItem("Gain",gain,-1,2));
 
   //Specific:
   if (m_isComplete) {
-    sc=m_nt->addItem("TimeOffset",timeOffset,0,100);
-    if (sc!=StatusCode::SUCCESS) {
-      ATH_MSG_ERROR( "addItem 'TimeOffset' failed" );
-      return StatusCode::FAILURE;
-    }
-    sc=m_nt->addItem("Phase",phase,0,49);
-    if (sc!=StatusCode::SUCCESS) {
-      ATH_MSG_ERROR( "addItem 'phase' failed" );
-      return StatusCode::FAILURE;
-    }
-    sc=m_nt->addItem("PhaseTime",phasetime,0,800);
-    if (sc!=StatusCode::SUCCESS) {
-      ATH_MSG_ERROR( "addItem 'PhaseTime' failed" );
-      return StatusCode::FAILURE;
-    }
+    ATH_CHECK(m_nt->addItem("TimeOffset",timeOffset,0,100));
+    ATH_CHECK(m_nt->addItem("Phase",phase,0,49));
+    ATH_CHECK(m_nt->addItem("PhaseTime",phasetime,0,800));
   }
-  sc=m_nt->addItem("nSamples",nSamples,0,100);
-  if (sc!=StatusCode::SUCCESS) {
-    ATH_MSG_ERROR( "addItem 'nSamples' failed" );
-    return StatusCode::FAILURE;
-  }
-  sc=m_nt->addItem("Shape",nSamples,Shape);
-  if (sc!=StatusCode::SUCCESS) {
-    ATH_MSG_ERROR( "addItem 'Shape' failed" );
-    return StatusCode::FAILURE;
-  }
-  sc=m_nt->addItem("ShapeDer",nSamples,ShapeDer);
-  if (sc!=StatusCode::SUCCESS) {
-    ATH_MSG_ERROR( "addItem 'ShapeDer' failed" );
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK(m_nt->addItem("nSamples",nSamples,0,100));
+  ATH_CHECK(m_nt->addItem("Shape",nSamples,Shape));
+  ATH_CHECK(m_nt->addItem("ShapeDer",nSamples,ShapeDer));
   
   const ILArShape* larShape = NULL ;
   const LArShapeComplete* larShapeComplete = NULL ;
 
   if (m_isComplete) {
-    sc = detStore()->retrieve(larShapeComplete,m_contKey);
-    if (sc.isFailure()) {
-      ATH_MSG_ERROR( "Can't retrieve LArShapeComplete object with key " << m_contKey );
-      return StatusCode::FAILURE;
-    }
+    ATH_CHECK(detStore()->retrieve(larShapeComplete,m_contKey));
     larShape=larShapeComplete; //Cast to base-class
   }
   else { //Use just the abstract interface (works also for LArShapeFlat and LArShapeMC)
-    sc = detStore()->retrieve(larShape,m_contKey);
-    if (sc.isFailure()) {
-      ATH_MSG_ERROR( "Can't retrieve ILArShape object with key " << m_contKey );
-      return StatusCode::FAILURE;
-    }
+    ATH_CHECK(detStore()->retrieve(larShape,m_contKey));
   }
 
-  SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey};
-  const LArOnOffIdMapping* cabling=*cablingHdl;
+  const LArOnOffIdMapping *cabling=0;
+  if(m_isSC) {
+    ATH_MSG_DEBUG( "LArOFC2Ntuple: using SC cabling" );
+    SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingSCKey, ctx};
+    cabling=*cablingHdl;
+  }else{
+    SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey, ctx};
+    cabling=*cablingHdl;
+  }
+
+
   if(!cabling) {
      ATH_MSG_WARNING( "Do not have cabling object LArOnOffIdMapping" );
      return StatusCode::FAILURE;
   }
+
 
   unsigned cellCounter=0;  
   for ( unsigned igain=CaloGain::LARHIGHGAIN; 
@@ -130,12 +103,8 @@ StatusCode LArShape2Ntuple::stop() {
 	  phase = (long)iphase ;
 	}
 
-	sc = ntupleSvc()->writeRecord(m_nt);
+	ATH_CHECK(ntupleSvc()->writeRecord(m_nt));
 	cellCounter++;
-	if (sc!=StatusCode::SUCCESS) {
-	  ATH_MSG_ERROR( "writeRecord failed" );
-	  return StatusCode::FAILURE;
-	}
       }//loop over phases
     }//loop over channels
   }//loop over gains

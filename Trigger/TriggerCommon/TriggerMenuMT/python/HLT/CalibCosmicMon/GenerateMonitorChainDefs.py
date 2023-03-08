@@ -11,7 +11,7 @@ log.info("Importing %s",__name__)
 
 
 
-def generateChainConfigs( chainDict ):
+def generateChainConfigs(flags,  chainDict ):
 
     listOfChainDicts = splitChainDict(chainDict)
     log.debug("Will generate Config for monitor chain: %s", chainDict['chainName'])
@@ -22,7 +22,7 @@ def generateChainConfigs( chainDict ):
     #needed to move to the correct format [{}]->{}
     for subChainDict in listOfChainDicts:
         
-        Monitor = MonitorChainConfiguration(subChainDict).assembleChain() 
+        Monitor = MonitorChainConfiguration(subChainDict).assembleChain(flags) 
 
         listOfChainDefs += [Monitor]
         log.debug('length of chaindefs %s', len(listOfChainDefs) )

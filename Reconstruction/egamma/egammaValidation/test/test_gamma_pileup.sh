@@ -6,9 +6,8 @@
 # art-input: mc16_13TeV.423001.ParticleGun_single_photon_egammaET.recon.RDO.e3566_s3112_r12662
 # art-input-nfiles: 8
 # art-cores: 4
-# art-include: 21.0/Athena
-# art-include: 22.0/Athena
 # art-include: master/Athena
+# art-include: 23.0/Athena
 # art-output: *.hist.root
 # art-output: *.txt
 # art-output: *.png
@@ -31,26 +30,25 @@ case $ArtProcess in
         echo "Unsetting ATHENA_NUM_PROC=${ATHENA_NUM_PROC}"
         unset  ATHENA_NUM_PROC
 
-        AODMerge_tf.py --inputAODFile=art_core_*/Nightly_AOD_gamma.pool.root --outputAOD_MRGFile=Nightly_AOD_gamma.pool.root --preExec "from egammaValidation.egammaOnlyPreExec import setRunEgammaOnlyMergeFlags; setRunEgammaOnlyMergeFlags()" --postInclude "all:egammaValidation/egammaArtCaloCalPostInclude.py" 
+	AODMerge_tf.py --CA --inputAODFile=art_core_*/Nightly_AOD.pool.root --outputAOD_MRGFile=Nightly_AOD.pool.root
 
 	echo  "art-result: $? AODMerge"
 
 	set +e
 
-	checkFile.py Nightly_AOD_gamma.pool.root > checkFile_Nightly_gamma.txt 
+	checkFile.py Nightly_AOD.pool.root > checkFile_Nightly_gamma.txt
 
 	echo  "art-result: $? checks_files"
 
-	get_files -jo egamma_art_checker_joboptions.py
-	athena -c "particleType='gamma'" egamma_art_checker_joboptions.py
+	runegammaMonitoring.py -p 'gamma'
 
 	echo  "art-result: $? athena_job"
 
-	EgammaARTmonitoring_plotsMaker.py /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/egammaValidation/Baseline_Files/rootFiles/Baseline-monitoring_gamma_pileup.hist.root Nightly-monitoring_gamma.hist.root gamma
+	EgammaARTmonitoring_plotsMaker.py /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/egammaValidation/Baseline_Files/rootFiles/Baseline-monitoring_gamma_pileup.hist.root Nightly-monitoring.hist.root gamma
 
 	echo  "art-result: $? final_comparison"
 
-	$ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py -p -x dcube -c /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/egammaValidation/DCube_Config/gamma.xml -r /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/egammaValidation/Nightly_Files/Nightly-monitoring_gamma_pileup.hist.root  Nightly-monitoring_gamma.hist.root
+	$ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py -p -x dcube -c /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/egammaValidation/DCube_Config/gamma.xml -r /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/egammaValidation/Nightly_Files/Nightly-monitoring_gamma_pileup.hist.root  Nightly-monitoring.hist.root
 	echo  "art-result: $? plot"
 
 	;;
@@ -62,14 +60,14 @@ case $ArtProcess in
 	cd "art_core_${ArtProcess}"
 
 	IFS=',' read -r -a file <<< "${ArtInFile}"
-        file=${file[${ArtProcess}]}
+	file=${file[${ArtProcess}]}
 	x="../$file"
-		
+
 	echo "Unsetting ATHENA_NUM_PROC=${ATHENA_NUM_PROC}"
 	unset  ATHENA_NUM_PROC
-	
-	Reco_tf.py --steering doRAWtoALL --inputRDOFile=$x --outputAODFile=Nightly_AOD_gamma.pool.root --maxEvents=2000 --autoConfiguration="everything" --conditionsTag="OFLCOND-MC16-SDR-RUN2-09" --preExec="from egammaValidation.egammaOnlyPreExec import setRunEgammaOnlyRecoFlags; setRunEgammaOnlyRecoFlags()"  --postInclude "RAWtoALL:egammaValidation/egammaArtCaloCalPostInclude.py" "POOLMergeAthenaMPAOD0:egammaValidation/egammaArtCaloCalPostInclude.py" 
-	
+
+	Reco_tf.py --CA --inputRDOFile=$x --outputAODFile=Nightly_AOD.pool.root --maxEvents=2000 --autoConfiguration="everything" --conditionsTag="OFLCOND-MC16-SDR-RUN2-09" --preInclude egammaConfig.egammaOnlyFromRawFlags.egammaOnlyFromRaw --postInclude egammaValidation.egammaArtSpecialContent.egammaArtSpecialContent
+
 	echo  "art-result: $? reconstruction"
 
 	;;

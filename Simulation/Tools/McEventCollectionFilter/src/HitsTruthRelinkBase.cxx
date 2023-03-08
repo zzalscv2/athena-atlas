@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HitsTruthRelinkBase.h"
@@ -32,28 +32,29 @@ StatusCode HitsTruthRelinkBase::getReferenceBarcode(const EventContext &ctx, int
   const HepMC::GenEvent *genEvt = *(inputCollection->begin());
 #ifdef HEPMC3
   size_t nVertices = genEvt->vertices().size();
-#else
-  size_t nVertices = genEvt->vertices_size();
-#endif
   if (nVertices == 0) {
     ATH_MSG_ERROR("Truth collection should have at least one vertex!");
     return StatusCode::FAILURE;
   }
-
-  const HepMC::ConstGenVertexPtr genVtx = HepMC::barcode_to_vertex(genEvt, -nVertices);
-#ifdef HEPMC3
+  const HepMC::ConstGenVertexPtr& genVtx = genEvt->vertices().back();
   size_t nParticles = genVtx->particles_out().size();
-#else
-  size_t nParticles = genVtx->particles_out_size();
-#endif
   if (nParticles == 0) {
     ATH_MSG_ERROR("Truth vertex should have at least one particle!");
     return StatusCode::FAILURE;
   }
-
-#ifdef HEPMC3
-  *barcode = HepMC::barcode(genVtx->particles_out().back());
+  *barcode = HepMC::barcode(genVtx->particles_out().front());
 #else
+  size_t nVertices = genEvt->vertices_size();
+  if (nVertices == 0) {
+    ATH_MSG_ERROR("Truth collection should have at least one vertex!");
+    return StatusCode::FAILURE;
+  }
+  auto genVtx = *(genEvt->vertices_end());
+  size_t nParticles = genVtx->particles_out_size();
+  if (nParticles == 0) {
+    ATH_MSG_ERROR("Truth vertex should have at least one particle!");
+    return StatusCode::FAILURE;
+  }
   *barcode = HepMC::barcode(*(genVtx->particles_out_const_begin()));
 #endif
 

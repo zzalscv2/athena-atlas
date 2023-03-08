@@ -1,12 +1,12 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
-def getMETMonTool(name = "MonTool"):
+def getMETMonTool(flags, name = "MonTool"):
    """
    Return configured GenericMonitoringTool instance for EFMissingETAlgMT
    """
-   mon = GenericMonitoringTool("MonTool")
+   mon = GenericMonitoringTool(flags, "MonTool")
    mon.defineHistogram( "TIME_Total", path='EXPERT', title="Time spent Alg",           xbins=100, xmin=0, xmax=100 )
    mon.defineHistogram( "TIME_Loop",  path='EXPERT', title="Time spent in Tools loop", xbins=100, xmin=0, xmax=100 )
 

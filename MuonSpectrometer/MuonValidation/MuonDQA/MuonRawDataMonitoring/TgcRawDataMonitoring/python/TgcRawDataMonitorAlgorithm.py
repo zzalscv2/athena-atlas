@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -44,6 +44,8 @@ def TgcRawDataMonitoringConfig(inputFlags):
 
     tgcRawDataMonAlg.FillGapByGapHistograms = (doGapByGapHitOcc or doGapByGapEffMap or doHitResiduals)
 
+    tgcRawDataMonAlg.GRLTool = ""
+
     tgcRawDataMonAlg.UseOnlyCombinedMuons = True
     tgcRawDataMonAlg.UseOnlyMuidCoStacoMuons = True
     tgcRawDataMonAlg.UseMuonSelectorTool = True
@@ -66,6 +68,15 @@ def TgcRawDataMonitoringConfig(inputFlags):
         tgcRawDataMonAlg.MonitorTriggerMultiplicity = False
         tgcRawDataMonAlg.CtpDecisionMoniorList = ''
         tgcRawDataMonAlg.UseMuonSelectorTool = False
+
+    if inputFlags.Trigger.EDMVersion < 3: # Run2 and before
+        tgcRawDataMonAlg.MuonRoIContainerName = ''
+        tgcRawDataMonAlg.MuonRoIContainerBCm2Name = ''
+        tgcRawDataMonAlg.MuonRoIContainerBCm1Name = ''
+        tgcRawDataMonAlg.MuonRoIContainerBCp1Name = ''
+        tgcRawDataMonAlg.MuonRoIContainerBCp2Name = ''
+        tgcRawDataMonAlg.MuRoIThresholdPatternsKey = ''
+        tgcRawDataMonAlg.MonitorThresholdPatterns = False
 
     if inputFlags.Input.Format is Format.BS or 'TGC_MeasurementsAllBCs' in inputFlags.Input.Collections:
         tgcRawDataMonAlg.AnaTgcPrd=True
@@ -1183,39 +1194,41 @@ if __name__=='__main__':
     from AthenaCommon.Constants import INFO
     log.setLevel(INFO)
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-
-    ConfigFlags.Input.isMC = True
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    flags.Input.isMC = False
 
     import glob
     import sys
     if len(sys.argv) == 3:
         inputs = sys.argv[1].split(',')
-        ConfigFlags.Input.Files = inputs
-        ConfigFlags.Output.HISTFileName = sys.argv[2]
+        flags.Input.Files = inputs
+        flags.Output.HISTFileName = sys.argv[2]
     else:
         inputs = glob.glob('data/*')
-        ConfigFlags.Input.Files = inputs
-        ConfigFlags.Output.HISTFileName = 'ExampleMonitorOutput.root'
+        flags.Input.Files = inputs
+        flags.Output.HISTFileName = 'ExampleMonitorOutput.root'
 
-    ConfigFlags.Trigger.triggerConfig = "FILE"
-    ConfigFlags.Trigger.triggerMenuSetup = "Dev_pp_run3_v1"
+    if flags.Input.isMC:
+        flags.Trigger.triggerConfig = "FILE"
+        flags.Trigger.triggerMenuSetup = "MC_pp_run3_v1_BulkMCProd_prescale"
+    else:
+        flags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2022-10"
+        flags.Trigger.triggerConfig = "DB"
 
-    if not ConfigFlags.Input.isMC:
-        ConfigFlags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2022-10"
 
-    ConfigFlags.lock()
-    ConfigFlags.dump()
+    flags.lock()
+    flags.dump()
 
     from AthenaCommon.AppMgr import ServiceMgr
     ServiceMgr.Dump = False
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
-    tgcRawDataMonitorAcc = TgcRawDataMonitoringConfig(ConfigFlags)
+    tgcRawDataMonitorAcc = TgcRawDataMonitoringConfig(flags)
     cfg.merge(tgcRawDataMonitorAcc)
     cfg.getEventAlgo('TgcRawDataMonAlg').OutputLevel = INFO
     cfg.getEventAlgo('TgcRawDataMonAlg').MonitorThresholdPatterns = True
@@ -1234,10 +1247,22 @@ if __name__=='__main__':
     cfg.getEventAlgo('TgcRawDataMonAlg').TagMuonInDifferentSystem = False
 
     from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
-    cfg.merge(AtlasFieldCacheCondAlgCfg(ConfigFlags))
-    from TrigConfigSvc.TrigConfigSvcCfg import L1ConfigSvcCfg,generateL1Menu
-    cfg.merge(L1ConfigSvcCfg(ConfigFlags))
-    generateL1Menu(ConfigFlags)
+    cfg.merge(AtlasFieldCacheCondAlgCfg(flags))
+
+    from TrigConfigSvc.TrigConfigSvcCfg import TrigConfigSvcCfg,L1PrescaleCondAlgCfg,BunchGroupCondAlgCfg,HLTPrescaleCondAlgCfg
+    cfg.merge( TrigConfigSvcCfg( flags ) )
+    cfg.merge( L1PrescaleCondAlgCfg( flags ) )
+    cfg.merge( BunchGroupCondAlgCfg( flags ) )
+    cfg.merge( HLTPrescaleCondAlgCfg( flags ) )
+
+    if not flags.Input.isMC:
+        from AthenaConfiguration.ComponentFactory import CompFactory
+        cfg.getEventAlgo('TgcRawDataMonAlg').GRLTool = CompFactory.GoodRunsListSelectorTool('GoodRunsListSelectorTool')
+        cfg.getEventAlgo('TgcRawDataMonAlg').GRLTool.GoodRunsListVec = ['data22_13p6TeV.periodAllYear_DetStatus-v109-pro28-04_MERGED_PHYS_StandardGRL_All_Good_25ns.xml']
+    else:
+        from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import generateMenuMT
+        generateMenuMT(flags)
+
 
     cfg.printConfig(withDetails=False, summariseProps = False)
 

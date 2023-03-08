@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTS_PHYSVAL_TOOL_H
@@ -13,6 +13,8 @@
 #include "InDetIdentifier/SCT_ID.h"
 #include "src/PixelClusterValidationPlots.h"
 #include "src/StripClusterValidationPlots.h"
+#include "src/PixelSpacePointValidationPlots.h"
+#include "src/StripSpacePointValidationPlots.h"
 
 namespace ActsTrk {
 
@@ -43,8 +45,19 @@ namespace ActsTrk {
     SG::ReadHandleKey< xAOD::StripClusterContainer > m_stripClusterContainerKey {this, "StripClusterContainerKey", "ITkStripClusters", 
 	"Key of input pixel clusters"};
 
+    SG::ReadHandleKey< xAOD::SpacePointContainer > m_pixelSpacePointContainerKey {this, "PixelSpacePointContainerKey", "ITkPixelSpacePoints",
+	"Key of input pixel space points"};
+    SG::ReadHandleKey< xAOD::SpacePointContainer > m_stripSpacePointContainerKey {this, "StripSpacePointContainerKey", "ITkStripSpacePoints",
+	"Key of input strip space points"};
+    SG::ReadHandleKey< xAOD::SpacePointContainer > m_stripOverlapSpacePointContainerKey {this, "StripOverlapSpacePointContainerKey", "ITkStripOverlapSpacePoints",
+	"Key of input strip overlap space points"};
+
     std::unique_ptr< ActsTrk::PixelClusterValidationPlots > m_pixelClusterValidationPlots;
     std::unique_ptr< ActsTrk::StripClusterValidationPlots > m_stripClusterValidationPlots;
+
+    std::unique_ptr< ActsTrk::PixelSpacePointValidationPlots > m_pixelSpacePointValidationPlots;
+    std::unique_ptr< ActsTrk::StripSpacePointValidationPlots > m_stripSpacePointValidationPlots;
+    std::unique_ptr< ActsTrk::StripSpacePointValidationPlots > m_stripOverlapSpacePointValidationPlots;
 
     const PixelID *m_pixelID {};
     const SCT_ID *m_stripID {};

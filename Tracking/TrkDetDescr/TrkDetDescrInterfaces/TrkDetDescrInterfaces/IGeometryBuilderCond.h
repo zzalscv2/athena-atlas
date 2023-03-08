@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -63,13 +63,6 @@ public:
 
   /** The unique signature */
   virtual GeometrySignature geometrySignature() const = 0;
-
-protected:
-  /** Protected method to register the Layer to the Surface */
-  void associateLayer(const Layer& lay, Surface& sf) const
-  {
-    sf.associateLayer(lay);
-  }
 };
 
 } // end of namespace

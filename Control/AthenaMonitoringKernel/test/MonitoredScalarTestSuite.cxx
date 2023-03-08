@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -55,6 +55,7 @@ class MonitoredScalarTestSuite {
     void test_shouldAcceptCustomTypeAndReturnOriginalValue() { 
       auto phi = Monitored::Scalar("phi", TestValue(4.123456789012345)); 
 
+      // cppcheck-suppress assertWithSideEffect
       assert(TestValue(4.123456789012345) == phi);
     }
 

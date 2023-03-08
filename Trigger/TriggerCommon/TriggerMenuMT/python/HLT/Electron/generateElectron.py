@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from TriggerMenuMT.HLT.Electron.ElectronRecoSequences import l2CaloRecoCfg
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, \
@@ -23,7 +23,7 @@ def _fastCaloSeq(flags):
     
     selAcc.mergeHypo(l2CaloHypo)
 
-    fastCaloSequence = MenuSequenceCA(selAcc,
+    fastCaloSequence = MenuSequenceCA(flags, selAcc,
                                       HypoToolGen=TrigEgammaFastCaloHypoToolFromDict)
     return (selAcc , fastCaloSequence)
 
@@ -53,8 +53,8 @@ def _ftfSeq(flags):
     fastElectronHypoAlg.RunInView = True
     selAcc.addHypoAlgo(fastElectronHypoAlg)
     from TrigEgammaHypo.TrigEgammaFastElectronHypoTool import TrigEgammaFastElectronHypoToolFromDict
-    fastInDetSequence = MenuSequenceCA(selAcc,
-                                        HypoToolGen=TrigEgammaFastElectronHypoToolFromDict)
+    fastInDetSequence = MenuSequenceCA(flags, selAcc,
+                                       HypoToolGen=TrigEgammaFastElectronHypoToolFromDict)
     return (selAcc , fastInDetSequence)
 
 def _ftf(flags, chainDict):
@@ -85,7 +85,7 @@ def _precisonCaloSeq(flags):
                                                            CaloClusters=recordable('HLT_CaloEMClusters_Electron'))
     selAcc.addHypoAlgo(hypoAlg)
     from TrigEgammaHypo.TrigEgammaPrecisionCaloHypoTool import TrigEgammaPrecisionCaloHypoToolFromDict
-    menuSequence = MenuSequenceCA(selAcc,
+    menuSequence = MenuSequenceCA(flags, selAcc,
                                   HypoToolGen=TrigEgammaPrecisionCaloHypoToolFromDict)
     return (selAcc , menuSequence)
 
@@ -111,7 +111,7 @@ def _precisionTrackingSeq(flags,chainDict):
     selAcc.addHypoAlgo(hypoAlg)
     def acceptAllHypoToolGen(chainDict):
         return CompFactory.TrigStreamerHypoTool(chainDict["chainName"], Pass = True)
-    menuSequence = MenuSequenceCA(selAcc,
+    menuSequence = MenuSequenceCA(flags, selAcc,
                                   HypoToolGen=acceptAllHypoToolGen)
     return (selAcc , menuSequence)
 
@@ -248,8 +248,8 @@ def _precisionElectronSeq(flags):
     selAcc.mergeReco(recoAcc)
     from TrigEgammaHypo.TrigEgammaPrecisionElectronHypoTool import TrigEgammaPrecisionElectronHypoToolFromDict, TrigEgammaPrecisionElectronHypoAlgCfg
     selAcc.mergeHypo( TrigEgammaPrecisionElectronHypoAlgCfg(flags, 'TrigEgammaHypoAlg_noGSF', TrigEgammaKeys.precisionElectronContainer ) )
-    menuSequence = MenuSequenceCA(selAcc,
-                                   HypoToolGen=TrigEgammaPrecisionElectronHypoToolFromDict)
+    menuSequence = MenuSequenceCA(flags, selAcc,
+                                  HypoToolGen=TrigEgammaPrecisionElectronHypoToolFromDict)
     return (selAcc, menuSequence)
 
 def _precisionElectron(flags, chainDict):

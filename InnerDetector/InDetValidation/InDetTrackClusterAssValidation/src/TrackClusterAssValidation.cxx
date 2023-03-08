@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/IPartPropSvc.h"
 #include "GaudiKernel/ServiceHandle.h"
-#include "AtlasHepMC/GenVertex.h"
 #include "TrkTrack/TrackCollection.h"
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"
 #include "InDetPrepRawData/SCT_ClusterContainer.h"
@@ -12,7 +11,13 @@
 #include "TrackClusterAssValidation.h"
 #include "StoreGate/ReadHandle.h"
 #include "HepPDT/ParticleDataTable.hh"
+#include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/GenParticle.h"
+
+#ifndef HEPMC3
+#include "AtlasHepMC/GenVertex.h"
+#endif
+
 #include <cmath>
 
 ///////////////////////////////////////////////////////////////////
@@ -55,9 +60,9 @@ InDet::TrackClusterAssValidation::TrackClusterAssValidation
   declareProperty("SpacePointsSCTName"    ,m_spacepointsSCTname    );
   declareProperty("SpacePointsPixelName"  ,m_spacepointsPixelname  );
   declareProperty("SpacePointsOverlapName",m_spacepointsOverlapname);
-  declareProperty("PixelClustesContainer" ,m_clustersPixelname     );
-  declareProperty("SCT_ClustesContainer"  ,m_clustersSCTname       );
-  declareProperty("TRT_ClustesContainer"  ,m_clustersTRTname       );
+  declareProperty("PixelClusterContainer" ,m_clustersPixelname     );
+  declareProperty("SCT_ClusterContainer"  ,m_clustersSCTname       );
+  declareProperty("TRT_ClusterContainer"  ,m_clustersTRTname       );
   declareProperty("TruthLocationSCT"      ,m_truth_locationSCT     );
   declareProperty("TruthLocationPixel"    ,m_truth_locationPixel   );
   declareProperty("TruthLocationTRT"      ,m_truth_locationTRT     );
@@ -1440,7 +1445,7 @@ bool InDet::TrackClusterAssValidation::noReconstructedParticles(const InDet::Tra
       bool Q = false;
       for(; mc!=mce; ++mc) {
 	if((*mc).first != ID) break;
-	if(HepMC::barcode((*mc).second.cptr())==k) {Q=true; break;}
+	if((*mc).second.barcode()==k) {Q=true; break;}
       }
 
       if(!Q) continue;
@@ -1524,7 +1529,7 @@ int InDet::TrackClusterAssValidation::charge(const InDet::TrackClusterAssValidat
   PRD_MultiTruthCollection::const_iterator mc = findTruth(event_data,d,mce);
 
   for(; mc!=mce; ++mc) {
-    if(HepMC::barcode((*mc).second.cptr())==k) {
+    if((*mc).second.barcode()==k) {
 
       HepMC::ConstGenParticlePtr   pat  = (*mc).second.cptr();
 
@@ -1543,7 +1548,7 @@ int InDet::TrackClusterAssValidation::charge(const InDet::TrackClusterAssValidat
 	ra > 1.6 ? rap = 2 : ra > .8 ?  rap = 1 : rap = 0;
 
       int                         pdg = pat->pdg_id();
-      const HepPDT::ParticleData* pd  = m_particleDataTable->particle(abs(pdg));
+      const HepPDT::ParticleData* pd  = m_particleDataTable->particle(std::abs(pdg));
       if(!pd) return 0;
       double ch = pd->charge(); if(pdg < 0) ch = -ch;
       if(ch >  .5) return  1;

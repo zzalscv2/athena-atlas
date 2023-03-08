@@ -1,16 +1,20 @@
 #!/usr/bin/env python
-
+ 
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
-
 from AthenaCommon.Logging import logging
 log = logging.getLogger('runHLT_standalone_newJO')
 
-from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
-from AthenaConfiguration.ComponentAccumulator import CompFactory
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.Enums import Format
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+
+# Make sure nobody uses deprecated global ConfigFlags
+import AthenaConfiguration.AllConfigFlags
+del AthenaConfiguration.AllConfigFlags.ConfigFlags
+
+flags = initConfigFlags()
 
 # Output configuration - currently testing offline workflow
 flags.Trigger.writeBS = False
@@ -26,6 +30,9 @@ flags.Scheduler.ShowDataDeps = True
 flags.Scheduler.ShowDataFlow = True
 flags.Scheduler.ShowControlFlow = True
 flags.Scheduler.EnableVerboseViews = True
+flags.Scheduler.AutoLoadUnmetDependencies = False
+flags.Input.FailOnUnknownCollections = True
+
 from CaloClusterCorrection.constants \
      import CALOCORR_JO, CALOCORR_POOL
 flags.Calo.ClusterCorrection.defaultSource = [CALOCORR_POOL, CALOCORR_JO] # temporary, until a complete support for cool is present
@@ -53,21 +60,23 @@ flags.addFlag("Trigger.disabledSignatures",[])
 flags.addFlag("Trigger.selectChains",[])       
 flags.addFlag("Trigger.disableChains",[]) 
 
+flags.Trigger.enabledSignatures = ['Muon', 'Tau','MinBias','Bphysics','Egamma', 'Electron', 'Photon', 'MET', 'Jet']
+# missing: 'Bjet'
 
-flags.Trigger.enabledSignatures = ['Muon', 'Photon','Electron']
-#flags.Trigger.disableChains=["HLT_2mu4_l2io_invmDimu_L1BPH-2M9-0DR15-2MU3VF", "HLT_2mu4_l2io_invmDimu_L1BPH-2M9-0DR15-2MU3V", "HLT_2mu6_l2io_invmDimu_L1BPH-2M9-2DR15-2MU5VF"]
-# exclude jets for now, since their MenuSeuqnece Structure needs more work to migrate
+# disable bBhv chains cause they cause terrible crash
+flags.Trigger.disableChains=[
+    "HLT_e5_lhvloose_bBeeM6000_L1BKeePrimary", "HLT_2e5_lhvloose_bBeeM6000_L1BKeePrimary",
+    "HLT_e5_lhvloose_bBeeM6000_L1BKeePrescaled", "HLT_2e5_lhvloose_bBeeM6000_L1BKeePrescaled",
+    "HLT_e5_lhvloose_bBeeM6000_L1EM22VHI", "HLT_e5_lhvloose_bBeeM6000_L14J15",     
+    "HLT_e5_lhvloose_bBeeM6000_L1All"
+    ]
 
 #--------------#
 #Leave commented lines for tests, since this is under development
-#from AthenaCommon.Constants import DEBUG
-#flags.Exec.OutputLevel=DEBUG
 #flags.Trigger.triggerMenuModifier=[ 'emptyMenu','HLT_mu8_L1MU5VF']
-#flags.Trigger.selectChains = [ 'HLT_mu8_L1MU5VF']#'HLT_j0_perf_L1RD0_FILLED']#'HLT_mu26_ivarmedium_mu6_l2io_probe_L1MU14FCH'] #'HLT_mu0_muoncalib_L1MU14FCH', 'HLT_mu6_L1MU5VF','HLT_mu6_msonly_L1MU5VF'] #'HLT_mu0_muoncalib_L1MU14FCH',#HLT_mu6_L1MU5VF
+#flags.Trigger.selectChains =  ['HLT_mu4_L1MU3V','HLT_mu8_L1MU5VF','HLT_2mu6_L12MU5VF', 'HLT_mu24_mu6_L1MU14FCH','HLT_mu24_mu6_probe_L1MU14FCH'] #, 'HLT_mu4_mu6_L12MU3V']
 #--------------#
 
-# if set to True, use standalone menu generation code
-oldMenuCode=False
 
 
 flags.InDet.useSctDCS = False
@@ -82,25 +91,19 @@ log.info("Command line arguments:")
 import sys
 log.info(" ".join(sys.argv))
 
-#Since isOnline is set by determining if input file is MC
-#can only set these once we've read in the input file (usually from command line)
-if flags.Common.isOnline:
-  flags.GeoModel.AtlasVersion = flags.Trigger.OnlineGeoTag
-  flags.IOVDb.GlobalTag = flags.Trigger.OnlineCondTag
-#otherwise, read these from file metadata (e.g. for MC)
-
-flags.lock()
+from TriggerJobOpts import runHLT
+_allflags = flags.clone()   # copy including Concurrency flags
+_allflags.lock()
+runHLT.lock_and_restrict(flags)
 flags.dump()
-# Enable when debugging deduplication issues
-# ComponentAccumulator.debugMode = "trackCA trackEventAlog ... and so on"
 
+acc = MainServicesCfg(_allflags)
+del _allflags
 
-acc = MainServicesCfg(flags)
-
-acc.getService('AvalancheSchedulerSvc').VerboseSubSlots = True
-
-# this delcares to the scheduler that EventInfo object comes from the input
-loadFromSG = [('xAOD::EventInfo', 'StoreGateSvc+EventInfo')]
+# Load these objects from StoreGate
+loadFromSG = [('xAOD::EventInfo', 'StoreGateSvc+EventInfo'),
+              ('TrigConf::L1Menu','DetectorStore+L1TriggerMenu'),
+              ('TrigConf::HLTMenu','DetectorStore+HLTTriggerMenu')]
 
 if flags.Input.Format is Format.BS:
     from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
@@ -115,15 +118,9 @@ acc.merge(TriggerHistSvcConfig(flags))
 
 
 
-if oldMenuCode:
-#  LoadAndGenerateMenu loads test _NewJO menu
-    from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import LoadAndGenerateMenu as generateHLTMenu
-else:
-    from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import generateMenuMT as generateHLTMenu
-
-
+from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import generateMenuMT
 from TriggerJobOpts.TriggerConfig import triggerRunCfg
-menu = triggerRunCfg(flags, menu=generateHLTMenu)
+menu = triggerRunCfg(flags, menu=generateMenuMT)
 # uncomment to obtain printout of menu (and associated components)
 # menu.printConfig(withDetails=True, summariseProps=True)
 acc.merge(menu)
@@ -135,14 +132,12 @@ if flags.Trigger.doTransientByteStream and flags.Trigger.doCalo:
     from TriggerJobOpts.TriggerTransBSConfig import triggerTransBSCfg_Calo
     acc.merge(triggerTransBSCfg_Calo(flags), sequenceName="HLTBeginSeq")
 
-if flags.Input.isMC and flags.Trigger.doMuon:
-    loadFromSG += [( 'RpcPadContainer' , 'StoreGateSvc+RPCPAD' ), ( 'TgcRdoContainer' , 'StoreGateSvc+TGCRDO' )]
-
 if flags.Trigger.doLVL1:
     from TriggerJobOpts.Lvl1SimulationConfig import Lvl1SimulationCfg
     acc.merge(Lvl1SimulationCfg(flags), sequenceName="HLTBeginSeq")
 
-acc.addEventAlgo(CompFactory.SGInputLoader(Load=loadFromSG), sequenceName="AthAlgSeq")
+from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+acc.merge(SGInputLoaderCfg(flags, loadFromSG))
 
 #track overlay needs this to ensure that the collections are copied correctly (due to the hardcoding of the name in the converters)
 if flags.Overlay.doTrackOverlay:
@@ -151,6 +146,12 @@ if flags.Overlay.doTrackOverlay:
 
 if log.getEffectiveLevel() <= logging.DEBUG:
     acc.printConfig(withDetails=False, summariseProps=True, printDefaults=True)
+
+
+
+if flags.Common.isOnline:
+  from TrigOnlineMonitor.TrigOnlineMonitorConfig import trigOpMonitorCfg
+  acc.merge( trigOpMonitorCfg(flags) )
 
 log.info("Running ...")
 status = acc.run()

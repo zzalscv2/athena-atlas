@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ByteStreamCnvSvc/ByteStreamCnvSvc.h"
@@ -274,6 +274,7 @@ ByteStreamCnvSvc::setRawEvent (std::unique_ptr<RawEventWrite> rawEventWrite)
 {
   RawEventWrite* ptr = rawEventWrite.get();
   m_slots->m_rawEventWrite = std::move (rawEventWrite);
+  // cppcheck-suppress returnDanglingLifetime
   return ptr;
 }
 

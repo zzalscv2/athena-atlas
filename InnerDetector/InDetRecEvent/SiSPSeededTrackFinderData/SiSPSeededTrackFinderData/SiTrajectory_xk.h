@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -61,13 +61,13 @@ namespace InDet{
 
       const int&  nholes        ()       const {return m_nholes        ;}
       const int&  dholes        ()       const {return m_dholes        ;}
-      const int&  nHolesBefore       ()       const {return m_nHolesBefore       ;}
-      const int&  nHolesAfter       ()       const {return m_nHolesAfter       ;}
+      const int&  nHolesBefore  ()       const {return m_nHolesBefore  ;}
+      const int&  nHolesAfter   ()       const {return m_nHolesAfter   ;}
       const int&  nclusters     ()       const {return m_nclusters     ;}
       const int&  ndf           ()       const {return m_ndf           ;}
       const int&  nclustersNoAdd()       const {return m_nclustersNoAdd;}
       const int&  nElements     ()       const {return m_nElements     ;}
-      const int&  naElements    ()       const {return m_nActiveElements    ;}
+      const int&  naElements    ()       const {return m_nActiveElements;}
       const int&  difference    ()       const {return m_difference    ;}
       const int&  elementsMap(int& i) const {return m_elementsMap[i];}
       const PatternHoleSearchOutcome&  getHoleSearchResult() const {return m_patternHoleOutcome;}
@@ -111,16 +111,15 @@ namespace InDet{
       bool forwardFilter    ();
       bool filterWithPreciseClustersError();
       bool backwardSmoother (bool);
-      bool isLastPixel      ();
+      bool isLastPixel      () const;
 
       /** @brief Return the pattern track parameters of the first element of this trajectory matching its status
        * @return nullptr or a pointer to the element owned pattern track parameters matching the current status
        *   of the trajectory element.
        */
-      const Trk::PatternTrackParameters *firstParameters();
-
+      const Trk::PatternTrackParameters *firstParameters() const;
       std::unique_ptr<Trk::TrackParameters> firstTrackParameters();
-      void getClusters(std::list<const InDet::SiCluster*>&);
+      void getClusters(std::list<const InDet::SiCluster*>&) const;
 
       DataVector<const Trk::TrackStateOnSurface>
       convertToTrackStateOnSurface();
@@ -149,7 +148,7 @@ namespace InDet{
       DataVector<const Trk::TrackStateOnSurface>
       convertToSimpleTrackStateOnSurfaceForDisTrackTrigger(int);
 
-      std::unique_ptr<Trk::FitQuality> convertToFitQuality();
+      std::unique_ptr<Trk::FitQuality> convertToFitQuality() const;
 
       void updateHoleSearchResult(); 
       
@@ -158,7 +157,7 @@ namespace InDet{
       bool jumpThroughPerigee();
       double quality         () const;
       double qualityOptimization();
-      double pTfirst         ();
+      double pTfirst         () const;
       std::ostream& dump(std::ostream& out) const;
 
     protected:
@@ -198,7 +197,7 @@ namespace InDet{
       ///////////////////////////////////////////////////////////////////
 
       void erase(int);
-      bool isNewTrack(std::multimap<const Trk::PrepRawData*,const Trk::Track*>&);
+      bool isNewTrack(std::multimap<const Trk::PrepRawData*,const Trk::Track*>&) const;
     };
   
   std::ostream& operator << (std::ostream&,const SiTrajectory_xk&);

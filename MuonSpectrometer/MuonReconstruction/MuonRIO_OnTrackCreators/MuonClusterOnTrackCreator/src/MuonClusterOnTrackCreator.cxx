@@ -20,6 +20,7 @@
 #include "MuonRIO_OnTrack/MMClusterOnTrack.h"
 #include "MuonRIO_OnTrack/sTgcClusterOnTrack.h"
 #include "TrkEventPrimitives/LocalParameters.h"
+#include "TrkEventPrimitives/LocalDirection.h"
 #include "TrkSurfaces/Surface.h"
 
 #define SIG_VEL 4.80000  // ns/m
@@ -324,7 +325,7 @@ namespace Muon {
             Amg::Vector3D lpos = rio_surface.transform().inverse() * GP;
             ATH_MSG_WARNING("Extrapolated GlobalPosition not on detector surface! Distance " << lpos.z());
             lp[Trk::locX] = lpos.x();
-            lp[Trk::locY] = lpos.y();      
+            lp[Trk::locY] = lpos.y();
         }
         //   set localX from the cluster parameters
         lp[Trk::locX] = locpar[Trk::locX];
@@ -352,21 +353,28 @@ namespace Muon {
             ATH_MSG_WARNING("Application of final as-built parameters failed for channel "<<m_idHelperSvc->toString(RIO.identify())<<" local pos = ("<<lp.x()<<"/"<<lp.y()<<").");
         }
 
-        //   set the value of the local parameter after applying conditions
-        //   note: not updating localY; there's no point in correcting the seed.
-        locpar[Trk::locX] = localposition3D.x();
-        double offsetZ = localposition3D.z();
+        //   Get the direction of the track in the local coordinate system and use it to project 
+        //   the actual hit position onto the nominal surface (locZ = 0), where the intersection 
+        //   of the track is considered. This "effective" position provides a more accurate residual.
+        Trk::LocalDirection ld;
+        rio_surface.globalToLocalDirection(GD, ld);
+        double a_impact    = ld.angleXZ() < 0 ? -M_PI_2 - ld.angleXZ() : M_PI_2 - ld.angleXZ();
+        double x_projected = localposition3D.x() - std::tan(a_impact) * localposition3D.z();
+
+        // * Set the value of the local parameter (locX) after applying conditions
+        //   The position along strip will be set from the seed (there is no better 
+        //   estimate than that; not used in the track fits anyway)
+        locpar[Trk::locX] = x_projected;
     
         ATH_MSG_VERBOSE("generating MMClusterOnTrack in MMClusterBuilder");
         MuonClusterOnTrack* cluster = new MMClusterOnTrack(mmPRD, locpar, loce, lp[Trk::locY]);
-        cluster->setOffsetNormal(offsetZ);
     
         return cluster;
     }
 
 
     //================================================================================
-    const MuonClusterOnTrack* MuonClusterOnTrackCreator::calibratedClusterSTG(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP, const Amg::Vector3D& /* GD*/) const {
+    const MuonClusterOnTrack* MuonClusterOnTrackCreator::calibratedClusterSTG(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP, const Amg::Vector3D& GD) const {
 
         // Make sure RIO has a detector element
         const MuonGM::sTgcReadoutElement* stgEL = static_cast<const MuonGM::sTgcReadoutElement*>(RIO.detectorElement());
@@ -380,7 +388,7 @@ namespace Muon {
         Trk::LocalParameters locpar = loce.cols() > 1 ? Trk::LocalParameters{RIO.localPosition()} : Trk::LocalParameters{Trk::DefinedParameter{RIO.localPosition().x(), Trk::locX}};
     
     
-        // Local cluster coordinates to feed to the calibration tools
+        // * Local cluster coordinates to feed to the calibration tools
         Amg::Vector2D lp{ Amg::Vector2D::Zero() };
 
         //   get local y from the seeded position
@@ -394,20 +402,26 @@ namespace Muon {
         //   set local x from the cluster parameters
         lp[Trk::locX] = locpar[Trk::locX];
 
-        // Correct the local coordinates for as-built conditions and b-lines
+        // * Correct the local coordinates for as-built conditions and b-lines
         Amg::Vector3D localposition3D { Amg::Vector3D::Zero() };
         stgEL->spacePointPosition(RIO.identify(), lp[Trk::locX], lp[Trk::locY], localposition3D);
 
-        //   set the value of the local parameter after applying conditions
-        //   note: not updating localY; there's no point in correcting the seed.
-        locpar[Trk::locX] = localposition3D.x();
-        double offsetZ = localposition3D.z();
+        //   Get the direction of the track in the local coordinate system and use it to project 
+        //   the actual hit position onto the nominal surface (locZ = 0), where the intersection 
+        //   of the track is considered. This "effective" position provides a more accurate residual. 
+        Trk::LocalDirection ld;
+        rio_surface.globalToLocalDirection(GD, ld);
+        double a_impact    = ld.angleXZ() < 0 ? -M_PI_2 - ld.angleXZ() : M_PI_2 - ld.angleXZ();
+        double x_projected = localposition3D.x() - std::tan(a_impact) * localposition3D.z();
 
-        // No further calibration available at the moment for sTGCs
+        // * Set the value of the local parameter (locX) after applying conditions
+        //   The position along strip will be set from the seed (there is no better 
+        //   estimate than that; not used in the track fits anyway)
+        locpar[Trk::locX] = x_projected;
+
 	const sTgcPrepData* stgPRD = static_cast<const sTgcPrepData*>(&RIO);
         ATH_MSG_VERBOSE("generating sTgcClusterOnTrack in MuonClusterBuilder");
         MuonClusterOnTrack* cluster = new sTgcClusterOnTrack(stgPRD, locpar, loce, lp[Trk::locY]);
-        cluster->setOffsetNormal(offsetZ);
 
         return cluster;
     }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // RIO_OnTrackCreator.h
@@ -63,19 +63,18 @@ namespace Trk {
     virtual ~RIO_OnTrackCreator();
 
     //!get specific ROT tools and the AtlasIdHelper
-    virtual StatusCode initialize();
+    virtual StatusCode initialize() override;
     //! standard AlgTool termination
-    virtual StatusCode finalize();
+    virtual StatusCode finalize() override; 
 
     //! the master method for going from RIO to ROT.
-    virtual const RIO_OnTrack* 
-      correct(const PrepRawData&,
-	      const TrackParameters&) const;
+    virtual const RIO_OnTrack* correct(const PrepRawData&,
+                                       const TrackParameters&) const override;
 
-  private:
-  ///////////////////////////////////////////////////////////////////
-  // Private data:
-  ///////////////////////////////////////////////////////////////////
+   private:
+    ///////////////////////////////////////////////////////////////////
+    // Private data:
+    ///////////////////////////////////////////////////////////////////
 
     //! Helper to detect type of sub-detector from PRD->identify().
     const AtlasDetectorID*           m_idHelper{nullptr};
@@ -94,6 +93,14 @@ namespace Trk {
     bool                             m_doPixel{true}; //!< Load Pixel IRIO_OnTrackCreator
     bool                             m_doSCT{true};   //!< Load SCT IRIO_OnTrackCreator
     bool                             m_doTRT{true};   //!< Load TRT IRIO_OnTrackCreator
+    //emum for the flag
+    enum struct Mode {
+      all = 0,
+      indet = 1,
+      muon = 2,
+      invalid = 3
+    };
+    Mode m_enumMode = Mode::all;
 
   };
 

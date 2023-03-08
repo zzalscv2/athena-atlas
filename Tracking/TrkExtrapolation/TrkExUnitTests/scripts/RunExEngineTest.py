@@ -62,6 +62,3 @@ cfg.merge(topoAcc)
 cfg.printConfig()
 
 cfg.run(10)
-f=open("ExtrapolationEngineTestConfig.pkl","wb")
-cfg.store(f)
-f.close()

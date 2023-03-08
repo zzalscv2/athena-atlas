@@ -61,7 +61,7 @@ class MetAnalysisConfig (ConfigBlock):
             alg.taus, alg.tausSelection = config.readNameAndSelection (self.taus)
         if self.invisible != "" :
             alg.invisible = config.readName (self.invisible)
-        alg.met = config.writeName (self.containerName)
+        alg.met = config.writeName (self.containerName, isMet = True)
 
 
         # Set up the met builder algorithm:
@@ -77,6 +77,9 @@ class MetAnalysisConfig (ConfigBlock):
         alg.significanceTool.IsAFII = config.dataType() == "afii"
         alg.met = config.readName (self.containerName)
 
+        config.addOutputVar (self.containerName, 'met', 'met')
+        config.addOutputVar (self.containerName, 'phi', 'phi')
+        config.addOutputVar (self.containerName, 'sumet', 'sumet')
 
 
 

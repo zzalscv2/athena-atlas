@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 ################################################################################
 ##
@@ -157,6 +157,20 @@ class tauRecTauJetRNNWPConfig(JobProperty):
     statusOn=True
     allowedTypes=[['string']]
     StoredValue=[ 'tauid_rnnWP_1p_R22_v0.root', 'tauid_rnnWP_2p_R22_v0.root', 'tauid_rnnWP_3p_R22_v0.root' ]
+
+class TauJetDeepSetConfig(JobProperty):
+    """Config files for TauJetRNNEvaluator for DeepSet jet ID
+    """
+    statusOn=True
+    allowedTypes=[['string']]
+    StoredValue=['tauid_R22_1p_trk_dpst_notrkfakeRNN.json', 'tauid_R22_2p_trk_dpst.json', 'tauid_R22_3p_trk_dpst.json']
+
+class TauJetDeepSetWP(JobProperty):
+    """Config files for TauWPDecorator for DeepSet jet ID
+    """
+    statusOn=True
+    allowedTypes=[['string']]
+    StoredValue=['model_R22_1p_trk_dpst_notrkfakeRNN.root', 'model_R22_2p_trk_dpst.root', 'model_R22_3p_trk_dpst.root']
 
 class tauRecTauEleRNNConfig(JobProperty):
     """Config files for TauJetRNNEvaluator eVeto
@@ -320,14 +334,12 @@ class tauRecFlags(JobPropertyContainer):
 jobproperties.add_Container(tauRecFlags)
 
 # I want always the following flags in the Rec container  
-_list_tau=[Enabled,doTauRec,isStandalone,tauRecSeedJetCollection,tauRecToolsCVMFSPath,doTJVA,doTJVA_Tiebreak,associateLRT,classifyLRT,removeDuplicateCoreTracks,useGhostTracks,ghostTrackDR,tauRecRNNTrackClassification,tauRecRNNTrackClassificationConfig,tauRecDecayModeNNClassifierConfig,tauRecCalibrateLCConfig,tauRecMvaTESConfig,tauRec0pMvaTESConfig,tauRecCombinedTESConfig,tauRecTauJetRNNConfig,tauRecTauJetRNNWPConfig,tauRecTauEleRNNConfig,tauRecTauEleRNNWPConfig,tauRecPi0ScoreConfig,tauRecSeedMinPt,tauRecSeedMaxEta,tauRecMinPt,tauRec0pMinPt,tauRecMaxNTracks,tauRecToolsDevToolList,tauRecToolsDevToolListProcessor,doRunTauDiscriminant,doPanTau,doPi0,pi0EtCuts,pi0MVACuts_1prong,pi0MVACuts_mprong,shotPtCut_1Photon,shotPtCut_2Photons,useOldVertexFitterAPI, inAOD, doAODMuonRemoval, doAODElecRemoval]
+_list_tau=[Enabled,doTauRec,isStandalone,tauRecSeedJetCollection,tauRecToolsCVMFSPath,doTJVA,doTJVA_Tiebreak,associateLRT,classifyLRT,removeDuplicateCoreTracks,useGhostTracks,ghostTrackDR,tauRecRNNTrackClassification,tauRecRNNTrackClassificationConfig,tauRecDecayModeNNClassifierConfig,tauRecCalibrateLCConfig,tauRecMvaTESConfig,tauRec0pMvaTESConfig,tauRecCombinedTESConfig,tauRecTauJetRNNConfig,tauRecTauJetRNNWPConfig,TauJetDeepSetConfig,TauJetDeepSetWP,tauRecTauEleRNNConfig,tauRecTauEleRNNWPConfig,tauRecPi0ScoreConfig,tauRecSeedMinPt,tauRecSeedMaxEta,tauRecMinPt,tauRec0pMinPt,tauRecMaxNTracks,tauRecToolsDevToolList,tauRecToolsDevToolListProcessor,doRunTauDiscriminant,doPanTau,doPi0,pi0EtCuts,pi0MVACuts_1prong,pi0MVACuts_mprong,shotPtCut_1Photon,shotPtCut_2Photons,useOldVertexFitterAPI, inAOD, doAODMuonRemoval, doAODElecRemoval]
 for j in _list_tau: 
     jobproperties.tauRecFlags.add_JobProperty(j)
 del _list_tau
 
 
 
-
 tauFlags=jobproperties.tauRecFlags
 #=======================================================================
-    

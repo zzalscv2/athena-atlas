@@ -1,11 +1,9 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaCommon.Logging import logging
 from AthenaCommon.GlobalFlags import globalflags
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
-from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
 log = logging.getLogger(__name__)
 
 ### Output data name ###
@@ -17,7 +15,7 @@ from RegionSelector.RegSelToolConfig import regSelTool_RPC_Cfg, regSelTool_TGC_C
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.ComponentFactory import CompFactory
-from MuonRecExample.MuonRecFlags import muonRecFlags
+from ..Config.MenuComponents import algorithmCAToGlobalWrapper
 
 CBTPname = recordable("HLT_CBCombinedMuon_RoITrackParticles")
 CBTPnameFS = recordable("HLT_CBCombinedMuon_FSTrackParticles")
@@ -26,7 +24,6 @@ ExtrpTPname = recordable("HLT_MSExtrapolatedMuons_RoITrackParticles")
 ExtrpTPnameFS = recordable("HLT_MSExtrapolatedMuons_FSTrackParticles")
 MSextrpTPname = recordable("HLT_MSOnlyExtrapolatedMuons_FSTrackParticles")
 
-from AtlasGeoModel.MuonGMJobProperties import MuonGeometryFlags
 
 from AthenaConfiguration.Enums import BeamType
 
@@ -65,21 +62,21 @@ muNames = muonNames().getNames('RoI')
 muNamesFS = muonNames().getNames('FS')
 muNamesLRT = muonNames().getNames('LRT')
 
-def isCosmic():
+def isCosmic(flags):
   #FIXME: this might not be ideal criteria to determine if this is cosmic chain but used to work in Run2 and will do for now, ATR-22758
-  return (ConfigFlags.Beam.Type == BeamType.Cosmics)
+  return (flags.Beam.Type == BeamType.Cosmics)
 
 def isLRT(name):
   return "LRT" in name
 
 #Returns relevant track collection name
-def getIDTracks(name=''):
+def getIDTracks(flags, name=''):
 
   from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
 
   if isLRT(name):
     return getInDetTrigConfig("muonLRT").tracks_FTF()
-  elif isCosmic():
+  elif isCosmic(flags):
     return getInDetTrigConfig("cosmics" ).tracks_IDTrig()
   else:
     return getInDetTrigConfig("muon").tracks_FTF()
@@ -216,7 +213,7 @@ def muonDecodeCfg(flags, RoIs):
 
     return acc
 
-def muFastRecoSequence( RoIs, doFullScanID = False, InsideOutMode=False, extraLoads=None, l2mtmode=False, calib=False ):
+def muFastRecoSequence( flags, RoIs, doFullScanID = False, InsideOutMode=False, extraLoads=None, l2mtmode=False, calib=False ):
 
   from AthenaCommon.AppMgr import ToolSvc
   from AthenaCommon.CFElements import parOR
@@ -240,17 +237,17 @@ def muFastRecoSequence( RoIs, doFullScanID = False, InsideOutMode=False, extraLo
                               ('Muon::RpcPrepDataContainer','StoreGateSvc+RPC_Measurements'),
                               ('Muon::MdtPrepDataContainer','StoreGateSvc+MDT_DriftCircles'),
                               ( 'RpcPadContainer' , 'StoreGateSvc+RPCPAD' )]
-    if MuonGeometryFlags.hasCSC():
+    if flags.Detector.GeometryCSC:
       ViewVerify.DataObjects += [('Muon::CscPrepDataContainer','StoreGateSvc+CSC_Clusters')]
-    if MuonGeometryFlags.hasSTGC():
+    if flags.Detector.GeometrysTGC:
       ViewVerify.DataObjects += [('Muon::sTgcPrepDataContainer','StoreGateSvc+STGC_Measurements')]
-    if MuonGeometryFlags.hasMM():
+    if flags.Detector.GeometryMM:
       ViewVerify.DataObjects += [('Muon::MMPrepDataContainer','StoreGateSvc+MM_Measurements')]
     #muFastRecoSequence+=ViewVerify
   else:
     ViewVerify.DataObjects += [( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s' % RoIs )]
   ViewVerify.DataObjects += [( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' )]
-  if ConfigFlags.Trigger.enableL1MuonPhase1:
+  if flags.Trigger.enableL1MuonPhase1:
     ViewVerify.DataObjects += [( 'xAOD::MuonRoIContainer' , 'StoreGateSvc+LVL1MuonRoIs' )]
   else:
     ViewVerify.DataObjects += [( 'DataVector< LVL1::RecMuonRoI >' , 'StoreGateSvc+HLT_RecMURoIs' )]
@@ -262,39 +259,23 @@ def muFastRecoSequence( RoIs, doFullScanID = False, InsideOutMode=False, extraLo
   muFastRecoSequence += ViewVerify
 
   from TrigT1MuonRecRoiTool.TrigT1MuonRecRoiToolConf import LVL1__TrigT1RPCRecRoiTool
-  trigRpcRoiTool = LVL1__TrigT1RPCRecRoiTool("RPCRecRoiTool", UseRun3Config=ConfigFlags.Trigger.enableL1MuonPhase1)
+  trigRpcRoiTool = LVL1__TrigT1RPCRecRoiTool("RPCRecRoiTool", UseRun3Config=flags.Trigger.enableL1MuonPhase1)
   from TrigL2MuonSA.TrigL2MuonSAConf import TrigL2MuonSA__RpcClusterPreparator
   L2RpcClusterPreparator = TrigL2MuonSA__RpcClusterPreparator(name = "L2RpcClusterPreparator",
                                                               TrigT1RPCRecRoiTool = trigRpcRoiTool)
   ToolSvc += L2RpcClusterPreparator
 
   ### set up MuFastSteering ###
-  from TrigL2MuonSA.TrigL2MuonSAConfig import TrigL2MuonSAConfig
-  muFastAlg = TrigL2MuonSAConfig("Muon"+postFix)
-
-  muFastAlg.Run2RecMuonRoI = "HLT_RecMURoIs"
-  muFastAlg.RecMuonRoI = "LVL1MuonRoIs"
-  muFastAlg.MuRoIs = RoIs
-  muFastAlg.MuonL2SAInfo = muNames.L2SAName+postFix
-  muFastAlg.L2IOCB = muNames.L2CBName+postFix
-  muFastAlg.MuonCalibrationStream = "MuonCalibrationStream"+postFix
-  muFastAlg.forID = muNames.L2forIDName+postFix
-  muFastAlg.forMS = "forMS"+postFix
-  muFastAlg.FILL_FSIDRoI = doFullScanID
-  muFastAlg.InsideOutMode = InsideOutMode
-  muFastAlg.TrackParticlesContainerName = getIDTracks()
-  #Do not run topo road and inside-out mode at the same time
-  if InsideOutMode:
-    muFastAlg.topoRoad = False
-  
-  if l2mtmode:
-    muFastAlg.multitrackMode = True
-    muFastAlg.doEndcapForl2mt = False
-
-  if ConfigFlags.Trigger.enableL1MuonPhase1:
-    muFastAlg.UseRun3Config = True
-  else:
-    muFastAlg.UseRun3Config = False
+  from TrigL2MuonSA.TrigL2MuonSAConfig_newJO import l2MuFastAlgCfg
+  muFastAlg = algorithmCAToGlobalWrapper(l2MuFastAlgCfg, flags,
+                                         roisKey = RoIs,
+                                         setup = postFix,
+                                         FILL_FSIDRoI = doFullScanID,
+                                         MuonL2SAInfo = muNames.L2SAName+postFix,
+                                         L2IOCB = muNames.L2CBName+postFix,
+                                         forID = muNames.L2forIDName+postFix,
+                                         forMS = "forMS"+postFix,
+                                         TrackParticlesContainerName = getIDTracks(flags))[0]
 
   muFastRecoSequence += muFastAlg
   sequenceOut = muFastAlg.MuonL2SAInfo
@@ -302,7 +283,7 @@ def muFastRecoSequence( RoIs, doFullScanID = False, InsideOutMode=False, extraLo
   return muFastRecoSequence, sequenceOut
 
 
-def muonIDFastTrackingSequence( RoIs, name, extraLoads=None, extraLoadsForl2mtmode=None, doLRT=False ):
+def muonIDFastTrackingSequence( flags, RoIs, name, extraLoads=None, extraLoadsForl2mtmode=None, doLRT=False ):
 
   from AthenaCommon.CFElements import parOR
 
@@ -316,7 +297,7 @@ def muonIDFastTrackingSequence( RoIs, name, extraLoads=None, extraLoadsForl2mtmo
   IDTrigConfig = getInDetTrigConfig( "muon"+name ) 
 
   from TrigInDetConfig.InDetTrigFastTracking import makeInDetTrigFastTracking
-  viewAlgs, viewVerify = makeInDetTrigFastTracking( config = IDTrigConfig, rois = RoIs )
+  viewAlgs, viewVerify = makeInDetTrigFastTracking( flags, config = IDTrigConfig, rois = RoIs )
   viewVerify.DataObjects += [( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s' % RoIs )]
   if extraLoads:
     viewVerify.DataObjects += extraLoads
@@ -329,7 +310,7 @@ def muonIDFastTrackingSequence( RoIs, name, extraLoads=None, extraLoadsForl2mtmo
 
   return muonIDFastTrackingSequence
 
-def muonIDCosmicTrackingSequence( RoIs, name, extraLoads=None ):
+def muonIDCosmicTrackingSequence( flags, RoIs, name, extraLoads=None ):
 
   from AthenaCommon.CFElements import parOR
   viewNodeName=name+"IDTrackingViewNode"
@@ -340,12 +321,12 @@ def muonIDCosmicTrackingSequence( RoIs, name, extraLoads=None ):
   IDTrigConfig = getInDetTrigConfig( "cosmics" )
 
   from TrigInDetConfig.InDetTrigFastTracking import makeInDetTrigFastTracking
-  dataPreparationAlgs, dataVerifier = makeInDetTrigFastTracking( config = IDTrigConfig, rois = RoIs, doFTF = False)
+  dataPreparationAlgs, dataVerifier = makeInDetTrigFastTracking( flags, config = IDTrigConfig, rois = RoIs, doFTF = False)
    
   dataVerifier.DataObjects += [( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s'%RoIs )]
 
   from TrigInDetConfig.EFIDTracking import makeInDetPatternRecognition
-  trackingAlgs, _ = makeInDetPatternRecognition( config  = IDTrigConfig, verifier = 'VDVCosmicIDTracking' )
+  trackingAlgs, _ = makeInDetPatternRecognition( flags, config  = IDTrigConfig, verifier = 'VDVCosmicIDTracking' )
 
   if extraLoads:
     dataVerifier.DataObjects += extraLoads
@@ -361,7 +342,7 @@ def muonIDCosmicTrackingSequence( RoIs, name, extraLoads=None ):
 
 
 
-def muCombRecoSequence( RoIs, name, l2mtmode=False ):
+def muCombRecoSequence( flags, RoIs, name, l2mtmode=False ):
 
   from AthenaCommon.CFElements import parOR
   postFix = ""
@@ -377,10 +358,9 @@ def muCombRecoSequence( RoIs, name, l2mtmode=False ):
 
   muCombRecoSequence+=ViewVerify
 
-  ### please read out TrigmuCombConfig file ###
-  ### and set up to run muComb algorithm    ###
-  from TrigmuComb.TrigmuCombConfig import TrigmuCombConfig
-  muCombAlg = TrigmuCombConfig("Muon"+postFix,name)
+  from TrigmuComb.TrigmuCombConfig import muCombCfg
+  _, muCombAlg = muCombCfg(flags, f'{postFix}_{name}', useBackExtrp=True)
+
   muCombAlg.L2StandAloneMuonContainerName = muNames.L2SAName+postFix
   if ('LRT' in name):
     muCombAlg.L2CombinedMuonContainerName   = muNamesLRT.L2CBName
@@ -388,9 +368,9 @@ def muCombRecoSequence( RoIs, name, l2mtmode=False ):
     muCombAlg.L2CombinedMuonContainerName   = muNames.L2CBName+postFix
     
   if l2mtmode:
-    muCombAlg.TrackParticlesContainerName   = getIDTracks()
+    muCombAlg.TrackParticlesContainerName   = getIDTracks(flags)
   else:
-    muCombAlg.TrackParticlesContainerName   = getIDTracks(name)
+    muCombAlg.TrackParticlesContainerName   = getIDTracks(flags, name)
 
   muCombRecoSequence += muCombAlg
   sequenceOut = muCombAlg.L2CombinedMuonContainerName
@@ -398,15 +378,16 @@ def muCombRecoSequence( RoIs, name, l2mtmode=False ):
   return muCombRecoSequence, sequenceOut
 
 
-def muEFSARecoSequence( RoIs, name ):
+def muEFSARecoSequence( flags, RoIs, name ):
 
-  import AthenaCommon.CfgGetter as CfgGetter
 
   from AthenaCommon import CfgMgr
   from AthenaCommon.CFElements import parOR
-  from MuonRecExample.MuonStandalone import MooSegmentFinderAlg, MuonStandaloneTrackParticleCnvAlg, MuonSegmentFinderAlg, MuonStationsInterSectAlg, MuonLayerHoughAlg, MuonSegmentFilterAlg
-  from MuonCombinedRecExample.MuonCombinedAlgs import MuonCombinedMuonCandidateAlg, MuonCreatorAlg
   from MuonCombinedAlgs.MuonCombinedAlgsMonitoring import MuonCreatorAlgMonitoring
+  from MuonConfig.MuonSegmentFindingConfig import MooSegmentFinderAlgCfg, MuonSegmentFinderAlgCfg, MuonLayerHoughAlgCfg, MuonSegmentFilterAlgCfg
+  from MuonConfig.MuonTrackBuildingConfig import MuPatTrackBuilderCfg, EMEO_MuPatTrackBuilderCfg
+  from xAODTrackingCnv.xAODTrackingCnvConfig import MuonStandaloneTrackParticleCnvAlgCfg
+  from MuonCombinedConfig.MuonCombinedReconstructionConfig import MuonCombinedMuonCandidateAlgCfg, MuonCreatorAlgCfg
 
   muEFSARecoSequence = parOR("efmsViewNode_"+name)
 
@@ -417,64 +398,44 @@ def muEFSARecoSequence( RoIs, name ):
 
   muEFSARecoSequence+= EFMuonViewDataVerifier
 
-  #need MdtCondDbAlg for the MuonStationIntersectSvc (required by segment and track finding)
-  from AthenaCommon.AlgSequence import AthSequencer
-  from MuonCondAlg.MuonTopCondAlgConfigRUN2 import MdtCondDbAlg
-  if not athenaCommonFlags.isOnline:
-    condSequence = AthSequencer("AthCondSeq")
-    if not hasattr(condSequence,"MdtCondDbAlg"):
-      condSequence += MdtCondDbAlg("MdtCondDbAlg")
-    # Sets up and configures the muon alignment:
-    from MuonRecExample import MuonAlignConfig # noqa: F401
-
-  MuonStationsInterSectAlg()
-  if (MuonGeometryFlags.hasSTGC() and MuonGeometryFlags.hasMM()):
-      theMuonLayerHough = MuonLayerHoughAlg("TrigMuonLayerHoughAlg")
+  if flags.Detector.GeometrysTGC and flags.Detector.GeometryMM:
+      theMuonLayerHough = algorithmCAToGlobalWrapper(MuonLayerHoughAlgCfg, flags, "TrigMuonLayerHoughAlg")
       muEFSARecoSequence+=theMuonLayerHough
 
       # if NSW is excluded from reconstruction (during commissioning)
-      if muonRecFlags.runCommissioningChain():
-        theSegmentFinderAlg = MuonSegmentFinderAlg("TrigMuonSegmentMaker_"+name,SegmentCollectionName="TrackMuonSegments_withNSW") 
-        theSegmentFilterAlg = MuonSegmentFilterAlg("TrigMuonSegmentFilter_"+name,SegmentCollectionName="TrackMuonSegments_withNSW",
+      if flags.Muon.runCommissioningChain:
+        theSegmentFinderAlg = algorithmCAToGlobalWrapper(MuonSegmentFinderAlgCfg, flags, name="TrigMuonSegmentMaker_"+name,SegmentCollectionName="TrackMuonSegments_withNSW") 
+        theSegmentFilterAlg = algorithmCAToGlobalWrapper(MuonSegmentFilterAlgCfg, flags, name="TrigMuonSegmentFilter_"+name,SegmentCollectionName="TrackMuonSegments_withNSW",
                                                    FilteredCollectionName="TrackMuonSegments", TrashUnFiltered=False, ThinStations={}) 
       else:
-        theSegmentFinderAlg = MuonSegmentFinderAlg("TrigMuonSegmentMaker_"+name)
+        theSegmentFinderAlg = algorithmCAToGlobalWrapper(MuonSegmentFinderAlgCfg, flags, "TrigMuonSegmentMaker_"+name)
 
   else:
-    theSegmentFinderAlg = MooSegmentFinderAlg("TrigMuonSegmentMaker_"+name)
+    theSegmentFinderAlg = algorithmCAToGlobalWrapper(MooSegmentFinderAlgCfg,flags,name="TrigMuonSegmentMaker_"+name, UseTGCNextBC=False, UseTGCPriorBC=False)
 
   from MuonSegmentTrackMaker.MuonTrackMakerAlgsMonitoring import MuPatTrackBuilderMonitoring
 
-  if muonRecFlags.runCommissioningChain():
-     chamberRecovery = CfgGetter.getPublicToolClone("MuonChamberRecovery", "MuonChamberHoleRecoveryTool", 
-                                                                sTgcPrepDataContainer="",
-                                                                MMPrepDataContainer="")
-     MooTrackBuilder = CfgGetter.getPublicToolClone("MooMuonTrackBuilder", 
-                                                "MooTrackBuilderTemplate",
-                                                 ChamberHoleRecoveryTool = chamberRecovery)
-     trackSteering = CfgGetter.getPublicToolClone("TrigMuonTrackSteering", "MuonTrackSteering",TrackBuilderTool= MooTrackBuilder) 
+  if flags.Muon.runCommissioningChain:
+    TrackBuilder = algorithmCAToGlobalWrapper(EMEO_MuPatTrackBuilderCfg, flags, name="TrigMuPatTrackBuilder_"+name ,MuonSegmentCollection = "TrackMuonSegments", MonTool = MuPatTrackBuilderMonitoring(flags, "MuPatTrackBuilderMonitoringSA_"+name), SpectrometerTrackOutputLocation="MuonSpectrometerTracks")
 
   else:
-     trackSteering = CfgGetter.getPublicToolClone("TrigMuonTrackSteering", "MuonTrackSteering")
+    TrackBuilder = algorithmCAToGlobalWrapper(MuPatTrackBuilderCfg, flags, name="TrigMuPatTrackBuilder_"+name ,MuonSegmentCollection = "TrackMuonSegments", MonTool = MuPatTrackBuilderMonitoring(flags, "MuPatTrackBuilderMonitoringSA_"+name))
 
-  TrackBuilder = CfgMgr.MuPatTrackBuilder("TrigMuPatTrackBuilder_"+name ,MuonSegmentCollection = "TrackMuonSegments",                                                                                                             TrackSteering = trackSteering,                                                                                                                                                         MonTool = MuPatTrackBuilderMonitoring("MuPatTrackBuilderMonitoringSA_"+name))
-
-  xAODTrackParticleCnvAlg = MuonStandaloneTrackParticleCnvAlg("TrigMuonStandaloneTrackParticleCnvAlg_"+name)
-  theMuonCandidateAlg=MuonCombinedMuonCandidateAlg("TrigMuonCandidateAlg_"+name)
+  xAODTrackParticleCnvAlg = algorithmCAToGlobalWrapper(MuonStandaloneTrackParticleCnvAlgCfg,flags, name = "TrigMuonStandaloneTrackParticleCnvAlg_"+name)
+  theMuonCandidateAlg=algorithmCAToGlobalWrapper(MuonCombinedMuonCandidateAlgCfg, flags, name="TrigMuonCandidateAlg_"+name)
 
   msMuonName = muNames.EFSAName
   if 'FS' in name:
     msMuonName = muNamesFS.EFSAName
 
-  themuoncreatoralg = MuonCreatorAlg("TrigMuonCreatorAlg_"+name, CreateSAmuons=True, TagMaps=[], MuonContainerLocation=msMuonName,
+  themuoncreatoralg = algorithmCAToGlobalWrapper(MuonCreatorAlgCfg, flags, name="TrigMuonCreatorAlg_"+name, CreateSAmuons=True, TagMaps=[], MuonContainerLocation=msMuonName,
                                      ExtrapolatedLocation = "HLT_MSExtrapolatedMuons_"+name, MSOnlyExtrapolatedLocation = "HLT_MSOnlyExtrapolatedMuons_"+name,
-                                     MuonCreatorTool = CfgGetter.getPrivateToolClone("TrigMuonCreatorToolSA", "MuonCreatorTool", TrackSummaryTool = CfgGetter.getPublicTool("MuonTrackSummaryTool")),
-                                     MonTool = MuonCreatorAlgMonitoring("MuonCreatorAlgSA_"+name))
+                                     MonTool = MuonCreatorAlgMonitoring(flags, "MuonCreatorAlgSA_"+name))
 
 
   #Algorithms to views
   muEFSARecoSequence+=theSegmentFinderAlg
-  if muonRecFlags.runCommissioningChain():
+  if flags.Muon.runCommissioningChain:
     muEFSARecoSequence+=theSegmentFilterAlg
   muEFSARecoSequence+=TrackBuilder
   muEFSARecoSequence+=xAODTrackParticleCnvAlg
@@ -482,82 +443,88 @@ def muEFSARecoSequence( RoIs, name ):
   muEFSARecoSequence+=themuoncreatoralg
 
 
-  sequenceOut = themuoncreatoralg.MuonContainerLocation
+  sequenceOut = msMuonName
 
   return muEFSARecoSequence, sequenceOut
 
 
 
+def VDVEFMuCBCfg(flags, RoIs, name):
+  acc = ComponentAccumulator()
+  dataObjects = [( 'Muon::MdtPrepDataContainer' , 'StoreGateSvc+MDT_DriftCircles' ),  
+                 ( 'Muon::TgcPrepDataContainer' , 'StoreGateSvc+TGC_Measurements' ),
+                 ( 'Muon::RpcPrepDataContainer' , 'StoreGateSvc+RPC_Measurements' ),
+                 ( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s' % RoIs ),
+                 ( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' )]
+  if "FS" in name:
+    dataObjects +=[( 'MuonCandidateCollection' , 'StoreGateSvc+MuonCandidates_FS' )]
+  else:
+    dataObjects +=[( 'MuonCandidateCollection' , 'StoreGateSvc+MuonCandidates')]
 
-def muEFCBRecoSequence( RoIs, name ):
+  if flags.Detector.GeometryCSC:
+    dataObjects += [( 'Muon::CscStripPrepDataContainer' , 'StoreGateSvc+CSC_Measurements' )]
+  if flags.Detector.GeometrysTGC and flags.Detector.GeometryMM: 
+    dataObjects += [( 'Muon::MMPrepDataContainer' , 'StoreGateSvc+MM_Measurements'),
+                    ( 'Muon::sTgcPrepDataContainer' , 'StoreGateSvc+STGC_Measurements') ]
+  if flags.Input.isMC:
+    dataObjects += [( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' )]
+
+  alg = CompFactory.AthViews.ViewDataVerifier( name = "VDVMuEFCB_"+name,
+                                               DataObjects = dataObjects)
+  acc.addEventAlgo(alg)
+  return acc
+
+def VDVPrecMuTrkCfg(flags, name):
+  acc = ComponentAccumulator()
+
+  vdvName = "VDVMuTrkLRT" if "LRT" in name else "VDVMuTrk"
+  trkname = "LRT" if "LRT" in name else ''
+  dataObjects = [( 'xAOD::TrackParticleContainer' , 'StoreGateSvc+'+getIDTracks(flags, trkname) ),
+                 ( 'xAOD::IParticleContainer' , 'StoreGateSvc+'+ getIDTracks(flags, trkname) )]
+
+  if not flags.Input.isMC:
+    dataObjects += [( 'IDCInDetBSErrContainer' , 'StoreGateSvc+PixelByteStreamErrs' ),
+                    ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_ByteStreamErrs' )]
+
+  alg = CompFactory.AthViews.ViewDataVerifier( name = vdvName,
+                                               DataObjects = dataObjects)
+  acc.addEventAlgo(alg)
+  return acc
 
 
-  from AthenaCommon import CfgMgr
+
+def muEFCBRecoSequence( flags, RoIs, name ):
+
+
   from AthenaCommon.CFElements import parOR
-  from MuonCombinedRecExample.MuonCombinedAlgs import MuonCombinedInDetCandidateAlg, MuonCombinedAlg, MuonCreatorAlg
+  from MuonCombinedRecExample.MuonCombinedAlgs import MuonCombinedInDetCandidateAlg
   from MuonCombinedAlgs.MuonCombinedAlgsMonitoring import MuonCreatorAlgMonitoring
+  from MuonCombinedConfig.MuonCombinedReconstructionConfig import MuonCreatorAlgCfg, MuonCombinedAlgCfg
 
   muEFCBRecoSequence = parOR("efcbViewNode_"+name)
-  #Need ID tracking related objects and MS tracks from previous steps
-  ViewVerifyMS = CfgMgr.AthViews__ViewDataVerifier("muonCBViewDataVerifier_"+name)
-  ViewVerifyMS.DataObjects = [( 'Muon::MdtPrepDataContainer' , 'StoreGateSvc+MDT_DriftCircles' ),  
-                              ( 'Muon::TgcPrepDataContainer' , 'StoreGateSvc+TGC_Measurements' ),
-                              ( 'Muon::RpcPrepDataContainer' , 'StoreGateSvc+RPC_Measurements' ),
-                              ( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s' % RoIs ),
-                              ( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' )]
-  if "FS" in name:
-    ViewVerifyMS.DataObjects +=[( 'MuonCandidateCollection' , 'StoreGateSvc+MuonCandidates_FS' )]
-  else:
-    ViewVerifyMS.DataObjects +=[( 'MuonCandidateCollection' , 'StoreGateSvc+MuonCandidates')]
 
-  if MuonGeometryFlags.hasCSC():
-    ViewVerifyMS.DataObjects += [( 'Muon::CscStripPrepDataContainer' , 'StoreGateSvc+CSC_Measurements' )]
-  if (MuonGeometryFlags.hasSTGC() and MuonGeometryFlags.hasMM()): 
-    ViewVerifyMS.DataObjects += [( 'Muon::MMPrepDataContainer' , 'StoreGateSvc+MM_Measurements'),
-                                ( 'Muon::sTgcPrepDataContainer' , 'StoreGateSvc+STGC_Measurements') ]
-
-  muEFCBRecoSequence += ViewVerifyMS
+  muEFCBRecoSequence += algorithmCAToGlobalWrapper(VDVEFMuCBCfg,flags, RoIs, name)
 
   from AthenaCommon.AlgSequence import AlgSequence
   topSequence = AlgSequence()
 
-  if not globalflags.InputFormat.is_bytestream():
+  if flags.Input.isMC:
     topSequence.SGInputLoader.Load += [( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' )]
-    ViewVerifyMS.DataObjects += [( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' )]
 
 
   from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
   signatureName = 'muon{}'.format( 'FS' if 'FS' in name else 'LRT' if 'LRT' in name else '' ) 
   IDTrigConfig = getInDetTrigConfig( signatureName )
 
+  ViewVerifyTrk = algorithmCAToGlobalWrapper(VDVPrecMuTrkCfg, flags, name)
   if "FS" in name:
     #Need to run tracking for full scan chains
     from TrigInDetConfig.InDetTrigFastTracking import makeInDetTrigFastTracking
-    viewAlgs, viewVerify = makeInDetTrigFastTracking(config = IDTrigConfig, rois = RoIs) 
+    viewAlgs, viewVerify = makeInDetTrigFastTracking(flags, config = IDTrigConfig, rois = RoIs)
 
     for viewAlg in viewAlgs:
       muEFCBRecoSequence += viewAlg
-
-  elif "LRT" in name:
-    ViewVerifyTrk = CfgMgr.AthViews__ViewDataVerifier("muonCBIDViewDataVerifierLRT")
-    ViewVerifyTrk.DataObjects = [( 'xAOD::TrackParticleContainer' , 'StoreGateSvc+'+getIDTracks(name) ),
-                                 ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_FlaggedCondData_TRIG' ),
-                                 ( 'xAOD::IParticleContainer' , 'StoreGateSvc+'+ getIDTracks(name) )]
-
-    if globalflags.InputFormat.is_bytestream():
-      ViewVerifyTrk.DataObjects += [( 'IDCInDetBSErrContainer' , 'StoreGateSvc+PixelByteStreamErrs' ),
-                                    ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_ByteStreamErrs' )]
-    muEFCBRecoSequence += ViewVerifyTrk
-
   else:
-    ViewVerifyTrk = CfgMgr.AthViews__ViewDataVerifier("muonCBIDViewDataVerifier")
-    ViewVerifyTrk.DataObjects = [( 'xAOD::TrackParticleContainer' , 'StoreGateSvc+'+getIDTracks() ),
-                                 ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_FlaggedCondData_TRIG' ),
-                                 ( 'xAOD::IParticleContainer' , 'StoreGateSvc+'+ getIDTracks() )]
-
-    if globalflags.InputFormat.is_bytestream():
-      ViewVerifyTrk.DataObjects += [( 'IDCInDetBSErrContainer' , 'StoreGateSvc+PixelByteStreamErrs' ),
-                                    ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_ByteStreamErrs' )]
     muEFCBRecoSequence += ViewVerifyTrk
 
 
@@ -571,33 +538,32 @@ def muEFCBRecoSequence( RoIs, name ):
   #Pass verifier as an argument and it will automatically append necessary DataObjects
   #@NOTE: Don't provide any verifier if loaded in the same view as FTF
   if 'FS' in name:
-    PTTracks, PTTrackParticles, PTAlgs = makeInDetTrigPrecisionTracking( config = IDTrigConfig, rois = RoIs, verifier = False)
+    PTTracks, PTTrackParticles, PTAlgs = makeInDetTrigPrecisionTracking( flags, config = IDTrigConfig, rois = RoIs, verifier = False)
     PTSeq = parOR("precisionTrackingInMuonsFS", PTAlgs  )
     muEFCBRecoSequence += PTSeq
     trackParticles = PTTrackParticles[-1]
   elif 'LRT' in name:
-    PTTracks, PTTrackParticles, PTAlgs = makeInDetTrigPrecisionTracking( config = IDTrigConfig, rois = RoIs,  verifier = ViewVerifyTrk )
+    PTTracks, PTTrackParticles, PTAlgs = makeInDetTrigPrecisionTracking( flags, config = IDTrigConfig, rois = RoIs,  verifier = ViewVerifyTrk[0] )
     PTSeq = parOR("precisionTrackingInMuonsLRT", PTAlgs  )
     muEFCBRecoSequence += PTSeq
     trackParticles = PTTrackParticles[-1]
   #In case of cosmic Precision Tracking has been already called before hence no need to call here just retrieve the correct collection of tracks
-  elif isCosmic():
+  elif isCosmic(flags):
     if 'LRT' in name:
-      PTTracks, PTTrackParticles, PTAlgs = makeInDetTrigPrecisionTracking( config = IDTrigConfig, rois = RoIs,  verifier = ViewVerifyTrk )
+      PTTracks, PTTrackParticles, PTAlgs = makeInDetTrigPrecisionTracking( flags, config = IDTrigConfig, rois = RoIs,  verifier = ViewVerifyTrk[0] )
       PTSeq = parOR("precisionTrackingInMuonsLRT", PTAlgs  )
       muEFCBRecoSequence += PTSeq
       trackParticles = PTTrackParticles[-1]
     else:
-      trackParticles = getIDTracks()
+      trackParticles = getIDTracks(flags)
   else:
-    PTTracks, PTTrackParticles, PTAlgs = makeInDetTrigPrecisionTracking( config = IDTrigConfig, rois = RoIs,  verifier = ViewVerifyTrk )
+    PTTracks, PTTrackParticles, PTAlgs = makeInDetTrigPrecisionTracking( flags, config = IDTrigConfig, rois = RoIs,  verifier = ViewVerifyTrk[0] )
     PTSeq = parOR("precisionTrackingInMuons", PTAlgs  )
     muEFCBRecoSequence += PTSeq
     trackParticles = PTTrackParticles[-1]
 
   #Make InDetCandidates
-  theIndetCandidateAlg = MuonCombinedInDetCandidateAlg("TrigMuonCombinedInDetCandidateAlg_"+name,TrackParticleLocation = [trackParticles], 
-                                                       InDetCandidateLocation="InDetCandidates_"+name)
+  theIndetCandidateAlg = MuonCombinedInDetCandidateAlg("TrigMuonCombinedInDetCandidateAlg_"+name,TrackParticleLocation = [trackParticles], InDetCandidateLocation="InDetCandidates_"+name)
 
   #No easy way to access AtlasHoleSearchTool in theIndetCandidateAlg
   from AthenaCommon.AppMgr import ToolSvc
@@ -606,7 +572,7 @@ def muEFCBRecoSequence( RoIs, name ):
   sct_ConditionsSummaryToolSetupWithoutFlagged = SCT_ConditionsSummaryToolSetup(SCT_ConditionsSetup.instanceName('InDetSCT_ConditionsSummaryToolWithoutFlagged'))
   sct_ConditionsSummaryToolSetupWithoutFlagged.setup()
   ToolSvc.CombinedMuonIDHoleSearch.BoundaryCheckTool.SctSummaryTool = sct_ConditionsSummaryToolSetupWithoutFlagged.getTool()
-  if globalflags.InputFormat.is_bytestream():
+  if not flags.Input.isMC:
     ToolSvc.CombinedMuonIDHoleSearch.BoundaryCheckTool.SctSummaryTool.ConditionsTools=['SCT_ConfigurationConditionsTool/InDetTrigInDetSCT_ConfigurationConditionsTool','SCT_ByteStreamErrorsTool/InDetTrigInDetSCT_ByteStreamErrorsTool']
   else:
     ToolSvc.CombinedMuonIDHoleSearch.BoundaryCheckTool.SctSummaryTool.ConditionsTools=['SCT_ConfigurationConditionsTool/InDetTrigInDetSCT_ConfigurationConditionsTool']
@@ -616,7 +582,7 @@ def muEFCBRecoSequence( RoIs, name ):
   if 'FS' in name:
     candidatesName = "MuonCandidates_FS"
 
-  theMuonCombinedAlg = MuonCombinedAlg("TrigMuonCombinedAlg_"+name, MuonCandidateLocation=candidatesName, InDetCandidateLocation="InDetCandidates_"+name)
+  theMuonCombinedAlg = algorithmCAToGlobalWrapper(MuonCombinedAlgCfg, flags,name="TrigMuonCombinedAlg_"+name, MuonCandidateLocation=candidatesName, InDetCandidateLocation="InDetCandidates_"+name)
 
   cbMuonName = muNames.EFCBOutInName
   if 'FS' in name:
@@ -624,10 +590,11 @@ def muEFCBRecoSequence( RoIs, name ):
   elif 'LRT' in name:
     cbMuonName = muNamesLRT.EFCBName
 
-  themuoncbcreatoralg = MuonCreatorAlg("TrigMuonCreatorAlgCB_"+name, MuonCandidateLocation=[candidatesName], TagMaps=["muidcoTagMap"], InDetCandidateLocation="InDetCandidates_"+name,
+
+  themuoncbcreatoralg = algorithmCAToGlobalWrapper(MuonCreatorAlgCfg, flags, name="TrigMuonCreatorAlgCB_"+name, MuonCandidateLocation=[candidatesName], TagMaps=["muidcoTagMap"], InDetCandidateLocation="InDetCandidates_"+name,
                                        MuonContainerLocation = cbMuonName, ExtrapolatedLocation = "CBExtrapolatedMuons",
                                        MSOnlyExtrapolatedLocation = "CBMSonlyExtrapolatedMuons", CombinedLocation = "HLT_CBCombinedMuon_"+name,
-                                       MonTool = MuonCreatorAlgMonitoring("MuonCreatorAlgCB_"+name))
+                                       MonTool = MuonCreatorAlgMonitoring(flags, "MuonCreatorAlgCB_"+name))
 
   #Add all algorithms
   muEFCBRecoSequence+=theIndetCandidateAlg
@@ -635,21 +602,37 @@ def muEFCBRecoSequence( RoIs, name ):
   muEFCBRecoSequence+=themuoncbcreatoralg
 
 
-  sequenceOut = themuoncbcreatoralg.MuonContainerLocation
+  sequenceOut = cbMuonName
 
 
   return muEFCBRecoSequence, sequenceOut
 
 
-def muEFInsideOutRecoSequence(RoIs, name):
+def VDVMuInsideOutCfg(flags, name, candidatesName):
+  acc = ComponentAccumulator()
+  dataObjects = [( 'Muon::RpcPrepDataContainer' , 'StoreGateSvc+RPC_Measurements' ),
+                 ( 'Muon::TgcPrepDataContainer' , 'StoreGateSvc+TGC_Measurements' ),
+                 ( 'MuonCandidateCollection' , 'StoreGateSvc+'+candidatesName )]
+  if not isCosmic(flags): dataObjects += [( 'Muon::HoughDataPerSectorVec' , 'StoreGateSvc+HoughDataPerSectorVec')]
+  if flags.Detector.GeometryCSC:
+    dataObjects += [( 'Muon::CscPrepDataContainer' , 'StoreGateSvc+CSC_Clusters' )]
+  if flags.Detector.GeometrysTGC and flags.Detector.GeometryMM:
+    dataObjects += [( 'Muon::MMPrepDataContainer'       , 'StoreGateSvc+MM_Measurements'),
+                    ( 'Muon::sTgcPrepDataContainer'     , 'StoreGateSvc+STGC_Measurements') ]
+
+  alg = CompFactory.AthViews.ViewDataVerifier( name = "VDVMuInsideOut_"+name,
+                                               DataObjects = dataObjects)
+  acc.addEventAlgo(alg)
+  return acc
+
+def muEFInsideOutRecoSequence(flags, RoIs, name):
 
   from AthenaCommon.CFElements import parOR
-  from AthenaCommon import CfgMgr
 
-  from MuonRecExample.MuonStandalone import MooSegmentFinderAlg, MuonSegmentFinderAlg, MuonSegmentFilterAlg
-  from MuonCombinedRecExample.MuonCombinedAlgs import MuonCombinedInDetCandidateAlg, MuonInsideOutRecoAlg, MuGirlStauAlg, MuonCreatorAlg, StauCreatorAlg, MuonInDetToMuonSystemExtensionAlg
+  from MuonConfig.MuonSegmentFindingConfig import MooSegmentFinderAlgCfg, MuonSegmentFinderAlgCfg, MuonLayerHoughAlgCfg, MuonSegmentFilterAlgCfg
+  from MuonCombinedRecExample.MuonCombinedAlgs import MuonCombinedInDetCandidateAlg
   from MuonCombinedAlgs.MuonCombinedAlgsMonitoring import MuonCreatorAlgMonitoring
-
+  from MuonCombinedConfig.MuonCombinedReconstructionConfig import MuonCreatorAlgCfg, MuGirlStauAlgCfg, StauCreatorAlgCfg, MuonInDetToMuonSystemExtensionAlgCfg, MuonInsideOutRecoAlgCfg
 
   viewNodeName="efmuInsideOutViewNode_"+name
   if "Late" in name:
@@ -663,34 +646,25 @@ def muEFInsideOutRecoSequence(RoIs, name):
   if "Late" in name:
 
     #Need to run hough transform at start of late muon chain
-    #need MdtCondDbAlg for the MuonStationIntersectSvc (required by segment and track finding)
-    from AthenaCommon.AlgSequence import AthSequencer
-    from MuonCondAlg.MuonTopCondAlgConfigRUN2 import MdtCondDbAlg
-    if not athenaCommonFlags.isOnline:
-      condSequence = AthSequencer("AthCondSeq")
-      if not hasattr(condSequence,"MdtCondDbAlg"):
-        condSequence += MdtCondDbAlg("MdtCondDbAlg")
-      # Sets up and configures the muon alignment:
-      from MuonRecExample import MuonAlignConfig # noqa: F401
+    if flags.Detector.GeometrysTGC and flags.Detector.GeometryMM:
+      theMuonLayerHough = algorithmCAToGlobalWrapper(MuonLayerHoughAlgCfg, flags, "TrigMuonLayerHoughAlg")
+      efmuInsideOutRecoSequence+=theMuonLayerHough
 
-      if (MuonGeometryFlags.hasSTGC() and MuonGeometryFlags.hasMM()):
-        theMuonLayerHough = CfgMgr.MuonLayerHoughAlg( "MuonLayerHoughAlg")
-        efmuInsideOutRecoSequence+=theMuonLayerHough
-
-        # if NSW is excluded from reconstruction (during commissioning)
-        if muonRecFlags.runCommissioningChain():
-          theSegmentFinderAlg = MuonSegmentFinderAlg("TrigMuonSegmentMaker_"+name,SegmentCollectionName="TrackMuonSegments_withNSW")
-          theSegmentFilterAlg = MuonSegmentFilterAlg("TrigMuonSegmentFilter_"+name,SegmentCollectionName="TrackMuonSegments_withNSW",
-                                                     FilteredCollectionName="TrackMuonSegments", TrashUnFiltered=False, ThinStations={})
-        else:
-          theSegmentFinderAlg = MuonSegmentFinderAlg( "TrigMuonSegmentMaker_"+name)
-
+      # if NSW is excluded from reconstruction (during commissioning)
+      if flags.Muon.runCommissioningChain:
+        theSegmentFinderAlg = algorithmCAToGlobalWrapper(MuonSegmentFinderAlgCfg, flags, name="TrigMuonSegmentMaker_"+name,SegmentCollectionName="TrackMuonSegments_withNSW") 
+        theSegmentFilterAlg = algorithmCAToGlobalWrapper(MuonSegmentFilterAlgCfg, flags, name="TrigMuonSegmentFilter_"+name,SegmentCollectionName="TrackMuonSegments_withNSW",
+                                                   FilteredCollectionName="TrackMuonSegments", TrashUnFiltered=False, ThinStations={}) 
       else:
-        theSegmentFinderAlg = MooSegmentFinderAlg("TrigLateMuonSegmentMaker_"+name)
+        theSegmentFinderAlg = algorithmCAToGlobalWrapper(MuonSegmentFinderAlgCfg, flags, "TrigMuonSegmentMaker_"+name)
 
-      efmuInsideOutRecoSequence+=theSegmentFinderAlg
-      if muonRecFlags.runCommissioningChain():
-        efmuInsideOutRecoSequence+=theSegmentFilterAlg 
+    else:
+      theSegmentFinderAlg = algorithmCAToGlobalWrapper(MooSegmentFinderAlgCfg,flags,name="TrigMuonSegmentMaker_"+name, UseTGCNextBC=False, UseTGCPriorBC=False)
+
+
+    efmuInsideOutRecoSequence+=theSegmentFinderAlg
+    if flags.Muon.runCommissioningChain:
+      efmuInsideOutRecoSequence+=theSegmentFilterAlg 
 
     # need to run precisions tracking for late muons, since we don't run it anywhere else
 
@@ -705,22 +679,22 @@ def muEFInsideOutRecoSequence(RoIs, name):
 
     from TrigInDetConfig.InDetTrigPrecisionTracking import makeInDetTrigPrecisionTracking
     #When run in a different view than FTF some data dependencies needs to be loaded through verifier
-    PTTracks, PTTrackParticles, PTAlgs = makeInDetTrigPrecisionTracking( config = IDTrigConfig, rois=RoIs)
+    PTTracks, PTTrackParticles, PTAlgs = makeInDetTrigPrecisionTracking(flags, config = IDTrigConfig, rois=RoIs)
     PTSeq = parOR("precisionTrackingInLateMuons", PTAlgs  )
 
     efmuInsideOutRecoSequence += PTSeq
     trackParticles = PTTrackParticles[-1]
 
     #Make InDetCandidates
-    theIndetCandidateAlg = MuonCombinedInDetCandidateAlg("TrigMuonCombinedInDetCandidateAlg_"+name,TrackParticleLocation = [trackParticles],ForwardParticleLocation=trackParticles, 
-                                                         InDetCandidateLocation="InDetCandidates_"+name)
+    theIndetCandidateAlg = MuonCombinedInDetCandidateAlg("TrigMuonCombinedInDetCandidateAlg_"+name,TrackParticleLocation = [trackParticles],ForwardParticleLocation=trackParticles, InDetCandidateLocation="InDetCandidates_"+name)
+
     from AthenaCommon.AppMgr import ToolSvc
     from InDetTrigRecExample.InDetTrigConditionsAccess import SCT_ConditionsSetup
     from SCT_ConditionsTools.SCT_ConditionsSummaryToolSetup import SCT_ConditionsSummaryToolSetup
     sct_ConditionsSummaryToolSetupWithoutFlagged = SCT_ConditionsSummaryToolSetup(SCT_ConditionsSetup.instanceName('InDetSCT_ConditionsSummaryToolWithoutFlagged'))
     sct_ConditionsSummaryToolSetupWithoutFlagged.setup()
     ToolSvc.CombinedMuonIDHoleSearch.BoundaryCheckTool.SctSummaryTool = sct_ConditionsSummaryToolSetupWithoutFlagged.getTool()
-    if globalflags.InputFormat.is_bytestream():
+    if not flags.Input.isMC:
       ToolSvc.CombinedMuonIDHoleSearch.BoundaryCheckTool.SctSummaryTool.ConditionsTools=['SCT_ConfigurationConditionsTool/InDetTrigInDetSCT_ConfigurationConditionsTool','SCT_ByteStreamErrorsTool/InDetTrigInDetSCT_ByteStreamErrorsTool']
     else:
       ToolSvc.CombinedMuonIDHoleSearch.BoundaryCheckTool.SctSummaryTool.ConditionsTools=['SCT_ConfigurationConditionsTool/InDetTrigInDetSCT_ConfigurationConditionsTool']
@@ -731,16 +705,7 @@ def muEFInsideOutRecoSequence(RoIs, name):
   else:
     # for non-latemu chains, the decoding/hough transform is run in an earlier step
     #Need PRD containers for inside-out reco
-    ViewVerifyInsideOut = CfgMgr.AthViews__ViewDataVerifier("muonInsideOutViewDataVerifier_"+name)
-    ViewVerifyInsideOut.DataObjects = [( 'Muon::RpcPrepDataContainer' , 'StoreGateSvc+RPC_Measurements' ),
-                                       ( 'Muon::TgcPrepDataContainer' , 'StoreGateSvc+TGC_Measurements' ),
-                                       ( 'MuonCandidateCollection' , 'StoreGateSvc+'+candidatesName )]
-    if not isCosmic(): ViewVerifyInsideOut.DataObjects += [( 'Muon::HoughDataPerSectorVec' , 'StoreGateSvc+HoughDataPerSectorVec')]
-    if MuonGeometryFlags.hasCSC():
-      ViewVerifyInsideOut.DataObjects += [( 'Muon::CscPrepDataContainer' , 'StoreGateSvc+CSC_Clusters' )]
-    if (MuonGeometryFlags.hasSTGC() and MuonGeometryFlags.hasMM()): 
-      ViewVerifyInsideOut.DataObjects += [( 'Muon::MMPrepDataContainer'       , 'StoreGateSvc+MM_Measurements'),
-                                          ( 'Muon::sTgcPrepDataContainer'     , 'StoreGateSvc+STGC_Measurements') ]
+    ViewVerifyInsideOut = algorithmCAToGlobalWrapper(VDVMuInsideOutCfg,flags, name, candidatesName)
 
     efmuInsideOutRecoSequence += ViewVerifyInsideOut
 
@@ -750,16 +715,18 @@ def muEFInsideOutRecoSequence(RoIs, name):
   cbMuonName = muNames.EFCBInOutName
   if 'Late' in name:
     cbMuonName = cbMuonName+"_Late"
-    theInsideOutRecoAlg = MuGirlStauAlg("TrigMuonLateInsideOutRecoAlg_"+name,InDetCandidateLocation="InDetCandidates_"+name)
-    insideoutcreatoralg = StauCreatorAlg("TrigLateMuonCreatorAlg_"+name, TagMaps=["stauTagMap"],InDetCandidateLocation="InDetCandidates_"+name,
+    theInsideOutRecoAlg = algorithmCAToGlobalWrapper(MuGirlStauAlgCfg, flags, name="TrigMuonLateInsideOutRecoAlg_"+name,InDetCandidateLocation="InDetCandidates_"+name)
+    insideoutcreatoralg = algorithmCAToGlobalWrapper(StauCreatorAlgCfg, flags, name="TrigLateMuonCreatorAlg_"+name, TagMaps=["stauTagMap"],InDetCandidateLocation="InDetCandidates_"+name,
                                          MuonContainerLocation = cbMuonName, MonTool = MuonCreatorAlgMonitoring("LateMuonCreatorAlg_"+name))
   else:
-    inDetExtensionAlg = MuonInDetToMuonSystemExtensionAlg("TrigInDetMuonExtensionAlg_"+name, InputInDetCandidates="InDetCandidates_"+name,
+    inDetExtensionAlg = algorithmCAToGlobalWrapper(MuonInDetToMuonSystemExtensionAlgCfg, flags, name="TrigInDetMuonExtensionAlg_"+name, InputInDetCandidates="InDetCandidates_"+name,
                                                           WriteInDetCandidates="InDetCandidatesSystemExtended_"+name)
-    theInsideOutRecoAlg = MuonInsideOutRecoAlg("TrigMuonInsideOutRecoAlg_"+name,InDetCandidateLocation="InDetCandidatesSystemExtended_"+name)
-    insideoutcreatoralg = MuonCreatorAlg("TrigMuonCreatorAlgInsideOut_"+name,  MuonCandidateLocation={candidatesName}, TagMaps=["muGirlTagMap"],InDetCandidateLocation="InDetCandidates_"+name,
+    theInsideOutRecoAlg = algorithmCAToGlobalWrapper(MuonInsideOutRecoAlgCfg, flags, name="TrigMuonInsideOutRecoAlg_"+name,InDetCandidateLocation="InDetCandidatesSystemExtended_"+name)
+
+    insideoutcreatoralg = algorithmCAToGlobalWrapper(MuonCreatorAlgCfg, flags, name="TrigMuonCreatorAlgInsideOut_"+name,  MuonCandidateLocation={candidatesName}, TagMaps=["muGirlTagMap"],InDetCandidateLocation="InDetCandidates_"+name,
                                          MuonContainerLocation = cbMuonName, ExtrapolatedLocation = "InsideOutCBExtrapolatedMuons",
-                                         MSOnlyExtrapolatedLocation = "InsideOutCBMSOnlyExtrapolatedMuons", CombinedLocation = "InsideOutCBCombinedMuon", MonTool = MuonCreatorAlgMonitoring("MuonCreatorAlgInsideOut_"+name))
+                                         MSOnlyExtrapolatedLocation = "InsideOutCBMSOnlyExtrapolatedMuons", CombinedLocation = "InsideOutCBCombinedMuon", MonTool = MuonCreatorAlgMonitoring(flags, "MuonCreatorAlgInsideOut_"+name))
+
     efmuInsideOutRecoSequence+=inDetExtensionAlg
 
   efmuInsideOutRecoSequence+=theInsideOutRecoAlg
@@ -771,7 +738,7 @@ def muEFInsideOutRecoSequence(RoIs, name):
 
 
 
-def efmuisoRecoSequence( RoIs, Muons, doMSiso=False ):
+def efmuisoRecoSequence( flags, RoIs, Muons, doMSiso=False ):
 
   from AthenaCommon.CFElements import parOR
 
@@ -786,7 +753,7 @@ def efmuisoRecoSequence( RoIs, Muons, doMSiso=False ):
   IDTrigConfig = getInDetTrigConfig( 'muonIso'+name )
 
   from TrigInDetConfig.InDetTrigFastTracking import makeInDetTrigFastTracking
-  viewAlgs, viewVerify = makeInDetTrigFastTracking( config = IDTrigConfig, rois = RoIs )
+  viewAlgs, viewVerify = makeInDetTrigFastTracking( flags, config = IDTrigConfig, rois = RoIs )
   viewVerify.DataObjects += [( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+MUEFIsoRoIs'+name ),
                              ( 'xAOD::MuonContainer' , 'StoreGateSvc+IsoViewMuons'+name )]
 
@@ -806,51 +773,44 @@ def efmuisoRecoSequence( RoIs, Muons, doMSiso=False ):
   PTTrackParticles = [] #List of TrackParticleKeys
   
   from TrigInDetConfig.InDetTrigPrecisionTracking import makeInDetTrigPrecisionTracking
-  PTTracks, PTTrackParticles, PTAlgs = makeInDetTrigPrecisionTracking( config = IDTrigConfig, rois=RoIs )
+  PTTracks, PTTrackParticles, PTAlgs = makeInDetTrigPrecisionTracking( flags, config = IDTrigConfig, rois=RoIs )
 
   PTSeq = parOR("precisionTrackingInMuonsIso"+name, PTAlgs  )
   efmuisoRecoSequence += PTSeq
 
   # set up algs
-  from TrigMuonEF.TrigMuonEFConfig import TrigMuonEFTrackIsolationConfig
-  trigEFmuIso = TrigMuonEFTrackIsolationConfig("TrigEFMuIso"+name)
-  if doMSiso:
-    trigEFmuIso.requireCombinedMuon=False
-  trigEFmuIso.MuonEFContainer = Muons
-  trackParticles = PTTrackParticles[-1]
-  trigEFmuIso.IdTrackParticles = trackParticles
-  trigEFmuIso.MuonContName = muNames.EFIsoMuonName+name
-  trigEFmuIso.ptcone02Name = "%s.ptcone02" % Muons
-  trigEFmuIso.ptcone03Name = "%s.ptcone03" % Muons
+  from TrigMuonEF.TrigMuonEFConfig import TrigMuonEFTrackIsolationAlgCfg
+  trigEFmuIso = algorithmCAToGlobalWrapper(TrigMuonEFTrackIsolationAlgCfg,flags,name="TrigEFMuIso"+name, requireCombinedMuon = not doMSiso, 
+                                           MuonEFContainer = Muons,IdTrackParticles = PTTrackParticles[-1], MuonContName = muNames.EFIsoMuonName+name,
+                                           ptcone02Name = "%s.ptcone02" % Muons, ptcone03Name = "%s.ptcone03" % Muons)
 
   efmuisoRecoSequence += trigEFmuIso
 
-  sequenceOut = trigEFmuIso.MuonContName
+  sequenceOut = muNames.EFIsoMuonName+name
 
   return efmuisoRecoSequence, sequenceOut
 
-
-def efLateMuRoISequence(): 
-
-  from AthenaCommon.CFElements import parOR
-  efLateMuRoISequence = parOR("efLateMuRoIViewNode")
-
+def VDVLateMuCfg(flags):
+  acc = ComponentAccumulator()
   # TODO: Replace MuCTPI_RDO dependency with xAOD::MuonRoIContainer for BC+1, BC-1 candidates, ATR-25031
-  import AthenaCommon.CfgMgr as CfgMgr
-  efLateMuRoIVDV = CfgMgr.AthViews__ViewDataVerifier( "efLateMuRoIVDV" )
-  efLateMuRoIVDV.DataObjects = [( 'MuCTPI_RDO' , 'StoreGateSvc+MUCTPI_RDO' )]
-  efLateMuRoISequence += efLateMuRoIVDV
+  dataObjects = [( 'MuCTPI_RDO' , 'StoreGateSvc+MUCTPI_RDO' )]
 
+  alg = CompFactory.AthViews.ViewDataVerifier( name = "efLateMuRoIVDV",
+                                               DataObjects = dataObjects)
+  acc.addEventAlgo(alg)
+  return acc
+
+
+def efLateMuRoISequenceCfg(flags):
+
+  acc = VDVLateMuCfg(flags)
   # Make sure the RDOs are still available at whole-event level
-  from AthenaCommon.AlgSequence import AlgSequence
-  topSequence = AlgSequence()
-  topSequence.SGInputLoader.Load += [( 'MuCTPI_RDO' , 'StoreGateSvc+MUCTPI_RDO' )]
+  loadFromSG= [( 'MuCTPI_RDO' , 'StoreGateSvc+MUCTPI_RDO' )]
+  from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+  acc.merge(SGInputLoaderCfg(flags, Load=loadFromSG))
 
   from TrigmuRoI.TrigmuRoIConfig import TrigmuRoIConfig
-  roiAlg = TrigmuRoIConfig("TrigmuRoI")
   sequenceOut = "LateMuRoIs"
-  roiAlg.RoisWriteHandleKey=sequenceOut
+  acc.merge(TrigmuRoIConfig(flags, "TrigmuRoI", outputRoIs=sequenceOut))
 
-  efLateMuRoISequence+=roiAlg
-
-  return efLateMuRoISequence, sequenceOut
+  return acc, sequenceOut

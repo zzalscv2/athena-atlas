@@ -104,8 +104,7 @@ StatusCode TauThinningAlg::execute (const EventContext& ctx) const
     TLorentzVector tauAxis = tauRecTools::getTauAxis(*tau, m_doVertexCorrection);
     const xAOD::Vertex* tauVertex = tau->vertex();
 
-    auto clusterList = tau->clusters();
-    for (const xAOD::IParticle* particle : clusterList) {
+    for (const xAOD::IParticle* particle : tau->clusters()) {
       const xAOD::CaloCluster* cluster = static_cast<const xAOD::CaloCluster*>(particle);
       TLorentzVector clusterP4 = cluster->p4();
 

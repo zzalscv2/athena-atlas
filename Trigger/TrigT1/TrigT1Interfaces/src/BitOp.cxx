@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <string>
@@ -20,7 +20,7 @@ void BitOp::printBinN( unsigned int uintValue, int nbits ) {
 
   std::string resultString( "" );
   for ( int i = nbits; i >= 0; i-- ) {
-    if ( uintValue & ( 1 << i ) ) {
+    if ( uintValue & ( 1u << i ) ) {
       resultString += "1";
     } else {
       resultString += "0";
@@ -34,7 +34,7 @@ void BitOp::printBinN( int intValue, int nbits ) {
 
   std::string resultString( "" );
   for ( int i = nbits; i >= 0; i-- ) {
-    if ( intValue & ( 1 << i ) ) {
+    if ( intValue & ( 1u << i ) ) {
       resultString += "1";
     } else {
       resultString += "0";

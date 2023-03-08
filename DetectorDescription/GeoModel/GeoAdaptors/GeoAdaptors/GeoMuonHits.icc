@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
@@ -290,8 +290,9 @@ inline Amg::Vector3D GeoMMHit::getTrkLocalPosition() const {
     if (mmdet == NULL)
     {
         const MmIdHelper* mmID = mgr()->mmIdHelper();
-        std::cerr<<"MM readout element not found for Id = "
-                 <<mmID->show_to_string(offid)<<std::endl;
+        std::string err = "MM readout element not found for Id = " + 
+          mmID->show_to_string(offid);
+        throw std::runtime_error (err);
     }
 
     Amg::Transform3D gToL = mmdet->absTransform().inverse();

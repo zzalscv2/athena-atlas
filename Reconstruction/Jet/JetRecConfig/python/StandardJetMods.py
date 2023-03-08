@@ -1,5 +1,4 @@
-
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 This module defines the standard JetModifier tools used in jet reco
 
@@ -27,7 +26,6 @@ from .Utilities import ldict
 from AthenaConfiguration.ComponentFactory import CompFactory
 from JetRecConfig.JetConfigFlags import jetInternalFlags
 
-
 stdJetModifiers = ldict()
 
 ########################################################################
@@ -41,7 +39,11 @@ stdJetModifiers.update(
                          ),
     Filter_ifnotESD = JetModifier("JetFilterTool","jetptfilter_{modspec}",
                                  PtMin = lambda _,modspec: 1 if jetInternalFlags.isRecoJob else int(modspec),
-                                 )
+                                 ),
+    # Filter that can be easily turned off via pre-exec for e.g. PHYSVAL
+    Filter_calibThreshold = JetModifier("JetFilterTool","jetptfilter_{modspec}",
+                                        PtMin = lambda jetdef,modspec: 1 if not jetdef._cflags.Jet.useCalibJetThreshold else int(modspec),
+                                       )
 )
 
 ########################################################################
@@ -93,8 +95,22 @@ try:
 
         # More complex cases here
         CaloEnergies =    JetModifier("JetCaloEnergies", "jetens", 
-                                      prereqs=["mod:EMScaleMom"], JetContainer = _jetname,
+                                      prereqs=["mod:EMScaleMom"], 
+                                      Calculations=["EMFrac", "HECFrac", "PSFrac"], JetContainer = _jetname,
                                       ),
+        
+        CaloEnergiesLargeR =    JetModifier("JetCaloEnergies", "jetenslargeR", 
+                                      prereqs=["mod:EMScaleMom"], 
+                                      Calculations=["EMFrac", "HECFrac", "PSFrac", "EM3Frac", "Tile0Frac", "EffNClusts"], JetContainer = _jetname,
+                                      calcClusterBasedVars = True,
+                                      ),
+
+        # CaloEnergiesClus is only relevant for FE-based jet collections
+        CaloEnergiesClus = JetModifier("JetCaloEnergies", "jetensclus",
+                                       prereqs=["mod:EMScaleMom"], 
+                                       Calculations=["EMFrac", "HECFrac", "PSFrac"], JetContainer = _jetname,
+                                       calcClusterBasedVars = True),
+
         CaloQuality =     JetModifier("JetCaloQualityTool", "caloqual",
                                       TimingCuts = [5,10],
                                       Calculations = ["LArQuality", "N90Constituents", "FracSamplingMax",  "NegativeE", "Timing", "HECQuality", "Centroid", "AverageLArQF", "BchCorrCell"],JetContainer = _jetname),
@@ -145,6 +161,14 @@ try:
                                      createfn=JetMomentToolsConfig.getPFlowbJVTTool,
                                      prereqs = ["input:EventDensity","input:PrimaryVertices"],
                                      JetContainer = _jetname),
+
+        ConstitFrac =    JetModifier("JetConstituentFrac", "constitFrac",
+                                     JetContainer = _jetname,
+                                     ),
+        
+        groomMRatio =    JetModifier("JetGroomMRatio", "groomMRatio",
+                                     JetContainer = _jetname,
+                                     ),
 
         JetPtAssociation = JetModifier("JetPtAssociationTool", "jetPtAssociation",
                                        filterfn=isMC,

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
@@ -47,15 +47,15 @@ def extractPreselection(fullChainDict):
 # Translate the preselection expression in the main jet chainDict into a temporary chainDict
 # that is only seen by the standard hypo tool generator, and used to return a configured
 # hypo tool for the preselection step
-def caloPreselJetHypoToolFromDict(mainChainDict):
-    return _preselJetHypoToolFromDict(mainChainDict)
+def caloPreselJetHypoToolFromDict(flags, mainChainDict):
+    return _preselJetHypoToolFromDict(flags, mainChainDict)
     
 
-def roiPreselJetHypoToolFromDict(mainChainDict):
-    return _preselJetHypoToolFromDict(mainChainDict,doBJetSel=True)
+def roiPreselJetHypoToolFromDict(flags, mainChainDict):
+    return _preselJetHypoToolFromDict(flags, mainChainDict,doBJetSel=True)
 
 
-def _preselJetHypoToolFromDict(mainChainDict, doBJetSel=False):
+def _preselJetHypoToolFromDict(flags, mainChainDict, doBJetSel=False):
 
     preselChainDict = dict(mainChainDict)
     preselChainDict['chainParts']=[]
@@ -71,15 +71,16 @@ def _preselJetHypoToolFromDict(mainChainDict, doBJetSel=False):
 
     for ip,p in enumerate(presel_cut_str.split('XX')):
         if not doBJetSel:  # Removing b-jet parts if b-jet presel is not requested
-            p = re.sub(r'b\d+', '', p)
-        hasBjetSel = bool(re.match(r'.*b\d+', p))
+            p = re.sub(r'b\w?\d+', '', p)
+        hasBjetSel = bool(re.match(r'.*b\w?\d+', p))
         assert not (hasBjetSel and not doBJetSel), "Your jet preselection has a b-jet part but a calo-only preselection was requested instead. This should not be possible. Please investigate."
 
-        matched = re.match(r'(?P<mult>\d?\d?)(?P<region>[jacf])(?P<scenario>(HT)?)(?P<cut>\d+)'+(r'b(?P<bwp>\d+)' if hasBjetSel else ''), p)
+        matched = re.match(r'(?P<mult>\d?\d?)(?P<region>[jacf])(?P<scenario>(HT)?)(?P<cut>\d+)'+(r'b(?P<btagger>\D?)(?P<bwp>\d+)' if hasBjetSel else ''), p)
         assert matched is not None, "Impossible to extract preselection cut for \'{0}\' substring. Please investigate.".format(p)
         cut_dict = matched.groupdict()
         if 'bwp' not in cut_dict.keys(): cut_dict['bwp'] = ''
-        mult,region,scenario,cut,bwp=cut_dict['mult'],cut_dict['region'],cut_dict['scenario'],cut_dict['cut'], cut_dict['bwp']
+        if 'btagger' not in cut_dict.keys(): cut_dict['btagger'] = ''
+        mult,region,scenario,cut,btagger,bwp=cut_dict['mult'],cut_dict['region'],cut_dict['scenario'],cut_dict['cut'],cut_dict['btagger'], cut_dict['bwp']
 
         if mult=='': mult='1'
         etarange = etaRangeAbbrev[region]
@@ -92,6 +93,11 @@ def _preselJetHypoToolFromDict(mainChainDict, doBJetSel=False):
             threshold=cut
             chainPartName=f'{mult}j{cut}_{etarange}'
 
+        if btagger == 'g':
+            btagger = 'gnone'
+        elif btagger == '':
+            btagger = 'dips'
+
         tmpChainDict = dict(preselCommonJetParts)
         tmpChainDict.update(
             {'L1threshold': 'FSNOSEED',
@@ -100,7 +106,7 @@ def _preselJetHypoToolFromDict(mainChainDict, doBJetSel=False):
             'threshold': threshold,
             'etaRange':etarange,
             'jvt':'',
-            'bdips': '' if bwp == '' else f'{bwp}bdips',
+            'bsel': '' if bwp == '' else f'{bwp}b{btagger}',
             'chainPartIndex': ip,
             'hypoScenario': hyposcenario,
             }
@@ -139,7 +145,7 @@ def _preselJetHypoToolFromDict(mainChainDict, doBJetSel=False):
 
     assert(len(preselChainDict['chainParts'])==len(mainChainDict['chainParts']))
     try:
-        return trigJetHypoToolFromDict(preselChainDict)
+        return trigJetHypoToolFromDict(flags, preselChainDict)
     except NoHypoToolCreated as nohypo:
         raise nohypo # We only generate the hypo tool for the first jet leg
     except Exception as e:

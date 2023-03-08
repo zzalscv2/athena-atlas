@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETTRACKINGGEOMETRY_SILAYERBUILDER_H
@@ -50,13 +50,13 @@ namespace InDet {
     virtual StatusCode initialize() override;
 
     /** LayerBuilder interface method - returning Barrel-like layers */
-    virtual const std::vector<Trk::CylinderLayer* >* cylindricalLayers() const override;
+    virtual std::unique_ptr<const std::vector<Trk::CylinderLayer* > > cylindricalLayers() const override final;
 
     /** LayerBuilder interface method - returning Endcap-like layers */
-    virtual const std::vector<Trk::DiscLayer* >*     discLayers() const override;
+    virtual std::unique_ptr<const std::vector<Trk::DiscLayer* > > discLayers() const override final;
 
     /** LayerBuilder interface method - returning Planar-like layers */
-    virtual const std::vector<Trk::PlaneLayer* >*    planarLayers() const override;
+    virtual std::unique_ptr<const std::vector<Trk::PlaneLayer* > > planarLayers() const override final;
 
     /** Name identification */
     virtual const std::string& identification() const override final;
@@ -71,12 +71,9 @@ namespace InDet {
      * endcap rings. Used for ITk specific case. */
     std::unique_ptr<std::vector< Trk::DiscLayer*> >
     createRingLayers() const;
-
-    virtual void registerSurfacesToLayer(Trk::BinnedArraySpan<Trk::Surface * const >& surfaces, Trk::Layer& layer) const override; //!< layer association
-
   };
 
-  inline const std::vector<Trk::PlaneLayer*>* SiLayerBuilder::planarLayers() const
+  inline std::unique_ptr<const std::vector<Trk::PlaneLayer*> > SiLayerBuilder::planarLayers() const
   { return 0; }
 
   inline const std::string& SiLayerBuilder::identification() const

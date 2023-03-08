@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 # @author Nils Krumnack
 # @author Tadej Novak
@@ -168,6 +168,8 @@ def makeEventAlgorithmsSequence (dataType) :
     ntupleMaker.Branches = [
         'EventInfo.runNumber   -> runNumber',
         'EventInfo.eventNumber -> eventNumber',
+        'Electrons.eta         -> el_eta',
+        'Electrons.phi         -> el_phi',
         ]
     algSeq += ntupleMaker
     treeFiller = createAlgorithm( 'CP::TreeFillerAlg', 'TreeFiller' )

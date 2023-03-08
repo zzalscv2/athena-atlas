@@ -462,7 +462,7 @@ std::vector< std::vector< int > > PixelPrepDataToxAOD::addSDOInformation( xAOD::
       std::vector< float > sdoDepEnergy;
       for( const auto& deposit : pos->second.getdeposits() ){
         if(deposit.first){
-          sdoDepBC.push_back( HepMC::barcode(deposit.first));
+          sdoDepBC.push_back(deposit.first.barcode());
         } else {
           sdoDepBC.push_back( -1 );   
         }
@@ -508,9 +508,10 @@ void  PixelPrepDataToxAOD::addSiHitInformation( xAOD::TrackMeasurementValidation
     for ( const auto& sihit : matchingHits ) {          
       sihit_energyDeposit[hitNumber] =  sihit.energyLoss() ;
       sihit_meanTime[hitNumber] =  sihit.meanTime() ;
-      sihit_barcode[hitNumber] =  sihit.particleLink().barcode() ;
-      if(sihit.particleLink().isValid()){
-        sihit_pdgid[hitNumber]   = sihit.particleLink()->pdg_id();
+      const HepMcParticleLink& HMPL = sihit.particleLink();
+      sihit_barcode[hitNumber] =  HMPL.barcode() ;
+      if(HMPL.isValid()){
+        sihit_pdgid[hitNumber]   = HMPL->pdg_id();
       }
     
       // Convert Simulation frame into reco frame
@@ -1103,19 +1104,18 @@ void  PixelPrepDataToxAOD::addNNTruthInfo(  xAOD::TrackMeasurementValidation* xp
   
     int readoutside = design->readoutSide();
     phi[hitNumber] = std::atan(std::tan(bowphi)-readoutside*tanlorentz);
-    
-    if (siHit.particleLink().isValid()){
-      barcode[hitNumber] = siHit.particleLink().barcode(); 
-      
-      auto particle = siHit.particleLink();
+    const HepMcParticleLink& HMPL = siHit.particleLink();
+    if (HMPL.isValid()){
+      barcode[hitNumber] = HMPL.barcode(); 
+      const auto particle = HMPL.cptr();
       pdgid[hitNumber]   = particle->pdg_id();
       HepMC::FourVector mom=particle->momentum();
       truep[hitNumber]  = std::sqrt(mom.x()*mom.x()+mom.y()*mom.y()+mom.z()*mom.z());
-      auto vertex =  particle->production_vertex();
+      const auto vertex =  particle->production_vertex();
 //AV Please note that taking the first particle as a mother is ambiguous.
 #ifdef HEPMC3
-      if ( vertex && vertex->particles_in().size()>0){
-        auto mother_of_particle=vertex->particles_in().at(0);             
+      if ( vertex && !vertex->particles_in().empty()){
+        const auto& mother_of_particle=vertex->particles_in().front();             
         motherBarcode[hitNumber] =  HepMC::barcode(mother_of_particle);
         motherPdgid[hitNumber]    = mother_of_particle->pdg_id();
       }

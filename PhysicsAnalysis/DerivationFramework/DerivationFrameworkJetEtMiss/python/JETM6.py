@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # DAOD_JETM6.py
@@ -13,10 +13,10 @@ def JETM6SkimmingToolCfg(ConfigFlags):
     acc = ComponentAccumulator()
 
     from DerivationFrameworkJetEtMiss import TriggerLists
-    electronTriggers = TriggerLists.single_el_Trig()
-    muonTriggers = TriggerLists.single_mu_Trig()
-    photonTriggers = TriggerLists.single_photon_Trig()
-    jetTriggers = TriggerLists.jetTrig()
+    electronTriggers = TriggerLists.single_el_Trig(ConfigFlags)
+    muonTriggers = TriggerLists.single_mu_Trig(ConfigFlags)
+    photonTriggers = TriggerLists.single_photon_Trig(ConfigFlags)
+    jetTriggers = TriggerLists.jetTrig(ConfigFlags)
 
     # Trigger API doesn't currently return all triggers used in Run-3
     # Adding all jets triggers via explicit list for the moment
@@ -221,6 +221,7 @@ def JETM6KernelCfg(ConfigFlags, name='JETM6Kernel', **kwargs):
         name                         = "JETM6Akt4PFlowJetTPThinningTool",
         StreamName                   = kwargs['StreamName'],
         JetKey                       = "AntiKt4EMPFlowJets",
+        SelectionString              = "AntiKt4EMPFlowJets.pt > 15*GeV",
         InDetTrackParticlesKey       = "InDetTrackParticles"))
 
     JETM6Akt10LCJetTPThinningTool = acc.getPrimaryAndMerge(JetTrackParticleThinningCfg(
@@ -228,6 +229,7 @@ def JETM6KernelCfg(ConfigFlags, name='JETM6Kernel', **kwargs):
         name                         = "JETM6Akt10LCJetTPThinningTool",
         StreamName                   = kwargs['StreamName'],
         JetKey                       = "AntiKt10LCTopoJets",
+        SelectionString              = "AntiKt10LCTopoJets.pt > 150*GeV",
         InDetTrackParticlesKey       = "InDetTrackParticles"))
 
     JETM6Akt10UFOJetTPThinningTool = acc.getPrimaryAndMerge(JetTrackParticleThinningCfg(
@@ -235,6 +237,7 @@ def JETM6KernelCfg(ConfigFlags, name='JETM6Kernel', **kwargs):
         name                         = "JETM6Akt10UFOJetTPThinningTool",
         StreamName                   = kwargs['StreamName'],
         JetKey                       = "AntiKt10UFOCSSKJets",
+        SelectionString              = "AntiKt10UFOCSSKJets.pt > 150*GeV",
         InDetTrackParticlesKey       = "InDetTrackParticles"))
 
     # Include inner detector tracks associated with muons
@@ -271,6 +274,15 @@ def JETM6KernelCfg(ConfigFlags, name='JETM6Kernel', **kwargs):
                      JETM6Akt10UFOJetTPThinningTool,
                      JETM6Akt4PFlowJetTPThinningTool]
 
+    if ConfigFlags.Input.isMC:
+        JETM6TruthJetInputThin = CompFactory.DerivationFramework.ViewContainerThinning( name = "JETM6ViewContThinning",
+                                                                                        StreamName           = kwargs['StreamName'],
+                                                                                        TruthParticleKey     = "TruthParticles",
+                                                                                        TruthParticleViewKey = "JetInputTruthParticles")
+
+        acc.addPublicTool(JETM6TruthJetInputThin)
+        thinningTools.append(JETM6TruthJetInputThin)
+
     # Finally the kernel itself
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
     acc.addEventAlgo(DerivationKernel(name, 
@@ -294,8 +306,8 @@ def JETM6ExtraContentCfg(ConfigFlags):
 
     if ConfigFlags.Input.isMC:
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddTopQuarkAndDownstreamParticlesCfg, AddTruthCollectionNavigationDecorationsCfg
-        acc.merge(AddTopQuarkAndDownstreamParticlesCfg(generations=4,rejectHadronChildren=True))
-        acc.merge(AddTruthCollectionNavigationDecorationsCfg(TruthCollections=["TruthTopQuarkWithDecayParticles","TruthBosonsWithDecayParticles"],prefix='Top'))
+        acc.merge(AddTopQuarkAndDownstreamParticlesCfg(ConfigFlags, generations=4,rejectHadronChildren=True))
+        acc.merge(AddTruthCollectionNavigationDecorationsCfg(ConfigFlags, TruthCollections=["TruthTopQuarkWithDecayParticles","TruthBosonsWithDecayParticles"],prefix='Top'))
 
 
     #=======================================
@@ -325,7 +337,7 @@ def JETM6Cfg(ConfigFlags):
     # for actually configuring the matching, so we create it here and pass it down
     # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    JETM6TriggerListsHelper = TriggerListsHelper()
+    JETM6TriggerListsHelper = TriggerListsHelper(ConfigFlags)
 
     # Skimming, thinning, augmentation, extra content
     acc.merge(JETM6KernelCfg(ConfigFlags, name="JETM6Kernel", StreamName = 'StreamDAOD_JETM6', TriggerListsHelper = JETM6TriggerListsHelper))
@@ -341,20 +353,23 @@ def JETM6Cfg(ConfigFlags):
     JETM6SlimmingHelper.SmartCollections = ["EventInfo","InDetTrackParticles","PrimaryVertices",
                                             "Electrons","Photons","Muons","TauJets",
                                             "MET_Baseline_AntiKt4EMPFlow",
-                                            "AntiKt4EMPFlowJets", "AntiKt4TruthJets",
-                                            "AntiKt10LCTopoJets","AntiKt10TruthJets", "AntiKt10UFOCSSKJets",
+                                            "AntiKt4EMPFlowJets",
+                                            "AntiKt10LCTopoJets","AntiKt10UFOCSSKJets",
                                             "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets",
                                             "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
                                             "BTagging_AntiKtVR30Rmax4Rmin02Track",
                                             "BTagging_AntiKt4EMPFlow"]
 
-    JETM6SlimmingHelper.AllVariables = ["Kt4EMPFlowEventShape","Kt4EMPFlowPUSBEventShape"]
-    JETM6SlimmingHelper.ExtraVariables  = ['CaloCalTopoClusters.calE.calEta.calM.calPhi.CENTER_MAG']
-
-    JETM6SlimmingHelper.ExtraVariables.append('GlobalChargedParticleFlowObjects.chargedObjectLinks')
-    JETM6SlimmingHelper.ExtraVariables.append('GlobalNeutralParticleFlowObjects.chargedObjectLinks')
-    JETM6SlimmingHelper.ExtraVariables.append('CSSKGChargedParticleFlowObjects.pt.eta.phi.m.matchedToPV.originalObjectLink')
-    JETM6SlimmingHelper.ExtraVariables.append('CSSKGNeutralParticleFlowObjects.pt.eta.phi.m.originalObjectLink')
+    JETM6SlimmingHelper.AllVariables = ["Kt4EMPFlowEventShape","Kt4EMPFlowPUSBEventShape","UFOCSSK"]
+    JETM6SlimmingHelper.ExtraVariables  = ['CaloCalTopoClusters.calE.calEta.calM.calPhi.CENTER_MAG',
+                                           'GlobalChargedParticleFlowObjects.chargedObjectLinks'
+                                           'GlobalNeutralParticleFlowObjects.chargedObjectLinks'
+                                           'CSSKGChargedParticleFlowObjects.pt.eta.phi.m.matchedToPV.originalObjectLink'
+                                           'CSSKGNeutralParticleFlowObjects.pt.eta.phi.m.originalObjectLink',
+                                           'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.SizeParameter',
+                                           'AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets.SizeParameter',
+                                           'AntiKt10TruthTrimmedPtFrac5SmallR20Jets.SizeParameter',
+                                           'AntiKt10TruthSoftDropBeta100Zcut10Jets.SizeParameter']
 
     # Truth containers
     if ConfigFlags.Input.isMC:
@@ -366,6 +381,7 @@ def JETM6Cfg(ConfigFlags):
                                                        'TruthParticlesAux': 'xAOD::TruthParticleAuxContainer'})
         
         JETM6SlimmingHelper.AllVariables += ["TruthEvents", "TruthParticles", "TruthTopQuarkWithDecayParticles", "TruthTopQuarkWithDecayVertices","TruthHFWithDecayParticles"]
+        JETM6SlimmingHelper.SmartCollections += ["AntiKt4TruthJets", "AntiKt10TruthJets"]
 
     #Low-level inputs
     from DerivationFrameworkJetEtMiss.JetCommonConfig import addOriginCorrectedClustersToSlimmingTool

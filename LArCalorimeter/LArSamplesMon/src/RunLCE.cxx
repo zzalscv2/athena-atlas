@@ -12,6 +12,7 @@
 #include "TROOT.h"
 #include "TApplication.h"
 #include "TSystem.h"
+#include "CxxUtils/checker_macros.h"
 
 #if ROOT_VERSION_CODE < ROOT_VERSION(6,0,0)
 #include "Cintex/Cintex.h"
@@ -51,7 +52,7 @@ using namespace std;
 
 
 
-void RunLCE(const char* inputFile, const char* defectLBFN)
+void RunLCE ATLAS_NOT_THREAD_SAFE (const char* inputFile, const char* defectLBFN)
 {
 
   //  TString workdir = gSystem->Getenv("WORKDIR");

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTrackingGeometry/MuonStationBuilderImpl.h"
@@ -264,12 +264,11 @@ Muon::MuonStationBuilderImpl::buildDetachedTrackingVolumesImpl(
           }
         } else if (dia) {
           // create active layer for diamond shape of NSW-sTGC QL3
-          std::shared_ptr<Trk::DiamondBounds> tbounds =
+          auto bounds =
               std::make_shared<Trk::DiamondBounds>(
                   dia->minHalflengthX(), dia->medHalflengthX(),
                   dia->maxHalflengthX(), dia->halflengthY1(),
                   dia->halflengthY2());
-          Trk::SharedObject<const Trk::SurfaceBounds> bounds(tbounds);
           std::unique_ptr<Trk::OverlapDescriptor> od = nullptr;
           double thickness =
               (mat.fullMaterial(layTransf.translation()))->thickness();
@@ -280,12 +279,11 @@ Muon::MuonStationBuilderImpl::buildDetachedTrackingVolumesImpl(
               bounds, mat, thickness, std::move(od), 1);
         } else if (rdia) {
           // create active layer for diamond shape of NSW-sTGC QL3
-          std::shared_ptr<Trk::DiamondBounds> tbounds =
+          auto bounds =
               std::make_shared<Trk::DiamondBounds>(
                   rdia->minHalflengthX(), rdia->medHalflengthX(),
                   rdia->maxHalflengthX(), rdia->halflengthY1(),
                   rdia->halflengthY2());
-          Trk::SharedObject<const Trk::SurfaceBounds> bounds(tbounds);
           std::unique_ptr<Trk::OverlapDescriptor> od = nullptr;
           double thickness =
               (mat.fullMaterial(layTransf.translation()))->thickness();
@@ -296,11 +294,10 @@ Muon::MuonStationBuilderImpl::buildDetachedTrackingVolumesImpl(
               bounds, mat, thickness, std::move(od), 1);
         } else if (trd) {
           // create active layer for trapezoid shape of rest of NSW-sTGC
-          std::shared_ptr<Trk::TrapezoidBounds> tbounds =
-              std::make_shared<Trk::TrapezoidBounds>(trd->minHalflengthX(),
-                                                     trd->maxHalflengthX(),
-                                                     trd->halflengthY());
-          Trk::SharedObject<const Trk::SurfaceBounds> bounds(tbounds);
+          auto bounds =
+              std::make_shared<const Trk::TrapezoidBounds>(trd->minHalflengthX(),
+                                                           trd->maxHalflengthX(),
+                                                           trd->halflengthY());
           std::unique_ptr<Trk::OverlapDescriptor> od = nullptr;
           double thickness =
               (mat.fullMaterial(layTransf.translation()))->thickness();
@@ -312,11 +309,10 @@ Muon::MuonStationBuilderImpl::buildDetachedTrackingVolumesImpl(
         } else {
           // create active layer
           // change of boundary type ( VP1 problems with rotated trapezoid )
-          std::shared_ptr<Trk::RotatedTrapezoidBounds> tbounds =
-              std::make_shared<Trk::RotatedTrapezoidBounds>(
+          auto bounds =
+              std::make_shared<const Trk::RotatedTrapezoidBounds>(
                   rtrd->halflengthX(), rtrd->minHalflengthY(),
                   rtrd->maxHalflengthY());
-          Trk::SharedObject<const Trk::SurfaceBounds> bounds(tbounds);
           std::unique_ptr<Trk::OverlapDescriptor> od = nullptr;
           double thickness =
               (mat.fullMaterial(layTransf.translation()))->thickness();

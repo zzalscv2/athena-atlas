@@ -1,8 +1,9 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
+from AthenaConfiguration.Enums import FlagEnum
 
 _steeringFlags = [ 'doGlobalMon', 'doLVL1CaloMon', 'doLVL1InterfacesMon', 'doCTPMon', 'doHLTMon',
                    'doPixelMon', 'doSCTMon', 'doTRTMon', 'doInDetMon',
@@ -20,6 +21,16 @@ _lowLevelSteeringFlags = [ 'InDet.doGlobalMon', 'InDet.doAlignMon',
                            'Muon.doPhysicsMon', 'Muon.doTrkPhysMon',
                            'Muon.doCombinedMon', 'LVL1Calo.doValidation'
                            ]
+
+
+class DQDataType(FlagEnum):
+    """Flag values for DQ.DataType"""
+    Collisions = 'collisions'
+    Cosmics    = 'cosmics'
+    HeavyIon   = 'heavyioncollisions'
+    MC         = 'monteCarlo'
+    User       = 'user'
+
 
 def createDQConfigFlags():
     acf=AthConfigFlags()
@@ -40,7 +51,7 @@ def createDQConfigFlags():
 
     # computed
     acf.addFlag('DQ.Environment', getEnvironment )
-    acf.addFlag('DQ.DataType', getDataType )
+    acf.addFlag('DQ.DataType', getDataType, enum=DQDataType )
 
     # for in-Athena histogram postprocessing
     acf.addFlag('DQ.doPostProcessing', False)
@@ -49,8 +60,8 @@ def createDQConfigFlags():
     # steering ...
     for flag in _steeringFlags + _lowLevelSteeringFlags:
         arg = True
-        if flag == 'doJetTagMon':
-            arg = lambda x: x.DQ.DataType != 'cosmics' # noqa: E731
+        if flag == 'doJetTagMon' or flag == "doJetMon" or flag == "doMissingEtMon":
+            arg = lambda x: x.DQ.DataType is not DQDataType.Cosmics # noqa: E731
         if flag == 'doHLTMon':
             # new HLT monitoring not yet compatible with pre-Run 3 data
             arg = lambda x: x.Trigger.EDMVersion == 3 # noqa: E731
@@ -74,21 +85,21 @@ def getUseTrigger(flags):
 def getDataType(flags):
     from AthenaConfiguration.Enums import BeamType
     if flags.Input.isMC:
-        return 'monteCarlo'
+        return DQDataType.MC
     elif (False): # this is the HI test, needs HI flags
-        return 'heavyioncollisions'
+        return DQDataType.HeavyIon
     elif flags.Beam.Type is BeamType.Cosmics:
-        return 'cosmics'
+        return DQDataType.Cosmics
     elif flags.Beam.Type is BeamType.Collisions:
-        return 'collisions'
+        return DQDataType.Collisions
     elif flags.Beam.Type is BeamType.SingleBeam:
         # historically, singlebeam treated as collisions
-        return 'collisions'
+        return DQDataType.Collisions
     else:
-        import logging
+        from AthenaCommon.Logging import logging
         local_logger = logging.getLogger('DQConfigFlags_getDataType')
-        local_logger.warning('Unable to figure out beam type for DQ; using "user"')
-        return 'user'
+        local_logger.warning('Unable to figure out beam type for DQ; using "User"')
+        return DQDataType.User
 
 def getEnvironment(flags):
     if flags.Common.isOnline:
@@ -108,7 +119,7 @@ def getEnvironment(flags):
         elif 'StreamDAOD_PHYS' in flags.Input.ProcessingTags:
             return 'DAOD_PHYS'
         else:
-            import logging
+            from AthenaCommon.Logging import logging
             local_logger = logging.getLogger('DQConfigFlags_getEnvironment')
             local_logger.warning('Unable to figure out environment for DQ; using "tier0ESD"')
             return 'tier0ESD'

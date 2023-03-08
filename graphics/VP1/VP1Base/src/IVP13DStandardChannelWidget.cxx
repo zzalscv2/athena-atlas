@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -220,7 +220,7 @@ void IVP13DStandardChannelWidget::create() {
 
   //Setup viewer (with possible splitter for extra widgets):
   QList<QPair<QString,QWidget*> > sysname2extradisplay;
-  foreach (IVP13DSystem* sys,m_d->systemsAllowedExtraDisplayWidgets) {
+  for (IVP13DSystem* sys : m_d->systemsAllowedExtraDisplayWidgets) {
     QWidget * edwidget = sys->buildExtraDisplayWidget();
     if (edwidget)
       sysname2extradisplay << QPair<QString,QWidget*>(sys->name(),edwidget);
@@ -251,7 +251,7 @@ void IVP13DStandardChannelWidget::create() {
   m_d->viewer->setTransparencyType( SoGLRenderAction::BLEND ); // this looks better for geometry volumes
 
   //Setup camera info:
-  foreach(IVP13DSystem*sys,m_d->systemsAllowedCameraList)
+  for (IVP13DSystem*sys : m_d->systemsAllowedCameraList)
     sys->registerViewer(m_d->viewer);
 
 

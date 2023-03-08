@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -215,7 +215,7 @@ namespace CP
       m_name = val_basename + "__" + number.substr (0, number.size()-4)
 	+ separator + number.substr (number.size()-4);
       while (m_name[m_name.size()-1] == '0')
-	m_name = m_name.substr (0, m_name.size()-1);
+	m_name.resize (m_name.size()-1);
     }
 
     RCU_NEW_INVARIANT (this);

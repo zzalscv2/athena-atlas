@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef _InDet_LWTNNCondAlg_H_
@@ -118,22 +118,6 @@ class LWTNNCondAlg : public AthReentrantAlgorithm {
           "NN_theta"},
         "List of training variables for the LWTNN networks in the order they are fed to evaluate the networks"};
 
-/*
-  Gaudi::Property<std::string> m_layerInfoHistogram
-  {this, "LayerInfoHistogram",      "LayersInfo","Name about the layer info histogram."};
-
-  Gaudi::Property<std::string> m_layerPrefix
-  {this, "LayerPrefix",             "Layer",     "Prefix of the pre layer weight and threshold histograms."}; 
-
-  Gaudi::Property<std::string> m_weightIndicator
-  {this, "LayerWeightIndicator",    "_weights",  "Suffix of the weight histograms."};
-
-  Gaudi::Property<std::string> m_thresholdIndicator
-  {this, "LayerThresholdIndicator", "_thresholds","Suffix of the threshold histograms."};
-
-  Gaudi::Property<bool> m_getInputsInfo
-  {this, "GetInputsInfo", false,"Also read a histogram which contains information about the inputs (Run I)."};
-  */
 };
 }
 #endif

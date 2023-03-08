@@ -2,6 +2,11 @@
 
    <!-- Dictionary for the persistent MuCTPI_RDO object -->
    <class name="MuCTPI_RDO_p1" id="406BC4C7-56B6-4956-A66A-B749BCD35009" />
+   
+   <!-- Dictionary for the persistent MuCTPIL1Topo object -->
+   <class name="MuCTPIL1Topo_p1" id="BC2BAC47-504A-4A8A-89D9-2086B9038E18" />
+   <class name="MuCTPIL1TopoCandidate_p1" />
+   <class name="std::vector<MuCTPIL1TopoCandidate_p1>" />
 
    <!-- Dictionary for the persistent CTP_RDO object -->
    <class name="CTP_RDO_p1" id="5E6D3E52-952F-4144-BC68-83ACE605AA45" />

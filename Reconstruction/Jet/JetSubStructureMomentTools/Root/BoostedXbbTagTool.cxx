@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetSubStructureMomentTools/BoostedXbbTagTool.h"
@@ -9,7 +9,7 @@
 
 using namespace std;
 
-BoostedXbbTagTool::BoostedXbbTagTool(std::string name) :
+BoostedXbbTagTool::BoostedXbbTagTool(const std::string& name) :
   JetSubStructureMomentToolsBase(name)
 {
   declareProperty("WorkingPoint", m_working_point               = "medium");

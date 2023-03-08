@@ -37,7 +37,7 @@ namespace LArSamples {
   class Residual;
   class Residuals;
   
-  class History {
+  class ATLAS_NOT_THREAD_SAFE History {
   
     public:
    

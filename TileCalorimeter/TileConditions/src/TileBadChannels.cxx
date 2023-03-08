@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileConditions/TileBadChannels.h"
@@ -47,4 +47,26 @@ const TileBchStatus& TileBadChannels::getChannelStatus(const HWIdentifier channe
 void TileBadChannels::setMaskedDrawers(std::vector<int>&& maskedDrawers) {
   m_maskedDrawers = std::move(maskedDrawers);
   std::sort (m_maskedDrawers.begin(), m_maskedDrawers.end());
+}
+
+uint32_t TileBadChannels::encodeStatus(const TileBchStatus& status) {
+  uint32_t bad;
+
+  if (status.isGood()) {
+    bad = 0;
+  } else if (status.isBad()) {
+    bad = 3;
+  } else if (status.isNoisy()) {
+    bad = 1;
+  } else if (status.isAffected()) {
+    bad = 2;
+  } else {
+    bad = 4;
+  }
+
+  return bad;
+}
+
+uint32_t TileBadChannels::encodeAdcStatus(const HWIdentifier adc_id) const {
+  return encodeStatus(getAdcStatus(adc_id));
 }

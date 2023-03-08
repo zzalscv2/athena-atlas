@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 #==============================================================================
 # Provides configs for the tools used for LLP Derivations
@@ -41,6 +41,7 @@ def LLP1TriggerSkimmingToolCfg(ConfigFlags, name, **kwargs):
     from TriggerMenuMT.TriggerAPI.TriggerEnums import TriggerPeriod, TriggerType
 
     allperiods = TriggerPeriod.y2015 | TriggerPeriod.y2016 | TriggerPeriod.y2017 | TriggerPeriod.y2018 | TriggerPeriod.future2e34
+    TriggerAPI.setConfigFlags(ConfigFlags)
     trig_el  = TriggerAPI.getLowestUnprescaledAnyPeriod(allperiods, triggerType=TriggerType.el,  livefraction=0.8)
     trig_mu  = TriggerAPI.getLowestUnprescaledAnyPeriod(allperiods, triggerType=TriggerType.mu,  livefraction=0.8)
     trig_g   = TriggerAPI.getLowestUnprescaledAnyPeriod(allperiods, triggerType=TriggerType.g,   livefraction=0.8)
@@ -122,7 +123,7 @@ def LRTElectronLHSelectorsCfg(ConfigFlags):
         "ElectronLHSelectorVeryLooseNoPix",
         ConfigFile = "ElectronPhotonSelectorTools/trigger/rel22_20210611/ElectronLikelihoodVeryLooseTriggerConfig_NoPix.conf")
     ElectronLHSelectorVeryLooseNoPix.primaryVertexContainer = "PrimaryVertices"
-    ElectronLHSelectorVeryLooseNoPix.usePVContainer = ConfigFlags.InDet.PriVertex.doVertexFinding
+    ElectronLHSelectorVeryLooseNoPix.usePVContainer = ConfigFlags.Tracking.doVertexFinding
     acc.addPublicTool(ElectronLHSelectorVeryLooseNoPix)
 
 
@@ -130,7 +131,7 @@ def LRTElectronLHSelectorsCfg(ConfigFlags):
         "ElectronLHSelectorLooseNoPix",
         ConfigFile = "ElectronPhotonSelectorTools/trigger/rel22_20210611/ElectronLikelihoodLooseTriggerConfig_NoPix.conf")
     ElectronLHSelectorLooseNoPix.primaryVertexContainer = "PrimaryVertices"
-    ElectronLHSelectorLooseNoPix.usePVContainer = ConfigFlags.InDet.PriVertex.doVertexFinding
+    ElectronLHSelectorLooseNoPix.usePVContainer = ConfigFlags.Tracking.doVertexFinding
     acc.addPublicTool(ElectronLHSelectorLooseNoPix)
 
 
@@ -138,7 +139,7 @@ def LRTElectronLHSelectorsCfg(ConfigFlags):
         "ElectronLHSelectorMediumNoPix",
         ConfigFile = "ElectronPhotonSelectorTools/trigger/rel22_20210611/ElectronLikelihoodMediumTriggerConfig_NoPix.conf")
     ElectronLHSelectorMediumNoPix.primaryVertexContainer = "PrimaryVertices"
-    ElectronLHSelectorMediumNoPix.usePVContainer = ConfigFlags.InDet.PriVertex.doVertexFinding
+    ElectronLHSelectorMediumNoPix.usePVContainer = ConfigFlags.Tracking.doVertexFinding
     acc.addPublicTool(ElectronLHSelectorMediumNoPix)
 
 
@@ -146,7 +147,7 @@ def LRTElectronLHSelectorsCfg(ConfigFlags):
         "ElectronLHSelectorTightNoPix",
         ConfigFile = "ElectronPhotonSelectorTools/trigger/rel22_20210611/ElectronLikelihoodTightTriggerConfig_NoPix.conf")
     ElectronLHSelectorTightNoPix.primaryVertexContainer = "PrimaryVertices"
-    ElectronLHSelectorTightNoPix.usePVContainer = ConfigFlags.InDet.PriVertex.doVertexFinding
+    ElectronLHSelectorTightNoPix.usePVContainer = ConfigFlags.Tracking.doVertexFinding
     acc.addPublicTool(ElectronLHSelectorTightNoPix)
 
     from DerivationFrameworkEGamma.EGammaToolsConfig import EGElectronLikelihoodToolWrapperCfg

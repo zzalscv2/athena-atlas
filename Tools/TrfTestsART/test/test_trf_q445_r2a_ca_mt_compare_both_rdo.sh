@@ -14,7 +14,7 @@ Reco_tf.py --CA \
   --inputRDOFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/DigitizationTests/ReferenceFiles/dev/x86_64-centos7-gcc11-opt/mc21a_ttbar.CA.RDO.pool.root \
   --outputAODFile myAOD_ca.pool.root \
   --outputESDFile myESD_ca.pool.root \
-  --preExec "all:from AthenaConfiguration.AllConfigFlags import ConfigFlags; ConfigFlags.Jet.WriteToAOD=True; ConfigFlags.MET.WritetoAOD=True" \
+  --preExec "all:ConfigFlags.Jet.WriteToAOD=True; ConfigFlags.MET.WritetoAOD=True" \
   --imf="False" \
   --maxEvents 100
 

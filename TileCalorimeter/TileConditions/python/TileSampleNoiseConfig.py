@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """Define methods to construct configured Tile sample noise tool and conditions algorithm"""
 
@@ -9,7 +9,7 @@ def TileSampleNoiseCondAlgCfg(flags, **kwargs):
     """Return component accumulator with configured Tile sample noise conditions algorithm
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
     Keyword arguments:
         Source -- source of Tile sample noise conditions (COOL, FILE). Defaults to COOL.
         ForceOnline -- flag to use online sample noise in offline. Defaults to False.
@@ -55,11 +55,10 @@ def TileSampleNoiseCondAlgCfg(flags, **kwargs):
     else:
         raise(Exception("Invalid source: %s" % source))
 
-
-    TileCalibFltCondAlg=CompFactory.getComp("TileCalibCondAlg<TileCalibDrawerFlt>")
-    sampleNoiseCondAlg = TileCalibFltCondAlg( name = name,
-                                              ConditionsProxy = sampleNoiseProxy,
-                                              TileCalibData = sampleNoise)
+    TileSampleNoiseCondAlg = CompFactory.getComp("TileCondAlg<TileSampleNoise,TileCalibDrawerFlt>")
+    sampleNoiseCondAlg = TileSampleNoiseCondAlg( name = name,
+                                                 ConditionsProxy = sampleNoiseProxy,
+                                                 TileCondData = sampleNoise)
 
     acc.addCondAlgo(sampleNoiseCondAlg)
 
@@ -70,7 +69,7 @@ def TileSampleNoiseCondAlgCfg(flags, **kwargs):
 def TileCondToolNoiseSampleCfg(flags, **kwargs):
     """Return component accumulator with configured private Tile sample noise tool
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
     Keyword arguments:
         Source -- source of Tile sample noise conditions (COOL, FILE). Defaults to COOL.
         TileSampleNoise -- name of Tile sample noise conditions object. Defaults to TileSampleNoise.
@@ -115,7 +114,7 @@ def TileCondToolNoiseSampleCfg(flags, **kwargs):
 
 if __name__ == "__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG
@@ -123,16 +122,17 @@ if __name__ == "__main__":
     # Test setup
     log.setLevel(DEBUG)
 
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.Common.isOnline = True
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.Common.isOnline = True
+    flags.lock()
 
     acc = ComponentAccumulator()
 
-    sampleNoiseTool = acc.popToolsAndMerge( TileCondToolNoiseSampleCfg(ConfigFlags) )
+    sampleNoiseTool = acc.popToolsAndMerge( TileCondToolNoiseSampleCfg(flags) )
     print(sampleNoiseTool)
 
-    accOnlSampleNoise = TileCondToolNoiseSampleCfg(ConfigFlags,
+    accOnlSampleNoise = TileCondToolNoiseSampleCfg(flags,
                                                    TileSampleNoise = 'TileSampleNoise',
                                                    TileOnlineSampleNoise = 'TileOnlineSampleNoise')
 

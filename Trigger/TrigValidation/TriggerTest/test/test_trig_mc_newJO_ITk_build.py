@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Trigger AthenaMT test running new-style job options
 # art-type: build
 # art-include: master/Athena
-# art-include: 22.0/Athena
+# art-include: 23.0/Athena
 # Skipping art-output which has no effect for build tests.
 # If you create a grid version, check art-output in existing grid tests.
 
@@ -18,7 +18,8 @@ run.executable = 'runHLT_standalone_newJO.py'
 run.args += ' --filesInput='+Input.get_input(run.input).paths[0]
 run.args += ' Trigger.triggerMenuSetup="Dev_pp_run3_v1"'
 run.args += ' Trigger.doRuntimeNaviVal=True'
-run.args += ' ITk.Tracking.doTruth="False"'
+run.args += ' ITk.doTruth=False'
+run.args += ' Tracking.doTruth=False'
 run.prmon = False
 
 

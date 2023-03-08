@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Misc includes
@@ -142,11 +142,7 @@ namespace xAOD {
   AUXSTORE_PRIMITIVE_GETTER(TrackParticle_v1, float, theta)
   AUXSTORE_PRIMITIVE_GETTER(TrackParticle_v1, float, qOverP)
 
-  float TrackParticle_v1::time() const {
-    static const SG::AuxElement::Accessor< float > acc("time");
-    if( !acc.isAvailable( *this) ) throw std::runtime_error( "Unavailable TrackParticle time requested" );
-    return acc( *this );
-  }
+  AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(TrackParticle_v1, float, time, setTime)
 
   DefiningParameters_t TrackParticle_v1::definingParameters() const{
     DefiningParameters_t tmp;
@@ -183,11 +179,6 @@ namespace xAOD {
     setDefiningParameters(d0, z0, phi0, theta, qOverP);
     setTime(time);
     return;
-  }
-
-  void TrackParticle_v1::setTime(float time) {
-    static const SG::AuxElement::Accessor< float > acc("time");
-    acc( *this ) = time;
   }
 
   static const SG::AuxElement::Accessor< std::vector< float > >

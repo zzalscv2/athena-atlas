@@ -21,17 +21,17 @@ print(options)
 globalflags.ConditionsTag = options['condition']
 
 ## Simulation flags
-from G4AtlasApps.SimFlags import SimFlags
-SimFlags.load_atlas_flags()
-SimFlags.CalibrationRun.set_Off()
+from G4AtlasApps.SimFlags import simFlags
+simFlags.load_atlas_flags()
+simFlags.CalibrationRun.set_Off()
 
 if len(options['geometry']) > 0 :
-    SimFlags.SimLayout = options['geometry']
+    simFlags.SimLayout = options['geometry']
 else :
-    SimFlags.SimLayout.set_On()
+    simFlags.SimLayout.set_On()
 
 if len(options['physlist']) > 0 :
-    SimFlags.PhysicsList = options['physlist']
+    simFlags.PhysicsList = options['physlist']
 
 ## AthenaCommon flags
 from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
@@ -40,10 +40,10 @@ athenaCommonFlags.SkipEvents = options['skipevents']
 athenaCommonFlags.PoolHitsOutput.set_Off()
 
 ## Set the LAr parameterization
-SimFlags.LArParameterization = 1
+simFlags.LArParameterization = 1
 
 from random import randint
-SimFlags.RandomSeedOffset = randint(1,443921180)
+simFlags.RandomSeedOffset = randint(1,443921180)
 
 if options['input'] is not None:
     athenaCommonFlags.PoolEvgenInput=options['input']
@@ -51,7 +51,7 @@ else:
     ## Use single particle generator
     import AthenaCommon.AtlasUnixGeneratorJob
     import ParticleGun as PG
-    topSequence += PG.ParticleGun(randomSvcName=simFlags.RandomSvc.get_Value(), randomStream="SINGLE")
+    topSequence += PG.ParticleGun(randomStream = "SINGLE", randomSeed = simFlags.RandomSeedOffset.get_Value())
     topSequence.ParticleGun.sampler.pid = int(options["pid"])
 
     topSequence.ParticleGun.sampler.mom = PG.EEtaMPhiSampler(energy=[options['energyMin'],options['energyMax']], eta=[options['etaMin'],options['etaMax']])

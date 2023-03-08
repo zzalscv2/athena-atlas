@@ -45,7 +45,7 @@ using std::setprecision;
 namespace {
 
   // Utility functions...
-  void validate_reduction(int matrixsize, TMatrixDSym& corr, std::vector<std::pair<TH1*, TH1*>>& eigenvars, TH1* result, std::string scheme, std::string tagger, std::string wp, std::string jetauthor){
+  void validate_reduction(int matrixsize, TMatrixDSym& corr, std::vector<std::pair<TH1*, TH1*>>& eigenvars, TH1* result, const std::string& scheme, const std::string& tagger, const std::string& wp, const std::string& jetauthor){
     // Validating the reduction schemes - you can compare the correlation matrix constructed before and after eigenvector decomposition 
     // using whatever eigenvectors are available at either stage. The less difference, the better.
 

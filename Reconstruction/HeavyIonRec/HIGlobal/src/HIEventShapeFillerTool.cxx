@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HIGlobal/HIEventShapeFillerTool.h"
@@ -14,47 +14,42 @@
 #include <iomanip>
 
 HIEventShapeFillerTool::HIEventShapeFillerTool(const std::string& myname) : asg::AsgTool(myname),
-m_evtShape(nullptr),
 m_index(nullptr)
 {
 }
 
 
-
-
-
-StatusCode HIEventShapeFillerTool::initializeCollection(xAOD::HIEventShapeContainer* evtShape_)
+StatusCode HIEventShapeFillerTool::initializeIndex()
 {
-  //change m_evtShape to m_evtShape
-  m_evtShape = evtShape_;
-  //tool is initialized only once
-  if (!m_index)
-  {
-    m_index = m_eventShapeMapTool->getIndex(HI::BinningScheme::COMPACT);
-  }
-  //fix this to have proper name passing
-  //use tool to initialize event shape object
-  if (!m_useClusters) m_index->initializeEventShapeContainer(m_evtShape, m_numOrders);
+  m_index = m_eventShapeMapTool->getIndex(HI::BinningScheme::COMPACT);
   return StatusCode::SUCCESS;
 }
 
 
+StatusCode HIEventShapeFillerTool::initializeEventShapeContainer(std::unique_ptr<xAOD::HIEventShapeContainer>& evtShape) const
+{
+  //use tool to initialize event shape object
+  if (!m_useClusters) m_index->initializeEventShapeContainer(evtShape, m_numOrders);
+  return StatusCode::SUCCESS;
+}
 
-StatusCode HIEventShapeFillerTool::fillCollectionFromTowers(const SG::ReadHandleKey<xAOD::CaloClusterContainer>& tower_container_key,
-  const SG::ReadHandleKey<INavigable4MomentumCollection>& navi_container_key)
+
+StatusCode HIEventShapeFillerTool::fillCollectionFromTowers(std::unique_ptr<xAOD::HIEventShapeContainer>& evtShape, const SG::ReadHandleKey<xAOD::CaloClusterContainer>& tower_container_key, const SG::ReadHandleKey<INavigable4MomentumCollection>& navi_container_key, const EventContext& ctx) const
 {
   //retrieve the tower container from store
   if (m_useClusters)
   {
-    SG::ReadHandle<xAOD::CaloClusterContainer>  readHandleCaloClus(tower_container_key.key());
+    SG::ReadHandle<xAOD::CaloClusterContainer>  readHandleCaloClus(tower_container_key, ctx);
     ATH_CHECK(readHandleCaloClus.isValid());
-    return fillCollectionFromClusterContainer(readHandleCaloClus.cptr());
+    return fillCollectionFromClusterContainer(evtShape, readHandleCaloClus.cptr(),ctx);
   }
-  SG::ReadHandle<INavigable4MomentumCollection>  readHandleINav(navi_container_key.key());
+  SG::ReadHandle<INavigable4MomentumCollection>  readHandleINav(navi_container_key, ctx);
   ATH_CHECK(readHandleINav.isValid());
-  return fillCollectionFromTowerContainer(readHandleINav.cptr());
+  return fillCollectionFromTowerContainer(evtShape, readHandleINav.cptr());
 }
-StatusCode HIEventShapeFillerTool::fillCollectionFromTowerContainer(const INavigable4MomentumCollection* navInColl)
+
+
+StatusCode HIEventShapeFillerTool::fillCollectionFromTowerContainer(std::unique_ptr<xAOD::HIEventShapeContainer>& evtShape, const INavigable4MomentumCollection* navInColl) const
 {
   //loop on towers
   for (INavigable4MomentumCollection::const_iterator towerItr = navInColl->begin();
@@ -72,19 +67,20 @@ StatusCode HIEventShapeFillerTool::fillCollectionFromTowerContainer(const INavig
 
     if (cellToken.size() == 0) continue;
     for (NavigationToken<CaloCell, double, CaloCellIDFcn>::const_iterator cellItr = cellToken.begin();
-      cellItr != cellToken.end(); ++cellItr) updateShape(m_evtShape, m_index, *cellItr, cellToken.getParameter(*cellItr), eta0, phi0);
+      cellItr != cellToken.end(); ++cellItr) updateShape(evtShape, m_index, *cellItr, cellToken.getParameter(*cellItr), eta0, phi0);
   }//end tower loop
   return StatusCode::SUCCESS;
 }
 
-StatusCode HIEventShapeFillerTool::fillCollectionFromClusterContainer(const xAOD::CaloClusterContainer* theClusters)
+
+StatusCode HIEventShapeFillerTool::fillCollectionFromClusterContainer(std::unique_ptr<xAOD::HIEventShapeContainer>& evtShape, const xAOD::CaloClusterContainer* theClusters, const EventContext& ctx) const
 {
   constexpr float area_slice = HI::TowerBins::getBinArea() * HI::TowerBins::numPhiBins();
-  m_evtShape->reserve(HI::TowerBins::numEtaBins());
+  evtShape->reserve(HI::TowerBins::numEtaBins());
   for (unsigned int eb = 0; eb < HI::TowerBins::numEtaBins(); eb++)
   {
     xAOD::HIEventShape* e = new xAOD::HIEventShape();
-    m_evtShape->push_back(e);
+    evtShape->push_back(e);
     e->setLayer(0);
     e->setEtaMin(HI::TowerBins::getBinLowEdgeEta(eb));
     e->setEtaMax(HI::TowerBins::getBinUpEdgeEta(eb));
@@ -105,19 +101,17 @@ StatusCode HIEventShapeFillerTool::fillCollectionFromClusterContainer(const xAOD
 
   constexpr float area_cluster = HI::TowerBins::getBinArea();
 
-  if (m_towerWeightTool) CHECK(m_towerWeightTool->configureEvent());
-
   for (auto cl : *theClusters)
   {
     double ET = cl->e() / std::cosh(cl->eta0());
     double phi = cl->phi0();
     double eta = cl->eta0();
     unsigned int eb = HI::TowerBins::findBinEta(eta);
-    xAOD::HIEventShape* slice = m_evtShape->at(eb);
+    xAOD::HIEventShape* slice = evtShape->at(eb);
     float weight = 1;
     if (m_towerWeightTool)
     {
-      float recip = m_towerWeightTool->getEtaPhiResponse(eta, phi);
+      float recip = m_towerWeightTool->getEtaPhiResponse(eta, phi, ctx);
       if (recip != 0.) weight = 1. / recip;
     }
     weight_vector->push_back(weight);
@@ -158,7 +152,7 @@ StatusCode HIEventShapeFillerTool::fillCollectionFromClusterContainer(const xAOD
     }
   }
   ATH_MSG_DEBUG("DUMPING HIEVENTSHAPE");
-  for (auto es : *m_evtShape)
+  for (auto es : *evtShape)
   {
     ATH_MSG_DEBUG(std::setw(10) << es->etaMin()
       << std::setw(10) << es->etaMax()
@@ -175,22 +169,25 @@ StatusCode HIEventShapeFillerTool::fillCollectionFromClusterContainer(const xAOD
   return StatusCode::SUCCESS;
 }
 
-StatusCode HIEventShapeFillerTool::fillCollectionFromCells(const SG::ReadHandleKey<CaloCellContainer>& cell_container_key)
+
+StatusCode HIEventShapeFillerTool::fillCollectionFromCells(std::unique_ptr<xAOD::HIEventShapeContainer>& evtShape, const SG::ReadHandleKey<CaloCellContainer>& cell_container_key, const EventContext& ctx) const
 {
   //retrieve the cell container from store
-  SG::ReadHandle<CaloCellContainer>  read_handle_caloCell(cell_container_key);
+  SG::ReadHandle<CaloCellContainer>  read_handle_caloCell(cell_container_key, ctx);
   const CaloCellContainer* CellContainer = read_handle_caloCell.get();
-  return fillCollectionFromCellContainer(CellContainer);
+  return fillCollectionFromCellContainer(evtShape, CellContainer);
 }
-StatusCode HIEventShapeFillerTool::fillCollectionFromCellContainer(const CaloCellContainer* CellContainer)
+
+
+StatusCode HIEventShapeFillerTool::fillCollectionFromCellContainer(std::unique_ptr<xAOD::HIEventShapeContainer>& evtShape, const CaloCellContainer* CellContainer) const
 {
   //loop on Cells
-  for (const auto cellItr : *CellContainer) updateShape(m_evtShape, m_index, cellItr, 1., cellItr->eta(), cellItr->phi());
+  for (const auto cellItr : *CellContainer) updateShape(evtShape, m_index, cellItr, 1., cellItr->eta(), cellItr->phi());
   return StatusCode::SUCCESS;
 }
 
 
-void HIEventShapeFillerTool::updateShape(xAOD::HIEventShapeContainer* shape, const HIEventShapeIndex* index, const CaloCell* theCell, float geoWeight, float eta0, float phi0, bool isNeg) const
+void HIEventShapeFillerTool::updateShape(std::unique_ptr<xAOD::HIEventShapeContainer>& shape, const HIEventShapeIndex* index, const CaloCell* theCell, float geoWeight, float eta0, float phi0, bool isNeg) const
 {
   float sgn = (isNeg) ? -1 : 1;
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, ConfigurationError
 import os
@@ -37,6 +37,12 @@ def IOVDbSvcCfg(flags, **kwargs):
 
     if 'FRONTIER_SERVER' in os.environ.keys() and os.environ['FRONTIER_SERVER'] != '':
         kwargs.setdefault('CacheAlign', 3)
+
+    # Very important cache settings for use of CoralProxy at P1 (ATR-4646)
+    if flags.Common.isOnline and flags.Trigger.Online.isPartition:
+        kwargs['CacheAlign'] = 0
+        kwargs['CacheRun'] = 0
+        kwargs['CacheTime'] = 0
 
     kwargs.setdefault('GlobalTag', flags.IOVDb.GlobalTag)
     if 'Folders' in kwargs:
@@ -142,7 +148,7 @@ def addFolderList(flags, listOfFolderInfoTuple, extensible=False, db=None, modif
     return result
 
 
-def addFoldersSplitOnline(flags, detDb, onlineFolders, offlineFolders, className=None, addMCString='_OFL', splitMC=False, tag=None, forceDb=None, modifiers=''):
+def addFoldersSplitOnline(flags, detDb, onlineFolders, offlineFolders, className=None, extensible=False, addMCString='_OFL', splitMC=False, tag=None, forceDb=None, modifiers=''):
     """Add access to given folder, using either online_folder  or offline_folder. For MC, add addMCString as a postfix (default is _OFL)"""
 
     if flags.Common.isOnline and not flags.Input.isMC:
@@ -154,7 +160,7 @@ def addFoldersSplitOnline(flags, detDb, onlineFolders, offlineFolders, className
         detDb = detDb + addMCString
         folders = offlineFolders
 
-    return addFolders(flags, folders, detDb, className, tag=tag, db=forceDb, modifiers=modifiers)
+    return addFolders(flags, folders, detDb, className, extensible, tag=tag, db=forceDb, modifiers=modifiers)
 
 
 _dblist = {
@@ -248,13 +254,13 @@ def _extractFolder(folderString):
 
 
 if __name__ == '__main__':
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.lock()
 
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.lock()
-
-    acc = IOVDbSvcCfg(ConfigFlags)
+    acc = IOVDbSvcCfg(flags)
 
     with open('test.pkl','wb') as f:
         acc.store(f)

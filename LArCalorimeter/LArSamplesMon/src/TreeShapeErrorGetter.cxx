@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/TreeShapeErrorGetter.h"
@@ -65,10 +65,6 @@ TreeShapeErrorGetter::TreeShapeErrorGetter(const TString& fileName, bool recreat
 TreeShapeErrorGetter::~TreeShapeErrorGetter()
 {
   if (m_file->GetOption() == TString("CREATE")) {
-    if (!m_file) {
-      cout << "No file, error writing data to TreeShapeErrorGetter" << endl;
-      return;
-    }
     m_file->cd();
     for (unsigned int g = 0; g < 3; g++ ) {
       if (!m_cellTrees[g] || !m_ringTrees[g]) {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOEVENT_CALOSUM_H
@@ -340,12 +340,12 @@ class CaloSum
    *
    *  \param theIterator   store iterator
    */
-  CaloRegion   getRegion(const_iterator& theIterator)   const;
+  static CaloRegion   getRegion(const_iterator& theIterator)   ;
   /*! \brief Returns sampling for a given iterator 
    *
    *  \param theIterator   store iterator
    */
-  CaloSampling::CaloSample getSampling(const_iterator& theIterator) const;
+  static CaloSampling::CaloSample getSampling(const_iterator& theIterator) ;
 
   /*! \brief Returns sums for a given iterator 
    *
@@ -463,8 +463,8 @@ class CaloSum
    *  \param  theRegion   region indicator
    *  \param  theSample   sampling indicator
    */
-  key_t getKey(const CaloRegion&               theRegion,
-	       const CaloSampling::CaloSample& theSample) const;
+  static key_t getKey(const CaloRegion&               theRegion,
+	       const CaloSampling::CaloSample& theSample) ;
   /*! \brief Translate into key 
    *
    *  \overload

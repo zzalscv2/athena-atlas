@@ -27,11 +27,11 @@ namespace Trk {
       m_measscatphi (0),
       m_sintheta (1)
   {
-  } 
-  
-  GXFMaterialEffects::GXFMaterialEffects(const MaterialEffectsOnTrack * meot) {
-    m_sigmadeltae = 0;
-    
+  }
+
+  GXFMaterialEffects::GXFMaterialEffects(const MaterialEffectsOnTrack *meot)
+      : m_sigmadeltae(0) {
+
     if (meot->energyLoss() != nullptr) {
       m_deltae = meot->energyLoss()->deltaE();
       m_sigmadeltaepos = meot->energyLoss()->sigmaPlusDeltaE();

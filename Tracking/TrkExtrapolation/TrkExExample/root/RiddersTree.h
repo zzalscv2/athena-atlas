@@ -96,7 +96,7 @@ public :
    void     Init(TTree *tree);
    virtual TH1F*    Loop(TString& histName, int bins, int low, int high, int entries=0,
                          bool loc1=true, bool loc2=true, bool phi=true, bool theta=true, bool qop=true, bool relAbs=true);
-   virtual Bool_t   Notify();
+   virtual Bool_t   Notify() final;
    virtual void     Show(Long64_t entry = -1);
 };
 

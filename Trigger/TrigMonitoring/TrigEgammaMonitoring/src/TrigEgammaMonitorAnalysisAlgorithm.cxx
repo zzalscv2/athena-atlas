@@ -144,8 +144,6 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiencies( const std::vector< st
 }
 
 
-
-
 void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiency( const std::string &subgroup, 
                                                          const std::string &level,
                                                          const std::string &pidword,
@@ -166,7 +164,7 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiency( const std::string &subg
     
     std::vector<float> et_vec, highet_vec, pt_vec, eta_vec, phi_vec, avgmu_vec, npvtx_vec,et_slice0_vec,et_slice1_vec,et_slice2_vec,et_slice3_vec;
     std::vector<float> match_et_vec, match_highet_vec, match_pt_vec, match_eta_vec, match_phi_vec, match_avgmu_vec, match_npvtx_vec;
-    std::vector<bool> et_passed_vec, highet_passed_vec, pt_passed_vec, eta_passed_vec, phi_passed_vec, avgmu_passed_vec, npvtx_passed_vec;
+    std::vector<bool> et_passed_vec, et_failed_vec, highet_passed_vec, highet_failed_vec, pt_passed_vec, eta_passed_vec, eta_failed_vec, phi_passed_vec, avgmu_passed_vec, npvtx_passed_vec;
     std::vector<bool> et_slice0_passed_vec,et_slice1_passed_vec,et_slice2_passed_vec,et_slice3_passed_vec;
 
     auto et_col     = Monitored::Collection( "et"     , et_vec );
@@ -186,9 +184,12 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiency( const std::string &subg
     auto match_npvtx_col  = Monitored::Collection( "match_npvtx"  , match_npvtx_vec );
 
     auto et_passed_col     = Monitored::Collection( "et_passed"     , et_passed_vec );
+    auto et_failed_col     = Monitored::Collection( "et_failed"     , et_failed_vec );
     auto highet_passed_col = Monitored::Collection( "highet_passed" , highet_passed_vec );
+    auto highet_failed_col = Monitored::Collection( "highet_failed" , highet_failed_vec );
     auto pt_passed_col     = Monitored::Collection( "pt_passed"     , pt_passed_vec );
     auto eta_passed_col    = Monitored::Collection( "eta_passed"    , eta_passed_vec );
+    auto eta_failed_col    = Monitored::Collection( "eta_failed"    , eta_failed_vec );
     auto phi_passed_col    = Monitored::Collection( "phi_passed"    , phi_passed_vec );
     auto avgmu_passed_col  = Monitored::Collection( "avgmu_passed"  , avgmu_passed_vec );
     auto npvtx_passed_col  = Monitored::Collection( "npvtx_passed"  , npvtx_passed_vec );
@@ -264,14 +265,16 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiency( const std::string &subg
                     match_npvtx_vec.push_back(npvtx);
                 }
 
-                et_passed_vec.push_back( true ); 
+                et_passed_vec.push_back( true );
+                et_failed_vec.push_back( false ); 
                 pt_passed_vec.push_back( true ); 
                 highet_passed_vec.push_back( true ); 
+                highet_failed_vec.push_back( false );
 
                 if(abs(eta)<=0.8){
                     et_slice0_passed_vec.push_back(true);
                 }else if( abs(eta) > 0.80 && abs(eta) <= 1.37 ){
-                    et_slice1_passed_vec.push_back(true);
+		    et_slice1_passed_vec.push_back(true);
                 }else if( abs(eta) > 1.37 && abs(eta) <= 1.54 ){
                     et_slice2_passed_vec.push_back(true);
                 }else if( abs(eta) > 1.54 && abs(eta) <= 2.50 ){
@@ -279,7 +282,8 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiency( const std::string &subg
                 }
 
                 if(et > etthr+1.0){
-                    eta_passed_vec.push_back( true ); 
+                    eta_passed_vec.push_back( true );
+                    eta_failed_vec.push_back( false ); 
                     phi_passed_vec.push_back( true ); 
                     avgmu_passed_vec.push_back( true ); 
                     npvtx_passed_vec.push_back( true ); 
@@ -287,12 +291,14 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiency( const std::string &subg
             } // Passes Trigger selection
             else {
 
-                et_passed_vec.push_back( false ); 
+                et_passed_vec.push_back( false );
+                et_failed_vec.push_back( true ); 
                 pt_passed_vec.push_back( false ); 
                 highet_passed_vec.push_back( false );
+                highet_failed_vec.push_back( true );
 
                 if(abs(eta)<=0.8){
-                    et_slice0_passed_vec.push_back(false);
+		    et_slice0_passed_vec.push_back(false);
                 }else if( abs(eta) > 0.80 && abs(eta) <= 1.37 ){
                     et_slice1_passed_vec.push_back(false);
                 }else if( abs(eta) > 1.37 && abs(eta) <= 1.54 ){
@@ -302,7 +308,8 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiency( const std::string &subg
                 }
 
                 if(et > etthr+1.0){
-                    eta_passed_vec.push_back( false ); 
+                    eta_passed_vec.push_back( false );
+                    eta_failed_vec.push_back( true ); 
                     phi_passed_vec.push_back( false ); 
                     avgmu_passed_vec.push_back( false ); 
                     npvtx_passed_vec.push_back( false ); 
@@ -317,13 +324,10 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiency( const std::string &subg
  
     fill( monGroup, et_col, highet_col, pt_col, eta_col, phi_col, avgmu_col, npvtx_col,
           match_et_col, match_highet_col, match_pt_col, match_eta_col, match_phi_col, match_avgmu_col, match_npvtx_col,
-          et_passed_col, highet_passed_col, pt_passed_col, eta_passed_col, phi_passed_col, avgmu_passed_col, npvtx_passed_col, 
+          et_passed_col, et_failed_col, highet_passed_col, highet_failed_col, pt_passed_col, eta_passed_col, eta_failed_col, phi_passed_col, avgmu_passed_col, npvtx_passed_col,  
           et_slice0_col,et_slice1_col,et_slice2_col,et_slice3_col,et_slice0_passed_col,et_slice1_passed_col,et_slice2_passed_col,et_slice3_passed_col);
 
 }
-
-
-
 // *********************************************************************************
 
 

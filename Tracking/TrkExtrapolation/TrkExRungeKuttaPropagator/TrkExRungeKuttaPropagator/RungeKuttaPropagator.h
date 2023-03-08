@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -228,7 +228,7 @@ public:
 
   /** Global position together with direction of the trajectory on the surface
    */
-  virtual const IntersectionSolution* intersect(
+  virtual IntersectionSolution intersect(
     const EventContext& ctx,
     const TrackParameters&,
     const Surface&,
@@ -239,7 +239,7 @@ public:
   /** GlobalPositions list interface:*/
   virtual void globalPositions(
     const EventContext& ctx,
-    std::list<Amg::Vector3D>&,
+    std::deque<Amg::Vector3D>&,
     const TrackParameters&,
     const MagneticFieldProperties&,
     const CylinderBounds&,
@@ -294,22 +294,11 @@ public:
     double&,
     ParticleHypothesis particle = pion) const override final;
 
-  /** GlobalPositions list interface:*/
-  virtual void globalPositions(
-    const EventContext& ctx,
-    std::list<Amg::Vector3D>&,
-    const PatternTrackParameters&,
-    const MagneticFieldProperties&,
-    const CylinderBounds&,
-    double,
-    ParticleHypothesis particle = pion) const override final;
-
-  /** GlobalPostions and steps for set surfaces */
   virtual void globalPositions(
     const EventContext& ctx,
     const PatternTrackParameters&,
-    std::list<const Surface*>&,
-    std::list<std::pair<Amg::Vector3D, double>>&,
+    std::vector<const Surface*>&,
+    std::vector<std::pair<Amg::Vector3D, double>>&,
     const MagneticFieldProperties&,
     ParticleHypothesis particle = pion) const override final;
 

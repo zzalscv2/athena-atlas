@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -87,15 +87,14 @@ StatusCode Trk::ResidualPullCalculator::finalize() {
 ////////////////////////////////////////////////////////////////////////////////
 //  calc residuals with determination of detector/MBase type
 ////////////////////////////////////////////////////////////////////////////////
-void Trk::ResidualPullCalculator::residuals(
-    std::vector<double>& residuals,
+std::array<double,5> 
+Trk::ResidualPullCalculator::residuals(
     const Trk::MeasurementBase* measurement,
     const Trk::TrackParameters* trkPar,
     const Trk::ResidualPull::ResidualType resType,
     const Trk::TrackState::MeasurementType detType) const {
 
-    if (residuals.size()<5) residuals.resize(5);
-    residuals[0]=residuals[1]=residuals[2]=residuals[3]=residuals[4]=-999;
+    std::array<double,5> residuals{-999.,-999.,-999.,-999.,-999};
     Trk::TrackState::MeasurementType measType = detType;
     if (detType == Trk::TrackState::unidentified) {
         Trk::MeasurementTypeID helper = MeasurementTypeID(m_idHelper);
@@ -130,30 +129,27 @@ void Trk::ResidualPullCalculator::residuals(
             // special case, has to be handed down to the SCT tool
             if ( ! m_SCTresidualTool.empty() ) {
                 ATH_MSG_VERBOSE ("Calling SCT tool ");
-                m_SCTresidualTool->residuals(residuals,measurement, trkPar, resType, Trk::TrackState::SCT);
+                return m_SCTresidualTool->residuals(measurement, trkPar, resType, Trk::TrackState::SCT);
             } else {
                 ATH_MSG_WARNING ("No SCT ResidualPullCalculator given, cannot calculate residual and pull for SCT measurement!");
-                return;
             }
             break;
         case Trk::TrackState::RPC:
             // special case, has to be handed down to the RPC tool
             if ( ! m_RPCresidualTool.empty() ) {
                 ATH_MSG_VERBOSE ("Calling RPC tool ");
-                m_RPCresidualTool->residuals(residuals,measurement, trkPar, resType, Trk::TrackState::RPC);
+                return m_RPCresidualTool->residuals(measurement, trkPar, resType, Trk::TrackState::RPC);
             } else {
                 ATH_MSG_WARNING ("No RPC ResidualPullCalculator given, cannot calculate residual and pull for RPC measurement!");
-                return;
             }
             break;
         case Trk::TrackState::TGC:
             // special case, has to be handed down to the TGC tool
             if ( ! m_TGCresidualTool.empty() ) {
                 ATH_MSG_VERBOSE ("Calling TGC tool ");  
-                m_TGCresidualTool->residuals(residuals,measurement, trkPar, resType, Trk::TrackState::TGC);
+                return m_TGCresidualTool->residuals(measurement, trkPar, resType, Trk::TrackState::TGC);
             } else {
                 ATH_MSG_WARNING ("No TGC ResidualPullCalculator given, cannot calculate residual and pull for TGC measurement!");
-                return;
             }
             break;
         case Trk::TrackState::Segment:
@@ -174,6 +170,7 @@ void Trk::ResidualPullCalculator::residuals(
             }
             break;
     }
+    return residuals;
 
 }
 

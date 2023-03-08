@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Tile includes
 #include "TileConditions/TileCondToolTiming.h"
-#include "TileCalibBlobObjs/TileCalibDrawerFlt.h"
 
 // Athena includes
 #include "AthenaKernel/errorcheck.h"
@@ -41,7 +40,7 @@ StatusCode TileCondToolTiming::initialize() {
 
 
   //=== Initialize condition data key with timings
-  ATH_CHECK( m_calibTimingKey.initialize() );
+  ATH_CHECK( m_timingKey.initialize() );
 
 
   return StatusCode::SUCCESS;
@@ -61,7 +60,7 @@ StatusCode TileCondToolTiming::finalize() {
 //____________________________________________________________________
 float TileCondToolTiming::getChannelOffset(unsigned int drawerIdx, unsigned int channel, unsigned int adc) const {
 
-  SG::ReadCondHandle<TileCalibDataFlt> calibTiming(m_calibTimingKey);
-  return calibTiming->getCalibDrawer(drawerIdx)->getData(channel, adc, 0);
+  SG::ReadCondHandle<TileTiming> timing(m_timingKey);
+  return timing->getSignalPhase(drawerIdx, channel, adc);
 
 }

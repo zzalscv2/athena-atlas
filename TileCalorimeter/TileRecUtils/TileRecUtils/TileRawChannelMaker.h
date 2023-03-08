@@ -54,7 +54,7 @@ class TileRawChannelMaker: public AthAlgorithm {
 
   private:
 
-    void fitOverflowedChannels(void);
+    void fitOverflowedChannels(const EventContext& ctx);
 
     // name of TDS container with TileDigits
     SG::ReadHandleKey<TileDigitsContainer> m_digitsContainerKey{this,"TileDigitsContainer","TileDigitsCnt",

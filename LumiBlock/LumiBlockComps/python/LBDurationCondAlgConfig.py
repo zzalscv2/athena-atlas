@@ -9,12 +9,12 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from IOVDbSvc.IOVDbSvcConfig import addFolders
 
-def LBDurationCondAlgCfg (configFlags):
+def LBDurationCondAlgCfg (flags):
     name = 'LBDurationCondAlg'
     result = ComponentAccumulator()
 
     folder = "/TRIGGER/LUMI/LBLB"
-    result.merge (addFolders (configFlags, folder, 'TRIGGER',
+    result.merge (addFolders (flags, folder, 'TRIGGER',
                               className = 'AthenaAttributeList'))
 
     LBDurationCondAlg=CompFactory.LBDurationCondAlg
@@ -27,11 +27,11 @@ def LBDurationCondAlgCfg (configFlags):
 
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
 
     print ('--- data')
-    flags1 = ConfigFlags.clone()
+    flags1 = initConfigFlags()
     flags1.Input.Files = defaultTestFiles.RAW
     flags1.lock()
     acc1 = LBDurationCondAlgCfg (flags1)

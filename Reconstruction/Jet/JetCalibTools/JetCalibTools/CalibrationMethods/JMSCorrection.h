@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETCALIBTOOLS_JMSCORRECTION_H
@@ -48,12 +48,12 @@ class JMSCorrection
   float getRho3D(double pT_uncorr, double mass_over_pt_uncorr, double eta) const;
   float getRho(double pT_uncorr, double mass_over_pt_uncorr, int etabin) const;
 
-  void setMassEtaBins(VecD etabins) { 
+  void setMassEtaBins(const VecD& etabins) { 
     if (etabins.size()==0) ATH_MSG_ERROR("Please check that the mass eta binning is properly set in your config file");
     m_massEtaBins=etabins;
   }
 
-  void setMassCombinationEtaBins(VecD etabins) { 
+  void setMassCombinationEtaBins(const VecD& etabins) { 
     if (etabins.size()==0) ATH_MSG_ERROR("Please check that the mass combination eta binning is properly set in your config file");
     m_massCombinationEtaBins=etabins;
   }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include "EventContainers/IdentifiableContainerMT.h"
 #include <vector>
@@ -10,6 +10,7 @@
 #include <atomic>
 #include <chrono>
 #include <random>
+#include <set>
 
 namespace IDC_TEST
 {

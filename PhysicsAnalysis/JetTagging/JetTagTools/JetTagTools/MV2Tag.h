@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETTAGTOOLS_MV2TAG_H
@@ -99,7 +99,7 @@ namespace Analysis {
     //void PrintInputs();
     std::vector<float>
     CreateVariables (const std::map<std::string, double> &inputs,
-                     const std::vector<std::string> inputVars) const;
+                     const std::vector<std::string>& inputVars) const;
 
     std::vector<float>
     GetMulticlassResponse(const std::vector<float>& vars,

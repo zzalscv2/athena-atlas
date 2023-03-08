@@ -119,13 +119,13 @@ for(unsigned int i=0; i< m_hashSym.size(); ++i) (m_hashSym[i]).clear();
 m_hashSym.clear();
 m_hashSym.resize(onlineId->febHashMax());
  for (unsigned iFeb=0;iFeb<onlineId->febHashMax();++iFeb) {
-   const HWIdentifier febid=onlineId->feb_Id(IdentifierHash(iFeb));
+   const HWIdentifier& febid=onlineId->feb_Id(IdentifierHash(iFeb));
     if( (toolAvailable && (m_badFebMasker->febMissing(febid)) ) || !toolAvailable ){
 	RobsFromMissingFeb.push_back( m_conv.getRobID( m_conv.getRodID( febrod, febid ) ) );
     }
     if( (toolAvailable && !(m_badFebMasker->febMissing(febid)) ) || !toolAvailable ){
 	// get RodID associated with the collection
-        HWIdentifier rodId = febrod.getReadoutModuleID(febid); 
+        const HWIdentifier& rodId = febrod.getReadoutModuleID(febid); 
 	unsigned int rodId32 = m_conv.getRodIDFromROM(rodId);
 	// index in the collection vector
 	int idx = m_hash(rodId32);

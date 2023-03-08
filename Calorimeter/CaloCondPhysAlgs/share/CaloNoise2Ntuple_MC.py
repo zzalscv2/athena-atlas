@@ -10,7 +10,7 @@
 if 'RunNumber' not in dir():
    RunNumber = 999999
 if 'Geometry' not in dir():   
-   Geometry = 'ATLAS-R2-2016-00-00-00'
+   Geometry = 'ATLAS-R2-2016-01-02-01'
 if 'GlobalTag' not in dir():   
    GlobalTag = 'OFLCOND-RUN12-SDR-33'
 if 'outputNtuple' not in dir():

@@ -700,7 +700,8 @@ TrigHTTSGToRawHitsTool::readTruthTracks(std::vector <HTTTruthTrack>& truth, cons
       // categorize particle (prompt, secondary, etc.) based on InDetPerformanceRTT/detector paper criteria.
       bool isPrimary = true;
       if (std::abs(truth_d0corr) > 2.) { isPrimary = false; }
-      if (HepMC::is_simulation_particle(particle) || HepMC::barcode(particle) == 0) { isPrimary = false; }
+      const int bc = HepMC::barcode(particle);
+      if (HepMC::is_simulation_particle(bc) || bc == 0) { isPrimary = false; }
 
       if (isPrimary && particle->production_vertex()) {
         const HepGeom::Point3D<double> startVertex(particle->production_vertex()->position().x(), particle->production_vertex()->position().y(), particle->production_vertex()->position().z());
@@ -714,7 +715,7 @@ TrigHTTSGToRawHitsTool::readTruthTracks(std::vector <HTTTruthTrack>& truth, cons
         isPrimary = false;
       }
 
-      HepMcParticleLink::ExtendedBarCode extBarcode2(HepMC::barcode(particle), ievt);
+      HepMcParticleLink::ExtendedBarCode extBarcode2(bc, ievt);
 
       HTTTruthTrack tmpSGTrack;
       tmpSGTrack.setVtxX(track_truth_x0);
@@ -749,7 +750,7 @@ void TrigHTTSGToRawHitsTool::getTruthInformation(InDetSimDataCollection::const_i
   const std::vector<InDetSimData::Deposit>& deposits(sdo.getdeposits());
   for (const InDetSimData::Deposit& dep : deposits) {
 
-    const HepMcParticleLink& particleLink(dep.first);
+    const HepMcParticleLink& particleLink = dep.first;
     // RDO's without SDO's are delta rays or detector noise.
     if (!particleLink.isValid()) { continue; }
     const float genEta = particleLink->momentum().pseudoRapidity();
@@ -757,9 +758,9 @@ void TrigHTTSGToRawHitsTool::getTruthInformation(InDetSimDataCollection::const_i
     // reject unstable particles
     if (particleLink->status() % 1000 != 1) { continue; }
     // reject secondaries and low pT (<400 MeV) pileup
-    if (HepMC::barcode(particleLink.cptr()) > m_simBarcodeOffset || HepMC::barcode(particleLink.cptr()) == 0) { continue; }
+    if (HepMC::is_simulation_particle(particleLink.barcode()) ||particleLink.barcode() == 0) { continue; }
     // reject far forward particles
-    if (fabs(genEta) > m_maxEta) { continue; }
+    if (std::fabs(genEta) > m_maxEta) { continue; }
     // "bestParent" is the highest pt particle
     if (bestParent == nullptr || bestParent->momentum().perp() < genPt) {
       bestParent = particleLink.cptr();

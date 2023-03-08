@@ -39,12 +39,12 @@ if( NOT SIMULATIONBASE )
                    POST_EXEC_SCRIPT noerror.sh )
 
    atlas_add_test( MuonReconstructionConfigTest
-                   SCRIPT python -m MuonConfig.MuonReconstructionConfig --run
+                   SCRIPT python -m MuonConfig.MuonReconstructionConfig --threads=1
                    PROPERTIES TIMEOUT 1200
                    POST_EXEC_SCRIPT noerror.sh )
 
    atlas_add_test( MuonSegmentFindingConfigTest
-                   SCRIPT python -m MuonConfig.MuonSegmentFindingConfig --run
+                   SCRIPT python -m MuonConfig.MuonSegmentFindingConfig --threads=1
                    PROPERTIES TIMEOUT 450
                    POST_EXEC_SCRIPT noerror.sh )
 endif()

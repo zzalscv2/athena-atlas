@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef jetsubstructuremomenttools_validator_header
@@ -21,7 +21,7 @@ class Validator :
 
     public:
       // Constructor and destructor
-      Validator(std::string name);
+      Validator(const std::string& name);
 
       int execute() const;
 

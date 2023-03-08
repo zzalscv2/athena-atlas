@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETTAGTOOLS_IPTAG_H
@@ -55,7 +55,7 @@ namespace Analysis {
                               const std::string &jetName) const override;
 
     /** calculate individual track contribution to the three likelihoods: */
-    void trackWeight(std::string jetAuthor, TrackGrade grade, double sa0, double sz0,
+    void trackWeight(const std::string& jetAuthor, const TrackGrade& grade, double sa0, double sz0,
                      double & twb, double & twu, double & twc) const;
     
     virtual void finalizeHistos() override {};

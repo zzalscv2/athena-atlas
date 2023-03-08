@@ -58,6 +58,12 @@ class PreJetAnalysisConfig (ConfigBlock) :
             alg = config.createAlgorithm( 'CP::AsgShallowCopyAlg', 'JetShallowCopyAlg' + self.postfix )
             alg.input = config.readName (self.containerName)
             alg.output = config.copyName (self.containerName)
+ 
+        config.addOutputVar (self.containerName, 'pt', 'pt')
+        config.addOutputVar (self.containerName, 'm', 'm')
+        config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True)
+        config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True)
+        config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True, enabled=False)
 
 
 
@@ -102,19 +108,22 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
         config.addPrivateTool( 'calibrationTool', 'JetCalibrationTool' )
         alg.calibrationTool.JetCollection = jetCollectionName[:-4]
         # Get the correct string to use in the config file name
-        if config.dataType() == 'afii':
-            configFile = "JES_MC16Recommendation_AFII_{0}_Apr2019_Rel21.config"
-        else:
-            configFile = "JES_MC16Recommendation_Consolidated_{0}_Apr2019_Rel21.config"
         if self.jetInput == "EMPFlow":
-            configFile = configFile.format("PFlow")
+            configFile = "PreRec_R22_PFlow_ResPU_EtaJES_GSC_February23_230215.config"
         else:
+            if config.dataType == 'afii':
+                configFile = "JES_MC16Recommendation_AFII_{0}_Apr2019_Rel21.config"
+            else:
+                configFile = "JES_MC16Recommendation_Consolidated_{0}_Apr2019_Rel21.config"
             configFile = configFile.format(self.jetInput)
         alg.calibrationTool.ConfigFile = configFile
         if config.dataType() == 'data':
             alg.calibrationTool.CalibSequence = 'JetArea_Residual_EtaJES_GSC_Insitu'
         else:
-            alg.calibrationTool.CalibSequence = 'JetArea_Residual_EtaJES_GSC_Smear'
+            if self.jetInput == "EMPFlow":
+                alg.calibrationTool.CalibSequence = 'JetArea_Residual_EtaJES_GSC'
+            else:
+                alg.calibrationTool.CalibSequence = 'JetArea_Residual_EtaJES_GSC_Smear'
         alg.calibrationTool.IsData = (config.dataType() == 'data')
         alg.jets = config.readName (self.containerName)
         alg.jetsOut = config.copyName (self.containerName)
@@ -152,6 +161,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             alg = config.createAlgorithm( 'CP::JvtUpdateAlg', 'JvtUpdateAlg'+postfix )
             config.addPrivateTool( 'jvtTool', 'JetVertexTaggerTool' )
             alg.jvtTool.JetContainer = self.jetCollection
+            alg.jvtTool.SuppressInputDependence=True
             alg.jets = config.readName (self.containerName)
             alg.jetsOut = config.copyName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
@@ -206,6 +216,8 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             alg.skipBadEfficiency = 0
             alg.jets = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
+            if alg.scaleFactorDecoration != '' :
+                config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'jvtEfficiency')
 
         if self.runFJvtSelection :
             alg = config.createAlgorithm( 'CP::JvtEfficiencyAlg', 'ForwardJvtEfficiencyAlg' )

@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
 #
 # File: TileRecUtils/share/TileCellBuilder_test.py
 # Author: sss
@@ -575,10 +575,9 @@ BADTIMING = [  0,    0, 1<<9] # BadTiming
 # So we pass in both representations; in finalize(), we'll check
 # that they match and print out the correct bad cell lines
 # if they do not.
-def make_tileBadChanTool (name, chans = [], lines = ''):
+def make_tileBadChannels (name, chans = [], lines = ''):
     global ToolSvc
     from TileConditions.TileCondProxyConf import getTileCondProxy
-    from TileConditions.TileConditionsConf import TileBadChanTool
     from TileConditions.TileConditionsConf import TileBadChannelsCondAlg
 
     # File data line format:
@@ -632,29 +631,28 @@ def make_tileBadChanTool (name, chans = [], lines = ''):
     from AthenaCommon.AlgSequence import AthSequencer
     condSeq = AthSequencer("AthCondSeq")
 
+    badChannels = name + 'CondData'
     condAlg = TileBadChannelsCondAlg (name + 'Cond',
-                                      TileBadChannels = name + 'CondData',
+                                      TileBadChannels = badChannels,
                                       OflBchProxy = getTileCondProxy ('FILE', 'Bch', TileBchList, name + '_ofl'),
                                       OnlBchProxy = getTileCondProxy ('FILE', 'Bch', 'TileNoBad.oflBch', name + '_onl'),
                                       )
     condSeq += condAlg
 
-    bct = TileBadChanTool (name,
-                           TileBadChannels = name + 'CondData')
-    return bct
+    return badChannels
 
 
-bct1 = make_tileBadChanTool ('tilecellbuilder_bct1')
+bc1 = make_tileBadChannels ('tilecellbuilder_bc1')
 
-bct2 = make_tileBadChanTool ('tilecellbuilder_bct2',
-                             [[(3, 1, 18,  8, 2, 0), BAD_HIGH],
-                              [(2, 1, 18,  9, 1, 0), BAD_LOW],
-                              [(2, 1, 18, 12, 0, 1), BAD_BOTH],
-                              [(2, 1, 18, 11, 0, 0), BADTIMING],
-                              [(4, 1,  0,  1, 0, 0), BAD_BOTH],
-                              [(4, 1,  6,  1, 0, 0), BADTIMING],
-                              ],
-                             """
+bc2 = make_tileBadChannels ('tilecellbuilder_bc2',
+                            [[(3, 1, 18,  8, 2, 0), BAD_HIGH],
+                             [(2, 1, 18,  9, 1, 0), BAD_LOW],
+                             [(2, 1, 18, 12, 0, 1), BAD_BOTH],
+                             [(2, 1, 18, 11, 0, 0), BADTIMING],
+                             [(4, 1,  0,  1, 0, 0), BAD_BOTH],
+                             [(4, 1,  6,  1, 0, 0), BADTIMING],
+                            ],
+                            """
 0x312 2 0 0 2 0
 0x312 4 0 2 0 0
 0x312 11 0 0 0 2
@@ -669,18 +667,18 @@ from TileRecUtils.TileRecUtilsConf import TileCellBuilder, \
     TileRawChannelNoiseFilter, TileDQstatusAlg
 noisefilter = TileRawChannelNoiseFilter ('noisefilter')
 
-def maketool (name, bct, **kw):
-    return TileCellBuilder (name, TileBadChanTool = bct, **kw)
-ToolSvc += maketool ('tool1', bct1)
-ToolSvc += maketool ('tool2', bct2)
-ToolSvc += maketool ('tool5', bct1, fakeCrackCells = True)
-ToolSvc += maketool ('tool6', bct1, EThreshold = 300)
-ToolSvc += maketool ('tool7', bct1, correctAmplitude = True, correctTime = True)
-ToolSvc += maketool ('tool8', bct1, NoiseFilterTools = [noisefilter])
-ToolSvc += maketool ('tool9', bct1, TileDSPRawChannelContainer = 'TileRawChannelCntDsp')
-ToolSvc += maketool ('tool10', bct1, TileDSPRawChannelContainer = 'TileRawChannelCntDsp',
+def maketool (name, badChannels, **kw):
+    return TileCellBuilder (name, TileBadChannels = badChannels, **kw)
+ToolSvc += maketool ('tool1', bc1)
+ToolSvc += maketool ('tool2', bc2)
+ToolSvc += maketool ('tool5', bc1, fakeCrackCells = True)
+ToolSvc += maketool ('tool6', bc1, EThreshold = 300)
+ToolSvc += maketool ('tool7', bc1, correctAmplitude = True, correctTime = True)
+ToolSvc += maketool ('tool8', bc1, NoiseFilterTools = [noisefilter])
+ToolSvc += maketool ('tool9', bc1, TileDSPRawChannelContainer = 'TileRawChannelCntDsp')
+ToolSvc += maketool ('tool10', bc1, TileDSPRawChannelContainer = 'TileRawChannelCntDsp',
                      correctTime = True, correctAmplitude = True)
-ToolSvc += maketool ('tool11', bct1, TileDSPRawChannelContainer = 'TileRawChannelCntDsp',
+ToolSvc += maketool ('tool11', bc1, TileDSPRawChannelContainer = 'TileRawChannelCntDsp',
                      NoiseFilterTools = [noisefilter])
 
 from xAODEventInfoCnv.xAODEventInfoCnvConf import xAODMaker__EventInfoCnvAlg

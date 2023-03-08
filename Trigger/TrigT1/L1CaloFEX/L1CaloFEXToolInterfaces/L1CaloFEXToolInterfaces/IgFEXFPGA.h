@@ -10,6 +10,10 @@
 #include "GaudiKernel/IAlgTool.h"
 #include "xAODTrigger/gFexJetRoI.h"
 
+#include "xAODTrigL1Calo/gFexTowerContainer.h"
+#include "xAODTrigL1Calo/gFexTowerAuxContainer.h"
+
+
 namespace LVL1 {
 
 /*
@@ -37,6 +41,14 @@ Interface definition for gFEXFPGA
 
     virtual void GetEnergyMatrix(gTowersCentral &) const = 0;
     virtual void GetEnergyMatrix(gTowersForward &) const = 0;
+
+    virtual void FillgTowerEDMCentral(SG::WriteHandle<xAOD::gFexTowerContainer> &) = 0;
+    virtual void FillgTowerEDMForward(SG::WriteHandle<xAOD::gFexTowerContainer> &) = 0;
+
+    virtual uint32_t getTowerIDForward ( int &iEta, int &iPhi, float Eta) const = 0;
+
+    virtual void getEtaPhi(float &Eta, float &Phi, int iEta, int iPhi) const = 0;
+
 
 
   private:

@@ -7,7 +7,7 @@
  **     @author  mark sutton
  **     @date    Thu  5 Sep 2013 20:32:47 CEST 
  **
- **     Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -194,12 +194,12 @@ void search(TDirectory* td=0, const std::string& s="") {
 
   }
 
-  double _t = simpletimer_stop(tv);
+  const double t = simpletimer_stop(tv);
   
-  double global_time = simpletimer_stop(global_timer);
+  const double global_time = simpletimer_stop(global_timer);
 
   
-  std::cout << "\tprocessed directory in " << _t*0.001 << " s  from " << global_time*0.001 << " s";
+  std::cout << "\tprocessed directory in " << t*0.001 << " s  from " << global_time*0.001 << " s";
 
 
   depth = savedepth;

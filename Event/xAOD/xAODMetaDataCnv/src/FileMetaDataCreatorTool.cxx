@@ -88,27 +88,54 @@ StatusCode
     FileMetaDataCreatorTool::preFinalize() {
       std::lock_guard lock(m_toolMutex);
 
-      if (!m_filledEvent || !m_filledNonEvent) {
+      if (!m_filledNonEvent) {
         ATH_MSG_DEBUG("Not writing empty or incomplete FileMetaData object");
         return StatusCode::SUCCESS;
       }
 
-      // Remove any existing objects with this key
-      if (!m_metaDataSvc->contains< xAOD::FileMetaData >(m_key)) {
-        auto info = std::make_unique< xAOD::FileMetaData >();
-        auto aux = std::make_unique< xAOD::FileMetaDataAuxInfo >();
-        info->setStore(aux.get());
-        ATH_CHECK(m_metaDataSvc->record(std::move(info), m_key));
-        ATH_CHECK(m_metaDataSvc->record(std::move(aux), m_key + "Aux."));
+      // Set metadata with content created for given stream
+      for (const std::string& key : m_metaDataSvc->getPerStreamKeysFor(m_key)) {
+        // Remove any existing objects with this key
+        if (!m_metaDataSvc->contains<xAOD::FileMetaData>(key)) {
+          auto info = std::make_unique<xAOD::FileMetaData>();
+          auto aux = std::make_unique<xAOD::FileMetaDataAuxInfo>();
+          info->setStore(aux.get());
+          ATH_CHECK(m_metaDataSvc->record(std::move(info), key));
+          ATH_CHECK(m_metaDataSvc->record(std::move(aux), key + "Aux."));
+        }
+
+        auto* output = m_metaDataSvc->tryRetrieve<xAOD::FileMetaData>(key);
+        if (output) {
+          // save event info that we've already had
+          float orig_mcProcID = -1;
+          std::vector<uint32_t> orig_runNumbers, orig_lumiBlocks;
+          if (!output->value(xAOD::FileMetaData::mcProcID, orig_mcProcID))
+            ATH_MSG_DEBUG("error getting mcProcID = " << orig_mcProcID);
+          if (!output->value("runNumbers", orig_runNumbers))
+            ATH_MSG_DEBUG("error getting runNumbers");
+          if (!output->value("lumiBlocks", orig_lumiBlocks))
+            ATH_MSG_DEBUG("error getting lumiBlocks");
+
+          // Replace content in store with content created for this stream
+          *output = *m_info;
+          ATH_MSG_DEBUG("FileMetaData payload replaced in store with content created for this stream");
+          if (!m_filledEvent) {
+            // restore original event info if it was not filled for this stream
+            ATH_MSG_DEBUG("Event information was not filled, restoring what we had");
+            if (!output->setValue(xAOD::FileMetaData::mcProcID, orig_mcProcID))
+              ATH_MSG_DEBUG("error setting " << xAOD::FileMetaData::mcProcID << " to " << orig_mcProcID);
+            if (!output->setValue("runNumbers", orig_runNumbers))
+              ATH_MSG_DEBUG("error restoring runNumbers");
+            if (!output->setValue("lumiBlocks", orig_lumiBlocks))
+              ATH_MSG_DEBUG("error restoring lumiBlocks");
+          }
+        } else {
+            ATH_MSG_DEBUG("cannot copy FileMetaData payload to output");
+        }
       }
 
-      // Replace content in store with content created for this stream
-      auto *output = m_metaDataSvc->tryRetrieve< xAOD::FileMetaData >(m_key);
-      if (output) *output = *m_info;
-      else ATH_MSG_DEBUG("cannot copy FileMetaData payload to output");
-
       return StatusCode::SUCCESS;
-    }
+}
 
 StatusCode
     FileMetaDataCreatorTool::finalize() {
@@ -167,33 +194,6 @@ StatusCode
         }
       }
 
-      // Return if object has already been filled
-      if (m_filledEvent) return StatusCode::SUCCESS;
-
-      {  // get dataType
-        const DataHeader* dataHeader = nullptr;
-        StatusCode sc = StatusCode::FAILURE;
-        if (m_eventStore->contains< DataHeader >(m_dataHeaderKey)) {
-          sc = m_eventStore->retrieve(dataHeader, m_dataHeaderKey);
-          ATH_MSG_DEBUG("Retrieved " << m_dataHeaderKey);
-        } else {
-          ATH_MSG_DEBUG("No DataHeader with key: " << m_dataHeaderKey);
-        }
-
-        xAOD::FileMetaData::MetaDataType type = xAOD::FileMetaData::dataType;
-        std::string tag = m_dataHeaderKey;
-        if (dataHeader && sc.isSuccess()) tag = dataHeader->getProcessTag();
-
-        try {
-          if (m_info->setValue(type, tag))
-            ATH_MSG_DEBUG("set " << type << " to " << tag);
-          else
-            ATH_MSG_DEBUG("error setting " << type << " to " << tag);
-        } catch (std::exception&) {
-          // This is unexpected
-          ATH_MSG_DEBUG("Failed to set " << xAOD::FileMetaData::dataType);
-        }
-      }
       m_filledEvent = true;
 
       return StatusCode::SUCCESS;
@@ -270,10 +270,51 @@ StatusCode
         }
 
       } else {
-        ATH_MSG_DEBUG(
+          ATH_MSG_DEBUG(
             "Failed to retrieve " << m_simInfoKey << " => cannot set: "
             << xAOD::FileMetaData::simFlavour << ", and "
-            << xAOD::FileMetaData::isDataOverlay);
+            << xAOD::FileMetaData::isDataOverlay
+            << ". Trying to get them from input metadata store." );
+
+          for (const std::string& key : m_metaDataSvc->getPerStreamKeysFor(m_key)) {
+              const xAOD::FileMetaData* input = nullptr;
+              StatusCode sc = StatusCode::FAILURE;
+              sc = m_inputMetaDataStore->retrieve(input, key);
+              if (input && sc.isSuccess()) {
+                  std::string orig_simFlavour = "none";
+                  bool orig_isDataOverlay = false;
+                  if (!input->value(xAOD::FileMetaData::simFlavour, orig_simFlavour) ||
+                      !input->value(xAOD::FileMetaData::isDataOverlay,
+                                    orig_isDataOverlay))
+                      ATH_MSG_DEBUG(
+                          "error getting simulation parameters from input metadata "
+                          "store");
+                  else {
+                      ATH_MSG_DEBUG("Retrieved from input metadata store: "
+                                    << xAOD::FileMetaData::simFlavour << " = "
+                                    << orig_simFlavour << ", "
+                                    << xAOD::FileMetaData::isDataOverlay << " = "
+                                    << orig_isDataOverlay);
+                      set(xAOD::FileMetaData::simFlavour, orig_simFlavour);
+                      set(xAOD::FileMetaData::isDataOverlay, orig_isDataOverlay);
+                  }
+              }
+          }
+      }
+
+      if (m_filledNonEvent) return StatusCode::SUCCESS;
+
+      {  // get dataType
+        xAOD::FileMetaData::MetaDataType type = xAOD::FileMetaData::dataType;
+        try {
+          if (m_info->setValue(type, m_dataHeaderKey.value()))
+            ATH_MSG_DEBUG("set " << type << " to " << m_dataHeaderKey.value());
+          else
+            ATH_MSG_DEBUG("error setting " << type << " to " << m_dataHeaderKey.value());
+        } catch (std::exception&) {
+          // This is unexpected
+          ATH_MSG_DEBUG("Failed to set " << xAOD::FileMetaData::dataType);
+        }
       }
 
       // FileMetaData object has been filled with non event info

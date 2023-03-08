@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 // Local include(s):
 #include "AsgAnalysisAlgorithms/AsgxAODNTupleMakerAlg.h"
@@ -54,15 +54,25 @@ namespace {
          return nullptr;
       }
       const xAOD::THolder* holder = evtStore.tds()->holder( key );
-      if( holder == nullptr) {
-         msg << MSG::ERROR << "Couldn't retrieve type for container with key \"" << key
+      if( holder != nullptr ) {
+         // If the object is in the transient store, get the type of it from
+         // the transient store itself. So that ConstDataVector types would be
+         // handled correctly.
+         const std::type_info* ti = holder->getTypeInfo();
+         cl = TClass::GetClass( *ti );
+      } else {
+         // If the object is not in the transient store, let's just use its
+         // "actual type".
+         cl = TClass::GetClass( typeid( *c ) );
+      }
+      if( ( allowMissing == false ) && ( cl == nullptr ) ) {
+         msg << MSG::ERROR
+             << "Couldn't find TClass dictionary for container \"" << key
              << "\"" << endmsg;
          return nullptr;
       }
 
-      const std::type_info* ti = holder->getTypeInfo();
-      cl = TClass::GetClass( *ti );
-
+      // Return the vector object.
       return c;
    }
 

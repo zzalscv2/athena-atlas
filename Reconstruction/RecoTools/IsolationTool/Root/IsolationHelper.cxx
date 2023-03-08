@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <IsolationTool/IsolationHelper.h>
@@ -56,7 +56,7 @@ namespace CP {
 		return true;
 	}
 
-	bool IsolationHelper::correction(float& value, const xAOD::IParticle& par, xAOD::Iso::IsolationType type, xAOD::Iso::IsolationCaloCorrection corr, xAOD::Iso::IsolationCaloCorrectionBitset corrMask) const {
+	bool IsolationHelper::correction(float& value, const xAOD::IParticle& par, xAOD::Iso::IsolationType type, xAOD::Iso::IsolationCaloCorrection corr, const xAOD::Iso::IsolationCaloCorrectionBitset& corrMask) const {
 		if(corr == xAOD::Iso::pileupCorrection){
 			return getPileupCorrection(value, par, type, corrMask);
 		} else {
@@ -70,7 +70,7 @@ namespace CP {
 		return true;
 	}
 
-	bool IsolationHelper::correction(float& value, const xAOD::IParticle& par, xAOD::Iso::IsolationType type, xAOD::Iso::IsolationCaloCorrectionBitset corrMask) const {
+	bool IsolationHelper::correction(float& value, const xAOD::IParticle& par, xAOD::Iso::IsolationType type, const xAOD::Iso::IsolationCaloCorrectionBitset& corrMask) const {
 		value = 0;
 		std::vector<xAOD::Iso::IsolationCaloCorrection> results;
 		xAOD::Iso::IsolationCaloCorrectionBitsetHelper::decode(corrMask, results);
@@ -93,7 +93,7 @@ namespace CP {
 		return isolation(value, par, type, mask); 
 	}
 
-	bool IsolationHelper::isolation(float& value, const xAOD::IParticle& par, xAOD::Iso::IsolationType type, xAOD::Iso::IsolationCaloCorrectionBitset corrMask) const {
+	bool IsolationHelper::isolation(float& value, const xAOD::IParticle& par, xAOD::Iso::IsolationType type, const xAOD::Iso::IsolationCaloCorrectionBitset& corrMask) const {
 		/// get orinial values
 		float origValue = 0;
 		if(!isolation(origValue, par, type)) return false;

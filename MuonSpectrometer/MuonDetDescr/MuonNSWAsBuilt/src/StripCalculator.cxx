@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <list>
@@ -191,8 +191,7 @@ void StripCalculator::parseRootElement(json_t j) {
     if (it != jtree.back().end) {
       std::unique_ptr<Element> daughter = buildElement(*it);
       collectStrip(quad_id, *daughter, *it);
-      Element* daugref = daughter.get();
-      mom->addDaughter(std::move(daughter));
+      Element* daugref = mom->addDaughter(std::move(daughter));
       if (it->contains(KEY)) {
         jtree.push_back({it->at(KEY).begin(), it->at(KEY).end()});
         mom = daugref;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -41,7 +41,7 @@ QStringList PRDCollHandle_SpacePoints::availableCollections(IVP1System*sys)
 	unsafekeys << key;
     }
   }
-  foreach (QString unsafekey,unsafekeys)
+  for (QString unsafekey : unsafekeys)
     keys.removeAll(unsafekey);
   return keys;
 }

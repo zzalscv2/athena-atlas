@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.CFElements import seqAND, parOR
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsPool
@@ -9,7 +9,7 @@ log = logging.getLogger(__name__)
 
 # ---------------------
 
-def getCommonInDetFullScanSequence(ConfigFlag):
+def getCommonInDetFullScanSequence(flags):
 
     from TriggerMenuMT.HLT.Jet.JetMenuSequences import getTrackingInputMaker
     InputMakerAlg=getTrackingInputMaker("ftf")
@@ -19,11 +19,11 @@ def getCommonInDetFullScanSequence(ConfigFlag):
 
     from ..CommonSequences.FullScanDefs import trkFSRoI
     from TrigInDetConfig.InDetTrigFastTracking import makeInDetTrigFastTrackingNoView
-    TrkInputNoViewAlg = makeInDetTrigFastTrackingNoView(config=IDTrigConfig, rois=trkFSRoI)
+    TrkInputNoViewAlg = makeInDetTrigFastTrackingNoView(flags, config=IDTrigConfig, rois=trkFSRoI)
 
     from TrigInDetConfig.InDetTrigVertices import makeInDetTrigVertices
     
-    vtxAlgs = makeInDetTrigVertices("jet", IDTrigConfig.tracks_FTF(), IDTrigConfig.vertex_jet, IDTrigConfig, adaptiveVertex=IDTrigConfig.adaptiveVertex_jet)
+    vtxAlgs = makeInDetTrigVertices(flags, "jet", IDTrigConfig.tracks_FTF(), IDTrigConfig.vertex_jet, IDTrigConfig, adaptiveVertex=IDTrigConfig.adaptiveVertex_jet)
     prmVtx = vtxAlgs[-1]
 
     TrkSeq = [InputMakerAlg,TrkInputNoViewAlg, prmVtx]
@@ -33,23 +33,23 @@ def getCommonInDetFullScanSequence(ConfigFlag):
 
 # ---------------------
 
-def getFullScanRecoOnlySequence():
+def getFullScanRecoOnlySequence(flags):
 
     from TrigStreamerHypo.TrigStreamerHypoConf import TrigStreamerHypoAlg
     from TrigStreamerHypo.TrigStreamerHypoConfig import StreamerHypoToolGenerator
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    ( TrkSeq, InputMakerAlg, sequenceOut) = RecoFragmentsPool.retrieve(getCommonInDetFullScanSequence,ConfigFlags)
+    ( TrkSeq, InputMakerAlg, sequenceOut) = RecoFragmentsPool.retrieve(getCommonInDetFullScanSequence,flags)
 
     HypoAlg = TrigStreamerHypoAlg("UncTrkDummyStream")
 
     log.debug("Building the menu sequence for FullScanRecoOnlySequence")
-    return MenuSequence( Sequence    = seqAND("UncTrkrecoSeq", TrkSeq),
+    return MenuSequence( flags,
+                         Sequence    = seqAND("UncTrkrecoSeq", TrkSeq),
                          Maker       = InputMakerAlg,
                          Hypo        = HypoAlg,
                          HypoToolGen = StreamerHypoToolGenerator )
 
-def getCommonInDetFullScanLRTSequence(ConfigFlags):
+def getCommonInDetFullScanLRTSequence(flags):
     from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
     std_cfg = getInDetTrigConfig("jet" )
     lrt_cfg = getInDetTrigConfig("fullScanLRT")
@@ -60,7 +60,7 @@ def getCommonInDetFullScanLRTSequence(ConfigFlags):
     from ..CommonSequences.FullScanDefs import trkFSRoI
     from TrigInDetConfig.InDetTrigFastTracking import makeInDetTrigFastTrackingNoView
 
-    ftf_algs = makeInDetTrigFastTrackingNoView(config=std_cfg, secondStageConfig = lrt_cfg, rois=trkFSRoI)
+    ftf_algs = makeInDetTrigFastTrackingNoView(flags, config=std_cfg, secondStageConfig = lrt_cfg, rois=trkFSRoI)
 
     #create two sequencers first contains everything apart from the final two algs
     std_seq = seqAND("UncTrkrecoSeq", [InputMakerAlg, ftf_algs[0:-2]])

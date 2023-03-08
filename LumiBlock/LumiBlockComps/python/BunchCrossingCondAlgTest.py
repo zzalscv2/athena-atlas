@@ -75,20 +75,21 @@ fillFolder(folder,d2,3*onesec,4*onesec)
 
 db.closeDatabase()
 
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-ConfigFlags.Input.Files=[]
-ConfigFlags.Input.isMC=False
-ConfigFlags.Beam.BunchStructureSource=BunchStructureSource.FILLPARAMS
-ConfigFlags.IOVDb.DatabaseInstance="CONDBR2"
-ConfigFlags.IOVDb.GlobalTag="CONDBR2-BLKPA-2017-05"
-ConfigFlags.GeoModel.AtlasVersion="ATLAS-R2-2016-01-00-01"
-ConfigFlags.lock()
+flags = initConfigFlags()
+flags.Input.Files=[]
+flags.Input.isMC=False
+flags.Beam.BunchStructureSource=BunchStructureSource.FILLPARAMS
+flags.IOVDb.DatabaseInstance="CONDBR2"
+flags.IOVDb.GlobalTag="CONDBR2-BLKPA-2017-05"
+flags.GeoModel.AtlasVersion="ATLAS-R2-2016-01-00-01"
+flags.lock()
 
-result=MainServicesCfg(ConfigFlags)
+result=MainServicesCfg(flags)
 
 from McEventSelector.McEventSelectorConfig import McEventSelectorCfg
-result.merge(McEventSelectorCfg(ConfigFlags,
+result.merge(McEventSelectorCfg(flags,
                                 RunNumber=330470,
                                 EventsPerRun=1,
                                 FirstEvent=1183722158,
@@ -98,10 +99,10 @@ result.merge(McEventSelectorCfg(ConfigFlags,
                                 InitialTimeStamp=1,
                                 TimeStampInterval=1))
 
-result.merge(BunchCrossingCondAlgCfg(ConfigFlags))
+result.merge(BunchCrossingCondAlgCfg(flags))
 
-print(ConfigFlags.Beam.BunchStructureSource)
-result.merge(IOVDbSvcCfg(ConfigFlags))
+print(flags.Beam.BunchStructureSource)
+result.merge(IOVDbSvcCfg(flags))
 result.getService("IOVDbSvc").Folders=["<db>sqlite://;schema=test.db;dbname=CONDBR2</db><tag>HEAD</tag>/TDAQ/OLC/LHC/FILLPARAMS"]
 result.getCondAlgo("BunchCrossingCondAlgDefault").OutputLevel=1
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -140,6 +140,7 @@ StatusCode TileCellBuilderFromHit::initialize() {
   ATH_CHECK( m_eventInfoKey.initialize() );
   ATH_CHECK( m_hitContainerKey.initialize() );
   ATH_CHECK( m_samplingFractionKey.initialize() );
+  ATH_CHECK( m_emScaleKey.initialize() );
 
   ATH_CHECK( detStore()->retrieve(m_tileMgr) );
   ATH_CHECK( detStore()->retrieve(m_tileID) );
@@ -148,9 +149,6 @@ StatusCode TileCellBuilderFromHit::initialize() {
 
   //=== get TileBadChanTool
   ATH_CHECK( m_tileBadChanTool.retrieve() );
-
-  //=== get TileCondToolEmscale
-  ATH_CHECK( m_tileToolEmscale.retrieve() );
 
   //---- retrieve the noise ----------------
   if (!m_caloNoiseKey.empty()) {
@@ -745,6 +743,8 @@ void TileCellBuilderFromHit::build(const CaloNoise* caloNoise,
   wrapper->setSeed (rngname, ctx);
   CLHEP::HepRandomEngine* engine = wrapper->getEngine (ctx);
 
+  SG::ReadCondHandle<TileEMScale> emScale(m_emScaleKey, ctx);
+
   /* zero all counters and sums */
   int nTwo = 0;
   int nCell = 0;
@@ -919,9 +919,9 @@ void TileCellBuilderFromHit::build(const CaloNoise* caloNoise,
         ++nMBTS;
 
         // convert energy to pCb
-        ener /= m_tileToolEmscale->channelCalib(drawerIdx, channel, gain, 1.,
-                                                TileRawChannelUnit::PicoCoulombs,
-                                                TileRawChannelUnit::MegaElectronVolts);
+        ener /= emScale->calibrateChannel(drawerIdx, channel, gain, 1.,
+                                          TileRawChannelUnit::PicoCoulombs,
+                                          TileRawChannelUnit::MegaElectronVolts);
         gain = (ener>12.) ? TileID::LOWGAIN : TileID::HIGHGAIN; // assume low gain above 12 pC
         eMBTSTot += ener;
         unsigned char iqual = iquality(qual);

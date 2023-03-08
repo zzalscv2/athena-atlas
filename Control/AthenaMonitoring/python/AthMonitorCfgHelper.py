@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file AthMonitorCfgHelper.py
@@ -14,28 +14,28 @@ class AthMonitorCfgHelper(object):
     This class is for the Run 3-style configuration framework. It is intended to be instantiated once
     per group of related monitoring algorithms.
     '''
-    def __init__(self, inputFlags, monName):
+    def __init__(self, flags, monName):
         '''
-        Create the configuration helper. Needs the global flags and the name of the set of
+        Create the configuration helper. Needs the job flags and the name of the set of
         monitoring algorithms.
 
         Arguments:
-        inputFlags -- the global configuration flag object
+        flags -- the configuration flag object
         monName -- the name you want to assign the family of algorithms
         '''
         
         from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
         from AthenaConfiguration.ComponentFactory import CompFactory
         AthSequencer=CompFactory.AthSequencer
-        self.inputFlags = inputFlags
+        self.flags = flags
         self.monName = monName
         self.monSeq = AthSequencer('AthMonSeq_' + monName)
         self.monSeq.StopOverride=True
         self.resobj = ComponentAccumulator()
         self.resobj.addSequence(self.monSeq)
-        if self.inputFlags.DQ.useTrigger:
+        if self.flags.DQ.useTrigger:
             from .TriggerInterface import TrigDecisionToolCfg
-            self.resobj.merge(TrigDecisionToolCfg(inputFlags))
+            self.resobj.merge(TrigDecisionToolCfg(flags))
 
     def addAlgorithm(self, algClassOrObj, name = None, addFilterTools = [], *args, **kwargs):
         '''
@@ -64,21 +64,20 @@ class AthMonitorCfgHelper(object):
             algObj = algClassOrObj
 
         # configure these properties; users really should have no reason to override them
-        algObj.Environment = self.inputFlags.DQ.Environment
-        algObj.DataType = self.inputFlags.DQ.DataType
-        if self.inputFlags.DQ.useTrigger:
+        algObj.Environment = self.flags.DQ.Environment
+        algObj.DataType = self.flags.DQ.DataType.value
+        if self.flags.DQ.useTrigger:
             algObj.TrigDecisionTool = self.resobj.getPublicTool("TrigDecisionTool")
-            algObj.TriggerTranslatorTool = self.resobj.popToolsAndMerge(getTriggerTranslatorToolSimple(self.inputFlags))
 
-        if self.inputFlags.DQ.enableLumiAccess:
+        if self.flags.DQ.enableLumiAccess:
             algObj.EnableLumi = True
             from LumiBlockComps.LuminosityCondAlgConfig import LuminosityCondAlgCfg
-            self.resobj.merge (LuminosityCondAlgCfg (self.inputFlags))
-            if not self.inputFlags.Input.isMC:
+            self.resobj.merge (LuminosityCondAlgCfg (self.flags))
+            if not self.flags.Input.isMC:
                 from LumiBlockComps.LBDurationCondAlgConfig import LBDurationCondAlgCfg
                 from LumiBlockComps.TrigLiveFractionCondAlgConfig import TrigLiveFractionCondAlgCfg
-                self.resobj.merge (LBDurationCondAlgCfg (self.inputFlags))
-                self.resobj.merge (TrigLiveFractionCondAlgCfg (self.inputFlags))
+                self.resobj.merge (LBDurationCondAlgCfg (self.flags))
+                self.resobj.merge (TrigLiveFractionCondAlgCfg (self.flags))
         else:
             algObj.EnableLumi = False
 
@@ -140,24 +139,24 @@ class AthMonitorCfgHelper(object):
         '''
         # Generate the n-dimensional array
         from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringArray
-        array = GenericMonitoringArray(baseName,dimensions)
+        array = GenericMonitoringArray(self.flags, baseName, dimensions)
 
-        if self.inputFlags.DQ.isReallyOldStyle:
+        if self.flags.DQ.isReallyOldStyle:
             from AthenaCommon.AppMgr import ServiceMgr
             array.broadcast('THistSvc',ServiceMgr.THistSvc)
         else:
-            acc = getDQTHistSvc(self.inputFlags)
+            acc = getDQTHistSvc(self.flags)
             self.resobj.merge(acc)
 
-        pathToSet = self.inputFlags.DQ.FileKey+('/%s' % topPath if topPath else '')
-        if self.inputFlags.Output.HISTFileName:
+        pathToSet = self.flags.DQ.FileKey+('/%s' % topPath if topPath else '')
+        if self.flags.Output.HISTFileName:
             pathToSet = '/' + pathToSet
         array.broadcast('HistPath',pathToSet)
         array.broadcast('UseCache',True)
-        convention = 'ONLINE' if self.inputFlags.Common.isOnline else 'OFFLINE'
+        convention = 'ONLINE' if self.flags.Common.isOnline else 'OFFLINE'
         array.broadcast('convention', convention)
         array.broadcast('defaultDuration',defaultDuration)
-        array.broadcast('RegisterHandler', not self.inputFlags.Common.isOnline)
+        array.broadcast('RegisterHandler', not self.flags.Common.isOnline)
         if alg is not None:
             alg.GMTools += array.toolList()
         return array
@@ -227,7 +226,6 @@ class AthMonitorCfgHelperOld(object):
                     not set up trigger in monitoring", self.dqflags.nameTrigDecTool())
             else:
                 algObj.TrigDecisionTool = getattr(ToolSvc, self.dqflags.nameTrigDecTool())
-                algObj.TriggerTranslatorTool = getattr(ToolSvc, self.dqflags.nameTrigTransTool())
         from AthenaCommon.GlobalFlags import globalflags
         if globalflags.DataSource() != 'geant4' and self.dqflags.enableLumiAccess():
             algObj.EnableLumi = True
@@ -283,7 +281,7 @@ class AthMonitorCfgHelperOld(object):
         '''
         # Generate the n-dimensional array
         from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringArray
-        array = GenericMonitoringArray(baseName,dimensions)
+        array = GenericMonitoringArray(None, baseName, dimensions)
         # Retrieve the THistSvc
         from AthenaCommon.AppMgr import ServiceMgr as svcMgr
         if not hasattr(svcMgr, 'THistSvc'):
@@ -317,7 +315,7 @@ class AthMonitorCfgHelperOld(object):
         '''
         return self.monSeq
 
-def getDQTHistSvc(inputFlags):
+def getDQTHistSvc(flags):
     '''
     This function creates a THistSvc - used for the new-style job configuration
     
@@ -330,53 +328,14 @@ def getDQTHistSvc(inputFlags):
 
     result = ComponentAccumulator()
 
-    if inputFlags.DQ.isReallyOldStyle:
+    if flags.DQ.isReallyOldStyle:
         from AthenaCommon.AppMgr import ServiceMgr
         result.addService(ServiceMgr.THistSvc)
         return result
 
     histsvc = THistSvc()
-    if inputFlags.Output.HISTFileName:
-        histsvc.Output += ["%s DATAFILE='%s' OPT='RECREATE'" % (inputFlags.DQ.FileKey, 
-                                                                inputFlags.Output.HISTFileName)]
+    if flags.Output.HISTFileName:
+        histsvc.Output += ["%s DATAFILE='%s' OPT='RECREATE'" % (flags.DQ.FileKey, 
+                                                                flags.Output.HISTFileName)]
     result.addService(histsvc)
     return result
-
-def getTriggerTranslatorToolSimple(inputFlags):
-    ''' Set up the Trigger Translator Tool; no reason for this to be called
-        outside the DQ setup code. '''
-    import logging
-    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-    from AthenaConfiguration.ComponentFactory import CompFactory
-    from TrigHLTMonitoring.HLTMonTriggerList import HLTMonTriggerList
-    import collections.abc
-
-    TriggerTranslatorToolSimple=CompFactory.TriggerTranslatorToolSimple
-    
-    tdt_local_logger = logging.getLogger('getTriggerTranslatorToolSimple')
-    tdt_local_hltconfig = HLTMonTriggerList()
-    tdt_mapping = {}
-    for tdt_menu, tdt_menu_item in tdt_local_hltconfig.__dict__.items():
-        if not isinstance(tdt_menu_item, collections.abc.Iterable):
-            continue
-        # work around possibly buggy category items
-        if isinstance(tdt_menu_item, str):
-            tdt_local_logger.debug('String, not list: %s', tdt_menu)
-            tdt_menu_item = [tdt_menu_item]
-            if len([_ for _ in tdt_menu_item if not (_.startswith('HLT_') or _.startswith('L1'))]) != 0:
-                tdt_local_logger.debug('Bad formatting: %s', tdt_menu)
-        tdt_menu_item = [_ if (_.startswith('HLT_') or _.startswith('L1_')) else 'HLT_' + _
-                         for _ in tdt_menu_item]
-        tdt_mapping[tdt_menu] = ','.join(tdt_menu_item)
-
-    if not getTriggerTranslatorToolSimple.printed:
-        for k, v in tdt_mapping.items():
-            tdt_local_logger.info('Category %s resolves to %s', k, v)
-        getTriggerTranslatorToolSimple.printed = True
-
-    monTrigTransTool = TriggerTranslatorToolSimple(
-        triggerMapping = tdt_mapping)
-    rv = ComponentAccumulator()
-    rv.setPrivateTools(monTrigTransTool)
-    return rv
-getTriggerTranslatorToolSimple.printed = False

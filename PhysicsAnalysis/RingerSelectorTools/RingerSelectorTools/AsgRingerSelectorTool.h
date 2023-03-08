@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef RINGERSELECTORTOOLS_ASGRINGERSELECTORTOOL_H
 #define RINGERSELECTORTOOLS_ASGRINGERSELECTORTOOL_H
@@ -35,7 +35,7 @@ namespace Ringer {
 
 
     /** Standard constructor */
-    AsgRingerSelectorTool(std::string name);
+    AsgRingerSelectorTool(const std::string& name);
 
     /** Standard destructor */
     virtual ~AsgRingerSelectorTool();
@@ -80,6 +80,7 @@ namespace Ringer {
 
     Gaudi::Property<std::vector<std::string>> m_configFiles{this, "ConfigFiles", {}, "Ringer Run3 Calib Path"};  
     ServiceHandle< AthONNX::IONNXRuntimeSvc > m_onnxSvc{ this, "ONNXRuntimeSvc", "AthONNX::ONNXRuntimeSvc", "Name of the service to use" };
+    Gaudi::Property<bool> m_useTansigOutput{this, "UseTansigOutput", {}, "Use tansig output."};  
 
 };
 

@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Trigger athenaHLT test of the Cosmic_run3_v1 menu on physics_Main stream from a cosmic run, then running BS decoding follows the athenaHLT process
 # art-type: build
 # art-include: master/Athena
-# art-include: 22.0/Athena
+# art-include: 23.0/Athena
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
@@ -26,6 +26,7 @@ precommand = ''.join([
   "setMenu='Cosmic_run3_v1';",
   "doCosmics=True;",
   "doL1Sim=True;",
+  "superCellWithBCID=True;",
   "rewriteLVL1=True;",
 ])
 ex.args = f'-c "{precommand}"'

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # CondDB.py
 # Configuration for Athena conditions DB access
@@ -190,8 +190,10 @@ class CondDB:
 
             # enable Frontier cache alignment if it looks like Frontier will
             # be used (via FRONTIER_SERVER variable)
-            if 'FRONTIER_SERVER' in os.environ.keys() and os.environ['FRONTIER_SERVER']!="":
+            # but not for HLT (ATR-4646)
+            if 'FRONTIER_SERVER' in os.environ.keys() and os.environ['FRONTIER_SERVER']!="" and not self.isOnline:
                 self.iovdbsvc.CacheAlign=3
+
             # setup PoolSvc catalogues
             from PoolSvc.PoolSvcConf import PoolSvc
             if not hasattr (svcMgr, 'PoolSvc'):
@@ -241,13 +243,16 @@ This allows the possibility of later adding a new IOV using IOVSvc::setRange."""
         "Add access to the given folder/schema, using a specified tag"
         self.addFolder(ident,folder+" <tag>%s</tag>" % tag,force,forceMC,forceData,className=className)
 
-    def addFolderSplitOnline(self,ident,folder1,folder2,force=False,forceMC=False,forceData=False,className=None):
+    def addFolderSplitOnline(self,ident,folder1,folder2,force=False,forceMC=False,forceData=False,
+                             className=None,extensible=False):
         "Add access to given folder, using folder1 online, folder2 offline"
         if self.isOnline and not self.isMC:
-            self.addFolder(ident,folder1,force=force,forceMC=forceMC,forceData=forceData,className=className)
+            self.addFolder(ident,folder1,force=force,forceMC=forceMC,forceData=forceData,
+                           className=className,extensible=extensible)
             return folder1
         else:
-            self.addFolder(ident+'_OFL',folder2,force=force,forceMC=forceMC,forceData=forceData,className=className)
+            self.addFolder(ident+'_OFL',folder2,force=force,forceMC=forceMC,forceData=forceData,
+                           className=className,extensible=extensible)
             return folder2
 
     def addFolderSplitMC(self,ident,folder1,folder2,force=False,forceMC=False,forceData=False,className=None):

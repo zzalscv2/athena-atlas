@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SimpleSTgcClusterBuilderTool_h
@@ -12,7 +12,6 @@
 
 #include <vector>
 #include <string>
-#include <set>
 
 //
 // Simple clusterization tool for STgc
@@ -40,23 +39,16 @@ namespace Muon
 
   private: 
 
-    double m_chargeCut;
-    unsigned int m_maxHoleSize;
-    double m_addError;
+    Gaudi::Property<double> m_chargeCut{this, "ChargeCut", 0.};
+    Gaudi::Property<unsigned int> m_maxHoleSize{this, "maxHoleSize", 0};
+    Gaudi::Property<double> m_addError{this, "addError", 0.};
 
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
     /// private functions
     void dumpStrips( std::vector<Muon::sTgcPrepData>& stripsVect,
 		     std::vector<Muon::sTgcPrepData*>& clustersVect )const;
-  
-    bool addStrip(const Muon::sTgcPrepData& strip,std::vector<std::set<unsigned int>> clustersStripNum[2][4], 
-                  std::vector<std::vector<Muon::sTgcPrepData>> clusters[2][4])const;
-
-
   };
-
-
 }
 #endif
 

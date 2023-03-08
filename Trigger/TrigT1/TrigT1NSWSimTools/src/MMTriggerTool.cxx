@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/ConcurrencyFlags.h"
@@ -186,139 +186,131 @@ namespace NSWL1 {
       // Finally, let's start with hits
       auto reco_it = Hits_Data_Set_Time.find(pair_event);
       if (reco_it != Hits_Data_Set_Time.end()) {
-        if (!reco_it->second.empty()) {
-          std::vector<hitData_entry> hitDatas;
-          for (const auto &hit_it : reco_it->second) hitDatas.push_back(hit_it.second);
+        if (reco_it->second.size() >= (diamond->getXthreshold()+diamond->getUVthreshold())) {
           if (do_MMDiamonds) {
             /*
              * Filling hits for each event: a new class, MMT_Hit, is called in
              * order to use both algorithms witghout interferences
              */
-            diamond->createRoads_fillHits(i-nskip, hitDatas, m_detManager, pars[station], stationPhi);
-            double smallest_bc = 999999.;
-            for(int ihds=0; ihds<(int)hitDatas.size(); ihds++) {
-              if (hitDatas[ihds].BC_time < 0.) continue;
-              else if (hitDatas[ihds].BC_time < smallest_bc) smallest_bc = hitDatas[ihds].BC_time;
-
-              if (m_doNtuple) {
-                m_trigger_VMM->push_back(hitDatas[ihds].VMM_chip);
-                m_trigger_plane->push_back(hitDatas[ihds].plane);
-                m_trigger_station->push_back(hitDatas[ihds].station_eta);
-                m_trigger_strip->push_back(hitDatas[ihds].strip);
+            diamond->createRoads_fillHits(i-nskip, reco_it->second, m_detManager, pars[station], stationPhi);
+            if (m_doNtuple) {
+              for(const auto &hit : reco_it->second) {
+                m_trigger_VMM->push_back(hit.second.VMM_chip);
+                m_trigger_plane->push_back(hit.second.plane);
+                m_trigger_station->push_back(hit.second.station_eta);
+                m_trigger_strip->push_back(hit.second.strip);
               }
+              std::vector<double> slopes = diamond->getHitSlopes();
+              for (const auto &s : slopes) m_trigger_RZslopes->push_back(s);
+              slopes.clear();
             }
-            std::vector<double> slopes = diamond->getHitSlopes();
-            if (m_doNtuple) for (const auto &s : slopes) m_trigger_RZslopes->push_back(s);
             diamond->resetSlopes();
-            slopes.clear();
             /*
              * Here we create roads with all MMT_Hit collected before (if any), then we save the results
              */
-            if (diamond->getHitVector(i-nskip).size() >= (diamond->getXthreshold()+diamond->getUVthreshold())) {
-              diamond->findDiamonds(i-nskip, smallest_bc, event);
+            diamond->findDiamonds(i-nskip, event);
 
-              if (!diamond->getSlopeVector(i-nskip).empty()) {
-                if (m_doNtuple) {
-                  m_trigger_diamond_ntrig->push_back(diamond->getSlopeVector(i-nskip).size());
-                  for (const auto &slope : diamond->getSlopeVector(i-nskip)) {
-                    m_trigger_diamond_sector->push_back(diamond->getDiamond(i-nskip).sector);
-                    m_trigger_diamond_stationPhi->push_back(diamond->getDiamond(i-nskip).stationPhi);
-                    m_trigger_diamond_bc->push_back(slope.BC);
-                    m_trigger_diamond_totalCount->push_back(slope.totalCount);
-                    m_trigger_diamond_realCount->push_back(slope.realCount);
-                    m_trigger_diamond_XbkgCount->push_back(slope.xbkg);
-                    m_trigger_diamond_UVbkgCount->push_back(slope.uvbkg);
-                    m_trigger_diamond_XmuonCount->push_back(slope.xmuon);
-                    m_trigger_diamond_UVmuonCount->push_back(slope.uvmuon);
-                    m_trigger_diamond_iX->push_back(slope.iRoad);
-                    m_trigger_diamond_iU->push_back(slope.iRoadu);
-                    m_trigger_diamond_iV->push_back(slope.iRoadv);
-                    m_trigger_diamond_age->push_back(slope.age);
-                    m_trigger_diamond_mx->push_back(slope.mx);
-                    m_trigger_diamond_my->push_back(slope.my);
-                    m_trigger_diamond_Uavg->push_back(slope.uavg);
-                    m_trigger_diamond_Vavg->push_back(slope.vavg);
-                    m_trigger_diamond_mxl->push_back(slope.mxl);
-                    m_trigger_diamond_theta->push_back(slope.theta);
-                    m_trigger_diamond_eta->push_back(slope.eta);
-                    m_trigger_diamond_dtheta->push_back(slope.dtheta);
-                    m_trigger_diamond_phi->push_back(slope.phi);
-                    m_trigger_diamond_phiShf->push_back(slope.phiShf);
-                  }
+            if (!diamond->getSlopeVector(i-nskip).empty()) {
+              if (m_doNtuple) {
+                m_trigger_diamond_ntrig->push_back(diamond->getSlopeVector(i-nskip).size());
+                for (const auto &slope : diamond->getSlopeVector(i-nskip)) {
+                  m_trigger_diamond_sector->push_back(diamond->getDiamond(i-nskip).sector);
+                  m_trigger_diamond_stationPhi->push_back(diamond->getDiamond(i-nskip).stationPhi);
+                  m_trigger_diamond_bc->push_back(slope.BC);
+                  m_trigger_diamond_totalCount->push_back(slope.totalCount);
+                  m_trigger_diamond_realCount->push_back(slope.realCount);
+                  m_trigger_diamond_XbkgCount->push_back(slope.xbkg);
+                  m_trigger_diamond_UVbkgCount->push_back(slope.uvbkg);
+                  m_trigger_diamond_XmuonCount->push_back(slope.xmuon);
+                  m_trigger_diamond_UVmuonCount->push_back(slope.uvmuon);
+                  m_trigger_diamond_iX->push_back(slope.iRoad);
+                  m_trigger_diamond_iU->push_back(slope.iRoadu);
+                  m_trigger_diamond_iV->push_back(slope.iRoadv);
+                  m_trigger_diamond_age->push_back(slope.age);
+                  m_trigger_diamond_mx->push_back(slope.mx);
+                  m_trigger_diamond_my->push_back(slope.my);
+                  m_trigger_diamond_Uavg->push_back(slope.uavg);
+                  m_trigger_diamond_Vavg->push_back(slope.vavg);
+                  m_trigger_diamond_mxl->push_back(slope.mxl);
+                  m_trigger_diamond_theta->push_back(slope.theta);
+                  m_trigger_diamond_eta->push_back(slope.eta);
+                  m_trigger_diamond_dtheta->push_back(slope.dtheta);
+                  m_trigger_diamond_phi->push_back(slope.phi);
+                  m_trigger_diamond_phiShf->push_back(slope.phiShf);
                 }
+              }
 
-                // MM RDO filling below
-                std::vector<int> slopeBC;
-                for (const auto &slope : diamond->getSlopeVector(i-nskip)) slopeBC.push_back(slope.BC);
-                std::sort(slopeBC.begin(), slopeBC.end());
-                slopeBC.erase( std::unique(slopeBC.begin(), slopeBC.end()), slopeBC.end() );
-                for (const auto &bc : slopeBC) {
-                  Muon::NSW_TrigRawData* trigRawData = new Muon::NSW_TrigRawData(diamond->getDiamond(i-nskip).stationPhi, diamond->getDiamond(i-nskip).side, bc);
+              // MM RDO filling below
+              std::vector<int> slopeBC;
+              for (const auto &slope : diamond->getSlopeVector(i-nskip)) slopeBC.push_back(slope.BC);
+              std::sort(slopeBC.begin(), slopeBC.end());
+              slopeBC.erase( std::unique(slopeBC.begin(), slopeBC.end()), slopeBC.end() );
+              for (const auto &bc : slopeBC) {
+                Muon::NSW_TrigRawData* trigRawData = new Muon::NSW_TrigRawData(diamond->getDiamond(i-nskip).stationPhi, diamond->getDiamond(i-nskip).side, bc);
 
-                  for (const auto &slope : diamond->getSlopeVector(i-nskip)) {
-                    if (bc == slope.BC) {
-                      Muon::NSW_TrigRawDataSegment* trigRawDataSegment = new Muon::NSW_TrigRawDataSegment();
+                for (const auto &slope : diamond->getSlopeVector(i-nskip)) {
+                  if (bc == slope.BC) {
+                    Muon::NSW_TrigRawDataSegment* trigRawDataSegment = new Muon::NSW_TrigRawDataSegment();
 
-                      // Phi-id - here use local phi (not phiShf)
-                      uint8_t phi_id = 0;
-                      if (slope.phi > m_phiMax || slope.phi < m_phiMin) trigRawDataSegment->setPhiIndex(phi_id);
-                      else {
-                        uint8_t nPhi = (1<<m_phiBits) -2; // To accomodate the new phi-id encoding prescription around 0
-                        float phiSteps = (m_phiMax - m_phiMin)/nPhi;
-                        for (uint8_t i=0; i<nPhi; i++) {
-                          if ((slope.phi) < (m_phiMin+i*phiSteps)) {
-                            phi_id = i;
-                            break;
-                          }
+                    // Phi-id - here use local phi (not phiShf)
+                    uint8_t phi_id = 0;
+                    if (slope.phi > m_phiMax || slope.phi < m_phiMin) trigRawDataSegment->setPhiIndex(phi_id);
+                    else {
+                      uint8_t nPhi = (1<<m_phiBits) -2; // To accomodate the new phi-id encoding prescription around 0
+                      float phiSteps = (m_phiMax - m_phiMin)/nPhi;
+                      for (uint8_t i=0; i<nPhi; i++) {
+                        if ((slope.phi) < (m_phiMin+i*phiSteps)) {
+                          phi_id = i;
+                          break;
                         }
-                        trigRawDataSegment->setPhiIndex(phi_id);
                       }
-                      if (m_doNtuple) m_trigger_diamond_TP_phi_id->push_back(phi_id);
-
-                      // R-id
-                      double extrapolatedR = 7824.46*std::abs(std::tan(slope.theta)); // The Z plane is a fixed value, taken from SL-TP documentation
-                      uint8_t R_id = 0;
-                      if (extrapolatedR > m_rMax || extrapolatedR < m_rMin) trigRawDataSegment->setRIndex(R_id);
-                      else {
-                        uint8_t nR = (1<<m_rBits) -1;
-                        float Rsteps = (m_rMax - m_rMin)/nR;
-                        for (uint8_t j=0; j<nR; j++) {
-                          if (extrapolatedR < (m_rMin+j*Rsteps)) {
-                            R_id = j;
-                            break;
-                          }
-                        }
-                        trigRawDataSegment->setRIndex(R_id);
-                      }
-                      if (m_doNtuple) m_trigger_diamond_TP_R_id->push_back(R_id);
-
-                      // DeltaTheta-id
-                      uint8_t dTheta_id = 0;
-                      if (slope.dtheta > m_dThetaMax || slope.dtheta < m_dThetaMin) trigRawDataSegment->setDeltaTheta(dTheta_id);
-                      else {
-                        uint8_t ndTheta = (1<<m_dThetaBits) -1;
-                        float dThetaSteps = (m_dThetaMax - m_dThetaMin)/ndTheta;
-                        for (uint8_t k=0; k<ndTheta; k++) {
-                          if ((slope.dtheta) < (m_dThetaMin+k*dThetaSteps)) {
-                            dTheta_id = k;
-                            break;
-                          }
-                        }
-                        trigRawDataSegment->setDeltaTheta(dTheta_id);
-                      }
-                      if (m_doNtuple) m_trigger_diamond_TP_dTheta_id->push_back(dTheta_id);
-
-                      // Low R-resolution bit
-                      trigRawDataSegment->setLowRes(slope.lowRes);
-
-                      trigRawData->push_back(trigRawDataSegment);
+                      trigRawDataSegment->setPhiIndex(phi_id);
                     }
+                    if (m_doNtuple) m_trigger_diamond_TP_phi_id->push_back(phi_id);
+
+                    // R-id
+                    double extrapolatedR = 7824.46*std::abs(std::tan(slope.theta)); // The Z plane is a fixed value, taken from SL-TP documentation
+                    uint8_t R_id = 0;
+                    if (extrapolatedR > m_rMax || extrapolatedR < m_rMin) trigRawDataSegment->setRIndex(R_id);
+                    else {
+                      uint8_t nR = (1<<m_rBits) -1;
+                      float Rsteps = (m_rMax - m_rMin)/nR;
+                      for (uint8_t j=0; j<nR; j++) {
+                        if (extrapolatedR < (m_rMin+j*Rsteps)) {
+                          R_id = j;
+                          break;
+                        }
+                      }
+                      trigRawDataSegment->setRIndex(R_id);
+                    }
+                    if (m_doNtuple) m_trigger_diamond_TP_R_id->push_back(R_id);
+
+                    // DeltaTheta-id
+                    uint8_t dTheta_id = 0;
+                    if (slope.dtheta > m_dThetaMax || slope.dtheta < m_dThetaMin) trigRawDataSegment->setDeltaTheta(dTheta_id);
+                    else {
+                      uint8_t ndTheta = (1<<m_dThetaBits) -1;
+                      float dThetaSteps = (m_dThetaMax - m_dThetaMin)/ndTheta;
+                      for (uint8_t k=0; k<ndTheta; k++) {
+                        if ((slope.dtheta) < (m_dThetaMin+k*dThetaSteps)) {
+                          dTheta_id = k;
+                          break;
+                        }
+                      }
+                      trigRawDataSegment->setDeltaTheta(dTheta_id);
+                    }
+                    if (m_doNtuple) m_trigger_diamond_TP_dTheta_id->push_back(dTheta_id);
+
+                    // Low R-resolution bit
+                    trigRawDataSegment->setLowRes(slope.lowRes);
+
+                    trigRawData->push_back(trigRawDataSegment);
                   }
-                  rdo->push_back(trigRawData);
                 }
-                ATH_MSG_DEBUG("Filled MM RDO container now having size: " << rdo->size() << ". Clearing event information!");
-              } else ATH_MSG_DEBUG("No output slopes to store");
-            }
+                rdo->push_back(trigRawData);
+              }
+              ATH_MSG_DEBUG("Filled MM RDO container now having size: " << rdo->size() << ". Clearing event information!");
+            } else ATH_MSG_DEBUG("No output slopes to store");
           } else {
             //////////////////////////////////////////////////////////////
             //                                                          //
@@ -330,6 +322,8 @@ namespace NSWL1 {
             auto find = std::make_unique<MMT_Finder>(pars[station], 1);
             ATH_MSG_DEBUG(  "Number of Roads Configured " <<  find->get_roads()  );
 
+            std::vector<hitData_entry> hitDatas;
+            for (const auto &hit_it : reco_it->second) hitDatas.push_back(hit_it.second);
             std::map<std::pair<int,int>,finder_entry> hitBuffer;
             for (const auto &hit_it : reco_it->second) {
               find->fillHitBuffer( hitBuffer, hit_it.second.entry_hit(pars[station]), pars[station] ); // Hit object, Map (road,plane) -> Finder entry
@@ -468,10 +462,10 @@ namespace NSWL1 {
                 }
               }
             }
+            hitDatas.clear();
           } // if-else Diamond clause
-          hitDatas.clear();
         } else {
-          ATH_MSG_WARNING( "Available hits are less than X+UV thresholds, skipping" );
+          ATH_MSG_DEBUG( "Available hits are " << reco_it->second.size() << ", less than X+UV threshold, skipping" );
           nskip++;
         }
       } else {

@@ -1,4 +1,4 @@
-<!--Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration-->
+<!--Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration-->
 
 # Bjet Trigger configuration guide
 
@@ -221,7 +221,7 @@ The following list will describe the available files and their functionality:
      ```
      , assembles the chain
      ```python
-      jet = JetChainConfiguration(chainDict).assembleChain()
+      jet = JetChainConfiguration(chainDict).assembleChain(flags)
      ```
      and checks whether the signature is `Bjet` or `Jet`, i.e. whether `bTag` option is set or not.\
      If the signature is '*Jet*', the chain consists only of jet-code ('*JetChainConfiguration*').
@@ -231,7 +231,7 @@ The following list will describe the available files and their functionality:
      ```
      If the signature is '*Bjet*', also bjet-code ('*BjetChainConfiguration*') is added to the chain
      ```python
-      Bjet = BjetChainConfiguration(subChainDict, jet).assembleChain() 
+      Bjet = BjetChainConfiguration(subChainDict, jet).assembleChain(flags) 
       jet.steps = jet.steps + Bjet.steps
       listOfChainDefs += [jet]
      ```
@@ -252,7 +252,7 @@ The following list will describe the available files and their functionality:
 In '*BjetChainConfiguration.py*' the bjet sequence is added as one step of the chain part steps. The sequence is extracted from `getBJetSequence`, which is defined in '*BjetMenuSequence*'.
      ```python
       stepName = f"Step2_{self.jc_name}_bjet"
-      chainSteps = [self.getStep(2, stepName, [bjetSequenceCfg])]
+      chainSteps = [self.getStep(flags,2, stepName, [bjetSequenceCfg])]
      ```
      Based on these steps the chain is being build
      ```python
@@ -307,6 +307,7 @@ In '*BjetChainConfiguration.py*' the bjet sequence is added as one step of the c
       The first algorithms are second stage of fast tracking and precision tracking (see [BjetTrackingConfiguration.py](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Bjet/BjetTrackingConfiguration.py)).
       ```python
         secondStageAlgs, PTTrackParticles = getSecondStageBjetTracking(
+          flags,
           inputRoI=InputMakerAlg.InViewRoIs,
           inputVertex=prmVtxKey,
           inputJets=InputMakerAlg.InViewJets
@@ -371,7 +372,8 @@ In '*BjetChainConfiguration.py*' the bjet sequence is added as one step of the c
 
       The complete '*MenuSequence*' then looks as follows
       ```python
-        return MenuSequence( Sequence    = BjetAthSequence,
+        return MenuSequence( flags,
+                             Sequence    = BjetAthSequence,
                              Maker       = InputMakerAlg,
                              Hypo        = hypo,
                              HypoToolGen = TrigBjetBtagHypoToolFromDict)
@@ -396,7 +398,7 @@ In '*BjetChainConfiguration.py*' the bjet sequence is added as one step of the c
      ```
      The first set of algorithms being added to the sequence are '*Second Stage of Fast Tracking*'
      ```python
-       viewAlgs, viewVerify = makeInDetTrigFastTracking( config = IDTrigConfig, rois=inputRoI)
+       viewAlgs, viewVerify = makeInDetTrigFastTracking(flags, config = IDTrigConfig, rois=inputRoI)
        algSequence.append( parOR("SecondStageFastTrackingSequence",viewAlgs) )
      ```
      The second set of algorthms being added to the sequence are '*Precision Tracking*'
@@ -417,37 +419,37 @@ In '*BjetChainConfiguration.py*' the bjet sequence is added as one step of the c
      The workflow is as follows:
      - **JetParticleAssociationAlg**
        ```python
-         acc.merge(JetParticleAssociationAlgCfg(ConfigFlags, inputJets.replace("Jets",""), inputTracks, "TracksForBTagging"))
+         acc.merge(JetParticleAssociationAlgCfg(flags, inputJets.replace("Jets",""), inputTracks, "TracksForBTagging"))
        ```
        Decorates a link to the jet container pointing towards the tracks (`HLT_IDTrack_Bjet_IDTrig`) called `HLT_{jc_key}bJets.TracksForBTagging`.
      - **Secondary Vertexing**
        ```python
          SecVertexers = [ 'JetFitter', 'SV1' ]
          for sv in SecVertexers:
-             acc.merge(JetSecVtxFindingAlgCfg(ConfigFlags, inputJets.replace("Jets",""), inputVertex, sv, "TracksForBTagging"))
-             acc.merge(JetSecVertexingAlgCfg(ConfigFlags, BTagName, inputJets.replace("Jets",""), inputTracks, inputVertex, sv))
+             acc.merge(JetSecVtxFindingAlgCfg(flags, inputJets.replace("Jets",""), inputVertex, sv, "TracksForBTagging"))
+             acc.merge(JetSecVertexingAlgCfg(flags, BTagName, inputJets.replace("Jets",""), inputTracks, inputVertex, sv))
        ```
        Determines the vertices for `SV1` and `JetFitter`, creates VertexContainers (`HLT_BTaggingJFVtx`, `HLT_BTaggingSecVtx`) and links them to the jets (`.JFVtx`, `.SecVtx`)
      - **JetBTaggingAlg**
        ```python
-         acc.merge(JetBTaggingAlgCfg(ConfigFlags, BTaggingCollection=BTagName, JetCollection=inputJets.replace("Jets",""), PrimaryVertexCollectionName=inputVertex, TaggerList=ConfigFlags.BTagging.Run2TrigTaggers, SetupScheme="Trig", SecVertexers = SecVertexers, Tracks = "TracksForBTagging", Muons = Muons))
+         acc.merge(JetBTaggingAlgCfg(flags, BTaggingCollection=BTagName, JetCollection=inputJets.replace("Jets",""), PrimaryVertexCollectionName=inputVertex, TaggerList=flags.BTagging.Run2TrigTaggers, SetupScheme="Trig", SecVertexers = SecVertexers, Tracks = "TracksForBTagging", Muons = Muons))
          ```
        Runs all the b-tagging algorithms used in Run2, i.e. IP2D, IP3D, SV1, JetFitter, MV2c10. Output is a BTagging-Container containing the respective output values from the algorithms. The name of the container is the one passed to `getFlavourTagging`. In addition tracks, muons, and jets (`.BTagTrackToJetAssociator`, `.Muons`, `.jetLink`, `.btaggingLink`) are linked to it. 
      - **BTagTrackAugmenterAlg**
        ```python
-         acc.merge(BTagTrackAugmenterAlgCfg(ConfigFlags, TrackCollection=inputTracks, PrimaryVertexCollectionName=inputVertex))
+         acc.merge(BTagTrackAugmenterAlgCfg(flags, TrackCollection=inputTracks, PrimaryVertexCollectionName=inputVertex))
        ```
        Decorates impact parameters, impact parameters uncertainties, etc. to the tracks (`HLT_IDTrack_Bjet_IDTrig.btagIp_d0.btagIp_z0SinTheta.btagIp_d0Uncertainty.btagIp_z0SinThetaUncertainty.btagIp_trackMomentum.btagIp_trackDisplacement`). These are needed as inputs for the new taggers `RNNIP` and `DIPS`. 
      - **BTagHighLevelAugmenterAlg**
        ```python
-         acc.merge(BTagHighLevelAugmenterAlgCfg(ConfigFlags, JetCollection=inputJets.replace("Jets",""), BTagCollection=BTagName, Associator="BTagTrackToJetAssociator", TrackCollection=inputTracks))
+         acc.merge(BTagHighLevelAugmenterAlgCfg(flags, JetCollection=inputJets.replace("Jets",""), BTagCollection=BTagName, Associator="BTagTrackToJetAssociator", TrackCollection=inputTracks))
        ```
        Decorates low level b-tagging quantities to the BTaggignContaier (`HLT_{jc_key}BTagging.IP2D_bc`, `.IP2D_bu`, `.IP2D_cu`, `.IP2D_isDefaults`, `.IP2D_nTrks`, `.IP3D_bc`, `.IP3D_bu`, `.IP3D_cu`, `.IP3D_isDefaults`, `.IP3D_nTrks`, `.JetFitterSecondaryVertex_averageAllJetTrackRelativeEta`, `.JetFitterSecondaryVertex_averageTrackRelativeEta`, `.JetFitterSecondaryVertex_displacement2d`, `.JetFitterSecondaryVertex_displacement3d`, `.JetFitterSecondaryVertex_energy`, `.JetFitterSecondaryVertex_energyFraction`, `.JetFitterSecondaryVertex_isDefaults`, `.JetFitterSecondaryVertex_mass`, `.JetFitterSecondaryVertex_maximumAllJetTrackRelativeEta`, `.JetFitterSecondaryVertex_maximumTrackRelativeEta`, `.JetFitterSecondaryVertex_minimumAllJetTrackRelativeEta`, `.JetFitterSecondaryVertex_minimumTrackRelativeEta`, `.JetFitterSecondaryVertex_nTracks`, `.JetFitter_deltaR`, `.JetFitter_isDefaults`, `.SV1_isDefaults`, `.absEta_btagJes`, `.eta_btagJes`, `.pt_btagJes`, `.rnnip_isDefaults`).\
        These are needed as inputs for the new taggers `DL1`, `Dl1r`and `DL1d`.
      - **HighLevelBTagAlg**
        ```python
          for jsonFile in tagger_list:
-             acc.merge(HighLevelBTagAlgCfg(ConfigFlags, BTaggingCollection=BTagName, TrackCollection=inputTracks, NNFile=jsonFile) )
+             acc.merge(HighLevelBTagAlgCfg(flags, BTaggingCollection=BTagName, TrackCollection=inputTracks, NNFile=jsonFile) )
        ```
        It runs the new Run3 taggers. All of them are neural networks and their configurations are saved in json-files. The '*tagger_list*' is as follows:
        - RNNIP: `HLT_{jc_key}BTagging.rnnip_pb`, `.rnnip_pc`, `.rnnip_ptau`, `.rnnip_pu`
@@ -461,8 +463,8 @@ In '*BjetChainConfiguration.py*' the bjet sequence is added as one step of the c
      For more informations on the specific flavour-tagging algorithms consult [atlassoftwaredocs-ftag](https://atlassoftwaredocs.web.cern.ch/_staging/create-ftag-guides/guides/ftag/).\
      For the "old" Run2 taggers the calibration of the algorithms are stored in the conditions database. The function `JetTagCalibConfig` is a condition algorithm that takes care of loading the correct calibrations
      ```python
-       acc.merge(JetTagCalibCfg(ConfigFlags, scheme="Trig",
-                             TaggerList=ConfigFlags.BTagging.Run2TrigTaggers,
+       acc.merge(JetTagCalibCfg(flags, scheme="Trig",
+                             TaggerList=flags.BTagging.Run2TrigTaggers,
                              NewChannel = [f"{inputJetsPrefix}->{inputJetsPrefix},AntiKt4EMTopo"]))
      ```
      This is then also added to the ComponentAccumulator.\

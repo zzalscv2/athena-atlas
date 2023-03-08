@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <algorithm>
@@ -1655,53 +1655,6 @@ bool SGImplSvc::tryELRemap (sgkey_t sgkey_in, size_t index_in,
 }
 
 
-DataObject* SGImplSvc::typeless_readPrivateCopy(const CLID& clid,
-                                                const std::string& key) {
-  lock_t lock (m_mutex);
-  DataObject *pObj(0);
-  DataProxy *p(this->proxy(clid, key));
-  if (p) {
-    if (p->object()) { //this looks in transient mem only
-      //if there is a dobj in transient memory we take ownership with addRef
-      p->addRef();
-      //and make the store forget about the proxy for a moment
-      const bool FORCEREMOVE(true);      
-      bool hard_reset = (m_numSlots > 1);
-      store()->removeProxy(p, FORCEREMOVE, hard_reset).ignore();
-      //now we try to read the object from disk. Relies on PPS to reload proxy
-      DataProxy *pDisk(this->proxy(clid, key));
-      if (pDisk) {
-        //We are managing the pObj so we addRef it
-        if ( (pObj = pDisk->accessData()) ) pObj->addRef();
-        //don't need this guy anymore, notice we use the SGImplSvc version
-        //to remove the t2p entry as well
-        removeProxy(pDisk, SG::DataProxy_cast(pDisk,clid), FORCEREMOVE).ignore();
-      }
-      //replace the "transient" proxy where it was
-      if (store()->addToStore(clid, p).isFailure()) {
-        error() << "SGImplSvc::typeless_readPrivateCopy: "
-              << "could not re-record proxy in store: "
-              << clid << "/" << key << endmsg;
-      }
-    } else if ( (pObj = p->accessData()) ) { //try reading from disk
-      //We are managing the pObj so we addRef it
-      pObj->addRef();
-      //and make the proxy forget about it
-      bool hard_reset = (m_numSlots > 1);
-      p->reset (hard_reset);
-    }
-  }
-  if (0 == pObj) {
-    string errType;
-    m_pCLIDSvc->getTypeNameOfID(clid, errType).ignore();
-    warning() << "SGImplSvc::typeless_readPrivateCopy: "
-              << "did not find object of type "
-              << errType << " with key " << key << endmsg;
-  }
-  return pObj;
-}
-
-
 DataObject* SGImplSvc::typeless_retrievePrivateCopy (const CLID clid,
                                                      const std::string& key)
 {
@@ -1772,7 +1725,7 @@ void SGImplSvc::addAutoSymLinks (const std::string& key,
     bib = SG::BaseInfoBase::find (clid);
   }
   if ( bib ) {
-    std::vector<CLID> bases = bib->get_bases();
+    const std::vector<CLID>& bases = bib->get_bases();
     for ( std::size_t i = 0, iMax = bases.size(); i < iMax; ++i ) {
       if ( bases[i] != clid ) {
         if ( addSymLink( bases[i], dp ).isSuccess() ) {

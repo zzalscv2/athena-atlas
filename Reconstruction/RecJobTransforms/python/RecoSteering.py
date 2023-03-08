@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import Format
@@ -7,10 +7,6 @@ from AthenaConfiguration.Enums import Format
 def RecoSteering(flags):
     """
     Generates configuration of the reconstructions
-
-    This driver configures all reconstruction steps unconditionally.
-    The selftest available below can be used for simple jobs,
-    yet full functionality is achieved with transforms that set many flags.
     """
     from AthenaCommon.Logging import logging
     log = logging.getLogger("RecoSteering")
@@ -45,8 +41,10 @@ def RecoSteering(flags):
         acc.merge(GEN_AOD2xAODCfg(flags))
         log.info("---------- Configured AODtoxAOD Truth Conversion")
 
-        # We always want to write pileup truth jets to AOD, irrespective of whether we write jets to AOD in general
-        # This is because we cannot rebuild jets from pileup truth particles from the AOD
+        # We always want to write pileup truth jets to AOD,
+        # irrespective of whether we write jets to AOD in general
+        # This is because we cannot rebuild jets from pileup truth
+        # particles from the AOD
         from JetRecConfig.JetRecoSteering import addTruthPileupJetsToOutputCfg
         acc.merge(addTruthPileupJetsToOutputCfg(flags))
         log.info("---------- Configured Truth pileup jet writing")
@@ -63,12 +61,6 @@ def RecoSteering(flags):
     if flags.Detector.EnableCalo:
         from CaloRec.CaloRecoConfig import CaloRecoCfg
         acc.merge(CaloRecoCfg(flags))
-        # configure xAOD thinning
-        if (flags.Output.doWriteAOD and
-                flags.Calo.Thin.NegativeEnergyCaloClusters):
-            from ThinningUtils.ThinNegativeEnergyCaloClustersConfig import (
-                ThinNegativeEnergyCaloClustersCfg)
-            acc.merge(ThinNegativeEnergyCaloClustersCfg(flags))
         log.info("---------- Configured calorimeter reconstruction")
 
     # ID / ITk
@@ -116,12 +108,13 @@ def RecoSteering(flags):
         acc.merge(MuonCombinedReconstructionCfg(flags))
         log.info("---------- Configured combined muon reconstruction")
 
-    # TrackParticleCellAssociation = add cells crossed by high pt ID tracks
+    # TrackParticleCellAssociation
+    # add cells crossed by high pt ID tracks
     acc.flagPerfmonDomain('TrackCellAssociation')
     if flags.Reco.EnableTrackCellAssociation:
         from TrackParticleAssociationAlgs.TrackParticleAssociationAlgsConfig import (
-            TrackParticleCellAssociationAlgCfg)
-        acc.merge(TrackParticleCellAssociationAlgCfg(flags))
+            TrackParticleCellAssociationCfg)
+        acc.merge(TrackParticleCellAssociationCfg(flags))
         log.info("---------- Configured track particle-cell association")
 
     # PFlow
@@ -133,7 +126,7 @@ def RecoSteering(flags):
 
     # EGamma and CombinedMuon isolation
     acc.flagPerfmonDomain('Isolation')
-    if flags.Reco.EnableCombinedMuon or flags.Reco.EnableEgamma:
+    if flags.Reco.EnableIsolation:
         from IsolationAlgs.IsolationSteeringConfig import IsolationSteeringCfg
         acc.merge(IsolationSteeringCfg(flags))
         log.info("---------- Configured isolation")
@@ -143,12 +136,7 @@ def RecoSteering(flags):
     if flags.Reco.EnableJet:
         from JetRecConfig.JetRecoSteering import JetRecoSteeringCfg
         acc.merge(JetRecoSteeringCfg(flags))
-        # We also need to build links between the newly
-        # created jet constituents (GlobalFE)
-        # and electrons,photons,muons and taus
-        from eflowRec.PFCfg import PFGlobalFlowElementLinkingCfg
-        acc.merge(PFGlobalFlowElementLinkingCfg(flags))
-        log.info("---------- Configured jets")
+        log.info("---------- Configured Jets")
 
     # btagging
     acc.flagPerfmonDomain('FTag')
@@ -168,6 +156,15 @@ def RecoSteering(flags):
             from eflowRec.PFRun3Config import PFTauFELinkCfg
             acc.merge(PFTauFELinkCfg(flags))
             log.info("---------- Configured particle flow tau FE linking")
+
+    acc.flagPerfmonDomain('Jets')
+    if flags.Reco.EnableGlobalFELinking:
+        # We also need to build links between the newly
+        # created jet constituents (GlobalFE)
+        # and electrons,photons,muons and taus
+        from eflowRec.PFCfg import PFGlobalFlowElementLinkingCfg
+        acc.merge(PFGlobalFlowElementLinkingCfg(flags))
+        log.info("---------- Configured particle flow global linking")
 
     # MET
     acc.flagPerfmonDomain('MET')
@@ -197,7 +194,7 @@ def RecoSteering(flags):
         acc.merge(AFPRecCfg(flags))
         log.info("---------- Configured AFP reconstruction")
 
-    #Lucid
+    # Lucid
     acc.flagPerfmonDomain('Lucid')
     if flags.Detector.EnableLucid:
         from ForwardRec.LucidRecConfig import LucidRecCfg
@@ -229,13 +226,6 @@ def RecoSteering(flags):
 
     # setup output
     acc.flagPerfmonDomain('IO')
-    if any((flags.Output.doWriteESD,
-            flags.Output.doWriteAOD,
-            flags.Output.doWriteRDO)):
-        from AthenaPoolCnvSvc.PoolWriteConfig import PoolWriteCfg
-        acc.merge(PoolWriteCfg(flags))
-        log.info("setup POOL format writing")
-
     if flags.Output.doWriteESD:
         # Needed for Trk::Tracks TPCnv
         from TrkEventCnvTools.TrkEventCnvToolsConfigCA import (
@@ -256,13 +246,16 @@ def RecoSteering(flags):
         from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
         acc.merge(PerfMonMTSvcCfg(flags))
         log.info("---------- Configured PerfMon")
-        acc.printPerfmonDomains()
 
     return acc
 
 
 def RecoPostProcessingCfg(flags):
     acc = ComponentAccumulator()
+    if flags.Reco.PostProcessing.ThinNegativeClusters:
+        from ThinningUtils.ThinNegativeEnergyCaloClustersConfig import (
+            ThinNegativeEnergyCaloClustersCfg)
+        acc.merge(ThinNegativeEnergyCaloClustersCfg(flags))
     if flags.Reco.PostProcessing.TRTAloneThinning:
         from ThinningUtils.ThinTRTStandaloneConfig import (
             ThinTRTStandaloneCfg)

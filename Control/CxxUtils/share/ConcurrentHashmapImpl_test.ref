@@ -2,4 +2,6 @@ CxxUtils/ConcurrentHashmapImpl_test
 test1
 test2
 test3
+test_erase
+test_swap
 test4

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -32,16 +32,15 @@
 #include "TileEvent/TileTTL1Container.h"  
 #include "TileRec/TileTTL1ToNtuple.h"
 
-TileTTL1ToNtuple::TileTTL1ToNtuple(const std::string name, ISvcLocator* pSvcLocator)
+TileTTL1ToNtuple::TileTTL1ToNtuple(const std::string& name, ISvcLocator* pSvcLocator)
   : AthAlgorithm(name, pSvcLocator)
   , m_ntuplePtr(0)
+  , m_ntupleID("h130")
+  , m_ntupleLoc("/FILE1/TileRec")
+  , m_ttl1Container("TileTTL1Cnt")
   , m_TT_ID(0)
   , m_tileTBID(0)
 {
-  m_ttl1Container="TileTTL1Cnt";
-  m_ntupleLoc="/FILE1/TileRec";
-  m_ntupleID="h130";
-
   declareProperty("TileTTL1Container", m_ttl1Container);    
   declareProperty("NTupleLoc", m_ntupleLoc);
   declareProperty("NTupleID", m_ntupleID);

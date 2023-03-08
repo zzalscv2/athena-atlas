@@ -6,7 +6,7 @@ from TrigOnlineSpacePointTool.TrigOnlineSpacePointToolConf import TrigL2LayerNum
 
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
-def TrigFastTrackFinderMonitoring(name, doResMon=False):
+def TrigFastTrackFinderMonitoring(flags, name, doResMon=False):
 
     def addSPHistograms(montool, name):
         if name in ['FS', 'JetFS', 'FullScan', 'fullScan', 'fullScanUTT', 'jet']:
@@ -193,7 +193,7 @@ def TrigFastTrackFinderMonitoring(name, doResMon=False):
         montool.defineHistogram('TIME_disappearingTrack', path='EXPERT',type='TH1F',title="Disappearing track reco time (ms)", xbins = 100, xmin=0.0, xmax=300.0)
 
 
-    montool = GenericMonitoringTool(HistPath = f"TrigFastTrackFinder_{name}")
+    montool = GenericMonitoringTool(flags, HistPath = f"TrigFastTrackFinder_{name}")
     addSPHistograms(montool, name)
     addDataErrorHistograms(montool)
     addTimingHistograms(montool, name)
@@ -232,7 +232,9 @@ remap  = {
 
 class TrigFastTrackFinderBase(TrigFastTrackFinder):
     __slots__ = []
-    def __init__(self, name, slice_name, conditionsTool=None):
+    from AthenaConfiguration.AthConfigFlags import AthConfigFlags
+    
+    def __init__(self, flags: AthConfigFlags, name, slice_name, conditionsTool=None):
         TrigFastTrackFinder.__init__(self,name)
 
         #Remapping should be now covered by SliceConfigurationSetting
@@ -274,7 +276,7 @@ class TrigFastTrackFinderBase(TrigFastTrackFinder):
         self.doResMon = config.doResMon
 
         # switch between Run-2/3 monitoring
-        self.MonTool = TrigFastTrackFinderMonitoring(slice_name, self.doResMon)
+        self.MonTool = TrigFastTrackFinderMonitoring(flags, slice_name, self.doResMon)
 
         # Spacepoint conversion
         from TrigOnlineSpacePointTool.TrigOnlineSpacePointToolConf import TrigSpacePointConversionTool
@@ -364,15 +366,16 @@ class TrigFastTrackFinderBase(TrigFastTrackFinder):
 
 
         from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigSiComTrackFinder
-        
-        if conditionsTool is None:
-          from InDetTrigRecExample.InDetTrigConditionsAccess import SCT_ConditionsSetup
-          from SCT_ConditionsTools.SCT_ConditionsSummaryToolSetup import SCT_ConditionsSummaryToolSetup
-          sct_ConditionsSummaryToolSetupWithoutFlagged = SCT_ConditionsSummaryToolSetup(SCT_ConditionsSetup.instanceName('InDetSCT_ConditionsSummaryToolWithoutFlagged'))
-          sct_ConditionsSummaryToolSetupWithoutFlagged.setup()
-          InDetTrigSiComTrackFinder.SctSummaryTool = sct_ConditionsSummaryToolSetupWithoutFlagged.getTool()
-        else:
-          InDetTrigSiComTrackFinder.SctSummaryTool = conditionsTool
+
+        from SCT_ConditionsTools.SCT_ConditionsToolsConfig import SCT_ConditionsSummaryToolCfg
+        from InDetTrigRecExample.InDetTrigCommonTools import CAtoLegacyPublicToolWrapper
+
+        kwargs = {}
+        kwargs['withFlaggedCondTool'] = False
+        kwargs['withTdaqTool'] = False
+        kwargs['name'] = 'InDetSCT_ConditionsSummaryToolWithoutFlagged_'+remapped_type
+        sctCondSummaryTool = CAtoLegacyPublicToolWrapper(SCT_ConditionsSummaryToolCfg,**kwargs)
+        InDetTrigSiComTrackFinder.SctSummaryTool = sctCondSummaryTool
 
 
         from InDetTrigRecExample.ConfiguredNewTrackingTrigCuts import EFIDTrackingCuts
@@ -461,8 +464,6 @@ class TrigFastTrackFinderBase(TrigFastTrackFinder):
 
         if not config.doZFinderOnly:
           from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
-          from AthenaConfiguration.AllConfigFlags import ConfigFlags
-          flags = ConfigFlags.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking."+config.name)
           
           from TrkConfig.TrkTrackSummaryToolConfig import InDetTrigTrackSummaryToolCfg, InDetTrigFastTrackSummaryToolCfg
           if config.holeSearch_FTF :
@@ -488,42 +489,3 @@ class TrigFastTrackFinderBase(TrigFastTrackFinder):
 
 
 
-class TrigFastTrackFinder_Muon(TrigFastTrackFinderBase):
-  def __init__(self, name = "TrigFastTrackFinder_Muon"):
-    TrigFastTrackFinderBase.__init__(self, "TrigFastTrackFinder_Muon","Muon")
-
-class TrigFastTrackFinder_MuonFS(TrigFastTrackFinderBase):
-  def __init__(self, name = "TrigFastTrackFinder_MuonFS"):
-    TrigFastTrackFinderBase.__init__(self, "TrigFastTrackFinder_MuonFS","Muon")
-
-class TrigFastTrackFinder_MuonLate(TrigFastTrackFinderBase):
-  def __init__(self, name = "TrigFastTrackFinder_MuonLate"):
-    TrigFastTrackFinderBase.__init__(self, "TrigFastTrackFinder_MuonLate","Muon")
-
-class TrigFastTrackFinder_MuonIso(TrigFastTrackFinderBase):
-  def __init__(self, name = "TrigFastTrackFinder_MuonIso"):
-    TrigFastTrackFinderBase.__init__(self, "TrigFastTrackFinder_MuonIso","Muon")
-
-class TrigFastTrackFinder_eGamma(TrigFastTrackFinderBase):
-  def __init__(self, name = "TrigFastTrackFinder_eGamma"):
-    TrigFastTrackFinderBase.__init__(self, "TrigFastTrackFinder_eGamma","eGamma")
-
-class TrigFastTrackFinder_Tau(TrigFastTrackFinderBase):
-  def __init__(self, name = "TrigFastTrackFinder_Tau"):
-    TrigFastTrackFinderBase.__init__(self, "TrigFastTrackFinder_Tau","Tau")
-
-class TrigFastTrackFinder_TauCore(TrigFastTrackFinderBase):
-  def __init__(self, name = "TrigFastTrackFinder_TauCore"):
-    TrigFastTrackFinderBase.__init__(self, "TrigFastTrackFinder_TauCore","TauCore")
-
-class TrigFastTrackFinder_TauIso(TrigFastTrackFinderBase):
-  def __init__(self, name = "TrigFastTrackFinder_TauIso"):
-    TrigFastTrackFinderBase.__init__(self, "TrigFastTrackFinder_TauIso","Tau")
-
-class TrigFastTrackFinder_Jet(TrigFastTrackFinderBase):
-  def __init__(self, name = "TrigFastTrackFinder_Jet"):
-    TrigFastTrackFinderBase.__init__(self, "TrigFastTrackFinder_Jet","Jet")
-
-class TrigFastTrackFinder_MinBias(TrigFastTrackFinderBase):
-  def __init__(self, name = "TrigFastTrackFinder_MinBias"):
-    TrigFastTrackFinderBase.__init__(self, "TrigFastTrackFinder_MinBias","MinBias")

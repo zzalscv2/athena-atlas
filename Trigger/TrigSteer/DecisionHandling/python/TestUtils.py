@@ -1,8 +1,7 @@
 #
-#  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
-from __future__ import print_function
 import six
 
 def writeEmulationFiles(data):
@@ -22,10 +21,9 @@ class MenuTest(object):
 from HLTSeeding.HLTSeedingConf import HLTSeeding
 # L1 emulation for RDO
 class L1EmulationTest(HLTSeeding):
-    def __init__(self, name='L1EmulationTest', *args, **kwargs):
+    def __init__(self, flags, name='L1EmulationTest', *args, **kwargs):
         super(L1EmulationTest, self).__init__(name, *args, **kwargs)
 
-        from AthenaConfiguration.AllConfigFlags import ConfigFlags
         from HLTSeeding.HLTSeedingConf import CTPUnpackingEmulationTool, RoIsUnpackingEmulationTool
 
         self.RoIBResult = ""
@@ -50,7 +48,7 @@ class L1EmulationTest(HLTSeeding):
         from HLTSeeding.HLTSeedingConfig import mapThresholdToL1RoICollection
 
         # EM unpacker
-        if ConfigFlags.Trigger.doID or ConfigFlags.Trigger.doCalo:
+        if flags.Trigger.doID or flags.Trigger.doCalo:
             emUnpacker = RoIsUnpackingEmulationTool("EMRoIsUnpackingTool",
                                                     Decisions = "EMRoIDecisions",
                                                     OutputTrigRoIs = mapThresholdToL1RoICollection("EM"),
@@ -60,7 +58,7 @@ class L1EmulationTest(HLTSeeding):
 
 
         # MU unpacker
-        if ConfigFlags.Trigger.doMuon:
+        if flags.Trigger.doMuon:
             muUnpacker = RoIsUnpackingEmulationTool("MURoIsUnpackingTool",
                                                     Decisions = "MURoIDecisions",
                                                     OutputTrigRoIs = mapThresholdToL1RoICollection("MU"),
@@ -83,7 +81,7 @@ class makeChainStep(object):
 
 chainsCounter = 0
 
-def makeChain( name, L1Thresholds, ChainSteps, Streams="physics:Main", Groups=["RATE:TestRateGroup", "BW:TestBW"]):
+def makeChain( flags, name, L1Thresholds, ChainSteps, Streams="physics:Main", Groups=["RATE:TestRateGroup", "BW:TestBW"]):
     """
     In addition to making the chain object fills the flags that are used to generate MnuCOnfig JSON file
     """
@@ -95,7 +93,7 @@ def makeChain( name, L1Thresholds, ChainSteps, Streams="physics:Main", Groups=["
     from TriggerMenuMT.HLT.Config.MenuComponents import ChainStep
 
     from TriggerMenuMT.HLT.Config.Utility.DictFromChainName import dictFromChainName
-    chainDict = dictFromChainName( prop )
+    chainDict = dictFromChainName( flags, prop )
     global chainsCounter
     chainDict["chainCounter"] = chainsCounter
     chainsCounter += 1
@@ -126,5 +124,9 @@ def makeChain( name, L1Thresholds, ChainSteps, Streams="physics:Main", Groups=["
     return chainConfig
 
 if __name__ == "__main__":
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaCommon.Constants import DEBUG
-    real = L1EmulationTest(OutputLevel=DEBUG)
+
+    flags = initConfigFlags()
+    flags.lock()
+    real = L1EmulationTest(flags, OutputLevel=DEBUG)

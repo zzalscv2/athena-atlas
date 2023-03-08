@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauMonitorAlgorithm.h"
 
 #include "GaudiKernel/SystemOfUnits.h"
 #include "xAODCore/ShallowCopy.h"
+#include <algorithm>
 
 using Gaudi::Units::GeV;
 using namespace Monitored;
@@ -450,14 +451,10 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
 
       fill(tool, trackLogSeedJetPt);
 
-      static const SG::AuxElement::ConstAccessor<float> idScoreCharged(
-          "rnn_chargedScore");
-      static const SG::AuxElement::ConstAccessor<float> idScoreIso(
-          "rnn_isolationScore");
-      static const SG::AuxElement::ConstAccessor<float> idScoreConv(
-          "rnn_conversionScore");
-      static const SG::AuxElement::ConstAccessor<float> idScoreFake(
-          "rnn_fakeScore");
+      static const SG::AuxElement::ConstAccessor<float> acc_trackScoreCharged("rnn_chargedScore");
+      static const SG::AuxElement::ConstAccessor<float> acc_trackScoreIso("rnn_isolationScore");
+      static const SG::AuxElement::ConstAccessor<float> acc_trackScoreConv("rnn_conversionScore");
+      // rnn_fakeScore may not be available (it is not provided by the TauJets smart slimming list), it can be obtained from unitarity
 
       for (const xAOD::TauTrack *track : tau->allTracks()) {
 
@@ -541,11 +538,21 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
              trackNPixHits,
              trackNSiHits,
              trackeProbabilityHT, trackeProbabilityNN, trackeProbabilityHTorNN);
-        if (track->isAvailable<float>("rnn_chargedScore")) {
-          trackIdScoreCharged = idScoreCharged(*track);
-          trackIdScoreIso = idScoreIso(*track);
-          trackIdScoreConv = idScoreConv(*track);
-          trackIdScoreFake = idScoreFake(*track);
+
+	if (acc_trackScoreCharged.isAvailable(*track)) {
+	  float chargedScore = acc_trackScoreCharged(*track);
+	  float isolationScore = acc_trackScoreIso(*track);
+	  float conversionScore = acc_trackScoreConv(*track);
+	  float fakeScore = 1. - chargedScore - isolationScore - conversionScore;
+	  // ensure the probability is within [0.,1.]
+	  fakeScore = std::max(0.f, fakeScore);
+	  fakeScore = std::min(1.f, fakeScore);
+
+	  trackIdScoreCharged = chargedScore;
+	  trackIdScoreIso = isolationScore;
+	  trackIdScoreConv = conversionScore;
+	  trackIdScoreFake = fakeScore;
+
           fill(tool, trackIdScoreCharged, trackIdScoreIso, trackIdScoreConv,
                trackIdScoreFake);
         }

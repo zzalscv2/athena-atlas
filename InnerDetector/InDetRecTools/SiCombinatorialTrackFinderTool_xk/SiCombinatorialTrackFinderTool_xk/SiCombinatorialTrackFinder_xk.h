@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -57,7 +57,7 @@ namespace InDet {
   @author Igor.Gavrilenko@cern.ch     
   */
 
-  class SiCombinatorialTrackFinder_xk : 
+  class SiCombinatorialTrackFinder_xk final: 
 
     public extends<AthAlgTool, ISiCombinatorialTrackFinder>
     {
@@ -73,61 +73,65 @@ namespace InDet {
       /// @name Standard tool methods
       ///////////////////////////////////////////////////////////////////
       //@{
-      SiCombinatorialTrackFinder_xk
-	(const std::string&,const std::string&,const IInterface*);
-      virtual ~SiCombinatorialTrackFinder_xk() = default;
-      virtual StatusCode initialize() override;
-      virtual StatusCode finalize  () override;
-      //@}
+     SiCombinatorialTrackFinder_xk(const std::string&, const std::string&,
+                                   const IInterface*);
+     virtual ~SiCombinatorialTrackFinder_xk() = default;
+     virtual StatusCode initialize() override;
+     virtual StatusCode finalize() override;
+     //@}
 
-      ///////////////////////////////////////////////////////////////////
-      /// @name Main methods for local track finding
-      ///////////////////////////////////////////////////////////////////
-      //@{
+     ///////////////////////////////////////////////////////////////////
+     /// @name Main methods for local track finding
+     ///////////////////////////////////////////////////////////////////
+     //@{
 
-      virtual const std::list<Trk::Track*>& getTracks
-        (SiCombinatorialTrackFinderData_xk& data,
-         const Trk::TrackParameters&, 
-	 const std::vector<const Trk::SpacePoint*>&,
-	 const std::list<Amg::Vector3D>&,
-	 std::list<const InDetDD::SiDetectorElement*>&,
-	 const TrackQualityCuts&, const EventContext& ctx) const override;
+     virtual const std::list<Trk::Track*>& getTracks(
+         SiCombinatorialTrackFinderData_xk& data, const Trk::TrackParameters&,
+         const std::vector<const Trk::SpacePoint*>&,
+         const std::list<Amg::Vector3D>&,
+         std::list<const InDetDD::SiDetectorElement*>&, const TrackQualityCuts&,
+         const EventContext& ctx) const override;
 
-      virtual const std::list<Trk::Track*>& getTracks
-        (SiCombinatorialTrackFinderData_xk& data,
-         const Trk::TrackParameters&, 
-	 const std::vector<const Trk::SpacePoint*>&,
-	 const std::list<Amg::Vector3D>&,
-	 std::list<const InDetDD::SiDetectorElement*>&,
-	 std::multimap<const Trk::PrepRawData*, const Trk::Track*>&, const EventContext& ctx) const override;
+     virtual const std::list<Trk::Track*>& getTracks(
+         SiCombinatorialTrackFinderData_xk& data, const Trk::TrackParameters&,
+         const std::vector<const Trk::SpacePoint*>&,
+         const std::list<Amg::Vector3D>&,
+         std::list<const InDetDD::SiDetectorElement*>&,
+         std::multimap<const Trk::PrepRawData*, const Trk::Track*>&,
+         const EventContext& ctx) const override;
 
-      virtual const std::list<Trk::Track*>& getTracksWithBrem
-        (SiCombinatorialTrackFinderData_xk& data,
-         const Trk::TrackParameters&, 
-	 const std::vector<const Trk::SpacePoint*>&,
-	 const std::list<Amg::Vector3D>&,
-	 std::list<const InDetDD::SiDetectorElement*>&,
-	 std::multimap<const Trk::PrepRawData*, const Trk::Track*>&,
-	 bool, const EventContext& ctx) const override;
-   
-      virtual double pTseed(SiCombinatorialTrackFinderData_xk& data,
-			    const Trk::TrackParameters&,
-			    const std::vector<const Trk::SpacePoint*>&,
-			    const EventContext&) const override;
+     virtual const std::list<Trk::Track*>& getTracksWithBrem(
+         SiCombinatorialTrackFinderData_xk& data, const Trk::TrackParameters&,
+         const std::vector<const Trk::SpacePoint*>&,
+         const std::list<Amg::Vector3D>&,
+         std::list<const InDetDD::SiDetectorElement*>&,
+         std::multimap<const Trk::PrepRawData*, const Trk::Track*>&, bool,
+         const EventContext& ctx) const override;
 
-      virtual void newEvent(const EventContext& ctx, SiCombinatorialTrackFinderData_xk& data) const override;
-      virtual void newEvent(const EventContext& ctx, SiCombinatorialTrackFinderData_xk& data,
-                            Trk::TrackInfo, const TrackQualityCuts&) const override;
+     virtual double pTseed(SiCombinatorialTrackFinderData_xk& data,
+                           const Trk::TrackParameters&,
+                           const std::vector<const Trk::SpacePoint*>&,
+                           const EventContext&) const override;
 
-      virtual void endEvent(SiCombinatorialTrackFinderData_xk& data) const override;
-      //@}
+     virtual void newEvent(
+         const EventContext& ctx,
+         SiCombinatorialTrackFinderData_xk& data) const override;
+     virtual void newEvent(const EventContext& ctx,
+                           SiCombinatorialTrackFinderData_xk& data,
+                           Trk::TrackInfo,
+                           const TrackQualityCuts&) const override;
 
-      ///////////////////////////////////////////////////////////////////
-      /// @name Print internal tool parameters and status
-      ///////////////////////////////////////////////////////////////////
-      //@{
-      MsgStream& dump(SiCombinatorialTrackFinderData_xk& data, MsgStream& out) const override;
-      //@}
+     virtual void endEvent(
+         SiCombinatorialTrackFinderData_xk& data) const override;
+     //@}
+
+     ///////////////////////////////////////////////////////////////////
+     /// @name Print internal tool parameters and status
+     ///////////////////////////////////////////////////////////////////
+     //@{
+     MsgStream& dump(SiCombinatorialTrackFinderData_xk& data,
+                     MsgStream& out) const override;
+     //@}
 
     private:
       

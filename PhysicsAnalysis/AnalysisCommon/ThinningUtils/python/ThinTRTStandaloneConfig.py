@@ -29,11 +29,11 @@ def ThinTRTStandaloneCfg(flags, name="ThinTRTStandaloneAlg", **kwargs):
 
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaConfiguration.ComponentAccumulator import printProperties
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-
+    flags = initConfigFlags()
     flags.Input.Files = defaultTestFiles.RDO_RUN2
     flags.Output.doWriteAOD = True  # To test the AOD parts
     flags.lock()

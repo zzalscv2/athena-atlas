@@ -23,7 +23,6 @@ class TileLaserPmt {
     , m_pmPedestal(0.0)
     , m_pmSigmaPedestal(0.0) { }
 
-  ~TileLaserPmt() { }
 
   int getPMADC() const               { return m_PMADC;           }
   int getTDC() const                 { return m_TDC;             }

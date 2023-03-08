@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
 from DecisionHandling.DecisionHandlingConf import ViewCreatorInitialROITool
@@ -14,12 +14,12 @@ def getTrigCosmicInDetTracking(flags):
 
     idTrigConfig = getInDetTrigConfig('cosmics')
     from TrigInDetConfig.InDetTrigFastTracking import makeInDetTrigFastTracking
-    dataPrepAlgs, verifier = makeInDetTrigFastTracking(config=idTrigConfig, 
+    dataPrepAlgs, verifier = makeInDetTrigFastTracking(flags, config=idTrigConfig,
                                      rois=dataPrepInputMaker.InViewRoIs, 
                                      viewVerifier='VDVCosmicsIDTracking', 
                                      doFTF=False) # no fast tracking, just data prep
     verifier.DataObjects += [('TrigRoiDescriptorCollection', 'StoreGateSvc+InputRoI')]
 
     from TrigInDetConfig.EFIDTracking import makeInDetPatternRecognition
-    efidAlgs, verifierForEF = makeInDetPatternRecognition(idTrigConfig, verifier='VDVCosmicsIDTracking')
+    efidAlgs, verifierForEF = makeInDetPatternRecognition(flags, idTrigConfig, verifier='VDVCosmicsIDTracking')
     return   dataPrepInputMaker, [verifier,verifierForEF] + dataPrepAlgs + efidAlgs

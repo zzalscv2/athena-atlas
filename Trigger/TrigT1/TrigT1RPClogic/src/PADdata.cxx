@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1RPClogic/PADdata.h"
@@ -94,16 +94,16 @@ void PADdata::PrintElement(std::ostream& stream,std::string element,bool detail)
     const
 {
     bool all  = (element == name() || element == "")? true : false;
-    bool nPad = pad_patterns().size();
+    bool nPad = m_pad_patterns.size();
     bool printed = false;
 
-    if(nPad && (element == (*pad_patterns().begin()).name() || all))
+    if(nPad && (element == (*m_pad_patterns.begin()).name() || all))
     {
         stream << name() << " contains " << m_pad_patterns.size()
 	       << " pad patterns:" << std::endl;  
         printed = true;
 	PATTERNSlist::const_iterator it = m_pad_patterns.begin();
-	while(it != pad_patterns().end())
+	while(it != m_pad_patterns.end())
         {
             it->Print(stream,detail);
 	    ++it;

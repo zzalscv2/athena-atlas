@@ -130,33 +130,11 @@ StatusCode TauolaPP::execute() {
     // Convert event record to format readable by tauola interface
     auto t_event = new Tauolapp::TauolaHepMCEvent(evt);
 
-#ifdef HEPMC3
-//move to GeV
-//comment out for this version, as it causes problems (we may need it for a new official version)
-//    for (auto p: t_event->getEvent()->particles()) {
-//        p->set_momentum(p->momentum()*1.0/1000);
-//        p->set_generated_mass(1.0/1000* p->generated_mass());}
-    // remove tau decays first
-      t_event->undecayTaus();
-    // decay taus
-      t_event->decayTaus();
-// move back to MeV
-//    for (auto p: t_event->getEvent()->particles()) {
-//        p->set_momentum(p->momentum()*1000);
-//        p->set_generated_mass(1000* p->generated_mass());}
-
-// for event listing uncomment the line below
-//    HepMC3::Print::listing(std::cout, *(t_event->getEvent()));
-
-#else
-
     // remove tau decays first
       t_event->undecayTaus();
     // decay taus
       t_event->decayTaus();
     // t_event->getEvent()->print();
-#endif
-
   }
 
   return StatusCode::SUCCESS;

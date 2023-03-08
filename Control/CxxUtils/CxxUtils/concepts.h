@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/concepts.h
@@ -45,6 +45,8 @@
 
 #ifdef __cpp_concepts
 
+#define HAVE_CONCEPTS 1
+
 #include <concepts>
 #define ATH_REQUIRES(...) requires __VA_ARGS__
 
@@ -58,7 +60,37 @@
   requires (CONDITION)   \
   RETTYPE
 
+
+// Some library concepts.
+
+namespace CxxUtils {
+namespace detail {
+
+
+// Standard library Hash requirement.
+template <class HASHER, class T>
+concept IsHash =
+  std::destructible<HASHER> &&
+  std::copy_constructible<HASHER> &&
+  requires (const HASHER& h, T x)
+{
+  { h(x) } -> std::same_as<size_t>;
+};
+
+
+// Standard library BinaryPredicate requirement.
+template <class PRED, class ARG1, class ARG2=ARG1>
+concept IsBinaryPredicate =
+  std::copy_constructible<PRED> &&
+  std::predicate<PRED, ARG1, ARG2>;
+
+
+} // namespace detail
+} // namespace CxxUtils
+
 #else
+
+#define HAVE_CONCEPTS 0
 
 #define ATH_REQUIRES(...)
 

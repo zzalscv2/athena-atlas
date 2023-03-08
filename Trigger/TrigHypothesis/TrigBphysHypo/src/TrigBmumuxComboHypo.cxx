@@ -285,6 +285,7 @@ StatusCode TrigBmumuxComboHypo::findDimuonCandidates(TrigBmumuxState& state) con
         return StatusCode::FAILURE;
       }
 
+      // the dimuon vertex in the xAOD::TrigBphysContainer is used as a reference for the upcoming B-candidates and to fire bBmumux_idperf chain
       state.dimuons.push_back(vertex.release());
       state.trigBphysMuonIndices.emplace_back(std::array<size_t, 2>{itrk1, itrk2});
       state.trigBphysCollection().push_back(trigBphys);
@@ -674,15 +675,15 @@ StatusCode TrigBmumuxComboHypo::findBmumuxCandidates(TrigBmumuxState& state) con
 StatusCode TrigBmumuxComboHypo::createDecisionObjects(TrigBmumuxState& state) const {
 
   for (const xAOD::TrigBphys* triggerObject : state.trigBphysCollection()) {
-    // skip all dimuon trigger objects, they are already linked to the Bmumux trigger objects via lowerChainLink()
-    if (triggerObject->particleType() == xAOD::TrigBphys::MULTIMU || triggerObject->particleType() == xAOD::TrigBphys::DSTDZPI) continue;
+    // skip the first vertex of the cascade decay B_c+(-> mu+ mu- D*+), it is already linked to the xAOD::TrigBphys::BCDSTMUMU trigger object via lowerChainLink()
+    if (triggerObject->particleType() == xAOD::TrigBphys::DSTDZPI) continue;
 
     ATH_MSG_DEBUG( "Found xAOD::TrigBphys object: mass = " << triggerObject->mass() );
 
     auto triggerObjectEL = ElementLink<xAOD::TrigBphysContainer>(state.trigBphysCollection(), triggerObject->index());
     ATH_CHECK( triggerObjectEL.isValid() );
 
-    const xAOD::TrigBphys* dimuonTriggerObject = triggerObject->lowerChain();
+    const xAOD::TrigBphys* dimuonTriggerObject = (triggerObject->particleType() == xAOD::TrigBphys::MULTIMU ? triggerObject : triggerObject->lowerChain());
     if (triggerObject->particleType() == xAOD::TrigBphys::BCDSTMUMU && dimuonTriggerObject) dimuonTriggerObject = dimuonTriggerObject->lowerChain();
     if (!dimuonTriggerObject) {
       ATH_MSG_ERROR( "Failed to found a valid link for preceding dimuon trigger object" );

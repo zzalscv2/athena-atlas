@@ -33,7 +33,6 @@
 
 #include "TrigInDetAnalysisExample/AnalysisConfig_Tier0.h"
 
-
 class TrigR3Mon : public AthMonitorAlgorithm {
 
 

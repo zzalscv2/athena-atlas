@@ -57,7 +57,7 @@ def InDetGlobalMonitoringRun3TestConfig(flags):
         ########### here ends InDetGlobalTrackMonAlg ###########
 
 
-    if flags.DQ.Environment in ('online', 'tier0', 'tier0Raw') and (flags.InDet.Tracking.doLargeD0 or flags.InDet.Tracking.doR3LargeD0 or flags.InDet.Tracking.doLowPtLargeD0):
+    if flags.DQ.Environment in ('online', 'tier0', 'tier0Raw') and (flags.Tracking.doLargeD0 or flags.Tracking.doLowPtLargeD0):
         ########### here begins InDetGlobalLRTMonAlg ###########
         from InDetGlobalMonitoringRun3Test.InDetGlobalLRTMonAlgCfg import InDetGlobalLRTMonAlgCfg
         inDetGlobalLRTMonAlg = helper.addAlgorithm(CompFactory.InDetGlobalLRTMonAlg, 'InDetGlobalLRTMonAlg',addFilterTools = [FilledBunchFilterToolCfg(flags)])

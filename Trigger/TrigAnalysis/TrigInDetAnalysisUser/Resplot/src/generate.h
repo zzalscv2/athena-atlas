@@ -5,7 +5,7 @@
  **     @author  mark sutton
  **     @date    Fri 11 Jan 2019 07:06:39 CET 
  **
- **     Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 #ifndef GENERATE_H
@@ -75,47 +75,50 @@ public:
 
   hist_generator(TH1D* h, bool _smooth=true );
   
-  virtual ~hist_generator() { delete ms; if ( mrandom ) delete mrandom; }
+  hist_generator(const hist_generator &) = delete;
+  hist_generator operator=(const hist_generator &) = delete;
+  
+  virtual ~hist_generator() { delete m_s; if ( m_random ) delete m_random; }
 
   /// actually generate a random number from the distribution
   double generate() const {
-    return invert(mrandom->uniform()); 
+    return invert(m_random->uniform());
   }
 
-  TH1D* histogram()       { return ms; }
-  TH1D* rawhistogram()    { return mraw; }
-  TH1D* smoothhistogram() { return msmooth; }
+  TH1D* histogram()       { return m_s; }
+  TH1D* rawhistogram()    { return m_raw; }
+  TH1D* smoothhistogram() { return m_smooth; }
 
 private:
 
   int getbin( double y ) const {
-    for ( unsigned i=0 ; i<my.size() ; i++ ) if ( y<=my[i] ) return i; 
-    return my.size()-1;
+    for ( unsigned i=0 ; i<m_y.size() ; i++ ) if ( y<=m_y[i] ) return i;
+    return m_y.size()-1;
   } 
     
   double invert( double y ) const {
     int i = getbin(y);
     if ( i==0 ) return 0;
-    else return (y-my[i-1])*mdxdy[i-1]+mx[i-1];
+    else return (y-m_y[i-1])*m_dxdy[i-1]+m_x[i-1];
   }
 
 
 private: 
  
-  std::vector<double> my;
-  std::vector<double> mx;
+  std::vector<double> m_y;
+  std::vector<double> m_x;
   
 
-  std::vector<double> mdx;
-  std::vector<double> mdy;
+  std::vector<double> m_dx;
+  std::vector<double> m_dy;
   
-  std::vector<double> mdxdy;
+  std::vector<double> m_dxdy;
 
-  TH1D* ms;   // accumated histogram
-  TH1D* mraw;    // raw histogram
-  TH1D* msmooth; // smoothed raw histogram
+  TH1D* m_s;   // accumated histogram
+  TH1D* m_raw;    // raw histogram
+  TH1D* m_smooth; // smoothed raw histogram
 
-  BasicRandom* mrandom;
+  BasicRandom* m_random;
 
 };
 
@@ -131,6 +134,8 @@ class experiment {
 public:
 
   experiment( TH1D* h, int Nexperiments=10, int fevents=0 );
+  experiment(const experiment& ) = delete;
+  experiment operator=(const experiment& ) = delete;
 
   double hmean() const { return m_hmean; }  
   double hrms()  const { return m_hrms; }  
@@ -141,7 +146,7 @@ public:
   double rms()       const { return m_global_rms; }  
   double rms_error() const { return m_global_rms_error; }  
 
-  generator_base* gen() { return mg; }
+  generator_base* gen() { return m_gen; }
 
   TH1D* rmshisto() { return m_THrms; } 
   
@@ -162,7 +167,7 @@ private:
   double m_global_rms;
   double m_global_rms_error;
     
-  generator_base* mg;
+  generator_base* m_gen;
 
   TH1D* m_THrms;
 };

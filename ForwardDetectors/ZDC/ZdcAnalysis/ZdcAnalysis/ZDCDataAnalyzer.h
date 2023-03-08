@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZDCANALYSIS_ZDCDataAnalyzer_h
@@ -11,6 +11,7 @@
 
 #include <array>
 #include <string>
+#include <memory>
 
 #include "CxxUtils/checker_macros.h"
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY; 
@@ -24,34 +25,34 @@ public:
 
 private:
   ZDCMsg::MessageFunctionPtr m_msgFunc_p;
-  size_t m_nSample;
-  float m_deltaTSample;
-  size_t m_preSampleIdx;
+  size_t m_nSample{};
+  float m_deltaTSample{};
+  size_t m_preSampleIdx{};
   std::string m_fitFunction;
-  bool m_forceLG;
+  bool m_forceLG{};
 
-  bool m_repassEnabled;
+  bool m_repassEnabled{};
 
-  std::array<std::array<int, 4>, 2> m_delayedOrder;
+  std::array<std::array<int, 4>, 2> m_delayedOrder{};
 
-  ZDCModuleBoolArray m_moduleDisabled;
-  std::array<std::array<std::unique_ptr<ZDCPulseAnalyzer>, 4>, 2> m_moduleAnalyzers;
+  ZDCModuleBoolArray m_moduleDisabled{};
+  std::array<std::array<std::unique_ptr<ZDCPulseAnalyzer>, 4>, 2> m_moduleAnalyzers{};
 
-  int m_eventCount;
+  int m_eventCount{};
 
   ZDCModuleFloatArray m_HGGains{};
   ZDCModuleFloatArray m_pedestals{};
 
-  bool m_haveECalib;
-  std::array<std::array<std::unique_ptr<TSpline>, 4>, 2> m_LBDepEcalibSplines;
+  bool m_haveECalib{};
+  std::array<std::array<std::unique_ptr<TSpline>, 4>, 2> m_LBDepEcalibSplines{};
 
-  bool m_haveT0Calib;
-  std::array<std::array<std::unique_ptr<TSpline>, 4>, 2> m_T0HGOffsetSplines;
-  std::array<std::array<std::unique_ptr<TSpline>, 4>, 2> m_T0LGOffsetSplines;
+  bool m_haveT0Calib{};
+  std::array<std::array<std::unique_ptr<TSpline>, 4>, 2> m_T0HGOffsetSplines{};
+  std::array<std::array<std::unique_ptr<TSpline>, 4>, 2> m_T0LGOffsetSplines{};
 
   // Transient data that is updated each LB or each event
   //
-  int m_currentLB;
+  int m_currentLB{};
   ZDCModuleFloatArray m_currentECalibCoeff{};
   ZDCModuleFloatArray m_currentT0OffsetsHG{};
   ZDCModuleFloatArray m_currentT0OffsetsLG{};
@@ -65,23 +66,23 @@ private:
   std::array<std::array<float, 4>, 2> m_calibAmplitude{};
   std::array<std::array<float, 4>, 2> m_calibTime{};
 
-  std::array<float, 2> m_moduleSum;
-  std::array<float, 2> m_moduleSumErrSq;
-  std::array<float, 2> m_moduleSumPreSample;
+  std::array<float, 2> m_moduleSum{};
+  std::array<float, 2> m_moduleSumErrSq{};
+  std::array<float, 2> m_moduleSumPreSample{};
 
-  std::array<float, 2> m_calibModuleSum;
-  std::array<float, 2> m_calibModuleSumErrSq;
+  std::array<float, 2> m_calibModuleSum{};
+  std::array<float, 2> m_calibModuleSumErrSq{};
 
-  std::array<float, 2> m_averageTime;
-  std::array<bool, 2> m_fail;
+  std::array<float, 2> m_averageTime{};
+  std::array<bool, 2> m_fail{};
 
-  std::array<std::array<float, 4>, 2> m_moduleAmpFractionLG;
+  std::array<std::array<float, 4>, 2> m_moduleAmpFractionLG{};
 
 public:
 
   ZDCDataAnalyzer(ZDCMsg::MessageFunctionPtr messageFunc_p, int nSample, float deltaTSample,
                   size_t preSampleIdx, std::string fitFunction,
-                  const ZDCModuleFloatArray& peak2ndDerivMinSamples,
+                  const ZDCModuleIntArray& peak2ndDerivMinSamples,
                   const ZDCModuleFloatArray& peak2ndDerivMinThresholdsHG,
                   const ZDCModuleFloatArray& peak2ndDerivMinThresholdsLG,
                   bool forceLG = false);
@@ -122,6 +123,8 @@ public:
 
   bool disableModule(size_t side, size_t module);
 
+  void set2ndDerivStep(size_t step);
+  
   void SetGainFactorsHGLG(float gainFactorHG, float gainFactorLG);
 
   void SetGainFactorsHGLG(const ZDCModuleFloatArray& gainFactorsHG, const ZDCModuleFloatArray& gainFactorsLG); 

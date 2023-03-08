@@ -24,7 +24,7 @@ StatusCode LArNoisyROMonAlg::initialize()
   ATH_CHECK(m_inputKey.initialize());
   ATH_CHECK(m_badFebKey.initialize());
   ATH_CHECK(m_MNBFebKey.initialize());
-  ATH_CHECK( m_eventInfoKey.initialize() );
+  ATH_CHECK( m_eventInfoDecorKey.initialize() );
   
   m_histoGroups.reserve(m_SubDetNames.size());
   for (unsigned i=0; i<m_SubDetNames.size(); ++i) {
@@ -45,7 +45,7 @@ void LArNoisyROMonAlg::fillHistogramsOnce(const EventContext& ctx, const bool is
   const LArBadFebCont *badCont{*badHdl};
   if(badCont) {
     if( !isMC && badCont->size()==0) {
-      ATH_MSG_WARNING("List of known Bad FEBs empty !? ");
+      ATH_MSG_DEBUG("List of known Bad FEBs empty !? ");
     } else {
       auto sl=Monitored::Scalar<unsigned>("slotBad",0);
       auto FT=Monitored::Scalar<unsigned>("FTBad",0);
@@ -91,6 +91,7 @@ void LArNoisyROMonAlg::fillHistogramsOnce(const EventContext& ctx, const bool is
 StatusCode LArNoisyROMonAlg::fillHistograms(const EventContext& ctx) const {
 
   SG::ReadHandle<xAOD::EventInfo> eventInfo = GetEventInfo(ctx);
+  ATH_CHECK(eventInfo.isValid());
   const bool isMC=eventInfo->eventType( xAOD::EventInfo::IS_SIMULATION);
   std::call_once(m_onceFlag, &LArNoisyROMonAlg::fillHistogramsOnce, this, ctx, isMC);
   

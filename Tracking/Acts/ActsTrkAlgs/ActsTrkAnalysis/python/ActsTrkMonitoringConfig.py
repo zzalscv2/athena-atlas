@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -14,7 +14,7 @@ def ActsTrkITkPixelClusterizationMonitoringToolCfg(flags,
     acc = ComponentAccumulator()
     
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-    monTool = GenericMonitoringTool(name)
+    monTool = GenericMonitoringTool(flags, name)
     
     monTool.defineHistogram('TIME_execute', path='EXPERT', type='TH1F', title='Time for execute',
                             xbins=100, xmin=0, xmax=10000)
@@ -29,7 +29,7 @@ def ActsTrkITkStripClusterizationMonitoringToolCfg(flags,
     acc = ComponentAccumulator()
     
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-    monTool = GenericMonitoringTool(name)
+    monTool = GenericMonitoringTool(flags, name)
     
     monTool.defineHistogram('TIME_execute', path='EXPERT', type='TH1F', title='Time for execute',
                             xbins=100, xmin=0, xmax=10000)
@@ -45,7 +45,7 @@ def ActsTrkPixelSpacePointFormationMonitoringToolCfg(flags,
     acc = ComponentAccumulator()
     
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-    monTool = GenericMonitoringTool(name)
+    monTool = GenericMonitoringTool(flags, name)
     
     monTool.defineHistogram('TIME_execute', path='EXPERT', type='TH1F', title='Time for execute',
                             xbins=100, xmin=0, xmax=1000)
@@ -62,7 +62,7 @@ def ActsTrkStripSpacePointFormationMonitoringToolCfg(flags,
     acc = ComponentAccumulator()
     
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-    monTool = GenericMonitoringTool(name)
+    monTool = GenericMonitoringTool(flags, name)
     
     monTool.defineHistogram('TIME_execute', path='EXPERT', type='TH1F', title='Time for execute',
                             xbins=100, xmin=0, xmax=1000)
@@ -81,7 +81,7 @@ def ActsTrkITkPixelSeedingMonitoringCfg(flags,
     acc = ComponentAccumulator()
 
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-    monTool = GenericMonitoringTool(name)
+    monTool = GenericMonitoringTool(flags, name)
     
     monTool.defineHistogram('TIME_execute', path='EXPERT', type='TH1F', title='Time for execute',
                             xbins=100, xmin=0, xmax=50000)
@@ -96,7 +96,7 @@ def ActsTrkITkStripSeedingMonitoringCfg(flags,
     acc = ComponentAccumulator()
     
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-    monTool = GenericMonitoringTool(name)
+    monTool = GenericMonitoringTool(flags, name)
     
     monTool.defineHistogram('TIME_execute', path='EXPERT', type='TH1F', title='Time for execute',
                             xbins=100, xmin=0, xmax=50000)
@@ -104,4 +104,18 @@ def ActsTrkITkStripSeedingMonitoringCfg(flags,
     acc.setPrivateTools(monTool)
     acc.merge(ActsTrkMonitoringHistSvcCfg(flags))     
     return acc
+
+def ActsTrkFindingMonitoringCfg(flags,
+                                name: str = "ActsTrkFindingLiveMonitoring",
+                                **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
     
+    from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
+    monTool = GenericMonitoringTool(flags, name)
+    
+    monTool.defineHistogram('TIME_execute', path='EXPERT', type='TH1F', title="Time for execute",
+                            xbins=100, xmin=0, xmax=70000)
+    
+    acc.setPrivateTools(monTool)
+    acc.merge(ActsTrkMonitoringHistSvcCfg(flags))
+    return acc

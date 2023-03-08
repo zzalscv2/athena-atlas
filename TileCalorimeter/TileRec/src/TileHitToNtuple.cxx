@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -32,15 +32,14 @@
 #include "TileEvent/TileHitContainer.h"  
 #include "TileRec/TileHitToNtuple.h"
 
-TileHitToNtuple::TileHitToNtuple(const std::string name, ISvcLocator* pSvcLocator)
+TileHitToNtuple::TileHitToNtuple(const std::string& name, ISvcLocator* pSvcLocator)
   : AthAlgorithm(name, pSvcLocator)
   , m_ntuplePtr(0)
+  , m_ntupleID("h30")
+  , m_ntupleLoc("/FILE1/TileRec")
+  , m_hitContainer("TileHitCnt")
   , m_tileID(0)
 {
-  m_hitContainer="TileHitCnt";
-  m_ntupleLoc="/FILE1/TileRec";
-  m_ntupleID="h30";
-
   declareProperty("TileHitContainer", m_hitContainer);    
   declareProperty("NTupleLoc", m_ntupleLoc);
   declareProperty("NTupleID", m_ntupleID);

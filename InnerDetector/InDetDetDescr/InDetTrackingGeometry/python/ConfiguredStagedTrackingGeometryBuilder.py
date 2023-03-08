@@ -60,6 +60,7 @@ class ConfiguredStagedTrackingGeometryBuilder( InDet__StagedTrackingGeometryBuil
             # Pixel barrel specifications
             PixelLayerBuilder.BarrelLayerBinsZ     = TrkDetFlags.PixelBarrelLayerMaterialBinsZ()
             PixelLayerBuilder.BarrelLayerBinsPhi   = TrkDetFlags.PixelBarrelLayerMaterialBinsPhi()
+            PixelLayerBuilder.BarrelEnvelope       = 0.0
             PixelLayerBuilder.EndcapLayerBinsR     = TrkDetFlags.PixelEndcapLayerMaterialBinsR()
             PixelLayerBuilder.EndcapLayerBinsPhi   = TrkDetFlags.PixelEndcapLayerMaterialBinsPhi()
             PixelLayerBuilder.EndcapRingLayout     = TrkDetFlags.PixelRingLayout()
@@ -93,6 +94,7 @@ class ConfiguredStagedTrackingGeometryBuilder( InDet__StagedTrackingGeometryBuil
             # SCT barrel specifications
             SCT_LayerBuilder.BarrelLayerBinsZ                = TrkDetFlags.SCT_BarrelLayerMaterialBinsZ()
             SCT_LayerBuilder.BarrelLayerBinsPhi              = TrkDetFlags.SCT_BarrelLayerMaterialBinsPhi()
+            SCT_LayerBuilder.BarrelEnvelope                  = 0.0
             # SCT endcap specifications                          
             SCT_LayerBuilder.EndcapLayerBinsR                = TrkDetFlags.SCT_EndcapLayerMaterialBinsR()
             SCT_LayerBuilder.EndcapLayerBinsPhi              = TrkDetFlags.SCT_EndcapLayerMaterialBinsPhi()

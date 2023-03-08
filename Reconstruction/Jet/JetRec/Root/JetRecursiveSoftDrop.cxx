@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020c CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023c CERN for the benefit of the ATLAS collaboration
 */
 
 // JetRecursiveSoftDrop.cxx
@@ -16,7 +16,7 @@ using xAOD::JetContainer;
 
 //**********************************************************************
 
-JetRecursiveSoftDrop::JetRecursiveSoftDrop(std::string name)
+JetRecursiveSoftDrop::JetRecursiveSoftDrop(const std::string& name)
   : AsgTool(name), m_bld("",this) {
   declareProperty("ZCut", m_zcut =0.1);
   declareProperty("Beta", m_beta =0.0);

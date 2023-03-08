@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration */
+/* Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration */
 #include "CaloDetDescr/CaloTowerGeometry.h"
 
 namespace { constexpr auto pi = 3.14159265358979323846; }
@@ -257,7 +257,7 @@ CaloTowerGeometry::elementvector_t CaloTowerGeometry::getTowers(IdentifierHash c
   uint_t cidx(static_cast<uint_t>(cellHash)); 
   if ( cidx >= m_towerLookup.size() ) { 
     //ATH_MSG_WARNING( CaloRec::Helpers::fmtMsg("invalid cell hash %6zu beyond range (max hash is %6zu)",cidx,m_maxCellHash) ); 
-    return elementvector_t();
+    return {};
   } else {
     return m_towerLookup.at(cidx);
   }

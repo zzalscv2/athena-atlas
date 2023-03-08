@@ -95,7 +95,7 @@ from IOVDbSvc.CondDB import conddb
 conddb.setGlobalTag("CONDBR2-BLKPA-2015-14") # latest and greates
 
 # The geometry version does not really matter. Any will do.
-#globalflags.DetDescrVersion = 'ATLAS-R1-2012-02-00-00'  # latest and greatest
+#globalflags.DetDescrVersion = 'ATLAS-R1-2012-03-02-00'  # latest and greatest
 #conddb.addOverride('/Indet/Align','InDetAlign-RUN2-25NS')
 #conddb.addOverride('/Indet/Align','InDetAlign_IOVDEP-02')
 #conddb.addOverride('/Indet/Align','InDetAlign_R2_IBLDistortion_p02C_4muPixY')

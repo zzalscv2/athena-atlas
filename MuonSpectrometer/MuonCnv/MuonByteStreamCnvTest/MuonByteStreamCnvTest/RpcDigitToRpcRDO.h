@@ -44,7 +44,8 @@ private:
     //       RDOs produced in release 22. The fillTagInfo() function thus needs to stay in release 22 until the workflow changes
     StatusCode fillTagInfo() const;
 
-    const MuonGM::MuonDetectorManager* m_MuonMgr;  // no ReadCondHandleKey used here for now, since no alignment applied in digitisation
+    SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_DetectorManagerKey{this, "DetectorManagerKey", "MuonDetectorManager",
+                                                                            "Key of input MuonDetectorManager condition data"};
 
     IntegerProperty m_fast_debug{this, "FastDebug", 0, "bits for debugging 'fast' algos"};
     IntegerProperty m_monitoring{this, "Monitoring", 0, "bits for monitoring sequence"};
@@ -80,6 +81,11 @@ private:
                                                              "ReadHandleKey for Input RpcDigitContainer"};
 
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
+
+    Gaudi::Property<std::vector<std::string>> m_exclStat{this, "ExcludeHitsFromStations",
+                                                            {"BIS"}, "Digits from these stations are not converted" };
+   
+    std::set<int> m_exclStatNames{};
 };
 
 #endif

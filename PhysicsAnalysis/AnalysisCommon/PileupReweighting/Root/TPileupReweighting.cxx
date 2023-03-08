@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /******************************************************************************
@@ -46,7 +46,7 @@ ClassImp(CP::TPileupReweighting)
 //=============================================================================
 CP::TPileupReweighting::TPileupReweighting(const char* name) :
   TNamed(name,"notitle"), m_parentTool(this),
-   m_SetWarnings(true),m_debugging(false),
+   m_SetWarnings(true),m_debugging(false),m_printInfo(true),
    m_countingMode(true),m_unrepresentedDataAction(0),m_isInitialized(false),m_lumiVectorIsLoaded(false),
    m_dataScaleFactorX(1.),m_dataScaleFactorY(1.),
    m_mcScaleFactorX(1.),m_mcScaleFactorY(1.),
@@ -113,7 +113,12 @@ Int_t CP::TPileupReweighting::GetDefaultChannel(Int_t mcRunNumber) {
 
 
 Double_t CP::TPileupReweighting::GetIntegratedLumi(const TString& trigger) {
-   if(!m_isInitialized) { Info("GetIntegratedLumi","Initializing the subtool.."); Initialize(); }
+   if(!m_isInitialized) {
+     if (m_printInfo) {
+       Info("GetIntegratedLumi","Initializing the subtool..");
+     }
+     Initialize();
+   }
    if(!m_lumiVectorIsLoaded) {
       Error("GetIntegratedLumi","No UNPRESCALED (Trigger=None) Lumicalc file loaded, so cannot get integrated lumi, returning 0");
       return 0;
@@ -132,7 +137,12 @@ Double_t CP::TPileupReweighting::GetIntegratedLumi(const TString& trigger) {
 
 
 Double_t CP::TPileupReweighting::GetIntegratedLumi(Int_t periodNumber, UInt_t start, UInt_t end) {
-   if(!m_isInitialized) { Info("GetIntegratedLumi","Initializing the subtool.."); Initialize(); }
+  if(!m_isInitialized) {
+    if (m_printInfo) {
+      Info("GetIntegratedLumi","Initializing the subtool..");
+    }
+    Initialize();
+  }
    //look through dataPeriodRunTotals["pileup"][periodNumber] for runs inside the given period
    double total = 0;
    for(auto run : m_periods[periodNumber]->runNumbers) {
@@ -142,7 +152,12 @@ Double_t CP::TPileupReweighting::GetIntegratedLumi(Int_t periodNumber, UInt_t st
 }
 
 Double_t CP::TPileupReweighting::GetLumiBlockIntegratedLumi(Int_t runNumber, UInt_t lb) {
-   if(!m_isInitialized) { Info("GetIntegratedLumi","Initializing the subtool.."); Initialize(); }
+   if(!m_isInitialized) {
+     if (m_printInfo) {
+       Info("GetIntegratedLumi","Initializing the subtool..");
+     }
+     Initialize();
+   }
    if(m_runs.find(runNumber)==m_runs.end()) return 0.;
    auto& run = m_runs[runNumber];
 
@@ -151,7 +166,12 @@ Double_t CP::TPileupReweighting::GetLumiBlockIntegratedLumi(Int_t runNumber, UIn
 }
 
 Float_t CP::TPileupReweighting::GetLumiBlockMu(Int_t runNumber, UInt_t lb) {
-   if(!m_isInitialized) { Info("GetLumiBlockMu","Initializing the subtool.."); Initialize(); }
+  if(!m_isInitialized) {
+    if (m_printInfo) {
+      Info("GetLumiBlockMu","Initializing the subtool..");
+    }
+    Initialize();
+  }
    if(m_runs.find(runNumber)==m_runs.end()) return -1.0;
    auto& run = m_runs[runNumber];
 
@@ -160,7 +180,12 @@ Float_t CP::TPileupReweighting::GetLumiBlockMu(Int_t runNumber, UInt_t lb) {
 }
 
 Double_t CP::TPileupReweighting::GetIntegratedLumiFraction(Int_t periodNumber, UInt_t start, UInt_t end) {
-   if(!m_isInitialized) { Info("GetIntegratedLumiFraction","Initializing the subtool.."); Initialize(); }
+  if(!m_isInitialized) {
+    if (m_printInfo) {
+      Info("GetIntegratedLumiFraction","Initializing the subtool..");
+    }
+    Initialize();
+  }
 
    if(!m_lumiVectorIsLoaded) {
       Error("GetIntegratedLumiFraction","No UNPRESCALED (Trigger=None) Lumicalc file loaded, so no lumi fraction possible, returning 0");
@@ -177,7 +202,12 @@ Double_t CP::TPileupReweighting::GetIntegratedLumiFraction(Int_t periodNumber, U
 }
 
 Double_t CP::TPileupReweighting::GetIntegratedLumiFraction(Int_t periodNumber, Double_t mu, UInt_t start, UInt_t end) {
-   if(!m_isInitialized) { Info("GetIntegratedLumiFraction","Initializing the subtool.."); Initialize(); }
+  if(!m_isInitialized) {
+    if (m_printInfo) {
+      Info("GetIntegratedLumiFraction","Initializing the subtool..");
+    }
+    Initialize();
+  }
    if(!m_lumiVectorIsLoaded) {
       Error("GetIntegratedLumiFraction","No UNPRESCALED (Trigger=None) Lumicalc file loaded, so no lumi fraction possible, returning 0");
       return 0;
@@ -208,7 +238,9 @@ Int_t CP::TPileupReweighting::UsePeriodConfig(const TString& configName) {
       AddPeriod(185649, 185353,186934); //period I-K1. For I-K you would change the last number to 187815
       AddPeriod(185761, 186935,191933); //everything else. Thanks Ellie!
       SetUniformBinning(100,0,50);
-      Info("UsePeriodConfig","Using MC11a Period configuration");
+      if (m_printInfo) {
+        Info("UsePeriodConfig","Using MC11a Period configuration");
+      }
       return 0;
    } else if(configName=="MC11b" || configName=="MC11c") {
       AddPeriod(180164, 177986, 180481);
@@ -216,7 +248,9 @@ Int_t CP::TPileupReweighting::UsePeriodConfig(const TString& configName) {
       AddPeriod(186169, 185353, 187815);
       AddPeriod(189751, 188902, 191933);
       SetUniformBinning(100,0,50);
-      Info("UsePeriodConfig","Using MC11b/c Period configuration");
+      if (m_printInfo) {
+        Info("UsePeriodConfig","Using MC11b/c Period configuration");
+      }
       return 0;
    } else if(configName=="MC12a") {
       AddPeriod(195847,200804,216432);
@@ -229,7 +263,9 @@ Int_t CP::TPileupReweighting::UsePeriodConfig(const TString& configName) {
       }
 
       SetUniformBinning(50,-0.5,49.5);
-      Info("UsePeriodConfig","Using MC12a Period configuration");
+      if (m_printInfo) {
+        Info("UsePeriodConfig","Using MC12a Period configuration");
+      }
       return 0;
    } else if(configName=="MC12b") {
       AddPeriod(195848,200804,216432);
@@ -242,7 +278,9 @@ Int_t CP::TPileupReweighting::UsePeriodConfig(const TString& configName) {
       }
 
       SetUniformBinning(50,-0.5,49.5);
-      Info("UsePeriodConfig","Using MC12b Period configuration");
+      if (m_printInfo) {
+        Info("UsePeriodConfig","Using MC12b Period configuration");
+      }
       return 0;
    } else if(configName=="MC12ab") {
       AddPeriod(195847,200804,216432);
@@ -256,7 +294,9 @@ Int_t CP::TPileupReweighting::UsePeriodConfig(const TString& configName) {
 
       //mc12a/b binning is in integer values of mu
       SetUniformBinning(50,-0.5,49.5);
-      Info("UsePeriodConfig","Using MC12ab Period configuration");
+      if (m_printInfo) {
+        Info("UsePeriodConfig","Using MC12ab Period configuration");
+      }
       return 0;
    } else if(configName=="MC14_8TeV") {
       AddPeriod(212272,200804,216432);
@@ -266,7 +306,9 @@ Int_t CP::TPileupReweighting::UsePeriodConfig(const TString& configName) {
          return -1;
       }
       SetUniformBinning(50,-0.5,49.5);
-      Info("UsePeriodConfig","Using MC14_8TeV Period configuration");
+      if (m_printInfo) {
+        Info("UsePeriodConfig","Using MC14_8TeV Period configuration");
+      }
       return 0;
    } else if(configName=="MC14_13TeV") {
       AddPeriod(222222,222222,999999);
@@ -276,7 +318,9 @@ Int_t CP::TPileupReweighting::UsePeriodConfig(const TString& configName) {
          return -1;
       }
       SetUniformBinning(100,-0.5,99.5);
-      Info("UsePeriodConfig","Using MC14_13TeV Period configuration");
+      if (m_printInfo) {
+        Info("UsePeriodConfig","Using MC14_13TeV Period configuration");
+      }
       return 0;
    } else if(configName=="MC15") {
       AddPeriod(222510,222222,999999);
@@ -290,7 +334,9 @@ Int_t CP::TPileupReweighting::UsePeriodConfig(const TString& configName) {
          return -1;
       }
       SetUniformBinning(100,0,100);
-      Info("UsePeriodConfig","Using MC15 Period configuration");
+      if (m_printInfo) {
+        Info("UsePeriodConfig","Using MC15 Period configuration");
+      }
       return 0;
    } else if(configName=="Run2") {
      m_autoRunStart = 222222; m_autoRunEnd = 999999; //periods will be automatically added during Fill
@@ -300,13 +346,17 @@ Int_t CP::TPileupReweighting::UsePeriodConfig(const TString& configName) {
          return -1;
       }
       SetUniformBinning(100,0,100);
-      Info("UsePeriodConfig","Using Run2 Period configuration, which assumes period assignment of 222222 to 999999");
+      if (m_printInfo) {
+        Info("UsePeriodConfig","Using Run2 Period configuration, which assumes period assignment of 222222 to 999999");
+      }
       return 0;
    } else if(configName=="MC16") {
      /* period configs are now assigned through the parent tool for MC16 */
 
      SetUniformBinning(100,0,100);
-     Info("UsePeriodConfig","Using MC16 Period configuration");
+     if (m_printInfo) {
+       Info("UsePeriodConfig","Using MC16 Period configuration");
+     }
      return 0;
    }
    Error("UsePeriodConfig","Unrecognized period config");
@@ -447,7 +497,9 @@ Int_t CP::TPileupReweighting::GenerateMetaDataFile(const TString& fileName,const
       TFile f1(outName,"RECREATE");
       outTree.Write();
       f1.Close();
-      Info("GenerateMetaDataFile","Succesfully Generated File %s",outName.Data());
+      if (m_printInfo) {
+        Info("GenerateMetaDataFile","Succesfully Generated File %s",outName.Data());
+      }
       return 0;
 }
 
@@ -643,7 +695,7 @@ void CP::TPileupReweighting::AddDistributionTree(TTree *tree, TFile *file) {
       TString sHistName(histName);
       TString weightName(customName);
       const auto &[ptr, inserted] = loadedHistos.try_emplace(sHistName, true);
-      
+
       if(inserted) {
          if(( (!m_ignoreFilePeriods) || m_periods.find(runNbr)==m_periods.end()) && isMC) {
             //if ignoring file periods, will still add the period if it doesnt exist!
@@ -811,7 +863,9 @@ Int_t CP::TPileupReweighting::AddLumiCalcFile(const TString& fileName, const TSt
       if(tmp) {
          m_lumicalcFiles[trigger].push_back(fileName);
          if(trigger=="None") {
-            Info("AddLumiCalcFile","Adding LumiMetaData (scale factor=%f)...",m_dataScaleFactorX);
+           if (m_printInfo) {
+             Info("AddLumiCalcFile","Adding LumiMetaData (scale factor=%f)...",m_dataScaleFactorX);
+           }
             //structure expected is as given by iLumiCalc:
             //   RunNbr, AvergeInteractionPerXing, IntLumi
             UInt_t runNbr=0;Float_t intLumi=0;UInt_t lbn=0;TBranch *b_runNbr=0;TBranch *b_intLumi=0;TBranch *b_lbn=0;
@@ -851,15 +905,18 @@ Int_t CP::TPileupReweighting::AddLumiCalcFile(const TString& fileName, const TSt
                //fill into input data histograms
                //check if we need to create an empty histogram
 
-               if(r.inputHists.find(trigger) == r.inputHists.end()) {
-                  r.inputHists[trigger] = CloneEmptyHistogram(runNbr,-1);
+               std::unique_ptr<TH1>& histptr = r.inputHists[trigger];
+               if (!histptr) {
+                  histptr = CloneEmptyHistogram(runNbr,-1);
                }
-               r.inputHists[trigger]->Fill(mu,intLumi);
+               histptr->Fill(mu,intLumi);
             }
             m_countingMode=false;
             m_lumiVectorIsLoaded=true;
          } else {
-            Info("AddLumiCalcFile","Adding LumiMetaData for DataWeight (trigger=%s) (scale factor=%f)...",trigger.Data(),m_dataScaleFactorX);
+           if (m_printInfo) {
+             Info("AddLumiCalcFile","Adding LumiMetaData for DataWeight (trigger=%s) (scale factor=%f)...",trigger.Data(),m_dataScaleFactorX);
+           }
          }
 
       } else {
@@ -973,7 +1030,9 @@ Int_t CP::TPileupReweighting::Initialize() {
    }
 
    if(m_countingMode) {
-      Info("Initialize","In Config File Generating mode. Remember to call WriteToFile!");
+     if (m_printInfo) {
+       Info("Initialize","In Config File Generating mode. Remember to call WriteToFile!");
+     }
       //need to check no periods have subperiods, this is not allowed in counting mode
       for(auto period : m_periods) {
          if(period.second->subPeriods.size()!=0) {
@@ -1119,7 +1178,9 @@ Int_t CP::TPileupReweighting::Initialize() {
                      if(inputHist.first<0) continue; //skips data
                      Double_t mcValue = (inputHist.second)->GetBinContent(bin);
                      if(mcValue==0.) {
-                        if(m_unrepresentedDataAction!=0 && m_debugging) Info("Initialize","Unrepresented data at coords [%f,%f] caused by periodNumber %d in channel %d",hist->GetXaxis()->GetBinCenter(binx),hist->GetYaxis()->GetBinCenter(biny),period.first,inputHist.first);
+                       if(m_unrepresentedDataAction!=0 && m_debugging && m_printInfo) {
+                           Info("Initialize","Unrepresented data at coords [%f,%f] caused by periodNumber %d in channel %d",hist->GetXaxis()->GetBinCenter(binx),hist->GetYaxis()->GetBinCenter(biny),period.first,inputHist.first);
+                         }
                         //if we are doing unrepaction=2, just set to 'not the bin number'. if we are doing action=3, find the nearest good bin
                         if(m_unrepresentedDataAction==0) {period.second->inputBinRedirect[bin] = bin-1;Error("Initialize","Unrepresented data at coords [%f,%f] caused by periodNumber %d in channel %d",hist->GetXaxis()->GetBinCenter(binx),hist->GetYaxis()->GetBinCenter(biny),period.first,inputHist.first);}
                         if(m_unrepresentedDataAction==1||m_unrepresentedDataAction==2) period.second->inputBinRedirect[bin] = bin-1;
@@ -1158,7 +1219,10 @@ Int_t CP::TPileupReweighting::Initialize() {
           for(auto lb : run.second.lumiByLbn) {
             totLumi += lb.second.first;
           }
-          hist->Scale( totLumi / hist->Integral() );
+          const double integral = hist->Integral();
+          if (std::abs(integral) > 0.) {
+            hist->Scale(totLumi / integral);
+          }
 
          }
 
@@ -1258,7 +1322,7 @@ Int_t CP::TPileupReweighting::Initialize() {
    }
 
 
-   if(m_debugging) Info("Initialize","Normalizing histograms and cleaning up...");
+   if(m_debugging && m_printInfo) Info("Initialize","Normalizing histograms and cleaning up...");
    //now that all the distributions are built. Normalize them all
    for(auto period : m_periods) {
       if(period.first != period.second->id) continue;
@@ -1273,7 +1337,7 @@ Int_t CP::TPileupReweighting::Initialize() {
 
    //we keep the inputHists for data, because can use that to do random run numbers based on mu
 
-   if(m_debugging) Info("Initialize","...Done");
+   if(m_debugging && m_printInfo) Info("Initialize","...Done");
    //if no input histograms were added, we are in counting mode
 
 
@@ -1346,7 +1410,10 @@ Double_t CP::TPileupReweighting::GetUnrepresentedDataFraction(Int_t periodNumber
 
 
 UInt_t CP::TPileupReweighting::GetRandomRunNumber(Int_t periodNumber) {
-   if(!m_isInitialized) { Info("GetRandomRunNumber","Initializing the subtool.."); Initialize(); }
+   if(!m_isInitialized) {
+     if (m_printInfo)Info("GetRandomRunNumber","Initializing the subtool..");
+     Initialize();
+   }
    if(m_countingMode) { return 0; } //do nothing when in counting mode
 
    Period* p = m_periods[periodNumber];
@@ -1369,7 +1436,10 @@ UInt_t CP::TPileupReweighting::GetRandomRunNumber(Int_t periodNumber) {
 }
 
 UInt_t CP::TPileupReweighting::GetRandomRunNumber(Int_t periodNumber, Double_t x) {
-   if(!m_isInitialized) { Info("GetRandomRunNumber","Initializing the subtool.."); Initialize(); }
+   if(!m_isInitialized) {
+     if (m_printInfo) Info("GetRandomRunNumber","Initializing the subtool..");
+     Initialize();
+   }
    if(m_countingMode) { return 0; } //do nothing when in counting mode
 
    Period* p = m_periods[periodNumber];
@@ -1397,7 +1467,12 @@ UInt_t CP::TPileupReweighting::GetRandomRunNumber(Int_t periodNumber, Double_t x
 }
 
 UInt_t CP::TPileupReweighting::GetRandomLumiBlockNumber(UInt_t runNumber) {
-   if(!m_isInitialized) {Info("GetRandomLumiBlockNumber","Initializing the subtool.."); Initialize(); }
+   if(!m_isInitialized) {
+     if (m_printInfo) {
+       Info("GetRandomLumiBlockNumber","Initializing the subtool..");
+     }
+     Initialize();
+   }
    if(m_countingMode) { return 0; } //do nothing when in counting mode
 
    double lumi = GetIntegratedLumi(runNumber,runNumber) * m_random3->Rndm() * 1E6 /* dont forget the lumi was divided by a million to get to pb */;
@@ -1415,7 +1490,10 @@ UInt_t CP::TPileupReweighting::GetRandomLumiBlockNumber(UInt_t runNumber) {
 
 //only considers periods assigned directly!
 Int_t CP::TPileupReweighting::GetRandomPeriodNumber(Int_t periodNumber) {
-   if(!m_isInitialized) { Info("GetRandomPeriodNumber","Initializing the subtool.."); Initialize(); }
+   if(!m_isInitialized) {
+     if (m_printInfo) Info("GetRandomPeriodNumber","Initializing the subtool..");
+     Initialize();
+   }
    if(m_countingMode) { return 0; } //do nothing when in counting mode
 
    Period* p = m_periods[periodNumber];
@@ -1450,7 +1528,10 @@ Bool_t CP::TPileupReweighting::IsUnrepresentedData(Int_t runNumber, Float_t x, F
 
 //this method builds a file get can be friended to a TTree with a prw-hash branch
 Bool_t CP::TPileupReweighting::MakeWeightTree(TString channelNumbers, TString outFile, TString hashBranch, TString weightBranch) {
-   if(!m_isInitialized) { Info("MakeWeightTree","Initializing the subtool.."); Initialize(); }
+   if(!m_isInitialized ) {
+     if (m_printInfo) Info("MakeWeightTree","Initializing the subtool..");
+     Initialize();
+   }
    TH1* hist = m_emptyHistogram.get();
    if(!hist) {
       Error("MakeWeightTree","Tool not configured properly ... please report this!");
@@ -1493,13 +1574,18 @@ Bool_t CP::TPileupReweighting::MakeWeightTree(TString channelNumbers, TString ou
    outTree->Write();
    f1.Close();
 
-   Info("MakeWeightTree","Successfully wrote prwTree to %s",outFile.Data());
+   if (m_printInfo) {
+     Info("MakeWeightTree","Successfully wrote prwTree to %s",outFile.Data());
+   }
 
    return true;
 }
 
 ULong64_t CP::TPileupReweighting::GetPRWHash(Int_t periodNumber, Int_t channelNumber, Float_t x, Float_t y) {
-   if(!m_isInitialized) { Info("GetPRWHash","Initializing the subtool.."); Initialize(); }
+  if(!m_isInitialized) {
+    if (m_printInfo) Info("GetPRWHash","Initializing the subtool..");
+    Initialize();
+  }
    TH1* hist = m_emptyHistogram.get();
    if(!hist) {
       Error("GetPRWHash","Tool not configured properly ... please report this!");
@@ -1515,9 +1601,12 @@ ULong64_t CP::TPileupReweighting::GetPRWHash(Int_t periodNumber, Int_t channelNu
 }
 
 Float_t CP::TPileupReweighting::GetCombinedWeight(Int_t periodNumber, Int_t channelNumber, Float_t x, Float_t y) {
-   if(!m_isInitialized) { Info("GetCombinedWeight","Initializing the subtool.."); Initialize(); }
+   if(!m_isInitialized) {
+     if (m_printInfo) Info("GetCombinedWeight","Initializing the subtool..");
+     Initialize();
+   }
    if(m_countingMode) return 0.;
-  
+
    //decide how many dimensions this weight has - use the emptyHistogram to tell...
    TH1* hist = m_emptyHistogram.get();
    if(!hist) {
@@ -1533,7 +1622,10 @@ Float_t CP::TPileupReweighting::GetCombinedWeight(Int_t periodNumber, Int_t chan
 
 Float_t CP::TPileupReweighting::GetPeriodWeight(Int_t periodNumber, Int_t channelNumber) {
    //= L_A/L / N_A/N
-   if(!m_isInitialized) { Info("GetPeriodWeight","Initializing the subtool.."); Initialize(); }
+  if(!m_isInitialized) {
+    if (m_printInfo) Info("GetPeriodWeight","Initializing the subtool..");
+     Initialize();
+  }
    if(m_countingMode) return 0.;
 
    Period* p = m_periods[periodNumber];
@@ -1560,7 +1652,10 @@ Float_t CP::TPileupReweighting::GetPeriodWeight(Int_t periodNumber, Int_t channe
 
 Float_t CP::TPileupReweighting::GetPrimaryWeight(Int_t periodNumber, Int_t channelNumber,Float_t x) {
    //= L_i/L_A / N_i/N_A .. primaryHists have already been normalized
-   if(!m_isInitialized) { Info("GetPrimaryWeight","Initializing the subtool.."); Initialize(); }
+  if(!m_isInitialized ) {
+    if (m_printInfo) Info("GetPrimaryWeight","Initializing the subtool..");
+    Initialize();
+  }
    if(m_countingMode) return 0.;
 
    Period* p = m_periods[periodNumber];
@@ -1605,7 +1700,10 @@ Float_t CP::TPileupReweighting::GetPrimaryWeight(Int_t periodNumber, Int_t chann
 
 Float_t CP::TPileupReweighting::GetSecondaryWeight(Int_t periodNumber, Int_t channelNumber,Float_t x,Float_t y) {
    //= L_j/L_i / N_j/N_i .. secondary hists have already been normalized
-   if(!m_isInitialized) { Info("GetSecondaryWeight","Initializing the subtool.."); Initialize(); }
+  if(!m_isInitialized ) {
+    if (m_printInfo) Info("GetSecondaryWeight","Initializing the subtool..");
+    Initialize();
+  }
    if(m_countingMode) return 0.;
 
    Period* p = m_periods[periodNumber];
@@ -1631,9 +1729,12 @@ Double_t CP::TPileupReweighting::GetDataWeight(Int_t runNumber, const TString& t
 
 Double_t CP::TPileupReweighting::GetDataWeight(Int_t runNumber, const TString& trigger, Double_t x, bool runDependent) {
 
-   if(!m_isInitialized) { Info("GetDataWeight","Initializing the subtool.."); Initialize(); }
+  if(!m_isInitialized ) {
+    if (m_printInfo) Info("GetDataWeight","Initializing the subtool..");
+    Initialize();
+  }
    if(m_countingMode) return 0.;
-   
+
    //determine which period this run number is in
    Int_t periodNumber = GetFirstFoundPeriodNumber(runNumber);
 
@@ -1734,7 +1835,10 @@ Double_t CP::TPileupReweighting::GetPrescaleWeight(Int_t runNumber, const TStrin
 
 //fills the appropriate inputHistograms
 Int_t CP::TPileupReweighting::Fill(Int_t runNumber,Int_t channelNumber,Float_t w,Float_t x, Float_t y) {
-   if(!m_isInitialized) { Info("Fill","Initializing the subtool.."); Initialize(); }
+  if(!m_isInitialized ) {
+    if (m_printInfo) Info("Fill","Initializing the subtool..");
+    Initialize();
+  }
    //should only be given genuine mcRunNumbers if mc (channel>=0). We don't fill periodNumber distributions
 
    TH1* hist = 0;
@@ -1756,11 +1860,12 @@ Int_t CP::TPileupReweighting::Fill(Int_t runNumber,Int_t channelNumber,Float_t w
          Error("Fill","Unrecognised runNumber: %d.  Check your period configuration (AddPeriod or UsePeriodConfig) ... but should never have got here so please report this!",runNumber);
          throw std::runtime_error("Throwing 1: Unrecognised periodNumber");
       }
-      if(p->inputHists.find(channelNumber)==p->inputHists.end()) {
+      std::unique_ptr<TH1>& histptr = p->inputHists[channelNumber];
+      if(!histptr) {
          //need to create my period histogram
-         p->inputHists[channelNumber] = CloneEmptyHistogram(runNumber,channelNumber);
+         histptr = CloneEmptyHistogram(runNumber,channelNumber);
       }
-      hist = p->inputHists[channelNumber].get();
+      hist = histptr.get();
    } else {
       Run& r = m_runs[runNumber];
       if( ! r.inputHists["None"]) r.inputHists["None"]=CloneEmptyHistogram(runNumber,channelNumber);
@@ -1874,8 +1979,10 @@ Int_t CP::TPileupReweighting::WriteToFile(TFile* outFile) {
       outTreeData->Write();
    }
 
+   if (m_printInfo) {
    Info("WriteToFile", "Successfully generated config file: %s",outFile->GetName());
    Info("WriteToFile", "Happy Reweighting :-)");
+   }
 
    gDirectory = origDir;
 
@@ -2059,7 +2166,7 @@ void CP::TPileupReweighting::calculateHistograms(CompositeTrigger* t, int runDep
                 if(runDependentRun && int(runNbr)!=runDependentRun) continue; //only use the given run with doing calculation run-dependently
                 //save the prescale by run and lbn
                 //if(runNbr==215643)
-                if(m_debugging) Info("...","prescale in [%d,%d] = %f %f %f", runNbr,lbn,ps1,ps2,ps3);
+                if(m_debugging && m_printInfo) Info("...","prescale in [%d,%d] = %f %f %f", runNbr,lbn,ps1,ps2,ps3);
                 if(ps1>0&&ps2>0&&ps3>0) prescaleByRunAndLbn[*it][runNbr][lbn] = ps1*ps2*ps3;
                 else if(isUnprescaled) prescaleByRunAndLbn[*it][runNbr][lbn] = 1; //special case where the trigger is an unprescaled one and user is reusing the unprescaled lumicalc
               }
@@ -2124,13 +2231,14 @@ void CP::TPileupReweighting::calculateHistograms(CompositeTrigger* t, int runDep
 
 
                 auto& triggerHists = t->triggerHists[idx];
-                if(triggerHists.find(tbits) == triggerHists.end()) {
-                    triggerHists[tbits] = CloneEmptyHistogram(p.first,-1);
-                    if(m_debugging) Info("CalculatePrescaledLuminosityHistograms","Created Data Weight Histogram for [%s,%d,%d,%ld]",t->val.Data(),p.first,idx,tbits);
+                std::unique_ptr<TH1>& histptr = triggerHists[tbits];
+                if(!histptr) {
+                    histptr = CloneEmptyHistogram(p.first,-1);
+                    if(m_debugging && m_printInfo) Info("CalculatePrescaledLuminosityHistograms","Created Data Weight Histogram for [%s,%d,%d,%ld]",t->val.Data(),p.first,idx,tbits);
                 }
                   //check if we were about to fill a bad bin ... if we are, we either skipp the fill (unrep action=1) or redirect (unrep action=3)
                 if( (m_unrepresentedDataAction==1) && p.second->inputBinRedirect[bin]!=bin) { } //do nothing
-                else if( m_unrepresentedDataAction==3 ) {triggerHists[tbits]->Fill(triggerHists[tbits]->GetBinCenter(p.second->inputBinRedirect[bin]), intLumi*pFactor);}
+                else if( m_unrepresentedDataAction==3 ) {histptr->Fill(triggerHists[tbits]->GetBinCenter(p.second->inputBinRedirect[bin]), intLumi*pFactor);}
                 else triggerHists[tbits]->Fill(mu*m_dataScaleFactorX,intLumi*pFactor);
 
 
@@ -2169,7 +2277,7 @@ void CP::TPileupReweighting::calculateHistograms(CompositeTrigger* t, int runDep
 std::unique_ptr<CP::TPileupReweighting::CompositeTrigger>
 CP::TPileupReweighting::makeTrigger(const TString& s) {
 
-   if( m_debugging ) {
+   if( m_debugging && m_printInfo ) {
       Info( "makeTrigger", "Doing %s", s.Data() );
    }
 
@@ -2279,7 +2387,7 @@ CP::TPileupReweighting::makeTrigger(const TString& s) {
          out->trig1 = makeTrigger( oper1 );
       }
       TString oper2 = s( i + 1, s.Length() );
-      if( m_debugging ) {
+      if( m_debugging && m_printInfo ) {
          Info( "makeTrigger", "Found & %s %s", oper1.Data(), oper2.Data() );
       }
       out->trig2 = makeTrigger( oper2 );
@@ -2291,7 +2399,7 @@ CP::TPileupReweighting::makeTrigger(const TString& s) {
 
       oper1 = s( 0, j );
       TString oper2 = s( j + 1, s.Length() );
-      if( m_debugging ) {
+      if( m_debugging && m_printInfo ) {
          Info( "makeTrigger", "Found & then | %s %s", oper1.Data(),
                oper2.Data() );
       }

@@ -1,5 +1,6 @@
+
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 def BSMonitoringConfig(inputFlags):
     '''Function to configure LVL1 BSMonitoring algorithm in the monitoring system.'''
@@ -17,7 +18,6 @@ def BSMonitoringConfig(inputFlags):
 
     # get any algorithms
     BSMonAlg = helper.addAlgorithm(CompFactory.TrigT1CTMonitoring.BSMonitoringAlgorithm,'BSMonAlg')
-
 
     # default values:
     ProcessRoIBResult = True
@@ -48,7 +48,6 @@ def BSMonitoringConfig(inputFlags):
             # Wrap everything in a sequence which will force algs to execute in order, even in MT mode
             #from AthenaCommon.AlgSequence import AthSequencer
             #CTPMonSeq=AthSequencer('CTPMonSeq')
-            #from AthenaConfiguration.AllConfigFlags import ConfigFlags
             #if 'IS_SIMULATION' not in metadata['eventTypes']:
             
             #none of these 2 work - pretty unsatisfying! - to be fixed asap!!!!! 
@@ -63,7 +62,7 @@ def BSMonitoringConfig(inputFlags):
                 #CTPMonSeq += CTPSimulationOnData("CTPSimulation")
                 
                 #from TrigT1MuctpiPhase1.TrigT1MuctpiPhase1Config import L1MuctpiPhase1_on_Data #MUCTPI_AthAlgCfg #L1MuctpiPhase1 #L1MuctpiPhase1_on_Data
-                #CTPMonSeq += L1MuctpiPhase1_on_Data("MUCTPI_AthTool") # MUCTPI_AthAlgCfg(ConfigFlags) #L1MuctpiPhase1() #L1MuctpiPhase1_on_Data()
+                #CTPMonSeq += L1MuctpiPhase1_on_Data("MUCTPI_AthTool") # MUCTPI_AthAlgCfg(inputFlags) #L1MuctpiPhase1() #L1MuctpiPhase1_on_Data()
                 
         # check if global muons are on 
         if not inputFlags.Reco.EnableCombinedMuon:
@@ -98,6 +97,38 @@ def BSMonitoringConfig(inputFlags):
                 RunOnESD = False
                 CompareRerun = False
 
+    # ------ DET MASK ---------------------------------------------------
+    from PyUtils.MetaReader import read_metadata
+    if len(inputFlags.Input.Files)==1:
+      print("INFO: exactly one file",inputFlags.Input.Files[0])
+      metadata = {}
+      thisFileMD = read_metadata(inputFlags.Input.Files[0], None, 'lite')
+      metadata.update(thisFileMD[inputFlags.Input.Files[0]])
+      #print("INFO: runNumbers = ",metadata['runNumbers'])
+      #print("INFO: detMask    = ",metadata['detectorMask'])
+    else:
+      print("INFO: more than one file. DetMask check may fail")
+
+    import eformat #eformat includes DetectorMask and is a tdaq package
+    iii=metadata['detectorMask'][0]
+    detmask=f'{iii:032x}' #detmask needs to be 32 hex chars
+    #print("INFO: detmask",detmask)
+    x = eformat.helper.DetectorMask(detmask)
+    #print("INFO: detMask MUCTPI    = ", x.is_set(eformat.helper.SubDetector.TDAQ_MUON_CTP_INTERFACE))
+    #print("INFO: detMask CTP       = ", x.is_set(eformat.helper.SubDetector.TDAQ_CTP))
+
+    if not x.is_set(eformat.helper.SubDetector.TDAQ_MUON_CTP_INTERFACE):
+       ProcessMuctpiData=False
+       print("INFO: MUCTPI is not in det mask; skipping muctpi algos")
+    # ------------------------------------------------------------------
+
+    from AthenaConfiguration.Enums import LHCPeriod
+    isRun3 = inputFlags.GeoModel.Run is LHCPeriod.Run3
+    BSMonAlg.isRun3 = isRun3
+    if not isRun3:
+        BSMonAlg.ProcessMuctpiData = False
+        BSMonAlg.ProcessMuctpiDataRIO = False
+
     BSMonAlg.isSimulation = isSimulation
     BSMonAlg.ProcessRoIBResult = ProcessRoIBResult
     BSMonAlg.InclusiveTriggerThresholds = InclusiveTriggerThresholds
@@ -106,17 +137,14 @@ def BSMonitoringConfig(inputFlags):
     BSMonAlg.RunOnESD = RunOnESD
     BSMonAlg.CompareRerun = CompareRerun
     BSMonAlg.ProcessCTPData = ProcessCTPData
-    from AthenaConfiguration.Enums import LHCPeriod
-    isRun3 = inputFlags.GeoModel.Run is LHCPeriod.Run3
-    BSMonAlg.isRun3 = isRun3
     DefaultBcIntervalInNs = 24.9507401
     BSMonAlg.DefaultBcIntervalInNs = DefaultBcIntervalInNs
-    BCsPerTurn = 3564
-    BSMonAlg.BCsPerTurn = BCsPerTurn
+    BSMonAlg.BCsPerTurn = 3564
     LumiBlockTimeCoolFolderName = '/TRIGGER/LUMI/LBLB"'
     BSMonAlg.LumiBlockTimeCoolFolderName = LumiBlockTimeCoolFolderName
-    FillStateCoolFolderName = '/LHC/DCS/FILLSTATE'
-    BSMonAlg.FillStateCoolFolderName = FillStateCoolFolderName
+    #should not use online
+    #FillStateCoolFolderName = '/LHC/DCS/FILLSTATE'
+    #BSMonAlg.FillStateCoolFolderName = FillStateCoolFolderName
     DataTakingModeCoolFolderName = '/TDAQ/RunCtrl/DataTakingMode'
     BSMonAlg.DataTakingModeCoolFolderName = DataTakingModeCoolFolderName
     IgnorePatterns = ["L1_TRT", "L1_ZB", "_AFP", "L1_BPTX", "L1_BCM", "L1_LUCID"]
@@ -128,9 +156,10 @@ def BSMonitoringConfig(inputFlags):
     mainDir = 'CT'
     myGroup = helper.addGroup(BSMonAlg, groupName , mainDir)
 
-    #add the phase1 algorithm
-    from TrigT1ResultByteStream.TrigT1ResultByteStreamConfig import MuCTPIPhase1ByteStreamAlgoCfg
-    result.merge( MuCTPIPhase1ByteStreamAlgoCfg(inputFlags) )
+    if isRun3 and ProcessMuctpiData:
+        #add the phase1 algorithm
+        from TrigT1ResultByteStream.TrigT1ResultByteStreamConfig import MuCTPIPhase1ByteStreamAlgoCfg
+        result.merge( MuCTPIPhase1ByteStreamAlgoCfg(inputFlags) )
 
 
     if(not isRun3):
@@ -501,22 +530,20 @@ def BSMonitoringConfig(inputFlags):
         path=monPath,xbins=512,xmin=0,xmax=512,opt='kAlwaysCreate')
         myGroup.defineHistogram('l1ItemsBPSimMismatchItemsX;l1ItemsBPSimMismatchItems', title='Sim mismatch L1 Items before prescale, mismatched ones only', path=monPath,xbins=512,xmin=0,xmax=512,opt='kAlwaysCreate')
 
-
-
-
-        errorSummaryMUCTPIBinLabels = [        #cxx indices
-        "CTP/MuCTPI BCID Offset",          #1
+        errorSummaryMUCTPIBinLabels = [    #cxx indices
+        "Event - MuCTPI BCID Mismatch",    #1
         "Wrong Cand Word Number",          #2
         "Wrong TOB Word Number",           #3
-        "Unequal Cand / TOB Number",       #4
-        "Incomplete fragment",             #5
-        "MuCTPI/noRPC candidate mismatch", #6
-        "MuCTPI/noTGC candidate mismatch", #7
-        "RPC/noMuCTPI candidate mismatch", #8
-        "GC/noMuCTPI candidate mismatch"   #9
+        "Unequal Cand - TOB Number",       #4
+        "Mismatch (Eta,Phi) Cand - TOB",   #5
+        "Incomplete fragment",             #6
+        "MuCTPI/noRPC candidate mismatch", #7
+        "MuCTPI/noTGC candidate mismatch", #8
+        "RPC/noMuCTPI candidate mismatch", #9
+        "TGC/noMuCTPI candidate mismatch"  #10
         ]
 
-        statusDataWordMUCTPIBinLabels = [                #cxx indices - ROD format indices
+        statusDataWordMUCTPIBinLabels = [          #cxx indices - ROD format indices
         "Event# mismatch (MSPA vs TRP) (central)", #1            #0
         "Event# mismatch (MSPC vs TRP) (central)", #2            #1
         "Event# mismatch (MSPA vs MSPC)"         , #3            #2
@@ -536,16 +563,28 @@ def BSMonitoringConfig(inputFlags):
         ]
 
         monPath="/MUCTPI/"
+        from TrigT1CTMonitoring.BSMonDefinitions import barrelEtaLowBinEdges
+        from TrigT1CTMonitoring.BSMonDefinitions import barrelPhiLowBinEdges
+        from TrigT1CTMonitoring.BSMonDefinitions import endcapEtaLowBinEdges
+        from TrigT1CTMonitoring.BSMonDefinitions import endcapPhiLowBinEdges
+        from TrigT1CTMonitoring.BSMonDefinitions import forwardEtaLowBinEdges
+        from TrigT1CTMonitoring.BSMonDefinitions import forwardPhiLowBinEdges
+        from TrigT1CTMonitoring.BSMonDefinitions import barrelPtThresholds
+        from TrigT1CTMonitoring.BSMonDefinitions import endcapForwardPtThresholds
+        from TrigT1CTMonitoring.BSMonDefinitions import candidateWordsPerTimeslice
+        from TrigT1CTMonitoring.BSMonDefinitions import tobWordsPerTimeslice        
+        #from TrigT1CTMonitoring.BSMonDefinitions import muctpiErrorBins
+
         #general errors, defined in this code
-        myGroup.defineHistogram('errorSummaryMUCTPIX,errorSummaryMUCTPIY;errorSummaryMUCTPI',title='MUCTPI errors; ; Error ratio', type='TProfile', path=monPath, xbins=len(errorSummaryMUCTPIBinLabels), xmin=0.5, xmax=len(errorSummaryMUCTPIBinLabels)+0.5, ymin=-1., ymax=2., xlabels=errorSummaryMUCTPIBinLabels, opt='kAlwaysCreate')
+        myGroup.defineHistogram('errorSummaryMUCTPI',title='MUCTPI errors;', type='TH1I', path=monPath, xbins=len(errorSummaryMUCTPIBinLabels), xmin=0.5, xmax=0.5+len(errorSummaryMUCTPIBinLabels), xlabels=errorSummaryMUCTPIBinLabels, opt='kAlwaysCreate')
         myGroup.defineHistogram('errorSummaryPerLumiBlockMUCTPIX,errorSummaryPerLumiBlockMUCTPIY;errorSummaryPerLumiBlockMUCTPI',title='Errors per lumi block; LB number; Errors', type='TH2F', path=monPath, xbins=2000, xmin=0.5, xmax=2000.5, ybins=len(errorSummaryMUCTPIBinLabels), ymin=0.5, ymax=len(errorSummaryMUCTPIBinLabels)+0.5, ylabels=errorSummaryMUCTPIBinLabels, opt='kAlwaysCreate')
         #error bits defined in the last word of the ROD  fragment
-        myGroup.defineHistogram('statusDataWordMUCTPIX,statusDataWordMUCTPIY;statusDataWordMUCTPI',title='Status word bits; ; Error ratio', type='TProfile', path=monPath, xbins=len(statusDataWordMUCTPIBinLabels), xmin=0.5, xmax=len(statusDataWordMUCTPIBinLabels)+0.5, ymin=-1., ymax=2., xlabels=statusDataWordMUCTPIBinLabels, opt='kAlwaysCreate')
+        myGroup.defineHistogram('statusDataWordMUCTPI',title='Status word bits;', type='TH1I', path=monPath, xbins=len(statusDataWordMUCTPIBinLabels), xmin=0.5, xmax=0.5+len(statusDataWordMUCTPIBinLabels), xlabels=statusDataWordMUCTPIBinLabels, opt='kAlwaysCreate')
         myGroup.defineHistogram('statusDataWordPerLumiBlockMUCTPIX,statusDataWordPerLumiBlockMUCTPIY;statusDataWordPerLumiBlockMUCTPI',title='Status word bits per lumi block; LB number; Errors', type='TH2F', path=monPath, xbins=2000, xmin=0.5, xmax=2000.5, ybins=len(statusDataWordMUCTPIBinLabels), ymin=0.5, ymax=len(statusDataWordMUCTPIBinLabels)+0.5, ylabels=statusDataWordMUCTPIBinLabels, opt='kAlwaysCreate')
 
         #mult
         monPath="/MUCTPI/Mult"
-        myGroup.defineHistogram('multThrX;multThr', title='MLT thresholds total count', path=monPath,xbins=32,xmin=-0.5,xmax=31.5,opt='kAlwaysCreate')
+        myGroup.defineHistogram('multThrX',title='MLT thresholds total count;',type='TH1I',path=monPath,xbins=32,xmin=-0.5,xmax=31.5,opt='kAlwaysCreate')
         myGroup.defineHistogram('multThrVsLBX,multThrVsLBY;multThrVsLB', title='MLT thresholds total count - per LB', type='TH2F',path=monPath,xbins=2000,xmin=0,xmax=2000,ybins=32,ymin=-0.5,ymax=31.5,opt='kAlwaysCreate')
 
         myGroup.defineHistogram('multBitsX;multBits', title='MLT bits total count', path=monPath,xbins=64,xmin=-0.5,xmax=63.5,opt='kAlwaysCreate')
@@ -553,23 +592,34 @@ def BSMonitoringConfig(inputFlags):
 
         #cand
         monPath="/MUCTPI/Cand"
-        myGroup.defineHistogram('candPtBAX;candPtBA', title='BA cand pT', path=monPath,xbins=6,xmin=0.5,xmax=6.5,opt='kAlwaysCreate')
-        myGroup.defineHistogram('candPtECX;candPtEC', title='EC cand pT', path=monPath,xbins=15,xmin=0.5,xmax=15.5,opt='kAlwaysCreate')
-        myGroup.defineHistogram('candPtFWX;candPtFW', title='FW cand pT', path=monPath,xbins=15,xmin=0.5,xmax=15.5,opt='kAlwaysCreate')
+        myGroup.defineHistogram('candPtBAX;candPtBA', title='BA cand pT;pT index;candidates', path=monPath,xbins=6, xmin=0.5, xmax=6.5, opt='kAlwaysCreate')
+        myGroup.defineHistogram('candPtECX;candPtEC', title='EC cand pT;pT index;candidates', path=monPath,xbins=15,xmin=0.5,xmax=15.5,opt='kAlwaysCreate')
+        myGroup.defineHistogram('candPtFWX;candPtFW', title='FW cand pT;pT index;candidates', path=monPath,xbins=15,xmin=0.5,xmax=15.5,opt='kAlwaysCreate')
+        myGroup.defineHistogram('candCount',title='Candidates distrib. per event (central slice);candidates',type='TH1I',path=monPath,xbins=candidateWordsPerTimeslice,opt='kAlwaysCreate')
 
-        myGroup.defineHistogram('candSLVsLBBAX,candSLVsLBBAY;candSLVsLBBA', title='BA cand SL vs LB', type='TH2F', path=monPath,xbins=2000,xmin=0.5,xmax=2000.5, ybins=64,ymin=-0.5,ymax=63.5 ,opt='kAlwaysCreate')
-        myGroup.defineHistogram('candSLVsLBECX,candSLVsLBECY;candSLVsLBEC', title='EC cand SL vs LB', type='TH2F', path=monPath,xbins=2000,xmin=0.5,xmax=2000.5, ybins=96,ymin=-0.5,ymax=95.5 ,opt='kAlwaysCreate')
-        myGroup.defineHistogram('candSLVsLBFWX,candSLVsLBFWY;candSLVsLBFW', title='FW cand SL vs LB', type='TH2F', path=monPath,xbins=2000,xmin=0.5,xmax=2000.5, ybins=48,ymin=-0.5,ymax=47.5 ,opt='kAlwaysCreate')
-        myGroup.defineHistogram('candVetoFlag_RoiVsSLBAX,candVetoFlag_RoiVsSLBAY;candVetoFlag_RoiVsSLBA', title='BA cand VetoFlag | RoI vs SL', type='TH2F', path=monPath,xbins=64,xmin=-0.5,xmax=63.5,ybins=30,ymin=-0.5,ymax=29.5,opt='kAlwaysCreate')
-        myGroup.defineHistogram('candVetoFlag_RoiVsSLECX,candVetoFlag_RoiVsSLECY;candVetoFlag_RoiVsSLEC', title='EC cand VetoFlag | RoI vs SL', type='TH2F', path=monPath,xbins=96,xmin=-0.5,xmax=95.5,ybins=64,ymin=-0.5,ymax=63.5,opt='kAlwaysCreate')
-        myGroup.defineHistogram('candVetoFlag_RoiVsSLFWX,candVetoFlag_RoiVsSLFWY;candVetoFlag_RoiVsSLFW', title='FW cand VetoFlag | RoI vs SL', type='TH2F', path=monPath,xbins=48,xmin=-0.5,xmax=47.5,ybins=148,ymin=-0.5,ymax=147.5,opt='kAlwaysCreate')
-
-        myGroup.defineHistogram('candRoiVsSLBACentralSliceX,candRoiVsSLBACentralSliceY;candRoiVsSLBACentralSlice', title='BA cand RoI vs SL (central slice)', type='TH2F', path=monPath,xbins=64,xmin=-0.5,xmax=63.5,ybins=30,ymin=-0.5,ymax=29.5,opt='kAlwaysCreate')
-        myGroup.defineHistogram('candRoiVsSLECCentralSliceX,candRoiVsSLCentralSliceECY;candRoiVsSLECCentralSlice', title='EC cand RoI vs SL (central slice)', type='TH2F', path=monPath,xbins=96,xmin=-0.5,xmax=95.5,ybins=64,ymin=-0.5,ymax=63.5,opt='kAlwaysCreate')
-        myGroup.defineHistogram('candRoiVsSLFWCentralSliceX,candRoiVsSLFWCentralSliceY;candRoiVsSLFWCentralSlice', title='FW cand RoI vs SL (central slice)', type='TH2F', path=monPath,xbins=48,xmin=-0.5,xmax=47.5,ybins=148,ymin=-0.5,ymax=147.5,opt='kAlwaysCreate')
-        myGroup.defineHistogram('candRoiVsSLBAOtherSliceX,candRoiVsSLBAOtherSliceY;candRoiVsSLBAOtherSlice', title='BA cand RoI vs SL (other slice)', type='TH2F', path=monPath,xbins=64,xmin=-0.5,xmax=63.5,ybins=30,ymin=-0.5,ymax=29.5,opt='kAlwaysCreate')
-        myGroup.defineHistogram('candRoiVsSLECOtherSliceX,candRoiVsSLECOtherSliceY;candRoiVsSLECOtherSlice', title='EC cand RoI vs SL (other slice)', type='TH2F', path=monPath,xbins=96,xmin=-0.5,xmax=95.5,ybins=64,ymin=-0.5,ymax=63.5,opt='kAlwaysCreate')
-        myGroup.defineHistogram('candRoiVsSLFWOtherSliceX,candRoiVsSLFWOtherSliceY;candRoiVsSLFWOtherSlice', title='FW cand RoI vs SL (other slice)', type='TH2F', path=monPath,xbins=48,xmin=-0.5,xmax=47.5,ybins=48,ymin=-0.5,ymax=147.5,opt='kAlwaysCreate')
+        monPath="/MUCTPI/Cand/Expert"
+        myGroup.defineHistogram('candSLVsLBBAX,candSLVsLBBAY;candSLVsLBBA', title='BA cand SL vs LB;LB;BA sect. number', type='TH2F', path=monPath,xbins=2000,xmin=0.5,xmax=2000.5, ybins=64,ymin=-0.5,ymax=63.5 ,opt='kAlwaysCreate')
+        myGroup.defineHistogram('candSLVsLBECX,candSLVsLBECY;candSLVsLBEC', title='EC cand SL vs LB;LB;EC sect. number', type='TH2F', path=monPath,xbins=2000,xmin=0.5,xmax=2000.5, ybins=96,ymin=-0.5,ymax=95.5 ,opt='kAlwaysCreate')
+        myGroup.defineHistogram('candSLVsLBFWX,candSLVsLBFWY;candSLVsLBFW', title='FW cand SL vs LB;LB;FW sect. number', type='TH2F', path=monPath,xbins=2000,xmin=0.5,xmax=2000.5, ybins=48,ymin=-0.5,ymax=47.5 ,opt='kAlwaysCreate')
+        myGroup.defineHistogram('candVetoFlag_RoiVsSLBAX,candVetoFlag_RoiVsSLBAY;candVetoFlag_RoiVsSLBA', title='BA cand VetoFlag | RoI vs SL;BA sect. number;RoI', type='TH2F', path=monPath,xbins=64,xmin=-0.5,xmax=63.5,ybins=30,ymin=-0.5,ymax=29.5,opt='kAlwaysCreate')
+        myGroup.defineHistogram('candVetoFlag_RoiVsSLECX,candVetoFlag_RoiVsSLECY;candVetoFlag_RoiVsSLEC', title='EC cand VetoFlag | RoI vs SL;EC sect. number;RoI', type='TH2F', path=monPath,xbins=96,xmin=-0.5,xmax=95.5,ybins=64,ymin=-0.5,ymax=63.5,opt='kAlwaysCreate')
+        myGroup.defineHistogram('candVetoFlag_RoiVsSLFWX,candVetoFlag_RoiVsSLFWY;candVetoFlag_RoiVsSLFW', title='FW cand VetoFlag | RoI vs SL;FW sect. number;RoI', type='TH2F', path=monPath,xbins=48,xmin=-0.5,xmax=47.5,ybins=148,ymin=-0.5,ymax=147.5,opt='kAlwaysCreate')
+        myGroup.defineHistogram('candVetoFlag_EtaPhiBAX,candVetoFlag_EtaPhiBAY;candVetoFlag_EtaPhiBA', title='BA cand Overlap Veto Flag;Eta;Phi', type='TH2F', path=monPath, xbins=barrelEtaLowBinEdges, ybins=barrelPhiLowBinEdges, opt='kAlwaysCreate')
+        myGroup.defineHistogram('candVetoFlag_EtaPhiECX,candVetoFlag_EtaPhiECY;candVetoFlag_EtaPhiEC', title='EC cand Overlap Veto Flag;Eta;Phi', type='TH2F', path=monPath, xbins=endcapEtaLowBinEdges, ybins=endcapPhiLowBinEdges, opt='kAlwaysCreate')
+        myGroup.defineHistogram('candVetoFlag_EtaPhiFWX,candVetoFlag_EtaPhiFWY;candVetoFlag_EtaPhiFW', title='FW cand Overlap Veto Flag;Eta;Phi', type='TH2F', path=monPath, xbins=forwardEtaLowBinEdges, ybins=forwardPhiLowBinEdges, opt='kAlwaysCreate')
+        myGroup.defineHistogram('candRoiVsSLBACentralSliceX,candRoiVsSLBACentralSliceY;candRoiVsSLBACentralSlice', title='BA cand RoI vs SL (central slice);BA sect. number;RoI', type='TH2F', path=monPath,xbins=64,xmin=-0.5,xmax=63.5,ybins=30,ymin=-0.5,ymax=29.5,opt='kAlwaysCreate')
+        myGroup.defineHistogram('candRoiVsSLECCentralSliceX,candRoiVsSLCentralSliceECY;candRoiVsSLECCentralSlice', title='EC cand RoI vs SL (central slice);EC sect. number;RoI', type='TH2F', path=monPath,xbins=96,xmin=-0.5,xmax=95.5,ybins=64,ymin=-0.5,ymax=63.5,opt='kAlwaysCreate')
+        myGroup.defineHistogram('candRoiVsSLFWCentralSliceX,candRoiVsSLFWCentralSliceY;candRoiVsSLFWCentralSlice', title='FW cand RoI vs SL (central slice);FW sect. number;RoI', type='TH2F', path=monPath,xbins=48,xmin=-0.5,xmax=47.5,ybins=148,ymin=-0.5,ymax=147.5,opt='kAlwaysCreate')
+        myGroup.defineHistogram('candRoiVsSLBAOtherSliceX,candRoiVsSLBAOtherSliceY;candRoiVsSLBAOtherSlice', title='BA cand RoI vs SL (other slice);BA sect. number;RoI', type='TH2F', path=monPath,xbins=64,xmin=-0.5,xmax=63.5,ybins=30,ymin=-0.5,ymax=29.5,opt='kAlwaysCreate')
+        myGroup.defineHistogram('candRoiVsSLECOtherSliceX,candRoiVsSLECOtherSliceY;candRoiVsSLECOtherSlice', title='EC cand RoI vs SL (other slice);EC sect. number;RoI', type='TH2F', path=monPath,xbins=96,xmin=-0.5,xmax=95.5,ybins=64,ymin=-0.5,ymax=63.5,opt='kAlwaysCreate')
+        myGroup.defineHistogram('candRoiVsSLFWOtherSliceX,candRoiVsSLFWOtherSliceY;candRoiVsSLFWOtherSlice', title='FW cand RoI vs SL (other slice);FW sect. number;RoI', type='TH2F', path=monPath,xbins=48,xmin=-0.5,xmax=47.5,ybins=48,ymin=-0.5,ymax=147.5,opt='kAlwaysCreate')
+        myGroup.defineHistogram('candEtaPhi_PhiOverlapX_BA,candEtaPhi_PhiOverlapY_BA;candEtaPhi_PhiOverlap_BA',title='BA cand phi overlap;Eta;Phi', type='TH2F', path=monPath, xbins=barrelEtaLowBinEdges, ybins=barrelPhiLowBinEdges, opt='kAlwaysCreate')
+        myGroup.defineHistogram('candEtaPhi_Gt1CandRoiX_BA,candEtaPhi_Gt1CandRoiY_BA;candEtaPhi_Gt1CandRoi_BA',title='BA cand >1 in Roi;Eta;Phi', type='TH2F', path=monPath, xbins=barrelEtaLowBinEdges, ybins=barrelPhiLowBinEdges, opt='kAlwaysCreate')
+        myGroup.defineHistogram('candEtaPhi_SectorFlagGtNX_BA,candEtaPhi_SectorFlagGtNY_BA;candEtaPhi_SectorFlagGtN_BA',title=">2 cand in sector;Eta;Phi", type='TH2F',path=monPath, xbins=barrelEtaLowBinEdges, ybins=barrelPhiLowBinEdges, opt='kAlwaysCreate')
+        myGroup.defineHistogram('candEtaPhi_NSWMonFlagX_EC,candEtaPhi_NSWMonFlagY_EC;candEtaPhi_NSWMonFlag_EC',title='NSW monitoring flag EC;Eta;Phi',type='TH2F',path=monPath,xbins=endcapEtaLowBinEdges,ybins=endcapPhiLowBinEdges,opt='kAlwaysCreate')
+        myGroup.defineHistogram('candEtaPhi_NSWMonFlagX_FW,candEtaPhi_NSWMonFlagY_FW;candEtaPhi_NSWMonFlag_FW',title='NSW monitoring flag FW;Eta;Phi',type='TH2F',path=monPath,xbins=forwardEtaLowBinEdges,ybins=forwardPhiLowBinEdges,opt='kAlwaysCreate')
+        myGroup.defineHistogram('candEtaPhi_SectorFlagGtNX_EC,candEtaPhi_SectorFlagGtNY_EC;candEtaPhi_SectorFlagGtN_EC',title='>4 cand in EC sector;Eta;Phi',type='TH2F',path=monPath,xbins=endcapEtaLowBinEdges,ybins=endcapPhiLowBinEdges,opt='kAlwaysCreate')
+        myGroup.defineHistogram('candEtaPhi_SectorFlagGtNX_FW,candEtaPhi_SectorFlagGtNY_FW;candEtaPhi_SectorFlagGtN_FW',title='>4 cand in FW sector;Eta;Phi',type='TH2F',path=monPath,xbins=forwardEtaLowBinEdges,ybins=forwardPhiLowBinEdges,opt='kAlwaysCreate')
 
         candFlagsMUCTPIBinLabels_BA = [        #cxx indices
         "> 1 cand. in the RoI"  ,          #1
@@ -581,40 +631,72 @@ def BSMonitoringConfig(inputFlags):
         "InnerCoin"             ,          #2
         "GoodMF"                ,          #2
         ]
-        myGroup.defineHistogram('candCandFlagsVsSLBACentralSliceX,candCandFlagsVsSLBACentralSliceY;candCandFlagsVsSLBACentralSlice', title='BA cand CandFlags vs SL (central slice)', type='TH2F', path=monPath, xbins=64, xmin=-0.5,xmax=63.5,  ybins=2, ymin=-0.5,ymax=1.5,ylabels=candFlagsMUCTPIBinLabels_BA,opt='kAlwaysCreate')
-        myGroup.defineHistogram('candCandFlagsVsSLECCentralSliceX,candCandFlagsVsSLCentralSliceECY;candCandFlagsVsSLECCentralSlice', title='EC cand CandFlags vs SL (central slice)', type='TH2F', path=monPath,xbins=96, xmin=-0.5,xmax=95.5,  ybins=4, ymin=-0.5,ymax=3.5,ylabels=candFlagsMUCTPIBinLabels_ECFW,opt='kAlwaysCreate')
-        myGroup.defineHistogram('candCandFlagsVsSLFWCentralSliceX,candCandFlagsVsSLFWCentralSliceY;candCandFlagsVsSLFWCentralSlice', title='FW cand CandFlags vs SL (central slice)', type='TH2F', path=monPath,  xbins=48,xmin=-0.5,xmax=47.5, ybins=4, ymin=-0.5,ymax=3.5,ylabels=candFlagsMUCTPIBinLabels_ECFW,opt='kAlwaysCreate')
+        myGroup.defineHistogram('candCandFlagsVsSLBACentralSliceX,candCandFlagsVsSLBACentralSliceY;candCandFlagsVsSLBACentralSlice', title='BA cand CandFlags vs SL (central slice);BA sect. number', type='TH2F', path=monPath, xbins=64, xmin=-0.5,xmax=63.5,  ybins=2, ymin=-0.5,ymax=1.5,ylabels=candFlagsMUCTPIBinLabels_BA,opt='kAlwaysCreate')
+        myGroup.defineHistogram('candCandFlagsVsSLECCentralSliceX,candCandFlagsVsSLCentralSliceECY;candCandFlagsVsSLECCentralSlice', title='EC cand CandFlags vs SL (central slice);EC sect. number', type='TH2F', path=monPath,xbins=96, xmin=-0.5,xmax=95.5,  ybins=4, ymin=-0.5,ymax=3.5,ylabels=candFlagsMUCTPIBinLabels_ECFW,opt='kAlwaysCreate')
+        myGroup.defineHistogram('candCandFlagsVsSLFWCentralSliceX,candCandFlagsVsSLFWCentralSliceY;candCandFlagsVsSLFWCentralSlice', title='FW cand CandFlags vs SL (central slice);FW sect. number', type='TH2F', path=monPath,  xbins=48,xmin=-0.5,xmax=47.5, ybins=4, ymin=-0.5,ymax=3.5,ylabels=candFlagsMUCTPIBinLabels_ECFW,opt='kAlwaysCreate')
 
         #sec err per LB
         myGroup.defineHistogram('candErrorflagVsSLBAOtherSlicePerLBX,candErrorflagVsSLBAOtherSlicePerLBY;candErrorflagVsSLBAOtherSlicePerLB', title='SL (BA) cand ErrorFlag vs LB (central slice)', type='TH2F', path=monPath,xbins=2000,xmin=0.5,xmax=2000.5,ybins=64,ymin=-0.5,ymax=63.5,opt='kAlwaysCreate')
         myGroup.defineHistogram('candErrorflagVsSLECOtherSlicePerLBX,candErrorflagVsSLECOtherSlicePerLBY;candErrorflagVsSLECOtherSlicePerLB', title='SL (EC) cand ErrorFlag vs LB (central slice)', type='TH2F', path=monPath,xbins=2000,xmin=0.5,xmax=2000.5,ybins=96,ymin=-0.5,ymax=95.5,opt='kAlwaysCreate')
         myGroup.defineHistogram('candErrorflagVsSLFWOtherSlicePerLBX,candErrorflagVsSLFWOtherSlicePerLBY;candErrorflagVsSLFWOtherSlicePerLB', title='SL (FW) cand ErrorFlag vs LB (central slice)', type='TH2F', path=monPath,xbins=2000,xmin=0.5,xmax=2000.5,ybins=48,ymin=-0.5,ymax=47.5,opt='kAlwaysCreate')
 
-        monPath="/MUCTPI/TOB"
+        monPath="/MUCTPI/TOB/Expert"
         etaBins=50
         etaMin=0
         etaMax=80
         phiBins=50
         phiMin=0
         phiMax=80
-        myGroup.defineHistogram('tobEtaPhiAX,tobEtaPhiAY;tobEtaPhiA',title='TOB hitmap (eta,phi)', type='TH2F', path=monPath, xbins=phiBins, xmin=phiMin, xmax=phiMax, ybins=etaBins, ymin=etaMin, ymax=etaMax, opt='kAlwaysCreate')
-        myGroup.defineHistogram('tobEtaPhiA_GoodMFX,tobEtaPhiA_GoodMFY;tobEtaPhiA_GoodMF',title='TOB GoodMF flag hitmap (eta,phi)', type='TH2F', path=monPath, xbins=phiBins, xmin=phiMin, xmax=phiMax, ybins=etaBins, ymin=etaMin, ymax=etaMax, opt='kAlwaysCreate')
-        myGroup.defineHistogram('tobEtaPhiA_InnerCoinX,tobEtaPhiA_InnerCoinY;tobEtaPhiA_InnerCoin',title='TOB InnerCoin flag hitmap (eta,phi)', type='TH2F', path=monPath, xbins=phiBins, xmin=phiMin, xmax=phiMax, ybins=etaBins, ymin=etaMin, ymax=etaMax, opt='kAlwaysCreate')
-        myGroup.defineHistogram('tobEtaPhiA_BW23X,tobEtaPhiA_BW23Y;tobEtaPhiA_BW23',title='TOB BW23 flag hitmap (eta,phi)', type='TH2F', path=monPath, xbins=phiBins, xmin=phiMin, xmax=phiMax, ybins=etaBins, ymin=etaMin, ymax=etaMax, opt='kAlwaysCreate')
-        myGroup.defineHistogram('tobEtaPhiA_ChargeX,tobEtaPhiA_ChargeY;tobEtaPhiA_Charge',title='TOB Charge flag hitmap (eta,phi)', type='TH2F', path=monPath, xbins=phiBins, xmin=phiMin, xmax=phiMax, ybins=etaBins, ymin=etaMin, ymax=etaMax, opt='kAlwaysCreate')
-        myGroup.defineHistogram('tobEtaPhiCX,tobEtaPhiCY;tobEtaPhiC',title='TOB hitmap (eta,phi)', type='TH2F', path=monPath, xbins=phiBins, xmin=phiMin, xmax=phiMax, ybins=etaBins, ymin=etaMin, ymax=etaMax, opt='kAlwaysCreate')
-        myGroup.defineHistogram('tobEtaPhiC_GoodMFX,tobEtaPhiC_GoodMFY;tobEtaPhiC_GoodMF',title='TOB GoodMF flag hitmap (eta,phi)', type='TH2F', path=monPath, xbins=phiBins, xmin=phiMin, xmax=phiMax, ybins=etaBins, ymin=etaMin, ymax=etaMax, opt='kAlwaysCreate')
-        myGroup.defineHistogram('tobEtaPhiC_InnerCoinX,tobEtaPhiC_InnerCoinY;tobEtaPhiC_InnerCoin',title='TOB InnerCoin flag hitmap (eta,phi)', type='TH2F', path=monPath, xbins=phiBins, xmin=phiMin, xmax=phiMax, ybins=etaBins, ymin=etaMin, ymax=etaMax, opt='kAlwaysCreate')
-        myGroup.defineHistogram('tobEtaPhiC_BW23X,tobEtaPhiC_BW23Y;tobEtaPhiC_BW23',title='TOB BW23 flag hitmap (eta,phi)', type='TH2F', path=monPath, xbins=phiBins, xmin=phiMin, xmax=phiMax, ybins=etaBins, ymin=etaMin, ymax=etaMax, opt='kAlwaysCreate')
-        myGroup.defineHistogram('tobEtaPhiC_ChargeX,tobEtaPhiC_ChargeY;tobEtaPhiC_Charge',title='TOB Charge flag hitmap (eta,phi)', type='TH2F', path=monPath, xbins=phiBins, xmin=phiMin, xmax=phiMax, ybins=etaBins, ymin=etaMin, ymax=etaMax, opt='kAlwaysCreate')
+
+        myGroup.defineHistogram('tobEtaPhiAX,tobEtaPhiAY;tobEtaPhiA',title='TOB hitmap (eta,phi);Eta;Phi', type='TH2F', path=monPath, xbins=phiBins, xmin=phiMin, xmax=phiMax, ybins=etaBins, ymin=etaMin, ymax=etaMax, opt='kAlwaysCreate')
+        myGroup.defineHistogram('tobEtaPhiA_GoodMFX,tobEtaPhiA_GoodMFY;tobEtaPhiA_GoodMF',title='TOB GoodMF flag hitmap (eta,phi);Eta;Phi', type='TH2F', path=monPath, xbins=phiBins, xmin=phiMin, xmax=phiMax, ybins=etaBins, ymin=etaMin, ymax=etaMax, opt='kAlwaysCreate')
+        myGroup.defineHistogram('tobEtaPhiA_InnerCoinX,tobEtaPhiA_InnerCoinY;tobEtaPhiA_InnerCoin',title='TOB InnerCoin flag hitmap (eta,phi);Eta;Phi', type='TH2F', path=monPath, xbins=phiBins, xmin=phiMin, xmax=phiMax, ybins=etaBins, ymin=etaMin, ymax=etaMax, opt='kAlwaysCreate')
+        myGroup.defineHistogram('tobEtaPhiA_BW23X,tobEtaPhiA_BW23Y;tobEtaPhiA_BW23',title='TOB BW23 flag hitmap (eta,phi);Eta;Phi', type='TH2F', path=monPath, xbins=phiBins, xmin=phiMin, xmax=phiMax, ybins=etaBins, ymin=etaMin, ymax=etaMax, opt='kAlwaysCreate')
+        myGroup.defineHistogram('tobEtaPhiA_ChargeX,tobEtaPhiA_ChargeY;tobEtaPhiA_Charge',title='TOB Charge flag hitmap (eta,phi);Eta;Phi', type='TH2F', path=monPath, xbins=phiBins, xmin=phiMin, xmax=phiMax, ybins=etaBins, ymin=etaMin, ymax=etaMax, opt='kAlwaysCreate')
+        myGroup.defineHistogram('tobEtaPhiCX,tobEtaPhiCY;tobEtaPhiC',title='TOB hitmap (eta,phi);Eta;Phi', type='TH2F', path=monPath, xbins=phiBins, xmin=phiMin, xmax=phiMax, ybins=etaBins, ymin=etaMin, ymax=etaMax, opt='kAlwaysCreate')
+        myGroup.defineHistogram('tobEtaPhiC_GoodMFX,tobEtaPhiC_GoodMFY;tobEtaPhiC_GoodMF',title='TOB GoodMF flag hitmap (eta,phi);Eta;Phi', type='TH2F', path=monPath, xbins=phiBins, xmin=phiMin, xmax=phiMax, ybins=etaBins, ymin=etaMin, ymax=etaMax, opt='kAlwaysCreate')
+        myGroup.defineHistogram('tobEtaPhiC_InnerCoinX,tobEtaPhiC_InnerCoinY;tobEtaPhiC_InnerCoin',title='TOB InnerCoin flag hitmap (eta,phi);Eta;Phi', type='TH2F', path=monPath, xbins=phiBins, xmin=phiMin, xmax=phiMax, ybins=etaBins, ymin=etaMin, ymax=etaMax, opt='kAlwaysCreate')
+        myGroup.defineHistogram('tobEtaPhiC_BW23X,tobEtaPhiC_BW23Y;tobEtaPhiC_BW23',title='TOB BW23 flag hitmap (eta,phi);Eta;Phi', type='TH2F', path=monPath, xbins=phiBins, xmin=phiMin, xmax=phiMax, ybins=etaBins, ymin=etaMin, ymax=etaMax, opt='kAlwaysCreate')
+        myGroup.defineHistogram('tobEtaPhiC_ChargeX,tobEtaPhiC_ChargeY;tobEtaPhiC_Charge',title='TOB Charge flag hitmap (eta,phi);Eta;Phi', type='TH2F', path=monPath, xbins=phiBins, xmin=phiMin, xmax=phiMax, ybins=etaBins, ymin=etaMin, ymax=etaMax, opt='kAlwaysCreate')
         #pt vs eta/phi
-        myGroup.defineHistogram('tobPtVsEtaAX,tobPtVsEtaAY;tobPtVsEtaA',title='TOB pT VS eta (A)', type='TH2F', path=monPath, xbins=etaBins, xmin=etaMin, xmax=etaMax, ybins=15, ymin=0.5, ymax=15.5, opt='kAlwaysCreate')
-        myGroup.defineHistogram('tobPtVsPhiAX,tobPtVsPhiAY;tobPtVsPhiA',title='TOB pT VS phi (A)', type='TH2F', path=monPath, xbins=phiBins, xmin=phiMin, xmax=phiMax, ybins=15, ymin=0.5, ymax=15.5, opt='kAlwaysCreate')
-        myGroup.defineHistogram('tobPtVsEtaCX,tobPtVsEtaCY;tobPtVsEtaC',title='TOB pT VS eta (C)', type='TH2F', path=monPath, xbins=etaBins, xmin=etaMin, xmax=etaMax, ybins=15, ymin=0.5, ymax=15.5, opt='kAlwaysCreate')
-        myGroup.defineHistogram('tobPtVsPhiCX,tobPtVsPhiCY;tobPtVsPhiC',title='TOB pT VS phi (C)', type='TH2F', path=monPath, xbins=phiBins, xmin=phiMin, xmax=phiMax, ybins=15, ymin=0.5, ymax=15.5, opt='kAlwaysCreate')
+        myGroup.defineHistogram('tobPtVsEtaAX,tobPtVsEtaAY;tobPtVsEtaA',title='TOB pT VS eta (A);Eta;pT index', type='TH2F', path=monPath, xbins=etaBins, xmin=etaMin, xmax=etaMax, ybins=15, ymin=0.5, ymax=15.5, opt='kAlwaysCreate')
+        myGroup.defineHistogram('tobPtVsPhiAX,tobPtVsPhiAY;tobPtVsPhiA',title='TOB pT VS phi (A);Phi;pT index', type='TH2F', path=monPath, xbins=phiBins, xmin=phiMin, xmax=phiMax, ybins=15, ymin=0.5, ymax=15.5, opt='kAlwaysCreate')
+        myGroup.defineHistogram('tobPtVsEtaCX,tobPtVsEtaCY;tobPtVsEtaC',title='TOB pT VS eta (C);Eta;pT index', type='TH2F', path=monPath, xbins=etaBins, xmin=etaMin, xmax=etaMax, ybins=15, ymin=0.5, ymax=15.5, opt='kAlwaysCreate')
+        myGroup.defineHistogram('tobPtVsPhiCX,tobPtVsPhiCY;tobPtVsPhiC',title='TOB pT VS phi (C);Phi;pT index', type='TH2F', path=monPath, xbins=phiBins, xmin=phiMin, xmax=phiMax, ybins=15, ymin=0.5, ymax=15.5, opt='kAlwaysCreate')
+
+        # Retrieve histogram binning for eta/phi
+
+        monPath="/MUCTPI/TOB"
+        myGroup.defineHistogram('tobEtaPhiXdecoded_BA,tobEtaPhiYdecoded_BA;tobEtaPhi_BA',title='TOB hitmap BA (eta,phi);Eta;Phi', type='TH2F', path=monPath, xbins=barrelEtaLowBinEdges, ybins=barrelPhiLowBinEdges, opt='kAlwaysCreate')
+        myGroup.defineHistogram('tobEtaPhiXdecoded_EC,tobEtaPhiYdecoded_EC;tobEtaPhi_EC',title='TOB hitmap EC (eta,phi);Eta;Phi', type='TH2F', path=monPath, xbins=endcapEtaLowBinEdges, ybins=endcapPhiLowBinEdges, opt='kAlwaysCreate')
+        myGroup.defineHistogram('tobEtaPhiXdecoded_FW,tobEtaPhiYdecoded_FW;tobEtaPhi_FW',title='TOB hitmap FW (eta,phi);Eta;Phi', type='TH2F', path=monPath, xbins=forwardEtaLowBinEdges, ybins=forwardPhiLowBinEdges, opt='kAlwaysCreate')
+
+        myGroup.defineHistogram('tobEtaPhi_GoodMFXdecoded_EC,tobEtaPhi_GoodMFYdecoded_EC;tobEtaPhi_GoodMF_EC',title='TOB GoodMF flag hitmap EC (eta,phi);Eta;Phi', type='TH2F', path=monPath, xbins=endcapEtaLowBinEdges, ybins=endcapPhiLowBinEdges, opt='kAlwaysCreate')
+        myGroup.defineHistogram('tobEtaPhi_GoodMFXdecoded_FW,tobEtaPhi_GoodMFYdecoded_FW;tobEtaPhi_GoodMF_FW',title='TOB GoodMF flag hitmap FW (eta,phi);Eta;Phi', type='TH2F', path=monPath, xbins=forwardEtaLowBinEdges, ybins=forwardPhiLowBinEdges, opt='kAlwaysCreate')
+
+        myGroup.defineHistogram('tobEtaPhi_InnerCoinXdecoded_EC,tobEtaPhi_InnerCoinYdecoded_EC;tobEtaPhi_InnerCoin_EC',title='TOB InnerCoin flag hitmap EC (eta,phi);Eta;Phi', type='TH2F', path=monPath,xbins=endcapEtaLowBinEdges, ybins=endcapPhiLowBinEdges, opt='kAlwaysCreate')
+        myGroup.defineHistogram('tobEtaPhi_InnerCoinXdecoded_FW,tobEtaPhi_InnerCoinYdecoded_FW;tobEtaPhi_InnerCoin_FW',title='TOB InnerCoin flag hitmap FW (eta,phi);Eta;Phi', type='TH2F', path=monPath,xbins=forwardEtaLowBinEdges, ybins=forwardPhiLowBinEdges, opt='kAlwaysCreate')
+
+        myGroup.defineHistogram('tobEtaPhi_BW23Xdecoded_EC,tobEtaPhi_BW23Ydecoded_EC;tobEtaPhi_BW23_EC',title='TOB BW23 flag hitmap EC (eta,phi);Eta;Phi', type='TH2F', path=monPath, xbins=endcapEtaLowBinEdges, ybins=endcapPhiLowBinEdges, opt='kAlwaysCreate')
+        myGroup.defineHistogram('tobEtaPhi_BW23Xdecoded_FW,tobEtaPhi_BW23Ydecoded_FW;tobEtaPhi_BW23_FW',title='TOB BW23 flag hitmap FW (eta,phi);Eta;Phi', type='TH2F', path=monPath, xbins=forwardEtaLowBinEdges, ybins=forwardPhiLowBinEdges, opt='kAlwaysCreate')
+
+        myGroup.defineHistogram('tobEtaPhi_ChargeXdecoded_EC,tobEtaPhi_ChargeYdecoded_EC;tobEtaPhi_Charge_EC',title='TOB Charge flag hitmap EC (eta,phi);Eta;Phi', type='TH2F', path=monPath, xbins=endcapEtaLowBinEdges, ybins=endcapPhiLowBinEdges, opt='kAlwaysCreate')
+        myGroup.defineHistogram('tobEtaPhi_ChargeXdecoded_FW,tobEtaPhi_ChargeYdecoded_FW;tobEtaPhi_Charge_FW',title='TOB Charge flag hitmap FW (eta,phi);Eta;Phi', type='TH2F', path=monPath, xbins=forwardEtaLowBinEdges, ybins=forwardPhiLowBinEdges, opt='kAlwaysCreate')
+
+        #pt vs eta/phi
+        myGroup.defineHistogram('tobPtVsEtaXdecoded_BA,tobPtVsEtaYdecoded_BA;tobPtVsEta_BA',title='TOB pT VS eta BA;Eta;pT index', type='TH2F', path=monPath, xbins=barrelEtaLowBinEdges, ybins=barrelPtThresholds, opt='kAlwaysCreate')
+        myGroup.defineHistogram('tobPtVsEtaXdecoded_EC,tobPtVsEtaYdecoded_EC;tobPtVsEta_EC',title='TOB pT VS eta EC;Eta;pT index', type='TH2F', path=monPath, xbins=endcapEtaLowBinEdges, ybins=endcapForwardPtThresholds, opt='kAlwaysCreate')
+        myGroup.defineHistogram('tobPtVsEtaXdecoded_FW,tobPtVsEtaYdecoded_FW;tobPtVsEta_FW',title='TOB pT VS eta FW;Eta;pT index', type='TH2F', path=monPath, xbins=forwardEtaLowBinEdges, ybins=endcapForwardPtThresholds, opt='kAlwaysCreate')
+
+        myGroup.defineHistogram('tobPtVsPhiXdecoded_BA,tobPtVsPhiYdecoded_BA;tobPtVsPhi_BA',title='TOB pT VS phi BA;Phi;pT index', type='TH2F', path=monPath, xbins=barrelPhiLowBinEdges, ybins=barrelPtThresholds, opt='kAlwaysCreate')
+        myGroup.defineHistogram('tobPtVsPhiXdecoded_EC,tobPtVsPhiYdecoded_EC;tobPtVsPhi_EC',title='TOB pT VS phi EC;Phi;pT index', type='TH2F', path=monPath, xbins=endcapPhiLowBinEdges, ybins=endcapForwardPtThresholds, opt='kAlwaysCreate')
+        myGroup.defineHistogram('tobPtVsPhiXdecoded_FW,tobPtVsPhiYdecoded_FW;tobPtVsPhi_FW',title='TOB pT VS phi FW;Phi;pT index', type='TH2F', path=monPath, xbins=forwardPhiLowBinEdges, ybins=endcapForwardPtThresholds, opt='kAlwaysCreate')
+        # tob count
+        myGroup.defineHistogram('tobCount',title='TOBs distrib. per event (central slice);TOBs',type='TH1I',xbins=tobWordsPerTimeslice,path=monPath,opt='kAlwaysCreate')
+        # difference between number of candidates and tobs
+        myGroup.defineHistogram('tobCandDifferenceX,tobCandDifferenceY;tobCandDifference',title='Discrepancy distrib. of Cand-TOBs per LumiBlock;LB;discrepancy',type='TH2F',path=monPath,xbins=2000, xmin=0.5, xmax=2000.5, ybins=tobWordsPerTimeslice, opt='kAlwaysCreate')
 
         monPath="/MUCTPI/Timing"
-
         candSliceVsSLMUCTPIBinLabels = [ #cxx indices
         "-3 Slice"           ,    #1
         "-2 Slice"           ,    #2
@@ -635,8 +717,6 @@ def BSMonitoringConfig(inputFlags):
 
 
 
-
-
     acc = helper.result()
     result.merge(acc)
     return result
@@ -645,24 +725,25 @@ def BSMonitoringConfig(inputFlags):
 if __name__=='__main__':
 
     # set input file and config options
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     import glob
     inputs = glob.glob('/eos/atlas/atlastier0/rucio/data18_13TeV/physics_Main/00354311/data18_13TeV.00354311.physics_Main.recon.ESD.f1129/data18_13TeV.00354311.physics_Main.recon.ESD.f1129._lb0013._SFO-8._0001.1')
-
-    ConfigFlags.Input.Files = inputs
-    ConfigFlags.Output.HISTFileName = 'ExampleMonitorOutput_CTPMonitoring.root'
-    ConfigFlags.lock()
-    #ConfigFlags.dump() # print all the configs
+  
+    flags = initConfigFlags()
+    flags.Input.Files = inputs
+    flags.Output.HISTFileName = 'ExampleMonitorOutput_CTPMonitoring.root'
+    flags.lock()
+    #flags.dump() # print all the configs
 
     from AthenaCommon.AppMgr import ServiceMgr
     ServiceMgr.Dump = False
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg  
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
-    BSMonitorCfg = BSMonitoringConfig(ConfigFlags)
+    BSMonitorCfg = BSMonitoringConfig(flags)
     cfg.merge(BSMonitorCfg)
     # message level for algorithm
     BSMonitorCfg.getEventAlgo('BSMonAlg').OutputLevel = 1 # 1/2 INFO/DEBUG

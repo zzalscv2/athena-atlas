@@ -14,6 +14,7 @@
 #include "xAODRootAccess/tools/Message.h"
 #include "AthContainers/normalizedTypeinfoName.h"
 #include "CxxUtils/ClassName.h"
+#include "CxxUtils/as_const_ptr.h"
 
 namespace xAOD {
 
@@ -58,7 +59,9 @@ namespace xAOD {
    std::unique_ptr< SG::IAuxTypeVector >
    TAuxVectorFactory::create( size_t size, size_t capacity ) const {
 
-      return std::make_unique< TAuxVector >( this, m_class, size, capacity );
+     return std::make_unique< TAuxVector >( this,
+                                            CxxUtils::as_const_ptr(m_class),
+                                            size, capacity );
    }
 
    std::unique_ptr< SG::IAuxTypeVector >

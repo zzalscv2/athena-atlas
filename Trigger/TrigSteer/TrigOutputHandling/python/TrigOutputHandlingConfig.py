@@ -1,9 +1,9 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
-def HLTResultMTMakerCfg(name="HLTResultMTMaker"):
-   from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
+def HLTResultMTMakerCfg(flags, name="HLTResultMTMaker"):
 
    m = CompFactory.HLTResultMTMaker(name)
 
@@ -34,7 +34,7 @@ def HLTResultMTMakerCfg(name="HLTResultMTMaker"):
    addROBs(m.ExtraROBs, SubDetector.TDAQ_CALO_TOPO_PROC,        [0x81, 0x91, 0x82, 0x92])
 
    # Configure HLT result monitoring histograms
-   m.MonTool = GenericMonitoringTool('MonTool', HistPath='HLTFramework/'+name)
+   m.MonTool = GenericMonitoringTool(flags, 'MonTool', HistPath='HLTFramework/'+name)
    m.MonTool.defineHistogram('TIME_makeResult', path='EXPERT', type='TH1F', title='makeResult() call time;Time [ms];Events',
                              xbins=200, xmin=0, xmax=50 )
    m.MonTool.defineHistogram('TIME_makeResult_extRange', path='EXPERT', type='TH1F', title='makeResult() call time;Time [ms];Events',
@@ -48,7 +48,7 @@ def HLTResultMTMakerCfg(name="HLTResultMTMaker"):
 
    return m
 
-def TriggerEDMSerialiserToolCfg(name="Serialiser"):
+def TriggerEDMSerialiserToolCfg(flags, name="Serialiser"):
 
    from TrigEDMConfig.DataScoutingInfo import getFullHLTResultID
 
@@ -85,8 +85,7 @@ def TriggerEDMSerialiserToolCfg(name="Serialiser"):
    serialiser.TruncationThresholds = truncThresholds
 
    # Configure monitoring histograms
-   from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-   serialiser.MonTool = GenericMonitoringTool('MonTool', HistPath='HLTFramework/'+name)
+   serialiser.MonTool = GenericMonitoringTool(flags, 'MonTool', HistPath='HLTFramework/'+name)
    serialiser.MonTool.defineHistogram('Truncation_ModuleId', path='EXPERT', type='TH1F',
                                       title='Module IDs of truncated HLT results;Module ID;Num of truncated results',
                                       xbins=20, xmin=0, xmax=20)
@@ -117,10 +116,9 @@ def TriggerBitsMakerToolCfg(name="TriggerBitsMakerTool"):
 
    return bitsmaker
 
-def DecisionSummaryMakerAlgCfg(name="DecisionSummaryMakerAlg"):
+def DecisionSummaryMakerAlgCfg(flags, name="DecisionSummaryMakerAlg"):
    alg = CompFactory.DecisionSummaryMakerAlg(name)
-   from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-   alg.MonTool = GenericMonitoringTool('MonTool', HistPath='HLTFramework/'+name)
+   alg.MonTool = GenericMonitoringTool(flags, 'MonTool', HistPath='HLTFramework/'+name)
    alg.MonTool.defineHistogram('RoIsDEta', path='EXPERT', type='TH1F',
                                title='Change of RoI eta position between initial and final RoI;delta eta;N final RoIs',
                                xbins=51, xmin=-1.02, xmax=1.02)

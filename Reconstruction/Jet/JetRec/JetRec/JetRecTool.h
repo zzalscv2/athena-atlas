@@ -1,7 +1,7 @@
 // JetRecTool.h. This file is -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -73,7 +73,7 @@ ASG_TOOL_CLASS2(JetRecTool, IJetBuildTool, IJetExecuteTool)
 
 public:
 
-  JetRecTool(std::string myname);
+  JetRecTool(const std::string& myname);
 
   /// Initialization. Check all tools here.
   StatusCode initialize() override;

@@ -4,18 +4,20 @@
 #
 #==============================================================
 
-from os import system
+import sys
 from subprocess import check_output
 from subprocess import CalledProcessError
 import six
 
+from AthenaCommon.AppMgr import ToolSvc
 from AthenaCommon.AppMgr import theApp
 svcMgr = theApp.serviceMgr()
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger( 'jobOptions_TileCalibRec.py' )
 
-#---  Output printout level ----------------------------------- 
+
+#---  Output printout level -----------------------------------
 #output threshold (1=VERBOSE, 2=DEBUG, 3=INFO, 4=WARNING, 5=ERROR, 6=FATAL)
 if not 'OutputLevel' in dir():
     OutputLevel = 4
@@ -23,6 +25,7 @@ svcMgr.MessageSvc.OutputLevel = OutputLevel
 svcMgr.MessageSvc.defaultLimit = 1000000
 svcMgr.MessageSvc.Format = "% F%60W%S%7W%R%T %0W%M"
 svcMgr.MessageSvc.useColors = False
+
 
 if 'ReadRDO' in dir() and ReadRDO:
     doSim = True
@@ -53,37 +56,17 @@ if not 'ReadDigits' in dir():
     ReadDigits = (not ReadPool)
 if not 'ReadRch' in dir():
     ReadRch = ReadPool
+
+if not 'RunNumber' in dir():
+    RunNumber = 0
 Year = 0
 
 if ReadPool:
     OldRun = False
-    if not 'RunNumber' in dir():
-        RunNumber = 0
     if not 'TilePhysRun' in dir():
         TilePhysRun = True
         TileRunType = 1
 
-    # if FileName is set all other parameters below are not needed
-    #if not 'FileName' in dir():
-    #    FileName='DigitizationOutput.pool.root'
-
-    # these parameters are tuned to read ESD or AOD for real data from CASTOR
-    if not 'RunStream' in dir():
-        RunStream = "physics_MinBias"
-    if not 'DataProject' in dir():
-        DataProject = "data15_cos"
-    if not 'DirectorySuffix' in dir():
-        DirectorySuffix = ""
-    if not 'InputDirectory' in dir():
-        if RunNumber < 171194:
-            InputDirectory = ( "/castor/cern.ch/grid/atlas/tzero/prod1/perm/%(project)s/%(stream)s/0%(run)s/%(project)s.00%(run)s.%(stream)s.%(suff)s" % { 'project': DataProject, 'stream': RunStream, 'run': RunNumber, 'suff': DirectorySuffix })
-        elif RunNumber < 254945:
-            InputDirectory = ( "/castor/cern.ch/grid/atlas/tzero/prod1/perm/%(project)s/%(stream)s/00%(run)s/%(project)s.00%(run)s.%(stream)s.%(suff)s" % { 'project': DataProject, 'stream': RunStream, 'run': RunNumber, 'suff': DirectorySuffix })
-        else:
-            InputDirectory = ( "/eos/atlas/atlastier0/rucio/%(project)s/%(stream)s/00%(run)s/%(project)s.00%(run)s.%(stream)s.%(suff)s" % { 'project': DataProject, 'stream': RunStream, 'run': RunNumber, 'suff': DirectorySuffix })
-
-
-        RunFromLocal=False
     if not 'FileFilter' in dir():
         if 'ReadESD' in dir() and ReadESD:
             FileFilter = "ESD"
@@ -111,210 +94,37 @@ else:
     #=== ByteStream Input
     #=============================================================
     include( "ByteStreamCnvSvc/BSEventStorageEventSelector_jobOptions.py" )
-    theApp.ExtSvc += [ "ByteStreamCnvSvc" ] 
+    theApp.ExtSvc += [ "ByteStreamCnvSvc" ]
     # frag to ROD mapping and additional options in external file
     svcMgr.ByteStreamCnvSvc.ROD2ROBmap = [ "-1" ]
     if 'TileMap' in dir():
         include( TileMap )
 
-    if not 'RunNumber' in dir():
-        RunNumber = 0
     # runs with 9 samples
     OldRun = (RunNumber > 10 and RunNumber < 40000)
 
     if not 'TilePhysRun' in dir():
         TilePhysRun = False
 
-    if TilePhysRun:
-        TileRunType = 1
-        if not 'RunStream' in dir():
-           RunStream = "physics_L1Calo"
-           log.warning('RunStream is not set up and will be used: %(stream)s' % {'stream': RunStream})
-        if not 'DataProject' in dir():
-           DataProject = "data15_cos"
-           log.warning('DataProject is not set up and will be used: %(project)s' % {'project': DataProject})
-        if not 'InputDirectory' in dir():
-           if RunNumber < 10:
-                InputDirectory = "."
-                RunFromLocal = True
-           elif RunNumber < 10800:
-                InputDirectory = "/castor/cern.ch/atlas/P1commisioning/phaseII"
-           elif RunNumber < 20000:
-                InputDirectory = "/castor/cern.ch/atlas/P1commisioning/phaseIII"
-           elif RunNumber < 28000:
-                InputDirectory = "/castor/cern.ch/grid/atlas/t0/perm/DAQ"
-           elif RunNumber < 32053:
-                InputDirectory = "/castor/cern.ch/grid/atlas/t0/perm/DAQ/M5"
-           elif RunNumber < 32946:
-                InputDirectory = "/castor/cern.ch/grid/atlas/t0/perm/DAQ/CaloWeekNov07"
-           elif RunNumber < 39801:
-                InputDirectory = "/castor/cern.ch/grid/atlas/t0/perm/DAQ/CaloWeekFeb08"
-           elif RunNumber < 44520:
-                InputDirectory = "/castor/cern.ch/grid/atlas/DAQ/M6"
-           elif RunNumber < 54063:
-                InputDirectory = "/castor/cern.ch/grid/atlas/DAQ/CaloWeekApr08"
-           elif RunNumber < 75354:
-                InputDirectory = "/castor/cern.ch/grid/atlas/DAQ/M7"
-           elif RunNumber < 92227:
-                InputDirectory = ("/castor/cern.ch/grid/atlas/DAQ/2008/%(run)s/%(stream)s" % { 'run': RunNumber, 'stream': RunStream })
-           elif RunNumber < 100000:
-                InputDirectory = ("/castor/cern.ch/grid/atlas/DAQ/2008/00%(run)s/%(stream)s" % { 'run': RunNumber, 'stream': RunStream })
-           elif RunNumber < 142407:
-                InputDirectory = ("/castor/cern.ch/grid/atlas/DAQ/2009/00%(run)s/%(stream)s" % { 'run': RunNumber, 'stream': RunStream })
-           elif RunNumber < 171194:
-                InputDirectory = ("/castor/cern.ch/grid/atlas/tzero/prod1/perm/%(project)s/%(stream)s/0%(run)s/%(project)s.00%(run)s.%(stream)s.merge.RAW" 
-                                  % { 'project': DataProject, 'stream': RunStream, 'run': RunNumber })
-           elif RunNumber < 254945:
-                InputDirectory = ( "/castor/cern.ch/grid/atlas/tzero/prod1/perm/%(project)s/%(stream)s/00%(run)s/%(project)s.00%(run)s.%(stream)s.merge.RAW" 
-                                   % { 'project': DataProject, 'stream': RunStream, 'run': RunNumber })
-           else:
-               if not 'DirectorySuffix' in dir():
-                   if RunStream.startswith('calibration'): DirectorySuffix = 'daq.RAW'
-                   else: DirectorySuffix = 'merge.RAW'
-                   log.warning('DirectorySuffix is not set up and will be used: %(suff)s' % {'suff': DirectorySuffix})
-
-               InputDirectory = ( "/eos/atlas/atlastier0/rucio/%(project)s/%(stream)s/00%(run)s/%(project)s.00%(run)s.%(stream)s.%(suff)s" 
-                                  % { 'project': DataProject, 'stream': RunStream, 'run': RunNumber, 'suff': DirectorySuffix })
-
-
-    if not 'InputDirectory' in dir():
-        if RunNumber < 10:
-            InputDirectory = "."
-            RunFromLocal = True
-        elif RunNumber < 36127:
-            InputDirectory = "/castor/cern.ch/atlas/testbeam/tilecal/2007/daq"
-        elif RunNumber < 100000:
-            InputDirectory = "/castor/cern.ch/atlas/testbeam/tilecal/2008/daq"
-        else:
-            if RunNumber < 142682:
-                Year = 2009
-            elif RunNumber < 171194:
-                Year = 2010
-            elif RunNumber < 194688:
-                Year = 2011
-            elif RunNumber < 216816:
-                Year = 2012            
-            elif RunNumber < 224305:
-                Year = 2013            
-            elif RunNumber < 248584:
-                Year = 2014
-            elif RunNumber < 287952:
-                Year = 2015
-            elif RunNumber < 314450:
-                Year = 2016
-            elif RunNumber < 342540:
-                Year = 2017
-            elif RunNumber < 367980:
-                Year = 2018
-            elif RunNumber < 374260:
-                Year = 2019
-            elif RunNumber < 387000:
-                Year = 2020
-            elif RunNumber < 408800:
-                Year = 2021
-            else:
-                Year = 2022
-
-
-            if 'RunStream' in dir():
-                if RunStream == 'l1calo' or RunStream == 'L1Calo':
-                    InputDirectory = ( "/castor/cern.ch/grid/atlas/DAQ/l1calo/00%(run)s" % { 'run': RunNumber })
-                elif RunStream.startswith('calibration_L1Calo'):
-                    if not 'DataProject' in dir(): 
-                        DataProject = 'data15_calib'
-                        log.warning('DataProject is not set up and will be used: %(project)s' % {'project': DataProject})
-
-                    InputDirectory = ( "/eos/atlas/atlastier0/rucio/%(project)s/%(stream)s/00%(run)s" 
-                                       % {'project': DataProject, 'stream': RunStream, 'run': RunNumber })
-                else:
-                    if RunNumber < 254372:
-                        InputDirectory = ( "/castor/cern.ch/grid/atlas/DAQ/%(year)s/00%(run)s/%(stream)s" 
-                                           % { 'year': Year, 'run': RunNumber, 'stream': RunStream })
-                    else:
-                        if not 'DataProject' in dir():
-                            DataProject = 'data15_cos'
-                            log.warning('DataProject is not set up and will be used: %(project)s' % {'project': DataProject})
-                        
-                        InputDirectory = ( "/eos/atlas/atlastier0/rucio/%(project)s/%(stream)s/00%(run)s/%(project)s.00%(run)s.%(stream)s.daq.RAW" 
-                                           % { 'project': DataProject, 'stream': RunStream, 'run': RunNumber })
-                        
-            else:
-                if RunNumber < 270317:
-                    InputDirectory = ( "/castor/cern.ch/grid/atlas/DAQ/tile/%(year)s/daq" % { 'year': Year })
-                else:
-                    InputDirectory = ( '/eos/atlas/atlascerngroupdisk/det-tile/online/%(year)s/daq' % { 'year': Year })
-
-
-    if not 'FileFilter' in dir():
-        FileFilter = ".data"
-
-if not 'RunFromLocal' in dir():
-    if InputDirectory == ".":
-        RunFromLocal = True
-    else:
-        RunFromLocal = False
-
-def FindFile(path, runinput, filter):
-
-    run = str(runinput).zfill(7) if int(runinput) > 0 else str(runinput)
-    if len(filter) < 1: filter = '.'
-
-    files = []
-    fullname = []
-
-    try:
-        if RunFromLocal:
-            files = check_output('ls %(path)s | grep %(run)s | grep %(filt)s' % {'path': path, 'run':run, 'filt':filter}, shell = True).splitlines()
-        elif (path.startswith('/eos/')):
-            files = check_output('xrdfs eosatlas ls -l %(path)s | grep %(run)s | grep -v "#" | grep -v -e "         [ 0-9][ 0-9][0-9] " | grep %(filt)s | sed "s|^.*/||" ' % {'path':path, 'run':run, 'filt':filter}, shell = True).splitlines()
-        else:
-            if (TilePhysRun and RunNumber > 28000 and RunNumber < 40000):
-                files = check_output('nsls -l %(path)s | grep %(run)s | grep -v -e "               [ 0-9][ 0-9][0-9] " -e "hlterror" | grep %(filt)s | grep -e "b0000[01][01][01][01]" -e "physics.cosmics" | cut -c66- ' % {'path': path, 'run':run, 'filt':filter  }, shell = True).splitlines()
-            elif (TilePhysRun and RunNumber > 40000 and RunNumber < 75354):
-                files = check_output('nsls -l %(path)s | grep %(run)s | grep -v -e "               [ 0-9][ 0-9][0-9] " -e "hlterror" | grep %(filt)s | grep -e "NIM0" -e "[pP]hysics" | cut -c66- ' % {'path': path, 'run':run, 'filt':filter}, shell = True).splitlines()
-            else:
-                files = check_output('nsls %(path)s | grep %(run)s | grep -v -e "               [ 0-9][ 0-9][0-9] " | grep %(filt)s ' % {'path': path, 'run':run, 'filt':filter  }, shell = True).splitlines()
-    
-    except CalledProcessError:
-        files = []
-        log.warn('Seems there are no such directory: ' + path)
-
-    files = [six.ensure_str(f) for f in files]
-    for file_name in (files):
-        try:
-            good=(not file_name in open('/afs/cern.ch/user/t/tilebeam/ARR/bad_data_files').read())
-            if good: good=(not file_name in open('/afs/cern.ch/user/t/tiledaq/public/bad_data_files').read())
-        except:
-            good=True
-        if good:
-            if (path.startswith('/eos/')):
-                fullname.append('root://eosatlas.cern.ch/' + path + '/' + file_name)
-            elif ReadPool and not RunFromLocal:
-                fullname.append('rfio:' + path + '/' + file_name) # maybe castor: ?
-            elif (path.startswith('/castor/')):
-                fullname.append('root://castoratlas/' + path + '/' + file_name)
-            else:
-                fullname.append(path + '/' + file_name)
-        else:
-            printfunc ("Excluding known bad data file",file_name)
-
-    return [fullname, run]
-
-
 if not 'FileNameVec' in dir():
-    if not 'FileName' in dir() or FileName == "":    
-        tmp = FindFile(InputDirectory, RunNumber, FileFilter)
-        FileNameVec = tmp[0]
-        FormattedRunNumber = tmp[1]
+    if not 'FileName' in dir() or FileName == "":
+        if not 'InputDirectory' in dir():
+            InputDirectory = None
+        if not 'RunStream' in dir():
+            RunStream = None
+        if not 'DataProject' in dir():
+            DataProject = None
+        if not 'DirectorySuffix' in dir():
+            DirectorySuffix = None
+        if not 'FileFilter' in dir():
+            FileFilter = '.data'
+        from TileRecEx import TileInputFiles
+        FileNameVec = TileInputFiles.findFiles(RunNumber,InputDirectory,FileFilter,RunStream,DataProject,DirectorySuffix)
     else:
         FileNameVec = [ FileName ]
-        FormattedRunNumber = RunNumber
-else:
-    FormattedRunNumber = RunNumber
 
 log.info("InputDirectory is " + str(InputDirectory))
-log.info("RunNumber was " + str(RunNumber))
-log.info("RunNumber is " + str(FormattedRunNumber))
+log.info("RunNumber is " + str(RunNumber))
 log.info("FullFileName is " + str(FileNameVec))
 
 if len(FileNameVec) < 1:
@@ -346,7 +156,7 @@ if not 'EvtMax' in dir():
 
 # if run type is set to non-zero value, it overrides event trig type
 if not 'TileRunType' in dir():
-    TileRunType = 0; # 1 - physics, 2 - laser, 4 - pedestal, 8 - CIS run 
+    TileRunType = 0; # 1 - physics, 2 - laser, 4 - pedestal, 8 - CIS run
 
 # if noise filter type is not set - disable it
 if not 'TileNoiseFilter' in dir():
@@ -457,7 +267,7 @@ if not 'TileEmulateDSP' in dir():
    TileEmulateDSP = False
 
 # special options
-# which algorithms to run 
+# which algorithms to run
 # and output from which algorithm to use as input for TileCellBuilder
 # by default we use 3 methods - Fit, Opt2 and OptAtlas
 
@@ -540,9 +350,9 @@ if not 'doTileCalib' in dir():
     doTileCalib = False
 
 # all other parameters which can be set to True or False
-# from the command line 
+# from the command line
 
-# use PMT ordering in ntuple (convert channel to PMT number) 
+# use PMT ordering in ntuple (convert channel to PMT number)
 if not 'doTileCable' in dir():
     doTileCable = False
 
@@ -597,7 +407,7 @@ else:
     doD3PD = False
 
 # check if we want to create noise monitoring plots
-if not 'doTileCellNoiseMon' in dir(): 
+if not 'doTileCellNoiseMon' in dir():
     doTileCellNoiseMon = False
 if not 'doTileDigiNoiseMon' in dir():
     doTileDigiNoiseMon = doTileCellNoiseMon or TilePedRun
@@ -699,19 +509,24 @@ projectName = FileNameVec[0].split('/').pop().split('.')[0]
 rec.projectName = projectName
 rec.RunNumber = int(RunNumber)
 
-if not 'RUN3' in dir():
-    RUN3 = False
-if not 'RUN2' in dir(): 
-    RUN2 = False
 if globalflags.DataSource() == 'data':
-    if RunNumber >= 411938:
-        RUN3 = True
-    if Year > 2014 or RunNumber > 232000 or projectName.startswith("data15_") or RUN2:
-        RUN2 = True
-    else: 
+    if not 'RUN3' in dir():
+        RUN3 = (RunNumber >= 411938)
+    if not 'RUN2' in dir():
+        RUN2 = not RUN3 and (RunNumber > 232000)
+    if not (RUN2 or RUN3):
         # use RUN1 DB for runs taken before Jul-2014
         if projectName.startswith("data14_"): rec.projectName = "data13_tilecomm"
         globalflags.DatabaseInstance = "COMP200"
+else:
+    if not ('RUN3' in dir() or 'RUN2' in dir() or 'RUN1' in dir()):
+        RUN3=True
+        RUN2=False
+    else:
+        if not 'RUN3' in dir():
+            RUN3 = False
+        if not 'RUN2' in dir():
+            RUN2 = False
 
 
 if not 'doTileRawChannelTimeMonTool' in dir():
@@ -728,18 +543,10 @@ if ReadPool:
     #--- Pool specific --------------------------------------------
     # - General Pool converters
     include( "AthenaPoolCnvSvc/ReadAthenaPool_jobOptions.py" )
-    # - Pool input 
+    # - Pool input
     svcMgr.EventSelector.InputCollections = FileNameVec
-    # Set Geometry version
-    if not 'DetDescrVersion' in dir():
-        if RUN3:
-            DetDescrVersion = 'ATLAS-R3S-2021-02-00-00'
-        elif RUN2:
-            DetDescrVersion = 'ATLAS-R2-2016-01-00-01'
-        else:
-            DetDescrVersion = 'ATLAS-R1-2012-02-00-00'
 else:
-    # - ByteStream input 
+    # - ByteStream input
     svcMgr.EventSelector.Input = FileNameVec
     # Set Global tag for IOVDbSvc
     if not 'CondDbTag' in dir():
@@ -747,7 +554,7 @@ else:
             if 'UPD4' in dir() and UPD4: CondDbTag = 'CONDBR2-BLKPA-RUN2-09'
             else:                        CondDbTag = 'CONDBR2-ES1PA-2022-01'
         elif RUN2:
-            if 'UPD4' in dir() and UPD4: CondDbTag = 'CONDBR2-BLKPA-2018-13'
+            if 'UPD4' in dir() and UPD4: CondDbTag = 'CONDBR2-BLKPA-2018-16'
             else:                        CondDbTag = 'CONDBR2-ES1PA-2018-05'
         else:
             if 'UPD4' in dir() and UPD4 and RunNumber > 141066: CondDbTag = 'COMCOND-BLKPA-RUN1-06'
@@ -755,15 +562,16 @@ else:
 
     jobproperties.Global.ConditionsTag = CondDbTag
     conddb.setGlobalTag(CondDbTag)
-    # Set Geometry version
-    if not 'DetDescrVersion' in dir():
-        if RUN3:
-            DetDescrVersion = 'ATLAS-R3S-2021-02-00-00'
-        elif RUN2:
-            DetDescrVersion = 'ATLAS-R2-2016-01-00-01'
-        else:
-            DetDescrVersion = 'ATLAS-R1-2012-02-00-00'
-jobproperties.Global.DetDescrVersion = DetDescrVersion 
+
+# Set Geometry version
+if not 'DetDescrVersion' in dir():
+    if RUN3:
+        DetDescrVersion = 'ATLAS-R3S-2021-03-01-00'
+    elif RUN2:
+        DetDescrVersion = 'ATLAS-R2-2016-01-00-01'
+    else:
+        DetDescrVersion = 'ATLAS-R1-2012-03-02-00'
+jobproperties.Global.DetDescrVersion = DetDescrVersion
 log.info( "DetDescrVersion = %s" % (jobproperties.Global.DetDescrVersion()) )
 
 from AtlasGeoModel import SetGeometryVersion
@@ -772,7 +580,7 @@ from GeoModelSvc.GeoModelSvcConf import GeoModelSvc
 GeoModelSvc = GeoModelSvc()
 GeoModelSvc.IgnoreTagDifference = True
 log.info( "GeoModelSvc.AtlasVersion = %s" % (GeoModelSvc.AtlasVersion) )
-#GeoModelSvc.TileVersionOverride = "TileCal-GEO-08"
+#GeoModelSvc.TileVersionOverride = "TileCal-GEO-13"
 #log.info( "GeoModelSvc.TileVersionOverride = %s" % (GeoModelSvc.TileVersionOverride) )
 
 
@@ -791,7 +599,7 @@ if not 'TileCorrectTime' in dir():
 
 if not 'doTileOverflowFit' in dir():
     doTileOverflowFit = False
-        
+
 include( "TileRec/TileDefaults_jobOptions.py" )
 
 from TileRecUtils.TileRecFlags import jobproperties
@@ -915,8 +723,8 @@ dqStatus = TileDQstatusAlgDefault (TileDigitsContainer = tileDigitsContainer,
                                    TileRawChannelContainer = '')
 
 if doTileFit and tileRawChannelBuilderFitFilter:
-    tileRawChannelBuilderFitFilter.MaxTimeFromPeak = 250.0; # recover behaviour of rel 13.0.30  
-    tileRawChannelBuilderFitFilter.RMSChannelNoise = 3; 
+    tileRawChannelBuilderFitFilter.MaxTimeFromPeak = 250.0; # recover behaviour of rel 13.0.30
+    tileRawChannelBuilderFitFilter.RMSChannelNoise = 3;
     tileRawChannelBuilderFitFilter.UseDSPCorrection = not TileBiGainRun
 
     printfunc (tileRawChannelBuilderFitFilter)
@@ -924,7 +732,7 @@ if doTileFit and tileRawChannelBuilderFitFilter:
 if doTileFitCool and tileRawChannelBuilderFitFilterCool:
     tileRawChannelBuilderFitFilterCool.MaxTimeFromPeak = 250.0; # recover behaviour of rel 13.0.30
     tileRawChannelBuilderFitFilterCool.UseDSPCorrection = not TileBiGainRun
-    
+
     printfunc (tileRawChannelBuilderFitFilterCool)
 
 if doTileOpt2:
@@ -955,7 +763,7 @@ if doTileOptATLAS and tileRawChannelBuilderOptATLAS:
         tileRawChannelBuilderOptATLAS.TileCondToolOfc = tileCondToolOfc
 
     printfunc (tileRawChannelBuilderOptATLAS)
-    
+
 if doTileMF and tileRawChannelBuilderMF:
 
     if PhaseFromCOOL:
@@ -1007,12 +815,12 @@ if (doEventDisplay or doCreatePool):
 
 if doCaloCell:
    # create TileCell from TileRawChannel and store it in CaloCellContainer
-   if TileBiGainRun: 
+   if TileBiGainRun:
        include( "TileRec/TileCellMaker_jobOptions_doublegain.py" )
        if OldRun: # disable masking on the fly
            topSequence.CaloCellMakerLG.CaloCellMakerToolNames["TileCellBuilderLG"].TileDSPRawChannelContainer=""
            topSequence.CaloCellMakerHG.CaloCellMakerToolNames["TileCellBuilderHG"].TileDSPRawChannelContainer=""
-   else: 
+   else:
        include( "TileRec/TileCellMaker_jobOptions.py" )
        if OldRun: # disable masking on the fly
            topSequence.CaloCellMaker.CaloCellMakerToolNames["TileCellBuilder"].TileDSPRawChannelContainer=""
@@ -1024,7 +832,7 @@ if doCaloCell:
 
 if doTileTower:
     include( "CaloRec/CaloCombinedTower_jobOptions.py" )
-    #NB: ONLY Tile Towers 
+    #NB: ONLY Tile Towers
     CmbTowerBldr.TowerBuilderTools=[ "TileTowerBuilderTool/TileCmbTwrBldr" ]
     if doRecoESD:
         TileCmbTwrBldr.CellContainerName = "AllCaloNewReco"
@@ -1057,13 +865,12 @@ if doTileTMDBRawChannel:
     # TileCondToolOfc
     from TileConditions.TileCondToolConf import getTileCondToolMuRcvPulseShape
     muRcvPulseShape = getTileCondToolMuRcvPulseShape('FILE', 'TileCondToolMuRcvPulseShape')
-    
+
     # Set up TileCondToolOfc to be used in TileRawChannelBuilderMF
     muRcvOfc = CfgMgr.TileCondToolOfc(name = 'TileCondToolMuRcvOfc'
                                       , OptFilterDeltaCorrelation = True
                                       , TileCondToolPulseShape = muRcvPulseShape)
-    
-    
+
     # Set up TileRawChannelBuilderOpt2 to be used
     muRcvRawChannelBuilder = CfgMgr.TileRawChannelBuilderOpt2Filter(name = 'TileMuRcvRawChannelBuilderOpt2'
                                                                     , TileRawChannelContainer = 'TileMuRcvRawChannelOpt2'
@@ -1072,8 +879,7 @@ if doTileTMDBRawChannel:
                                                                     , calibrateEnergy = False
                                                                     , correctTime = False
                                                                     , TileCondToolOfc = muRcvOfc)
-    
-    
+
     topSequence += CfgMgr.TileRawChannelMaker(name = 'TileMuRcvRChMaker'
                                               , TileDigitsContainer = 'MuRcvDigitsCnt'
                                               , TileRawChannelBuilder = [ muRcvRawChannelBuilder ])
@@ -1135,11 +941,11 @@ if doD3PD:
             if doRecoESD and doCaloCell:
                 alg += TileDetailsD3PDObject (**_args(1, 'TileDetails',kw, sgkey='AllCaloNewReco', prefix='tile_', \
                                                               Kinematics_WriteEtaPhi = True, TileDetails_SavePositionInfo = TileD3PDSavePosition))
-                    
+
                 alg += CaloInfoD3PDObject (**_args(0, 'CaloInfo',kw, sgkey='AllCaloNewReco', prefix='calo_'))
                 alg += MBTSD3PDObject (**_args(1, 'MBTS', kw, prefix='mbts_', sgkey='MBTSContainerNewReco'))
 
-#                if RUN2 and not RUN3:
+#                if RUN2:
 #                    alg += MBTSD3PDObject (**_args(1, 'MBTS', kw, prefix = 'e4pr_', sgkey = 'E4prContainerNewReco'))
 
             else:
@@ -1152,7 +958,7 @@ if doD3PD:
                     alg += MBTSD3PDObject (**_args(1, 'MBTS', kw, prefix = 'mbts_', sgkey = 'MBTSContainerHG'))
                     alg += MBTSD3PDObject (**_args(1, 'MBTS', kw, prefix = 'mbtsLG_', sgkey = 'MBTSContainerLG'))
 
-                    if RUN2 and not RUN3:
+                    if RUN2:
                         alg += MBTSD3PDObject (**_args(1, 'MBTS', kw, prefix = 'e4pr_', sgkey = 'E4prContainerHG', MBTS_SaveEtaPhiInfo = False))
                         alg += MBTSD3PDObject (**_args(1, 'MBTS', kw, prefix = 'e4prLG_', sgkey = 'E4prContainerLG', MBTS_SaveEtaPhiInfo = False))
                 else:
@@ -1163,7 +969,7 @@ if doD3PD:
 
                     alg += MBTSD3PDObject (**_args(1, 'MBTS', kw, prefix = 'mbts_', sgkey = 'MBTSContainer'))
 
-                    if RUN2 and not RUN3:
+                    if RUN2:
                         alg += MBTSD3PDObject (**_args(1, 'MBTS', kw, prefix = 'e4pr_', sgkey = 'E4prContainer', MBTS_SaveEtaPhiInfo = False))
 
         if doCaloTopoCluster:
@@ -1356,7 +1162,7 @@ if doTileMon:
 
     if doTileMonDigi:
         b2d = TilePedRun
-        theTileDigitsMon = TileDigitsMonTool ( name            ="TileDigitsMon", 
+        theTileDigitsMon = TileDigitsMonTool ( name            ="TileDigitsMon",
                                                histoPathBase   = "/Tile/Digits",
                                                bookAllDrawers  = True,
                                                book2D          = b2d,
@@ -1373,7 +1179,7 @@ if doTileMon:
 
     if doTileMonRch:
         b2d = TileCisRun or TileRampRun
-        theTileRawChannelMon = TileRawChannelMonTool ( name            ="TileRawChannelMon", 
+        theTileRawChannelMon = TileRawChannelMonTool ( name            ="TileRawChannelMon",
                                                        histoPathBase   = "/Tile/RawChannel",
                                                        bookAllDrawers  = True,
                                                        book2D          = b2d,
@@ -1385,7 +1191,7 @@ if doTileMon:
 
         if doTileOF1:
             theTileRawChannelMon.TileRawChannelContainer = "TileRawChannelOF1"
-            
+
         if doTileOptATLAS:
             theTileRawChannelMon.TileRawChannelContainer = "TileRawChannelFixed"
 
@@ -1431,7 +1237,7 @@ if doTileMon:
                                              histoPathBase      = "/Tile/DMUErrors");
 
         theTileDQFragMon.TileRawChannelContainerOffl = "TileRawChannelCnt"; # default for simulation
-            
+
         if doTileOptATLAS:
             theTileDQFragMon.TileRawChannelContainerOffl = "TileRawChannelFixed"
 
@@ -1485,7 +1291,7 @@ if doTileMon:
                                                 CheckDCS           = TileUseDCS,
                                                 FragIDsToIgnoreDMUErrors = TileFragIDsToIgnoreDMUErrors,
                                                 histoPathBase = "/Tile/DigiNoise" );
-        
+
         if not TileBiGainRun: TileDigiNoiseMon.TriggerTypes = [ 0x82 ]
 
         TileMon.AthenaMonTools += [ TileDigiNoiseMon ];
@@ -1600,7 +1406,7 @@ if doTileMon:
                                                 , OutputLevel         = INFO
                                                 , TileDigitsContainer = "MuRcvDigitsCnt"
                                                 , histoPathBase       = "/Tile/TMDBDigits")
-        
+
         TileMon.AthenaMonTools += [ TileTMDBDigitsMon ]
         printfunc (TileTMDBDigitsMon)
 
@@ -1615,15 +1421,15 @@ if doTileMon:
 
         TileMon.AthenaMonTools += [TileTMDBRawChannelDspMon ]
         printfunc (TileTMDBRawChannelDspMon)
-        
+
         TileTMDBRawChannelMon = CfgMgr.TileTMDBRawChannelMonTool(name                      = 'TileTMDBRawChannelMon'
                                                     , OutputLevel             = INFO
                                                     , TileRawChannelContainer = "TileMuRcvRawChannelOpt2"
                                                     , NotDSP                   = True
                                                     , AmplitudeThresholdForTime = 10.0
                                                     , histoPathBase           = "/Tile/TMDBRawChannel")
-        
-        
+
+
         TileMon.AthenaMonTools += [TileTMDBRawChannelMon ]
         printfunc (TileTMDBRawChannelMon)
 
@@ -1693,7 +1499,7 @@ if doTileCalib:
 
         topSequence += TileCalibAlg
     elif TileL1CaloRun:
-        if RUN2: include("TrigT1CaloByteStream/ReadLVL1CaloBSRun2_jobOptions.py")
+        if RUN2 or RUN3: include("TrigT1CaloByteStream/ReadLVL1CaloBSRun2_jobOptions.py")
         else: include( "TrigT1CaloByteStream/ReadLVL1CaloBS_jobOptions.py" )
 
         # Trigger calibration using top calib alg
@@ -1712,7 +1518,7 @@ if doTileCalib:
         #from AthenaCommon.AppMgr import ToolSvc
         TileCalibAlg.TileCalibTools += [ TileTriggerTool ]
 
-        topSequence += TileCalibAlg              
+        topSequence += TileCalibAlg
     elif TileLasRun:
         # Laser calibration
         from TileCalibAlgs.TileCalibAlgsConf import TileLaserCalibAlg
@@ -1733,7 +1539,7 @@ if doTileCalib:
         TileCalibAlg.Tools = [ TileLaserTool ]
 
         topSequence += TileCalibAlg
-    else: 
+    else:
         log.warning( "TileCalib options are not ready yet for this runtype" )
 
 # Provides handle to give a time stamp for calib runs without time in the event header.
@@ -1822,7 +1628,7 @@ if doAtlantis:
 #-----------------------
 
 theAuditorSvc = svcMgr.AuditorSvc
-theAuditorSvc.Auditors =  [ "ChronoAuditor" ] 
+theAuditorSvc.Auditors =  [ "ChronoAuditor" ]
 
 if not ReadPool:
     svcMgr.EventSelector.MaxBadEvents = 10000

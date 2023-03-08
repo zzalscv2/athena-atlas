@@ -62,18 +62,17 @@ namespace InDet
 
   bool PixelRDOTool::isGoodRDO(const InDet::SiDetectorElementStatus *pixelDetElStatus,
 		 const IdentifierHash& moduleHash,
-		 const Identifier& rdoID) const
+		 const Identifier& rdoID, const EventContext& ctx) const
   {
     VALIDATE_STATUS_ARRAY(
       m_useModuleMap && pixelDetElStatus,
       pixelDetElStatus->isChipGood(moduleHash,m_pixelReadout->getFE(rdoID, m_pixelId->wafer_id(rdoID))),
-      m_summaryTool->isGood(moduleHash, rdoID)
-    );
+      m_summaryTool->isGood(moduleHash, rdoID, ctx));
 
     return !m_useModuleMap ||
       (pixelDetElStatus ?
          pixelDetElStatus->isChipGood(moduleHash, m_pixelReadout->getFE(rdoID, m_pixelId->wafer_id(rdoID)))
-       : m_summaryTool->isGood(moduleHash, rdoID));
+       : m_summaryTool->isGood(moduleHash, rdoID, ctx));
   }
 
   
@@ -133,11 +132,11 @@ namespace InDet
       VALIDATE_STATUS_ARRAY (
         m_useModuleMap,
         pixelDetElStatus->isGood(idHash),
-        m_summaryTool->isGood(idHash)
+        m_summaryTool->isGood(idHash,ctx)
       );
     }
     //
-    if (m_useModuleMap && (pixelDetElStatus ? !pixelDetElStatus->isGood(idHash): !(m_summaryTool->isGood(idHash)))) {
+    if (m_useModuleMap && (pixelDetElStatus ? !pixelDetElStatus->isGood(idHash): !(m_summaryTool->isGood(idHash, ctx)))) {
       return nullptr;
     }
 
@@ -175,7 +174,7 @@ namespace InDet
     for(const auto *const rdo : collection) {
       const Identifier rdoID = rdo->identify();
 
-      if (!isGoodRDO(pixelDetElStatus, idHash, rdoID))
+      if (!isGoodRDO(pixelDetElStatus, idHash, rdoID, ctx))
 	continue;
 
       if (not idset.insert(rdoID).second) {

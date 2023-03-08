@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 __doc__ = """
           Instantiate the
@@ -13,19 +13,12 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 
 def EGammaSteeringCfg(flags,
-                      name="EGammaSteering",
-                      doAllUpstream=False):
+                      name="EGammaSteering"):
 
     mlog = logging.getLogger(name)
     mlog.info('Starting EGamma Steering')
 
     acc = ComponentAccumulator()
-
-    # upstream the main egamma reconstruction
-    from egammaConfig.egammaUpstreamConfig import (
-        egammaUpstreamCfg)
-    acc.merge(egammaUpstreamCfg(flags,
-                                doAll=doAllUpstream))
 
     # e/gamma main Reconstruction
     from egammaConfig.egammaReconstructionConfig import (
@@ -39,7 +32,7 @@ def EGammaSteeringCfg(flags,
         acc.merge(egammaOutputCfg(flags))
 
     # LRT Reconstruction
-    if flags.Detector.GeometryID and flags.InDet.Tracking.doR3LargeD0:
+    if flags.Tracking.doLargeD0:
         from egammaConfig.egammaLRTReconstructionConfig import (
             egammaLRTReconstructionCfg)
         acc.merge(egammaLRTReconstructionCfg(flags))

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Dear emacs, this is -*-c++-*-
@@ -34,7 +34,7 @@ private:
   SG::ReadHandleKey<sTgcDigitContainer> m_signalInputKey{this, "SignalInputKey", "Sig_sTGC_DIGITS", "ReadHandleKey for Signal Input sTgcDigitContainer"};
   SG::WriteHandleKey<sTgcDigitContainer> m_outputKey{this, "OutputKey", "sTGC_DIGITS", "WriteHandleKey for Output sTgcDigitContainer"};
 
-  FloatProperty m_timeIntegrationWindow { this, "IntegrationWindow", 50.0, "Time Integration Window" };
+  FloatProperty m_timeIntegrationWindow { this, "IntegrationWindow", 30.0, "Time Integration Window" };
 
 };
 

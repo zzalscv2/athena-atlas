@@ -82,8 +82,6 @@ namespace top {
     m_weight_leptonSF_MU_SF_ID_QCD_TEMPLATE_DOWN(0.),
     m_weight_leptonSF_MU_SF_ID_SUPRESSION_SCALE_UP(0.),
     m_weight_leptonSF_MU_SF_ID_SUPRESSION_SCALE_DOWN(0.),
-    m_weight_leptonSF_MU_SF_ID_SYS_UP(0.),
-    m_weight_leptonSF_MU_SF_ID_SYS_DOWN(0.),
     m_weight_leptonSF_MU_SF_ID_TRUTH_UP(0.),
     m_weight_leptonSF_MU_SF_ID_TRUTH_DOWN(0.),
     m_weight_leptonSF_MU_SF_ID_TRUTH_LOWPT_UP(0.),
@@ -102,11 +100,32 @@ namespace top {
     m_weight_leptonSF_MU_SF_ID_HIGHETA_PROBEISO_DOWN(0.),
     m_weight_leptonSF_MU_SF_ID_TAGPT_UP(0.),
     m_weight_leptonSF_MU_SF_ID_TAGPT_DOWN(0.),
+    m_weight_leptonSF_MU_SF_ID_EXTRAPOLATION_UP(0.),
+    m_weight_leptonSF_MU_SF_ID_EXTRAPOLATION_DOWN(0.),
     // Muon isolation SF systematics
     m_weight_leptonSF_MU_SF_Isol_STAT_UP(0.),
     m_weight_leptonSF_MU_SF_Isol_STAT_DOWN(0.),
     m_weight_leptonSF_MU_SF_Isol_SYST_UP(0.),
     m_weight_leptonSF_MU_SF_Isol_SYST_DOWN(0.),
+    m_weight_leptonSF_MU_SF_Isol_BKG_FRACTION_UP(0.),
+    m_weight_leptonSF_MU_SF_Isol_BKG_FRACTION_DOWN(0.),
+    m_weight_leptonSF_MU_SF_Isol_DRMUJ_UP(0.),
+    m_weight_leptonSF_MU_SF_Isol_DRMUJ_DOWN(0.),
+    m_weight_leptonSF_MU_SF_Isol_LUMI_UNCERT_UP(0.),
+    m_weight_leptonSF_MU_SF_Isol_LUMI_UNCERT_DOWN(0.),
+    m_weight_leptonSF_MU_SF_Isol_MC_XSEC_UP(0.),
+    m_weight_leptonSF_MU_SF_Isol_MC_XSEC_DOWN(0.),
+    m_weight_leptonSF_MU_SF_Isol_MLLWINDOW_UP(0.),
+    m_weight_leptonSF_MU_SF_Isol_MLLWINDOW_DOWN(0.),
+    m_weight_leptonSF_MU_SF_Isol_QCD_TEMPLATE_UP(0.),
+    m_weight_leptonSF_MU_SF_Isol_QCD_TEMPLATE_DOWN(0.),
+    m_weight_leptonSF_MU_SF_Isol_SHERPA_POWHEG_UP(0.),
+    m_weight_leptonSF_MU_SF_Isol_SHERPA_POWHEG_DOWN(0.),
+    m_weight_leptonSF_MU_SF_Isol_SUPRESSION_SCALE_UP(0.),
+    m_weight_leptonSF_MU_SF_Isol_SUPRESSION_SCALE_DOWN(0.),
+    m_weight_leptonSF_MU_SF_Isol_EXTRAPOLATION_UP(0.),
+    m_weight_leptonSF_MU_SF_Isol_EXTRAPOLATION_DOWN(0.),
+    //Muon TTVA SF systematics
     m_weight_leptonSF_MU_SF_TTVA_STAT_UP(0.),
     m_weight_leptonSF_MU_SF_TTVA_STAT_DOWN(0.),
     m_weight_leptonSF_MU_SF_TTVA_SYST_UP(0.),
@@ -121,6 +140,8 @@ namespace top {
     m_weight_leptonSF_MU_SF_TTVA_QCD_TEMPLATE_DOWN(0.),
     m_weight_leptonSF_MU_SF_TTVA_SUPRESSION_SCALE_UP(0.),
     m_weight_leptonSF_MU_SF_TTVA_SUPRESSION_SCALE_DOWN(0.),
+    m_weight_leptonSF_MU_SF_TTVA_EXTRAPOLATION_UP(0.),
+    m_weight_leptonSF_MU_SF_TTVA_EXTRAPOLATION_DOWN(0.),
 
     // triggers
     m_weight_trigger(0.),
@@ -604,10 +625,6 @@ namespace top {
                                                "weight_leptonSF_MU_SF_ID_SUPRESSION_SCALE_UP");
             systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_ID_SUPRESSION_SCALE_DOWN,
                                                "weight_leptonSF_MU_SF_ID_SUPRESSION_SCALE_DOWN");
-            systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_ID_SYS_UP,
-                                               "weight_leptonSF_MU_SF_ID_SYS_UP");
-            systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_ID_SYS_DOWN,
-                                               "weight_leptonSF_MU_SF_ID_SYS_DOWN");
             systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_ID_TRUTH_UP,
                                                "weight_leptonSF_MU_SF_ID_TRUTH_UP");
             systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_ID_TRUTH_DOWN,
@@ -640,6 +657,10 @@ namespace top {
                                                 "weight_leptonSF_MU_SF_ID_TAGPT_UP");
             systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_ID_TAGPT_DOWN,
                                                 "weight_leptonSF_MU_SF_ID_TAGPT_DOWN");
+            systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_ID_EXTRAPOLATION_UP,
+                                                "weight_leptonSF_MU_SF_ID_EXTRAPOLATION_UP");
+            systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_ID_EXTRAPOLATION_DOWN,
+                                                "weight_leptonSF_MU_SF_ID_EXTRAPOLATION_DOWN");
           } else {
             systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_ID_SYST_LOWPT_UP,
                                                "weight_leptonSF_MU_SF_ID_SYST_LOWPT_UP");
@@ -661,20 +682,54 @@ namespace top {
             systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_ID_BAD_MUON_VETO_DOWN,
                                                "weight_leptonSF_MU_SF_ID_BAD_MUON_VETO_DOWN");
           }
-          // Muon isolation SF systematics
+          // Muon isolation and TTVA SF systematics
           systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_Isol_STAT_UP,
                                              "weight_leptonSF_MU_SF_Isol_STAT_UP");
           systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_Isol_STAT_DOWN,
                                              "weight_leptonSF_MU_SF_Isol_STAT_DOWN");
-          systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_Isol_SYST_UP,
-                                             "weight_leptonSF_MU_SF_Isol_SYST_UP");
-          systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_Isol_SYST_DOWN,
-                                             "weight_leptonSF_MU_SF_Isol_SYST_DOWN");
           systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_TTVA_STAT_UP,
                                              "weight_leptonSF_MU_SF_TTVA_STAT_UP");
           systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_TTVA_STAT_DOWN,
                                              "weight_leptonSF_MU_SF_TTVA_STAT_DOWN");
           if (m_config->muonBreakDownSystematics()) {
+            
+            systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_Isol_BKG_FRACTION_UP,
+                                               "weight_leptonSF_MU_SF_Isol_BKG_FRACTION_UP");
+            systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_Isol_BKG_FRACTION_DOWN,
+                                               "weight_leptonSF_MU_SF_Isol_BKG_FRACTION_DOWN");
+            systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_Isol_DRMUJ_UP,
+                                               "weight_leptonSF_MU_SF_Isol_DRMUJ_UP");
+            systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_Isol_DRMUJ_DOWN,
+                                               "weight_leptonSF_MU_SF_Isol_DRMUJ_DOWN");
+            systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_Isol_LUMI_UNCERT_UP,
+                                               "weight_leptonSF_MU_SF_Isol_LUMI_UNCERT_UP");
+            systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_Isol_LUMI_UNCERT_DOWN,
+                                               "weight_leptonSF_MU_SF_Isol_LUMI_UNCERT_DOWN");
+            systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_Isol_MC_XSEC_UP,
+                                               "weight_leptonSF_MU_SF_Isol_MC_XSEC_UP");
+            systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_Isol_MC_XSEC_DOWN,
+                                               "weight_leptonSF_MU_SF_Isol_MC_XSEC_DOWN");
+            systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_Isol_MLLWINDOW_UP,
+                                               "weight_leptonSF_MU_SF_Isol_MLLWINDOW_UP");
+            systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_Isol_MLLWINDOW_DOWN,
+                                               "weight_leptonSF_MU_SF_Isol_MLLWINDOW_DOWN");
+            systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_Isol_QCD_TEMPLATE_UP,
+                                               "weight_leptonSF_MU_SF_Isol_QCD_TEMPLATE_UP");
+            systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_Isol_QCD_TEMPLATE_DOWN,
+                                               "weight_leptonSF_MU_SF_Isol_QCD_TEMPLATE_DOWN");
+            systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_Isol_SHERPA_POWHEG_UP,
+                                               "weight_leptonSF_MU_SF_Isol_SHERPA_POWHEG_UP");
+            systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_Isol_SHERPA_POWHEG_DOWN,
+                                               "weight_leptonSF_MU_SF_Isol_SHERPA_POWHEG_DOWN");
+            systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_Isol_SUPRESSION_SCALE_UP,
+                                               "weight_leptonSF_MU_SF_Isol_SUPRESSION_SCALE_UP");
+            systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_Isol_SUPRESSION_SCALE_DOWN,
+                                               "weight_leptonSF_MU_SF_Isol_SUPRESSION_SCALE_DOWN");
+            systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_Isol_EXTRAPOLATION_UP,
+                                               "weight_leptonSF_MU_SF_Isol_EXTRAPOLATION_UP");
+            systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_Isol_EXTRAPOLATION_DOWN,
+                                               "weight_leptonSF_MU_SF_Isol_EXTRAPOLATION_DOWN");
+                                               
             systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_TTVA_BKG_FRACTION_UP,
                                                "weight_leptonSF_MU_SF_TTVA_BKG_FRACTION_UP");
             systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_TTVA_BKG_FRACTION_DOWN,
@@ -695,7 +750,15 @@ namespace top {
                                                "weight_leptonSF_MU_SF_TTVA_SUPRESSION_SCALE_UP");
             systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_TTVA_SUPRESSION_SCALE_DOWN,
                                                "weight_leptonSF_MU_SF_TTVA_SUPRESSION_SCALE_DOWN");
+            systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_TTVA_EXTRAPOLATION_UP,
+                                               "weight_leptonSF_MU_SF_TTVA_EXTRAPOLATION_UP");
+            systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_TTVA_EXTRAPOLATION_DOWN,
+                                               "weight_leptonSF_MU_SF_TTVA_EXTRAPOLATION_DOWN");
           } else {
+            systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_Isol_SYST_UP,
+                                             "weight_leptonSF_MU_SF_Isol_SYST_UP");
+            systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_Isol_SYST_DOWN,
+                                             "weight_leptonSF_MU_SF_Isol_SYST_DOWN");
             systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_TTVA_SYST_UP,
                                                "weight_leptonSF_MU_SF_TTVA_SYST_UP");
             systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_TTVA_SYST_DOWN,
@@ -1959,8 +2022,6 @@ namespace top {
           m_weight_leptonSF_MU_SF_ID_QCD_TEMPLATE_DOWN = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_ID_QCD_TEMPLATE_DOWN);
           m_weight_leptonSF_MU_SF_ID_SUPRESSION_SCALE_UP = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_ID_SUPRESSION_SCALE_UP);
           m_weight_leptonSF_MU_SF_ID_SUPRESSION_SCALE_DOWN = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_ID_SUPRESSION_SCALE_DOWN);
-          m_weight_leptonSF_MU_SF_ID_SYS_UP = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_ID_SYS_UP);
-          m_weight_leptonSF_MU_SF_ID_SYS_DOWN = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_ID_SYS_DOWN);
           m_weight_leptonSF_MU_SF_ID_TRUTH_UP = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_ID_TRUTH_UP);
           m_weight_leptonSF_MU_SF_ID_TRUTH_DOWN = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_ID_TRUTH_DOWN);
           m_weight_leptonSF_MU_SF_ID_TRUTH_LOWPT_UP = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_ID_TRUTH_LOWPT_UP);
@@ -1977,6 +2038,8 @@ namespace top {
           m_weight_leptonSF_MU_SF_ID_HIGHETA_PROBEISO_DOWN = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_ID_HIGHETA_PROBEISO_DOWN);
           m_weight_leptonSF_MU_SF_ID_TAGPT_UP = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_ID_TAGPT_UP);
           m_weight_leptonSF_MU_SF_ID_TAGPT_DOWN = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_ID_TAGPT_DOWN);
+          m_weight_leptonSF_MU_SF_ID_EXTRAPOLATION_UP = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_ID_EXTRAPOLATION_UP);
+          m_weight_leptonSF_MU_SF_ID_EXTRAPOLATION_DOWN = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_ID_EXTRAPOLATION_DOWN);
         } else {
           m_weight_leptonSF_MU_SF_ID_SYST_LOWPT_UP = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_ID_SYST_LOWPT_UP);
           m_weight_leptonSF_MU_SF_ID_SYST_LOWPT_DOWN = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_ID_SYST_LOWPT_DOWN);
@@ -1994,11 +2057,29 @@ namespace top {
         // Muon isolation SF systematics
         m_weight_leptonSF_MU_SF_Isol_STAT_UP = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_Isol_STAT_UP);
         m_weight_leptonSF_MU_SF_Isol_STAT_DOWN = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_Isol_STAT_DOWN);
-        m_weight_leptonSF_MU_SF_Isol_SYST_UP = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_Isol_SYST_UP);
-        m_weight_leptonSF_MU_SF_Isol_SYST_DOWN = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_Isol_SYST_DOWN);
+        
         m_weight_leptonSF_MU_SF_TTVA_STAT_UP = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_TTVA_STAT_UP);
         m_weight_leptonSF_MU_SF_TTVA_STAT_DOWN = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_TTVA_STAT_DOWN);
         if (m_config->muonBreakDownSystematics()) {
+          m_weight_leptonSF_MU_SF_Isol_BKG_FRACTION_UP = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_Isol_BKG_FRACTION_UP);
+          m_weight_leptonSF_MU_SF_Isol_BKG_FRACTION_DOWN = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_Isol_BKG_FRACTION_DOWN);
+          m_weight_leptonSF_MU_SF_Isol_DRMUJ_UP = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_Isol_DRMUJ_UP);
+          m_weight_leptonSF_MU_SF_Isol_DRMUJ_DOWN = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_Isol_DRMUJ_DOWN);
+          m_weight_leptonSF_MU_SF_Isol_LUMI_UNCERT_UP = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_Isol_LUMI_UNCERT_UP);
+          m_weight_leptonSF_MU_SF_Isol_LUMI_UNCERT_DOWN = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_Isol_LUMI_UNCERT_DOWN);
+          m_weight_leptonSF_MU_SF_Isol_MC_XSEC_UP = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_Isol_MC_XSEC_UP);
+          m_weight_leptonSF_MU_SF_Isol_MC_XSEC_DOWN = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_Isol_MC_XSEC_DOWN);
+          m_weight_leptonSF_MU_SF_Isol_MLLWINDOW_UP = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_Isol_MLLWINDOW_UP);
+          m_weight_leptonSF_MU_SF_Isol_MLLWINDOW_DOWN = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_Isol_MLLWINDOW_DOWN);
+          m_weight_leptonSF_MU_SF_Isol_QCD_TEMPLATE_UP = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_Isol_QCD_TEMPLATE_UP);
+          m_weight_leptonSF_MU_SF_Isol_QCD_TEMPLATE_DOWN = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_Isol_QCD_TEMPLATE_DOWN);
+          m_weight_leptonSF_MU_SF_Isol_SHERPA_POWHEG_UP = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_Isol_SHERPA_POWHEG_UP);
+          m_weight_leptonSF_MU_SF_Isol_SHERPA_POWHEG_DOWN = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_Isol_SHERPA_POWHEG_DOWN);
+          m_weight_leptonSF_MU_SF_Isol_SUPRESSION_SCALE_UP = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_Isol_SUPRESSION_SCALE_UP);
+          m_weight_leptonSF_MU_SF_Isol_SUPRESSION_SCALE_DOWN = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_Isol_SUPRESSION_SCALE_DOWN);
+          m_weight_leptonSF_MU_SF_Isol_EXTRAPOLATION_UP = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_Isol_EXTRAPOLATION_UP);
+          m_weight_leptonSF_MU_SF_Isol_EXTRAPOLATION_DOWN = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_Isol_EXTRAPOLATION_DOWN);
+          
           m_weight_leptonSF_MU_SF_TTVA_BKG_FRACTION_UP = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_TTVA_BKG_FRACTION_UP);
           m_weight_leptonSF_MU_SF_TTVA_BKG_FRACTION_DOWN = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_TTVA_BKG_FRACTION_DOWN);
           m_weight_leptonSF_MU_SF_TTVA_LUMI_UNCERT_UP = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_TTVA_LUMI_UNCERT_UP);
@@ -2009,7 +2090,11 @@ namespace top {
           m_weight_leptonSF_MU_SF_TTVA_QCD_TEMPLATE_DOWN = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_TTVA_QCD_TEMPLATE_DOWN);
           m_weight_leptonSF_MU_SF_TTVA_SUPRESSION_SCALE_UP = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_TTVA_SUPRESSION_SCALE_UP);
           m_weight_leptonSF_MU_SF_TTVA_SUPRESSION_SCALE_DOWN = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_TTVA_SUPRESSION_SCALE_DOWN);
+          m_weight_leptonSF_MU_SF_TTVA_EXTRAPOLATION_UP = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_TTVA_EXTRAPOLATION_UP);
+          m_weight_leptonSF_MU_SF_TTVA_EXTRAPOLATION_DOWN = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_TTVA_EXTRAPOLATION_DOWN);
         } else {
+          m_weight_leptonSF_MU_SF_Isol_SYST_UP = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_Isol_SYST_UP);
+          m_weight_leptonSF_MU_SF_Isol_SYST_DOWN = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_Isol_SYST_DOWN);
           m_weight_leptonSF_MU_SF_TTVA_SYST_UP = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_TTVA_SYST_UP);
           m_weight_leptonSF_MU_SF_TTVA_SYST_DOWN = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_TTVA_SYST_DOWN);
         }
@@ -2785,8 +2870,8 @@ namespace top {
         // the following are in DC14
 
         m_jet_jvt[i] = -1;
-        if (jetPtr->isAvailable<float>("AnalysisTop_JVT")) {
-          m_jet_jvt[i] = jetPtr->auxdataConst<float>("AnalysisTop_JVT");
+        if (jetPtr->isAvailable<float>("NNJvt")) {
+          m_jet_jvt[i] = jetPtr->auxdataConst<float>("NNJvt");
         }
 
         m_jet_fjvt[i] = -1;
@@ -2932,8 +3017,8 @@ namespace top {
 	}
 
         m_failJvt_jet_jvt[i] = -1;
-        if (jetPtr->isAvailable<float>("AnalysisTop_JVT")) {
-          m_failJvt_jet_jvt[i] = jetPtr->auxdataConst<float>("AnalysisTop_JVT");
+        if (jetPtr->isAvailable<float>("NNJvt")) {
+          m_failJvt_jet_jvt[i] = jetPtr->auxdataConst<float>("NNJvt");
         }
 
         m_failJvt_jet_fjvt[i] = -1;
@@ -3053,12 +3138,12 @@ namespace top {
 	}
 
         m_failFJvt_jet_jvt[i] = -1;
-        if (jetPtr->isAvailable<float>("AnalysisTop_JVT")) {
-          m_failFJvt_jet_jvt[i] = jetPtr->auxdataConst<float>("AnalysisTop_JVT");
+        if (jetPtr->isAvailable<float>("NNJvt")) {
+          m_failFJvt_jet_jvt[i] = jetPtr->auxdataConst<float>("NNJvt");
         }
         m_failFJvt_jet_passjvt[i] = -1;
-        if (jetPtr->isAvailable<char>("passJVT")) {
-          m_failFJvt_jet_passjvt[i] = jetPtr->getAttribute<char>("passJVT");
+        if (jetPtr->isAvailable<char>("NNJvtPass")) {
+          m_failFJvt_jet_passjvt[i] = jetPtr->getAttribute<char>("NNJvtPass");
         }
         m_failFJvt_jet_fjvt[i] = -1;
         if (jetPtr->isAvailable<float>("fJvt")) { 

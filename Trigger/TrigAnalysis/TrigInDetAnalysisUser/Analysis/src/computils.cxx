@@ -4,7 +4,7 @@
  **     @author  mark sutton
  **     @date    Sat Aug 30 2014 14:38:03 CEST  
  **
- **     Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -39,7 +39,7 @@ bool LINEF = true;
 bool LINES = false;
 
 
-bool Plots::watermark = true;
+bool Plots::s_watermark = true;
 
 int   colours[6] = {  1,    2, kBlue-4,  6, kCyan-2,  kMagenta+2 };
 int   markers[6] = { 20,   24,      25, 26,      25,          22 };
@@ -237,14 +237,14 @@ bool fcontains( const std::string& s, const std::string& p) {
 double plotable( TH1* h ) { // , double xlo, double xhi ) {
   double n = 0;
     
-  double _xlo = h->GetBinLowEdge(1);
-  double _xhi = h->GetBinLowEdge(h->GetNbinsX()+1);
+  double xlo = h->GetBinLowEdge(1);
+  double xhi = h->GetBinLowEdge(h->GetNbinsX()+1);
 
   //  if ( xlo!=-999 ) _xlo = xlo;
   //  if ( xhi!=-999 ) _xhi = xhi;
 
   for ( int i=h->GetNbinsX()+1 ; --i ; ) {
-    if ( h->GetBinCenter(i)>_xlo && h->GetBinCenter(i)<_xhi ) n += h->GetBinContent(i);
+    if ( h->GetBinCenter(i)>xlo && h->GetBinCenter(i)<xhi ) n += h->GetBinContent(i);
   } 
   return n;
 }
@@ -553,7 +553,7 @@ std::string findcell( std::string name, const std::string& regex, const std::str
   std::string duff = name;
 
   while ( pos!=std::string::npos && pos>posex+regex.size() ) { 
-    name = name.substr( 0, pos );
+    name.resize(pos); //pos must be <=string length
     pos = name.find_last_of( splitex );
   }
   

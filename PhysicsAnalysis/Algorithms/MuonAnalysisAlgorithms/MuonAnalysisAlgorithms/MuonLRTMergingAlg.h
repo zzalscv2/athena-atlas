@@ -54,6 +54,7 @@ namespace CP
       /// allows to pass an overlap removal strategy to the underlying removal tool, without manually configuring said tool.
       /// Advantageous in certain analysis frameworks.
       Gaudi::Property<int>  m_ORstrategy{this, "overlapStrategy", CP::IMuonLRTOverlapRemovalTool::defaultStrategy, "Overlap removal strategy to use (0 = default, 1 = write all muons and decorate with overlap type)"};  
+      Gaudi::Property<bool>  m_useRun3WP{this, "UseRun3WP", false, "Switch to toggle the run 2 & run 3 geometry for the muon ID working points used in the prompt-LRT overlap resolution. Set to true for run 3 and false for run 2."}; 
 
       ///////////////////////////////////////////////////////////////////
       /** @brief Private methods:                                    */

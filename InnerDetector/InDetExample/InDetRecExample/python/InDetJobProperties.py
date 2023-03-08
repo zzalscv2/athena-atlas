@@ -1363,6 +1363,7 @@ class InDetJobProperties(JobPropertyContainer):
        self.checkThenSet(self.primaryVertexCutSetup  , "Offline") 
        self.checkThenSet(self.secondaryVertexCutSetup, "PileUp") 
        self.checkThenSet(self.vertexSeedFinder       , "SlidingWindowMultiSeedFinder")
+       self.checkThenSet(self.useActsPriVertexing    , False)
        self.checkThenSet(self.doV0Finder             , False)
        self.checkThenSet(self.doSimpleV0Finder       , False)      
        self.checkThenSet(self.doConversions          , True )        
@@ -1499,7 +1500,8 @@ class InDetJobProperties(JobPropertyContainer):
        self.checkThenSet(self.doVertexFinding         , False             )
        self.checkThenSet(self.primaryVertexSetup      , "IterativeFinding")
        self.checkThenSet(self.primaryVertexCutSetup   , "Offline"         )          
-       self.checkThenSet(self.priVtxCutLevel          , 4                 )   
+       self.checkThenSet(self.priVtxCutLevel          , 4                 )
+       self.checkThenSet(self.useActsPriVertexing    ,  False             )
        # --- sec vertexing setup
        self.checkThenSet(self.secondaryVertexCutSetup , "PileUp"          ) 
        self.checkThenSet(self.conversionVertexCutSetup, "ConversionPileUp")
@@ -1553,7 +1555,8 @@ class InDetJobProperties(JobPropertyContainer):
           # --- primary vertex setup
           self.checkThenSet(self.primaryVertexSetup      , "IterativeFinding")
           self.checkThenSet(self.primaryVertexCutSetup   , "Offline")          
-          self.checkThenSet(self.priVtxCutLevel          , 1)   
+          self.checkThenSet(self.priVtxCutLevel          , 1)
+          self.checkThenSet(self.useActsPriVertexing    , False)
           # --- sec vertexing setup
           self.checkThenSet(self.secondaryVertexCutSetup , "StartUp") 
           self.checkThenSet(self.conversionVertexCutSetup, "ConversionStartUp")
@@ -1584,6 +1587,7 @@ class InDetJobProperties(JobPropertyContainer):
           # --- primary vertex setup
           self.checkThenSet(self.primaryVertexSetup   , "IterativeFinding")
           self.checkThenSet(self.primaryVertexCutSetup, "LowPt")
+          self.checkThenSet(self.useActsPriVertexing  , False)
           # --- sec vertexing setup
           self.checkThenSet(self.secondaryVertexCutSetup , "StartUp") 
           self.checkThenSet(self.conversionVertexCutSetup, "ConversionStartUp") 
@@ -1617,7 +1621,7 @@ class InDetJobProperties(JobPropertyContainer):
         self.checkThenSet(self.doTrackSegmentsDisappearing, False)
 
     if rec.doExpressProcessing() :
-       self.checkThenSet(self.useBeamConstraint,False)
+       self.checkThenSet(self.useBeamConstraint, True)
 
     # --- Setup correct mu for TRT mu-scaling
     if not rec.doRDOTrigger():
@@ -2059,7 +2063,8 @@ class InDetJobProperties(JobPropertyContainer):
      self.doVertexFinding         = False             
      self.primaryVertexSetup      = "IterativeFinding"
      self.primaryVertexCutSetup   = "Offline"                   
-     self.priVtxCutLevel          = 4                    
+     self.priVtxCutLevel          = 4
+     self.useActsPriVertexing     = False
      # --- sec vertexing setup
      self.secondaryVertexCutSetup = "PileUp"           
      self.conversionVertexCutSetup= "ConversionPileUp"

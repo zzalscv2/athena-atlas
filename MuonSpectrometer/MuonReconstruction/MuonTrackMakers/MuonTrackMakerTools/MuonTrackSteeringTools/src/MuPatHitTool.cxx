@@ -4,8 +4,6 @@
 
 #include "MuPatHitTool.h"
 
-#include <set>
-
 #include "MuPatPrimitives/SortMuPatHits.h"
 #include "MuonCompetingRIOsOnTrack/CompetingMuonClustersOnTrack.h"
 #include "MuonPrepRawData/RpcPrepData.h"
@@ -16,36 +14,25 @@
 #include "MuonRecHelperTools/MuonEDMPrinterTool.h"
 #include "MuonSegment/MuonSegment.h"
 #include "MuonTrackMakerUtils/MuonTrackMakerStlTools.h"
-#include "TrkEventPrimitives/ResidualPull.h"
 #include "TrkGeometry/MagneticFieldProperties.h"
 #include "TrkMeasurementBase/MeasurementBase.h"
 #include "TrkParameters/TrackParameters.h"
 #include "TrkPseudoMeasurementOnTrack/PseudoMeasurementOnTrack.h"
-#include "TrkToolInterfaces/IResidualPullCalculator.h"
 #include "TrkTrack/Track.h"
 #include "TrkTrack/TrackStateOnSurface.h"
 
 namespace Muon {
 
-    MuPatHitTool::MuPatHitTool(const std::string& t, const std::string& n, const IInterface* p) :
-        AthAlgTool(t, n, p), m_magFieldProperties(Trk::NoField) {
+    MuPatHitTool::MuPatHitTool(const std::string& t, const std::string& n, const IInterface* p) : AthAlgTool(t, n, p) {
         declareInterface<MuPatHitTool>(this);
     }
 
-    MuPatHitTool::~MuPatHitTool() {}
+    MuPatHitTool::~MuPatHitTool() = default;
 
     StatusCode MuPatHitTool::initialize() {
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(m_mdtRotCreator.retrieve());
-        if (!m_cscRotCreator.empty()) {
-            if (!m_idHelperSvc->hasCSC())
-                ATH_MSG_WARNING(
-                    "The current layout does not have any CSC chamber but you gave a CscRotCreator, ignoring it, but "
-                    "double-check configuration");
-            else
-                ATH_CHECK(m_cscRotCreator.retrieve());
-        }
-        ATH_CHECK(m_compClusterCreator.retrieve());
+        ATH_CHECK(m_cscRotCreator.retrieve(DisableTool{m_cscRotCreator.empty()})); 
         ATH_CHECK(m_edmHelperSvc.retrieve());
         ATH_CHECK(m_printer.retrieve());
         ATH_CHECK(m_pullCalculator.retrieve());
@@ -53,39 +40,27 @@ namespace Muon {
 
         return StatusCode::SUCCESS;
     }
-    bool MuPatHitTool::insert(MuPatHit* /*hit*/, MuPatHitList& /*hitList*/) const { return true; }
 
-    bool MuPatHitTool::create(const EventContext& ctx, const MuonSegment& seg, MuPatHitList& hitList, GarbageContainer& hitsToBeDeleted) const {
+    bool MuPatHitTool::create(const EventContext& ctx, const MuonSegment& seg, MuPatHitList& hitList) const {
         ATH_MSG_DEBUG(" creating hit list from segment " << std::endl << m_printer->print(seg));
 
         // create parameters with very large momentum and no charge
-        double momentum = 1e8;
-        double charge = 0.;
+        double momentum{1.e8}, charge{0.};
         std::unique_ptr<const Trk::TrackParameters> pars{m_edmHelperSvc->createTrackParameters(seg, momentum, charge)};
         if (!pars) {
             ATH_MSG_WARNING(" could not create track parameters for segment ");
             return false;
         }
 
-        bool result = create(ctx, *pars, seg.containedMeasurements(), hitList, hitsToBeDeleted);
-
-        return result;
+        return create(ctx, *pars, seg.containedMeasurements(), hitList);
     }
 
-    bool MuPatHitTool::create(const EventContext& ctx, const Trk::TrackParameters& pars, const std::vector<const Trk::MeasurementBase*>& measVec,
-                              MuPatHitList& hitList, GarbageContainer& hitsToBeDeleted) const {
-        // store position of the current hit to speed up insertion
-        MuPatHitIt currentHitIt = hitList.begin();
-
-        bool wasPrinted = false;  // boolean to suppress multiple printing of the same message
-
+    bool MuPatHitTool::create(const EventContext& ctx, const Trk::TrackParameters& pars,
+                              const std::vector<const Trk::MeasurementBase*>& measVec, MuPatHitList& hitList) const {
         // loop over hits
-        std::vector<const Trk::MeasurementBase*>::const_iterator sit = measVec.begin();
-        std::vector<const Trk::MeasurementBase*>::const_iterator sit_end = measVec.end();
-        for (; sit != sit_end; ++sit) {
+        for (const Trk::MeasurementBase* meas : measVec) {
             // create hit info
-            MuPatHit::Info hitInfo;
-            getHitInfo(**sit, hitInfo);
+            MuPatHit::Info hitInfo = getHitInfo(*meas);
 
             const Identifier& id = hitInfo.id;
             if (hitInfo.type == MuPatHit::UnknownType) {
@@ -94,71 +69,53 @@ namespace Muon {
             }
 
             // create broad measurement
-            std::unique_ptr<const Trk::MeasurementBase> broadMeas = createBroadMeasurement(**sit, hitInfo);
+            std::unique_ptr<const Trk::MeasurementBase> broadMeas = createBroadMeasurement(*meas, hitInfo);
             if (!broadMeas) {
                 ATH_MSG_WARNING(" could not create broad measurement " << m_idHelperSvc->toString(id));
                 continue;
             }
-
-            // use broad measurement for residual calculation
-            const Trk::MeasurementBase& meas = *broadMeas;
-
             // extrapolate
-            std::shared_ptr<const Trk::TrackParameters> exPars;
-            if (pars.associatedSurface() == meas.associatedSurface()) {
-                exPars.reset(pars.clone());
+            std::unique_ptr<const Trk::TrackParameters> exPars;
+            if (pars.associatedSurface() == broadMeas->associatedSurface()) {
+                exPars = pars.uniqueClone();
                 ATH_MSG_VERBOSE(" start parameters and measurement expressed at same surface, cloning parameters ");
-            } else {
-                // this code does its own manual garbage collection which can probably be omitted now
-                exPars = m_propagator->propagate(ctx, pars, meas.associatedSurface(), 
-                                                 Trk::anyDirection, false, m_magFieldProperties);
-
-                if (!exPars) {
-                    if (!wasPrinted) {
-                        ATH_MSG_WARNING(" extrapolation of segment failed, cannot calculate residual ");
-                        wasPrinted = true;
-                    }
-                    continue;
-                }  // !exPars
+            } else {                
+                exPars = m_propagator->propagate(ctx, pars, broadMeas->associatedSurface(), Trk::anyDirection, false, m_magFieldProperties);
+                if (!exPars) { continue; }  // !exPars
             }
 
             // create hit and insert it into list
             ATH_MSG_VERBOSE(" inserting hit " << m_idHelperSvc->toString(id) << " " << m_printer->print(*exPars));
-            std::unique_ptr<MuPatHit> hit = std::make_unique<MuPatHit>(std::move(exPars), *sit, std::move(broadMeas), hitInfo);
-            currentHitIt = insert(hitList, currentHitIt, hit.get());
-            hitsToBeDeleted.push_back(std::move(hit));
+            std::unique_ptr<MuPatHit> hit = std::make_unique<MuPatHit>(std::move(exPars), meas->uniqueClone(), std::move(broadMeas), std::move(hitInfo));
+            hitList.push_back(std::move(hit));           
         }
-
+        if (!m_isCosmic) {
+            const SortMuPatHits isLargerCal{m_idHelperSvc.get()};
+            std::stable_sort(hitList.begin(), hitList.end(), isLargerCal);          
+        } else {
+            const CosmicMuPatHitSorter isLargerCal{pars};
+            std::stable_sort(hitList.begin(), hitList.end(), isLargerCal);      
+        }
         return true;
     }
 
-    bool MuPatHitTool::create(const Trk::Track& track, MuPatHitList& hitList, GarbageContainer& hitsToBeDeleted) const {
-        // store position of the current hit to speed up insertion
-        MuPatHitIt currentHitIt = hitList.begin();
-
-        // get tsos
-        const DataVector<const Trk::TrackStateOnSurface>* tsos = track.trackStateOnSurfaces();
-        if (!tsos) return false;
-
+    bool MuPatHitTool::create(const Trk::Track& track, MuPatHitList& hitList) const {
         // loop over hits
-        DataVector<const Trk::TrackStateOnSurface>::const_iterator tsit = tsos->begin();
-        DataVector<const Trk::TrackStateOnSurface>::const_iterator tsit_end = tsos->end();
-        for (; tsit != tsit_end; ++tsit) {
+        for (const Trk::TrackStateOnSurface* tsit : *track.trackStateOnSurfaces()) {
             // do not take into account scatteres and holes for now
-            if ((*tsit)->type(Trk::TrackStateOnSurface::Scatterer)) continue;
-            if ((*tsit)->type(Trk::TrackStateOnSurface::Hole)) continue;
+            if (tsit->type(Trk::TrackStateOnSurface::Scatterer) ||
+                tsit->type(Trk::TrackStateOnSurface::Hole)) continue;
 
-            const Trk::MeasurementBase* meas = (*tsit)->measurementOnTrack();
+            const Trk::MeasurementBase* meas = tsit->measurementOnTrack();
             if (!meas) continue;
 
-            const Trk::TrackParameters* pars = (*tsit)->trackParameters();
+            const Trk::TrackParameters* pars = tsit->trackParameters();
             if (!pars) continue;
 
             // create hit info
-            MuPatHit::Info hitInfo;
-            getHitInfo(*meas, hitInfo);
+            MuPatHit::Info hitInfo = getHitInfo(*meas);
 
-            if ((*tsit)->type(Trk::TrackStateOnSurface::Outlier)) hitInfo.status = MuPatHit::Outlier;
+            if (tsit->type(Trk::TrackStateOnSurface::Outlier)) hitInfo.status = MuPatHit::Outlier;
 
             const Identifier& id = hitInfo.id;
 
@@ -177,111 +134,48 @@ namespace Muon {
             }
 
             // create hit and insert it into list
-            std::shared_ptr<const Trk::TrackParameters> pars_sp(pars, MuPatHit::Unowned());
-            std::unique_ptr<MuPatHit> hit = std::make_unique<MuPatHit>(std::move(pars_sp), meas, std::move(broadMeas), hitInfo);
+            std::unique_ptr<MuPatHit> hit = std::make_unique<MuPatHit>(pars->uniqueClone(), meas->uniqueClone(), std::move(broadMeas), hitInfo);
             ATH_MSG_VERBOSE(" inserting hit " << m_printer->print(*meas) << (hitInfo.status == MuPatHit::Outlier ? " Outlier" : ""));
-
-            currentHitIt = insert(hitList, currentHitIt, hit.get());
-            hitsToBeDeleted.push_back(std::move(hit));
+            double residual{0.}, pull{0.};
+            calculateResiduals(tsit, Trk::ResidualPull::Unbiased, residual, pull);
+            hit->setResidual(residual,pull);
+            hitList.push_back(std::move(hit));         
         }
-
+        if (!m_isCosmic) {
+            const SortMuPatHits isLargerCal{m_idHelperSvc.get()};
+            std::stable_sort(hitList.begin(), hitList.end(), isLargerCal);          
+        } else {
+            const Trk::TrackParameters* pars = track.perigeeParameters();
+            const CosmicMuPatHitSorter isLargerCal{*pars};
+            std::stable_sort(hitList.begin(), hitList.end(), isLargerCal);      
+        }
         return true;
     }
 
-    bool MuPatHitTool::merge(const EventContext& ctx, const MuPatHitList& hitList1, const MuPatHitList& hitList2, MuPatHitList& outList) const {
+    MuPatHitList MuPatHitTool::merge(const MuPatHitList& hitList1, const MuPatHitList& hitList2) const {
         // copy first list into outList
-        outList = hitList1;
-
-        return merge(ctx, hitList2, outList);
-    }
-
-    bool MuPatHitTool::merge(const EventContext& ctx, const MuPatHitList& hitList1, MuPatHitList& hitList2) const {
-        // The hits in the first list are most likely expressed with respect to a different set of track parameters
-        // as the ones in the second list. They cannot be merged. To allow merging a new set of track parameters is
-        // calculated for the hits in the first list by extrapolation of parameters of hits in the second list. This is only
-        // done if the hits are in the same station.
-
-        // create a map to store a track parameter per station
-        std::map<MuonStationIndex::StIndex, const Trk::TrackParameters*> stationParsMap;
-
-        // list to check for duplicates
-        std::set<Identifier> idList;
-
-        // loop over the second list and extract the first track parameter per station
-        MuPatHitCit it = hitList2.begin(), it_end = hitList2.end();
-        for (; it != it_end; ++it) {
-            if (!(*it)->info().id.is_valid()) continue;
-            MuonStationIndex::StIndex stIndex = m_idHelperSvc->stationIndex((*it)->info().id);
-
-            // add hits in first list
-            idList.insert((*it)->info().id);
-
-            if (stationParsMap.find(stIndex) == stationParsMap.end()) {
-                ATH_MSG_VERBOSE(" reference hit " << *it << "  " << m_idHelperSvc->toString((*it)->info().id) << " "
-                                                  << m_printer->print((*it)->parameters()));
-
-                stationParsMap[stIndex] = &(*it)->parameters();
-            }
+        MuPatHitList tmpList{};
+        tmpList.reserve(hitList1.size() + hitList2.size());
+        if (!m_isCosmic) {
+            const SortMuPatHits isLargerCal{m_idHelperSvc.get()};
+            std::merge(hitList1.begin(), hitList1.end(), hitList2.begin(), hitList2.end(), 
+                            std::back_inserter(tmpList), isLargerCal);
+        } else if (!hitList1.empty()) {
+            const Trk::TrackParameters& pars{hitList1.front()->parameters()};
+            const CosmicMuPatHitSorter isLargerCal{pars};            
+            std::merge(hitList1.begin(), hitList1.end(), hitList2.begin(), hitList2.end(), 
+                            std::back_inserter(tmpList), isLargerCal);
+        } else {
+            return hitList2;
         }
-
-        // loop over entries in first list and add them to the second list
-        it = hitList1.begin(), it_end = hitList1.end();
-        MuPatHitIt pos = hitList2.begin();  // start at first hit
-        for (; it != it_end; ++it) {
-            // hit before adding
-            MuPatHit* hit = *it;
-
-            // update parameters (only for measurements with identifier), else insert with the current parameters
-            if ((*it)->info().id.is_valid()) {
-                // check if hit already contained in list, skip if that is the case
-                if (idList.count((*it)->info().id)) continue;
-                idList.insert((*it)->info().id);
-
-                MuonStationIndex::StIndex stIndex = m_idHelperSvc->stationIndex((*it)->info().id);
-
-                // check whether there were also hits in this station in the second list
-                std::map<MuonStationIndex::StIndex, const Trk::TrackParameters*>::iterator stationPos = stationParsMap.find(stIndex);
-                if (stationPos != stationParsMap.end()) {
-                    // get track parameters from other list
-                    const Trk::TrackParameters& stPars = *stationPos->second;
-
-                    // check whether parameters are the same as of the original hit, if so do nothing
-                    if (&stPars != &(*it)->parameters()) {
-                        // use broad measurement for residual calculation
-                        const Trk::MeasurementBase& meas = hit->broadMeasurement();
-
-                        std::unique_ptr<const Trk::TrackParameters> exPars;
-                        // check whether the station parameters are already expressed at the measurement surface
-                        if (stPars.associatedSurface() == meas.associatedSurface()) {
-                            ATH_MSG_VERBOSE(" station parameters already expressed at measurement surface, cloning parameters ");
-                            exPars.reset(stPars.clone());
-                        } else {
-                            // redo propagation
-
-                            // this code does its own garbage collection, but this can prob. be simplified now
-                            exPars =
-                                m_propagator->propagate(ctx, stPars, meas.associatedSurface(), 
-                                                        Trk::anyDirection, false, m_magFieldProperties);
-
-                            // if failed keep old parameters
-                            if (!exPars) {
-                                ATH_MSG_DEBUG(" extrapolation failed, cannot insert hit "
-                                              << std::endl
-                                              << " meas " << m_printer->print(meas) << std::endl
-                                              << " pars " << m_printer->print(stPars) << std::endl
-                                              << " surf pars " << stPars.associatedSurface() << std::endl
-                                              << " surf meas " << meas.associatedSurface());
-                                exPars.reset(hit->parameters().clone());
-                            }
-                        }
-
-                        hit->updateParameters(std::move(exPars));
-                    }
-                }
-            }
-            pos = insert(hitList2, pos, hit);
-        }
-        return true;
+        MuPatHitList outList{};
+        outList.reserve(tmpList.size());
+        std::set<Identifier> used_hits{};
+        /// Loop another time to ensure that duplicate hits are removed
+        std::copy_if(std::make_move_iterator(tmpList.begin()), std::make_move_iterator(tmpList.end()), std::back_inserter(outList),
+                     [&used_hits](const MuPatHitPtr& pathit) { return used_hits.insert(pathit->info().id).second; });
+        
+        return outList;
     }
 
     bool MuPatHitTool::extract(const MuPatHitList& hitList, std::vector<const Trk::MeasurementBase*>& measVec, bool usePreciseHits,
@@ -290,11 +184,9 @@ namespace Muon {
         measVec.reserve(hitList.size());
 
         // loop over hit list
-        MuPatHitCit lit = hitList.begin(), lit_end = hitList.end();
-        for (; lit != lit_end; ++lit) {
-            const MuPatHit& hit = **lit;
-            if (hit.info().status != MuPatHit::OnTrack) { continue; }
-            const Trk::MeasurementBase* meas = usePreciseHits ? &hit.preciseMeasurement() : &hit.broadMeasurement();
+        for (const MuPatHitPtr& hit : hitList) {
+            if (hit->info().status != MuPatHit::OnTrack) { continue; }
+            const Trk::MeasurementBase* meas = usePreciseHits ? &hit->preciseMeasurement() : &hit->broadMeasurement();
             measVec.push_back(meas);
         }
         return true;
@@ -316,10 +208,12 @@ namespace Muon {
 
     bool MuPatHitTool::remove(const Trk::MeasurementBase& meas, MuPatHitList& hitList) const {
         // loop over hit list
+        const Identifier meas_id = m_edmHelperSvc->getIdentifier(meas);
         MuPatHitIt lit = hitList.begin(), lit_end = hitList.end();
         for (; lit != lit_end; ++lit) {
             const MuPatHit& hit = **lit;
-            if (&hit.preciseMeasurement() == &meas || &hit.broadMeasurement() == &meas) {
+            if (m_edmHelperSvc->getIdentifier(hit.preciseMeasurement()) == meas_id || 
+                m_edmHelperSvc->getIdentifier(hit.broadMeasurement()) == meas_id) {
                 hitList.erase(lit);
                 return true;
             }
@@ -346,7 +240,8 @@ namespace Muon {
         return MuPatHit::UnknownType;
     }
 
-    void MuPatHitTool::getHitInfo(const Trk::MeasurementBase& meas, MuPatHit::Info& hitInfo) const {
+    MuPatHit::Info MuPatHitTool::getHitInfo(const Trk::MeasurementBase& meas) const {
+        MuPatHit::Info hitInfo{};
         hitInfo.id = m_edmHelperSvc->getIdentifier(meas);
         // for clusters store layer id instead of channel id
         hitInfo.measuresPhi = true;  // assume that all PseudoMeasurements measure phi!!
@@ -355,8 +250,12 @@ namespace Muon {
         if (hitInfo.id.is_valid() && m_idHelperSvc->isMuon(hitInfo.id)) {
             hitInfo.type = getHitType(hitInfo.id);
             hitInfo.measuresPhi = m_idHelperSvc->measuresPhi(hitInfo.id);
+            hitInfo.isSmall = m_idHelperSvc->isSmallChamber(hitInfo.id);
+            hitInfo.stIdx = m_idHelperSvc->stationIndex(hitInfo.id);
+            hitInfo.isEndcap = m_idHelperSvc->isEndcap(hitInfo.id);
             if (hitInfo.type != MuPatHit::MDT && hitInfo.type != MuPatHit::MM) hitInfo.id = m_idHelperSvc->layerId(hitInfo.id);
         }
+        return hitInfo;
     }
 
     std::unique_ptr<const Trk::MeasurementBase> MuPatHitTool::createBroadMeasurement(const Trk::MeasurementBase& meas,
@@ -390,155 +289,7 @@ namespace Muon {
         }
 
         // don't change errors for CSC phi hits, TGC, RPC and Pseudo measurements
-        return std::unique_ptr<const Trk::MeasurementBase>(meas.clone());
-    }
-
-    MuPatHitIt MuPatHitTool::insert(MuPatHitList& list, MuPatHitIt& pos, MuPatHit* hit) const {
-        // first check whether list is empty, if so insert
-        if (list.empty()) {
-            ATH_MSG_VERBOSE(" inserting first hit  " << m_idHelperSvc->toString(hit->info().id) << " "
-                                                     << m_printer->print(hit->parameters()));
-            list.push_back(hit);
-            return list.begin();
-        }
-
-        // if at the end of the list move pos backwards to last entry
-        if (pos == list.end()) { --pos; }
-
-        SortMuPatHits isLargerCal{};
-        bool isLarger = isLargerCal(hit, *pos, &*m_idHelperSvc);  // check whether the hit is larger that the current list item
-        bool isLargerInit = isLarger;            // to know which direction we moved
-
-        // check whether the hit is larger that the current list item
-        if (isLarger) {
-            // as long as the hit is larger than the current list item take a step forward
-            while (isLarger) {
-                ++pos;  // take a step forward
-                // if we reached the end of the list, insert the hit at the end
-                if (pos == list.end()) {
-                    // check whether hit duplicate of last hit in list
-		    if (isLargerCal(list.back(), hit, &*m_idHelperSvc) != isLargerCal(hit, list.back(), &*m_idHelperSvc) ||
-                        (hit->info().type == MuPatHit::MM && hit->info().id != list.back()->info().id)) {
-                        ATH_MSG_VERBOSE(" inserting hit at back   " << m_idHelperSvc->toString(hit->info().id) << " "
-                                                                    << m_printer->print(hit->parameters()));
-
-                        list.push_back(hit);
-                        pos = list.end();
-                    } else {
-                        // hit is a duplicate
-                        ATH_MSG_VERBOSE(" NOT inserting duplicate hit  " << m_idHelperSvc->toString(hit->info().id) << " "
-                                                                         << m_printer->print(hit->parameters()));
-                    }
-                    return --pos;
-                }
-                isLarger = isLargerCal(hit, *pos, &*m_idHelperSvc);  // recalculate distance
-            }
-        } else {
-            // as long as the hit is smaller and we didn't reach the beginning of the list take a step back
-            while (pos != list.begin() && !isLarger) {
-                --pos;                              // take a step back
-                isLarger = isLargerCal(hit, *pos, &*m_idHelperSvc);  // recalculate distance
-            }
-            // if we reached the first list item, check whether current hit is smaller. If so insert before first.
-            if (pos == list.begin() && !isLarger) {
-                // check whether hit duplicate of last hit in list
-	        if (isLargerCal(list.front(), hit, &*m_idHelperSvc) != isLargerCal(hit, list.front(), &*m_idHelperSvc) ||
-                    (hit->info().type == MuPatHit::MM && hit->info().id != list.front()->info().id)) {
-                    ATH_MSG_VERBOSE(" inserting hit at front  " << m_idHelperSvc->toString(hit->info().id) << " "
-                                                                << m_printer->print(hit->parameters()));
-
-                    list.push_front(hit);
-                } else {
-                    // hit is a duplicate
-                    ATH_MSG_VERBOSE(" NOT inserting duplicate hit  " << m_idHelperSvc->toString(hit->info().id) << " "
-                                                                     << m_printer->print(hit->parameters()));
-                }
-                return list.begin();
-            }
-
-            // the hit is larger than the current list item, we should insert after it.
-            // Therefor pos should be increased by one so it points to the first element larger than hit.
-            // Check whether not at end of list
-            ++pos;
-            if (pos == list.end()) {
-                // check whether hit duplicate of last hit in list
-	        if (isLargerCal(list.back(), hit, &*m_idHelperSvc) != isLargerCal(hit, list.back(), &*m_idHelperSvc) ||
-                    (hit->info().type == MuPatHit::MM && hit->info().id != list.back()->info().id)) {
-                    ATH_MSG_VERBOSE(" inserting hit at back   " << m_idHelperSvc->toString(hit->info().id) << " "
-                                                                << m_printer->print(hit->parameters()));
-                    list.push_back(hit);
-                    pos = list.end();
-                } else {
-                    // hit is a duplicate
-                    ATH_MSG_VERBOSE(" NOT inserting duplicate hit  " << m_idHelperSvc->toString(hit->info().id) << " "
-                                                                     << m_printer->print(hit->parameters()));
-                }
-                return --pos;
-            }
-            isLarger = isLargerCal(hit, *pos, &*m_idHelperSvc);  // recalculate distance
-        }
-        // check for chamber sorting issues
-        if (pos != list.begin() && (*pos)->info().id.is_valid() && hit->info().id.is_valid() && m_idHelperSvc->detElId(hit->info().id) != m_idHelperSvc->detElId((*pos)->info().id)) {
-            Identifier posDetElId = m_idHelperSvc->detElId((*pos)->info().id);
-            --pos;
-            if ((*pos)->info().id.is_valid() && posDetElId == m_idHelperSvc->detElId((*pos)->info().id)) {  // can't insert a hit from one chamber in the middle of hits of another chamber
-                while (posDetElId == m_idHelperSvc->detElId((*pos)->info().id)) {
-                    if (isLargerInit)
-                        --pos;  // we incremented up to get here, so go down to find the rest of the hits from this chamber
-                    else
-                        ++pos;                // we incremented down to get here, so go up to find the rest of the hits from this chamber
-                    if (pos == list.end()) {  // insert hit at end, no need to check for duplicates in this case
-                        ATH_MSG_VERBOSE(" inserting hit at back   " << m_idHelperSvc->toString(hit->info().id) << " "
-                                                                    << m_printer->print(hit->parameters()));
-                        list.push_back(hit);
-                        pos = list.end();
-                        return --pos;
-                    } else if (pos == list.begin()) {  // insert hit at beginning, no need to check for duplicates in this case
-                        ATH_MSG_VERBOSE(" inserting hit at front  " << m_idHelperSvc->toString(hit->info().id) << " "
-                                                                    << m_printer->print(hit->parameters()));
-                        list.push_front(hit);
-                        return list.begin();
-                    }
-                }
-                // now insert the hit
-                ATH_MSG_VERBOSE(" inserting hit in middle " << m_idHelperSvc->toString(hit->info().id) << " "
-                                                            << m_printer->print(hit->parameters()));
-                return list.insert(pos, hit);
-            } else
-                ++pos;  // false alarm, back to the original position
-        }
-
-        // remove duplicates
-
-        // check whether hit and entry at pos are a duplicate
-        if (isLarger == isLargerCal(*pos, hit, &*m_idHelperSvc) && (hit->info().type != MuPatHit::MM || hit->info().id == (*pos)->info().id)) {
-            // hit is a duplicate
-            ATH_MSG_VERBOSE(" NOT inserting duplicate hit  " << m_idHelperSvc->toString(hit->info().id) << " "
-                                                             << m_printer->print(hit->parameters()));
-            return pos;
-        }
-
-        // final check: is the previous hit a duplicate of our hit
-        if (pos != list.begin()) {
-            --pos;  // move to previous hit
-
-            // check whether hit and entry at pos are a duplicate
-            if (isLargerCal(hit, *pos, &*m_idHelperSvc) == isLargerCal(*pos, hit, &*m_idHelperSvc) &&
-                (hit->info().type != MuPatHit::MM || hit->info().id == (*pos)->info().id)) {
-                ++pos;  // move forward to insert position for pos
-                // hit is a duplicate
-                ATH_MSG_VERBOSE(" NOT inserting duplicate hit  " << m_idHelperSvc->toString(hit->info().id) << " "
-                                                                 << m_printer->print(hit->parameters()));
-                return pos;
-            }
-            // if the hit is not a duplicate we can safely insert it at the original position
-            ++pos;  // move forward to insert position
-        }
-
-        // the hit will be inserted before pos
-        ATH_MSG_VERBOSE(" inserting hit in middle " << m_idHelperSvc->toString(hit->info().id) << " "
-                                                    << m_printer->print(hit->parameters()));
-        return list.insert(pos, hit);
+        return meas.uniqueClone();
     }
 
     bool MuPatHitTool::update(const Trk::Track& track, MuPatHitList& hitList) const {
@@ -572,8 +323,8 @@ namespace Muon {
 
     std::string MuPatHitTool::print(const MuPatHitList& hitList, bool printPos, bool printDir, bool printMom) const {
         std::ostringstream sout;
-        SortMuPatHits isLargerCal{};
-        MuPatHitDistanceAlongParameters distCal{};
+        SortMuPatHits isLargerCal{m_idHelperSvc.get()};
+        DistanceAlongParameters distCal{};
 
         // for nicely aligned printout, get max width of Id printout
         std::vector<std::string> idStrings;
@@ -611,10 +362,10 @@ namespace Muon {
             dataOss << "  " << result << " dist " << distance;
             dataStrings.push_back(dataOss.str());
             if (itNext != it_end) {
-	        isLarger = isLargerCal(*itNext, *it, &*m_idHelperSvc);
+                isLarger = isLargerCal(*itNext, *it);
                 distance = distCal(*it, *itNext);
                 result = isLarger ? "larger " : "smaller";
-                if (isLarger == isLargerCal(*it, *itNext, &*m_idHelperSvc)) {
+                if (isLarger == isLargerCal(*it, *itNext)) {
                     result = "duplicate";
                 } else if (!isLarger) {
                     result += "   sorting problem ";
@@ -631,99 +382,30 @@ namespace Muon {
 
         return sout.str();
     }
-
-    std::string MuPatHitTool::printId(const Trk::MeasurementBase& measurement) const {
-        std::string idStr;
-        Identifier id = m_edmHelperSvc->getIdentifier(measurement);
-        if (!id.is_valid()) {
-            const Trk::PseudoMeasurementOnTrack* pseudo = dynamic_cast<const Trk::PseudoMeasurementOnTrack*>(&measurement);
-            if (pseudo)
-                idStr = "pseudo measurement";
-            else
-                idStr = "no Identifier";
-        } else if (!m_idHelperSvc->mdtIdHelper().is_muon(id)) {
-            idStr = "Id hit";
-        } else {
-            idStr = m_idHelperSvc->toString(id);
-        }
-
-        return idStr;
-    }
-
-    std::string MuPatHitTool::printData(const Trk::MeasurementBase& measurement) const {
-        std::ostringstream sout;
-
-        // print position of hit
-        double h_r = measurement.globalPosition().perp();
-        double h_z = measurement.globalPosition().z();
-        double h_phi = measurement.globalPosition().phi();
-        double h_theta = measurement.globalPosition().theta();
-
-        sout << "  r " << std::fixed << std::setprecision(0) << std::setw(5) << h_r << "  z " << std::fixed << std::setprecision(0)
-             << std::setw(5) << h_z << "  phi " << std::fixed << std::setprecision(3) << std::setw(4) << h_phi << "  theta " << std::fixed
-             << std::setprecision(3) << std::setw(4) << h_theta;
-
-        // print measurement data
-        const Trk::RIO_OnTrack* rot = dynamic_cast<const Trk::RIO_OnTrack*>(&measurement);
-        if (rot) {
-            // add drift time for MDT
-            const MdtDriftCircleOnTrack* mdt = dynamic_cast<const MdtDriftCircleOnTrack*>(rot);
-            if (mdt) {
-                sout << "  r_drift " << std::fixed << std::setprecision(2) << std::setw(5) << mdt->driftRadius();
-            } else {
-                // add time for RPC
-                const RpcClusterOnTrack* rpc = dynamic_cast<const RpcClusterOnTrack*>(rot);
-                if (rpc) {
-                    const RpcPrepData* rpcPRD = rpc->prepRawData();
-                    if (rpcPRD) { sout << "  time " << std::fixed << std::setprecision(2) << std::setw(5) << rpcPRD->time(); }
-                }
-            }
-        } else {  // !rot
-            // if we get here: not a ROT, maybe a CROT
-            const CompetingMuonClustersOnTrack* crot = dynamic_cast<const CompetingMuonClustersOnTrack*>(&measurement);
-            if (crot) {
-                unsigned int nlayers = 0;
-                unsigned int nhits = 0;
-                std::set<Identifier> layers;
-                std::vector<double> rpcTimes;
-                const std::vector<const MuonClusterOnTrack*>& rots = crot->containedROTs();
-                nhits = rots.size();
-                rpcTimes.reserve(nhits);
-                std::vector<const MuonClusterOnTrack*>::const_iterator itR = rots.begin(), itR_end = rots.end();
-                for (; itR != itR_end; ++itR) {
-                    Identifier layerId = m_idHelperSvc->layerId((*itR)->identify());
-                    layers.insert(layerId);
-                    const RpcClusterOnTrack* rpc = dynamic_cast<const RpcClusterOnTrack*>(*itR);
-                    const RpcPrepData* rpcPRD = rpc ? rpc->prepRawData() : nullptr;
-                    if (rpcPRD) rpcTimes.push_back(rpcPRD->time());
-                }
-                nlayers = layers.size();
-                sout << "  CompRot: hits " << nhits << " layers " << nlayers;
-                // add time for RPC
-                if (rpcTimes.size()) {
-                    sout << (rpcTimes.size() == 1 ? "  time" : "  times") << std::fixed << std::setprecision(2);
-                    std::vector<double>::iterator itD = rpcTimes.begin(), itD_end = rpcTimes.end();
-                    for (; itD != itD_end; ++itD) sout << " " << std::setw(5) << *itD;
-                }
-            }  // if crot
-        }      // else !rot
-
-        return sout.str();
-    }  // printData( Trk::MeasurementBase )
-
     bool MuPatHitTool::isSorted(const MuPatHitList& hitList) const {
-        SortMuPatHits isLargerCal{};
+        SortMuPatHits isLargerCal{m_idHelperSvc.get()};
         MuPatHitCit it = hitList.begin();
         MuPatHitCit it_end = hitList.end();
         MuPatHitCit itNext = it;
         if (itNext != it_end) ++itNext;
         bool isLarger = true;
         for (; itNext != it_end; ++it, ++itNext) {
-	    isLarger = isLargerCal(*it, *itNext, &*m_idHelperSvc);
-            bool sameSurface = (isLarger == isLargerCal(*it, *itNext, &*m_idHelperSvc));  // same surface
+            isLarger = isLargerCal(*it, *itNext);
+            bool sameSurface = (isLarger == isLargerCal(*it, *itNext));  // same surface
             if (!isLarger && !sameSurface) return false;
             if (sameSurface) return false;
         }
         return true;
+    }
+    inline void MuPatHitTool::calculateResiduals(const Trk::TrackStateOnSurface* tsos, Trk::ResidualPull::ResidualType type, double& residual,
+                                            double& residualPull) const {
+        std::unique_ptr<const Trk::ResidualPull> resPull(
+            m_pullCalculator->residualPull(tsos->measurementOnTrack(), tsos->trackParameters(), type));
+        if (resPull) {
+            residual = resPull->residual().front();
+            residualPull = resPull->pull().front();
+        } else {
+            residual = residualPull = -999;
+        }
     }
 }  // namespace Muon

@@ -14,14 +14,14 @@ def egammaMVAToolCfg(flags, **kwargs):
 
 def egammaMVASvcCfg(flags, name="egammaMVASvc", **kwargs):
 
-    mlog = logging.getLogger(name)
     acc = ComponentAccumulator()
 
-    if flags.Egamma.Calib.MVAVersion is not None:
+    if "folder" not in kwargs:
         folder = flags.Egamma.Calib.MVAVersion
-        mlog.info('egamma MVA calib version: %s', folder)
     else:
-        raise KeyError("Egamma.Calib.MVAVersion is not set")
+        # we pop. As folder is not a property of
+        # egammaMVASvc but of the tools
+        folder = kwargs.pop("folder")
 
     if "ElectronTool" not in kwargs:
         kwargs["ElectronTool"] = acc.popToolsAndMerge(
@@ -71,9 +71,10 @@ if __name__ == "__main__":
     mlog = logging.getLogger("egammaMVASvcConfigTest")
     mlog.info("Configuring egammaMVASvc :")
     printProperties(mlog, cfg.getPrimaryAndMerge(
-        egammaMVASvcCfg(ConfigFlags)),
-        nestLevel=1,
-        printDefaults=True)
+        egammaMVASvcCfg(ConfigFlags,
+                        folder=ConfigFlags.Egamma.Calib.MVAVersion)),
+                    nestLevel=1,
+                    printDefaults=True)
     cfg.printConfig()
 
     f = open("egmvatools.pkl", "wb")

@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  AthContainers/DataVector.h
@@ -539,7 +539,6 @@
 #include "AthContainers/tools/IsMostDerivedFlag.h"
 #include "AthContainers/DataVectorWithAllocFwd.h"
 #include "AthLinks/tools/selection_ns.h"
-#include <boost/static_assert.hpp>
 #include <boost/iterator/iterator_adaptor.hpp>
 #include <type_traits>
 #include <vector>
@@ -605,6 +604,17 @@ namespace DataVector_detail {
 template <class B1,
           class B2=DataModel_detail::NoBase,
           class B3=DataModel_detail::NoBase> struct VirtBases;
+
+
+/// Helpers for enabling the correct overloads for insert() methods taking
+/// a range, allowing us to handle the unique_ptr case.
+template <class ITERATOR, class T>
+using enable_if_ptr_itr =
+  std::enable_if_t<std::is_convertible_v<typename std::iterator_traits<ITERATOR>::value_type, T*>, bool>;
+
+template <class ITERATOR, class T>
+using enable_if_up_itr =
+  std::enable_if_t<std::is_convertible_v<typename std::iterator_traits<ITERATOR>::value_type, std::unique_ptr<T> >, bool>;
 
 
 } // namespace DataVector_detail
@@ -999,7 +1009,6 @@ public:
 
 
   /**
-
    * @param l An initializer list.
    *
    * Any existing owned elements will be released.
@@ -1438,8 +1447,32 @@ public:
    *
    * Note: this method may only be called using the most derived
    * @c DataVector in the hierarchy.
+   *
+   * This overload is for the case where the iterator value type
+   * is convertible to T*.
    */
-  template <class InputIterator>
+  template <class InputIterator,
+            DataVector_detail::enable_if_ptr_itr<InputIterator, T> = true>
+  void insert(iterator position, InputIterator first, InputIterator last);
+
+
+  /**
+   * @brief Add a group of new elements to the collection.
+   * @param position Iterator before which the element will be added.
+   * @param first The start of the range to put in the container.
+   * @param last The end of the range to put in the container.
+   *
+   * The container's ownership policy will determine if it takes ownership
+   * of the new element.
+   *
+   * Note: this method may only be called using the most derived
+   * @c DataVector in the hierarchy.
+   *
+   * This overload is for the case where the iterator value type
+   * is convertible to unique_ptr<T>.
+   */
+  template <class InputIterator,
+            DataVector_detail::enable_if_up_itr<InputIterator, T> = true>
   void insert(iterator position, InputIterator first, InputIterator last);
 
 
@@ -2708,8 +2741,32 @@ public:
    *
    * Note: this method may only be called using the most derived
    * @c DataVector in the hierarchy.
+   *
+   * This overload is for the case where the iterator value type
+   * is convertible to T*.
    */
-  template <class InputIterator>
+  template <class InputIterator,
+            DataVector_detail::enable_if_ptr_itr<InputIterator, T> = true>
+  void insert(iterator position, InputIterator first, InputIterator last);
+
+
+  /**
+   * @brief Add a group of new elements to the collection.
+   * @param position Iterator before which the element will be added.
+   * @param first The start of the range to put in the container.
+   * @param last The end of the range to put in the container.
+   *
+   * The container's ownership policy will determine if it takes ownership
+   * of the new element.
+   *
+   * Note: this method may only be called using the most derived
+   * @c DataVector in the hierarchy.
+   *
+   * This overload is for the case where the iterator value type
+   * is convertible to unique_ptr<T>.
+   */
+  template <class InputIterator,
+            DataVector_detail::enable_if_up_itr<InputIterator, T> = true>
   void insert(iterator position, InputIterator first, InputIterator last);
 
 

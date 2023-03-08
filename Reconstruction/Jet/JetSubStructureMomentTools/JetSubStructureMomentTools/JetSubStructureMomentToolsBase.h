@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef jetsubstructuremomenttools_jetsubstructurebase_header
@@ -20,7 +20,7 @@ class JetSubStructureMomentToolsBase :
     public:
 
       // Constructor and destructor
-      JetSubStructureMomentToolsBase(std::string name);
+      JetSubStructureMomentToolsBase(const std::string& name);
 
       StatusCode initialize();
 

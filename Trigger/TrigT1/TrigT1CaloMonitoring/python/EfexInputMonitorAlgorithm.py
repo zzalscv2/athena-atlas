@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 def EfexInputMonitoringConfig(inputFlags):
     '''Function to configure LVL1 EfexInput algorithm in the monitoring system.'''
@@ -35,10 +35,12 @@ def EfexInputMonitoringConfig(inputFlags):
     myGroup = helper.addGroup(EfexInputMonAlg, groupName , mainDir)
     EmErrorGroup = helper.addGroup(EfexInputMonAlg, groupName+"_EmError", mainDir)
     HadErrorGroup = helper.addGroup(EfexInputMonAlg, groupName+"_HadError", mainDir)
+    refCompareGroup = helper.addGroup(EfexInputMonAlg,groupName+"_RefCompare", mainDir)
+    refCompareTreeGroup = helper.addGroup(EfexInputMonAlg,groupName+"_RefCompareTree", mainDir)
 
     # histograms of eFex tower variables
     myGroup.defineHistogram('NEfexTowers;h_nEfexTowers', title='Number of eFex towers',
-                            type='TH1I', path=trigPath, xbins=500,xmin=0,xmax=5000)
+                            type='TH1I', path=trigPath, xbins=500,xmin=0,xmax=10000)
 
     myGroup.defineHistogram('TowerEta;h_TowerEta', title='eFex Tower Eta',
                             type='TH1F', path=trigPath, xbins=100,xmin=-3.0,xmax=3.0)
@@ -46,8 +48,8 @@ def EfexInputMonitoringConfig(inputFlags):
     myGroup.defineHistogram('TowerPhi;h_TowerPhi', title='eFex Tower Phi',
                             type='TH1F', path=trigPath, xbins=64,xmin=-math.pi,xmax=math.pi)
 
-    myGroup.defineHistogram('TowerEta,TowerPhi;h_TowerEtaPhiMap', title='eFex Tower Eta vs Phi',
-                            type='TH2F',path=trigPath, xbins=50,xmin=-3.0,xmax=3.0,ybins=64,ymin=-math.pi,ymax=math.pi)
+    myGroup.defineHistogram('TowerEta,TowerPhi;h_TowerEtaPhiMap', title='eFex Tower Eta vs Phi;#eta;#phi',
+                            type='TH2F',path=trigPath, xbins=60,xmin=-3.0,xmax=3.0,ybins=64,ymin=-math.pi,ymax=math.pi)
 
     myGroup.defineHistogram('TowerEtcount1;h_TowerEtcount1', title='eFex Tower Et Count1 (pre-sampler)',
                             type='TH1F', path=trigPath, xbins=100,xmin=0,xmax=100.0)
@@ -126,7 +128,13 @@ def EfexInputMonitoringConfig(inputFlags):
 
     myGroup.defineHistogram('TowerHadstatus;h_TowerHadstatus', title='eFex Tower Hadronic status bit',
                             type='TH1F', path=trigPath, xbins=10,xmin=0,xmax=2400.0)
-    
+
+    refCompareGroup.defineHistogram('TowerEta,TowerPhi;h_TowerMismatch',title="eFexTower mismatches to reference;#eta;#phi",type='TH2I',
+                            path=trigPath,xbins=60,xmin=-3,xmax=3,ybins=64,ymin=-math.pi,ymax=math.pi)
+    refCompareTreeGroup.defineTree('EventNumber,TowerId,TowerEta,TowerPhi,TowerEmstatus,TowerHadstatus,TowerSlot,TowerCount,RefTowerCount;mismatched',
+                                   "eventNumber/l:id/I:eta/F:phi/F:em_status/i:had_status/i:slot/i:count/I:ref_count/I",
+                                   title="mismatched",path=trigPath)
+
     acc = helper.result()
     result.merge(acc)
     return result
@@ -134,26 +142,27 @@ def EfexInputMonitoringConfig(inputFlags):
 
 if __name__=='__main__':
     # set input file and config options
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     import glob
 
     inputs = glob.glob('/eos/atlas/atlastier0/rucio/data18_13TeV/physics_Main/00354311/data18_13TeV.00354311.physics_Main.recon.ESD.f1129/data18_13TeV.00354311.physics_Main.recon.ESD.f1129._lb0013._SFO-8._0001.1')
 
-    ConfigFlags.Input.Files = inputs
-    ConfigFlags.Output.HISTFileName = 'ExampleMonitorOutput_LVL1_MC.root'
+    flags = initConfigFlags()
+    flags.Input.Files = inputs
+    flags.Output.HISTFileName = 'ExampleMonitorOutput_LVL1_MC.root'
 
-    ConfigFlags.lock()
-    ConfigFlags.dump() # print all the configs
+    flags.lock()
+    flags.dump() # print all the configs
 
     from AthenaCommon.AppMgr import ServiceMgr
     ServiceMgr.Dump = False
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
-    EfexInputMonitorCfg = EfexInputMonitoringConfig(ConfigFlags)
+    EfexInputMonitorCfg = EfexInputMonitoringConfig(flags)
     cfg.merge(EfexInputMonitorCfg)
 
     # options - print all details of algorithms, very short summary 

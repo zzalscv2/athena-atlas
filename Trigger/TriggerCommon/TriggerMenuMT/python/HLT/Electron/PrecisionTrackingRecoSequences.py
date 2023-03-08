@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaCommon.CFElements import parOR
@@ -12,7 +12,7 @@ log = logging.getLogger(__name__)
 
 from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
 
-def precisionTracking(RoIs, ion=False, variant=''):
+def precisionTracking(flags, RoIs, ion=False, variant=''):
 
     ## Taking Fast Track information computed in 2nd step ##
     TrigEgammaKeys = getTrigEgammaKeys(variant, ion=ion)
@@ -27,7 +27,7 @@ def precisionTracking(RoIs, ion=False, variant=''):
     ViewVerifyTrk.DataObjects = [( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s' % RoIs ),
                                  ( 'CaloCellContainer' , 'StoreGateSvc+CaloCells' ),
                                  ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing' ),
-                                 ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_FlaggedCondData_TRIG' )]
+                                 ]
 
     # These objects must be loaded from SGIL if not from CondInputLoader
     from AthenaCommon.AlgSequence import AlgSequence
@@ -46,7 +46,7 @@ def precisionTracking(RoIs, ion=False, variant=''):
     
     from TrigInDetConfig.InDetTrigPrecisionTracking import makeInDetTrigPrecisionTracking
 
-    PTTracks, PTTrackParticles, PTAlgs = makeInDetTrigPrecisionTracking( config = IDTrigConfig, verifier = ViewVerifyTrk, rois= RoIs )
+    PTTracks, PTTrackParticles, PTAlgs = makeInDetTrigPrecisionTracking( flags, config = IDTrigConfig, verifier = ViewVerifyTrk, rois= RoIs )
     PTSeq = parOR("precisionTrackingInElectrons" + variant + tag, PTAlgs)
     #trackParticles = PTTrackParticles[-1]    
     trackParticles = TrigEgammaKeys.precisionTrackingContainer

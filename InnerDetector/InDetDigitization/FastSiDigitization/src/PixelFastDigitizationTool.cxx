@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////////////////
@@ -278,10 +278,9 @@ StatusCode PixelFastDigitizationTool::processAllSubEvents(const EventContext& ct
     ATH_MSG_DEBUG ( "SiHitCollection found with " << p_collection->size() << " hits" );
     ++iColl;
   }
-  m_thpcsi = &thpcsi;
 
   // Process the Hits straw by straw: get the iterator pairs for given straw
-  if(this->digitize(ctx).isFailure()) {
+  if(this->digitize(ctx, thpcsi).isFailure()) {
     ATH_MSG_FATAL ( "digitize method failed!" );
     return StatusCode::FAILURE;
   }
@@ -362,7 +361,7 @@ StatusCode PixelFastDigitizationTool::mergeEvent(const EventContext& ctx)
   m_ambiguitiesMap =new PixelGangedClusterAmbiguities();
 
   if (m_thpcsi != nullptr) {
-    if(digitize(ctx).isFailure()) {
+    if(digitize(ctx, *m_thpcsi).isFailure()) {
       ATH_MSG_FATAL ( "Pixel digitize method failed!" );
       return StatusCode::FAILURE;
     }
@@ -399,7 +398,8 @@ StatusCode PixelFastDigitizationTool::mergeEvent(const EventContext& ctx)
 }
 
 
-StatusCode PixelFastDigitizationTool::digitize(const EventContext& ctx)
+StatusCode PixelFastDigitizationTool::digitize(const EventContext& ctx,
+                                               TimedHitCollection<SiHit>& thpcsi)
 {
   // Set the RNG to use for this event.
   ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this, m_randomEngineName);
@@ -424,7 +424,7 @@ StatusCode PixelFastDigitizationTool::digitize(const EventContext& ctx)
   std::vector<int> trkNo;
   std::vector<Identifier> detEl;
 
-  while (m_thpcsi->nextDetectorElement(i, e)) {
+  while (thpcsi.nextDetectorElement(i, e)) {
 
     Pixel_detElement_RIO_map PixelDetElClusterMap;
 

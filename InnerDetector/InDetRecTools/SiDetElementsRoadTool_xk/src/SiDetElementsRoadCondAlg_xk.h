@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -38,7 +38,7 @@ namespace InDet {
      @author Susumu.Oda@cern.ch
   */
 
-  class SiDetElementsRoadCondAlg_xk : public AthReentrantAlgorithm
+  class SiDetElementsRoadCondAlg_xk final: public AthReentrantAlgorithm
   {
     ///////////////////////////////////////////////////////////////////
     // Public methods:

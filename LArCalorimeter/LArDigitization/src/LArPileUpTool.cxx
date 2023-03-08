@@ -122,15 +122,14 @@ StatusCode LArPileUpTool::initialize()
   }
 
   if (m_onlyUseContainerName) {
+      m_hitContainerNames = m_inputKeys.value();
+  }
+  else {
     if (m_useLArHitFloat) {
-      for (const auto& RHkey : m_hitFloatContainerKeys.keys()) {
-        m_hitContainerNames.push_back(RHkey->key());
+      ATH_CHECK(m_hitFloatContainerKeys.assign(m_inputKeys.value()));
       }
-    }
     else {
-      for (const auto& RHkey : m_hitContainerKeys.keys()) {
-        m_hitContainerNames.push_back(RHkey->key());
-      }
+      ATH_CHECK(m_hitContainerKeys.assign(m_inputKeys.value()));
     }
   }
   ATH_MSG_DEBUG("Input objects in these containers : '" << m_hitContainerNames << "'");

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetRecTool.cxx
@@ -39,7 +39,7 @@ using xAOD::Jet;
 
 //**********************************************************************
 
-JetRecTool::JetRecTool(std::string myname)
+JetRecTool::JetRecTool(const std::string& myname)
 : AsgTool(myname),
   m_intool("",this),
 #ifdef XAOD_ANALYSIS

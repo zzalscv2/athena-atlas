@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -118,7 +118,7 @@ void VP1CollectionWidget::Imp::repopulateGUIFromCollections()
   }
 
   QSet<QString> sections;
-  foreach (VP1Collection* col,collections)
+  for (VP1Collection* col :collections)
     sections.insert(col->section());
   QList<QString> sectionsSorted = sections.values();
   std::sort(sectionsSorted.begin(), sectionsSorted.end());
@@ -130,7 +130,7 @@ void VP1CollectionWidget::Imp::repopulateGUIFromCollections()
   QList<QCheckBox*> firstColumnCheckBoxes;
 
   int gridmargins(0);
-  foreach (QString section,sectionsSorted) {
+  for  (QString section : sectionsSorted) {
     //type section header:
     QLabel * sectionlabel(0);
     if (!nosectionlabels) {
@@ -151,7 +151,7 @@ void VP1CollectionWidget::Imp::repopulateGUIFromCollections()
     if (!nosectionlabels)
       gridLayout->addItem(new QSpacerItem(10, 1, QSizePolicy::Fixed, QSizePolicy::Fixed),0,0);
     vlayout->addLayout(gridLayout);
-    foreach (VP1Collection* col,collections) {
+    for (VP1Collection* col : collections) {
       if (col->section()!=section)
 	continue;
       if (sectionlabel) {
@@ -161,7 +161,7 @@ void VP1CollectionWidget::Imp::repopulateGUIFromCollections()
       }
       int newrow = gridLayout->rowCount();
       int i(1);
-      foreach (QWidget*w,col->widgetsForGuiRow()) {
+      for (QWidget*w : col->widgetsForGuiRow()) {
 	if (!w) {
 	  theclass->message("WARNING: Ignoring null widget provided by widgetsForGuiRow() (perhaps due to a VP1StdCollection you didn't init()?)");
 	  continue;
@@ -198,7 +198,7 @@ void VP1CollectionWidget::Imp::repopulateGUIFromCollections()
   }
 
   if (maxFirstColumnCheckBoxWidth>0) {
-    foreach(QCheckBox *cb,firstColumnCheckBoxes)
+    for (QCheckBox *cb : firstColumnCheckBoxes)
       cb->setMinimumWidth(maxFirstColumnCheckBoxWidth);
   }
 
@@ -246,7 +246,7 @@ void VP1CollectionWidget::addCollections(QList<VP1Collection*> cols, bool applyS
     VP1Collection::applyStates(m_d->collections, m_d->states);
 
   possibleChange_visibleStdCollections();
-  foreach(VP1Collection* col,cols) {
+  for (VP1Collection* col : cols) {
     VP1StdCollection* stdcol = dynamic_cast<VP1StdCollection*>(col);
     if (stdcol)
       connect(stdcol,SIGNAL(visibilityChanged(bool)),this,SLOT(possibleChange_visibleStdCollections()));
@@ -265,7 +265,7 @@ void VP1CollectionWidget::setCollections(QList<VP1Collection*> cols,bool applySa
     VP1Collection::applyStates(m_d->collections, m_d->states);
 
   possibleChange_visibleStdCollections();
-  foreach(VP1Collection* col,cols) {
+  for (VP1Collection* col : cols) {
     VP1StdCollection* stdcol = dynamic_cast<VP1StdCollection*>(col);
     if (stdcol)
       connect(stdcol,SIGNAL(visibilityChanged(bool)),this,SLOT(possibleChange_visibleStdCollections()));
@@ -312,7 +312,7 @@ VP1CollStates VP1CollectionWidget::states() const
 QList<qint32> VP1CollectionWidget::Imp::visibleStdCollectionTypesFromVisStdCols(const QList<VP1StdCollection*>& l) const
 {
   QSet<qint32> vt;
-  foreach(VP1StdCollection* stdcol,l)
+  for (VP1StdCollection* stdcol : l)
     vt.insert(stdcol->collTypeID());
   QList<qint32> vistypes = vt.values();
   std::sort(vistypes.begin(), vistypes.end());
@@ -330,7 +330,7 @@ QList<qint32> VP1CollectionWidget::visibleStdCollectionTypes() const
 QList<VP1StdCollection*> VP1CollectionWidget::visibleStdCollections() const
 {
   QList<VP1StdCollection*> l;
-  foreach(VP1StdCollection* stdcol,collections<VP1StdCollection>()) {
+  for(VP1StdCollection* stdcol : collections<VP1StdCollection>()) {
     if (stdcol->visible())
       l << stdcol;
   }
@@ -362,12 +362,12 @@ void VP1CollectionWidget::ensureFirst(const QString& wildcard,QList<QString>& st
 {
   QRegExp rx(wildcard,Qt::CaseInsensitive,QRegExp::Wildcard);
   QList<QString> l;
-  foreach(QString str, strs)
+  for (QString str : strs)
     if (rx.exactMatch(str))
       l << str;
-  foreach(QString str, l)
+  for (QString str : l)
     strs.removeAll(str);
-  foreach(QString str, strs)
+  for (QString str : strs)
     l << str;
   strs = l;
 
@@ -378,10 +378,10 @@ void VP1CollectionWidget::ensureLast(const QString& wildcard,QList<QString>& str
 {
   QRegExp rx(wildcard,Qt::CaseInsensitive,QRegExp::Wildcard);
   QList<QString> l;
-  foreach(QString str, strs)
+  for(QString str : strs)
     if (rx.exactMatch(str))
       l << str;
-  foreach(QString str, l)
+  for (QString str : l)
     strs.removeAll(str);
   strs << l;
 }

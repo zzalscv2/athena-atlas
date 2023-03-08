@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  CaloClusterCorrectionCommon.cxx
@@ -418,9 +418,7 @@ CaloClusterCorrectionCommon::CaloClusterCorrectionCommon (const std::string& typ
  *
  * Needs to be out-of-line due to m_ddhelper.
  */
-CaloClusterCorrectionCommon::~CaloClusterCorrectionCommon()
-{
-}
+CaloClusterCorrectionCommon::~CaloClusterCorrectionCommon() = default;
 
 
 /**

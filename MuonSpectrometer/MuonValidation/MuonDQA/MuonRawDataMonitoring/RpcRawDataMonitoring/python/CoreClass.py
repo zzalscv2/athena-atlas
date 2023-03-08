@@ -134,8 +134,8 @@ class Draw_Base(object):
   _var_title = {
     "p0"                  : "p0"       ,
     "p1"                  : "p1"       ,
-    "chi2"                : "Chi2/ndf"     ,
-    "prdhits"             : "PRD hits"     ,
+    "chi2"                : "Chi2/ndf" ,
+    "prdhits"             : "Hits"     ,
     "muon_Z_num"          : "Muons(Z) extrapolated to individual RPC panels with hits",
     "muon_Z_den"          : "Muons(Z) extrapolated to individual RPC panels",
     "muon_all_num"        : "Muons(All) extrapolated to individual RPC panels with hits",
@@ -467,7 +467,7 @@ class Draw_Base(object):
       z_max       = self._rangeOfVariables_perPanel[self._variable][1]
 
     dic_hists = {}
-    for i_layer in range(1, 7): # 1,2,...,6
+    for i_layer in range(1, 9): # 1,2,...,8
       for i_measPhi in [0, 1]:
         h2_name  = out_hname+"_layer"+str(i_layer)+"_measPhi"+str(i_measPhi)
         h2_title = out_htitle+"("+layerNames[i_layer]+"-"+isMeasPhiNames[i_measPhi]+")"
@@ -476,8 +476,6 @@ class Draw_Base(object):
 
     for i_sector, dic_perSecLayer in self._dic_panels_detect.items():
       i_layer = i_sector[1]
-      if i_layer > 6:
-        i_layer = i_layer-2
 
       for i_dbPhi_meas, dic_dbPhi_meas in dic_perSecLayer.items():
         h2_temp = dic_hists[(i_layer, i_dbPhi_meas[1])]
@@ -494,7 +492,7 @@ class Draw_Base(object):
           h2_temp.SetBinContent(x_bin, y_bin, content)
 
     list_hists = []
-    for i_layer in range(1, 7): # 1,2,...,6
+    for i_layer in range(1, 9): # 1,2,...,8
       for i_measPhi in [0, 1]:
         h2 = dic_hists[(i_layer, i_measPhi)]
 
@@ -508,6 +506,8 @@ class Draw_Base(object):
         HistDecorate.set_verticalGrid(h2)
         HistDecorate.set_horizonGrid(h2)
         HistDecorate.setAxisLabel_EtaPhi(h2)
+        
+        HistDecorate.set_blankBox(h2, i_layer)
 
         list_hists.append(h2)
       

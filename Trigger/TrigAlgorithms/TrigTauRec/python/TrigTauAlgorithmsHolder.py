@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 ################################################################################
 ##
@@ -9,7 +9,6 @@
 ################################################################################
 
 from AthenaCommon.SystemOfUnits import mm, GeV
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
 
 cached_instances = {}
 
@@ -60,61 +59,6 @@ def getJetSeedBuilder():
     cached_instances[_name] = JetSeedBuilder
     return JetSeedBuilder
 
-########################################################################
-# Tau energy calibration and tau axis direction
-def getTauAxis():
-    _name = sPrefix + 'TauAxis'
-    
-    if _name in cached_instances:
-        return cached_instances[_name]
-    
-    from tauRecTools.tauRecToolsConf import TauAxisSetter
-    TauAxisSetter = TauAxisSetter(  name = _name, 
-                                    ClusterCone = 0.2,
-                                    VertexCorrection = doVertexCorrection )
-    # No Axis correction at trigger level
-                                    
-    cached_instances[_name] = TauAxisSetter                
-    return TauAxisSetter
-
-########################################################################
-# MvaTESVariableDecorator
-def getMvaTESVariableDecorator():
-
-    _name = sPrefix + 'MvaTESVariableDecorator'
-
-    if _name in cached_instances:
-        return cached_instances[_name]
-
-    from AthenaCommon.AppMgr import ToolSvc
-    from tauRecTools.tauRecToolsConf import MvaTESVariableDecorator
-    MvaTESVariableDecorator = MvaTESVariableDecorator(name = _name,
-                                                      VertexCorrection = doVertexCorrection)
-
-    MvaTESVariableDecorator.Key_vertexInputContainer = ""
-    MvaTESVariableDecorator.EventShapeKey = ""
-
-    ToolSvc += MvaTESVariableDecorator
-    cached_instances[_name] = MvaTESVariableDecorator
-    return MvaTESVariableDecorator
-
-########################################################################
-# MvaTESEvaluator
-def getMvaTESEvaluator():
-
-    _name = sPrefix + 'MvaTESEvaluator'
-
-    if _name in cached_instances:
-        return cached_instances[_name]
-
-    from AthenaCommon.AppMgr import ToolSvc
-    from tauRecTools.tauRecToolsConf import MvaTESEvaluator
-    MvaTESEvaluator = MvaTESEvaluator(name = _name,
-                                      WeightFileName = ConfigFlags.Trigger.Offline.Tau.MvaTESConfig)
-
-    ToolSvc += MvaTESEvaluator
-    cached_instances[_name] = MvaTESEvaluator
-    return MvaTESEvaluator
 
 ########################################################################
 # Tau cell variables calculation
@@ -417,36 +361,6 @@ def getTauTrackFinder(applyZ0cut=False, maxDeltaZ0=2, noSelector = False, prefix
     return TauTrackFinder
 
 
-# Associate the cluster in jet constituents to the tau candidate
-def getTauClusterFinder():
-    _name = sPrefix + 'TauClusterFinder'
-
-    if _name in cached_instances:
-        return cached_instances[_name]
-  
-    from tauRecTools.tauRecToolsConf import TauClusterFinder
-    TauClusterFinder = TauClusterFinder(name = _name,
-                                        UseOriginalCluster = False)
-
-    cached_instances[_name] = TauClusterFinder
-    return TauClusterFinder
-
-
-def getTauVertexedClusterDecorator():
-    from tauRecTools.tauRecToolsConf import TauVertexedClusterDecorator
-
-    _name = sPrefix + 'TauVertexedClusterDecorator'
-    
-    if _name in cached_instances:
-        return cached_instances[_name]
-  
-    myTauVertexedClusterDecorator = TauVertexedClusterDecorator(name = _name,
-                                                                SeedJet = "")
-    
-    cached_instances[_name] = myTauVertexedClusterDecorator
-    return myTauVertexedClusterDecorator
-
-
 ########################################################################
 # TauIDVarCalculator
 def getTauIDVarCalculator():
@@ -468,7 +382,7 @@ def getTauIDVarCalculator():
 
 ########################################################################
 # TauJetRNNEvaluator
-def getTauJetRNNEvaluator(LLP=False, OutputVarname="RNNJetScore", 
+def getTauJetRNNEvaluator(flags, LLP=False, OutputVarname="RNNJetScore",
                           MaxTracks=10, MaxClusters=6, MaxClusterDR=1.0, TrackClassification=False,
                           InputLayerScalar="scalar", InputLayerTracks="tracks", InputLayerClusters="clusters", 
                           OutputLayer="rnnid_output", OutputNode="sig_prob"):
@@ -479,8 +393,8 @@ def getTauJetRNNEvaluator(LLP=False, OutputVarname="RNNJetScore",
         return cached_instances[_name]
 
     (NetworkFile0P, NetworkFile1P, NetworkFile3P) = \
-        ConfigFlags.Trigger.Offline.Tau.TauJetRNNConfigLLP if LLP \
-        else ConfigFlags.Trigger.Offline.Tau.TauJetRNNConfig
+        flags.Trigger.Offline.Tau.TauJetRNNConfigLLP if LLP \
+        else flags.Trigger.Offline.Tau.TauJetRNNConfig
 
     from AthenaCommon.AppMgr import ToolSvc
     from tauRecTools.tauRecToolsConf import TauJetRNNEvaluator
@@ -506,7 +420,7 @@ def getTauJetRNNEvaluator(LLP=False, OutputVarname="RNNJetScore",
 
 ########################################################################
 # TauWPDecoratorJetRNN
-def getTauWPDecoratorJetRNN(LLP=False):
+def getTauWPDecoratorJetRNN(flags, LLP=False):
 
     _name = sPrefix + 'TauWPDecoratorJetRNN' + ('_LLP' if LLP else '')
 
@@ -525,12 +439,12 @@ def getTauWPDecoratorJetRNN(LLP=False):
     # if we need different WPs, we can define new flags
 
     (flatteningFile0Prong, flatteningFile1Prong, flatteningFile3Prong) = \
-        ConfigFlags.Trigger.Offline.Tau.TauJetRNNWPConfigLLP if LLP \
-        else ConfigFlags.Trigger.Offline.Tau.TauJetRNNWPConfig
+        flags.Trigger.Offline.Tau.TauJetRNNWPConfigLLP if LLP \
+        else flags.Trigger.Offline.Tau.TauJetRNNWPConfig
 
     (targetEff0Prong, targetEff1Prong, targetEff3Prong) = \
-        ConfigFlags.Trigger.Offline.Tau.TauJetRNNLLPTargetEff if LLP \
-        else ConfigFlags.Trigger.Offline.Tau.TauJetRNNTargetEff
+        flags.Trigger.Offline.Tau.TauJetRNNLLPTargetEff if LLP \
+        else flags.Trigger.Offline.Tau.TauJetRNNTargetEff
 
     TauWPDecorator = TauWPDecorator( name=_name,
                                      flatteningFile0Prong = flatteningFile0Prong,

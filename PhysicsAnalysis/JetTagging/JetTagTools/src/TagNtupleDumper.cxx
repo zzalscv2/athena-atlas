@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -59,10 +59,11 @@ namespace Analysis {
   {
     std::lock_guard<std::mutex> lock (m_mutex);
 
-    if (m_trees.count(jetauthor) == 0) {
-      m_trees[jetauthor] = new TTree(jetauthor.c_str(), "who cares");
+    TTree* & tree = m_trees[jetauthor];
+    if (tree == nullptr) {
+      tree = new TTree(jetauthor.c_str(), "who cares");
       if (m_hist_svc->regTree("/" + m_stream + "/" + jetauthor,
-                              m_trees.at(jetauthor)).isFailure()) {
+                              tree).isFailure()) {
         ATH_MSG_ERROR("Cannot register tree " + m_stream + "/" + jetauthor);
         return;
       }
@@ -70,12 +71,13 @@ namespace Analysis {
     for (const auto& in: inputs) {
       const auto idx = std::make_pair(in.first, jetauthor);
       // add this branch if it doesn't exist
-      if (m_features.count(idx) == 0) {
-        m_features[idx] = new float;
-        m_trees.at(jetauthor)->Branch(in.first.c_str(), m_features.at(idx));
+      float* & feature = m_features[idx];
+      if (feature == nullptr) {
+        feature = new float;
+        m_trees.at(jetauthor)->Branch(in.first.c_str(), feature);
         ATH_MSG_INFO("Added Branch " + jetauthor + ": " + in.first );
       }
-      *m_features.at(idx) = in.second;
+      *feature = in.second;
     }
     // fill tree
     m_trees.at(jetauthor)->Fill();

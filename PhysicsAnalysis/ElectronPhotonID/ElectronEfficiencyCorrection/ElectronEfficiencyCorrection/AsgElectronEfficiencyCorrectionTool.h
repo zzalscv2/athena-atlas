@@ -15,9 +15,7 @@
 
 // Fwd Declarations
 class TH2F;
-namespace Root {
-class TElectronEfficiencyCorrectionTool;
-}
+#include "ElectronEfficiencyCorrection/TElectronEfficiencyCorrectionTool.h"
 #include "xAODEgamma/ElectronFwd.h"
 // Interface
 #include "EgammaAnalysisInterfaces/IAsgElectronEfficiencyCorrectionTool.h"
@@ -72,6 +70,12 @@ public:
    */
   virtual CP::CorrectionCode getEfficiencyScaleFactor(
     const xAOD::Electron& inputObject,
+    double& efficiencyScaleFactor) const override final;
+  //
+  virtual CP::CorrectionCode getEfficiencyScaleFactor(
+    const double et,  /*in MeV*/
+    const double cluster_eta, /*cluster*/
+    const unsigned int runNumber,
     double& efficiencyScaleFactor) const override final;
   //
   virtual CP::CorrectionCode applyEfficiencyScaleFactor(
@@ -130,11 +134,11 @@ private:
     float m_toy_scale;
   };
 
-  // To check if the metadat can be retrieved
+  /// To check if the metadata can be retrieved
   bool m_metadata_retrieved = false;
 
   /// Pointer to the underlying ROOT based tool
-  Root::TElectronEfficiencyCorrectionTool* m_rootTool;
+  std::unique_ptr<Root::TElectronEfficiencyCorrectionTool> m_rootTool = nullptr;
 
   /// Systematics filter map
   std::unordered_map<CP::SystematicSet, CP::SystematicSet> m_systFilter;

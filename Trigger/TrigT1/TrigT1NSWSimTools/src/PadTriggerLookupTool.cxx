@@ -29,10 +29,8 @@ PadTriggerLookupTool::PadTriggerLookupTool(const std::string& type, const std::s
     AthAlgTool(type,name,parent),
     m_etaBandsLargeSector(BandsInEtaLargeSector),
     m_etaBandsSmallSector(BandsInEtaSmallSector),
-    m_detManager(nullptr),
-    m_dumpSectorGeometry(true) {
+    m_detManager(nullptr) {
     declareInterface<NSWL1::IPadTriggerLookupTool>(this);
-    declareProperty("DumpSectorGeometry",m_dumpSectorGeometry  = true, "record sector pad geometry into an ASCII file / use it for debugging");
 }
 
 StatusCode PadTriggerLookupTool::initialize() {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////
@@ -365,7 +365,7 @@ void TileCorrelation::printCorrelation(int dignum) {
 }
 
 ////////////////////////////////////////
-void TileCorrelation::saveCorrelationSumm(bool deltaCorrelation, std::string correlationSummOptFilterFile,
+void TileCorrelation::saveCorrelationSumm(bool deltaCorrelation, const std::string& correlationSummOptFilterFile,
     const TileHWID *tileHWID, int dignum) {
 
   ATH_MSG_DEBUG("SaveCorrelationSumm");
@@ -429,7 +429,7 @@ void TileCorrelation::saveCorrelationSumm(bool deltaCorrelation, std::string cor
 }
 
 ////////////////////////////////////////
-void TileCorrelation::saveCorrelationMatrix(bool deltaCorrelation, std::string correlationMatrixOptFilterFile,
+void TileCorrelation::saveCorrelationMatrix(bool deltaCorrelation, const std::string& correlationMatrixOptFilterFile,
     const TileHWID *tileHWID, int dignum) {
 
   ATH_MSG_DEBUG("SaveCorrelationMatrix");
@@ -492,10 +492,17 @@ void TileCorrelation::saveCorrelationMatrix(bool deltaCorrelation, std::string c
 }
 
 ////////////////////////////////////////
-void TileCorrelation::calculateWeights(bool deltaCorrelation, std::vector<double> shapeFormLG,
-    std::vector<double> shapeFormHG, std::vector<double> shapeFormDerivativeLG,
-    std::vector<double> shapeFormDerivativeHG, std::string aiLoOptFilterFile, std::string biLoOptFilterFile,
-    std::string aiHiOptFilterFile, std::string biHiOptFilterFile, const TileHWID *tileHWID, int dignum) {
+void TileCorrelation::calculateWeights
+  (bool deltaCorrelation,
+   const std::vector<double>& shapeFormLG,
+   const std::vector<double>& shapeFormHG,
+   const std::vector<double>& shapeFormDerivativeLG,
+   const std::vector<double>& shapeFormDerivativeHG,
+   const std::string& aiLoOptFilterFile,
+   const std::string& biLoOptFilterFile,
+   const std::string& aiHiOptFilterFile,
+   const std::string& biHiOptFilterFile,
+   const TileHWID *tileHWID, int dignum) {
 
   ATH_MSG_DEBUG("CalcWeights");
 

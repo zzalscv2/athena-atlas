@@ -1,12 +1,12 @@
 #
-#  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 from AthenaCommon.CFElements import parOR
 #logging
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
 
-def precisionElectronRecoSequence(RoIs, ion=False, doGSF=True, doLRT=False):
+def precisionElectronRecoSequence(flags, RoIs, ion=False, doGSF=True, doLRT=False):
     """ With this function we will setup the sequence of offline EgammaAlgorithms so to make a electron for TrigEgamma 
 
     Sequence of algorithms is the following:
@@ -75,7 +75,7 @@ def precisionElectronRecoSequence(RoIs, ion=False, doGSF=True, doLRT=False):
           ViewVerifyTrk_GSF.DataObjects += [( 'TRT_RDO_Container' , 'StoreGateSvc+%s' % "TRT_RDOs" )]
 
     """ Retrieve the factories now """
-    from TriggerMenuMT.HLT.Electron.TrigElectronFactories import TrigEgammaRecElectron, TrigElectronSuperClusterBuilder, TrigTopoEgammaElectronCfg
+    from TriggerMenuMT.HLT.Electron.TrigElectronFactories import TrigEgammaRecElectronCfg, TrigElectronSuperClusterBuilderCfg, TrigTopoEgammaElectronCfg
     from TriggerMenuMT.HLT.Egamma.TrigEgammaFactories import  TrigEMTrackMatchBuilder, TrigElectronIsoBuilderCfg, TrigElectronIsoBuilderCfg_LRT
    
     # Create the sequence of three steps:
@@ -88,7 +88,7 @@ def precisionElectronRecoSequence(RoIs, ion=False, doGSF=True, doLRT=False):
     thesequence_GSF += ViewVerifyTrk_GSF
 
     ## TrigEMTrackMatchBuilder_GSF ##
-    TrigEMTrackMatchBuilder_GSF = TrigEMTrackMatchBuilder("TrigEMTrackMatchBuilder"+tag)
+    TrigEMTrackMatchBuilder_GSF = TrigEMTrackMatchBuilder(flags)("TrigEMTrackMatchBuilder"+tag)
     ## if gsf then use trackparticles here, otherwise match with trackparticles_noGSF
     if doGSF:
         TrigEMTrackMatchBuilder_GSF.TrackParticlesName = trackParticles
@@ -96,14 +96,14 @@ def precisionElectronRecoSequence(RoIs, ion=False, doGSF=True, doLRT=False):
         TrigEMTrackMatchBuilder_GSF.TrackParticlesName = trackParticles_noGSF
     
     ## TrigEgammaRecElectron_GSF ##
-    TrigEgammaRecAlgo_GSF = TrigEgammaRecElectron("TrigEgammaRecElectron"+tag)
+    TrigEgammaRecAlgo_GSF = TrigEgammaRecElectronCfg(flags, "TrigEgammaRecElectron"+tag)
     thesequence_GSF += TrigEgammaRecAlgo_GSF
     if doGSF:
         TrigEgammaRecAlgo_GSF.TrackMatchBuilderTool = TrigEMTrackMatchBuilder_GSF
     TrigEgammaRecAlgo_GSF.InputClusterContainerName = caloClusters
 
     ## TrigElectronSuperClusterBuilder_GSF ##
-    TrigSuperElectronAlgo_GSF = TrigElectronSuperClusterBuilder("TrigElectronSuperClusterBuilder"+tag)
+    TrigSuperElectronAlgo_GSF = TrigElectronSuperClusterBuilderCfg(flags, "TrigElectronSuperClusterBuilder"+tag)
     thesequence_GSF += TrigSuperElectronAlgo_GSF
     TrigSuperElectronAlgo_GSF.TrackMatchBuilderTool = TrigEMTrackMatchBuilder_GSF
 
@@ -137,7 +137,7 @@ def precisionElectronRecoSequence(RoIs, ion=False, doGSF=True, doLRT=False):
     
     #online monitoring for topoEgammaBuilder_GSF
     from TriggerMenuMT.HLT.Electron.TrigElectronFactories import PrecisionElectronTopoMonitorCfg
-    PrecisionElectronRecoMonAlgo_GSF = PrecisionElectronTopoMonitorCfg("PrecisionElectronTopoMonitoring"+tag)
+    PrecisionElectronRecoMonAlgo_GSF = PrecisionElectronTopoMonitorCfg(flags, "PrecisionElectronTopoMonitoring"+tag)
     PrecisionElectronRecoMonAlgo_GSF.ElectronKey = TrigTopoEgammaAlgo_GSF.ElectronOutputName
     PrecisionElectronRecoMonAlgo_GSF.IsoVarKeys = [ '%s.ptcone20' % TrigTopoEgammaAlgo_GSF.ElectronOutputName,
                                                     '%s.ptvarcone20' % TrigTopoEgammaAlgo_GSF.ElectronOutputName,
@@ -147,7 +147,7 @@ def precisionElectronRecoSequence(RoIs, ion=False, doGSF=True, doLRT=False):
 
     #online monitoring for TrigElectronSuperClusterBuilder_GSF
     from TriggerMenuMT.HLT.Electron.TrigElectronFactories import PrecisionElectronSuperClusterMonitorCfg
-    PrecisionElectronSuperClusterMonAlgo_GSF = PrecisionElectronSuperClusterMonitorCfg("PrecisionElectronSuperClusterBuilder"+tag)
+    PrecisionElectronSuperClusterMonAlgo_GSF = PrecisionElectronSuperClusterMonitorCfg(flags, "PrecisionElectronSuperClusterBuilder"+tag)
     PrecisionElectronSuperClusterMonAlgo_GSF.InputEgammaRecContainerName = TrigSuperElectronAlgo_GSF.SuperElectronRecCollectionName
     thesequence_GSF += PrecisionElectronSuperClusterMonAlgo_GSF
 

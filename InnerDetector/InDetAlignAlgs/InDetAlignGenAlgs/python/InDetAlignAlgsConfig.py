@@ -1,21 +1,34 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def CreateITkMisalignAlgCfg(flags, name="CreateITkMisalignAlg", **kwargs):
+def CreateITkMisalignAlgCfg(flags, name="CreateITkMisalignAlg",SetITkPixelAlignable=False,SetITkStripAlignable=False, **kwargs):
+    kwargs.setdefault("MisalignmentX",0.0)
+    kwargs.setdefault("MisalignmentY",0.0)
+    kwargs.setdefault("MisalignmentZ",0.0)
+    kwargs.setdefault("MisalignmentAlpha",0.0)
+    kwargs.setdefault("MisalignmentBeta",0.0)
+    kwargs.setdefault("MisalignmentGamma",0.0)
+    kwargs.setdefault("ScalePixelIBL",0.0)
+    kwargs.setdefault("IBLBowingTshift",0.0)
+    kwargs.setdefault("ScalePixelBarrel",1.0)
+    kwargs.setdefault("ScalePixelEndcap",1.0)
+    kwargs.setdefault("ScaleSCTBarrel",0.0)
+    kwargs.setdefault("ScaleSCTEndcap",0.0)
+
     result = ComponentAccumulator()
     
     if flags.Detector.EnableITkPixel:
         from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
-        result.merge(ITkPixelReadoutGeometryCfg(flags))
+        result.merge(ITkPixelReadoutGeometryCfg(flags,setGeometryAlignable=SetITkPixelAlignable))
         kwargs.setdefault("PixelDetEleCollKey","ITkPixelDetectorElementCollection")
     else:
         kwargs.setdefault("PixelDetEleCollKey","")
 
     if flags.Detector.EnableITkStrip:    
         from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
-        result.merge(ITkStripReadoutGeometryCfg(flags))
+        result.merge(ITkStripReadoutGeometryCfg(flags,setGeometryAlignable=SetITkStripAlignable))
         kwargs.setdefault("SCTDetEleCollKey","ITkStripDetectorElementCollection")
     else:
         kwargs.setdefault("SCTDetEleCollKey","")

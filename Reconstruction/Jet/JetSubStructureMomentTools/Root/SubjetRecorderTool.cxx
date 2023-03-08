@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetSubStructureMomentTools/SubjetRecorderTool.h"
@@ -8,14 +8,14 @@
 #include "JetEDM/JetConstituentFiller.h"
 #include "JetEDM/FastJetUtils.h"
 
-SubjetRecorderTool::SubjetRecorderTool(std::string name) : 
+SubjetRecorderTool::SubjetRecorderTool(const std::string& name) : 
   AsgTool(name), m_subjetlabel(""), m_subjetcontainername("")
 {
   declareProperty("SubjetLabel", m_subjetlabel);
   declareProperty("SubjetContainerName", m_subjetcontainername);
 }
 
-std::vector<xAOD::Jet *> SubjetRecorderTool::recordSubjets(std::vector<fastjet::PseudoJet> subjets, xAOD::Jet &jet) const
+std::vector<xAOD::Jet *> SubjetRecorderTool::recordSubjets(const std::vector<fastjet::PseudoJet>& subjets, xAOD::Jet &jet) const
 {
   // Retrieve or set up subjet container
   std::string subjet_name = m_subjetlabel;

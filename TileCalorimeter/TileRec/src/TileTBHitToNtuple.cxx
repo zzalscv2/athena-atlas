@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -35,15 +35,14 @@
 const int max_chan=99999;
 
 // Constructor & deconstructor
-TileTBHitToNtuple::TileTBHitToNtuple(std::string name, ISvcLocator* pSvcLocator)
+TileTBHitToNtuple::TileTBHitToNtuple(const std::string& name, ISvcLocator* pSvcLocator)
   : AthAlgorithm(name, pSvcLocator)
   , m_ntuplePtr(0)
+  , m_ntupleID("h31")
+  , m_ntupleLoc("/FILE1/TileRec")
+  , m_hitContainer("TileTBHits") //name of hit vector for ancillary detectors
   , m_tileTBID(0)
 {
-  m_hitContainer="TileTBHits"; //name of hit vector for ancillary detectors
-  m_ntupleLoc="/FILE1/TileRec";
-  m_ntupleID="h31";
-
   declareProperty("TileHitContainer", m_hitContainer);    
   declareProperty("NTupleLoc", m_ntupleLoc);
   declareProperty("NTupleID", m_ntupleID);

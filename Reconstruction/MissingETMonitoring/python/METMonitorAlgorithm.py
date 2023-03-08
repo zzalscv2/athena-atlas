@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 import math
 def defineHistograms(monAlg, group,helper,histoNameSuffix=""):
 #    name = histoNameSuffix + 'x'
@@ -56,13 +56,14 @@ def METMonitoringConfig(inputFlags):
     if inputFlags.DQ.Environment == 'tier0Raw':
         return result
 
-    from AthenaMonitoring import AthMonitorCfgHelper     
+    from AthenaMonitoring import AthMonitorCfgHelper
     helper = AthMonitorCfgHelper(inputFlags,'METMonitor') 
  
-# Import filter tools as helpers
+    # Import filter tools as helpers
     from AthenaMonitoring.AtlasReadyFilterConfig import AtlasReadyFilterCfg
     from AthenaMonitoring.BadLBFilterToolConfig import LArBadLBFilterToolCfg
     from AthenaMonitoring.FilledBunchFilterToolConfig import FilledBunchFilterToolCfg
+    from AthenaMonitoring.DQConfigFlags import DQDataType
 
     from AthenaConfiguration.ComponentFactory import CompFactory  
     METRefFinal_MonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'METRefFinal_MonAlg',
@@ -82,7 +83,7 @@ def METMonitoringConfig(inputFlags):
     for mets in met_types:
         defineHistograms(METRefFinal_MonAlg, group,helper,mets)
 
-    if inputFlags.DQ.DataType != 'cosmics':
+    if inputFlags.DQ.DataType is not DQDataType.Cosmics:
         METPflow_MonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'METPflow_MonAlg',
                                             addFilterTools = [AtlasReadyFilterCfg(inputFlags),
                                                               LArBadLBFilterToolCfg(inputFlags),
@@ -140,7 +141,7 @@ def METMonitoringConfig(inputFlags):
     for mets in met_types:
         defineHistograms(METRefFinal_XE50_MonAlg, group,helper,mets)
 
-    if inputFlags.DQ.DataType != 'cosmics':
+    if inputFlags.DQ.DataType is not DQDataType.Cosmics:
         METPflow_XE50_MonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'METPflow_XE50_MonAlg',
                                                    addFilterTools = [AtlasReadyFilterCfg(inputFlags),
                                                                      LArBadLBFilterToolCfg(inputFlags),
@@ -195,7 +196,7 @@ def METMonitoringConfig(inputFlags):
     for mets in met_types:
         defineHistograms(METRefFinal_METCut_MonAlg, group,helper,mets) 
    
-    if inputFlags.DQ.DataType != 'cosmics':
+    if inputFlags.DQ.DataType is not DQDataType.Cosmics:
         METPflow_METCut_MonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'METPflow_METCut_MonAlg',
                                                      addFilterTools = [AtlasReadyFilterCfg(inputFlags),
                                                                        LArBadLBFilterToolCfg(inputFlags),
@@ -265,7 +266,7 @@ def METMonitoringConfig(inputFlags):
         defineHistograms(JetCleaning_METMonAlg, JetCleaningGroup,helper,mets)
         
 
-    if inputFlags.DQ.DataType != 'cosmics':
+    if inputFlags.DQ.DataType is not DQDataType.Cosmics:
         PflowJetCleaning_METMonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'PflowJetCleaning_METMonAlg',
                                                          addFilterTools = [AtlasReadyFilterCfg(inputFlags),
                                                                            LArBadLBFilterToolCfg(inputFlags),
@@ -330,7 +331,7 @@ def METMonitoringConfig(inputFlags):
     for mets in met_types:
         defineHistograms(BadJets_METMonAlg, BadJetsGroup,helper,mets)
 
-    if inputFlags.DQ.DataType != 'cosmics':
+    if inputFlags.DQ.DataType is not DQDataType.Cosmics:
         BadPFJets_METMonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'BadPFJets_METMonAlg',
                                                   addFilterTools = [AtlasReadyFilterCfg(inputFlags),
                                                                     LArBadLBFilterToolCfg(inputFlags),

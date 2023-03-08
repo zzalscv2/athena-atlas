@@ -489,7 +489,7 @@ std::vector<TH2D*>  MakeQuarkGluonFractionPlots::evaluateQGFUncertaity(std::vect
   return final_histos;
 }
 // Compute quark-gluon composition
-std::vector<TH2D*> MakeQuarkGluonFractionPlots::computeQuarkGluonFraction (std::map< std::string, TH2D* > inputhistos, std::string quarkflavour, const std::string& prename){
+std::vector<TH2D*> MakeQuarkGluonFractionPlots::computeQuarkGluonFraction (std::map< std::string, TH2D* > inputhistos, const std::string& quarkflavour, const std::string& prename){
   std::vector<TH2D*> QuarkGluonFractionhistos;
   std::string jetCollection = extractJetCollectionName(inputhistos.begin()->first);
   int njets =  (inputhistos.size()-6)/5; //FIXME this can be potentially wrong
@@ -562,7 +562,7 @@ std::vector<TH2D*> MakeQuarkGluonFractionPlots::computeQuarkGluonFraction (std::
   return QuarkGluonFractionhistos;
 }
 // Extract jet collection name
-std::string MakeQuarkGluonFractionPlots::extractJetCollectionName(std::string histoname){
+std::string MakeQuarkGluonFractionPlots::extractJetCollectionName(const std::string& histoname){
   if(histoname.find("EMPFlow")!=std::string::npos) return "AntiKt4EMPFlow";
   else if(histoname.find("EMTopo")!=std::string::npos) return "AntiKt4EMTopo";
   else if(histoname.find("LCTopo")!=std::string::npos) return "AntiKt4LCTopo";
@@ -630,19 +630,19 @@ void MakeQuarkGluonFractionPlots::AbortXMLDecode(const std::string& value){
   abort();
 }
 
-bool MakeQuarkGluonFractionPlots::decodeFloat(TXMLEngine xml, XMLAttrPointer_t attr, std::string match, float &value){
+bool MakeQuarkGluonFractionPlots::decodeFloat(TXMLEngine xml, XMLAttrPointer_t attr, const std::string& match, float &value){
   if(strncmp(xml.GetAttrName(attr),match.c_str(),100)!=0) return false;
   value=std::stof(xml.GetAttrValue(attr));
   return true;
 }
 
-bool MakeQuarkGluonFractionPlots::decodeString(TXMLEngine xml, XMLAttrPointer_t attr, std::string match, std::string &value){
+bool MakeQuarkGluonFractionPlots::decodeString(TXMLEngine xml, XMLAttrPointer_t attr, const std::string& match, std::string &value){
   if(strncmp(xml.GetAttrName(attr),match.c_str(),100)!=0) return false;
   value=xml.GetAttrValue(attr);
   return true;
 }
 
-bool MakeQuarkGluonFractionPlots::decodeBool(TXMLEngine xml, XMLAttrPointer_t attr, std::string match, bool &value){
+bool MakeQuarkGluonFractionPlots::decodeBool(TXMLEngine xml, XMLAttrPointer_t attr, const std::string& match, bool &value){
   if(strncmp(xml.GetAttrName(attr),match.c_str(),100)!=0) return false;
   if(strncmp(xml.GetAttrValue(attr),"true",100)==0)
     value=true;

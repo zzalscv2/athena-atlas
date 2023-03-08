@@ -75,7 +75,7 @@ FCSReturnCode TFCSLateralShapeTuning::simulate_hit(Hit &hit, TFCSSimulationState
     
     // do not do anything if the parameter interpolation map is empty
     // this means we are in an pseudorapidity region, where no tuning to data is available
-    if(m_parameterInterpol.size() == 0) return FCSSuccess;
+    if(m_parameterInterpol.empty()) return FCSSuccess;
 
     //set maximum scaling factor
     float maxScaling = 500;

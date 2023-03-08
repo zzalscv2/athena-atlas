@@ -264,6 +264,36 @@ const CP::CorrectionCode ElectronPhotonVariableCorrectionBase::applyCorrection(x
     // From the object, get the variable value according to the variable from the conf file
     // if variable not found, fail
     float original_variable = 0.;
+
+    if (m_correctionVariable == "transformed_e_probability_ht" and !m_variableToCorrect->isAvailable(electron)) {
+        // this is a special case, since what we want to fudge is not the variable
+        // usually stoared in (D)xAOD, but a transformed version
+        // here we compute the transormed version
+        // this is code duplication from AsgElectronLikelihoodTool.cxx
+
+        const xAOD::TrackParticle* track = electron.trackParticle();
+        if (!track) {
+             ATH_MSG_ERROR("you are trying to fudge transformed_e_probability_ht but the electron has no track!");
+             return CP::CorrectionCode::Error;
+        }
+        float TRT_PID = 0.;
+        if (!track->summaryValue(TRT_PID, xAOD::eProbabilityHT)) {
+            ATH_MSG_ERROR("you are trying to fudge transformed_e_probability_ht but eProbabilityHT is not present");
+            return CP::CorrectionCode::Error;
+        }
+
+        const double tau = 15.0;
+        const double fEpsilon = 1.0e-30; // to avoid zero division
+        double pid_tmp = TRT_PID;
+        if (pid_tmp >= 1.0)
+          pid_tmp = 1.0 - 1.0e-15; // this number comes from TMVA
+        else if (pid_tmp <= fEpsilon)
+          pid_tmp = fEpsilon;
+        double trans_TRT_PID = -std::log(1.0 / pid_tmp - 1.0) * (1. / double(tau));
+
+        (*m_variableToCorrect)(electron) = (float)trans_TRT_PID;
+    }
+
     if (m_variableToCorrect->isAvailable(electron))
     {
         original_variable = (*m_variableToCorrect)(electron);

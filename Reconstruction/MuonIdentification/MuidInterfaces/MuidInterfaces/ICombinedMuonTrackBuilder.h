@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -71,9 +71,6 @@ namespace Rec {
         */
         virtual std::unique_ptr<Trk::Track> standaloneRefit(const EventContext& ctx, const Trk::Track& combinedTrack,  const Amg::Vector3D& bs) const = 0;
 
-        /*refit a track*/
-        virtual std::unique_ptr<Trk::Track> fit(const EventContext& ctx, Trk::Track& track, const Trk::RunOutlierRemoval runOutlier = false,
-                                                const Trk::ParticleHypothesis particleHypothesis = Trk::muon) const = 0;
     };
 
 }  // namespace Rec

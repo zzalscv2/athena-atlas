@@ -56,6 +56,11 @@ class CfgFlag(object):
         if self._value is not None:
             return deepcopy(self._value)
 
+        # For cases where the value is intended to be None
+        # i.e. _setDef applied this value, we should not progress
+        if self._setDef is None:
+            return None
+
         if not flagdict:
             raise RuntimeError("Flag is using a callable but all flags are not available.")
 

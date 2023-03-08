@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -11,6 +11,7 @@
 #include "GaudiKernel/ITHistSvc.h"
 #include "StoreGate/ReadHandleKey.h"
 
+#include "GeneratorObjects/McEventCollection.h"
 #include "InDetRawData/InDetRawDataCLASS_DEF.h"
 #include "InDetRawData/InDetRawDataContainer.h"
 #include "InDetSimData/InDetSimDataCollection.h"
@@ -45,6 +46,7 @@ public:
 private:
   SG::ReadHandleKey<SCT_RDO_Container> m_inputKey {this, "CollectionName", "ITkStripRDOs", "Input ITk Strip RDO collection name"};
   SG::ReadHandleKey<InDetSimDataCollection> m_inputTruthKey {this, "SDOCollectionName", "ITkStripSDO_Map", "Input ITk Strip SDO collection name"};
+  SG::ReadHandleKey<McEventCollection> m_inputMcEventCollectionKey {this, "McEventCollectionName", "TruthEvent", "Input McEventCollection name"};
   const SCT_ID *m_sctID{};
   const InDetDD::SCT_DetectorManager *m_SCT_Manager{};
 

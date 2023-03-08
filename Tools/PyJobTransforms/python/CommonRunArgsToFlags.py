@@ -23,12 +23,15 @@ def commonRunArgsToFlags(runArgs,configFlags):
     if hasattr(runArgs,"geometryVersion"): 
         configFlags.GeoModel.AtlasVersion=runArgs.geometryVersion
 
+    if hasattr(runArgs,"triggerConfig"): 
+        configFlags.Trigger.triggerConfig=runArgs.triggerConfig
+
     if hasattr(runArgs,"beamType"):
         from AthenaConfiguration.Enums import BeamType
         configFlags.Beam.Type=BeamType(runArgs.beamType)
 
     # Read the input entries for some common types
-    for ftype in ["HITS", "RDO", "ESD", "AOD"]:
+    for ftype in ["BS", "HITS", "RDO", "ESD", "AOD"]:
         if hasattr(runArgs, f"input{ftype}FileNentries"):
             configFlags.Input.FileNentries = getattr(runArgs, f"input{ftype}FileNentries")
 

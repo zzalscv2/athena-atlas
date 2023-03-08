@@ -127,7 +127,7 @@ namespace InDet
    if (!indexOfSorted.empty()){
      exPerigee =
        m_extrapolator
-         ->extrapolate(ctx, *preselectedTracks[indexOfSorted[0]], perigeeSurface, Trk::anyDirection, true, Trk::pion)
+         ->extrapolateTrack(ctx, *preselectedTracks[indexOfSorted[0]], perigeeSurface, Trk::anyDirection, true, Trk::pion)
          .release();
    }
 
@@ -148,7 +148,7 @@ namespace InDet
    if(m_useMaxInCluster) addingDistance = 0.;
    for(unsigned int i=0;i<indexOfSorted.size();++i)
    {
-    const  Trk::TrackParameters * lexPerigee = m_extrapolator->extrapolate(ctx, *preselectedTracks[indexOfSorted[i]],
+    const  Trk::TrackParameters * lexPerigee = m_extrapolator->extrapolateTrack(ctx, *preselectedTracks[indexOfSorted[i]],
 									   perigeeSurface,Trk::anyDirection,true, Trk::pion).release(); 
     float currentTrackZ0 = lexPerigee->parameters()[Trk::z0];
     delete lexPerigee;
@@ -385,7 +385,7 @@ std::vector< std::vector<const Trk::TrackParameters *> > SlidingWindowMultiSeedF
 	const Trk::TrackParameters * exPerigee(nullptr);
 	Trk::PerigeeSurface perigeeSurface(beamposition->position());
 	
-	exPerigee = m_extrapolator->extrapolate(ctx, *preselectedTracks[indexOfSorted[0]],
+	exPerigee = m_extrapolator->extrapolate(ctx, preselectedTracks[indexOfSorted[0]]->perigeeParameters(),
 						perigeeSurface,Trk::anyDirection,true, Trk::pion).release();
 	
 	float lastTrackZ0  = -999.;
@@ -413,7 +413,11 @@ std::vector< std::vector<const Trk::TrackParameters *> > SlidingWindowMultiSeedF
           const Trk::TrackParameters* lexPerigee =
             m_extrapolator
               ->extrapolate(
-                ctx, *preselectedTracks[indexOfSorted[i]], perigeeSurface, Trk::anyDirection, true, Trk::pion).release();
+                ctx, 
+                preselectedTracks[indexOfSorted[i]]->perigeeParameters(), 
+                perigeeSurface, 
+                Trk::anyDirection, 
+                true, Trk::pion).release();
           float currentTrackZ0 = lexPerigee->parameters()[Trk::z0];
           delete lexPerigee;
 

@@ -545,6 +545,7 @@ def EGammaCommonCfg(ConfigFlags):
         # Decorate egammaTruthParticles with truth-particle-level etcone20,30,40
         from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import TruthIsolationToolCfg
         TruthEgetIsolationTool = acc.getPrimaryAndMerge(TruthIsolationToolCfg(
+            ConfigFlags,
             name="TruthEgetIsolationTool",
             isoParticlesKey="egammaTruthParticles",
             allParticlesKey="TruthParticles",
@@ -557,6 +558,7 @@ def EGammaCommonCfg(ConfigFlags):
 
         # Decorate egammaTruthParticles with truth-particle-level ptcone20,30,40
         TruthEgptIsolationTool = acc.getPrimaryAndMerge(TruthIsolationToolCfg(
+            ConfigFlags,
             name="TruthEgptIsolationTool",
             isoParticlesKey="egammaTruthParticles",
             allParticlesKey="TruthParticles",
@@ -572,7 +574,7 @@ def EGammaCommonCfg(ConfigFlags):
         from JetRecConfig.StandardJetConstits import stdConstitDic as cst
 
         # Schedule PseudoJetTruth
-        constit_algs = getInputAlgs(cst.Truth, configFlags=ConfigFlags)
+        constit_algs = getInputAlgs(cst.Truth, flags=ConfigFlags)
         constit_algs = reOrderAlgs( [a for a in constit_algs if a is not None])
 
         for a in constit_algs:

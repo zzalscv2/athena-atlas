@@ -6,6 +6,10 @@ from PyJobTransforms.CommonRunArgsToFlags import commonRunArgsToFlags
 from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, processPostExec, processPostInclude
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 
+# temporarily force no global config flags
+from AthenaConfiguration import AllConfigFlags
+del AllConfigFlags.ConfigFlags
+
 
 def fromRunArgs(runArgs):
     from AthenaCommon.Logging import logging
@@ -16,21 +20,22 @@ def fromRunArgs(runArgs):
     logDerivation.info(str(runArgs))
 
     logDerivation.info('**** Setting-up configuration flags')
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    commonRunArgsToFlags(runArgs, ConfigFlags)
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    commonRunArgsToFlags(runArgs, flags)
 
     # Switch on PerfMon
-    ConfigFlags.PerfMon.doFullMonMT = True
+    flags.PerfMon.doFullMonMT = True
 
     # Input types
     if not hasattr(runArgs, 'inputDAOD_PHYSVALFile'):
         raise ValueError('Input must be provided using --inputDAOD_PHYSVALFile')
-    ConfigFlags.Input.Files = runArgs.inputDAOD_PHYSVALFile
+    flags.Input.Files = runArgs.inputDAOD_PHYSVALFile
 
     # Physics Validation
     if hasattr(runArgs, 'outputNTUP_PHYSVALFile'):
         logDerivation.info('Will produce NTUP_PHYSVAL file')
-        ConfigFlags.PhysVal.OutputFileName = runArgs.outputNTUP_PHYSVALFile
+        flags.PhysVal.OutputFileName = runArgs.outputNTUP_PHYSVALFile
 
         if not (hasattr(runArgs, 'inputAODFile') or hasattr(runArgs, 'inputDAOD_PHYSVALFile')):
             logDerivation.error('NTUP_PHYSVAL requires AOD or DAOD_PHYSVAL input')
@@ -44,44 +49,44 @@ def fromRunArgs(runArgs):
                 flag = 'doPFlow'
 
             name = f'PhysVal.{flag}'
-            if not ConfigFlags.hasFlag(name):
+            if not flags.hasFlag(name):
                 raise ValueError(f"Unknown validation flag '{name}'")
 
             logDerivation.info("Enabling validation flag '%s'", name)
-            ConfigFlags._set(name, True)
+            flags._set(name, True)
     else:
         raise ValueError('Output file name needs to be set using --outputNTUP_PHYSVALFile')
 
     # Pre-include
-    processPreInclude(runArgs, ConfigFlags)
+    processPreInclude(runArgs, flags)
 
     # Pre-exec
-    processPreExec(runArgs, ConfigFlags)
+    processPreExec(runArgs, flags)
 
     # Lock flags
-    ConfigFlags.lock()
+    flags.lock()
 
     # The main services configuration
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
     # Run NTUP_PHYSVAL making
     from PhysValMonitoring.PhysValMonitoringConfig import PhysValMonitoringCfg
-    cfg.merge(PhysValMonitoringCfg(ConfigFlags))
+    cfg.merge(PhysValMonitoringCfg(flags))
 
     # PerfMonSD
     from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
-    cfg.merge(PerfMonMTSvcCfg(ConfigFlags))
+    cfg.merge(PerfMonMTSvcCfg(flags))
 
     # Set EventPrintoutInterval to 100 events
     cfg.getService(cfg.getAppProps()['EventLoop']).EventPrintoutInterval = 100
 
     # Post-include
-    processPostInclude(runArgs, ConfigFlags, cfg)
+    processPostInclude(runArgs, flags, cfg)
 
     # Post-exec
-    processPostExec(runArgs, ConfigFlags, cfg)
+    processPostExec(runArgs, flags, cfg)
 
     # Run the final configuration
     sc = cfg.run()

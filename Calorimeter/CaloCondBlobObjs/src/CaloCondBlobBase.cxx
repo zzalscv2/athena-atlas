@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloCondBlobObjs/CaloCondBlobBase.h"
@@ -25,8 +25,7 @@ CaloCondBlobBase::CaloCondBlobBase(coral::Blob* blob_nc,
     m_pDataStart=static_cast<const void*>(this_c.getBlobStart()+getHdrSize());
     //std::cout << "CaloCondBlobObj: nChans=" << m_nChans << " nGains=" << m_nGains << std::endl;
   }
-  return;
-}
+  }
 
 CaloCondBlobBase::CaloCondBlobBase(const coral::Blob& blob)
   : CaloCondBlobBase (nullptr, &blob)

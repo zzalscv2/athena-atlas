@@ -1,8 +1,5 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-# this is based on MuonConfigFlags as a guide
-
-import unittest
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 
 
@@ -89,20 +86,23 @@ def createEgammaConfigFlags():
 
     egcf.addFlag("Egamma.Keys.Output.EgammaSuppAOD",
                  '-e033.-e011.-e333.-e335.-e337.-e377.'
-                 '-isEMLoose.-isEMTight.'
-                 '-ptconeCorrBitset.-ptconecoreTrackPtrCorrection.'
-                 '-topoetconeCorrBitset')
+                 '-isEMLoose.-isEMTight')
 
-    egcf.addFlag("Egamma.Keys.Output.Electrons", 'Electrons')
     # Remove GlobalFELinks - these are links between FlowElement (FE)
     # containers created in jet finding and electrons/photons.
     # Since these transient FE containers are not in the ESD/AOD,
     # we should not write out these links.
-    gpf_vars = '-chargedGlobalFELinks.-neutralGlobalFELinks.'
-    egcf.addFlag("Egamma.Keys.Output.ElectronsSuppESD", gpf_vars)
+    egcf.addFlag("Egamma.Keys.Output.EgammaSuppESD",
+                 '-ptconeCorrBitset.-ptconecoreTrackPtrCorrection.'
+                 '-topoetconeCorrBitset.'
+                 '-chargedGlobalFELinks.-neutralGlobalFELinks')
+
+    egcf.addFlag("Egamma.Keys.Output.Electrons", 'Electrons')
+    egcf.addFlag("Egamma.Keys.Output.ElectronsSuppESD",
+                 lambda prevFlags: (prevFlags.Egamma.Keys.Output.EgammaSuppESD))
     egcf.addFlag("Egamma.Keys.Output.ElectronsSuppAOD",
                  lambda prevFlags: (
-                     prevFlags.Egamma.Keys.Output.ElectronsSuppESD +
+                     prevFlags.Egamma.Keys.Output.ElectronsSuppESD + '.' +
                      prevFlags.Egamma.Keys.Output.EgammaSuppAOD + '.'
                      "-EgammaCovarianceMatrix."
                      "-isEMLHLoose.-isEMLHTight.-isEMLHMedium.-isEMMedium"))
@@ -124,12 +124,14 @@ def createEgammaConfigFlags():
                      prevFlags.Egamma.Keys.Output.ForwardClustersSuppESD))
 
     egcf.addFlag("Egamma.Keys.Output.Photons", 'Photons')
-    egcf.addFlag("Egamma.Keys.Output.PhotonsSuppESD", gpf_vars)
+    egcf.addFlag("Egamma.Keys.Output.PhotonsSuppESD",
+                 lambda prevFlags: (
+                     prevFlags.Egamma.Keys.Output.EgammaSuppESD +
+                     '.-ptvarcone20.-ptvarcone30'))
     egcf.addFlag("Egamma.Keys.Output.PhotonsSuppAOD",
                  lambda prevFlags: (
-                     prevFlags.Egamma.Keys.Output.PhotonsSuppESD +
-                     prevFlags.Egamma.Keys.Output.EgammaSuppAOD + '.'
-                     '-ptvarcone20.-ptvarcone30'))
+                     prevFlags.Egamma.Keys.Output.PhotonsSuppESD + '.' +
+                     prevFlags.Egamma.Keys.Output.EgammaSuppAOD))
 
     egcf.addFlag("Egamma.Keys.Output.GSFTrackParticles", 'GSFTrackParticles')
     egcf.addFlag("Egamma.Keys.Output.GSFTrackParticlesSuppESD", '')
@@ -155,19 +157,11 @@ def createEgammaConfigFlags():
     egcf.addFlag("Egamma.Keys.Output.EgammaLargeFWDClusters",
                  'egamma66FWDClusters')
     egcf.addFlag("Egamma.Keys.Output.EgammaLargeFWDClustersSuppESD", '')
-    
+
     return egcf
-
-
-# self test
-class TestEgammaConfigFlags(unittest.TestCase):
-
-    def runTest(self):
-        flags = createEgammaConfigFlags()
-        self.assertEqual(flags.Egamma.Keys.Output.Photons, "Photons")
-        self.assertEqual(flags._get("Egamma.Keys.Output.Photons"), "Photons")
 
 
 if __name__ == "__main__":
 
-    unittest.main()
+    flags = createEgammaConfigFlags()
+    flags.dump()

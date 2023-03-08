@@ -53,13 +53,14 @@ class ZdcModuleGetter ( Configured ) :
 
             if (geoFlags.Run() == "RUN2"):
                 from ZdcRec.ZdcRecConf import ZdcRecV3
-                mlog.info("got ZdcRecV3")
+                mlog.info("got ZdcRecV3, configuring it for Run2")
                 self._zdcRecHandle = ZdcRecV3()
-
+                self._zdcRecHandle.ZdcAnalysisTool.LHCRun=2
             if (geoFlags.Run() == "RUN3"):
                 from ZdcRec.ZdcRecConf import ZdcRecRun3
-                mlog.info("got ZdcRecRun3")
+                mlog.info("got ZdcRecRun3, configuring it for Run3")
                 self._zdcRecHandle = ZdcRecRun3()
+                self._zdcRecHandle.ZdcAnalysisTool.LHCRun=3
 
         except Exception:
             mlog.error("could not get handle to ZDC reco")

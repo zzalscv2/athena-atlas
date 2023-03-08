@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -58,6 +58,9 @@ namespace InDet
   ~BaseTRTPIDCalculator(){
     delete [] Blob;
   }
+
+   BaseTRTPIDCalculator (const BaseTRTPIDCalculator&) = delete;
+   BaseTRTPIDCalculator& operator= (const BaseTRTPIDCalculator&) = delete;
 
   // set constants to hard coded defaults
   virtual void setDefaultCalibrationConstants()=0;

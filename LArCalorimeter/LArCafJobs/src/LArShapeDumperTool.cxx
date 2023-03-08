@@ -47,14 +47,6 @@ StatusCode LArShapeDumperTool::initialize() {
   m_fcalId = idHelper->fcal_idHelper();
 
   ATH_CHECK(detStore()->retrieve(m_onlineHelper, "LArOnlineID"));
-
-  if (m_doShape) {
-    StatusCode sc = detStore()->regHandle(m_shape, m_shapeKey);
-    if (sc.isFailure()) {
-      msg(MSG::ERROR) << "Cannot register handle for LArShape with key " << m_shapeKey << endl << detStore()->dump() << endmsg;
-      return sc;
-    }
-  }
   
   return StatusCode::SUCCESS; 
 }
@@ -122,12 +114,12 @@ CellInfo* LArShapeDumperTool::makeCellInfo(const HWIdentifier& channelID, const 
 
 ShapeInfo* LArShapeDumperTool::retrieveShape(const HWIdentifier& channelID, CaloGain::CaloGain gain) const
 {
-  if (!m_shape) return 0;
-  if (!m_shape.cptr()) {
-    msg(MSG::WARNING) << "Could not retrieve shape object!" << endmsg;
-    return 0;
-  }        
-  const LArShapeComplete* shapeObj = dynamic_cast<const LArShapeComplete*>(m_shape.cptr());
+  ILArShape* ishape=nullptr;
+  if (detStore()->retrieve(ishape,m_shapeKey)!=StatusCode::SUCCESS) {
+    return nullptr;
+  }
+ 
+  const LArShapeComplete* shapeObj = dynamic_cast<const LArShapeComplete*>(ishape);
   if (!shapeObj) {
     msg(MSG::INFO) << "Shape object is not of type LArShapeComplete!" << endmsg;
     return 0;

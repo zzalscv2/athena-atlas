@@ -35,7 +35,7 @@ public:
 	std::bitset<3> timeBits;
 	Acts::Ccl::Label label{Acts::Ccl::NO_LABEL}; // required by ACTS
 
-	Cell(size_t i, Identifier id, std::bitset<3> timeBits)
+	Cell(size_t i, Identifier id, const std::bitset<3>& timeBits)
 	    : index(i), id(id), timeBits(timeBits) {}
     };
 
@@ -62,10 +62,6 @@ public:
 	       xAOD::StripClusterContainer& container) const override;
 
 private:
-
-    struct StripConnect {
-	Acts::Ccl::ConnectResult operator()(const Cell& ref, const Cell& iter);
-    };
 
     bool passTiming(const std::bitset<3>& timePattern) const;
     

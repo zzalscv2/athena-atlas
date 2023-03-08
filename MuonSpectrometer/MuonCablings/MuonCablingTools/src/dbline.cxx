@@ -128,7 +128,7 @@ void DBline::GetStr(std::string& str) {
             BadExtraction();
             return;
         }
-        str += m_data.substr(m_pos, pos);
+        str.append(m_data, m_pos, pos);
         m_data.erase(m_pos, (pos - m_pos) + 1);
     } else {
         str.clear();

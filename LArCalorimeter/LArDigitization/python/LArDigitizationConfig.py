@@ -120,8 +120,6 @@ def LArPileUpToolCfg(flags, name="LArPileUpTool", **kwargs):
         acc.merge(InputOverwriteCfg("LArHitContainer","LArHitEMEC","LArHitFloatContainer","LArHitEMEC"))
         acc.merge(InputOverwriteCfg("LArHitContainer","LArHitHEC","LArHitFloatContainer","LArHitHEC"))
         acc.merge(InputOverwriteCfg("LArHitContainer","LArHitFCAL","LArHitFloatContainer","LArHitFCAL"))
-        kwargs.setdefault("LArHitContainers", [])
-
         if flags.Common.isOverlay:
             from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
             acc.merge(SGInputLoaderCfg(flags, [
@@ -131,8 +129,6 @@ def LArPileUpToolCfg(flags, name="LArPileUpTool", **kwargs):
                 "LArHitFloatContainer#LArHitHEC",
             ]))
     else:
-        kwargs.setdefault("LArHitFloatContainers", [])
-
         if flags.Common.isOverlay and not flags.Sim.DoFullChain:
             from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
             acc.merge(SGInputLoaderCfg(flags, [
@@ -156,7 +152,7 @@ def LArPileUpToolCfg(flags, name="LArPileUpTool", **kwargs):
     acc.setPrivateTools(LArPileUpTool(name, **kwargs))
     return acc
 
-def LArHitEMapToDigitAlgCfg(flags, name="LArHitEMapToDigitAlgCfg", **kwargs):
+def LArHitEMapToDigitAlgCfg(flags, name="LArHitEMapToDigitAlg", **kwargs):
     """Return ComponentAccumulator with configured LArHitEMapToDigitAlg"""
     acc = LArGMCfg(flags)
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRKSPACEPOINTFORMATIONTOOL_STRIPSPACEPOINTFORMATIONTOOL_H
@@ -8,18 +8,18 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "ActsTrkToolInterfaces/IStripSpacePointFormationTool.h"
 #include "StripInformationHelper.h"
-#include "ActsTrkEvent/SpacePoint.h"
-#include "ActsTrkEvent/SpacePointData.h"
-#include "ActsTrkEvent/SpacePointMeasurementDetails.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "SiSpacePointFormation/SiElementPropertiesTable.h"
 #include "xAODInDetMeasurement/StripClusterContainer.h"
+#include "xAODInDetMeasurement/SpacePointContainer.h"
+#include "xAODInDetMeasurement/SpacePointAuxContainer.h"
 
 #include <string>
 
 class SCT_ID;
 
 namespace ActsTrk {
+  
     /// @class StripSpacePointFormationTool
     /// Tool to produce strip space points.
     /// Strip space points are made by combining clusters from pairs of
@@ -48,41 +48,33 @@ namespace ActsTrk {
 
         /// @name Production of space points
         //@{
-        virtual void produceStripSpacePoints(const xAOD::StripClusterContainer& clusterContainer,
-                                             const InDet::SiElementPropertiesTable& properties,
-                                             const InDetDD::SiDetectorElementCollection& elements,
-                                             const Amg::Vector3D& beamSpotVertex,
-                                             ActsTrk::SpacePointContainer& spacePoints,
-                                             ActsTrk::SpacePointData& spacePointData,
-                                             ActsTrk::SpacePointMeasurementDetails& spacePointDetails,
-                                             ActsTrk::SpacePointContainer& overlapSpacePoints,
-                                             ActsTrk::SpacePointData& overlapSpacePointData,
-                                             ActsTrk::SpacePointMeasurementDetails& overlapSpacePointDetails,
-                                             bool processOverlaps) const override;
+        virtual StatusCode produceStripSpacePoints(const xAOD::StripClusterContainer& clusterContainer,
+						   const InDet::SiElementPropertiesTable& properties,
+						   const InDetDD::SiDetectorElementCollection& elements,
+						   const Amg::Vector3D& beamSpotVertex,
+						   std::vector<StripSP>& spacePoints,
+						   std::vector<StripSP>& overlapSpacePoints,
+						   bool processOverlaps) const override;
         //@}
 
     private:
 
         /// @name Production of space points
         //@{
-        void fillStripSpacePoints(std::array<const InDetDD::SiDetectorElement*, nNeighbours> neighbourElements,
-                                  std::array<std::vector<std::pair<const xAOD::StripCluster*, size_t>>, nNeighbours> neighbourClusters,
-                                  std::array<double, 14> overlapExtents,
-                                  const Amg::Vector3D& beamSpotVertex,
-                                  ActsTrk::SpacePointContainer& spacePoints,
-                                  ActsTrk::SpacePointData& spacePointData,
-                                  ActsTrk::SpacePointMeasurementDetails& spacePointDetails,
-                                  ActsTrk::SpacePointContainer& overlapSpacePoints,
-                                  ActsTrk::SpacePointData& overlapSpacePointData,
-                                  ActsTrk::SpacePointMeasurementDetails& overlapSpacePointDetails) const;
-
-        std::unique_ptr<ActsTrk::SpacePoint> makeStripSpacePoint(const StripInformationHelper& firstInfo,
-                                                                 const StripInformationHelper& secondInfo,
-                                                                 bool isEndcap,
-                                                                 double limit,
-                                                                 double slimit,
-                                                                 ActsTrk::SpacePointData& data,
-                                                                 ActsTrk::SpacePointMeasurementDetails& details) const;
+        StatusCode
+	  fillStripSpacePoints(const std::array<const InDetDD::SiDetectorElement*, nNeighbours>& neighbourElements,
+			       const std::array<std::vector<std::pair<const xAOD::StripCluster*, size_t>>, nNeighbours>& neighbourClusters,
+			       const std::array<double, 14>& overlapExtents,
+			       const Amg::Vector3D& beamSpotVertex,
+			       std::vector<StripSP>& spacePoints,
+			       std::vector<StripSP>& overlapSpacePoints ) const;
+	
+	StatusCode makeStripSpacePoint(std::vector<StripSP>&,
+				       const StripInformationHelper& firstInfo,
+				       const StripInformationHelper& secondInfo,
+				       bool isEndcap,
+				       double limit,
+				       double slimit) const;
 
         void updateRange(const InDetDD::SiDetectorElement* element1,
                          const InDetDD::SiDetectorElement* element2,

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ParticleJetTools/CopyTruthParticles.h"
@@ -44,7 +44,6 @@ int CopyTruthParticles::execute() const {
   }
   for (size_t itp(0); itp<hsevt->nTruthParticles(); ++itp) {
     const xAOD::TruthParticle* tp = hsevt->truthParticle(itp);
-    if (!tp || tp->pt() < m_ptmin)
     if (!tp) {
       // This might result from a thinned truth collection, so is not
       // an error state.

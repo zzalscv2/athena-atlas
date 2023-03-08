@@ -9,4 +9,4 @@ atlas_subdir( G4SimAthenaPOOL )
 atlas_add_poolcnv_library( G4SimAthenaPOOLPoolCnv
                            src/*.cxx
                            FILES TrackRecord/TrackRecordCollection.h
-                           LINK_LIBRARIES AthenaPoolUtilities AtlasSealCLHEP GaudiKernel AthenaPoolCnvSvcLib G4SimTPCnv )
+                           LINK_LIBRARIES AthenaPoolUtilities GaudiKernel AthenaPoolCnvSvcLib G4SimTPCnv )

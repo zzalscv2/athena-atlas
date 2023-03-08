@@ -12,6 +12,9 @@ def defineMenu():
     l1items = L1MenuFlags.items()
     l1items += [
 
+        # ATR-26727
+        'L1_DY-BOX-2MU3VF',
+
         'L1_MU14FCH_jJ80',
         'L1_MU14FCH_jXE70',
 
@@ -25,6 +28,7 @@ def defineMenu():
         'L1_BTAG-MU5VFjJ90',
         'L1_BPH-0M9-EM7-EM5',
         'L1_BPH-0DR3-EM7J15',
+        'L1_cTAU20M_DR-eTAU20eTAU12-jJ40',
     ]
 
     # To replace thresholds in the physics menu
@@ -270,11 +274,17 @@ def defineMenu():
         'L1_AFP_NSC_BGRP12':'',
         'L1_AFP_A':'',
         'L1_AFP_C':'',
-        'L1_AFP_A_AND_C':'',
-        'L1_AFP_A_OR_C':'',
         'L1_AFP_A_OR_C_MBTS_2':'',
         'L1_AFP_A_AND_C_MBTS_2':'',
-
+        'L1_AFP_A_AND_C_TOF_T0T1':'',
+        'L1_AFP_FSA_TOF_T0_BGRP12':'',
+        'L1_AFP_FSA_TOF_T1_BGRP12':'',
+        'L1_AFP_FSC_TOF_T0_BGRP12':'',
+        'L1_AFP_FSC_TOF_T1_BGRP12':'',
+        'L1_AFP_FSA_TOF_T2_BGRP12':'',
+        'L1_AFP_FSA_TOF_T3_BGRP12':'',
+        'L1_AFP_FSC_TOF_T2_BGRP12':'',
+        'L1_AFP_FSC_TOF_T3_BGRP12':'',
     } 
 
     #----------------------------------------------

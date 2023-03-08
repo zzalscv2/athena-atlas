@@ -30,7 +30,7 @@ def canAddDecorator(flags):
 
     return flags.PhysVal.IDPVM.runDecoration and ("StreamESD" in flags.Input.ProcessingTags
                                                   or "StreamAOD" in flags.Input.ProcessingTags
-                                                  or "StreamDAOD" in flags.Input.ProcessingTags[0]) # Look for substring StreamDAOD in first processing tag to cover all DAOD flavors
+                                                  or (len(flags.Input.ProcessingTags) > 0 and "StreamDAOD" in flags.Input.ProcessingTags[0])) # Look for substring StreamDAOD in first processing tag to cover all DAOD flavors
 
     '''
     if rec.readTAG:

@@ -24,6 +24,7 @@
 #include "GaudiKernel/SystemOfUnits.h"
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "TrigSteeringEvent/TrigRoiDescriptor.h"
 #include "xAODTracking/TrackParticleContainer.h"
@@ -32,7 +33,7 @@
 #include "xAODTrigEgamma/TrigElectronContainer.h"
 #include "RecoToolInterfaces/IParticleCaloExtensionTool.h" 
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
-
+#include "CaloDetDescr/CaloDetDescrManager.h"
 
 /**
  * \class TrigEgammaFastElectronReAlgo 
@@ -69,7 +70,11 @@ class TrigEgammaFastElectronReAlgo : public AthReentrantAlgorithm  {
       return (el->trackParticle() ? el->trackParticle()->pt()   : -999);
     }
 
-    bool extrapolate(const xAOD::TrigEMCluster *, const xAOD::TrackParticle *, double &, double &) const;
+    bool extrapolate(const EventContext& ctx, 
+                     const CaloDetDescrManager& caloDD,
+                     const xAOD::TrigEMCluster *, 
+                     const xAOD::TrackParticle *, 
+                     double &, double &) const;
 
      // Algorithm properties: the parameters are {this, <name>, <default value>, <documentation>}
     Gaudi::Property<bool>  m_acceptAll  {this, "AcceptAll", false, "Build electrons for all tracks"};
@@ -84,9 +89,17 @@ class TrigEgammaFastElectronReAlgo : public AthReentrantAlgorithm  {
     Gaudi::Property<float> m_calotrackdeoverp_high {this,  "CaloTrackdEoverPHigh", 0, "upper limit on track E(calo)/p(track)"};
     Gaudi::Property<float> m_RCAL {this,  "RCalBarrelFace",  1470.0*Gaudi::Units::mm , "Radius of inner face of the barrel calorimeter"};
     Gaudi::Property<float> m_ZCAL {this,  "ZCalEndcapFace",     3800.0*Gaudi::Units::mm, "z of the inner face of endcap calorimeter"};
-    // Too be changed Public Tools depreciated
-    ToolHandle<Trk::IParticleCaloExtensionTool > m_caloExtensionTool {this,  "ParticleCaloExtensionTool",  "Trk::ParticleCaloExtensionTool/ParticleCaloExtensionTool", "Tool to extrapolate Track to Calo inner surface"};
- 
+
+    Gaudi::Property<bool> m_useCaloInfoInExtrap{
+        this, "useCaloInfoInExtrap", false,
+        "use knowledge of the cluster in extrapolation"};
+
+    //
+    ToolHandle<Trk::IParticleCaloExtensionTool> m_caloExtensionTool{
+        this, "ParticleCaloExtensionTool",
+        "Trk::ParticleCaloExtensionTool/ParticleCaloExtensionTool",
+        "Tool to extrapolate Track to Calo inner surface"};
+
     SG::ReadHandleKey<TrigRoiDescriptorCollection> m_roiCollectionKey { this, 
         "RoIs",                             // property name
         "rois",                             // default value of StoreGate key
@@ -102,9 +115,16 @@ class TrigEgammaFastElectronReAlgo : public AthReentrantAlgorithm  {
         "Tracks",                     // default value of StoreGate key
         "input TrackParticle container name"};
 
-    SG::WriteHandleKey<xAOD::TrigElectronContainer> m_outputElectronsKey{ this,
-        "ElectronsName",                  // property name
-        "Electrons",                      // default value of StoreGate key
+    SG::ReadCondHandleKey<CaloDetDescrManager> m_caloDetDescrMgrKey{
+        this, 
+        "CaloDetDescrManager", 
+        "CaloDetDescrManager",
+        "SG Key for CaloDetDescrManager in the Condition Store"};
+
+    SG::WriteHandleKey<xAOD::TrigElectronContainer> m_outputElectronsKey{
+        this,
+        "ElectronsName",  // property name
+        "Electrons",      // default value of StoreGate key
         "output Electron container name "};
 
     SG::WriteHandleKey<xAOD::TrigElectronContainer> m_outputDummyElectronsKey{ this,

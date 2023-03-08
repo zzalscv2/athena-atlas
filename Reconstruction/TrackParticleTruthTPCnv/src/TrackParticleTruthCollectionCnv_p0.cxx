@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrackParticleTruthTPCnv/TrackParticleTruthCollectionCnv_p0.h"
@@ -31,8 +31,8 @@ void TrackParticleTruthCollectionCnv_p0::persToTrans( const Rec::TrackParticleTr
     //static (const) DataLink<Rec::TrackParticleContainer>                 = 
     TrackParticleTruthCollectionAccessor::trackParticleContainerLink(trans) = dynamic_cast<const Rec::TrackParticleContainer*>((*pers)[0].first.getStorableObjectPointer());
 
-    for(Rec::TrackParticleTruthCollection_p0::const_iterator i=pers->begin(); i!=pers->end(); ++i) {
-      trans->insert(trans->end(), std::make_pair(i->first, i->second));
+    for (const auto& p : *pers) {
+      trans->insert(trans->end(), std::make_pair(p.first, p.second));
     }
   }
 

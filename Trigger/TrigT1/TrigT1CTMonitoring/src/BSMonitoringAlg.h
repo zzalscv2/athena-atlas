@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1_CTMONITORING_BSMONITORING_H
@@ -22,7 +22,6 @@
 #include "TrigT1Interfaces/ITrigT1MuonRecRoiTool.h"
 #include "TrigT1Result/MuCTPI_RDO.h"
 #include "TrigT1Result/MuCTPI_Phase1_RDO.h"
-//#include "TrigT1Result/MuCTPI_RIO.h"
 #include "TrigT1Result/CTP_RDO.h"
 #include "TrigT1Result/CTP_RIO.h"
 #include "TrigT1Result/RoIBResult.h"
@@ -39,7 +38,6 @@
 class CTP_RDO;
 class CTP_RIO;
 class MuCTPI_RDO;
-//class MuCTPI_RIO;
 class CTP_BC;
 
 namespace ROIB {
@@ -71,44 +69,35 @@ namespace TrigT1CTMonitoring {
 
     void doMuonRoI( const MuCTPI_RDO* theMuCTPI_RDO,
                     const ROIB::RoIBResult* roib,
-		    const EventContext& ctx ) const;
+					const EventContext& ctx ) const;
 
     void doCtp( const CTP_RDO* theCTP_RDO,
                 const CTP_RIO* theCTP_RIO,
-		const EventContext& ctx ) const;
+				const EventContext& ctx ) const;
 
     void doMuctpi(const MuCTPI_RDO* theMuCTPI_RDO,
                   const RpcSectorLogicContainer* theRPCContainer,
                   const Muon::TgcCoinDataContainer* theTGCContainer,
-          const EventContext& ctx ) const;
+				  const EventContext& ctx ) const;
 
     void doMuctpi(const MuCTPI_Phase1_RDO* theMuCTPI_Phase1_RDO,
                   const std::vector<uint>& bcidFirstInTrain,
                   //const RpcSectorLogicContainer* theRPCContainer,    //will be used later
                   //const Muon::TgcCoinDataContainer* theTGCContainer, //will be used later
-          const EventContext& ctx ) const;
+				  const EventContext& ctx ) const;
 
     void doCtpMuctpi( const CTP_RDO* theCTP_RDO,
-                      //const CTP_RIO* theCTP_RIO,
                       const MuCTPI_RDO* theMuCTPI_RDO,
-                      //const MuCTPI_RIO* theMuCTPI_RIO,
-		      const EventContext& ctx ) const;
+					  const EventContext& ctx ) const;
 
     void dumpData(const CTP_RDO* theCTP_RDO,
-                  //const CTP_RIO* theCTP_RIO,
                   const MuCTPI_RDO* theMuCTPI_RDO,
-                  //const MuCTPI_RIO* theMuCTPI_RIO,
                   const ROIB::RoIBResult* roib,
-		  const EventContext& ctx ) const;
+				  const EventContext& ctx ) const;
 
     StatusCode compareRerun(const CTP_BC &bunchCrossing,
-			    const EventContext& ctx ) const;
-
-
-
-    //ToolHandle< LVL1::ITrigT1MuonRecRoiTool > m_rpcRoiTool{ this, "RPCRecRoiTool", "LVL1::TrigT1RPCRecRoiTool/TrigT1RPCRecRoiTool", "RPC Rec Roi Tool"};
-    //ToolHandle< LVL1::ITrigT1MuonRecRoiTool > m_tgcRoiTool{ this, "TGCRecRoiTool", "LVL1::TrigT1TGCRecRoiTool/TrigT1TGCRecRoiTool", "TGC Rec Roi Tool"};
-
+							const EventContext& ctx ) const;
+	
     SG::ReadCondHandleKey<TrigConf::L1BunchGroupSet> m_bgKey{this, "L1BunchGroup", "L1BunchGroup", "L1BunchGroupSet key name"};
 
     SG::ReadCondHandleKey<AthenaAttributeList> m_LBLBFolderInputKey{ this, "LBLBFolderInputKey", "/TRIGGER/LUMI/LBLB" };
@@ -117,7 +106,6 @@ namespace TrigT1CTMonitoring {
 
     SG::ReadHandleKey<MuCTPI_RDO> m_MuCTPI_RDOKey{ this, "MuCTPI_RDOKey", "MUCTPI_RDO" };
     SG::ReadHandleKey<MuCTPI_Phase1_RDO> m_MuCTPI_Phase1_RDOKey{ this, "MuCTPI_Phase1_RDOKey", "MUCTPI_Phase1_RDO" };
-    //SG::ReadHandleKey<MuCTPI_RIO> m_MuCTPI_RIOKey{ this, "MuCTPI_RIOKey", "MUCTPI_RIO" };
     SG::ReadHandleKey<CTP_RDO> m_CTP_RDOKey{ this, "CTP_RDOKey", "CTP_RDO" };
     SG::ReadHandleKey<CTP_RIO> m_CTP_RIOKey{ this, "CTP_RIOKey", "CTP_RIO" };
     SG::ReadHandleKey<CTP_RDO> m_CTP_RDO_RerunKey{ this, "CTP_RDO_RerunKey", "CTP_RDO_Rerun" };
@@ -127,7 +115,6 @@ namespace TrigT1CTMonitoring {
 
     Gaudi::Property<bool> m_isRun3{ this, "isRun3",  true, "isRun3" };
     Gaudi::Property<bool> m_isSim{ this, "isSimulation",  false, "isSimulation" };
-    //Gaudi::Property<std::string> m_baseDirName{ this, "DirectoryName", "CT/", "Directory in output root file where the histograms will be stored." };
     Gaudi::Property<bool> m_inclusiveTriggerThresholds{ this, "InclusiveTriggerThresholds", true, "Flag to activate the inclusive counting of PT thresholds in trigger patterns" };
     Gaudi::Property<bool> m_processMuctpi{ this, "ProcessMuctpiData", true, "Flag to activate the processing of Muctpi data" };
     Gaudi::Property<bool> m_processMuctpiRIO{ this, "ProcessMuctpiDataRIO",  true, "Flag to activate the processing of the Muctpi RIO" };
@@ -140,7 +127,8 @@ namespace TrigT1CTMonitoring {
     Gaudi::Property<double> m_defaultBcIntervalInNs{ this, "DefaultBcIntervalInNs", 24.9507401, "Default bunch-crossing duration to use if not accessible in COOL" };
     Gaudi::Property<int64_t> m_bcsPerTurn{ this, "BCsPerTurn", 3564, "Number of bunch crossings per turn" };
     Gaudi::Property<std::string > m_lbTimeCoolFolderName{ this, "LumiBlockTimeCoolFolderName", "/TRIGGER/LUMI/LBLB", "COOL folder in COOLONL_TRIGGER holding info about start and stop times for luminosity blocks" };
-    Gaudi::Property<std::string > m_fillStateCoolFolderName{ this, "FillStateCoolFolderName", "/LHC/DCS/FILLSTATE", "COOL folder in COOLOFL_DCS holding the LHC fill state info" };
+    //do not use online
+    //Gaudi::Property<std::string > m_fillStateCoolFolderName{ this, "FillStateCoolFolderName", "/LHC/DCS/FILLSTATE", "COOL folder in COOLOFL_DCS holding the LHC fill state info" };
     Gaudi::Property<std::string> m_dataTakingModeCoolFolderName{ this, "DataTakingModeCoolFolderName", "/TDAQ/RunCtrl/DataTakingMode", "COOL folder in COOLONL_TDAQ holding the ATLAS data taking mode info" };
     Gaudi::Property<std::vector<std::string>> m_ignorePatterns{ this, "IgnorePatterns", {"L1_TRT", "L1_ZB", "_AFP", "L1_BPTX", "L1_BCM", "L1_LUCID"}, "patters that are excluded from check (no regex)"};
 

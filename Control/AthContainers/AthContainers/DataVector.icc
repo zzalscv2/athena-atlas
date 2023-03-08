@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  AthContainers/DataVector.icc
@@ -15,6 +15,7 @@
 
 #include "AthContainers/tools/CompareAndPrint.h"
 #include "AthContainers/tools/ATHCONTAINERS_ASSERT.h"
+#include "CxxUtils/releasing_iterator.h"
 #include <limits>
 #include <functional>
 
@@ -148,9 +149,8 @@ struct VirtBases<B1, B2, DataModel_detail::NoBase>
     virtual public DataVector<B2>
 {
   // Check to be sure that @c B1 and @c B2 have the same ultimate base type.
-  typedef ::boost::is_same<typename DataVector<B1>::PtrVector,
-                           typename DataVector<B2>::PtrVector> check;
-  BOOST_STATIC_ASSERT (check::value);
+  static_assert (std::is_same_v<typename DataVector<B1>::PtrVector,
+                                typename DataVector<B2>::PtrVector>);
 
   // Make these types available to the derived @c DataVector.
   typedef typename DataVector<B1>::PtrVector PtrVector;
@@ -234,12 +234,10 @@ struct VirtBases
 {
   // Check to be sure that @c B1, @c B2, and @c B3 have the same
   // ultimate base type.
-  typedef ::boost::is_same<typename DataVector<B1>::PtrVector,
-                           typename DataVector<B2>::PtrVector> check1;
-  typedef ::boost::is_same<typename DataVector<B1>::PtrVector,
-                           typename DataVector<B3>::PtrVector> check2;
-  BOOST_STATIC_ASSERT (check1::value);
-  BOOST_STATIC_ASSERT (check2::value);
+  static_assert (std::is_same_v<typename DataVector<B1>::PtrVector,
+                                typename DataVector<B2>::PtrVector>);
+  static_assert (std::is_same_v<typename DataVector<B1>::PtrVector,
+                                typename DataVector<B3>::PtrVector>);
 
 
   // Make these types available to the derived @c DataVector.
@@ -467,8 +465,10 @@ DataVector<T, BASE>::DataVector
   //   B* bb[] = ...
   //   DataVector<D> d (bb, bb+1);
   // which would otherwise compile.
-  typedef typename std::iterator_traits<InputIterator>::value_type ittype;
-  BOOST_STATIC_ASSERT ((::boost::is_convertible<ittype, const T*>::value));
+  //FIXME: Rewrite using concepts once we're using c++20.
+  using ittype = typename std::iterator_traits<InputIterator>::value_type;
+  static_assert (std::is_convertible_v<ittype, const T*> ||
+                 std::is_convertible_v<ittype, std::unique_ptr<T> >);
   
   this->m_ownPolicy = ownPolicy;
   this->template initAuxVectorBase<DataVector> (ownPolicy, trackIndices);
@@ -476,8 +476,7 @@ DataVector<T, BASE>::DataVector
   BASE::clearMostDerived();
   if (store)
     this->setStore (store);
-  this->m_pCont.assign (first, last);
-  this->moveAux (0, first, last);
+  insert (this->begin(), first, last);
 }
 
 
@@ -612,7 +611,6 @@ void DataVector<T, BASE>::assign(InputIterator first, InputIterator last)
   testInsert ("assign");
   this->clear();                // Release any currently-owned elements.
   insert(begin(), first, last);
-  this->moveAux (0, first, last);
 }
 
 
@@ -1153,7 +1151,7 @@ DataVector<T, BASE>::insert(iterator position, value_type pElem)
   testInsert ("insert");
   iterator ret (this->m_pCont.insert(position.base(), pElem), this);
   this->shift (ret - this->begin(), 1);
-  this->moveAux (ret-this->begin(), pElem);
+  this->moveAux (ret-this->begin(), pElem, false, true);
   return ret;
 }
 
@@ -1183,7 +1181,7 @@ DataVector<T, BASE>::insert(iterator position,
   value_type ptr = pElem.release();
   iterator ret (this->m_pCont.insert(position.base(), ptr), this);
   this->shift (ret - this->begin(), 1);
-  this->moveAux (ret-this->begin(), ptr);
+  this->moveAux (ret-this->begin(), ptr, false, true);
   return ret;
 }
 
@@ -1222,9 +1220,13 @@ DataVector<T, BASE>::emplace(iterator position, value_type pElem)
  *
  * Note: this method may only be called using the most derived
  * @c DataVector in the hierarchy.
+ *
+ * This overload is for the case where the iterator value type
+ * is convertible to T*.
  */
 template <class T, class BASE>
-template <class InputIterator>
+template <class InputIterator,
+          DataVector_detail::enable_if_ptr_itr<InputIterator, T> >
 void DataVector<T, BASE>::insert(iterator position,
                                  InputIterator first,
                                  InputIterator last)
@@ -1236,8 +1238,8 @@ void DataVector<T, BASE>::insert(iterator position,
   //   DataVector<D> d;
   //   d.insert (d.begin(), bb, bb+1);
   // which would otherwise compile.
-  typedef typename std::iterator_traits<InputIterator>::value_type ittype;
-  BOOST_STATIC_ASSERT ((::boost::is_convertible<ittype, const T*>::value));
+  using ittype = typename std::iterator_traits<InputIterator>::value_type;
+  static_assert (std::is_convertible_v<ittype, const T*>);
 
   // Ensure we're not being called via a base class.
   testInsert ("insert");
@@ -1246,7 +1248,51 @@ void DataVector<T, BASE>::insert(iterator position,
   this->m_pCont.insert(position.base(), first, last);
   size_t n = this->m_pCont.size() - old_sz;
   this->shift (idx, n);
-  this->moveAux (idx, first, last);
+  this->moveAux (idx, first, last, false, true);
+}
+
+
+/**
+ * @brief Add a group of new elements to the collection.
+ * @param position Iterator before which the element will be added.
+ * @param first The start of the range to put in the container.
+ * @param last The end of the range to put in the container.
+ *
+ * The container's ownership policy will determine if it takes ownership
+ * of the new element.
+ *
+ * Note: this method may only be called using the most derived
+ * @c DataVector in the hierarchy.
+ *
+ * This overload is for the case where the iterator value type
+ * is convertible to unique_ptr<T>.
+ */
+template <class T, class BASE>
+template <class InputIterator,
+          DataVector_detail::enable_if_up_itr<InputIterator, T> >
+void DataVector<T, BASE>::insert(iterator position,
+                                 InputIterator first,
+                                 InputIterator last)
+{
+  // Make sure that the input iterator can actually be converted
+  // to a T*.  Lets us give a compilation error for this:
+  //   DATAVECTOR_BASE(D, B);
+  //   B* bb[] = ...
+  //   DataVector<D> d;
+  //   d.insert (d.begin(), bb, bb+1);
+  // which would otherwise compile.
+  using ittype = typename std::iterator_traits<InputIterator>::value_type;
+  static_assert (std::is_convertible_v<typename ittype::pointer, const T*>);
+
+  // Ensure we're not being called via a base class.
+  testInsert ("insert");
+  size_t idx = position - this->begin();
+  size_t old_sz = this->m_pCont.size();
+  using CxxUtils::releasing_iterator;
+  this->m_pCont.insert(position.base(), releasing_iterator(first), releasing_iterator(last));
+  size_t n = this->m_pCont.size() - old_sz;
+  this->shift (idx, n);
+  this->moveAux (idx, this->begin()+idx, this->begin()+idx+n);
 }
 
 
@@ -2147,14 +2193,13 @@ DATAVECTOR::DataVector
    SG::OwnershipPolicy ownPolicy /*= SG::VIEW_ELEMENTS*/,
    SG::IndexTrackingPolicy trackIndices /*= SG::DEFAULT_TRACK_INDICES*/,
    SG::IAuxStore* store /*= 0*/)
-  : m_ownPolicy(ownPolicy),
-    m_pCont(first, last)
+  : m_ownPolicy(ownPolicy)
 {
   this->template initAuxVectorBase<DataVector> (ownPolicy, trackIndices);
   this->m_isMostDerived = true;
   if (store)
     this->setStore (store);
-  this->moveAux (0, first, last);
+  insert (this->begin(), first, last);
 }
 
 
@@ -2279,7 +2324,6 @@ void DATAVECTOR::assign (InputIterator first,
   testInsert ("assign");
   clear();                 // Release any currently-owned elements.
   insert(begin(), first, last);
-  this->moveAux (0, first, last);
 }
 
 
@@ -2900,7 +2944,7 @@ DATAVECTOR::insert(iterator position, value_type pElem)
   testInsert ("insert");
   iterator ret (m_pCont.insert(position.base(), pElem), this);
   this->shift (ret - this->begin(), 1);
-  this->moveAux (ret-this->begin(), pElem);
+  this->moveAux (ret-this->begin(), pElem, false, true);
   return ret;
 }
 
@@ -2930,7 +2974,7 @@ DATAVECTOR::insert(iterator position, std::unique_ptr<base_value_type> pElem)
   value_type ptr = pElem.release();
   iterator ret (m_pCont.insert(position.base(), ptr), this);
   this->shift (ret - this->begin(), 1);
-  this->moveAux (ret-this->begin(), ptr);
+  this->moveAux (ret-this->begin(), ptr, false, true);
   return ret;
 }
 
@@ -2970,9 +3014,47 @@ DATAVECTOR::emplace(iterator position, value_type pElem)
  *
  * Note: this method may only be called using the most derived
  * @c DataVector in the hierarchy.
+ *
+ * This overload is for the case where the iterator value type
+ * is convertible to T*.
  */
 template <class T>
-template <class InputIterator>
+template <class InputIterator,
+          DataVector_detail::enable_if_ptr_itr<InputIterator, T> >
+inline
+void
+DATAVECTOR::insert (iterator position, InputIterator first, InputIterator last)
+{
+  static_assert (std::is_same_v<T*, typename DATAVECTOR::value_type>);
+  // Ensure we're not being called via a base class.
+  testInsert ("insert");
+  size_t idx = position - this->begin();
+  size_t old_sz = this->m_pCont.size();
+  m_pCont.insert(position.base(), first, last);
+  size_t n = this->m_pCont.size() - old_sz;
+  this->shift (idx, n);
+  this->moveAux (idx, first, last, false, true);
+}
+
+
+/**
+ * @brief Add a group of new elements to the collection.
+ * @param position Iterator before which the element will be added.
+ * @param first The start of the range to put in the container.
+ * @param last The end of the range to put in the container.
+ *
+ * The container's ownership policy will determine if it takes ownership
+ * of the new element.
+ *
+ * Note: this method may only be called using the most derived
+ * @c DataVector in the hierarchy.
+ *
+ * This overload is for the case where the iterator value type
+ * is convertible to unique_ptr<T>.
+ */
+template <class T>
+template <class InputIterator,
+          DataVector_detail::enable_if_up_itr<InputIterator, T> >
 inline
 void
 DATAVECTOR::insert (iterator position, InputIterator first, InputIterator last)
@@ -2981,10 +3063,11 @@ DATAVECTOR::insert (iterator position, InputIterator first, InputIterator last)
   testInsert ("insert");
   size_t idx = position - this->begin();
   size_t old_sz = this->m_pCont.size();
-  m_pCont.insert(position.base(), first, last);
+  using CxxUtils::releasing_iterator;
+  m_pCont.insert(position.base(), releasing_iterator(first), releasing_iterator(last));
   size_t n = this->m_pCont.size() - old_sz;
   this->shift (idx, n);
-  this->moveAux (idx, first, last);
+  this->moveAux (idx, this->begin()+idx, this->begin()+idx+n);
 }
 
 

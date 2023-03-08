@@ -129,6 +129,10 @@ class PhotonCalibrationConfig (ConfigBlock) :
         alg.egammasOut = config.copyName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
 
+        config.addOutputVar (self.containerName, 'pt', 'pt')
+        config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True)
+        config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True)
+
 
 
 class PhotonWorkingPointConfig (ConfigBlock) :
@@ -195,6 +199,7 @@ class PhotonWorkingPointConfig (ConfigBlock) :
         alg.selectionDecoration = 'baselineSelection' + postfix + ',as_char'
         alg.particles = config.readName (self.containerName)
         alg.preselection = config.getFullSelection (self.containerName, self.selectionName)
+        config.addOutputVar (self.containerName, 'baselineSelection' + postfix, 'select' + postfix)
 
         if config.dataType() != 'data':
             # Set up the photon efficiency correction algorithm.
@@ -213,6 +218,7 @@ class PhotonWorkingPointConfig (ConfigBlock) :
             alg.outOfValidityDeco = 'bad_eff' + postfix
             alg.photons = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
+            config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'effSF' + postfix)
 
 
 

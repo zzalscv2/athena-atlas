@@ -24,7 +24,7 @@ namespace LArSamples {
   class DataTweaker;
   class TreeAccessor;
   
-  class MultiTreeAccessor : public Accessor {
+  class ATLAS_NOT_THREAD_SAFE MultiTreeAccessor : public Accessor {
   
     public:
    

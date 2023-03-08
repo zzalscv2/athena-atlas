@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DATAHEADERCNV_H
@@ -60,6 +60,9 @@ public:
 
    /// query if a new DHForm was written in the last createPersistent()
    bool         wroteNewDHForm()    { return m_wroteDHForm; }
+
+   /// Remove DataHeaderElements with incomplete (dbID="") refs
+   void         removeBadElements(DataHeader* dh);
   
 protected:
    DataHeaderCnv_p6     m_tpOutConverter;
@@ -79,6 +82,7 @@ protected:
 
    /// true if the last writing of the DataHeader had to write a new DHForm
    bool                 m_wroteDHForm {false};
+   std::map< std::string, std::string>  m_lastGoodDHFRef;
 
    /// for use when reading DataHeader_p5
    DataHeaderCnv_p5                     m_tpInConverter_p5;  

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -20,7 +20,7 @@ class MuonTrackVertexAssociationTool : public BaseTrackVertexAssociationTool
   ASG_TOOL_CLASS(MuonTrackVertexAssociationTool, ITrackVertexAssociationTool)
 
 public:
-  MuonTrackVertexAssociationTool(std::string name)
+  MuonTrackVertexAssociationTool(const std::string& name)
       : BaseTrackVertexAssociationTool(name)
   {
     CHECK_EXC(setProperty("d0sig_cut", 3.0));

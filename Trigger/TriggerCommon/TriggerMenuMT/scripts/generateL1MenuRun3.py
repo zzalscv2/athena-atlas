@@ -1,14 +1,14 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import sys
 
 def main():
     import argparse
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("menu", nargs="?", default='PhysicsP1_pp_run3_v1', #ConfigFlags.Trigger.triggerMenuSetup,
+    parser.add_argument("menu", nargs="?", default='PhysicsP1_pp_run3_v1',
                         help="the menu to generate [%(default)s]")
     parser.add_argument("--bgrp", action="store_true",
                         help="generate default MC bunchgroup")
@@ -18,9 +18,10 @@ def main():
     args = parser.parse_args()
 
     # set menu
-    ConfigFlags.Input.Files = []
-    ConfigFlags.Trigger.triggerMenuSetup = args.menu
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = []
+    flags.Trigger.triggerMenuSetup = args.menu
+    flags.lock()
 
     # set verbosity
     if args.verbose:
@@ -37,7 +38,7 @@ def main():
     else:
         # L1 menu generation
         from TrigConfigSvc.TrigConfigSvcCfg import generateL1Menu
-        generateL1Menu(ConfigFlags)
+        generateL1Menu(flags)
 
     return 0
 

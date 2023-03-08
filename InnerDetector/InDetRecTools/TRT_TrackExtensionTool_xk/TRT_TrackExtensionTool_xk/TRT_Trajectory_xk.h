@@ -75,17 +75,15 @@ namespace InDet{
 
       void set(Trk::MagneticFieldProperties&, const AtlasFieldCacheCondObj*);
 
-      void initiateForPrecisionSeed
-	(std::list< std::pair<Amg::Vector3D,double> >&,
-	 const std::vector<const InDetDD::TRT_BaseElement*>&,
-	 const TRT_DriftCircleContainer*&,
-	 const Trk::PatternTrackParameters&);
+      void initiateForPrecisionSeed(
+          std::vector<std::pair<Amg::Vector3D, double> >&,
+          const std::vector<const InDetDD::TRT_BaseElement*>&,
+          const TRT_DriftCircleContainer*&, const Trk::PatternTrackParameters&);
 
-      void initiateForTRTSeed
-	(std::list< std::pair<Amg::Vector3D,double> >&,
-	 const std::vector<const InDetDD::TRT_BaseElement*>&,
-	 const TRT_DriftCircleContainer*&,
-	 const Trk::PatternTrackParameters&);
+      void initiateForTRTSeed(
+          std::vector<std::pair<Amg::Vector3D, double> >&,
+          const std::vector<const InDetDD::TRT_BaseElement*>&,
+          const TRT_DriftCircleContainer*&, const Trk::PatternTrackParameters&);
 
       void convert(std::vector<const Trk::MeasurementBase*>&);
       Trk::TrackSegment* convert();

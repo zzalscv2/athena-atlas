@@ -1,11 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArCaliWaves2Ntuple.h"
 #include "CaloIdentifier/CaloGain.h"
-//#include "TGraph.h"
-//#include "TF1.h"
 
 LArCaliWaves2Ntuple::LArCaliWaves2Ntuple(const std::string& name, ISvcLocator* pSvcLocator): LArWaves2Ntuple(name, pSvcLocator)
 { 
@@ -124,8 +122,6 @@ StatusCode LArCaliWaves2Ntuple::stop ATLAS_NOT_THREAD_SAFE ()
   }
 
   
-  //SG::ReadCondHandle<LArCalibLineMapping> clHdl{m_calibMapKey};
-  //const LArCalibLineMapping *clCont {*clHdl};
   const LArCalibLineMapping *clCont=0;
   if(m_isSC) {
     ATH_MSG_DEBUG( "LArCaliWaves2Ntuple: using SC calib map" );
@@ -171,10 +167,7 @@ StatusCode LArCaliWaves2Ntuple::stop ATLAS_NOT_THREAD_SAFE ()
 
     
     for (unsigned igain=CaloGain::LARHIGHGAIN;igain<CaloGain::LARNGAIN ;++igain){
-      std::vector<HWIdentifier>::const_iterator itOnId = m_onlineId->channel_begin();
-      std::vector<HWIdentifier>::const_iterator itOnIdEnd = m_onlineId->channel_end();
-      for(; itOnId!=itOnIdEnd;++itOnId){
-	const HWIdentifier chid = *itOnId;
+      for (const HWIdentifier chid: m_onlineId->channel_range()) {
 	m_gain=(long)igain;
 	const LArCaliWaveVec& cwv = caliWaveContainer->get(chid,igain);
 	if (cwv.size()==0) continue;

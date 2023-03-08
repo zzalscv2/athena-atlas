@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file ExampleMonitorAlgorithm.py
@@ -9,7 +9,7 @@
 @brief Example python configuration for the Run III AthenaMonitoring package
 '''
 
-def ExampleMonitoringConfig(inputFlags):
+def ExampleMonitoringConfig(flags):
     '''Function to configures some algorithms in the monitoring system.'''
 
     ### STEP 1 ###
@@ -22,14 +22,14 @@ def ExampleMonitoringConfig(inputFlags):
     # The following class will make a sequence, configure algorithms, and link
     # them to GenericMonitoringTools
     from AthenaMonitoring import AthMonitorCfgHelper
-    helper = AthMonitorCfgHelper(inputFlags,'ExampleAthMonitorCfg')
+    helper = AthMonitorCfgHelper(flags, 'ExampleAthMonitorCfg')
 
 
     ### STEP 2 ###
     # Adding an algorithm to the helper. Here, we will use the example 
     # algorithm in the AthenaMonitoring package. Just pass the type to the 
     # helper. Then, the helper will instantiate an instance and set up the 
-    # base class configuration following the inputFlags. The returned object 
+    # base class configuration following the configuration flags. The returned object 
     # is the algorithm.
     # This uses the new Configurables object system.
     from AthenaConfiguration.ComponentFactory import CompFactory
@@ -167,24 +167,25 @@ if __name__=='__main__':
     log.setLevel(INFO)
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
     import sys
     nightly = '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CommonInputs/'
     file = 'data16_13TeV.00311321.physics_Main.recon.AOD.r9264/AOD.11038520._000001.pool.root.1'
-    ConfigFlags.Input.Files = [nightly+file]
-    ConfigFlags.Input.isMC = False
-    ConfigFlags.Output.HISTFileName = 'ExampleMonitorOutput.root'
-    ConfigFlags.fillFromArgs(sys.argv[1:])
+    flags.Input.Files = [nightly+file]
+    flags.Input.isMC = False
+    flags.Output.HISTFileName = 'ExampleMonitorOutput.root'
+    flags.fillFromArgs(sys.argv[1:])
     
-    ConfigFlags.lock()
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
-    exampleMonitorAcc = ExampleMonitoringConfig(ConfigFlags)
+    exampleMonitorAcc = ExampleMonitoringConfig(flags)
     cfg.merge(exampleMonitorAcc)
 
     # If you want to turn on more detailed messages ...

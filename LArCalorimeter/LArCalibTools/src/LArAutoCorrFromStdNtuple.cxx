@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArAutoCorrFromStdNtuple.h"
@@ -215,14 +215,11 @@ StatusCode LArAutoCorrFromStdNtuple::stop()
 
   count = 0;
   if(m_sFcal) { // now add sFcal
-      std::vector<HWIdentifier>::const_iterator itOnId = onlineHelper->channel_begin();
-      std::vector<HWIdentifier>::const_iterator itOnIdEnd = onlineHelper->channel_end();
-      int limit = nsamples;
+    int limit = nsamples;
       if(limit > 31) limit = 31;
       AutoCorrVec myvec(limit);
       ATH_MSG_INFO( "Using limit " << limit );
-      for(; itOnId!=itOnIdEnd;++itOnId){
-          const HWIdentifier chid = *itOnId;
+      for (const HWIdentifier chid: onlineHelper->channel_range()) {
           if(!m_isComplete) {
              if (chid != mcsym->ZPhiSymOnl(chid) ) {
                  ATH_MSG_DEBUG( "Symmetrized, not stored" );

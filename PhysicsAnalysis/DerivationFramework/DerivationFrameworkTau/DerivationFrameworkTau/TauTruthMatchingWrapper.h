@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -16,6 +16,8 @@
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "TauAnalysisTools/ITauTruthMatchingTool.h"
+#include "StoreGate/ReadHandleKey.h"
+#include "xAODTau/TauJetContainer.h"
 
 /**
  * wrapper tool for tau truth matching 
@@ -32,11 +34,13 @@ namespace DerivationFramework {
       virtual StatusCode addBranches() const;
 
     private:
-      std::string m_tauContainerName;
+      SG::ReadHandleKey<xAOD::TauJetContainer> m_tauKey
+         {this, "TauContainerName", "TauJets", "ReadHandleKey for input TauJetContainer"};
+
 
       ToolHandle < TauAnalysisTools::ITauTruthMatchingTool > m_tTauTruthMatchingTool;
 
   }; 
 }
 
-#endif // DERIVATIONFRAMEWORK_TAUPVTRKSELECTIONTOOL_H
+#endif 

@@ -39,7 +39,7 @@ void SiHitIdHelper::Initialize() {
   // cache the HL-LHC decision
   m_isITkHGTD = isITkHGTD || isITkHGTDPLR || isITk_HGTD_NewID_PLR;
 
-  if (m_isITkHGTD) InitializeField("Part",0,2);
+  if (isITkHGTD) InitializeField("Part",0,2);
   else if (isITkHGTDPLR || isITk_HGTD_NewID_PLR) InitializeField("Part",0,3);
   else InitializeField("Part",0,1);
   if (isDBM || isITkHGTDPLR || isITk_HGTD_NewID_PLR) InitializeField("BarrelEndcap",-4,4);
@@ -126,4 +126,22 @@ int SiHitIdHelper::buildHitId(const int Part, const int BrlECap, const int Layer
   this->SetFieldValue("PhiModule",      phiM, theID);
   this->SetFieldValue("Side",           side, theID);
   return theID;
+}
+
+int SiHitIdHelper::buildHitIdFromStringITk(int part, std::string physVolName) const
+{
+    int brlEcap = 0;
+    int layerDisk = 0;
+    int etaMod = 0;
+    int phiMod = 0;
+    int side = 0;
+    //Extract the indices from the name, and write them in to the matching int
+    std::map<std::string, int&> fields{{"barrel_endcap",brlEcap},{"layer_wheel",layerDisk},{"phi_module",phiMod},{"eta_module",etaMod},{"side",side}};
+    for(auto field:fields){
+        size_t pos1 = (physVolName).find(field.first+"_");
+        size_t pos2 = (physVolName).find("_",pos1+field.first.size()+1);//start looking only after end of first delimiter (plus 1 for the "_" appended) ends
+        std::string strNew = (physVolName).substr(pos1+field.first.size()+1,pos2-(pos1+field.first.size()+1));
+        field.second = std::stoi(strNew);
+    }
+    return buildHitId(part,brlEcap,layerDisk,etaMod,phiMod,side);
 }

@@ -34,7 +34,7 @@ else()
        bin/gprof2dot bin/issues bin/magnifyPoolFile.py bin/merge-poolfiles.py
        bin/apydep.py bin/pool_extractFileIdentifier.py
        bin/pool_insertFileToCatalog.py bin/print_auditor_callgraph.py bin/pyroot.py
-       bin/vmem-sz.py bin/meta-reader.py bin/meta-diff.py bin/tree-orderer.py bin/dump-event-from-file.py
+       bin/vmem-sz.py bin/meta-reader.py bin/meta-diff.py bin/dump-event-from-file.py
        POST_BUILD_CMD ${ATLAS_FLAKE8} )
     
     # Aliases:
@@ -57,7 +57,6 @@ else()
     atlas_add_alias( getMetadata "getMetadata.py" )
     atlas_add_alias( meta-reader "meta-reader.py" )
     atlas_add_alias( meta-diff   "meta-diff.py" )
-    atlas_add_alias( tree-orderer "tree-orderer.py" )
     
     # Tests:
     atlas_add_test( RootUtils

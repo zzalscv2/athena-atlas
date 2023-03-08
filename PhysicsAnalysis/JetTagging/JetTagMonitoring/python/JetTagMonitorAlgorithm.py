@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file JetTagMonitorAlgorithm.py
@@ -25,7 +25,8 @@ def JetTagMonitorConfig(inputFlags):
         return result
 
     # do not run in cosmics
-    if inputFlags.DQ.DataType == 'cosmics':
+    from AthenaMonitoring.DQConfigFlags import DQDataType
+    if inputFlags.DQ.DataType is DQDataType.Cosmics:
         return result
 
     # The following class will make a sequence, configure algorithms, and link
@@ -63,7 +64,7 @@ def JetTagMonitorConfig(inputFlags):
     jetTagMonAlg.ElectronsCollection = "Electrons"
 
     #Skip jet filter selection in case of ion-ion or proton-ion collisions
-    if inputFlags.DQ.DataType == 'heavyioncollisions':
+    if inputFlags.DQ.DataType is DQDataType.HeavyIon:
         jetTagMonAlg.SkipPreSelection = True
         jetTagMonAlg.SkipJetFilter = True
         jetTagMonAlg.JetsCollection = "AntiKt4HIJets" #Heavy Ion jet collection

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARSC2NTUPLE_H
@@ -39,10 +39,10 @@ class LArSC2Ntuple : public LArDigits2Ntuple
   ToolHandle<ICaloSuperCellIDTool>   m_scidtool{this, "CaloSuperCellIDTool", "CaloSuperCellIDTool", "Offline / SuperCell ID mapping tool"};
   ToolHandle< Trig::TrigDecisionTool > m_trigDec{this, "TrigDecisionTool", "", "Handle to the TrigDecisionTool"};
   //To get the data-dependency right ... 
-  SG::ReadDecorHandleKey<xAOD::EventInfo> m_eventInfoKey{this, "LArStatusFlag", "EventInfo.larFlag", "Key for EventInfo object"};
+  SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this, "LArStatusFlag", "EventInfo", "Key for EventInfo object"};
+  SG::ReadDecorHandleKey<xAOD::EventInfo> m_eventInfoDecorKey{this, "EventInfoDecorKey", "EventInfo.larFlags"};
 
   NTuple::Item<short> m_latomeChannel;
-  NTuple::Item<short> m_LB;
 
   NTuple::Array<float>  m_ROD_energy;
 

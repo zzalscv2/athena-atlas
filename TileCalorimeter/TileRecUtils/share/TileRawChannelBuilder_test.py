@@ -305,7 +305,8 @@ class TestAlg (Alg):
 
 
     def execute (self):
-        iev = self.getContext().evt()
+        ctx = self.getContext()
+        iev = ctx.evt()
 
         if iev == 3:
             return StatusCode.Success
@@ -334,14 +335,14 @@ class TestAlg (Alg):
 
         digits = self.make_digits (digits_0)
 
-        if not tool.createContainer():
+        if not tool.createContainer(ctx):
             return StatusCode.Failure
 
         for coll in digits:
-            if not tool.build (coll):
+            if not tool.build (coll, ctx):
                 return StatusCode.Failure
 
-        if not tool.commitContainer():
+        if not tool.commitContainer(ctx):
             return StatusCode.Failure
 
         chans = self.evtStore['TileRawChannelFiltered']

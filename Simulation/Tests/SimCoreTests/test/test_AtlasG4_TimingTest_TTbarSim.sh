@@ -3,8 +3,8 @@
 # art-description: Run simulation outside ISF, reading ttbar events, switching on extra timing checks, writing HITS, using 2015 geometry and conditions
 # art-include: 21.0/Athena
 # art-include: 21.0/AthSimulation
-# art-include: 21.3/Athena
-# art-include: 21.9/Athena
+# art-include: 23.0/Athena
+# art-include: 23.0/AthSimulation
 # art-include: master/Athena
 # art-include: master/AthSimulation
 # art-type: grid

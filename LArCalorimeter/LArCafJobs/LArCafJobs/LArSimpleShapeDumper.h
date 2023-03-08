@@ -28,7 +28,7 @@ class HWIdentifier;
 class Identifier;
 class CaloDetDescrElement;
 
-class LArSimpleShapeDumper : public AthAlgorithm
+class  ATLAS_NOT_THREAD_SAFE LArSimpleShapeDumper : public AthAlgorithm
 {
  public:
   LArSimpleShapeDumper(const std::string & name, ISvcLocator * pSvcLocator);

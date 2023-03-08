@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -84,7 +84,8 @@ public:
   StatusCode mergeClusters(Pixel_detElement_RIO_map * cluster_map);
   StatusCode mergeClusters(SCT_detElement_RIO_map * cluster_map);
 
-  StatusCode digitize(const EventContext& ctx);
+  StatusCode digitize(const EventContext& ctx,
+                      TimedHitCollection<SiHit>& thpcsi);
   StatusCode createAndStoreRIOs(const EventContext& ctx);
   StatusCode retrieveTruth();
   StatusCode finalize();
@@ -103,7 +104,6 @@ public:
 
  private:
 
-  TimedHitCollection<SiHit>* m_thpcsi;
   ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc", ""};  //!< Random number service
 
   SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_pixelDetEleCollKey{this, "PixelDetEleCollKey", "PixelDetectorElementCollection", "Key of SiDetectorElementCollection for Pixel"};

@@ -113,7 +113,7 @@ int TrigInDetTrackTruth::updateFamilyTree()
       // first get GenParticle pointer
       if ( !it1->isValid() ) continue; 
    
-      auto p_child = (*it1);
+      auto p_child = (*it1).cptr();
       log << MSG::DEBUG << "GenParticle " << child << " (" << p_child << "); PDG id=" 
 	  << p_child->pdg_id() << "; status=" << p_child->status() 
 	  << "; pT=" << p_child->momentum().perp() 

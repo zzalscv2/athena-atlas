@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <HIGlobal/HIEventShapeMaker.h>
@@ -11,7 +11,7 @@
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
 
-HIEventShapeMaker::HIEventShapeMaker(const std::string& name, ISvcLocator* pSvcLocator) : AthAlgorithm(name, pSvcLocator)//,
+HIEventShapeMaker::HIEventShapeMaker(const std::string& name, ISvcLocator* pSvcLocator) : AthReentrantAlgorithm(name, pSvcLocator)
 {
 }
 
@@ -37,19 +37,18 @@ StatusCode HIEventShapeMaker::initialize()
   {
     ATH_CHECK(m_HIEventShapeFillerTool.retrieve());
     m_HIEventShapeFillerTool->setContainerName(m_outputKey.key());
+    ATH_CHECK(m_HIEventShapeFillerTool->initializeIndex());
   }
   if (m_summaryKey.key().compare("") != 0) ATH_CHECK(m_summaryTool->initialize());
 
   return StatusCode::SUCCESS;
 }
 
-StatusCode HIEventShapeMaker::execute()
+StatusCode HIEventShapeMaker::execute(const EventContext& ctx) const
 {
-  ATH_MSG_DEBUG("Inside HIEventShapeMaker::execute()");
-
   const xAOD::HIEventShapeContainer* evtShape_const = nullptr;
   if (m_summaryOnly) {
-    SG::ReadHandle<xAOD::HIEventShapeContainer>  readHandleEvtShape(m_readExistingKey);
+    SG::ReadHandle<xAOD::HIEventShapeContainer>  readHandleEvtShape(m_readExistingKey, ctx);
     if (!readHandleEvtShape.isValid()) {
       ATH_MSG_FATAL("Could not find HI event shape! (" << m_readExistingKey.key() << ").");
       return(StatusCode::FAILURE);
@@ -58,27 +57,29 @@ StatusCode HIEventShapeMaker::execute()
   }
   else
   {
-    ATH_MSG_DEBUG("Making HIEventShapeContainer with key " << m_outputKey.key());
-    SG::WriteHandle<xAOD::HIEventShapeContainer> writeHandleEvtShape(m_outputKey);
-    ATH_CHECK(writeHandleEvtShape.record(std::make_unique<xAOD::HIEventShapeContainer>(),
-      std::make_unique<xAOD::HIEventShapeAuxContainer>()));
-    ATH_CHECK(m_HIEventShapeFillerTool->initializeCollection(writeHandleEvtShape.ptr()));
-    evtShape_const = writeHandleEvtShape.cptr();
+    auto evtShape=std::make_unique<xAOD::HIEventShapeContainer>();
+    auto evtShapeAux=std::make_unique<xAOD::HIEventShapeAuxContainer>();
+    evtShape->setStore(evtShapeAux.get());
+
+    ATH_CHECK(m_HIEventShapeFillerTool->initializeEventShapeContainer(evtShape));
 
     if (not m_cellContainerKey.empty()) {
-      ATH_MSG_DEBUG("Calling filler tool with Cells " << m_cellContainerKey.key());
-      ATH_CHECK(m_HIEventShapeFillerTool->fillCollectionFromCells(m_cellContainerKey));
+      ATH_CHECK(m_HIEventShapeFillerTool->fillCollectionFromCells(evtShape,m_cellContainerKey, ctx));
     } else {
-      ATH_MSG_DEBUG("Calling filler tool with Towers " << m_towerContainerKey.key());
-      ATH_CHECK(m_HIEventShapeFillerTool->fillCollectionFromTowers(m_towerContainerKey, m_naviContainerKey));
+      ATH_CHECK(m_HIEventShapeFillerTool->fillCollectionFromTowers(evtShape,m_towerContainerKey, m_naviContainerKey, ctx));
     }
+
+    SG::WriteHandle<xAOD::HIEventShapeContainer> writeHandleEvtShape(m_outputKey, ctx);
+    ATH_CHECK( writeHandleEvtShape.record(std::move(evtShape), std::move(evtShapeAux)) );
+
+    evtShape_const = writeHandleEvtShape.cptr();
   }
 
-  //PrintHIEventShapeContainer( evtShape_const );
+  ATH_MSG_DEBUG(PrintHIEventShapeContainer(evtShape_const));
 
   if (!m_summaryKey.empty())
   {
-    SG::WriteHandle<xAOD::HIEventShapeContainer> write_handle_esSummary(m_summaryKey);
+    SG::WriteHandle<xAOD::HIEventShapeContainer> write_handle_esSummary(m_summaryKey,ctx);
     ATH_CHECK(write_handle_esSummary.record(std::make_unique<xAOD::HIEventShapeContainer>(),
       std::make_unique<xAOD::HIEventShapeAuxContainer>()));
     if (m_summaryOnly) {
@@ -91,24 +92,22 @@ StatusCode HIEventShapeMaker::execute()
 }
 
 
-
 StatusCode HIEventShapeMaker::finalize()
 {
   return StatusCode::SUCCESS;
 }
 
 
-void HIEventShapeMaker::PrintHIEventShapeContainer(const xAOD::HIEventShapeContainer* Container)
+std::string HIEventShapeMaker::PrintHIEventShapeContainer(const xAOD::HIEventShapeContainer* Container) const
 {
-  for (int i = 0;i < 40;i++) { std::cout << "#"; };
-  std::cout << std::endl;
-  std::cout << "|" << std::setw(10) << "EtaMin" << "  |"\
+  std::stringstream buffer;
+  buffer << std::endl << "|############|############|############|############|############|" << std::endl;
+  buffer << "|" << std::setw(10) << "EtaMin" << "  |"\
     << std::setw(10) << "EtaMax" << "  |"\
     << std::setw(10) << "Layer" << "  |"\
     << std::setw(10) << "NCells" << "  |"\
-    << std::setw(10) << "Et" << std::endl;
+    << std::setw(10) << "Et" << "  |"<< std::endl;
   unsigned int size = Container->size();
-  if (size > 10) size = 10;
   for (unsigned int i = 0;i < size;i++) {
     const xAOD::HIEventShape* sh = Container->at(i);
     int NCells = sh->nCells();
@@ -118,12 +117,13 @@ void HIEventShapeMaker::PrintHIEventShapeContainer(const xAOD::HIEventShapeConta
     float EtaMax = sh->etaMax();
 
     if (Et == 0) continue;
-    std::cout << "|" << std::setw(10) << EtaMin << "  |"\
+    buffer << "|" << std::setw(10) << EtaMin << "  |"\
       << std::setw(10) << EtaMax << "  |"\
       << std::setw(10) << Layer << "  |"\
       << std::setw(10) << NCells << "  |"\
-      << std::setw(10) << Et << std::endl;
+      << std::setw(10) << Et << "  |" <<std::endl;
   }
-  for (int i = 0;i < 40;i++) { std::cout << "#"; };
-  std::cout << std::endl;
+  buffer << "|############|############|############|############|############|" << std::endl;
+
+  return buffer.str();
 }

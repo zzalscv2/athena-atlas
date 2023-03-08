@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 # TRUTH1.py - format containing extended common ATLAS truth record
 
@@ -7,6 +7,11 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 def TRUTH1Cfg(ConfigFlags):
     """Main config for TRUTH1"""
     acc = ComponentAccumulator()
+
+    # Ensure EventInfoCnvAlg is scheduled
+    if "EventInfo#EventInfo" not in ConfigFlags.Input.TypedCollections:
+        from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
+        acc.merge(EventInfoCnvAlgCfg(ConfigFlags, inputKey="McEventInfo", outputKey="EventInfo", disableBeamSpot=True)) 
 
     # Add translator from EVGEN input to xAOD-like truth
     # Add all the particle derivation tools
@@ -25,7 +30,8 @@ def TRUTH1Cfg(ConfigFlags):
     #==============================================================================
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     TRUTH1SlimmingHelper = SlimmingHelper("TRUTH1SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
-    TRUTH1SlimmingHelper.AppendToDictionary = {'TruthEvents':'xAOD::TruthEventContainer','TruthEventsAux':'xAOD::TruthEventAuxContainer',
+    TRUTH1SlimmingHelper.AppendToDictionary = {'EventInfo':'xAOD::EventInfo','EventInfoAux':'xAOD::EventAuxInfo',
+                                               'TruthEvents':'xAOD::TruthEventContainer','TruthEventsAux':'xAOD::TruthEventAuxContainer',
                                                'TruthVertices':'xAOD::TruthVertexContainer','TruthVerticesAux':'xAOD::TruthVertexAuxContainer',
                                                'TruthParticles':'xAOD::TruthParticleContainer','TruthParticlesAux':'xAOD::TruthParticleAuxContainer', 
                                                'MET_Truth':'xAOD::MissingETContainer','MET_TruthAux':'xAOD::MissingETAuxContainer',
@@ -57,7 +63,8 @@ def TRUTH1Cfg(ConfigFlags):
                                                'TruthLabelPartons':'xAOD::TruthParticleContainer', 'TruthLabelTausFinal':'xAOD::TruthParticleContainer'  
                                               }
     # Custom all variables -- won't be overridden by the call below, just added to. Full lists for completeness.
-    TRUTH1SlimmingHelper.AllVariables = [ 'TruthEvents', 
+    TRUTH1SlimmingHelper.AllVariables = [ 'EventInfo',
+                                          'TruthEvents', 
                                           'TruthVertices',
                                           'TruthParticles',
                                           'TruthLabelBHadronsFinal',

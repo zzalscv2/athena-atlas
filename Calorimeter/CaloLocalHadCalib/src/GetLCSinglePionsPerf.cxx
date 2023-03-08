@@ -665,7 +665,7 @@ StatusCode GetLCSinglePionsPerf::execute()
     ATH_MSG_ERROR( "No particles in McEventCollection" );
     return StatusCode::FAILURE;
   }
-   HepMC::ConstGenParticlePtr gen=truthEvent->at(0)->particles().front();
+  const HepMC::ConstGenParticlePtr& gen=truthEvent->at(0)->particles().front();
 #else  
   if( truthEvent->at(0)->particles_empty() ){
     ATH_MSG_ERROR( "No particles in McEventCollection" );

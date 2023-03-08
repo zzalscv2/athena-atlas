@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -20,6 +20,8 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "LArRawEvent/LArDigitContainer.h"
 #include "LArRawEvent/LArRawSCContainer.h"
+#include "LArRawEvent/LArAccumulatedDigitContainer.h"
+#include "LArRawEvent/LArAccumulatedCalibDigitContainer.h"
 #include "LArRawEvent/LArSCDigit.h"
 #include "LArRawEvent/LArLATOMEHeaderContainer.h"
 #include "LArCabling/LArLATOMEMapping.h"
@@ -32,8 +34,10 @@
 #include <fstream>
 #include "eformat/index.h"
 #include "LArIdentifier/LArOnline_SuperCellID.h"
+#include "CaloDetDescr/ICaloSuperCellIDTool.h"
+#include "LArCabling/LArOnOffIdMapping.h"
+#include "LArRecConditions/LArCalibLineMapping.h"
 
-using namespace OFFLINE_FRAGMENTS_NAMESPACE;
 
 
 /**
@@ -49,6 +53,8 @@ enum class MonDataType {
   ADC=0,
   Energy=2,
   SelectedEnergy=3,
+  Averaged=4,
+  AutoCorr=5,
   Invalid=15
 };
 
@@ -67,18 +73,24 @@ public:
   LArLATOMEDecoder(const std::string& type, const std::string& name, const IInterface* parent);
   static const InterfaceID& interfaceID();
   /** @brief Destructor*/
-  virtual ~LArLATOMEDecoder();
+  virtual ~LArLATOMEDecoder() = default;
   /** @brief Initialize the converter*/
   virtual StatusCode initialize();
   /** @brief Finalize the converter*/
-  virtual StatusCode finalize();
+  virtual StatusCode finalize() {return StatusCode::SUCCESS;};
   /** @brief Converter*/
-  StatusCode convert(const RawEvent* re, const LArLATOMEMapping *map,
+  StatusCode convert(const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>& robFrags, const LArLATOMEMapping *map,
                      LArDigitContainer* adc_coll,
 		     LArDigitContainer* adc_bas_coll,
 		     LArRawSCContainer* et_coll,
 		     LArRawSCContainer* et_id_coll,
 		     LArLATOMEHeaderContainer* header_coll) const;
+
+  StatusCode convert(const RawEvent* re, const LArLATOMEMapping *map, 
+                     const LArOnOffIdMapping *onoffmap, const LArCalibLineMapping *clmap,
+                     LArAccumulatedDigitContainer* accdigits,
+                     LArAccumulatedCalibDigitContainer* caccdigits,
+                     LArLATOMEHeaderContainer* header_coll) const;
   
 private:
 
@@ -94,10 +106,27 @@ private:
     std::vector<int> et;
     std::vector<int> et_id;
     std::vector<bool> saturation;
-    unsigned int latomeChannel;
+    unsigned int latomeChannel{};
   };
 
-  class EventProcess {
+  class LatomeAveragedRawData{
+
+    public:
+      std::vector<unsigned long long> sum;
+      std::vector<unsigned long long> sumSq;
+      std::vector<unsigned int> nTrigValid;
+      unsigned int latomeChannel{};
+  };
+
+  class LatomeCalibPatterns{
+
+    public:
+      unsigned int DAC=0;
+      unsigned int delay=0;
+      std::vector<unsigned int> patterns;
+  };
+
+  class EventProcess : public AthMessaging {
   public:
     /// this should be the same as how we get the data, otherwise we will have bugs.
     /// use reinterpret_cast later to properly interpret the bit in other format if needed.
@@ -108,16 +137,19 @@ private:
     typedef int Sample;
     typedef std::string Path;
 
-    EventProcess(const LArLATOMEDecoder* decoderInput, const LArLATOMEMapping *map,
+    EventProcess(const LArLATOMEDecoder* decoderInput, 
                  LArDigitContainer* adc_coll,
 		 LArDigitContainer* adc_bas_coll,
 		 LArRawSCContainer* et_coll,
 		 LArRawSCContainer* et_id_coll,
+                 LArAccumulatedDigitContainer* accdigits,
+                 LArAccumulatedCalibDigitContainer* caccdigits,
 		 LArLATOMEHeaderContainer* header_coll);
     
     /** @brief Execute decoding for an event*/
 
-    void fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment* pROB, const LArLATOMEMapping *map);
+    void fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment* pROB, const LArLATOMEMapping *map, 
+                        const LArOnOffIdMapping *onoffmap=nullptr, const LArCalibLineMapping *clmap=nullptr);
 
   private:
     bool compareOrSet(Word& param, Word value, bool compare);
@@ -135,6 +167,8 @@ private:
     int signEnergy(unsigned int energy);
     /** @brief Pass ADC values from an event*/
     void fillRaw(const LArLATOMEMapping *map);
+    void fillCalib(const LArLATOMEMapping *map, 
+                   const LArOnOffIdMapping *onoffmap, const LArCalibLineMapping *clmap);
     void fillHeader();
     
     enum MODE {
@@ -150,74 +184,80 @@ private:
     std::vector<Word> m_packetEnd;
 
     // rod header
-    Word m_latomeBCID;
+    Word m_latomeBCID{};
     //// mon header
-    Word m_latomeID;
-    Word m_l1ID;
-    Word m_nPackets;
-    Word m_iPacket;
-    Word m_nWordsPerPacket;
-    Word m_monHeaderSize;
-    Word m_region;
-    Word m_nStreams;
-    Word m_streamNumber;
-    Word m_at0type;
-    Word m_at1type;
-    Word m_at0nBC;
-    Word m_at1nBC;
-    Word m_at0BC;
-    Word m_at1BC;
-    Word m_activeSC;
-    Word m_nsc1;
-    Word m_nsc2;
-    Word m_nsc3;
-    Word m_nsc4;
-    Word m_nsc5;
-    Word m_nsc6;
-    bool m_headerDecoded;
+    Word m_latomeID{};
+    Word m_l1ID{};
+    Word m_nPackets{};
+    Word m_iPacket{};
+    Word m_nWordsPerPacket{};
+    Word m_monHeaderSize{};
+    Word m_region{};
+    Word m_nStreams{};
+    Word m_streamNumber{};
+    Word m_at0typeRec{};
+    Word m_at1typeRec{};
+    Word m_at0type{};
+    Word m_at1type{};
+    Word m_at0nBC{};
+    Word m_at1nBC{};
+    Word m_at0BC{};
+    Word m_at1BC{};
+    Word m_activeSC{};
+    Word m_nsc1{};
+    Word m_nsc2{};
+    Word m_nsc3{};
+    Word m_nsc4{};
+    Word m_nsc5{};
+    Word m_nsc6{};
+    bool m_headerDecoded{};
 
-    short m_nBC_rawADC;
-    short m_nBC_ADC;
-    short m_nBC_E;
-    short m_nBC_EID;
+    short m_nBC_rawADC{};
+    short m_nBC_ADC{};
+    short m_nBC_E{};
+    short m_nBC_EID{};
+    short m_nBC_Averaged{};
     
-    short m_BC_rawADC;
-    short m_BC_ADC;
-    short m_BC_E;
-    short m_BC_EID;
+    short m_BC_rawADC{};
+    short m_BC_ADC{};
+    short m_BC_E{};
+    short m_BC_EID{};
 
-    bool m_hasRawAdc;
-    bool m_hasAdc;
-    bool m_hasE;
-    bool m_hasEID;
-
+    bool m_hasRawAdc{};
+    bool m_hasAdc{};
+    bool m_hasE{};
+    bool m_hasEID{};
+    bool m_isAveraged{};
+    bool m_isAutoCorr{};
     
-    const LArLATOMEDecoder *m_decoder;
-    LArDigitContainer* m_adc_coll;
-    LArDigitContainer* m_adc_bas_coll;
-    LArRawSCContainer* m_et_coll;
-    LArRawSCContainer* m_et_id_coll;
-    LArLATOMEHeaderContainer* m_header_coll;
+    const LArLATOMEDecoder *m_decoder{};
+    LArDigitContainer* m_adc_coll{};
+    LArDigitContainer* m_adc_bas_coll{};
+    LArRawSCContainer* m_et_coll{};
+    LArRawSCContainer* m_et_id_coll{};
+    LArAccumulatedDigitContainer* m_accdigits{};
+    LArAccumulatedCalibDigitContainer* m_caccdigits{};
+    LArLATOMEHeaderContainer* m_header_coll{};
     
     // LATOME source ID is stored here:
     unsigned int m_nthLATOME = 0;
 
     std::vector<unsigned short> m_BCIDsInEvent;
     std::vector<LatomeRawData> m_rawValuesInEvent;
+    std::vector<LatomeAveragedRawData> m_averagedRawValuesInEvent;
+    std::vector<LatomeCalibPatterns> m_latomeCalibPatternsInEvent;
   };
 
   // propary of tool
-  Path m_detailDumpFileName;
-  Path m_ADCDumpFileName;  
-  bool m_protectSourceId;
-  bool m_ignoreBarrelChannels;
-  bool m_ignoreEndcapChannels;
-  const LArOnline_SuperCellID* m_onlineId;
+  const LArOnline_SuperCellID* m_onlineId{};
+  ToolHandle<ICaloSuperCellIDTool> m_sc2ccMappingTool;
   
-  /** @brief Detail dump file*/
-  std::ofstream* ATH_UNUSED_MEMBER(m_detailDumpFile) = nullptr;
-  /** @brief ADC dump file*/
-  std::ofstream* ATH_UNUSED_MEMBER(m_ADCDumpFile) = nullptr;
+  BooleanProperty m_ignoreBarrelChannels{this, "IgnoreBarrelChannels", false};
+  BooleanProperty m_ignoreEndcapChannels{this, "IgnoreEndcapChannels", false};
+  BooleanProperty m_protectSourceId{this, "ProtectSourceId", true, "discard main readout sourceID, should be false for reading all files from the mon path with old source IDs"};
+  BooleanProperty m_keepPulsed{this, "KeepOnlyPulsed", true};
+  SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKeySC{this,"ScCablingKey","LArOnOffIdMapSC","SG Key of SC LArOnOffIdMapping object"};
+
 };
 
 #endif // LARBYTESTREAM_LARLATOMEDDECODER_H

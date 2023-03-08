@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 '''@file RunTileMonitoring.py
 @brief Script to run Tile Reconstrcution/Monitoring with new-style configuration
@@ -48,7 +48,7 @@ def _configFlagsFromPartition(flags, partition, log):
            beamType = 'cosmics'
 
         if partition == 'Tile':
-            ConfigFlags.Tile.NoiseFilter = 0
+            flags.Tile.NoiseFilter = 0
             if 'CIS' in runType:
                 flags.Tile.RunType = 'MONOCIS' if 'mono' in runType else 'CIS'
             elif 'Laser' in runType:
@@ -70,8 +70,9 @@ if __name__=='__main__':
         group.add_argument('--' + argument, dest=destination, action='store_true', help="Switch on " + help)
         group.add_argument('--no-' + argument, dest=destination, action='store_false', help="Switch off " + help)
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    parser = ConfigFlags.getArgumentParser()
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    parser = flags.getArgumentParser()
     parser.add_argument('--preExec', help='Code to execute before locking configs')
     parser.add_argument('--postExec', help='Code to execute after setup')
     parser.add_argument('--printDetailedConfig', action='store_true', help='Print detailed Athena configuration')
@@ -175,85 +176,85 @@ if __name__=='__main__':
         sys.exit(0)
 
     # Set the Athena configuration flags to defaults (can be overriden via comand line)
-    ConfigFlags.DQ.useTrigger = False
-    ConfigFlags.DQ.enableLumiAccess = False
-    ConfigFlags.Tile.RunType = 'PHY'
+    flags.DQ.useTrigger = False
+    flags.DQ.enableLumiAccess = False
+    flags.Tile.RunType = 'PHY'
 
     if args.mbts and args.useMbtsTrigger:
-        ConfigFlags.Trigger.triggerConfig = 'DB'
+        flags.Trigger.triggerConfig = 'DB'
 
     if args.stateless:
-        _configFlagsFromPartition(ConfigFlags, args.partition, log)
-        ConfigFlags.Input.Files = []
-        ConfigFlags.Input.isMC = False
-        ConfigFlags.Input.Format = Format.BS
+        _configFlagsFromPartition(flags, args.partition, log)
+        flags.Input.Files = []
+        flags.Input.isMC = False
+        flags.Input.Format = Format.BS
         if args.mbts and args.useMbtsTrigger:
             from AthenaConfiguration.AutoConfigOnlineRecoFlags import autoConfigOnlineRecoFlags
-            autoConfigOnlineRecoFlags(ConfigFlags, args.partition)
+            autoConfigOnlineRecoFlags(flags, args.partition)
     else:
         if args.filesInput:
-            ConfigFlags.Input.Files = args.filesInput.split(",")
+            flags.Input.Files = args.filesInput.split(",")
         elif args.laser:
             inputDirectory = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TileByteStream/TileByteStream-02-00-00"
             inputFile = "data18_tilecomm.00363899.calibration_tile.daq.RAW._lb0000._TileREB-ROS._0005-200ev.data"
-            ConfigFlags.Input.Files = [os.path.join(inputDirectory, inputFile)]
-            ConfigFlags.Input.RunNumber = [363899]
+            flags.Input.Files = [os.path.join(inputDirectory, inputFile)]
+            flags.Input.RunNumber = [363899]
         elif args.noise:
             inputDirectory = 'root://eosatlas.cern.ch//eos/atlas/atlascerngroupdisk/det-tile/test'
             inputFile = 'data12_8TeV.00201555.physics_ZeroBiasOverlay.merge.RAW._lb0150._SFO-ALL._0001.1'
-            ConfigFlags.Input.Files = [os.path.join(inputDirectory, inputFile)]
+            flags.Input.Files = [os.path.join(inputDirectory, inputFile)]
         else:
             from AthenaConfiguration.TestDefaults import defaultTestFiles
-            ConfigFlags.Input.Files = defaultTestFiles.RAW
+            flags.Input.Files = defaultTestFiles.RAW
 
-    runNumber = ConfigFlags.Input.RunNumber[0]
-    ConfigFlags.GeoModel.AtlasVersion = 'ATLAS-R3S-2021-02-00-00' if not ConfigFlags.Input.isMC and runNumber >= 411938 else 'ATLAS-R2-2016-01-00-01'
+    runNumber = flags.Input.RunNumber[0]
+    flags.GeoModel.AtlasVersion = 'ATLAS-R3S-2021-03-01-00' if not flags.Input.isMC and runNumber >= 411938 else 'ATLAS-R2-2016-01-00-01'
 
-    if not ConfigFlags.Output.HISTFileName:
-        ConfigFlags.Output.HISTFileName = 'tilemon_{}.root'.format(runNumber)
+    if not flags.Output.HISTFileName:
+        flags.Output.HISTFileName = 'tilemon_{}.root'.format(runNumber)
 
     if args.online:
-        ConfigFlags.Common.isOnline = True
-    if ConfigFlags.Common.isOnline:
-        ConfigFlags.IOVDb.GlobalTag = 'CONDBR2-HLTP-2022-02' if runNumber > 232498 else 'COMCOND-HLTP-004-02'
-        ConfigFlags.DQ.Environment = 'online'
-        ConfigFlags.DQ.FileKey = ''
+        flags.Common.isOnline = True
+    if flags.Common.isOnline:
+        flags.IOVDb.GlobalTag = 'CONDBR2-HLTP-2022-02' if runNumber > 232498 else 'COMCOND-HLTP-004-02'
+        flags.DQ.Environment = 'online'
+        flags.DQ.FileKey = ''
     else:
-        ConfigFlags.IOVDb.GlobalTag = 'CONDBR2-BLKPA-2022-08' if runNumber > 232498 else 'COMCOND-BLKPA-RUN1-06'
+        flags.IOVDb.GlobalTag = 'CONDBR2-BLKPA-2022-08' if runNumber > 232498 else 'COMCOND-BLKPA-RUN1-06'
 
     if args.laser:
-        ConfigFlags.Tile.RunType = 'LAS'
-        ConfigFlags.Tile.TimingType = 'GAP/LAS'
-        ConfigFlags.Tile.doFit = True
-        ConfigFlags.Tile.correctTime = True
-        ConfigFlags.Tile.doOverflowFit = False
-        ConfigFlags.Tile.BestPhaseFromCOOL = True
-        ConfigFlags.Tile.NoiseFilter = 1
+        flags.Tile.RunType = 'LAS'
+        flags.Tile.TimingType = 'GAP/LAS'
+        flags.Tile.doFit = True
+        flags.Tile.correctTime = True
+        flags.Tile.doOverflowFit = False
+        flags.Tile.BestPhaseFromCOOL = True
+        flags.Tile.NoiseFilter = 1
 
     # Override default configuration flags from command line arguments
-    ConfigFlags.fillFromArgs(parser=parser)
+    flags.fillFromArgs(parser=parser)
 
     # perfmon
     if args.perfmon:
-        ConfigFlags.PerfMon.doFullMonMT=True
+        flags.PerfMon.doFullMonMT=True
 
     if args.preExec:
         log.info('Executing preExec: %s', args.preExec)
         exec(args.preExec)
 
     log.info('FINAL CONFIG FLAGS SETTINGS FOLLOW')
-    ConfigFlags.dump()
+    flags.dump()
 
-    ConfigFlags.lock()
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    cfg = MainServicesCfg(ConfigFlags)
+    cfg = MainServicesCfg(flags)
 
     # Add perfmon
     if args.perfmon:
         from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
-        cfg.merge(PerfMonMTSvcCfg(ConfigFlags))
+        cfg.merge(PerfMonMTSvcCfg(flags))
 
     typeNames = ['TileRawChannelContainer/TileRawChannelCnt', 'TileDigitsContainer/TileDigitsCnt']
     if any([args.tmdbDigits, args.tmdb]):
@@ -262,12 +263,12 @@ if __name__=='__main__':
         typeNames += ['TileRawChannelContainer/MuRcvRawChCnt']
     if args.mbts and args.useMbtsTrigger:
         typeNames += ['CTP_RDO/CTP_RDO']
-    if ConfigFlags.Tile.RunType != 'PHY':
+    if flags.Tile.RunType != 'PHY':
         typeNames += ['TileBeamElemContainer/TileBeamElemCnt']
 
     if args.stateless:
         from ByteStreamEmonSvc.EmonByteStreamConfig import EmonByteStreamCfg
-        cfg.merge( EmonByteStreamCfg(ConfigFlags, type_names=typeNames) )
+        cfg.merge( EmonByteStreamCfg(flags, type_names=typeNames) )
         bsEmonInputSvc = cfg.getService( "ByteStreamInputSvc" )
         bsEmonInputSvc.Partition = args.partition
         bsEmonInputSvc.Key = args.key
@@ -282,87 +283,87 @@ if __name__=='__main__':
         bsEmonInputSvc.LVL1Names = args.lvl1Names
         bsEmonInputSvc.LVL1Logic = args.lvl1Logic
         bsEmonInputSvc.LVL1Origin = args.lvl1Origin
-        bsEmonInputSvc.StreamType = 'express' if ConfigFlags.Beam.Type is BeamType.SingleBeam else args.streamType
+        bsEmonInputSvc.StreamType = 'express' if flags.Beam.Type is BeamType.SingleBeam else args.streamType
         bsEmonInputSvc.StreamNames = args.streamNames
         bsEmonInputSvc.StreamLogic = args.streamLogic
         bsEmonInputSvc.GroupName = args.groupName
         bsEmonInputSvc.ProcessCorruptedEvents = True
     else:
         from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-        cfg.merge( ByteStreamReadCfg(ConfigFlags, type_names = typeNames) )
+        cfg.merge( ByteStreamReadCfg(flags, type_names = typeNames) )
 
     cfg.addPublicTool( CompFactory.TileROD_Decoder(fullTileMode = runNumber) )
 
     from TileRecUtils.TileRawChannelMakerConfig import TileRawChannelMakerCfg
-    cfg.merge( TileRawChannelMakerCfg(ConfigFlags) )
+    cfg.merge( TileRawChannelMakerCfg(flags) )
 
     l1Triggers = ['bit0_RNDM', 'bit1_ZeroBias', 'bit2_L1Cal', 'bit3_Muon',
                   'bit4_RPC', 'bit5_FTK', 'bit6_CTP', 'bit7_Calib', 'AnyPhysTrig']
 
     if args.laser:
         from TileMonitoring.TileRawChannelTimeMonitorAlgorithm import TileRawChannelTimeMonitoringConfig
-        cfg.merge(TileRawChannelTimeMonitoringConfig(ConfigFlags))
+        cfg.merge(TileRawChannelTimeMonitoringConfig(flags))
 
     if args.rod:
         from TileMonitoring.TileRODMonitorAlgorithm import TileRODMonitoringConfig
-        cfg.merge(TileRODMonitoringConfig(ConfigFlags, fillHistogramsForL1Triggers = l1Triggers))
+        cfg.merge(TileRODMonitoringConfig(flags, fillHistogramsForL1Triggers = l1Triggers))
 
     if args.tmdbDigits:
         from TileMonitoring.TileTMDBDigitsMonitorAlgorithm import TileTMDBDigitsMonitoringConfig
-        cfg.merge(TileTMDBDigitsMonitoringConfig(ConfigFlags))
+        cfg.merge(TileTMDBDigitsMonitoringConfig(flags))
 
     if args.tmdbRawChannels:
         from TileMonitoring.TileTMDBRawChannelMonitorAlgorithm import TileTMDBRawChannelMonitoringConfig
-        cfg.merge(TileTMDBRawChannelMonitoringConfig(ConfigFlags))
+        cfg.merge(TileTMDBRawChannelMonitoringConfig(flags))
 
     if args.tmdb:
         from TileMonitoring.TileTMDBMonitorAlgorithm import TileTMDBMonitoringConfig
-        cfg.merge(TileTMDBMonitoringConfig(ConfigFlags))
+        cfg.merge(TileTMDBMonitoringConfig(flags))
 
     if any([args.cells, args.towers, args.clusters, args.mbts, args.muid, args.muonfit]):
         from TileRecUtils.TileCellMakerConfig import TileCellMakerCfg
-        cfg.merge( TileCellMakerCfg(ConfigFlags) )
+        cfg.merge( TileCellMakerCfg(flags) )
 
     if args.cells:
         from TileMonitoring.TileCellMonitorAlgorithm import TileCellMonitoringConfig
-        cfg.merge(TileCellMonitoringConfig(ConfigFlags, fillHistogramsForL1Triggers = l1Triggers, fillGapScintilatorHistograms=True))
+        cfg.merge(TileCellMonitoringConfig(flags, fillHistogramsForL1Triggers = l1Triggers, fillGapScintilatorHistograms=True))
 
     if args.towers:
         from TileMonitoring.TileTowerMonitorAlgorithm import TileTowerMonitoringConfig
-        cfg.merge(TileTowerMonitoringConfig(ConfigFlags, fillHistogramsForL1Triggers = l1Triggers))
+        cfg.merge(TileTowerMonitoringConfig(flags, fillHistogramsForL1Triggers = l1Triggers))
 
     if args.clusters:
         from TileMonitoring.TileClusterMonitorAlgorithm import TileClusterMonitoringConfig
-        cfg.merge(TileClusterMonitoringConfig(ConfigFlags, fillTimingHistograms = True, fillHistogramsForL1Triggers = l1Triggers))
+        cfg.merge(TileClusterMonitoringConfig(flags, fillTimingHistograms = True, fillHistogramsForL1Triggers = l1Triggers))
 
     if args.mbts:
         from TileMonitoring.TileMBTSMonitorAlgorithm import TileMBTSMonitoringConfig
-        cfg.merge(TileMBTSMonitoringConfig(ConfigFlags, FillHistogramsPerMBTS = True, useTrigger = args.useMbtsTrigger))
+        cfg.merge(TileMBTSMonitoringConfig(flags, FillHistogramsPerMBTS = True, useTrigger = args.useMbtsTrigger))
 
     if args.muid:
         from TileMuId.TileMuIdConfig import TileLookForMuAlgCfg
-        cfg.merge(TileLookForMuAlgCfg(ConfigFlags))
+        cfg.merge(TileLookForMuAlgCfg(flags))
 
         from TileMonitoring.TileMuIdMonitorAlgorithm import TileMuIdMonitoringConfig
-        cfg.merge(TileMuIdMonitoringConfig(ConfigFlags, fillHistogramsForL1Triggers = l1Triggers))
+        cfg.merge(TileMuIdMonitoringConfig(flags, fillHistogramsForL1Triggers = l1Triggers))
 
     if args.muonfit:
         from TileCosmicAlgs.TileMuonFitterConfig import TileMuonFitterCfg
-        cfg.merge(TileMuonFitterCfg(ConfigFlags))
+        cfg.merge(TileMuonFitterCfg(flags))
 
         from TileMonitoring.TileMuonFitMonitorAlgorithm import TileMuonFitMonitoringConfig
-        cfg.merge(TileMuonFitMonitoringConfig(ConfigFlags, fillHistogramsForL1Triggers = l1Triggers))
+        cfg.merge(TileMuonFitMonitoringConfig(flags, fillHistogramsForL1Triggers = l1Triggers))
 
     if args.digiNoise:
         from TileMonitoring.TileDigiNoiseMonitorAlgorithm import TileDigiNoiseMonitoringConfig
-        cfg.merge(TileDigiNoiseMonitoringConfig(ConfigFlags))
+        cfg.merge(TileDigiNoiseMonitoringConfig(flags))
 
     if args.rawChanNoise:
         from TileMonitoring.TileRawChannelNoiseMonitorAlgorithm import TileRawChannelNoiseMonitoringConfig
-        cfg.merge(TileRawChannelNoiseMonitoringConfig(ConfigFlags))
+        cfg.merge(TileRawChannelNoiseMonitoringConfig(flags))
 
     from TileMonitoring.TileDQFragMonitorAlgorithm import TileDQFragMonitoringConfig
-    cfg.merge( TileDQFragMonitoringConfig(ConfigFlags) )
+    cfg.merge( TileDQFragMonitoringConfig(flags) )
 
     if any([args.digiNoise, args.rawChanNoise, args.tmdbDigits, args.tmdb]) and args.postProcessingInterval > 0:
         from AthenaCommon.Utils.unixtools import find_datafile
@@ -383,16 +384,16 @@ if __name__=='__main__':
                 return super(TileMonPostProcessingAlg, self).initialize()
 
         ppa = TileMonPostProcessingAlg("TileMonPostProcessingAlg")
-        ppa.OutputLevel = ConfigFlags.Exec.OutputLevel
+        ppa.OutputLevel = flags.Exec.OutputLevel
         ppa.ExtraInputs = [( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' )]
         ppa.Interval = args.postProcessingInterval
         ppa.ConfigFiles = configurations
         ppa._ctr = 1 # Start postprocessing only after specified number of events (not during the first one)
-        if ConfigFlags.Common.isOnline:
-            fileKey = ConfigFlags.DQ.FileKey
+        if flags.Common.isOnline:
+            fileKey = flags.DQ.FileKey
             ppa.FileKey = (fileKey + '/') if not fileKey.endswith('/') else fileKey
         else:
-            ppa.FileKey = f'/{ConfigFlags.DQ.FileKey}/run_{runNumber}/'
+            ppa.FileKey = f'/{flags.DQ.FileKey}/run_{runNumber}/'
 
         cfg.addEventAlgo(ppa, sequenceName='AthEndSeq')
 
@@ -401,8 +402,8 @@ if __name__=='__main__':
         log.info('Executing postExec: %s', args.postExec)
         exec(args.postExec)
 
-    if ConfigFlags.Common.isOnline:
-        cfg.getService("THistSvc").Output=["Tile DATAFILE='%s' OPT='RECREATE'" % (ConfigFlags.Output.HISTFileName)]
+    if flags.Common.isOnline:
+        cfg.getService("THistSvc").Output=["Tile DATAFILE='%s' OPT='RECREATE'" % (flags.Output.HISTFileName)]
         cfg.getService("TileCablingSvc").CablingType=6
 
     if args.mbts and args.useMbtsTrigger:

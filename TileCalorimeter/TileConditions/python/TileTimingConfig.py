@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """Define methods to construct configured Tile timing conditions tool and algorithm"""
 
@@ -9,7 +9,7 @@ def TileTimingCondAlgCfg(flags, **kwargs):
     """Return component accumulator with configured Tile timing conditions algorithm
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
     Keyword arguments:
         Source -- source of Tile timing conditions (COOL, FILE). Defaults to COOL.
         TileTiming -- name of Tile timing conditions object. Defaults to TileTiming.
@@ -69,10 +69,10 @@ def TileTimingCondAlgCfg(flags, **kwargs):
     else:
         raise(Exception("Invalid source: %s" % source))
 
-    TileCalibFltCondAlg=CompFactory.getComp("TileCalibCondAlg<TileCalibDrawerFlt>")
-    timingCondAlg = TileCalibFltCondAlg( name = name,
-                                         ConditionsProxy = timingProxy,
-                                         TileCalibData = timing)
+    TileTimingCondAlg = CompFactory.getComp("TileCondAlg<TileTiming,TileCalibDrawerFlt>")
+    timingCondAlg = TileTimingCondAlg( name = name,
+                                       ConditionsProxy = timingProxy,
+                                       TileCondData = timing)
 
     acc.addCondAlgo(timingCondAlg)
 
@@ -84,7 +84,7 @@ def TileCondToolTimingCfg(flags, **kwargs):
     """Return component accumulator with configured private Tile timing conditions tool
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
     Keyword arguments:
         Source -- source of Tile timing conditions (COOL, FILE). Defaults to COOL.
         TileTiming -- name of Tile timing conditions object. Defaults to TileTiming (TileOnlineTiming if ForceOnline).
@@ -119,7 +119,7 @@ def TileCondToolOnlineTimingCfg(flags, **kwargs):
 
 if __name__ == "__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG
@@ -127,16 +127,17 @@ if __name__ == "__main__":
     # Test setup
     log.setLevel(DEBUG)
 
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.Tile.RunType = 'PHY'
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.Tile.RunType = 'PHY'
+    flags.lock()
 
     acc = ComponentAccumulator()
 
-    timingTool = acc.popToolsAndMerge( TileCondToolTimingCfg(ConfigFlags) )
+    timingTool = acc.popToolsAndMerge( TileCondToolTimingCfg(flags) )
     print(timingTool)
 
-    onlineTimingTool = acc.popToolsAndMerge( TileCondToolOnlineTimingCfg(ConfigFlags) )
+    onlineTimingTool = acc.popToolsAndMerge( TileCondToolOnlineTimingCfg(flags) )
     print(onlineTimingTool)
 
     acc.printConfig(withDetails = True, summariseProps = True)

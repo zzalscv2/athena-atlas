@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef jetsubstructuremomenttools_dipolaritytool_header
@@ -13,7 +13,7 @@ class DipolarityTool :
     
     public:
       // Constructor and destructor
-      DipolarityTool(std::string name);
+      DipolarityTool(const std::string& name);
 
       int modifyJet(xAOD::Jet &injet) const;
 

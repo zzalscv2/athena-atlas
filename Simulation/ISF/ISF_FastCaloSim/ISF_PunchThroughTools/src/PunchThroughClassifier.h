@@ -54,7 +54,7 @@ public:
     virtual double computePunchThroughProbability(const ISF::ISFParticle &isfp, const TFCSSimulationState& simulstate) const override;
 
     /** calcalate NN inputs based on isfp and simulstate */
-    std::map<std::string, std::map<std::string, double> > computeInputs(const ISF::ISFParticle &isfp, const TFCSSimulationState& simulstate) const;
+    static std::map<std::string, std::map<std::string, double> > computeInputs(const ISF::ISFParticle &isfp, const TFCSSimulationState& simulstate) ;
 
     /** scale NN inputs using MinMaxScaler */
     std::map<std::string, std::map<std::string, double> > scaleInputs(std::map<std::string, std::map<std::string, double> >& inputs) const;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  CaloTopoTowerContainer_test.cxx
@@ -70,7 +70,7 @@ void test1 (StoreGateSvc* sg)
   assert (tc1.GetCells().cptr() == lc1);
 
   CaloCell2ClusterMap cm1;
-  assert (tc1.GetCellToClusterMap() == 0);
+  assert (tc1.GetCellToClusterMap() == nullptr);
   tc1.SetCellToClusterMap (&cm1);
   assert (tc1.GetCellToClusterMap() == &cm1);
 
@@ -254,7 +254,7 @@ void test2 (StoreGateSvc* sg)
   assert (tc2.GetCaloIndices() == calos);
 
   CaloTopoTowerContainer tc4 (CaloTowerSeg (10, 10, 0, 1, 0, 2), true);
-  assert (tc4.size() == 0);
+  assert (tc4.empty());
 }
 
 
@@ -267,7 +267,7 @@ int main()
   }  
 
   ISvcLocator* svcLoc = Gaudi::svcLocator();
-  StoreGateSvc* sg = 0;
+  StoreGateSvc* sg = nullptr;
   assert ( svcLoc->service("StoreGateSvc", sg).isSuccess() );
 
   test1 (sg);

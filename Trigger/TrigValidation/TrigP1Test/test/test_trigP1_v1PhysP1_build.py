@@ -1,17 +1,17 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Trigger athenaHLT test of the PhysicsP1_pp_run3_v1 menu, then running BS decoding follows the athenaHLT process
 # art-type: build
 # art-include: master/Athena
-# art-include: 22.0/Athena
+# art-include: 23.0/Athena
 
-from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
+from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps, PyStep
 
 ##################################################
 # Helper functions to build the test steps
 ##################################################
-from TrigP1Test.TrigP1TestSteps import filterBS, decodeBS
+from TrigP1Test.TrigP1TestSteps import filterBS, decodeBS, check_hlt_properties
 
 ##################################################
 # Test definition
@@ -21,7 +21,7 @@ ex = ExecStep.ExecStep()
 ex.type = 'athenaHLT'
 ex.job_options = 'TriggerJobOpts/runHLT_standalone.py'
 ex.input = 'data'
-ex.args = '-c "setMenu=\'PhysicsP1_pp_run3_v1_HLTReprocessing_prescale\';doL1Sim=True;rewriteLVL1=True;"'
+ex.args = '-c "setMenu=\'PhysicsP1_pp_run3_v1_HLTReprocessing_prescale\';doL1Sim=True;rewriteLVL1=True;enableL1NSWVetoMode=False;enableL1NSWMMTrigger=False;enableL1NSWPadTrigger=False;enableL1NSWStripTrigger=False;"'
 ex.args += ' -o output'
 ex.args += ' --dump-config-reload'
 
@@ -34,10 +34,14 @@ filterCost = filterBS("CostMonitoring")
 decodeCost = decodeBS("CostMonitoring")
 decodeCost.args += ' -c "ModuleID=1"'
 
+# Check a few important job options
+checkProperties = PyStep.PyStep(check_hlt_properties, name="CheckProperties")
+checkProperties.required = True
+
 test = Test.Test()
 test.art_type = 'build'
 test.exec_steps = [ex, filterMain, decodeMain, filterCost, decodeCost]
-test.check_steps = CheckSteps.default_check_steps(test)
+test.check_steps = CheckSteps.default_check_steps(test) + [checkProperties]
 
 import sys
 sys.exit(test.run())

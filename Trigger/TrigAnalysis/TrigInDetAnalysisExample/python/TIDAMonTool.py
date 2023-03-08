@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 # create all the histograms for each analysis - this will get called once for each 
 # configured chain - we can set the HistPath either already here, or from the c++ 
@@ -12,7 +12,7 @@
 def createMonTool( flags, slicetag, chain ) :
 
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-    monTool = GenericMonitoringTool( chain )
+    monTool = GenericMonitoringTool( flags, chain )
 
     histpath = slicetag + monGroup(chain)
 

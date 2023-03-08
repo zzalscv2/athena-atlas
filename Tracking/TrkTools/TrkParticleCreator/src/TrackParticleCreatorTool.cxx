@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -746,6 +746,7 @@ TrackParticleCreatorTool::createParticle(const EventContext& ctx,
 
   if (m_computeAdditionalInfo && track!=nullptr) {
     addExpectedHitInformation(track->perigeeParameters(), *trackparticle);
+    addOutlierHitInformation(track->trackStateOnSurfaces(), *trackparticle);
     if(m_doSharedSiHits || m_doSharedTRTHits) addSharedHitInformation(track, *trackparticle);
   }
 
@@ -1118,13 +1119,69 @@ TrackParticleCreatorTool::addExpectedHitInformation(const Perigee *perigee, xAOD
 
 }
 
+void
+TrackParticleCreatorTool::addOutlierHitInformation(const DataVector<const TrackStateOnSurface>* trackStates, xAOD::TrackParticle& tp) const
+{
+
+  uint8_t nPixOutliers = 0, nInPixOutliers = 0, nNInPixOutliers = 0, nSCTOutliers = 0;
+  uint8_t nInEndcapPixOutliers = 0, nNInEndcapPixOutliers = 0;
+
+  for (const TrackStateOnSurface* tsos : *trackStates) {
+
+    bool isOutlier = tsos->type(Trk::TrackStateOnSurface::Outlier);
+    if(!isOutlier) continue;
+
+    const Trk::MeasurementBase* mesb = tsos->measurementOnTrack();
+    if(mesb==nullptr) continue;
+    // Check if the measurement type is RIO on Track (ROT)
+    const RIO_OnTrack* rot = nullptr;
+    if (mesb->type(Trk::MeasurementBaseType::RIO_OnTrack)) {
+      rot = static_cast<const RIO_OnTrack*>(mesb);
+    }
+    if(rot==nullptr) continue;
+
+    const Identifier& id = rot->identify();
+
+    if(m_pixelID->is_pixel(id)){
+      nPixOutliers++;
+      int layer = m_pixelID->layer_disk(id);
+      if(m_pixelID->is_barrel(id)){
+	if(layer==0)      nInPixOutliers++;
+	else if(layer==1) nNInPixOutliers++;
+      }else if(m_doITk){ // isITk && isEndCap -> ITk specific counters
+	if(layer==0)                  nInEndcapPixOutliers++;
+	else if(layer==1 || layer==2) nNInEndcapPixOutliers++; // L0.5 + L1 disks
+      }
+    }
+
+    else if(m_sctID->is_sct(id)){
+      nSCTOutliers++;
+    }
+
+    // TRT outliers are already filled in the InDetTrackSummaryHelperTool as used in the ambi solver
+
+  }
+
+  tp.setSummaryValue(nPixOutliers,    xAOD::numberOfPixelOutliers);
+  tp.setSummaryValue(nInPixOutliers,  xAOD::numberOfInnermostPixelLayerOutliers);
+  tp.setSummaryValue(nNInPixOutliers, xAOD::numberOfNextToInnermostPixelLayerOutliers);
+  tp.setSummaryValue(nSCTOutliers,    xAOD::numberOfSCTOutliers);
+
+  if(m_doITk){
+    tp.setSummaryValue(nInEndcapPixOutliers,  xAOD::numberOfInnermostPixelLayerEndcapOutliers);
+    tp.setSummaryValue(nNInEndcapPixOutliers, xAOD::numberOfNextToInnermostPixelLayerEndcapOutliers);
+  }
+
+}
 
 void
 TrackParticleCreatorTool::addSharedHitInformation(const Track *track, xAOD::TrackParticle& tp) const
 {
 
   uint8_t nPixSharedHits = 0, nInPixSharedHits = 0, nNInPixSharedHits = 0, nSCTSharedHits = 0, nTRTSharedHits = 0;
+  uint8_t nInPixSharedEndcapHits = 0, nNInPixSharedEndcapHits = 0;
   uint8_t nPixSplitHits = 0, nInPixSplitHits = 0, nNInPixSplitHits = 0;
+  uint8_t nInPixSplitEndcapHits = 0, nNInPixSplitEndcapHits = 0;
 
   const DataVector<const Trk::MeasurementBase>* measurements = track->measurementsOnTrack();
   if(!measurements){
@@ -1160,13 +1217,18 @@ TrackParticleCreatorTool::addSharedHitInformation(const Track *track, xAOD::Trac
 	  const InDet::PixelCluster* pixPrd = pix->prepRawData();
 	  const Trk::ClusterSplitProbabilityContainer::ProbabilityInfo&
 	    splitProb = getClusterSplittingProbability(pixPrd);
+	  int layer = m_pixelID->layer_disk(id);
 	  if(pixPrd and splitProb.isSplit()){
 	    ATH_MSG_DEBUG("split Pixel hit found");
 	    hitIsSplit = true;
 	    nPixSplitHits++;
 	    if(m_pixelID->is_barrel(id)){
-	      if(m_pixelID->layer_disk(id) == 0)      nInPixSplitHits++;
-	      else if(m_pixelID->layer_disk(id) == 1) nNInPixSplitHits++;
+	      if(layer==0)      nInPixSplitHits++;
+	      else if(layer==1) nNInPixSplitHits++;
+	    }
+	    else if(m_doITk){ // isITk && isEndCap -> ITk specific counters
+	      if(layer==0)                  nInPixSplitEndcapHits++;
+	      else if(layer==1 || layer==2) nNInPixSplitEndcapHits++; // L0.5 + L1 disks
 	    }
 	  }
 	}
@@ -1178,9 +1240,14 @@ TrackParticleCreatorTool::addSharedHitInformation(const Track *track, xAOD::Trac
 	if(prd_to_track_map->isShared(*(rot->prepRawData()))){
 	  ATH_MSG_DEBUG("shared Pixel hit found");
 	  nPixSharedHits++;
+	  int layer = m_pixelID->layer_disk(id);
 	  if(m_pixelID->is_barrel(id)){
-	    if(m_pixelID->layer_disk(id) == 0)      nInPixSharedHits++;
-	    else if(m_pixelID->layer_disk(id) == 1) nNInPixSharedHits++;
+	    if(layer==0)      nInPixSharedHits++;
+	    else if(layer==1) nNInPixSharedHits++;
+	  }
+	  else if(m_doITk){ // isITk && isEndCap -> ITk specific counters
+	    if(layer==0)                  nInPixSharedEndcapHits++;
+	    else if(layer==1 || layer==2) nNInPixSharedEndcapHits++; // L0.5 + L1 disks
 	  }
 	}
       }
@@ -1212,6 +1279,13 @@ TrackParticleCreatorTool::addSharedHitInformation(const Track *track, xAOD::Trac
   tp.setSummaryValue(nNInPixSharedHits, xAOD::numberOfNextToInnermostPixelLayerSharedHits);
   tp.setSummaryValue(nSCTSharedHits,    xAOD::numberOfSCTSharedHits);
   tp.setSummaryValue(nTRTSharedHits,    xAOD::numberOfTRTSharedHits);
+
+  if(m_doITk){
+    tp.setSummaryValue(nInPixSplitEndcapHits,   xAOD::numberOfInnermostPixelLayerSplitEndcapHits);
+    tp.setSummaryValue(nNInPixSplitEndcapHits,  xAOD::numberOfNextToInnermostPixelLayerSplitEndcapHits);
+    tp.setSummaryValue(nInPixSharedEndcapHits,  xAOD::numberOfInnermostPixelLayerSharedEndcapHits);
+    tp.setSummaryValue(nNInPixSharedEndcapHits, xAOD::numberOfNextToInnermostPixelLayerSharedEndcapHits);
+  }
 
 }
 

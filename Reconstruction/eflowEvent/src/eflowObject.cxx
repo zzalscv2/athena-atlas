@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -40,22 +40,13 @@ UPDATED:   8th April 2004 (P Loch) implement new navigation scheme
 // temporary for navigation !!
 #include <boost/any.hpp>
 
-eflowObject::eflowObject() : P4EEtaPhiM(0.,0.,0.,0.)
+eflowObject::eflowObject()
+  : P4EEtaPhiM(0.,0.,0.,0.),
+    m_passedEOverPCheck (true), //by default true
+    m_eflowObjectType (ChargedPion),
+    m_recoStatus(),
+    m_valid (true)
 {
-  m_d0 = 0.0;
-  m_z0 = 0.0;
-  m_eflowType = 0;
-  m_charge = 0;
-  m_valid = true;
-  m_passedEOverPCheck = true; //by default true
-  m_isSubtracted = false;
-  m_isDuplicated = false;
-  m_recoStatus = CaloRecoStatus();
-  m_nTrack = 0;
-  m_nClus = 0;
-  m_pi0MVA = 0.0;
-  m_centerMag = 0.0;
-  m_eflowObjectType = ChargedPion;
 }
 
 eflowObject::eflowObject(eflowObject* eflowObj) : P4EEtaPhiM(eflowObj->e(),eflowObj->eta(),eflowObj->phi(),eflowObj->m())
@@ -103,13 +94,8 @@ void eflowObject::initialize(eflowObject* eflowObj, bool useClus)
 
 eflowObject::~eflowObject()
 {
-
-  std::vector<CaloClusterContainer*>::iterator firstContainer = m_eflowClusContainers.begin();
-  std::vector<CaloClusterContainer*>::iterator lastContainer = m_eflowClusContainers.end();
-
-  for (; firstContainer != lastContainer; ++firstContainer) delete *firstContainer;
-  m_eflowClusContainers.clear();
-
+  for (CaloClusterContainer* c : m_eflowClusContainers)
+    delete c;
 }
 
 bool eflowObject::checkParticleType(ParticleType particleType) const{
@@ -241,11 +227,9 @@ void eflowObject::navigateClusters(const cluster_type& theClusters,
   // forward query
   if ( ! isHonored )
     {
-      cluster_iterator first = theClusters.begin();
-      cluster_iterator last  = theClusters.end();
-      for ( ; first != last; ++first )
+      for (const CaloCluster* c : theClusters)
 	{
-	  (*first)->fillToken(thisToken,weight);
+	  c->fillToken(thisToken,weight);
 	}
     }
 
@@ -361,11 +345,9 @@ eflowObject::toToken(const CONT&  theData,
 		     TOKEN*       theToken,
 		     double        weight) const
 {
-  typename CONT::const_iterator first = theData.begin();
-  typename CONT::const_iterator last  = theData.end();
-  for ( ; first != last; ++first )
+  for (const auto* p : theData)
     {
-      theToken->setObject((*first),weight);
+      theToken->setObject(p,weight);
     }
 }
 
@@ -374,11 +356,9 @@ void
 eflowObject::toToken(const CONT&  theData,
 		     TOKEN*       theToken) const
 {
-  typename CONT::const_iterator first = theData.begin();
-  typename CONT::const_iterator last  = theData.end();
-  for ( ; first != last; ++first )
+  for (const auto* p : theData)
     {
-      theToken->setObject(*first);
+      theToken->setObject(p);
     }
 }
 

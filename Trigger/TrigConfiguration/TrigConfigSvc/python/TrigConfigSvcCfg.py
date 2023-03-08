@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -338,14 +338,15 @@ def HLTPrescaleCondAlgCfg( flags ):
     log.info("Setting up HLTPrescaleCondAlg")
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     acc = ComponentAccumulator()
-    TrigConf__HLTPrescaleCondAlg = CompFactory.getComp("TrigConf::HLTPrescaleCondAlg")
-    hltPrescaleCondAlg = TrigConf__HLTPrescaleCondAlg("HLTPrescaleCondAlg")
+    hltPrescaleCondAlg = CompFactory.getComp("TrigConf::HLTPrescaleCondAlg")("HLTPrescaleCondAlg")
 
     tc = getTrigConfigFromFlag( flags )
     hltPrescaleCondAlg.Source = tc["SOURCE"]
     if flags.Common.isOnline or tc["SOURCE"]=="COOL":
         from IOVDbSvc.IOVDbSvcConfig import addFolders
-        acc.merge(addFolders(flags, getHLTPrescaleFolderName(), "TRIGGER_ONL", className="AthenaAttributeList"))
+        acc.merge(addFolders(flags, getHLTPrescaleFolderName(), "TRIGGER_ONL",
+                             className = "AthenaAttributeList",
+                             extensible = flags.Trigger.Online.isPartition))
         log.info("Adding folder %s to CompAcc", getHLTPrescaleFolderName() )
     if tc["SOURCE"] == "COOL":
         hltPrescaleCondAlg.TriggerDB = tc["DBCONN"]
@@ -376,26 +377,26 @@ if __name__ == "__main__":
 
         def test_currentMenu(self):
             from AthenaConfiguration.AllConfigFlags import initConfigFlags
-            ConfigFlags = initConfigFlags()
-            ConfigFlags.Trigger.EDMVersion = 3
+            flags = initConfigFlags()
+            flags.Trigger.EDMVersion = 3
             from AthenaConfiguration.TestDefaults import defaultTestFiles
-            ConfigFlags.Input.Files = defaultTestFiles.RAW
-            ConfigFlags.lock()
-            TrigConfigSvcCfg( ConfigFlags )
-            L1PrescaleCondAlgCfg( ConfigFlags )
-            BunchGroupCondAlgCfg( ConfigFlags )
-            HLTPrescaleCondAlgCfg( ConfigFlags )
+            flags.Input.Files = defaultTestFiles.RAW
+            flags.lock()
+            TrigConfigSvcCfg( flags )
+            L1PrescaleCondAlgCfg( flags )
+            BunchGroupCondAlgCfg( flags )
+            HLTPrescaleCondAlgCfg( flags )
 
         def test_legacyMenu(self):
             from AthenaConfiguration.AllConfigFlags import initConfigFlags
-            ConfigFlags = initConfigFlags()
+            flags = initConfigFlags()
             from AthenaConfiguration.TestDefaults import defaultTestFiles
-            ConfigFlags.Input.Files = defaultTestFiles.RAW
-            ConfigFlags.lock()
-            TrigConfigSvcCfg( ConfigFlags )
-            L1PrescaleCondAlgCfg( ConfigFlags )
-            BunchGroupCondAlgCfg( ConfigFlags )
-            HLTPrescaleCondAlgCfg( ConfigFlags )
+            flags.Input.Files = defaultTestFiles.RAW
+            flags.lock()
+            TrigConfigSvcCfg( flags )
+            L1PrescaleCondAlgCfg( flags )
+            BunchGroupCondAlgCfg( flags )
+            HLTPrescaleCondAlgCfg( flags )
 
         def test_jsonConverter(self):
             keys = createJsonMenuFiles(run=360026, lb=151)

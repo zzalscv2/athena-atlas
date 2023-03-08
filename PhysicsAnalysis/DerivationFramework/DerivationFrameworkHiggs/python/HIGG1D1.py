@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # DAOD_HIGG1D1.py
@@ -194,7 +194,7 @@ def HIGG1D1Cfg(ConfigFlags):
     acc = ComponentAccumulator()
     
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    HIGG1D1TriggerListsHelper = TriggerListsHelper()
+    HIGG1D1TriggerListsHelper = TriggerListsHelper(ConfigFlags)
     
     acc.merge(HIGG1D1KernelCfg(ConfigFlags, name="HIGG1D1Kernel", StreamName = 'StreamDAOD_HIGG1D1', TriggerListsHelper = HIGG1D1TriggerListsHelper))
 
@@ -294,7 +294,6 @@ def HIGG1D1Cfg(ConfigFlags):
                                               "AntiKt4EMTopoJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt",
                                               "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt",
                                               "TruthPrimaryVertices.t.x.y.z",
-                                              "InDetTrackParticles.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.numberOfTRTHits.numberOfTRTOutliers",
                                               "EventInfo.hardScatterVertexLink.timeStampNSOffset",
                                               "TauJets.dRmax.etOverPtLeadTrk",
                                               "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET.ex.ey",
@@ -334,24 +333,15 @@ def HIGG1D1Cfg(ConfigFlags):
     HIGG1D1SlimmingHelper.ExtraVariables += PhotonsCPDetailedContent
 
 
-    # Add the variables for Gain adn Cluster energy  --  need to get the tools first to use existing functions 
-    from DerivationFrameworkCalo.DerivationFrameworkCaloFactories import getGainDecorations, getClusterEnergyPerLayerDecorations  
-    GainDecoratorTool = None
-    ClusterEnergyPerLayerDecorators = []  
-    for toolStr in acc.getEventAlgo("HIGG1D1Kernel").AugmentationTools:
-        toolStr  = f"{toolStr}"
-        splitStr = toolStr.split('/')
-        tool =  acc.getPublicTool(splitStr[1])
-        if splitStr[0]== "DerivationFramework::GainDecorator":
-            GainDecoratorTool = tool
-        elif splitStr[0] ==  "DerivationFramework::ClusterEnergyPerLayerDecorator":
-            ClusterEnergyPerLayerDecorators.append( tool )
-
-    if GainDecoratorTool :
-        HIGG1D1SlimmingHelper.ExtraVariables.extend( getGainDecorations(GainDecoratorTool) )
-    for tool in ClusterEnergyPerLayerDecorators:
-        HIGG1D1SlimmingHelper.ExtraVariables.extend( getClusterEnergyPerLayerDecorations(tool) )
-    
+    # Add the variables for Gain and Cluster energy
+    from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import (
+        getGainDecorations, getClusterEnergyPerLayerDecorations )
+    gainDecorations = getGainDecorations(acc, 'HIGG1D1Kernel')
+    HIGG1D1SlimmingHelper.ExtraVariables.extend(gainDecorations)
+    clusterEnergyDecorations = getClusterEnergyPerLayerDecorations(
+        acc, 'HIGG1D1Kernel' )
+    HIGG1D1SlimmingHelper.ExtraVariables.extend(clusterEnergyDecorations)
+        
     # Add HTXS variables
     HIGG1D1SlimmingHelper.ExtraVariables.extend(["EventInfo.HTXS_prodMode",
                                                  "EventInfo.HTXS_errorCode",
@@ -391,6 +381,8 @@ def HIGG1D1Cfg(ConfigFlags):
                                                  "Photons.maxEcell_gain",
                                                  "Photons.maxEcell_onlId",
                                                  "Photons.zvertex"])
+    # Add TTVA variables
+    HIGG1D1SlimmingHelper.ExtraVariables.extend(["InDetTrackParticles.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.numberOfTRTHits.numberOfTRTOutliers"])
 
     # Trigger content
     HIGG1D1SlimmingHelper.IncludeTriggerNavigation = False

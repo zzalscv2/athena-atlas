@@ -76,7 +76,6 @@ namespace ActsTrk {
     SG::ReadCondHandleKey< AtlasFieldCacheCondObj > m_fieldCondObjInputKey {this, "AtlasFieldCacheCondObj", "fieldCondObj",
         "Name of the Magnetic Field conditions object key"};
 
-    SG::ReadHandleKey<xAOD::EventInfo> m_evtKey {this, "EventInfoKey", "EventInfo"};
 
     Gaudi::Property< bool > m_usePixel {this, "UsePixel", true, ""};
   };

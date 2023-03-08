@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """
 Geant4 simulation Python facilities for the ATLAS experiment.
@@ -107,10 +107,7 @@ class G4AtlasEngine:
         # The profiler will work if log level = debug
         G4AtlasEngine._app_profiler = _app_profiler(G4AtlasEngine.log.level)
 
-        # pylcgdict default dictionaries
-        self.load_Dict('AtlasSealCLHEPDict')
         self.init_status = 0
-
         self.useISF = useISF
 
         G4AtlasEngine._InitList = list()

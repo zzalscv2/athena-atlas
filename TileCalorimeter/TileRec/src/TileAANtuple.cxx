@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -109,7 +109,7 @@ s1.c_str()
  */
 
 
-TileAANtuple::TileAANtuple(std::string name, ISvcLocator* pSvcLocator)
+TileAANtuple::TileAANtuple(const std::string& name, ISvcLocator* pSvcLocator)
 : AthAlgorithm(name, pSvcLocator)
 , m_evTime(0)
 , m_run(0)
@@ -1239,6 +1239,9 @@ StatusCode TileAANtuple::storeTMDBDecision(const EventContext& ctx) {
     TileMuonReceiverContainer::const_iterator itLast = decisionCnt->end();
   
     // Go through all decisions
+    //
+    int bcid[3]={0};
+
     for(; it != itLast; ++it) {
 
       const TileMuonReceiverObj * obj = (*it);
@@ -1250,10 +1253,13 @@ StatusCode TileAANtuple::storeTMDBDecision(const EventContext& ctx) {
 
         int fragId = (*it)->identify();
         int drawer = fragId & 0x3F;
-        int ros    = (fragId>>8) - 1;
+        int ros    = ((fragId>>8) & 0xF) - 1;
+	bcid[2]    = ((fragId>>24) & 0xF);
+	bcid[1]    = ((fragId>>20) & 0xF);
+	bcid[0]    = ((fragId>>16) & 0XF);
  
         if (siz > N_TMDBDECISIONS) {
-          ATH_MSG_VERBOSE( "ONLY " << N_TMDBDECISIONS << " decisions saved to ntuple instead of " << siz);
+          ATH_MSG_VERBOSE( "TMDB ONLY " << N_TMDBDECISIONS << " decisions saved to ntuple instead of " << siz);
           siz = N_TMDBDECISIONS;
         }
 
@@ -1261,15 +1267,19 @@ StatusCode TileAANtuple::storeTMDBDecision(const EventContext& ctx) {
           m_arrays->m_decisionTMDB[ros][drawer][n] = (unsigned char) decision[n];
         }
 
+	for (int n = 0; n < 3; ++n) {
+          m_arrays->m_bcidTMDB[ros][drawer][n] = (unsigned char) bcid[n];
+        }
+
         if (msgLvl(MSG::VERBOSE)) {
           std::stringstream ss;
           for (int n = 0; n < siz; ++n) {
             ss<<std::setw(5)<<(int)m_arrays->m_decisionTMDB[ros][drawer][n];
           }
-          ATH_MSG_VERBOSE( "   0x" <<MSG::hex<< fragId <<MSG::dec<<" "<< part[ros] 
+          ATH_MSG_VERBOSE( "TMDB 0x" <<MSG::hex<< fragId <<MSG::dec<<" "<< part[ros]
                            << std::setfill('0') << std::setw(2)
-                           << drawer+1 << std::setfill(' ') 
-                           << "      decision: " <<ss.str()  );
+                           << drawer+1 << std::setfill(' ')
+                           << " BCID check " << bcid[0] <<"/"<< bcid[1] <<"/"<< bcid[2] << "      decision: " << ss.str()  );
         }
       }
     }
@@ -1307,7 +1317,7 @@ StatusCode TileAANtuple::storeTMDBDigits(const EventContext& ctx) {
         int ros    = (fragId>>8) - 1;
         int ichannel = 0;
  
-        ATH_MSG_VERBOSE( "   0x" <<MSG::hex<< fragId <<MSG::dec<<" "<< part[ros]
+        ATH_MSG_VERBOSE( "TMDB 0x" <<MSG::hex<< fragId <<MSG::dec<<" "<< part[ros]
                          << std::setfill('0') << std::setw(2)
                           << drawer+1 << std::setfill(' ') ); 
 
@@ -1325,7 +1335,7 @@ StatusCode TileAANtuple::storeTMDBDigits(const EventContext& ctx) {
           int siz = sampleVec.size();
 
           if (siz > m_nSamples) {
-            ATH_MSG_VERBOSE( "ONLY " << m_nSamples << " digits saved to ntuple instead of " << siz);
+            ATH_MSG_VERBOSE( "TMDB ONLY " << m_nSamples << " digits saved to ntuple instead of " << siz);
             siz = m_nSamples;
           }
 
@@ -1338,7 +1348,7 @@ StatusCode TileAANtuple::storeTMDBDigits(const EventContext& ctx) {
             for (int n = 0; n < siz; ++n) {
               ss<<std::setw(5)<<(int)m_arrays->m_sampleTMDB[sample_ind_TMDB(ros,drawer,ichannel,n)];
             }
-            ATH_MSG_VERBOSE( "      dig: " <<ros+1<<"/"<<drawer<<"/"<<m_tileHWID->channel(digit->adc_HWID())<<": "<<ss.str()  );
+            ATH_MSG_VERBOSE( "TMDB dig: " <<ros+1<<"/"<<drawer<<"/"<<m_tileHWID->channel(digit->adc_HWID())<<": "<<ss.str()  );
           }
       
           ++ichannel;
@@ -1379,7 +1389,7 @@ StatusCode TileAANtuple::storeTMDBRawChannel(const EventContext& ctx) {
         int ros    = (fragId>>8) - 1;
         int ichannel = 0;
   
-        ATH_MSG_VERBOSE( "   0x" <<MSG::hex<< fragId <<MSG::dec<<" "<< part[ros]
+        ATH_MSG_VERBOSE( "TMDB 0x" <<MSG::hex<< fragId <<MSG::dec<<" "<< part[ros]
                          << std::setfill('0') << std::setw(2)
                          << drawer+1 << std::setfill(' ') ); 
 
@@ -1394,7 +1404,7 @@ StatusCode TileAANtuple::storeTMDBRawChannel(const EventContext& ctx) {
         
           m_arrays->m_eTMDB[ros][drawer][ichannel] =  rc -> amplitude();
 
-          ATH_MSG_VERBOSE( "      rc: " <<ros+1<<"/"<<drawer<<"/"<<m_tileHWID->channel(rc->adc_HWID())<< ": " << m_arrays->m_eTMDB[ros][drawer][ichannel] );
+          ATH_MSG_VERBOSE( "TMDB rc: " <<ros+1<<"/"<<drawer<<"/"<<m_tileHWID->channel(rc->adc_HWID())<< ": " << m_arrays->m_eTMDB[ros][drawer][ichannel] );
 
           ++ichannel;
         }
@@ -2171,6 +2181,10 @@ void TileAANtuple::TMDB_addBranch(void)
     m_ntuplePtr->Branch("decisionTMDB", m_arrays->m_decisionTMDB, "decisionTMDB[4][64][4]/b"); // unsigned char m_arrays->m_decisionTMDB[N_ROS][N_MODULES][N_TMDBDECISIONS] 
   }
 
+  if (!m_tileMuRcvContainerKey.empty()) {
+    m_ntuplePtr->Branch("bcidTMDB", m_arrays->m_bcidTMDB, "bcidTMDB[4][64][3]/b"); // unsigned char m_arrays->m_bcidTMDB[N_ROS][N_MODULES][N_TMDBBCIDWORDS]
+  }
+
 }
 
 void TileAANtuple::TMDB_clearBranch(void)
@@ -2178,6 +2192,7 @@ void TileAANtuple::TMDB_clearBranch(void)
   if (!m_tileMuRcvRawChannelContainerKey.empty()) CLEAR(m_arrays->m_eTMDB);
   if (!m_tileMuRcvDigitsContainerKey.empty()) CLEAR6(m_arrays->m_sampleTMDB);
   if (!m_tileMuRcvContainerKey.empty()) CLEAR(m_arrays->m_decisionTMDB);
+  if (!m_tileMuRcvContainerKey.empty()) CLEAR(m_arrays->m_bcidTMDB);
 }
 
 /*/////////////////////////////////////////////////////////////////////////////

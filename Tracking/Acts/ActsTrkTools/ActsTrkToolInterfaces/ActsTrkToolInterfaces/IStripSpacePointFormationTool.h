@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRKTOOLINTERFACES_ISTRIPSPACEPOINTFORMATIONTOOL_H
@@ -8,13 +8,28 @@
 // Athena
 #include "GaudiKernel/IAlgTool.h"
 
-#include "ActsTrkEvent/SpacePoint.h"
-#include "ActsTrkEvent/SpacePointData.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "SiSpacePointFormation/SiElementPropertiesTable.h"
 #include "xAODInDetMeasurement/StripClusterContainer.h"
+#include "xAODInDetMeasurement/SpacePointContainer.h"
 
 namespace ActsTrk {
+  struct StripSP {
+    StripSP() = default;
+
+    std::vector<unsigned int> idHashes {};
+    Eigen::Matrix<float,3,1> globPos {0, 0, 0};
+    float cov_r {0};
+    float cov_z {0};
+    std::vector<std::size_t> measurementIndexes {};
+    float topHalfStripLength {0};
+    float bottomHalfStripLength {0};
+    Eigen::Matrix<float,3,1> topStripDirection {0, 0, 0};
+    Eigen::Matrix<float,3,1> bottomStripDirection {0, 0, 0};
+    Eigen::Matrix<float,3,1> stripCenterDistance {0, 0, 0};
+    Eigen::Matrix<float,3,1> topStripCenter {0, 0, 0};
+  };
+
     /// @class IPixelSpacePointFormationTool
     /// Base class for strip space point formation tool
 
@@ -22,17 +37,13 @@ namespace ActsTrk {
     public:
         DeclareInterfaceID(IStripSpacePointFormationTool, 1, 0);
 
-        virtual void produceStripSpacePoints(const xAOD::StripClusterContainer& clusterContainer,
-                                             const InDet::SiElementPropertiesTable& properties,
-                                             const InDetDD::SiDetectorElementCollection& elements,
-                                             const Amg::Vector3D& beamSpotVertex,
-                                             ActsTrk::SpacePointContainer& spacePoints,
-                                             ActsTrk::SpacePointData& spacePointData,
-                                             ActsTrk::SpacePointMeasurementDetails& spacePointDetails,
-                                             ActsTrk::SpacePointContainer& overlapSpacePoints,
-                                             ActsTrk::SpacePointData& overlapSpacePointData,
-                                             ActsTrk::SpacePointMeasurementDetails& overlapSpacePointDetails,
-                                             bool processOverlaps) const = 0;
+        virtual StatusCode produceStripSpacePoints(const xAOD::StripClusterContainer& clusterContainer,
+						   const InDet::SiElementPropertiesTable& properties,
+						   const InDetDD::SiDetectorElementCollection& elements,
+						   const Amg::Vector3D& beamSpotVertex,
+						   std::vector<StripSP>& spacePoints,
+						   std::vector<StripSP>& overlapSpacePoints,
+						   bool processOverlaps) const = 0;
     };
 
 } // ACTSTRKTOOLINTERFACES_ISTRIPSPACEPOINTFORMATIONTOOL_H

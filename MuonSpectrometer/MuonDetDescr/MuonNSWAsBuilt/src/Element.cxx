@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonNSWAsBuilt/Element.h"
@@ -89,13 +89,14 @@ void Element::setParametersFromMap(ParameterClass iclass, const std::map<std::st
 
 
 //===============================================================================
-void Element::addDaughter(std::unique_ptr<Element> daughter) 
+Element* Element::addDaughter(std::unique_ptr<Element> daughter) 
 {
   if (daughter->m_mother) {
     throw std::runtime_error("Element has a defined mother already");
   }
   daughter->m_mother = this;
   m_daughters.push_back(std::move(daughter));
+  return m_daughters.back().get();
 }
 
 

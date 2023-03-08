@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from TrigHypoCommonTools.TrigHypoCommonToolsConf import L1InfoHypo, L1InfoHypoTool
 
@@ -6,7 +6,6 @@ from TriggerMenuMT.HLT.Config.ChainConfigurationBase import ChainConfigurationBa
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsPool
 from DecisionHandling.DecisionHandlingConf import InputMakerForRoI, ViewCreatorInitialROITool
 from AthenaCommon.CFElements import seqAND
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
 
 from AthenaCommon.Logging import logging
 logging.getLogger().info("Importing %s",__name__)
@@ -62,7 +61,7 @@ l1seeds = { 'low'  : \
                 'L1_XE35',
             ] }
 
-def enhancedBiasAthSequence(ConfigFlags):
+def enhancedBiasAthSequence(flags):
         inputMakerAlg = InputMakerForRoI("IM_enhancedBias")
         inputMakerAlg.RoITool = ViewCreatorInitialROITool()
         inputMakerAlg.RoIs="enhancedBiasInputRoIs"
@@ -72,12 +71,12 @@ def enhancedBiasAthSequence(ConfigFlags):
 
 
 def enahncedBiasSequence_Cfg(flags):
-    return enhancedBiasMenuSequence()
+    return enhancedBiasMenuSequence(flags)
 
 
-def enhancedBiasMenuSequence():
+def enhancedBiasMenuSequence(flags):
         # InputMaker and sequence
-        (_, inputMakerAlg, enhancedBiasSequence) = RecoFragmentsPool.retrieve(enhancedBiasAthSequence, ConfigFlags)
+        (_, inputMakerAlg, enhancedBiasSequence) = RecoFragmentsPool.retrieve(enhancedBiasAthSequence, flags)
 
         # Hypo
         hypoAlg = L1InfoHypo("EnhancedBiasHypo")
@@ -95,10 +94,11 @@ def enhancedBiasMenuSequence():
 
             return tool
 
-        return MenuSequence( Sequence   = enhancedBiasSequence,
+        return MenuSequence(flags,
+                            Sequence   = enhancedBiasSequence,
                             Maker       = inputMakerAlg,
                             Hypo        = hypoAlg,
-                            HypoToolGen = EnhancedBiasHypoToolGen )
+                            HypoToolGen = EnhancedBiasHypoToolGen)
 
 
 class EnhancedBiasChainConfiguration(ChainConfigurationBase):
@@ -106,10 +106,10 @@ class EnhancedBiasChainConfiguration(ChainConfigurationBase):
         ChainConfigurationBase.__init__(self, chainDict)
 
 
-    def assembleChainImpl(self):
+    def assembleChainImpl(self, flags):
         chainSteps = []
         log.debug("Assembling chain for %s", self.chainName)
 
-        chainSteps.append( self.getStep(1,"EnhancedBias", [enahncedBiasSequence_Cfg]) )
+        chainSteps.append( self.getStep(flags, 1, "EnhancedBias", [enahncedBiasSequence_Cfg]) )
 
         return self.buildChain(chainSteps)

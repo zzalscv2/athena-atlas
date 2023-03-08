@@ -1,11 +1,10 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.CFElements import (seqAND, parOR)
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence
 from AthenaCommon.Logging import logging
 
 from ..Config.MenuComponents import RecoFragmentsPool, algorithmCAToGlobalWrapper
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
 from TrigEDMConfig.TriggerEDMRun3 import recordable
 from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
 from DecisionHandling.DecisionHandlingConf import ViewCreatorCentredOnIParticleROITool
@@ -14,9 +13,9 @@ from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
 logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
 
-def DJPromptStep():
-    from TrigLongLivedParticlesHypo.TrigDJHypoConfig import (TrigDJHypoPromptToolFromDict)
-    from TrigLongLivedParticlesHypo.TrigLongLivedParticlesHypoConf import (DisplacedJetPromptHypoAlg)
+def DJPromptStep(flags):
+    from TrigLongLivedParticlesHypo.TrigDJHypoConfig import TrigDJHypoPromptToolFromDict
+    from TrigLongLivedParticlesHypo.TrigLongLivedParticlesHypoConf import DisplacedJetPromptHypoAlg
 
     hypo_alg = DisplacedJetPromptHypoAlg("DJTrigPromptHypoAlg")
 
@@ -35,20 +34,21 @@ def DJPromptStep():
     im_alg = conf2toConfigurable(CompFactory.InputMakerForRoI( "IM_DJTRIG_Prompt" ))
     im_alg.RoITool = conf2toConfigurable(CompFactory.ViewCreatorInitialROITool())
 
-    return MenuSequence( Sequence    = seqAND("DJTrigPromptEmptyStep",[im_alg]),
+    return MenuSequence( flags,
+                         Sequence    = seqAND("DJTrigPromptEmptyStep",[im_alg]),
                          Maker       = im_alg,
                          Hypo        = hypo_alg,
                          HypoToolGen = TrigDJHypoPromptToolFromDict,
                      )
 
-def DJDispFragment(ConfigFlags):
+def DJDispFragment(flags):
     lrtcfg = getInDetTrigConfig( 'DJetLRT' )
     roiTool = ViewCreatorCentredOnIParticleROITool('ViewCreatorDJRoI', RoisWriteHandleKey = recordable(lrtcfg.roi), RoIEtaWidth = lrtcfg.etaHalfWidth, RoIPhiWidth = lrtcfg.phiHalfWidth)
     InputMakerAlg = EventViewCreatorAlgorithm("IMDJRoIFTF",mergeUsingFeature = True, RoITool = roiTool,Views = "DJRoIViews",InViewRoIs = "InViewRoIs",RequireParentView = False,ViewFallThrough = True)
     fscfg = getInDetTrigConfig("jet")
     from TrigInDetConfig.InDetTrigFastTracking import makeInDetTrigFastTracking
 
-    algs, view_verify = makeInDetTrigFastTracking(config=lrtcfg, LRTInputCollection = fscfg.trkTracks_FTF(), rois = InputMakerAlg.InViewRoIs)
+    algs, view_verify = makeInDetTrigFastTracking(flags, config=lrtcfg, LRTInputCollection = fscfg.trkTracks_FTF(), rois = InputMakerAlg.InViewRoIs)
 
     reco_seq = parOR("UncTrkrecoSeqDJTrigDispRecoSeq", algs)
 
@@ -58,11 +58,11 @@ def DJDispFragment(ConfigFlags):
     InputMakerAlg.ViewNodeName = reco_seq.name()
 
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
-    robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Si, ConfigFlags, nameSuffix=InputMakerAlg.name())[0]
+    robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Si, flags, nameSuffix=InputMakerAlg.name())[0]
 
     return (seqAND("UncTrkrecoSeqDJTrigDisp", [InputMakerAlg, robPrefetchAlg, reco_seq]), InputMakerAlg)
 
-def DJDispStep():
+def DJDispStep(flags):
     from TrigLongLivedParticlesHypo.TrigDJHypoConfig import TrigDJHypoDispToolFromDict
     from TrigLongLivedParticlesHypo.TrigLongLivedParticlesHypoConf import (DisplacedJetDispHypoAlg)
 
@@ -74,9 +74,10 @@ def DJDispStep():
     hypo_alg.lrtTracksKey = lrtcfg.tracks_FTF()
     hypo_alg.vtxKey = fscfg.vertex_jet
 
-    ( alg_seq ,im_alg) = RecoFragmentsPool.retrieve(DJDispFragment,ConfigFlags)
+    ( alg_seq ,im_alg) = RecoFragmentsPool.retrieve(DJDispFragment,flags)
 
-    return MenuSequence(Sequence    = alg_seq,
+    return MenuSequence(flags,
+                        Sequence    = alg_seq,
                         Maker       = im_alg,
                         Hypo        = hypo_alg,
                         HypoToolGen = TrigDJHypoDispToolFromDict,

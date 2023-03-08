@@ -116,7 +116,7 @@ def BeamEffectsAlgCfg(flags, name="BeamEffectsAlg", **kwargs):
     manipulators = []
     manipulators.append(acc.popToolsAndMerge(ValidityCheckerCfg(flags)))
     from SimulationConfig.SimEnums import CavernBackground
-    if flags.Beam.Type is not BeamType.Cosmics and flags.Sim.CavernBackground is not CavernBackground.Read:
+    if flags.Beam.Type not in [BeamType.Cosmics, BeamType.TestBeam] and flags.Sim.CavernBackground is not CavernBackground.Read:
         manipulators.append(acc.popToolsAndMerge(GenEventVertexPositionerCfg(flags)))
     # manipulators.append(acc.popToolsAndMerge(GenEventBeamEffectBoosterCfg(flags))) # todo segmentation violation
     # manipulators.append(acc.popToolsAndMerge(VertexPositionFromFileCfg(flags))) # todo

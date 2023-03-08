@@ -89,7 +89,7 @@ int main( int argc, char** argv ) {
 	size_t pos = tmp.find("\"");
 	std::string p = tmp.substr( pos+1, tmp.size()-pos-1 );
 	pos = p.find("\"");
-	p = p.substr( 0, pos );
+	if (pos!=std::string::npos) p.resize( pos );
 	//	position[iblock] = std::atoi( p.c_str() );
 
 	//	std::cout << "pos: " << position << std::endl;

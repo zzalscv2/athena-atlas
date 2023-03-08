@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "L1TriggerByteStreamDecoderAlg.h"
@@ -172,7 +172,12 @@ StatusCode L1TriggerByteStreamDecoderAlg::execute(const EventContext& eventConte
     ATH_CHECK(checkRobs(vrobfForTool, toolName, eventContext));
     monTimePrep.stop();
     auto monTimeConv = Monitored::Timer<std::chrono::duration<float, std::milli>>("TIME_convert_"+toolName);
-    ATH_CHECK(decoderTool->convertFromBS(vrobfForTool, eventContext));
+    try {
+      ATH_CHECK(decoderTool->convertFromBS(vrobfForTool, eventContext));
+    } catch (const std::exception& ex) {
+      ATH_MSG_ERROR("Exception in " << toolName << "::convertFromBS: " << ex.what());
+      return StatusCode::FAILURE;
+    }
     // Note: time histograms not filled if any ATH_CHECK above fails
     Monitored::Group(m_monTool, monTimePrep, monTimeConv);
   }

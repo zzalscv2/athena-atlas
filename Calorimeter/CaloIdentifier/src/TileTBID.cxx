@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -300,21 +300,21 @@ IdContext
 TileTBID::type_context  (void)  const
 {
     ExpandedIdentifier id;
-    return (IdContext(id, 0, m_TYPE_INDEX));
+    return {id, 0, m_TYPE_INDEX};
 }
 
 IdContext	
 TileTBID::module_context  (void)  const
 {
     ExpandedIdentifier id;
-    return (IdContext(id, 0, m_MODULE_INDEX));
+    return {id, 0, m_MODULE_INDEX};
 }
 
 IdContext	
 TileTBID::channel_context     (void)  const
 {
     ExpandedIdentifier id;
-    return (IdContext(id, 0, m_CHANNEL_INDEX));
+    return {id, 0, m_CHANNEL_INDEX};
 }
 
 int  TileTBID::get_id     (const IdentifierHash& hash_id, Identifier& id, const IdContext* context ) const

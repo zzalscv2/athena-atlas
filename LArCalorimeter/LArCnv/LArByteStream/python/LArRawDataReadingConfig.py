@@ -27,23 +27,24 @@ def LArRawDataReadingCfg(configFlags, **kwargs):
 
 if __name__=="__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags=initConfigFlags()
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG
     log.setLevel(DEBUG)
 
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    ConfigFlags.LAr.doAlign=False
-    ConfigFlags.Exec.OutputLevel=DEBUG
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.lock()
+    flags.LAr.doAlign=False
+    flags.Exec.OutputLevel=DEBUG
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.lock()
 
-    acc = MainServicesCfg( ConfigFlags )
-    acc.merge(LArRawDataReadingCfg(ConfigFlags))
+    acc = MainServicesCfg( flags )
+    acc.merge(LArRawDataReadingCfg(flags))
     
     DumpLArRawChannels=CompFactory.DumpLArRawChannels
     from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg 
-    acc.merge(LArOnOffIdMappingCfg(ConfigFlags))
+    acc.merge(LArOnOffIdMappingCfg(flags))
     acc.addEventAlgo(DumpLArRawChannels(LArRawChannelContainerName="LArRawChannels",))
 
     acc.run(2)

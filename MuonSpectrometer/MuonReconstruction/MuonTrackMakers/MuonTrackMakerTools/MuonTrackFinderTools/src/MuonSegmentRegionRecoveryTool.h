@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**@class MuonSegmentRegionRecoveryTool
@@ -23,7 +23,7 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "IRegionSelector/IRegSelTool.h"
 #include "IRegionSelector/RegSelEnums.h"
-#include "MuidInterfaces/ICombinedMuonTrackBuilder.h"
+#include "MuidInterfaces/ICombinedMuonTrackFitter.h"
 #include "MuonChamberHoleRecoveryTool.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonPrepRawData/CscPrepDataCollection.h"
@@ -144,7 +144,7 @@ namespace Muon {
 
         ToolHandle<MuonChamberHoleRecoveryTool> m_chamberHoleRecoveryTool{this, "ChamberHoleRecoveryTool", "", "hit-based hole search"};
         ToolHandle<Trk::IExtrapolator> m_extrapolator{this, "Extrapolator", "Trk::Extrapolator/MuonExtrapolator"};
-        ToolHandle<Rec::ICombinedMuonTrackBuilder> m_builder{this, "Builder", ""};
+        ToolHandle<Rec::ICombinedMuonTrackFitter> m_builder{this, "Builder", ""};
         ToolHandle<Trk::ITrackFitter> m_fitter{this, "Fitter", "Trk::GlobalChi2Fitter/MCTBSLFitter"};
         ToolHandle<IMuonHitSummaryTool> m_hitSummaryTool{this, "HitSummaryTool", "Muon::MuonHitSummaryTool/MuonHitSummaryTool"};
         ToolHandle<IRegSelTool> m_regsel_mdt{this, "MDTRegionSelector", "RegSelTool/RegSelTool_MDT"};

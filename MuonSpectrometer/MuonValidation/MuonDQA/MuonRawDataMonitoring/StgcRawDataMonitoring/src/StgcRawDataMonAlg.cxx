@@ -30,6 +30,7 @@ StatusCode sTgcRawDataMonAlg::initialize() {
   ATH_CHECK(m_sTgcContainerKey.initialize());
   ATH_CHECK(m_detectorManagerKey.initialize());
   ATH_CHECK(m_segmentManagerKey.initialize());
+  ATH_CHECK(m_meTrkKey.initialize());
   
   return StatusCode::SUCCESS;
 } 
@@ -37,12 +38,24 @@ StatusCode sTgcRawDataMonAlg::initialize() {
 StatusCode sTgcRawDataMonAlg::fillHistograms(const EventContext& ctx) const {  
   SG::ReadHandle<Muon::sTgcPrepDataContainer> sTgcContainer(m_sTgcContainerKey, ctx);
   SG::ReadCondHandle<MuonGM::MuonDetectorManager> detectorManagerKey(m_detectorManagerKey, ctx);
+  
+  SG::ReadHandle<xAOD::TrackParticleContainer> meTPContainer(m_meTrkKey, ctx);
+  
+  if (!meTPContainer.isValid()) {
+    ATH_MSG_FATAL("Could not get track particle container: " << m_meTrkKey.fullKey());
+    return StatusCode::FAILURE;
+  }
+  
+  fillsTgcClusterFromTrackHistograms(meTPContainer.cptr());
+
   SG::ReadHandle<Trk::SegmentCollection> segmentContainer(m_segmentManagerKey, ctx);
   
   if(!segmentContainer.isValid()) {
     ATH_MSG_ERROR("Could not get segmentContainer");      
     return StatusCode::FAILURE;
   }
+  
+  fillsTgcClusterFromSegmentsHistograms(segmentContainer.cptr());
   
   const int lumiblock = GetEventInfo(ctx) -> lumiBlock();
   
@@ -56,8 +69,6 @@ StatusCode sTgcRawDataMonAlg::fillHistograms(const EventContext& ctx) const {
       }
     }
   }
-  
-  fillsTgcClusterFromSegmentsHistograms(segmentContainer.cptr());
   
   return StatusCode::SUCCESS;
 }
@@ -357,3 +368,56 @@ void sTgcRawDataMonAlg::fillsTgcClusterFromSegmentsHistograms(const Trk::Segment
   }
 }
 
+void sTgcRawDataMonAlg::fillsTgcClusterFromTrackHistograms(const xAOD::TrackParticleContainer*  muonContainer) const {
+  for (const xAOD::TrackParticle* meTP : *muonContainer) {
+    if (!meTP) continue;
+
+    const Trk::Track* meTrack = meTP -> track();
+    if(!meTrack) continue;
+    
+    for(const Trk::TrackStateOnSurface* trkState : *meTrack -> trackStateOnSurfaces()) {
+      if(!(trkState)) continue;
+      if (!trkState -> type(Trk::TrackStateOnSurface::Measurement)) continue;
+      Identifier surfaceId = (trkState) -> surface().associatedDetectorElementIdentifier();
+      if(!m_idHelperSvc -> issTgc(surfaceId)) continue;
+
+      const Trk::MeasurementBase* meas = trkState->measurementOnTrack();
+      if(!meas) continue;
+      
+      const Trk::RIO_OnTrack* rot = dynamic_cast<const Trk::RIO_OnTrack*>(meas);
+      if(!rot) continue;
+      Identifier rot_id = rot->identify();
+      if(!m_idHelperSvc -> issTgc(rot_id)) continue;
+
+      const Amg::Vector3D& pos = (trkState) -> trackParameters() -> position();
+      float xPosSegm = pos.x();
+      float yPosSegm = pos.y();
+      
+      int channelType  = m_idHelperSvc -> stgcIdHelper().channelType(surfaceId);
+      int stationEta   = m_idHelperSvc -> stgcIdHelper().stationEta(surfaceId);
+      int multiplet    = m_idHelperSvc -> stgcIdHelper().multilayer(surfaceId);
+      int gasGap       = m_idHelperSvc -> stgcIdHelper().gasGap(surfaceId);
+      int iside        = (stationEta > 0) ? 1 : 0;
+      std::string side = GeometricSectors::sTgcSide[iside];
+      int layer        = getLayer(multiplet, gasGap);
+     
+      if (channelType == sTgcIdHelper::sTgcChannelTypes::Pad) {
+	auto xPosSegmPadMon = Monitored::Scalar<float>("xPosPad_" + side + "_layer_" + std::to_string(layer), xPosSegm); 
+	auto yPosSegmPadMon = Monitored::Scalar<float>("yPosPad_" + side + "_layer_" + std::to_string(layer), yPosSegm);
+	fill("sTgcYvsX", xPosSegmPadMon, yPosSegmPadMon);
+      }
+
+      else if (channelType == sTgcIdHelper::sTgcChannelTypes::Strip) {
+	auto xPosSegmStripMon = Monitored::Scalar<float>("xPosStrip_" + side + "_layer_" + std::to_string(layer), xPosSegm); 
+	auto yPosSegmStripMon = Monitored::Scalar<float>("yPosStrip_" + side + "_layer_" + std::to_string(layer), yPosSegm);
+	fill("sTgcYvsX", xPosSegmStripMon, yPosSegmStripMon);
+      }
+
+      else if (channelType == sTgcIdHelper::sTgcChannelTypes::Wire) {
+	auto xPosSegmWireGroupMon = Monitored::Scalar<float>("xPosWireGroup_" + side + "_layer_" + std::to_string(layer), xPosSegm); 
+	auto yPosSegmWireGroupMon = Monitored::Scalar<float>("yPosWireGroup_" + side + "_layer_" + std::to_string(layer), yPosSegm);
+	fill("sTgcYvsX", xPosSegmWireGroupMon, yPosSegmWireGroupMon);
+      }   
+    }
+  }
+}

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -743,7 +743,7 @@ JetVertexCharge::SetupReaders( Vars& vars,
      //KM: if it doesn't find "<" in the string, it starts from non-space character
      std::string::size_type posi = sss.find('<')!=std::string::npos ? sss.find('<') : sss.find_first_not_of(" ");
      std::string tmp = sss.erase(0,posi);
-     iss << tmp.data(); 
+     iss << tmp; 
      if (tmp.find("<Variable")!=std::string::npos ) {
        if ( tmp.find("Variable VarIndex")!=std::string::npos ) {
 	 // Retrieve the original expression for use with a new TMVA::Reader object

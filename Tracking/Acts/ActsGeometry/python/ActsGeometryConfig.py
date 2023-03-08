@@ -1,273 +1,241 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator 
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 
-def ActsTrackingGeometrySvcCfg(configFlags, name = "ActsTrackingGeometrySvc", **kwargs) :
+def ActsTrackingGeometrySvcCfg(flags, name = "ActsTrackingGeometrySvc", **kwargs) :
   result = ComponentAccumulator()
 
-  Acts_ActsTrackingGeometrySvc = CompFactory.ActsTrackingGeometrySvc
   subDetectors = []
-  if configFlags.Detector.GeometryBpipe:
+  if flags.Detector.GeometryBpipe:
     from BeamPipeGeoModel.BeamPipeGMConfig import BeamPipeGeometryCfg
-    result.merge(BeamPipeGeometryCfg(configFlags))
-  if configFlags.Detector.GeometryPixel:
+    result.merge(BeamPipeGeometryCfg(flags))
+    kwargs.setdefault("BuildBeamPipe", True)
+
+  if flags.Detector.GeometryPixel:
     subDetectors += ["Pixel"]
-  if configFlags.Detector.GeometrySCT:
+    from PixelGeoModel.PixelGeoModelConfig import PixelReadoutGeometryCfg
+    result.merge(PixelReadoutGeometryCfg(flags))
+
+  if flags.Detector.GeometrySCT:
     subDetectors += ["SCT"]
-  if configFlags.Detector.GeometryTRT:
+    from SCT_GeoModel.SCT_GeoModelConfig import SCT_ReadoutGeometryCfg
+    result.merge(SCT_ReadoutGeometryCfg(flags))
+
+  if flags.Detector.GeometryTRT:
     # Commented out because TRT is not production ready yet and we don't 
     # want to turn it on even if the global flag is set
     #  subDetectors += ["TRT"]
-    pass
+    from TRT_GeoModel.TRT_GeoModelConfig import TRT_ReadoutGeometryCfg
+    result.merge(TRT_ReadoutGeometryCfg(flags))
 
-  if configFlags.Detector.GeometryCalo:
+  if flags.Detector.GeometryCalo:
     # Commented out because Calo is not production ready yet and we don't 
     # want to turn it on even if the global flag is set
     #  subDetectors += ["Calo"]
+    #  kwargs.setdefault("CaloVolumeBuilder", CompFactory.ActsCaloTrackingVolumeBuilder())
 
     # need to configure calo geometry, otherwise we get a crash
     # Do this even though it's not production ready yet, so the service can
     # be forced to build the calorimeter later on anyway
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
-    result.merge(LArGMCfg(configFlags))
+    result.merge(LArGMCfg(flags))
     from TileGeoModel.TileGMConfig import TileGMCfg
-    result.merge(TileGMCfg(configFlags))
+    result.merge(TileGMCfg(flags))
 
-  if configFlags.Detector.GeometryITkPixel:
+  if flags.Detector.GeometryITkPixel:
     subDetectors += ["ITkPixel"]
-  if configFlags.Detector.GeometryITkStrip:
+    from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
+    result.merge(ITkPixelReadoutGeometryCfg(flags))
+
+  if flags.Detector.GeometryITkStrip:
     subDetectors += ["ITkStrip"]
+    from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
+    result.merge(ITkStripReadoutGeometryCfg(flags))
 
+  if flags.Detector.GeometryHGTD:
+    subDetectors += ["HGTD"]
+    if flags.HGTD.Geometry.useGeoModelXml:
+        from HGTD_GeoModelXml.HGTD_GeoModelConfig import HGTD_ReadoutGeometryCfg
+    else:
+        from HGTD_GeoModel.HGTD_GeoModelConfig import HGTD_ReadoutGeometryCfg
+    result.merge(HGTD_ReadoutGeometryCfg(flags))
 
-  if configFlags.Detector.GeometryBpipe:
-    from BeamPipeGeoModel.BeamPipeGMConfig import BeamPipeGeometryCfg
-    result.merge(BeamPipeGeometryCfg(configFlags))
-    kwargs.setdefault("BuildBeamPipe", True)
+  actsTrackingGeometrySvc = CompFactory.ActsTrackingGeometrySvc(name,
+                                                                BuildSubDetectors=subDetectors,
+                                                                **kwargs)
+  if flags.Detector.GeometryITk:
+    if flags.Acts.TrackingGeometry.MaterialSource == "Default":
+      actsTrackingGeometrySvc.UseMaterialMap = True
+      actsTrackingGeometrySvc.MaterialMapCalibFolder = flags.Acts.TrackingGeometry.MaterialCalibrationFolder
+      actsTrackingGeometrySvc.MaterialMapInputFile = "material-maps-" + flags.GeoModel.AtlasVersion +".json"
+    elif flags.Acts.TrackingGeometry.MaterialSource.find(".json") != -1:
+      actsTrackingGeometrySvc.UseMaterialMap = True
+      actsTrackingGeometrySvc.MaterialMapCalibFolder = flags.Acts.TrackingGeometry.MaterialCalibrationFolder
+      actsTrackingGeometrySvc.MaterialMapInputFile = flags.Acts.TrackingGeometry.MaterialSource
 
-
-  idSub = [sd in subDetectors for sd in ("Pixel", "SCT", "TRT", "ITkPixel", "ITkStrip")]
-  if any(idSub):
-    # ANY of the ID subdetectors are on => we require GM sources
-    from InDetConfig.InDetGeometryConfig import InDetGeometryCfg
-    result.merge(InDetGeometryCfg(configFlags))
-
-  if "Calo" in subDetectors:
-    # in case Calo is enabled, we need this tool
-    kwargs.setdefault("CaloVolumeBuilder", CompFactory.ActsCaloTrackingVolumeBuilder())
-
-  actsTrackingGeometrySvc = Acts_ActsTrackingGeometrySvc(name,
-                                                         BuildSubDetectors=subDetectors,
-                                                         **kwargs)
-
-
-  if configFlags.Acts.TrackingGeometry.MaterialSource == "Input":
-    actsTrackingGeometrySvc.UseMaterialMap = True
-    actsTrackingGeometrySvc.MaterialMapInputFile = "material-maps.json"
-  if configFlags.Acts.TrackingGeometry.MaterialSource.find(".json") != -1:  
-    actsTrackingGeometrySvc.UseMaterialMap = True
-    actsTrackingGeometrySvc.MaterialMapInputFile = configFlags.Acts.TrackingGeometry.MaterialSource
   result.addService(actsTrackingGeometrySvc)
   return result
 
-def ActsPropStepRootWriterSvcCfg(configFlags, 
+
+def ActsPropStepRootWriterSvcCfg(flags,
                                  name="ActsPropStepRootWriterSvc",
-                                 FilePath="propsteps.root",
-                                 TreeName="propsteps"):
+                                 **kwargs):
     result = ComponentAccumulator()
-
-    ActsPropStepRootWriterSvc = CompFactory.ActsPropStepRootWriterSvc
-    svc = ActsPropStepRootWriterSvc(name=name, 
-                                    FilePath=FilePath, 
-                                    TreeName=TreeName)
-
-    result.addService(svc)
-
+    result.addService(CompFactory.ActsPropStepRootWriterSvc(name, **kwargs))
     return result
 
-def ActsTrackingGeometryToolCfg(configFlags, name = "ActsTrackingGeometryTool" ) :
-  result = ComponentAccumulator()
-  
-  acc = ActsTrackingGeometrySvcCfg(configFlags)
-  result.merge(acc)
 
-  result.merge(ActsAlignmentCondAlgCfg(configFlags))
-  
-  Acts_ActsTrackingGeometryTool = CompFactory.ActsTrackingGeometryTool
-  actsTrackingGeometryTool = Acts_ActsTrackingGeometryTool(name)
-  result.addPublicTool(actsTrackingGeometryTool, primary=True)
-  
+def ActsTrackingGeometryToolCfg(flags, name = "ActsTrackingGeometryTool" ) :
+  result = ComponentAccumulator()
+  result.merge(ActsTrackingGeometrySvcCfg(flags))
+  result.merge(ActsAlignmentCondAlgCfg(flags))
+  result.setPrivateTools(CompFactory.ActsTrackingGeometryTool(name))
   return result
 
-def NominalAlignmentCondAlgCfg(configFlags, name = "NominalAlignmentCondAlg", **kwargs) :
+
+def NominalAlignmentCondAlgCfg(flags, name = "NominalAlignmentCondAlg", **kwargs) :
   result = ComponentAccumulator()
-  
-  acc = ActsTrackingGeometrySvcCfg(configFlags)
-  result.merge(acc)
-  
-  Acts_NominalAlignmentCondAlg = CompFactory.NominalAlignmentCondAlg
-  nominalAlignmentCondAlg = Acts_NominalAlignmentCondAlg(name, **kwargs)
-  result.addCondAlgo(nominalAlignmentCondAlg)
-  
+  result.merge(ActsTrackingGeometrySvcCfg(flags))
+  result.addCondAlgo(CompFactory.NominalAlignmentCondAlg(name, **kwargs))
   return result
 
-def ActsAlignmentCondAlgCfg(configFlags, name = "ActsAlignmentCondAlg", **kwargs) :
+
+def ActsAlignmentCondAlgCfg(flags, name = "ActsAlignmentCondAlg", **kwargs) :
   result = ComponentAccumulator()
   
-  if configFlags.Detector.GeometryITk:
+  if flags.Detector.GeometryITk:
     from PixelConditionsAlgorithms.ITkPixelConditionsConfig import ITkPixelAlignCondAlgCfg
-    result.merge(ITkPixelAlignCondAlgCfg(configFlags))
-
+    result.merge(ITkPixelAlignCondAlgCfg(flags))
     from SCT_ConditionsAlgorithms.ITkStripConditionsAlgorithmsConfig import ITkStripAlignCondAlgCfg
-    result.merge(ITkStripAlignCondAlgCfg(configFlags))
-
+    result.merge(ITkStripAlignCondAlgCfg(flags))
     kwargs.setdefault("PixelAlignStoreReadKey", "ITkPixelAlignmentStore")
     kwargs.setdefault("SCTAlignStoreReadKey", "ITkStripAlignmentStore")
   else:
     from PixelConditionsAlgorithms.PixelConditionsConfig import PixelAlignCondAlgCfg
-    result.merge(PixelAlignCondAlgCfg(configFlags))
-
+    result.merge(PixelAlignCondAlgCfg(flags))
     from SCT_ConditionsAlgorithms.SCT_ConditionsAlgorithmsConfig import SCT_AlignCondAlgCfg
-    result.merge(SCT_AlignCondAlgCfg(configFlags))
-
+    result.merge(SCT_AlignCondAlgCfg(flags))
     kwargs.setdefault("PixelAlignStoreReadKey", "PixelAlignmentStore")
     kwargs.setdefault("SCTAlignStoreReadKey", "SCTAlignmentStore")
 
-  
-  Acts_ActsAlignmentCondAlg = CompFactory.ActsAlignmentCondAlg
-  actsAlignmentCondAlg = Acts_ActsAlignmentCondAlg(name, **kwargs)
-  result.addCondAlgo(actsAlignmentCondAlg)
-  
+  result.addCondAlgo(CompFactory.ActsAlignmentCondAlg(name, **kwargs))
   return result
 
-from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
-def ActsExtrapolationToolCfg(configFlags, name="ActsExtrapolationTool", **kwargs) :
+
+def ActsExtrapolationToolCfg(flags, name="ActsExtrapolationTool", **kwargs) :
   result=ComponentAccumulator()
-  
-  acc  = AtlasFieldCacheCondAlgCfg(configFlags)
-  result.merge(acc)
-  
-  acc = ActsTrackingGeometryToolCfg(configFlags) 
-  result.merge(acc)
-  
-  Acts_ActsExtrapolationTool = CompFactory.ActsExtrapolationTool
-  actsExtrapolationTool = Acts_ActsExtrapolationTool(name, **kwargs)
-  result.addPublicTool(actsExtrapolationTool, primary=True)
+  from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
+  result.merge(AtlasFieldCacheCondAlgCfg(flags))
+  kwargs.setdefault("TrackingGeometryTool", result.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags))) # PrivateToolHandle
+  result.setPrivateTools(CompFactory.ActsExtrapolationTool(name, **kwargs))
   return result
 
 
-def ActsMaterialTrackWriterSvcCfg(configFlags,
-                                  name="ActsMaterialTrackWriterSvc",
-                                  FilePath="MaterialTracks_mapping.root",
-                                  TreeName="material-tracks") :
+def ActsMaterialTrackWriterSvcCfg(flags, name="ActsMaterialTrackWriterSvc", **kwargs) :
   result = ComponentAccumulator()
-
-  acc = ActsTrackingGeometrySvcCfg(configFlags)
-  result.merge(acc)
-
-  Acts_ActsMaterialTrackWriterSvc = CompFactory.ActsMaterialTrackWriterSvc
-  ActsMaterialTrackWriterSvc = Acts_ActsMaterialTrackWriterSvc(name, 
-                                                               FilePath=FilePath,
-                                                               TreeName=TreeName)
-
-  from AthenaCommon.Constants import INFO
-  ActsMaterialTrackWriterSvc.OutputLevel = INFO
-  result.addService(ActsMaterialTrackWriterSvc, primary=True)
+  result.merge(ActsTrackingGeometrySvcCfg(flags))
+  result.addService(CompFactory.ActsMaterialTrackWriterSvc(name, **kwargs), primary=True)
   return result
 
-def ActsMaterialStepConverterToolCfg(name = "ActsMaterialStepConverterTool" ) :
+
+def ActsMaterialStepConverterToolCfg(flags, name = "ActsMaterialStepConverterTool", **kwargs ) :
   result=ComponentAccumulator()
-  
-  Acts_ActsMaterialStepConverterTool = CompFactory.ActsMaterialStepConverterTool
-  ActsMaterialStepConverterTool = Acts_ActsMaterialStepConverterTool(name)
-
-  from AthenaCommon.Constants import INFO
-  ActsMaterialStepConverterTool.OutputLevel = INFO
-
-  result.addPublicTool(ActsMaterialStepConverterTool, primary=True)
+  result.addPublicTool(CompFactory.ActsMaterialStepConverterTool(name, **kwargs), primary=True)
   return result
 
-def ActsSurfaceMappingToolCfg(configFlags, name = "ActsSurfaceMappingTool" ) :
+
+def ActsSurfaceMappingToolCfg(flags, name = "ActsSurfaceMappingTool", **kwargs ) :
   result=ComponentAccumulator()
-    
-  acc = ActsTrackingGeometryToolCfg(configFlags) 
-  result.merge(acc)
-
-  Acts_ActsSurfaceMappingTool = CompFactory.ActsSurfaceMappingTool
-  ActsSurfaceMappingTool = Acts_ActsSurfaceMappingTool(name)
-
-  from AthenaCommon.Constants import INFO
-  ActsSurfaceMappingTool.OutputLevel = INFO
-
-  result.addPublicTool(ActsSurfaceMappingTool, primary=True)
+  kwargs.setdefault("TrackingGeometryTool", result.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags))) # PrivateToolHandle
+  result.addPublicTool(CompFactory.ActsSurfaceMappingTool(name, **kwargs), primary=True)
   return result
 
-def ActsVolumeMappingToolCfg(configFlags, name = "ActsVolumeMappingTool" ) :
+
+def ActsVolumeMappingToolCfg(flags, name = "ActsVolumeMappingTool", **kwargs ) :
   result=ComponentAccumulator()
-    
-  acc = ActsTrackingGeometryToolCfg(configFlags) 
-  result.merge(acc)
-
-  Acts_ActsVolumeMappingTool = CompFactory.ActsVolumeMappingTool
-  ActsVolumeMappingTool = Acts_ActsVolumeMappingTool(name)
-
-  from AthenaCommon.Constants import INFO
-  ActsVolumeMappingTool.OutputLevel = INFO
-
-  result.addPublicTool(ActsVolumeMappingTool, primary=True)
+  kwargs.setdefault("TrackingGeometryTool", result.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags))) # PrivateToolHandle
+  result.addPublicTool(CompFactory.ActsVolumeMappingTool(name, **kwargs), primary=True)
   return result
 
-def ActsMaterialJsonWriterToolCfg(name= "ActsMaterialJsonWriterTool", **kwargs) :
+
+def ActsMaterialJsonWriterToolCfg(flags, name= "ActsMaterialJsonWriterTool", **kwargs) :
   result=ComponentAccumulator()
-    
-  Acts_ActsMaterialJsonWriterTool = CompFactory.ActsMaterialJsonWriterTool
-  ActsMaterialJsonWriterTool = Acts_ActsMaterialJsonWriterTool(name, **kwargs)
-
-  from AthenaCommon.Constants import INFO
-  ActsMaterialJsonWriterTool.OutputLevel = INFO
-
-  result.addPublicTool(ActsMaterialJsonWriterTool, primary=True)
+  result.addPublicTool(CompFactory.ActsMaterialJsonWriterTool(name, **kwargs), primary=True)
   return result
 
-def ActsObjWriterToolCfg(name= "ActsObjWriterTool", **kwargs) :
+
+def ActsObjWriterToolCfg(flags, name= "ActsObjWriterTool", **kwargs) :
   result=ComponentAccumulator()
-    
-  Acts_ActsObjWriterTool = CompFactory.ActsObjWriterTool
-  ActsObjWriterTool = Acts_ActsObjWriterTool(name, **kwargs)
-
-  from AthenaCommon.Constants import INFO
-  ActsObjWriterTool.OutputLevel = INFO
-
-  result.addPublicTool(ActsObjWriterTool, primary=True)
+  result.addPublicTool(CompFactory.ActsObjWriterTool(name, **kwargs), primary=True)
   return result
 
 
-def ActsExtrapolationAlgCfg(configFlags, name = "ActsExtrapolationAlg", **kwargs):
+def ActsExtrapolationAlgCfg(flags, name = "ActsExtrapolationAlg", **kwargs):
   result = ComponentAccumulator()
 
   if "ExtrapolationTool" not in kwargs:
-    extrapTool = ActsExtrapolationToolCfg(configFlags)
-    kwargs["ExtrapolationTool"] = extrapTool.getPrimary()
-    result.merge(extrapTool)
+    kwargs["ExtrapolationTool"] = result.popToolsAndMerge(ActsExtrapolationToolCfg(flags)) # PrivateToolHandle
 
-  propStepWriterSvc = ActsPropStepRootWriterSvcCfg(configFlags)
-  result.merge(propStepWriterSvc)
-
-  ActsExtrapolationAlg = CompFactory.ActsExtrapolationAlg
-  alg = ActsExtrapolationAlg(name, **kwargs)
-  result.addEventAlgo(alg)
-
+  result.merge(ActsPropStepRootWriterSvcCfg(flags, FilePath="propsteps.root", TreeName="propsteps"))
+  result.addEventAlgo(CompFactory.ActsExtrapolationAlg(name, **kwargs))
   return result
+
 
 def ActsATLASConverterToolCfg(flags, name="ActsATLASConverterTool", **kwargs):
     result = ComponentAccumulator()
+    kwargs.setdefault("TrackingGeometryTool", result.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags))) # PrivateToolHandle
+    result.setPrivateTools(CompFactory.ActsATLASConverterTool(name, **kwargs) )
+    return result
 
-    trkGeoTool = result.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags))
 
-    result.setPrivateTools(
-        CompFactory.ActsATLASConverterTool(
-            name, TrackingGeometryTool=trkGeoTool, **kwargs
-        )
-    )
+def ActsWriteTrackingGeometryCfg(flags, name="ActsWriteTrackingGeometry", **kwargs):
+    result = ComponentAccumulator()
 
+    kwargs.setdefault("TrackingGeometryTool", result.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags))) # PrivateToolHandle
+
+    kwargs["MaterialJsonWriterTool"] = \
+      result.getPrimaryAndMerge(ActsMaterialJsonWriterToolCfg(flags,
+                                                              OutputFile = "geometry-maps.json",
+                                                              processSensitives = False,
+                                                              processNonMaterial = True) )
+
+    subDetectors = []
+    if flags.Detector.GeometryBpipe:
+      subDetectors = ["BeamPipe"]
+
+    if flags.Detector.GeometryPixel:
+      subDetectors += ["Pixel"]
+    if flags.Detector.GeometryITkPixel:
+      subDetectors += ["ITkPixel"]
+
+    if flags.Detector.GeometrySCT:
+      subDetectors += ["SCT"]
+    if flags.Detector.GeometryITkStrip:
+      subDetectors += ["ITkStrip"]
+    if flags.Detector.GeometryHGTD:
+      subDetectors += ["HGTD"]
+
+    kwargs["ObjWriterTool"] = \
+      result.getPrimaryAndMerge(ActsObjWriterToolCfg(flags,
+                                                     OutputDirectory = "obj",
+                                                     SubDetectors = subDetectors) )
+
+    result.addEventAlgo(CompFactory.ActsWriteTrackingGeometry(name, **kwargs))
+    return result
+
+
+def ActsMaterialMappingCfg(flags, name = "ActsMaterialMapping", **kwargs):
+    result = ComponentAccumulator()
+
+    kwargs["MaterialStepConverterTool"] = result.getPrimaryAndMerge(ActsMaterialStepConverterToolCfg(flags))
+    kwargs["SurfaceMappingTool"] = result.getPrimaryAndMerge(ActsSurfaceMappingToolCfg(flags))
+    kwargs["VolumeMappingTool"] = result.getPrimaryAndMerge(ActsVolumeMappingToolCfg(flags))
+    kwargs["MaterialJsonWriterTool"] = \
+      result.getPrimaryAndMerge( ActsMaterialJsonWriterToolCfg(flags,
+                                                               OutputFile = "material-maps.json",
+                                                               processSensitives = False,
+                                                               processNonMaterial = False) )
+
+    result.addEventAlgo(CompFactory.ActsMaterialMapping(name, **kwargs))
     return result

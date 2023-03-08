@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILECONDITIONS_TILECONDALG_H
@@ -47,5 +47,16 @@ class TileCondAlg: public AthReentrantAlgorithm {
 };
 
 #include "TileCondAlg.icc"
+
+#include "TileCalibBlobObjs/TileCalibDrawerFlt.h"
+
+#include "TileConditions/TilePulse.h"
+typedef TileCondAlg<TilePulse,TileCalibDrawerFlt> TilePulseShapeCondAlg;
+
+#include "TileConditions/TileSampleNoise.h"
+typedef TileCondAlg<TileSampleNoise,TileCalibDrawerFlt> TileSampleNoiseCondAlg;
+
+#include "TileConditions/TileTiming.h"
+typedef TileCondAlg<TileTiming,TileCalibDrawerFlt> TileTimingCondAlg;
 
 #endif // TILECONDITIONS_TILECONDALG_H

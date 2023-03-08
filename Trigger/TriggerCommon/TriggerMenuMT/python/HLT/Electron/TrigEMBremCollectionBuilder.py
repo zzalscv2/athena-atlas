@@ -38,10 +38,8 @@ class TrigEgammaBremCollectionBuilder (egammaAlgsConf.EMBremCollectionBuilder):
         GSFRefitterTool = egammaTrkRefitterTool(
             name='GSFRefitterTool',
             FitterTool=egammaRec.EMCommonRefitter.getGSFTrackFitter(),
-            #FitterTool=TrigEMCommonRefitter.getGSFTrackFitter(),
-            useBeamSpot=False,
-            Extrapolator=GSFBuildInDetExtrapolator,
-            ReintegrateOutliers=True)
+            #FitterTool=TrigEMCommonRefitter.getGSFTrackFitter()
+            )
 
         #
         #  BLayer and Pixel Related Tools (private = True)

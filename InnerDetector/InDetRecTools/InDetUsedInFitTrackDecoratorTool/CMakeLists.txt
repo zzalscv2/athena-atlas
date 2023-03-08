@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( InDetUsedInFitTrackDecoratorTool )
@@ -20,4 +20,3 @@ atlas_add_dictionary( InDetUsedInFitTrackDecoratorToolDict
     InDetUsedInFitTrackDecoratorTool/selection.xml
     LINK_LIBRARIES InDetUsedInFitTrackDecoratorToolLib )
 
-atlas_install_python_modules( python/*.py )

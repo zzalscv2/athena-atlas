@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 # Script building all the externals necessary for Athena.
 #
@@ -10,10 +10,9 @@ ATLAS_PROJECT_DIR=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)
 ATLAS_EXT_PROJECT_NAME="AthenaExternals"
 ATLAS_BUILDTYPE="RelWithDebInfo"
 ATLAS_EXTRA_CMAKE_ARGS=(-DLCG_VERSION_NUMBER=102
-                        -DLCG_VERSION_POSTFIX="b_ATLAS_9"
-                        -DATLAS_GAUDI_SOURCE="URL;https://gitlab.cern.ch/atlas/Gaudi/-/archive/v36r9.000/Gaudi-v36r9.000.tar.gz;URL_MD5;b8e6bfdf2a997a5b50ae5b1c1df5aa52"
-                        -DATLAS_ACTS_SOURCE="URL;https://github.com/acts-project/acts/archive/refs/tags/v21.1.0.tar.gz;URL_MD5;6c852dabc9c750326377761a1d298139"
-                        -DATLAS_GEOMODEL_SOURCE="URL;https://gitlab.cern.ch/GeoModelDev/GeoModel/-/archive/4.4.3/GeoModel-4.4.3.tar.bz2;URL_MD5;593a9eda9974e73d30b60d4d670b6940")
+                        -DLCG_VERSION_POSTFIX="b_ATLAS_11"
+                        -DATLAS_GAUDI_SOURCE="URL;https://gitlab.cern.ch/atlas/Gaudi/-/archive/v36r11.000/Gaudi-v36r11.000.tar.gz;URL_MD5;75c37c23a1e210d8fcbf98d988bf7fcd"
+                        -DATLAS_ACTS_SOURCE="URL;https://github.com/acts-project/acts/archive/refs/tags/v23.4.0.tar.gz;URL_MD5;b2a4293abcd36470b781392bdd936da4")
 ATLAS_EXTRA_MAKE_ARGS=()
 
 # Let "the common script" do all the heavy lifting.

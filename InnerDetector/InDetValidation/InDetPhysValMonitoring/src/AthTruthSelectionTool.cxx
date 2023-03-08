@@ -52,6 +52,7 @@ AthTruthSelectionTool::AthTruthSelectionTool(const std::string& type, const std:
   declareProperty("maxPt", m_maxPt = -1);
   declareProperty("maxBarcode", m_maxBarcode = 200e3);
   declareProperty("requireCharged", m_requireCharged = true);
+  declareProperty("selectedCharge", m_selectedCharge = 0);
   declareProperty("requireStatus1", m_requireStatus1 = true);
   declareProperty("requireSiHit", m_requireSiHit = 0);
   declareProperty("maxProdVertRadius", m_maxProdVertRadius = 110.);
@@ -110,8 +111,9 @@ AthTruthSelectionTool::initialize() {
     }, "barcode < " + std::to_string(m_maxBarcode)));
   }
   if (m_requireCharged) {
-    m_cutList.add(Accept_t([](const P_t& p) {
-      return(not (p.isNeutral()));
+    m_cutList.add(Accept_t([&m_selectedCharge = std::as_const(m_selectedCharge)](const P_t& p) {
+      if(m_selectedCharge ==0) return(not (p.isNeutral()));
+      else return(not(p.isNeutral()) and p.charge()==m_selectedCharge);
     }, "charged"));
   }
   if (m_requireStatus1) {

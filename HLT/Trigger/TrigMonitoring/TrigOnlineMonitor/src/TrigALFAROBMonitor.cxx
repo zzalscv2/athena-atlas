@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigALFAROBMonitor.h"
@@ -678,8 +678,8 @@ void TrigALFAROBMonitor::findALFATracks( const ROIB::RoIBResult* roIBResult,
 
                                 const std::vector<ROIB::CTPRoI> ctpRoIVecBP = roIBResult->cTPResult().TBP();
                                 ATH_MSG_DEBUG( "findALFATracks TBP size: " <<ctpRoIVecBP.size()<<" m_map_TrgItemNumbersToHistGroups.size() = "<< m_map_TrgItemNumbersToHistGroups.size() );
-       		                //const std::vector<uint32_t>& itemsBP = resultL1.itemsBeforePrescale();
-       		                if ( ctpRoIVecBP.size() > 0) {
+
+                                if ( !ctpRoIVecBP.empty() ) {
                                    for (std::map<int, int>::const_iterator it = m_map_TrgItemNumbersToHistGroups.begin(); it != m_map_TrgItemNumbersToHistGroups.end(); ++it) {
                                           int word = it->first>>5;
                                           int offset = (it->first)%32;
@@ -728,7 +728,7 @@ void TrigALFAROBMonitor::findALFATracks( const ROIB::RoIBResult* roIBResult,
 
         const std::vector<ROIB::CTPRoI> ctpRoIVecBP = roIBResult->cTPResult().TBP();
         //const std::vector<uint32_t>& itemsBP = resultL1.itemsBeforePrescale();
-        if ( (ctpRoIVecBP.size() >0) && (m_elast15>0) && (m_elast18>0) ) {
+        if ( !ctpRoIVecBP.empty() && (m_elast15>0) && (m_elast18>0) ) {
            if ((ctpRoIVecBP.at(m_elast15>>5)).roIWord() & (1 <<(m_elast15%32))) {
               {
                   std::string stationName  = "goodDataAssessmentLB15";
@@ -780,7 +780,7 @@ void TrigALFAROBMonitor::findALFATracks( const ROIB::RoIBResult* roIBResult,
         const float dist = 8264.;
         const std::vector <std::string> triggers={"elast15", "elast18", "syst17", "syst18"};
         const std::vector <std::string> armSets={"L1U", "L1D", "R1U","R1D"};
-        if ((ctpRoIVecBP.at(m_elast15>>5)).roIWord() & (1 <<(m_elast15%32))) {
+        if (!ctpRoIVecBP.empty() && (ctpRoIVecBP.at(m_elast15>>5).roIWord() & (1 <<(m_elast15%32)))) {
            if ( (nbOfTracksInDetectors[0] == 1) && (nbOfTracksInDetectors[2] == 1) && (nbOfTracksInDetectors[5] == 1) && (nbOfTracksInDetectors[7] == 1) &&
                  (nbOfTracksInDetectors[1] == 0) && (nbOfTracksInDetectors[3] == 0) && (nbOfTracksInDetectors[4] == 0) && (nbOfTracksInDetectors[6] == 0) ) {
                if ( (x_Rec[0] > -9000.) && (x_Rec[2] > -9000.) && (x_Rec[7] > -9000.) ) {
@@ -847,7 +847,7 @@ void TrigALFAROBMonitor::findALFATracks( const ROIB::RoIBResult* roIBResult,
          }
         }
 
-        if ((ctpRoIVecBP.at(m_elast18>>5)).roIWord() & (1 <<(m_elast18%32))) {
+        if (!ctpRoIVecBP.empty() && (ctpRoIVecBP.at(m_elast18>>5).roIWord() & (1 <<(m_elast18%32)))) {
            if ( (nbOfTracksInDetectors[1] == 1) && (nbOfTracksInDetectors[3] == 1) && (nbOfTracksInDetectors[4] == 1) && (nbOfTracksInDetectors[6] == 1) &&
                  (nbOfTracksInDetectors[0] == 0) && (nbOfTracksInDetectors[2] == 0) && (nbOfTracksInDetectors[5] == 0) && (nbOfTracksInDetectors[7] == 0) ) {
                if ( (x_Rec[1] > -9000.) && (x_Rec[3] > -9000.) && (x_Rec[6] > -9000.) ) {
@@ -913,7 +913,7 @@ void TrigALFAROBMonitor::findALFATracks( const ROIB::RoIBResult* roIBResult,
            }
          }
 
-        if ((ctpRoIVecBP.at(m_syst17>>5)).roIWord() & (1 <<(m_syst17%32))) {
+        if (!ctpRoIVecBP.empty() && (ctpRoIVecBP.at(m_syst17>>5).roIWord() & (1 <<(m_syst17%32)))) {
            //if ( (m_nbOfTracksInDetectors[0] >= 1) && (m_nbOfTracksInDetectors[2] >= 1) && (m_nbOfTracksInDetectors[4] >= 1) && (m_nbOfTracksInDetectors[6] >= 1) &&
              if (1) {  // (m_nbOfTracksInDetectors[1] == 0) && (m_nbOfTracksInDetectors[3] == 0) && (m_nbOfTracksInDetectors[5] == 0) && (m_nbOfTracksInDetectors[7] == 0) ) {
                //ATH_MSG_INFO(" m_syst17 fired: xrec0: "<<x_Rec[0]<<" xrec2: "<<x_Rec[2]<<" xrec4: "<<x_Rec[4]<<" xrec6: "<<x_Rec[6] );
@@ -980,7 +980,7 @@ void TrigALFAROBMonitor::findALFATracks( const ROIB::RoIBResult* roIBResult,
            }
          }
 
-        if ((ctpRoIVecBP.at(m_syst18>>5)).roIWord() & (1 <<(m_syst18%32))) {
+        if (!ctpRoIVecBP.empty() && (ctpRoIVecBP.at(m_syst18>>5).roIWord() & (1 <<(m_syst18%32)))) {
             //if ( (m_nbOfTracksInDetectors[1] >= 1) && (m_nbOfTracksInDetectors[3] >= 1) && (m_nbOfTracksInDetectors[5] >= 1) && (m_nbOfTracksInDetectors[7] >= 1) &&
               if (1) { //((m_nbOfTracksInDetectors[0] == 0) && (m_nbOfTracksInDetectors[2] == 0) && (m_nbOfTracksInDetectors[4] == 0) && (m_nbOfTracksInDetectors[6] == 0) ) {
                //ATH_MSG_INFO(" m_syst18 fired: xrec1: "<<x_Rec[1]<<" xrec3: "<<x_Rec[3]<<" xrec5: "<<x_Rec[5]<<" xrec7: "<<x_Rec[7] );

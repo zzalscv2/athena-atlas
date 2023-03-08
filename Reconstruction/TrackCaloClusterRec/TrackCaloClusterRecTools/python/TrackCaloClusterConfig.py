@@ -30,7 +30,7 @@ def getDecorationKeyFunc(trackParticleName, assocPostfix):
     """Simple helper returning a function to build decoration keys """
     return lambda d : trackParticleName+'.'+d+assocPostfix
 
-def setupTrackCaloAssoc(configFlags, caloClusterName="CaloCalTopoClusters",detectorEtaName="default",trackParticleName="InDetTrackParticles", assocPostfix = "TCC", onlyPV0Tracks=False):
+def setupTrackCaloAssoc(flags, caloClusterName="CaloCalTopoClusters",detectorEtaName="default",trackParticleName="InDetTrackParticles", assocPostfix = "TCC", onlyPV0Tracks=False):
     """ Schedule a TrackParticleClusterAssociationAlg in the top sequence, taking as input clusters and tracks defined 
     by the keys caloClusterName and trackParticleName.
 
@@ -45,13 +45,13 @@ def setupTrackCaloAssoc(configFlags, caloClusterName="CaloCalTopoClusters",detec
     components = ComponentAccumulator()
 
     from TrackToCalo.CaloExtensionBuilderAlgCfg import CaloExtensionBuilderAlgCfg 
-    caloExtAlg =CaloExtensionBuilderAlgCfg( configFlags )
+    caloExtAlg =CaloExtensionBuilderAlgCfg( flags )
     caloExtAlg.TrkPartContainerName = trackParticleName
 
     components.merge(caloExtAlg)    #since its a stack of algorithms
 
     from TrackVertexAssociationTool.TTVAToolConfig import TTVAToolCfg
-    TrackVertexAssoTool = components.popToolsAndMerge(TTVAToolCfg(configFlags,"tvaTool",WorkingPoint="Nonprompt_All_MaxWeight"))
+    TrackVertexAssoTool = components.popToolsAndMerge(TTVAToolCfg(flags,"tvaTool",WorkingPoint="Nonprompt_All_MaxWeight"))
 
     trackParticleClusterAssociation = CompFactory.TrackParticleClusterAssociationAlg(
         "TrackParticleClusterAssociationAlg"+assocPostfix,
@@ -74,7 +74,7 @@ def setupTrackCaloAssoc(configFlags, caloClusterName="CaloCalTopoClusters",detec
 
     
 
-def runTCCReconstruction(configFlags, caloClusterName="CaloCalTopoClusters", detectorEtaName = "default", trackParticleName="InDetTrackParticles",
+def runTCCReconstruction(flags, caloClusterName="CaloCalTopoClusters", detectorEtaName = "default", trackParticleName="InDetTrackParticles",
                          assocPostfix="TCC", doCombined=False, doNeutral=True, doCharged=False, outputTCCName="TrackCaloClusters"):
 
     """Create a TrackCaloCluster collection from clusters and tracks (caloClusterName and trackParticleName). 
@@ -92,12 +92,12 @@ def runTCCReconstruction(configFlags, caloClusterName="CaloCalTopoClusters", det
     components = ComponentAccumulator()    
     
     components.merge(
-        setupTrackCaloAssoc(configFlags, caloClusterName, detectorEtaName, trackParticleName, assocPostfix, onlyPV0Tracks=False)
+        setupTrackCaloAssoc(flags, caloClusterName, detectorEtaName, trackParticleName, assocPostfix, onlyPV0Tracks=False)
     )
 
     from TrackVertexAssociationTool.TTVAToolConfig import TTVAToolCfg
     commonArgs=dict(
-        TrackVertexAssoTool = components.popToolsAndMerge(TTVAToolCfg(configFlags,"tvaTool",WorkingPoint="Nonprompt_All_MaxWeight")),
+        TrackVertexAssoTool = components.popToolsAndMerge(TTVAToolCfg(flags,"tvaTool",WorkingPoint="Nonprompt_All_MaxWeight")),
         AssoClustersDecor=decorKey("AssoClusters"),            
     )    
 
@@ -124,7 +124,7 @@ def runTCCReconstruction(configFlags, caloClusterName="CaloCalTopoClusters", det
 
     from TrackVertexAssociationTool.TTVAToolConfig import TTVAToolCfg
     commonArgs=dict(
-        TrackVertexAssoTool = components.popToolsAndMerge(TTVAToolCfg(configFlags,"tvaTool",WorkingPoint="Nonprompt_All_MaxWeight")),
+        TrackVertexAssoTool = components.popToolsAndMerge(TTVAToolCfg(flags,"tvaTool",WorkingPoint="Nonprompt_All_MaxWeight")),
         AssoClustersDecor=decorKey("AssoClusters"),            
     )    
 
@@ -182,17 +182,17 @@ def runTCCReconstruction(configFlags, caloClusterName="CaloCalTopoClusters", det
 
 
 
-def runUFOReconstruction(configFlags, constits, caloClusterName="CaloCalTopoClusters", detectorEtaName = "default", assocPostfix="UFO", inputFEcontainerkey=""):
+def runUFOReconstruction(flags, constits, caloClusterName="CaloCalTopoClusters", detectorEtaName = "default", assocPostfix="UFO", inputFEcontainerkey=""):
     """wrapper function using CAtoGlobalWrapper in order to maintain compatibility with RunII-style config in derivations"""
     from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
     if isComponentAccumulatorCfg():
-        return runUFOReconstruction_r22(configFlags, constits=constits, caloClusterName=caloClusterName, detectorEtaName=detectorEtaName, assocPostfix=assocPostfix, inputFEcontainerkey=inputFEcontainerkey)
+        return runUFOReconstruction_r22(flags, constits=constits, caloClusterName=caloClusterName, detectorEtaName=detectorEtaName, assocPostfix=assocPostfix, inputFEcontainerkey=inputFEcontainerkey)
     else:
         from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
-        return CAtoGlobalWrapper(runUFOReconstruction_r22, configFlags, constits=constits, caloClusterName=caloClusterName, detectorEtaName=detectorEtaName, assocPostfix=assocPostfix, inputFEcontainerkey=inputFEcontainerkey)
+        return CAtoGlobalWrapper(runUFOReconstruction_r22, flags, constits=constits, caloClusterName=caloClusterName, detectorEtaName=detectorEtaName, assocPostfix=assocPostfix, inputFEcontainerkey=inputFEcontainerkey)
 
 
-def runUFOReconstruction_r22( configFlags,constits, caloClusterName="CaloCalTopoClusters", detectorEtaName = "default", assocPostfix="UFO", inputFEcontainerkey=""):
+def runUFOReconstruction_r22( flags,constits, caloClusterName="CaloCalTopoClusters", detectorEtaName = "default", assocPostfix="UFO", inputFEcontainerkey=""):
     
     """Create a UFO collection from PFlow and tracks (PFO retrieved from PFOPrefix and tracks directly from trackParticleName). 
     This functions schedules 2 UFO specific algs : 
@@ -218,14 +218,14 @@ def runUFOReconstruction_r22( configFlags,constits, caloClusterName="CaloCalTopo
     
 
     components.merge(
-        setupTrackCaloAssoc(configFlags, caloClusterName, detectorEtaName, trackParticleName, assocPostfix, onlyPV0Tracks=False) #onlyPV0Tracks True was original option
+        setupTrackCaloAssoc(flags, caloClusterName, detectorEtaName, trackParticleName, assocPostfix, onlyPV0Tracks=False) #onlyPV0Tracks True was original option
     )
     
 
     
     from TrackVertexAssociationTool.TTVAToolConfig import TTVAToolCfg
     commonArgs=dict(
-        TrackVertexAssoTool = components.popToolsAndMerge(TTVAToolCfg(configFlags,"tvaTool",WorkingPoint="Nonprompt_All_MaxWeight")),
+        TrackVertexAssoTool = components.popToolsAndMerge(TTVAToolCfg(flags,"tvaTool",WorkingPoint="Nonprompt_All_MaxWeight")),
         AssoClustersDecor=decorKey("AssoClusters"),
     )    
     

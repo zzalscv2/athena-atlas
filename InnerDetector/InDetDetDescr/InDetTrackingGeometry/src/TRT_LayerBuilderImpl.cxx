@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTrackingGeometry/TRT_LayerBuilderImpl.h"
@@ -359,7 +359,7 @@ InDet::TRT_LayerBuilderImpl::cylindricalLayersImpl(const InDetDD::TRT_DetElement
 
         // the sector surfaces
         Trk::BinUtility* layerSectorBinUtility = new Trk::BinUtility(nBarrelPhiSectors,layerPhiMinCorrected,layerPhiMaxCorrected,Trk::closed,Trk::binPhi);
-        Trk::BinnedArrayArray<Trk::Surface>* strawArray = new Trk::BinnedArrayArray<Trk::Surface>(layerSectorArrays, layerSectorBinUtility );
+        auto strawArray = std::make_unique<Trk::BinnedArrayArray<Trk::Surface>>(layerSectorArrays, layerSectorBinUtility );
 
         ATH_MSG_VERBOSE("--> Layer " << layer << " has been built with " << strawArray->arrayObjects().size() << " straws.");
 
@@ -394,7 +394,7 @@ InDet::TRT_LayerBuilderImpl::cylindricalLayersImpl(const InDetDD::TRT_DetElement
           }
 
           barrelLayers->push_back(new Trk::CylinderLayer(barrelLayerBounds,
-                                                         strawArray,
+                                                         std::move(strawArray),
                                                          *layerMaterial,
                                                          m_layerThickness,
                                                          std::make_unique<InDet::TRT_OverlapDescriptor>(trtIdHelper),
@@ -403,7 +403,7 @@ InDet::TRT_LayerBuilderImpl::cylindricalLayersImpl(const InDetDD::TRT_DetElement
 
         } else
           barrelLayers->push_back(new Trk::CylinderLayer(barrelLayerBounds,
-                                                         strawArray,
+                                                         std::move(strawArray),
                                                          m_layerThickness,
                                                          std::make_unique<InDet::TRT_OverlapDescriptor>(trtIdHelper),
                                                          aDescritpor));
@@ -623,7 +623,7 @@ InDet::TRT_LayerBuilderImpl::discLayersImpl(const InDetDD::TRT_DetElementContain
                 return nullptr;
               }
               Trk::BinUtility* currentBinUtility = new Trk::BinUtility(numberOfStraws, -M_PI, M_PI, Trk::closed, Trk::binPhi);
-              Trk::BinnedArray<Trk::Surface>*  strawArray = new Trk::BinnedArray1D<Trk::Surface>(strawPerEndcapLayer, currentBinUtility);
+              auto strawArray = std::make_unique<Trk::BinnedArray1D<Trk::Surface>>(strawPerEndcapLayer, currentBinUtility);
               Trk::DiscLayer* currentLayer = nullptr;
 
               // redefine the discZ
@@ -656,7 +656,7 @@ InDet::TRT_LayerBuilderImpl::discLayersImpl(const InDetDD::TRT_DetElementContain
               if (assignMaterial)
                 currentLayer = new Trk::DiscLayer(fullDiscTransform,
                                                   fullDiscBounds->clone(),
-                                                  strawArray,
+                                                  std::move(strawArray),
                                                   *layerMaterial,
                                                   m_layerThickness,
                                                   std::make_unique<InDet::TRT_OverlapDescriptor>(trtIdHelper),
@@ -664,7 +664,7 @@ InDet::TRT_LayerBuilderImpl::discLayersImpl(const InDetDD::TRT_DetElementContain
               else if (!m_modelGeometry)
                 currentLayer = new Trk::DiscLayer(fullDiscTransform,
                                                   fullDiscBounds->clone(),
-                                                  strawArray,
+                                                  std::move(strawArray),
                                                   m_layerThickness,
                                                   std::make_unique<InDet::TRT_OverlapDescriptor>(trtIdHelper),
                                                   aDescriptor);

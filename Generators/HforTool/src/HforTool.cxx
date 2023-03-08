@@ -290,7 +290,7 @@ void HforTool::findHFQuarks() {
 	// check that there is no b/c-hadron as a parent
 	// also find mpi and top parents
 #ifdef HEPMC3
-	for (auto pin: prodvtx->particles_in()){
+	for (const auto& pin: prodvtx->particles_in()){
 #else
 	for (auto pin_it = prodvtx->particles_begin(HepMC::parents); pin_it != prodvtx->particles_end(HepMC::parents); ++pin_it) {
           auto pin=*pin_it;
@@ -372,16 +372,20 @@ void HforTool::findHFQuarks() {
     // Actually it does not make much sense.
     if ( msgLvl(MSG::DEBUG) && finalstate_q.size() ) {
       ATH_MSG_DEBUG("print out vertex -5") ;
-      auto vtx5=HepMC::barcode_to_vertex(evt,-5) ;
-      if (vtx5) {
+
 #ifdef HEPMC3
-	for ( auto pin = vtx5->particles_in().begin() ; pin != vtx5->particles_in().end(); ++pin)      ATH_MSG_DEBUG("    incoming: " << (*pin));
-	for ( auto pout = vtx5->particles_out().begin() ; pout != vtx5->particles_out().end(); ++pout) ATH_MSG_DEBUG("    outgoing: " << (*pout));
+    auto vtx5 = evt->vertices().at(5-1);
+    if (vtx5) {
+     for ( const auto& pin:  vtx5->particles_in()) ATH_MSG_DEBUG("    incoming: " << pin);
+     for ( const auto& pout: vtx5->particles_out()) ATH_MSG_DEBUG("    outgoing: " << pout);
+    }
 #else
+   auto vtx5 = HepMC::barcode_to_vertex(evt,-5) ;
+   if (vtx5) {
 	for ( auto pin = vtx5->particles_begin(HepMC::parents) ; pin != vtx5->particles_end(HepMC::parents); ++pin)      ATH_MSG_DEBUG("    incoming: " << (*pin));
 	for ( auto pout = vtx5->particles_begin(HepMC::children) ; pout != vtx5->particles_end(HepMC::children); ++pout) ATH_MSG_DEBUG("    outgoing: " << (*pout));
+   }
 #endif
-      }
     } // print out vtx -5 if there are HF quarks and in DEBUG mode
   } // Pythia shower
   else if ( m_ShowerGenerator == "UNKNOWN" ) {
@@ -430,7 +434,7 @@ void HforTool::findHFQuarksHerwig
       }
       if ( !isPDF && prodvtx ) {
 #ifdef HEPMC3
-	for (auto  pin: HepMC::ancestor_particles(prodvtx)) {
+	for (const auto& pin: HepMC::ancestor_particles(prodvtx)) {
 #else
 	HepMC::GenVertex::particle_iterator prodvtx_particles_begin = prodvtx->particles_begin(HepMC::ancestors) ;
 	HepMC::GenVertex::particle_iterator prodvtx_particles_end =    prodvtx->particles_end(HepMC::ancestors) ;
@@ -609,7 +613,7 @@ void HforTool::findHFQuarksPythia
 	  // check whether there is a proton ancestor,
 	  // and how many ancestors there are
 #ifdef HEPMC3
-          for ( auto pin: prodvtx->particles_in()) {
+          for ( const auto& pin: prodvtx->particles_in()) {
 #else
           for ( auto pin_it = prodvtx->particles_begin(HepMC::ancestors); pin_it != prodvtx->particles_end(HepMC::ancestors) ; ++pin_it ) {
             auto pin=*pin_it;
@@ -680,7 +684,7 @@ void HforTool::findHFQuarksPythia
 	      // to vertex -5 with stat=3 ME parton; identical pdgid
 	      // -> prod vtx of showered ME parton ==
 	      //    prod vtx of one of the parents of stat=3 ME parton
-
+              //AV  Not sure the convention holds
 	      // vertex -3 / -4 have as output showerd PDF parton and link
 	      // to vertex -5 wih stat=3 PDF anti-parton; opposite pdgid
 	      // -> prod vtx of showered PDF parton ==
@@ -691,7 +695,7 @@ void HforTool::findHFQuarksPythia
 	      bool bc34=(HepMC::barcode(pvtx34)==-3 || HepMC::barcode(pvtx34)==-4) ;
 	      if ( !bc34 ) {
 #ifdef HEPMC3
-                for (auto pin: HepMC::ancestor_particles(prodvtx) ) {
+                for (const auto& pin: HepMC::ancestor_particles(prodvtx) ) {
 #else
                 for (auto pin_it=prodvtx->particles_begin(HepMC::ancestors);pin_it!=prodvtx->particles_end(HepMC::ancestors); ++pin_it ) {
                  auto pin=*pin_it;
@@ -822,7 +826,7 @@ void HforTool::findHFQuarksUnknown
       bool iscquarkfromb(false) ;
       if ( prodvtx ) {
 #ifdef HEPMC3
-	for ( auto pin: prodvtx->particles_in()) {
+	for ( const auto& pin: prodvtx->particles_in()) {
 #else
 	for ( auto pin_it = prodvtx->particles_begin(HepMC::ancestors); pin_it != prodvtx->particles_end(HepMC::ancestors) ; ++pin_it ) {
         auto pin=*pin_it;

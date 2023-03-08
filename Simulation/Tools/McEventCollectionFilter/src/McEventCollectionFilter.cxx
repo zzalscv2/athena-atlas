@@ -19,10 +19,6 @@
 #include "MuonSimEvent/sTGCSimHit.h"
 #include "MuonSimEvent/MMSimHit.h"
 // CLHEP
-#include "CLHEP/Vector/LorentzVector.h"
-#include "CLHEP/Units/SystemOfUnits.h"
-//
-#include "CLHEP/Geometry/Point3D.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 
 #include "AtlasHepMC/MagicNumbers.h" // for crazyParticleBarcode
@@ -98,37 +94,39 @@ StatusCode McEventCollectionFilter::execute(const EventContext &ctx) const
     auto cs = std::make_shared<HepMC3::GenCrossSection>(*genEvt->cross_section().get());
     evt->set_cross_section(cs);
   }
+  // to set geantino vertex as a truth primary vertex
+  HepMC::ConstGenVertexPtr hScatVx = genEvt->vertices().at(3-1);
+  if (hScatVx != nullptr) {
+    HepMC::FourVector pmvxpos=hScatVx->position();
+    genVertex->set_position(pmvxpos);
+    // to set geantino kinematic phi=eta=0, E=p=E_hard_scat
+
+    if (hScatVx->particles_in().size()==2) {
+      double sum = hScatVx->particles_in().at(0)->momentum().e()+hScatVx->particles_in().at(1)->momentum().e();
+      genPart->set_momentum(HepMC::FourVector(sum,0,0,sum));
+    }
+  }
 #else
   evt->set_beam_particles(genEvt->beam_particles());
   if (genEvt->cross_section()) {
     evt->set_cross_section(*genEvt->cross_section());
   }
-#endif
-
   // to set geantino vertex as a truth primary vertex
   HepMC::ConstGenVertexPtr hScatVx = HepMC::barcode_to_vertex(genEvt,-3);
   if (hScatVx != nullptr) {
     HepMC::FourVector pmvxpos=hScatVx->position();
     genVertex->set_position(pmvxpos);
     // to set geantino kinematic phi=eta=0, E=p=E_hard_scat
-#ifdef HEPMC3 
-    auto itrp = hScatVx->particles_in().begin();
-    if (hScatVx->particles_in().size()==2) {
-#else
     HepMC::GenVertex::particles_in_const_iterator itrp =hScatVx->particles_in_const_begin();
     if (hScatVx->particles_in_size()==2) {
-#endif
       HepMC::FourVector mom1=(*itrp)->momentum();
       HepMC::FourVector mom2=(*(++itrp))->momentum();
-      HepMC::FourVector vxmom;
-      vxmom.setPx(mom1.e()+mom2.e());
-      vxmom.setPy(0.);
-      vxmom.setPz(0.);
-      vxmom.setE(mom1.e()+mom2.e());
-
-      genPart->set_momentum(vxmom);
+      double sum = mom1.e()+mom2.e();
+      genPart->set_momentum(HepMC::FourVector(sum,0,0,sum));
     }
   }
+#endif
+
 
   // electrons from TRT hits
   if (m_keepElectronsLinkedToTRTHits) {
@@ -140,7 +138,7 @@ StatusCode McEventCollectionFilter::execute(const EventContext &ctx) const
     ATH_MSG_DEBUG("Found input hits collection " << inputCollectionH.name() << " in store " << inputCollectionH.store());
 
     for (const TRTUncompressedHit &hit : *inputCollectionH) {
-      HepMcParticleLink link = hit.particleLink();
+      const HepMcParticleLink& link = hit.particleLink();
       int pdgID = hit.GetParticleEncoding();
       if (std::abs(pdgID) != 11 || link.barcode() == 0) continue;
       HepMC::ConstGenParticlePtr particle = link.cptr();

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -74,7 +74,7 @@ class StatInt {
 class TileTBStat: public AthAlgorithm {
   public:
     //Constructor
-    TileTBStat(std::string name, ISvcLocator* pSvcLocator);
+    TileTBStat(const std::string& name, ISvcLocator* pSvcLocator);
 
     //Destructor 
     virtual ~TileTBStat();

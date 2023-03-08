@@ -29,8 +29,10 @@ StatusCode Calo::CaloTrackingGeometryBuilder::finalize() {
   return Calo::CaloTrackingGeometryBuilderImpl::finalize();
 }
 
-Trk::TrackingGeometry* Calo::CaloTrackingGeometryBuilder::trackingGeometry(
+std::unique_ptr<Trk::TrackingGeometry> Calo::CaloTrackingGeometryBuilder::trackingGeometry(
     Trk::TrackingVolume* innerVol) const {
+
+  std::unique_ptr<Trk::TrackingGeometry> trackingGeometry{};
 
   const CaloDetDescrManager* caloDDM =
       detStore()->tryConstRetrieve<CaloDetDescrManager>(caloMgrStaticKey);
@@ -41,23 +43,22 @@ Trk::TrackingGeometry* Calo::CaloTrackingGeometryBuilder::trackingGeometry(
         StatusCode::SUCCESS) {
       ATH_MSG_WARNING("Failed to record CaloDetDescrManager with the key "
                       << caloMgrStaticKey << " in DetStore");
-      return nullptr;
+      return trackingGeometry;
     }
     if (detStore()->retrieve(caloDDM, caloMgrStaticKey) !=
         StatusCode::SUCCESS) {
       ATH_MSG_WARNING("Failed to retrieve CaloDetDescrManager with the key "
                       << caloMgrStaticKey << " from DetStore");
-      return nullptr;
+      return trackingGeometry;
     }
   }
   // if caloDD is still null, we;re in trouble because it gets dereferenced
   // after this
   if (!caloDDM) {
     ATH_MSG_WARNING("caloDDM is a null pointer in CaloTrackingGeometryBuilder");
-    return nullptr;
+    return trackingGeometry;
   }
   return Calo::CaloTrackingGeometryBuilderImpl::createTrackingGeometry(innerVol,
-                                                                       caloDDM)
-      .release();
+                                                                       caloDDM);
 }
 

@@ -30,6 +30,13 @@ static const InterfaceID IID_ISensorSimTool("SensorSimTool", 1, 0);
 
 class SensorSimTool: public AthAlgTool, virtual public IAlgTool {
 public:
+
+  enum RadiationDamageSimulationType {
+    NO_RADIATION_DAMAGE = 0,
+    RAMO_POTENTIAL = 1,
+    TEMPLATE_CORRECTION = 2
+  };
+
   SensorSimTool(const std::string& type, const std::string& name, const IInterface* parent) :
     AthAlgTool(type, name, parent) {
     declareInterface<SensorSimTool>(this);
@@ -41,7 +48,8 @@ public:
     ATH_CHECK(AthAlgTool::initialize());
     ATH_CHECK(m_siPropertiesTool.retrieve());
     ATH_CHECK(m_moduleDataKey.initialize());
-    ATH_CHECK(m_fluenceDataKey.initialize(m_doRadDamage && !m_fluenceDataKey.empty()));
+    ATH_CHECK(m_fluenceDataKey.initialize(m_radiationDamageSimulationType != RadiationDamageSimulationType::NO_RADIATION_DAMAGE && !m_fluenceDataKey.empty()));
+
     return StatusCode::SUCCESS;
   }
 
@@ -68,14 +76,57 @@ protected:
     this, "PixelModuleData", "PixelModuleData", "Pixel module data"
   };
 
-  Gaudi::Property<bool> m_doRadDamage
+  Gaudi::Property<int> m_radiationDamageSimulationType
   {
-    this, "doRadDamage", false, "doRadDamage bool: should be flag"
+    this, "RadiationDamageSimulationType", RadiationDamageSimulationType::NO_RADIATION_DAMAGE, "Option to simualte the effects of radiation damage"
   };
 
-  Gaudi::Property<bool> m_doRadDamageTemplate
+  Gaudi::Property<std::string> m_templateCorrectionRootFile
   {
-    this, "doRadDamageTemplate", false, "doRadDamageTemplate bool: should be flag - tells the code to use the template version of the radiation damage"
+    this, "TemplateCorrectionROOTfile", "maps_ITk_PL_100um_100V_fl10e15.root",
+    "Path to the ROOT file with histograms for radiation damage template corrections"
+  };
+  
+  Gaudi::Property<bool> m_isITk
+  {
+    this, "IsITk", false,
+    "Flag to tell the code if the code is meant for ITk"
+  };
+  
+  Gaudi::Property<std::vector<std::string> > m_lorentzAngleCorrectionHistos
+  {
+    this, "LorentzAngleCorrectionHistos", {
+      "la",
+      "la",
+      "la",
+      "la",
+      "la"
+    },
+    "Paths to the histograms inside the ROOT file for Lorentz angle correction"
+  };
+
+  Gaudi::Property<std::vector<std::string> > m_chargeCorrectionHistos
+  {
+    this, "ChargeCorrectionHistos", {
+      "cce",
+      "cce",
+      "cce",
+      "cce",
+      "cce"
+    },
+    "Paths to the histograms inside the ROOT file for radiation damage charge correction"
+  };
+
+  Gaudi::Property<std::vector<std::string> > m_distanceCorrectionHistos
+  {
+    this, "DistanceCorrectionHistos", {
+      "dz",
+      "dz",
+      "dz",
+      "dz",
+      "dz"
+    },
+    "Paths to the histograms inside the ROOT file for radiation damage distance correction"
   };
 
   SG::ReadCondHandleKey<PixelRadiationDamageFluenceMapData> m_fluenceDataKey

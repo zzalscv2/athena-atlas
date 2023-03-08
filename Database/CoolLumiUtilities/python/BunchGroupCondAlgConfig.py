@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 # File: CoolLumiUtilities/python/BunchGroupCondAlgConfig.py
 # Created: May 2019, sss
@@ -11,16 +11,16 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from IOVDbSvc.IOVDbSvcConfig import addFolders
 
 
-def BunchGroupCondAlgCfg (configFlags):
+def BunchGroupCondAlgCfg (flags):
     name = 'BunchGroupCondAlg'
     result = ComponentAccumulator()
 
     folder = ''
-    if configFlags.IOVDb.DatabaseInstance == 'COMP200':
+    if flags.IOVDb.DatabaseInstance == 'COMP200':
         folder = '/TRIGGER/LVL1/BunchGroupContent'
 
         # Mistakenly created as multi-version folder, must specify HEAD 
-        result.merge (addFolders (configFlags, folder, 'TRIGGER', tag='HEAD',
+        result.merge (addFolders (flags, folder, 'TRIGGER', tag='HEAD',
                                   className='AthenaAttributeList'))
 
     BunchGroupCondAlg=CompFactory.BunchGroupCondAlg
@@ -33,14 +33,14 @@ def BunchGroupCondAlgCfg (configFlags):
 
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.lock()
 
     print ('--- data')
-    flags1 = ConfigFlags.clone()
+    flags1 = flags.clone()
     flags1.Input.Files = defaultTestFiles.RAW
     flags1.Input.ProjectName = 'data12_8TeV'
     flags1.lock()
@@ -50,7 +50,7 @@ if __name__ == "__main__":
     acc1.wasMerged()
 
     print ('--- default')
-    flags2 = ConfigFlags.clone()
+    flags2 = flags.clone()
     flags2.Input.Files = defaultTestFiles.RAW
     flags2.lock()
     acc2 = BunchGroupCondAlgCfg (flags2)

@@ -42,13 +42,16 @@ class PileupReweightingBlock (ConfigBlock):
 
         if campaign:
             if self.userPileupConfigs is None:
-                from PileupReweighting.AutoconfigurePRW import getConfigurationFiles
-                toolConfigFiles = getConfigurationFiles(campaign=campaign, files=self.files, useDefaultConfig=self.useDefaultConfig,
-                                                        data_type=config.dataType())
-                log.info('Setting PRW configuration based on input files')
+                if config.dataType() == 'data':
+                    log.info('Data needs no configuration files')
+                else:
+                    from PileupReweighting.AutoconfigurePRW import getConfigurationFiles
+                    toolConfigFiles = getConfigurationFiles(campaign=campaign, files=self.files, useDefaultConfig=self.useDefaultConfig,
+                                                            data_type=config.dataType())
+                    log.info('Setting PRW configuration based on input files')
 
-                if toolConfigFiles:
-                    log.info(f'Using PRW configuration: {", ".join(toolConfigFiles)}')
+                    if toolConfigFiles:
+                        log.info(f'Using PRW configuration: {", ".join(toolConfigFiles)}')
             else:
                 log.info('Using user provided PRW configuration')
 
@@ -102,6 +105,7 @@ class GeneratorAnalysisBlock (ConfigBlock):
         alg = config.createAlgorithm( 'CP::PMGTruthWeightAlg', 'PMGTruthWeightAlg' )
         config.addPrivateTool( 'truthWeightTool', 'PMGTools::PMGTruthWeightTool' )
         alg.decoration = 'generatorWeight_%SYS%'
+        config.addOutputVar ('EventInfo', 'generatorWeight_%SYS%', 'generatorWeight', isEventLevel=True)
 
 
 
@@ -180,6 +184,7 @@ class OutputThinningBlock (ConfigBlock):
         alg.input = config.readName (self.containerName)
         if self.outputName is not None :
             alg.output = self.outputName + '_%SYS%'
+            config.addOutputContainer (self.containerName, self.outputName)
         else :
             alg.output = config.copyName (self.containerName)
         if selection != '' :

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonSelectorTools/MuonSelectionTool.h"
@@ -312,7 +312,7 @@ namespace CP {
             if(isRun3())
             {
                 
-                if(m_quality!=0 && m_quality!=1 && m_quality!=4) ATH_MSG_WARNING("muonSelectionTool currently only supports loose, medium and highpt (in the barrel) WPs for run 3 data/MC, all other WPs can currently only be used for tests using Expert mode");
+                if(m_quality!=1 && m_quality!=2 && m_quality!=4) ATH_MSG_WARNING("muonSelectionTool currently only supports loose, medium and highpt (in the barrel) WPs for run 3 data/MC, all other WPs can currently only be used for tests using Expert mode");
             }
             isFirstRun3Check=false;
         }
@@ -1422,7 +1422,7 @@ namespace CP {
             MS_track = mu.trackParticle(xAOD::Muon::CombinedTrackParticle);
         }
 
-        if (!MS_track || !CB_track || !MS_track) return ResolutionCategory::unclassified;
+        if (!MS_track || !CB_track) return ResolutionCategory::unclassified;
         const float etaMS = MS_track->eta();
         const float etaCB = CB_track->eta();
         const float phiMS = MS_track->phi();

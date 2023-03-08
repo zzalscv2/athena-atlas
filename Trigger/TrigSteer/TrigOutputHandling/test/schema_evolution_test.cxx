@@ -99,5 +99,5 @@ int main() {
   VALUE( pStore->record(result, "HLTResultMT") ) EXPECTED ( StatusCode::SUCCESS );
 
   VALUE( deser.execute( ctx ) ) EXPECTED ( StatusCode::SUCCESS );
-
+  VALUE( deser.sysFinalize() ) EXPECTED ( StatusCode::SUCCESS );
 }

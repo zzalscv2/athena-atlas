@@ -14,7 +14,7 @@ def AddTauAugmentationCfg(ConfigFlags, **kwargs):
     acc = ComponentAccumulator()
 
     # tau selection relies on RNN electron veto, we must decorate the fixed eveto WPs before applying tau selection
-    acc.merge(AddTauWPDecorationCfg(ConfigFlags, evetoFix=True))
+    acc.merge(AddTauIDDecorationCfg(ConfigFlags, TauContainerName="TauJets"))
 
     from DerivationFrameworkTools.DerivationFrameworkToolsConfig import AsgSelectionToolWrapperCfg
     from TauAnalysisTools.TauAnalysisToolsConfig import TauSelectionToolCfg
@@ -98,43 +98,42 @@ def AddDiTauLowPtCfg(ConfigFlags, **kwargs):
     return acc
 
 
-# TauWP decoration
-def AddTauWPDecorationCfg(ConfigFlags, **kwargs):
-    """Recompute the tau working point decorations"""
+def AddTauIDDecorationCfg(flags, **kwargs):
+    """Decorate tau ID scores and working points"""
 
-    # the correct configurations are:
-    # - TauContainerName="TauJets" and OverrideDecoration=False
-    # - TauContainerName="TauJets_MuonRM" and OverrideDecoration=True
-    kwargs.setdefault("evetoFix",           False)
-    kwargs.setdefault("TauContainerName",   "TauJets")
-    kwargs.setdefault("OverrideDecoration", False)
+    kwargs.setdefault("evetoFix",         True)
+    kwargs.setdefault("DeepSetID",        True)
+    kwargs.setdefault("TauContainerName", "TauJets")
+    kwargs.setdefault("prefix",           kwargs['TauContainerName'])
 
     acc = ComponentAccumulator()
 
-    TauWPDecoratorWrapper = CompFactory.DerivationFramework.TauWPDecoratorWrapper
-    TauWPDecoratorKernel = CompFactory.DerivationFramework.CommonAugmentation
+    import tauRec.TauToolHolder as tauTools
+    tools = []
 
     if kwargs['evetoFix']:
-        evetoTauWPDecorator = CompFactory.TauWPDecorator(name = "TauWPDecoratorEleRNN_v1",
-                                                         flatteningFile1Prong = "rnneveto_mc16d_flat_1p_fix.root",
-                                                         flatteningFile3Prong = "rnneveto_mc16d_flat_3p_fix.root",
-                                                         DecorWPNames = [ "EleRNNLoose_v1", "EleRNNMedium_v1", "EleRNNTight_v1" ],
-                                                         DecorWPCutEffs1P = [0.95, 0.90, 0.85],
-                                                         DecorWPCutEffs3P = [0.98, 0.95, 0.90],
-                                                         UseEleBDT = True,
-                                                         ScoreName = "RNNEleScore",
-                                                         NewScoreName = "RNNEleScoreSigTrans_v1",
-                                                         DefineWPs = True )
-        acc.addPublicTool(evetoTauWPDecorator)
+        tools.append( acc.popToolsAndMerge(tauTools.TauWPDecoratorEleRNNFixCfg(flags)) )
 
-        tauContainerName = kwargs['TauContainerName']
-        evetoTauWPDecoratorWrapper = TauWPDecoratorWrapper(name               = f"TauWPDecorEvetoWrapper_{tauContainerName}",
-                                                           TauContainerName   = tauContainerName,
-                                                           TauWPDecorator     = evetoTauWPDecorator,
-                                                           OverrideDecoration = kwargs["OverrideDecoration"])
-        acc.addPublicTool(evetoTauWPDecoratorWrapper)
-        acc.addEventAlgo(TauWPDecoratorKernel(name              = f"TauWPDecorKernel_{tauContainerName}",
-                                              AugmentationTools = [evetoTauWPDecoratorWrapper]))
+    if kwargs['DeepSetID']:
+        tools.append( acc.popToolsAndMerge(tauTools.TauVertexedClusterDecoratorCfg(flags)) )
+        tools.append( acc.popToolsAndMerge(tauTools.TauJetDeepSetEvaluatorCfg(flags)) )
+        tools.append( acc.popToolsAndMerge(tauTools.TauWPDecoratorJetDeepSetCfg(flags)) )
+
+    if tools:
+        for tool in tools:
+            acc.addPublicTool(tool)
+
+        TauIDDecoratorWrapper = CompFactory.DerivationFramework.TauIDDecoratorWrapper
+        TauIDDecoratorKernel = CompFactory.DerivationFramework.CommonAugmentation
+
+        prefix = kwargs['prefix']
+        tauIDDecoratorWrapper = TauIDDecoratorWrapper(name             = f"{prefix}_TauIDDecoratorWrapper",
+                                                      TauContainerName = kwargs['TauContainerName'],
+                                                      TauIDTools       = tools)
+
+        acc.addPublicTool(tauIDDecoratorWrapper)
+        acc.addEventAlgo(TauIDDecoratorKernel(name              = f"{prefix}_TauIDDecorKernel",
+                                              AugmentationTools = [tauIDDecoratorWrapper]))
 
     return acc
 
@@ -190,4 +189,13 @@ def AddMuonRemovalTauAODReRecoAlgCfg(flags, **kwargs):
         officialTools                  = tools_after
     )
     acc.addEventAlgo(myTauAODRunnerAlg)
+    return acc
+
+
+def TauThinningCfg(flags, name, **kwargs):
+    """configure tau thinning"""
+
+    acc = ComponentAccumulator()
+    TauThinningTool = CompFactory.DerivationFramework.TauThinningTool
+    acc.addPublicTool(TauThinningTool(name, **kwargs), primary=True)
     return acc

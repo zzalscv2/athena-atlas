@@ -59,10 +59,16 @@ if athArgs.force_input :
     testFile = athArgs.force_input
 svcMgr.EventSelector.InputCollections = [testFile]
 
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
+flags = initConfigFlags()
+flags.Input.Files = [testFile]
+flags.lock()
+
 from AnalysisAlgorithmsConfig.FullCPAlgorithmsTest import makeSequence
 algSeq = makeSequence (dataType, blockConfig, forCompare=forCompare,
                        noSystematics = athArgs.no_systematics,
-                       isPhyslite=isPhyslite, noPhysliteBroken=noPhysliteBroken)
+                       isPhyslite=isPhyslite, noPhysliteBroken=noPhysliteBroken,
+                       autoconfigFromFlags=flags)
 print (algSeq) # For debugging
 
 # Add all algorithms from the sequence to the job.
@@ -75,7 +81,7 @@ if not blockConfig :
 else :
     outputFile = "ANALYSIS DATAFILE='FullCPAlgorithmsConfigTest." + dataType + ".hist.root' OPT='RECREATE'"
 if athArgs.force_output :
-    outputFile = athArgs.force_output
+    outputFile = "ANALYSIS DATAFILE='" + athArgs.force_output + "' OPT='RECREATE'"
 ServiceMgr.THistSvc.Output += [ outputFile ]
 
 # Reduce the printout from Athena:

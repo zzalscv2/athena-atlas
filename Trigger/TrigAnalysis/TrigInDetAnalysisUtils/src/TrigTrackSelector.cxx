@@ -4,7 +4,7 @@
  **     @author  mark sutton
  **     @date    Sun  2 Nov 2014 11:10:06 CET 
  **
- **     Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -789,7 +789,7 @@ TIDA::Track* TrigTrackSelector::makeTrack( const TruthParticle* track, unsigned 
     //// if ( gp->production_vertex() ){
     ////   cout<<"BP BP gp->production_vertex() "<<endl;
     ////   generatedTrackPerigee = truthToTrack->makePerigeeParameters( gp );
-    ////   if (generatedTrackPerigee == NULL && gp->barcode() > 1000000 ) {
+    ////   if (generatedTrackPerigee == NULL && gp->barcode() > HepMC::SIM_REGENERATION_INCREMENT ) {
     ////      std::cout<<"BP No perigee available for interacting truth particle."<<std::endl;
     ////   }
     //// }
@@ -1205,10 +1205,10 @@ bool TrigTrackSelector::selectTrack( const xAOD::TrackParticle* track, void* ) {
       int fitter = track->trackFitter();
       std::bitset<xAOD::NumberOfTrackRecoInfo>  patternrec = track->patternRecoInfo();
 
-      int icount = 0;
+      //int icount = 0;<- never used if section below is commented
       for ( unsigned ipr=patternrec.size() ; ipr-- ; ) { 
 	if ( patternrec[ipr] ) {
-	  icount++;
+	  //icount++; <- never used if section below is commented
 	  trackAuthor |= (ipr >> 16);
 	  // static bool first = true;
 	  // if ( first && icount>1 ) { 

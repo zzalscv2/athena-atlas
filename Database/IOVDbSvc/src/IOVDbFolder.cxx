@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // IOVDbFolder.cxx - helper class for IOVDbSvc to manage folder & data cache
@@ -223,12 +223,79 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
   // timer to track amount of time in loadCache
   TStopwatch cachetimer;
   const auto & [cachestart, cachestop] = m_iovs.getCacheBounds();
-  BasicFolder b;
+  BasicFolder basicFolder;
   if (m_source == "CREST"){
     //const std::string  jsonFolderName=sanitiseCrestTag(m_foldername);
     const std::string  completeTag=jsonTagName(globalTag, m_foldername);
     ATH_MSG_INFO("Download tag would be: "<<completeTag);
-    std::string reply=getPayloadForTag(completeTag);
+
+    // *** *** *** *** *** ***
+    // Routine which converts openended CREST IOVs into non-overlapping IOVs
+    
+    // Get a vector of pairs retrieved from crest
+    //  <IOV_SINCE(string),HASH(string)>
+    auto crestIOVs = getIovsForTag(completeTag);
+
+    typedef std::pair<cool::ValidityKey,size_t> IOV2Index; // <CREST_IOV(converted to ull),Index_in_crestIOVs>
+    std::vector<IOV2Index> iov2IndexVect;                  // Temporary vector for sorting IOV_SINCE values
+    iov2IndexVect.reserve(crestIOVs.size());
+    size_t hashInd{0};
+    for(auto crestIOV : crestIOVs) {
+      iov2IndexVect.push_back(IOV2Index(std::stoull(crestIOV.first),hashInd++));
+    }
+
+    std::sort(iov2IndexVect.begin(),iov2IndexVect.end(),
+	      [](const IOV2Index& a, const IOV2Index& b)
+	      {
+		return a.first < b.first;
+	      });
+
+
+    typedef std::pair<IovStore::Iov_t,std::string> IOVHash; // <<IOV_SINCE(ull),IOV_UNTIL(ull)>,HASH(string)>
+    std::vector<IOVHash> iovHashVect;                       // Vector of non-overlapping IOVs + corresponding Hashes
+    size_t nIOVs = iov2IndexVect.size();
+    iovHashVect.reserve(nIOVs);
+    for(size_t ind=0; ind<nIOVs-1; ++ind) {
+      iovHashVect.push_back(IOVHash(IovStore::Iov_t(iov2IndexVect[ind].first
+						    , iov2IndexVect[ind+1].first)
+				    , crestIOVs[iov2IndexVect[ind].second].second));
+    }
+    iovHashVect.push_back(IOVHash(IovStore::Iov_t(iov2IndexVect[nIOVs-1].first
+						  , cool::ValidityKeyMax)
+				  , crestIOVs[iov2IndexVect[nIOVs-1].second].second));
+    
+    // End of the CREST IOV conversion routine
+    // *** *** *** *** *** ***
+
+    if(vkey < iovHashVect[0].first.first) {
+      ATH_MSG_FATAL("Load cache failed for " << m_foldername << ". No valid IOV retrieved from the DB");
+      return false;
+    }
+
+    size_t indIOV = 0;
+    for(const auto& iovhash : iovHashVect) {
+      if(vkey >= iovhash.first.second) {
+	++indIOV;
+	continue;
+      }
+      else if(vkey >= iovhash.first.first) {
+	break;
+      }
+      else {
+	ATH_MSG_FATAL("Load cache failed for " << m_foldername << ". No valid IOV retrieved from the DB");
+	return false;
+      }
+    }
+
+    if(indIOV==iovHashVect.size()) {
+      ATH_MSG_FATAL("Load cache failed for " << m_foldername << ". No valid IOV retrieved from the DB");
+      return false;
+    }
+
+    ATH_MSG_DEBUG("Found IOV for " << m_foldername << " and VKEY " << vkey
+		  << " " << iovHashVect[indIOV].first);
+
+    std::string reply=getPayloadForHash(iovHashVect[indIOV].second);
     if (reply.empty()){
       ATH_MSG_FATAL("Reading channel data from "<<m_foldername<<" failed.");
       return false;
@@ -241,8 +308,8 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
       return false;
     }
     //basic folder now contains the info
-    Json2Cool inputJson(ss, b, specString);
-    if (b.empty()){
+    Json2Cool inputJson(ss, basicFolder, specString, &(iovHashVect[indIOV].first));
+    if (basicFolder.empty()){
       ATH_MSG_FATAL("Reading channel data from "<<m_foldername<<" failed.");
       return false;
     }
@@ -285,7 +352,7 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
   ATH_MSG_DEBUG( "IOVDbFolder:loadCache limits set to ["  << since << "," << until << "]" );
   bool vectorPayload{};
   if (m_source=="CREST"){
-    vectorPayload = b.isVectorPayload();
+    vectorPayload = basicFolder.isVectorPayload();
   } else {
     vectorPayload = (m_foldertype ==CoraCool) or (m_foldertype == CoolVector);
   }
@@ -445,14 +512,14 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
     //this is code using CREST objects now
     ATH_MSG_DEBUG( "loadCache: Expecting to see " << nChannelsExpected << " channels" );
     if (!resolveTag(nullptr,globalTag)) return false;
-    addIOVtoCache(b.iov().first, b.iov().second);
-    const auto & channelNumbers=b.channelIds();
+    const auto & channelNumbers=basicFolder.channelIds();
     ATH_MSG_DEBUG( "ChannelIds is " << channelNumbers.size() << " long" );
     unsigned int iadd{};
     for (const auto & chan: channelNumbers){
       m_cachechan.push_back(chan);
-      if (b.isVectorPayload()) {
-        const auto & vPayload = b.getVectorPayload(chan);
+      addIOVtoCache(basicFolder.iov().first, basicFolder.iov().second);
+      if (basicFolder.isVectorPayload()) {
+        const auto & vPayload = basicFolder.getVectorPayload(chan);
         const unsigned int istart=m_cacheattr.size();
         for (const auto & attList:vPayload){
           if (m_cachespec==0) setSharedSpec(attList);
@@ -464,7 +531,7 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
         m_cacheccend.push_back(m_cacheattr.size());
         ++iadd;
       } else {
-        auto const & attList = b.getPayload(chan);
+        auto const & attList = basicFolder.getPayload(chan);
         if (m_cachespec==0) setSharedSpec(attList);
         const coral::AttributeList c(*m_cachespec,true);
         m_cacheattr.push_back(c);// maybe needs to be cleared before
@@ -749,16 +816,17 @@ IOVDbFolder::getAddress(const cool::ValidityKey reftime,
       }
     }
     ATH_MSG_DEBUG( "Retrieved object: folder " << m_foldername 
-             <<  " at IOV " << reftime << " channels " << nobj << " has range " 
-             << range );
+		   <<  " at IOV " << reftime << " channels " << nobj << " has range "
+		   << range );
     // shrink range so it does not extend into 'gap' channels or outside cache
     IOVTime tnaystart=makeEpochOrRunLumi(naystart, m_timestamp);
     IOVTime tnaystop=makeEpochOrRunLumi(naystop, m_timestamp);
     IOVTime rstart=range.start();
     IOVTime rstop=range.stop();
     if (tnaystart > rstart || rstop > tnaystop) {
-      ATH_MSG_DEBUG( "Shrink IOV range from [" << rstart << ":" <<
-          rstop << "] to [" << tnaystart << ":" << tnaystop << "]" );
+      ATH_MSG_DEBUG( "Shrink IOV range for " << m_foldername
+		     << " from [" << rstart << ":" << rstop << "] to ["
+		     << tnaystart << ":" << tnaystop << "]" );
       if (tnaystart > rstart) rstart=tnaystart;
       if (tnaystop  < rstop)  rstop=tnaystop;
       range=IOVRange(rstart,rstop);

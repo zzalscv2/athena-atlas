@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SeedAnalysisAlg.h"
@@ -34,7 +34,7 @@ namespace ActsTrk {
     ATH_CHECK( m_pixelClusterContainerKey.initialize(not m_prdTruth.empty() and m_usePixel) );
     ATH_CHECK( m_stripClusterContainerKey.initialize(not m_prdTruth.empty() and not m_usePixel) );
 
-    ATH_CHECK( m_evtKey.initialize() );
+    ATH_CHECK( m_EventInfoKey.initialize() );
 
     if (not m_prdTruth.empty()) {
       ATH_CHECK( m_paramEstimationTool.retrieve() );
@@ -179,7 +179,7 @@ namespace ActsTrk {
 						       { return params[6]; });
       
 
-    SG::ReadHandle<xAOD::EventInfo> eventInfo = SG::makeHandle(m_evtKey, ctx);
+    SG::ReadHandle<xAOD::EventInfo> eventInfo = SG::makeHandle(m_EventInfoKey, ctx);
     ATH_CHECK(eventInfo.isValid());
 
     auto monitor_event_number = Monitored::Scalar<long>("event_number", static_cast<long>(eventInfo->eventNumber()));
@@ -249,7 +249,7 @@ namespace ActsTrk {
     // utilities
     // Used for param estimation
     auto retrieveSurfaceFunction = 
-      [this, &input_cluster_collection, &detEle] (const Acts::Seed<ActsTrk::SpacePoint>& seed) -> const Acts::Surface& 
+      [this, &input_cluster_collection, &detEle] (const Acts::Seed<xAOD::SpacePoint>& seed) -> const Acts::Surface& 
       { 
 	std::size_t bottom_idx = seed.sp().front()->measurementIndexes()[0];
 
@@ -398,7 +398,7 @@ namespace ActsTrk {
 							   float pTPerHelixRadius) const
   {
     auto extractCoordinates = 
-      [] (const ActsTrk::SpacePoint* sp) -> std::array<float,4>
+      [] (const xAOD::SpacePoint* sp) -> std::array<float,4>
       {
 	std::array<float, 4> coordinates {static_cast<float>(sp->x()), 
 					  static_cast<float>(sp->y()), 

@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODROOTACCESS_TOOLS_TAUXBRANCHMANAGER_H
@@ -60,8 +60,10 @@ namespace xAOD {
        /// Function for updating the object in memory if needed
       virtual ::Int_t getEntry( ::Long64_t entry, ::Int_t getall = 0 );
 
+      /// Function getting a const pointer to the object being handled
+      virtual const void* object() const;
       /// Function getting a pointer to the object being handled
-      virtual void* object() const;
+      virtual void* object();
       /// Function replacing the object being handled
       virtual void setObject( void* obj );
 

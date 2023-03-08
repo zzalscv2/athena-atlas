@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETPHYSVALMONITORING_ATHTRUTHSELECTIONTOOL_H
@@ -54,6 +54,7 @@ private:
   float m_minPt;
   int m_maxBarcode;
   bool m_requireCharged;
+  int m_selectedCharge;
   bool m_requireStatus1;
   int m_requireSiHit;
   // max decay radius for secondaries [mm];

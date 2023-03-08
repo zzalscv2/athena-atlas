@@ -91,7 +91,6 @@ int main( int argc, char* argv[] ) {
   Info( APP_NAME, "\n\n");
   Info( APP_NAME, "---- SYSTEMATICS LIST -----------------------------------------------------------------------------------------\n");
 
-  auto isys = 0;
   for (const auto& sysInfo : systInfoList) {
     const CP::SystematicSet& sys = sysInfo.systset;
     if(sys.name()=="") continue;
@@ -100,7 +99,6 @@ int main( int argc, char* argv[] ) {
                 getFW(ST::testAffectsObject(sysInfo.affectsType),12).c_str(), 
                 sysInfo.affectsKinematics ? "Kin." : "Weight");
     //Info( APP_NAME, ("      "+getFW(sys.name(),45)+"\t  Affects : "+getFW(ST::testAffectsObject(sysInfo.affectsType),12)+"  ("+(sysInfo.affectsKinematics ? "Kin.)" : "Weight)")).c_str() );
-    ++isys;
   }
 
   Info( APP_NAME, "---------------------------------------------------------------------------------------------------------------\n");

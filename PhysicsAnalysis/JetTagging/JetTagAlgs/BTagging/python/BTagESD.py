@@ -174,8 +174,8 @@ if __name__=="__main__":
 
     args = parser.parse_args()
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags as cfgFlags
-
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    cfgFlags = initConfigFlags()
     cfgFlags.Input.Files= args.filesIn.split(",")    
 
     cfgFlags.Output.ESDFileName="esdOut.pool.root"

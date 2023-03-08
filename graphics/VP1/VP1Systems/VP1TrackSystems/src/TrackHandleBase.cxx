@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -1898,10 +1898,6 @@ void AssocObjAttachmentHandle::detachNodes( SoNode*simple, SoNode*detailed )
     return;
   int isimple = m_d->septrack_simple->findChild(simple);
   if (VP1Msg::verbose()) {
-    if (!m_d->septrack_simple) {
-      //       VP1Msg::message("ERROR: AssocObjAttachmentHandle::detachNodes Not initialised previously!.");
-      m_d->ensureInit();
-    }
     if (!simple||!detailed) {
       VP1Msg::messageVerbose("AssocObjAttachmentHandle::detach ERROR: Called with null pointers!");
       return;

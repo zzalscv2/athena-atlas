@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 from TrigEDMConfig import DataScoutingInfo
@@ -33,7 +33,7 @@ def addEventBuildingSequence(flags, chain, eventBuildType, chainDict):
         return pebInfoWriterTool(flags, chainDict['chainName'], eventBuildType)
 
     inputMaker = pebInputMaker(flags, chain, eventBuildType)
-    seq = MenuSequence(
+    seq = MenuSequence(flags,
         Sequence    = pebSequence(eventBuildType, inputMaker),
         Maker       = inputMaker,
         Hypo        = PEBInfoWriterAlg('PEBInfoWriterAlg_' + eventBuildType),
@@ -47,7 +47,7 @@ def addEventBuildingSequence(flags, chain, eventBuildType, chainDict):
                          chainDicts=[chainDict])
     else:
         # standard PEB chain
-        prevStep = chain.steps[-1]
+        prevStep = chain.steps[-1]        
         step_name = 'Step_merged{:s}_PEBInfoWriter_{:s}'.format(prevStep.name, eventBuildType)
         step = ChainStep(name=step_name,
                          Sequences=[seq for leg in prevStep.legIds],
@@ -330,7 +330,8 @@ def isRoIBasedPEB(flags, eventBuildType):
 # Unit test
 if __name__ == "__main__":
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
     flags.Input.Files = defaultTestFiles.RAW
     flags.lock()
     failures = 0

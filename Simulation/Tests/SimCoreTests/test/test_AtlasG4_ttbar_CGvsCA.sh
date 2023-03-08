@@ -1,6 +1,7 @@
 #!/bin/sh
 #
 # art-description: Run G4AtlasAlg simulation, reading ttbar events, writing HITS, using MC15aPlus geometry and conditions
+# art-include: 23.0/Athena
 # art-include: master/Athena
 
 # art-type: grid

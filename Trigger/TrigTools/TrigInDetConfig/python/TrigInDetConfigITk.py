@@ -42,7 +42,7 @@ def ITkftfCfg(flags, roisKey, signature, signatureName):
                                                                     layerNumberTool   = acc.getPublicTool("TrigL2LayerNumberToolITk_FTF") ) )
 
     from TrigFastTrackFinder.TrigFastTrackFinder_Config import TrigFastTrackFinderMonitoring
-    monTool = TrigFastTrackFinderMonitoring(name = "trigfasttrackfinder_" + signature, doResMon=False)
+    monTool = TrigFastTrackFinderMonitoring(flags, name = "trigfasttrackfinder_" + signature, doResMon=False)
 
     ftf = CompFactory.TrigFastTrackFinder( name = "TrigFastTrackFinder_" + signature,
                                             LayerNumberTool          = acc.getPublicTool( "TrigL2LayerNumberToolITk_FTF" ),
@@ -88,9 +88,6 @@ def ITktrigInDetFastTrackingCfg( inflags, roisKey, signatureName, in_view ):
     signature =  ("_" + signatureName if signatureName else '').lower()
 
     acc = ComponentAccumulator()
-
-    from TrigInDetConfig.TrigInDetConfig import magFieldCfgCfg
-    acc.merge(magFieldCfgCfg(flags))
 
     if in_view:
         from TrigInDetConfig.TrigInDetConfig import InDetCacheNames

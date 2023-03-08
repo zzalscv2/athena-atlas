@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGINDETPATTRECOTOOLS_TRIG_TRACK_SEED_GENERATOR_ITK_H
@@ -39,7 +39,7 @@ private:
   float m_phiSliceWidth;
   float m_minDeltaRadius, m_maxDeltaRadius;
 
-  float m_CovMS, m_minR_squ, m_dtPreCut;
+  float m_minR_squ, m_maxCurv;
 
   INTERNAL_TRIPLET_BUFFER m_triplets;
 

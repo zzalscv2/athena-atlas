@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -63,7 +63,7 @@ public:
    * (passing ownership) */
   ConeLayer(const Amg::Transform3D& transform,
             ConeBounds* cbounds,
-            SurfaceArray* surfaceArray,
+            std::unique_ptr<SurfaceArray> surfaceArray,
             double thickness = 0.,
             std::unique_ptr<OverlapDescriptor> od = nullptr,
             int laytyp = int(Trk::active));
@@ -72,7 +72,7 @@ public:
      MaterialProperties and pointer SurfaceArray (passing ownership) */
   ConeLayer(const Amg::Transform3D& transform,
             ConeBounds* cbounds,
-            SurfaceArray* surfaceArray,
+            std::unique_ptr<SurfaceArray> surfaceArray,
             const LayerMaterialProperties& laymatprop,
             double thickness = 0.,
             std::unique_ptr<OverlapDescriptor> od = nullptr,

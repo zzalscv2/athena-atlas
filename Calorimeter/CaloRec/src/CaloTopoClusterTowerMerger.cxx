@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "StoreGate/ReadHandle.h"
@@ -108,7 +108,7 @@ CaloTopoClusterTowerMerger::CaloTopoClusterTowerMerger(const std::string& name,I
 }
 
 CaloTopoClusterTowerMerger::~CaloTopoClusterTowerMerger()
-{ }
+= default;
 
 StatusCode CaloTopoClusterTowerMerger::initialize()
 {
@@ -171,7 +171,7 @@ CaloTopoClusterTowerMerger::makeDeepCopy(const xAOD::CaloCluster& rClus,
   return true;
 }
 
-StatusCode CaloTopoClusterTowerMerger::addContainerWriteHandle(whandle_t& signalHandle) const
+StatusCode CaloTopoClusterTowerMerger::addContainerWriteHandle(whandle_t& signalHandle) 
 { return CaloClusterStoreHelper::AddContainerWriteHandle(signalHandle); }
 //   // get a new signal handle
 //   signalHandle = std::unique_ptr<xAOD::CaloClusterContainer>(new xAOD::CaloClusterContainer());

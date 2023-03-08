@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /*********************************************************************
@@ -2257,7 +2257,7 @@ namespace Trk
         if (TP == nullptr) return -999999.;
         std::unique_ptr<const Trk::TrackParameters> extrPer =
           m_extrapolator->extrapolate(
-            Gaudi::Hive::currentContext(), *TP, perigeeSurface);
+            Gaudi::Hive::currentContext(), TP->perigeeParameters(), perigeeSurface);
         if (extrPer == nullptr)
           return -999999.;
         px += extrPer->momentum().x();
@@ -2293,7 +2293,7 @@ namespace Trk
         if (TP == nullptr) return -999999.;
         std::unique_ptr<const Trk::TrackParameters> extrPer =
           m_extrapolator->extrapolate(
-            Gaudi::Hive::currentContext(), *TP, perigeeSurface);
+            Gaudi::Hive::currentContext(), TP->perigeeParameters(), perigeeSurface);
         if (extrPer == nullptr)
           return -999999.;
         px += extrPer->momentum().x();
@@ -2423,7 +2423,7 @@ namespace Trk
         if (TP == nullptr) return -999999.;
         std::unique_ptr<const Trk::TrackParameters> extrPer =
           m_extrapolator->extrapolate(
-            Gaudi::Hive::currentContext(), *TP, perigeeSurface);
+            Gaudi::Hive::currentContext(), TP->perigeeParameters(), perigeeSurface);
         if (extrPer == nullptr)
           return -999999.;
         const AmgSymMatrix(5)* cov_tmp = extrPer->covariance();

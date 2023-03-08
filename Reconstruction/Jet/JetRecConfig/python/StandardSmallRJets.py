@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from JetRecConfig.StandardJetConstits import stdConstitDic as cst
 from JetRecConfig.JetRecConfig import registerAsInputConstit
@@ -37,8 +37,12 @@ calibmods_lowCut = (
     "Sort",
 )
 
+calibmods_noCut = (
+    "ConstitFourMom", "CaloEnergies", "Sort"
+)
+
 standardmods = (
-    "LArHVCorr", "Width",
+    "Width",
     "CaloQuality", "TrackMoments","TrackSumMoments",
     "JVF", "JVT", "Charge",
 )
@@ -72,17 +76,9 @@ AntiKt4PV0Track = JetDefinition("AntiKt", 0.4, cst.PV0Track,
 # Standard small R reco jet definitions
 # *********************************************************
 
-# Configurable filter for PhysVal
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
-filterPF = ("Filter:10000",)
-filterEM = ("Filter:15000",)
-if not ConfigFlags.Jet.useCalibJetThreshold:
-    filterPF = ("Filter:1",)
-    filterEM = ("Filter:1",)
-
 AntiKt4EMPFlow = JetDefinition("AntiKt",0.4,cst.GPFlow,
                                ghostdefs = standardghosts+flavourghosts,
-                               modifiers = calibmods+filterPF+truthmods+standardmods+("JetGhostLabel",),
+                               modifiers = calibmods+truthmods+standardmods+("Filter_calibThreshold:10000","JetGhostLabel","LArHVCorr"),
                                lock = True
 )
 
@@ -91,7 +87,7 @@ AntiKt4EMPFlow = JetDefinition("AntiKt",0.4,cst.GPFlow,
 
 AntiKt4LCTopo = JetDefinition("AntiKt",0.4,cst.LCTopoOrigin,
                               ghostdefs = standardghosts+flavourghosts, 
-                              modifiers = calibmods+("Filter_ifnotESD:15000","OriginSetPV")+standardmods+clustermods,
+                              modifiers = calibmods+("Filter_ifnotESD:15000","OriginSetPV","LArHVCorr")+standardmods+clustermods,
                               lock = True,
 )
 
@@ -99,7 +95,7 @@ AntiKt4LCTopo = JetDefinition("AntiKt",0.4,cst.LCTopoOrigin,
 
 AntiKt4EMTopo = JetDefinition("AntiKt",0.4,cst.EMTopoOrigin,
                               ghostdefs = standardghosts+["TrackLRT"]+flavourghosts,
-                              modifiers = calibmods+filterEM+truthmods+standardmods+clustermods,
+                              modifiers = calibmods+truthmods+standardmods+clustermods+("Filter_calibThreshold:15000","LArHVCorr",),
                               lock = True,
 )
 
@@ -109,7 +105,7 @@ AntiKt4EMTopo = JetDefinition("AntiKt",0.4,cst.EMTopoOrigin,
 # *********************************************************
 AntiKt4EMPFlowCSSK = JetDefinition("AntiKt",0.4,cst.GPFlowCSSK,
                                    ghostdefs = standardghosts+flavourghosts,
-                                   modifiers = ("ConstitFourMom","CaloEnergies","Sort","Filter:1","JetPtAssociation")+truthmods+standardmods,
+                                   modifiers = ("ConstitFourMom","CaloEnergies","Sort","Filter:1","JetPtAssociation","LArHVCorr")+truthmods+standardmods,
                                    ptmin = 2000,
                                    lock = True
 )
@@ -120,7 +116,7 @@ AntiKt4EMPFlowCSSK = JetDefinition("AntiKt",0.4,cst.GPFlowCSSK,
 # *********************************************************
 AntiKt4UFOCSSK = JetDefinition("AntiKt",0.4,cst.UFOCSSK,
                                ghostdefs = standardghosts+flavourghosts,
-                               modifiers = ("ConstitFourMom","Sort","Filter:1","EMScaleMom","JetPtAssociation","Width","TrackMoments","TrackSumMoments","JVF","JVT","Charge","CaloEnergies",)+truthmods,
+                               modifiers = calibmods_noCut+("Filter:1","EMScaleMom","JetPtAssociation","CaloEnergiesClus",)+truthmods+standardmods,
                                ptmin = 2000,
                                lock = True
 )
@@ -131,7 +127,7 @@ AntiKt4UFOCSSK = JetDefinition("AntiKt",0.4,cst.UFOCSSK,
 AntiKt4UFOCSSKNoPtCut = JetDefinition("AntiKt",0.4,cst.UFOCSSK,
                                       infix = "NoPtCut",
                                       ghostdefs = standardghosts+flavourghosts,
-                                      modifiers = ("ConstitFourMom", "Sort", "Filter:1", "EMScaleMom", "JetPtAssociation", "Width", "TrackMoments", "TrackSumMoments", "JVF", "JVT", "Charge", "CaloEnergies", "N90",)+truthmods,
+                                      modifiers = calibmods_noCut+("Filter:1","EMScaleMom","JetPtAssociation","CaloEnergiesClus",)+truthmods+standardmods,
                                       ptmin = 1,
                                       lock = True
 )
@@ -147,7 +143,7 @@ AntiKt4EMPFlowCSSKNoPtCut = JetDefinition("AntiKt",0.4,cst.GPFlowCSSK,
 AntiKt4EMPFlowNoPtCut = JetDefinition("AntiKt",0.4,cst.GPFlow,
                                       infix = "NoPtCut",
                                       ghostdefs = standardghosts+flavourghosts,
-                                      modifiers = calibmods_lowCut+("Filter:1",)+truthmods+standardmods+("JetPtAssociation",),
+                                      modifiers = calibmods_lowCut+("Filter:1",)+truthmods+standardmods+("JetPtAssociation","CaloEnergiesClus"),
                                       ptmin = 1,
                                       lock = True
 )
@@ -220,7 +216,7 @@ AntiKt6TruthGEN   = AntiKt4TruthGEN.clone(radius=0.6)
 AntiKt6TruthGENWZ = AntiKt4TruthGENWZ.clone(radius=0.6)
 
 
-def StandardSmallRJetCfg(configFlags):
+def StandardSmallRJetCfg(flags):
     """Top-level function to schedule the smallR jets in standard reconstruction """
     from JetRecConfig.JetRecConfig import JetRecCfg
 
@@ -230,9 +226,9 @@ def StandardSmallRJetCfg(configFlags):
         AntiKt4Truth,
         ]
 
-    compacc = JetRecCfg( configFlags, standarSmallRList[0], )
+    compacc = JetRecCfg( flags, standarSmallRList[0], )
     for jetdef in standarSmallRList[1:]:
-        compacc.merge( JetRecCfg( configFlags, jetdef) )
+        compacc.merge( JetRecCfg( flags, jetdef) )
 
     return compacc
         

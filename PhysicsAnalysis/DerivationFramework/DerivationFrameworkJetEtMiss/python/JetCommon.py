@@ -215,7 +215,7 @@ def addSidebandEventShape(sequence=DerivationFrameworkJob):
     from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable
     from AthenaConfiguration.AllConfigFlags import ConfigFlags
 
-    constit_algs = getInputAlgs(cst.GPFlow, configFlags=ConfigFlags)
+    constit_algs = getInputAlgs(cst.GPFlow, flags=ConfigFlags)
     constit_algs = reOrderAlgs( [a for a in constit_algs if a is not None])
 
     for a in constit_algs:

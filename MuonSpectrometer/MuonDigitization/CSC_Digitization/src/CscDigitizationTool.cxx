@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
@@ -212,19 +212,17 @@ StatusCode CscDigitizationTool::CoreDigitization(Collections_t& collections,CscS
       }
       const HepMcParticleLink::PositionFlag idxFlag = (phit.eventId()==0) ? HepMcParticleLink::IS_POSITION: HepMcParticleLink::IS_INDEX;
       const HepMcParticleLink trackLink(phit->trackNumber(), phit.eventId(), evColl, idxFlag);
+      const auto cscd = CscMcData(energy, ypos, zpos);
       for (; vecBeg != vecEnd; ++vecBeg) {
-        CscSimData::Deposit deposit(trackLink, CscMcData(energy, ypos, zpos));
-        myDeposits[(*vecBeg)].push_back(deposit);
+        myDeposits[(*vecBeg)].emplace_back(trackLink,cscd);
       }
       hashVec.clear();
     }
   }
 
-  // reset the pointer if it is not null
-  if (m_thpcCSC) {
-    delete m_thpcCSC;
-    m_thpcCSC=nullptr;
-  }
+  // reset the pointer.
+  delete m_thpcCSC;
+  m_thpcCSC=nullptr;
 
   // now loop over the digit map
   // build the digits

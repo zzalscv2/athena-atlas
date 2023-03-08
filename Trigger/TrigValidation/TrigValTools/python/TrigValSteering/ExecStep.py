@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -147,10 +147,11 @@ class ExecStep(Step):
         elif self.job_options is None or len(self.job_options) == 0:
             self.misconfig_abort('Job options not provided for this step')
         # Check if job options exist
-        if check_job_options(self.job_options):
-            self.log.debug('Job options file exists: %s', self.job_options)
-        else:
-            self.misconfig_abort('Failed to find job options file %s', self.job_options)
+        if self.job_options.endswith('.py'):  # no check for CA modules in athenaHLT
+            if check_job_options(self.job_options):
+                self.log.debug('Job options file exists: %s', self.job_options)
+            else:
+                self.misconfig_abort('Failed to find job options file %s', self.job_options)
 
     def add_precommand(self, precommand):
         if self.type == 'athena':
@@ -261,7 +262,7 @@ class ExecStep(Step):
         # Enable CostMonitoring/FPEAuditor
         if self.type != 'other':
             if self.costmon:
-                self.add_hlt_jo_modifier('forceCostMonitoring=True')
+                self.add_hlt_jo_modifier('from AthenaConfiguration.AllConfigFlags import ConfigFlags; ConfigFlags.Trigger.CostMonitoring.monitorAllEvents=True')
             if self.fpe_auditor:
                 self.add_hlt_jo_modifier('fpeAuditor=True')
 

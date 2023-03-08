@@ -25,7 +25,7 @@ StatusCode ChargedTracksFilter::filterEvent() {
   for (McEventCollection::const_iterator itr = events()->begin(); itr != events()->end(); ++itr) {
     const HepMC::GenEvent* genEvt = *itr;
 
-  for (auto part: *genEvt){
+  for (const auto& part: *genEvt){
       // We only care about stable particles
       if (!MC::isGenStable(part)) continue;
 

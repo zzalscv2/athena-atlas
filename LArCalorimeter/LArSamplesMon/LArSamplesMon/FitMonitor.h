@@ -11,10 +11,11 @@
 #define LArSamples_FitMonitor_H
 
 #include "LArSamplesMon/MonitorBase.h"
+#include "CxxUtils/checker_macros.h"
   
 namespace LArSamples {
     
-  class FitMonitor : public MonitorBase  
+  class ATLAS_NOT_THREAD_SAFE FitMonitor : public MonitorBase  
   {
   
     public:

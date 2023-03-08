@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # art-description: art job for tau_ztautau_pu46
 # art-type: grid
 # art-include: master/Athena
-# art-include: 22.0/Athena
+# art-include: 23.0/Athena
 # art-input: valid1.601191.PhPy8EG_AZNLO_Ztautau.recon.RDO.e8453_e8455_s3873_s3874_r13929_tid30652308_00
 # art-input-nfiles: 3
 # art-athena-mt: 8

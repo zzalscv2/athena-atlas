@@ -80,7 +80,7 @@ if hasattr( runArgs, "triggerBit"):
     ConfigFlags.Detector.EnableCalo = False
     ConfigFlags.lock()
     from TriggerJobOpts.TriggerRecoGetter import TriggerRecoGetter
-    triggerGetter = TriggerRecoGetter()
+    triggerGetter = TriggerRecoGetter(ConfigFlags)
 else:
     filAlg.L1Trigger = ""
 

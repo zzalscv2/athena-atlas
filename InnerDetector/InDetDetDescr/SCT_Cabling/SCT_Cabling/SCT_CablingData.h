@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SCT_CablingData_h
@@ -15,6 +15,8 @@
 // STL includes
 #include <array>
 #include <map>
+#include <set>
+
 // uint32 in std namespace
 #include <cstdint>
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -131,10 +131,7 @@ CaloSurfaceBuilder::CreateUserSurface(const CaloCell_ID::CaloSample sample,
     return nullptr;
   }
 
-
-  // NB: the Transform3D created here belong to the surface,
-  //     and will be deleted by it
-  auto pos = std::make_unique<Amg::Transform3D>(Trk::s_idTransform);
+  auto pos = Amg::Transform3D(Trk::s_idTransform);
   Trk::Surface* surf = nullptr;
 
   bool result = false;
@@ -187,13 +184,12 @@ CaloSurfaceBuilder::CreateUserSurface(const CaloCell_ID::CaloSample sample,
       we'll take only the radius from them, the rest we copy from TileBar1 */
     if (sample == CaloCell_ID::TileBar2) {
       double radius2 = 0;
-      Amg::Transform3D* pos2 = new Amg::Transform3D(Trk::s_idTransform);
+      auto  pos2 = Amg::Transform3D(Trk::s_idTransform);
       result = this->get_cylinder_surface(
         sample, side, pos2, radius, hphi, hlen, depth, calo_dd);
-      delete pos2;
       result = this->get_cylinder_surface(CaloCell_ID::TileBar1,
                                           side,
-                                          pos.get(),
+                                          pos,
                                           radius2,
                                           hphi,
                                           hlen,
@@ -201,7 +197,7 @@ CaloSurfaceBuilder::CreateUserSurface(const CaloCell_ID::CaloSample sample,
                                           calo_dd);
     } else {
       result = this->get_cylinder_surface(
-        sample, side, pos.get(), radius, hphi, hlen, depth, calo_dd);
+        sample, side, pos, radius, hphi, hlen, depth, calo_dd);
     }
     if (!result) {
       return nullptr;
@@ -218,13 +214,13 @@ CaloSurfaceBuilder::CreateUserSurface(const CaloCell_ID::CaloSample sample,
     // for Atlas configuration, avoid to create a hole at phi ~ pi by hphi
     // rounding effects  (the phi range was introduced for the testbeam)
     if (hphi < 0.9 * M_PI) {
-      surf = new Trk::CylinderSurface(*pos, radius, hphi, hlen);
+      surf = new Trk::CylinderSurface(pos, radius, hphi, hlen);
     } else {
-      surf = new Trk::CylinderSurface(*pos, radius, hlen);
+      surf = new Trk::CylinderSurface(pos, radius, hlen);
     }
   } else {
     bool result = this->get_disk_surface(
-      sample, side, pos.get(), z, rmin, rmax, hphi, depth, calo_dd);
+      sample, side, pos, z, rmin, rmax, hphi, depth, calo_dd);
     if (!result) {
       return nullptr;
     }
@@ -233,16 +229,16 @@ CaloSurfaceBuilder::CreateUserSurface(const CaloCell_ID::CaloSample sample,
 
     if (!tile && !HEC3) {
       betterz = m_calodepth->radius(sample, etaCaloLocal, 0., calo_dd);
-      z = offset + betterz - (*pos)(2, 3);
+      z = offset + betterz - (pos)(2, 3);
       Amg::Translation3D vec(0., 0., z);
-      *pos = (*pos) * vec;
+      pos = (pos) * vec;
     }
     // for Atlas configuration, avoid to create a hole a phi ~ pi by hphi
     // rounding effects. the phi range was introduced for the testbeam
     if (hphi < 0.9 * M_PI) {
-      surf = new Trk::DiscSurface(*pos, rmin, rmax, hphi);
+      surf = new Trk::DiscSurface(pos, rmin, rmax, hphi);
     } else {
-      surf = new Trk::DiscSurface(*pos, rmin, rmax);
+      surf = new Trk::DiscSurface(pos, rmin, rmax);
     }
   }
 
@@ -266,9 +262,7 @@ CaloSurfaceBuilder::CreateLastSurface(const CaloCell_ID::CaloSample sample,
       sample == CaloCell_ID::TileGap3)
     tile = true;
 
-  // NB: the Transform3D created here belong to the surface,
-  //     and will be deleted by it
-  auto pos = std::make_unique<Amg::Transform3D>(Trk::s_idTransform);
+  auto pos = Amg::Transform3D(Trk::s_idTransform);
 
   bool result = false;
   double rmin = 0.;
@@ -291,13 +285,12 @@ CaloSurfaceBuilder::CreateLastSurface(const CaloCell_ID::CaloSample sample,
       we'll take only the radius from them, the rest we copy from TileBar1 */
     if (sample == CaloCell_ID::TileBar2) {
       double radius2 = 0;
-      Amg::Transform3D* pos2 = new Amg::Transform3D(Trk::s_idTransform);
+      auto pos2 = Amg::Transform3D(Trk::s_idTransform);
       result = this->get_cylinder_surface(
         sample, side, pos2, radius, hphi, hlen, depth, calo_dd);
-      delete pos2;
       result = this->get_cylinder_surface(CaloCell_ID::TileBar1,
                                           side,
-                                          pos.get(),
+                                          pos,
                                           radius2,
                                           hphi,
                                           hlen,
@@ -306,7 +299,7 @@ CaloSurfaceBuilder::CreateLastSurface(const CaloCell_ID::CaloSample sample,
     } else {
 
       result = this->get_cylinder_surface(
-        sample, side, pos.get(), radius, hphi, hlen, depth, calo_dd);
+        sample, side, pos, radius, hphi, hlen, depth, calo_dd);
     }
     if (!result) {
       return nullptr;
@@ -335,15 +328,15 @@ CaloSurfaceBuilder::CreateLastSurface(const CaloCell_ID::CaloSample sample,
       }
 
       if (hphi < 0.9 * M_PI) {
-        return surf = new Trk::CylinderSurface(*pos, radius, hphi, hlen);
+        return surf = new Trk::CylinderSurface(pos, radius, hphi, hlen);
       } else {
-        return surf = new Trk::CylinderSurface(*pos, radius, hlen);
+        return surf = new Trk::CylinderSurface(pos, radius, hlen);
       }
     }
   } else if (sample == CaloCell_ID::TileGap3 || sample == CaloCell_ID::HEC3) {
 
     bool result = this->get_disk_surface(
-      sample, side, pos.get(), z, rmin, rmax, hphi, depth, calo_dd);
+      sample, side, pos, z, rmin, rmax, hphi, depth, calo_dd);
     if (!result) {
       return nullptr;
     }
@@ -366,17 +359,17 @@ CaloSurfaceBuilder::CreateLastSurface(const CaloCell_ID::CaloSample sample,
       }
     }
 
-    z = offset + zend - (*pos)(2, 3);
+    z = offset + zend - (pos)(2, 3);
 
     Amg::Translation3D vec(0., 0., z);
-    *pos = (*pos) * vec;
+    pos = (pos) * vec;
 
     // for Atlas configuration, avoid to create a hole a phi ~ pi by hphi
     // rounding effects. the phi range was introduced for the testbeam
     if (hphi < 0.9 * M_PI) {
-      return new Trk::DiscSurface(*pos, rmin, rmax, hphi);
+      return new Trk::DiscSurface(pos, rmin, rmax, hphi);
     } else {
-      return new Trk::DiscSurface(*pos, rmin, rmax);
+      return new Trk::DiscSurface(pos, rmin, rmax);
     }
   } else {
     ATH_MSG_ERROR(
@@ -399,7 +392,7 @@ bool
 CaloSurfaceBuilder::get_cylinder_surface(
   CaloCell_ID::CaloSample sample,
   int side,
-  Amg::Transform3D* htrans,
+  Amg::Transform3D& htrans,
   double& radius,
   double& hphi,
   double& hlength,
@@ -471,7 +464,7 @@ CaloSurfaceBuilder::get_cylinder_surface(
 bool
 CaloSurfaceBuilder::get_disk_surface(CaloCell_ID::CaloSample sample,
                                      int side,
-                                     Amg::Transform3D* htrans,
+                                     Amg::Transform3D& htrans,
                                      double& z,
                                      double& rmin,
                                      double& rmax,
@@ -533,21 +526,21 @@ CaloSurfaceBuilder::get_disk_surface(CaloCell_ID::CaloSample sample,
     rmin = 0.;
   }
   // Fix the z ( convention is different in Calo's and Tracking )
-  Amg::Translation3D vec(0., 0., z - (*htrans)(2, 3));
-  *htrans = (*htrans) * vec;
+  Amg::Translation3D vec(0., 0., z - (htrans)(2, 3));
+  htrans = (htrans) * vec;
   return result;
 }
 
 bool
 CaloSurfaceBuilder::get_cylinder_surface(CaloSubdetNames::ALIGNVOL alvol,
-                                         Amg::Transform3D* htrans,
+                                         Amg::Transform3D& htrans,
                                          double& hphi,
                                          std::vector<double>& radius,
                                          std::vector<double>& depth,
                                          std::vector<double>& hlength) const
 {
   bool result = m_lar_simplegeom->get_cylinder_surface(
-    alvol, *htrans, hphi, radius, depth, hlength);
+    alvol, htrans, hphi, radius, depth, hlength);
 
   // Shift the POS/NEG sides  ( htrans convention is different in Calo's and
   // Tracking )
@@ -556,16 +549,16 @@ CaloSurfaceBuilder::get_cylinder_surface(CaloSubdetNames::ALIGNVOL alvol,
   if (alvol == CaloSubdetNames::EMB_POS ||
       alvol == CaloSubdetNames::PRESAMPLER_B_POS) {
     result = m_lar_simplegeom->get_cylinder_surface(
-      alvol, *htrans, hphi, radius, depth, hlength);
+      alvol, htrans, hphi, radius, depth, hlength);
     Amg::Translation3D vec(0., 0., hlength[0]);
-    *htrans = (*htrans) * vec;
+    htrans = (htrans) * vec;
     return result;
   } else if (alvol == CaloSubdetNames::EMB_NEG ||
              alvol == CaloSubdetNames::PRESAMPLER_B_NEG) {
     result = m_lar_simplegeom->get_cylinder_surface(
-      alvol, *htrans, hphi, radius, depth, hlength);
+      alvol, htrans, hphi, radius, depth, hlength);
     Amg::Translation3D vec(0., 0., -1. * hlength[0]);
-    *htrans = (*htrans) * vec;
+    htrans = (htrans) * vec;
     return result;
   }
 
@@ -574,7 +567,7 @@ CaloSurfaceBuilder::get_cylinder_surface(CaloSubdetNames::ALIGNVOL alvol,
 
 bool
 CaloSurfaceBuilder::get_disk_surface(CaloSubdetNames::ALIGNVOL alvol,
-                                     Amg::Transform3D* htrans,
+                                     Amg::Transform3D& htrans,
                                      double& hphi,
                                      std::vector<double>& z,
                                      std::vector<double>& depth,
@@ -582,7 +575,7 @@ CaloSurfaceBuilder::get_disk_surface(CaloSubdetNames::ALIGNVOL alvol,
                                      std::vector<double>& rmax) const
 {
   bool result = m_lar_simplegeom->get_disk_surface(
-    alvol, *htrans, hphi, z, depth, rmin, rmax);
+    alvol, htrans, hphi, z, depth, rmin, rmax);
 
   // Fix the z ( htrans convention is different in Calo's and Tracking ) ?
   //   = left to the CreateDDEClayer method, because z is a vector => 1 fix per

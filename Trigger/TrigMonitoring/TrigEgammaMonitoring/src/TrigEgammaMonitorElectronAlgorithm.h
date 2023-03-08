@@ -55,7 +55,7 @@ class TrigEgammaMonitorElectronAlgorithm: public TrigEgammaMonitorAnalysisAlgori
     Gaudi::Property<bool> m_rmCrack{ this, "RemoveCrack", true};
     /*! Event Wise offline ElectronContainer Access and end iterator */
     SG::ReadHandleKey<xAOD::ElectronContainer> m_offElectronKey{ this, "ElectronKey", "Electrons", ""};
-    SG::ReadDecorHandleKey<xAOD::EventInfo> m_eventInfoKey{this, "LArStatusFlag", "EventInfo.larFlag", "Key for EventInfo object"};
+    SG::ReadDecorHandleKey<xAOD::EventInfo> m_eventInfoDecorKey{this, "LArStatusFlag", "EventInfo.larFlags", "Key for EventInfo object"}; //To get data-dependencies right
     
 };
 

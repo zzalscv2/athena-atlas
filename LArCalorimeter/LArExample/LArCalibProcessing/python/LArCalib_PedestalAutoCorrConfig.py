@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory 
 
@@ -37,14 +37,23 @@ def LArPedestalAutoCorrCfg(flags):
 
     else:   
        digKey="SC"
-       theLArLATOMEDecoder = CompFactory.LArLATOMEDecoder("LArLATOMEDecoder",DumpFile = '',RawDataFile = '')
-       result.addEventAlgo(CompFactory.LArRawSCDataReadingAlg(adcCollKey = digKey, adcBasCollKey = "", etCollKey = "",
-                                                               etIdCollKey = "", LATOMEDecoder = theLArLATOMEDecoder))
+       theLArLATOMEDecoder = CompFactory.LArLATOMEDecoder("LArLATOMEDecoder",
+                                                           IgnoreBarrelChannels = flags.LArCalib.SCIgnoreBarrelChannels,
+                                                           IgnoreEndcapChannels = flags.LArCalib.SCIgnoreEndcapChannels)
 
-    if flags.LArCalib.Input.isRawData:
-       result.addEventAlgo(CompFactory.LArDigitsAccumulator("LArDigitsAccumulator", KeyList = [digKey], 
+       if flags.LArCalib.Input.isRawData:
+          result.addEventAlgo(CompFactory.LArRawSCDataReadingAlg(adcCollKey = digKey, adcBasCollKey = "", etCollKey = "",
+                                                               etIdCollKey = "", LATOMEDecoder = theLArLATOMEDecoder))
+          result.addEventAlgo(CompFactory.LArDigitsAccumulator("LArDigitsAccumulator", KeyList = [digKey], 
                                                              LArAccuDigitContainerName = "", NTriggersPerStep = 100,
                                                              isSC = flags.LArCalib.isSC, DropPercentTrig = 20))
+       else:   
+          # this needs also legacy  maps
+          from LArCabling.LArCablingConfig import LArCalibIdMappingCfg,LArOnOffIdMappingCfg
+          result.merge(LArOnOffIdMappingCfg(flags))
+          result.merge(LArCalibIdMappingCfg(flags))
+
+          result.addEventAlgo(CompFactory.LArRawSCCalibDataReadingAlg(LArSCAccDigitKey = digKey, LATOMEDecoder = theLArLATOMEDecoder))
 
     LArPedACBuilder=CompFactory.LArPedestalAutoCorrBuilder()
     LArPedACBuilder.KeyList         = [digKey,]
@@ -98,7 +107,9 @@ def LArPedestalAutoCorrCfg(flags):
                                         outputFile=flags.LArCalib.Output.POOLFile,
                                         ObjectList=["LArPedestalComplete#Pedestal#"+flags.LArCalib.Pedestal.Folder,
                                                     "LArAutoCorrComplete#LArAutoCorr#"+flags.LArCalib.AutoCorr.Folder],
-                                        IOVTagList=[pedestalTag,autocorrTag]
+                                        IOVTagList=[pedestalTag,autocorrTag],
+                                        Run1=flags.LArCalib.IOVStart,
+                                        Run2=flags.LArCalib.IOVEnd
                                     ))
 
     #RegistrationSvc    
@@ -208,20 +219,23 @@ def LArPedestalAutoCorrCfg(flags):
 if __name__ == "__main__":
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from LArCalibProcessing.LArCalibConfigFlags import addLArCalibFlags
+    ConfigFlags=initConfigFlags()
     addLArCalibFlags(ConfigFlags)
 
     ConfigFlags.LArCalib.Input.Dir = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/LArCalibProcessing"
+    
     ConfigFlags.LArCalib.Input.Type="calibration_LArElec-Pedestal"
-    ConfigFlags.LArCalib.Input.RunNumbers=[174585,]
-
+    ConfigFlags.LArCalib.Input.RunNumbers=[441236,]
+    
     ConfigFlags.Input.Files=ConfigFlags.LArCalib.Input.Files
     
-    ConfigFlags.LArCalib.Output.ROOTFile="ped.root"
-
+    ConfigFlags.LArCalib.Output.ROOTFile="larpededest.root"
+    ConfigFlags.LArCalib.Output.POOLFile="larpedestal.pool.root"
     ConfigFlags.IOVDb.DBConnection="sqlite://;schema=output.sqlite;dbname=CONDBR2"
-    ConfigFlags.IOVDb.GlobalTag="LARCALIB-000-02"
+    ConfigFlags.IOVDb.GlobalTag="LARCALIB-RUN2-00"
+    ConfigFlags.IOVDb.DatabaseInstance="CONDBR2"
 
     ConfigFlags.fillFromArgs()
     ConfigFlags.lock()

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -70,7 +70,7 @@ protected:
 
     if (event->type()==QEvent::ChildAdded) {
       //Maybe the user added a widget, so update the event filters (todo: test that it works):
-      foreach(QObject* c, watched->children()) {
+      for (QObject* c :  watched->children()) {
 	      installEventFilterRecursively(c,true);
 	      installEventFilterRecursively(c);
       }
@@ -100,7 +100,7 @@ protected:
       child->removeEventFilter(this);
     else
       child->installEventFilter(this);
-    foreach(QObject* c, child->children())
+    for (QObject* c :  child->children())
       installEventFilterRecursively(c,remove);
   }
 };
@@ -284,7 +284,7 @@ void VP1DockWidget::contextMenuEvent ( QContextMenuEvent * event )
     menu_movechan.addAction("No other tabs available")->setEnabled(false);
   } else {
     QString thistab = m_d->tabmanager->channelToTab(m_d->channelwidget);
-    foreach (QString tab, tablist) {
+    for (QString tab :  tablist) {
       if (tab!=thistab)
 	menu_movechan.addAction(tab)->setData("MOVECHAN");
     }

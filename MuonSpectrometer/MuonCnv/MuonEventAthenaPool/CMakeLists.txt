@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( MuonEventAthenaPool )
@@ -13,7 +13,7 @@ atlas_add_tpcnv_library( MuonEventAthenaPoolLib
    PUBLIC_HEADERS MuonEventAthenaPool
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} AthenaPoolUtilities
-   AtlasSealCLHEP MuonRDO MuonRIO_OnTrack MuonSegment AthAllocators
+   MuonRDO MuonRIO_OnTrack MuonSegment AthAllocators
    AthContainers AthenaKernel StoreGateLib AthenaPoolCnvSvcLib
    Identifier GaudiKernel CscCalibEvent MuonEventTPCnv RPC_CondCablingLib
    MuonReadoutGeometry MuonDigitContainer MuonIdHelpersLib MuonChamberT0s
@@ -54,7 +54,7 @@ atlas_add_poolcnv_library( MuonEventAthenaPoolPoolCnv
                         Muon::NSW_PadTriggerDataContainer Muon::NSW_TrigRawDataContainer
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} AthenaPoolUtilities
-                  AtlasSealCLHEP MuonRDO MuonRIO_OnTrack MuonSegment
+                  MuonRDO MuonRIO_OnTrack MuonSegment
                   AthAllocators AthContainers AthenaKernel StoreGateLib
                   AthenaPoolCnvSvcLib Identifier GaudiKernel
                   CscCalibEvent MuonEventTPCnv RPC_CondCablingLib

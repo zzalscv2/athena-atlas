@@ -147,7 +147,7 @@ class TrigTauMonitorAlgorithm : public AthMonitorAlgorithm {
     }
   };
 
-  SG::ReadDecorHandleKey<xAOD::EventInfo> m_eventInfoKey{this, "LArStatusFlag", "EventInfo.larFlag", "Key for EventInfo object"};
+  SG::ReadDecorHandleKey<xAOD::EventInfo> m_eventInfoDecorKey{this, "LArStatusFlag", "EventInfo.larFlags", "Key for EventInfo object"}; //To get data-dependencies right
   SG::ReadHandleKey< xAOD::TauJetContainer> m_offlineTauJetKey { this, "offlineTauJetKey", "TauJets", "Offline taujet container key" };
   SG::ReadHandleKey<xAOD::ElectronContainer> m_offlineElectronKey{ this, "offlineElectronKey", "Electrons", "Offline Electron key for tau-e chains"};
   SG::ReadHandleKey<xAOD::MuonContainer> m_offlineMuonKey{ this, "offlineMuonKey", "Muons", "Offline Muon key for tau-mu chains"};
@@ -157,7 +157,6 @@ class TrigTauMonitorAlgorithm : public AthMonitorAlgorithm {
   SG::ReadHandleKey< xAOD::jFexTauRoIContainer>  m_phase1l1jTauRoIKey {this, "phase1l1jTauRoIKey", "L1_jFexTauRoI","jTau Phase1 L1 RoI key"};
   SG::ReadHandleKey< xAOD::TauJetContainer> m_hltTauJetKey { this, "hltTauJetKey", "HLT_TrigTauRecMerged_MVA", "HLT taujet container key" };
   SG::ReadHandleKey< xAOD::TauJetContainer> m_hltTauJetCaloMVAOnlyKey { this, "hltTauJetCaloMVAOnlyKey", "HLT_TrigTauRecMerged_CaloMVAOnly", "HLT taujet container key" };
-  SG::ReadHandleKey< xAOD::JetContainer> m_hltSeedJetKey { this, "hltSeedJetKey", "HLT_jet_seed", "HLT jet seed container key" };
   SG::ReadHandleKey< xAOD::TruthParticleContainer> m_truthParticleKey { this, "truthParticleKey", "TruthParticles", "TruthParticleContainer key" };
 
 };

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 ################################################################################
 #
@@ -15,27 +15,13 @@ from AthenaConfiguration.Enums import ProductionStep
 from AthenaCommon.SystemOfUnits import GeV, MeV, deg
 from tauRec.tauRecFlags import tauFlags
 
-cached_instances = {}
-
-sPrefix = 'tauRec_'
-bAODmode = False
-
-# standard container names
-_DefaultVertexContainer = "PrimaryVertices"
-_DefaultTrackContainer = "InDetTrackParticles"
-_DefaultLargeD0TrackContainer = "InDetLargeD0TrackParticles"
-
-######################################################################## 
-def setPrefix(prefix): 
-    global sPrefix 
-    sPrefix = prefix 
 
 ########################################################################
 # JetSeedBuilder
 @AccumulatorCache
 def JetSeedBuilderCfg(flags):
     result = ComponentAccumulator()
-    _name = sPrefix + 'JetSeedBuilder'
+    _name = flags.Tau.ActiveConfig.prefix + 'JetSeedBuilder'
 
     JetSeedBuilder = CompFactory.getComp("JetSeedBuilder")
     JetSeedBuilder = JetSeedBuilder(name = _name)
@@ -45,20 +31,20 @@ def JetSeedBuilderCfg(flags):
 
 #########################################################################
 def TVAToolCfg(flags):
-    _name = sPrefix + "TVATool"
+    _name = flags.Tau.ActiveConfig.prefix + "TVATool"
 
     from TrackVertexAssociationTool.TTVAToolConfig import TTVAToolCfg as _TTVAToolCfg
     # returns a component accumulator instance, also sets UsedInFitDecorator
     TVAToolCA = _TTVAToolCfg(flags, _name,
                            WorkingPoint = "Nonprompt_Hard_MaxWeight",
-                           TrackContName = flags.Tau.TrackCollection,
-                           VertexContName = flags.Tau.VertexCollection)
+                           TrackContName = flags.Tau.ActiveConfig.TrackCollection,
+                           VertexContName = flags.Tau.ActiveConfig.VertexCollection)
     return TVAToolCA
 
 #########################################################################
 def TauVertexFinderCfg(flags):
     result = ComponentAccumulator()
-    _name = sPrefix + 'TauVertexFinder'
+    _name = flags.Tau.ActiveConfig.prefix + 'TauVertexFinder'
 
     from InDetConfig.InDetTrackSelectionToolConfig import Tau_InDetTrackSelectionToolForTJVACfg
 
@@ -70,8 +56,8 @@ def TauVertexFinderCfg(flags):
                                       UseTJVA_Tiebreak        = flags.Tau.doTJVATiebreak,
                                       AssociatedTracks="GhostTrack", # OK??
                                       InDetTrackSelectionToolForTJVA = result.popToolsAndMerge(Tau_InDetTrackSelectionToolForTJVACfg(flags)),
-                                      Key_trackPartInputContainer= flags.Tau.TrackCollection,
-                                      Key_vertexInputContainer = flags.Tau.VertexCollection,
+                                      Key_trackPartInputContainer= flags.Tau.ActiveConfig.TrackCollection,
+                                      Key_vertexInputContainer = flags.Tau.ActiveConfig.VertexCollection,
                                       TVATool = result.popToolsAndMerge(TVAToolCfg(flags)) )
 
     result.setPrivateTools(TauVertexFinder)
@@ -81,7 +67,7 @@ def TauVertexFinderCfg(flags):
 # Tau energy calibration and tau axis direction
 def TauAxisCfg(flags):
     result = ComponentAccumulator()
-    _name = sPrefix + 'TauAxis'
+    _name = flags.Tau.ActiveConfig.prefix + 'TauAxis'
 
     TauAxisSetter = CompFactory.getComp("TauAxisSetter")
     TauAxisSetter = TauAxisSetter(  name = _name,
@@ -106,7 +92,7 @@ def getParticleCache(flags):
 # Tau-Track Association
 def TauTrackFinderCfg(flags):
     result = ComponentAccumulator()
-    _name = sPrefix + 'TauTrackFinder'
+    _name = flags.Tau.ActiveConfig.prefix + 'TauTrackFinder'
 
     # BeamSpot Conditions
     from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
@@ -128,9 +114,9 @@ def TauTrackFinderCfg(flags):
                                     removeDuplicateCoreTracks = flags.Tau.RemoveDupeCoreTracks,
                                     useGhostTracks = flags.Tau.useGhostTracks,
                                     ghostTrackDR = flags.Tau.ghostTrackDR,
-                                    Key_jetContainer = (flags.Tau.SeedJetCollection if flags.Tau.useGhostTracks else ""),
-                                    Key_trackPartInputContainer = flags.Tau.TrackCollection,
-                                    Key_LargeD0TrackInputContainer = (flags.Tau.LargeD0TrackContainer if flags.Tau.associateLRT else ""),
+                                    Key_jetContainer = (flags.Tau.ActiveConfig.SeedJetCollection if flags.Tau.useGhostTracks else ""),
+                                    Key_trackPartInputContainer = flags.Tau.ActiveConfig.TrackCollection,
+                                    Key_LargeD0TrackInputContainer = (flags.Tau.ActiveConfig.LargeD0TrackContainer if flags.Tau.associateLRT else ""),
                                     TrackToVertexIPEstimator = result.popToolsAndMerge(AtlasTrackToVertexIPEstimatorCfg(flags)) )
                                     #maxDeltaZ0wrtLeadTrk = 2, #in mm
                                     #removeTracksOutsideZ0wrtLeadTrk = True
@@ -142,7 +128,7 @@ def TauTrackFinderCfg(flags):
 # Associate the cluster in jet constituents to the tau candidate
 def TauClusterFinderCfg(flags):
     result = ComponentAccumulator()
-    _name = sPrefix + 'TauClusterFinder'
+    _name = flags.Tau.ActiveConfig.prefix + 'TauClusterFinder'
 
 
     TauClusterFinder = CompFactory.getComp("TauClusterFinder")
@@ -155,11 +141,11 @@ def TauClusterFinderCfg(flags):
 ########################################################################
 def TauVertexedClusterDecoratorCfg(flags):
     result = ComponentAccumulator()
-    _name = sPrefix + 'TauVertexedClusterDecorator'
+    _name = flags.Tau.ActiveConfig.prefix + 'TauVertexedClusterDecorator'
 
     TauVertexedClusterDecorator = CompFactory.getComp("TauVertexedClusterDecorator")
     myTauVertexedClusterDecorator = TauVertexedClusterDecorator(name = _name,
-                                                                SeedJet = flags.Tau.SeedJetCollection)
+                                                                SeedJet = flags.Tau.ActiveConfig.SeedJetCollection)
 
     result.setPrivateTools(myTauVertexedClusterDecorator)
     return result
@@ -167,7 +153,7 @@ def TauVertexedClusterDecoratorCfg(flags):
 ########################################################################
 def TauTrackRNNCfg(flags):
     result = ComponentAccumulator()
-    _name = sPrefix + 'TauTrackRNNClassifier'
+    _name = flags.Tau.ActiveConfig.prefix + 'TauTrackRNNClassifier'
 
     TrackRNN = CompFactory.tauRecTools.TrackRNN
     _RNN = TrackRNN(name = _name + "_TrackRNN",
@@ -180,7 +166,7 @@ def TauTrackRNNCfg(flags):
 ########################################################################
 def TauTrackRNNClassifierCfg(flags):
     result = ComponentAccumulator()
-    _name = sPrefix + 'TauTrackRNNClassifier'
+    _name = flags.Tau.ActiveConfig.prefix + 'TauTrackRNNClassifier'
 
     # create tool alg
     TauTrackRNNClassifier = CompFactory.tauRecTools.TauTrackRNNClassifier
@@ -201,31 +187,26 @@ def TauTrackRNNClassifierCfg(flags):
 
 ########################################################################
 # Tau energy calibration
-def EnergyCalibrationLCCfg(flags, correctEnergy=True, correctAxis=False, postfix=''):
+def EnergyCalibrationLCCfg(flags):
     result = ComponentAccumulator()
-    _name = sPrefix +'EnergyCalibrationLC' + postfix
+    _name = flags.Tau.ActiveConfig.prefix +'EnergyCalibrationLC'
 
-    TauCalibrateLC=CompFactory.getComp("TauCalibrateLC")
+    TauCalibrateLC = CompFactory.getComp("TauCalibrateLC")
     TauCalibrateLC = TauCalibrateLC(name = _name,
                                     calibrationFile = tauFlags.tauRecCalibrateLCConfig(),
-                                    Key_vertexInputContainer = flags.Tau.VertexCollection)
+                                    Key_vertexInputContainer = flags.Tau.ActiveConfig.VertexCollection)
             
     result.setPrivateTools(TauCalibrateLC)
     return result
 
 ########################################################################
 # Tau cell variables calculation
-def CellVariablesCfg(flags, cellConeSize=0.2, prefix=''):
+def CellVariablesCfg(flags):
     result = ComponentAccumulator()
-    #if prefix is not given, take global one 
-    if not prefix: 
-        prefix=sPrefix 
-    _name = prefix + 'CellVariables'
+    _name = flags.Tau.ActiveConfig.prefix + 'CellVariables'
 
     TauCellVariables = CompFactory.getComp("TauCellVariables")
     TauCellVariables = TauCellVariables(name = _name,
-                                        StripEthreshold = 0.2*GeV,
-                                        CellCone = cellConeSize,
                                         VertexCorrection = True)
 
     result.setPrivateTools(TauCellVariables)
@@ -235,10 +216,7 @@ def CellVariablesCfg(flags, cellConeSize=0.2, prefix=''):
 # ele veto variables
 def ElectronVetoVarsCfg(flags):
     result = ComponentAccumulator()
-    _name = sPrefix + 'TauElectronVetoVars'
-    
-    if _name in cached_instances:
-        return cached_instances[_name]
+    _name = flags.Tau.ActiveConfig.prefix + 'TauElectronVetoVars'
     
     from TrackToCalo.TrackToCaloConfig import ParticleCaloExtensionToolCfg
 
@@ -310,7 +288,7 @@ def CellWeightToolCfg(flags):
 # Photon Shot Finder
 def TauShotFinderCfg(flags):
     result = ComponentAccumulator()
-    _name = sPrefix + 'TauShotFinder'
+    _name = flags.Tau.ActiveConfig.prefix + 'TauShotFinder'
 
     shotPtCut_1Photon = flags.Tau.shotPtCut_1Photon
     shotPtCut_2Photons = flags.Tau.shotPtCut_2Photons
@@ -337,7 +315,7 @@ def TauShotFinderCfg(flags):
 # Cluster finder for Pi0 algo
 def Pi0ClusterFinderCfg(flags):
     result = ComponentAccumulator()
-    _name = sPrefix + 'Pi0ClusterFinder'
+    _name = flags.Tau.ActiveConfig.prefix + 'Pi0ClusterFinder'
 
     TauPi0CreateROI = CompFactory.getComp("TauPi0CreateROI")
     
@@ -351,7 +329,7 @@ def Pi0ClusterFinderCfg(flags):
 # Cell finalizer tool for BuildAlg
 def TauCellFinalizerCfg(flags):
     result = ComponentAccumulator()
-    _name = sPrefix + 'tauPi0CellContainerFinalizer'
+    _name = flags.Tau.ActiveConfig.prefix + 'tauPi0CellContainerFinalizer'
 
     CaloCellContainerFinalizerTool = CompFactory.getComp("CaloCellContainerFinalizerTool")
     TauCellContainerFinalizer = CaloCellContainerFinalizerTool(name=_name)
@@ -365,7 +343,7 @@ def TauCellFinalizerCfg(flags):
 
 def TauCaloLCClassificationCfg(flags):
     result = ComponentAccumulator()
-    _name = sPrefix + 'LCClassify'
+    _name = flags.Tau.ActiveConfig.prefix + 'LCClassify'
 
     CaloLCClassificationTool = CompFactory.getComp("CaloLCClassificationTool")
     LCClassify = CaloLCClassificationTool(_name)
@@ -382,7 +360,7 @@ def TauCaloLCClassificationCfg(flags):
 
 def TauCaloLCWeightCfg(flags):
     result = ComponentAccumulator()
-    _name = sPrefix + 'CaloLCWeightTool'
+    _name = flags.Tau.ActiveConfig.prefix + 'CaloLCWeightTool'
 
     # Schedule total noise cond alg
     from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
@@ -401,7 +379,7 @@ def TauCaloLCWeightCfg(flags):
 
 def TauCaloLCOutOfClusterCfg(flags):
     result = ComponentAccumulator()
-    _name = sPrefix + 'CaloLCOutOfClusterTool'
+    _name = flags.Tau.ActiveConfig.prefix + 'CaloLCOutOfClusterTool'
 
     CaloLCOutOfClusterTool = CompFactory.getComp("CaloLCOutOfClusterTool")
     LCOut = CaloLCOutOfClusterTool(_name)
@@ -414,7 +392,7 @@ def TauCaloLCOutOfClusterCfg(flags):
 
 def TauCaloLCOutPi0Cfg(flags):
     result = ComponentAccumulator()
-    _name = sPrefix + 'LCOutPi0'
+    _name = flags.Tau.ActiveConfig.prefix + 'LCOutPi0'
 
     CaloLCOutOfClusterTool = CompFactory.getComp("CaloLCOutOfClusterTool")
     LCOutPi0 = CaloLCOutOfClusterTool(_name)
@@ -427,7 +405,7 @@ def TauCaloLCOutPi0Cfg(flags):
 
 def TauCaloLCDeadMaterialCfg(flags):
     result = ComponentAccumulator()
-    _name = sPrefix + 'CaloLCDeadMaterialTool'
+    _name = flags.Tau.ActiveConfig.prefix + 'CaloLCDeadMaterialTool'
 
     CaloLCDeadMaterialTool = CompFactory.getComp("CaloLCDeadMaterialTool")
     LCDeadMaterial = CaloLCDeadMaterialTool(_name)
@@ -442,7 +420,7 @@ def TauCaloLCDeadMaterialCfg(flags):
 
 def TauCaloClusterLocalCalibCfg(flags):
     result = ComponentAccumulator()
-    _name = sPrefix + 'CaloLocalCalib'
+    _name = flags.Tau.ActiveConfig.prefix + 'CaloLocalCalib'
 
     CaloClusterLocalCalib = CompFactory.getComp("CaloClusterLocalCalib")
     LocalCalib =  CaloClusterLocalCalib(_name)
@@ -456,7 +434,7 @@ def TauCaloClusterLocalCalibCfg(flags):
 
 def TauCaloOOCCalibCfg(flags):
     result = ComponentAccumulator()
-    _name = sPrefix + 'OOCCalibTool'
+    _name = flags.Tau.ActiveConfig.prefix + 'OOCCalibTool'
 
     CaloClusterLocalCalib = CompFactory.getComp("CaloClusterLocalCalib")
     OOCCalib   = CaloClusterLocalCalib (_name)
@@ -469,7 +447,7 @@ def TauCaloOOCCalibCfg(flags):
 
 def TauCaloDMCalibCfg(flags):
     result = ComponentAccumulator()
-    _name = sPrefix + 'DMCalib'
+    _name = flags.Tau.ActiveConfig.prefix + 'DMCalib'
 
     CaloClusterLocalCalib = CompFactory.getComp("CaloClusterLocalCalib")
     DMCalib =  CaloClusterLocalCalib(_name)
@@ -482,7 +460,7 @@ def TauCaloDMCalibCfg(flags):
 
 def TauCaloOOCPi0CalibCfg(flags):
     result = ComponentAccumulator()
-    _name = sPrefix + 'OOCPi0CalibTool'
+    _name = flags.Tau.ActiveConfig.prefix + 'OOCPi0CalibTool'
 
     CaloClusterLocalCalib = CompFactory.getComp("CaloClusterLocalCalib")
     OOCPi0Calib   = CaloClusterLocalCalib (_name)
@@ -495,7 +473,7 @@ def TauCaloOOCPi0CalibCfg(flags):
 
 def TauCaloClusterCellWeightCalibCfg(flags):
     result = ComponentAccumulator()
-    _name = sPrefix + 'CellWeights'
+    _name = flags.Tau.ActiveConfig.prefix + 'CellWeights'
 
     CaloClusterCellWeightCalib = CompFactory.getComp("CaloClusterCellWeightCalib")
     CellWeights = CaloClusterCellWeightCalib(_name)
@@ -511,7 +489,7 @@ def TauCaloClusterCellWeightCalibCfg(flags):
 
 def TauCaloTopoClusterMakerCfg(flags):
     result = ComponentAccumulator()
-    _name = sPrefix + 'Pi0TopoClusterMaker'
+    _name = flags.Tau.ActiveConfig.prefix + 'Pi0TopoClusterMaker'
 
     # Schedule total noise cond alg
     from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
@@ -522,7 +500,7 @@ def TauCaloTopoClusterMakerCfg(flags):
     CaloTopoClusterMaker = CompFactory.getComp("CaloTopoClusterMaker")
     TopoClusterForTaus = CaloTopoClusterMaker(_name)
 
-    TopoClusterForTaus.CellsName = "TauCommonPi0Cells"
+    TopoClusterForTaus.CellsName = flags.Tau.ActiveConfig.TauCommonPi0Cells
     TopoClusterForTaus.CalorimeterNames=["LAREM"]
     TopoClusterForTaus.SeedSamplingNames = ["PreSamplerB", "EMB1", "EMB2", "PreSamplerE", "EME1", "EME2"]
     TopoClusterForTaus.NeighborOption                    = "super3D"
@@ -547,7 +525,7 @@ def TauCaloTopoClusterMakerCfg(flags):
 def TauCaloTopoClusterSplitterCfg(flags):
 
     result = ComponentAccumulator()
-    _name = sPrefix + 'Pi0TopoClusterSplitter'
+    _name = flags.Tau.ActiveConfig.prefix + 'Pi0TopoClusterSplitter'
 
     CaloTopoClusterSplitter = CompFactory.getComp("CaloTopoClusterSplitter")
     TopoSplitterForTaus = CaloTopoClusterSplitter(_name)
@@ -570,7 +548,7 @@ def TauCaloTopoClusterSplitterCfg(flags):
 
 def TauCaloClusterMomentsMakerCfg(flags):
     result = ComponentAccumulator()
-    _name = sPrefix + 'Pi0TopoMoments'
+    _name = flags.Tau.ActiveConfig.prefix + 'Pi0TopoMoments'
 
     # Schedule total noise cond alg
     from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
@@ -610,7 +588,7 @@ def TauCaloClusterMomentsMakerCfg(flags):
 
 def TauCaloClusterBadChannelCfg(flags):
     result = ComponentAccumulator()
-    _name = sPrefix + 'CaloClusterBadChannelList'
+    _name = flags.Tau.ActiveConfig.prefix + 'CaloClusterBadChannelList'
 
     CaloClusterBadChannelListCorr = CompFactory.getComp("CaloClusterBadChannelList")
     BadChannelListCorrForTaus = CaloClusterBadChannelListCorr(_name)
@@ -618,78 +596,11 @@ def TauCaloClusterBadChannelCfg(flags):
     result.setPrivateTools(BadChannelListCorrForTaus)
     return result
 
-########################################################################
-########################################################################
-# Tracking Tools
-########################################################################
-
-########################################################################
-# Tools for Adaptive Vertex Finder
-def TauNewtonTrkDistanceFinderCfg(flags):
-    result = ComponentAccumulator()
-
-    Trk__SeedNewtonTrkDistanceFinder = CompFactory.Trk.SeedNewtonTrkDistanceFinder
-    TauNewtonTrkDistanceFinder = Trk__SeedNewtonTrkDistanceFinder( name = sPrefix+'TauSeedNewtonTrkDistanceFinder')
-
-    result.setPrivateTools(TauNewtonTrkDistanceFinder)
-    return result
-
-def CrossDistancesSeedFinderCfg(flags):
-    result = ComponentAccumulator()
-    _name = 'TauCrossDistancesSeedFinder'
-    
-    Trk__CrossDistancesSeedFinder = CompFactory.Trk.CrossDistancesSeedFinder
-    TauCrossDistancesSeedFinder = Trk__CrossDistancesSeedFinder( name = _name, TrkDistanceFinder=result.popToolsAndMerge(TauNewtonTrkDistanceFinderCfg(flags)) )
-    
-    result.setPrivateTools(TauCrossDistancesSeedFinder)
-    return result
-    
-def ImpactPoint3dEstimatorCfg(flags):
-    result = ComponentAccumulator()
-
-    from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
-    Trk__ImpactPoint3dEstimator = CompFactory.Trk.ImpactPoint3dEstimator
-    AtlasExtrapolator = result.popToolsAndMerge(AtlasExtrapolatorCfg(flags))
-    #This is a public tool, so we explicitly must add it to the ToolSvc
-    result.addPublicTool(AtlasExtrapolator) 
-    TauInDetImpactPoint3dEstimator = Trk__ImpactPoint3dEstimator(name = sPrefix+'TauTrkImpactPoint3dEstimator', Extrapolator = AtlasExtrapolator   )
-
-    result.setPrivateTools(TauInDetImpactPoint3dEstimator)
-    return result
-
-def SequentialVertexSmootherCfg(flags):
-    result = ComponentAccumulator()
-
-    Trk__SequentialVertexSmoother = CompFactory.Trk.SequentialVertexSmoother
-    TauSequentialVertexSmoother = Trk__SequentialVertexSmoother(name = sPrefix+'TauSequentialVertexSmoother')
-
-    result.setPrivateTools(TauSequentialVertexSmoother)
-    return result
-
-########################################################################
-# TauAdaptiveVertexFitter
-def TauAdaptiveVertexFitterCfg(flags):
-    result = ComponentAccumulator()
-    _name = sPrefix + 'TauAdaptiveVertexFitter'
-
-    from TrkConfig.TrkVertexFitterUtilsConfig import TauDetAnnealingMakerCfg, AtlasFullLinearizedTrackFactoryCfg
-
-    Trk__AdaptiveVertexFitter = CompFactory.Trk.AdaptiveVertexFitter
-    TauAdaptiveVertexFitter = Trk__AdaptiveVertexFitter(name = _name,
-                                                        SeedFinder=result.popToolsAndMerge(CrossDistancesSeedFinderCfg(flags)),
-                                                        ImpactPoint3dEstimator=result.popToolsAndMerge(ImpactPoint3dEstimatorCfg(flags)),
-                                                        VertexSmoother=result.popToolsAndMerge(SequentialVertexSmootherCfg(flags)),
-                                                        AnnealingMaker=result.popToolsAndMerge(TauDetAnnealingMakerCfg(flags)),
-                                                        LinearizedTrackFactory=result.popToolsAndMerge(AtlasFullLinearizedTrackFactoryCfg(flags)) )
-
-    result.setPrivateTools(TauAdaptiveVertexFitter)
-    return result
-
 #####################
 # create Pi0 clusters
 def Pi0ClusterCreatorCfg(flags):
     result = ComponentAccumulator()
-    _name = sPrefix + 'Pi0ClusterCreator'
+    _name = flags.Tau.ActiveConfig.prefix + 'Pi0ClusterCreator'
 
     TauPi0ClusterCreator = CompFactory.getComp("TauPi0ClusterCreator")
     TauPi0ClusterCreator = TauPi0ClusterCreator(name = _name)
@@ -701,7 +612,7 @@ def Pi0ClusterCreatorCfg(flags):
 # Set energy of cluster to take care of charged pion energy deposited in the ECAL
 def Pi0ClusterScalerCfg(flags): 
     result = ComponentAccumulator()
-    _name = sPrefix + 'Pi0ClusterScaler'
+    _name = flags.Tau.ActiveConfig.prefix + 'Pi0ClusterScaler'
 
     TauPi0ClusterScaler = CompFactory.getComp("TauPi0ClusterScaler")
     TauPi0ClusterScaler = TauPi0ClusterScaler(name = _name)
@@ -713,7 +624,7 @@ def Pi0ClusterScalerCfg(flags):
 # calculate MVA scores of pi0 clusters
 def Pi0ScoreCalculatorCfg(flags):
     result = ComponentAccumulator()
-    _name = sPrefix + 'Pi0ScoreCalculator'
+    _name = flags.Tau.ActiveConfig.prefix + 'Pi0ScoreCalculator'
 
     TauPi0ScoreCalculator = CompFactory.getComp("TauPi0ScoreCalculator")
     TauPi0ScoreCalculator = TauPi0ScoreCalculator(name = _name,
@@ -726,7 +637,7 @@ def Pi0ScoreCalculatorCfg(flags):
 # select pi0 clusters
 def Pi0SelectorCfg(flags):
     result = ComponentAccumulator()
-    _name = sPrefix + 'Pi0Selector'
+    _name = flags.Tau.ActiveConfig.prefix + 'Pi0Selector'
 
     TauPi0Selector = CompFactory.getComp("TauPi0Selector")
     TauPi0Selector = TauPi0Selector(name = _name,
@@ -741,7 +652,11 @@ def Pi0SelectorCfg(flags):
 # Tau Vertex Variables
 def TauVertexVariablesCfg(flags):
     result = ComponentAccumulator()
-    _name = sPrefix + 'TauVertexVariables'
+    _name = flags.Tau.ActiveConfig.prefix + 'TauVertexVariables'
+
+    from TrkConfig.TrkVertexFittersConfig import TauAdaptiveVertexFitterCfg
+    from TrkConfig.TrkVertexSeedFinderToolsConfig import (
+        CrossDistancesSeedFinderCfg)
 
     TauVertexVariables = CompFactory.getComp("TauVertexVariables")
     TauVertexVariables = TauVertexVariables(  name = _name,
@@ -755,7 +670,7 @@ def TauVertexVariablesCfg(flags):
 # Tau Variables
 def TauCommonCalcVarsCfg(flags):
     result = ComponentAccumulator()
-    _name = sPrefix + 'TauCommonCalcVars'
+    _name = flags.Tau.ActiveConfig.prefix + 'TauCommonCalcVars'
 
     TauCommonCalcVars = CompFactory.getComp("TauCommonCalcVars")
     TauCommonCalcVars = TauCommonCalcVars(name = _name)
@@ -767,7 +682,7 @@ def TauCommonCalcVarsCfg(flags):
 # Tau Variables
 def TauSubstructureCfg(flags):
     result = ComponentAccumulator()
-    _name = sPrefix + 'TauSubstructure'
+    _name = flags.Tau.ActiveConfig.prefix + 'TauSubstructure'
 
     TauSubstructureVariables = CompFactory.getComp("TauSubstructureVariables")
     TauSubstructureVariables = TauSubstructureVariables(  name = _name )
@@ -779,11 +694,11 @@ def TauSubstructureCfg(flags):
 # MvaTESVariableDecorator
 def MvaTESVariableDecoratorCfg(flags):
     result = ComponentAccumulator()
-    _name = sPrefix + 'MvaTESVariableDecorator'
+    _name = flags.Tau.ActiveConfig.prefix + 'MvaTESVariableDecorator'
 
     MvaTESVariableDecorator = CompFactory.getComp("MvaTESVariableDecorator")
     MvaTESVariableDecorator = MvaTESVariableDecorator(name = _name,
-                                                      Key_vertexInputContainer= flags.Tau.VertexCollection,
+                                                      Key_vertexInputContainer= flags.Tau.ActiveConfig.VertexCollection,
                                                       VertexCorrection = True)
     result.setPrivateTools(MvaTESVariableDecorator)
     return result
@@ -792,7 +707,7 @@ def MvaTESVariableDecoratorCfg(flags):
 # MvaTESEvaluator
 def MvaTESEvaluatorCfg(flags):
     result = ComponentAccumulator()
-    _name = sPrefix + 'MvaTESEvaluator'
+    _name = flags.Tau.ActiveConfig.prefix + 'MvaTESEvaluator'
 
     MvaTESEvaluator = CompFactory.getComp("MvaTESEvaluator")
     MvaTESEvaluator = MvaTESEvaluator(name = _name,
@@ -804,7 +719,7 @@ def MvaTESEvaluatorCfg(flags):
 
 def TauIDVarCalculatorCfg(flags):
     result = ComponentAccumulator()
-    _name = sPrefix + 'TauIDVarCalculator'
+    _name = flags.Tau.ActiveConfig.prefix + 'TauIDVarCalculator'
 
     TauIDVarCalculator = CompFactory.getComp("TauIDVarCalculator")    
     myTauIDVarCalculator = TauIDVarCalculator(name=_name,
@@ -815,7 +730,7 @@ def TauIDVarCalculatorCfg(flags):
 
 def TauJetRNNEvaluatorCfg(flags):
     result = ComponentAccumulator()
-    _name = sPrefix + 'TauJetRNN'
+    _name = flags.Tau.ActiveConfig.prefix + 'TauJetRNN'
 
     TauJetRNNEvaluator = CompFactory.getComp("TauJetRNNEvaluator")
     RNNConf = flags.Tau.TauJetRNNConfig
@@ -845,7 +760,7 @@ def TauWPDecoratorJetRNNCfg(flags):
     cppyy.load_library('libxAODTau_cDict')
 
     result = ComponentAccumulator()
-    _name = sPrefix + 'TauWPDecoratorJetRNN'
+    _name = flags.Tau.ActiveConfig.prefix + 'TauWPDecoratorJetRNN'
 
     TauWPDecorator = CompFactory.getComp("TauWPDecorator")
     WPConf = flags.Tau.TauJetRNNWPConfig
@@ -868,9 +783,54 @@ def TauWPDecoratorJetRNNCfg(flags):
     result.setPrivateTools(myTauWPDecorator)
     return result
 
+def TauJetDeepSetEvaluatorCfg(flags):
+    result = ComponentAccumulator()
+    _name = flags.Tau.ActiveConfig.prefix + 'TauJetDeepSet'
+
+    TauJetRNNEvaluator = CompFactory.getComp("TauJetRNNEvaluator")
+    NNConf = flags.Tau.TauJetDeepSetConfig
+    myTauJetRNNEvaluator = TauJetRNNEvaluator(name = _name,
+                                              NetworkFile1P = NNConf[0],
+                                              NetworkFile2P = NNConf[1],
+                                              NetworkFile3P = NNConf[2],
+                                              OutputVarname = "JetDeepSetScore",
+                                              MaxTracks = 10,
+                                              MaxClusters = 6,
+                                              MaxClusterDR = 1.0,
+                                              VertexCorrection = True,
+                                              InputLayerScalar = "scalar",
+                                              InputLayerTracks = "tracks",
+                                              InputLayerClusters = "clusters",
+                                              OutputLayer = "rnnid_output",
+                                              OutputNode = "sig_prob")
+
+    result.setPrivateTools(myTauJetRNNEvaluator)
+    return result
+
+def TauWPDecoratorJetDeepSetCfg(flags):
+    result = ComponentAccumulator()
+    _name = flags.Tau.ActiveConfig.prefix + 'TauWPDecoratorJetDeepSet'
+
+    TauWPDecorator = CompFactory.getComp("TauWPDecorator")
+    WPConf = flags.Tau.TauJetDeepSetWP
+    myTauWPDecorator = TauWPDecorator(name=_name,
+                                      flatteningFile1Prong = WPConf[0],
+                                      flatteningFile2Prong = WPConf[1],
+                                      flatteningFile3Prong = WPConf[2],
+                                      DecorWPNames = ["JetDeepSetVeryLoose", "JetDeepSetLoose", "JetDeepSetMedium", "JetDeepSetTight"],
+                                      DecorWPCutEffs1P = [0.95, 0.85, 0.75, 0.60],
+                                      DecorWPCutEffs2P = [0.95, 0.75, 0.60, 0.45],
+                                      DecorWPCutEffs3P = [0.95, 0.75, 0.60, 0.45],
+                                      ScoreName = "JetDeepSetScore",
+                                      NewScoreName = "JetDeepSetScoreTrans",
+                                      DefineWPs = True)
+
+    result.setPrivateTools(myTauWPDecorator)
+    return result
+
 def TauEleRNNEvaluatorCfg(flags):
     result = ComponentAccumulator()
-    _name = sPrefix + 'TauEleRNN' 
+    _name = flags.Tau.ActiveConfig.prefix + 'TauEleRNN'
 
     TauJetRNNEvaluator = CompFactory.getComp("TauJetRNNEvaluator")
     RNNConf = flags.Tau.TauEleRNNConfig    
@@ -898,7 +858,7 @@ def TauWPDecoratorEleRNNCfg(flags):
     cppyy.load_library('libxAODTau_cDict')
 
     result = ComponentAccumulator()
-    _name = sPrefix + 'TauWPDecoratorEleRNN'
+    _name = flags.Tau.ActiveConfig.prefix + 'TauWPDecoratorEleRNN'
 
     TauWPDecorator = CompFactory.getComp("TauWPDecorator")
     WPConf = flags.Tau.TauEleRNNWPConfig
@@ -919,9 +879,29 @@ def TauWPDecoratorEleRNNCfg(flags):
     result.setPrivateTools(myTauEleWPDecorator)
     return result
 
+def TauWPDecoratorEleRNNFixCfg(flags):
+    result = ComponentAccumulator()
+    _name = flags.Tau.ActiveConfig.prefix + 'TauWPDecoratorEleRNNFix_v1'
+
+    TauWPDecorator = CompFactory.getComp("TauWPDecorator")
+    WPConf = flags.Tau.TauEleRNNWPfix
+    myTauEleWPDecorator = TauWPDecorator(name = _name,
+                                         flatteningFile1Prong = WPConf[0],
+                                         flatteningFile3Prong = WPConf[1],
+                                         DecorWPNames = [ "EleRNNLoose_v1", "EleRNNMedium_v1", "EleRNNTight_v1" ],
+                                         DecorWPCutEffs1P = [0.95, 0.90, 0.85],
+                                         DecorWPCutEffs3P = [0.98, 0.95, 0.90],
+                                         UseEleBDT = True,
+                                         ScoreName = "RNNEleScore",
+                                         NewScoreName = "RNNEleScoreSigTrans_v1",
+                                         DefineWPs = True)
+
+    result.setPrivateTools(myTauEleWPDecorator)
+    return result
+
 def TauDecayModeNNClassifierCfg(flags):
     result = ComponentAccumulator()
-    _name = sPrefix + 'TauDecayModeNNClassifier'
+    _name = flags.Tau.ActiveConfig.prefix + 'TauDecayModeNNClassifier'
 
     TauDecayModeNNClassifier = CompFactory.getComp("TauDecayModeNNClassifier")
     myTauDecayModeNNClassifier = TauDecayModeNNClassifier(name=_name,
@@ -932,7 +912,7 @@ def TauDecayModeNNClassifierCfg(flags):
 
 def TauAODSelectorCfg(flags):
     result = ComponentAccumulator()
-    _name = sPrefix + 'TauAODSelector'
+    _name = flags.Tau.ActiveConfig.prefix + 'TauAODSelector'
 
     TauAODSelector = CompFactory.getComp("TauAODSelector")
     myTauAODSelector = TauAODSelector(name=_name,
@@ -946,7 +926,7 @@ def TauAODSelectorCfg(flags):
 # TauCombinedTES
 def TauCombinedTESCfg(flags):
     result = ComponentAccumulator()    
-    _name = sPrefix + 'TauCombinedTES'
+    _name = flags.Tau.ActiveConfig.prefix + 'TauCombinedTES'
 
     TauCombinedTES = CompFactory.getComp("TauCombinedTES")
     myTauCombinedTES = TauCombinedTES(name = _name,
@@ -959,7 +939,7 @@ def TauCombinedTESCfg(flags):
 # muon removal tool
 def TauAODMuonRemovalCfg(flags):
     result = ComponentAccumulator()   
-    _name = sPrefix + 'MuonRemoval'
+    _name = flags.Tau.ActiveConfig.prefix + 'MuonRemoval'
     TauAODLeptonRemovalTool = CompFactory.getComp("TauAODLeptonRemovalTool")
     myMuonRemoval = TauAODLeptonRemovalTool(    name                   = _name,
                                                 Key_MuonInputContainer = 'Muons',
@@ -974,7 +954,7 @@ def TauAODMuonRemovalCfg(flags):
 # elec removal tool
 def TauAODElectronRemovalCfg(flags):
     result = ComponentAccumulator()  
-    _name = sPrefix + 'ElecRemoval'
+    _name = flags.Tau.ActiveConfig.prefix + 'ElecRemoval'
     TauAODLeptonRemovalTool = CompFactory.getComp("TauAODLeptonRemovalTool")
     myElecRemoval = TauAODLeptonRemovalTool(    name                   = _name,
                                                 Key_ElecInputContainer = 'Electrons',
@@ -984,4 +964,17 @@ def TauAODElectronRemovalCfg(flags):
     )
     result.setPrivateTools(myElecRemoval)
     return result
-########################################################################
+
+# FIXME: placeholder, tool not implemented yet
+# electron excluder tool
+def TauElectronExcluderCfg(flags):
+    result = ComponentAccumulator()
+    _name = flags.Tau.ActiveConfig.prefix + 'TauElectronExcluder'
+
+    TauElectronExcluder = CompFactory.getComp("TauElectronExcluder")
+    myTauElectronExcluder = TauElectronExcluder(name                       = _name,
+                                                Key_RemovalDirectionsInput = flags.Tau.ActiveConfig.ElectronDirections,
+                                                CheckingCone               = 0.6)
+
+    result.setPrivateTools(myTauElectronExcluder)
+    return result

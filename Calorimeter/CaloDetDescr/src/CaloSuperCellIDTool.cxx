@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CaloDetDescr/src/CaloSuperCellIDTool.cxx
@@ -321,7 +321,7 @@ CaloSuperCellIDTool::offlineToSuperCellID (const Identifier& id) const
     assert (rhash < m_offlineIndex.size());
     int ndx = m_offlineIndex[rhash];
     if (ndx < 0)
-      return Identifier();
+      return {};
     
     // Now search through all entries for this offline region to find one
     // that includes this cell.
@@ -384,7 +384,7 @@ CaloSuperCellIDTool::offlineToSuperCellID (const Identifier& id) const
     }
 
     if (section != TileID::BARREL && section != TileID::EXTBAR)
-      return Identifier();
+      return {};
 
     int sample_sc = sample_offline;
     if (sample_sc != TileID::SAMP_D) sample_sc = TileID::SAMP_A;
@@ -397,7 +397,7 @@ CaloSuperCellIDTool::offlineToSuperCellID (const Identifier& id) const
                                sample_sc);
   }
 
-  return Identifier();
+  return {};
 }
 
 

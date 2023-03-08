@@ -1,6 +1,7 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaMonitoring.DQConfigFlags import DQDataType
 
 import math
 
@@ -31,7 +32,7 @@ class TrigTauMonAlgBuilder:
     self.__logger.info("TrigTauMonToolBuilder.configureMode()")
     self._get_monitoring_mode_success = self.get_monitoring_mode()
     if self._get_monitoring_mode_success is False:
-      self.__logger.warning("HLTMonTriggerList: Error getting monitoring mode, default monitoring lists will be used.")
+      self.__logger.warning("Error getting monitoring mode, default monitoring lists will be used.")
     else:
       self.__logger.info("Configuring for %s", self.data_type)
 
@@ -99,14 +100,14 @@ class TrigTauMonAlgBuilder:
   def get_monitoring_mode(self):
 
     self.__logger.info("TrigTauMonToolBuilder.get_monitoring_mode()")
-    self.data_type = self.helper.inputFlags.DQ.DataType
-    if self.data_type == 'monteCarlo': 
+    self.data_type = self.helper.flags.DQ.DataType
+    if self.data_type is DQDataType.MC:
       self.mc_mode = True
       return True
-    elif self.data_type == 'collisions': 
+    elif self.data_type is DQDataType.Collisions:
       self.pp_mode = True
       return True
-    elif self.data_type == 'cosmics':
+    elif self.data_type is DQDataType.Cosmics:
       self.cosmic_mode = True
       return True
     else:
@@ -138,7 +139,7 @@ class TrigTauMonAlgBuilder:
 
     ### monitorig groups
     from TrigConfigSvc.TriggerConfigAccess import getHLTMonitoringAccess
-    moniAccess=getHLTMonitoringAccess(self.helper.inputFlags)
+    moniAccess=getHLTMonitoringAccess(self.helper.flags)
     monitoring_tau=moniAccess.monitoredChains(signatures="tauMon",monLevels=["shifter","t0","val"])
   
     # if mon groups not found fall back to hard-coded trigger monitoring list
@@ -188,6 +189,13 @@ class TrigTauMonAlgBuilder:
        # Tag and probe
        'HLT_e26_lhtight_ivarloose_tau20_mediumRNN_tracktwoMVA_03dRAB_L1EM22VHI',
        'HLT_mu26_ivarmedium_tau20_mediumRNN_tracktwoMVA_03dRAB_L1MU14FCH',
+       # LRT 
+       'HLT_tau25_idperf_trackLRT_L1TAU12IM',
+       'HLT_tau80_idperf_trackLRT_L1TAU60',
+       'HLT_tau160_idperf_trackLRT_L1TAU100',
+       'HLT_tau25_mediumRNN_trackLRT_L1TAU12IM', 
+       'HLT_tau80_mediumRNN_trackLRT_L1TAU60',
+       'HLT_tau160_mediumRNN_trackLRT_L1TAU100',
        # Phase-I
        'HLT_tau25_idperf_tracktwoMVA_L1eTAU20',
        'HLT_tau25_perf_tracktwoMVA_L1eTAU20', 
@@ -212,8 +220,8 @@ class TrigTauMonAlgBuilder:
       self.tauMonAlg = self.helper.addAlgorithm( CompFactory.TrigTauMonitorAlgorithm, "TrigTauMonAlg" )
       self.tauMonAlg.TriggerList=self.tauList    
       isMC = False
-      self.data_type = self.helper.inputFlags.DQ.DataType
-      if self.data_type == 'monteCarlo':
+      self.data_type = self.helper.flags.DQ.DataType
+      if self.data_type == DQDataType.MC:
          isMC = True
       self.tauMonAlg.isMC = isMC
 

@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaCommon.CFElements import parOR
@@ -124,15 +124,17 @@ def jetHIRecoSequence(configFlags, clustersKey, towerKey, **jetRecoDict):
 
     from HLTSeeding.HLTSeedingConfig import mapThresholdToL1RoICollection
     from TrigCaloRec.TrigCaloRecConfig import HLTCaloCellMaker
-    cellMaker = HLTCaloCellMaker('HLTCaloCellMakerEGFS')
-    cellMaker.RoIs = mapThresholdToL1RoICollection('FSNOSEED')
-    cellMaker.CellsName = 'CaloCellsEGFS'
+    cellMaker = HLTCaloCellMaker(configFlags,
+                                 name = 'HLTCaloCellMakerEGFS',
+                                 roisKey = mapThresholdToL1RoICollection('FSNOSEED'),
+                                 CellsName = 'CaloCellsEGFS',
+                                 monitorCells = False)
     jetHIRecSeq += cellMaker 
     from TrigT2CaloCommon.CaloDef import _algoHLTHIEventShape
     eventShapeMaker = _algoHLTHIEventShape(
-             name='HLTEventShapeMaker_egamma',
+             name='HLTEventShapeMakerEG',
              inputEDM=cellMaker.CellsName,
-             outputEDM="HLTHIEventShape"
+             outputEDM="HLT_HIEventShapeEG" # needs to be in sync with the one setup in HIMenuSequences (for Fgap triggers)
     )
     jetHIRecSeq += eventShapeMaker 
 
@@ -157,7 +159,7 @@ def jetHIRecoSequence(configFlags, clustersKey, towerKey, **jetRecoDict):
 
     ## Get online monitoring tool
     from JetRec import JetOnlineMon
-    monTool = JetOnlineMon.getMonTool_TrigJetAlgorithm("HLTJets/AntiKt4HI/")
+    monTool = JetOnlineMon.getMonTool_TrigJetAlgorithm(configFlags, "HLTJets/AntiKt4HI/")
 
     # Reconstruction 
     jetRecAlg = getHIJetRecAlg(jetDef, jetsFullName_Unsub, monTool=monTool)
@@ -444,7 +446,7 @@ def JetHICfg(flags, clustersKey, **jetRecoDict):
     from JetRec import JetOnlineMon
     acc.addEventAlgo(
         JetRecConfig.getJetRecAlg(
-            jetDef, JetOnlineMon.getMonTool_TrigJetAlgorithm(f"HLTJets/{jetsOut}/")
+            jetDef, JetOnlineMon.getMonTool_TrigJetAlgorithm(flags, f"HLTJets/{jetsOut}/")
         ),
         primary=True,
     )

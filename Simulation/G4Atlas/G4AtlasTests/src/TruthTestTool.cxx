@@ -223,7 +223,7 @@ StatusCode TruthTestTool::processEvent()
       }
 
       int npart_prim=0, npart_sec=0;
-      for (auto currentGenParticle: *(*currentGenEventIter)) {
+      for (const auto& currentGenParticle: *(*currentGenEventIter)) {
         int barcode = HepMC::barcode(currentGenParticle);
         const HepMC::FourVector mom = currentGenParticle->momentum();
         m_px_truth->Fill( mom.x() );
@@ -296,7 +296,7 @@ StatusCode TruthTestTool::processEvent()
         }
         else {
           ++npart_sec;
-          const int gen = barcode/ 1000000 +2;
+          const int gen = barcode/ HepMC::SIM_REGENERATION_INCREMENT +2;
           m_n_generations ->Fill(gen);
         }
       }

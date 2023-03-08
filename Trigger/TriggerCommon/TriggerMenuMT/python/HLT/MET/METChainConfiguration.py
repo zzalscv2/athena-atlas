@@ -1,10 +1,11 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 
 logging.getLogger().info("Importing %s", __name__)
 log = logging.getLogger(__name__)
 
+from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 
 from ..Config.ChainConfigurationBase import ChainConfigurationBase
 from .ConfigHelpers import recoKeys, AlgConfig
@@ -37,7 +38,11 @@ class METChainConfiguration(ChainConfigurationBase):
     # ----------------------
     # Assemble the chain depending on information from chainName
     # ----------------------
-    def assembleChainImpl(self):
+    def assembleChainImpl(self, flags):
         log.debug("Assembling chain for %s", self.chainName)
-        conf = AlgConfig.fromRecoDict(**self.recoDict)
-        return self.buildChain(conf.make_steps(self.dict))
+        conf = AlgConfig.fromRecoDict(flags, **self.recoDict)
+        if isComponentAccumulatorCfg():
+            steps = conf.make_accumulator_steps(flags, self.dict)
+        else:
+            steps = conf.make_steps(flags, self.dict)
+        return self.buildChain(steps)

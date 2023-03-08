@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRY_ACTSEXTRAPOLATIONTOOL_H
@@ -114,6 +114,8 @@ public:
   Acts::MagneticFieldContext
   getMagneticFieldContext(const EventContext& ctx) const override;
 
+ private:
+  const Acts::Logger& logger() const { return *m_logger; }
 
 private:
   std::unique_ptr<const ActsExtrapolationDetail::VariantPropagator> m_varProp;

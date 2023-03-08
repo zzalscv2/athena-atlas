@@ -113,7 +113,7 @@ namespace TrigCompositeUtils {
       }
     }
     return false;
-  }    
+  }
 
   bool passed( DecisionID id, const DecisionIDContainer& idSet ) {
     return idSet.count( id ) != 0;
@@ -731,7 +731,7 @@ namespace TrigCompositeUtils {
         HLT::Identifier legID = createLegName(chainName, legIdx);
         std::vector<LinkInfo<xAOD::IParticleContainer>> legFeatures;
         for (const LinkInfo<xAOD::IParticleContainer>& info : features)
-          if (isAnyIDPassing(info.source, {legID.numeric()}))
+          if (passed(legID.numeric(), info.decisions))
             legFeatures.push_back(info);
       combinations.addLeg(legMultiplicities.at(legIdx), std::move(legFeatures));
       }

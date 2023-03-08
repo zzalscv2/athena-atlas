@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 # TRUTH0.py - direct and complete translation of HepMC in EVNT to xAOD truth 
 # No additional information is added
@@ -25,19 +25,24 @@ def TRUTH0Cfg(ConfigFlags):
         raise RuntimeError("No recognised HepMC truth information found in the input")
  
     # Contents
-    TRUTH0Items = ["xAOD::EventInfo#*",
-                   "xAOD::EventAuxInfo#*",
-                   "xAOD::TruthEventContainer#*",
-                   "xAOD::TruthEventAuxContainer#*",
-                   "xAOD::TruthVertexContainer#*",
-                   "xAOD::TruthVertexAuxContainer#*",
-                   "xAOD::TruthParticleContainer#*",
-                   "xAOD::TruthParticleAuxContainer#*"]
+    from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
+    TRUTH0SlimmingHelper = SlimmingHelper("TRUTH0SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
+    TRUTH0SlimmingHelper.AppendToDictionary = {'EventInfo':'xAOD::EventInfo','EventInfoAux':'xAOD::EventAuxInfo',
+                                               'TruthEvents':'xAOD::TruthEventContainer','TruthEventsAux':'xAOD::TruthEventAuxContainer',
+                                               'TruthVertices':'xAOD::TruthVertexContainer','TruthVerticesAux':'xAOD::TruthVertexAuxContainer',
+                                               'TruthParticles':'xAOD::TruthParticleContainer','TruthParticlesAux':'xAOD::TruthParticleAuxContainer'} 
+
+    TRUTH0SlimmingHelper.AllVariables = [ 'EventInfo',
+                                          'TruthEvents', 
+                                          'TruthVertices',
+                                          'TruthParticles']
+
     # Metadata
     TRUTH0MetaDataItems = [ "xAOD::TruthMetaDataContainer#TruthMetaData", "xAOD::TruthMetaDataAuxContainer#TruthMetaDataAux." ]
 
     # Create output stream 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_TRUTH0", ItemList=TRUTH0Items, MetadataItemList=TRUTH0MetaDataItems))
+    TRUTH0ItemList = TRUTH0SlimmingHelper.GetItemList()
+    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_TRUTH0", ItemList=TRUTH0ItemList, MetadataItemList=TRUTH0MetaDataItems))
  
     return acc

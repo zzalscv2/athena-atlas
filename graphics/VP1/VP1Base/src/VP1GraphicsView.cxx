@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -302,8 +302,8 @@ void VP1GraphicsView::keyPressEvent(QKeyEvent *event)
   }
 
 //   if (m_d->mode==PICK) {
-//     foreach (QGraphicsItem*item,items(event->pos())) {
-//       foreach(VP1GraphicsItemCollection* ic,m_d->cols_act) {
+//     for (QGraphicsItem*item : items(event->pos())) {
+//       for (VP1GraphicsItemCollection* ic : m_d->cols_act) {
 // 	if (ic->itemBelongsAndIsPresentlyActive(item)) {
 // 	  event->accept();
 // 	  //EMIT [event] SIGNALS.
@@ -357,16 +357,16 @@ void VP1GraphicsView::setMode(const Mode& m)
 
   //Interactions/movable:
   if (m==PICK) {
-    foreach (VP1GraphicsItemCollection*ic,m_d->cols_act)
+    for (VP1GraphicsItemCollection*ic : m_d->cols_act)
       if (!m_d->cols_override_inactive.contains(ic))
 	ic->setTemporaryIgnoreInteractions(false);
-    foreach (VP1GraphicsItemCollection*ic,m_d->cols_all)
+    for (VP1GraphicsItemCollection*ic : m_d->cols_all)
       if (!m_d->cols_override_unmovable.contains(ic))
 	ic->setTemporaryIgnoreMovable(false);
   } else {
-    foreach (VP1GraphicsItemCollection*ic,m_d->cols_all)
+    for (VP1GraphicsItemCollection*ic : m_d->cols_all)
       ic->setTemporaryIgnoreMovable(true);
-    foreach (VP1GraphicsItemCollection*ic,m_d->cols_act)
+    for (VP1GraphicsItemCollection*ic : m_d->cols_act)
       ic->setTemporaryIgnoreInteractions(true);
   }
 }
@@ -416,8 +416,8 @@ void VP1GraphicsView::mouseDoubleClickEvent(QMouseEvent * event) {
     return;
   }
   //Fixme: transformed pos
-  foreach (QGraphicsItem*item,items(event->pos())) {
-    foreach(VP1GraphicsItemCollection* ic,m_d->cols_act) {
+  for (QGraphicsItem*item : items(event->pos())) {
+    for (VP1GraphicsItemCollection* ic : m_d->cols_act) {
       if (ic->itemBelongsAndIsPresentlyActive(item)) {
 	event->accept();
 	//EMIT SIGNALS. CHANGE SELECTION.
@@ -446,8 +446,8 @@ void VP1GraphicsView::mouseMoveEvent(QMouseEvent *event)
     return;
   }
   if (m_d->mode==PICK) {
-    foreach (QGraphicsItem*item,items(event->pos())) {
-      foreach(VP1GraphicsItemCollection* ic,m_d->cols_act) {
+    for (QGraphicsItem*item : items(event->pos())) {
+      for (VP1GraphicsItemCollection* ic : m_d->cols_act) {
 	if (ic->itemBelongsAndIsPresentlyActive(item)) {
 	  event->accept();
 	  //EMIT [event] SIGNALS.
@@ -576,10 +576,10 @@ void VP1GraphicsView::mouseReleaseEvent(QMouseEvent *event)
   }
 
   if (m_d->mode==PICK) {
-//     foreach (QGraphicsItem*item,items(event->pos())) {
+//     for (QGraphicsItem*item : items(event->pos())) {
 //       if (item==static_cast<QGraphicsItem*>(m_d->selectionoutline))//Fixme: Dont do the cast here.
 // 	continue;
-//       foreach(VP1GraphicsItemCollection* ic,m_d->cols_act) {
+//       for(VP1GraphicsItemCollection* ic : m_d->cols_act) {
 // 	if (ic->itemBelongsAndIsPresentlyActive(item)) {
 // 	  event->accept();
 // 	  if (ic->interactionMode()==VP1GraphicsItemCollection::EVENTS) {
@@ -623,7 +623,7 @@ void VP1GraphicsView::Imp::locateActiveItemAtPoint(QGraphicsItem*&item,
   }
 
   //Fixme: use faster stl style iterators.
-  foreach(QGraphicsItem* item2,view->items(p)) {
+  for (QGraphicsItem* item2 : view->items(p)) {
     if (searchic) {
       if (searchic->itemBelongsAndIsPresentlyActive(item2)) {
 	item=item2;
@@ -631,7 +631,7 @@ void VP1GraphicsView::Imp::locateActiveItemAtPoint(QGraphicsItem*&item,
 	return;
       }
     } else {
-      foreach(VP1GraphicsItemCollection* ic2,cols_act) {
+      for (VP1GraphicsItemCollection* ic2 : cols_act) {
 	if (ic2->itemBelongsAndIsPresentlyActive(item2)) {
 	  item=item2;
 	  ic=ic2;

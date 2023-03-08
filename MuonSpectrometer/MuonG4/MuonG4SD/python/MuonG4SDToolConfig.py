@@ -1,16 +1,16 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from ISF_Algorithms.CollectionMergerConfig import CollectionMergerCfg
 
 
-def CSCSensitiveDetectorCosmicsCfg(ConfigFlags, name="CSCSensitiveDetectorCosmics", **kwargs):
+def CSCSensitiveDetectorCosmicsCfg(flags, name="CSCSensitiveDetectorCosmics", **kwargs):
     bare_collection_name = "CSC_Hits"
     mergeable_collection_suffix = "_G4"
     merger_input_property = "CSCHits"
     region = "MUON"
-    result, hits_collection_name = CollectionMergerCfg(ConfigFlags,
+    result, hits_collection_name = CollectionMergerCfg(flags,
                                                        bare_collection_name,
                                                        mergeable_collection_suffix,
                                                        merger_input_property,
@@ -20,12 +20,12 @@ def CSCSensitiveDetectorCosmicsCfg(ConfigFlags, name="CSCSensitiveDetectorCosmic
 
     result.setPrivateTools( CompFactory.CSCSensitiveDetectorCosmicsTool(name, **kwargs) )
     return result
-def CSCSensitiveDetectorCfg(ConfigFlags, name="CSCSensitiveDetector", **kwargs):
+def CSCSensitiveDetectorCfg(flags, name="CSCSensitiveDetector", **kwargs):
     bare_collection_name = "CSC_Hits"
     mergeable_collection_suffix = "_G4"
     merger_input_property = "CSCHits"
     region = "MUON"
-    result, hits_collection_name = CollectionMergerCfg(ConfigFlags,
+    result, hits_collection_name = CollectionMergerCfg(flags,
                                                        bare_collection_name,
                                                        mergeable_collection_suffix,
                                                        merger_input_property,
@@ -37,7 +37,7 @@ def CSCSensitiveDetectorCfg(ConfigFlags, name="CSCSensitiveDetector", **kwargs):
     return result
 
 
-def GenericMuonSensitiveDetectorCfg(ConfigFlags, name="GenericMuonSensitiveDetector", **kwargs):
+def GenericMuonSensitiveDetectorCfg(flags, name="GenericMuonSensitiveDetector", **kwargs):
     kwargs.setdefault("LogicalVolumeNames", ["GenericSenitiveVolume"])
     kwargs.setdefault("OutputCollectionNames", ["GenericMuonSensitiveDetector"])
     result=ComponentAccumulator()
@@ -45,12 +45,12 @@ def GenericMuonSensitiveDetectorCfg(ConfigFlags, name="GenericMuonSensitiveDetec
     return result
 
 
-def MDTSensitiveDetectorCosmicsCfg(ConfigFlags, name="MDTSensitiveDetectorCosmics", **kwargs):
+def MDTSensitiveDetectorCosmicsCfg(flags, name="MDTSensitiveDetectorCosmics", **kwargs):
     bare_collection_name = "MDT_Hits"
     mergeable_collection_suffix = "_G4"
     merger_input_property = "MDTHits"
     region = "MUON"
-    result, hits_collection_name = CollectionMergerCfg(ConfigFlags,
+    result, hits_collection_name = CollectionMergerCfg(flags,
                                                        bare_collection_name,
                                                        mergeable_collection_suffix,
                                                        merger_input_property,
@@ -62,12 +62,12 @@ def MDTSensitiveDetectorCosmicsCfg(ConfigFlags, name="MDTSensitiveDetectorCosmic
     return result
 
 
-def MDTSensitiveDetectorCfg(ConfigFlags, name="MDTSensitiveDetector", **kwargs):
+def MDTSensitiveDetectorCfg(flags, name="MDTSensitiveDetector", **kwargs):
     bare_collection_name = "MDT_Hits"
     mergeable_collection_suffix = "_G4"
     merger_input_property = "MDTHits"
     region = "MUON"
-    result, hits_collection_name = CollectionMergerCfg(ConfigFlags,
+    result, hits_collection_name = CollectionMergerCfg(flags,
                                                        bare_collection_name,
                                                        mergeable_collection_suffix,
                                                        merger_input_property,
@@ -79,12 +79,12 @@ def MDTSensitiveDetectorCfg(ConfigFlags, name="MDTSensitiveDetector", **kwargs):
     return result
 
 
-def MicromegasSensitiveDetectorCfg(ConfigFlags, name="MicromegasSensitiveDetector", **kwargs):
+def MicromegasSensitiveDetectorCfg(flags, name="MicromegasSensitiveDetector", **kwargs):
     bare_collection_name = "MM_Hits"
     mergeable_collection_suffix = "_G4"
     merger_input_property = "MMHits"
     region = "MUON"
-    result, hits_collection_name = CollectionMergerCfg(ConfigFlags,
+    result, hits_collection_name = CollectionMergerCfg(flags,
                                                        bare_collection_name,
                                                        mergeable_collection_suffix,
                                                        merger_input_property,
@@ -96,12 +96,12 @@ def MicromegasSensitiveDetectorCfg(ConfigFlags, name="MicromegasSensitiveDetecto
     return result
 
 
-def RPCSensitiveDetectorCosmicsCfg(ConfigFlags, name="RPCSensitiveDetectorCosmics", **kwargs):
+def RPCSensitiveDetectorCosmicsCfg(flags, name="RPCSensitiveDetectorCosmics", **kwargs):
     bare_collection_name = "RPC_Hits"
     mergeable_collection_suffix = "_G4"
     merger_input_property = "RPCHits"
     region = "MUON"
-    result, hits_collection_name = CollectionMergerCfg(ConfigFlags,
+    result, hits_collection_name = CollectionMergerCfg(flags,
                                                        bare_collection_name,
                                                        mergeable_collection_suffix,
                                                        merger_input_property,
@@ -113,12 +113,12 @@ def RPCSensitiveDetectorCosmicsCfg(ConfigFlags, name="RPCSensitiveDetectorCosmic
     return result
 
 
-def RPCSensitiveDetectorCfg(ConfigFlags, name="RPCSensitiveDetector", **kwargs):
+def RPCSensitiveDetectorCfg(flags, name="RPCSensitiveDetector", **kwargs):
     bare_collection_name = "RPC_Hits"
     mergeable_collection_suffix = "_G4"
     merger_input_property = "RPCHits"
     region = "MUON"
-    result, hits_collection_name = CollectionMergerCfg(ConfigFlags,
+    result, hits_collection_name = CollectionMergerCfg(flags,
                                                        bare_collection_name,
                                                        mergeable_collection_suffix,
                                                        merger_input_property,
@@ -130,12 +130,12 @@ def RPCSensitiveDetectorCfg(ConfigFlags, name="RPCSensitiveDetector", **kwargs):
     return result
 
 
-def TGCSensitiveDetectorCosmicsCfg(ConfigFlags, name="TGCSensitiveDetectorCosmics", **kwargs):
+def TGCSensitiveDetectorCosmicsCfg(flags, name="TGCSensitiveDetectorCosmics", **kwargs):
     bare_collection_name = "TGC_Hits"
     mergeable_collection_suffix = "_G4"
     merger_input_property = "TGCHits"
     region = "MUON"
-    result, hits_collection_name = CollectionMergerCfg(ConfigFlags,
+    result, hits_collection_name = CollectionMergerCfg(flags,
                                                        bare_collection_name,
                                                        mergeable_collection_suffix,
                                                        merger_input_property,
@@ -147,12 +147,12 @@ def TGCSensitiveDetectorCosmicsCfg(ConfigFlags, name="TGCSensitiveDetectorCosmic
     return result
 
 
-def TGCSensitiveDetectorCfg(ConfigFlags, name="TGCSensitiveDetector", **kwargs):
+def TGCSensitiveDetectorCfg(flags, name="TGCSensitiveDetector", **kwargs):
     bare_collection_name = "TGC_Hits"
     mergeable_collection_suffix = "_G4"
     merger_input_property = "TGCHits"
     region = "MUON"
-    result, hits_collection_name = CollectionMergerCfg(ConfigFlags,
+    result, hits_collection_name = CollectionMergerCfg(flags,
                                                        bare_collection_name,
                                                        mergeable_collection_suffix,
                                                        merger_input_property,
@@ -164,12 +164,12 @@ def TGCSensitiveDetectorCfg(ConfigFlags, name="TGCSensitiveDetector", **kwargs):
     return result
 
 
-def sTGCSensitiveDetectorCfg(ConfigFlags, name="sTGCSensitiveDetector", **kwargs):
+def sTGCSensitiveDetectorCfg(flags, name="sTGCSensitiveDetector", **kwargs):
     bare_collection_name = "sTGC_Hits"
     mergeable_collection_suffix = "_G4"
     merger_input_property = "sTGCHits"
     region = "MUON"
-    result, hits_collection_name = CollectionMergerCfg(ConfigFlags,
+    result, hits_collection_name = CollectionMergerCfg(flags,
                                                        bare_collection_name,
                                                        mergeable_collection_suffix,
                                                        merger_input_property,

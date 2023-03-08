@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////
@@ -12,10 +12,10 @@
 #include "TileRecUtils/ITileRawChannelTool.h"
 #include "TileEvent/TileDigitsContainer.h"
 #include "TileConditions/ITileCondToolDspThreshold.h"
-#include "TileConditions/TileCondToolNoiseSample.h"
+#include "TileConditions/TileSampleNoise.h"
 #include "TileConditions/TileCondToolOfc.h"
 #include "TileConditions/TileCondToolTiming.h"
-#include "TileConditions/TileCondToolEmscale.h"
+#include "TileConditions/TileEMScale.h"
 
 // Atlas includes
 #include "AthenaBaseComps/AthAlgTool.h"
@@ -58,8 +58,16 @@ class TileRawChannelOF1Corrector: public extends<AthAlgTool, ITileRawChannelTool
 
     const TileHWID* m_tileHWID; //!< Pointer to TileHWID
 
-    ToolHandle<TileCondToolNoiseSample> m_tileToolNoiseSample{this,
-        "TileCondToolNoiseSample", "TileCondToolNoiseSample", "Tile noise sample tool"};
+    /**
+     * @brief Name of TileSampleNoise in condition store
+     */
+    SG::ReadCondHandleKey<TileSampleNoise> m_sampleNoiseKey{this,
+        "TileSampleNoise", "TileSampleNoise", "Input Tile sample noise"};
+    /**
+     * @brief Name of online TileSampleNoise in condition store
+     */
+    SG::ReadCondHandleKey<TileSampleNoise> m_onlineSampleNoiseKey{this,
+        "TileOnlineSampleNoise", "TileOnlineSampleNoise", "Input online Tile sample noise"};
 
     ToolHandle<ITileCondToolOfc> m_tileCondToolOfc{this,
         "TileCondToolOfc", "TileCondToolOfcCoolOF1", "Tile OFC tool"};
@@ -67,8 +75,11 @@ class TileRawChannelOF1Corrector: public extends<AthAlgTool, ITileRawChannelTool
     ToolHandle<TileCondToolTiming> m_tileToolTiming{this,
         "TileCondToolTiming", "TileCondToolOnlineTiming", "Tile timing tool"};
 
-    ToolHandle<TileCondToolEmscale> m_tileToolEms{this,
-        "TileCondToolEmscale", "TileCondToolEmscale", "Tile EM scale calibration tool"};
+   /**
+    * @brief Name of TileEMScale in condition store
+    */
+    SG::ReadCondHandleKey<TileEMScale> m_emScaleKey{this,
+        "TileEMScale", "TileEMScale", "Input Tile EMS calibration constants"};
 
     ToolHandle<ITileCondToolDspThreshold> m_tileDspThreshold{this,
         "TileCondToolDspThreshold", "TileCondToolDspThreshold", "Tile DSP thresholds tool"};

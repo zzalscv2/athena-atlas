@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -170,20 +170,20 @@ def CaloFwdTopoTowerCfg(flags,**kwargs):
 
 
 if __name__=="__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecExRecoTest/mc20e_13TeV/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.ESD.e4993_s3227_r12689/myESD.pool.root"]  
+    flags.Output.ESDFileName="esdOut.pool.root"
 
-    ConfigFlags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecExRecoTest/mc20e_13TeV/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.ESD.e4993_s3227_r12689/myESD.pool.root"]  
-    ConfigFlags.Output.ESDFileName="esdOut.pool.root"
-
-    ConfigFlags.lock()
+    flags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 
-    cfg=MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg=MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
-    towerAcc=CaloFwdTopoTowerCfg(ConfigFlags,towerContainerKey="NewTowers",CaloTopoClusterContainerKey="CaloCalTopoClusters")
+    towerAcc=CaloFwdTopoTowerCfg(flags,towerContainerKey="NewTowers",CaloTopoClusterContainerKey="CaloCalTopoClusters")
 
     cfg.merge(towerAcc)
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //--------------------------------------------------------------
@@ -109,7 +109,7 @@ void CaloCellContainer::push_back_fast(std::unique_ptr<CaloCell> theCell)
    DataVector<CaloCell>::push_back(std::move(theCell));
 }
 
-void CaloCellContainer::print() const {
+void CaloCellContainer::print() {
   REPORT_MESSAGE_WITH_CONTEXT (MSG::WARNING, "CaloCellContainer")
     << "CaloCellContainer::print not implemented";
 }

@@ -51,13 +51,51 @@ InDet::TRT_DriftCircleOnTrack::TRT_DriftCircleOnTrack(
       static_cast<const Trk::StraightLineSurface&>(detElSurf);
 
     m_globalPosition =
-      slsf.localToGlobal(driftRadius, predictedTrackDirection, predictedLocZ);
+      slsf.localToGlobal(m_localParams, predictedTrackDirection, predictedLocZ);
   }
   Amg::Vector3D  loc_gDirection = predictedTrackDirection; 
-  const double dr = driftRadius[Trk::driftRadius];
+  const double dr = m_localParams[Trk::driftRadius];
   
   //scaling the direction with drift radius   
   if(dr !=0.){
+    m_localAngle = std::atan2(loc_gDirection.y(), loc_gDirection.x());
+  } else {
+    m_localAngle = 0.;
+  }
+}
+
+InDet::TRT_DriftCircleOnTrack::TRT_DriftCircleOnTrack(
+  const InDet::TRT_DriftCircle* RIO,
+  Trk::LocalParameters&& driftRadius,
+  Amg::MatrixX&& errDriftRadius,
+  const IdentifierHash& idDE,
+  double predictedLocZ,
+  const Amg::Vector3D& predictedTrackDirection,
+  const Trk::DriftCircleStatus status)
+  // call base class constructor
+  : Trk::RIO_OnTrack(std::move(driftRadius), std::move(errDriftRadius), RIO->identify())
+  , m_globalPosition{}
+  , m_positionAlongWire(predictedLocZ)
+  , m_idDE(idDE)
+  , m_status(status)
+  , m_highLevel(RIO->highLevel())
+  , m_timeOverThreshold(RIO->timeOverThreshold())
+  , m_detEl(RIO->detectorElement())
+{
+
+  m_rio.setElement(RIO);
+  const Trk::Surface& detElSurf = m_detEl->surface(RIO->identify());
+  if (detElSurf.type() == Trk::SurfaceType::Line) {
+    const Trk::StraightLineSurface& slsf =
+        static_cast<const Trk::StraightLineSurface&>(detElSurf);
+    m_globalPosition =
+        slsf.localToGlobal(m_localParams, predictedTrackDirection, predictedLocZ);
+  }
+  Amg::Vector3D loc_gDirection = predictedTrackDirection;
+  const double dr = m_localParams[Trk::driftRadius];
+
+  // scaling the direction with drift radius
+  if (dr != 0.) {
     m_localAngle = std::atan2(loc_gDirection.y(), loc_gDirection.x());
   } else {
     m_localAngle = 0.;

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # DAOD_PHYSVAL.py
@@ -22,6 +22,19 @@ def PHYSVALKernelCfg(ConfigFlags, name='PHYSVALKernel', **kwargs):
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
     acc.merge(PhysCommonAugmentationsCfg(ConfigFlags, TriggerListsHelper = kwargs['TriggerListsHelper']))
 
+    # LLP-specific configs
+    if ConfigFlags.Tracking.doLargeD0:
+        from DerivationFrameworkLLP.PhysValLLPConfig import PhysValLLPCfg
+        acc.merge(PhysValLLPCfg(ConfigFlags))
+
+    # R = 0.4 LCTopo jets (for tau validation)
+    from JetRecConfig.StandardSmallRJets import AntiKt4LCTopo
+    from JetRecConfig.JetRecConfig import JetRecCfg
+    from JetRecConfig.JetConfigFlags import jetInternalFlags
+
+    jetInternalFlags.isRecoJob = True
+    acc.merge(JetRecCfg(ConfigFlags,AntiKt4LCTopo))
+
     # Kernel algorithm
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
     acc.addEventAlgo(DerivationKernel(name))
@@ -37,7 +50,7 @@ def PHYSVALCfg(ConfigFlags):
     # for actually configuring the matching, so we create it here and pass it down
     # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    PHYSVALTriggerListsHelper = TriggerListsHelper()
+    PHYSVALTriggerListsHelper = TriggerListsHelper(ConfigFlags)
 
     # Common augmentations
     acc.merge(PHYSVALKernelCfg(ConfigFlags, name="PHYSVALKernel", StreamName = 'StreamDAOD_PHYSVAL', TriggerListsHelper = PHYSVALTriggerListsHelper))
@@ -58,6 +71,7 @@ def PHYSVALCfg(ConfigFlags):
                                               "InDetLargeD0TrackParticles",
                                               "AntiKt4EMTopoJets",
                                               "AntiKt4EMPFlowJets",
+                                              "AntiKt4LCTopoJets",
                                               "BTagging_AntiKt4EMPFlow",
                                               "BTagging_AntiKtVR30Rmax4Rmin02Track",
                                               "MET_Baseline_AntiKt4EMTopo",
@@ -79,6 +93,7 @@ def PHYSVALCfg(ConfigFlags):
                                            "InDetLargeD0TrackParticles",
                                            "AntiKt4EMTopoJets",
                                            "AntiKt4EMPFlowJets",
+                                           "AntiKt4LCTopoJets",
                                            "BTagging_AntiKt4EMPFlow",
                                            "BTagging_AntiKt4EMTopo",
                                            "BTagging_AntiKtVR30Rmax4Rmin02Track",
@@ -130,6 +145,10 @@ def PHYSVALCfg(ConfigFlags):
     StaticContent += ["xAOD::VertexContainer#SoftBVrtClusterTool_Loose_Vertices"]
     StaticContent += ["xAOD::VertexAuxContainer#SoftBVrtClusterTool_Loose_VerticesAux." + excludedVertexAuxData]
     StaticContent += ["xAOD::VertexAuxContainer#BTagging_AntiKt4EMPFlowSecVtxAux.-vxTrackAtVertex"]
+    for wp in ["","_LeptonsMod_LRTR3_1p0"]:
+        StaticContent += ["xAOD::VertexContainer#VrtSecInclusive_SecondaryVertices" + wp]
+        StaticContent += ["xAOD::VertexAuxContainer#VrtSecInclusive_SecondaryVertices" + wp + "Aux."]
+
     if ConfigFlags.BTagging.RunFlipTaggers is True:
         StaticContent += ["xAOD::VertexAuxContainer#BTagging_AntiKt4EMPFlowSecVtxFlipAux.-vxTrackAtVertex"]
 
@@ -137,6 +156,7 @@ def PHYSVALCfg(ConfigFlags):
         StaticContent += ["xAOD::VertexAuxContainer#BTagging_AntiKt4EMTopoSecVtxAux.-vxTrackAtVertex"]
         if ConfigFlags.BTagging.RunFlipTaggers is True:
             StaticContent += ["xAOD::VertexAuxContainer#BTagging_AntiKt4EMTopoSecVtxFlipAux.-vxTrackAtVertex"]
+
  
     PHYSVALSlimmingHelper.StaticContent = StaticContent
 
@@ -202,6 +222,19 @@ def PHYSVALCfg(ConfigFlags):
                                              "TauChargedParticleFlowObjects.pt.eta.phi.m.bdtPi0Score",
                                              "MET_Track.sumet"]
     PHYSVALSlimmingHelper.ExtraVariables += GSFTracksCPDetailedContent
+
+    VSITrackAuxVars = [
+        "is_selected", "is_associated", "is_svtrk_final", "pt_wrtSV", "eta_wrtSV",
+        "phi_wrtSV", "d0_wrtSV", "z0_wrtSV", "errP_wrtSV", "errd0_wrtSV",
+        "errz0_wrtSV", "chi2_toSV"
+    ]
+
+    for suffix in ["","_LeptonsMod_LRTR3_1p0"]:
+        PHYSVALSlimmingHelper.ExtraVariables += [ "InDetTrackParticles." + '.'.join( [ var + suffix for var in VSITrackAuxVars] ) ]
+        PHYSVALSlimmingHelper.ExtraVariables += [ "InDetLargeD0TrackParticles." + '.'.join( [ var + suffix for var in VSITrackAuxVars] ) ]
+        PHYSVALSlimmingHelper.ExtraVariables += [ "GSFTrackParticles." + '.'.join( [ var + suffix for var in VSITrackAuxVars] ) ]
+        PHYSVALSlimmingHelper.ExtraVariables += [ "LRTGSFTrackParticles." + '.'.join( [ var + suffix for var in VSITrackAuxVars] ) ]
+
 
     # Trigger content
     PHYSVALSlimmingHelper.IncludeTriggerNavigation          = True

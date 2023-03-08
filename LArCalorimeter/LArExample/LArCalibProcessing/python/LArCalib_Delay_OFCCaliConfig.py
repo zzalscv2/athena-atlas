@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory 
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -27,36 +27,49 @@ def LArDelay_OFCCaliCfg(flags):
     acTag=tagResolver.getFolderTag(flags.LArCalib.AutoCorr.Folder)
     del tagResolver
     
-    print("pedestalTag",pedestalTag)
-    print("acTag",acTag)
-
-
     from IOVDbSvc.IOVDbSvcConfig import addFolders
     result.merge(addFolders(flags,flags.LArCalib.Pedestal.Folder,detDb=flags.LArCalib.Input.Database, tag=pedestalTag, modifiers=chanSelStr(flags),
                             className="LArPedestalComplete"))
     result.merge(addFolders(flags,flags.LArCalib.AutoCorr.Folder,detDb=flags.LArCalib.Input.Database, tag=acTag,modifiers=chanSelStr(flags)))
     
 
-    result.addEventAlgo(CompFactory.LArRawCalibDataReadingAlg(LArAccCalibDigitKey=digKey,
+    if not flags.LArCalib.isSC:
+       result.addEventAlgo(CompFactory.LArRawCalibDataReadingAlg(LArAccCalibDigitKey=digKey,
                                                               LArFebHeaderKey="LArFebHeader",
                                                               SubCaloPreselection=flags.LArCalib.Input.SubDet,
                                                               PosNegPreselection=flags.LArCalib.Preselection.Side,
                                                               BEPreselection=flags.LArCalib.Preselection.BEC,
                                                               FTNumPreselection=flags.LArCalib.Preselection.FT))
     
-    from LArROD.LArFebErrorSummaryMakerConfig import LArFebErrorSummaryMakerCfg
-    result.merge(LArFebErrorSummaryMakerCfg(flags))
-    result.getEventAlgo("LArFebErrorSummaryMaker").CheckAllFEB=False
+       from LArROD.LArFebErrorSummaryMakerConfig import LArFebErrorSummaryMakerCfg
+       result.merge(LArFebErrorSummaryMakerCfg(flags))
+       result.getEventAlgo("LArFebErrorSummaryMaker").CheckAllFEB=False
 
+       if flags.LArCalib.Input.SubDet == "EM":
+          from LArCalibProcessing.LArStripsXtalkCorrConfig import LArStripsXtalkCorrCfg
+          result.merge(LArStripsXtalkCorrCfg(flags,[digKey,]))
     
-    if flags.LArCalib.Input.SubDet == "EM":
-        from LArCalibProcessing.LArStripsXtalkCorrConfig import LArStripsXtalkCorrCfg
-        result.merge(LArStripsXtalkCorrCfg(flags,[digKey,]))
-    
-    
-        theLArCalibShortCorrector = CompFactory.LArCalibShortCorrector(KeyList = [digKey,])
-        result.addEventAlgo(theLArCalibShortCorrector)
+          theLArCalibShortCorrector = CompFactory.LArCalibShortCorrector(KeyList = [digKey,])
+          result.addEventAlgo(theLArCalibShortCorrector)
+    else:
+       digKey="SC"
+       theLArLATOMEDecoder = CompFactory.LArLATOMEDecoder("LArLATOMEDecoder")
+       if flags.LArCalib.Input.isRawData:
+          result.addEventAlgo(CompFactory.LArRawSCDataReadingAlg(adcCollKey = digKey, adcBasCollKey = "", etCollKey = "",
+                                                               etIdCollKey = "", LATOMEDecoder = theLArLATOMEDecoder))
+          result.addEventAlgo(CompFactory.LArDigitsAccumulator("LArDigitsAccumulator", KeyList = [digKey], 
+                                                             LArAccuDigitContainerName = "", NTriggersPerStep = 100,
+                                                             isSC = flags.LArCalib.isSC, DropPercentTrig = 20))
 
+
+       else:   
+          # this needs also legacy  maps
+          from LArCabling.LArCablingConfig import LArCalibIdMappingCfg,LArOnOffIdMappingCfg
+          result.merge(LArOnOffIdMappingCfg(flags))
+          result.merge(LArCalibIdMappingCfg(flags))
+          result.addEventAlgo(CompFactory.LArRawSCCalibDataReadingAlg(LArSCAccCalibDigitKey = digKey, LATOMEDecoder = theLArLATOMEDecoder, ))
+
+    bcKey = "LArBadChannelSC" if flags.LArCalib.isSC else "LArBadChannel"     
 
     theLArCaliWaveBuilder = CompFactory.LArCaliWaveBuilder()
     theLArCaliWaveBuilder.KeyList= [digKey,]
@@ -68,6 +81,8 @@ def LArDelay_OFCCaliCfg(flags):
     theLArCaliWaveBuilder.UseDacAndIsPulsedIndex = False # should have an impact only for HEC
     theLArCaliWaveBuilder.RecAllCells      = False
     theLArCaliWaveBuilder.isSC       = flags.LArCalib.isSC
+    if flags.LArCalib.isSC:
+       theLArCaliWaveBuilder.CablingKey="LArOnOffIdMapSC"
     result.addEventAlgo(theLArCaliWaveBuilder)
     
 
@@ -92,6 +107,7 @@ def LArDelay_OFCCaliCfg(flags):
     if flags.LArCalib.CorrectBadChannels:
         theLArCaliWavePatcher=CompFactory.getComp("LArCalibPatchingAlg<LArCaliWaveContainer>")("LArCaliWavePatch")
         theLArCaliWavePatcher.ContainerKey= "LArCaliWave"
+        theLArCaliWavePatcher.BadChanKey=bcKey 
         #theLArCaliWavePatcher.PatchMethod="PhiNeighbor" ##take the first neigbour
         theLArCaliWavePatcher.PatchMethod="PhiAverage" ##do an aveage in phi after removing bad and empty event
         theLArCaliWavePatcher.ProblemsToPatch=[
@@ -129,14 +145,16 @@ def LArDelay_OFCCaliCfg(flags):
                                                             AddFEBTempInfo = False,
                                                             SaveDerivedInfo = True,
                                                             ApplyCorrection = True,
+                                                            BadChanKey = bcKey,
                                                             OffId=True
                                                         ))
 
         if rootfile2 == "":
            result.addEventAlgo(CompFactory.LArOFC2Ntuple(ContainerKey = "LArOFC",
-                                                         AddFEBTempInfo  = False,
-                                                         OffId=True
-                                                     ))
+                                                      AddFEBTempInfo  = False,
+                                                      BadChanKey = bcKey,
+                                                      OffId=True
+                                                  ))
 
         import os
         if os.path.exists(rootfile):
@@ -148,7 +166,8 @@ def LArDelay_OFCCaliCfg(flags):
     if rootfile2 != "":
         result.addEventAlgo(CompFactory.LArOFC2Ntuple(ContainerKey = "LArOFC",
                                                    AddFEBTempInfo  = False,
-                                                   NtupleFile = "FILE2"
+                                                   NtupleFile = "FILE2",
+                                                   BadChanKey = bcKey
                                                ))
 
         import os
@@ -176,7 +195,9 @@ def LArDelay_OFCCaliCfg(flags):
                                         outputFile=flags.LArCalib.Output.POOLFile,
                                         ObjectList=["LArCaliWaveContainer#LArCaliWave#"+flags.LArCalib.CaliWave.Folder,
                                                     "LArOFCComplete#LArOFC#"+flags.LArCalib.OFCCali.Folder],
-                                        IOVTagList=[caliWaveTag,caliOFCTag]
+                                        IOVTagList=[caliWaveTag,caliOFCTag],
+                                        Run1=flags.LArCalib.IOVStart,
+                                        Run2=flags.LArCalib.IOVEnd
                                     ))
 
     #RegistrationSvc    
@@ -190,24 +211,84 @@ def LArDelay_OFCCaliCfg(flags):
 
     return result
 
+def LArDelay_OFCCali_PoolDumpCfg(flags):
+
+    #Get basic services and cond-algos
+    from LArCalibProcessing.LArCalibBaseConfig import LArCalibBaseCfg
+    result=LArCalibBaseCfg(flags)
+
+    bcKey = "LArBadChannelSC" if flags.LArCalib.isSC else "LArBadChannel"   
+
+    #CondProxyProvider
+    from EventSelectorAthenaPool.CondProxyProviderConfig import CondProxyProviderCfg
+    result.merge (CondProxyProviderCfg (flags, flags.LArCalib.Input.Files))
+
+    #ROOT ntuple writing:
+    rootfile=flags.LArCalib.Output.ROOTFile
+    rootfile2=flags.LArCalib.Output.ROOTFile2
+    if rootfile:
+        result.addEventAlgo(CompFactory.LArCaliWaves2Ntuple(KeyList = ["LArCaliWave",],
+                                                            NtupleName  = "CALIWAVE",
+                                                            AddFEBTempInfo = False,
+                                                            SaveDerivedInfo = True,
+                                                            ApplyCorrection = True,
+                                                            BadChanKey = bcKey
+                                                        ))
+
+        if not rootfile2:
+           result.addEventAlgo(CompFactory.LArOFC2Ntuple(ContainerKey = "LArOFC",
+                                                      AddFEBTempInfo  = False,
+                                                      BadChanKey = bcKey
+                                                  ))
+
+        import os
+        if os.path.exists(rootfile):
+            os.remove(rootfile)
+        result.addService(CompFactory.NTupleSvc(Output = [ "FILE1 DATAFILE='"+rootfile+"' OPT='NEW'" ]))
+        result.setAppProperty("HistogramPersistency","ROOT")
+
+    if rootfile2:
+        if rootfile == rootfile2:
+           result.addEventAlgo(CompFactory.LArOFC2Ntuple(ContainerKey = "LArOFC",
+                                                   AddFEBTempInfo  = False,
+                                                   NtupleFile = "FILE1",
+                                                   BadChanKey = bcKey
+                                               ))
+        else:
+           result.addEventAlgo(CompFactory.LArOFC2Ntuple(ContainerKey = "LArOFC",
+                                                   AddFEBTempInfo  = False,
+                                                   NtupleFile = "FILE2",
+                                                   BadChanKey = bcKey
+                                               ))
+
+           import os
+           if os.path.exists(rootfile2):
+               os.remove(rootfile2)
+           if not rootfile:   
+               result.addService(CompFactory.NTupleSvc(Output = [ "FILE2 DATAFILE='"+rootfile2+"' OPT='NEW'" ]))
+           else:   
+               result.getService("NTupleSvc").Output += [ "FILE2 DATAFILE='"+rootfile2+"' OPT='NEW'" ]
+           result.setAppProperty("HistogramPersistency","ROOT")
+
+
+    return result
+
 
 if __name__ == "__main__":
-
-
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from LArCalibProcessing.LArCalibConfigFlags import addLArCalibFlags
+    ConfigFlags=initConfigFlags()
     addLArCalibFlags(ConfigFlags)
 
-    ConfigFlags.LArCalib.Input.Dir = "/scratch/wlampl/calib21/Aug27"
+    ConfigFlags.LArCalib.Input.Dir = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/LArCalibProcessing"
     ConfigFlags.LArCalib.Input.Type="calibration_LArElec-Delay"
-    ConfigFlags.LArCalib.Input.RunNumbers=[400268,]
-    ConfigFlags.LArCalib.Input.Database="db.sqlite"
-    ConfigFlags.LArCalib.Preselection.BEC=[1]
-    ConfigFlags.LArCalib.Preselection.Side=[0]
+    ConfigFlags.LArCalib.Input.RunNumbers=[441251,]
+    ConfigFlags.LArCalib.Input.Database="output.sqlite"
     ConfigFlags.Input.Files=ConfigFlags.LArCalib.Input.Files
 
 
     ConfigFlags.LArCalib.Output.ROOTFile="ofccali.root"
+    ConfigFlags.LArCalib.Output.POOLFile="ofccali.pool.root"
 
     ConfigFlags.IOVDb.DBConnection="sqlite://;schema=output.sqlite;dbname=CONDBR2"
     ConfigFlags.IOVDb.GlobalTag="LARCALIB-RUN2-02"

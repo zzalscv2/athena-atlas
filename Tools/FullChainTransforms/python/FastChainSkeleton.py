@@ -1,12 +1,16 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import sys
 from PyJobTransforms.CommonRunArgsToFlags import commonRunArgsToFlags
 from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, processPostExec, processPostInclude
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-from AthenaPoolCnvSvc.PoolWriteConfig import PoolWriteCfg
 from SimuJobTransforms.CommonSimulationSteering import specialConfigPreInclude, specialConfigPostInclude
+
+
+# temporarily force no global config flags
+from AthenaConfiguration import AllConfigFlags
+del AllConfigFlags.ConfigFlags
 
 
 def fromRunArgs(runArgs):
@@ -18,157 +22,158 @@ def fromRunArgs(runArgs):
     logFastChain.info(str(runArgs))
 
     logFastChain.info('**** Setting-up configuration flags')
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+
     from SimulationConfig.SimEnums import SimulationFlavour
-    commonRunArgsToFlags(runArgs, ConfigFlags)
+    commonRunArgsToFlags(runArgs, flags)
 
     # Set ProductionStep
     from AthenaConfiguration.Enums import ProductionStep
-    ConfigFlags.Common.ProductionStep = ProductionStep.FastChain
+    flags.Common.ProductionStep = ProductionStep.FastChain
 
     # Set simulator
     if hasattr(runArgs, 'simulator'):
-        ConfigFlags.Sim.ISF.Simulator = SimulationFlavour(runArgs.simulator)
+        flags.Sim.ISF.Simulator = SimulationFlavour(runArgs.simulator)
 
     # This is ISF
-    ConfigFlags.Sim.ISFRun = True
+    flags.Sim.ISFRun = True
 
     # Set input files
     if hasattr(runArgs, 'inputRDO_BKGFile') or hasattr(runArgs, 'inputBS_SKIMFile'):
         # Set inputs for Overlay
         from OverlayConfiguration.OverlaySkeleton import setOverlayInputFiles
-        setOverlayInputFiles(runArgs, ConfigFlags, logFastChain)
-        ConfigFlags.Overlay.FastChain = True
+        setOverlayInputFiles(runArgs, flags, logFastChain)
+        flags.Overlay.FastChain = True
     else:
         # Setting input files for FastChain without overlay
         if hasattr(runArgs, 'inputEVNTFile'):
-            ConfigFlags.Input.Files = runArgs.inputEVNTFile
+            flags.Input.Files = runArgs.inputEVNTFile
         else:
             raise RuntimeError('No input EVNT file defined')
 
     # Setting output files (including for Overlay) for FastChain
     if hasattr(runArgs, 'outputHITSFile'):
-        ConfigFlags.Output.HITSFileName = runArgs.outputHITSFile
+        flags.Output.HITSFileName = runArgs.outputHITSFile
 
     if hasattr(runArgs, 'outputRDOFile'):
         if runArgs.outputRDOFile == 'None':
-            ConfigFlags.Output.RDOFileName = ''
+            flags.Output.RDOFileName = ''
         else:
-            ConfigFlags.Output.RDOFileName = runArgs.outputRDOFile
+            flags.Output.RDOFileName = runArgs.outputRDOFile
     else:
         raise RuntimeError('No outputRDOFile defined')
 
-    if ConfigFlags.Overlay.FastChain:
+    if flags.Overlay.FastChain:
         if hasattr(runArgs, 'outputRDO_SGNLFile'):
-            ConfigFlags.Output.RDO_SGNLFileName = runArgs.outputRDO_SGNLFile
+            flags.Output.RDO_SGNLFileName = runArgs.outputRDO_SGNLFile
 
     if hasattr(runArgs, 'conditionsTag'):
-        ConfigFlags.IOVDb.GlobalTag = runArgs.conditionsTag
+        flags.IOVDb.GlobalTag = runArgs.conditionsTag
 
     # Generate detector list (must be after input setting)
     from SimuJobTransforms.SimulationHelpers import getDetectorsFromRunArgs
-    detectors = getDetectorsFromRunArgs(ConfigFlags, runArgs)
+    detectors = getDetectorsFromRunArgs(flags, runArgs)
 
     # Setup detector flags
     from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
-    setupDetectorFlags(ConfigFlags, detectors, toggle_geometry=True)
+    setupDetectorFlags(flags, detectors, toggle_geometry=True)
 
     # Common simulation runtime arguments
     from SimulationConfig.SimConfigFlags import simulationRunArgsToFlags
-    simulationRunArgsToFlags(runArgs, ConfigFlags)
+    simulationRunArgsToFlags(runArgs, flags)
 
     # Setup digitization flags
     from Digitization.DigitizationConfigFlags import digitizationRunArgsToFlags
-    digitizationRunArgsToFlags(runArgs, ConfigFlags)
+    digitizationRunArgsToFlags(runArgs, flags)
 
     # Setup flags for pile-up
-    if not ConfigFlags.Overlay.FastChain:
+    if not flags.Overlay.FastChain:
         # Setup common digitization flags
         from Digitization.DigitizationConfigFlags import setupDigitizationFlags
-        setupDigitizationFlags(runArgs, ConfigFlags)
-        logFastChain.info('Running with pile-up: %s', ConfigFlags.Digitization.PileUp)
+        setupDigitizationFlags(runArgs, flags)
+        logFastChain.info('Running with pile-up: %s', flags.Digitization.PileUp)
 
     # Disable LVL1 trigger if triggerConfig explicitly set to 'NONE'
     if hasattr(runArgs, 'triggerConfig') and runArgs.triggerConfig == 'NONE':
-        ConfigFlags.Detector.EnableL1Calo = False
+        flags.Detector.EnableL1Calo = False
 
     # Setup perfmon flags from runargs
     from PerfMonComps.PerfMonConfigHelpers import setPerfmonFlagsFromRunArgs
-    setPerfmonFlagsFromRunArgs(ConfigFlags, runArgs)
+    setPerfmonFlagsFromRunArgs(flags, runArgs)
 
     # Pre-include
-    processPreInclude(runArgs, ConfigFlags)
+    processPreInclude(runArgs, flags)
 
     # Special Configuration preInclude
-    specialConfigPreInclude(ConfigFlags)
+    specialConfigPreInclude(flags)
 
     # Pre-exec
-    processPreExec(runArgs, ConfigFlags)
+    processPreExec(runArgs, flags)
 
-    if not ConfigFlags.Overlay.FastChain:
+    if not flags.Overlay.FastChain:
         # Load pile-up stuff after pre-include/exec to ensure everything is up-to-date
         from Digitization.DigitizationConfigFlags import pileupRunArgsToFlags
-        pileupRunArgsToFlags(runArgs, ConfigFlags)
+        pileupRunArgsToFlags(runArgs, flags)
 
         # Setup pile-up profile
-        if ConfigFlags.Digitization.PileUp:
+        if flags.Digitization.PileUp:
             from RunDependentSimComps.PileUpUtils import setupPileUpProfile
-            setupPileUpProfile(ConfigFlags)
+            setupPileUpProfile(flags)
 
-    ConfigFlags.Sim.DoFullChain = True
+    flags.Sim.DoFullChain = True
 
     # Lock flags
-    ConfigFlags.lock()
+    flags.lock()
 
-    if ConfigFlags.Digitization.PileUp:
+    if flags.Digitization.PileUp:
         from Digitization.PileUpConfig import PileUpEventLoopMgrCfg
-        cfg = MainServicesCfg(ConfigFlags, LoopMgr="PileUpEventLoopMgr")
-        cfg.merge(PileUpEventLoopMgrCfg(ConfigFlags))
+        cfg = MainServicesCfg(flags, LoopMgr="PileUpEventLoopMgr")
+        cfg.merge(PileUpEventLoopMgrCfg(flags))
     else:
-        cfg = MainServicesCfg(ConfigFlags)
+        cfg = MainServicesCfg(flags)
 
-    cfg.merge(PoolReadCfg(ConfigFlags))
-    cfg.merge(PoolWriteCfg(ConfigFlags))
+    cfg.merge(PoolReadCfg(flags))
 
     # Simulation
     from BeamEffects.BeamEffectsAlgConfig import BeamEffectsAlgCfg
-    cfg.merge(BeamEffectsAlgCfg(ConfigFlags))
+    cfg.merge(BeamEffectsAlgCfg(flags))
 
-    if (not ConfigFlags.Overlay.FastChain and "xAOD::EventInfo#EventInfo" in ConfigFlags.Input.TypedCollections) \
-        or (ConfigFlags.Overlay.FastChain and "xAOD::EventInfo#EventInfo" in ConfigFlags.Input.SecondaryTypedCollections):
+    if not flags.Digitization.PileUp and ( (not flags.Overlay.FastChain and "xAOD::EventInfo#EventInfo" in flags.Input.TypedCollections) \
+                                           or (flags.Overlay.FastChain and "xAOD::EventInfo#EventInfo" in flags.Input.SecondaryTypedCollections) ):
         # Make sure signal EventInfo is rebuilt from event context
         # TODO: this is probably not needed, but keeping it to be in sync with standard simulation
         from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoUpdateFromContextAlgCfg
-        cfg.merge(EventInfoUpdateFromContextAlgCfg(ConfigFlags))
+        cfg.merge(EventInfoUpdateFromContextAlgCfg(flags))
 
-    if ConfigFlags.Overlay.FastChain:
+    if flags.Overlay.FastChain:
         # CopyMcEventCollection should be before Kernel
         from OverlayCopyAlgs.OverlayCopyAlgsConfig import CopyMcEventCollectionCfg
-        cfg.merge(CopyMcEventCollectionCfg(ConfigFlags))
+        cfg.merge(CopyMcEventCollectionCfg(flags))
 
     from ISF_Config.ISF_MainConfig import ISF_KernelCfg
-    cfg.merge(ISF_KernelCfg(ConfigFlags))
+    cfg.merge(ISF_KernelCfg(flags))
 
     # Main Overlay Steering
-    if ConfigFlags.Overlay.FastChain:
+    if flags.Overlay.FastChain:
         from OverlayConfiguration.OverlaySteering import OverlayMainContentCfg
-        cfg.merge(OverlayMainContentCfg(ConfigFlags))
+        cfg.merge(OverlayMainContentCfg(flags))
     else:
         from Digitization.DigitizationSteering import DigitizationMainContentCfg
-        cfg.merge(DigitizationMainContentCfg(ConfigFlags))
+        cfg.merge(DigitizationMainContentCfg(flags))
 
     # Special message service configuration
     from Digitization.DigitizationSteering import DigitizationMessageSvcCfg
-    cfg.merge(DigitizationMessageSvcCfg(ConfigFlags))
+    cfg.merge(DigitizationMessageSvcCfg(flags))
 
     # Special Configuration postInclude
-    specialConfigPostInclude(ConfigFlags, cfg)
+    specialConfigPostInclude(flags, cfg)
 
     # Post-include
-    processPostInclude(runArgs, ConfigFlags, cfg)
+    processPostInclude(runArgs, flags, cfg)
 
     # Post-exec
-    processPostExec(runArgs, ConfigFlags, cfg)
+    processPostExec(runArgs, flags, cfg)
 
     # Run the final accumulator
     sc = cfg.run()

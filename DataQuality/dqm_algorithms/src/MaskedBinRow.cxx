@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /*! \file MaskedBinRow.cxx
  * \author R. Calkins
  */
 
+#include <set>
 #include <dqm_core/AlgorithmConfig.h>
 #include <dqm_algorithms/MaskedBinRow.h>
 #include <dqm_algorithms/tools/AlgorithmHelper.h>
@@ -60,6 +61,13 @@ dqm_algorithms::MaskedBinRow::execute(	const std::string & name,
   int useReference = dqm_algorithms::tools::GetFirstFromMap( "UseReference", config.getParameters(), 0);
   int useTotalEntries = dqm_algorithms::tools::GetFirstFromMap( "UseTotalEntries", config.getParameters(), 0);
   int entriesBin = dqm_algorithms::tools::GetFirstFromMap( "EntriesBin", config.getParameters(), -1);
+
+  std::set<int> ignoredBins;
+  for (const std::pair<std::string,double> keyValuePair : config.getParameters()) {
+    if (keyValuePair.first.compare(0, 9, "IgnoreBin") == 0) {
+      ignoredBins.insert(keyValuePair.second);
+    }
+  }
 
   TH2* refhist=0;
   if (useReference) {
@@ -159,32 +167,36 @@ dqm_algorithms::MaskedBinRow::execute(	const std::string & name,
       }
 
       if(bincontent>gthreshold){
-	if( testrows==1 && histogram->GetBinContent(maskedbin,j)  != 0) continue;
-	if( testrows==0 && histogram->GetBinContent(i,maskedbin)  != 0) continue;
-	if(refhist != 0){
-	  if( refhist->GetBinContent(i,j)  != 0){
-	    if(bincontent < 1.0-gthreshold && bincontent > 1.0-rthreshold  ) yellowrows++;   
-	    if(bincontent < 1.0-rthreshold ) redrows++;   
-	    continue; 
-	  }
-	}
-	if( testrows==0 && j == okbin){
-	  if(bincontent < 1.0-gthreshold && bincontent > 1.0-rthreshold  ) yellowrows++;   
-	  if(bincontent < 1.0-rthreshold ) redrows++;   
-	  continue; }
-	if( testrows==1 && i == okbin){
-	  if(bincontent < 1.0-gthreshold && bincontent > 1.0-rthreshold  ) yellowrows++;   
-	  if(bincontent < 1.0-rthreshold ) redrows++;   
-	  continue; }
+        if( testrows==1 && histogram->GetBinContent(maskedbin,j)  != 0) continue;
+        if( testrows==0 && histogram->GetBinContent(i,maskedbin)  != 0) continue;
 
-	ERS_DEBUG(1,"Found bin : ("<< i<< ","<<j<<" ) = " << bincontent ) ;
+        int bin = histogram->GetBin(i, j);
+        if (ignoredBins.count(bin)) continue;
 
-	dqm_algorithms::tools::PublishBin(histogram,i,j,bincontent,result);
-	if(bincontent>rthreshold){
-	  ++redcount;
-	}else{
-	  ++yellowcount;
-	}
+        if(refhist != 0){
+          if( refhist->GetBinContent(i,j)  != 0){
+            if(bincontent < 1.0-gthreshold && bincontent > 1.0-rthreshold  ) ++yellowrows;
+            if(bincontent < 1.0-rthreshold ) ++redrows;
+            continue;
+          }
+        }
+        if( testrows==0 && j == okbin){
+          if(bincontent < 1.0-gthreshold && bincontent > 1.0-rthreshold  ) ++yellowrows;
+          if(bincontent < 1.0-rthreshold ) redrows++;
+          continue; }
+        if( testrows==1 && i == okbin){
+          if(bincontent < 1.0-gthreshold && bincontent > 1.0-rthreshold  ) ++yellowrows;
+          if(bincontent < 1.0-rthreshold ) ++redrows;
+          continue; }
+
+        ERS_DEBUG(1,"Found bin : ("<< i<< ","<<j<<" ) = " << bincontent ) ;
+
+        dqm_algorithms::tools::PublishBin(histogram,i,j,bincontent,result);
+        if(bincontent>rthreshold){
+          ++redcount;
+        }else{
+          ++yellowcount;
+        }
       } 
 
     }
@@ -237,4 +249,5 @@ dqm_algorithms::MaskedBinRow::printDescription(std::ostream& out)
   out<<"Optional Parameter: UseReference : Reference histogram with entries in the 'ok' bins will be used to indicate that these bins should be ignored  when parameter is set to 1.    default = 0 "<<std::endl;
   out<<"Optional Parameter: UseTotalEntries : The rate of digital errors will be checked against total number of entries in histogram  : default = 0 "<<std::endl;
   out<<"Optional Parameter: EntriesBin : The rate of digital errors will be checked against content of global bin, if it is not negative : default = -1 "<<std::endl;
+  out<<"Optional Parameter: IgnoreBin* : Ignore during this test specified global bin, where * unique characters (can be used many times to ignore many bins)"<<std::endl;
 }

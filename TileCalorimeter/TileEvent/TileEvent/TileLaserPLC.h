@@ -25,7 +25,6 @@ class TileLaserPLC{
       , m_interlock(0)
       ,  m_alarm(0) { }
 
-    ~TileLaserPLC() { }
 
     int getAlphaPos() const     { return m_alphaPos;  }   
     double getLVdiodes() const  { return m_LVdiodes;  }   

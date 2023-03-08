@@ -9,8 +9,7 @@
 
 from TrigEDMConfig.TriggerEDMRun1 import TriggerL2List,TriggerEFList,TriggerResultsRun1List
 from TrigEDMConfig.TriggerEDMRun2 import TriggerResultsList,TriggerLvl1List,TriggerIDTruth,TriggerHLTList,EDMDetails,EDMLibraries,TriggerL2EvolutionList,TriggerEFEvolutionList
-from TrigEDMConfig.TriggerEDMRun3 import TriggerHLTListRun3,AllowedOutputFormats,addExtraCollectionsToEDMList,varToRemoveFromAODSLIM
-from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+from TrigEDMConfig.TriggerEDMRun3 import TriggerHLTListRun3,AllowedOutputFormats,varToRemoveFromAODSLIM 
 from AthenaCommon.Logging import logging
 log = logging.getLogger('TriggerEDM')
 
@@ -20,12 +19,6 @@ log = logging.getLogger('TriggerEDM')
 #  For Run 3
 #
 #************************************************************
-# Let adding collections via preExec for detailed validation
-if flags.Trigger.ExtraEDMList:
-    log.info( "Adding {} extra collections to EDM (): {}".format(len(TriggerHLTListRun3), flags.Trigger.ExtraEDMList) )
-    addExtraCollectionsToEDMList(TriggerHLTListRun3, flags.Trigger.ExtraEDMList)
-    log.info( "Number of EDM items after adding extra collections: {}".format(len(TriggerHLTListRun3)) )
-
 
 def getTriggerEDMList(key, runVersion):
     """

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef jetsubstructuremomenttools_angularitytool_header
@@ -13,7 +13,7 @@ class AngularityTool :
     
     public:
       // Constructor and destructor
-      AngularityTool(std::string name);
+      AngularityTool(const std::string& name);
 
       int modifyJet(xAOD::Jet &injet) const;
 };

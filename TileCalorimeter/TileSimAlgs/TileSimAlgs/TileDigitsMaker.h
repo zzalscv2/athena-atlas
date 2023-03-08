@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -93,7 +93,7 @@ class TileDigitsMaker: public AthReentrantAlgorithm {
                                        std::vector<std::vector<double>>& drawerBufferHi,
                                        std::vector<int>& igain, int ros, int drawer, int drawerIdx,
                                        std::vector<int>& over_gain, const TileEMScale* emScale,
-                                       const TileSampleNoise& sampleNoise, const TileDQstatus* dqStatus,
+                                       const TileSampleNoise* sampleNoise, const TileDQstatus* dqStatus,
                                        const TileBadChannels* badChannels) const;
 
     StatusCode fillDigitCollection(const TileHitCollection* hitCollection,
@@ -101,7 +101,7 @@ class TileDigitsMaker: public AthReentrantAlgorithm {
                                    std::vector<std::vector<double>>& drawerBufferHi,
                                    std::vector<int>& igain, std::vector<int>& overgain, std::vector<double>& ech_int,
                                    std::vector<bool> &signal_in_channel, const TileEMScale* emScale,
-                                   const TileSamplingFraction* samplingFraction, const TilePulse& pulse) const;
+                                   const TileSamplingFraction* samplingFraction, const TilePulse* pulse) const;
 
     SG::ReadHandleKey<TileHitContainer> m_hitContainerKey{this,
          "TileHitContainer", "TileHitCnt", "input Tile hit container key"};
@@ -203,7 +203,7 @@ class TileDigitsMaker: public AthReentrantAlgorithm {
     /**
      * @brief Name of TileSampleNoise in condition store
      */
-    SG::ReadCondHandleKey<TileCalibDataFlt> m_sampleNoiseKey{this,
+    SG::ReadCondHandleKey<TileSampleNoise> m_sampleNoiseKey{this,
         "TileSampleNoise", "TileSampleNoise", "Input Tile sample noise"};
 
     /**
@@ -215,7 +215,7 @@ class TileDigitsMaker: public AthReentrantAlgorithm {
     /**
      * @brief Name of TilePulseShape in condition store
      */
-    SG::ReadCondHandleKey<TileCalibDataFlt> m_pulseShapeKey{this,
+    SG::ReadCondHandleKey<TilePulse> m_pulseShapeKey{this,
         "TilePulseShape", "TilePulseShape", "Input Tile pulse shape"};
 
     /**

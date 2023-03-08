@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4UserActions_RadiationMapsMaker_H
@@ -262,6 +262,7 @@ namespace G4UA
       TGraph * m_tgpSiB = 0;
       TGraph * m_tgnSiA = 0;
       TGraph * m_tgnSiB = 0;
+      TGraph * m_tgnSiC = 0;
       TGraph * m_tgpiSi = 0;
       TGraph * m_tgeSi  = 0;
 

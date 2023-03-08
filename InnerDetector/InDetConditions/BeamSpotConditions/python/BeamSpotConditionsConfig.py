@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -14,7 +14,8 @@ def BeamSpotCondAlgCfg(flags, name="BeamSpotCondAlg", **kwargs):
                              className="AthenaAttributeList"))
     else :
         acc.merge(addFoldersSplitOnline(flags, "INDET","/Indet/Onl/Beampos",
-                                        "/Indet/Beampos", className="AthenaAttributeList"))
+                                        "/Indet/Beampos", className="AthenaAttributeList",
+                                        extensible=flags.Trigger.doHLT and flags.Trigger.Online.isPartition))
 
     BeamSpotCondAlg = CompFactory.BeamSpotCondAlg
     acc.addCondAlgo(BeamSpotCondAlg(name, **kwargs))

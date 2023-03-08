@@ -49,12 +49,11 @@ void  InDet::TRT_Trajectory_xk::set
 // Initiate trajectory for precision seed
 ///////////////////////////////////////////////////////////////////
 
-void InDet::TRT_Trajectory_xk::initiateForPrecisionSeed
-(std::list< std::pair<Amg::Vector3D,double> >      & Gp  ,
- const std::vector<const InDetDD::TRT_BaseElement*>        & De  ,
- const TRT_DriftCircleContainer*                   & TRTc,
- const Trk::PatternTrackParameters                 & Tp   )
-{
+void InDet::TRT_Trajectory_xk::initiateForPrecisionSeed(
+    std::vector<std::pair<Amg::Vector3D, double> >& Gp,
+    const std::vector<const InDetDD::TRT_BaseElement*>& De,
+    const TRT_DriftCircleContainer*& TRTc,
+    const Trk::PatternTrackParameters& Tp) {
   m_ndf             =  0;
   m_nholes          =  0;
   m_nholesb         =  0;
@@ -71,7 +70,7 @@ void InDet::TRT_Trajectory_xk::initiateForPrecisionSeed
 
   std::vector<const InDetDD::TRT_BaseElement*>::const_iterator d=De.begin(),de=De.end();
 
-  std::list< std::pair<Amg::Vector3D,double> >::iterator i=Gp.begin(),i0=Gp.begin(),ie=Gp.end();
+  std::vector< std::pair<Amg::Vector3D,double> >::iterator i=Gp.begin(),i0=Gp.begin(),ie=Gp.end();
   // At least two elements are needed for the direction computation.
   // So, return immediately if there are no elements, or if the next
   // element is already the end.
@@ -132,12 +131,11 @@ void InDet::TRT_Trajectory_xk::initiateForPrecisionSeed
 // Initiate trajectory for TRT seed
 ///////////////////////////////////////////////////////////////////
 
-void InDet::TRT_Trajectory_xk::initiateForTRTSeed
-(std::list< std::pair<Amg::Vector3D,double> >      & Gp  ,
- const std::vector<const InDetDD::TRT_BaseElement*>        & De  ,
- const TRT_DriftCircleContainer*                   & TRTc,
- const Trk::PatternTrackParameters                 & Tp   )
-{
+void InDet::TRT_Trajectory_xk::initiateForTRTSeed(
+    std::vector<std::pair<Amg::Vector3D, double> >& Gp,
+    const std::vector<const InDetDD::TRT_BaseElement*>& De,
+    const TRT_DriftCircleContainer*& TRTc,
+    const Trk::PatternTrackParameters& Tp) {
   m_ndf             =  0;
   m_nholes          =  0;
   m_nholesb         =  0;
@@ -157,7 +155,7 @@ void InDet::TRT_Trajectory_xk::initiateForTRTSeed
 
   std::vector<const InDetDD::TRT_BaseElement*>::const_iterator d=De.begin(),de=De.end();
 
-  std::list< std::pair<Amg::Vector3D,double> >::iterator i=Gp.begin(),i0=Gp.begin(),ie=Gp.end();
+  std::vector< std::pair<Amg::Vector3D,double> >::iterator i=Gp.begin(),i0=Gp.begin(),ie=Gp.end();
   if(i0==ie) return;
   // At least two elements are needed for the direction computation.
   // So, return immediately if there are no elements, or if the next
@@ -180,44 +178,57 @@ void InDet::TRT_Trajectory_xk::initiateForTRTSeed
     }
   }
 
-  for(i=Gp.begin(); i!=ie; ++i) {
+  for (i = Gp.begin(); i != ie; ++i) {
 
-    IdentifierHash id = (*d)->identifyHash(); const auto *w=(*TRTc).indexFindPtr(id);
+    IdentifierHash id = (*d)->identifyHash();
+    const auto* w = (*TRTc).indexFindPtr(id);
     bool q;
-    if(w!=nullptr && w->begin()!=w->end()) {
+    if (w != nullptr && w->begin() != w->end()) {
 
-      ti = w->begin(); te = w->end  ();
-      q = m_elements[m_lastRoad].initiateForTRTSeed(1,(*d),ti,te,(*i),A,m_roadwidth2);
-      if(m_elements [m_lastRoad].isCluster()) ++m_naElements;
+      ti = w->begin();
+      te = w->end();
+      q = m_elements[m_lastRoad].initiateForTRTSeed(1, (*d), ti, te, (*i), A,
+                                                    m_roadwidth2);
+      if (m_elements[m_lastRoad].isCluster())
+        ++m_naElements;
 
+    } else {
+      q = m_elements[m_lastRoad].initiateForTRTSeed(0, (*d), ti, te, (*i), A,
+                                                    m_roadwidth2);
     }
-    else                                               {
-      q = m_elements[m_lastRoad].initiateForTRTSeed(0,(*d),ti,te,(*i),A,m_roadwidth2);
-    }
 
-    if(m_elements[m_lastRoad].nlinks()) {
+    if (m_elements[m_lastRoad].nlinks()) {
 
-      if(q) {
-	if(m_firstTrajectory < 0) {m_firstTrajectory = m_lastTrajectory = m_lastRoad;}
-	else                      {                    m_lastTrajectory = m_lastRoad;}
+      if (q) {
+        if (m_firstTrajectory < 0) {
+          m_firstTrajectory = m_lastTrajectory = m_lastRoad;
+        } else {
+          m_lastTrajectory = m_lastRoad;
+        }
       }
       ++m_lastRoad;
     }
-    if(++d==de) break;
+    if (++d == de)
+      break;
 
     // New trajectory direction calculation
     //
-    if( (*i).second-(*i0).second > 50.) {
+    if ((*i).second - (*i0).second > 50.) {
 
-      A[0] = (*i).first.x()-(*i0).first.x();
-      A[1] = (*i).first.y()-(*i0).first.y();
-      A[2] = (*i).first.z()-(*i0).first.z();
-      double As = 1./std::sqrt(A[0]*A[0]+A[1]*A[1]+A[2]*A[2]);
-      A[0]*=As; A[1]*=As; A[2]*=As; i0=i;
+      A[0] = (*i).first.x() - (*i0).first.x();
+      A[1] = (*i).first.y() - (*i0).first.y();
+      A[2] = (*i).first.z() - (*i0).first.z();
+      double As = 1. / std::sqrt(A[0] * A[0] + A[1] * A[1] + A[2] * A[2]);
+      A[0] *= As;
+      A[1] *= As;
+      A[2] *= As;
+      i0 = i;
     }
   }
-  m_nElements = m_lastRoad - m_firstRoad; m_lastRoad-=1;
-  if(m_firstTrajectory < 0) m_naElements = 0;
+  m_nElements = m_lastRoad - m_firstRoad;
+  m_lastRoad -= 1;
+  if (m_firstTrajectory < 0)
+    m_naElements = 0;
 }
 
 ///////////////////////////////////////////////////////////////////

@@ -75,6 +75,8 @@ def BunchCrossingCondAlgDefault():
                                FillParamsFolderKey =folder,
                                Mode=beamFlags.bunchStructureSource(),
                                L1BunchGroupCondData=bgkey )
+    if beamFlags.bunchStructureSource() == 1:
+        alg.TrigConfigSvc = ''
 
     condSeq += alg
 

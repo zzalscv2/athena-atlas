@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // STL include files
@@ -22,6 +22,7 @@
 #include "MuonNSWCommonDecode/NSWPadTriggerL1a.h"
 #include "MuonNSWCommonDecode/NSWResourceId.h"
 #include "MuonNSWCommonDecode/MMARTPacket.h"
+#include "MuonNSWCommonDecode/MMTrigPacket.h"
 
 
 
@@ -31,14 +32,16 @@
 struct Params
 {
   bool print_only {false};
-  unsigned int printout_level {0};
-  unsigned int max_events {0};
+  uint32_t printout_level {0};
+  uint32_t max_events {0};
   std::vector <std::string> file_names; //outfiles will just rename input ones
 };
 
 struct Statistics
 {
-  unsigned int nevents {0};
+  uint32_t nevents {0};
+  uint32_t nevents_not_decoded {0};
+  uint32_t nevents_sus_felix_stat {0};
   double total_decoding_time {0};
   double avg_decoding_time {0};
   //can be extended for any quick stat wanted
@@ -47,8 +50,9 @@ struct Statistics
 struct outBranches
 {
   //each event has multple ROBs (e.g. multiple sectors)
-  //each ROB then has multiple elinks (so at least 2 layers of vector)
-  //MML1A - comtemplating multiple elinks
+  //each ROB then has multiple elinks
+  //MML1A - comtemplating multiple elinks,
+  //so the vector is on elinks
   std::vector<uint32_t> b_MML1A_ROD_sourceID = {} ;
   std::vector<uint32_t> b_MML1A_ROD_subdetID = {} ;
   std::vector<uint32_t> b_MML1A_ROD_moduleID = {} ;
@@ -79,8 +83,58 @@ struct outBranches
   std::vector<std::vector<uint32_t>> b_MML1A_art_BCID = {} ;
   std::vector<std::vector<uint32_t>> b_MML1A_art_layers = {} ;
   std::vector<std::vector<uint32_t>> b_MML1A_art_channels = {} ;
+  std::vector<std::vector<uint32_t>> b_MML1A_trig_BCID = {} ;
+  std::vector<std::vector<uint32_t>> b_MML1A_trig_dTheta = {} ;
+  std::vector<std::vector<uint32_t>> b_MML1A_trig_phiBin = {} ;
+  std::vector<std::vector<uint32_t>> b_MML1A_trig_rBin = {} ;
   std::vector<uint32_t> b_MML1A_trailer_CRC = {} ;
-  //PAD - comtemplating multiple elinks
+  //MMMon - comtemplating multiple elinks (even if only one possible in current design)
+  //so the vector is on elinks
+  std::vector<uint32_t> b_MMMon_ROD_sourceID = {} ;
+  std::vector<uint32_t> b_MMMon_ROD_subdetID = {} ;
+  std::vector<uint32_t> b_MMMon_ROD_moduleID = {} ;
+  std::vector<uint32_t> b_MMMon_ROD_L1ID = {} ;
+  std::vector<uint32_t> b_MMMon_ROD_n_words = {} ;
+  std::vector<uint32_t> b_MMMon_head_fragID = {} ;
+  std::vector<uint32_t> b_MMMon_head_sectID = {} ;
+  std::vector<uint32_t> b_MMMon_head_EC = {} ;
+  std::vector<uint32_t> b_MMMon_head_flags = {} ;
+  std::vector<uint32_t> b_MMMon_head_BCID = {} ;
+  std::vector<uint32_t> b_MMMon_head_orbit = {} ;
+  std::vector<uint32_t> b_MMMon_head_spare = {} ;
+  std::vector<uint32_t> b_MMMon_L1ID = {} ;
+  std::vector<uint32_t> b_MMMon_head_coincBCID = {} ;
+  std::vector<uint32_t> b_MMMon_head_regionCount = {} ;
+  std::vector<uint32_t> b_MMMon_head_coincRegion = {} ;
+  std::vector<uint32_t> b_MMMon_head_reserved = {} ;
+  std::vector<std::vector<uint32_t>> b_MMMon_finder_streamID = {} ;
+  std::vector<std::vector<uint32_t>> b_MMMon_finder_regionCount = {} ;
+  std::vector<std::vector<uint32_t>> b_MMMon_finder_triggerID = {} ;
+  std::vector<std::vector<uint32_t>> b_MMMon_finder_V1 = {} ;
+  std::vector<std::vector<uint32_t>> b_MMMon_finder_V0 = {} ;
+  std::vector<std::vector<uint32_t>> b_MMMon_finder_U1 = {} ;
+  std::vector<std::vector<uint32_t>> b_MMMon_finder_U0 = {} ;
+  std::vector<std::vector<uint32_t>> b_MMMon_finder_X3 = {} ;
+  std::vector<std::vector<uint32_t>> b_MMMon_finder_X2 = {} ;
+  std::vector<std::vector<uint32_t>> b_MMMon_finder_X1 = {} ;
+  std::vector<std::vector<uint32_t>> b_MMMon_finder_X0 = {} ;
+  std::vector<std::vector<uint32_t>> b_MMMon_fitter_streamID = {} ;
+  std::vector<std::vector<uint32_t>> b_MMMon_fitter_regionCount = {} ;
+  std::vector<std::vector<uint32_t>> b_MMMon_fitter_triggerID = {} ;
+  std::vector<std::vector<uint32_t>> b_MMMon_fitter_filler = {} ;
+  std::vector<std::vector<uint32_t>> b_MMMon_fitter_mxG = {} ;
+  std::vector<std::vector<uint32_t>> b_MMMon_fitter_muG = {} ;
+  std::vector<std::vector<uint32_t>> b_MMMon_fitter_mvG = {} ;
+  std::vector<std::vector<uint32_t>> b_MMMon_fitter_mxL = {} ;
+  std::vector<std::vector<uint32_t>> b_MMMon_fitter_mx_ROI = {} ;
+  std::vector<std::vector<uint32_t>> b_MMMon_fitter_dTheta = {} ;
+  std::vector<std::vector<uint32_t>> b_MMMon_fitter_zero = {} ;
+  std::vector<std::vector<uint32_t>> b_MMMon_fitter_phiSign = {} ;
+  std::vector<std::vector<uint32_t>> b_MMMon_fitter_phiBin = {} ;
+  std::vector<std::vector<uint32_t>> b_MMMon_fitter_rBin = {} ;
+  std::vector<uint32_t> b_MMMon_trailer_CRC = {} ;
+  //PadL1A - comtemplating multiple elinks
+  //so the vector is on elinks
   std::vector<uint32_t> b_PadL1A_ROD_sourceID = {} ;
   std::vector<uint32_t> b_PadL1A_ROD_subdetID = {} ;
   std::vector<uint32_t> b_PadL1A_ROD_moduleID = {} ;
@@ -119,7 +173,7 @@ struct outBranches
 void test_nsw_trigger_common_decoder_help (char *progname)
 {
   std::cout << "Usage: " << progname
-	    << " [-v] [-r] [-t] [-f] [-d <MMG/STG>] [-n events] [-h] file1, file2, ..." << std::endl;
+	<< " [-h] [-n events] [-p] [-v] file1, file2, ..." << std::endl;
   std::cout << "\t\t[-n events] maximum number of events to read (default = all)" << std::endl;
   std::cout << "\t\t[-p] only print raw fragments" << std::endl;
   std::cout << "\t\tMultiple [-v] options increase printout detail level" << std::endl;
@@ -138,7 +192,7 @@ int test_nsw_trigger_common_decoder_opt (int argc, char **argv, Params& params)
 	        params.print_only = true;
 	        break;
         case 'n':
-          params.max_events = static_cast <unsigned int> (atoi (argv[++i]));
+          params.max_events = static_cast <uint32_t> (strtol(argv[++i], NULL, 10));
           break;
         case 'h':
 	        test_nsw_trigger_common_decoder_help (argv[0]);
@@ -163,71 +217,123 @@ int test_nsw_trigger_common_decoder_opt (int argc, char **argv, Params& params)
   return 0;
 }
 
-int test_nsw_trigger_common_decoder_init_tree (TTree* outtree, outBranches &data)
+int test_nsw_trigger_common_decoder_init_tree (TTree &outtree, outBranches &data)
 {
-  outtree->Branch( "MML1A_ROD_sourceID", &data.b_MML1A_ROD_sourceID);
-  outtree->Branch( "MML1A_ROD_subdetID", &data.b_MML1A_ROD_subdetID);
-  outtree->Branch( "MML1A_ROD_moduleID", &data.b_MML1A_ROD_moduleID);
-  outtree->Branch( "MML1A_ROD_L1ID", &data.b_MML1A_ROD_L1ID);
-  outtree->Branch( "MML1A_ROD_n_words", &data.b_MML1A_ROD_n_words);
-  outtree->Branch( "MML1A_head_fragID", &data.b_MML1A_head_fragID);
-  outtree->Branch( "MML1A_head_sectID", &data.b_MML1A_head_sectID);
-  outtree->Branch( "MML1A_head_EC", &data.b_MML1A_head_EC);
-  outtree->Branch( "MML1A_head_flags", &data.b_MML1A_head_flags);
-  outtree->Branch( "MML1A_head_BCID", &data.b_MML1A_head_BCID);
-  outtree->Branch( "MML1A_head_orbit", &data.b_MML1A_head_orbit);
-  outtree->Branch( "MML1A_head_spare", &data.b_MML1A_head_spare);
-  outtree->Branch( "MML1A_L1ID", &data.b_MML1A_L1ID);
-  outtree->Branch( "MML1A_head_wdw_open", &data.b_MML1A_head_wdw_open);
-  outtree->Branch( "MML1A_head_l1a_req", &data.b_MML1A_head_l1a_req);
-  outtree->Branch( "MML1A_head_wdw_close", &data.b_MML1A_head_wdw_close);
-  outtree->Branch( "MML1A_head_overflowCount", &data.b_MML1A_head_overflowCount);
-  outtree->Branch( "MML1A_head_wdw_matching_engines_usage", &data.b_MML1A_head_wdw_matching_engines_usage);
-  outtree->Branch( "MML1A_head_cfg_wdw_open_offset", &data.b_MML1A_head_cfg_wdw_open_offset);
-  outtree->Branch( "MML1A_head_cfg_l1a_req_offset", &data.b_MML1A_head_cfg_l1a_req_offset);
-  outtree->Branch( "MML1A_head_cfg_wdw_close_offset", &data.b_MML1A_head_cfg_wdw_close_offset);
-  outtree->Branch( "MML1A_head_cfg_timeout", &data.b_MML1A_head_cfg_timeout);
-  outtree->Branch( "MML1A_head_link_const", &data.b_MML1A_head_link_const);
-  outtree->Branch( "MML1A_stream_head_nbits", &data.b_MML1A_stream_head_nbits);
-  outtree->Branch( "MML1A_stream_head_nwords", &data.b_MML1A_stream_head_nwords);
-  outtree->Branch( "MML1A_stream_head_fifo_size", &data.b_MML1A_stream_head_fifo_size);
-  outtree->Branch( "MML1A_stream_head_streamID", &data.b_MML1A_stream_head_streamID);
-  outtree->Branch( "MML1A_trailer_CRC", &data.b_MML1A_trailer_CRC);
-  outtree->Branch( "MML1A_art_BCID", &data.b_MML1A_art_BCID);
-  outtree->Branch( "MML1A_art_layers", &data.b_MML1A_art_layers);
-  outtree->Branch( "MML1A_art_channels", &data.b_MML1A_art_channels);
-  outtree->Branch( "PadL1A_ROD_sourceID", &data.b_PadL1A_ROD_sourceID);
-  outtree->Branch( "PadL1A_ROD_subdetID", &data.b_PadL1A_ROD_subdetID);
-  outtree->Branch( "PadL1A_ROD_moduleID", &data.b_PadL1A_ROD_moduleID);
-  outtree->Branch( "PadL1A_ROD_L1ID", &data.b_PadL1A_ROD_L1ID);
-  outtree->Branch( "PadL1A_ROD_n_words", &data.b_PadL1A_ROD_n_words);
-  outtree->Branch( "PadL1A_flags", &data.b_PadL1A_flags);
-  outtree->Branch( "PadL1A_ec", &data.b_PadL1A_ec);
-  outtree->Branch( "PadL1A_fragid", &data.b_PadL1A_fragid);
-  outtree->Branch( "PadL1A_secid", &data.b_PadL1A_secid);
-  outtree->Branch( "PadL1A_spare", &data.b_PadL1A_spare);
-  outtree->Branch( "PadL1A_orbit", &data.b_PadL1A_orbit);
-  outtree->Branch( "PadL1A_bcid", &data.b_PadL1A_bcid);
-  outtree->Branch( "PadL1A_l1id", &data.b_PadL1A_l1id);
-  outtree->Branch( "PadL1A_hit_n", &data.b_PadL1A_hit_n);
-  outtree->Branch( "PadL1A_pfeb_n", &data.b_PadL1A_pfeb_n);
-  outtree->Branch( "PadL1A_trigger_n", &data.b_PadL1A_trigger_n);
-  outtree->Branch( "PadL1A_bcid_n", &data.b_PadL1A_bcid_n);
-  outtree->Branch( "PadL1A_hit_relbcid", &data.b_PadL1A_hit_relbcid);
-  outtree->Branch( "PadL1A_hit_pfeb", &data.b_PadL1A_hit_pfeb);
-  outtree->Branch( "PadL1A_hit_tdschannel", &data.b_PadL1A_hit_tdschannel);
-  outtree->Branch( "PadL1A_hit_vmmchannel", &data.b_PadL1A_hit_vmmchannel);
-  outtree->Branch( "PadL1A_hit_vmm", &data.b_PadL1A_hit_vmm);
-  outtree->Branch( "PadL1A_hit_padchannel", &data.b_PadL1A_hit_padchannel);
-  outtree->Branch( "PadL1A_pfeb_addr", &data.b_PadL1A_pfeb_addr);
-  outtree->Branch( "PadL1A_pfeb_nchan", &data.b_PadL1A_pfeb_nchan);
-  outtree->Branch( "PadL1A_pfeb_disconnected", &data.b_PadL1A_pfeb_disconnected);
-  outtree->Branch( "PadL1A_trigger_bandid", &data.b_PadL1A_trigger_bandid);
-  outtree->Branch( "PadL1A_trigger_phiid", &data.b_PadL1A_trigger_phiid);
-  outtree->Branch( "PadL1A_trigger_relbcid", &data.b_PadL1A_trigger_relbcid);
-  outtree->Branch( "PadL1A_bcid_rel", &data.b_PadL1A_bcid_rel);
-  outtree->Branch( "PadL1A_bcid_status", &data.b_PadL1A_bcid_status);
-  outtree->Branch( "PadL1A_bcid_multzero", &data.b_PadL1A_bcid_multzero);
+
+    //creating always all branches... you never know which swROD modules are connected...
+    //can change later if needed (but this is a test app so...)
+    outtree.Branch( "MML1A_ROD_sourceID", &data.b_MML1A_ROD_sourceID);
+    outtree.Branch( "MML1A_ROD_subdetID", &data.b_MML1A_ROD_subdetID);
+    outtree.Branch( "MML1A_ROD_moduleID", &data.b_MML1A_ROD_moduleID);
+    outtree.Branch( "MML1A_ROD_L1ID", &data.b_MML1A_ROD_L1ID);
+    outtree.Branch( "MML1A_ROD_n_words", &data.b_MML1A_ROD_n_words);
+    outtree.Branch( "MML1A_head_fragID", &data.b_MML1A_head_fragID);
+    outtree.Branch( "MML1A_head_sectID", &data.b_MML1A_head_sectID);
+    outtree.Branch( "MML1A_head_EC", &data.b_MML1A_head_EC);
+    outtree.Branch( "MML1A_head_flags", &data.b_MML1A_head_flags);
+    outtree.Branch( "MML1A_head_BCID", &data.b_MML1A_head_BCID);
+    outtree.Branch( "MML1A_head_orbit", &data.b_MML1A_head_orbit);
+    outtree.Branch( "MML1A_head_spare", &data.b_MML1A_head_spare);
+    outtree.Branch( "MML1A_L1ID", &data.b_MML1A_L1ID);
+    outtree.Branch( "MML1A_head_wdw_open", &data.b_MML1A_head_wdw_open);
+    outtree.Branch( "MML1A_head_l1a_req", &data.b_MML1A_head_l1a_req);
+    outtree.Branch( "MML1A_head_wdw_close", &data.b_MML1A_head_wdw_close);
+    outtree.Branch( "MML1A_head_overflowCount", &data.b_MML1A_head_overflowCount);
+    outtree.Branch( "MML1A_head_wdw_matching_engines_usage", &data.b_MML1A_head_wdw_matching_engines_usage);
+    outtree.Branch( "MML1A_head_cfg_wdw_open_offset", &data.b_MML1A_head_cfg_wdw_open_offset);
+    outtree.Branch( "MML1A_head_cfg_l1a_req_offset", &data.b_MML1A_head_cfg_l1a_req_offset);
+    outtree.Branch( "MML1A_head_cfg_wdw_close_offset", &data.b_MML1A_head_cfg_wdw_close_offset);
+    outtree.Branch( "MML1A_head_cfg_timeout", &data.b_MML1A_head_cfg_timeout);
+    outtree.Branch( "MML1A_head_link_const", &data.b_MML1A_head_link_const);
+    outtree.Branch( "MML1A_stream_head_nbits", &data.b_MML1A_stream_head_nbits);
+    outtree.Branch( "MML1A_stream_head_nwords", &data.b_MML1A_stream_head_nwords);
+    outtree.Branch( "MML1A_stream_head_fifo_size", &data.b_MML1A_stream_head_fifo_size);
+    outtree.Branch( "MML1A_stream_head_streamID", &data.b_MML1A_stream_head_streamID);
+    outtree.Branch( "MML1A_trailer_CRC", &data.b_MML1A_trailer_CRC);
+    outtree.Branch( "MML1A_art_BCID", &data.b_MML1A_art_BCID);
+    outtree.Branch( "MML1A_art_layers", &data.b_MML1A_art_layers);
+    outtree.Branch( "MML1A_art_channels", &data.b_MML1A_art_channels);
+    outtree.Branch( "MML1A_trig_BCID", &data.b_MML1A_trig_BCID);
+    outtree.Branch( "MML1A_trig_dTheta", &data.b_MML1A_trig_dTheta);
+    outtree.Branch( "MML1A_trig_phiBin", &data.b_MML1A_trig_phiBin);
+    outtree.Branch( "MML1A_trig_rBin", &data.b_MML1A_trig_rBin);
+
+    outtree.Branch("MMMon_ROD_sourceID", &data.b_MMMon_ROD_sourceID);
+    outtree.Branch("MMMon_ROD_subdetID", &data.b_MMMon_ROD_subdetID);
+    outtree.Branch("MMMon_ROD_moduleID", &data.b_MMMon_ROD_moduleID);
+    outtree.Branch("MMMon_ROD_L1ID", &data.b_MMMon_ROD_L1ID);
+    outtree.Branch("MMMon_ROD_n_words", &data.b_MMMon_ROD_n_words);
+    outtree.Branch("MMMon_head_fragID", &data.b_MMMon_head_fragID);
+    outtree.Branch("MMMon_head_sectID", &data.b_MMMon_head_sectID);
+    outtree.Branch("MMMon_head_EC", &data.b_MMMon_head_EC);
+    outtree.Branch("MMMon_head_flags", &data.b_MMMon_head_flags);
+    outtree.Branch("MMMon_head_BCID", &data.b_MMMon_head_BCID);
+    outtree.Branch("MMMon_head_orbit", &data.b_MMMon_head_orbit);
+    outtree.Branch("MMMon_head_spare", &data.b_MMMon_head_spare);
+    outtree.Branch("MMMon_L1ID", &data.b_MMMon_L1ID);
+    outtree.Branch("MMMon_head_coincBCID", &data.b_MMMon_head_coincBCID);
+    outtree.Branch("MMMon_head_regionCount", &data.b_MMMon_head_regionCount);
+    outtree.Branch("MMMon_head_coincRegion", &data.b_MMMon_head_coincRegion);
+    outtree.Branch("MMMon_head_reserved", &data.b_MMMon_head_reserved);
+    outtree.Branch("MMMon_finder_streamID", &data.b_MMMon_finder_streamID);
+    outtree.Branch("MMMon_finder_regionCount", &data.b_MMMon_finder_regionCount);
+    outtree.Branch("MMMon_finder_triggerID", &data.b_MMMon_finder_triggerID);
+    outtree.Branch("MMMon_finder_V1", &data.b_MMMon_finder_V1);
+    outtree.Branch("MMMon_finder_V0", &data.b_MMMon_finder_V0);
+    outtree.Branch("MMMon_finder_U1", &data.b_MMMon_finder_U1);
+    outtree.Branch("MMMon_finder_U0", &data.b_MMMon_finder_U0);
+    outtree.Branch("MMMon_finder_X3", &data.b_MMMon_finder_X3);
+    outtree.Branch("MMMon_finder_X2", &data.b_MMMon_finder_X2);
+    outtree.Branch("MMMon_finder_X1", &data.b_MMMon_finder_X1);
+    outtree.Branch("MMMon_finder_X0", &data.b_MMMon_finder_X0);
+    outtree.Branch("MMMon_fitter_streamID", &data.b_MMMon_fitter_streamID);
+    outtree.Branch("MMMon_fitter_regionCount", &data.b_MMMon_fitter_regionCount);
+    outtree.Branch("MMMon_fitter_triggerID", &data.b_MMMon_fitter_triggerID);
+    outtree.Branch("MMMon_fitter_filler", &data.b_MMMon_fitter_filler);
+    outtree.Branch("MMMon_fitter_mxG", &data.b_MMMon_fitter_mxG);
+    outtree.Branch("MMMon_fitter_muG", &data.b_MMMon_fitter_muG);
+    outtree.Branch("MMMon_fitter_mvG", &data.b_MMMon_fitter_mvG);
+    outtree.Branch("MMMon_fitter_mxL", &data.b_MMMon_fitter_mxL);
+    outtree.Branch("MMMon_fitter_mx_ROI", &data.b_MMMon_fitter_mx_ROI);
+    outtree.Branch("MMMon_fitter_dTheta", &data.b_MMMon_fitter_dTheta);
+    outtree.Branch("MMMon_fitter_zero", &data.b_MMMon_fitter_zero);
+    outtree.Branch("MMMon_fitter_phiSign", &data.b_MMMon_fitter_phiSign);
+    outtree.Branch("MMMon_fitter_phiBin", &data.b_MMMon_fitter_phiBin);
+    outtree.Branch("MMMon_fitter_rBin", &data.b_MMMon_fitter_rBin);
+    outtree.Branch("MMMon_trailer_CRC", &data.b_MMMon_trailer_CRC);
+
+    outtree.Branch( "PadL1A_ROD_sourceID", &data.b_PadL1A_ROD_sourceID);
+    outtree.Branch( "PadL1A_ROD_subdetID", &data.b_PadL1A_ROD_subdetID);
+    outtree.Branch( "PadL1A_ROD_moduleID", &data.b_PadL1A_ROD_moduleID);
+    outtree.Branch( "PadL1A_ROD_L1ID", &data.b_PadL1A_ROD_L1ID);
+    outtree.Branch( "PadL1A_ROD_n_words", &data.b_PadL1A_ROD_n_words);
+    outtree.Branch( "PadL1A_flags", &data.b_PadL1A_flags);
+    outtree.Branch( "PadL1A_ec", &data.b_PadL1A_ec);
+    outtree.Branch( "PadL1A_fragid", &data.b_PadL1A_fragid);
+    outtree.Branch( "PadL1A_secid", &data.b_PadL1A_secid);
+    outtree.Branch( "PadL1A_spare", &data.b_PadL1A_spare);
+    outtree.Branch( "PadL1A_orbit", &data.b_PadL1A_orbit);
+    outtree.Branch( "PadL1A_bcid", &data.b_PadL1A_bcid);
+    outtree.Branch( "PadL1A_l1id", &data.b_PadL1A_l1id);
+    outtree.Branch( "PadL1A_hit_n", &data.b_PadL1A_hit_n);
+    outtree.Branch( "PadL1A_pfeb_n", &data.b_PadL1A_pfeb_n);
+    outtree.Branch( "PadL1A_trigger_n", &data.b_PadL1A_trigger_n);
+    outtree.Branch( "PadL1A_bcid_n", &data.b_PadL1A_bcid_n);
+    outtree.Branch( "PadL1A_hit_relbcid", &data.b_PadL1A_hit_relbcid);
+    outtree.Branch( "PadL1A_hit_pfeb", &data.b_PadL1A_hit_pfeb);
+    outtree.Branch( "PadL1A_hit_tdschannel", &data.b_PadL1A_hit_tdschannel);
+    outtree.Branch( "PadL1A_hit_vmmchannel", &data.b_PadL1A_hit_vmmchannel);
+    outtree.Branch( "PadL1A_hit_vmm", &data.b_PadL1A_hit_vmm);
+    outtree.Branch( "PadL1A_hit_padchannel", &data.b_PadL1A_hit_padchannel);
+    outtree.Branch( "PadL1A_pfeb_addr", &data.b_PadL1A_pfeb_addr);
+    outtree.Branch( "PadL1A_pfeb_nchan", &data.b_PadL1A_pfeb_nchan);
+    outtree.Branch( "PadL1A_pfeb_disconnected", &data.b_PadL1A_pfeb_disconnected);
+    outtree.Branch( "PadL1A_trigger_bandid", &data.b_PadL1A_trigger_bandid);
+    outtree.Branch( "PadL1A_trigger_phiid", &data.b_PadL1A_trigger_phiid);
+    outtree.Branch( "PadL1A_trigger_relbcid", &data.b_PadL1A_trigger_relbcid);
+    outtree.Branch( "PadL1A_bcid_rel", &data.b_PadL1A_bcid_rel);
+    outtree.Branch( "PadL1A_bcid_status", &data.b_PadL1A_bcid_status);
+    outtree.Branch( "PadL1A_bcid_multzero", &data.b_PadL1A_bcid_multzero);
 
   return 0;
 }
@@ -235,6 +341,9 @@ int test_nsw_trigger_common_decoder_init_tree (TTree* outtree, outBranches &data
 int test_nsw_trigger_common_decoder_end (Statistics &statistics)
 {
   std::cout << "Total event processed             = " << statistics.nevents << std::endl;
+  std::cout << "Total event not decoded           = " << statistics.nevents_not_decoded << std::endl;
+  std::cout << "Total event with flx elink errors = " << statistics.nevents_sus_felix_stat << std::endl;
+  std::cout << "Total decoding time (ms)          = " << statistics.total_decoding_time << std::endl;
   return 0;
 }
 
@@ -249,7 +358,8 @@ int test_nsw_trigger_common_decoder_event (const eformat::read::FullEventFragmen
 
   for (auto r = robs.begin (); r != robs.end (); ++r)
   {
-    bool is_nsw = false, is_mmg = false, is_stg = false, is_tp = false, is_pt = false;
+    bool is_nsw = false, is_mmg = false, is_stg = false;
+    bool is_tp = false, is_pt = false, is_l1a = false, is_mon = false; //is_l1a and is_mon are actuall
 
     // check fragment for errors
     try{ r->check (); }
@@ -266,8 +376,9 @@ int test_nsw_trigger_common_decoder_event (const eformat::read::FullEventFragmen
       is_nsw = is_stg = true;
 
     //int sector = m & 0xf;
-    if ((m & 0xf0) == 0x10) {is_tp = true;}
-    else if ((m & 0xf0) == 0x20) {is_pt = true;}
+    if      ((m & 0xf0) == 0x10) {is_tp = true; is_l1a = true;}
+    else if ((m & 0xf0) == 0x20) {is_pt = true; is_l1a = true;}
+    else if ((m & 0xf0) == 0x50) {is_tp = true; is_mon = true;}
 
 
     if (params.printout_level > 1 && is_nsw){
@@ -279,146 +390,207 @@ int test_nsw_trigger_common_decoder_event (const eformat::read::FullEventFragmen
       std::cout << "is_stg                = " << (is_stg?"Yes":"No") << std::endl;
       std::cout << "is_pt                 = " << (is_pt?"Yes":"No") << std::endl;
       std::cout << "is_tp                 = " << (is_tp?"Yes":"No") << std::endl;
+      std::cout << "is_l1a                = " << (is_l1a?"Yes":"No") << std::endl;
+      std::cout << "is_mon                = " << (is_mon?"Yes":"No") << std::endl;
     }
 
 
     if (is_nsw && (is_pt || is_tp)){
-
-      //this has to be fixed to get TP data, filtering DAQ no! (need to add an offset)
       if (params.printout_level > 0 || params.print_only){
         std::cout << "NSW Trigger fragment found: length " << r->rod_ndata () << std::endl;
       }
-	      // Print out raw fragment
-	    if (params.print_only){
-        std::cout << "ROD Fragment size in words:" << std::endl;
-        std::cout << "ROD Total: " << r->rod_fragment_size_word () << std::endl;
-        std::cout << "ROD Header: " << r->rod_header_size_word () << std::endl;
-        std::cout << "ROD Trailer: " << r->rod_trailer_size_word () << std::endl;
-        std::cout << "ROD L1 ID: " << std::hex << r->rod_lvl1_id () << std::dec << std::endl;
-	      std::cout << "ROD Data words: " << r->rod_ndata () << std::endl;
+
+      const uint32_t *bs = r->rod_data ();
+
+      // Print out raw fragment
+      if (params.print_only){
+	std::cout << "ROD Fragment size in words:" << std::endl;
+	std::cout << "ROD Total: " << r->rod_fragment_size_word () << std::endl;
+	std::cout << "ROD Header: " << r->rod_header_size_word () << std::endl;
+	std::cout << "ROD Trailer: " << r->rod_trailer_size_word () << std::endl;
+	std::cout << "ROD L1 ID: " << std::hex << r->rod_lvl1_id () << std::dec << std::endl;
+	std::cout << "ROD Data words: " << r->rod_ndata () << std::endl;
+
+        std::cout << "Printing raw data (ignoring any structure)" << std::endl;
+        std::cout << std::hex;
+        for (unsigned int i = 0; i < r->rod_ndata (); ++i){
+          std::cout << " " << std::setfill('0') << std::setw(8) << bs[i];
+          if (i % 4 == 3) std::cout << std::endl;
+        }
+        std::cout << std::dec;
+        std::cout << std::endl;
       }
 
-	     const uint32_t *bs = r->rod_data ();
+      if (!params.print_only){
+        std::string robType = std::string(is_pt?"Pad":(is_mmg?"MM":"STG")) + std::string(is_l1a?"L1A":(is_mon?"Mon":""));
+        std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now ();
+        Muon::nsw::NSWTriggerCommonDecoder nsw_trigger_decoder (*r, robType);
+        std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now ();
+        unsigned int time_elapsed = std::chrono::duration_cast <std::chrono::microseconds> (end - begin).count ();
+  	    float time_elapsed_ms = static_cast <float> (time_elapsed) / 1000;
+        if (params.printout_level > 1){
+          std::cout << "Time for decoding this event (ms): " << time_elapsed_ms << std::endl;
+          std::cout << std::endl;
+        }
+        statistics.total_decoding_time += time_elapsed_ms;
 
-       if (params.print_only){
-         std::cout << "Printing raw data (ignoring any structure)" << std::endl;
-         std::cout << std::hex;
-         for (unsigned int i = 0; i < r->rod_ndata (); ++i){
-           std::cout << " " << std::setfill('0') << std::setw(8) << bs[i];
-           if (i % 4 == 3) std::cout << std::endl;
-         }
-         std::cout << std::dec;
-         std::cout << std::endl;
-       }
+        if (robType=="PadL1A"){
+          for (size_t i = 0; i < nsw_trigger_decoder.get_elinks().size(); ++i) {
+            std::shared_ptr<Muon::nsw::NSWPadTriggerL1a> link = std::dynamic_pointer_cast<Muon::nsw::NSWPadTriggerL1a>(nsw_trigger_decoder.get_elinks()[i]);
+            data.b_PadL1A_ROD_sourceID.push_back( sid );
+            data.b_PadL1A_ROD_subdetID.push_back( s );
+            data.b_PadL1A_ROD_moduleID.push_back( m );
+            data.b_PadL1A_ROD_L1ID.push_back( r->rod_lvl1_id () );
+            data.b_PadL1A_ROD_n_words.push_back( r->rod_ndata () );
+            data.b_PadL1A_flags.push_back( link->getFlags() );
+            data.b_PadL1A_ec.push_back( link->getEc() );
+            data.b_PadL1A_fragid.push_back( link->getFragid() );
+            data.b_PadL1A_secid.push_back( link->getSecid() );
+            data.b_PadL1A_spare.push_back( link->getSpare() );
+            data.b_PadL1A_orbit.push_back( link->getOrbit() );
+            data.b_PadL1A_bcid.push_back( link->getBcid() );
+            data.b_PadL1A_l1id.push_back( link->getL1id() );
+            data.b_PadL1A_hit_n.push_back( link->getNumberOfHits() );
+            data.b_PadL1A_pfeb_n.push_back( link->getNumberOfPfebs() );
+            data.b_PadL1A_trigger_n.push_back( link->getNumberOfTriggers() );
+            data.b_PadL1A_bcid_n.push_back( link->getNumberOfBcids() );
+            data.b_PadL1A_hit_relbcid.push_back( link->getHitRelBcids() );
+            data.b_PadL1A_hit_pfeb.push_back( link->getHitPfebs() );
+            data.b_PadL1A_hit_tdschannel.push_back( link->getHitTdsChannels() );
+            data.b_PadL1A_hit_vmmchannel.push_back( link->getHitVmmChannels() );
+            data.b_PadL1A_hit_vmm.push_back( link->getHitVmms() );
+            data.b_PadL1A_hit_padchannel.push_back( link->getHitPadChannels() );
+            data.b_PadL1A_pfeb_addr.push_back( link->getPfebAddresses() );
+            data.b_PadL1A_pfeb_nchan.push_back( link->getPfebNChannels() );
+            data.b_PadL1A_pfeb_disconnected.push_back( link->getPfebDisconnecteds() );
+            data.b_PadL1A_trigger_bandid.push_back( link->getTriggerBandIds() );
+            data.b_PadL1A_trigger_phiid.push_back( link->getTriggerPhiIds() );
+            data.b_PadL1A_trigger_relbcid.push_back( link->getTriggerRelBcids() );
+            data.b_PadL1A_bcid_rel.push_back( link->getBcidRels() );
+            data.b_PadL1A_bcid_status.push_back( link->getBcidStatuses() );
+            data.b_PadL1A_bcid_multzero.push_back( link->getBcidMultZeros() );
+          }
+        }
+        if (robType=="MML1A") {
+          for (size_t i = 0; i < nsw_trigger_decoder.get_elinks().size(); ++i) {
+      	    std::shared_ptr<Muon::nsw::NSWTriggerMML1AElink> link = std::dynamic_pointer_cast<Muon::nsw::NSWTriggerMML1AElink>(nsw_trigger_decoder.get_elinks()[i]);
+            data.b_MML1A_ROD_sourceID.push_back( sid );
+            data.b_MML1A_ROD_subdetID.push_back( s );
+            data.b_MML1A_ROD_moduleID.push_back( m );
+            data.b_MML1A_ROD_L1ID.push_back( r->rod_lvl1_id () );
+            data.b_MML1A_ROD_n_words.push_back( r->rod_ndata () );
+            data.b_MML1A_head_fragID.push_back( link->head_fragID() );
+            data.b_MML1A_head_sectID.push_back( link->head_sectID() );
+            data.b_MML1A_head_EC.push_back( link->head_EC() );
+            data.b_MML1A_head_flags.push_back( link->head_flags() );
+            data.b_MML1A_head_BCID.push_back( link->head_BCID() );
+            data.b_MML1A_head_orbit.push_back( link->head_orbit() );
+            data.b_MML1A_head_spare.push_back( link->head_spare() );
+            data.b_MML1A_L1ID.push_back( link->L1ID() );
+            data.b_MML1A_head_wdw_open.push_back( link->head_wdw_open() );
+            data.b_MML1A_head_l1a_req.push_back( link->head_l1a_req() );
+            data.b_MML1A_head_wdw_close.push_back( link->head_wdw_close() );
+            data.b_MML1A_head_overflowCount.push_back( link->head_overflowCount() );
+            data.b_MML1A_head_wdw_matching_engines_usage.push_back( link->head_wdw_matching_engines_usage() );
+            data.b_MML1A_head_cfg_wdw_open_offset.push_back( link->head_cfg_wdw_open_offset() );
+            data.b_MML1A_head_cfg_l1a_req_offset.push_back( link->head_cfg_l1a_req_offset() );
+            data.b_MML1A_head_cfg_wdw_close_offset.push_back( link->head_cfg_wdw_close_offset() );
+            data.b_MML1A_head_cfg_timeout.push_back( link->head_cfg_timeout() );
+            data.b_MML1A_head_link_const.push_back( link->head_link_const() );
+            data.b_MML1A_stream_head_nbits.push_back( link->stream_head_nbits() );
+            data.b_MML1A_stream_head_nwords.push_back( link->stream_head_nwords() );
+            data.b_MML1A_stream_head_fifo_size.push_back( link->stream_head_fifo_size() );
+            data.b_MML1A_stream_head_streamID.push_back( link->stream_head_streamID() );
 
-       if (!params.print_only){
+      	    const std::vector<std::shared_ptr<Muon::nsw::MMARTPacket>>& arts = link->art_packets();
+      	    std::vector<uint32_t> tmp_art_BCIDs;
+            std::vector<uint32_t> tmp_art_layers;
+            std::vector<uint32_t> tmp_art_channels;
+      	    for (auto art : arts){
+              for (uint i = 0; i < art->channels().size(); ++i){
+                //so that there's a timestamp per channel
+                tmp_art_layers.push_back( art->channels()[i].first );
+      		      tmp_art_channels.push_back( art->channels()[i].second );
+      		      tmp_art_BCIDs.push_back( art->art_BCID() );
+              }
+            }
+            data.b_MML1A_art_BCID.push_back( tmp_art_BCIDs );
+            data.b_MML1A_art_layers.push_back( tmp_art_layers );
+            data.b_MML1A_art_channels.push_back( tmp_art_channels );
 
-         std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now ();
-         Muon::nsw::NSWTriggerCommonDecoder nsw_trigger_decoder (*r, (is_pt?"PadL1A":(is_mmg?"MML1A":"STGL1A")) );
-         //ignoring monitoring for now; rob ids not defined yet
-         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now ();
-         unsigned int time_elapsed = std::chrono::duration_cast <std::chrono::microseconds> (end - begin).count ();
-  	     float time_elapsed_ms = static_cast <float> (time_elapsed) / 1000;
-         if (params.printout_level > 1){
-           std::cout << "Time for decoding this event: " << time_elapsed_ms << std::endl;
-           std::cout << std::endl;
-         }
-         statistics.total_decoding_time += time_elapsed_ms;
+            const std::vector<std::shared_ptr<Muon::nsw::MMTrigPacket>>& trigs = link->trig_packets();
+            std::vector<uint32_t> tmp_trig_BCID;
+            std::vector<uint32_t> tmp_trig_dTheta;
+            std::vector<uint32_t> tmp_trig_phiBin;
+            std::vector<uint32_t> tmp_trig_rBin;
+      	    for (auto trig : trigs){
+              tmp_trig_BCID.push_back( trig->trig_BCID() );
+              tmp_trig_dTheta.push_back( trig->trig_dTheta() );
+              tmp_trig_phiBin.push_back( trig->trig_phiBin() );
+              tmp_trig_rBin.push_back( trig->trig_rBin() );
+            }
+            data.b_MML1A_trig_BCID.push_back( tmp_trig_BCID );
+            data.b_MML1A_trig_dTheta.push_back( tmp_trig_dTheta );
+            data.b_MML1A_trig_phiBin.push_back( tmp_trig_phiBin );
+            data.b_MML1A_trig_rBin.push_back( tmp_trig_rBin );
 
-         if (is_pt){
-           for (size_t i = 0; i < nsw_trigger_decoder.get_elinks().size(); i++) {
-	     std::shared_ptr<Muon::nsw::NSWPadTriggerL1a> link = std::dynamic_pointer_cast<Muon::nsw::NSWPadTriggerL1a>(nsw_trigger_decoder.get_elinks()[i]);
-             data.b_PadL1A_ROD_sourceID.push_back( sid );
-             data.b_PadL1A_ROD_subdetID.push_back( s );
-             data.b_PadL1A_ROD_moduleID.push_back( m );
-             data.b_PadL1A_ROD_L1ID.push_back( r->rod_lvl1_id () );
-             data.b_PadL1A_ROD_n_words.push_back( r->rod_ndata () );
-             data.b_PadL1A_flags.push_back( link->getFlags() );
-             data.b_PadL1A_ec.push_back( link->getEc() );
-             data.b_PadL1A_fragid.push_back( link->getFragid() );
-             data.b_PadL1A_secid.push_back( link->getSecid() );
-             data.b_PadL1A_spare.push_back( link->getSpare() );
-             data.b_PadL1A_orbit.push_back( link->getOrbit() );
-             data.b_PadL1A_bcid.push_back( link->getBcid() );
-             data.b_PadL1A_l1id.push_back( link->getL1id() );
-             data.b_PadL1A_hit_n.push_back( link->getNumberOfHits() );
-             data.b_PadL1A_pfeb_n.push_back( link->getNumberOfPfebs() );
-             data.b_PadL1A_trigger_n.push_back( link->getNumberOfTriggers() );
-             data.b_PadL1A_bcid_n.push_back( link->getNumberOfBcids() );
-             data.b_PadL1A_hit_relbcid.push_back( link->getHitRelBcids() );
-             data.b_PadL1A_hit_pfeb.push_back( link->getHitPfebs() );
-             data.b_PadL1A_hit_tdschannel.push_back( link->getHitTdsChannels() );
-             data.b_PadL1A_hit_vmmchannel.push_back( link->getHitVmmChannels() );
-             data.b_PadL1A_hit_vmm.push_back( link->getHitVmms() );
-             data.b_PadL1A_hit_padchannel.push_back( link->getHitPadChannels() );
-             data.b_PadL1A_pfeb_addr.push_back( link->getPfebAddresses() );
-             data.b_PadL1A_pfeb_nchan.push_back( link->getPfebNChannels() );
-             data.b_PadL1A_pfeb_disconnected.push_back( link->getPfebDisconnecteds() );
-             data.b_PadL1A_trigger_bandid.push_back( link->getTriggerBandIds() );
-             data.b_PadL1A_trigger_phiid.push_back( link->getTriggerPhiIds() );
-             data.b_PadL1A_trigger_relbcid.push_back( link->getTriggerRelBcids() );
-             data.b_PadL1A_bcid_rel.push_back( link->getBcidRels() );
-             data.b_PadL1A_bcid_status.push_back( link->getBcidStatuses() );
-             data.b_PadL1A_bcid_multzero.push_back( link->getBcidMultZeros() );
-           }
-         } else if (is_mmg) {
-           for (size_t i = 0; i < nsw_trigger_decoder.get_elinks().size(); i++) {
-	     std::shared_ptr<Muon::nsw::NSWTriggerMML1AElink> link = std::dynamic_pointer_cast<Muon::nsw::NSWTriggerMML1AElink>(nsw_trigger_decoder.get_elinks()[i]);
-             data.b_MML1A_ROD_sourceID.push_back( sid );
-             data.b_MML1A_ROD_subdetID.push_back( s );
-             data.b_MML1A_ROD_moduleID.push_back( m );
-             data.b_MML1A_ROD_L1ID.push_back( r->rod_lvl1_id () );
-             data.b_MML1A_ROD_n_words.push_back( r->rod_ndata () );
-             data.b_MML1A_head_fragID.push_back( link->head_fragID() );
-             data.b_MML1A_head_sectID.push_back( link->head_sectID() );
-             data.b_MML1A_head_EC.push_back( link->head_EC() );
-             data.b_MML1A_head_flags.push_back( link->head_flags() );
-             data.b_MML1A_head_BCID.push_back( link->head_BCID() );
-             data.b_MML1A_head_orbit.push_back( link->head_orbit() );
-             data.b_MML1A_head_spare.push_back( link->head_spare() );
-             data.b_MML1A_L1ID.push_back( link->L1ID() );
-             data.b_MML1A_head_wdw_open.push_back( link->head_wdw_open() );
-             data.b_MML1A_head_l1a_req.push_back( link->head_l1a_req() );
-             data.b_MML1A_head_wdw_close.push_back( link->head_wdw_close() );
-             data.b_MML1A_head_overflowCount.push_back( link->head_overflowCount() );
-             data.b_MML1A_head_wdw_matching_engines_usage.push_back( link->head_wdw_matching_engines_usage() );
-             data.b_MML1A_head_cfg_wdw_open_offset.push_back( link->head_cfg_wdw_open_offset() );
-             data.b_MML1A_head_cfg_l1a_req_offset.push_back( link->head_cfg_l1a_req_offset() );
-             data.b_MML1A_head_cfg_wdw_close_offset.push_back( link->head_cfg_wdw_close_offset() );
-             data.b_MML1A_head_cfg_timeout.push_back( link->head_cfg_timeout() );
-             data.b_MML1A_head_link_const.push_back( link->head_link_const() );
-             data.b_MML1A_stream_head_nbits.push_back( link->stream_head_nbits() );
-             data.b_MML1A_stream_head_nwords.push_back( link->stream_head_nwords() );
-             data.b_MML1A_stream_head_fifo_size.push_back( link->stream_head_fifo_size() );
-             data.b_MML1A_stream_head_streamID.push_back( link->stream_head_streamID() );
+            data.b_MML1A_trailer_CRC.push_back( link->trailer_CRC() );
 
-	     const std::vector<std::shared_ptr<Muon::nsw::MMARTPacket>>& arts = link->art_packets();
-	     std::vector<uint32_t> tmp_BCIDs;
-             std::vector<uint32_t> tmp_layers;
-             std::vector<uint32_t> tmp_channels;
-
-	     for (auto art : arts){
-	       for (uint i = 0; i < art->channels().size(); i++){
-		 //so that there's a timestamp per channel
-		 tmp_layers.push_back( art->channels()[i].first );
-		 tmp_channels.push_back( art->channels()[i].second );
-		 tmp_BCIDs.push_back( art->art_BCID() );
-	       }
-	     }
-
-             data.b_MML1A_art_BCID.push_back( tmp_BCIDs );
-             data.b_MML1A_art_layers.push_back( tmp_layers );
-             data.b_MML1A_art_channels.push_back( tmp_channels );
-
-             data.b_MML1A_trailer_CRC.push_back( link->trailer_CRC() );
-           }
-         }
-       }
-
-     } //end if is_nsw
-   } //end for on robs
-
-   return 0;
+          }
+        }
+        if (robType=="MMMon") {
+          for (size_t i = 0; i < nsw_trigger_decoder.get_elinks().size(); ++i) {
+            std::shared_ptr<Muon::nsw::NSWTriggerMMMonElink> link = std::dynamic_pointer_cast<Muon::nsw::NSWTriggerMMMonElink>(nsw_trigger_decoder.get_elinks()[i]);
+            data.b_MMMon_ROD_sourceID.push_back( sid );
+            data.b_MMMon_ROD_subdetID.push_back( s );
+            data.b_MMMon_ROD_moduleID.push_back( m );
+            data.b_MMMon_ROD_L1ID.push_back( r->rod_lvl1_id () );
+            data.b_MMMon_ROD_n_words.push_back( r->rod_ndata () );
+            data.b_MMMon_head_fragID.push_back( link->head_fragID() );
+            data.b_MMMon_head_sectID.push_back( link->head_sectID() );
+            data.b_MMMon_head_EC.push_back( link->head_EC() );
+            data.b_MMMon_head_flags.push_back( link->head_flags() );
+            data.b_MMMon_head_BCID.push_back( link->head_BCID() );
+            data.b_MMMon_head_orbit.push_back( link->head_orbit() );
+            data.b_MMMon_head_spare.push_back( link->head_spare() );
+            data.b_MMMon_L1ID.push_back( link->L1ID() );
+            data.b_MMMon_head_coincBCID.push_back( link->head_coincBCID() );
+            data.b_MMMon_head_regionCount.push_back( link->head_regionCount() );
+            data.b_MMMon_head_coincRegion.push_back( link->head_coincRegion() );
+            data.b_MMMon_head_reserved.push_back( link->head_reserved() );
+            data.b_MMMon_finder_streamID.push_back( link->finder_streamID() );
+            data.b_MMMon_finder_regionCount.push_back( link->finder_regionCount() );
+            data.b_MMMon_finder_triggerID.push_back( link->finder_triggerID() );
+            data.b_MMMon_finder_V1.push_back( link->finder_V1() );
+            data.b_MMMon_finder_V0.push_back( link->finder_V0() );
+            data.b_MMMon_finder_U1.push_back( link->finder_U1() );
+            data.b_MMMon_finder_U0.push_back( link->finder_U0() );
+            data.b_MMMon_finder_X3.push_back( link->finder_X3() );
+            data.b_MMMon_finder_X2.push_back( link->finder_X2() );
+            data.b_MMMon_finder_X1.push_back( link->finder_X1() );
+            data.b_MMMon_finder_X0.push_back( link->finder_X0() );
+            data.b_MMMon_fitter_streamID.push_back( link->fitter_streamID() );
+            data.b_MMMon_fitter_regionCount.push_back( link->fitter_regionCount() );
+            data.b_MMMon_fitter_triggerID.push_back( link->fitter_triggerID() );
+            data.b_MMMon_fitter_filler.push_back( link->fitter_filler() );
+            data.b_MMMon_fitter_mxG.push_back( link->fitter_mxG() );
+            data.b_MMMon_fitter_muG.push_back( link->fitter_muG() );
+            data.b_MMMon_fitter_mvG.push_back( link->fitter_mvG() );
+            data.b_MMMon_fitter_mxL.push_back( link->fitter_mxL() );
+            data.b_MMMon_fitter_mx_ROI.push_back( link->fitter_mx_ROI() );
+            data.b_MMMon_fitter_dTheta.push_back( link->fitter_dTheta() );
+            data.b_MMMon_fitter_zero.push_back( link->fitter_zero() );
+            data.b_MMMon_fitter_phiSign.push_back( link->fitter_phiSign() );
+            data.b_MMMon_fitter_phiBin.push_back( link->fitter_phiBin() );
+            data.b_MMMon_fitter_rBin.push_back( link->fitter_rBin() );
+            data.b_MMMon_trailer_CRC.push_back( link->trailer_CRC() );
+          }
+        }
+      }
+    } //end if is_nsw
+  } //end for loop on robs
+ 
+  return 0;
 }
 
 
@@ -435,8 +607,8 @@ int test_nsw_trigger_common_decoder_loop (Params &params, Statistics &statistics
     char *buf = nullptr;
     unsigned int size = 0;
 
-    TFile* outfile = new TFile();
-    TTree* outtree = new TTree();
+    TFile* outfile = nullptr;
+    TTree* outtree = nullptr; //no need for a smart pointer for ttrees, given root behaviour (deleting ttree's when closing files)
 
     std::string data_file_name (filename);
     std::string out_file_name = data_file_name.substr(data_file_name.find_last_of("/\\") + 1) + ".decoded.root";
@@ -446,7 +618,7 @@ int test_nsw_trigger_common_decoder_loop (Params &params, Statistics &statistics
       std::cout << "Saving here file " << out_file_name << std::endl;
       outfile = new TFile(out_file_name.c_str(), "recreate");
       outtree = new TTree("decoded_data", "decoded_data");
-      test_nsw_trigger_common_decoder_init_tree (outtree, data);
+      test_nsw_trigger_common_decoder_init_tree (*outtree, data);
     }
 
     std::unique_ptr <DataReader> reader (pickDataReader (data_file_name));
@@ -484,6 +656,7 @@ int test_nsw_trigger_common_decoder_loop (Params &params, Statistics &statistics
             continue;
           }
 
+	  
           if (!params.print_only) {outtree->Fill();}
           ++statistics.nevents;
         }
@@ -501,7 +674,7 @@ int test_nsw_trigger_common_decoder_loop (Params &params, Statistics &statistics
     }
 
     if (!params.print_only) {
-      outfile->Write();
+      outtree->Write();
       outfile->Close();
     }
   }

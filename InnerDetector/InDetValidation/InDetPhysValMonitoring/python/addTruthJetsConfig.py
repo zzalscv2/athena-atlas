@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 def AddTruthJetsIfNotExistingCfg(flags):
     '''
@@ -16,6 +16,7 @@ def AddTruthJetsIfNotExistingCfg(flags):
         log.info('DEBUG addTruthJetsIfNotExising {} not in {} [file_type={}]'.format("AntiKt4TruthJets", flags.Input.TypedCollections, flags.Input.Format))
 
         from JetRecConfig.StandardSmallRJets import AntiKt4Truth
+        # Append a "full truth" ghost association for IDPVM (run on AOD with full truth container)
+        AntiKt4Truth.ghostdefs.append("Truth")
         from JetRecConfig.JetRecConfig import JetRecCfg
-
         return JetRecCfg(flags, AntiKt4Truth)

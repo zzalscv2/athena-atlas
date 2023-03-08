@@ -1,7 +1,6 @@
 # 
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration 
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
-from AthenaConfiguration.AllConfigFlags import ConfigFlags 
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence,algorithmCAToGlobalWrapper
 from AthenaCommon.CFElements import parOR, seqAND
 from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable
@@ -10,7 +9,7 @@ from DecisionHandling.DecisionHandlingConf import InputMakerForRoI, ViewCreatorI
 from TriggerMenuMT.HLT.Config.MenuComponents import RecoFragmentsPool
 
 
-def AFPTrkRecoBaseSequence(ConfigFlags):
+def AFPTrkRecoBaseSequence(flags):
     # Create inputs using input maker
     AFPInputMaker = InputMakerForRoI("IM_AFPTrackingFS")
     AFPInputMaker.RoITool = ViewCreatorInitialROITool()
@@ -28,11 +27,11 @@ def AFPTrkRecoBaseSequence(ConfigFlags):
     #cluster reconstruction
 
     from AFP_SiClusterTools.AFP_SiClusterTools import AFP_SiClusterTools_HLT
-    AFP_SiCl= algorithmCAToGlobalWrapper(AFP_SiClusterTools_HLT,ConfigFlags)
+    AFP_SiCl= algorithmCAToGlobalWrapper(AFP_SiClusterTools_HLT,flags)
     
     # tracks reconstruction
     from AFP_LocReco.AFP_LocReco import AFP_LocReco_SiD_HLT
-    AFP_SID = algorithmCAToGlobalWrapper(AFP_LocReco_SiD_HLT,ConfigFlags)
+    AFP_SID = algorithmCAToGlobalWrapper(AFP_LocReco_SiD_HLT,flags)
     
     if globalflags.InputFormat.is_bytestream():
         AFPRecoSeq = parOR("AFPTrkRecoSeq", [AFP_Raw, AFP_R2D, AFP_SiCl, AFP_SID])
@@ -53,17 +52,18 @@ def AFPTrkSequenceCfg(flags):
     def trigStreamerAFPHypoTool(chain_dict):
         return conf2toConfigurable(CompFactory.TrigStreamerHypoTool(chain_dict["chainName"]))
 
-    return MenuSequence(Sequence = AFPPassThroughSequence,
+    return MenuSequence(flags,
+                        Sequence = AFPPassThroughSequence,
                         Maker    = inputMaker,
                         Hypo     = hypoAlg,
                         HypoToolGen = trigStreamerAFPHypoTool)
 
-def TestTrigAFPDijetHypoToolGen(chainDict):
+def TestTrigAFPDijetHypoToolGen(flags, chainDict):
     from TrigAFPHypo.TrigAFPHypoConf import TestTrigAFPDijetHypoTool
     hypo = TestTrigAFPDijetHypoTool(chainDict["chainName"])
 
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-    monTool = GenericMonitoringTool("MonTool_AFP_Hypo")
+    monTool = GenericMonitoringTool(flags, "MonTool_AFP_Hypo")
     monTool.defineHistogram('DijetMass', type='TH1F', path='EXPERT', title="Dijet mass", xbins=100, xmin=0, xmax=2000)
     monTool.defineHistogram('DijetRapidity', type='TH1F', path='EXPERT', title="Dijet rapidity", xbins=100, xmin=-5, xmax=5)
 
@@ -97,9 +97,49 @@ def TestTrigAFPDijetHypoToolGen(chainDict):
 
     return hypo
 
-def AFPTrkRecoHypoSequence():
+def TrigAFPDijetComboHypoToolCfg(flags, chainDict):
+    from TrigAFPHypo.TrigAFPHypoConf import TrigAFPDijetComboHypoTool
+    name = chainDict['chainName']
+    tool = TrigAFPDijetComboHypoTool(name)
+    
+    from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
+    monTool = GenericMonitoringTool(flags, "MonTool_"+name,
+                                    HistPath = 'AFPComboHypo/'+tool.getName())
+    monTool.defineHistogram('DijetMass', type='TH1F', path='EXPERT', title="Dijet mass", xbins=100, xmin=0, xmax=2000)
+    monTool.defineHistogram('DijetRapidity', type='TH1F', path='EXPERT', title="Dijet rapidity", xbins=100, xmin=-5, xmax=5)
 
-    (AFPRecoSeqHypo, AFPInputMakerHypo) = RecoFragmentsPool.retrieve(AFPTrkRecoBaseSequence,ConfigFlags)
+    monTool.defineHistogram('XiJet1', type='TH1F', path='EXPERT', title="Jet 1 xi", xbins=100, xmin=0, xmax=1)
+    monTool.defineHistogram('XiJet2', type='TH1F', path='EXPERT', title="Jet 2 x1", xbins=100, xmin=0, xmax=1)
+
+    monTool.defineHistogram('PredictProtonAEnergy', type='TH1F', path='EXPERT', title="Predicted proton energy A", xbins=100, xmin=0, xmax=10000)
+    monTool.defineHistogram('PredictProtonCEnergy', type='TH1F', path='EXPERT', title="Predicted proton energy C", xbins=100, xmin=0, xmax=10000)
+
+    monTool.defineHistogram('SideA_predictX', type='TH1F', path='EXPERT', title="Predicted X side A", xbins=100, xmin=-100, xmax=100)
+    monTool.defineHistogram('SideA_predictY', type='TH1F', path='EXPERT', title="Predicted Y side A", xbins=100, xmin=-100, xmax=100)
+    monTool.defineHistogram('SideC_predictX', type='TH1F', path='EXPERT', title="Predicted X side C", xbins=100, xmin=-100, xmax=100)
+    monTool.defineHistogram('SideC_predictY', type='TH1F', path='EXPERT', title="Predicted Y side C", xbins=100, xmin=-100, xmax=100)
+
+    monTool.defineHistogram('XDiff', type='TH1F', path='EXPERT', title="X difference", xbins=100, xmin=-100, xmax=100)
+    monTool.defineHistogram('YDiff', type='TH1F', path='EXPERT', title="Y difference", xbins=100, xmin=-100, xmax=100)
+    monTool.defineHistogram('distance', type='TH1F', path='EXPERT', title="distance", xbins=100, xmin=0, xmax=50)
+
+    monTool.defineHistogram('SideA_trackX', type='TH1F', path='EXPERT', title="Track X side A", xbins=100, xmin=-100, xmax=100)
+    monTool.defineHistogram('SideA_trackY', type='TH1F', path='EXPERT', title="Track Y side A", xbins=100, xmin=-100, xmax=100)
+    monTool.defineHistogram('SideA_diffX', type='TH1F', path='EXPERT', title="Track X diff side A", xbins=100, xmin=-50, xmax=50)
+    monTool.defineHistogram('SideA_diffY', type='TH1F', path='EXPERT', title="Track Y diff side A", xbins=100, xmin=-50, xmax=50)
+
+    monTool.defineHistogram('SideC_trackX', type='TH1F', path='EXPERT', title="Track X side C", xbins=100, xmin=-100, xmax=100)
+    monTool.defineHistogram('SideC_trackY', type='TH1F', path='EXPERT', title="Track Y side C", xbins=100, xmin=-100, xmax=100)
+    monTool.defineHistogram('SideC_diffX', type='TH1F', path='EXPERT', title="Track X diff side C", xbins=100, xmin=-50, xmax=50)
+    monTool.defineHistogram('SideC_diffY', type='TH1F', path='EXPERT', title="Track Y diff side C", xbins=100, xmin=-50, xmax=50)
+
+    tool.MonTool = monTool
+    return tool
+
+
+def AFPTrkRecoHypoSequence(flags):
+
+    (AFPRecoSeqHypo, AFPInputMakerHypo) = RecoFragmentsPool.retrieve(AFPTrkRecoBaseSequence,flags)
     AFPSequenceHypo = seqAND("AFPSequenceHypo", [AFPInputMakerHypo, AFPRecoSeqHypo])
     
     # Hypo
@@ -109,7 +149,8 @@ def AFPTrkRecoHypoSequence():
                                    InputJetCollection = 'HLT_AntiKt4EMTopoJets_nojcalib')
     
 
-    return MenuSequence(Sequence = AFPSequenceHypo,
+    return MenuSequence(flags,
+                        Sequence = AFPSequenceHypo,
                         Maker    = AFPInputMakerHypo,
                         Hypo     = hypoAlg,
                         HypoToolGen = TestTrigAFPDijetHypoToolGen)
@@ -151,7 +192,8 @@ def AFPGlobalSequenceCfg(flags):
                                       AFPVertexContainer = 'HLT_AFPVertexContainer',
                                       VertexContainer = 'HLT_IDVertex_FS')
         
-    return MenuSequence(Sequence = seq,
+    return MenuSequence(flags,
+                        Sequence = seq,
                         Maker    = inputMaker,
                         Hypo     = hypoAlg,
                         HypoToolGen = AFPTOFHypoToolGen)

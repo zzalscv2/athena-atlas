@@ -13,7 +13,7 @@
  **
  **   @date         Mon Jun 21 18:35:22 BST 2004
  **
- **   Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+ **   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **                   
  **                   
  **
@@ -68,20 +68,24 @@ public:
   //          alleged garbage collection in root
 
   Resplot() : 
-    mSet(false),  m_Nentries(NULL), 
+    m_Set(false),  m_Nentries(NULL),
     m_mean(NULL), m_sigma(NULL), m_chi2(NULL), 
     m_h2d(NULL), m_h1d(NULL), 
     m_dir(NULL),
+    m_n_primary(0),
+    m_n_secondary(0),
+    m_a_secondary(0.0),
+    m_b_secondary(0.0),
     m_xaxis(""), m_yaxis(""), m_fitname(""), m_finalised(false),
     m_uniform(true)
   {  } 
-  
+
 
   Resplot(const std::string& name, 
 	  int n1, double a1, double b1, 
 	  int n2, double a2, double b2, const std::string& xaxis="") :
     //    TH2D( "2d", "2d", n1, a1, b1, n2, a2, b2), 
-    mSet(false),  m_name(name), 
+    m_Set(false),  m_name(name),
     m_Nentries(NULL), 
     m_mean(NULL), m_sigma(NULL), m_chi2(NULL), 
     m_h2d(NULL),  m_h1d(NULL), 
@@ -95,7 +99,7 @@ public:
 	  int n1, const double* a1,
 	  int n2, double a2, double b2, const std::string& xaxis="") :
     //    TH2D( "2d", "2d", n1, a1, n2, a2, b2),   
-    mSet(false),  m_name(name), 
+    m_Set(false),  m_name(name),
     m_Nentries(NULL), 
     m_mean(NULL), m_sigma(NULL), m_chi2(NULL),  
     m_h2d(NULL),  m_h1d(NULL), 
@@ -107,8 +111,7 @@ public:
   Resplot(const std::string& name, 
 	  const std::vector<double>& a,
 	  int n2, double a2, double b2, const std::string& xaxis="") :
-    //   TH2D( "2d", "2d", a.size()-1, &a[0], n2, a2, b2),   
-    mSet(false),  m_name(name), 
+    m_Set(false),  m_name(name),
     m_Nentries(NULL), 
     m_mean(NULL), m_sigma(NULL), m_chi2(NULL),   
     m_h2d(NULL),  m_h1d(NULL), 
@@ -122,8 +125,7 @@ public:
 	  const std::vector<double>& a,
 	  const std::vector<double>& b, 
 	  const std::string& xaxis="") :
-    //   TH2D( "2d", "2d", a.size()-1, &a[0], n2, a2, b2),   
-    mSet(false),  m_name(name), 
+    m_Set(false),  m_name(name),
     m_Nentries(NULL), 
     m_mean(NULL), m_sigma(NULL), m_chi2(NULL),   
     m_h2d(NULL),  m_h1d(NULL), 
@@ -137,13 +139,13 @@ public:
   Resplot(const Resplot& r, const std::string& tag="") : 
     //    TH2D( (TH2D)r ),
     TObject(r),
-    mSet(r.mSet),  m_name(r.m_name+tag), 
+    m_Set(r.m_Set),  m_name(r.m_name+tag),
     m_Nentries(new TH1D(*r.m_Nentries)), 
     m_mean(new TH1D(*r.m_mean)), m_sigma(new TH1D(*r.m_sigma)), m_chi2(new TH1D(*r.m_chi2)),  
     m_h2d(new TH2D(*r.m_h2d)),   m_h1d(new TH1D(*r.m_h1d)),
     m_dir(NULL),
-    n_primary(r.n_primary),  //   a_primary(r.a_primary),     b_primary(r.b_primary),
-    n_secondary(r.n_secondary), a_secondary(r.a_secondary), b_secondary(r.b_secondary), 
+    m_n_primary(r.m_n_primary),  //   a_primary(r.a_primary),     b_primary(r.b_primary),
+    m_n_secondary(r.m_n_secondary), m_a_secondary(r.m_a_secondary), m_b_secondary(r.m_b_secondary),
     m_xaxis(r.m_xaxis), m_yaxis(r.m_yaxis), m_fitname(""), m_finalised(false),
     m_uniform(true)
   { 
@@ -157,7 +159,7 @@ public:
   }
 
   Resplot(const std::string& name, const TH2* hin, const bool flip=false) :
-    mSet(false),  m_name(name), 
+    m_Set(false),  m_name(name),
     m_Nentries(NULL), 
     m_mean(NULL), m_sigma(NULL), m_chi2(NULL),  
     m_h2d(NULL),  m_h1d(NULL), 
@@ -231,13 +233,13 @@ public:
     skip(m_chi2);
     skip(m_Nentries);
     
-    n_primary = m_h2d->GetNbinsX();
+    m_n_primary = m_h2d->GetNbinsX();
 
     m_finalised = true;
 
     m_uniform = true;
 
-    //    std::cout << "Resplot(std::string)" << name << "\t n_primary " << n_primary << std::endl;
+    //    std::cout << "Resplot(std::string)" << name << "\t m_n_primary " << m_n_primary << std::endl;
 
     // deep copy
     for ( int i=1 ; i<=m_h2d->GetNbinsX() ; i++ ) { 
@@ -267,12 +269,12 @@ public:
 		  int n2, const double* a2);
 
   void Initialise(const std::string& name, 
-		  std::vector<double> a, 
+		  const std::vector<double>& a, 
 		  int n2, double a2, double b2);
 
   void Initialise(const std::string& name, 
-		  std::vector<double> a, 
-		  std::vector<double> b ); 
+		  const std::vector<double>& a, 
+		  const std::vector<double>& b ); 
  
   
   // Fill the helper histograms
@@ -453,12 +455,12 @@ public:
   Int_t Write(const char* =0, Int_t =0, Int_t =0)       { return DWrite(); } 
   Int_t DWrite(TDirectory* g=0) const;
 
-  static bool AddDirectoryStatus() { return mAddDirectoryStatus; } 
-  static void AddDirectory(bool t=false) { mAddDirectoryStatus=t; } 
+  static bool AddDirectoryStatus() { return s_mAddDirectoryStatus; }
+  static void AddDirectory(bool t=false) { s_mAddDirectoryStatus=t; }
 
   void SetDirectory(TDirectory* =0) {  }
 
-  static void setInterpolateFlag(bool b) { interpolate_flag = b; }
+  static void setInterpolateFlag(bool b) { s_interpolate_flag = b; }
 
 
   /// operators 
@@ -549,10 +551,10 @@ public:
 
   void setUniform(bool t=false) { m_uniform=t; }
 
-  static std::string version()      { return rversion; } 
-  static bool setoldrms95(bool b)   { return oldrms95=b; } 
-  static bool setscalerms95(bool b) { return scalerms95=b; } 
-  static bool setnofit(bool b)      { return nofit=b; } 
+  static std::string version()      { return s_rversion; }
+  static bool setoldrms95(bool b)   { return s_oldrms95=b; }
+  static bool setscalerms95(bool b) { return s_scalerms95=b; }
+  static bool setnofit(bool b)      { return s_nofit=b; }
 
   /// flip the x and y axes
   static TH2D* rotate(const TH2* h);
@@ -589,15 +591,15 @@ private:
   void deletehist(TH2D* t) { if ( t ) delete t; }
   
 
-  void SetPrimary(int n, const double* )     {  n_primary=n; }
-  void SetPrimary(int n, double , double )   {  n_primary=n; } // a_primary=a;  b_primary=b;  }
-  void SetSecondary(int n, double a, double b) { n_secondary=n; a_secondary=a; b_secondary=b; } 
+  void SetPrimary(int n, const double* )     {  m_n_primary=n; }
+  void SetPrimary(int n, double , double )   {  m_n_primary=n; } // a_primary=a;  b_primary=b;  }
+  void SetSecondary(int n, double a, double b) { m_n_secondary=n; m_a_secondary=a; m_b_secondary=b; }
   
 
   // stuff for calculating efficiencies
 
-  StatVal get_mean()  { return g_mean; }
-  StatVal get_sigma() { return g_sigma; }
+  StatVal get_mean()  { return m_g_mean; }
+  StatVal get_sigma() { return m_g_sigma; }
   
   
   void AddEfficiency(TH1D* h, int i, double lower, double upper) {
@@ -630,12 +632,12 @@ private:
   
 private:
 
-  static bool mAddDirectoryStatus;
-  static bool interpolate_flag;
+  static bool s_mAddDirectoryStatus;
+  static bool s_interpolate_flag;
 
-  static const std::string rversion;
+  static const std::string s_rversion;
 
-  bool mSet; 
+  bool m_Set;
 
   std::string m_name;
 
@@ -647,16 +649,16 @@ private:
   TH2D* m_h2d = 0;
   TH1D* m_h1d = 0;
 
-  StatVal  g_mean;
-  StatVal  g_sigma;
+  StatVal  m_g_mean;
+  StatVal  m_g_sigma;
 
   TDirectory* m_dir = 0;
 
-  int     n_primary;
+  int     m_n_primary;
   //  double  a_primary, b_primary;
 
-  int    n_secondary;
-  double a_secondary, b_secondary;
+  int    m_n_secondary;
+  double m_a_secondary, m_b_secondary;
 
   std::string  m_xaxis;
   std::string  m_yaxis;
@@ -671,13 +673,13 @@ private:
 
   /// temporarily allow toggeling between old 
   /// and new rms95 error estimates
-  static bool oldrms95;
-  static bool scalerms95;
+  static bool s_oldrms95;
+  static bool s_scalerms95;
 
-  static bool nofit;
+  static bool s_nofit;
 
 
-  static ERROR ErrorSet; //! don't persistify this 
+  static ERROR s_ErrorSet; //! don't persistify this
 
   ClassDef(Resplot, 1)
 

@@ -22,6 +22,11 @@
 #include "TrigT1EventTPCnv/RoIBResult_p1.h"
 
 //
+// Includes for LVL1::MuCTPIL1Topo
+//
+#include "TrigT1EventTPCnv/MuCTPIL1Topo_p1.h"
+
+//
 // Includes for LVL1::TriggerTower
 //
 #include "TrigT1EventTPCnv/TriggerTowerCollection_tlp1.h"

@@ -306,7 +306,7 @@ StatusCode TestHepMC::execute() {
     } else {
       ATH_MSG_WARNING("Invalid number of beam particles " << beams_t.size() << " this generator interface should be fixed");
       /// Uncomment for full debug HepMC3::Print::content(*evt);
-      for (auto part: beams_t) HepMC3::Print::line(part);
+      for (const auto& part: beams_t) HepMC3::Print::line(part);
     }
 #else
     auto beams = evt->beam_particles();
@@ -344,7 +344,7 @@ StatusCode TestHepMC::execute() {
     int vtxDisplacedstatuscodenot12CheckRateCnt=0;
     int vtxDisplacedMoreThan_1m_CheckRateCnt=0;
 #ifdef HEPMC3
-    for (auto vtx: evt->vertices()) {
+    for (const auto& vtx: evt->vertices()) {
 #else
     for (auto vitr = evt->vertices_begin(); vitr != evt->vertices_end(); ++vitr ) {
       const HepMC::GenVertex* vtx = *vitr;
@@ -382,7 +382,7 @@ StatusCode TestHepMC::execute() {
         ATH_MSG_WARNING("Found vertex position displaced by more than " << m_max_dist_trans << "mm in transverse distance: " << dist_trans << "mm");
 
 #ifdef HEPMC3
-        for (auto part: vtx->particles_in()) {
+        for (const auto& part: vtx->particles_in()) {
 #else
         for (auto part_it = vtx->particles_in_const_begin(); part_it != vtx->particles_in_const_end(); ++part_it) {
         auto part=(*part_it);
@@ -396,7 +396,7 @@ StatusCode TestHepMC::execute() {
           if (m_dumpEvent) ATH_MSG_WARNING("parents info: ");
           if (part->production_vertex()) {
 #ifdef HEPMC3
-            for(auto p_parents: part->production_vertex()->particles_in()) {
+            for(const auto& p_parents: part->production_vertex()->particles_in()) {
 #else
             for(auto p_parents_it = part->production_vertex()->particles_in_const_begin(); p_parents_it != part->production_vertex()->particles_in_const_end(); ++p_parents_it) {
             auto p_parents=(*p_parents_it);

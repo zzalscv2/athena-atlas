@@ -2,6 +2,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.Enums import ProductionStep
 from AtlasGeoModel.GeoModelConfig import GeoModelCfg
 from AthenaConfiguration.Enums import LHCPeriod
@@ -64,9 +65,7 @@ def MuonDetectorToolCfg(flags):
             else :
                 #logMuon.info("Reading As-Built parameters from conditions database")
                 detTool.EnableMdtAsBuiltParameters = 1
-                ## disable for now, otherwise standard tests crash (ATLASRECTS-7017)
-                detTool.EnableNswAsBuiltParameters = 0
-                #detTool.EnableNswAsBuiltParameters = 1 if flags.GeoModel.Run>=LHCPeriod.Run3 else 0
+                detTool.EnableNswAsBuiltParameters = 1 if flags.GeoModel.Run>=LHCPeriod.Run3 else 0
                 pass
 
     else:
@@ -99,7 +98,7 @@ def MuonDetectorToolCfg(flags):
     acc.setPrivateTools(detTool)
     return acc
 
-
+@AccumulatorCache
 def MuonAlignmentCondAlgCfg(flags):
     acc = MuonGeoModelToolCfg(flags)
     acc.merge(MuonIdHelperSvcCfg(flags))
@@ -156,12 +155,11 @@ def MuonAlignmentCondAlgCfg(flags):
             #logMuon.info("Reading As-Built parameters from conditions database")
             acc.merge(addFolders( flags, '/MUONALIGN/MDT/ASBUILTPARAMS' , 'MUONALIGN_OFL', className='CondAttrListCollection'))
             MuonAlign.ParlineFolders += ["/MUONALIGN/MDT/ASBUILTPARAMS"]
-            if flags.GeoModel.Run>=LHCPeriod.Run3: 
-                pass
-                ## disable for now, otherwise standard tests crash (ATLASRECTS-7017)
-                #acc.merge(addFolders( flags, '/MUONALIGN/ASBUILTPARAMS/MM'  , 'MUONALIGN_OFL', className='CondAttrListCollection'))
-                #acc.merge(addFolders( flags, '/MUONALIGN/ASBUILTPARAMS/STGC', 'MUONALIGN_OFL', className='CondAttrListCollection'))
-                #MuonAlign.ParlineFolders += ['/MUONALIGN/ASBUILTPARAMS/MM', '/MUONALIGN/ASBUILTPARAMS/STGC']
+            if flags.GeoModel.Run>=LHCPeriod.Run3:
+                # TODO: remove hard-coded tag once the global tag is ready
+                acc.merge(addFolders( flags, '/MUONALIGN/ASBUILTPARAMS/MM'  , 'MUONALIGN_OFL', className='CondAttrListCollection', tag='MuonAlignAsBuiltParamsMm-RUN3-01-00'))
+                acc.merge(addFolders( flags, '/MUONALIGN/ASBUILTPARAMS/STGC', 'MUONALIGN_OFL', className='CondAttrListCollection', tag='MUONALIGN_STG_ASBUILT-001-03'))
+                MuonAlign.ParlineFolders += ['/MUONALIGN/ASBUILTPARAMS/MM', '/MUONALIGN/ASBUILTPARAMS/STGC']
             pass
 
     acc.addCondAlgo(MuonAlign)

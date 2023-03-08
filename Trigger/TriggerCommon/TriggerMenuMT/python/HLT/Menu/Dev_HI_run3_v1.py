@@ -1,7 +1,7 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 #------------------------------------------------------------------------#
-# Dev_HI_run3_v1.py menu for the long shutdown development
+# Dev_HI_run3_v1.py menu for Run 3 development
 #------------------------------------------------------------------------#
 
 # This defines the input format of the chain and it's properties with the defaults set
@@ -9,9 +9,9 @@
 #['name', 'L1chainParts'=[], 'stream', 'groups', 'merging'=[], 'topoStartFrom'=False],
 
 
-from TriggerMenuMT.HLT.Config.Utility.ChainDefInMenu import ChainProp
+from ..Config.Utility.ChainDefInMenu import ChainProp
 
-from TriggerMenuMT.HLT.Menu.Physics_pp_run3_v1 import (
+from .Physics_pp_run3_v1 import (
     SingleMuonGroup,
     MinBiasGroup,
     MultiMuonGroup,
@@ -29,21 +29,15 @@ from TriggerMenuMT.HLT.Menu.Physics_pp_run3_v1 import (
     TagAndProbeGroup
 )
 
-
-import TriggerMenuMT.HLT.Menu.PhysicsP1_HI_run3_v1 as HIp1_menu
-
-from TriggerMenuMT.HLT.Menu.PhysicsP1_HI_run3_v1 import HardProbesStream,MinBiasStream,UPCStream, MinBiasOverlayStream
-
+from .SignatureDicts import ChainStore
+from . import PhysicsP1_HI_run3_v1 as HIp1_menu
+from .PhysicsP1_HI_run3_v1 import HardProbesStream,MinBiasStream,UPCStream, MinBiasOverlayStream
 
 
-def setupMenu():
 
-    chains = HIp1_menu.setupMenu()
+def getDevHISignatures():
 
-    from AthenaCommon.Logging                 import logging
-    log = logging.getLogger( __name__ )
-    log.info('setupMenu ...')
-
+    chains = ChainStore()
     chains['Muon'] += [
         #-- 1 mu
         ChainProp(name='HLT_mu6_L1MU3V',   stream=[HardProbesStream, 'express'], groups=SingleMuonGroup+PrimaryL1MuGroup, monGroups=['muonMon:shifter','muonMon:online']),
@@ -352,8 +346,6 @@ def setupMenu():
         ChainProp(name='HLT_noalg_mb_L1MBTS_1_VTE5', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportLegGroup),
         ChainProp(name='HLT_noalg_L1TE5_VTE20',      l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportLegGroup),
         ChainProp(name='HLT_noalg_L1TE20_VTE200',    l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportLegGroup),
-
-
     ]
 
     #---- beamspot trigger with VTE to avoid busy tracking in central events
@@ -391,5 +383,18 @@ def setupMenu():
         # need to add ZDC based eb chains for 2023 heavy ion runs
     ]
 
+    return chains
+
+def setupMenu(menu_name):
+
+    from AthenaCommon.Logging import logging
+    log = logging.getLogger( __name__ )
+
+    chains = HIp1_menu.getPhysicsHISignatures()
+
+    log.info('[setupMenu] going to add the Dev menu chains now')
+
+    for sig,chainsInSig in getDevHISignatures().items():
+        chains[sig] += chainsInSig
 
     return chains

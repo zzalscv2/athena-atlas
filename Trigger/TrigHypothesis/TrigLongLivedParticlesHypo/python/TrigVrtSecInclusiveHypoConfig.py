@@ -1,11 +1,11 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger('TrigVrtSecIclusiveHypoTool')
 
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
-def createTrigVSIHypoAlg(name):
+def createTrigVSIHypoAlg(flags, name):
     # make the Hypo
     from TrigLongLivedParticlesHypo.TrigLongLivedParticlesHypoConf import (TrigVSIHypoAlg)
 
@@ -16,7 +16,7 @@ def createTrigVSIHypoAlg(name):
     theHypoAlg.vtxCountKey = recordable("HLT_TrigVSI_VtxCount")
 
     # monioring
-    monTool = GenericMonitoringTool("IM_MonTool"+name)
+    monTool = GenericMonitoringTool(flags, "IM_MonTool"+name)
     #
     monTool.defineHistogram("nVtx",         type='TH1F', path='EXPERT', title="Nr of TrigVSI vertices;N TrigVSI vertices size;Nevents", xbins=50, xmin=0, xmax=500)
     monTool.defineHistogram("preselNVtx",   type='TH1F', path='EXPERT', title="Nr of vertices passed preselection on hypo;N vertices;Nevents", xbins=50, xmin=0, xmax=500)

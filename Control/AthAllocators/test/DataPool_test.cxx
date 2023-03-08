@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -40,8 +40,103 @@ class Fluff
 };
 
 
+class ClearedFluff
+  : public Fluff
+{
+public:
+  static void clear (ClearedFluff* f) {
+    f->setPar (1);
+    std::cout << "Fluff::clear\n";
+  }
+};
+
+
+// Basic tests
+void test_basic()
+{
+  std::cout << "test_basic\n";
+
+  // ask for 10 Fluff's in memory, but default is 1024!
+  DataPool<Fluff>* df = new DataPool<Fluff>(10);
+  DataPool<Fluff>::const_iterator iter = df->begin();
+  DataPool<Fluff>::const_iterator iend = df->end();
+  assert(iter == iend);		 // because pool ain't accessed yet.
+  assert (0 == df->allocated());
+  //  check pool capacity: default is 1024 even though we asked for 10
+  //   ... and may be more because we round up to a full page.
+  assert (1024 <= df->capacity());
+
+  // Now use the first 5 of these Fluff's
+  for (int j = 10; j < 15; j++)
+  {
+    Fluff* f = df->nextElementPtr();
+    f->setPar(j);
+  }
+  assert (5 == df->allocated());
+
+  // loop again and check whether the first five are set:
+  int k = 10;
+  DataPool<Fluff>::const_iterator iter2 = df->begin();
+  DataPool<Fluff>::const_iterator iend2 = df->end();
+  for (; iter2 != iend2; ++iter2)
+  {
+    assert(nullptr != (*iter2));
+    // Note: we iterate backwards...
+    assert(24-k == (*iter2)->value());
+    k++;
+  }
+
+	
+  df->reset();						// reset DataPool
+  DataPool<Fluff>::const_iterator iter3 = df->begin();
+  DataPool<Fluff>::const_iterator iend3 = df->end();
+  assert (iter3 == iend3);	 // after reset
+  assert (0 == df->allocated());
+  assert (1024 <= df->capacity());			// should be same
+
+  // Now use 1500 of these Fluff's.. should automatically resize
+  //cout << "You should see a message on automatic increase of pool size" << endl;
+
+  for (int j = 0; j < 1500; j++)
+  {
+    Fluff* f = df->nextElementPtr();
+    f->setPar(j);
+  }
+
+  assert(1500 == df->allocated());			// up by 2 automatically
+								 
+  assert(2048 <= df->capacity());
+
+  // check that resizing to less than m_refCount doesn't work
+  df->reserve(1000);
+  assert(2048<=df->capacity());
+  assert(1500==df->allocated());
+
+  // check that resizing to less than m_maxRefCount works
+  // changes related to m_maxRefCount are not visible in capacity() or allocated().
+  df->reserve(1600);			
+
+  assert(2048<=df->capacity());
+  assert(1500==df->allocated());
+
+  // this is test by cheating. We reset the data pool (objects are not deleted
+  // we go to the memory location and check if all values are still ok.
+  df->reset();
+  for (int j = 0; j < 1500; j++)
+  {
+    Fluff* f = static_cast<Fluff*>(df->mem());
+    assert(j == f->value());
+  }
+
+  // call the pool destructor
+  delete df;
+
+}
+
+
 void test_slots()
 {
+  std::cout << "test_slots\n";
   SG::ArenaHeader& head = *SG::ArenaHeader::defaultHeader();
   SG::Arena a1 ("1");
   SG::Arena a2 ("2");
@@ -86,6 +181,29 @@ Elts InUse/Free/Total   Bytes InUse/Free/Total  Blocks InUse/Free/Total\n\
 }
 
 
+// Test use of clear.
+void test_clear()
+{
+  std::cout << "test_clear\n";
+
+  DataPool<ClearedFluff, ClearedFluff::clear> df;
+
+  size_t cap = df.capacity();
+  for (size_t i = 0; i < cap; i++) {
+    Fluff* f = df.nextElementPtr();
+    f->setPar (123+i);
+  }
+  df.reset();
+
+  cap = df.capacity();
+  for (size_t i = 0; i < cap; i++) {
+    Fluff* f = df.nextElementPtr();
+    assert (f->value() == 1);
+    f->setPar (123+i);
+  }
+}
+
+
 int main ATLAS_NOT_THREAD_SAFE ()
 {
 
@@ -104,82 +222,9 @@ int main ATLAS_NOT_THREAD_SAFE ()
 
 	std::cout << " *** DataPool test in progress: " << std::endl;
 
-	// ask for 10 Fluff's in memory, but default is 1024!
-	DataPool<Fluff>* df = new DataPool<Fluff>(10);
-	DataPool<Fluff>::const_iterator iter = df->begin();
-	DataPool<Fluff>::const_iterator iend = df->end();
-	assert(iter == iend);		 // because pool ain't accessed yet.
-	assert (0 == df->allocated());
-	//  check pool capacity: default is 1024 even though we asked for 10
-        //   ... and may be more because we round up to a full page.
-	assert (1024 <= df->capacity());
-
-	// Now use the first 5 of these Fluff's
-	for (int j = 10; j < 15; j++)
-	{
-		Fluff* f = df->nextElementPtr();
-		f->setPar(j);
-	}
-	assert (5 == df->allocated());
-
-	// loop again and check whether the first five are set:
-	int k = 10;
-	DataPool<Fluff>::const_iterator iter2 = df->begin();
-	DataPool<Fluff>::const_iterator iend2 = df->end();
-	for (; iter2 != iend2; ++iter2)
-	{
-		assert(nullptr != (*iter2));
-                // Note: we iterate backwards...
-		assert(24-k == (*iter2)->value());
-		k++;
-	}
-
-	
-	df->reset();						// reset DataPool
-	DataPool<Fluff>::const_iterator iter3 = df->begin();
-	DataPool<Fluff>::const_iterator iend3 = df->end();
-	assert (iter3 == iend3);	 // after reset
-	assert (0 == df->allocated());
-	assert (1024 <= df->capacity());			// should be same
-
-	// Now use 1500 of these Fluff's.. should automatically resize
-	//cout << "You should see a message on automatic increase of pool size" << endl;
-
-	for (int j = 0; j < 1500; j++)
-	{
-		Fluff* f = df->nextElementPtr();
-		f->setPar(j);
-	}
-
-	assert(1500 == df->allocated());			// up by 2 automatically
-								 
-	assert(2048 <= df->capacity());
-
-	// check that resizing to less than m_refCount doesn't work
-	df->reserve(1000);
-	assert(2048<=df->capacity());
-	assert(1500==df->allocated());
-
-	// check that resizing to less than m_maxRefCount works
-	// changes related to m_maxRefCount are not visible in capacity() or allocated().
-	df->reserve(1600);			
-
-	assert(2048<=df->capacity());
-	assert(1500==df->allocated());
-
-	// this is test by cheating. We reset the data pool (objects are not deleted
-	// we go to the memory location and check if all values are still ok.
-	df->reset();
-	for (int j = 0; j < 1500; j++)
-	{
-		Fluff* f = static_cast<Fluff*>(df->mem());
-		assert(j == f->value());
-	}
-
-	// call the pool destructor
-	delete df;
-
+        test_basic();
         test_slots();
+        test_clear();
 
 	cout << " **** DataPool test successfully completed **** " << endl;
 	p_svc->chronoStop("ChronoStatSvc");

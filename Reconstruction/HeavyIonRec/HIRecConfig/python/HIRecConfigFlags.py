@@ -10,6 +10,11 @@ def createHIRecConfigFlags():
 
   flags.addFlag("HeavyIon.doJet", True)
   flags.addFlag("HeavyIon.Jet.doTrackJetSeed", True)
+  flags.addFlag("HeavyIon.Jet.ApplyTowerEtaPhiCorrection", True)
+  flags.addFlag("HeavyIon.Jet.HarmonicsForSubtraction", [2, 3, 4])
+  flags.addFlag("HeavyIon.Jet.SeedPtMin", 25000)
+  flags.addFlag("HeavyIon.Jet.RecoOutputPtMin", 25000)
+  flags.addFlag("HeavyIon.Jet.TrackJetPtMin", 7000)
 
   flags.addFlag("HeavyIon.doEgamma", True)
   # expand as needed

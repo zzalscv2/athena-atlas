@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -19,6 +19,7 @@
 #include "TrkEventPrimitives/TrackStateDefs.h"
 #include "TrkEventPrimitives/ResidualPull.h"
 #include <memory>
+#include <array>
 
 namespace Trk {
 static const InterfaceID IID_IResidualPullCalculator("IResidualPullCalculator",1,0);
@@ -68,11 +69,10 @@ public:
              const std::vector<const Trk::AlignmentEffectsOnTrack*>& ) const { return nullptr; }
 
      /** This function is a light-weight version of the function above, designed for track fitters
-      * where speed is critical. The user has to provide a std::vector of size 5, which gets 
-      * filled with the residuals. If the size of the vector is not 5, the method will crash!
+      * where speed is critical. The user has to provide a std::array of size 5, which gets 
+      * filled with the residuals.
       */ 
-    virtual void residuals
-      (std::vector<double>&,
+    virtual  std::array<double,5> residuals(
        const Trk::MeasurementBase*,
        const Trk::TrackParameters*,
        const Trk::ResidualPull::ResidualType residualType,

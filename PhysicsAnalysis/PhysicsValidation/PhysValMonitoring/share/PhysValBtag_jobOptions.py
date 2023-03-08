@@ -17,7 +17,8 @@ tool1.JVTCutAntiKt4EMPFlowJets = 0.2
 tool1.truthMatchProbabilityCut = 0.75
 
 path = ROOT.PathResolver.find_file( 'JetTagDQA/PhysValBtag_VariablesMenu.json', 'DATAPATH' )
-tool1.HistogramDefinitions = getHistogramDefinitions(path, 'PHYSVAL', 'ALL')
+path_Run = ROOT.PathResolver.find_file( 'JetTagDQA/PhysValBtag_VariablesMenu_Run3.json', 'DATAPATH' )
+tool1.HistogramDefinitions = getHistogramDefinitions(path, 'PHYSVAL', 'ALL') + getHistogramDefinitions(path_Run, 'PHYSVAL', 'ALL') 
 
 monMan = CfgMgr.AthenaMonManager("PhysValMonManager")
 monMan.AthenaMonTools += [ tool1 ]

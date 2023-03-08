@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILERECUTILS_TILECELLBUILDER_H
@@ -28,11 +28,11 @@
 #include "TileEvent/TileDQstatus.h"
 #include "TileIdentifier/TileFragHash.h"
 #include "TileIdentifier/TileRawChannelUnit.h"
-#include "TileConditions/ITileBadChanTool.h"
-#include "TileConditions/TileCondToolEmscale.h"
+#include "TileConditions/TileBadChannels.h"
+#include "TileConditions/TileEMScale.h"
 #include "TileConditions/TileCondToolTiming.h"
 #include "TileConditions/TileCablingSvc.h"
-#include "TileConditions/ITileDCSTool.h"
+#include "TileConditions/TileDCSState.h"
 #include "TileRecUtils/ITileRawChannelTool.h"
 
 // Calo includes
@@ -200,11 +200,17 @@ private:
     const TileHWID* m_tileHWID; //!< Pointer to TileHWID
     const TileCablingService* m_cabling; //!< TileCabling instance
 
-    ToolHandle<ITileBadChanTool> m_tileBadChanTool{this,
-        "TileBadChanTool", "TileBadChanTool", "Tile bad channel tool"};
+    /**
+     * @brief Name of TileBadChannels in condition store
+     */
+    SG::ReadCondHandleKey<TileBadChannels> m_badChannelsKey{this,
+        "TileBadChannels", "TileBadChannels", "Input Tile bad channel status"};
 
-    ToolHandle<TileCondToolEmscale> m_tileToolEmscale{this,
-        "TileCondToolEmscale", "TileCondToolEmscale", "Tile EM scale calibration tool"};
+   /**
+    * @brief Name of TileEMScale in condition store
+    */
+     SG::ReadCondHandleKey<TileEMScale> m_emScaleKey{this,
+         "TileEMScale", "TileEMScale", "Input Tile EMS calibration constants"};
 
     ToolHandle<TileCondToolTiming> m_tileToolTiming{this,
         "TileCondToolTiming", "TileCondToolTiming", "Tile timing tool"};
@@ -212,7 +218,11 @@ private:
     ToolHandleArray<ITileRawChannelTool> m_noiseFilterTools{this,
         "NoiseFilterTools", {}, "Tile noise filter tools"};
 
-    ToolHandle<ITileDCSTool> m_tileDCS{this, "TileDCSTool", "TileDCSTool", "Tile DCS tool"};
+   /**
+     * @brief Name of TileDCSState object in condition store
+     */
+    SG::ReadCondHandleKey<TileDCSState> m_DCSStateKey{this,
+        "TileDCS", "TileDCS", "Input Tile DCS status"};
 
     /**
      * @brief Name of Tile cabling service
@@ -272,11 +282,11 @@ private:
      or recovers from single-channel failure. It returns true if cell was changed, false otherwise
      */
     bool maskBadChannel (TileDrawerEvtStatusArray& drawerEvtStatus,
-                         const TileDQstatus* DQstatus,
-                         TileCell* pCell, HWIdentifier hwid) const;
+                         const TileDQstatus* DQstatus, const TileDCSState* dcsState,
+                         const TileBadChannels* badChannels, TileCell* pCell, HWIdentifier hwid) const;
     bool maskBadChannels (TileDrawerEvtStatusArray& drawerEvtStatus,
-                          const TileDQstatus* DQstatus,
-                          TileCell* pCell) const;
+                          const TileDQstatus* DQstatus, const TileDCSState* dcsState,
+                          const TileBadChannels* badChannels, TileCell* pCell) const;
 
     void correctCell(TileCell* pCell, int correction, int pmt, int gain, float ener, float time,
         unsigned char iqual, unsigned char qbit, int ch_type) const; //!< Compute calibrated energy, time, etc. for TileCell and adjust it.
@@ -293,8 +303,6 @@ private:
                          bool count_over, bool good_time, bool good_ener,
                          bool overflow, bool underflow,
                          bool good_overflowfit) const;
-
-    bool isChanDCSgood (int ros, int drawer, int channel) const;
 
     template<typename T, typename V>
     class DoubleVectorIterator {

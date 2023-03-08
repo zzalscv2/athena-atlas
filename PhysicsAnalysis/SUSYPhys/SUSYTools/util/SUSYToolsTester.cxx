@@ -146,7 +146,10 @@ int main( int argc, char* argv[] ) {
   bool isRun3 = false;
   if ((fileName.Contains("mc21") || fileName.Contains("data22")) && fileName.Contains("13p6TeV")) isRun3 = true;
   std::string config_file = (PathResolverFindCalibFile("SUSYTools/SUSYTools_Default.conf")).c_str();
-  if (isRun3) config_file = (PathResolverFindCalibFile("SUSYTools/SUSYTools_Default_Run3.conf")).c_str();
+  if (isRun3) {
+    config_file = (PathResolverFindCalibFile("SUSYTools/SUSYTools_Default_Run3.conf")).c_str();
+    ANA_MSG_INFO("Configuring for Run 3");
+  }
   std::string prw_file = "DUMMY";
   std::string ilumicalc_file = "DUMMY";
 
@@ -184,7 +187,7 @@ int main( int argc, char* argv[] ) {
     if (x.first.find("AntiKtVR30Rmax4Rmin02TrackJets")!=std::string::npos)           hasTrkJets = true;
     if (x.first.find("AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets")!=std::string::npos) hasFatJets = true;
     if (x.first.find("AnalysisElectrons")!=std::string::npos)                        isPHYSLite = true;
-
+    if (isPHYSLite && x.first.find("AnalysisLargeRJets")!=std::string::npos)         hasFatJets = true;
   }
   if (debug>0) {
     ANA_MSG_INFO("Checking file contents (containers):");
@@ -222,8 +225,8 @@ int main( int argc, char* argv[] ) {
     myGRLs.push_back(PathResolverFindCalibFile("GoodRunsLists/data16_13TeV/20180129/physics_25ns_21.0.19.xml"));
     myGRLs.push_back(PathResolverFindCalibFile("GoodRunsLists/data17_13TeV/20180619/physics_25ns_Triggerno17e33prim.xml"));
     myGRLs.push_back(PathResolverFindCalibFile("GoodRunsLists/data18_13TeV/20190219/physics_25ns_Triggerno17e33prim.xml"));
-    myGRLs.push_back(PathResolverFindCalibFile("GoodRunsLists/data22_13p6TeV/20220922/physics_25ns_ignoreTRIGMUO.xml"));
-
+    myGRLs.push_back(PathResolverFindCalibFile("GoodRunsLists/data22_13p6TeV/20230116/data22_13p6TeV.periodAllYear_DetStatus-v109-pro28-04_MERGED_PHYS_StandardGRL_All_Good_25ns.xml"));
+    //myGRLs.push_back(PathResolverFindCalibFile("GoodRunsLists/data22_13p6TeV/20230116/data22_13p6TeV.periodAllYear_DetStatus-v109-pro28-04_MERGED_PHYS_StandardGRL_All_Good_25ns_ignore_TRIGMUO_TRIGLAR.xml"));
     ANA_CHECK( m_grl.setProperty("GoodRunsListVec", myGRLs) );
     ANA_CHECK( m_grl.setProperty("PassThrough", false) );
     ANA_CHECK( m_grl.retrieve() );
@@ -382,7 +385,7 @@ int main( int argc, char* argv[] ) {
   // Triggers from https://twiki.cern.ch/twiki/bin/view/Atlas/LowestUnprescaled
   std::vector<std::string> el_triggers,mu_triggers,ph_triggers,tau_triggers,emu_triggers;
   if (isRun3){
-    el_triggers = {"HLT_e26_lhtight_ivarloose_L1EM22VHI", "HLT_e60_lhmedium_L1EM22VHI", "HLT_e140_lhloose_L1EM22VHI","HLT_e300_etcut_L1EM22VHI"};
+    el_triggers = {"HLT_e26_lhtight_ivarloose_L1EM22VHI", "HLT_e60_lhmedium_L1EM22VHI", "HLT_e140_lhloose_L1EM22VHI"};//,"HLT_e300_etcut_L1EM22VHI"
     mu_triggers = {"HLT_mu24_ivarmedium_L1MU14FCH","HLT_mu50_L1MU14FCH","HLT_mu60_0eta105_msonly_L1MU14FCH","HLT_mu60_L1MU14FCH","HLT_mu80_msonly_3layersEC_L1MU14FCH"};
     ph_triggers = {"HLT_g140_loose_L1EM22VHI","HLT_g300_etcut_L1EM22VHI"};
     tau_triggers = {"HLT_tau160_mediumRNN_tracktwoMVA_L1TAU100", "HLT_tau40_mediumRNN_tracktwoMVA_tau35_mediumRNN_tracktwoMVA_03dRAB_L1TAU25IM_2TAU20IM_2J25_3J20"};
@@ -496,7 +499,6 @@ int main( int argc, char* argv[] ) {
       // No special jets when running on PHYSLITE
       if (isPHYSLite) {
          hasTrkJets = false;
-         hasFatJets = false;
       }
     }
 
@@ -653,7 +655,7 @@ int main( int argc, char* argv[] ) {
     // FatJets
     const xAOD::JetContainer* FJC = nullptr;
     if(slices["fjet"] && hasFatJets) { // stream.Contains("SUSY10") || stream.Contains("PHYSVAL")){
-      ANA_MSG_DEBUG( "Nominal Large R jet step" );
+      ANA_MSG_DEBUG( "Nominal fat jet step, collection: " <<  FatJetCollection );
       if( event.retrieve(FJC, FatJetCollection).isSuccess() ){
         ANA_CHECK( objTool.GetFatJets(fatjets_nominal, fatjets_nominal_aux, true, "", true) );
         ANA_MSG_DEBUG( fatjets_nominal->size() << " large R jets");
@@ -675,6 +677,10 @@ int main( int argc, char* argv[] ) {
       ANA_MSG_DEBUG( taus_nominal->size() << " taus");
     }
     
+    // MET Trigger
+    bool passMETtrig = objTool.IsMETTrigPassed();
+    ANA_MSG_DEBUG( "Pass MET trigger " << passMETtrig);
+
     // MET
     metcst_nominal->setStore(metcst_nominal_aux);
     metcst_nominal->reserve(10);
@@ -1097,6 +1103,25 @@ int main( int argc, char* argv[] ) {
         }
       }
 
+
+      // ========================================
+      // Photons
+      if (slices["pho"]) {
+        ANA_MSG_DEBUG( "Photon step - selection" );
+        int n_SignalPhotons = 0;
+        for (const auto& y : *photons) {
+          if ( y->auxdata<char>("passOR") && y->auxdata<char>("signal")) {
+            n_SignalPhotons++;
+            ANA_MSG_DEBUG( "Photon pt = "<< y->pt()*1e-3
+                          << ", idSF = "   << objTool.GetSignalPhotonSF(*y,true,false,false)
+                          << ", isoSF = " << objTool.GetSignalPhotonSF(*y,false,true,false)
+                          << ", trigSF = "  << objTool.GetSignalPhotonSF(*y,false,false,true)
+                        );
+          }
+        }
+        if(n_SignalPhotons>0) ANA_MSG_DEBUG( "Total Event photon SF = " << objTool.GetTotalPhotonSF(*photons, true, true, true));
+      }
+
       // ====================
       // Check for combined e-mu triggers
       bool comb_trig_check = false;
@@ -1145,7 +1170,7 @@ int main( int argc, char* argv[] ) {
           else if(objTool.treatAsYear()==2016)   muonSF = objTool.GetTotalMuonSF(*muons, true, true, muTrig2016.Data());
           else if(objTool.treatAsYear()==2017)   muonSF = objTool.GetTotalMuonSF(*muons, true, true, muTrig2017.Data());
           else if(objTool.treatAsYear()==2018)   muonSF = objTool.GetTotalMuonSF(*muons, true, true, muTrig2017.Data());
-          else                                   muonSF = objTool.GetTotalMuonSF(*muons, true, true, muTrig2022.Data());
+          else if(objTool.treatAsYear()==2022 && objTool.GetRandomRunNumber() < 435816)  muonSF = objTool.GetTotalMuonSF(*muons, true, true, muTrig2022.Data()); //temporary solution to avoid warning from missing SF in the latest periods (from H)
           ANA_MSG_DEBUG("MUON AFTER SF =  " << muonSF << "   " << objTool.treatAsYear() << "   "  << objTool.GetRandomRunNumber() << "    " <<  objTool.GetPileupWeight() );
         }
       }
@@ -1272,6 +1297,7 @@ int main( int argc, char* argv[] ) {
       } // cosmics
 
       ANA_MSG_DEBUG("Lepton SF done");
+      ANA_MSG_DEBUG("Final event weight = " << event_weight);
 
       // Clean up the systematics copies
       if (sysInfo.affectsKinematics) {

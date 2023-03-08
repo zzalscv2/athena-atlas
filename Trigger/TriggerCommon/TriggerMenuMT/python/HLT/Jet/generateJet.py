@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, ChainStep, Chain, InEventRecoCA, SelectionCA
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -55,7 +55,7 @@ def generateChains( flags, chainDict ):
     hypo = CompFactory.TrigJetHypoAlg(f"TrigJetHypoAlg_{jetDefStr}", Jets=jetDef.fullname())
     acc.addHypoAlgo(hypo)
 
-    jetSequence = MenuSequenceCA(acc,
+    jetSequence = MenuSequenceCA(flags, acc,
                                  HypoToolGen = trigJetHypoToolFromDict)
 
     jetStep = ChainStep(name=stepName, Sequences=[jetSequence], chainDicts=[chainDict])

@@ -12,17 +12,7 @@
 using namespace TMath;
 
 InDetPerfPlot_HitResidual::InDetPerfPlot_HitResidual(InDetPlotBase* pParent, const std::string& sDir)  : InDetPlotBase(
-    pParent, sDir),
-  m_residualx_1hit{},
-  m_residualx_2ormorehits{},
-  m_residualx{},
-  m_residualy_1hit{},
-  m_residualy_2ormorehits{},
-  m_residualy{},
-  m_pullx{},
-  m_pully{},
-  m_phiWidth{},
-  m_etaWidth{} {
+    pParent, sDir) {
 //
 }
 
@@ -30,75 +20,82 @@ void
 InDetPerfPlot_HitResidual::initializePlots() {
   // const bool prependDirectory(false);
   // x residuals
-  book(m_residualx[L0PIXBARR][BARREL], "residualx_l0pix_barrel");
-  book(m_residualx_1hit[L0PIXBARR][BARREL], "residualx_l0pix_barrel_1hit");
-  book(m_residualx_2ormorehits[L0PIXBARR][BARREL], "residualx_l0pix_barrel_2ormorehits");
+  book(m_residualx.at(L0PIXBARR).at(BARREL), "residualx_l0pix_barrel");
+  book(m_residualx_1hit.at(L0PIXBARR).at(BARREL), "residualx_l0pix_barrel_1hit");
+  book(m_residualx_2ormorehits.at(L0PIXBARR).at(BARREL), "residualx_l0pix_barrel_2ormorehits");
   //
-  book(m_residualx[PIXEL][BARREL], "residualx_pixel_barrel");
-  book(m_residualx_1hit[PIXEL][BARREL], "residualx_pixel_barrel_1hit");
-  book(m_residualx_2ormorehits[PIXEL][BARREL], "residualx_pixel_barrel_2ormorehits");
+  book(m_residualx.at(PIXEL).at(BARREL), "residualx_pixel_barrel");
+  book(m_residualx_1hit.at(PIXEL).at(BARREL), "residualx_pixel_barrel_1hit");
+  book(m_residualx_2ormorehits.at(PIXEL).at(BARREL), "residualx_pixel_barrel_2ormorehits");
   //
-  book(m_residualx[SCT][BARREL], "residualx_sct_barrel");
-  book(m_residualx_1hit[SCT][BARREL], "residualx_sct_barrel_1hit");
-  book(m_residualx_2ormorehits[SCT][BARREL], "residualx_sct_barrel_2ormorehits");
+  book(m_residualx.at(SCT).at(BARREL), "residualx_sct_barrel");
+  book(m_residualx_1hit.at(SCT).at(BARREL), "residualx_sct_barrel_1hit");
+  book(m_residualx_2ormorehits.at(SCT).at(BARREL), "residualx_sct_barrel_2ormorehits");
   //
-  book(m_residualx[TRT][BARREL], "residualx_trt_barrel");
+  book(m_residualx.at(TRT).at(BARREL), "residualx_trt_barrel");
   // ..now endcaps
-  book(m_residualx[PIXEL][ENDCAP], "residualx_pixel_endcap");
-  book(m_residualx_1hit[PIXEL][ENDCAP], "residualx_pixel_endcap_1hit");
-  book(m_residualx_2ormorehits[PIXEL][ENDCAP], "residualx_pixel_endcap_2ormorehits");
+  book(m_residualx.at(PIXEL).at(ENDCAP), "residualx_pixel_endcap");
+  book(m_residualx_1hit.at(PIXEL).at(ENDCAP), "residualx_pixel_endcap_1hit");
+  book(m_residualx_2ormorehits.at(PIXEL).at(ENDCAP), "residualx_pixel_endcap_2ormorehits");
   //
-  book(m_residualx[SCT][ENDCAP], "residualx_sct_endcap");
-  book(m_residualx_1hit[SCT][ENDCAP], "residualx_sct_endcap_1hit");
-  book(m_residualx_2ormorehits[SCT][ENDCAP], "residualx_sct_endcap_2ormorehits");
+  book(m_residualx.at(SCT).at(ENDCAP), "residualx_sct_endcap");
+  book(m_residualx_1hit.at(SCT).at(ENDCAP), "residualx_sct_endcap_1hit");
+  book(m_residualx_2ormorehits.at(SCT).at(ENDCAP), "residualx_sct_endcap_2ormorehits");
   //
-  book(m_residualx[TRT][ENDCAP], "residualx_trt_endcap");
+  book(m_residualx.at(TRT).at(ENDCAP), "residualx_trt_endcap");
   //
 
   // y residuals
-  book(m_residualy[L0PIXBARR][BARREL], "residualy_l0pix_barrel");
-  book(m_residualy_1hit[L0PIXBARR][BARREL], "residualy_l0pix_barrel_1hit");
-  book(m_residualy_2ormorehits[L0PIXBARR][BARREL], "residualy_l0pix_barrel_2ormorehits");
+  book(m_residualy.at(L0PIXBARR).at(BARREL), "residualy_l0pix_barrel");
+  book(m_residualy_1hit.at(L0PIXBARR).at(BARREL), "residualy_l0pix_barrel_1hit");
+  book(m_residualy_2ormorehits.at(L0PIXBARR).at(BARREL), "residualy_l0pix_barrel_2ormorehits");
   //
-  book(m_residualy[PIXEL][BARREL], "residualy_pixel_barrel");
-  book(m_residualy_1hit[PIXEL][BARREL], "residualy_pixel_barrel_1hit");
-  book(m_residualy_2ormorehits[PIXEL][BARREL], "residualy_pixel_barrel_2ormorehits");
+  book(m_residualy.at(PIXEL).at(BARREL), "residualy_pixel_barrel");
+  book(m_residualy_1hit.at(PIXEL).at(BARREL), "residualy_pixel_barrel_1hit");
+  book(m_residualy_2ormorehits.at(PIXEL).at(BARREL), "residualy_pixel_barrel_2ormorehits");
   //
   // SCT and TRT do not have y-residuals/pulls
   // ..now endcaps
-  book(m_residualy[PIXEL][ENDCAP], "residualy_pixel_endcap");
-  book(m_residualy_1hit[PIXEL][ENDCAP], "residualy_pixel_endcap_1hit");
-  book(m_residualy_2ormorehits[PIXEL][ENDCAP], "residualy_pixel_endcap_2ormorehits");
+  book(m_residualy.at(PIXEL).at(ENDCAP), "residualy_pixel_endcap");
+  book(m_residualy_1hit.at(PIXEL).at(ENDCAP), "residualy_pixel_endcap_1hit");
+  book(m_residualy_2ormorehits.at(PIXEL).at(ENDCAP), "residualy_pixel_endcap_2ormorehits");
   //
   // SCT and TRT do not have y-residuals/pulls
   // pulls
   // barrel
-  book(m_pullx[L0PIXBARR][BARREL], "pullx_l0pix_barrel");
-  book(m_pullx[PIXEL][BARREL], "pullx_pixel_barrel");
-  book(m_pullx[SCT][BARREL], "pullx_sct_barrel");
-  book(m_pullx[TRT][BARREL], "pullx_trt_barrel");
+  book(m_pullx.at(L0PIXBARR).at(BARREL), "pullx_l0pix_barrel");
+  book(m_pullx.at(PIXEL).at(BARREL), "pullx_pixel_barrel");
+  book(m_pullx.at(SCT).at(BARREL), "pullx_sct_barrel");
+  book(m_pullx.at(TRT).at(BARREL), "pullx_trt_barrel");
   //
-  book(m_pullx[PIXEL][ENDCAP], "pullx_pixel_endcap");
-  book(m_pullx[SCT][ENDCAP], "pullx_sct_endcap");
-  book(m_pullx[TRT][ENDCAP], "pullx_trt_endcap");
+  book(m_pullx.at(PIXEL).at(ENDCAP), "pullx_pixel_endcap");
+  book(m_pullx.at(SCT).at(ENDCAP), "pullx_sct_endcap");
+  book(m_pullx.at(TRT).at(ENDCAP), "pullx_trt_endcap");
   //
   // barrel
-  book(m_pully[L0PIXBARR][BARREL], "pully_l0pix_barrel");
-  book(m_pully[PIXEL][BARREL], "pully_pixel_barrel");
+  book(m_pully.at(L0PIXBARR).at(BARREL), "pully_l0pix_barrel");
+  book(m_pully.at(PIXEL).at(BARREL), "pully_pixel_barrel");
   //
   // SCT and TRT do not have y-residuals/pulls
-  book(m_pully[PIXEL][ENDCAP], "pully_pixel_endcap");
+  book(m_pully.at(PIXEL).at(ENDCAP), "pully_pixel_endcap");
   //
   ////SCT and TRT do not have y-residuals/pulls
   // introduce cluster width histograms
-  book(m_phiWidth[PIXEL][BARREL], "clusterPhiWidth_pixel_barrel");
-  book(m_phiWidth[PIXEL][ENDCAP], "clusterPhiWidth_pixel_endcap");
-  book(m_etaWidth[PIXEL][BARREL], "clusterEtaWidth_pixel_barrel");
-  book(m_etaWidth[PIXEL][ENDCAP], "clusterEtaWidth_pixel_endcap");
+
+  book(m_etaWidth.at(PIXEL).at(BARREL), "clusterEtaWidth_pixel_barrel");
+  book(m_etaWidth.at(PIXEL).at(ENDCAP), "clusterEtaWidth_pixel_endcap");
+  book(m_phiWidth.at(PIXEL).at(BARREL), "clusterPhiWidth_pixel_barrel");
+  book(m_phiWidth.at(PIXEL).at(ENDCAP), "clusterPhiWidth_pixel_endcap");
   //
-  book(m_phiWidth[SCT][BARREL], "clusterPhiWidth_sct_barrel");
-  book(m_phiWidth[SCT][ENDCAP], "clusterPhiWidth_sct_endcap");
+  book(m_phiWidth.at(SCT).at(BARREL), "clusterPhiWidth_sct_barrel");
+  book(m_phiWidth.at(SCT).at(ENDCAP), "clusterPhiWidth_sct_endcap");
+
+  book(m_phiWidthEta.at(PIXEL), "clusterPhiWidth_eta_pixel");
+  book(m_etaWidthEta.at(PIXEL), "clusterEtaWidth_eta_pixel");
+  //
+  book(m_phiWidthEta.at(SCT), "clusterPhiWidth_eta_sct");
 }
+
 
 void
 InDetPerfPlot_HitResidual::fill(const xAOD::TrackParticle& trkprt, float weight) {
@@ -121,6 +118,8 @@ InDetPerfPlot_HitResidual::fill(const xAOD::TrackParticle& trkprt, float weight)
       const std::vector<float>& result_pullLocY = trkprt.auxdata< std::vector<float> >("hitResiduals_pullLocY");
       const std::vector<int>& result_phiWidth = trkprt.auxdata< std::vector<int> >("hitResiduals_phiWidth");
       const std::vector<int>& result_etaWidth = trkprt.auxdata< std::vector<int> >("hitResiduals_etaWidth");
+
+      const float eta = trkprt.eta();
 
       // NP: this should be fine... resiudal filled with -1 if not hit
       if (result_det.size() != result_residualLocX.size()) {
@@ -146,29 +145,34 @@ InDetPerfPlot_HitResidual::fill(const xAOD::TrackParticle& trkprt, float weight)
         }
         if ((width > 0) or (det ==TRT)){//TRT does not have defined cluster width 
           // introduce cluster width histograms
-          fillHisto(m_phiWidth[det][region], width, weight);
-          fillHisto(m_etaWidth[det][region], etaWidth, weight);
-          fillHisto(m_residualx[det][region], residualLocX, weight);
+          fillHisto(m_phiWidth.at(det).at(region), width, weight);
+          fillHisto(m_etaWidth.at(det).at(region), etaWidth, weight);
+
+          // cluster width eta profiles
+          fillHisto(m_phiWidthEta.at(det), eta, width, weight);
+          fillHisto(m_etaWidthEta.at(det), eta, etaWidth, weight);
+
+          fillHisto(m_residualx.at(det).at(region), residualLocX, weight);
           const bool hasYCoordinate = (det != SCT)and(det != TRT); // SCT & TRT do not have LocY
           if (hasYCoordinate) {
-            fillHisto(m_residualy[det][region], residualLocY, weight);
+            fillHisto(m_residualy.at(det).at(region), residualLocY, weight);
           }
-          fillHisto(m_pullx[det][region], pullLocX, weight);
+          fillHisto(m_pullx.at(det).at(region), pullLocX, weight);
           if (hasYCoordinate) { // SCT & TRT do not have LocY
-            fillHisto(m_pully[det][region], pullLocY, weight);
+            fillHisto(m_pully.at(det).at(region), pullLocY, weight);
           }
           if ((det == TRT) or (width < 0)) {
             continue;
           }
           if (width == 1) {
-            fillHisto(m_residualx_1hit[det][region], residualLocX, weight);
+            fillHisto(m_residualx_1hit.at(det).at(region), residualLocX, weight);
             if (hasYCoordinate) {
-              fillHisto(m_residualy_1hit[det][region], residualLocY, weight);
+              fillHisto(m_residualy_1hit.at(det).at(region), residualLocY, weight);
             }
           } else {
-            fillHisto(m_residualx_2ormorehits[det][region], residualLocX, weight);
+            fillHisto(m_residualx_2ormorehits.at(det).at(region), residualLocX, weight);
             if (hasYCoordinate) {
-              fillHisto(m_residualy_2ormorehits[det][region], residualLocY, weight);
+              fillHisto(m_residualy_2ormorehits.at(det).at(region), residualLocY, weight);
             }
           }
         }

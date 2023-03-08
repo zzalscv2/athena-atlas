@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -105,7 +105,7 @@ StatusCode ISF::TruthSvc::initializeTruthCollection()
 void ISF::TruthSvc::deleteChildVertex(HepMC::GenVertexPtr vertex) const {
   HepMC::GenEvent* parent=vertex->parent_event(); 
   std::vector<HepMC::GenVertexPtr> verticesToDelete=HepMC::descendant_vertices(vertex);
-  for (auto v: verticesToDelete) parent->remove_vertex(v);
+  for (auto& v: verticesToDelete) parent->remove_vertex(v);
   verticesToDelete.clear();
   return;
 }
@@ -219,9 +219,16 @@ void ISF::TruthSvc::recordIncidentToMCTruth( ISF::ITruthIncident& ti, bool passW
   Barcode::PhysicsProcessCode processCode = ti.physicsProcessCode();
   Barcode::ParticleBarcode       parentBC = ti.parentBarcode();
 
+  // Check properties of any pre-existing end  vertex of the parent particle
+  HepMC::GenVertexPtr oldVertex = ti.parentParticle()->end_vertex();
+  ISF::InteractionClass_t oldClassification = ISF::UNKNOWN_VTX;
+  if (oldVertex) {
+    oldClassification = interactionClassification(oldVertex);
+  }
+
   // record the GenVertex
   const bool replaceVertex(false);
-  HepMC::GenVertexPtr  vtx = createGenVertexFromTruthIncident(ti, replaceVertex);
+  HepMC::GenVertexPtr  vtxFromTI = createGenVertexFromTruthIncident(ti, replaceVertex);
   const ISF::InteractionClass_t classification = ti.interactionClassification();
 #ifdef DEBUG_TRUTHSVC
   const std::string survival = (ti.parentSurvivesIncident()) ? "parent survives" : "parent destroyed";
@@ -257,7 +264,6 @@ void ISF::TruthSvc::recordIncidentToMCTruth( ISF::ITruthIncident& ti, bool passW
   HepMC::GenParticlePtr  parentBeforeIncident = ti.parentParticle();
   HepMC::GenParticlePtr  parentAfterIncident = ti.parentParticleAfterIncident( newPrimBC ); // This call changes ti.parentParticle() output
   if(parentAfterIncident) {
-    ATH_MSG_VERBOSE ( "Parent After Incident: " << parentAfterIncident);
     if (classification==ISF::QS_SURV_VTX) {
       // Special case when a particle with a pre-defined decay
       // interacts and survives.
@@ -266,42 +272,54 @@ void ISF::TruthSvc::recordIncidentToMCTruth( ISF::ITruthIncident& ti, bool passW
       parentAfterIncident->set_status(2);
       // 2) A new GenVertex for the intermediate interaction should be
       // added.
+      if (oldClassification == ISF::QS_DEST_VTX && ti.interactionClassification() == ISF::QS_SURV_VTX) {
+        // In this case vtxFromTI needs to be stitched into the event before oldVertex
+        vtxFromTI->add_particle_in( parentBeforeIncident );
+        vtxFromTI->add_particle_out( parentAfterIncident );
+        oldVertex->add_particle_in( parentAfterIncident );
 #ifdef HEPMC3
-      // NB Doing this check to explicitly avoid the fallback mechanism in
-      // HepMC3::GenVertex::position() to return the position of
-      // another GenVertex in the event if the position isn't set (or is set to zero)!
-      const HepMC::FourVector &posVec = (vtx->has_set_position()) ? vtx->position() : HepMC::FourVector::ZERO_VECTOR();
-      auto newVtx = HepMC::newGenVertexPtr( posVec, vtx->status());
-      HepMC::GenEvent *mcEvent = parentBeforeIncident->parent_event();
-      auto tmpVtx = newVtx;
-      mcEvent->add_vertex( newVtx);
-      HepMC::suggest_barcode(newVtx, this->maxGeneratedVertexBarcode(mcEvent)-1 );
-      auto vtx_weights=vtx->attribute<HepMC3::VectorDoubleAttribute>("weights");
-      if (vtx_weights) newVtx->add_attribute("weights",std::make_shared<HepMC3::VectorDoubleAttribute>(vtx_weights->value()));
-#else
-      std::unique_ptr<HepMC::GenVertex> newVtx = std::make_unique<HepMC::GenVertex>( vtx->position(), vtx->id(), vtx->weights() );
-      HepMC::GenEvent *mcEvent = parentBeforeIncident->parent_event();
-      HepMC::suggest_barcode(newVtx.get(), this->maxGeneratedVertexBarcode(mcEvent)-1 );
-      auto tmpVtx = newVtx.get();
-      if(!mcEvent->add_vertex( newVtx.release() )) {
-        ATH_MSG_FATAL("Failed to add GenVertex to GenEvent.");
-        abort();
-      }
+        HepMC::suggest_barcode( parentAfterIncident, newPrimBC ); // TODO check this works correctly
 #endif
-      tmpVtx->add_particle_in( parentBeforeIncident );
-      tmpVtx->add_particle_out( parentAfterIncident );
-      vtx->add_particle_in( parentAfterIncident );
+      }
+      else {
+#ifdef HEPMC3
+        // NB Doing this check to explicitly avoid the fallback mechanism in
+        // HepMC3::GenVertex::position() to return the position of
+        // another GenVertex in the event if the position isn't set (or is set to zero)!
+        const HepMC::FourVector &posVec = (vtxFromTI->has_set_position()) ? vtxFromTI->position() : HepMC::FourVector::ZERO_VECTOR();
+        auto newVtx = HepMC::newGenVertexPtr( posVec, vtxFromTI->status());
+        HepMC::GenEvent *mcEvent = parentBeforeIncident->parent_event();
+        auto tmpVtx = newVtx;
+        mcEvent->add_vertex( newVtx);
+        HepMC::suggest_barcode(newVtx, this->maxGeneratedVertexBarcode(mcEvent)-1 );
+        auto vtx_weights=vtxFromTI->attribute<HepMC3::VectorDoubleAttribute>("weights");
+        if (vtx_weights) newVtx->add_attribute("weights",std::make_shared<HepMC3::VectorDoubleAttribute>(vtx_weights->value()));
+#else
+        std::unique_ptr<HepMC::GenVertex> newVtx = std::make_unique<HepMC::GenVertex>( vtxFromTI->position(), vtxFromTI->id(), vtxFromTI->weights() );
+        HepMC::GenEvent *mcEvent = parentBeforeIncident->parent_event();
+        HepMC::suggest_barcode(newVtx.get(), this->maxGeneratedVertexBarcode(mcEvent)-1 );
+        auto tmpVtx = newVtx.get();
+        if(!mcEvent->add_vertex( newVtx.release() )) {
+          ATH_MSG_FATAL("Failed to add GenVertex to GenEvent.");
+          abort();
+        }
+#endif
+        tmpVtx->add_particle_in( parentBeforeIncident );
+        tmpVtx->add_particle_out( parentAfterIncident );
+        vtxFromTI->add_particle_in( parentAfterIncident );
 #ifdef HEPMC3
       HepMC::suggest_barcode( parentAfterIncident, newPrimBC ); // TODO check this works correctly
 #endif
-      vtx = tmpVtx;
+      vtxFromTI = tmpVtx;
+      }
     }
     else {
-      vtx->add_particle_out( parentAfterIncident );
+      vtxFromTI->add_particle_out( parentAfterIncident );
 #ifdef HEPMC3
       HepMC::suggest_barcode( parentAfterIncident, newPrimBC ); // TODO check this works correctly
 #endif
     }
+    ATH_MSG_VERBOSE ( "Parent After Incident: " << parentAfterIncident << ", barcode: " << HepMC::barcode(parentAfterIncident));
   }
 
   const bool isQuasiStableVertex = (classification == ISF::QS_PREDEF_VTX); // QS_DEST_VTX and QS_SURV_VTX should be treated as normal from now on.
@@ -314,9 +332,9 @@ void ISF::TruthSvc::recordIncidentToMCTruth( ISF::ITruthIncident& ti, bool passW
     // also check if the pdgids of the child particles are the same
     // too.
 #ifdef HEPMC3
-    unsigned short nVertexChildren=vtx->particles_out().size();
+    unsigned short nVertexChildren=vtxFromTI->particles_out().size();
 #else
-    unsigned short nVertexChildren=vtx->particles_out_size();
+    unsigned short nVertexChildren=vtxFromTI->particles_out_size();
 #endif
     if(parentAfterIncident) { nVertexChildren-=1; }
     if(nVertexChildren!=numSec) {
@@ -375,19 +393,14 @@ void ISF::TruthSvc::recordIncidentToMCTruth( ISF::ITruthIncident& ti, bool passW
         p = ti.childParticle( i, secBC ); // potentially overrides secBC
         if (p) {
           // add particle to vertex
-          vtx->add_particle_out( p);
+          vtxFromTI->add_particle_out( p);
 #ifdef HEPMC3
           Barcode::ParticleBarcode secBCFromTI = ti.childBarcode(i);
-          if (secBCFromTI) {
-            HepMC::suggest_barcode( p, secBCFromTI );
-          }
-          else {
-            HepMC::suggest_barcode( p, secBC );
-          }
+          HepMC::suggest_barcode( p, secBCFromTI ? secBCFromTI :secBC );
 #endif
         }
       }
-      ATH_MSG_VERBOSE ( "Writing out " << i << "th child particle: " << p);
+      ATH_MSG_VERBOSE ( "Writing out " << i << "th child particle: " << p << ", barcode: " << HepMC::barcode(p));
     } // <-- if write out child particle
     else {
       ATH_MSG_VERBOSE ( "Not writing out " << i << "th child particle." );
@@ -435,10 +448,10 @@ HepMC::GenVertexPtr  ISF::TruthSvc::createGenVertexFromTruthIncident( ISF::ITrut
   }
   int vtxID = 1000 + static_cast<int>(processCode);
 #ifdef HEPMC3
-  auto vtx = HepMC::newGenVertexPtr( ti.position(),vtxID);
+  auto newVtx = HepMC::newGenVertexPtr( ti.position(),vtxID);
 #else
-  std::unique_ptr<HepMC::GenVertex> vtx = std::make_unique<HepMC::GenVertex>( ti.position(), vtxID, weights );
-  HepMC::suggest_barcode( vtx.get(), vtxbcode );
+  std::unique_ptr<HepMC::GenVertex> newVtx = std::make_unique<HepMC::GenVertex>( ti.position(), vtxID, weights );
+  HepMC::suggest_barcode( newVtx.get(), vtxbcode );
 #endif
 
   if (parent->end_vertex()){
@@ -450,75 +463,104 @@ HepMC::GenVertexPtr  ISF::TruthSvc::createGenVertexFromTruthIncident( ISF::ITrut
     }
     auto oldVertex = parent->end_vertex();
 #ifdef DEBUG_TRUTHSVC
-    ATH_MSG_VERBOSE("createGVfromTI Existing QS GenVertex 1: " << *oldVertex );
-    ATH_MSG_VERBOSE("createGVfromTI QS Parent 1: " << *parent);
+    ATH_MSG_VERBOSE("createGVfromTI Existing QS GenVertex 1: " << oldVertex << ", barcode: " << HepMC::barcode(oldVertex) );
+    ATH_MSG_VERBOSE("createGVfromTI QS Parent 1: " << parent << ", barcode: " << HepMC::barcode(parent));
 #endif
     if(replaceExistingGenVertex) {
-      vtx->add_particle_in( parent );
+      newVtx->add_particle_in( parent );
 
 #ifdef HEPMC3
-      ATH_MSG_VERBOSE("createGVfromTI Replacement QS GenVertex: " << vtx );
-      mcEvent->add_vertex(vtx);
-      HepMC::suggest_barcode( vtx, vtxbcode );
-      vtx->add_attribute("weights",std::make_shared<HepMC3::VectorDoubleAttribute>(weights));
+      ATH_MSG_VERBOSE("createGVfromTI Replacement QS GenVertex: " << newVtx << ", barcode: " << HepMC::barcode(newVtx) );
+      mcEvent->add_vertex(newVtx);
+      HepMC::suggest_barcode( newVtx, vtxbcode );
+      newVtx->add_attribute("weights",std::make_shared<HepMC3::VectorDoubleAttribute>(weights));
 #else
-      ATH_MSG_VERBOSE("createGVfromTI Replacement QS GenVertex: " << vtx.get() );
-      mcEvent->add_vertex( vtx.release() );
+      ATH_MSG_VERBOSE("createGVfromTI Replacement QS GenVertex: " << newVtx.get() );
+      mcEvent->add_vertex( newVtx.release() );
 #endif
       // Delete oldVertex and children here
       this->deleteChildVertex(oldVertex);
     }
     else {
+      // Keep the existing GenVertex. There are two cases:
+      if (interactionClassification(oldVertex) == ISF::QS_DEST_VTX && ti.interactionClassification() == ISF::QS_SURV_VTX) {
+        // (Case 1) Add a extra interaction from the simulation, so we
+        // need to stitch the newVtx object into the chain of
+        // interactions of the quasi-stable parent particle "before"
+        // the oldVertex object.
 #ifdef HEPMC3
-      // NB Doing this check to explicitly avoid the fallback mechanism in
-      // HepMC3::GenVertex::position() to return the position of
-      // another GenVertex in the event if the position isn't set (or is set to zero)!
-      const HepMC::FourVector &old_pos = (oldVertex->has_set_position()) ? oldVertex->position() : HepMC::FourVector::ZERO_VECTOR();
-#else
-      const auto& old_pos=oldVertex->position();
+        mcEvent->add_vertex(newVtx);
+        HepMC::suggest_barcode( newVtx, vtxbcode );
+        newVtx->add_attribute("weights",std::make_shared<HepMC3::VectorDoubleAttribute>(weights));
+        newVtx->add_particle_in( parent );
+#ifdef DEBUG_TRUTHSVC
+        ATH_MSG_VERBOSE("createGVfromTI new intermediate QS GenVertex 1: " << newVtx << ", barcode: " << HepMC::barcode(newVtx));
 #endif
-      const auto& new_pos=ti.position();
-      double diffr=std::sqrt(std::pow(new_pos.x()-old_pos.x(),2)+std::pow(new_pos.y()-old_pos.y(),2)+std::pow(new_pos.z()-old_pos.z(),2));
-      //AV The comparison below is not portable.
-      if(diffr>1*Gaudi::Units::mm) { //Check for a change of the vertex position by more than 1mm
-        ATH_MSG_WARNING("For particle: " << parent);
-        ATH_MSG_WARNING("  decay vertex before QS partice sim: " << oldVertex );
-        oldVertex->set_position( ti.position() );
-        ATH_MSG_WARNING("  decay vertex after  QS partice sim:  " << oldVertex );
-      } else {
-        oldVertex->set_position( ti.position() );
-      }  
-#ifdef HEPMC3
-      oldVertex->set_status( vtxID );
-      oldVertex->add_attribute("weights",std::make_shared<HepMC3::VectorDoubleAttribute>(weights));
 #else
-      oldVertex->set_id( vtxID );
-      oldVertex->weights() = weights;
+        newVtx->add_particle_in( parent );
+        auto *nVtmpPtr = newVtx.release();
+        mcEvent->add_vertex( nVtmpPtr ); // passing ownership
+#ifdef DEBUG_TRUTHSVC
+        ATH_MSG_VERBOSE("createGVfromTI new intermediate QS GenVertex 1: " << *nVtmpPtr << ", barcode: " << HepMC::barcode(*nVtmpPtr));
+#endif
+#endif
+      }
+      else {
+        // (Case 2) Assume that this is the simulation doing the
+        // pre-defined decay of the quasi-stable parent particle, so we
+        // update and return the oldVertex object and ignore the
+        // newVtx object.
+#ifdef HEPMC3
+        // NB Doing this check to explicitly avoid the fallback mechanism in
+        // HepMC3::GenVertex::position() to return the position of
+        // another GenVertex in the event if the position isn't set (or is set to zero)!
+        const HepMC::FourVector &old_pos = (oldVertex->has_set_position()) ? oldVertex->position() : HepMC::FourVector::ZERO_VECTOR();
+#else
+        const auto& old_pos=oldVertex->position();
+#endif
+        const auto& new_pos=ti.position();
+        double diffr=std::sqrt(std::pow(new_pos.x()-old_pos.x(),2)+std::pow(new_pos.y()-old_pos.y(),2)+std::pow(new_pos.z()-old_pos.z(),2));
+        //AV The comparison below is not portable.
+        if(diffr>1*Gaudi::Units::mm) { //Check for a change of the vertex position by more than 1mm
+          ATH_MSG_WARNING("For particle: " << parent);
+          ATH_MSG_WARNING("  decay vertex before QS partice sim: " << oldVertex );
+          oldVertex->set_position( ti.position() );
+          ATH_MSG_WARNING("  decay vertex after  QS partice sim:  " << oldVertex );
+        } else {
+          oldVertex->set_position( ti.position() );
+        }
+#ifdef HEPMC3
+        oldVertex->set_status( vtxID );
+        oldVertex->add_attribute("weights",std::make_shared<HepMC3::VectorDoubleAttribute>(weights));
+#else
+        oldVertex->set_id( vtxID );
+        oldVertex->weights() = weights;
 #endif
 #ifdef DEBUG_TRUTHSVC
-      ATH_MSG_VERBOSE("createGVfromTI Existing QS GenVertex 2: " << *oldVertex );
+        ATH_MSG_VERBOSE("createGVfromTI Existing QS GenVertex 2: " << oldVertex << ", barcode: " << HepMC::barcode(oldVertex) );
 #endif
+      }
     }
 #ifdef DEBUG_TRUTHSVC
     ATH_MSG_VERBOSE ( "createGVfromTI QS End Vertex representing process: " << processCode << ", for parent with barcode "<<parentBC<<". Creating." );
-    ATH_MSG_VERBOSE ( "createGVfromTI QS Parent 2: " << *parent);
+    ATH_MSG_VERBOSE ( "createGVfromTI QS Parent 2: " << parent << ", barcode: " << HepMC::barcode(parent));
 #endif
   } else { // Normal simulation
 #ifdef DEBUG_TRUTHSVC
-    ATH_MSG_VERBOSE ("createGVfromTI Parent 1: " << *parent);
+    ATH_MSG_VERBOSE ("createGVfromTI Parent 1: " << parent << ", barcode: " << HepMC::barcode(parent));
 #endif
-    // add parent particle to vtx
-    vtx->add_particle_in( parent );
+    // add parent particle to newVtx
+    newVtx->add_particle_in( parent );
 #ifdef DEBUG_TRUTHSVC
     ATH_MSG_VERBOSE ( "createGVfromTI End Vertex representing process: " << processCode << ", for parent with barcode "<<parentBC<<". Creating." );
-    ATH_MSG_VERBOSE ( "createGVfromTI Parent 2: " << *parent);
+    ATH_MSG_VERBOSE ( "createGVfromTI Parent 2: " << parent << ", barcode: " << HepMC::barcode(parent));
 #endif
 #ifdef HEPMC3
-    mcEvent->add_vertex(vtx);
-    HepMC::suggest_barcode( vtx, vtxbcode );
-    vtx->add_attribute("weights",std::make_shared<HepMC3::VectorDoubleAttribute>(weights));
+    mcEvent->add_vertex(newVtx);
+    HepMC::suggest_barcode( newVtx, vtxbcode );
+    newVtx->add_attribute("weights",std::make_shared<HepMC3::VectorDoubleAttribute>(weights));
 #else
-    mcEvent->add_vertex( vtx.release() );
+    mcEvent->add_vertex( newVtx.release() );
 #endif
   }
 
@@ -545,23 +587,29 @@ void ISF::TruthSvc::setSharedChildParticleBarcode( ISF::ITruthIncident& ti) cons
 int ISF::TruthSvc::maxGeneratedParticleBarcode(HepMC::GenEvent *genEvent) const {
   int maxBarcode=0;
   const int firstSecondaryParticleBarcode(m_barcodeSvc->secondaryParticleBcOffset());
+#ifdef HEPMC3
+  auto allbarcodes = genEvent->attribute<HepMC::GenEventBarcodes>("barcodes");
+  for (const auto& bp: allbarcodes->barcode_to_particle_map()) {
+    if(bp.first < firstSecondaryParticleBarcode) { maxBarcode=std::max(maxBarcode,bp.first); }
+  }
+#else
   for (auto currentGenParticle: *genEvent) {
     const int barcode=HepMC::barcode(currentGenParticle);
     if(barcode > maxBarcode && barcode < firstSecondaryParticleBarcode) { maxBarcode=barcode; }
   }
+#endif
   return maxBarcode;
 }
 
 int ISF::TruthSvc::maxGeneratedVertexBarcode(HepMC::GenEvent *genEvent) const {
   int maxBarcode=0;
-#ifdef HEPMC3
   const int firstSecondaryVertexBarcode(m_barcodeSvc->secondaryVertexBcOffset());
-  for (auto currentGenVertex: genEvent->vertices()) {
-    const int barcode=HepMC::barcode(currentGenVertex);
-    if(barcode < maxBarcode && barcode > firstSecondaryVertexBarcode) { maxBarcode=barcode; }
+#ifdef HEPMC3
+  auto allbarcodes = genEvent->attribute<HepMC::GenEventBarcodes>("barcodes");
+  for (const auto& bp: allbarcodes->barcode_to_vertex_map()) {
+    if(bp.first > firstSecondaryVertexBarcode) { maxBarcode=std::min(maxBarcode,bp.first); }
   }
 #else
-  const int firstSecondaryVertexBarcode(m_barcodeSvc->secondaryVertexBcOffset());
   HepMC::GenEvent::vertex_const_iterator currentGenVertexIter;
   for (currentGenVertexIter= genEvent->vertices_begin();
        currentGenVertexIter!= genEvent->vertices_end();
@@ -571,4 +619,47 @@ int ISF::TruthSvc::maxGeneratedVertexBarcode(HepMC::GenEvent *genEvent) const {
   }
 #endif
   return maxBarcode;
+}
+
+ISF::InteractionClass_t ISF::TruthSvc::interactionClassification(HepMC::GenVertexPtr& vtx) const {
+  const int nIn = HepMC::particles_in_size(vtx);
+  std::vector<int> pdgIn; pdgIn.reserve(nIn);
+#ifdef HEPMC3
+  for(const auto& particle : vtx->particles_in()) {
+    pdgIn.push_back(particle->pdg_id());
+  }
+#else
+  for (auto partItr = vtx->particles_in_const_begin(); partItr != vtx->particles_in_const_end(); ++partItr) {
+    pdgIn.push_back((*partItr)->pdg_id());
+  }
+#endif
+  const int nOut = HepMC::particles_out_size(vtx);
+  std::vector<int> pdgOut; pdgOut.reserve(nOut);
+#ifdef HEPMC3
+  for(const auto& particle : vtx->particles_out()) {
+    pdgOut.push_back(particle->pdg_id());
+  }
+#else
+  for (auto partItr = vtx->particles_out_const_begin(); partItr != vtx->particles_out_const_end(); ++partItr) {
+    pdgOut.push_back((*partItr)->pdg_id());
+  }
+#endif
+  bool survivesIncident(false);
+  for(int id : pdgIn) {
+    for(int idOUT : pdgOut) {
+      if(id==idOUT) {
+        survivesIncident=true;
+        break;
+      }
+    }
+    if (survivesIncident) { break; }
+  }
+  ISF::InteractionClass_t classification(ISF::STD_VTX);
+  if(survivesIncident) {
+    classification = ISF::QS_SURV_VTX;
+  }
+  else {
+    classification = ISF::QS_DEST_VTX;
+  }
+  return classification;
 }

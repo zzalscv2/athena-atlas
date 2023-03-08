@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -11,7 +11,7 @@ namespace Ringer{
 
   namespace onnx{
 
-    Model::Model( std::string modelPath, AthONNX::IONNXRuntimeSvc *svc,
+    Model::Model( const std::string& modelPath, AthONNX::IONNXRuntimeSvc *svc,
                   float etmin, float etmax, float etamin, float etamax,
                   unsigned barcode):
       m_etmin(etmin),

@@ -26,7 +26,7 @@ TFCSGANEtaSlice::TFCSGANEtaSlice() {
 
 }
 
-TFCSGANEtaSlice::TFCSGANEtaSlice(int pid, int etaMin, int etaMax, const TFCSGANXMLParameters param) {
+TFCSGANEtaSlice::TFCSGANEtaSlice(int pid, int etaMin, int etaMax, const TFCSGANXMLParameters& param) {
   m_pid = pid;
   m_etaMin = etaMin;
   m_etaMax = etaMax;
@@ -67,13 +67,13 @@ bool TFCSGANEtaSlice::LoadGAN(){
   
   if (m_pid == 211){
     inputFileName = m_param.GetInputFolder() + "/neural_net_" + std::to_string(m_pid) + "_eta_" + std::to_string(m_etaMin) + "_" + std::to_string(m_etaMax) +"_All.json";
-    std::cout<<"Gan input file name "<<inputFileName<<std::endl;
+    //std::cout<<"Gan input file name "<<inputFileName<<std::endl;
     m_gan_all = new TFCSGANLWTNNHandler();
     return m_gan_all->LoadGAN(inputFileName);    
   }
   else if (m_pid == 2212){
     inputFileName = m_param.GetInputFolder() + "/neural_net_" + std::to_string(m_pid) + "_eta_" + std::to_string(m_etaMin) + "_" + std::to_string(m_etaMax) +"_High10.json";
-    std::cout<<"Gan input file name "<<inputFileName<<std::endl;
+    //std::cout<<"Gan input file name "<<inputFileName<<std::endl;
     m_gan_all = new TFCSGANLWTNNHandler();
     return m_gan_all->LoadGAN(inputFileName);    
   }
@@ -95,10 +95,10 @@ bool TFCSGANEtaSlice::LoadGAN(){
 
 void TFCSGANEtaSlice::CalculateMeanPointFromDistributionOfR(){
   std::string rootFileName = m_param.GetInputFolder() + "/rootFiles/pid"+std::to_string(m_pid)+"_E1048576_eta_"+std::to_string(m_etaMin)+"_"+std::to_string(m_etaMin+5)+".root";
-  std::cout<<"Opening file "<<rootFileName<<std::endl;
+  //std::cout<<"Opening file "<<rootFileName<<std::endl;
   TFile* file = TFile::Open(rootFileName.c_str(), "read");
   for (int layer : m_param.GetRelevantLayers() ){
-    std::cout<<"Layer "<<layer<<std::endl;
+    //std::cout<<"Layer "<<layer<<std::endl;
     TFCSGANXMLParameters::Binning binsInLayers = m_param.GetBinning();
     TH2D* h2 = &binsInLayers[layer];
 
@@ -111,7 +111,7 @@ void TFCSGANEtaSlice::CalculateMeanPointFromDistributionOfR(){
     
     TAxis* x = (TAxis*)h2->GetXaxis();
     for (int ix = 1; ix <= h2->GetNbinsX(); ++ix){
-      std::cout<<ix<<std::endl;
+      //std::cout<<ix<<std::endl;
       h1->GetXaxis()->SetRangeUser(x->GetBinLowEdge(ix), x->GetBinUpEdge(ix));
 
       double result = 0;
@@ -126,12 +126,12 @@ void TFCSGANEtaSlice::CalculateMeanPointFromDistributionOfR(){
       m_allFitResults[layer].push_back(result);
     }
   }
-  std::cout<<"Done initialisaing fits"<<std::endl;
+  //std::cout<<"Done initialisaing fits"<<std::endl;
 }
 
 void TFCSGANEtaSlice::ExtractExtrapolatorMeansFromInputs(){
   std::string rootFileName = m_param.GetInputFolder()  + "/rootFiles/pid"+std::to_string(m_pid)+"_E65536_eta_"+std::to_string(m_etaMin)+"_"+std::to_string(m_etaMin+5)+"_validation.root";
-  std::cout<<"Opening file "<<rootFileName<<std::endl;
+  //std::cout<<"Opening file "<<rootFileName<<std::endl;
   TFile* file = TFile::Open(rootFileName.c_str(), "read");
   for (int layer : m_param.GetRelevantLayers() ){
     std::string branchName="extrapWeight_"+std::to_string(layer);
@@ -140,7 +140,7 @@ void TFCSGANEtaSlice::ExtractExtrapolatorMeansFromInputs(){
     std::string command = branchName + ">>h";
     tree->Draw(command.c_str());
     m_extrapolatorWeights[layer] = h->GetMean();
-    std::cout<<"Extrapolation: layer "<<layer<<" mean "<<m_extrapolatorWeights[layer]<< std::endl;
+    //std::cout<<"Extrapolation: layer "<<layer<<" mean "<<m_extrapolatorWeights[layer]<< std::endl;
   }
 }
 
@@ -170,8 +170,9 @@ TFCSGANEtaSlice::NetworkOutputs TFCSGANEtaSlice::GetNetworkOutputs(const TFCSTru
 
   int p_min = std::pow(2,minExp);
   int p_max = std::pow(2,maxExp);
-  double Ekin_min = std::sqrt(std::pow(p_min,2)+std::pow(truth->M(),2))-truth->M()+truth->Ekin_off();
-  double Ekin_max = std::sqrt(std::pow(p_max,2)+std::pow(truth->M(),2))-truth->M()+truth->Ekin_off();
+  //Keep min and max without mass offset as we do not train on antiparticles
+  double Ekin_min = std::sqrt(std::pow(p_min,2)+std::pow(truth->M(),2))-truth->M();
+  double Ekin_max = std::sqrt(std::pow(p_max,2)+std::pow(truth->M(),2))-truth->M();
 
   for (int i = 0; i< m_param.GetLatentSpaceSize(); i ++)
   {
@@ -179,9 +180,9 @@ TFCSGANEtaSlice::NetworkOutputs TFCSGANEtaSlice::GetNetworkOutputs(const TFCSTru
     inputs["node_0"].insert ( std::pair<std::string,double>("variable_"+std::to_string(i), randUniformZ) );
   }
 
-  double e =log(truth->Ekin()/Ekin_min)/log(Ekin_max/Ekin_min) ;
+  //double e =log(truth->Ekin()/Ekin_min)/log(Ekin_max/Ekin_min) ;
   
-  std::cout << "Check label: " << e <<" Ekin:" << truth->Ekin() <<" p:" << truth->P() <<" mass:" << truth->M() <<" Ekin_off:" << truth->Ekin_off() << " Ekin_min:"<<Ekin_min<<" Ekin_max:"<<Ekin_max<< std::endl;
+  //std::cout << "Check label: " << e <<" Ekin:" << truth->Ekin() <<" p:" << truth->P() <<" mass:" << truth->M() <<" Ekin_off:" << truth->Ekin_off() << " Ekin_min:"<<Ekin_min<<" Ekin_max:"<<Ekin_max<< std::endl;
   //inputs["node_1"].insert ( std::pair<std::string,double>("variable_0", truth->Ekin()/(std::pow(2,maxExp))) ); //Old conditioning using linear interpolation, now use logaritminc interpolation
   inputs["node_1"].insert ( std::pair<std::string,double>("variable_0", log(truth->Ekin()/Ekin_min)/log(Ekin_max/Ekin_min) ));
 
@@ -199,7 +200,7 @@ TFCSGANEtaSlice::NetworkOutputs TFCSGANEtaSlice::GetNetworkOutputs(const TFCSTru
   }
   else{
     if (truth->P() > 4096){ //This is the momentum, not the energy, because the split is based on the samples which are produced with the momentum
-      std::cout<<"Computing outputs given inputs for high"<<std::endl;
+      //std::cout<<"Computing outputs given inputs for high"<<std::endl;
       return m_gan_high->GetGraph()->compute(inputs);
     }
     else{

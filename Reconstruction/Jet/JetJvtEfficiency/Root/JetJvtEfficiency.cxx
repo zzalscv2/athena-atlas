@@ -5,6 +5,7 @@
 #include "JetJvtEfficiency/JetJvtEfficiency.h"
 #include "AsgMessaging/StatusCode.h"
 #include "AsgDataHandles/WriteDecorHandle.h"
+#include <AsgTools/AsgToolConfig.h>
 #include "PATInterfaces/SystematicRegistry.h"
 #include "PATInterfaces/SystematicVariation.h"
 #include "PathResolver/PathResolver.h"
@@ -19,6 +20,7 @@ static const SG::AuxElement::ConstAccessor<float> acc_jetTiming("Timing");
 
 JetJvtEfficiency::JetJvtEfficiency( const std::string& name): asg::AsgTool( name ),
   m_appliedSystEnum(NONE),
+  m_NNJvtTool_handle("", this),
   m_h_JvtHist(nullptr),
   m_h_EffHist(nullptr),
   m_passJvtDecName(""),
@@ -81,7 +83,7 @@ StatusCode JetJvtEfficiency::initialize(){
                 m_NNJvtCutFile = "NNJVT.Cuts.FixedEffPt.Offline.Nonprompt_All_MaxW.json";
         }
         else if (m_wp == "TightFwd") {
-                m_NNJvtCutFile = "NNJVT.Cuts.TightFwd.Offline.Nonprompt_All_MaxW.json";
+                m_NNJvtCutFile = "NNJVT.Cuts.TightFwd.Offline.Nonprompt_All_MaxWeight.json";
         }
         else {
           ATH_MSG_ERROR("Unkown NNJvt WP " << m_wp << ", choose between FixedEffPt (Default) and TightFwd.");
@@ -111,11 +113,14 @@ StatusCode JetJvtEfficiency::initialize(){
     }
 
     // setup the NNJvt tool for recalculating NNJvt scores
-    ATH_CHECK( ASG_MAKE_ANA_TOOL(m_NNJvtTool_handle, JetPileupTag::JetVertexNNTagger));
-    ATH_CHECK(m_NNJvtTool_handle.setProperty("JetContainer", m_jetContainerName));
-    ATH_CHECK(m_NNJvtTool_handle.setProperty("NNParamFile", m_NNJvtParamFile));
-    ATH_CHECK(m_NNJvtTool_handle.setProperty("NNCutFile", m_NNJvtCutFile));
-    ATH_CHECK(m_NNJvtTool_handle.setProperty("SuppressInputDependence", true)); // otherwise decorations can't be accessed properly
+    if (m_NNJvtTool_handle.empty()) {
+      asg::AsgToolConfig config_NNjvt ("JetPileupTag::JetVertexNNTagger/NNJvt");
+      ATH_CHECK(config_NNjvt.setProperty("JetContainer", m_jetContainerName));
+      ATH_CHECK(config_NNjvt.setProperty("NNParamFile", m_NNJvtParamFile));
+      ATH_CHECK(config_NNjvt.setProperty("NNCutFile", m_NNJvtCutFile));
+      ATH_CHECK(config_NNjvt.setProperty("SuppressInputDependence", true)); // otherwise decorations can't be accessed properly
+      ATH_CHECK(config_NNjvt.makePrivateTool(m_NNJvtTool_handle));
+    }
     ATH_CHECK(m_NNJvtTool_handle.retrieve());
 
     // NNJvt tool will decorate decision on jets that we can retrieve
@@ -486,12 +491,14 @@ bool JetJvtEfficiency::isInRange(const xAOD::Jet& jet) const {
     if (std::abs((*m_jetEtaAcc)(jet))<2.5) return false;
     if (std::abs((*m_jetEtaAcc)(jet))>4.5) return false;
   } else {
+    // in case a SF file has been specified look up if eta of jet is covered by the file
     if (!m_useDummySFs) {
       if (std::abs((*m_jetEtaAcc)(jet))<m_h_JvtHist->GetYaxis()->GetBinLowEdge(1)) return false;
       if (std::abs((*m_jetEtaAcc)(jet))>m_h_JvtHist->GetYaxis()->GetBinUpEdge(m_h_JvtHist->GetNbinsY())) return false;
     }
+    // in case dummy SFs are used (NNJvt only), manually restrict pile-up jets to central region
     else {
-      if (std::abs((*m_jetEtaAcc)(jet))<2.5) return false;
+      if (std::abs((*m_jetEtaAcc)(jet))>2.5) return false;
     }
   }
   // skip check of histograms when using dummy SFs as no histograms have been loaded

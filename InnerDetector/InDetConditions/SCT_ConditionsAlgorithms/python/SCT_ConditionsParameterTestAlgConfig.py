@@ -18,24 +18,25 @@ if __name__=="__main__":
     from AthenaCommon.Constants import INFO
     log.setLevel(INFO)
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    ConfigFlags.Input.Files = []
-    ConfigFlags.Input.isMC = False
-    ConfigFlags.Input.ProjectName = "data12_8TeV"
-    ConfigFlags.Input.RunNumber = 215643
-    ConfigFlags.Input.TimeStamp = 1354748400 # LB 469 of run 215643, 2012-12-05 @ 11:00pm (UTC)
-    ConfigFlags.IOVDb.GlobalTag = "COMCOND-BLKPA-RUN1-09"
-    ConfigFlags.IOVDb.DatabaseInstance = "COMP200"
-    ConfigFlags.GeoModel.AtlasVersion = "ATLAS-R1-2012-03-00-00"
-    ConfigFlags.Detector.GeometrySCT = True
-    ConfigFlags.lock()
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    flags.Input.Files = []
+    flags.Input.isMC = False
+    flags.Input.ProjectName = "data12_8TeV"
+    flags.Input.RunNumber = 215643
+    flags.Input.TimeStamp = 1354748400 # LB 469 of run 215643, 2012-12-05 @ 11:00pm (UTC)
+    flags.IOVDb.GlobalTag = "COMCOND-BLKPA-RUN1-09"
+    flags.IOVDb.DatabaseInstance = "COMP200"
+    flags.GeoModel.AtlasVersion = "ATLAS-R1-2012-03-02-00"
+    flags.Detector.GeometrySCT = True
+    flags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    cfg = MainServicesCfg(ConfigFlags)
+    cfg = MainServicesCfg(flags)
 
     from McEventSelector.McEventSelectorConfig import McEventSelectorCfg
-    cfg.merge(McEventSelectorCfg(ConfigFlags))
+    cfg.merge(McEventSelectorCfg(flags))
 
-    cfg.merge(SCT_ConditionsParameterTestAlgCfg(ConfigFlags))
+    cfg.merge(SCT_ConditionsParameterTestAlgCfg(flags))
 
     cfg.run(maxEvents=20)

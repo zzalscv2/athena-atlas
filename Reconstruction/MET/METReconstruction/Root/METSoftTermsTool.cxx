@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // METSoftTermsTool.cxx 
@@ -114,7 +114,7 @@ namespace met {
     return true;
   }
 
-  bool METSoftTermsTool::accept(const xAOD::TrackParticle* /*trk*/) const
+  bool METSoftTermsTool::accept(const xAOD::TrackParticle* /*trk*/) 
   {
     // if(!trk) return false;
 
@@ -159,7 +159,7 @@ namespace met {
   bool METSoftTermsTool::resolveOverlap(xAOD::MissingETComponentMap* metMap,
                                         std::vector<const xAOD::IParticle*>& acceptedSignals) const
   {
-    const xAOD::IParticle* dummyObject = 0;                  // Just a dummy object
+    const xAOD::IParticle* dummyObject = nullptr;                  // Just a dummy object
     MissingETBase::Types::weight_t dummyObjWeight(1.,1.,1.); // Currently use a default value
     return resolveOverlap(dummyObject, metMap, acceptedSignals, dummyObjWeight);
   }
@@ -192,11 +192,11 @@ namespace met {
       newComp->setStatusWord(MissingETBase::Status::contributedSoftTerm());
 
       // Loop over all clusters
-      for( CaloClusterContainer::const_iterator iClus=caloClusCont->begin(); iClus!=caloClusCont->end(); ++iClus ) {
+      for(const auto *iClus : *caloClusCont) {
         // Check if cluster satisfies the requirements
-        if( this->accept(*iClus)) {
+        if( this->accept(iClus)) {
           // Add the selected clusters to the list
-          signalList.push_back(*iClus);
+          signalList.push_back(iClus);
         }
       } // end loop over clusters
 
@@ -224,11 +224,11 @@ namespace met {
       newComp->setStatusWord(MissingETBase::Status::contributedSoftTerm());
 
       // Loop over all tracks
-      for( TrackParticleContainer::const_iterator iTrk=trackParCont->begin(); iTrk!=trackParCont->end(); ++iTrk ) {
+      for(const auto *iTrk : *trackParCont) {
         // Check if track satisfies the requirements
-        if( this->accept(*iTrk) ) {
+        if( this->accept(iTrk) ) {
           // Add the selected track particles to the list
-          signalList.push_back(*iTrk);
+          signalList.push_back(iTrk);
         }
       } // end loop over tracks
 

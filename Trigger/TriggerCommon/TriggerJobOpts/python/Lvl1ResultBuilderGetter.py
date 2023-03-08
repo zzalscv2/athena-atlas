@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # -------------------------------------------------------------
 # L1 Getter of the result
@@ -13,11 +13,7 @@ from RecExConfig.RecFlags import rec
 
 from RecExConfig.ObjKeyStore import objKeyStore
 
-def Lvl1ResultBuilderGetter(flags=None):
-    if flags is None:
-        from AthenaConfiguration.AllConfigFlags import ConfigFlags
-        flags = ConfigFlags
-
+def Lvl1ResultBuilderGetter(flags):
     if flags.Input.Format is Format.BS:
         from TrigT1CaloByteStream.LVL1CaloRun2ByteStreamConfig import LVL1CaloRun2ReadBSCfg
         CAtoGlobalWrapper(LVL1CaloRun2ReadBSCfg, flags)

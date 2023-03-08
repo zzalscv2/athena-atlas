@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///============================================================
@@ -61,8 +61,7 @@ CaloTopoTowerAlg::CaloTopoTowerAlg(const std::string& name,ISvcLocator* pSvcLoca
 /// DESTRUCTOR
 ///==============================================
 CaloTopoTowerAlg::~CaloTopoTowerAlg() 
-{ 
-}
+= default;
 
 ///==============================================
 /// finalize

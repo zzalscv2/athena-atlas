@@ -13,9 +13,6 @@ def isComponentAccumulatorCfg():
     else:
         return False
 
-# for backwards compatibility
-isRun3Cfg = isComponentAccumulatorCfg
-
 #This version of CompFactory provides the RecExCommon-style configurables 
 # used by athena.py. Internally works like CfgMgr
 

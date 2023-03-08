@@ -93,7 +93,8 @@ validationTP_electron = [
 validationTP_electron_DNN = [ # will be added when new DNN is ready 
         'HLT_e26_dnnloose_L1EM22VHI',
         'HLT_e26_dnnmedium_L1EM22VHI',
-        'HLT_e26_dnntight_L1EM22VHI'
+        'HLT_e26_dnntight_L1EM22VHI',
+        'HLT_e26_dnntight_ivarloose_L1EM22VHI'
         ]
 
 validationTP_electron_eEM = [

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaKernel/StorableConversions.h"
@@ -212,6 +212,13 @@ StatusCode TriggerEDMDeserialiserAlg::initialize() {
   add_bs_streamerinfos();
   return StatusCode::SUCCESS;
 }
+
+
+StatusCode TriggerEDMDeserialiserAlg::finalize() {
+  s_streamerInfoList.reset();
+  return StatusCode::SUCCESS;
+}
+
 
 StatusCode TriggerEDMDeserialiserAlg::execute(const EventContext& context) const {
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #pragma once
@@ -17,13 +17,23 @@ class ActsAthenaPrintPolicy final : public Acts::Logging::OutputPrintPolicy
 {
 public:
 
-  ActsAthenaPrintPolicy(std::shared_ptr<MsgStream> msg) : m_msg(msg) {}
+ ActsAthenaPrintPolicy(std::shared_ptr<MsgStream> msg, const std::string& name) 
+   : m_msg(msg), m_name(name) {}
 
   void
-  flush(const Acts::Logging::Level& lvl, const std::string& input);
+  flush(const Acts::Logging::Level& lvl, const std::string& input) override;
+
+  virtual 
+    const std::string& 
+    name() const override;
+
+  virtual 
+    std::unique_ptr<Acts::Logging::OutputPrintPolicy> 
+    clone(const std::string& name) const override;
 
 private:
   std::shared_ptr<MsgStream> m_msg;
+  std::string m_name;
 };
 
 class ActsAthenaFilterPolicy final : public Acts::Logging::OutputFilterPolicy {
@@ -32,7 +42,15 @@ public:
 
   //~AthenaFilterPolicy() = default;
 
-  bool doPrint(const Acts::Logging::Level& lvl) const;
+  bool doPrint(const Acts::Logging::Level& lvl) const override;
+
+  virtual 
+    Acts::Logging::Level 
+    level() const override;
+
+  virtual 
+    std::unique_ptr<Acts::Logging::OutputFilterPolicy> 
+    clone(Acts::Logging::Level level) const override;
 
 private:
   std::shared_ptr<MsgStream> m_msg;

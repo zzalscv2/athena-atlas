@@ -99,7 +99,7 @@ StatusCode ROBPrefetchingAlg::execute(const EventContext& eventContext) const {
   // Prefetch all ROBs collected above
   ATH_MSG_DEBUG("Prefetching " << robsToPrefetch.size() << " ROBs: " << robSetToString(robsToPrefetch));
   std::vector<uint32_t> robsToPrefetchVec{robsToPrefetch.begin(),robsToPrefetch.end()};
-  m_robDataProviderSvc->addROBData(robsToPrefetchVec, name());
+  m_robDataProviderSvc->addROBData(eventContext, robsToPrefetchVec, name());
 
   return StatusCode::SUCCESS;
 }

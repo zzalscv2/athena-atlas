@@ -1,10 +1,8 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <math.h>
-
-#include "GaudiKernel/ITHistSvc.h"
 
 #include "jFexInputProvider.h"
 #include "TrigT1CaloEvent/JetROI_ClassDEF.h"
@@ -32,8 +30,7 @@ const double jFexInputProvider::m_etaDouble_conversion = 0.025;    // 40 x eta t
 
 jFexInputProvider::jFexInputProvider(const std::string& type, const std::string& name, 
                                    const IInterface* parent) :
-   base_class(type, name, parent),
-   m_histSvc("THistSvc", name)
+   base_class(type, name, parent)
 {
    declareInterface<LVL1::IInputTOBConverter>( this );
 }
@@ -44,13 +41,6 @@ jFexInputProvider::~jFexInputProvider()
 StatusCode
 jFexInputProvider::initialize() {
 
-   CHECK(m_histSvc.retrieve());
-
-   ServiceHandle<IIncidentSvc> incidentSvc("IncidentSvc", "jFexInputProvider");
-   CHECK(incidentSvc.retrieve());
-   incidentSvc->addListener(this,"BeginRun", 100);
-   incidentSvc.release().ignore();
-
    CHECK(m_jJet_EDMKey.initialize(SG::AllowEmpty));
    CHECK(m_jLJet_EDMKey.initialize(SG::AllowEmpty));
    CHECK(m_jEM_EDMKey.initialize(SG::AllowEmpty));
@@ -58,259 +48,10 @@ jFexInputProvider::initialize() {
    CHECK(m_jXE_EDMKey.initialize(SG::AllowEmpty));
    CHECK(m_jTE_EDMKey.initialize(SG::AllowEmpty));
 
+   if (!m_monTool.empty()) ATH_CHECK(m_monTool.retrieve());
+
    return StatusCode::SUCCESS;
 }
-
-
-void
-jFexInputProvider::handle(const Incident& incident) {
-   if (incident.type()!="BeginRun") return;
-   ATH_MSG_DEBUG( "In BeginRun incident");
-
-   string histPath = "/EXPERT/" + name() + "/";
-   replace( histPath.begin(), histPath.end(), '.', '/'); 
-
-   // jJet
-   auto h_jJetPt = std::make_unique<TH1I>( "jJetTOBPt", "jJet TOB Pt", 200, 0, 400);
-   h_jJetPt->SetXTitle("p_{T} [GeV]");
-
-   auto h_jJetPhiEta = std::make_unique<TH2I>( "jJetTOBPhiEta", "jJet TOB Location", 200, -200, 200, 128, 0, 128);
-   h_jJetPhiEta->SetXTitle("#eta#times40");
-   h_jJetPhiEta->SetYTitle("#phi#times20");
-
-
-   if (m_histSvc->regShared( histPath + "jJetTOBPt", std::move(h_jJetPt), m_h_jJetPt ).isSuccess()){
-     ATH_MSG_DEBUG("jJetTOB Pt histogram has been registered successfully from jFexInputProvider.");
-   }
-   else{
-     ATH_MSG_WARNING("Could not register jJetTOB Pt histogram from jFexInputProvider");
-   }
-
-   if (m_histSvc->regShared( histPath + "jJetTOBPhiEta", std::move(h_jJetPhiEta), m_h_jJetPhiEta ).isSuccess()){
-     ATH_MSG_DEBUG("jJetTOB PhiEta histogram has been registered successfully from jFexInputProvider.");
-   }
-   else{
-     ATH_MSG_WARNING("Could not register jJetTOB PhiEta histogram from jFexInputProvider");
-   }
-
-   // jLJet
-   auto h_jLJetPt = std::make_unique<TH1I>( "jLJetTOBPt", "jLJet TOB Pt", 200, 0, 1000);
-   h_jLJetPt->SetXTitle("p_{T} [GeV]");
-
-   auto h_jLJetPhiEta = std::make_unique<TH2I>( "jLJetTOBPhiEta", "jLJet TOB Location", 200, -200, 200, 128, 0, 128);
-   h_jLJetPhiEta->SetXTitle("#eta#times40");
-   h_jLJetPhiEta->SetYTitle("#phi#times20");
-
-
-   if (m_histSvc->regShared( histPath + "jLJetTOBPt", std::move(h_jLJetPt), m_h_jLJetPt ).isSuccess()){
-     ATH_MSG_DEBUG("jLJetTOB Pt histogram has been registered successfully from jFexInputProvider.");
-   }
-   else{
-     ATH_MSG_WARNING("Could not register jLJetTOB Pt histogram from jFexInputProvider");
-   }
-
-   if (m_histSvc->regShared( histPath + "jLJetTOBPhiEta", std::move(h_jLJetPhiEta), m_h_jLJetPhiEta ).isSuccess()){
-     ATH_MSG_DEBUG("jLJetTOB PhiEta histogram has been registered successfully from jFexInputProvider.");
-   }
-   else{
-     ATH_MSG_WARNING("Could not register jLJetTOB PhiEta histogram from jFexInputProvider");
-   }
-
-   // jTau
-   auto h_jTauPt = std::make_unique<TH1I>( "jTauTOBPt", "jTau TOB Pt", 200, 0, 400);
-   h_jTauPt->SetXTitle("p_{T} [GeV]");
-
-   auto h_jTauIsolation = std::make_unique<TH1I>( "jTauTOBIsolation", "jTau TOB Isolation", 200, 0, 400);
-   h_jTauIsolation->SetXTitle("Isolation [GeV]");
-
-   auto h_jTauPhiEta = std::make_unique<TH2I>( "jTauTOBPhiEta", "jTau TOB Location", 200, -200, 200, 128, 0, 128);
-   h_jTauPhiEta->SetXTitle("#eta#times40");
-   h_jTauPhiEta->SetYTitle("#phi#times20");
-
-   auto h_jTauIsolationEta = std::make_unique<TH2I>( "jTauTOBIsolationEta", "jTau TOB Isolation vs eta", 200, -200, 200, 200, 0, 400);
-   h_jTauIsolationEta->SetXTitle("#eta#times40");
-   h_jTauIsolationEta->SetYTitle("Isolation [GeV]");
-
-   if (m_histSvc->regShared( histPath + "jTauTOBPt", std::move(h_jTauPt), m_h_jTauPt ).isSuccess()){
-     ATH_MSG_DEBUG("jTauTOB Pt histogram has been registered successfully from jFexInputProvider.");
-   }
-   else{
-     ATH_MSG_WARNING("Could not register jTauTOB Pt histogram from jFexInputProvider");
-   }
-   if (m_histSvc->regShared( histPath + "jTauTOBIsolation", std::move(h_jTauIsolation), m_h_jTauIsolation ).isSuccess()){
-     ATH_MSG_DEBUG("jTauTOB Isolation histogram has been registered successfully from jFexInputProvider.");
-   }
-   else{
-     ATH_MSG_WARNING("Could not register jTauTOB Isolation histogram from jFexInputProvider");
-   }
-   if (m_histSvc->regShared( histPath + "jTauTOBPhiEta", std::move(h_jTauPhiEta), m_h_jTauPhiEta ).isSuccess()){
-     ATH_MSG_DEBUG("jTauTOB PhiEta histogram has been registered successfully from jFexInputProvider.");
-   }
-   else{
-     ATH_MSG_WARNING("Could not register jTauTOB PhiEta histogram from jFexInputProvider");
-   }
-   if (m_histSvc->regShared( histPath + "jTauTOBIsolationEta", std::move(h_jTauIsolationEta), m_h_jTauIsolationEta ).isSuccess()){
-     ATH_MSG_DEBUG("jTauTOB Eta/Isolation histogram has been registered successfully from jFexInputProvider.");
-   }
-   else{
-     ATH_MSG_WARNING("Could not register jTauTOB Eta/Isolation histogram from jFexInputProvider");
-   }
-
-   // jEm
-   auto h_jEmPt = std::make_unique<TH1I>( "jEmTOBPt", "jEm TOB Pt", 200, 0, 400);
-   h_jEmPt->SetXTitle("p_{T} [GeV]");
-
-   auto h_jEmIsolation = std::make_unique<TH1I>( "jEmTOBIsolation", "jEm TOB Isolation", 4, 0, 4);
-   h_jEmIsolation->SetXTitle("Isolation");
-
-   auto h_jEmFrac1 = std::make_unique<TH1I>( "jEmTOBFrac1", "jEm TOB Frac1", 4, 0, 4);
-   h_jEmFrac1->SetXTitle("Frac1");
-
-   auto h_jEmFrac2 = std::make_unique<TH1I>( "jEmTOBFrac2", "jEm TOB Frac2", 4, 0, 4);
-   h_jEmFrac2->SetXTitle("Frac2");
-
-   auto h_jEmPhiEta = std::make_unique<TH2I>( "jEmTOBPhiEta", "jEm TOB Location", 200, -200, 200, 128, 0, 128);
-   h_jEmPhiEta->SetXTitle("#eta#times40");
-   h_jEmPhiEta->SetYTitle("#phi#times20");
-
-   auto h_jEmIsolationEta = std::make_unique<TH2I>( "jEmTOBIsolationEta", "jEm TOB Isolation vs eta", 200, -200, 200, 4, 0, 4);
-   h_jEmIsolationEta->SetXTitle("#eta#times40");
-   h_jEmIsolationEta->SetYTitle("Isolation");
-
-   auto h_jEmFrac1Eta = std::make_unique<TH2I>( "jEmTOBFrac1Eta", "jEm TOB Frac1 vs eta", 200, -200, 200, 4, 0, 4);
-   h_jEmFrac1Eta->SetXTitle("#eta#times40");
-   h_jEmFrac1Eta->SetYTitle("Frac1");
-
-   auto h_jEmFrac2Eta = std::make_unique<TH2I>( "jEmTOBFrac2Eta", "jEm TOB Frac2 vs eta", 200, -200, 200, 4, 0, 4);
-   h_jEmFrac2Eta->SetXTitle("#eta#times40");
-   h_jEmFrac2Eta->SetYTitle("Frac2");
-
-   if (m_histSvc->regShared( histPath + "jEmTOBPt", std::move(h_jEmPt), m_h_jEmPt ).isSuccess()){
-     ATH_MSG_DEBUG("jEmTOB Pt histogram has been registered successfully from jFexInputProvider.");
-   }
-   else{
-     ATH_MSG_WARNING("Could not register jEmTOB Pt histogram from jFexInputProvider");
-   }
-   if (m_histSvc->regShared( histPath + "jEmTOBIsolation", std::move(h_jEmIsolation), m_h_jEmIsolation ).isSuccess()){
-     ATH_MSG_DEBUG("jEmTOB Isolation histogram has been registered successfully from jFexInputProvider.");
-   }
-   else{
-     ATH_MSG_WARNING("Could not register jEmTOB Isolation histogram from jFexInputProvider");
-   }
-   if (m_histSvc->regShared( histPath + "jEmTOBFrac1", std::move(h_jEmFrac1), m_h_jEmFrac1 ).isSuccess()){
-     ATH_MSG_DEBUG("jEmTOB Frac1 histogram has been registered successfully from jFexInputProvider.");
-   }
-   else{
-     ATH_MSG_WARNING("Could not register jEmTOB Frac1 histogram from jFexInputProvider");
-   }
-   if (m_histSvc->regShared( histPath + "jEmTOBFrac2", std::move(h_jEmFrac2), m_h_jEmFrac2 ).isSuccess()){
-     ATH_MSG_DEBUG("jEmTOB Frac2 histogram has been registered successfully from jFexInputProvider.");
-   }
-   else{
-     ATH_MSG_WARNING("Could not register jEmTOB Frac2 histogram from jFexInputProvider");
-   }
-   if (m_histSvc->regShared( histPath + "jEmTOBPhiEta", std::move(h_jEmPhiEta), m_h_jEmPhiEta ).isSuccess()){
-     ATH_MSG_DEBUG("jEmTOB PhiEta histogram has been registered successfully from jFexInputProvider.");
-   }
-   else{
-     ATH_MSG_WARNING("Could not register jEmTOB PhiEta histogram from jFexInputProvider");
-   }
-   if (m_histSvc->regShared( histPath + "jEmTOBIsolationEta", std::move(h_jEmIsolationEta), m_h_jEmIsolationEta ).isSuccess()){
-     ATH_MSG_DEBUG("jEmTOB IsolationEta histogram has been registered successfully from jFexInputProvider.");
-   }
-   else{
-     ATH_MSG_WARNING("Could not register jEmTOB IsolationEta histogram from jFexInputProvider");
-   }
-   if (m_histSvc->regShared( histPath + "jEmTOBFrac1Eta", std::move(h_jEmFrac1Eta), m_h_jEmFrac1Eta ).isSuccess()){
-     ATH_MSG_DEBUG("jEmTOB Frac1Eta histogram has been registered successfully from jFexInputProvider.");
-   }
-   else{
-     ATH_MSG_WARNING("Could not register jEmTOB Frac1Eta histogram from jFexInputProvider");
-   }
-   if (m_histSvc->regShared( histPath + "jEmTOBFrac2Eta", std::move(h_jEmFrac2Eta), m_h_jEmFrac2Eta ).isSuccess()){
-     ATH_MSG_DEBUG("jEmTOB Frac2Eta histogram has been registered successfully from jFexInputProvider.");
-   }
-   else{
-     ATH_MSG_WARNING("Could not register jEmTOB Frac2Eta histogram from jFexInputProvider");
-   }
-
-   // jXE
-   auto h_jXE_Pt = std::make_unique<TH1I>( "jXETOBPt", "jXE TOB Pt", 200, 0, 2000);
-   h_jXE_Pt->SetXTitle("p_{T} [GeV]");
-
-   auto h_jXE_Phi = std::make_unique<TH1I>( "jXETOBPhi", "jXE TOB Phi", 64, -3.2, 3.2);
-   h_jXE_Phi->SetXTitle("#phi");
-
-   if (m_histSvc->regShared( histPath + "jXETOBPt", std::move(h_jXE_Pt), m_h_jXE_Pt ).isSuccess()){
-     ATH_MSG_DEBUG("jXETOB Pt histogram has been registered successfully for jFexInputProvider.");
-   }
-   else{
-     ATH_MSG_WARNING("Could not register jXETOB Pt histogram for jFexInputProvider");
-   }
-   if (m_histSvc->regShared( histPath + "jXETOBPhi", std::move(h_jXE_Phi), m_h_jXE_Phi ).isSuccess()){
-     ATH_MSG_DEBUG("jXETOB Phi histogram has been registered successfully for jFexInputProvider.");
-   }
-   else{
-     ATH_MSG_WARNING("Could not register jXETOB Phi histogram for jFexInputProvider");
-   }
-
-   // jTE
-   auto h_jTE_sumEt = std::make_unique<TH1I>( "jTETOBsumEt", "jTE TOB sumEt", 400, 0, 4000);
-   h_jTE_sumEt->SetXTitle("p_{T} [GeV]");
-
-   if (m_histSvc->regShared( histPath + "jTETOBsumEt", std::move(h_jTE_sumEt), m_h_jTE_sumEt ).isSuccess()){
-     ATH_MSG_DEBUG("jTETOB sumEt histogram has been registered successfully for jFexInputProvider.");
-   }
-   else{
-     ATH_MSG_WARNING("Could not register jTETOB sumEt histogram for jFexInputProvider");
-   }
-
-   // jTEC
-   auto h_jTEC_sumEt = std::make_unique<TH1I>( "jTECTOBsumEt", "jTEC TOB sumEt", 400, 0, 4000);
-   h_jTEC_sumEt->SetXTitle("p_{T} [GeV]");
-
-   if (m_histSvc->regShared( histPath + "jTECTOBsumEt", std::move(h_jTEC_sumEt), m_h_jTEC_sumEt ).isSuccess()){
-     ATH_MSG_DEBUG("jTECTOB sumEt histogram has been registered successfully for jFexInputProvider.");
-   }
-   else{
-     ATH_MSG_WARNING("Could not register jTECTOB sumEt histogram for jFexInputProvider");
-   }
-
-   // jTEFWD
-   auto h_jTEFWD_sumEt = std::make_unique<TH1I>( "jTEFWDTOBsumEt", "jTEFWD TOB sumEt", 400, 0, 4000);
-   h_jTEFWD_sumEt->SetXTitle("p_{T} [GeV]");
-
-   if (m_histSvc->regShared( histPath + "jTEFWDTOBsumEt", std::move(h_jTEFWD_sumEt), m_h_jTEFWD_sumEt ).isSuccess()){
-     ATH_MSG_DEBUG("jTEFWDTOB sumEt histogram has been registered successfully for jFexInputProvider.");
-   }
-   else{
-     ATH_MSG_WARNING("Could not register jTEFWDTOB sumEt histogram for jFexInputProvider");
-   }
-
-   // jTEFWDA
-   auto h_jTEFWDA_sumEt = std::make_unique<TH1I>( "jTEFWDATOBsumEt", "jTEFWDA TOB sumEt", 400, 0, 4000);
-   h_jTEFWDA_sumEt->SetXTitle("p_{T} [GeV]");
-
-   if (m_histSvc->regShared( histPath + "jTEFWDATOBsumEt", std::move(h_jTEFWDA_sumEt), m_h_jTEFWDA_sumEt ).isSuccess()){
-     ATH_MSG_DEBUG("jTEFWDATOB sumEt histogram has been registered successfully for jFexInputProvider.");
-   }
-   else{
-     ATH_MSG_WARNING("Could not register jTEFWDATOB sumEt histogram for jFexInputProvider");
-   }
-
-   // jTEFWDC
-   auto h_jTEFWDC_sumEt = std::make_unique<TH1I>( "jTEFWDCTOBsumEt", "jTEFWDC TOB sumEt", 400, 0, 4000);
-   h_jTEFWDC_sumEt->SetXTitle("p_{T} [GeV]");
-
-   if (m_histSvc->regShared( histPath + "jTEFWDCTOBsumEt", std::move(h_jTEFWDC_sumEt), m_h_jTEFWDC_sumEt ).isSuccess()){
-     ATH_MSG_DEBUG("jTEFWDCTOB sumEt histogram has been registered successfully for jFexInputProvider.");
-   }
-   else{
-     ATH_MSG_WARNING("Could not register jTEFWDCTOB sumEt histogram for jFexInputProvider");
-   }
-
-}
-
 
 StatusCode
 jFexInputProvider::fillEM(TCS::TopoInputEvent& inputEvent) const {
@@ -361,14 +102,13 @@ jFexInputProvider::fillEM(TCS::TopoInputEvent& inputEvent) const {
 
     inputEvent.addjEm( jem );
 
-    m_h_jEmPt->Fill(jem.EtDouble());
-    m_h_jEmIsolation->Fill(jem.isolation());
-    m_h_jEmFrac1->Fill(jem.frac1());
-    m_h_jEmFrac2->Fill(jem.frac2());
-    m_h_jEmPhiEta->Fill(jem.eta(),jem.phi()); 
-    m_h_jEmIsolationEta->Fill(jem.eta(),jem.isolation()); 
-    m_h_jEmFrac1Eta->Fill(jem.eta(),jem.frac1()); 
-    m_h_jEmFrac2Eta->Fill(jem.eta(),jem.frac2()); 
+    auto mon_h_jEmPt = Monitored::Scalar("jEmTOBPt", jem.EtDouble());
+    auto mon_h_jEmIsolation = Monitored::Scalar("jEmTOBIsolation", jem.isolation());
+    auto mon_h_jEmFrac1 = Monitored::Scalar("jEmTOBFrac1", jem.frac1());
+    auto mon_h_jEmFrac2 = Monitored::Scalar("jEmTOBFrac2", jem.frac2());
+    auto mon_h_jEmPhi = Monitored::Scalar("jEmTOBPhi", jem.phi());
+    auto mon_h_jEmEta = Monitored::Scalar("jEmTOBEta", jem.eta());
+    Monitored::Group(m_monTool, mon_h_jEmPt, mon_h_jEmIsolation, mon_h_jEmFrac1, mon_h_jEmFrac2, mon_h_jEmPhi, mon_h_jEmEta); 
   }
 
   return StatusCode::SUCCESS;
@@ -417,10 +157,11 @@ jFexInputProvider::fillTau(TCS::TopoInputEvent& inputEvent) const {
     inputEvent.addjTau( jtau );
     inputEvent.addcTau( jtau );
 
-    m_h_jTauPt->Fill(jtau.EtDouble());
-    m_h_jTauIsolation->Fill(jtau.EtIso()*m_EtDouble_conversion);
-    m_h_jTauPhiEta->Fill(jtau.eta(),jtau.phi()); 
-    m_h_jTauIsolationEta->Fill(jtau.eta(),jtau.EtIso()*m_EtDouble_conversion); 
+    auto mon_h_jTauPt = Monitored::Scalar("jTauTOBPt", jtau.EtDouble());
+    auto mon_h_jTauIsolation = Monitored::Scalar("jTauTOBIsolation", jtau.EtIso()*m_EtDouble_conversion);
+    auto mon_h_jTauPhi = Monitored::Scalar("jTauTOBPhi", jtau.phi());
+    auto mon_h_jTauEta = Monitored::Scalar("jTauTOBEta", jtau.eta());
+    Monitored::Group(m_monTool, mon_h_jTauPt, mon_h_jTauIsolation, mon_h_jTauPhi, mon_h_jTauEta); 
   }
 
   return StatusCode::SUCCESS;
@@ -464,8 +205,10 @@ jFexInputProvider::fillLRJet(TCS::TopoInputEvent& inputEvent) const {
 
     inputEvent.addjLJet( jet );
 
-    m_h_jLJetPt->Fill(jet.EtDouble());
-    m_h_jLJetPhiEta->Fill(jet.eta(),jet.phi());
+    auto mon_h_jLJetPt = Monitored::Scalar("jLJetTOBPt", jet.EtDouble());
+    auto mon_h_jLJetPhi = Monitored::Scalar("jLJetTOBPhi", jet.phi());
+    auto mon_h_jLJetEta = Monitored::Scalar("jLJetTOBEta", jet.eta());
+    Monitored::Group(m_monTool, mon_h_jLJetPt, mon_h_jLJetPhi, mon_h_jLJetEta); 
   }
 
   return StatusCode::SUCCESS;
@@ -509,8 +252,10 @@ jFexInputProvider::fillSRJet(TCS::TopoInputEvent& inputEvent) const {
  
     inputEvent.addjJet( jet );
 
-    m_h_jJetPt->Fill(jet.EtDouble());
-    m_h_jJetPhiEta->Fill(jet.eta(),jet.phi());
+    auto mon_h_jJetPt = Monitored::Scalar("jJetTOBPt", jet.EtDouble());
+    auto mon_h_jJetPhi = Monitored::Scalar("jJetTOBPhi", jet.phi());
+    auto mon_h_jJetEta = Monitored::Scalar("jJetTOBEta", jet.eta());
+    Monitored::Group(m_monTool, mon_h_jJetPt, mon_h_jJetPhi, mon_h_jJetEta); 
     
   }
 
@@ -565,8 +310,9 @@ jFexInputProvider::fillXE(TCS::TopoInputEvent& inputEvent) const {
   jxe.setEt2( Et2Topo );
 
   inputEvent.setjXE( jxe );
-  m_h_jXE_Pt->Fill(jxe.EtDouble());
-  m_h_jXE_Phi->Fill( atan2(jxe.Ey(),jxe.Ex()) );
+  auto mon_h_jXE_Pt = Monitored::Scalar("jXETOBPt", jxe.EtDouble());
+  auto mon_h_jXE_Phi = Monitored::Scalar("jXETOBPhi", atan2(jxe.Ey(),jxe.Ex()));
+  Monitored::Group(m_monTool, mon_h_jXE_Pt, mon_h_jXE_Phi); 
 
   return StatusCode::SUCCESS;
 }
@@ -661,11 +407,12 @@ jFexInputProvider::fillTE(TCS::TopoInputEvent& inputEvent) const {
   inputEvent.setjTEFWDA( jtefwda );
   inputEvent.setjTEFWDC( jtefwdc );
 
-  m_h_jTE_sumEt->Fill(jte.sumEtDouble());
-  m_h_jTEC_sumEt->Fill(jtec.sumEtDouble());
-  m_h_jTEFWD_sumEt->Fill(jtefwd.sumEtDouble());
-  m_h_jTEFWDA_sumEt->Fill(jtefwda.sumEtDouble());
-  m_h_jTEFWDC_sumEt->Fill(jtefwdc.sumEtDouble());
+  auto mon_h_jTE_sumEt = Monitored::Scalar("jTETOBsumEt", jte.sumEtDouble());
+  auto mon_h_jTEC_sumEt = Monitored::Scalar("jTECTOBsumEt", jtec.sumEtDouble());
+  auto mon_h_jTEFWD_sumEt = Monitored::Scalar("jTEFWDTOBsumEt", jtefwd.sumEtDouble());
+  auto mon_h_jTEFWDA_sumEt = Monitored::Scalar("jTEFWDATOBsumEt", jtefwda.sumEtDouble());
+  auto mon_h_jTEFWDC_sumEt = Monitored::Scalar("jTEFWDCTOBsumEt", jtefwdc.sumEtDouble());
+  Monitored::Group(m_monTool, mon_h_jTE_sumEt, mon_h_jTEC_sumEt, mon_h_jTEFWD_sumEt, mon_h_jTEFWDA_sumEt, mon_h_jTEFWDC_sumEt); 
 
   return StatusCode::SUCCESS;
 }

@@ -4,7 +4,7 @@
  **     @author  ben sowden
  **     @date    Mon 04 Aug 2014 10:45:00 BST
  **
- **     Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -373,9 +373,9 @@ int main(int argc, char** argv) {
 
       std::string histname = algorithms[algorithm]; // + histograms.at(histogram).fname;
 
-      std::string _xaxis = xaxis;
+      std::string xaxis_tmp = xaxis;
       bool fractional = contains( histname, "Fractional" );
-      if ( fractional ) _xaxis = "Fraction of " + histograms.at(histogram).dname;
+      if ( fractional ) xaxis_tmp = "Fraction of " + histograms.at(histogram).dname;
       
 
       //      std::cout << "\t" << histname << "\t" << algorithms.at(algorithm) << " " <<  histograms.at(histogram).fname << std::endl;
@@ -449,10 +449,10 @@ int main(int argc, char** argv) {
       refhist->GetYaxis()->SetTitle(yaxis.c_str());
       refhist->GetYaxis()->SetTitleOffset(1.5);
       
-      testhist->GetXaxis()->SetTitle(_xaxis.c_str());
+      testhist->GetXaxis()->SetTitle(xaxis_tmp.c_str());
       testhist->GetXaxis()->SetTitleOffset(1.5);
 
-      refhist->GetXaxis()->SetTitle(_xaxis.c_str());
+      refhist->GetXaxis()->SetTitle(xaxis_tmp.c_str());
       refhist->GetXaxis()->SetTitleOffset(1.5);
 
 

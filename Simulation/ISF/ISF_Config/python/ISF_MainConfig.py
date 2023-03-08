@@ -75,6 +75,13 @@ def Kernel_GenericSimulatorMTCfg(flags, name="ISF_Kernel_GenericSimulatorMT", **
         acc.addPublicTool(entryLayerTool)
         kwargs.setdefault("EntryLayerTool", acc.getPublicTool(entryLayerTool.name))
 
+    from AthenaConfiguration.Enums import ProductionStep
+    if flags.Common.ProductionStep == ProductionStep.FastChain:
+        if flags.Digitization.PileUp:
+            OEsvc = CompFactory.StoreGateSvc("OriginalEvent_SG")
+            acc.addService(OEsvc)
+            kwargs.setdefault("EvtStore", OEsvc.name) # TODO check this is correct
+
     kwargs.setdefault("Cardinality", flags.Concurrency.NumThreads)
     kwargs.setdefault("InputEvgenCollection", "BeamTruthEvent")
     kwargs.setdefault("OutputTruthCollection", "TruthEvent")
@@ -99,15 +106,16 @@ def Kernel_GenericG4OnlyMTCfg(flags, name="ISF_Kernel_GenericG4OnlyMT", **kwargs
     acc = ComponentAccumulator()
 
     defaultG4SelectorRegions = set(["BeamPipeSimulationSelectors", "IDSimulationSelectors", "CaloSimulationSelectors", "MSSimulationSelectors"])
+    if flags.Detector.GeometryCavern:
+        # If we are simulating the cavern then we want to use the FullGeant4Selector here too
+        defaultG4SelectorRegions.add("CavernSimulationSelectors")
     if defaultG4SelectorRegions - kwargs.keys(): # i.e. if any of these have not been defined yet
         tool = acc.popToolsAndMerge(FullGeant4SelectorCfg(flags))
         acc.addPublicTool(tool)
         pubTool = acc.getPublicTool(tool.name)
         # SimulationSelectors are still public ToolHandleArrays currently
-        kwargs.setdefault("BeamPipeSimulationSelectors", [pubTool])
-        kwargs.setdefault("IDSimulationSelectors", [pubTool])
-        kwargs.setdefault("CaloSimulationSelectors", [pubTool])
-        kwargs.setdefault("MSSimulationSelectors", [pubTool])
+        for selectorRegion in defaultG4SelectorRegions:
+            kwargs.setdefault(selectorRegion, [pubTool])
 
     if "CavernSimulationSelectors" not in kwargs:
         tool = acc.popToolsAndMerge(DefaultParticleKillerSelectorCfg(flags))

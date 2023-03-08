@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -61,7 +61,7 @@ const std::vector<double>& TBTailCatcher::getSignals() const
 }
 
 double
-TBTailCatcher::getSignal(std::string thisScintName) const
+TBTailCatcher::getSignal(const std::string& thisScintName) const
 {
   return ( this->findIndex(thisScintName) < m_signals.size() )
     ? m_signals[this->findIndex(thisScintName)]

@@ -37,9 +37,11 @@
 #include <EventLoop/StopwatchModule.h>
 #include <EventLoop/PostClosedOutputsModule.h>
 #include <EventLoop/TEventModule.h>
+#include <EventLoop/WorkerConfigModule.h>
 #include <RootCoreUtils/Assert.h>
 #include <RootCoreUtils/RootUtils.h>
 #include <RootCoreUtils/ThrowMsg.h>
+#include <RootUtils/WithRootErrorHandler.h>
 #include <SampleHandler/DiskOutput.h>
 #include <SampleHandler/DiskWriter.h>
 #include <SampleHandler/MetaFields.h>
@@ -389,6 +391,7 @@ namespace EL
       m_modules.push_back (std::make_unique<Detail::AlgorithmTimerModule> ());
     m_modules.push_back (std::make_unique<Detail::FileExecutedModule> ());
     m_modules.push_back (std::make_unique<Detail::EventCountModule> ());
+    m_modules.push_back (std::make_unique<Detail::WorkerConfigModule> ());
     m_modules.push_back (std::make_unique<Detail::AlgorithmStateModule> ());
     m_modules.push_back (std::make_unique<Detail::PostClosedOutputsModule> ());
 
@@ -541,10 +544,29 @@ namespace EL
 
 
 
+  bool Worker ::
+  fileOpenErrorFilter(int level, bool, const char*, const char *)
+  {
+    // For messages above warning level (SysError, Error, Fatal)
+    if( level > kWarning ) {
+      // We won't output further; ROOT should have already put something in the log file
+      throw std::runtime_error("ROOT error detected");
+
+      // No need for further error handling
+      return false;
+    }
+
+    // Pass to the default error handlers
+    return true;
+  }
+
   ::StatusCode Worker ::
   openInputFile (std::string inputFileUrl)
   {
     using namespace msgEventLoop;
+
+    // Enable custom error handling in a nice way
+    RootUtils::WithRootErrorHandler my_handler( fileOpenErrorFilter );
 
     RCU_CHANGE_INVARIANT (this);
 

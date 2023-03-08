@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 ###############################################################
 ## @file   TrigPSCPythonSetup.py
@@ -45,21 +45,24 @@ else:
    theApp.JobOptionsSvcType = PscConfig.optmap["JOBOPTIONSSVCTYPE"]
 
    ## add the MessageSvc and the JobOptionsSvc to the ServiceMgr
-   from AthenaCommon.ConfigurableDb import getConfigurable
-   ServiceMgr += getConfigurable(theApp.JobOptionsSvcType)("JobOptionsSvc")
-   ServiceMgr += getConfigurable(theApp.MessageSvcType   )("MessageSvc"   )
+   from AthenaConfiguration.ComponentFactory import CompFactory
+   from TrigServices.TrigServicesConfig import getMessageSvc
+   ServiceMgr += CompFactory.getComp(theApp.JobOptionsSvcType)("JobOptionsSvc")
 
    ## set OutputLevel
    logLevel = PscConfig.optmap['LOGLEVEL'].upper().split(',')
 
    if len(logLevel) > 0:
       from AthenaCommon import Constants
-      theApp.setOutputLevel(getattr(Constants, logLevel[0]))
+      flags.Exec.OutputLevel = getattr(Constants, logLevel[0])
 
    if 'POOL_OUTMSG_LEVEL' not in os.environ and len(logLevel)>1:
       os.environ['POOL_OUTMSG_LEVEL'] = logLevel[1]
 
    del logLevel
+
+   ServiceMgr += getMessageSvc(flags, theApp.MessageSvcType)
+   theApp.setOutputLevel(flags.Exec.OutputLevel)
 
    from AthenaCommon.Logging import logging
    psclog = logging.getLogger('TrigPSCPythonSetup')
@@ -95,6 +98,10 @@ else:
       print(" | Execute command before jobOptions script END.  | ")
       print(" +------------------------------------------------+ ")
       print("\n")
+
+   ## Now clone and use locked flags for services configuration
+   flags = flags.clone()
+   flags.lock()
 
    ### basic job configuration before user configuration ------------------------
    from TrigServices.TriggerUnixStandardSetup import setupCommonServices
@@ -134,10 +141,6 @@ else:
       # Throw exception to stop application
       theApp._exitstate = ExitCodes.UNKNOWN_EXCEPTION
       raise
-
-   ### basic job configuration after user configuration -------------------------
-   from TrigServices.TriggerUnixStandardSetup import setupCommonServicesEnd
-   setupCommonServicesEnd()
 
    ### run optional command after user job options script -----------------------
    if PscConfig.optmap['POSTCOMMAND']:

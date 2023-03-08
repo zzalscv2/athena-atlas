@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -9,21 +9,24 @@
 #ifndef ASG_TOOLS__ASG_COMPONENT_CONFIG_H
 #define ASG_TOOLS__ASG_COMPONENT_CONFIG_H
 
+// Athena include(s).
+#include "AsgMessaging/StatusCode.h"
+
+// System include(s).
 #include <map>
 #include <memory>
 #include <string>
 #include <vector>
 
-class StatusCode;
-
 namespace asg
 {
-  class AsgComponent;
-  class AsgToolConfig;
-}
+  /// @brief Namespace for "implementation types"
+  namespace details
+  {
+    // Forward declaration of the private tool configuration type
+    struct AsgComponentPrivateToolConfig;
+  }
 
-namespace asg
-{
   /// \brief an object that stores the configuration for an \ref
   /// AsgComponent and is able to create one from it
 
@@ -170,7 +173,7 @@ namespace asg
     ///   out of memory II
   public:
     StatusCode addPrivateTool (const std::string& name,
-                               AsgToolConfig toolConfig);
+                               AsgComponentConfig toolConfig);
 
 
     /// \brief the array version of \ref createPrivateTool
@@ -198,7 +201,7 @@ namespace asg
     ///   out of memory II
   public:
     std::string addPrivateToolInArray (const std::string& name,
-                                       AsgToolConfig toolConfig);
+                                       AsgComponentConfig toolConfig);
 
 
 
@@ -275,7 +278,7 @@ namespace asg
     std::string m_name;
 
     /// \brief the map of (private) tools to create
-    std::map<std::string,std::tuple<AsgToolConfig,std::string>> m_privateTools;
+    std::map<std::string, details::AsgComponentPrivateToolConfig> m_privateTools;
 
     /// \brief the map of (private) tool handle arrays to manage, and
     /// the tools they contain
@@ -301,7 +304,7 @@ namespace asg
     /// \{
     struct AccessSubtoolData final
     {
-      AsgToolConfig *config {nullptr};
+      AsgComponentConfig *config {nullptr};
       std::string prefix;
       std::string name;
     };
@@ -309,10 +312,20 @@ namespace asg
                                      std::size_t split);
     /// \}
   };
-}
+
+  namespace details {
+
+    /// @brief Helper type with all necessary details about private tools
+    struct AsgComponentPrivateToolConfig {
+      /// The configuration of the private tool
+      AsgComponentConfig m_config;
+      /// The property name (?) of the private tool
+      std::string m_propName;
+    };
+
+  } // namespace details
+} // namespace asg
 
 #include "AsgComponentConfig.icc"
-
-#include <AsgTools/AsgToolConfig.h>
 
 #endif

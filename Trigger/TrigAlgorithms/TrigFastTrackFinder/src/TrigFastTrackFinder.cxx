@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -67,7 +67,6 @@ TrigFastTrackFinder::TrigFastTrackFinder(const std::string& name, ISvcLocator* p
   m_disTrkFitter("Trk::GlobalChi2Fitter/InDetTrackFitter"),
   m_accelTool("TrigInDetAccelerationTool"),
   m_accelSvc("TrigInDetAccelerationSvc", name),
-  m_doCloneRemoval(true),
   m_useBeamSpot(true),
   m_doZFinder(false),
   m_doZFinderOnly(false),
@@ -135,7 +134,7 @@ TrigFastTrackFinder::TrigFastTrackFinder(const std::string& name, ISvcLocator* p
 
 
   //* Clone removal (removal of tracks sharing too many hits */
-  declareProperty("doCloneRemoval", m_doCloneRemoval = true,"Remove tracks sharing too many hits");
+  
   declareProperty( "FreeClustersCut"   ,m_nfreeCut,"Minimum number of unshared clusters");
 
   //** Cuts applied to final tracks after Fit
@@ -184,7 +183,7 @@ TrigFastTrackFinder::TrigFastTrackFinder(const std::string& name, ISvcLocator* p
   // Phase II
   declareProperty("ITkMode",           m_ITkMode = false);
   declareProperty("StandaloneMode",    m_standaloneMode = false);
-  declareProperty("UseEtaBinning",     m_tcs.m_useEtaBinning = false,"Split layers into eta bins");
+  
 }
 
 //--------------------------------------------------------------------------
@@ -297,7 +296,7 @@ StatusCode TrigFastTrackFinder::initialize() {
       std::ifstream ifs(conn_fileName.c_str());
       
       m_tcs.m_conn = new FASTRACK_CONNECTOR(ifs);
-      
+      m_tcs.m_useEtaBinning = m_useEtaBinning;
       ATH_MSG_INFO("Layer connections are initialized from file " << conn_fileName);
     }
   }
@@ -424,7 +423,8 @@ StatusCode TrigFastTrackFinder::execute(const EventContext& ctx) const {
   //RoI preparation/update
 
   if (m_standaloneMode) {
-    const TrigRoiDescriptor internalRoI = TrigRoiDescriptor(true);
+    //the default fullscan TrigRoiDescriptor settings for beamspot width (z-range) are incorrect
+    const TrigRoiDescriptor internalRoI = TrigRoiDescriptor(0, -4.5, 4.5, 0, -M_PI, M_PI, 0, -168.0, 168.0);
 
     ATH_CHECK(findTracks(trackEventData, internalRoI, inputTracks, *outputTracks, ctx));
 
@@ -808,7 +808,13 @@ StatusCode TrigFastTrackFinder::findTracks(InDet::SiTrackMakerEventData_xk &trac
   mnt_timer_TrackFitter.start();
 
   if( ! m_dodEdxTrk ) {
-     m_trigInDetTrackFitter->fit(initialTracks, outputTracks, ctx, m_particleHypothesis);
+
+    if(m_doTrackRefit) {
+      m_trigInDetTrackFitter->fit(initialTracks, outputTracks, ctx, m_particleHypothesis);
+    }
+    else {
+      outputTracks = std::move(initialTracks);
+    }
   }
   else {
      TrackCollection outputTrackswTP;
@@ -825,6 +831,7 @@ StatusCode TrigFastTrackFinder::findTracks(InDet::SiTrackMakerEventData_xk &trac
   if( outputTracks.empty() ) {
      ATH_MSG_DEBUG("REGTEST / No tracks fitted");
   }
+  
 
   bool do_recoverDisCombTrk = true;
   if( m_doDisappearingTrk && (initialTracks.size()!=outputTracks.size()) ) {
@@ -848,10 +855,10 @@ StatusCode TrigFastTrackFinder::findTracks(InDet::SiTrackMakerEventData_xk &trac
      }
   }
 
-  size_t counter(1);
-  idx = 0;
+  //check track parameters
+
   for ( auto fittedTrack = outputTracks.begin(); fittedTrack!=outputTracks.end(); ) {
-    if ((*fittedTrack)->perigeeParameters()){
+    if ((*fittedTrack)->perigeeParameters()) {
       float d0 = (*fittedTrack)->perigeeParameters()->parameters()[Trk::d0];
       float z0 = (*fittedTrack)->perigeeParameters()->parameters()[Trk::z0];
       if (std::abs(d0) > m_initialD0Max || std::abs(z0) > m_Z0Max) {
@@ -893,6 +900,17 @@ StatusCode TrigFastTrackFinder::findTracks(InDet::SiTrackMakerEventData_xk &trac
         }
       }
     }
+    ++fittedTrack;
+  }
+
+  mnt_timer_TrackFitter.stop();
+
+  //make track summary
+
+  size_t counter(1);
+  idx = 0;
+
+  for ( auto fittedTrack  = outputTracks.begin();fittedTrack!=outputTracks.end();++fittedTrack) {
 
     (*fittedTrack)->info().setPatternRecognitionInfo(Trk::TrackInfo::FastTrackFinderSeed);
     ATH_MSG_VERBOSE("Updating fitted track: " << counter);
@@ -908,11 +926,10 @@ StatusCode TrigFastTrackFinder::findTracks(InDet::SiTrackMakerEventData_xk &trac
        }
     }
 
-    counter++; fittedTrack++;
+    ++counter;
     idx++;
   }
-
-  mnt_timer_TrackFitter.stop();
+  
   mnt_timer_Total.stop();
 
   if( outputTracks.empty() ) {
@@ -1041,6 +1058,13 @@ void TrigFastTrackFinder::updateClusterMap(long int trackIdx, const Trk::Track* 
     if (siCLOT==nullptr) continue;
     const InDet::SiCluster* siCL = dynamic_cast<const InDet::SiCluster*>(siCLOT->prepRawData());
     if (siCL==nullptr) continue;
+
+    if(m_ITkMode) {
+      //skip non-pixel clusters because all seeds are PPP in ITK mode
+      const InDet::PixelCluster* pixCL = dynamic_cast<const InDet::PixelCluster*>(siCL);
+      if(pixCL==nullptr) continue;
+    }
+
     Identifier id = siCL->identify();
     clusterMap[id].push_back(trackIdx);
   }

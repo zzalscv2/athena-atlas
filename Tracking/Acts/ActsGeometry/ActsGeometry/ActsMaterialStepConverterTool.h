@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRY_ACTSMATERIALSTEPCONVERTERTOOL_H
@@ -29,6 +29,8 @@ public:
   virtual
   const Acts::RecordedMaterialTrack
   convertToMaterialTrack(const Trk::MaterialStepCollection &colStep) const override;
+
+  static constexpr double s_tolerance{0.1}; // mm
 
 };
 #endif

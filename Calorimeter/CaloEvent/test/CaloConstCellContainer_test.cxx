@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CaloEvent/test/CaloConstCellContainer_test.cxx
@@ -22,8 +22,8 @@
 #include <cassert>
 
 
-typedef std::vector<const CaloCell*> CellVector;
-typedef CaloConstCellContainer CellContainer;
+using CellVector = std::vector<const CaloCell *>;
+using CellContainer = CaloConstCellContainer;
 #define CONST_CONTAINER
 
 #include "CaloCellContainerTestCommon.icc"

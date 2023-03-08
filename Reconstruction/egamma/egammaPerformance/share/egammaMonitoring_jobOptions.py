@@ -6,8 +6,6 @@ if  DQMonFlags.monManEnvironment() in ('tier0','tier0ESD','online', 'AOD'):
     from AthenaMonitoring.AthenaMonitoringConf import AthenaMonManager
     from AthenaMonitoring.DQMonFlags import DQMonFlags
 
-    import TrigEgammaMonitoring.TrigEgammaMonitCategory as egammaConf
- 
     try:
 
         monManEgamma = AthenaMonManager(name="EgammaMonManager",
@@ -73,33 +71,9 @@ if  DQMonFlags.monManEnvironment() in ('tier0','tier0ESD','online', 'AOD'):
         FrwdETrigItems = []
         MyTrigDecisionTool = ""
 
-        # do trigger by default for at least one electron and photon monitor
-
-        BypassphotonTrigItems = []
-        BypassmySingleElectronTrigItems = []
-        # Force the trigger with a trigger found in the test file for test purpose
-        # BypassphotonTrigItems = ['L1_EM20VH']
-        # BypassmySingleElectronTrigItems = ['L1_EM20VH']
-
-        BypassphotonTrigItems += egammaConf.primary_double_pho
-        BypassmySingleElectronTrigItems += egammaConf.primary_single_ele
-        print("egamma electron trigger = %s" % BypassmySingleElectronTrigItems)
-
-        BypassMyTrigDecisionTool = monTrigDecTool if DQMonFlags.useTrigger() else None
-
-        ## Commenting in/out Trigger for now
+        ## Trigger not supported anymore in legacy DQ
         MyDoTrigger = False
-        #MyDoTrigger = DQMonFlags.useTrigger()
-
-        if (MyDoTrigger):
-            photonTrigItems += egammaConf.primary_double_pho
-            mySingleElectronTrigger += egammaConf.primary_single_ele
-            myDiElectronTrigger += egammaConf.primary_double_ele
-            JPsiTrigItems += egammaConf.monitoring_Jpsiee
-            FrwdETrigItems += egammaConf.primary_single_ele
-            ZeeTrigItems += egammaConf.monitoring_Zee 
-            MyTrigDecisionTool = monTrigDecTool
-            
+        BypassMyTrigDecisionTool = None
 
         if(egammaMonitorPhotons):
             from egammaPerformance.egammaPerformanceConf import photonMonTool
@@ -118,22 +92,6 @@ if  DQMonFlags.monManEnvironment() in ('tier0','tier0ESD','online', 'AOD'):
                 phMonTool.FilterTools += [GetFilledBunchFilterTool()]
             monManEgamma.AthenaMonTools += [ phMonTool ]
 
-            if DQMonFlags.useTrigger():
-                phMonToolWithTrigger = photonMonTool(name= "phMonToolWithTrigger",
-                                                     EgTrigDecisionTool = BypassMyTrigDecisionTool,
-                                                     EgUseTrigger = True,
-                                                     EgTrigger = BypassphotonTrigItems,
-                                                     EgGroupExtension = "WithTrigger",
-                                                     PhotonContainer = "Photons",
-                                                     OutputLevel = egammaMonOutputLevel,
-                                                     )
-            
-                phMonToolWithTrigger.FilterTools += [ GetLArBadLBFilterTool() ]
-                
-                if jobproperties.Beam.beamType()=='collisions':
-                    phMonToolWithTrigger.FilterTools += [GetFilledBunchFilterTool()]
-                monManEgamma.AthenaMonTools += [ phMonToolWithTrigger ]
-
 
         if(egammaMonitorElectrons):
             from egammaPerformance.egammaPerformanceConf import electronMonTool
@@ -151,21 +109,6 @@ if  DQMonFlags.monManEnvironment() in ('tier0','tier0ESD','online', 'AOD'):
             monManEgamma.AthenaMonTools += [ elMonTool ]
             print(elMonTool)
 
-            if DQMonFlags.useTrigger():
-                elMonToolWithTrigger = electronMonTool(name= "elMonToolWithTrigger",
-                                                       EgTrigDecisionTool = BypassMyTrigDecisionTool,
-                                                       EgUseTrigger = True,
-                                                       EgTrigger = BypassmySingleElectronTrigItems,
-                                                       EgGroupExtension = "WithTrigger",
-                                                       ElectronContainer = "Electrons",
-                                                       OutputLevel = egammaMonOutputLevel,
-                                                       )
-                elMonToolWithTrigger.FilterTools += [ GetLArBadLBFilterTool() ]
-                if jobproperties.Beam.beamType()=='collisions':
-                    elMonToolWithTrigger.FilterTools += [GetFilledBunchFilterTool()]
-                monManEgamma.AthenaMonTools += [ elMonToolWithTrigger ]
-                print(elMonToolWithTrigger)
-            
 
         if(egammaMonitorFwdEg):
             from egammaPerformance.egammaPerformanceConf import forwardElectronMonTool

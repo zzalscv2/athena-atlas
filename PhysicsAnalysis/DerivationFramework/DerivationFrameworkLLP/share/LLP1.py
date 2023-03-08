@@ -89,7 +89,8 @@ SeqLLP1 += CfgMgr.CP__MuonLRTMergingAlg(name="LLP1_MuonLRTMergingAlg",
                                         PromptMuonLocation    = "Muons",
                                         LRTMuonLocation       = "MuonsLRT",
                                         OutputMuonLocation    = MergedMuonContainer,
-                                        CreateViewCollection  = True)
+                                        CreateViewCollection  = True,
+                                        UseRun3WP = ConfigFlags.GeoModel.Run == LHCPeriod.Run3)
 
 #====================================================================
 # Run VSI

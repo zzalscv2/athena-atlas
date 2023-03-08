@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileEvent/TileRawChannel.h"
@@ -165,9 +165,7 @@ StatusCode TileRawChannelBuilderWienerFilter::finalize() {
 }
 
 
-TileRawChannel * TileRawChannelBuilderWienerFilter::rawChannel(const TileDigits* digits) {
-
-  const EventContext &ctx = Gaudi::Hive::currentContext();
+TileRawChannel * TileRawChannelBuilderWienerFilter::rawChannel(const TileDigits* digits, const EventContext& ctx) {
 
   ++m_chCounter;
 

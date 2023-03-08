@@ -117,13 +117,13 @@ namespace ISF {
     std::vector<double> inversePCA(std::vector<double> &variables) const;
 
     //apply the inverse CDF trainsform
-    double inverseCdfTransform(double variable, std::map<double, double> inverse_cdf_map) const;
+    static double inverseCdfTransform(double variable, std::map<double, double> inverse_cdf_map) ;
 
     //dot product between matrix and vector, used to inverse PCA
-    std::vector<double> dotProduct(const std::vector<std::vector<double>> &m, const std::vector<double> &v) const;
+    static std::vector<double> dotProduct(const std::vector<std::vector<double>> &m, const std::vector<double> &v) ;
 
     //returns normal cdf based on normal gaussian value
-    double normal_cdf(double x) const;
+    static double normal_cdf(double x) ;
 
     //apply energy interpolation
     double interpolateEnergy(const double &energy, CLHEP::HepRandomEngine* rndmEngine) const;
@@ -135,7 +135,7 @@ namespace ISF {
     StatusCode initializeInverseCDF(const std::string & quantileTransformerConfigFile);
 
     //get CDF mapping for individual XML node
-    std::map<double, double> getVariableCDFmappings(xmlNodePtr& nodeParent);
+    static std::map<double, double> getVariableCDFmappings(xmlNodePtr& nodeParent);
 
     //load inverse PCA from XML
     StatusCode initializeInversePCA(const std::string & inversePCAConfigFile);

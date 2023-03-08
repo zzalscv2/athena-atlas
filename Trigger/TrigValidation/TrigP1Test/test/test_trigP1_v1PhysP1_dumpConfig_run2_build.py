@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Trigger athenaHLT test of the PhysicsP1_pp_run3_v1 menu, with Run2 EB data as input
 # art-type: build
 # art-include: master/Athena
-# art-include: 22.0/Athena
+# art-include: 23.0/Athena
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
@@ -17,7 +17,7 @@ ex = ExecStep.ExecStep()
 ex.type = 'athenaHLT'
 ex.job_options = 'TriggerJobOpts/runHLT_standalone.py'
 ex.input = 'data_run2_EB'
-ex.args = '-c "setMenu=\'PhysicsP1_pp_run3_v1_HLTReprocessing_prescale\';doL1Sim=True;rewriteLVL1=True;setDetDescr=\'ATLAS-R2-2016-01-00-01\';setGlobalTag=\'CONDBR2-HLTP-2018-03\';"'
+ex.args = '-c "setMenu=\'PhysicsP1_pp_run3_v1_HLTReprocessing_prescale\';doL1Sim=True;rewriteLVL1=True;flags.GeoModel.AtlasVersion=\'ATLAS-R2-2016-01-00-01\';flags.IOVDb.GlobalTag=\'CONDBR2-HLTP-2018-03\';"'
 ex.args += ' --dump-config-exit'
 
 test = Test.Test()

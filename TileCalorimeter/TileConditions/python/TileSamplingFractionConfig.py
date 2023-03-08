@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """Define methods to construct configured Tile sampling fraction conditions algorithm"""
 
@@ -10,7 +10,7 @@ def TileSamplingFractionCondAlgCfg(flags, **kwargs):
     """Return component accumulator with configured Tile sampling fraction conditions algorithm
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
     Keyword arguments:
         Source -- source of Tile SamplingFraction conditions (COOL, FILE). Defaults to COOL.
         TileSamplingFraction -- name of Tile sampling fraction conditions object. Defaults to TileSamplingFraction.
@@ -63,7 +63,7 @@ def TileSamplingFractionCondAlgCfg(flags, **kwargs):
 
 if __name__ == "__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG
@@ -71,12 +71,13 @@ if __name__ == "__main__":
     # Test setup
     log.setLevel(DEBUG)
 
-    ConfigFlags.Input.Files = defaultTestFiles.HITS_RUN2
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.HITS_RUN2
+    flags.lock()
 
     acc = ComponentAccumulator()
 
-    acc.merge( TileSamplingFractionCondAlgCfg(ConfigFlags) )
+    acc.merge( TileSamplingFractionCondAlgCfg(flags) )
 
     acc.printConfig(withDetails = True, summariseProps = True)
     print(acc.getService('IOVDbSvc'))

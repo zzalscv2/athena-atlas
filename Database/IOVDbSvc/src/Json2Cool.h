@@ -10,6 +10,7 @@
 #include <map>
 #include "nlohmann/json.hpp"
 #include "BasicFolder.h"
+#include "IovStore.h"
 
 namespace cool{
   class RecordSpecification;
@@ -18,11 +19,12 @@ namespace cool{
 
 
 namespace IOVDbNamespace {
+
   //@brief Produces cool objects from their JSON representation, storing them in a 'BasicFolder'
   class Json2Cool {
   public:
     
-    Json2Cool(std::istream & stream, BasicFolder & b, const std::string &specString);
+    Json2Cool(std::istream & stream, BasicFolder & b, const std::string &specString, const IovStore::Iov_t* iov = nullptr);
     ~Json2Cool();
     
     static cool::Record 
@@ -32,7 +34,7 @@ namespace IOVDbNamespace {
     parsePayloadSpec(const std::string & stringSpecification);
     
   private:
-    void init(std::istream & stream, const std::string & specString);
+    void init(std::istream & stream, const std::string & specString, const IovStore::Iov_t* iov);
     cool::RecordSpecification * m_sharedSpec;
     //
     bool m_isVectorPayload;

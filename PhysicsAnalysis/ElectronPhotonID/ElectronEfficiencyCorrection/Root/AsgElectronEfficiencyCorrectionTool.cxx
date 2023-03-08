@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 /**
@@ -10,8 +10,6 @@
 // Include this class's header
 #include "ElectronEfficiencyCorrection/AsgElectronEfficiencyCorrectionTool.h"
 #include "ElectronEfficiencyCorrection/ElRecomFileHelpers.h"
-// Implementation include
-#include "ElectronEfficiencyCorrection/TElectronEfficiencyCorrectionTool.h"
 // Library includes
 #include <boost/algorithm/string.hpp>
 #include <cfloat>
@@ -57,7 +55,6 @@ enum model
 AsgElectronEfficiencyCorrectionTool::AsgElectronEfficiencyCorrectionTool(
   const std::string& myname)
   : asg::AsgMetadataTool(myname)
-  , m_rootTool(nullptr)
   , m_affectedSys()
   , m_appliedSystematics(nullptr)
   , m_correlation_model(correlationModel::SIMPLIFIED)
@@ -74,8 +71,8 @@ AsgElectronEfficiencyCorrectionTool::AsgElectronEfficiencyCorrectionTool(
   , m_uncorrVarDown{}
 {
   // Create an instance of the underlying ROOT tool
-  m_rootTool =
-    new Root::TElectronEfficiencyCorrectionTool(("T" + (this->name())).c_str());
+  m_rootTool = std::make_unique<Root::TElectronEfficiencyCorrectionTool>(
+      ("T" + (this->name())).c_str());
   // Declare the needed properties
   declareProperty(
     "CorrectionFileNameList",
@@ -83,7 +80,7 @@ AsgElectronEfficiencyCorrectionTool::AsgElectronEfficiencyCorrectionTool(
     "List of file names that store the correction factors for simulation.");
   declareProperty("MapFilePath",
                   m_mapFile = "ElectronEfficiencyCorrection/2015_2025/rel22.2/"
-                              "2022_Summer_Prerecom_v1/map1.txt",
+                              "2022_Summer_Prerecom_v1/map2.txt",
                   "Full path to the map file");
   declareProperty(
     "RecoKey", m_recoKey = "", "Key associated with reconstruction");
@@ -147,7 +144,6 @@ AsgElectronEfficiencyCorrectionTool::~AsgElectronEfficiencyCorrectionTool()
   if (m_UncorrRegions) {
     delete m_UncorrRegions;
   }
-  delete m_rootTool;
 }
 
 StatusCode
@@ -328,7 +324,7 @@ AsgElectronEfficiencyCorrectionTool::getEfficiencyScaleFactor(
 
   efficiencyScaleFactor = 1;
   // Retrieve the proper random Run Number
-  unsigned int runnumber = m_defaultRandomRunNumber;
+  unsigned int runNumber = m_defaultRandomRunNumber;
   if (m_useRandomRunNumber) {
     const xAOD::EventInfo* eventInfo =
       evtStore()->retrieve<const xAOD::EventInfo>(m_eventInfoCollectionName);
@@ -344,13 +340,12 @@ AsgElectronEfficiencyCorrectionTool::getEfficiencyScaleFactor(
         "reflect PU distribution in data");
       return CP::CorrectionCode::Error;
     }
-    runnumber = randomrunnumber(*(eventInfo));
+    runNumber = randomrunnumber(*(eventInfo));
   }
   //
   // Get the result
   //
   double cluster_eta(-9999.9);
-  double et(0.0);
 
   const xAOD::CaloCluster* cluster = inputObject.caloCluster();
   if (!cluster) {
@@ -367,12 +362,12 @@ AsgElectronEfficiencyCorrectionTool::getEfficiencyScaleFactor(
     cluster_eta = cluster->etaBE(2);
   }
 
-  // use et from cluster because it is immutable under syst variations of ele
-  // energy scale
+  // use et from cluster because it is immutable under syst variations of
+  // electron energy scale
   const double energy = cluster->e();
   const double parEta = inputObject.eta();
-  et = (std::cosh(parEta) != 0.) ? energy / std::cosh(parEta) : 0.;
-
+  const double coshEta = std::cosh(parEta);
+  double et = (coshEta != 0.) ? energy / coshEta : 0.;
   // allow for a 5% margin at the lowest pT bin boundary (i.e. increase et by 5%
   // for sub-threshold electrons). This assures that electrons that pass the
   // threshold only under syst variations of energy get a scale factor assigned.
@@ -380,54 +375,110 @@ AsgElectronEfficiencyCorrectionTool::getEfficiencyScaleFactor(
   if (itr_pt != m_pteta_bins.end() && et < itr_pt->first) {
     et = et * 1.05;
   }
+  return getEfficiencyScaleFactor(et, cluster_eta, runNumber,
+                                  efficiencyScaleFactor);
+}
 
-  size_t CorrIndex{ 0 };
-  size_t MCToysIndex{ 0 };
-  std::vector<double> result;
-  const int status = m_rootTool->calculate(m_dataType,
-                                           runnumber,
-                                           cluster_eta,
-                                           et, /* in MeV */
-                                           result,
-                                           CorrIndex,
-                                           MCToysIndex);
+CP::CorrectionCode
+AsgElectronEfficiencyCorrectionTool::getEfficiencyScaleFactor(
+    const double et,  /*in MeV*/
+    const double cluster_eta, /*cluster*/
+    const unsigned int runNumber,
+    double& efficiencyScaleFactor) const
+{
+  // We pass only one variation per time
+  // The applied systematic is always one systematic.
+  // Either is relevant and acquires a value
+  // or stays 0.
+  double sys(0);
+
+  // Let's try to figure already what we are to do
+  bool doSFOnly = appliedSystematics().empty();
+  bool doToys = (m_correlation_model == correlationModel::MCTOYS ||
+                 m_correlation_model == correlationModel::COMBMCTOYS);
+  bool isTotal = (m_correlation_model == correlationModel::TOTAL);
+  bool isFull = (m_correlation_model == correlationModel::FULL);
+  bool isSimplified = (m_correlation_model == correlationModel::SIMPLIFIED);
+
+  // Lets see if we have an uncorrelated syst variation passed
+  int unCorrSign = 0;
+  // or a correlated one
+  int indexCorrelated = -999;
+  int correlatedSign = 0;
+  if (!(doSFOnly || doToys || isTotal) && (isFull || isSimplified)) {
+    const auto& sysName = appliedSystematics().begin()->name();
+    bool isUncorr = (sysName.find("UncorrUnc") != std::string::npos);
+    int currentUncorReg = -999;
+    if (isUncorr) {
+      // Can we find an uncorrelated region?
+      if (isFull) {
+        currentUncorReg = currentUncorrSystRegion(cluster_eta, et);
+      } else if (isSimplified) {
+        currentUncorReg = currentSimplifiedUncorrSystRegion(cluster_eta, et);
+      }
+      if (currentUncorReg < 0) {
+        return CP::CorrectionCode::OutOfValidityRange;
+      }
+      // And  use it to if we got the "right" syst variation
+      if (appliedSystematics().matchSystematic(
+              m_uncorrVarDown[currentUncorReg])) {
+        unCorrSign = -1;
+      } else if (appliedSystematics().matchSystematic(
+                     m_uncorrVarUp[currentUncorReg])) {
+        unCorrSign = 1;
+      }
+    } else if (m_nCorrSyst != 0) {//if we have 0 we do not care ...
+      if (sysName.find("CorrUnc") != std::string::npos) {
+        // given the name convention we
+        const auto varNumEnd = sysName.rfind("__");
+        const auto varNumBegin = sysName.rfind("NP") + 2;
+        const int varIndex =
+            std::stoi(sysName.substr(varNumBegin, (varNumEnd - varNumBegin)));
+        if (appliedSystematics().matchSystematic(m_corrVarUp[varIndex])) {
+          indexCorrelated = varIndex;
+          correlatedSign = 1;
+        } else if (appliedSystematics().matchSystematic(
+                       m_corrVarDown[varIndex])) {
+          indexCorrelated = varIndex;
+          correlatedSign = -1;
+        }
+      }  // find CorrUncertainty in name
+    } // not Uncorr and we have CorrSyst
+  } // Not (SF or toys or total)
+
+  // Now lets do the call
+  // For now we more or less calculate on demand only
+  // the Correlated and the toys we can see if we want
+  // top opt also the "TOTAL"
+  Root::TElectronEfficiencyCorrectionTool::Result result;
+  const int status =
+      m_rootTool->calculate(m_dataType, runNumber, cluster_eta, et, /* in MeV */
+                            result, isTotal);
 
   // if status 0 something went wrong
   if (!status) {
     efficiencyScaleFactor = 1;
     return CP::CorrectionCode::OutOfValidityRange;
   }
-  //
-  // At this point we have the
-  // result std::vector
-  efficiencyScaleFactor = result[static_cast<size_t>(
-    Root::TElectronEfficiencyCorrectionTool::Position::SF)];
-
-  if (appliedSystematics().empty()) {
+  // At this point we have the SF
+  efficiencyScaleFactor = result.SF;
+  //And if all we need we can return
+  if (doSFOnly) {
     return CP::CorrectionCode::Ok;
   }
 
-  // Systematic Variations
-  // We pass only one variation per time
-  // The applied systemetic is always one systematic
-  // Either is relevant and acquires a values
-  // or stays 0.
-  double sys(0);
-
   // First the logic if the user requested toys
-  if (m_correlation_model == correlationModel::MCTOYS ||
-      m_correlation_model == correlationModel::COMBMCTOYS) {
+  if (doToys) {
     auto toy = appliedSystematics().getToyVariationByBaseName(m_toysBasename);
     toy.second = m_scale_toys;
-    sys = result[MCToysIndex + toy.first - 1] * m_scale_toys;
+    sys = result.toys[toy.first - 1] * m_scale_toys;
     // return here for Toy variations
     efficiencyScaleFactor = sys;
     return CP::CorrectionCode::Ok;
   }
   // The "TOTAL" single uncertainty uncorrelated+correlated
-  else if (m_correlation_model == correlationModel::TOTAL) {
-    sys = result[static_cast<size_t>(
-      Root::TElectronEfficiencyCorrectionTool::Position::Total)];
+  else if (isTotal) {
+    sys = result.Total;
     if (appliedSystematics().matchSystematic(m_uncorrVarUp[0])) {
       return HelperFunc(efficiencyScaleFactor, sys);
     }
@@ -435,85 +486,35 @@ AsgElectronEfficiencyCorrectionTool::getEfficiencyScaleFactor(
       return HelperFunc(efficiencyScaleFactor, -1 * sys);
     }
   }
-  // Then the uncorrelated part for the FULL model
-  else if (m_correlation_model == correlationModel::FULL) {
-    int currentReg = currentUncorrSystRegion(cluster_eta, et);
-    if (currentReg < 0) {
-      return CP::CorrectionCode::OutOfValidityRange;
-    }
-    if (appliedSystematics().matchSystematic(m_uncorrVarUp[currentReg])) {
-      sys = result[static_cast<size_t>(
-        Root::TElectronEfficiencyCorrectionTool::Position::UnCorr)];
-      return HelperFunc(efficiencyScaleFactor, sys);
-    }
-    if (appliedSystematics().matchSystematic(m_uncorrVarDown[currentReg])) {
-      sys = -1 * result[static_cast<size_t>(
-                   Root::TElectronEfficiencyCorrectionTool::Position::UnCorr)];
-      return HelperFunc(efficiencyScaleFactor, sys);
-    }
-    // Then the uncorrelated for the SIMPLIFIED model
-  } else if (m_correlation_model == correlationModel::SIMPLIFIED) {
-    int currentReg = currentSimplifiedUncorrSystRegion(cluster_eta, et);
-    if (currentReg < 0) {
-      return CP::CorrectionCode::OutOfValidityRange;
-    }
-
-    if (appliedSystematics().matchSystematic(m_uncorrVarUp[currentReg])) {
-      sys = result[static_cast<size_t>(
-        Root::TElectronEfficiencyCorrectionTool::Position::UnCorr)];
-      return HelperFunc(efficiencyScaleFactor, sys);
-    }
-
-    if (appliedSystematics().matchSystematic(m_uncorrVarDown[currentReg])) {
-      sys = -1 * result[static_cast<size_t>(
-                   Root::TElectronEfficiencyCorrectionTool::Position::UnCorr)];
-      return HelperFunc(efficiencyScaleFactor, sys);
-    }
+  // Then the uncorrelated part for the SiMPLIFIED/FULL models
+  else if (unCorrSign!=0) {
+    sys = unCorrSign * result.UnCorr;
+    return HelperFunc(efficiencyScaleFactor, sys);
   }
 
-  // Now we need to handle the correlated part
+  // If we reach this point
+  // it means we need to do the correlated part
+  // for the FULL/SIMPLIFIED models.
   // First if there are not correlated systematic
   if (m_nCorrSyst == 0) {
+
     if (appliedSystematics().matchSystematic(m_corrVarUp[0])) {
-      sys = std::sqrt(
-        result[static_cast<size_t>(
-          Root::TElectronEfficiencyCorrectionTool::Position::Total)] *
-          result[static_cast<size_t>(
-            Root::TElectronEfficiencyCorrectionTool::Position::Total)] -
-        result[static_cast<size_t>(
-          Root::TElectronEfficiencyCorrectionTool::Position::UnCorr)] *
-          result[static_cast<size_t>(Root::TElectronEfficiencyCorrectionTool::
-                                       Position::UnCorr)]); // total
-                                                            // -stat
+      sys = std::sqrt(result.Total * result.Total -
+                      result.UnCorr * result.UnCorr);  // total
+                                                       // -stat
       return HelperFunc(efficiencyScaleFactor, sys);
     }
     if (appliedSystematics().matchSystematic(m_corrVarDown[0])) {
-      sys =
-        -1 *
-        std::sqrt(
-          result[static_cast<size_t>(
-            Root::TElectronEfficiencyCorrectionTool::Position::Total)] *
-            result[static_cast<size_t>(
-              Root::TElectronEfficiencyCorrectionTool::Position::Total)] -
-          result[static_cast<size_t>(
-            Root::TElectronEfficiencyCorrectionTool::Position::UnCorr)] *
-            result[static_cast<size_t>(Root::TElectronEfficiencyCorrectionTool::
-                                         Position::UnCorr)]); // total -stat
+      sys = -1 * std::sqrt(result.Total * result.Total -
+                           result.UnCorr * result.UnCorr);  // total
+                                                            // -stat
       return HelperFunc(efficiencyScaleFactor, sys);
     }
   }
-  // If we reach this point
-  // it means we need to do the correlated for
-  // the FULL/SIMPLIFIED models.
-  for (int i = 0; i < m_nCorrSyst; ++i) { /// number of correlated sources
-    if (appliedSystematics().matchSystematic(m_corrVarUp[i])) {
-      sys = result[CorrIndex + i];
-      return HelperFunc(efficiencyScaleFactor, sys);
-    }
-    if (appliedSystematics().matchSystematic(m_corrVarDown[i])) {
-      sys = -1 * result[CorrIndex + i];
-      return HelperFunc(efficiencyScaleFactor, sys);
-    }
+ //or if we had
+ if (correlatedSign != 0) {
+    sys = correlatedSign * result.Corr[indexCorrelated];
+    return HelperFunc(efficiencyScaleFactor, sys);
   }
   return CP::CorrectionCode::Ok;
 }
@@ -588,7 +589,7 @@ AsgElectronEfficiencyCorrectionTool::applySystematicVariation(
     CP::SystematicSet& mySysConf = itr->second;
     m_appliedSystematics = &mySysConf;
   }
-  // if not , we should register it, after it passes sanity checks
+  // if not, we should register it, after it passes sanity checks
   else {
     // If it's a new input set, we need to filter it
     CP::SystematicSet affectingSys = affectingSystematics();
@@ -599,7 +600,7 @@ AsgElectronEfficiencyCorrectionTool::applySystematicVariation(
         "Unsupported combination of systematic variations passed to the tool!");
       return StatusCode::FAILURE;
     }
-    // Does filtered make sense ,  only one per time
+    // Does filtered make sense,  only one per time
     if (filteredSys.size() > 1) {
       ATH_MSG_ERROR(
         "More than one systematic variation passed at the same time");

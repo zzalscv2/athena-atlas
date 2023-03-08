@@ -130,25 +130,6 @@ public:
   /** AlgTool finalize method */
   virtual StatusCode finalize() override;
 
-  /** Extrapolate Neutral xAOD particle to surface.
-   * Starts from the perigee parameters. */
-  virtual std::unique_ptr<NeutralParameters> extrapolate(
-    const xAOD::NeutralParticle& xnParticle,
-    const Surface& sf,
-    PropDirection dir = anyDirection,
-    const BoundaryCheck& bcheck = true) const override final;
-
-  /** Extrapolate Charged xAOD particle to surface
-   * Starts from the perigee parameters.*/
-  virtual std::unique_ptr<TrackParameters> extrapolate(
-    const EventContext& ctx,
-    const xAOD::TrackParticle& particleBase,
-    const Surface& sf,
-    PropDirection dir = anyDirection,
-    const BoundaryCheck& bcheck = true,
-    ParticleHypothesis particle = pion,
-    MaterialUpdateMode matupmode = addNoise) const override final;
-
   /** Extrapolate directly: Forwards directly the call to the 
    * configured "Global" propagator. No navigation and no 
    * material effecs. Useful when we need fast propagation
@@ -196,7 +177,7 @@ public:
   /** Main extrapolation interface starting from a Trk::Track and aiming
    * at Surface. It uses the navigator to find the closest parameters
    * of the track to the surface. */
-  virtual std::unique_ptr<TrackParameters> extrapolate(
+  virtual std::unique_ptr<TrackParameters> extrapolateTrack(
     const EventContext& ctx,
     const Track& trk,
     const Surface& sf,
@@ -240,13 +221,14 @@ public:
    * mainly for muons and Particle Flow.
    */
   virtual std::unique_ptr<
-    std::vector<std::pair<std::unique_ptr<Trk::TrackParameters>, int>>>
-  extrapolate(const EventContext& ctx,
-              const Trk::TrackParameters& parm,
-              Trk::PropDirection dir,
-              Trk::ParticleHypothesis particle,
-              std::vector<const Trk::TrackStateOnSurface*>*& material,
-              int destination = 3) const override final;
+      std::vector<std::pair<std::unique_ptr<Trk::TrackParameters>, int>>>
+  collectIntersections(
+    const EventContext& ctx,
+    const Trk::TrackParameters& parm,
+    Trk::PropDirection dir,
+    Trk::ParticleHypothesis particle,
+    std::vector<const Trk::TrackStateOnSurface*>*& material,
+    int destination = 3) const override final;
 
   /** Extrapolation to the next active layer with material collection*/
   virtual std::pair<std::unique_ptr<TrackParameters>, const Layer*> extrapolateToNextActiveLayerM(
@@ -268,9 +250,6 @@ public:
 
   /** Return the TrackingGeometry used by the Extrapolator (forward information from Navigator)*/
   virtual const TrackingGeometry* trackingGeometry() const override final;
-
-  /** Validation Action,*/
-  virtual void validationAction() const override final;
 
 private:
 
@@ -705,7 +684,7 @@ private:
   bool m_fastField;
   Trk::MagneticFieldProperties m_fieldProperties;
   //------------Reference surface --------------
-  Surface* m_referenceSurface;
+  std::unique_ptr<Surface> m_referenceSurface;
   //-------------------------- SCREEN output steering -------------------------------------------//
   bool m_printRzOutput;
   //------------------------- VALIDATION  SECTION ------------------------------------------//

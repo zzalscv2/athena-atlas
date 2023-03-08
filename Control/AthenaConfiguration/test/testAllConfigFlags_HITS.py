@@ -1,19 +1,20 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.TestDefaults import defaultTestFiles
-ConfigFlags.Input.Files = defaultTestFiles.HITS_RUN2
-ConfigFlags._loadDynaFlags("Detector")
+flags = initConfigFlags()
+flags.Input.Files = defaultTestFiles.HITS_RUN2
 
-# Don't fail just because G4AtlasApps isn't present in this build.
-havesim = True
-try:
-    import G4AtlasApps # noqa: F401
-except ImportError:
-    havesim = False
-if havesim:
-    ConfigFlags._loadDynaFlags("Sim")
+# Load Detector flags
+flags._loadDynaFlags("Detector")
 
-ConfigFlags.initAll()
-ConfigFlags.lock()
-ConfigFlags.dump()
+# Load Sim flags
+flags._loadDynaFlags("Sim")
+
+# Load GeoModel flags
+flags._loadDynaFlags("GeoModel")
+
+# Init and print
+flags.initAll()
+flags.lock()
+flags.dump()

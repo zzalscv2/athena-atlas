@@ -9,14 +9,12 @@
 #include "VxVertex/VxTrackAtVertex.h"
 #include "VxVertex/LinearizedTrack.h"
 #include "TrkSurfaces/PerigeeSurface.h"
-#include "TrkExInterfaces/IExtrapolator.h"
 #include "TrkDetDescrUtils/GeometryStatics.h"
 #include "TrkTrack/TrackCollection.h"
 #include "TrkTrack/Track.h"
 #include "TrkTrack/LinkToTrack.h"
 #include "TrkParticleBase/LinkToTrackParticleBase.h"
 #include "TrkParticleBase/TrackParticleBase.h"
-#include "TrkVertexFitterInterfaces/IVertexLinearizedTrackFactory.h"
 #include "EventPrimitives/EventPrimitives.h"
 #include "TrkLinks/LinkToXAODTrackParticle.h" 
 //xAOD includes 
@@ -82,16 +80,12 @@ namespace Trk
 
 	FastVertexFitter::FastVertexFitter ( const std::string& t, const std::string& n, const IInterface*  p ) : base_class ( t,n,p ),
 														  m_maxIterations ( 3 ),
-														  m_maxDchi2PerNdf ( 0.000001 ),
-														  m_extrapolator ( "Trk::Extrapolator" ),
-														  m_linFactory ( "Trk::FullLinearizedTrackFactory" )
+														  m_maxDchi2PerNdf ( 0.000001 )
 														  
 														  
 	{
 	  declareProperty ( "MaxIterations",        m_maxIterations );
 	  declareProperty ( "MaxChi2PerNdf",        m_maxDchi2PerNdf );
-	  declareProperty ( "Extrapolator",         m_extrapolator );
-	  declareProperty ( "LinearizedTrackFactory", m_linFactory );
 	  declareInterface<IVertexFitter> ( this );
 	}
 

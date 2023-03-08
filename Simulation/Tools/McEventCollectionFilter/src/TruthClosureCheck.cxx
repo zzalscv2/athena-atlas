@@ -41,7 +41,7 @@ StatusCode TruthClosureCheck::initialize() {
 StatusCode TruthClosureCheck::sanityCheck(const HepMC::GenEvent& event) const {
   //Sanity check
   bool resetProblem(false);
-  for (auto particle: event) {
+  for (const auto& particle: event) {
     if (particle->status() == 1) {
       if (!particle->production_vertex()) {
         ATH_MSG_ERROR("Status 1 particle without a production vertex!! " << particle);
@@ -78,16 +78,16 @@ void TruthClosureCheck::printGenVertex(HepMC::ConstGenVertexPtr origVertex,
   ATH_MSG_INFO("Original Vertex:");
   ATH_MSG_INFO( origVertex );
   ATH_MSG_INFO("Particles In:");
-  for (auto originalPartIn: origVertex->particles_in()) ATH_MSG_INFO( originalPartIn );
+  for (const auto& originalPartIn: origVertex->particles_in()) ATH_MSG_INFO( originalPartIn );
   ATH_MSG_INFO("Particles Out:");
-  for (auto originalPartOut: origVertex->particles_out()) ATH_MSG_INFO( originalPartOut );
+  for (const auto& originalPartOut: origVertex->particles_out()) ATH_MSG_INFO( originalPartOut );
   ATH_MSG_INFO("----------------------------------");
   ATH_MSG_INFO("Reset Vertex:");
   ATH_MSG_INFO( resetVertex );
   ATH_MSG_INFO("Particles In:");
-  for (auto resetPartIn: resetVertex->particles_in()) ATH_MSG_INFO( resetPartIn );
+  for (const auto& resetPartIn: resetVertex->particles_in()) ATH_MSG_INFO( resetPartIn );
   ATH_MSG_INFO("Particles Out:");
-  for (auto resetPartOut: resetVertex->particles_out()) ATH_MSG_INFO( resetPartOut );
+  for (const auto& resetPartOut: resetVertex->particles_out()) ATH_MSG_INFO( resetPartOut );
   ATH_MSG_INFO("----------------------------------");
   return;
 }
@@ -177,8 +177,9 @@ StatusCode TruthClosureCheck::compareGenVertex(HepMC::ConstGenVertexPtr origVert
 
   std::vector<HepMC::ConstGenParticlePtr> OriginalListOfParticlesOut = origVertex->particles_out();
   std::vector<HepMC::ConstGenParticlePtr> ResetListOfParticlesOut = resetVertex->particles_out();
-  std::sort(OriginalListOfParticlesOut.begin(), OriginalListOfParticlesOut.end(), [](auto& a, auto& b) -> bool{return HepMC::barcode(a) > HepMC::barcode(b); });
-  std::sort(ResetListOfParticlesOut.begin(), ResetListOfParticlesOut.end(), [](auto& a, auto& b) -> bool{return HepMC::barcode(a) > HepMC::barcode(b); });
+//AV: please remember that the best quantities to compare particles are physical quantities.  
+  std::sort(OriginalListOfParticlesOut.begin(), OriginalListOfParticlesOut.end(), [](auto& a, auto& b) -> bool{return a->momentum().pz() > b->momentum().pz(); });
+  std::sort(ResetListOfParticlesOut.begin(), ResetListOfParticlesOut.end(), [](auto& a, auto& b) -> bool{return a->momentum().pz() > b->momentum().pz(); });
 
   for ( std::vector<HepMC::ConstGenParticlePtr>::iterator originalPartOutIter(OriginalListOfParticlesOut.begin()), resetPartOutIter(ResetListOfParticlesOut.begin()); 
         originalPartOutIter != OriginalListOfParticlesOut.end() && resetPartOutIter != ResetListOfParticlesOut.end(); 

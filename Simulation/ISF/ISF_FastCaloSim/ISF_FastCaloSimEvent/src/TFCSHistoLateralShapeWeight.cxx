@@ -77,7 +77,7 @@ bool TFCSHistoLateralShapeWeight::Initialize(TH1* hist)
   if(!hist) return false;
   if(m_hist) delete m_hist;
 	m_hist=(TH1*)hist->Clone(TString("TFCSHistoLateralShapeWeight_")+hist->GetName());
-	m_hist->SetDirectory(0);
+	m_hist->SetDirectory(nullptr);
 
   return true;
 }

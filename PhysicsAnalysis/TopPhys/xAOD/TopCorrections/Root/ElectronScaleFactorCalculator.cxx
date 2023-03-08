@@ -1002,7 +1002,6 @@ namespace top {
               double SF_Isol(1.), SF_IsolLoose(1.);
 
               /// --Trigger-- ///
-              int count = 0;
               for (const CP::SystematicSet& isyst : m_systTriggerCorrModel) {
 
                 top::check(m_electronEffSFTriggerCorrModel->applySystematicVariation(isyst),
@@ -1031,8 +1030,6 @@ namespace top {
                 vec_SF_TriggerLoose_UP.emplace_back(SF_TriggerLoose);
                 vec_Eff_Trigger_UP.emplace_back(EFF_Trigger);
                 vec_Eff_TriggerLoose_UP.emplace_back(EFF_TriggerLoose);
-
-                count++;
               }
 
               // Do some sanity check
@@ -1068,7 +1065,6 @@ namespace top {
                            m_systNominal), "Failed to set systematic");
 
               /// --Reco-- ///
-              count = 0;
               for (const CP::SystematicSet& isyst : m_systRecoCorrModel) {
 
                 top::check(m_electronEffSFRecoCorrModel->applySystematicVariation(isyst), "Failed to set systematic");
@@ -1077,7 +1073,6 @@ namespace top {
 
                 vec_SF_Reco_DOWN.emplace_back(SF_Reco);
                 vec_SF_Reco_UP.emplace_back(SF_Reco);
-                ++count;
               }
               if (vec_SF_Reco_DOWN.size() != vec_SF_Reco_UP.size()) {
                 throw std::runtime_error {
@@ -1090,7 +1085,6 @@ namespace top {
                            m_systNominal), "Failed to set systematic");
 
               /// --ID-- ///
-              count = 0;
               for (const CP::SystematicSet& isyst : m_systIDCorrModel) {
 
                 top::check(m_electronEffSFIDCorrModel->applySystematicVariation(isyst), "Failed to set systematic");
@@ -1105,7 +1099,6 @@ namespace top {
                 vec_SF_IDLoose_DOWN.emplace_back(SF_IDLoose);
                 vec_SF_ID_UP.emplace_back(SF_ID);
                 vec_SF_IDLoose_UP.emplace_back(SF_IDLoose);
-                ++count;
               }
               if (vec_SF_ID_DOWN.size() != vec_SF_ID_UP.size()) {
                 throw std::runtime_error {
@@ -1125,7 +1118,6 @@ namespace top {
                            m_systNominal), "Failed to set systematic");
 
               ///-- Iso --///
-              count = 0;
               for (const CP::SystematicSet& isyst : m_systIsoCorrModel) {
 
                 if (m_electronEffIso_exists) {
@@ -1150,7 +1142,6 @@ namespace top {
                 vec_SF_IsolLoose_DOWN.emplace_back(SF_IsolLoose);
                 vec_SF_Isol_UP.emplace_back(SF_Isol);
                 vec_SF_IsolLoose_UP.emplace_back(SF_IsolLoose);
-                ++count;
               }
               if (vec_SF_Isol_DOWN.size() != vec_SF_Isol_UP.size()) {
                 throw std::runtime_error {

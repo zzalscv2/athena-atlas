@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -143,7 +143,9 @@ namespace Analysis {
       // some other parameters we have go get directly from the
       // extrapolator. This is more or less copied from:
       // https://goo.gl/iWLv5T
-      std::unique_ptr< const Trk::TrackParameters > extrap_pars( m_extrapolator->extrapolate(ctx, *track, primary_surface ) );
+      std::unique_ptr< const Trk::TrackParameters > extrap_pars( m_extrapolator->extrapolate(ctx, 
+                                                                                             track->perigeeParameters(), 
+                                                                                             primary_surface ) );
       if ( extrap_pars ) {
         const Amg::Vector3D& track_pos = extrap_pars->position();
         const Amg::Vector3D& vertex_pos = primary->position();
@@ -179,7 +181,7 @@ namespace Analysis {
   }
 
   const xAOD::Vertex* BTagTrackAugmenterAlg::getPrimaryVertex( const xAOD::VertexContainer& vertexCollection ) const {
-    if ( vertexCollection.size() == 0 ) {
+    if ( vertexCollection.empty() ) {
       ATH_MSG_DEBUG( "Input vertex collection has size 0!" );
       return nullptr;
     }

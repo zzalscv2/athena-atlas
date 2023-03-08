@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 import sys, shutil, re
@@ -416,7 +416,7 @@ def SleptonsLLPCfg(flags):
             physicsOptions += [ result.popToolsAndMerge(STauLPlusToTauGravitinoCfg(flags)) ]
             physicsOptions += [ result.popToolsAndMerge(STauRMinusToTauGravitinoCfg(flags)) ]
             physicsOptions += [ result.popToolsAndMerge(STauLMinusToTauGravitinoCfg(flags)) ]
-    result.getService("PhysicsListSvc").PhysOption += physicsOptions
+        result.getService("PhysicsListSvc").PhysOption += physicsOptions
     return result
 
 
@@ -441,7 +441,7 @@ def GMSB_Cfg(flags):
             print ('GMSBIndex %i not supported' % GMSBIndex)
             raise
         del GMSBIndex
-    result.getService("PhysicsListSvc").PhysOption += physicsOptions
+        result.getService("PhysicsListSvc").PhysOption += physicsOptions
     return result
 
 

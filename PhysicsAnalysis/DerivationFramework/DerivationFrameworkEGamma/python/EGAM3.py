@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # EGAM3.py
@@ -390,7 +390,7 @@ def EGAM3Cfg(ConfigFlags):
     # TODO: this should ideally be called higher up to avoid it being run
     # multiple times in a train
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    EGAM3TriggerListsHelper = TriggerListsHelper()
+    EGAM3TriggerListsHelper = TriggerListsHelper(ConfigFlags)
 
     # configure skimming/thinning/augmentation tools
     acc.merge(EGAM3KernelCfg(ConfigFlags,
@@ -511,24 +511,15 @@ def EGAM3Cfg(ConfigFlags):
     EGAM3SlimmingHelper.ExtraVariables += GSFTracksCPDetailedContent
 
     # photons and electrons: gain and cluster energy per layer
-    from DerivationFrameworkCalo.DerivationFrameworkCaloFactories import (
+    from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import (
         getGainDecorations, getClusterEnergyPerLayerDecorations )
-    GainDecoratorTool = None
-    ClusterEnergyPerLayerDecorators = []  
-    for toolStr in acc.getEventAlgo('EGAM3Kernel').AugmentationTools:
-        toolStr  = f'{toolStr}'
-        splitStr = toolStr.split('/')
-        tool =  acc.getPublicTool(splitStr[1])
-        if splitStr[0] == 'DerivationFramework::GainDecorator':
-            GainDecoratorTool = tool
-        elif splitStr[0] == 'DerivationFramework::ClusterEnergyPerLayerDecorator':
-            ClusterEnergyPerLayerDecorators.append( tool )
-    if GainDecoratorTool : 
-        EGAM3SlimmingHelper.ExtraVariables.extend(
-            getGainDecorations(GainDecoratorTool) )
-    for tool in ClusterEnergyPerLayerDecorators:
-        EGAM3SlimmingHelper.ExtraVariables.extend(
-            getClusterEnergyPerLayerDecorations( tool ) )
+    gainDecorations = getGainDecorations(acc, 'EGAM3Kernel')
+    print('EGAM3 gain decorations: ', gainDecorations)
+    EGAM3SlimmingHelper.ExtraVariables.extend(gainDecorations)
+    clusterEnergyDecorations = getClusterEnergyPerLayerDecorations(
+        acc, 'EGAM3Kernel' )
+    print('EGAM3 cluster energy decorations: ', clusterEnergyDecorations)
+    EGAM3SlimmingHelper.ExtraVariables.extend(clusterEnergyDecorations)
 
     # photon HLT variables
     EGAM3SlimmingHelper.ExtraVariables += ExtraVariablesHLTPhotons[MenuType]

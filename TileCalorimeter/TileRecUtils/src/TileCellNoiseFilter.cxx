@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Tile includes
@@ -35,8 +35,6 @@ const InterfaceID& TileCellNoiseFilter::interfaceID() {
 TileCellNoiseFilter::TileCellNoiseFilter(const std::string& type,
     const std::string& name, const IInterface* parent)
     : base_class(type, name, parent)
-    , m_tileID(0)
-    , m_tileHWID(0)
     , m_truncationThresholdOnAbsEinSigma(4.0) // 4 sigma of ADC HF noise by default
     , m_minimumNumberOfTruncatedChannels(0.6) // at least 60% of channels should be below threshold
     , m_useTwoGaussNoise(false) // do not use 2G - has no sense for ADC HF noise for the moment
@@ -58,20 +56,17 @@ StatusCode TileCellNoiseFilter::initialize() {
   ATH_CHECK( detStore()->retrieve(m_tileID));
   ATH_CHECK( detStore()->retrieve(m_tileHWID));
 
-  //=== get TileCondToolEmscale
-  ATH_CHECK( m_tileToolEmscale.retrieve() );
+  ATH_CHECK( m_emScaleKey.initialize() );
+
+  ATH_CHECK( m_sampleNoiseKey.initialize(m_caloNoiseKey.empty()) );
 
   if (m_caloNoiseKey.empty()) {
-    //=== get TileCondToolNoiseSample
-    ATH_CHECK( m_tileToolNoiseSample.retrieve());
-
     //=== get TileBadChanTool
     ATH_CHECK( m_tileBadChanTool.retrieve() );
 
   } else {
     ATH_CHECK( m_caloNoiseKey.initialize());
 
-    m_tileToolNoiseSample.disable();
     m_tileBadChanTool.disable();
   }
 
@@ -92,15 +87,23 @@ StatusCode TileCellNoiseFilter::process (CaloCellContainer* cellcoll,
   }
 
   const CaloNoise* caloNoise = nullptr;
+  const TileSampleNoise* sampleNoise = nullptr;
   if (!m_caloNoiseKey.empty()) {
     SG::ReadCondHandle<CaloNoise> noiseH (m_caloNoiseKey, ctx);
     caloNoise = noiseH.cptr();
+  } else {
+    SG::ReadCondHandle<TileSampleNoise> sampleNoiseHandle(m_sampleNoiseKey, ctx);
+    ATH_CHECK( sampleNoiseHandle.isValid() );
+    sampleNoise = sampleNoiseHandle.cptr();
   }
+
+  SG::ReadCondHandle<TileEMScale> emScale(m_emScaleKey, ctx);
+  ATH_CHECK( emScale.isValid() );
 
   // common-mode shift calculation
   ATH_MSG_DEBUG("Calculating common-mode shift...");
   cmdata_t commonMode = {{{0}}};
-  int ncorr = this->calcCM(caloNoise, cellcoll, commonMode, ctx);
+  int ncorr = this->calcCM(caloNoise, sampleNoise, *emScale, cellcoll, commonMode);
   if (ncorr <= 0) {
     ATH_MSG_DEBUG( "Failed to calculate common-mode shift - no corrections applied");
     return StatusCode::SUCCESS;
@@ -117,7 +120,7 @@ StatusCode TileCellNoiseFilter::process (CaloCellContainer* cellcoll,
     if (tilecell == 0) continue;
     if (tilecell->badcell()) continue;
 
-    setCMSEnergy(commonMode, tilecell);
+    setCMSEnergy(*emScale, commonMode, tilecell);
   }
 
   return StatusCode::SUCCESS;
@@ -131,7 +134,8 @@ StatusCode TileCellNoiseFilter::finalize() {
 
 // ============================================================================
 // correct energy
-void TileCellNoiseFilter::setCMSEnergy(const cmdata_t& commonMode,
+void TileCellNoiseFilter::setCMSEnergy(const TileEMScale* emScale,
+                                       const cmdata_t& commonMode,
                                        TileCell* tilecell) const {
   //Identifier id  = tilecell->ID(); 
   bool good1 = !tilecell->badch1();
@@ -151,9 +155,9 @@ void TileCellNoiseFilter::setCMSEnergy(const cmdata_t& commonMode,
     int drawer = m_tileHWID->drawer(adc_id); // 0-63
     int chan = m_tileHWID->channel(adc_id);  // 0-47
     unsigned int drawerIdx = TileCalibUtils::getDrawerIdx(partition, drawer);
-    e1 -= m_tileToolEmscale->channelCalib(drawerIdx, chan, gain1,
-        this->getCMShift(commonMode, partition - 1, drawer, chan),
-        TileRawChannelUnit::ADCcounts, TileRawChannelUnit::MegaElectronVolts);
+    e1 -= emScale->calibrateChannel(drawerIdx, chan, gain1,
+                                    this->getCMShift(commonMode, partition - 1, drawer, chan),
+                                    TileRawChannelUnit::ADCcounts, TileRawChannelUnit::MegaElectronVolts);
   }
 
   if (gain2 == TileID::HIGHGAIN && good2 && hash2 != TileHWID::NOT_VALID_HASH) {
@@ -162,9 +166,9 @@ void TileCellNoiseFilter::setCMSEnergy(const cmdata_t& commonMode,
     int drawer = m_tileHWID->drawer(adc_id); // 0-63
     int chan = m_tileHWID->channel(adc_id);  // 0-47
     unsigned int drawerIdx = TileCalibUtils::getDrawerIdx(partition, drawer);
-    e2 -= m_tileToolEmscale->channelCalib(drawerIdx, chan, gain2,
-        this->getCMShift(commonMode, partition - 1, drawer, chan),
-        TileRawChannelUnit::ADCcounts, TileRawChannelUnit::MegaElectronVolts);
+    e2 -= emScale->calibrateChannel(drawerIdx, chan, gain2,
+                                    this->getCMShift(commonMode, partition - 1, drawer, chan),
+                                    TileRawChannelUnit::ADCcounts, TileRawChannelUnit::MegaElectronVolts);
   }
 
   if ((good1 && good2)
@@ -190,9 +194,10 @@ void TileCellNoiseFilter::setCMSEnergy(const cmdata_t& commonMode,
 // ============================================================================
 // calculate correction
 int TileCellNoiseFilter::calcCM(const CaloNoise* caloNoise,
+                                const TileSampleNoise* sampleNoise,
+                                const TileEMScale* emScale,
                                 const CaloCellContainer* cellcoll,
-                                cmdata_t& commonMode,
-                                const EventContext& ctx) const
+                                cmdata_t& commonMode) const
 {
   int nEmptyChan[s_maxPartition][s_maxDrawer][s_maxMOB] = {{{0}}};
   int nGoodChan[s_maxPartition][s_maxDrawer][s_maxMOB] = {{{0}}};
@@ -245,13 +250,13 @@ int TileCellNoiseFilter::calcCM(const CaloNoise* caloNoise,
       if (gain1 == TileID::HIGHGAIN) {
 
         unsigned int drawerIdx = TileCalibUtils::getDrawerIdx(partition, drawer);
-        float chanCalMeV = m_tileToolEmscale->channelCalib(drawerIdx, chan,
-            gain1, 1., TileRawChannelUnit::ADCcounts, TileRawChannelUnit::MegaElectronVolts);
+        float chanCalMeV = emScale->calibrateChannel(drawerIdx, chan, gain1, 1.,
+                                                     TileRawChannelUnit::ADCcounts, TileRawChannelUnit::MegaElectronVolts);
 
         float amp = tilecell->ene1() / chanCalMeV;
         if (amp != 0.0) { // second iteration (in case there is non-linear correction)
-          chanCalMeV = m_tileToolEmscale->channelCalib(drawerIdx, chan, gain1,
-              amp, TileRawChannelUnit::ADCcounts, TileRawChannelUnit::MegaElectronVolts) / amp;
+          chanCalMeV = emScale->calibrateChannel(drawerIdx, chan, gain1, amp,
+                                                 TileRawChannelUnit::ADCcounts, TileRawChannelUnit::MegaElectronVolts) / amp;
 
           amp = tilecell->ene1() / chanCalMeV;
         }
@@ -260,7 +265,7 @@ int TileCellNoiseFilter::calcCM(const CaloNoise* caloNoise,
           if (m_useTwoGaussNoise) {
             // nothing for the moment - keep 1.5 ADC counts
           } else {
-            noise_sigma = m_tileToolNoiseSample->getHfn(drawerIdx, chan, gain1, TileRawChannelUnit::ADCcounts, ctx);
+            noise_sigma = sampleNoise->getHfn(drawerIdx, chan, gain1);
           }
           
           significance = 999.999;
@@ -298,13 +303,13 @@ int TileCellNoiseFilter::calcCM(const CaloNoise* caloNoise,
       if (gain2 == TileID::HIGHGAIN) {
 
         unsigned int drawerIdx = TileCalibUtils::getDrawerIdx(partition, drawer);
-        float chanCalMeV = m_tileToolEmscale->channelCalib(drawerIdx, chan
-              , gain2, 1., TileRawChannelUnit::ADCcounts, TileRawChannelUnit::MegaElectronVolts);
+        float chanCalMeV = emScale->calibrateChannel(drawerIdx, chan, gain2, 1.,
+                                                     TileRawChannelUnit::ADCcounts, TileRawChannelUnit::MegaElectronVolts);
 
         float amp = tilecell->ene2() / chanCalMeV;
         if (amp != 0.0) { // second iteration (in case there is non-linear correction)
-          chanCalMeV = m_tileToolEmscale->channelCalib(drawerIdx, chan, gain2,
-              amp, TileRawChannelUnit::ADCcounts, TileRawChannelUnit::MegaElectronVolts) / amp;
+          chanCalMeV = emScale->calibrateChannel(drawerIdx, chan, gain2, amp,
+                                                 TileRawChannelUnit::ADCcounts, TileRawChannelUnit::MegaElectronVolts) / amp;
 
           amp = tilecell->ene2() / chanCalMeV;
         }
@@ -313,7 +318,7 @@ int TileCellNoiseFilter::calcCM(const CaloNoise* caloNoise,
           if (m_useTwoGaussNoise) {
             // nothing for the moment - keep 1.5 ADC counts
           } else {
-            noise_sigma = m_tileToolNoiseSample->getHfn(drawerIdx, chan, gain2, TileRawChannelUnit::ADCcounts, ctx);
+            noise_sigma = sampleNoise->getHfn(drawerIdx, chan, gain2);
           }
 
           // use only empty channels with less significance

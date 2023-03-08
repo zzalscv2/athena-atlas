@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------
@@ -388,7 +388,7 @@ CaloTopoClusterMaker::execute(const EventContext& ctx,
 	  bool passedNeighborCut = (m_neighborCutsInAbsE?std::abs(signedRatio):signedRatio) > m_neighborThresholdOnEorAbsEinSigma;
 	  bool passedSeedCut = (m_seedCutsInAbsE?std::abs(signedRatio):signedRatio) > m_seedThresholdOnEorAbsEinSigma;
 
-	  bool applyTimeCut = m_seedCutsInT && !(m_useTimeCutUpperLimit && signedRatio > m_timeCutUpperLimit);
+	  bool applyTimeCut = m_seedCutsInT && (!m_useTimeCutUpperLimit || signedRatio <= m_timeCutUpperLimit);
 	  bool passTimeCut_seedCell = (!applyTimeCut || passCellTimeCut(pCell,m_seedThresholdOnTAbs));
 	  bool passedSeedAndTimeCut = (passedSeedCut && passTimeCut_seedCell);
 
@@ -676,7 +676,6 @@ void CaloTopoClusterMaker::getClusterSize(){
     m_clusterSize = xAOD::CaloCluster::Topo_420;    
   }
   ATH_MSG_DEBUG( "Cluster size = " << m_clusterSize);  
-  return;
 }
 
 

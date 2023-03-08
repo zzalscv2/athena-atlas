@@ -80,13 +80,13 @@ class MakeQuarkGluonFractionPlots {
   void drawhistos(std::vector<TH2D*> histos, const std::string& psfilename);
 
   //function to extract the JetCollectionName
-  std::string extractJetCollectionName(std::string histoname);
+  std::string extractJetCollectionName(const std::string& histoname);
 
   //function to extract the JetNumber
   std::string extractJetNumber(std::string histoname);
   
   //function to compute the gluon fraction
-  std::vector<TH2D*> computeQuarkGluonFraction (std::map< std::string,TH2D* > inputhistos, std::string quarkflavour, const std::string& prename);
+  std::vector<TH2D*> computeQuarkGluonFraction (std::map< std::string,TH2D* > inputhistos, const std::string& quarkflavour, const std::string& prename);
   
   //function to create the output file
   void createOutputFile(std::string filename,std::vector<TH2D*> histos, std::vector<TH2D*> histosUnc );

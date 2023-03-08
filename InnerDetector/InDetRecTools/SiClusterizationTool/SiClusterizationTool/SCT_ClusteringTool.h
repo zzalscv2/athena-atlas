@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file SCT_ClusteringTool.h
@@ -45,23 +45,23 @@ namespace InDet {
    * Input is from RDOs, assumed to be sorted. They are then scanned 
    * in order and neighbouring RDOs are grouped together.
    */
-  class SCT_ClusteringTool: public extends<AthAlgTool, ISCT_ClusteringTool> {
+  class SCT_ClusteringTool final: public extends<AthAlgTool, ISCT_ClusteringTool> {
   public:
     /// Normal constructor for an AlgTool; 'properties' are also declared here
     SCT_ClusteringTool(const std::string& type, const std::string& name, const IInterface* parent);
     /// Retrieve the necessary services in initialize                
-    StatusCode initialize();
+    virtual StatusCode initialize() override;
     /// Defaul destructor
     virtual ~SCT_ClusteringTool() = default;
 
     /// Clusterize method the SCT RDOs. This method is the main one of this class.
-    virtual SCT_ClusterCollection*
+    SCT_ClusterCollection*
     clusterize(const InDetRawDataCollection<SCT_RDORawData>& RDOs,
                const SCT_ID& idHelper,
-               const InDet::SiDetectorElementStatus *sctDetElementStatus) const;
+               const InDet::SiDetectorElementStatus *sctDetElementStatus) const override;
 
     /// A new fast method originally implemented for ITk. Can be internally used in clusterize with m_doFastClustering=true.
-    virtual SCT_ClusterCollection*
+    SCT_ClusterCollection*
       fastClusterize(const InDetRawDataCollection<SCT_RDORawData>& RDOs,
                      const SCT_ID& idHelper,
                      const InDet::SiDetectorElementStatus *sctDetElementStatus) const;

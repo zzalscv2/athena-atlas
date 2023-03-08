@@ -38,18 +38,8 @@ def LArOFCCondAlgCfg (flags, name = 'LArOFCCondAlg', **kwargs):
     kwargs.setdefault ('isMC', True)
     kwargs.setdefault ('firstSample', flags.LAr.ROD.FirstSample)
     kwargs.setdefault ('useHighestGainAutoCorr', flags.LAr.ROD.UseHighestGainAutoCorr)
-
-    if flags.LAr.ROD.DoOFCPileupOptimization:
-        if flags.LAr.ROD.NumberOfCollisions:
-            kwargs.setdefault('Nminbias',flags.LAr.ROD.NumberOfCollisions)
-            mlog.info("Setup LArOFCCOndAlg Nminbias %f ", flags.LAr.ROD.NumberOfCollisions)
-        else:
-            kwargs.setdefault('Nminbias',flags.Beam.NumberOfCollisions)
-            mlog.info("Setup LArOFCCOndAlg Nminbias %f ", flags.Beam.NumberOfCollisions)
-    else:
-         kwargs.setdefault('Nminbias',0.)
-         mlog.info(" no pileup optimization")
-
+    kwargs.setdefault('Nminbias',flags.LAr.ROD.NumberOfCollisions)
+    mlog.info("Setup LArOFCCOndAlg Nminbias %f ", flags.LAr.ROD.NumberOfCollisions)
     #The LArPileUpTool needs: Calbling, Shape, Noise, Pedestal and the (total) AutoCorr
     acc = LArOnOffIdMappingCfg(flags)
     requiredConditons=["Shape","Noise","Pedestal"]
@@ -84,16 +74,8 @@ def LArOFCSCCondAlgCfg (flags, name = 'LArOFCSCCondAlg', **kwargs):
     kwargs.setdefault("LArAutoCorrTotalObjKey", 'LArAutoCorrTotalSC') # Provided by LArAutoCorrTotalSCCondAlg
     kwargs.setdefault("LArOFCObjKey", 'LArOFCSC') # Output
 
-    if flags.LAr.ROD.DoOFCPileupOptimization:
-        if flags.LAr.ROD.NumberOfCollisions:
-            kwargs.setdefault('Nminbias',flags.LAr.ROD.NumberOfCollisions)
-            mlog.info("Setup LArOFCCOndAlg Nminbias %f ", flags.LAr.ROD.NumberOfCollisions)
-        else:
-            kwargs.setdefault('Nminbias',flags.Beam.NumberOfCollisions)
-            mlog.info("Setup LArOFCCOndAlg Nminbias %f ", flags.Beam.NumberOfCollisions)
-    else:
-         kwargs.setdefault('Nminbias',0.)
-         mlog.info(" no pileup optimization")
+    kwargs.setdefault('Nminbias',flags.LAr.ROD.NumberOfCollisions)
+    mlog.info("Setup LArOFCSCCOndAlg Nminbias %f ", flags.LAr.ROD.NumberOfCollisions)
 
     acc.addCondAlgo (CompFactory.LArOFCCondAlg (name, **kwargs))
     return acc
@@ -112,16 +94,11 @@ def LArAutoCorrTotalCondAlgCfg (flags, name = 'LArAutoCorrTotalCondAlg', **kwarg
     mlog.info("DeltaBunch %d " , deltaBunch)
     kwargs.setdefault('deltaBunch',deltaBunch)
 
-    if flags.LAr.ROD.DoOFCPileupOptimization:
-        if flags.LAr.ROD.NumberOfCollisions:
-            kwargs.setdefault("Nminbias", flags.LAr.ROD.NumberOfCollisions)
-            mlog.info(" NMminBias %f", flags.LAr.ROD.NumberOfCollisions)
-        else:
-            kwargs.setdefault("Nminbias", flags.Beam.NumberOfCollisions)
-            mlog.info(" NMminBias %f", flags.Beam.NumberOfCollisions)
-    else:
-        kwargs.setdefault('Nminbias',0.)
+    if flags.LAr.ROD.NumberOfCollisions <= 0 or not flags.LAr.ROD.DoOFCPileupOptimization:
+        kwargs.setdefault("NoPileUp", True)
         mlog.info(" no pileup noise in LArAutoCorrTotal ")
+    else:
+        kwargs.setdefault("NoPileUp", False)
 
     #The LArAutoCorrTotalAlg needs cabling and
     #Shape, AutoCorr, Noise, Pedestal, fSampl and MinBias
@@ -166,16 +143,12 @@ def LArAutoCorrTotalSCCondAlgCfg (flags, name = 'LArAutoCorrTotalSCCondAlg', **k
     mlog.info("DeltaBunch %d " , deltaBunch)
     kwargs.setdefault('deltaBunch',deltaBunch)
 
-    if flags.LAr.ROD.DoOFCPileupOptimization:
-        if flags.LAr.ROD.NumberOfCollisions:
-            kwargs.setdefault("Nminbias", flags.LAr.ROD.NumberOfCollisions)
-            mlog.info(" NMminBias %f", flags.LAr.ROD.NumberOfCollisions)
-        else:
-            kwargs.setdefault("Nminbias", flags.Beam.NumberOfCollisions)
-            mlog.info(" NMminBias %f", flags.Beam.NumberOfCollisions)
-    else:
-        kwargs.setdefault('Nminbias',0.)
+
+    if flags.LAr.ROD.NumberOfCollisions <= 0 or not flags.LAr.ROD.DoOFCPileupOptimization:
+        kwargs.setdefault("NoPileUp", True)
         mlog.info(" no pileup noise in LArAutoCorrTotal ")
+    else:
+        kwargs.setdefault("NoPileUp", False)
 
     LArAutoCorrTotalCondAlg=CompFactory.LArAutoCorrTotalCondAlg
     acc.addCondAlgo (LArAutoCorrTotalCondAlg (name, **kwargs))
@@ -202,11 +175,11 @@ def LArRoIMapCondAlgCfg (flags, name = 'LArRoIMapCondAlg', **kwargs):
 
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
 
     print ('--- LArOFCCondAlg 1')
-    flags1 = ConfigFlags.clone()
+    flags1 = initConfigFlags()
     flags1.Input.Files = defaultTestFiles.RDO_RUN2
     flags1.lock()
     acc1 = LArOFCCondAlgCfg (flags1)
@@ -214,7 +187,7 @@ if __name__ == "__main__":
     acc1.wasMerged()
 
     print ('--- LArAutoCorrTotalCondAlg')
-    flags4 = ConfigFlags.clone()
+    flags4 = initConfigFlags()
     flags4.Input.Files = defaultTestFiles.RDO_RUN2
     flags4.LAr.ROD.nSamples = 32
     flags4.lock()
@@ -223,7 +196,7 @@ if __name__ == "__main__":
     acc4.wasMerged()
 
     print ('--- LArRoIMapCondAlg')
-    flags5 = ConfigFlags.clone()
+    flags5 = initConfigFlags()
     flags5.Input.Files = defaultTestFiles.RDO_RUN2
     flags5.lock()
     acc5 = LArRoIMapCondAlgCfg (flags5)

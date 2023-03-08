@@ -19,6 +19,7 @@ from PixelGeoModel.PixelGeoModelConfig import PixelReadoutGeometryCfg
 from PixelReadoutGeometry.PixelReadoutGeometryConfig import PixelReadoutManagerCfg
 from SiLorentzAngleTool.PixelLorentzAngleConfig import PixelLorentzAngleToolCfg
 from SiPropertiesTool.PixelSiPropertiesConfig import PixelSiPropertiesToolCfg
+from SimulationConfig.SimEnums import PixelRadiationDamageSimulationType
 
 
 # The earliest and last bunch crossing times for which interactions will be sent
@@ -80,9 +81,9 @@ def SensorSimPlanarToolCfg(flags, name="SensorSimPlanarTool", **kwargs):
     kwargs.setdefault("SiPropertiesTool", acc.popToolsAndMerge(PixelSiPropertiesToolCfg(flags)))
     kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(PixelLorentzAngleToolCfg(flags)))
     SensorSimPlanarTool = CompFactory.SensorSimPlanarTool
-    kwargs.setdefault("doRadDamage", flags.Digitization.DoPixelPlanarRadiationDamage)
-    kwargs.setdefault("doRadDamageTemplate", flags.Digitization.DoPixelPlanarRadiationDamageTemplate)
-    if flags.Digitization.DoPixelPlanarRadiationDamage:
+    kwargs.setdefault("RadiationDamageSimulationType", flags.Digitization.PixelPlanarRadiationDamageSimulationType.value)
+    kwargs.setdefault("IsITk", False)
+    if flags.Digitization.PixelPlanarRadiationDamageSimulationType is not PixelRadiationDamageSimulationType.NoRadiationDamage:
         acc.merge(PixelRadSimFluenceMapAlgCfg(flags))
     acc.setPrivateTools(SensorSimPlanarTool(name, **kwargs))
     return acc
@@ -93,9 +94,9 @@ def SensorSim3DToolCfg(flags, name="SensorSim3DTool", **kwargs):
     acc = PixelConfigCondAlgCfg(flags)
     kwargs.setdefault("SiPropertiesTool", acc.popToolsAndMerge(PixelSiPropertiesToolCfg(flags)))
     SensorSim3DTool = CompFactory.SensorSim3DTool
-    kwargs.setdefault("doRadDamage", flags.Digitization.DoPixel3DRadiationDamage)
-    kwargs.setdefault("doRadDamageTemplate", flags.Digitization.DoPixel3DRadiationDamageTemplate)
-    if flags.Digitization.DoPixel3DRadiationDamage:
+    kwargs.setdefault("RadiationDamageSimulationType", flags.Digitization.Pixel3DRadiationDamageSimulationType.value)
+    kwargs.setdefault("IsITk", False)
+    if flags.Digitization.Pixel3DRadiationDamageSimulationType is not PixelRadiationDamageSimulationType.NoRadiationDamage:
         acc.merge(PixelRadSimFluenceMapAlgCfg(flags))
     acc.setPrivateTools(SensorSim3DTool(name, **kwargs))
     return acc
@@ -277,13 +278,8 @@ def PixelDigitizationSplitNoMergePUToolCfg(flags, name="PixelDigitizationSplitNo
 def PixelOverlayDigitizationToolCfg(flags, name="PixelOverlayDigitizationTool", **kwargs):
     """Return ComponentAccumulator with PixelDigitizationTool configured for overlay"""
     kwargs.setdefault("OnlyUseContainerName", False)
-    #in the case of track overlay, only run digitization on the HS
-    if not flags.Overlay.doTrackOverlay:
-        kwargs.setdefault("RDOCollName", flags.Overlay.SigPrefix + "PixelRDOs")
-        kwargs.setdefault("SDOCollName", flags.Overlay.SigPrefix + "PixelSDO_Map")
-    else:
-        kwargs.setdefault("RDOCollName", "PixelRDOs")
-        kwargs.setdefault("SDOCollName", "PixelSDO_Map")
+    kwargs.setdefault("RDOCollName", flags.Overlay.SigPrefix + "PixelRDOs")
+    kwargs.setdefault("SDOCollName", flags.Overlay.SigPrefix + "PixelSDO_Map")
     kwargs.setdefault("HardScatterSplittingMode", 0)
     kwargs.setdefault("PileUpMergeSvc", '')
     return PixelDigitizationBasicToolCfg(flags, name, **kwargs)

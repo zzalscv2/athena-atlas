@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file TrigMETMonitoringAlgorithm.py
@@ -264,6 +264,8 @@ def TrigMETMonConfig(inputFlags):
     muonPtCut = 30.0
     electronEtaCut = 2.5
     muonEtaCut = 2.5
+    LArNoiseBurstVetoAlgs = ["pfopufit",
+                     "cell"]
     signalLepAlgs = ["pfopufit",
                      "cell",
                      "tcpufit"]
@@ -273,6 +275,7 @@ def TrigMETMonConfig(inputFlags):
     TrigMETMonAlg.muonPtCut = muonPtCut
     TrigMETMonAlg.muonEtaCut = muonEtaCut
     TrigMETMonAlg.signalLepAlgs = signalLepAlgs
+    TrigMETMonAlg.LArNoiseBurstVetoAlgs = LArNoiseBurstVetoAlgs
 
     ### STEP 4 ###
     # Add some tools. N.B. Do not use your own trigger decion tool. Use the
@@ -542,6 +545,60 @@ def TrigMETMonConfig(inputFlags):
                              title='{} Missing E_{{T}};E_{{T}} [GeV];Events'.format(alg),
                              path='Shifter/preSel',
                              xbins=et_bins,xmin=et_min,xmax=et_max)
+    ## MET with LAr Noiseburst Veto applied
+    for alg in LArNoiseBurstVetoAlgs:
+      metGroup.defineHistogram('{}_LArNoiseBurstVeto_Ex'.format(alg),
+                             title='{} Missing E_{{x}};E_{{x}} [GeV];Events'.format(alg),
+                             path='Shifter/LArNoiseBurstVetoed/{}'.format(alg),
+                             xbins=ec_bins,xmin=ec_min,xmax=ec_max)
+      metGroup.defineHistogram('{}_LArNoiseBurstVeto_Ex_log'.format(alg),
+                             title='{} Missing E_{{x}} log;sgn(E_{{x}}) log(E_{{x}}/GeV);Events'.format(alg),
+                             path='Shifter/LArNoiseBurstVetoed/{}'.format(alg),
+                             xbins=ec_bins_log,xmin=ec_min_log,xmax=ec_max_log)
+      metGroup.defineHistogram('{}_LArNoiseBurstVeto_Ey'.format(alg),
+                             title='{} Missing E_{{y}};E_{{y}} [GeV];Events'.format(alg),
+                             path='Shifter/LArNoiseBurstVetoed/{}'.format(alg),
+                             xbins=ec_bins,xmin=ec_min,xmax=ec_max)
+      metGroup.defineHistogram('{}_LArNoiseBurstVeto_Ey_log'.format(alg),
+                             title='{} Missing E_{{y}} log;sgn(E_{{y}}) log(E_{{y}}/GeV);Events'.format(alg),
+                             path='Shifter/LArNoiseBurstVetoed/{}'.format(alg),
+                             xbins=ec_bins_log,xmin=ec_min_log,xmax=ec_max_log)
+      metGroup.defineHistogram('{}_LArNoiseBurstVeto_Et'.format(alg),
+                             title='{} Missing E_{{T}};E_{{T}} [GeV];Events'.format(alg),
+                             path='Shifter/LArNoiseBurstVetoed/{}'.format(alg),
+                             xbins=et_bins,xmin=et_min,xmax=et_max)
+      metGroup.defineHistogram('{}_LArNoiseBurstVeto_Et_log'.format(alg),
+                             title='{} Missing E_{{T}} log;log(E_{{T}}/GeV);Events'.format(alg),
+                             path='Shifter/LArNoiseBurstVetoed/{}'.format(alg),
+                             xbins=et_bins_log,xmin=et_min_log,xmax=et_max_log)
+      metGroup.defineHistogram('{}_LArNoiseBurstVeto_sumEt'.format(alg),
+                             title='{} sumE_{{T}};sumE_{{T}} [GeV];Events'.format(alg),
+                             path='Shifter/LArNoiseBurstVetoed/{}'.format(alg),
+                             xbins=sumet_bins,xmin=sumet_min,xmax=sumet_max)
+      metGroup.defineHistogram('{}_LArNoiseBurstVeto_sumEt_log'.format(alg),
+                             title='{} sumE_{{T}} log;log(sumE_{{T}}/GeV);Events'.format(alg),
+                             path='Shifter/LArNoiseBurstVetoed/{}'.format(alg),
+                             xbins=sumet_bins_log,xmin=sumet_min_log,xmax=sumet_max_log)
+      metGroup.defineHistogram('{}_LArNoiseBurstVeto_phi'.format(alg),
+                             title='{} #phi;#phi;Events'.format(alg),
+                             path='Shifter/LArNoiseBurstVetoed/{}'.format(alg),
+                             xbins=phi_bins,xmin=phi_min,xmax=phi_max)
+      metGroup.defineHistogram('{0}_LArNoiseBurstVeto_phi;{0}_phi_etweight'.format(alg), 
+                             title='{} #phi (etweighted);#phi;Et weighted events'.format(alg),
+                             weight='{}_Et'.format(alg),
+                             path='Shifter/LArNoiseBurstVetoed/{}'.format(alg),
+                             xbins=phi_bins,xmin=phi_min,xmax=phi_max)
+      metGroup.defineHistogram('{0}_LArNoiseBurstVeto_eta,{0}_LArNoiseBurstVeto_phi;{0}_LArNoiseBurstVeto_eta_phi'.format(alg), 
+                             type='TH2F', 
+                             title='{} #eta - #phi;#eta;#phi'.format(alg),
+                             path='Shifter/LArNoiseBurstVetoed/{}'.format(alg),
+                             xbins=eta_bins_2d,xmin=eta_min,xmax=eta_max,ybins=phi_bins_2d,ymin=phi_min,ymax=phi_max)
+      metGroup.defineHistogram('{0}_LArNoiseBurstVeto_eta,{0}_LArNoiseBurstVeto_phi;{0}_LArNoiseBurstVeto_eta_phi_etweight'.format(alg), 
+                             type='TH2F', 
+                             title='{} #eta - #phi (etweighted);#eta;#phi'.format(alg),
+                             weight='{}_LArNoiseBurstVeto_Et'.format(alg),
+                             path='Shifter/LArNoiseBurstVetoed/{}'.format(alg),
+                             xbins=eta_bins_2d,xmin=eta_min,xmax=eta_max,ybins=phi_bins_2d,ymin=phi_min,ymax=phi_max)
     # for alg in signalLepAlgs:
     for alg in signalLepAlgs:
       metGroup.defineHistogram('{}_SigEl_Ex'.format(alg),
@@ -857,22 +914,23 @@ if __name__=='__main__':
     log.setLevel(DEBUG)
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     nightly = '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CommonInputs/'
     file = 'data16_13TeV.00311321.physics_Main.recon.AOD.r9264/AOD.11038520._000001.pool.root.1'
-    ConfigFlags.Input.Files = [nightly+file]
-    ConfigFlags.Input.isMC = True
-    ConfigFlags.Output.HISTFileName = 'TrigMETMonitorOutput.root'
+    flags = initConfigFlags()
+    flags.Input.Files = [nightly+file]
+    flags.Input.isMC = True
+    flags.Output.HISTFileName = 'TrigMETMonitorOutput.root'
 
-    ConfigFlags.lock()
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
-    trigMETMonitorAcc = TrigMETMonConfig(ConfigFlags)
+    trigMETMonitorAcc = TrigMETMonConfig(flags)
     cfg.merge(trigMETMonitorAcc)
 
     # If you want to turn on more detailed messages ...

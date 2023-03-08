@@ -48,7 +48,7 @@ StatusCode Muon::MuonTrackingGeometryBuilder::finalize() {
   return StatusCode::SUCCESS;
 }
 
-Trk::TrackingGeometry* Muon::MuonTrackingGeometryBuilder::trackingGeometry(Trk::TrackingVolume* tvol) const {
+std::unique_ptr<Trk::TrackingGeometry> Muon::MuonTrackingGeometryBuilder::trackingGeometry(Trk::TrackingVolume* tvol) const {
   // process muon material objects
   std::unique_ptr<const std::vector<std::unique_ptr<Trk::DetachedTrackingVolume> > > stations;
   if (m_muonActive && m_stationBuilder) {
@@ -65,6 +65,5 @@ Trk::TrackingGeometry* Muon::MuonTrackingGeometryBuilder::trackingGeometry(Trk::
   }
 
   return MuonTrackingGeometryBuilderImpl::trackingGeometryImpl(std::move(stations), std::move(inertObjs),
-                                                               std::move(constituentsVector), tvol)
-      .release();
+                                                               std::move(constituentsVector), tvol);
 }

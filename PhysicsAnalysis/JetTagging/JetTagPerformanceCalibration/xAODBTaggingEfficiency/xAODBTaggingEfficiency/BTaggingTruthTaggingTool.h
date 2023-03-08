@@ -171,7 +171,7 @@ class BTaggingTruthTaggingTool: public asg::AsgTool,
   StatusCode getQuantiles(TRFinfo &trfinf,std::vector<std::vector<int> > &trf_bin_ex, std::vector<std::vector<int> > &trf_bin_in);
 
   // functions to make comparison with direct-tagging easier
-  float getEvtSF(TRFinfo &trfinf,std::vector<int> & quantiles, int syst=0);                                                  
+  float getEvtSF(TRFinfo &trfinf,std::vector<int> & quantiles);
   StatusCode getDirectTaggedJets(TRFinfo &trfinf,std::vector<bool> &is_tagged);
 
   //These WP must be listed in ascending order of cut value, meaning 85 to 60

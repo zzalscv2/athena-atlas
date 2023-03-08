@@ -22,8 +22,8 @@ In addition to the modules supporting the current jobOptions configuration, addi
 * [InDetTrigCommon](InDetTrigCommonInDetTrigCommon.py)
   * Configures Precision Tracking algorithms and tools common to both InDetTrigPrecisionTracking and EFIDTracking 
 # Vertex Reconstruction
-* [TrigInDetPriVtxConfig](TrigInDetPriVtxConfig.py)
-  * Configures the primary vertex finding algorithms
+* [InDetPriVxFinderConfig](InnerDetector/IndetConfig/python/InDetPriVxFinderConfig.py)
+  * Configures the primary vertex finding algorithms, both for offline and online
 # Component Accumulator
 * [TrigInDetConfig](TrigInDetConfig.py)
   * ComponentAccumulator configuration of ID trigger algorithms and tools  
@@ -95,14 +95,14 @@ An example on how to call this
 
       from TrigInDetConfig.InDetTrigFastTracking import makeInDetTrigFastTracking
 
-      viewAlgs, viewVerify = makeInDetTrigFastTracking( config = idconfig, rois = RoIs )
+      viewAlgs, viewVerify = makeInDetTrigFastTracking( flags, config = idconfig, rois = RoIs )
 
       TrackCollection = idconfig.tracks_FTF()
 
 
 The actual interface is 
 <pre>
-  def makeInDetTrigFastTracking( config = None, rois = 'EMViewRoIs', doFTF = True, viewVerifier='IDViewDataVerifier', secondStageConfig = None):
+  def makeInDetTrigFastTracking( flags, config = None, rois = 'EMViewRoIs', doFTF = True, viewVerifier='IDViewDataVerifier', secondStageConfig = None):
 </pre>
 where the arguments are    
   
@@ -127,17 +127,18 @@ and should be configured using
 
       from TrigInDetConfig.InDetTrigPrecisionTracking import makeInDetTrigPrecisionTracking
 
-      viewAlgs, viewVerify = makeInDetTrigPrecisionTracking( config = idconfig, rois = RoIs )
+      viewAlgs, viewVerify = makeInDetTrigPrecisionTracking( flags, config = idconfig, rois = RoIs )
 
       TrackCollection = idconfig.tracks_IDTrig()
 
 
 The actual interface is 
 <pre>
-  def makeInDetTrigPrecisionTracking( config = None, verifier = False, rois = 'EMViewRoIs', prefix = 'InDetTrigMT'):
+  def makeInDetTrigPrecisionTracking( flags, config = None, verifier = False, rois = 'EMViewRoIs', prefix = 'InDetTrigMT'):
 </pre>
 where the arguments are    
-  
+
+       flags     - ConfigFlags instance
        config    - the ID Trigger configuration for the signature
        verifier  - the view data verifier
        rois      - the view RoI name 
@@ -158,38 +159,32 @@ but the actual called function should be the same as for the precision tracking.
 
 The vertexing is configured using the code in 
 
-[Trigger/TrigTools/TrigInDetConfig/python/TrigInDetPriVtxConfig.py](https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TrigTools/TrigInDetConfig/python/InDetTrigFastTracking.py)
+[InnerDetector/IndetConfig/python/InDetPriVxFinderConfig.py](InnerDetector/IndetConfig/python/InDetPriVxFinderConfig.py)
 
-Typically it should be used as in th following example 
+Typically it should be used as in the following example 
 
-      from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
-      idconfig = getInDetTrigConfig( "jet" )
+    from InDetConfig.InDetPriVxFinderConfig import InDetTrigPriVxFinderCfg
 
-      from TrigInDetConfig.InDetTrigFastTracking import makeInDetTrigVertices
+    acc = InDetTrigPriVxFinderCfg(
+        flags,
+        signature = "jet",
+        TracksName = jetContext["Tracks"],
+        VxCandidatesOutputName = jetContext["Vertices"])
 
-      vtxAlgs = makeInDetTrigVertices( "jet", idconfig.tracks_FTF(), idconfig.vertex, idconfig )
-
-      vertexCollection = idconfig.vertex
 
 The actual function is defined 
 ```
-def makeInDetTrigVertices( whichSignature, inputTrackCollection, outputVtxCollection=None, config=None, adaptiveVertex=None ) :
+def InDetTrigPriVxFinderCfg(flags, name="InDetTrigPriVxFinder",
+                            signature="",
+                            **kwargs):
 ```
 where the arguments are    
 
-       whichSignature        - the ID Trigger signature
-       inputTrackCollection  - the input track collection key
-       outputVtxCollection   - optional output vertex collection key
-       config                - optional configuration
-       adaptiveVertex        - flag to determine whether the adaptive vertexing should be used
+       signature              - the ID Trigger signature
+       TracksName             - the input track collection key
+       VxCandidatesOutputName - optional output vertex collection key
 
-The reason for this somewhat redundent structure, is because of the prior need to be able to run both  the adaptive, and iterative vertex finders in the jet slice, and as such the signature name and the configuration needed to be able to be set to be independent, as did the output vertex collection name, and whether the adaptive vertex algorithm should be run.
-
-As such, this ```makeInDetTrigVertices()``` function contains code to determine the ID config automatically from  ```whichSignature```.
-
-Now that both vertex algorithms do not need to be run in the chain, this should probably be replaced by calls to the principle ```vertexFinder_builder()``` function 
-
-Last updated 2021 - 10 - 01
+Last updated 2023 - 01 - 12
 
 
 

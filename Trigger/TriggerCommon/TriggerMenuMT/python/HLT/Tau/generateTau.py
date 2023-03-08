@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from TriggerMenuMT.HLT.Config.MenuComponents import Chain, ChainStep, MenuSequenceCA, SelectionCA, InViewRecoCA, EmptyMenuSequence
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -38,7 +38,7 @@ def generateChains( flags, chainDict ):
                                                     taujets = "HLT_TrigTauRecMerged_CaloMVAOnly" )
         selAcc.addHypoAlgo(hypoAlg)
         from TrigTauHypo.TrigTauHypoTool import TrigL2TauHypoToolFromDict
-        menuCA = MenuSequenceCA(selAcc, HypoToolGen=TrigL2TauHypoToolFromDict)
+        menuCA = MenuSequenceCA(flags, selAcc, HypoToolGen=TrigL2TauHypoToolFromDict)
         return (selAcc , menuCA)
 
     def __calo():
@@ -83,7 +83,7 @@ def generateChains( flags, chainDict ):
                                                     trackcollection = flags.Trigger.InDetTracking.TauCore.trkTracks_FTF )
         selAcc.addHypoAlgo(hypoAlg)
         from TrigTauHypo.TrigTauHypoTool import TrigTauTrackHypoToolFromDict
-        menuCA = MenuSequenceCA(selAcc, HypoToolGen=TrigTauTrackHypoToolFromDict)
+        menuCA = MenuSequenceCA(flags, selAcc, HypoToolGen=TrigTauTrackHypoToolFromDict)
         return (selAcc , menuCA)
     
     def __ftfCore():                         
@@ -122,7 +122,7 @@ def generateChains( flags, chainDict ):
         selAcc.addHypoAlgo(hypoAlg)
 
         from TrigTauHypo.TrigTauHypoTool import TrigTauTrackHypoToolFromDict
-        menuCA = MenuSequenceCA(selAcc, HypoToolGen=TrigTauTrackHypoToolFromDict)
+        menuCA = MenuSequenceCA(flags, selAcc, HypoToolGen=TrigTauTrackHypoToolFromDict)
         return (selAcc , menuCA)
     
     def __ftfIso():
@@ -160,7 +160,7 @@ def generateChains( flags, chainDict ):
         selAcc.addHypoAlgo(hypoAlg)
 
         from TrigTauHypo.TrigTauHypoTool import TrigTauTrackHypoToolFromDict
-        menuCA = MenuSequenceCA(selAcc, HypoToolGen=TrigTauTrackHypoToolFromDict)
+        menuCA = MenuSequenceCA(flags, selAcc, HypoToolGen=TrigTauTrackHypoToolFromDict)
         return (selAcc , menuCA)
     
     def __ftfIsoBDT():
@@ -176,12 +176,13 @@ def generateChains( flags, chainDict ):
 
 if __name__ == "__main__":
     # run with: python -m TriggerMenuMT.HLT.Tau.generateTau
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.lock()
     from TriggerMenuMT.HLT.Config.Utility.DictFromChainName import dictFromChainName
-    chain = generateChains(ConfigFlags, dictFromChainName('HLT_tau0_perf_ptonly_L1TAU8'))
+    chain = generateChains(flags, dictFromChainName(flags, 'HLT_tau0_perf_ptonly_L1TAU8'))
     for step in chain.steps:
         for s in step.sequences:
             if not isinstance(s, EmptyMenuSequence):

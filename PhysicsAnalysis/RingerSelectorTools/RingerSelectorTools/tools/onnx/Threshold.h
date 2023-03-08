@@ -43,7 +43,7 @@ namespace Ringer{
     inline bool Threshold::accept( float value, float avgmu) const
     {
 	    avgmu = std::min(avgmu, m_maxavgmu);
-      return value > (m_slope*avgmu + m_offset);
+      return value >= (m_slope*avgmu + m_offset);
     }
 
 

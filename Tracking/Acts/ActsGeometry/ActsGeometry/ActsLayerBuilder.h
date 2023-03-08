@@ -11,7 +11,6 @@
 
 // ATHENA
 #include "CxxUtils/checker_macros.h"
-#include <mutex>
 
 // ACTS
 #include "Acts/Geometry/ILayerBuilder.hpp"
@@ -19,6 +18,9 @@
 #include "Acts/Utilities/BinningType.hpp"
 #include "Acts/Geometry/GeometryContext.hpp"
 #include "Acts/Definitions/Units.hpp"
+
+#include <mutex>
+#include <array>
 
 class ActsTrackingGeomtrySvc;
 
@@ -62,16 +64,16 @@ public:
     Acts::BinningType                    bTypeZ = Acts::equidistant;
     std::shared_ptr<ElementVector> elementStore;
 
-    std::pair<double, double> endcapEnvelopeR = {2 * Acts::UnitConstants::mm,
-                                                 2 * Acts::UnitConstants::mm};
-    std::pair<double, double> endcapEnvelopeZ = {2 * Acts::UnitConstants::mm,
-                                                 2 * Acts::UnitConstants::mm};
-
-    std::pair<double, double> barrelEnvelopeR = {2 * Acts::UnitConstants::mm,
-                                                 2 * Acts::UnitConstants::mm};
-    std::pair<double, double> barrelEnvelopeZ = {2 * Acts::UnitConstants::mm,
-                                                 2 * Acts::UnitConstants::mm};
-
+    std::array<double, 2> endcapEnvelopeR = {2 * Acts::UnitConstants::mm,
+					     2 * Acts::UnitConstants::mm};
+    std::array<double, 2> endcapEnvelopeZ = {2 * Acts::UnitConstants::mm,
+					     2 * Acts::UnitConstants::mm};
+    
+    std::array<double, 2> barrelEnvelopeR = {2 * Acts::UnitConstants::mm,
+					     2 * Acts::UnitConstants::mm};
+    std::array<double, 2> barrelEnvelopeZ = {2 * Acts::UnitConstants::mm,
+					     2 * Acts::UnitConstants::mm};
+    
     std::pair<size_t, size_t> endcapMaterialBins = {20, 5};
     std::pair<size_t, size_t> barrelMaterialBins = {10, 10};
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_MDTDRIFTCIRCLEONTRACKCREATOR_H
@@ -163,15 +163,15 @@ namespace Muon {
       };
       
       /** preform the mdt calibration */
-      CalibrationOutput getLocalMeasurement( const MdtPrepData& DC, 
-					     const Amg::Vector3D& gpos,
-					     const Amg::Vector3D* gdir,
-					     MdtCalibrationSvcInput& inputData,
-					     const MuonDriftCircleErrorStrategy* strategy = 0,
-					     float t0Shift = 0,
-               const double beta = 1,
-               const double tTrack = 0) const;
-      
+      CalibrationOutput getLocalMeasurement(const MdtPrepData &DC,
+                                            const Amg::Vector3D &gpos,
+                                            const Amg::Vector3D *gdir,
+                                            MdtCalibrationSvcInput &inputData,
+                                            const MuonDriftCircleErrorStrategy *strategy,
+                                            float t0Shift,
+                                            const double beta,
+                                            const double tTrack) const;
+
       /** currently returns 0. */
       double getTriggerTime() const { return 0.; }
 
@@ -191,36 +191,56 @@ namespace Muon {
       ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
       ToolHandle<MdtCalibrationTool>        m_mdtCalibrationTool{this,"CalibrationTool","MdtCalibrationTool"};
       ToolHandle<MdtCalibrationDbTool>      m_mdtCalibrationDbTool{this,"CalibrationDbTool","MdtCalibrationDbTool"};
-
+   
       // Configuration variables
-      bool                                 m_doMdt; //!< Process MDT ROTs
-      int                                  m_timeCorrectionType; //!< Defined in TimingMode enum.
-      bool                                 m_discardMaskedHits; //!< if set to true, do not create ROTs for masked hits
-
+      Gaudi::Property<bool>  m_doMdt{this, "doMDT", true}; //!< Process MDT ROTs
+      //!< Defined in TimingMode enum.
+      Gaudi::Property<int>   m_timeCorrectionType{this, "TimingMode", 0}; 
+      //!< if set to true, do not create ROTs for masked hits
+      Gaudi::Property<bool>  m_discardMaskedHits{this, "DiscardMaskedHits", true}; 
       // Constants for use during calculations
-      double                               m_fixedError; //!< Error used when m_doFixed error =true or m_scaleErrorManually = true
-      double                               m_globalToLocalTolerance; 
+      //!< Error used when m_doFixed error =true or m_scaleErrorManually = true
+      Gaudi::Property<double> m_fixedError{this, "FixedError", 1. }; 
       
-      std::unique_ptr<MdtCalibrationSvcSettings>           m_mdtCalibSvcSettings; 
+      Gaudi::Property<double> m_globalToLocalTolerance{this,"GlobalToLocalTolerance", 1000., "Tolerance used for the Surface::globalToLocal"}; 
+      
+      std::unique_ptr<MdtCalibrationSvcSettings> m_mdtCalibSvcSettings{std::make_unique<MdtCalibrationSvcSettings>()}; 
 
       // Member variables used to fill the default error strategy
-      MuonDriftCircleErrorStrategy        m_errorStrategy; //!< Error strategy for created ROTs
-      std::string                         m_defaultStrategy; //!< Default error strategy for the error strategy object
-      bool                                m_createTubeHits; //!< if set to true, the ROT creator create 'tube' hits with a local position of 0 and an error of tube radius/sqrt(12) 
-      bool                                m_scaleMdtCov; //!< Scale ROTs depending on local alignment (i.e. location in detector)
-      bool                                m_doFixedError; //!< Fixed error (not tube radius) 
-      bool                                m_useErrorParametrisation; //!< Use parameterised errors
-      bool                                m_errorAtPredictedPosition; //!< Use the predicted track position to correct the Error. See Muon::MdtDriftCircleOnTrack::ErrorAtPredictedPosition
-      bool                                m_doWireSag;  //!< if set to true, then apply wire sag corrections. Controlled via DoWireSag property
-      bool                                m_stationError; //!< Add a term to the error to account for very poorly aligned stations
-      bool                                m_t0Refit; //!< Add a special error to account for the T0 refit
-      bool                                m_doSegments; //!< Use error strategy for segments by default
-      bool                                m_doIndividualChamberReweights; //!< Deweight individual chambers
-      bool                                m_isMC; //!< toggle between MC and data alignment errors (to be removed in rel. 21!)
-      bool                                m_looseErrors; //!< toggle between loose errors (initial before alignment) and tight after alignment
-      Gaudi::Property<bool>               m_wasConfigured {this,"WasConfigured",false,"This tool is too complicated to rely on defaults. Will fail if not configured."};
+      MuonDriftCircleErrorStrategy        m_errorStrategy{Muon::MuonDriftCircleErrorStrategyInput()}; //!< Error strategy for created ROTs
+      
+      //!< Default error strategy for the error strategy object
+      Gaudi::Property<std::string> m_defaultStrategy{this, "Moore", "Default error strategy to be used in calculating errors"}; 
+      
+      //!< if set to true, the ROT creator create 'tube' hits with a local position of 0 and an error of tube radius/sqrt(12) 
+      Gaudi::Property<bool> m_createTubeHits{this, "CreateTubeHit", false}; 
+      //!< Scale ROTs depending on local alignment (i.e. location in detector)
+      Gaudi::Property<bool> m_scaleMdtCov{this, "DoErrorScaling", true};
+      Gaudi::Property<bool> m_doFixedError{this, "DoFixedError", true}; //!< Fixed error (not tube radius) 
+      //!< Use parameterised errors
+      Gaudi::Property<bool> m_useErrorParametrisation{this, "UseParametrisedError", false}; 
+      //!< Use the predicted track position to correct the Error. See Muon::MdtDriftCircleOnTrack::ErrorAtPredictedPosition
+      //!< The error will be adjusted to be that corresponding to the predicted position. This is useful to fix problems with tracks very close to the wire.
+      Gaudi::Property<bool> m_errorAtPredictedPosition{this, "UseErrorAtPredictedPosition", false}; 
+      //!< if set to true, then apply wire sag corrections.
+      Gaudi::Property<bool> m_doWireSag{this, "DoWireSag", false }; 
+      //!< Add a term to the error to account for very poorly aligned stations 
+      Gaudi::Property<bool> m_stationError{this, "DoStationError", false}; 
+      //!< Add a special error to account for the T0 refit
+      Gaudi::Property<bool> m_t0Refit{this, "T0RefitError", false}; 
+      //!< Use error strategy for segments by default
+      Gaudi::Property<bool> m_doSegments{this, "DoSegmentErrors",true}; 
+       //!< Deweight individual chambers
+      Gaudi::Property<bool> m_doIndividualChamberReweights{this, "DeweightIndividualChambers", true};
+      //!< toggle between MC and data alignment errors (to be removed in rel. 21!)      
+      Gaudi::Property<bool> m_isMC{this, "IsMC", false};
+      //!< toggle whether the time of flight is included in the t0 shifts
+      Gaudi::Property<bool> m_applyToF{this, "ApplyToF", true};
+      //!< toggle between loose errors (initial before alignment) and tight after alignment 
+      Gaudi::Property<bool> m_looseErrors{this, "UseLooseErrors",false , "Use error strategy for MC"}; 
+      Gaudi::Property<bool> m_wasConfigured {this,"WasConfigured",false,"This tool is too complicated to rely on defaults. Will fail if not configured."};
     
-      const double m_inverseSpeedOfLight = 1 / Gaudi::Units::c_light; // need 1/299.792458, needed inside timeOfFlight()
+      static constexpr double m_inverseSpeedOfLight = 1 / Gaudi::Units::c_light; 
     };
 
 } // End of muon namespace

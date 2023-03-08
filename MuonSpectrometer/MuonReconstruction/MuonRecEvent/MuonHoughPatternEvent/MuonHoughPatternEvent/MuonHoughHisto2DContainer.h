@@ -19,7 +19,7 @@ public:
 
     /** return maximum of container
      * gives first id histogram (sector) and then maximumbin */
-    std::pair<int, int> getMaximumBinnumber(unsigned int maximum_number, bool which_segment, int printlevel = 0) const;
+    std::pair<int, int> getMaximumBinnumber() const;
 
     /** resets histograms */
     void reset() const;
@@ -28,16 +28,16 @@ public:
     /** reserve a certain size (memory) for m_histos */
     void reserve(int);
     /** push_back a histogram */
-    void push_back(MuonHoughHisto2D*);
+    void push_back(std::unique_ptr<MuonHoughHisto2D>);
 
 private:
     /** vector of MuonHoughHisto2D* */
-    std::vector<MuonHoughHisto2D*> m_histos;
+    std::vector<std::unique_ptr<MuonHoughHisto2D>> m_histos{};
 };
 
 inline int MuonHoughHisto2DContainer::size() const { return m_histos.size(); }
-inline MuonHoughHisto2D* MuonHoughHisto2DContainer::getHisto(int id) const { return m_histos[id]; }
+inline MuonHoughHisto2D* MuonHoughHisto2DContainer::getHisto(int id) const { return m_histos.at(id).get(); }
 inline void MuonHoughHisto2DContainer::reserve(int size) { m_histos.reserve(size); }
-inline void MuonHoughHisto2DContainer::push_back(MuonHoughHisto2D* histo) { m_histos.push_back(histo); }
+inline void MuonHoughHisto2DContainer::push_back(std::unique_ptr<MuonHoughHisto2D> histo) { m_histos.push_back(std::move(histo)); }
 
 #endif  // MUONHOUGHPATTERNEVENT_MUONHOUGHHISTO2DCONTAINER_H

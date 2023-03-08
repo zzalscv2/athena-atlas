@@ -100,9 +100,10 @@ namespace DerivationFramework {
   StatusCode TrackStateOnSurfaceDecorator::initialize()
   {
     ATH_MSG_DEBUG("Initialize");
-
-    if (m_sgName.empty()) {
-      ATH_MSG_WARNING("No decoration prefix name provided for the output of TrackStateOnSurfaceDecorator!");
+    
+    if (m_sgName.value() == "notSet") {
+      ATH_MSG_ERROR("No decoration prefix name provided for the output of TrackStateOnSurfaceDecorator! Use the variable DecorationPrefix to properly set a prefix.");
+      return StatusCode::FAILURE;
     }
     ATH_MSG_DEBUG("Prefix for decoration: " << m_sgName);
 
@@ -654,7 +655,7 @@ namespace DerivationFramework {
 
 
         // Track extrapolation
-        std::unique_ptr<const Trk::TrackParameters> extrap( m_extrapolator->extrapolate(ctx,*trkTrack,trackState->surface()) );
+        std::unique_ptr<const Trk::TrackParameters> extrap( m_extrapolator->extrapolateTrack(ctx,*trkTrack,trackState->surface()) );
 
         // Set local positions on the surface
         if (tp) { 

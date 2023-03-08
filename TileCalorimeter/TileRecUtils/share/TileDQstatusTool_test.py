@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
 #
 # File: TileRecUtils/share/TileDQstatusTool_test.py
 # Author: scott snyder
@@ -325,9 +325,12 @@ class TestAlg (Alg):
 
         eid = ROOT.EventIDBase()
         eid.set_bunch_crossing_id (1234)
+        eid.set_run_number(1)
+        eid.set_lumi_block(0)
         ctx = ROOT.EventContext()
         ctx.setEventID (eid)
         ctx.setSlot (0)
+        ctx.setExtension(ROOT.Atlas.ExtendedEventContext())
 
         trigType = -123
         cispar = 110*[0]

@@ -54,13 +54,13 @@ for(int ihar=2;ihar<=6;ihar++){
       prof2=(TProfile*)infile->Get(name);
       if(!prof2) {cout<<name<<" not found"<<endl;continue;}
 
-      if(ieta<5){
-        if(ieta==0) {prof3= (TProfile*) prof1->Clone();}
-        else        {prof3->Add(prof1);}
-
-        if(ieta==0) {prof4= (TProfile*) prof2->Clone();}
-        else        {prof4->Add(prof2);}
-      }
+        if(ieta == 0) {
+          prof3 = (TProfile*) prof1->Clone(); 
+          prof4 = (TProfile*) prof2->Clone();
+        } else {
+          prof3->Add(prof1);
+          prof4->Add(prof2);
+        }
     }
     for(int ib=0;ib<n_b_bins;ib++){
        func1->SetParameter(0,1.25); //mean eta
@@ -118,13 +118,11 @@ for(int ib_canvas=0;ib_canvas<2;ib_canvas++) {  //0-45% is canvas0,   45-90% is 
       prof2=(TProfile*)infile->Get(name);
       if(!prof2) {cout<<name<<" not found"<<endl;continue;}
 
-      if(ieta<5){
-        if(ieta==0) {prof3= (TProfile*) prof1->Clone();}
-        else        {prof3->Add(prof1);}
+      if(ieta==0) {prof3= (TProfile*) prof1->Clone();}
+      else        {prof3->Add(prof1);}
 
-        if(ieta==0) {prof4= (TProfile*) prof2->Clone();}
-        else        {prof4->Add(prof2);}
-      }
+      if(ieta==0) {prof4= (TProfile*) prof2->Clone();}
+      else        {prof4->Add(prof2);}
     }
     prof3->GetXaxis()->SetRangeUser(0,18);
     prof3->SetLineColor(2);

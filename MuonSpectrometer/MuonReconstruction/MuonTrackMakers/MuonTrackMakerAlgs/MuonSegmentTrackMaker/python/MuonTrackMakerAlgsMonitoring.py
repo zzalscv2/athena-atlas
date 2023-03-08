@@ -1,12 +1,12 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 # Author: Laurynas Mince
 # Created on 15.10.2019
 
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
-def MuPatTrackBuilderMonitoring(name = "MuPatTrackBuilderMonitoring"):
+def MuPatTrackBuilderMonitoring(flags, name = "MuPatTrackBuilderMonitoring"):
 
-    montool = GenericMonitoringTool(name, HistPath = name)
+    montool = GenericMonitoringTool(flags, name, HistPath = name)
 
     montool.defineHistogram("mstrks_n", type="TH1F", path="EXPERT", title="MS track n; N of tracks", xbins=50, xmin=0, xmax=50)
     montool.defineHistogram("mstrks_pt", type="TH1F", path="EXPERT", title="MS track pT; pT", xbins=100, xmin=0, xmax=300)

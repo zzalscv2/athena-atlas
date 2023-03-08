@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TgcRawDataMonitorAlgorithm.h"
@@ -8,6 +8,7 @@
 #include "FourMomUtils/xAODP4Helpers.h"
 #include "StoreGate/ReadDecorHandle.h"
 #include "MuonReadoutGeometry/TgcDetectorElement.h"
+#include "GoodRunsLists/TGRLCollection.h"
 
 namespace {
   // Cut values on pt bein exploited throughout the monitoring
@@ -45,12 +46,10 @@ StatusCode TgcRawDataMonitorAlgorithm::initialize() {
   ATH_CHECK(m_TgcCoinDataContainerPrevBCKey.initialize(SG::AllowEmpty));
   ATH_CHECK(m_PrimaryVertexContainerKey.initialize(SG::AllowEmpty));
 
-  if( !m_extrapolator.empty() ) ATH_CHECK(m_extrapolator.retrieve());
-  else m_extrapolator.disable();
-  if( !m_tgcMonTool.empty() ) ATH_CHECK(m_tgcMonTool.retrieve());
-  else m_tgcMonTool.disable();
-  if( !m_muonSelectionTool.empty() ) ATH_CHECK(m_muonSelectionTool.retrieve());
-  else m_muonSelectionTool.disable();
+  ATH_CHECK(m_extrapolator.retrieve(DisableTool{m_extrapolator.empty()}));
+  ATH_CHECK(m_tgcMonTool.retrieve(DisableTool{m_tgcMonTool.empty()}));
+  ATH_CHECK(m_muonSelectionTool.retrieve(DisableTool{m_muonSelectionTool.empty()}));
+  ATH_CHECK(m_GoodRunsListSelectorTool.retrieve(DisableTool{m_GoodRunsListSelectorTool.empty()}));
 
   ATH_CHECK(m_L1MenuKey.initialize()); // ReadHandleKey, but DetStore (so renounce)
   renounce(m_L1MenuKey);
@@ -74,7 +73,7 @@ StatusCode TgcRawDataMonitorAlgorithm::initialize() {
     std::unique_ptr<TObjArray> monTrigs( Str.Tokenize(";") );
     for(int i = 0 ; i < monTrigs->GetEntries() ; i++){
       TString monTrig = monTrigs->At(i)->GetName();
-      if(monTrig=="")continue;
+      if(monTrig.IsNull())continue;
       CtpDecMonObj monObj;
       monObj.trigItem = monObj.title = "dummy";
       monObj.rpcThr=monObj.tgcThr=monObj.multiplicity=0;
@@ -82,7 +81,7 @@ StatusCode TgcRawDataMonitorAlgorithm::initialize() {
       std::unique_ptr<TObjArray> monElement( monTrig.Tokenize(",") );
       for(int j = 0 ; j < monElement->GetEntries() ; j++){
 	std::string sysItem = monElement->At(j)->GetName();
-	if(sysItem=="")continue;
+	if(sysItem.empty())continue;
 	std::string item = sysItem.substr(4,sysItem.size());// remove "Tit:", "CTP:", "HLT:", "RPC:", "TGC:"
 	if(sysItem.find("Tit")==0){
 	  monObj.title = item;
@@ -92,13 +91,13 @@ StatusCode TgcRawDataMonitorAlgorithm::initialize() {
 	  monObj.trigItem = item;
 	}else if(sysItem.find("RPC")==0){
 	  monObj.rpcThr = std::atoi(item.data());
-	  monObj.rpcR = (item.find("R")!=std::string::npos);
-	  monObj.rpcM = (item.find("M")!=std::string::npos);
+	  monObj.rpcR = (item.find('R')!=std::string::npos);
+	  monObj.rpcM = (item.find('M')!=std::string::npos);
 	}else if(sysItem.find("TGC")==0){
 	  monObj.tgcThr = std::atoi(item.data());
-	  monObj.tgcF = (item.find("F")!=std::string::npos);
-	  monObj.tgcC = (item.find("C")!=std::string::npos);
-	  monObj.tgcH = (item.find("H")!=std::string::npos);
+	  monObj.tgcF = (item.find('F')!=std::string::npos);
+	  monObj.tgcC = (item.find('C')!=std::string::npos);
+	  monObj.tgcH = (item.find('H')!=std::string::npos);
 	}
       }
       m_CtpDecMonObj.push_back(monObj);
@@ -134,6 +133,22 @@ StatusCode TgcRawDataMonitorAlgorithm::initialize() {
 
 StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
   ATH_MSG_DEBUG("fillHistograms()");
+
+  if( !m_GoodRunsListSelectorTool.empty() ){
+    int runNumber   = GetEventInfo(ctx)->runNumber();
+    int lumiBlockNr = GetEventInfo(ctx)->lumiBlock();
+    if(m_GoodRunsListSelectorTool->getGRLCollection()->IsEmpty()){
+      ATH_MSG_ERROR("Empty GRL");
+      return StatusCode::FAILURE;
+    }
+    bool pass = m_GoodRunsListSelectorTool->getGRLCollection()->HasRunLumiBlock(runNumber,lumiBlockNr);
+    if(pass){
+      ATH_MSG_DEBUG("passing GRL: run=" << runNumber << " lb=" << lumiBlockNr);
+    }else{
+      ATH_MSG_DEBUG("failed GRL: run=" << runNumber << " lb=" << lumiBlockNr);
+      return StatusCode::SUCCESS;
+    }
+  }
 
   // Print out all available muon triggers
   // This is to be used when making a list of triggers
@@ -197,7 +212,7 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
       if( !triggerList.empty() ){
 	for(const auto &trig : triggerList) {
 	  if( trig.find("HLT_mu") != 0 )continue; // muon trigger
-	  if( trig.find("-") != std::string::npos )continue; // vetoing topo item
+	  if( trig.find('-') != std::string::npos )continue; // vetoing topo item
 	  if( trig.find("L1MU") == std::string::npos )continue; // RoI-seedeed L1 muon trigger
 	  if( trig.find("mu") !=  trig.rfind("mu") )continue;  // mu occurrence only once -> single muon trigger
 	  if( trig.find("MU") !=  trig.rfind("MU") )continue;  // MU occurrence only once -> single muon trigger
@@ -976,7 +991,7 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
 							     m_endcapPivotPlaneMaximumRadius.value());
 	  const Trk::BoundaryCheck boundaryCheck = true;
 	  const auto extTrkParams = m_extrapolator->extrapolate(ctx,
-								*trackParticle,
+								trackParticle->perigeeParameters(),
 								*disc,
 								Trk::alongMomentum,
 								boundaryCheck,
@@ -1560,8 +1575,8 @@ return (m.muon->charge()>0);
 	  for(const auto& chamHasHit : map_muon_and_tgchits[muon]){
 	    if( chamHasHit.find(tgcHit.gap_name()) != std::string::npos ) continue; // skipping the same gap
 	    if( chamHasHit.find("M04") != std::string::npos ) continue; // skipping EI/FI
-	    if( chamHasHit.find("W") != std::string::npos ) nWhits++;
-	    if( chamHasHit.find("S") != std::string::npos ) nShits++;
+	    if( chamHasHit.find('W') != std::string::npos ) nWhits++;
+	    if( chamHasHit.find('S') != std::string::npos ) nShits++;
 	  }
 	  if(nWhits < m_nHitsInOtherBWTGCWire.value())continue;
 	  if(nShits < m_nHitsInOtherBWTGCStrip.value())continue;
@@ -1731,7 +1746,7 @@ return (m.muon->charge()>0);
 	  if(cham.iM()!=4){
 	    tgcHitBCMaskBWSectors["All"].push_back( (cham.iSide()==TGC::TGCSIDE::TGCASIDE)?( +1 * cham.iSec() ):(-1 * cham.iSec()) );
 	    tgcHitBCMaskForBWSectors["All"].push_back(tgcHit.bcmask());
-	    if(chamberNameWithWS.find("W")!=std::string::npos){
+	    if(chamberNameWithWS.find('W')!=std::string::npos){
 	      tgcHitBCMaskBWSectors["Wire"].push_back( (cham.iSide()==TGC::TGCSIDE::TGCASIDE)?( +1 * cham.iSec() ):(-1 * cham.iSec()) );
 	      tgcHitBCMaskForBWSectors["Wire"].push_back(tgcHit.bcmask());
 	    }else{
@@ -1795,8 +1810,8 @@ return (m.muon->charge()>0);
 	      for(const auto& chamHasHit : map_muon_and_tgchits[ext.muon]){
 		if( chamHasHit.find(gap_name) != std::string::npos ) continue; // skipping the same gap
 		if( chamHasHit.find("M04") != std::string::npos ) continue; // skipping EI/FI
-		if( chamHasHit.find("W") != std::string::npos ) nWhits++;
-		if( chamHasHit.find("S") != std::string::npos ) nShits++;
+		if( chamHasHit.find('W') != std::string::npos ) nWhits++;
+		if( chamHasHit.find('S') != std::string::npos ) nShits++;
 	      }
 	      if(nWhits < m_nHitsInOtherBWTGCWire.value())continue;
 	      if(nShits < m_nHitsInOtherBWTGCStrip.value())continue;
@@ -1857,7 +1872,7 @@ return (m.muon->charge()>0);
 	varowner_eachchamber_double.reserve(tgcHitsMap.size());
       	for (const auto &tgcHitMap : tgcHitsMap) {
 	  auto chanName = tgcHitMap.first;
-	  if(chanName.find("L")!=std::string::npos){ // individual gaps
+	  if(chanName.find('L')!=std::string::npos){ // individual gaps
 	    varowner_eachchamber.push_back(Monitored::Collection(Form("hit_on_%s",chanName.data()),tgcHitMap.second,[](const TGC::TgcHit&m){return m.channel();}));
 	    hit_variables.push_back(varowner_eachchamber.back());
 	  }else{ // only summed over the gaps

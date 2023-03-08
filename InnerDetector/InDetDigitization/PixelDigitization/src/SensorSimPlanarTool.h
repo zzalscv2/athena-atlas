@@ -48,6 +48,9 @@ private:
   std::vector<PixelHistoConverter> m_lorentzMap_e;
   std::vector<PixelHistoConverter> m_lorentzMap_h;
   std::vector<std::pair<double,double> > m_centrePixelNNEtaPhi;
+  std::vector<PixelHistoConverter> m_lorentzCorrection;
+  std::vector<PixelHistoConverter> m_chargeCorrection;
+  std::vector<PixelHistoConverter> m_distanceCorrection;
 
   Gaudi::Property<int> m_numberOfSteps
   {

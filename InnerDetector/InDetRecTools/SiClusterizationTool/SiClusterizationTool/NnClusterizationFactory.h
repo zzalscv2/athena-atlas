@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
  #ifndef SICLUSTERIZATIONTOOL_NnClusterizationFactory_C
@@ -71,18 +71,18 @@ namespace InDet {
     operator bool() const {
       return !matrixOfToT.empty();
     }
-    int sizeX;
-    int sizeY;
+    int sizeX = 0;
+    int sizeY = 0;
     std::vector<std::vector<float> > matrixOfToT;
     std::vector<float> vectorOfPitchesY;
-    int ClusterPixLayer;
-    int ClusterPixBarrelEC;
-    float phi;
-    float theta;
-    float etaModule;
-    bool useTrackInfo;
-    int columnWeightedPosition;
-    int rowWeightedPosition;
+    int ClusterPixLayer = 0;
+    int ClusterPixBarrelEC = 0;
+    float phi = 0;
+    float theta = 0;
+    float etaModule = 0;
+    bool useTrackInfo = 0;
+    int columnWeightedPosition = 0;
+    int rowWeightedPosition = 0;
   };
 
   static const InterfaceID IID_NnClusterizationFactory("InDet::NnClusterizationFactory", 1, 0);
@@ -98,8 +98,8 @@ namespace InDet {
                      const std::string& n, const IInterface* p);
      ~NnClusterizationFactory() = default;
 
-    virtual StatusCode initialize();
-    virtual StatusCode finalize() { return StatusCode::SUCCESS; };
+    virtual StatusCode initialize() override;
+    virtual StatusCode finalize() override { return StatusCode::SUCCESS; };
 
     std::vector<double> estimateNumberOfParticles(const InDet::PixelCluster& pCluster,
                                                   Amg::Vector3D & beamSpotPosition) const;

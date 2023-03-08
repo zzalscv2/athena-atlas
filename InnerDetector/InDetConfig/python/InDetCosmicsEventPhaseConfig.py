@@ -76,27 +76,28 @@ def InDetCosmicsEventPhaseCfg(flags, name='InDetCosmicsEventPhase', **kwargs):
 
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
 
     numThreads=1
-    ConfigFlags.Concurrency.NumThreads=numThreads
-    ConfigFlags.Concurrency.NumConcurrentEvents=numThreads # Might change this later, but good enough for the moment.
+    flags.Concurrency.NumThreads=numThreads
+    flags.Concurrency.NumConcurrentEvents=numThreads # Might change this later, but good enough for the moment.
 
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    ConfigFlags.Input.Files = defaultTestFiles.RDO_RUN2
-    ConfigFlags.lock()
-    ConfigFlags.dump()
+    flags.Input.Files = defaultTestFiles.RDO_RUN2
+    flags.lock()
+    flags.dump()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    top_acc = MainServicesCfg(ConfigFlags)
+    top_acc = MainServicesCfg(flags)
     
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    top_acc.merge(PoolReadCfg(ConfigFlags))
+    top_acc.merge(PoolReadCfg(flags))
 
     from TRT_GeoModel.TRT_GeoModelConfig import TRT_ReadoutGeometryCfg
-    top_acc.merge(TRT_ReadoutGeometryCfg( ConfigFlags ))
+    top_acc.merge(TRT_ReadoutGeometryCfg( flags ))
 
-    top_acc.merge(InDetCosmicsEventPhaseCfg(ConfigFlags,
+    top_acc.merge(InDetCosmicsEventPhaseCfg(flags,
                                             InputTracksNames=['TRTTracks_Phase', 'ExtendedTracksPhase']))
 
     iovsvc = top_acc.getService('IOVDbSvc')

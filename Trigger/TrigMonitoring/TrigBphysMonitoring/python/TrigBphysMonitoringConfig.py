@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -43,7 +43,7 @@ class TrigBphysMonAlgBuilder:
     self.__logger.info("TrigBphysMonToolBuilder.configureMode()")
     self._get_monitoring_mode_success = self.get_monitoring_mode()
     if not self._get_monitoring_mode_success :
-      self.__logger.warning("  HLTMonTriggerList: Error getting monitoring mode, default monitoring lists will be used.")
+      self.__logger.warning("Error getting monitoring mode, default monitoring lists will be used.")
     else:
       self.__logger.info("  Configuring for %s", self.data_type)
 
@@ -126,7 +126,7 @@ class TrigBphysMonAlgBuilder:
 
     ### monitorig groups
     from TrigConfigSvc.TriggerConfigAccess import getHLTMonitoringAccess
-    moniAccess=getHLTMonitoringAccess(self.helper.inputFlags)
+    moniAccess=getHLTMonitoringAccess(self.helper.flags)
     monitoring_bphys=moniAccess.monitoredChains(signatures="bphysMon",monLevels=["shifter","t0","val"]) # other are ["shifter","t0","val"]
   
     # if mon groups not found fall back to hard-coded trigger monitoring list
@@ -175,7 +175,7 @@ class TrigBphysMonAlgBuilder:
   
   
   def setStreamChecks(self):
-    if self.helper.inputFlags.Common.doExpressProcessing :
+    if self.helper.flags.Common.doExpressProcessing :
       #enable checking that the event triggered by certain chain was explicitly sent to express stream
       self.__logger.info("  Processing Express stream, will enable requireExplicitESDecision")
       self.require_explicit_ES_decision = True
@@ -198,20 +198,20 @@ class TrigBphysMonAlgBuilder:
     acc = self.helper.resobj
     
     from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
-    AtlasExtrapolator = acc.popToolsAndMerge( AtlasExtrapolatorCfg(self.helper.inputFlags) )
+    AtlasExtrapolator = acc.popToolsAndMerge( AtlasExtrapolatorCfg(self.helper.flags) )
     acc.addPublicTool(AtlasExtrapolator)
 
     from InDetConfig.InDetConversionFinderToolsConfig import BPHY_VertexPointEstimatorCfg
     self.bphysMonAlg.VertexPointEstimator = acc.popToolsAndMerge(
-        BPHY_VertexPointEstimatorCfg(self.helper.inputFlags, 'BphysMonVertexPointEstimator'))
+        BPHY_VertexPointEstimatorCfg(self.helper.flags, 'BphysMonVertexPointEstimator'))
 
     from TrkConfig.TrkVKalVrtFitterConfig import BPHY_TrkVKalVrtFitterCfg
     self.bphysMonAlg.VertexFitter = acc.popToolsAndMerge(
-        BPHY_TrkVKalVrtFitterCfg(self.helper.inputFlags, 'BphysMonTrkVKalVrtFitter'))
+        BPHY_TrkVKalVrtFitterCfg(self.helper.flags, 'BphysMonTrkVKalVrtFitter'))
 
     from TrkConfig.TrkVertexAnalysisUtilsConfig import V0ToolsCfg
     self.bphysMonAlg.V0Tools = acc.popToolsAndMerge(
-        V0ToolsCfg(self.helper.inputFlags, 'BphysMonV0Tools'))
+        V0ToolsCfg(self.helper.flags, 'BphysMonV0Tools'))
     
     self.bphysMonAlg.ContainerNames = self.monitored_containers
     self.bphysMonAlg.ChainNames_MuMu = self.monitored_mumu_list

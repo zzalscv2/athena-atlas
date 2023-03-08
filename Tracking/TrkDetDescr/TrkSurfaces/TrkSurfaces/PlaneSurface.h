@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -121,37 +121,13 @@ public:
                double maxhalephi,
                double haleta);
 
-  /** Constructor for Planes with provided RectangleBounds - ownership of bounds
+  /** Constructor for Planes with provided Bounds - ownership of bounds
    * is passed*/
-  PlaneSurface(const Amg::Transform3D & htrans, RectangleBounds* rbounds);
-
-  /** Constructor for Planes with provided TriangleBounds - ownership of bounds
-   * is passed*/
-  PlaneSurface(const Amg::Transform3D & htrans, TriangleBounds* rbounds);
-
-  /** Constructor for Planes with provided AnnulusBounds - ownership of bounds
-   * is passed*/
-  PlaneSurface(const Amg::Transform3D& htrans, AnnulusBounds* rbounds);
-
-  /** Constructor for Planes with provided TrapezoidBounds - ownership of bounds
-   * is passed*/
-  PlaneSurface(const Amg::Transform3D& htrans, TrapezoidBounds* rbounds);
-
-  /** Constructor for Planes with provided RotatedTrapezoidBounds - ownership of
-   * bounds is passed*/
-  PlaneSurface(const Amg::Transform3D& htrans, RotatedTrapezoidBounds* rbounds);
-
-  /** Constructor for Planes with provided DiamondBounds - ownership of bounds
-   * is passed*/
-  PlaneSurface(const Amg::Transform3D& htrans, DiamondBounds* rbounds);
-
-  /** Constructor for Planes with provided EllipseBounds - ownership of bounds
-   * is passed*/
-  PlaneSurface(const Amg::Transform3D& htrans, EllipseBounds* rbounds);
+  PlaneSurface(const Amg::Transform3D & htrans, const Trk::SurfaceBounds* rbounds);
 
   /** Constructor for Planes with shared object*/
   PlaneSurface(const Amg::Transform3D& htrans,
-               Trk::SharedObject<const Trk::SurfaceBounds>& sbounds);
+               const Trk::SharedObject<const Trk::SurfaceBounds>& sbounds);
 
   /**Equality operator*/
   virtual bool operator==(const Surface& sf) const override;

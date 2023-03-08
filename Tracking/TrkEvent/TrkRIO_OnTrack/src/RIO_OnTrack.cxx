@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -27,6 +27,16 @@ Trk::RIO_OnTrack::RIO_OnTrack(const Trk::LocalParameters& locpars,
   , m_identifier(id)
 {
 }
+
+Trk::RIO_OnTrack::RIO_OnTrack(Trk::LocalParameters&& locpars,
+                              Amg::MatrixX&& loccov,
+                              const Identifier& id)
+  : MeasurementBase(std::move(locpars), std::move(loccov))
+  , Trk::ObjectCounter<Trk::RIO_OnTrack>()
+  , m_identifier(id)
+{
+}
+
 
 MsgStream& Trk::RIO_OnTrack::dump( MsgStream& sl ) const
 {

@@ -19,6 +19,8 @@
 #include "LArCafJobs/EventData.h"
 #include "LArCafJobs/CaloId.h"
 
+#include "CxxUtils/checker_macros.h"
+
 #include "TROOT.h"
 #include "TApplication.h"
 #include "TSystem.h"
@@ -30,7 +32,7 @@
 using namespace LArSamples;
 using namespace std;
 
-class LCE_CellList {
+class ATLAS_NOT_THREAD_SAFE LCE_CellList {
 
 public:
 
@@ -330,7 +332,7 @@ std::string LCE_CellList::partitionName(const short caloId, const short layer) c
 
 
 
-int main(int argc, char** argv) {
+int main ATLAS_NOT_THREAD_SAFE (int argc, char** argv) {
 
   if (argc<3 || (argc>1 && (!strcmp(argv[1],"-h") || !strcmp(argv[1],"--help")))) {
     std::cout << "Syntax:" << std::endl;

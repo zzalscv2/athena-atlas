@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: Normalizations.h 704615 2015-10-29 18:50:12Z wsfreund $
@@ -211,8 +211,8 @@ class MinMax : public virtual IPreProcessor,
       : m_dim(0){;}
 
     MinMax(
-        const std::vector<float> min,
-        const std::vector<float> max);
+        const std::vector<float>& min,
+        const std::vector<float>& max);
 
     virtual void execute(std::vector<float> &inputSpace) const final override;
 

@@ -83,8 +83,7 @@ bool  ISF::TruthAssocSimSelector::passSelectorCuts(const ISFParticle& particle) 
                               << " pdg=" << particle.pdgCode() << ","
                               << " barcode=" << particle.barcode() << ")"
                               << " passes due relative particle"
-                              << " (pdg=" << relative->pdg_id() << ","
-                              << " barcode=" << HepMC::barcode(relative) << ")" );
+                              << " (" << relative<< ")" );
               // selector cuts passed
               return true;
             } // found relative

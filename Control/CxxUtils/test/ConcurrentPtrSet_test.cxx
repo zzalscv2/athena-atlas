@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/test/ConcurrentPtrSet_test.cxx
@@ -96,6 +96,22 @@ public:
   }
 
   static Context_t defaultContext() { return 0; }
+
+
+  void swap (TestUpdater& other)
+  {
+    auto swap_atomic = [] (std::atomic<T*>& a, std::atomic<T*>& b)
+    {
+      T* tmp = a.load (std::memory_order_relaxed);
+      a.store (b.load (std::memory_order_relaxed),
+               std::memory_order_relaxed);
+      b.store (tmp, std::memory_order_relaxed);
+    };
+
+    swap_atomic (m_p, other.m_p);
+    m_garbage.swap (other.m_garbage);
+    std::swap (m_inGrace, other.m_inGrace);
+  }
 
 
 private:
@@ -309,6 +325,52 @@ void test3()
 
   std::sort (seen.begin(), seen.end());
   assert (seen == exp);
+}
+
+
+// Swap
+void test_swap()
+{
+  std::cout << "test_swap\n";
+
+  TestSet set1 {TestSet::Updater_t()};
+  TestSet set2 {TestSet::Updater_t()};
+
+  const size_t MAXKEYS = 1000;
+
+  std::vector<int> keys1;
+  std::vector<int> keys2;
+
+  for (size_t i = 0; i < MAXKEYS; i++) {
+    keys1.push_back (i);
+  }
+  for (size_t i = 0; i < MAXKEYS/2; i++) {
+    keys2.push_back (i + MAXKEYS);
+  }
+
+  for (size_t i = 0; i < MAXKEYS; i++) {
+    auto [it, flag] = set1.emplace (&keys1[i]);
+    assert (flag);
+  }
+  for (size_t i = 0; i < MAXKEYS/2; i++) {
+    auto [it, flag] = set2.emplace (&keys2[i]);
+    assert (flag);
+  }
+
+  assert (set1.size() == MAXKEYS);
+  assert (set2.size() == MAXKEYS/2);
+
+  set1.swap (set2);
+  
+  assert (set2.size() == MAXKEYS);
+  assert (set1.size() == MAXKEYS/2);
+
+  for (size_t i = 0; i < MAXKEYS; i++) {
+    assert (set2.count (&keys1[i]) == 1);
+  }
+  for (size_t i = 0; i < MAXKEYS/2; i++) {
+    assert (set1.count (&keys2[i]) == 1);
+  }
 }
 
 
@@ -872,6 +934,7 @@ int main (int argc, char** argv)
   test1();
   test2();
   test3();
+  test_swap();
   test4();
   return 0;
 }

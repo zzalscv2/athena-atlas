@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -37,28 +37,28 @@ def CaloMonitoringCfg(flags):
 
 if __name__=='__main__':
 
-   from AthenaConfiguration.AllConfigFlags import ConfigFlags
-
+   from AthenaConfiguration.AllConfigFlags import initConfigFlags
    from AthenaConfiguration.TestDefaults import defaultTestFiles
-   ConfigFlags.Input.Files = defaultTestFiles.ESD
+   flags = initConfigFlags()
+   flags.Input.Files = defaultTestFiles.ESD
 
-   ConfigFlags.Output.HISTFileName = 'CaloMonitoringOutput.root'
-   ConfigFlags.DQ.enableLumiAccess = True
-   ConfigFlags.DQ.useTrigger = False
-   ConfigFlags.DQ.Environment = 'tier0'
+   flags.Output.HISTFileName = 'CaloMonitoringOutput.root'
+   flags.DQ.enableLumiAccess = True
+   flags.DQ.useTrigger = False
+   flags.DQ.Environment = 'tier0'
 
-   ConfigFlags.lock()
+   flags.lock()
 
    # Initialize configuration object, add accumulator, merge, and run.
    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
    from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-   acc = MainServicesCfg(ConfigFlags)
-   acc.merge(PoolReadCfg(ConfigFlags))
+   acc = MainServicesCfg(flags)
+   acc.merge(PoolReadCfg(flags))
 
-   acc.merge( CaloMonitoringCfg(ConfigFlags) )
+   acc.merge( CaloMonitoringCfg(flags) )
 
    acc.printConfig(withDetails = True, summariseProps = True)
-   ConfigFlags.dump()
+   flags.dump()
    acc.store(open("CaloMonitoring.pkl","wb"))
 
    sc = acc.run(maxEvents = 3)

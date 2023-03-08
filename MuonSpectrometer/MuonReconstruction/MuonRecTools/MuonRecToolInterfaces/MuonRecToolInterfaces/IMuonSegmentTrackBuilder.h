@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_IMUONSEGMENTTRACKBUILDER_H
@@ -23,7 +23,7 @@ namespace Muon {
     /** @brief The IMuonSegmentMaker is a pure virtual interface for tools to find tracks starting from MuonSegmentCombinations  */
     class IMuonSegmentTrackBuilder : virtual public IAlgTool {
     public:
-        typedef std::vector<const Trk::PrepRawData*> PrepVec;
+        using PrepVec = std::vector<const Trk::PrepRawData*>;
         typedef PrepVec::iterator PrepIt;
         typedef PrepVec::const_iterator PrepCit;
 
@@ -55,8 +55,8 @@ namespace Muon {
             @param externalPhiHits if provided, the external phi hits will be used instead of the phi hits on the segment
             @return a pointer to the combined segment, will return zero if combination failed. Ownership passed to user.
         */
-        virtual MuonSegment* combineToSegment(const EventContext& ctx, const MuonSegment& seg1, const MuonSegment& seg2,
-                                              const PrepVec* patternPhiHits) const = 0;
+        virtual std::unique_ptr<MuonSegment> combineToSegment(const EventContext& ctx, const MuonSegment& seg1, const MuonSegment& seg2,
+                                              const PrepVec& patternPhiHits) const = 0;
 
         /** @brief combine two segments to a track
             @param seg1 the first segment
@@ -65,7 +65,7 @@ namespace Muon {
             @return a pointer to the resulting track, will return zero if combination failed. Ownership passed to user.
         */
         virtual std::unique_ptr<Trk::Track> combine(const EventContext& ctx, const MuonSegment& seg1, const MuonSegment& seg2,
-                                                    const PrepVec* patternPhiHits) const = 0;
+                                                    const PrepVec& patternPhiHits) const = 0;
 
         /** @brief combine a track with a segment
             @param track a track
@@ -74,7 +74,7 @@ namespace Muon {
             @return a pointer to the resulting track, will return zero if combination failed. Ownership passed to user.
         */
         virtual std::unique_ptr<Trk::Track> combine(const EventContext& ctx, const Trk::Track& track, const MuonSegment& seg,
-                                                    const PrepVec* patternPhiHits) const = 0;
+                                                    const PrepVec& patternPhiHits) const = 0;
 
         /** @brief find closest TrackParameters to the position. Closest is defined as closest in z in the endcap and
              closest in r in the barrel.

@@ -11,7 +11,7 @@
  **
  **   @date         Wed May  4 17:54:25 BST 2005
  **
- **   Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+ **   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **                   
  **                   
  **
@@ -30,31 +30,30 @@ class Directory {
 
  public:
 
-  Directory() : mHAddState(true), mDAddState(true), mPop(NULL), mDir(NULL) { } 
-  Directory(const std::string& n) : mPop(gDirectory), mDir(gDirectory->mkdir(n.c_str())) { 
-    //   push();
+  Directory() : m_HAddState(true), m_DAddState(true), m_Pop(NULL), m_Dir(NULL) { }
+  Directory(const std::string& n) :m_HAddState(true), m_DAddState(true), m_Pop(gDirectory), m_Dir(gDirectory->mkdir(n.c_str())) {
   } 
 
   virtual ~Directory() {  }
 
-  void push() { mPop = gDirectory; if (mDir) mDir->cd(); } 
-  void pop()  { if (mPop) mPop->cd(); }
+  void push() { m_Pop = gDirectory; if (m_Dir) m_Dir->cd(); }
+  void pop()  { if (m_Pop) m_Pop->cd(); }
 
-  void Write() { push(); mDir->Write(); pop(); } 
+  void Write() { push(); m_Dir->Write(); pop(); }
 
-  void  pwd() const { mDir->pwd(); }  
-  TDirectory* cwd() { return mDir; }  
+  void  pwd() const { m_Dir->pwd(); }
+  TDirectory* cwd() { return m_Dir; }
 
   void disable() {  }
   void restore() {  }
 
  protected:
   
-  bool        mHAddState;
-  bool        mDAddState;
+  bool        m_HAddState;
+  bool        m_DAddState;
 
-  TDirectory* mPop;
-  TDirectory* mDir;
+  TDirectory* m_Pop;
+  TDirectory* m_Dir;
 
 };
 

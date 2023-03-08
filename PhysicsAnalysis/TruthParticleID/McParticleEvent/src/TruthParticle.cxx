@@ -250,7 +250,7 @@ void TruthParticle::setGenParticle( HepMC::ConstGenParticlePtr particle )
     m_children.reserve( dcyVtx ? dcyVtx->particles_out().size() : 0 );
 
     if ( dcyVtx ) {
-      for ( auto  itr: dcyVtx->particles_out()) {
+      for ( const auto&  itr: dcyVtx->particles_out()) {
         m_children.push_back( HepMC::barcode(itr) );
       }//> end loop over outgoing particles
     }//> decay vertex exists
@@ -259,7 +259,7 @@ void TruthParticle::setGenParticle( HepMC::ConstGenParticlePtr particle )
     auto prodVtx = particle->production_vertex();
     m_mothers.reserve( prodVtx ? prodVtx->particles_in().size() : 0 );
     if ( prodVtx ) {
-      for ( auto itr:  prodVtx->particles_in()) {
+      for (const auto& itr:  prodVtx->particles_in()) {
         m_mothers.push_back( HepMC::barcode(itr) );
       }//> end loop over ingoing particles
     }//> production vertex exists

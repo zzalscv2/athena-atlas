@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -105,7 +105,7 @@ namespace LVL1 {
     addET(et, cell);
     
     //multi linear digitisation encoding
-    unsigned int outET = eFEXCompression::decode((unsigned int)m_et_float[cell],layer);
+    unsigned int outET = eFEXCompression::decode(std::round(m_et_float[cell]),layer);
     m_et[cell] = outET;
   }
 
@@ -123,7 +123,7 @@ namespace LVL1 {
       m_scID[cell] = ID;
     
       //multi linear digitisation encoding
-      unsigned int outET = eFEXCompression::decode((unsigned int)m_et_float[cell],layer);
+      unsigned int outET = eFEXCompression::decode(std::round(m_et_float[cell]),layer);
       m_et[cell] = outET;
     }
     else{
@@ -148,8 +148,8 @@ namespace LVL1 {
       
       m_scID.push_back(ID);
 
-      unsigned int outET1 = eFEXCompression::decode((unsigned int)m_et_float[cell],layer);
-      unsigned int outET2 = eFEXCompression::decode((unsigned int)m_et_float[cell+1],layer);
+      unsigned int outET1 = eFEXCompression::decode(std::round(m_et_float[cell]),layer);
+      unsigned int outET2 = eFEXCompression::decode(std::round(m_et_float[cell+1]),layer);
       
       m_et[cell] = outET1;
       m_et[cell+1] = outET2;

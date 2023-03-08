@@ -2,7 +2,7 @@
 # art-description: Generation test Pythia8 with two jet filters QCDTruthJetJZ2 with R=0.6 and MultiBJetFilter with R=0.4 
 # art-type: build
 # art-include: master/AthGeneration
-# art-include: master--HepMC3/Athena
+# art-include: master--HepMC2/Athena
 # art-include: 22.0/Athena
 # art-output: *.root
 # art-output: log.generate

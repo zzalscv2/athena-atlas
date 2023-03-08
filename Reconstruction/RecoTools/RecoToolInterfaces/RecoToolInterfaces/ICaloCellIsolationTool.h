@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -39,7 +39,7 @@ namespace xAOD {
     */    
     virtual bool caloCellIsolation( CaloIsolation& result, const IParticle& tp, 
 				    const std::vector<Iso::IsolationType>& cones, 
-				    CaloCorrection corrections, 
+				    const CaloCorrection& corrections, 
 				    const CaloCellContainer* container = 0 ) const = 0; 
 
   };

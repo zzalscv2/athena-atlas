@@ -43,13 +43,13 @@ ServiceMgr.THistSvc.Output += [
     ]
 
 # Workaround for running the event selection algs on MC with multiple event weights
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
 from EventBookkeeperTools.EventBookkeeperToolsConfig import CutFlowSvcCfg
-
-ConfigFlags.Input.Files = [testFile]
-ConfigFlags.lock()
-CAtoGlobalWrapper(CutFlowSvcCfg, ConfigFlags)
+flags = initConfigFlags()
+flags.Input.Files = [testFile]
+flags.lock()
+CAtoGlobalWrapper(CutFlowSvcCfg, flags)
 
 # Reduce the printout from Athena:
 include( "AthAnalysisBaseComps/SuppressLogging.py" )

@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-# Author : Benjamin Trocme (CNRS/IN2P3 - LPSC Grenoble) - 2017 - 2022
+# Author : Benjamin Trocme (CNRS/IN2P3 - LPSC Grenoble) - 2017 - 2023
 # Python 3 migration by Miaoran Lu (University of Iowa)- 2022
 #
 # Queries the defect database, computes and displays the data losses.
@@ -27,7 +27,7 @@ import xmlrpc.client
 sys.path.append("/afs/cern.ch/user/l/larmon/public/prod/Misc")
 from LArMonCoolLib import GetLBTimeStamps,GetOnlineLumiFromCOOL,GetOfflineLumiFromCOOL,GetLBDuration,GetReadyFlag,GetNumberOfCollidingBunches
 
-from DeMoLib import strLumi,plotStack,initialize,MakeTH1,MakeTProfile,SetXLabel 
+from DeMoLib import strLumi,plotStack,initializeMonitoredDefects,retrieveYearTagProperties,MakeTH1,MakeTProfile,SetXLabel
 import DQDefects
 
 sys.path.append("/afs/cern.ch/user/l/larcalib/LArDBTools/python/")
@@ -47,11 +47,16 @@ passwd = passfile.read().strip(); passfile.close()
 dqmapi = xmlrpc.client.ServerProxy('https://%s@atlasdqm.cern.ch'%(passwd))
 
 #scriptdir = str(pathlib.Path(__file__).parent.resolve())
-runListDir = "./RunList"
+runListDir = "./YearStats-common"
 
 
 ################################################################################################################################################
 #### Ancillary functions
+def sort_period(text):
+  letter = "".join([i for i in text if not i.isdigit()])
+  number = "".join([i for i in text if i.isdigit()])
+  return (letter, int(number))
+ 
 def printProp(varname):
   print("**",varname,"**")
   if hasattr(sys.modules[__name__],varname):
@@ -216,6 +221,26 @@ def extractNamePartition(foundDefect):
       defectSplitted = foundDefect.split("_",2)
       if len(defectSplitted) > 2:
         defectName=defectSplitted[2]
+    elif (foundDefect.startswith("LUMI")): # LUMI_[NAME]
+      defectSplitted = foundDefect.split("_",1)
+      if len(defectSplitted) > 1:
+        defectName=defectSplitted[1]
+    elif (foundDefect.startswith("ALFA")): # ALFA_[NAME]
+      defectSplitted = foundDefect.split("_",1)
+      if len(defectSplitted) > 1:
+        defectName=defectSplitted[1]
+    elif (foundDefect.startswith("LCD")): # LCD_[NAME]
+      defectSplitted = foundDefect.split("_",1)
+      if len(defectSplitted) > 1:
+        defectName=defectSplitted[1]
+    elif (foundDefect.startswith("ZDC")): # ZDC_[NAME]
+      defectSplitted = foundDefect.split("_",1)
+      if len(defectSplitted) > 1:
+        defectName=defectSplitted[1]
+    elif (foundDefect.startswith("GLOBAL")): # GLOBAL_[NAME]
+      defectSplitted = foundDefect.split("_",1)
+      if len(defectSplitted) > 1:
+        defectName=defectSplitted[1]
 
     return defectName, defectPart
     
@@ -237,7 +262,7 @@ def retrieveDefectsFromDB(run, defectTag, grlDef,signOffDefects):
     return parsed_defects
 
 ################################################################################################################################################
-#### Retrieval of new runs not yet in RunList/all-[year].dat
+#### Retrieval of new runs not yet in YearStats-common/runlist-[year]-AtlasReady.dat
 def updateRunList(year=time.localtime().tm_year):
     # Update list of runs. If there is not an up-to-date file, get the latest info from the atlas dqm APIs'''
     print("Checking run list for year",year)
@@ -251,7 +276,7 @@ def updateRunList(year=time.localtime().tm_year):
                     fileRuns.append(r)
                     print("Adding the ATLAS ready run: %s"%r)
                     outfile.write("%s\n"%r)
-    allRunListDat = runListDir+"/all-"+str(year)+".dat"
+    allRunListDat = "%s/runlist-%s-AtlasReady.dat"%(runListDir,str(year))
     if os.path.isfile(allRunListDat):
         fRunList = open(allRunListDat,'r+')
         fileRuns = [l.strip() for l in fRunList.readlines() ]
@@ -330,12 +355,12 @@ from argparse import RawTextHelpFormatter,ArgumentParser
 
 parser = ArgumentParser(description='',formatter_class=RawTextHelpFormatter)
 # General arguments
-parser.add_argument('-y','--year',dest='year',default = str(time.localtime().tm_year),help='Year [Default: '+str(time.localtime().tm_year)+']. May also include special conditions such as 5TeV, hi... Check the RunList files',action='store')
-parser.add_argument('-t','--tag',dest='tag',default = "Tier0_"+str(time.localtime().tm_year),help='Defect tag [Default: "Tier0_'+str(time.localtime().tm_year)+'"]',action='store')
+parser.add_argument('-y','--year',dest='year',default = str(time.localtime().tm_year),help='Year [Default: '+str(time.localtime().tm_year)+']. May also include special conditions such as 5TeV, hi...',action='store')
+parser.add_argument('-t','--tag',dest='tag',default = "AtlasReady",help='Defect tag [Default: "AtlasReady"]',action='store')
 parser.add_argument('-s','--system',dest='system',default="LAr",help='System: LAr, Pixel, IDGlobal, RPC... [Default: "LAr"]',action='store')
 parser.add_argument('-b','--batch',dest='batchMode',help='Batch mode',action='store_true')
 # Different options. 
-parser.add_argument('--runListUpdate',dest='runListUpdate',help='Update of the run list (all-[year].dat). No other action allowed. Exit when done.',action='store_true') 
+parser.add_argument('--runListUpdate',dest='runListUpdate',help='Update of the run list for the AtlasReady tag. No other action allowed. Exit when done.',action='store_true') 
 parser.add_argument('--weeklyReport',dest='weekly',help='Weekly report. No run range to specify, no year-stats update.',action='store_true')
 # Selection of runs to be considered
 parser.add_argument('--runRange',type=int,dest='runRange',default=[],help='Run or run range (in addition to RunList)',nargs='*',action='store')
@@ -380,7 +405,8 @@ if args.runListUpdate:
   sys.exit()
 
 options = args.__dict__
-initialize(options['system'],yearTagProperties,partitions,grlDef,defectVeto,veto,signOff,options['year'],options['tag'],runlist)
+initializeMonitoredDefects(options['system'],partitions,grlDef,defectVeto,veto,signOff,options['year'],options['tag'],runlist)
+yearTagProperties = retrieveYearTagProperties(options['year'],options['tag'])
 
 if debug:
   printProp("yearTagProperties")
@@ -393,15 +419,16 @@ if debug:
 # Choose between recorded and delivered luminosity - By default, use the delivered one
 options['recordedLumiNorm'] = not options['deliveredLumiNorm']
 # tag to access defect database and COOL database (for veto windows) - Defined in DeMoLib.py
-options['defectTag']=yearTagProperties["defect"][options['tag']]
-if len(yearTagProperties["veto"])>0: # The veto tag is not defined for all systems
-  options['vetoTag']=yearTagProperties["veto"][options['tag']]
+options['defectTag']=yearTagProperties["Defect tag"]
+if len(yearTagProperties["Veto tag"])>0: # The veto tag is not defined for all systems
+  options['vetoTag']=yearTagProperties["Veto tag"]
 else:
   options['vetoTag']=""
 options['yearStatsDir'] = "YearStats-%s/%s/%s"%(options['system'],options['year'],options['tag'])
 
 # No run range active, no update years stats, no filter... in weekly report
 if (options['weekly']):
+  options['tag'] = "AtlasReady" # Weekly reports are relevant only for the AtlasReady tag
   options['updateYearStats'] = False
   options['runRange'] = []
 
@@ -416,12 +443,6 @@ if options['updateYearStats']:
     sys.exit()
   else:
     os.system("touch %s"%tokenName)
-
-# Define the run list to consider depending on the options
-# In RunList directory, are the different lists:
-# - all-[year].dat: contains all the runs with ATLAS ready. Automatically updated with the command: python DeMoUpdate.py --runListUpdate -y [year]
-# - grl-[year].dat: contains all runs that belongs to the year GRL (so far only one GRL, the largest but could be changed). By default these runs are necessarily in all-[year].dat. Updated by hand.
-# - [system]/roughVeto-[year].dat: sometimes, some runs may require a rough veto to reduce processing time. By default, this list is empty.
 
 startrun = 0
 endrun   = 1e12
@@ -446,6 +467,10 @@ else:
   print("The %s file does not exist. Create it or choose a different tag."%runListFilename)
   sys.exit()
 
+if (len(runlist['primary']) == 0):
+  print("No run found -> Exiting")
+  sys.exit()
+
 roughVetoFilename = runListDir+"/%s/roughVeto-%s.dat"%(options['system'],options['year'])
 if os.path.exists(roughVetoFilename):
   fRoughVeto = open(roughVetoFilename,'r')
@@ -467,7 +492,6 @@ if options['updateYearStats']:
         print("I am forcing the year stats reset...")
         options['resetYearStats'] = True
     elif os.path.getsize("%s/runs-ALL.dat"%options['yearStatsDir']) == 0.:
-        # runs-ALL.data and runs-[period].dat updated only for runs in GRL
         # Test here relevant at the beginning of the year when some runs have been reviewed at EXPR/BULK level (but not FINAL hence no year stats)
         # In such a case a TProfiles.root file may exist even if no update was made
         # April 18: I am not sure that this situation is still relevant... 
@@ -491,6 +515,9 @@ if options['resetYearStats']:
         os.system("rm -f %s/loss*.dat"%options['yearStatsDir'])
         os.system("rm -f %s/Run/*.txt"%options['yearStatsDir'])
         os.system("rm -f %s"%(yearStatsArchiveFilename))
+        fLastReset = open("%s/lastResetYS.dat"%options['yearStatsDir'],"w")
+        fLastReset.write("%s\n"%(time.strftime("%a, %d %b %H:%M",time.localtime())))
+        fLastReset.close()
 
 # Open log file : errors and not yet signed off runs
 errorLogFile = open("%s/errors.log"%options['yearStatsDir'],'a')
@@ -540,9 +567,9 @@ if options['weekly']: # Weekly report - Look for the last 7-days runs + the sign
         elif (time.time()-runinfo[run]["Run start"] < oneWeek):
             print("Run",run,"was acquired during the last seven days")
             runlist['toprocess'].append(run)
-    if (os.path.exists("RunList/weekly.dat")):
-        weeklyFile = open("RunList/weekly.dat",'r')
-        print("I found a weekly.dat file and will add some runs...")
+    if (os.path.exists("%s/runlist-weekly.dat")%runListDir):
+        weeklyFile = open("%s/runlist-weekly.dat"%runListDir,'r')
+        print("I found a runlist-weekly.dat file and will add some runs...")
         for iRun in weeklyFile.readlines():
           if runlist['weekly-dqmeeting'] == "": # The first line of the weekly file contains the date of the DQ meeting
             runlist['weekly-dqmeeting'] = iRun
@@ -666,7 +693,7 @@ for idef in grlDef["intol"]+grlDef["intol_recov"]+allIntolDef: #Intolerable defe
     if len(periodListYear) != 0 or len(periodListCurrent) != 0: # At least one period found in current or past runs, otherwise no way to plot year stats
       # Collect all periods (archived ones + new ones)
       periodListYear = periodListYear + newPeriodInYearStats 
-      periodListYear.sort() # The list of periods is now sorted
+      periodListYear = sorted(periodListYear, key=sort_period) # The list of periods is now sorted
       periodNbYear = len(periodListYear) # Number of periods      
       # Create the empty year stats TProfile histograms for the updated period list
       hProfPeriod_IntolDefect[idef] = MakeTProfile(profPeriodName,"%s"%(defectVeto["description"][idefName]),"Lost luminosity (%)", -0.5,+0.5+periodNbYear,periodNbYear+1,defectVeto["color"][idefName])
@@ -813,7 +840,7 @@ for irun,runNb in enumerate(runlist['toprocess']):
   if options['onlineLumiNorm']:
     thisRunPerLB["deliveredLumi"] = GetOnlineLumiFromCOOL(runNb,0)
   else:
-    thisRunPerLB["deliveredLumi"] = GetOfflineLumiFromCOOL(runNb,0,yearTagProperties["offlineLumiTag"]["OflLumi"][options['year']])
+    thisRunPerLB["deliveredLumi"] = GetOfflineLumiFromCOOL(runNb,0,yearTagProperties["OflLumi tag"])
 
   # Look for peak lumi
   runinfo[runNb]['peakLumi'] = 0.
@@ -825,7 +852,7 @@ for irun,runNb in enumerate(runlist['toprocess']):
   thisRunPerLB['duration'] = GetLBDuration(runNb)
 
   # Back up method. Retrieve the precise LB duration (more precise than GetLBDuration(runNb)) and liveFraction (relevant if recorded lumi normalisation).
-  lumiacct=fetch_iovs('COOLOFL_TRIGGER::/TRIGGER/OFLLUMI/LumiAccounting', tag=yearTagProperties["offlineLumiTag"]["OflLumiAcct"][options['year']], since=v_lbTimeSt[1][0]*1000000000, until=v_lbTimeSt[len(v_lbTimeSt)][1]*1000000000) 
+  lumiacct=fetch_iovs('COOLOFL_TRIGGER::/TRIGGER/OFLLUMI/LumiAccounting', tag=yearTagProperties["OflLumiAcct tag"], since=v_lbTimeSt[1][0]*1000000000, until=v_lbTimeSt[len(v_lbTimeSt)][1]*1000000000) 
   thisRunPerLB['duration'] = dict()
   for iLumiAcct in range(len(lumiacct)):
     if options['recordedLumiNorm']: # The LB duration is corrected by the live fraction 
@@ -1038,7 +1065,7 @@ if options['vetoLumiEvolution']:
     h1_vetoInstLumiEvol[iVeto].Divide(h1_vetoInstLumiEvol[iVeto],h1_vetoInstLumiEvol['NoVeto'],100.,1.)
     
 ######################### Treatment when a run range was considered (weekly report)
-if (len(list(runinfo.keys()))>2 and runinfo['AllRuns']['Lumi']!=0):
+if (runinfo['AllRuns']['Lumi']!=0):
   # Compute inefficiencies for the whole period
   
   # Defect inefficencies first
@@ -1146,9 +1173,9 @@ gStyle.SetOptStat(0)
 if options['plotResults']:
   gStyle.SetHistMinimumZero()
 
-  plotStack("defects--Run--%s"%(args.tag),hProfRun_IntolDefect,grlDef["intol"],defectVeto["description"],h1Run_IntLuminosity,False,stackResults,canvasResults,legendResults)
+  plotStack("defects--Run--%s"%(yearTagProperties["Description"]),hProfRun_IntolDefect,grlDef["intol"],defectVeto["description"],h1Run_IntLuminosity,False,stackResults,canvasResults,legendResults)
   if (len(veto["all"])):
-    plotStack("veto--Run--%s"%(args.tag),hProfRun_Veto,veto["all"],defectVeto["description"],h1Run_IntLuminosity,False,stackResults,canvasResults,legendResults)
+    plotStack("veto--Run--%s"%(yearTagProperties["Description"]),hProfRun_Veto,veto["all"],defectVeto["description"],h1Run_IntLuminosity,False,stackResults,canvasResults,legendResults)
 
   if options['vetoLumiEvolution']:
     for iVeto in veto["all"]:
@@ -1219,7 +1246,7 @@ if (options['updateYearStats'] and bool_newRunsInYearStats):
       for irun in periodListCurrent[iper]:
         if (irun in list(runinfo.keys()) and runinfo[irun]['newInYearStats']): # Runs not yet considered in yearStats
           f.write("%d\n"%(irun))
-          fAll.write("%d\n"%(irun))
+          fAll.write("%d (%s)\n"%(irun,iper))
       f.close()
     fAll.close()
     print("I have updated year stats")

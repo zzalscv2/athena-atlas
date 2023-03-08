@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include "xAODCore/AuxStoreAccessorMacros.h"
 #include "xAODTracking/versions/TrackState_v1.h"
@@ -26,9 +26,11 @@ namespace xAOD {
     DEFINE_API(TrackStateIndexType, smoothed, setSmoothed)
     DEFINE_API(TrackStateIndexType, jacobian, setJacobian)
     DEFINE_API(TrackStateIndexType, projector, setProjector)
-    DEFINE_API(TrackStateIndexType, uncalibrated, setUncalibrated)
     DEFINE_API(TrackStateIndexType, calibrated, setCalibrated)
     DEFINE_API(TrackStateIndexType, measDim, setMeasDim)
+    AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(TrackState_v1, ElementLink<xAOD::UncalibratedMeasurementContainer>, uncalibratedMeasurementLink, setUncalibratedMeasurementLink);
+    AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(TrackState_v1,  uint64_t, geometryId, setGeometryId);
+
 }
 
 

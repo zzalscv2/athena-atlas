@@ -1,11 +1,13 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODTRACKING_VERSIONS_TRACKSTATE_V1_H
 #define XAODTRACKING_VERSIONS_TRACKSTATE_V1_H
 #include <cstdint>
 #include "AthContainers/AuxElement.h"
+#include "AthLinks/ElementLink.h"
+#include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
 namespace xAOD {
     using TrackStateIndexType=uint32_t; // TODO move this declaration to one location
     /**
@@ -164,24 +166,6 @@ namespace xAOD {
 
         /**
          * @brief index in TrackMeasurementContainer corresponding to this TracksTate
-         * Points to uncalibrated measurement
-         * @return index, invalid if identical to max possible value of this type
-         */
-        TrackStateIndexType uncalibrated() const;
-        /**
-         * @brief Set the Uncalibrated index
-         * @see uncalibrated() method
-         */
-        void setUncalibrated(TrackStateIndexType);
-
-        /**
-         * @brief pointers API needed by MTJ
-         */
-        const TrackStateIndexType* uncalibratedPtr() const;
-        TrackStateIndexType* uncalibratedPtr();
-
-        /**
-         * @brief index in TrackMeasurementContainer corresponding to this TracksTate
          * Points to calibrated measurement
          * @return index, invalid if identical to max possible value of this type
          */
@@ -215,7 +199,26 @@ namespace xAOD {
         const TrackStateIndexType* measDimPtr() const;
         TrackStateIndexType* measDimPtr();
 
+        /**
+         * @brief EL to uncalibrated measurement
+         * Can be invalid sometimes!
+         */
+        ElementLink<xAOD::UncalibratedMeasurementContainer> uncalibratedMeasurementLink() const;
 
+        /**
+         * @brief Set EL to uncalibrated measurement
+         */
+        void setUncalibratedMeasurementLink( ElementLink<xAOD::UncalibratedMeasurementContainer> );
+
+        /**
+         * @brief geometry ID associated with uncalibrated measurement
+         */
+         uint64_t geometryId() const;
+
+        /**
+         * @brief set geometry ID associated with uncalibrated measurement
+         */
+        void setGeometryId(uint64_t);
     };
 }
 

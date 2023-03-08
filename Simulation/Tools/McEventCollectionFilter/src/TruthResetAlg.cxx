@@ -51,7 +51,7 @@ StatusCode TruthResetAlg::execute() {
 
   //Sanity check
   bool inputProblem(false);
-  for (auto particle: inputEvent) {
+  for (const auto& particle: inputEvent) {
     if (particle->status() == 1) {
       if (!particle->production_vertex()) {
         ATH_MSG_ERROR("Status 1 particle without a production vertex!! " << particle);
@@ -81,18 +81,18 @@ StatusCode TruthResetAlg::execute() {
    for (;;) {
      std::vector<HepMC::GenParticlePtr> p_to_remove;
      std::vector<HepMC::GenVertexPtr> v_to_remove;
-     for (auto particle: outputEvent->particles()) {
+     for (auto& particle: outputEvent->particles()) {
        if (HepMC::is_simulation_particle(particle)) { // TODO Consider making the threshold for this check configurable.
          p_to_remove.push_back(particle);
        }
      }
-     for (auto particle: p_to_remove) outputEvent->remove_particle(particle);
-     for (auto vertex: outputEvent->vertices()) {
+     for (auto& particle: p_to_remove) outputEvent->remove_particle(particle);
+     for (auto& vertex: outputEvent->vertices()) {
        if (HepMC::is_simulation_vertex(vertex) || vertex->particles_out().empty() ) {  // TODO Consider making the threshold for this check configurable.
          v_to_remove.push_back(vertex);
        }
      }
-     for (auto vertex: v_to_remove) outputEvent->remove_vertex(vertex);
+     for (auto& vertex: v_to_remove) outputEvent->remove_vertex(vertex);
      if (p_to_remove.empty() && v_to_remove.empty()) break;
    }
 #else
@@ -129,8 +129,7 @@ StatusCode TruthResetAlg::execute() {
     if (HepMC::is_simulation_vertex(pCurrentVertex)) { // TODO Consider making the threshold for this check configurable.
       continue; // skip vertices created by the simulation
     }
-    std::unique_ptr<HepMC::GenVertex> copyOfGenVertex =
-      std::make_unique<HepMC::GenVertex>(pCurrentVertex->position(), pCurrentVertex->id(), pCurrentVertex->weights() );
+    std::unique_ptr<HepMC::GenVertex> copyOfGenVertex =std::make_unique<HepMC::GenVertex>(pCurrentVertex->position(), pCurrentVertex->id(), pCurrentVertex->weights() );
     copyOfGenVertex->suggest_barcode( pCurrentVertex->barcode() );
     inputEvtVtxToOutputEvtVtx[pCurrentVertex] = copyOfGenVertex.get();
     outputEvent->add_vertex( copyOfGenVertex.release() );
@@ -194,7 +193,7 @@ StatusCode TruthResetAlg::execute() {
 
   //Sanity check
   bool outputProblem(false);
-  for (auto particle: *(outputEvent.get())) {
+  for (const auto& particle: *(outputEvent.get())) {
     if (particle->status() == 1) {
       if (!particle->production_vertex()) {
         ATH_MSG_ERROR("Status 1 particle without a production vertex!! " << particle);

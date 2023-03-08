@@ -68,7 +68,9 @@ if DetFlags.detdescr.Muon_on() and rec.doWriteESD():
 
    #PRDs
    if MuonGeometryFlags.hasMM(): MuonESDList+=["Muon::MMPrepDataContainer#MM_Measurements"]
-   if MuonGeometryFlags.hasSTGC(): MuonESDList+=["Muon::sTgcPrepDataContainer#STGC_Measurements"]
+   if MuonGeometryFlags.hasSTGC():
+      MuonESDList+=["Muon::sTgcPrepDataContainer#STGC_Measurements"]
+      MuonESDList+=["Muon::NSW_PadTriggerDataContainer#NSW_PadTrigger_RDO"]
    if MuonGeometryFlags.hasCSC():
       MuonESDList+=["Muon::CscPrepDataContainer#CSC_Clusters"]
       MuonESDList+=["Muon::CscStripPrepDataContainer#CSC_Measurements"]

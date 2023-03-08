@@ -13,10 +13,12 @@
 
 #include "TString.h"
 #include <map>
+#include "CxxUtils/checker_macros.h"
+
 
 namespace LArSamples {
   
-  class RunData {
+  class ATLAS_NOT_THREAD_SAFE RunData {
     
     public:
       

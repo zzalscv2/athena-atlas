@@ -667,13 +667,14 @@ void Pythia8_i::addLHEToHepMC(HepMC::GenEvent *evt){
   }
 
   //This code and the HepMC2 version below assume a correct input, e.g. beams[0]->end_vertex() exists.
-  for(auto  v: procEvent->vertices()) v->set_status(1);
+  for(auto&  v: procEvent->vertices()) v->set_status(1);
   auto beams=evt->beams();
   auto procBeams=procEvent->beams();
   if(beams[0]->momentum().pz() * procBeams[0]->momentum().pz() < 0.) std::swap(procBeams[0],procBeams[1]);
   for (auto p: procBeams[0]->end_vertex()->particles_out())  beams[0]->end_vertex()->add_particle_out(p);
   for (auto p: procBeams[1]->end_vertex()->particles_out())  beams[1]->end_vertex()->add_particle_out(p);
-
+   
+  HepMC::fillBarcodesAttribute(procEvent);
 #else
   HepMC::GenEvent *procEvent = new HepMC::GenEvent(evt->momentum_unit(), evt->length_unit());
 

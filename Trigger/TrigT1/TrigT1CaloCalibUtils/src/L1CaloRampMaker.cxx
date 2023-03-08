@@ -310,8 +310,8 @@ double L1CaloRampMaker::getCaloEnergy(const xAOD::TriggerTower* tt)
             LVL1::TriggerTower T(tt->phi(), tt->eta(), K.ttKey(tt->phi(), tt->eta()));
 	    std::vector<float> etRec = m_jmTools->hadTTCellsEtByReceiver(&T);
 	    if (etRec.size() == 2) {
-	        if      (m_isFcalLowEta)  et = etRec[0];
-		else if (m_isFcalHighEta) et = etRec[1];
+	        if      (m_isFcalLowEta)  et = etRec[1];//FCAL high and low eta receivers swapped here due to LAr baseplane misrouting
+		else if (m_isFcalHighEta) et = etRec[0];
 	        else                      et = etRec[0] + etRec[1];
             } else if (etRec.size() == 1) et = etRec[0];
         }

@@ -31,7 +31,11 @@ def PixelClusterizationCfg(flags, name = "InDetPixelClusterization", **kwargs):
         kwargs.setdefault("gangedAmbiguitiesFinder", acc.popToolsAndMerge(
             PixelGangedAmbiguitiesFinderCfg(flags)))
 
-    kwargs.setdefault("DataObjectName", "PixelRDOs")
+    if not flags.Overlay.doTrackOverlay:
+        kwargs.setdefault("DataObjectName", "PixelRDOs")
+    else:
+        #for track overlay, only run tracking on the HS RDOs
+        kwargs.setdefault("DataObjectName", flags.Overlay.SigPrefix + "PixelRDOs")
     kwargs.setdefault("ClustersName", "PixelClusters")
 
     acc.addEventAlgo(CompFactory.InDet.PixelClusterization(name, **kwargs))
@@ -118,7 +122,11 @@ def SCTClusterizationCfg(flags, name="InDetSCT_Clusterization", **kwargs):
         kwargs.setdefault("clusteringTool", acc.popToolsAndMerge(
             SCT_ClusteringToolCfg(flags)))
 
-    kwargs.setdefault("DataObjectName", 'SCT_RDOs')
+    if not flags.Overlay.doTrackOverlay:
+        kwargs.setdefault("DataObjectName", 'SCT_RDOs')
+    else:
+        #for track overlay, only run tracking on the HS RDOs
+        kwargs.setdefault("DataObjectName", flags.Overlay.SigPrefix + "SCT_RDOs")
     kwargs.setdefault("ClustersName", 'SCT_Clusters')
 
     acc.addEventAlgo(CompFactory.InDet.SCT_Clusterization(name, **kwargs))
@@ -151,7 +159,7 @@ def TrigSCTClusterizationCfg(flags, name="InDetSCT_Clusterization", roisKey="", 
     kwargs.setdefault("ClustersName", 'SCT_TrigClusters')
     kwargs.setdefault("isRoI_Seeded", True)
     kwargs.setdefault("ClusterContainerCacheKey", "SCT_ClustersCache")
-    kwargs.setdefault("FlaggedCondCacheKey", "SctFlaggedCondCache")
+    kwargs.setdefault("FlaggedCondCacheKey", "")
 
     acc.addEventAlgo(CompFactory.InDet.SCT_Clusterization(name+signature, **kwargs))
     return acc
@@ -197,7 +205,11 @@ def InDetTRT_RIO_MakerCfg(flags, name = "InDetTRT_RIO_Maker", **kwargs):
             TRT_DriftCircleToolCfg(flags)))
 
     kwargs.setdefault("TrtDescrManageLocation", 'TRT')
-    kwargs.setdefault("TRTRDOLocation", 'TRT_RDOs')    
+    if not flags.Overlay.doTrackOverlay:
+        kwargs.setdefault("TRTRDOLocation", 'TRT_RDOs')
+    else:
+        #for track overlay, only run tracking on the HS RDOs
+        kwargs.setdefault("TRTRDOLocation", flags.Overlay.SigPrefix + 'TRT_RDOs')
     kwargs.setdefault("TRTRIOLocation", 'TRT_DriftCircles')
 
     acc.addEventAlgo(CompFactory.InDet.TRT_RIO_Maker(name, **kwargs))

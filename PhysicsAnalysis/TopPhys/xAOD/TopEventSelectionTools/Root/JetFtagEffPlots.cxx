@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "TopEventSelectionTools/JetFtagEffPlots.h"
@@ -262,14 +262,14 @@ namespace top {
     float eventWeightVar3cDown = 1.0;
     float eventWeightFSRUp = 1.0;
     float eventWeightFSRDown = 1.0;
-    float muRup = GetPMGTruthWeight(WEIGHTTYPE::MURUP);
-    float muRdown = GetPMGTruthWeight(WEIGHTTYPE::MURDOWN);
-    float muFup = GetPMGTruthWeight(WEIGHTTYPE::MUFUP);
-    float muFdown = GetPMGTruthWeight(WEIGHTTYPE::MUFDOWN);
-    float Var3cUp = GetPMGTruthWeight(WEIGHTTYPE::VAR3CUP);
-    float Var3cDown = GetPMGTruthWeight(WEIGHTTYPE::VAR3CDOWN);
-    float FSRUp = GetPMGTruthWeight(WEIGHTTYPE::FSRUP);
-    float FSRDown = GetPMGTruthWeight(WEIGHTTYPE::FSRDOWN);
+    float muRup = GetPMGTruthWeight(event.m_info,WEIGHTTYPE::MURUP);
+    float muRdown = GetPMGTruthWeight(event.m_info,WEIGHTTYPE::MURDOWN);
+    float muFup = GetPMGTruthWeight(event.m_info,WEIGHTTYPE::MUFUP);
+    float muFdown = GetPMGTruthWeight(event.m_info,WEIGHTTYPE::MUFDOWN);
+    float Var3cUp = GetPMGTruthWeight(event.m_info,WEIGHTTYPE::VAR3CUP);
+    float Var3cDown = GetPMGTruthWeight(event.m_info,WEIGHTTYPE::VAR3CDOWN);
+    float FSRUp = GetPMGTruthWeight(event.m_info,WEIGHTTYPE::FSRUP);
+    float FSRDown = GetPMGTruthWeight(event.m_info,WEIGHTTYPE::FSRDOWN);
 
     float jvt_sf = event.m_jvtSF;
     float pu_weight = 1.0;
@@ -357,31 +357,31 @@ namespace top {
     }
   }
 
-  float JetFtagEffPlots::GetPMGTruthWeight(WEIGHTTYPE type) const {
+  float JetFtagEffPlots::GetPMGTruthWeight(const xAOD::EventInfo* evtInfo, WEIGHTTYPE type) const {
     float result = 1;
 
     if (type == WEIGHTTYPE::MURUP) {
-      if (m_PMGTruthWeights->hasWeight(" muR = 2.0, muF = 1.0 ")) result = m_PMGTruthWeights->getWeight(" muR = 2.0, muF = 1.0 ");
-      else if (m_PMGTruthWeights->hasWeight(" muR = 2.00, muF = 1.00 ")) result = m_PMGTruthWeights->getWeight(" muR = 2.00, muF = 1.00 ");
+      if (m_PMGTruthWeights->hasWeight(" muR = 2.0, muF = 1.0 ")) result = m_PMGTruthWeights->getWeight(evtInfo," muR = 2.0, muF = 1.0 ");
+      else if (m_PMGTruthWeights->hasWeight(" muR = 2.00, muF = 1.00 ")) result = m_PMGTruthWeights->getWeight(evtInfo," muR = 2.00, muF = 1.00 ");
     } else if (type == WEIGHTTYPE::MURDOWN) {
-      if (m_PMGTruthWeights->hasWeight(" muR = 0.5, muF = 1.0 ")) result = m_PMGTruthWeights->getWeight(" muR = 0.5, muF = 1.0 ");
-      else if (m_PMGTruthWeights->hasWeight(" muR = 0.50, muF = 1.00 ")) result = m_PMGTruthWeights->getWeight(" muR = 0.50, muF = 1.00 ");
+      if (m_PMGTruthWeights->hasWeight(" muR = 0.5, muF = 1.0 ")) result = m_PMGTruthWeights->getWeight(evtInfo," muR = 0.5, muF = 1.0 ");
+      else if (m_PMGTruthWeights->hasWeight(" muR = 0.50, muF = 1.00 ")) result = m_PMGTruthWeights->getWeight(evtInfo," muR = 0.50, muF = 1.00 ");
     } else if (type == WEIGHTTYPE::MUFUP) {
-      if (m_PMGTruthWeights->hasWeight(" muR = 1.0, muF = 2.0 ")) result = m_PMGTruthWeights->getWeight(" muR = 1.0, muF = 2.0 ");
-      else if (m_PMGTruthWeights->hasWeight(" muR = 1.00, muF = 2.00 ")) result = m_PMGTruthWeights->getWeight(" muR = 1.00, muF = 2.00 ");
+      if (m_PMGTruthWeights->hasWeight(" muR = 1.0, muF = 2.0 ")) result = m_PMGTruthWeights->getWeight(evtInfo," muR = 1.0, muF = 2.0 ");
+      else if (m_PMGTruthWeights->hasWeight(" muR = 1.00, muF = 2.00 ")) result = m_PMGTruthWeights->getWeight(evtInfo," muR = 1.00, muF = 2.00 ");
     } else if (type == WEIGHTTYPE::MUFDOWN) {
-      if (m_PMGTruthWeights->hasWeight(" muR = 1.0, muF = 0.5 ")) result = m_PMGTruthWeights->getWeight(" muR = 1.0, muF = 0.5 ");
-      else if (m_PMGTruthWeights->hasWeight(" muR = 1.00, muF = 0.50 ")) result = m_PMGTruthWeights->getWeight(" muR = 1.00, muF = 0.50 ");
+      if (m_PMGTruthWeights->hasWeight(" muR = 1.0, muF = 0.5 ")) result = m_PMGTruthWeights->getWeight(evtInfo," muR = 1.0, muF = 0.5 ");
+      else if (m_PMGTruthWeights->hasWeight(" muR = 1.00, muF = 0.50 ")) result = m_PMGTruthWeights->getWeight(evtInfo," muR = 1.00, muF = 0.50 ");
     } else if (type == WEIGHTTYPE::VAR3CUP) {
-      if (m_PMGTruthWeights->hasWeight("Var3cUp")) result = m_PMGTruthWeights->getWeight("Var3cUp");
+      if (m_PMGTruthWeights->hasWeight("Var3cUp")) result = m_PMGTruthWeights->getWeight(evtInfo,"Var3cUp");
     } else if (type == WEIGHTTYPE::VAR3CDOWN) {
-      if (m_PMGTruthWeights->hasWeight("Var3cDown")) result = m_PMGTruthWeights->getWeight("Var3cDown");
+      if (m_PMGTruthWeights->hasWeight("Var3cDown")) result = m_PMGTruthWeights->getWeight(evtInfo,"Var3cDown");
     } else if (type == WEIGHTTYPE::FSRUP) {
-      if (m_PMGTruthWeights->hasWeight("isr:muRfac=1.0_fsr:muRfac=2.0")) result = m_PMGTruthWeights->getWeight("isr:muRfac=1.0_fsr:muRfac=2.0");
-      else if (m_PMGTruthWeights->hasWeight("isr:muRfac=1.00_fsr:muRfac=2.00")) result = m_PMGTruthWeights->getWeight("isr:muRfac=1.00_fsr:muRfac=2.00");
+      if (m_PMGTruthWeights->hasWeight("isr:muRfac=1.0_fsr:muRfac=2.0")) result = m_PMGTruthWeights->getWeight(evtInfo,"isr:muRfac=1.0_fsr:muRfac=2.0");
+      else if (m_PMGTruthWeights->hasWeight("isr:muRfac=1.00_fsr:muRfac=2.00")) result = m_PMGTruthWeights->getWeight(evtInfo,"isr:muRfac=1.00_fsr:muRfac=2.00");
     } else if (type == WEIGHTTYPE::FSRDOWN) {
-      if (m_PMGTruthWeights->hasWeight("isr:muRfac=1.0_fsr:muRfac=0.5")) result = m_PMGTruthWeights->getWeight("isr:muRfac=1.0_fsr:muRfac=0.5");
-      else if (m_PMGTruthWeights->hasWeight("isr:muRfac=1.00_fsr:muRfac=0.50")) result = m_PMGTruthWeights->getWeight("isr:muRfac=1.00_fsr:muRfac=0.50");
+      if (m_PMGTruthWeights->hasWeight("isr:muRfac=1.0_fsr:muRfac=0.5")) result = m_PMGTruthWeights->getWeight(evtInfo,"isr:muRfac=1.0_fsr:muRfac=0.5");
+      else if (m_PMGTruthWeights->hasWeight("isr:muRfac=1.00_fsr:muRfac=0.50")) result = m_PMGTruthWeights->getWeight(evtInfo,"isr:muRfac=1.00_fsr:muRfac=0.50");
     }
 
     return result;

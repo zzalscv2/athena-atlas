@@ -460,8 +460,7 @@ void HGTD_DigitizationTool::createAndStoreSDO(
       if (theDeposit != depositsR_end) {
         (*theDeposit).second += charge_list_itr->time();
       } else { // create a new deposit
-        InDetSimData::Deposit deposit(trkLink, charge_list_itr->charge());
-        deposits.push_back(deposit);
+        deposits.emplace_back(trkLink, charge_list_itr->charge());
       }
     } // END LOOP charges within diode
 
@@ -476,8 +475,7 @@ void HGTD_DigitizationTool::createAndStoreSDO(
       const Identifier id_readout = m_id_helper->pixel_id(
           charged_diodes->identify(), phi_index, eta_index);
 
-      m_sdo_collection_map->insert(std::make_pair(
-          id_readout, InDetSimData(deposits, (*i_chargedDiode).second.flag())));
+      m_sdo_collection_map->try_emplace(id_readout, std::move(deposits), (*i_chargedDiode).second.flag());
     }
   } // END LOOP charged diodes
 }

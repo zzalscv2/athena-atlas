@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -46,7 +46,7 @@ namespace InDet {
    * Its object is instantiated in SiSPSeededTrackFinder::execute.
    */
 
-  class SiZvertexMaker_xk : public extends<AthAlgTool, ISiZvertexMaker>
+  class SiZvertexMaker_xk final: public extends<AthAlgTool, ISiZvertexMaker>
   {
     ///////////////////////////////////////////////////////////////////
     // Public methods:

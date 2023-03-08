@@ -389,6 +389,9 @@ class SlimmingHelper:
                 elif collectionName=="MET_Baseline_AntiKt4EMPFlow":
                         from DerivationFrameworkJetEtMiss.MET_Baseline_AntiKt4EMPFlowCPContent import MET_Baseline_AntiKt4EMPFlowCPContent
                         items.extend(MET_Baseline_AntiKt4EMPFlowCPContent)
+                elif collectionName=="AntiKt2TruthJets":
+                        from DerivationFrameworkJetEtMiss.AntiKt2TruthJetsCPContent import AntiKt2TruthJetsCPContent
+                        items.extend(AntiKt2TruthJetsCPContent)
                 elif collectionName=="AntiKt4TruthJets":
                         from DerivationFrameworkJetEtMiss.AntiKt4TruthJetsCPContent import AntiKt4TruthJetsCPContent
                         items.extend(AntiKt4TruthJetsCPContent)
@@ -404,12 +407,18 @@ class SlimmingHelper:
                 elif collectionName=="AntiKt4LCTopoJets":
                         from DerivationFrameworkJetEtMiss.AntiKt4LCTopoJetsCPContent import AntiKt4LCTopoJetsCPContent
                         items.extend(AntiKt4LCTopoJetsCPContent)
-                elif collectionName=="AntiKt6LCTopoJets":
-                        from DerivationFrameworkJetEtMiss.AntiKt6LCTopoJetsCPContent import AntiKt6LCTopoJetsCPContent
-                        items.extend(AntiKt6LCTopoJetsCPContent)
                 elif collectionName=="AntiKt4EMTopoJets":
                         from DerivationFrameworkJetEtMiss.AntiKt4EMTopoJetsCPContent import AntiKt4EMTopoJetsCPContent
                         items.extend(AntiKt4EMTopoJetsCPContent)
+                elif collectionName=="AntiKt4EMTopoLowPtJets":
+                        from DerivationFrameworkJetEtMiss.AntiKt4EMTopoLowPtJetsCPContent import AntiKt4EMTopoLowPtJetsCPContent
+                        items.extend(AntiKt4EMTopoLowPtJetsCPContent)
+                elif collectionName=="AntiKt4EMPFlowJets":
+                        from DerivationFrameworkJetEtMiss.AntiKt4EMPFlowJetsCPContent import AntiKt4EMPFlowJetsCPContent
+                        items.extend(AntiKt4EMPFlowJetsCPContent)
+                elif collectionName=="AntiKt4EMPFlowLowPtJets":
+                        from DerivationFrameworkJetEtMiss.AntiKt4EMPFlowLowPtJetsCPContent import AntiKt4EMPFlowLowPtJetsCPContent
+                        items.extend(AntiKt4EMPFlowLowPtJetsCPContent)
                 elif collectionName=="AntiKt10TruthJets":
                         from DerivationFrameworkJetEtMiss.AntiKt10TruthJetsCPContent import AntiKt10TruthJetsCPContent
                         items.extend(AntiKt10TruthJetsCPContent)
@@ -440,9 +449,6 @@ class SlimmingHelper:
                                 self.AppendToDictionary["AntiKt10TrackCaloClusterTrimmedPtFrac5SmallR20Jets"]='xAOD::JetContainer'
                                 self.AppendToDictionary["AntiKt10TrackCaloClusterTrimmedPtFrac5SmallR20JetsAux"]='xAOD::JetAuxContainer'
                         items.extend(AntiKt10TrackCaloClusterTrimmedPtFrac5SmallR20JetsCPContent)
-                elif collectionName=="AntiKt10EMPFlowTrimmedPtFrac5SmallR20Jets":
-                        from DerivationFrameworkJetEtMiss.AntiKt10EMPFlowTrimmedPtFrac5SmallR20JetsCPContent import AntiKt10EMPFlowTrimmedPtFrac5SmallR20JetsCPContent
-                        items.extend(AntiKt10EMPFlowTrimmedPtFrac5SmallR20JetsCPContent)
                 elif collectionName=="AntiKt10TruthSoftDropBeta100Zcut10Jets":
                         from DerivationFrameworkJetEtMiss.AntiKt10TruthSoftDropBeta100Zcut10JetsCPContent import AntiKt10TruthSoftDropBeta100Zcut10JetsCPContent
                         items.extend(AntiKt10TruthSoftDropBeta100Zcut10JetsCPContent)
@@ -452,36 +458,6 @@ class SlimmingHelper:
                 elif collectionName=="AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets":
                         from DerivationFrameworkJetEtMiss.AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsCPContent import AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsCPContent
                         items.extend(AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsCPContent)
-                elif collectionName=="AntiKt4EMPFlowJets":
-                        from DerivationFrameworkJetEtMiss.AntiKt4EMPFlowJetsCPContent import AntiKt4EMPFlowJetsCPContent
-                        items.extend(AntiKt4EMPFlowJetsCPContent)
-                elif collectionName=="AntiKt2TruthJets":
-                        from DerivationFrameworkJetEtMiss.AntiKt2TruthJetsCPContent import AntiKt2TruthJetsCPContent
-                        items.extend(AntiKt2TruthJetsCPContent)
-                elif collectionName=="AntiKt2LCTopoJets":
-                        from DerivationFrameworkJetEtMiss.AntiKt2LCTopoJetsCPContent import AntiKt2LCTopoJetsCPContent
-                        items.extend(AntiKt2LCTopoJetsCPContent)
-                elif collectionName=="AntiKt3LCTopoJets":
-                        from DerivationFrameworkJetEtMiss.AntiKt3LCTopoJetsCPContent import AntiKt3LCTopoJetsCPContent
-                        items.extend(AntiKt3LCTopoJetsCPContent)
-                elif collectionName=="AntiKt5LCTopoJets":
-                        from DerivationFrameworkJetEtMiss.AntiKt5LCTopoJetsCPContent import AntiKt5LCTopoJetsCPContent
-                        items.extend(AntiKt5LCTopoJetsCPContent)
-                elif collectionName=="AntiKt6LCTopoJets":
-                        from DerivationFrameworkJetEtMiss.AntiKt6LCTopoJetsCPContent import AntiKt6LCTopoJetsCPContent
-                        items.extend(AntiKt6LCTopoJetsCPContent)
-                elif collectionName=="AntiKt7LCTopoJets":
-                        from DerivationFrameworkJetEtMiss.AntiKt7LCTopoJetsCPContent import AntiKt7LCTopoJetsCPContent
-                        items.extend(AntiKt7LCTopoJetsCPContent)
-                elif collectionName=="AntiKt8LCTopoJets":
-                        from DerivationFrameworkJetEtMiss.AntiKt8LCTopoJetsCPContent import AntiKt8LCTopoJetsCPContent
-                        items.extend(AntiKt8LCTopoJetsCPContent)
-                elif collectionName=="AntiKt8EMTopoJets":
-                        from DerivationFrameworkJetEtMiss.AntiKt8EMTopoJetsCPContent import AntiKt8EMTopoJetsCPContent
-                        items.extend(AntiKt8EMTopoJetsCPContent)
-                elif collectionName=="AntiKt8EMPFlowJets":
-                        from DerivationFrameworkJetEtMiss.AntiKt8EMPFlowJetsCPContent import AntiKt8EMPFlowJetsCPContent
-                        items.extend(AntiKt8EMPFlowJetsCPContent)
                 elif collectionName=="AntiKtVR30Rmax4Rmin02PV0TrackJets":
                         from DerivationFrameworkJetEtMiss.AntiKtVR30Rmax4Rmin02PV0TrackJetsCPContent import AntiKtVR30Rmax4Rmin02PV0TrackJetsCPContent
                         items.extend(AntiKtVR30Rmax4Rmin02PV0TrackJetsCPContent)

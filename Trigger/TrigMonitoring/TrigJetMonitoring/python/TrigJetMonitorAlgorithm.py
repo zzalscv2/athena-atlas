@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file MTMonitoring.py
@@ -181,16 +181,14 @@ JetCollections = dict()
 JetCollections['MT'] = {
   'HLT_AntiKt4EMTopoJets_subjesIS'                                : { 'MatchTo' : 'AntiKt4EMPFlowJets'}, # default small-R EM
   'HLT_AntiKt4EMTopoJets_subjesIS_fastftag'                       : { 'MatchTo' : 'NONE'}, # small-R EM jets with RoI tracking & fast flavour tagging
-  'HLT_AntiKt4EMTopoJets_subjesgscIS_ftf'                         : { 'MatchTo' : 'AntiKt4EMPFlowJets'}, # a4 calo jet w/ calo+track GSC
-  'HLT_AntiKt4EMPFlowJets_subjesgscIS_ftf'                        : { 'MatchTo' : 'AntiKt4EMPFlowJets'}, # a4 pflow w/ calo+track GSC
+  'HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf'                      : { 'MatchTo' : 'AntiKt4EMPFlowJets'}, # a4 calo jet w/ FTF
+  'HLT_AntiKt4EMTopoJets_subjesgscIS_ftf'                         : { 'MatchTo' : 'AntiKt4EMPFlowJets'}, # a4 calo jet w/ calo+track GSC, reconstructed by MET
+  'HLT_AntiKt4EMPFlowJets_subjesgscIS_ftf'                        : { 'MatchTo' : 'AntiKt4EMPFlowJets'}, # a4 pflow w/ calo+track GSC, reconstructed by MET
   'HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf'                     : { 'MatchTo' : 'AntiKt4EMPFlowJets'}, # a4 pflow w/ residual + calo+track GSC
   'HLT_AntiKt4EMPFlowJets_nojcalib_ftf'                           : { 'MatchTo' : 'NONE'},               # a4 pflow nojcalib
-  'HLT_AntiKt4EMPFlowCSSKJets_nojcalib_ftf'                       : { 'MatchTo' : 'NONE'},               # a4 pflow cssk nojcalib
   'HLT_AntiKt10EMTopoRCJets_subjesIS'                             : { 'MatchTo' : 'NONE'},               # a10r
   'HLT_AntiKt10LCTopoJets_subjes'                                 : { 'MatchTo' : 'NONE'},               # a10
   'HLT_AntiKt10LCTopoTrimmedPtFrac4SmallR20Jets_jes'              : { 'MatchTo' : 'NONE'}, # a10t
-  'HLT_AntiKt10LCTopoSoftDropBeta100Zcut10Jets_nojcalib'          : { 'MatchTo' : 'NONE'},               # a10sd lcw nojcalib
-  'HLT_AntiKt10EMPFlowSoftDropBeta100Zcut10Jets_nojcalib_ftf'     : { 'MatchTo' : 'NONE'},               # a10sd pflow nojcalib
   'HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_nojcalib_ftf' : { 'MatchTo' : 'NONE'},               # a10sd pflow cssk nojcalib
   'HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftf'      : { 'MatchTo' : 'NONE'},               # a10sd pflow cssk jes
 }
@@ -208,23 +206,23 @@ Chains2Monitor['MT'] = {
   # Small-R EMTopo chains
   'HLT_j45_L1J15'  : { 'HLTColl' : 'HLT_AntiKt4EMTopoJets_subjesIS',
                        'RefChain' : 'NONE',
-                       'OfflineColl' : 'AntiKt4EMTopoJets' },
+                       'OfflineColl' : 'AntiKt4EMPFlowJets' },
 
-  'HLT_j45_ftf_preselj20_L1J15'  : { 'HLTColl' : 'HLT_AntiKt4EMTopoJets_subjesgscIS_ftf',
+  'HLT_j45_ftf_preselj20_L1J15'  : { 'HLTColl' : 'HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf',
                        'RefChain' : 'NONE',
-                       'OfflineColl' : 'AntiKt4EMTopoJets' },
+                       'OfflineColl' : 'AntiKt4EMPFlowJets' },
 
   'HLT_j420_L1J100': {'HLTColl': 'HLT_AntiKt4EMTopoJets_subjesIS',
                       'RefChain': 'HLT_j85_L1J20',
-                      'OfflineColl': 'AntiKt4EMTopoJets'},
+                      'OfflineColl': 'AntiKt4EMPFlowJets'},
   
   'HLT_3j200_L1J100': {'HLTColl': 'HLT_AntiKt4EMTopoJets_subjesIS',
                        'RefChain': 'HLT_j85_L1J20',
-                       'OfflineColl': 'AntiKt4EMTopoJets'},
+                       'OfflineColl': 'AntiKt4EMPFlowJets'},
   
   'HLT_4j120_L13J50': {'HLTColl': 'HLT_AntiKt4EMTopoJets_subjesIS',
                        'RefChain': 'HLT_j85_L1J20',
-                       'OfflineColl': 'AntiKt4EMTopoJets'},
+                       'OfflineColl': 'AntiKt4EMPFlowJets'},
   
   'HLT_j45_320eta490_L1J15p31ETA49': {'HLTColl': 'HLT_AntiKt4EMTopoJets_subjesIS',
                                       'RefChain': 'NONE',
@@ -298,10 +296,6 @@ Chains2Monitor['MT'] = {
                                              'RefChain': 'NONE',
                                              'OfflineColl': 'NONE'},
   
-  'HLT_2j330_a10t_lcw_jes_35smcINF_L1J100': {'HLTColl': 'HLT_AntiKt10LCTopoTrimmedPtFrac4SmallR20Jets_jes', # TODO: Remove after 21st Round Sample A (has old naming convention)
-                                             'RefChain': 'NONE',
-                                             'OfflineColl': 'NONE'},
-
   'HLT_2j330_35smcINF_a10t_lcw_jes_L1J100': {'HLTColl': 'HLT_AntiKt10LCTopoTrimmedPtFrac4SmallR20Jets_jes',
                                              'RefChain': 'NONE',
                                              'OfflineColl': 'NONE'},
@@ -322,10 +316,6 @@ Chains2Monitor['MT'] = {
   'HLT_2j330_a10sd_cssk_pf_jes_ftf_presel2j225_L1SC111-CJ15': {'HLTColl': 'HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftf',
                                                                'RefChain': 'NONE',
                                                                'OfflineColl': 'NONE'},
-  
-  'HLT_2j330_a10sd_cssk_pf_jes_ftf_35smcINF_presel2j225_L1SC111-CJ15': {'HLTColl': 'HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftf', # TODO: Remove after 21st Round Sample A (has old naming convention)
-                                                                        'RefChain': 'NONE',
-                                                                        'OfflineColl': 'NONE'},
   
   'HLT_2j330_35smcINF_a10sd_cssk_pf_jes_ftf_presel2j225_L1SC111-CJ15': {'HLTColl': 'HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftf',
                                                                         'RefChain': 'NONE',
@@ -615,13 +605,12 @@ for var in [ "pt", "eta", "m" ]:
 OnlineScaleMomenta.append("") #Adding this for convenience in the jet matching loop below
 OfflineScaleMomenta.append("")
 
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
 
 def TrigJetMonConfig(inputFlags):
 
   # This is the right place to get the info, but the autoconfig of the flag
   # is not yet implemented
-  AthenaMT = ConfigFlags.Trigger.EDMVersion==3
+  AthenaMT = inputFlags.Trigger.EDMVersion==3
 
   # AthenaMT or Legacy
   InputType = 'MT' if AthenaMT else 'Legacy'
@@ -641,7 +630,7 @@ def TrigJetMonConfig(inputFlags):
                                         JetCalibScale=jetcalibscale)
         
         alg.ExtraInputs += [('xAOD::TrigCompositeContainer',
-                             'StoreGateSvc+%s' % getRun3NavigationContainerFromInput(ConfigFlags))]
+                             'StoreGateSvc+%s' % getRun3NavigationContainerFromInput(inputFlags))]
         cfg.addEventAlgo(alg)
 
   # Match offline to offline jets
@@ -656,7 +645,7 @@ def TrigJetMonConfig(inputFlags):
                                         JetCalibScale=jetcalibscale)
         
         alg.ExtraInputs += [('xAOD::TrigCompositeContainer',
-                             'StoreGateSvc+%s' % getRun3NavigationContainerFromInput(ConfigFlags))]
+                             'StoreGateSvc+%s' % getRun3NavigationContainerFromInput(inputFlags))]
         cfg.addEventAlgo(alg)
 
   # Match L1 to offline as well as HLT jets
@@ -671,7 +660,7 @@ def TrigJetMonConfig(inputFlags):
               
       alg = CompFactory.JetMatcherAlg(**kwds)
       alg.ExtraInputs += [('xAOD::TrigCompositeContainer',
-                           'StoreGateSvc+%s' % getRun3NavigationContainerFromInput(ConfigFlags))]
+                           'StoreGateSvc+%s' % getRun3NavigationContainerFromInput(inputFlags))]
       cfg.addEventAlgo(alg)
 
   # The following class will make a sequence, configure algorithms, and link
@@ -681,13 +670,13 @@ def TrigJetMonConfig(inputFlags):
 
   # Loop over L1 jet collections
   for jetcoll in L1JetCollections:
-    l1jetconf = l1JetMonitoringConfig(ConfigFlags,jetcoll,'',True)
+    l1jetconf = l1JetMonitoringConfig(inputFlags,jetcoll,'',True)
     l1jetconf.toAlg(helper)
 
   # Loop over L1 jet chains
   for chain,jetcolls in Chain2L1JetCollDict.items():
     for jetcoll in jetcolls:
-      l1chainconf = l1JetMonitoringConfig(ConfigFlags,jetcoll,chain)
+      l1chainconf = l1JetMonitoringConfig(inputFlags,jetcoll,chain)
       l1chainconf.toAlg(helper)
 
   # Loop over offline jet collections
@@ -832,7 +821,9 @@ def jetMonitoringConfig(inputFlags,jetcoll,athenaMT):
            if "subresjesgscIS" in jetcoll:
                addFlavourTagVariables(conf,"fastDIPS20211215")
        if 'fastftag' in jetcoll:
-         addFlavourTagVariables(conf,"fastDips")
+           addFlavourTagVariables(conf,"fastDips")
+       if 'EMTopo' in jetcoll: #dedicated histograms for online EMTopo jets
+           conf.appendHistos("Timing")
      else:
        for hist in ExtraLargeROnlineHists: conf.appendHistos(hist)
      # Add matched jets plots
@@ -882,16 +873,19 @@ def jetMonitoringConfig(inputFlags,jetcoll,athenaMT):
        )
    else: # offline
      for hist in ExtraOfflineHists: conf.appendHistos(hist)
-     if 'AntiKt4' in jetcoll: conf.appendHistos(SelectSpec('LooseBadFailedJets', 'LooseBad',
-                                                           InverseJetSel=True,
-                                                           FillerTools = ["pt",
-                                                                          "phi",
-                                                                          "phi_tight",
-                                                                          "eta"])) #cleaning variables not applicable for large-R collections
+     if 'AntiKt4' in jetcoll:
+         conf.appendHistos(SelectSpec('LooseBadFailedJets', 'LooseBad',
+                                      InverseJetSel=True,
+                                      FillerTools = ["pt",
+                                                     "phi",
+                                                     "phi_tight",
+                                                     "eta"])) #cleaning variables not applicable for large-R collections
      
-     if 'PF' in jetcoll: # dedicated histograms for offline PFlow jets
-       conf.appendHistos("SumPtChargedPFOPt500[0]")
-       conf.appendHistos("fCharged")
+         if 'PF' in jetcoll: # dedicated histograms for offline PFlow jets
+             conf.appendHistos("SumPtChargedPFOPt500[0]")
+             conf.appendHistos("fCharged")
+         elif 'EMTopo' in jetcoll:
+             conf.appendHistos("Timing")
      if OfflineJetCollections[jetcoll]['MatchTo'] != 'NONE':
        def defineHistoForOfflineJetMatch(conf, parentAlg, monhelper , path):
          # create a monitoring group with the histo path starting from the parentAlg
@@ -1176,15 +1170,17 @@ if __name__=='__main__':
   log.setLevel(INFO)
 
   # Set the Athena configuration flags
-  ConfigFlags.Input.Files = [inputFile]
-  ConfigFlags.Input.isMC = True
-  ConfigFlags.Output.HISTFileName = 'AthenaMTMonitorOutput.root' if AthenaMT else 'LegacyMonitoringOutput.root'
-  ConfigFlags.lock()
+  from AthenaConfiguration.AllConfigFlags import initConfigFlags
+  flags = initConfigFlags()
+  flags.Input.Files = [inputFile]
+  flags.Input.isMC = True
+  flags.Output.HISTFileName = 'AthenaMTMonitorOutput.root' if AthenaMT else 'LegacyMonitoringOutput.root'
+  flags.lock()
 
   # Initialize configuration object, add accumulator, merge, and run.
   from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
   from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-  cfg = MainServicesCfg(ConfigFlags)
+  cfg = MainServicesCfg(flags)
 
   # AthenaMT or Legacy
   InputType = 'MT' if AthenaMT else 'Legacy'
@@ -1196,7 +1192,7 @@ if __name__=='__main__':
     from JetRecConfig.StandardSmallRJets import AntiKt4Truth # import the standard definitions
     # Add the components from our jet reconstruction job
     from JetRecConfig.JetRecConfig import JetRecCfg
-    comp = JetRecCfg(AntiKt4Truth,ConfigFlags)
+    comp = JetRecCfg(AntiKt4Truth,flags)
     cfg.merge(comp)
     # add jets to the output list
     key = "{0}Jets".format(AntiKt4Truth.basename)
@@ -1213,7 +1209,7 @@ if __name__=='__main__':
     AntiKt10EMPFlowCSSKSoftDrop = JetSoftDrop(AntiKt10EMPFlowCSSK,modifiers=standardrecomods+substrmods,ZCut=0.1,Beta=1.0) # standard SoftDrop
     # Add the components from our jet reconstruction job
     from JetRecConfig.JetRecConfig import JetRecCfg
-    comp = JetRecCfg(AntiKt10EMPFlowCSSKSoftDrop,ConfigFlags)
+    comp = JetRecCfg(AntiKt10EMPFlowCSSKSoftDrop,flags)
     cfg.merge(comp)
     # add jets to the output list
     key = "{0}Jets".format(AntiKt10EMPFlowCSSKSoftDrop.basename)
@@ -1223,14 +1219,14 @@ if __name__=='__main__':
   if RunTruth or GenOfflineR10PF:
     # Get the output stream components
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    cfg.merge(OutputStreamCfg(ConfigFlags,"xAOD",ItemList=outputlist))
+    cfg.merge(OutputStreamCfg(flags,"xAOD",ItemList=outputlist))
 
-  cfg.merge(PoolReadCfg(ConfigFlags))
+  cfg.merge(PoolReadCfg(flags))
 
   # The following class will make a sequence, configure algorithms, and link
   # them to GenericMonitoringTools
   from AthenaMonitoring import AthMonitorCfgHelper
-  helper = AthMonitorCfgHelper(ConfigFlags,'TrigJetMonitorAlgorithm')
+  helper = AthMonitorCfgHelper(flags,'TrigJetMonitorAlgorithm')
   cfg.merge(helper.result()) # merge it to add the sequence needed to add matchers
 
   # Match HLT jets to offline jets
@@ -1240,7 +1236,7 @@ if __name__=='__main__':
         scalestring = "_"+jetcalibscale if jetcalibscale != "" else ""
         name = 'Matching_{}{}_{}'.format(hltColl,scalestring,collDict['MatchTo'])
         alg = CompFactory.JetMatcherAlg(name, JetContainerName1=hltColl,JetContainerName2=collDict['MatchTo'],JetCalibScale=jetcalibscale)
-        alg.ExtraInputs += [('xAOD::TrigCompositeContainer','StoreGateSvc+%s' % getRun3NavigationContainerFromInput(ConfigFlags))]
+        alg.ExtraInputs += [('xAOD::TrigCompositeContainer','StoreGateSvc+%s' % getRun3NavigationContainerFromInput(flags))]
         cfg.addEventAlgo(alg,sequenceName='AthMonSeq_TrigJetMonitorAlgorithm') # Add matchers to monitoring alg sequence
 
   # Match offline to offline jets
@@ -1250,7 +1246,7 @@ if __name__=='__main__':
         scalestring = "_"+jetcalibscale if jetcalibscale != "" else ""
         name = 'Matching_{}{}_{}'.format(offjetColl,scalestring,collDict['MatchTo'])
         alg = CompFactory.JetMatcherAlg(name, JetContainerName1=offjetColl,JetContainerName2=collDict['MatchTo'],JetCalibScale=jetcalibscale)
-        alg.ExtraInputs += [('xAOD::TrigCompositeContainer','StoreGateSvc+%s' % getRun3NavigationContainerFromInput(ConfigFlags))]
+        alg.ExtraInputs += [('xAOD::TrigCompositeContainer','StoreGateSvc+%s' % getRun3NavigationContainerFromInput(flags))]
         cfg.addEventAlgo(alg,sequenceName='AthMonSeq_TrigJetMonitorAlgorithm')
 
   # Match L1 to offline as well as HLT jets
@@ -1259,27 +1255,27 @@ if __name__=='__main__':
       if matchjetcoll != 'NONE':
         name = 'Matching_{}_{}'.format(l1jetColl,matchjetcoll)
         alg = CompFactory.JetMatcherAlg(name, L1JetContainerName1=l1jetColl,JetContainerName2=matchjetcoll,MatchL1=True)
-        alg.ExtraInputs += [('xAOD::TrigCompositeContainer','StoreGateSvc+%s' % getRun3NavigationContainerFromInput(ConfigFlags))]
+        alg.ExtraInputs += [('xAOD::TrigCompositeContainer','StoreGateSvc+%s' % getRun3NavigationContainerFromInput(flags))]
         cfg.addEventAlgo(alg,sequenceName='AthMonSeq_TrigJetMonitorAlgorithm')
   
   # Loop over L1 jet collectoins
   for jetcoll in L1JetCollections:
-    l1jetconf = l1JetMonitoringConfig(ConfigFlags,jetcoll,'',True)
+    l1jetconf = l1JetMonitoringConfig(flags,jetcoll,'',True)
     l1jetconf.toAlg(helper)
 
   # Loop over L1 jet chains
   for chain,jetcoll in Chain2L1JetCollDict.items():
-    l1chainconf = l1JetMonitoringConfig(ConfigFlags,jetcoll,chain)
+    l1chainconf = l1JetMonitoringConfig(flags,jetcoll,chain)
     l1chainconf.toAlg(helper)
 
   # Loop over offline jet collections
   for jetcoll in OfflineJetCollections:
-    offlineMonitorConf = jetMonitoringConfig(ConfigFlags,jetcoll,AthenaMT)
+    offlineMonitorConf = jetMonitoringConfig(flags,jetcoll,AthenaMT)
     offlineMonitorConf.toAlg(helper)
 
   # Loop over HLT jet collections
   for jetcoll in JetCollections[InputType]:
-    monitorConf = jetMonitoringConfig(ConfigFlags,jetcoll,AthenaMT)
+    monitorConf = jetMonitoringConfig(flags,jetcoll,AthenaMT)
     # then we turn the full specification into properly configured algorithm and tools.
     # we use the method 'toAlg()' defined for the specialized dictionnary 'JetMonAlgSpec'
     monitorConf.toAlg(helper)
@@ -1289,13 +1285,13 @@ if __name__=='__main__':
     jetcoll = chainDict['HLTColl']
     # kinematic plots
     if AthenaMT:
-      chainMonitorConfT = jetChainMonitoringConfig(ConfigFlags,jetcoll,chain,AthenaMT,True)
+      chainMonitorConfT = jetChainMonitoringConfig(flags,jetcoll,chain,AthenaMT,True)
       chainMonitorConfT.toAlg(helper)
-    chainMonitorConfF = jetChainMonitoringConfig(ConfigFlags,jetcoll,chain,AthenaMT,False)
+    chainMonitorConfF = jetChainMonitoringConfig(flags,jetcoll,chain,AthenaMT,False)
     chainMonitorConfF.toAlg(helper)
     # efficiency plots
     if chainDict['RefChain'] != 'NONE' and chainDict['OfflineColl'] != 'NONE':
-      effMonitorConf = jetEfficiencyMonitoringConfig(ConfigFlags, jetcoll,
+      effMonitorConf = jetEfficiencyMonitoringConfig(flags, jetcoll,
                                                      chainDict['OfflineColl'], chain,
                                                      chainDict['RefChain'], AthenaMT)
       effMonitorConf.toAlg(helper)

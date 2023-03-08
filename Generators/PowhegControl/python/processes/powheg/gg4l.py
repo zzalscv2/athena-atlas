@@ -1,5 +1,6 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
+import os
 from AthenaCommon import Logging
 from ..powheg_RES import PowhegRES
 
@@ -23,9 +24,20 @@ class gg4l(PowhegRES):
         @param kwargs          dictionary of arguments from Generate_tf.
         """
         super(gg4l, self).__init__(base_directory, "gg4l", **kwargs)
+                # defining gg4l environment variable to bypass file path issues in QCDLoop-*/ff/ffinit.f
+        os.environ['gg4lPATH'] = os.path.dirname(self.executable)
+        logger.info("gg4lPATH defined as = {0}".format(os.getenv('gg4lPATH')))
 
         # This is a hacky fix that's needed at the moment...
         self.manually_set_openloops_gnu_paths()
+
+        # Adding external libraries to LD_LIBRARY_PATH for gg4l
+        self.link_external_powheg_libraries("/External/cln*/cln_lib/lib")
+        self.link_external_powheg_libraries("/External/ginac*/ginac_lib/lib/")
+        self.link_external_powheg_libraries("/External/chaplin*/lib")
+        self.link_external_powheg_libraries("/POWHEG-BOX-RES/gg4l/amplitudes/obj-gnu/")
+        self.link_external_powheg_libraries("/POWHEG-BOX-RES/gg4l/ggvvamp*/obj-gnu")
+        self.link_external_powheg_libraries("/POWHEG-BOX-RES/gg4l/QCDLoop*/ff/obj-gnu/")
 
         # Add parameter validation functions
         self.validation_functions.append("validate_process_contrib")

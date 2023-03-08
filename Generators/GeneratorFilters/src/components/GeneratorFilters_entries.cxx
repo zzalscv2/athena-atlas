@@ -33,6 +33,7 @@
 #include "GeneratorFilters/xAODXtoVVDecayFilterExtended.h"
 #include "GeneratorFilters/xAODHTFilter.h"
 #include "GeneratorFilters/xAODFourLeptonMassFilter.h"
+#include "GeneratorFilters/xAODJetFilter.h"
 
 
 
@@ -101,6 +102,7 @@
 #include "GeneratorFilters/VBFHbbEtaSortingFilter.h"  
 #include "GeneratorFilters/ZtoLeptonFilter.h"
 
+
 //filters accepted for 22.6 (xAOD format)
 DECLARE_COMPONENT( QCDTruthJetFilter )
 DECLARE_COMPONENT( xAODBSignalFilter )
@@ -136,6 +138,7 @@ DECLARE_COMPONENT( xAODVBFMjjIntervalFilter )
 DECLARE_COMPONENT( xAODXtoVVDecayFilterExtended )
 DECLARE_COMPONENT( xAODHTFilter )
 DECLARE_COMPONENT( xAODFourLeptonMassFilter)
+DECLARE_COMPONENT( xAODJetFilter)
 
 
 

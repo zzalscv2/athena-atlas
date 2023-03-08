@@ -10,6 +10,8 @@
 
 #include "EventPrimitives/EventPrimitives.h"
 
+#include <array>
+
 namespace xAOD {
 
     /// Define the type of the uncalibrated measurement

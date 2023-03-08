@@ -71,7 +71,7 @@ StatusCode TRT_LocalOccupancy::initialize()
   ATH_CHECK( m_strawStatusPermKey.initialize() );
   ATH_CHECK( m_strawReadKey.initialize() );
 
-  std::string OccupancyCacheName = name() + "OccupancyData";
+  std::string OccupancyCacheName = "GlobalTRTOccupancyData";
   m_occupancyCacheRead = OccupancyCacheName;
   m_occupancyCacheWrite = OccupancyCacheName;
   ATH_CHECK(m_occupancyCacheRead.initialize());

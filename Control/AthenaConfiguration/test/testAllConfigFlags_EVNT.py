@@ -1,26 +1,29 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.TestDefaults import defaultTestFiles
-ConfigFlags.Input.Files = defaultTestFiles.EVNT
+flags = initConfigFlags()
+flags.Input.Files = defaultTestFiles.EVNT
 
-havedet = True
+# Load Detector flags if available
+flagsAvailableDetector = True
 try:
     import DetDescrCnvSvc # noqa: F401
 except ImportError:
-    havedet = False
-if havedet:
-    ConfigFlags._loadDynaFlags("Detector")
+    flagsAvailableDetector = False
+if flagsAvailableDetector:
+    flags._loadDynaFlags("Detector")
 
-# Don't fail just because G4AtlasApps isn't present in this build.
-havesim = True
+# Load Sim flags if available
+flagsAvailableSim = True
 try:
-    import G4AtlasApps # noqa: F401
+    import SimulationConfig # noqa: F401
 except ImportError:
-    havesim = False
-if havesim:
-    ConfigFlags._loadDynaFlags("Sim")
+    flagsAvailableSim = False
+if flagsAvailableSim:
+    flags._loadDynaFlags("Sim")
 
-ConfigFlags.initAll()
-ConfigFlags.lock()
-ConfigFlags.dump()
+# Init and print
+flags.initAll()
+flags.lock()
+flags.dump()

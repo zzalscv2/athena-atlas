@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // METSoftAssociator.cxx
@@ -38,7 +38,7 @@ namespace met {
   // Destructor
   ///////////////
   METSoftAssociator::~METSoftAssociator()
-  {}
+  = default;
 
   // Athena algtool's Hooks
   ////////////////////////////
@@ -124,7 +124,7 @@ namespace met {
           dec_softConst(*metCoreCl) = std::vector<ElementLink<IParticleContainer> >();
           dec_softConst(*metCoreCl).reserve(uniquePFOs->size());
         }
-        for(const auto sig : *uniquePFOs) {
+        for(const auto *const sig : *uniquePFOs) {
           const PFO *pfo = static_cast<const PFO*>(sig);
           if (pfo->isCharged()) { // Charged PFOs
             // We set a small -ve pt for cPFOs that were rejected
@@ -158,7 +158,7 @@ namespace met {
       MissingET* metCoreEMCl = new MissingET(0.,0.,0.,"SoftClusEMCore",MissingETBase::Source::softEvent() | MissingETBase::Source::clusterEM());
       metCont->push_back(metCoreEMCl);
       const IParticleContainer* uniqueClusters = metMap->getUniqueSignals(constits.tcCont,MissingETBase::UsageHandler::AllCalo);
-      const IParticleContainer* uniqueTracks = constits.trkCont == NULL ? new const IParticleContainer() : metMap->getUniqueSignals(constits.trkCont);
+      const IParticleContainer* uniqueTracks = constits.trkCont == nullptr ? new const IParticleContainer() : metMap->getUniqueSignals(constits.trkCont);
       if(m_decorateSoftTermConst) {
         dec_softConst(*metCoreTrk) = std::vector<ElementLink<IParticleContainer> >();
         dec_softConst(*metCoreTrk).reserve(uniqueTracks->size());
@@ -168,7 +168,7 @@ namespace met {
       SG::ReadHandle<xAOD::CaloClusterContainer> lctc(m_lcmodclus_key);
       SG::ReadHandle<xAOD::CaloClusterContainer> emtc(m_emmodclus_key);
 
-      for(const auto cl : *uniqueClusters) {
+      for(const auto *const cl : *uniqueClusters) {
         if (cl->e()>FLT_MIN) {
           if(m_useModifiedClus) {
             if(lctc.isValid() && emtc.isValid()) {
@@ -198,7 +198,7 @@ namespace met {
       }
 
       if(constits.pv) {
-        for(const auto trk : *uniqueTracks) {
+        for(const auto *const trk : *uniqueTracks) {
           ATH_MSG_VERBOSE("Test core track with pt " << trk->pt());
           if(acceptTrack(static_cast<const TrackParticle*>(trk),constits.pv) && isGoodEoverP(static_cast<const TrackParticle*>(trk))) {
             ATH_MSG_VERBOSE("Add core track with pt " << trk->pt());

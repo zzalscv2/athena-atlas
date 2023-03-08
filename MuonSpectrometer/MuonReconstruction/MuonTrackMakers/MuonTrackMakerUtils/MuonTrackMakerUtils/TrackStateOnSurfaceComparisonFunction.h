@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -45,6 +45,8 @@ namespace Muon {
         TrackStateOnSurfaceComparisonFunction(const TrackStateOnSurfaceComparisonFunction& MCF) : m_direction(0) {
             if (MCF.m_direction) m_direction = new Amg::Vector3D(*(MCF.m_direction));
         }
+
+        TrackStateOnSurfaceComparisonFunction& operator= (const TrackStateOnSurfaceComparisonFunction&) = delete;
 
         /** Destructor */
         virtual ~TrackStateOnSurfaceComparisonFunction() { delete m_direction; }

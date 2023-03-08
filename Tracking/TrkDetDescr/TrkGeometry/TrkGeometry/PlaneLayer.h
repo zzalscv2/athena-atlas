@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -45,33 +45,9 @@ public:
   /**Constructor with PlaneSurface
      components and MaterialProperties
      - rectangle bounds */
-  PlaneLayer(const Amg::Transform3D & transform, RectangleBounds* rbounds,
+  PlaneLayer(const Amg::Transform3D & transform, const SurfaceBounds* rbounds,
              const LayerMaterialProperties& laymatprop, double thickness = 0.,
              std::unique_ptr<OverlapDescriptor> od = nullptr, int laytyp = int(Trk::active));
-
-  /**Constructor with PlaneSurface
-     components and MaterialProperties
-     - trapezoidal bounds */
-  PlaneLayer(const Amg::Transform3D & transform, TrapezoidBounds* tbounds,
-             const LayerMaterialProperties& laymatprop, double thickness = 0.,
-             std::unique_ptr<OverlapDescriptor> od = nullptr, int laytyp = int(Trk::active));
-
-  /**Constructor with PlaneSurface
-      components and MaterialProperties
-      - diamond bounds */
-  PlaneLayer(const Amg::Transform3D & transform, DiamondBounds* tbounds,
-             const LayerMaterialProperties& laymatprop, double thickness = 0.,
-             std::unique_ptr<OverlapDescriptor> od = nullptr, int laytyp = int(Trk::active));
-
-  /**Constructor with PlaneSurface
-     components and MaterialProperties
-     - ellipse bounds */
-  PlaneLayer(const Amg::Transform3D & transform, EllipseBounds* tbounds,
-             const LayerMaterialProperties& laymatprop, double thickness = 0.,
-             std::unique_ptr<OverlapDescriptor> od = nullptr, int laytyp = int(Trk::active));
-
-  /**Constructor with PlaneSurface
-     and MaterialProperties */
 
   PlaneLayer(Trk::PlaneSurface* plane,
              const LayerMaterialProperties& laymatprop, double thickness = 0.,
@@ -81,7 +57,7 @@ public:
      components and MaterialProperties
      - shared bounds */
   PlaneLayer(const Amg::Transform3D & transform,
-             Trk::SharedObject<const Trk::SurfaceBounds>& tbounds,
+             const Trk::SharedObject<const Trk::SurfaceBounds>& tbounds,
              const Trk::LayerMaterialProperties& laymatprop,
              double thickness = 0., std::unique_ptr<Trk::OverlapDescriptor> olap = nullptr,
              int laytyp = int(Trk::active));
@@ -89,46 +65,8 @@ public:
   /**Constructor with PlaneSurface
   components and pointer to SurfaceArray (passing ownership),
   - rectangle bounds */
-  PlaneLayer(const Amg::Transform3D & transform, RectangleBounds* rbounds,
-             SurfaceArray* surfaceArray, double thickness = 0.,
-             std::unique_ptr<OverlapDescriptor> od = nullptr, int laytyp = int(Trk::active));
-
-  /**Constructor with PlaneSurface
- components and pointer to SurfaceArray (passing ownership),
- - trapezoidal bounds */
-  PlaneLayer(const Amg::Transform3D & transform, TrapezoidBounds* tbounds,
-             SurfaceArray* surfaceArray, double thickness = 0.,
-             std::unique_ptr<OverlapDescriptor> od = nullptr, int laytyp = int(Trk::active));
-
-  /**Constructor with PlaneSurface
- components and pointer to SurfaceArray (passing ownership),
- - diamond bounds */
-  PlaneLayer(const Amg::Transform3D & transform, DiamondBounds* tbounds,
-             SurfaceArray* surfaceArray, double thickness = 0.,
-             std::unique_ptr<OverlapDescriptor> od = nullptr, int laytyp = int(Trk::active));
-
-  /**Constructor with PlaneSurface components,
-     MaterialProperties and pointer SurfaceArray (passing ownership)
-     - rectangle bounds */
-  PlaneLayer(const Amg::Transform3D & transform, RectangleBounds* rbounds,
-             SurfaceArray* surfaceArray,
-             const LayerMaterialProperties& laymatprop, double thickness = 0.,
-             std::unique_ptr<OverlapDescriptor> od = nullptr, int laytyp = int(Trk::active));
-
-  /**Constructor with PlaneSurface components,
-     MaterialProperties and pointer SurfaceArray (passing ownership)
-     - trapezoidal bounds */
-  PlaneLayer(const Amg::Transform3D & transform, TrapezoidBounds* rbounds,
-             SurfaceArray* surfaceArray,
-             const LayerMaterialProperties& laymatprop, double thickness = 0.,
-             std::unique_ptr<OverlapDescriptor> od = nullptr, int laytyp = int(Trk::active));
-
-  /**Constructor with PlaneSurface components,
-     MaterialProperties and pointer SurfaceArray (passing ownership)
-     - diamond bounds */
-  PlaneLayer(const Amg::Transform3D & transform, DiamondBounds* rbounds,
-             SurfaceArray* surfaceArray,
-             const LayerMaterialProperties& laymatprop, double thickness = 0.,
+  PlaneLayer(const Amg::Transform3D & transform, const Trk::SurfaceBounds* tbounds,
+             std::unique_ptr<SurfaceArray> surfaceArray, double thickness = 0.,
              std::unique_ptr<OverlapDescriptor> od = nullptr, int laytyp = int(Trk::active));
 
   /**Copy constructor of PlaneLayer*/

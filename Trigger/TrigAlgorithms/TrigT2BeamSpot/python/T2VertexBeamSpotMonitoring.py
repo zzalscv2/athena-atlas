@@ -1,6 +1,6 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool, defineHistogram
+from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
 # Default set opt histogram options to use for per-LBN histograms
 _LBN_OPTIONS = "kLBNHistoryDepth=1 kAlwaysCreate"
@@ -10,19 +10,16 @@ class BaseMonitoringTool:
     """Base class which defines few useful methods to cope with defineHistogram
     madness.
     """
-    def __init__(self, name):
-        self.name = name
-        self.histograms = []
+    def __init__(self, flags, name):
+        self.monTool = GenericMonitoringTool(flags, name)
 
-    def __call__(self):
-        """Creates the actual monitoring tool instance"""
-        return GenericMonitoringTool(self.name, Histograms = self.histograms)
-
-    def makeHisto1D(self, name, type, xbins, xmin, xmax, title, path='EXPERT', opt=None, **kw):
-        self.histograms += [defineHistogram(
+    def makeHisto1D(self, name, type, xbins, xmin, xmax, title, path='EXPERT', opt=None, alias=None, **kw):
+        if alias is not None:
+            name = f"{name};{alias}"
+        self.monTool.defineHistogram(
             name, path=path, type=type, title=title, opt=opt,
             xbins=xbins, xmin=xmin, xmax=xmax, **kw
-        )]
+        )
 
     def makeLBNHisto1D(self, name, type, xbins, xmin, xmax, title, path='EXPERT', opt="", **kw):
         opt = _LBN_OPTIONS + " " + opt if opt else _LBN_OPTIONS
@@ -31,14 +28,16 @@ class BaseMonitoringTool:
         )
 
     def makeHisto2D(self, nameX, nameY, type, xbins, xmin, xmax,
-                    ybins, ymin, ymax, title, path='EXPERT', opt=None, **kw):
+                    ybins, ymin, ymax, title, path='EXPERT', opt=None, alias=None, **kw):
         name = ", ".join([nameX, nameY])
-        self.histograms += [defineHistogram(
+        if alias is not None:
+            name = f"{name};{alias}"
+        self.monTool.defineHistogram(
             name, path=path, type=type, title=title, opt=opt,
             xbins=xbins, xmin=xmin, xmax=xmax,
             ybins=ybins, ymin=ymin, ymax=ymax,
             **kw
-        )]
+        )
 
     def makeLBNHisto2D(self, nameX, nameY, type, xbins, xmin, xmax,
                        ybins, ymin, ymax, title, path='EXPERT', opt="", **kw):
@@ -48,12 +47,14 @@ class BaseMonitoringTool:
             path=path, opt=opt, **kw,
         )
 
-    def makeProfile(self, nameX, nameY, xbins, xmin, xmax, title, path='EXPERT', opt=None, **kw):
+    def makeProfile(self, nameX, nameY, xbins, xmin, xmax, title, path='EXPERT', opt=None, alias=None, **kw):
         name = ", ".join([nameX, nameY])
-        self.histograms += [defineHistogram(
+        if alias is not None:
+            name = f"{name};{alias}"
+        self.monTool.defineHistogram(
             name, path=path, type="TProfile", title=title, opt=opt,
             xbins=xbins, xmin=xmin, xmax=xmax, **kw,
-        )]
+        )
 
     def makeLBNProfile(self, nameX, nameY, xbins, xmin, xmax, title, path='EXPERT', opt="", **kw):
         opt = _LBN_OPTIONS + " " + opt if opt else _LBN_OPTIONS
@@ -63,8 +64,8 @@ class BaseMonitoringTool:
 
 
 class T2VertexBeamSpotMonitoring(BaseMonitoringTool):
-    def __init__ (self, name="T2VertexBeamSpotMonitoring"):
-        super(T2VertexBeamSpotMonitoring, self).__init__(name)
+    def __init__ (self, flags, name="T2VertexBeamSpotMonitoring"):
+        super(T2VertexBeamSpotMonitoring, self).__init__(flags, name)
 
         # monitored variables for updateBS():
         #  - TIME_TotalTime
@@ -77,7 +78,7 @@ class T2VertexBeamSpotMonitoring(BaseMonitoringTool):
 
 
 class T2VertexBeamSpotToolMonitoring(BaseMonitoringTool):
-    def __init__ (self, name="T2VertexBeamSpotToolMonitoring", detail=2):
+    def __init__ (self, flags, name="T2VertexBeamSpotToolMonitoring", detail=2):
         """
         Parameters
         ----------
@@ -87,7 +88,7 @@ class T2VertexBeamSpotToolMonitoring(BaseMonitoringTool):
             online running. 2 (default) will make all possible histograms,
             this should be suitable for offline.
         """
-        super(T2VertexBeamSpotToolMonitoring, self).__init__(name)
+        super(T2VertexBeamSpotToolMonitoring, self).__init__(flags, name)
 
         # monitored variables for execute():
         #  - nTotalTracks
@@ -434,6 +435,16 @@ class T2VertexBeamSpotToolMonitoring(BaseMonitoringTool):
                                 title="Split Vertex DY vs. NTrks; N trk per split vertex; #Deltay between split vertices [mm]")
             self.makeLBNHisto2D('SplitVertexDNTrksPass', 'SplitVertexDZPass', 'TH2F', 100, 0.0, 50.0, 250, -2.5, 2.5,
                                 title="Split Vertex DZ vs. NTrks; N trk per split vertex; #Deltaz between split vertices [mm]")
+            # same histograms, per run
+            self.makeHisto2D('SplitVertexDNTrksPass', 'SplitVertexDXPass', 'TH2F', 100, 0.0, 50.0, 250, -1.25, 1.25,
+                             title="Split Vertex DX vs. NTrks (runsummary); N trk per split vertex; #Deltax between split vertices [mm]",
+                             alias="SplitVertexDXPass_vs_SplitVertexDNTrksPass_runsummary")
+            self.makeHisto2D('SplitVertexDNTrksPass', 'SplitVertexDYPass', 'TH2F', 100, 0.0, 50.0, 250, -1.25, 1.25,
+                             title="Split Vertex DY vs. NTrks (runsummary); N trk per split vertex; #Deltay between split vertices [mm]",
+                             alias="SplitVertexDYPass_vs_SplitVertexDNTrksPass_runsummary")
+            self.makeHisto2D('SplitVertexDNTrksPass', 'SplitVertexDZPass', 'TH2F', 100, 0.0, 50.0, 250, -2.5, 2.5,
+                             title="Split Vertex DZ vs. NTrks (runsummary); N trk per split vertex; #Deltaz between split vertices [mm]",
+                             alias="SplitVertexDZPass_vs_SplitVertexDNTrksPass_runsummary")
 
             # Pull in X, Y, Z vs. Ntrk in split vertices: Monitors quality of tracking information
             # Total number of bins: 30,000
@@ -480,8 +491,8 @@ class T2BSTrackFilterToolMonitoring(BaseMonitoringTool):
 
     where {filter} is one of "Filter" or "FilterBS"
     """
-    def __init__ (self, name="T2BSTrackFilterToolMonitoring", detail=1):
-        super(T2BSTrackFilterToolMonitoring, self).__init__(name)
+    def __init__ (self, flags, name="T2BSTrackFilterToolMonitoring", detail=1):
+        super(T2BSTrackFilterToolMonitoring, self).__init__(flags, name)
 
         self.makeHisto1D('TIME_TrackFilter', 'TH1I', 100, 0, 10000,
                          title="Timing of filter method; time [#mus];")
@@ -549,8 +560,8 @@ class T2TrackBeamSpotToolMonitoring(BaseMonitoringTool):
     - BeamLSMatricesBCID
     - TrackLLPolyCoeff
     """
-    def __init__ (self, name="T2TrackBeamSpotToolMonitoring", detail=1):
-        super(T2TrackBeamSpotToolMonitoring, self).__init__(name)
+    def __init__ (self, flags, name="T2TrackBeamSpotToolMonitoring", detail=1):
+        super(T2TrackBeamSpotToolMonitoring, self).__init__(flags, name)
 
         self.makeHisto1D('TIME_updateBS', 'TH1I', 100, 0, 10000,
                          title="Timing beamspot update; time [#mus];")

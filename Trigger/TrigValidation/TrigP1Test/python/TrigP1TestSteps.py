@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -8,9 +8,11 @@ The main common check steps are defined in the TrigValSteering.CheckSteps module
 '''
 
 from TrigValTools.TrigValSteering import Step, CheckSteps
+from TrigValTools.TrigValSteering.Common import get_logger
 import os
 import inspect
-
+import json
+import re
 
 class TrigBSDumpGrepStep(Step.Step):
     '''
@@ -101,6 +103,33 @@ class ExtractExpertMonitoring(CheckSteps.InputDependentStep):
     def configure(self, test):
         self.args += ' {:s}:{:s}/HLT-Histogramming/*/EXPERT/* expert-monitoring.root'.format(self.input_file, self.path_prefix or '')
         super(ExtractExpertMonitoring, self).configure(test)
+
+
+def check_hlt_properties(filename='HLTJobOptions.db.json'):
+    '''Check a few important job options in the JSON file'''
+
+    log = get_logger()
+
+    with open(filename) as f:
+        props = json.load(f)['properties']
+
+    def checkprop(comp, prop, regex):
+        value = props[comp][prop]
+        if re.match(regex, value) is None:
+            log.error('Property "%s.%s" does not match "%s". Current value: "%s"', comp, prop, regex, value)
+            return False
+        return True
+
+    checks = [
+        checkprop('IOVDbSvc', 'CacheAlign', '0'),
+        checkprop('IOVDbSvc', 'CacheRun', '0'),
+        checkprop('IOVDbSvc', 'CacheTime', '0'),
+        checkprop('AtlasFieldMapCondAlg', 'LoadMapOnStart', 'True'),
+        checkprop('IOVDbSvc', 'Folders', r'.*/TRIGGER/LUMI/HLTPrefLumi\s*<extensible/>.*'),
+        checkprop('IOVDbSvc', 'Folders', r'.*/Indet/Onl/Beampos\s*<extensible/>.*'),
+        checkprop('IOVDbSvc', 'Folders', r'.*/TRIGGER/HLT/PrescaleKey <tag>HEAD</tag>\s*<extensible/>.*'),
+    ]
+    return 0 if all(checks) else 1
 
 
 def default_check_steps_OHMon(test, hist_path):

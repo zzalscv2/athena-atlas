@@ -1,14 +1,13 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from ..Config.MenuComponents import MenuSequence, RecoFragmentsPool, algorithmCAToGlobalWrapper
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
 from AthenaCommon.CFElements import seqAND
 from TrigEDMConfig.TriggerEDMRun3 import recordable
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
 
 
-def bmumuxAlgSequence(ConfigFlags):
+def bmumuxAlgSequence(flags):
     from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
     from DecisionHandling.DecisionHandlingConf import  ViewCreatorCentredOnIParticleROITool, ViewCreatorMuonSuperROITool 
 
@@ -46,52 +45,52 @@ def bmumuxAlgSequence(ConfigFlags):
         InViewMuons = 'HLT_Muons_Bmumux')
 
     from .BphysicsRecoSequences import bmumuxRecoSequence
-    recoSequence = bmumuxRecoSequence(viewMaker.InViewRoIs, viewMaker.InViewMuons)
+    recoSequence = bmumuxRecoSequence(flags, viewMaker.InViewRoIs, viewMaker.InViewMuons)
 
     viewMaker.ViewNodeName = recoSequence.name()
 
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
-    robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Si, ConfigFlags, nameSuffix=viewMaker.name())[0]
+    robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Si, flags, nameSuffix=viewMaker.name())[0]
 
     sequence = seqAND('bmumuxSequence', [viewMaker, robPrefetchAlg, recoSequence])
 
     return (sequence, viewMaker)
 
 
-def bmumuxSequence():
+def bmumuxSequence(flags):
     from TrigBphysHypo.TrigBphysHypoConf import TrigBphysStreamerHypo
     from TrigBphysHypo.TrigBphysStreamerHypoConfig import TrigBphysStreamerHypoToolFromDict
 
-    sequence, viewMaker = RecoFragmentsPool.retrieve(bmumuxAlgSequence, ConfigFlags)
+    sequence, viewMaker = RecoFragmentsPool.retrieve(bmumuxAlgSequence, flags)
     hypo = TrigBphysStreamerHypo('BmumuxStreamerHypoAlg')
 
-    return MenuSequence(
+    return MenuSequence(flags,
         Sequence = sequence,
         Maker = viewMaker,
         Hypo = hypo,
         HypoToolGen = TrigBphysStreamerHypoToolFromDict)
 
 
-def dimuL2Sequence():
+def dimuL2Sequence(flags):
     from ..Muon.MuonMenuSequences import muCombAlgSequence
     from TrigBphysHypo.TrigBphysHypoConf import TrigBphysStreamerHypo
     from TrigBphysHypo.TrigBphysStreamerHypoConfig import TrigBphysStreamerHypoToolFromDict
 
-    sequence, viewMaker, combinedMuonContainerName = RecoFragmentsPool.retrieve(muCombAlgSequence, ConfigFlags)
+    sequence, viewMaker, combinedMuonContainerName = RecoFragmentsPool.retrieve(muCombAlgSequence, flags)
 
     hypo = TrigBphysStreamerHypo(
         name = 'DimuL2StreamerHypoAlg',
         triggerList = getNoL2CombChainNames(),
         triggerLevel = 'L2')
 
-    return MenuSequence(
+    return MenuSequence(flags,
         Sequence = sequence,
         Maker = viewMaker,
         Hypo = hypo,
         HypoToolGen = TrigBphysStreamerHypoToolFromDict)
 
 
-def dimuEFSequence():
+def dimuEFSequence(flags):
     from DecisionHandling.DecisionHandlingConf import InputMakerForRoI, ViewCreatorPreviousROITool
     from TrigBphysHypo.TrigBphysHypoConf import TrigBphysStreamerHypo
     from TrigBphysHypo.TrigBphysStreamerHypoConfig import TrigBphysStreamerHypoToolFromDict
@@ -106,7 +105,7 @@ def dimuEFSequence():
 
     hypo = TrigBphysStreamerHypo('DimuEFStreamerHypoAlg', triggerLevel = 'EF')
 
-    return MenuSequence(
+    return MenuSequence(flags,
         Sequence = sequence,
         Maker = viewMaker,
         Hypo = hypo,

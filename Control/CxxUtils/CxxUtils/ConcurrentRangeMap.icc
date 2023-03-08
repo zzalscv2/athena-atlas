@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/ConcurrentRangeMap.icc
@@ -39,7 +39,10 @@ IRangeMapPayloadDeleter<T, CONTEXT>::delfcn() const
 //*****************************************************************************
 
 
-#define T_CONCURRENTRANGEMAP template <class RANGE, class KEY, class T, class COMPARE, template <class> class UPDATER>
+#define T_CONCURRENTRANGEMAP template <class RANGE, class KEY, class T, class COMPARE, template <class> class UPDATER> \
+  ATH_REQUIRES (detail::IsUpdater<UPDATER> &&                           \
+                detail::IsConcurrentRangeCompare<COMPARE, RANGE, KEY, typename UPDATER<int>::Context_t>)
+
 #define CONCURRENTRANGEMAP ConcurrentRangeMap<RANGE, KEY, T, COMPARE, UPDATER>
 
 
@@ -594,15 +597,12 @@ CONCURRENTRANGEMAP::trim (const std::vector<key_query_type>& keys)
 
     // We're deleting the object now.
 
-    // Discard it.
-    m_payloadDeleter->discard (pos->second);
-    ++ndel;
+    // Discard it.  Be sure to adjust m_begin first.
+    mapped_type todel = pos->second;
     ++pos;
-  }
-
-  // If we've deleted any object, then update the begin pointer.
-  if (ndel > 0) {
     m_begin = pos;
+    m_payloadDeleter->discard (todel);
+    ++ndel;
   }
 
   return ndel;

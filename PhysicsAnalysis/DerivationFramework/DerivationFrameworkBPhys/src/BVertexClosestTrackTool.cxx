@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //============================================================================
@@ -233,6 +233,7 @@ namespace DerivationFramework {
       } // for i
     } else {
       boost::format f5("Mismatch: nTracks: %d nVtap: %d nSelpat: %d\n");
+      // cppcheck-suppress ignoredReturnValue; false positive
       f5 % tracks.size() % vtap.size() % selpat.size();
       rstr.append(f5.str());
     } // if sizes

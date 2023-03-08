@@ -17,9 +17,6 @@ def egammaLRTReconstructionCfg(flags, name="egammaLRTReconstruction"):
 
     acc = ComponentAccumulator()
 
-    # All algorithms defined herein will be assigned to LRT
-    acc.flagPerfmonDomain('LRT')
-
     # Add e/gamma tracking algorithms
     if flags.Egamma.doTracking:
         from egammaAlgs.egammaSelectedTrackCopyConfig import (

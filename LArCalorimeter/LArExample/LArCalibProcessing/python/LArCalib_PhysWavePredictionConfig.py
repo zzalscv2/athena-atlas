@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory 
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -18,6 +18,8 @@ def LArPhysWavePredictionCfg(flags):
     MphysOverMcalTag=rs.getFolderTag(flags.LArCalib.MPhysOverMCal.Folder)
     PhysWaveTag=rs.getFolderTag(flags.LArCalib.PhysWave.Folder)
     del rs #Close database
+
+    bcKey = "LArBadChannelSC" if flags.LArCalib.isSC else "LArBadChannel"     
 
     #Lots of special settings for HEC
     isHEC= (flags.LArCalib.Input.SubDet == "HEC")
@@ -68,6 +70,7 @@ def LArPhysWavePredictionCfg(flags):
     LArPhysWavePredictor.DumpMphysMcali           = False # set to True to dump on a ASCII file
     LArPhysWavePredictor.KeyPhys                  = "LArPhysWave"
     LArPhysWavePredictor.isHEC                    = isHEC
+    LArPhysWavePredictor.BadChanKey               = bcKey
 
 
     result.addEventAlgo(LArPhysWavePredictor)
@@ -97,12 +100,14 @@ def LArPhysWavePredictionCfg(flags):
       LArPhysWaves2Ntuple.AddFEBTempInfo   = False  
       LArPhysWaves2Ntuple.KeyList      = [ "LArPhysWave"  ]
       LArPhysWaves2Ntuple.isSC = flags.LArCalib.isSC
+      LArPhysWaves2Ntuple.BadChanKey = bcKey
       result.addEventAlgo(LArPhysWaves2Ntuple)
 
       LArMphysOverMcal2Ntuple                = CompFactory.LArMphysOverMcal2Ntuple( "LArMphysOverMcal2Ntuple" )
       LArMphysOverMcal2Ntuple.ContainerKey   = "LArMphysOverMcal"
       LArMphysOverMcal2Ntuple.AddFEBTempInfo   = False
       LArMphysOverMcal2Ntuple.isSC = flags.LArCalib.isSC
+      LArMphysOverMcal2Ntuple.BadChanKey = bcKey
       result.addEventAlgo(LArMphysOverMcal2Ntuple)
 
       import os
@@ -118,7 +123,9 @@ def LArPhysWavePredictionCfg(flags):
                                         outputFile=flags.LArCalib.Output.POOLFile,
                                         ObjectList=["LArPhysWaveContainer#LArPhysWave#"+flags.LArCalib.PhysWave.Folder,
                                                     "LArMphysOverMcalComplete#LArMphysOverMcal#"+flags.LArCalib.MPhysOverMCal.Folder,],
-                                        IOVTagList=[PhysWaveTag,MphysOverMcalTag]
+                                        IOVTagList=[PhysWaveTag,MphysOverMcalTag],
+                                        Run1=flags.LArCalib.IOVStart,
+                                        Run2=flags.LArCalib.IOVEnd
                                     ))
 
     #RegistrationSvc    
@@ -144,7 +151,8 @@ def LArPhysWavePredictionCfg(flags):
 if __name__ == "__main__":
 
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    ConfigFlags=initConfigFlags()
     from LArCalibProcessing.LArCalibConfigFlags import addLArCalibFlags
     addLArCalibFlags(ConfigFlags)
 
@@ -164,7 +172,7 @@ if __name__ == "__main__":
     ConfigFlags.Input.RunNumber=ConfigFlags.LArCalib.Input.RunNumbers[0]
 
     #ConfigFlags.Exec.OutputLevel=1
-
+    ConfigFlags.fillFromArgs()
     ConfigFlags.lock()
     cfg=MainServicesCfg(ConfigFlags)
     cfg.merge(LArPhysWavePredictionCfg(ConfigFlags))

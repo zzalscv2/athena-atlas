@@ -5,7 +5,7 @@ class defaultTestFiles:
     import os
     d = os.environ.get ("ATLAS_REFERENCE_DATA",
                         "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art")
-    EVNT = [f"{d}/SimCoreTests/mcatnlojimmy_ttbar_leptonfilter.19.2.5.37.EVNT.pool.root"] #find an official file.
+    EVNT = [f"{d}/CampaignInputs/mc23/EVNT/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8514/EVNT.32288062._002040.pool.root.1"]
     HITS_RUN2 = [f"{d}/Tier0ChainTests/mc16_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.simul.HITS.e6337_s3681/HITS.25836812._004813.pool.root.1"]
     HITS_RUN3 = [f"{d}/CampaignInputs/mc21/HITS/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.simul.HITS.e8453_s3873/50events.HITS.pool.root"]
     HITS_RUN4 = [f"{d}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-01-00-00/mc15_14TeV.600012.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.simul.HITS.e8185_s3856/HITS.29179779._000100.pool.root.1"]
@@ -21,6 +21,7 @@ class defaultTestFiles:
     ]
     HITS_DATA_OVERLAY = [f"{d}/OverlayTests/DataOverlaySimulation/22.0/v1/mc16_13TeV.361107.PowhegPythia8EvtGen_AZNLOCTEQ6L1_Zmumu.HITS.pool.root"]
     RAW = [f"{d}/TrigP1Test/data17_13TeV.00327265.physics_EnhancedBias.merge.RAW._lb0100._SFO-1._0001.1"]
+    RAW_RUN1 = [f"{d}/Tier0ChainTests/data12_8TeV.00209109.physics_JetTauEtmiss.merge.RAW._lb0186._SFO-1._0001.1"]
     RAW_RUN3 = [f"{d}/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data"]
     RAW_BKG = [f"{d}/OverlayTests/mc15_valid.00200010.overlay_streamsAll_2016_pp_1.skim.DRAW.r8381/DRAW.09331084._000146.pool.root.1"]
     RDO_RUN2 = [f"{d}/CampaignInputs/mc20/RDO/mc20_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.recon.AOD.e6337_s3681_r13145/100events.RDO.pool.root"]
@@ -28,5 +29,7 @@ class defaultTestFiles:
     RDO_BKG_RUN3 = [f"{d}/CampaignInputs/mc21/RDO_BKG/mc21_13p6TeV.900149.PG_single_nu_Pt50.digit.RDO.e8453_e8455_s3864_d1761/50events.RDO.pool.root"]
     RDO_BKG_RUN4 = [f"{d}/PhaseIIUpgrade/RDO_BKG/ATLAS-P2-RUN4-01-00-00/mu200.50events.RDO.pool.root"]
     ESD = [f"{d}/RecExRecoTest/mc16_13TeV.361022.Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ2W.recon.ESD.e3668_s3170_r10572_homeMade.pool.root"]
-    AOD = [f"{d}/CommonInputs/data16_13TeV.00311321.physics_Main.recon.AOD.r9264/AOD.11038520._000001.pool.root.1"]
-    AOD_MC = [f"{d}/CommonInputs/mc16_13TeV.410501.PowhegPythia8EvtGen_A14_ttbar_hdamp258p75_nonallhad.merge.AOD.e5458_s3126_r9364_r9315/AOD.11182705._000001.pool.root.1"]
+    AOD_RUN2_DATA = [f"{d}/CampaignInputs/data18/AOD/data18_13TeV.00357772.physics_Main.merge.AOD.r13286_p4910/1000events.AOD.27655096._000455.pool.root.1"]
+    AOD_RUN2_MC = [f"{d}/CampaignInputs/mc20/AOD/mc20_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.recon.AOD.e6337_s3681_r13145/1000events.AOD.27121237._002005.pool.root.1"]
+    AOD_RUN3_DATA = [f"{d}/CampaignInputs/data22/AOD/data22_13p6TeV.00431906.physics_Main.merge.AOD.r13928_p5279/1000events.AOD.30220215._001367.pool.root.1"]
+    AOD_RUN3_MC = [f"{d}/CampaignInputs/mc21/AOD/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.AOD.e8453_s3873_r13829/1000events.AOD.29787656._000153.pool.root.1"]

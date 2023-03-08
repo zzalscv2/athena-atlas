@@ -30,7 +30,11 @@ atlas_add_test( MdtCabling_Run3MC
                 SCRIPT python -m MuonCondTest.MdtCablingTester -i /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/WorkflowReferences/22.0/q445/v20/myESD.pool.root
                 PROPERTIES TIMEOUT 600
                 POST_EXEC_SCRIPT nopost.sh)
-                
+
+atlas_add_test( RpcCabling_Run3MC
+                SCRIPT python -m MuonNRPC_Cabling.createCablingJSON && python -m MuonCondTest.RpcCablingTester
+                PROPERTIES TIMEOUT 600
+                POST_EXEC_SCRIPT nopost.sh)
 atlas_add_test( NSWCondTest
                 SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/testNSWCondAlg.sh 
                 PROPERTIES TIMEOUT 600

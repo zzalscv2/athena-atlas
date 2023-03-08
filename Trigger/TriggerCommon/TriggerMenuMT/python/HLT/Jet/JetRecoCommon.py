@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 ##########################################################################################
@@ -187,21 +187,12 @@ def getPrefilterCleaningString(prefilters_list):
 ##########################################################################################
 ### --- Modifier and decoration list getters ---
 
-def getTrackMods(trkopt):
-    trkmods = [
-        "TrackMoments:"+trkopt,
-        "JVF:"+trkopt,
-        "JVT:"+trkopt,
-    ]
-    return trkmods
-
 # Translate calib specification into something understood by
 # the calibration config helper
-def getCalibMods(jetRecoDict,dataSource,rhoKey="auto"):
+def getCalibMods(flags,jetRecoDict,dataSource,rhoKey="auto"):
 
     ## Importing temporay validation flag for testing new online derived calibration
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    calibKey = "Trigger" if ConfigFlags.Trigger.Jet.useTriggerCalib else "TrigLS2"
+    calibKey = "Trigger" if flags.Trigger.Jet.useTriggerCalib else "TrigLS2"
 
     from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
 
@@ -391,7 +382,7 @@ def defineJets(jetRecoDict,clustersKey=None,prefix='',suffix='',pfoPrefix=None):
 
     suffix="_"+jetRecoDict["jetCalib"]+'_'*(suffix.strip()!='')+suffix
     if jetDefNeedsTracks(jetRecoDict):
-        suffix += "_{}".format(jetRecoDict["trkopt"])
+        suffix += "_"+jetRecoDict["trkopt"]
 
     jetDef = JetDefinition( "AntiKt", actualradius, jetConstit, ptmin=minpt[jetradius], prefix=prefix, suffix=suffix, context=jetRecoDict["trkopt"])
     return jetDef

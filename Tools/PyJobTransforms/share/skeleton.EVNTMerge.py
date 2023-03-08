@@ -1,4 +1,5 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+from AthenaCommon.Logging import logging
 ## basic jobO configuration
 include("PATJobTransforms/CommonSkeletonJobOptions.py")
 ## load pool support
@@ -27,7 +28,7 @@ from IOVDbSvc import IOVDb
 if hasattr(runArgs, "preExec"):
     for cmd in runArgs.preExec:
         exec(cmd)
-        
+
 ## Pre-include
 if hasattr(runArgs, "preInclude"):
     for fragment in runArgs.preInclude:
@@ -36,7 +37,7 @@ if hasattr(runArgs, "preInclude"):
 # Avoid command line preInclude for Event Service
 if hasattr(runArgs, "eventService") and runArgs.eventService:
     import AthenaMP.EventService
-        
+
 ## Post-include
 if hasattr(runArgs, "postInclude"):
     for fragment in runArgs.postInclude:
@@ -46,8 +47,16 @@ if hasattr(runArgs, "postInclude"):
 if hasattr(runArgs, "postExec"):
     for cmd in runArgs.postExec:
         exec(cmd)
-              
-########## EOF ###############
 
-
-
+#==============================================================
+## Special configuration
+from AthenaConfiguration.AutoConfigFlags import GetFileMD
+hepmc_version = GetFileMD(ServiceMgr.EventSelector.InputCollections).get("hepmc_version", None)
+if hepmc_version is not None:
+    log = logging.getLogger('EVNTMerge')
+    if hepmc_version == "2":
+        hepmc_version = "HepMC2"
+    elif hepmc_version == "3":
+        hepmc_version = "HepMC3"
+    log.info('Input file was produced with %s', hepmc_version)
+    ServiceMgr.TagInfoMgr.ExtraTagValuePairs.update({"hepmc_version": hepmc_version})

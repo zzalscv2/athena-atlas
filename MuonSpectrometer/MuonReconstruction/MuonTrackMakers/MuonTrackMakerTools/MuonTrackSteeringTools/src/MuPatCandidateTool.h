@@ -48,7 +48,7 @@ namespace Muon {
     /** class to manipulate MuPatCandidateBase objects */
     class MuPatCandidateTool : public AthAlgTool {
     public:
-        typedef std::vector<const Trk::MeasurementBase*> MeasVec;
+        using MeasVec = std::vector<const Trk::MeasurementBase*>;
         typedef MeasVec::iterator MeasIt;
         typedef MeasVec::const_iterator MeasCit;
 
@@ -74,8 +74,7 @@ namespace Muon {
             @param[in] seg   the MuPatSegment to be added, ownership is NOT passed!
             @param[out] true if any segment was removed from the track, false if not
         */
-        bool extendWithSegment(MuPatTrack& can, MuPatSegment& segInfo, std::unique_ptr<Trk::Track>& track,
-                               GarbageContainer& trash_bin) const;
+        bool extendWithSegment(MuPatTrack& can, MuPatSegment& segInfo, std::unique_ptr<Trk::Track>& track) const;
 
         /** @brief create a track candidate from one segment
             @param[in] seg1 the first MuPatSegment to be added, ownership is NOT passed!
@@ -83,8 +82,7 @@ namespace Muon {
             @param[in] track the new track, ownership is passed to the candidate
             @param[out] the new candidate, ownership is passed to caller
         */
-        std::unique_ptr<MuPatTrack> createCandidate(MuPatSegment& segInfo, std::unique_ptr<Trk::Track>& track,
-                                                    GarbageContainer& trash_bin) const;
+        std::unique_ptr<MuPatTrack> createCandidate(MuPatSegment& segInfo, std::unique_ptr<Trk::Track>& track) const;
 
         /** @brief create a track candidate from two segments
             @param[in] seg1 the first MuPatSegment to be added, ownership is NOT passed!
@@ -92,21 +90,20 @@ namespace Muon {
             @param[in] track the new track, ownership is passed to the candidate
             @param[out] the new candidate, ownership is passed to caller
         */
-        std::unique_ptr<MuPatTrack> createCandidate(MuPatSegment& segInfo1, MuPatSegment& segInfo2, std::unique_ptr<Trk::Track>& track,
-                                                    GarbageContainer& trash_bin) const;
+        std::unique_ptr<MuPatTrack> createCandidate(MuPatSegment& segInfo1, MuPatSegment& segInfo2, std::unique_ptr<Trk::Track>& track) const;
 
         /** @brief create a track candidate from a track
             @param[in] track the new track, ownership is passed to the candidate
             @param[out] the new candidate, ownership is passed to caller
         */
-        std::unique_ptr<MuPatTrack> createCandidate(std::unique_ptr<Trk::Track>& track, GarbageContainer& measurementsToBeDeleted) const;
+        std::unique_ptr<MuPatTrack> createCandidate(std::unique_ptr<Trk::Track>& track) const;
 
         /** @brief set the new track in the candidate, and update candidate contents. Candidate takes ownership of track.
             Returns whether segments have been removed compared to the pre-existing list of segments. */
-        bool updateTrack(MuPatTrack& candidate, std::unique_ptr<Trk::Track>& track, GarbageContainer& trash_bin) const;
+        bool updateTrack(MuPatTrack& candidate, std::unique_ptr<Trk::Track>& track) const;
 
         /** @brief recalculate the chamber indices on the candidate and reset them. Return whether segment has been removed. */
-        bool recalculateCandidateSegmentContent(MuPatTrack& candidate, GarbageContainer& trash_bin) const;
+        bool recalculateCandidateSegmentContent(MuPatTrack& candidate) const;
 
         /** @brief copy a candidate without copying the track (lazy pointer copy)
             @param[in] can the MuPatTrack to be copied
@@ -118,7 +115,7 @@ namespace Muon {
             @param[in] segment  input segment
             @param[out] the MuPatSegment object, ownership is passed to caller
         */
-        std::unique_ptr<MuPatSegment> createSegInfo(const EventContext& ctx, const MuonSegment& segment, GarbageContainer& trash_bin) const;
+        std::unique_ptr<MuPatSegment> createSegInfo(const EventContext& ctx, const MuonSegment& segment) const;
 
         /** @brief get list of the readout elements of the hits on the entry */
         std::set<const MuonGM::MuonReadoutElement*> readoutElements(const MuPatCandidateBase& entry) const;
@@ -143,7 +140,7 @@ namespace Muon {
 
     private:
         /** @brief update hits for a MuPatCandidateBase */
-        void updateHits(MuPatCandidateBase& entry, const MeasVec& measurements, GarbageContainer& trash_bin, bool recreateMDT = false,
+        void updateHits(MuPatCandidateBase& entry, const MeasVec& measurements, bool recreateMDT = false,
                         bool recreateCSC = false, bool createComp = false) const;
 
         /** @brief extract MuonClusterOnTrack('s) from measurement */
@@ -151,7 +148,7 @@ namespace Muon {
 
         /** @brief create CompetingMuonClustersOnTracks from ROTs and add them to the MeasVec. NEVER pass mixed eta/phi hits!! */
         void createAndAddCompetingROTs(const std::vector<const MuonClusterOnTrack*>& rots, MeasVec& hits, MeasVec& allHits,
-                                       GarbageContainer& trash_bin) const;
+                                       MuPatCandidateBase& entry) const;
 
         ToolHandle<IMdtDriftCircleOnTrackCreator> m_mdtRotCreator{
             this, "MdtRotCreator", "Muon::MdtDriftCircleOnTrackCreator/MdtDriftCircleOnTrackCreator", "tool to calibrate MDT hits"};

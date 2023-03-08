@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // METCaloRegionsTool.h 
@@ -94,8 +94,8 @@ namespace met{
     StatusCode       fillClusterMet    (xAOD::MissingETContainer* metContainer,
                                         const xAOD::CaloClusterContainer* caloClusContainer) const;
     // Find MET term for a given sampling
-    xAOD::MissingET* findMetTerm       (xAOD::MissingETContainer* metContainer, 
-                                        CaloSampling::CaloSample sample) const;
+    static xAOD::MissingET* findMetTerm       (xAOD::MissingETContainer* metContainer, 
+                                        CaloSampling::CaloSample sample) ;
     // CaloRegions enum - do NOT mess w/ the order
     enum CaloRegions {
       EMB = 0,

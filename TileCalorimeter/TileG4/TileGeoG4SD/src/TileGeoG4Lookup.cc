@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //************************************************************
@@ -192,7 +192,7 @@ void TileGeoG4Section::AddModuleToCell(bool negative) {
   else nrOfPhysicalSections++;
 }
 
-void TileGeoG4Section::PrintScinToCell(std::string section_name) {
+void TileGeoG4Section::PrintScinToCell(const std::string& section_name) {
   if (m_verboseLevel < 5) return;
   int l_nRow = nrOfScintillators;
   int i = 0;

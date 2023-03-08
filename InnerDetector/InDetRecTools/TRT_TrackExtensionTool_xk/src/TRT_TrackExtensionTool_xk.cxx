@@ -19,23 +19,22 @@
 #include "TrkTrack/Track.h"
 #include "TrkTrack/TrackStateOnSurface.h"
 #include <array>
-#include <list>
+#include <vector>
 #include <iostream>
 
 namespace{
   constexpr size_t MAX_ROAD_SIZE(399);
 
-  std::list<const Trk::Surface*> 
-  listOfSurfacesFromVectorOfElements(const std::vector<const InDetDD::TRT_BaseElement*> & v){
+  std::vector<const Trk::Surface*> 
+  vectorOfSurfacesFromVectorOfElements(const std::vector<const InDetDD::TRT_BaseElement*> & v){
     size_t roadsize{0};
-    std::list<const Trk::Surface*> surfaces;
+    std::vector<const Trk::Surface*> surfaces;
     for(const auto &pThisElement: v) {
      surfaces.emplace_back(&(pThisElement->surface())); 
      if(++roadsize==MAX_ROAD_SIZE) break;
     }
     return surfaces;
   }
-
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -375,13 +374,13 @@ InDet::TRT_TrackExtensionTool_xk::findSegment(const EventContext& ctx,
 
   // Array pointers to surface preparation
   //
-  auto surfaces = listOfSurfacesFromVectorOfElements(detectorElements);
+  auto surfaces =vectorOfSurfacesFromVectorOfElements(detectorElements);
 
   // Global position on surfaces production
   //
   Trk::PatternTrackParameters Tp; 
   if(!Tp.production(par)) return nullptr;
-  std::list< std::pair<Amg::Vector3D,double> > gpos;
+  std::vector< std::pair<Amg::Vector3D,double> > gpos;
   m_proptool->globalPositions(ctx, Tp, surfaces, gpos, m_fieldprop);
 
   // Initiate trajectory
@@ -462,13 +461,13 @@ InDet::TRT_TrackExtensionTool_xk::isGoodExtension(const EventContext& ctx,
   if(int(detectorElements.size()) < m_minNumberDCs) return false;
   // Array pointers to surface preparation
   //
-  auto surfaces = listOfSurfacesFromVectorOfElements(detectorElements);
+  auto surfaces = vectorOfSurfacesFromVectorOfElements(detectorElements);
   
   // Global position on surfaces production
   //
   Trk::PatternTrackParameters Tp; 
   if(!Tp.production(par)) return false;
-  std::list< std::pair<Amg::Vector3D,double> > gpos;
+  std::vector< std::pair<Amg::Vector3D,double> > gpos;
   m_proptool->globalPositions(ctx, Tp,surfaces,gpos,m_fieldprop);
 
   // Initiate trajectory

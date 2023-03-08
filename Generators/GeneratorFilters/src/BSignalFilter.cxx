@@ -114,7 +114,7 @@ StatusCode BSignalFilter::filterEvent()
       // ** Check HepMC for particles activating LVL1 trigger, if that is what user wishes **
       //
       bool LVL1Passed = false;
-      int LVL1MuonBarcode = 0;
+      HepMC::ConstGenParticlePtr LVL1Muon = nullptr;
       //
       if ( m_localLVL1MuonCutOn )
         {
@@ -124,7 +124,7 @@ StatusCode BSignalFilter::filterEvent()
 	      if ( LVL1Result )
                 {
 		  LVL1Passed = true;
-		  LVL1MuonBarcode = HepMC::barcode(part);  // Remember the muon for LVL2 testing
+		  LVL1Muon = part;  // Remember the muon for LVL2 testing
 		  break;
                 }
             }
@@ -141,7 +141,7 @@ StatusCode BSignalFilter::filterEvent()
 	      bool LVL2Result = LVL2_eMu_Trigger( part );
 	      if ( LVL2Result )
                 {
-		  if ( HepMC::barcode(part) != LVL1MuonBarcode ) // Check the particle triggering LVL2 isn't
+		  if ( part != LVL1Muon ) // Check the particle triggering LVL2 isn't
 		    LVL2Passed = true;	                       // the muon that triggered LVL1 --> Artificial,
 		                                               // since, effectively, LVL2 trigger is not applied.
                                                                // This is needed to "trigger" the 2nd muon!

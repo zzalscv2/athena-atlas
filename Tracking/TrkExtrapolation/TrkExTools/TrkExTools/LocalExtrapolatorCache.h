@@ -1,6 +1,5 @@
-
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
  
 #ifndef TRKEXTOOLS_LOCALEXCACHE_H
@@ -71,8 +70,6 @@ struct Cache
     const Trk::EnergyLoss* m_cacheEloss = nullptr;
     //!< cache of TrackStateOnSurfaces
     std::vector<const Trk::TrackStateOnSurface*>* m_matstates = nullptr;
-    //!< cache of Transport Jacobians
-    std::vector<Trk::TransportJacobian*>* m_jacs = nullptr;
     // for active volumes
     std::unique_ptr<identifiedParameters_t> m_identifiedParameters;
 
@@ -95,13 +92,11 @@ struct Cache
     std::vector<std::pair<const Trk::TrackingVolume*, unsigned int>> m_navigVolsInt;
     
     //methods
-
-     Cache();
-     Cache(const std::vector<const IMaterialEffectsUpdator*> & updaters);
+    Cache();
+    Cache(const std::vector<const IMaterialEffectsUpdator*> & updaters);
     ~Cache();
 
     TrackParmContainer& trackParmContainer() { return m_trackParmContainer; }
-
  
     ManagedTrackParmPtr manage(std::unique_ptr<Trk::TrackParameters>&& parm)
     {
@@ -126,10 +121,7 @@ struct Cache
        return m_trackingGeometry->lowestTrackingVolume(gp);
     }
     
-
-   
-    
-     /** Get the IMaterialEffectsUpdator::ICache  for the MaterialEffectsUpdator*/
+    /** Get the IMaterialEffectsUpdator::ICache  for the MaterialEffectsUpdator*/
     IMaterialEffectsUpdator::ICache& 
     subMaterialEffectsUpdatorCache(const TrackingVolume& tvol) ;
     
@@ -174,26 +166,6 @@ struct Cache
     ///Insert navigation surfaces from layers, dense boundaries, navig boundaries and detached boundaries
     void
     copyToNavigationSurfaces();
-
-    /**
-     * struct for accumulating stat counters
-     */
-    struct AtomicMax
-    {
-      void update(size_t val)
-      {
-        while (val > m_maxVal) {
-          val = m_maxVal.exchange(val);
-        }
-      }
-      size_t val() const { return m_maxVal; }
-      std::atomic<size_t> m_maxVal = 0;
-    };
-    static AtomicMax s_navigSurfsMax ATLAS_THREAD_SAFE;
-    static AtomicMax s_navigVolsMax ATLAS_THREAD_SAFE;
-    static AtomicMax s_navigVolsIntMax ATLAS_THREAD_SAFE;
-    static AtomicMax s_containerSizeMax ATLAS_THREAD_SAFE;
-    static bool s_reported ATLAS_THREAD_SAFE;
   };
   }
   #endif

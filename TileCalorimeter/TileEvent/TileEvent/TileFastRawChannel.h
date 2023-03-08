@@ -55,8 +55,6 @@ class TileFastRawChannel {
     {
     }
 
-    ~TileFastRawChannel() {
-    }
 
     inline unsigned int frag(void) const {
       return m_frag;

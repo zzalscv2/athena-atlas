@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 
@@ -59,7 +59,7 @@ def TrigDecisionToolCfg(flags):
     acc.addPublicTool(tdt, primary=True)
 
     msg.info('Configuring the TrigDecisionTool and xAODConfigSvc to use ConfigSource: %s, Run3NavigationFormat: %s, Run3NavigationSummaryCollection: %s',
-        'InFileMetadata' if flags.Trigger.InputContainsConfigMetadata else 'ConditionsAndDetStore',
+        'InFileMetadata' if flags.Trigger.triggerConfig == 'INFILE' else 'ConditionsAndDetStore',
         str(use_run3_format),
         tdt.HLTSummary)
 
@@ -91,13 +91,15 @@ def getRun3NavigationContainerFromInput(flags):
 
 
 if __name__ == '__main__':
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     import sys
+
+    flags = initConfigFlags()
     if '--RAWRUN2' in sys.argv:
         flags.Input.Files = defaultTestFiles.RAW
     else:
-        flags.Input.Files = defaultTestFiles.AOD
+        flags.Input.Files = defaultTestFiles.AOD_RUN2_DATA
         #TODO expand the test scope Run3 AODs and RAWs
 
     flags.lock()

@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 __author__ = "Mark Sutton, Matous Vozak"
 __doc__    = "ConfigSettings"
@@ -74,6 +74,7 @@ class ConfigSettings_tau( _ConfigSettingsBase ):
       self._suffix   = "Tau"
       self._roi      = "HLT_Roi_Tau"
       self._vertex   = "HLT_IDVertex_Tau"
+      # Note: This is the only AMVF non-ACTS mode
       self._adaptiveVertex  = True
       self._pTmin           = 0.8*GeV
       self._etaHalfWidth    = 0.4
@@ -108,7 +109,7 @@ class ConfigSettings_tauIso( _ConfigSettingsBase ):
       self._vertex         = "HLT_IDVertex_Tau"
       self._electronPID    = False
       self._pTmin          = 0.8*GeV
-      self._Xi2max         = 12
+      #self._Xi2max         = 9     Revert to default value for 2023
       # potential change coming up ...
       # self._minNSiHits_vtx = 6
 
@@ -152,7 +153,7 @@ class ConfigSettings_jetSuper( _ConfigSettingsBase ):
       self._roi          = "HLT_Roi_JetSuper"
       self._etaHalfWidth = 0.3
       self._phiHalfWidth = 0.3
-      self._zedHalfWidth = 150
+      self._zedHalfWidth = 180.0
       self._doFullScan   = True
       self._pTmin        = 1*GeV
       #-----
@@ -464,7 +465,7 @@ class ConfigSettings_fullScanLRT( _ConfigSettingsBase ):
 class ConfigSettings_DJetLRT( _ConfigSettingsBase ):
    def __init__( self ):
       _ConfigSettingsBase.__init__(self)
-      self._name     = "displacedJetLRT"
+      self._name     = "DJetLRT"
       self._suffix   = "DJLRT"
       self._roi      = "HLT_Roi_DJ"
       self._doFullScan      = False
@@ -501,7 +502,7 @@ class ConfigSettings_DJetLRT( _ConfigSettingsBase ):
 class ConfigSettings_DVtxLRT( _ConfigSettingsBase ):
    def __init__( self ):
       _ConfigSettingsBase.__init__(self)
-      self._name     = "displacedVertexLRT"
+      self._name     = "DVtxLRT"
       self._suffix   = "DVLRT"
       self._roi      = "HLT_Roi_DV"
       self._doFullScan      = False

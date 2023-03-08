@@ -31,6 +31,11 @@ namespace Muon {
 
     class MuonHoughPatternFinderTool : virtual public IMuonHoughPatternFinderTool, public AthAlgTool {
     public:
+
+        using PrepDataSet =  IMuonCombinePatternTool::PrepDataSet;
+        using EtaPhiHitAssocMap = IMuonCombinePatternTool::EtaPhiHitAssocMap;
+
+
         /** constructor */
         MuonHoughPatternFinderTool(const std::string&, const std::string&, const IInterface*);
 
@@ -42,34 +47,44 @@ namespace Muon {
         /** finalize */
         virtual StatusCode finalize() override;
 
+        using MuonPatternHoughPair = std::pair<std::unique_ptr<MuonPatternCombinationCollection>, std::unique_ptr<Muon::HoughDataPerSectorVec>>;
+        
         /** find patterns for a give set of MuonPrepData collections + optionally CSC
          * segment combinations */
-        std::pair<std::unique_ptr<MuonPatternCombinationCollection>, std::unique_ptr<Muon::HoughDataPerSectorVec>> find(
+        MuonPatternHoughPair find(
             const std::vector<const MdtPrepDataCollection*>& mdtCols, const std::vector<const CscPrepDataCollection*>& cscCols,
             const std::vector<const TgcPrepDataCollection*>& tgcCols, const std::vector<const RpcPrepDataCollection*>& rpcCols,
             const MuonSegmentCombinationCollection* cscSegmentCombis, const EventContext& ctx) const override;
 
-        std::pair<std::unique_ptr<MuonPatternCombinationCollection>, std::unique_ptr<HoughDataPerSectorVec>> find(
+        MuonPatternHoughPair find(
             const MdtPrepDataContainer* mdtCont, const CscPrepDataContainer* cscCols, const TgcPrepDataContainer* tgcCont,
             const RpcPrepDataContainer* rpcCont, const sTgcPrepDataContainer* stgcCont, const MMPrepDataContainer* mmCont,
             const EventContext& ctx) const override;
 
     private:
+        MuonPatternHoughPair find(const EventContext& ctx, 
+                                  const std::vector<const MdtPrepDataCollection*>& mdtCols, 
+                                  const std::vector<const CscPrepDataCollection*>& cscCols,
+                                  const std::vector<const TgcPrepDataCollection*>& tgcCols, 
+                                  const std::vector<const RpcPrepDataCollection*>& rpcCols,
+                                  const std::vector<const sTgcPrepDataCollection*>& stgcCols,
+                                  const std::vector<const MMPrepDataCollection*>& mmCols,
+                                  const MuonSegmentCombinationCollection* cscSegmentCombis) const;
+       
         template <class T> std::vector<const T*> stdVec(const MuonPrepDataContainer<T>* cont) const;
 
         /** retrieves all hits and converts them into internal EDM */
         std::unique_ptr<MuonHoughHitContainer> getAllHits(
-            const std::vector<const MdtPrepDataCollection*>& mdtCols, const std::vector<const CscPrepDataCollection*>& cscCols,
-            const std::vector<const TgcPrepDataCollection*>& tgcCols, const std::vector<const RpcPrepDataCollection*>& rpcCols,
-            const MuonSegmentCombinationCollection* cscSegmentCombis, std::map<int, std::vector<std::pair<int, int>>>& rpcmdtstationmap,
+            const std::vector<const MdtPrepDataCollection*>& mdtCols, const std::vector<const TgcPrepDataCollection*>& tgcCols, 
+            const std::vector<const RpcPrepDataCollection*>& rpcCols, const MuonSegmentCombinationCollection* cscSegmentCombis, 
+            std::map<int, std::vector<std::pair<int, int>>>& rpcmdtstationmap,
             std::map<int, std::vector<std::pair<int, int>>>& tgcmdtstationmap,
-            std::map<const Trk::PrepRawData*, std::set<const Trk::PrepRawData*, Muon::IdentifierPrdLess>>& phietahitassociation) const;
+            EtaPhiHitAssocMap& phietahitassociation) const;
 
         /** analyse hits */
-        MuonPatternCombinationCollection* analyse(
+        std::unique_ptr<MuonPatternCombinationCollection> analyse( const EventContext& ctx,
             const MuonHoughHitContainer& hitcontainer,
-            const std::map<const Trk::PrepRawData*, std::set<const Trk::PrepRawData*, Muon::IdentifierPrdLess>>* phietahitassociation,
-            const EventContext& ctx) const;
+            const EtaPhiHitAssocMap& phietahitassociation) const;
 
     private:
         /** record patterncollection to storegate or deletes collection when
@@ -81,7 +96,9 @@ namespace Muon {
         void addRpcCollection(
             const RpcPrepDataCollection* rpc_coll, MuonHoughHitContainer& hitcontainer,
             std::map<int, std::vector<std::pair<int, int>>>& rpcmdtstationmap,
-            std::map<const Trk::PrepRawData*, std::set<const Trk::PrepRawData*, Muon::IdentifierPrdLess>>& phietahitassociation) const;
+            EtaPhiHitAssocMap& phietahitassociation) const;
+        
+
         /** convert and add mdt preprawdata collection (1 chamber) */
         void addMdtCollection(const MdtPrepDataCollection* mdt_coll, MuonHoughHitContainer& hitcontainer,
                               std::map<int, std::vector<std::pair<int, int>>>& rpcmdtstationmap,
@@ -89,12 +106,23 @@ namespace Muon {
         /** convert and add csc preprawdata collection (1 chamber) */
         void addCscCollection(
             const CscPrepDataCollection* csc_coll, MuonHoughHitContainer& hitcontainer,
-            std::map<const Trk::PrepRawData*, std::set<const Trk::PrepRawData*, Muon::IdentifierPrdLess>>& phietahitassociation) const;
+            EtaPhiHitAssocMap& phietahitassociation) const;
+        
+        
+     
+        /// Inserts the Prds into the Hough container & fills the eta phi association map
+        template <class CollContainer> void addCollection(const CollContainer& cont,
+                                                          MuonHoughHitContainer& hitcontainer,
+                                                          EtaPhiHitAssocMap& phietahitassociation) const;
+        template <class CollContainer> void addCollections(const std::vector<const CollContainer*>& colls,
+                                                          MuonHoughHitContainer& hitcontainer,
+                                                          EtaPhiHitAssocMap& phietahitassociation) const;
+
         /** convert and add tgc preprawdata collection (1 chamber) */
         void addTgcCollection(
             const Muon::TgcPrepDataCollection*, MuonHoughHitContainer& hitcontainer,
             std::map<int, std::vector<std::pair<int, int>>>& tgcmdtstationmap,
-            std::map<const Trk::PrepRawData*, std::set<const Trk::PrepRawData*, Muon::IdentifierPrdLess>>& phietahitassociation) const;
+            EtaPhiHitAssocMap& phietahitassociation) const;
 
         /** finds best segment for given driftcircle vector (nl1/2 = number of dc's in
          * ml 1 and 2, angledif is difference between angle of segment and
@@ -125,10 +153,9 @@ namespace Muon {
                                     std::map<int, std::vector<std::pair<int, int>>>::iterator& it, int& stationcode, const int& hit_begin,
                                     const int& hit_end);
 
-        ToolHandle<IMuonHoughPatternTool> m_muonHoughPatternTool{this, "muonHoughPatternTool",
-                                                                 "MuonHoughPatternTool"};  //!< Pointer to concrete tool
+        ToolHandle<IMuonHoughPatternTool> m_muonHoughPatternTool{this, "muonHoughPatternTool",""};  //!< Pointer to concrete tool
         ToolHandle<Muon::IMuonCombinePatternTool> m_muonCombinePatternTool{this, "muonCombinePatternTool",
-                                                                           "MuonCombinePatternTool"};  //!< Pointer to concrete tool
+                                                                           ""};  //!< Pointer to concrete tool
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
         ToolHandle<Muon::MuonEDMPrinterTool> m_printer{this, "printerTool", "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool",
                                                        "ToolHandle for EDM printing of segments"};
@@ -150,8 +177,12 @@ namespace Muon {
         Gaudi::Property<bool> m_use_csc{this, "CSC", true};
         /** use mdt preprawdata (true) */
         Gaudi::Property<bool> m_use_mdt{this, "MDT", true};
+        /*  use the micromega prepraw data */
+        Gaudi::Property<bool> m_use_mm{this, "MM", true};
+        /*  use the stgc prepraw data */
+        Gaudi::Property<bool> m_use_stgc{this, "STGC", true};
         /** use weight for csc segments */
-        double m_weight_csc_on_segment;
+        double m_weight_csc_on_segment{2.};
 
         /** reduce cpu for showers (true) */
         Gaudi::Property<bool> m_showerskip{this, "ShowerSkipping", true};
@@ -188,6 +219,11 @@ namespace Muon {
             std::unique_ptr<TH1> m_weighthistogramtgc{};
             /** csc histogram */
             std::unique_ptr<TH1> m_weighthistogramcsc{};
+            /** stgc histogram */
+            std::unique_ptr<TH1> m_weighthistogramstgc{};
+            /** mm histogram*/
+            std::unique_ptr<TH1> m_weighthistogrammm{};
+            
         };
         std::unique_ptr<Hists> m_h;
         Hists& getHists() const;

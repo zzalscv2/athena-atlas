@@ -716,12 +716,12 @@ Analysis::CalibrationDataInterfaceROOT::retrieveCalibrationIndex (const std::str
     // have to call the named scale factor etc. methods once just to retrieve the container).
     string flavour = (label == "N/A") ? "Light" : label;
     string cntname = getContainername(flavour, isSF, mapIndex);
-    std::cout << "CalibrationDataInterfaceROOT->retrieveCalibrationIndex :  container name is " << cntname  << std::endl;
+    if (m_verbose) std::cout << "CalibrationDataInterfaceROOT->retrieveCalibrationIndex :  container name is " << cntname  << std::endl;
     retrieveContainer(flavour, OP, author, cntname, isSF, m_verbose); // Only call this if you want to retrieve a currently not available container
     it = m_objectIndices.find(name);
     if (it == m_objectIndices.end()) return false;
   } else {
-    std::cout << "CalibrationDataInterfaceROOT->retrieveCalibrationIndex : container " << name << " already cached! " << std::endl;
+    if (m_verbose) std::cout << "CalibrationDataInterfaceROOT->retrieveCalibrationIndex : container " << name << " already cached! " << std::endl;
   }
 
   index = it->second;
@@ -938,8 +938,6 @@ Analysis::CalibrationDataInterfaceROOT::getScaleFactor (const CalibrationDataVar
     // and some care has to be taken not to duplicate or omit uncertainties
     if (container->getUncertainty("extrapolation from charm", variables, resSyst) == Analysis::kError)
       cerr << "getScaleFactor: error retrieving Scale factor parameter extrapolation uncertainty!" << endl;
-  } else if (unc == None){
-    std::cout << " Dealing with a None uncertainty - returning no error " << std::endl;
   }
 
   double uncertainty = combinedUncertainty(stat, resSyst);
@@ -948,7 +946,6 @@ Analysis::CalibrationDataInterfaceROOT::getScaleFactor (const CalibrationDataVar
 
   // Prevent negative return values. Should the comparison be against a strict 0?
   result.first = std::max(Analysis::CalibZERO, result.first);
-  std::cout << "CDIROOT->getScaleFactor : returning " << result.first << " and " << result.second << std::endl;
   return status;
 
 }

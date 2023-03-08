@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 from AthenaCommon.CFElements import seqAND
 from TriggerMenuMT.HLT.Config.MenuComponents import RecoFragmentsPool, MenuSequence
@@ -38,9 +38,10 @@ def TLAMuonMenuSequence( flags, muChainPart):
     hypo = TrigMuonTLAHypoAlg("TrigMuonTLAHypoAlg_"+muonsIn)  
 
     hypo.TLAOutputName = sequenceOut  
-    hypo.MonTool = TrigMuonTLAHypoMonitoring("TrigMuonTLAHypoAlg/")
+    hypo.MonTool = TrigMuonTLAHypoMonitoring(flags, "TrigMuonTLAHypoAlg/")
 
-    return MenuSequence( Sequence  = tlaMuonAthSequence,
+    return MenuSequence( flags,
+                         Sequence  = tlaMuonAthSequence,
                          Maker       = tlaMuonInputMakerAlg,
                          Hypo        = hypo,
                          HypoToolGen = TrigMuonEFMSonlyHypoToolFromDict

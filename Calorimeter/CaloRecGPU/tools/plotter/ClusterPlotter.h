@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 //
 
 #ifndef CALORECGPU_TOOLS_CLUSTERPLOTTER_H
@@ -24,7 +24,6 @@
 
 #include "CxxUtils/checker_macros.h"
 
-using namespace CaloRecGPU;
 
 #ifdef ATLAS_CHECK_THREAD_SAFETY
 
@@ -32,15 +31,19 @@ using namespace CaloRecGPU;
 
 #endif
 
-
-constexpr double default_min_similarity = 0.9;
-constexpr double default_term_weight = 1.0;
-constexpr double default_grow_weight = 250;
-constexpr double default_seed_weight = 5000;
-
+namespace CaloRecGPU{
+  constexpr double default_min_similarity = 0.9;
+  constexpr double default_term_weight = 1.0;
+  constexpr double default_grow_weight = 250;
+  constexpr double default_seed_weight = 5000;
+}
 
 struct EventData
 {
+  // for initialisers
+  static constexpr double maxDbl=std::numeric_limits<double>::max();
+  static constexpr double lowestDbl = std::numeric_limits<double>::lowest();
+  //
   std::vector<ClusterData> ref_clusters, test_clusters;
   std::vector<float> SNR_array;
   std::vector<float> energy_array;
@@ -61,15 +64,20 @@ struct EventData
   float min_type_energy[4], max_type_energy[4], min_type_SNR[4], max_type_SNR[4];
   //By type (all, seed, grow, terminal)
 
-  double min_delta_R[4], max_delta_R[4];
+  double min_delta_R[4] = {maxDbl, maxDbl,maxDbl, maxDbl};
+  double max_delta_R[4] = {lowestDbl, lowestDbl, lowestDbl, lowestDbl};
 
-  double min_delta_E[4], max_delta_E[4];
+  double min_delta_E[4]={maxDbl, maxDbl,maxDbl, maxDbl};
+  double max_delta_E[4]= {lowestDbl, lowestDbl, lowestDbl, lowestDbl};
 
-  double min_delta_Et[4], max_delta_Et[4];
+  double min_delta_Et[4] = {maxDbl, maxDbl,maxDbl, maxDbl};
+  double max_delta_Et[4] = {lowestDbl, lowestDbl, lowestDbl, lowestDbl};
 
-  double min_delta_E_rel[4], max_delta_E_rel[4];
+  double min_delta_E_rel[4] = {maxDbl, maxDbl,maxDbl, maxDbl};
+  double max_delta_E_rel[4] = {lowestDbl, lowestDbl, lowestDbl, lowestDbl};
 
-  double min_delta_Et_rel[4], max_delta_Et_rel[4];
+  double min_delta_Et_rel[4] = {maxDbl, maxDbl,maxDbl, maxDbl};
+  double max_delta_Et_rel[4] = {lowestDbl, lowestDbl, lowestDbl, lowestDbl};
 
   double min_delta_eta[4], max_delta_eta[4];
 
@@ -86,10 +94,10 @@ struct EventData
 
   std::vector<bool> cluster_same_cells[4];
 
-  void find_matches(const double min_similarity = default_min_similarity,
-                    const double term_weight = default_term_weight,
-                    const double grow_weight = default_grow_weight,
-                    const double seed_weight = default_seed_weight)
+  void find_matches(const double min_similarity = CaloRecGPU::default_min_similarity,
+                    const double term_weight = CaloRecGPU::default_term_weight,
+                    const double grow_weight = CaloRecGPU::default_grow_weight,
+                    const double seed_weight = CaloRecGPU::default_seed_weight)
   {
     std::vector<int> similarity_map(test_clusters.size() * ref_clusters.size(), 0.f);
 
@@ -97,7 +105,7 @@ struct EventData
     std::vector<double> test_normalization(test_clusters.size(), 0.f);
 
 
-    for (int i = 0; i < NCaloCells; ++i)
+    for (int i = 0; i < CaloRecGPU::NCaloCells; ++i)
       {
         const int ref_tag = ref_tag_array[i];
         const int test_tag = test_tag_array[i];
@@ -280,23 +288,23 @@ struct EventData
   }
 
 
-  EventData(const GeometryArr & geometry,
-            const CellNoiseArr & noise_arr,
-            const CellInfoArr & cell_info,
-            const CellStateArr & ref_cells,
-            const CellStateArr & test_cells,
-            const ClusterInfoArr & reference,
-            const ClusterInfoArr & test,
-            const double min_similarity = default_min_similarity,
-            const double term_weight = default_term_weight,
-            const double grow_weight = default_grow_weight,
-            const double seed_weight = default_seed_weight):
+  EventData(const CaloRecGPU::GeometryArr & geometry,
+            const CaloRecGPU::CellNoiseArr & noise_arr,
+            const CaloRecGPU::CellInfoArr & cell_info,
+            const CaloRecGPU::CellStateArr & ref_cells,
+            const CaloRecGPU::CellStateArr & test_cells,
+            const CaloRecGPU::ClusterInfoArr & reference,
+            const CaloRecGPU::ClusterInfoArr & test,
+            const double min_similarity = CaloRecGPU::default_min_similarity,
+            const double term_weight = CaloRecGPU::default_term_weight,
+            const double grow_weight = CaloRecGPU::default_grow_weight,
+            const double seed_weight = CaloRecGPU::default_seed_weight):
     ref_clusters(reference.number),
     test_clusters(test.number),
-    SNR_array(NCaloCells),
-    energy_array(NCaloCells),
-    ref_tag_array(NCaloCells),
-    test_tag_array(NCaloCells),
+    SNR_array(CaloRecGPU::NCaloCells),
+    energy_array(CaloRecGPU::NCaloCells),
+    ref_tag_array(CaloRecGPU::NCaloCells),
+    test_tag_array(CaloRecGPU::NCaloCells),
     r2t_matches(reference.number, -1),
     t2r_matches(test.number, -1),
     delta_R_array(reference.number, -1),
@@ -337,7 +345,7 @@ struct EventData
       }
 
 
-    for (int i = 0; i < NCaloCells; ++i)
+    for (int i = 0; i < CaloRecGPU::NCaloCells; ++i)
       {
         const float this_energy = cell_info.energy[i];
 
@@ -346,16 +354,16 @@ struct EventData
 
         float this_SNR = 0.00001;
 
-        if (!GainConversion::is_bad_cell(this_gain))
+        if (!CaloRecGPU::GainConversion::is_bad_cell(this_gain))
           {
-            const int corrected_gain = GainConversion::recover_invalid_seed_cell_gain(this_gain);
+            const int corrected_gain = CaloRecGPU::GainConversion::recover_invalid_seed_cell_gain(this_gain);
             const float this_noise = noise_arr.noise[corrected_gain][i];
 
             if (finite(this_noise) && this_noise > 0.0f)
               {
                 this_SNR = std::abs(this_energy / this_noise);
               }
-            if (this_SNR > SNR_thresholds[2] && GainConversion::is_invalid_seed_cell(this_gain))
+            if (this_SNR > SNR_thresholds[2] && CaloRecGPU::GainConversion::is_invalid_seed_cell(this_gain))
               {
                 this_SNR = (SNR_thresholds[2] + SNR_thresholds[1]) / 2;
                 //Hack to turn invalid seeds to growing.
@@ -456,7 +464,7 @@ struct EventData
         test_clusters[i].abs_energy = 0;
       }
 
-    for (int i = 0; i < NCaloCells; ++i)
+    for (int i = 0; i < CaloRecGPU::NCaloCells; ++i)
       {
 
         const int ref_tag = ref_tag_array[i];
@@ -743,7 +751,7 @@ struct EventData
         cluster_same_cells[i].resize(ref_clusters.size(), true);
       }
 
-    for (int i = 0; i < NCaloCells; ++i)
+    for (int i = 0; i < CaloRecGPU::NCaloCells; ++i)
       {
         const int ref_tag = get_legacy_tag(ref_cells.clusterTag[i]);
         const int test_tag = get_legacy_tag(test_cells.clusterTag[i]);
@@ -801,9 +809,13 @@ struct EventData
 
 struct ClusterPlotter : public BasePlotter
 {
+  //
+  static constexpr double maxDbl=std::numeric_limits<double>::max();
+  static constexpr double lowestDbl = std::numeric_limits<double>::lowest();
+  //
   std::vector<EventData> events;
-  Helpers::CPU_object<GeometryArr> geometry;
-  Helpers::CPU_object<CellNoiseArr> noise;
+  CaloRecGPU::Helpers::CPU_object<CaloRecGPU::GeometryArr> geometry;
+  CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellNoiseArr> noise;
 
 
   double min_energy_cut = 1e-3;
@@ -816,13 +828,17 @@ struct ClusterPlotter : public BasePlotter
   double min_delta_R[4], max_delta_R[4];
 
 
-  double min_delta_E[4], max_delta_E[4];
+  double min_delta_E[4] = {maxDbl, maxDbl, maxDbl, maxDbl};
+  double max_delta_E[4] = {lowestDbl, lowestDbl, lowestDbl, lowestDbl};
 
-  double min_delta_Et[4], max_delta_Et[4];
+  double min_delta_Et[4] = {maxDbl, maxDbl, maxDbl, maxDbl};
+  double max_delta_Et[4] = {lowestDbl, lowestDbl, lowestDbl, lowestDbl};
 
-  double min_delta_E_rel[4], max_delta_E_rel[4];
+  double min_delta_E_rel[4] = {maxDbl, maxDbl, maxDbl, maxDbl};
+  double max_delta_E_rel[4] = {lowestDbl, lowestDbl, lowestDbl, lowestDbl};
 
-  double min_delta_Et_rel[4], max_delta_Et_rel[4];
+  double min_delta_Et_rel[4] = {maxDbl, maxDbl, maxDbl, maxDbl};
+  double max_delta_Et_rel[4] = {lowestDbl, lowestDbl, lowestDbl, lowestDbl};
 
   double min_delta_eta[4], max_delta_eta[4];
 
@@ -862,10 +878,10 @@ struct ClusterPlotter : public BasePlotter
                  const boost::filesystem::path & test_folder_path,
                  const int max_events = -1,
                  const std::string & filter = "",
-                 const double min_similarity = default_min_similarity,
-                 const double term_weight = default_term_weight,
-                 const double grow_weight = default_grow_weight,
-                 const double seed_weight = default_seed_weight)
+                 const double min_similarity = CaloRecGPU::default_min_similarity,
+                 const double term_weight = CaloRecGPU::default_term_weight,
+                 const double grow_weight = CaloRecGPU::default_grow_weight,
+                 const double seed_weight = CaloRecGPU::default_seed_weight)
   {
 
     auto filename_filter = [&](const std::string & str)

@@ -53,8 +53,6 @@ public:
 
   /** @brief Default constructor */
   TileDQstatus();
-  /** @brief Destructor */
-  ~TileDQstatus();
 
   /** @brief returns whether TileDQStatus has been filled with data from TileDQ fragment */
   inline bool   isFilled        ()              const           { return m_isFilled; }

@@ -77,6 +77,82 @@ class ElectronPlots:public PlotBase {
       TH1* nTypeParticles;
       std::string m_sParticleType;
 
+      void Set_d0_nBins(unsigned d0_nBins) 
+      {
+        m_oTrackAllRecoPlots.Set_d0_nBins(d0_nBins);
+        m_oTrackIsoRecoPlots.Set_d0_nBins(d0_nBins);
+        m_oTrackIsoLHLoosePlots.Set_d0_nBins(d0_nBins);
+        m_oTrackIsoLHMediumPlots.Set_d0_nBins(d0_nBins);
+        m_oTrackIsoLHTightPlots.Set_d0_nBins(d0_nBins);
+        m_oTrackPromptRecoPlots.Set_d0_nBins(d0_nBins);
+        m_oTrackPromptLHLoosePlots.Set_d0_nBins(d0_nBins);
+        m_oTrackPromptLHMediumPlots.Set_d0_nBins(d0_nBins);
+        m_oTrackPromptLHTightPlots.Set_d0_nBins(d0_nBins);
+      };
+
+      void Set_d0sig_nBins(unsigned d0_nBins) 
+      {
+        m_oTrackAllRecoPlots.Set_d0sig_nBins(d0_nBins);
+        m_oTrackIsoRecoPlots.Set_d0sig_nBins(d0_nBins);
+        m_oTrackIsoLHLoosePlots.Set_d0sig_nBins(d0_nBins);
+        m_oTrackIsoLHMediumPlots.Set_d0sig_nBins(d0_nBins);
+        m_oTrackIsoLHTightPlots.Set_d0sig_nBins(d0_nBins);
+        m_oTrackPromptRecoPlots.Set_d0sig_nBins(d0_nBins);
+        m_oTrackPromptLHLoosePlots.Set_d0sig_nBins(d0_nBins);
+        m_oTrackPromptLHMediumPlots.Set_d0sig_nBins(d0_nBins);
+        m_oTrackPromptLHTightPlots.Set_d0sig_nBins(d0_nBins);
+      };
+      void Set_z0_nBins(unsigned z0_nBins)
+      {
+        m_oTrackAllRecoPlots.Set_z0_nBins(z0_nBins);
+        m_oTrackIsoRecoPlots.Set_z0_nBins(z0_nBins);
+        m_oTrackIsoLHLoosePlots.Set_z0_nBins(z0_nBins);
+        m_oTrackIsoLHMediumPlots.Set_z0_nBins(z0_nBins);
+        m_oTrackIsoLHTightPlots.Set_z0_nBins(z0_nBins);
+        m_oTrackPromptRecoPlots.Set_z0_nBins(z0_nBins);
+        m_oTrackPromptLHLoosePlots.Set_z0_nBins(z0_nBins);
+        m_oTrackPromptLHMediumPlots.Set_z0_nBins(z0_nBins);
+        m_oTrackPromptLHTightPlots.Set_z0_nBins(z0_nBins);
+      };
+      void Set_d0_Bins(const std::vector<double> &d0Range) 
+      {
+        m_oTrackAllRecoPlots.Set_d0_Bins(d0Range);
+        m_oTrackIsoRecoPlots.Set_d0_Bins(d0Range);
+        m_oTrackIsoLHLoosePlots.Set_d0_Bins(d0Range);
+        m_oTrackIsoLHMediumPlots.Set_d0_Bins(d0Range);
+        m_oTrackIsoLHTightPlots.Set_d0_Bins(d0Range);
+        m_oTrackPromptRecoPlots.Set_d0_Bins(d0Range);
+        m_oTrackPromptLHLoosePlots.Set_d0_Bins(d0Range);
+        m_oTrackPromptLHMediumPlots.Set_d0_Bins(d0Range);
+        m_oTrackPromptLHTightPlots.Set_d0_Bins(d0Range);
+      };
+
+      void Set_d0sig_Bins(const std::vector<double> &d0Range) 
+      {
+        m_oTrackAllRecoPlots.Set_d0sig_Bins(d0Range);
+        m_oTrackIsoRecoPlots.Set_d0sig_Bins(d0Range);
+        m_oTrackIsoLHLoosePlots.Set_d0sig_Bins(d0Range);
+        m_oTrackIsoLHMediumPlots.Set_d0sig_Bins(d0Range);
+        m_oTrackIsoLHTightPlots.Set_d0sig_Bins(d0Range);
+        m_oTrackPromptRecoPlots.Set_d0sig_Bins(d0Range);
+        m_oTrackPromptLHLoosePlots.Set_d0sig_Bins(d0Range);
+        m_oTrackPromptLHMediumPlots.Set_d0sig_Bins(d0Range);
+        m_oTrackPromptLHTightPlots.Set_d0sig_Bins(d0Range);
+      };
+      void Set_z0_Bins(const std::vector<double> &z0Range) 
+      {
+        m_oTrackAllRecoPlots.Set_z0_Bins(z0Range);
+        m_oTrackIsoRecoPlots.Set_z0_Bins(z0Range);
+        m_oTrackIsoLHLoosePlots.Set_z0_Bins(z0Range);
+        m_oTrackIsoLHMediumPlots.Set_z0_Bins(z0Range);
+        m_oTrackIsoLHTightPlots.Set_z0_Bins(z0Range);
+        m_oTrackPromptRecoPlots.Set_z0_Bins(z0Range);
+        m_oTrackPromptLHLoosePlots.Set_z0_Bins(z0Range);
+        m_oTrackPromptLHMediumPlots.Set_z0_Bins(z0Range);
+        m_oTrackPromptLHTightPlots.Set_z0_Bins(z0Range);
+      };
+
+
     private:
       virtual void initializePlots();
       

@@ -18,7 +18,7 @@ atlas_add_root_dictionary( EventLoopTestLib
 # have one basic library to use for most tests.  this has an explicit list
 # of files, because some files go into the next library.
 atlas_add_library( EventLoopTestLib
-   Root/UnitTest.cxx Root/UnitTestAlg.cxx Root/UnitTestAlg1.cxx Root/UnitTestAlg2.cxx Root/UnitTestAlg3.cxx Root/UnitTestAlg4.cxx Root/UnitTestAlg5.cxx Root/UnitTestAlg6.cxx Root/UnitTestAlgXAOD.cxx Root/UnitTestConfig.cxx Root/UnitTestTool.cxx
+   Root/UnitTest.cxx Root/UnitTestAlg.cxx Root/UnitTestAlg1.cxx Root/UnitTestAlg2.cxx Root/UnitTestAlg3.cxx Root/UnitTestAlg4.cxx Root/UnitTestAlg5.cxx Root/UnitTestAlg6.cxx Root/UnitTestAlg7.cxx Root/UnitTestAlgXAOD.cxx Root/UnitTestConfig.cxx Root/UnitTestTool.cxx
    ${EventLoopTestDictSource}
    PUBLIC_HEADERS EventLoopTest
    DEFINITIONS USE_CMAKE
@@ -89,4 +89,4 @@ endforeach (source ${util_sources})
 
 
 # Install files from the package:
-atlas_install_data( data/*.yml )
+atlas_install_data( data/*.yml data/*.py )

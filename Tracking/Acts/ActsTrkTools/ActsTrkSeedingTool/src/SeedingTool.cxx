@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/SeedingTool.h"
@@ -15,13 +15,12 @@
 #include "Acts/Seeding/SeedConfirmationRangeConfig.hpp"
 
 namespace ActsTrk {
-
-  SeedingTool::SeedingTool(const std::string& type,
+   SeedingTool::SeedingTool(const std::string& type,
     const std::string& name,
     const IInterface* parent)
     : base_class(type, name, parent)
   {}
-
+  
   StatusCode SeedingTool::initialize() {
     ATH_MSG_DEBUG("Initializing " << name() << "...");
 
@@ -41,7 +40,6 @@ namespace ActsTrk {
     ATH_MSG_DEBUG("   " << m_zBinEdges);
     ATH_MSG_DEBUG("   " << m_deltaRMax);
     ATH_MSG_DEBUG("   " << m_gridRMax);
-    ATH_MSG_DEBUG("   " << m_bFieldInZ);
     ATH_MSG_DEBUG("   " << m_phiBinDeflectionCoverage);
 
     ATH_MSG_DEBUG(" * Used by SeedFinderConfig:");
@@ -164,216 +162,200 @@ namespace ActsTrk {
       }
     }
 
+    ATH_CHECK( prepareConfiguration() );
+
     return StatusCode::SUCCESS;
   }
-
+  
   StatusCode
   SeedingTool::createSeeds(const EventContext& /*ctx*/,
-                           const std::vector<const ActsTrk::SpacePoint*>& spContainer,
+                           const std::vector<const xAOD::SpacePoint*>& spContainer,
                            const Acts::Vector3& beamSpotPos,
                            const Acts::Vector3& bField,
                            ActsTrk::SeedContainer& seedContainer ) const
   {
     // Create Seeds
     //TODO POSSIBLE OPTIMISATION come back here: see MR !52399 ( i.e. use static thread_local)
-    std::vector<Acts::Seed< external_spacepoint< ActsTrk::SpacePointContainer::const_iterator>::type >> groupSeeds;
+    std::vector<Acts::Seed< xAOD::SpacePoint >> groupSeeds;
     ATH_CHECK(createSeeds(spContainer.begin(),
-        spContainer.end(),
-        beamSpotPos,
-        bField,
-        groupSeeds));
-
+			  spContainer.end(),
+			  beamSpotPos,
+			  bField,
+			  groupSeeds));
+    
     // Store seeds
     seedContainer.reserve(groupSeeds.size());
     for( const auto& seed: groupSeeds) {
-      std::unique_ptr< ActsTrk::Seed > to_add = std::make_unique<ActsTrk::Seed>(seed);
+      std::unique_ptr< seed_type > to_add = 
+	std::make_unique< seed_type >(seed);
       seedContainer.push_back(std::move(to_add));  
     }
-
+    
     return StatusCode::SUCCESS;
   }
-
-
-
-  template< typename spacepoint_iterator_t >
-   StatusCode
-    SeedingTool::createSeeds(spacepoint_iterator_t spBegin,
-      spacepoint_iterator_t spEnd,
-      const Acts::Vector3& beamSpotPos,
-      const Acts::Vector3& bField,
-      std::vector<Acts::Seed< typename external_spacepoint<spacepoint_iterator_t>::type >>& seeds) const {
-
-    using external_spacepoint_t = typename external_spacepoint<spacepoint_iterator_t>::type;
-    using seed_t = Acts::Seed< external_spacepoint_t >;
+  
+  template< typename external_iterator_t >
+  StatusCode
+  SeedingTool::createSeeds(external_iterator_t spBegin,
+			   external_iterator_t spEnd,
+			   const Acts::Vector3& beamSpotPos,
+			   const Acts::Vector3& bField,
+			   std::vector< seed_type >& seeds) const 
+  {
+    static_assert(std::is_same<typename external_spacepoint< external_iterator_t >::type, value_type>::value,
+		  "Inconsistent type");
+    
     seeds.clear();
     if (spBegin == spEnd)
       return StatusCode::SUCCESS;
 
-    auto [gridCfg, finderCfg] = prepareConfiguration< external_spacepoint_t >(Acts::Vector2(beamSpotPos[Amg::x], beamSpotPos[Amg::y]),
-									      bField); 
-        
-    auto extractCovariance = [&beamSpotPos](const external_spacepoint_t& sp, float,
-                                            float, float) -> std::pair<Acts::Vector3, Acts::Vector2> {
-      /// Convert coordinates w.r.t. beam spot
-      Acts::Vector3 position(sp.x() - beamSpotPos[Amg::x], sp.y() - beamSpotPos[Amg::y], sp.z() - beamSpotPos[Amg::z]);
-      Acts::Vector2 covariance(sp.varianceR(), sp.varianceZ());
-      return std::make_pair(position, covariance);
-    };
-
-
+    // Space Point Grid Options
+    Acts::SpacePointGridOptions gridOpts;
+    gridOpts.bFieldInZ = bField[2];
+    gridOpts = gridOpts.toInternalUnits();
+    
+    // Seed Finder Options
+    Acts::SeedFinderOptions finderOpts;
+    finderOpts.beamPos = Acts::Vector2(beamSpotPos[Amg::x], 
+    		       	               beamSpotPos[Amg::y]);
+    finderOpts.bFieldInZ = bField[2];
+    finderOpts = finderOpts.toInternalUnits().calculateDerivedQuantities(m_finderCfg);
+    
+    auto extractCovariance = [](const value_type& sp, 
+				float, float, float) -> std::pair<Acts::Vector3, Acts::Vector2> 
+      {
+	/// Do not convert coordinates w.r.t. beam spot
+	/// Coordinates are converted internally when constructing 
+	/// InternalSpacePoints 
+	Acts::Vector3 position(sp.x(),
+			       sp.y(),
+			       sp.z());
+	Acts::Vector2 covariance(sp.varianceR(), sp.varianceZ());
+	return std::make_pair(position, covariance);
+      };
+    
+    
     Acts::Extent rRangeSPExtent;
-
-    std::shared_ptr< Acts::BinFinder< external_spacepoint_t > > bottomBinFinder =
-      std::make_shared< Acts::BinFinder< external_spacepoint_t > >(m_zBinNeighborsBottom, m_numPhiNeighbors);
-    std::shared_ptr< Acts::BinFinder< external_spacepoint_t > > topBinFinder =
-      std::make_shared< Acts::BinFinder< external_spacepoint_t > >(m_zBinNeighborsTop, m_numPhiNeighbors);
-
-    std::unique_ptr< Acts::SpacePointGrid< external_spacepoint_t > > grid =
-      Acts::SpacePointGridCreator::createGrid< external_spacepoint_t >(gridCfg);
-    Acts::BinnedSPGroup< external_spacepoint_t > spacePointsGrouping(spBegin, spEnd, extractCovariance,								     
-      bottomBinFinder, topBinFinder, std::move(grid), rRangeSPExtent, finderCfg);
-
-    Acts::SeedFinder< external_spacepoint_t > finder(finderCfg);
-
+    
+    std::shared_ptr< Acts::BinFinder< value_type > > bottomBinFinder =
+      std::make_shared< Acts::BinFinder< value_type > >(m_zBinNeighborsBottom, m_numPhiNeighbors);
+    std::shared_ptr< Acts::BinFinder< value_type > > topBinFinder =
+      std::make_shared< Acts::BinFinder< value_type > >(m_zBinNeighborsTop, m_numPhiNeighbors);
+    
+    std::unique_ptr< Acts::SpacePointGrid< value_type > > grid =
+      Acts::SpacePointGridCreator::createGrid< value_type >(m_gridCfg, gridOpts);
+    Acts::BinnedSPGroup< value_type > spacePointsGrouping(spBegin, spEnd, extractCovariance,								     
+      bottomBinFinder, topBinFinder, std::move(grid), rRangeSPExtent, m_finderCfg, finderOpts);
+    
     // variable middle SP radial region of interest
     const Acts::Range1D<float> rMiddleSPRange(std::floor(rRangeSPExtent.min(Acts::binR) / 2) * 2 +
-					      finderCfg.deltaRMiddleMinSPRange,
+					      m_finderCfg.deltaRMiddleMinSPRange,
 					      std::floor(rRangeSPExtent.max(Acts::binR) / 2) * 2 -
-					      finderCfg.deltaRMiddleMaxSPRange);
-
+					      m_finderCfg.deltaRMiddleMaxSPRange);
+    
     //TODO POSSIBLE OPTIMISATION come back here: see MR !52399 ( i.e. use static thread_local)
-    typename decltype(finder)::SeedingState state;
+    typename decltype(m_finder)::SeedingState state;
 
     auto group = spacePointsGrouping.begin();
     auto groupEnd = spacePointsGrouping.end();
     for (; group != groupEnd; ++group) {
-      finder.createSeedsForGroup(state, std::back_inserter(seeds), group.bottom(),
-				 group.middle(), group.top(), rMiddleSPRange);
+      m_finder.createSeedsForGroup(finderOpts, state, std::back_inserter(seeds), group.bottom(),
+				   group.middle(), group.top(), rMiddleSPRange);
     }
 
     return StatusCode::SUCCESS;
   }
 
-
-
-  template< typename external_spacepoint_t >
-  const std::pair< Acts::SpacePointGridConfig, Acts::SeedFinderConfig< external_spacepoint_t > >
-  SeedingTool::prepareConfiguration(const Acts::Vector2& beamPos,
-				    const Acts::Vector3& bField) const {
-    
-    //TODO POSSIBLE OPTIMISATION
-    // do not create for each call SpacePointGridConfig, SeedFinderConfig and SeedFilterConfig.
-    // They only two quantities that depend on the event context are
-    // finderCfg.bFieldInZ and finderCfg.beamPos.
-    // The rest of the configuration stays the same.
-
-    // Configuration for Acts::SpacePointGrid
-    // These values will not be changed during execution.
-    // For the grid formation, a constant value of the Z component
-    // is used to reduce computational overhead.
-    Acts::SpacePointGridConfig gridCfg;
-    gridCfg.minPt = m_minPt;
-    gridCfg.cotThetaMax = m_cotThetaMax;
-    gridCfg.impactMax = m_impactMax;
-    gridCfg.zMin = m_zMin;
-    gridCfg.zMax = m_zMax;
-    gridCfg.phiMin = m_gridPhiMin;
-    gridCfg.phiMax = m_gridPhiMax;
-    gridCfg.zBinEdges = m_zBinEdges;
-    gridCfg.deltaRMax = m_deltaRMax;
-    gridCfg.rMax = m_gridRMax;
-    gridCfg.bFieldInZ = m_bFieldInZ;
-    gridCfg.phiBinDeflectionCoverage = m_phiBinDeflectionCoverage;
+  StatusCode 
+  SeedingTool::prepareConfiguration() {
+    // Prepare the Acts::SeedFinderConfig object
+    // This is done only once, during initialization using the
+    // parameters set in the JO
 
     // Configuration for Acts::SeedFinder
-    // These values will not be changed during execution
-    // B Field and Beam Spot position will be updated for each event (finderCfg.bFieldInZ and finderCfg.beamPos)
-    Acts::SeedFinderConfig< external_spacepoint_t > finderCfg;
-    finderCfg.bFieldInZ = bField[2];
-    finderCfg.beamPos = beamPos;
-    finderCfg.minPt = m_minPt;
-    finderCfg.cotThetaMax = m_cotThetaMax;
-    finderCfg.impactMax = m_impactMax;
-    finderCfg.zMin = m_zMin;
-    finderCfg.zMax = m_zMax;
-    finderCfg.zBinEdges = m_zBinEdges;
-    finderCfg.rMax = m_rMax;
-    finderCfg.binSizeR = m_binSizeR;
-    finderCfg.forceRadialSorting = m_forceRadialSorting;
-    finderCfg.deltaRMin = m_deltaRMin;
-    finderCfg.deltaRMax = m_deltaRMax;
-    finderCfg.deltaRMinTopSP = m_deltaRMinTopSP;
-    finderCfg.deltaRMaxTopSP = m_deltaRMaxTopSP;
-    finderCfg.deltaRMinBottomSP = m_deltaRMinBottomSP;
-    finderCfg.deltaRMaxBottomSP = m_deltaRMaxBottomSP;
-    finderCfg.deltaZMax = m_deltaZMax;
-    finderCfg.collisionRegionMin = m_collisionRegionMin;
-    finderCfg.collisionRegionMax = m_collisionRegionMax;
-    finderCfg.sigmaScattering = m_sigmaScattering;
-    finderCfg.maxPtScattering = m_maxPtScattering;
-    finderCfg.radLengthPerSeed = m_radLengthPerSeed;
-    finderCfg.maxSeedsPerSpM = m_maxSeedsPerSpM;
-    finderCfg.interactionPointCut = m_interactionPointCut;
-    finderCfg.arithmeticAverageCotTheta = m_arithmeticAverageCotTheta;
-    finderCfg.skipPreviousTopSP = m_skipPreviousTopSP;
-    finderCfg.zBinsCustomLooping = m_zBinsCustomLooping;
-    finderCfg.useVariableMiddleSPRange = m_useVariableMiddleSPRange;
-    finderCfg.deltaRMiddleMinSPRange = m_deltaRMiddleMinSPRange;
-    finderCfg.deltaRMiddleMaxSPRange = m_deltaRMiddleMaxSPRange;
-    finderCfg.seedConfirmation = m_seedConfirmation;
-    finderCfg.centralSeedConfirmationRange.zMinSeedConf = m_seedConfCentralZMin;
-    finderCfg.centralSeedConfirmationRange.zMaxSeedConf = m_seedConfCentralZMax;
-    finderCfg.centralSeedConfirmationRange.rMaxSeedConf = m_seedConfCentralRMax;
-    finderCfg.centralSeedConfirmationRange.nTopForLargeR = m_seedConfCentralNTopLargeR;
-    finderCfg.centralSeedConfirmationRange.nTopForSmallR = m_seedConfCentralNTopSmallR;
-    finderCfg.centralSeedConfirmationRange.seedConfMinBottomRadius = m_seedConfCentralMinBottomRadius;
-    finderCfg.centralSeedConfirmationRange.seedConfMaxZOrigin = m_seedConfCentralMaxZOrigin;
-    finderCfg.centralSeedConfirmationRange.minImpactSeedConf = m_seedConfCentralMinImpact;
-    finderCfg.forwardSeedConfirmationRange.zMinSeedConf = m_seedConfForwardZMin;
-    finderCfg.forwardSeedConfirmationRange.zMaxSeedConf = m_seedConfForwardZMax;
-    finderCfg.forwardSeedConfirmationRange.rMaxSeedConf = m_seedConfForwardRMax;
-    finderCfg.forwardSeedConfirmationRange.nTopForLargeR = m_seedConfForwardNTopLargeR;
-    finderCfg.forwardSeedConfirmationRange.nTopForSmallR = m_seedConfForwardNTopSmallR;
-    finderCfg.forwardSeedConfirmationRange.seedConfMinBottomRadius = m_seedConfForwardMinBottomRadius;
-    finderCfg.forwardSeedConfirmationRange.seedConfMaxZOrigin = m_seedConfForwardMaxZOrigin;
-    finderCfg.forwardSeedConfirmationRange.minImpactSeedConf = m_seedConfForwardMinImpact;
-    finderCfg.useDetailedDoubleMeasurementInfo = m_useDetailedDoubleMeasurementInfo;
-    finderCfg.toleranceParam = m_toleranceParam;
-    finderCfg.phiMin = m_phiMin;
-    finderCfg.phiMax = m_phiMax;
-    finderCfg.rMin = m_rMin;
-    finderCfg.zAlign = m_zAlign;
-    finderCfg.rAlign = m_rAlign;
-    finderCfg.sigmaError = m_sigmaError;
+    m_finderCfg.minPt = m_minPt;
+    m_finderCfg.cotThetaMax = m_cotThetaMax;
+    m_finderCfg.impactMax = m_impactMax;
+    m_finderCfg.zMin = m_zMin;
+    m_finderCfg.zMax = m_zMax;
+    m_finderCfg.zBinEdges = m_zBinEdges;
+    m_finderCfg.rMax = m_rMax;
+    m_finderCfg.binSizeR = m_binSizeR;
+    m_finderCfg.forceRadialSorting = m_forceRadialSorting;
+    m_finderCfg.deltaRMin = m_deltaRMin;
+    m_finderCfg.deltaRMax = m_deltaRMax;
+    m_finderCfg.deltaRMinTopSP = m_deltaRMinTopSP;
+    m_finderCfg.deltaRMaxTopSP = m_deltaRMaxTopSP;
+    m_finderCfg.deltaRMinBottomSP = m_deltaRMinBottomSP;
+    m_finderCfg.deltaRMaxBottomSP = m_deltaRMaxBottomSP;
+    m_finderCfg.deltaZMax = m_deltaZMax;
+    m_finderCfg.collisionRegionMin = m_collisionRegionMin;
+    m_finderCfg.collisionRegionMax = m_collisionRegionMax;
+    m_finderCfg.sigmaScattering = m_sigmaScattering;
+    m_finderCfg.maxPtScattering = m_maxPtScattering;
+    m_finderCfg.radLengthPerSeed = m_radLengthPerSeed;
+    m_finderCfg.maxSeedsPerSpM = m_maxSeedsPerSpM;
+    m_finderCfg.interactionPointCut = m_interactionPointCut;
+    m_finderCfg.arithmeticAverageCotTheta = m_arithmeticAverageCotTheta;
+    m_finderCfg.skipPreviousTopSP = m_skipPreviousTopSP;
+    m_finderCfg.zBinsCustomLooping = m_zBinsCustomLooping;
+    m_finderCfg.useVariableMiddleSPRange = m_useVariableMiddleSPRange;
+    m_finderCfg.deltaRMiddleMinSPRange = m_deltaRMiddleMinSPRange;
+    m_finderCfg.deltaRMiddleMaxSPRange = m_deltaRMiddleMaxSPRange;
+    m_finderCfg.seedConfirmation = m_seedConfirmation;
+    m_finderCfg.centralSeedConfirmationRange.zMinSeedConf = m_seedConfCentralZMin;
+    m_finderCfg.centralSeedConfirmationRange.zMaxSeedConf = m_seedConfCentralZMax;
+    m_finderCfg.centralSeedConfirmationRange.rMaxSeedConf = m_seedConfCentralRMax;
+    m_finderCfg.centralSeedConfirmationRange.nTopForLargeR = m_seedConfCentralNTopLargeR;
+    m_finderCfg.centralSeedConfirmationRange.nTopForSmallR = m_seedConfCentralNTopSmallR;
+    m_finderCfg.centralSeedConfirmationRange.seedConfMinBottomRadius = m_seedConfCentralMinBottomRadius;
+    m_finderCfg.centralSeedConfirmationRange.seedConfMaxZOrigin = m_seedConfCentralMaxZOrigin;
+    m_finderCfg.centralSeedConfirmationRange.minImpactSeedConf = m_seedConfCentralMinImpact;
+    m_finderCfg.forwardSeedConfirmationRange.zMinSeedConf = m_seedConfForwardZMin;
+    m_finderCfg.forwardSeedConfirmationRange.zMaxSeedConf = m_seedConfForwardZMax;
+    m_finderCfg.forwardSeedConfirmationRange.rMaxSeedConf = m_seedConfForwardRMax;
+    m_finderCfg.forwardSeedConfirmationRange.nTopForLargeR = m_seedConfForwardNTopLargeR;
+    m_finderCfg.forwardSeedConfirmationRange.nTopForSmallR = m_seedConfForwardNTopSmallR;
+    m_finderCfg.forwardSeedConfirmationRange.seedConfMinBottomRadius = m_seedConfForwardMinBottomRadius;
+    m_finderCfg.forwardSeedConfirmationRange.seedConfMaxZOrigin = m_seedConfForwardMaxZOrigin;
+    m_finderCfg.forwardSeedConfirmationRange.minImpactSeedConf = m_seedConfForwardMinImpact;
+    m_finderCfg.useDetailedDoubleMeasurementInfo = m_useDetailedDoubleMeasurementInfo;
+    m_finderCfg.toleranceParam = m_toleranceParam;
+    m_finderCfg.phiMin = m_phiMin;
+    m_finderCfg.phiMax = m_phiMax;
+    m_finderCfg.rMin = m_rMin;
+    m_finderCfg.zAlign = m_zAlign;
+    m_finderCfg.rAlign = m_rAlign;
+    m_finderCfg.sigmaError = m_sigmaError;
 
     if (m_useDetailedDoubleMeasurementInfo) {
-      finderCfg.getTopHalfStripLength.connect(
-        [](const void*, const ActsTrk::SpacePoint& sp) -> float {
+      m_finderCfg.getTopHalfStripLength.connect(
+        [](const void*, const value_type& sp) -> float {
           return sp.topHalfStripLength();
         });
-      finderCfg.getBottomHalfStripLength.connect(
-        [](const void*, const ActsTrk::SpacePoint& sp) -> float {
+      m_finderCfg.getBottomHalfStripLength.connect(
+        [](const void*, const value_type& sp) -> float {
           return sp.bottomHalfStripLength();
         });
-      finderCfg.getTopStripDirection.connect(
-        [](const void*, const ActsTrk::SpacePoint& sp) -> Acts::Vector3 {
-          return sp.topStripDirection();
+      m_finderCfg.getTopStripDirection.connect(
+        [](const void*, const value_type& sp) -> Acts::Vector3 {
+          return sp.topStripDirection().cast<double>();
         });
-      finderCfg.getBottomStripDirection.connect(
-        [](const void*, const ActsTrk::SpacePoint& sp) -> Acts::Vector3 {
-          return sp.bottomStripDirection();
+      m_finderCfg.getBottomStripDirection.connect(
+        [](const void*, const value_type& sp) -> Acts::Vector3 {
+          return sp.bottomStripDirection().cast<double>();
         });
-      finderCfg.getStripCenterDistance.connect(
-          [](const void*, const ActsTrk::SpacePoint& sp) -> Acts::Vector3 {
-            return sp.stripCenterDistance();
+      m_finderCfg.getStripCenterDistance.connect(
+          [](const void*, const value_type& sp) -> Acts::Vector3 {
+            return sp.stripCenterDistance().cast<double>();
           });
-      finderCfg.getTopStripCenterPosition.connect(
-          [](const void*, const ActsTrk::SpacePoint& sp) -> Acts::Vector3 {
-            return sp.topStripCenter();
+      m_finderCfg.getTopStripCenterPosition.connect(
+          [](const void*, const value_type& sp) -> Acts::Vector3 {
+            return sp.topStripCenter().cast<double>();
           });
     }
 
-    // Configuration for Acts::SeedFilter
+    // Configuration for Acts::SeedFilter (used by FinderCfg)
     Acts::SeedFilterConfig filterCfg;
     filterCfg.deltaRMin = m_deltaRMin;
     filterCfg.maxSeedsPerSpM = m_maxSeedsPerSpM;
@@ -382,17 +364,36 @@ namespace ActsTrk {
     filterCfg.seedConfirmation = m_seedConfirmationInFilter;
     filterCfg.maxSeedsPerSpMConf = m_maxSeedsPerSpMConf;
     filterCfg.maxQualitySeedsPerSpMConf = m_maxQualitySeedsPerSpMConf;
-    filterCfg.centralSeedConfirmationRange = finderCfg.centralSeedConfirmationRange;
-    filterCfg.forwardSeedConfirmationRange = finderCfg.forwardSeedConfirmationRange;
+    filterCfg.centralSeedConfirmationRange = m_finderCfg.centralSeedConfirmationRange;
+    filterCfg.forwardSeedConfirmationRange = m_finderCfg.forwardSeedConfirmationRange;
     filterCfg.impactWeightFactor = m_impactWeightFactor;
     filterCfg.compatSeedWeight = m_compatSeedWeight;
     filterCfg.compatSeedLimit = m_compatSeedLimit;
     filterCfg.seedWeightIncrement = m_seedWeightIncrement;
     filterCfg.numSeedIncrement = m_numSeedIncrement;
     filterCfg.deltaInvHelixDiameter = m_deltaInvHelixDiameter;
-    finderCfg.seedFilter = std::make_unique<Acts::SeedFilter< external_spacepoint_t > >(filterCfg);
+    m_finderCfg.seedFilter = std::make_unique<Acts::SeedFilter< value_type > >(filterCfg.toInternalUnits());    
 
-    return std::make_pair(gridCfg, finderCfg);
+    m_finderCfg = m_finderCfg.toInternalUnits().calculateDerivedQuantities();
+
+    // Grid Configuration
+    m_gridCfg.minPt = m_minPt;
+    m_gridCfg.cotThetaMax = m_cotThetaMax;
+    m_gridCfg.impactMax = m_impactMax;
+    m_gridCfg.zMin = m_zMin;
+    m_gridCfg.zMax = m_zMax;
+    m_gridCfg.phiMin = m_gridPhiMin;
+    m_gridCfg.phiMax = m_gridPhiMax;
+    m_gridCfg.zBinEdges = m_zBinEdges;
+    m_gridCfg.deltaRMax = m_deltaRMax;
+    m_gridCfg.rMax = m_gridRMax;
+    m_gridCfg.phiBinDeflectionCoverage = m_phiBinDeflectionCoverage;
+    m_gridCfg = m_gridCfg.toInternalUnits();
+
+    // Seed Finder
+    m_finder = Acts::SeedFinder< value_type >(m_finderCfg);
+ 
+    return StatusCode::SUCCESS;
   }
 
 } // namespace ActsTrk

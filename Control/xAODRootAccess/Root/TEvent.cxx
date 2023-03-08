@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 // System include(s):
 #include <cassert>
@@ -1071,8 +1071,8 @@ namespace xAOD {
                   XAOD_MESSAGE( "Internal logic error detected" ) );
          return StatusCode::FAILURE;
       }
-      const TObjectManager* objMgr =
-         dynamic_cast< const TObjectManager* >( vobjMgr->second );
+      TObjectManager* objMgr =
+         dynamic_cast< TObjectManager* >( vobjMgr->second );
       if( ! objMgr ) {
          ::Error( "xAOD::TEvent::copy",
                   XAOD_MESSAGE( "Internal logic error detected" ) );
@@ -1108,8 +1108,8 @@ namespace xAOD {
       }
       // Check what type of auxiliary store this is:
       if( m_auxMode == kClassAccess || m_auxMode == kAthenaAccess ) {
-         const TObjectManager* auxMgr =
-            dynamic_cast< const TObjectManager* >( vauxMgr->second );
+         TObjectManager* auxMgr =
+            dynamic_cast< TObjectManager* >( vauxMgr->second );
          if( ! auxMgr ) {
             ::Error( "xAOD::TEvent::copy",
                      XAOD_MESSAGE( "Internal logic error detected" ) );
@@ -1120,8 +1120,8 @@ namespace xAOD {
                                auxMgr->holder()->getClass()->GetName(),
                                key + "Aux.", basketSize, splitLevel, kTRUE ) );
       } else if( m_auxMode == kBranchAccess ) {
-         const TAuxManager* auxMgr =
-            dynamic_cast< const TAuxManager* >( vauxMgr->second );
+         TAuxManager* auxMgr =
+            dynamic_cast< TAuxManager* >( vauxMgr->second );
          if( ! auxMgr ) {
             ::Error( "xAOD::TEvent::copy",
                      XAOD_MESSAGE( "Internal logic error detected" ) );
@@ -1640,7 +1640,7 @@ namespace xAOD {
             const TObject * obj = in->At(index);
             if ( ! obj ) continue;
             const TBranch * element = dynamic_cast<const TBranch*>(obj);
-            if (!obj) {
+            if (!element) {
                ::Error("xAOD::TEvent::getNames", "Failure inspecting input objects");
                break;
             }
@@ -1692,7 +1692,7 @@ namespace xAOD {
             const TObject * obj = out->At(index);
             if ( ! obj ) continue;
             const TBranch * element = dynamic_cast<const TBranch*>(obj);
-            if (!obj) {
+            if (!element) {
                ::Error("xAOD::TEvent::getNames", "Failure inspecting input objects");
                break;
             }
@@ -2509,8 +2509,8 @@ namespace xAOD {
       Object_t::const_iterator out_itr = m_outputObjects.find( key );
       if( out_itr != m_outputObjects.end() ) {
          // It needs to be an object manager...
-         const TObjectManager* mgr =
-            dynamic_cast< const TObjectManager* >( out_itr->second );
+         TObjectManager* mgr =
+            dynamic_cast< TObjectManager* >( out_itr->second );
          if( ! mgr ) {
             ::Error( "xAOD::TEvent::connectBranch",
                      XAOD_MESSAGE( "Couldn't access output manager for: %s" ),
@@ -3316,7 +3316,7 @@ namespace xAOD {
                leaflist << brName << "/" << rootType;
 
                // Let's create a holder for this property:
-               THolder* hldr = new THolder( ( void* ) aux->getIOData( id ),
+               THolder* hldr = new THolder( aux->getIOData( id ),
                                             0, kFALSE );
                TPrimitiveAuxBranchManager* auxmgr =
                   new TPrimitiveAuxBranchManager( id, 0, hldr );
@@ -3362,7 +3362,7 @@ namespace xAOD {
                brProperTypeName = cl->GetName();
 
                // Let's create a holder for this property:
-               THolder* hldr = new THolder( ( void* ) aux->getIOData( id ),
+               THolder* hldr = new THolder( aux->getIOData( id ),
                                             cl, kFALSE );
                TAuxBranchManager* auxmgr =
                   new TAuxBranchManager( id, 0, hldr );
@@ -3425,7 +3425,9 @@ namespace xAOD {
          }
 
          // Replace the managed object:
-         bmgr->second->setObject( ( void* ) aux->getIOData( id ) );
+         void* nc_data ATLAS_THREAD_SAFE = // we hold non-const pointers but check on retrieve
+           const_cast< void* >( static_cast< const void* >( aux->getIOData( id ) ) );
+         bmgr->second->setObject( nc_data );
       }
 
       // Return gracefully:

@@ -10,6 +10,8 @@
 #include "DerivationFrameworkMCTruth/TruthDressingTool.h"
 #include "MCTruthClassifier/MCTruthClassifier.h"
 #include "xAODTruth/TruthEventContainer.h"
+#include "StoreGate/WriteDecorHandle.h"
+#include "StoreGate/ReadDecorHandle.h"
 #include "fastjet/PseudoJet.hh"
 #include "fastjet/ClusterSequence.hh"
 #include <vector>
@@ -24,27 +26,6 @@ DerivationFramework::TruthDressingTool::TruthDressingTool(const std::string& t,
    : AthAlgTool(t,n,p)
 {
     declareInterface<DerivationFramework::IAugmentationTool>(this);
-    declareProperty ("particlesKey",
-            m_particlesKey = "TruthParticles",
-            "Name of TruthParticles key for photon list input");
-    declareProperty ("dressParticlesKey",
-            m_dressParticlesKey = "TruthParticles",
-            "Name of TruthParticles key for input particles to be dressed.  If taus are selected, everything in this input key will be used!");
-    declareProperty ("usePhotonsFromHadrons",
-            m_usePhotonsFromHadrons = false,
-            "Add photons coming from hadron decays while dressing particles?");
-    declareProperty ("useLeptonsFromHadrons",
-            m_useLeptonsFromHadrons = false,
-            "Consider leptons coming from hadron decays?");
-    declareProperty ("dressingConeSize", m_coneSize = 0.1,
-            "Size of dR cone in which to include FSR photons in dressing");
-    declareProperty ("particleIDsToDress", m_listOfPIDs = std::vector<int>{11,13},
-            "List of the pdgID's of particles to be dressed (usually 11,13).  Special treatment for taus (15)");
-    declareProperty ("useAntiKt", m_useAntiKt = false,
-            "use anti-k_T instead of fixed-cone dressing");
-    declareProperty ("decorationName", m_decorationName = "",
-            "Name of the decoration for photons that were used in dressing");
-
 }
 
 // Destructor
@@ -54,6 +35,31 @@ DerivationFramework::TruthDressingTool::~TruthDressingTool() {
 // Athena initialize and finalize
 StatusCode DerivationFramework::TruthDressingTool::initialize()
 {
+    // Initialise handle keys
+    ATH_CHECK(m_particlesKey.initialize());
+    ATH_CHECK(m_dressParticlesKey.initialize());
+    m_decorator_eKey = m_dressParticlesKey.key() + ".e_dressed";
+    ATH_CHECK(m_decorator_eKey.initialize());
+    m_decorator_ptKey = m_dressParticlesKey.key() + ".pt_dressed";
+    ATH_CHECK(m_decorator_ptKey.initialize());
+    m_decorator_etaKey= m_dressParticlesKey.key() + ".eta_dressed";
+    ATH_CHECK(m_decorator_etaKey.initialize());
+    m_decorator_phiKey= m_dressParticlesKey.key() + ".phi_dressed";
+    ATH_CHECK(m_decorator_phiKey.initialize());
+    m_decorator_pt_visKey = m_dressParticlesKey.key() + ".pt_vis_dressed";
+    ATH_CHECK(m_decorator_pt_visKey.initialize());
+    m_decorator_eta_visKey= m_dressParticlesKey.key() + ".eta_vis_dressed";
+    ATH_CHECK(m_decorator_eta_visKey.initialize());
+    m_decorator_phi_visKey= m_dressParticlesKey.key() + ".phi_vis_dressed";
+    ATH_CHECK(m_decorator_phi_visKey.initialize());
+    m_decorator_m_visKey= m_dressParticlesKey.key() + ".m_vis_dressed";
+    ATH_CHECK(m_decorator_m_visKey.initialize());
+    m_decorator_nphotonKey = m_dressParticlesKey.key() + ".nPhotons_dressed";
+    ATH_CHECK(m_decorator_nphotonKey.initialize());
+    if (!m_decorationName.empty()) {m_decorationKey = m_dressParticlesKey.key()+"."+m_decorationName;}
+    else {m_decorationKey = m_dressParticlesKey.key()+".unusedPhotonDecoration";} 
+    ATH_CHECK(m_decorationKey.initialize());
+
     return StatusCode::SUCCESS;
 }
 
@@ -66,40 +72,41 @@ StatusCode DerivationFramework::TruthDressingTool::finalize()
 // Function to do dressing, implements interface in IAugmentationTool
 StatusCode DerivationFramework::TruthDressingTool::addBranches() const
 {
-    // Retrieve the truth collections
-    const xAOD::TruthParticleContainer* importedTruthParticles(nullptr);
-    if (evtStore()->retrieve(importedTruthParticles, m_particlesKey).isFailure()) {
-        ATH_MSG_ERROR("No TruthParticleContainer with name " << m_particlesKey << " found in StoreGate!");
-        return StatusCode::FAILURE;
-    }
-    const xAOD::TruthParticleContainer* importedDressTruthParticles(nullptr);
-    if (evtStore()->retrieve(importedDressTruthParticles, m_dressParticlesKey).isFailure()) {
-        ATH_MSG_ERROR("No TruthParticleContainer with name " << m_dressParticlesKey << " found in StoreGate!");
-        return StatusCode::FAILURE;
-    }
-    const static SG::AuxElement::Decorator< float > decorator_e("e_dressed");
-    const static SG::AuxElement::Decorator< float > decorator_pt("pt_dressed");
-    const static SG::AuxElement::Decorator< float > decorator_eta("eta_dressed");
-    const static SG::AuxElement::Decorator< float > decorator_phi("phi_dressed");
+    // Get the event context
+    const EventContext& ctx = Gaudi::Hive::currentContext();
 
+    // Retrieve the truth collections
+    SG::ReadHandle<xAOD::TruthParticleContainer> truthParticles(m_particlesKey,ctx);
+    if (!truthParticles.isValid()) {
+        ATH_MSG_ERROR("Couldn't retrieve TruthParticle collection with name " << m_particlesKey);
+        return StatusCode::FAILURE;
+    }
+ 
+    SG::ReadHandle<xAOD::TruthParticleContainer> dressTruthParticles(m_dressParticlesKey,ctx);
+    if (!dressTruthParticles.isValid()) {
+        ATH_MSG_ERROR("Couldn't retrieve TruthParticle collection with name " << m_particlesKey);
+        return StatusCode::FAILURE;
+    } 
+
+    // Decorators
+    SG::WriteDecorHandle< xAOD::TruthParticleContainer,float > decorator_e(m_decorator_eKey, ctx);
+    SG::WriteDecorHandle< xAOD::TruthParticleContainer,float > decorator_pt(m_decorator_ptKey, ctx);
+    SG::WriteDecorHandle< xAOD::TruthParticleContainer,float > decorator_eta(m_decorator_etaKey, ctx);
+    SG::WriteDecorHandle< xAOD::TruthParticleContainer,float > decorator_phi(m_decorator_phiKey, ctx);
     // for truth taus, use 'vis' in the decoration name to avoid prompt/visible tau momentum ambiguity
     // use (pt,eta,phi,m) for taus, for consistency with other TauAnalysisTools decorations
-    const static SG::AuxElement::Decorator< float > decorator_pt_vis("pt_vis_dressed");
-    const static SG::AuxElement::Decorator< float > decorator_eta_vis("eta_vis_dressed");
-    const static SG::AuxElement::Decorator< float > decorator_phi_vis("phi_vis_dressed");
-    const static SG::AuxElement::Decorator< float > decorator_m_vis("m_vis_dressed");
-
-    const static SG::AuxElement::Decorator< int > decorator_nphoton("nPhotons_dressed");
-
+    SG::WriteDecorHandle< xAOD::TruthParticleContainer,float > decorator_pt_vis(m_decorator_pt_visKey, ctx);
+    SG::WriteDecorHandle< xAOD::TruthParticleContainer,float > decorator_eta_vis(m_decorator_eta_visKey, ctx);
+    SG::WriteDecorHandle< xAOD::TruthParticleContainer,float > decorator_phi_vis(m_decorator_phi_visKey, ctx);
+    SG::WriteDecorHandle< xAOD::TruthParticleContainer,float > decorator_m_vis(m_decorator_m_visKey, ctx);
+    SG::WriteDecorHandle< xAOD::TruthParticleContainer,int > decorator_nphoton(m_decorator_nphotonKey, ctx);
     static const SG::AuxElement::ConstAccessor<unsigned int> acc_origin("Classification");
-
     // One for the photons as well
-    std::string decorationName = m_decorationName.empty()?"unusedPhotonDecoration":m_decorationName;
-    const static SG::AuxElement::Decorator< char > dressDec (decorationName);
+    SG::WriteDecorHandle< xAOD::TruthParticleContainer, char > dressDec (m_decorationKey, ctx);
     // If we want to decorate, then we need to decorate everything with false to begin with
-    if (!m_decorationName.empty()){
-      for (const auto * particle : *importedTruthParticles){
-        if (!particle->isAvailable<char>(decorationName)) {
+    if (!m_decorationKey.key().empty()){
+      for (const auto * particle : *truthParticles){
+        if (!particle->isAvailable<char>(m_decorationKey.key())) {
           dressDec(*particle);
         }
       } // Loop over particles
@@ -115,15 +122,15 @@ StatusCode DerivationFramework::TruthDressingTool::addBranches() const
     if(m_listOfPIDs.size()==1 && abs(m_listOfPIDs[0])==15) {
       // when dressing only truth taus, it is assumed that the truth tau container has
       // been built beforehand and is used as input
-      for (auto pItr = importedDressTruthParticles->begin(); pItr != importedDressTruthParticles->end(); ++pItr) {
-        listOfParticlesToDress.push_back(*pItr);
+      for (auto *pItr : *dressTruthParticles) {
+        listOfParticlesToDress.push_back(pItr);
       }
     } 
     else {
       // non-prompt particles are still included here to ensure all particles
       // will get the decoration; however further down only the prompt particles
       // are actually dressed depending on the value of m_useLeptonsFromHadrons
-      decayHelper.constructListOfFinalParticles(importedDressTruthParticles, listOfParticlesToDress, m_listOfPIDs, true);
+      decayHelper.constructListOfFinalParticles(dressTruthParticles.ptr(), listOfParticlesToDress, m_listOfPIDs, true);
     }
 
     //initialize list of dressed particles
@@ -135,7 +142,7 @@ StatusCode DerivationFramework::TruthDressingTool::addBranches() const
     //fill the photon list
     std::vector<const xAOD::TruthParticle*>  photonsFSRList;
     std::vector<int> photonPID{22};
-    const bool pass = decayHelper.constructListOfFinalParticles(importedTruthParticles, photonsFSRList, 
+    const bool pass = decayHelper.constructListOfFinalParticles(truthParticles.ptr(), photonsFSRList, 
                                                                 photonPID, m_usePhotonsFromHadrons);
     if (!pass) {
       ATH_MSG_ERROR("MCTruthClassifier \"Classification\" not available, cannot apply notFromHadron veto!");

@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include "MdtCablingTestAlg.h"
 #include "StoreGate/ReadCondHandle.h"
 #include "MuonReadoutGeometry/MdtReadoutElement.h"
+#include "MuonCablingData/MdtMezzanineCard.h"
 
 
 
@@ -21,7 +22,52 @@ StatusCode MdtCablingTestAlg::initialize(){
 StatusCode MdtCablingTestAlg::execute(){
   const EventContext& ctx = Gaudi::Hive::currentContext();
   ATH_MSG_INFO("Start validation of the Mdt cabling");
-
+  {
+    using Mapping = MdtMezzanineCard::Mapping;
+    using OffChnl = MdtMezzanineCard::OfflineCh;
+    Mapping staggering{};
+    for (unsigned i = 0 ; i < staggering.size(); ++i){
+        staggering[i] = (staggering.size() -1) -i;
+    }
+    for (unsigned i = 0 ; i < staggering.size()  ; i+=2){
+        std::swap(staggering[i], staggering[i+1]);
+    }
+    for (unsigned nLay : {3,4}){
+      MdtMezzanineCard testCard(staggering, nLay , 0);
+      if (!testCard.checkConsistency(msgStream())) return StatusCode::FAILURE;
+      ATH_MSG_INFO("Test mezzanine "<<testCard);
+      /// Test the online -> offline conversion
+      for (unsigned ch = 0 ; ch < staggering.size() ; ++ch) {
+          OffChnl off = testCard.offlineTube(ch, msgStream());
+          if (!off.isValid) {
+            ATH_MSG_FATAL("Failed to load tube & layer for channel "<<ch);
+            return StatusCode::FAILURE;
+          }
+          unsigned back_ch = testCard.tdcChannel(off.layer, off.tube +1 , msgStream());
+          if (ch != back_ch) {
+            ATH_MSG_FATAL("Forward conversion of "<<ch<<" lead to "
+                            <<static_cast<int>(off.layer)<<","
+                            <<static_cast<int>(off.tube +1)<<" and then back to "
+                            <<back_ch);
+            return StatusCode::FAILURE;
+          }
+      }
+      /// Test the shift by n channels
+      for (unsigned lay = 1 ; lay <= nLay ; ++lay) {
+        for (unsigned int tube = 1 ; tube <= testCard.numTubesPerLayer() ; ++tube) {
+            const unsigned ch1 = testCard.tdcChannel(lay,tube,msgStream());
+            const unsigned ch2 = testCard.tdcChannel(lay,tube  + testCard.numTubesPerLayer(),msgStream());
+            
+            if(ch1 != ch2) {
+                ATH_MSG_FATAL("The tube "<<tube<<" in layer "<<lay
+                              <<" leads to 2 different answers "<<ch1<<" vs. "<<ch2);
+                return StatusCode::FAILURE;
+            }
+        }
+      }
+    }
+  }
+  
   SG::ReadCondHandle<MuonGM::MuonDetectorManager> detectorMgr{m_DetectorManagerKey, ctx};
   if (!detectorMgr.isValid()){
       ATH_MSG_FATAL("Failed to retrieve the Detector manager "<<m_DetectorManagerKey.fullKey());
@@ -82,6 +128,7 @@ StatusCode MdtCablingTestAlg::execute(){
           if (test_id != tube_id){
             ATH_MSG_ERROR("The forward -> backward conversion failed. Started with "<<m_idHelperSvc->toString(tube_id)<<" ended with "<<m_idHelperSvc->toString(test_id));
             failure = true;
+            return StatusCode::FAILURE;
             continue;
           }
           
@@ -92,7 +139,7 @@ StatusCode MdtCablingTestAlg::execute(){
           cabling_data.tdcId = 0xff;
           cabling_data.channelId =0xff;
           if (!cabling->getOfflineId(cabling_data, msgStream()) || !cabling->convert(cabling_data, test_id, true)) {
-              ATH_MSG_ERROR("Failed to decode Mdt module");
+              ATH_MSG_ERROR("Failed to decode Mdt module "<<m_idHelperSvc->toString(tube_id));
               failure = true;
               continue;
           }

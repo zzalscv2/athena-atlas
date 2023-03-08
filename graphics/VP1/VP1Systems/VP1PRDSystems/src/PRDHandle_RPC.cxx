@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1PRDSystems/PRDHandle_RPC.h"
@@ -130,7 +130,7 @@ QStringList PRDHandle_RPC::clicked() const
     Identifier id = m_rpc->identify();
 
     os << "RpcPrepData with Identifier ["<<id.get_compact()  ;
-    os << "] = [" << (idhelper->print_to_string(id)).c_str()  ;
+    os << "] = [" << (idhelper->print_to_string(id))  ;
     os << "]\n at global position = [" << m_rpc->globalPosition()<<"], local position = ["<<m_rpc->localPosition()<<"].";
     os <<"\nTime: "<<m_rpc->time();
     os <<", Trigger info: "<<m_rpc->triggerInfo();

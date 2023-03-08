@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //general interface for secondary vertex finders
@@ -16,7 +16,7 @@
 namespace Analysis {
 
   JetSecVtxFindingAlg::JetSecVtxFindingAlg(const std::string& name, ISvcLocator* pSvcLocator):
-    AthAlgorithm(name,pSvcLocator),
+    AthReentrantAlgorithm(name,pSvcLocator),
     m_secVertexFinderToolHandle(this),
     m_vxPrimaryName("PrimaryVertices")
   {
@@ -25,8 +25,7 @@ namespace Analysis {
     declareProperty("SecVtxFinder",          m_secVertexFinderToolHandle);
   }
 
-  JetSecVtxFindingAlg::~JetSecVtxFindingAlg() {
-  }
+  JetSecVtxFindingAlg::~JetSecVtxFindingAlg() = default;
 
   StatusCode JetSecVtxFindingAlg::initialize()
   {
@@ -53,35 +52,35 @@ namespace Analysis {
   }
 
 
-  StatusCode JetSecVtxFindingAlg::execute() {
+  StatusCode JetSecVtxFindingAlg::execute(const EventContext& ctx) const {
     //retrieve the Jet container
-    SG::ReadHandle<xAOD::JetContainer> h_JetCollectionName (m_JetCollectionName);
+    SG::ReadHandle<xAOD::JetContainer> h_JetCollectionName (m_JetCollectionName, ctx);
     if (!h_JetCollectionName.isValid()) {
       ATH_MSG_ERROR( " cannot retrieve jet container with key " << m_JetCollectionName.key()  );
       return StatusCode::FAILURE;
     }
 
     /* Record the VxSecVertexInfo output container */
-    SG::WriteHandle<Trk::VxSecVertexInfoContainer> h_VxSecVertexInfoName (m_VxSecVertexInfoName);
+    SG::WriteHandle<Trk::VxSecVertexInfoContainer> h_VxSecVertexInfoName (m_VxSecVertexInfoName, ctx);
     ATH_CHECK( h_VxSecVertexInfoName.record(std::make_unique<Trk::VxSecVertexInfoContainer>()));
 
-    if (h_JetCollectionName->size() == 0) {
+    if (h_JetCollectionName->empty()) {
       ATH_MSG_DEBUG("#BTAG# Empty Jet collection");
       return StatusCode::SUCCESS;
     }
 
     SG::ReadDecorHandle<xAOD::JetContainer, std::vector<ElementLink< xAOD::IParticleContainer> > >
-      h_TracksToTag (m_TracksToTag);
+      h_TracksToTag (m_TracksToTag, ctx);
 
     if (!h_TracksToTag.isAvailable()) {
       ATH_MSG_ERROR( "cannot retrieve jet container particle EL decoration with key " << h_TracksToTag.decorKey()  );
       return StatusCode::FAILURE;
     }
  
-    const xAOD::Vertex* primaryVertex(0);
+    const xAOD::Vertex* primaryVertex(nullptr);
 
     //retrieve primary vertex
-    SG::ReadHandle<xAOD::VertexContainer> h_VertexCollectionName (m_VertexCollectionName);
+    SG::ReadHandle<xAOD::VertexContainer> h_VertexCollectionName (m_VertexCollectionName, ctx);
     if (!h_VertexCollectionName.isValid()) {
         ATH_MSG_ERROR( " cannot retrieve primary vertex container with key " << m_VertexCollectionName.key()  );
         return StatusCode::FAILURE;
@@ -91,9 +90,9 @@ namespace Analysis {
       ATH_MSG_DEBUG("#BTAG#  Vertex container is empty");
       return StatusCode::SUCCESS;
     }
-    for (xAOD::VertexContainer::const_iterator fz = h_VertexCollectionName->begin(); fz != h_VertexCollectionName->end(); ++fz) {
-      if ((*fz)->vertexType() == xAOD::VxType::PriVtx) {
-	      primaryVertex = *fz;
+    for (const auto *fz : *h_VertexCollectionName) {
+      if (fz->vertexType() == xAOD::VxType::PriVtx) {
+	      primaryVertex = fz;
 	      break;
       }
     }
@@ -110,13 +109,13 @@ namespace Analysis {
 
     const xAOD::Vertex& PrimaryVtx = *primaryVertex;
 
-    for (xAOD::JetContainer::const_iterator jetIter = h_JetCollectionName->begin(); jetIter != h_JetCollectionName->end(); ++jetIter) {
-      const xAOD::Jet& jetToTag = **jetIter;
+    for (const auto *jetIter : *h_JetCollectionName) {
+      const xAOD::Jet& jetToTag = *jetIter;
 
       const std::vector<ElementLink< xAOD::IParticleContainer > >& tracksInJet
         = h_TracksToTag(jetToTag);
 
-      if(tracksInJet.size()==0){
+      if(tracksInJet.empty()){
         ATH_MSG_DEBUG("#BTAG# No track in Jet");
         h_VxSecVertexInfoName->push_back(nullptr);
         continue;
@@ -125,13 +124,14 @@ namespace Analysis {
       std::vector<const xAOD::IParticle*> inputIParticles;
        
 
-      for (auto iparticle : tracksInJet)
+      inputIParticles.reserve(tracksInJet.size());
+      for (const auto& iparticle : tracksInJet)
 	      /// warning -> will not work if at some point we decide to associate to several track collections at the same time (in the same assoc object)
         inputIParticles.push_back(*iparticle);
 
       ATH_MSG_DEBUG("#BTAG#  Running " << m_secVertexFinderToolHandle);
 
-      Trk::VxSecVertexInfo* myVertexInfo = m_secVertexFinderToolHandle->findSecVertex(PrimaryVtx, (*jetIter)->p4(), inputIParticles);
+      Trk::VxSecVertexInfo* myVertexInfo = m_secVertexFinderToolHandle->findSecVertex(PrimaryVtx, jetIter->p4(), inputIParticles);
       ATH_MSG_DEBUG("#BTAG# Number of vertices found: " << myVertexInfo->vertices().size());
       h_VxSecVertexInfoName->push_back(myVertexInfo); 
     }// for loop on jets

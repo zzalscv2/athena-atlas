@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2013 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -34,7 +34,6 @@ class LArMphysOverMcal2Ntuple : public LArCond2NtupleBase
  private:
 
   std::string m_contKey;
-  bool m_isMC;
 };
 
 #endif

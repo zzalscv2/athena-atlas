@@ -20,6 +20,8 @@
 #include "MuonAnalysisInterfaces/IMuonEfficiencyScaleFactors.h"
 #include "MuonAnalysisInterfaces/IMuonSelectionTool.h"
 #include "MuonAnalysisInterfaces/IMuonTriggerScaleFactors.h"
+#include "MuonAnalysisInterfaces/IMuonLRTOverlapRemovalTool.h"
+#include "xAODMuon/MuonAuxContainer.h"
 
 #include "IsolationCorrections/IIsolationCorrectionTool.h"
 #include "IsolationSelection/IIsolationSelectionTool.h"
@@ -48,12 +50,75 @@ namespace ST {
   const static SG::AuxElement::ConstAccessor<float> acc_z0sinTheta("z0sinTheta");
   const static SG::AuxElement::Decorator<float>     dec_d0sig("d0sig");
   const static SG::AuxElement::ConstAccessor<float> acc_d0sig("d0sig");
+  const static SG::AuxElement::Decorator<ElementLink<xAOD::MuonContainer>> dec_originalMuonLink("originalMuonLink");
+  const static SG::AuxElement::Decorator<char> dec_isLRT("isLRT");
 
-StatusCode SUSYObjDef_xAOD::GetMuons(xAOD::MuonContainer*& copy, xAOD::ShallowAuxContainer*& copyaux, bool recordSG, const std::string& muonkey, const xAOD::MuonContainer* containerToBeCopied)
+
+StatusCode SUSYObjDef_xAOD::MergeMuons(const xAOD::MuonContainer & muons, const std::vector<bool> &writeMuon, xAOD::MuonContainer* outputCol) const{
+
+    if (muons.empty()) return StatusCode::SUCCESS;
+    for (const xAOD::Muon* muon: muons) {
+        // add muon into output 
+        if (writeMuon.at(muon->index())){
+            newMuon = new xAOD::Muon(*muon);
+            ElementLink<xAOD::MuonContainer> muLink;
+            muLink.toIndexedElement(muons, muon->index());
+            dec_originalMuonLink(*newMuon) = muLink;
+            outputCol->push_back(newMuon); 
+        }
+    }
+    return StatusCode::SUCCESS;
+}
+
+
+StatusCode SUSYObjDef_xAOD::GetMuons(xAOD::MuonContainer*& copy, xAOD::ShallowAuxContainer*& copyaux, bool recordSG, const std::string& muonkey, const std::string& lrtmuonkey, const xAOD::MuonContainer* containerToBeCopied)
 {
   if (!m_tool_init) {
     ATH_MSG_ERROR("SUSYTools was not initialized!!");
     return StatusCode::FAILURE;
+  }
+
+  // Initializing prompt/LRT OR procedure
+  auto outputCol = std::make_unique<xAOD::MuonContainer>();
+  std::unique_ptr<xAOD::MuonAuxContainer> outputAuxCol;
+  outputAuxCol = std::make_unique<xAOD::MuonAuxContainer>();
+  outputCol->setStore(outputAuxCol.get());
+  ATH_CHECK( m_outMuonLocation.initialize() );
+
+  if (bool(m_muLRT) && evtStore()->contains<xAOD::MuonContainer>(lrtmuonkey)){
+    ATH_MSG_DEBUG("Applying prompt/LRT muon OR procedure"); 
+
+    // First identify if merged container has already been made (for instances where GetMuons() is called more than once)
+    if (evtStore()->contains<xAOD::MuonContainer>("StdWithLRTMuons")) {
+      ATH_MSG_DEBUG("Merged prompt/LRT container already created in TStore");  
+    } else {
+      ATH_MSG_DEBUG("Creating merged prompt/LRT container in TStore");
+
+      // Retrieve prompt and LRT muons from TStore
+      ATH_CHECK( evtStore()->retrieve(prompt_muons, muonkey) );
+      ATH_CHECK( evtStore()->retrieve(lrt_muons, lrtmuonkey) );
+
+      // Check overlap between prompt and LRT collections
+      std::vector<bool> writePromptMuon;
+      std::vector<bool> writeLRTMuon;
+      m_muonLRTORTool->checkOverlap(*prompt_muons, *lrt_muons, writePromptMuon, writeLRTMuon);
+    
+      // Decorate muons with prompt/LRT
+      for (const xAOD::Muon* mu : *prompt_muons) dec_isLRT(*mu) = 0;
+      for (const xAOD::Muon* mu : *lrt_muons) dec_isLRT(*mu) = 1;
+
+      // Create merged StdWithLRTMuons container
+      outputCol->reserve(prompt_muons->size() + lrt_muons->size());
+      ATH_CHECK(MergeMuons(*prompt_muons, writePromptMuon, outputCol.get()) );
+      ATH_CHECK(MergeMuons(*lrt_muons, writeLRTMuon, outputCol.get()) );
+
+      // Save merged StdWithLRTMuons container to TStore
+      ATH_CHECK(evtStore()->record(std::move(outputCol), m_outMuonLocation.key())); 
+      ATH_CHECK(evtStore()->record(std::move(outputAuxCol), m_outMuonLocation.key() + "Aux.") );
+    }
+  } else {
+    if (evtStore()->contains<xAOD::MuonContainer>(lrtmuonkey) == false && bool(m_muLRT) == true) ATH_MSG_WARNING("prompt/LRT OR procedure attempted but " << lrtmuonkey << " not in ROOT file, check config!");
+    ATH_MSG_DEBUG("Not applying prompt/LRT muon OR procedure"); 
   }
   
   if (m_isPHYSLITE && muonkey.find("AnalysisMuons")==std::string::npos){
@@ -62,23 +127,33 @@ StatusCode SUSYObjDef_xAOD::GetMuons(xAOD::MuonContainer*& copy, xAOD::ShallowAu
   }
 
   const xAOD::MuonContainer* muons = nullptr;
-  if (copy==nullptr) { // empty container provided
-    if (containerToBeCopied != nullptr) {
-      muons = containerToBeCopied;
+  if (bool(m_muLRT) && evtStore()->contains<xAOD::MuonContainer>(lrtmuonkey)){
+      ATH_MSG_DEBUG("Using container: " << m_outMuonLocation.key());
+      ATH_CHECK( evtStore()->retrieve(muons, m_outMuonLocation.key())); 
+  }
+  else { 
+    if (copy==nullptr) { // empty container provided
+        ATH_MSG_DEBUG("Empty container provided");
+      if (containerToBeCopied != nullptr) {
+        ATH_MSG_DEBUG("Containter to be copied not nullptr");
+        muons = containerToBeCopied;
+      }
+      else {
+        ATH_MSG_DEBUG("Getting Muons collection");
+        ATH_CHECK( evtStore()->retrieve(muons, muonkey) );
+      }
     }
-    else {
-      ATH_CHECK( evtStore()->retrieve(muons, muonkey) );
-    }
-    std::pair<xAOD::MuonContainer*, xAOD::ShallowAuxContainer*> shallowcopy = xAOD::shallowCopyContainer(*muons);
-    copy = shallowcopy.first;
-    copyaux = shallowcopy.second;
-    bool setLinks = xAOD::setOriginalObjectLink(*muons, *copy);
-    if (!setLinks) {
-      ATH_MSG_WARNING("Failed to set original object links on " << muonkey);
-    }
+  }
+
+  std::pair<xAOD::MuonContainer*, xAOD::ShallowAuxContainer*> shallowcopy = xAOD::shallowCopyContainer(*muons);
+  copy = shallowcopy.first;
+  copyaux = shallowcopy.second;
+  bool setLinks = xAOD::setOriginalObjectLink(*muons, *copy);
+  if (!setLinks) {
+    ATH_MSG_WARNING("Failed to set original object links on " << muonkey);
   } else { // use the user-supplied collection instead 
-    ATH_MSG_DEBUG("Not retrieving muon collecton, using existing one provided by user");
-    muons=copy;
+      ATH_MSG_DEBUG("Not retrieving muon collecton, using existing one provided by user");
+      muons=copy;
   }
 
   for (const auto& muon : *copy) {
@@ -182,21 +257,21 @@ StatusCode SUSYObjDef_xAOD::FillMuon(xAOD::Muon& input, float ptcut, float etacu
       track->summaryValue( nTRTOutliers, xAOD::numberOfTRTOutliers);
     }
 
-    ATH_MSG_INFO( "MUON pt: " << input.pt() );
-    ATH_MSG_INFO( "MUON eta: " << input.eta() );
-    ATH_MSG_INFO( "MUON phi: " << input.phi() );
-    ATH_MSG_INFO( "MUON comb: " << (int)(input.muonType() == xAOD::Muon::Combined) );
-    ATH_MSG_INFO( "MUON sTag: " << (int)(input.muonType() == xAOD::Muon::SegmentTagged));
-    ATH_MSG_INFO( "MUON loose: " << (int)(input.quality() == xAOD::Muon::Loose ) );
-    ATH_MSG_INFO( "MUON bHit: " << (int) nBLHits );
-    ATH_MSG_INFO( "MUON pHit: " << (int) nPixHits );
-    ATH_MSG_INFO( "MUON pDead: " << (int) nPixelDeadSensors );
-    ATH_MSG_INFO( "MUON pHole: " << (int) nPixHoles );
-    ATH_MSG_INFO( "MUON sHit: "  << (int) nSCTHits);
-    ATH_MSG_INFO( "MUON sDead: " << (int) nSCTDeadSensors );
-    ATH_MSG_INFO( "MUON sHole: " << (int) nSCTHoles );
-    ATH_MSG_INFO( "MUON tHit: "  << (int) nTRTHits );
-    ATH_MSG_INFO( "MUON tOut: "  << (int) nTRTOutliers );
+    ATH_MSG_INFO( "MUON pt:   " << input.pt() );
+    ATH_MSG_INFO( "MUON eta:  " << input.eta() );
+    ATH_MSG_INFO( "MUON phi:  " << input.phi() );
+    ATH_MSG_INFO( "MUON comb: " << (input.muonType() == xAOD::Muon::Combined));
+    ATH_MSG_INFO( "MUON sTag: " << (input.muonType() == xAOD::Muon::SegmentTagged));
+    ATH_MSG_INFO( "MUON loose:" << (input.quality() == xAOD::Muon::Loose));
+    ATH_MSG_INFO( "MUON bHit: " << static_cast<int>( nBLHits ));
+    ATH_MSG_INFO( "MUON pHit: " << static_cast<int>( nPixHits ));
+    ATH_MSG_INFO( "MUON pDead:" << static_cast<int>( nPixelDeadSensors ));
+    ATH_MSG_INFO( "MUON pHole:" << static_cast<int>( nPixHoles ));
+    ATH_MSG_INFO( "MUON sHit: " << static_cast<int>( nSCTHits));
+    ATH_MSG_INFO( "MUON sDead:" << static_cast<int>( nSCTDeadSensors ));
+    ATH_MSG_INFO( "MUON sHole:" << static_cast<int>( nSCTHoles ));
+    ATH_MSG_INFO( "MUON tHit: " << static_cast<int>( nTRTHits ));
+    ATH_MSG_INFO( "MUON tOut: " << static_cast<int>( nTRTOutliers ));
 
     const xAOD::TrackParticle* idtrack =
       input.trackParticle( xAOD::Muon::InnerDetectorTrackParticle );
@@ -204,7 +279,7 @@ StatusCode SUSYObjDef_xAOD::FillMuon(xAOD::Muon& input, float ptcut, float etacu
     if ( !idtrack) {
       ATH_MSG_VERBOSE( "No ID track!! " );
     } else {
-      ATH_MSG_VERBOSE( "ID track pt: "  << idtrack->pt() );
+      ATH_MSG_VERBOSE( "ID track pt: "  << idtrack->pt());
     }
   }
   
@@ -258,14 +333,14 @@ bool SUSYObjDef_xAOD::IsSignalMuon(const xAOD::Muon & input, float ptcut, float 
   dec_signal(input) = true;
 
   if (m_muId == 4) { //i.e. HighPt muons
-    ATH_MSG_VERBOSE( "IsSignalMuon: mu pt " << input.pt()
-                     << " signal? " << (int) acc_signal(input)
-                     << " isolation? " << (int) acc_isol(input)
-                     << " passedHighPtCuts? " << (int) acc_passedHighPtCuts(input));
+    ATH_MSG_VERBOSE( "IsSignalMuon: mu pt "   << input.pt()
+                     << " signal? "           << static_cast<int>(acc_signal(input))
+                     << " isolation? "        << static_cast<int>(acc_isol(input))
+                     << " passedHighPtCuts? " << static_cast<int>(acc_passedHighPtCuts(input)));
   } else {
-    ATH_MSG_VERBOSE( "IsSignalMuon: mu pt " << input.pt()
-                     << " signal? " << (int) acc_signal(input)
-                     << " isolation? " << (int) acc_isol(input));
+    ATH_MSG_VERBOSE( "IsSignalMuon: mu pt "   << input.pt()
+                     << " signal? "           << static_cast<int>( acc_signal(input))
+                     << " isolation? "        << static_cast<int>( acc_isol(input)));
     // Don't show HighPtFlag ... we didn't set it!
   }
 
@@ -399,6 +474,7 @@ bool SUSYObjDef_xAOD::IsCosmicMuon(const xAOD::Muon& input, float z0cut, float d
     }
   }
 
+
   if (isoSF) {
     float sf_iso(1.);
     if (acc_isolHighPt(mu) && mu.pt()>m_muIsoHighPtThresh) {
@@ -413,6 +489,7 @@ bool SUSYObjDef_xAOD::IsCosmicMuon(const xAOD::Muon& input, float z0cut, float d
     ATH_MSG_VERBOSE( "MuonIso ScaleFactor " << sf_iso );
     sf *= sf_iso;
   }
+
 
   dec_effscalefact(mu) = sf;
   return sf;
@@ -434,8 +511,9 @@ double SUSYObjDef_xAOD::GetMuonTriggerEfficiency(const xAOD::Muon& mu, const std
 
 
 double SUSYObjDef_xAOD::GetTotalMuonTriggerSF(const xAOD::MuonContainer& sfmuons, const std::string& trigExpr) {
-
+ 
   if (trigExpr.empty() || sfmuons.empty()) return 1.;
+
 
   double trig_sf = 1.;
 
@@ -462,13 +540,13 @@ double SUSYObjDef_xAOD::GetTotalMuonTriggerSF(const xAOD::MuonContainer& sfmuons
   }
   else{ //Case 3: let's go the hard way...
         //Following https://twiki.cern.ch/twiki/bin/view/Atlas/TrigMuonEfficiency
-
     std::string newtrigExpr = TString(trigExpr).Copy().ReplaceAll("HLT_2","").Data();
 
     //redefine dimuon triggers here (2mu14 --> mu14_mu14)
     if (isdimuon) { newtrigExpr += "_"+newtrigExpr;  }
     boost::replace_all(newtrigExpr, "HLT_", "");
     boost::char_separator<char> sep("_");
+
     for (const auto& mutrig : boost::tokenizer<boost::char_separator<char>>(newtrigExpr, sep)) {
       double dataFactor = 1.;
       double mcFactor   = 1.;

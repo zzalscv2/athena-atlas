@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONNSWASBUILT_ELEMENT_H
@@ -94,7 +94,7 @@ namespace NswAsBuilt {
       const std::string& asapId() const { return m_asapId; }
 
      /* Getters and setters for the tree structure */
-      void addDaughter(std::unique_ptr<Element> daughter);
+      Element* addDaughter(std::unique_ptr<Element> daughter);
       const Element* mother() const { return m_mother; }
             Element* mother()       { return m_mother; }
 

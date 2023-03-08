@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 # art-description: BeamSpot update test using athenaHLT
 # art-type: build
 # art-include: master/Athena
-# art-include: 22.0/Athena
+# art-include: 23.0/Athena
 
 from TrigValTools.TrigValSteering import Test, Step, ExecStep, CheckSteps
 from TrigValTools.TrigValSteering.Input import get_input

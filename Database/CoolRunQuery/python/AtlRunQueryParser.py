@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 # ----------------------------------------------------------------
 # Script : AtlRunQueryParser.py
@@ -730,7 +730,7 @@ class ArgumentParser:
 
         # remove duplicates in show block
         duples  = ['--show %s' % d.strip() for d in showargs.split('--show') if d.strip()!='']
-        uniques = reduce(lambda l, x: (x not in l and l.append(x)) or l, duples, [])
+        uniques = reduce(lambda first, second: (second not in first and first.append(second)) or first, duples, [])
         showargs = ' '.join(uniques)
 
         return showargs

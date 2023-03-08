@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // METTruthAssociator.cxx 
@@ -31,7 +31,7 @@
 #include "xAODEgamma/EgammaxAODHelpers.h"
 //#include "xAODEgamma/EgammaTruthxAODHelpers.h"
 #include "xAODTruth/xAODTruthHelpers.h"
-#include "TruthUtils/TruthParticleHelpers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 // DeltaR calculation
 #include "FourMomUtils/xAODP4Helpers.h"
@@ -52,7 +52,7 @@ namespace met {
   // Destructor
   ///////////////
   METTruthAssociator::~METTruthAssociator()
-  {}
+  = default;
 
   // Athena algtool's Hooks
   ////////////////////////////
@@ -158,7 +158,7 @@ namespace met {
     std::vector<const IParticle*> jetTruth;
     std::vector<ElementLink<IParticleContainer> > jetconst;
     jetTruth.reserve(20);
-    for(const auto jet : *jetCont) {
+    for(const auto *const jet : *jetCont) {
       jetTruth.clear();
       jetconst.clear();
       MissingETBase::Types::constvec_t trkvec;
@@ -232,10 +232,10 @@ namespace met {
     const IParticleContainer* uniqueTruth = metMap->getUniqueSignals(truthParticleCont.asDataVector(),MissingETBase::UsageHandler::TruthParticle);
     ATH_MSG_VERBOSE("Extracted " << uniqueTruth->size() << "/" << truthParticleCont.size()
 		    << " unique truth particles.");
-    for(const auto part : *uniqueTruth) {
+    for(const auto *const part : *uniqueTruth) {
       const xAOD::TruthParticle* truth = static_cast<const xAOD::TruthParticle*>(part);
       // stable
-      if(!MC::isGenStable(truth->status(),truth->barcode())) continue;
+      if(!truth->isGenStable()) continue;
       // interacting
       if(MC::isNonInteracting(truth->pdgId())) continue;
       if(truth->pt()<1 || fabs(truth->eta())>5) continue;
@@ -281,7 +281,7 @@ namespace met {
     const xAOD::Electron* el = static_cast<const xAOD::Electron*>(obj);
     // El --> TruthParticles
     const xAOD::TruthParticle* eltruth = TruthHelpers::getTruthParticle( *el );
-    if(eltruth && MC::isGenStable(eltruth->status(),eltruth->barcode()))
+    if(eltruth && eltruth->isGenStable())
       truthlist.push_back(eltruth);
 
     // for(size_t iTrk=0; iTrk<el->nTrackParticles(); ++iTrk) {
@@ -312,7 +312,7 @@ namespace met {
     for(const auto truth : truthParticleCont) {
       if(truth->pt()<1) continue;
       // stable
-      if(!MC::isGenStable(truth->status(),truth->barcode())) continue;
+      if(!truth->isGenStable()) continue;
       // interacting
       if(MC::isNonInteracting(truth->pdgId())) continue;
       float etasize = 0.025/2;
@@ -362,7 +362,7 @@ namespace met {
     const xAOD::Photon* ph = static_cast<const xAOD::Photon*>(obj);
     // Ph --> TruthParticles
     const xAOD::TruthParticle* phtruth = TruthHelpers::getTruthParticle( *ph );
-    if(phtruth && MC::isGenStable(phtruth->status(),phtruth->barcode()))
+    if(phtruth && phtruth->isGenStable())
       truthlist.push_back(phtruth);
 
     // std::vector<const xAOD::TrackParticle*> phtrks;
@@ -405,7 +405,7 @@ namespace met {
     for(const auto truth : truthParticleCont) {
       if(!truth || truth->pt()<1) continue;
       // stable
-      if(!MC::isGenStable(truth->status(),truth->barcode())) continue;
+      if(!truth->isGenStable()) continue;
       // interacting
       if(MC::isNonInteracting(truth->pdgId())) continue;
       float etasize(0.025/2);
@@ -454,13 +454,13 @@ namespace met {
   }
 
   StatusCode METTruthAssociator::extractTruthFromMuon(const xAOD::IParticle* obj,
-						      std::vector<const xAOD::IParticle*>& truthlist) const
+						      std::vector<const xAOD::IParticle*>& truthlist) 
   {
     const xAOD::Muon* mu = static_cast<const xAOD::Muon*>(obj);
     const TrackParticle* trk = mu->primaryTrackParticle();
-    const xAOD::TruthParticle* truth(0);
+    const xAOD::TruthParticle* truth(nullptr);
     if(trk) truth = TruthHelpers::getTruthParticle( *trk );
-    if(truth && MC::isGenStable(truth->status(),truth->barcode()))
+    if(truth && truth->isGenStable())
       truthlist.push_back(truth);
     return StatusCode::SUCCESS;
   }
@@ -492,7 +492,7 @@ namespace met {
     std::vector<const IParticle*> constlist;
     constlist.reserve(20);
     std::vector<const IParticle*> hardObjs_tmp;
-    for(const auto obj : *hardObjs) {
+    for(const auto *const obj : *hardObjs) {
       hardObjs_tmp.push_back(obj);
     }
     std::sort(hardObjs_tmp.begin(),hardObjs_tmp.end(),greaterPt);

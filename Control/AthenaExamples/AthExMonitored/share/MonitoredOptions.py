@@ -1,6 +1,7 @@
 from AthenaCommon.AppMgr import theApp
 from AthenaCommon.AppMgr import ServiceMgr as svcMgr
 from AthenaCommon.AlgSequence import AlgSequence
+from AthenaConfiguration.AllConfigFlags import ConfigFlags
 
 job = AlgSequence()
 
@@ -8,7 +9,7 @@ from AthExMonitored.AthExMonitoredConf import MonitoredAlg
 job += MonitoredAlg('MonAlg')
 
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-monTool = GenericMonitoringTool('MonTool')
+monTool = GenericMonitoringTool(ConfigFlags, 'MonTool')
 
 #monTool.HistPath = 'MyGroup/MySubDir'  # default is the parent name of MonTool
 monTool.defineHistogram( 'nTracks', path='EXPERT', type='TH1F', title='Counts',

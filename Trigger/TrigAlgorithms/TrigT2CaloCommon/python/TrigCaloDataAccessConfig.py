@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
@@ -37,7 +37,7 @@ def CaloOffsetCorrectionCfg(flags):
     from LArRecUtils.LArRecUtilsConfig import LArMCSymCondAlgCfg
     acc.merge( LArMCSymCondAlgCfg( flags ) )
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-    monTool = GenericMonitoringTool('MonTool')
+    monTool = GenericMonitoringTool(flags, 'MonTool')
     monTool.defineHistogram('TIME_exec', path='EXPERT', type='TH1F', title="CaloBCIDAvgAlg execution time; time [ us ] ; Nruns", xbins=80, xmin=0.0, xmax=4000)
     acc.getEventAlgo("CaloBCIDAvgAlg").MonTool = monTool
     return acc
@@ -96,29 +96,34 @@ def trigCaloDataAccessSvcCfg( flags ):
         else:
             acc.merge(CaloOffsetCorrectionCfg(flags))
 
-    acc.addService( svc )
+    acc.addService( svc, primary=True )
     return acc
 
 
 if __name__ == "__main__":
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.Input.isMC=False
-    ConfigFlags.lock()
-    acc = ComponentAccumulator()
-    from AthenaCommon.CFElements import parOR
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    import sys
 
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.Input.isMC=False
+    flags.lock()
+
+    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+    acc = MainServicesCfg( flags )
+
+    from AthenaCommon.CFElements import parOR
     acc.addSequence(parOR("HLTBeginSeq"))
 
     from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-    acc.merge( ByteStreamReadCfg( ConfigFlags ) )
+    acc.merge( ByteStreamReadCfg( flags ) )
 
-    acc.merge( trigCaloDataAccessSvcCfg( ConfigFlags ) )
+    acc.merge( trigCaloDataAccessSvcCfg( flags ) )
 
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
     import math
-    mon = GenericMonitoringTool("TrigCaloDataAccessSvcMon")
+    mon = GenericMonitoringTool(flags, "TrigCaloDataAccessSvcMon")
     mon.defineHistogram("TIME_locking_LAr_RoI",
                         path="EXPERT",
                         title="Time spent in unlocking the LAr collection",
@@ -140,18 +145,9 @@ if __name__ == "__main__":
 
     acc.getService("TrigCaloDataAccessSvc").MonTool = mon
 
-
-    TestCaloDataAccess=CompFactory.TestCaloDataAccess
-    testAlg = TestCaloDataAccess()
+    testAlg = CompFactory.TestCaloDataAccess()
     acc.addEventAlgo(testAlg)
 
     acc.printConfig(True)
-
-    print("running this configuration")  # noqa: ATL901
-    of = open("test.pkl", "wb")
-    acc.store(of)
-    of.close()
-
-
-
-
+    sc = acc.run(10)
+    sys.exit(sc.isFailure())

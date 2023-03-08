@@ -13,6 +13,7 @@
 
 #include "TString.h"
 #include <vector>
+#include "CxxUtils/checker_macros.h"
 
 namespace LArSamples {
 
@@ -25,7 +26,7 @@ namespace LArSamples {
     TString name, label; 
   };
   
-  class EventData {
+  class ATLAS_NOT_THREAD_SAFE EventData {
     
     public:
       

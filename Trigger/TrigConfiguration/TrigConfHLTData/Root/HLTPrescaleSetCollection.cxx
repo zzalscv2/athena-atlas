@@ -8,6 +8,7 @@
 #include <iomanip>
 #include <stdexcept>
 #include <iostream>
+#include <sstream>
 
 using namespace std;
 using namespace TrigConf;

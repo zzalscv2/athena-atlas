@@ -29,7 +29,7 @@ TFCSGANLWTNNHandler::~TFCSGANLWTNNHandler(){
   }
 }
 
-bool TFCSGANLWTNNHandler::LoadGAN(std::string inputFile){
+bool TFCSGANLWTNNHandler::LoadGAN(const std::string& inputFile){
   std::ifstream input(inputFile);
   std::stringstream sin;
   sin << input.rdbuf();

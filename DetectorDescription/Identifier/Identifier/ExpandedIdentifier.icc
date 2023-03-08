@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------
@@ -19,9 +19,7 @@ inline ExpandedIdentifier::ExpandedIdentifier(const ExpandedIdentifier& other,
 inline void
 ExpandedIdentifier::add(element_type value)
 {
-  // Max size of id levels should be < 10
-  if (m_fields.capacity() < 10)
-    m_fields.reserve(10);
+  // Max size of id levels should be < 12
   m_fields.push_back(value);
 }
 
@@ -29,11 +27,8 @@ ExpandedIdentifier::add(element_type value)
 inline ExpandedIdentifier&
 ExpandedIdentifier::operator<<(element_type value)
 {
-  // Max size of id levels should be < 10
-  if (m_fields.capacity() < 10)
-    m_fields.reserve(10);
+  // Max size of id levels should be < 12
   m_fields.push_back(value);
-
   return (*this);
 }
 

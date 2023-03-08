@@ -25,7 +25,7 @@ class TileLaser {
     , m_filtNumber(0)
     , m_slamaDelay(0) { }
 
-  ~TileLaser() { }
+  ~TileLaser() =default;
     
   int getDiodeCurrOrd() const  { return m_diodeCurrOrd;  }
   int getDiodeCurrMeas() const { return m_diodeCurrMeas; }

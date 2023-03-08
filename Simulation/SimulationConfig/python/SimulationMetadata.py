@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 ### This module contains functions which may need to peek at the input file metadata
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.Enums import FlagEnum, ProductionStep
@@ -13,7 +13,13 @@ def fillAtlasMetadata(flags, dbFiller):
     #todo - only add certain ones?
     #in future this should be a ConfigFlags method...?
     for flag in sorted(flags._flagdict): #only sim
-        if "Sim" in flag:
+        if flag.startswith("Sim."):
+            if "GenerationConfiguration" in flag:
+                # This flag is only temporarily defined in the SimConfigFlags module
+                continue
+            if "Twiss" in flag and not flags.Detector.GeometryForward:
+                # The various Twiss flags should only be written out when Forward Detector simulation is enabled
+                continue
             key = flag.split(".")[-1] #use final part of flag as the key
             value = flags._get(flag)
             if isinstance(value, FlagEnum):

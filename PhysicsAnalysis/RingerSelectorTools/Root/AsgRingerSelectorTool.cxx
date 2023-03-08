@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
 // Local includes:
 #include "RingerSelectorTools/AsgRingerSelectorTool.h"
 #include "RingerSelectorTools/tools/onnx/RingerSelector.h"
-
+#include <cmath>
 
 namespace Ringer {
 
@@ -15,7 +15,7 @@ namespace Ringer {
 //==============================================================================
 // Standard constructor
 //==============================================================================
-AsgRingerSelectorTool::AsgRingerSelectorTool(std::string name) :
+AsgRingerSelectorTool::AsgRingerSelectorTool(const std::string& name) :
   AsgTool( name ),
   m_selector( name )
 {}
@@ -72,7 +72,8 @@ asg::AcceptData AsgRingerSelectorTool::accept( const xAOD::TrigRingerRings *ring
 
 float AsgRingerSelectorTool::predict( const xAOD::TrigRingerRings* ringsCluster ) const 
 {
-  return m_selector.predict( ringsCluster , nullptr);
+  float output = m_selector.predict( ringsCluster , nullptr);
+  return m_useTansigOutput ? tanh(output) : output;
 }
 
 // =============================================================================
@@ -80,7 +81,8 @@ float AsgRingerSelectorTool::predict( const xAOD::TrigRingerRings* ringsCluster 
 float AsgRingerSelectorTool::predict( const xAOD::TrigRingerRings* ringsCluster,
                                       const xAOD::TrigElectron *el ) const 
 {
-  return m_selector.predict( ringsCluster , el);
+  float output =  m_selector.predict( ringsCluster , el);
+  return m_useTansigOutput ? tanh(output) : output;
 }
 
 // =============================================================================

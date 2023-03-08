@@ -171,11 +171,10 @@ namespace met {
     else if (m_jetSelection == "Tighter"){ m_CenJetPtCut = 20e3; m_FwdJetPtCut = 35e3; m_JvtWP = "FixedEffPt"; m_JvtCut = m_doPFlow ? 0.5 : 0.59; m_JvtPtMax = 60e3; }
     else if (m_jetSelection == "Tenacious")  {
       m_CenJetPtCut  = 20e3; m_FwdJetPtCut = 35e3;
+      m_JvtWP = "TightFwd";
       m_JvtCutTight  = 0.91; m_JvtTightPtMax  = 40.0e3;
       m_JvtCutMedium = 0.59; m_JvtMediumPtMax = 60.0e3;
       m_JvtCut       = 0.11; m_JvtPtMax = 120e3;
-      // for the current definition of the Tenacious WP we need to rely on placing individual Jvt cuts
-      m_useR21JvtFallback = true;
     }
     else if (m_jetSelection == "Tier0")  { m_CenJetPtCut = 0;    m_FwdJetPtCut = 0;    m_JvtCut = -1;   m_JvtPtMax = 0; m_useR21JvtFallback = true;}
     else if (m_jetSelection == "Expert")  {

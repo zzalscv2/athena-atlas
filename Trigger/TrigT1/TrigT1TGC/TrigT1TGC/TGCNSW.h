@@ -22,7 +22,7 @@ class TGCNSW : public AthMessaging {
  public:
   TGCNSW();
   virtual ~TGCNSW() = default;
-  TGCNSW(const TGCNSW& right) = default;
+  TGCNSW(const TGCNSW& right) = delete;
   const TGCNSW& operator = (const TGCNSW& right) = delete;
   bool operator == (const TGCNSW& right) const = delete;
   bool operator != (const TGCNSW& right) const = delete;

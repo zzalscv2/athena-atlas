@@ -23,6 +23,7 @@ def PhysCommonAugmentationsCfg(ConfigFlags,**kwargs):
             AddTruthCollectionNavigationDecorationsCfg)
         from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import TruthCollectionMakerCfg
         PhysCommonTruthCharmTool = acc.getPrimaryAndMerge(TruthCollectionMakerCfg(
+            ConfigFlags,
             name                    = "PhysCommonTruthCharmTool",
             NewCollectionName       = "TruthCharm",
             KeepNavigationInfo      = False,
@@ -33,6 +34,7 @@ def PhysCommonAugmentationsCfg(ConfigFlags,**kwargs):
         acc.merge(AddHFAndDownstreamParticlesCfg(ConfigFlags))
         acc.merge(AddStandardTruthContentsCfg(ConfigFlags))
         acc.merge(AddTruthCollectionNavigationDecorationsCfg(
+            ConfigFlags,
             TruthCollections=["TruthElectrons", 
                               "TruthMuons", 
                               "TruthPhotons", 
@@ -56,18 +58,18 @@ def PhysCommonAugmentationsCfg(ConfigFlags,**kwargs):
     # TODO: need to find the new flags equivalent for the missing settings below, then we can
     # drop these kwargs and do everything via the ConfigFlags
     acc.merge(InDetCommonCfg(ConfigFlags,
-                             DoVertexFinding = ConfigFlags.InDet.PriVertex.doVertexFinding if ConfigFlags.GeoModel.Run<=LHCPeriod.Run3 else ConfigFlags.ITk.PriVertex.doVertexFinding,
+                             DoVertexFinding = ConfigFlags.Tracking.doVertexFinding,
                              AddPseudoTracks = ConfigFlags.InDet.Tracking.doPseudoTracking and ConfigFlags.GeoModel.Run<=LHCPeriod.Run3,
                              DecoLRTTTVA = False,
-                             DoR3LargeD0 = ConfigFlags.InDet.Tracking.doR3LargeD0 if ConfigFlags.GeoModel.Run<=LHCPeriod.Run3 else ConfigFlags.ITk.Tracking.doLargeD0,
-                             StoreSeparateLargeD0Container = ConfigFlags.InDet.Tracking.storeSeparateLargeD0Container if ConfigFlags.GeoModel.Run<=LHCPeriod.Run3 else ConfigFlags.ITk.Tracking.storeSeparateLargeD0Container,
+                             DoR3LargeD0 = ConfigFlags.Tracking.doLargeD0,
+                             StoreSeparateLargeD0Container = ConfigFlags.Tracking.storeSeparateLargeD0Container,
                              MergeLRT = False)) 
     acc.merge(MuonsCommonCfg(ConfigFlags))
     acc.merge(EGammaCommonCfg(ConfigFlags))
     # Jets, di-taus, tau decorations, flavour tagging, MET association
     from DerivationFrameworkJetEtMiss.JetCommonConfig import JetCommonCfg
     from DerivationFrameworkFlavourTag.FtagDerivationConfig import FtagJetCollectionsCfg
-    from DerivationFrameworkTau.TauCommonConfig import (AddDiTauLowPtCfg, AddTauWPDecorationCfg, AddMuonRemovalTauAODReRecoAlgCfg)
+    from DerivationFrameworkTau.TauCommonConfig import (AddDiTauLowPtCfg, AddMuonRemovalTauAODReRecoAlgCfg, AddTauIDDecorationCfg)
     from DerivationFrameworkJetEtMiss.METCommonConfig import METCommonCfg 
     acc.merge(JetCommonCfg(ConfigFlags))
     #We also need to build links between the newly created jet constituents (GlobalFE)
@@ -76,9 +78,9 @@ def PhysCommonAugmentationsCfg(ConfigFlags,**kwargs):
     acc.merge(PFGlobalFlowElementLinkingCfg(ConfigFlags))
     acc.merge(AddDiTauLowPtCfg(ConfigFlags))
     acc.merge(AddMuonRemovalTauAODReRecoAlgCfg(ConfigFlags))
-    # fix eVeto WP for taus and ditaus
-    acc.merge(AddTauWPDecorationCfg(ConfigFlags, evetoFix=True))
-    acc.merge(AddTauWPDecorationCfg(ConfigFlags, evetoFix=True, TauContainerName="TauJets_MuonRM", OverrideDecoration=True))
+    # eVeto WP and DeepSet ID for taus and muon-subtracted taus
+    acc.merge(AddTauIDDecorationCfg(ConfigFlags, TauContainerName="TauJets"))
+    acc.merge(AddTauIDDecorationCfg(ConfigFlags, TauContainerName="TauJets_MuonRM"))
 
     FTagJetColl = ['AntiKt4EMPFlowJets','AntiKtVR30Rmax4Rmin02TrackJets']
     if ConfigFlags.GeoModel.Run >= LHCPeriod.Run4:
@@ -87,7 +89,7 @@ def PhysCommonAugmentationsCfg(ConfigFlags,**kwargs):
     acc.merge(METCommonCfg(ConfigFlags))
 
     # Trigger matching
-    if ConfigFlags.Reco.EnableTrigger or ConfigFlags.Trigger.InputContainsConfigMetadata:
+    if ConfigFlags.Reco.EnableTrigger or ConfigFlags.Trigger.triggerConfig == 'INFILE':
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import TriggerMatchingCommonRun2Cfg
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import TriggerMatchingCommonRun3Cfg
         # requires some wrangling due to the difference between run 2 and 3

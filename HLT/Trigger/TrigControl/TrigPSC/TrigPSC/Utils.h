@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -37,10 +37,16 @@ namespace psc {
     /**
      * @brief  Include a python file via AthenaCommon.Include
      * @param  pyFileName File name
-     * @param  showIncludes Trace included files
      * @return Success/Failure
      */
     bool pyInclude (const std::string& pyFileName);
+
+    /**
+     * @brief  Execute a python file (via include or import)
+     * @param  pyFileName File name
+     * @return Success/Failure
+     */
+    bool execFile (const std::string& pyFileName);
     
     /**
      * @brief  Very simple timer class

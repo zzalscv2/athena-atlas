@@ -1,11 +1,12 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaCommon.Logging import logging
 log = logging.getLogger('decodeBS_TLA_AOD.py')
+
 
 
 def decodingCfg(flags):
@@ -18,6 +19,11 @@ def decodingCfg(flags):
     acc.addSequence(seqAND("Decoding"))
 
     acc.addEventAlgo(CompFactory.HLTResultMTByteStreamDecoderAlg(), "Decoding")
+
+    from TrigDecisionMaker.TrigDecisionMakerConfig import Run3DecisionMakerCfg
+    
+    acc.merge(Run3DecisionMakerCfg(flags))
+
 
     deserialiser = CompFactory.TriggerEDMDeserialiserAlg("TLATrigDeserialiser")
     deserialiser.ModuleID = DataScoutingInfo.DataScoutingIdentifiers["PhysicsTLA"]
@@ -40,6 +46,8 @@ def outputCfg(flags):
     ItemList += [ "xAOD::EventInfo#EventInfo", "xAOD::EventAuxInfo#EventInfoAux." ]
     ItemList += [ 'xAOD::TrigCompositeContainer#*' ]
     ItemList += [ 'xAOD::TrigCompositeAuxContainer#*' ]
+    ItemList += [ 'xAOD::TrigDecision#*' ]
+    ItemList += [ 'xAOD::TrigDecisionAuxInfo#*']
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     acc.merge(OutputStreamCfg(flags, "AOD", ItemList=ItemList))
@@ -88,21 +96,26 @@ def setupDecodeCfgCA(flags):
 
 if __name__ == "__main__":
    
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
 
     args = GetCustomAthArgs()
+    flags = initConfigFlags()
 
     # Setup custom input file
-    ConfigFlags.Input.Files = args.filesInput
+    flags.Input.Files = args.filesInput
 
-    ConfigFlags.Trigger.triggerConfig = "DB"
-    ConfigFlags.Input.isMC = False
+    flags.Trigger.triggerConfig = "DB"
+    flags.Input.isMC = False
 
+    # decoding flags for TrigDecisionMakerMT    
+    flags.Trigger.DecodeHLT = False
+    flags.Trigger.L1.doCTP = False
+    flags.Trigger.DecisionMakerValidation.Execute = False
     
-    ConfigFlags.lock()
+    flags.lock()
 
     # setup CA 
-    cfg = setupDecodeCfgCA(ConfigFlags)
+    cfg = setupDecodeCfgCA(flags)
 
     # Execute
     import sys

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """
 Dumps the trigger menu, optionally running some checks for name
@@ -58,12 +58,14 @@ def run():
     # The Physics menu (at least) depends on a check of the menu name
     # in order to decide if PS:Online chains should be retained.
     # Should do this in a more explicit way
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    ConfigFlags.Trigger.triggerMenuSetup=menu_name
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    flags.Trigger.triggerMenuSetup=menu_name
+    flags.lock()
 
     # Import menu by name
     menumodule = importlib.import_module(f'TriggerMenuMT.HLT.Menu.{menu_name}')
-    menu = menumodule.setupMenu()
+    menu = menumodule.setupMenu(menu_name)
 
     # Can't do these without parsing
     if args.check_l1 or args.dump_dicts:
@@ -81,7 +83,7 @@ def run():
     if args.names:
         dump_chains(chains)
     elif args.parse_names:
-        chain_to_dict, failed = get_chain_dicts(chains)
+        chain_to_dict, failed = get_chain_dicts(flags, chains)
         if failed:
             sys.exit(1)
         if args.check_l1:
@@ -129,7 +131,7 @@ def is_new_error(error):
         return False
     return True
 
-def get_chain_dicts(chains):
+def get_chain_dicts(flags, chains):
     """
     returns map of chain names to dictionaries with a set of failed chains
     """
@@ -141,7 +143,7 @@ def get_chain_dicts(chains):
     chain_to_dict = {}
     for chain in chains:
         try:
-            chain_dict = dictFromChainName(chain)
+            chain_dict = dictFromChainName(flags, chain)
             name = chain_dict['chainName']
             chain_to_dict[name] = chain_dict
             passed.add(name)

@@ -16,9 +16,10 @@
 
 #include "GaudiKernel/MsgStream.h"
 #include <string>
+#include <utility>
 
 LArFCS_StepInfoSD::LArFCS_StepInfoSD(G4String a_name, const FCS_Param::Config& config)
-  : FCS_StepInfoSD(a_name, config)
+  : FCS_StepInfoSD(std::move(a_name), config)
   , m_calculator(m_config.m_LArCalculator)
 {
 }

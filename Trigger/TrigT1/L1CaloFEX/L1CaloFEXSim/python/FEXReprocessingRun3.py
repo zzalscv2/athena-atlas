@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -9,7 +9,7 @@ from AthenaConfiguration.Enums import Format
 if __name__ == '__main__':
     
     
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaCommon.Logging import logging
     import glob
     import sys
@@ -20,6 +20,7 @@ if __name__ == '__main__':
                                    Example: python -m L1CaloFEXTools.L1CaloFEXToolsConfig --filesInput "data22*" --evtMax 10 --outputs eTOBs """)
     parser.add_argument('--evtMax',type=int,default=-1,help="number of events")
     parser.add_argument('--filesInput',nargs='+',help="input files",required=True)
+    parser.add_argument('--skipEvents',type=int,default=0,help="number of events to skip")
     parser.add_argument('--outputLevel',default="WARNING",choices={ 'INFO','WARNING','DEBUG','VERBOSE'})
     parser.add_argument('--outputs',nargs='+',choices={"jFex","eFex","gFex"},required=True, help="What data to decode and output.")
     args = parser.parse_args()
@@ -31,16 +32,18 @@ if __name__ == '__main__':
     from AthenaCommon import Constants
     algLogLevel = getattr(Constants,args.outputLevel)
 
-    if any(["data22" in f for f in args.filesInput]):
+    flags = initConfigFlags()
+    if any(["data" in f for f in args.filesInput]):
         flags.Trigger.triggerConfig='DB'
 
     flags.Exec.OutputLevel = algLogLevel
     flags.Exec.MaxEvents = args.evtMax
+    flags.Exec.SkipEvents = args.skipEvents
     flags.Input.Files = [file for x in args.filesInput for file in glob.glob(x)]
     flags.Concurrency.NumThreads = 1
     flags.Concurrency.NumConcurrentEvents = 1
   
-    if any(["data22" in f for f in args.filesInput]):
+    if any(["data" in f for f in args.filesInput]):
         s=args.filesInput[0].replace('*','').replace('.data','')
         flags.Output.AODFileName = "AOD."+(s.split("/")[-1]).split('_SFO')[0]+"pool.root"
     else:
@@ -49,11 +52,10 @@ if __name__ == '__main__':
     flags.Trigger.EDMVersion = 3
     flags.Trigger.doLVL1 = True
     flags.Trigger.enableL1CaloPhase1 = True
-    if flags.Common.isOnline:
-        flags.IOVDb.GlobalTag = flags.Trigger.OnlineCondTag
 
-    if not flags.Input.isMC and flags.Input.RunNumber[0] > 400000:
-        flags.GeoModel.AtlasVersion = 'ATLAS-R3S-2021-02-00-00'
+    from AthenaConfiguration.Enums import LHCPeriod
+    if not flags.Input.isMC and flags.GeoModel.Run is LHCPeriod.Run2:
+        flags.GeoModel.AtlasVersion = 'ATLAS-R2-2016-01-00-01'
 
     # Enable only calo for this test
     from AthenaConfiguration.DetectorConfigFlags import setupDetectorsFromList
@@ -151,6 +153,7 @@ if __name__ == '__main__':
         ##################################################    
         jFEX = CompFactory.LVL1.jFEXDriver('jFEXDriver')
         jFEX.jSuperCellTowerMapperTool = CompFactory.LVL1.jSuperCellTowerMapper('jSuperCellTowerMapper')
+        jFEX.jSuperCellTowerMapperTool.SCellMasking = True
         jFEX.jFEXSysSimTool = CompFactory.LVL1.jFEXSysSim('jFEXSysSimTool')
         
         #TOBs
@@ -198,12 +201,29 @@ if __name__ == '__main__':
         outputEDM += addEDM('xAOD::jFexFwdElRoIContainer', 'L1_jFexFwdElRoI')
         outputEDM += addEDM('xAOD::jFexSumETRoIContainer', 'L1_jFexSumETRoI')
         outputEDM += addEDM('xAOD::jFexMETRoIContainer'  , 'L1_jFexMETRoI'  ) 
+
+        ##################################################
+        # jFEX decoded Towers
+        ##################################################  
+        from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import jFexInputByteStreamToolCfg
+        inputjFexTool = jFexInputByteStreamToolCfg('jFexInputBSDecoder', flags)
+        for module_id in inputjFexTool.ROBIDs:
+            maybeMissingRobs.append(module_id)
+
+        decoderTools += [inputjFexTool]
+        # saving/adding the jTower xAOD container
+        outputEDM += addEDM('xAOD::jFexTowerContainer', inputjFexTool.jTowersWriteKey.Path)    
         
+        
+        # Uses SCell to decorate the jTowers
+        from L1CaloFEXAlgos.L1CaloFEXAlgosConfig import L1CaloFEXDecoratorCfg
+        DecoratorAlgo = L1CaloFEXDecoratorCfg(flags, name = 'jFexTower2SCellDecorator', ExtraInfo=True)
+        acc.merge(DecoratorAlgo)    
 
     if "gFex" in args.outputs:    
 
         ##################################################
-        # jFEX simulation
+        # gFEX simulation
         ##################################################  
         gFEX = CompFactory.LVL1.gFEXDriver('gFEXDriver')
         gFEX.gSuperCellTowerMapperTool = CompFactory.LVL1.gSuperCellTowerMapper('gSuperCellTowerMapper')
@@ -232,6 +252,7 @@ if __name__ == '__main__':
         outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', 'L1_gMETComponentsNoiseCutSim')
         outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', 'L1_gScalarENoiseCutSim'      )
         outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', 'L1_gScalarERmsSim'           )                
+        outputEDM += addEDM('xAOD::gFexTowerContainer',     'L1_gFexTriggerTowers'        )                
         
         acc.addEventAlgo(gFEX, sequenceName='AthAlgSeq')
         
@@ -242,7 +263,6 @@ if __name__ == '__main__':
         from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import gFexByteStreamToolCfg
         gFexTool = gFexByteStreamToolCfg('gFexBSDecoder', flags)
         decoderTools += [gFexTool]
-
                 
         outputEDM += addEDM('xAOD::gFexJetRoIContainer'   , 'L1_gFexRhoRoI'            )
         outputEDM += addEDM('xAOD::gFexJetRoIContainer'   , 'L1_gFexSRJetRoI'          )
@@ -253,11 +273,19 @@ if __name__ == '__main__':
         outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', 'L1_gMSTComponentsJwoj'    )
         outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', 'L1_gMETComponentsNoiseCut')
         outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', 'L1_gScalarENoiseCut'      )
-        outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', 'L1_gScalarERms'           )
-        
+        outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', 'L1_gScalarERms'           )        
+
+
+        from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import gFexInputByteStreamToolCfg
+        gFexInputTool = gFexInputByteStreamToolCfg('gFexInputBSDecoder', flags)
+        decoderTools += [gFexInputTool]
+        outputEDM += addEDM('xAOD::gFexTowerContainer'    , 'L1_gFexDataTowers'        )                
+
     
     decoderAlg = CompFactory.L1TriggerByteStreamDecoderAlg(name="L1TriggerByteStreamDecoder", DecoderTools=decoderTools, MaybeMissingROBs=maybeMissingRobs)
-    acc.addEventAlgo(decoderAlg, primary=True, sequenceName='AthAlgSeq')
+    acc.addEventAlgo(decoderAlg, sequenceName='AthAlgSeq')
+    
+
    
     
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloConditions/CaloCellPositionShift.h"
@@ -13,7 +13,6 @@ void CaloCellPositionShift::resize(const size_type& size) {
  m_deltaX.resize(size,0.0);
  m_deltaY.resize(size,0.0);
  m_deltaZ.resize(size,0.0);
- return;
 }
 
 }//end namespace

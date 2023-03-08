@@ -3,7 +3,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def TrkDistanceFinderNeutralNeutralCfg(name, **options):
+def TrkDistanceFinderNeutralNeutralCfg(flags, name, **options):
     """Sets up a TrkDistanceFinderNeutralNeutral tool and returns it.
 
     The following options have BTaggingFlags defaults:

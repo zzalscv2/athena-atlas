@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from TrigEDMConfig.TriggerEDMRun3 import recordable
@@ -80,7 +80,8 @@ def generatePhotonsCfg( flags ):
     l2CaloReco = RecoFragmentsPool.retrieve( l2CaloRecoCfg, flags )
     acc.merge( l2CaloReco )
     
-    fastCaloSequence = MenuSequence( Sequence    = l2CaloReco.sequence(),
+    fastCaloSequence = MenuSequence( flags,
+                                     Sequence    = l2CaloReco.sequence(),
                                      Maker       = l2CaloReco.inputMaker(),
                                      Hypo        = l2CaloHypo,
                                      HypoToolGen = TrigEgammaFastCaloHypoToolFromDict )
@@ -99,7 +100,8 @@ def generatePhotonsCfg( flags ):
 
     from TrigEgammaHypo.TrigEgammaFastPhotonHypoTool import TrigEgammaFastPhotonHypoToolFromDict
 
-    l2PhotonSequence = MenuSequence( Sequence    = l2PhotonReco.sequence(),
+    l2PhotonSequence = MenuSequence( flags,
+                                     Sequence    = l2PhotonReco.sequence(),
                                      Maker       = l2PhotonReco.inputMaker(),
                                      Hypo        = l2PhotonHypo,
                                      HypoToolGen = TrigEgammaFastPhotonHypoToolFromDict )
@@ -117,10 +119,11 @@ def generatePhotonsCfg( flags ):
 
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    ConfigFlags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data17_13TeV.00327265.physics_EnhancedBias.merge.RAW._lb0100._SFO-1._0001.1"]
-    ConfigFlags.Trigger.menu.photons = ["HLT_g5_etcut L1_EM3", "HLT_g10_etcut L1_EM3"]
-    ConfigFlags.lock()
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data17_13TeV.00327265.physics_EnhancedBias.merge.RAW._lb0100._SFO-1._0001.1"]
+    flags.Trigger.menu.photons = ["HLT_g5_etcut L1_EM3", "HLT_g10_etcut L1_EM3"]
+    flags.lock()
 
-    acc, sequences = generatePhotonsCfg( ConfigFlags )
+    acc, sequences = generatePhotonsCfg( flags )
     acc.printConfig()

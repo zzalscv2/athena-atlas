@@ -40,15 +40,6 @@ StatusCode HepMCTruthReader::execute() {
   for (unsigned int cntr = 0; cntr < mcColl->size(); ++cntr) {
     const HepMC::GenEvent* genEvt = (*mcColl)[cntr]; 
 
-    // Print PDF info if found
-    /*xAOD::TruthEvent::PdfInfo pdfi = evt->pdfInfo();
-    if (pdfi.valid()) {
-      cout << "PDF info: PIDs " << pdfi.pdgId1 << ", " << pdfi.pdgId2 << " with x = "
-           << pdfi.x1 << ", " << pdfi.x2 << " & Q = " << pdfi.Q << " => xf = "
-           << pdfi.xf1 << ", " << pdfi.xf2 << " with PDFs "
-           << pdfi.pdfId1 << " and " << pdfi.pdfId2 << endl;
-    }*/
-
     // Print the event particle/vtx contents
     if (cntr==0) ATH_MSG_INFO("Printing signal event...");
     if (cntr>0) ATH_MSG_INFO("Printing pileup events...");  
@@ -170,13 +161,7 @@ void HepMCTruthReader::printVertex(const HepMC::ConstGenVertexPtr& vertex) {
       cout << endl;
     }
   }
-  // // Print the weights if there are any
-  // if (vertex->weights().size() != 0) {
-  //   cout << vertex->weights().size() << " weights =";
-  //   for (vector<float>::const_iterator wgt = vertex->weights().begin();
-  //        wgt != vertex->weights().end(); ++wgt) { cout << *wgt << " "; }
-  //   cout << endl;
-  // }
+
   // Print out all the incoming, then outgoing particles
 #ifdef HEPMC3
   for (const auto&  iPIn: vertex->particles_in()) {       

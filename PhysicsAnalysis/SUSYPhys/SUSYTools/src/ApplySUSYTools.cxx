@@ -450,7 +450,7 @@ StatusCode ApplySUSYTools::execute()
       bool isbjet = m_objTool->IsBJet(*p);
       if( doPrint ) ATH_MSG_DEBUG("Systematic jet pt " <<sysname <<" "
                                   <<p->pt() <<" " 
-                                  <<(int)p->auxdata<char>("baseline")
+                                  <<static_cast<int>(p->auxdata<char>("baseline"))
                                   <<" " <<isbad <<" " <<issig <<" " <<isbjet);
       if( p->auxdata<char>("baseline") && p->pt() > m_jetPtCut ){ 
         (*jetCutMask)[pIndex] = true;
@@ -493,8 +493,8 @@ StatusCode ApplySUSYTools::execute()
       for (const auto& fatjet : *fatjets_nominal) {
 	ATH_MSG_DEBUG("--------------------------------------");
 	ATH_MSG_DEBUG("Recorded fat jet pt = " <<  fatjet->pt()*0.001 << " ,"
-		      << " Wtag = " << (int)fatjet->auxdata<int>("Wtag") << " ,"
-		      << " Ztag = " << (int)fatjet->auxdata<int>("Ztag"));
+		      << " Wtag = " << static_cast<int>(fatjet->auxdata<int>("Wtag")) << " ,"
+		      << " Ztag = " << static_cast<int>(fatjet->auxdata<int>("Ztag")));
       }
     }
   }//endif doFatJets
@@ -822,7 +822,7 @@ StatusCode ApplySUSYTools::execute()
       //bool issig = m_objTool->IsSignalTau(*p, m_tauPt, m_tauEta);
       if( doPrint ) ATH_MSG_DEBUG("Systematic tau pt " <<sysname <<" "
                                   <<p->pt() <<" " <<ptorig <<" "
-                                  <<(int)p->auxdata<char>("baseline"));
+                                  <<static_cast<int>(p->auxdata<char>("baseline")));
       if( p->auxdata<char>("baseline") ){
         if( doPrint && sysname == "Nominal" ){
           ATH_MSG_DEBUG("Accepted Nominal tau pt " <<p->pt());
@@ -888,7 +888,7 @@ StatusCode ApplySUSYTools::execute()
       bool issig = m_objTool->IsSignalPhoton(*p, m_photonPt);
       if( doPrint ) ATH_MSG_DEBUG("Systematic photon pt " <<sysname <<" "
                                   <<p->pt() <<" " <<ptorig <<" "
-                                  <<(int)p->auxdata<char>("baseline") <<" "
+                                  <<static_cast<int>(p->auxdata<char>("baseline")) <<" "
                                   <<issig);
       if( p->auxdata<char>("baseline") ){
         if( doPrint && sysname == "Nominal" ){
@@ -1120,7 +1120,7 @@ StatusCode ApplySUSYTools::execute()
     for(const auto& p : (*p_Electrons) ){
       dec_match(*p) = m_objTool->IsTrigMatched(p, key);
       if( doPrint ) ATH_MSG_DEBUG("e match " <<p->pt() <<" " <<p->eta() <<" "
-                                             <<(int)dec_match(*p));
+                                             <<static_cast<int>(dec_match(*p)));
     }
   }
 
@@ -1130,7 +1130,7 @@ StatusCode ApplySUSYTools::execute()
     for(const auto& p : (*p_Muons) ){
       dec_match(*p) = m_objTool->IsTrigMatched(p, key);
       if( doPrint ) ATH_MSG_DEBUG("mu match " <<p->pt() <<" " <<p->eta() <<" "
-                                              <<(int)dec_match(*p));
+                                              <<static_cast<int>(dec_match(*p)));
     }
   }
 
@@ -1140,7 +1140,7 @@ StatusCode ApplySUSYTools::execute()
     for(const auto& p : (*p_Photons) ){
       dec_match(*p) = m_objTool->IsTrigMatched(p, key);
       if( doPrint ) ATH_MSG_DEBUG("g match " <<p->pt() <<" " <<p->eta() <<" "
-                                             <<(int)dec_match(*p));
+                                             <<static_cast<int>(dec_match(*p)));
     }
   }
 

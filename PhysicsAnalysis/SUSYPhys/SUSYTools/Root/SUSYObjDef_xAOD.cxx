@@ -37,11 +37,13 @@
 #include "EgammaAnalysisInterfaces/IAsgPhotonIsEMSelector.h"
 #include "EgammaAnalysisInterfaces/IAsgDeadHVCellRemovalTool.h"
 #include "EgammaAnalysisInterfaces/IEGammaAmbiguityTool.h"
+#include "EgammaAnalysisInterfaces/IElectronLRTOverlapRemovalTool.h"
 
 #include "MuonAnalysisInterfaces/IMuonSelectionTool.h"
 #include "MuonAnalysisInterfaces/IMuonCalibrationAndSmearingTool.h"
 #include "MuonAnalysisInterfaces/IMuonEfficiencyScaleFactors.h"
 #include "MuonAnalysisInterfaces/IMuonTriggerScaleFactors.h"
+#include "MuonAnalysisInterfaces/IMuonLRTOverlapRemovalTool.h"
 
 #include "TauAnalysisTools/ITauSelectionTool.h"
 #include "TauAnalysisTools/ITauSmearingTool.h"
@@ -169,6 +171,7 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
     m_eleIsoHighPt_WP(""),
     m_eleIsoHighPtThresh(-99.),
     m_eleChID_WP(""),
+    m_eleLRT_strat(-99),
     m_eleChIso(true),
     m_eleChID_signal(false),
     m_runECIS(false),
@@ -651,6 +654,7 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
   m_muonIsolationSFTool.declarePropertyFor( this, "MuonIsolationScaleFactorsTool", "The MuonIsolationSFTool" );
   m_muonHighPtIsolationSFTool.declarePropertyFor( this, "MuonHighPtIsolationScaleFactorsTool", "The MuonIsolationSFTool" );
   m_muonTriggerSFTool.declarePropertyFor( this, "MuonTriggerScaleFactorsTool", "The MuonTriggerSFTool" );
+  m_muonLRTORTool.declarePropertyFor( this, "MuonLRTOverlapRemovalTool", "Prompt/LRT muon OR Tool" );
   //
   m_elecEfficiencySFTool_reco.declarePropertyFor( this, "ElectronEfficiencyCorrectionTool_reco", "The ElectronEfficiencyCorrectionTool for reconstruction SFs" );
   m_elecEfficiencySFTool_id.declarePropertyFor( this, "ElectronEfficiencyCorrectionTool_id", "The ElectronEfficiencyCorrectionTool for ID SFs" );
@@ -661,6 +665,7 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
   m_egammaAmbiguityTool.declarePropertyFor( this, "EgammaAmbiguityTool", "The EgammaAmbiguityTool" );
   m_elecChargeIDSelectorTool.declarePropertyFor( this, "ElectronChargeIDSelectorTool", "The ElectronChargeIDSelectorTool" );
   m_elecChargeEffCorrTool.declarePropertyFor( this, "ElectronChargeEffCorrectionTool", "The ElectronChargeEffCorrectionTool" );
+  m_elecLRTORTool.declarePropertyFor( this, "ElectronLRTOverlapRemovalTool", "Prompt/LRT electron OR Tool" );
   //
   m_photonSelIsEM.declarePropertyFor( this, "PhotonIsEMSelector" , "The PhotonIsEMSelectorTool for signal photons" );
   m_photonSelIsEMBaseline.declarePropertyFor( this, "PhotonIsEMSelectorBaseline" , "The PhotonIsEMSelectorTool for baseline photons" );
@@ -1024,7 +1029,7 @@ StatusCode SUSYObjDef_xAOD::autoconfigurePileupRWTool(const std::string& PRWfile
     }
 
     // Retrieve the input file
-    int DSID_INT = (int) dsid;
+    int DSID_INT = static_cast<int>(dsid);
     prwConfigFile += "DSID" + std::to_string(DSID_INT/1000) + "xxx/pileup_" + mcCampaignMD + "_dsid" + std::to_string(DSID_INT) + "_" + simType + ".root";
 
     if (RPVLLmode) prwConfigFile = TString(prwConfigFile).ReplaceAll(".root","_rpvll.root").Data();
@@ -1140,7 +1145,7 @@ void SUSYObjDef_xAOD::configFromFile(bool& property, const std::string& propname
     rEnv.GetTable()->Remove( rEnv.GetTable()->FindObject(propname.c_str() ) );
     return;
   }
-  property = rEnv.GetValue(propname.c_str(), (int) defaultValue);
+  property = rEnv.GetValue(propname.c_str(), static_cast<int>(defaultValue));
   ATH_MSG_INFO( "configFromFile(): Loaded property \"" << propname << "\" with value " << property );
   // Remove the item from the table
   rEnv.GetTable()->Remove( rEnv.GetTable()->FindObject(propname.c_str() ) );
@@ -1223,21 +1228,21 @@ StatusCode SUSYObjDef_xAOD::readConfig()
 
   if (m_jetInputType == xAOD::JetInput::Uncategorized) {
     m_jetInputType = xAOD::JetInput::Type(rEnv.GetValue("Jet.InputType", 9));
-    ATH_MSG_INFO( "readConfig(): Loaded property Jet.InputType with value " << (int)m_jetInputType);
+    ATH_MSG_INFO( "readConfig(): Loaded property Jet.InputType with value " << static_cast<int>(m_jetInputType));
   }
   // Remove the item from the table
   rEnv.GetTable()->Remove( rEnv.GetTable()->FindObject("Jet.InputType") );
 
   if (m_muId == static_cast<int>(xAOD::Muon::Quality(xAOD::Muon::VeryLoose))) {
     int muIdTmp = rEnv.GetValue("Muon.Id", 1);
-    m_muId = (muIdTmp<4 ? (int)xAOD::Muon::Quality(muIdTmp) : muIdTmp);
+    m_muId = (muIdTmp<4 ? static_cast<int>(xAOD::Muon::Quality(muIdTmp)) : muIdTmp);
     ATH_MSG_INFO( "readConfig(): Loaded property Muon.Id with value " << m_muId);
     // Remove the item from the table
     rEnv.GetTable()->Remove( rEnv.GetTable()->FindObject("Muon.Id") );
   }
   if (m_muIdBaseline == static_cast<int>(xAOD::Muon::Quality(xAOD::Muon::VeryLoose))) {
     int muIdTmp = rEnv.GetValue("MuonBaseline.Id", 1);
-    m_muIdBaseline = (muIdTmp<4 ? (int)xAOD::Muon::Quality(muIdTmp) : muIdTmp);
+    m_muIdBaseline = (muIdTmp<4 ? static_cast<int>(xAOD::Muon::Quality(muIdTmp)) : muIdTmp);
     ATH_MSG_INFO( "readConfig(): Loaded property MuonBaseline.Id with value " << m_muIdBaseline);
     // Remove the item from the table
     rEnv.GetTable()->Remove( rEnv.GetTable()->FindObject("MuonBaseline.Id") );
@@ -1334,6 +1339,8 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_eleChIso, "Ele.CFTIso", rEnv, true); // use charge ID SFs without iso applied
   configFromFile(m_eleChID_signal, "Ele.CFTSignal", rEnv, !m_eleChID_WP.empty()); // Require ECID as part of the signal lepton definition
   configFromFile(m_eleId, "Ele.Id", rEnv, "TightLLH");
+  configFromFile(m_eleLRT, "Ele.LRTOR", rEnv, false);
+  configFromFile(m_eleLRT_strat, "Ele.LRTORStrat", rEnv, 0);
   configFromFile(m_eleConfig, "Ele.Config", rEnv, "None");
   configFromFile(m_eled0sig, "Ele.d0sig", rEnv, 5.);
   configFromFile(m_elez0, "Ele.z0", rEnv, 0.5);
@@ -1383,6 +1390,9 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_muCosmicz0, "MuonCosmic.z0", rEnv, 1.);
   configFromFile(m_muCosmicd0, "MuonCosmic.d0", rEnv, 0.2);
   //
+  // LRT muons
+  configFromFile(m_muLRT, "Muon.LRTOR", rEnv, false);
+  // 
   configFromFile(m_badmuQoverP, "BadMuon.qoverp", rEnv, 0.4);
   //
   configFromFile(m_muCalibrationMode, "Muon.CalibrationMode", rEnv, 1); // 0: "setup1"(correctData), 1: "setup2"(additionalMCSys)
@@ -1418,7 +1428,7 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_JvtWP, "Jet.JvtWP", rEnv, "FixedEffPt"); // https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/PileupJetRecommendations
   configFromFile(m_JvtPtMax, "Jet.JvtPtMax", rEnv, 60.0e3);
   configFromFile(m_JvtConfig, "Jet.JvtConfig", rEnv, "Moriond2018/");
-  configFromFile(m_jetUncertaintiesConfig, "Jet.UncertConfig", rEnv, "rel21/Summer2019/R4_SR_Scenario1_SimpleJER.config"); // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JetUncertaintiesRel21Summer2018SmallR
+  configFromFile(m_jetUncertaintiesConfig, "Jet.UncertConfig", rEnv, "rel22/Winter2023_PreRec/R4_CategoryReduction_FullJER.config"); // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JetUncertaintiesRel22/
   configFromFile(m_jetUncertaintiesAnalysisFile, "Jet.AnalysisFile", rEnv, "default"); // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JetUncertaintiesRel21Summer2018SmallR
   configFromFile(m_jetUncertaintiesCalibArea, "Jet.UncertCalibArea", rEnv, "default"); // Defaults to default area set by tool
   configFromFile(m_jetUncertaintiesPDsmearing, "Jet.UncertPDsmearing", rEnv, false); // for non "SimpleJER" config, run the PDSmear systematics. This are labelled with an __2 if they are being used, but otherwise will have the same tree name as the JET_JER systematic trees.
@@ -1431,7 +1441,7 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_ToptagConfig, "Jet.ToptaggerConfig", rEnv, "DNNTagger_AntiKt10UFOSD_TopInclusive80_Oct30.dat");
   configFromFile(m_JetTruthLabelName, "Jet.JetTruthLabelName", rEnv, "R10TruthLabel_R21Precision_2022v1");
   configFromFile(m_TopTaggerCalibArea, "Jet.TopTaggerCalibArea", rEnv, "JSSWTopTaggerDNN/Rel21/February2022/");
-  configFromFile(m_jesConfig, "Jet.JESConfig", rEnv, "JES_MC16Recommendation_Consolidated_EMTopo_Apr2019_Rel21.config");
+  configFromFile(m_jesConfig, "Jet.JESConfig", rEnv, "PreRec_R22_PFlow_ResPU_EtaJES_GSC_February23_230215.config"); //https://twiki.cern.ch/twiki/bin/view/AtlasProtected/ApplyJetCalibrationR22
   configFromFile(m_jesConfigAFII, "Jet.JESConfigAFII", rEnv, "JES_MC16Recommendation_AFII_EMTopo_Apr2019_Rel21.config");
   configFromFile(m_jesConfigJMS, "Jet.JESConfigJMS", rEnv, "JES_JMS_MC16Recommendation_Consolidated_MC_only_EMTopo_July2019_Rel21.config");
   configFromFile(m_jesConfigJMSData, "Jet.JESConfigJMSData", rEnv, "JES_JMS_MC16Recommendation_Consolidated_data_only_EMTopo_Sep2019_Rel21.config");

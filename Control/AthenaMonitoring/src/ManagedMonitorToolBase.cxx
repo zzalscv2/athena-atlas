@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ManagedMonitorToolBase_CXX
@@ -34,12 +34,11 @@
 #include "AthenaMonitoring/IDQFilterTool.h"
 #include "GaudiKernel/ITHistSvc.h"
 
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;    // legacy (serial) DQ monitoring framework
 
 //____________________________________________________________________
 class ManagedMonitorToolBase::Imp {
 public:
-  static ISvcLocator*    s_svcLocator;
+  inline static std::atomic<ISvcLocator*>    s_svcLocator{nullptr};
   Imp(ManagedMonitorToolBase*tc) : m_theclass(tc),
 				   m_warnAboutMissingInitialize(true),
 				   m_doResourceMon(false),
@@ -178,16 +177,13 @@ void ManagedMonitorToolBase::Imp::benchFinalReport()
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-ISvcLocator* ManagedMonitorToolBase::Imp::s_svcLocator(0);
-
 namespace {
 
    std::string strToLower( const std::string& str );
-   //std::string strToUpper( const std::string& str );
 
 } // unnamed namespace
 
-static unsigned s_mmtb_mongroup_ncopies=0;
+static std::atomic<unsigned> s_mmtb_mongroup_ncopies=0;
 unsigned ManagedMonitorToolBase::MonGroup::ncopies() { return s_mmtb_mongroup_ncopies; }
 void ManagedMonitorToolBase::MonGroup::badusage() { ++s_mmtb_mongroup_ncopies; }
 
@@ -450,7 +446,7 @@ ManagedMonitorToolBase( const std::string & type, const std::string & name,
    declareProperty( "DataType", m_dataTypeStr );
    declareProperty( "Environment", m_environmentStr );
 
-   if( Imp::s_svcLocator==0 )
+   if( !Imp::s_svcLocator )
       Imp::s_svcLocator = svcLoc();
 
    for (auto interval: { eventsBlock, lumiBlock, lowStat, run, all }) {
@@ -654,9 +650,9 @@ intervalStringToEnum( const std::string& str )
    else if( lcstr == "file" )
       return file;
 
-   if( Imp::s_svcLocator!=0 ) {
+   if( Imp::s_svcLocator ) {
       IMessageSvc* ms(0);
-      StatusCode sc = Imp::s_svcLocator->service( "MessageSvc", ms, true );
+      StatusCode sc = Imp::s_svcLocator.load()->service( "MessageSvc", ms, true );
       if( sc.isSuccess() ) {
          MsgStream log( ms, "ManagedMonitorToolBase::intervalStringToEnum()" );
          log << MSG::WARNING << "Unknown ManagedMonitorToolBase::Interval_t \""

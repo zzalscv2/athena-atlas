@@ -16,7 +16,7 @@ Derivation_tf.py \
   --formats PHYS PHYSLITE \
   --multiprocess True \
   --sharedWriter True \
-  --postExec 'from AthenaAuditors.AthenaAuditorsConf import FPEAuditor;FPEAuditor.NStacktracesOnFPE=10;' \
+  --preExec 'flags.Exec.FPE=10' \
   --maxEvents 1000
 
 rcderiv=$?

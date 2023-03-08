@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-# Author : Benjamin Trocme (CNRS/IN2P3 - LPSC Grenoble) - 2017 - 2022
+# Author : Benjamin Trocme (CNRS/IN2P3 - LPSC Grenoble) - 2017 - 2023
 # Python 3 migration by Miaoran Lu (University of Iowa)- 2022
 #
 # Displays the run affected per defect type
@@ -23,7 +23,7 @@ gROOT.SetBatch(False)
 
 sys.path.append("/afs/cern.ch/user/l/larmon/public/prod/Misc")
 from LArMonCoolLib import GetReadyFlag
-from DeMoLib import strLumi, initialize,MakeTH1,SetXLabel,MakeLegend
+from DeMoLib import strLumi,initializeMonitoredDefects,retrieveYearTagProperties,MakeTH1,SetXLabel,MakeLegend,returnPeriod
 
 global debug
 debug = False
@@ -39,8 +39,8 @@ from argparse import RawTextHelpFormatter,ArgumentParser
 from DQDefects import DefectsDB
 
 parser = ArgumentParser(description='',formatter_class=RawTextHelpFormatter)
-parser.add_argument('-y','--year',dest='parser_year',default = ["2018"],nargs='*',help='Year [Default: 2018]',action='store')
-parser.add_argument('-t','--tag',dest='parser_tag',default = ["Tier0_2018"],nargs='*',help='Defect tag [Default: "Tier0_2018"]',action='store')
+parser.add_argument('-y','--year',dest='parser_year',default = ["2022"],nargs='*',help='Year [Default: 2022]',action='store')
+parser.add_argument('-t','--tag',dest='parser_tag',default = ["AtlasReady"],nargs='*',help='Defect tag [Default: "AtlasReady"]',action='store')
 parser.add_argument('-s','--system',dest='parser_system',default="LAr",help='System: LAr, CaloCP [Default: "LAr"]',action='store')
 parser.add_argument('-d','--directory',dest='parser_directory',default=".",help='Directory to display',action='store')
 parser.add_argument('-b','--batch',dest='parser_batchMode',help='Batch mode',action='store_true')
@@ -69,7 +69,7 @@ grlDef = {}
 defectVeto = {}
 veto = {}
 signOff = {}
-initialize(args.parser_system,yearTagProperties,partitions,grlDef,defectVeto,veto,signOff,args.parser_year[0])
+initializeMonitoredDefects(args.parser_system,partitions,grlDef,defectVeto,veto,signOff,args.parser_year[0],args.parser_tag[0])
 
 yearTagList = []
 yearTagDir = {}
@@ -79,7 +79,8 @@ for iYear in args.parser_year:
   for iTag in args.parser_tag:
     directory = "%s/YearStats-%s/%s/%s"%(args.parser_directory,args.parser_system,iYear,iTag)
     if os.path.exists(directory):
-      yearTag = "%s%s"%(iYear,yearTagProperties["description"][iTag])
+      yearTagProperties[iTag] = retrieveYearTagProperties(iYear,iTag)
+      yearTag = "%s%s"%(iYear,yearTagProperties[iTag]["Description"])
       yearTagList.append(yearTag)
       yearTagDir[yearTag] = directory
       yearTagTag[yearTag] = iTag # Used only to retrieve comments
@@ -138,10 +139,11 @@ options['recapDefects'] = args.parser_recapDefects
 options['prepareReproc'] = args.parser_reproc  
 runsFilter = []
 # If runs filter is requested, look for the runs of the chosen year/tag
-if (options['plotDiff2tags'] and options['restrictTagRuns'] in list(yearTagProperties["description"].keys()) and "%s%s"%(args.parser_year[0],yearTagProperties["description"][options['restrictTagRuns']]) in yearTagList): #if requested, restrict the runs to be considered to the one of the tag option
-  fRuns = open("%s/runs-ALL.dat"%yearTagDir["%s%s"%(args.parser_year[0],yearTagProperties["description"][options['restrictTagRuns']])])
+if (options['plotDiff2tags'] and options['restrictTagRuns'] in list(yearTagProperties.keys()) and "%s%s"%(args.parser_year[0],yearTagProperties[options['restrictTagRuns']]["Description"]) in yearTagList): #if requested, restrict the runs to be considered to the one of the tag option
+  fRuns = open("%s/runs-ALL.dat"%yearTagDir["%s%s"%(args.parser_year[0],yearTagProperties[options['restrictTagRuns']]["Description"])])
   for iline in fRuns.readlines():
-    runsFilter.append(int(iline))
+    runWithoutPeriod = int(iline.split(" (")[0])
+    runsFilter.append(runWithoutPeriod)
   fRuns.close()
   print("I am considering only the %d runs of %s"%(len(runsFilter),options['restrictTagRuns']))
   print(runsFilter)
@@ -164,18 +166,18 @@ if options['retrieveComments']:
     defRecap[iDef] = "\n\n===== Recap for %s================================================================================================================================\n"%(iDef.ljust(15))
     defRecap[iDef] += "Description: %s - %s\n"%(defectVeto["description"][iDef],defVetoType[iDef])
     if (defVetoType[iDef] == "Intolerable defect"):
-      defRecap[iDef] +="     Run| Tot lumi|Lost lumi|Recov. L.|  LB range |     Author | "
+      defRecap[iDef] +="     Run| Period| Tot lumi|Lost lumi|Recov. L.|  LB range |     Author | "
     else:
-      defRecap[iDef] +="     Run| Tot lumi|Aff. lumi|Recov. L.|  LB range |     Author | "
+      defRecap[iDef] +="     Run| Period| Tot lumi|Aff. lumi|Recov. L.|  LB range |     Author | "
 
     if (defVetoType[iDef] == "Intolerable defect"):
-      defRecapHtml[iDef] ='<tr class="out0intolerable" id="%s-%s-%s"> <th colspan="7"> %s - LUMILOSTTOBEREPLACED affected </th></tr>'%(iDef,args.parser_year[0],args.parser_tag[0],iDef)
-      defRecapHtml[iDef] +='<tr class="out0intolerable"> <th colspan="7"> Description: %s - %s</th></tr>'%(defectVeto["description"][iDef],defVetoType[iDef])
-      defRecapHtml[iDef] +='<tr class="out0"> <th> Run </th><th> Tot lumi </th><th> Lost lumi </th><th> Recov. L. </th><th>  LB range </th><th>     Author </th><th>     Comment </th></tr> '
+      defRecapHtml[iDef] ='<tr class="out0intolerable" id="%s-%s-%s"> <th colspan="8"> %s - LUMILOSTTOBEREPLACED affected </th></tr>'%(iDef,args.parser_year[0],args.parser_tag[0],iDef)
+      defRecapHtml[iDef] +='<tr class="out0intolerable"> <th colspan="8"> Description: %s - %s</th></tr>'%(defectVeto["description"][iDef],defVetoType[iDef])
+      defRecapHtml[iDef] +='<tr class="out0"> <th> Run </th><th> Period </th><th> Tot lumi </th><th> Lost lumi </th><th> Recov. L. </th><th>  LB range </th><th>     Author </th><th>     Comment </th></tr> '
     else:
-      defRecapHtml[iDef] ='<tr class="out0tolerable" id="%s-%s-%s"> <th colspan="7"> %s - LUMILOSTTOBEREPLACED affected </th></tr>'%(iDef,args.parser_year[0],args.parser_tag[0],iDef)
-      defRecapHtml[iDef] +='<tr class="out0tolerable"> <th colspan="7"> Description: %s - %s</th></tr>'%(defectVeto["description"][iDef],defVetoType[iDef])
-      defRecapHtml[iDef] +='<tr class="out0"> <th> Run </th><th> Tot lumi </th><th> Aff. lumi </th><th> Recov. L. </th><th>  LB range </th><th>     Author </th><th>     Comment </th></tr> '
+      defRecapHtml[iDef] ='<tr class="out0tolerable" id="%s-%s-%s"> <th colspan="8"> %s - LUMILOSTTOBEREPLACED affected </th></tr>'%(iDef,args.parser_year[0],args.parser_tag[0],iDef)
+      defRecapHtml[iDef] +='<tr class="out0tolerable"> <th colspan="8"> Description: %s - %s</th></tr>'%(defectVeto["description"][iDef],defVetoType[iDef])
+      defRecapHtml[iDef] +='<tr class="out0"> <th> Run </th><th> Period </th><th> Tot lumi </th><th> Aff. lumi </th><th> Recov. L. </th><th>  LB range </th><th>     Author </th><th>     Comment </th></tr> '
 
 if options['prepareReproc']:
   defReproc = {}
@@ -286,7 +288,7 @@ for iYT in yearTagList:
             loss_rLPR[iYT][iDefVeto].append(recovLumi)
             if options['retrieveComments'] and "defect" in defVetoType[iDefVeto]: # retrieve comments for defects
               print("@%d"%(runnumber))
-              db = DefectsDB(tag=yearTagProperties["defect"][yearTagTag[iYT]])
+              db = DefectsDB(tag=yearTagProperties[yearTagTag[iYT]]["Defect tag"])
               system_defects = []
               for iPrefix in grlDef["prefix"]:
                 system_defects += [d for d in (db.defect_names | db.virtual_defect_names) if (d.startswith(iPrefix) and iDefVeto in d)]
@@ -319,13 +321,14 @@ for iYT in yearTagList:
                       # This "replace" is a dirty hack due to bad unicode in defect comment in run 355995/LAr
                       # You may need to add some others if you observe a crash...
 
-                      defRecap[iDef] += "\n %d |%s|%s|%s|%s |%s| %s"%(runnumber,strLumi(luminosity,"ub",False).rjust(9),(strLumi(lostLumi,"pb",False)).rjust(9),(strLumi(recovLumi,"pb",False)).rjust(9),lbRange,defect.user.rjust(12),cleanedDefect)
-                      defRecapHtml[iDef] += '<tr class="out1"><th> %d </th> <th> %s </th><th> %s </th><th> %s </th><th> %s </th><th> %s </th><th> %s </th><tr>'%(runnumber,strLumi(luminosity,"ub",False).rjust(9),(strLumi(lostLumi,"pb",False)).rjust(9),(strLumi(recovLumi,"pb",False)).rjust(9),lbRange,defect.user.rjust(12),cleanedDefect)
+                      runperiod = returnPeriod(runnumber,args.parser_system,args.parser_year[0],args.parser_tag[0])
+                      defRecap[iDef] += "\n %d |%s|%s|%s|%s|%s |%s| %s"%(runnumber,runperiod.rjust(7),strLumi(luminosity,"ub",False).rjust(9),(strLumi(lostLumi,"pb",False)).rjust(9),(strLumi(recovLumi,"pb",False)).rjust(9),lbRange,defect.user.rjust(12),cleanedDefect)
+                      defRecapHtml[iDef] += '<tr class="out1"><th> %d </th> <th> %s </th> <th> %s </th><th> %s </th><th> %s </th><th> %s </th><th> %s </th><th> %s </th><tr>'%(runnumber,runperiod,strLumi(luminosity,"ub",False).rjust(9),(strLumi(lostLumi,"pb",False)).rjust(9),(strLumi(recovLumi,"pb",False)).rjust(9),lbRange,defect.user.rjust(12),cleanedDefect)
                       if (options['prepareReproc'] and recovLumi>0.):
                         defReproc[iDef] += "\n@%d"%runnumber
                     else:
-                      defRecap[iDef] += "\n -------------------------------------|%s |%s| %s"%(lbRange,defect.user.rjust(12),cleanedDefect)
-                      defRecapHtml[iDef] += '<tr class="out1"><th colspan="4"><th> %s </th><th> %s </th><th> %s </th><tr>'%(lbRange,defect.user.rjust(12),cleanedDefect)
+                      defRecap[iDef] += "\n ---------------------------------------------|%s |%s| %s"%(lbRange,defect.user.rjust(12),cleanedDefect)
+                      defRecapHtml[iDef] += '<tr class="out1"><th colspan="5"><th> %s </th><th> %s </th><th> %s </th><tr>'%(lbRange,defect.user.rjust(12),cleanedDefect)
                     for iPart in ["EMBA","EMBC","EMECA","EMECC","HECA","HECC","FCALA","FCALC"]:
                       if iPart in defect.channel and "SEVNOISEBURST" not in defect.channel: # Add the affected partition (except for SEVNOISEBURST, where the comment should contain it)
                         defRecap[iDef] += " - %s"%iPart
@@ -376,8 +379,8 @@ if options['plotLossPerRun'] and options['retrieveComments']:
   f = open("%s/YearStats-%s/%s/%s/recapDefects.txt"%(args.parser_directory,args.parser_system,args.parser_year[0],args.parser_tag[0]),'w')
   fHtml = open("%s/YearStats-%s/%s/%s/recapDefects.html"%(args.parser_directory,args.parser_system,args.parser_year[0],args.parser_tag[0]),'w')
   fHtml.write('<table class="report">')
-  fHtml.write('<tr class="out0"> <th width="60pix"></th><th width="100pix"></th></th><th width="100pix"></th><th width="100pix"></th><th width="100pix"></th><th width="100pix"></th><th></th></tr>')
-  fHtml.write('<tr class="out0"> <th colspan="7"> Recap generated on %s </th></tr>'%(strftime("%a, %d %b %Y %H:%M", localtime())))
+  fHtml.write('<tr class="out0"> <th width="60pix"></th><th width="60pix"></th><th width="80pix"></th></th><th width="80pix"></th><th width="80pix"></th><th width="80pix"></th><th width="100pix"></th><th></th></tr>')
+  fHtml.write('<tr class="out0"> <th colspan="8"> Recap generated on %s </th></tr>'%(strftime("%a, %d %b %Y %H:%M", localtime())))
   if options['prepareReproc']:
     fReproc = open("YearStats-%s/%s/%s/defectsForReproc.txt"%(args.parser_system,args.parser_year[0],args.parser_tag[0]),'w')
 

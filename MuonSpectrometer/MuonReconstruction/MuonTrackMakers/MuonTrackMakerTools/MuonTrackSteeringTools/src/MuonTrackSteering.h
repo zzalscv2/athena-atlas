@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTRACKSTEERING_H
@@ -7,9 +7,8 @@
 
 #include <mutex>
 #include <set>
-#include <string>
 #include <utility>
-#include <vector>
+
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ServiceHandle.h"
@@ -19,7 +18,7 @@
 #include "MooCandidateMatchingTool.h"
 #include "MooTrackBuilder.h"
 #include "MuPatCandidateTool.h"
-#include "MuPatPrimitives/MuPatGarbage.h"
+#include "MuPatPrimitives/MuPatSegment.h"
 #include "MuonRecHelperTools/IMuonEDMHelperSvc.h"
 #include "MuonRecHelperTools/MuonEDMPrinterTool.h"
 #include "MuonRecToolInterfaces/IMuonHoleRecoveryTool.h"
@@ -27,7 +26,6 @@
 #include "MuonRecToolInterfaces/IMuonTrackBuilder.h"
 #include "MuonRecToolInterfaces/IMuonTrackFinder.h"
 #include "MuonSegmentMakerToolInterfaces/IMuonSegmentInOverlapResolvingTool.h"
-#include "MuonSegmentMakerToolInterfaces/IMuonSegmentMerger.h"
 #include "MuonStationIndex/MuonStationIndex.h"
 #include "MuonTrackSelectorTool.h"
 #include "MuonTrackSteeringStrategy.h"
@@ -37,14 +35,10 @@
 #include "TrkTrack/Track.h"
 #include "TrkTrack/TrackCollection.h"
 #include "TrkTrackSummary/MuonTrackSummary.h"
-namespace Muon {
-    class MuPatSegment;
+namespace Muon {  
     class MuPatTrack;
 }  // namespace Muon
 
-namespace Trk {
-    class IExtendedTrackSummaryTool;
-}  // namespace Trk
 namespace Muon {
 
     typedef std::vector<const Muon::MuonSegment*> MuonSegmentCollection;
@@ -86,13 +80,23 @@ namespace Muon {
             @param coll a reference to a MuonSegmentCollection
             @return a pointer to a vector of tracks, the ownership of the tracks is passed to the client calling the tool.
         */
-        TrackCollection* find(const EventContext& ctx, const MuonSegmentCollection& coll) const override;
+       std::unique_ptr<TrackCollection> find(const EventContext& ctx, const MuonSegmentCollection& coll) const override;
 
     private:
-        TrackCollection* selectTracks(std::vector<std::unique_ptr<MuPatTrack>>& candidates, bool takeOwnership = true) const;
+        struct GarbageContainer {
+            void push_back(std::unique_ptr<MuonSegment> seg) {seg_garbage.push_back(std::move(seg));}
+            void push_back(std::unique_ptr<MuPatSegment> seg) {pat_garbage.push_back(std::move(seg));}
+            void reserve(size_t N) {
+                pat_garbage.reserve(N);
+                seg_garbage.reserve(N);
+            }
+            std::vector<std::unique_ptr<MuPatSegment>> pat_garbage{};
+            std::vector<std::unique_ptr<MuonSegment>> seg_garbage{};            
+        };
+        std::unique_ptr<TrackCollection> selectTracks(std::vector<std::unique_ptr<MuPatTrack>>& candidates, bool takeOwnership = true) const;
 
         /** actual find method */
-        TrackCollection* findTracks(const EventContext& ctx, SegColVec& chamberSegments, SegColVec& stationSegments, GarbageContainer& trash_bin) const;
+        std::unique_ptr<TrackCollection> findTracks(const EventContext& ctx, SegColVec& chamberSegments, SegColVec& stationSegments) const;
         bool extractSegments(const EventContext& ctx, const MuonSegmentCollection& coll, SegColVec& chamberSegments, SegColVec& stationSegments,
                              ChSet& chambersWithSegments, StSet& stationsWithSegments, GarbageContainer& trash_bin) const;
 
@@ -101,18 +105,16 @@ namespace Muon {
         bool decodeList(const std::string& input, std::vector<std::string>& list) const;
 
         std::vector<std::unique_ptr<MuPatTrack>> extendWithLayer(const EventContext& ctx, MuPatTrack& candidate, const SegColVec& segcol, unsigned int nextlayer,
-                                                                 const unsigned int endlayer, GarbageContainer& trash_bin,
-                                                                 int cutLevel = 0) const;
+                                                                 const unsigned int endlayer, int cutLevel = 0) const;
         /** @brief Find tracks starting from a good segment
             @param seedSeg the seeding MuonSegment pointer
             @param strat the current track finding strategy
             @param layer the current layer for the seed
         */
         std::vector<std::unique_ptr<MuPatTrack>> findTrackFromSeed(const EventContext& ctx, MuPatSegment& seedSeg, const MuonTrackSteeringStrategy& strat,
-                                                                   const unsigned int layer, const SegColVec& segs,
-                                                                   GarbageContainer& trash_bin) const;
+                                                                   const unsigned int layer, const SegColVec& segs) const;
 
-        void refineTracks(const EventContext& ctx, std::vector<std::unique_ptr<MuPatTrack>>& candidates, GarbageContainer& trash_bin) const;
+        void refineTracks(const EventContext& ctx, std::vector<std::unique_ptr<MuPatTrack>>& candidates) const;
 
         /** @brief Resolve ambiguities among tracks for a single strategy
                    This allows a strategy-specific ambiguity solving (with some options per strategy)
@@ -138,7 +140,6 @@ namespace Muon {
         ToolHandle<IMuonTrackRefiner> m_trackRefineTool{this, "TrackRefinementTool", "Muon::MooTrackBuilder/MooMuonTrackBuilder"};
         ToolHandle<IMuonSegmentFittingTool> m_segmentFitter{this, "MuonSegmentFittingTool",
                                                             "Muon::MuonSegmentFittingTool/MuonSegmentFittingTool"};
-        ToolHandle<IMuonSegmentMerger> m_segmentMerger{this, "MuonSegmentMerger", ""};
         ToolHandle<Muon::MuonTrackSelectorTool> m_trackSelector{this, "MuonTrackSelector",
                                                                 "Muon::MuonTrackSelectorTool/MuonTrackSelectorTool"};
         ToolHandle<IMuonHoleRecoveryTool> m_muonHoleRecoverTool{this, "HoleRecoveryTool",

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ASGTOOLS_ASGTOOLSSTANDALONEDICT_H
@@ -13,6 +13,11 @@
 #include "AsgTools/AsgComponent.h"
 #include "AsgTools/AsgComponentConfig.h"
 #include "AsgTools/AsgToolConfig.h"
+
+// System include(s).
+#include <map>
+#include <string>
+#include <tuple>
 
 // The following is only needed for standalone usage. In Athena the
 // setProperty(...) function(s) come(s) from the AlgTool base class, with all
@@ -51,5 +56,13 @@ SETPROPERTY_INSTAN( std::vector< std::string > );
 
 // Make the compiler forget about this macro now...
 #undef SETPROPERTY_INSTAN
+
+namespace {
+  struct ASGTOOLSSTANDALONEDICT_INSTANTIATIONS {
+    std::vector<std::string> type1;
+    std::map<std::string, std::vector<std::string> > type2;
+    std::map<std::string, asg::details::AsgComponentPrivateToolConfig> type3;
+  };
+}
 
 #endif // not ASGTOOLS_ASGTOOLSDICT_H

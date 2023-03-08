@@ -1,11 +1,10 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-
+from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 from AthenaCommon.Logging import logging
 log = logging.getLogger('TrigL2TauHypoTool')
 
 from collections import namedtuple
-
 
 # Here we need a large repository of configuration values
 # The meaning of the configuration values is as follows:
@@ -45,12 +44,14 @@ thresholdsEF = {
     ('perf',0)       : TauCuts(3, 1,0.,-1111),
     ('perf',20)      : TauCuts(3, 1,20000.,-1111),
     ('perf',25)      : TauCuts(3, 1,25000.,-1111),
+    ('perf',30)      : TauCuts(3, 1,30000.,-1111),
     ('perf',35)      : TauCuts(3, 1,35000.,-1111),
     ('perf',160)  : TauCuts(3, 1,160000.,-1111),
     ('perf',200)  : TauCuts(3, 1,200000.,-1111),
     ('idperf',0)     : TauCuts(3,999, 0.,2),
     ('idperf',20)    : TauCuts(3,999,20000.,2),
     ('idperf',25)    : TauCuts(3,999,25000.,2),
+    ('idperf',30)    : TauCuts(3,999,30000.,2),
     ('idperf',35)    : TauCuts(3,999,35000.,2),
     ('idperf',80)    : TauCuts(3,999,80000.,2),
     ('idperf',160): TauCuts(3,999,160000.,2),    
@@ -77,7 +78,7 @@ thresholdsEF_singlepion = {
     ('singlepion', 25): SinglePionCuts(30.0*GeV, 25.0*GeV, 1, 0, 0.06, 0.4, 0.85)
 }
 
-def TrigEFTauMVHypoToolFromDict( chainDict ):
+def TrigEFTauMVHypoToolFromDict( flags, chainDict ):
 
     name = chainDict['chainName']
 
@@ -92,8 +93,7 @@ def TrigEFTauMVHypoToolFromDict( chainDict ):
         currentHypo = CompFactory.TrigEFTauMVHypoTool(name)
 
         if 'tauMon:online' in chainDict['monGroups']:
-           from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-           monTool = GenericMonitoringTool('MonTool_' + name)
+           monTool = GenericMonitoringTool(flags, 'MonTool_' + name)
            monTool.HistPath = 'TrigTauRecMerged_TrigEFTauMVHypo/' + name
 
            # define quantities to be monitored
@@ -128,8 +128,7 @@ def TrigEFTauMVHypoToolFromDict( chainDict ):
 
     elif criteria in [ 'dikaonmass', 'kaonpi1', 'kaonpi2', 'dipion1', 'dipion2', 'dipion3', 'dipion4', 'singlepion' ]: # ATR-22644
         currentHypo = CompFactory.TrigEFTauDiKaonHypoTool(name)
-        from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-        monTool = GenericMonitoringTool('MonTool_' + name)
+        monTool = GenericMonitoringTool(flags, 'MonTool_' + name)
         monTool.HistPath = 'ComboHypo/' + name.replace("leg001_","")
 
         monTool.defineHistogram('massTrkSysAccepted',path='EXPERT',type='TH1F',title=';DiPion Mass [GeV]; Entries', xbins=50, xmin=0.,xmax=3.)
@@ -171,7 +170,7 @@ def TrigEFTauMVHypoToolFromDict( chainDict ):
         
     return currentHypo
 
-def TrigTauTrackHypoToolFromDict( chainDict ):
+def TrigTauTrackHypoToolFromDict( flags, chainDict ):
 
     name = chainDict['chainName']
     chainPart = chainDict['chainParts'][0]
@@ -182,8 +181,7 @@ def TrigTauTrackHypoToolFromDict( chainDict ):
     currentHypo = CompFactory.TrigTrackPreSelHypoTool(name)
 
     if 'tauMon:online' in chainDict['monGroups']:
-       from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-       monTool = GenericMonitoringTool('MonTool_' + name)
+       monTool = GenericMonitoringTool(flags, 'MonTool_' + name)
        monTool.HistPath = 'TrigTauRecMerged_TrigTrackPreSelHypo/' + name
 
        # define quantities to be monitored

@@ -1,10 +1,10 @@
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 from AthenaCommon.SystemOfUnits import GeV
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
+from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
 from ROOT import egammaPID
 
@@ -14,14 +14,14 @@ def same( val , tool):
 #
 # Create the hypo alg with all selectors
 #
-def createTrigEgammaPrecisionElectronHypoAlg(name, sequenceOut):
+def createTrigEgammaPrecisionElectronHypoAlg(flags, name, sequenceOut):
     acc = ComponentAccumulator()
-    from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool, defineHistogram
-    MonTool = GenericMonitoringTool("MonTool_"+name)
+    monTool = GenericMonitoringTool(flags, "MonTool_"+name,
+                                    HistPath = 'PrecisionElectronHypo/'+name)
   
-    acc_ElectronCBSelectorTools = TrigEgammaPrecisionElectronCBSelectorCfg()
-    acc_ElectronLHSelectorTools = TrigEgammaPrecisionElectronLHSelectorCfg()
-    acc_ElectronDNNSelectorTools = TrigEgammaPrecisionElectronDNNSelectorCfg()
+    acc_ElectronCBSelectorTools = TrigEgammaPrecisionElectronCBSelectorCfg(flags)
+    acc_ElectronLHSelectorTools = TrigEgammaPrecisionElectronLHSelectorCfg(flags)
+    acc_ElectronDNNSelectorTools = TrigEgammaPrecisionElectronDNNSelectorCfg(flags)
 
     acc.merge(acc_ElectronCBSelectorTools)
     acc.merge(acc_ElectronLHSelectorTools)
@@ -39,20 +39,17 @@ def createTrigEgammaPrecisionElectronHypoAlg(name, sequenceOut):
                                         "lhtight_nogsf", "lhmedium_nogsf","lhloose_nogsf","lhvloose_nogsf",
                                         "lhtight_nogsf_nopix", "lhmedium_nogsf_nopix","lhloose_nogsf_nopix","lhvloose_nogsf_nopix"] # just like the pidnames
     thePrecisionElectronHypo.DNNNames = ["dnntight", "dnnmedium", "dnnloose"] # just like the pidnames
-    MonTool.Histograms = [ 
-                defineHistogram('TIME_exec', type='TH1F', path='EXPERT', title="Precision Electron Hypo Algtime; time [ us ] ; Nruns", xbins=80, xmin=0.0, xmax=8000.0),
-                defineHistogram('TIME_LH_exec', type='TH1F', path='EXPERT', title="Precision Electron Hypo LH Algtime; time [ us ] ; Nruns", xbins=20, xmin=0.0, xmax=2000),
-                defineHistogram('TIME_DNN_exec', type='TH1F', path='EXPERT', title="Precision Electron Hypo DNN Algtime; time [ us ] ; Nruns", xbins=20, xmin=0.0, xmax=2000),
-    ]
-    MonTool.HistPath = 'PrecisionElectronHypo/'+name
-    thePrecisionElectronHypo.MonTool=MonTool
+    monTool.defineHistogram('TIME_exec', type='TH1F', path='EXPERT', title="Precision Electron Hypo Algtime; time [ us ] ; Nruns", xbins=80, xmin=0.0, xmax=8000.0)
+    monTool.defineHistogram('TIME_LH_exec', type='TH1F', path='EXPERT', title="Precision Electron Hypo LH Algtime; time [ us ] ; Nruns", xbins=20, xmin=0.0, xmax=2000)
+    monTool.defineHistogram('TIME_DNN_exec', type='TH1F', path='EXPERT', title="Precision Electron Hypo DNN Algtime; time [ us ] ; Nruns", xbins=20, xmin=0.0, xmax=2000)
+
+    thePrecisionElectronHypo.MonTool=monTool
     #acc.addEventAlgo(thePrecisionElectronHypo)
     return thePrecisionElectronHypo, acc
 
 def TrigEgammaPrecisionElectronHypoAlgCfg(flags, name, inputElectronCollection ):
-    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     acc = ComponentAccumulator()
-    hypo_tuple = createTrigEgammaPrecisionElectronHypoAlg( name, inputElectronCollection )
+    hypo_tuple = createTrigEgammaPrecisionElectronHypoAlg( flags, name, inputElectronCollection )
     hypo_alg = hypo_tuple[0]
     hypo_acc = hypo_tuple[1]
     acc.addEventAlgo( hypo_alg )
@@ -228,7 +225,7 @@ class TrigEgammaPrecisionElectronHypoToolConfig:
   #
   # Compile the chain
   #
-  def compile(self):
+  def compile(self, flags):
 
     if 'nocut' == self.pidname():
       self.nocut()
@@ -247,59 +244,56 @@ class TrigEgammaPrecisionElectronHypoToolConfig:
 
     if hasattr(self.tool(), "MonTool"):
       
-      doValidationMonitoring = ConfigFlags.Trigger.doValidationMonitoring # True to monitor all chains for validation purposes
+      doValidationMonitoring = flags.Trigger.doValidationMonitoring # True to monitor all chains for validation purposes
       monGroups = self.__monGroups
 
       if (any('egammaMon:online' in group for group in monGroups) or doValidationMonitoring):
-        self.addMonitoring()
+        self.addMonitoring(flags)
 
 
   #
   # Create the monitoring code
   #
-  def addMonitoring(self):
+  def addMonitoring(self, flags):
 
-    from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool, defineHistogram
-    monTool = GenericMonitoringTool("MonTool_"+self.chain())
-    monTool.Histograms = [ defineHistogram('dEta', type='TH1F', path='EXPERT', title="PrecisionElectron Hypo #Delta#eta_{EF L1}; #Delta#eta_{EF L1}", xbins=80, xmin=-0.01, xmax=0.01),
-                           defineHistogram('dPhi', type='TH1F', path='EXPERT', title="PrecisionElectron Hypo #Delta#phi_{EF L1}; #Delta#phi_{EF L1}", xbins=80, xmin=-0.01, xmax=0.01),
-                           defineHistogram('Et_em', type='TH1F', path='EXPERT', title="PrecisionElectron Hypo cluster E_{T}^{EM};E_{T}^{EM} [MeV]", xbins=50, xmin=-2000, xmax=100000),
-                           defineHistogram('Eta', type='TH1F', path='EXPERT', title="PrecisionElectron Hypo entries per Eta;Eta", xbins=100, xmin=-2.5, xmax=2.5),
-                           defineHistogram('Phi', type='TH1F', path='EXPERT', title="PrecisionElectron Hypo entries per Phi;Phi", xbins=128, xmin=-3.2, xmax=3.2),
-                           defineHistogram('EtaBin', type='TH1I', path='EXPERT', title="PrecisionElectron Hypo entries per Eta bin;Eta bin no.", xbins=11, xmin=-0.5, xmax=10.5),
-                           defineHistogram('LikelihoodRatio', type='TH1F', path='EXPERT', title="PrecisionElectron Hypo LH", xbins=100, xmin=-5, xmax=5),
-                           defineHistogram('mu', type='TH1F', path='EXPERT', title="Average interaction per crossing", xbins=100, xmin=0, xmax=100)]
+    monTool = GenericMonitoringTool(flags, "MonTool_"+self.chain(),
+                                    HistPath = 'PrecisionElectronHypo/'+self.chain())
+    monTool.defineHistogram('dEta', type='TH1F', path='EXPERT', title="PrecisionElectron Hypo #Delta#eta_{EF L1}; #Delta#eta_{EF L1}", xbins=80, xmin=-0.01, xmax=0.01)
+    monTool.defineHistogram('dPhi', type='TH1F', path='EXPERT', title="PrecisionElectron Hypo #Delta#phi_{EF L1}; #Delta#phi_{EF L1}", xbins=80, xmin=-0.01, xmax=0.01)
+    monTool.defineHistogram('Et_em', type='TH1F', path='EXPERT', title="PrecisionElectron Hypo cluster E_{T}^{EM};E_{T}^{EM} [MeV]", xbins=50, xmin=-2000, xmax=100000)
+    monTool.defineHistogram('Eta', type='TH1F', path='EXPERT', title="PrecisionElectron Hypo entries per Eta;Eta", xbins=100, xmin=-2.5, xmax=2.5)
+    monTool.defineHistogram('Phi', type='TH1F', path='EXPERT', title="PrecisionElectron Hypo entries per Phi;Phi", xbins=128, xmin=-3.2, xmax=3.2)
+    monTool.defineHistogram('EtaBin', type='TH1I', path='EXPERT', title="PrecisionElectron Hypo entries per Eta bin;Eta bin no.", xbins=11, xmin=-0.5, xmax=10.5)
+    monTool.defineHistogram('LikelihoodRatio', type='TH1F', path='EXPERT', title="PrecisionElectron Hypo LH", xbins=100, xmin=-5, xmax=5)
+    monTool.defineHistogram('mu', type='TH1F', path='EXPERT', title="Average interaction per crossing", xbins=100, xmin=0, xmax=100)
 
     cuts=['Input','#Delta #eta EF-L1', '#Delta #phi EF-L1','eta','E_{T}^{EM}']
 
-    monTool.Histograms += [ defineHistogram('CutCounter', type='TH1I', path='EXPERT', title="PrecisionElectron Hypo Passed Cuts;Cut",
-                                            xbins=13, xmin=-1.5, xmax=12.5,  opt="kCumulative", xlabels=cuts) ]
+    monTool.defineHistogram('CutCounter', type='TH1I', path='EXPERT', title="PrecisionElectron Hypo Passed Cuts;Cut",
+                            xbins=13, xmin=-1.5, xmax=12.5,  opt="kCumulative", xlabels=cuts)
 
 
-    if ConfigFlags.Trigger.doValidationMonitoring:
+    if flags.Trigger.doValidationMonitoring:
       monTool.defineHistogram('ptcone20',type='TH1F',path='EXPERT',title= "PrecisionElectron Hypo ptcone20; ptcone20;", xbins=50, xmin=0, xmax=5.0),
       monTool.defineHistogram('relptcone20',type='TH1F',path='EXPERT',title= "PrecisionElectron Hypo; ptcone20/pt;", xbins=50, xmin=0, xmax=1),
       monTool.defineHistogram('ptvarcone20',type='TH1F',path='EXPERT',title= "PrecisionElectron Hypo ptvarcone20; ptvarcone20;", xbins=50, xmin=0, xmax=5.0),
       monTool.defineHistogram('relptvarcone20',type='TH1F',path='EXPERT',title= "PrecisionElectron Hypo; ptvarcone20/pt;", xbins=50, xmin=0, xmax=0.5)
       monTool.defineHistogram('trk_d0', type="TH1F", path='EXPERT', title="PrecisionElectron Hypo Track d0; d0 [mm]", xbins=100, xmin=-1, xmax=1)
 
-    monTool.HistPath = 'PrecisionElectronHypo/'+self.chain()
     self.tool().MonTool = monTool
 
 
-def _IncTool( name, monGroups, cpart, tool=None):
+def _IncTool(flags, name, monGroups, cpart, tool=None):
     config = TrigEgammaPrecisionElectronHypoToolConfig(name, monGroups, cpart, tool=tool)
-    config.compile()
+    config.compile(flags)
     return config.tool()
 
 
 
-def TrigEgammaPrecisionElectronHypoToolFromDict( d , tool=None):
+def TrigEgammaPrecisionElectronHypoToolFromDict(flags, d , tool=None):
     """ Use menu decoded chain dictionary to configure the tool """
     cparts = [i for i in d['chainParts'] if ((i['signature']=='Electron') or (i['signature']=='Electron'))]
-    name = d['chainName']
-    monGroups = d['monGroups']
-    return _IncTool( name, monGroups, cparts[0] , tool=tool )
+    return _IncTool( flags, d['chainName'], d['monGroups'], cparts[0] , tool=tool )
 
 
 
@@ -307,11 +301,11 @@ def TrigEgammaPrecisionElectronHypoToolFromDict( d , tool=None):
 #
 # Electron DNN Selectors
 #
-def TrigEgammaPrecisionElectronDNNSelectorCfg(name='TrigEgammaPrecisionElectronDNNSelector', ConfigFilePath=None):
+def TrigEgammaPrecisionElectronDNNSelectorCfg(flags, name='TrigEgammaPrecisionElectronDNNSelector', ConfigFilePath=None):
     acc = ComponentAccumulator()
     # We should include the DNN here
     if not ConfigFilePath:
-      ConfigFilePath = ConfigFlags.Trigger.egamma.dnnVersion
+      ConfigFilePath = flags.Trigger.egamma.dnnVersion
   
     import collections.abc
     SelectorNames = collections.OrderedDict({
@@ -337,7 +331,7 @@ def TrigEgammaPrecisionElectronDNNSelectorCfg(name='TrigEgammaPrecisionElectronD
 #
 # Electron LH Selectors
 #
-def TrigEgammaPrecisionElectronLHSelectorCfg( name='TrigEgammaPrecisionElectronLHSelector', ConfigFilePath=None, ConfigFileNoPixPath=None, ConfigFileNoGSFPath=None, ConfigFileNoGSFNoPixPath=None):
+def TrigEgammaPrecisionElectronLHSelectorCfg(flags, name='TrigEgammaPrecisionElectronLHSelector', ConfigFilePath=None, ConfigFileNoPixPath=None, ConfigFileNoGSFPath=None, ConfigFileNoGSFNoPixPath=None):
 
     # Configure the LH selectors
     acc = ComponentAccumulator()
@@ -363,10 +357,10 @@ def TrigEgammaPrecisionElectronLHSelectorCfg( name='TrigEgammaPrecisionElectronL
     VariationConfigInfos['_nogsf']['postfix']        = ''
     VariationConfigInfos['_nogsf_nopix']['postfix']  = '_NoPix'
     
-    VariationConfigInfos['_default']['path']      = ConfigFilePath           if ConfigFilePath           else ConfigFlags.Trigger.egamma.electronPidVersion
-    VariationConfigInfos['_nopix']['path']        = ConfigFileNoPixPath      if ConfigFileNoPixPath      else ConfigFlags.Trigger.egamma.electronNoPixPidVersion
-    VariationConfigInfos['_nogsf']['path']        = ConfigFileNoGSFPath      if ConfigFileNoGSFPath      else ConfigFlags.Trigger.egamma.electronNoGSFPidVersion
-    VariationConfigInfos['_nogsf_nopix']['path']  = ConfigFileNoGSFNoPixPath if ConfigFileNoGSFNoPixPath else ConfigFlags.Trigger.egamma.electronNoGSFNoPixPidVersion
+    VariationConfigInfos['_default']['path']      = ConfigFilePath           if ConfigFilePath           else flags.Trigger.egamma.electronPidVersion
+    VariationConfigInfos['_nopix']['path']        = ConfigFileNoPixPath      if ConfigFileNoPixPath      else flags.Trigger.egamma.electronNoPixPidVersion
+    VariationConfigInfos['_nogsf']['path']        = ConfigFileNoGSFPath      if ConfigFileNoGSFPath      else flags.Trigger.egamma.electronNoGSFPidVersion
+    VariationConfigInfos['_nogsf_nopix']['path']  = ConfigFileNoGSFNoPixPath if ConfigFileNoGSFNoPixPath else flags.Trigger.egamma.electronNoGSFNoPixPidVersion
     
     from AthenaCommon.Logging import logging
     log = logging.getLogger('TrigEgammaPrecisionElectronHypoTool')
@@ -394,7 +388,7 @@ def TrigEgammaPrecisionElectronLHSelectorCfg( name='TrigEgammaPrecisionElectronL
 # Electron CB Selectors
 #
 
-def TrigEgammaPrecisionElectronCBSelectorCfg(name='TrigEgammaPrecisionElectronCBSelector', ConfigFilePath=None):
+def TrigEgammaPrecisionElectronCBSelectorCfg(flags, name='TrigEgammaPrecisionElectronCBSelector', ConfigFilePath=None):
     acc = ComponentAccumulator()
     from ElectronPhotonSelectorTools.TrigEGammaPIDdefs import BitDefElectron
 
@@ -418,7 +412,7 @@ def TrigEgammaPrecisionElectronCBSelectorCfg(name='TrigEgammaPrecisionElectronCB
     )
 
     if not ConfigFilePath:
-        ConfigFilePath = ConfigFlags.Trigger.egamma.electronHIPidVersion
+        ConfigFilePath = flags.Trigger.egamma.electronHIPidVersion
 
     from collections import OrderedDict
     SelectorNames = OrderedDict({

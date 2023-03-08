@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include "TrkFitterUtils/TrackFitInputPreparator.h"
 #include "TrkGlobalChi2Fitter/GlobalChi2Fitter.h"
@@ -261,7 +261,6 @@ namespace Trk {
 
   StatusCode GlobalChi2Fitter::finalize() {
 
-    ATH_MSG_INFO("finalize()");
     ATH_MSG_INFO(m_fit_status[S_FITS] << " attempted track fits");
     ATH_MSG_INFO(m_fit_status[S_SUCCESSFUL_FITS] << " successful track fits");
     ATH_MSG_INFO(m_fit_status[S_MAT_INV_FAIL] << " track fits failed because of a matrix inversion failure");
@@ -1710,6 +1709,7 @@ namespace Trk {
           errors[1] = 10;
           
           pseudostate2->setMeasurementErrors(errors);
+          // cppcheck-suppress invalidLifetime; false positive
           outlierstates2.push_back(pseudostate2.get());
           trajectory.addMeasurementState(std::move(pseudostate2));
         }
@@ -5226,8 +5226,7 @@ namespace Trk {
         
         double *errors = state->measurementErrors();
 
-        std::vector<double> residuals;
-        m_residualPullCalculator->residuals(residuals, measbase, currenttrackpar, ResidualPull::Biased, hittype);
+        std::array<double,5> residuals = m_residualPullCalculator->residuals(measbase, currenttrackpar, ResidualPull::Biased, hittype);
         
         for (int i = 0; i < 5; i++) {
           if (

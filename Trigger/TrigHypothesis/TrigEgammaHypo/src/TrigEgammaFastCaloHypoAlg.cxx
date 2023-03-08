@@ -27,19 +27,7 @@ TrigEgammaFastCaloHypoAlg::TrigEgammaFastCaloHypoAlg( const std::string& name,
 StatusCode TrigEgammaFastCaloHypoAlg::initialize() {
 
   ATH_CHECK( m_hypoTools.retrieve() );
-
-  if(m_useRun3){
-    ATH_CHECK(m_ringerNNTools.retrieve());
-  }else{
-    for( size_t idx=0; idx<m_constantsCalibPaths.size(); ++idx){
-      auto* selector = new Ringer::RingerSelectorTool();
-      selector->setConstantsCalibPath(m_constantsCalibPaths[idx]);
-      selector->setThresholdsCalibPath(m_thresholdsCalibPaths[idx]);
-      ATH_CHECK(selector->initialize());
-      m_ringerTools.push_back(selector) ;
-    }
-  }
-
+  ATH_CHECK( m_ringerNNTools.retrieve());
   ATH_CHECK( m_clustersKey.initialize() );
   ATH_CHECK( m_ringsKey.initialize(SG::AllowEmpty));
 
@@ -112,29 +100,18 @@ StatusCode TrigEgammaFastCaloHypoAlg::execute( const EventContext& context ) con
 
     float avgmu   = m_lumiBlockMuTool->averageInteractionsPerCrossing();
     info.valueDecorator["avgmu"] = avgmu;
-
+    
     // Decorate the info object with NN ringer decision. if rings size is zero, this object is a dummy and
     // should not compute any decision. the hypo tool will not found any pid name and will reprove this.
     if(ringsCluster && emCluster && !ringsCluster->rings().empty() )
     {
       int idx=0;
       for (auto& pidname : m_pidNames ){
-        if (m_useRun3){
-          timer_predict.start();
-          float nnOutput = m_ringerNNTools[0]->predict(ringsCluster);
-          timer_predict.stop();
-          info.pidDecorator[pidname] = (bool)m_ringerNNTools[idx]->accept(ringsCluster, nnOutput, avgmu);
-          info.valueDecorator[pidname+"NNOutput"] = nnOutput;
-        }else{
-          const std::vector<float> rings = ringsCluster->rings();
-          std::vector<float> refRings(rings.size());
-          refRings.assign(rings.begin(), rings.end());
-          timer_predict.start();
-          float nnOutput = m_ringerTools[0]->calculate( refRings, emCluster->et(), emCluster->eta(), avgmu );
-          timer_predict.stop();
-          info.pidDecorator[pidname] = m_ringerTools[idx]->accept(nnOutput, emCluster->et(),emCluster->eta(),avgmu) ;
-          info.valueDecorator[pidname+"NNOutput"] = nnOutput;
-        }
+        timer_predict.start();
+        float nnOutput = m_ringerNNTools[0]->predict(ringsCluster);
+        timer_predict.stop();
+        info.pidDecorator[pidname] = (bool)m_ringerNNTools[idx]->accept(ringsCluster, nnOutput, avgmu);
+        info.valueDecorator[pidname+"NNOutput"] = nnOutput;
         idx++;
       }   
     }

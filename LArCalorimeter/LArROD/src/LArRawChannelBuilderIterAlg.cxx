@@ -16,8 +16,6 @@
 #define MAXINT INT_MAX
 #define MAXINT2 -INT_MAX
 
-LArRawChannelBuilderIterAlg::LArRawChannelBuilderIterAlg(const std::string& name, ISvcLocator* pSvcLocator):
-  AthReentrantAlgorithm(name, pSvcLocator) {}
   
 StatusCode LArRawChannelBuilderIterAlg::initialize() {
   ATH_CHECK(m_digitKey.initialize());	 

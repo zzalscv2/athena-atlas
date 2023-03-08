@@ -1,14 +1,10 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
 // BCM_RodDecoder.h
 //   Header file for class BCM_RodDecoder
-///////////////////////////////////////////////////////////////////
-// (c) ATLAS BCM Detector software
-///////////////////////////////////////////////////////////////////
-// 
 ///////////////////////////////////////////////////////////////////
 //  Version 00-00-01 12/05/2008 Daniel Dobos
 //  Version 00-00-11 05/02/2009 Daniel Dobos
@@ -36,8 +32,8 @@ public:
   typedef BCM_RawData RDO;
   typedef BCM_RDO_Collection BCM_RawCollection; 
 
-  // constructor
-  BCM_RodDecoder(const std::string& type, const std::string& name, const IInterface* parent);
+  // delegate constructor
+  using AthAlgTool::AthAlgTool;
 
   static const InterfaceID& interfaceID();
 

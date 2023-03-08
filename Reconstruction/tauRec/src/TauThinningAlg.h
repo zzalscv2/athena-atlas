@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration.
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
 */
 
 #ifndef TAUREC_TAUTHINNINGALG_H
@@ -68,7 +68,7 @@ class TauThinningAlg : public AthReentrantAlgorithm
 
   // Tau pi0 cluster cell link container to thin
   SG::ThinningHandleKey<CaloClusterCellLinkContainer> m_pi0CellLinks
-    { this, "Pi0CellLinks", "TauPi0Clusters_links", "Tau pi0 cluster cell link container to thin" };
+    { this, "TauPi0CellLinks", "TauPi0Clusters_links", "Tau pi0 cluster cell link container to thin" };
 
   // Tau final pi0 container to thin
   SG::ThinningHandleKey<xAOD::ParticleContainer> m_finalPi0s
@@ -84,7 +84,7 @@ class TauThinningAlg : public AthReentrantAlgorithm
 
   // Tau shot cluster cell link container to thin
   SG::ThinningHandleKey<CaloClusterCellLinkContainer> m_shotCellLinks
-    { this, "ShotCellLinks", "TauShotClusters_links", "Tau shot cluster cell link container to thin" };
+    { this, "TauShotCellLinks", "TauShotClusters_links", "Tau shot cluster cell link container to thin" };
 
   // Tau hadronic PFO container to thin
   SG::ThinningHandleKey<xAOD::PFOContainer> m_hadronicPFOs

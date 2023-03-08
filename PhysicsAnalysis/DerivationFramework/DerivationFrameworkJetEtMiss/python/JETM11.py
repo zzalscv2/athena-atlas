@@ -1,4 +1,4 @@
-4# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+4# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # DAOD_JETM11.py
@@ -13,8 +13,8 @@ def JETM11TriggerSkimmingToolCfg(ConfigFlags):
     acc = ComponentAccumulator()
 
     from DerivationFrameworkJetEtMiss import TriggerLists
-    singleElTriggers = TriggerLists.single_el_Trig()
-    singleMuTriggers = TriggerLists.single_mu_Trig()
+    singleElTriggers = TriggerLists.single_el_Trig(ConfigFlags)
+    singleMuTriggers = TriggerLists.single_mu_Trig(ConfigFlags)
 
     JETM11TrigSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool( name                   = "JETM11TrigSkimmingTool1",
                                                                                   TriggerListOR          = singleElTriggers + singleMuTriggers)
@@ -68,7 +68,7 @@ def JETM11Cfg(ConfigFlags):
     # for actually configuring the matching, so we create it here and pass it down
     # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    JETM11TriggerListsHelper = TriggerListsHelper()
+    JETM11TriggerListsHelper = TriggerListsHelper(ConfigFlags)
 
     # Skimming, thinning, augmentation
     acc.merge(JETM11KernelCfg(ConfigFlags, name="JETM11Kernel", StreamName = 'StreamDAOD_JETM11', TriggerListsHelper = JETM11TriggerListsHelper))

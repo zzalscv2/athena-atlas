@@ -68,7 +68,13 @@ StatusCode GenVertexFillerTool::fill (const HepMC::GenVertex& p)
   *m_y = pos.y();
   *m_z = pos.z();
   *m_barcode = HepMC::barcode(p);
+//AV The id in HepMC2 means "status" of the vertex, while in HepMC3 the status of the vertex is "status"
+#ifdef HEPMC3
+  if (m_do_id) *m_id = p.status();
+#else
   if (m_do_id) *m_id = p.id();
+#endif
+
 
   return StatusCode::SUCCESS;
 }

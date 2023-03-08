@@ -5,12 +5,8 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 
 def METCalo_Cfg(configFlags):
-    sequencename = "METReconstruction_Calo"
 
     components = ComponentAccumulator()
-    from AthenaConfiguration.ComponentFactory import CompFactory
-    AthSequencer=CompFactory.AthSequencer
-    components.addSequence( AthSequencer(sequencename) )
     ############################################################################
     # EMTopo
 
@@ -38,5 +34,5 @@ def METCalo_Cfg(configFlags):
                      )
 
     recoAlg_calo = getMETRecoAlg(algName='METRecoAlg_Calo',configs={"EMTopo":cfg_emt,"LocHadTopo":cfg_lht,"Calo":cfg_calo})
-    components.addEventAlgo(recoAlg_calo,sequencename)
+    components.addEventAlgo(recoAlg_calo)
     return components

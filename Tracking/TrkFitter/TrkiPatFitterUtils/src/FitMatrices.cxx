@@ -290,7 +290,7 @@ void FitMatrices::refinePointers(void) {
   for (int col = 0; col < m_columnsDM; ++col) {
     int i = m_firstRowForParameter[col];
     int j = m_lastRowForParameter[col];
-    if (m_fitMatrix.derivative[i][col] == 0. && i < --j) {
+    if (i < --j && m_fitMatrix.derivative[i][col] == 0. ) {
       while (i != j && m_fitMatrix.derivative[i][col] == 0.)
         ++i;
       m_firstRowForParameter[col] = i;
@@ -634,8 +634,8 @@ __attribute__((flatten))
 }
 
 void FitMatrices::usePerigee(const FitMeasurement& measurement) {
-  m_perigee = measurement.perigee();
-  m_perigeeWeight = measurement.perigeeWeight();
+  m_perigee = &(measurement.perigee());
+  m_perigeeWeight = &(measurement.perigeeWeight());
   // TODO: needs eigen equiv !!
   if (m_matrixFromCLHEP) {
     m_usePerigee = true;

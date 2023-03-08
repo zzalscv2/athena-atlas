@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////
@@ -119,7 +119,7 @@ public:
   template <class T>
   QList<TrackCollHandleBase*> createSpecificCollections() {
     QList<TrackCollHandleBase*> l;
-    foreach (QString name, T::availableCollections(theclass)) {
+    for (QString name : T::availableCollections(theclass)) {
       T * col = new T(common,name);
       col->init();
       l << col;
@@ -273,7 +273,7 @@ void VP1TrackSystem::buildEventSceneGraph(StoreGateSvc* sg, SoSeparator *root)
   m_d->common->controller()->collWidget()->setCollections(m_d->createCollections());
 
   //Add collections to event scenegraph:
-  foreach (VP1StdCollection* col,m_d->common->controller()->collWidget()->collections<VP1StdCollection>())
+  for (VP1StdCollection* col : m_d->common->controller()->collWidget()->collections<VP1StdCollection>())
     m_d->sel_tracks->addChild(col->collSwitch());
 
   root->addChild(m_d->sel_tracks);
@@ -511,7 +511,7 @@ void VP1TrackSystem::setApplicableIDProjections( InDetProjFlags::InDetProjPartsF
   if (changes) {
     messageVerbose("  => Flags changed.");
     if (m_d->common->controller()) {
-      foreach( TrackCollHandleBase* collhandle, m_d->common->controller()->collWidget()->collections<TrackCollHandleBase>() )
+      for( TrackCollHandleBase* collhandle : m_d->common->controller()->collWidget()->collections<TrackCollHandleBase>() )
       collhandle->updateInDetProjectionsOfAllHandles();
     }
   } else {
@@ -589,7 +589,7 @@ void VP1TrackSystem::userSelectedSingleNode( SoCooperativeSelection* sel, SoNode
   //If at least one of the track measurements is unselected, we
   //select them all. Otherwise we deselect them.
         bool oneunselected(false);
-        foreach(AssociatedObjectHandleBase* meas,trackmeas) {
+        for (AssociatedObjectHandleBase* meas : trackmeas) {
           if (!currentsel.contains(meas)) {
             oneunselected = true;
             break;
@@ -601,7 +601,7 @@ void VP1TrackSystem::userSelectedSingleNode( SoCooperativeSelection* sel, SoNode
           m_d->ascObjSelManager->ensureSelected(trackmeas);
 
           // Add PRDs. Need to be careful as they might not exist.
-          foreach(AssociatedObjectHandleBase* meas,trackmeas) {
+          for (AssociatedObjectHandleBase* meas : trackmeas) {
             AscObj_TSOS* tsosAsc = dynamic_cast<AscObj_TSOS*>(meas);
             if (tsosAsc && tsosAsc->rioOnTrack() && tsosAsc->rioOnTrack()->prepRawData()) prdSet.append(tsosAsc->rioOnTrack()->prepRawData());
           }
@@ -826,7 +826,7 @@ void VP1TrackSystem::refit()
   m_d->common->controller()->collWidget()->addCollections(newcols);
 
   //Add new collections to event scenegraph and turn them on:
-  foreach (TrackCollHandleBase* col,newcols) {
+  for (TrackCollHandleBase* col : newcols) {
     m_d->sel_tracks->addChild(col->collSwitch());
     col->setVisible(true);
   }
@@ -838,7 +838,7 @@ void VP1TrackSystem::refitFromPRDs(const Trk::ITrackFitter* /**currentFitter*/, 
 
   // std::vector<const Trk::PrepRawData*> prdSet;
   //  prdSet.reserve(m_d->selectedPRDs.count());
-  //  foreach (const Trk::PrepRawData* prd,m_d->selectedPRDs)
+  //  for (const Trk::PrepRawData* prd : m_d->selectedPRDs)
   //    prdSet.push_back(prd);
   //
   //  if (prdSet.size()==0) {
@@ -961,7 +961,7 @@ void VP1TrackSystem::updateAlignment(){
   }
 
   QList<AssociatedObjectHandleBase*> currentsel = m_d->ascObjSelManager->currentSelection();
-  foreach(AssociatedObjectHandleBase* meas,currentsel) {
+  for (AssociatedObjectHandleBase* meas : currentsel) {
     AscObj_TSOS* tsosAsc = dynamic_cast<AscObj_TSOS*>(meas);
     if (tsosAsc){
       if (tsosAsc->rioOnTrack() )
@@ -993,13 +993,12 @@ void VP1TrackSystem::tracksFromVertexChanged(QList< std::pair<const SoMaterial*,
   m_d->common->controller()->vertexCutsAllowed(true);
 
   // do something with vertexList!
-  std::pair<const SoMaterial*, QList< const Trk::Track*> > it;
-  foreach(it, vertexList){
+  for (const auto& it : vertexList){
     SoMaterial* mat = const_cast<SoMaterial*>(it.first);
     messageVerbose("Number of tracks associated with this vertex= "+QString::number(it.second.size()));
 
     
-    foreach(const Trk::Track* trk, it.second) {
+    for (const Trk::Track* trk : it.second) {
       m_d->vertexMaterialForTrackBases[trk]=mat;
       mat->ref();
 //      messageVerbose("Adding TrackHandleBase with pointer= "+QString::number((unsigned int)handle)+" for trk="+QString::number((unsigned int)trk));
@@ -1007,7 +1006,7 @@ void VP1TrackSystem::tracksFromVertexChanged(QList< std::pair<const SoMaterial*,
   }
 
   // update track collections too.
-  foreach(TrackCollHandleBase* coll,  m_d->common->controller()->collWidget()->collections<TrackCollHandleBase>())
+  for (TrackCollHandleBase* coll : m_d->common->controller()->collWidget()->collections<TrackCollHandleBase>())
     if (coll->allowColourByVertex()) coll->updateMaterialOfAllHandles();
 }
 

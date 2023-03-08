@@ -84,7 +84,7 @@ G4bool LArG4CalibSD::SimpleHit( const LArG4Identifier& a_ident , const std::vect
   // of order 10e-12 instead of 0 due to rounding errors in that
   // calculation, or general cases where the energy deposits are
   // trivially small.
-  if(energies[0]+energies[1]+energies[3] < 0.001*CLHEP::eV && fabs(energies[2]) < 0.001*CLHEP::eV ) {
+  if(energies[0]+energies[1]+energies[3] < 0.001*CLHEP::eV && std::abs(energies[2]) < 0.001*CLHEP::eV ) {
     return true;
   }
       

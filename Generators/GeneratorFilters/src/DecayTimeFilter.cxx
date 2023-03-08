@@ -43,7 +43,7 @@ StatusCode DecayTimeFilter::filterEvent() {
   bool passed = true;
   for (McEventCollection::const_iterator itr = events()->begin(); itr != events()->end(); ++itr) {
      const HepMC::GenEvent* genEvt = *itr;
-     for (auto part: *genEvt){
+     for (const auto& part: *genEvt){
        for (int pdg : m_particleID){
            if(pdg == part->pdg_id()){
                nPassPDG++;

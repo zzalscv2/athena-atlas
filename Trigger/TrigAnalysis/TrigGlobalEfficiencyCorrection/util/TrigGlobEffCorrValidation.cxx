@@ -45,6 +45,10 @@ public:
 		efficiencyScaleFactor = m_func(electron.pt());
 		return CP::CorrectionCode::Ok;
 	}
+	virtual CP::CorrectionCode getEfficiencyScaleFactor(double, double , unsigned int ,double&) const override
+	{
+		return CP::CorrectionCode::Error;
+	}
 	virtual CP::CorrectionCode applyEfficiencyScaleFactor(const xAOD::Electron&) const override { return CP::CorrectionCode::Error; }
 	virtual bool isAffectedBySystematic(const CP::SystematicVariation&) const override { return false; }
 	virtual CP::SystematicSet affectingSystematics() const override { return CP::SystematicSet(); }

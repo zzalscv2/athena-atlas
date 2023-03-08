@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -59,14 +59,14 @@ FitMeasurement::FitMeasurement(int hitIndex, HitOnTrack* hitOnTrack,
       m_materialEffectsOwner(false),
       m_measurementBase(measurementBase),
       m_minEnergyDeposit(0.),
-      m_minimizationDirection(nullptr),
-      m_normal(nullptr),
+      m_minimizationDirection{},
+      m_normal{},
       m_numberDoF(measurementBase->localCovariance().cols()),
       m_numericalDerivative(false),
       m_outlier(false),
       m_particleMassSquared(0.),
-      m_perigee(nullptr),
-      m_perigeeWeight(nullptr),
+      m_perigee{},
+      m_perigeeWeight{},
       m_position(measurementBase->associatedSurface().center()),
       m_qOverP(0.),
       m_radiationThickness(0.),
@@ -77,7 +77,7 @@ FitMeasurement::FitMeasurement(int hitIndex, HitOnTrack* hitOnTrack,
       m_scatteringAngle(0.),
       m_scatteringAngleOffSet(0.),
       m_secondResidual(0.),
-      m_sensorDirection(nullptr),
+      m_sensorDirection{},
       m_sigma(0.),
       m_sigmaMinus(0.),
       m_sigmaPlus(0.),
@@ -97,7 +97,7 @@ FitMeasurement::FitMeasurement(int hitIndex, HitOnTrack* hitOnTrack,
   // remaining data according to surface (normal, sensor, minimization
   // directions etc)
   if (dynamic_cast<const PlaneSurface*>(m_surface)) {
-    m_normal = new Amg::Vector3D(m_surface->transform().rotation().col(2));
+    m_normal = Amg::Vector3D(m_surface->transform().rotation().col(2));
     const Amg::Vector3D posptr =
         m_surface->localToGlobal(measurementBase->localParameters());
     m_position = posptr;
@@ -124,21 +124,20 @@ FitMeasurement::FitMeasurement(int hitIndex, HitOnTrack* hitOnTrack,
       double sinStereo = 0.0;
       if (term > -0.5) {
         sinStereo = std::sqrt(0.5 + term);
-        if (ab * m_normal->z() < 0.)
+        if (ab * m_normal.z() < 0.)
           sinStereo = -sinStereo;
       }
 
       const Amg::Vector3D& axis = m_surface->transform().rotation().col(1);
       m_sensorDirection =
-          new Amg::Vector3D(axis(0) * cosStereo + axis(1) * sinStereo,
-                            axis(1) * cosStereo - axis(0) * sinStereo, axis(2));
+          Amg::Vector3D(axis(0) * cosStereo + axis(1) * sinStereo,
+                        axis(1) * cosStereo - axis(0) * sinStereo, axis(2));
     } else {
       m_sensorDirection =
-          new Amg::Vector3D(m_surface->transform().rotation().col(1));
+          Amg::Vector3D(m_surface->transform().rotation().col(1));
     }
 
-    m_minimizationDirection =
-        new Amg::Vector3D(m_sensorDirection->cross(*m_normal));
+    m_minimizationDirection = Amg::Vector3D(m_sensorDirection.cross(m_normal));
     if (m_numberDoF == 2)
       m_type = pixelCluster;
   } else if (dynamic_cast<const StraightLineSurface*>(m_surface)) {
@@ -151,19 +150,19 @@ FitMeasurement::FitMeasurement(int hitIndex, HitOnTrack* hitOnTrack,
       //    position = surface->transform() * loc3D
       // but probably just same as using centre with wire direction ...
       m_sensorDirection =
-          new Amg::Vector3D(m_surface->transform().rotation().col(2));
+          Amg::Vector3D(m_surface->transform().rotation().col(2));
       m_signedDriftDistance = measurementBase->localParameters()[driftRadius];
       m_type = driftCircle;
     } else {
       // pseudomeasurement - minimize along wire direction
       m_minimizationDirection =
-          new Amg::Vector3D(m_surface->transform().rotation().col(2));
+          Amg::Vector3D(m_surface->transform().rotation().col(2));
       double mag = m_surface->center().mag();
-      m_normal = mag > 1e-6 ? new Amg::Vector3D(m_surface->center() / mag)
-                            : new Amg::Vector3D(m_surface->normal());
+      m_normal = mag > 1e-6 ? Amg::Vector3D(m_surface->center() / mag)
+                            : Amg::Vector3D(m_surface->normal());
       m_position = measurementBase->globalPosition();
       m_sensorDirection =
-          new Amg::Vector3D(m_normal->cross(*m_minimizationDirection));
+          Amg::Vector3D(m_normal.cross(m_minimizationDirection));
       m_signedDriftDistance = 0.;
       m_type = pseudoMeasurement;
     }
@@ -173,7 +172,7 @@ FitMeasurement::FitMeasurement(int hitIndex, HitOnTrack* hitOnTrack,
       dynamic_cast<const PerigeeSurface*>(m_surface);
   if (perigee) {
     m_position = m_surface->center();
-    m_sensorDirection = new Amg::Vector3D(0., 0., 1.);
+    m_sensorDirection = Amg::Vector3D(0., 0., 1.);
     m_type = transverseVertex;
     if (m_numberDoF == 2)
       m_type = vertex;
@@ -221,14 +220,14 @@ FitMeasurement::FitMeasurement(const MaterialEffectsBase* materialEffects,
       m_materialEffectsOwner(false),
       m_measurementBase(nullptr),
       m_minEnergyDeposit(0.),
-      m_minimizationDirection(nullptr),
-      m_normal(nullptr),
+      m_minimizationDirection{},
+      m_normal{},
       m_numberDoF(0),
       m_numericalDerivative(false),
       m_outlier(false),
       m_particleMassSquared(particleMass * particleMass),
-      m_perigee(nullptr),
-      m_perigeeWeight(nullptr),
+      m_perigee{},
+      m_perigeeWeight{},
       m_position(position),
       m_qOverP(qOverP),
       m_radiationThickness(materialEffects->thicknessInX0()),
@@ -239,7 +238,7 @@ FitMeasurement::FitMeasurement(const MaterialEffectsBase* materialEffects,
       m_scatteringAngle(0.),
       m_scatteringAngleOffSet(0.),
       m_secondResidual(0.),
-      m_sensorDirection(nullptr),
+      m_sensorDirection{},
       m_sigma(0.),
       m_sigmaMinus(0.),
       m_sigmaPlus(0.),
@@ -329,14 +328,14 @@ FitMeasurement::FitMeasurement(double radiationThickness, double deltaE,
       m_materialEffectsOwner(true),
       m_measurementBase(nullptr),
       m_minEnergyDeposit(0.),
-      m_minimizationDirection(nullptr),
-      m_normal(nullptr),
+      m_minimizationDirection{},
+      m_normal{},
       m_numberDoF(0),
       m_numericalDerivative(false),
       m_outlier(false),
       m_particleMassSquared(particleMass * particleMass),
-      m_perigee(nullptr),
-      m_perigeeWeight(nullptr),
+      m_perigee{},
+      m_perigeeWeight{},
       m_position(position),
       m_qOverP(qOverP),
       m_radiationThickness(radiationThickness),
@@ -347,7 +346,7 @@ FitMeasurement::FitMeasurement(double radiationThickness, double deltaE,
       m_scatteringAngle(0.),
       m_scatteringAngleOffSet(0.),
       m_secondResidual(0.),
-      m_sensorDirection(nullptr),
+      m_sensorDirection{},
       m_sigma(0.),
       m_sigmaMinus(0.),
       m_sigmaPlus(0.),
@@ -406,14 +405,14 @@ FitMeasurement::FitMeasurement(const AlignmentEffectsOnTrack* alignmentEffects,
       m_materialEffectsOwner(false),
       m_measurementBase(nullptr),
       m_minEnergyDeposit(0.),
-      m_minimizationDirection(nullptr),
-      m_normal(nullptr),
+      m_minimizationDirection{},
+      m_normal{},
       m_numberDoF(2),
       m_numericalDerivative(false),
       m_outlier(false),
       m_particleMassSquared(0.),
-      m_perigee(nullptr),
-      m_perigeeWeight(nullptr),
+      m_perigee{},
+      m_perigeeWeight{},
       m_position(position),
       m_qOverP(0.),
       m_radiationThickness(0.),
@@ -424,7 +423,7 @@ FitMeasurement::FitMeasurement(const AlignmentEffectsOnTrack* alignmentEffects,
       m_scatteringAngle(0.),
       m_scatteringAngleOffSet(0.),
       m_secondResidual(0.),
-      m_sensorDirection(nullptr),
+      m_sensorDirection{},
       m_sigma(0.),
       m_sigmaMinus(alignmentEffects->sigmaDeltaAngle()),
       m_sigmaPlus(alignmentEffects->sigmaDeltaTranslation()),
@@ -466,14 +465,14 @@ FitMeasurement::FitMeasurement(const TrackSurfaceIntersection& intersection,
       m_materialEffectsOwner(false),
       m_measurementBase(nullptr),
       m_minEnergyDeposit(0.),
-      m_minimizationDirection(nullptr),
-      m_normal(nullptr),
+      m_minimizationDirection{},
+      m_normal{},
       m_numberDoF(0),
       m_numericalDerivative(false),
       m_outlier(false),
       m_particleMassSquared(0.),
-      m_perigee(nullptr),
-      m_perigeeWeight(nullptr),
+      m_perigee{},
+      m_perigeeWeight{},
       m_position(intersection.position()),
       m_qOverP(0.),
       m_radiationThickness(0.),
@@ -484,7 +483,7 @@ FitMeasurement::FitMeasurement(const TrackSurfaceIntersection& intersection,
       m_scatteringAngle(0.),
       m_scatteringAngleOffSet(0.),
       m_secondResidual(0.),
-      m_sensorDirection(nullptr),
+      m_sensorDirection{},
       m_sigma(0.),
       m_sigmaMinus(0.),
       m_sigmaPlus(0.),
@@ -525,14 +524,14 @@ FitMeasurement::FitMeasurement(const TrackStateOnSurface& TSOS)
       m_materialEffectsOwner(false),
       m_measurementBase(nullptr),
       m_minEnergyDeposit(0.),
-      m_minimizationDirection(nullptr),
-      m_normal(nullptr),
+      m_minimizationDirection{},
+      m_normal{},
       m_numberDoF(0),
       m_numericalDerivative(false),
       m_outlier(false),
       m_particleMassSquared(0.),
-      m_perigee(nullptr),
-      m_perigeeWeight(nullptr),
+      m_perigee{},
+      m_perigeeWeight{},
       m_position(TSOS.trackParameters()->position()),
       m_qOverP(0.),
       m_radiationThickness(0.),
@@ -543,7 +542,7 @@ FitMeasurement::FitMeasurement(const TrackStateOnSurface& TSOS)
       m_scatteringAngle(0.),
       m_scatteringAngleOffSet(0.),
       m_secondResidual(0.),
-      m_sensorDirection(nullptr),
+      m_sensorDirection{},
       m_sigma(0.),
       m_sigmaMinus(0.),
       m_sigmaPlus(0.),
@@ -591,8 +590,8 @@ FitMeasurement::FitMeasurement(int hitIndex, HitOnTrack* hitOnTrack,
       m_numericalDerivative(false),
       m_outlier(false),
       m_particleMassSquared(0.),
-      m_perigee(nullptr),
-      m_perigeeWeight(nullptr),
+      m_perigee{},
+      m_perigeeWeight{},
       m_position(position),
       m_qOverP(0.),
       m_radiationThickness(0.),
@@ -620,35 +619,21 @@ FitMeasurement::FitMeasurement(int hitIndex, HitOnTrack* hitOnTrack,
   // special treatment for projective trapezoidal chambers in the endcap
   // take sensorDirection from stereo angle as I don't understand Surface axes
   // in this case
-  m_normal = new Amg::Vector3D(m_surface->transform().rotation().col(2));
-  if (m_numberDoF == 1 && std::abs(m_normal->z()) > 0.99 &&
+  m_normal = Amg::Vector3D(m_surface->transform().rotation().col(2));
+  if (m_numberDoF == 1 && std::abs(m_normal.z()) > 0.99 &&
       std::abs(sinStereo) < 0.5)  // end-cap projective geometry
   {
     double cosStereo = std::sqrt(1. - sinStereo * sinStereo);
-    m_sensorDirection = new Amg::Vector3D(
-        position(0) * cosStereo + position(1) * sinStereo,
-        -position(0) * sinStereo + position(1) * cosStereo, 0.);
-    (*m_sensorDirection) /= m_sensorDirection->perp();
-
-    // 	Amg::Vector3D sensor = surface->transform().getRotation().colY();
-    // 	double temp = sensor(0)*cosStereo + sensor(1)*sinStereo;
-    // 	sensor.setY(-sensor(0)*sinStereo + sensor(1)*cosStereo);
-    // 	sensor.setX(temp);
-    // 	std::cout << " projective   x " <<
-    // surface->transform().getRotation().co(0)
-    // 		  << "   y " << surface->transform().getRotation().colY()
-    // 		  << "   z " << surface->transform().getRotation().colZ()
-    // 		  << "   m_normal " << *m_normal
-    // 		  << "   m_sensor " << *m_sensorDirection
-    // 		  << "   projective " << sensor << std::endl;
+    m_sensorDirection =
+        Amg::Vector3D(position(0) * cosStereo + position(1) * sinStereo,
+                      -position(0) * sinStereo + position(1) * cosStereo, 0.);
+    (m_sensorDirection) /= m_sensorDirection.perp();
   } else  // otherwise chambers have parallel strips with sensor direction =
           // appropriate module axis
   {
-    m_sensorDirection =
-        new Amg::Vector3D(m_surface->transform().rotation().col(1));
+    m_sensorDirection = Amg::Vector3D(m_surface->transform().rotation().col(1));
   }
-  m_minimizationDirection =
-      new Amg::Vector3D(m_sensorDirection->cross(*m_normal));
+  m_minimizationDirection = Amg::Vector3D(m_sensorDirection.cross(m_normal));
 
   // add protection against junk input
   if (sigma > 0.) {
@@ -691,14 +676,14 @@ FitMeasurement::FitMeasurement(int hitIndex, HitOnTrack* hitOnTrack,
       m_materialEffectsOwner(false),
       m_measurementBase(nullptr),
       m_minEnergyDeposit(0.),
-      m_minimizationDirection(nullptr),
-      m_normal(nullptr),
+      m_minimizationDirection{},
+      m_normal{},
       m_numberDoF(1),
       m_numericalDerivative(false),
       m_outlier(false),
       m_particleMassSquared(0.),
-      m_perigee(nullptr),
-      m_perigeeWeight(nullptr),
+      m_perigee{},
+      m_perigeeWeight{},
       m_position(position),
       m_qOverP(0.),
       m_radiationThickness(0.),
@@ -718,8 +703,7 @@ FitMeasurement::FitMeasurement(int hitIndex, HitOnTrack* hitOnTrack,
       m_type(driftCircle),
       m_weight(1.),
       m_weight2(1.) {
-  m_sensorDirection =
-      new Amg::Vector3D(m_surface->transform().rotation().col(2));
+  m_sensorDirection = Amg::Vector3D(m_surface->transform().rotation().col(2));
 
   // add protection against junk input
   if (sigma > 0.) {
@@ -751,15 +735,15 @@ FitMeasurement::FitMeasurement(const TrackParameters& perigee)
       m_materialEffectsOwner(false),
       m_measurementBase(nullptr),
       m_minEnergyDeposit(0.),
-      m_minimizationDirection(nullptr),
-      m_normal(nullptr),
+      m_minimizationDirection{},
+      m_normal{},
       m_numberDoF(0),
       m_numericalDerivative(false),
       m_outlier(true),  // use base class for additional trackParameters at
                         // detector boundary
       m_particleMassSquared(0.),
-      m_perigee(nullptr),
-      m_perigeeWeight(nullptr),
+      m_perigee{},
+      m_perigeeWeight{},
       m_position(perigee.associatedSurface().center()),
       m_qOverP(0.),
       m_radiationThickness(0.),
@@ -770,7 +754,7 @@ FitMeasurement::FitMeasurement(const TrackParameters& perigee)
       m_scatteringAngle(0.),
       m_scatteringAngleOffSet(0.),
       m_secondResidual(0.),
-      m_sensorDirection(nullptr),
+      m_sensorDirection{},
       m_sigma(0.),
       m_sigmaMinus(0.),
       m_sigmaPlus(0.),
@@ -781,8 +765,7 @@ FitMeasurement::FitMeasurement(const TrackParameters& perigee)
       m_weight(1.),
       m_weight2(1.) {
   // perigee axis needed for propagation of fitted parameters
-  m_sensorDirection =
-      new Amg::Vector3D(m_surface->transform().rotation().col(2));
+  m_sensorDirection = Amg::Vector3D(m_surface->transform().rotation().col(2));
 
   // is this perigee to be used as a measurement?
   if (perigee.covariance() && !m_outlier) {
@@ -805,50 +788,10 @@ FitMeasurement::FitMeasurement(const TrackParameters& perigee)
     parameters(3) = sinPhi;
     parameters(4) = cotTheta;
     parameters(5) = ptInv0;
-    m_perigee = new Amg::VectorX(parameters);
-
-    // ///////
-    // // weight = inverse covariance
-    // JacobianCotThetaPtToThetaP jacob(cotTheta, ptInv0);
-    // CLHEP::HepSymMatrix cov  =
-    // measuredPerigee->localErrorMatrix().covariance();
-
-    // // convert to internal units (TeV) to avoid rounding
-    // for (int row = 0; row < 5; ++row)
-    // {
-    //     cov[row][4]  *= Gaudi::Units::TeV;
-    // }
-    // cov[4][4]        *= Gaudi::Units::TeV;
-    // int     fail;
-    // cov.invert(fail);
-    // CLHEP::HepSymMatrix wtCLHEP(cov.similarityT(jacob));
-    // // convert to eigen
-    // Amg::MatrixX* weight = new Amg::MatrixX(5,5);
-    // std::cout << " weight from CLHEP :" << std::endl;
-    // for (int i = 0; i != 5; ++i)
-    // {
-    //     for (int j = 0; j != 5; ++j)
-    //     {
-    // 	(*weight)(i,j) = wtCLHEP[j][i];
-    //     }
-    //     std::cout << "  " << (*weight)(i,0) << "  " << (*weight)(i,1) << "  "
-    //     << (*weight)(i,2)
-    // 	      << "  " << (*weight)(i,3) << "  " << (*weight)(i,4) << std::endl;
-
-    // }
-    // std::cout << std::endl;
-
-    // m_perigeeWeight	= weight;
-    // //////
+    m_perigee = Amg::VectorX(parameters);
 
     // weight = inverse covariance
     AmgSymMatrix(5) covariance(*perigee.covariance());
-    // for (int i = 0; i != 5; ++i)
-    // {
-    //     for (int j = 0; j != 5; ++j)
-    // 	covariance(i,j) =
-    // measuredPerigee->localErrorMatrix().covariance()[j][i];
-    // }
 
     // convert to internal units (TeV) to avoid rounding
     for (int row = 0; row < 5; ++row) {
@@ -858,19 +801,9 @@ FitMeasurement::FitMeasurement(const TrackParameters& perigee)
     covariance(4, 4) *= Gaudi::Units::TeV;
     covariance.inverse();
 
-    // TODO: fix in mig5
     JacobianCotThetaPtToThetaP jacobian(cotTheta, ptInv0);
-    // Amg::MatrixX jac(5,5);
-    // for (int i = 0; i != 5; ++i)
-    // {
-    //     for (int j = 0; j != 5; ++j)	jac(i,j) = jacobian[j][i];
-    // }
-    // TODO: check eigen transformation gives same as CLHEP code above
-    // (transpose first??)
-    //
     m_perigeeWeight =
-        new const Amg::MatrixX(jacobian * covariance * jacobian.transpose());
-    // std::cout << " weight :" << std::endl;
+        Amg::MatrixX(jacobian * covariance * jacobian.transpose());
   }
 }
 
@@ -896,14 +829,14 @@ FitMeasurement::FitMeasurement(double d0, const Amg::Vector3D& position,
       m_materialEffectsOwner(false),
       m_measurementBase(nullptr),
       m_minEnergyDeposit(0.),
-      m_minimizationDirection(nullptr),
-      m_normal(nullptr),
+      m_minimizationDirection{},
+      m_normal{},
       m_numberDoF(1),
       m_numericalDerivative(false),
       m_outlier(false),
       m_particleMassSquared(0.),
-      m_perigee(nullptr),
-      m_perigeeWeight(nullptr),
+      m_perigee{},
+      m_perigeeWeight{},
       m_position(position),
       m_qOverP(0.),
       m_radiationThickness(0.),
@@ -914,7 +847,7 @@ FitMeasurement::FitMeasurement(double d0, const Amg::Vector3D& position,
       m_scatteringAngle(0.),
       m_scatteringAngleOffSet(0.),
       m_secondResidual(0.),
-      m_sensorDirection(new Amg::Vector3D(0., 0., 1.)),
+      m_sensorDirection(Amg::Vector3D(0., 0., 1.)),
       m_sigma(0.),
       m_sigmaMinus(0.),
       m_sigmaPlus(0.),
@@ -927,11 +860,6 @@ FitMeasurement::FitMeasurement(double d0, const Amg::Vector3D& position,
 
 // destructor
 FitMeasurement::~FitMeasurement(void) {
-  delete m_minimizationDirection;
-  delete m_normal;
-  delete m_perigee;
-  delete m_perigeeWeight;
-  delete m_sensorDirection;
   if ((m_type == materialDelimiter || m_type == transverseVertex) &&
       !m_measurementBase)
     delete m_surface;

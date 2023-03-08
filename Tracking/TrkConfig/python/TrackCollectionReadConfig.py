@@ -1,6 +1,5 @@
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-# File: CaloRec/python/CaloBCIDAvgAlgConfig.py
 # Created: Nov 2019, sss
 # Purpose: Configure AthReadAlg for reading a TrackCollection.
 #
@@ -56,15 +55,27 @@ in the input file."""
     aliases = []
     if key == tracks_alias and 'Tracks' not in tcolls:
         aliases = ['Tracks']
+    
+    extra_inputs = []
+    if flags.Detector.GeometryPixel:
+        extra_inputs.append(('InDetDD::SiDetectorElementCollection', 'ConditionStore+PixelDetectorElementCollection'))
+    if flags.Detector.GeometrySCT:
+        extra_inputs.append(('InDetDD::SiDetectorElementCollection', 'ConditionStore+SCT_DetectorElementCollection'))
+    if flags.Detector.GeometryTRT:
+        extra_inputs.append(( 'InDetDD::TRT_DetElementContainer' , 'ConditionStore+TRT_DetElementContainer' ))
+    if flags.Detector.GeometryITkPixel:
+        extra_inputs.append(( 'InDetDD::SiDetectorElementCollection' , 'ConditionStore+ITkPixelDetectorElementCollection' ))
+    if flags.Detector.GeometryITkStrip:
+        extra_inputs.append(( 'InDetDD::SiDetectorElementCollection' , 'ConditionStore+ITkStripDetectorElementCollection' ))    
+    if flags.Detector.GeometryMuon:
+        extra_inputs.append(('MuonGM::MuonDetectorManager', 'ConditionStore+MuonDetectorManager'))    
 
     # Configure the algorithm.
     AthReadAlg=CompFactory.AthReadAlg
     alg = AthReadAlg ('TrackCollectionRead_' + key,
                       Key = 'TrackCollection/' + key,
                       Aliases = aliases,
-                      ExtraInputs = [('InDetDD::SiDetectorElementCollection', 'ConditionStore+PixelDetectorElementCollection'),
-                                     ('InDetDD::SiDetectorElementCollection', 'ConditionStore+SCT_DetectorElementCollection'), 
-                                     ( 'InDetDD::TRT_DetElementContainer' , 'ConditionStore+TRT_DetElementContainer' ) ])
+                      ExtraInputs = extra_inputs)
     result.addEventAlgo (alg)
 
     # We also require AddressRemappingSvc.
@@ -74,11 +85,13 @@ in the input file."""
 
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+
     from AthenaConfiguration.TestDefaults import defaultTestFiles
 
     print ('--- Reference aliased object by base name.')
-    flags1 = ConfigFlags.clone()
+    flags1 = flags.clone()
     flags1.Concurrency.NumThreads = 1
     flags1.Input.Files = defaultTestFiles.ESD
     flags1.lock()
@@ -87,7 +100,7 @@ if __name__ == "__main__":
     acc1.wasMerged()
 
     print ('--- Reference aliased object by alias.')
-    flags2 = ConfigFlags.clone()
+    flags2 = flags.clone()
     flags2.Concurrency.NumThreads = 1
     flags2.Input.Files = defaultTestFiles.ESD
     flags2.lock()
@@ -96,7 +109,7 @@ if __name__ == "__main__":
     acc2.wasMerged()
 
     print ('--- Non-aliased object.')
-    flags3 = ConfigFlags.clone()
+    flags3 = flags.clone()
     flags3.Concurrency.NumThreads = 1
     flags3.Input.Files = defaultTestFiles.ESD
     flags3.lock()
@@ -105,7 +118,7 @@ if __name__ == "__main__":
     acc3.wasMerged()
 
     print ('--- Non-existent object.')
-    flags4 = ConfigFlags.clone()
+    flags4 = flags.clone()
     flags4.Concurrency.NumThreads = 1
     flags4.Input.Files = defaultTestFiles.ESD
     flags4.lock()
@@ -114,7 +127,7 @@ if __name__ == "__main__":
     acc4.wasMerged()
 
     print ('--- Non-threaded.')
-    flags5 = ConfigFlags.clone()
+    flags5 = flags.clone()
     flags5.Input.Files = defaultTestFiles.ESD
     flags5.lock()
     acc5 = TrackCollectionReadCfg (flags5, 'Tracks')

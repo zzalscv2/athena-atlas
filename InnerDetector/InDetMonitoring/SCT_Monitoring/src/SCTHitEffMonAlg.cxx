@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCTHitEffMonAlg.h"
@@ -49,13 +49,6 @@ using namespace SCT_Monitoring;
 namespace {// anonymous namespace for functions at file scope
   static const bool testOffline{false};
 
-  static const std::string histogramPath[N_REGIONS_INC_GENERAL] = {
-    "SCT/SCTEC/eff", "SCT/SCTB/eff", "SCT/SCTEA/eff", "SCT/GENERAL/eff"
-  };
-  static const std::string histogramPathRe[N_REGIONS] = {
-    "SCT/SCTEC/eff/perLumiBlock", "SCT/SCTB/eff/perLumiBlock", "SCT/SCTEA/eff/perLumiBlock"
-  };
-
   template< typename T > Identifier
   surfaceOnTrackIdentifier(const T& tsos, const bool useTrackParameters = true) {
     Identifier result; // default constructor produces invalid value
@@ -73,12 +66,6 @@ namespace {// anonymous namespace for functions at file scope
 
   static const double stripWidth{79.95e-3}; // in mm
 
-  static const std::array < std::string, N_REGIONS > mapName = {
-    "m_eff_", "eff_", "p_eff_"
-  };
-  static const std::array < std::string, N_REGIONS > ineffmapName = {
-    "ineffm_", "ineff_", "ineffp_"
-  };
   static const std::array < std::string, N_REGIONS > regionNames = {
     "SCTHitEffMonitorEC", "SCTHitEffMonitorB", "SCTHitEffMonitorEA"
   };

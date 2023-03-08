@@ -20,8 +20,9 @@ namespace ActsTrk {
   public:
     /// @name Constructors with and without parameters
     //@{
-    StripInformationHelper() {};
-    StripInformationHelper(const Amg::Vector3D& stripStart,
+    StripInformationHelper() = default;
+    StripInformationHelper(const unsigned int& idHash,
+			   const Amg::Vector3D& stripStart,
                            const Amg::Vector3D& stripEnd,
                            const Amg::Vector3D& beamSpotVertex,
                            const float& locx,
@@ -38,7 +39,8 @@ namespace ActsTrk {
 
     /// @name Public method to set strip properties
     //@{
-    void set(const Amg::Vector3D& stripStart,
+    void set(const unsigned int& idHash,
+	     const Amg::Vector3D& stripStart,
              const Amg::Vector3D& stripEnd,
              const Amg::Vector3D& beamSpotVertex,
              const float& locx,
@@ -48,6 +50,7 @@ namespace ActsTrk {
 
     /// @name Public methods to return strip properties
     //@{
+    const unsigned int& idHash() const {return m_idHash;}
     const size_t& clusterIndex() const {return m_clusterIndex;}
     const Amg::Vector3D& stripCenter () const {return m_stripCenter ;}
     const Amg::Vector3D& stripDirection () const {return m_stripDir ;}
@@ -64,25 +67,27 @@ namespace ActsTrk {
     /// @name Private members
     /// @param m_stripCenter Center of strip, evaluated in setting function
     /// as (stripStart+stripEnd)*0.5
-    Amg::Vector3D m_stripCenter;
+    Amg::Vector3D m_stripCenter {0., 0., 0.};
     /// @param m_stripDir Direction of strip, evaluated in setting function
     /// as (stripStart-stripEnd)
-    Amg::Vector3D m_stripDir;
+    Amg::Vector3D m_stripDir {0., 0., 0.};
     /// @param m_trajDir Direction of trajectory, evaluated in setting function
     /// as (stripStart+stripEnd-2*beamSpotVertex)
-    Amg::Vector3D m_trajDir;
+    Amg::Vector3D m_trajDir {0., 0., 0.};
     /// @param m_normal Normal to strip diretion and trjectory direction plane,
     /// evaluated in setting function as cross product
     /// between stripDirection and trajDirection
-    Amg::Vector3D m_normal;
+    Amg::Vector3D m_normal {0., 0., 0.};
     /// @param m_oneOverStrip Inverse of length of the strip
-    double        m_oneOverStrip;
+    double        m_oneOverStrip {0.};
     /// @param m_locX Location X of cluster
-    float         m_locX;
+    float         m_locX {0.};
     /// @param m_stripIndex index of the strip corresponding to location
-    size_t        m_stripIndex;
+    size_t        m_stripIndex {0};
     /// @param m_clusterIndex xAOD::StripCluster index in container
-    size_t        m_clusterIndex;
+    size_t        m_clusterIndex {0};
+    /// @param m_idHash xAOD::StripCluster idHash for connection to detector element
+    unsigned int  m_idHash {0};
   };
 
 } // end of name space

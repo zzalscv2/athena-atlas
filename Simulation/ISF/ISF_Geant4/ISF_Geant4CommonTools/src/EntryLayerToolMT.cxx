@@ -127,7 +127,7 @@ ISF::EntryLayer ISF::EntryLayerToolMT::registerParticle(const ISF::ISFParticle& 
     CLHEP::Hep3Vector      hepMom( mom.x(), mom.y(), mom.z() ); // not optimal, but required by TrackRecord
 
     double mass            = particle.mass();
-    double energy          = sqrt(mass*mass + mom.mag2());
+    double energy          = std::sqrt(mass*mass + mom.mag2());
 
     // Use barcode of generation zero particle from truth binding if possible (reproduces legacy AtlasG4 behaviour).
     // Use barcode assigend to ISFParticle only if no generation zero particle is present.

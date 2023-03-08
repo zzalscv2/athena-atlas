@@ -1,6 +1,6 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 // METSignificance.cxx
 // Implementation file for class METSignificance
@@ -38,19 +38,19 @@
 #endif
 
 namespace met {
-    
+
   typedef ElementLink<xAOD::IParticleContainer> iplink_t;
-    
+
   static const SG::AuxElement::ConstAccessor<float> acc_varX("varX");
   static const SG::AuxElement::ConstAccessor<float> acc_varY("varY");
   static const SG::AuxElement::ConstAccessor<float> acc_covXY("covXY");
   static const SG::AuxElement::ConstAccessor<float> acc_jvt("Jvt");
   static const SG::AuxElement::ConstAccessor<float> acc_fjvt("fJvt");
   static const SG::AuxElement::ConstAccessor<float> acc_fjvt_der("DFCommonJets_fJvt");
-    
+
   static const SG::AuxElement::ConstAccessor< std::vector<iplink_t > > dec_constitObjLinks("ConstitObjectLinks");
   const static MissingETBase::Types::bitmask_t invisSource = 0x100000; // doesn't overlap with any other
-    
+
   METSignificance::METSignificance(const std::string& name) :
     AsgTool(name),
     m_jetCalibTool(""),
@@ -92,7 +92,7 @@ namespace met {
     declareProperty("ConfigJetPhiResoFile", m_configJetPhiResoFile  = "jet_unc.root" );
     declareProperty("JetResoAux",           m_JetResoAux            = ""  ); // relative pT resolution in addition to normal JES
     declareProperty("EMuResoAux",           m_EMuResoAux            = ""  ); // aux string sets a bool for the leptons to run the jet resolation
-    declareProperty("JetCollection",        m_JetCollection         = "AntiKt4EMTopo" );
+    declareProperty("JetCollection",        m_JetCollection         = "AntiKt4EMPFlow" );
 
     // properties to delete eventually
     declareProperty("IsDataJet",   m_isDataJet     = false   );
@@ -102,9 +102,9 @@ namespace met {
 
     m_file = nullptr;
   }
-  
+
   METSignificance::~METSignificance(){}
-  
+
   StatusCode METSignificance::initialize(){
 
     ATH_MSG_INFO ("Initializing " << name() << "...");
@@ -139,9 +139,9 @@ namespace met {
       if(m_JetCollection=="AntiKt4EMPFlow"){
         config = "JES_data2017_2016_2015_Recommendation_PFlow_Aug2018_rel21.config";
         calibSeq = "JetArea_Residual_EtaJES_GSC_Smear";
-        calibArea = "00-04-81";        
+        calibArea = "00-04-81";
       }
-    
+
       ANA_CHECK( ASG_MAKE_ANA_TOOL(m_jetCalibTool, JetCalibrationTool) );
       ANA_CHECK( m_jetCalibTool.setProperty("JetCollection",m_JetCollection) );
       ANA_CHECK( m_jetCalibTool.setProperty("ConfigFile",config) );
@@ -177,7 +177,7 @@ namespace met {
 
     return StatusCode::SUCCESS;
   }
-  
+
   StatusCode METSignificance::finalize(){
 
     ATH_MSG_INFO ("Finalizing " << name() << "...");
@@ -187,7 +187,7 @@ namespace met {
 
     return StatusCode::SUCCESS;
   }
-  
+
   // **** Rebuild generic MET term ****
   StatusCode METSignificance::varianceMET(xAOD::MissingETContainer* metCont, float avgmu, std::string jetTermName, std::string softTermName, std::string totalMETName){
 
@@ -438,7 +438,7 @@ namespace met {
         ATH_MSG_VERBOSE("This muon had none of the normal muon types (ID,MS,CB) - check this in detail");
         return StatusCode::FAILURE;
       }
-    
+
       pt_reso=m_muonCalibrationAndSmearingTool->expectedResolution(dettype,*muon,!m_isDataMuon);
       if(m_doPhiReso) phi_reso = muon->pt()*0.001;
       // run the jet resolution for muons. for validation region extrapolation
@@ -448,7 +448,7 @@ namespace met {
       }
       ATH_MSG_VERBOSE("muon: " << pt_reso << " dettype: " << dettype << " " << muon->pt() << " " << muon->p4().Eta() << " " << muon->p4().Phi());
     }// end reco setup
-  
+
     // Common setup
     if(m_doPhiReso) phi_reso = obj->pt()*0.001;
     ATH_MSG_VERBOSE("muon: " << pt_reso << " dettype: " << dettype << " " << obj->pt() << " " << obj->p4().Eta() << " " << obj->p4().Phi());
@@ -548,7 +548,7 @@ namespace met {
       double jet_phi_unc = std::abs(GetPhiUnc(jet->eta(), jet->phi(),jet->pt()/m_GeV));
       phi_reso = jet->pt()*jet_phi_unc;
     }
-    
+
     // Add user defined additional resolutions. For example, b-tagged jets
     if(m_JetResoAux!=""){
       SG::AuxElement::ConstAccessor<float> acc_extra(m_JetResoAux);
@@ -574,7 +574,7 @@ namespace met {
       if (auto combp4 = dynamic_cast<TauCombinedTES*>(m_tauCombinedTES.get())) {
         pt_reso = combp4->getMvaEnergyResolution(*tau);
       }
-      
+
       if(m_doPhiReso) phi_reso = tau->pt()*0.01;
       ATH_MSG_VERBOSE("tau: " << pt_reso << " " << tau->pt() << " " << tau->p4().Eta() << " " << tau->p4().Phi() << " phi reso: " << phi_reso);
     }
@@ -600,7 +600,7 @@ namespace met {
       m_VarL+=particle_u_rot[0][0];
       m_VarT+=particle_u_rot[1][1];
       m_CvLT+=particle_u_rot[0][1];
-      
+
       // Save the resolutions separated for each object type
       AddResoMap(particle_u_rot[0][0],
                  particle_u_rot[1][1],
@@ -783,7 +783,7 @@ namespace met {
         else if(jet_pt<60)  unc = 0.1050 + 1.3196 * fjvt + 0.03554 * fjvt * fjvt;
         else if(jet_pt<120) unc = 0.0400 + 0.5653 * fjvt + 1.96323 * fjvt * fjvt;
         // max of 0.9 seems reasonable
-        if(jet_fjvt>0.6) unc = 0.9; 
+        if(jet_fjvt>0.6) unc = 0.9;
       }
       // end emtopo
     }else{//p-flow inputs
@@ -811,7 +811,7 @@ namespace met {
           else if(jet_jvt<0.25) unc = 0.0027 + 0.0058 * avgmu -0.00001 * avgmu * avgmu  ;
           else if(jet_jvt<0.85) unc = -0.0143 + 0.0008 * avgmu + 0.00001 * avgmu * avgmu;
           else                  unc = -0.0012 + 0.0001 * avgmu + 0.00000 * avgmu * avgmu;
-        }else if(jet_pt<100){          
+        }else if(jet_pt<100){
           unc = 0.8558 -1.8519 * jet_jvt + 1.00208 * jet_jvt * jet_jvt;
         }else if(jet_pt<150){
           unc = 0.6474 -1.4491 * jet_jvt + 0.80591 * jet_jvt * jet_jvt;
@@ -883,7 +883,7 @@ namespace met {
         else if(jet_pt<60)  unc = 0.0872 + 1.5718 * fjvt + 0.02135 * fjvt * fjvt;
         else if(jet_pt<120) unc = 0.0303 + 0.8560 * fjvt + 1.89537 * fjvt * fjvt;
         // max of 0.9 seems reasonable
-        if(jet_fjvt>0.6) unc = 0.9; 
+        if(jet_fjvt>0.6) unc = 0.9;
       }
     }// end pflow
 
@@ -1040,16 +1040,10 @@ namespace met {
 
   void METSignificance::AddResoMap(const double varL, const double varT, const double CvLT, const int term){
 
-    if(m_term_VarL.find(term)==m_term_VarL.end()){
-      m_term_VarL[term] = 0.0;
-      m_term_VarT[term] = 0.0;
-      m_term_CvLT[term] = 0.0;
-    }
-
     m_term_VarL[term] += varL;
     m_term_VarT[term] += varT;
     m_term_CvLT[term] += CvLT;
-    
+
   }
 
 } //> end namespace met

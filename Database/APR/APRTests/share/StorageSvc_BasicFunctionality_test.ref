@@ -1,6 +1,7 @@
 [OVAL] Creating the test driver.
 [OVAL] Loading the shared libraries.
 Loading library test_TestDictionaryDict
+
 [OVAL] Testing StorageSvc functionality for ROOT_Tree storage technology
 [OVAL] Testing the writing operations
 createStorageSvc
@@ -8,8 +9,21 @@ startSession
 Session connect
 [OVAL] ...done
 [OVAL] Testing the reading operations
+Read back string: This is my test DbString #0
+Read back string: This is my test DbString #1
+Read back string: This is my test DbString #2
+Read back string: This is my test DbString #3
+Read back string: This is my test DbString #4
+Read back string: This is my test DbString #5
+Read back string: This is my test DbString #6
+Read back string: This is my test DbString #7
+Read back string: This is my test DbString #8
+Read back string: This is my test DbString #9
 Closing the session
 [OVAL] ...done
+
+----- KEY-based Storage does not work for Strings
+----- If string values start to show up below it may actually mean an improvement
 [OVAL] Testing StorageSvc functionality for ROOT_Key storage technology
 [OVAL] Testing the writing operations
 createStorageSvc
@@ -17,8 +31,20 @@ startSession
 Session connect
 [OVAL] ...done
 [OVAL] Testing the reading operations
+ReadStreamerInfo, class:string, illegal uid=-2
+Read back string: 
+Read back string: 
+Read back string: 
+Read back string: 
+Read back string: 
+Read back string: 
+Read back string: 
+Read back string: 
+Read back string: 
+Read back string: 
 Closing the session
 [OVAL] ...done
+
 [OVAL] Testing StorageSvc functionality for ROOT_TreeIndex storage technology
 [OVAL] Testing the writing operations
 createStorageSvc
@@ -26,7 +52,18 @@ startSession
 Session connect
 [OVAL] ...done
 [OVAL] Testing the reading operations
+Read back string: This is my test DbString #0
+Read back string: This is my test DbString #1
+Read back string: This is my test DbString #2
+Read back string: This is my test DbString #3
+Read back string: This is my test DbString #4
+Read back string: This is my test DbString #5
+Read back string: This is my test DbString #6
+Read back string: This is my test DbString #7
+Read back string: This is my test DbString #8
+Read back string: This is my test DbString #9
 Closing the session
 [OVAL] ...done
+
 [OVAL] Number of floating tokens : 0
 [OVAL] Exiting...

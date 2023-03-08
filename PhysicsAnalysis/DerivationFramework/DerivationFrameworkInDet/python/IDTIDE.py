@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # IDTIDE.py
@@ -52,15 +52,16 @@ def IDTIDEKernelCfg(configFlags, name='IDTIDEKernel', **kwargs):
     )
     augmentationTools.append(IDTIDETrackToVertexWrapper)
 
-    from InDetUsedInFitTrackDecoratorTool.InDetUsedInFitTrackDecoratorToolConfig import InDetUsedInFitTrackDecoratorToolCfg
-    IDTIDEUsedInFitDecoratorTool = acc.getPrimaryAndMerge(InDetUsedInFitTrackDecoratorToolCfg(
-        configFlags,
-        name     = "IDTIDEUsedInFitDecoratorTool",
-        AMVFVerticesDecoName = "TTVA_AMVFVertices",
-        AMVFWeightsDecoName  = "TTVA_AMVFWeights",
-        TrackContainer       = "InDetTrackParticles",
-        VertexContainer      = "PrimaryVertices" )
-    )
+    from InDetConfig.InDetUsedInFitTrackDecoratorToolConfig import (
+        InDetUsedInFitTrackDecoratorToolCfg)
+    IDTIDEUsedInFitDecoratorTool = acc.popToolsAndMerge(
+        InDetUsedInFitTrackDecoratorToolCfg(
+            configFlags,
+            name     = "IDTIDEUsedInFitDecoratorTool",
+            AMVFVerticesDecoName = "TTVA_AMVFVertices",
+            AMVFWeightsDecoName  = "TTVA_AMVFWeights",
+            TrackContainer       = "InDetTrackParticles",
+            VertexContainer      = "PrimaryVertices" ))
 
     from DerivationFrameworkInDet.InDetToolsConfig import UsedInVertexFitTrackDecoratorCfg
     IDTIDEUsedInFitDecorator = acc.getPrimaryAndMerge(UsedInVertexFitTrackDecoratorCfg(
@@ -299,19 +300,6 @@ def IDTIDEKernelCfg(configFlags, name='IDTIDEKernel', **kwargs):
         ThinningTools = thinningTools,
         OutputLevel =INFO), sequenceName="IDTIDESequence")
     #sequenceName = "IDTIDEPostProcSequence")
-
-    ## Decorate if jet passed JVT criteria
-    from JetJvtEfficiency.JetJvtEfficiencyToolConfig import getJvtEffToolCfg
-        
-    algName_EMTopo = "DFJet_EventCleaning_passJvtAlg_EMTopo"
-    passJvtTool_EMTopo = acc.popToolsAndMerge(getJvtEffToolCfg(configFlags, 'AntiKt4EMTopo'))
-    passJvtTool_EMTopo.PassJVTKey = "AntiKt4EMTopoJets.DFCommonJets_passJvt"
-    acc.addEventAlgo(CompFactory.JetDecorationAlg(algName_EMTopo, JetContainer='AntiKt4EMTopoJets', Decorators=[passJvtTool_EMTopo]))
-        
-    algName_EMPFlow = "DFJet_EventCleaning_passJvtAlg_EMPFlow"
-    passJvtTool_EMPFlow = acc.popToolsAndMerge(getJvtEffToolCfg(configFlags, 'AntiKt4EMPFlow'))
-    passJvtTool_EMPFlow.PassJVTKey = "AntiKt4EMPFlowJets.NNJvtPass"
-    acc.addEventAlgo(CompFactory.JetDecorationAlg(algName_EMPFlow, JetContainer='AntiKt4EMPFlowJets', Decorators=[passJvtTool_EMPFlow]))
  
     return acc
 

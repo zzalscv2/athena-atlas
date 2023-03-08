@@ -1,13 +1,13 @@
 #!/bin/sh
 #
 # art-description: Reco_tf runs on 7TeV collision data with all streams 2011
-# art-athena-mt: 4
+# art-athena-mt: 8
 # art-type: grid
 # art-include: master/Athena
-# art-include: 22.0/Athena
+# art-include: 23.0/Athena
 
-# We set --preExec="DQMonFlags.doLVL1CaloMon=False" to resolve ATR-25910. Lv1CaloMon monitors hardware and so anyway is not relevant for reprocessing old data.
-Reco_tf.py --athenaopts="--threads=8" --inputBSFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecJobTransformTests/high_mu-data11_7TeV.00179725.physics_JetTauEtmiss.merge.RAW._lb0021.data --maxEvents 300 --autoConfiguration everything --conditionsTag="COMCOND-BLKPA-RUN1-07" --preExec="DQMonFlags.doLVL1CaloMon=False" --postExec 'all:from IOVDbSvc.CondDB import conddb;conddb.addOverride("/TRT/Calib/PID_NN", "TRTCalibPID_NN_v1");conddb.addOverride("/TRT/Onl/Calib/PID_NN", "TRTCalibPID_NN_v1");' --outputESDFile myESD.pool.root --outputAODFile myAOD.pool.root --outputHISTFile myHist.root 
+export ATHENA_CORE_NUMBER=8
+Reco_tf.py  --CA --multithreaded --inputBSFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecJobTransformTests/high_mu-data11_7TeV.00179725.physics_JetTauEtmiss.merge.RAW._lb0021.data --maxEvents 300  --conditionsTag="COMCOND-BLKPA-RUN1-07"  --geometryVersion="ATLAS-R1-2011-02-00-00" --outputESDFile myESD.pool.root --outputAODFile myAOD.pool.root --outputHISTFile myHist.root 
 
 RES=$?
 echo "art-result: $RES Reco"

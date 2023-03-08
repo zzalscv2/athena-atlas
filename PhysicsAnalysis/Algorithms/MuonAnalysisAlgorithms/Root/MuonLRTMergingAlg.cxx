@@ -37,6 +37,7 @@ namespace CP{
         if (m_overlapRemovalTool.empty()){
             asg::AsgToolConfig config("CP::MuonLRTOverlapRemovalTool/MuonLRTOverlapRemovalTool");
             ATH_CHECK(config.setProperty("overlapStrategy",m_ORstrategy.value()));
+            ATH_CHECK(config.setProperty("UseRun3WP",m_useRun3WP.value()));
             ATH_CHECK(config.makePrivateTool(m_overlapRemovalTool));
         }
 

@@ -5,7 +5,6 @@ GeoModelSvc::RDBMaterialManager                   WARNING  Getting InDetMatCompo
 GeoModelSvc::RDBMaterialManager                   WARNING  Getting InDetMaterials with default tag
 GeoModelSvc.TileDetectorTool                         INFO  Tile Geometry with Saddle supports, starting from TileCal-CSC-02 xxx
 TestAlg                                              INFO Initializing TestAlg...
-ApplicationMgr                                    SUCCESS                     PyAthena::Alg/TestAlg
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #1, run #284500 0 events processed so far  <<<===
 Py:TestAlg           INFO finished
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #1, run #284500 1 events processed so far  <<<===

@@ -22,8 +22,9 @@
 #include "TString.h"
 #include <vector>
 #include <cstdlib>
+#include "CxxUtils/checker_macros.h"
 
-class LArIdTranslatorHelper
+class ATLAS_NOT_THREAD_SAFE LArIdTranslatorHelper
 {
   public:
 

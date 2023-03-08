@@ -1,9 +1,9 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
-def tauMonitoringCaloOnlyMVA():
-   monTool = GenericMonitoringTool('MonTool')
+def tauMonitoringCaloOnlyMVA(flags):
+   monTool = GenericMonitoringTool(flags, 'MonTool')
   
    monTool.defineHistogram('track_errors', path='EXPERT', type='TH1F', title="CaloMVA Track Errors; nRoIs; nEntries", xbins=2, xmin=-0.5, xmax=1.5) 
    monTool.defineHistogram('calo_errors', path='EXPERT', type='TH1F', title="CaloMVA Calo Errors; nRoIs; nEntries", xbins=10, xmin=-0.5, xmax=9.5)
@@ -61,8 +61,8 @@ def tauMonitoringCaloOnlyMVA():
 
    return monTool
 
-def tauMonitoringPrecisionMVA():
-   monTool = GenericMonitoringTool('MonTool')
+def tauMonitoringPrecisionMVA(flags):
+   monTool = GenericMonitoringTool(flags, 'MonTool')
 
    monTool.defineHistogram('track_errors', path='EXPERT', type='TH1F', title="Precision Track Errors; nRoIs; nEntries", xbins=2, xmin=-0.5, xmax=1.5)
    monTool.defineHistogram('calo_errors', path='EXPERT', type='TH1F', title="Precision Calo Errors; nRoIs; nEntries", xbins=10, xmin=-0.5, xmax=9.5)

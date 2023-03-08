@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /*
  */
@@ -13,14 +13,15 @@
 // Tile includes
 #include "TileIdentifier/TileRawChannelUnit.h"
 #include "TileRecUtils/ITileRawChannelTool.h"
-#include "TileConditions/TileCondToolEmscale.h"
-#include "TileConditions/ITileBadChanTool.h"
-#include "TileConditions/TileCondToolNoiseSample.h"
+#include "TileConditions/TileEMScale.h"
+#include "TileConditions/TileBadChannels.h"
+#include "TileConditions/TileSampleNoise.h"
 #include "TileEvent/TileDQstatus.h"
 
 // Atlas includes
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/ReadCondHandleKey.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
 
@@ -59,14 +60,23 @@ class TileRawChannelNoiseFilter: public extends<AthAlgTool, ITileRawChannelTool>
 
     const TileHWID* m_tileHWID; //!< Pointer to TileHWID
 
-    ToolHandle<TileCondToolEmscale> m_tileToolEmscale{this,
-        "TileCondToolEmscale", "TileCondToolEmscale", "Tile EM scale calibration tool"};
+   /**
+    * @brief Name of TileEMScale in condition store
+    */
+     SG::ReadCondHandleKey<TileEMScale> m_emScaleKey{this,
+         "TileEMScale", "TileEMScale", "Input Tile EMS calibration constants"};
 
-    ToolHandle<TileCondToolNoiseSample> m_tileToolNoiseSample{this,
-        "TileCondToolNoiseSample", "TileCondToolNoiseSample", "Tile noise sample tool"};
+    /**
+     * @brief Name of TileSampleNoise in condition store
+     */
+    SG::ReadCondHandleKey<TileSampleNoise> m_sampleNoiseKey{this,
+        "TileSampleNoise", "TileSampleNoise", "Input Tile sample noise"};
 
-    ToolHandle<ITileBadChanTool> m_tileBadChanTool{this,
-        "TileBadChanTool", "TileBadChanTool", "Tile bad channel tool"};
+    /**
+     * @brief Name of TileBadChannels in condition store
+     */
+    SG::ReadCondHandleKey<TileBadChannels> m_badChannelsKey{this,
+        "TileBadChannels", "TileBadChannels", "Input Tile bad channel status"};
 
     // properties
     SG::ReadHandleKey<TileDQstatus> m_DQstatusKey{this, "TileDQstatus", 

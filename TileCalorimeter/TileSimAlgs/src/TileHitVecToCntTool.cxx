@@ -214,10 +214,11 @@ StatusCode TileHitVecToCntTool::initialize() {
     ATH_MSG_INFO("Number of MBTS cell to be merged: " << std::count (m_MBTSmerged.begin(), m_MBTSmerged.end(), true));
   }
 
-  if(m_onlyUseContainerName) {
-    for(auto& RHkey : m_hitVectorKeys.keys()) {
-      m_hitVectorNames.push_back(RHkey->key());
-    }
+  if (m_onlyUseContainerName) {
+    m_hitVectorNames = m_inputKeys.value();
+  }
+  else {
+    ATH_CHECK(m_hitVectorKeys.assign(m_inputKeys.value()));
   }
   ATH_MSG_DEBUG("Input objects in these containers : '" << m_hitVectorNames << "'");
 

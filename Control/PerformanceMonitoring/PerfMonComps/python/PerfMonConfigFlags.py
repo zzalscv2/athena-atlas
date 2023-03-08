@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 
@@ -9,5 +9,8 @@ def createPerfMonConfigFlags():
     pcf.addFlag('PerfMon.doFastMonMT', False)
     pcf.addFlag('PerfMon.doFullMonMT', False)
     pcf.addFlag('PerfMon.OutputJSON', 'perfmonmt.json')
+    # List of algorithms to profile e.g from
+    # callgrind/valkyrie or Vtune
+    pcf.addFlag('PerfMon.ProfiledAlgs', [])
     
     return pcf

@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 def TrigBphysMonConfig(inputFlags):
@@ -22,22 +22,24 @@ def TrigBphysMonConfig(inputFlags):
 
 if __name__=='__main__':
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     nightly = '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CommonInputs/'
     file = 'data16_13TeV.00311321.physics_Main.recon.AOD.r9264/AOD.11038520._000001.pool.root.1'
-    ConfigFlags.Input.Files = [nightly+file]
-    ConfigFlags.Input.isMC = False
-    ConfigFlags.Output.HISTFileName = 'TrigBphysMonitorOutput.root'
+
+    flags = initConfigFlags()
+    flags.Input.Files = [nightly+file]
+    flags.Input.isMC = False
+    flags.Output.HISTFileName = 'TrigBphysMonitorOutput.root'
     
-    ConfigFlags.lock()
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
-    trigBphysMonitorAcc = TrigBphysMonConfig(ConfigFlags)
+    trigBphysMonitorAcc = TrigBphysMonConfig(flags)
     cfg.merge(trigBphysMonitorAcc)
 
     # If you want to turn on more detailed messages ...

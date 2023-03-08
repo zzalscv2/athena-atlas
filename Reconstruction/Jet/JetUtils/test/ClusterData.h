@@ -1,7 +1,7 @@
 // emacs, this file is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <vector>
@@ -21,7 +21,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 struct ClusterMomentSetter {
   static TTree* tree ;
   
-  ClusterMomentSetter(std::string name, xAOD::CaloCluster::MomentType m) : m_data(0), m_momtype(m) {
+  ClusterMomentSetter(const std::string& name, xAOD::CaloCluster::MomentType m) : m_data(0), m_momtype(m) {
     tree->SetBranchAddress(name.c_str(), &m_data);
   }
 

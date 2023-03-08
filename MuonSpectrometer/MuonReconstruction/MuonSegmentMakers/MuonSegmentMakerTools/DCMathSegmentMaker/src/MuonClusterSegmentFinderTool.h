@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONROADFINDERTOOL_H
@@ -45,7 +45,7 @@ namespace Muon {
             bool operator!() const {return !get();}
             operator bool() const {return get();}
                      
-            const Amg::Vector3D& dir() const {return *m_dir;}
+            const Amg::Vector3D& dir() const {return m_dir;}
             const Amg::Vector3D& pos() const {return m_cl->globalPosition();}
 
             double dirDot(const SeedMeasurement& other) const {return dirDot(other.dir());}
@@ -56,7 +56,7 @@ namespace Muon {
             
         private:
             const Muon::MuonClusterOnTrack* m_cl{nullptr};
-            std::shared_ptr<const Amg::Vector3D> m_dir {nullptr};
+            Amg::Vector3D m_dir {Amg::Vector3D::Zero()};
             double m_distance{0.};           
         };
 
@@ -185,6 +185,7 @@ namespace Muon {
         Gaudi::Property<double> m_maxClustDist{this, "ClusterDistance", 5.};
         Gaudi::Property<int> m_nOfSeedLayers{this, "NOfSeedLayers", 1};
 
+        Gaudi::Property<bool> m_useStereoSeeding{this, "SeedMMStereos", true};
     public:
         using SeedMeasurement = NSWSeed::SeedMeasurement;
         using MeasVec = NSWSeed::MeasVec;

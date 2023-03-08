@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -14,7 +14,6 @@ def MooTrackFitterCfg(flags, name = 'MooTrackFitter', prefix='', **kwargs):
     Muon__MooTrackFitter=CompFactory.Muon.MooTrackFitter
     MuonSegmentMomentum=CompFactory.MuonSegmentMomentum
     from MuonConfig.MuonRecToolsConfig import MuonPhiHitSelectorCfg, MuonTrackToSegmentToolCfg, MuonTrackSummaryHelperToolCfg, MuPatHitToolCfg
-    from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MdtDriftCircleOnTrackCreatorCfg
     
     result = ComponentAccumulator()
     mctb_fitter = result.getPrimaryAndMerge(MCTBFitterCfg(flags, name = prefix+'MCTBFitter'))
@@ -47,8 +46,6 @@ def MooTrackFitterCfg(flags, name = 'MooTrackFitter', prefix='', **kwargs):
     track_to_segment_tool =  result.popToolsAndMerge(MuonTrackToSegmentToolCfg(flags))
     kwargs.setdefault("TrackToSegmentTool", track_to_segment_tool)    
     
-    mdt_dcot_creator = result.popToolsAndMerge(MdtDriftCircleOnTrackCreatorCfg(flags, name="MdtTubeHitOnTrackCreator", CreateTubeHit=True ))
-    kwargs.setdefault("MdtRotCreator", mdt_dcot_creator)
     
     kwargs.setdefault("PhiHitSelector",  result.popToolsAndMerge(MuonPhiHitSelectorCfg(flags)))
     kwargs.setdefault("TrackCleaner",  result.popToolsAndMerge(MuonTrackCleanerCfg(flags)))
@@ -412,7 +409,7 @@ def MuonTrackSteeringCfg(flags, name="MuonTrackSteering", **kwargs):
     kwargs.setdefault("MooBuilderTool",       result.popToolsAndMerge( MooTrackBuilderCfg(flags, name='MooMuonTrackBuilder', prefix="MuSt_"))) 
     
     kwargs.setdefault("CandidateMatchingTool", 
-        result.popToolsAndMerge(MooCandidateMatchingToolCfg(flags, doSegmentPhiMatching=True)))
+                      result.popToolsAndMerge(MooCandidateMatchingToolCfg(flags, doSegmentPhiMatching=True)))
     
     kwargs.setdefault("MuonSegmentFittingTool",       
                        result.popToolsAndMerge(MuonSegmentFittingToolCfg(flags))) 
@@ -451,7 +448,7 @@ def MuonTrackSelectorCfg(flags, name = "MuonTrackSelectorTool", **kwargs):
     result.setPrivateTools(theTool)
     return result
 
-def EMEO_MuPatTrackBuilderCfg(flags):
+def EMEO_MuPatTrackBuilderCfg(flags, name="MuPatTrackBuilder_EMEO", **kwargs):
     result = ComponentAccumulator()
 
     recovery_tool = result.getPrimaryAndMerge(EMEO_MuonChamberHoleRecoveryToolCfg(flags))
@@ -466,10 +463,12 @@ def EMEO_MuPatTrackBuilderCfg(flags):
                                TrackBuilderTool = track_builder)
     track_steering = acc.getPrimary()
     result.merge(acc)
-    the_alg = CompFactory.MuPatTrackBuilder(name = "MuPatTrackBuilder_EMEO",
-                                            TrackSteering=track_steering, 
-                                            SpectrometerTrackOutputLocation="EMEO_MuonSpectrometerTracks", 
-                                            MuonSegmentCollection="TrackMuonSegmentsEMEO")
+
+    kwargs.setdefault("TrackSteering", track_steering)
+    kwargs.setdefault("MuonSegmentCollection", "TrackMuonSegmentsEMEO")
+    kwargs.setdefault("SpectrometerTrackOutputLocation", "EMEO_MuonSpectrometerTracks")
+
+    the_alg = CompFactory.MuPatTrackBuilder(name = name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
 
@@ -479,10 +478,11 @@ def MuPatTrackBuilderCfg(flags, name = "MuPatTrackBuilder", **kwargs):
     track_steering = acc.getPrimary()
     result.merge(acc)
     
-    track_builder = CompFactory.MuPatTrackBuilder(name=name, 
-                                                TrackSteering = track_steering, 
-                                                MuonSegmentCollection="TrackMuonSegments", 
-                                                SpectrometerTrackOutputLocation="MuonSpectrometerTracks", **kwargs)
+    kwargs.setdefault("TrackSteering", track_steering)
+    kwargs.setdefault("MuonSegmentCollection", "TrackMuonSegments")
+    kwargs.setdefault("SpectrometerTrackOutputLocation", "MuonSpectrometerTracks")
+
+    track_builder = CompFactory.MuPatTrackBuilder(name=name,  **kwargs)
     result.addEventAlgo( track_builder, primary=True )
    
     return result
@@ -509,24 +509,15 @@ def MuonTrackBuildingCfg(flags, name = "MuPatTrackBuilder", **kwargs):
 if __name__=="__main__":
     # To run this, do e.g. 
     # python -m MuonConfig.MuonTrackBuildingConfig --run --threads=
-    from MuonConfig.MuonConfigUtils import SetupMuonStandaloneArguments, SetupMuonStandaloneConfigFlags, SetupMuonStandaloneOutput, SetupMuonStandaloneCA
-
-    args = SetupMuonStandaloneArguments()
-    ConfigFlags = SetupMuonStandaloneConfigFlags(args)
-    cfg = SetupMuonStandaloneCA(args,ConfigFlags)
-          
-    # Run the actual test.
-    acc = MuonTrackBuildingCfg(ConfigFlags)
-    cfg.merge(acc)
+    from MuonConfig.MuonConfigUtils import SetupMuonStandaloneConfigFlags, SetupMuonStandaloneOutput, SetupMuonStandaloneCA
     
-    if args.threads>1 and args.forceclone:
-        from AthenaCommon.Logging import log
-        log.info('Forcing track building cardinality to be equal to '+str(args.threads))
-        # We want to force the algorithms to run in parallel (eventually the algorithm will be marked as cloneable in the source code)
-        AlgResourcePool=CompFactory.AlgResourcePool
-        cfg.addService(AlgResourcePool( OverrideUnClonable=True ) )
-        track_builder = acc.getPrimary()
-        track_builder.Cardinality=args.threads
+    args, flags = SetupMuonStandaloneConfigFlags()
+    cfg = SetupMuonStandaloneCA(flags)
+
+    # Run the actual test.
+    acc = MuonTrackBuildingCfg(args, flags)
+    cfg.merge(acc)
+
             
     # This is a temporary fix - it should go someplace central as it replaces the functionality of addInputRename from here:
     # https://gitlab.cern.ch/atlas/athena/blob/master/Control/SGComps/python/AddressRemappingSvc.py
@@ -540,7 +531,7 @@ if __name__=="__main__":
     cfg.addService(ars)
 
     itemsToRecord = ["TrackCollection#MuonSpectrometerTracks"] 
-    SetupMuonStandaloneOutput(cfg, ConfigFlags, itemsToRecord)
+    SetupMuonStandaloneOutput(cfg, flags, itemsToRecord)
     
     cfg.printConfig(withDetails = True)
               
@@ -548,7 +539,7 @@ if __name__=="__main__":
     cfg.store(f)
     f.close()
     
-    if args.run:
+    if not args.config_only:
         sc = cfg.run(20)
         if not sc.isSuccess():
             import sys

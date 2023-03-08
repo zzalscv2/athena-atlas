@@ -83,8 +83,8 @@ def MuGirlStauAlgCfg(flags, name="MuGirlStauAlg", **kwargs):
                        result.popToolsAndMerge(MuonStauRecoToolCfg(flags)))
     kwargs.setdefault("TagMap", "stauTagMap")
     kwargs.setdefault("HasCSC", flags.Detector.GeometryCSC)
-    kwargs.setdefault("HasSTgc", flags.Detector.GeometrysTGC)
-    kwargs.setdefault("HasMM", flags.Detector.GeometryMM)
+    kwargs.setdefault("HasSTgc", False)
+    kwargs.setdefault("HasMM", False)
     # kwargs.setdefault("TGCPrepDataLocation",
     #                   'TGC_MeasurementsAllBCs' if not flags.Muon.useTGCPriorNextBC else 'TGC_Measurements')
     kwargs.setdefault("TGCPrepDataLocation", 'TGC_Measurements') # This is probably wrong, but matches old-config. #FIXME
@@ -176,7 +176,8 @@ def MuonInDetToMuonSystemExtensionAlgCfg(flags, name="MuonInDetToMuonSystemExten
     muon_ext_tool = result.popToolsAndMerge(
         MuonSystemExtensionToolCfg(flags))
     kwargs.setdefault("MuonSystemExtensionTool", muon_ext_tool)
-    kwargs.setdefault("WriteStauCandidates", "InDetCandidatesStaus")
+    kwargs.setdefault("WriteStauCandidates", "InDetCandidatesStausPrompt" 
+                                              if flags.Tracking.doLargeD0 else "InDetCandidatesStaus")
     
     if not flags.Muon.MuonTrigger:
         from MuonConfig.MuonSegmentFindingConfig import MuonLayerHoughAlgCfg
@@ -188,7 +189,7 @@ def MuonInDetToMuonSystemExtensionAlgCfg(flags, name="MuonInDetToMuonSystemExten
 
 
 def LRT_MuonInDetToMuonSystemExtensionAlgCfg(flags, name="MuonInDetToMuonSystemExtensionAlg_LRT",  **kwargs):
-    kwargs.setdefault("WriteStauCandidates", "")
+    kwargs.setdefault("WriteStauCandidates", "InDetCandidatesStausLRT")
     kwargs.setdefault("WriteInDetCandidates",
                       "InDetCandidateLRT_SystemExtended")
     kwargs.setdefault("InputInDetCandidates", "TrackParticleCandidateLRT")
@@ -359,8 +360,7 @@ def MuonSegContainerMergerAlgCfg(flags, name = "MuonSegContainerMergerAlg", **kw
         if flags.MuonCombined.doStatisticalCombination: tag_maps+=["stacoTagMap_EMEO"]
         if flags.MuonCombined.doCombinedFit: tag_maps+=["muidcoTagMap_EMEO"]
         muon_maps += ["MuonCandidates_EMEO"]
-    if (flags.Detector.GeometryID and flags.InDet.Tracking.doR3LargeD0) \
-   or (flags.Detector.GeometryITk and flags.ITk.Tracking.doLargeD0):
+    if flags.Tracking.doLargeD0:
          if flags.MuonCombined.doMuGirl: tag_maps+=["MuGirlMap_LRT"]
          if flags.MuonCombined.doStatisticalCombination: tag_maps+=["stacoTagMap_LRT"]
          if flags.MuonCombined.doCombinedFit: tag_maps+=["muidcoTagMap_LRT"]
@@ -373,6 +373,14 @@ def MuonSegContainerMergerAlgCfg(flags, name = "MuonSegContainerMergerAlg", **kw
     the_alg = CompFactory.MuonSegContainerMergerAlg(name, **kwargs)
     result.addEventAlgo(the_alg)
     return result  
+
+def MuonInDetExtensionMergerAlgCfg(flags, name="MuonInDetExtensionMergerAlg", **kwargs):
+    result = ComponentAccumulator()
+    kwargs.setdefault("ToMerge", ["InDetCandidatesStausPrompt", "InDetCandidatesStausLRT"])
+    kwargs.setdefault("ToWrite", "InDetCandidatesStaus")
+    the_alg = CompFactory.MuonInDetExtensionMergerAlg(name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
 
 # Returns a pair vectors containing th names of the
 # track particle collections associated with combined muon tracks
@@ -397,8 +405,7 @@ def GetCombinedTrkContainers(flags):
                     "ExtrapolatedStauTrackParticles"]
         track_coll += ["CombinedStauTracks",
                        "ExtrapolatedStauTracks"]
-    if (flags.Detector.GeometryID and flags.InDet.Tracking.doR3LargeD0) \
-   or (flags.Detector.GeometryITk and flags.ITk.Tracking.doLargeD0):
+    if flags.Tracking.doLargeD0:
         tp_coll += ["CombinedMuonsLRTTrackParticles",
                     "ExtraPolatedMuonsLRTTrackParticles",
                     "MSOnlyExtraPolatedMuonsLRTTrackParticles"]
@@ -436,9 +443,8 @@ def MuonDecorationAlgsCfg(flags):
                 "MSOnlyExtrapolatedMuonTrackParticles" ]
     stau_coll = ["CombinedStauTrackParticles", "ExtrapolatedStauTrackParticles"]  if flags.MuonCombined.doMuGirl and flags.MuonCombined.doMuGirlLowBeta else []
     track_coll_lrt = ["CombinedMuonsLRTTrackParticles", 
-                          "ExtraPolatedMuonsLRTTrackParticles",
-                          "MSOnlyExtraPolatedMuonsLRTTrackParticles"] if (flags.Detector.GeometryID and flags.InDet.Tracking.doR3LargeD0) \
-   or (flags.Detector.GeometryITk and flags.ITk.Tracking.doLargeD0) else []
+                      "ExtraPolatedMuonsLRTTrackParticles",
+                      "MSOnlyExtraPolatedMuonsLRTTrackParticles"] if flags.Tracking.doLargeD0 else []
 
     # Decorate the muon tracks
     for coll in trk_cols + stau_coll + track_coll_lrt:
@@ -459,9 +465,7 @@ def MuonDecorationAlgsCfg(flags):
         result.merge(MuonPrecisionLayerDecorAlgCfg(flags, "MuonCombStauPrecisionLayerDecorAlg",
                                                    MuonContainer="Staus",
                                                    TrackContainer=stau_coll))
-    if (flags.Detector.GeometryID and flags.InDet.Tracking.doR3LargeD0) \
-   or (flags.Detector.GeometryITk and flags.ITk.Tracking.doLargeD0):
-
+    if flags.Tracking.doLargeD0:
 
         result.merge(MuonPrecisionLayerDecorAlgCfg(flags, "MuonCombLRTPrecisionLayerDecorAlg",
                                                    MuonContainer="MuonsLRT",
@@ -492,8 +496,7 @@ def CombinedMuonTruthAssociationAlgsCfg(flags):
     from MuonConfig.MuonTruthAlgsConfig import MuonTruthAssociationAlgCfg
     result.merge(MuonTruthAssociationAlgCfg(flags))
 
-    if (flags.Detector.GeometryID and flags.InDet.Tracking.doR3LargeD0) \
-       or (flags.Detector.GeometryITk and flags.ITk.Tracking.doLargeD0):
+    if flags.Tracking.doLargeD0:
         result.merge(MuonTruthAssociationAlgCfg(flags, name="MuonTruthAssociationAlgLRT",
                                                 MuonContainerName="MuonsLRT",
                                                 RecoLinkName="recoMuonLinkLRT",
@@ -519,10 +522,9 @@ def CombinedMuonOutputCfg(flags):
     result = ComponentAccumulator()
 
     # FIXME! Fix for ATLASRECTS-5151. Remove when better solution found.
-    Trk__EventCnvSuperTool = CompFactory.Trk.EventCnvSuperTool
-    cnvTool = Trk__EventCnvSuperTool(name='EventCnvSuperTool')
-    cnvTool.MuonCnvTool.FixTGCs = True
-    result.addPublicTool(cnvTool)
+    from TrkEventCnvTools.TrkEventCnvToolsConfigCA import (
+        TrkEventCnvSuperToolCfg)
+    result.merge(TrkEventCnvSuperToolCfg(flags))
 
     # Avoid old-style import from from IsolationAlgs.IsoUpdatedTrackCones import iso_vars
     # But shouldn't be here.
@@ -569,7 +571,7 @@ def CombinedMuonOutputCfg(flags):
 
     # FIXME! Next two lines are hack to remove derivation framework variables that are added by DRAW building and are supposed to be transient
     wp_decors = ["DFCommonMuonsTight", "DFCommonGoodMuon", "DFCommonMuonsMedium",
-                 "DFCommonMuonsLoose", "InnerDetectorPt", "MuonSpectrometerPt"]    
+                 "DFCommonMuonsLoose", "InnerDetectorPt", "MuonSpectrometerPt" , "isMedium_DRAWZmumu"]    
     #Remove GlobalFELinks and related variables - these are links between FlowElement (FE) containers created in jet finding and muons. 
     #Since these transient FE containers are not in the ESD/AOD, we should not write out these links.
     gpf_vars = [ "chargedGlobalFELinks", "neutralGlobalFELinks", "deltaR_muon_clus_GlobalFEalg", "muon_efrac_matched_GlobalFE"]
@@ -648,23 +650,32 @@ def MuonCombinedReconstructionCfg(flags):
     from TrkConfig.TrackCollectionReadConfig import TrackCollectionReadCfg
     result.merge(TrackCollectionReadCfg(flags, 'Tracks'))
 
-    result.merge(MuonCombinedInDetCandidateAlgCfg(flags))
+    
+    ### We do not need to schedule the Inner detector selector algs if none 
+    ### of the combined algs executed
+    if flags.MuonCombined.doMuGirl or \
+       flags.MuonCombined.doStatisticalCombination or \
+       flags.MuonCombined.doCaloTrkMuId  or \
+       flags.MuonCombined.doCombinedFit or \
+       flags.MuonCombined.doMuonSegmentTagger:
+    
+        result.merge(MuonCombinedInDetCandidateAlgCfg(flags))
+        if flags.Tracking.doLargeD0:
+            result.merge(LRT_MuonCombinedInDetCandidateAlgCfg(flags))
+    
     result.merge(MuonCombinedMuonCandidateAlgCfg(flags))
 
-    do_LRT = (flags.Detector.GeometryID and flags.InDet.Tracking.doR3LargeD0) \
-             or (flags.Detector.GeometryITk and flags.ITk.Tracking.doLargeD0)
-    if do_LRT:
-        result.merge(LRT_MuonCombinedInDetCandidateAlgCfg(flags))
+    
 
     if flags.MuonCombined.doStatisticalCombination or flags.MuonCombined.doCombinedFit:
         result.merge(MuonCombinedAlgCfg(flags))
-        if do_LRT:
+        if flags.Tracking.doLargeD0:
             result.merge(LRT_MuonCombinedAlgCfg(flags))
 
     # Perform system extensions on ID tracks where MuidCo did not succeed
     if flags.MuonCombined.doCombinedFit:
         result.merge(MuonInDetToMuonSystemExtensionAlgCfg(flags))
-        if do_LRT:
+        if flags.Tracking.doLargeD0:
             result.merge(LRT_MuonInDetToMuonSystemExtensionAlgCfg(flags))
     if flags.MuonCombined.doMuGirl:
         # Use only ID tracks rejected by MuidCo
@@ -672,20 +683,21 @@ def MuonCombinedReconstructionCfg(flags):
                                              InDetCandidateLocation="InDetCandidates"
                                              if not flags.MuonCombined.doCombinedFit else "InDetCandidatesSystemExtened"))
         if flags.MuonCombined.doMuGirlLowBeta:
+            if flags.Tracking.doLargeD0: result.merge(MuonInDetExtensionMergerAlgCfg(flags))
             # Use the InDetCandidateStaus as InDetCandidates as they've also the extensions
             # from the MuidCo tracks
             result.merge(MuGirlStauAlgCfg(flags))
-        if do_LRT:
+        if flags.Tracking.doLargeD0:
             result.merge(LRT_MuGirlAlgCfg(flags))
 
     if flags.MuonCombined.doCaloTrkMuId:
         result.merge(MuonCaloTagAlgCfg(flags))
-        if do_LRT:
+        if flags.Tracking.doLargeD0:
             result.merge(LRT_MuonCaloTagAlgCfg(flags))
 
     if flags.MuonCombined.doMuonSegmentTagger:
         result.merge(MuonSegmentTagAlgCfg(flags))
-        if do_LRT:
+        if flags.Tracking.doLargeD0:
             result.merge(LRT_MuonSegmentTagAlgCfg(flags))
 
     if flags.Muon.runCommissioningChain:
@@ -714,7 +726,7 @@ def MuonCombinedReconstructionCfg(flags):
         result.merge(EMEO_MuonCreatorAlgCfg(flags))
     # runs over outputs and create xAODMuon collection
     result.merge(MuonCreatorAlgCfg(flags))
-    if do_LRT:
+    if flags.Tracking.doLargeD0:
         result.merge(LRT_MuonCreatorAlgCfg(flags))
 
     if flags.MuonCombined.doMuGirlLowBeta:
@@ -748,44 +760,32 @@ if __name__ == "__main__":
     # To run this, do e.g.
     # python -m MuonCombinedConfig.MuonCombinedReconstructionConfig --run --threads=1
 
-    from MuonConfig.MuonConfigUtils import SetupMuonStandaloneArguments, SetupMuonStandaloneCA
-
-    args = SetupMuonStandaloneArguments()
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from MuonConfig.MuonConfigUtils import SetupMuonStandaloneCA
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    args = flags.fillFromArgs()
 
     # Keep this commented in for now until ATLASRECTS-6858 is fixed
     # only once !51435 is accepted.
-    ConfigFlags.Input.Files = [
+    flags.Input.Files = [
         '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonCombinedConfig/myESD_q445_unslimmedTracks.pool.root']
     # ConfigFlags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/q221/21.0/v2/myESD.pool.root']
 
-    ConfigFlags.Concurrency.NumThreads = args.threads
-    # Might change this later, but good enough for the moment.
-    ConfigFlags.Concurrency.NumConcurrentEvents = args.threads
-    ConfigFlags.IOVDb.GlobalTag = "OFLCOND-MC21-SDR-RUN3-07"
+    flags.IOVDb.GlobalTag = "OFLCOND-MC21-SDR-RUN3-07"
 
-    ConfigFlags.Output.ESDFileName = args.output
-    ConfigFlags.InDet.Tracking.doR3LargeD0 = False  # Not working with this input
-    ConfigFlags.Muon.useTGCPriorNextBC = False
-    ConfigFlags.MuonCombined.doMuGirlLowBeta = False # This fails due to "Hough data per sector vector not found"
+    flags.Muon.useTGCPriorNextBC = False
+    flags.MuonCombined.doMuGirlLowBeta = False # This fails due to "Hough data per sector vector not found"
 
-    if args.debug:
-        from AthenaCommon.Debugging import DbgStage
-        if args.debug not in DbgStage.allowed_values:
-            raise ValueError("Unknown debug stage, allowed values {}".format
-                             (DbgStage.allowed_values))
-        ConfigFlags.Exec.DebugStage = args.debug
+    flags.lock()
+    flags.dump()
 
-    ConfigFlags.lock()
-    ConfigFlags.dump()
-
-    cfg = SetupMuonStandaloneCA(args, ConfigFlags)
+    cfg = SetupMuonStandaloneCA(args, flags)
     from MuonConfig.MuonPrepDataConvConfig import MuonPrepDataConvCfg
-    cfg.merge(MuonPrepDataConvCfg(ConfigFlags))
+    cfg.merge(MuonPrepDataConvCfg(flags))
 
     # "Fixes" to get this working standalone i.e. from ESD
     # Configure topocluster algorithms, and associated conditions
-    acc = MuonCombinedReconstructionCfg(ConfigFlags)
+    acc = MuonCombinedReconstructionCfg(flags)
     cfg.merge(acc)
 
     # This causes a stall due to missing HoughDataPerSectorVec
@@ -804,15 +804,6 @@ if __name__ == "__main__":
     # tmp = cfg.getService("StoreGateSvc")
     # tmp.OutpuDumptLevel=True
 
-    if args.threads > 1 and args.forceclone:
-        from AthenaCommon.Logging import log
-        log.info(
-            'Forcing track building cardinality to be equal to '+str(args.threads))
-        # We want to force the algorithms to run in parallel (eventually the algorithm will be marked as cloneable in the source code)
-        AlgResourcePool = CompFactory.AlgResourcePool
-        cfg.addService(AlgResourcePool(OverrideUnClonable=True))
-        track_builder = acc.getPrimary()
-        track_builder.Cardinality = args.threads
 
     # Need to make it possible to write Muons ... so rename read containers
     from SGComps.AddressRemappingConfig import AddressRemappingCfg
@@ -834,7 +825,7 @@ if __name__ == "__main__":
     # cfg.store(f)
     # f.close()
 
-    if args.run:
+    if not args.config_only:
         sc = cfg.run(20)
         if not sc.isSuccess():
             import sys

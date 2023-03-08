@@ -30,6 +30,8 @@ class FailedOrPassedCheck(WorkflowCheck):
                             warnings.append(line[9:].strip())
                         elif '"successful run"' in line:
                             counter += 1
+                        elif step == "DQHistogramMerge" and "Writing file: myHIST.root" in line:  # DQ merge hack
+                            counter += 1
 
             if warnings:
                 self.logger.info(f"{step} validation test step WARNINGS")
@@ -48,6 +50,13 @@ class FailedOrPassedCheck(WorkflowCheck):
 
             if counter:
                 self.logger.info(f"{step} validation test step successful")
+
+                if step == "DQHistogramMerge":
+                    self.logger.info(f"Full {step} step log:")
+                    with log.open() as file:
+                        for line in file:
+                            self.logger.print(f"  {line.strip()}")
+                    self.logger.info("-----------------------------------------------------")
             else:
                 result = False
                 if log.exists():
@@ -210,6 +219,79 @@ class FrozenTier0PolicyCheck(WorkflowCheck):
 
         return result
 
+
+class MetadataCheck(WorkflowCheck):
+    """Run metadata check."""
+
+    def __init__(self, setup: TestSetup, input_format: str) -> None:
+        super().__init__(setup)
+        self.format = input_format
+
+    def run(self, test: WorkflowTest) -> bool:
+        self.logger.info("---------------------------------------------------------------------------------------")
+        self.logger.info(f"Running {test.ID} metadata check on {self.format}")
+
+        reference_path: Path = test.reference_path
+        # Read references from CVMFS
+        if self.setup.validation_only:
+            # Resolve the subfolder first. Results are stored like: main_folder/branch/test/version/.
+            reference_revision = references_map[f"{test.ID}"]
+            cvmfs_path = Path(references_CVMFS_path)
+            reference_path = cvmfs_path / self.setup.release_ID / test.ID / reference_revision
+            if not reference_path.exists():
+                self.logger.error(f"CVMFS reference location {reference_path} does not exist!")
+                return False
+
+        self.logger.info(f"Reading the reference file from location {reference_path}")
+
+        exclusion_list = " ".join(["file_guid", "file_size", "/TagInfo/AtlasRelease", "FileMetaData/productionRelease"])
+
+        file_name = f"my{self.format}.pool.root"
+        if test.type == WorkflowType.Derivation:
+            file_name = f"{self.format}.myOutput.pool.root"
+        reference_file = reference_path / file_name
+        validation_file = test.validation_path / file_name
+        log_file = test.validation_path / f"meta-diff-{test.ID}.{self.format}.log"
+
+        comparison_command = f"meta-diff --ordered -m full -x diff {reference_file} {validation_file} --drop {exclusion_list} > {log_file} 2>&1"
+        output, error = subprocess.Popen(["/bin/bash", "-c", comparison_command], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+        output, error = output.decode("utf-8"), error.decode("utf-8")
+
+        result = True
+        with log_file.open() as file:
+            for line in file:
+                if line.strip():
+                    result = False
+
+        if result:
+            self.logger.info("Passed!\n")
+        else:
+            # print CI helper directly to avoid logger decorations
+            if self.setup.disable_release_setup:
+                self.logger.print(f"ATLAS-CI-ADD-LABEL: {test.run.value}-{test.type.value}-output-changed")
+                self.logger.print("")
+
+            self.logger.error(f"Your change breaks the frozen tier0 policy in test {test.ID}.")
+            self.logger.error("Please make sure this has been discussed in the correct meeting (RIG or Simulation) meeting and approved by the relevant experts.")
+
+            # copy the artifacts
+            if self.setup.disable_release_setup:
+                comparison_command = f"CopyCIArtifact.sh {validation_file}"
+                output, error = subprocess.Popen(["/bin/bash", "-c", comparison_command], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+                output, error = output.decode("utf-8"), error.decode("utf-8")
+
+                if error or not output:
+                    self.logger.error(f"Tried copying '{validation_file}' to the CI artifacts area but it failed.")
+                    self.logger.error(f"  {error.strip()}")
+                else:
+                    self.logger.error(output)
+
+            with log_file.open() as file:
+                for line in file:
+                    self.logger.info(f"  {line.strip()}")
+                self.logger.info("-----------------------------------------------------\n")
+
+        return result
 
 class AODContentCheck(WorkflowCheck):
     """Run AOD Content Check."""

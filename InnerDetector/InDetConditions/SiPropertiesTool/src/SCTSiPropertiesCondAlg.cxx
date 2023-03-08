@@ -27,9 +27,12 @@ StatusCode SCTSiPropertiesCondAlg::initialize() {
   ATH_CHECK(detStore()->retrieve(m_pHelper, "SCT_ID"));
 
   // Read Cond Handles
-  ATH_CHECK(m_readKeyTemp.initialize());
-  ATH_CHECK(m_readKeyHV.initialize());
+  ATH_CHECK(m_readKeyTemp.initialize(!m_forceGeoModel));
+  ATH_CHECK(m_readKeyHV.initialize(!m_forceGeoModel));
   ATH_CHECK(m_SCTDetEleCollKey.initialize());
+  if (m_forceGeoModel){
+    ATH_MSG_INFO("Configured to use GeoModel values of HV and Temp, not conditions");
+  }
   // Write Cond Handle
   ATH_CHECK(m_writeKey.initialize());
 
@@ -49,26 +52,28 @@ StatusCode SCTSiPropertiesCondAlg::execute(const EventContext& ctx) const {
     return StatusCode::SUCCESS; 
   }
 
-  // Read Cond Handle (temperature)
-  SG::ReadCondHandle<SCT_DCSFloatCondData> readHandleTemp{m_readKeyTemp, ctx};
-  const SCT_DCSFloatCondData* readCdoTemp{*readHandleTemp};
-  if (readCdoTemp==nullptr) {
-    ATH_MSG_FATAL("Null pointer to the read conditions object");
-    return StatusCode::FAILURE;
+  if (!m_forceGeoModel){
+    // Read Cond Handle (temperature)
+    SG::ReadCondHandle<SCT_DCSFloatCondData> readHandleTemp{m_readKeyTemp, ctx};
+    const SCT_DCSFloatCondData* readCdoTemp{*readHandleTemp};
+    if (readCdoTemp==nullptr) {
+      ATH_MSG_FATAL("Null pointer to the read conditions object");
+      return StatusCode::FAILURE;
+    }
+    writeHandle.addDependency(readHandleTemp);
+    ATH_MSG_INFO("Input is " << readHandleTemp.fullKey() << " with the range of " << readHandleTemp.getRange());
+    
+    // Read Cond Handle (HV)
+    SG::ReadCondHandle<SCT_DCSFloatCondData> readHandleHV{m_readKeyHV, ctx};
+    const SCT_DCSFloatCondData* readCdoHV{*readHandleHV};
+    if (readCdoHV==nullptr) {
+      ATH_MSG_FATAL("Null pointer to the read conditions object");
+      return StatusCode::FAILURE;
+    }
+    writeHandle.addDependency(readHandleHV);
+    ATH_MSG_INFO("Input is " << readHandleHV.fullKey() << " with the range of " << readHandleHV.getRange());
   }
-  writeHandle.addDependency(readHandleTemp);
-  ATH_MSG_INFO("Input is " << readHandleTemp.fullKey() << " with the range of " << readHandleTemp.getRange());
-
-  // Read Cond Handle (HV)
-  SG::ReadCondHandle<SCT_DCSFloatCondData> readHandleHV{m_readKeyHV, ctx};
-  const SCT_DCSFloatCondData* readCdoHV{*readHandleHV};
-  if (readCdoHV==nullptr) {
-    ATH_MSG_FATAL("Null pointer to the read conditions object");
-    return StatusCode::FAILURE;
-  }
-  writeHandle.addDependency(readHandleHV);
-  ATH_MSG_INFO("Input is " << readHandleHV.fullKey() << " with the range of " << readHandleHV.getRange());
-
+  
   // Get SCT_DetectorElementCollection
   SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> sctDetEle(m_SCTDetEleCollKey, ctx);
   const InDetDD::SiDetectorElementCollection* elements(sctDetEle.retrieve());

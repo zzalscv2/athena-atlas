@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -15,7 +15,7 @@
 #include "TRT_DriftCircleOnTrackTool/TRT_DriftCircleOnTrackTool.h"
 #include "TRT_ReadoutGeometry/TRT_EndcapElement.h"
 #include "TrkEventPrimitives/LocalParameters.h"
-#include "TrkRIO_OnTrack/check_cast.h"
+#include "TrkRIO_OnTrack/ErrorScalingCast.h"
 
 
 ///////////////////////////////////////////////////////////////////
@@ -84,7 +84,7 @@ const InDet::TRT_DriftCircleOnTrack* InDet::TRT_DriftCircleOnTrackTool::correct
 
   // Global direction of the track parameters
   //
-  const Amg::VectorX& P = TP.parameters();
+  const AmgVector(5)& P = TP.parameters();
   double se = sin(P[3]); 
   Amg::Vector3D dir(cos(P[2])*se,sin(P[2])*se,cos(P[3]));
 
@@ -104,11 +104,8 @@ const InDet::TRT_DriftCircleOnTrack* InDet::TRT_DriftCircleOnTrackTool::correct
 
   // TRT_DriftCircleOnTrack production
   //
-  Amg::MatrixX cov;
-  if (m_trtErrorScalingKey.key().empty()) {
-    cov = DC->localCovariance();
-  } else             {
-
+  Amg::MatrixX cov = DC->localCovariance();
+  if (!m_trtErrorScalingKey.key().empty()) {
     const EventContext& ctx = Gaudi::Hive::currentContext();
     double mu=0.;
     if (!m_lumiDataKey.empty()) {
@@ -118,25 +115,25 @@ const InDet::TRT_DriftCircleOnTrack* InDet::TRT_DriftCircleOnTrackTool::correct
 
     bool endcap = false;
     if(dynamic_cast<const InDetDD::TRT_EndcapElement*>(pE)) endcap = true;
-    //    SG::ReadCondHandle<TRTRIO_OnTrackErrorScaling> error_scaling( m_trtErrorScalingKey );
     SG::ReadCondHandle<RIO_OnTrackErrorScaling> error_scaling( m_trtErrorScalingKey );
-    cov = check_cast<TRTRIO_OnTrackErrorScaling>(*error_scaling)->getScaledCovariance( DC->localCovariance(),endcap, mu );
+    cov = Trk::ErrorScalingCast<TRTRIO_OnTrackErrorScaling>(*error_scaling)
+              ->getScaledCovariance(std::move(cov), endcap, mu);
   }
 
-
   if(!m_useErrorCorrection || DC->localPosition().x() > .30) {
-
     Trk::DefinedParameter  radius(sign*DC->localPosition().x(),Trk::locX);
-    Trk::LocalParameters lp(radius);  
-    return new InDet::TRT_DriftCircleOnTrack(DC,lp,cov,iH,predictedLocZ,dir,Trk::DECIDED);
+    Trk::LocalParameters lp(radius);
+    return new InDet::TRT_DriftCircleOnTrack(DC, std::move(lp), std::move(cov),
+                                             iH, predictedLocZ, dir,
+                                             Trk::DECIDED);
   }
 
   cov(0,0) =  DC->localPosition().x()*DC->localPosition().x() +.09; 
 
   Trk::DefinedParameter radius(0.,Trk::locX);
-  Trk::LocalParameters  lp(radius);  
+  Trk::LocalParameters  lp(radius);
 
-  return new InDet::TRT_DriftCircleOnTrack(DC,lp,cov,iH,predictedLocZ,dir,Trk::DECIDED);
-}  
-
+  return new InDet::TRT_DriftCircleOnTrack(
+      DC, std::move(lp), std::move(cov), iH, predictedLocZ, dir, Trk::DECIDED);
+}
 

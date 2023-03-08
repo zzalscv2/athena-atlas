@@ -14,7 +14,7 @@ def LArCalibBaseCfg(flags):
         result.merge(LArOnOffIdMappingSCCfg(flags))
         result.merge(LArCalibIdMappingSCCfg(flags))
         result.merge(LArLATOMEMappingCfg(flags))
-    else:
+    else: 
         #Setup regular cabling
         from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg, LArCalibIdMappingCfg
         result.merge(LArOnOffIdMappingCfg(flags))

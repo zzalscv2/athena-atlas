@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 # ===============================================================
 #  main()
@@ -13,7 +13,8 @@ def main():
     
     import sys 
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
     flags.Exec.MaxEvents = -1
     flags.IOVDb.GlobalTag = 'CONDBR2-BLKPA-2022-02'
     import glob

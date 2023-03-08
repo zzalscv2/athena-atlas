@@ -60,7 +60,7 @@ namespace Trig {
   class ChainGroup;
 }
 
-class LArShapeDumper : public AthAlgorithm
+class ATLAS_NOT_THREAD_SAFE LArShapeDumper : public AthAlgorithm
 {
  public:
   LArShapeDumper(const std::string & name, ISvcLocator * pSvcLocator);

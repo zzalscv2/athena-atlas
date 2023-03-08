@@ -1,11 +1,11 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, ChainStep, Chain, EmptyMenuSequence, SelectionCA, InViewRecoCA
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import BeamType, Format
 
 from TrigL2MuonSA.TrigL2MuonSAConfig_newJO import l2MuFastAlgCfg, l2MuFastHypoCfg
-from TrigmuComb.TrigmuCombConfig_newJO import l2MuCombRecoCfg, l2MuCombHypoCfg
+from TrigmuComb.TrigmuCombConfig import l2MuCombRecoCfg, l2MuCombHypoCfg
 from TrigMuonHypo.TrigMuonHypoConfig import TrigMufastHypoToolFromDict, TrigmuCombHypoToolFromDict, TrigMuonEFMSonlyHypoToolFromDict, TrigMuonEFCombinerHypoToolFromDict, TrigMuonEFTrackIsolationHypoToolFromDict
 from TrigInDetConfig.TrigInDetConfig import trigInDetFastTrackingCfg
 
@@ -20,7 +20,7 @@ from MuonCombinedConfig.MuonCombinedReconstructionConfig import MuonCombinedMuon
 from MuonSegmentTrackMaker.MuonTrackMakerAlgsMonitoring import MuPatTrackBuilderMonitoring
 from MuonCombinedConfig.MuonCombinedReconstructionConfig import MuonCombinedInDetCandidateAlgCfg, MuonCombinedAlgCfg, MuonCreatorAlgCfg
 
-from TrigMuonEF.TrigMuonEFConfig_newJO import TrigMuonEFTrackIsolationAlgCfg, MuonFilterAlgCfg, MergeEFMuonsAlgCfg
+from TrigMuonEF.TrigMuonEFConfig import TrigMuonEFTrackIsolationAlgCfg, MuonFilterAlgCfg, MergeEFMuonsAlgCfg
 from AthenaCommon.CFElements import seqAND, parOR, seqOR
 
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
@@ -58,7 +58,8 @@ def EFMuonCBViewDataVerifierCfg(flags, name):
         else:
             EFMuonCBViewDataVerifier.DataObjects += [( 'MuonCandidateCollection' , 'StoreGateSvc+MuonCandidates' ),
                                                     ( 'xAOD::TrackParticleContainer' , 'StoreGateSvc+'+flags.Trigger.InDetTracking.Muon.tracks_FTF ),
-                                                    ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_FlaggedCondData' )]
+                                                    ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_FlaggedCondData' )
+                                                     ]
 
     if flags.Input.Format is Format.BS:
         EFMuonCBViewDataVerifier.DataObjects += [( 'IDCInDetBSErrContainer' , 'StoreGateSvc+PixelByteStreamErrs' ),
@@ -158,21 +159,21 @@ def efMuIsoHypoConf(flags, name="UNSPECIFIED", inputMuons="UNSPECIFIED"):
     return efHypo
 
 @AccumulatorCache
-def _muFastStepSeq(flags):
+def _muFastStepSeq(flags, is_probe_leg=False):
     # Step 1 (L2MuonSA)
-    selAcc = SelectionCA("L2MuFastReco")
+    selAcc = SelectionCA("L2MuFastSel",  is_probe_leg)
     # Set EventViews for L2MuonSA step
-    reco = InViewRecoCA("L2MuFastReco")
+    reco = InViewRecoCA("L2MuFastReco", isProbe=is_probe_leg)
 
     #external data loading to view
     reco.mergeReco( MuFastViewDataVerifier(flags) )
 
     # decoding
-    decodeAcc = muonDecodeCfg(flags, selAcc.name+"RoIs")
+    decodeAcc = muonDecodeCfg(flags, reco.name+"RoIs")
     reco.mergeReco(decodeAcc)
 
     #L2 SA alg
-    reco.mergeReco(l2MuFastAlgCfg( flags, roisKey=selAcc.name+"RoIs"))
+    reco.mergeReco(l2MuFastAlgCfg( flags, roisKey=reco.name+"RoIs"))
 
     selAcc.mergeReco(reco)
 
@@ -182,14 +183,14 @@ def _muFastStepSeq(flags):
 
     selAcc.addHypoAlgo(l2muFastHypo)
 
-    l2muFastSequence = MenuSequenceCA(selAcc, 
-                                      HypoToolGen = TrigMufastHypoToolFromDict )
+    l2muFastSequence = MenuSequenceCA(flags, selAcc,
+                                      HypoToolGen = TrigMufastHypoToolFromDict, isProbe=is_probe_leg )
 
     return (selAcc , l2muFastSequence)
 
 def muFastSequence(flags, is_probe_leg=False): 
     muonflags = flags.cloneAndReplace('Muon', 'Trigger.Offline.SA.Muon')
-    selAcc , l2muFastSequence =  _muFastStepSeq(muonflags)
+    selAcc , l2muFastSequence =  _muFastStepSeq(muonflags, is_probe_leg)
     return l2muFastSequence
 
 
@@ -198,6 +199,7 @@ def muFastStep(flags, chainDict):
     selAcc , l2muFastSequence = _muFastStepSeq(flags)
 
     return ChainStep( name=selAcc.name, Sequences=[l2muFastSequence], chainDicts=[chainDict] )
+
 
 @AccumulatorCache
 def _muCombStepSeq(flags):
@@ -220,7 +222,7 @@ def _muCombStepSeq(flags):
                                    muCombInfo = 'HLT_MuonL2CBInfo' )
 
     selAccL2CB.addHypoAlgo(l2muCombHypo)
-    l2muCombSequence = MenuSequenceCA(selAccL2CB,
+    l2muCombSequence = MenuSequenceCA(flags, selAccL2CB,
                                       HypoToolGen = TrigmuCombHypoToolFromDict)
 
     return (selAccL2CB , l2muCombSequence)
@@ -236,10 +238,15 @@ def muCombStep(flags, chainDict):
 
     return ChainStep( name=selAccL2CB.name, Sequences=[l2muCombSequence], chainDicts=[chainDict] )
 
+def muCombOvlpRmSequence(flags, is_probe_leg=False):
+    log.warning("FAKE muCombOvlpRmSequence replaced by single muCombSequence")
+    return muCombSequence(flags)
+
+
 @AccumulatorCache
 def _muEFSAStepSeq(flags, name='RoI'):
     #EF MS only
-    selAccMS = SelectionCA('EFMuMSReco_'+name)
+    selAccMS = SelectionCA('EFMuMSSel_'+name)
     
     viewName="EFMuMSReco_"+name
     if 'FS' in name:
@@ -256,12 +263,12 @@ def _muEFSAStepSeq(flags, name='RoI'):
     recoMS.mergeReco(EFMuonViewDataVerifierCfg(flags, name))
 
     # decoding
-    recoMS.mergeReco(muonDecodeCfg(flags, selAccMS.name+"RoIs"))
+    recoMS.mergeReco(muonDecodeCfg(flags, recoMS.name+"RoIs"))
 
     #Reco
     recoMS.mergeReco( MooSegmentFinderAlgCfg(flags,name="TrigMooSegmentFinder_"+name,UseTGCNextBC=False, UseTGCPriorBC=False))
 
-    recoMS.mergeReco(MuPatTrackBuilderCfg(flags, name="TrigMuPatTrackBuilder_"+name, MonTool = MuPatTrackBuilderMonitoring("MuPatTrackBuilderMonitoringSA_"+name)))
+    recoMS.mergeReco(MuPatTrackBuilderCfg(flags, name="TrigMuPatTrackBuilder_"+name, MonTool = MuPatTrackBuilderMonitoring(flags, "MuPatTrackBuilderMonitoringSA_"+name)))
     from xAODTrackingCnv.xAODTrackingCnvConfig import MuonTrackParticleCnvCfg
     recoMS.mergeReco(MuonTrackParticleCnvCfg(flags, name = "TrigMuonTrackParticleCnvAlg_"+name))
     recoMS.mergeReco(MuonCombinedMuonCandidateAlgCfg(flags, name = "TrigMuonCandidateAlg_"+name))
@@ -276,7 +283,7 @@ def _muEFSAStepSeq(flags, name='RoI'):
 
     selAccMS.addHypoAlgo(efmuMSHypo)
     
-    efmuMSSequence = MenuSequenceCA(selAccMS,
+    efmuMSSequence = MenuSequenceCA(flags, selAccMS,
                                     HypoToolGen = TrigMuonEFMSonlyHypoToolFromDict)
 
     return (selAccMS , efmuMSSequence)
@@ -374,7 +381,7 @@ def _muEFCBStepSeq(flags, name='RoI'):
 
     selAccEFCB.addHypoAlgo(efmuCBHypo)
 
-    efmuCBSequence = MenuSequenceCA(selAccEFCB,
+    efmuCBSequence = MenuSequenceCA(flags, selAccEFCB,
                                     HypoToolGen = TrigMuonEFCombinerHypoToolFromDict)
    
     return (selAccEFCB , efmuCBSequence)
@@ -424,7 +431,7 @@ def _muEFIsoStepSeq(flags):
                                   inputMuons = "MuonsIso" )
     selAccEFIso.addHypoAlgo(efmuIsoHypo)
 
-    efmuIsoSequence = MenuSequenceCA(selAccEFIso,
+    efmuIsoSequence = MenuSequenceCA(flags, selAccEFIso,
                                      HypoToolGen = TrigMuonEFTrackIsolationHypoToolFromDict)
     
     return (selAccEFIso , efmuIsoSequence)

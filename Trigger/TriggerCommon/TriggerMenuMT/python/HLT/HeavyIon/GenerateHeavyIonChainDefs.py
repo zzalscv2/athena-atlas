@@ -8,7 +8,7 @@ from TriggerMenuMT.HLT.Config.Utility.ChainDictTools import splitChainDict
 from TriggerMenuMT.HLT.Config.Utility.ChainMerging import mergeChainDefs
 from .HeavyIonChainConfiguration import HeavyIonChainConfig
 
-def generateChainConfigs(chainDict):
+def generateChainConfigs(flags, chainDict):
 
   listOfChainDicts = splitChainDict(chainDict)
   log.debug('Implement case for heavy ion chain with %d legs', len(listOfChainDicts))
@@ -16,7 +16,7 @@ def generateChainConfigs(chainDict):
   listOfChainDefs = []
 
   for subChainDict in listOfChainDicts:
-    HeavyIon = HeavyIonChainConfig(subChainDict).assembleChain()
+    HeavyIon = HeavyIonChainConfig(subChainDict).assembleChain(flags)
 
     listOfChainDefs += [HeavyIon]
     log.debug('length of chaindefs: %d', len(listOfChainDefs))

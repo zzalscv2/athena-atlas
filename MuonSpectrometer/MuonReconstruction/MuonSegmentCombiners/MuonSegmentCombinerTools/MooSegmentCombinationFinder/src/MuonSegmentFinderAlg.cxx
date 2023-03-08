@@ -182,6 +182,7 @@ StatusCode MuonSegmentFinderAlg::execute(const EventContext& ctx) const {
     SG::WriteHandle<Trk::SegmentCollection> handle(m_segmentCollectionKey, ctx);
     ATH_CHECK(handle.record(std::move(segmentContainer)));
     if (m_idHelperSvc->recoMM() || m_idHelperSvc->recosTgc()) {
+         m_segmentOverlapRemovalTool->removeDuplicates(*nswSegmentContainer);
         SG::WriteHandle<Trk::SegmentCollection> handle_segNSW(m_segmentNSWCollectionKey, ctx);
         ATH_CHECK(handle_segNSW.record(std::move(nswSegmentContainer)));  
     }

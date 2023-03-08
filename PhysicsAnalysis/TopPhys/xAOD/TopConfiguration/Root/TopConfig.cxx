@@ -1,5 +1,5 @@
 /*
-   Copyrightf (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TopConfiguration/TopConfig.h"
@@ -240,6 +240,7 @@ namespace top {
     m_muon_d0SigCut(3.0),
     m_muon_delta_z0(0.5),
     m_muonCalibMode("SetMe"),
+    m_muonSmearingSystematicModel("SetMe"),
     m_muonMuonDoSmearing2stationHighPt(true),
     m_muonMuonDoExtraSmearingHighPt(false),
     m_muonBreakDownSystematics(false),
@@ -277,7 +278,7 @@ namespace top {
     m_jetStoreTruthLabels("True"),
     m_doJVTInMETCalculation(true),
     m_saveFailJVTJets(false),
-    m_JVTWP("Default"),
+    m_JVTWP("FixedEffPt"),
     m_doForwardJVTInMETCalculation(false),
     m_saveFailForwardJVTJets(false),
     m_fJVTWP("None"),
@@ -286,7 +287,7 @@ namespace top {
     m_METUncertaintiesConfigDir("SetMe"),
     m_METSignif(false),
     m_METSignifSoftTermParam("Random"),
-
+    m_METJetSelectionWP("Tight"),
     
     // Ghost Track Configuration
     m_ghostTrackspT(500.),
@@ -1264,6 +1265,7 @@ namespace top {
     remove_duplicates(m_muonIsolationWPs);
     
     m_muonCalibMode = settings->value("MuonCalibrationMode");
+    m_muonSmearingSystematicModel = settings->value("MuonSmearingSystematicModel");
     bool muonDoSmearing2stationHighPt = false;
     settings->retrieve("MuonDoSmearing2stationHighPt", muonDoSmearing2stationHighPt);
     if (settings->value("MuonQuality") != "HighPt" ) muonDoSmearing2stationHighPt = false;
@@ -1465,7 +1467,8 @@ namespace top {
     // MET Significance
     if(settings->value("METSignificance") == "True"){this->METSignificance(true);}
     this->METSignifSoftTermParam(settings->value("METSignificanceSoftTermParam"));
-
+    // MET JetSelection for NNJvt
+    this->setMETJetSelectionWP(settings->value("METJetSelectionWP"));
 
     // for top mass analysis, per default set to 1.0!
     m_JSF = std::stof(settings->value("JSF"));
@@ -1821,8 +1824,6 @@ namespace top {
 
     const std::string isRun3 = settings->value("IsRun3");
     this->setIsRun3(isRun3 == "True");
-
-    m_muon_trigger_SF = settings->value("MuonTriggerSF");
 
     m_trigMatchElemRelink = settings->retrieve("TriggerMatchingElementRelinking");
 
@@ -3520,7 +3521,6 @@ namespace top {
 
     out->m_fwdElectronID = m_fwdElectronID;
 
-    out->m_muon_trigger_SF = m_muon_trigger_SF;
     out->m_muonQuality = m_muonQuality;
     out->m_muonQualityLoose = m_muonQualityLoose;
     out->m_muonIsolation = m_muonIsolation;
@@ -3685,7 +3685,6 @@ namespace top {
 
     m_fwdElectronID = settings->m_fwdElectronID;
 
-    m_muon_trigger_SF = settings->m_muon_trigger_SF;
     m_muonQuality = settings->m_muonQuality;
     m_muonQualityLoose = settings->m_muonQualityLoose;
     m_muonIsolation = settings->m_muonIsolation;
@@ -3875,7 +3874,7 @@ namespace top {
       if (runnumber == 310000) return "2018";
       
       // Run 3 mc21a
-      if (runnumber == 330000) return "2022";
+      if (runnumber == 410000) return "2022";
 
       return "UNKNOWN";
     }

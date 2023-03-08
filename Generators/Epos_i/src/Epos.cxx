@@ -187,6 +187,7 @@ StatusCode Epos::fillEvt( HepMC::GenEvent* evt )
 #ifdef HEPMC3
     hepevtconverter.convert(*evt);
     evt->set_event_number(m_events);
+    HepMC::fillBarcodesAttribute(evt);
     HepMC::set_random_states(evt, m_seeds );
     evt->weights().push_back(1.0);
     m_runinfo = std::make_shared<HepMC3::GenRunInfo>();
@@ -198,7 +199,7 @@ StatusCode Epos::fillEvt( HepMC::GenEvent* evt )
     /// We use the old approach for HepMC2, as the CRMC 2.0.1 has a bug that prevents us from using the same approach as for HepMC3.
     /// This should be changed once the bug is fixed.
     hepevtconverter.convert();
-    for (auto v: hepevtconverter.vertices()) evt->add_vertex(v);
+    for (auto& v: hepevtconverter.vertices()) evt->add_vertex(v);
     if  (hepevtconverter.beams().size() == 2) evt->set_beam_particles(hepevtconverter.beams()[0],hepevtconverter.beams()[1]);
     if  (hepevtconverter.beams().size() == 1) evt->set_beam_particles(hepevtconverter.beams()[0],nullptr);
     evt->set_event_number(m_events);

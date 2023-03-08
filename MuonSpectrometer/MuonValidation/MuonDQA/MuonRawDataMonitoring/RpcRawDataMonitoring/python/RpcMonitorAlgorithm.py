@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -33,13 +33,14 @@ def RpcMonitoringConfig(inputFlags):
     rpcTrackAnaAlg.plotMuonEff = True
     rpcTrackAnaAlg.plotPRD     = True
     rpcTrackAnaAlg.ElementsFileName = "Element.xml"
-
-    # rpcTrackAnaAlg.TagTrigList = 'HLT_mu26_ivarmedium'
     rpcTrackAnaAlg.TagAndProbe         = False
-    # rpcTrackAnaAlg.TagAndProbeZmumu    = False
 
     if not inputFlags.DQ.triggerDataAvailable:
         rpcTrackAnaAlg.MuonRoIContainerName = ''
+    else:
+        # LVL1MuonRoIs are only available after the HLTResultMTByteStreamDecoderAlg has executed
+        from TrigDecisionTool.TrigDecisionToolConfig import getRun3NavigationContainerFromInput
+        rpcTrackAnaAlg.ExtraInputs += [('xAOD::TrigCompositeContainer' , 'StoreGateSvc+'+getRun3NavigationContainerFromInput(inputFlags))]
 
     ######################################################################################################
     ## Occupancy histograms
@@ -59,7 +60,7 @@ def RpcMonitoringConfig(inputFlags):
                         xbins=1200, xmin=0.5, xmax=1200.5)
 
     myGroup_track.defineHistogram('prdTime', 
-                        title="Number of RPC Prepare Data;Time;N RPC Prepare Data",
+                        title="Number of RPC Hit;Time;NHit",
                         type='TH1D', 
                         path='RpcOccupancy',
                         xbins=67, xmin=-104.6875, xmax=104.6875)
@@ -90,12 +91,12 @@ def RpcMonitoringConfig(inputFlags):
                         ybins=8, ymin=0.5, ymax=8.5)
 
     myGroup_track.defineHistogram('LB,panelInd;NPRDHit_Panels_All', 
-                title='Number of RPC Prepare Data;Luminosity Block;Panel Index;NHit',
+                title='Number of RPC Hit;Luminosity Block;Panel Index;NHit',
                 type='TH2I', 
                 path='RpcOccupancy',
                 xbins=1200, xmin=0.5, xmax=1200.5, ybins=8592, ymin=-0.5, ymax=8591.5)
     myGroup_track.defineHistogram('LB;NPRDHitVSLB_All', 
-                title="Number of RPC Prepare Data;Luminosity Block;NHit",
+                title="Number of RPC Hit;Luminosity Block;NHit",
                 type='TH1I', 
                 path='RpcOccupancy',
                 xbins=1200, xmin=0.5, xmax=1200.5)
@@ -111,7 +112,7 @@ def RpcMonitoringConfig(inputFlags):
                             path=trackPath,
                             xbins=1200, xmin=0.5, xmax=1200.5, ybins=33, ymin=-16.5, ymax=16.5)
 
-    ## Z muon
+    ## probe muon with Z tag&probe method
     myGroup_track.defineHistogram('muPt_MuonFromZ;Pt_MuonFromZ',
                             title='Pt of muons decayed from Z candidates;Pt[MeV];NMuon',
                             type='TH1D',
@@ -126,6 +127,18 @@ def RpcMonitoringConfig(inputFlags):
                             title='#phi of muons decayed from Z candidates;#phi;NMuon',
                             type='TH1D',
                             path='PlotCand',
+                            xbins=32, xmin=-3.1415926, xmax=3.1415926)
+    myGroup_track.defineHistogram('muEta_MuonFromZ,muPhi_MuonFromZ;EtaVSPhi_MuonFromZ', 
+                            type='TH2D', 
+                            title='Eta vs phi for muons decayed from Z;#eta;#phi;NMuon',
+                            path='PlotCand',
+                            xbins=42,xmin=-1.05,     xmax=1.05,
+                            ybins=32,ymin=-3.1415926,ymax=3.1415926)
+    myGroup_track.defineHistogram('muEta_p_MuonFromZ,muPhi_p_MuonFromZ;EtaVSPhi_MuonFromZ_plateau', 
+                            type='TH2D', 
+                            title='Eta vs phi for muons decayed from Z(pT>25GeV);#eta;#phi;NMuon',
+                            path='PlotCand',
+                            xbins=42,xmin=-1.05,     xmax=1.05,
                             ybins=32,ymin=-3.1415926,ymax=3.1415926)
 
     myGroup_track.defineHistogram('hitMulti_eta;HitMultiplicity_eta', 
@@ -164,13 +177,13 @@ def RpcMonitoringConfig(inputFlags):
                             path=trackPath,
                             xbins=11, xmin=-0.5, xmax=10.5, ybins=8592, ymin=-0.5, ymax=8591.5)
 
-    myGroup_track.defineHistogram('muon_passExtrap,panelInd_hM;Panel_Efficiency_MuonFromZ', 
+    myGroup_track.defineHistogram('muon_passExtrap,panelInd_hM;Detection_Efficiency_MuonFromZ', 
                             title='Panels detection efficiency for muons decayed from Z candidates;Panel Index;Efficiency',
                             type='TEfficiency',
                             path=trackPath,
                             xbins=8592, xmin=-0.5, xmax=8591.5)
 
-    myGroup_track.defineHistogram('muon_passExtrap,LB_detEff;Panel_Efficiency_LB_MuonFromZ', 
+    myGroup_track.defineHistogram('muon_passExtrap,LB_detEff;Detection_Efficiency_LB_MuonFromZ', 
                             title='Panels detection efficiency for muons decayed from Z candidates;Luminosity Block;Efficiency',
                             type='TEfficiency',
                             path=trackPath,
@@ -203,44 +216,42 @@ def RpcMonitoringConfig(inputFlags):
                             title='#phi of muons in all events;#phi;NMuon',
                             type='TH1D',
                             path='PlotCand',
+                            xbins=32, xmin=-3.1415926, xmax=3.1415926)
+    myGroup_track.defineHistogram('muEta_allMu,muPhi_allMu;EtaVSPhi_AllMuons', 
+                            type='TH2D', 
+                            title='Eta vs phi of all muons;#eta;#phi;NMuon',
+                            path='PlotCand',
+                            xbins=42,xmin=-1.05,     xmax=1.05,
                             ybins=32,ymin=-3.1415926,ymax=3.1415926)
 
-    myGroup_track.defineHistogram('muon_passExtrap_allMu,panelInd_hM_allMu;Panel_Efficiency_AllMuons', 
+
+    myGroup_track.defineHistogram('muon_passExtrap_allMu,panelInd_hM_allMu;Detection_Efficiency_AllMuons', 
                             title='Panels detection efficiency for all muons;Panel Index;Efficiency',
                             type='TEfficiency',
                             path=trackPath,
                             xbins=8592, xmin=-0.5, xmax=8591.5)
 
 
-    sectors       = [str(k) for k in range(1, 16+1)]
+    sectors       = ["sector"+str(k) for k in range(1, 16+1)]
     array_sectors = helper.addArray([sectors], rpcTrackAnaAlg, 'RpcTrackAnaAlg', 'Muon/MuonRawDataMonitoring/RPC/')
 
-    array_sectors.defineHistogram('cs_sec;ClusterSize_Sector',
-                title='Cluster size on sector{0};Cluster size;NCluster',
+    array_sectors.defineHistogram('cs_sec;ClusterSize',
+                title='Cluster size on {0};Cluster size;NCluster',
                 type='TH1I',
                 path='TrackMatch/ClusterSize',
                 xbins=11, xmin=-0.5, xmax=10.5)
 
-    array_sectors.defineHistogram('hitTime_sec;PRDHitTime_MuonFromZ_Sector',
-                title='Hit time on sector{0};Hit time;NHits',
+    array_sectors.defineHistogram('hitTime_sec;PRDHitTime_MuonFromZ',
+                title='Hit time on {0};Hit time;NHits',
                 type='TH1I',
                 path='TrackMatch/PRDHitTime',
                 xbins=67, xmin=-104.6875, xmax=104.6875)
 
 
     ######################################################################################################
-    ## Rpc lv1 Analysis
+    ## Rpc lv1 trigger
     ######################################################################################################
-    RPCLv1AnaAlg    = CompFactory.RPCLv1AnaAlg
-
-    Lv1AnaAlg  = helper.addAlgorithm(RPCLv1AnaAlg, "RPCLv1AnaAlgAlg")
-    # Lv1AnaAlg.TriggerChain  = 'HLT_mu26_ivarmedium'
-    
-    if not inputFlags.DQ.triggerDataAvailable:
-        Lv1AnaAlg.MuonRoIContainerName = ''
-
-    myGroup_lv1Trigger = helper.addGroup(Lv1AnaAlg, 'RPCLv1AnaAlg', 'Muon/MuonRawDataMonitoring/RPC/')
-
+    myGroup_lv1Trigger = helper.addGroup(rpcTrackAnaAlg, 'RpcTrackAnaAlg', 'Muon/MuonRawDataMonitoring/RPC/')
     myGroup_lv1Trigger.defineHistogram('nMu;NMuon',
                             title='Number of Muons;nMuons;Events',
                             type='TH1I',
@@ -251,13 +262,6 @@ def RpcMonitoringConfig(inputFlags):
                             type='TH1I',
                             path='PlotCand',
                             xbins=5,xmin=-0.5,xmax=4.5)
-
-    myGroup_lv1Trigger.defineHistogram('muPt_full;MuonPt_full',
-                            title='barrel and endcap muon Pt;Pt[MeV];NMuon',
-                            type='TH1D',
-                            path='PlotCand',
-                            xbins=100,xmin=0,xmax=400e3)
-
     myGroup_lv1Trigger.defineHistogram('roiEta;roiEta',
                             title='roi eta;roi #eta;rois',
                             type='TH1D',
@@ -275,56 +279,37 @@ def RpcMonitoringConfig(inputFlags):
                             type='TH1I',
                             path='PlotCand',
                             xbins=6,xmin=0.5,xmax=6.5)
-    
-    myGroup_lv1Trigger.defineHistogram('nMuBarrel_medium;NMuonBarrel_medium',
-                            title='Number of Barrel Medium Muons;nMuons;Events',
-                            type='TH1I',
-                            path='L1Trigger',
-                            xbins=5,xmin=-0.5,xmax=4.5)
 
-    myGroup_lv1Trigger.defineHistogram('muPtDen;MuonPt',
-                            title='Barrel Muon Pt;Pt[MeV];NMuon',
-                            type='TH1D',
-                            path='L1Trigger',
-                            xbins=200,xmin=0,xmax=1000e3)
+    lv1Triggers = ["thr"+str(k) for k in range(1, 6+1)]
+    array_triggerThr = helper.addArray([lv1Triggers], rpcTrackAnaAlg, 'RpcTrackAnaAlg', 'Muon/MuonRawDataMonitoring/RPC/')
 
-    myGroup_lv1Trigger.defineHistogram('muEtaDen,muPhiDen;L1TriggerEffDen', 
-                            type='TH2D', 
-                            title='L1 Trigger Efficiency Denominator;#eta;#phi;NMuon',
-                            path='L1Trigger',
-                            xbins=42,xmin=-1.05,     xmax=1.05,
-                            ybins=32,ymin=-3.1415926,ymax=3.1415926)
-
-    lv1Triggers = [str(k) for k in range(1, 6+1)]
-    array_triggerThr = helper.addArray([lv1Triggers], Lv1AnaAlg, 'RPCLv1AnaAlg', 'Muon/MuonRawDataMonitoring/RPC')
-
-    array_triggerThr.defineHistogram('passTrigger,muPt;L1TriggerEff_muPt',
-                title='L1 Trigger Threshold{0} Efficiency;Pt[MeV];#epsilon Thr{0}',
+    array_triggerThr.defineHistogram('passTrigger,muPt_l1;L1TriggerEff_muPt',
+                title='L1 Trigger Efficiency for {0};Pt[MeV];#epsilon for {0}',
                 type='TEfficiency',
                 path='L1Trigger',
                 xbins=10, xmin=0.0, xmax=80.0e3)
 
-    array_triggerThr.defineHistogram('passTrigger,muEta;L1TriggerEff_muEta',
-                title='L1 Trigger Threshold{0} Efficiency;#eta;#epsilon Thr{0}',
+    array_triggerThr.defineHistogram('passTrigger_plateau,muEta_l1;L1TriggerEff_muEta',
+                title='L1 Trigger Efficiency for {0};#eta;#epsilon for {0}',
                 type='TEfficiency',
                 path='L1Trigger',
                 xbins=42,xmin=-1.05, xmax=1.05)
 
-    array_triggerThr.defineHistogram('passTrigger,muPhi;L1TriggerEff_muPhi',
-                title='L1 Trigger Threshold{0} Efficiency;#phi;#epsilon Thr{0}',
+    array_triggerThr.defineHistogram('passTrigger_plateau,muPhi_l1;L1TriggerEff_muPhi',
+                title='L1 Trigger Efficiency for {0};#phi;#epsilon for {0}',
                 type='TEfficiency',
                 path='L1Trigger',
                 xbins=32,xmin=-3.1415926,xmax=3.1415926)
 
-    array_triggerThr.defineHistogram('muEta,muPhi;L1TriggerEffNum', 
+    array_triggerThr.defineHistogram('muEta_l1,muPhi_l1;L1TriggerEffNum', 
                 type='TH2D', 
-                title='L1 Trigger Efficiency numerator;#eta;#phi;NMuon Thr{0}',
+                title='L1 Trigger Efficiency Numerator for {0};#eta;#phi;NMuon for {0}',
                 path='L1Trigger',
                 xbins=42,xmin=-1.05,     xmax=1.05,
                 ybins=32,ymin=-3.1415926,ymax=3.1415926)
 
-    array_triggerThr.defineHistogram('passTrigger,muEta,muPhi;L1TriggerEff_eta_phi',
-                title='L1 Trigger Threshold{0} Efficiency;#eta;#phi;#epsilon Thr{0}',
+    array_triggerThr.defineHistogram('passTrigger_plateau,muEta_l1,muPhi_l1;L1TriggerEff_eta_phi',
+                title='L1 Trigger Efficiency for {0};#eta;#phi;#epsilon for {0}',
                 type='TEfficiency',
                 path='L1Trigger',
                 xbins=42,xmin=-1.05,     xmax=1.05,
@@ -344,7 +329,8 @@ if __name__=="__main__":
     log.setLevel(INFO)
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
 
     # Config Input/Output 
     import os
@@ -362,36 +348,31 @@ if __name__=="__main__":
         print ("file input.txt does not exist")
         print ("WIll use files: \n", file_list)
 
-    ConfigFlags.Input.Files = file_list
+    flags.Input.Files = file_list
+    flags.Output.HISTFileName = 'RPCMonitoringOutput.root'
+    flags.GeoModel.AtlasVersion = "ATLAS-R2-2016-01-00-01"
 
-    ConfigFlags.Output.HISTFileName = 'RPCMonitoringOutput.root'
-
-    ConfigFlags.GeoModel.AtlasVersion = "ATLAS-R2-2016-01-00-01"
-
-    ConfigFlags.lock()
-    ConfigFlags.dump()
-
-    from AthenaCommon.AppMgr import ServiceMgr
-    ServiceMgr.Dump = False
+    flags.lock()
+    flags.dump()
 
     # Initialize configuration object, add accumulator, merge and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
-    acc = RpcMonitoringConfig(ConfigFlags)
+    acc = RpcMonitoringConfig(flags)
     acc.OutputLevel = INFO
     cfg.merge(acc)
 
     from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
-    cfg.merge(AtlasFieldCacheCondAlgCfg(ConfigFlags))
+    cfg.merge(AtlasFieldCacheCondAlgCfg(flags))
 
-    if ConfigFlags.DQ.Steering.Muon.doTrackMon:
+    if flags.DQ.Steering.Muon.doTrackMon:
         # do not run in RAW->ESD
-        if ConfigFlags.DQ.Environment not in ('tier0Raw',):
+        if flags.DQ.Environment not in ('tier0Raw',):
             from MuonTrackMonitoring.MuonTrackMonitorAlgorithm import MuonTrackConfig
-            cfg.merge(MuonTrackConfig(ConfigFlags))
+            cfg.merge(MuonTrackConfig(flags))
 
     cfg.printConfig(withDetails=True, summariseProps = True)
 

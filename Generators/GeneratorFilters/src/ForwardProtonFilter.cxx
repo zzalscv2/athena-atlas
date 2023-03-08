@@ -37,7 +37,7 @@ StatusCode ForwardProtonFilter::filterEvent() {
   McEventCollection::const_iterator itr;
   for (itr = events()->begin(); itr != events()->end(); ++itr) {
     const HepMC::GenEvent* genEvt = *itr;
-    for (auto part: *genEvt) {
+    for (const auto& part: *genEvt) {
       // We're only interested in stable (status == 1) particles
       if ( part->status() != 1) continue;
 

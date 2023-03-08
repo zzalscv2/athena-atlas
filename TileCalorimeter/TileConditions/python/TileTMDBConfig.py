@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """Define methods to construct configured Tile TMDB conditions tool and algorithm"""
 
@@ -9,7 +9,7 @@ def TileTMDBCondAlgCfg(flags, **kwargs):
     """Return component accumulator with configured Tile TMDB conditions algorithms
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
     Keyword arguments:
         Source -- source of Tile TMDB conditions (COOL, FILE). Defaults to COOL.
         TileTMDBThreshold -- name of Tile TMDB threshold conditions object. Defaults to TileTMDBThreshold.
@@ -85,7 +85,7 @@ def TileCondToolTMDBCfg(flags, **kwargs):
     """Return component accumulator with configured private Tile TMDB conditions tool
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
     Keyword arguments:
         Source -- source of Tile TMDB conditions (COOL, FILE). Defaults to COOL.
         TileTMDBThreshold -- name of Tile TMDB threshold conditions object. Defaults to TileTMDBThreshold.
@@ -120,7 +120,7 @@ def TileCondToolTMDBCfg(flags, **kwargs):
 
 if __name__ == "__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG
@@ -128,13 +128,14 @@ if __name__ == "__main__":
     # Test setup
     log.setLevel(DEBUG)
 
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.Tile.RunType = 'PHY'
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.Tile.RunType = 'PHY'
+    flags.lock()
 
     acc = ComponentAccumulator()
 
-    tmdbTool = acc.popToolsAndMerge( TileCondToolTMDBCfg(ConfigFlags) )
+    tmdbTool = acc.popToolsAndMerge( TileCondToolTMDBCfg(flags) )
     print(tmdbTool)
 
     acc.printConfig(withDetails = True, summariseProps = True)

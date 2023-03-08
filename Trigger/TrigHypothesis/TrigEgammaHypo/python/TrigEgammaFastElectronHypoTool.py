@@ -1,14 +1,12 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
-
-
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.SystemOfUnits import GeV
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
+from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
 #
 # For electrons only
 #
-def createTrigEgammaFastElectronHypoAlg(name, sequenceOut):
+def createTrigEgammaFastElectronHypoAlg(flags, name, sequenceOut):
   
   # make the Hypo
   #rom TriggerMenuMT.HLT.Egamma.TrigEgammaDefs import createTrigEgammaFastCaloSelectors
@@ -21,14 +19,12 @@ def createTrigEgammaFastElectronHypoAlg(name, sequenceOut):
   #theFastElectronHypo.PidNames = ["tight", "medium", "loose", "vloose"]
   #theFastElectronHypo.RingerNNSelectorTools = createTrigEgammaFastCaloSelectors()
 
-  from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool, defineHistogram
-  MonTool = GenericMonitoringTool("MonTool_"+name)
-  MonTool.Histograms = [ 
-        defineHistogram('TIME_exec', type='TH1F', path='EXPERT', title="Fast Calo Hypo Algtime; time [ us ] ; Nruns", xbins=80, xmin=0.0, xmax=8000.0),
-        defineHistogram('TIME_NN_exec', type='TH1F', path='EXPERT', title="Fast Calo Hypo NN Algtime; time [ us ] ; Nruns", xbins=100, xmin=0.0, xmax=100),
-  ]
-  MonTool.HistPath = 'FastElectronHypo/'+name
-  theFastElectronHypo.MonTool=MonTool
+  monTool = GenericMonitoringTool(flags, "MonTool_"+name,
+                                  HistPath = 'FastElectronHypo/'+name)
+  monTool.defineHistogram('TIME_exec', type='TH1F', path='EXPERT', title="Fast Calo Hypo Algtime; time [ us ] ; Nruns", xbins=80, xmin=0.0, xmax=8000.0)
+  monTool.defineHistogram('TIME_NN_exec', type='TH1F', path='EXPERT', title="Fast Calo Hypo NN Algtime; time [ us ] ; Nruns", xbins=100, xmin=0.0, xmax=100)
+
+  theFastElectronHypo.MonTool=monTool
   return theFastElectronHypo
 
 
@@ -140,7 +136,7 @@ class TrigEgammaFastElectronHypoToolConfig:
   #
   # Compile the chain
   #
-  def compile(self):
+  def compile(self, flags):
     
     if 'idperf' in self.idperfInfo():
       self.nocut()
@@ -155,20 +151,19 @@ class TrigEgammaFastElectronHypoToolConfig:
     # add mon tool
     if hasattr(self.tool(), "MonTool"):
       
-      doValidationMonitoring = ConfigFlags.Trigger.doValidationMonitoring # True to monitor all chains for validation purposes
+      doValidationMonitoring = flags.Trigger.doValidationMonitoring # True to monitor all chains for validation purposes
       monGroups = self.__monGroups
 
       if (any('egammaMon:online' in group for group in monGroups) or doValidationMonitoring):
-        self.addMonitoring()
+        self.addMonitoring(flags)
 
 
   #
   # Monitoring code
   #
-  def addMonitoring(self):
-    
-    from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-    monTool = GenericMonitoringTool("MonTool"+self.__name)
+  def addMonitoring(self, flags):
+
+    monTool = GenericMonitoringTool(flags, "MonTool"+self.__name)
     monTool.defineHistogram('CutCounter', type='TH1I', path='EXPERT', title="FastElectron Hypo Cut Counter;Cut Counter", xbins=8, xmin=-1.5, xmax=7.5, opt="kCumulative")
     monTool.defineHistogram('CaloTrackdEta', type='TH1F', path='EXPERT', title="FastElectron Hypo #Delta #eta between cluster and track;#Delta #eta;Nevents", xbins=80, xmin=-0.4, xmax=0.4)
     monTool.defineHistogram('CaloTrackdPhi', type='TH1F', path='EXPERT', title="FastElectron Hypo #Delta #phi between cluster and track;#Delta #phi;Nevents", xbins=80, xmin=-0.4, xmax=0.4)
@@ -187,22 +182,14 @@ class TrigEgammaFastElectronHypoToolConfig:
 
 
 
-def _IncTool(name, monGroups, cpart, tool=None):
+def _IncTool(flags, name, monGroups, cpart, tool=None):
   config = TrigEgammaFastElectronHypoToolConfig(name,monGroups, cpart, tool=tool)
-  config.compile()
+  config.compile(flags)
   return config.tool()
 
 
 
-def TrigEgammaFastElectronHypoToolFromDict( d , tool=None):
+def TrigEgammaFastElectronHypoToolFromDict( flags, chainDict , tool=None):
     """ Use menu decoded chain dictionary to configure the tool """
-    cparts = [i for i in d['chainParts'] if (i['signature']=='Electron')]
-    name = d['chainName']
-    monGroups = d['monGroups']
-    return _IncTool( name, monGroups, cparts[0] , tool=tool)
-
-
-if __name__ == "__main__":
-    pass
-
-
+    cparts = [i for i in chainDict['chainParts'] if (i['signature']=='Electron')]
+    return _IncTool( flags, chainDict['chainName'], chainDict['monGroups'], cparts[0] , tool=tool)

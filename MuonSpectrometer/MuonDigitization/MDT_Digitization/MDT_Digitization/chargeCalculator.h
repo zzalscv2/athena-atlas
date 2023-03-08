@@ -45,12 +45,12 @@ double chargeCalculator(const MDTSimHit& hit, unsigned short eventId = 0) {
     if (genParticle) {
         int particleEncoding = genParticle->pdg_id();
         //      std::cout << "SB: pdgId=" << particleEncoding <<std::endl;
-        if (((int)(abs(particleEncoding) / 10000000) == 1) && ((int)(abs(particleEncoding) / 100000) == 100)) {
-            qcharge = ((abs(particleEncoding) / 100000.0) - 100.0) * 1000.0;
+        if (((int)(std::abs(particleEncoding) / 10000000) == 1) && ((int)(std::abs(particleEncoding) / 100000) == 100)) {
+            qcharge = ((std::abs(particleEncoding) / 100000.0) - 100.0) * 1000.0;
             if (particleEncoding < 0.0) qcharge = -qcharge;
             //			std::cout << "SB: BINGO! Qball: qcharge=" << qcharge <<std::endl;
-        } else if (((int)(abs(particleEncoding) / 10000000) == 2) && ((int)(abs(particleEncoding) / 100000) == 200)) {
-            qcharge = (double)((abs(particleEncoding) / 1000) % 100) / (double)((abs(particleEncoding) / 10) % 100);
+        } else if (((int)(std::abs(particleEncoding) / 10000000) == 2) && ((int)(std::abs(particleEncoding) / 100000) == 200)) {
+            qcharge = (double)((std::abs(particleEncoding) / 1000) % 100) / (double)((std::abs(particleEncoding) / 10) % 100);
             if (particleEncoding < 0.0) qcharge = -qcharge;
         }
     } else {

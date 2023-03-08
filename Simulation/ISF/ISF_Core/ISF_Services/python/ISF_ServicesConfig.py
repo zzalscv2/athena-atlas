@@ -20,6 +20,7 @@ from ISF_HepMC_Tools.ISF_HepMC_ToolsConfig import (
     TruthStrategyGroupIDHadIntCfg,
     TruthStrategyGroupCaloMuBremCfg,
     ParticleSimWhiteList_ExtraParticlesCfg,
+    ValidationTruthStrategyCfg
 )
 from BarcodeServices.BarcodeServicesConfig import BarcodeSvcCfg
 from ISF_Geant4CommonTools.ISF_Geant4CommonToolsConfig import (
@@ -38,7 +39,7 @@ def GenParticleFiltersToolCfg(flags):
     acc = ParticleFinalStateFilterCfg(flags)
     genParticleFilterList += [result.popToolsAndMerge(acc)]
     if "ATLAS" in flags.GeoModel.Layout or "atlas" in flags.GeoModel.Layout:
-        if flags.Beam.Type is not BeamType.Cosmics:
+        if flags.Beam.Type not in [BeamType.Cosmics, BeamType.TestBeam]:
             acc = ParticlePositionFilterDynamicCfg(flags)
             genParticleFilterList += [result.popToolsAndMerge(acc)]
             if not (flags.Detector.GeometryAFP or flags.Detector.GeometryALFA or flags.Detector.GeometryFwdRegion) \
@@ -160,10 +161,13 @@ def GenericTruthServiceCfg(flags, name="ISF_TruthService", **kwargs):
 
 
 def ValidationTruthServiceCfg(flags, name="ISF_ValidationTruthService", **kwargs):
-    kwargs.setdefault("TruthStrategies", ["ISF_ValidationTruthStrategy"] )
+    result = ComponentAccumulator()
+    kwargs.setdefault("TruthStrategies", [result.popToolsAndMerge(ValidationTruthStrategyCfg(flags))] )
     kwargs.setdefault("IgnoreUndefinedBarcodes", True)
     kwargs.setdefault("PassWholeVertices", True)
-    return GenericTruthServiceCfg(flags, name, **kwargs)
+    truthService = result.getPrimaryAndMerge(GenericTruthServiceCfg(flags, name, **kwargs))
+    result.addService(truthService, primary=True)
+    return result
 
 
 # MC12 Truth Service Configurations

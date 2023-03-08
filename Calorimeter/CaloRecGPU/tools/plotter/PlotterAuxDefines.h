@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 //
 
 #ifndef CALORECGPU_TOOLS_PLOTTERAUXDEFINES_H
@@ -52,7 +52,6 @@
 #include <TGraphErrors.h>
 
 
-using namespace CaloRecGPU;
 
 inline bool sortCaloCellRatio(const int & cell1Tag, const int & cell2Tag)
 {
@@ -66,7 +65,7 @@ static constexpr float regCuts[3] = {1.5, 3.2, 5};
 static constexpr float SNR_thresholds[3] = {0., 2., 4.};
 
 template <class T>
-constexpr T pi = Helpers::Constants::pi<T>;
+constexpr T pi = CaloRecGPU::Helpers::Constants::pi<T>;
 
 template <class T>
 T wrapPhi( const T phi )
@@ -161,11 +160,11 @@ void operate_on_types (Obj * arr, const float SNR, F && f, Args && ... args)
     }
 }
 
-inline int get_legacy_tag(const tag_type tag)
+inline int get_legacy_tag(const CaloRecGPU::tag_type tag)
 {
-  if (Tags::is_part_of_cluster(tag))
+  if (CaloRecGPU::Tags::is_part_of_cluster(tag))
     {
-      return Tags::get_index_from_tag(tag);
+      return CaloRecGPU::Tags::get_index_from_tag(tag);
     }
   else
     {
@@ -215,15 +214,15 @@ template <class T> void set_to_lowest(T && val)
 
 struct ClusterData
 {
-  int num_cells;
-  float energy;
-  float transverse_energy;
-  float eta;
-  float phi;
-  double abs_energy;
-  double eta_post;
-  double phi_post;
-  double energy_post;
+  int num_cells{};
+  float energy{};
+  float transverse_energy{};
+  float eta{};
+  float phi{};
+  double abs_energy{};
+  double eta_post{};
+  double phi_post{};
+  double energy_post{};
 
   ClusterData(const int n_c = 0, const float en = 0, const float e_t = 0, const float h = 0, const float f = 0, const double abs_e = 0,
               const double h_post = 0, const double f_post = 0, const double en_post = 0):
@@ -1617,7 +1616,7 @@ struct BasePlotter
                                    const std::string & title_override = "",
                                    const bool force_range = false) const override
     {
-      std::array<double, 4> min, max;
+      std::array<double, 4> min{}, max{};
 
       if (force_range)
         {

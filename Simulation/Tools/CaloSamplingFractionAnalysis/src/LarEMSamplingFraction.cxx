@@ -150,7 +150,7 @@ StatusCode LarEMSamplingFraction::execute()
       return StatusCode::FAILURE;
     }
 #ifdef HEPMC3
-  HepMC::ConstGenParticlePtr   gen=truthEvent->at(0)->particles().front();
+  const HepMC::ConstGenParticlePtr&  gen = truthEvent->at(0)->particles().front();
 #else
   HepMC::GenEvent::particle_const_iterator pit  = truthEvent->at(0)->particles_begin();
   HepMC::ConstGenParticlePtr   gen  = *pit;

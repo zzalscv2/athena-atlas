@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TBCaloCoolPosTool.h"
@@ -71,7 +71,7 @@ void TBCaloCoolPosTool::handle(const Incident&)
     return; 
 } 
 
-bool TBCaloCoolPosTool::initHandles() 
+bool TBCaloCoolPosTool::initHandles ATLAS_NOT_THREAD_SAFE ()
 { 
       ATH_MSG_DEBUG ("in initHandles()" );
 

@@ -9,28 +9,28 @@
 #include "BarcodeServices/ValidationBarcodeSvc.h"
 // framework include
 #include "GaudiKernel/IIncidentSvc.h"
-
+#include "TruthUtils/MagicNumbers.h"
 
 /** Constructor **/
 Barcode::ValidationBarcodeSvc::ValidationBarcodeSvc(const std::string& name,ISvcLocator* svc) :
   base_class(name,svc),
   m_incidentSvc("IncidentSvc", name),
-  m_firstVertex(-200001),
+  m_firstVertex(-HepMC::SIM_BARCODE_THRESHOLD-1),
   m_vertexIncrement(-1),
   m_currentVertex(-1),
-  m_firstSecondary(200001),
+  m_firstSecondary(HepMC::SIM_BARCODE_THRESHOLD+1),
   m_secondaryIncrement(1),
   m_currentSecondary(1),
-  m_particleGenerationIncrement(1000000),
+  m_particleGenerationIncrement(HepMC::SIM_REGENERATION_INCREMENT),
   m_barcodeGenerationOffset(1e8),
   m_doUnderOverflowChecks(true)
 {
   // python properties
-  declareProperty("FirstSecondaryVertexBarcode",  m_firstVertex=-200001                );
+  declareProperty("FirstSecondaryVertexBarcode",  m_firstVertex=HepMC::SIM_BARCODE_THRESHOLD-1                );
   declareProperty("VertexIncrement"            ,  m_vertexIncrement=-1                 );
-  declareProperty("FirstSecondaryBarcode"      ,  m_firstSecondary=200001              );
+  declareProperty("FirstSecondaryBarcode"      ,  m_firstSecondary=HepMC::SIM_BARCODE_THRESHOLD+1              );
   declareProperty("SecondaryIncrement"         ,  m_secondaryIncrement=1               );
-  declareProperty("ParticleGenerationIncrement",  m_particleGenerationIncrement=1000000);
+  declareProperty("ParticleGenerationIncrement",  m_particleGenerationIncrement=HepMC::SIM_REGENERATION_INCREMENT);
   declareProperty("BarcodeGenerationOffset"    ,  m_barcodeGenerationOffset=1e8        );
   declareProperty("DoUnderAndOverflowChecks"   ,  m_doUnderOverflowChecks=true         );
 }

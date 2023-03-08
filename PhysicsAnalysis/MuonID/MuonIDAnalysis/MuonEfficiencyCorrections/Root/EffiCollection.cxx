@@ -151,12 +151,12 @@ namespace CP {
             if (std::abs(mu.eta()) >= 2.5) {
                 return m_forward_eff.get();
             }
-            if (mu.author() == xAOD::Muon::CaloTag) {
+            if (mu.muonType() == xAOD::Muon::CaloTagged) {
                 return m_lowpt_calo_eff.get();
             }
             return m_lowpt_central_eff.get();
         }
-        if (mu.author() == xAOD::Muon::CaloTag) {
+        if (mu.muonType() == xAOD::Muon::CaloTagged) {
             return m_calo_eff.get();
         } else if (std::abs(mu.eta()) < 2.5) {
             return m_central_eff.get();
@@ -355,7 +355,7 @@ namespace CP {
                 }
             }
         } else return true;
-        Error("CollectionContainer", "Could not find any SF period in %s matching the run number %u", EffiCollection::FileTypeName(type()).c_str(), RunNumber);
+        Warning("CollectionContainer", "Could not find any SF period in %s matching the run number %u", EffiCollection::FileTypeName(type()).c_str(), RunNumber);
         return false;
     }
     EfficiencyScaleFactor* CollectionContainer::retrieve(unsigned int RunNumber) {

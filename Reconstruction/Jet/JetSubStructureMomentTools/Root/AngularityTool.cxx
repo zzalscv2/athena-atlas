@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetSubStructureMomentTools/AngularityTool.h"
 #include "JetSubStructureUtils/Angularity.h"
 
-AngularityTool::AngularityTool(std::string name) : 
+AngularityTool::AngularityTool(const std::string& name) : 
   JetSubStructureMomentToolsBase(name)
 {
 }

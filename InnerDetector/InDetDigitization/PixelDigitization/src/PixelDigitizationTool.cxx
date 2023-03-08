@@ -126,9 +126,7 @@ StatusCode PixelDigitizationTool::digitizeEvent(const EventContext& ctx) {
 
   std::unique_ptr<SiChargedDiodeCollection> chargedDiodes = std::make_unique<SiChargedDiodeCollection>();
   std::vector<std::pair<double, double> > trfHitRecord;
-  trfHitRecord.clear();
   std::vector<double> initialConditions;
-  initialConditions.clear();
 
   std::vector<bool> processedElements;
   processedElements.resize(m_detID->wafer_hash_max(), false);
@@ -315,14 +313,13 @@ void PixelDigitizationTool::addSDO(SiChargedDiodeCollection* collection) {
       // if the charge has already hit the Diode add it to the deposit
       if (theDeposit != depositsR_end) (*theDeposit).second += i_ListOfCharges->charge();
       else { // create a new deposit
-        InDetSimData::Deposit deposit(trkLink, i_ListOfCharges->charge());
-        deposits.push_back(deposit);
+        deposits.emplace_back(trkLink, i_ListOfCharges->charge());
       }
     }
     // add the simdata object to the map:
     if (real_particle_hit || m_createNoiseSDO) {
-      m_simDataColl->insert(std::make_pair(collection->getId((*i_chargedDiode).first),
-                                           InDetSimData(deposits, (*i_chargedDiode).second.flag())));
+      m_simDataColl->try_emplace(collection->getId((*i_chargedDiode).first),
+                                           std::move(deposits), (*i_chargedDiode).second.flag());
     }
   }
 }

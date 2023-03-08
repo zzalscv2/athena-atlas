@@ -28,6 +28,7 @@ def ATLASFieldManagerToolCfg(flags, name='ATLASFieldManager', **kwargs):
     result.setPrivateTools(GlobalFieldManagerTool(name, **kwargs))
     return result
 
+
 def TightMuonsATLASFieldManagerToolCfg(flags, name='TightMuonsATLASFieldManager', **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("IntegratorStepper", flags.Sim.G4Stepper)
@@ -38,10 +39,12 @@ def TightMuonsATLASFieldManagerToolCfg(flags, name='TightMuonsATLASFieldManager'
     result.setPrivateTools(GlobalFieldManagerTool(name, **kwargs))
     return result
 
+
 #not used in G4AtlasServicesConfig?
 def ClassicFieldManagerToolCfg(flags, name='ClassicFieldManager', **kwargs):
     kwargs.setdefault("IntegratorStepper", "ClassicalRK4")
     return ATLASFieldManagerToolCfg(flags, name, **kwargs)
+
 
 def BasicDetectorFieldManagerToolCfg(flags, name='BasicDetectorFieldManager', **kwargs):
     result = ComponentAccumulator()
@@ -54,6 +57,7 @@ def BasicDetectorFieldManagerToolCfg(flags, name='BasicDetectorFieldManager', **
     result.setPrivateTools(DetectorFieldManagerTool(name, **kwargs))
     return result
 
+
 def BeamPipeFieldManagerToolCfg(flags, name='BeamPipeFieldManager', **kwargs):
     kwargs.setdefault("LogicalVolumes", ['BeamPipe::BeamPipe'])
     #kwargs.setdefault('DeltaChord',         0.00001)
@@ -62,6 +66,7 @@ def BeamPipeFieldManagerToolCfg(flags, name='BeamPipeFieldManager', **kwargs):
     kwargs.setdefault('MaximumEpsilonStep', 0.001)
     kwargs.setdefault('MinimumEpsilonStep', 0.00001)
     return BasicDetectorFieldManagerToolCfg(flags, name, **kwargs)
+
 
 def InDetFieldManagerToolCfg(flags, name='InDetFieldManager', **kwargs):
     kwargs.setdefault("LogicalVolumes", ['IDET::IDET'])
@@ -72,6 +77,7 @@ def InDetFieldManagerToolCfg(flags, name='InDetFieldManager', **kwargs):
     kwargs.setdefault('MinimumEpsilonStep', 0.00001)
     return BasicDetectorFieldManagerToolCfg(flags, name, **kwargs)
 
+
 def ITkFieldManagerToolCfg(flags, name='ITkFieldManager', **kwargs):
     kwargs.setdefault("LogicalVolumes", ['ITK::ITK'])
     #kwargs.setdefault('DeltaChord',         0.00001)
@@ -80,6 +86,7 @@ def ITkFieldManagerToolCfg(flags, name='ITkFieldManager', **kwargs):
     kwargs.setdefault('MaximumEpsilonStep', 0.001)
     kwargs.setdefault('MinimumEpsilonStep', 0.00001)
     return BasicDetectorFieldManagerToolCfg(flags, name, **kwargs)
+
 
 def MuonsOnlyInCaloFieldManagerToolCfg(flags, name='MuonsOnlyInCaloFieldManager', **kwargs):
     kwargs.setdefault("PhysicalVolumes", ['LArBarrel'])
@@ -100,6 +107,7 @@ def MuonFieldManagerToolCfg(flags, name='MuonFieldManager', **kwargs):
     kwargs.setdefault('MinimumEpsilonStep', 0.000001)
     return BasicDetectorFieldManagerToolCfg(flags, name, **kwargs)
 
+
 #not used in G4AtlasServicesConfig?
 def BasicFwdFieldManagerToolCfg(flags, name='FwdFieldManagerTool', **kwargs):
     #kwargs.setdefault('DeltaChord',         0.00000002)
@@ -114,6 +122,7 @@ def BasicFwdFieldManagerToolCfg(flags, name='FwdFieldManagerTool', **kwargs):
         kwargs.setdefault("MaximumStep", 1000.)
     return BasicDetectorFieldManagerToolCfg(flags, name, **kwargs)
 
+
 def Q1FwdFieldManagerToolCfg(flags, name='Q1FwdFieldManager', **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("FieldSvc", result.getPrimaryAndMerge(Q1FwdG4FieldSvcCfg(flags)).name)
@@ -122,6 +131,8 @@ def Q1FwdFieldManagerToolCfg(flags, name='Q1FwdFieldManager', **kwargs):
     tool = result.popToolsAndMerge(acc)
     result.setPrivateTools(tool)
     return result
+
+
 def Q2FwdFieldManagerToolCfg(flags, name='Q2FwdFieldManager', **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("FieldSvc", result.getPrimaryAndMerge(Q2FwdG4FieldSvcCfg(flags)).name)
@@ -130,6 +141,8 @@ def Q2FwdFieldManagerToolCfg(flags, name='Q2FwdFieldManager', **kwargs):
     tool = result.popToolsAndMerge(acc)
     result.setPrivateTools(tool)
     return result
+
+
 def Q3FwdFieldManagerToolCfg(flags, name='Q3FwdFieldManager', **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("FieldSvc", result.getPrimaryAndMerge(Q3FwdG4FieldSvcCfg(flags)).name)
@@ -138,6 +151,8 @@ def Q3FwdFieldManagerToolCfg(flags, name='Q3FwdFieldManager', **kwargs):
     tool = result.popToolsAndMerge(acc)
     result.setPrivateTools(tool)
     return result
+
+
 def D1FwdFieldManagerToolCfg(flags, name='D1FwdFieldManager', **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("FieldSvc", result.getPrimaryAndMerge(D1FwdG4FieldSvcCfg(flags)).name)
@@ -148,6 +163,8 @@ def D1FwdFieldManagerToolCfg(flags, name='D1FwdFieldManager', **kwargs):
     tool = result.popToolsAndMerge(acc)
     result.setPrivateTools(tool)
     return result
+
+
 def D2FwdFieldManagerToolCfg(flags, name='D2FwdFieldManager', **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("FieldSvc", result.getPrimaryAndMerge(D2FwdG4FieldSvcCfg(flags)).name)
@@ -156,6 +173,8 @@ def D2FwdFieldManagerToolCfg(flags, name='D2FwdFieldManager', **kwargs):
     tool = result.popToolsAndMerge(acc)
     result.setPrivateTools(tool)
     return result
+
+
 def Q4FwdFieldManagerToolCfg(flags, name='Q4FwdFieldManager', **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("FieldSvc", result.getPrimaryAndMerge(Q4FwdG4FieldSvcCfg(flags)).name)
@@ -164,6 +183,8 @@ def Q4FwdFieldManagerToolCfg(flags, name='Q4FwdFieldManager', **kwargs):
     tool = result.popToolsAndMerge(acc)
     result.setPrivateTools(tool)
     return result
+
+
 def Q5FwdFieldManagerToolCfg(flags, name='Q5FwdFieldManager', **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("FieldSvc", result.getPrimaryAndMerge(Q5FwdG4FieldSvcCfg(flags)).name)
@@ -172,6 +193,8 @@ def Q5FwdFieldManagerToolCfg(flags, name='Q5FwdFieldManager', **kwargs):
     tool = result.popToolsAndMerge(acc)
     result.setPrivateTools(tool)
     return result
+
+
 def Q6FwdFieldManagerToolCfg(flags, name='Q6FwdFieldManager', **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("FieldSvc", result.getPrimaryAndMerge(Q6FwdG4FieldSvcCfg(flags)).name)
@@ -180,6 +203,8 @@ def Q6FwdFieldManagerToolCfg(flags, name='Q6FwdFieldManager', **kwargs):
     tool = result.popToolsAndMerge(acc)
     result.setPrivateTools(tool)
     return result
+
+
 def Q7FwdFieldManagerToolCfg(flags, name='Q7FwdFieldManager', **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("FieldSvc", result.getPrimaryAndMerge(Q7FwdG4FieldSvcCfg(flags)).name)
@@ -188,6 +213,8 @@ def Q7FwdFieldManagerToolCfg(flags, name='Q7FwdFieldManager', **kwargs):
     tool = result.popToolsAndMerge(acc)
     result.setPrivateTools(tool)
     return result
+
+
 def Q1HKickFwdFieldManagerToolCfg(flags, name='Q1HKickFwdFieldManager', **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("FieldSvc", result.getPrimaryAndMerge(Q1HKickFwdG4FieldSvcCfg(flags)).name)
@@ -196,6 +223,8 @@ def Q1HKickFwdFieldManagerToolCfg(flags, name='Q1HKickFwdFieldManager', **kwargs
     tool = result.popToolsAndMerge(acc)
     result.setPrivateTools(tool)
     return result
+
+
 def Q1VKickFwdFieldManagerToolCfg(flags, name='Q1VKickFwdFieldManager', **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("FieldSvc", result.getPrimaryAndMerge(Q1VKickFwdG4FieldSvcCfg(flags)).name)
@@ -204,6 +233,8 @@ def Q1VKickFwdFieldManagerToolCfg(flags, name='Q1VKickFwdFieldManager', **kwargs
     tool = result.popToolsAndMerge(acc)
     result.setPrivateTools(tool)
     return result
+
+
 def Q2HKickFwdFieldManagerToolCfg(flags, name='Q2HKickFwdFieldManager', **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("FieldSvc", result.getPrimaryAndMerge(Q2HKickFwdG4FieldSvcCfg(flags)).name)
@@ -212,6 +243,8 @@ def Q2HKickFwdFieldManagerToolCfg(flags, name='Q2HKickFwdFieldManager', **kwargs
     tool = result.popToolsAndMerge(acc)
     result.setPrivateTools(tool)
     return result
+
+
 def Q2VKickFwdFieldManagerToolCfg(flags, name='Q2VKickFwdFieldManager', **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("FieldSvc", result.getPrimaryAndMerge(Q2VKickFwdG4FieldSvcCfg(flags)).name)
@@ -220,6 +253,8 @@ def Q2VKickFwdFieldManagerToolCfg(flags, name='Q2VKickFwdFieldManager', **kwargs
     tool = result.popToolsAndMerge(acc)
     result.setPrivateTools(tool)
     return result
+
+
 def Q3HKickFwdFieldManagerToolCfg(flags, name='Q3HKickFwdFieldManager', **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("FieldSvc", result.getPrimaryAndMerge(Q3HKickFwdG4FieldSvcCfg(flags)).name)
@@ -228,6 +263,8 @@ def Q3HKickFwdFieldManagerToolCfg(flags, name='Q3HKickFwdFieldManager', **kwargs
     tool = result.popToolsAndMerge(acc)
     result.setPrivateTools(tool)
     return result
+
+
 def Q3VKickFwdFieldManagerToolCfg(flags, name='Q3VKickFwdFieldManager', **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("FieldSvc", result.getPrimaryAndMerge(Q3VKickFwdG4FieldSvcCfg(flags)).name)
@@ -236,6 +273,8 @@ def Q3VKickFwdFieldManagerToolCfg(flags, name='Q3VKickFwdFieldManager', **kwargs
     tool = result.popToolsAndMerge(acc)
     result.setPrivateTools(tool)
     return result
+
+
 def Q4VKickAFwdFieldManagerToolCfg(flags, name='Q4VKickAFwdFieldManager', **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("FieldSvc", result.getPrimaryAndMerge(Q4VKickAFwdG4FieldSvcCfg(flags)).name)
@@ -244,6 +283,8 @@ def Q4VKickAFwdFieldManagerToolCfg(flags, name='Q4VKickAFwdFieldManager', **kwar
     tool = result.popToolsAndMerge(acc)
     result.setPrivateTools(tool)
     return result
+
+
 def Q4HKickFwdFieldManagerToolCfg(flags, name='Q4HKickFwdFieldManager', **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("FieldSvc", result.getPrimaryAndMerge(Q4HKickFwdG4FieldSvcCfg(flags)).name)
@@ -252,6 +293,8 @@ def Q4HKickFwdFieldManagerToolCfg(flags, name='Q4HKickFwdFieldManager', **kwargs
     tool = result.popToolsAndMerge(acc)
     result.setPrivateTools(tool)
     return result
+
+
 def Q4VKickBFwdFieldManagerToolCfg(flags, name='Q4VKickBFwdFieldManager', **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("FieldSvc", result.getPrimaryAndMerge(Q4VKickBFwdG4FieldSvcCfg(flags)).name)
@@ -260,6 +303,8 @@ def Q4VKickBFwdFieldManagerToolCfg(flags, name='Q4VKickBFwdFieldManager', **kwar
     tool = result.popToolsAndMerge(acc)
     result.setPrivateTools(tool)
     return result
+
+
 def Q5HKickFwdFieldManagerToolCfg(flags, name='Q5HKickFwdFieldManager', **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("FieldSvc", result.getPrimaryAndMerge(Q5HKickFwdG4FieldSvcCfg(flags)).name)
@@ -268,6 +313,8 @@ def Q5HKickFwdFieldManagerToolCfg(flags, name='Q5HKickFwdFieldManager', **kwargs
     tool = result.popToolsAndMerge(acc)
     result.setPrivateTools(tool)
     return result
+
+
 def Q6VKickFwdFieldManagerToolCfg(flags, name='Q6VKickFwdFieldManager', **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("FieldSvc", result.getPrimaryAndMerge(Q6VKickFwdG4FieldSvcCfg(flags)).name)
@@ -277,8 +324,10 @@ def Q6VKickFwdFieldManagerToolCfg(flags, name='Q6VKickFwdFieldManager', **kwargs
     result.setPrivateTools(tool)
     return result
 
+
 def FwdRegionFieldManagerToolCfg(flags, name='FwdRegionFieldManager', **kwargs):
     kwargs.setdefault("LogicalVolumes", ['FwdRegion::ForwardRegionGeoModel'])
+    # Deliberately left commented out for now
     #from G4AtlasApps.SimFlags import simFlags
     #if simFlags.FwdStepLimitation.statusOn:
     #    kwargs.setdefault("MaximumStep", simFlags.FwdStepLimitation())

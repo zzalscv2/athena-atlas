@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -39,7 +39,6 @@ struct Cache
     , invalidWeightSum{ 0 }
     , minimumValidFraction{ 0.01 }
     , minimumFractionalWeight{ 1e-09 }
-    , assemblyDone{ false }
   {
     multiComponentState.reserve(72);
   }
@@ -48,19 +47,18 @@ struct Cache
   double invalidWeightSum;
   const double minimumValidFraction;
   const double minimumFractionalWeight;
-  bool assemblyDone;
 };
 
 /** Method to add a single set of Trk::ComponentParameters to the cached
  * Trk::MultiComponentState object under construction */
-bool
+void
 addComponent(
   MultiComponentStateAssembler::Cache& cache,
   ComponentParameters&& multiComponentState);
 
 /** Method to add a new Trk::MultiComponentState to the cached
- * Trk::MultiComponentState o bject under construction */
-bool
+ * Trk::MultiComponentState object under construction */
+void
 addMultiState(
   MultiComponentStateAssembler::Cache& cache,
   Trk::MultiComponentState&& multiComponentState);
@@ -74,5 +72,26 @@ assembledState(MultiComponentStateAssembler::Cache&& cache);
 } // End MultiComponentStateAssembler namespace
 
 } // End Trk namepace
+
+// inline methods
+inline void Trk::MultiComponentStateAssembler::addComponent(
+    Cache& cache, ComponentParameters&& componentParameters) {
+
+  cache.validWeightSum += componentParameters.second;
+  cache.multiComponentState.emplace_back(std::move(componentParameters.first),
+                                         componentParameters.second);
+}
+
+inline void Trk::MultiComponentStateAssembler::addMultiState(
+    Cache& cache, Trk::MultiComponentState&& multiComponentState) {
+
+  double sumW(0.);
+  for (auto& component : multiComponentState) {
+    sumW += component.second;
+    cache.multiComponentState.emplace_back(std::move(component.first),
+                                           component.second);
+  }
+  cache.validWeightSum += sumW;
+}
 
 #endif

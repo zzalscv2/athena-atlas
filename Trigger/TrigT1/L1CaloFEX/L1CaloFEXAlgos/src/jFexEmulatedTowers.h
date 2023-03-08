@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -52,6 +52,9 @@ class jFexEmulatedTowers : public AthReentrantAlgorithm{
         
         // FiberMapping property required by the interface
         Gaudi::Property<std::string> m_FiberMapping {this, "jFexTowerMapping", PathResolver::find_calib_file("L1CaloFEXByteStream/2022-10-19/jFexTowerMap.txt"), "Text file to convert from hardware fiber to eta-phi location"};
+        
+        //property for jFEX mapping
+        Gaudi::Property<bool> m_apply_masking {this, "SCellMasking", true, "Applies masking. Only use for data"};
         
         //property for jFEX mapping
         Gaudi::Property<std::string> m_jFEX2Scellmapping {this, "jFEX2SCmapping"  , PathResolver::find_calib_file("L1CaloFEXByteStream/2022-10-19/jfex_SCID.txt")  , "Text file to convert from simulation ID to SuperCell Identifier"};

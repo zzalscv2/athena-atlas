@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/sgkey_t.h
@@ -11,7 +11,7 @@
  * These are managed by @c IProxyDict.  This definition was broken
  * out from there due to dependency issues.  This would more naturally
  * be in AthenaKernel, but we put it in CxxUtils so that it can be used
- * by xAOD standanone code as well.
+ * by xAOD standalone code as well.
  */
 
 
@@ -20,6 +20,7 @@
 
 
 #include <cstdint>
+#include <cstddef>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -49,6 +50,32 @@ constexpr bool sgkeyLess (const sgkey_t a, const sgkey_t b)
 {
   return a < b;
 }
+
+
+/**
+ * @brief Hash functional for sgkey_t.
+ */
+struct SGKeyHash
+{
+  inline
+  constexpr size_t operator() (const sgkey_t k) const
+  {
+    return k;
+  }
+};
+
+
+/**
+ * @brief Comparison functional for sgkey_t.
+ */
+struct SGKeyEqual
+{
+  inline
+  constexpr bool operator() (const sgkey_t a, const sgkey_t b) const
+  {
+    return sgkeyEqual (a, b);
+  }
+};
 
 
 /**

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 __doc__ = """Tool configuration to instantiate all
  egammaCaloTools with default configuration"""
@@ -6,26 +6,8 @@ __doc__ = """Tool configuration to instantiate all
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from TrkConfig.AtlasExtrapolatorConfig import (
-    AtlasExtrapolatorCfg, egammaCaloExtrapolatorCfg)
-from TrackToCalo.TrackToCaloConfig import ParticleCaloExtensionToolCfg
-from CaloTrackingGeometry.CaloTrackingGeometryConfig import (
-    CaloSurfaceBuilderMiddleCfg)
-
-def EMParticleCaloExtensionToolCfg(flags, **kwargs):
-    acc = ComponentAccumulator()
-    kwargs.setdefault("name", "EMParticleCaloExtensionTool")
-    kwargs.setdefault("ParticleType", "electron")
-    kwargs.setdefault("StartFromPerigee", True)
-
-    if "CaloSurfaceBuilder" not in kwargs:
-        kwargs["CaloSurfaceBuilder"] = acc.popToolsAndMerge(
-            CaloSurfaceBuilderMiddleCfg(flags))
-
-    if "Extrapolator" not in kwargs:
-        extrapAcc = egammaCaloExtrapolatorCfg(flags)
-        kwargs["Extrapolator"] = acc.popToolsAndMerge(extrapAcc)
-    return ParticleCaloExtensionToolCfg(flags, **kwargs)
+from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
+from TrackToCalo.TrackToCaloConfig import EMParticleCaloExtensionToolCfg
 
 
 def EMExtrapolationToolsCfg(flags, **kwargs):
@@ -58,11 +40,6 @@ def egammaTrkRefitterToolCfg(flags,
         from TrkConfig.TrkGaussianSumFilterConfig import EMGSFTrackFitterCfg
         kwargs["FitterTool"] = acc.popToolsAndMerge(
             EMGSFTrackFitterCfg(flags, name="GSFTrackFitter"), **kwargs)
-    kwargs.setdefault("useBeamSpot", False)
-    kwargs.setdefault("ReintegrateOutliers", True)
-    if "Extrapolator" not in kwargs:
-        kwargs["Extrapolator"] = acc.getPrimaryAndMerge(
-            AtlasExtrapolatorCfg(flags))
     tool = CompFactory.egammaTrkRefitterTool(name, **kwargs)
     acc.setPrivateTools(tool)
     return acc
@@ -73,6 +50,8 @@ def CaloCluster_OnTrackBuilderCfg(flags,
                                   **kwargs):
     acc = ComponentAccumulator()
     if "CaloSurfaceBuilder" not in kwargs:
+        from CaloTrackingGeometry.CaloTrackingGeometryConfig import (
+            CaloSurfaceBuilderMiddleCfg)
         kwargs["CaloSurfaceBuilder"] = acc.popToolsAndMerge(
             CaloSurfaceBuilderMiddleCfg(flags))
     tool = CompFactory.CaloCluster_OnTrackBuilder(name, **kwargs)

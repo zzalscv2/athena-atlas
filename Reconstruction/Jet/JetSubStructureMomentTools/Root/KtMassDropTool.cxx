@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetSubStructureMomentTools/KtMassDropTool.h"
 #include "JetSubStructureUtils/KtMassDrop.h"
 
-KtMassDropTool::KtMassDropTool(std::string name) : 
+KtMassDropTool::KtMassDropTool(const std::string& name) : 
   JetSubStructureMomentToolsBase(name)
 {
 }

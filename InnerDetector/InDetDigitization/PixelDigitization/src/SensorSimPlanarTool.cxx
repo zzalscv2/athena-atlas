@@ -7,7 +7,6 @@
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
 #include "SiDigitization/SiSurfaceCharge.h"
 #include "InDetSimEvent/SiHit.h"
-#include "InDetSimEvent/SiTrackDistance.h"
 #include "InDetIdentifier/PixelID.h"
 #include "GeneratorObjects/HepMcParticleLink.h"
 #include "SiPropertiesTool/SiliconProperties.h"
@@ -176,6 +175,73 @@ StatusCode SensorSimPlanarTool::initialize() {
       mapsFile->Close();
     }
   }
+
+  // read the correction histograms 
+  if (m_radiationDamageSimulationType == RadiationDamageSimulationType::TEMPLATE_CORRECTION) {
+
+    const std::size_t numberOfLayers = m_isITk ? 5 : 4;
+
+    ATH_MSG_INFO("Opening file: " << m_templateCorrectionRootFile << " for radiation damage correction");
+    std::unique_ptr<TFile> file(TFile::Open(PathResolverFindCalibFile(m_templateCorrectionRootFile).c_str(), "READ"));
+    if (!file) {
+      ATH_MSG_ERROR("Unable to read the ROOT file needed for radiation damage correction at: " << m_templateCorrectionRootFile);
+      return StatusCode::FAILURE;
+    }
+
+    if (m_lorentzAngleCorrectionHistos.size() != numberOfLayers) {
+      ATH_MSG_ERROR("The size of the vector of Lorentz angle histogram paths is " << m_lorentzAngleCorrectionHistos.size() << " instead of " << numberOfLayers);
+      return StatusCode::FAILURE;
+    }
+
+    if (m_chargeCorrectionHistos.size() != numberOfLayers) {
+      ATH_MSG_ERROR("The size of the vector of charge correction histogram paths is " << m_chargeCorrectionHistos.size() << " instead of " << numberOfLayers);
+      return StatusCode::FAILURE;
+    }
+
+    if (m_distanceCorrectionHistos.size() != numberOfLayers) {
+      ATH_MSG_ERROR("The size of the vector of distance correction histogram paths is " << m_distanceCorrectionHistos.size() << " instead of " << numberOfLayers);
+      return StatusCode::FAILURE;
+    }
+
+    for (const std::string& i : m_lorentzAngleCorrectionHistos) {
+      ATH_MSG_INFO("Reading histogram: " << i << " for Lorentz angle correction needed for Pixel radiation damage simulation");
+      std::unique_ptr<TH1> h(file->Get<TH1>(i.c_str()));
+      if (!h) {
+        ATH_MSG_ERROR("Cannot read histogram " << i << " needed for Lorentz angle correction");
+        return StatusCode::FAILURE;
+      }
+
+      m_lorentzCorrection.emplace_back();
+      ATH_CHECK(m_lorentzCorrection.back().setHisto1D(h.get()));
+    }
+
+    for (const std::string& i : m_chargeCorrectionHistos) {
+      ATH_MSG_INFO("Reading histogram: " << i << " for charge correction needed for Pixel radiation damage simulation");
+      std::unique_ptr<TH1> h(file->Get<TH1>(i.c_str()));
+      if (!h) {
+        ATH_MSG_ERROR("Cannot read histogram " << i << " needed for charge correction");
+        return StatusCode::FAILURE;
+      }
+
+      m_chargeCorrection.emplace_back();
+      ATH_CHECK(m_chargeCorrection.back().setHisto1D(h.get()));
+    }
+
+    for (const std::string& i : m_distanceCorrectionHistos) {
+      ATH_MSG_INFO("Reading histogram: " << i << " for distance correction needed for Pixel radiation damage simulation");
+      std::unique_ptr<TH1> h(file->Get<TH1>(i.c_str()));
+      if (!h) {
+        ATH_MSG_ERROR("Cannot read histogram " << i << " needed for distance correction");
+        return StatusCode::FAILURE;
+      }
+
+      m_distanceCorrection.emplace_back();
+      ATH_CHECK(m_distanceCorrection.back().setHisto1D(h.get()));
+    }
+
+    file->Close();
+  } 
+
   return StatusCode::SUCCESS;
 }
 
@@ -232,13 +298,6 @@ StatusCode SensorSimPlanarTool::induceCharge(const TimedHitPtr<SiHit>& phit,
   double sensorThickness = Module.design().thickness();
   const InDet::SiliconProperties& siProperties = m_siPropertiesTool->getSiProperties(Module.identifyHash(), ctx);
 
-  // Prepare values that are needed for radiation damage corrections later
-  const HepGeom::Point3D<double>& startPosition = phit->localStartPosition();
-  const HepGeom::Point3D<double>& endPosition   = phit->localEndPosition();
-  const float zPosDiff = endPosition.Z - startPosition.Z;
-  const float tanTheta = (zPosDiff != 0.) ? (endPosition.Y - startPosition.Y) / zPosDiff : (endPosition.Y - startPosition.Y) * 9999.;
-  const float tanPhi   = (zPosDiff != 0.) ? (endPosition.X - startPosition.X) / zPosDiff : (endPosition.X - startPosition.X) * 9999.;
-
   int etaCells = p_design.columns();
   int phiCells = p_design.rows();
 
@@ -256,7 +315,10 @@ StatusCode SensorSimPlanarTool::induceCharge(const TimedHitPtr<SiHit>& phit,
 
   double collectionDist = 0.2 * CLHEP::mm;
   double smearScale = 1. + 0.35 * smearRand;
-  double tanLorentz = m_lorentzAngleTool->getTanLorentzAngle(Module.identifyHash());
+  double tanLorentz(0);
+  if (m_radiationDamageSimulationType != RadiationDamageSimulationType::TEMPLATE_CORRECTION) {
+    tanLorentz = m_lorentzAngleTool->getTanLorentzAngle(Module.identifyHash());
+  }
   double coLorentz = std::sqrt(1.0 + (tanLorentz*tanLorentz));
 
   const EBC_EVCOLL evColl = EBC_MAINEVCOLL;
@@ -273,7 +335,7 @@ StatusCode SensorSimPlanarTool::induceCharge(const TimedHitPtr<SiHit>& phit,
   const double halfEtaPitch = 0.5*Module.etaPitch();
   const double halfPhiPitch = 0.5*Module.phiPitch();
 
-  if (m_doRadDamage && !(Module.isDBM()) && Module.isBarrel() && !m_doRadDamageTemplate) {
+  if (m_radiationDamageSimulationType == RadiationDamageSimulationType::RAMO_POTENTIAL && !(Module.isDBM()) && Module.isBarrel()) {
     SG::ReadCondHandle<PixelRadiationDamageFluenceMapData> fluenceDataHandle(m_fluenceDataKey,ctx);
     const PixelRadiationDamageFluenceMapData *fluenceData = *fluenceDataHandle;
 
@@ -503,7 +565,7 @@ StatusCode SensorSimPlanarTool::induceCharge(const TimedHitPtr<SiHit>& phit,
     });
 
   }
-  else if (m_doRadDamage && m_doRadDamageTemplate && !(Module.isDBM()) && Module.isBarrel()){ // will run radiation damage but with the template method
+  else if (m_radiationDamageSimulationType == RadiationDamageSimulationType::TEMPLATE_CORRECTION && !(Module.isDBM()) && Module.isBarrel()){ // will run radiation damage but with the template method
     for (auto & iHitRecord : trfHitRecord) {
       double eta_i = eta_0;
       double phi_i = phi_0;
@@ -514,12 +576,15 @@ StatusCode SensorSimPlanarTool::induceCharge(const TimedHitPtr<SiHit>& phit,
         depth_i += 1.0 * iHitRecord.first / iTotalLength * dDepth;
       }
 
-      // Distance between charge and readout side.  p_design->readoutSide() is
-      // +1 if readout side is in +ve depth axis direction and visa-versa.
-      double dist_electrode = 0.5 * sensorThickness - Module.design().readoutSide() * depth_i;
-      if (dist_electrode < 0) {
-        dist_electrode = 0;
-      }
+      const double depthZ = (depth_i + 0.5*sensorThickness)*1e3; // to get it in micro meters
+      
+      const double dist_electrode = m_distanceCorrection.at(layer).getContent(depthZ);
+
+      // get corrected LA
+      tanLorentz = m_lorentzCorrection.at(layer).getContent(depthZ);
+
+      // for charge corrections
+      const double chargeCorrection = m_chargeCorrection.at(layer).getContent(depthZ);
 
       // nonTrapping probability
       double nontrappingProbability = 1.0;
@@ -554,11 +619,11 @@ StatusCode SensorSimPlanarTool::induceCharge(const TimedHitPtr<SiHit>& phit,
         } else {
           ed = energy_per_step * eleholePairEnergy;
         }
+        // apply the correction from radiation damage
+        ed *= chargeCorrection;
 
-        // prepare SiTrackDistance object needed
-        const SiTrackDistance trackDistance(tanTheta, tanPhi, startPosition.Z);
         //The following lines are adapted from SiDigitization's Inserter class
-        const SiSurfaceCharge scharge(chargePos, SiCharge(ed, pHitTime, SiCharge::track, particleLink, trackDistance));
+        const SiSurfaceCharge scharge(chargePos, SiCharge(ed, pHitTime, SiCharge::track, particleLink));
 
         const SiCellId& diode = Module.cellIdOfPosition(scharge.position());
 

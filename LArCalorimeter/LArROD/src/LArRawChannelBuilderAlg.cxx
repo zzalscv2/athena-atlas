@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArRawChannelBuilderAlg.h" 
@@ -10,8 +10,6 @@
 #include "LArCOOLConditions/LArDSPThresholdsFlat.h"
 #include <cmath>
 
-LArRawChannelBuilderAlg::LArRawChannelBuilderAlg(const std::string& name, ISvcLocator* pSvcLocator):
-  AthReentrantAlgorithm(name, pSvcLocator) {}
   
 StatusCode LArRawChannelBuilderAlg::initialize() {
   ATH_CHECK(m_digitKey.initialize());	 

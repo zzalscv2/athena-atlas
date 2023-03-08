@@ -281,7 +281,7 @@ InDetIterativePriVxFinderTool::findVertex(
     return std::make_pair(theVertexContainer, theVertexAuxContainer);
   }
 
-  int iterations = -1;
+  int iterations = 0;
   unsigned int seedtracknumber = seedTracks.size();
 
   // used to store seed info
@@ -302,7 +302,6 @@ InDetIterativePriVxFinderTool::findVertex(
       break;
     }
 
-    iterations += 1;
     ATH_MSG_DEBUG("ITERATION NUMBER " << iterations);
 
     // now find a new SEED
@@ -677,10 +676,15 @@ InDetIterativePriVxFinderTool::findVertex(
         dummyxAODVertex->setVertexType(xAOD::VxType::NoVtx);
       }
     }
+
+    ++iterations;
   } while (seedTracks.size() > 1 && iterations < m_maxVertices);
 
-  if (iterations >= m_maxVertices) {
-    ATH_MSG_WARNING("Reached maximum iterations ");
+  if (iterations == m_maxVertices) {
+    ATH_MSG_DEBUG("Reached maximum iterations, have "<<iterations<<" vertices");
+  }
+  else if (iterations > m_maxVertices) {
+    ATH_MSG_WARNING("Exceeded maximum iterations, have "<<iterations<<" vertices, m_maxVertices = "<<m_maxVertices);
   }
 
   // unfortunately you have still a problem with the track to links!!!

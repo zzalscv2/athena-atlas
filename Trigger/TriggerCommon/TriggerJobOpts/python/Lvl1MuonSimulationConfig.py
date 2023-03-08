@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -22,8 +22,8 @@ def TMDBConfig(flags):
     from TileConditions.TileCablingSvcConfig import TileCablingSvcCfg
     acc.merge(TileCablingSvcCfg(flags))
 
-    from TileConditions.TileEMScaleConfig import TileCondToolEmscaleCfg
-    emScaleTool = acc.popToolsAndMerge( TileCondToolEmscaleCfg(flags) )
+    from TileConditions.TileEMScaleConfig import TileEMScaleCondAlgCfg
+    acc.merge( TileEMScaleCondAlgCfg(flags) )
 
     tmdbAlg = CompFactory.TileMuonReceiverDecision('TileMuonReceiverDecision'
                                                    , TileRawChannelContainer = "MuRcvRawChCnt" # input
@@ -37,8 +37,7 @@ def TMDBConfig(flags):
                                                    # run 3 thresholds
                                                    , MuonReceiverEneThreshCellD5 = 500
                                                    , MuonReceiverEneThreshCellD6 = 500
-                                                   , MuonReceiverEneThreshCellD5andD6 = 500
-                                                   , TileCondToolEmscale = emScaleTool)
+                                                   , MuonReceiverEneThreshCellD5andD6 = 500)
     acc.addEventAlgo(tmdbAlg)
     return acc
 
@@ -418,7 +417,8 @@ def Lvl1MuonSimulationCfg(flags):
 
 if __name__ == "__main__":
     import sys
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
     flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TriggerTest/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.merge.RDO.e4993_s3214_r11315/RDO.17533168._000001.pool.root.1']
     flags.Common.isOnline=False
     flags.Exec.MaxEvents=25

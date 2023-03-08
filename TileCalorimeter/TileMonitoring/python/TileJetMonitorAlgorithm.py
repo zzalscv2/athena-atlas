@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -60,8 +60,8 @@ def TileJetMonitoringConfig(flags, **kwargs):
     Do1DHistograms = kwargs.get('Do1DHistograms', tileJetMonAlg._descriptors['Do1DHistograms'].default)
     DoEnergyDiffHistograms  = kwargs.get('DoEnergyDiffHistograms', tileJetMonAlg._descriptors['DoEnergyDiffHistograms'].default)
 
-
-    if flags.DQ.DataType not in ('heavyioncollisions', 'cosmics'):
+    from AthenaMonitoring.DQConfigFlags import DQDataType
+    if flags.DQ.DataType not in (DQDataType.HeavyIon, DQDataType.Cosmics):
 
         jvtTool = CompFactory.JetVertexTaggerTool()
         jetContainer = kwargs.get('JetContainer', tileJetMonAlg._descriptors['JetContainer'].default)
@@ -267,29 +267,29 @@ if __name__=='__main__':
     log.setLevel(INFO)
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    ConfigFlags.Input.Files = defaultTestFiles.ESD
-    ConfigFlags.Output.HISTFileName = 'TileJetMonitorOutput.root'
-    ConfigFlags.DQ.useTrigger = False
-    ConfigFlags.DQ.enableLumiAccess = False
-    ConfigFlags.Exec.MaxEvents = 3
-    ConfigFlags.fillFromArgs()
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.ESD
+    flags.Output.HISTFileName = 'TileJetMonitorOutput.root'
+    flags.DQ.useTrigger = False
+    flags.DQ.enableLumiAccess = False
+    flags.Exec.MaxEvents = 3
+    flags.fillFromArgs()
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
-    tileJetMonitorAccumulator  = TileJetMonitoringConfig(ConfigFlags,
+    tileJetMonitorAccumulator  = TileJetMonitoringConfig(flags,
                                                          Do1DHistograms = True,
                                                          DoEnergyDiffHistograms = True)
     cfg.merge(tileJetMonitorAccumulator)
     #cfg.printConfig(withDetails = True, summariseProps = True)
-    ConfigFlags.dump()
+    flags.dump()
 
     cfg.store( open('TileJetMonitorAlgorithm.pkl','wb') )
 

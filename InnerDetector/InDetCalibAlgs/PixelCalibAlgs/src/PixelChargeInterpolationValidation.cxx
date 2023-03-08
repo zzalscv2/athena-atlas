@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PixelChargeInterpolationValidation_C
@@ -178,7 +178,7 @@ for(int i  = 0; i < ntot+1; i++){
 		name << "ResEta_Layer" << i;
 		title << "Local y resolution - Layer " << i ;
 		m_eta_Layer.push_back(
-				new PixelResidualHistograms(name.str().c_str(),
+				new PixelResidualHistograms(name.str(),
 				 ( title.str() + " - Analog position").c_str(),
 				500, 100, binsvectors_Layer, binsnames_Layer)
 				);
@@ -204,7 +204,7 @@ for(int i  = 0; i < ntot+1; i++){
 		name << "ResPhi_Layer" << i;
 		title << "Local x resolution - Layer " << i ;
 		m_phi_Layer.push_back(
-				new PixelResidualHistograms(name.str().c_str(),
+				new PixelResidualHistograms(name.str(),
 				 ( title.str() + " - Analog position").c_str(),
 				150, 100, binsvectors_Layer, binsnames_Layer)
 				);
@@ -232,7 +232,7 @@ for(int i  = 0; i < ntot+1; i++){
 		name << "ResEta_Clustersize" << i+1;
 		title << "Local y resolution - Clustersize " << i+1;
 		m_eta_Clustersize.push_back(
-				new PixelResidualHistograms(name.str().c_str(),
+				new PixelResidualHistograms(name.str(),
 				 ( title.str() + " - Analog position").c_str(),
 				400, 100, binsvectors_Clustersize, binsnames_Clustersize)
 				);
@@ -272,7 +272,7 @@ for(int i  = 0; i < ntot+1; i++){
 		name << "ResPhi_Clustersize" << i+1;
 		title << "Local x resolution - Clustersize " << i+1;
 		m_phi_Clustersize.push_back(
-				new PixelResidualHistograms(name.str().c_str(),
+				new PixelResidualHistograms(name.str(),
 				 ( title.str() + " - Analog position").c_str(),
 				150, 100, binsvectors_Clustersize, binsnames_Clustersize)
 				);

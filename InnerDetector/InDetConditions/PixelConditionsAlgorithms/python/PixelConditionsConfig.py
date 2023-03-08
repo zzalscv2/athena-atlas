@@ -1,6 +1,6 @@
 """Define functions to configure Pixel conditions algorithms
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -117,7 +117,9 @@ def PixelCablingCondAlgCfg(flags, name="PixelCablingCondAlg", **kwargs):
     acc.merge(PixelConfigCondAlgCfg(flags))
     acc.merge(PixelReadoutSpeedAlgCfg(flags))
 
-    if not flags.Input.isMC and not flags.Overlay.DataOverlay:
+    from AthenaConfiguration.Enums import LHCPeriod
+
+    if not flags.Input.isMC and not flags.Overlay.DataOverlay and not flags.GeoModel.Run < LHCPeriod.Run2 :
         acc.merge(addFoldersSplitOnline(flags, "PIXEL", "/PIXEL/Onl/CablingMap","/PIXEL/CablingMap", className="AthenaAttributeList"))
         kwargs.setdefault("ReadKey", "/PIXEL/CablingMap")
         if flags.Input.RunNumber and flags.Input.RunNumber[0]<222222:
@@ -416,8 +418,8 @@ def PixelDetectorElementStatusAlgActiveOnlyCfg(flags, name = "PixelDetectorEleme
 
 if __name__ == '__main__':
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
-
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
     flags.fillFromArgs()
 
     from AthenaConfiguration.TestDefaults import defaultTestFiles

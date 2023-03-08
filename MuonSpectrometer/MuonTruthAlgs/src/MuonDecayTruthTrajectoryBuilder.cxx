@@ -25,12 +25,12 @@ namespace Muon {
         declareInterface<Trk::ITruthTrajectoryBuilder>(this);
     }
     //================================================================
-    void MuonDecayTruthTrajectoryBuilder::buildTruthTrajectory(TruthTrajectory* result, HepMC::ConstGenParticlePtr input) const {
+    void MuonDecayTruthTrajectoryBuilder::buildTruthTrajectory(TruthTrajectory* result, const HepMC::ConstGenParticlePtr& input) const {
         result->clear();
         if (input) {
             HepMC::ConstGenParticlePtr next{nullptr};
             auto current = input;
-            ATH_MSG_DEBUG(" New TruthTrajectory: input: barcode " << HepMC::barcode(input) << " PDG id " << input->pdg_id());
+            ATH_MSG_DEBUG(" New TruthTrajectory: input: " << input << " PDG id " << input->pdg_id());
 
             // Extend trajectory outwards.  The last particle should go at [0]
             // in the TruthTrajectory, so we need to use a tmp storage while
@@ -41,17 +41,17 @@ namespace Muon {
             // copy the outer half to result
             while (!tmp.empty()) {
                 ATH_MSG_DEBUG(" Adding daughter: " << current);
-                result->push_back(tmp.top());
+                result->emplace_back(tmp.top());
                 tmp.pop();
             }
 
             // The input particle itself
-            result->push_back(input);
+            result->emplace_back(input);
 
             // Now continue towards the interaction point
             while ((next = getMother(current))) {
                 ATH_MSG_DEBUG(" Adding mother:  " << current);
-                result->push_back(current = next);
+                result->emplace_back(current = next);
             }
 
             ATH_MSG_DEBUG(" Final TruthTrajectory: ");
@@ -60,7 +60,7 @@ namespace Muon {
             for (; pit != pit_end; ++pit) {
                 const HepMC::GenParticle& par = *pit->cptr();
                 if (msgLvl(MSG::DEBUG)) {
-                    msg(MSG::DEBUG) << " PDG ID " << par.pdg_id() << " barcode: " << HepMC::barcode(par)
+                    msg(MSG::DEBUG) << " PDG ID " << par.pdg_id() 
                                     << " pt: " << par.momentum().perp();
                     if (par.production_vertex())
                         msg(MSG::DEBUG) << " vertices prod: r " << par.production_vertex()->position().perp() << " z "
@@ -75,7 +75,7 @@ namespace Muon {
 
     //================================================================
     MuonDecayTruthTrajectoryBuilder::MotherDaughter MuonDecayTruthTrajectoryBuilder::truthTrajectoryCuts(
-        HepMC::ConstGenVertexPtr vtx) const {
+        const HepMC::ConstGenVertexPtr& vtx) const {
         HepMC::ConstGenParticlePtr mother{nullptr};
         HepMC::ConstGenParticlePtr daughter{nullptr};
 #ifdef HEPMC3
@@ -103,7 +103,7 @@ namespace Muon {
                 HepMC::ConstGenParticlePtr passed_cuts{nullptr};
                 for (auto candidate : *vtx) {
                     if (msgLvl(MSG::DEBUG)) {
-                        msg(MSG::DEBUG) << " PDG ID " << candidate->pdg_id() << " barcode: " << HepMC::barcode(candidate)
+                        msg(MSG::DEBUG) << " PDG ID " << candidate->pdg_id() << " particle: " << candidate
                                         << " pt: " << candidate->momentum().perp();
                         if (candidate->production_vertex())
                             msg(MSG::DEBUG) << " vertices prod: r " << candidate->production_vertex()->position().perp() << " z "
@@ -144,28 +144,17 @@ namespace Muon {
     }
 
     //================================================================
-    HepMC::ConstGenParticlePtr MuonDecayTruthTrajectoryBuilder::getDaughter(HepMC::ConstGenParticlePtr mother) const {
-        HepMC::ConstGenParticlePtr daughter{nullptr};
-
-        if (mother) {
-            MotherDaughter res = truthTrajectoryCuts(mother->end_vertex());
-            if (res.first == mother) { daughter = res.second; }
-        }
-
-        return daughter;
+    HepMC::ConstGenParticlePtr MuonDecayTruthTrajectoryBuilder::getDaughter(const HepMC::ConstGenParticlePtr& mother) const {
+      if(mother) {
+        MotherDaughter res = truthTrajectoryCuts(mother->end_vertex());
+        if(res.first == mother) return res.second;
+      }
+      return {nullptr};
     }
 
     //================================================================
-    HepMC::ConstGenParticlePtr MuonDecayTruthTrajectoryBuilder::getMother(HepMC::ConstGenParticlePtr daughter) const {
-        HepMC::ConstGenParticlePtr mother{nullptr};
-
-        if (daughter) {
-            MotherDaughter res = truthTrajectoryCuts(daughter->production_vertex());
-            mother = res.first;
-            // m_isDecayIntoTwoMuons = false; // Don't think this does anything? EJWM.
-        }
-
-        return mother;
+    HepMC::ConstGenParticlePtr MuonDecayTruthTrajectoryBuilder::getMother(const HepMC::ConstGenParticlePtr& daughter) const {
+        return daughter ? truthTrajectoryCuts(daughter->production_vertex()).first : HepMC::ConstGenParticlePtr{nullptr};
     }
 
     //================================================================

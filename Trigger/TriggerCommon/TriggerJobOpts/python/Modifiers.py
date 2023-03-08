@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 ##############################################################
 # Modifiers.py
@@ -355,6 +355,7 @@ class DisableMdtT0Fit(_modifier):
         if flags.Trigger.doMuon:
             from MuonRecExample.MuonRecFlags import muonRecFlags
             muonRecFlags.doSegmentT0Fit.set_Value_and_Lock(False)
+            flags.Muon.doSegmentT0Fit=False
 
 ###############################################################
 # Monitoring and misc.
@@ -377,11 +378,10 @@ class enableALFAMon(_modifier):
     turn on ALFA monitoring in the HLT
     """
     def postSetup(self, flags):
-        from AthenaCommon.Include import include, IncludeError
-        try:
-            include("TrigOnlineMonitor/TrigALFAROBMonitor.py")
-        except IncludeError:
-            log.error('No ALFA ROB monitoring available.')
+        from TrigOnlineMonitor.TrigOnlineMonitorConfig import TrigALFAROBMonitor
+        from AthenaCommon.AlgSequence import AlgSequence
+        topSequence = AlgSequence()
+        topSequence += TrigALFAROBMonitor(flags)
 
 
 class nameAuditors(_modifier):
@@ -501,23 +501,6 @@ class autoConditionsTag(_modifier):
         from RecExConfig.AutoConfiguration import ConfigureConditionsTag
         ConfigureConditionsTag()
 
-class enableCostMonitoring(_modifier):
-    """
-    Enable Cost Monitoring for online
-    """
-    def preSetup(self, flags):
-        flags.Trigger.CostMonitoring.doCostMonitoring = True
-
-class forceCostMonitoring(_modifier):
-    """
-    Enable Cost Monitoring and produce the monitoring collections in each event
-    without requiring the HLT cost monitoring chain to be present and active.
-    """
-    def preSetup(self, flags):
-        flags.Trigger.CostMonitoring.doCostMonitoring = True
-        flags.Trigger.CostMonitoring.monitorAllEvents = True
-
-
 class BeamspotFromSqlite(_modifier):
     """
     Read beamspot from sqlite file (./beampos.db)
@@ -563,3 +546,41 @@ class doRuntimeNaviVal(_modifier):
         log.info("Enabling Runtime Trigger Navigation Validation")
         flags.Trigger.doRuntimeNaviVal = True
 
+
+class superCellNoBCID(_modifier):
+    """
+    force superCell container SC_ET to be used
+    """
+    def postSetup(self, flags):
+        log.info('superCellNoBCID Modifier trying to set the SC_ET for superCell production')
+        from AthenaCommon.AlgSequence import AlgSequence
+        from AthenaCommon.CFElements import findSubSequence,findAlgorithm
+        topSequence = AlgSequence()
+        beg = findSubSequence(topSequence,"HLTBeginSeq")
+        L1SimSeq = beg.L1SimSeq
+        L1CaloSimSeq = L1SimSeq.L1CaloSimSeq
+        algo = findAlgorithm(L1CaloSimSeq,'LArRAWtoSuperCell')
+        if algo:
+            log.info('Found Algorithm, setting the property')
+            algo.SCellContainerIn = "SC_ET"
+        else:
+            log.info('The LArRAWtoSuperCell Modifier has no effect because the algorithm was not configured to run')
+
+class superCellWithBCID(_modifier):
+    """
+    force superCell container SC_ET_ID to be used
+    """
+    def postSetup(self, flags):
+        log.info('superCellBCID Modifier trying to set the SC_ET_ID for superCell production')
+        from AthenaCommon.AlgSequence import AlgSequence
+        from AthenaCommon.CFElements import findSubSequence,findAlgorithm
+        topSequence = AlgSequence()
+        beg = findSubSequence(topSequence,"HLTBeginSeq")
+        L1SimSeq = beg.L1SimSeq
+        L1CaloSimSeq = L1SimSeq.L1CaloSimSeq
+        algo = findAlgorithm(L1CaloSimSeq,'LArRAWtoSuperCell')
+        if algo:
+            log.info('Found Algorithm, setting the property')
+            algo.SCellContainerIn = "SC_ET_ID"
+        else:
+            log.info('The LArRAWtoSuperCell Modifier has no effect because the algorithm was not configured to run')

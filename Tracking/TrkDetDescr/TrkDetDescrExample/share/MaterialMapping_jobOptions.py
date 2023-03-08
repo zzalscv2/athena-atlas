@@ -36,7 +36,7 @@ from AthenaCommon.AlgSequence import AlgSequence
 job = AlgSequence()
 
 # build GeoModel
-DetDescrVersion = 'ATLAS-R1-2012-02-01-00' #ATLAS-GEO-21-02-02' #R1-2012-01-02'
+DetDescrVersion = 'ATLAS-R1-2012-03-02-00' #ATLAS-GEO-21-02-02' #R1-2012-01-02'
 
 from AthenaCommon.GlobalFlags import globalflags
 globalflags.DetDescrVersion = DetDescrVersion

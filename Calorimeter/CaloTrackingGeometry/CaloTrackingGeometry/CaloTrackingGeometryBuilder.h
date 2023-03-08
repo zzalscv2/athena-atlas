@@ -42,7 +42,7 @@ class CaloTrackingGeometryBuilder final
   virtual StatusCode finalize() override;
 
   /** TrackingGeometry Interface methode */
-  virtual Trk::TrackingGeometry* trackingGeometry(
+  virtual std::unique_ptr<Trk::TrackingGeometry> trackingGeometry(
       Trk::TrackingVolume* tvol = 0) const override;
 
   /** The unique signature */

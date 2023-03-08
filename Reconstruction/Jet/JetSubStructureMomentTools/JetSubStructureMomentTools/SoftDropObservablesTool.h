@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef jetsubstructuremomenttools_softdropobservablestool_header
@@ -13,7 +13,7 @@ class SoftDropObservablesTool :
 
     public:
       // Constructor and destructor
-      SoftDropObservablesTool(std::string name);
+      SoftDropObservablesTool(const std::string& name);
 
       int modifyJet(xAOD::Jet &injet) const;
 

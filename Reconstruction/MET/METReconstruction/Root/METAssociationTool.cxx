@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // METAssociationTool.cxx 
@@ -68,15 +68,8 @@ namespace met {
       ATH_CHECK( m_mapKey.initialize() );
     }
 
-    // retrieve associators and generate clocks
-    unsigned int ntool = m_metAssociators.size();
-    m_toolClocks.resize(ntool);
-
+    // retrieve associators
     ATH_CHECK(m_metAssociators.retrieve());    
-    for (auto & clock : m_toolClocks) {
-      clock.Reset();
-    }
-    m_clock.Reset();
     return StatusCode::SUCCESS;
   }
 
@@ -113,37 +106,6 @@ namespace met {
   {
     ATH_MSG_INFO ("Finalizing " << name() << "...");
 
-    if ( m_timeDetail > 0 ) {
-      double ctime = m_clock.CpuTime()*1000;
-      double wtime = m_clock.RealTime()*1000;
-      double actime = 0.0;
-      double awtime = 0.0;
-      if ( m_nevt > 0 ) {
-	actime = ctime/double(m_nevt);
-	awtime = wtime/double(m_nevt);
-      }
-      ATH_MSG_INFO("  Total CPU/wall time: " << ctime << "/" << wtime << " ms");
-      ATH_MSG_INFO("   Avg. CPU/wall time: " << actime << "/" << awtime << " ms");
-    }
-
-    if ( m_timeDetail > 1 && m_nevt > 0 ) {
-      unsigned int ntool = m_metAssociators.size();
-      ATH_MSG_INFO("  CPU/wall time [ms] for " << ntool << " tools:");
-      unsigned int itool=0;
-
-      // time associators
-      for(ToolHandleArray<IMETAssocToolBase>::const_iterator iAssociator=m_metAssociators.begin();
-	  iAssociator != m_metAssociators.end(); ++iAssociator) {
-	ToolHandle<IMETAssocToolBase> th = *iAssociator;
-	double tctime = m_toolClocks[itool].CpuTime()/double(m_nevt)*1000;
-	double twtime = m_toolClocks[itool].RealTime()/double(m_nevt)*1000;
-	ATH_MSG_INFO("    " << setw(30) << th.typeAndName()
-		     << fixed << setprecision(3) << setw(10) << tctime
-		     << fixed << setprecision(3) << setw(10) << twtime);
-	++itool;
-      }
-    }
-
     return StatusCode::SUCCESS;
   }
 
@@ -154,35 +116,17 @@ namespace met {
   StatusCode METAssociationTool::buildMET(xAOD::MissingETContainer* metCont, xAOD::MissingETAssociationMap* metMap) const
   {
 
-    if ( m_timeDetail > 0 ) m_clock.Start(false);
 
-    unsigned int itool=0;
     // Run the MET reconstruction tools in sequence
-    for(ToolHandleArray<IMETAssocToolBase>::const_iterator iAssociator=m_metAssociators.begin();
-	iAssociator != m_metAssociators.end(); ++iAssociator) {
-      ToolHandle<IMETAssocToolBase> tool = *iAssociator;
-      if ( m_timeDetail > 1 ) m_toolClocks[itool].Start(false);
+    for(auto tool : m_metAssociators) {
       if (tool->execute(metCont,metMap).isFailure()){
         ATH_MSG_WARNING("Failed to execute tool: " << tool->name());
-	if ( m_timeDetail > 0 ) m_clock.Stop();
-	if ( m_timeDetail > 1 ) m_toolClocks[itool].Stop();
         return StatusCode::FAILURE;
       }
-      if ( m_timeDetail > 1 ) {
-	m_toolClocks[itool].Stop();
-	ATH_MSG_VERBOSE("  " << tool->name() << " CPU/wall time: " << m_clock.CpuTime()*1000
-			<< "/" << m_clock.RealTime()*1000 << " ms");
-      }
-      ++itool;
     }
     bool foundOverlaps = metMap->identifyOverlaps();
     ATH_MSG_DEBUG( (foundOverlaps ? "Overlaps" : "No overlaps") << " identified!");
-    if ( m_timeDetail > 0 ) m_clock.Stop();
-    ATH_MSG_DEBUG("  " << this->name() << " total CPU/wall time: " << m_clock.CpuTime()*1000
-		  << "/" << m_clock.RealTime()*1000 << " ms");
-
     ++m_nevt;
     return StatusCode::SUCCESS;
   }
-
 }

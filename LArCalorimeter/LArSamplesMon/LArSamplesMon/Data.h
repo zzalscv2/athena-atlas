@@ -74,7 +74,7 @@ namespace LArSamples {
 #endif
 
 
-  class Data : public AbsShape {
+  class ATLAS_NOT_THREAD_SAFE Data : public AbsShape {
     
     public:
       

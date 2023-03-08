@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_IMUONTRACKREFINER_H
@@ -18,8 +18,7 @@ namespace Trk {
 namespace Muon {
 
     class MuPatTrack;
-    class MuPatHit;
-    class GarbageContainer;
+    class MuPatHit;  
 
     /** @brief The IMuonTrackRefiner is a pure virtual interface for tools which refine the hit content of a given track
 
@@ -41,7 +40,7 @@ namespace Muon {
             @param track input track
             @return new refined track. Pointer could be zero, ownership passed to caller
         */
-        virtual void refine(const EventContext& ctx, MuPatTrack& track, GarbageContainer& trash_bin) const = 0;
+        virtual void refine(const EventContext& ctx, MuPatTrack& track) const = 0;
     };
 }  // namespace Muon
 

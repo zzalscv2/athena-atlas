@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////
@@ -164,7 +164,7 @@ StatusCode TileRawChannelBuilderQIEFilter::finalize() {
 	return StatusCode::SUCCESS;
 }
 
-TileRawChannel * TileRawChannelBuilderQIEFilter::rawChannel(const TileDigits* digits) {
+TileRawChannel * TileRawChannelBuilderQIEFilter::rawChannel(const TileDigits* digits, const EventContext& /*ctx*/) {
 
 	++m_chCounter;
 

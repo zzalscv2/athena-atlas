@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon import CfgMgr
 
@@ -13,7 +13,5 @@ def getSTGC_Overlay(name="STGC_Overlay", **kwargs):
         kwargs.setdefault("BkgInputKey", overlayFlags.dataStore() + "+sTGC_DIGITS")
         kwargs.setdefault("SignalInputKey", overlayFlags.evtStore() + "+sTGC_DIGITS")
         kwargs.setdefault("OutputKey", overlayFlags.outputStore() + "+sTGC_DIGITS")
-    
-    kwargs.setdefault("IntegrationWindow", 30) # in ns
 
     return CfgMgr.STGC_Overlay(name, **kwargs)

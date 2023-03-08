@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 # Transform skeleton for RDO -> RDO_TRIG (running trigger and adding its output to the RDO file).
 # This is only a wrapper interfacing transform arguments into the main job options file
@@ -49,14 +49,19 @@ ConfigFlags.Input.Files = getFromRunArgs('inputRDOFile')
 ConfigFlags.Output.RDOFileName = getFromRunArgs('outputRDO_TRIGFile')
 
 # Max/skip events
-maxEvents = getFromRunArgs('maxEvents', False) or -1
-skipEvents = getFromRunArgs('skipEvents', False) or 0
-athenaCommonFlags.EvtMax = maxEvents
-athenaCommonFlags.SkipEvents = skipEvents
+athenaCommonFlags.EvtMax = getFromRunArgs('maxEvents', False) or -1
+athenaCommonFlags.SkipEvents = getFromRunArgs('skipEvents', False) or 0
 
 #conditions/geometry setup for runHLT_standalone
-setGlobalTag = getFromRunArgs("conditionsTag", False)
-setDetDescr = getFromRunArgs("geometryVersion", False)
+try:
+    ConfigFlags.IOVDb.GlobalTag = getFromRunArgs("conditionsTag")
+except RuntimeError:
+    pass  # don't set the flag if not specified
+
+try:
+    ConfigFlags.GeoModel.AtlasVersion = getFromRunArgs("geometryVersion")
+except RuntimeError:
+    pass  # don't set the flag if not specified
 
 # PerfMon setup (ATR-25439)
 setPerfmonFlagsFromRunArgs(ConfigFlags, ra)

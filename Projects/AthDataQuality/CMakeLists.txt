@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Set up the project.
 cmake_minimum_required( VERSION 3.6 )
@@ -18,7 +18,7 @@ set( TDAQ-COMMON_ATROOT
 find_package( AtlasCMake REQUIRED )
 
 # Build the project against LCG:
-set( LCG_VERSION_POSTFIX "b_ATLAS_9"
+set( LCG_VERSION_POSTFIX "b_ATLAS_11"
    CACHE STRING "Version postfix for the LCG release to use" )
 set( LCG_VERSION_NUMBER 102
    CACHE STRING "Version number for the LCG release to use" )
@@ -37,6 +37,7 @@ find_package( PNG )
 find_package( TBB )
 find_package( TIFF )
 find_package( libffi )
+find_package( gl2ps )
 
 # Disable flake8.
 set( ATLAS_FLAKE8 true   # <- this is the shell builtin `true`
@@ -92,6 +93,15 @@ install( FILES
    ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/PreConfig.cmake
    ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/PostConfig.cmake
    DESTINATION ${CMAKE_INSTALL_CMAKEDIR} )
+
+# Setup IDE integration:
+set( ATLAS_ENABLE_IDE_HELPERS OFF CACHE BOOL "Enable IDE helpers" )
+if( ATLAS_ENABLE_IDE_HELPERS )
+   set( ATLAS_IDEHELPERSCRIPTS_SETUP
+      "${CMAKE_SOURCE_DIR}/../../.vscode/IDEHelperScripts/Setup.cmake"
+      CACHE FILEPATH "Setup file for the IDE / VS Code helpers" )
+   include( "${ATLAS_IDEHELPERSCRIPTS_SETUP}" )
+endif()
 
 # Set up CPack:
 atlas_cpack_setup()

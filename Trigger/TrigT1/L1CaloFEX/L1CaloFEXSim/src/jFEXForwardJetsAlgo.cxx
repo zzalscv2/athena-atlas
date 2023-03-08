@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration  
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration  
 */
 //***************************************************************************  
 //		jFEXForwardJetsAlgo - Algorithm for forward Jets in jFEX
 //                              -------------------
 //     begin                : 07 06 2021
-//     email                : varsiha.sothilingam@cern.ch
+//     email                : Sergi.Rodriguez@cern.ch
 //***************************************************************************  
 #include <iostream>
 #include <vector>
@@ -22,6 +22,8 @@
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "StoreGate/StoreGateSvc.h"
 
+#include <fstream>
+
 namespace LVL1{
 
 //Default Constructor
@@ -35,10 +37,19 @@ LVL1::jFEXForwardJetsAlgo::jFEXForwardJetsAlgo(const std::string& type, const st
 LVL1::jFEXForwardJetsAlgo::~jFEXForwardJetsAlgo()
 {
 }
-StatusCode LVL1::jFEXForwardJetsAlgo::initialize()
-{
-   ATH_CHECK(m_jFEXForwardJetsAlgo_jTowerContainerKey.initialize());
-   return StatusCode::SUCCESS;
+StatusCode LVL1::jFEXForwardJetsAlgo::initialize(){
+    
+    ATH_CHECK(m_jFEXForwardJetsAlgo_jTowerContainerKey.initialize());
+
+    ATH_CHECK(ReadfromFile(PathResolver::find_calib_file(m_SeedRingStr) , m_SeedRingMap ));
+    ATH_CHECK(ReadfromFile(PathResolver::find_calib_file(m_1stRingStr)  , m_1stRingMap  ));
+    ATH_CHECK(ReadfromFile(PathResolver::find_calib_file(m_2ndRingStr)  , m_2ndRingMap  ));
+    ATH_CHECK(ReadfromFile(PathResolver::find_calib_file(m_CorrStr)     , m_CorrMap     ));
+    ATH_CHECK(ReadfromFile(PathResolver::find_calib_file(m_Corr2Str)    , m_Corr2Map    ));
+    ATH_CHECK(ReadfromFile(PathResolver::find_calib_file(m_SearchGStr)  , m_SearchGMap  ));
+    ATH_CHECK(ReadfromFile(PathResolver::find_calib_file(m_SearchGeStr) , m_SearchGeMap ));
+
+    return StatusCode::SUCCESS;
 
 }
 
@@ -58,27 +69,33 @@ StatusCode LVL1::jFEXForwardJetsAlgo::reset() {
     return StatusCode::SUCCESS;
 }
 
-void LVL1::jFEXForwardJetsAlgo::setup(int inputTable[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width], int jfex, int fpga) {
+void LVL1::jFEXForwardJetsAlgo::setup(int inputTable[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width], int jfex) {
     std::copy(&inputTable[0][0], &inputTable[0][0] + (FEXAlgoSpaceDefs::jFEX_algoSpace_height*FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width), &m_jFEXalgoTowerID[0][0]);
     m_jfex=jfex;
-    m_fpga=fpga;
-    
 }
 
 //Gets geometric global centre Eta and Phi coord of the TT
 //Has the advantage over the individual eta, phi methods that it does only one tower search
-std::array<float,3> LVL1::jFEXForwardJetsAlgo::globalEtaPhiEt(int TTID) {
+std::array<float,2> LVL1::jFEXForwardJetsAlgo::globalEtaPhi(int TTID) {
     if(TTID == 0) {
-        return {999,999,-999};
+        return {999,999};
+    }
+
+    const LVL1::jTower *tmpTower = m_jTowerContainer->findTower(TTID);
+    return {tmpTower->centreEta(),tmpTower->centrephi_toPI()};
+}
+
+int LVL1::jFEXForwardJetsAlgo::getEt(unsigned int TTID) {
+    if(TTID == 0) {
+        return -999;
     }
     
-    float TT_Et = -999;
+    int TT_Et = -999;
     if(m_map_Etvalues.find(TTID) != m_map_Etvalues.end()) {
         TT_Et = m_map_Etvalues[TTID][0];
     }    
 
-    const LVL1::jTower *tmpTower = m_jTowerContainer->findTower(TTID);
-    return {tmpTower->centreEta(),tmpTower->centrePhi(),TT_Et};
+    return TT_Et;
 }
 
 std::unordered_map<int, jFEXForwardJetsInfo> LVL1::jFEXForwardJetsAlgo::FcalJetsTowerIDLists() {
@@ -121,83 +138,86 @@ std::unordered_map<int, jFEXForwardJetsInfo> LVL1::jFEXForwardJetsAlgo::FcalJets
 
                 //STEP 4: define TTID which will be the key for class in map
                 int myTTIDKey = m_jFEXalgoTowerID[centre_nphi][centre_neta];
-
+                
                 //STEP 5: ignore when tower ID is zero. Should not happend though
                 if(myTTIDKey == 0) {
                     continue;
                 }
-
-                //STEP 6: define class
-                jFEXForwardJetsInfo TriggerTowerInformation;
-
-                //STEP 7: fill local eta phi coords in the fpga matrix "m_jFEXalgoTowerID"
-                TriggerTowerInformation.setCentreLocalTTPhi(centre_nphi);
-                TriggerTowerInformation.setCentreLocalTTEta(centre_neta);
-
-                const auto [centreTT_eta,centreTT_phi,centreTT_Et] = globalEtaPhiEt(myTTIDKey);
-                TriggerTowerInformation.setCentreTTPhi(centreTT_phi);
-                TriggerTowerInformation.setCentreTTEta(centreTT_eta);
-                TriggerTowerInformation.includeTTinSeed(myTTIDKey);
-                TriggerTowerInformation.addToSeedET(centreTT_Et);
-                TriggerTowerInformation.includeTTinSearchWindow(myTTIDKey);
-                TriggerTowerInformation.addToSearchWindowET(centreTT_Et);
+                bool iAmJet = false;
                 
-                //STEP 8: loop over all FCAL0 TTIDs and fill TT IDs for seed and calculate seed energy
-                for(int nphi = 0; nphi < FEXAlgoSpaceDefs::jFEX_algoSpace_height; nphi++) {
-                    for(int neta = m_lowerEM_eta; neta < m_upperEM_eta; neta++) {
-                        
-                        int auxTTID = m_jFEXalgoTowerID[nphi][neta];
-                        auto [TT_eta,TT_phi,TT_Et] = globalEtaPhiEt(auxTTID);
-                        
-                        if(auxTTID == myTTIDKey || auxTTID == 0) continue;
-                        
-                        //This corrects the overlap of FPGA 0 with FPGA 3 and viceversa
-                        if(m_fpga==0 || m_fpga==3) { 
-                            if(m_fpga==0) {
-                                if(TT_phi>M_PI){
-                                   TT_phi = TT_phi-m_2PI; 
-                                }
-                            }
-                            else {
-                                if(TT_phi<M_PI){
-                                   TT_phi = TT_phi+m_2PI; 
-                                }
-                            }
-                        }
-                        
-                        // cast float to int to avoid misbehaviours
-                        int DeltaR = std::round( (std::pow((centreTT_eta - TT_eta),2) + std::pow((centreTT_phi - TT_phi),2)) * 1e5   );
-
-                        if(DeltaR < m_Edge_dR2 ) {
-                            //STEP 9.0: fill TTID in seed
-                            TriggerTowerInformation.includeTTinSeed(auxTTID);
-                            //STEP 10.0: add ET value to seed
-                            TriggerTowerInformation.addToSeedET(TT_Et);
-                        }
-                        else if(DeltaR < m_Edge_dR4 ) {
-                            TriggerTowerInformation.addToFirstEnergyRingET(TT_Et);
-                            if(m_storeEnergyRingTTIDs) {
-                                TriggerTowerInformation.includeTTIDinFirstER(auxTTID);
-                            }
-                        }
-                        else if(DeltaR < m_Edge_dR8 ){
-                            TriggerTowerInformation.addToSecondEnergyRingET(TT_Et);
-                            if(m_storeEnergyRingTTIDs) {
-                                TriggerTowerInformation.includeTTIDinSecondER(auxTTID);
-                            }    
-                        }
-                        
-                        
-                        if(DeltaR < m_Edge_dR3 ) {
-                            //STEP 9.1: fill TTID in search window
-                            TriggerTowerInformation.includeTTinSearchWindow(auxTTID);
-                            //STEP 10.1: add ET value to seed
-                            TriggerTowerInformation.addToSearchWindowET(TT_Et);
-                        }
-                    }
+                //Know wich consition should satisfy
+                unsigned int elemCorr  = elementsCorr(myTTIDKey);
+                unsigned int elemCorr2 = elementsCorr2(myTTIDKey);
+                
+                
+                if(elemCorr == 0 and elemCorr2 == 0){
+                    iAmJet = isLM(myTTIDKey);
                 }
-                //STEP 11: Store filled class into map, with central TT ID as Key
-                FCALJetTowerIDLists[myTTIDKey] = TriggerTowerInformation;
+                else if(elemCorr == 0 and elemCorr2 > 0){
+                    iAmJet = isLM(myTTIDKey) and condCorr2(myTTIDKey);
+                }
+                else if(elemCorr > 0 and elemCorr2 == 0){
+                    iAmJet = isLM(myTTIDKey) or (isLMabove(myTTIDKey) and condCorr(myTTIDKey));
+                }
+                else if(elemCorr > 0 and elemCorr2 > 0){
+                    iAmJet = (isLM(myTTIDKey) and condCorr2(myTTIDKey)) or (isLMabove(myTTIDKey) and condCorr(myTTIDKey));
+                }
+                
+                if(iAmJet){
+                    
+                    //STEP 6: define class
+                    jFEXForwardJetsInfo TriggerTowerInformation;
+                    
+                    TriggerTowerInformation.setCentreLocalTTPhi(centre_nphi);
+                    TriggerTowerInformation.setCentreLocalTTEta(centre_neta);
+                    
+                    const auto [centreTT_eta,centreTT_phi] = globalEtaPhi(myTTIDKey);
+                    TriggerTowerInformation.setCentreTTPhi(centreTT_phi);
+                    TriggerTowerInformation.setCentreTTEta(centreTT_eta);  
+                    
+                    
+                    //STEP 7: Filling energies   
+                    
+                    // Seed
+                    auto it_seed_map = m_SeedRingMap.find(myTTIDKey);
+                    if(it_seed_map == m_SeedRingMap.end()) {
+                        ATH_MSG_FATAL("Could not find TT" << myTTIDKey << " in Jet seed file.");
+                    }
+                    for(const auto& seedTT : it_seed_map->second){
+                        TriggerTowerInformation.includeTTinSeed(seedTT);
+                        TriggerTowerInformation.addToSeedET(getEt(seedTT));
+                    }                    
+
+                    // 1st Energy Ring!
+                    it_seed_map = m_1stRingMap.find(myTTIDKey);
+                    if(it_seed_map == m_1stRingMap.end()) {
+                        ATH_MSG_FATAL("Could not find TT" << myTTIDKey << " in 1st Energy ring file.");
+                    }
+                    
+                    for(const auto& firstER_TT : it_seed_map->second){
+                        TriggerTowerInformation.addToFirstEnergyRingET(getEt(firstER_TT));
+                        if(m_storeEnergyRingTTIDs) {
+                            TriggerTowerInformation.includeTTIDinFirstER(firstER_TT);
+                        }                        
+                    }    
+
+                    // 2nd Energy Ring!
+                    it_seed_map = m_2ndRingMap.find(myTTIDKey);
+                    if(it_seed_map == m_2ndRingMap.end()) {
+                        ATH_MSG_FATAL("Could not find TT" << myTTIDKey << " in 2nd Energy ring file.");
+                    }
+                    
+                    for(const auto& secondER_TT : it_seed_map->second){
+                        TriggerTowerInformation.addToSecondEnergyRingET(getEt(secondER_TT));
+                        if(m_storeEnergyRingTTIDs) {
+                            TriggerTowerInformation.includeTTIDinSecondER(secondER_TT);
+                        }
+                    }                    
+
+                    // Storing all jets in the same map!
+                    FCALJetTowerIDLists[myTTIDKey] = TriggerTowerInformation;                    
+                }
+                
             }//end of centre_neta loop
         }//end of centre_nphi loop
     }//end of myCounter loop
@@ -205,166 +225,164 @@ std::unordered_map<int, jFEXForwardJetsInfo> LVL1::jFEXForwardJetsAlgo::FcalJets
     return FCALJetTowerIDLists;
 }
 
-
-
-std::unordered_map<int, jFEXForwardJetsInfo> LVL1::jFEXForwardJetsAlgo::isSeedLocalMaxima() {
-    //std::vector<int> localMaximas;
-    std::unordered_map<int, jFEXForwardJetsInfo> localMaximaCandidates = FcalJetsTowerIDLists();
-    std::unordered_map<int, jFEXForwardJetsInfo> localMaximaList ;
-
-    uint isLocalMaxima = 0;
+int LVL1::jFEXForwardJetsAlgo::SumEtSeed(unsigned int TTID) {
     
-    for (auto& [myTTKey,myFCALJetInfoClass] : localMaximaCandidates){
-        //Local maxima check takes place here
-        isLocalMaxima = 0;
-        float centre_phi = myFCALJetInfoClass.getCentreTTPhi();
-        float centre_eta = myFCALJetInfoClass.getCentreTTEta();
-        int centre_energy = myFCALJetInfoClass.getSeedET();
-
-        const std::vector<int> TTinSW = myFCALJetInfoClass.getTTinSearchWindow();
-        
-        for (const int iTTinSW : TTinSW) {
-            if(iTTinSW == myTTKey) continue;
-            auto [seed_eta,seed_phi,seed_Et] = globalEtaPhiEt(iTTinSW);
-
-            //This corrects the overlap of FPGA 0 with FPGA 3 and viceversa
-            if(m_fpga==0 || m_fpga==3) { 
-                if(m_fpga==0) {
-                    if(seed_phi>M_PI){
-                       seed_phi = seed_phi-m_2PI; 
-                    }
-                }
-                else {
-                    if(seed_phi<M_PI){
-                       seed_phi = seed_phi+m_2PI; 
-                    }
-                }
-            }
-
-
-            int delta_phi = std::round((seed_phi - centre_phi)*100);
-            int delta_eta = std::round((seed_eta - centre_eta)*100);
-            
-            int seed_energy = 0;
-            
-            //get the seed Et for iTTinSW, and check if it is a Local Maxima 
-            if(localMaximaCandidates.count(iTTinSW)==1 ){
-              seed_energy = localMaximaCandidates[iTTinSW].getSeedET();
-            }
-            // for the overlap regions there is not SeedET calculation, therefore the calculation is needed
-            else{
-                for(int nphi = 0; nphi < FEXAlgoSpaceDefs::jFEX_algoSpace_height; nphi++) {
-                    for(int neta = m_lowerEM_eta; neta < m_upperEM_eta; neta++) {
-                        int auxTTID = m_jFEXalgoTowerID[nphi][neta];
-                        
-                        if(auxTTID==0 ) {
-                            continue;
-                        }
-                        auto [TT_eta,TT_phi,TT_Et] = globalEtaPhiEt(auxTTID);
-                        
-                        //This corrects the overlap of FPGA 0 with FPGA 3 and viceversa
-                        if(m_fpga==0 || m_fpga==3) { 
-                            if(m_fpga==0) {
-                                if(TT_phi>M_PI){
-                                   TT_phi = TT_phi-m_2PI; 
-                                }
-                            }
-                            else {
-                                if(TT_phi<M_PI){
-                                   TT_phi = TT_phi+m_2PI; 
-                                }
-                            }
-                        }
-                        
-                        // cast float to int to avoid misbehaviours
-                        int DeltaR = std::round( (std::pow((seed_eta - TT_eta),2) + std::pow((seed_phi - TT_phi),2)) * 1e5   );
-                        if(DeltaR < m_Edge_dR2 ) {
-                            seed_energy+=TT_Et;
-                        }
-                    }
-                }
-            }
-            
-            if( (delta_eta + delta_phi) < 0 || ((delta_eta + delta_phi) == 0 && delta_eta < 0) ) {
-                if(centre_energy >= seed_energy) {
-                    isLocalMaxima++;
-                }
-            }
-            else {   
-                if(centre_energy > seed_energy) {
-                    isLocalMaxima++;
-                }
-            }
-        }
-
-        //if it is a local maxima, we save the TT ID
-        if((isLocalMaxima == TTinSW.size()-1) && (isLocalMaxima !=0)) {
-            localMaximaList[myTTKey] = myFCALJetInfoClass;
-        }
+    // Exists the jTower in the mapping?
+    auto it_seed_map = m_SeedRingMap.find(TTID);
+    if(it_seed_map == m_SeedRingMap.end()) {
+        ATH_MSG_FATAL("Could not find TT" << TTID << " in Jet seed file.");
+        return 0;
     }
-    return localMaximaList;
+    
+    int summedEt = 0;
+    for(const auto& seedTT : it_seed_map->second){
+        summedEt += getEt(seedTT);  
+    }
+    return summedEt;
 }
 
+bool LVL1::jFEXForwardJetsAlgo::isLM(unsigned int TTID){
+    
+    int CentralSeedEt = SumEtSeed(TTID);
+    
+    // Exists the jTower in the seach (greater than) tower map?
+    auto it_seed_map = m_SearchGMap.find(TTID);
+    if(it_seed_map == m_SearchGMap.end()) {
+        ATH_MSG_FATAL("Could not find TT" << TTID << " in the seach (>) local maxima for jets file.");
+        return false;
+    }
+
+    bool greater = true;
+    for (const auto& Gtt : it_seed_map->second ){
+        //checking if the Central seed has strictly more energy than its neighbours
+        int tmpEt = SumEtSeed(Gtt);
+        if( CentralSeedEt <= tmpEt ){
+            greater = false;
+            break;
+        }
+    }
+    
+    //No need to continue.. Not a LM
+    if(!greater){
+        return false;
+    }
+
+    // Exists the jTower in the seach (greater or equal than) tower map?
+    it_seed_map = m_SearchGeMap.find(TTID);
+    if(it_seed_map == m_SearchGeMap.end()) {
+        ATH_MSG_FATAL("Could not find TT" << TTID << " in the seach (>=) local maxima for jets file.");
+        return false;
+    }
+
+    bool greaterEqual = true;
+    for (const auto& Gtt : it_seed_map->second ){
+        //checking if the Central seed has strictly more energy than its neighbours
+        int tmpEt = SumEtSeed(Gtt);
+        if( CentralSeedEt < tmpEt ){
+            greaterEqual = false;
+            break;
+        }
+    }
+
+    //Not a LM
+    if(!greaterEqual){
+        return false;
+    }    
+    return true;
+}
+
+bool LVL1::jFEXForwardJetsAlgo::isLMabove(unsigned int TTID){
+    
+    // Exists the jTower in the correction tower map?
+    auto it_seed_map = m_CorrMap.find(TTID);
+    if(it_seed_map == m_CorrMap.end()) {
+        ATH_MSG_FATAL("Could not find TT" << TTID << " in the correction (LM above) for jets file.");
+        return false;
+    }
+    // If there is not Trigger tower to correct with, then return false
+    if( (it_seed_map->second).size() == 0){
+        return false;
+    }
+    
+    for (const auto& Gtt : it_seed_map->second ){
+        //Checking if the displaced TT is a seed
+        return isLM(Gtt);       
+    }
+    return false;
+}
+
+unsigned int LVL1::jFEXForwardJetsAlgo::elementsCorr(unsigned int TTID){
+    auto it_seed_map = m_CorrMap.find(TTID);
+    if(it_seed_map == m_CorrMap.end()) {
+        ATH_MSG_FATAL("Could not find TT" << TTID << " in the condition (greater than) for jets file.");
+        return 0;
+    }    
+    
+    return (it_seed_map->second).size();
+}
+
+bool LVL1::jFEXForwardJetsAlgo::condCorr(unsigned int TTID){
+
+    // Exists the jTower in the correction tower map?
+    auto it_seed_map = m_CorrMap.find(TTID);
+    if(it_seed_map == m_CorrMap.end()) {
+        ATH_MSG_FATAL("Could not find TT" << TTID << " in the condition (greater than) for jets file.");
+        return false;
+    }
+    
+    // If there is no TT to check then the Et of central is always bigger :D
+    if( (it_seed_map->second).size() == 0){
+        return false;
+    }
+    
+    int centralEt = getEt(TTID);
+    
+    for (const auto& Gtt : it_seed_map->second ){
+        //Checking if central Et is always strictly greater than the previous TT Et 
+        int tmpEt = getEt(Gtt);
+        if(centralEt <= tmpEt ){
+            return false;
+        }
+    }
+    return true;    
+    
+}
+
+unsigned int LVL1::jFEXForwardJetsAlgo::elementsCorr2(unsigned int TTID){
+    auto it_seed_map = m_Corr2Map.find(TTID);
+    if(it_seed_map == m_Corr2Map.end()) {
+        ATH_MSG_FATAL("Could not find TT" << TTID << " in the condition (greater than) for jets file.");
+        return 0;
+    }    
+    
+    return (it_seed_map->second).size();
+}
+
+bool LVL1::jFEXForwardJetsAlgo::condCorr2(unsigned int TTID){
+
+    // Exists the jTower in the correction tower map?
+    auto it_seed_map = m_Corr2Map.find(TTID);
+    if(it_seed_map == m_Corr2Map.end()) {
+         ATH_MSG_FATAL("Could not find TT" << TTID << " in the correction (greater or equal) file.");
+        return false;
+    }
+    
+    int centralEt = getEt(TTID);
+    
+    for (const auto& Gtt : it_seed_map->second ){
+        //Checking if central Et is always greater or equal than the previous TT Et 
+        int tmpEt = getEt(Gtt);
+        if(centralEt < tmpEt ){
+            return false;
+        }
+    }
+    return true;    
+    
+}
 
 std::unordered_map<int, jFEXForwardJetsInfo> LVL1::jFEXForwardJetsAlgo::calculateJetETs() {
 
-    // setting the lower/upper eta range for the FCAL 2 and 3 since they are not added in the seed information yet 
-    int lowerFCAL_eta = FEXAlgoSpaceDefs::jFEX_algoSpace_C_lowerFCAL_eta;
-    int upperFCAL_eta = FEXAlgoSpaceDefs::jFEX_algoSpace_C_upperFCAL_eta;
-    if(m_jfex == 5) {
-        //Module 5
-        lowerFCAL_eta = FEXAlgoSpaceDefs::jFEX_algoSpace_A_lowerFCAL_eta;
-        upperFCAL_eta = FEXAlgoSpaceDefs::jFEX_algoSpace_A_upperFCAL_eta;
-    } 
-    // Adding the FCAL 2 and 3 TT in the seed, 1st and 2nd energy rings
-    std::unordered_map<int, jFEXForwardJetsInfo> localMaximas = isSeedLocalMaxima();
-    for(auto& [myTTKey,myFCALJetInfoClass] : localMaximas) {
-        float centreTT_phi = myFCALJetInfoClass.getCentreTTPhi();
-        float centreTT_eta = myFCALJetInfoClass.getCentreTTEta();
-        for(int nphi = 0; nphi < 8; nphi++) {
-            for(int neta = lowerFCAL_eta; neta < upperFCAL_eta; neta++) {
-                
-                int auxTTID = m_jFEXalgoTowerID[nphi][neta];
-                
-                auto [TT_eta,TT_phi,TT_Et] = globalEtaPhiEt(auxTTID);
-                
-                //This corrects the overlap of FPGA 0 with FPGA 3 and viceversa
-                if(m_fpga==0 || m_fpga==3) {
-                    if(m_fpga==0) {
-                        if(TT_phi>M_PI) {
-                            TT_phi = TT_phi-m_2PI;
-                        }
-                    }
-                    else {
-                        if(TT_phi<M_PI) {
-                            TT_phi = TT_phi+m_2PI;
-                        }
-                    }
-                }
-                
-                // cast float to int to avoid misbehaviours
-                int DeltaR = std::round( (std::pow((centreTT_eta - TT_eta),2) + std::pow((centreTT_phi - TT_phi),2)) * 1e5   );
-                if(DeltaR < m_Edge_dR2 ) {
-                    myFCALJetInfoClass.addToSeedET(TT_Et);
-                    myFCALJetInfoClass.includeTTinSeed(auxTTID);
-                }
-                else if(DeltaR < m_Edge_dR4 ) {
-                    myFCALJetInfoClass.addToFirstEnergyRingET(TT_Et);
-                    if(m_storeEnergyRingTTIDs) {
-                        myFCALJetInfoClass.includeTTIDinFirstER(auxTTID);
-                    }
-                }
-                else if(DeltaR < m_Edge_dR8) {
-                    myFCALJetInfoClass.addToSecondEnergyRingET(TT_Et);
-                    if(m_storeEnergyRingTTIDs) {
-                        myFCALJetInfoClass.includeTTIDinSecondER(auxTTID);
-                    }
-                }
-            }
-        }
-        
-    }
-    //Returning the complite information 
+    std::unordered_map<int, jFEXForwardJetsInfo> localMaximas = FcalJetsTowerIDLists();
     return localMaximas;
 }
 
@@ -372,6 +390,57 @@ std::unordered_map<int, jFEXForwardJetsInfo> LVL1::jFEXForwardJetsAlgo::calculat
 void LVL1::jFEXForwardJetsAlgo::setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map){
     m_map_Etvalues=et_map;
 }
+
+StatusCode LVL1::jFEXForwardJetsAlgo::ReadfromFile(const std::string & fileName, std::unordered_map<unsigned int, std::vector<unsigned int> >& fillingMap){
+    
+    std::string myline;
+    
+    //opening file with ifstream
+    std::ifstream myfile(fileName);
+    
+    if ( !myfile.is_open() ){
+        ATH_MSG_FATAL("Could not open file:" << fileName);
+        return StatusCode::FAILURE;
+    }
+    
+    //loading the mapping information
+    while ( std::getline (myfile, myline) ) {
+
+        //removing the header of the file (it is just information!)
+        if(myline[0] == '#') continue;
+        
+        //Splitting myline in different substrings
+        std::stringstream oneLine(myline);
+        
+        //reading elements
+        std::vector<unsigned int> elements;
+        std::string element;
+        while(std::getline(oneLine, element, ' '))
+        {
+            elements.push_back(std::stoi(element));
+        }
+        
+        // We should have at least two elements! Central TT and (at least) itself
+        if(elements.size() < 1){
+            ATH_MSG_ERROR("Unexpected number of elemennts (<1 expected) in file: "<< fileName);
+            return StatusCode::FAILURE;
+        }
+        
+        //Central TiggerTower
+        unsigned int TTID = elements.at(0);
+        
+        // rest of TTs that need to be checked
+        elements.erase(elements.begin());
+        
+        fillingMap[TTID] = elements;
+        
+    }
+    myfile.close();
+
+    return StatusCode::SUCCESS;
+}
+
+
 
 }// end of namespace LVL1
 

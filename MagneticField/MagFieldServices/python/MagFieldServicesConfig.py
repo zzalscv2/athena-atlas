@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -30,6 +30,8 @@ def AtlasFieldCacheCondAlgCfg(flags, **kwargs):
     if flags.Common.isOnline:
       # online does not use DCS
       afmArgs.update( UseMapsFromCOOL = False )
+      # load map on start() for HLT
+      afmArgs.update( LoadMapOnStart = flags.Trigger.doHLT and flags.Trigger.Online.isPartition )
       # consider field off if current is below these values:
       afmArgs.update( SoleMinCurrent = 160 )  # Standby current is 150A
       afmArgs.update( ToroMinCurrent = 210 )  # Standby current is 200A
@@ -71,18 +73,18 @@ if __name__=="__main__":
 
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import VERBOSE
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
 
     log.setLevel(VERBOSE)
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.Input.isMC = False
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.Input.isMC = False
+    flags.lock()
 
     cfg=ComponentAccumulator()
 
-    acc  = AtlasFieldCacheCondAlgCfg(ConfigFlags)
+    acc  = AtlasFieldCacheCondAlgCfg(flags)
     log.verbose(acc)
     cfg.merge(acc)
 

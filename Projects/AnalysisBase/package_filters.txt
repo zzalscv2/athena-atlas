@@ -47,6 +47,7 @@
 + Event/xAOD/xAODTruthCnv
 - Event/xAOD/.*Cnv
 - Event/xAOD/xAODInDetMeasurement
+- Event/xAOD/xAODMuonRDO
 + Event/xAOD/.*
 + ForwardDetectors/ZDC/ZdcAnalysis
 + Generators/TruthUtils

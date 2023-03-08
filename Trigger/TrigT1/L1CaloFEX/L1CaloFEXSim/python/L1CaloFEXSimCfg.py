@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -18,7 +18,7 @@ def ReadSCellFromPoolFileCfg(flags, key='SCell'):
     return acc
 
 
-def ReadSCellFromByteStreamCfg(flags, key='SCell', keyIn='SC_ET'):
+def ReadSCellFromByteStreamCfg(flags, key='SCell', keyIn='SC_ET_ID',SCmask=True):
     acc=ComponentAccumulator()
 
     # Geometry, conditions and cabling setup
@@ -37,10 +37,24 @@ def ReadSCellFromByteStreamCfg(flags, key='SCell', keyIn='SC_ET'):
     decoderAlg = CompFactory.LArRawSCDataReadingAlg('LArRawSCDataReadingAlg', LATOMEDecoder=decoderTool)
     acc.addEventAlgo(decoderAlg)
 
-    acc.merge(LArRAWtoSuperCellCfg(flags,mask=True,SCellContainerIn=keyIn, SCellContainerOut=key) )
+    acc.merge(LArRAWtoSuperCellCfg(flags,mask=SCmask,SCellContainerIn=keyIn, SCellContainerOut=key) )
 
     return acc
 
+def eFEXTOBEtToolCfg(flags):
+    """
+    Configure the eFEX TOB Et Tool which recalculates isolation variables
+    The tool requires eTowers as inputs (add eTowerMaker algorithm)
+    """
+    acc = ComponentAccumulator()
+
+    eTowerMakerAlg = CompFactory.LVL1.eTowerMakerFromSuperCells('eTowerMakerFromSuperCells')
+    acc.addEventAlgo(eTowerMakerAlg)
+
+    eFEXTOBEtTool = CompFactory.LVL1.eFEXTOBEtTool
+    acc.setPrivateTools(eFEXTOBEtTool())
+
+    return acc
 
 def TriggerTowersInputCfg(flags):
     '''Configuration to provide TriggerTowers as input to the Fex simulation'''
@@ -71,7 +85,7 @@ def L1CaloFEXSimCfg(flags):
             acc.merge(emulateSC_Cfg(flags,SCOut=sCellType))
         else:
             # Run-3+ data inputs, decode SCells from ByteStream
-            acc.merge(ReadSCellFromByteStreamCfg(flags,sCellType))
+            acc.merge(ReadSCellFromByteStreamCfg(flags,key=sCellType,keyIn="SC_ET_ID"))
 
     # Need also TriggerTowers as input
     acc.merge(TriggerTowersInputCfg(flags))
@@ -146,6 +160,10 @@ def L1CaloFEXSimCfg(flags):
             jFEX.jFEXSysSimTool.Key_jFexSumETOutputContainer=getSimHandle(jFEX.jFEXSysSimTool.Key_jFexSumETOutputContainer)
             jFEX.jFEXSysSimTool.Key_jFexMETOutputContainer=getSimHandle(jFEX.jFEXSysSimTool.Key_jFexMETOutputContainer)
             jFEX.jFEXSysSimTool.Key_jFexFwdElOutputContainer=getSimHandle(jFEX.jFEXSysSimTool.Key_jFexFwdElOutputContainer)
+            jFEX.jFEXSysSimTool.Key_xTobOutKey_jJ=getSimHandle(jFEX.jFEXSysSimTool.Key_xTobOutKey_jJ)
+            jFEX.jFEXSysSimTool.Key_xTobOutKey_jLJ=getSimHandle(jFEX.jFEXSysSimTool.Key_xTobOutKey_jLJ)
+            jFEX.jFEXSysSimTool.Key_xTobOutKey_jTau=getSimHandle(jFEX.jFEXSysSimTool.Key_xTobOutKey_jTau)
+            jFEX.jFEXSysSimTool.Key_xTobOutKey_jEM=getSimHandle(jFEX.jFEXSysSimTool.Key_xTobOutKey_jEM)
         if flags.Trigger.L1.dogFex:
             gFEX.gFEXSysSimTool.Key_gFexSRJetOutputContainer=getSimHandle(gFEX.gFEXSysSimTool.Key_gFexSRJetOutputContainer)
             gFEX.gFEXSysSimTool.Key_gFexLRJetOutputContainer=getSimHandle(gFEX.gFEXSysSimTool.Key_gFexLRJetOutputContainer)
@@ -185,8 +203,10 @@ if __name__ == '__main__':
     ##################################################
     # Configure all the flags
     ##################################################
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from TrigValTools.TrigValSteering import Input
+
+    flags = initConfigFlags()
     flags.Input.Files = Input.get_input(args.input).paths
     flags.Output.AODFileName = 'AOD.pool.root'
     flags.Common.isOnline = not flags.Input.isMC
@@ -199,13 +219,11 @@ if __name__ == '__main__':
     flags.Trigger.EDMVersion = 3
     flags.Trigger.doLVL1 = True
     flags.Trigger.enableL1CaloPhase1 = True
-    if flags.Common.isOnline:
-        flags.IOVDb.GlobalTag = flags.Trigger.OnlineCondTag
+    flags.Trigger.triggerConfig = 'FILE'
 
-    # TODO 1: Reverse this into a special setting for Run-2 data input when the default geo tag is changed to Run-3
-    # TODO 2: Any better way of figuring this out than run number?
-    if not flags.Input.isMC and flags.Input.RunNumber[0] > 400000:
-        flags.GeoModel.AtlasVersion = 'ATLAS-R3S-2021-02-00-00'
+    from AthenaConfiguration.Enums import LHCPeriod
+    if not flags.Input.isMC and flags.GeoModel.Run is LHCPeriod.Run2:
+        flags.GeoModel.AtlasVersion = 'ATLAS-R2-2016-01-00-01'
 
     # Enable only calo for this test
     from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags

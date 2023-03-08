@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILERECUTILS_TILERAWCHANNELBUILDERMANYAMPS_H
@@ -38,11 +38,11 @@ class TileRawChannelBuilderManyAmps: public TileRawChannelBuilder {
     ~TileRawChannelBuilderManyAmps();
 
     // virtual methods
-    virtual StatusCode initialize();
-    virtual StatusCode finalize();
+    virtual StatusCode initialize() override;
+    virtual StatusCode finalize() override;
 
     // Inherited from TileRawChannelBuilder
-    virtual TileRawChannel* rawChannel(const TileDigits* digits);
+    virtual TileRawChannel* rawChannel(const TileDigits* digits, const EventContext& ctx) override;
 
   private:
 

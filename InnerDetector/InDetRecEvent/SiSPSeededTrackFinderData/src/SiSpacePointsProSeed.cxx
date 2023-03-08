@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SiSPSeededTrackFinderData/SiSpacePointsProSeed.h"
@@ -19,6 +19,8 @@ namespace InDet {
     m_q  = 0.;
   }
 
+  // Variables not copied deliberately?
+  // cppcheck-suppress operatorEqVarError
   SiSpacePointsProSeed& SiSpacePointsProSeed::operator = 
   (const SiSpacePointsProSeed& sp) 
   {

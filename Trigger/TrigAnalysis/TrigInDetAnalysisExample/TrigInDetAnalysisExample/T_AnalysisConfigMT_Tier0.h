@@ -17,7 +17,7 @@
  **     @author  mark sutton
  **     @date    Tue 16 May 2017 09:28:55 CEST 
  **
- **     Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 #ifndef TrigInDetAnalysisExample_T_AnalysisConfigMT_Tier0_H
@@ -1081,218 +1081,8 @@ protected:
     if(m_provider->msg().level() <= MSG::VERBOSE)
       m_provider->msg(MSG::VERBOSE) << "AnalysisConfigMT_Tier0::book() " << name() << endmsg;
 
-    // get the TriggerDecisionTool
+    m_provider->msg(MSG::ERROR) << "AnalysisConfigMT_Tier0::book() should no longer be called: " << name() << endmsg;
 
-    if( m_tdt->retrieve().isFailure() ) {
-      if(m_provider->msg().level() <= MSG::ERROR)
-        m_provider->msg(MSG::ERROR) << " Unable to retrieve the TrigDecisionTool: Please check job options file" << endmsg;
-      // return StatusCode::FAILURE;
-      return;
-    }
-
-    if(m_provider->msg().level() <= MSG::VERBOSE) {
-      m_provider->msg(MSG::VERBOSE) << " Successfully retrived the TrigDecisionTool"  << endmsg;
-    }
-
-
-    /// get list of configured triggers
-    if (m_provider->msg().level() <= MSG::VERBOSE) {
-      std::vector<std::string> configuredChains  = (*(m_tdt))->getListOfTriggers("L2_.*, EF_.*, HLT_.*");
-
-      m_provider->msg(MSG::VERBOSE)  << "Configured chains" << endmsg;
-      for ( unsigned i=0 ; i<configuredChains.size() ; i++ ) {
-        if( m_provider->msg().level() <= MSG::VERBOSE)
-          m_provider->msg(MSG::VERBOSE)  << " Chain " << configuredChains[i]  << endmsg;
-      }
-    }
-
-
-    // std::vector<std::string> chains;
-    // chains.reserve( m_chainNames.size() );
-
-    std::vector<ChainString>::iterator chainitr = m_chainNames.begin();
-
-    std::vector<ChainString> chains;
-
-    /// handle wildcard chain selection - but only the first time
-    /// NB: also check all other chains as well - only set up an
-    ///     analysis for configured chains
-    while ( chainitr!=m_chainNames.end() ) {
-
-      /// get chain
-      ChainString& chainName = (*chainitr);
-
-      if ( chainName.head() == "" ) {
-	
-	std::string selectChain = chainName.raw();
-
-	/// replace wildcard with actual matching chains ...
-	chains.push_back( selectChain );
-
-      }
-      else { 
-	
-	/// get matching chains
-	std::vector<std::string> selectChains  = (*(m_tdt))->getListOfTriggers( chainName.head() );
-	
-	// std::cout << "selected chains " << selectChains.size() << std::endl;
-	
-	// if ( selectChains.size()==0 ) m_provider->msg(MSG::WARNING) << "No chains matched for  " << chainName << endmsg;
-	
-	for ( unsigned iselected=0 ; iselected<selectChains.size() ; iselected++ ) {
-	  
-	  selectChains[iselected] = chainName.subs( selectChains[iselected] ); 
-
-	  /// replace wildcard with actual matching chains ...
-	  chains.push_back( ChainString(selectChains[iselected]) );
-	  
-	  if(m_provider->msg().level() <= MSG::VERBOSE) {
-	    m_provider->msg(MSG::VERBOSE) << "Matching chain " << selectChains[iselected] << " (" << chainName.head() << endmsg;
-	  }
-	  
-	}
-      }
-	
-      chainitr++;
-    }
-
-    m_chainNames = chains;
-
-    for ( unsigned ic=0 ; ic<m_chainNames.size() ; ic++ ) {
-
-      if ( ic>0 ) { 
-	m_provider->msg(MSG::WARNING) << "more than one chain configured for this analysis - skipping " << m_chainNames[ic] << endmsg;
-	continue;
-      }
-
-      m_provider->msg(MSG::VERBOSE) << "Analyse chain " << m_chainNames[ic] << endmsg;
-
-      // m_provider->msg(MSG::VERBOSE)  << "--------------------------------------------------" << endmsg;
-      
-      std::string folder_name = "";
-      
-      if ( name()!="" )  folder_name = name(); 
-      else               folder_name = "HLT/TRIDT/IDMon";  
-      
-      // unsigned decisiontype;
-      // if ( m_chainNames.at(0).passed() ) decisiontype = TrigDefs::Physics;
-      // else                               decisiontype = TrigDefs::alsoDeactivateTEs;
-      
-      /// folder_name.erase(0,3); // erase "L2_" or "EF_" so histograms all go in same chain folder - NO!!!! this means 
-      /// they will over write, unless eg L2_, EF_, HLT_ etc is include in the histogram name 
-      
-      /// don't use test_type now ? 
-      if( m_testType != "" ) folder_name = folder_name + "/" + m_testType;
-      
-      std::string mongroup;
-
-      
-      if ( name().find("Shifter")!=std::string::npos || m_shifter ) {
-	/// shifter histograms - do not encode chain names
-	if      ( m_chainNames.at(ic).tail().find("_FTF") != std::string::npos )              mongroup = folder_name + "/FTF";
-	else if ( m_chainNames.at(ic).tail().find("_IDTrig") != std::string::npos || 
-		  m_chainNames.at(ic).tail().find("_EFID") != std::string::npos )             mongroup = folder_name + "/EFID";
-	else if ( m_chainNames.at(ic).tail().find("InDetTrigParticle") != std::string::npos ) mongroup = folder_name + "/EFID_RUN1";
-	else if ( m_chainNames.at(ic).tail().find("_GSF")      != std::string::npos )         mongroup = folder_name + "/GSF";
-	else                                                                                  mongroup = folder_name + "/Unknown";
-
-	if ( m_chainNames.at(ic).vtx()!="" ) mongroup += "/" + m_chainNames.at(ic).vtx();
-
-      }
-      else { 
-	/// these are the Expert / non-Shifter histograms - encode the full chain names
-
-	if ( m_chainNames[ic].head() == "" ) mongroup = folder_name + "/Fullscan";
-	else                                 mongroup = folder_name + "/" + m_chainNames[ic].head();
-	std::string track_collection = ""; 
-
-	if ( m_chainNames.at(ic).tail()!="" )  { 
-	  track_collection =  "/" + m_chainNames.at(ic).tail();
-	  if ( m_chainNames.at(ic).extra()!="" ) track_collection += "_" + m_chainNames.at(ic).extra();
-	}
-
-	if ( m_chainNames.at(ic).roi()!="" ) { 
-	  if ( track_collection!="" ) track_collection += "_" + m_chainNames[ic].roi();
-	  else                        track_collection = "/" + m_chainNames[ic].roi();
-	}
-
-	if ( m_chainNames.at(ic).vtx()!="" ) { 
-	  if ( track_collection!="" ) track_collection += "_" + m_chainNames[ic].vtx();
-	  else                        track_collection  = "/" + m_chainNames[ic].vtx();
-	}
-
-	/// add trigger element and roi descriptor names
-	if ( m_chainNames.at(ic).element()!="" ) { 
-	  if ( track_collection!="" ) track_collection += "_" + m_chainNames[ic].element();
-	  else                        track_collection  = "/" + m_chainNames[ic].element();
-	}
-	
-	if ( track_collection!="" )  mongroup += track_collection;
-
-	if ( !m_chainNames.at(ic).passed() )      mongroup += "/DTE";
-
-	//	std::cout << "\n SUTT chain " << m_chainNames.at(ic) << "\tvtx " << m_chainNames.at(ic).vtx() << "\tmongroup " << mongroup << std::endl;
-	
-      }
-
-      //      std::cout << "SUTT chain " << "\tvtx " << m_chainNames.at(ic).vtx() << "\tmongroup " << mongroup << std::endl;
-      
-      m_provider->msg(MSG::VERBOSE) << " book mongroup " << mongroup << endmsg;
-      
-#     ifdef ManagedMonitorToolBase_Uses_API_201401
-      m_provider->addMonGroup( new ManagedMonitorToolBase::MonGroup( m_provider, mongroup, ManagedMonitorToolBase::run ) );
-#     else
-      m_provider->addMonGroup( new ManagedMonitorToolBase::MonGroup( m_provider, mongroup, 
-								     ManagedMonitorToolBase::shift, 
-								     ManagedMonitorToolBase::run ) );
-#   endif
-      
-      _analysis = dynamic_cast<A*>(m_analysis);
- 
-      if ( monTool() ) _analysis->set_monTool( monTool() );
-
-      m_analysis->initialise();
-      
-      _analysis->setevent( m_event ); 
-
-      
-      std::map<std::string, TH1*>::const_iterator hitr = _analysis->THbegin();
-      std::map<std::string, TH1*>::const_iterator hend = _analysis->THend();
-      
-      //    std::cout << "\tsutt adding to mongroup   " << mongroup << std::endl;
-
-      // booking invariant mass histograms for tag and probe analysis
-      if ( m_TnP_tool != 0 ) {
-	m_invmass = new TH1F( "invmass", "invariant mass;mass [GeV]", 320, 0, 200 );                                                                                                      
-	m_provider->addHistogram( m_invmass );                            
-
-	m_invmass_obj = new TH1F( "invmass_obj", "invariant mass;mass [GeV]", 320, 0, 200 );                                                                                                      
-	m_provider->addHistogram( m_invmass_obj );                            
-	///}       
-	//	m_TnP_tool->BookMinvHisto() ;
-	//	m_provider->addHistogram( m_TnP_tool->GetMinvHisto(), mongroup ) ;
-	//	m_provider->addHistogram( m_TnP_tool->GetMinvObjHisto(), mongroup ) ;
-      }
-      
-      while ( hitr!=hend ) {
-	//  std::cout << "\tsutt addHisto " << hitr->second->GetName() << std::endl;
-	m_provider->addHistogram( hitr->second, mongroup );
-	hitr++;
-      }
-      
-      std::map<std::string, TProfile*>::const_iterator effitr = _analysis->TEffbegin();
-      std::map<std::string, TProfile*>::const_iterator effend = _analysis->TEffend();
-      
-      while ( effitr!=effend ) {
-	// std::cout << "\tsutt addProfile " << effitr->second->GetName() << std::endl;
-	m_provider->addHistogram( effitr->second, mongroup );
-	effitr++;
-      }
-      
-      if(m_provider->msg().level() <= MSG::VERBOSE) {
-	m_provider->msg(MSG::VERBOSE) << "AnalysisConfigMT_Tier0::book() done" << endmsg;
-      }
-    }
 
   }
 
@@ -1328,9 +1118,6 @@ protected:
   bool           m_useBeamCondSvc;
 
   TIDA::Event*  m_event;
-
-  TFile*    mFile;
-  TTree*    mTree;
 
   std::vector<ChainString>     m_chainNames;
   std::vector<A*> m_analyses;

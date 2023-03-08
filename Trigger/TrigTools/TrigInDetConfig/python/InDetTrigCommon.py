@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 #     Contains algs/tools used by Inner Detector Trigger
 
@@ -143,10 +143,10 @@ def trackCollectionCnvTool_builder(name, trackParticleCreatorTool, config):
 
 
 
-def trackMonitoringTool_builder(suffix):
+def trackMonitoringTool_builder(flags, suffix):
   #First load the generic monitoring tool with set of histograms for Particle Cnv
-  from TrigInDetMonitoringTools.TrigInDetTrackingMonitoring import  TrigInDetTrackCnvMonitoring
-  genericMonTool = TrigInDetTrackCnvMonitoring( name = 'GenericMonitoring_{}'.format(suffix))
+  from TrigInDetMonitoringTools.TrigInDetTrackingMonitoring import TrigInDetTrackCnvMonitoring
+  genericMonTool = TrigInDetTrackCnvMonitoring(flags, name = 'GenericMonitoring_{}'.format(suffix))
 
 
 
@@ -169,7 +169,7 @@ def getTrackingSuffix( name ):
       return ''
 
 
-def trackParticleCnv_builder(name, config, inTrackCollectionKey, outTrackParticlesKey, trackParticleCreatorTool ):
+def trackParticleCnv_builder(flags, name, config, inTrackCollectionKey, outTrackParticlesKey, trackParticleCreatorTool ):
   """Alg that stages conversion of Trk::TrackCollection into xAOD::TrackParticle container"""
 
   if trackParticleCreatorTool is None:
@@ -190,8 +190,8 @@ def trackParticleCnv_builder(name, config, inTrackCollectionKey, outTrackParticl
                                            TrackParticleCreator                      = trackParticleCreatorTool,
                                            #Add track monitoring
                                            DoMonitoring                              = True,
-                                           MonTool                                   = xAODTrackingCnvMonTool(),
-                                           TrkMonTool                                = trackMonitoringTool_builder( config.input_name + getTrackingSuffix(name) ),
+                                           MonTool                                   = xAODTrackingCnvMonTool(flags),
+                                           TrkMonTool                                = trackMonitoringTool_builder( flags, config.input_name + getTrackingSuffix(name) ),
                                            # Properties below are used for obsolete: Rec:TrackParticle, aod -> xAOD::TrackParticle (Turn off)
                                            ConvertTrackParticles = False,  # Retrieve of Rec:TrackParticle, don't need this atm
                                            xAODContainerName                         = '',
@@ -271,17 +271,6 @@ def ambiguityScoringTool_builder(name, config, trackSummaryTool ):
                           minTRTonTrk         = 0 )
                          
 
-    #Change some of the parameters in case of beamgas signature
-    if config.name == 'beamgas':
-        from InDetTrigRecExample.ConfiguredNewTrackingTrigCuts import EFIDTrackingCutsBeamGas
-        kwargs = setDefaults( kwargs,
-                              minPt          = EFIDTrackingCutsBeamGas.minPT(),
-                              maxRPhiImp     = EFIDTrackingCutsBeamGas.maxPrimaryImpact(),
-                              maxZImp        = EFIDTrackingCutsBeamGas.maxZImpact(),
-                              minSiClusters  = EFIDTrackingCutsBeamGas.minClusters(),
-                              maxSiHoles     = EFIDTrackingCutsBeamGas.maxHoles(),
-                              useSigmaChi2   = True )
-        
     from InDetTrackScoringTools.InDetTrackScoringToolsConf import InDet__InDetAmbiScoringTool
 
     scoringTool = InDet__InDetAmbiScoringTool(name=name, **kwargs )
@@ -314,11 +303,7 @@ def trackFitterTool_getter(config):
 def trackSelectionTool_getter(config):
       #TODO this might need to be revisited!
 
-      if config.name == 'beamgas':
-        from InDetTrigRecExample.InDetTrigConfigRecLoadToolsBeamGas import InDetTrigAmbiTrackSelectionToolBeamGas
-        return InDetTrigAmbiTrackSelectionToolBeamGas
-
-      elif config.name == 'cosmics':
+      if config.name == 'cosmics':
         from InDetTrigRecExample.InDetTrigConfigRecLoadToolsCosmics import  InDetTrigAmbiTrackSelectionToolCosmicsN
         return InDetTrigAmbiTrackSelectionToolCosmicsN
 

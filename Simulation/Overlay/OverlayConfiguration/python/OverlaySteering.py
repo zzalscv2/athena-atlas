@@ -8,7 +8,6 @@ from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 from AthenaConfiguration.DetectorConfigFlags import getEnabledDetectors
 from AthenaConfiguration.Enums import LHCPeriod
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-from AthenaPoolCnvSvc.PoolWriteConfig import PoolWriteCfg
 from Digitization.DigitizationParametersConfig import writeDigitizationParameters
 from OverlayConfiguration.OverlayMetadata import overlayMetadataCheck, \
     fastChainOverlayMetadataCheck
@@ -42,7 +41,6 @@ def OverlayMainCfg(configFlags):
     # Construct our accumulator to run
     acc = MainServicesCfg(configFlags)
     acc.merge(PoolReadCfg(configFlags))
-    acc.merge(PoolWriteCfg(configFlags))
     acc.merge(OverlayMainContentCfg(configFlags))
     return acc
 
@@ -67,7 +65,8 @@ def OverlayMainContentCfg(configFlags):
         acc.merge(CopyJetTruthInfoCfg(configFlags))
         acc.merge(CopyPileupParticleTruthInfoCfg(configFlags))
         acc.merge(CopyCaloCalibrationHitContainersCfg(configFlags))
-        acc.merge(CopyTrackRecordCollectionsCfg(configFlags))
+        if not configFlags.Overlay.FastChain:
+            acc.merge(CopyTrackRecordCollectionsCfg(configFlags))
 
     # Beam spot reweighting
     if configFlags.Digitization.InputBeamSigmaZ > 0:

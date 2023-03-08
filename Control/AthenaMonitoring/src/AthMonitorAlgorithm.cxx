@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaMonitoring/AthMonitorAlgorithm.h"
@@ -36,18 +36,11 @@ StatusCode AthMonitorAlgorithm::initialize() {
         ATH_MSG_DEBUG( "TDT retrieved" );
 
         // If the trigger chain is specified, parse it into a list.
-        if ( m_triggerChainString!="" ) {
+        if ( !m_triggerChainString.empty() ) {
             sc = parseList(m_triggerChainString,m_vTrigChainNames);
             if ( !sc.isSuccess() ) {
                 ATH_MSG_WARNING("Error parsing trigger chain list, using empty list instead.");
                 m_vTrigChainNames.clear();
-            }
-
-            // Then, retrieve the trigger translator if requested. Finally, convert 
-            // into a usable format using the unpackTriggerCategories function.
-            if (!m_trigTranslator.empty()) {
-                ATH_CHECK( m_trigTranslator.retrieve() );
-                unpackTriggerCategories(m_vTrigChainNames);
             }
         }
     }
@@ -211,8 +204,8 @@ bool AthMonitorAlgorithm::trigChainsArePassed( const std::vector<std::string>& v
   // monitored here are responsible for the event being selected for
   // the express stream.
 
-  const auto group =  m_trigDecTool->getChainGroup(m_vTrigChainNames);
-  if (m_isExpressStreamJob){  
+  const auto group =  m_trigDecTool->getChainGroup(vTrigNames);
+  if (m_enforceExpressTriggers){  
     const auto passedBits = m_trigDecTool->isPassedBits(group);
     bool expressPass = passedBits & TrigDefs::Express_passed; //bitwise AND
     if(!expressPass) {
@@ -353,29 +346,4 @@ StatusCode AthMonitorAlgorithm::parseList(const std::string& line, std::vector<s
     }
 
     return StatusCode::SUCCESS;
-}
-
-
-void AthMonitorAlgorithm::unpackTriggerCategories(std::vector<std::string>& vTrigChainNames) const {
-    for (size_t i = 0; i < vTrigChainNames.size(); ++i) {
-        std::string& thisName = vTrigChainNames[i];
-
-        if (thisName.compare(0,9, "CATEGORY_")==0) {
-            ATH_MSG_DEBUG("Found a trigger category: " << thisName << ". Unpacking.");
-            std::vector<std::string> triggers = m_trigTranslator->translate(thisName.substr(9,std::string::npos));
-            std::ostringstream oss;
-            oss << "(";
-            for (size_t itrig = 0; itrig < triggers.size(); ++itrig) {
-                if (itrig != 0) { 
-                    oss << "|";
-                }
-                oss << triggers[itrig];
-            }
-            oss << ")";
-            // replace with new value
-            std::string newval = oss.str();
-            ATH_MSG_DEBUG("Replaced with " << newval);
-            vTrigChainNames[i] = newval;
-        }
-    }
 }

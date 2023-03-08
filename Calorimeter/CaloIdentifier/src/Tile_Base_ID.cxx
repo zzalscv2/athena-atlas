@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -1041,42 +1041,42 @@ IdContext
 Tile_Base_ID::region_context  (void)  const
 {
     ExpandedIdentifier id;
-    return (IdContext(id, 0, m_SIDE_INDEX));
+    return {id, 0, m_SIDE_INDEX};
 }
 
 IdContext	
 Tile_Base_ID::module_context  (void)  const
 {
     ExpandedIdentifier id;
-    return (IdContext(id, 0, m_MODULE_INDEX));
+    return {id, 0, m_MODULE_INDEX};
 }
 
 IdContext	
 Tile_Base_ID::tower_context   (void)  const
 {
     ExpandedIdentifier id;
-    return (IdContext(id, 0, m_TOWER_INDEX));
+    return {id, 0, m_TOWER_INDEX};
 }
 
 IdContext	
 Tile_Base_ID::cell_context    (void)  const
 {
     ExpandedIdentifier id;
-    return (IdContext(id, 0, m_SAMPLE_INDEX));
+    return {id, 0, m_SAMPLE_INDEX};
 }
 
 IdContext	
 Tile_Base_ID::pmt_context     (void)  const
 {
     ExpandedIdentifier id;
-    return (IdContext(id, 0, m_PMT_INDEX));
+    return {id, 0, m_PMT_INDEX};
 }
 
 IdContext	
 Tile_Base_ID::adc_context     (void)  const
 {
     ExpandedIdentifier id;
-    return (IdContext(id, 0, m_ADC_INDEX));
+    return {id, 0, m_ADC_INDEX};
 }
 
 int

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 #####
 # CI Reference Files Map
@@ -11,19 +11,19 @@
 # Format is "test" : "version"
 references_map = {
     # Simulation
-    "s3761": "v5",
-    "s3779": "v5",
-    "s4005": "v3",
-    "s4006": "v5",
-    "s4007": "v5",
-    "s4008": "v3",
+    "s3761": "v12",
+    "s3779": "v8",
+    "s4005": "v8",
+    "s4006": "v12",
+    "s4007": "v12",
+    "s4008": "v4",
     # Overlay
-    "d1590": "v14",
-    "d1726": "v10",
-    "d1759": "v17",
+    "d1590": "v15",
+    "d1726": "v11",
+    "d1759": "v21",
     # Reco
-    "q442": "v4",
-    "q443": "v6",
-    "q445": "v6",
-    "q449": "v4",
+    "q442": "v11",
+    "q443": "v14",
+    "q445": "v16",
+    "q449": "v20",
 }

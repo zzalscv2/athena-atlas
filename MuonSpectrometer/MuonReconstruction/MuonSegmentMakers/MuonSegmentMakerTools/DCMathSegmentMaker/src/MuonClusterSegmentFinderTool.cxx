@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonClusterSegmentFinderTool.h"
@@ -99,18 +99,19 @@ namespace Muon {
     ///
     using MeasVec= NSWSeed::MeasVec;
     NSWSeed::SeedMeasurement::SeedMeasurement(const Muon::MuonClusterOnTrack* cl):
-        m_cl{cl} {
-        static const Amg::Vector3D dir_loc{0., 1.,0.};
-        m_dir = std::make_unique<Amg::Vector3D>(cl->detectorElement()->transform(cl->identify()).linear()*dir_loc);
+        m_cl{cl},
+        m_dir (cl->detectorElement()->transform(cl->identify()).linear() * Amg::Vector3D(0, 1, 0))
+    {
     }
 
     NSWSeed::NSWSeed(const MuonClusterSegmentFinderTool* parent, const std::array<SeedMeasurement, 4>& seed,
                      const std::array<double,2>& lengths) :
-        m_parent{parent} {       
+      m_parent{parent},
+      m_pos {seed[0].pos() + lengths[0] * seed[0].dir()}
+    {       
        
-        m_pos = seed[0].pos() + lengths[0] * seed[0].dir();
         const Amg::Vector3D un_dir = (seed[1].pos() + lengths[1] *seed[1].dir() - m_pos);
-        m_dir = un_dir.unit();
+        m_dir = un_dir.unit()*(un_dir.z() * seed[0].pos().z() > 0 ? 1 : -1);
 
         if (m_parent->msgLvl(MSG::VERBOSE))
             m_parent->msgStream() << MSG::VERBOSE << m_parent->printSeed(seed)<<" is a valid seed "<<to_string(m_pos) <<" pointing to "<<to_string(m_dir)<<"."<<endmsg;
@@ -300,44 +301,75 @@ namespace Muon {
             std::vector<std::unique_ptr<Muon::MuonSegment>> precSegs = find3DSegments(ctx, segmentInput, etaSegs);
             out_segments.insert(out_segments.end(), std::make_move_iterator(precSegs.begin()), std::make_move_iterator(precSegs.end()));
         }
-        for (std::unique_ptr<Muon::MuonSegment>& seg : out_segments) {
-            if (segColl)
-                segColl->push_back(std::move(seg));
-            else
-                segments.push_back(std::move(seg));
-        }
-
-        if (!segPerQuadColl) return;
-
-        // 4-layer segments
-        for (int iWedge{1}; iWedge <= 4; ++iWedge) {
-            std::vector<std::unique_ptr<Muon::MuonSegment>> wedge_segs{};
-            if (iWedge == 2 || iWedge == 3) {
-                wedge_segs = findStereoSegments(ctx, muonClusters, iWedge);
-            } else {
-                std::vector<std::unique_ptr<Muon::MuonSegment>> etaSegs = findPrecisionSegments(ctx, muonClusters, iWedge);
-                wedge_segs = find3DSegments(ctx, segmentInput, etaSegs, iWedge);
+        auto dump_output = [&]() {
+            for (std::unique_ptr<Muon::MuonSegment>& seg : out_segments) {
+                if (segColl)
+                    segColl->push_back(std::move(seg));
+                else
+                    segments.push_back(std::move(seg));
             }
-            for (std::unique_ptr<Muon::MuonSegment>& seg : wedge_segs) segPerQuadColl->push_back(std::move(seg));
+        };
+        if (!segPerQuadColl) {
+            dump_output();
+            return;
         }
+        /// Single wedge segments. Important for the alignment runs
+        for (std::unique_ptr<Muon::MuonSegment>& seg : out_segments) {            
+            std::vector<const MuonClusterOnTrack*> seg_hits{};
+            seg_hits.reserve(seg->containedMeasurements().size());
+            for (const Trk::MeasurementBase* meas : seg->containedMeasurements()) {
+                const Muon::MuonClusterOnTrack* clus = dynamic_cast<const Muon::MuonClusterOnTrack*>(meas);
+                if (clus) seg_hits.push_back(clus);
+            }
+            /// Loop over the 4 quads to create the segment container
+            for (int iWedge{1}; iWedge<=4 ; ++iWedge) {
+                MeasVec quad_hits = cleanClusters(seg_hits, HitType::Eta | HitType::Phi, iWedge);
+                /// The micromegas need 4 hits on track
+                if ( quad_hits.size () < 2 || ((iWedge == 2 || iWedge == 3) && quad_hits.size() < 4)) continue;
+                std::vector<const Trk::MeasurementBase*> fit_meas{};
+                std::unique_ptr<Trk::PseudoMeasurementOnTrack> pseudoVtx{ipConstraint(ctx)};
+                if (pseudoVtx) fit_meas.push_back(pseudoVtx.get());            
+                std::copy(quad_hits.begin(), quad_hits.end(), std::back_inserter(fit_meas));
+                /// Create the perigee parameter
+                const Trk::Surface& surf = quad_hits.front()->associatedSurface();
+                Trk::Intersection intersect = surf.straightLineIntersection(seg->globalPosition(), seg->globalDirection(), false, false);
+                const Amg::Vector3D& gpos_seg = intersect.position;
+                Amg::Vector3D gdir_seg{seg->globalDirection()};
+                Amg::Vector3D perpos = gpos_seg - 10 * gdir_seg.unit();
+                if (perpos.dot(gdir_seg) < 0) gdir_seg *= -1;
+                Trk::Perigee startpar{perpos, gdir_seg, 0, perpos};
+                /// Create the segment
+                std::unique_ptr<Trk::Track> segtrack = fit(ctx, fit_meas, startpar);
+                if (!segtrack) continue;
+
+                MuonSegment* seg = m_trackToSegmentTool->convert(ctx, *segtrack);
+                if (seg) {
+                    ATH_MSG_VERBOSE(" adding new quad segment " << m_printer->print(*seg) << std::endl 
+                                            <<"position: "<<to_string(seg->globalPosition())<< std::endl
+                                            <<"direction: "<<to_string(seg->globalDirection())<< std::endl
+                                            << m_printer->print(seg->containedMeasurements()));
+                    segPerQuadColl->push_back(seg);
+                }
+            }
+        }        
+        dump_output();
     }
     std::vector<std::unique_ptr<Muon::MuonSegment>> MuonClusterSegmentFinderTool::findStereoSegments(
-        const EventContext& ctx, const std::vector<const Muon::MuonClusterOnTrack*>& allClusts, int singleWedge) const {
-        std::vector<std::unique_ptr<Muon::MuonSegment>> final_segs{};
-
+        const EventContext& ctx, const std::vector<const Muon::MuonClusterOnTrack*>& allClusts, int singleWedge) const {      
+        
+        if (!m_useStereoSeeding) return {};
         /// Order any parsed hit into the layer structure
         LayerMeasVec orderedClust =
             classifyByLayer(cleanClusters(allClusts, HitType::Eta | HitType::Phi, singleWedge), HitType::Wire | HitType::Pad);
 
-        if (orderedClust.empty()) return final_segs;
+        if (orderedClust.empty()) return {};
         std::vector<NSWSeed> seeds = segmentSeedFromMM(orderedClust);
-        if (seeds.empty()) return final_segs;
+        if (seeds.empty()) return {};
         TrackCollection trackSegs{SG::OWN_ELEMENTS};
         /// Loop over the seeds
         for (NSWSeed& seed : seeds) {
             /// Require that the seed has at least one extra hit, if we're not
             /// restricting ourselves to a single wedge
-            if (seed.size() < 4 - (singleWedge != 0)) continue;
             std::vector<const Trk::MeasurementBase*> fit_meas{};
 
             std::unique_ptr<Trk::PseudoMeasurementOnTrack> pseudoVtx{ipConstraint(ctx)};
@@ -354,7 +386,7 @@ namespace Muon {
             if (perpos.dot(gdir_seg) < 0) gdir_seg *= -1;
 
             Trk::Perigee startpar{perpos, gdir_seg, 0, perpos};
-
+            
             /// Create the segment
             std::unique_ptr<Trk::Track> segtrack = fit(ctx, fit_meas, startpar);
             if (segtrack) trackSegs.push_back(std::move(segtrack));
@@ -1058,15 +1090,27 @@ namespace Muon {
             bool accept{true};
             ATH_MSG_VERBOSE("Check intersections of "<<printSeed(base_seed));
             constexpr double tolerance = 10.* Gaudi::Units::mm;
+            std::optional<Amg::Vector3D> seg_pos{std::nullopt}, seg_dir{std::nullopt};
             for (unsigned int i = 0; i < base_seed.size(); ++i) {
-                    const MuonGM::MuonChannelDesign* design = getDesign(base_seed[i]);
-                    const double halfLength = design->channelHalfLength(channel(base_seed[i]), true);
-                    accept &= (halfLength  + tolerance > std::abs(lengths[i]));
-                    if (msgLvl(MSG::VERBOSE)) {
-                            ATH_MSG_VERBOSE(" ----- "<<(i+1)<<" at "<<to_string(base_seed[i].pos() + lengths[i]*base_seed[i].dir())
-                                      << " ("<< std::string( halfLength > std::abs(lengths[i]) ? "inside" : "outside")<<" wedge) "
-                                      << halfLength <<" vs. "<<std::abs(lengths[i]));
-                    } else if (!accept) return std::nullopt;
+                const MuonGM::MuonChannelDesign* design = getDesign(base_seed[i]);
+                const double halfLength = design->channelHalfLength(channel(base_seed[i]), true);
+                accept &= (halfLength  + tolerance > std::abs(lengths[i]));
+                if (msgLvl(MSG::VERBOSE)) {
+                    if (!seg_pos) {
+                        seg_pos = std::make_optional<Amg::Vector3D>(base_seed[0].pos() +
+                                                                    lengths[0] * base_seed[0].dir());
+                        ATH_MSG_VERBOSE("Position "<<to_string(*seg_pos));
+                    }
+                    if (!seg_dir){
+                            seg_dir = std::make_optional<Amg::Vector3D>((base_seed[1].pos() + 
+                                                                    lengths[1] *base_seed[1].dir() - (*seg_pos)).unit());
+                        ATH_MSG_VERBOSE("Direction "<<to_string(*seg_dir));
+                    }
+                    std::optional<double> mu_crossing = MuonGM::intersect<3>(*seg_pos, *seg_dir, base_seed[i].pos(),base_seed[i].dir());
+                    ATH_MSG_VERBOSE(" ----- "<<(i+1)<<" at "<<to_string(base_seed[i].pos() + lengths[i]*base_seed[i].dir())
+                                << " ("<< std::string( halfLength > std::abs(lengths[i]) ? "inside" : "outside")<<" wedge) "
+                                << halfLength <<" vs. "<<std::abs(lengths[i])<<" crossing point: "<<std::abs(*mu_crossing));
+                } else if (!accept) return std::nullopt;
             }
             if (!accept) return std::nullopt;
             return std::make_optional<std::array<double,2>>({lengths[0], lengths[1]});
@@ -1199,9 +1243,11 @@ namespace Muon {
             bool add_seed{true};
             for (NSWSeed& good : seeds) {
                 NSWSeed::SeedOR ov = good.overlap(seed);
-                if (ov == NSWSeed::SeedOR::SubSet)
+                if (ov == NSWSeed::SeedOR::SubSet) {
                     std::swap(seed, good);
-                else if (ov == NSWSeed::SeedOR::Same || ov == NSWSeed::SeedOR::SuperSet) {
+                    add_seed = false;
+                    break;
+                } else if (ov == NSWSeed::SeedOR::Same || ov == NSWSeed::SeedOR::SuperSet) {
                     add_seed = false;
                     break;
                 }

@@ -13,6 +13,7 @@
 
 #include "LArCafJobs/AbsShape.h"
 #include "LArSamplesMon/Chi2Calc.h"
+#include "CxxUtils/checker_macros.h"
 
 namespace LArSamples {
   
@@ -20,7 +21,7 @@ namespace LArSamples {
   class Data;
   class ScaledErrorData;
   
-  class ShapeFitter  {
+  class ATLAS_NOT_THREAD_SAFE ShapeFitter  {
   
     public:
    

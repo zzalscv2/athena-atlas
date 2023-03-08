@@ -265,7 +265,6 @@ namespace InDet {
   // Finalize method:
   StatusCode SCT_Clusterization::finalize() 
   {
-    ATH_MSG_INFO("SCT_Clusterization::finalize()");
     return StatusCode::SUCCESS;
   }
 }

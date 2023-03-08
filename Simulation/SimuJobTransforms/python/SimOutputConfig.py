@@ -1,5 +1,7 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
+from AthenaConfiguration.Enums import BeamType
+
 def getStreamEVNT_TR_ItemList(flags):
     #Add to item list
     ItemList = [
@@ -80,6 +82,9 @@ def getStreamHITS_ItemList(flags):
                          "LArHitContainer#LArHitFCAL_FastCaloSim"]
 
     if flags.Detector.EnableTile:
+        if flags.Beam.Type is BeamType.TestBeam:
+            ItemList += ["TBElementContainer#TBElementCnt",
+                         "TileHitVector#TileTBHits"]
         ItemList += ["TileHitVector#TileHitVec",
                      "TileHitVector#MBTSHits"]
         if flags.Sim.ISF.HITSMergingRequired.get('CALO', False):
@@ -126,7 +131,6 @@ def getStreamHITS_ItemList(flags):
         ItemList += ["AFP_TDSimHitCollection#*",
                      "AFP_SIDSimHitCollection#*"]
 
-    from AthenaConfiguration.Enums import BeamType
     if flags.Beam.Type is BeamType.Cosmics:
         ItemList += ["TrackRecordCollection#CosmicRecord",
                      "TrackRecordCollection#CosmicPerigee"]

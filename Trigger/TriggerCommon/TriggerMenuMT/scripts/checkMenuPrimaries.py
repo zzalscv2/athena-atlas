@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 def main():
     from TriggerMenuMT.TriggerAPI.TriggerAPI import TriggerAPI
@@ -8,10 +8,13 @@ def main():
     log = logging.getLogger("checkMenuPrimaries")
     log.setLevel(logging.INFO)
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    ConfigFlags.Input.Files = []
-    ConfigFlags.Trigger.triggerMenuSetup = "Physics_pp_run3_v1"
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    flags.Input.Files = []
+    flags.Trigger.triggerMenuSetup = "Physics_pp_run3_v1"
+    flags.lock()
 
+    TriggerAPI.setConfigFlags(flags)
     TriggerAPI.setRelease("current")
     inconsistent =  TriggerAPI.checkPeriodConsistency(TriggerPeriod.future2e34, TriggerType.ALL)
     if inconsistent:

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  AthenaKernel/BaseInfo.icc
@@ -305,7 +305,7 @@ BaseInfo<T>::castfnTo (const std::type_info& tinfo)
  *        have class IDs).  The list will include @a T itself.
  */
 template <class T>
-std::vector<CLID> BaseInfo<T>::get_bases ()
+const std::vector<CLID>& BaseInfo<T>::get_bases ()
 {
   return instance().get_bases();
 }

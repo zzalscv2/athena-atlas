@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -566,10 +566,10 @@ Trk::TimedExtrapolator::extrapolateToVolumeWithPathLimit(
   std::vector<std::pair<const Trk::TrackingVolume *, unsigned int> > navigVols;
 
   gp = currPar->position();
-  std::vector<const Trk::DetachedTrackingVolume *> *detVols =
+  std::vector<const Trk::DetachedTrackingVolume *> detVols =
     m_navigator->trackingGeometry(ctx)->lowestDetachedTrackingVolumes(gp);
-  std::vector<const Trk::DetachedTrackingVolume *>::iterator dIter = detVols->begin();
-  for (; dIter != detVols->end(); ++dIter) {
+  std::vector<const Trk::DetachedTrackingVolume *>::iterator dIter = detVols.begin();
+  for (; dIter != detVols.end(); ++dIter) {
     const Trk::Layer *layR = (*dIter)->layerRepresentation();
     bool active = layR && layR->layerType();
     if (active && !m_resolveActive) {
@@ -692,7 +692,6 @@ Trk::TimedExtrapolator::extrapolateToVolumeWithPathLimit(
       }
     }
   }
-  delete detVols;
 
   // confined layers
   if (cache.m_currentStatic->confinedLayers() && updateStatic) {

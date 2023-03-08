@@ -1,28 +1,27 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
 
 from TriggerMenuMT.HLT.Config.ChainConfigurationBase import ChainConfigurationBase
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsPool # ChainStep,
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsPool, algorithmCAToGlobalWrapper
 from TrigT2CaloCommon.CaloDef import fastCaloRecoSequence
 from TrigGenericAlgs.TrigGenericAlgsConfig import TimeBurnerCfg, TimeBurnerHypoToolGen
 from DecisionHandling.DecisionHandlingConf import InputMakerForRoI, ViewCreatorInitialROITool
 from AthenaCommon.CFElements import seqAND
 
 
-def getLArNoiseBurstRecoSequence():
+def getLArNoiseBurstRecoSequence(flags):
     from AthenaCommon.CFElements import parOR
     noiseBurstRecoSeq = parOR('LArNoiseRecoSeq')
     from TriggerMenuMT.HLT.CommonSequences.CaloSequences import cellRecoSequence
-    cells_sequence, cells_name = RecoFragmentsPool.retrieve(cellRecoSequence, flags=ConfigFlags, RoIs='')
+    cells_sequence, cells_name = RecoFragmentsPool.retrieve(cellRecoSequence, flags, RoIs='')
     noiseBurstRecoSeq += cells_sequence
     from TrigCaloHypo.TrigCaloHypoConfig import TrigLArNoiseBurstRecoAlgCfg
-    noiseBurstRecoSeq += TrigLArNoiseBurstRecoAlgCfg(CellContainerKey=cells_name)
+    noiseBurstRecoSeq += algorithmCAToGlobalWrapper(TrigLArNoiseBurstRecoAlgCfg, flags, cells_name)[0]
     
     return noiseBurstRecoSeq
 
@@ -30,18 +29,18 @@ def getLArNoiseBurstRecoSequence():
 # --------------------
 # LArNoiseBurst configuration
 # --------------------
-def getLArNoiseBurst(self):
+def getLArNoiseBurst(flags):
 
     hypoAlg = CompFactory.TrigLArNoiseBurstAlg("NoiseBurstAlg")
     from TrigCaloHypo.TrigCaloHypoConfig import TrigLArNoiseBurstHypoToolGen
     from TrigT2CaloCommon.CaloDef import clusterFSInputMaker
     noiseBurstInputMakerAlg = conf2toConfigurable(clusterFSInputMaker())
 
-    noiseBurstRecoSeq = getLArNoiseBurstRecoSequence()
+    noiseBurstRecoSeq = getLArNoiseBurstRecoSequence(flags)
 
     noiseBurstMenuSeq =  seqAND("LArNoiseMenuSeq", [noiseBurstInputMakerAlg, noiseBurstRecoSeq])
 
-    return MenuSequence(
+    return MenuSequence(flags,
             Sequence    = noiseBurstMenuSeq,
             Maker       = noiseBurstInputMakerAlg,
             Hypo        = hypoAlg,
@@ -57,20 +56,20 @@ def LArPSAllEMSequence(flags, name="LArPSSequence_AllEM"):
     from TrigT2CaloCommon.CaloDef import fastCalo_AllEM_EVCreator
  
     (LArPSViewsMaker_AllEM, InViewRoIs) = fastCalo_AllEM_EVCreator()
-    (LArPSAllEMInViewSequence, sequenceOut) = fastCaloRecoSequence(InViewRoIs,doRinger=False, ClustersName="HLT_LArPS_AllCaloEMClusters",doAllEm=True,doAll=False)
+    (LArPSAllEMInViewSequence, sequenceOut) = fastCaloRecoSequence(flags, InViewRoIs,ClustersName="HLT_LArPS_AllCaloEMClusters",doAllEm=True,doAll=False)
     LArPSViewsMaker_AllEM.ViewNodeName = LArPSAllEMInViewSequence.name()
     LArPSAllEMSequence = seqAND(name,[LArPSViewsMaker_AllEM, LArPSAllEMInViewSequence])
     return (LArPSAllEMSequence, LArPSViewsMaker_AllEM, sequenceOut)
 
-def getCaloAllEMLayersPS(self):
+def getCaloAllEMLayersPS(flags):
 
-    sequence, viewsmaker, sequenceOut =  RecoFragmentsPool.retrieve(LArPSAllEMSequence,flags=ConfigFlags)
+    sequence, viewsmaker, sequenceOut =  RecoFragmentsPool.retrieve(LArPSAllEMSequence,flags)
     
     from TrigCaloHypo.TrigCaloHypoConfig import TrigL2CaloLayersHypoToolGen
     TrigL2CaloLayersAlg = CompFactory.TrigL2CaloLayersAlg("TrigL2CaloLayersAlg_AllEM")
     TrigL2CaloLayersAlg.TrigClusterContainerKey = sequenceOut
 
-    return MenuSequence(
+    return MenuSequence(flags,
         Sequence    = sequence,
         Maker       = viewsmaker,
         Hypo        = TrigL2CaloLayersAlg,
@@ -87,21 +86,21 @@ def LArPSAllSequence( flags,  name="LArPSSequence_All"):
     from TrigT2CaloCommon.CaloDef import fastCalo_All_EVCreator
     
     (LArPSViewsMaker_All, InViewRoIs) = fastCalo_All_EVCreator()
-    (LArPSAllInViewSequence, sequenceOut) = fastCaloRecoSequence(InViewRoIs,doRinger=False, ClustersName="HLT_LArPS_AllCaloClusters",doAllEm=False,doAll=True)
+    (LArPSAllInViewSequence, sequenceOut) = fastCaloRecoSequence(flags, InViewRoIs,ClustersName="HLT_LArPS_AllCaloClusters",doAllEm=False,doAll=True)
     LArPSViewsMaker_All.ViewNodeName = LArPSAllInViewSequence.name()
     LArPSAllSequence = seqAND(name,[LArPSViewsMaker_All, LArPSAllInViewSequence])
     return (LArPSAllSequence, LArPSViewsMaker_All, sequenceOut)
 
 
-def getCaloAllLayersPS(self):
+def getCaloAllLayersPS(flags):
 
-    sequence, viewsmaker, sequenceOut =  RecoFragmentsPool.retrieve(LArPSAllSequence,flags=ConfigFlags)
+    sequence, viewsmaker, sequenceOut =  RecoFragmentsPool.retrieve(LArPSAllSequence,flags)
 
     from TrigCaloHypo.TrigCaloHypoConfig import TrigL2CaloLayersHypoToolGen
     TrigL2CaloLayersAlg = CompFactory.TrigL2CaloLayersAlg("TrigL2CaloLayersAlg_All")
     TrigL2CaloLayersAlg.TrigClusterContainerKey = sequenceOut
 
-    return MenuSequence(
+    return MenuSequence(flags,
         Sequence    = sequence,
         Maker       = viewsmaker,
         Hypo        = TrigL2CaloLayersAlg,
@@ -116,7 +115,7 @@ class CalibChainConfiguration(ChainConfigurationBase):
     # ----------------------
     # Assemble the chain depending on information from chainName
     # ----------------------
-    def assembleChainImpl(self):       
+    def assembleChainImpl(self, flags):       
                          
         chainSteps = []
         log.debug("Assembling chain for %s", self.chainName)
@@ -134,7 +133,7 @@ class CalibChainConfiguration(ChainConfigurationBase):
         elif self.chainPart['purpose'][0] == 'idcalib':
             steps=stepDictionary['IDCalib']
         for i, step in enumerate(steps): 
-            chainstep = getattr(self, step)(i)
+            chainstep = getattr(self, step)(flags, i)
             chainSteps+=[chainstep]
 
         myChain = self.buildChain(chainSteps)
@@ -155,26 +154,26 @@ class CalibChainConfiguration(ChainConfigurationBase):
         return stepDictionary
 
 
-    def getAcceptedEventsStep(self, i):
-        return self.getStep(1, 'AcceptedEvents', [acceptedEventsSequence])
+    def getAcceptedEventsStep(self, flags, i):
+        return self.getStep(flags,1, 'AcceptedEvents', [acceptedEventsSequence])
 
-    def getAllTEStep(self, i):
-        return self.getStep(1, 'LArNoiseBurst', [getLArNoiseBurst])
+    def getAllTEStep(self, flags, i):
+        return self.getStep(flags,1, 'LArNoiseBurst', [getLArNoiseBurst])
 
-    def getCaloAllEMStep(self, i):
-        return self.getStep(1, 'LArPSALLEM', [getCaloAllEMLayersPS])
+    def getCaloAllEMStep(self, flags, i):
+        return self.getStep(flags,1, 'LArPSALLEM', [getCaloAllEMLayersPS])
 
-    def getCaloAllStep(self, i):
-        return self.getStep(1, 'LArPSALL', [getCaloAllLayersPS])
+    def getCaloAllStep(self, flags, i):
+        return self.getStep(flags,1, 'LArPSALL', [getCaloAllLayersPS])
 
-    def getIDCalibEmpty(self,i):
+    def getIDCalibEmpty(self, flags, i):
         return self.getEmptyStep(1, 'IDCalibEmptyStep')
 
-    def getIDCalibFTFReco(self,i):
-        return self.getStep(2,'IDCalibFTFCfg',[IDCalibFTFCfg])
+    def getIDCalibFTFReco(self, flags, i):
+        return self.getStep(flags,2,'IDCalibFTFCfg',[IDCalibFTFCfg])
 
-    def getIDCalibTrigger(self,i):
-        return self.getStep(3,'IDCalibTriggerCfg',[IDCalibTriggerCfg])
+    def getIDCalibTrigger(self, flags, i):
+        return self.getStep(flags,3,'IDCalibTriggerCfg',[IDCalibTriggerCfg])
 
 #----------------------------------------------------------------
 
@@ -186,11 +185,10 @@ def IDCalibTriggerCfg(flags):
 
     from TrigTrackingHypo.IDCalibHypoConfig import IDCalibHypoToolFromDict
     from TrigTrackingHypo.IDCalibHypoConfig import createIDCalibHypoAlg
-    theHypoAlg = createIDCalibHypoAlg("IDCalibHypo")
+    theHypoAlg = createIDCalibHypoAlg(flags, "IDCalibHypo")
 
     from TriggerMenuMT.HLT.UnconventionalTracking.CommonConfiguration import getCommonInDetFullScanSequence
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    ( TrkSeq, InputMakerAlg, sequenceOut ) = RecoFragmentsPool.retrieve(getCommonInDetFullScanSequence,ConfigFlags)
+    ( TrkSeq, InputMakerAlg, sequenceOut ) = RecoFragmentsPool.retrieve(getCommonInDetFullScanSequence,flags)
     theHypoAlg.tracksKey = sequenceOut
 
     from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable
@@ -198,7 +196,8 @@ def IDCalibTriggerCfg(flags):
     DummyInputMakerAlg = conf2toConfigurable(CompFactory.InputMakerForRoI( "IM_IDCalib_HypoOnlyStep" ))
     DummyInputMakerAlg.RoITool = conf2toConfigurable(CompFactory.ViewCreatorInitialROITool())
 
-    return MenuSequence( Sequence    = seqAND("IDCalibEmptySeq",[DummyInputMakerAlg]),
+    return MenuSequence( flags,
+                         Sequence    = seqAND("IDCalibEmptySeq",[DummyInputMakerAlg]),
                          Maker       = DummyInputMakerAlg,
                          Hypo        = theHypoAlg,
                          HypoToolGen = IDCalibHypoToolFromDict,
@@ -209,14 +208,14 @@ def IDCalibTriggerCfg(flags):
 def IDCalibFTFCfg(flags):
 
     from TriggerMenuMT.HLT.UnconventionalTracking.CommonConfiguration import getCommonInDetFullScanSequence
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    ( TrkSeq, InputMakerAlg, sequenceOut ) = RecoFragmentsPool.retrieve(getCommonInDetFullScanSequence,ConfigFlags)
+    ( TrkSeq, InputMakerAlg, sequenceOut ) = RecoFragmentsPool.retrieve(getCommonInDetFullScanSequence,flags)
 
     from TrigStreamerHypo.TrigStreamerHypoConf import TrigStreamerHypoAlg
     from TrigStreamerHypo.TrigStreamerHypoConfig import StreamerHypoToolGenerator
     HypoAlg = TrigStreamerHypoAlg("IDCalibTrkDummyStream")
 
-    return MenuSequence( Sequence    = seqAND("IDCalibTrkrecoSeq", TrkSeq),
+    return MenuSequence( flags,
+                         Sequence    = seqAND("IDCalibTrkrecoSeq", TrkSeq),
                          Maker       = InputMakerAlg,
                          Hypo        = HypoAlg,
                          HypoToolGen = StreamerHypoToolGenerator )
@@ -242,7 +241,7 @@ def acceptedEventsSequence(flags):
     hypoAlg = conf2toConfigurable(TimeBurnerCfg(name="AcceptedEventsHypo"))
     hypoAlg.SleepTimeMillisec = 0
 
-    return MenuSequence(
+    return MenuSequence(flags,
         Sequence    = inputMakerSeq,
         Maker       = inputMaker,
         Hypo        = hypoAlg,

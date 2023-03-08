@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
 #
 # File: MuonMDT_CnvTools/share/MdtRdoToPrepDataTool_test.py
 # Author: scott snyder
@@ -35,14 +35,14 @@ class TestAlg (Alg):
         return StatusCode.Success
         
 
-def testCfg (configFlags):
+def testCfg (flags):
     result = ComponentAccumulator()
 
     from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
-    result.merge (MuonGeoModelCfg(configFlags, forceDisableAlignment=True))
+    result.merge (MuonGeoModelCfg(flags, forceDisableAlignment=True))
 
     from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
-    result.merge (AtlasFieldCacheCondAlgCfg(configFlags, UseDCS = False))
+    result.merge (AtlasFieldCacheCondAlgCfg(flags, UseDCS = False))
 
     Muon__MdtRdoToPrepDataTool = CompFactory.Muon.MdtRdoToPrepDataToolMT
     result.addPublicTool (Muon__MdtRdoToPrepDataTool ('Muon__MdtRdoToPrepDataTool', OutputLevel = 1))
@@ -51,14 +51,18 @@ def testCfg (configFlags):
     return result
 
 
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.TestDefaults import defaultTestFiles
 
-ConfigFlags.Input.Files = defaultTestFiles.RAW
-ConfigFlags.lock()
+flags = initConfigFlags()
+flags.Input.Files = defaultTestFiles.RAW
+flags.lock()
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
-acc=MainServicesCfg(ConfigFlags)
+acc=MainServicesCfg(flags)
 
-acc.merge (testCfg (ConfigFlags))
+acc.merge (testCfg (flags))
+
+#Want to see all verbose messages in this test
+acc.getService("MessageSvc").enableSuppression = False
+
 acc.run(1)
-

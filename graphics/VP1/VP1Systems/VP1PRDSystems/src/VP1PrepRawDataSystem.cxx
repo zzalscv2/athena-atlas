@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //Fixme: cleanup includes.
@@ -325,7 +325,7 @@ void VP1PrepRawDataSystem::buildEventSceneGraph(StoreGateSvc*, SoSeparator *root
   m_d->selNode_click->policy = SoCooperativeSelection::SINGLE;
   m_d->selNode_highlight->policy = SoCooperativeSelection::SINGLE;
   
-  foreach (VP1StdCollection* col,m_d->controller->collWidget()->collections<VP1StdCollection>())
+  for (VP1StdCollection* col : m_d->controller->collWidget()->collections<VP1StdCollection>())
   m_d->selNode_click->addChild(col->collSwitch());
   m_d->selNode_highlight->addChild(m_d->selNode_click);
   root->addChild(m_d->selNode_highlight);
@@ -423,7 +423,7 @@ void VP1PrepRawDataSystem::userSelectedSingleNode(SoCooperativeSelection* sel, S
         VP1CameraHelper::animatedZoomToPath(*it,handle->collHandle()->collSep(),pickedPath,2.0,1.0);
     }
     if (m_d->controller->printInfoOnClick()) {
-      foreach (QString line, handle->clicked())
+      for (QString line :  handle->clicked())
       message(line);
     }
   } else {
@@ -561,7 +561,7 @@ void VP1PrepRawDataSystem::appropriateMDTProjectionsChanged(int iproj)
   m_d->appropriatemdtprojection = iproj;
   if (!m_d->controller)
     return;//applied upon creation of collections instead
-  foreach (PRDCollHandle_MDT* mdtcol,m_d->controller->collWidget()->collections<PRDCollHandle_MDT>())
+  for (PRDCollHandle_MDT* mdtcol : m_d->controller->collWidget()->collections<PRDCollHandle_MDT>())
   mdtcol->setAppropriateProjection( m_d->appropriatemdtprojection );
   
 }
@@ -584,7 +584,7 @@ void VP1PrepRawDataSystem::setApplicableIDProjections( InDetProjFlags::InDetProj
   if (!m_d->controller)
     return;//applied upon creation of collections instead
   
-  foreach (PRDCollHandle_TRT* trtcol,m_d->controller->collWidget()->collections<PRDCollHandle_TRT>())
+  for (PRDCollHandle_TRT* trtcol : m_d->controller->collWidget()->collections<PRDCollHandle_TRT>())
   trtcol->setAppropriateProjection(m_d->idprojflags_trt);
   
   //NB: Add for pixel/sct as well once supported!

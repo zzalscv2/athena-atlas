@@ -26,7 +26,7 @@ public:
 private:
   float calculateDeltaR( float max_deltar, float eta_1, float phi_1, float eta_2, float phi_2 ) const;
 
-  SG::ReadDecorHandleKey<xAOD::EventInfo> m_eventInfoKey{this, "LArStatusFlag", "EventInfo.larFlag", "Key for EventInfo object"};
+  SG::ReadDecorHandleKey<xAOD::EventInfo> m_eventInfoDecorKey{this, "LArStatusFlag", "EventInfo.larFlags", "Key for EventInfo object"}; // to get data dependencies right
   SG::ReadCondHandleKey<BunchCrossingCondData> m_bunchCrossingKey{this, "BunchCrossingKey", "BunchCrossingData", "Key BunchCrossing CDO" };
   SG::ReadHandleKey<xAOD::TrigEMClusterContainer> m_HLT_cont_key;
   SG::ReadHandleKey<xAOD::CaloClusterContainer> m_OFF_cont_key;

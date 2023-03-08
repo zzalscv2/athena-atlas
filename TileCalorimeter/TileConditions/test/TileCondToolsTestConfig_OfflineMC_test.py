@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 """Run a test on Tile conditions algorithms configuration on MC offline
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 
 if __name__ == "__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaCommon.Logging import log
@@ -15,14 +15,15 @@ if __name__ == "__main__":
     # test setup
     log.setLevel(DEBUG)
 
-    ConfigFlags.Input.Files = defaultTestFiles.RDO_RUN2
-    ConfigFlags.Tile.RunType = 'PHY'
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RDO_RUN2
+    flags.Tile.RunType = 'PHY'
+    flags.lock()
 
     acc = ComponentAccumulator()
 
     from TileConditions.TileCondToolsTestConfig import TileCondToolsTestCfg
-    acc.merge( TileCondToolsTestCfg(ConfigFlags) )
+    acc.merge( TileCondToolsTestCfg(flags) )
 
     acc.printConfig(withDetails = True, summariseProps = True)
 

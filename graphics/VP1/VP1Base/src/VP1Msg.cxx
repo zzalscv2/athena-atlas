@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -93,10 +93,10 @@ void VP1Msg::messageVerbose( const QString& str )
 void VP1Msg::message(const QStringList& l, const QString& addtoend, IVP1System*sys )
 {
   if (addtoend.isEmpty()) {
-    foreach(QString s, l)
+    for (QString s :  l)
       message(s,sys);
   } else {
-    foreach(QString s, l)
+    for (QString s :  l)
       message(s+addtoend,sys);
   }
 }
@@ -108,10 +108,10 @@ void VP1Msg::messageDebug(const QStringList& l, const QString& addtoend )
     return;
   }
   if (addtoend.isEmpty()) {
-    foreach(QString s, l)
+    for (QString s :  l)
       messageDebug(s);
   } else {
-    foreach(QString s, l)
+    for (QString s :  l)
       messageDebug(s+addtoend);
   }
 }
@@ -123,10 +123,10 @@ void VP1Msg::messageVerbose(const QStringList& l, const QString& addtoend )
     return;
   }
   if (addtoend.isEmpty()) {
-    foreach(QString s, l)
+    for (QString s :  l)
       messageVerbose(s);
   } else {
-    foreach(QString s, l)
+    for (QString s :  l)
       messageVerbose(s+addtoend);
   }
 }
@@ -140,10 +140,10 @@ void VP1Msg::message(const QString& addtostart, const QStringList& l,
     return;
   }
   if (addtoend.isEmpty()) {
-    foreach(QString s, l)
+    for (QString s :  l)
       message(addtostart+s,sys);
   } else {
-    foreach(QString s, l)
+    for (QString s :  l)
       message(addtostart+s+addtoend,sys);
   }
 }
@@ -159,10 +159,10 @@ void VP1Msg::messageDebug(const QString& addtostart, const QStringList& l, const
     return;
   }
   if (addtoend.isEmpty()) {
-    foreach(QString s, l)
+    for (QString s :  l)
       messageDebug(addtostart+s);
   } else {
-    foreach(QString s, l)
+    for (QString s :  l)
       messageDebug(addtostart+s+addtoend);
   }
 }
@@ -178,10 +178,10 @@ void VP1Msg::messageVerbose(const QString& addtostart, const QStringList& l, con
     return;
   }
   if (addtoend.isEmpty()) {
-    foreach(QString s, l)
+    for (QString s :  l)
       messageVerbose(addtostart+s);
   } else {
-    foreach(QString s, l)
+    for (QString s :  l)
       messageVerbose(addtostart+s+addtoend);
   }
 }
