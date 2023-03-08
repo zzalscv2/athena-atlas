@@ -7,7 +7,6 @@
 #include "JetRec/JetPruner.h"
 #include <iomanip>
 #include "fastjet/PseudoJet.hh"
-#include "fastjet/JetDefinition.hh"
 #include "fastjet/tools/Pruner.hh"
 #include "JetEDM/PseudoJetVector.h"
 #include "JetEDM/FastJetUtils.h"
