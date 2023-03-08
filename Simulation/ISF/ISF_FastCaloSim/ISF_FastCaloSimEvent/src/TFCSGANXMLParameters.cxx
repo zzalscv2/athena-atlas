@@ -78,6 +78,7 @@ void TFCSGANXMLParameters::InitialiseFromXML(int pid,int etaMid,const std::strin
          }
       }
    }   
+   xmlFreeDoc(doc);
 }   
 
 bool TFCSGANXMLParameters::ReadBooleanAttribute(const std::string& name, xmlNodePtr node){
