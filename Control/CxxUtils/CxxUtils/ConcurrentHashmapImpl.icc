@@ -688,7 +688,7 @@ void CHMIMPL::forceClear()
  * @param capacity The new table capacity.
  * @param ctx Execution context.
  *
- * No action will be taken in @c capacity is smaller
+ * No action will be taken if @c capacity is smaller
  * than the current capacity.
  */
 T_CHMIMPL
@@ -745,6 +745,17 @@ void CHMIMPL::swap (ConcurrentHashmapImpl& other)
 
   swap_atomic (m_size, other.m_size);
   swap_atomic (m_erased, other.m_erased);
+}
+
+
+/**
+ * @brief Access the Updater instance.
+ */
+T_CHMIMPL
+inline
+typename CHMIMPL::Updater_t& CHMIMPL::updater()
+{
+  return m_updater;
 }
 
 
