@@ -109,20 +109,37 @@ else:
             run_type = 'Uknown'
             if data[12] == 1:
                 run_type = 'Physics'
+                TileRunType = 1
             elif data[12] == 2:
                 run_type = 'Laser'
+                TileRunType = 2
             elif data[12] == 4:
                 run_type = 'Pedestals'
                 TilePedRun = True
+                TileRunType = 4
                 tilemon_log.info('Set up run type: Pedestals (TilePedRun=True)')
             elif data[12] == 8:
                 run_type = 'CIS'
                 TileCisRun = True
+                TileRunType = 8
                 tilemon_log.info('Set up run type: CIS (TileCisRun=True)')
                 
             tilemon_log.info('TILE CONFIGURATION: RunType: %s, Mode: %s, Samples: %s, Pipeline: %s, I3Delay: %s, Event: %s, Phase: %s, DAC: %s, Capacity: %s'
                              % (run_type, data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7]))
                 
+
+try:
+    dsp_config = ISObject(ipc_partition, 'TileParams.TileCal_DSPConfig', 'TileCal_IS_DSPConfig')
+except:
+    tilemon_log.info( "Could not find Tile DSP Config in IS - Set default number of samples to 7")
+else:
+    try:
+        dsp_config.checkout()
+    except:
+        tilemon_log.info( "Could not find Tile DSP Config in IS - Set default number of samples to 7")
+    else:
+        TileFrameLength = dsp_config.samples
+        tilemon_log.info( "Set the following number of samples from DSP Config in IS: " + str(TileFrameLength))
 
 # #########################################
 # The source of events, SFI for full events
@@ -135,7 +152,7 @@ ByteStreamEmonInputSvc.Key = Key
 
 
 if 'KeyCount' not in dir():
-    KeyCount = 50
+    KeyCount = 0
 
 ByteStreamEmonInputSvc.KeyCount = KeyCount
 
