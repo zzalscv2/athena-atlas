@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */ 
 
 #ifndef _RIO_OnTrackErrorScalingCondAlg_H_
@@ -16,7 +16,7 @@
 
 class RIO_OnTrackErrorScalingKit;
 
-class RIO_OnTrackErrorScalingCondAlg : public AthAlgorithm 
+class RIO_OnTrackErrorScalingCondAlg final: public AthAlgorithm 
 {  
  public:
   RIO_OnTrackErrorScalingCondAlg(const std::string& name, ISvcLocator* pSvcLocator);

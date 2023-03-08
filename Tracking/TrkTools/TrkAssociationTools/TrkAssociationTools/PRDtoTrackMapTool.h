@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRK_PRDtoTrackMapTool_H
@@ -21,10 +21,10 @@ namespace Trk {
   class PrepRawData;
 
   /** Concrete Implementation of the IPRD_AssociationTool interface.*/
-  class PRDtoTrackMapTool : public extends<AthAlgTool, IPRDtoTrackMapTool>
-{
+  class PRDtoTrackMapTool final
+      : public extends<AthAlgTool, IPRDtoTrackMapTool> {
 
-  public:
+   public:
     PRDtoTrackMapTool(const std::string&,const std::string&,const IInterface*);
     virtual ~PRDtoTrackMapTool()=default;
     virtual StatusCode initialize() override;
@@ -63,8 +63,6 @@ namespace Trk {
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
   protected:
     void ensureType(Trk::PRDtoTrackMap &virt_prd_to_track_map) const ;
-
   };
-
 }
 #endif

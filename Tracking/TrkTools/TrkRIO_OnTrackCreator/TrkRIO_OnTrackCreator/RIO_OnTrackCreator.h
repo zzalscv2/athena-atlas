@@ -49,12 +49,12 @@ namespace Trk {
       @author Wolfgang Liebig <http://consult.cern.ch/xwho/people/54608>
    */
 
-  class RIO_OnTrackCreator : public AthAlgTool,
-                             virtual public IRIO_OnTrackCreator {
-  public:
-  ///////////////////////////////////////////////////////////////////
-  // Public methods:
-  ///////////////////////////////////////////////////////////////////
+  class RIO_OnTrackCreator final : public AthAlgTool,
+                                   virtual public IRIO_OnTrackCreator {
+   public:
+    ///////////////////////////////////////////////////////////////////
+    // Public methods:
+    ///////////////////////////////////////////////////////////////////
 
     //! standard AlgTool constructor
     RIO_OnTrackCreator(const std::string&,const std::string&,
@@ -101,7 +101,6 @@ namespace Trk {
       invalid = 3
     };
     Mode m_enumMode = Mode::all;
-
   };
 
 } // end of namespace
