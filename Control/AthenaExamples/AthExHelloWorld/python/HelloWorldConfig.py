@@ -3,82 +3,70 @@
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
-def HelloWorldCfg(flags):
-    result=ComponentAccumulator()
-    
-    HelloAlg=CompFactory.HelloAlg
-    HelloWorld=HelloAlg("HelloWorld")
-    
-    HelloWorld.OutputLevel = 0
 
-    # Set an int property
-    HelloWorld.MyInt = 42
-
-    # Set a boolean property (False, True, 0, 1)
-    HelloWorld.MyBool = True
-
-    # Set a double property
-    HelloWorld.MyDouble = 3.14159
-
-    # Set a vector of strings property ...
-    HelloWorld.MyStringVec = [ "Welcome", "to", "Athena", "Framework", "Tutorial" ]
-
-    # ... and add one more:
-    HelloWorld.MyStringVec += [ "!" ]
-
-    # Set a map of strings to strings property ...
-    HelloWorld.MyDict = { 'Bonjour'      : 'Guten Tag',
-                          'Good Morning' : 'Bonjour' , 'one' : 'uno' }
-
-    # ... and add one more:
-    HelloWorld.MyDict[ "Goeiedag" ] = "Ni Hao"
-
-    # Set a table (a vector of pairs of doubles) ...
-    HelloWorld.MyTable = [ ( 1 , 1 ) , ( 2 , 4 ) , ( 3 , 9 ) ]
-
-    # ... and one more:
-    HelloWorld.MyTable += [ ( 4, 16 ) ]
-
-    # Set a matrix (a vector of vectors) ...
-    HelloWorld.MyMatrix = [ [ 1, 2, 3 ],
-                            [ 4, 5, 6 ] ]
-
-    # ... and some more:
-    HelloWorld.MyMatrix += [ [ 7, 8, 9 ] ]
-
-    HelloTool=CompFactory.HelloTool
-    ht=HelloTool( "HelloTool" )
-    HelloWorld.MyPrivateHelloTool = ht #HelloTool( "HelloTool" )
-    HelloWorld.MyPrivateHelloTool.MyMessage = "A Private Message!"
-
-    pt=HelloTool( "PublicHello")
-    pt.MyMessage="A public Message!"    
-
-    result.addPublicTool(pt)
-    print (pt)
-
-
-    HelloWorld.MyPublicHelloTool=pt
-
-
-    #print HelloWorld
-
-    result.addEventAlgo(HelloWorld)
+def HelloWorldToolCfg(flags, name="HelloTool", **kwargs):
+    result = ComponentAccumulator()
+    # one can use kwargs to set properties
+    kwargs.setdefault("MyMessage", "Hello World!")
+    # create and add the tool to the result (and pass arguments)
+    result.setPrivateTools(CompFactory.HelloTool(name, **kwargs))
     return result
 
 
-if __name__=="__main__":
+def HelloWorldPublicToolCfg(flags, name="PublicHello", **kwargs):
+    result = ComponentAccumulator()
+    # one can also set properties directly with creation
+    tool = CompFactory.HelloTool(name, MyMessage="Hello!", **kwargs)
+    # ...or after creation
+    tool.MyMessage = "A public Message!"
+    # add the tool to the result
+    result.addPublicTool(tool, primary=True)
+    return result
+
+
+def HelloWorldCfg(flags):
+    result = ComponentAccumulator()
+
+    alg = CompFactory.HelloAlg("HelloWorld",
+                               # Set an int from a flag
+                               MyInt=flags.Input.JobNumber,
+                               # Set a boolean property (False, True, 0, 1)
+                               MyBool=True,
+                               # Set a double property
+                               MyDouble=3.14159,
+                               # Set a vector of strings property
+                               MyStringVec=["Welcome", "to",
+                                            "Athena", "Framework", "Tutorial"],
+                               # Set a map of strings to strings property
+                               MyDict={"Bonjour": "Guten Tag",
+                                       "Good Morning": "Bonjour",
+                                       "one": "uno"},
+                               # Set a table (a vector of pairs of doubles)
+                               MyTable=[(1, 1), (2, 4), (3, 9)],
+                               # Set a matrix (a vector of vectors) ...
+                               MyMatrix=[[1, 2, 3],
+                                         [4, 5, 6]],
+                               # set a private tool
+                               MyPrivateHelloTool=result.popToolsAndMerge(
+                                   HelloWorldToolCfg(flags)),
+                               # set a public tool
+                               MyPublicHelloTool=result.getPrimaryAndMerge(
+                                   HelloWorldPublicToolCfg(flags)),
+                               )
+
+    # add the algorithm to the result
+    result.addEventAlgo(alg)
+    return result
+
+
+if __name__ == "__main__":
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    flags=initConfigFlags()
-    flags.Exec.MaxEvents=10
+    flags = initConfigFlags()
+    flags.Exec.MaxEvents = 10
     flags.fillFromArgs()
     flags.lock()
-    cfg=MainServicesCfg(flags)
+
+    cfg = MainServicesCfg(flags)
     cfg.merge(HelloWorldCfg(flags))
     cfg.run()
-
-    #f=open("HelloWorld.pkl","wb")
-    #cfg.store(f)
-    #f.close()
-
