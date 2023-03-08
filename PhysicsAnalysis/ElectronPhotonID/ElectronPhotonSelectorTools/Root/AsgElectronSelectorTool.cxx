@@ -552,18 +552,32 @@ std::vector<float> AsgElectronSelectorTool::calculateMultipleOutputs(const Event
   }
   d0significance = std::abs(d0 / d0sigma);
 
-  if (!track->summaryValue(TRT_PID, xAOD::eProbabilityHT)){
-    allFound = false;
-    notFoundList += "eProbabilityHT ";
-  }
+  const static SG::AuxElement::Accessor<float> trans_TRT_PID_acc("transformed_e_probability_ht");
+  if (!trans_TRT_PID_acc.isAvailable(*eg)) {
+    // most probable case, need to compute the variable
 
-  //Transform the TRT PID output for use in the ML tool.
-  double tau = 15.0;
-  double fEpsilon = 1.0e-30; // to avoid zero division
-  double pid_tmp = TRT_PID;
-  if (pid_tmp >= 1.0) pid_tmp = 1.0 - 1.0e-15; //this number comes from TMVA
-  else if (pid_tmp <= fEpsilon) pid_tmp = fEpsilon;
-  trans_TRTPID = -std::log(1.0 / pid_tmp - 1.0) * (1. / tau);
+    if (!track->summaryValue(TRT_PID, xAOD::eProbabilityHT)) {
+      allFound = false;
+      notFoundList += "eProbabilityHT ";
+    }
+
+    // Transform the TRT PID output for use in the LH tool.
+    const double tau = 15.0;
+    const double fEpsilon = 1.0e-30; // to avoid zero division
+    double pid_tmp = TRT_PID;
+    if (pid_tmp >= 1.0)
+      pid_tmp = 1.0 - 1.0e-15; // this number comes from TMVA
+    else if (pid_tmp <= fEpsilon)
+      pid_tmp = fEpsilon;
+    trans_TRTPID = -std::log(1.0 / pid_tmp - 1.0) * (1. / tau);
+  }
+  else
+  {
+    // it means the variable have been already computed by another tool
+    // usually this is the EGammaVariableCorrection, which means that
+    // it is also fudged (only MC)
+    trans_TRTPID = trans_TRT_PID_acc(*eg);
+  }
 
   // Change default value of TRT PID to 0.15 instead of 0 when there is no information from the TRT
   if ((std::abs(trans_TRTPID) < 1.0e-6) && (std::abs(eta) > 2.01)){
