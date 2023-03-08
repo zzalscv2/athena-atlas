@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -34,7 +34,7 @@
 class TileMuToNtuple: public AthAlgorithm {
   public:
     //Constructor
-    TileMuToNtuple(std::string name, ISvcLocator* pSvcLocator);
+    TileMuToNtuple(const std::string& name, ISvcLocator* pSvcLocator);
 
     //Destructor 
     virtual ~TileMuToNtuple();

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -332,8 +332,7 @@ StatusCode TileLookForMuAlg::execute (const EventContext& ctx) const {
                                 << muPhi << ", "
                                 << muEnergy[0] << ", "
                                 << muEnergy[1] << ", "
-                                << muEnergy[2] << ", "
-                                << muEnergy[3]
+                                << muEnergy[2]
                                 << " tag  eta 1st, 2nd, 3rd,"
                                 << m_etaA[cellA] << ", "
                                 << m_etaBC[cellBC] << ", "
