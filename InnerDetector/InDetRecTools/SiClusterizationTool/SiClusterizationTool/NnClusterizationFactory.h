@@ -98,8 +98,8 @@ namespace InDet {
                      const std::string& n, const IInterface* p);
      ~NnClusterizationFactory() = default;
 
-    virtual StatusCode initialize();
-    virtual StatusCode finalize() { return StatusCode::SUCCESS; };
+    virtual StatusCode initialize() override;
+    virtual StatusCode finalize() override { return StatusCode::SUCCESS; };
 
     std::vector<double> estimateNumberOfParticles(const InDet::PixelCluster& pCluster,
                                                   Amg::Vector3D & beamSpotPosition) const;

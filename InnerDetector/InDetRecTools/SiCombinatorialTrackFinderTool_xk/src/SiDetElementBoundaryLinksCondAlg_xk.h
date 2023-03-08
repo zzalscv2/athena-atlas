@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SiDetElementBoundaryLinksCondAlg_xk_h
@@ -25,7 +25,7 @@ namespace InDet {
    * this condition algorithm is necessary.
    */
 
-  class SiDetElementBoundaryLinksCondAlg_xk : public AthReentrantAlgorithm {
+  class SiDetElementBoundaryLinksCondAlg_xk final: public AthReentrantAlgorithm {
   public:
     SiDetElementBoundaryLinksCondAlg_xk(const std::string& name, ISvcLocator* pSvcLocator);
     virtual ~SiDetElementBoundaryLinksCondAlg_xk() override = default;

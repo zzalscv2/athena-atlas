@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -30,7 +30,7 @@ namespace InDet
 
       @author Kurt Barry, Tim Nelsen, Andreas Salzburger
   */
-  class TotPixelClusterSplitter : public extends<AthAlgTool, IPixelClusterSplitter>
+  class TotPixelClusterSplitter final : public extends<AthAlgTool, IPixelClusterSplitter>
   {
     public :
       /** Constructor*/
@@ -42,15 +42,17 @@ namespace InDet
       ~TotPixelClusterSplitter() = default;
           
       /** AthAlgTool interface methods */
-      StatusCode initialize();            
-      StatusCode finalize();            
-          
+      virtual StatusCode initialize() override;            
+      virtual StatusCode finalize() override;
+
       /** take one, give zero or many */
-      std::vector<InDet::PixelClusterParts> splitCluster(const InDet::PixelCluster& OrigCluster ) const;
-          
+      virtual std::vector<InDet::PixelClusterParts> splitCluster(
+          const InDet::PixelCluster& OrigCluster) const override;
+
       /** take one, give zero or many - with split probability object */
-      std::vector<InDet::PixelClusterParts> splitCluster(const InDet::PixelCluster& OrigCluster, 
-        const InDet::PixelClusterSplitProb & spo) const;
+      virtual std::vector<InDet::PixelClusterParts> splitCluster(
+          const InDet::PixelCluster& OrigCluster,
+          const InDet::PixelClusterSplitProb& spo) const override;
 
       /** Set the lower and upper bounds for the number of pixels in clusters to be considered. */
       inline void setMinPixels(unsigned int minPix);

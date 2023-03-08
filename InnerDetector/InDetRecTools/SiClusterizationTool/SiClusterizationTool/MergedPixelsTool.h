@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -49,7 +49,7 @@ namespace InDet {
     return id1.COL < id2.COL;
   };
  
-  class MergedPixelsTool : public extends<AthAlgTool, IPixelClusteringTool> {
+  class MergedPixelsTool final: public extends<AthAlgTool, IPixelClusteringTool> {
   public:
 
 

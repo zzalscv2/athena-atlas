@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -33,7 +33,7 @@ namespace ITk {
     by job Option. Also the handle to the general hit-error scaling
     is implemented.
 */
-  class StripClusterOnTrackTool: 
+  class StripClusterOnTrackTool final: 
     public AthAlgTool,virtual public Trk::IRIO_OnTrackCreator
 {
   ///////////////////////////////////////////////////////////////////
@@ -46,7 +46,7 @@ public:
   StripClusterOnTrackTool(const std::string&,const std::string&,const IInterface*);
   virtual ~StripClusterOnTrackTool () = default;
   //! AlgTool initialisation
-  virtual StatusCode initialize();
+  virtual StatusCode initialize() override;
 
   
   /** @brief produces an StripClusterOnTrack using the measured
@@ -56,7 +56,7 @@ public:
       of management/deletion of the  StripClusterOnTrack.
   */
   virtual const InDet::SCT_ClusterOnTrack* correct
-    (const Trk::PrepRawData&, const Trk::TrackParameters&) const; 
+    (const Trk::PrepRawData&, const Trk::TrackParameters&) const override; 
 
   
   /** @brief Returns a correction to be applied to the Strip cluster local x position
