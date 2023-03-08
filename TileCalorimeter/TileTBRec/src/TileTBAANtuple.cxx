@@ -87,7 +87,7 @@ if (msgLvl(MSG::DEBUG))                                                 \
  *  @brief class to produce TileCal commissioning ntuples
  */
 
-TileTBAANtuple::TileTBAANtuple(std::string name, ISvcLocator* pSvcLocator)
+TileTBAANtuple::TileTBAANtuple(const std::string& name, ISvcLocator* pSvcLocator)
   : AthAlgorithm(name, pSvcLocator)
   , m_thistSvc("THistSvc", name)
   , m_ntuplePtr(0)
@@ -417,7 +417,7 @@ StatusCode TileTBAANtuple::ntuple_initialize() {
       m_drawerList[3] = "0x201"; m_drawerType[3] = 2; // barrel neg
       m_drawerList[4] = "0x203"; m_drawerType[4] = 2; // barrel neg
       m_drawerList[5] = "0x402"; m_drawerType[5] = 4; // ext.barrel neg
-      m_drawerList[7] = "0x405"; m_drawerType[6] = 4; // ext.barrel neg
+      m_drawerList[6] = "0x405"; m_drawerType[6] = 4; // ext.barrel neg
     }
 
     if (m_TBperiod < 2016) {
@@ -1941,17 +1941,11 @@ StatusCode TileTBAANtuple::storeHitVector() {
   SG::ReadCondHandle<TileSamplingFraction> samplingFraction(m_samplingFractionKey);
   ATH_CHECK( samplingFraction.isValid() );
 
-  // Get iterator for all hits in hit vector
-  TileHitVecConstIterator it = hitVec->begin();
-  TileHitVecConstIterator itEnd = hitVec->end();
-  bool emptyColl = (it==itEnd);
-
   // Go through all TileHit
-  for(; it != itEnd; it++) {
+  for (const TileHit& cinp : *hitVec) {
 
     // get hits
-    const TileHit * cinp = &(*it);
-    HWIdentifier hwid = cinp->pmt_HWID();
+    HWIdentifier hwid = cinp.pmt_HWID();
 
     // determine type of frag
     int fragId = m_tileHWID->frag(hwid);
@@ -1963,11 +1957,11 @@ StatusCode TileTBAANtuple::storeHitVector() {
 
     } else {
       int fragType = m_drawerType[type];
-      storeHit(cinp,fragType,fragId,m_ehitVec.at(type),m_thitVec.at(type), *samplingFraction);
+      storeHit(&cinp,fragType,fragId,m_ehitVec.at(type),m_thitVec.at(type), *samplingFraction);
     }
   }
 
-  if (emptyColl)
+  if (hitVec->empty())
     return StatusCode::FAILURE;
   else
     return StatusCode::SUCCESS;

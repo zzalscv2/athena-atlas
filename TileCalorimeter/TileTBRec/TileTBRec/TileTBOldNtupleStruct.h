@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////
@@ -22,7 +22,7 @@ class TileTBOldNtupleStruct {
 public :
 
   TileTBOldNtupleStruct(TTree *tree, bool bigain, bool adderFit, std::vector<int> & shift);
-  void SetEventShift(std::vector<int> shift) {m_eventShift = shift;}
+  void SetEventShift(const std::vector<int>& shift) {m_eventShift = shift;}
   void SetEventShift(int dr, int shift)  {m_eventShift[dr] = shift;}
 
   virtual ~TileTBOldNtupleStruct();
