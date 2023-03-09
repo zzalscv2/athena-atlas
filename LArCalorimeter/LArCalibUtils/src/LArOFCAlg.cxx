@@ -1,7 +1,5 @@
-//Dear emacs, this is -*- c++ -*-
-
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArOFC: Algorithm to calculate optimal filtering constants.
@@ -368,8 +366,6 @@ StatusCode LArOFCAlg::stop()
     larOFCComplete->dumpOFC(m_dumpOFCfile) ;
   }
 
-  // record and symlink LArOFCComplete object
-  LArOFCComplete* larOFCCompletePtr=larOFCComplete.get();
   sc = detStore()->record(std::move(larOFCComplete),m_ofcKey);
   if (sc.isFailure()) {
       ATH_MSG_ERROR( "Could not record LArOFCComplete to DetStore with key " << m_ofcKey );
@@ -377,7 +373,7 @@ StatusCode LArOFCAlg::stop()
   }
   ATH_MSG_INFO( "LArOFCComplete object recorded with key " << m_ofcKey ) ;
 
-  sc = detStore()->symLink(larOFCCompletePtr,(ILArOFC*)larOFCCompletePtr);
+  sc=detStore()->symLink(ClassID_traits<LArOFCComplete>::ID(),m_ofcKey,ClassID_traits<ILArOFC>::ID());
   if (sc.isFailure()) {
       ATH_MSG_ERROR( "Could not symlink ILArOFC with LArOFCComplete." );
       return StatusCode::FAILURE;
@@ -387,7 +383,6 @@ StatusCode LArOFCAlg::stop()
 
   // record and symlink second version of LArOFCComplete object
   if (m_computeV2) {
-    LArOFCComplete* larOFCCompletePtrV2=larOFCCompleteV2.get();
     sc = detStore()->record(std::move(larOFCCompleteV2),m_ofcKeyV2);
     if (sc.isFailure()) {
       ATH_MSG_ERROR( "Could not record LArOFCComplete to DetStore with key " << m_ofcKeyV2 );
@@ -395,7 +390,7 @@ StatusCode LArOFCAlg::stop()
     }
     ATH_MSG_INFO( "LArOFCComplete object recorded with key " << m_ofcKeyV2 ) ;
 
-    sc = detStore()->symLink(larOFCCompletePtrV2,(ILArOFC*)larOFCCompletePtrV2);
+    sc=detStore()->symLink(ClassID_traits<LArOFCComplete>::ID(),m_ofcKeyV2,ClassID_traits<ILArOFC>::ID());
     if (sc.isFailure()) {
       ATH_MSG_ERROR( "Could not symlink ILArOFC with LArOFCComplete." );
       return StatusCode::FAILURE;
@@ -414,7 +409,6 @@ StatusCode LArOFCAlg::stop()
   // record and symlink LArShapeComplete object
   if ( m_fillShape ) {
     ATH_MSG_DEBUG( "Trying to record LArShapeComplete object to detector store, key = " << m_shapeKey);
-    LArShapeComplete* shapePtr=larShapeComplete.get();
     sc = detStore()->record(std::move(larShapeComplete),m_shapeKey);
     if (sc.isFailure()) {
        ATH_MSG_ERROR( "Could not record LArShapeComplete to DetStore with key " << m_shapeKey );
@@ -422,7 +416,7 @@ StatusCode LArOFCAlg::stop()
     }
     ATH_MSG_INFO( "LArShapeComplete object recorded to DetStore successfully with key " << m_shapeKey ) ;
     ATH_MSG_DEBUG( "Trying to symlink ILArShape with LArShapeComplete");
-    sc = detStore()->symLink(shapePtr,(ILArShape*)shapePtr);
+    sc=detStore()->symLink(ClassID_traits<LArShapeComplete>::ID(),m_shapeKey,ClassID_traits<ILArShape>::ID());
     if (sc.isFailure()) {
       ATH_MSG_ERROR( "Could not symlink ILArShape with LArShapeComplete." );
       return StatusCode::FAILURE;
