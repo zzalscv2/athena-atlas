@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRUTHRIVETTOOLS_HIGGSTEMPLATECROSSSECTIONSDEFS_H
@@ -307,7 +307,7 @@ namespace HTXS {
     // Higgs Template Cross Section
     struct HiggsClassification {
       // Higgs production mode
-      HTXS::HiggsProdMode prodMode;
+      HTXS::HiggsProdMode prodMode{HTXS::HiggsProdMode::UNKNOWN};
       // The Higgs boson
       TLV higgs;
       // The Higgs boson decay products
@@ -329,9 +329,9 @@ namespace HTXS {
       HTXS::Stage1_2_Fine::Category stage1_2_fine_cat_pTjet25GeV;
       HTXS::Stage1_2_Fine::Category stage1_2_fine_cat_pTjet30GeV;
       // Flag for Z->vv decay mode (needed to split QQ2ZH and GG2ZH)
-      bool isZ2vvDecay;
+      bool isZ2vvDecay{};
       // Error code :: classification was succesful or some error occured
-      HTXS::ErrorCode errorCode;
+      HTXS::ErrorCode errorCode{HTXS::ErrorCode::UNDEFINED};
     };
     
     template <class category>
