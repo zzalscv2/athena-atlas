@@ -481,7 +481,8 @@ def VDVPrecMuTrkCfg(flags, name):
   vdvName = "VDVMuTrkLRT" if "LRT" in name else "VDVMuTrk"
   trkname = "LRT" if "LRT" in name else ''
   dataObjects = [( 'xAOD::TrackParticleContainer' , 'StoreGateSvc+'+getIDTracks(flags, trkname) ),
-                 ( 'xAOD::IParticleContainer' , 'StoreGateSvc+'+ getIDTracks(flags, trkname) )]
+                 ( 'xAOD::IParticleContainer' , 'StoreGateSvc+'+ getIDTracks(flags, trkname) ),
+                 ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_FlaggedCondData' )]
 
   if not flags.Input.isMC:
     dataObjects += [( 'IDCInDetBSErrContainer' , 'StoreGateSvc+PixelByteStreamErrs' ),
@@ -498,9 +499,8 @@ def muEFCBRecoSequence( flags, RoIs, name ):
 
 
   from AthenaCommon.CFElements import parOR
-  from MuonCombinedRecExample.MuonCombinedAlgs import MuonCombinedInDetCandidateAlg
   from MuonCombinedAlgs.MuonCombinedAlgsMonitoring import MuonCreatorAlgMonitoring
-  from MuonCombinedConfig.MuonCombinedReconstructionConfig import MuonCreatorAlgCfg, MuonCombinedAlgCfg
+  from MuonCombinedConfig.MuonCombinedReconstructionConfig import MuonCreatorAlgCfg, MuonCombinedAlgCfg, MuonCombinedInDetCandidateAlgCfg
 
   muEFCBRecoSequence = parOR("efcbViewNode_"+name)
 
@@ -564,19 +564,8 @@ def muEFCBRecoSequence( flags, RoIs, name ):
     trackParticles = PTTrackParticles[-1]
 
   #Make InDetCandidates
-  theIndetCandidateAlg = MuonCombinedInDetCandidateAlg("TrigMuonCombinedInDetCandidateAlg_"+name,TrackParticleLocation = [trackParticles], InDetCandidateLocation="InDetCandidates_"+name)
+  theIndetCandidateAlg = algorithmCAToGlobalWrapper(MuonCombinedInDetCandidateAlgCfg, flags, name="TrigMuonCombinedInDetCandidateAlg_"+name,TrackParticleLocation = [trackParticles], InDetCandidateLocation="InDetCandidates_"+name)
 
-  #No easy way to access AtlasHoleSearchTool in theIndetCandidateAlg
-  from AthenaCommon.AppMgr import ToolSvc
-  from InDetTrigRecExample.InDetTrigConditionsAccess import SCT_ConditionsSetup
-  from SCT_ConditionsTools.SCT_ConditionsSummaryToolSetup import SCT_ConditionsSummaryToolSetup
-  sct_ConditionsSummaryToolSetupWithoutFlagged = SCT_ConditionsSummaryToolSetup(SCT_ConditionsSetup.instanceName('InDetSCT_ConditionsSummaryToolWithoutFlagged'))
-  sct_ConditionsSummaryToolSetupWithoutFlagged.setup()
-  ToolSvc.CombinedMuonIDHoleSearch.BoundaryCheckTool.SctSummaryTool = sct_ConditionsSummaryToolSetupWithoutFlagged.getTool()
-  if not flags.Input.isMC:
-    ToolSvc.CombinedMuonIDHoleSearch.BoundaryCheckTool.SctSummaryTool.ConditionsTools=['SCT_ConfigurationConditionsTool/InDetTrigInDetSCT_ConfigurationConditionsTool','SCT_ByteStreamErrorsTool/InDetTrigInDetSCT_ByteStreamErrorsTool']
-  else:
-    ToolSvc.CombinedMuonIDHoleSearch.BoundaryCheckTool.SctSummaryTool.ConditionsTools=['SCT_ConfigurationConditionsTool/InDetTrigInDetSCT_ConfigurationConditionsTool']
 
   #MS ID combination
   candidatesName = "MuonCandidates"
@@ -631,9 +620,8 @@ def muEFInsideOutRecoSequence(flags, RoIs, name):
   from AthenaCommon.CFElements import parOR
 
   from MuonConfig.MuonSegmentFindingConfig import MooSegmentFinderAlgCfg, MuonSegmentFinderAlgCfg, MuonLayerHoughAlgCfg, MuonSegmentFilterAlgCfg
-  from MuonCombinedRecExample.MuonCombinedAlgs import MuonCombinedInDetCandidateAlg
   from MuonCombinedAlgs.MuonCombinedAlgsMonitoring import MuonCreatorAlgMonitoring
-  from MuonCombinedConfig.MuonCombinedReconstructionConfig import MuonCreatorAlgCfg, MuGirlStauAlgCfg, StauCreatorAlgCfg, MuonInDetToMuonSystemExtensionAlgCfg, MuonInsideOutRecoAlgCfg
+  from MuonCombinedConfig.MuonCombinedReconstructionConfig import MuonCreatorAlgCfg, MuGirlStauAlgCfg, StauCreatorAlgCfg, MuonInDetToMuonSystemExtensionAlgCfg, MuonInsideOutRecoAlgCfg, MuonCombinedInDetCandidateAlgCfg
 
   viewNodeName="efmuInsideOutViewNode_"+name
   if "Late" in name:
@@ -687,19 +675,7 @@ def muEFInsideOutRecoSequence(flags, RoIs, name):
     trackParticles = PTTrackParticles[-1]
 
     #Make InDetCandidates
-    theIndetCandidateAlg = MuonCombinedInDetCandidateAlg("TrigMuonCombinedInDetCandidateAlg_"+name,TrackParticleLocation = [trackParticles],ForwardParticleLocation=trackParticles, InDetCandidateLocation="InDetCandidates_"+name)
-
-    from AthenaCommon.AppMgr import ToolSvc
-    from InDetTrigRecExample.InDetTrigConditionsAccess import SCT_ConditionsSetup
-    from SCT_ConditionsTools.SCT_ConditionsSummaryToolSetup import SCT_ConditionsSummaryToolSetup
-    sct_ConditionsSummaryToolSetupWithoutFlagged = SCT_ConditionsSummaryToolSetup(SCT_ConditionsSetup.instanceName('InDetSCT_ConditionsSummaryToolWithoutFlagged'))
-    sct_ConditionsSummaryToolSetupWithoutFlagged.setup()
-    ToolSvc.CombinedMuonIDHoleSearch.BoundaryCheckTool.SctSummaryTool = sct_ConditionsSummaryToolSetupWithoutFlagged.getTool()
-    if not flags.Input.isMC:
-      ToolSvc.CombinedMuonIDHoleSearch.BoundaryCheckTool.SctSummaryTool.ConditionsTools=['SCT_ConfigurationConditionsTool/InDetTrigInDetSCT_ConfigurationConditionsTool','SCT_ByteStreamErrorsTool/InDetTrigInDetSCT_ByteStreamErrorsTool']
-    else:
-      ToolSvc.CombinedMuonIDHoleSearch.BoundaryCheckTool.SctSummaryTool.ConditionsTools=['SCT_ConfigurationConditionsTool/InDetTrigInDetSCT_ConfigurationConditionsTool']
-
+    theIndetCandidateAlg = algorithmCAToGlobalWrapper(MuonCombinedInDetCandidateAlgCfg, flags, name="TrigMuonCombinedInDetCandidateAlg_"+name,TrackParticleLocation = [trackParticles],ForwardParticleLocation=trackParticles, InDetCandidateLocation="InDetCandidates_"+name)
     efmuInsideOutRecoSequence+=theIndetCandidateAlg
 
 
