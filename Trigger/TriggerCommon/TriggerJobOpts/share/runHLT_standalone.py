@@ -36,7 +36,6 @@ class opt:
     endJobAfterGenerate = False       # Finish job after menu generation
     forceEnableAllChains = False      # if True, all HLT chains will run even if the L1 item is false
     enableL1MuonPhase1   = None       # option to overwrite flags.Trigger.enableL1MuonPhase1
-    enableL1CaloPhase1   = False      # Enable Run-3 LVL1 calo simulation and/or decoding
     enableL1CaloLegacy = True         # Enable Run-2 L1Calo simulation and/or decoding (possible even if enablePhase1 is True)
     enableL1TopoDump = False          # Enable L1Topo simulation to write inputs to txt
     enableL1TopoBWSimulation = False  # Enable bitwise L1Topo simulation
@@ -189,19 +188,6 @@ if 'doL1Sim' not in globals():
     opt.doL1Sim = flags.Input.isMC
     log.info('Setting default doL1Sim=%s because flags.Input.isMC=%s', opt.doL1Sim, flags.Input.isMC)
 
-# Set default enableL1CaloPhase1 option to True if running L1Sim on data or MC with SuperCells (ATR-23703)
-if 'enableL1CaloPhase1' not in globals():
-    if flags.Input.Format is Format.BS:
-        opt.enableL1CaloPhase1 = opt.doL1Sim
-        log.info('Setting default enableL1CaloPhase1=%s because flags.Input.Format=%s and doL1Sim=%s',
-                 opt.enableL1CaloPhase1, flags.Input.Format, opt.doL1Sim)
-    else:
-        scell_available = objKeyStore.isInInput('CaloCellContainer','SCell')
-        opt.enableL1CaloPhase1 = scell_available
-        log.info('Setting default enableL1CaloPhase1=%s because flags.Input.Format=%s and SuperCells '
-                 'are%s available in the input file',
-                 opt.enableL1CaloPhase1, flags.Input.Format, ('' if scell_available else ' not'))
-
 if flags.Input.Format is Format.BS or opt.doL1Sim:
     flags.Trigger.HLTSeeding.forceEnableAllChains = opt.forceEnableAllChains
 
@@ -209,7 +195,6 @@ if flags.Input.Format is Format.BS or opt.doL1Sim:
 flags.Trigger.doLVL1 = opt.doL1Sim
 if opt.enableL1MuonPhase1 is not None:
     flags.Trigger.enableL1MuonPhase1 = opt.enableL1MuonPhase1
-flags.Trigger.enableL1CaloPhase1 = opt.enableL1CaloPhase1
 flags.Trigger.enableL1CaloLegacy = opt.enableL1CaloLegacy
 flags.Trigger.enableL1TopoDump = opt.enableL1TopoDump
 flags.Trigger.enableL1TopoBWSimulation = opt.enableL1TopoBWSimulation

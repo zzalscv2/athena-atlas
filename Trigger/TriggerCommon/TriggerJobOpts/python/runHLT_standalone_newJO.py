@@ -42,8 +42,6 @@ flags.Exec.MaxEvents = 50
 flags.Common.isOnline = lambda f: not f.Input.isMC
 flags.Common.MsgSourceLength=70
 flags.Trigger.doLVL1=True # run L1 sim also on data
-flags.Trigger.enableL1CaloPhase1=False
-flags.Trigger.enableL1CaloLegacy=True
 flags.Concurrency.NumThreads = 1
 
 # Disable some forward detetors
