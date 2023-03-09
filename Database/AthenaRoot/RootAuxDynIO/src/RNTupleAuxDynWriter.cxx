@@ -35,26 +35,6 @@ namespace RootAuxDynIO
       }
 
 
-   void RNTupleAuxDynWriter::checkType(const std::string& type)
-   {
-      /*  MN: some typedefs are not loaded automatically - this hack will detect 'known'
-          classes containing typedefed data members and parse the right headers so that
-          GetClass() will work
-      */
-      static std::set<std::pair<const char*, const char*> >  typedefLoader ATLAS_THREAD_SAFE
-      { {"xAOD::MissingET", "#include \"xAODMissingET/versions/MissingETCompositionBase.h\"" } };
-
-      for( auto &el : typedefLoader ) {
-         if( type.rfind(el.first, 0) == 0 ) {
-            ATH_MSG_DEBUG("**** loading header (for typedefs): " << el.second);
-               gInterpreter->ProcessLine( el.second );
-            typedefLoader.erase(el);
-            return;
-         }
-      }
-   }
-
-
    void  RNTupleAuxDynWriter::makeNewEntry() {
 #if ROOT_VERSION_CODE < ROOT_VERSION( 6, 27, 0 )
       m_entry = std::make_unique<REntry>();
@@ -128,7 +108,6 @@ namespace RootAuxDynIO
          // first event - only update NTuple Model and store tha data pointer locally
          // fill the RNTuple entry when the entire model is defined (in writeEntry)
          m_attrDataMap[ field_name ] = attr_data;
-         checkType(attr_type);
          auto field = RFieldBase::Create(field_name, attr_type).Unwrap();
          m_model->AddField( move(field) );
       }
@@ -147,17 +126,13 @@ namespace RootAuxDynIO
          throw std::runtime_error( std::string("Attempt to add new field to RNTuple after the first write. name: ")
                               + field_name + " type: " + attr_type );
       }
-// ROOT 6.26 version not implemented
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 27, 0 ) 
       if( m_attrDataMap.find(field_name) != m_attrDataMap.end() ) {
          throw std::runtime_error( std::string("Attempt to add existing field.  name: ")
                               + field_name + "new type: " + attr_type );
       }
-      checkType(attr_type);
       auto field = RFieldBase::Create(field_name, attr_type).Unwrap();
       m_model->AddField( move(field) );
       m_attrDataMap[ field_name ] = nullptr;
-#endif         
    }
 
 
@@ -167,7 +142,7 @@ namespace RootAuxDynIO
       auto field_iter = m_attrDataMap.find(field_name);
       if( field_iter == m_attrDataMap.end() ) {
          std::stringstream msg;
-         msg <<"Attempt to write unknonw Field with name: '" << field_name << std::ends;
+         msg <<"Attempt to write unknown Field with name: '" << field_name << std::ends;
          throw std::runtime_error( msg.str() );
       }
       if( !m_model ) {
