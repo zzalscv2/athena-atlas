@@ -45,7 +45,8 @@ class ATLAS_NOT_THREAD_SAFE LArPhysWavePredictor : public AthAlgorithm
   Gaudi::Property<std::vector<std::string> > m_problemsToMask{this,"ProblemsToMask",{}, "Bad-Channel categories to mask"};
 
 
-  const LArOnlineID_Base* m_onlineHelper;
+  const LArOnlineID_Base* m_onlineHelper=nullptr;
+  const CaloCell_Base_ID* m_caloCellId=nullptr;
   bool m_testmode;
   bool m_storeEmpty;
   bool m_dumpMphysMcali;
