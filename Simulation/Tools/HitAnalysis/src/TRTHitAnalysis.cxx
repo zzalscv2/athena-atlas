@@ -175,7 +175,7 @@ StatusCode TRTHitAnalysis::execute() {
       m_TRT_barcode->push_back(i_hit->particleLink().barcode());
       
       int particleId(i_hit->GetParticleEncoding());
-      if(particleId == 22 || static_cast<int>(abs(particleId)/100000)==41 || static_cast<int>(abs(particleId)/10000000)==1) {
+      if(particleId == 22 || static_cast<int>(std::abs(particleId)/100000)==41 || static_cast<int>(std::abs(particleId)/10000000)==1) {
 	m_h_TRT_time_photons->Fill(i_hit->GetGlobalTime());
 	m_h_TRT_edep_photons->Fill(i_hit->GetEnergyDeposit());
 	m_h_TRT_kine_photons->Fill(i_hit->GetKineticEnergy());
