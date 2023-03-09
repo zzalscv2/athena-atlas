@@ -1,10 +1,12 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibUtils/LArShapeCorrector.h"
 #include "LArRawConditions/LArShapeComplete.h"
 #include "CaloIdentifier/CaloGain.h"
+#include "AthenaKernel/ClassID_traits.h"
+#include <memory>
 
 LArShapeCorrector::LArShapeCorrector(const std::string& name, ISvcLocator* pSvcLocator) :
   AthAlgorithm(name, pSvcLocator),
@@ -71,7 +73,7 @@ StatusCode LArShapeCorrector::stop() {
     return sc;
   }
 
-  LArShapeComplete* larShapeCompleteCorr=new LArShapeComplete();
+  std::unique_ptr<LArShapeComplete> larShapeCompleteCorr=std::make_unique<LArShapeComplete>();
   larShapeCompleteCorr->setGroupingType( static_cast<LArConditionsContainerBase::GroupingType>(m_groupingType));
   sc  = larShapeCompleteCorr->initialize(); 
   if ( sc.isFailure() ) {
@@ -163,14 +165,14 @@ StatusCode LArShapeCorrector::stop() {
 
   ATH_MSG_DEBUG(" Selected shapes for "  <<  count << " cells. NChannels=" << larShapeCompleteCorr->chan_size());
 
-  sc = detStore()->record(larShapeCompleteCorr,  m_keyShape_newcorr);
+  sc = detStore()->record(std::move(larShapeCompleteCorr),  m_keyShape_newcorr);
   if (sc.isFailure()) {
     ATH_MSG_ERROR( "Failed to record LArShapeComplete object with key " << m_keyShape_newcorr );
     return sc;
   }
   ATH_MSG_INFO( "Successfully registered LArShapeComplete object with key " << m_keyShape_newcorr );
 
-  sc = detStore()->symLink(larShapeCompleteCorr, (ILArShape*)larShapeCompleteCorr);
+  sc=detStore()->symLink(ClassID_traits<LArShapeComplete>::ID(),m_keyShape_newcorr,ClassID_traits<ILArShape>::ID());
   if (sc.isFailure()) {
     ATH_MSG_ERROR( "Failed to sym-link LArShapeComplete object" );
     return sc;

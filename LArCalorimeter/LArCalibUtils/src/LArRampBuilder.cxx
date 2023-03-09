@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArRampBuilder.h"
@@ -14,6 +14,7 @@
 
 #include <fstream>
 
+#include "AthenaKernel/ClassID_traits.h"
 
 StatusCode LArRampBuilder::initialize()
 {
@@ -731,12 +732,11 @@ StatusCode LArRampBuilder::stop()
     ATH_MSG_INFO( " Summary : Number of FCAL      cells side A or C (connected+unconnected):   1762+  30 =  1792 ");
 
 
-    const auto *rampPtr=larRampComplete.get(); //Remember ptr for symlink
     sc=detStore()->record(std::move(larRampComplete),m_keyoutput);
     if (sc.isFailure()) {
       ATH_MSG_ERROR( "Failed to record LArRampComplete object");
     }
-    sc=detStore()->symLink(rampPtr, (const ILArRamp*)rampPtr);
+    sc=detStore()->symLink(ClassID_traits<LArRampComplete>::ID(),m_keyoutput,ClassID_traits<ILArRamp>::ID());
     if (sc.isFailure()) {
       ATH_MSG_ERROR( "Failed to symlink LArRawRamp object");
     }

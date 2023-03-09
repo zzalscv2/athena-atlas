@@ -1,11 +1,14 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibUtils/LArPhysWavePredictor.h"
 
 #include "GaudiKernel/ToolHandle.h"
+#include "AthenaKernel/ClassID_traits.h"
+
 #include "CaloIdentifier/CaloCell_ID.h"
+#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
 
 #include "LArRawConditions/LArCaliWave.h"
 #include "LArRawConditions/LArCaliWaveContainer.h"
@@ -37,13 +40,13 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <memory>
 
 
 typedef LArPhysWaveContainer::ConstConditionsMapIterator PhysWaveIt;
 
 LArPhysWavePredictor::LArPhysWavePredictor (const std::string& name, ISvcLocator* pSvcLocator) 
  : AthAlgorithm(name, pSvcLocator),
-   m_onlineHelper(0),
    m_groupingType("FeedThrough") // SubDetector, Single, FeedThrough
 {
   declareProperty("TestMode",         m_testmode   = false);
@@ -125,13 +128,18 @@ StatusCode LArPhysWavePredictor::initialize()
     ATH_CHECK(detStore()->retrieve(ll, "LArOnline_SuperCellID"));
     m_onlineHelper = (const LArOnlineID_Base*)ll;
     ATH_MSG_DEBUG("Found the LArOnlineID helper");
-    
+    const CaloCell_SuperCell_ID* scid;
+    ATH_CHECK(detStore()->retrieve(scid, "CaloCell_SuperCell_ID" ));
+    m_caloCellId= (const CaloCell_Base_ID*)scid;
+
   } else { // m_isSC
     const LArOnlineID* ll;
     ATH_CHECK(detStore()->retrieve(ll, "LArOnlineID") );
     m_onlineHelper = (const LArOnlineID_Base*)ll;
     ATH_MSG_DEBUG(" Found the LArOnlineID helper. ");
-    
+     const CaloCell_ID* cid;
+    ATH_CHECK(detStore()->retrieve(cid, "CaloCell_ID" ));
+    m_caloCellId= (const CaloCell_Base_ID*)cid;
   }
 
   ATH_CHECK( m_BCKey.initialize() );
@@ -186,13 +194,6 @@ StatusCode LArPhysWavePredictor::stop()
       return sc;
     }}
 
-  const CaloCell_ID* idHelper = nullptr;
-  ATH_CHECK( detStore()->retrieve (idHelper, "CaloCell_ID") );
-  const LArEM_ID* emId = idHelper->em_idHelper();
-  if (!emId) {
-      ATH_MSG_ERROR( "Could not access lar EM ID helper" );
-      return StatusCode::FAILURE;
-  }   
   
   // Retrieve cabling
   const LArOnOffIdMapping* cabling(0);
@@ -290,7 +291,7 @@ StatusCode LArPhysWavePredictor::stop()
   int nchannel = 0 ;
   
   // Create LArPhysWaveContainer for predicted physics waveforms
-  LArPhysWaveContainer* larPhysWaveContainer = new LArPhysWaveContainer();
+  std::unique_ptr<LArPhysWaveContainer> larPhysWaveContainer = std::make_unique<LArPhysWaveContainer>();
 
   sc=larPhysWaveContainer->setGroupingType(m_groupingType,msg());
   if (sc.isFailure()) {
@@ -305,7 +306,7 @@ StatusCode LArPhysWavePredictor::stop()
   }   
 
   // Create LArMphysOverMcalComplete for predicted Mphys/Mcali
-  LArMphysOverMcalComplete* MphysOverMcalComplete = new LArMphysOverMcalComplete(); 
+  std::unique_ptr<LArMphysOverMcalComplete> MphysOverMcalComplete = std::make_unique<LArMphysOverMcalComplete>(); 
   sc=MphysOverMcalComplete->setGroupingType(m_groupingType,msg());
   if (sc.isFailure()) {
     ATH_MSG_ERROR( "Failed to set groupingType for LArMphysOverMcalComplete object" );
@@ -420,8 +421,8 @@ StatusCode LArPhysWavePredictor::stop()
 	    continue ; 	  
 	  }
 
-	  int region = emId->region(id);
-          int layer  = emId->sampling(id);
+	  int region = m_caloCellId->region(id);
+          int layer  = m_caloCellId->sampling(id);
 
   	  // Get the parameters corresponding to current LArCaliWave
 	  float Tcali;
@@ -551,7 +552,7 @@ StatusCode LArPhysWavePredictor::stop()
 	  //      
 	  LArPhysWave larPhysWave;
 	  float MphysMcali ;	
-	  if(larIdealPhysWaveContainer && emId->is_lar_hec(id)) {
+	  if(larIdealPhysWaveContainer && m_caloCellId->is_lar_hec(id)) {
 	    const LArPhysWave& laridealPhysWave = larIdealPhysWaveContainer -> get(chid,gain);
 	    int LArWaveFlag=LArWave::predCali;    // 111 - for HEC Wave
 	    //int LArIdealPhysWaveFlag=LArWave::predCali;    // 111 - for HEC Wave
@@ -611,49 +612,17 @@ StatusCode LArPhysWavePredictor::stop()
 	  MphysOverMcalComplete->set(chid,gain,MphysMcali);
 	  NMPMC++;
 	  if ( m_dumpMphysMcali ) { 
-	     int eta = emId->eta(id);
-	     int phi = emId->phi(id);
+	     int eta = m_caloCellId->eta(id);
+	     int phi = m_caloCellId->phi(id);
 	     fprintf( f , "%2d %2d %3d %3d  %2u %8.3f \n", region, layer, eta, phi, gain, MphysMcali ) ;
-	  }
+	  } //end if m_dumpMphysMcal
 	  
-	  if ( m_testmode && nchannel>=10 ) {
-
-	    ATH_MSG_INFO( "Test mode selected, process only one channel!" ) ;
-	    
-	    // Record LArPhysWaveContainer to DetectorStore
-  	    sc = detStore()->record(larPhysWaveContainer,m_keyPhys);
-	    if (sc.isFailure()) {
-	      ATH_MSG_FATAL( "Cannot record LArPhysWaveContainer to StoreGate! key=" << m_keyPhys );
-	      return StatusCode::FAILURE;
-            }
-
-            // Record LArMphysOverMcalComplete to DetectorStore
-            sc = detStore()->record(MphysOverMcalComplete,m_keyMphysMcali); 
-            if (sc.isFailure()) {
-              ATH_MSG_FATAL( "Cannot record LArMphysOverMcalComplete to StoreGate! key=" << m_keyMphysMcali );
-              return StatusCode::FAILURE;
-            }
-  
-            // Symlink LArMphysOverMcalComplete to ILArMphysOverMcal for further use
-            ATH_MSG_DEBUG("Trying to symlink ILArMphysOverMcal with LArMphysOverMcalComplete...");
-            ILArMphysOverMcal *larMphysOverMcal = NULL;
-            sc = detStore()->symLink(MphysOverMcalComplete,larMphysOverMcal);
-            if (sc.isFailure()) {
-              ATH_MSG_FATAL( "Could not symlink ILArMphysOverMcal with LArMphysOverMcalComplete." );
-              return StatusCode::FAILURE;
-            } 
-            ATH_MSG_INFO( "ILArMphysOverMcal symlink with LArMphysOverMcalComplete successfully" ) ;
-
-	    return StatusCode::SUCCESS; 
-
-          } // end of if ( m_testmode && nchannel>=1 )
-
         } // end loop over DAC value for a given cell
-
+	if ( m_testmode && nchannel>=1 ) break;
       }  // end loop over cells for a given gain
-
+      if ( m_testmode && nchannel>=1 ) break;
     } // end loop over gains for a give container
-  
+    if ( m_testmode && nchannel>=1 ) break;
   }  // End loop over all CaliWave containers
 
   //ATH_MSG_INFO( " Summary : Number of cells with a PhysWave values computed : " << larPhysWaveContainer->totalNumberOfConditions()  );
@@ -690,14 +659,14 @@ StatusCode LArPhysWavePredictor::stop()
   ATH_MSG_INFO( "\n" );
 
   // Record LArPhysWaveContainer to DetectorStore
-  sc = detStore()->record(larPhysWaveContainer,m_keyPhys);
+  sc = detStore()->record(std::move(larPhysWaveContainer),m_keyPhys);
   if (sc.isFailure()) {
     ATH_MSG_FATAL( "Cannot record LArPhysWaveContainer to StoreGate! key=" << m_keyPhys );
     return StatusCode::FAILURE;
   }
 
   // Record LArMphysOverMcalComplete to DetectorStore
-  sc = detStore()->record(MphysOverMcalComplete,m_keyMphysMcali); 
+  sc = detStore()->record(std::move(MphysOverMcalComplete),m_keyMphysMcali); 
   if (sc.isFailure()) {
     ATH_MSG_FATAL( "Cannot record LArMphysOverMcalComplete to StoreGate! key=" << m_keyMphysMcali );
     return StatusCode::FAILURE;
@@ -705,8 +674,7 @@ StatusCode LArPhysWavePredictor::stop()
   
   // Symlink LArMphysOverMcalComplete to ILArMphysOverMcal for further use
   ATH_MSG_DEBUG("Trying to symlink ILArMphysOverMcal with LArMphysOverMcalComplete...");
-  ILArMphysOverMcal *larMphysOverMcal = NULL;
-  sc = detStore()->symLink(MphysOverMcalComplete,larMphysOverMcal);
+  sc = detStore()->symLink(ClassID_traits<LArMphysOverMcalComplete>::ID(),m_keyMphysMcali,ClassID_traits<ILArMphysOverMcal>::ID());
   if (sc.isFailure()) {
       ATH_MSG_FATAL( "Could not symlink ILArMphysOverMcal with LArMphysOverMcalComplete." );
       return StatusCode::FAILURE;
