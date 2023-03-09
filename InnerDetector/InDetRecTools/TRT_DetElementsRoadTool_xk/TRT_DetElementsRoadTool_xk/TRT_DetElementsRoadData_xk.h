@@ -1,5 +1,5 @@
 /*                                                                                                                                          
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration                                                                    
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration                                                                    
 */
 
 #include "TrkSurfaces/CylinderBounds.h"
@@ -17,7 +17,7 @@ namespace InDet{
    ~TRT_DetElementsRoadData_xk()=default;
 
    inline void setTRTLayerVectors(TRT_DetElementsLayerVectors_xk layers){m_TRTLayerVectors=std::move(layers);}
-   inline void setBounds(Trk::CylinderBounds cbounds, double rmintrt){m_bounds=cbounds;m_rminTRT=rmintrt;}
+   inline void setBounds(const Trk::CylinderBounds& cbounds, double rmintrt){m_bounds=cbounds;m_rminTRT=rmintrt;}
 
    inline const TRT_DetElementsLayerVectors_xk* getLayers() const {return &m_TRTLayerVectors;}
    inline const Trk::CylinderBounds getBounds() const {return m_bounds;}
