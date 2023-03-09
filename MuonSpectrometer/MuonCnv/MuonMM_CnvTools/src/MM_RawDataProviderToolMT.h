@@ -11,7 +11,7 @@
 
 namespace Muon
 {
-  /** @class STGC_RawDataProviderToolMT
+  /** @class MM_RawDataProviderToolMT
    *  A tool to decode Micromegas ROB fragments into Micromegas RDO (based on the sTGC tool).
    *  @author Leonidas <leonidas.fountas@cern.ch>
    */

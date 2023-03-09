@@ -10,6 +10,7 @@
 
 #include "GaudiKernel/IAlgTool.h"
 #include "ByteStreamData/RawEvent.h"
+#include "MuonRDO/MM_RawDataCollection.h"
 
 namespace Muon
 {
@@ -29,7 +30,7 @@ namespace Muon
       static const InterfaceID& interfaceID() { return IID_IMM_ROD_Decoder; }
 
       /** Convert ROBFragments to RDOs */
-      virtual StatusCode fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment&, const std::vector<IdentifierHash>&, MM_RawDataContainer&) const = 0;
+      virtual StatusCode fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment&, const std::vector<IdentifierHash>&, std::unordered_map<IdentifierHash, std::unique_ptr<MM_RawDataCollection>>& ) const = 0;
   };
 
 } // end of namespace
