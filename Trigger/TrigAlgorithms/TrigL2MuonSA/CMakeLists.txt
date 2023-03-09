@@ -27,5 +27,5 @@ atlas_add_test( MdtDataPreparator_test
                 POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( TrigL2MuonSAConfig
-                SCRIPT python -m TrigL2MuonSA.TrigL2MuonSAConfig_newJO
+                SCRIPT python -m TrigL2MuonSA.TrigL2MuonSAConfig
                 POST_EXEC_SCRIPT noerror.sh )

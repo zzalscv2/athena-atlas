@@ -263,7 +263,7 @@ def muFastRecoSequence( flags, RoIs, doFullScanID = False, InsideOutMode=False, 
 
 
   ### set up MuFastSteering ###
-  from TrigL2MuonSA.TrigL2MuonSAConfig_newJO import l2MuFastAlgCfg
+  from TrigL2MuonSA.TrigL2MuonSAConfig import l2MuFastAlgCfg
   muFastAlg = algorithmCAToGlobalWrapper(l2MuFastAlgCfg, flags,
                                          roisKey = RoIs,
                                          setup = postFix,
