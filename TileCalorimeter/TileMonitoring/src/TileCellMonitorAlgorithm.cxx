@@ -406,23 +406,25 @@ StatusCode TileCellMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
 
       if (realCell) {
 
+        int dbGain1 = gain1;
+        int dbGain2 = gain2;
         // When only one channel is bad, it might be that gain of masked channel is not correct
         // If two qualities are not identical, then gains are not the same (new feature introduced in rel 17.2)
         int quality1 = (int)tile_cell->qual1();
         int quality2 = (int)tile_cell->qual2();
         if (isBadChannel1 != isBadChannel2 && quality1 != quality2
             && quality1 < 255 && quality2 < 255) {
-          if (isBadChannel1 && isOkChannel1) gain1 = 1 - gain1;
-          if (isBadChannel2 && isOkChannel2) gain2 = 1 - gain2;
+          if (isBadChannel1 && isOkChannel1) dbGain1 = 1 - gain1;
+          if (isBadChannel2 && isOkChannel2) dbGain2 = 1 - gain2;
         }
 
         if (hash1 != TileHWID::NOT_VALID_HASH) {
-          HWIdentifier adc1_id = m_tileHWID->adc_id(hash1, gain1);
+          HWIdentifier adc1_id = m_tileHWID->adc_id(hash1, dbGain1);
           isMaskedAdc1 = badChannels->getAdcStatus(adc1_id).isBad();
         }
 
         if (hash2 != TileHWID::NOT_VALID_HASH) {
-          HWIdentifier adc2_id = m_tileHWID->adc_id(hash2, gain2);
+          HWIdentifier adc2_id = m_tileHWID->adc_id(hash2, dbGain2);
           isMaskedAdc2 = badChannels->getAdcStatus(adc2_id).isBad();
         }
 
