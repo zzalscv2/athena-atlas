@@ -71,6 +71,9 @@ def TrigCaloMonConfig(inputFlags):
         L2CaloEMClustersMonAlg.OFFMinET = -1.0
         L2CaloEMClustersMonAlg.MaxDeltaR = 0.04
         L2CaloEMClustersMonAlg.HLTChainsT0 = HLTChainsEgammaT0[i]
+        # Algorithm must be scheduled after the decoding of the trigger bytestream ROB
+        from TrigDecisionTool.TrigDecisionToolConfig import getRun3NavigationContainerFromInput
+        L2CaloEMClustersMonAlg.ExtraInputs += [('xAOD::TrigCompositeContainer' , 'StoreGateSvc+'+getRun3NavigationContainerFromInput(inputFlags))]
    
         # Add group
         L2CaloEMClustersMonGroup.append(helper.addGroup(L2CaloEMClustersMonAlg, 'TrigCaloMonitor','HLT/HLTCalo'))
@@ -281,6 +284,8 @@ def TrigCaloMonConfig(inputFlags):
             configuredAlg.HLTChainsT0 = EgammaJetMetTauChain[i][j]
             # Add group
             TopoCaloClustersMonGroup[i][j] = helper.addGroup(configuredAlg, 'TrigCaloMonitor','HLT/HLTCalo')
+            # Algorithm must be scheduled after the decoding of the trigger bytestream ROB
+            configuredAlg.ExtraInputs += [('xAOD::TrigCompositeContainer' , 'StoreGateSvc+'+getRun3NavigationContainerFromInput(inputFlags))]
 
             ########################
             #     HLT_Clusters     #
