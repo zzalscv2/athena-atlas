@@ -15,7 +15,13 @@ ex.type = 'athena'
 ex.job_options = 'TriggerJobOpts/runHLT_standalone.py'
 ex.input = 'minbias'
 ex.threads = 1
-ex.args = '-c "setMenu=\'PhysicsP1_pp_lowMu_run3_v1\';doWriteBS=False;doWriteRDOTrigger=True;"'
+precommand = ''.join([
+  "setMenu='PhysicsP1_pp_lowMu_run3_v1';",
+  "doWriteBS=False;",
+  "doWriteRDOTrigger=True;",
+  "from AthenaConfiguration.AllConfigFlags import ConfigFlags;ConfigFlags.IOVDb.GlobalTag='OFLCOND-MC21-SDR-RUN3-07'"
+])
+ex.args = '-c "{:s}"'.format(precommand)
 
 test = Test.Test()
 test.art_type = 'build'
