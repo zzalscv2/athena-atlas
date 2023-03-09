@@ -198,7 +198,7 @@ concept IsConcurrentRangeCompare = requires (const COMPARE& c,
  *
  * In order to implement updating concurrently with reading, we need to
  * defer deletion of objects until no thread can be referencing them any more.
- * The policy for this for the internal implementation objcets
+ * The policy for this for the internal implementation objects
  * is set by the template UPDATER<T>.  For details, see IsUpdater.h.
  *
  * Deletion of payload objects is managed via the @c IRangeMapPayloadDeleter
