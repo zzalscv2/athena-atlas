@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: Arrayrep.cxx,v 1.3 2009-04-08 21:12:44 ssnyder Exp $
@@ -273,7 +273,7 @@ void Arrayrep::write_array(std::ostream& stream) const {
    * @param std::ostream where the text should be written
    *
    * Writes the content of the array to a ostream. The sub-arrays are
-   * enclosed by square-brackets and separated by commas.
+   * enclosed by square brackets and separated by commas.
    */
 
 void Arrayrep::write_subarray(std::ostream& stream, std::vector<Arrayelt>::size_type& idx, unsigned dimIndex) const {
