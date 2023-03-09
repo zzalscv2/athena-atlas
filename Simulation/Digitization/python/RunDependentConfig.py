@@ -2,7 +2,7 @@
 
 Including features from old style DigitizationFlags.py
 
-Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -41,11 +41,11 @@ def LumiProfileSvcCfg(flags, name="LumiProfileSvc", **kwargs):
     #clear svc properties?
     kwargs.setdefault("RunLumiList", runLumiList)
     kwargs.setdefault("ScaleFactorList", scaleFactorList)
-    acc.addService(CompFactory.LumiProfileSvc(name, **kwargs))
+    acc.addService(CompFactory.LumiProfileSvc(name, **kwargs), primary=True)
     return acc
 
 
 def NoProfileSvcCfg(flags, name="NoProfileSvc", **kwargs):
     acc = ComponentAccumulator()
-    acc.addService(CompFactory.NoProfileSvc(name, **kwargs))
+    acc.addService(CompFactory.NoProfileSvc(name, **kwargs), primary=True)
     return acc
