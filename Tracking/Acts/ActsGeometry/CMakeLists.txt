@@ -41,13 +41,13 @@ atlas_add_library( ActsGeometryLib
                    InDetIdentifier
                    InDetReadoutGeometry
                    MagFieldConditions
-                   PRIVATE_LINK_LIBRARIES
-                   PathResolver
                    StoreGateLib
                    TRT_ReadoutGeometry
                    SCT_ReadoutGeometry
-                   TrkGeometry
                    TrkSurfaces
+                   PRIVATE_LINK_LIBRARIES
+                   PathResolver
+                   TrkGeometry
                    TrkFitterUtils
                    TrkTrackSummary
                    TrkToolInterfaces
