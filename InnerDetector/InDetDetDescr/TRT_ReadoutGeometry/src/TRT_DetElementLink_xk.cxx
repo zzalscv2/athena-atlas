@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -12,12 +12,6 @@
 // Version 1.0 21/04/2004 I.Gavrilenko
 ///////////////////////////////////////////////////////////////////
 
-#include <iostream>
-#include <iomanip>
+#include "TRT_ReadoutGeometry/TRT_DetElementLink_xk.h"
 
-#include "TRT_DetElementsRoadTool_xk/TRT_DetElementLink_xk.h"
-
-///////////////////////////////////////////////////////////////////
-// Constructor with parameters
-///////////////////////////////////////////////////////////////////
 

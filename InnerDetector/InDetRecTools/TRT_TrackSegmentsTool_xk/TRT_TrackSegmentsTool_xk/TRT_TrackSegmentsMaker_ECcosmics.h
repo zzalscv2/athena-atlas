@@ -95,7 +95,9 @@ namespace InDet{
       // Methods of seeds production without vertex constraint
       ///////////////////////////////////////////////////////////////////
 
-      virtual void find(const EventContext& ctx, InDet::ITRT_TrackSegmentsMaker::IEventData &event_data) const override;
+      virtual void find(const EventContext &ctx,
+                        InDet::ITRT_TrackSegmentsMaker::IEventData &event_data,
+                        InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap &used) const override;
 
       ///////////////////////////////////////////////////////////////////
       // Iterator through seeds pseudo collection produced accordingly

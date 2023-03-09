@@ -39,8 +39,8 @@ StatusCode InDet::TRT_TrackExtensionAlg::initialize() {
 ///////////////////////////////////////////////////////////////////
 
 StatusCode InDet::TRT_TrackExtensionAlg::execute(const EventContext& ctx) const {
-        Counter_t counter;
 
+  Counter_t counter;
 	// Get input tracks collection
 	SG::ReadHandle<TrackCollection> inputTracks(m_inputTracksKey,ctx);
 	if (not inputTracks.isValid()) {
@@ -48,34 +48,37 @@ StatusCode InDet::TRT_TrackExtensionAlg::execute(const EventContext& ctx) const 
 		return StatusCode::SUCCESS;
 	}
 
-        std::unique_ptr<InDet::ITRT_TrackExtensionTool::IEventData>
-           event_data_p( m_trtExtension->newEvent(ctx) );
+  std::unique_ptr<InDet::ITRT_TrackExtensionTool::IEventData>
+    event_data_p( m_trtExtension->newEvent(ctx) );
 
 	// Loop through all input track and output tracks collection production
 	SG::WriteHandle<TrackExtensionMap> outputTracks(m_outputTracksKey,ctx);
 	ATH_CHECK( outputTracks.record(std::make_unique<TrackExtensionMap>()) );
 
 	TrackCollection::const_iterator trk,trkEnd = inputTracks->end();
+  //We create this structure outside the loop,
+  //the vectors are cleared/resized inside the loop but 
+  //we try to "retain capacity"
+  InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap used{}; 
 	for (trk = inputTracks->begin(); trk != trkEnd; ++trk) {
 		if ( !(*trk) ) continue;
 		++counter.m_nTracks;
 
-		std::vector<const Trk::MeasurementBase*>& trkExt = m_trtExtension->extendTrack(ctx, *(*trk), *event_data_p);
-		if( trkExt.empty() ) continue;
-
+		std::vector<const Trk::MeasurementBase*>& trkExt = m_trtExtension->extendTrack(ctx, *(*trk), *event_data_p,used);
+		if( trkExt.empty() ) {continue;}
 		outputTracks->insert( std::make_pair((*trk), trkExt) ); 
 		++counter.m_nTracksExtended;
 	}
 
-        {
-           std::lock_guard<std::mutex> lock(m_counterMutex);
-           m_totalCounts += counter;
-        }
+  {
+    std::lock_guard<std::mutex> lock(m_counterMutex);
+    m_totalCounts += counter;
+  }
 
-        if (msgLvl(MSG::DEBUG)) {
-           dumpEvent(msg(MSG::DEBUG), counter);
-           msg(MSG::DEBUG) << endmsg;
-        }
+  if (msgLvl(MSG::DEBUG)) {
+    dumpEvent(msg(MSG::DEBUG), counter);
+    msg(MSG::DEBUG) << endmsg;
+  }
 	return StatusCode::SUCCESS;
 }
 

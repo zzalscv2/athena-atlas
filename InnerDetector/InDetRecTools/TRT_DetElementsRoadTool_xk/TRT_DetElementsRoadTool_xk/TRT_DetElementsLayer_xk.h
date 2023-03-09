@@ -19,7 +19,7 @@
 #include <vector>
 #include <list>
 
-#include "TRT_DetElementsRoadTool_xk/TRT_DetElementLink_xk.h"
+#include "TRT_ReadoutGeometry/TRT_DetElementLink_xk.h"
 
 namespace InDet{
 

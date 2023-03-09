@@ -213,6 +213,7 @@ InDet::TRT_SeededTrackFinder::execute(const EventContext& ctx) const{
   ATH_MSG_DEBUG ("Begin looping over all TRT segments in the event");
   Trk::SegmentCollection::const_iterator iseg    = segments->begin();
   Trk::SegmentCollection::const_iterator isegEnd = segments->end();
+  InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap map;
   for(; iseg != isegEnd; ++ iseg) {
     // Get the track segment
     const Trk::TrackSegment *trackTRT = dynamic_cast<const Trk::TrackSegment*>(*iseg);
@@ -340,15 +341,17 @@ InDet::TRT_SeededTrackFinder::execute(const EventContext& ctx) const{
               // statistics
               ev_stat.m_counter[Stat_t::Stat_t::kNTrtExtCalls]++;
               // call extension tool
-              std::vector<const Trk::MeasurementBase*>& tn = m_trtExtension->extendTrack(ctx, *(*itt), *ext_event_data_p);
-              if(tn.empty()) {
+              std::vector<const Trk::MeasurementBase*>& tn =
+                  m_trtExtension->extendTrack(ctx, *(*itt), *ext_event_data_p, map);
+              if (tn.empty()) {
                 // Fallback if extension failed
                 ATH_MSG_DEBUG ("No new segment found, use input segment as fallback.");
                 // statistics
                 ev_stat.m_counter[Stat_t::Stat_t::kNTrtExtFail]++;
                 // merge Si with input track segments
                 globalTrackNew = mergeSegments(**itt,*trackTRT);
-              } else if (!m_rejectShortExten || tn.size() >= trackTRT->numberOfMeasurementBases() ) {
+              } else if (!m_rejectShortExten ||
+                         tn.size() >= trackTRT->numberOfMeasurementBases()) {
                 // Use the extension to instead of the segment
                 ATH_MSG_DEBUG ("Successful extension, number of TRT hits : " << tn.size() << " was : " << (trackTRT->numberOfMeasurementBases()));
                 // merge the extension with the Si track

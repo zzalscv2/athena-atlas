@@ -219,7 +219,8 @@ void InDet::TRT_TrackSegmentsMaker_BarrelCosmics::endEvent (InDet::ITRT_TrackSeg
 //////////////////////////////////////////////////////////////////////////////////////////
 
 void InDet::TRT_TrackSegmentsMaker_BarrelCosmics::find(const EventContext &/*ctx*/,
-                                                       InDet::ITRT_TrackSegmentsMaker::IEventData &virt_event_data) const {
+                                                       InDet::ITRT_TrackSegmentsMaker::IEventData &virt_event_data,
+                                                       InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap&) const {
   TRT_TrackSegmentsMaker_BarrelCosmics::EventData &
      event_data  = TRT_TrackSegmentsMaker_BarrelCosmics::EventData::getPrivateEventData(virt_event_data);
 

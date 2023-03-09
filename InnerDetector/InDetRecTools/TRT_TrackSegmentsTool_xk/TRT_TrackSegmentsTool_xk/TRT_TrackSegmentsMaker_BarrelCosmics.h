@@ -62,8 +62,11 @@ namespace InDet{
       virtual std::unique_ptr<InDet::ITRT_TrackSegmentsMaker::IEventData> newRegion(const EventContext& ctx, const std::vector<IdentifierHash>&) const override;
       void endEvent(InDet::ITRT_TrackSegmentsMaker::IEventData &event_data) const override;
 
-      virtual void find(const EventContext& ctx, InDet::ITRT_TrackSegmentsMaker::IEventData &event_data) const override;
-      virtual Trk::TrackSegment *next(InDet::ITRT_TrackSegmentsMaker::IEventData &event_data) const override;
+      virtual void find(const EventContext &ctx,
+                        InDet::ITRT_TrackSegmentsMaker::IEventData &event_data,
+                        InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap &used) const override;
+      virtual Trk::TrackSegment *next(InDet::ITRT_TrackSegmentsMaker::IEventData
+                                          &event_data) const override;
 
       virtual MsgStream&    dump          (MsgStream   & out) const override
       { return out; };

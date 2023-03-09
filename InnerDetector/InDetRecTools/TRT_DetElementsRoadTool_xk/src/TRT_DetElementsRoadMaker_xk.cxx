@@ -279,7 +279,8 @@ std::vector<const InDetDD::TRT_BaseElement*>
 InDet::TRT_DetElementsRoadMaker_xk::detElementsRoad
 (const EventContext& ctx,
  MagField::AtlasFieldCache& fieldCache,
- const Trk::TrackParameters& Tp,Trk::PropDirection D) const
+ const Trk::TrackParameters& Tp,Trk::PropDirection D,
+ InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap& used) const
 {
   double qp   = std::abs(500.*Tp.parameters()[4]) ; 
   if( qp < 1.e-10  ) qp = 1.e-10;
@@ -296,7 +297,7 @@ InDet::TRT_DetElementsRoadMaker_xk::detElementsRoad
     std::deque<Amg::Vector3D> G;
     m_proptool->globalPositions(ctx, G,Tp,fieldprop,CB,S,Trk::pion);
     if(G.size() > 1 ) {
-      detElementsRoadATL(G,result);
+      detElementsRoadATL(G,result,used);
     }
   }
   return result;
@@ -310,7 +311,8 @@ InDet::TRT_DetElementsRoadMaker_xk::detElementsRoad
 
 void InDet::TRT_DetElementsRoadMaker_xk::detElementsRoadATL
 (std::deque<Amg::Vector3D>& GP,
- std::vector<const InDetDD::TRT_BaseElement*>& Road) const
+ std::vector<const InDetDD::TRT_BaseElement*>& Road,
+ InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap& used) const
 {
   int n0     = 0;
   int n1     = 0;
@@ -327,12 +329,17 @@ void InDet::TRT_DetElementsRoadMaker_xk::detElementsRoadATL
   for(; n2!=(int)layer[2].size(); ++n2) {if(Po[2] < layer[2][n2].z()) break;}
 
   std::vector<std::pair<const InDet::TRT_DetElementLink_xk*,float> > lDE;
-  std::array<std::vector<std::vector<InDet::TRT_DetElementLink_xk::Used_t> >,3> used;
-  for ( unsigned int module_i=0; module_i<3; ++module_i) {
-     used[module_i].resize( layer[module_i].size() );
-     for (unsigned int layer_i=0; layer_i < layer[module_i].size(); ++layer_i) {
-        used[module_i][layer_i].resize( layer[module_i][layer_i].nElements() );
-     }
+  for (unsigned int module_i = 0; module_i < 3; ++module_i) {
+    size_t layersSize = layer[module_i].size();
+    //Add more vectors if we need more
+    used[module_i].resize(layersSize);
+    for (unsigned int layer_i = 0; layer_i < layersSize; ++layer_i) {
+      // Although we clear/resize , we retain capacity
+      // clear what was there before
+      used[module_i][layer_i].clear();
+      //default init to false 
+      used[module_i][layer_i].resize(layer[module_i][layer_i].nElements());
+    }
   }
 
   for(++g; g!=ge; ++g) {
@@ -446,7 +453,8 @@ void InDet::TRT_DetElementsRoadMaker_xk::detElementsRoadATL
 
 void InDet::TRT_DetElementsRoadMaker_xk::detElementsRoadCTB
 (std::deque<Amg::Vector3D>& GP,
- std::vector<const InDetDD::TRT_BaseElement*>& Road) const
+ std::vector<const InDetDD::TRT_BaseElement*>& Road,
+ InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap& used) const
 {
   int n1     = 0;
   std::deque<Amg::Vector3D>::iterator g=GP.begin(),ge=GP.end();
@@ -459,12 +467,17 @@ void InDet::TRT_DetElementsRoadMaker_xk::detElementsRoadCTB
   for(; n1!=(int)layer[1].size(); ++n1) {if(Po[3] < layer[1][n1].r()) break;}
 
   std::vector<std::pair<const InDet::TRT_DetElementLink_xk*,float> > lDE;
-  std::array<std::vector<std::vector<InDet::TRT_DetElementLink_xk::Used_t> >,3> used;
-  for ( unsigned int module_i=0; module_i<3; ++module_i) {
-     used[module_i].resize( layer[module_i].size() );
-     for (unsigned int layer_i=0; layer_i < layer[module_i].size(); ++layer_i) {
-        used[module_i][layer_i].resize( layer[module_i][layer_i].nElements() );
-     }
+  for (unsigned int module_i = 0; module_i < 3; ++module_i) {
+    size_t layersSize = layer[module_i].size();
+    //Add more vectors if we need more
+    used[module_i].resize(layersSize);
+    for (unsigned int layer_i = 0; layer_i < layersSize; ++layer_i) {
+      // Although we clear/resize , we retain capacity
+      // clear what was there before
+      used[module_i][layer_i].clear();
+      //default init to false 
+      used[module_i][layer_i].resize(layer[module_i][layer_i].nElements());
+    }
   }
 
   for(++g; g!=ge; ++g) {
