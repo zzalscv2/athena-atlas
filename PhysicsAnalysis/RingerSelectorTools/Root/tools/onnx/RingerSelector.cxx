@@ -172,7 +172,6 @@ namespace Ringer{
       // Barcode 1 for half rings normalized by the total energy
       }else if ( barcode == 1){
 
-        std::vector< std::vector< float > > inputs;
         const std::vector<float> rings = ringsCluster->rings();
         std::vector<float> refRings(rings.size());
         refRings.assign(rings.begin(), rings.end());
