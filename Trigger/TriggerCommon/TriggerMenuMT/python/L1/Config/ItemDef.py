@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 # Disable flake8 checking due to the use of 'exec':
 # flake8: noqa
@@ -118,8 +118,11 @@ class ItemDef:
         PHYS_VZDC_A_5ZDC_C         = ZDC_comb5
         PHYS_ZDC_1TO4XOR5          = ZDC_comb6
         PHYS_5ZDC_A_5ZDC_C         = ZDC_comb7
-        ZDC_A     = ZDC_comb1 | ZDC_comb3 | ZDC_comb4 | ZDC_comb6 | ZDC_comb7
-        ZDC_C     = ZDC_comb2 | ZDC_comb3 | ZDC_comb5 | ZDC_comb6 | ZDC_comb7
+
+        #ATR-26984 refine ZDC_A and ZDC_C logic
+        ZDC_A     = Not(ZDC_comb0) & Not(ZDC_comb2) & Not(ZDC_comb5)
+        ZDC_C     = Not(ZDC_comb0) & Not(ZDC_comb1) & Not(ZDC_comb4)
+
         ZDC_A_C   = ZDC_A & ZDC_C
         ZDC_AND   = ZDC_A_C
         VZDC_A_C  = ZDC_comb0
