@@ -3133,6 +3133,8 @@ StatusCode TileROD_Decoder::convertLaser(const RawEvent* re, TileLaserObject* la
   
   ATH_MSG_DEBUG( "Reading TileLaser data from ByteStream" );
   
+  setLaserVersion(*laserObject);
+
   if (!re) {
     ATH_MSG_FATAL( "RawEvent passed to 'convert'-function is a null pointer!" );
     return StatusCode::FAILURE;

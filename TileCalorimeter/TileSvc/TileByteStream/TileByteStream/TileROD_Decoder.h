@@ -167,6 +167,10 @@ class TileROD_Decoder: public AthAlgTool {
     void fillContainer_TileMuRcv_Decision(const ROBData* rob, TileMuonReceiverContainer& v) const;
     void fillCollection_FELIX_Digi(const ROBData* rob,  TileDigitsCollection& v) const;
 
+    void setLaserVersion(TileLaserObject & laserObject) const {
+      laserObject.setVersion((m_runPeriod >= 2) ? -2 : -1);
+    }
+
     void loadRw2Cell(const int section, const std::vector<int>& vec) {
       //    std::cout << vec.size() << std::endl;
       for (unsigned int i = 0; i < vec.size(); ++i) {
