@@ -19,6 +19,7 @@ precommand = ''.join([
   "setMenu='Dev_HI_run3_v1_TriggerValidation_prescale';",
   "doWriteBS=False;",
   "doWriteRDOTrigger=True;",
+  "from AthenaConfiguration.AllConfigFlags import ConfigFlags;ConfigFlags.IOVDb.GlobalTag='OFLCOND-MC16-SDR-RUN2-09'"
 ])
 ex.args = '-c "{:s}"'.format(precommand)
 

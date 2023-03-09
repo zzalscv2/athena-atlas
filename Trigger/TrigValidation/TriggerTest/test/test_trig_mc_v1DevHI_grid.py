@@ -29,7 +29,13 @@ ex.input = 'pbpb'
 ex.threads = 4
 ex.concurrent_events = 4
 ex.max_events = 500
-ex.args = '-c "setMenu=\'Dev_HI_run3_v1_TriggerValidation_prescale\';doWriteBS=False;doWriteRDOTrigger=True;"'
+precommand = ''.join([
+  "setMenu='Dev_HI_run3_v1_TriggerValidation_prescale';",
+  "doWriteBS=False;",
+  "doWriteRDOTrigger=True;",
+  "from AthenaConfiguration.AllConfigFlags import ConfigFlags;ConfigFlags.IOVDb.GlobalTag='OFLCOND-MC16-SDR-RUN2-09'"
+])
+ex.args = '-c "{:s}"'.format(precommand)
 
 test = Test.Test()
 test.art_type = 'grid'
