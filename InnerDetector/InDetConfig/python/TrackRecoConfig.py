@@ -635,7 +635,7 @@ def InDetTrackRecoCfg(flags):
 
         result.merge(TrackParticleCnvAlgNoPIDCfg(
             flags,
-            name = f"SiSPSeededTracksCnvAlg",
+            name = "SiSPSeededTracksCnvAlg",
             TrackContainerName = TrackContainer,
             xAODTrackParticlesFromTracksContainerName = \
             "SiSPSeededTracksTrackParticles"))
