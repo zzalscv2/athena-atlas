@@ -96,7 +96,7 @@ if DQMonFlags.doGlobalMon():
         ManagedAthenaGlobalPhysMon.DataType            = DQMonFlags.monManDataType()
         ManagedAthenaGlobalPhysMon.Environment         = DQMonFlags.monManEnvironment()
 
-        from DataQualityTools.DQTGlobalWZFinderAlg import DQTGlobalWZFinderAlg
+        from DataQualityTools.DQTGlobalWZFinderAlg import DQTGlobalWZFinderAlgConfig
         topSequence += DQTGlobalWZFinderAlgConfig(DQMonFlags)
 
         from DataQualityTools.DQTLumiMonAlg import DQTLumiMonAlgConfig
