@@ -183,7 +183,6 @@ EventInfoAuxDyn.mcEventNumber
 EventInfoAuxDyn.mcEventWeights
 EventInfoAuxDyn.streamTagDets
 EventInfoAuxDyn.streamTagRobs
-EventInfo_p4
 EventNumber
 EventTime
 EventTimeNanoSec
@@ -221,6 +220,7 @@ ExtrapolatedStauTrackParticles
 ExtrapolatedStauTrackParticlesAux.
 FileMetaData
 FileMetaDataAux.
+FileMetaDataAuxDyn.amiTag
 FileMetaDataAuxDyn.beamEnergy
 FileMetaDataAuxDyn.beamType
 FileMetaDataAuxDyn.conditionsTag
@@ -658,8 +658,6 @@ InDetTrackParticlesAuxDyn.nBC_meas
 InDetTrackParticlesAuxDyn.trackLink
 InDetTrackParticlesClusterAssociations
 InDetTrackParticlesClusterAssociationsAux.
-IncompleteLumiBlocks
-IncompleteLumiBlocksAux.
 IsCalibration
 IsSimulation
 IsTestBeam

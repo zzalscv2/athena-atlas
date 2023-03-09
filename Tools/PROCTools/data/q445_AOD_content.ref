@@ -1,13 +1,3 @@
-AFPProtonContainer
-AFPProtonContainerAux.
-AFPSiHitsClusterContainer
-AFPSiHitsClusterContainerAux.
-AFPToFTrackContainer
-AFPToFTrackContainerAux.
-AFPTrackContainer
-AFPTrackContainerAux.
-AFPVertexContainer
-AFPVertexContainerAux.
 AllCalo
 BunchConfKey
 BunchId
@@ -196,7 +186,6 @@ EventInfoAuxDyn.onlineBeamTiltXZ
 EventInfoAuxDyn.onlineBeamTiltYZ
 EventInfoAuxDyn.streamTagDets
 EventInfoAuxDyn.streamTagRobs
-EventInfo_p4
 EventNumber
 EventTime
 EventTimeNanoSec
@@ -1740,7 +1729,6 @@ MSOnlyExtrapolatedMuonTrackParticlesAuxDyn.truthType
 MSonlyTracklets
 MSonlyTrackletsAux.
 McChannel
-MuonCandidates_FS_ROIs
 MuonClusterCollection
 MuonClusterCollectionAux.
 MuonClusterCollectionAuxDyn.CellLink
@@ -2025,8 +2013,6 @@ StausAuxDyn.truthParticleLink
 StausAuxDyn.truthType
 StausAuxDyn.z0_staco
 StreamAOD
-SuspectLumiBlocks
-SuspectLumiBlocksAux.
 TauFinalPi0s
 TauFinalPi0sAux.
 TauFinalPi0sAuxDyn.pi0PFOLinks

@@ -44,11 +44,14 @@ class QTest(WorkflowTest):
         #     self.output_checks.append(FrozenTier0PolicyCheck(setup, "RDO", 10))
         self.output_checks.append(FrozenTier0PolicyCheck(setup, "AOD", 60))
         self.output_checks.append(FrozenTier0PolicyCheck(setup, "ESD", 20))
+        if "CA" not in extra_args or "--CA True" in extra_args:
+            self.output_checks.append(MetadataCheck(setup, "AOD"))
+            self.output_checks.append(MetadataCheck(setup, "ESD"))
 
         self.digest_checks = []
-        if "--CA" not in extra_args:
+        if not setup.disable_output_checks:
             self.digest_checks.append(AODContentCheck(setup))
-            self.digest_checks.append(AODDigestCheck(setup))
+        self.digest_checks.append(AODDigestCheck(setup))
 
         super().__init__(ID, run, type, steps, setup)
 
