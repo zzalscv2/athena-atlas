@@ -23,7 +23,7 @@ class STGC_ROD_Decoder : virtual public ISTGC_ROD_Decoder, public AthAlgTool
     STGC_ROD_Decoder(const std::string& t, const std::string& n, const IInterface* p);
     virtual ~STGC_ROD_Decoder() = default;
     virtual StatusCode initialize() override;
-    virtual StatusCode fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment&, const std::vector<IdentifierHash>&, STGC_RawDataContainer&) const override;
+    virtual StatusCode fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment&, const std::vector<IdentifierHash>&, std::unordered_map<IdentifierHash, std::unique_ptr<STGC_RawDataCollection>>& rdo_map) const override;
 
   protected:
     const sTgcIdHelper* m_stgcIdHelper = nullptr;

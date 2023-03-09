@@ -26,9 +26,23 @@ StatusCode Muon::MM_RawDataProviderToolMT::initialize()
   // generate all the Source Identifiers for MicroMegas to request the fragments.
   // assume 16 RODs per side (one per sector) and that ROB ID = ROD ID.
   for (uint32_t detID : {eformat::MUON_MMEGA_ENDCAP_A_SIDE, eformat::MUON_MMEGA_ENDCAP_C_SIDE}) { //0x6B, 0x6C
-    for (uint32_t sectorID(0); sectorID < 16; ++sectorID) {
-       SourceIdentifier sid(static_cast<eformat::SubDetector>(detID), sectorID);
+    for (uint8_t sectorID(0); sectorID < 16; ++sectorID) {
+       // for now lets build all the possible ROB ids of all possible readout configurations
+       // maybe later we can come up with a smart way to detect which readout sheme is running and only request the relevant ROB ids from the ROBDataProviderSvc
+       // reference: slide 6 of https://indico.cern.ch/event/1260377/contributions/5294286/attachments/2603399/4495810/NSW-SwRod-Felix-v3.pdf
+ 
+       uint16_t moduleID = (0x0 << 8) | sectorID; // combined/single ROB
+       SourceIdentifier sid(static_cast<eformat::SubDetector>(detID), moduleID);
        m_allRobIds.push_back(sid.simple_code());
+       
+       moduleID = (0x1 << 8) | sectorID; // full device ROB (split configuration)
+       sid = SourceIdentifier(static_cast<eformat::SubDetector>(detID), moduleID);
+       m_allRobIds.push_back(sid.simple_code());
+       
+       moduleID = (0x2 << 8) | sectorID; // shared device ROB (split configuration)
+       sid = SourceIdentifier(static_cast<eformat::SubDetector>(detID), moduleID);
+       m_allRobIds.push_back(sid.simple_code());
+       
     }
   }
 
