@@ -53,7 +53,6 @@ flags.DQ.Steering.doTRTMon = False
 flags.DQ.Steering.InDet.doAlignMon = False
 
 ##Updates are based on LArConfigFlags.py. This stuff is in the LArConfigRun3PileUp, see LArConfigRun3.py
-flags.LAr.ROD.DoOFCPileupOptimization = True # default is False, but if setting up LArConfigRun3PileUp it must be True
 flags.LAr.ROD.UseHighestGainAutoCorr = True # default is False, but if setting up LArConfigRun3PileUp it must be True
 flags.LAr.ROD.FirstSample = 0 # default
 flags.LAr.ROD.nSamples = 4 # default is 5

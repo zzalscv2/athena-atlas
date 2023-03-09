@@ -115,8 +115,7 @@ def getNewConfigFlags():
         pass
     try:
         from LArROD.LArRODFlags import larRODFlags
-        ConfigFlags.LAr.ROD.DoOFCPileupOptimization=larRODFlags.doOFCPileupOptimization()
-        ConfigFlags.LAr.ROD.NumberOfCollisions=larRODFlags.NumberOfCollisions()
+        ConfigFlags.LAr.ROD.NumberOfCollisions= larRODFlags.NumberOfCollisions() if larRODFlags.doOFCPileupOptimization() else 0
         ConfigFlags.LAr.ROD.nSamples=larRODFlags.nSamples()
         ConfigFlags.LAr.ROD.FirstSample=larRODFlags.firstSample()
         ConfigFlags.LAr.ROD.UseHighestGainAutoCorr=larRODFlags.useHighestGainAutoCorr()
