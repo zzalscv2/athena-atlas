@@ -131,6 +131,7 @@ TrackParticleCreatorTool::TrackParticleCreatorTool(const std::string& t,
   declareProperty("DoSharedSiHits", m_doSharedSiHits = false);
   declareProperty("DoSharedTRTHits", m_doSharedTRTHits = false);
   declareProperty("RunningTIDE_Ambi", m_runningTIDE_Ambi = false);
+  declareProperty("UpdateTrackSummary", m_updateTrackSummary = false);
   declareProperty("KeepParameters", m_keepParameters);
   declareProperty("KeepFirstParameters", m_keepFirstParameters);
   declareProperty("KeepAllPerigee", m_keepAllPerigee);
@@ -348,7 +349,7 @@ TrackParticleCreatorTool::createParticle(const EventContext& ctx,
   std::unique_ptr<Trk::TrackSummary> updated_summary;
   const Trk::TrackSummary* summary = track.trackSummary();
   if (m_trackSummaryTool.get() != nullptr) {
-    if (!track.trackSummary()) {
+    if (!track.trackSummary() || m_updateTrackSummary) {
       updated_summary = m_trackSummaryTool->summary(ctx, track);
       summary = updated_summary.get();
     }
