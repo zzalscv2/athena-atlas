@@ -94,7 +94,7 @@ def LArAutoCorrTotalCondAlgCfg (flags, name = 'LArAutoCorrTotalCondAlg', **kwarg
     mlog.info("DeltaBunch %d " , deltaBunch)
     kwargs.setdefault('deltaBunch',deltaBunch)
 
-    if flags.LAr.ROD.NumberOfCollisions <= 0 or not flags.LAr.ROD.DoOFCPileupOptimization:
+    if flags.LAr.ROD.NumberOfCollisions <= 0:
         kwargs.setdefault("NoPileUp", True)
         mlog.info(" no pileup noise in LArAutoCorrTotal ")
     else:
@@ -144,7 +144,7 @@ def LArAutoCorrTotalSCCondAlgCfg (flags, name = 'LArAutoCorrTotalSCCondAlg', **k
     kwargs.setdefault('deltaBunch',deltaBunch)
 
 
-    if flags.LAr.ROD.NumberOfCollisions <= 0 or not flags.LAr.ROD.DoOFCPileupOptimization:
+    if flags.LAr.ROD.NumberOfCollisions <= 0:
         kwargs.setdefault("NoPileUp", True)
         mlog.info(" no pileup noise in LArAutoCorrTotal ")
     else:
@@ -180,6 +180,7 @@ if __name__ == "__main__":
 
     print ('--- LArOFCCondAlg 1')
     flags1 = initConfigFlags()
+    flags1.LAr.ROD.NumberOfCollisions=0
     flags1.Input.Files = defaultTestFiles.RDO_RUN2
     flags1.lock()
     acc1 = LArOFCCondAlgCfg (flags1)
@@ -188,6 +189,7 @@ if __name__ == "__main__":
 
     print ('--- LArAutoCorrTotalCondAlg')
     flags4 = initConfigFlags()
+    flags4.LAr.ROD.NumberOfCollisions=0
     flags4.Input.Files = defaultTestFiles.RDO_RUN2
     flags4.LAr.ROD.nSamples = 32
     flags4.lock()
@@ -197,6 +199,7 @@ if __name__ == "__main__":
 
     print ('--- LArRoIMapCondAlg')
     flags5 = initConfigFlags()
+    flags5.LAr.ROD.NumberOfCollisions=0
     flags5.Input.Files = defaultTestFiles.RDO_RUN2
     flags5.lock()
     acc5 = LArRoIMapCondAlgCfg (flags5)
