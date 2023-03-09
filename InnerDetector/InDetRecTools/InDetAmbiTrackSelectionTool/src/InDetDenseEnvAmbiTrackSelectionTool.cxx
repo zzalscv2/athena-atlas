@@ -93,7 +93,6 @@ std::tuple<Trk::Track*,bool> InDet::InDetDenseEnvAmbiTrackSelectionTool::getClea
 
   CacheEntry  cache;
   
-  // nominal or optimized ROI definition
   if (m_skipAmbiInROI && inHadronicROI(ptrTrack)){
     ATH_MSG_DEBUG("skipping ambiguity resolution for track in hadronic ROI with m_minPtBjetROI = "<<m_minPtBjetROI<<", m_phiWidth = "<<m_phiWidth<<", m_etaWidth = "<<m_etaWidth);
     return std::make_tuple(static_cast<Trk::Track *>(nullptr),true); // keep input track
