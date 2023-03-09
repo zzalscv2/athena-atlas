@@ -203,16 +203,13 @@ atlas_add_citest( CPAlgorithmsRun3Data_PHYSLITE
 # Data Quality
 #################################################################################
 
-atlas_add_citest( DataQuality_r21ESD
-   SCRIPT Run3DQTestingDriver.py 'Input.Files=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/q431/21.0/myESD.pool.root"]' Output.HISTFileName='DataQuality_r21ESD_HIST.root' DQ.Steering.doHLTMon=False --threads=1 )
-
-atlas_add_citest( DataQuality_r21ESD_Postprocessing
-   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/DataQuality_r21ESD_Postprocessing.sh
-   DEPENDS_SUCCESS DataQuality_r21ESD )
-
 atlas_add_citest( DataQuality_Run3MC
    SCRIPT Run3DQTestingDriver.py 'Input.Files=["../RecoRun3MC/run_q445/myAOD.pool.root"]' DQ.Environment=AOD DQ.Steering.doHLTMon=False --threads=1
    DEPENDS_SUCCESS RecoRun3MC )
+
+atlas_add_citest( DataQuality_Run3Data_Postprocessing
+   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/DataQuality_Run3Data_Postprocessing.sh
+   DEPENDS_SUCCESS RecoRun3Data )
 
 atlas_add_citest( DataQuality_Run3Data_AODtoHIST
    SCRIPT Reco_tf.py --AMI=q449 --inputAODFile="../RecoRun3Data/run_q449/myAOD.pool.root" --outputHISTFile=DataQuality_Run3Data_AODtoHIST.root  --athenaopts='--threads=1'
