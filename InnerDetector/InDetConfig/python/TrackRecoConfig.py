@@ -626,13 +626,6 @@ def InDetTrackRecoCfg(flags):
             TrackParticleCnvAlgNoPIDCfg)
         TrackContainer = "SiSPSeededTracks"
 
-        if flags.Tracking.doTruth:
-            result.merge(InDetTrackTruthCfg(
-                flags,
-                Tracks = TrackContainer,
-                DetailedTruth = f"{TrackContainer}DetailedTruth",
-                TracksTruth = f"{TrackContainer}TruthCollection"))
-
         result.merge(TrackParticleCnvAlgNoPIDCfg(
             flags,
             name = "SiSPSeededTracksCnvAlg",
