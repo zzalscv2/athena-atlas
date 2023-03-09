@@ -237,7 +237,7 @@ if __name__ == "__main__":
     log = logging.getLogger('ByteStreamConfig')
     
     flags = initConfigFlags()
-    flags.Input.Files = defaultTestFiles.RAW
+    flags.Input.Files = defaultTestFiles.RAW_RUN2
     flags.Output.doWriteBS = True
     flags.lock()
 

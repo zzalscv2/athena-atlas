@@ -65,7 +65,7 @@ if __name__=="__main__":
     from AthenaConfiguration.TestDefaults import defaultTestFiles
 
     flags = initConfigFlags()
-    flags.Input.Files = defaultTestFiles.RAW 
+    flags.Input.Files = defaultTestFiles.RAW_RUN2 
     flags.Exec.MaxEvents = 1
     flags.IOVDb.GlobalTag = 'CONDBR2-BLKPA-2022-02'
     flags.GeoModel.AtlasVersion="ATLAS-R2-2015-03-01-00"

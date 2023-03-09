@@ -37,7 +37,7 @@ if __name__ == "__main__":
 
     print ('--- data')
     flags1 = initConfigFlags()
-    flags1.Input.Files = defaultTestFiles.RAW
+    flags1.Input.Files = defaultTestFiles.RAW_RUN2
     flags1.Input.ProjectName = 'data12_8TeV'
     flags1.lock()
     acc1 = FillParamsCondAlgCfg (flags1)
@@ -47,7 +47,7 @@ if __name__ == "__main__":
 
     print ('--- default')
     flags2 = initConfigFlags()
-    flags2.Input.Files = defaultTestFiles.RAW
+    flags2.Input.Files = defaultTestFiles.RAW_RUN2
     flags2.lock()
     acc2 = FillParamsCondAlgCfg (flags2)
     acc2.printCondAlgs(summariseProps=True)

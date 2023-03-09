@@ -38,7 +38,7 @@ if __name__ == "__main__":
 
     print ('--- collisions')
     flags1 = initConfigFlags()
-    flags1.Input.Files = defaultTestFiles.RAW
+    flags1.Input.Files = defaultTestFiles.RAW_RUN2
     flags1.lock()
     acc1 = LumiBlockMuWriterCfg (flags1)
     acc1.printCondAlgs (summariseProps=True)

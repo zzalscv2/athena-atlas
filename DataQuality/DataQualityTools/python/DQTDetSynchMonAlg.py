@@ -160,7 +160,7 @@ if __name__ == '__main__':
     from AthenaConfiguration.AllConfigFlags import ConfigFlags
     nightly = '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CommonInputs/'
     file = 'data16_13TeV.00311321.physics_Main.recon.AOD.r9264/AOD.11038520._000001.pool.root.1'
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
+    ConfigFlags.Input.Files = defaultTestFiles.RAW_RUN2
     #ConfigFlags.Input.isMC = False
     ConfigFlags.Output.HISTFileName = 'ExampleMonitorOutput.root'
     

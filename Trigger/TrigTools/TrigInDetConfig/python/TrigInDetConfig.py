@@ -412,7 +412,7 @@ if __name__ == "__main__":
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     ComponentAccumulator.debugMode = "trackCA trackPublicTool trackEventAlgo trackCondAlgo trackPrivateTool"
     flags = initConfigFlags()
-    flags.Input.Files = defaultTestFiles.RAW
+    flags.Input.Files = defaultTestFiles.RAW_RUN2
     flags.lock()
     # this configuration is not runable, the test checks if there is no mistake in python scripts above
     # output can be used by experts to check actual configuration (e.g. here we configure to run on RAW and it should be reflected in settings)

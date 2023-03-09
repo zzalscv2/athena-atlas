@@ -334,7 +334,7 @@ if __name__=='__main__':
 
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaConfiguration.Enums import BeamType
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
+    ConfigFlags.Input.Files = defaultTestFiles.RAW_RUN2
     ConfigFlags.Output.HISTFileName = 'LArRawChannelMonOutput.root'
     ConfigFlags.DQ.enableLumiAccess = False
     ConfigFlags.DQ.useTrigger = False

@@ -36,7 +36,7 @@ if __name__ == "__main__":
     only = ['CaloThinCellsBySamplingAlg_TileGap3']
 
     flags1 = initConfigFlags()
-    flags1.Input.Files = defaultTestFiles.RAW
+    flags1.Input.Files = defaultTestFiles.RAW_RUN2
     flags1.lock()
     acc1 = CaloThinCellsBySamplingAlgCfg (flags1, 'StreamAOD',
                                           ['TileGap3'])

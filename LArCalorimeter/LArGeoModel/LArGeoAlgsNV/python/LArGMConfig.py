@@ -79,7 +79,7 @@ if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import ConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
 
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
+    ConfigFlags.Input.Files = defaultTestFiles.RAW_RUN2
     ConfigFlags.lock()
 
     acc = LArGMCfg(ConfigFlags)

@@ -202,7 +202,7 @@ if __name__=='__main__':
    createLArMonConfigFlags()
 
    from AthenaConfiguration.TestDefaults import defaultTestFiles
-   ConfigFlags.Input.Files = defaultTestFiles.RAW
+   ConfigFlags.Input.Files = defaultTestFiles.RAW_RUN2
 
    ConfigFlags.Output.HISTFileName = 'LArDigitsMonOutput.root'
    ConfigFlags.DQ.enableLumiAccess = False

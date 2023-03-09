@@ -32,7 +32,7 @@ if __name__ == "__main__":
 
     print ('--- data')
     flags1 = initConfigFlags()
-    flags1.Input.Files = defaultTestFiles.RAW
+    flags1.Input.Files = defaultTestFiles.RAW_RUN2
     flags1.lock()
     acc1 = LBDurationCondAlgCfg (flags1)
     acc1.printCondAlgs(summariseProps=True)

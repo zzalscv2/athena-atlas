@@ -51,7 +51,7 @@ if __name__ == "__main__":
     log.setLevel(INFO)
 
     flags = initConfigFlags()
-    flags.Input.Files = defaultTestFiles.RAW
+    flags.Input.Files = defaultTestFiles.RAW_RUN2
     flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.

@@ -18,7 +18,7 @@ class Test(unittest.TestCase):
 
    def test_data(self):
       """For data, trigger always uses dedicated tags."""
-      self.flags.Input.Files = defaultTestFiles.RAW
+      self.flags.Input.Files = defaultTestFiles.RAW_RUN2
 
       self.assertEqual(self.flags.GeoModel.AtlasVersion, trigGeoTag(self.flags))
       self.assertEqual(self.flags.IOVDb.GlobalTag, trigGlobalTag(self.flags))

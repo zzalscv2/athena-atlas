@@ -1085,7 +1085,7 @@ if __name__ == "__main__":
   flags = initConfigFlags()
 
   from AthenaConfiguration.TestDefaults import defaultTestFiles
-  flags.Input.Files=defaultTestFiles.RAW
+  flags.Input.Files=defaultTestFiles.RAW_RUN2
   
   from AthenaCommon.Logging import logging
   l = logging.getLogger('TrackingPassFlags')

@@ -36,12 +36,12 @@ if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     flags = initConfigFlags()
-    flags.Input.Files = defaultTestFiles.RAW
+    flags.Input.Files = defaultTestFiles.RAW_RUN2
     flags.lock()
 
     print ('--- data')
     flags1 = flags.clone()
-    flags1.Input.Files = defaultTestFiles.RAW
+    flags1.Input.Files = defaultTestFiles.RAW_RUN2
     flags1.Input.ProjectName = 'data12_8TeV'
     flags1.lock()
     acc1 = BunchGroupCondAlgCfg (flags1)
@@ -51,7 +51,7 @@ if __name__ == "__main__":
 
     print ('--- default')
     flags2 = flags.clone()
-    flags2.Input.Files = defaultTestFiles.RAW
+    flags2.Input.Files = defaultTestFiles.RAW_RUN2
     flags2.lock()
     acc2 = BunchGroupCondAlgCfg (flags2)
     acc2.printCondAlgs(summariseProps=True)

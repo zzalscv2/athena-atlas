@@ -200,7 +200,7 @@ if __name__ == "__main__":
 
     print ('--- run2')
     flags1 = initConfigFlags()
-    flags1.Input.Files = defaultTestFiles.RAW
+    flags1.Input.Files = defaultTestFiles.RAW_RUN2
     flags1.lock()
     acc1 = LuminosityCondAlgCfg (flags1)
     acc1.printCondAlgs(summariseProps=True)
@@ -209,7 +209,7 @@ if __name__ == "__main__":
 
     print ('--- run2/express')
     flags2 = initConfigFlags()
-    flags2.Input.Files = defaultTestFiles.RAW
+    flags2.Input.Files = defaultTestFiles.RAW_RUN2
     flags2.Common.doExpressProcessing = True
     flags2.lock()
     acc2 = LuminosityCondAlgCfg (flags2)
@@ -219,7 +219,7 @@ if __name__ == "__main__":
 
     print ('--- run1')
     flags3 = initConfigFlags()
-    flags3.Input.Files = defaultTestFiles.RAW
+    flags3.Input.Files = defaultTestFiles.RAW_RUN2
     flags3.Input.ProjectName = 'data12_8TeV'
     flags3.lock()
     acc3 = LuminosityCondAlgCfg (flags3)
@@ -229,7 +229,7 @@ if __name__ == "__main__":
 
     print ('--- run1/express')
     flags4 = initConfigFlags()
-    flags4.Input.Files = defaultTestFiles.RAW
+    flags4.Input.Files = defaultTestFiles.RAW_RUN2
     flags4.Input.ProjectName = 'data12_8TeV'
     flags4.Common.doExpressProcessing = True
     flags4.lock()
@@ -248,7 +248,7 @@ if __name__ == "__main__":
 
     print ('--- online')
     flags6 = initConfigFlags()
-    flags6.Input.Files = defaultTestFiles.RAW
+    flags6.Input.Files = defaultTestFiles.RAW_RUN2
     flags6.Common.useOnlineLumi = True
     flags6.lock()
     acc6 = LuminosityCondAlgCfg (flags6)
@@ -257,7 +257,7 @@ if __name__ == "__main__":
 
     print ('--- forced online')
     flags7 = initConfigFlags()
-    flags7.Input.Files = defaultTestFiles.RAW
+    flags7.Input.Files = defaultTestFiles.RAW_RUN2
     flags7.lock()
     acc7 = LuminosityCondAlgCfg (flags7, useOnlineLumi=True, suffix='Online')
     acc7.printCondAlgs(summariseProps=True)
