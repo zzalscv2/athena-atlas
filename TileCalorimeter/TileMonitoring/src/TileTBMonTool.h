@@ -5,11 +5,6 @@
 // ********************************************************************
 //
 // NAME:     TileTBMonTool.h
-// PACKAGE:  
-//
-// AUTHOR:   
-//
-//
 // ********************************************************************
 #ifndef TILEMONITORING_TILETBMONTOOL_H
 #define TILEMONITORING_TILETBMONTOOL_H
@@ -51,27 +46,27 @@ class ATLAS_NOT_THREAD_SAFE TileTBMonTool : public TileFatherMonTool {  // depre
     std::string m_cellContainer; 
 
 
-    TH1F* m_tileTotalEventEnergy;
+    TH1F* m_tileTotalEventEnergy{};
 
-    TProfile2D* m_tileTBHitMapLBC01;
-    TProfile2D* m_tileTBHitMapEBC02;
-    TProfile2D* m_tileTBHitMap;
-    TH2F* m_tileEventEnergyVsCellsNumber;
-    TH2F* m_CtotVsClong;
-    TH1F* m_Ctot;
-    TH1F* m_Clong;
+    TProfile2D* m_tileTBHitMapLBC01{};
+    TProfile2D* m_tileTBHitMapEBC02{};
+    TProfile2D* m_tileTBHitMap{};
+    TH2F* m_tileEventEnergyVsCellsNumber{};
+    TH2F* m_CtotVsClong{};
+    TH1F* m_Ctot{};
+    TH1F* m_Clong{};
     TH1F* m_hotCell_LBC02_A{nullptr};
 
-    TProfile* m_tileTBChannelTime[4][64];
+    TProfile* m_tileTBChannelTime[4][64] = {};
 
-    bool m_isFirstEvent;
-    unsigned char m_maskedChannels[276][48]; // max drawerIdx = 276 and max channel = 48
+    bool m_isFirstEvent{};
+    unsigned char m_maskedChannels[276][48] = {}; // max drawerIdx = 276 and max channel = 48
     std::vector<std::string> m_masked;
 
-    double m_maxTotalEnergy;
-    double m_cellEnergyThreshold;
-    float m_energyThresholdForTime;
-    double m_beamEnergy;
+    double m_maxTotalEnergy{};
+    double m_cellEnergyThreshold{};
+    float m_energyThresholdForTime{};
+    double m_beamEnergy{};
     std::vector<std::vector<IdentifierHash>> m_cellsNearTower;
 };
 
