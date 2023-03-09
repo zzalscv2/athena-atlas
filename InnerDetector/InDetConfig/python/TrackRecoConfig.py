@@ -525,13 +525,12 @@ def InDetTrackRecoCfg(flags):
                 result.merge(TruthTrackingCfg(current_flags))
 
                 ## Old config only scheduled InDetTrackTruth for IdealPseudoTracking, while the TrackParticleCnvAlg requires it if "doTruth" is enabled
-                from InDetConfig.TrackTruthConfig import InDetTrackTruthCfg
                 PseudoTracks = 'InDetPseudoTracks'
                 result.merge(InDetTrackTruthCfg(
                     current_flags,
                     Tracks = PseudoTracks,
                     DetailedTruth = PseudoTracks + 'DetailedTruth',
-                    TrackTruth = PseudoTracks + 'TruthCollection'))
+                    TracksTruth = PseudoTracks + 'TruthCollection'))
 
                 result.merge(TrackParticleCnvAlgPIDCheckCfg(
                     current_flags,
@@ -561,7 +560,6 @@ def InDetTrackRecoCfg(flags):
         AssociationMapName = "PRDtoTrackMapCombinedInDetTracks"))
 
     if flags.Tracking.doTruth:
-        from InDetConfig.TrackTruthConfig import InDetTrackTruthCfg
         result.merge(InDetTrackTruthCfg(
             flags,
             Tracks = "CombinedInDetTracks",
@@ -578,13 +576,7 @@ def InDetTrackRecoCfg(flags):
             TrackLocation = ["CombinedInDetTracks"]))
 
     if flags.Tracking.doTruth:
-        from InDetConfig.TrackTruthConfig import InDetTrackTruthCfg
         result.merge(InDetTrackTruthCfg(flags))
-        if flags.InDet.Tracking.doTIDE_AmbiTrackMonitoring:
-            result.merge(InDetTrackTruthCfg(flags,
-                                            Tracks = "ObservedTracksCollection",
-                                            DetailedTruth = "ObservedTracksCollectionDetailedTruth",
-                                            TracksTruth = "ObservedTracksCollectionTruthCollection"))
 
         if flags.InDet.Tracking.doTIDE_AmbiTrackMonitoring:
             result.merge(InDetTrackTruthCfg(
@@ -710,6 +702,7 @@ def InDetTrackRecoCfg(flags):
         TrackStateOnSurfaceDecorator = result.getPrimaryAndMerge(
             TrackStateOnSurfaceDecoratorCfg(
                 flags, name="TrackStateOnSurfaceDecorator"))
+        TrackStateOnSurfaceDecorator.DecorationPrefix = "Reco_"
         result.addEventAlgo(
             CompFactory.DerivationFramework.CommonAugmentation(
                 "InDetCommonKernel",
