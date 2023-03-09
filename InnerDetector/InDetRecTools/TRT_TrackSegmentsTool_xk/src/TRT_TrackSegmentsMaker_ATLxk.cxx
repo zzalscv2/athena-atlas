@@ -333,7 +333,8 @@ void InDet::TRT_TrackSegmentsMaker_ATLxk::endEvent (InDet::ITRT_TrackSegmentsMak
 // Methods for seeds production without vertex constraint
 ///////////////////////////////////////////////////////////////////
 void InDet::TRT_TrackSegmentsMaker_ATLxk::find(const EventContext &ctx,
-                                               InDet::ITRT_TrackSegmentsMaker::IEventData &virt_event_data) const
+                                               InDet::ITRT_TrackSegmentsMaker::IEventData &virt_event_data,
+                                               InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap& used) const
 {
    TRT_TrackSegmentsMaker_ATLxk::EventData &
       event_data = TRT_TrackSegmentsMaker_ATLxk::EventData::getPrivateEventData(virt_event_data);
@@ -402,7 +403,7 @@ void InDet::TRT_TrackSegmentsMaker_ATLxk::find(const EventContext &ctx,
   while(event_data.m_sizebin_iterator!=event_data.m_sizebin.rend()) {
 
     unsigned int bin =(*event_data.m_sizebin_iterator++).second;
-    findLocaly(ctx, bin,prd_to_track_map_cptr, event_data);
+    findLocaly(ctx, bin,prd_to_track_map_cptr, event_data, used);
   }
 
   // Final segments preparation
@@ -632,7 +633,8 @@ void InDet::TRT_TrackSegmentsMaker_ATLxk::analyseHistogramm
 void InDet::TRT_TrackSegmentsMaker_ATLxk::findLocaly(const EventContext &ctx,
                                                      unsigned int bin,
                                                      const Trk::PRDtoTrackMap *prd_to_track_map,
-                                                     TRT_TrackSegmentsMaker_ATLxk::EventData &event_data) const
+                                                     TRT_TrackSegmentsMaker_ATLxk::EventData &event_data,
+                                                     InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap& used) const
 {
   const TRT_TrackSegmentsToolCondData_xk &condData = *getConditionsData();
 
@@ -698,7 +700,7 @@ void InDet::TRT_TrackSegmentsMaker_ATLxk::findLocaly(const EventContext &ctx,
     0., 0., fm, std::atan2(1., condData.m_dzdr[ndzdr]), pin, std::nullopt);
   ++event_data.m_nlocal;
 
-  Trk::TrackSegment* seg = m_extensionTool->findSegment(ctx, Tp.get(), *(event_data.m_extEventData) );
+  Trk::TrackSegment* seg = m_extensionTool->findSegment(ctx, Tp.get(), *(event_data.m_extEventData),used);
   if(!seg) return;
 
   // Momentum cut

@@ -297,7 +297,8 @@ InDet::TRT_TrackExtensionTool_xk::newEvent(const EventContext& ctx) const
 std::vector<const Trk::MeasurementBase*>&
 InDet::TRT_TrackExtensionTool_xk::extendTrack(const EventContext& ctx,
                                               const Trk::Track& Tr,
-                                              InDet::ITRT_TrackExtensionTool::IEventData &virt_event_data) const
+                                              InDet::ITRT_TrackExtensionTool::IEventData &virt_event_data,
+                                              InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap& used) const
 {
   InDet::TRT_TrackExtensionTool_xk::EventData &
      event_data=InDet::TRT_TrackExtensionTool_xk::EventData::getPrivateEventData(virt_event_data);
@@ -311,7 +312,7 @@ InDet::TRT_TrackExtensionTool_xk::extendTrack(const EventContext& ctx,
     const Amg::Vector3D& g2 = parb->position();
     if((g2.x()*g2.x()+g2.y()*g2.y()) > (g1.x()*g1.x()+g1.y()*g1.y())) par=parb;
   }
-  return extendTrackFromParameters(ctx, par, event_data);
+  return extendTrackFromParameters(ctx, par, event_data,used);
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -321,21 +322,23 @@ InDet::TRT_TrackExtensionTool_xk::extendTrack(const EventContext& ctx,
 std::vector<const Trk::MeasurementBase*>&
 InDet::TRT_TrackExtensionTool_xk::extendTrack(const EventContext& ctx,
                                               const Trk::TrackParameters * par,
-                                              InDet::ITRT_TrackExtensionTool::IEventData &virt_event_data) const
+                                              InDet::ITRT_TrackExtensionTool::IEventData &virt_event_data,
+                                              InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap& used) const
 {
   InDet::TRT_TrackExtensionTool_xk::EventData &
      event_data=InDet::TRT_TrackExtensionTool_xk::EventData::getPrivateEventData(virt_event_data);
-  return extendTrackFromParameters(ctx, par, event_data);
+  return extendTrackFromParameters(ctx, par, event_data, used);
 }
 
 
 std::vector<const Trk::MeasurementBase*>&
 InDet::TRT_TrackExtensionTool_xk::extendTrackFromParameters(const EventContext& ctx,
                                                             const Trk::TrackParameters * par,
-                                                            InDet::TRT_TrackExtensionTool_xk::EventData &event_data) const
+                                                            InDet::TRT_TrackExtensionTool_xk::EventData &event_data,
+                                                            InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap& used) const
 {
   event_data.m_measurement.clear();
-  if(isGoodExtension(ctx, par,event_data)) event_data.m_trajectory.convert(event_data.m_measurement);
+  if(isGoodExtension(ctx, par,event_data,used)) event_data.m_trajectory.convert(event_data.m_measurement);
   return event_data.m_measurement;
 }
 
@@ -346,7 +349,8 @@ InDet::TRT_TrackExtensionTool_xk::extendTrackFromParameters(const EventContext& 
 Trk::TrackSegment*
 InDet::TRT_TrackExtensionTool_xk::findSegment(const EventContext& ctx,
                                               const Trk::TrackParameters * par,
-                                              InDet::ITRT_TrackExtensionTool::IEventData &virt_event_data) const
+                                              InDet::ITRT_TrackExtensionTool::IEventData &virt_event_data,
+                                              InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap& used) const
 {
   InDet::TRT_TrackExtensionTool_xk::EventData &
      event_data=InDet::TRT_TrackExtensionTool_xk::EventData::getPrivateEventData(virt_event_data);
@@ -368,7 +372,9 @@ InDet::TRT_TrackExtensionTool_xk::findSegment(const EventContext& ctx,
 
   // TRT detector elements road builder
   //
-  const std::vector<const InDetDD::TRT_BaseElement*> & detectorElements = m_roadtool->detElementsRoad(ctx, fieldCache, *par, Trk::alongMomentum);
+  const std::vector<const InDetDD::TRT_BaseElement*>& detectorElements =
+      m_roadtool->detElementsRoad(ctx, fieldCache, *par, Trk::alongMomentum,
+                                  used);
 
   if(int(detectorElements.size())< nCut) return nullptr;
 
@@ -443,7 +449,8 @@ InDet::TRT_TrackExtensionTool_xk::findSegment(const EventContext& ctx,
 bool 
 InDet::TRT_TrackExtensionTool_xk::isGoodExtension(const EventContext& ctx,
                                                        const Trk::TrackParameters * par,
-                                                       InDet::TRT_TrackExtensionTool_xk::EventData &event_data) const
+                                                       InDet::TRT_TrackExtensionTool_xk::EventData &event_data,
+                                                       InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap& used) const
 {
   // Get AtlasFieldCache
   MagField::AtlasFieldCache fieldCache;
@@ -457,8 +464,10 @@ InDet::TRT_TrackExtensionTool_xk::isGoodExtension(const EventContext& ctx,
   fieldCondObj->getInitializedCache (fieldCache);
   // TRT detector elements road builder
   //
-  const std::vector<const InDetDD::TRT_BaseElement*> & detectorElements = m_roadtool->detElementsRoad(ctx, fieldCache, *par,Trk::alongMomentum);
-  if(int(detectorElements.size()) < m_minNumberDCs) return false;
+  const std::vector<const InDetDD::TRT_BaseElement*>& detectorElements =
+      m_roadtool->detElementsRoad(ctx, fieldCache, *par, Trk::alongMomentum, used);
+  if (int(detectorElements.size()) < m_minNumberDCs)
+      return false;
   // Array pointers to surface preparation
   //
   auto surfaces = vectorOfSurfacesFromVectorOfElements(detectorElements);
@@ -498,7 +507,8 @@ InDet::TRT_TrackExtensionTool_xk::isGoodExtension(const EventContext& ctx,
 Trk::Track* 
 InDet::TRT_TrackExtensionTool_xk::newTrack(const EventContext& ctx,
                                            const Trk::Track& Tr,
-                                           InDet::ITRT_TrackExtensionTool::IEventData &virt_event_data) const
+                                           InDet::ITRT_TrackExtensionTool::IEventData &virt_event_data,
+                                           InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap& used) const
 {
   InDet::TRT_TrackExtensionTool_xk::EventData &
      event_data=InDet::TRT_TrackExtensionTool_xk::EventData::getPrivateEventData(virt_event_data);
@@ -520,7 +530,7 @@ InDet::TRT_TrackExtensionTool_xk::newTrack(const EventContext& ctx,
 
   // Test possibility extend track and new track production
   //
-  if(isGoodExtension(ctx, pe,event_data)) return event_data.m_trajectory.convert(Tr);
+  if(isGoodExtension(ctx, pe,event_data,used)) return event_data.m_trajectory.convert(Tr);
   return nullptr;
 }
 

@@ -71,15 +71,26 @@ namespace InDet{
       // Main methods for track extension to TRT
       ///////////////////////////////////////////////////////////////////
 
-      virtual std::vector<const Trk::MeasurementBase*>& extendTrack
-        (const EventContext& ctx, const Trk::Track&,InDet::ITRT_TrackExtensionTool::IEventData &virt_event_data) const override;
-      virtual std::vector<const Trk::MeasurementBase*>& extendTrack
-        (const EventContext& ctx, const Trk::TrackParameters *,InDet::ITRT_TrackExtensionTool::IEventData &virt_event_data) const override;
-      virtual Trk::TrackSegment* findSegment
-        (const EventContext& ctx, const Trk::TrackParameters *, InDet::ITRT_TrackExtensionTool::IEventData &virt_event_data) const override;
-      virtual Trk::Track* newTrack
-        (const EventContext& ctx, const Trk::Track&, InDet::ITRT_TrackExtensionTool::IEventData &virt_event_data) const override;
-      virtual std::unique_ptr<InDet::ITRT_TrackExtensionTool::IEventData> newEvent(const EventContext& ctx) const override;
+      virtual std::vector<const Trk::MeasurementBase*>& extendTrack(
+          const EventContext& ctx, const Trk::Track&,
+          InDet::ITRT_TrackExtensionTool::IEventData& virt_event_data,
+          InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap& used)
+          const override;
+      virtual std::vector<const Trk::MeasurementBase*>& extendTrack(
+          const EventContext& ctx, const Trk::TrackParameters*,
+          InDet::ITRT_TrackExtensionTool::IEventData& virt_event_data,
+          InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap& used)
+          const override;
+      virtual Trk::TrackSegment* findSegment(
+          const EventContext& ctx, const Trk::TrackParameters*,
+          InDet::ITRT_TrackExtensionTool::IEventData& virt_event_data,
+          InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap& used)
+          const override;
+      virtual Trk::Track* newTrack(const EventContext& ctx, const Trk::Track&,
+                                   InDet::ITRT_TrackExtensionTool::IEventData& virt_event_data,
+                                   InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap& used) const override;
+      virtual std::unique_ptr<InDet::ITRT_TrackExtensionTool::IEventData>
+      newEvent(const EventContext& ctx) const override;
 
       ///////////////////////////////////////////////////////////////////
       // Print internal tool parameters and status
@@ -111,7 +122,8 @@ namespace InDet{
       std::vector<const Trk::MeasurementBase*>& extendTrackFromParameters
       (const EventContext& ctx,
        const Trk::TrackParameters *,
-       InDet::TRT_TrackExtensionTool_xk::EventData &event_data) const;
+       InDet::TRT_TrackExtensionTool_xk::EventData &event_data,
+       InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap& used) const;
 
       ///////////////////////////////////////////////////////////////////
       // Protected Data
@@ -162,7 +174,8 @@ namespace InDet{
       StatusCode magneticFieldInit(IOVSVC_CALLBACK_ARGS);
       bool isGoodExtension(const EventContext& ctx,
                            const Trk::TrackParameters *,
-                           InDet::TRT_TrackExtensionTool_xk::EventData &event_data) const;
+                           InDet::TRT_TrackExtensionTool_xk::EventData &event_data,
+                           InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap& used) const;
       bool numberPIXandSCTclustersCut(const Trk::Track&) const;
 
       MsgStream&    dumpConditions(MsgStream   & out) const;
