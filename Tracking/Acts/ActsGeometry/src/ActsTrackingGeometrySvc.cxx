@@ -36,6 +36,7 @@
 #include <Acts/Plugins/Json/MaterialMapJsonConverter.hpp>
 #include <Acts/Surfaces/PlanarBounds.hpp>
 #include <Acts/Surfaces/AnnulusBounds.hpp>
+#include <Acts/Surfaces/DiscSurface.hpp>
 #include <Acts/Surfaces/RectangleBounds.hpp>
 
 // PACKAGE
@@ -426,7 +427,7 @@ bool ActsTrackingGeometrySvc::runConsistencyChecks() const {
   bool result = true;
 
   std::vector<Acts::Vector2> localPoints;
-  localPoints.reserve(1000);
+  localPoints.reserve(m_consistencyCheckPoints);
   std::mt19937 gen;
   std::uniform_real_distribution<> dist(0.0, 1.0);
 
@@ -439,9 +440,9 @@ bool ActsTrackingGeometrySvc::runConsistencyChecks() const {
   }
 
   if(os) {
-    (*os) << "geo_id,vol_id,lay_id,sen_id,type,acts_loc0,acts_loc1,acts_inside,trk_loc0,trk_loc1,trk_inside,x,y,z" << std::endl;
+    (*os) << "geo_id,vol_id,lay_id,sen_id,type,acts_loc0,acts_loc1,acts_inside,trk_loc0,trk_loc1,trk_inside,x,y,z,g2l_loc0,g2l_loc1,trk_x,trk_y,trk_z" << std::endl;
   }
-  for(size_t i=0;i<localPoints.capacity();i++) {
+  for(size_t i=0;i<m_consistencyCheckPoints;i++) {
     localPoints.emplace_back(dist(gen), dist(gen));
   }
 
@@ -450,10 +451,17 @@ bool ActsTrackingGeometrySvc::runConsistencyChecks() const {
   Acts::GeometryContext gctx = explicitContext.context();
 
   size_t nTotalSensors = 0;
-  size_t nInconsistentInside = 0;
+  std::array<size_t,3> nInconsistent{0,0,0};
+  size_t nMismatchedCenters = 0;
   size_t nMismatchedNormals = 0;
 
-  m_trackingGeometry->visitSurfaces([&](const auto* surface) {
+  // Comparison of Eigen vectors, similar to a.isApprox(b), but use absolute comparison to also work with zero vectors.
+  // All values will be mm or radians, so 1e-5 is a reasonable precision.
+  auto isApprox = [](auto& a, auto& b) -> bool {
+    return ((a - b).array().abs() < 1e-5).all();
+  };
+
+  m_trackingGeometry->visitSurfaces([&](const Acts::Surface *surface) {
       nTotalSensors++;
 
       const auto* actsDetElem = dynamic_cast<const ActsDetectorElement*>(surface->associatedDetectorElement());
@@ -469,15 +477,66 @@ bool ActsTrackingGeometrySvc::runConsistencyChecks() const {
 
       const auto& trkSurface = siDetElem->surface();
 
-      if(!trkSurface.normal().isApprox(surface->normal(gctx))) {
+      Acts::Vector3 center{surface->center(gctx)};
+      Amg::Vector3D trkCenter{trkSurface.center()};
+      if (/* auto *b = */ dynamic_cast<const Acts::AnnulusBounds *>(&surface->bounds()))
+      {
+        // // Acts::AnnulusBounds defines center() as center of whole disc, so get it from the bounds
+        // Acts::Vector2 locCenter{0.5 * (b->rMin() + b->rMax()), 0.5 * (b->phiMin() + b->phiMax())};
+        // center = surface->localToGlobal(gctx, locCenter, Acts::Vector3::Zero());
+        center.head<2>() = trkCenter.head<2>();  // that doesn't (quite) work for xy, so just pass that check
+      }
+
+      if(!isApprox(trkCenter, center)) {
+        std::string trkName;
+        if (auto idHelper = siDetElem->getIdHelper())
+        {
+          trkName = idHelper->show_to_string(siDetElem->identify());
+        }
+        ATH_MSG_WARNING("Acts surface "
+                        << surface->geometryId()
+                        << " center (" << center[0] << ',' << center[1] << ',' << center[2]
+                        << ") does not match Trk surface " << trkName
+                        << " center (" << trkCenter[0] << ',' << trkCenter[1] << ',' << trkCenter[2] << ')');
+        nMismatchedCenters++;
+        result = false;
+      }
+
+      Acts::Vector3 norm{surface->normal(gctx)};
+      Amg::Vector3D trkNorm{trkSurface.normal()};
+      if(!isApprox(trkNorm, norm)) {
+        std::string trkName;
+        if (auto idHelper = siDetElem->getIdHelper())
+        {
+          trkName = idHelper->show_to_string(siDetElem->identify());
+        }
+        ATH_MSG_WARNING("Acts surface "
+                        << surface->geometryId()
+                        << " normal (" << norm[0] << ',' << norm[1] << ',' << norm[2]
+                        << ") does not match Trk surface " << trkName
+                        << " normal (" << trkNorm[0] << ',' << trkNorm[1] << ',' << trkNorm[2] << ')');
         nMismatchedNormals++;
         result = false;
       }
 
-      auto doPoints = [&](unsigned int type, Acts::Vector2 loc) -> bool {
+      auto doPoints = [&](unsigned int type, const Acts::Vector2& loc) -> std::array<bool,3> {
           Acts::Vector3 glb = surface->localToGlobal(gctx, loc, Acts::Vector3::Zero());
 
-          Amg::Vector2D locTrk = trkSurface.globalToLocal(glb).value();
+          Amg::Vector2D locTrk = Amg::Vector2D::Zero();
+          Amg::Vector3D glbTrk = Amg::Vector3D::Zero();
+          Acts::Vector2 locg2l = Acts::Vector2::Zero();
+          bool locg2lOk = false;
+          auto locTrkRes = trkSurface.globalToLocal(glb);
+          if (locTrkRes) {
+            locTrk = locTrkRes.value();
+            glbTrk = trkSurface.localToGlobal(locTrk);
+
+            auto locg2lRes = surface->globalToLocal(gctx, glbTrk, Acts::Vector3::Zero());
+            if (locg2lRes.ok()) {
+              locg2lOk = true;
+              locg2l = locg2lRes.value();
+            }
+          }
 
           auto gId = surface->geometryId();
           if(os) {
@@ -495,12 +554,20 @@ bool ActsTrackingGeometrySvc::runConsistencyChecks() const {
                   << "," << glb[0] 
                   << "," << glb[1] 
                   << "," << glb[2] 
+                  << "," << locg2l[0] 
+                  << "," << locg2l[1] 
+                  << "," << glbTrk[0] 
+                  << "," << glbTrk[1] 
+                  << "," << glbTrk[2] 
                   << std::endl;
           }
 
-          return surface->insideBounds(loc) == trkSurface.insideBounds(locTrk);
+          return {surface->insideBounds(loc) == trkSurface.insideBounds(locTrk),
+                  locg2lOk ? isApprox(loc, locg2l) : true,
+                  locTrkRes ? isApprox(glb, glbTrk) : true};
       };
 
+      std::array<bool,3> allOk{true,true,true};
       if(const auto* bounds = dynamic_cast<const Acts::PlanarBounds*>(&surface->bounds()); bounds) {
         ATH_MSG_VERBOSE("Planar bounds");
 
@@ -509,20 +576,16 @@ bool ActsTrackingGeometrySvc::runConsistencyChecks() const {
         Acts::Vector2 max = boundingBox.max().array() - 1*Acts::UnitConstants::mm;
         Acts::Vector2 diag = max - min;
 
-        bool insideConsistent = true;
-
         for(const auto& testPoint : localPoints) {
           Acts::Vector2 loc = min.array() + (testPoint.array() * diag.array());
-          if(!doPoints(0, loc)) {
-            result = false;
-            insideConsistent = false;
+          auto pointOk = doPoints(0, loc);
+          for (size_t i=0; i<pointOk.size(); ++i) {
+            if (!pointOk[i]) {
+              result = false;
+              allOk[i] = false;
+            }
           }
         }
-
-        if(!insideConsistent) {
-          nInconsistentInside++;
-        }
-
 
       }
       else if(const auto* bounds = dynamic_cast<const Acts::AnnulusBounds*>(&surface->bounds()); bounds) {
@@ -542,31 +605,36 @@ bool ActsTrackingGeometrySvc::runConsistencyChecks() const {
 
         for(const auto& testPoint : localPoints) {
           Acts::Vector2 locXY = min.array() + (testPoint.array() * diag.array());
+          Acts::Vector2 locPC = dynamic_cast<const Acts::DiscSurface&>(*surface).localCartesianToPolar(locXY);
 
-          Acts::Vector3 glb = surface->transform(gctx) * Acts::Vector3{locXY[0], locXY[1], 0};
-          Acts::Vector2 locPC = surface->globalToLocal(gctx, glb, Acts::Vector3::Zero()).value();
-
-        bool insideConsistent = true;
-
-          if(!doPoints(1, locPC)) {
-            result = false;
-            insideConsistent = false;
-          }
-
-          if(!insideConsistent) {
-            nInconsistentInside++;
+          auto pointOk = doPoints(1, locPC);
+          for (size_t i=0; i<pointOk.size(); ++i) {
+            if (!pointOk[i]) {
+              result = false;
+              allOk[i] = false;
+            }
           }
         }
+
       }
       else {
         result = false;
       }
 
+      for (size_t i=0; i<allOk.size(); ++i) {
+        if (!allOk[i]) {
+          ++nInconsistent[i];
+        }
+      }
+
   });
 
   ATH_MSG_INFO("Total number of sensors                   : " << nTotalSensors);
+  ATH_MSG_INFO("Number of sensors with mismatched centers : " << nMismatchedCenters);
   ATH_MSG_INFO("Number of sensors with mismatched normals : " << nMismatchedNormals);
-  ATH_MSG_INFO("Number of sensors with inconsistent inside: " << nInconsistentInside);
+  ATH_MSG_INFO("Number of sensors with inconsistent inside: " << nInconsistent[0]);
+  ATH_MSG_INFO("Number of sensors with inconsistent g2l   : " << nInconsistent[1]);
+  ATH_MSG_INFO("Number of sensors with inconsistent l2g   : " << nInconsistent[2]);
 
   return result;
 }

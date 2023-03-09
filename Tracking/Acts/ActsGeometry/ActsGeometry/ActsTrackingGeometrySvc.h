@@ -120,6 +120,9 @@ private:
   StringProperty m_consistencyCheckOutput{this, "ConsistencyCheckOutput", 
     "", "Output file for geometry debugging, will not write if empty",};
 
+  Gaudi::Property<size_t> m_consistencyCheckPoints{this, "ConsistencyCheckPoints",
+    1000, "number of random points for consistency check"};
+
   ToolHandle<IActsTrackingVolumeBuilder> m_caloVolumeBuilder{this, 
       "CaloVolumeBuilder", "", "CaloVolumeBuilder"};
 
