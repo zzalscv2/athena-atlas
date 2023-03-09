@@ -549,10 +549,6 @@ def InDetTrackRecoCfg(flags):
         InputCombinedInDetTracks += [flags.Overlay.BkgPrefix+\
                                      "CombinedInDetTracks"]
 
-    if flags.InDet.doSlimming:
-        from TrkConfig.TrkTrackSlimmerConfig import TrackSlimmerCfg
-        result.merge(TrackSlimmerCfg(flags,
-                                    TrackLocation = ["CombinedInDetTracks"]))
     result.merge(TrackCollectionMergerAlgCfg(
         flags,
         InputCombinedTracks = InputCombinedInDetTracks,

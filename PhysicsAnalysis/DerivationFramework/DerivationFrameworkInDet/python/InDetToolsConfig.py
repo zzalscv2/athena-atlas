@@ -72,7 +72,7 @@ def ObserverTrackStateOnSurfaceDecoratorCfg(ConfigFlags,
     kwargs.setdefault("AddPRD", True)
     kwargs.setdefault("StoreHoles", False)
     return TrackStateOnSurfaceDecoratorCfg(ConfigFlags, name, **kwargs)
-  
+
 def PseudoTrackStateOnSurfaceDecoratorCfg(ConfigFlags,
                                           name="PseudoTrackStateOnSurfaceDecorator",
                                           **kwargs):

@@ -12,8 +12,6 @@ def createInDetConfigFlags():
     icf.addFlag("InDet.doSplitReco", False)
     # Turn on running of PRD MultiTruthMaker
     icf.addFlag("InDet.doTruth", lambda prevFlags: prevFlags.Input.isMC)
-    # Toggle track slimming
-    icf.addFlag("InDet.doSlimming", True)
     # defines if the X1X mode is used for the offline or not
     icf.addFlag("InDet.selectSCTIntimeHits", lambda prevFlags: (
         not(prevFlags.Beam.Type is BeamType.Cosmics or \

@@ -475,7 +475,7 @@ namespace InDet
     FloatProperty m_phiWidth{this, "phiWidth", 0.2};
     FloatProperty m_etaWidth{this, "etaWidth", 0.2};
     SG::ReadHandleKey<ROIPhiRZContainer> m_inputHadClusterContainerName{this, "HadROIPhiRZContainer", ""};
-
+      
     BooleanProperty m_useEmClusSeed{this, "doEmCaloSeed", false};
     FloatProperty m_minPtEm{this, "minPtConv", 10000., "in MeV"};
     FloatProperty m_phiWidthEm{this, "phiWidthEM", 0.05};
