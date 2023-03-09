@@ -298,6 +298,7 @@ private:
   bool m_doSharedSiHits;
   bool m_doSharedTRTHits;
   bool m_runningTIDE_Ambi;
+  bool m_updateTrackSummary;
 
   /** the following keep options are mutually exclusive **/
   /** keep all TrackParameters */

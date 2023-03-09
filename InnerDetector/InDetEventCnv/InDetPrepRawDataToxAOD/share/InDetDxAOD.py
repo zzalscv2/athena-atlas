@@ -153,7 +153,8 @@ if makeSplitTracks:
                                                                       TrackSummaryTool        = TrackingCommon.getInDetTrackSummaryTool(),
                                                                       TestPixelLayerTool      = TrackingCommon.getInDetTestPixelLayerToolInner(),
                                                                       ComputeAdditionalInfo   = True,
-                                                                      KeepParameters          = True)
+                                                                      KeepParameters          = True,
+                                                                      UpdateTrackSummary      = True)
     ToolSvc += InDetxAODSplitParticleCreatorTool
 
     from xAODTrackingCnv.xAODTrackingCnvConf import xAODMaker__TrackCollectionCnvTool
