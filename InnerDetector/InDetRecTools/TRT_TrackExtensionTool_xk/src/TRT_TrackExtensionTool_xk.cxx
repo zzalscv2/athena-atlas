@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -43,21 +43,21 @@ namespace{
 
 InDet::TRT_TrackExtensionTool_xk::TRT_TrackExtensionTool_xk
 (const std::string& t,const std::string& n,const IInterface* p)
-  : AthAlgTool(t,n,p)
+  : AthAlgTool(t,n,p),
+    m_segmentFindMode (3),
+    m_minNumberDCs    (9),
+    m_minNumberSCT    (5),
+    m_minNumberPIX    (2),
+    m_roadwidth       (10.),
+    m_maxslope        (.00005),
+    m_zVertexWidth    (150.),
+    m_impact          (50.),
+    m_usedriftrad     (true),
+    m_parameterization(true),
+    m_scale_error     (2.),
+    m_fieldmode       ("MapSolenoid"),
+    m_trtmanager      ("TRT")
 {
-  m_fieldmode       = "MapSolenoid"      ;
-  m_trtmanager      = "TRT"              ;
-  m_minNumberDCs    = 9                  ;
-  m_minNumberSCT    = 5                  ;
-  m_minNumberPIX    = 2                  ;
-  m_roadwidth       = 10.                ;
-  m_maxslope        = .00005             ;
-  m_zVertexWidth    = 150.               ;
-  m_impact          = 50.                ;
-  m_segmentFindMode = 3                  ;
-  m_usedriftrad     = true               ;
-  m_parameterization= true               ;
-  m_scale_error     = 2.                 ;
   declareInterface<ITRT_TrackExtensionTool>(this);
   declareProperty("TrtManagerLocation"     ,m_trtmanager      );
   declareProperty("RoadWidth"              ,m_roadwidth       );

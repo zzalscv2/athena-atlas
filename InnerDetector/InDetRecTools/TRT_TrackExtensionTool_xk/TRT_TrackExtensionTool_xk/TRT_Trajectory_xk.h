@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -224,6 +224,7 @@ namespace InDet{
       (*this) = T;
     }
 
+  // cppcheck-suppress operatorEqVarError; scratch arrays not copied.
   inline TRT_Trajectory_xk& TRT_Trajectory_xk::operator =
     (const TRT_Trajectory_xk& T)
     {

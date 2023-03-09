@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -30,12 +30,12 @@
 
 InDet::TRT_TrackExtensionToolCosmics::TRT_TrackExtensionToolCosmics
 (const std::string& t,const std::string& n,const IInterface* p)
-  : AthAlgTool(t,n,p)
+  : AthAlgTool(t,n,p),
+    m_minNumberDCs    (9),
+    m_roadwidth       (10.),
+    m_roadwidth_locz  (10.),
+    m_trtmanager      ("TRT")
 {
-  m_trtmanager      = "TRT"             ;
-  m_minNumberDCs    = 9                 ;
-  m_roadwidth       = 10.               ;
-  m_roadwidth_locz  = 10.               ;
 
   declareInterface<ITRT_TrackExtensionTool>(this);
 
