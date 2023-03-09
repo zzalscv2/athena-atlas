@@ -114,7 +114,7 @@ if __name__ == '__main__':
     
     # Decodes LATOME into SCell container
     from L1CaloFEXSim.L1CaloFEXSimCfg import ReadSCellFromByteStreamCfg,TriggerTowersInputCfg
-    acc.merge(ReadSCellFromByteStreamCfg(flags,keyIn="SC_ET_ID"))
+    acc.merge(ReadSCellFromByteStreamCfg(flags))
     
     # Creates the TriggerTower container
     acc.merge(TriggerTowersInputCfg(flags))
