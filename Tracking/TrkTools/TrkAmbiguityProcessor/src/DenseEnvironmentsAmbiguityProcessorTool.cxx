@@ -158,7 +158,13 @@ Trk::DenseEnvironmentsAmbiguityProcessorTool::process(const TracksScores *trackS
   if (AmbiguityProcessorBase::m_observerTool.isEnabled() && m_observerToolWriter.isEnabled()){
     // Sanity check
     ATH_MSG_DEBUG("Saving observed tracks to store");
-    unsigned int nFinalTracks = m_observerToolWriter->saveTracksToStore(ctx, AmbiguityProcessorBase::m_observerTool->getTrackMap(ctx));
+    unsigned int nFinalTracks;
+    if (trackScoreTrackMap->size() > 0){
+      nFinalTracks = m_observerToolWriter->saveTracksToStore(ctx, AmbiguityProcessorBase::m_observerTool->getTrackMap(ctx));
+    }
+    else{
+      nFinalTracks = m_observerToolWriter->saveTracksToStore(ctx, nullptr);
+    }
     if (finalTracks){
       if (nFinalTracks != finalTracks->size()){
         ATH_MSG_ERROR("Track observer recorded different number of final tracks: "<<nFinalTracks<<" vs. "<<finalTracks->size());
