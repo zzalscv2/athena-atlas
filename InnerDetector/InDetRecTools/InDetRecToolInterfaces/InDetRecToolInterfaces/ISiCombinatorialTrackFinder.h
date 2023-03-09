@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -174,10 +174,10 @@ namespace InDet {
     }
   
   inline TrackQualityCuts::TrackQualityCuts
-    (const std::map<const std::string,int>& in,const std::map<const std::string,double>& db)
+    (const std::map<const std::string,int>& in,const std::map<const std::string,double>& db) :
+      m_idata (in),
+      m_ddata (db)
     {
-      m_idata = in;
-      m_ddata = db;
     }
 
   inline void TrackQualityCuts::setIntCut (const std::string& name, int cut)
