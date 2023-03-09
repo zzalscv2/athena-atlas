@@ -1196,7 +1196,7 @@ if __name__=='__main__':
 
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
-    flags.Input.isMC = False
+    flags.Input.isMC = True
 
     import glob
     import sys
@@ -1209,13 +1209,8 @@ if __name__=='__main__':
         flags.Input.Files = inputs
         flags.Output.HISTFileName = 'ExampleMonitorOutput.root'
 
-    if flags.Input.isMC:
-        flags.Trigger.triggerConfig = "FILE"
-        flags.Trigger.triggerMenuSetup = "MC_pp_run3_v1_BulkMCProd_prescale"
-    else:
+    if not flags.Input.isMC:
         flags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2022-10"
-        flags.Trigger.triggerConfig = "DB"
-
 
     flags.lock()
     flags.dump()
@@ -1249,20 +1244,19 @@ if __name__=='__main__':
     from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
     cfg.merge(AtlasFieldCacheCondAlgCfg(flags))
 
-    from TrigConfigSvc.TrigConfigSvcCfg import TrigConfigSvcCfg,L1PrescaleCondAlgCfg,BunchGroupCondAlgCfg,HLTPrescaleCondAlgCfg
-    cfg.merge( TrigConfigSvcCfg( flags ) )
-    cfg.merge( L1PrescaleCondAlgCfg( flags ) )
-    cfg.merge( BunchGroupCondAlgCfg( flags ) )
-    cfg.merge( HLTPrescaleCondAlgCfg( flags ) )
-
     if not flags.Input.isMC:
         from AthenaConfiguration.ComponentFactory import CompFactory
         cfg.getEventAlgo('TgcRawDataMonAlg').GRLTool = CompFactory.GoodRunsListSelectorTool('GoodRunsListSelectorTool')
         cfg.getEventAlgo('TgcRawDataMonAlg').GRLTool.GoodRunsListVec = ['data22_13p6TeV.periodAllYear_DetStatus-v109-pro28-04_MERGED_PHYS_StandardGRL_All_Good_25ns.xml']
-    else:
-        from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import generateMenuMT
-        generateMenuMT(flags)
 
+    flags_dummy = initConfigFlags()
+    flags_dummy.Input.Files = flags.Input.Files
+    flags_dummy.Trigger.triggerConfig = "FILE"
+    flags_dummy.Trigger.triggerMenuSetup = "Dev_pp_run3_v1"
+    flags_dummy.lock()
+    from TrigConfigSvc.TrigConfigSvcCfg import L1ConfigSvcCfg,generateL1Menu
+    cfg.merge( L1ConfigSvcCfg( flags_dummy ) )
+    generateL1Menu(flags_dummy)
 
     cfg.printConfig(withDetails=False, summariseProps = False)
 
