@@ -5,6 +5,7 @@
 #==============================================================
 
 import sys
+from os import system
 from subprocess import check_output
 from subprocess import CalledProcessError
 import six
@@ -511,9 +512,9 @@ rec.RunNumber = int(RunNumber)
 
 if globalflags.DataSource() == 'data':
     if not 'RUN3' in dir():
-        RUN3 = (RunNumber >= 411938)
+        RUN3 = (RunNumber >= 411938) or (RunNumber<=0) or (RunNumber==3)
     if not 'RUN2' in dir():
-        RUN2 = not RUN3 and (RunNumber > 232000)
+        RUN2 = not RUN3 and ((RunNumber > 232000) or (RunNumber==2))
     if not (RUN2 or RUN3):
         # use RUN1 DB for runs taken before Jul-2014
         if projectName.startswith("data14_"): rec.projectName = "data13_tilecomm"

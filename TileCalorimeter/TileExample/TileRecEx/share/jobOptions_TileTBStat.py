@@ -53,10 +53,10 @@ if len(FileNameVec) < 1:
     sys.exit(1)
 
 if not 'RUN3' in dir():
-    RUN3 = (RunNumber >= 411938) or (RunNumber<=-3) or (RunNumber==3)
+    RUN3 = (RunNumber >= 411938) or (RunNumber<=0) or (RunNumber==3)
 
 if not 'RUN2' in dir():
-    RUN2 = (RunNumber>232000) or (RunNumber<=0) or (RunNumber==2)
+    RUN2 = not RUN3 and (RunNumber > 232000) or (RunNumber==2)
 
 if not 'MC' in dir():
     MC = (RunNumber>0) and (RunNumber<10)

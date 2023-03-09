@@ -86,6 +86,7 @@ StatusCode TileLaserObjByteStreamCnv::createObjConst(IOpaqueAddress* pAddr, Data
 
   // create TileLaserObject
   auto cont = std::make_unique<TileLaserObject>() ; 
+  m_decoder->setLaserVersion(*cont);
 
   if (robf.size() > 0 ) {
     m_decoder->fillTileLaserObj(robf[0], *cont);
