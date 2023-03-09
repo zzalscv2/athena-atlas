@@ -437,8 +437,8 @@ if __name__ == '__main__':
     from IOVDbSvc.IOVDbSvcConfig import addFolders
     acc.merge(addFolders(flags,"/LAR/BadChannels/BadChannelsSC","LAR",tag="LARBadChannelsBadChannelsSC-RUN3-UPD1-00",className="CondAttrListCollection"))
     acc.addCondAlgo(CompFactory.LArBadChannelCondAlg(ReadKey="/LAR/BadChannels/BadChannelsSC",isSC=True,CablingKey="LArOnOffIdMapSC"))
-
-    acc.addEventAlgo( CompFactory.LVL1.eFexTowerBuilder("eFexTowerBuilder",MappingVerificationMode=False), sequenceName='AthAlgSeq' )
+        
+    acc.addEventAlgo( CompFactory.LVL1.eFexTowerBuilder("eFexTowerBuilder"), sequenceName='AthAlgSeq' )
     outputEDM += addEDM('xAOD::eFexTowerContainer', acc.getEventAlgo("eFexTowerBuilder").eFexContainerWriteKey)
 
   if "sCells" in args.outputs:
