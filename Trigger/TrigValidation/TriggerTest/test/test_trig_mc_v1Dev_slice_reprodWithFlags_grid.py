@@ -24,17 +24,6 @@
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
 
-def hist_rename_pre_exec(file_name):
-    pre_exec = ';'.join([
-        "from GaudiSvc.GaudiSvcConf import THistSvc",
-        "from AthenaCommon.AppMgr import ServiceMgr as svcMgr",
-        "svcMgr += THistSvc()",
-        "svcMgr.THistSvc.Output+=[\\\"EXPERT DATAFILE='{:s}' OPT='RECREATE'\\\"]".format(file_name),
-    ])
-    pre_exec += ';'
-    return pre_exec
-
-
 def generate_exec_steps(slice_name = None):
     name = slice_name or 'FullMenu'
     # athena
@@ -44,11 +33,17 @@ def generate_exec_steps(slice_name = None):
     ex.input = 'ttbar'
     ex.threads = 1
     ex.max_events = 100
-    hist_file_name = 'onlinemon_{:s}.root'.format(name)
-    pre_exec = hist_rename_pre_exec(hist_file_name)
+    pre_exec = ''
     if slice_name:
         pre_exec += 'doEmptyMenu=True;do{:s}Slice=True;'.format(slice_name)
     ex.args = '-c "setMenu=\'Dev_pp_run3_v1\';doWriteBS=False;doWriteRDOTrigger=False;{:s}"'.format(pre_exec)
+    # rename histogram file
+    hist_file_name = 'expert-monitoring_{:s}.root'.format(name)
+    mv = ExecStep.ExecStep('RenameHist' + name)
+    mv.type = 'other'
+    mv.executable = 'mv'
+    mv.input = ''
+    mv.args = f'expert-monitoring.root {hist_file_name}'
     # chainDump
     cd = ExecStep.ExecStep('ChainDump' + name)
     cd.type = 'other'
@@ -58,7 +53,7 @@ def generate_exec_steps(slice_name = None):
     cd.auto_report_result = False
     cd.prmon = False
 
-    return [ex, cd]
+    return [ex, mv, cd]
 
 
 def generate_chaincomp_step(slice_name):
