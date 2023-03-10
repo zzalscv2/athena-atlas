@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRT_TrackSegmentsMakerCondAlg_ATLxk.h"
@@ -29,12 +29,12 @@
 
 InDet::TRT_TrackSegmentsMakerCondAlg_ATLxk::TRT_TrackSegmentsMakerCondAlg_ATLxk(const std::string& name, ISvcLocator* pSvcLocator)
   : ::AthReentrantAlgorithm(name, pSvcLocator),
-    m_propTool("Trk::RungeKuttaPropagator")
+    m_fieldmode ("MapSolenoid"),
+    m_propTool ("Trk::RungeKuttaPropagator"),
+    m_pTmin (500.),
+    m_nMom (70)
 
 {
-  m_fieldmode   =      "MapSolenoid" ;
-  m_pTmin       =                500.;
-  m_nMom        =                 70 ;
   declareProperty("PropagatorTool"         ,m_propTool     );
   declareProperty("pTmin"                  ,m_pTmin        );
   declareProperty("NumberMomentumChannel"  ,m_nMom         ); 
@@ -91,8 +91,6 @@ StatusCode InDet::TRT_TrackSegmentsMakerCondAlg_ATLxk::execute(const EventContex
     return StatusCode::SUCCESS;
   }
 
-  InDet::TRT_TrackSegmentsToolCondData_xk* writeCdo=new InDet::TRT_TrackSegmentsToolCondData_xk();
-
   EventIDRange rangeTrt;
 
   SG::ReadCondHandle<InDetDD::TRT_DetElementContainer> trtDetEleHandle(m_trtDetEleContKey, ctx);
@@ -111,6 +109,7 @@ StatusCode InDet::TRT_TrackSegmentsMakerCondAlg_ATLxk::execute(const EventContex
     return StatusCode::FAILURE;
   }
 
+  auto writeCdo = std::make_unique<InDet::TRT_TrackSegmentsToolCondData_xk>();
   if(writeCdo->m_ndzdr  ) delete [] writeCdo->m_ndzdr  ;
   if(writeCdo->m_slope  ) delete [] writeCdo->m_slope  ;
   if(writeCdo->m_islope ) delete [] writeCdo->m_islope ;
@@ -375,7 +374,7 @@ StatusCode InDet::TRT_TrackSegmentsMakerCondAlg_ATLxk::execute(const EventContex
     }
   }
 
-  if (writeHandle.record(rangeTrt, writeCdo).isFailure()) {
+  if (writeHandle.record(rangeTrt, std::move(writeCdo)).isFailure()) {
     ATH_MSG_FATAL("Could not record " << writeHandle.key()
                                       << " with EventRange " << rangeTrt
                                       << " into Conditions Store");
