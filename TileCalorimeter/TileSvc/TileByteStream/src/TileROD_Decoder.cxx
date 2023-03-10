@@ -1256,6 +1256,8 @@ void TileROD_Decoder::unpack_frag6(uint32_t /*version*/,
   digitsMetaData[1].insert(digitsMetaData[1].end(), &moduleID[0], &moduleID[4]);
   digitsMetaData[1].insert(digitsMetaData[1].end(), &runType[0], &runType[4]);
   digitsMetaData[1].insert(digitsMetaData[1].end(), &runNumber[0], &runNumber[4]);
+  digitsMetaData[1].insert(digitsMetaData[1].end(), &pedestalLo[0], &pedestalLo[4]);
+  digitsMetaData[1].insert(digitsMetaData[1].end(), &pedestalHi[0], &pedestalHi[4]);
   digitsMetaData[1].insert(digitsMetaData[1].end(), &chargeInjected[0], &chargeInjected[4]);
   digitsMetaData[1].insert(digitsMetaData[1].end(), &timeInjected[0], &timeInjected[4]);
   digitsMetaData[1].insert(digitsMetaData[1].end(), &capacitor[0], &capacitor[4]);
@@ -4349,7 +4351,7 @@ void TileROD_Decoder::fillCollection_FELIX_Digi(const ROBData* rob , TileDigitsC
   uint32_t sizeOverhead = 3; // Sub fragment marker, size, and (id + type)
 
   // initialize meta data storage
-  DigitsMetaData_t digitsMetaData(7);
+  DigitsMetaData_t digitsMetaData(9);
   RawChannelMetaData_t rawchannelMetaData;
 
   pDigiVec pDigits;

@@ -233,15 +233,18 @@ TileTBAANtuple::TileTBAANtuple(const std::string& name, ISvcLocator* pSvcLocator
   declareProperty("TileInfoName", m_infoName = "TileInfo");
   declareProperty("TileCondToolEmscale", m_tileToolEmscale);
   declareProperty("TileDigitsContainer", m_digitsContainer = "TileDigitsCnt");
+  declareProperty("TileDigitsContainerFlx", m_digitsContainerFlx = "TileDigitsFlxCnt");
   declareProperty("TileBeamElemContainer", m_beamElemContainer = "TileBeamElemCnt");
   // declareProperty("TileRawChannelContainerFlat", m_flatRawChannelContainer = "TileRawChannelFlat");
   declareProperty("TileRawChannelContainerFlat", m_flatRawChannelContainer = ""); // don't create by default
   // declareProperty("TileLaserObject", m_laserObject = "TileLaserObj");
   declareProperty("TileLaserObject", m_laserObject = ""); // don't create by default
   declareProperty("TileRawChannelContainerFit", m_fitRawChannelContainer = ""); // don't create by default
+  declareProperty("TileRawChannelContainerOpt", m_optRawChannelContainer = "TileRawChannelOpt2");
+  declareProperty("TileRawChannelContainerFitFlx", m_flxFitRawChannelContainer = ""); // don't create by default
+  declareProperty("TileRawChannelContainerOptFlx", m_flxOptRawChannelContainer = ""); // don't create by default
   declareProperty("TileRawChannelContainerFitCool", m_fitcRawChannelContainer = ""); // don't create by default
   //declareProperty("TileRawChannelContainerOpt", m_optRawChannelContainer = ""); // don't create by default
-  declareProperty("TileRawChannelContainerOpt", m_optRawChannelContainer = "TileRawChannelOpt2");
   declareProperty("TileRawChannelContainerDsp", m_dspRawChannelContainer = ""); //
   declareProperty("CalibrateEnergy", m_calibrateEnergy = true);
   declareProperty("UseDspUnits", m_useDspUnits = false);
@@ -265,6 +268,7 @@ TileTBAANtuple::TileTBAANtuple(const std::string& name, ISvcLocator* pSvcLocator
   declareProperty("TreeSize", m_treeSize = 16000000000LL);
 
   declareProperty("NSamples", m_nSamples = NOT_SETUP);
+  declareProperty("NSamplesFelix", m_nSamplesFlx = NOT_SETUP);
   declareProperty("NDrawers", m_nDrawers = 6);
 
   declareProperty("EventsPerFile", m_eventsPerFile = 200000);
@@ -381,6 +385,9 @@ StatusCode TileTBAANtuple::ntuple_initialize() {
 
   if (m_nSamples < 0) {
     m_nSamples = 7;
+  }
+  if (m_nSamplesFlx < 0) {
+    m_nSamples = 32;
   }
 
   if (m_TBperiod >= 2015)  {
@@ -599,6 +606,10 @@ StatusCode TileTBAANtuple::ntuple_initialize() {
     ATH_MSG_ERROR( " Error during drawer list initialization"  );
   }
 
+  if (initListFlx().isFailure()) {
+    ATH_MSG_ERROR( " Error during drawer list initialization"  );
+  }
+
   if (initNTuple().isFailure()) {
     ATH_MSG_ERROR( " Error during ntuple initialization" );
   }
@@ -680,14 +691,20 @@ StatusCode TileTBAANtuple::execute() {
     if (m_nSamples > 0) {
       empty &= (storeDigits().isFailure());
     }
+    if (m_nSamplesFlx > 0) {
+       empty &= (storeDigitsFlx().isFailure());
+    }
 
     // store TileRawChannels
     // start from DSP channels - so we can find out what is the DSP units
-    empty &= (storeRawChannels(m_dspRawChannelContainer, &m_eDspVec, &m_tDspVec, &m_chi2DspVec, 0, &m_ROD_GlobalCRCVec, &m_ROD_DMUBCIDVec, &m_ROD_DMUmemoryErrVec, &m_ROD_DMUSstrobeErrVec, &m_ROD_DMUDstrobeErrVec, &m_ROD_DMUHeadformatErrVec, &m_ROD_DMUHeadparityErrVec, &m_ROD_DMUDataformatErrVec, &m_ROD_DMUDataparityErrVec, &m_ROD_DMUMaskVec).isFailure());
-    empty &= (storeRawChannels(m_fitRawChannelContainer, &m_efitVec, &m_tfitVec, &m_chi2Vec, &m_pedfitVec, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0).isFailure());
-    empty &= (storeRawChannels(m_fitcRawChannelContainer, &m_efitcVec, &m_tfitcVec, &m_chi2cVec, &m_pedfitcVec, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0).isFailure());
-    empty &= (storeRawChannels(m_flatRawChannelContainer, &m_eneVec, &m_timeVec, &m_chi2FlatVec, &m_pedFlatVec, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0).isFailure());
-    empty &= (storeRawChannels(m_optRawChannelContainer, &m_eOptVec, &m_tOptVec, &m_chi2OptVec, &m_pedOptVec, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0).isFailure());
+
+    empty &= (storeRawChannels(m_dspRawChannelContainer,m_calibMode, &m_eDspVec, &m_tDspVec, &m_chi2DspVec, 0, &m_ROD_GlobalCRCVec, &m_ROD_DMUBCIDVec, &m_ROD_DMUmemoryErrVec, &m_ROD_DMUSstrobeErrVec, &m_ROD_DMUDstrobeErrVec, &m_ROD_DMUHeadformatErrVec, &m_ROD_DMUHeadparityErrVec, &m_ROD_DMUDataformatErrVec, &m_ROD_DMUDataparityErrVec, &m_ROD_DMUMaskVec).isFailure());
+    empty &= (storeRawChannels(m_fitRawChannelContainer, m_calibMode, &m_efitVec, &m_tfitVec, &m_chi2Vec, &m_pedfitVec, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0).isFailure());
+    empty &= (storeRawChannels(m_flxFitRawChannelContainer, true, &m_eflxfitVec, &m_tflxfitVec, &m_chi2flxfitVec, &m_pedflxfitVec, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0).isFailure());
+    empty &= (storeRawChannels(m_optRawChannelContainer,m_calibMode, &m_eOptVec, &m_tOptVec, &m_chi2OptVec, &m_pedOptVec, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0).isFailure());
+    empty &= (storeRawChannels(m_flxOptRawChannelContainer, true, &m_eflxoptVec, &m_tflxoptVec, &m_chi2flxoptVec, &m_pedflxoptVec, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0).isFailure());
+    empty &= (storeRawChannels(m_fitcRawChannelContainer,m_calibMode, &m_efitcVec, &m_tfitcVec, &m_chi2cVec, &m_pedfitcVec, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0).isFailure());
+    empty &= (storeRawChannels(m_flatRawChannelContainer,m_calibMode, &m_eneVec, &m_timeVec, &m_chi2FlatVec, &m_pedFlatVec, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0).isFailure());
 
     empty &= (storeHitVector().isFailure());
     empty &= (storeHitContainer().isFailure());
@@ -1437,6 +1454,7 @@ StatusCode TileTBAANtuple::storeBeamElements() {
 /// named container fitted/opt filtered
  */
 StatusCode TileTBAANtuple::storeRawChannels(std::string containerId
+                                            , bool calib_mode
                                             , std::vector<float*>* eneVec
                                             , std::vector<float*>* timeVec
                                             , std::vector<float*>* chi2Vec
@@ -1456,6 +1474,7 @@ StatusCode TileTBAANtuple::storeRawChannels(std::string containerId
 
   if (containerId.size() == 0) // empty name, nothing to do
     return StatusCode::FAILURE;
+
 
   // get named container
   const TileRawChannelContainer* rcCnt = nullptr;
@@ -1534,7 +1553,7 @@ StatusCode TileTBAANtuple::storeRawChannels(std::string containerId
         int channel = m_tileHWID->channel(hwid);
         int gain = m_tileHWID->adc(hwid);
 
-        if (m_calibMode) {
+        if (calib_mode) {
           // gain, if hi add m_nDrawers to index
           if (gain == 1) index += m_nDrawers;
         }
@@ -1584,7 +1603,7 @@ StatusCode TileTBAANtuple::storeRawChannels(std::string containerId
       if (ROD_GlobalCRCVec != 0) {
 
         int index1 = type, index2 = type + 1;
-        if (m_calibMode) index2 += m_nDrawers;
+        if (calib_mode) index2 += m_nDrawers;
 
         for (int index = index1; index < index2; index += m_nDrawers) {
 
@@ -1925,7 +1944,217 @@ StatusCode TileTBAANtuple::storeDigits() {
     return StatusCode::SUCCESS;
 }
 
-/**
+
+StatusCode TileTBAANtuple::storeDigitsFlx() {
+
+  bool emptyColl = true;
+
+  // Read Digits from TDS
+  const TileDigitsContainer *digitsCntFlx;
+  CHECK( evtStore()->retrieve(digitsCntFlx, m_digitsContainerFlx) );
+
+  // Get iterator for all TDColl in TDCont
+  TileDigitsContainer::const_iterator itColl = (*digitsCntFlx).begin();
+  TileDigitsContainer::const_iterator itCollEnd = (*digitsCntFlx).end();
+
+  TileDigitsCollection::const_iterator it, itEnd;
+
+  // type is 0 - m_nDrawers-1, fragType is 1-4 B+/B-/EB+/EB-
+  int n, type,  channel;
+
+  std::vector<float> sampleVecLo;
+  std::vector<float> sampleVecHi;
+  std::vector<uint32_t> headerVec;
+  std::vector<uint32_t> headerVecHi;
+
+
+  // Go through all TileDigitsCollections
+  for(; itColl != itCollEnd; ++itColl) {
+    // determine type of frag
+    int fragId = (*itColl)->identify();
+    drawerMap_iterator itr = m_drawerMap.find(fragId);
+    if ( itr != m_drawerMap.end() ) {
+      type = (*itr).second;
+    } else {
+      type= -1;
+    }
+
+    if (type < 0) {
+      if ( (*itColl)->begin() != (*itColl)->end() )
+          //ATH_MSG_WARNING( "frag id 0x" << MSG::hex << fragId << MSG::dec <<" was not found among valid frag IDs when storing TRC!" );
+        ATH_MSG_DEBUG( "frag id 0x" << MSG::hex << fragId << MSG::dec <<" was not found among valid frag IDs when storing TRC!" );
+
+    } else {
+
+      ATH_MSG_DEBUG( "Event# " << m_evtNr
+                     << " Frag id 0x" << MSG::hex << fragId << MSG::dec
+                     << " index " << type);
+
+      ATH_MSG_DEBUG( "       Size=" << (*itColl)->getFragSize());
+
+      ATH_MSG_DEBUG( "       Lvl1ID=" << (*itColl)->getLvl1Id()
+                     << " EvBCID=" << (*itColl)->getRODBCID()
+                     << " EvType=" << (*itColl)->getDetEvType() );
+
+
+      if (m_completeNtuple) {
+        /// Store ROD header info from collection
+        /// (should be just one per ROD,
+        /// but we don't know how many RODs we have,
+        /// so store it for every collection)
+        m_l1ID->at(type) = (*itColl)->getLvl1Id();
+        m_l1Type->at(type) = (*itColl)->getLvl1Type();
+        m_evType->at(type) = (*itColl)->getDetEvType();
+        m_evBCID->at(type) = (*itColl)->getRODBCID();
+        // store FrBCID
+        m_frBCID->at(type) = (*itColl)->getFragBCID();
+       }
+
+
+      // Digits in calib mode
+        // check gain for first digits in collection
+
+        if (m_mdL1idVec.at(type)) {
+          std::vector<uint32_t> extraWords = (*itColl)->getFragExtraWords();
+          if (extraWords.size() >= 10 * MAX_MINIDRAWERS) {
+
+            int* md[] = {m_mdL1idVec.at(type), m_mdBcidVec.at(type),
+                         m_mdModuleVec.at(type), m_mdRunTypeVec.at(type),m_mdPedLoVec.at(type), m_mdPedHiVec.at(type), m_mdRunVec.at(type),
+                         m_mdChargeVec.at(type), m_mdChargeTimeVec.at(type), m_mdCapacitorVec.at(type)};
+
+            auto it = extraWords.begin();
+            for (int i = 0; i < 10; ++i) {
+              std::copy(it + i * MAX_MINIDRAWERS, it + (i + 1) * MAX_MINIDRAWERS, md[i]);
+            }
+          }
+        }
+
+
+        it = (*itColl)->begin();
+        itEnd = (*itColl)->end();
+
+        int dcnt=0;
+        // non empty collection
+        if(it != itEnd) {
+          // store evtnr, bcid,crc, size
+          // Same for lo and hi, because they come from the same fragment
+          *(m_rodBCIDflxVec.at(type)) = (*itColl)->getRODBCID();
+          *(m_sizeflxVec.at(type)) = (*itColl)->getFragSize();
+          *m_sizeflxVec[type + m_nDrawers] = (*itColl)->getFragSize();
+          *m_evtflxVec[type] = m_evtNr;
+          *m_evtflxVec[type + m_nDrawers] = m_evtNr;
+
+
+          headerVec = (*itColl)->getFragChipHeaderWords();
+          headerVecHi = (*itColl)->getFragChipHeaderWordsHigh();
+
+          unsigned int headsize = std::min(16U, static_cast<unsigned int>(headerVec.size()));
+          unsigned int headsizehi = std::min(16U, static_cast<unsigned int>(headerVecHi.size()));
+          for (unsigned int ih = 0; ih < headsize; ++ih) {
+
+            (m_bcidVec.at(type))[ih] = (headerVec[ih] & 0xFFF);
+          }
+
+          for (unsigned int ihhi = 0; ihhi < headsizehi; ++ihhi) {
+            (m_bcidVec.at(type + m_nDrawers))[ihhi] = (headerVecHi[ihhi] & 0xFFF);
+          }
+
+
+         // go through all TileDigits in collection
+          for (; it != itEnd; ++it) {
+            emptyColl = false;
+            HWIdentifier hwid = (*it)->adc_HWID();
+            // determine gain
+            int gain = m_tileHWID->adc(hwid);
+            // add m_nDrawers to index if hi gain
+            int index = type;
+            if (gain == 1) index += m_nDrawers;
+
+            // determine channel
+            channel = m_tileHWID->channel(hwid);
+            // cabling for testbeam (convert to pmt#-1)
+
+
+            // gain determined for all digits in collection
+            (m_gainflxVec.at(index))[channel] = gain;
+            ATH_MSG_DEBUG( "Storing TD for channel: " << channel
+                           << " with gain " << m_tileHWID->adc(hwid)
+                           << " index " << index );
+
+            // get digits
+            if (gain == 0) sampleVecLo = (*it)->samples();
+            if (gain == 1) sampleVecHi = (*it)->samples();
+            int sizLo = sampleVecLo.size();
+            int sizHi = sampleVecHi.size();
+
+
+            if (msgLvl(MSG::DEBUG)) {
+              if (sizLo > 0 ){
+                 msg(MSG::DEBUG) << "Low gain Digits(" << sizLo << ")." << (dcnt++) << " {";
+                 for (int i = 0; i < sizLo; i++) {
+                    msg(MSG::DEBUG) << (int) sampleVecLo[i] << " ";
+                 }
+
+                 if (sizLo > m_nSamplesFlx) {
+                    msg(MSG::DEBUG) << "} ONLY " << m_nSamplesFlx << " digits saved to ntuple" << endmsg;
+                 } else {
+                    msg(MSG::DEBUG) << "}" << endmsg;
+                 }
+              }
+
+              if (sizHi > 0 ){
+                 msg(MSG::DEBUG) << "High gain Digits(" << sizHi << ")." << (dcnt++) << " {";
+                 for (int i = 0; i < sizHi; i++) {
+                    msg(MSG::DEBUG) << (int) sampleVecHi[i] << " ";
+                 }
+
+                 if (sizHi > m_nSamplesFlx) {
+                    msg(MSG::DEBUG) << "} ONLY " << m_nSamplesFlx << " digits saved to ntuple" << endmsg;
+                 } else {
+                    msg(MSG::DEBUG) << "}" << endmsg;
+                 }
+              }
+
+
+            }
+            if (sizLo > m_nSamplesFlx) sizLo = m_nSamplesFlx;
+            if (sizHi > m_nSamplesFlx) sizHi = m_nSamplesFlx;
+            for (n = 0; n < sizLo; n++) {
+              (m_sampleflxVec.at(index))[channel][n] = (int) sampleVecLo[n];
+            }
+            for (n = 0; n < sizHi; n++) {
+              (m_sampleflxVec.at(index))[channel][n] = (int) sampleVecHi[n];
+            }
+            sampleVecLo.clear();
+            sampleVecHi.clear();
+
+          }
+        }
+
+
+
+    }
+    // next container
+  }
+
+  if (emptyColl)
+    return StatusCode::FAILURE;
+  else
+    return StatusCode::SUCCESS;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+/*
 /// Fill Ntuple with MC truth info from simulation
 /// Namely, hit energies directly from Geant4
  */
@@ -2133,6 +2362,7 @@ StatusCode TileTBAANtuple::ntuple_clear() {
   COINCBOARD_clearBranch();
 
   DIGI_clearBranch(); // working now
+  FELIX_clearBranch();
 
   HIT_clearBranch();
   ATH_MSG_DEBUG( "clear() successfully" );
@@ -2161,6 +2391,12 @@ StatusCode TileTBAANtuple::initNTuple(void) {
   m_feCRCVec.clear();
   m_rodCRCVec.clear();
 
+  m_evtflxVec.clear();
+  m_rodBCIDflxVec.clear();
+  m_sizeflxVec.clear();
+  m_gainflxVec.clear();
+  m_sampleflxVec.clear();
+
   m_eneVec.clear();
   m_timeVec.clear();
   m_pedFlatVec.clear();
@@ -2180,6 +2416,16 @@ StatusCode TileTBAANtuple::initNTuple(void) {
   m_tOptVec.clear();
   m_pedOptVec.clear();
   m_chi2OptVec.clear();
+
+  m_eflxfitVec.clear();
+  m_tflxfitVec.clear();
+  m_pedflxfitVec.clear();
+  m_chi2flxfitVec.clear();
+
+  m_eflxoptVec.clear();
+  m_tflxoptVec.clear();
+  m_pedflxoptVec.clear();
+  m_chi2flxoptVec.clear();
 
   m_eDspVec.clear();
   m_tDspVec.clear();
@@ -2226,6 +2472,7 @@ StatusCode TileTBAANtuple::initNTuple(void) {
   CISPAR_addBranch();
   BEAM_addBranch();
   DIGI_addBranch(); //working now
+  FELIX_addBranch();
 
   HIT_addBranch();
 
@@ -2293,6 +2540,7 @@ StatusCode TileTBAANtuple::storeCells() {
 
   return StatusCode::SUCCESS;
 }
+
 
 
 StatusCode TileTBAANtuple::initList() {
@@ -2423,6 +2671,156 @@ StatusCode TileTBAANtuple::initList() {
         m_nSamples = 0;
       }
     }
+  }
+
+  return StatusCode::SUCCESS;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+StatusCode TileTBAANtuple::initListFlx() {
+
+  unsigned int size = m_drawerList.size();
+
+  if (size > 0) {
+
+    int frag = strtol(m_drawerList[0].data(), NULL, 0);
+
+    if (frag < 0) { // setup frags IDs from the data
+
+      // Read Digits from TDS
+
+      const TileDigitsContainer *digitsCntFlx;
+      if (evtStore()->retrieve(digitsCntFlx, m_digitsContainerFlx).isFailure()) {
+        ATH_MSG_ERROR( "can't retrieve Felix Digits from TDS" );
+        ATH_MSG_ERROR( "can't set up fragment list for ntuple" );
+
+        if (m_nSamplesFlx != 0) {
+          ATH_MSG_WARNING( "Disable Felix digit samples in ntuple" );
+          m_nSamplesFlx = 0;
+        }
+
+        return StatusCode::SUCCESS;
+      }
+
+
+
+      // Get iterator for all TDColl in TDCont
+      TileDigitsContainer::const_iterator itColl = (*digitsCntFlx).begin();
+      TileDigitsContainer::const_iterator itCollEnd = (*digitsCntFlx).end();
+
+      std::vector<unsigned int> frags;
+      // Go through all TileDigitsCollections
+      for (; itColl != itCollEnd; ++itColl) {
+        // determine type of frag
+        if ((*itColl)->begin() != (*itColl)->end()) frags.push_back((*itColl)->identify());
+      }
+      size = frags.size();
+
+      if (size > 0) {
+
+        if (size < m_nDrawers) {
+          ATH_MSG_INFO( "decreasing m_nDrawers from " << m_nDrawers << " to " << size );
+          m_nDrawers = size;
+        }
+
+        unsigned int rosOrder[5] = { 2, 1, 3, 4, 0 };
+        unsigned int dr = 0;
+        char frg[6] = "0x000";
+
+        m_drawerList.clear();
+        // m_drawerType.clear();
+        m_drawerMap.clear();
+
+        msg(MSG::INFO) << "setting drawerList from data " << MSG::hex;
+        for (unsigned int ir = 0; ir < 5; ++ir) {
+          for (unsigned int i = 0; i < size; ++i) {
+            unsigned int frag = frags[i];
+            if (frag >> 8 == rosOrder[ir]) {
+              sprintf(frg, "0x%3.3x", frag);
+              m_drawerList.push_back((std::string) frg);
+              if (dr == m_drawerType.size()) m_drawerType.push_back(frag >> 8);
+              m_drawerMap[frag] = dr;
+              msg(MSG::INFO) << " 0x" << frag;
+              ++dr;
+            }
+          }
+        }
+
+        msg(MSG::INFO) << MSG::dec << endmsg;
+
+        size = m_drawerType.size();
+        if (size < m_nDrawers) {
+          m_drawerType.resize(m_nDrawers);
+          for (; size < m_nDrawers; ++size)
+            m_drawerType[size] = 0;
+        }
+
+        msg(MSG::INFO) << MSG::INFO << "drawerType ";
+        for (unsigned int dr = 0; dr < size; ++dr)
+          msg(MSG::INFO) << " " << m_drawerType[dr];
+        msg(MSG::INFO) << endmsg;
+
+        if (size > m_nDrawers) {
+          ATH_MSG_INFO( "increasing m_nDrawers from " << m_nDrawers << " to " << size );
+          m_nDrawers = size;
+        }
+
+        if (size < 1) size = 1;
+        if (m_eventsPerFile == 0) {
+          m_eventsPerFile = (int) (200 / size) * 1000;
+          ATH_MSG_INFO( "Number of events per file was 0, set it to 200k/" << size << " = " << m_eventsPerFile );
+        }
+
+      } else {
+
+        ATH_MSG_ERROR( "can't find any TileDigits collections" );
+        ATH_MSG_ERROR( "can't set up fragment list for ntuple" );
+      }
+    }
+
+
+    // once again - check number of samples in the data
+    // but do not print any ERRORs now
+
+    // Read Digits from TDS
+
+    const TileDigitsContainer *digitsCntFlx;
+    if (evtStore()->retrieve(digitsCntFlx, m_digitsContainerFlx).isSuccess()) {
+       TileDigitsContainer::const_iterator itColl = (*digitsCntFlx).begin();
+       TileDigitsContainer::const_iterator itCollEnd = (*digitsCntFlx).end();
+
+       for (; itColl != itCollEnd; ++itColl) {
+        if ((*itColl)->begin() != (*itColl)->end()) {
+          int siz = (*(*itColl)->begin())->samples().size();
+          m_nSamplesInDrawerMap[(*itColl)->identify()] = siz;
+          if (siz > m_nSamplesFlx && m_nSamplesFlx != 0) {
+            ATH_MSG_WARNING( "Increasing number of FELIX  digit samples in ntuple from " << m_nSamplesFlx << " to " << siz );
+            m_nSamplesFlx = siz;
+          }
+        }
+      }
+    } else {
+      if (m_nSamplesFlx != 0) {
+        ATH_MSG_WARNING( "Disable FELIX digit samples in ntuple" );
+        m_nSamplesFlx = 0;
+      }
+    }
+
+
   }
 
   return StatusCode::SUCCESS;
@@ -3499,7 +3897,7 @@ void TileTBAANtuple::DIGI_addBranch(void)
 	m_ntuplePtr->Branch(("mdBCID"+suffixArr[i]).c_str(),m_mdBcidVec.back(),("mdBcid"+suffixArr[i]+"[4]/I").c_str()); // int
 	m_ntuplePtr->Branch(("mdModule"+suffixArr[i]).c_str(),m_mdModuleVec.back(),("mdModule"+suffixArr[i]+"[4]/I").c_str()); // int
 	m_ntuplePtr->Branch(("mdRunType"+suffixArr[i]).c_str(),m_mdRunTypeVec.back(),("mdRunType"+suffixArr[i]+"[4]/I").c_str()); // int
-	m_ntuplePtr->Branch(("mdRun"+suffixArr[i]).c_str(),m_mdRunVec.back(),("mdRun"+suffixArr[i]+"[4]/I").c_str()); // int
+        m_ntuplePtr->Branch(("mdRun"+suffixArr[i]).c_str(),m_mdRunVec.back(),("mdRun"+suffixArr[i]+"[4]/I").c_str()); // int
 	m_ntuplePtr->Branch(("mdCharge"+suffixArr[i]).c_str(),m_mdChargeVec.back(),("mdCharge"+suffixArr[i]+"[4]/I").c_str()); // int
 	m_ntuplePtr->Branch(("mdChargeTime"+suffixArr[i]).c_str(),m_mdChargeTimeVec.back(),("mdChargeTime"+suffixArr[i]+"[4]/I").c_str()); // int
 	m_ntuplePtr->Branch(("mdCapacitor"+suffixArr[i]).c_str(),m_mdCapacitorVec.back(),("mdCapacitor"+suffixArr[i]+"[4]/I").c_str()); // int
@@ -3652,6 +4050,236 @@ void TileTBAANtuple::DIGI_clearBranch(void)
   }
 
 }
+
+
+void TileTBAANtuple::FELIX_addBranch(void)
+{
+  m_eflxfitVec.reserve(MAX_DRAWERS);
+  m_tflxfitVec.reserve(MAX_DRAWERS);
+  m_chi2flxfitVec.reserve(MAX_DRAWERS);
+  m_pedflxfitVec.reserve(MAX_DRAWERS);
+  m_eflxoptVec.reserve(MAX_DRAWERS);
+  m_tflxoptVec.reserve(MAX_DRAWERS);
+  m_chi2flxoptVec.reserve(MAX_DRAWERS);
+  m_pedflxoptVec.reserve(MAX_DRAWERS);
+  m_gainflxVec.reserve(MAX_DRAWERS);
+  m_sampleflxVec.reserve(MAX_DRAWERS);
+
+     std::ostringstream oss;
+  oss << m_nSamplesFlx;
+  std::string nSampStr_Flx=oss.str();
+
+  unsigned int listSize = std::min (m_nDrawers, static_cast<unsigned int>(m_drawerMap.size()) );
+
+      std::string digit[10] = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
+    std::vector<std::string> suffixArr;
+    unsigned int length;
+    bool testbeam = TileCablingService::getInstance()->getTestBeam();
+      length = 2 * m_nDrawers;
+      suffixArr.resize(length);
+
+      for (unsigned int i = 0; i < listSize; ++i) {
+        unsigned int ros = m_drawerType[i];
+        unsigned int drawer = strtol(m_drawerList[i].data(), NULL, 0) & 0x3F;
+        std::string digits;
+        if (m_TBperiod >= 2010) {
+          ++drawer; // count modules from 1
+          digits = digit[drawer / 10] + digit[drawer % 10];
+        } else if (testbeam) {
+          digits = digit[drawer & 7];
+        } else {
+          ++drawer; // count modules from 1
+          digits = digit[drawer / 10] + digit[drawer % 10];
+        }
+
+
+        if (ros == 0) {
+          std::string suff = m_drawerList[i];
+          suff.replace(suff.find("0x"), 2, "");
+          suffixArr[i] = suff + "lo";
+          suffixArr[i + m_nDrawers] = suff + "hi";
+        } else {
+          suffixArr[i] = m_rosName[ros] + digits + "lo";
+          suffixArr[i + m_nDrawers] = m_rosName[ros] + digits + "hi";
+        }
+      }
+
+  for (unsigned int i = 0; i < length; i++) {
+
+      int nSamplesInDrawer(0);
+      int frag = std::stoi(m_drawerList[i%m_nDrawers], nullptr, 0);
+
+      auto it = m_nSamplesInDrawerMap.find(frag);
+      if (it != m_nSamplesInDrawerMap.end()) {
+        nSamplesInDrawer = it->second;
+      }
+
+      if (i % m_nDrawers < listSize)
+        ATH_MSG_DEBUG( "Adding items for " << suffixArr[i] );
+
+      int *evt = new int;
+      short *size = new short;
+      short *rodBCID = new short;
+      int *gain = new int[N_CHANS];
+
+
+
+      int **sample_flx = (int**) malloc(N_CHANS * sizeof(int *));
+      sample_flx[0] = (int*) malloc(N_CHANS * m_nSamplesFlx * sizeof(int));
+      memset(sample_flx[0], -1, sizeof(int) * m_nSamplesFlx * N_CHANS);
+      nSamplesInDrawer = std::max(m_nSamplesFlx,nSamplesInDrawer);
+      for (int j = 1; j < N_CHANS; j++) {
+        sample_flx[j] = sample_flx[0] + j * nSamplesInDrawer;
+      }
+
+      float *eflxfit = new float[N_CHANS];
+      float *tflxfit = new float[N_CHANS];
+      float *pedflxfit = new float[N_CHANS];
+      float *chi2flxfit = new float[N_CHANS];
+
+      float *eflxOpt = new float[N_CHANS];
+      float *tflxOpt = new float[N_CHANS];
+      float *pedflxOpt = new float[N_CHANS];
+      float *chi2flxOpt = new float[N_CHANS];
+
+
+      int* mdL1id(nullptr);
+      int* mdBcid(nullptr);
+      int* mdModule(nullptr);
+      int* mdRunType(nullptr);
+      int* mdPedLo(nullptr);
+      int* mdPedHi(nullptr);
+      int* mdRun(nullptr);
+      int* mdCharge(nullptr);
+      int* mdChargeTime(nullptr);
+      int* mdCapacitor(nullptr);
+
+
+      mdL1id = new int[MAX_MINIDRAWERS];
+      mdBcid = new int[MAX_MINIDRAWERS];
+      mdModule = new int[MAX_MINIDRAWERS];
+      mdRunType = new int[MAX_MINIDRAWERS];
+      mdPedLo = new int[MAX_MINIDRAWERS];
+      mdRun = new int[MAX_MINIDRAWERS];
+      mdCharge = new int[MAX_MINIDRAWERS];
+      mdChargeTime = new int[MAX_MINIDRAWERS];
+      mdCapacitor = new int[MAX_MINIDRAWERS];
+
+
+
+      m_eflxfitVec.push_back( eflxfit );
+      m_tflxfitVec.push_back( tflxfit );
+      m_pedflxfitVec.push_back( pedflxfit );
+      m_chi2flxfitVec.push_back( chi2flxfit );
+
+      m_eflxoptVec.push_back( eflxOpt );
+      m_tflxoptVec.push_back( tflxOpt );
+      m_pedflxoptVec.push_back( pedflxOpt );
+      m_chi2flxoptVec.push_back( chi2flxOpt );
+
+     m_rodBCIDflxVec.push_back( rodBCID);
+     m_sizeflxVec.push_back( size);
+     m_evtflxVec.push_back( evt);
+
+     m_mdL1idVec.push_back(mdL1id);
+     m_mdBcidVec.push_back(mdBcid);
+     m_mdModuleVec.push_back(mdModule);
+     m_mdRunTypeVec.push_back(mdRunType);
+     m_mdPedLoVec.push_back(mdPedLo);
+     m_mdPedHiVec.push_back(mdPedHi);
+     m_mdRunVec.push_back(mdRun);
+     m_mdChargeVec.push_back(mdCharge);
+     m_mdChargeTimeVec.push_back(mdChargeTime);
+     m_mdCapacitorVec.push_back(mdCapacitor);
+
+
+     m_gainflxVec.push_back( gain );
+     m_sampleflxVec.push_back( sample_flx ); // U(48/96,9)
+
+     if (i%m_nDrawers < listSize) {
+
+        ATH_MSG_DEBUG( "Adding Leaf to Event '" << ("Evt" + suffixArr[i]+"Flx") << "' @" << evt );
+
+        if (m_bsInput) {
+         m_ntuplePtr->Branch(("Flx_Evt"+suffixArr[i]).c_str(),evt,("Flx_Evt"+suffixArr[i]+"/I").c_str()); // int
+         m_ntuplePtr->Branch(("Flx_rodBCID"+suffixArr[i]).c_str(),rodBCID,("Flx_rodBCID"+suffixArr[i]+"/S").c_str());//int
+         m_ntuplePtr->Branch(("Flx_Size"+suffixArr[i]).c_str(),size,("Flx_Size"+suffixArr[i]+"/S").c_str()); // short
+        }
+
+        if (mdL1id) {
+         m_ntuplePtr->Branch(("mdL1ID"+suffixArr[i]).c_str(),m_mdL1idVec.back(),("mdL1id"+suffixArr[i]+"[4]/I").c_str()); // int
+         m_ntuplePtr->Branch(("mdBCID"+suffixArr[i]).c_str(),m_mdBcidVec.back(),("mdBcid"+suffixArr[i]+"[4]/I").c_str()); // int
+         m_ntuplePtr->Branch(("mdModule"+suffixArr[i]).c_str(),m_mdModuleVec.back(),("mdModule"+suffixArr[i]+"[4]/I").c_str()); // int
+         m_ntuplePtr->Branch(("mdRunType"+suffixArr[i]).c_str(),m_mdRunTypeVec.back(),("mdRunType"+suffixArr[i]+"[4]/I").c_str()); // int
+         m_ntuplePtr->Branch(("mdPedLo"+suffixArr[i]).c_str(),m_mdPedLoVec.back(),("mdPedLo"+suffixArr[i]+"[4]/I").c_str()); // int
+         m_ntuplePtr->Branch(("mdPedHi"+suffixArr[i]).c_str(),m_mdPedHiVec.back(),("mdPedHi"+suffixArr[i]+"[4]/I").c_str()); // int
+         m_ntuplePtr->Branch(("mdChargeTime"+suffixArr[i]).c_str(),m_mdChargeTimeVec.back(),("mdChargeTime"+suffixArr[i]+"[4]/I").c_str()); // int
+         m_ntuplePtr->Branch(("mdCapacitor"+suffixArr[i]).c_str(),m_mdCapacitorVec.back(),("mdCapacitor"+suffixArr[i]+"[4]/I").c_str()); // int
+        }
+
+       m_ntuplePtr->Branch(("Flx_Gain"+suffixArr[i]).c_str(),m_gainflxVec.back(),("Flx_gain"+suffixArr[i]+"[48]/I").c_str()); // int
+
+       if (nSamplesInDrawer > 0) {
+
+         nSampStr_Flx = std::to_string(nSamplesInDrawer);
+         m_ntuplePtr->Branch(("Flx_Sample" + suffixArr[i]).c_str(), *sample_flx,
+                             ("Flx_sample" + suffixArr[i] + "[48]["+nSampStr_Flx+"]/I").c_str()); // size m_nsample and type int
+
+
+
+        }
+
+        if (m_flxFitRawChannelContainer.size() > 0) {
+          m_ntuplePtr->Branch(("Flx_Efit" + suffixArr[i]).c_str(), m_eflxfitVec.back(), ("Flx_eflxfit" + suffixArr[i] + "[48]/F").c_str()); // float
+          m_ntuplePtr->Branch(("Flx_Tfit" + suffixArr[i]).c_str(), m_tflxfitVec.back(), ("Flx_tflxfit" + suffixArr[i] + "[48]/F").c_str()); // float
+          m_ntuplePtr->Branch(("Flx_Pedfit" + suffixArr[i]).c_str(), m_pedflxfitVec.back(), ("Flx_pedflxfit" + suffixArr[i] + "[48]/F").c_str()); // float
+          m_ntuplePtr->Branch(("Flx_Chi2fit" + suffixArr[i]).c_str(), m_chi2flxfitVec.back(), ("Flx_chiflxfit" + suffixArr[i] + "[48]/F").c_str()); // float
+
+        }
+
+        if (m_flxOptRawChannelContainer.size() > 0) {
+          m_ntuplePtr->Branch(("Flx_EOpt" + suffixArr[i]).c_str(), m_eflxoptVec.back(), ("Flx_eflxOpt" + suffixArr[i] + "[48]/F").c_str()); // float
+          m_ntuplePtr->Branch(("Flx_TOpt" + suffixArr[i]).c_str(), m_tflxoptVec.back(), ("Flx_tflxOpt" + suffixArr[i] + "[48]/F").c_str()); // float
+          m_ntuplePtr->Branch(("Flx_PedOpt" + suffixArr[i]).c_str(), m_pedflxoptVec.back(), ("Flx_pedflxOpt" + suffixArr[i] + "[48]/F").c_str()); // float
+          m_ntuplePtr->Branch(("Flx_Chi2Opt" + suffixArr[i]).c_str(), m_chi2flxoptVec.back(), ("Flx_chiflxOpt" + suffixArr[i] + "[48]/F").c_str()); // float
+
+        }
+     }
+   }
+}
+
+
+
+void TileTBAANtuple::FELIX_clearBranch(void)
+{
+  clear_int(m_evtflxVec,1);
+  clear_short(m_rodBCIDflxVec,1);
+  clear_short(m_sizeflxVec,1);
+
+  clear_intint(m_sampleflxVec,N_CHANS);
+
+  clear_float(m_eflxfitVec);
+  clear_float(m_tflxfitVec );
+  clear_float(m_chi2flxfitVec);
+  clear_float(m_pedflxfitVec);
+  clear_float(m_eflxoptVec);
+  clear_float(m_tflxoptVec);
+  clear_float(m_chi2flxoptVec);
+  clear_float(m_pedflxoptVec);
+
+  clear_int(m_mdL1idVec, MAX_MINIDRAWERS);
+  clear_int(m_mdBcidVec, MAX_MINIDRAWERS);
+  clear_int(m_mdModuleVec, MAX_MINIDRAWERS);
+  clear_int(m_mdRunTypeVec, MAX_MINIDRAWERS);
+  clear_int(m_mdRunVec, MAX_MINIDRAWERS);
+  clear_int(m_mdChargeVec, MAX_MINIDRAWERS);
+  clear_int(m_mdChargeTimeVec, MAX_MINIDRAWERS);
+  clear_int(m_mdCapacitorVec, MAX_MINIDRAWERS);
+  clear_int(m_mdPedLoVec, MAX_MINIDRAWERS);
+  clear_int(m_mdPedHiVec, MAX_MINIDRAWERS);
+
+}
+
 /**
 //////////////////////////////////////////////////////////////////////////////
 ///Add Tree HIT variables Tree
