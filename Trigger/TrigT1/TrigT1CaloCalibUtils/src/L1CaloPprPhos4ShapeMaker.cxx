@@ -553,7 +553,7 @@ StatusCode L1CaloPprPhos4ShapeMaker::GetRODHeader(){
    return StatusCode::SUCCESS;
 }
 
-StatusCode L1CaloPprPhos4ShapeMaker::GetDatabaseHandle(std::string folderName){
+StatusCode L1CaloPprPhos4ShapeMaker::GetDatabaseHandle(const std::string& folderName){
    
    StatusCode sc = evtStore()->retrieve(m_attrList,folderName.c_str());
    //ATH_MSG_INFO( detStore()->dump() );
