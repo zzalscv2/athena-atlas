@@ -171,8 +171,6 @@ bool LVL1::jFEXSmallRJetAlgo::isSeedLocalMaxima() {
     bool isCentralLM   = CalculateLM(m_jFEXalgoSearchWindowSeedET) && (getTTowerET(m_jFEXalgoTowerID[3][3]) >= getTTowerET(m_jFEXalgoTowerID[4][2]));
     bool isDisplacedLM = CalculateLM(m_jFEXalgoSearchWindowSeedET_displaced) && (getTTowerET(m_jFEXalgoTowerID[3][3]) >  getTTowerET(m_jFEXalgoTowerID[2][4]));
     
-
-
     if(isCentralLM || isDisplacedLM){
         return true;
     }

@@ -138,11 +138,11 @@ uint32_t jFEXFormTOBs::formSRJetTOB(int jFEX, int iPhi, int iEta, int EtClus, in
         } 
     }
     
-    //Appliying jet calibration
-    jFEXSmallRJetTOBEt = Get_calibrated_SRj_ET(EtClus,jFEX)/Resolution;
+    // COMENTED FOR NOW, Appliying jet calibration
+    //jFEXSmallRJetTOBEt = Get_calibrated_SRj_ET(EtClus,jFEX)/Resolution;
     
-    // COMENTED FOR NOW, in the firmware the calibration is not applied yet. Needs COOL DB implementation!
-    //jFEXSmallRJetTOBEt = EtClus/Resolution;
+    //In the firmware the calibration is not applied yet.
+    jFEXSmallRJetTOBEt = EtClus/Resolution;
     
     if(jFEXSmallRJetTOBEt > 0x7ff) {
         jFEXSmallRJetTOBEt = 0x7ff;

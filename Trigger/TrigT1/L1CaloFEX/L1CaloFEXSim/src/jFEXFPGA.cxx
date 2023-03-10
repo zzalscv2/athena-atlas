@@ -118,9 +118,9 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection) {
     std::vector<float> pileup_rho;
     pileup_rho = m_jFEXPileupAndNoiseTool->CalculatePileup();
 
-    //Applying pileup sustraction in jet or met independently - this sets the flags to true in m_jFEXPileupAndNoiseTool
-    m_jFEXPileupAndNoiseTool->ApplyPileup2Jets(true);
-    m_jFEXPileupAndNoiseTool->ApplyPileup2Met(true);
+    //NOT Applying pileup sustraction on jet or met - this sets the flags to false in m_jFEXPileupAndNoiseTool
+    m_jFEXPileupAndNoiseTool->ApplyPileup2Jets(false);
+    m_jFEXPileupAndNoiseTool->ApplyPileup2Met(false);
     
     //Noise should be always applied
     m_jFEXPileupAndNoiseTool->ApplyNoise2Jets(true);
@@ -238,7 +238,7 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection) {
         m_jFEXSmallRJetAlgoTool->setFPGAEnergy(m_map_Etvalues_FPGA);
         m_jFEXLargeRJetAlgoTool->setFPGAEnergy(m_map_Etvalues_FPGA);
         m_jFEXtauAlgoTool->setFPGAEnergy(m_map_Etvalues_FPGA);
-        
+     
         for(int mphi = 8; mphi < FEXAlgoSpaceDefs::jFEX_algoSpace_height-8; mphi++) {
             for(int meta = 8; meta < FEXAlgoSpaceDefs::jFEX_thin_algoSpace_width-8; meta++) {
                 //definition of arrays
@@ -335,7 +335,7 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection) {
     
     //FCAL region algorithm
     if(m_jfexid ==0 || m_jfexid ==5) {
-        
+
         //**********Forward Jets***********************
         ATH_CHECK(m_jFEXForwardJetsAlgoTool->safetyTest());
         ATH_CHECK(m_jFEXForwardJetsAlgoTool->reset());

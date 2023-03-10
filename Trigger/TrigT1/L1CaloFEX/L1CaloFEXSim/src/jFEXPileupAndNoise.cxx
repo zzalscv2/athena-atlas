@@ -482,7 +482,7 @@ void LVL1::jFEXPileupAndNoise::ApplyNoiseCuts(std::unordered_map<int,std::vector
         tmpTower = m_jTowerContainer->findTower(key);
         int Jet_NoiseCut = tmpTower->getNoiseForJet(layer);
         int Met_NoiseCut = tmpTower->getNoiseForMet(layer);
-        
+
         if(m_apply_noise2jets && map_Etvalues[key][0]<=Jet_NoiseCut){ // Et for jets
             map_Etvalues[key][0]=0.;
         }        

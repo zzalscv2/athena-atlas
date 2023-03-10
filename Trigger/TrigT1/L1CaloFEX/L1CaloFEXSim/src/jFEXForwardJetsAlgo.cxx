@@ -148,8 +148,7 @@ std::unordered_map<int, jFEXForwardJetsInfo> LVL1::jFEXForwardJetsAlgo::FcalJets
                 //Know wich consition should satisfy
                 unsigned int elemCorr  = elementsCorr(myTTIDKey);
                 unsigned int elemCorr2 = elementsCorr2(myTTIDKey);
-                
-                
+
                 if(elemCorr == 0 and elemCorr2 == 0){
                     iAmJet = isLM(myTTIDKey);
                 }
@@ -161,6 +160,7 @@ std::unordered_map<int, jFEXForwardJetsInfo> LVL1::jFEXForwardJetsAlgo::FcalJets
                 }
                 else if(elemCorr > 0 and elemCorr2 > 0){
                     iAmJet = (isLM(myTTIDKey) and condCorr2(myTTIDKey)) or (isLMabove(myTTIDKey) and condCorr(myTTIDKey));
+
                 }
                 
                 if(iAmJet){
@@ -183,6 +183,7 @@ std::unordered_map<int, jFEXForwardJetsInfo> LVL1::jFEXForwardJetsAlgo::FcalJets
                     if(it_seed_map == m_SeedRingMap.end()) {
                         ATH_MSG_FATAL("Could not find TT" << myTTIDKey << " in Jet seed file.");
                     }
+                    
                     for(const auto& seedTT : it_seed_map->second){
                         TriggerTowerInformation.includeTTinSeed(seedTT);
                         TriggerTowerInformation.addToSeedET(getEt(seedTT));
@@ -199,7 +200,7 @@ std::unordered_map<int, jFEXForwardJetsInfo> LVL1::jFEXForwardJetsAlgo::FcalJets
                         if(m_storeEnergyRingTTIDs) {
                             TriggerTowerInformation.includeTTIDinFirstER(firstER_TT);
                         }                        
-                    }    
+                    }
 
                     // 2nd Energy Ring!
                     it_seed_map = m_2ndRingMap.find(myTTIDKey);
@@ -238,6 +239,7 @@ int LVL1::jFEXForwardJetsAlgo::SumEtSeed(unsigned int TTID) {
     for(const auto& seedTT : it_seed_map->second){
         summedEt += getEt(seedTT);  
     }
+
     return summedEt;
 }
 
@@ -261,7 +263,7 @@ bool LVL1::jFEXForwardJetsAlgo::isLM(unsigned int TTID){
             break;
         }
     }
-    
+
     //No need to continue.. Not a LM
     if(!greater){
         return false;
@@ -283,7 +285,7 @@ bool LVL1::jFEXForwardJetsAlgo::isLM(unsigned int TTID){
             break;
         }
     }
-
+    
     //Not a LM
     if(!greaterEqual){
         return false;
@@ -308,6 +310,7 @@ bool LVL1::jFEXForwardJetsAlgo::isLMabove(unsigned int TTID){
         //Checking if the displaced TT is a seed
         return isLM(Gtt);       
     }
+    
     return false;
 }
 
@@ -332,7 +335,7 @@ bool LVL1::jFEXForwardJetsAlgo::condCorr(unsigned int TTID){
     
     // If there is no TT to check then the Et of central is always bigger :D
     if( (it_seed_map->second).size() == 0){
-        return false;
+        return true;
     }
     
     int centralEt = getEt(TTID);
@@ -344,6 +347,7 @@ bool LVL1::jFEXForwardJetsAlgo::condCorr(unsigned int TTID){
             return false;
         }
     }
+    
     return true;    
     
 }
@@ -368,7 +372,6 @@ bool LVL1::jFEXForwardJetsAlgo::condCorr2(unsigned int TTID){
     }
     
     int centralEt = getEt(TTID);
-    
     for (const auto& Gtt : it_seed_map->second ){
         //Checking if central Et is always greater or equal than the previous TT Et 
         int tmpEt = getEt(Gtt);
@@ -376,6 +379,7 @@ bool LVL1::jFEXForwardJetsAlgo::condCorr2(unsigned int TTID){
             return false;
         }
     }
+    
     return true;    
     
 }

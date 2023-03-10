@@ -200,7 +200,20 @@ if __name__ == '__main__':
         outputEDM += addEDM('xAOD::jFexTauRoIContainer'  , 'L1_jFexTauRoI'  )
         outputEDM += addEDM('xAOD::jFexFwdElRoIContainer', 'L1_jFexFwdElRoI')
         outputEDM += addEDM('xAOD::jFexSumETRoIContainer', 'L1_jFexSumETRoI')
-        outputEDM += addEDM('xAOD::jFexMETRoIContainer'  , 'L1_jFexMETRoI'  ) 
+        outputEDM += addEDM('xAOD::jFexMETRoIContainer'  , 'L1_jFexMETRoI'  )
+        
+        #xTOBs 
+        jFexxRoiByteStreamTool = jFexRoiByteStreamToolCfg('jFexBSDecoderTool_xtobs', flags=flags, writeBS=False,xTOBs=True)
+        
+        decoderTools += [jFexxRoiByteStreamTool]
+        maybeMissingRobs += jFexxRoiByteStreamTool.ROBIDs
+                
+        outputEDM += addEDM('xAOD::jFexSRJetRoIContainer', 'L1_jFexSRJetxRoI')
+        outputEDM += addEDM('xAOD::jFexLRJetRoIContainer', 'L1_jFexLRJetxRoI')
+        outputEDM += addEDM('xAOD::jFexTauRoIContainer'  , 'L1_jFexTauxRoI'  )
+        outputEDM += addEDM('xAOD::jFexFwdElRoIContainer', 'L1_jFexFwdElxRoI')
+        outputEDM += addEDM('xAOD::jFexSumETRoIContainer', 'L1_jFexSumETxRoI')
+        outputEDM += addEDM('xAOD::jFexMETRoIContainer'  , 'L1_jFexMETxRoI'  ) 
 
         ##################################################
         # jFEX decoded Towers
