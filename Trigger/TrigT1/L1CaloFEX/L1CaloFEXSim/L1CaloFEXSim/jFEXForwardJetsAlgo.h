@@ -94,8 +94,6 @@ namespace LVL1 {
         bool condCorr2(unsigned int TTID);
         
         std::array<float,2> globalEtaPhi(int TTID);
-
-     
                 
   };
 }//end of namespace

@@ -1090,7 +1090,7 @@ int jSuperCellTowerMapper::FindAndConnectTower(std::unique_ptr<jTowerContainer> 
         iJTower = FindTowerIDForSuperCell(towereta, towerphi) + towerID_Modifier;
         
         //Applying the SCell masking!
-        if( (prov >> 7 & 1) and m_apply_masking ){
+        if( (prov >> 7 & 1) and m_apply_masking and ((ID.get_compact()>>32) != 906973184) ){
             //if masked then Et = 0
             et = 0.0;
         }
@@ -1216,18 +1216,19 @@ StatusCode jSuperCellTowerMapper::AssignPileupAndNoiseValues(std::unique_ptr<jTo
         //Expected noise cut from the performance group
         int noise = 0;  
         
-        //COMMENTED FOR NOW, currently applied in the firmware at P1  
-        //s etting noise for EMB, EMEC and HEC (all LAr)   
+        // Currently applied in the firmware at P1  
+        // setting noise for EMB, EMEC and HEC (all LAr)   
         // the noise cut depends on different regions for LAr and Tile
-        //if(layer == 0 or (layer == 1 and TTid > 500000) ){
-            //noise = 40*25;
-        //}
-        //else if(layer == 1 ){ // 500 MEV cut for Tile
-            //noise = 1*500;
-        //}
-        //else{
-            //noise = 0;
-        //}      
+        if(layer == 0 or (layer == 1 and TTid > 500000) ){
+            noise = 40*25;
+        }
+        else if(layer == 1 ){ // 500 MEV cut for Tile
+            noise = 1*500;
+        }
+        else{
+            noise = 0;
+        }      
+
         
         
         LVL1::jTower * targetTower = my_jTowerContainerRaw->findTower(TTid);
