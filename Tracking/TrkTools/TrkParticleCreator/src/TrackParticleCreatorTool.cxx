@@ -114,35 +114,11 @@ TrackParticleCreatorTool::TrackParticleCreatorTool(const std::string& t,
   , m_pixelID(nullptr)
   , m_sctID(nullptr)
   , m_trtID(nullptr)
-  , m_copyExtraSummaryName{ "eProbabilityComb",  "eProbabilityHT", "eProbabilityNN",
-                            "TRTTrackOccupancy", "TRTdEdx",        "TRTdEdxUsedHits" }
   , m_copyEProbabilities{}
   , m_decorateEProbabilities{}
   , m_decorateSummaryTypes{}
   , m_doIBL(false)
-  , m_computeAdditionalInfo(false)
-  , m_keepParameters(false)
-  , m_keepFirstParameters(false)
-  , m_keepAllPerigee(false)
-  , m_perigeeExpression("BeamLine")
 {
-  declareProperty("DoITk" , m_doITk = false);
-  declareProperty("ComputeAdditionalInfo", m_computeAdditionalInfo);
-  declareProperty("DoSharedSiHits", m_doSharedSiHits = false);
-  declareProperty("DoSharedTRTHits", m_doSharedTRTHits = false);
-  declareProperty("RunningTIDE_Ambi", m_runningTIDE_Ambi = false);
-  declareProperty("UpdateTrackSummary", m_updateTrackSummary = false);
-  declareProperty("KeepParameters", m_keepParameters);
-  declareProperty("KeepFirstParameters", m_keepFirstParameters);
-  declareProperty("KeepAllPerigee", m_keepAllPerigee);
-  declareProperty("CheckConversion", m_checkConversion = true);
-  declareProperty("MinSiHitsForCaloExtrap", m_minSiHits = 4);
-  declareProperty("MinPtForCaloExtrap", m_minPt = 1000.);
-  declareProperty("PerigeeExpression", m_perigeeExpression);
-  // 0 = off, 1 = OOT, 2 = dE/dx, 3 = combination of OOT and dE/dx, 4 =
-  // combination of OOT, dE/dx, and size
-  declareProperty("BadClusterID", m_badclusterID = 0);
-  declareProperty("ExtraSummaryTypes", m_copyExtraSummaryName);
 }
 
 StatusCode
