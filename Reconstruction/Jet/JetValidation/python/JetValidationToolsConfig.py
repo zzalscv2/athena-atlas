@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -28,8 +28,14 @@ def PhysValJetToolCfg(flags, name="PhysValJetTool", **kwargs):
     fillers = []
     for col in jetcollections:
         truthJetCollection = ''
-        if flags.Input.isMC:
-            truthJetCollection = 'AntiKt4TruthJets'
+        if flags.Input.isMC and 'Truth' not in col:
+            if col == 'AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets':
+                truthJetCollection = 'AntiKt10TruthTrimmedPtFrac5SmallR20Jets'
+            elif col == 'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets':
+                truthJetCollection = 'AntiKt10TruthSoftDropBeta100Zcut10Jets'
+            elif 'AntiKt4' in col:
+                truthJetCollection = 'AntiKt4TruthJets'
+
         fillers += [ acc.popToolsAndMerge(JetMonToolCfg(flags, JetContainer=col,
                                                         refcontainer=truthJetCollection)) ]
 
