@@ -629,7 +629,7 @@ ElectronChainParts = {
     'isoInfo'        : ['ivarloose','ivarmedium','ivartight'],
     'idperfInfo'     : ['idperf'],
     'gsfInfo'        : ['nogsf'],
-    'lrtInfo'        : ['lrtloose','lrtmedium','lrttight'],
+    'lrtInfo'        : ['lrtloose','lrtmedium','lrttight','lrtxtight','lrtvxtight'],
     'caloInfo'       : [],
     'lhInfo'         : ['nod0', 'nopix'],
     'L2IDAlg'        : ['noringer'],
