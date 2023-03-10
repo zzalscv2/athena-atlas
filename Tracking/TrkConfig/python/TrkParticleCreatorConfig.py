@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 # Configuration of TrkParticleCreator package
-# Creating xAOD::TrackParticles starting from 
+# Creating xAOD::TrackParticles starting from
 # input Trk::Tracks
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -35,13 +35,13 @@ def TrackParticleCreatorToolCfg(flags,
         result.addPublicTool(TrackSummaryTool)
         kwargs.setdefault("TrackSummaryTool", TrackSummaryTool)
 
-    if "TRT_ElectronPidTool" not in kwargs :
+    if "TRT_ElectronPidTool" not in kwargs:
         from InDetConfig.TRT_ElectronPidToolsConfig import (
             TRT_ElectronPidToolCfg)
         kwargs.setdefault("TRT_ElectronPidTool", result.popToolsAndMerge(
             TRT_ElectronPidToolCfg(flags, name="InDetTRT_ElectronPidTool")))
 
-    if 'PixelToTPIDTool' not in kwargs :
+    if 'PixelToTPIDTool' not in kwargs:
         from InDetConfig.PixelToTPIDToolConfig import PixelToTPIDToolCfg
         kwargs.setdefault("PixelToTPIDTool", result.popToolsAndMerge(
             PixelToTPIDToolCfg(flags)))
@@ -55,11 +55,11 @@ def TrackParticleCreatorToolCfg(flags,
     kwargs.setdefault("ComputeAdditionalInfo", True)
     kwargs.setdefault("AssociationMapName", "")
     kwargs.setdefault("DoSharedSiHits", flags.Tracking.doSharedHits
-                      and kwargs["AssociationMapName"]!="")
+                      and kwargs["AssociationMapName"] != "")
     kwargs.setdefault("DoSharedTRTHits", flags.Tracking.doSharedHits
                       and flags.Detector.EnableTRT
-                      and kwargs["AssociationMapName"]!="")
-    kwargs.setdefault("RunningTIDE_Ambi", flags.InDet.Tracking.doTIDE_Ambi)
+                      and kwargs["AssociationMapName"] != "")
+    kwargs.setdefault("RunningTIDE_Ambi", flags.Tracking.doTIDE_Ambi)
 
     # Select the mode to identify suspicous pixel cluster
     kwargs.setdefault("BadClusterID", 3)
@@ -71,6 +71,7 @@ def TrackParticleCreatorToolCfg(flags,
     result.setPrivateTools(
         CompFactory.Trk.TrackParticleCreatorTool(name, **kwargs))
     return result
+
 
 def TrackParticleCreatorToolPIDCheckCfg(flags,
                                         name="InDetxAODParticleCreatorTool",
@@ -84,17 +85,18 @@ def TrackParticleCreatorToolPIDCheckCfg(flags,
         kwargs.setdefault("TestPixelLayerTool", None)
 
     # have to create special public instance depending on PID tool configuration
-    if name=="InDetxAODParticleCreatorTool" :
+    if name == "InDetxAODParticleCreatorTool":
         pixel_pid = flags.InDet.Tracking.ActiveConfig.RunPixelPID
         trt_pid = flags.InDet.Tracking.ActiveConfig.RunTRTPID
-        if not trt_pid and not pixel_pid :
-            name  += "NoPID"
-        elif not trt_pid :
+        if not trt_pid and not pixel_pid:
+            name += "NoPID"
+        elif not trt_pid:
             name += "NoTRTPID"
-        elif not pixel_pid :
-            name  += "NoPixPID"
+        elif not pixel_pid:
+            name += "NoPixPID"
 
     return TrackParticleCreatorToolCfg(flags, name, **kwargs)
+
 
 def TrackParticleCreatorToolNoPIDCfg(flags,
                                      name="InDetxAODParticleCreatorToolNoPID",
@@ -103,6 +105,7 @@ def TrackParticleCreatorToolNoPIDCfg(flags,
     kwargs.setdefault("PixelToTPIDTool", None)
     kwargs.setdefault("TestPixelLayerTool", None)
     return TrackParticleCreatorToolCfg(flags, name, **kwargs)
+
 
 def InDetTrigParticleCreatorToolFTFCfg(flags,
                                        name="InDetTrigParticleCreatorToolFTF",
@@ -126,17 +129,19 @@ def InDetTrigParticleCreatorToolFTFCfg(flags,
     kwargs.setdefault("KeepParameters", True)
     kwargs.setdefault("ComputeAdditionalInfo", True)
     kwargs.setdefault("AssociationMapName", "")
-    kwargs.setdefault("DoSharedSiHits", kwargs["AssociationMapName"]!="")
+    kwargs.setdefault("DoSharedSiHits", kwargs["AssociationMapName"] != "")
 
     result.setPrivateTools(
         CompFactory.Trk.TrackParticleCreatorTool(name, **kwargs))
     return result
 
+
 def ITkTrackParticleCreatorToolCfg(flags,
                                    name="ITkTrackParticleCreatorTool",
                                    **kwargs):
     from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
-    result = BeamSpotCondAlgCfg(flags) # To produce InDet::BeamSpotData CondHandle
+    # To produce InDet::BeamSpotData CondHandle
+    result = BeamSpotCondAlgCfg(flags)
 
     if "TrackToVertex" not in kwargs:
         from TrackToVertex.TrackToVertexConfig import TrackToVertexCfg
@@ -158,8 +163,9 @@ def ITkTrackParticleCreatorToolCfg(flags,
 
     kwargs.setdefault("ComputeAdditionalInfo", True)
     kwargs.setdefault("AssociationMapName", "")
-    kwargs.setdefault("DoSharedSiHits", flags.Tracking.doSharedHits \
-                      and kwargs["AssociationMapName"]!="")
+    kwargs.setdefault("DoSharedSiHits",
+                      flags.Tracking.doSharedHits and
+                      kwargs["AssociationMapName"] != "")
     kwargs.setdefault("RunningTIDE_Ambi", True)
 
     # Select the mode to identify suspicous pixel cluster
@@ -253,6 +259,7 @@ def MuonParticleCreatorToolCfg(flags, name="MuonParticleCreatorTool", **kwargs):
         CompFactory.Trk.TrackParticleCreatorTool(name, **kwargs))
     return result
 
+
 def MuonCombinedParticleCreatorCfg(flags,
                                    name="MuonCombinedParticleCreator",
                                    **kwargs):
@@ -287,8 +294,8 @@ def MuonCombinedParticleCreatorCfg(flags,
             kwargs.setdefault("PixelToTPIDTool", result.popToolsAndMerge(
                 PixelToTPIDToolCfg(flags)))
 
-        if 'TestPixelLayerTool' not in kwargs and \
-           (flags.Detector.EnablePixel or flags.Detector.EnableITkPixel):
+        if ('TestPixelLayerTool' not in kwargs and
+                (flags.Detector.EnablePixel or flags.Detector.EnableITkPixel)):
             from InDetConfig.InDetTestPixelLayerConfig import (
                 InDetTestPixelLayerToolInnerCfg)
             kwargs.setdefault("TestPixelLayerTool", result.popToolsAndMerge(
@@ -307,11 +314,12 @@ def MuonCombinedParticleCreatorCfg(flags,
         kwargs.setdefault("PerigeeExpression", "Origin")
     kwargs.setdefault("IBLParameterSvc",
                       "IBLParameterSvc" if flags.Detector.GeometryID else "")
- 
+
     kwargs.setdefault("TrackingVolumesSvc", "TrackingVolumesSvc")
     result.setPrivateTools(
         CompFactory.Trk.TrackParticleCreatorTool(name, **kwargs))
     return result
+
 
 def MuonCaloParticleCreatorCfg(flags, name="MuonCaloParticleCreator", **kwargs):
     result = ComponentAccumulator()

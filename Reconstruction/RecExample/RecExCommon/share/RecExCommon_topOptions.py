@@ -402,7 +402,7 @@ ConfigFlags = getNewConfigFlags()
 # since we started locking ConfigFlags in here.
 from InDetRecExample.InDetJobProperties import InDetFlags
 if jobproperties.Beam.beamType() == 'cosmics':
-    ConfigFlags.InDet.Tracking.doTIDE_Ambi = False
+    ConfigFlags.Tracking.doTIDE_Ambi = False
 
 if rec.doMonitoring():
     include ("AthenaMonitoring/DataQualityInit_jobOptions.py")

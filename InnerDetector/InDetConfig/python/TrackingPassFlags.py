@@ -204,8 +204,9 @@ def createTrackingPassFlags():
 
     icf.addFlag("usePrdAssociationTool", False)
     icf.addFlag("isLowPt", False)
-    icf.addFlag("useTIDE_Ambi", lambda pcf: pcf.InDet.Tracking.doTIDE_Ambi)
-    icf.addFlag("useTRTExtension", lambda pcf: pcf.InDet.Tracking.doTRTExtension)
+    icf.addFlag("useTIDE_Ambi", lambda pcf: pcf.Tracking.doTIDE_Ambi)
+    icf.addFlag("useTRTExtension",
+                lambda pcf: pcf.InDet.Tracking.doTRTExtension)
     icf.addFlag("storeSeparateContainer", False)
     icf.addFlag("doAmbiguityProcessorTrackFit", True)
 
