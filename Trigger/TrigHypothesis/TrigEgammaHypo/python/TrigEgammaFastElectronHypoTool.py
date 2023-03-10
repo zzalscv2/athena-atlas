@@ -51,7 +51,9 @@ class TrigEgammaFastElectronHypoToolConfig:
 
   __trigElectronLrtd0Cut = { 'lrtloose' :2.0,
                              'lrtmedium':3.0,
-                             'lrttight' :5.0
+                             'lrttight' :5.0,
+                             'lrtxtight':10.0,
+                             'lrtvxtight':20.0
                            }
 
   def __init__(self, name, monGroups, cpart, tool=None):
