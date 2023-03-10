@@ -75,21 +75,21 @@ def HTTBankSvcCfg():
     return result
 
 
-def HTTRoadUnionToolCfg(configFlags):
+def HTTRoadUnionToolCfg(flags):
     result=ComponentAccumulator()
     RF = CompFactory.HTTRoadUnionTool()
     
-    xBins = configFlags.Trigger.HTT.ActiveConfig.xBins
-    xBufferBins = configFlags.Trigger.HTT.ActiveConfig.xBufferBins
-    yBins = configFlags.Trigger.HTT.ActiveConfig.yBins
-    yBufferBins = configFlags.Trigger.HTT.ActiveConfig.yBufferBins
-    xMin = configFlags.Trigger.HTT.ActiveConfig.phiMin
-    xMax = configFlags.Trigger.HTT.ActiveConfig.phiMax
+    xBins = flags.Trigger.HTT.ActiveConfig.xBins
+    xBufferBins = flags.Trigger.HTT.ActiveConfig.xBufferBins
+    yBins = flags.Trigger.HTT.ActiveConfig.yBins
+    yBufferBins = flags.Trigger.HTT.ActiveConfig.yBufferBins
+    xMin = flags.Trigger.HTT.ActiveConfig.phiMin
+    xMax = flags.Trigger.HTT.ActiveConfig.phiMax
     xBuffer = (xMax - xMin) / xBins * xBufferBins
     xMin = xMin - xBuffer
     xMax = xMax +  xBuffer
-    yMin = configFlags.Trigger.HTT.ActiveConfig.qptMin
-    yMax = configFlags.Trigger.HTT.ActiveConfig.qptMax
+    yMin = flags.Trigger.HTT.ActiveConfig.qptMin
+    yMax = flags.Trigger.HTT.ActiveConfig.qptMax
     yBuffer = (yMax - yMin) / yBins * yBufferBins
     yMin -= yBuffer
     yMax += yBuffer
@@ -101,24 +101,24 @@ def HTTRoadUnionToolCfg(configFlags):
         HoughTransform.HTTEventSelectionSvc = HTTEventSelectionCfg().getService("HTTEventSelectionSvc")
         HoughTransform.TrigHTTBankSvc = HTTBankSvcCfg().getService("TrigHTTBankSvc")
         HoughTransform.TrigHTTMappingSvc = HTTMapping 
-        HoughTransform.combine_layers = configFlags.Trigger.HTT.ActiveConfig.combineLayers 
-        HoughTransform.convSize_x = configFlags.Trigger.HTT.ActiveConfig.convSizeX 
-        HoughTransform.convSize_y = configFlags.Trigger.HTT.ActiveConfig.convSizeY 
-        HoughTransform.convolution = configFlags.Trigger.HTT.ActiveConfig.convolution 
+        HoughTransform.combine_layers = flags.Trigger.HTT.ActiveConfig.combineLayers 
+        HoughTransform.convSize_x = flags.Trigger.HTT.ActiveConfig.convSizeX 
+        HoughTransform.convSize_y = flags.Trigger.HTT.ActiveConfig.convSizeY 
+        HoughTransform.convolution = flags.Trigger.HTT.ActiveConfig.convolution 
         HoughTransform.d0_max = 0 
         HoughTransform.d0_min = 0 
-        HoughTransform.fieldCorrection = configFlags.Trigger.HTT.ActiveConfig.fieldCorrection
-        HoughTransform.hitExtend_x = configFlags.Trigger.HTT.ActiveConfig.hitExtendX
-        HoughTransform.localMaxWindowSize = configFlags.Trigger.HTT.ActiveConfig.localMaxWindowSize        
+        HoughTransform.fieldCorrection = flags.Trigger.HTT.ActiveConfig.fieldCorrection
+        HoughTransform.hitExtend_x = flags.Trigger.HTT.ActiveConfig.hitExtendX
+        HoughTransform.localMaxWindowSize = flags.Trigger.HTT.ActiveConfig.localMaxWindowSize        
         HoughTransform.nBins_x = xBins + 2 * xBufferBins
         HoughTransform.nBins_y = yBins + 2 * yBufferBins
         HoughTransform.phi_max = xMax
         HoughTransform.phi_min = xMin
         HoughTransform.qpT_max = yMax 
         HoughTransform.qpT_min = yMin 
-        HoughTransform.scale = configFlags.Trigger.HTT.ActiveConfig.scale
+        HoughTransform.scale = flags.Trigger.HTT.ActiveConfig.scale
         HoughTransform.subRegion = number
-        HoughTransform.threshold = configFlags.Trigger.HTT.ActiveConfig.threshold 
+        HoughTransform.threshold = flags.Trigger.HTT.ActiveConfig.threshold 
         HoughTransform.traceHits = False
         tools.append(HoughTransform)
 
@@ -127,11 +127,11 @@ def HTTRoadUnionToolCfg(configFlags):
     return result
 
 
-def HTTRawLogicCfg(configFlags):
+def HTTRawLogicCfg(flags):
     result=ComponentAccumulator()
     HTTRawLogic = CompFactory.HTTRawToLogicalHitsTool()
     HTTRawLogic.SaveOptional = 2
-    if (configFlags.Trigger.HTT.ActiveConfig.sampleType == 'skipTruth'): 
+    if (flags.Trigger.HTT.ActiveConfig.sampleType == 'skipTruth'): 
         HTTRawLogic.SaveOptional = 1
     HTTRawLogic.TowersToMap = [0] # TODO TODO why is this hardcoded?
     HTTRawLogic.HTTEventSelectionSvc = HTTEventSelectionCfg().getService("HTTEventSelectionSvc")
@@ -148,10 +148,10 @@ def HTTDataFlowToolCfg():
     result.setPrivateTools(DataFlowTool)
     return result
 
-def HTTSpacePointsToolCfg(configFlags):
+def HTTSpacePointsToolCfg(flags):
     result=ComponentAccumulator()
     SpacePointTool = CompFactory.HTTSpacePointsTool_v2()
-    SpacePointTool.Filtering = configFlags.Trigger.HTT.ActiveConfig.spacePointFiltering
+    SpacePointTool.Filtering = flags.Trigger.HTT.ActiveConfig.spacePointFiltering
     SpacePointTool.FilteringClosePoints = False
     SpacePointTool.PhiWindow = 0.008
     SpacePointTool.Duplication = True
@@ -184,16 +184,16 @@ def HTTHoughRootOutputToolCfg():
     result.setPrivateTools(HoughRootOutputTool)
     return result
 
-def LRTRoadFinderCfg(configFlags):
+def LRTRoadFinderCfg(flags):
     result=ComponentAccumulator()
     LRTRoadFinder =CompFactory.HTTHoughTransform_d0phi0_Tool()
     LRTRoadFinder.TrigHTTBankSvc = HTTBankSvcCfg().getService("TrigHTTBankSvc")
     LRTRoadFinder.TrigHTTMappingSvc = TrigHTTMappingCfg().getService("TrigHTTMappingSvc")
-    LRTRoadFinder.combine_layers = configFlags.Trigger.HTT.ActiveConfig.lrtStraighttrackCombineLayers
-    LRTRoadFinder.convolution = configFlags.Trigger.HTT.ActiveConfig.lrtStraighttrackConvolution
-    LRTRoadFinder.hitExtend_x = configFlags.Trigger.HTT.ActiveConfig.lrtStraighttrackHitExtendX
-    LRTRoadFinder.scale = configFlags.Trigger.HTT.ActiveConfig.scale
-    LRTRoadFinder.threshold = configFlags.Trigger.HTT.ActiveConfig.lrtStraighttrackThreshold
+    LRTRoadFinder.combine_layers = flags.Trigger.HTT.ActiveConfig.lrtStraighttrackCombineLayers
+    LRTRoadFinder.convolution = flags.Trigger.HTT.ActiveConfig.lrtStraighttrackConvolution
+    LRTRoadFinder.hitExtend_x = flags.Trigger.HTT.ActiveConfig.lrtStraighttrackHitExtendX
+    LRTRoadFinder.scale = flags.Trigger.HTT.ActiveConfig.scale
+    LRTRoadFinder.threshold = flags.Trigger.HTT.ActiveConfig.lrtStraighttrackThreshold
     result.setPrivateTools(LRTRoadFinder)
     return result
 
@@ -205,67 +205,67 @@ def NNTrackToolCfg():
     result.setPrivateTools(NNTrackTool)
     return result
 
-def HTTWriteOutputCfg(configFlags):
+def HTTWriteOutputCfg(flags):
     result=ComponentAccumulator()
     HTTWriteOutput = CompFactory.HTTOutputHeaderTool("HTTWriteOutput")
     HTTWriteOutput.InFileName = ["test"]
     HTTWriteOutput.RWstatus = "HEADER" # do not open file, use THistSvc
-    HTTWriteOutput.RunSecondStage = configFlags.Trigger.HTT.ActiveConfig.secondStage
+    HTTWriteOutput.RunSecondStage = flags.Trigger.HTT.ActiveConfig.secondStage
     result.addPublicTool(HTTWriteOutput, primary=True)
     return result
 
-def HTTTrackFitterToolCfg(configFlags):
+def HTTTrackFitterToolCfg(flags):
     result=ComponentAccumulator()
     TF_1st = CompFactory.HTTTrackFitterTool("HTTTrackFitterTool_1st")
-    TF_1st.GuessHits = configFlags.Trigger.HTT.ActiveConfig.guessHits
-    TF_1st.IdealCoordFitType = configFlags.Trigger.HTT.ActiveConfig.idealCoordFitType
+    TF_1st.GuessHits = flags.Trigger.HTT.ActiveConfig.guessHits
+    TF_1st.IdealCoordFitType = flags.Trigger.HTT.ActiveConfig.idealCoordFitType
     TF_1st.TrigHTTBankSvc = HTTBankSvcCfg().getService("TrigHTTBankSvc")
     TF_1st.TrigHTTMappingSvc = TrigHTTMappingCfg().getService("TrigHTTMappingSvc")
-    TF_1st.chi2DofRecoveryMax = configFlags.Trigger.HTT.ActiveConfig.chi2DoFRecoveryMax
-    TF_1st.chi2DofRecoveryMin = configFlags.Trigger.HTT.ActiveConfig.chi2DoFRecoveryMin
-    TF_1st.doMajority = configFlags.Trigger.HTT.ActiveConfig.doMajority
-    TF_1st.nHits_noRecovery = configFlags.Trigger.HTT.ActiveConfig.nHitsNoRecovery
-    TF_1st.DoDeltaGPhis = configFlags.Trigger.HTT.ActiveConfig.doDeltaGPhis
-    TF_1st.DoMissingHitsChecks = configFlags.Trigger.HTT.ActiveConfig.doMissingHitsChecks
+    TF_1st.chi2DofRecoveryMax = flags.Trigger.HTT.ActiveConfig.chi2DoFRecoveryMax
+    TF_1st.chi2DofRecoveryMin = flags.Trigger.HTT.ActiveConfig.chi2DoFRecoveryMin
+    TF_1st.doMajority = flags.Trigger.HTT.ActiveConfig.doMajority
+    TF_1st.nHits_noRecovery = flags.Trigger.HTT.ActiveConfig.nHitsNoRecovery
+    TF_1st.DoDeltaGPhis = flags.Trigger.HTT.ActiveConfig.doDeltaGPhis
+    TF_1st.DoMissingHitsChecks = flags.Trigger.HTT.ActiveConfig.doMissingHitsChecks
     result.addPublicTool(TF_1st, primary=True)
     return result
 
-def HTTOverlapRemovalToolCfg(configFlags):
+def HTTOverlapRemovalToolCfg(flags):
     result=ComponentAccumulator()
     OR_1st = CompFactory.HTTOverlapRemovalTool("HTTOverlapRemovalTool_1st")
     OR_1st.ORAlgo = "Normal"
-    OR_1st.doFastOR =configFlags.Trigger.HTT.ActiveConfig.doFastOR
+    OR_1st.doFastOR =flags.Trigger.HTT.ActiveConfig.doFastOR
     OR_1st.NumOfHitPerGrouping = 5
     OR_1st.TrigHTTMappingSvc = TrigHTTMappingCfg().getService("TrigHTTMappingSvc")
-    if configFlags.Trigger.HTT.ActiveConfig.hough:
-        OR_1st.nBins_x = configFlags.Trigger.HTT.ActiveConfig.xBins + 2 * configFlags.Trigger.HTT.ActiveConfig.xBufferBins
-        OR_1st.nBins_y = configFlags.Trigger.HTT.ActiveConfig.yBins + 2 * configFlags.Trigger.HTT.ActiveConfig.yBufferBins
-        OR_1st.localMaxWindowSize = configFlags.Trigger.HTT.ActiveConfig.localMaxWindowSize
-        OR_1st.roadSliceOR = configFlags.Trigger.HTT.ActiveConfig.roadSliceOR
+    if flags.Trigger.HTT.ActiveConfig.hough:
+        OR_1st.nBins_x = flags.Trigger.HTT.ActiveConfig.xBins + 2 * flags.Trigger.HTT.ActiveConfig.xBufferBins
+        OR_1st.nBins_y = flags.Trigger.HTT.ActiveConfig.yBins + 2 * flags.Trigger.HTT.ActiveConfig.yBufferBins
+        OR_1st.localMaxWindowSize = flags.Trigger.HTT.ActiveConfig.localMaxWindowSize
+        OR_1st.roadSliceOR = flags.Trigger.HTT.ActiveConfig.roadSliceOR
     
     result.addPublicTool(OR_1st, primary=True)
     return result
 
 
-def HTTOverlapRemovalTool_2ndCfg(configFlags):
+def HTTOverlapRemovalTool_2ndCfg(flags):
     result=ComponentAccumulator()
     OR_2nd = CompFactory.HTTOverlapRemovalTool("HTTOverlapRemovalTool_2nd")
     OR_2nd.TrigHTTMappingSvc = TrigHTTMappingCfg().getService("TrigHTTMappingSvc")
-    if configFlags.Trigger.HTT.ActiveConfig.secondStage:
+    if flags.Trigger.HTT.ActiveConfig.secondStage:
         OR_2nd.DoSecondStage = True
         OR_2nd.ORAlgo = "Normal"
-        OR_2nd.doFastOR = configFlags.Trigger.HTT.ActiveConfig.doFastOR
+        OR_2nd.doFastOR = flags.Trigger.HTT.ActiveConfig.doFastOR
         OR_2nd.NumOfHitPerGrouping = 5
     result.setPrivateTools(OR_2nd)
     return result
 
 
-def HTTTrackFitterTool_2ndCfg(configFlags):
+def HTTTrackFitterTool_2ndCfg(flags):
     result=ComponentAccumulator()
     TF_2nd = CompFactory.HTTTrackFitterTool("HTTTrackFitterTool_2nd")
     TF_2nd.TrigHTTBankSvc = HTTBankSvcCfg().getService("TrigHTTBankSvc")
     TF_2nd.TrigHTTMappingSvc = TrigHTTMappingCfg().getService("TrigHTTMappingSvc")
-    if configFlags.Trigger.HTT.ActiveConfig.secondStage:
+    if flags.Trigger.HTT.ActiveConfig.secondStage:
         TF_2nd.Do2ndStageTrackFit = True 
     result.setPrivateTools(TF_2nd)
     return result
@@ -277,20 +277,27 @@ def checkIfAlgoTagExist(flags, tag):
     except RuntimeError:
         raise Exception(f'{tag} does not appear to be flag category')
 
+def HTTReadInputCfg(flags):
+    result=ComponentAccumulator()
+    InputTool = CompFactory.HTTInputHeaderTool("HTTReadInput",
+                                               InFileName = flags.Input.Files)
+    result.addPublicTool(InputTool, primary=True)
+    return result
 
-def HTTLogicalHistProcessAlgCfg(configFlags):
+
+def HTTLogicalHistProcessAlgCfg(flags):
    
     result=ComponentAccumulator()
 
    
     theHTTLogicalHistProcessAlg=CompFactory.HTTLogicalHitsProcessAlg()
-    theHTTLogicalHistProcessAlg.HitFiltering = configFlags.Trigger.HTT.ActiveConfig.hitFiltering
-    theHTTLogicalHistProcessAlg.writeOutputData = configFlags.Trigger.HTT.ActiveConfig.writeOutputData
+    theHTTLogicalHistProcessAlg.HitFiltering = flags.Trigger.HTT.ActiveConfig.hitFiltering
+    theHTTLogicalHistProcessAlg.writeOutputData = flags.Trigger.HTT.ActiveConfig.writeOutputData
     theHTTLogicalHistProcessAlg.Clustering = True
-    theHTTLogicalHistProcessAlg.tracking = configFlags.Trigger.HTT.ActiveConfig.doTracking
-    theHTTLogicalHistProcessAlg.outputHitTxt = configFlags.Trigger.HTT.ActiveConfig.outputHitTxt
-    theHTTLogicalHistProcessAlg.RunSecondStage = configFlags.Trigger.HTT.ActiveConfig.secondStage
-    theHTTLogicalHistProcessAlg.DoMissingHitsChecks = configFlags.Trigger.HTT.ActiveConfig.doMissingHitsChecks
+    theHTTLogicalHistProcessAlg.tracking = flags.Trigger.HTT.ActiveConfig.doTracking
+    theHTTLogicalHistProcessAlg.outputHitTxt = flags.Trigger.HTT.ActiveConfig.outputHitTxt
+    theHTTLogicalHistProcessAlg.RunSecondStage = flags.Trigger.HTT.ActiveConfig.secondStage
+    theHTTLogicalHistProcessAlg.DoMissingHitsChecks = flags.Trigger.HTT.ActiveConfig.doMissingHitsChecks
     theHTTLogicalHistProcessAlg.DoHoughRootOutput = False
     theHTTLogicalHistProcessAlg.DoNNTrack = False
     theHTTLogicalHistProcessAlg.eventSelector = result.getPrimaryAndMerge(HTTEventSelectionCfg())
@@ -300,21 +307,18 @@ def HTTLogicalHistProcessAlgCfg(configFlags):
 
     result.getPrimaryAndMerge(HTTBankSvcCfg())
 
-    theHTTLogicalHistProcessAlg.RoadFinder = result.getPrimaryAndMerge(HTTRoadUnionToolCfg(configFlags))
-    theHTTLogicalHistProcessAlg.RawToLogicalHitsTool = result.getPrimaryAndMerge(HTTRawLogicCfg(configFlags))
+    theHTTLogicalHistProcessAlg.RoadFinder = result.getPrimaryAndMerge(HTTRoadUnionToolCfg(flags))
+    theHTTLogicalHistProcessAlg.RawToLogicalHitsTool = result.getPrimaryAndMerge(HTTRawLogicCfg(flags))
 
-    InputTool = CompFactory.HTTInputHeaderTool("HTTReadInput")
-    InputTool.InFileName = configFlags.Input.Files
-    result.addPublicTool(InputTool)
-    theHTTLogicalHistProcessAlg.InputTool = InputTool
+    theHTTLogicalHistProcessAlg.InputTool = result.getPrimaryAndMerge(HTTReadInputCfg(flags))
 
     InputTool2 = CompFactory.HTTReadRawRandomHitsTool("HTTReadRawRandomHitsTool")
-    InputTool2.InFileName = configFlags.Input.Files[0]
+    InputTool2.InFileName = flags.Input.Files[0]
     result.addPublicTool(InputTool2)
     theHTTLogicalHistProcessAlg.InputTool2 = InputTool2
 
     theHTTLogicalHistProcessAlg.DataFlowTool = result.getPrimaryAndMerge(HTTDataFlowToolCfg())
-    theHTTLogicalHistProcessAlg.SpacePointTool = result.getPrimaryAndMerge(HTTSpacePointsToolCfg(configFlags))
+    theHTTLogicalHistProcessAlg.SpacePointTool = result.getPrimaryAndMerge(HTTSpacePointsToolCfg(flags))
 
     RoadFilter = CompFactory.HTTEtaPatternFilterTool()
     RoadFilter.TrigHTTMappingSvc = HTTMaping
@@ -327,7 +331,7 @@ def HTTLogicalHistProcessAlgCfg(configFlags):
     result.addPublicTool(LRTRoadFilter)
     theHTTLogicalHistProcessAlg.LRTRoadFilter = LRTRoadFilter
 
-    theHTTLogicalHistProcessAlg.LRTRoadFinder = result.getPrimaryAndMerge(LRTRoadFinderCfg(configFlags))
+    theHTTLogicalHistProcessAlg.LRTRoadFinder = result.getPrimaryAndMerge(LRTRoadFinderCfg(flags))
     theHTTLogicalHistProcessAlg.NNTrackTool = result.getPrimaryAndMerge(NNTrackToolCfg())
 
     RoadFilter2 = CompFactory.HTTPhiRoadFilterTool()
@@ -336,27 +340,27 @@ def HTTLogicalHistProcessAlgCfg(configFlags):
     theHTTLogicalHistProcessAlg.RoadFilter2 = RoadFilter2
 
     theHTTLogicalHistProcessAlg.ClusteringTool = CompFactory.HTTClusteringTool()
-    theHTTLogicalHistProcessAlg.OutputTool = result.getPrimaryAndMerge(HTTWriteOutputCfg(configFlags))
-    theHTTLogicalHistProcessAlg.TrackFitter_1st = result.getPrimaryAndMerge(HTTTrackFitterToolCfg(configFlags))
-    theHTTLogicalHistProcessAlg.OverlapRemoval_1st = result.getPrimaryAndMerge(HTTOverlapRemovalToolCfg(configFlags))
-    theHTTLogicalHistProcessAlg.OverlapRemoval_2nd = result.getPrimaryAndMerge(HTTOverlapRemovalTool_2ndCfg(configFlags))
-    theHTTLogicalHistProcessAlg.TrackFitter_2nd = result.getPrimaryAndMerge(HTTTrackFitterTool_2ndCfg(configFlags))
+    theHTTLogicalHistProcessAlg.OutputTool = result.getPrimaryAndMerge(HTTWriteOutputCfg(flags))
+    theHTTLogicalHistProcessAlg.TrackFitter_1st = result.getPrimaryAndMerge(HTTTrackFitterToolCfg(flags))
+    theHTTLogicalHistProcessAlg.OverlapRemoval_1st = result.getPrimaryAndMerge(HTTOverlapRemovalToolCfg(flags))
+    theHTTLogicalHistProcessAlg.OverlapRemoval_2nd = result.getPrimaryAndMerge(HTTOverlapRemovalTool_2ndCfg(flags))
+    theHTTLogicalHistProcessAlg.TrackFitter_2nd = result.getPrimaryAndMerge(HTTTrackFitterTool_2ndCfg(flags))
 
 
-    if configFlags.Trigger.HTT.ActiveConfig.secondStage:
+    if flags.Trigger.HTT.ActiveConfig.secondStage:
         HTTExtrapolatorTool = CompFactory.HTTExtrapolator()
         HTTExtrapolatorTool.Ncombinations = 16
         theHTTLogicalHistProcessAlg.Extrapolator = HTTExtrapolatorTool
 
 
-    if configFlags.Trigger.HTT.ActiveConfig.lrt:
-        assert configFlags.Trigger.HTT.ActiveConfig.lrtUseBasicHitFilter != configFlags.Trigger.HTT.ActiveConfig.lrtUseMlHitFilter, 'Inconsistent LRT hit filtering setup, need either ML of Basic filtering enabled'
-        assert configFlags.Trigger.HTT.ActiveConfig.lrtUseStraightTrackHT != configFlags.Trigger.HTT.ActiveConfig.lrtUseDoubletHT, 'Inconsistent LRT HT setup, need either double or strightTrack enabled'
+    if flags.Trigger.HTT.ActiveConfig.lrt:
+        assert flags.Trigger.HTT.ActiveConfig.lrtUseBasicHitFilter != flags.Trigger.HTT.ActiveConfig.lrtUseMlHitFilter, 'Inconsistent LRT hit filtering setup, need either ML of Basic filtering enabled'
+        assert flags.Trigger.HTT.ActiveConfig.lrtUseStraightTrackHT != flags.Trigger.HTT.ActiveConfig.lrtUseDoubletHT, 'Inconsistent LRT HT setup, need either double or strightTrack enabled'
         theHTTLogicalHistProcessAlg.doLRT = True
-        theHTTLogicalHistProcessAlg.LRTHitFiltering = (not configFlags.Trigger.HTT.ActiveConfig.lrtSkipHitFiltering)
+        theHTTLogicalHistProcessAlg.LRTHitFiltering = (not flags.Trigger.HTT.ActiveConfig.lrtSkipHitFiltering)
 
     from TrigHTTAlgorithms.HTTAlgorithmConfig import HTTLogicalHitsProcessAlgMonitoringCfg
-    theHTTLogicalHistProcessAlg.MonTool = result.getPrimaryAndMerge(HTTLogicalHitsProcessAlgMonitoringCfg(configFlags))
+    theHTTLogicalHistProcessAlg.MonTool = result.getPrimaryAndMerge(HTTLogicalHitsProcessAlgMonitoringCfg(flags))
 
     result.addEventAlgo(theHTTLogicalHistProcessAlg)
     return result
@@ -370,12 +374,13 @@ def prepareFlagsForHTTLogicalHistProcessAlg(flags):
 
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+    flags = initConfigFlags()
+    flags.Input.Files = ['HTTWrapper.singlemu_Pt10.root']
 
-    ConfigFlags.Input.Files = ['/ATLAS/tbold/DATA/HTTWrapper.singlemu_Pt10.root']
-
-    newFlags = prepareFlagsForHTTLogicalHistProcessAlg(ConfigFlags)
+    newFlags = prepareFlagsForHTTLogicalHistProcessAlg(flags)
+    del flags
 
     acc=MainServicesCfg(newFlags)
     acc.addService(CompFactory.THistSvc(Output = ["EXPERT DATAFILE='monitoring.root', OPT='RECREATE'"]))

@@ -330,7 +330,7 @@ StatusCode HTTMapMakerAlg::writeSubrmap(std::vector<HTTHit> const & allHits)
     }
 
     std::stringstream trim;
-    trim << std::fixed << std::setprecision(3) << m_trim;
+    trim << std::fixed << std::setprecision(3) << m_trim.value();
     std::string str_trim = trim.str();
     int dot = str_trim.find_last_of(".");
     str_trim.replace(dot,1,"p");
