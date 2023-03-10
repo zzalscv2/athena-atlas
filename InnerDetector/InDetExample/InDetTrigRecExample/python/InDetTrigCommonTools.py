@@ -9,15 +9,6 @@
 
 """
 
-from AthenaCommon.GlobalFlags import globalflags
-
-
-# Straw status DB Tool
-from TRT_ConditionsServices.TRT_ConditionsServicesConf import TRT_StrawStatusSummaryTool
-InDetTrigTRTStrawStatusSummaryTool = TRT_StrawStatusSummaryTool(name = "InDetTrigTRTStrawStatusSummaryTool",
-                                                                isGEANT4 = (globalflags.DataSource == 'geant4'))
-
-
 
 def CAtoLegacyPublicToolWrapper(func,**kwargs):
 
@@ -32,3 +23,4 @@ def CAtoLegacyPublicToolWrapper(func,**kwargs):
   ToolSvc += tool
 
   return tool
+
