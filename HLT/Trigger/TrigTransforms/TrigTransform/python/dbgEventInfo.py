@@ -57,7 +57,6 @@ class dbgEventInfo:
                                     'Reserved',
                                     'PARTIAL_EVENT']
 
-
         # Copied from TrigSteeringEvent/OnlineErrorCode.h 
         self.onlineErrorCode = ['UNCLASSIFIED',
                                 'BEFORE_NEXT_EVENT',
@@ -72,7 +71,9 @@ class dbgEventInfo:
                                 'AFTER_RESULT_SENT',
                                 'COOL_UPDATE',
                                 'TIMEOUT',
-                                'RESULT_TRUNCATION']
+                                'RESULT_TRUNCATION',
+                                'MISSING_CTP_FRAGMENT',
+                                'BAD_CTP_FRAGMENT']
 
 
     def eventCount(self, event):
@@ -170,7 +171,7 @@ class dbgEventInfo:
 
         # Check second word of first status element with Full Event specific status
         statusList = checkBits(event.status()[0], 16, 32, self.EventSpecificStatus)
-
+        
         # Check if PSC_PROBLEM bit was on and retrieve Online Error Codes
         # stored in following event status words
         if getBit(event.status()[0], 28):
@@ -178,13 +179,18 @@ class dbgEventInfo:
             if statusLen > 1:
                 # Skip first event - already analyzed
                 for i in range(1, statusLen):
-                    # Check both words saved in uint32
-                    statusList += checkBits(event.status()[i], 0, 16, self.onlineErrorCode)
-                    statusList += checkBits(event.status()[i], 16, 32, self.onlineErrorCode)
+                    #If the first event status element is repeated skip over the next
+                    if int(event.status()[0]) == int(event.status()[i]):              
+                         continue 
+                    statusList.append(self.onlineErrorCode[int(event.status()[i])])
             else:
                 msg.warn("Cannot find additional words for PSC_PROBLEM")
+        
+        
+        #ensure EventStatusNames are None if statusList is empty
+        if len(statusList) != 0:  
+           self.EventStatusNames = ','.join(str(name) for name in statusList)
 
-        self.EventStatusNames = ','.join(str(name) for name in statusList)
         msg.info('Event Status :%s', self.EventStatusNames)
         
         # Check if the length of the EventStatusNames
@@ -362,8 +368,8 @@ class dbgEventInfo:
             ULong_t Global_ID;\
             Int_t   Lumiblock;\
             Int_t   Node_ID;\
-            Int_t   SuperMasterKey;\
-            Int_t   HLTPrescaleKey;\
+            ULong_t   SuperMasterKey;\
+            ULong_t   HLTPrescaleKey;\
             Bool_t  HLT_Decision;\
             Char_t  EventStatusNames[STRINGLENGTH];\
             };" )
