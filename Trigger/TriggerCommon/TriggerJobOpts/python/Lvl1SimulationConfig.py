@@ -66,6 +66,7 @@ if __name__ == '__main__':
     flags.Scheduler.ShowDataFlow=True
     flags.Trigger.enableL1MuonPhase1=True
     flags.Trigger.triggerMenuSetup='Dev_pp_run3_v1'
+    flags.Trigger.enableL1CaloPhase1 = False # FIXME: ATR-27095
     flags.fillFromArgs()
     flags.lock()
 
