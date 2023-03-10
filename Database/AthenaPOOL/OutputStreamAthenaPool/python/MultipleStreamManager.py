@@ -612,7 +612,7 @@ class MultipleStreamManager:
             TREE_AUTO_FLUSH = 500
         if StreamName in ["StreamDAOD_PHYSLITE", "StreamD2AOD_PHYSLITE"]:
             TREE_AUTO_FLUSH = 1000
-            CONTAINER_SPLITLEVEL = 99
+            CONTAINER_SPLITLEVEL = 1
         svcMgr.AthenaPoolCnvSvc.PoolAttributes += [ pah.setTreeAutoFlush( FileName, "CollectionTree", str(TREE_AUTO_FLUSH) ) ]
         svcMgr.AthenaPoolCnvSvc.PoolAttributes += [ pah.setContainerSplitLevel( FileName, "CollectionTree", str(CONTAINER_SPLITLEVEL) ) ]
         svcMgr.AthenaPoolCnvSvc.PoolAttributes += [ pah.setContainerSplitLevel( FileName, "Aux.", str(CONTAINER_SPLITLEVEL) ) ]
@@ -649,7 +649,7 @@ class MultipleStreamManager:
             TREE_AUTO_FLUSH = 500
         if Parent in ["StreamDAOD_PHYSLITE", "StreamD2AOD_PHYSLITE"]:
             TREE_AUTO_FLUSH = 1000
-            CONTAINER_SPLITLEVEL = 99
+            CONTAINER_SPLITLEVEL = 1
         svcMgr.AthenaPoolCnvSvc.PoolAttributes += [ pah.setTreeAutoFlush( FileName, "CollectionTree_" + StreamName, str(TREE_AUTO_FLUSH) ) ]
         svcMgr.AthenaPoolCnvSvc.PoolAttributes += [ pah.setContainerSplitLevel( FileName, "CollectionTree_" + StreamName, str(CONTAINER_SPLITLEVEL) ) ]
         svcMgr.AthenaPoolCnvSvc.PoolAttributes += [ pah.setContainerSplitLevel( FileName, "Aux.", str(CONTAINER_SPLITLEVEL) ) ]

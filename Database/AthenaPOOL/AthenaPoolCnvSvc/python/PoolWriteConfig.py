@@ -144,7 +144,7 @@ def PoolWriteCfg(flags, forceTreeAutoFlush=-1):
             auto_flush = 500
         if stream_name in ["DAOD_PHYSLITE", "D2AOD_PHYSLITE"]:
             auto_flush = 1000
-            split_level = 99
+            split_level = 1
         if stream_name in ["DAOD_PHYSVAL"]:
             auto_flush = 100
         # override if needed
