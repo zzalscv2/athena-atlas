@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /** Adapted from code by A.Hamilton to check trigger EDM; R.Goncalo 21/11/07 */
@@ -56,7 +56,6 @@
 #include "tauEvent/TauJet.h"
 
 #include "xAODMuon/MuonContainer.h"
-#include "MuonCombinedToolInterfaces/IMuonPrintingTool.h"
 
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/VertexContainer.h"
@@ -112,7 +111,6 @@ static const int maxRepWarnings = 5;
 
 TrigEDMChecker::TrigEDMChecker(const std::string& name, ISvcLocator* pSvcLocator)
   : AthAnalysisAlgorithm(name, pSvcLocator),
-    m_muonPrinter("Rec::MuonPrintingTool/MuonPrintingTool"),
     m_clidSvc( "ClassIDSvc", name )
 {
   /** switches to control the analysis through job options */
@@ -221,15 +219,12 @@ StatusCode TrigEDMChecker::initialize() {
   ATH_MSG_INFO("REGTEST m_doDumpTrigCompsiteNavigation   = " << m_doDumpTrigCompsiteNavigation );
   ATH_MSG_INFO("REGTEST m_doTDTCheck                     = " << m_doTDTCheck );
 
-	ATH_MSG_INFO("maxRepWarning      = " <<  maxRepWarnings );
+  ATH_MSG_INFO("maxRepWarning      = " <<  maxRepWarnings );
 
-	if(m_doDumpxAODMuonContainer || m_doDumpAll) {
-	  StatusCode sc = m_muonPrinter.retrieve();
-	  if(sc.isFailure()) {
-	    ATH_MSG_ERROR("Could not retrieve MuonPrinter tool");
-	    return sc;
-	  }
-	}
+  if(m_doDumpxAODMuonContainer || m_doDumpAll) {
+    ATH_CHECK( m_muonPrinter.retrieve() );
+  }
+  else m_muonPrinter.disable();   // to avoid auto-retrieval
 
   if (m_doDumpTrigCompsiteNavigation) {
     ATH_CHECK( m_clidSvc.retrieve() );
@@ -239,9 +234,9 @@ StatusCode TrigEDMChecker::initialize() {
     ATH_CHECK( m_trigDec.retrieve() );
     ATH_MSG_INFO("TDT Executing with navigation format: " << m_trigDec->getNavigationFormat());
   }
-  ATH_CHECK(m_muonTracksKey.initialize(m_doTDTCheck));
+  ATH_CHECK(m_muonTracksKey.initialize(m_doDumpAll || m_doTDTCheck));
 
-	return StatusCode::SUCCESS;
+  return StatusCode::SUCCESS;
 }
 
 

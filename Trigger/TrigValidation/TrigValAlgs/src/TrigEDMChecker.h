@@ -1,29 +1,24 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIG_EDM_CHECKER_H
 #define TRIG_EDM_CHECKER_H
 
+#include "GaudiKernel/IClassIDSvc.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "GaudiKernel/ObjectVector.h"
 
 #include "AthAnalysisBaseComps/AthAnalysisAlgorithm.h"
 #include "CxxUtils/checker_macros.h"
-
-#include "xAODTrigger/TrigCompositeContainer.h"
-
-#include "xAODTracking/TrackParticleContainer.h"
-
-#include "GaudiKernel/IClassIDSvc.h"
-
+#include "MuonCombinedToolInterfaces/IMuonPrintingTool.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
-#include "xAODTrigger/TrigNavigation.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
-#include "TrigNavigation/Navigation.h"
-
 #include "TrigDecisionTool/TrigDecisionTool.h"
+#include "TrigNavigation/Navigation.h"
+#include "xAODTrigger/TrigCompositeContainer.h"
+#include "xAODTracking/TrackParticleContainer.h"
+#include "xAODTrigger/TrigNavigation.h"
 
 #include <string>
 
@@ -218,7 +213,7 @@ class TrigEDMChecker : public AthAnalysisAlgorithm  {
     */
    StatusCode TrigCompositeNavigationToDot(std::string& returnValue, bool& pass);
 
-   ToolHandle<Rec::IMuonPrintingTool>            m_muonPrinter;
+   ToolHandle<Rec::IMuonPrintingTool> m_muonPrinter{this, "MuonPrinter", "Rec::MuonPrintingTool/MuonPrintingTool"};
 
    ServiceHandle< ::IClassIDSvc > m_clidSvc;
 
@@ -226,7 +221,7 @@ class TrigEDMChecker : public AthAnalysisAlgorithm  {
    SG::ReadHandleKey< xAOD::TrigNavigation > m_navigationHandleKey{ this, "TrigNavigation", "TrigNavigation", "" };
    SG::WriteHandleKey<TrigCompositeUtils::DecisionContainer> m_decisionsKey{ this, "Decisions", "RoIDecisions", "Decisions created from TEs" };
    ToolHandle< HLT::Navigation > m_navigationTool{ this, "NavigationTool", "HLT::Navigation/Navigation", "" };
-   ToolHandle< Trig::TrigDecisionTool > m_trigDec{ this, "TriggerDecisionTool", "Trig::TrigDecisionTool/TrigDecisionTool", ""};
+   PublicToolHandle< Trig::TrigDecisionTool > m_trigDec{ this, "TriggerDecisionTool", "Trig::TrigDecisionTool/TrigDecisionTool", ""};
 
    int m_trackWarningNum{0};
    int m_vertexWarningNum{0};
