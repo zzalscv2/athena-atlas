@@ -26,7 +26,7 @@
 #include "ActsTrkToolInterfaces/ITrackFindingTool.h"
 #include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
-#include "ActsGeometryInterfaces/IActsATLASConverterTool.h"
+#include "ActsTrkEventCnv/IActsToTrkConverterTool.h"
 
 // Other
 #include <atomic>
@@ -59,7 +59,7 @@ namespace ActsTrk
     ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", "ActsExtrapolationTool"};
     ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
     ToolHandle<Trk::IExtendedTrackSummaryTool> m_trkSummaryTool{this, "SummaryTool", "ToolHandle for track summary tool"};
-    ToolHandle<IActsATLASConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", "ActsATLASConverterTool"};
+    ToolHandle<ActsTrk::IActsToTrkConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", "ActsToTrkConverterTool"};
     ToolHandle<Trk::IBoundaryCheckTool> m_boundaryCheckTool{this, "BoundaryCheckTool", "InDet::InDetBoundaryCheckTool", "Boundary checking tool for detector sensitivities"};
     ToolHandle<Trk::IRIO_OnTrackCreator> m_RotCreatorTool{this, "RotCreatorTool", "", "optional RIO_OnTrack creator tool"};
 

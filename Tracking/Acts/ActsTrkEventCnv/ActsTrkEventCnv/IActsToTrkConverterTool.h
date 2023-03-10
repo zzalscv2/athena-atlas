@@ -30,6 +30,7 @@ namespace Acts {
 
 class IActsTrackingGeometryTool;
 
+namespace ActsTrk {
 class IActsToTrkConverterTool : virtual public IAlgTool {
   public:
 
@@ -73,5 +74,6 @@ class IActsToTrkConverterTool : virtual public IAlgTool {
   const IActsTrackingGeometryTool*
   trackingGeometryTool() const = 0;
 };
+} // end of namespace
 
 #endif

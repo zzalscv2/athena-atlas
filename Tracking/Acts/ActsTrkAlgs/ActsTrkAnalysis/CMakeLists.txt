@@ -9,7 +9,7 @@ atlas_add_component( ActsTrkAnalysis
                      src/components/*.cxx
                      LINK_LIBRARIES AthenaBaseComps AthenaKernel GaudiKernel Identifier InDetIdentifier InDetReadoutGeometry StoreGateLib ActsTrkEvent xAODInDetMeasurement
 		     AthenaMonitoringKernelLib AthenaMonitoringLib TrkTruthData ActsTrkToolInterfacesLib
-		     PixelReadoutGeometryLib ReadoutGeometryBase InDetReadoutGeometry SCT_ReadoutGeometry )
+		     PixelReadoutGeometryLib ReadoutGeometryBase InDetReadoutGeometry SCT_ReadoutGeometry ActsTrkEventCnvLib )
 
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_scripts( test/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

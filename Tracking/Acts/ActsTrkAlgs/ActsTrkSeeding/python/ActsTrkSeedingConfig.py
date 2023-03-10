@@ -6,9 +6,9 @@ from ActsTrkSeedingTool.ActsTrkSeedingToolConfig import ActsTrkITkPixelSeedingTo
 from ActsTrkSeedingTool.ActsTrkSeedingToolConfig import ActsTrkITkPixelOrthogonalSeedingToolCfg, ActsTrkITkStripOrthogonalSeedingToolCfg
 from ActsTrkTrackParamsEstimationTool.ActsTrkTrackParamsEstimationToolConfig import TrackParamsEstimationToolCfg
 from ActsGeometry.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-from ActsGeometry.ActsGeometryConfig import ActsATLASConverterToolCfg
 from ActsInterop.ActsConfigFlags import SeedingStrategy
-        
+from ActsTrkEventCnv.ActsTrkEventCnvConfig import ActsToTrkConverterToolCfg
+
 # ACTS algorithm using Athena objects upstream
 def ActsTrkITkPixelSeedingCfg(flags,
                               name: str = 'ActsTrkPixelSeedingAlg',
@@ -21,7 +21,7 @@ def ActsTrkITkPixelSeedingCfg(flags,
     acc.addPublicTool(geoTool)
 
     # ATLAS Converter Tool
-    converterTool = acc.popToolsAndMerge(ActsATLASConverterToolCfg(flags))
+    converterTool = acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags))
 
     # Track Param Estimation Tool
     trackEstimationTool = acc.popToolsAndMerge(TrackParamsEstimationToolCfg(flags))
@@ -62,7 +62,7 @@ def ActsTrkITkStripSeedingCfg(flags,
     acc.addPublicTool(geoTool)
 
     # ATLAS Converter Tool
-    converterTool = acc.popToolsAndMerge(ActsATLASConverterToolCfg(flags))
+    converterTool = acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags))
 
     # Track Param Estimation Tool
     trackEstimationTool = acc.popToolsAndMerge(TrackParamsEstimationToolCfg(flags))

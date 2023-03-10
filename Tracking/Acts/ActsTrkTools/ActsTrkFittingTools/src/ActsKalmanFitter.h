@@ -26,9 +26,9 @@
 
 // PACKAGE
 
-#include "ActsGeometryInterfaces/IActsATLASConverterTool.h"
 #include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsTrkEventCnv/IActsToTrkConverterTool.h"
 
 // STL
 #include <string>
@@ -197,7 +197,7 @@ private:
 
   ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", "ActsExtrapolationTool"};
   ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
-  ToolHandle<IActsATLASConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", "ActsATLASConverterTool"};
+  ToolHandle<ActsTrk::IActsToTrkConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", "ActsToTrkConverterTool"};
   ToolHandle<Trk::IExtendedTrackSummaryTool> m_trkSummaryTool {this, "SummaryTool", "", "ToolHandle for track summary tool"};
   ToolHandle<Trk::IBoundaryCheckTool> m_boundaryCheckTool {this, 
                                                            "BoundaryCheckTool", 

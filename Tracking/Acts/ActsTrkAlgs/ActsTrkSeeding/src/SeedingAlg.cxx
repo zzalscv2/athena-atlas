@@ -170,7 +170,7 @@ namespace ActsTrk {
       { 
 	const InDetDD::SiDetectorElement* Element = detEle->getDetectorElement(seed.sp().front()->elementIdList()[0]);
 	const Trk::Surface& atlas_surface = Element->surface();
-	return this->m_ATLASConverterTool->ATLASSurfaceToActs(atlas_surface);
+	return this->m_ATLASConverterTool->trkSurfaceToActsSurface(atlas_surface); 
       };
 
     auto geo_context = m_trackingGeometryTool->getNominalGeometryContext();

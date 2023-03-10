@@ -16,7 +16,7 @@
 
 // ACTS
 #include "ActsTrkEvent/TrackParameters.h"
-#include "ActsGeometryInterfaces/IActsATLASConverterTool.h"
+#include "ActsTrkEventCnv/IActsToTrkConverterTool.h"
 
 // Athena
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"

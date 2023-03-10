@@ -29,7 +29,6 @@
 
 // PACKAGE
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
-#include "ActsGeometry/ActsATLASConverterTool.h"
 #include "ActsGeometry/ActsGeometryContext.h"
 #include "ActsInterop/Logger.h"
 
@@ -128,14 +127,14 @@ ActsKalmanFitter::fit(const EventContext& ctx,
 
   std::vector<ATLASSourceLink::ElementsType> elementCollection;
 
-  std::vector<ATLASSourceLink> trackSourceLinks = m_ATLASConverterTool->ATLASTrackToSourceLink(tgContext,inputTrack,elementCollection);
+  std::vector<ATLASSourceLink> trackSourceLinks = m_ATLASConverterTool->trkTrackToSourceLinks(tgContext,inputTrack,elementCollection);
   // protection against error in the conversion from Atlas masurement to Acts source link
   if (trackSourceLinks.empty()) {
     ATH_MSG_INFO("input contain measurement but no source link created, probable issue with the converter, reject fit ");
     return track;
   }
 
-  const auto& initialParams = m_ATLASConverterTool->ATLASTrackParameterToActs(inputTrack.perigeeParameters());
+  const auto& initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters((*inputTrack.perigeeParameters()));
 
   // The covariance from already fitted track are too small and would result an incorect smoothing.
   // We scale up the input covaraiance to avoid this.
@@ -208,7 +207,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
   elementCollection.reserve(inputMeasSet.size());
 
   for (auto it = inputMeasSet.begin(); it != inputMeasSet.end(); ++it){
-    trackSourceLinks.push_back(m_ATLASConverterTool->ATLASMeasurementToSourceLink(tgContext, *it, elementCollection));
+    trackSourceLinks.push_back(m_ATLASConverterTool->trkMeasurementToSourceLink(tgContext, **it, elementCollection));
   }
   // protection against error in the conversion from Atlas masurement to Acts source link
   if (trackSourceLinks.empty()) {
@@ -216,7 +215,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
     return track;
   }
 
-  const auto& initialParams = m_ATLASConverterTool->ATLASTrackParameterToActs(&estimatedStartParameters); 
+  const auto& initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(estimatedStartParameters); 
 
   Acts::TrackContainer tracks{
     Acts::VectorTrackContainer{},
@@ -302,8 +301,8 @@ ActsKalmanFitter::fit(const EventContext& ctx,
 
   std::vector<ATLASSourceLink::ElementsType> elementCollection;
 
-  std::vector<ATLASSourceLink> trackSourceLinks = m_ATLASConverterTool->ATLASTrackToSourceLink(tgContext, inputTrack, elementCollection);
-  const auto& initialParams = m_ATLASConverterTool->ATLASTrackParameterToActs(inputTrack.perigeeParameters());
+  std::vector<ATLASSourceLink> trackSourceLinks = m_ATLASConverterTool->trkTrackToSourceLinks(tgContext, inputTrack, elementCollection);
+  const auto& initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(*(inputTrack.perigeeParameters()));
 
 
   std::vector< ATLASSourceLink::ElementsType > atlasElementCollection;
@@ -311,7 +310,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
 
   for (auto it = addMeasColl.begin(); it != addMeasColl.end(); ++it)
   {
-    trackSourceLinks.push_back(m_ATLASConverterTool->ATLASMeasurementToSourceLink(tgContext, *it, atlasElementCollection));
+    trackSourceLinks.push_back(m_ATLASConverterTool->trkMeasurementToSourceLink(tgContext, **it, atlasElementCollection));
   }
   // protection against error in the conversion from Atlas masurement to Acts source link
   if (trackSourceLinks.empty()) {
@@ -404,8 +403,8 @@ ActsKalmanFitter::fit(const EventContext& ctx,
   std::vector<ATLASSourceLink::ElementsType> elementCollection1;
   std::vector<ATLASSourceLink::ElementsType> elementCollection2;
 
-  std::vector<ATLASSourceLink> trackSourceLinks = m_ATLASConverterTool->ATLASTrackToSourceLink(tgContext, intrk1, elementCollection1);
-  std::vector<ATLASSourceLink> trackSourceLinks2 = m_ATLASConverterTool->ATLASTrackToSourceLink(tgContext, intrk2, elementCollection2);
+  std::vector<ATLASSourceLink> trackSourceLinks = m_ATLASConverterTool->trkTrackToSourceLinks(tgContext, intrk1, elementCollection1);
+  std::vector<ATLASSourceLink> trackSourceLinks2 = m_ATLASConverterTool->trkTrackToSourceLinks(tgContext, intrk2, elementCollection2);
   trackSourceLinks.insert(trackSourceLinks.end(), trackSourceLinks2.begin(), trackSourceLinks2.end());
   // protection against error in the conversion from Atlas masurement to Acts source link
   if (trackSourceLinks.empty()) {
@@ -413,7 +412,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
     return track;
   }
 
-  const auto &initialParams = m_ATLASConverterTool->ATLASTrackParameterToActs(intrk1.perigeeParameters());
+  const auto &initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(*(intrk1.perigeeParameters()));
 
   // The covariance from already fitted track are too small and would result an incorect smoothing.
   // We scale up the input covaraiance to avoid this.

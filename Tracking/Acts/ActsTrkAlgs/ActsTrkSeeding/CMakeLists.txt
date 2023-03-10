@@ -18,7 +18,8 @@ atlas_add_component( ActsTrkSeeding
                      MagFieldConditions
                      ActsGeometryInterfacesLib
                      SiSPSeededTrackFinderData
-		     AthenaMonitoringKernelLib
+		             AthenaMonitoringKernelLib
+                     ActsTrkEventCnvLib
                      )
 
 # Install files from the package:

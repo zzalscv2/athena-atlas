@@ -21,6 +21,7 @@ atlas_add_component( ActsTrkFindingTool
                      SiSpacePoint
                      xAODInDetMeasurement
                      InDetRIO_OnTrack
+                     ActsTrkEventCnvLib
                      )
 
 # Install files from the package:
