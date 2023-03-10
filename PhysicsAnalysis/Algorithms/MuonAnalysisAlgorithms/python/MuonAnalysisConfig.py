@@ -31,7 +31,7 @@ class MuonCalibrationConfig (ConfigBlock):
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg',
                                'MuonEtaCutAlg' + self.postfix )
         config.addPrivateTool( 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
-        alg.selectionTool.maxEta = 2.5
+        alg.selectionTool.maxEta = 2.7
         alg.selectionDecoration = 'selectEta' + self.postfix + ',as_bits'
         alg.particles = config.readName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
