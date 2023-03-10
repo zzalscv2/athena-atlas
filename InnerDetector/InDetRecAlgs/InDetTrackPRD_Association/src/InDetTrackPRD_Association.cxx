@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTrackPRD_Association/InDetTrackPRD_Association.h"
@@ -27,13 +27,13 @@ StatusCode InDet::InDetTrackPRD_Association::initialize()
 
 StatusCode InDet::InDetTrackPRD_Association::execute(const EventContext& ctx) const
 {
-  // Assosiate tracks with PRDs
+  // Associate tracks with PRDs
   //
   std::unique_ptr<Trk::PRDtoTrackMap> prd_to_track_map(m_assoTool->createPRDtoTrackMap());
 
   for (const SG::ReadHandleKey<TrackCollection>& collKey : m_tracksName) {
     SG::ReadHandle<TrackCollection> tracks(collKey,ctx);
-    assert (tracks.isValid());
+    if (!tracks.isValid()) return StatusCode::FAILURE;
 
     unsigned tracksPRD=0;
     unsigned tracksPRDn=0;
