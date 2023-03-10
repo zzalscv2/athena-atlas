@@ -1,41 +1,58 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from TrigValAlgs.TrigValAlgsConf import TrigEDMChecker
-from TrigValAlgs.TrigValAlgsConf import TrigEDMAuxChecker
-
-
-# TrigEDMChecker configurable
-class TrigEDMChecker ( TrigEDMChecker ):
-    __slots__ = []
-    def __init__(self, name="TrigEDMChecker"):
-        super( TrigEDMChecker, self ).__init__( name )
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory import CompFactory
 
 
-def getEDMAuxList():
+def TrigEDMCheckerCfg(flags, name="TrigEDMChecker", doDumpAll=True):
+    cfg = ComponentAccumulator()
+    edmchecker = CompFactory.TrigEDMChecker(name, doDumpAll = doDumpAll)
+
+    if doDumpAll:
+        from MuonConfig.MuonRecToolsConfig import MuonEDMPrinterToolCfg
+        from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg, MuonIdHelperSvcCfg
+        from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
+        cfg.merge(MuonGeoModelCfg(flags))
+        cfg.merge(MuonIdHelperSvcCfg(flags))
+        edmchecker.MuonPrinter = CompFactory.Rec.MuonPrintingTool(
+            MuonStationPrinter = cfg.popToolsAndMerge(MuonEDMPrinterToolCfg(flags)) )
+        edmchecker.TriggerDecisionTool = cfg.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
+
+    cfg.addEventAlgo(edmchecker)
+
+    return cfg
+
+
+def TrigEDMAuxCheckerCfg(flags, name="TrigEDMAuxChecker"):
+    cfg = ComponentAccumulator()
+
+    alg = CompFactory.TrigEDMAuxChecker(name, AuxContainerList=getEDMAuxList(flags))
+    cfg.addEventAlgo(alg)
+    return cfg
+
+
+def getEDMAuxList(flags):
     from TrigEDMConfig.TriggerEDM import getTriggerEDMList
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    EDMVersion = ConfigFlags.Trigger.EDMVersion
-    AODEDMSet = ConfigFlags.Trigger.AODEDMSet
-    tlist=getTriggerEDMList(AODEDMSet,EDMVersion)
+    tlist=getTriggerEDMList(flags.Trigger.AODEDMSet, flags.Trigger.EDMVersion)
     objlist=[]
     for t,kset in tlist.items():
         for k in kset:
              if 'Aux.' in k:
                  s = k.split('.',1)[0] + "."
                  # Types of these collections from Run 2 do not inherit from xAOD::AuxContainerBase, so can't test them here
-                 if EDMVersion == 2 and "HLT_xAOD__JetContainer" in s or "xTrigDecisionAux" in s or "TrigNavigationAux" in s:
+                 if flags.Trigger.EDMVersion == 2 and "HLT_xAOD__JetContainer" in s or "xTrigDecisionAux" in s or "TrigNavigationAux" in s:
                      continue
                  objlist += [s]
     return objlist
 
-# TrigEDMChecker configurable
-class TrigEDMAuxChecker ( TrigEDMAuxChecker ):
-    __slots__ = []
-    def __init__(self, name="TrigEDMAuxChecker"):
-        super( TrigEDMAuxChecker, self ).__init__( name )
 
-    def setDefaults(self, handle) :
-        #self.AuxContainerList=['HLT_xAOD__PhotonContainer_egamma_PhotonsAux.']
-        self.AuxContainerList=getEDMAuxList()
-    
-    
+if __name__ == '__main__':
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW_RUN3
+    flags.lock()
+
+    cfg = ComponentAccumulator()
+    cfg.merge( TrigEDMCheckerCfg(flags) )
+    cfg.merge( TrigEDMAuxCheckerCfg(flags) )
