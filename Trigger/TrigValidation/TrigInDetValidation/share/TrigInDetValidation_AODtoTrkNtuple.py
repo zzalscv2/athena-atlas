@@ -275,8 +275,10 @@ if ( True ) :
     #"HLT_mb.*:HLT_IDTrack_MinBias_EFID"  #There are no tracks here
     
     "HLT_2mu4_bBmumux_BsmumuPhi_L12MU3V:HLT_IDTrack_Bmumux_FTF",
-    "HLT_2mu4_bBmumux_BsmumuPhi_L12MU3V:HLT_IDTrack_Bmumux_IDTrig"
-    
+    "HLT_2mu4_bBmumux_BsmumuPhi_L12MU3V:HLT_IDTrack_Bmumux_IDTrig",
+    "HLT_mu11_mu6_bBmumux_Bidperf_L1MU8VF_2MU5VF:HLT_IDTrack_Bmumux_FTF",
+    "HLT_mu11_mu6_bBmumux_Bidperf_L1MU8VF_2MU5VF:HLT_IDTrack_Bmumux_IDTrig"
+
     ]
 
   from PyUtils.Helpers import release_metadata

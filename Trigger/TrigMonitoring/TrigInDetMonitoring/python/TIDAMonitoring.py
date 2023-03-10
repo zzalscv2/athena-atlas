@@ -310,7 +310,9 @@ def TIDAMonitoring( flags=None, name=None, monlevel=None, mcTruth=False ) :
         tidabphysics.AnalysisConfig = "Tier0"
 
         chains = getchains( [ "HLT_mu.*_bBmumux_BsmumuPhi.*:key=HLT_IDTrack_Bmumux_FTF",
-                              "HLT_mu.*_bBmumux_BsmumuPhi.*:key=HLT_IDTrack_Bmumux_IDTrig" ], monlevel )
+                              "HLT_mu.*_bBmumux_BsmumuPhi.*:key=HLT_IDTrack_Bmumux_IDTrig",
+                              "HLT_mu.*_bBmumux_Bidperf.*:key=HLT_IDTrack_Bmumux_FTF",
+                              "HLT_mu.*_bBmumux_Bidperf.*:key=HLT_IDTrack_Bmumux_IDTrig"], monlevel )
 
 
         if len(chains)>0 :
