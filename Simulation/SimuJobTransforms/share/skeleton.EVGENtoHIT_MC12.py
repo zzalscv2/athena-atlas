@@ -10,6 +10,9 @@ include("SimuJobTransforms/CommonSkeletonJobOptions.py")
 if hasattr(runArgs, 'useISF') and runArgs.useISF:
     raise RuntimeError("Unsupported configuration! If you want to run with useISF=True, please use Sim_tf.py!")
 
+from ISF_Config.ISF_jobProperties import ISF_Flags
+ISF_Flags.Simulator = 'AtlasG4'
+
 ## Simulation flags need to be imported first
 from G4AtlasApps.SimFlags import simFlags
 simFlags.load_atlas_flags()
@@ -258,8 +261,6 @@ if nThreads > 0:
 
 from AthenaCommon.CfgGetter import getAlgorithm
 topSeq += getAlgorithm("BeamEffectsAlg", tryDefaultConfigurable=True)
-
-from ISF_Config.ISF_jobProperties import ISF_Flags
 
 # Flag to check if we should run FastCaloSim within Geant4
 doFastCaloSim = (hasattr( simFlags, 'LArParameterization') and simFlags.LArParameterization() == 4)
