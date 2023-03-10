@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RPC_CondCabling/WiredOR.h"
@@ -11,7 +11,7 @@
 
 using namespace RPC_CondCabling;
 
-WiredOR::WiredOR(parseParams pars) : CablingObject{pars, "WOR"}, m_params{pars} {}
+WiredOR::WiredOR(const parseParams& pars) : CablingObject{pars, "WOR"}, m_params{pars} {}
 
 WiredOR::~WiredOR() = default;
 
