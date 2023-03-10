@@ -1,6 +1,8 @@
 <lcgdict>
   <!-- patterns for all containers -->
-  <class pattern="LArConditionsContainer<*>"  /> 
+  <class pattern="LArConditionsContainer<*>"  >
+        <field name="m_cached" transient="true" />
+  </class>
   <class pattern="LArConditionsContainerDB<*>"  /> 
   <class pattern="LArConditionsContainerDB<*>::const_iterator"  /> 
 
@@ -16,6 +18,9 @@
   <class name="LArConditionsSubset<LArShapeP>"  id="055CF2F5-08D0-4EAA-B154-8CE5B1A599E7" >
     <field name="m_subsetMap" transient="true" />
   </class>
+  <class name="DataVector<LArConditionsSubset<LArShapeP1> >"/>
+  <class name="LArConditionsContainer<LArShapeP1>"/>
+  <class name="CondMultChanCollection<LArConditionsSubset<LArShapeP1> >"/>
   <read sourceClass="LArConditionsSubset<LArShapeP>" version="[1-]"
         targetClass="LArConditionsSubset<LArShapeP>" source=""
         target="" >
