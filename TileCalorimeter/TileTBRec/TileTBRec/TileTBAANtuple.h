@@ -100,6 +100,7 @@ class TileTBAANtuple: public AthAlgorithm {
 
 
     StatusCode storeRawChannels(std::string cntID
+                                , bool calibMode
                                 , std::vector<float*>* eneVec
                                 , std::vector<float*>* timeVec
                                 , std::vector<float*>* chi2Vec
@@ -116,6 +117,7 @@ class TileTBAANtuple: public AthAlgorithm {
                                 , std::vector<short*>* ROD_DMUMaskVec);
 
     StatusCode storeDigits();
+    StatusCode storeDigitsFlx();
     StatusCode storeBeamElements();
     StatusCode storeCells();
     StatusCode storeLaser();
@@ -125,6 +127,7 @@ class TileTBAANtuple: public AthAlgorithm {
                   const TileSamplingFraction* samplingFraction);
 
     StatusCode initList(void);
+    StatusCode initListFlx(void);
     StatusCode initNTuple(void);
     //StatusCode connectFile(void);
 
@@ -139,6 +142,7 @@ class TileTBAANtuple: public AthAlgorithm {
     void CISPAR_addBranch(void);
     void BEAM_addBranch(void);
     void DIGI_addBranch(void);
+    void FELIX_addBranch(void);
     //void RAW_addBranch(void);
     void HIT_addBranch(void);
     void ENETOTAL_addBranch(void);
@@ -154,6 +158,7 @@ class TileTBAANtuple: public AthAlgorithm {
     void CISPAR_clearBranch(void);
     void BEAM_clearBranch(void);
     void DIGI_clearBranch(void);
+    void FELIX_clearBranch(void);
     //void RAW_clearBranch(void);
     void HIT_clearBranch(void);
     void ENETOTAL_clearBranch(void);
@@ -378,6 +383,13 @@ class TileTBAANtuple: public AthAlgorithm {
     std::vector<short*> m_rodBCIDVec;
     std::vector<short*> m_sizeVec;
 
+    std::vector<int*> m_evtflxVec;
+    std::vector<short*> m_rodBCIDflxVec;
+    std::vector<short*> m_sizeflxVec;
+
+    std::vector<int*> m_gainflxVec;
+    std::vector<int**> m_sampleflxVec;
+
     std::vector<int*> m_bcidVec;
     std::vector<uint32_t*> m_DMUheaderVec;
     std::vector<short*> m_DMUformatErrVec;
@@ -413,6 +425,15 @@ class TileTBAANtuple: public AthAlgorithm {
     std::vector<float*> m_tDspVec;
     std::vector<float*> m_chi2DspVec;
 
+    std::vector<float*> m_eflxfitVec;
+    std::vector<float*> m_tflxfitVec;
+    std::vector<float*> m_chi2flxfitVec;
+    std::vector<float*> m_pedflxfitVec;
+    std::vector<float*> m_eflxoptVec;
+    std::vector<float*> m_tflxoptVec;
+    std::vector<float*> m_chi2flxoptVec;
+    std::vector<float*> m_pedflxoptVec;
+
     std::vector<short*> m_ROD_GlobalCRCVec;
     std::vector<short*> m_ROD_DMUBCIDVec;
     std::vector<short*> m_ROD_DMUmemoryErrVec;
@@ -432,6 +453,17 @@ class TileTBAANtuple: public AthAlgorithm {
     std::vector<int*> m_mdChargeVec;
     std::vector<int*> m_mdChargeTimeVec;
     std::vector<int*> m_mdCapacitorVec;
+
+    std::vector<int*> m_mdL1idflxVec;
+    std::vector<int*> m_mdBcidflxVec;
+    std::vector<int*> m_mdModuleflxVec;
+    std::vector<int*> m_mdRunTypeflxVec;
+    std::vector<int*> m_mdPedLoVec;
+    std::vector<int*> m_mdPedHiVec;
+    std::vector<int*> m_mdRunflxVec;
+    std::vector<int*> m_mdChargeflxVec;
+    std::vector<int*> m_mdChargeTimeflxVec;
+    std::vector<int*> m_mdCapacitorflxVec;
 
     float* m_LarEne;
     float* m_BarEne;
@@ -523,6 +555,9 @@ class TileTBAANtuple: public AthAlgorithm {
     std::vector<float*> m_thitCnt;
     // Container Parameters
     std::string m_digitsContainer;
+    std::string m_digitsContainerFlx;
+    std::string m_flxFitRawChannelContainer;
+    std::string m_flxOptRawChannelContainer;
     std::string m_beamElemContainer;
     std::string m_flatRawChannelContainer;
     std::string m_fitRawChannelContainer;
@@ -550,6 +585,7 @@ class TileTBAANtuple: public AthAlgorithm {
     std::string m_ntupleLoc;
     Long64_t m_treeSize;
     int m_nSamples;
+    int m_nSamplesFlx;
     unsigned int m_nDrawers;
     TileRawChannelUnit::UNIT m_rchUnit;  //!< Unit for TileRawChannels (ADC, pCb, MeV)
     TileRawChannelUnit::UNIT m_dspUnit;  //!< Unit for TileRawChannels in DSP
