@@ -124,7 +124,7 @@ def getEnvironment(flags):
             local_logger.warning('Unable to figure out environment for DQ; using "tier0ESD"')
             return 'tier0ESD'
 
-def allSteeringFlagsOff():
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+
+def allSteeringFlagsOff(flags):
     for flag in _steeringFlags:
-        setattr(getattr(ConfigFlags, 'DQ.Steering'), flag, False)
+        setattr(getattr(flags, 'DQ.Steering'), flag, False)

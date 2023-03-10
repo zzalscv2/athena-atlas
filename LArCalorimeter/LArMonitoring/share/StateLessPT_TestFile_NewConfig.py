@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 if __name__=='__main__':
@@ -64,7 +64,7 @@ if __name__=='__main__':
 
    partition = os.environ.get("TDAQ_PARTITION")
    
-   from ispy import *
+   from ispy import IPCPartition, ISObject
 
    # ################################
    # To read run parameters from IS
@@ -140,91 +140,91 @@ if __name__=='__main__':
    print("RUN CONFIGURATION: ReadDigits =", ReadDigits)
    
    ## And now CA
-   from AthenaConfiguration.AllConfigFlags import ConfigFlags
-
+   from AthenaConfiguration.AllConfigFlags import initConfigFlags
+   flags = initConfigFlags()
    from AthenaMonitoring.DQConfigFlags import allSteeringFlagsOff
-   allSteeringFlagsOff()
+   allSteeringFlagsOff(flags)
 
    ### Set Beam Type
    from AthenaConfiguration.Enums import BeamType
    if beamType=='collisions':
-      ConfigFlags.Beam.Type=BeamType.Collisions
+      flags.Beam.Type=BeamType.Collisions
    elif beamType=='cosmics':
-      ConfigFlags.Beam.Type=BeamType.Cosmics   
+      flags.Beam.Type=BeamType.Cosmics   
    else:   
       print('Setting default collisions beam type')
-      ConfigFlags.Beam.Type=BeamType.Collisions
-   ConfigFlags.Beam.BunchSpacing=25
-   print("RUN CONFIGURATION: Beamtype =",ConfigFlags.Beam.Type)
+      flags.Beam.Type=BeamType.Collisions
+   flags.Beam.BunchSpacing=25
+   print("RUN CONFIGURATION: Beamtype =",flags.Beam.Type)
    
-   ConfigFlags.Common.isOnline=True
-   ConfigFlags.Input.Format=Format.BS
-   ConfigFlags.Input.isMC=False
+   flags.Common.isOnline=True
+   flags.Input.Format=Format.BS
+   flags.Input.isMC=False
 
-   ConfigFlags.IOVDb.DatabaseInstance="CONDBR2"
-   ConfigFlags.IOVDb.GlobalTag="CONDBR2-ES1PA-2016-03"
+   flags.IOVDb.DatabaseInstance="CONDBR2"
+   flags.IOVDb.GlobalTag="CONDBR2-ES1PA-2016-03"
 
-   ConfigFlags.GeoModel.Layout="alas"
-   ConfigFlags.GeoModel.AtlasVersion="ATLAS-R2-2015-04-00-00"
+   flags.GeoModel.Layout="alas"
+   flags.GeoModel.AtlasVersion="ATLAS-R2-2015-04-00-00"
 
    #Run clustering w/o calibration
-   ConfigFlags.Calo.TopoCluster.doTopoClusterLocalCalib=False
+   flags.Calo.TopoCluster.doTopoClusterLocalCalib=False
 
-   ConfigFlags.Exec.MaxEvents=-1
+   flags.Exec.MaxEvents=-1
 
    from AthenaConfiguration.AutoConfigOnlineRecoFlags import setDefaultOnlineRecoFlags
-   setDefaultOnlineRecoFlags(ConfigFlags)
+   setDefaultOnlineRecoFlags(flags)
 
    from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
-   setupDetectorFlags(ConfigFlags, ['LAr'], toggle_geometry=True)
+   setupDetectorFlags(flags, ['LAr'], toggle_geometry=True)
 
-   ConfigFlags.Trigger.doID=False
-   ConfigFlags.Trigger.doMuon=False
-   ConfigFlags.Trigger.L1.doMuon=False
-   ConfigFlags.Trigger.L1.doTopo=False
-   ConfigFlags.Trigger.triggerConfig='COOL'
+   flags.Trigger.doID=False
+   flags.Trigger.doMuon=False
+   flags.Trigger.L1.doMuon=False
+   flags.Trigger.L1.doTopo=False
+   flags.Trigger.triggerConfig='COOL'
 
-   ConfigFlags.DQ.doMonitoring=True
-   ConfigFlags.DQ.disableAtlasReadyFilter=True
-   ConfigFlags.DQ.enableLumiAccess=False
-   ConfigFlags.DQ.useTrigger=True
+   flags.DQ.doMonitoring=True
+   flags.DQ.disableAtlasReadyFilter=True
+   flags.DQ.enableLumiAccess=False
+   flags.DQ.useTrigger=True
    # for P1
-   ConfigFlags.DQ.FileKey=''
+   flags.DQ.FileKey=''
    
-   ConfigFlags.LAr.doAlign=False
-   ConfigFlags.LAr.doHVCorr=False
+   flags.LAr.doAlign=False
+   flags.LAr.doHVCorr=False
 
-   ConfigFlags.Calo.TopoCluster.doTopoClusterLocalCalib=False
+   flags.Calo.TopoCluster.doTopoClusterLocalCalib=False
 
-   ConfigFlags.Input.Files=[INPUT]
+   flags.Input.Files=[INPUT]
 
    #test multithreads
-   ConfigFlags.Concurrency.NumThreads=4
-   ConfigFlags.Concurrency.NumConcurrentEvents=4
+   flags.Concurrency.NumThreads=4
+   flags.Concurrency.NumConcurrentEvents=4
 
    def __monflags():
       from LArMonitoring.LArMonConfigFlags import createLArMonConfigFlags
       return createLArMonConfigFlags()
 
-   ConfigFlags.addFlagsCategory("LArMon", __monflags)
+   flags.addFlagsCategory("LArMon", __monflags)
 
    if 'CaloMon' in CONFIG: # needs Lumi access
-      ConfigFlags.DQ.enableLumiAccess=True
+      flags.DQ.enableLumiAccess=True
 
-   ConfigFlags.lock()
+   flags.lock()
 
    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-   acc = MainServicesCfg(ConfigFlags)
+   acc = MainServicesCfg(flags)
  
    from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-   acc.merge(ByteStreamReadCfg(ConfigFlags,type_names=['TileDigitsContainer/TileDigitsCnt',
+   acc.merge(ByteStreamReadCfg(flags,type_names=['TileDigitsContainer/TileDigitsCnt',
                                                        'TileRawChannelContainer/TileRawChannelCnt',
                                                        'TileMuonReceiverContainer/TileMuRcvCnt']))
 
    #from RecoPT_NewConfig import LArMonitoringConfig
    # include("RecoPT_NewConfig.py")
    from LArMonitoring.RecoPT_NewConfig import LArMonitoringConfig
-   acc.merge(LArMonitoringConfig(ConfigFlags,CONFIG,STREAM))
+   acc.merge(LArMonitoringConfig(flags,CONFIG,STREAM))
    
    # somehow needs to add postprocessing
    if DOPOSTPROC:
@@ -232,9 +232,9 @@ if __name__=='__main__':
       ppa = DQPostProcessingAlg("DQPostProcessingAlg")
       ppa.ExtraInputs = [( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' )]
       ppa.Interval = POSTFREQ
-      if ConfigFlags.Common.isOnline:
-         ppa.FileKey = ((ConfigFlags.DQ.FileKey + '/') if not ConfigFlags.DQ.FileKey.endswith('/') 
-                        else ConfigFlags.DQ.FileKey) 
+      if flags.Common.isOnline:
+         ppa.FileKey = ((flags.DQ.FileKey + '/') if not flags.DQ.FileKey.endswith('/') 
+                        else flags.DQ.FileKey) 
 
       acc.addEventAlgo(ppa, sequenceName='AthEndSeq')
 
