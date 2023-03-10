@@ -1,5 +1,5 @@
 #!/bin/sh
-# art-description: ART test job HITS to AOD
+# art-description: RAWtoALL (q443 test), PHYSVAL production and NTUP_PHYSVAL for jets with no pT threshold
 # art-type: grid
 # art-include: master/Athena
 # art-memory: 4096
@@ -7,46 +7,52 @@
 # art-output: dcube
 # art-html: dcube
 
-ART_PATH="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/"
-ART_FILE="mc16_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.simul.HITS.e6337_s3126/HITS.12860054._032508.pool.root.1"
-HITSFile="${ART_PATH}${ART_FILE}"
-echo "Input HITS file for    : ${HITSFile}"
-
-Nevents=3000
-echo "Number of test events  : ${Nevents}"
-
-ART_AOD="nightly_jet_noPtCut.AOD.pool.root"
-echo "Output AOD file        : ${ART_AOD}"
-
-ART_Validation="nightly_jet_noPtCut.PHYSVAL.root"
-echo "Output Validation file : ${ART_Validation}"
-
-echo "Submitting Reconstruction ..."
-
+export ATHENA_CORE_NUMBER=8
 Reco_tf.py \
-    --maxEvents=${Nevents} \
-    --inputHITSFile=${HITSFile} \
-    --outputAODFile=${ART_AOD} \
-    --outputNTUP_PHYSVALFile ${ART_Validation} \
-    --valid=True \
-    --validationFlags 'doInDet,doJet' \
-    --autoConfiguration everything \
-    --conditionsTag 'all:OFLCOND-MC21-SDR-RUN3-08' \
-    --preExec 'from RecExConfig.RecFlags import rec;rec.doTrigger=False; from JetRec.JetRecFlags import jetFlags; jetFlags.writeJetsToAOD.set_Value_and_Lock(True); from AthenaConfiguration.AllConfigFlags import ConfigFlags; ConfigFlags.Jet.useCalibJetThreshold=False;'
+  --AMI q443 \
+  --CA "all:True" "RDOtoRDOTrigger:False" \
+  --sharedWriter True \
+  --steering 'doRDO_TRIG' 'doTRIGtoALL' \
+  --outputAODFile myAOD.pool.root \
+  --athenaopts "HITtoRDO:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" "RDOtoRDOTrigger:--threads=0 --nprocs=${ATHENA_CORE_NUMBER}" "RAWtoALL:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" "AODtoDAOD:--threads=0 --nprocs=${ATHENA_CORE_NUMBER}" \
+  --postExec 'from AthenaAuditors.AthenaAuditorsConf import FPEAuditor;FPEAuditor.NStacktracesOnFPE=10;' \
+  --maxEvents 1000
 
-rc=$?
-echo "art-result: $rc Reco"
+rc1=$?
+echo "art-result: ${rc1} Reco_tf"
 
-rc2=-9999
-if [ ${rc} -eq 0 ]
+Derivation_tf.py \
+  --CA \
+  --inputAODFile myAOD.pool.root \
+  --outputDAODFile pool.root \
+  --sharedWriter True \
+  --multiprocess True \
+  --formats PHYSVAL \
+  --preExec 'flags.Jet.useCalibJetThreshold=False' \
+  --postExec 'from AthenaAuditors.AthenaAuditorsConf import FPEAuditor;FPEAuditor.NStacktracesOnFPE=10' \
+  --maxEvents -1
+
+rc2=$?
+echo "art-result: ${rc2} PHYSVAL"
+
+Derivation_tf.py \
+  --CA \
+  --inputDAOD_PHYSVALFile "DAOD_PHYSVAL.pool.root" \
+  --outputNTUP_PHYSVALFile "nightly_jet_noPtCut.PHYSVAL.root" \
+  --validationFlags doJet \
+  --format NTUP_PHYSVAL \
+  --maxEvents -1
+
+rc3=$?
+echo "art-result: ${rc3} NTUP_PHYSVAL"
+
+if [ ${rc3} -eq 0 ]
 then
   art.py download --user=artprod --dst=last_results JetValidation test_jet_noPtCut
   # Histogram comparison with DCube
-  $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-      -p -x dcube \
-      -c /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/JetValidation/DCUBE/jet.xml \
-      -r last_results/nightly_jet_noPtCut.PHYSVAL.root \
-      nightly_jet_noPtCut.PHYSVAL.root
-  rc2=$?
+  dcubeXML="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/JetValidation/DCUBE/jet.xml"
+  dcubeRef="last_results/nightly_jet_noPtCut.PHYSVAL.root"
+  $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py -p -c ${dcubeXML} -r ${dcubeRef} -x dcube nightly_jet_noPtCut.PHYSVAL.root
+  rc4=$?
 fi
-echo "art-result: ${rc2} plot"
+echo "art-result: ${rc4} dcube"
