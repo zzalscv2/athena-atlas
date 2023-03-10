@@ -52,7 +52,7 @@ if __name__ == '__main__':
 
     flags = initConfigFlags()
     flags.Exec.OutputLevel = DEBUG  # noqa: ATL900 - fine for short unit test
-    flags.Input.Files = defaultTestFiles.RAW
+    flags.Input.Files = defaultTestFiles.RAW_RUN2
     flags.lock()
 
     acc = MainServicesCfg(flags)

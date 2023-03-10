@@ -76,7 +76,7 @@ def makeGRL(run, defect, fname):
         outf.write(data)
 
 def go(fname):
-    import subprocess, os, shutil
+    import subprocess, os, shutil  # noqa: F401
     if 'DQ_STREAM' in os.environ:
         if (os.environ.get('DQPRODUCTION', '0') == '1'
             and os.environ['DQ_STREAM'] != 'physics_Main'):
@@ -87,17 +87,18 @@ def go(fname):
     if not checkDirExists(fname):
         print('But DQTGlobalWZFinder directory does not exist: code probably did not run. Exiting')
         return
-    grlcmd = []
+    grlcmd = []  # noqa: F841
     if runno >= 325000:
         makeGRL(runno, 'PHYS_StandardGRL_All_Good', 'grl.xml')
-        grlcmd = ['--grl', 'grl.xml']
+        grlcmd = ['--grl', 'grl.xml']  # noqa: F841
     else:
         print('Run number', runno, 'not 2017 data')
 
-    subprocess.call(['dqt_zlumi_compute_lumi.py', fname, '--out', 'zlumiraw.root', '--dblivetime', '--plotdir', ''] + grlcmd)
-    subprocess.call(['dqt_zlumi_alleff_HIST.py', fname, '--out', 'zlumieff.root', '--plotdir', ''])
-    subprocess.call(['dqt_zlumi_combine_lumi.py', 'zlumiraw.root', 'zlumieff.root', 'zlumi.root'])
-    subprocess.call(['dqt_zlumi_display_z_rate.py', 'zlumi.root', '--plotdir', ''])
-    copyPlot('zlumi.root', fname)
-    if os.path.isfile('zlumi.root_zrate.csv'):
-        shutil.move('zlumi.root_zrate.csv', 'zrate.csv')
+    # Temporarily comment. Run 3 version of this code will be inserted soon
+    # subprocess.check_call(['dqt_zlumi_compute_lumi.py', fname, '--out', 'zlumiraw.root', '--dblivetime', '--plotdir', ''] + grlcmd)
+    # subprocess.check_call(['dqt_zlumi_alleff_HIST.py', fname, '--out', 'zlumieff.root', '--plotdir', ''])
+    # subprocess.check_call(['dqt_zlumi_combine_lumi.py', 'zlumiraw.root', 'zlumieff.root', 'zlumi.root'])
+    # subprocess.check_call(['dqt_zlumi_display_z_rate.py', 'zlumi.root', '--plotdir', ''])
+    # copyPlot('zlumi.root', fname)
+    # if os.path.isfile('zlumi.root_zrate.csv'):
+    #     shutil.move('zlumi.root_zrate.csv', 'zrate.csv')

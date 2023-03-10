@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */ 
 
 #ifndef _RIO_OnTrackErrorScalingDbOverrideCondAlg_H_
@@ -17,7 +17,7 @@
 
 class RIO_OnTrackErrorScalingKit;
 
-class RIO_OnTrackErrorScalingDbOverrideCondAlg : public AthAlgorithm 
+class RIO_OnTrackErrorScalingDbOverrideCondAlg final: public AthAlgorithm 
 {  
  public:
   RIO_OnTrackErrorScalingDbOverrideCondAlg(const std::string& name, ISvcLocator* pSvcLocator);

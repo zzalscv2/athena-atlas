@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DenseEnvironmentsAmbiguityProcessorTool_H
@@ -30,7 +30,7 @@
 namespace Trk {
   class ITruthToTrack;
   //
-  class DenseEnvironmentsAmbiguityProcessorTool : public AmbiguityProcessorBase{
+  class DenseEnvironmentsAmbiguityProcessorTool final : public AmbiguityProcessorBase{
   public:
   // default methods
   DenseEnvironmentsAmbiguityProcessorTool(const std::string&,const std::string&,const IInterface*);
@@ -62,7 +62,7 @@ namespace Trk {
 
 
     /** refit PRDs */
-    Track*
+    virtual Track*
     refitPrds( const Track* track, Trk::PRDtoTrackMap &prd_to_track_map,
     Counter &stat) const override final;
 

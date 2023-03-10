@@ -92,6 +92,11 @@ def fromRunArgs(runArgs):
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     cfg.merge(PoolReadCfg(flags))
 
+    # Ensure proper metadata propagation for EVNT->DAOD_TRUTHx
+    if (allowedInputTypes[idx]=='EVNT'):
+       from AthenaServices.MetaDataSvcConfig import MetaDataSvcCfg
+       cfg.merge(MetaDataSvcCfg(flags, ['IOVDbMetaDataTool']))
+
     # Cut flow service
     from EventBookkeeperTools.EventBookkeeperToolsConfig import CutFlowSvcCfg
     cfg.merge(CutFlowSvcCfg(flags))

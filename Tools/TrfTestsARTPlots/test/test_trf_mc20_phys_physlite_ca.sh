@@ -17,7 +17,7 @@ Derivation_tf.py \
   --formats PHYS PHYSLITE \
   --multiprocess True \
   --sharedWriter True \
-  --preExec 'flags.Exec.FPE=10'
+  --preExec 'flags.Exec.FPE=10' \
   --maxEvents 1000
 
 rcderiv=$?

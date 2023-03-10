@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -65,34 +65,29 @@ namespace InDet {
       /// @name Main methods for track-finding
       ///////////////////////////////////////////////////////////////////
       //@{
-      
-      virtual const std::list<Trk::Track*>& getTracks
-	(SiCombinatorialTrackFinderData_xk& data,
-         const Trk::TrackParameters&, 
-	 const std::vector<const Trk::SpacePoint*>&,
-	 const std::list<Amg::Vector3D>&,
-	 std::list<const InDetDD::SiDetectorElement*>&,
-	 const TrackQualityCuts&,
-   const EventContext&) const =0;
 
-      virtual const std::list<Trk::Track*>& getTracks
-	(SiCombinatorialTrackFinderData_xk& data,
-         const Trk::TrackParameters&, 
-	 const std::vector<const Trk::SpacePoint*>&,
-	 const std::list<Amg::Vector3D>&,
-	 std::list<const InDetDD::SiDetectorElement*>&,
-	 std::multimap<const Trk::PrepRawData*, const Trk::Track*>&,
-   const EventContext&) const =0;
+      virtual const std::list<Trk::Track*>& getTracks(
+          SiCombinatorialTrackFinderData_xk& data, const Trk::TrackParameters&,
+          const std::vector<const Trk::SpacePoint*>&,
+          const std::vector<Amg::Vector3D>&,
+          std::list<const InDetDD::SiDetectorElement*>&,
+          const TrackQualityCuts&, const EventContext&) const = 0;
 
-      virtual const std::list<Trk::Track*>& getTracksWithBrem
-	(SiCombinatorialTrackFinderData_xk& data,
-         const Trk::TrackParameters&,
-	 const std::vector<const Trk::SpacePoint*>&,
-	 const std::list<Amg::Vector3D>&,
-	 std::list<const InDetDD::SiDetectorElement*>&,
-	 std::multimap<const Trk::PrepRawData*, const Trk::Track*>&,
-	 bool,
-   const EventContext&) const =0;
+      virtual const std::list<Trk::Track*>& getTracks(
+          SiCombinatorialTrackFinderData_xk& data, const Trk::TrackParameters&,
+          const std::vector<const Trk::SpacePoint*>&,
+          const std::vector<Amg::Vector3D>&,
+          std::list<const InDetDD::SiDetectorElement*>&,
+          std::multimap<const Trk::PrepRawData*, const Trk::Track*>&,
+          const EventContext&) const = 0;
+
+      virtual const std::list<Trk::Track*>& getTracksWithBrem(
+          SiCombinatorialTrackFinderData_xk& data, const Trk::TrackParameters&,
+          const std::vector<const Trk::SpacePoint*>&,
+          const std::vector<Amg::Vector3D>&,
+          std::list<const InDetDD::SiDetectorElement*>&,
+          std::multimap<const Trk::PrepRawData*, const Trk::Track*>&, bool,
+          const EventContext&) const = 0;
 
       virtual double pTseed(SiCombinatorialTrackFinderData_xk& data,
 			    const Trk::TrackParameters&,
@@ -174,10 +169,10 @@ namespace InDet {
     }
   
   inline TrackQualityCuts::TrackQualityCuts
-    (const std::map<const std::string,int>& in,const std::map<const std::string,double>& db)
+    (const std::map<const std::string,int>& in,const std::map<const std::string,double>& db) :
+      m_idata (in),
+      m_ddata (db)
     {
-      m_idata = in;
-      m_ddata = db;
     }
 
   inline void TrackQualityCuts::setIntCut (const std::string& name, int cut)

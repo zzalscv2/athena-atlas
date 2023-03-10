@@ -86,15 +86,14 @@ StatusCode jFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
         
         const auto dataArray = CxxUtils::span{rob->rod_data(), rob->rod_ndata()};
         std::vector<uint32_t> vec_words(dataArray.begin(),dataArray.end());
+
         
         // jFEX to ROD trailer position
         unsigned int trailers_pos = rob->rod_ndata();
         
         // Starting to loop over the different jFEX blocks
-        bool READ_TOBS = true;
-        while(READ_TOBS){
-            
-            //if(m_verbose) printf("----------------------------------------------------------------------------------------------------------------------\n");
+        bool READ_WORDS = true;
+        while(READ_WORDS){
             
             const auto [payload, jfex, fpga]                      = jFEXtoRODTrailer  ( vec_words.at(trailers_pos-2), vec_words.at(trailers_pos-1) );
             
@@ -104,7 +103,7 @@ StatusCode jFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
             
             if(payload % jBits::DATA_WORDS_PER_BLOCK != 0){
                 ATH_MSG_ERROR(C.B_RED<<"  Payload number (" << payload << ") not a multiple of data words per channel. Expected: " << jBits::DATA_WORDS_PER_BLOCK <<C.END);
-                READ_TOBS = false;
+                READ_WORDS = false;
                 continue;
             }
             
@@ -112,9 +111,14 @@ StatusCode jFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
             unsigned int wordIndex = trailers_pos - (jBits::jFEX2ROD_WORDS);      
             
             // Number of iterations that must be done. It is divisible otherwise it throws out an error (Line 108)
-            uint Max_iter = payload/jBits::DATA_WORDS_PER_BLOCK;
+            unsigned int Max_iter = payload/jBits::DATA_WORDS_PER_BLOCK;
             
-            for (uint iblock = 0; iblock < Max_iter; iblock++){
+            if(Max_iter>trailers_pos){
+               ATH_MSG_ERROR(C.B_RED<<"Block size error in fragment 0x"<< std::hex << rob->rob_source_id() << std::dec<<". Words available: " << trailers_pos << ". Number of words wanted to decode: " << Max_iter <<C.END);
+               return StatusCode::FAILURE;
+            }
+                        
+            for (unsigned int iblock = 0; iblock < Max_iter; iblock++){
                 const auto [channel, saturation] = BulkStreamTrailer(vec_words.at(wordIndex-1),vec_words.at(wordIndex-2));
                 
                 const auto [DATA13_low          , DATA15, DATA14] = Dataformat1(vec_words.at(wordIndex-3));
@@ -191,7 +195,7 @@ StatusCode jFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
             trailers_pos -= (payload + jBits::jFEX2ROD_WORDS);
             
             if(trailers_pos == 0){
-                READ_TOBS = false;
+                READ_WORDS = false;
             }
         }
     }

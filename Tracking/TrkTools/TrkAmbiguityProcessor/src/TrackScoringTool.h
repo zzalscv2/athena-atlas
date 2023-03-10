@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -19,7 +19,7 @@ class Track;
 class TrackSummary;
 
 /**Concrete implementation of the ITrackScoringTool pABC*/
- class TrackScoringTool : virtual public ITrackScoringTool, public AthAlgTool{
+ class TrackScoringTool final: virtual public ITrackScoringTool, public AthAlgTool{
 
   public:
     TrackScoringTool(const std::string&,const std::string&,const IInterface*);

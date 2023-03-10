@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Dear emacs, this is -*-c++-*-
@@ -14,7 +14,7 @@
 
 namespace Trk {
   
-  class DecayInFlyTruthTrajectoryBuilder: virtual public ITruthTrajectoryBuilder,
+  class DecayInFlyTruthTrajectoryBuilder final: virtual public ITruthTrajectoryBuilder,
 				       public AthAlgTool 
   {
   public:

@@ -92,6 +92,10 @@ AthenaEventLoopMgr::AthenaEventLoopMgr(const std::string& nam,
 		  "(DEFAULT). 2: RECOVERABLE and FAILURE skip to next events");
   declareProperty("EventPrintoutInterval", m_eventPrintoutInterval=1,
                   "Print event heartbeat printouts every m_eventPrintoutInterval events");
+  declareProperty("IntervalInSeconds",  m_intervalInSeconds = 0,
+		  "heartbeat time interval is seconds rather than events"
+		  "you also get a nice event rate printout then");
+  declareProperty("DoLiteLoop",m_liteLoop=false,"Runs the bare minimum during executeEvent");
   declareProperty("UseDetailChronoStat",m_doChrono=false);
   declareProperty("ClearStorePolicy",
 		  m_clearStorePolicy = "EndEvent",
@@ -549,6 +553,15 @@ StatusCode AthenaEventLoopMgr::executeAlgorithms(const EventContext& ctx) {
 //=========================================================================
 StatusCode AthenaEventLoopMgr::executeEvent(EventContext&& ctx)    
 {
+    //This is a lightweight implementation of the executeEvent, used when e.g. processing TTrees with RootNtupleEventSelector
+    if(m_liteLoop) {
+        m_incidentSvc->fireIncident(Incident("BeginEvent",IncidentType::BeginEvent));
+        StatusCode sc = executeAlgorithms(ctx);
+        m_incidentSvc->fireIncident(Incident("EndEvent",IncidentType::EndEvent));
+        ++m_proc;
+        ++m_nev;
+        return sc;
+    }
 
   const EventInfo* pEvent(nullptr);
   std::unique_ptr<EventInfo> pEventPtr;
@@ -723,11 +736,18 @@ StatusCode AthenaEventLoopMgr::executeEvent(EventContext&& ctx)
 
 
   uint64_t evtNumber = eventID.event_number();
-  bool doEvtHeartbeat(m_eventPrintoutInterval.value() > 0 && 
-                      0 == (m_nev % m_eventPrintoutInterval.value()));
+  bool doEvtHeartbeat(m_eventPrintoutInterval.value() > 0 &&
+                              ( (!m_intervalInSeconds && 0 == (m_nev % m_eventPrintoutInterval.value())) ||
+                                (m_intervalInSeconds && (time(nullptr)-m_lastTime)>m_intervalInSeconds) ));
   if (doEvtHeartbeat)  {
-    if(!m_useTools) ATH_MSG_INFO ( "  ===>>>  start processing event #" << evtNumber << ", run #" << m_currentRun 
-	<< " " << m_nev << " events processed so far  <<<===" );
+    if(!m_useTools) {
+        ATH_MSG_INFO ( "  ===>>>  start processing event #" << evtNumber << ", run #" << m_currentRun << " " << m_nev << " events processed so far  <<<===" );
+        if(m_intervalInSeconds) {
+            ATH_MSG_INFO(" ===>>> Event processing rate = " << double(m_nev-m_lastNev)/(time(nullptr)-m_lastTime) << " Hz <<<===");
+            m_lastNev = m_nev; m_lastTime = time(nullptr);
+        }
+    }
+
    else ATH_MSG_INFO ( "  ===>>>  start processing event #" << evtNumber << ", run #" << m_currentRun 
 	<< " " << m_nev << " events read and " << m_proc 
         << " events processed so far  <<<===" );   
@@ -797,11 +817,15 @@ StatusCode AthenaEventLoopMgr::executeEvent(EventContext&& ctx)
   }  // end of toolsPassed test
   ++m_nev;
   if (doEvtHeartbeat) {
-    if(!m_useTools) ATH_MSG_INFO ( "  ===>>>  done processing event #" << evtNumber << ", run #" << m_currentRun 
-                           << " " << m_nev << " events processed so far  <<<===" );
-    else ATH_MSG_INFO ( "  ===>>>  done processing event #" << evtNumber << ", run #" << m_currentRun 
-                << " " << m_nev << " events read and " << m_proc 
-                << " events processed so far <<<===" );
+      if(!m_intervalInSeconds) {
+          if (!m_useTools)
+              ATH_MSG_INFO("  ===>>>  done processing event #" << evtNumber << ", run #" << m_currentRun
+                                                               << " " << m_nev << " events processed so far  <<<===");
+          else
+              ATH_MSG_INFO("  ===>>>  done processing event #" << evtNumber << ", run #" << m_currentRun
+                                                               << " " << m_nev << " events read and " << m_proc
+                                                               << " events processed so far <<<===");
+      }
    std::ofstream outfile( "eventLoopHeartBeat.txt");
    if ( !outfile ) {
      ATH_MSG_ERROR ( " unable to open: eventLoopHeartBeat.txt" );

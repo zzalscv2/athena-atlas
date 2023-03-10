@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrkMaterialProviderTool_H
@@ -49,7 +49,7 @@ class AtlasDetectorID;
    */
 namespace Trk{  
   
-  class TrkMaterialProviderTool : public AthAlgTool,
+  class TrkMaterialProviderTool final: public AthAlgTool,
     virtual public Trk::ITrkMaterialProviderTool {
       
   public:

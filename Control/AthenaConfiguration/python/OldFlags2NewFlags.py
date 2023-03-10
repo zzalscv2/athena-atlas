@@ -98,11 +98,11 @@ def getNewConfigFlags():
     try:
         from InDetRecExample.InDetJobProperties import InDetFlags
         InDetFlags.init()
-        ConfigFlags.InDet.Tracking.doTIDE_Ambi = InDetFlags.doTIDE_Ambi()
+        ConfigFlags.Tracking.doTIDE_Ambi = InDetFlags.doTIDE_Ambi()
         ConfigFlags.InDet.useDCS = InDetFlags.useDCS()
         ConfigFlags.Tracking.doVertexFinding = InDetFlags.doVertexFinding()
     except ImportError:
-        log.info('InDetRecExample not available, "ConfigFlags.InDet.Tracking.doTIDE_Ambi", "ConfigFlags.InDet.useDCS" and "ConfigFlags.Tracking.doVertexFinding" not set')
+        log.info('InDetRecExample not available, "ConfigFlags.Tracking.doTIDE_Ambi", "ConfigFlags.InDet.useDCS" and "ConfigFlags.Tracking.doVertexFinding" not set')
         pass
 
 
@@ -115,8 +115,7 @@ def getNewConfigFlags():
         pass
     try:
         from LArROD.LArRODFlags import larRODFlags
-        ConfigFlags.LAr.ROD.DoOFCPileupOptimization=larRODFlags.doOFCPileupOptimization()
-        ConfigFlags.LAr.ROD.NumberOfCollisions=larRODFlags.NumberOfCollisions()
+        ConfigFlags.LAr.ROD.NumberOfCollisions= larRODFlags.NumberOfCollisions() if larRODFlags.doOFCPileupOptimization() else 0
         ConfigFlags.LAr.ROD.nSamples=larRODFlags.nSamples()
         ConfigFlags.LAr.ROD.FirstSample=larRODFlags.firstSample()
         ConfigFlags.LAr.ROD.UseHighestGainAutoCorr=larRODFlags.useHighestGainAutoCorr()

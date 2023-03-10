@@ -20,8 +20,8 @@ namespace{
   
   enum TupleItem{ ThisLayer, NumLayers, NumHits};
   
-  typedef std::tuple <int , int , int> OneDetail;
-  typedef std::vector<OneDetail> DetailVector;
+  using OneDetail = std::tuple<int, int, int>;
+  using DetailVector = std::vector<OneDetail>;
   
   template<int q>
   int addUp(int l, const std::pair < Trk::DetectorRegion, DetailVector > & p){

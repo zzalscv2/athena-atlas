@@ -21,10 +21,10 @@ namespace Trk {
   class PrepRawData;
 
   /** Concrete Implementation of the IPRD_AssociationTool interface.*/
-  class PRD_AssociationTool : public extends<AthAlgTool, IPRD_AssociationTool>
-{
+  class PRD_AssociationTool final
+      : public extends<AthAlgTool, IPRD_AssociationTool> {
 
-  public:
+   public:
     PRD_AssociationTool(const std::string&,const std::string&,const IInterface*);
     virtual ~PRD_AssociationTool()=default;
     virtual StatusCode initialize() override;
@@ -112,9 +112,7 @@ namespace Trk {
     SG::ReadHandleKey<Trk::PRDtoTrackMap> m_prdToTrackMap {this,"PRDtoTrackMap",""};
 
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
-
-};
-
+  };
 
 inline bool Trk::PRD_AssociationTool::isUsed(const Maps& maps,
                                              const PrepRawData& prd) const

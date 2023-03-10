@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIG_DECISIONUNPACKEREVENTINFO_H
@@ -29,7 +29,7 @@ namespace Trig{
 
   class DecisionUnpackerEventInfo : public IDecisionUnpacker, public Logger {
   public:
-    DecisionUnpackerEventInfo(SG::ReadHandleKey<EventInfo>* oldEventInfoKey);
+    DecisionUnpackerEventInfo(const SG::ReadHandleKey<EventInfo>* oldEventInfoKey);
     virtual ~DecisionUnpackerEventInfo();
 
     DecisionUnpackerEventInfo (const DecisionUnpackerEventInfo&) = delete;
@@ -48,7 +48,7 @@ namespace Trig{
     virtual StatusCode unpackNavigation(const EventContext&, HLT::TrigNavStructure*) const override;
 
   private:
-    SG::ReadHandleKey<EventInfo>* m_eventInfoKey{nullptr};
+    const SG::ReadHandleKey<EventInfo>* m_eventInfoKey{nullptr};
     StatusCode unpackItems(const std::vector<uint32_t>& level1TriggerInfo,
                            std::map<CTPID, LVL1CTP::Lvl1Item>& itemsCache,
                            std::unordered_map<std::string, const LVL1CTP::Lvl1Item*>& itemsByName) const;

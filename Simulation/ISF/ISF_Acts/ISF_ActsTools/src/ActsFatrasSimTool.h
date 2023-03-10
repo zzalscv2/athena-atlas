@@ -175,14 +175,14 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
   // ===============================
   // Setup ActsFatras simulator types
   // Charged
-  using ChargedSelector = ActsFatras::EveryParticle;
+  using ChargedSelector = ActsFatras::ChargedSelector;
   using ChargedInteractions =
           ActsFatras::StandardChargedElectroMagneticInteractions;
   using ChargedSimulation = SingleParticleSimulation<
           ChargedPropagator, ChargedInteractions, HitSurfaceSelector,
           ActsFatras::NoDecay>;
   // Neutral
-  using NeutralSelector = ActsFatras::EveryParticle;
+  using NeutralSelector = ActsFatras::NeutralSelector;
   using NeutralInteractions = ActsFatras::InteractionList<>;
   using NeutralSimulation = SingleParticleSimulation<
           NeutralPropagator, NeutralInteractions, ActsFatras::NoSurface,

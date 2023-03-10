@@ -13,6 +13,7 @@
 #ifndef TILELASEROBJECT_H
 #define TILELASEROBJECT_H
 
+#include <cmath>
 #include <string>
 #include <vector>
 #include <time.h>
@@ -143,6 +144,8 @@ public:
               const int interlock,
               const int alarm);
   
+  void setVersion(const int version);
+
   void setDaqType(const unsigned int daqtype);
   
   void setTimeouts(const bool qdc, const bool tdc);
@@ -198,6 +201,11 @@ inline int TileLaserObject::getCounter() const
   return m_laserParameter.getCounter();
 }
 
+inline void TileLaserObject::setVersion(const int version)
+{
+  m_version = version;
+}
+
 inline int TileLaserObject::getVersion() const
 {
   return m_version;
@@ -205,7 +213,7 @@ inline int TileLaserObject::getVersion() const
 
 inline bool TileLaserObject::isLASERII() const
 {
-  return (m_version==2);
+  return (std::abs(m_version)==2);
 }
 
 inline double TileLaserObject::getDiodeCurrOrd() const

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIG_DECISIONUNPACKERATHENA_H
@@ -31,7 +31,7 @@ namespace Trig{
 
   class DecisionUnpackerAthena : public IDecisionUnpacker, public Logger {
   public:
-    DecisionUnpackerAthena( SG::ReadHandleKey<TrigDec::TrigDecision>* olddeckey );
+    DecisionUnpackerAthena( const SG::ReadHandleKey<TrigDec::TrigDecision>* olddeckey );
     virtual ~DecisionUnpackerAthena();
 
     DecisionUnpackerAthena (const DecisionUnpackerAthena&) = delete;
@@ -51,7 +51,7 @@ namespace Trig{
 
   private:
     /// Key of the trigger decision object in the event
-    SG::ReadHandleKey<TrigDec::TrigDecision>* m_deckey{nullptr};
+    const SG::ReadHandleKey<TrigDec::TrigDecision>* m_deckey{nullptr};
 
     StatusCode unpackItems(const LVL1CTP::Lvl1Result& result,
                std::map<CTPID, LVL1CTP::Lvl1Item>&,

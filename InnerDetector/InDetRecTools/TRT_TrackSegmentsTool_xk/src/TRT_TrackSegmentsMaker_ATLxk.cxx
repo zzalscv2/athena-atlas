@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -32,18 +32,17 @@
 InDet::TRT_TrackSegmentsMaker_ATLxk::TRT_TrackSegmentsMaker_ATLxk
 (const std::string& t,const std::string& n,const IInterface* p)
   : AthAlgTool(t,n,p),
-  m_propTool     ("Trk::RungeKuttaPropagator"                  )
+  m_fieldmode    ("MapSolenoid"                                ),
+  m_propTool     ("Trk::RungeKuttaPropagator"                  ),
+  m_build        (false                                        ),
+  m_gupdate      (false                                        ),
+  m_removeNoise  (true                                         ),
+  m_clustersCut  (10                                           ),
+  m_pTmin        (500.                                         ),
+  m_sharedfrac   (0.3                                          ),
+  m_nPhi         (500                                          ),
+  m_nMom         (70                                           )
 {
-  m_fieldmode   =      "MapSolenoid" ;
-  m_pTmin       =                500.;
-  m_sharedfrac  =                0.3 ;
-  m_nPhi        =                500 ;
-  m_nMom        =                 70 ;
-  m_clustersCut =                 10 ;
-  m_removeNoise =                true;
-  m_build       =               false;
-  m_gupdate     =               false;
-
   declareInterface<ITRT_TrackSegmentsMaker>(this);
 
   declareProperty("PropagatorTool"         ,m_propTool     );
@@ -333,7 +332,8 @@ void InDet::TRT_TrackSegmentsMaker_ATLxk::endEvent (InDet::ITRT_TrackSegmentsMak
 // Methods for seeds production without vertex constraint
 ///////////////////////////////////////////////////////////////////
 void InDet::TRT_TrackSegmentsMaker_ATLxk::find(const EventContext &ctx,
-                                               InDet::ITRT_TrackSegmentsMaker::IEventData &virt_event_data) const
+                                               InDet::ITRT_TrackSegmentsMaker::IEventData &virt_event_data,
+                                               InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap& used) const
 {
    TRT_TrackSegmentsMaker_ATLxk::EventData &
       event_data = TRT_TrackSegmentsMaker_ATLxk::EventData::getPrivateEventData(virt_event_data);
@@ -402,7 +402,7 @@ void InDet::TRT_TrackSegmentsMaker_ATLxk::find(const EventContext &ctx,
   while(event_data.m_sizebin_iterator!=event_data.m_sizebin.rend()) {
 
     unsigned int bin =(*event_data.m_sizebin_iterator++).second;
-    findLocaly(ctx, bin,prd_to_track_map_cptr, event_data);
+    findLocaly(ctx, bin,prd_to_track_map_cptr, event_data, used);
   }
 
   // Final segments preparation
@@ -632,7 +632,8 @@ void InDet::TRT_TrackSegmentsMaker_ATLxk::analyseHistogramm
 void InDet::TRT_TrackSegmentsMaker_ATLxk::findLocaly(const EventContext &ctx,
                                                      unsigned int bin,
                                                      const Trk::PRDtoTrackMap *prd_to_track_map,
-                                                     TRT_TrackSegmentsMaker_ATLxk::EventData &event_data) const
+                                                     TRT_TrackSegmentsMaker_ATLxk::EventData &event_data,
+                                                     InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap& used) const
 {
   const TRT_TrackSegmentsToolCondData_xk &condData = *getConditionsData();
 
@@ -698,7 +699,7 @@ void InDet::TRT_TrackSegmentsMaker_ATLxk::findLocaly(const EventContext &ctx,
     0., 0., fm, std::atan2(1., condData.m_dzdr[ndzdr]), pin, std::nullopt);
   ++event_data.m_nlocal;
 
-  Trk::TrackSegment* seg = m_extensionTool->findSegment(ctx, Tp.get(), *(event_data.m_extEventData) );
+  Trk::TrackSegment* seg = m_extensionTool->findSegment(ctx, Tp.get(), *(event_data.m_extEventData),used);
   if(!seg) return;
 
   // Momentum cut

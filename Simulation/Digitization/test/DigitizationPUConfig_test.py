@@ -29,7 +29,6 @@ flags.Beam.NumberOfCollisions = 20.
 
 flags.LAr.ROD.NumberOfCollisions = 20
 flags.LAr.ROD.nSamples = 4
-flags.LAr.ROD.DoOFCPileupOptimization = True
 flags.LAr.ROD.FirstSample = 0
 flags.LAr.ROD.UseHighestGainAutoCorr = True
 

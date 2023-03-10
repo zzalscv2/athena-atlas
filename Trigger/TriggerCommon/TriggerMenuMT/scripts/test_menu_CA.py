@@ -27,7 +27,7 @@ flags.Trigger.enabledSignatures = ['Muon', 'Photon','Electron', 'MinBias', 'Heav
 flags.Trigger.generateMenuDiagnostics = True
 
 from AthenaConfiguration.TestDefaults import defaultTestFiles
-flags.Input.Files = defaultTestFiles.RAW
+flags.Input.Files = defaultTestFiles.RAW_RUN2
 flags.Trigger.triggerMenuSetup="Dev_pp_run3_v1"
 
 flags.Trigger.EDMVersion=3

@@ -101,7 +101,7 @@ namespace InDet{
       bool globalPositionsToClusters
         (const PixelClusterContainer*                             ,
          const SCT_ClusterContainer*                              ,
-         const std::list<Amg::Vector3D>                          &,
+         const std::vector<Amg::Vector3D>                         &,
          std::vector<const InDet::SiDetElementBoundaryLink_xk*>  &,
          std::multimap<const Trk::PrepRawData*,const Trk::Track*>&,
          std::list<const InDet::SiCluster*>                      &);

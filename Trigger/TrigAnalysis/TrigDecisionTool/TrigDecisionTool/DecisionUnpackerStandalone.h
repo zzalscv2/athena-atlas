@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGDECISIONTOOL_DECISIONUNPACKERSTANDALONE_H
@@ -42,8 +42,8 @@ namespace Trig {
 
   public:
     /// Constructor with arguments
-    DecisionUnpackerStandalone(SG::ReadHandleKey<xAOD::TrigDecision>*,
-                               SG::ReadHandleKey<xAOD::TrigNavigation>* navikey);
+    DecisionUnpackerStandalone(const SG::ReadHandleKey<xAOD::TrigDecision>*,
+                               const SG::ReadHandleKey<xAOD::TrigNavigation>* navikey);
     /// Destructor
     virtual ~DecisionUnpackerStandalone();
 
@@ -82,9 +82,9 @@ namespace Trig {
                              const HLT::Chain* >& output ) const;
 
     /// Key of the trigger decision object in the event
-    SG::ReadHandleKey<xAOD::TrigDecision>* m_deckey{nullptr};
+    const SG::ReadHandleKey<xAOD::TrigDecision>* m_deckey{nullptr};
     /// Key of the trigger navigation object in the event
-    SG::ReadHandleKey<xAOD::TrigNavigation>* m_navikey{nullptr};
+    const SG::ReadHandleKey<xAOD::TrigNavigation>* m_navikey{nullptr};
 
   }; // class DecisionUnpackerStandalone
 

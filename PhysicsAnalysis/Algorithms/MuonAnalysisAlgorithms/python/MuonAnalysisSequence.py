@@ -98,7 +98,7 @@ def makeMuonCalibrationSequence( seq, dataType,
     alg = createAlgorithm( 'CP::AsgSelectionAlg',
                            'MuonEtaCutAlg' + postfix )
     addPrivateTool( alg, 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
-    alg.selectionTool.maxEta = 2.5
+    alg.selectionTool.maxEta = 2.7
     alg.selectionDecoration = 'selectEta' + postfix + ',as_bits'
     seq.append( alg, inputPropName = 'particles',
                 stageName = 'selection',

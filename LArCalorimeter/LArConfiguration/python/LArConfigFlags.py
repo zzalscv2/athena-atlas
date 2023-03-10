@@ -39,10 +39,8 @@ def createLArConfigFlags():
     # DataBase server string
     lcf.addFlag("LAr.DBConnection", "")
 
-    # Do pileup OFC optimization
-    lcf.addFlag("LAr.ROD.DoOFCPileupOptimization",False)
     # Number of collisions to optimize OFC for pileup
-    lcf.addFlag("LAr.ROD.NumberOfCollisions",lambda prevFlags: prevFlags.Beam.NumberOfCollisions if prevFlags.LAr.ROD.DoOFCPileupOptimization else 0)
+    lcf.addFlag("LAr.ROD.NumberOfCollisions",0)
     # Number of samples in LAr digitization + ROD emulation
     lcf.addFlag("LAr.ROD.nSamples", 5)
     # Index of first sample in LAr digitization + ROD emulation
@@ -65,6 +63,7 @@ def createLArConfigFlags():
     lcf.addFlag("LAr.ROD.nnJson", "")
     lcf.addFlag("LAr.ROD.nnOutputNode", "")
     lcf.addFlag("LAr.ROD.nnInputNode", "")
+    lcf.addFlag("LAr.LATOME.DTInfoForL1","SC_ET_ID")
 
     ##NoisyRO flags
     # cell quality cut

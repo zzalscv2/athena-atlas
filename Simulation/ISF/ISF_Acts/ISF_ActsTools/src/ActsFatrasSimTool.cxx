@@ -25,13 +25,7 @@ StatusCode ISF::ActsFatrasSimTool::initialize() {
   if (!m_particleFilter.empty()) ATH_CHECK(m_particleFilter.retrieve());
 
   // setup logger
-  int athena_msg_outputlevel = this->msgSvc().get()->outputLevel();
-  if (athena_msg_outputlevel <= MSG::Level::DEBUG){
-    m_logger = makeActsAthenaLogger(this->msgSvc().get(), "ActsFatrasSimTool", athena_msg_outputlevel, boost::optional<std::string>("ActsFatrasSimTool"));
-  }
-  else{
-    m_logger = makeActsAthenaLogger(this->msgSvc().get(), "ActsFatrasSimTool", MSG::Level::FATAL, boost::optional<std::string>("ActsFatrasSimTool")); // disable the Error msg from propagator. No need to report Error for particle that fail to be simulated
-  }
+  m_logger = makeActsAthenaLogger(this, "ActsFatras","ActsFatrasSimTool");
 
   // retrive tracking geo tool
   ATH_CHECK(m_trackingGeometryTool.retrieve());
@@ -87,12 +81,12 @@ StatusCode ISF::ActsFatrasSimTool::simulateVector(
                << particles.size() << " particles for simulation.");
 
   // construct the ACTS simulator
-  Acts::Navigator navigator( Acts::Navigator::Config{ m_trackingGeometry } );
+  Acts::Navigator navigator( Acts::Navigator::Config{ m_trackingGeometry }, m_logger);
   auto bField = std::make_shared<ATLASMagneticFieldWrapper>();
   auto chargedStepper = ChargedStepper(std::move(bField));
   auto neutralStepper = NeutralStepper();
-  auto chargedPropagator = ChargedPropagator(chargedStepper, navigator);
-  auto neutralPropagator = NeutralPropagator(neutralStepper, navigator);
+  auto chargedPropagator = ChargedPropagator(chargedStepper, navigator, m_logger->clone(Acts::Logging::Level::FATAL));
+  auto neutralPropagator = NeutralPropagator(neutralStepper, navigator, m_logger->clone(Acts::Logging::Level::FATAL));
   ChargedSimulation simulatorCharged(std::move(chargedPropagator), m_logger);
   NeutralSimulation simulatorNeutral(std::move(neutralPropagator), m_logger);
   Simulation simulator=Simulation(std::move(simulatorCharged),std::move(simulatorNeutral));
@@ -114,8 +108,8 @@ StatusCode ISF::ActsFatrasSimTool::simulateVector(
     // //  
     // input/output particle and hits containers
     // Convert to ActsFatras::Particle
-    // ISF: Energy, mass, and momentum are in MeV
-    // Acts: Energy, mass, and momentum are in GeV
+    // ISF: Energy, mass, and momentum are in MeV, position in mm
+    // Acts: Energy, mass, and momentum are in GeV, position in mm
     std::vector<ActsFatras::Particle> input = std::vector<ActsFatras::Particle>{
       ActsFatras::Particle(ActsFatras::Barcode().setVertexPrimary(0).setParticle(
         isfp->barcode()),static_cast<Acts::PdgParticle>(isfp->pdgCode()), 
@@ -133,8 +127,12 @@ StatusCode ISF::ActsFatrasSimTool::simulateVector(
     auto result=simulator.simulate(anygctx, mctx, generator, input, simulatedInitial, simulatedFinal, hits);
     auto simulatedFailure=result.value();
     if (simulatedFailure.size()>0){
-      ATH_MSG_WARNING(name() << "Particle " << input[0] << "fail to be simulated during Propagation");
-      continue;
+      for (const auto& simfail : simulatedFailure){
+        auto errCode = Acts::make_error_code(Acts::PropagatorError(simfail.error.value()));
+        ATH_MSG_WARNING(name() << " Particle id " <<simfail.particle.particleId()<< ": fail to be simulated during Propagation: " << errCode.message());
+        ATH_MSG_WARNING(name() << " Particle vertex|particle|generation|subparticle"<<simfail.particle << " starts from position" << Acts::toString(simfail.particle.position()) << " and direction " << Acts::toString(simfail.particle.unitDirection()));
+        return StatusCode::SUCCESS;
+      }
     }
 
     ATH_MSG_DEBUG(name() << " initial particle " << simulatedInitial[0]);
@@ -158,7 +156,6 @@ StatusCode ISF::ActsFatrasSimTool::simulateVector(
 
       }
     }
-    ATH_MSG_DEBUG(name() << " No. of secondaries: " << secondaries.size());
     ATH_MSG_DEBUG(name() << " ActsFatras simulator hits: " << hits.size());
     int i = 0;
     for (const auto& hit : hits) {
@@ -166,6 +163,8 @@ StatusCode ISF::ActsFatrasSimTool::simulateVector(
       ++i;
       if (i>5) break;
     }
+  ATH_MSG_DEBUG(name() << " No. of secondaries: " << secondaries.size());
+  
   std::vector<ActsFatras::Particle>().swap(input);
   std::vector<ActsFatras::Particle>().swap(simulatedInitial);
   std::vector<ActsFatras::Particle>().swap(simulatedFinal);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DenseEnvironmentsAmbiguityScoreProcessorTool_H
@@ -37,10 +37,10 @@ namespace Trk {
 
   class ITrackScoringTool;
 
-  class DenseEnvironmentsAmbiguityScoreProcessorTool: public AthAlgTool, 
-                                                      virtual public ITrackAmbiguityScoreProcessorTool
-  {
-  public:
+  class DenseEnvironmentsAmbiguityScoreProcessorTool final
+      : public AthAlgTool,
+        virtual public ITrackAmbiguityScoreProcessorTool {
+   public:
     enum class ScoreCategory {
       kNtracks,
       kNcandidates,

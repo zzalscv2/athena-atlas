@@ -129,7 +129,7 @@ StatusCode LArOFPhasePicker::pickOFC() {
     return sc;
   }
   
-  LArOFCComplete *larOFCComplete=new LArOFCComplete();
+  std::unique_ptr<LArOFCComplete> larOFCComplete=std::make_unique<LArOFCComplete>();
   larOFCComplete->setGroupingType( static_cast<LArConditionsContainerBase::GroupingType>(m_groupingType));
   sc  = larOFCComplete->initialize(); 
   if ( sc.isFailure() ) {
@@ -184,12 +184,12 @@ StatusCode LArOFPhasePicker::pickOFC() {
 
   ATH_MSG_DEBUG(" Selected OFCs for  " << count << " cells");
 
-  sc = detStore()->record(larOFCComplete,  m_keyOFC_new);
+  sc = detStore()->record(std::move(larOFCComplete),  m_keyOFC_new);
   if (sc.isFailure()) {
     ATH_MSG_ERROR( "Failed to record LArOFCComplete object with key " << m_keyOFC_new );
     return sc;
   }
-  sc = detStore()->symLink(larOFCComplete, (ILArOFC*)larOFCComplete);
+  sc=detStore()->symLink(ClassID_traits<LArOFCComplete>::ID(),m_keyOFC_new,ClassID_traits<ILArOFC>::ID());
   if (sc.isFailure()) {
     ATH_MSG_ERROR( "Failed to sym-link LArOFCComplete object" );
     return sc;
@@ -210,7 +210,7 @@ StatusCode LArOFPhasePicker::pickShape()
     return sc;
   }
   
-  LArShapeComplete *larShapeComplete=new LArShapeComplete();
+  std::unique_ptr<LArShapeComplete> larShapeComplete=std::make_unique<LArShapeComplete>();
   larShapeComplete->setGroupingType( static_cast<LArConditionsContainerBase::GroupingType>(m_groupingType));
   sc  = larShapeComplete->initialize(); 
   if ( sc.isFailure() ) {
@@ -263,12 +263,12 @@ StatusCode LArOFPhasePicker::pickShape()
 
   ATH_MSG_DEBUG(" Selected shapes for "  <<  count << " cells");
 
-  sc = detStore()->record(larShapeComplete,  m_keyShape_new);
+  sc = detStore()->record(std::move(larShapeComplete),  m_keyShape_new);
   if (sc.isFailure()) {
     ATH_MSG_ERROR( "Failed to record LArShapeComplete object with key " << m_keyShape_new );
     return sc;
   }
-  sc = detStore()->symLink(larShapeComplete, (ILArShape*)larShapeComplete);
+  sc=detStore()->symLink(ClassID_traits<LArShapeComplete>::ID(),m_keyShape_new,ClassID_traits<ILArShape>::ID());
   if (sc.isFailure()) {
     ATH_MSG_ERROR( "Failed to sym-link LArShapeComplete object" );
     return sc;

@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 #*****************************************************************
@@ -52,6 +52,9 @@ if TestOnline:
     storeHisto = True;
 
 if not 'TileFELIX' in dir():
+    if 'PublishName' in dir():
+        TileFELIX = False
+    else:
         TileFELIX = False
 
 if not 'TileTBperiod' in dir():
@@ -63,7 +66,9 @@ if not 'TileTBperiod' in dir():
     if RunNumber > 800000:
         TileTBperiod += 2
 
-    if RunNumber >= 2110000:
+    if RunNumber >= 2200000:
+        TileTBperiod = 2022
+    elif RunNumber >= 2110000:
         TileTBperiod = 2021
 
 if not 'UseDemoCabling' in dir():
@@ -98,15 +103,6 @@ if not 'TileCisRun' in dir():
 if TileCisRun:
     TileRunType = 8
     TileBiGainRun = True
-
-
-
-from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
-if not 'TileSummaryUpdateFrequency' in dir():
-    if athenaCommonFlags.isOnline():
-        TileSummaryUpdateFrequency = 100
-    else:
-        TileSummaryUpdateFrequency = 0
 
 def FindFile(path, runinput):
 
@@ -143,6 +139,13 @@ def FindFile(path, runinput):
 
 # include Flags jobOption
 include( "TileMonitoring/TileRec_FlagOptions.py" )
+
+from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
+if not 'TileSummaryUpdateFrequency' in dir():
+    if doStateless:
+        TileSummaryUpdateFrequency = 100
+    else:
+        TileSummaryUpdateFrequency = 0
 
 ## get a handle to the default top-level algorithm sequence
 from AthenaCommon.AlgSequence import AlgSequence
@@ -311,6 +314,12 @@ elif RunNumber >= 2110000:
     ByteStreamCnvSvc.ROD2ROBmap += ["0x200", "0x0"]
     ByteStreamCnvSvc.ROD2ROBmap += ["0x201", "0x0"]
     ByteStreamCnvSvc.ROD2ROBmap += ["0x402", "0x10"]
+    ByteStreamCnvSvc.ROD2ROBmap += ["0x12", "0x500000"]
+
+if RunNumber >= 2200000:
+    ByteStreamCnvSvc.ROD2ROBmap += ["0x10", "0x500000"]
+    if RunNumber >= 2210456:
+        UseDemoCabling = 2018
 
 if TileFELIX:
     ByteStreamCnvSvc.ROD2ROBmap += ["0x203", "0x500006"]
@@ -319,6 +328,7 @@ if 'PublishName' in dir():
     doTileOptATLAS = False
     doTileOpt2 = False
     doTileFit = True
+    doTileCalib = False
 
 if not 'TileCorrectTime' in dir():
     TileCorrectTime = False
@@ -339,8 +349,9 @@ include( "TileConditions/TileConditions_jobOptions.py" )
 from TileRecUtils.TileRecFlags import jobproperties
 jobproperties.TileRecFlags.calibrateEnergy.set_Value_and_Lock(False) #don't need pC in raw channels, keep ADC counts
 jobproperties.TileRecFlags.noiseFilter.set_Value_and_Lock(0) #Enable noise filter tool
+jobproperties.TileRecFlags.correctTimeJumps.set_Value_and_Lock(False)
 jobproperties.TileRecFlags.BestPhaseFromCOOL.set_Value_and_Lock(False) #Use best phase from COOL
-jobproperties.TileRecFlags.doTileOverflowFit.set_Value_and_Lock(True)
+jobproperties.TileRecFlags.doTileOverflowFit.set_Value_and_Lock(False)
 include( "TileRec/TileRec_jobOptions.py" )
 
 
@@ -349,10 +360,15 @@ if doTileCells:
     doCaloNeighborsCorr = False
     if TileBiGainRun:
         include( "TileRec/TileCellMaker_jobOptions_doublegain.py" )
+        topSequence.CaloCellMakerHG.CaloCellMakerToolNames["TileCellBuilderHG"].UseDemoCabling = UseDemoCabling
+        topSequence.CaloCellMakerLG.CaloCellMakerToolNames["TileCellBuilderLG"].UseDemoCabling = UseDemoCabling
+        topSequence.CaloCellMakerHG.CaloCellMakerToolNames["TileCellBuilderHG"].mergeChannels = False
+        topSequence.CaloCellMakerLG.CaloCellMakerToolNames["TileCellBuilderLG"].mergeChannels = False
     else:
         include('TileRec/TileCellMaker_jobOptions.py')
         topSequence.CaloCellMaker.CaloCellMakerToolNames["TileCellBuilder"].UseDemoCabling = UseDemoCabling
         topSequence.CaloCellMaker.CaloCellMakerToolNames["TileCellBuilder"].maskBadChannels = False
+        topSequence.CaloCellMaker.CaloCellMakerToolNames["TileCellBuilder"].mergeChannels = False
 
 from TileRecUtils.TileDQstatusAlgDefault import TileDQstatusAlgDefault
 TileDQstatusAlgDefault()
@@ -391,6 +407,8 @@ if doMonitoring:
                                            , MaxTotalEnergy      = MaxTotalEnergy
                                            , CellEnergyThreshold = CellEnergyThreshold)
 
+    if 'beam_energy' in dir() and beam_energy > 0:
+        TileTBMonTool.BeamEnergy = beam_energy * 1000
 
     topSequence.TileTBMonManager.AthenaMonTools += [ TileTBMonTool ]
     
@@ -402,24 +420,56 @@ if doMonitoring:
                                                    , MBTSCellContainerID = '' # used to check if the current event is collision
                                                    , CutEnergyMin = 40
                                                    , CutEnergyMax = 70
-                                                   , BC1HorizontalOffset = -0.156736
-                                                   , BC1HorizontalSlope = -0.178455
-                                                   , BC1VerticalOffset = -0.452977
-                                                   , BC1VerticalSlope = -0.17734
-                                                   , BC2HorizontalOffset = 2.88152
-                                                   , BC2HorizontalSlope = -0.187192
-                                                   , BC2VerticalOffset = -1.79832
-                                                   , BC2VerticalSlope = -0.190846
                                                    , CellContainer       = CellContainerMonitored )
 
+    if TileTBperiod >= 2021:
+        TileTBBeamMonTool.BC1Z = 17348.8
+        TileTBBeamMonTool.BC2Z = 4404.2
+        if RunNumber <= 2110503:
+            # September TB2021
+            TileTBBeamMonTool.BC1HorizontalOffset = -0.156736
+            TileTBBeamMonTool.BC1HorizontalSlope = -0.178455
+            TileTBBeamMonTool.BC1VerticalOffset = -0.452977
+            TileTBBeamMonTool.BC1VerticalSlope = -0.17734
+            TileTBBeamMonTool.BC2HorizontalOffset = 2.88152
+            TileTBBeamMonTool.BC2HorizontalSlope = -0.187192
+            TileTBBeamMonTool.BC2VerticalOffset = -1.79832
+            TileTBBeamMonTool.BC2VerticalSlope = -0.190846
+        elif RunNumber < 2200000:
+            # November TB2021
+            TileTBBeamMonTool.BC1HorizontalOffset = -0.0107769
+            TileTBBeamMonTool.BC1HorizontalSlope = -0.178204
+            TileTBBeamMonTool.BC1VerticalOffset = -0.625063
+            TileTBBeamMonTool.BC1VerticalSlope = -0.178842
+            TileTBBeamMonTool.BC2HorizontalOffset = 0.746517
+            TileTBBeamMonTool.BC2HorizontalSlope = -0.176083
+            TileTBBeamMonTool.BC2VerticalOffset = +0.49177
+            TileTBBeamMonTool.BC2VerticalSlope = -0.18221
+        else:
+            # June TB2022
+            TileTBBeamMonTool.BC1HorizontalOffset = -0.566211
+            TileTBBeamMonTool.BC1HorizontalSlope = -0.0513049
+            TileTBBeamMonTool.BC1VerticalOffset = 1.15376
+            TileTBBeamMonTool.BC1VerticalSlope = -0.0514167
+            TileTBBeamMonTool.BC2HorizontalOffset = -0.163869
+            TileTBBeamMonTool.BC2HorizontalSlope = -0.0523055
+            TileTBBeamMonTool.BC2VerticalOffset = -0.0602012
+            TileTBBeamMonTool.BC2VerticalSlope =  -0.0532108
 
 
     topSequence.TileTBMonManager.AthenaMonTools += [ TileTBBeamMonTool ]
     
 
+    TimeRange = [-100, 100]
+    if 'TileFrameLength' in dir():
+        if TileFrameLength == 9:
+            TimeRange = [-125, 125]
+        elif TileFrameLength == 15:
+            TimeRange = [-200, 200]
     TileTBPulseMonTool = CfgMgr.TileTBPulseMonTool ( name                  = 'TileTBPulseMonTool'
                                                      , histoPathBase       = '/Tile/TestBeam/PulseShape'
                                                      , UseDemoCabling = UseDemoCabling
+                                                     , TimeRange = TimeRange
                                                      , TileRawChannelContainer = jobproperties.TileRecFlags.TileRawChannelContainer() )
 
     topSequence.TileTBMonManager.AthenaMonTools += [ TileTBPulseMonTool ]
@@ -434,7 +484,8 @@ if doMonitoring:
                                                          , FillTimeHistograms = True
                                                          , energyThresholdForTime = 1.0
                                                          , MaxEnergy = MaxEnergy
-                                                         , MaxTotalEnergy = MaxTotalEnergy)
+                                                         , MaxTotalEnergy = MaxTotalEnergy
+                                                         , TimeRange = TimeRange)
         
         topSequence.TileTBMonManager.AthenaMonTools += [ TileTBCellMonToolHG ]
         
@@ -448,7 +499,8 @@ if doMonitoring:
                                                          , FillTimeHistograms = True
                                                          , energyThresholdForTime = 1.0
                                                          , MaxEnergy = MaxEnergy
-                                                         , MaxTotalEnergy = MaxTotalEnergy)
+                                                         , MaxTotalEnergy = MaxTotalEnergy
+                                                         , TimeRange = TimeRange)
         
         topSequence.TileTBMonManager.AthenaMonTools += [ TileTBCellMonToolLG ]
 
@@ -462,20 +514,21 @@ if doMonitoring:
                                                        , FillTimeHistograms = True
                                                        , energyThresholdForTime = 1.0
                                                        , MaxEnergy = MaxEnergy
-                                                       , MaxTotalEnergy = MaxTotalEnergy)
+                                                       , MaxTotalEnergy = MaxTotalEnergy
+                                                       , TimeRange = TimeRange)
 
         topSequence.TileTBMonManager.AthenaMonTools += [ TileTBCellMonTool ]
 
     
 
-    if TileMonoRun or TileCisRun or TilePedRun:
+    if (TileMonoRun or TileCisRun or TilePedRun) or True:
         TileRawChannelMon = CfgMgr.TileRawChannelMonTool ( name              = "TileRawChannelMon"
                                                            , OutputLevel     = WARNING
                                                            , histoPathBase   = "/Tile/RawChannel"
-                                                           , book2D          = False
+                                                           , book2D          = True if ('TileCisRun' in dir() and TileCisRun) else False
                                                            , PlotDSP         = False
                                                            , runType         = 9 if TileMonoRun else TileRunType
-                                                           , TileRawChannelContainer = 'TileRawChannelOpt2' if TilePedRun else 'TileRawChannelFit'
+                                                           , TileRawChannelContainer = 'TileRawChannelFit' if (doTileFit and not TilePedRun) else 'TileRawChannelOpt2'
                                                            , SummaryUpdateFrequency = TileSummaryUpdateFrequency)
         topSequence.TileTBMonManager.AthenaMonTools += [ TileRawChannelMon ]
 

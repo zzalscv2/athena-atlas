@@ -21,6 +21,7 @@
 #include "GaudiKernel/EventContext.h"
 #include "TrkEventPrimitives/PropDirection.h"
 #include "TrkParameters/TrackParameters.h"
+#include "TRT_ReadoutGeometry/TRT_DetElementLink_xk.h"
 
 class MsgStream;
 
@@ -61,7 +62,8 @@ namespace InDet {
       virtual std::vector<const InDetDD::TRT_BaseElement*> 
       detElementsRoad(const EventContext& ctx,
          MagField::AtlasFieldCache& fieldCache,
-         const Trk::TrackParameters&,Trk::PropDirection) const = 0;
+         const Trk::TrackParameters& Tp,Trk::PropDirection D,
+         InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap& used) const = 0;
 
       ///////////////////////////////////////////////////////////////////
       // Print internal tool parameters and status

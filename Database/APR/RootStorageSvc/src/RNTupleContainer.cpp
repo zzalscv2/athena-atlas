@@ -60,7 +60,32 @@ namespace {
       }
    } EHI;
    ErrorHandlerFunc_t ErrorHandlerInit::m_oldHandler ATLAS_THREAD_SAFE;
-}
+} // namespace
+
+#include "TInterpreter.h"
+#include <TROOT.h>
+namespace {
+   /* Parse header files with typedefs to builtin C++ types (not classes) because genreflex does not
+      allow them in rootmap files and ROOT does not know were to find them on its own
+      Hopefully a Temporary hack
+   */
+   void parseTypedefHeaders()
+   {
+      /*  typedef / header location */
+      static const std::set<std::pair<const char*, const char*> >  typedefLoader ATLAS_THREAD_SAFE {
+         {"xAOD::MissingETBase::Types::bitmask_t", "#include <xAODMissingET/versions/MissingETCompositionBase.h>" },
+         {"SG::sgkey_t", "#include <CxxUtils/sgkey_t.h>" }
+      };
+
+      DbPrint log("APR-RNTuple");
+      for( auto &el : typedefLoader ) {
+         log << DbPrintLvl::Info << "**** parsing header (for typedefs): " << el.second << DbPrint::endmsg;
+         gInterpreter->ProcessLine( el.second );
+      }
+   }
+
+} // namespace
+
 
 // required for unique_ptr compilation
 RNTupleContainer::FieldDesc::~FieldDesc() {
@@ -89,6 +114,9 @@ RNTupleContainer::RNTupleContainer()
      m_dbH(POOL_StorageType), m_rootDb(nullptr),
      m_ioBytes(0), m_isDirty(false)
 {
+   // Enable typedef resolving
+   static std::once_flag onceFlag;
+   std::call_once( onceFlag, parseTypedefHeaders );
 }
 
 /// Standard destructor

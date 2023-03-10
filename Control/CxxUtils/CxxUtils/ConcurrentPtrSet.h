@@ -355,7 +355,7 @@ public:
    * @param capacity The new table capacity.
    * @param ctx Execution context.
    *
-   * No action will be taken in @c capacity is smaller
+   * No action will be taken if @c capacity is smaller
    * than the current capacity.
    */
   void reserve (size_type capacity,
@@ -366,7 +366,7 @@ public:
    * @brief Increase the table capacity.
    * @param capacity The new table capacity.
    *
-   * No action will be taken in @c capacity is smaller
+   * No action will be taken if @c capacity is smaller
    * than the current capacity.
    */
   void rehash (size_type capacity);
@@ -407,6 +407,12 @@ public:
    * either container during this operation.
    */
   void swap (ConcurrentPtrSet& other);
+
+
+  /**
+   * @brief Access the Updater instance.
+   */
+  Updater_t& updater();
 
 
 private:

@@ -380,7 +380,7 @@ if __name__ == "__main__":
             flags = initConfigFlags()
             flags.Trigger.EDMVersion = 3
             from AthenaConfiguration.TestDefaults import defaultTestFiles
-            flags.Input.Files = defaultTestFiles.RAW
+            flags.Input.Files = defaultTestFiles.RAW_RUN2
             flags.lock()
             TrigConfigSvcCfg( flags )
             L1PrescaleCondAlgCfg( flags )
@@ -391,7 +391,7 @@ if __name__ == "__main__":
             from AthenaConfiguration.AllConfigFlags import initConfigFlags
             flags = initConfigFlags()
             from AthenaConfiguration.TestDefaults import defaultTestFiles
-            flags.Input.Files = defaultTestFiles.RAW
+            flags.Input.Files = defaultTestFiles.RAW_RUN2
             flags.lock()
             TrigConfigSvcCfg( flags )
             L1PrescaleCondAlgCfg( flags )

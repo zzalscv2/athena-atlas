@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 if __name__=='__main__':
@@ -45,7 +45,7 @@ if __name__=='__main__':
 
    partition = os.environ.get("TDAQ_PARTITION")
    
-   from ispy import *
+   from ispy import IPCPartition, ISObject
 
    # ################################
    # To read run parameters from IS
@@ -132,93 +132,91 @@ if __name__=='__main__':
    print("RUN CONFIGURATION: ReadDigits =", ReadDigits)
    
    ## And now CA
-   from AthenaConfiguration.AllConfigFlags import ConfigFlags
-
+   from AthenaConfiguration.AllConfigFlags import initConfigFlags
+   flags = initConfigFlags()
    from AthenaMonitoring.DQConfigFlags import allSteeringFlagsOff
-   allSteeringFlagsOff()
+   allSteeringFlagsOff(flags)
 
    ### Set Beam Type
-   ConfigFlags.Beam.Type=beamType 
-   ConfigFlags.Beam.BunchSpacing=25
-   print("RUN CONFIGURATION: Beamtype =",ConfigFlags.Beam.Type)
+   flags.Beam.Type=beamType 
+   flags.Beam.BunchSpacing=25
+   print("RUN CONFIGURATION: Beamtype =",flags.Beam.Type)
    
-   ConfigFlags.Common.isOnline=True
-   ConfigFlags.Input.Format=Format.BS
-   ConfigFlags.Input.isMC=False
+   flags.Common.isOnline=True
+   flags.Input.Format=Format.BS
+   flags.Input.isMC=False
 
-   ConfigFlags.IOVDb.DatabaseInstance="CONDBR2"
-   ConfigFlags.IOVDb.GlobalTag="CONDBR2-ES1PA-2016-03"
+   flags.IOVDb.DatabaseInstance="CONDBR2"
+   flags.IOVDb.GlobalTag="CONDBR2-ES1PA-2016-03"
 
-   ConfigFlags.GeoModel.Layout="atlas"
-   ConfigFlags.GeoModel.AtlasVersion="ATLAS-R2-2015-04-00-00"
+   flags.GeoModel.Layout="atlas"
+   flags.GeoModel.AtlasVersion="ATLAS-R2-2015-04-00-00"
 
-   ConfigFlags.Exec.MaxEvents=-1
+   flags.Exec.MaxEvents=-1
 
    from AthenaConfiguration.AutoConfigOnlineRecoFlags import autoConfigOnlineRecoFlags
-   autoConfigOnlineRecoFlags(ConfigFlags,partition)
+   autoConfigOnlineRecoFlags(flags,partition)
    #overwrite the run number 
-   ConfigFlags.Input.RunNumber=[runnumber]
+   flags.Input.RunNumber=[runnumber]
    # overwrite LB number for playback partition if needed....
-   ConfigFlags.Input.LumiBlockNumber=[0]
+   flags.Input.LumiBlockNumber=[0]
 
    from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
-   setupDetectorFlags(ConfigFlags, ['LAr'], toggle_geometry=True)
+   setupDetectorFlags(flags, ['LAr'], toggle_geometry=True)
 
-   ConfigFlags.Trigger.doID=False
-   ConfigFlags.Trigger.doMuon=False
-   ConfigFlags.Trigger.L1.doMuon=False
-   ConfigFlags.Trigger.L1.doTopo=False
-   ConfigFlags.Trigger.doHLT=False
-   ConfigFlags.Trigger.doLVL1=False
-   ConfigFlags.Trigger.Online.isPartition=True
-   ConfigFlags.Trigger.triggerConfig='DB'
+   flags.Trigger.doID=False
+   flags.Trigger.doMuon=False
+   flags.Trigger.L1.doMuon=False
+   flags.Trigger.L1.doTopo=False
+   flags.Trigger.doHLT=False
+   flags.Trigger.doLVL1=False
+   flags.Trigger.Online.isPartition=True
+   flags.Trigger.triggerConfig='DB'
 
-   ConfigFlags.DQ.doMonitoring=True
-   ConfigFlags.DQ.disableAtlasReadyFilter=True
-   ConfigFlags.DQ.useTrigger=True
-   ConfigFlags.DQ.FileKey=''
-   ConfigFlags.DQ.Environment='online'
+   flags.DQ.doMonitoring=True
+   flags.DQ.disableAtlasReadyFilter=True
+   flags.DQ.useTrigger=True
+   flags.DQ.FileKey=''
+   flags.DQ.Environment='online'
    
-   ConfigFlags.LAr.doAlign=True
-   ConfigFlags.LAr.doHVCorr=False
+   flags.LAr.doAlign=True
+   flags.LAr.doHVCorr=False
 
-   ConfigFlags.Calo.TopoCluster.doTopoClusterLocalCalib=False
+   flags.Calo.TopoCluster.doTopoClusterLocalCalib=False
 
    #test multithreads
-   #ConfigFlags.Concurrency.NumThreads=1
-   #ConfigFlags.Concurrency.NumConcurrentEvents=1
+   #flags.Concurrency.NumThreads=1
+   #flags.Concurrency.NumConcurrentEvents=1
 
    def __monflags():
       from LArMonitoring.LArMonConfigFlags import createLArMonConfigFlags
       return createLArMonConfigFlags()
 
-   ConfigFlags.addFlagsCategory("LArMon", __monflags)
+   flags.addFlagsCategory("LArMon", __monflags)
 
    if STREAM=="CosmicCalo" or STREAM=="LArCellsEmpty":
-      ConfigFlags.LArMon.doLArRawMonitorSignal=True
+      flags.LArMon.doLArRawMonitorSignal=True
 
    if 'CaloMon' in CONFIG: # needs Lumi access
-      ConfigFlags.DQ.enableLumiAccess=False
+      flags.DQ.enableLumiAccess=False
    else:
-      ConfigFlags.DQ.enableLumiAccess=False
+      flags.DQ.enableLumiAccess=False
 
-   ConfigFlags.lock()
+   flags.lock()
 
-   ConfigFlags.dump()
+   flags.dump()
 
    # taken from future EmonByteStreamConfig
-   from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
    from AthenaConfiguration.ComponentFactory import CompFactory
-   from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
 
    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-   acc = MainServicesCfg(ConfigFlags)
+   acc = MainServicesCfg(flags)
  
    bytestream_conversion = CompFactory.ByteStreamCnvSvc()
    acc.addService(bytestream_conversion, primary=True)
 
    from ByteStreamEmonSvc.EmonByteStreamConfig import EmonByteStreamCfg
-   acc.merge(EmonByteStreamCfg(ConfigFlags))
+   acc.merge(EmonByteStreamCfg(flags))
 
    bytestream_input = acc.getService("ByteStreamInputSvc")
 
@@ -386,7 +384,7 @@ if __name__=='__main__':
    acc.addService(proxy)
 
    from TriggerJobOpts.TriggerRecoConfig import TriggerRecoCfg
-   acc.merge(TriggerRecoCfg(ConfigFlags))
+   acc.merge(TriggerRecoCfg(flags))
 
    ## fix for trigger
    l1bsdec = acc.getEventAlgo("L1TriggerByteStreamDecoder")
@@ -400,7 +398,7 @@ if __name__=='__main__':
    
    # testing Denis stuff
    from LArMonitoring.LArSuperCellMonAlg import LArSuperCellMonConfig
-   acc.merge(LArSuperCellMonConfig(ConfigFlags))
+   acc.merge(LArSuperCellMonConfig(flags))
 
    # fixes for splashes
    if RunType == 0:
@@ -420,15 +418,15 @@ if __name__=='__main__':
    #             break
 
    # somehow needs to add postprocessing
-   from AthenaCommon.Constants import WARNING,DEBUG
+   from AthenaCommon.Constants import WARNING
    from DataQualityUtils.DQPostProcessingAlg import DQPostProcessingAlg
    ppa = DQPostProcessingAlg("DQPostProcessingAlg")
    ppa.ExtraInputs = [( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' )]
    ppa.Interval = 200
    ppa.OutputLevel = WARNING
-   if ConfigFlags.Common.isOnline:
-      ppa.FileKey = ((ConfigFlags.DQ.FileKey + '/') if not ConfigFlags.DQ.FileKey.endswith('/') 
-                     else ConfigFlags.DQ.FileKey) 
+   if flags.Common.isOnline:
+      ppa.FileKey = ((flags.DQ.FileKey + '/') if not flags.DQ.FileKey.endswith('/') 
+                     else flags.DQ.FileKey) 
 
    acc.addEventAlgo(ppa, sequenceName='AthEndSeq')
 

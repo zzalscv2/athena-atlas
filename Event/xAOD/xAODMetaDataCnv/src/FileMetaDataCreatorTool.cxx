@@ -110,11 +110,11 @@ StatusCode
           float orig_mcProcID = -1;
           std::vector<uint32_t> orig_runNumbers, orig_lumiBlocks;
           if (!output->value(xAOD::FileMetaData::mcProcID, orig_mcProcID))
-            ATH_MSG_DEBUG("error getting mcProcID = " << orig_mcProcID);
+            ATH_MSG_DEBUG("Could not get mcProcID");
           if (!output->value("runNumbers", orig_runNumbers))
-            ATH_MSG_DEBUG("error getting runNumbers");
+            ATH_MSG_DEBUG("Could not get runNumbers");
           if (!output->value("lumiBlocks", orig_lumiBlocks))
-            ATH_MSG_DEBUG("error getting lumiBlocks");
+            ATH_MSG_DEBUG("Could not get lumiBlocks");
 
           // Replace content in store with content created for this stream
           *output = *m_info;
@@ -123,11 +123,11 @@ StatusCode
             // restore original event info if it was not filled for this stream
             ATH_MSG_DEBUG("Event information was not filled, restoring what we had");
             if (!output->setValue(xAOD::FileMetaData::mcProcID, orig_mcProcID))
-              ATH_MSG_DEBUG("error setting " << xAOD::FileMetaData::mcProcID << " to " << orig_mcProcID);
+              ATH_MSG_DEBUG("Could not set " << xAOD::FileMetaData::mcProcID << " to " << orig_mcProcID);
             if (!output->setValue("runNumbers", orig_runNumbers))
-              ATH_MSG_DEBUG("error restoring runNumbers");
+              ATH_MSG_DEBUG("Could not restore runNumbers");
             if (!output->setValue("lumiBlocks", orig_lumiBlocks))
-              ATH_MSG_DEBUG("error restoring lumiBlocks");
+              ATH_MSG_DEBUG("Could not restore lumiBlocks");
           }
         } else {
             ATH_MSG_DEBUG("cannot copy FileMetaData payload to output");
@@ -278,16 +278,15 @@ StatusCode
 
           for (const std::string& key : m_metaDataSvc->getPerStreamKeysFor(m_key)) {
               const xAOD::FileMetaData* input = nullptr;
-              StatusCode sc = StatusCode::FAILURE;
-              sc = m_inputMetaDataStore->retrieve(input, key);
-              if (input && sc.isSuccess()) {
+              input = m_inputMetaDataStore->tryRetrieve< xAOD::FileMetaData >(key);
+              if (input) {
                   std::string orig_simFlavour = "none";
                   bool orig_isDataOverlay = false;
                   if (!input->value(xAOD::FileMetaData::simFlavour, orig_simFlavour) ||
                       !input->value(xAOD::FileMetaData::isDataOverlay,
                                     orig_isDataOverlay))
                       ATH_MSG_DEBUG(
-                          "error getting simulation parameters from input metadata "
+                          "Could not get simulation parameters from input metadata "
                           "store");
                   else {
                       ATH_MSG_DEBUG("Retrieved from input metadata store: "

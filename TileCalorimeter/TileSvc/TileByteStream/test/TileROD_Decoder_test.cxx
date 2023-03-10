@@ -159,11 +159,13 @@ void test1 (const TileROD_Decoder* decoder)
     std::cout << "\n";
   }
   {
-    TileBeamElemCollection coll (0);
-    decoder->fillCollection (&data02.rob(), coll);
-    std::cout << "TileBeamElemCollection: " << coll.size() << "\n";
-    std::cout << static_cast<std::string> (coll);
-    std::cout << "\n";
+    for (auto fragId : {0x10, 0x12, 0x13, 0xff}) {
+      TileBeamElemCollection coll (fragId);
+      decoder->fillCollection (&data02.rob(), coll);
+      std::cout << "TileBeamElemCollection (0x" << std::hex << fragId << std::dec << "): " << coll.size() << "\n";
+      std::cout << static_cast<std::string> (coll);
+      std::cout << "\n";
+    }
   }
 }
 

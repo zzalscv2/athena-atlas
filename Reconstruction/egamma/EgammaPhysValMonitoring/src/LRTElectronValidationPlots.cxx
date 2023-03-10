@@ -19,9 +19,9 @@ LRTElectronValidationPlots::LRTElectronValidationPlots(PlotBase* pParent, const 
                       matrix(nullptr)
 
 {
-  m_oCentralElecPlots.Set_d0_nBins(200);
-  m_oCentralElecPlots.Set_d0sig_nBins(200);
-  m_oCentralElecPlots.Set_z0_nBins(200);
+  m_oCentralElecPlots.Set_d0_nBins(50);
+  m_oCentralElecPlots.Set_d0sig_nBins(50);
+  m_oCentralElecPlots.Set_z0_nBins(50);
   m_oCentralElecPlots.Set_d0_Bins(std::vector<double>{-300.0,300.0});
   m_oCentralElecPlots.Set_d0sig_Bins(std::vector<double>{-300.0,300.0});
   m_oCentralElecPlots.Set_z0_Bins(std::vector<double>{-300.0,300.0});
@@ -42,7 +42,7 @@ void LRTElectronValidationPlots::initializePlots(){
 
 }
  
-void LRTElectronValidationPlots::fill(const xAOD::Electron& electron, const xAOD::EventInfo& eventInfo, bool isPrompt) {
+void LRTElectronValidationPlots::fill(const xAOD::Electron& electron, const xAOD::EventInfo& eventInfo, bool isPrompt, bool pass_LHVeryLooseNoPix, bool pass_LHLooseNoPix, bool pass_LHMediumNoPix, bool pass_LHTightNoPix) {
 
   float weight = eventInfo.beamSpotWeight();
 
@@ -50,6 +50,6 @@ void LRTElectronValidationPlots::fill(const xAOD::Electron& electron, const xAOD
   
   if(electron.author()&xAOD::EgammaParameters::AuthorElectron||
      electron.author(xAOD::EgammaParameters::AuthorAmbiguous))  {
-    m_oCentralElecPlots.fill(electron, eventInfo, isPrompt);
+    m_oCentralElecPlots.fill(electron, eventInfo, isPrompt, pass_LHVeryLooseNoPix, pass_LHLooseNoPix, pass_LHMediumNoPix, pass_LHTightNoPix);
   } 
 }

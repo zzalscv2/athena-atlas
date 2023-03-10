@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -637,7 +637,7 @@ Signal::handleQuit ATLAS_NOT_THREAD_SAFE (QuitHook hook /* = 0 */)
     A multi-threaded application should call this method in each
     thread.  (FIXME: Calling this in one thread and blocking signals
     in others won't work on Linux, and in any case will probably
-    produce non-sense stack traces (unless stacktrace can be fixed to
+    produce nonsense stack traces (unless stacktrace can be fixed to
     dump the stacks of all the threads).  Since the handler is always
     the same, I am not sure it will make the slightest difference
     which thread catches the signals, and on the other hand, it is

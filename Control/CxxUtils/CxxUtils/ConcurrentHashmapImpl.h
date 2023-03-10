@@ -579,7 +579,7 @@ public:
    * @param capacity The new table capacity.
    * @param ctx Execution context.
    *
-   * No action will be taken in @c capacity is smaller
+   * No action will be taken if @c capacity is smaller
    * than the current capacity.
    */
   void reserve (size_t capacity,
@@ -606,6 +606,12 @@ public:
    * either container during this operation.
    */
   void swap (ConcurrentHashmapImpl& other);
+
+
+  /**
+   * @brief Access the Updater instance.
+   */
+  Updater_t& updater();
 
 
 private:

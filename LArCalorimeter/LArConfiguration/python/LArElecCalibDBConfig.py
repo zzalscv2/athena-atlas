@@ -258,7 +258,7 @@ if __name__ == "__main__":
 
     print ('--- run2')
     flags1 = initConfigFlags()
-    flags1.Input.Files = defaultTestFiles.RAW
+    flags1.Input.Files = defaultTestFiles.RAW_RUN2
     flags1.lock()
     acc1 = LArElecCalibDbCfg (flags1, ['Ramp', 'Pedestal'])
     acc1.printCondAlgs(summariseProps=True)
@@ -267,7 +267,7 @@ if __name__ == "__main__":
 
     print ('--- run1')
     flags2 = initConfigFlags()
-    flags2.Input.Files = defaultTestFiles.RAW
+    flags2.Input.Files = defaultTestFiles.RAW_RUN2
     from AthenaConfiguration.Enums import LHCPeriod
     flags2.GeoModel.Run=LHCPeriod.Run1
     flags2.lock()

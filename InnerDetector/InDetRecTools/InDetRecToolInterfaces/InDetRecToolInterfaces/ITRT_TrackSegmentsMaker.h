@@ -34,6 +34,7 @@
 #include "Identifier/IdentifierHash.h"
 #include "TrkSegment/TrackSegment.h"
 #include "VxVertex/Vertex.h"
+#include "TRT_ReadoutGeometry/TRT_DetElementLink_xk.h"
 
 class MsgStream;
 
@@ -74,7 +75,10 @@ namespace InDet {
       // Methods of seeds production without vertex constraint
       ///////////////////////////////////////////////////////////////////
 
-      virtual void find(const EventContext& ctx, InDet::ITRT_TrackSegmentsMaker::IEventData &event_data) const =0;
+      virtual void find(
+          const EventContext& ctx,
+          InDet::ITRT_TrackSegmentsMaker::IEventData& event_data,
+          InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap& used) const = 0;
 
       ///////////////////////////////////////////////////////////////////
       // Iterator through track segments pseudo collection produced 

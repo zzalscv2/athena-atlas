@@ -38,6 +38,9 @@ def createTrackingConfigFlags():
 
     # control if the shared hits are recorded in TrackPatricles
     icf.addFlag("Tracking.doSharedHits", True)
+    # Switch for running TIDE Ambi
+    icf.addFlag("Tracking.doTIDE_Ambi", lambda prevFlags:
+                not(prevFlags.Beam.Type is BeamType.Cosmics))
 
     # Express track parameters wrt. to : 'BeamLine','BeamSpot','Vertex' (first primary vertex)
     icf.addFlag("Tracking.perigeeExpression", lambda prevFlags:
@@ -102,6 +105,8 @@ def createTrackingConfigFlags():
     icf.addFlag("Tracking.doMinBias", False)
     # Turn on InDetRecStatistics
     icf.addFlag("Tracking.doStats", False)
+    # Switch for track observer tool
+    icf.addFlag("Tracking.doTIDE_AmbiTrackMonitoring", False)
 
     # Vertexing flags
     from TrkConfig.VertexFindingFlags import (

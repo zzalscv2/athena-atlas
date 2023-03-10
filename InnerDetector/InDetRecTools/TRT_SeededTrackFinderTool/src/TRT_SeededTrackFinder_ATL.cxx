@@ -140,7 +140,7 @@ InDet::TRT_SeededTrackFinder_ATL::TRT_SeededTrackFinder_ATL
 
 }
 
-InDet::TRT_SeededTrackFinder_ATL::~TRT_SeededTrackFinder_ATL(){};
+InDet::TRT_SeededTrackFinder_ATL::~TRT_SeededTrackFinder_ATL()= default;;
 
 
 ///////////////////////////////////////////////////////////////////
@@ -629,7 +629,7 @@ InDet::TRT_SeededTrackFinder_ATL::findTrack(const EventContext& ctx, MagField::A
     //
     // --------------- Get the Si extensions using the combinatorial track finding tool
     //
-    std::list<Amg::Vector3D> Gp;
+    std::vector<Amg::Vector3D> Gp;
     aTracks = m_tracksfinder->getTracks(combinatorialData, *mesTP, SpVec, Gp, DE, m_trackquality, ctx);
     if(aTracks.empty()) {
       ATH_MSG_DEBUG("No tracks found by the combinatorial track finder!");

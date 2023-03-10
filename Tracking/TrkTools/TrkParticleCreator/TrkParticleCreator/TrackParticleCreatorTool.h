@@ -274,7 +274,9 @@ private:
 
   /** Configurable to set the eProbabilities and extra track summary types which
    * are to be copied from the track summary.*/
-  std::vector<std::string> m_copyExtraSummaryName;
+  StringArrayProperty m_copyExtraSummaryName{this, "ExtraSummaryTypes",
+      {"eProbabilityComb",  "eProbabilityHT", "eProbabilityNN",
+	  "TRTTrackOccupancy", "TRTdEdx",        "TRTdEdxUsedHits"}};
 
   /** Enums of an eProbability which are set in the xAOD::TrackSummary.*/
   std::vector<Trk::eProbabilityType> m_copyEProbabilities;
@@ -291,33 +293,38 @@ private:
   static const SG::AuxElement::Accessor<uint8_t> s_trtdEdxUsedHitsDecoration;
 
   bool m_doIBL;
-  bool m_doITk;
+  BooleanProperty m_doITk{this, "DoITk", false};
   ///< if the track contains a summary, the shared, expected hit, and PID
   ///< information will be recomputed. The summary of the track is not updated.
-  bool m_computeAdditionalInfo;
-  bool m_doSharedSiHits;
-  bool m_doSharedTRTHits;
-  bool m_runningTIDE_Ambi;
+  BooleanProperty m_computeAdditionalInfo{this, "ComputeAdditionalInfo", false};
+  BooleanProperty m_doSharedSiHits    {this, "DoSharedSiHits", false};
+  BooleanProperty m_doSharedTRTHits   {this, "DoSharedTRTHits", false};
+  BooleanProperty m_runningTIDE_Ambi  {this, "RunningTIDE_Ambi", false};
+  BooleanProperty m_updateTrackSummary{this, "UpdateTrackSummary", false};
 
   /** the following keep options are mutually exclusive **/
   /** keep all TrackParameters */
-  bool m_keepParameters;
+  BooleanProperty m_keepParameters{this, "KeepParameters", false};
   ///< keep the first parameters when creating track particles.
-  bool m_keepFirstParameters;
+  BooleanProperty m_keepFirstParameters{this, "KeepFirstParameters", false};
   /** keep all MeasuredPerigee parameters (e.g. adding those that may exist at
    * Volume boundaries) */
-  bool m_keepAllPerigee;
-  int m_badclusterID;
+  BooleanProperty m_keepAllPerigee{this, "KeepAllPerigee", false};
+  // BadCluster ID
+  // 0 = off, 1 = OOT, 2 = dE/dx, 3 = combination of OOT and dE/dx, 4 =
+  // combination of OOT, dE/dx, and size
+  IntegerProperty m_badclusterID{this, "BadClusterID", 0};
 
-  std::string m_perigeeExpression;
+  StringProperty m_perigeeExpression{this, "PerigeeExpression", "BeamLine"};
   std::vector<std::string> m_perigeeOptions{ "BeamLine",
                                              "BeamSpot",
                                              "Vertex",
                                              "Origin" };
 
-  bool m_checkConversion;
-  int m_minSiHits;
-  double m_minPt;
+  BooleanProperty m_checkConversion{this, "CheckConversion", true};
+  IntegerProperty m_minSiHits{this, "MinSiHitsForCaloExtrap", 4};
+  DoubleProperty m_minPt{this, "MinPtForCaloExtrap", 1000.};
+
   SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey { this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot" };
   SG::ReadHandleKey<Trk::ClusterSplitProbabilityContainer> m_clusterSplitProbContainer{ this, "ClusterSplitProbabilityName", "", "" };
   SG::ReadHandleKey<Trk::PRDtoTrackMap> m_assoMapContainer{ this, "AssociationMapName", ""};

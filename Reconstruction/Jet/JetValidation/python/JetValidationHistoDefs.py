@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 def GetJetVariables(container, refcontainer=''):
     vars = []
@@ -75,49 +75,49 @@ def GetJetVariables(container, refcontainer=''):
             "zg",
         ]
 
-    if "Trimmed" in container or "SoftDrop" in container:    
+    if "Trimmed" in container:
         vars += [
-            "ECF1",
-            "ECF2",
-            "ECF3",
-            "Tau1_wta",
-            "Tau2_wta",
-            "Tau3_wta",
-            "Split12",
-            "Split23",
             "NTrimSubjets",
-            "DetectorEta",
             "TrackSumPt",
             "TrackSumMass",
-            "Qw",
-            "PlanarFlow",
-            "FoxWolfram2",
-            "FoxWolfram0",
-            "Angularity",
-            "Aplanarity",
-            "KtDR",
-            "ZCut12",
-            "Dip12",
-            "Dip23",
-            "DipExcl12",
-            "Split34",
-            "ZCut23",
-            "ZCut34",
-            "Mu12",
-            "ThrustMin",
-            "ThrustMaj",
-            "FoxWolfram1",
-            "FoxWolfram3",
-            "FoxWolfram4",
-            "Sphericity",
-            "PullMag",
-            "PullPhi",
-            "Pull_C00",
-            "Pull_C01",
-            "Pull_C10",
-            "Pull_C11",
-            "Charge",
         ]
+
+    if "Trimmed" in container or "SoftDrop" in container:
+        if "Truth" in container:
+            vars += [
+                "D2",
+                "Tau1_wta",
+                "Tau2_wta",
+                "Tau3_wta",
+                "Qw",
+            ]
+        else:
+            vars += [
+                "ECF1",
+                "ECF2",
+                "ECF3",
+                "Tau1_wta",
+                "Tau2_wta",
+                "Tau3_wta",
+                "Split12",
+                "Split23",
+                "Split34",
+                "DetectorEta",
+                "Qw",
+                "PlanarFlow",
+                "FoxWolfram2",
+                "FoxWolfram0",
+                "Angularity",
+                "Aplanarity",
+                "KtDR",
+                "ZCut12",
+                "ZCut23",
+                "ZCut34",
+                "ThrustMin",
+                "ThrustMaj",
+                "Sphericity",
+                "Charge",
+            ]
 
     if 'PV0Track' in container:
         vars += [

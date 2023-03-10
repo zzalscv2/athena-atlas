@@ -213,10 +213,10 @@ def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
     cfg.addService(CompFactory.AlgContextSvc(BypassIncidents=True))
     cfg.addAuditor(CompFactory.AlgContextAuditor())
 
-    cfg.addService(CompFactory.StoreGateSvc())
-    cfg.addService(CompFactory.StoreGateSvc("DetectorStore"))
+    cfg.addService(CompFactory.StoreGateSvc(Dump=flags.Debug.DumpEvtStore))
+    cfg.addService(CompFactory.StoreGateSvc("DetectorStore",Dump=flags.Debug.DumpDetStore))
     cfg.addService(CompFactory.StoreGateSvc("HistoryStore"))
-    cfg.addService(CompFactory.StoreGateSvc("ConditionStore"))
+    cfg.addService(CompFactory.StoreGateSvc("ConditionStore",Dump=flags.Debug.DumpCondStore))
 
     cfg.merge(MessageSvcCfg(flags))
 

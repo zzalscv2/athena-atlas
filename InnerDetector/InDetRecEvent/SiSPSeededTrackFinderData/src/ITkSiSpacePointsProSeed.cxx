@@ -141,8 +141,8 @@ namespace ITk
       const std::array<float, 4>& spM,
       bool isBottom) -> std::array<float, 5>
       {
-        auto& [xM, yM, zM, rM] = spM;
-        auto& [xO, yO, zO, rO] = sp;
+        const auto& [xM, yM, zM, rM] = spM;
+        const auto& [xO, yO, zO, rO] = sp;
 
         float cosPhiM = xM / rM;
         float sinPhiM = yM / rM;

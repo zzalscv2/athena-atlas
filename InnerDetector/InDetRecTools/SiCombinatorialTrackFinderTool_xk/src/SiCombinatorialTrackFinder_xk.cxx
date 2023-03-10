@@ -325,7 +325,7 @@ const std::list<Trk::Track*>&  InDet::SiCombinatorialTrackFinder_xk::getTracks
 (SiCombinatorialTrackFinderData_xk& data,
  const Trk::TrackParameters& Tp,
  const std::vector<const Trk::SpacePoint*>& Sp,
- const std::list<Amg::Vector3D>& Gp,
+ const std::vector<Amg::Vector3D>& Gp,
  std::list<const InDetDD::SiDetectorElement*>& DE,
  const TrackQualityCuts& Cuts,
  const EventContext& ctx) const
@@ -391,7 +391,7 @@ const std::list<Trk::Track*>& InDet::SiCombinatorialTrackFinder_xk::getTracks
 (SiCombinatorialTrackFinderData_xk& data,
  const Trk::TrackParameters& Tp,
  const std::vector<const Trk::SpacePoint*>& Sp,
- const std::list<Amg::Vector3D>& Gp,
+ const std::vector<Amg::Vector3D>& Gp,
  std::list<const InDetDD::SiDetectorElement*>& DE,
  std::multimap<const Trk::PrepRawData*, const Trk::Track*>& PT,
  const EventContext& ctx) const
@@ -459,7 +459,7 @@ const std::list<Trk::Track*>&  InDet::SiCombinatorialTrackFinder_xk::getTracksWi
 (SiCombinatorialTrackFinderData_xk& data,
  const Trk::TrackParameters& Tp,
  const std::vector<const Trk::SpacePoint*>& Sp,
- const std::list<Amg::Vector3D>& Gp,
+ const std::vector<Amg::Vector3D>& Gp,
  std::list<const InDetDD::SiDetectorElement*>& DE,
  std::multimap<const Trk::PrepRawData*, const Trk::Track*>& PT,
  bool isCaloCompatible,
@@ -588,7 +588,8 @@ double InDet::SiCombinatorialTrackFinder_xk::pTseed
 InDet::SiCombinatorialTrackFinder_xk::EStat_t InDet::SiCombinatorialTrackFinder_xk::findTrack
 (SiCombinatorialTrackFinderData_xk& data,
  const Trk::TrackParameters& Tp,
- const std::vector<const Trk::SpacePoint*>& Sp,const std::list<Amg::Vector3D>& Gp,
+ const std::vector<const Trk::SpacePoint*>& Sp,
+ const std::vector<Amg::Vector3D>& Gp,
  std::list<const InDetDD::SiDetectorElement*>& DE,
  std::multimap<const Trk::PrepRawData*,const Trk::Track*>& PT,
  const EventContext& ctx) const

@@ -204,15 +204,14 @@ SimplePoolFile1...  DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7
 SimplePoolFile1...  DEBUG ---->ClassID:BBACA313-D7B0-3A4C-9161-089CACF4B1CC
 SimplePoolFile1...  DEBUG DB Action Commit
 Stream1.FileMet...  DEBUG beam energy "" tag could not be converted to float
-Stream1.FileMet...  DEBUG Failed to retrieve  'SimInfoKey':'/Simulation/Parameters' => cannot set: xAOD::FileMetaData::simFlavour, and xAOD::FileMetaData::isDataOverlay
+Stream1.FileMet...  DEBUG Failed to retrieve  'SimInfoKey':'/Simulation/Parameters' => cannot set: xAOD::FileMetaData::simFlavour, and xAOD::FileMetaData::isDataOverlay. Trying to get them from input metadata store.
+Stream1.FileMet...  DEBUG set xAOD::FileMetaData::dataType to Stream1
 Stream1.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream1.FileMet...  DEBUG added 1 to list of runNumbers
 Stream1.FileMet...  DEBUG retrieved existing list of lumiBlocks
 Stream1.FileMet...  DEBUG added 0 to list of lumiBlocks
 Stream1.FileMet...  DEBUG Retrieved  'EventInfoKey':'EventInfo'
 Stream1.FileMet...  DEBUG setting xAOD::FileMetaData::mcProcID to 0
-Stream1.FileMet...  DEBUG Retrieved  'StreamName':'Stream1'
-Stream1.FileMet...  DEBUG set xAOD::FileMetaData::dataType to Stream1
 Stream2             DEBUG addItemObjects(2101,"*") called
 Stream2             DEBUG            Key:*
 Stream2             DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -308,15 +307,14 @@ SimplePoolFile2...  DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2
 SimplePoolFile2...  DEBUG ---->ClassID:BBACA313-D7B0-3A4C-9161-089CACF4B1CC
 SimplePoolFile2...  DEBUG DB Action Commit
 Stream2.FileMet...  DEBUG beam energy "" tag could not be converted to float
-Stream2.FileMet...  DEBUG Failed to retrieve  'SimInfoKey':'/Simulation/Parameters' => cannot set: xAOD::FileMetaData::simFlavour, and xAOD::FileMetaData::isDataOverlay
+Stream2.FileMet...  DEBUG Failed to retrieve  'SimInfoKey':'/Simulation/Parameters' => cannot set: xAOD::FileMetaData::simFlavour, and xAOD::FileMetaData::isDataOverlay. Trying to get them from input metadata store.
+Stream2.FileMet...  DEBUG set xAOD::FileMetaData::dataType to Stream2
 Stream2.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream2.FileMet...  DEBUG added 1 to list of runNumbers
 Stream2.FileMet...  DEBUG retrieved existing list of lumiBlocks
 Stream2.FileMet...  DEBUG added 0 to list of lumiBlocks
 Stream2.FileMet...  DEBUG Retrieved  'EventInfoKey':'EventInfo'
 Stream2.FileMet...  DEBUG setting xAOD::FileMetaData::mcProcID to 0
-Stream2.FileMet...  DEBUG Retrieved  'StreamName':'Stream2'
-Stream2.FileMet...  DEBUG set xAOD::FileMetaData::dataType to Stream2
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #1, run #1 1 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #2, run #1 1 events processed so far  <<<===
 WriteData           DEBUG in execute()
@@ -1208,6 +1206,8 @@ AthenaEventLoopMgr   INFO   ===>>>  done processing event #20, run #1 20 events 
 Stream1             DEBUG AthenaOutputStream Stream1 ::stop()
 Stream2             DEBUG AthenaOutputStream Stream2 ::stop()
 Stream1             DEBUG slot 0  handle() incident type: MetaDataStop
+Stream1.FileMet...  DEBUG Could not get mcProcID
+Stream1.FileMet...  DEBUG FileMetaData payload replaced in store with content created for this stream
 ToolSvc.Bookkee...   INFO Successfully copied CutBookkeepers to the output MetaDataStore
 Stream1             DEBUG addItemObjects(73252552,"FileMetaDataAux.") called
 Stream1             DEBUG            Key:FileMetaDataAux.
@@ -1313,6 +1313,7 @@ SimplePoolFile1...  DEBUG DB Action Commit
 Stream1              INFO Metadata records written: 21
 Stream1             DEBUG Leaving incident handler for MetaDataStop
 Stream2             DEBUG slot 0  handle() incident type: MetaDataStop
+Stream2.FileMet...  DEBUG FileMetaData payload replaced in store with content created for this stream
 Stream2             DEBUG addItemObjects(73252552,"FileMetaDataAux.") called
 Stream2             DEBUG            Key:FileMetaDataAux.
 Stream2             DEBUG      Comp Attr 0 with 7 mantissa bits.

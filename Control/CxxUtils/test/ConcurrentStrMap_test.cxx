@@ -118,6 +118,9 @@ public:
   }
 
 
+  unsigned int inGrace() const { return m_inGrace; }
+
+
 private:
   std::mutex m_mutex;
   std::atomic<T*> m_p;
@@ -236,6 +239,8 @@ void test1a()
   assert (map.size() == MAXKEYS);
   assert (map.capacity() == 1024);
   assert (!map.empty());
+ 
+  assert (map.updater().inGrace() == 0x0e);
 
   for (size_t i = 0; i < MAXKEYS; i++) {
     const_iterator it = map.find (keys[i]);

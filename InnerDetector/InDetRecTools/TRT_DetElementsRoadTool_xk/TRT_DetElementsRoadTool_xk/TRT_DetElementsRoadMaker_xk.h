@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -63,8 +63,8 @@ namespace InDet {
   */
 
 
-  class TRT_DetElementsRoadMaker_xk final:
-    virtual public ITRT_DetElementsRoadMaker, public AthAlgTool
+class TRT_DetElementsRoadMaker_xk final:
+  virtual public ITRT_DetElementsRoadMaker, public AthAlgTool
     {
       ///////////////////////////////////////////////////////////////////
       // Public methods:
@@ -76,28 +76,27 @@ namespace InDet {
       // Standard tool methods
       ///////////////////////////////////////////////////////////////////
 
-      TRT_DetElementsRoadMaker_xk
-	(const std::string&,const std::string&,const IInterface*);
-      virtual ~TRT_DetElementsRoadMaker_xk();
-      virtual StatusCode initialize();
-      virtual StatusCode finalize  ();
+     TRT_DetElementsRoadMaker_xk(const std::string&, const std::string&,
+                                 const IInterface*);
+     virtual ~TRT_DetElementsRoadMaker_xk();
+     virtual StatusCode initialize() override;
+     virtual StatusCode finalize() override;
 
-      ///////////////////////////////////////////////////////////////////
-      // Main methods for road builder
-      ///////////////////////////////////////////////////////////////////
+     ///////////////////////////////////////////////////////////////////
+     // Main methods for road builder
+     ///////////////////////////////////////////////////////////////////
 
-       
-     virtual std::vector<const InDetDD::TRT_BaseElement*> 
-     detElementsRoad(const EventContext& ctx,
-         MagField::AtlasFieldCache& fieldCache,
-         const Trk::TrackParameters&,Trk::PropDirection) const;
+     virtual std::vector<const InDetDD::TRT_BaseElement*> detElementsRoad(
+         const EventContext& ctx, MagField::AtlasFieldCache& fieldCache,
+         const Trk::TrackParameters& Tp, Trk::PropDirection D,
+         InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap& used) const override;
 
-      ///////////////////////////////////////////////////////////////////
-      // Print internal tool parameters and status
-      ///////////////////////////////////////////////////////////////////
+     ///////////////////////////////////////////////////////////////////
+     // Print internal tool parameters and status
+     ///////////////////////////////////////////////////////////////////
 
-      MsgStream&    dump(MsgStream&    out) const;
-      std::ostream& dump(std::ostream& out) const;
+     MsgStream& dump(MsgStream& out) const;
+     std::ostream& dump(std::ostream& out) const;
 
 
     private :
@@ -123,10 +122,12 @@ namespace InDet {
 
       void detElementsRoadATL(
           std::deque<Amg::Vector3D>&,
-          std::vector<const InDetDD::TRT_BaseElement*>&) const;
+          std::vector<const InDetDD::TRT_BaseElement*>&,
+          InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap& used) const;
       void detElementsRoadCTB(
           std::deque<Amg::Vector3D>&,
-          std::vector<const InDetDD::TRT_BaseElement*>&) const;
+          std::vector<const InDetDD::TRT_BaseElement*>&,
+          InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap& used) const;
       static double stepToDetElement(const InDetDD::TRT_BaseElement*&,
                                      Amg::Vector3D&, Amg::Vector3D&);
 

@@ -47,7 +47,7 @@ if __name__=="__main__":
     addShapeDumpFlags(flags)
 
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    flags.Input.Files=defaultTestFiles.RAW
+    flags.Input.Files=defaultTestFiles.RAW_RUN2
     flags.LAr.ROD.forceIter=True
     flags.LArShapeDump.outputNtup="SPLASH"
     flags.lock()

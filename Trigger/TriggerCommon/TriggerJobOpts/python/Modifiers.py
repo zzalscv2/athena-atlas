@@ -52,41 +52,6 @@ class BunchSpacing25ns(_modifier):
         from InDetTrigRecExample.InDetTrigFlags import InDetTrigFlags
         InDetTrigFlags.InDet25nsec.set_Value_and_Lock(True)
 
-class disableInDetDCS(_modifier):
-    """
-    disable access to DCS state info which is in general not available 
-    """
-
-    def preSetup(self, flags):
-        flags.InDet.useDCS = False
-
-class BunchSpacing50ns(_modifier):
-    """
-    ID (and other settings) related to 50ns bunch spacing
-    """
-    def preSetup(self, flags):
-        from AthenaCommon.BeamFlags import jobproperties
-        jobproperties.Beam.bunchSpacing = 50
-        flags.Beam.BunchSpacing = 50
-        from InDetTrigRecExample.InDetTrigFlags import InDetTrigFlags
-        InDetTrigFlags.InDet25nsec.set_Value_and_Lock(False)
-
-class noLArCalibFolders(_modifier):
-    """
-    We should not use LAr electronics calibration data
-    """
-    def preSetup(self, flags):
-        from LArConditionsCommon.LArCondFlags import larCondFlags
-        larCondFlags.LoadElecCalib=False
-
-class reducedLArCalibFolders(_modifier):
-    """
-    Load minimum amount of LAr electronics calibration data to run on transparent data
-    """
-    def preSetup(self, flags):
-        from LArConditionsCommon.LArCondFlags import larCondFlags
-        larCondFlags.SingleVersion=True
-        larCondFlags.OFCShapeFolder=""
 
 class ForceMuonDataType(_modifier):
     """
@@ -108,37 +73,6 @@ class useNewRPCCabling(_modifier):
         from MuonCnvExample.MuonCnvFlags import muonCnvFlags
         if hasattr(muonCnvFlags,'RpcCablingMode'):
             muonCnvFlags.RpcCablingMode.set_Value_and_Lock('new')
-
-class MdtCalibFromDB(_modifier):
-    """
-    setup MDT calibration from DB instead of ascii
-    """
-    def postSetup(self, flags):
-        from AthenaCommon.AppMgr import ToolSvc
-        from AthenaCommon.AppMgr import ServiceMgr as svcMgr
-        from IOVDbSvc.CondDB import conddb
-        # Use COOL for MDT conditions (this will be moved to muon jobO fragment soon)
-        conddb.addFolder("MDT","/MDT/T0")
-        conddb.addFolder("MDT","/MDT/RT")
-        from MdtCalibDbCoolStrTool.MdtCalibDbCoolStrToolConf import MuonCalib__MdtCalibDbCoolStrTool
-        MdtDbTool = MuonCalib__MdtCalibDbCoolStrTool("MdtCalibDbTool",defaultT0=580,TubeFolder="/MDT/T0",RtFolder="/MDT/RT",RT_InputFiles=["Muon_RT_default.data"])
-        ToolSvc += MdtDbTool
-        from MdtCalibSvc.MdtCalibSvcConf import MdtCalibrationDbSvc, MdtCalibrationSvc
-        svcMgr += MdtCalibrationDbSvc( DBTool=MdtDbTool )
-        svcMgr += MdtCalibrationSvc()
-        svcMgr.MdtCalibrationSvc.DoTofCorrection = False
-
-class MdtCalibFixedTag(_modifier):
-    """
-    Force use of specific MDT calibration tag
-    THIS IS ONLY MEANT FOR NIGHTLY TEST WITH MC
-    """
-    def postSetup(self, flags):
-        from IOVDbSvc.CondDB import conddb
-        conddb.blockFolder("/MDT/T0")
-        conddb.blockFolder("/MDT/RT")
-        conddb.addFolder("MDT","/MDT/T0 <tag>HEAD</tag>",force=True)
-        conddb.addFolder("MDT","/MDT/RT <tag>HEAD</tag>",force=True)
 
 class SolenoidOff(_modifier):
     """
@@ -193,50 +127,6 @@ class useOracle(_modifier):
             svcMgr.DBReplicaSvc.UseCOOLFrontier = True
             svcMgr.DBReplicaSvc.UseGeomSQLite = False
 
-
-class noPileupNoise(_modifier):
-    """
-    Disable pileup noise correction
-    """
-    def preSetup(self, flags):
-        from CaloTools.CaloNoiseFlags import jobproperties
-        jobproperties.CaloNoiseFlags.FixedLuminosity.set_Value_and_Lock(0)
-        flags.Trigger.calo.doOffsetCorrection = False
-
-class usePileupNoiseMu8(_modifier):
-    """
-    Enable pileup noise correction for fixed luminosity point (mu=8)
-    """
-    def preSetup(self, flags):
-        from CaloTools.CaloNoiseFlags import jobproperties
-        jobproperties.CaloNoiseFlags.FixedLuminosity.set_Value_and_Lock(1.45)
-
-class usePileupNoiseMu20(_modifier):
-    """
-    Enable pileup noise correction for fixed luminosity point (mu=20)
-    """
-    def preSetup(self, flags):
-        from CaloTools.CaloNoiseFlags import jobproperties
-        jobproperties.CaloNoiseFlags.FixedLuminosity.set_Value_and_Lock(1.45*20/8)
-
-class usePileupNoiseMu30(_modifier):
-    """
-    Enable pileup noise correction for fixed luminosity point (mu=30)
-    """
-    def preSetup(self, flags):
-        from CaloTools.CaloNoiseFlags import jobproperties
-        jobproperties.CaloNoiseFlags.FixedLuminosity.set_Value_and_Lock(1.45*30/8)
-
-
-class forcePileupNoise(_modifier):
-    """
-    Use noise correction from run with pileup noise filled in for the online database
-    """
-    def postSetup(self, flags):
-        from IOVDbSvc.CondDB import conddb
-        conddb.addMarkup("/CALO/Noise/CellNoise","<forceRunNumber>178540</forceRunNumber>")
-
-
 class useOnlineLumi(_modifier):
     """
     Use online LuminosityTool
@@ -284,21 +174,6 @@ class forceConditions(_modifier):
                 svcMgr.IOVDbSvc.Folders[i] += f'<forceTimestamp>{timestamp:d}</forceTimestamp>'
             else:
                 svcMgr.IOVDbSvc.Folders[i] += f'<forceRunNumber>{_run_number:d}</forceRunNumber> <forceLumiblockNumber>{_lb_number:d}</forceLumiblockNumber>'
-
-
-class forceAFPLinkNum(_modifier):
-    """
-    force AFP link number translator to use Run2 setup
-    """
-    def postSetup(self, flags):
-        from AthenaCommon.AlgSequence import AthSequencer
-        from AthenaCommon.CFElements import findAlgorithm
-        AFPRecoSeq = AthSequencer("AFPRecoSeq")
-        AFP_RawDataProv = findAlgorithm(AFPRecoSeq, "AFP_RawDataProvider")
-        if AFP_RawDataProv:
-            AFP_RawDataProv.ProviderTool.AFP_ByteStream2RawCnv.AFP_WordReadOut.AFP_LinkNumTranslator.ForceRunConfig = 2
-        else:
-            log.info('The forceAFPLinkNum Modifier has no effect because AFP_RawDataProvider is not configured to run')
 
 
 ###############################################################
@@ -383,32 +258,6 @@ class enableALFAMon(_modifier):
         topSequence = AlgSequence()
         topSequence += TrigALFAROBMonitor(flags)
 
-
-class nameAuditors(_modifier):
-    """
-    Turn on name auditor
-    """
-    def postSetup(self, flags):
-        from AthenaCommon import CfgMgr
-        theApp.AuditAlgorithms = True
-        theApp.AuditServices = True
-        theApp.AuditTools = True
-        svcMgr.AuditorSvc += CfgMgr.NameAuditor()
-
-class chronoAuditor(_modifier):
-    """
-    Turn on ChronoAuditor
-    """
-    def postSetup(self, flags):
-        from AthenaCommon import CfgMgr
-        theApp.AuditAlgorithms = True
-        theApp.AuditServices = True
-        theApp.AuditTools = True
-        svcMgr.AuditorSvc += CfgMgr.ChronoAuditor()
-        svcMgr.AuditorSvc.ChronoAuditor.CustomEventTypes = ['Start','Stop']
-        svcMgr.ChronoStatSvc.ChronoDestinationCout = True
-        svcMgr.ChronoStatSvc.PrintEllapsedTime = True
-
 class fpeAuditor(_modifier):
     """
     Turn on FPEAuditor
@@ -425,28 +274,6 @@ class fpeAuditor(_modifier):
         theApp.AuditTools = True
         svcMgr.AuditorSvc += CfgMgr.FPEAuditor()
         svcMgr.AuditorSvc.FPEAuditor.NStacktracesOnFPE=1
-
-class athMemAuditor(_modifier):
-    """
-    Turn on AthMemoryAuditor
-    """
-    def postSetup(self, flags):
-        from AthenaCommon import CfgMgr
-        theApp.AuditAlgorithms = True
-        theApp.AuditServices = True
-        theApp.AuditTools = True
-        svcMgr.AuditorSvc += CfgMgr.AthMemoryAuditor(MaxStacktracesPerAlg=20,
-                                                     DefaultStacktraceDepth=50,
-                                                     StacktraceDepthPerAlg=["Stream1 100"])
-
-class perfmon(_modifier):
-    """
-    Enable PerfMon
-    """
-    def preSetup(self, flags):
-        from PerfMonComps.PerfMonFlags import jobproperties
-        jobproperties.PerfMonFlags.doMonitoring = True
-        jobproperties.PerfMonFlags.doPersistencyMonitoring = False
 
 class enableSchedulerMon(_modifier):
     """
@@ -476,57 +303,12 @@ class enableCountAlgoMiss(_modifier):
         from AthenaCommon.AppMgr import ServiceMgr as svcMgr
         svcMgr.AlgResourcePool.CountAlgorithmInstanceMisses=True
 
-class enableFPE(_modifier):
-    """
-    Turn on floating point exceptions
-    """
-    def postSetup(self, flags):
-        theApp.CreateSvc += ["FPEControlSvc"]
-
-
 class doValidation(_modifier):
     """
     Enable validation mode (e.g. extra histograms)
     """
     def preSetup(self, flags):
         flags.Trigger.doValidationMonitoring = True
-
-class autoConditionsTag(_modifier):
-    """
-    UGLY hack to setup conditions based on stream tag
-    require RecExConfig.RecFlags.triggerStream to be set elsewhere
-    Please do not use this - for trigger reprocessing only!!!
-    """
-    def preSetup(self, flags):
-        from RecExConfig.AutoConfiguration import ConfigureConditionsTag
-        ConfigureConditionsTag()
-
-class BeamspotFromSqlite(_modifier):
-    """
-    Read beamspot from sqlite file (./beampos.db)
-    """
-    def postSetup(self, flags):
-        folders = []
-        for f in svcMgr.IOVDbSvc.Folders:
-            if f.find('/Indet/Onl/Beampos')!=-1:
-                folders += ['<db>sqlite://;schema=beampos.db;dbname=COMP200</db> /Indet/Onl/Beampos <key>/Indet/Beampos</key> <tag>IndetBeamposOnl-HLT-UPD1-001-00</tag>']
-            else:
-                folders += [f]
-        svcMgr.IOVDbSvc.Folders = folders
-
-class LumiFromSqlite(_modifier):
-    """
-    Read beamspot from sqlite file (./lumi.db)
-    """
-    def postSetup(self, flags):
-        folders = []
-        for f in svcMgr.IOVDbSvc.Folders:
-            if f.find('/TRIGGER/LUMI/HLTPrefLumi')!=-1:
-                folders += ['<db>sqlite://;schema=lumi.db;dbname=CONDBR2</db> /TRIGGER/LUMI/HLTPrefLumi <tag>HLTPrefLumi-HLT-UPD1-001-00</tag>']
-            else:
-                folders += [f]
-        svcMgr.IOVDbSvc.Folders = folders
-
 
 class useDynamicAlignFolders(_modifier):
     """
@@ -545,42 +327,3 @@ class doRuntimeNaviVal(_modifier):
     def preSetup(self, flags):
         log.info("Enabling Runtime Trigger Navigation Validation")
         flags.Trigger.doRuntimeNaviVal = True
-
-
-class superCellNoBCID(_modifier):
-    """
-    force superCell container SC_ET to be used
-    """
-    def postSetup(self, flags):
-        log.info('superCellNoBCID Modifier trying to set the SC_ET for superCell production')
-        from AthenaCommon.AlgSequence import AlgSequence
-        from AthenaCommon.CFElements import findSubSequence,findAlgorithm
-        topSequence = AlgSequence()
-        beg = findSubSequence(topSequence,"HLTBeginSeq")
-        L1SimSeq = beg.L1SimSeq
-        L1CaloSimSeq = L1SimSeq.L1CaloSimSeq
-        algo = findAlgorithm(L1CaloSimSeq,'LArRAWtoSuperCell')
-        if algo:
-            log.info('Found Algorithm, setting the property')
-            algo.SCellContainerIn = "SC_ET"
-        else:
-            log.info('The LArRAWtoSuperCell Modifier has no effect because the algorithm was not configured to run')
-
-class superCellWithBCID(_modifier):
-    """
-    force superCell container SC_ET_ID to be used
-    """
-    def postSetup(self, flags):
-        log.info('superCellBCID Modifier trying to set the SC_ET_ID for superCell production')
-        from AthenaCommon.AlgSequence import AlgSequence
-        from AthenaCommon.CFElements import findSubSequence,findAlgorithm
-        topSequence = AlgSequence()
-        beg = findSubSequence(topSequence,"HLTBeginSeq")
-        L1SimSeq = beg.L1SimSeq
-        L1CaloSimSeq = L1SimSeq.L1CaloSimSeq
-        algo = findAlgorithm(L1CaloSimSeq,'LArRAWtoSuperCell')
-        if algo:
-            log.info('Found Algorithm, setting the property')
-            algo.SCellContainerIn = "SC_ET_ID"
-        else:
-            log.info('The LArRAWtoSuperCell Modifier has no effect because the algorithm was not configured to run')

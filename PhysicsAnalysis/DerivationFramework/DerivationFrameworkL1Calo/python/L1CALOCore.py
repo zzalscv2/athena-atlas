@@ -67,7 +67,7 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
     # emulate/decorate the input towers 
     # first need to decode LATOME readout
     from L1CaloFEXSim.L1CaloFEXSimCfg import ReadSCellFromByteStreamCfg
-    acc.merge(ReadSCellFromByteStreamCfg(flags, keyIn="SC_ET_ID"))
+    acc.merge(ReadSCellFromByteStreamCfg(flags))
 
     # Emulate jFEX input towers
     emulatedDataTowersKey = "L1_jFexEmulatedTowers"

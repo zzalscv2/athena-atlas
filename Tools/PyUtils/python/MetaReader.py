@@ -956,11 +956,7 @@ def _extract_fields_triggermenujson(interface, aux):
                 result['HLTChains'] = [ _convert_value(chain) for chain in decoded['chains'] ] 
             elif decoded['filetype'] == 'l1menu':
                 result['L1Items'] = [ _convert_value(item) for item in decoded['items'] ] 
-            elif decoded['filetype'] == 'hltprescale':
-                return result
-            elif decoded['filetype'] == 'l1prescale':
-                return result
-            elif decoded['filetype'] == 'hltmonitoringsummary':
+            elif decoded['filetype'] in ['bunchgroupset', 'hltprescale', 'l1prescale', 'hltmonitoringsummary']:
                 return result
 
             else:

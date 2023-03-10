@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -26,6 +26,7 @@
 
 #include "AsgDataHandles/ReadHandle.h"
 #include "CxxUtils/checker_macros.h"
+#include "CxxUtils/as_const_ptr.h"
 
 #include "TrigSteeringEvent/Lvl1Item.h"
 
@@ -308,15 +309,17 @@ bool Trig::CacheGlobalMemory::assert_decision() const {
     // over DecisionUnpackerAthena
     if ( contains_xAOD_decision ){
       ATH_MSG_INFO("SG contains xAOD decision, use DecisionUnpackerStandalone");
-      m_unpacker = std::make_unique<DecisionUnpackerStandalone>(m_decisionKeyPtr, m_run2NavigationKeyPtr);
+      m_unpacker = std::make_unique<DecisionUnpackerStandalone>
+        (CxxUtils::as_const_ptr(m_decisionKeyPtr),
+         CxxUtils::as_const_ptr(m_run2NavigationKeyPtr));
     }
     else if( is_l1result_configured ){
       ATH_MSG_INFO("SG contains AOD decision, use DecisionUnpackerAthena");
-      m_unpacker = std::make_unique<DecisionUnpackerAthena>(m_oldDecisionKeyPtr);
+      m_unpacker = std::make_unique<DecisionUnpackerAthena>(CxxUtils::as_const_ptr(m_oldDecisionKeyPtr));
     }
     else if (contains_old_event_info) {
       ATH_MSG_INFO("SG contains NO(!) L1Result in the AOD TrigDecision, assuming also no HLTResult. Read from EventInfo");
-      m_unpacker = std::make_unique<DecisionUnpackerEventInfo>(m_oldEventInfoKeyPtr);
+      m_unpacker = std::make_unique<DecisionUnpackerEventInfo>(CxxUtils::as_const_ptr(m_oldEventInfoKeyPtr));
     }
 #else
     if ( contains_xAOD_decision ){

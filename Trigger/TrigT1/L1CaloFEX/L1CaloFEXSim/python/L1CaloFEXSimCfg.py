@@ -18,7 +18,7 @@ def ReadSCellFromPoolFileCfg(flags, key='SCell'):
     return acc
 
 
-def ReadSCellFromByteStreamCfg(flags, key='SCell', keyIn='SC_ET_ID',SCmask=True):
+def ReadSCellFromByteStreamCfg(flags, key='SCell', SCmask=True):
     acc=ComponentAccumulator()
 
     # Geometry, conditions and cabling setup
@@ -37,7 +37,7 @@ def ReadSCellFromByteStreamCfg(flags, key='SCell', keyIn='SC_ET_ID',SCmask=True)
     decoderAlg = CompFactory.LArRawSCDataReadingAlg('LArRawSCDataReadingAlg', LATOMEDecoder=decoderTool)
     acc.addEventAlgo(decoderAlg)
 
-    acc.merge(LArRAWtoSuperCellCfg(flags,mask=SCmask,SCellContainerIn=keyIn, SCellContainerOut=key) )
+    acc.merge(LArRAWtoSuperCellCfg(flags,mask=SCmask, SCellContainerOut=key) )
 
     return acc
 
@@ -85,7 +85,7 @@ def L1CaloFEXSimCfg(flags):
             acc.merge(emulateSC_Cfg(flags,SCOut=sCellType))
         else:
             # Run-3+ data inputs, decode SCells from ByteStream
-            acc.merge(ReadSCellFromByteStreamCfg(flags,key=sCellType,keyIn="SC_ET_ID"))
+            acc.merge(ReadSCellFromByteStreamCfg(flags,key=sCellType))
 
     # Need also TriggerTowers as input
     acc.merge(TriggerTowersInputCfg(flags))

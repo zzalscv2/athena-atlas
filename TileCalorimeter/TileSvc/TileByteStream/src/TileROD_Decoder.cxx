@@ -540,7 +540,7 @@ void TileROD_Decoder::unpack_frag0(uint32_t version,
     digitsMetaData[1].push_back(p[2]);
   }
   
-  if (dataWordsPerChip > 14) { // can not be true !!!
+  if (dataWordsPerChip > 15) { // can not be true !!!
     savedDigiMode = -1; // check again digiMode in next fragment
   }
 }
@@ -2677,7 +2677,10 @@ void TileROD_Decoder::unpack_brod(uint32_t /* version */,
   // first word is frag size
   int count = *(p);
   // second word is frag ID and frag type
-  int frag = *(p + 1) & 0xFFFF;
+  uint32_t idAndType = *(p + 1);
+  int frag = idAndType & 0xFFFF;
+  bool is16ChannelType = (idAndType >> 16) & 1; // V775N, V792N
+  bool is32ChannelType = (idAndType >> 17) & 1; // V775, V792
   
   p += 2; // 2 words so far
   int datasize = count - sizeOverhead; // can be 2 or 3 words less
@@ -2705,46 +2708,51 @@ void TileROD_Decoder::unpack_brod(uint32_t /* version */,
     case BEAM_TDC_FRAG:
     case COMMON_TDC1_FRAG:
     case COMMON_TDC2_FRAG: {
-      
-      uint32_t prev = 0xFF;
-      std::vector<uint32_t> adc;
-      for (int c = 0; c < datasize; ++c) {
-        uint32_t time = *p & 0xFFFF;
-        uint32_t flag = *p >> 16;
-        //uint32_t edge =  flag & 0x01;
-        uint32_t chan = (flag >> 1) & 0x0F;
-        uint32_t bad = (flag >> 5) & 0x01;
-        if (/* prev != chan && */ !bad) {
-          if (prev != 0xFF) {
-            HWIdentifier adcID = m_tileHWID->adc_id(drawerID, prev, 0);
-            rc = new TileBeamElem(adcID, adc);
-            pBeam.push_back(rc);
-            adc.clear();
+      if (!(is16ChannelType || is32ChannelType)) {
+        uint32_t prev = 0xFF;
+        std::vector<uint32_t> adc;
+        for (int c = 0; c < datasize; ++c) {
+          uint32_t time = *p & 0xFFFF;
+          uint32_t flag = *p >> 16;
+          uint32_t chan = (flag >> 1) & 0x0F;
+          uint32_t bad = (flag >> 5) & 0x01;
+          if (!bad) {
+            if (prev != 0xFF) {
+              HWIdentifier adcID = m_tileHWID->adc_id(drawerID, prev, 0);
+              rc = new TileBeamElem(adcID, adc);
+              pBeam.push_back(rc);
+              adc.clear();
+            }
+            prev = chan;
           }
-          prev = chan;
+          adc.push_back(time);
+          ++p;
         }
-        adc.push_back(time);
-        ++p;
+        if (prev != 0xFF) {
+          HWIdentifier adcID = m_tileHWID->adc_id(drawerID, prev, 0);
+          rc = new TileBeamElem(adcID, adc);
+          pBeam.push_back(rc);
+        }
+        break;
       }
-      if (prev != 0xFF) {
-        HWIdentifier adcID = m_tileHWID->adc_id(drawerID, prev, 0);
-        rc = new TileBeamElem(adcID, adc);
-        pBeam.push_back(rc);
-      }
+      // Fall through to default
+      [[fallthrough]]; // silent the warning on fall through
     }
-      break;
-      
+
       /* ************************************************************************************* */
-      /*           CAEN V775 12 bit TDC  (1count=35psec) in common beam crate			 */
+      /*           CAEN V775 or V775N 12 bit TDC  (1count=35psec) in common beam crate			 */
     case COMMON_TOF_FRAG: {
       
       uint32_t prev = 0xFF;
       std::vector<uint32_t> adc;
       for (int c = 0; c < datasize; ++c) {
+        uint32_t chan = is16ChannelType ? (*p >> 17) & 0x3FF  // take 10 bits, but 6 upper bits should be 0
+                                        : (*p >> 16) & 0x7FF; // take 11 bits, but 6 upper bits should be 0
+        if (chan > 31) {
+          continue; // skip header or end of block
+        }
         uint32_t time = *p & 0x1FFF; // uppermost bit is overflow flag
-        // uint32_t underthreshold = ( *p >> 13) & 1; // should be always 0
-        uint32_t chan = (*p >> 16) & 0x7FF; // take 11 bits, but 6 upper bits should be 0
-        if (prev != chan && chan < 16) { // ignore 16 upper channels and corrupted data
+        if (prev != chan && ((is16ChannelType && chan < 16) || (is32ChannelType && chan < 32))) {
           if (prev != 0xFF) {	        // channel >= 32 can be only in corrupted data
             HWIdentifier adcID = m_tileHWID->adc_id(drawerID, prev, 0);
             rc = new TileBeamElem(adcID, adc);
@@ -2756,7 +2764,7 @@ void TileROD_Decoder::unpack_brod(uint32_t /* version */,
         adc.push_back(time);
         ++p;
       }
-      if (prev < 16) { // ignore 16 upper channels and corrupted data
+      if ((is16ChannelType && prev < 16) || (is32ChannelType && prev < 32)) {
         HWIdentifier adcID = m_tileHWID->adc_id(drawerID, prev, 0);
         rc = new TileBeamElem(adcID, adc);
         pBeam.push_back(rc);
@@ -2830,7 +2838,46 @@ void TileROD_Decoder::unpack_brod(uint32_t /* version */,
       pBeam.push_back(rc);
     }
       break;
-      
+
+    /* ************************************************************************************* */
+    /*           CAEN V792 or V792N 12 bit ADC in common beam crate			             */
+    case COMMON_ADC1_FRAG:
+    case COMMON_ADC2_FRAG: {
+
+      if (is16ChannelType || is32ChannelType) {
+        uint32_t prev = 0xFF;
+        std::vector<uint32_t> adc;
+        for (int c = 0; c < datasize; ++c) {
+          uint32_t chan = is16ChannelType ? (*p >> 17) & 0x3FF  // take 10 bits, but 6 upper bits should be 0
+                                          : (*p >> 16) & 0x7FF; // take 11 bits, but 6 upper bits should be 0
+
+          if (chan > 31) {
+            continue; // skip header or end of block
+          }
+          uint32_t amplitude = *p & 0x1FFF; // uppermost bit is overflow flag
+          if (prev != chan && ((is16ChannelType && chan < 16) || (is32ChannelType && chan < 32))) {
+            if (prev != 0xFF) {	        // channel >= 32 can be only in corrupted data
+              HWIdentifier adcID = m_tileHWID->adc_id(drawerID, prev, 0);
+              rc = new TileBeamElem(adcID, adc);
+              pBeam.push_back(rc);
+              adc.clear();
+            }
+            prev = chan;
+          }
+          adc.push_back(amplitude);
+          ++p;
+        }
+        if ((is16ChannelType && prev < 16) || (is32ChannelType && prev < 32)) {
+          HWIdentifier adcID = m_tileHWID->adc_id(drawerID, prev, 0);
+          rc = new TileBeamElem(adcID, adc);
+          pBeam.push_back(rc);
+        }
+        break;
+      }
+      // Fall through to default
+      [[fallthrough]]; // silent the warning on fall through
+    }
+
       /* ************************************************************************************* */
       /*                                   OTHER FRAGS: ONE WORD = ONE CHANNEL       		 */
     default: {
@@ -3086,6 +3133,8 @@ StatusCode TileROD_Decoder::convertLaser(const RawEvent* re, TileLaserObject* la
   
   ATH_MSG_DEBUG( "Reading TileLaser data from ByteStream" );
   
+  setLaserVersion(*laserObject);
+
   if (!re) {
     ATH_MSG_FATAL( "RawEvent passed to 'convert'-function is a null pointer!" );
     return StatusCode::FAILURE;

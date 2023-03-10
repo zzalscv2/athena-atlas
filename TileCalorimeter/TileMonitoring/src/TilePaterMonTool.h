@@ -220,14 +220,14 @@ protected:
                 std::string trigChain = "", std::string mergeAlgo = "" );
   
 
-  const TileID* m_tileID;
-  const TileHWID* m_tileHWID;
-  const TileTBID* m_tileTBID;
-  const TileCablingService* m_cabling;
+  const TileID* m_tileID{};
+  const TileHWID* m_tileHWID{};
+  const TileTBID* m_tileTBID{};
+  const TileCablingService* m_cabling{};
 
-  bool m_savePng;
-  bool m_savePs;
-  bool m_saveSvg;
+  bool m_savePng{};
+  bool m_savePs{};
+  bool m_saveSvg{};
 
   std::vector<int> m_fragIDsToIgnoreDMUerrors;
   std::vector<int> m_fragIDsDemonstrators;

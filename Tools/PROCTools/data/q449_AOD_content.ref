@@ -207,7 +207,6 @@ EventInfoAuxDyn.mcEventNumber
 EventInfoAuxDyn.mcEventWeights
 EventInfoAuxDyn.streamTagDets
 EventInfoAuxDyn.streamTagRobs
-EventInfo_p4
 EventNumber
 EventTime
 EventTimeNanoSec
@@ -270,6 +269,7 @@ ExtrapolatedStauTrackParticles
 ExtrapolatedStauTrackParticlesAux.
 FileMetaData
 FileMetaDataAux.
+FileMetaDataAuxDyn.amiTag
 FileMetaDataAuxDyn.beamEnergy
 FileMetaDataAuxDyn.beamType
 FileMetaDataAuxDyn.conditionsTag
@@ -1525,8 +1525,6 @@ JetETMissNeutralParticleFlowObjectsAuxDyn.SECOND_R
 JetETMissNeutralParticleFlowObjectsAuxDyn.TIMING
 L1TopoErrorFlags_Legacy
 L1TopoErrorFlags_LegacyAux.
-L1TopoRawData
-L1TopoRawDataAux.
 L1_cTauRoI
 L1_cTauRoIAux.
 L1_eEMRoI
@@ -1968,8 +1966,6 @@ StausAuxDyn.qOverP_staco
 StausAuxDyn.theta_staco
 StausAuxDyn.z0_staco
 StreamAOD
-SuspectLumiBlocks
-SuspectLumiBlocksAux.
 TauFinalPi0s
 TauFinalPi0sAux.
 TauFinalPi0sAuxDyn.pi0PFOLinks

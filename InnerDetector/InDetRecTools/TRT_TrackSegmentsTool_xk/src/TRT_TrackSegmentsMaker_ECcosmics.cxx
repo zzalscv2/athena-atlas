@@ -339,7 +339,9 @@ namespace InDet{
 // Methods of TRT segment reconstruction in one event
 ///////////////////////////////////////////////////////////////////
 
-void InDet::TRT_TrackSegmentsMaker_ECcosmics::find(const EventContext & /*ctx*/, InDet::ITRT_TrackSegmentsMaker::IEventData &virt_event_data) const
+void InDet::TRT_TrackSegmentsMaker_ECcosmics::find(const EventContext & /*ctx*/, 
+                                                   InDet::ITRT_TrackSegmentsMaker::IEventData &virt_event_data,
+                                                   InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap &) const
 {
   TRT_TrackSegmentsMaker_ECcosmics::EventData &
      event_data  = TRT_TrackSegmentsMaker_ECcosmics::EventData::getPrivateEventData(virt_event_data);

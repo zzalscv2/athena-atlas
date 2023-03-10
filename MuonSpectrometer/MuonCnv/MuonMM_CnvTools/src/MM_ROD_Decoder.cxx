@@ -39,7 +39,7 @@ StatusCode Muon::MM_ROD_Decoder::initialize()
 // (only requested modules are decoded). This must be made here, because the 
 // trigger granularity is a module, whereas ROB granularity is a whole sector. 
 // Therefore, refined selection is needed with decoded information.
-StatusCode Muon::MM_ROD_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment& robFrag, const std::vector<IdentifierHash>& rdoIdhVect, MM_RawDataContainer& rdoIdc) const
+StatusCode Muon::MM_ROD_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment& robFrag, const std::vector<IdentifierHash>& rdoIdhVect, std::unordered_map<IdentifierHash, std::unique_ptr<MM_RawDataCollection>> &rdo_map) const
 {
   // check fragment for errors
   try {
@@ -58,12 +58,6 @@ StatusCode Muon::MM_ROD_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPAC
   ATH_MSG_DEBUG("Retrieved "<<elinks.size()<<" elinks");
   if (!elinks.size()) return StatusCode::SUCCESS;
 
-  // RDO hash IDs may repeat in different elinks of the same ROB, but not in different ROBs (modules). 
-  // To handle possible repetition, we temporarily store them in an STL map.
-  std::unordered_map<IdentifierHash, std::unique_ptr<MM_RawDataCollection>> rdo_map;
-
-  // error counters
-  int nerr_duplicate{0}, nerr_rdo{0};
 
   // loop on elinks. we need an RDO (collection) per quadruplet!
   for (auto* elink : elinks) {
@@ -101,27 +95,6 @@ StatusCode Muon::MM_ROD_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPAC
        rdo->push_back(new MM_RawData(channel_ID, channel_number, channel->tdo(), channel->pdo(), channel->rel_bcid(),timeAndChargeInCounts)); // isDead = false (ok?)
     }
   }
-
-  // add the RDO collections created from the data of this ROB into the identifiable container.
-  for (auto& pair : rdo_map) {
-
-    if (!pair.second->size()) continue; // skip empty collections
-
-    MM_RawDataContainer::IDC_WriteHandle lock = rdoIdc.getWriteHandle(pair.first);
-    if (lock.alreadyPresent()) {
-      // RDO hash IDs should not repeat in different ROBs.
-      ++nerr_duplicate;
-    } else if (!lock.addOrDelete(std::move(pair.second)).isSuccess()) {
-      // since we prevent duplicates above, this error should never happen.
-      ++nerr_rdo;
-    }
-  }
-
-  rdo_map.clear();
-
-  // error summary (to reduce the number of messages)
-  if (nerr_duplicate) ATH_MSG_WARNING(nerr_duplicate << " elinks skipped since the same module hash has been added by a previous ROB fragment");
-  if (nerr_rdo)       ATH_MSG_ERROR("Failed to add "<<nerr_rdo<<" RDOs into the identifiable container");
 
   return StatusCode::SUCCESS;
 }

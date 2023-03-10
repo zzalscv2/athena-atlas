@@ -22,7 +22,7 @@ if __name__=='__main__':
    parser.add_argument('-j','--outpprefix', dest='outpprefix', default="LArRamp", help='Prefix of output ramp pool filename', type=str)
    parser.add_argument('-e','--outrdir', dest='outrdir', default="/eos/atlas/atlascerngroupdisk/det-larg/Temp/Weekly/ntuples", help='Output root file directory', type=str)
    parser.add_argument('-k','--outpdir', dest='outpdir', default="/eos/atlas/atlascerngroupdisk/det-larg/Temp/Weekly/poolFiles", help='Output pool file directory', type=str)
-   parser.add_argument('-u','--inpsqlite', dest='inpsql', default="mysql.db", help='Input sqlite file with pedestals, in pool output dir.', type=str)
+   parser.add_argument('-u','--insqlite', dest='inpsql', default="mysql.db", help='Input sqlite file with pedestals, in pool output dir.', type=str)
    parser.add_argument('-l','--inofcsqlite', dest='inofcsql', default="mysql_delay.db", help='Input sqlite file with ofcs, in pool output dir', type=str)
    parser.add_argument('-n','--outsqlite', dest='outsql', default="mysql_ramp.db", help='Output sqlite file, in pool output dir.', type=str)
    parser.add_argument('-m','--subdet', dest='subdet', default="EMB", help='Subdetector, EMB, EMEC, HEC or FCAL', type=str)
@@ -62,7 +62,7 @@ if __name__=='__main__':
    from AthenaConfiguration.AllConfigFlags import initConfigFlags
    from LArCalibProcessing.LArCalibConfigFlags import addLArCalibFlags
    flags=initConfigFlags()
-   addLArCalibFlags(ConfigFlags, args.supercells)
+   addLArCalibFlags(flags, args.supercells)
    
    #Now we set the flags as required for this particular job:
    #The following flags help finding the input bytestream files: 
@@ -71,6 +71,8 @@ if __name__=='__main__':
    flags.LArCalib.Input.RunNumbers = [int(args.run),]
    flags.LArCalib.Input.Database = args.outpdir + "/" +args.inpsql
    flags.LArCalib.Input.Database2 = args.outpdir + "/" +args.inofcsql
+   gainNumMap={"HIGH":0,"MEDIUM":1,"LOW":2}
+   flags.LArCalib.Gain=gainNumMap[args.gain.upper()]
 
    # Input files
    flags.Input.Files=flags.LArCalib.Input.Files

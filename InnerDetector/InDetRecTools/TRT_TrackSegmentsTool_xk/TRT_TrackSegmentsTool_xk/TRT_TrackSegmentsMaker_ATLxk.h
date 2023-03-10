@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -70,14 +70,16 @@ namespace InDet{
       ///////////////////////////////////////////////////////////////////
 
       virtual std::unique_ptr<InDet::ITRT_TrackSegmentsMaker::IEventData> newEvent (const EventContext& ctx) const override;
-        virtual std::unique_ptr<InDet::ITRT_TrackSegmentsMaker::IEventData> newRegion(const EventContext& ctx, const std::vector<IdentifierHash>&) const override;
+      virtual std::unique_ptr<InDet::ITRT_TrackSegmentsMaker::IEventData> newRegion(const EventContext& ctx, const std::vector<IdentifierHash>&) const override;
       void endEvent(InDet::ITRT_TrackSegmentsMaker::IEventData &event_data) const override;
       
       ///////////////////////////////////////////////////////////////////
       // Methods of seeds production without vertex constraint
       ///////////////////////////////////////////////////////////////////
 
-      virtual void find(const EventContext& ctx, InDet::ITRT_TrackSegmentsMaker::IEventData &event_data) const override;
+      virtual void find(const EventContext &ctx,
+                        InDet::ITRT_TrackSegmentsMaker::IEventData &event_data,
+                        InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap &used) const override;
 
       ///////////////////////////////////////////////////////////////////
       // Iterator through seeds pseudo collection produced accordingly
@@ -107,6 +109,8 @@ namespace InDet{
          }
 
          ~EventData() { delete [] m_circles; }
+         EventData (const EventData&) = delete;
+         EventData& operator= (const EventData&) = delete;
 
       protected:
          const InDet::TRT_DriftCircleContainer *m_trtcontainer = nullptr;
@@ -188,7 +192,8 @@ namespace InDet{
       void findLocaly(const EventContext &ctx,
                       unsigned int,
                       const Trk::PRDtoTrackMap *prd_to_track_map,
-                      TRT_TrackSegmentsMaker_ATLxk::EventData &event_data) const;
+                      TRT_TrackSegmentsMaker_ATLxk::EventData &event_data,
+                      InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap &used) const;
 
       static void segmentsPreparation(TRT_TrackSegmentsMaker_ATLxk::EventData &event_data) ;
 

@@ -106,7 +106,7 @@ if __name__ == "__main__":
     import sys
 
     flags = initConfigFlags()
-    flags.Input.Files = defaultTestFiles.RAW
+    flags.Input.Files = defaultTestFiles.RAW_RUN2
     flags.Input.isMC=False
     flags.lock()
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -30,12 +30,12 @@
 
 InDet::TRT_TrackExtensionToolCosmics::TRT_TrackExtensionToolCosmics
 (const std::string& t,const std::string& n,const IInterface* p)
-  : AthAlgTool(t,n,p)
+  : AthAlgTool(t,n,p),
+    m_minNumberDCs    (9),
+    m_roadwidth       (10.),
+    m_roadwidth_locz  (10.),
+    m_trtmanager      ("TRT")
 {
-  m_trtmanager      = "TRT"             ;
-  m_minNumberDCs    = 9                 ;
-  m_roadwidth       = 10.               ;
-  m_roadwidth_locz  = 10.               ;
 
   declareInterface<ITRT_TrackExtensionTool>(this);
 
@@ -226,7 +226,8 @@ InDet::TRT_TrackExtensionToolCosmics::newEvent(const EventContext& ctx) const
 std::vector<const Trk::MeasurementBase*>& 
 InDet::TRT_TrackExtensionToolCosmics::extendTrack(const EventContext& ctx,
                                                   const Trk::Track& Tr,
-                                                  InDet::ITRT_TrackExtensionTool::IEventData &virt_event_data) const
+                                                  InDet::ITRT_TrackExtensionTool::IEventData &virt_event_data,
+                                                  InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap& used) const
 { 
   InDet::TRT_TrackExtensionToolCosmics::EventData &
      event_data=InDet::TRT_TrackExtensionToolCosmics::EventData::getPrivateEventData(virt_event_data);
@@ -252,7 +253,7 @@ InDet::TRT_TrackExtensionToolCosmics::extendTrack(const EventContext& ctx,
   }
 
   if(Tr.perigeeParameters()) {
-    return extendTrack(ctx, Tr.perigeeParameters(),event_data);
+    return extendTrack(ctx, Tr.perigeeParameters(),event_data, used);
   }
   event_data.m_measurement.clear();
   return event_data.m_measurement;
@@ -385,7 +386,8 @@ class tp_sort_cosmics{
 std::vector<const Trk::MeasurementBase*>&
 InDet::TRT_TrackExtensionToolCosmics::extendTrack(const EventContext& /*ctx*/,
                                                   const Trk::TrackParameters * par,
-                                                  InDet::ITRT_TrackExtensionTool::IEventData &virt_event_data) const
+                                                  InDet::ITRT_TrackExtensionTool::IEventData &virt_event_data,
+                                                  InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap&) const
 {
   InDet::TRT_TrackExtensionToolCosmics::EventData &
      event_data=InDet::TRT_TrackExtensionToolCosmics::EventData::getPrivateEventData(virt_event_data);
@@ -479,7 +481,8 @@ InDet::TRT_TrackExtensionToolCosmics::extendTrack(const EventContext& /*ctx*/,
 Trk::TrackSegment* 
 InDet::TRT_TrackExtensionToolCosmics::findSegment(const EventContext& /*ctx*/,
                                                   const Trk::TrackParameters *,
-                                                  InDet::ITRT_TrackExtensionTool::IEventData &) const
+                                                  InDet::ITRT_TrackExtensionTool::IEventData &,
+                                                  InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap&) const
 {
   return nullptr;
 }
@@ -578,7 +581,8 @@ Amg::Vector3D InDet::TRT_TrackExtensionToolCosmics::intersect(const Trk::Surface
 Trk::Track* 
 InDet::TRT_TrackExtensionToolCosmics::newTrack(const EventContext& /*ctx*/,
                                                const Trk::Track&,
-                                               InDet::ITRT_TrackExtensionTool::IEventData &) const
+                                               InDet::ITRT_TrackExtensionTool::IEventData &,
+                                               InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap&) const
 { 
   return nullptr;
 }

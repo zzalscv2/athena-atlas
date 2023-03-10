@@ -162,6 +162,8 @@ def hltTopoClusterMakerCfg(flags, name, clustersKey="HLT_TopoCaloClustersFS",
        from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
        # We need the electronic noise for the LC weights
        acc.merge(CaloNoiseCondAlgCfg(flags, noisetype="electronicNoise"))
+       from CaloRec.CaloTopoClusterConfig import caloTopoCoolFolderCfg
+       acc.merge(caloTopoCoolFolderCfg(flags))
        listClusterCorrectionTools = [ hltCaloLocalCalib(flags), hltCaloOOCalib(flags),
              hltCaloOOCPi0Calib(flags), hltCaloDMCalib(flags) ]
 

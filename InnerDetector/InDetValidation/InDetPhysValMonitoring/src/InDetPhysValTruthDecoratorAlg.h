@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETPHYSVALMONITORING_INDETPHYSVALTRUTHDECORATORTOOL_H
@@ -16,10 +16,11 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "TrkExInterfaces/IExtrapolator.h"
+#include "StoreGate/ReadDecorHandleKeyArray.h"
 #include "StoreGate/WriteDecorHandleKey.h"
 #include "StoreGate/WriteDecorHandle.h"
-#include "BeamSpotConditionsData/BeamSpotData.h"
 #include "AthContainers/AuxElement.h"
+#include "xAODEventInfo/EventInfo.h"
 #include "xAODTracking/TrackMeasurementValidationContainer.h"
 #include "GaudiKernel/EventContext.h"
 #include "InDetPhysValMonitoring/IAthSelectionTool.h"
@@ -48,7 +49,10 @@ private:
 
   PublicToolHandle<Trk::IExtrapolator> m_extrapolator
      {this,"Extrapolator","Trk::Extrapolator/AtlasExtrapolator",""};
-  SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey { this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot" };
+  SG::ReadDecorHandleKeyArray<xAOD::EventInfo> m_beamSpotDecoKey
+     {this, "BeamSpotDecoKeys",
+        {"EventInfo.beamPosX", "EventInfo.beamPosY", "EventInfo.beamPosZ"},
+	"Beamspot position decoration keys"};
 
   PublicToolHandle<IAthSelectionTool>         m_truthSelectionTool
      {this,"TruthSelectionTool","",""};

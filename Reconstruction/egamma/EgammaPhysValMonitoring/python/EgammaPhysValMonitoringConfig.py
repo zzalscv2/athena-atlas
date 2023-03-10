@@ -27,6 +27,37 @@ def EgammaPhysValMonitoringToolCfg(flags, **kwargs):
     if flags.Tracking.doLargeD0:
         kwargs.setdefault("LRTElectronContainerName", "LRTElectrons")
 
+    # VeryLooseNoPix
+    ElectronLHSelectorVeryLooseNoPix = CompFactory.AsgElectronLikelihoodTool(
+        "ElectronLHSelectorVeryLooseNoPix",
+        ConfigFile = "ElectronPhotonSelectorTools/trigger/rel22_20210611/ElectronLikelihoodVeryLooseTriggerConfig_NoPix.conf",
+        primaryVertexContainer = "PrimaryVertices")
+    kwargs.setdefault("ElectronLHSelectorVeryLooseNoPix", ElectronLHSelectorVeryLooseNoPix)
+
+    # LooseNoPix
+    ElectronLHSelectorLooseNoPix = CompFactory.AsgElectronLikelihoodTool(
+        "ElectronLHSelectorLooseNoPix",
+        ConfigFile = "ElectronPhotonSelectorTools/trigger/rel22_20210611/ElectronLikelihoodLooseTriggerConfig_NoPix.conf",
+        primaryVertexContainer = "PrimaryVertices")
+    kwargs.setdefault("ElectronLHSelectorLooseNoPix", ElectronLHSelectorLooseNoPix)
+
+    # MediumNoPix
+    ElectronLHSelectorMediumNoPix = CompFactory.AsgElectronLikelihoodTool(
+        "ElectronLHSelectorMediumNoPix",
+        ConfigFile = "ElectronPhotonSelectorTools/trigger/rel22_20210611/ElectronLikelihoodMediumTriggerConfig_NoPix.conf",
+        primaryVertexContainer = "PrimaryVertices")
+    kwargs.setdefault("ElectronLHSelectorMediumNoPix", ElectronLHSelectorMediumNoPix)
+
+    # TightNoPix
+    ElectronLHSelectorTightNoPix = CompFactory.AsgElectronLikelihoodTool(
+        "ElectronLHSelectorTightNoPix",
+        ConfigFile = "ElectronPhotonSelectorTools/trigger/rel22_20210611/ElectronLikelihoodTightTriggerConfig_NoPix.conf",
+        primaryVertexContainer = "PrimaryVertices")
+    kwargs.setdefault("ElectronLHSelectorTightNoPix", ElectronLHSelectorTightNoPix)
+
     acc.setPrivateTools(
         CompFactory.EgammaPhysValMonitoring.EgammaPhysValMonitoringTool(**kwargs))
+
+
     return acc
+

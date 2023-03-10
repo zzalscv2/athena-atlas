@@ -423,7 +423,7 @@ if __name__ == '__main__':
     flags.fillFromArgs()
 
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    flags.Input.Files = defaultTestFiles.RAW # need to update this depending on EDMversion
+    flags.Input.Files = defaultTestFiles.RAW_RUN2 # need to update this depending on EDMversion
     flags.Exec.MaxEvents=5
 
     flags.lock()

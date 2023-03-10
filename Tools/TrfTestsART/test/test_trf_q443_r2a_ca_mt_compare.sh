@@ -11,10 +11,10 @@ cd ca
 Reco_tf.py --CA \
   --AMI q443  \
   --multithreaded="True" \
-  --steering "doRAWtoALL" \
+  --steering "no" \
   --outputAODFile myAOD_ca.pool.root \
   --outputESDFile myESD_ca.pool.root \
-  --preExec "all:ConfigFlags.Jet.WriteToAOD=True; ConfigFlags.MET.WritetoAOD=True" \
+  --preExec "all:flags.Jet.WriteToAOD=True; flags.MET.WritetoAOD=True" \
   --imf="False" \
   --maxEvents 100
 
@@ -27,7 +27,7 @@ cd def
 Reco_tf.py \
   --AMI q443  \
   --multithreaded="True" \
-  --steering "doRAWtoALL" \
+  --steering "no" \
   --outputAODFile myAOD_def.pool.root \
   --outputESDFile myESD_def.pool.root \
   --preExec "all:from JetRec.JetRecFlags import jetFlags; jetFlags.writeJetsToAOD.set_Value_and_Lock(True); from METReconstruction.METRecoFlags import metFlags; metFlags.WriteMETAssocToOutput.set_Value_and_Lock(True);  metFlags.WriteMETToOutput.set_Value_and_Lock(True);" \

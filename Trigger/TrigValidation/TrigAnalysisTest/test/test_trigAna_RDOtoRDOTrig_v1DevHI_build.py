@@ -25,6 +25,7 @@ ex.threads = 1
 ex.args = '--outputRDO_TRIGFile=RDO_TRIG.pool.root'
 ex.args += ' --ignorePatterns "Py:Configurable.+attempt to add a duplicate.+"'
 ex.args += ' --preExec="all:{:s};"'.format(preExec)
+ex.args += ' --conditionsTag="all:OFLCOND-MC16-SDR-RUN2-09"'
 
 test = Test.Test()
 test.art_type = 'build'

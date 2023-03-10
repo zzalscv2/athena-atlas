@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from HIJetRec.HIJetRecFlags import HIJetFlags
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -19,7 +19,7 @@ def AddToOutputList(tname, objType='xAOD::JetContainer') :
     if not has_key :
         aux_suffix='Aux.'
         if 'CaloCluster' in objType :
-            HIJetFlags.HIJetOutputList += [ objType.replace("Container","CellLinkContainer") + "#" + tname + "_links" ]
+            HIJetFlags.HIJetOutputList += [ objType.replace("Container","CellLinkContainer").replace ('xAOD::','') + "#" + tname + "_links" ]
             if not HIJetFlags.WriteClusterMoments() : aux_suffix+='-'
         else  :
             for k in HIJetFlags.MomentsSkipped() :

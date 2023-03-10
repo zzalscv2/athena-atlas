@@ -36,6 +36,11 @@ def initConfigFlags():
     acf.addFlag('Exec.WarningMessageComponents',[])
     acf.addFlag('Exec.ErrorMessageComponents',[])
 
+    #Activate per-event log-output of StoreGate content
+    acf.addFlag('Debug.DumpEvtStore',False)
+    acf.addFlag('Debug.DumpDetStore',False)
+    acf.addFlag('Debug.DumpCondStore',False)
+
     acf.addFlag('ExecutorSplitting.TotalSteps', 0)
     acf.addFlag('ExecutorSplitting.Step', -1)
     acf.addFlag('ExecutorSplitting.TotalEvents', -1)

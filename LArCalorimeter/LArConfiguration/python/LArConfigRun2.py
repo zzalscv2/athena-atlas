@@ -1,7 +1,6 @@
 # Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 
 def LArConfigRun2PileUp(flags):
-   flags.LAr.ROD.DoOFCPileupOptimization = True
    flags.LAr.ROD.UseHighestGainAutoCorr = True
    flags.LAr.ROD.FirstSample = 0  # default
    flags.LAr.ROD.nSamples = 4     # default
@@ -12,7 +11,6 @@ def LArConfigRun2PileUp(flags):
 
 
 def LArConfigRun2NoPileUp(flags):
-   flags.LAr.ROD.DoOFCPileupOptimization = False
    flags.LAr.ROD.UseHighestGainAutoCorr = False
    flags.LAr.ROD.FirstSample = 0  # default
    flags.LAr.ROD.nSamples = 4     # default

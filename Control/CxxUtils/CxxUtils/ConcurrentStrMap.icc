@@ -447,7 +447,7 @@ void CONCURRENTSTRMAP::insert (InputIterator first, InputIterator last)
  * @param capacity The new table capacity.
  * @param ctx Execution context.
  *
- * No action will be taken in @c capacity is smaller
+ * No action will be taken if @c capacity is smaller
  * than the current capacity.
  */
 T_CONCURRENTSTRMAP
@@ -464,7 +464,7 @@ void CONCURRENTSTRMAP::reserve (size_type capacity,
  * @brief Increase the table capacity.
  * @param capacity The new table capacity.
  *
- * No action will be taken in @c capacity is smaller
+ * No action will be taken if @c capacity is smaller
  * than the current capacity.
  */
 T_CONCURRENTSTRMAP
@@ -502,6 +502,16 @@ T_CONCURRENTSTRMAP
 void CONCURRENTSTRMAP::swap (ConcurrentStrMap& other)
 {
   m_impl.swap (other.m_impl);
+}
+
+
+/**
+ * @brief Access the Updater instance.
+ */
+T_CONCURRENTSTRMAP
+auto CONCURRENTSTRMAP::updater() -> Updater_t&
+{
+  return m_impl.updater();
 }
 
 

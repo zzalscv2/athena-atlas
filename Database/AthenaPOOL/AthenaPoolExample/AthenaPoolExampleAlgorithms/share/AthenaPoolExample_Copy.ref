@@ -352,15 +352,14 @@ SimplePoolRepli...  DEBUG ---->Class:float
 SimplePoolRepli...  DEBUG ---->[0]:float Typ:float [10] Size:0 Offset:0 #Elements:1
 SimplePoolRepli...  DEBUG DB Action Commit
 Stream1.FileMet...  DEBUG beam energy "" tag could not be converted to float
-Stream1.FileMet...  DEBUG Failed to retrieve  'SimInfoKey':'/Simulation/Parameters' => cannot set: xAOD::FileMetaData::simFlavour, and xAOD::FileMetaData::isDataOverlay
+Stream1.FileMet...  DEBUG Failed to retrieve  'SimInfoKey':'/Simulation/Parameters' => cannot set: xAOD::FileMetaData::simFlavour, and xAOD::FileMetaData::isDataOverlay. Trying to get them from input metadata store.
+Stream1.FileMet...  DEBUG set xAOD::FileMetaData::dataType to Stream1
 Stream1.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream1.FileMet...  DEBUG added 1 to list of runNumbers
 Stream1.FileMet...  DEBUG retrieved existing list of lumiBlocks
 Stream1.FileMet...  DEBUG added 0 to list of lumiBlocks
 Stream1.FileMet...  DEBUG Retrieved  'EventInfoKey':'EventInfo'
 Stream1.FileMet...  DEBUG setting xAOD::FileMetaData::mcProcID to 0
-Stream1.FileMet...  DEBUG Retrieved  'StreamName':'Stream1'
-Stream1.FileMet...  DEBUG set xAOD::FileMetaData::dataType to Stream1
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #1, run #1 1 events processed so far  <<<===
 EventSelector       DEBUG Get AttributeList from the collection
 EventSelector       DEBUG AttributeList size 3
@@ -881,6 +880,8 @@ RootDatabase.close  DEBUG Closing DB SimplePoolFile1.root
 AthenaEventLoopMgr   INFO No more events in event selection 
 Stream1             DEBUG AthenaOutputStream Stream1 ::stop()
 Stream1             DEBUG slot 0  handle() incident type: MetaDataStop
+Stream1.FileMet...  DEBUG Could not get mcProcID
+Stream1.FileMet...  DEBUG FileMetaData payload replaced in store with content created for this stream
 Stream1             DEBUG addItemObjects(73252552,"FileMetaDataAux.") called
 Stream1             DEBUG            Key:FileMetaDataAux.
 Stream1             DEBUG      Comp Attr 0 with 7 mantissa bits.

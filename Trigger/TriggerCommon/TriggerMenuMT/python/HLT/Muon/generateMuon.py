@@ -4,7 +4,7 @@ from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, ChainStep, C
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import BeamType, Format
 
-from TrigL2MuonSA.TrigL2MuonSAConfig_newJO import l2MuFastAlgCfg, l2MuFastHypoCfg
+from TrigL2MuonSA.TrigL2MuonSAConfig import l2MuFastAlgCfg, l2MuFastHypoCfg
 from TrigmuComb.TrigmuCombConfig import l2MuCombRecoCfg, l2MuCombHypoCfg
 from TrigMuonHypo.TrigMuonHypoConfig import TrigMufastHypoToolFromDict, TrigmuCombHypoToolFromDict, TrigMuonEFMSonlyHypoToolFromDict, TrigMuonEFCombinerHypoToolFromDict, TrigMuonEFTrackIsolationHypoToolFromDict
 from TrigInDetConfig.TrigInDetConfig import trigInDetFastTrackingCfg

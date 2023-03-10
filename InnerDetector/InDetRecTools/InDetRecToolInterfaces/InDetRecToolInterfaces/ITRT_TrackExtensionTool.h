@@ -17,6 +17,7 @@
 
 #include "TrkParameters/TrackParameters.h" //typedef, cannot fwd declare
 #include "GaudiKernel/IAlgTool.h"
+#include "TRT_ReadoutGeometry/TRT_DetElementLink_xk.h"
 #include <vector>
 #include <memory> //for unique_ptr
 
@@ -61,17 +62,20 @@ namespace InDet {
       virtual std::vector<const Trk::MeasurementBase*>& extendTrack
         (const EventContext& ctx,
          const Trk::Track&,
-         InDet::ITRT_TrackExtensionTool::IEventData &virt_event_data) const = 0;
+         InDet::ITRT_TrackExtensionTool::IEventData &virt_event_data,
+         InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap& used) const = 0;
 
       virtual std::vector<const Trk::MeasurementBase*>& extendTrack
         (const EventContext& ctx,
          const Trk::TrackParameters * pTrackParams,
-         InDet::ITRT_TrackExtensionTool::IEventData &virt_event_data) const = 0;
+         InDet::ITRT_TrackExtensionTool::IEventData &virt_event_data,
+         InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap& used) const = 0;
 
       virtual Trk::Track* newTrack
         (const EventContext& ctx,
          const Trk::Track&,
-         InDet::ITRT_TrackExtensionTool::IEventData &virt_event_data) const = 0;
+         InDet::ITRT_TrackExtensionTool::IEventData &virt_event_data,
+         InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap& used) const = 0;
 
       ///////////////////////////////////////////////////////////////////
       // TRT seed extension to TRT
@@ -80,7 +84,8 @@ namespace InDet {
       virtual Trk::TrackSegment* findSegment
         (const EventContext& ctx,
          const Trk::TrackParameters *,
-         InDet::ITRT_TrackExtensionTool::IEventData &virt_event_data) const = 0;
+         InDet::ITRT_TrackExtensionTool::IEventData &virt_event_data,
+         InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap& used) const = 0;
 
       ///////////////////////////////////////////////////////////////////
       //  Tool initialisation  for new event

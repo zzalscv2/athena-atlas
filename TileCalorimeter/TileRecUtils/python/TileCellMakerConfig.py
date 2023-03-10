@@ -117,7 +117,7 @@ if __name__ == "__main__":
     log.setLevel(DEBUG)
 
     flags = initConfigFlags()
-    flags.Input.Files = defaultTestFiles.RAW
+    flags.Input.Files = defaultTestFiles.RAW_RUN2
     flags.Tile.RunType = 'PHY'
     flags.Tile.doOptATLAS = True
     flags.Tile.correctTimeJumps = True

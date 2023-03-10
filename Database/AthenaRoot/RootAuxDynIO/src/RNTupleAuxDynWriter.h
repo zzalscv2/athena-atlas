@@ -50,8 +50,6 @@ namespace RootAuxDynIO
 
       RNTupleAuxDynWriter(TFile* file, const std::string& ntupleName, int compression);
 
-      void checkType(const std::string& type);
-
       void  makeNewEntry();
 
       /// handle writing of dynamic xAOD attributes of an object - called from RootTreeContainer::writeObject()

@@ -225,6 +225,7 @@ flags.Trigger.doHLT = bool(opt.doHLT)
 flags.Trigger.doID = opt.doID
 flags.Trigger.doMuon = opt.doMuon
 flags.Trigger.doCalo = opt.doCalo
+flags.InDet.useDCS = False   # DCS is in general not available online
 
 # Set legacy Cond/Geo tags:
 globalflags.DetDescrVersion = flags.GeoModel.AtlasVersion
@@ -235,12 +236,10 @@ if opt.setMenu:
 
 # Setup list of modifiers
 # Common modifiers for MC and data
-setModifiers = ['noLArCalibFolders',
-                'ForceMuonDataType',
+setModifiers = ['ForceMuonDataType',
                 'useNewRPCCabling',
                 'useOracle',
-                'BunchSpacing25ns',
-                'disableInDetDCS',
+                'BunchSpacing25ns'
 ]
 
 if flags.Input.isMC:  # MC modifiers
@@ -258,7 +257,7 @@ else:           # More data modifiers
                      'enableSchedulerMon',
     ]
     if opt.doL1Sim:
-        setModifiers += ['superCellWithBCID']
+        flags.LAr.LATOME.DTInfoForL1="SC_ET_ID"
 
 
 #-------------------------------------------------------------

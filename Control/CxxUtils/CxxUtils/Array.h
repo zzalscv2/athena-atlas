@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -341,7 +341,7 @@ public:
    * @param std::ostream where the text should be written
    *
    * Writes the content of the array to a ostream. The sub-arrays are
-   * enclosed by square-brackets and separated by commas.
+   * enclosed by square brackets and separated by commas.
    */
   void write_array (std::ostream& stream) const;
 

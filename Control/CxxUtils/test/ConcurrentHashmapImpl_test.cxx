@@ -112,6 +112,9 @@ public:
   }
 
 
+  unsigned int inGrace() const { return m_inGrace; }
+
+
 private:
   std::mutex m_mutex;
   std::atomic<T*> m_p;
@@ -217,6 +220,8 @@ void test3()
   assert (chm.hasher()(12345) == CHMImpl::Hasher_t()(12345));
   assert (chm.matcher() (4321, 4321));
   assert (!chm.matcher() (4321, 4322));
+
+  assert (chm.updater().inGrace() == 0x0e);
 
   {
     auto [begin, end] = chm.range();

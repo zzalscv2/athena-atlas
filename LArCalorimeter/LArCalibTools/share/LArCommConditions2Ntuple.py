@@ -143,10 +143,14 @@ if doObj("PEDESTAL"):
       conddb.addFolder("",getDBFolderAndTag("/LAR/ElecCalibMC/Pedestal"))
       LArPedestals2Ntuple.ContainerKey="LArPedestal"
   elif IsFlat:    
-    from LArRecUtils.LArRecUtilsConf import LArFlatConditionsAlg_LArPedestalFlat_ as LArPedCondAlg 
     from AthenaCommon.AlgSequence import AthSequencer
     condSequence = AthSequencer("AthCondSeq")
-    folder="/LAR/ElecCalibFlat/Pedestal"
+    if SuperCells:
+       from LArRecUtils.LArRecUtilsConf import LArFlatConditionsAlg_LArPedestalSC_ as LArPedCondAlg 
+       folder="/LAR/ElecCalibFlatSC/Pedestal"
+    else:
+       from LArRecUtils.LArRecUtilsConf import LArFlatConditionsAlg_LArPedestalFlat_ as LArPedCondAlg 
+       folder="/LAR/ElecCalibFlat/Pedestal"
     conddb.addFolder("",getDBFolderAndTag(folder),className = 'CondAttrListCollection')
     LArPedestals2Ntuple.ContainerKey="Pedestal"
     condSequence += LArPedCondAlg(ReadKey=folder, WriteKey='Pedestal')
@@ -155,7 +159,7 @@ if doObj("PEDESTAL"):
     LArPedestals2Ntuple.ContainerKey="Pedestal"
   LArPedestals2Ntuple.isSC=SuperCells 
   LArPedestals2Ntuple.isFlat=IsFlat 
-  LArPedestals2Ntuple.OutputLevel=DEBUG 
+  LArPedestals2Ntuple.OutputLevel=WARNING
   topSequence+=LArPedestals2Ntuple
 
 

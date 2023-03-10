@@ -46,12 +46,12 @@ private:  // data
 
   // Job options.
   std::string m_jetalg;                 // Kt, AntiKt, CamKt
-  float m_zcut;                         // zcut: pTi, pTj > pT(i+j)
-  float m_rcut;                         // rcut: Rij < rcut*2m/pT
+  float m_zcut{};                         // zcut: pTi, pTj > pT(i+j)
+  float m_rcut{};                         // rcut: Rij < rcut*2m/pT
   ToolHandle<IJetFromPseudojet> m_bld;  // Tool to build jets.
 
   // Data
-  fastjet::JetAlgorithm m_fjalg;
+  fastjet::JetAlgorithm m_fjalg=fastjet::undefined_jet_algorithm;
   
 };
 

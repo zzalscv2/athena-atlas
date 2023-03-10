@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /** 
@@ -43,8 +43,8 @@ namespace Trk {
   // And this is the code to fill an inverse map with data
   template<class OrigMap, class CmpT>
   void addToInverseMultiMap(InverseMultiMap<OrigMap, CmpT> *result, const OrigMap& rec2truth) {
-    for(typename OrigMap::const_iterator i=rec2truth.begin(); i!=rec2truth.end(); i++) {
-      result->insert(std::make_pair(i->second, i->first));
+    for (const auto& p : rec2truth) {
+      result->insert(std::make_pair(p.second, p.first));
     }
   }
   

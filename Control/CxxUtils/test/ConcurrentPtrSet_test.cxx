@@ -114,6 +114,9 @@ public:
   }
 
 
+  unsigned int inGrace() const { return m_inGrace; }
+
+
 private:
   std::mutex m_mutex;
   std::atomic<T*> m_p;
@@ -152,6 +155,8 @@ void test1()
   assert (set.size() == MAXKEYS);
   assert (set.capacity() == 1024);
   assert (!set.empty());
+
+  assert (set.updater().inGrace() == 0x0e);
 
   for (size_t i = 0; i < MAXKEYS; i++) {
     TestSet::const_iterator it = set.find (&keys[i]);

@@ -51,14 +51,14 @@ atlas_add_citest( OverlayRun3MC_Legacy
 #################################################################################
 
 atlas_add_citest( RecoRun2Data
-   SCRIPT RunWorkflowTests_Run2.py --CI -r -w DataReco -e '--maxEvents 25' )
+   SCRIPT RunWorkflowTests_Run2.py --CI -r -w DataReco -e '--CA True --maxEvents 25' )
 
-atlas_add_citest( RecoRun2Data_CAConfig
-   SCRIPT RunWorkflowTests_Run2.py --CI -r -w DataReco -e '--CA --maxEvents 25' --no-output-checks )
+atlas_add_citest( RecoRun2Data_Legacy
+   SCRIPT RunWorkflowTests_Run2.py --CI -r -w DataReco -e '--CA False --maxEvents 25' --no-output-checks )
 
 atlas_add_citest( RecoRun2Data_LegacyVsCA
    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/RecoLegacyVsCA.sh RecoRun2Data q442
-   DEPENDS_SUCCESS RecoRun2Data RecoRun2Data_CAConfig )
+   DEPENDS_SUCCESS RecoRun2Data RecoRun2Data_Legacy )
 
 atlas_add_citest( DerivationRun2Data_PHYS
    SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag data_PHYS --threads 4
@@ -69,14 +69,14 @@ atlas_add_citest( DerivationRun2Data_PHYSLITE
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( RecoRun2MC
-   SCRIPT RunWorkflowTests_Run2.py --CI -r -w MCReco --threads 0 -e '--maxEvents 25' )
+   SCRIPT RunWorkflowTests_Run2.py --CI -r -w MCReco --threads 0 -e '--CA "all:True" "RDOtoRDOTrigger:False" --maxEvents 25' --no-output-checks )
 
-atlas_add_citest( RecoRun2MC_CAConfig
-   SCRIPT RunWorkflowTests_Run2.py --CI -r -w MCReco -e '--CA --maxEvents 25' --no-output-checks )
+atlas_add_citest( RecoRun2MC_Legacy
+   SCRIPT RunWorkflowTests_Run2.py --CI -r -w MCReco -e '--CA False --maxEvents 25' )
 
 atlas_add_citest( RecoRun2MC_LegacyVsCA
    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/RecoLegacyVsCA.sh RecoRun2MC q443
-   DEPENDS_SUCCESS RecoRun2MC RecoRun2MC_CAConfig )
+   DEPENDS_SUCCESS RecoRun2MC RecoRun2MC_Legacy )
 
 atlas_add_citest( RecoRun2MC_PileUp
    SCRIPT RunWorkflowTests_Run2.py --CI -p -w MCPileUpReco -e '--maxEvents 5 --inputRDO_BKGFile=../../PileUpPresamplingRun2/run_d1730/myRDO.pool.root' --no-output-checks  # go two levels up as the test runs in a subfolder
@@ -91,19 +91,19 @@ atlas_add_citest( DerivationRun2MC_PHYSLITE
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( RecoRun3Data
-   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q449 --threads 8 -e '--maxEvents 100' --run-only
+   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q449 --threads 8 -e '--CA True --maxEvents 100 --preExec pass' --run-only
    PROPERTIES PROCESSORS 8 )
 
 atlas_add_citest( RecoRun3Data_Checks
-   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q449 --threads 8 -e '--maxEvents 100' --checks-only --output-path ../RecoRun3Data
+   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q449 --threads 8 -e '--CA True --maxEvents 100 --preExec pass' --checks-only --output-path ../RecoRun3Data
    DEPENDS_SUCCESS RecoRun3Data )
 
-atlas_add_citest( RecoRun3Data_CAConfig
-   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -e '--CA --maxEvents 100 --preExec pass' --threads 8 --no-output-checks )
+atlas_add_citest( RecoRun3Data_Legacy
+   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -e '--CA False --maxEvents 100' --threads 8 --no-output-checks )
 
 atlas_add_citest( RecoRun3Data_LegacyVsCA
    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/RecoLegacyVsCA.sh RecoRun3Data q449
-   DEPENDS_SUCCESS RecoRun3Data RecoRun3Data_CAConfig )
+   DEPENDS_SUCCESS RecoRun3Data RecoRun3Data_Legacy )
 
 atlas_add_citest( RecoRun3Data_Bulk
    SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a f1262 --threads 8 -e '--skipEvents 100 --maxEvents 500 --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data --postExec="all:FPEAuditor.NStacktracesOnFPE=20"' --run-only --no-output-checks
@@ -131,14 +131,14 @@ atlas_add_citest( DerivationRun3Data_PHYSLITE
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( RecoRun3MC
-   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/RecoRun3MC.sh )
+   SCRIPT RunWorkflowTests_Run3.py --CI -r -w MCReco -e '--CA "all:True" "RDOtoRDOTrigger:False" --maxEvents 25' )
 
-atlas_add_citest( RecoRun3MC_CAConfig
-   SCRIPT RunWorkflowTests_Run3.py --CI -r -w MCReco -e '--CA --maxEvents 25' --no-output-checks )
+atlas_add_citest( RecoRun3MC_Legacy
+   SCRIPT RunWorkflowTests_Run3.py --CI -r -w MCReco -e '--CA False --maxEvents 25' --no-output-checks )
 
 atlas_add_citest( RecoRun3MC_LegacyVsCA
    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/RecoLegacyVsCA.sh RecoRun3MC q445
-   DEPENDS_SUCCESS RecoRun3MC RecoRun3MC_CAConfig )
+   DEPENDS_SUCCESS RecoRun3MC RecoRun3MC_Legacy )
 
 atlas_add_citest( RecoRun3MC_PileUp
    SCRIPT RunWorkflowTests_Run3.py --CI -p -w MCPileUpReco -e '--maxEvents 5 --inputRDO_BKGFile=../../PileUpPresamplingRun3/run_d1760/myRDO.pool.root' --no-output-checks  # go two levels up as the test runs in a subfolder
@@ -203,16 +203,13 @@ atlas_add_citest( CPAlgorithmsRun3Data_PHYSLITE
 # Data Quality
 #################################################################################
 
-atlas_add_citest( DataQuality_r21ESD
-   SCRIPT Run3DQTestingDriver.py 'Input.Files=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/q431/21.0/myESD.pool.root"]' Output.HISTFileName='DataQuality_r21ESD_HIST.root' DQ.Steering.doHLTMon=False --threads=1 )
-
 atlas_add_citest( DataQuality_Run3MC
-   SCRIPT Run3DQTestingDriver.py 'Input.Files=["../RecoRun3MC/run_q445/myAOD.pool.root"]' DQ.Environment=AOD --threads=1
+   SCRIPT Run3DQTestingDriver.py 'Input.Files=["../RecoRun3MC/run_q445/myAOD.pool.root"]' DQ.Environment=AOD DQ.Steering.doHLTMon=False --threads=1
    DEPENDS_SUCCESS RecoRun3MC )
 
-atlas_add_citest( DataQuality_r21ESD_Postprocessing
-   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/DataQuality_r21ESD_Postprocessing.sh
-   DEPENDS_SUCCESS DataQuality_r21ESD )
+atlas_add_citest( DataQuality_Run3Data_Postprocessing
+   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/DataQuality_Run3Data_Postprocessing.sh
+   DEPENDS_SUCCESS RecoRun3Data )
 
 atlas_add_citest( DataQuality_Run3Data_AODtoHIST
    SCRIPT Reco_tf.py --AMI=q449 --inputAODFile="../RecoRun3Data/run_q449/myAOD.pool.root" --outputHISTFile=DataQuality_Run3Data_AODtoHIST.root  --athenaopts='--threads=1'

@@ -36,15 +36,13 @@ bool isGenStable (const xAOD::TruthParticle& tp)
 
   const xAOD::TruthVertex* vertex = tp.hasDecayVtx() ? tp.decayVtx() : 0;
   // we want to keep primary particle with status==2 but without vertex in HepMC
-  int vertex_barcode=-999999;
-  if (vertex) vertex_barcode=vertex->barcode();
 
   return (
           ( ( tp.status()%1000 == 1) ||  
-            (tp.status()==2 && vertex_barcode<-200000) || 
+            (tp.status()==2 && (!vertex || HepMC::is_simulation_vertex(vertex->barcode()))) || 
             (tp.status()%1000 == 2 && tp.status() > 1000) 
-            ) && (tp.barcode()<200000) 
-          && !(abs(p_id) == 21 && tp.e()==0)
+            ) && (!HepMC::is_simulation_particle(tp.barcode())) 
+          && !(std::abs(p_id) == 21 && tp.e()==0)
           ) ? true:false;    
 }
 
@@ -52,19 +50,16 @@ bool isGenStable (const xAOD::TruthParticle& tp)
 bool isGenInteracting (const xAOD::TruthParticle& tp)
 {
   int status = tp.status();
-  int barcode = tp.barcode();
   int pdg_id = abs(tp.pdgId());
   const xAOD::TruthVertex* vertex = tp.hasDecayVtx() ? tp.decayVtx() : 0;
   // we want to keep primary particle with status==2 but without vertex in HepMC
-  int vertex_barcode=-999999;
-  if (vertex) vertex_barcode=vertex->barcode();
 
   return
     (
 
      (((status%1000 == 1) ||
        (status%1000 == 2 && status > 1000) ||
-       (status==2 && vertex_barcode<-200000)) && (barcode<200000)) &&
+       (status==2 && (!vertex || HepMC::is_simulation_vertex(vertex->barcode())))) && (!HepMC::is_simulation_particle(tp.barcode())) ) &&
 
      !(pdg_id==12 || pdg_id==14 || pdg_id==16 ||
        (pdg_id==1000022 &&  status%1000==1 ) ||
@@ -200,7 +195,7 @@ bool egammaTruthAlg::isAccepted (const xAOD::TruthParticle& tp,
     for (size_t i = 0; i < sz; i++) {
       const xAOD::TruthParticle* child = v->outgoingParticle(i);
       if( child && child->pdgId()==id && child->barcode()!=barcode
-          && (child->barcode() <100000 ))
+          && (child->barcode() <100000 ))//AV: This should be a bug
       {
         return false;
       }

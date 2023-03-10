@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -37,7 +37,7 @@ InDetPhysValTruthDecoratorAlg::~InDetPhysValTruthDecoratorAlg () {
 StatusCode
 InDetPhysValTruthDecoratorAlg::initialize() {
   ATH_CHECK(m_extrapolator.retrieve());
-  ATH_CHECK(m_beamSpotKey.initialize());
+  ATH_CHECK(m_beamSpotDecoKey.initialize());
   ATH_CHECK( m_truthPixelClusterName.initialize() );
   ATH_CHECK( m_truthSCTClusterName.initialize() );
   ATH_CHECK( m_truthSelectionTool.retrieve( EnableTool { not m_truthSelectionTool.name().empty() } ) );
@@ -120,9 +120,10 @@ InDetPhysValTruthDecoratorAlg::execute(const EventContext &ctx) const {
     } // Loop over PIX clusters
   }
   if (not float_decor.empty()) {
-     SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey, ctx };
-     ATH_CHECK(beamSpotHandle.isValid());
-     const auto& beamPos = beamSpotHandle->beamPos();
+     SG::ReadDecorHandle<xAOD::EventInfo, float> beamPosX(m_beamSpotDecoKey[0], ctx);
+     SG::ReadDecorHandle<xAOD::EventInfo, float> beamPosY(m_beamSpotDecoKey[1], ctx);
+     SG::ReadDecorHandle<xAOD::EventInfo, float> beamPosZ(m_beamSpotDecoKey[2], ctx);
+     Amg::Vector3D beamPos = Amg::Vector3D(beamPosX(0), beamPosY(0), beamPosZ(0));
 
      if ( m_truthSelectionTool.get() ) {
         CutFlow tmp_cut_flow(m_truthSelectionTool->nCuts());
@@ -220,14 +221,6 @@ InDetPhysValTruthDecoratorAlg::decorateTruth(const xAOD::TruthParticle& particle
     IDPVM::decorateOrRejectQuietly(particle,float_decor[kDecorProdR],prodR_truth);
     IDPVM::decorateOrRejectQuietly(particle,float_decor[kDecorProdZ],z_truth);
 
-    // particle.auxdecor<float>(prefix + "d0") = d0_truth;
-    // particle.auxdecor<float>(prefix + "z0") = z0_truth;
-    // particle.auxdecor<float>(prefix + "phi") = phi_truth;
-    // particle.auxdecor<float>(prefix + "theta") = theta_truth;
-    // particle.auxdecor<float>(prefix + "z0st") = z0st_truth;
-    // particle.auxdecor<float>(prefix + "qOverP") = qOverP_truth;
-    // particle.auxdecor<float>(prefix + "prodR") = prodR_truth;
-    // particle.auxdecor<float>(prefix + "prodZ") = z_truth;
     return true;
   } else {
     ATH_MSG_DEBUG("The TrackParameters pointer for this TruthParticle is NULL");

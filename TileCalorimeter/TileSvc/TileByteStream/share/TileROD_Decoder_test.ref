@@ -1,26 +1,13 @@
 TileROD_Decoder_test
 
 
-Initializing Gaudi ApplicationMgr using job opts /home/solodkov/git/r22.0.tile/athena/TileCalorimeter/TileSvc/TileByteStream/share/TileROD_Decoder_test.txt
-JobOptionsSvc        INFO # =======> /home/solodkov/git/r22.0.tile/athena/TileCalorimeter/TileSvc/TileByteStream/share/TileROD_Decoder_test.txt
-JobOptionsSvc        INFO # (2,1): ApplicationMgr.ExtSvc = ["StoreGateSvc/DetectorStore", "StoreGateSvc/ConditionStore"]
-JobOptionsSvc        INFO # (3,1): ToolSvc.TileROD_Decoder.TileL2Builder = ""
-JobOptionsSvc        INFO # (4,1): ToolSvc.TileROD_Decoder.TileBadChanTool = ""
-JobOptionsSvc        INFO Job options successfully read in from /home/solodkov/git/r22.0.tile/athena/TileCalorimeter/TileSvc/TileByteStream/share/TileROD_Decoder_test.txt
-ApplicationMgr    SUCCESS 
-====================================================================================================================================
-                                                   Welcome to ApplicationMgr (GaudiCoreSvc v36r4)
-                                          running on pcatl03.cern.ch on Sun Mar 13 20:41:52 2022
-====================================================================================================================================
 ApplicationMgr       INFO Application Manager Configured successfully
-ClassIDSvc           INFO getRegistryEntries: read 11965 CLIDRegistry entries for module ALL
 EventLoopMgr      WARNING Unable to locate service "EventSelector" 
 EventLoopMgr      WARNING No events will be processed from external input.
 ApplicationMgr       INFO Application Manager Initialized successfully
 ApplicationMgr Ready
 TileHWID             INFO initialize_from_dictionary 
 TileTBID             INFO initialize_from_dictionary 
-ClassIDSvc           INFO getRegistryEntries: read 555 CLIDRegistry entries for module ALL
 test1 (fillCollection)
 TileDigitsCollection: 16
 TileRawDataCollection of TileDigits Id = 0x100 size = 16
@@ -98,81 +85,60 @@ TileRawChannel Id = 5/0/1/0/45/1 ampl = -23 time = 0 qual = 0
 TileRawChannel Id = 5/0/1/0/46/1 ampl = -9 time = 0 qual = 0
 TileRawChannel Id = 5/0/1/0/47/1 ampl = 9.5 time = 0 qual = 0
 
-TileBeamElemCollection: 73
-TileRawDataCollection of TileBeamElem Id = 0x0 size = 73
-TileBeamElem Id = 5/0/0/0/14/0 Val: 8223
-TileBeamElem Id = 5/0/0/0/13/0 Val: 7711 6684
-TileBeamElem Id = 5/0/0/0/14/0 Val: 8478
-TileBeamElem Id = 5/0/0/0/11/0 Val: 8221
-TileBeamElem Id = 5/0/0/0/12/0 Val: 8478 7971 6943 8479
-TileBeamElem Id = 5/0/0/0/13/0 Val: 7968 6942
-TileBeamElem Id = 5/0/0/0/13/0 Val: 9246
-TileBeamElem Id = 5/0/0/0/12/0 Val: 8221
-TileBeamElem Id = 5/0/0/0/12/0 Val: 7709 6948 7199 8223
-TileBeamElem Id = 5/0/0/0/14/0 Val: 7969
-TileBeamElem Id = 5/0/0/0/14/0 Val: 6942
-TileBeamElem Id = 5/0/0/0/14/0 Val: 8734
-TileBeamElem Id = 5/0/0/0/13/0 Val: 8221
-TileBeamElem Id = 5/0/0/0/10/0 Val: 7708 7458
-TileBeamElem Id = 5/0/0/0/15/0 Val: 7712 8223
-TileBeamElem Id = 5/0/0/0/15/0 Val: 8736
-TileBeamElem Id = 5/0/0/0/14/0 Val: 7710
-TileBeamElem Id = 5/0/0/0/15/0 Val: 8734
-TileBeamElem Id = 5/0/0/0/14/0 Val: 8732
-TileBeamElem Id = 5/0/0/0/11/0 Val: 7454 7975
-TileBeamElem Id = 5/0/0/0/14/0 Val: 7711
-TileBeamElem Id = 5/0/0/0/15/0 Val: 8735
-TileBeamElem Id = 5/0/0/0/14/0 Val: 8223
-TileBeamElem Id = 5/0/0/0/15/0 Val: 7965
-TileBeamElem Id = 5/0/0/0/15/0 Val: 9247 8221
-TileBeamElem Id = 5/0/0/0/13/0 Val: 6942 7462 7714
-TileBeamElem Id = 5/0/0/0/15/0 Val: 8735
-TileBeamElem Id = 5/0/0/0/14/0 Val: 7966
-TileBeamElem Id = 5/0/0/0/15/0 Val: 7963
-TileBeamElem Id = 5/0/0/0/14/0 Val: 8988 6685
-TileBeamElem Id = 5/0/0/0/15/0 Val: 6945 7968
-TileBeamElem Id = 5/0/0/0/14/0 Val: 7714
-TileBeamElem Id = 5/0/0/0/15/0 Val: 8479
-TileBeamElem Id = 5/0/0/0/15/0 Val: 7965
-TileBeamElem Id = 5/0/0/0/14/0 Val: 7966
-TileBeamElem Id = 5/0/0/0/13/0 Val: 9247 6429
-TileBeamElem Id = 5/0/0/0/15/0 Val: 6693
-TileBeamElem Id = 5/0/0/0/15/0 Val: 8225
-TileBeamElem Id = 5/0/0/0/14/0 Val: 7967
-TileBeamElem Id = 5/0/0/0/0/0 Val: 37758
-TileBeamElem Id = 5/0/0/0/0/0 Val: 40027
-TileBeamElem Id = 5/0/0/0/0/0 Val: 38273
-TileBeamElem Id = 5/0/0/0/0/0 Val: 40205
-TileBeamElem Id = 5/0/0/0/0/0 Val: 37920
-TileBeamElem Id = 5/0/0/0/0/0 Val: 38284
-TileBeamElem Id = 5/0/0/0/0/0 Val: 34648
-TileBeamElem Id = 5/0/0/0/0/0 Val: 33591
-TileBeamElem Id = 5/0/0/0/0/0 Val: 37535
-TileBeamElem Id = 5/0/0/0/0/0 Val: 37379
-TileBeamElem Id = 5/0/0/0/0/0 Val: 38812
-TileBeamElem Id = 5/0/0/0/0/0 Val: 44356
-TileBeamElem Id = 5/0/0/0/0/0 Val: 38640
-TileBeamElem Id = 5/0/0/0/0/0 Val: 44905
-TileBeamElem Id = 5/0/0/0/0/0 Val: 36249
-TileBeamElem Id = 5/0/0/0/0/0 Val: 39928
-TileBeamElem Id = 5/0/0/0/0/0 Val: 39188
-TileBeamElem Id = 5/0/0/0/0/0 Val: 41289
-TileBeamElem Id = 5/0/0/0/0/0 Val: 40226
-TileBeamElem Id = 5/0/0/0/0/0 Val: 47720
-TileBeamElem Id = 5/0/0/0/0/0 Val: 42129
-TileBeamElem Id = 5/0/0/0/0/0 Val: 39158
-TileBeamElem Id = 5/0/0/0/0/0 Val: 35538
-TileBeamElem Id = 5/0/0/0/0/0 Val: 41147
-TileBeamElem Id = 5/0/0/0/0/0 Val: 50378
-TileBeamElem Id = 5/0/0/0/0/0 Val: 42851
-TileBeamElem Id = 5/0/0/0/0/0 Val: 48525
-TileBeamElem Id = 5/0/0/0/0/0 Val: 45673
-TileBeamElem Id = 5/0/0/0/0/0 Val: 45704
-TileBeamElem Id = 5/0/0/0/0/0 Val: 42040
-TileBeamElem Id = 5/0/0/0/0/0 Val: 45056
-TileBeamElem Id = 5/0/0/0/0/0 Val: 47329
-TileBeamElem Id = 5/0/0/0/0/0 Val: 0
-TileBeamElem Id = 5/0/0/0/0/0 Val: 0
+TileBeamElemCollection (0x10): 16
+TileRawDataCollection of TileBeamElem Id = 0x10 size = 16
+TileBeamElem Id = 5/0/0/16/0/0 Val: 1412
+TileBeamElem Id = 5/0/0/16/8/0 Val: 642
+TileBeamElem Id = 5/0/0/16/1/0 Val: 703
+TileBeamElem Id = 5/0/0/16/9/0 Val: 645
+TileBeamElem Id = 5/0/0/16/2/0 Val: 638
+TileBeamElem Id = 5/0/0/16/10/0 Val: 649
+TileBeamElem Id = 5/0/0/16/3/0 Val: 366
+TileBeamElem Id = 5/0/0/16/11/0 Val: 78
+TileBeamElem Id = 5/0/0/16/4/0 Val: 2239
+TileBeamElem Id = 5/0/0/16/12/0 Val: 60
+TileBeamElem Id = 5/0/0/16/5/0 Val: 434
+TileBeamElem Id = 5/0/0/16/13/0 Val: 7972
+TileBeamElem Id = 5/0/0/16/6/0 Val: 606
+TileBeamElem Id = 5/0/0/16/14/0 Val: 511
+TileBeamElem Id = 5/0/0/16/7/0 Val: 557
+TileBeamElem Id = 5/0/0/16/15/0 Val: 660
+
+TileBeamElemCollection (0x12): 8
+TileRawDataCollection of TileBeamElem Id = 0x12 size = 8
+TileBeamElem Id = 5/0/0/18/0/0 Val: 1702
+TileBeamElem Id = 5/0/0/18/8/0 Val: 1259
+TileBeamElem Id = 5/0/0/18/9/0 Val: 1063
+TileBeamElem Id = 5/0/0/18/3/0 Val: 1730
+TileBeamElem Id = 5/0/0/18/4/0 Val: 2136
+TileBeamElem Id = 5/0/0/18/5/0 Val: 1489
+TileBeamElem Id = 5/0/0/18/6/0 Val: 1680
+TileBeamElem Id = 5/0/0/18/7/0 Val: 1874
+
+TileBeamElemCollection (0x13): 3
+TileRawDataCollection of TileBeamElem Id = 0x13 size = 3
+TileBeamElem Id = 5/0/0/19/13/0 Val: 1319
+TileBeamElem Id = 5/0/0/19/14/0 Val: 1154
+TileBeamElem Id = 5/0/0/19/15/0 Val: 2532
+
+TileBeamElemCollection (0xff): 16
+TileRawDataCollection of TileBeamElem Id = 0xff size = 16
+TileBeamElem Id = 5/0/0/255/0/0 Val: 0
+TileBeamElem Id = 5/0/0/255/1/0 Val: 15
+TileBeamElem Id = 5/0/0/255/2/0 Val: 32
+TileBeamElem Id = 5/0/0/255/3/0 Val: 130
+TileBeamElem Id = 5/0/0/255/4/0 Val: 0
+TileBeamElem Id = 5/0/0/255/5/0 Val: 0
+TileBeamElem Id = 5/0/0/255/6/0 Val: 0
+TileBeamElem Id = 5/0/0/255/7/0 Val: 0
+TileBeamElem Id = 5/0/0/255/8/0 Val: 0
+TileBeamElem Id = 5/0/0/255/9/0 Val: 0
+TileBeamElem Id = 5/0/0/255/10/0 Val: 1668370548
+TileBeamElem Id = 5/0/0/255/11/0 Val: 0
+TileBeamElem Id = 5/0/0/255/12/0 Val: 1
+TileBeamElem Id = 5/0/0/255/13/0 Val: 0
+TileBeamElem Id = 5/0/0/255/14/0 Val: 0
+TileBeamElem Id = 5/0/0/255/15/0 Val: 0
 
 test2 (fillCollection_TileMuRcv)
 TileDigitsCollection_TileMuRcv: 8

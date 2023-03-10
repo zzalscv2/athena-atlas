@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CXXUTILS_PAGEACCESSCONTROL_H
@@ -77,7 +77,7 @@ public:
     Entry(const void* a, size_t l, int p, void* pl);
     /// address of page for which protection was requested. Used as key
     const void* addr;
-    ///lenght of the protected region, from page addr to end of protected obj
+    ///length of the protected region, from page addr to end of protected obj
     size_t lenProt; 
     int prot;
     ///pointer to the heap fragment we leaked before protecting the page

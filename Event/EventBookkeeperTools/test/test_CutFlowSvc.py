@@ -33,7 +33,7 @@ flags = initConfigFlags()
 if args.input:
   flags.Input.Files = [args.input]
 elif args.data:
-  flags.Input.Files = defaultTestFiles.RAW
+  flags.Input.Files = defaultTestFiles.RAW_RUN2
 else:
   flags.Input.Files = defaultTestFiles.AOD_RUN2_MC
 

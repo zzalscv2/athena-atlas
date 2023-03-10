@@ -332,7 +332,7 @@ if __name__ == "__main__":
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
-    flags.Input.Files = defaultTestFiles.RAW
+    flags.Input.Files = defaultTestFiles.RAW_RUN2
     flags.lock()
     failures = 0
     for eb_identifier in EventBuildingInfo.getAllEventBuildingIdentifiers():

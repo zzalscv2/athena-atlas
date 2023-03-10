@@ -23,7 +23,7 @@ class MM_ROD_Decoder : virtual public IMM_ROD_Decoder, public AthAlgTool
     MM_ROD_Decoder(const std::string& type, const std::string& name, const IInterface* parent ) ;
     virtual ~MM_ROD_Decoder() = default;  
     virtual StatusCode initialize() override;
-    virtual StatusCode fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment&, const std::vector<IdentifierHash>&, MM_RawDataContainer&) const override;
+    virtual StatusCode fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment&, const std::vector<IdentifierHash>&, std::unordered_map<IdentifierHash, std::unique_ptr<MM_RawDataCollection>>&) const override;
 
   protected:
     const MmIdHelper* m_MmIdHelper = nullptr;    
