@@ -39,9 +39,6 @@ def createInDetConfigFlags():
 
     # Tracking parameters
 
-    # Switch for running TIDE Ambi
-    icf.addFlag("InDet.Tracking.doTIDE_Ambi", lambda prevFlags:
-                not(prevFlags.Beam.Type is BeamType.Cosmics))
     # Turn on running of Brem Recovery in tracking
     icf.addFlag("InDet.Tracking.doBremRecovery", lambda prevFlags: (
         not (prevFlags.Tracking.doVtxLumi or
@@ -144,8 +141,6 @@ def createInDetConfigFlags():
     icf.addFlag("InDet.Tracking.doPseudoTracking", False)
     # Special pass using truth information for pattern recognition, removes assumed in-efficencies applied to PseudoTracking
     icf.addFlag("InDet.Tracking.doIdealPseudoTracking", False)
-    # Switch for track observer tool
-    icf.addFlag("InDet.Tracking.doTIDE_AmbiTrackMonitoring", False)
 
 
     from InDetConfig.TrackingPassFlags import (
