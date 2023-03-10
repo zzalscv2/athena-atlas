@@ -9,7 +9,7 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "TrkValHistUtils/PlotBase.h"
 #include "TrkValHistUtils/ParamPlots.h"
-#include "ElectronPlots.h"
+#include "LRTElectronPlots.h"
 #include "ElectronFrwdPlots.h"
 #include "KinematicsPlots.h"
 #include "xAODEgamma/Electron.h"
@@ -19,11 +19,11 @@
 class LRTElectronValidationPlots:public PlotBase {
   public:
     LRTElectronValidationPlots(PlotBase* pParent, const std::string& sDir);
-    void fill(const xAOD::Electron& electron, const xAOD::EventInfo& eventInfo, bool isPrompt);
+    void fill(const xAOD::Electron& electron, const xAOD::EventInfo& eventInfo, bool isPrompt, bool pass_LHVeryLooseNoPix, bool pass_LHLooseNoPix, bool pass_LHMediumNoPix, bool pass_LHTightNoPix);
 
     std::string m_sParticleType;
 
-    Egamma::ElectronPlots           m_oCentralElecPlots;
+    Egamma::LRTElectronPlots           m_oCentralElecPlots;
       
     TH1* author;
     TH1* mu_average;

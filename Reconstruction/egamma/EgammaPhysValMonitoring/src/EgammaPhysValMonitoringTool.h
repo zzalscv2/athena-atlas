@@ -42,6 +42,8 @@
 #include "CLHEP/Units/SystemOfUnits.h"
 #include "CxxUtils/checker_macros.h"
 
+#include "EgammaAnalysisInterfaces/IAsgElectronLikelihoodTool.h"
+
 class IMCTruthClassifier;
 namespace EgammaPhysValMonitoring {
 
@@ -113,6 +115,33 @@ class ATLAS_NOT_THREAD_SAFE EgammaPhysValMonitoringTool
   ToolHandle<IMCTruthClassifier>  m_truthClassifier {this,
       "MCTruthClassifier", "EMMCTruthClassifier", "Handle of MCTruthClassifier"};
 
+  ToolHandle<IAsgElectronLikelihoodTool> m_Electron_VeryLooseNoPix_LLHTool{
+      this,
+      "ElectronLHSelectorVeryLooseNoPix", // Name of the configurable argument
+      "AsgElectronLikelihoodTool/ElectronLHSelectorVeryLooseNoPix", // Default instance of the tool, of the form ToolClass/ToolName
+      "Electron Likelihood Selector VeryLooseNoPix" // Description
+  };
+
+  ToolHandle<IAsgElectronLikelihoodTool> m_Electron_LooseNoPix_LLHTool{
+      this,
+      "ElectronLHSelectorLooseNoPix", // Name of the configurable argument
+      "AsgElectronLikelihoodTool/ElectronLHSelectorLooseNoPix", // Default instance of the tool, of the form ToolClass/ToolName
+      "Electron Likelihood Selector LooseNoPix" // Description
+  };
+
+  ToolHandle<IAsgElectronLikelihoodTool> m_Electron_MediumNoPix_LLHTool{
+      this,
+      "ElectronLHSelectorMediumNoPix", // Name of the configurable argument
+      "AsgElectronLikelihoodTool/ElectronLHSelectorMediumNoPix", // Default instance of the tool, of the form ToolClass/ToolName
+      "Electron Likelihood Selector Medium" // Description
+  };
+
+  ToolHandle<IAsgElectronLikelihoodTool> m_Electron_TightNoPix_LLHTool{
+      this,
+      "ElectronLHSelectorTightNoPix", // Name of the configurable argument
+      "AsgElectronLikelihoodTool/ElectronLHSelectorTightNoPix", // Default instance of the tool, of the form ToolClass/ToolName
+      "Electron Likelihood Selector Tight" // Description
+  };
 }; 
 
 }

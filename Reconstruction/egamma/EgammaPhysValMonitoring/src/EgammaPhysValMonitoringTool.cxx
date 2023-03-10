@@ -66,8 +66,11 @@ StatusCode EgammaPhysValMonitoringTool::initialize()
 {
   ATH_MSG_INFO ("Initializing " << name() << "...");    
   ATH_CHECK(ManagedMonitorToolBase::initialize());
-  ATH_CHECK(m_truthClassifier.retrieve());  
-
+  ATH_CHECK(m_truthClassifier.retrieve()); 
+  ATH_CHECK(m_Electron_VeryLooseNoPix_LLHTool.retrieve()); 
+  ATH_CHECK(m_Electron_LooseNoPix_LLHTool.retrieve()); 
+  ATH_CHECK(m_Electron_MediumNoPix_LLHTool.retrieve()); 
+  ATH_CHECK(m_Electron_TightNoPix_LLHTool.retrieve()); 
   ATH_CHECK(m_EventInfoContainerKey.initialize());
   ATH_CHECK(m_photonContainerKey.initialize());
   ATH_CHECK(m_electronContainerKey.initialize());
@@ -478,6 +481,10 @@ StatusCode EgammaPhysValMonitoringTool::fillLRTElecHistograms(const xAOD::TruthP
     bool isElecPrompt=false;
 
     if(!(electron->isGoodOQ (xAOD::EgammaParameters::BADCLUSELECTRON))) continue;
+    bool pass_LHVeryLooseNoPix = static_cast<bool>(m_Electron_VeryLooseNoPix_LLHTool->accept(electron));
+    bool pass_LHLooseNoPix = static_cast<bool>(m_Electron_LooseNoPix_LLHTool->accept(electron));
+    bool pass_LHMediumNoPix = static_cast<bool>(m_Electron_MediumNoPix_LLHTool->accept(electron));
+    bool pass_LHTightNoPix = static_cast<bool>(m_Electron_TightNoPix_LLHTool->accept(electron));
 
     if(electron->isAvailable <int>("truthType")) {
       MCTruthPartClassifier::ParticleType type = (MCTruthPartClassifier::ParticleType) electron->auxdata<int>("truthType");
@@ -503,7 +510,7 @@ StatusCode EgammaPhysValMonitoringTool::fillLRTElecHistograms(const xAOD::TruthP
     } else if(m_isMC){ if(Match(electron,11, truthParticles)!=nullptr ) isElecPrompt=true;}
     
     
-    m_oLRTElectronValidationPlots.fill(*electron,*eventInfo,isElecPrompt);
+    m_oLRTElectronValidationPlots.fill(*electron,*eventInfo, isElecPrompt, pass_LHVeryLooseNoPix, pass_LHLooseNoPix, pass_LHMediumNoPix, pass_LHTightNoPix);
     if(electron->author()&xAOD::EgammaParameters::AuthorElectron||
        electron->author()&xAOD::EgammaParameters::AuthorAmbiguous)   numofele++;
     
