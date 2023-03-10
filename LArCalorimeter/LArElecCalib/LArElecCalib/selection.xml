@@ -15,6 +15,7 @@
   <class name="ILArGlobalTimeOffset" />
   <class name="ILArH6Oscillation" />
   <class name="ILArMinBias" />
+  <class name="ILArMinBiasAverage" />
   <class name="ILArMphysOverMcal" />
   <class name="ILArNoise" />
   <class name="ILArOFC" />
