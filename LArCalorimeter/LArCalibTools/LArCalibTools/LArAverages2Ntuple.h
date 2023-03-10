@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -9,45 +9,42 @@
    * @author S. Laplace
    * 14. 12. 2005
    * Modifications:
+   * P. Strizenec 9.3.2023 migration to rel. 23 
 */
 
 #ifndef LARAVERAGES2NTUPLE_H
 #define LARAVERAGES2NTUPLE_H
+
 #include "LArCalibTools/LArCond2NtupleBase.h"
-
-#include "CaloIdentifier/LArEM_ID.h"
+#include "StoreGate/ReadHandleKey.h"
+#include "LArRawEvent/LArAccumulatedCalibDigitContainer.h"
 #include "LArIdentifier/LArOnlineID.h"
-#include "LArCabling/LArOnOffIdMapping.h"
-#include "LArRecConditions/LArCalibLineMapping.h"
-
-#include <fstream>
-#include <math.h>
-#include <string>
-#include <map>
 
 class LArAverages2Ntuple : public LArCond2NtupleBase
 {
  public:
   LArAverages2Ntuple(const std::string & name, ISvcLocator * pSvcLocator);
-  ~LArAverages2Ntuple();
+  ~LArAverages2Ntuple(){};
 
   //standard algorithm methods
-  StatusCode initialize();
-  StatusCode execute() ;
-  StatusCode finalize(){return StatusCode::SUCCESS;}
+  virtual StatusCode initialize() override final;
+  virtual StatusCode execute() override final;
 
  private:
   const LArOnlineID_Base* m_onlineHelper;
 
-  std::string m_ntName;
-  std::string m_contKey;
-  std::vector<unsigned int> m_keepFT;
+  SG::ReadHandleKey<LArAccumulatedCalibDigitContainer> m_contKey{this, "ContainerKey","","LArAccumulatedCalibDigit key"};
+  Gaudi::Property< unsigned int >  m_Nsamples{this, "NSamples", 32,"Number of samples to store"};
+  Gaudi::Property< bool >  m_keepPulsed{this, "KeepOnlyPulsed", true};
+  Gaudi::Property< std::vector<unsigned int> > m_keepFT{this,"KeepFT", {}, "list of FT to keep"};
 
-  unsigned int  m_Nsamples;
-  bool m_keepPulsed;
-  int m_ipass;
+  std::string m_ntName;
+
+  unsigned long long m_event;
+  bool m_pass;
 
   NTuple::Item<unsigned long long> m_IEvent;
+  NTuple::Item<unsigned long long> m_EventNum;
   NTuple::Item<long> m_Nsteps;
   NTuple::Item<long> m_DAC;
   NTuple::Item<long> m_Ntrigger;
