@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -7,36 +7,11 @@ Definitions of additional validation steps in Trigger ART tests relevant only fo
 The main common check steps are defined in the TrigValSteering.CheckSteps module.
 '''
 
-from TrigValTools.TrigValSteering.ExecStep import ExecStep
 from TrigValTools.TrigValSteering.CheckSteps import CheckFileStep, InputDependentStep, LogMergeStep
 
 ##################################################
 # Additional exec steps
 ##################################################
-
-class AthenaCheckerStep(ExecStep, InputDependentStep):
-    '''
-    Run athena job with Trig*Checker algorithm with job options accepting a fileList parameter
-    '''
-    def __init__(self, name, job_options):
-        InputDependentStep.__init__(self, name)
-        ExecStep.__init__(self, name)
-        # InputDependentStep parameters
-        self.input_file = 'AOD.pool.root'
-        # ExecStep parameters
-        self.type = 'athena'
-        self.job_options = job_options
-        self.input = ''
-        self.explicit_input = True
-        self.perfmon = False
-        self.prmon = False
-
-    def configure(self, test):
-        self.args += ' -c \'fileList=["{:s}"]\''.format(self.input_file)
-        return ExecStep.configure(self, test)
-
-    def run(self, dry_run):
-        return InputDependentStep.run(self, dry_run)
 
 class TrigDecChecker(InputDependentStep):
     def __init__(self, name='TrigDecChecker', in_file='AOD.pool.root'):
@@ -48,15 +23,16 @@ class TrigDecChecker(InputDependentStep):
         self.args = f' --filesInput {self.input_file}'
         super().configure(test)
 
-class TrigEDMChecker(AthenaCheckerStep):
+class TrigEDMChecker(InputDependentStep):
     def __init__(self, name='TrigEDMChecker', in_file='AOD.pool.root'):
-        AthenaCheckerStep.__init__(self, name, 'TrigAnalysisTest/testAthenaTrigAOD_TrigEDMCheck.py')
+        super().__init__(name)
         self.input_file = in_file
+        self.executable = 'trigEDMChecker.py'
 
-class TrigEDMAuxChecker(AthenaCheckerStep):
-    def __init__(self, name='TrigEDMAuxChecker', in_file='AOD.pool.root'):
-        AthenaCheckerStep.__init__(self, name, 'TrigAnalysisTest/testAthenaTrigAOD_TrigEDMAuxCheck.py')
-        self.input_file = in_file
+    def configure(self, test):
+        self.args = f' --filesInput {self.input_file}'
+        super().configure(test)
+
 
 ##################################################
 # Additional check steps
@@ -80,8 +56,7 @@ def trig_analysis_exec_steps(input_file='AOD.pool.root'):
     # TODO: add TrigNavSlimming test
     return [
         TrigDecChecker(in_file=input_file),
-        TrigEDMChecker(in_file=input_file),
-        TrigEDMAuxChecker(in_file=input_file)
+        TrigEDMChecker(in_file=input_file)
     ]
 
 def trig_analysis_check_steps():
