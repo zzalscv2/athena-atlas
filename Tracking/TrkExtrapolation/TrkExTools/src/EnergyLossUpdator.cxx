@@ -182,7 +182,7 @@ Trk::EnergyLossUpdator::dEdX(const MaterialProperties& mat,
 }
 
 // public interface method
-std::unique_ptr<Trk::EnergyLoss>
+Trk::EnergyLoss
 Trk::EnergyLossUpdator::energyLoss(const MaterialProperties& mat,
                                    double p,
                                    double pathcorrection,
@@ -194,7 +194,7 @@ Trk::EnergyLossUpdator::energyLoss(const MaterialProperties& mat,
   if (particle == Trk::undefined) {
     ATH_MSG_WARNING(
       "undefined ParticleHypothesis, energy loss calculation cancelled");
-    return nullptr;
+    return {};
   }
 
   if (usePDGformula) {
@@ -235,16 +235,16 @@ Trk::EnergyLossUpdator::energyLoss(const MaterialProperties& mat,
                   << meanRad << " sigIoni " << sigIoni << " sigRad " << sigRad
                   << " sign " << sign << " pathLength " << pathLength);
     return (!m_detailedEloss
-              ? std::make_unique<Trk::EnergyLoss>(deltaE, sigmaDeltaE)
-              : std::make_unique<Trk::EnergyLoss>(deltaE,
-                                                  sigmaDeltaE,
-                                                  sigmaDeltaE,
-                                                  sigmaDeltaE,
-                                                  meanIoni,
-                                                  sigIoni,
-                                                  meanRad,
-                                                  sigRad,
-                                                  pathLength));
+              ? Trk::EnergyLoss(deltaE, sigmaDeltaE)
+              : Trk::EnergyLoss(deltaE,
+                                sigmaDeltaE,
+                                sigmaDeltaE,
+                                sigmaDeltaE,
+                                meanIoni,
+                                sigIoni,
+                                meanRad,
+                                sigRad,
+                                pathLength));
   }
 
   // Code below will not be used if the parameterization of TrkUtils is used
@@ -372,7 +372,7 @@ Trk::EnergyLossUpdator::energyLoss(const MaterialProperties& mat,
   double sigmaDeltaE = std::sqrt(sigmaDeltaE_rad * sigmaDeltaE_rad +
                                  sigmaDeltaE_ioni * sigmaDeltaE_ioni);
 
-  return (m_detailedEloss ? std::make_unique<EnergyLoss>(
+  return (m_detailedEloss ? EnergyLoss(
                               deltaE,
                               sigmaDeltaE,
                               sigmaDeltaE,
@@ -382,13 +382,13 @@ Trk::EnergyLossUpdator::energyLoss(const MaterialProperties& mat,
                               deltaE_rad,
                               sigmaDeltaE_rad,
                               pathLength)
-                          : std::make_unique<EnergyLoss>(deltaE, sigmaDeltaE));
+                          : EnergyLoss(deltaE, sigmaDeltaE));
 }
 
 // public interface method
 
-std::unique_ptr<Trk::EnergyLoss>
-Trk::EnergyLossUpdator::updateEnergyLoss(Trk::EnergyLoss* eLoss,
+Trk::EnergyLoss
+Trk::EnergyLossUpdator::updateEnergyLoss(Trk::EnergyLoss& eLoss,
                                          double caloEnergy,
                                          double caloEnergyError,
                                          double pCaloEntry,
@@ -420,29 +420,29 @@ Trk::EnergyLossUpdator::updateEnergyLoss(Trk::EnergyLoss* eLoss,
   elossFlag = 0;
 
   int isign = 1;
-  if (eLoss->deltaE() < 0) {
+  if (eLoss.deltaE() < 0) {
     isign = -1;
   }
 
-  double deltaE = eLoss->deltaE();
-  double sigmaDeltaE = eLoss->sigmaDeltaE();
+  double deltaE = eLoss.deltaE();
+  double sigmaDeltaE = eLoss.sigmaDeltaE();
   // Detailed Eloss
-  double deltaE_ioni = eLoss->meanIoni();
-  double sigmaDeltaE_ioni = 0.45 * eLoss->sigmaIoni(); // sigma Landau
-  double deltaE_rad = eLoss->meanRad();
+  double deltaE_ioni = eLoss.meanIoni();
+  double sigmaDeltaE_ioni = 0.45 * eLoss.sigmaIoni(); // sigma Landau
+  double deltaE_rad = eLoss.meanRad();
   double sigmaDeltaE_rad =
-    eLoss->sigmaRad(); // rms and mean of steep exponential
-  double depth = eLoss->length();
+    eLoss.sigmaRad(); // rms and mean of steep exponential
+  double depth = eLoss.length();
 
   // Eloss radiative protection
 
-  if (eLoss->meanRad() > 100000.) {
+  if (eLoss.meanRad() > 100000.) {
     deltaE_rad = 100000.;
-    sigmaDeltaE_rad = eLoss->sigmaRad() * 100000. / eLoss->meanRad();
+    sigmaDeltaE_rad = eLoss.sigmaRad() * 100000. / eLoss.meanRad();
   }
 
-  double sigmaPlusDeltaE = eLoss->sigmaPlusDeltaE();
-  double sigmaMinusDeltaE = eLoss->sigmaMinusDeltaE();
+  double sigmaPlusDeltaE = eLoss.sigmaPlusDeltaE();
+  double sigmaMinusDeltaE = eLoss.sigmaMinusDeltaE();
 
   double MOP = deltaE_ioni - isign * 3.59524 * sigmaDeltaE_ioni;
 
@@ -560,15 +560,15 @@ Trk::EnergyLossUpdator::updateEnergyLoss(Trk::EnergyLoss* eLoss,
     }
   }
 
-  return std::make_unique<EnergyLoss>(deltaE,
-                                      sigmaDeltaE,
-                                      sigmaMinusDeltaE,
-                                      sigmaPlusDeltaE,
-                                      deltaE_ioni,
-                                      sigmaDeltaE_ioni,
-                                      deltaE_rad,
-                                      sigmaDeltaE_rad,
-                                      depth);
+  return EnergyLoss(deltaE,
+                    sigmaDeltaE,
+                    sigmaMinusDeltaE,
+                    sigmaPlusDeltaE,
+                    deltaE_ioni,
+                    sigmaDeltaE_ioni,
+                    deltaE_rad,
+                    sigmaDeltaE_rad,
+                    depth);
 }
 
 // public interface method
@@ -698,7 +698,7 @@ Trk::EnergyLossUpdator::getX0ElossScales(int icalo,
   }
 }
 
-std::unique_ptr<Trk::EnergyLoss>
+Trk::EnergyLoss
 Trk::EnergyLossUpdator::ionizationEnergyLoss(const MaterialProperties& mat,
                                              double p,
                                              double pathcorrection,
@@ -717,14 +717,14 @@ Trk::EnergyLossUpdator::ionizationEnergyLoss(const MaterialProperties& mat,
              p, &(mat.material()), particle, sigIoni, kazL, pathLength);
 
   return (!m_detailedEloss
-            ? std::make_unique<Trk::EnergyLoss>(meanIoni, sigIoni)
-            : std::make_unique<Trk::EnergyLoss>(meanIoni,
-                                                sigIoni,
-                                                sigIoni,
-                                                sigIoni,
-                                                meanIoni,
-                                                sigIoni,
-                                                0.,
-                                                0.,
-                                                pathLength));
+            ? Trk::EnergyLoss(meanIoni, sigIoni)
+            : Trk::EnergyLoss(meanIoni,
+                              sigIoni,
+                              sigIoni,
+                              sigIoni,
+                              meanIoni,
+                              sigIoni,
+                              0.,
+                              0.,
+                              pathLength));
 }

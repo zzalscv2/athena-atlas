@@ -774,13 +774,13 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
           cache.m_extrapolationCache->updateX0(dInX0);
           Trk::MaterialProperties materialProperties(*propagVol, std::abs(path));
           double currentqoverp = nextPar->parameters()[Trk::qOverP];
-          std::unique_ptr<EnergyLoss> eloss = m_elossupdater->energyLoss(
+          EnergyLoss eloss = m_elossupdater->energyLoss(
             materialProperties, std::abs(1. / currentqoverp), 1., dir, particle);
           ATH_MSG_DEBUG("  [M] Energy loss: STEP,EnergyLossUpdator:"
                         << nextPar->momentum().mag() - currPar->momentum().mag() << ","
-                        << eloss->deltaE());
+                        << eloss.deltaE());
           cache.m_extrapolationCache->updateEloss(
-            eloss->meanIoni(), eloss->sigmaIoni(), eloss->meanRad(), eloss->sigmaRad());
+            eloss.meanIoni(), eloss.sigmaIoni(), eloss.meanRad(), eloss.sigmaRad());
           if (m_dumpCache) {
             ATH_MSG_DEBUG(cache.to_string( " After"));
           }
@@ -797,12 +797,12 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
           0, 0, scatsigma / std::sin(nextPar->parameters()[Trk::theta]), scatsigma);
         // energy loss
         double currentqoverp = nextPar->parameters()[Trk::qOverP];
-        std::unique_ptr<EnergyLoss> eloss = (m_elossupdater->energyLoss(
-          materialProperties, std::abs(1. / currentqoverp), 1., dir, particle));
+        EnergyLoss eloss = m_elossupdater->energyLoss(
+          materialProperties, std::abs(1. / currentqoverp), 1., dir, particle);
         // compare energy loss
         ATH_MSG_DEBUG("  [M] Energy loss: STEP,EnergyLossUpdator:"
                       << nextPar->momentum().mag() - currPar->momentum().mag() << ","
-                      << eloss->deltaE());
+                      << eloss.deltaE());
         // use curvilinear TPs to simplify retrieval by fitters
         std::unique_ptr<const Trk::TrackParameters> cvlTP(new Trk::CurvilinearParameters(
           nextPar->position(), nextPar->momentum(), nextPar->charge()));
@@ -813,14 +813,16 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
           }
           cache.m_extrapolationCache->updateX0(dInX0);
           cache.m_extrapolationCache->updateEloss(
-            eloss->meanIoni(), eloss->sigmaIoni(), eloss->meanRad(), eloss->sigmaRad());
+            eloss.meanIoni(), eloss.sigmaIoni(), eloss.meanRad(), eloss.sigmaRad());
           if (m_dumpCache) {
             ATH_MSG_DEBUG(cache.to_string( " After"));
           }
         }
-        auto mefot =
-          std::make_unique<Trk::MaterialEffectsOnTrack>(dInX0, newsa, std::move(eloss), cvlTP->associatedSurface());
-        cache.m_matstates->push_back(new TrackStateOnSurface(nullptr, std::move(cvlTP), std::move(mefot)));
+        auto mefot = std::make_unique<Trk::MaterialEffectsOnTrack>(
+            dInX0, newsa, std::make_unique<Trk::EnergyLoss>(std::move(eloss)),
+            cvlTP->associatedSurface());
+        cache.m_matstates->push_back(new TrackStateOnSurface(
+            nullptr, std::move(cvlTP), std::move(mefot)));
         ATH_MSG_DEBUG("  [M] Collecting material from static volume '" << propagVol->volumeName()
                                                                        << "', t/X0 = " << dInX0);
       }
@@ -1082,10 +1084,10 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
           cache.m_extrapolationCache->updateX0(dInX0);
           Trk::MaterialProperties materialProperties(*cache.m_currentDense, std::abs(path));
           double currentqoverp = nextPar->parameters()[Trk::qOverP];
-          std::unique_ptr<Trk::EnergyLoss> eloss = m_elossupdater->energyLoss(
+          Trk::EnergyLoss eloss = m_elossupdater->energyLoss(
             materialProperties, std::abs(1. / currentqoverp), 1., dir, particle);
           cache.m_extrapolationCache->updateEloss(
-            eloss->meanIoni(), eloss->sigmaIoni(), eloss->meanRad(), eloss->sigmaRad());
+            eloss.meanIoni(), eloss.sigmaIoni(), eloss.meanRad(), eloss.sigmaRad());
           if (m_dumpCache) {
             ATH_MSG_DEBUG(cache.to_string(" After"));
           }
@@ -1106,12 +1108,12 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
           0, 0, scatsigma / std::sin(nextPar->parameters()[Trk::theta]), scatsigma);
         // energy loss
         double currentqoverp = nextPar->parameters()[Trk::qOverP];
-        std::unique_ptr<EnergyLoss> eloss = m_elossupdater->energyLoss(
+        EnergyLoss eloss = m_elossupdater->energyLoss(
           materialProperties, std::abs(1. / currentqoverp), 1., dir, particle);
         // compare energy loss
         ATH_MSG_DEBUG("  [M] Energy loss: STEP,EnergyLossUpdator:"
                       << nextPar->momentum().mag() - currPar->momentum().mag() << ","
-                      << eloss->deltaE());
+                      << eloss.deltaE());
 
         // use curvilinear TPs to simplify retrieval by fitters
         std::unique_ptr<const Trk::TrackParameters> cvlTP(new Trk::CurvilinearParameters(
@@ -1122,16 +1124,16 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
             ATH_MSG_DEBUG(cache.to_string(" extrapolateToNextMaterialLayer dense"));
           }
           cache.m_extrapolationCache->updateX0(dInX0);
-          cache.m_extrapolationCache->updateEloss(eloss->meanIoni(),
-                                                  eloss->sigmaIoni(),
-                                                  eloss->meanRad(),
-                                                  eloss->sigmaRad());
+          cache.m_extrapolationCache->updateEloss(eloss.meanIoni(),
+                                                  eloss.sigmaIoni(),
+                                                  eloss.meanRad(),
+                                                  eloss.sigmaRad());
           if (m_dumpCache) {
              ATH_MSG_DEBUG(cache.to_string(" After"));
           }
         }
         auto mefot = std::make_unique<const Trk::MaterialEffectsOnTrack>(
-          dInX0, newsa, std::move(eloss), cvlTP->associatedSurface());
+          dInX0, newsa, std::make_unique<Trk::EnergyLoss>(std::move(eloss)), cvlTP->associatedSurface());
 
         cache.m_matstates->push_back(new TrackStateOnSurface(
           nullptr, std::move(cvlTP), std::move(mefot)));
@@ -1225,10 +1227,10 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
                   }
                   cache.m_extrapolationCache->updateX0(dInX0);
                   double currentqoverp = nextPar->parameters()[Trk::qOverP];
-                  std::unique_ptr<EnergyLoss> eloss = m_elossupdater->energyLoss(
+                  EnergyLoss eloss = m_elossupdater->energyLoss(
                     *lmat, std::abs(1. / currentqoverp), 1. / costr, dir, particle);
                   cache.m_extrapolationCache->updateEloss(
-                    eloss->meanIoni(), eloss->sigmaIoni(), eloss->meanRad(), eloss->sigmaRad());
+                    eloss.meanIoni(), eloss.sigmaIoni(), eloss.meanRad(), eloss.sigmaRad());
                   if (m_dumpCache) {
                      ATH_MSG_DEBUG(cache.to_string(" After"));
                   }
@@ -1246,7 +1248,7 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
                   0, 0, scatsigma / std::sin(nextPar->parameters()[Trk::theta]), scatsigma);
                 // energy loss
                 double currentqoverp = nextPar->parameters()[Trk::qOverP];
-                std::unique_ptr<EnergyLoss> eloss = m_elossupdater->energyLoss(
+                EnergyLoss eloss = m_elossupdater->energyLoss(
                   *lmat, std::abs(1. / currentqoverp), 1. / costr, dir, particle);
 
                 // use curvilinear TPs to simplify retrieval by fitters
@@ -1259,7 +1261,7 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
                     }
                     cache.m_extrapolationCache->updateX0(dInX0);
                     cache.m_extrapolationCache->updateEloss(
-                      eloss->meanIoni(), eloss->sigmaIoni(), eloss->meanRad(), eloss->sigmaRad());
+                      eloss.meanIoni(), eloss.sigmaIoni(), eloss.meanRad(), eloss.sigmaRad());
                     if (m_dumpCache) {
                       ATH_MSG_DEBUG(cache.to_string(" After"));
                     }
@@ -1267,10 +1269,13 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
                     ATH_MSG_DEBUG(cache.elossPointerErrorMsg(__LINE__));
                   }
                 }
-                auto mefot = std::make_unique<const Trk::MaterialEffectsOnTrack>(
-                  dInX0, newsa, std::move(eloss), cvlTP->associatedSurface());
+                auto mefot =
+                    std::make_unique<const Trk::MaterialEffectsOnTrack>(
+                        dInX0, newsa,
+                        std::make_unique<Trk::EnergyLoss>(std::move(eloss)),
+                        cvlTP->associatedSurface());
                 cache.m_matstates->push_back(new TrackStateOnSurface(
-                  nullptr, std::move(cvlTP), std::move(mefot)));
+                    nullptr, std::move(cvlTP), std::move(mefot)));
               }
             }
           } // end material update at massive (static volume) boundary
@@ -1382,10 +1387,10 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
                 Trk::MaterialProperties materialProperties(
                   *nextLayer->fullUpdateMaterialProperties(*nextPar)); // !<@TODO check
                 double currentqoverp = nextPar->parameters()[Trk::qOverP];
-                std::unique_ptr<EnergyLoss> eloss = m_elossupdater->energyLoss(
+                EnergyLoss eloss = m_elossupdater->energyLoss(
                   materialProperties, std::abs(1. / currentqoverp), 1. / costr, dir, particle);
                 cache.m_extrapolationCache->updateEloss(
-                  eloss->meanIoni(), eloss->sigmaIoni(), eloss->meanRad(), eloss->sigmaRad());
+                  eloss.meanIoni(), eloss.sigmaIoni(), eloss.meanRad(), eloss.sigmaRad());
                 if (m_dumpCache) {
                   ATH_MSG_DEBUG(cache.to_string( " After"));
                 }
@@ -1406,8 +1411,8 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
               Trk::ScatteringAngles newsa(0, 0, scatsigma / std::sin(par_theta), scatsigma);
               // energy loss
               double currentqoverp = nextPar->parameters()[Trk::qOverP];
-              std::unique_ptr<EnergyLoss> eloss = (m_elossupdater->energyLoss(
-                materialProperties, std::abs(1. / currentqoverp), 1. / costr, dir, particle));
+              EnergyLoss eloss = m_elossupdater->energyLoss(
+                materialProperties, std::abs(1. / currentqoverp), 1. / costr, dir, particle);
 
               // use curvilinear TPs to simplify retrieval by fitters
               auto cvlTP = std::make_unique<const Trk::CurvilinearParameters>(
@@ -1419,7 +1424,7 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
                   }
                   cache.m_extrapolationCache->updateX0(dInX0);
                   cache.m_extrapolationCache->updateEloss(
-                    eloss->meanIoni(), eloss->sigmaIoni(), eloss->meanRad(), eloss->sigmaRad());
+                    eloss.meanIoni(), eloss.sigmaIoni(), eloss.meanRad(), eloss.sigmaRad());
                   if (m_dumpCache) {
                     ATH_MSG_DEBUG(cache.to_string( " After"));
                   }
@@ -1428,7 +1433,7 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
                 }
               }
               auto mefot = std::make_unique<const Trk::MaterialEffectsOnTrack>(
-                dInX0, newsa, std::move(eloss), cvlTP->associatedSurface());
+                dInX0, newsa, std::make_unique<Trk::EnergyLoss>(std::move(eloss)), cvlTP->associatedSurface());
               cache.m_matstates->push_back(new TrackStateOnSurface(
                 nullptr, std::move(cvlTP), std::move(mefot)));
             }
@@ -4429,12 +4434,12 @@ Trk::Extrapolator::addMaterialEffectsOnTrack(const EventContext& ctx,
       }
       cache.m_extrapolationCache->updateX0(tInX0);
       double currentQoP = parsOnLayer->parameters()[Trk::qOverP];
-      std::unique_ptr<Trk::EnergyLoss> energyLoss(m_elossupdater->energyLoss(
+      Trk::EnergyLoss energyLoss(m_elossupdater->energyLoss(
         *materialProperties, std::abs(1. / currentQoP), pathCorrection, propDir, particle));
-      cache.m_extrapolationCache->updateEloss(energyLoss->meanIoni(),
-                                              energyLoss->sigmaIoni(),
-                                              energyLoss->meanRad(),
-                                              energyLoss->sigmaRad());
+      cache.m_extrapolationCache->updateEloss(energyLoss.meanIoni(),
+                                              energyLoss.sigmaIoni(),
+                                              energyLoss.meanRad(),
+                                              energyLoss.sigmaRad());
       if (m_dumpCache) {
         ATH_MSG_DEBUG(cache.to_string(" After"));
       }
@@ -4445,8 +4450,9 @@ Trk::Extrapolator::addMaterialEffectsOnTrack(const EventContext& ctx,
     double tInX0 = pathCorrection * materialProperties->thicknessInX0();
     // get the q/p for the energyLoss object
     double currentQoP = parsOnLayer->parameters()[Trk::qOverP];
-    auto energyLoss = std::unique_ptr<EnergyLoss>(m_elossupdater->energyLoss(
-      *materialProperties, std::abs(1. / currentQoP), pathCorrection, propDir, particle));
+    auto energyLoss = m_elossupdater->energyLoss(
+        *materialProperties, std::abs(1. / currentQoP), pathCorrection, propDir,
+        particle);
     // get the scattering angle
     double sigmaMS = std::sqrt(m_msupdater->sigmaSquare(
       *materialProperties, std::abs(1. / currentQoP), pathCorrection, particle));
@@ -4455,7 +4461,7 @@ Trk::Extrapolator::addMaterialEffectsOnTrack(const EventContext& ctx,
 
    // update cache
     if (cache.m_extrapolationCache) {
-      if (energyLoss->meanIoni() == 0. && tInX0 > 0.) {
+      if (energyLoss.meanIoni() == 0. && tInX0 > 0.) {
         ATH_MSG_WARNING(" Extrapolator: the ExtrapolationCache cannot work "
                         "because the ElossUpdator is wrongly configured: "
                         "switch joboption DetailedEloss on ");
@@ -4464,16 +4470,17 @@ Trk::Extrapolator::addMaterialEffectsOnTrack(const EventContext& ctx,
         ATH_MSG_DEBUG(cache.to_string(" addMaterialEffectsOnTrack"));
       }
       cache.m_extrapolationCache->updateX0(tInX0);
-      cache.m_extrapolationCache->updateEloss(energyLoss->meanIoni(),
-                                              energyLoss->sigmaIoni(),
-                                              energyLoss->meanRad(),
-                                              energyLoss->sigmaRad());
+      cache.m_extrapolationCache->updateEloss(energyLoss.meanIoni(),
+                                              energyLoss.sigmaIoni(),
+                                              energyLoss.meanRad(),
+                                              energyLoss.sigmaRad());
       if (m_dumpCache) {
         ATH_MSG_DEBUG(cache.to_string(" After"));
       }
     }
     auto meot = std::make_unique<const Trk::MaterialEffectsOnTrack>(
-      tInX0, scatAngles, std::move(energyLoss), *lay.surfaceRepresentation().baseSurface());
+        tInX0, scatAngles, std::make_unique<Trk::EnergyLoss>(std::move(energyLoss)),
+        *lay.surfaceRepresentation().baseSurface());
     // push it to the material states
     cache.m_matstates->push_back(
       new TrackStateOnSurface(nullptr, parsOnLayer.to_unique(), std::move(meot)));
@@ -5005,14 +5012,14 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
       double dInX0 = std::abs(path) / cache.m_currentDense->x0();
       double currentqoverp = nextPar->parameters()[Trk::qOverP];
       MaterialProperties materialProperties(*cache.m_currentDense, std::abs(path));
-      std::unique_ptr<EnergyLoss> eloss = (m_elossupdater->energyLoss(
+      EnergyLoss eloss = (m_elossupdater->energyLoss(
         materialProperties, std::abs(1. / currentqoverp), 1., dir, particle));
       if (m_dumpCache) {
         ATH_MSG_DEBUG(cache.to_string( " extrapolateToVolumeWithPathLimit"));
       }
       cache.m_extrapolationCache->updateX0(dInX0);
       cache.m_extrapolationCache->updateEloss(
-        eloss->meanIoni(), eloss->sigmaIoni(), eloss->meanRad(), eloss->sigmaRad());
+        eloss.meanIoni(), eloss.sigmaIoni(), eloss.meanRad(), eloss.sigmaRad());
       if (m_dumpCache) {
         ATH_MSG_DEBUG(cache.to_string(" After"));
       }
@@ -5026,12 +5033,12 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
         0, 0, scatsigma / std::sin(nextPar->parameters()[Trk::theta]), scatsigma);
       // energy loss
       double currentqoverp = nextPar->parameters()[Trk::qOverP];
-      std::unique_ptr<EnergyLoss> eloss = m_elossupdater->energyLoss(
+      EnergyLoss eloss = m_elossupdater->energyLoss(
         materialProperties, std::abs(1. / currentqoverp), 1., dir, particle);
       // compare energy loss
       ATH_MSG_DEBUG(" [M] Energy loss: STEP , EnergyLossUpdator:"
                     << nextPar->momentum().mag() - currPar->momentum().mag() << ","
-                    << eloss->deltaE());
+                    << eloss.deltaE());
 
      if (cache.m_extrapolationCache) {
         if (m_dumpCache) {
@@ -5039,13 +5046,14 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
         }
         cache.m_extrapolationCache->updateX0(dInX0);
         cache.m_extrapolationCache->updateEloss(
-          eloss->meanIoni(), eloss->sigmaIoni(), eloss->meanRad(), eloss->sigmaRad());
+          eloss.meanIoni(), eloss.sigmaIoni(), eloss.meanRad(), eloss.sigmaRad());
         if (m_dumpCache) {
           ATH_MSG_DEBUG(cache.to_string( " After"));
         }
       }
       auto mefot = std::make_unique<const Trk::MaterialEffectsOnTrack>(
-        dInX0, newsa, std::move(eloss), *((nextPar->associatedSurface()).baseSurface()));
+          dInX0, newsa, std::make_unique<Trk::EnergyLoss>(std::move(eloss)),
+          *((nextPar->associatedSurface()).baseSurface()));
 
       cache.m_matstates->push_back(
         new TrackStateOnSurface(nullptr, ManagedTrackParmPtr(nextPar).to_unique(), std::move(mefot)));

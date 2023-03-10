@@ -17,11 +17,11 @@ void test(Trk::IEnergyLossUpdator& tool)
   std::cout << "test: "  << tool.name() << "\n";
   Trk::Material mat1(31.5, 32.5, 33.5, 34.5, 35.5);
   Trk::MaterialProperties trkmat(mat1, 4);
-  std::unique_ptr<Trk::EnergyLoss> eloss = tool.energyLoss(trkmat, 5000., 5.);
+  Trk::EnergyLoss eloss = tool.energyLoss(trkmat, 5000., 5.);
 
-  double dE = eloss->deltaE();
-  double dEneg = eloss->sigmaMinusDeltaE();
-  double dEpos = eloss->sigmaPlusDeltaE();
+  double dE = eloss.deltaE();
+  double dEneg = eloss.sigmaMinusDeltaE();
+  double dEpos = eloss.sigmaPlusDeltaE();
   
   printf("deltaE: %f\n", dE);
   printf("dEneg: %f\n", dEneg);

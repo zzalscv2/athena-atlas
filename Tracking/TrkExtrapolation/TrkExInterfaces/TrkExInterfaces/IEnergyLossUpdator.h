@@ -57,7 +57,7 @@ public:
 
     Units: [MeV]
     */
-  virtual std::unique_ptr<EnergyLoss> energyLoss(
+  virtual EnergyLoss energyLoss(
     const MaterialProperties& mat,
     double p,
     double pathcorrection,
@@ -70,8 +70,8 @@ public:
      as an input the detailed Eloss information Calorimeter energy, error
      momentum and momentum error */
 
-  virtual std::unique_ptr<EnergyLoss> updateEnergyLoss(
-    EnergyLoss* eLoss,
+  virtual EnergyLoss updateEnergyLoss(
+    EnergyLoss& eLoss,
     double caloEnergy,
     double caloEnergyError,
     double pCaloEntry,

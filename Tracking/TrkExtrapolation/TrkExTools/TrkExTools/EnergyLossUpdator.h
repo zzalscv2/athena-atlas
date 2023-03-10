@@ -140,7 +140,7 @@ public:
 
     mpv steers the most probable energy loss
     */
-  virtual std::unique_ptr<EnergyLoss> energyLoss(
+  virtual EnergyLoss energyLoss(
     const MaterialProperties& mat,
     double p,
     double pathcorrection,
@@ -152,8 +152,8 @@ public:
   /** Method to recalculate Eloss values for the fit setting an elossFlag using
      as an input the detailed Eloss information Calorimeter energy, error
      momentum and momentum error */
-  virtual std::unique_ptr<EnergyLoss> updateEnergyLoss(
-    EnergyLoss* eLoss,
+  virtual EnergyLoss updateEnergyLoss(
+    EnergyLoss& eLoss,
     double caloEnergy,
     double caloEnergyError,
     double pCaloEntry,
@@ -178,7 +178,7 @@ private:
     PropDirection direction = alongMomentum,
     ParticleHypothesis particleHypothesis = electron) const;
 
-  std::unique_ptr<Trk::EnergyLoss> ionizationEnergyLoss(
+  Trk::EnergyLoss ionizationEnergyLoss(
     const MaterialProperties& mat,
     double p,
     double pathcorrection,

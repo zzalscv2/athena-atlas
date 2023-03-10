@@ -1705,20 +1705,20 @@ Trk::TrkMaterialProviderTool::modifyTSOSvector(const std::vector<const Trk::Trac
                              deltaTheta,
                              std::sqrt(sigmaDeltaPhi2_tot / 2.),
                              std::sqrt(sigmaDeltaTheta2_tot / 2.));
-      Trk::EnergyLoss* energyLoss2 = new EnergyLoss(deltaE_tot,
-                                                    sigmaDeltaE_tot,
-                                                    sigmaMinusDeltaE_tot,
-                                                    sigmaPlusDeltaE_tot,
-                                                    deltaE_ioni_tot,
-                                                    sigmaDeltaE_ioni_tot,
-                                                    deltaE_rad_tot,
-                                                    sigmaDeltaE_rad_tot,
-                                                    0.);
+      Trk::EnergyLoss energyLoss2 =  EnergyLoss(deltaE_tot,
+                                                sigmaDeltaE_tot,
+                                                sigmaMinusDeltaE_tot,
+                                                sigmaPlusDeltaE_tot,
+                                                deltaE_ioni_tot,
+                                                sigmaDeltaE_ioni_tot,
+                                                deltaE_rad_tot,
+                                                sigmaDeltaE_rad_tot,
+                                                0.);
       if (threePlanes)
         ATH_MSG_VERBOSE(" Calorimeter energyLoss2 delta E "
-                        << energyLoss2->deltaE() << " meanIoni "
-                        << energyLoss2->meanIoni() << " sigmaIoni "
-                        << energyLoss2->sigmaIoni() << " X0_tot " << X0_tot);
+                        << energyLoss2.deltaE() << " meanIoni "
+                        << energyLoss2.meanIoni() << " sigmaIoni "
+                        << energyLoss2.sigmaIoni() << " X0_tot " << X0_tot);
 
       int elossFlag =
         0; // return Flag for updateEnergyLoss Calorimeter energy (0 = not used)
@@ -1730,25 +1730,25 @@ Trk::TrkMaterialProviderTool::modifyTSOSvector(const std::vector<const Trk::Trac
       if (!useMeasuredEnergy)
         calEr = 0.;
 
-      std::unique_ptr<Trk::EnergyLoss> energyLossNew =
+      Trk::EnergyLoss energyLossNew =
         (updateEloss
            ? m_elossupdator->updateEnergyLoss(
                energyLoss2, calE, calEr, pCaloEntry, momentumError, elossFlag)
-           : std::make_unique<EnergyLoss>(deltaE_tot,
-                            sigmaDeltaE_tot,
-                            sigmaMinusDeltaE_tot,
-                            sigmaPlusDeltaE_tot,
-                            deltaE_ioni_tot,
-                            sigmaDeltaE_ioni_tot,
-                            deltaE_rad_tot,
-                            sigmaDeltaE_rad_tot,
-                            0.));
-      auto caloEnergyNew = std::make_unique<CaloEnergy>(*energyLossNew);
+           : EnergyLoss(deltaE_tot,
+                        sigmaDeltaE_tot,
+                        sigmaMinusDeltaE_tot,
+                        sigmaPlusDeltaE_tot,
+                        deltaE_ioni_tot,
+                        sigmaDeltaE_ioni_tot,
+                        deltaE_rad_tot,
+                        sigmaDeltaE_rad_tot,
+                        0.));
+      auto caloEnergyNew = std::make_unique<CaloEnergy>(energyLossNew);
       if (threePlanes)
         ATH_MSG_VERBOSE(" After update Calorimeter energyLossNew "
-                        << energyLossNew->deltaE() << " meanIoni "
-                        << energyLossNew->meanIoni() << " sigmaIoni "
-                        << energyLossNew->sigmaIoni());
+                        << energyLossNew.deltaE() << " meanIoni "
+                        << energyLossNew.meanIoni() << " sigmaIoni "
+                        << energyLossNew.sigmaIoni());
 
       caloEnergyNew->set_measEnergyLoss(caloEnergy, caloEnergyError);
       // Store FSR calo energy
@@ -1761,13 +1761,12 @@ Trk::TrkMaterialProviderTool::modifyTSOSvector(const std::vector<const Trk::Trac
       }
 
       int eLossFlagTmp = 0;
-      std::unique_ptr<Trk::EnergyLoss> energyLossParam = m_elossupdator->updateEnergyLoss(energyLoss2, 0.0, 0.0, pCaloEntry, 0., eLossFlagTmp);
+      Trk::EnergyLoss energyLossParam = m_elossupdator->updateEnergyLoss(energyLoss2, 0.0, 0.0, pCaloEntry, 0., eLossFlagTmp);
 
-      caloEnergyNew->set_paramEnergyLoss(energyLossParam->deltaE(), energyLossParam->sigmaMinusDeltaE(), energyLossParam->sigmaPlusDeltaE());
+      caloEnergyNew->set_paramEnergyLoss(energyLossParam.deltaE(), energyLossParam.sigmaMinusDeltaE(), energyLossParam.sigmaPlusDeltaE());
       if(m_overwriteElossParam&&m_useCaloEnergyMeasurement) caloEnergyNew->set_paramEnergyLoss(totalEloss,meanElossIoni,0.45*sigmaElossIoni);
-      ATH_MSG_DEBUG( " modifyTSOSvector energyLossParam Eloss " << energyLossParam->deltaE() << " on TSOS " << energyLossNew->deltaE() << " calE " << calE);
+      ATH_MSG_DEBUG( " modifyTSOSvector energyLossParam Eloss " << energyLossParam.deltaE() << " on TSOS " << energyLossNew.deltaE() << " calE " << calE);
       Eloss_tot += caloEnergyNew->deltaE();
-      delete energyLoss2;
 
       //        direction of plane
       Amg::Vector3D dir = wdir/w_tot;
@@ -1965,21 +1964,19 @@ void Trk::TrkMaterialProviderTool::getMopAndIoniEnergyLoss(const std::vector<con
     }
   }
 
-  EnergyLoss* eLoss = new EnergyLoss(deltaE_tot, sigmaDeltaE_tot, sigmaMinusDeltaE_tot, sigmaPlusDeltaE_tot,
+  EnergyLoss eLoss = EnergyLoss(deltaE_tot, sigmaDeltaE_tot, sigmaMinusDeltaE_tot, sigmaPlusDeltaE_tot,
 				     deltaE_ioni_tot, sigmaDeltaE_ioni_tot,
 				     deltaE_rad_tot, sigmaDeltaE_rad_tot, 0.) ;
 
   int elossFlag=0;
 
-  std::unique_ptr<EnergyLoss> eLoss2 ( m_elossupdator->updateEnergyLoss(eLoss, 0, 0, pCaloEntry, 0, elossFlag) );
+  EnergyLoss eLoss2 ( m_elossupdator->updateEnergyLoss(eLoss, 0, 0, pCaloEntry, 0, elossFlag) );
 
-  totalEloss = eLoss2->meanIoni() + eLoss2->meanRad();
-  meanElossIoni = eLoss2->meanIoni();
-  sigmaElossIoni = eLoss2->sigmaIoni();
+  totalEloss = eLoss2.meanIoni() + eLoss2.meanRad();
+  meanElossIoni = eLoss2.meanIoni();
+  sigmaElossIoni = eLoss2.sigmaIoni();
 
   ATH_MSG_DEBUG("Mop Energy Loss " << totalEloss << " mean ionization energy loss " << meanElossIoni << " sigmaElossIoni " << sigmaElossIoni);
-
-  delete eLoss;
 }
 
 /** Function to check isolation */
