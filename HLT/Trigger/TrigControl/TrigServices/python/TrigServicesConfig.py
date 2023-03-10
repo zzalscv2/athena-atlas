@@ -179,6 +179,10 @@ def TrigServicesCfg(flags):
    loop_mgr.EvtSel = acc.getService('EventSelectorByteStream')
    loop_mgr.OutputCnvSvc = acc.getService('ByteStreamCnvSvc')
 
+   from TrigSteerMonitor.TrigSteerMonitorConfig import SchedulerMonSvcCfg
+   acc.merge( SchedulerMonSvcCfg(flags) )
+   loop_mgr.MonitorScheduler = True
+
    acc.addService(loop_mgr, primary=True)
    acc.setAppProperty("EventLoop", loop_mgr.name)
 

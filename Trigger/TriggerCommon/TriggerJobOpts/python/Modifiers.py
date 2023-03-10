@@ -275,25 +275,6 @@ class fpeAuditor(_modifier):
         svcMgr.AuditorSvc += CfgMgr.FPEAuditor()
         svcMgr.AuditorSvc.FPEAuditor.NStacktracesOnFPE=1
 
-class enableSchedulerMon(_modifier):
-    """
-    Enable SchedulerMonSvc
-    """
-    def preSetup(self, flags):
-        if not flags.Trigger.Online.isPartition:
-            log.debug('SchedulerMonSvc currently only works with athenaHLT / online partition. Skipping setup.')
-            return
-
-        from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
-        from TrigSteerMonitor.TrigSteerMonitorConfig import SchedulerMonSvcCfg
-        flags1=flags.clone()
-        flags1.lock()
-        CAtoGlobalWrapper(SchedulerMonSvcCfg, flags1)
-    
-    def postSetup(self, flags):
-        if flags.Trigger.Online.isPartition:
-            from AthenaCommon.AppMgr import ServiceMgr as svcMgr
-            svcMgr.HltEventLoopMgr.MonitorScheduler = True
 
 class enableCountAlgoMiss(_modifier):
     """

@@ -236,10 +236,6 @@ else:           # More data modifiers
                      'useOnlineLumi',
                      #for running with real data
                      'DisableMdtT0Fit',
-                     #Set muComb/muIso Backextrapolator tuned for real data
-                     #Monitoring for L1 muon group
-                     #Monitoring L1Topo at ROB level
-                     'enableSchedulerMon',
     ]
     if opt.doL1Sim:
         flags.LAr.LATOME.DTInfoForL1="SC_ET_ID"
