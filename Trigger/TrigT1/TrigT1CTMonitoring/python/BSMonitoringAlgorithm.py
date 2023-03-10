@@ -98,28 +98,19 @@ def BSMonitoringConfig(inputFlags):
                 CompareRerun = False
 
     # ------ DET MASK ---------------------------------------------------
-    from PyUtils.MetaReader import read_metadata
-    if len(inputFlags.Input.Files)==1:
-      print("INFO: exactly one file",inputFlags.Input.Files[0])
-      metadata = {}
-      thisFileMD = read_metadata(inputFlags.Input.Files[0], None, 'lite')
-      metadata.update(thisFileMD[inputFlags.Input.Files[0]])
-      #print("INFO: runNumbers = ",metadata['runNumbers'])
-      #print("INFO: detMask    = ",metadata['detectorMask'])
-    else:
-      print("INFO: more than one file. DetMask check may fail")
+    from AthenaConfiguration.AutoConfigFlags import GetFileMD
+    metadata = GetFileMD(inputFlags.Input.Files)
+    if len(inputFlags.Input.Files)!=1: print("INFO: more than one file. DetMask check may fail")
 
-    import eformat #eformat includes DetectorMask and is a tdaq package
-    iii=metadata['detectorMask'][0]
-    detmask=f'{iii:032x}' #detmask needs to be 32 hex chars
-    #print("INFO: detmask",detmask)
-    x = eformat.helper.DetectorMask(detmask)
-    #print("INFO: detMask MUCTPI    = ", x.is_set(eformat.helper.SubDetector.TDAQ_MUON_CTP_INTERFACE))
-    #print("INFO: detMask CTP       = ", x.is_set(eformat.helper.SubDetector.TDAQ_CTP))
-
-    if not x.is_set(eformat.helper.SubDetector.TDAQ_MUON_CTP_INTERFACE):
-       ProcessMuctpiData=False
-       print("INFO: MUCTPI is not in det mask; skipping muctpi algos")
+    #else, the det mask check is invalid => don't assume MUCTPI is OUT
+    if 'detectorMask' in metadata:
+        import eformat #eformat includes DetectorMask and is a tdaq package
+        detmask_unformatted=metadata['detectorMask'][0]
+        detmask=f'{detmask_unformatted:032x}' #detmask needs to be 32 hex chars
+        x = eformat.helper.DetectorMask(detmask)
+        if not x.is_set(eformat.helper.SubDetector.TDAQ_MUON_CTP_INTERFACE):
+            ProcessMuctpiData=False
+            print("INFO: MUCTPI is not in det mask; skipping muctpi algos")
     # ------------------------------------------------------------------
 
     from AthenaConfiguration.Enums import LHCPeriod
