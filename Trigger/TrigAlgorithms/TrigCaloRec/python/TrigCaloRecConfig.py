@@ -295,19 +295,19 @@ class TrigCaloTowerMaker_hijet (TrigCaloTowerMaker):
         from LArRecUtils.LArRecUtilsConf import LArTowerBuilderTool,LArFCalTowerBuilderTool
 
         larcmbtwrbldr = LArTowerBuilderTool("LArCmbTwrBldr",
-                                            CellContainerName = "AllCalo",
+                                            CellContainerName = "CaloCellsFS",
                                             IncludedCalos     = [ "LAREM", "LARHEC" ]
                                             )
         
         fcalcmbtwrbldr = LArFCalTowerBuilderTool("FCalCmbTwrBldr",
-                                                 CellContainerName = "AllCalo",
+                                                 CellContainerName = "CaloCellsFS",
                                                  MinimumEt         = 0.*MeV
                                                  )
 
         #input to  TileTowerBuilder:  cells in TILE
         from TileRecUtils.TileRecUtilsConf import TileTowerBuilderTool
         tilecmbtwrbldr = TileTowerBuilderTool("TileCmbTwrBldr",
-                                              CellContainerName = "AllCalo",
+                                              CellContainerName = "CaloCellsFS",
                                               #DumpTowers        = False,
                                               #DumpWeightMap     = False
                                               )
@@ -322,7 +322,7 @@ class TrigCaloTowerMaker_hijet (TrigCaloTowerMaker):
         self.EtaMax=5.0
         self.DeltaEta=1.2
         self.DeltaPhi=1.2
-        self.TowerMakerTools = [ tilecmbtwrbldr.getFullName(), larcmbtwrbldr.getFullName(), fcalcmbtwrbldr.getFullName() ]
+        self.TowerMakerTools = [ tilecmbtwrbldr, larcmbtwrbldr, fcalcmbtwrbldr ]
 
 def hltHICaloTowerMakerCfg(flags, name, clustersKey, cellsKey="CaloCells"):
     acc = ComponentAccumulator()
