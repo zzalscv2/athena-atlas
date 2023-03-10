@@ -365,7 +365,7 @@ if __name__ == '__main__':
     if flags.Trigger.EDMVersion==1:
       flags.Input.Files = defaultTestFiles.RAW_RUN1
     elif flags.Trigger.EDMVersion==2:
-      flags.Input.Files = defaultTestFiles.RAW
+      flags.Input.Files = defaultTestFiles.RAW_RUN2
     elif flags.Trigger.EDMVersion==3:
       flags.Input.Files = defaultTestFiles.RAW_RUN3
       

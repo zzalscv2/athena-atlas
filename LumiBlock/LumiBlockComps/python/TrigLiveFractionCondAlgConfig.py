@@ -48,7 +48,7 @@ if __name__ == "__main__":
 
     print ('--- run2')
     flags1 = initConfigFlags()
-    flags1.Input.Files = defaultTestFiles.RAW
+    flags1.Input.Files = defaultTestFiles.RAW_RUN2
     flags1.lock()
     acc1 = TrigLiveFractionCondAlgCfg (flags1)
     acc1.printCondAlgs(summariseProps=True)
@@ -56,7 +56,7 @@ if __name__ == "__main__":
 
     print ('--- run1')
     flags3 = initConfigFlags()
-    flags3.Input.Files = defaultTestFiles.RAW
+    flags3.Input.Files = defaultTestFiles.RAW_RUN2
     flags3.Input.ProjectName = 'data12_8TeV'
     flags3.lock()
     acc3 = TrigLiveFractionCondAlgCfg (flags3)

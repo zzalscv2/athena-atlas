@@ -24,7 +24,7 @@ def _run(input):
         from AthenaConfiguration.TestDefaults import defaultTestFiles
         from AthenaConfiguration.Enums import ProductionStep
         if input == "RAW":
-            flags.Input.Files = defaultTestFiles.RAW
+            flags.Input.Files = defaultTestFiles.RAW_RUN2
             flags.Common.ProductionStep=ProductionStep.Reconstruction
         if input == "ESD":
             flags.Input.Files = defaultTestFiles.ESD

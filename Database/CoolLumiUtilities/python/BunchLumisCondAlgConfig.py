@@ -48,7 +48,7 @@ if __name__ == "__main__":
 
     print ('--- data')
     flags1 = initConfigFlags()
-    flags1.Input.Files = defaultTestFiles.RAW
+    flags1.Input.Files = defaultTestFiles.RAW_RUN2
     flags1.Input.ProjectName = 'data12_8TeV'
     flags1.lock()
     acc1 = BunchLumisCondAlgCfg (flags1)
@@ -58,7 +58,7 @@ if __name__ == "__main__":
 
     print ('--- data+overlay')
     flags2 = initConfigFlags()
-    flags2.Input.Files = defaultTestFiles.RAW
+    flags2.Input.Files = defaultTestFiles.RAW_RUN2
     flags2.Input.ProjectName = 'data12_8TeV'
     flags2.Common.ProductionStep = ProductionStep.Overlay
     flags2.lock()
@@ -69,7 +69,7 @@ if __name__ == "__main__":
 
     print ('--- default')
     flags3 = initConfigFlags()
-    flags3.Input.Files = defaultTestFiles.RAW
+    flags3.Input.Files = defaultTestFiles.RAW_RUN2
     flags3.lock()
     acc3 = BunchLumisCondAlgCfg (flags3)
     acc3.printCondAlgs(summariseProps=True)

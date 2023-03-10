@@ -1082,7 +1082,7 @@ from AthenaConfiguration.TestDefaults import defaultTestFiles
 
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
 flags = initConfigFlags()
-flags.Input.Files = defaultTestFiles.RAW
+flags.Input.Files = defaultTestFiles.RAW_RUN2
 flags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2017-05"
 
 test1 (flags)

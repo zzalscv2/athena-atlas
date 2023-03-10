@@ -97,7 +97,7 @@ if __name__ == '__main__':
 
     flags = initConfigFlags()
     if '--RAWRUN2' in sys.argv:
-        flags.Input.Files = defaultTestFiles.RAW
+        flags.Input.Files = defaultTestFiles.RAW_RUN2
     else:
         flags.Input.Files = defaultTestFiles.AOD_RUN2_DATA
         #TODO expand the test scope Run3 AODs and RAWs

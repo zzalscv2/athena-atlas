@@ -377,7 +377,7 @@ if __name__=="__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     flags = initConfigFlags()
-    flags.Input.Files = defaultTestFiles.RAW
+    flags.Input.Files = defaultTestFiles.RAW_RUN2
     # Set global tag by hand for now
     flags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2018-13"#"CONDBR2-BLKPA-2015-17"
     flags.GeoModel.AtlasVersion = "ATLAS-R2-2016-01-00-01"#"ATLAS-R2-2015-03-01-00"

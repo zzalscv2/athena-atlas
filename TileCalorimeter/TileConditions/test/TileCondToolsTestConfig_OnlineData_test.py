@@ -16,7 +16,7 @@ if __name__ == "__main__":
     log.setLevel(DEBUG)
 
     flags = initConfigFlags()
-    flags.Input.Files = defaultTestFiles.RAW
+    flags.Input.Files = defaultTestFiles.RAW_RUN2
     flags.Common.isOnline = True
     flags.Tile.RunType = 'PHY'
     flags.lock()

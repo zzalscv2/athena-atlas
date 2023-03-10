@@ -205,7 +205,7 @@ if __name__=='__main__':
             flags.Input.Files = [os.path.join(inputDirectory, inputFile)]
         else:
             from AthenaConfiguration.TestDefaults import defaultTestFiles
-            flags.Input.Files = defaultTestFiles.RAW
+            flags.Input.Files = defaultTestFiles.RAW_RUN2
 
     runNumber = flags.Input.RunNumber[0]
     flags.GeoModel.AtlasVersion = 'ATLAS-R3S-2021-03-01-00' if not flags.Input.isMC and runNumber >= 411938 else 'ATLAS-R2-2016-01-00-01'

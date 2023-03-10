@@ -27,7 +27,7 @@ if __name__ == "__main__":
     only = ['CaloCellContainerAliasAlg_myalias']
 
     flags1 = initConfigFlags()
-    flags1.Input.Files = defaultTestFiles.RAW
+    flags1.Input.Files = defaultTestFiles.RAW_RUN2
     flags1.lock()
     acc1 = CaloCellContainerAliasAlgCfg (flags1, 'myalias')
     acc1.printConfig(summariseProps=True, onlyComponents=only)

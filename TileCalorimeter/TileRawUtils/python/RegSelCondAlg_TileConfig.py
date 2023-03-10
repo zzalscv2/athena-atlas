@@ -35,7 +35,7 @@ if __name__ == "__main__":
     # Test setup
     log.setLevel(INFO)
 
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
+    ConfigFlags.Input.Files = defaultTestFiles.RAW_RUN2
     ConfigFlags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
