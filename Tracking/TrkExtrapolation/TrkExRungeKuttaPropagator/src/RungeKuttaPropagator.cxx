@@ -1457,12 +1457,7 @@ Trk::RungeKuttaPropagator::propagate(const ::EventContext& ctx,
 {
   double J[25];
   Cache cache{};
-  cache.m_dlt = m_dlt;
-  cache.m_helixStep = m_helixStep;
-  cache.m_straightStep = m_straightStep;
-  cache.m_usegradient = m_usegradient;
-  // Get field cache object
-  getFieldCacheObject(cache, ctx);
+  getInitializedCache(cache, ctx);
 
   cache.m_maxPath = 10000.;
   return propagateRungeKutta(cache, true, Tp, Su, D, B, M, J, returnCurv);
@@ -1487,12 +1482,7 @@ Trk::RungeKuttaPropagator::propagate(const ::EventContext& ctx,
 {
   double J[25];
   Cache cache{};
-  cache.m_dlt = m_dlt;
-  cache.m_helixStep = m_helixStep;
-  cache.m_straightStep = m_straightStep;
-  cache.m_usegradient = m_usegradient;
-  // Get field cache object
-  getFieldCacheObject(cache, ctx);
+  getInitializedCache(cache, ctx);
 
   pathLength < 0. ? cache.m_maxPath = 10000. : cache.m_maxPath = pathLength;
   auto Tpn = propagateRungeKutta(cache, true, Tp, Su, D, B, M, J, returnCurv);
@@ -1528,12 +1518,7 @@ Trk::RungeKuttaPropagator::propagate(const ::EventContext& ctx,
 {
 
   Cache cache{};
-  cache.m_dlt = m_dlt;
-  cache.m_helixStep = m_helixStep;
-  cache.m_straightStep = m_straightStep;
-  cache.m_usegradient = m_usegradient;
-  // Get field cache object
-  getFieldCacheObject(cache, ctx);
+  getInitializedCache(cache, ctx);
 
   Sol.erase(Sol.begin(), Sol.end());
   Path = 0.;
@@ -1725,13 +1710,7 @@ Trk::RungeKuttaPropagator::propagateParameters(const ::EventContext& ctx,
 {
   double J[25];
   Cache cache{};
-  cache.m_dlt = m_dlt;
-  cache.m_helixStep = m_helixStep;
-  cache.m_straightStep = m_straightStep;
-  cache.m_usegradient = m_usegradient;
-
-  // Get field cache object
-  getFieldCacheObject(cache, ctx);
+  getInitializedCache(cache, ctx);
 
   cache.m_maxPath = 10000.;
   return propagateRungeKutta(cache, false, Tp, Su, D, B, M, J, returnCurv);
@@ -1804,12 +1783,8 @@ Trk::RungeKuttaPropagator::propagateParameters(const ::EventContext& ctx,
 {
   double J[25];
   Cache cache{};
-  cache.m_dlt = m_dlt;
-  cache.m_helixStep = m_helixStep;
-  cache.m_straightStep = m_straightStep;
-  cache.m_usegradient = m_usegradient;
-  // Get field cache object
-  getFieldCacheObject(cache, ctx);
+  getInitializedCache(cache, ctx);
+
   cache.m_maxPath = 10000.;
   auto Tpn{ propagateRungeKutta(cache, true, Tp, Su, D, B, M, J, returnCurv) };
 
@@ -1844,13 +1819,7 @@ Trk::RungeKuttaPropagator::globalPositions(const ::EventContext& ctx,
   if (!Trk::RungeKuttaUtils::transformLocalToGlobal(false, Tp, P))
     return;
   Cache cache{};
-  cache.m_dlt = m_dlt;
-  cache.m_helixStep = m_helixStep;
-  cache.m_straightStep = m_straightStep;
-  cache.m_usegradient = m_usegradient;
-
-  // Get field cache object
-  getFieldCacheObject(cache, ctx);
+  getInitializedCache(cache, ctx);
 
   cache.m_direction = std::abs(mS);
   if (mS > 0.)
@@ -1873,14 +1842,7 @@ Trk::RungeKuttaPropagator::intersect(const ::EventContext& ctx,
   bool nJ = false;
   const Trk::Surface* su = &Su;
   Cache cache{};
-  cache.m_dlt = m_dlt;
-  cache.m_helixStep = m_helixStep;
-  cache.m_straightStep = m_straightStep;
-  cache.m_usegradient = m_usegradient;
-
-
-  // Get field cache object
-  getFieldCacheObject(cache, ctx);
+  getInitializedCache(cache, ctx);
 
   cache.m_direction = 0.;
 
@@ -1919,13 +1881,7 @@ Trk::RungeKuttaPropagator::propagate(const ::EventContext& ctx,
 {
   double S = 0;
   Cache cache{};
-  cache.m_dlt = m_dlt;
-  cache.m_helixStep = m_helixStep;
-  cache.m_straightStep = m_straightStep;
-  cache.m_usegradient = m_usegradient;
-
-  // Get field cache object
-  getFieldCacheObject(cache, ctx);
+  getInitializedCache(cache, ctx);
 
   cache.m_maxPath = 10000.;
   return propagateRungeKutta(cache, true, Ta, Su, Tb, D, M, S);
@@ -1946,13 +1902,7 @@ Trk::RungeKuttaPropagator::propagate(const ::EventContext& ctx,
                                      ParticleHypothesis) const
 {
   Cache cache{};
-  cache.m_dlt = m_dlt;
-  cache.m_helixStep = m_helixStep;
-  cache.m_straightStep = m_straightStep;
-  cache.m_usegradient = m_usegradient;
-
-  // Get field cache object
-  getFieldCacheObject(cache, ctx);
+  getInitializedCache(cache, ctx);
 
   cache.m_maxPath = 10000.;
   return propagateRungeKutta(cache, true, Ta, Su, Tb, D, M, S);
@@ -1973,14 +1923,7 @@ Trk::RungeKuttaPropagator::propagateParameters(const ::EventContext& ctx,
 {
   double S = 0;
   Cache cache{};
-  cache.m_dlt = m_dlt;
-  cache.m_helixStep = m_helixStep;
-  cache.m_straightStep = m_straightStep;
-  cache.m_usegradient = m_usegradient;
-
-
-  // Get field cache object
-  getFieldCacheObject(cache, ctx);
+  getInitializedCache(cache, ctx);
 
   cache.m_maxPath = 10000.;
   return propagateRungeKutta(cache, false, Ta, Su, Tb, D, M, S);
@@ -2001,14 +1944,7 @@ Trk::RungeKuttaPropagator::propagateParameters(const ::EventContext& ctx,
                                                ParticleHypothesis) const
 {
   Cache cache{};
-  cache.m_dlt = m_dlt;
-  cache.m_helixStep = m_helixStep;
-  cache.m_straightStep = m_straightStep;
-  cache.m_usegradient = m_usegradient;
-
-
-  // Get field cache object
-  getFieldCacheObject(cache, ctx);
+  getInitializedCache(cache, ctx);
 
   cache.m_maxPath = 10000.;
   return propagateRungeKutta(cache, false, Ta, Su, Tb, D, M, S);
@@ -2026,19 +1962,20 @@ Trk::RungeKuttaPropagator::globalPositions(const ::EventContext& ctx,
                                            ParticleHypothesis) const
 {
   Cache cache{};
-  getFieldCacheObject(cache, ctx);
-  cache.m_dlt = m_dlt;
-  cache.m_helixStep = m_helixStep;
-  cache.m_straightStep = m_straightStep;
-  cache.m_usegradient = m_usegradient;
+  getInitializedCache(cache, ctx);
   globalPositionsImpl(cache, Tp, SU, GP, M);
 }
 
 void
-Trk::RungeKuttaPropagator::getFieldCacheObject(Cache& cache, const EventContext& ctx) const
+Trk::RungeKuttaPropagator::getInitializedCache(Cache& cache, const EventContext& ctx) const
 {
   SG::ReadCondHandle<AtlasFieldCacheCondObj> readHandle{ m_fieldCondObjInputKey, ctx };
   const AtlasFieldCacheCondObj* fieldCondObj{ *readHandle };
   fieldCondObj->getInitializedCache(cache.m_fieldCache);
+  cache.m_dlt = m_dlt;
+  cache.m_helixStep = m_helixStep;
+  cache.m_straightStep = m_straightStep;
+  cache.m_usegradient = m_usegradient;
+ 
 }
 
