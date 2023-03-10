@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -66,7 +66,8 @@ namespace InDet {
       virtual std::list<Trk::Track*>
         getTracks(const EventContext& ctx, SiTrackMakerEventData_xk& data, const std::vector<const Trk::SpacePoint*>&) const =0;
       virtual std::list<Trk::Track*>
-	getTracks(const EventContext& ctx, SiTrackMakerEventData_xk& data, const Trk::TrackParameters&, const std::list<Amg::Vector3D>&) const =0;
+        getTracks(const EventContext& ctx, SiTrackMakerEventData_xk& data, const Trk::TrackParameters&, 
+                  const std::vector<Amg::Vector3D>&) const =0;
 
       virtual void newEvent(const EventContext& ctx, SiTrackMakerEventData_xk& data, bool, bool) const =0;
 

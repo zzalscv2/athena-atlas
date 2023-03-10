@@ -701,7 +701,7 @@ std::list<Trk::Track*> InDet::SiTrackMaker_xk::getTracks
   ++data.summaryStatAll()[kTotalUsedSeeds][K];
 
   /// prepare a list of global positions
-  std::list<Amg::Vector3D> Gp;
+  std::vector<Amg::Vector3D> Gp;
 
   /// update another counter
   ++data.summaryStatUsedInTrack()[kUsedSeedsEta][K][r];
@@ -763,7 +763,7 @@ std::list<Trk::Track*> InDet::SiTrackMaker_xk::getTracks
 ///////////////////////////////////////////////////////////////////
 
 std::list<Trk::Track*> InDet::SiTrackMaker_xk::getTracks
-(const EventContext& ctx, SiTrackMakerEventData_xk& data, const Trk::TrackParameters& Tp, const std::list<Amg::Vector3D>& Gp) const
+(const EventContext& ctx, SiTrackMakerEventData_xk& data, const Trk::TrackParameters& Tp, const std::vector<Amg::Vector3D>& Gp) const
 {
   ++data.inputseeds();
   std::list<Trk::Track*> tracks;

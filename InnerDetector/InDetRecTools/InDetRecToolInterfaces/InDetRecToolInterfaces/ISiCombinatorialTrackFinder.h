@@ -65,34 +65,29 @@ namespace InDet {
       /// @name Main methods for track-finding
       ///////////////////////////////////////////////////////////////////
       //@{
-      
-      virtual const std::list<Trk::Track*>& getTracks
-	(SiCombinatorialTrackFinderData_xk& data,
-         const Trk::TrackParameters&, 
-	 const std::vector<const Trk::SpacePoint*>&,
-	 const std::list<Amg::Vector3D>&,
-	 std::list<const InDetDD::SiDetectorElement*>&,
-	 const TrackQualityCuts&,
-   const EventContext&) const =0;
 
-      virtual const std::list<Trk::Track*>& getTracks
-	(SiCombinatorialTrackFinderData_xk& data,
-         const Trk::TrackParameters&, 
-	 const std::vector<const Trk::SpacePoint*>&,
-	 const std::list<Amg::Vector3D>&,
-	 std::list<const InDetDD::SiDetectorElement*>&,
-	 std::multimap<const Trk::PrepRawData*, const Trk::Track*>&,
-   const EventContext&) const =0;
+      virtual const std::list<Trk::Track*>& getTracks(
+          SiCombinatorialTrackFinderData_xk& data, const Trk::TrackParameters&,
+          const std::vector<const Trk::SpacePoint*>&,
+          const std::vector<Amg::Vector3D>&,
+          std::list<const InDetDD::SiDetectorElement*>&,
+          const TrackQualityCuts&, const EventContext&) const = 0;
 
-      virtual const std::list<Trk::Track*>& getTracksWithBrem
-	(SiCombinatorialTrackFinderData_xk& data,
-         const Trk::TrackParameters&,
-	 const std::vector<const Trk::SpacePoint*>&,
-	 const std::list<Amg::Vector3D>&,
-	 std::list<const InDetDD::SiDetectorElement*>&,
-	 std::multimap<const Trk::PrepRawData*, const Trk::Track*>&,
-	 bool,
-   const EventContext&) const =0;
+      virtual const std::list<Trk::Track*>& getTracks(
+          SiCombinatorialTrackFinderData_xk& data, const Trk::TrackParameters&,
+          const std::vector<const Trk::SpacePoint*>&,
+          const std::vector<Amg::Vector3D>&,
+          std::list<const InDetDD::SiDetectorElement*>&,
+          std::multimap<const Trk::PrepRawData*, const Trk::Track*>&,
+          const EventContext&) const = 0;
+
+      virtual const std::list<Trk::Track*>& getTracksWithBrem(
+          SiCombinatorialTrackFinderData_xk& data, const Trk::TrackParameters&,
+          const std::vector<const Trk::SpacePoint*>&,
+          const std::vector<Amg::Vector3D>&,
+          std::list<const InDetDD::SiDetectorElement*>&,
+          std::multimap<const Trk::PrepRawData*, const Trk::Track*>&, bool,
+          const EventContext&) const = 0;
 
       virtual double pTseed(SiCombinatorialTrackFinderData_xk& data,
 			    const Trk::TrackParameters&,

@@ -975,7 +975,7 @@ InDet::SiTrajectoryElement_xk::trackSimpleStateOnSurface
 (bool change,bool cov,int Q)
 {
   if(!m_detelement) {
-    return 0;
+    return nullptr;
   }
 
   std::unique_ptr<Trk::TrackParameters> tp = nullptr;
@@ -2064,7 +2064,7 @@ int InDet::SiTrajectoryElement_xk::numberClusters() const
   
 bool InDet::SiTrajectoryElement_xk::difference() const
 {
-  return !(m_cluster == m_clusterOld && m_status == 3);
+  return m_cluster != m_clusterOld || m_status != 3;
 }
 
 /////////////////////////////////////////////////////////////////////////////////

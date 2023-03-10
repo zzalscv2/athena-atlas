@@ -88,14 +88,14 @@ namespace InDet {
      virtual const std::list<Trk::Track*>& getTracks(
          SiCombinatorialTrackFinderData_xk& data, const Trk::TrackParameters&,
          const std::vector<const Trk::SpacePoint*>&,
-         const std::list<Amg::Vector3D>&,
+         const std::vector<Amg::Vector3D>&,
          std::list<const InDetDD::SiDetectorElement*>&, const TrackQualityCuts&,
          const EventContext& ctx) const override;
 
      virtual const std::list<Trk::Track*>& getTracks(
          SiCombinatorialTrackFinderData_xk& data, const Trk::TrackParameters&,
          const std::vector<const Trk::SpacePoint*>&,
-         const std::list<Amg::Vector3D>&,
+         const std::vector<Amg::Vector3D>&,
          std::list<const InDetDD::SiDetectorElement*>&,
          std::multimap<const Trk::PrepRawData*, const Trk::Track*>&,
          const EventContext& ctx) const override;
@@ -103,7 +103,7 @@ namespace InDet {
      virtual const std::list<Trk::Track*>& getTracksWithBrem(
          SiCombinatorialTrackFinderData_xk& data, const Trk::TrackParameters&,
          const std::vector<const Trk::SpacePoint*>&,
-         const std::list<Amg::Vector3D>&,
+         const std::vector<Amg::Vector3D>&,
          std::list<const InDetDD::SiDetectorElement*>&,
          std::multimap<const Trk::PrepRawData*, const Trk::Track*>&, bool,
          const EventContext& ctx) const override;
@@ -217,35 +217,36 @@ namespace InDet {
       // Methods 
       ///////////////////////////////////////////////////////////////////
 
-      EStat_t findTrack
-        (SiCombinatorialTrackFinderData_xk& data,
-         const Trk::TrackParameters&, 
-	 const std::vector<const Trk::SpacePoint*>&,
-	 const std::list<Amg::Vector3D>&,
-	 std::list<const InDetDD::SiDetectorElement*>&,
-	 std::multimap<const Trk::PrepRawData*, const Trk::Track*>&,
-   const EventContext&) const;
+      EStat_t findTrack(
+          SiCombinatorialTrackFinderData_xk& data, const Trk::TrackParameters&,
+          const std::vector<const Trk::SpacePoint*>&,
+          const std::vector<Amg::Vector3D>&,
+          std::list<const InDetDD::SiDetectorElement*>&,
+          std::multimap<const Trk::PrepRawData*, const Trk::Track*>&,
+          const EventContext&) const;
 
-      static void getTrackQualityCuts(SiCombinatorialTrackFinderData_xk& data, const TrackQualityCuts&) ;
+      static void getTrackQualityCuts(SiCombinatorialTrackFinderData_xk& data,
+                                      const TrackQualityCuts&);
 
       Trk::Track* convertToTrack(SiCombinatorialTrackFinderData_xk& data) const;
-      Trk::Track* convertToNextTrack(SiCombinatorialTrackFinderData_xk& data) const;
- 
+      Trk::Track* convertToNextTrack(
+          SiCombinatorialTrackFinderData_xk& data) const;
+
       void magneticFieldInit();
 
-      static bool spacePointsToClusters
-	(const std::vector<const Trk::SpacePoint*>&,
-	 std::list<const InDet::SiCluster*> &) ; 
+      static bool spacePointsToClusters(
+          const std::vector<const Trk::SpacePoint*>&,
+          std::list<const InDet::SiCluster*>&);
 
-      static bool spacePointsToClusters
-	(const std::vector<const Trk::SpacePoint*>&,
-	 std::list<const InDet::SiCluster*> &,
-	 std::list<const InDetDD::SiDetectorElement*>&) ;
+      static bool spacePointsToClusters(
+          const std::vector<const Trk::SpacePoint*>&,
+          std::list<const InDet::SiCluster*>&,
+          std::list<const InDetDD::SiDetectorElement*>&);
 
-      void detectorElementLinks
-	(std::list<const InDetDD::SiDetectorElement*>        &,
-	 std::vector<const InDet::SiDetElementBoundaryLink_xk*>&,
-   const EventContext& ctx) const;
+      void detectorElementLinks(
+          std::list<const InDetDD::SiDetectorElement*>&,
+          std::vector<const InDet::SiDetElementBoundaryLink_xk*>&,
+          const EventContext& ctx) const;
 
       MsgStream& dumpconditions(MsgStream& out) const;
       static MsgStream& dumpevent(SiCombinatorialTrackFinderData_xk& data, MsgStream& out) ;

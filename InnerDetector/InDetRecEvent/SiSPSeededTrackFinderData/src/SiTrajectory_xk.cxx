@@ -997,13 +997,13 @@ bool InDet::SiTrajectory_xk::trackParametersToClusters
 bool InDet::SiTrajectory_xk::globalPositionsToClusters
 (const InDet::PixelClusterContainer*                       PIXc      ,
  const InDet::SCT_ClusterContainer*                        SCTc      ,
- const std::list<Amg::Vector3D>                          & Gp        ,
+ const std::vector<Amg::Vector3D>                          & Gp        ,
  std::vector<const InDet::SiDetElementBoundaryLink_xk*>    & DE        ,
  std::multimap<const Trk::PrepRawData*,const Trk::Track*>& PT        ,
  std::list<const InDet::SiCluster*>                      & lSiCluster)
 {
   std::vector<const InDet::SiDetElementBoundaryLink_xk*>::iterator iter_boundaryLink = DE.begin(), endBoundaryLinks = DE.end();
-  std::list<Amg::Vector3D>::const_iterator                    g,gb = Gp.begin(), ge = Gp.end();
+  std::vector<Amg::Vector3D>::const_iterator g,gb = Gp.begin(), ge = Gp.end();
   InDet::PixelClusterCollection::const_iterator pib, pie;
   InDet::SCT_ClusterCollection::const_iterator sib, sie;
   std::multimap<const Trk::PrepRawData*,const Trk::Track*>::const_iterator t, te =PT.end();
