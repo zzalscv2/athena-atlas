@@ -3,7 +3,6 @@
 */
 
 #include "LArCalibTools/LArAccumulatedDigits2Ntuple.h"
-
 #include "LArRawEvent/LArAccumulatedDigitContainer.h"
 
 //#include "GaudiKernel/ToolHandle.h"
@@ -13,11 +12,8 @@ LArAccumulatedDigits2Ntuple::LArAccumulatedDigits2Ntuple(const std::string& name
   m_ipass(0),
   m_event(0)
 {
-  declareProperty("ContainerKey",m_contKey);
-  declareProperty("NSamples",m_Nsamples=7);
-  declareProperty("Normalize",m_normalize=1);
   m_ntTitle="AccumulatedDigits";
-  m_ntpath="/NTUPLES/FILE1/ACCUMULATEDDIGITS"+m_contKey;
+  m_ntpath="/NTUPLES/FILE1/ACCUMULATEDDIGITS"+m_contKey.key();
 
 }
 
@@ -37,9 +33,15 @@ StatusCode LArAccumulatedDigits2Ntuple::initialize()
 
 
 
-  sc=m_nt->addItem("IEvent",m_IEvent,0,3000);
+  sc=m_nt->addItem("IEvent",m_IEvent);
   if (sc!=StatusCode::SUCCESS) {
       ATH_MSG_ERROR( "addItem 'IEvent' failed" );
+      return sc;
+    }
+
+  sc=m_nt->addItem("EventNum",m_EventNum);
+  if (sc!=StatusCode::SUCCESS) {
+      ATH_MSG_ERROR( "addItem 'EventNum' failed" );
       return sc;
     }
 
@@ -55,25 +57,25 @@ StatusCode LArAccumulatedDigits2Ntuple::initialize()
       return sc;
     }
 
-  sc=m_nt->addItem("sum",m_Nsamples,m_sum);
+  sc=m_nt->addItem("Sum",m_Nsamples,m_sum);
   if (sc!=StatusCode::SUCCESS) {
       ATH_MSG_ERROR( "addItem 'sum' failed" );
       return sc;
     }
   
-  sc=m_nt->addItem("sumsq",m_Nsamples,m_sumsq);
+  sc=m_nt->addItem("Sumsq",m_Nsamples,m_sumsq);
   if (sc!=StatusCode::SUCCESS) {
       ATH_MSG_ERROR( "addItem 'sumsq' failed" );
       return sc;
     }
 
-  sc=m_nt->addItem("mean",m_mean);
+  sc=m_nt->addItem("Mean",m_mean);
   if (sc!=StatusCode::SUCCESS) {
       ATH_MSG_ERROR( "addItem 'mean' failed" );
       return sc;
     }
 
-  sc=m_nt->addItem("rms",m_rms);
+  sc=m_nt->addItem("RMS",m_rms);
   if (sc!=StatusCode::SUCCESS) {
       ATH_MSG_ERROR( "addItem 'rms' failed" );
       return sc;
@@ -85,9 +87,9 @@ StatusCode LArAccumulatedDigits2Ntuple::initialize()
       return sc;
     }
 
+  ATH_CHECK( m_contKey.initialize(!m_contKey.key().empty()) );
 
   m_ipass = 0;
-
   m_event=0;
 
   return StatusCode::SUCCESS;
@@ -97,20 +99,24 @@ StatusCode LArAccumulatedDigits2Ntuple::initialize()
 StatusCode LArAccumulatedDigits2Ntuple::execute()
 {
 
+  ATH_MSG_DEBUG( "in execute" ); 
   StatusCode sc;
   
-  ATH_MSG_DEBUG( "in execute" ); 
+  if (m_contKey.key().empty()) return StatusCode::SUCCESS;
+
+  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   m_event++;
   
-  const LArAccumulatedDigitContainer* accuDigitContainer = NULL;
-  sc=detStore()->retrieve(accuDigitContainer,m_contKey);  
-  if (sc!=StatusCode::SUCCESS) {
-     ATH_MSG_WARNING( "Unable to retrieve LArAccumulatedDigitContainer with key " << m_contKey << " from DetectorStore. " );
-    } 
-  else
-     ATH_MSG_DEBUG( "Got LArAccumulatedDigitContainer with key " << m_contKey );
-  
+  const LArAccumulatedDigitContainer* accuDigitContainer = nullptr;
+  SG::ReadHandle<LArAccumulatedDigitContainer> Hdl{m_contKey, ctx};
+  if (!Hdl.isValid()) {
+     ATH_MSG_WARNING( "Unable to retrieve LArAccumulatedDigitContainer with key " << m_contKey.key() << " from DetectorStore. " );
+     return StatusCode::SUCCESS;
+  } else {
+     ATH_MSG_DEBUG( "Got LArAccumulatedDigitContainer with key " << m_contKey.key() );
+     accuDigitContainer = Hdl.cptr();
+  }
  
  if (accuDigitContainer) { 
    
@@ -123,12 +129,11 @@ StatusCode LArAccumulatedDigits2Ntuple::execute()
 
    for (const LArAccumulatedDigit* digit : *accuDigitContainer) {
 
-     m_IEvent=m_event;
+     m_IEvent = m_event;
+     m_EventNum = ctx.eventID().event_number(); 
      m_Ntrigger = digit->nTrigger();
      unsigned int trueMaxSample = digit->nsample();
      m_ntNsamples = trueMaxSample;
-
-     //     std::cout << "trigger = " << m_Ntrigger << ", samples = "<< m_ntNsamples << std::endl;
 
      if(trueMaxSample>m_Nsamples){
        if(!m_ipass){
@@ -160,6 +165,5 @@ StatusCode LArAccumulatedDigits2Ntuple::execute()
      }
    } 
  } 
- ATH_MSG_DEBUG( "LArAccumulatedDigits2Ntuple has finished." );
  return StatusCode::SUCCESS;
-}// end finalize-method.
+}// end execute method.
