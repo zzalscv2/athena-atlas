@@ -1168,35 +1168,34 @@ std::vector<const Trk::TrackStateOnSurface*> Trk::GeantFollowerMSHelper::modifyT
                                  deltaTheta,
                                  sqrt(sigmaDeltaPhi2_tot / 2.),
                                  sqrt(sigmaDeltaTheta2_tot / 2.));
-          auto energyLoss2 = std::make_unique<Trk::EnergyLoss>(deltaE_tot,
-                                                        sigmaDeltaE_tot,
-                                                        sigmaPlusDeltaE_tot,
-                                                        sigmaMinusDeltaE_tot,
-                                                        deltaE_ioni_tot,
-                                                        sigmaDeltaE_ioni_tot,
-                                                        deltaE_rad_tot,
-                                                        sigmaDeltaE_rad_tot,
-                                                        0.);
+          auto energyLoss2 = Trk::EnergyLoss(deltaE_tot,
+                                             sigmaDeltaE_tot,
+                                             sigmaPlusDeltaE_tot,
+                                             sigmaMinusDeltaE_tot,
+                                             deltaE_ioni_tot,
+                                             sigmaDeltaE_ioni_tot,
+                                             deltaE_rad_tot,
+                                             sigmaDeltaE_rad_tot,
+                                             0.);
 
           int elossFlag = 0; // return Flag for updateEnergyLoss Calorimeter
                              // energy (0 = not used)
           auto energyLossNew =
-            (updateEloss ? std::unique_ptr<Trk::EnergyLoss>(
-                             m_elossupdator->updateEnergyLoss(energyLoss2.get(),
+            (updateEloss ? m_elossupdator->updateEnergyLoss(energyLoss2,
                                                               caloEnergy,
                                                               caloEnergyError,
                                                               pCaloEntry,
                                                               momentumError,
-                                                              elossFlag))
-                         : std::make_unique<Trk::EnergyLoss>(deltaE_tot,
-                                                             sigmaDeltaE_tot,
-                                                             sigmaPlusDeltaE_tot,
-                                                             sigmaMinusDeltaE_tot,
-                                                             deltaE_ioni_tot,
-                                                             sigmaDeltaE_ioni_tot,
-                                                             deltaE_rad_tot,
-                                                             sigmaDeltaE_rad_tot,
-                                                             0.));
+                                                              elossFlag)
+                         : Trk::EnergyLoss(deltaE_tot,
+                                           sigmaDeltaE_tot,
+                                           sigmaPlusDeltaE_tot,
+                                           sigmaMinusDeltaE_tot,
+                                           deltaE_ioni_tot,
+                                           sigmaDeltaE_ioni_tot,
+                                           deltaE_rad_tot,
+                                           sigmaDeltaE_rad_tot,
+                                           0.));
 
 
           //        direction of plane
@@ -1237,7 +1236,7 @@ std::vector<const Trk::TrackStateOnSurface*> Trk::GeantFollowerMSHelper::modifyT
             surfLast->createUniqueParameters<5, Trk::Charged>(
               0., 0., dir.phi(), dir.theta(), qOverPNew);
 
-          Eloss_tot += energyLossNew->deltaE();
+          Eloss_tot += energyLossNew.deltaE();
           if(!threePlanes) {
             //
             // make two scattering planes and TSOS
@@ -1250,9 +1249,10 @@ std::vector<const Trk::TrackStateOnSurface*> Trk::GeantFollowerMSHelper::modifyT
             //          prepare for second MaterialEffectsOnTrack with X0 = X0/2
             //          Eloss = Eloss total and scattering2 = total2 / 2. depth
             //          = 0
-            auto meotLast =
-              std::make_unique<const Trk::MaterialEffectsOnTrack>(
-                X0_tot / 2., scatNew, std::move(energyLossNew), *surfLast, meotPattern);
+            auto meotLast = std::make_unique<const Trk::MaterialEffectsOnTrack>(
+                X0_tot / 2., scatNew,
+                std::make_unique<Trk::EnergyLoss>(std::move(energyLossNew)),
+                *surfLast, meotPattern);
             //
             //
             const Trk::TrackStateOnSurface* newTSOSFirst =
@@ -1287,7 +1287,9 @@ std::vector<const Trk::TrackStateOnSurface*> Trk::GeantFollowerMSHelper::modifyT
             //        prepare for middle MaterialEffectsOnTrack with X0 =  0
             //        Eloss = ElossNew and scattering2 = 0. depth = 0
             auto meot = std::make_unique<const Trk::MaterialEffectsOnTrack>(
-              0., scatZero, std::move(energyLossNew), *surf, meotPattern);
+                0., scatZero,
+                std::make_unique<Trk::EnergyLoss>(std::move(energyLossNew)),
+                *surf, meotPattern);
             //        prepare for last MaterialEffectsOnTrack with X0 =  X0/2
             //        Eloss = 0 total and scattering2 = total2 / 2. depth = 0
             auto meotLast = std::make_unique<const Trk::MaterialEffectsOnTrack>(

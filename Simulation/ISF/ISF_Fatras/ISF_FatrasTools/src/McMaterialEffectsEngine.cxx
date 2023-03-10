@@ -519,11 +519,11 @@ Trk::ExtrapolationCode iFatras::McMaterialEffectsEngine::processMaterialOnLayer(
               dX0 / m_matProp->thicknessInX0(),
               dir,
               eCell.pHypothesis))
-          : m_eLossSampler->energyLoss(*m_matProp,
+          : std::make_unique<Trk::EnergyLoss>(m_eLossSampler->energyLoss(*m_matProp,
                                        p,
                                        dX0 / m_matProp->thicknessInX0(),
                                        dir,
-                                       eCell.pHypothesis);
+                                       eCell.pHypothesis));
 
       if (eCell.pHypothesis==Trk::electron && m_createBremPhoton) {
 

@@ -921,19 +921,17 @@ iFatras::McMaterialEffectsUpdator::update(
   double newP = p;
   if (m_eLoss){
     // get the momentum change plus the according sigma
-    std::unique_ptr<Trk::EnergyLoss> sampledEnergyLoss( m_eLossUpdator->energyLoss(matprop, p, pathCorrection, dir, particle));
+    Trk::EnergyLoss sampledEnergyLoss( m_eLossUpdator->energyLoss(matprop, p, pathCorrection, dir, particle));
 
-
-    if (sampledEnergyLoss){
-       double energyLoss = sampledEnergyLoss->deltaE();
-       // protection against NaN
-       if ( E+energyLoss < m) {
-           ATH_MSG_VERBOSE( "  [+] particle momentum fell under momentum cut - stop simulation" );
-           return nullptr;
-       }
-      // smear the mometnum change with the sigma
-       newP = sqrt((E+energyLoss)*(E+energyLoss)-m*m);
+    double energyLoss = sampledEnergyLoss.deltaE();
+    // protection against NaN
+    if (E + energyLoss < m) {
+      ATH_MSG_VERBOSE(
+          "  [+] particle momentum fell under momentum cut - stop simulation");
+      return nullptr;
     }
+    // smear the mometnum change with the sigma
+    newP = sqrt((E + energyLoss) * (E + energyLoss) - m * m);
 
     if (m_recordEnergyDeposition && m_currentSample > 0){
         if (m_edValidationTree){
@@ -944,7 +942,7 @@ iFatras::McMaterialEffectsUpdator::update(
                 m_edLayerIntersectR = parm.position().perp();
                 // the layer and the deposited energy
                 m_edLayerSample     = m_currentSample;
-                m_edLayerEnergyDeposit = -1*sampledEnergyLoss->deltaE();
+                m_edLayerEnergyDeposit = -1*sampledEnergyLoss.deltaE();
                 // and fill it
                 m_edValidationTree->Fill();
             }

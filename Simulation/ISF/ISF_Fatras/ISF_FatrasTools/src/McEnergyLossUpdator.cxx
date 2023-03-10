@@ -86,7 +86,7 @@ double iFatras::McEnergyLossUpdator::dEdX( const Trk::MaterialProperties& materi
   return m_energyLossUpdator->dEdX( materialProperties, momentum, particleHypothesis );
 }
 
-std::unique_ptr<Trk::EnergyLoss>
+Trk::EnergyLoss
 iFatras::McEnergyLossUpdator::energyLoss(
   const Trk::MaterialProperties& materialProperties,
   double momentum,
@@ -100,7 +100,7 @@ iFatras::McEnergyLossUpdator::energyLoss(
   bool mpvSwitch = m_energyLossDistribution >= 2;
  
   // get the number of the material effects distribution
-  std::unique_ptr<Trk::EnergyLoss> sampledEloss =
+  Trk::EnergyLoss sampledEloss =
     m_energyLossUpdator->energyLoss(materialProperties,
                                     momentum,
                                     pathCorrection,
@@ -109,7 +109,6 @@ iFatras::McEnergyLossUpdator::energyLoss(
                                     mpvSwitch,
                                     m_usePDGformula);
 
-  if (!sampledEloss) return nullptr; 
 
   // smear according to preselected distribution
   switch (m_energyLossDistribution) {
@@ -117,19 +116,19 @@ iFatras::McEnergyLossUpdator::energyLoss(
   case 0 : { } break;
     // gaussian smearing
   case 1 : { 
-    float deIoni = sampledEloss->sigmaIoni() * CLHEP::RandGaussZiggurat::shoot(m_randomEngine);
-    float deRad  = sampledEloss->sigmaRad() * CLHEP::RandGaussZiggurat::shoot(m_randomEngine);
-    sampledEloss->update(deIoni,0.,deRad,0.,false);
+    float deIoni = sampledEloss.sigmaIoni() * CLHEP::RandGaussZiggurat::shoot(m_randomEngine);
+    float deRad  = sampledEloss.sigmaRad() * CLHEP::RandGaussZiggurat::shoot(m_randomEngine);
+    sampledEloss.update(deIoni,0.,deRad,0.,false);
   } break;
   case 2 : {
-    float deIoni = -sampledEloss->sigmaIoni() * CLHEP::RandLandau::shoot(m_randomEngine);  // TODO :check sign
-    sampledEloss->update(deIoni,0.,0.,0.,false);   
+    float deIoni = -sampledEloss.sigmaIoni() * CLHEP::RandLandau::shoot(m_randomEngine);  // TODO :check sign
+    sampledEloss.update(deIoni,0.,0.,0.,false);   
   } break;
     // landau smearing
     default : {
-      float deIoni = -sampledEloss->sigmaIoni() * CLHEP::RandLandau::shoot(m_randomEngine);  // TODO :check sign
-      float deRad  = -sampledEloss->sigmaRad() * CLHEP::RandLandau::shoot(m_randomEngine);   // TODO :check sign      
-      sampledEloss->update(deIoni,0.,deRad,0.,false);   
+      float deIoni = -sampledEloss.sigmaIoni() * CLHEP::RandLandau::shoot(m_randomEngine);  // TODO :check sign
+      float deRad  = -sampledEloss.sigmaRad() * CLHEP::RandLandau::shoot(m_randomEngine);   // TODO :check sign      
+      sampledEloss.update(deIoni,0.,deRad,0.,false);   
     } break;
   }
 
@@ -137,9 +136,9 @@ iFatras::McEnergyLossUpdator::energyLoss(
   double m     = Trk::ParticleMasses::mass[particleHypothesis];
   double E     = sqrt(momentum*momentum+m*m);
 
-  if (sampledEloss->deltaE()+E<m ) {    // particle stopping - rest energy
-      float dRad_rest = m-E-sampledEloss->deltaE();
-      sampledEloss->update(0.,0.,dRad_rest,0.,false);   
+  if (sampledEloss.deltaE()+E<m ) {    // particle stopping - rest energy
+      float dRad_rest = m-E-sampledEloss.deltaE();
+      sampledEloss.update(0.,0.,dRad_rest,0.,false);   
   }
 
   return sampledEloss;
