@@ -181,14 +181,6 @@ def ActsExtrapolationAlgCfg(flags, name = "ActsExtrapolationAlg", **kwargs):
   result.addEventAlgo(CompFactory.ActsExtrapolationAlg(name, **kwargs))
   return result
 
-
-def ActsATLASConverterToolCfg(flags, name="ActsATLASConverterTool", **kwargs):
-    result = ComponentAccumulator()
-    kwargs.setdefault("TrackingGeometryTool", result.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags))) # PrivateToolHandle
-    result.setPrivateTools(CompFactory.ActsATLASConverterTool(name, **kwargs) )
-    return result
-
-
 def ActsWriteTrackingGeometryCfg(flags, name="ActsWriteTrackingGeometry", **kwargs):
     result = ComponentAccumulator()
 

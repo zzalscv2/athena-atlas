@@ -2,7 +2,8 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "ActsGeometry/ActsATLASConverterTool.h"
+#include "EventPrimitives/EventPrimitives.h" 
+//needed here to get the ATLAS eigen plugins in before the ACTS eigen plugins 
 
 #include "ActsGeometry/ActsExtrapolationAlg.h"
 #include "ActsGeometry/ActsWriteTrackingGeometry.h"
@@ -47,5 +48,3 @@ DECLARE_COMPONENT( ActsTrackingGeometryTool )
 DECLARE_COMPONENT( ActsPropStepRootWriterSvc )
 DECLARE_COMPONENT( ActsAlignmentCondAlg )
 DECLARE_COMPONENT( ActsCaloTrackingVolumeBuilder )
-
-DECLARE_COMPONENT( ActsATLASConverterTool )

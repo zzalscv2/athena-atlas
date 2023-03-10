@@ -41,7 +41,6 @@
 // PACKAGE
 #include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
-#include "ActsGeometry/ActsATLASConverterTool.h"
 #include "ActsGeometry/ActsGeometryContext.h"
 #include "ActsGeometry/ActsDetectorElement.h"
 #include "ActsInterop/Logger.h"
@@ -642,7 +641,7 @@ namespace ActsTrk
                  {
                    for (auto meas : *clusterContainer) {
                      sourceLinks.insert(sourceLinks.end(),
-                                        m_ATLASConverterTool->UncalibratedMeasurementToSourceLink(*detEleColl, meas, elementsCollection));
+                                        m_ATLASConverterTool->uncalibratedTrkMeasurementToSourceLink(*detEleColl, *meas, elementsCollection));
                    } },
                  clusterContainerVar);
     }
@@ -774,7 +773,7 @@ namespace ActsTrk
               const Acts::BoundTrackParameters actsParam(state.referenceSurface().getSharedPtr(),
                                                          state.predicted(),
                                                          state.predictedCovariance());
-              parm = m_ATLASConverterTool->ActsTrackParameterToATLAS(actsParam, tgContext);
+              parm = m_ATLASConverterTool->actsTrackParametersToTrkParameters(actsParam, tgContext);
               auto boundaryCheck = m_boundaryCheckTool->boundaryCheck(*parm);
 
               // Check if this is a hole, a dead sensors or a state outside the sensor boundary
@@ -814,7 +813,7 @@ namespace ActsTrk
               const Acts::BoundTrackParameters actsParam(state.referenceSurface().getSharedPtr(),
                                                          state.filtered(),
                                                          state.filteredCovariance());
-              parm = m_ATLASConverterTool->ActsTrackParameterToATLAS(actsParam, tgContext);
+              parm = m_ATLASConverterTool->actsTrackParametersToTrkParameters(actsParam, tgContext);
               typePattern.set(Trk::TrackStateOnSurface::Outlier);
             }
             // The state is a measurement state, use smoothed parameters
@@ -826,7 +825,7 @@ namespace ActsTrk
 
               // is it really necessary to keep our own copy of all the smoothed parameters?
               actsSmoothedParam.push_back(std::make_unique<const Acts::BoundTrackParameters>(Acts::BoundTrackParameters(actsParam)));
-              parm = m_ATLASConverterTool->ActsTrackParameterToATLAS(actsParam, tgContext);
+              parm = m_ATLASConverterTool->actsTrackParametersToTrkParameters(actsParam, tgContext);
               typePattern.set(Trk::TrackStateOnSurface::Measurement);
             }
 
@@ -855,7 +854,7 @@ namespace ActsTrk
                                                track.parameters(),
                                                track.covariance());
 
-      std::unique_ptr<const Trk::TrackParameters> per = m_ATLASConverterTool->ActsTrackParameterToATLAS(actsPer, tgContext);
+      std::unique_ptr<const Trk::TrackParameters> per = m_ATLASConverterTool->actsTrackParametersToTrkParameters(actsPer, tgContext);
       std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
       typePattern.set(Trk::TrackStateOnSurface::Perigee);
       auto perState = new Trk::TrackStateOnSurface(nullptr,

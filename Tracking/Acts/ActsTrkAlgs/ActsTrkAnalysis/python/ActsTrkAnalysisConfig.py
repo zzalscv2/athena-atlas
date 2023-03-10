@@ -159,8 +159,8 @@ def ActsTrkBaseSeedAnalysisAlgCfg(flags,
         acc.addPublicTool(geoTool)
 
         # ATLAS Converter Tool
-        from ActsGeometry.ActsGeometryConfig import ActsATLASConverterToolCfg
-        converterTool = acc.popToolsAndMerge(ActsATLASConverterToolCfg(flags))
+        from ActsTrkEventCnv.ActsTrkEventCnvConfig import ActsToTrkConverterToolCfg
+        converterTool = acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags))
 
         # Track Param Estimation Tool
         from ActsTrkTrackParamsEstimationTool.ActsTrkTrackParamsEstimationToolConfig import TrackParamsEstimationToolCfg

@@ -259,7 +259,7 @@ namespace ActsTrk {
 	  }, input_cluster_collection);
 	
 	const Trk::Surface& atlas_surface = Element->surface();
-	return this->m_ATLASConverterTool->ATLASSurfaceToActs(atlas_surface);
+	return this->m_ATLASConverterTool->trkSurfaceToActsSurface(atlas_surface);
       };
 
 

@@ -5,9 +5,9 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from ActsGeometry.ActsGeometryConfig import (
     ActsExtrapolationToolCfg,
     ActsTrackingGeometryToolCfg,
-    ActsATLASConverterToolCfg,
 )
 from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
+from ActsTrkEventCnv.ActsTrkEventCnvConfig import ActsToTrkConverterToolCfg
 
 
 def ActsTrkFindingToolCfg(flags, **kwargs) -> ComponentAccumulator:
@@ -34,7 +34,7 @@ def ActsTrkFindingToolCfg(flags, **kwargs) -> ComponentAccumulator:
 
     kwargs.setdefault(
         "ATLASConverterTool",
-        acc.popToolsAndMerge(ActsATLASConverterToolCfg(flags)),
+        acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)),
     )
 
     if flags.Detector.GeometryITk:

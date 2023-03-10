@@ -35,7 +35,8 @@ atlas_add_component( ActsTrkFittingAlgs
                      TrkTrackSummary
                      xAODTracking 
                      TrkToolInterfaces
-                     TrkFitterInterfaces)
+                     TrkFitterInterfaces
+                     ActsTrkEventCnvLib)
 
 # Install files from the package:
 atlas_install_joboptions( share/*.py )

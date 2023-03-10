@@ -79,7 +79,7 @@ ActsKalmanFitter::makeTrack(const EventContext& ctx,
       const Acts::BoundTrackParameters actsParam(state.referenceSurface().getSharedPtr(),
 						 state.predicted(),
 						 state.predictedCovariance());
-      parm = m_ATLASConverterTool->ActsTrackParameterToATLAS(actsParam, tgContext);
+      parm = m_ATLASConverterTool->actsTrackParametersToTrkParameters(actsParam, tgContext);
       auto boundaryCheck = m_boundaryCheckTool->boundaryCheck(*parm);
       
       // Check if this is a hole, a dead sensors or a state outside the sensor boundary
@@ -106,7 +106,7 @@ ActsKalmanFitter::makeTrack(const EventContext& ctx,
       const Acts::BoundTrackParameters actsParam(state.referenceSurface().getSharedPtr(),
 						 state.filtered(),
 						 state.filteredCovariance());
-      parm = m_ATLASConverterTool->ActsTrackParameterToATLAS(actsParam, tgContext);
+      parm = m_ATLASConverterTool->actsTrackParametersToTrkParameters(actsParam, tgContext);
       typePattern.set(Trk::TrackStateOnSurface::Outlier);
     }
     // The state is a measurement state, use smoothed parameters 
@@ -118,7 +118,7 @@ ActsKalmanFitter::makeTrack(const EventContext& ctx,
 						 state.smoothedCovariance());
       
       actsSmoothedParam.push_back(std::make_unique<const Acts::BoundTrackParameters>(Acts::BoundTrackParameters(actsParam)));
-      parm = m_ATLASConverterTool->ActsTrackParameterToATLAS(actsParam, tgContext);
+      parm = m_ATLASConverterTool->actsTrackParametersToTrkParameters(actsParam, tgContext);
       typePattern.set(Trk::TrackStateOnSurface::Measurement);                                           
     }
 
@@ -141,7 +141,7 @@ ActsKalmanFitter::makeTrack(const EventContext& ctx,
   const Acts::BoundTrackParameters actsPer(acts_track.referenceSurface().getSharedPtr(), 
   				   	   acts_track.parameters(), 
 					   acts_track.covariance());
-  std::unique_ptr<const Trk::TrackParameters> per = m_ATLASConverterTool->ActsTrackParameterToATLAS(actsPer, tgContext);
+  std::unique_ptr<const Trk::TrackParameters> per = m_ATLASConverterTool->actsTrackParametersToTrkParameters(actsPer, tgContext);
   std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
   typePattern.set(Trk::TrackStateOnSurface::Perigee);
   const Trk::TrackStateOnSurface *perState = new Trk::TrackStateOnSurface(nullptr, std::move(per), nullptr, typePattern);

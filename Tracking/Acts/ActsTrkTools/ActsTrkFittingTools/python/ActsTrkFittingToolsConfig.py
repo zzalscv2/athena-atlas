@@ -8,9 +8,9 @@ from ActsInterop import UnitConstants
 from ActsGeometry.ActsGeometryConfig import (
     ActsExtrapolationToolCfg,
     ActsTrackingGeometryToolCfg,
-    ActsATLASConverterToolCfg,
 )
 from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
+from ActsTrkEventCnv.ActsTrkEventCnvConfig import ActsToTrkConverterToolCfg
 
 
 def ActsKalmanFitterCfg(flags, name: str = "ActsKalmanFitter", **kwargs):
@@ -32,8 +32,8 @@ def ActsKalmanFitterCfg(flags, name: str = "ActsKalmanFitter", **kwargs):
     kwargs.setdefault("ReverseFilteringPt", 1.0 * UnitConstants.GeV)
     kwargs.setdefault("OverstepLimit", 300 * UnitConstants.um)
 
-    ActsATLASConverterTool = result.popToolsAndMerge(ActsATLASConverterToolCfg(flags))
-    kwargs["ATLASConverterTool"] = ActsATLASConverterTool
+    actsConverter = result.popToolsAndMerge(ActsToTrkConverterToolCfg(flags))
+    kwargs["ATLASConverterTool"] = actsConverter
 
     if "SummaryTool" not in kwargs:
         summary = result.getPrimaryAndMerge(

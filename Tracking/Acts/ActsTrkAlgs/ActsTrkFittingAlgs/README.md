@@ -5,7 +5,7 @@ This is the implementation of the Acts track fitting within Athena.
 
 As of now only fit using measurement set and existing track have been implemented.
 
-This use the ActsGeometry/ActsATLASConverterTool to convert those measurment Acts source link that can then be used for the fitting. Sue to the difficulty in converting Atlas TRT identifier into Acts one this conversion cannot be done for TRT measurement.
+This uses the ActsTrkEventCnv/ActsToTrkConverterTool to convert those measurment Acts source link that can then be used for the fitting. Sue to the difficulty in converting Atlas TRT identifier into Acts one this conversion cannot be done for TRT measurement.
 
 A track reffiting algorithm is also provided this can be used to refit resolved tracks (since they don't have TRT hits) to compare the acts fit with the ATLAS one. To do so one can use Reco_tf :
 

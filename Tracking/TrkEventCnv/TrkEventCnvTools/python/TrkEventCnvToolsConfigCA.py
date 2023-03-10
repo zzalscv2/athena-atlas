@@ -64,6 +64,15 @@ def TrkEventCnvSuperToolCfg(flags, name='EventCnvSuperTool', **kwargs):
             IdCnvTool = acc.popToolsAndMerge(ITkEventCnvToolCfg(flags))
         kwargs.setdefault("IdCnvTool", IdCnvTool)
 
+    acc.addPublicTool(CompFactory.Trk.EventCnvSuperTool(name, **kwargs))
+    return acc
+    if kwargs["DoID"] and "IdCnvTool" not in kwargs:
+        if flags.Detector.GeometryID:
+            IdCnvTool = acc.popToolsAndMerge(InDetEventCnvToolCfg(flags))
+        elif flags.Detector.GeometryITk:
+            IdCnvTool = acc.popToolsAndMerge(ITkEventCnvToolCfg(flags))
+        kwargs.setdefault("IdCnvTool", IdCnvTool)
+
     if kwargs["DoMuons"] and "MuonCnvTool" not in kwargs:
         kwargs.setdefault("MuonCnvTool", acc.popToolsAndMerge(
             MuonCnvToolFixTGCsCfg(flags)))

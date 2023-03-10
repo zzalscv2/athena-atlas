@@ -19,6 +19,7 @@ atlas_add_component( ActsTrkFinding
                      ActsGeometryInterfacesLib
                      SiSPSeededTrackFinderData
                      AthenaMonitoringKernelLib
+                     ActsTrkEventCnvLib
                      )
 
 # Install files from the package:
