@@ -62,7 +62,7 @@ if DetFlags.haveRIO.TRT_on() :
     from TrigInDetConfig.InDetTrigCollectionKeys import TrigTRTKeys
     from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTRTCalDbTool
 
-    from InDetTrigRecExample.InDetTrigCommonTools import InDetTrigTRTStrawStatusSummaryTool
+    from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigTRTStrawStatusSummaryTool
     from TRT_ElectronPidTools.TRT_ElectronPidToolsConf import InDet__TRT_ElectronPidToolRun2,InDet__TRT_LocalOccupancy,TRT_ToT_dEdx
     InDetTrigTRT_LocalOccupancy = InDet__TRT_LocalOccupancy(name ="InDetTrig_TRT_LocalOccupancy",
                                                             isTrigger = True,

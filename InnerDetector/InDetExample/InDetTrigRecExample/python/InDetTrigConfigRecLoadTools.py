@@ -22,6 +22,10 @@ log = logging.getLogger("InDetTrigConfigRecLoadTools.py")
 
 from InDetTrigRecExample.InDetTrigCommonTools import CAtoLegacyPublicToolWrapper
 
+from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_StrawStatusSummaryToolCfg
+InDetTrigTRTStrawStatusSummaryTool = CAtoLegacyPublicToolWrapper(TRT_StrawStatusSummaryToolCfg, name="InDetTrigTRTStrawStatusSummaryTool")
+
+
 from InDetTrigRecExample.InDetTrigConditionsAccess import PixelConditionsSetup, SCT_ConditionsSetup
 from AthenaCommon.CfgGetter import getPublicTool,getPrivateTool
 TrigPixelLorentzAngleTool = getPublicTool("PixelLorentzAngleTool")
@@ -340,7 +344,6 @@ if InDetTrigFlags.loadSummaryTool():
   
   from InDetTrackSummaryHelperTool.InDetTrackSummaryHelperToolConf import InDet__InDetTrackSummaryHelperTool
   from InDetTrigRecExample.InDetTrigConditionsAccess import TRT_ConditionsSetup  # noqa: F401
-  from InDetTrigRecExample.InDetTrigCommonTools import InDetTrigTRTStrawStatusSummaryTool
   InDetTrigTrackSummaryHelperTool = InDet__InDetTrackSummaryHelperTool(name          = "InDetTrigSummaryHelper",
                                                                        HoleSearch    = InDetTrigHoleSearchTool,
                                                                        TRTStrawSummarySvc=InDetTrigTRTStrawStatusSummaryTool,

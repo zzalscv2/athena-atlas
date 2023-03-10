@@ -634,7 +634,7 @@ class TRTConditionsServicesSetup:
       conddb.addFolderSplitOnline("TRT","/TRT/Onl/Calib/ToT/ToTValue","/TRT/Calib/ToT/ToTValue",className='CondAttrListCollection')
 
     # Straw status tool (now private, cannot be passed by name)
-    from InDetTrigRecExample.InDetTrigCommonTools import InDetTrigTRTStrawStatusSummaryTool
+    from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigTRTStrawStatusSummaryTool
     
     # straw status  algorithm
     from TRT_ConditionsAlgs.TRT_ConditionsAlgsConf import TRTStrawStatusCondAlg
