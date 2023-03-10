@@ -115,7 +115,7 @@ private:
    std::string m_ppmDeadChannelsFolderName;
    std::string m_l1caloDerivedRunParsFolderName;
    std::string m_l1caloRunParametersFolderName;
-   StatusCode GetDatabaseHandle(std::string folderName);
+   StatusCode GetDatabaseHandle(const std::string& folderName);
    
    void SetTimingRegime(const std::string& regime);
    
