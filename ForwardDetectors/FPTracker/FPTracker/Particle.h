@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FPTRACKER_PARTICLE_H
@@ -21,11 +21,11 @@ namespace FPTracker{
     Particle();
     Particle(double x, double y, double z, double px, double py, double pz);
   
-    Point   position()                   const;
-    Point&  position();
-    Point   positionRelBeam()            const;
-    Point   direction()                  const;
-    Point&  direction();
+    const Point&  position()                   const;
+          Point&  position();
+          Point   positionRelBeam()            const;
+    const Point&  direction()                  const;
+          Point&  direction();
 
     TransversePoint displacement()       const;
 
