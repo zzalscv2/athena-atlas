@@ -113,6 +113,9 @@ if __name__ == '__main__':
         eFEXInputs.eSuperCellTowerMapperTool = CompFactory.LVL1.eSuperCellTowerMapper('eSuperCellTowerMapper')
         eFEX = CompFactory.LVL1.eFEXDriver('eFEXDriver')
         eFEX.eFEXSysSimTool = CompFactory.LVL1.eFEXSysSim('eFEXSysSimTool')
+        eFEX.eFEXSysSimTool.eFEXSimTool = CompFactory.LVL1.eFEXSim('eFEXSimTool')
+        eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool = CompFactory.LVL1.eFEXFPGA('eFEXFPGATool')
+        eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool.eFEXegAlgoTool = CompFactory.LVL1.eFEXegAlgo('eFEXegAlgoTool',dmCorr=False)
         
         #TOBs
         eFEX.eFEXSysSimTool.Key_eFexEMOutputContainer  = getSimHandle( eFEX.eFEXSysSimTool.Key_eFexEMOutputContainer )

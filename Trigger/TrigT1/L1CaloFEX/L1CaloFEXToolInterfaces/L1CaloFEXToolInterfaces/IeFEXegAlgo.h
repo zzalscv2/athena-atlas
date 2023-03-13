@@ -38,6 +38,7 @@ Interface definition for eFEXegAlgo
     virtual void getRealEta(float & eta) = 0;
     virtual std::unique_ptr<eFEXegTOB> geteFEXegTOB() = 0;
     virtual unsigned int getET() = 0;
+    virtual unsigned int dmCorrection(unsigned int ET, unsigned int layer) = 0;
     virtual void getWindowET(int layer, int jPhi, int SCID, unsigned int &) = 0;
     virtual bool hasSeed() = 0;
     virtual unsigned int getSeed() = 0;
