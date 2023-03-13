@@ -359,7 +359,6 @@ void InDet::SiDetElementsRoadMaker_xk::detElementsRoad
   }
 
   
-  std::vector<InDet::SiDetElementLink_xk::ElementWay> lDE;
 
   /// reset the detector-element usage info. 
   /// If we are the first client to see this event data object,
@@ -373,6 +372,8 @@ void InDet::SiDetElementsRoadMaker_xk::detElementsRoad
     roadMakerData.resetUsageTracker();
   }
 
+  std::vector<InDet::SiDetElementLink_xk::ElementWay> lDE;
+  lDE.reserve(8); //reasonable minimum guess
   /// done with the first probed position. Now we can start to move along the trajectory
   ++currentPosition;
   while (currentPosition!=endPositions) {
