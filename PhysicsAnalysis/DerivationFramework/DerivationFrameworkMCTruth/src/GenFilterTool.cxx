@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Class header file
@@ -26,7 +26,22 @@ namespace DerivationFramework {
     return false;
   }
 
+  static bool isFromWZTau(const xAOD::TruthParticle* tp) {
+    ParticleOrigin orig = static_cast<ParticleOrigin>(tp->auxdata<unsigned int>("classifierParticleOrigin"));
+
+    switch(orig) {
+    case ParticleOrigin::WBoson:
+    case ParticleOrigin::ZBoson:
+    case ParticleOrigin::TauLep:
+      return true;
+    default:
+      return false;
+    }
+    return false;
+  }
+
   static const SG::AuxElement::Decorator<float> dec_genFiltHT("GenFiltHT");
+  static const SG::AuxElement::Decorator<float> dec_genFiltHTinclNu("GenFiltHTinclNu");
   static const SG::AuxElement::Decorator<float> dec_genFiltMET("GenFiltMET");
   static const SG::AuxElement::Decorator<float> dec_genFiltPTZ("GenFiltPTZ");
   static const SG::AuxElement::Decorator<float> dec_genFiltFatJ("GenFiltFatJ");
@@ -97,12 +112,13 @@ namespace DerivationFramework {
       return StatusCode::FAILURE;
     }
 
-    float genFiltHT(0.), genFiltMET(0.), genFiltPTZ(0.), genFiltFatJ(0.);
-    ATH_CHECK( getGenFiltVars(truthPC, genFiltHT, genFiltMET, genFiltPTZ, genFiltFatJ) );
+    float genFiltHT(0.), genFiltHTinclNu(0.), genFiltMET(0.), genFiltPTZ(0.), genFiltFatJ(0.);
+    ATH_CHECK( getGenFiltVars(truthPC, genFiltHT, genFiltHTinclNu, genFiltMET, genFiltPTZ, genFiltFatJ) );
 
-    ATH_MSG_DEBUG("Computed generator filter quantities: HT " << genFiltHT/1e3 << ", MET " << genFiltMET/1e3 << ", PTZ " << genFiltPTZ/1e3 << ", FatJ " << genFiltFatJ/1e3 );
+    ATH_MSG_DEBUG("Computed generator filter quantities: HT " << genFiltHT/1e3 << ", HTinclNu " << genFiltHTinclNu/1e3 << ", MET " << genFiltMET/1e3 << ", PTZ " << genFiltPTZ/1e3 << ", FatJ " << genFiltFatJ/1e3 );
 
     dec_genFiltHT(*eventInfo) = genFiltHT;
+    dec_genFiltHTinclNu(*eventInfo) = genFiltHTinclNu;
     dec_genFiltMET(*eventInfo) = genFiltMET;
     dec_genFiltPTZ(*eventInfo) = genFiltPTZ;
     dec_genFiltFatJ(*eventInfo) = genFiltFatJ;
@@ -110,7 +126,7 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode GenFilterTool::getGenFiltVars(const xAOD::TruthParticleContainer* tpc, float& genFiltHT, float& genFiltMET, float& genFiltPTZ, float& genFiltFatJ) const {
+  StatusCode GenFilterTool::getGenFiltVars(const xAOD::TruthParticleContainer* tpc, float& genFiltHT, float& genFiltHTinclNu, float& genFiltMET, float& genFiltPTZ, float& genFiltFatJ) const {
     // Get jet container out
     const xAOD::JetContainer* truthjets = nullptr;
     if ( evtStore()->retrieve( truthjets, m_truthJetsName).isFailure() || !truthjets ){
@@ -120,13 +136,15 @@ namespace DerivationFramework {
 
     // Get HT
     genFiltHT = 0.;
+    genFiltHTinclNu = 0.; // this HT definition includes neutrinos from W/Z/tau
     for (const auto *const tj : *truthjets) {
-      if ( tj->pt()>m_MinJetPt && fabs(tj->eta())<m_MaxJetEta ) {
+      if ( tj->pt()>m_MinJetPt && std::abs(tj->eta())<m_MaxJetEta ) {
         ATH_MSG_VERBOSE("Adding truth jet with pt " << tj->pt()
                         << ", eta " << tj->eta()
                         << ", phi " << tj->phi()
                         << ", nconst = " << tj->numConstituents());
         genFiltHT += tj->pt();
+        genFiltHTinclNu += tj->pt();
       }
     }
 
@@ -138,7 +156,7 @@ namespace DerivationFramework {
       if (pdgid==21 && tp->e()==0) continue; // Work around for an old generator bug
       if ( tp->status() %1000 !=1 ) continue; // Stable!
 
-      if ((abs(pdgid)==11 || abs(pdgid)==13) && tp->pt()>m_MinLepPt && fabs(tp->eta())<m_MaxLepEta) {
+      if ((std::abs(pdgid)==11 || std::abs(pdgid)==13) && tp->pt()>m_MinLepPt && std::abs(tp->eta())<m_MaxLepEta) {
         if( isPrompt(tp) ) {
           ATH_MSG_VERBOSE("Adding prompt lepton with pt " << tp->pt()
                           << ", eta " << tp->eta()
@@ -146,7 +164,20 @@ namespace DerivationFramework {
                           << ", status " << tp->status()
                           << ", pdgId " << pdgid);
           genFiltHT += tp->pt();
+          genFiltHTinclNu += tp->pt();
         }
+      }
+
+      // include neutrinos from W/Z/Tau in one of the HT definitions
+      // this corresponds to a subset of HT-sliced samples where the HT filter
+      // was configured to include these particles
+      if (tp->isNeutrino() && isFromWZTau(tp)) {
+        ATH_MSG_VERBOSE("Adding neutrino from W/Z/Tau with pt " << tp->pt()
+                        << ", eta " << tp->eta()
+                        << ", phi " << tp->phi()
+                        << ", status " << tp->status()
+                        << ", pdgId " << pdgid);
+        genFiltHTinclNu += tp->pt();
       }
 
       if (isNonInteracting(pdgid) && isPrompt(tp) ) {
@@ -171,8 +202,8 @@ namespace DerivationFramework {
       if (HepMC::is_simulation_particle(pitr1)) continue;
       if (pitr1->status()!=1) continue;
       // Pick electrons or muons with Pt > MinPt_PTZ and |eta| < m_maxEta
-      if (std::abs(pdgId1) == 11 || abs(pdgId1) == 13) {
-        if (pitr1->pt() >= MinPt_PTZ && fabs(pitr1->eta()) <= MaxEta_PTZ){
+      if (std::abs(pdgId1) == 11 || std::abs(pdgId1) == 13) {
+        if (pitr1->pt() >= MinPt_PTZ && std::abs(pitr1->eta()) <= MaxEta_PTZ){
           for (const xAOD::TruthParticle* pitr2 : *tpc){
             if (pitr2==pitr1) continue;
             if (HepMC::is_simulation_particle(pitr2)) continue;
@@ -181,9 +212,9 @@ namespace DerivationFramework {
             // Pick electrons or muons with Pt > MinPt_PTZ and |eta| < MaxEta_PTZ
             // If AllowSameCharge_PTZ is not true only pick those with opposite charge to the first particle
             // If AllowElecMu_PTZ is true allow also Z -> emu compinations (with charge requirements as above)
-            if ((AllowSameCharge_PTZ  && (abs(pdgId2) == abs(pdgId1) || (AllowElecMu_PTZ && (abs(pdgId2) == 11 || abs(pdgId2) == 13) ) ) ) ||
+            if ((AllowSameCharge_PTZ  && (std::abs(pdgId2) == std::abs(pdgId1) || (AllowElecMu_PTZ && (std::abs(pdgId2) == 11 || std::abs(pdgId2) == 13) ) ) ) ||
                 (!AllowSameCharge_PTZ && (pdgId2 == -1*pdgId1 || (AllowElecMu_PTZ && (pdgId2 == (pdgId1 < 0 ? 1 : -1) * 11 || (pdgId1 < 0 ? 1 : -1) * pdgId2 == 13) ) ) ) ) {
-              if (pitr2->pt() >= MinPt_PTZ && fabs(pitr2->eta()) <= MaxEta_PTZ){
+              if (pitr2->pt() >= MinPt_PTZ && std::abs(pitr2->eta()) <= MaxEta_PTZ){
                 double invMass = (pitr1->p4()+pitr2->p4()).M();
                 double dilepPt = (pitr1->p4()+pitr2->p4()).Pt();
                 // Only consider pair that fall in the mass window
