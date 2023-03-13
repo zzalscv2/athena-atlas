@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonPatternSegmentMaker/MuonPatternCalibration.h"
@@ -16,23 +16,12 @@
 #include "MuonReadoutGeometry/RpcReadoutElement.h"
 #include "MuonReadoutGeometry/TgcReadoutElement.h"
 #include "TrkToolInterfaces/IRIO_OnTrackCreator.h"
-
+#include "EventPrimitives/EventPrimitivesToStringConverter.h"
 namespace Muon {
 
 MuonPatternCalibration::MuonPatternCalibration(const std::string& t, const std::string& n, const IInterface* p)
-    : AthAlgTool(t, n, p), m_keyRpc("RPC_Measurements"), m_keyTgc("TGC_Measurements")
-{
+    : AthAlgTool(t, n, p) {
     declareInterface<IMuonPatternCalibration>(this);
-
-    declareProperty("DoMultiChamberAnalysis", m_doMultiAnalysis = true);
-    declareProperty("DropDistance", m_dropDistance = 1500.);
-    declareProperty("AngleCutPhi", m_phiAngleCut = 1e9);
-    declareProperty("FullFinder", m_doFullFinder = true);
-    declareProperty("RpcPrepDataContainer", m_keyRpc);
-    declareProperty("TgcPrepDataContainer", m_keyTgc);
-    declareProperty("DoSummary", m_doSummary = false);
-    declareProperty("RecoverTriggerHits", m_recoverTriggerHits = true);
-    declareProperty("RemoveDoubleMdtHits", m_removeDoubleMdtHits = true);
 }
 
 StatusCode
@@ -49,82 +38,60 @@ MuonPatternCalibration::initialize()
 }
 
 
-void
-MuonPatternCalibration::calibrate(const MuonPatternCombination&           pattern,
-                                  IMuonPatternCalibration::ROTsPerRegion& hitsPerRegion, const EventContext& ctx) const
-{
+
+StatusCode MuonPatternCalibration::calibrate(const EventContext& ctx, const MuonPatternCombination& pattern, ROTsPerRegion& hitsPerRegion) const {
     Muon::MuonPatternCalibration::RegionMap regionMap;
-    bool                                    hasPhiMeasurements = checkForPhiMeasurements(pattern);
-    createRegionMap(pattern, regionMap, hasPhiMeasurements, ctx);
+    bool hasPhiMeasurements = checkForPhiMeasurements(pattern);
+    ATH_CHECK(createRegionMap(ctx, pattern, regionMap, hasPhiMeasurements));
     // calibrate hits
     calibrateRegionMap(regionMap, hitsPerRegion);
-    return;
+    return StatusCode::SUCCESS;
 }
 
 
-int
-MuonPatternCalibration::getRegionId(const Identifier& id) const
-{
+int MuonPatternCalibration::getRegionId(const Identifier& id) const{
 
     // simple division of MuonSpectrometer in regions using barrel/endcap seperation plus
     // inner/middle/outer seperation
-
-    int stIndex = (int)m_idHelperSvc->stationIndex(id);
-    int eta     = m_idHelperSvc->stationEta(id);
-
-    int regionId = stIndex;
-    if (eta < 0) regionId *= -1;
-
-    return regionId;
+    return m_idHelperSvc->stationIndex(id)* (  m_idHelperSvc->stationEta(id) > 0 ? 1 : -1);
 }
 
 
 bool
-MuonPatternCalibration::checkForPhiMeasurements(const MuonPatternCombination& pat) const
-{
+MuonPatternCalibration::checkForPhiMeasurements(const MuonPatternCombination& pat) const {
 
-    bool                                                     hasPhiMeasurements(false);
-    std::vector<MuonPatternChamberIntersect>::const_iterator it = pat.chamberData().begin();
-    for (; it != pat.chamberData().end(); ++it) {
-        if (hasPhiMeasurements == true) {
-            break;
-        }
-        std::vector<const Trk::PrepRawData*>::const_iterator pit = (*it).prepRawDataVec().begin();
-        for (; pit != (*it).prepRawDataVec().end(); ++pit) {
-            Identifier id = (*pit)->identify();
-            if (m_idHelperSvc->isRpc(id) && m_idHelperSvc->rpcIdHelper().measuresPhi(id)) {
-                hasPhiMeasurements = true;
-                break;
-            } else if (m_idHelperSvc->isTgc(id) && m_idHelperSvc->tgcIdHelper().isStrip(id)) {
-                hasPhiMeasurements = true;
-                break;
-            } else if (m_idHelperSvc->isCsc(id) && m_idHelperSvc->cscIdHelper().measuresPhi(id)) {
-                hasPhiMeasurements = true;
-                break;
-            }
+    for (const  MuonPatternChamberIntersect& intersect : pat.chamberData()) {
+        for (const Trk::PrepRawData* prd : intersect.prepRawDataVec()){
+            const Identifier id = prd->identify();
+            /// Exclude the sTGC hits. MM hits do not have phi measurements
+            if (!m_idHelperSvc->issTgc(id) &&
+                m_idHelperSvc->measuresPhi(id)) return true;
         }
     }
-    return hasPhiMeasurements;
+    return false;
 }
 
-void
-MuonPatternCalibration::createRegionMap(const MuonPatternCombination& pat, RegionMap& regionMap,
-                                        bool hasPhiMeasurements, const EventContext& ctx) const
+StatusCode
+MuonPatternCalibration::createRegionMap(const EventContext& ctx,const MuonPatternCombination& pat, 
+                                        RegionMap& regionMap, bool hasPhiMeasurements ) const
 {
     if (hasPhiMeasurements)
         ATH_MSG_DEBUG("pattern has phi measurements using extrapolation to determine second coordinate");
     else
         ATH_MSG_DEBUG("No phi measurements using center tubes");
 
-    MuonPatternCalibration::Containers containers = retrieveTriggerHitContainers(ctx);
+    
+    const Muon::TgcPrepDataContainer* tgcPrdCont{nullptr};
+    const Muon::RpcPrepDataContainer* rpcPrdCont{nullptr};
+    ATH_CHECK(loadFromStoreGate(ctx, m_keyRpc, rpcPrdCont));
+    ATH_CHECK(loadFromStoreGate(ctx, m_keyTgc, tgcPrdCont)); 
+   
+    for (const MuonPatternChamberIntersect& isect : pat.chamberData()) {
 
-    std::vector<MuonPatternChamberIntersect>::const_iterator it = pat.chamberData().begin();
-    for (; it != pat.chamberData().end(); ++it) {
+        if (isect.prepRawDataVec().empty()) continue;
 
-        if (it->prepRawDataVec().empty()) continue;
-
-        const Amg::Vector3D& patpose = (*it).intersectPosition();
-        const Amg::Vector3D  patdire = (*it).intersectDirection().unit();
+        const Amg::Vector3D& patpose = isect.intersectPosition();
+        const Amg::Vector3D  patdire = isect.intersectDirection().unit();
 
         /** Try to recover missing phi clusters:
             - loop over the clusters in the region and sort them by collection
@@ -135,31 +102,29 @@ MuonPatternCalibration::createRegionMap(const MuonPatternCombination& pat, Regio
         std::set<Identifier>      clusterIds;
 
 
-        const Trk::PrepRawData* prd = (*it).prepRawDataVec().front();
-        if (!prd) continue;
-        Identifier id = prd->identify();
+        const Trk::PrepRawData* prd = isect.prepRawDataVec().front();
+        const Identifier id = prd->identify();
 
         // apply cut on the opening angle between pattern and chamber phi
         // do some magic to avoid problems at phi = 0 and 2*pi
         double phiStart  = patdire.phi();
         double chPhi     = prd->detectorElement()->center().phi();
-        double pi        = M_PI;
-        double phiRange  = 0.75 * pi;
-        double phiRange2 = 0.25 * pi;
+        constexpr double phiRange  = 0.75 * M_PI;
+        constexpr double phiRange2 = 0.25 * M_PI;
         double phiOffset = 0.;
         if (phiStart > phiRange || phiStart < -phiRange)
-            phiOffset = 2 * pi;
+            phiOffset = 2 * M_PI;
         else if (phiStart > -phiRange2 && phiStart < phiRange2)
-            phiOffset = pi;
+            phiOffset = M_PI;
 
-        if (phiOffset > 1.5 * pi) {
+        if (phiOffset > 1.5 * M_PI) {
             if (phiStart < 0) phiStart += phiOffset;
             if (chPhi < 0) chPhi += phiOffset;
         } else if (phiOffset > 0.) {
             phiStart += phiOffset;
             chPhi += phiOffset;
         }
-        double dphi = fabs(phiStart - chPhi);
+        double dphi = std::abs(phiStart - chPhi);
 
         if (dphi > m_phiAngleCut) {
             ATH_MSG_DEBUG("Large angular phi difference between pattern and chamber, phi pattern "
@@ -168,16 +133,12 @@ MuonPatternCalibration::createRegionMap(const MuonPatternCombination& pat, Regio
         }
 
         // map to find duplicate hits in the chamber
-        std::map<Identifier, const MdtPrepData*> idMdtMap;
+        std::map<Identifier, const MdtPrepData*> idMdtMap{};
 
-        std::vector<const Trk::PrepRawData*>::const_iterator pit = (*it).prepRawDataVec().begin();
-        for (; pit != (*it).prepRawDataVec().end(); ++pit) {
+        for (const Trk::PrepRawData* isect_prd : isect.prepRawDataVec()) {
 
-            if (!(*pit)) continue;
-
-            const MdtPrepData* mdt = dynamic_cast<const MdtPrepData*>(*pit);
-            if (mdt) {
-
+            if (isect_prd->type(Trk::PrepRawDataType::MdtPrepData)) {
+                 const MdtPrepData* mdt = dynamic_cast<const MdtPrepData*>(isect_prd);           
                 if (m_removeDoubleMdtHits) {
                     const MdtPrepData*& previousMdt = idMdtMap[mdt->identify()];
                     if (!previousMdt || previousMdt->tdc() > mdt->tdc())
@@ -185,70 +146,57 @@ MuonPatternCalibration::createRegionMap(const MuonPatternCombination& pat, Regio
                     else
                         continue;
                 }
-
                 insertMdt(*mdt, regionMap, patpose, patdire, hasPhiMeasurements);
-            } else {
-
-                const MuonCluster* clus = dynamic_cast<const MuonCluster*>(*pit);
-                if (!clus) continue;
-                const Identifier& id = clus->identify();
-
-                if (clusterIds.count(id)) continue;
-                clusterIds.insert(id);
-
-                if (m_recoverTriggerHits) {
-                    bool measuresPhi = m_idHelperSvc->measuresPhi(id);
-                    int  colHash     = clus->collectionHash();
-
-                    EtaPhiHits& hitsPerChamber = etaPhiHitsPerChamber[colHash];
-                    if (measuresPhi)
-                        ++hitsPerChamber.nphi;
-                    else
-                        ++hitsPerChamber.neta;
-                }
-                insertCluster(*clus, regionMap, patpose, patdire, hasPhiMeasurements);
+                continue;
+            } /// Remove the NSW hits from the segment building 
+            else if (isect_prd->type(Trk::PrepRawDataType::MMPrepData) || isect_prd->type(Trk::PrepRawDataType::sTgcPrepData)){
+                continue;
+            }   
+            const MuonCluster* clus = dynamic_cast<const MuonCluster*>(isect_prd);
+            if (!clus) continue;
+            const Identifier id = clus->identify();
+            if (!clusterIds.insert(id).second) continue;
+            
+            if (m_recoverTriggerHits) {
+                bool measuresPhi = m_idHelperSvc->measuresPhi(id);
+                int  colHash     = clus->collectionHash();
+                EtaPhiHits& hitsPerChamber = etaPhiHitsPerChamber[colHash];
+                if (measuresPhi)
+                    ++hitsPerChamber.nphi;
+                else
+                    ++hitsPerChamber.neta;
             }
+            insertCluster(*clus, regionMap, patpose, patdire, hasPhiMeasurements);            
         }
-        if (!etaPhiHitsPerChamber.empty()) {
-            std::map<int, EtaPhiHits>::iterator chit     = etaPhiHitsPerChamber.begin();
-            std::map<int, EtaPhiHits>::iterator chit_end = etaPhiHitsPerChamber.end();
-            for (; chit != chit_end; ++chit) {
-                EtaPhiHits& hits = chit->second;
-                if ((hits.neta > 0 && hits.nphi == 0) || (hits.nphi > 0 && hits.neta == 0)) {
-                    if (m_idHelperSvc->isRpc(id) && containers.m_rpcPrdContainer) {
+        for (const auto& [coll_hash, hits] : etaPhiHitsPerChamber) {
+            if ((hits.neta > 0 && hits.nphi == 0) || (hits.nphi > 0 && hits.neta == 0)) {
+                if (m_idHelperSvc->isRpc(id) && rpcPrdCont) {
 
-                        auto pos = containers.m_rpcPrdContainer->indexFindPtr(chit->first);
-                        if (pos == nullptr)
-                            ATH_MSG_DEBUG("RpcPrepDataCollection not found in container!!"<< m_keyRpc);
-                        else {
-                            RpcPrepDataCollection::const_iterator rpcit     = pos->begin();
-                            RpcPrepDataCollection::const_iterator rpcit_end = pos->end();
-                            for (; rpcit != rpcit_end; ++rpcit) {
-                                if (clusterIds.count((*rpcit)->identify())) continue;
-                                const MuonCluster* clus = dynamic_cast<const MuonCluster*>(*rpcit);
-                                insertCluster(*clus, regionMap, patpose, patdire, hasPhiMeasurements);
-                                clusterIds.insert(clus->identify());
-                            }
-                        }
-                    } else if (m_idHelperSvc->isTgc(id) && containers.m_tgcPrdContainer) {
-                        auto pos = containers.m_tgcPrdContainer->indexFindPtr(chit->first);
-                        if (pos == nullptr)
-                            ATH_MSG_DEBUG("TgcPrepDataCollection not found in container!! "<< m_keyTgc);
-                        else {
-                            TgcPrepDataCollection::const_iterator tgcit     = pos->begin();
-                            TgcPrepDataCollection::const_iterator tgcit_end = pos->end();
-                            for (; tgcit != tgcit_end; ++tgcit) {
-                                if (clusterIds.count((*tgcit)->identify())) continue;
-                                const MuonCluster* clus = dynamic_cast<const MuonCluster*>(*tgcit);
-                                insertCluster(*clus, regionMap, patpose, patdire, hasPhiMeasurements);
-                                clusterIds.insert(clus->identify());
-                            }
-                        }
+                    const Muon::RpcPrepDataCollection* prd_coll = rpcPrdCont->indexFindPtr(coll_hash);
+                    if (!prd_coll) {
+                        ATH_MSG_VERBOSE("RpcPrepDataCollection not found in container!!"<< m_keyRpc);
+                        continue;
+                    }                   
+                    for (const Muon::RpcPrepData* rpc_prd : *prd_coll) {
+                        if (!clusterIds.insert(rpc_prd->identify()).second) continue;
+                        insertCluster(*rpc_prd, regionMap, patpose, patdire, hasPhiMeasurements);
+                    }                    
+                } else if (m_idHelperSvc->isTgc(id) && tgcPrdCont) {
+                     const Muon::TgcPrepDataCollection* prd_coll = tgcPrdCont->indexFindPtr(coll_hash);
+                     if (!prd_coll) {
+                        ATH_MSG_DEBUG("TgcPrepDataCollection not found in container!! "<< m_keyTgc);
+                        continue;
                     }
+                   
+                    for (const Muon::TgcPrepData* tgc_prd : *prd_coll) {
+                        if (!clusterIds.insert(tgc_prd->identify()).second) continue;
+                        insertCluster(*tgc_prd, regionMap, patpose, patdire, hasPhiMeasurements);                        
+                    }                    
                 }
             }
         }
     }
+    return StatusCode::SUCCESS;
 }
 
 void
@@ -256,12 +204,12 @@ MuonPatternCalibration::insertCluster(const MuonCluster& clus, RegionMap& region
                                       const Amg::Vector3D& patdire, bool hasPhiMeasurements) const
 {
 
-    const Identifier& id = clus.identify();
+    const Identifier id = clus.identify();
     // check whether we are measuring phi or eta
-    bool measuresPhi = m_idHelperSvc->measuresPhi(id);
+    const bool measuresPhi = m_idHelperSvc->measuresPhi(id);
 
     Amg::Vector3D globalpos = clus.globalPosition();
-    Amg::Vector3D intersect;
+    Amg::Vector3D intersect{Amg::Vector3D::Zero()};
 
     if (hasPhiMeasurements) {
         // if there is a phi measurement in the pattern use the global direction to calculate the intersect with
@@ -344,17 +292,13 @@ MuonPatternCalibration::insertCluster(const MuonCluster& clus, RegionMap& region
     // enter hit in map
     int regionId = getRegionId(id);
 
-    RegionMapIt mip = regionMap.find(regionId);
-    if (mip == regionMap.end()) {
-        Region region;
-        region.triggerPrds.push_back(std::make_pair(intersect, &clus));
+    Region& region = regionMap[regionId];
+    if (!region.init) {
         region.regionDir = patdire;
         region.regionPos = patpose;
-        regionMap.insert(std::make_pair(regionId, region));
-    } else {
-        Region& region = mip->second;
-        region.triggerPrds.push_back(std::make_pair(intersect, &clus));
-    }
+        region.init = true;
+    }   
+    region.triggerPrds.push_back(std::make_pair(intersect, &clus));
 }
 
 
@@ -363,7 +307,7 @@ MuonPatternCalibration::insertMdt(const MdtPrepData& mdt, RegionMap& regionMap, 
                                   const Amg::Vector3D& patdire, bool hasPhiMeasurements) const
 {
 
-    Amg::Vector3D     intersect;
+    Amg::Vector3D     intersect{Amg::Vector3D::Zero()};
     const Identifier& id = mdt.identify();
 
     const MuonGM::MdtReadoutElement* detEl   = mdt.detectorElement();
@@ -419,23 +363,28 @@ MuonPatternCalibration::insertMdt(const MdtPrepData& mdt, RegionMap& regionMap, 
     int                       chFlag  = elId.get_identifier32().get_compact();
     if (m_doMultiAnalysis) {
         if (m_idHelperSvc->isSmallChamber(id)) {
-            ATH_MSG_VERBOSE("Small chamber " << m_idHelperSvc->toString(elId));
+            ATH_MSG_VERBOSE(" Small chamber " << m_idHelperSvc->toString(elId));
             chFlag = 0;
             if (chIndex == MuonStationIndex::BIS) {
                 int eta = m_idHelperSvc->stationEta(elId);
-                if (abs(eta) == 8) {
-                    ATH_MSG_VERBOSE("BIS8 chamber " << m_idHelperSvc->toString(elId));
+                if (std::abs(eta) == 8) {
+                    ATH_MSG_VERBOSE(" BIS8 chamber " << m_idHelperSvc->toString(elId));
                     chFlag = 3;
                 }
             }
         } else {
-            ATH_MSG_VERBOSE("Large chamber " << m_idHelperSvc->toString(elId));
+            ATH_MSG_VERBOSE(" Large chamber " << m_idHelperSvc->toString(elId));
             chFlag = 1;
             if (chIndex == MuonStationIndex::BIL) {
                 std::string stName = m_idHelperSvc->chamberNameString(id);
                 if (stName[2] == 'R') {
-                    ATH_MSG_VERBOSE("BIR chamber " << m_idHelperSvc->toString(elId));
+                    ATH_MSG_VERBOSE(" BIR chamber " << m_idHelperSvc->toString(elId));
                     chFlag = 2;
+                }
+            } else if (chIndex == MuonStationIndex::BOL) {
+                if (std::abs(m_idHelperSvc->stationEta(id)) == 7) {
+                    ATH_MSG_VERBOSE(" BOE chamber " << m_idHelperSvc->toString(elId));
+                    chFlag = 4;
                 }
             }
         }
@@ -446,159 +395,89 @@ MuonPatternCalibration::insertMdt(const MdtPrepData& mdt, RegionMap& regionMap, 
     // use center tube for region assignment
     int regionId = getRegionId(id);
 
-    RegionMapIt mip = regionMap.find(regionId);
-    if (mip == regionMap.end()) {
-        Region region;
-        region.mdtPrdsPerChamber[chFlag].push_back(std::make_pair(intersect, &mdt));
+    Region& region = regionMap[regionId];
+    if (!region.init) {
         region.regionPos = patpose;
         region.regionDir = patdire;
-        regionMap.insert(std::make_pair(regionId, region));
-    } else {
-        Region& region = mip->second;
-        region.mdtPrdsPerChamber[chFlag].push_back(std::make_pair(intersect, &mdt));
+        region.init = true;        
     }
+    region.mdtPrdsPerChamber[chFlag].push_back(std::make_pair(intersect, &mdt));
 }
-
-void
-MuonPatternCalibration::clearRotsPerRegion(IMuonPatternCalibration::ROTsPerRegion& hitsPerRegion) const
-{
-    // loop over regions, delete all ROTS in map
-    ROTsPerRegionIt rit     = hitsPerRegion.begin();
-    ROTsPerRegionIt rit_end = hitsPerRegion.end();
-    for (; rit != rit_end; ++rit) {
-
-        // loop over mdt hits vectors in region
-        MdtVecIt mdtvit     = rit->mdts.begin();
-        MdtVecIt mdtvit_end = rit->mdts.end();
-        for (; mdtvit != mdtvit_end; ++mdtvit) {
-
-            // loop over mdt hits
-            MdtIt mdtit     = mdtvit->begin();
-            MdtIt mdtit_end = mdtvit->end();
-            for (; mdtit != mdtit_end; ++mdtit) {
-                delete *mdtit;
-            }
-        }
-
-        // loop over clusters in region
-        ClusterIt clit     = rit->clusters.begin();
-        ClusterIt clit_end = rit->clusters.end();
-        for (; clit != clit_end; ++clit) {
-            delete *clit;
-        }
-    }
-}
-
 
 void
 MuonPatternCalibration::printRegionMap(const RegionMap& regionMap) const
 {
 
-    RegionMapCit mit     = regionMap.begin();
-    RegionMapCit mit_end = regionMap.end();
     ATH_MSG_INFO("Summarizing input");
 
-    for (; mit != mit_end; ++mit) {
-        ATH_MSG_INFO("new region " << mit->first << " trigger " << mit->second.triggerPrds.size() << " mdt ch "
-                                   << mit->second.mdtPrdsPerChamber.size());
+    for (const auto& [detRegionId, chamberData] : regionMap) {
+        ATH_MSG_INFO("new region " << detRegionId << " trigger " << chamberData.triggerPrds.size() << " mdt ch "
+                                   << chamberData.mdtPrdsPerChamber.size());
+        if (!chamberData.triggerPrds.empty()) ATH_MSG_INFO("trigger hits " << chamberData.triggerPrds.size());
 
-        if (!mit->second.triggerPrds.empty()) ATH_MSG_INFO("trigger hits " << mit->second.triggerPrds.size());
-
-
-        ISPrdIt pit     = mit->second.triggerPrds.begin();
-        ISPrdIt pit_end = mit->second.triggerPrds.end();
-        for (; pit != pit_end; ++pit) {
-            ATH_MSG_INFO("  " << m_printer->print(*(pit->second)));
+        for (const auto& [globalPos, prd] : chamberData.triggerPrds) {
+            ATH_MSG_INFO("  " << m_printer->print(*prd)<<" "<<globalPos);
         }
-
-        RegionIdMapIt idit     = mit->second.mdtPrdsPerChamber.begin();
-        RegionIdMapIt idit_end = mit->second.mdtPrdsPerChamber.end();
-        for (; idit != idit_end; ++idit) {
-            ATH_MSG_INFO("new MDT chamber with " << idit->second.size() << " hits");
-
-            ISPrdMdtIt mdtit     = idit->second.begin();
-            ISPrdMdtIt mdtit_end = idit->second.end();
-            for (; mdtit != mdtit_end; ++mdtit) {
-                const MdtPrepData* prd = mdtit->second;
-                ATH_MSG_INFO("  " << m_printer->print(*prd));
+        for (const auto& [statId, MdtChamHits]: chamberData.mdtPrdsPerChamber) {
+            ATH_MSG_INFO("new MDT chamber with " << MdtChamHits.size() << " hits");
+            for (const auto& [globalPos, prd] : MdtChamHits) {
+                ATH_MSG_INFO("  " << m_printer->print(*prd)<<" "<<globalPos);
             }
         }
     }
 }
 
 void
-MuonPatternCalibration::calibrateRegionMap(const RegionMap&                        regionMap,
-                                           IMuonPatternCalibration::ROTsPerRegion& hitsPerRegion) const
-{
+MuonPatternCalibration::calibrateRegionMap(const RegionMap& regionMap,
+                                           IMuonPatternCalibration::ROTsPerRegion& hitsPerRegion) const {
 
-    RegionMapCit mit     = regionMap.begin();
-    RegionMapCit mit_end = regionMap.end();
+    
+    for (const auto& [regionId, regMeasColl] : regionMap) {
 
-    for (; mit != mit_end; ++mit) {
-
-
-        ROTRegion rotRegion;
-        rotRegion.regionId  = mit->first;
-        rotRegion.regionPos = mit->second.regionPos;
-        rotRegion.regionDir = mit->second.regionDir;
-
-
-        ISPrdIt pit     = mit->second.triggerPrds.begin();
-        ISPrdIt pit_end = mit->second.triggerPrds.end();
-        for (; pit != pit_end; ++pit) {
-
-            if (!pit->second) continue;
-
-            const MuonClusterOnTrack* cluster = m_clusterCreator->createRIO_OnTrack(*(pit->second), pit->first);
+        ROTRegion rotRegion{};
+        rotRegion.regionId  = regionId;
+        rotRegion.regionPos = regMeasColl.regionPos;
+        rotRegion.regionDir = regMeasColl.regionDir;
+ 
+        for (const auto& [globalPos, prd] : regMeasColl.triggerPrds) {
+            std::unique_ptr<const MuonClusterOnTrack> cluster{m_clusterCreator->createRIO_OnTrack(*prd, globalPos)};
             if (!cluster) continue;
-
-            rotRegion.clusters.push_back(cluster);
+            rotRegion.push_back(std::move(cluster));
         }
-
-        RegionIdMapIt idit     = mit->second.mdtPrdsPerChamber.begin();
-        RegionIdMapIt idit_end = mit->second.mdtPrdsPerChamber.end();
-        for (; idit != idit_end; ++idit) {
-
-            ISPrdMdtIt mdtit     = idit->second.begin();
-            ISPrdMdtIt mdtit_end = idit->second.end();
-
-            MdtVec mdtROTs;
-            for (; mdtit != mdtit_end; ++mdtit) {
-                const MdtPrepData* prd = mdtit->second;
-                if (!prd) continue;
-
-                const MdtDriftCircleOnTrack* mdt = m_mdtCreator->createRIO_OnTrack(*prd, mdtit->first);
-
+        for (const auto& [regionId, MdtsWithIsect] :regMeasColl.mdtPrdsPerChamber) {
+            ATH_MSG_VERBOSE("Run over region id "<<regionId);
+            MdtVec mdtROTs{};
+            for (const auto& [globalPos, prd] : MdtsWithIsect) {  
+                ATH_MSG_VERBOSE("Calibrate prd"<<m_idHelperSvc->toString(prd->identify())
+                                <<",tdc: "<<prd->tdc()<<",adc: "<<prd->adc()<<" at "<<Amg::toString(globalPos));
+                const MdtDriftCircleOnTrack* mdt = m_mdtCreator->createRIO_OnTrack(*prd, globalPos, &globalPos);
                 if (!mdt) {
                     ATH_MSG_VERBOSE("Failed to calibrate " << m_idHelperSvc->toString(prd->identify()));
                     continue;
                 }
                 mdtROTs.push_back(mdt);
             }
-            if (!mdtROTs.empty()) rotRegion.mdts.push_back(mdtROTs);
+            if (!mdtROTs.empty()) rotRegion.push_back(std::move(mdtROTs));
         }
-        hitsPerRegion.push_back(rotRegion);
+        hitsPerRegion.push_back(std::move(rotRegion));
     }
 }
 
-MuonPatternCalibration::Containers
-MuonPatternCalibration::retrieveTriggerHitContainers(const EventContext& ctx) const
-{
-    MuonPatternCalibration::Containers containers;
-    SG::ReadHandle<Muon::RpcPrepDataContainer> RpcCont(m_keyRpc, ctx);
-    if (!RpcCont.isValid()) {
-        ATH_MSG_DEBUG(" Failed to retrieve RpcPrepDataContainer, will not recover rpc trigger hits ");
-    } else{
-        containers.m_rpcPrdContainer = RpcCont.cptr();
+template <class ContType> StatusCode MuonPatternCalibration::loadFromStoreGate(const EventContext& ctx,
+                                                           const SG::ReadHandleKey<ContType>& key,
+                                                           const ContType* & cont_ptr) const {
+    if (key.empty()){
+        ATH_MSG_VERBOSE("Empty key given for "<<typeid(ContType).name()<<".");
+        cont_ptr = nullptr;
+        return StatusCode::SUCCESS;
     }
-    SG::ReadHandle<Muon::TgcPrepDataContainer> TgcCont(m_keyTgc, ctx);
-    if (!TgcCont.isValid()) {
-        ATH_MSG_DEBUG(" Failed to retrieve TgcPrepDataContainer, will not recover tgc trigger hits ");
-    } else{
-        containers.m_tgcPrdContainer = TgcCont.cptr();
+    SG::ReadHandle<ContType> readHandle{key, ctx};
+    if (!readHandle.isValid()) {
+        ATH_MSG_FATAL("Failed to retrieve "<<key.fullKey()<<" from store gate");
+        return StatusCode::FAILURE;
     }
-
-    return containers;
+    cont_ptr = readHandle.cptr();        
+    return StatusCode::SUCCESS;
 }
 
 }  // namespace Muon

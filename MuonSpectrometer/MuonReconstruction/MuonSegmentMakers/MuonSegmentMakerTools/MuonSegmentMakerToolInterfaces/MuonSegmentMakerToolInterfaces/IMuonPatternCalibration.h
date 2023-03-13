@@ -23,19 +23,35 @@ namespace Muon {
     /** @brief The IMuonCalibration is a pure virtual interface for tools to calibrate PRD hits  */
     class IMuonPatternCalibration : virtual public IAlgTool {
     public:
-        typedef std::vector<const MuonClusterOnTrack*> ClusterVec;
-        typedef std::vector<const MdtDriftCircleOnTrack*> MdtVec;
-        typedef std::vector<MdtVec> MdtVecVec;
+        using ClusterVec = std::vector<const MuonClusterOnTrack*>;
+        using MdtVec = std::vector<const MdtDriftCircleOnTrack*>;
+        using MdtVecVec = std::vector<MdtVec>;
 
         struct ROTRegion {
             int regionId{0};
-            Amg::Vector3D regionPos{0., 0., 0.};
-            Amg::Vector3D regionDir{0., 0., 0.};
-            ClusterVec clusters;
-            MdtVecVec mdts;
+            Amg::Vector3D regionPos{Amg::Vector3D::Zero()};
+            Amg::Vector3D regionDir{Amg::Vector3D::Zero()};
+            
+            const ClusterVec& clusters() const {return m_clusters;}
+            const MdtVecVec& mdts() const {return m_mdts;}
+
+            void push_back(std::unique_ptr<const MuonClusterOnTrack> cl){
+                m_clusters.push_back(cl.get());
+                m_garbage.push_back(std::move(cl));
+            }
+            void push_back(MdtVec&& vec) {
+                std::transform(vec.begin(), vec.end(),std::back_inserter(m_garbage), 
+                    [](const MdtDriftCircleOnTrack* mdt) {return std::shared_ptr<const Trk::MeasurementBase>{mdt};
+                });
+                m_mdts.push_back(std::move(vec));
+            }
+        private:
+            ClusterVec m_clusters{};
+            MdtVecVec m_mdts{};
+            std::vector<std::shared_ptr<const Trk::MeasurementBase>> m_garbage{};
         };
 
-        typedef std::vector<ROTRegion> ROTsPerRegion;
+        using ROTsPerRegion = std::vector<ROTRegion>;
 
         /** access to tool interface */
         static const InterfaceID& interfaceID() {
@@ -43,9 +59,8 @@ namespace Muon {
             return IID_IMuonPatternCalibration;
         }
 
-        virtual void calibrate(const MuonPatternCombination& pat, ROTsPerRegion& hitsPerRegion, const EventContext& ctx) const = 0;
-        virtual int getRegionId(const Identifier& id) const = 0;
-        virtual void clearRotsPerRegion(ROTsPerRegion& hitsPerRegion) const = 0;
+        virtual StatusCode calibrate(const EventContext& ctx, const MuonPatternCombination& pat, ROTsPerRegion& hitsPerRegion) const = 0;
+        virtual int getRegionId(const Identifier& id) const = 0;      
         virtual bool checkForPhiMeasurements(const MuonPatternCombination& pat) const = 0;
 
         virtual ~IMuonPatternCalibration() = default;

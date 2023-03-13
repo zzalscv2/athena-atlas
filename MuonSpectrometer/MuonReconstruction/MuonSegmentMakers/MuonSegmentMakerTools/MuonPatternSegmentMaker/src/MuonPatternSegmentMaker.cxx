@@ -514,7 +514,7 @@ MuonPatternSegmentMaker::insertMdt(const MdtPrepData& mdt, RegionMap& regionMap,
     Identifier elId = m_idHelperSvc->mdtIdHelper().elementID(id);
 
     MuonStationIndex::ChIndex chIndex = m_idHelperSvc->chamberIndex(elId);
-    int                       chFlag  = elId.get_identifier32().get_compact();
+    int chFlag  = elId.get_identifier32().get_compact();
     if (m_doMultiAnalysis) {
         if (m_idHelperSvc->isSmallChamber(id)) {
             ATH_MSG_VERBOSE(" Small chamber " << m_idHelperSvc->toString(elId));
@@ -536,7 +536,7 @@ MuonPatternSegmentMaker::insertMdt(const MdtPrepData& mdt, RegionMap& regionMap,
                     chFlag = 2;
                 }
             } else if (chIndex == MuonStationIndex::BOL) {
-                if (abs(m_idHelperSvc->stationEta(id)) == 7) {
+                if (std::abs(m_idHelperSvc->stationEta(id)) == 7) {
                     ATH_MSG_VERBOSE(" BOE chamber " << m_idHelperSvc->toString(elId));
                     chFlag = 4;
                 }

@@ -87,7 +87,6 @@ def MuonSegmentFilterAlg(name="MuonSegmentFilterAlg", **kwargs):
     kwargs.setdefault("SegmentCollectionName", "TrackMuonSegments")
     return CfgMgr.MuonSegmentFilterAlg(name, **kwargs)
 
-
 def MooSegmentFinderNCBAlg( name="MuonSegmentMaker_NCB",**kwargs ):
     reco_cscs = muonRecFlags.doCSCs() and MuonGeometryFlags.hasCSC()
     kwargs.setdefault("SegmentFinder",getPublicToolClone("MooSegmentFinder_NCB","MooSegmentFinder",
@@ -114,7 +113,59 @@ def MooSegmentFinderNCBAlg( name="MuonSegmentMaker_NCB",**kwargs ):
 
     return CfgMgr.MooSegmentFinderAlg(name,**kwargs)
 
+
+def MuonSegmentFinderNCBAlg(name="MuonSegmentMaker_NCB", **kwargs):
+    ### Only use the TGC measurements from the  current bunch crossing
+    kwargs.setdefault("TGC_PRDs", "TGC_Measurements")
+    reco_cscs = muonRecFlags.doCSCs() and MuonGeometryFlags.hasCSC()
+    reco_mircomegas = muonRecFlags.doMMs() and MuonGeometryFlags.hasMM()
+    reco_stgc = muonRecFlags.dosTGCs() and MuonGeometryFlags.hasSTGC()
+    kwargs.setdefault("doStgcSegments", reco_stgc)
+    kwargs.setdefault("doMMSegments", reco_mircomegas)
+    kwargs.setdefault("doMdtSegments", False)
+    kwargs.setdefault("CSC_clusterkey", "CSC_Clusters" if reco_cscs else "")
+    ## Define the output container
+    kwargs.setdefault("SegmentCollectionName", "NCB_TrackMuonSegments")
+    ### Do not rebuild the NSW alignment segments
+    kwargs.setdefault("NSWSegmentCollectionName", "")
+    kwargs.setdefault("SegmentQuality", 1)
+
+    ### Do not recombine the segments
+    kwargs.setdefault("SegmentCombiner", getPublicTool("MuonCurvedSegmentCombiner"))
+    kwargs.setdefault("RunSegmentCombiner", False)
+    ### Setup the CSC segment maker
+    if reco_cscs:
+        cscSegmentUtilTool = getPublicToolClone("CscSegmentUtilTool_NCB",
+                                                "CscSegmentUtilTool",
+                                                TightenChi2 = False, 
+                                                IPconstraint=False) 
+        kwargs.setdefault("Csc2dSegmentMaker", getPublicToolClone("Csc2dSegmentMaker_NCB","Csc2dSegmentMaker",
+                                                                segmentTool = cscSegmentUtilTool))
+        kwargs.setdefault("Csc4dSegmentMaker",getPublicToolClone("Csc4dSegmentMaker_NCB","Csc4dSegmentMaker",
+                                                                segmentTool = getPublicTool("CscSegmentUtilTool_NCB")))
+    ### Setup the NSW segment maker
+    if reco_mircomegas or reco_stgc:
+        kwargs.setdefault("MuonClusterCreator",  getPublicTool("MuonClusterOnTrackCreator"))
+        Cleaner = getPublicToolClone("MuonTrackCleaner_seg","MuonTrackCleaner")
+        Cleaner.Extrapolator = getPublicTool("MuonStraightLineExtrapolator")
+        Cleaner.Fitter = getPublicTool("MCTBSLFitterMaterialFromTrack")
+        Cleaner.PullCut = 3
+        Cleaner.PullCutPhi = 3
+        Cleaner.UseSLFit = True
+        kwargs.setdefault("MuonClusterSegmentFinderTool", getPublicToolClone("MuonClusterSegmentFinderTool_NCB",
+                                                                            "MuonClusterSegmentFinderTool",
+                                                                            TrackCleaner = Cleaner,
+                                                                            SeedMMStereos = False,
+                                                                            IPConstraint = False) )
+
+    
+    return CfgMgr.MuonSegmentFinderAlg(name, **kwargs)
+
+
 def MuonSegmentFinderAlg( name="MuonSegmentMaker", **kwargs):
+    from AthenaCommon.BeamFlags import jobproperties
+    beamFlags = jobproperties.Beam
+    
     SegmentFinder = getPublicTool("MuonClusterSegmentFinderTool")
     Cleaner = getPublicToolClone("MuonTrackCleaner_seg","MuonTrackCleaner")
     Cleaner.Extrapolator = getPublicTool("MuonStraightLineExtrapolator")
@@ -129,20 +180,24 @@ def MuonSegmentFinderAlg( name="MuonSegmentMaker", **kwargs):
         SegmentLocation = "ThirdChainSegments"
     reco_cscs = muonRecFlags.doCSCs() and MuonGeometryFlags.hasCSC()
     reco_mircomegas = muonRecFlags.doMMs() and MuonGeometryFlags.hasMM()
-    reco_stgc = muonRecFlags.dosTGCs() and MuonGeometryFlags.hasSTGC()
+    reco_stgc = muonRecFlags.dosTGCs() and MuonGeometryFlags.hasSTGC()    
+    kwargs.setdefault("CSC_clusterkey", "CSC_Clusters" if reco_cscs else "")
+    kwargs.setdefault("doStgcSegments", reco_stgc)
+    kwargs.setdefault("doMMSegments", reco_mircomegas)
     kwargs.setdefault("Csc2dSegmentMaker",  getPublicTool("Csc2dSegmentMaker") if reco_cscs else "")
     kwargs.setdefault("Csc4dSegmentMaker",  getPublicTool("Csc4dSegmentMaker") if reco_cscs else "")
     kwargs.setdefault("MuonClusterCreator", getPublicTool("MuonClusterOnTrackCreator") if reco_mircomegas or reco_stgc else "" )
     kwargs.setdefault("MuonClusterSegmentFinderTool", getPublicTool("MuonClusterSegmentFinderTool") if reco_mircomegas or reco_stgc else "" )
-    kwargs.setdefault("SegmentCollectionName",SegmentLocation)
+    kwargs.setdefault("SegmentCollectionName", SegmentLocation)
     kwargs.setdefault("MuonPatternCalibration", getPublicTool("MuonPatternCalibration"))
-    kwargs.setdefault("MuonPatternSegmentMaker", getPublicTool("MuonPatternSegmentMaker"))
     kwargs.setdefault("PrintSummary",  muonStandaloneFlags.printSummary())
     kwargs.setdefault("MuonClusterSegmentFinder", getPublicTool("MuonClusterSegmentFinder"))
     kwargs.setdefault("TGC_PRDs", 'TGC_MeasurementsAllBCs' if not muonRecFlags.useTGCPriorNextBC else 'TGC_Measurements')
-
-    MuonSegmentFinderAlg = CfgMgr.MuonSegmentFinderAlg( name, **kwargs )
-   # print ('TGC_MeasurementsAllBCs' if not muonRecFlags.useTGCPriorNextBC else 'TGC_Measurements')
+    
+    
+    kwargs.setdefault("SegmentCombiner", getPublicTool("MuonCurvedSegmentCombiner"))
+    kwargs.setdefault("RunSegmentCombiner", beamFlags.beamType() == 'cosmics')
+    MuonSegmentFinderAlg = CfgMgr.MuonSegmentFinderAlg( name, **kwargs )   
    
     # we check whether the layout contains any CSC chamber and if yes, we check that the user also wants to use the CSCs in reconstruction
     if reco_cscs:
@@ -188,16 +243,24 @@ def MuonStationsInterSectAlg(**kwargs):
     condSequence += MuonStationIntersectCondAlg("MuonStationIntersectCondAlg",**kwargs)
 
 def MuonLayerHoughAlg(name="MuonLayerHoughAlg", **kwargs):
+    from AthenaCommon.BeamFlags import jobproperties
+    beamFlags = jobproperties.Beam
+    
     reco_stgc = muonRecFlags.dosTGCs() and MuonGeometryFlags.hasSTGC()
     reco_mircomegas = muonRecFlags.doMMs() and MuonGeometryFlags.hasMM()
     reco_cscs = muonRecFlags.doCSCs() and MuonGeometryFlags.hasCSC()
-    return CfgMgr.MuonLayerHoughAlg(name,
-                             MuonLayerScanTool =  getPublicTool("MuonLayerHoughTool"),
-                             PrintSummary = muonStandaloneFlags.printSummary(),
-                             CscPrepDataContainer = ("CSC_Clusters" if reco_cscs else ""),
-                             sTgcPrepDataContainer = ("STGC_Measurements" if reco_stgc else ""),
-                             MMPrepDataContainer = ("MM_Measurements" if reco_mircomegas else ""),
-                             TgcPrepDataContainer = 'TGC_MeasurementsAllBCs' if not muonRecFlags.useTGCPriorNextBC else 'TGC_Measurements'  )
+    
+    if ( beamFlags.beamType() == 'collisions'  ): 
+        kwargs.setdefault( "MuonLayerScanTool", getPublicTool("MuonLayerHoughTool") )
+    else:
+        kwargs.setdefault( "MuonLayerScanTool", getPublicTool("MuonHoughPatternFinderTool" ))
+    
+    kwargs.setdefault("PrintSummary", muonStandaloneFlags.printSummary())
+    kwargs.setdefault("CscPrepDataContainer" ,"CSC_Clusters" if reco_cscs else "")
+    kwargs.setdefault("sTgcPrepDataContainer" , "STGC_Measurements" if reco_stgc else "")
+    kwargs.setdefault("MMPrepDataContainer" , "MM_Measurements" if reco_mircomegas else "")
+    kwargs.setdefault("TgcPrepDataContainer" , 'TGC_MeasurementsAllBCs' if not muonRecFlags.useTGCPriorNextBC else 'TGC_Measurements')
+    return CfgMgr.MuonLayerHoughAlg(name,  **kwargs)
 #
 # The top level configurator
 #
@@ -215,21 +278,19 @@ class MuonStandalone(ConfiguredMuonRec):
         if not self.isEnabled(): return        
         # do the following in case of (at least one) NSW
         reco_stgc = muonRecFlags.dosTGCs() and MuonGeometryFlags.hasSTGC()
-        reco_mircomegas = muonRecFlags.doMMs() and MuonGeometryFlags.hasMM()
-        reco_cscs = muonRecFlags.doCSCs() and MuonGeometryFlags.hasCSC()
+        reco_mircomegas = muonRecFlags.doMMs() and MuonGeometryFlags.hasMM()        
         
         MuonStationsInterSectAlg()
 
         self.addAlg( MuonLayerHoughAlg("MuonLayerHoughAlg"))
         if not muonStandaloneFlags.patternsOnly():
-            self.addAlg( MuonSegmentFinderAlg("MuonSegmentMaker" ))
-            if reco_cscs:
-                self.addAlg(MooSegmentFinderNCBAlg("MuonSegmentMaker_NCB"))
-
-                if not cfgKeyStore.isInInput ('xAOD::MuonSegmentContainer', 'MuonSegments_NCB'):
-                     self.addAlg( CfgMgr.xAODMaker__MuonSegmentCnvAlg("MuonSegmentCnvAlg_NCB",
-                                                                      SegmentContainerName="NCB_TrackMuonSegments",
-                                                                      xAODContainerName="NCB_MuonSegments") )
+            self.addAlg(MuonSegmentFinderAlg("MuonSegmentMaker"))
+                
+            self.addAlg(MuonSegmentFinderNCBAlg("MuonSegmentMaker_NCB"))
+            if not cfgKeyStore.isInInput ('xAOD::MuonSegmentContainer', 'MuonSegments_NCB'):
+                self.addAlg( CfgMgr.xAODMaker__MuonSegmentCnvAlg("MuonSegmentCnvAlg_NCB",
+                                                                SegmentContainerName="NCB_TrackMuonSegments",
+                                                                xAODContainerName="NCB_MuonSegments") )
 
         if reco_stgc or reco_mircomegas:
             self.addAlg( CfgMgr.xAODMaker__MuonSegmentCnvAlg("QuadNSW_MuonSegmentCnvAlg",

@@ -197,8 +197,8 @@ addToolClone("MuonSegmentRegionRecoveryTool","MuonEORecoveryTool",OnlyEO = True,
 
 addTool( "MuonRecExample.MooreTools.MuonPatternSegmentMaker","MuonPatternSegmentMaker")
 
-addTool("Muon::MuonPatternCalibration", "MuonPatternCalibration",
-                                        TgcPrepDataContainer = 'TGC_MeasurementsAllBCs' if not muonRecFlags.useTGCPriorNextBC else 'TGC_Measurements')
+addTool("MuonRecExample.MooreTools.MuonPatternCalibration", "MuonPatternCalibration")
+                                        
 
 addTool( "MuonRecExample.MooreTools.MuonCurvedSegmentCombiner","MuonCurvedSegmentCombiner")
 
@@ -211,12 +211,7 @@ addToolClone( "MdtDriftCircleOnTrackCreator", "MdtDriftCircleOnTrackCreatorPreFi
 addTool( "MuonRecExample.MooreTools.MooCandidateMatchingTool","MooCandidateMatchingTool")
 
 addTool( "MuonRecExample.MooreTools.MooTrackFitter", "MooTrackFitter")
-
-addTool( "MuonRecExample.MooreTools.MooTrackFitter", "MooSLTrackFitter",
-         Fitter="MCTBSLFitter",
-         Propagator="MuonStraightLinePropagator",
-         ReducedChi2Cut = 10.0 ,
-         SLFit=True)
+addTool( "MuonRecExample.MooreTools.MooSLTrackFitter", "MooSLTrackFitter")
 
 addTool( "MuonRecExample.MooreTools.MooTrackBuilder", "MooTrackBuilderTemplate")
 

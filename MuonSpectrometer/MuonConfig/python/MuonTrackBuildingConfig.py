@@ -45,8 +45,7 @@ def MooTrackFitterCfg(flags, name = 'MooTrackFitter', prefix='', **kwargs):
 
     track_to_segment_tool =  result.popToolsAndMerge(MuonTrackToSegmentToolCfg(flags))
     kwargs.setdefault("TrackToSegmentTool", track_to_segment_tool)    
-    
-    
+   
     kwargs.setdefault("PhiHitSelector",  result.popToolsAndMerge(MuonPhiHitSelectorCfg(flags)))
     kwargs.setdefault("TrackCleaner",  result.popToolsAndMerge(MuonTrackCleanerCfg(flags)))
     kwargs.setdefault("SegmentInOverlapTool",  result.popToolsAndMerge(MuonSegmentInOverlapResolvingToolCfg(flags)))

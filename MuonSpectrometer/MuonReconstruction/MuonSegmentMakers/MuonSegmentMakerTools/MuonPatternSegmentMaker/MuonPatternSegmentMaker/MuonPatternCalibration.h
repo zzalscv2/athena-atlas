@@ -29,53 +29,29 @@ class MdtDriftCircleOnTrack;
 
 class MuonPatternCalibration : virtual public IMuonPatternCalibration, public AthAlgTool {
   public:
-    typedef std::pair<Amg::Vector3D, const MuonCluster*> ISPrd;
-    typedef std::vector<ISPrd>                           ISPrdVec;
-    typedef ISPrdVec::const_iterator                     ISPrdIt;
+    using ISPrd = std::pair<Amg::Vector3D, const MuonCluster*>;
+    using ISPrdVec = std::vector<ISPrd>;    
 
-    typedef std::pair<Amg::Vector3D, const MdtPrepData*> ISPrdMdt;
-    typedef std::vector<ISPrdMdt>                        ISPrdMdtVec;
-    typedef ISPrdMdtVec::const_iterator                  ISPrdMdtIt;
-
-    typedef std::map<int, ISPrdMdtVec>  RegionIdMap;
-    typedef RegionIdMap::const_iterator RegionIdMapIt;
-
+    using ISPrdMdt = std::pair<Amg::Vector3D, const MdtPrepData*>;
+    using ISPrdMdtVec = std::vector<ISPrdMdt>;
+    using RegionIdMap = std::map<int, ISPrdMdtVec>;
+   
     struct Region {
-        Amg::Vector3D regionPos;
-        Amg::Vector3D regionDir;
-        ISPrdVec      triggerPrds;
-        RegionIdMap   mdtPrdsPerChamber;
+        Region() = default;
+        Amg::Vector3D regionPos{Amg::Vector3D::Zero()};
+        Amg::Vector3D regionDir{Amg::Vector3D::Zero()};
+        ISPrdVec      triggerPrds{};
+        RegionIdMap   mdtPrdsPerChamber{};
+        bool init{false};
     };
 
-    struct Containers
-    {
-      const Muon::RpcPrepDataContainer* m_rpcPrdContainer = nullptr;
-      const Muon::TgcPrepDataContainer* m_tgcPrdContainer = nullptr;
-    };
-    typedef std::map<int, Region> RegionMap;
-    typedef RegionMap::iterator       RegionMapIt;
-    typedef RegionMap::const_iterator RegionMapCit;
-
-
-    typedef std::vector<const MuonClusterOnTrack*> ClusterVec;
-    typedef ClusterVec::iterator                   ClusterIt;
-    typedef ClusterVec::const_iterator             ClusterCit;
-
-    typedef std::vector<const MdtDriftCircleOnTrack*> MdtVec;
-    typedef MdtVec::iterator                          MdtIt;
-    typedef MdtVec::iterator                          MdtCit;
-
-    typedef std::vector<MdtVec> MdtVecVec;
-    typedef MdtVecVec::iterator MdtVecIt;
-    typedef MdtVecVec::iterator MdtVecCit;
-
-    typedef IMuonPatternCalibration::ROTsPerRegion::iterator       ROTsPerRegionIt;
-    typedef IMuonPatternCalibration::ROTsPerRegion::const_iterator ROTsPerRegionCit;
-
+  
+    using RegionMap =  std::map<int, Region>;
+ 
     struct EtaPhiHits {
-        EtaPhiHits() : neta(0), nphi(0) {}
-        int neta;
-        int nphi;
+        EtaPhiHits() = default;
+        unsigned int neta{0};
+        unsigned int nphi{0};
     };
 
   public:
@@ -84,13 +60,14 @@ class MuonPatternCalibration : virtual public IMuonPatternCalibration, public At
 
     virtual StatusCode initialize();
 
-    void calibrate(const MuonPatternCombination& pat, IMuonPatternCalibration::ROTsPerRegion& hitsPerRegion, const EventContext& ctx) const;
-    int  getRegionId(const Identifier& id) const;
-    void clearRotsPerRegion(IMuonPatternCalibration::ROTsPerRegion& hitsPerRegion) const;
-    bool checkForPhiMeasurements(const MuonPatternCombination& pat) const;
+    StatusCode calibrate(const EventContext& ctx, const MuonPatternCombination& pat, ROTsPerRegion& hitsPerRegion) const override;
+    int  getRegionId(const Identifier& id) const override;
+    bool checkForPhiMeasurements(const MuonPatternCombination& pat) const override;
 
   private:
-    void createRegionMap(const MuonPatternCombination& pat, RegionMap& regionMap, bool hasPhiMeasurements, const EventContext& ctx) const;
+    StatusCode createRegionMap(const EventContext& ctx, const MuonPatternCombination& pat, 
+                               RegionMap& regionMap, bool hasPhiMeasurements) const;
+    
     void printRegionMap(const RegionMap& regionMap) const;
 
     void calibrateRegionMap(const RegionMap& regionMap, IMuonPatternCalibration::ROTsPerRegion& hitsPerRegion) const;
@@ -103,12 +80,10 @@ class MuonPatternCalibration : virtual public IMuonPatternCalibration, public At
                    const Amg::Vector3D& patdire, bool hasPhiMeasurements) const;
 
 
-    Containers retrieveTriggerHitContainers(const EventContext& ctx) const;
-
     ToolHandle<IMdtDriftCircleOnTrackCreator> m_mdtCreator{
         this,
         "MdtCreator",
-        "Muon::MdtDriftCircleOnTrackCreator/MdtDriftCircleOnTrackCreator",
+        "",
     };  //<! pointer to mdt rio ontrack creator
     ToolHandle<IMuonClusterOnTrackCreator> m_clusterCreator{
         this,
@@ -127,16 +102,21 @@ class MuonPatternCalibration : virtual public IMuonPatternCalibration, public At
         "Muon::MuonIdHelperSvc/MuonIdHelperSvc",
     };
 
-    bool   m_doMultiAnalysis;  //<! use neighbouring chambers during segment finding
-    bool   m_doFullFinder;     //<!
-    double m_dropDistance;     //<! hits that are further away than the distance are not added to segmentmaker input
-    double m_phiAngleCut;      //<! cut on the phi opening angle between chamber and pattern
-    bool   m_doSummary;
-    bool   m_recoverTriggerHits;
-    bool   m_removeDoubleMdtHits;
+    Gaudi::Property<bool> m_doMultiAnalysis{this, "DoMultiChamberAnalysis", true};  //<! use neighbouring chambers during segment finding
+    Gaudi::Property<double> m_dropDistance{this, "DropDistance", 1500.};     //<! hits that are further away than the distance are not added to segmentmaker input
+    Gaudi::Property<double> m_phiAngleCut{this, "AngleCutPhi", 1.e9};      //<! cut on the phi opening angle between chamber and pattern
+    Gaudi::Property<bool> m_doSummary{this, "DoSummary", false};
+    Gaudi::Property<bool> m_recoverTriggerHits{this, "RecoverTriggerHits", true};
+    Gaudi::Property<bool> m_removeDoubleMdtHits{this, "RemoveDoubleMdtHits", true};
 
-    SG::ReadHandleKey<Muon::RpcPrepDataContainer> m_keyRpc;
-    SG::ReadHandleKey<Muon::TgcPrepDataContainer> m_keyTgc;
+    SG::ReadHandleKey<Muon::RpcPrepDataContainer> m_keyRpc{this, "RpcPrepDataContainer","RPC_Measurements"};
+    SG::ReadHandleKey<Muon::TgcPrepDataContainer> m_keyTgc{this, "TgcPrepDataContainer","TGC_Measurements"};
+
+    /// load the container from storegate given a ReadHandleKey. If the key is empty
+    /// a nullptr will be returned
+    template <class ContType> StatusCode loadFromStoreGate(const EventContext& ctx,
+                                                           const SG::ReadHandleKey<ContType>& key,
+                                                           const ContType* & cont_ptr) const;
 };
 
 }  // namespace Muon
