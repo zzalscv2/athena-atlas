@@ -102,37 +102,6 @@ def tauLRTRoiUpdaterCfg(inflags, inputRoIs, tracks):
     acc.addEventAlgo(alg)
     return acc
 
-def _algoTauPrecision(flags, name, inputRoIs, tracks):
-    from TrigTauRec.TrigTauRecConfig import TrigTauRecMerged_TauPrecisionMVA
-    from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
-
-    if "MVA" in name:
-      algo                                 = TrigTauRecMerged_TauPrecisionMVA(flags, name= "TrigTauRecMerged_TauPrecision_PrecisionMVA", doTrackBDT=False, doLLP=False)
-      algo.Key_trigTauJetOutputContainer   = recordable("HLT_TrigTauRecMerged_MVA")
-      algo.Key_trigTauTrackOutputContainer = recordable("HLT_tautrack_MVA")
-    elif "LLP" in name:
-      algo                                 = TrigTauRecMerged_TauPrecisionMVA(flags, name= "TrigTauRecMerged_TauPrecision_PrecisionLLP", doTrackBDT=False, doLLP=True)
-      algo.Key_trigTauJetOutputContainer   = recordable("HLT_TrigTauRecMerged_LLP")
-      algo.Key_trigTauTrackOutputContainer = recordable("HLT_tautrack_LLP")
-    elif "LRT" in name:
-      algo                                 = TrigTauRecMerged_TauPrecisionMVA(flags, name= "TrigTauRecMerged_TauPrecision_PrecisionLRT", doTrackBDT=False, doLLP=True)
-      algo.Key_trigTauJetOutputContainer   = recordable("HLT_TrigTauRecMerged_LRT")
-      algo.Key_trigTauTrackOutputContainer = recordable("HLT_tautrack_LRT")
-    else:
-      raise Exception( "_algoTauPrecision : called with incorrect non existent name: "+name )
-      return None
-
-    algo.Key_trigTauTrackInputContainer  = "HLT_tautrack_dummy"
-    algo.Key_trigTauJetInputContainer    = "HLT_TrigTauRecMerged_CaloMVAOnly"
-    algo.Key_trigJetSeedOutputKey        = recordable("HLT_jet_seed")
-
-    algo.RoIInputKey                     = inputRoIs
-    algo.clustersKey                     = ""
-    algo.Key_vertexInputContainer        = getInDetTrigConfig( "tauIso" ).vertex
-    algo.Key_trackPartInputContainer     = tracks
-
-    return algo
-
 def tauCaloMVARecoSequence(flags, InViewRoIs, SeqName):
     global TauCaloJetContainer
     from TrigTauRec.TrigTauRecConfig import trigTauRecMergedCaloOnlyMVACfg
@@ -189,7 +158,10 @@ def tauIdSequence(flags, RoIs, name):
 
     tauIdSequence+= ViewVerifyId
 
-    tauPrecisionAlg = _algoTauPrecision(flags, name, inputRoIs = RoIs, tracks = IDTrigConfig.tracks_IDTrig())
+    newflags = flags.cloneAndReplace("InDet.Tracking.ActiveConfig","Trigger.InDetTracking."+IDTrigConfig.name)
+
+    from TrigTauRec.TrigTauRecConfig import trigTauRecMergedPrecisionMVACfg
+    tauPrecisionAlg = algorithmCAToGlobalWrapper(trigTauRecMergedPrecisionMVACfg, newflags, name, inputRoIs = RoIs, tracks = IDTrigConfig.tracks_IDTrig())[0]
 
     tauIdSequence += tauPrecisionAlg
 

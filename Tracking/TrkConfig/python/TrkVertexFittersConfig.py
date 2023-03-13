@@ -30,7 +30,7 @@ def AdaptiveMultiVertexFitterCfg(flags, name="AdaptiveMultiVertexFitter", **kwar
 
 def SequentialVertexSmootherCfg(flags, name="SequentialVertexSmoother", **kwargs):
     acc = ComponentAccumulator()
-    acc.setPrivateTools(CompFactory.Trk.SequentialVertexSmoother())
+    acc.setPrivateTools(CompFactory.Trk.SequentialVertexSmoother(name, **kwargs))
     return acc
 
 def AdaptiveVertexFitterCfg(flags, name="AdaptiveVertexFitter", **kwargs):
