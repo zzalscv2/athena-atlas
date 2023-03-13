@@ -658,6 +658,8 @@ InDetTrackParticlesAuxDyn.nBC_meas
 InDetTrackParticlesAuxDyn.trackLink
 InDetTrackParticlesClusterAssociations
 InDetTrackParticlesClusterAssociationsAux.
+IncompleteLumiBlocks
+IncompleteLumiBlocksAux.
 IsCalibration
 IsSimulation
 IsTestBeam

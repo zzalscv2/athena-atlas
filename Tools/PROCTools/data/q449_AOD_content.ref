@@ -1976,6 +1976,8 @@ StausAuxDyn.qOverP_staco
 StausAuxDyn.theta_staco
 StausAuxDyn.z0_staco
 StreamAOD
+SuspectLumiBlocks
+SuspectLumiBlocksAux.
 TauFinalPi0s
 TauFinalPi0sAux.
 TauFinalPi0sAuxDyn.pi0PFOLinks
