@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from TrigTRTHighTHitCounter.TrigTRTHighTHitCounterConf import TrigTRTHTHhypoTool
+from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
 def _IncTool(flags, name):
@@ -12,15 +12,15 @@ def _IncTool(flags, name):
     monTool.defineHistogram('TRTHTHitsRoad', type='TH1F', path='EXPERT', title="TrigTRTHTH Hypo TRTHTHitsRoad", xbins=100, xmin=0, xmax=100)
     monTool.defineHistogram('TRTHTHitsWedge', type='TH1F', path='EXPERT', title="TrigTRTHTH Hypo TRTHTHitsWedge", xbins=100, xmin=0, xmax=100)
 
-    tool = TrigTRTHTHhypoTool( name,
-                               AcceptAll = False,
-                               MinTRTHTHitsRoad = 20,
-                               MinHTRatioRoad = 0.4,
-                               MinTRTHTHitsWedge = 30,
-                               MinHTRatioWedge = 0.4,
-                               DoWedge = True,
-                               DoRoad = False,
-                               MonTool = monTool )
+    tool = CompFactory.TrigTRTHTHhypoTool( name,
+                                           AcceptAll = False,
+                                           MinTRTHTHitsRoad = 20,
+                                           MinHTRatioRoad = 0.4,
+                                           MinTRTHTHitsWedge = 30,
+                                           MinHTRatioWedge = 0.4,
+                                           DoWedge = True,
+                                           DoRoad = False,
+                                           MonTool = monTool )
     return tool
 
 def TrigTRTHTHhypoToolFromDict( flags, chainDict ):

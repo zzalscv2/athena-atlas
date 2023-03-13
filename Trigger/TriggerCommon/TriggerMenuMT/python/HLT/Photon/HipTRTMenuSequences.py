@@ -8,7 +8,6 @@ from AthenaCommon.CFElements import parOR, seqAND
 import AthenaCommon.CfgMgr as CfgMgr
 from AthenaCommon.GlobalFlags import globalflags
 from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
-#from DecisionHandling.DecisionHandlingConf import ViewCreatorPreviousROITool
 from DecisionHandling.DecisionHandlingConf import ViewCreatorCentredOnClusterROITool
 from TrigTRTHighTHitCounter.TrigTRTHTHCounterConfig import TrigTRTHTHCounterFex
 
@@ -44,11 +43,12 @@ def TRTHitGeneratorSequence(flags):
     from TrigInDetConfig.InDetTrigPrecisionTracking import trtRIOMaker_builder
     trtInviewAlgs = trtRIOMaker_builder(signature = "electrontrt", config = None, rois=InViewRoIs)
     
-    trtHTHFex = TrigTRTHTHCounterFex("TrigTRTH_fex")
-    trtHTHFex.RoIs = trtViewsMaker.InViewRoIs
-    trtHTHFex.TRT_DC_ContainerName = "TRT_TrigDriftCircles" 
-    trtHTHFex.RNNOutputName = TrigEgammaKeys.TrigTRTHTCountsContainer
-    sequenceOut = trtHTHFex.RNNOutputName    
+    trtHTHFex = TrigTRTHTHCounterFex(flags, name="TrigTRTH_fex",
+                                     RoIs = trtViewsMaker.InViewRoIs,
+                                     containerName = "TRT_TrigDriftCircles",
+                                     RNNOutputName = TrigEgammaKeys.TrigTRTHTCountsContainer)
+
+    sequenceOut = TrigEgammaKeys.TrigTRTHTCountsContainer
     
     trtInviewAlgs = parOR("trtInviewAlgs", trtInviewAlgs + [ViewVerify,trtHTHFex])
     trtViewsMaker.ViewNodeName = "trtInviewAlgs"
