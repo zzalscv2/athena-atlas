@@ -53,6 +53,7 @@ namespace LVL1 {
     virtual void getRealEta(float & eta) override;
     virtual std::unique_ptr<eFEXegTOB> geteFEXegTOB() override;
     virtual unsigned int getET() override;
+    virtual unsigned int dmCorrection(unsigned int ET, unsigned int layer) override;
     virtual void getWindowET(int layer, int jPhi, int SCID, unsigned int &) override;
     virtual bool hasSeed() override {return m_hasSeed;};
     virtual unsigned int getSeed() override {return m_seedID;};
@@ -73,6 +74,10 @@ namespace LVL1 {
     int m_central_eta;
     bool m_hasSeed;
 
+    // Enable dead material corrections
+    Gaudi::Property<bool> m_dmCorr  {this, "dmCorr", false, "Enable dead material correctionst"};
+
+    // Key for input towers
     SG::ReadHandleKey<LVL1::eTowerContainer> m_eTowerContainerKey {this, "MyETowers", "eTowerContainer", "Input container for eTowers"};
 
   };

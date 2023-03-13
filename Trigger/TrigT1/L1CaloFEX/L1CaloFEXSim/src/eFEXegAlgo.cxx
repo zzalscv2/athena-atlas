@@ -24,9 +24,16 @@
 
 namespace LVL1 {
 
+static const int s_corrections[3][25] = {
+    {0,0,0,0,0,0,0,0x8,0,0,0xb,0x4,0x8,0x9,0x34,0x7e,0x7b,0x6b,0,0,0,0,0,0,0},
+    {0xe,0x12,0x12,0x12,0x12,0x13,0x18,0x17,0x42,0x40,0x38,0x3d,0x3b,0x4e,0x2d,0xc,0x10,0x4,0x27,0x19,0x19,0x16,0x12,0x10,0xc},
+    {0xb,0x8,0x8,0x8,0x8,0x8,0x7,0x9,0x8,0x8,0x8,0x7,0x8,0x8,0x21,0x2,0x2,0x4,0x6,0x8,0x8,0x8,0x9,0x10,0x12}
+};
+
+
   // default constructor for persistency
 eFEXegAlgo::eFEXegAlgo(const std::string& type, const std::string& name, const IInterface* parent):
-    AthAlgTool(type, name, parent) 
+    AthAlgTool(type, name, parent)
   {
     declareInterface<IeFEXegAlgo>(this);
   }
@@ -129,8 +136,8 @@ void eFEXegAlgo::getReta(std::vector<unsigned int> & retavec) {
   for (int i=iTotalStart; i<=iTotalEnd; ++i) { // eta
     for(int j=0; j<=2; ++j) { // phi
       if (i>=iCoreStart && i <= iCoreEnd && j>=phiStart && j<=phiEnd) {
-	unsigned int tmp_et; getWindowET(2,j,i,tmp_et);
-	coresum += tmp_et;
+         unsigned int tmp_et; getWindowET(2,j,i,tmp_et);
+         coresum += tmp_et;
       }
 
       unsigned int tmptot_et; getWindowET(2,j,i,tmptot_et);
@@ -172,7 +179,7 @@ void eFEXegAlgo::getRhad(std::vector<unsigned int> & rhadvec) {
         const eTower * tTower = eTowerContainer->findTower(m_eFEXegAlgoTowerID[i][j]);
         hadsum += tTower->getLayerTotalET(4);
         if (j==1) {
-	      emsum += ( tTower->getLayerTotalET(0) + tTower->getLayerTotalET(3) );
+          emsum += ( tTower->getLayerTotalET(0) + tTower->getLayerTotalET(3) );
         }
       }
     }
@@ -232,7 +239,6 @@ void LVL1::eFEXegAlgo::getWstot(std::vector<unsigned int> & output){
 }
 
 unsigned int LVL1::eFEXegAlgo::getET() {
-
   int phiUpDownID = -1;
   if (m_seed_UnD) {
     phiUpDownID = 2;
@@ -264,10 +270,21 @@ unsigned int LVL1::eFEXegAlgo::getET() {
   unsigned int L3_ET_1, L3_ET_2;
   getWindowET(3, 1, 0, L3_ET_1); getWindowET(3, phiUpDownID, 0, L3_ET_2);
 
-  unsigned int totET = PS_ET_1 + PS_ET_2;
-  totET += L1_ET_1 + L1_ET_2 + L1_ET_3 + L1_ET_4 + L1_ET_5 + L1_ET_6;
-  totET += L2_ET_1 + L2_ET_2 + L2_ET_3 + L2_ET_4 + L2_ET_5 + L2_ET_6;
-  totET += L3_ET_1 + L3_ET_2;
+  /// Layer sums
+  unsigned int PS_ET = PS_ET_1 + PS_ET_2;
+  unsigned int L1_ET = L1_ET_1 + L1_ET_2 + L1_ET_3 + L1_ET_4 + L1_ET_5 + L1_ET_6;
+  unsigned int L2_ET = L2_ET_1 + L2_ET_2 + L2_ET_3 + L2_ET_4 + L2_ET_5 + L2_ET_6;
+  unsigned int L3_ET = L3_ET_1 + L3_ET_2;
+
+  /// Apply dead material corrections
+  if (m_dmCorr) {
+     PS_ET = dmCorrection(PS_ET, 0);
+     L1_ET = dmCorrection(L1_ET, 1);
+     L2_ET = dmCorrection(L2_ET, 2);
+  }
+
+  /// Final ET sum
+  unsigned int totET = PS_ET + L1_ET + L2_ET + L3_ET;
 
   // overflow handling
   if (totET > 0xffff) totET = 0xffff;
@@ -275,6 +292,50 @@ unsigned int LVL1::eFEXegAlgo::getET() {
   return totET;
 
 }
+
+unsigned int LVL1::eFEXegAlgo::dmCorrection(unsigned int ET, unsigned int layer) {
+  /// Check layer is valid, otherwise do nothing
+  if (layer > 2) return ET;
+
+  /// Get correction factor
+  /// Start by calculating RoI |eta| with range 0-24
+  int efexEta = m_efexid%3;
+  int ieta = 0;
+  if (efexEta == 2) {  // Rightmost eFEX
+     // m_central_eta has range 1-4 or 1-5
+     ieta = 8 + m_fpgaid*4 + m_central_eta - 1;
+  }
+  else if (efexEta == 1 && m_fpgaid > 1) { // central eFEX, eta > 0
+     // m_central_eta has range 1-4
+     ieta = (m_fpgaid-2)*4 + m_central_eta - 1;
+  }
+  else if (efexEta == 1) { // central eFEX, eta < 0
+     // m_central_eta had range 1-4
+     ieta = (1-m_fpgaid)*4 + (4-m_central_eta);
+  }
+  else {   // Leftmost eFEX
+     // m_central_eta has range 0-4 or 1-4
+     ieta = 8 + 4*(3-m_fpgaid) + (4-m_central_eta);
+  }
+
+  /// Retrieve the factor from table (eventually from DB)
+  unsigned int factor = s_corrections[layer][ieta];
+
+  /** Calculate correction
+      Factors are 7 bit words, highest bit corresponding to the most significant
+       term in the correction (ET/2).
+       So we'll work backwards from the top bit (bit 6) to implement it */
+
+  unsigned int correction = ET;
+  for (int bit = 6; bit >= 0; bit--) {
+     correction /= 2;
+     if (factor & (1<<bit))
+       ET += correction;
+  }
+  /// And this should now be the corrected ET
+  return ET;
+}
+
 
 std::unique_ptr<eFEXegTOB> LVL1::eFEXegAlgo::geteFEXegTOB() {
 
