@@ -71,7 +71,7 @@ def recordable( arg ):
 # ============
 # === JETS ===
 JetVarsToKeep = ['ActiveArea', 'ActiveArea4vec_eta', 'ActiveArea4vec_m', 'ActiveArea4vec_phi', 'ActiveArea4vec_pt', 'AlgorithmType',
-                 'DetectorEta', 'DetectorPhi', 'EMFrac', 'EnergyPerSampling', 'GhostTrack_ftf', 'HECFrac', 'InputType',
+                 'DetectorEta', 'DetectorPhi', 'EMFrac', 'EnergyPerSampling', 'EnergyPerSamplingCaloBased', 'GhostTrack_ftf', 'HECFrac', 'InputType',
                  'JetConstitScaleMomentum_eta', 'JetConstitScaleMomentum_m', 'JetConstitScaleMomentum_phi', 'JetConstitScaleMomentum_pt',
                  'JetPileupScaleMomentum_eta', 'JetPileupScaleMomentum_m', 'JetPileupScaleMomentum_phi', 'JetPileupScaleMomentum_pt',
                  'JetEtaJESScaleMomentum_eta', 'JetEtaJESScaleMomentum_m', 'JetEtaJESScaleMomentum_phi', 'JetEtaJESScaleMomentum_pt',
@@ -111,7 +111,7 @@ VSIVars = '.'.join(VSIVarsToKeep)
 # === TLA ===
 TLAJetVarsToKeep = [
                    'pt', 'eta', 'phi', 'm', 'ActiveArea', 'ActiveArea4vec_eta', 'ActiveArea4vec_m', 'ActiveArea4vec_phi', 'ActiveArea4vec_pt',
-                   'DetectorEta', 'DetectorPhi', 'EMFrac', 'HECFrac', 'EnergyPerSampling',
+                   'DetectorEta', 'DetectorPhi', 'EMFrac', 'HECFrac', 'EnergyPerSampling', 'EnergyPerSamplingCaloBased',
                    'JetConstitScaleMomentum_eta', 'JetConstitScaleMomentum_m', 'JetConstitScaleMomentum_phi', 'JetConstitScaleMomentum_pt',
                    'JetPileupScaleMomentum_eta', 'JetPileupScaleMomentum_m', 'JetPileupScaleMomentum_phi', 'JetPileupScaleMomentum_pt',
                    'JetEtaJESScaleMomentum_eta', 'JetEtaJESScaleMomentum_m', 'JetEtaJESScaleMomentum_phi', 'JetEtaJESScaleMomentum_pt',
