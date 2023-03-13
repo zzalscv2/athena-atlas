@@ -8,28 +8,6 @@ from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentFactory import CompFactory
 log = logging.getLogger(__name__)
 
-#-----------------------------------------------------#
-### Used the algorithms as Step1 "muFast step" ###
-### Load data from Muon detectors ###
-#-----------------------------------------------------#
-#import MuonRecExample.MuonRecStandaloneOnlySetup
-from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
-
-if not isComponentAccumulatorCfg():
-    from MuonCombinedRecExample.MuonCombinedRecFlags import muonCombinedRecFlags
-    from MuonRecExample.MuonRecFlags import muonRecFlags
-    muonRecFlags.doTrackPerformance    = True
-    muonRecFlags.TrackPerfSummaryLevel = 2
-    muonRecFlags.TrackPerfDebugLevel   = 5
-    muonCombinedRecFlags.doCaloTrkMuId = False
-    muonCombinedRecFlags.printSummary = False
-    muonCombinedRecFlags.doSiAssocForwardMuons = False
-    muonCombinedRecFlags.doStatisticalCombination = False
-    muonCombinedRecFlags.doCombinedFit = True
-    muonRecFlags.enableErrorTuning = False
-    muonRecFlags.runCommissioningChain = False
-
-
 from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
 from DecisionHandling.DecisionHandlingConf import ViewCreatorInitialROITool, ViewCreatorNamedROITool, \
   ViewCreatorFSROITool, ViewCreatorCentredOnIParticleROITool, ViewCreatorFetchFromViewROITool
