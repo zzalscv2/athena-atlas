@@ -7,7 +7,6 @@ atlas_subdir( TrigHLTMonitoring )
 atlas_add_component( TrigHLTMonitoring
                      src/*.cxx
                      src/components/*.cxx
-                     INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                      LINK_LIBRARIES AthenaMonitoringKernelLib AthenaMonitoringLib StoreGateLib TrigSteeringEvent xAODTrigger )
 
 # Install files from the package:
