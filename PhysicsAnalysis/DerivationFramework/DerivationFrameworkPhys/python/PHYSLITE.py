@@ -223,11 +223,12 @@ def PHYSLITECfg(ConfigFlags):
         AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = PHYSLITESlimmingHelper, 
                                          OutputContainerPrefix = "AnalysisTrigMatch_",
                                          TriggerList = PHYSLITETriggerListsHelper.Run2TriggerNamesNoTau)
-    # Run 3
-    if ConfigFlags.Trigger.EDMVersion == 3:
+
+    # Run 3, or Run 2 with navigation conversion
+    if ConfigFlags.Trigger.EDMVersion == 3 or (ConfigFlags.Trigger.EDMVersion == 2 and ConfigFlags.Trigger.doEDMVersionConversion):
         # No need to run matching: just keep navigation so matching can be done by analysts
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
-        AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(PHYSLITESlimmingHelper)        
+        AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(PHYSLITESlimmingHelper)
 
     # Event content
     PHYSLITESlimmingHelper.AppendToDictionary.update({

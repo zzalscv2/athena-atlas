@@ -67,26 +67,36 @@ def TrigDecisionToolCfg(flags):
 
 
 possible_keys = [
-    'HLTNav_Summary',
-    'HLTNav_Summary_OnlineSlimmed',
-    'HLTNav_Summary_ESDSlimmed',
-    'HLTNav_Summary_AODSlimmed',
-    'HLTNav_Summary_DAODSlimmed'
+    'HLTNav_Summary', # Produced initially online (only the final nodes, all other nodes spread out over many many collections created by trigger framework algs)
+    'HLTNav_Summary_OnlineSlimmed', # Produced online, all nodes in one container. Accessible during RAWtoALL, good for T0 monitoring.
+    'HLTNav_Summary_ESDSlimmed', # Produced offline in jobs writing ESD. Minimal slimming, good for T0-style monitoring. Equivalent to AOD at AODFULL level.
+    'HLTNav_Summary_AODSlimmed', # Produced offline in jobs writing AOD. Minimal slimming in AODFULL mode, good for T0-style monitoring. Slimming applied in AODSLIM mode, good for analysis use, final-features accessible.
+    'HLTNav_Summary_DAODSlimmed', # Chain level slimming and IParticle feature-compacting for DAOD. Good for analysis use, final-features four vectors accessible.
+    'HLTNav_R2ToR3Summary' # Output of Run 2 to Run 3 navigation conversion procedure. Somewhat equivalent to AODFULL level. Designed to be further reduced to DAODSlimmed level before analysis use.
     ]
+
 
 def getRun3NavigationContainerFromInput(flags):
     # What to return if we cannot look in the file
     default_key = 'HLTNav_Summary_OnlineSlimmed' if flags.Trigger.doOnlineNavigationCompactification else 'HLTNav_Summary'
     to_return = default_key
 
-    for key in possible_keys:
-        if key in flags.Input.Collections:
-            to_return = key
-            break
+    if flags.Trigger.doEDMVersionConversion:
+        to_return = 'HLTNav_R2ToR3Summary'
+    else:
+        for key in possible_keys:
+            if key in flags.Input.Collections:
+                to_return = key
+                break
 
     from AthenaCommon.Logging import logging
     msg = logging.getLogger('getRun3NavigationContainerFromInput')
     msg.info('Returning {} as the Run 3 trigger navigation colletion to read in this job.'.format(to_return))
+
+    # Double check 'possible_keys' is kept up to date
+    if to_return not in possible_keys:
+        msg.error('Must add {} to the "possible_keys" array!'.format(to_return))
+
     return to_return
 
 

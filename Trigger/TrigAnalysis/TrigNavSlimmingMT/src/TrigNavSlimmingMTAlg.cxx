@@ -124,8 +124,10 @@ StatusCode TrigNavSlimmingMTAlg::execute(const EventContext& ctx) const {
   }
   if (m_repackFeatures) {
     outputParticles = createAndStoreWithAux<xAOD::ParticleContainer, xAOD::ParticleAuxContainer>(m_outputRepackedFeaturesCollectionKey_Particle, ctx);
-    outputMETs = createAndStoreWithAux<xAOD::TrigMissingETContainer, xAOD::TrigMissingETAuxContainer>(m_outputRepackedFeaturesCollectionKey_MET, ctx);
     outputContainers.particles = &outputParticles;
+  }
+  if (m_repackMET) {
+    outputMETs = createAndStoreWithAux<xAOD::TrigMissingETContainer, xAOD::TrigMissingETAuxContainer>(m_outputRepackedFeaturesCollectionKey_MET, ctx);
     outputContainers.mets = &outputMETs;
   }
 
@@ -401,6 +403,19 @@ StatusCode TrigNavSlimmingMTAlg::propagateDecisionIDs(
   return StatusCode::SUCCESS;
 }
 
+void TrigNavSlimmingMTAlg::printIParticleRepackingDebug(const TrigCompositeUtils::Decision* output, const std::string& when) const {
+  if (not msgLvl(MSG::DEBUG)) return;
+  if (output->hasObjectLink(featureString(), ClassID_traits<xAOD::IParticleContainer>::ID())) {
+    ElementLink<xAOD::IParticleContainer> link = output->objectLink<xAOD::IParticleContainer>(featureString());
+    if (link.isValid()) {
+      const xAOD::IParticle& l = **link;
+      ATH_MSG_DEBUG("IParticle repacking debug. " << when << " : " 
+        << "(pt:" << l.pt() << ",eta:" << l.eta() << ",phi:" << l.phi() << ",m:" << l.m() << ",e:" << l.e() << ")"
+        << " from:" << link.dataID());
+    }
+  }
+}
+
 
 StatusCode TrigNavSlimmingMTAlg::repackLinks(
   TrigCompositeUtils::Decision* output,
@@ -412,44 +427,23 @@ StatusCode TrigNavSlimmingMTAlg::repackLinks(
     ATH_CHECK( doRepack<TrigRoiDescriptorCollection>(output, outputContainers.rois, initialRoIString()) );
   }
 
-
   if (m_repackFeatures) {
     // Debug printing. Look at the four-momentum of any feature before the repacking.
     // Note: Transiently we interact with the IParticle interface.
-    if (msgLvl(MSG::DEBUG)) {
-      if (output->hasObjectLink(featureString(), ClassID_traits<xAOD::IParticleContainer>::ID())) {
-        ElementLink<xAOD::IParticleContainer> before = output->objectLink<xAOD::IParticleContainer>(featureString());
-        if (before.isValid()) {
-          const xAOD::IParticle& b = **before;
-          ATH_MSG_DEBUG("--- --- ---");
-          ATH_MSG_DEBUG("IParticle repacking debug. Before: "
-            << "(pt:" << b.pt() << ",eta:" << b.eta() << ",phi:" << b.phi() << ",m:" << b.m() << ",e:" << b.e() << ")"
-            << " from:" << before.dataID());
-        }
-      }
-    }
+    printIParticleRepackingDebug(output, "Before");
 
     // Do any IParticle repacking
     ATH_CHECK( doRepack<xAOD::ParticleContainer>(output, outputContainers.particles, featureString()) );
 
     // Debug printing. Look at the four-momentum of any feature after the repacking (the stored link is re-written)
-    if (msgLvl(MSG::DEBUG)) {
-      if (output->hasObjectLink(featureString(), ClassID_traits<xAOD::IParticleContainer>::ID())) {
-        ElementLink<xAOD::IParticleContainer> after = output->objectLink<xAOD::IParticleContainer>(featureString());
-        if (after.isValid()) {
-          const xAOD::IParticle& a = **after;
-          ATH_MSG_DEBUG("IParticle repacking debug. After : " 
-            << "(pt:" << a.pt() << ",eta:" << a.eta() << ",phi:" << a.phi() << ",m:" << a.m() << ",e:" << a.e() << ")"
-            << " from:" << after.dataID());
-        }
-      }
-    }
-
-    // Some features do not support an IParticle interface. These need their own containers.
-    // TODO. Apply some thinning?
-    ATH_CHECK( doRepack<xAOD::TrigMissingETContainer>(output, outputContainers.mets, featureString()) );
+    printIParticleRepackingDebug(output, "After");
   }
 
+  // Some features do not support an IParticle interface. These need their own containers.
+  // TODO. Apply some thinning?
+  if (m_repackMET) {
+    ATH_CHECK( doRepack<xAOD::TrigMissingETContainer>(output, outputContainers.mets, featureString()) );
+  }
 
   return StatusCode::SUCCESS;
 }

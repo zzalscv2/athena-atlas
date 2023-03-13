@@ -148,10 +148,24 @@ def PHYSCfg(ConfigFlags):
         AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = PHYSSlimmingHelper, 
                                          OutputContainerPrefix = "TrigMatch_",
                                          TriggerList = PHYSTriggerListsHelper.Run2TriggerNamesNoTau)
-    # Run 3
-    if ConfigFlags.Trigger.EDMVersion == 3:
+    # Run 3, or Run 2 with navigation conversion
+    if ConfigFlags.Trigger.EDMVersion == 3 or (ConfigFlags.Trigger.EDMVersion == 2 and ConfigFlags.Trigger.doEDMVersionConversion):
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
-        AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(PHYSSlimmingHelper)        
+        AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(PHYSSlimmingHelper)
+        ##################################################### 
+        ## NOTE: This block is temporary, during validation of the doEDMVersionConversion flag.
+        ## This adds a LOT of containers to the output! In order to help validate the conversion.
+        ## It should be removed once doEDMVersionConversion goes into production use.
+        if ConfigFlags.Trigger.doEDMVersionConversion:   
+            from DerivationFrameworkTrigger.TrigSlimmingHelper import addTrigEDMSetToOutput
+            from AthenaCommon.Logging import logging
+            msg = logging.getLogger('PHYSCfg')
+            msg.warn('doEDMVersionConversion is still in validation, WRITING FULL TRIGGER EDM TO THE DAOD!')
+            addTrigEDMSetToOutput(ConfigFlags, PHYSSlimmingHelper, "AODFULL")
+            PHYSSlimmingHelper.AppendToDictionary.update({'HLTNav_R2ToR3Summary':'xAOD::TrigCompositeContainer'})
+            PHYSSlimmingHelper.AllVariables += ['HLTNav_R2ToR3Summary']
+        ##
+        #####################################################
 
     # Output stream    
     PHYSItemList = PHYSSlimmingHelper.GetItemList()
