@@ -50,7 +50,7 @@ def AddRun2TriggerMatchingToSlimmingHelper(**kwargs):
 
 
 def TriggerMatchingCommonRun2Cfg(ConfigFlags, name, **kwargs):
-    """Configure the common trigger matching for run 2 DAODs"""
+    """Configure the common trigger matching for run 2 DAODs using the run 2 analysis formalism (matching happens during derivation)"""
 
     acc = ComponentAccumulator()
  
@@ -61,11 +61,34 @@ def TriggerMatchingCommonRun2Cfg(ConfigFlags, name, **kwargs):
     outputContainerPrefix = kwargs['OutputContainerPrefix']
     acc.addEventAlgo(CommonAugmentation(f"{outputContainerPrefix}TriggerMatchingKernel",
                                         AugmentationTools=[PhysCommonTriggerMatchingTool]))
+
+    return(acc)
+
+def TriggerMatchingCommonRun2ToRun3Cfg(ConfigFlags, **kwargs):
+    """Covert run 2 trigger navigation data these data into the run 3 formalism (matching happens from DAOD)"""
+
+    acc = ComponentAccumulator()
+
+    if not ConfigFlags.Trigger.doEDMVersionConversion:
+        return(acc)
+
+    from AthenaCommon.Logging import logging
+    msg = logging.getLogger('TriggerMatchingCommonRun2ToRun3Cfg')
+    msg.info('doEDMVersionConversion is True, now scheduling conversion of Run 2 trigger navigation to Run 3')
+
+    from TrigNavTools.NavConverterConfig import NavConverterCfg
+    acc.merge(NavConverterCfg(ConfigFlags))
+
+    # And then run the run 3 slimming on the output of NavConverter
+    triggerList = kwargs['TriggerList']
+    from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import TrigNavSlimmingMTDerivationCfg
+    acc.merge(TrigNavSlimmingMTDerivationCfg(ConfigFlags,chainsFilter=triggerList))
+
     return(acc)
 
 
 def TriggerMatchingCommonRun3Cfg(ConfigFlags, **kwargs):
-    """Configure the common trigger matching for run 3 DAODs"""
+    """Configure the common trigger matching for run 3 DAODs using the run 3 formalism (matching happens from DAOD)"""
     
     if ConfigFlags.Trigger.EDMVersion != 3:
         raise ValueError('This configuration can only be used for Run 3 trigger navigation')

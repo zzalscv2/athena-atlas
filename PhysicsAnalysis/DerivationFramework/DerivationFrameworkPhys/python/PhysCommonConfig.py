@@ -91,10 +91,16 @@ def PhysCommonAugmentationsCfg(ConfigFlags,**kwargs):
     # Trigger matching
     if ConfigFlags.Reco.EnableTrigger or ConfigFlags.Trigger.triggerConfig == 'INFILE':
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import TriggerMatchingCommonRun2Cfg
+        from DerivationFrameworkPhys.TriggerMatchingCommonConfig import TriggerMatchingCommonRun2ToRun3Cfg
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import TriggerMatchingCommonRun3Cfg
         # requires some wrangling due to the difference between run 2 and 3
         triggerListsHelper = kwargs['TriggerListsHelper']
         if ConfigFlags.Trigger.EDMVersion == 2:
+            # NOTE: Once Run-2 -> Run-3 trigger navigation is validated and doEDMVersionConversion is on by default, we will only want to do ONE of
+            # TriggerMatchingCommonRun2Cfg(s) OR TriggerMatchingCommonRun2ToRun3Cfg
+            # Otherwise we are doubling up on the analysis trigger data in both the Run-2 and Run-3 formats.
+
+            # This sets up the Run-2 style matching during the derivation process
             acc.merge(TriggerMatchingCommonRun2Cfg(ConfigFlags, 
                                                    name = "PhysCommonTrigMatchNoTau", 
                                                    OutputContainerPrefix = "TrigMatch_", 
@@ -104,7 +110,13 @@ def PhysCommonAugmentationsCfg(ConfigFlags,**kwargs):
                                                    OutputContainerPrefix = "TrigMatch_", 
                                                    ChainNames = triggerListsHelper.Run2TriggerNamesTau, 
                                                    DRThreshold = 0.2))
+            # This sets up a conversion of the Run-2 trigger navigation to the Run-3 style, 
+            # followed by Run-3 style navigation slimming for trigger-matching from DAOD.
+            # This function is a noop if doEDMVersionConversion=False
+            acc.merge(TriggerMatchingCommonRun2ToRun3Cfg(ConfigFlags, 
+                                                         TriggerList = triggerListsHelper.Run2TriggerNamesNoTau + triggerListsHelper.Run2TriggerNamesTau))
         if ConfigFlags.Trigger.EDMVersion == 3:
+            # This sets up the Run-3 style navigation slimming for trigger-matching from DAOD
             acc.merge(TriggerMatchingCommonRun3Cfg(ConfigFlags, TriggerList = triggerListsHelper.Run3TriggerNames))
 
     return acc

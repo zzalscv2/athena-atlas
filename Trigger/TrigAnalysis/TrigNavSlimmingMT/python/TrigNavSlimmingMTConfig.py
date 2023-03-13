@@ -74,7 +74,9 @@ def TrigNavSlimmingMTDerivationCfg(flags, chainsFilter = []):
   daodSlim.KeepOnlyFinalFeatures = True
   daodSlim.RepackROIs = False # CAUTION: There may be an ROI memory management issue which needs solving in order to enable this functionality (ATLASG-1662).
   daodSlim.RepackROIsOutputCollection = "HLTNav_RepackedROIs"
+  daodSlim.RepackMET = True # To check: Is there any analysis need to have online-MET(s) in DAOD?
   daodSlim.RepackFeatures = True
+
   daodSlim.RepackFeaturesOutputCollection_Particle = "HLTNav_RepackedFeatures_Particle"
   daodSlim.RepackFeaturesOutputCollection_MET = "HLTNav_RepackedFeatures_MET"
   daodSlim.EdgesToDrop = ["view"]
@@ -88,26 +90,6 @@ def TrigNavSlimmingMTDerivationCfg(flags, chainsFilter = []):
     log.error("Producing a collection {} which is not listed in 'possible_keys'! Add this here too.".format(daodSlim.OutputCollection))
 
   return ca
-
-#
-# Ideally this should be handled inside TrigNavSlimmingMTDerivationCfg
-# But until DAOD production migrates to new-JO, we can have this as a separate call
-#
-def AddRun3TrigNavSlimmingCollectionsToEDM(stream):
-  # Note: Not nice, duplication in strings between here and TrigNavSlimmingMTDerivationCfg
-  #
-  # Note: Not using the ThinningHelper as this only looks to work with content in the AOD.
-  # These collections are all created during AOD->DAOD
-  stream.AddItem("xAOD::TrigCompositeContainer#HLTNav_Summary_DAODSlimmed")
-  stream.AddItem("xAOD::TrigCompositeAuxContainer#HLTNav_Summary_DAODSlimmedAux.")
-  #
-  stream.AddItem("xAOD::ParticleContainer#HLTNav_RepackedFeatures_Particle")
-  stream.AddItem("xAOD::ParticleAuxContainer#HLTNav_RepackedFeatures_ParticleAux.")
-  #
-  stream.AddItem("xAOD::TrigMissingETContainer#HLTNav_RepackedFeatures_MET")
-  stream.AddItem("xAOD::TrigMissingETAuxContainer#HLTNav_RepackedFeatures_METAux.")
-  #
-  stream.AddItem("TrigRoiDescriptorCollection#HLTNav_RepackedROIs")
 
 # Same as the above but adds the branches to the slimming helper. 
 # This is the component accumulator version

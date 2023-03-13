@@ -78,11 +78,15 @@ private:
 
   Gaudi::Property<bool> m_repackROIs{
     this, "RepackROIs", false,
-    "Re=pack the target of all 'roi' and 'initialRoI' edges into a single container (WriteHandle defined above)"};
+    "Re-pack the target of all 'roi' and 'initialRoI' edges into a single container (WriteHandle defined above)"};
+
+  Gaudi::Property<bool> m_repackMET{
+    this, "RepackMET", false,
+    "Re-pack the target of all 'feature' edges to xAOD::TrigMissingET objects into a single container (WriteHandle defined above)"};
 
   Gaudi::Property<bool> m_repackFeatures{
     this, "RepackFeatures", false,
-    "Re=pack the target of all 'feature' edges into a small number of containers (WriteHandle defined above)"};
+    "Re-pack the target of all 'feature' edges into a small number of containers (WriteHandle defined above)"};
 
   Gaudi::Property<std::vector<std::string>> m_edgesToDrop{
     this, "EdgesToDrop", {"view"},
@@ -182,6 +186,13 @@ private:
   StatusCode repackLinks(
     TrigCompositeUtils::Decision* output,
     Outputs& outputContainers) const;
+
+  /**
+   * @brief Print debug infomration relating to the re-packing of feature links as Particle objects
+   **/
+  void printIParticleRepackingDebug(
+    const TrigCompositeUtils::Decision* output,
+    const std::string& when) const;
 
   /**
    * @brief Look for an ElementLink<COLLECTION> with the given edge-name in 'decision',

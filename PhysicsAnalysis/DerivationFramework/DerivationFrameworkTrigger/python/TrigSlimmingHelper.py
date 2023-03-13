@@ -3,18 +3,17 @@
 """Helper functions for adding trigger EDM content to a derivation"""
 
 from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
 from TrigEDMConfig.TriggerEDM import getTriggerEDMList
 
 
-def addTrigEDMSetToOutput(helper: SlimmingHelper, edmSet: str, edmVersion: int = None):
+def addTrigEDMSetToOutput(flags, helper: SlimmingHelper, edmSet: str, edmVersion: int = None):
     """Add a full trigger EDM set to the output slimming helper"""
 
     # NB: I'm not sure that importing and using the ConfigFlags is a pattern that we want to
     # encourage, but given that the derivations aren't built with CA's yet this is the best I can
     # do...
     if edmVersion is None:
-        edmVersion = ConfigFlags.Trigger.EDMVersion
+        edmVersion = flags.Trigger.EDMVersion
 
     edmList = getTriggerEDMList(edmSet, edmVersion)
     # This list is a mapping from container type to a list of required container names

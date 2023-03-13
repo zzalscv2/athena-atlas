@@ -10,18 +10,24 @@ log = logging.getLogger("NavConverterConfig")
 
 def NavConverterCfg(flags):
     """Configures Run 1/2 to Run 3 navigation conversion algorithm for all triggers"""
+
     acc = ComponentAccumulator()
-    from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
+
+    if not flags.Trigger.doEDMVersionConversion:
+        return acc
+
+    from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg, getRun3NavigationContainerFromInput
     tdt = acc.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
+
+    r2ToR3OutputName = getRun3NavigationContainerFromInput(flags)
 
     cnvAlg = CompFactory.Run2ToRun3TrigNavConverterV2("TrigRun2ToRun3NavConverter")
     cnvAlg.TrigDecisionTool = tdt
     cnvAlg.TrigNavReadKey = ""
     cnvAlg.TrigConfigSvc = tdt.TrigConfigSvc
-    outputName = "HLTNav_R2ToR3Summary"
-    cnvAlg.OutputNavKey = outputName
+    cnvAlg.OutputNavKey = r2ToR3OutputName
     from OutputStreamAthenaPool.OutputStreamConfig import addToAOD, addToESD
-    collections = [f"xAOD::TrigCompositeContainer#{outputName}", f"xAOD::TrigCompositeAuxContainer#{outputName}Aux."]
+    collections = [f"xAOD::TrigCompositeContainer#{r2ToR3OutputName}", f"xAOD::TrigCompositeAuxContainer#{r2ToR3OutputName}Aux."]
     acc.merge(addToAOD(flags, collections))
     acc.merge(addToESD(flags, collections))
 
@@ -42,9 +48,10 @@ def NavConverterCfg(flags):
     # in conversion job  Run2 TDT is setup as default, we need to setup an alternative to access Run 3 format
 
     run3tdt = CompFactory.Trig.TrigDecisionTool("Run3TrigDecisionTool",
-                                                HLTSummary = "HLTNav_R2ToR3Summary",
+                                                HLTSummary = r2ToR3OutputName,
                                                 NavigationFormat = 'TrigComposite',
-                                                AcceptMultipleInstance=True)
+                                                AcceptMultipleInstance=True,
+                                                TrigConfigSvc = tdt.TrigConfigSvc)
     acc.addPublicTool(run3tdt)
     checker.RetrievalToolRun3Nav = CompFactory.Trig.R3IParticleRetrievalTool(TrigDecisionTool = run3tdt)
     checker.Chains=['HLT_e26_lhtight_nod0_e15_etcut_L1EM7_Zee', 'HLT_mu4'] #TODO automate this
@@ -58,6 +65,7 @@ if __name__ == "__main__":
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     flags = initConfigFlags()
     flags.Input.Files = defaultTestFiles.RAW_RUN2
+    flags.Trigger.doEDMVersionConversion = True
     flags.lock()
 
     acc = NavConverterCfg(flags)
