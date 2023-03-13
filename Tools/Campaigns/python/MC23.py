@@ -22,8 +22,8 @@ def MC23a(flags):
     # 0.001953314389 / 0.9980466856. Those numbers are then multiplied by 84.5
     # to follow pile-up profile. Only a relevant number of significant digits
     # are kept.
-    flags.Digitization.PU.NumberOfLowPtMinBias = 61.380
-    flags.Digitization.PU.NumberOfHighPtMinBias = 0.120
+    flags.Digitization.PU.NumberOfLowPtMinBias = 67.369
+    flags.Digitization.PU.NumberOfHighPtMinBias = 0.131
     flags.Digitization.PU.BunchStructureConfig = 'RunDependentSimData.BunchStructure_Fill7314_BCMSPattern_Flat'
     flags.Digitization.PU.ProfileConfig = 'RunDependentSimData.PileUpProfile_run410000_MC23a_MultiBeamspot'
 
