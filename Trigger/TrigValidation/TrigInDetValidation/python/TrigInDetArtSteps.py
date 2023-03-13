@@ -88,6 +88,7 @@ class TrigInDetReco(ExecStep):
                 chains += "'HLT_mu26_ivarperf_L1MU14FCH',"
                 flags += 'doMuonSlice=True;'
             if (i=='muon-tnp') :
+                chains += "'HLT_mu14_mu14_idtp_idZmumu_L12MU8F'," 
                 chains += "'HLT_mu14_mu14_idperf_50invmAB130_L12MU8F',"
                 flags += 'doMuonSlice=True;'
             if (i=='L2electronLRT') :
