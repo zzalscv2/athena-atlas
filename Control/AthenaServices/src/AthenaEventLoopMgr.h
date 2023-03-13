@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENASERVICES_ATHENAEVENTLOOPMGR_H
@@ -204,19 +204,19 @@ private:
   StatusCode installEventContext (EventContext& ctx, const EventID& pEvent,
                                   unsigned int conditionsRun, bool consume_modifier_stream);
 
-  int m_nevt;
+  int m_nevt{};
   /// @property histogram write/update interval
   IntegerProperty m_writeInterval;
-  bool m_writeHists;
+  bool m_writeHists{};
 
   /// events processed
   unsigned int m_nev;
   unsigned int m_proc;
   bool m_useTools;
 
-  unsigned int m_lastNev;
+  unsigned int m_lastNev{};
   unsigned int m_intervalInSeconds;
-  time_t m_lastTime;
+  time_t m_lastTime{};
 
   bool m_liteLoop;
 
