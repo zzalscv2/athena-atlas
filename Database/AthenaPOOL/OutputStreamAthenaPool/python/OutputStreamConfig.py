@@ -2,7 +2,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, ConfigurationError
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import ProductionStep
+from AthenaConfiguration.Enums import Format, ProductionStep
 from AthenaCommon.Logging import logging
 
 
@@ -114,10 +114,13 @@ def OutputStreamCfg(flags, streamName, ItemList=[], MetadataItemList=[],
       # Propagate cutbookkeepers
       if 'CutBookkeepers' in flags.Input.MetadataItems:
          mdToolNames.append('BookkeeperTool')
-      if flags.Concurrency.NumProcs > 0:
-         result.addEventAlgo(CompFactory.CreateLumiBlockCollectionFromFile())
-      else:
+
+      if flags.Input.Format == Format.BS and not flags.Common.isOnline:
+         from LumiBlockComps.CreateLumiBlockCollectionFromFileConfig import CreateLumiBlockCollectionFromFileCfg
+         result.merge(CreateLumiBlockCollectionFromFileCfg(flags))
+      elif "LumiBlock" in flags.Input.MetadataItems:
          mdToolNames.append('LumiBlockMetaDataTool')
+
       outputStream.MetadataItemList += ['xAOD::TriggerMenuContainer#*'
                                        ,'xAOD::TriggerMenuAuxContainer#*'
                                        ,'xAOD::TriggerMenuJsonContainer#*'
