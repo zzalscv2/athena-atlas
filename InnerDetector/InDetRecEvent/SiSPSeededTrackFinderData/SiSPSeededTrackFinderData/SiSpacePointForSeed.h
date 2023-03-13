@@ -35,12 +35,15 @@ namespace InDet {
     
   public:
     
-    SiSpacePointForSeed();
+    SiSpacePointForSeed() = default;
+    SiSpacePointForSeed(const SiSpacePointForSeed&) = default;
+    SiSpacePointForSeed& operator  = (const SiSpacePointForSeed&) = default;
+    SiSpacePointForSeed(SiSpacePointForSeed&&) noexcept = default;
+    SiSpacePointForSeed& operator  = (SiSpacePointForSeed&) noexcept = default;
+    ~SiSpacePointForSeed() = default;
+
     SiSpacePointForSeed(const Trk::SpacePoint*const&,const float*);
     SiSpacePointForSeed(const Trk::SpacePoint*const&,const float*,const float*);
-    SiSpacePointForSeed(const SiSpacePointForSeed&) = default;
-    ~SiSpacePointForSeed() = default;
-    SiSpacePointForSeed& operator  = (const SiSpacePointForSeed&) = default;
 
     void set(const Trk::SpacePoint*const&,const float*);
     void set(const Trk::SpacePoint*const&,const float*,const float*);
@@ -52,7 +55,7 @@ namespace InDet {
     void setPt(const float&);
     void setScorePenalty(const float& par) {m_scorePenalty=par;}
 
-    const Trk::SpacePoint* spacepoint{}; 
+    const Trk::SpacePoint* spacepoint = nullptr; 
     const float&          x() const {return m_x;}
     const float&          y() const {return m_y;}
     const float&          z() const {return m_z;}
@@ -85,8 +88,8 @@ namespace InDet {
     float m_param{};  /// impact parameter
     float m_scorePenalty=0.f; /// penalty term in the seed score
     float m_q{};   /// quality of the best seed this candidate was seen on
-    const Trk::Surface* m_su{};
-    const Trk::Surface* m_sn{};
+    const Trk::Surface* m_su = nullptr;
+    const Trk::Surface* m_sn = nullptr;
   };
  
 } // end of name space
