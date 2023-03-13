@@ -12,6 +12,11 @@
 #include "CxxUtils/checker_macros.h"
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
+// using testing::_ gets maybe-uninitialized warnings from gcc12.
+#if __GNUC__ >= 12
+# pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
+
 // Tested AthAlgorithm
 #include "../InDetOverlay/TRTOverlay.h"
 
