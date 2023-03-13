@@ -235,7 +235,6 @@ else:           # More data modifiers
                      #Check for beamspot quality flag
                      'useOnlineLumi',
                      #for running with real data
-                     'DisableMdtT0Fit',
     ]
     if opt.doL1Sim:
         flags.LAr.LATOME.DTInfoForL1="SC_ET_ID"
@@ -434,13 +433,6 @@ if flags.Trigger.doCalo:
         from TriggerJobOpts.TriggerTransBSConfig import triggerTransBSCfg_Calo
         CAtoGlobalWrapper(triggerTransBSCfg_Calo, flags, seqName="HLTBeginSeq")
 
-
-if flags.Trigger.doMuon:
-    from MuonConfig.MuonCablingConfig import MuonCablingConfigCfg
-    CAtoGlobalWrapper(MuonCablingConfigCfg, flags)
-    import MuonRecExample.MuonReadCalib      # noqa: F401
-
-    include ("MuonRecExample/MuonRecLoadTools.py")
 
 # restore logger after above includes
 log = logging.getLogger('runHLT_standalone.py')

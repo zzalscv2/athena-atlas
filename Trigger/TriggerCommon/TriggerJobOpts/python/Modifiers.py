@@ -222,16 +222,6 @@ class rewriteLVL1(_modifier):
                 streamBS.ItemList += [ 'ROIB::RoIBResult#RoIBResult' ]
 
 
-class DisableMdtT0Fit(_modifier):
-    """
-    Disable MDT T0 re-fit and use constants from COOL instead
-    """
-    def preSetup(self, flags):
-        if flags.Trigger.doMuon:
-            from MuonRecExample.MuonRecFlags import muonRecFlags
-            muonRecFlags.doSegmentT0Fit.set_Value_and_Lock(False)
-            flags.Muon.doSegmentT0Fit=False
-
 ###############################################################
 # Monitoring and misc.
 ###############################################################
