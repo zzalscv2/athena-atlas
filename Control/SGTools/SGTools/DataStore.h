@@ -15,6 +15,8 @@
 #include "AthenaKernel/IProxyDict.h"
 #include "AthenaKernel/DefaultKey.h"
 #include "AthenaKernel/IProxyRegistry.h"
+#include "CxxUtils/ConcurrentMap.h"
+#include "CxxUtils/SimpleUpdater.h"
 #include "GaudiKernel/ClassID.h"
 #include "GaudiKernel/StatusCode.h"
 #include <boost/array.hpp>
@@ -173,7 +175,12 @@ namespace SG {
     StoreMap m_storeMap;
 
     /// Map of hashed sgkey -> DataProxy.
-    typedef SGKeyMap<DataProxy*> KeyMap_t;
+    using KeyMap_t = CxxUtils::ConcurrentMap<
+      sgkey_t, DataProxy*,
+      CxxUtils::SimpleUpdater,
+      SGKeyHash, SGKeyEqual,
+      0,
+      static_cast<CxxUtils::detail::ConcurrentHashmapVal_t> (-1)>;
     KeyMap_t m_keyMap;
 
     StoreID::type m_storeID;
@@ -217,17 +224,22 @@ namespace SG {
 
 
     /**
+     * @brief Remove a proxy from m_keyMap.
+     * @param proxy The proxy being removed.
+     */
+    StatusCode removeFromKeyMap (DataProxy* proxy);
+
+
+    /**
      * @brief Helper for removing a proxy.
-     * @param proxy The Proxy being removed.
-     * @param forceRemove If true, remove the proxy regardless of the proxy's
-     *                    resetOnly setting.
-     * @param hard If true, then bound objects should also clear any data
-     *             that depends on the identity of the current event store.
+     * @param proxy The proxy being removed.
      * @param index The index of this proxy in m_proxies.
+     *
+     * This removes the proxy from m_storeMap and releases it,
+     * but does NOT remove it from m_keyMap.
      */
     StatusCode
-    removeProxyImpl (DataProxy* proxy, bool forceRemove, bool hard,
-                     int index);
+    removeProxyImpl (DataProxy* proxy, int index);
   };
   //////////////////////////////////////////////////////////////////
   inline void
