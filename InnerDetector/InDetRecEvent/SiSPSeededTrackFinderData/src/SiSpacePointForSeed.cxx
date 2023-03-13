@@ -15,26 +15,6 @@
 
 namespace InDet {
 
-  SiSpacePointForSeed::SiSpacePointForSeed ()
-  {
-    spacepoint = nullptr;
-    m_x     = 0.;
-    m_y     = 0.;
-    m_z     = 0.;
-    m_r     = 0.;
-    m_covr  = 0.;
-    m_covz  = 0.;
-    m_param = 0.;
-    m_d0    = 0.;
-    m_eta   = 0.;
-    m_dzdr  = 0.;
-    m_pt    = 0.;
-    m_q     = 0.;
-    m_su    = nullptr ;
-    m_sn    = nullptr ;
-  }
-
- 
   SiSpacePointForSeed::SiSpacePointForSeed
   (const Trk::SpacePoint*const& sp,const float* r) 
   {

@@ -38,12 +38,15 @@ namespace ITk
 
   public:
 
-    SiSpacePointForSeed();
+    SiSpacePointForSeed() = default;
+    SiSpacePointForSeed(const SiSpacePointForSeed&) = default;
+    SiSpacePointForSeed& operator  = (const SiSpacePointForSeed&) =default;
+    SiSpacePointForSeed(SiSpacePointForSeed&&) noexcept = default;
+    SiSpacePointForSeed& operator  = (SiSpacePointForSeed&&) noexcept =default;
+    ~SiSpacePointForSeed() = default;
+    
     SiSpacePointForSeed(const Trk::SpacePoint*const&,const float*);
     SiSpacePointForSeed(const Trk::SpacePoint*const&,const float*,const float*);
-    SiSpacePointForSeed(const SiSpacePointForSeed&) = default;
-    ~SiSpacePointForSeed() = default;
-    SiSpacePointForSeed& operator  = (const SiSpacePointForSeed&) =default;
 
     void set(const Trk::SpacePoint*const&,const float*)  ;
     void set(const Trk::SpacePoint*const&,const float*,const float*);
@@ -55,7 +58,7 @@ namespace ITk
     void setScorePenalty(const float&);
     void setPt(const float&);
 
-    const Trk::SpacePoint* spacepoint{}              ;
+    const Trk::SpacePoint* spacepoint = nullptr ;
     const float&          x() const {return m_x;}
     const float&          y() const {return m_y;}
     const float&          z() const {return m_z;}
@@ -101,8 +104,8 @@ namespace ITk
     float m_dr[3]{};
     float m_r0[3]{};
 
-    const Trk::Surface* m_su{};
-    const Trk::Surface* m_sn{};
+    const Trk::Surface* m_su = nullptr;
+    const Trk::Surface* m_sn = nullptr;
   };
 
 } // end of name space ITk
