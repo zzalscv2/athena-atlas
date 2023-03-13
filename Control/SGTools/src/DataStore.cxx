@@ -11,6 +11,8 @@
 #include "GaudiKernel/Bootstrap.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "SGAudCore/ISGAudSvc.h"
+#include "CxxUtils/ConcurrentPtrSet.h"
+#include "CxxUtils/SimpleUpdater.h"
 #include "CxxUtils/checker_macros.h"
 #include "CxxUtils/AthUnlikelyMacros.h"
 
@@ -28,7 +30,9 @@ using SG::ConstProxyIterator;
  */
 DataStore::DataStore (IProxyDict& pool)
   : m_pool (pool),
-    m_storeMap(), m_storeID(StoreID::UNKNOWN), m_t2p(), 
+    m_storeMap(),
+    m_keyMap(KeyMap_t::Updater_t()),
+    m_storeID(StoreID::UNKNOWN), m_t2p(), 
     m_pSGAudSvc(0), m_noAudSvc(0), m_pSvcLoc(0)
 {
    setSvcLoc().ignore();
@@ -63,6 +67,17 @@ void DataStore::setSGAudSvc() {
 //////////////////////////////////////////////////////////////
 void DataStore::clearStore(bool force, bool hard, MsgStream* /*pmlog*/)
 {
+  /// Be careful with changing this --- it's important for performance
+  /// for some analysis use cases.
+
+  /// Rather than dealing with erasures in m_keyMap, we first do the
+  /// removals just from m_storeMap, remembering along the way the
+  /// set of reset-only proxies.  Then we run through the entries
+  /// in m_keyMap and copy all that match one of the reset-only proxies
+  /// to a new map and then swap.  (We can't ask the proxy itself if it's
+  /// reset-only at this point because if it isn't, it'll have been deleted.)
+  std::unordered_set<DataProxy*> saved;
+  
   /// Go through the list of unique proxies, and run requestRelease()
   /// on each.  If that returns true, then we're meant to remove this
   /// proxy from the store.  Be careful that removing a proxy from the
@@ -71,14 +86,23 @@ void DataStore::clearStore(bool force, bool hard, MsgStream* /*pmlog*/)
   for (size_t i = 0; i < m_proxies.size(); ) {
     SG::DataProxy* dp = m_proxies[i];
     if (ATH_UNLIKELY (dp->requestRelease (force, hard))) {
-      if (removeProxyImpl (dp, true, true, i).isFailure()) {
+      if (removeProxyImpl (dp, i).isFailure()) {
         ++i;
       }
     }
     else {
+      saved.insert (dp);
       ++i;
     }
   }
+
+  KeyMap_t newMap (KeyMap_t::Updater_t(), m_keyMap.capacity());
+  for (auto p : m_keyMap) {
+    if (saved.count (p.second)) {
+      newMap.emplace (p.first, p.second);
+    }
+  }
+  m_keyMap.swap (newMap);
 
   // clear T2PMap
   m_t2p.clear();
@@ -128,7 +152,7 @@ DataStore::addToStore(const CLID& id, DataProxy* dp)
 
   if (id == 0 && dp->clID() == 0 && dp->sgkey() != 0) {
     // Handle a dummied proxy.
-    m_keyMap[dp->sgkey()] = dp;
+    m_keyMap.emplace (dp->sgkey(), dp);
   }
   else {
     ProxyMap& pmap = m_storeMap[id];
@@ -174,115 +198,129 @@ DataStore::removeProxy(DataProxy* proxy, bool forceRemove, bool hard)
   if (!proxy) {
     return StatusCode::FAILURE;
   }
+  
+  if (!forceRemove && proxy->isResetOnly()) {
+    // A reset-only proxy.  Don't remove it.
+    proxy->reset (hard);
+    return StatusCode::SUCCESS;
+  }
+
+  // First remove from m_keyMap.
+  // We may fail to find the entry if this is a key that has been versioned.
+  // E.g., we add aVersObj.  Call this DP1.
+  // Then we add a new version of it.  Call this DP2.
+  // The version logic will add the alias ';00;aVersObj' to DP1.
+  // It will also then add the alias `aVersObj' to DP2.
+  // This will overwrite the entries for DP1 in pmap and m_keyMap.
+  // If we then clear and DP2 is removed first, then the m_keyMap entry
+  // for DP1's primary key will be gone.
+  // FIXME: Should just remove the versioned key code ... it's anyway
+  // not compatible with MT.
+  removeFromKeyMap (proxy).ignore();
+
+  // Then remove from the m_storeMap and release the proxy.
   auto it = std::find (m_proxies.begin(), m_proxies.end(), proxy);
   if (it == m_proxies.end()) {
     return StatusCode::FAILURE;
   }
-  return removeProxyImpl (proxy, forceRemove, hard, it - m_proxies.begin());
+  return removeProxyImpl (proxy, it - m_proxies.begin());
+}
+
+
+/**
+ * @brief Remove a proxy from m_keyMap.
+ * @param proxy The proxy being removed.
+ */
+StatusCode DataStore::removeFromKeyMap (DataProxy* proxy)
+{
+  SG::DataProxy::AliasCont_t alias_set = proxy->alias();
+  std::string name = proxy->name();
+
+  for (CLID symclid : proxy->transientID()) 
+  {
+    sgkey_t sgkey = m_pool.stringToKey (name, symclid);
+    m_keyMap.erase (sgkey);
+
+    for (const std::string& alias : alias_set) {
+      m_keyMap.erase (m_pool.stringToKey (alias, symclid));
+    }
+  }
+
+  return StatusCode::SUCCESS;
 }
 
 
 /**
  * @brief Helper for removing a proxy.
- * @param proxy The Proxy being removed.
- * @param forceRemove If true, remove the proxy regardless of the proxy's
- *                    resetOnly setting.
- * @param hard If true, then bound objects should also clear any data
- *             that depends on the identity of the current event store.
+ * @param proxy The proxy being removed.
  * @param index The index of this proxy in m_proxies.
+ *
+ * This removes the proxy from m_storeMap and releases it,
+ * but does NOT remove it from m_keyMap.
  */
 StatusCode
-DataStore::removeProxyImpl (DataProxy* proxy, bool forceRemove, bool hard,
-                            int index)
+DataStore::removeProxyImpl (DataProxy* proxy, int index)
 {
-  StatusCode sc(StatusCode::FAILURE);
-  if (0 == proxy) return sc;
-
-  if (!forceRemove && proxy->isResetOnly()) {
-    proxy->reset (hard);
-    sc =  StatusCode::SUCCESS;
-  } else {
-
-    proxy->setStore (nullptr);
+  proxy->setStore (nullptr);
     
-    SG::DataProxy::CLIDCont_t clids = proxy->transientID();
-    std::string name = proxy->name();
-    sgkey_t primary_sgkey = proxy->sgkey();
+  std::string name = proxy->name();
+  CLID clid = proxy->clID();
+  SG::DataProxy::AliasCont_t alias_set = proxy->alias();
 
-    CLID clid = proxy->clID();
-    ProxyMap* pmap = nullptr;
-    StoreIterator storeIter = m_storeMap.find(clid);
-    if (storeIter != m_storeMap.end()) {
-      pmap = &m_storeMap[clid];
-    }
+  // nb. This has to be here, not just before the loop below,
+  //     as the proxy may be deleted in the meantime.
+  SG::DataProxy::CLIDCont_t clids = proxy->transientID();
+
+  StoreIterator storeIter = m_storeMap.find(clid);
+  if (storeIter != m_storeMap.end()) {
+    ProxyMap& pmap = storeIter->second;
 
     // first remove the alias key:
     SG::DataProxy::AliasCont_t alias_set = proxy->alias();
     for (const std::string& alias : alias_set) {
-      m_keyMap.erase (m_pool.stringToKey (alias, clid));
-      if (pmap && 1 == pmap->erase(alias)) proxy->release();
+      if (1 == pmap.erase(alias)) proxy->release();
     }
       
-    // then remove the primary key
-    KeyMap_t::iterator it = m_keyMap.find (primary_sgkey);
-    // We may fail to find the entry if this is a key that has been versioned.
-    // E.g., we add aVersObj.  Call this DP1.
-    // Then we add a new version of it.  Call this DP2.
-    // The version logic will add the alias ';00;aVersObj' to DP1.
-    // It will also then add the alias `aVersObj' to DP2.
-    // This will overwrite the entries for DP1 in pmap and m_keyMap.
-    // If we then clear and DP2 is removed first, then the m_keyMap entry
-    // for DP1's primary key will be gone.
-    // FIXME: Should just remove the versioned key code ... it's anyway
-    // not compatible with MT.
-    sc = StatusCode::SUCCESS;
-    if (it != m_keyMap.end()) {
-      // Remove primary entry.
-      m_keyMap.erase (it);
-      if (storeIter != m_storeMap.end()) {
-        if (1 == storeIter->second.erase(name)) {
-          proxy->release();
-        }
-      }
-      else {
-        // A dummy proxy.
+    // Remove primary entry.
+    if (1 == pmap.erase(name)) {
+      proxy->release();
+    }
+  }
+  else {
+    // A dummy proxy.
+    proxy->release();
+  }
+
+  // Remove all symlinks too.
+  for (CLID symclid : clids) 
+  {
+    if (clid == symclid) continue;
+    storeIter = m_storeMap.find(symclid);
+    if (storeIter != m_storeMap.end()) {
+      ProxyMap& pmap = storeIter->second;
+      SG::ProxyIterator it = pmap.find (name);
+      if (it != pmap.end() && it->second == proxy) {
+        storeIter->second.erase (it);
         proxy->release();
       }
-
-      // Remove all symlinks too.
-      for (CLID symclid : clids) 
-      {
-        sgkey_t sgkey = m_pool.stringToKey (name, symclid);
-        m_keyMap.erase (sgkey);
-        if (clid == symclid) continue;
-        storeIter = m_storeMap.find(symclid);
-        if (storeIter != m_storeMap.end()) {
-          SG::ProxyIterator it = storeIter->second.find (name);
-          if (it != storeIter->second.end() && it->second == proxy) {
-            storeIter->second.erase (it);
-            proxy->release();
-          }
-
-          for (const std::string& alias : alias_set) {
-            m_keyMap.erase (m_pool.stringToKey (alias, symclid));
-            if (1 == storeIter->second.erase (alias)) proxy->release();
-          }
-        }
-      } //symlinks loop
-    }
-
-    if (index != -1 && !m_proxies.empty()) {
-      // Remove the proxy from m_proxies.  If it's not at the end, then
-      // move the proxy at the end to this proxy's index (and update the
-      // index for the other proxy stored in m_keyMap).
-      if (index != (int)m_proxies.size() - 1) {
-        SG::DataProxy* dp = m_proxies.back();
-        m_proxies[index] = dp;
+        
+      for (const std::string& alias : alias_set) {
+        if (1 == pmap.erase (alias)) proxy->release();
       }
-      m_proxies.pop_back();
     }
-  } //reset only
-  return sc;
+  } //symlinks loop
+
+  if (index != -1 && !m_proxies.empty()) {
+    // Remove the proxy from m_proxies.  If it's not at the end, then
+    // move the proxy at the end to this proxy's index (and update the
+    // index for the other proxy stored in m_keyMap).
+    if (index != (int)m_proxies.size() - 1) {
+      m_proxies[index] = m_proxies.back();
+    }
+    m_proxies.pop_back();
+  }
+
+  return StatusCode::SUCCESS;
 }
 
 //////////////////////////////////////////////////////////////
@@ -327,7 +365,7 @@ DataStore::addAlias(const std::string& aliasKey, DataProxy* dp)
     }
     dp->addRef();
     pmap[aliasKey] = dp;
-    m_keyMap[m_pool.stringToKey (aliasKey, clid)] = dp;
+    m_keyMap.emplace (m_pool.stringToKey (aliasKey, clid), dp);
   }
 
   // set alias in proxy
