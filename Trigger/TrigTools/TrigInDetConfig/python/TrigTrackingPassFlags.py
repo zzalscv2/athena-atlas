@@ -24,6 +24,26 @@ def __flagsFromConfigSettings(settings):
     flags.addFlag("refitROT", False) # should likely be moved to ConfigSettingsBase
     flags.addFlag("trtExtensionType", "xf") # should likely be moved to ConfigSettingsBase
     flags.minPT = flags.pTmin # hack to sync pT threshold used in offline and trigger
+
+    #temporary - to be reworked
+    flags.nHolesMax           = 2
+    flags.nHolesGapMax        = 2
+    flags.Xi2max              = 9.
+    flags.Xi2maxNoAdd         = 25.
+    flags.seedFilterLevel     = 0.
+    flags.nWeightedClustersMin= 6
+    
+    if flags.isLRT:
+      flags.nHolesGapMax        = 1
+      flags.nWeightedClustersMin= 8
+    if flags.input_name=="cosmics":
+      flags.nClustersMin        = 4
+      flags.nHolesMax           = 3
+      flags.Xi2max              = 60.
+      flags.Xi2maxNoAdd         = 100.
+      flags.nWeightedClustersMin= 8
+    
+
     return flags
 
 

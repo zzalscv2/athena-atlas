@@ -118,7 +118,7 @@ private:
   SG::ReadHandle<InDet::SiDetectorElementStatus> getPixelDetElStatus(const EventContext& ctx) const;
 
   /** Pointer to Extrapolator AlgTool*/
-  PublicToolHandle<Trk::IExtrapolator> m_extrapolator{
+  ToolHandle<Trk::IExtrapolator> m_extrapolator{
     this,
     "Extrapolator",
     "Trk::Extrapolator/InDetExtrapolator",

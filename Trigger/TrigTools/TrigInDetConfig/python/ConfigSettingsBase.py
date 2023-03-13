@@ -17,7 +17,7 @@ class _ConfigSettingsBase() :
       self._name                = None
       self._suffix              = None
       self._pTmin               = 1.*GeV
-      self._Xi2max              = None
+      self._Xi2max              = 9.
       self._newConfig           = True
       self._TripletDoPPS        = True
       self._Triplet_D0Max       = 4.0
@@ -44,9 +44,9 @@ class _ConfigSettingsBase() :
       self._TrackInitialD0Max   = 20.0
       self._TrackZ0Max          = 300.0
       self._isLRT               = False
-      self._UseTrigSeedML       = None
+      self._UseTrigSeedML       = 0
       self._RoadWidth           = 10
-      self._nClustersMin        = None
+      self._nClustersMin        = 7
       self._roi                 = None
       self._isLRT               = False
       self._LRTD0Min            = None
@@ -66,7 +66,6 @@ class _ConfigSettingsBase() :
       self._doDisappearingTrk   = False
       self._usePixelNN          = False
       self._useDynamicRoiZWidth = False
-
 
       #precision tracking configuration values
       #__provisional change__:

@@ -34,7 +34,6 @@ InDet::InDetTrackHoleSearchTool::InDetTrackHoleSearchTool(const std::string& t,
                                                           const IInterface*  p) :
   AthAlgTool(t,n,p),
   m_atlasId(nullptr),
-  m_extrapolator("Trk::Extrapolator/InDetExtrapolator"),
   m_extendedListOfHoles(false),
   m_cosmic(false),
   m_warning(0) {

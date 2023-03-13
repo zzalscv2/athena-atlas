@@ -153,81 +153,6 @@ def trtDataPrep(flags, roisKey, signature):
 
   return acc
 
-def ftfCfg(flags, roisKey, signature, signatureName):
-  acc = ComponentAccumulator()
-
-  from TrkConfig.TrkTrackSummaryToolConfig import InDetTrigFastTrackSummaryToolCfg
-  TrackSummaryTool = acc.popToolsAndMerge( InDetTrigFastTrackSummaryToolCfg(flags) )
-  acc.addPublicTool(TrackSummaryTool)
-
-  from InDetConfig.SiTrackMakerConfig import TrigSiTrackMaker_xkCfg
-  initialTrackMaker = acc.popToolsAndMerge( TrigSiTrackMaker_xkCfg(flags, name = "InDetTrigSiTrackMaker_FTF"+signature) )
-  acc.addPublicTool(initialTrackMaker)
-
-  acc.addPublicTool( CompFactory.TrigInDetTrackFitter( "TrigInDetTrackFitter" ) )
-  from RegionSelector.RegSelToolConfig import (regSelTool_SCT_Cfg, regSelTool_Pixel_Cfg)
-
-  pixRegSelTool = acc.popToolsAndMerge( regSelTool_Pixel_Cfg( flags) )
-  sctRegSelTool = acc.popToolsAndMerge( regSelTool_SCT_Cfg( flags) )
-
-
-  acc.addPublicTool( CompFactory.TrigL2LayerNumberTool( name = "TrigL2LayerNumberTool_FTF",
-                                                        UseNewLayerScheme = True) )
-  acc.addPublicTool( CompFactory.TrigL2LayerNumberTool( "TrigL2LayerNumberTool_FTF" ) )
-
-  acc.addPublicTool( CompFactory.TrigSpacePointConversionTool( "TrigSpacePointConversionTool" + signature,
-                                                                 DoPhiFiltering    = True,
-                                                                 UseBeamTilt       = False,
-                                                                 UseNewLayerScheme = True,
-                                                                 RegSelTool_Pixel  = pixRegSelTool,
-                                                                 RegSelTool_SCT    = sctRegSelTool,
-                                                                 layerNumberTool   = acc.getPublicTool("TrigL2LayerNumberTool_FTF") ) )
-
-  from InDetConfig.SiCombinatorialTrackFinderToolConfig import SiDetElementBoundaryLinksCondAlg_xk_Pixel_Cfg, SiDetElementBoundaryLinksCondAlg_xk_SCT_Cfg
-  acc.merge(SiDetElementBoundaryLinksCondAlg_xk_Pixel_Cfg(flags))
-  acc.merge(SiDetElementBoundaryLinksCondAlg_xk_SCT_Cfg(flags))
-
-  from TrigFastTrackFinder.TrigFastTrackFinder_Config import TrigFastTrackFinderMonitoring
-  monTool = TrigFastTrackFinderMonitoring(flags, name = "trigfasttrackfinder_" + signature, doResMon=False)
-
-  ftf = CompFactory.TrigFastTrackFinder( name = "trigfasttrackfinder_" + signature,
-                                         LayerNumberTool          = acc.getPublicTool( "TrigL2LayerNumberTool_FTF" ),
-                                         SpacePointProviderTool   = acc.getPublicTool( "TrigSpacePointConversionTool" + signature ),
-                                         TrackSummaryTool         = TrackSummaryTool,
-                                         initialTrackMaker        = initialTrackMaker,
-                                         trigInDetTrackFitter     = acc.getPublicTool( "TrigInDetTrackFitter" ),
-                                         RoIs                     = roisKey,
-                                         trigZFinder              = CompFactory.TrigZFinder(),
-                                         doZFinder                = False,
-                                         SeedRadBinWidth          =  flags.InDet.Tracking.ActiveConfig.SeedRadBinWidth,
-                                         TrackInitialD0Max        = 1000. if flags.InDet.Tracking.ActiveConfig.extension == 'cosmics' else 20.0,
-                                         TracksName               = flags.InDet.Tracking.ActiveConfig.trkTracks_FTF,
-                                         TripletDoPSS             = False,
-                                         Triplet_D0Max            = flags.InDet.Tracking.ActiveConfig.Triplet_D0Max,
-                                         Triplet_D0_PPS_Max       = flags.InDet.Tracking.ActiveConfig.Triplet_D0_PPS_Max,
-                                         Triplet_MaxBufferLength  = 3,
-                                         Triplet_MinPtFrac        = 1,
-                                         Triplet_nMaxPhiSlice     = 53,
-                                         doCloneRemoval           = flags.InDet.Tracking.ActiveConfig.doCloneRemoval,
-                                         doResMon                 = flags.InDet.Tracking.ActiveConfig.doResMon,
-                                         doSeedRedundancyCheck    = flags.InDet.Tracking.ActiveConfig.doSeedRedundancyCheck,
-                                         pTmin                    = flags.InDet.Tracking.ActiveConfig.minPT,
-                                         useNewLayerNumberScheme  = True,
-                                         MinHits                  = 5,
-                                         useGPU                   = False,
-                                         DoubletDR_Max            = 270,
-                                         LRT_Mode                 = flags.InDet.Tracking.ActiveConfig.isLRT,
-                                         MonTool = monTool)
-
-  if flags.InDet.Tracking.ActiveConfig.LRTD0Min is not None:
-    ftf.LRT_D0Min = flags.InDet.Tracking.ActiveConfig.LRTD0Min
-  if flags.InDet.Tracking.ActiveConfig.LRTHardPtMin is not None:
-    ftf.LRT_HardMinPt = flags.InDet.Tracking.ActiveConfig.LRTHardPtMin
-
-  acc.addEventAlgo( ftf, primary=True )
-
-  return acc
-
 def _trackConverterCfg(flags, signature, inputTracksKey, outputTrackParticleKey):
   acc = ComponentAccumulator()
 
@@ -299,7 +224,14 @@ def trigInDetFastTrackingCfg( inflags, roisKey="EMRoIs", signatureName='', in_vi
 
   from InDetConfig.SiSpacePointFormationConfig import TrigSiTrackerSpacePointFinderCfg
   acc.merge(TrigSiTrackerSpacePointFinderCfg(flags, name="InDetSiTrackerSpacePointFinder_"+signature))
-  acc.merge(ftfCfg(flags, roisKey, signature, signatureName))
+  
+  #this should not be needed once SiDetElementsRoadMaker_xkCfg invoked internally (causes count changes atm)
+  #i.e. remove RoadTool arg from TrigSiTrackMaker
+  acc.addCondAlgo(CompFactory.InDet.SiDetElementsRoadCondAlg_xk(name = "SiDetElementsRoadCondAlg_xk"))
+
+  from TrigFastTrackFinder.TrigFastTrackFinder_Config import TrigFastTrackFinderCfg
+  acc.merge(TrigFastTrackFinderCfg(flags, "TrigFastTrackFinder_"+signatureName, signatureName, roisKey))
+  
   acc.merge(trackFTFConverterCfg(flags, signature))
   return acc
 

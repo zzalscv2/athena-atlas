@@ -109,7 +109,7 @@ private:
   /**ID TRT helper*/
   const TRT_ID* m_trtId{ nullptr };
 
-  PublicToolHandle<Trk::ITrackHoleSearchTool> m_holeSearchTool{
+  ToolHandle<Trk::ITrackHoleSearchTool> m_holeSearchTool{
     this,
     "HoleSearch",
     "InDet::InDetTrackHoleSearchTool"
