@@ -40,7 +40,4 @@ cd ${RB_PATH_SCRIPTS}
 # Return to test working dir
 cd ${TEST_DIR}
 
-sed -i -e 's/allowNoOracleConnection\s*=\s*False/allowNoOracleConnection = True/g' ${RB_PATH_PYTHON}/runOptions.py
-sed -i -e 's/retryOracleConnection\s*=\s*True/retryOracleConnection = False/g' ${RB_PATH_PYTHON}/runOptions.py
-
 exit 0
