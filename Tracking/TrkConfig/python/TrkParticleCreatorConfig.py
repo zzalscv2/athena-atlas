@@ -124,8 +124,12 @@ def InDetTrigParticleCreatorToolFTFCfg(flags,
             InDetTrigFastTrackSummaryToolCfg(flags))
         result.addPublicTool(TrackSummaryTool)
         kwargs.setdefault("TrackSummaryTool", TrackSummaryTool)
+    # 2023fix
+    # if 'TestPixelLayerTool' not in kwargs:
+    #     from InDetConfig.InDetTestPixelLayerConfig import InDetTrigTestPixelLayerToolInnerCfg
+    #     kwargs.setdefault("TestPixelLayerTool", result.popToolsAndMerge(InDetTrigTestPixelLayerToolInnerCfg(flags)))
+    kwargs.setdefault("TestPixelLayerTool", "")  #must be empty key not None to prevent retrieval of unconfigured Extrapolator
 
-    kwargs.setdefault("TestPixelLayerTool", None)
     kwargs.setdefault("KeepParameters", True)
     kwargs.setdefault("ComputeAdditionalInfo", True)
     kwargs.setdefault("AssociationMapName", "")

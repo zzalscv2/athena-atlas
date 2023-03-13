@@ -165,15 +165,11 @@ def makeInDetTrigFastTracking( flags, config = None, rois = 'EMViewRoIs', doFTF 
 
       else:
 
-        from TrigFastTrackFinder.TrigFastTrackFinder_Config import TrigFastTrackFinderBase
+        from TrigFastTrackFinder.TrigFastTrackFinder_Config import TrigFastTrackFinderCfg
         #TODO: eventually adapt IDTrigConfig also in FTF configuration (pass as additional param)
-        theFTF = TrigFastTrackFinderBase(flags, "TrigFastTrackFinder_" + signature, flags.InDet.Tracking.ActiveConfig.input_name)
-        theFTF.RoIs           = rois
-
-        if LRTInputCollection is not None:
-          theFTF.inputTracksName = LRTInputCollection
-
-        viewAlgs.append(theFTF)
+        theFTF = algorithmCAToGlobalWrapper(TrigFastTrackFinderCfg, flags, "TrigFastTrackFinder_" + signature, 
+                                            flags.InDet.Tracking.ActiveConfig.input_name, rois, inputTracksName = LRTInputCollection)
+        viewAlgs.extend(theFTF)
 
       if not flags.InDet.Tracking.ActiveConfig.doZFinderOnly: 
 
@@ -193,11 +189,8 @@ def makeInDetTrigFastTracking( flags, config = None, rois = 'EMViewRoIs', doFTF 
           inputTracksname = flags.InDet.Tracking.ActiveConfig.trkTracks_FTF   #before ActiveConfig gets replaced -needs restructuring
           flags = flags.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking."+secondStageConfig.name)
 
-          theFTF2 = TrigFastTrackFinderBase(flags, "TrigFastTrackFinder_" + secondStageConfig.input_name, secondStageConfig.input_name)
-          theFTF2.RoIs           = rois
-          theFTF2.inputTracksName = inputTracksname
-        
-          
+          theFTF2 = algorithmCAToGlobalWrapper(TrigFastTrackFinderCfg,flags, "TrigFastTrackFinder_" + secondStageConfig.input_name, 
+                                               secondStageConfig.input_name, rois, inputTracksName = inputTracksname)
           viewAlgs.append(theFTF2)
 
           

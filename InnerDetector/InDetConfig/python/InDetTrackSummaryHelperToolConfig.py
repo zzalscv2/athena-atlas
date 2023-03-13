@@ -40,7 +40,6 @@ def TrigTrackSummaryHelperToolCfg(flags, name="InDetTrigSummaryHelper", **kwargs
   if "HoleSearch" not in kwargs:
     from InDetConfig.InDetTrackHoleSearchConfig import TrigHoleSearchToolCfg
     holeSearchTool = result.popToolsAndMerge( TrigHoleSearchToolCfg(flags))
-    result.addPublicTool(holeSearchTool)
     kwargs.setdefault("HoleSearch", holeSearchTool)
 
   # Kept for consistency with previous config but unclear if different from default TRT_StrawStatusSummaryTool loaded in C++

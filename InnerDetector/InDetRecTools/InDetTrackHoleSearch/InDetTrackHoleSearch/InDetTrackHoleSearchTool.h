@@ -110,7 +110,12 @@ namespace InDet
       const AtlasDetectorID* m_atlasId;
       
       /** Pointer to Extrapolator AlgTool*/
-      ToolHandle< Trk::IExtrapolator >  m_extrapolator;
+      ToolHandle<Trk::IExtrapolator> m_extrapolator{
+	this,
+	"Extrapolator",
+	"Trk::Extrapolator/InDetExtrapolator",
+	"Extrapolator used to extrapolate to layers"
+      };
       ToolHandle<Trk::IBoundaryCheckTool> m_boundaryCheckTool {
          this,
          "BoundaryCheckTool",

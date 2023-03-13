@@ -147,11 +147,11 @@ def TrigSiTrackMaker_xkCfg(flags, name="TrigSiTrackMaker", **kwargs):
 
     kwargs.setdefault("pTmin", flags.InDet.Tracking.ActiveConfig.minPT)
     kwargs.setdefault("nClustersMin",
-                      flags.InDet.Tracking.ActiveConfig.minClusters)
+                      flags.InDet.Tracking.ActiveConfig.nClustersMin)
     kwargs.setdefault("nHolesMax", flags.InDet.Tracking.ActiveConfig.nHolesMax)
     kwargs.setdefault("nHolesGapMax",
                       flags.InDet.Tracking.ActiveConfig.nHolesGapMax)
-    kwargs.setdefault("SeedsFilterLevel",
+    kwargs.setdefault("SeedsFilterLevel", 
                       flags.InDet.Tracking.ActiveConfig.seedFilterLevel)
     kwargs.setdefault("Xi2max", flags.InDet.Tracking.ActiveConfig.Xi2max)
     kwargs.setdefault("Xi2maxNoAdd",
@@ -161,6 +161,9 @@ def TrigSiTrackMaker_xkCfg(flags, name="TrigSiTrackMaker", **kwargs):
     kwargs.setdefault("Xi2maxMultiTracks",
                       flags.InDet.Tracking.ActiveConfig.Xi2max)
     kwargs.setdefault("UseAssociationTool", False)
+    kwargs.setdefault("useBremModel", flags.InDet.Tracking.ActiveConfig.name == "2023fix")
+
+    kwargs.setdefault("CosmicTrack", flags.InDet.Tracking.ActiveConfig.input_name == "cosmics")
 
     acc.setPrivateTools(CompFactory.InDet.SiTrackMaker_xk(name, **kwargs))
     return acc

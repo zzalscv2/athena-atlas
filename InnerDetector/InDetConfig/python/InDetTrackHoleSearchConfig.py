@@ -14,7 +14,6 @@ def InDetTrackHoleSearchToolCfg(flags, name = 'InDetHoleSearchTool', **kwargs):
     #TODO: Check if AtlasExtrapolatorCfg can be used instead
     from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
     extrapolator = result.popToolsAndMerge(InDetExtrapolatorCfg(flags))
-    result.addPublicTool(extrapolator)
     kwargs.setdefault("Extrapolator", extrapolator)
 
   if 'BoundaryCheckTool' not in kwargs:
@@ -35,7 +34,6 @@ def TrigHoleSearchToolCfg(flags, name="InDetTrigHoleSearchTool", **kwargs):
   if 'Extrapolator' not in kwargs:
     from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
     extrapolator = result.popToolsAndMerge(InDetExtrapolatorCfg(flags, name="InDetTrigExtrapolator"))  
-    result.addPublicTool(extrapolator)
     kwargs.setdefault("Extrapolator", extrapolator)
 
   from SCT_ConditionsTools.SCT_ConditionsToolsConfig import SCT_ConditionsSummaryToolCfg

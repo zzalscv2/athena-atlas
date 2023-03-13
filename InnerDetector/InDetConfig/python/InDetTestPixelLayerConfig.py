@@ -21,7 +21,6 @@ def InDetTestPixelLayerToolCfg(flags, name = "InDetTestPixelLayerTool", **kwargs
   if 'Extrapolator' not in kwargs :
     from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
     InDetExtrapolator = result.popToolsAndMerge(InDetExtrapolatorCfg(flags))
-    result.addPublicTool(InDetExtrapolator)  # TODO: migrate to private?
     kwargs.setdefault("Extrapolator", InDetExtrapolator)
 
   kwargs.setdefault("CheckActiveAreas", flags.InDet.checkDeadElementsOnTrack)

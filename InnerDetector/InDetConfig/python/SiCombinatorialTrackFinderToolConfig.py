@@ -11,7 +11,7 @@ def SiDetElementBoundaryLinksCondAlg_xk_Pixel_Cfg(flags, name = "InDetSiDetEleme
     kwargs.setdefault("ReadKey", "PixelDetectorElementCollection")
     kwargs.setdefault("WriteKey", "PixelDetElementBoundaryLinks_xk")
 
-    acc.addEventAlgo(CompFactory.InDet.SiDetElementBoundaryLinksCondAlg_xk(name, **kwargs))
+    acc.addCondAlgo(CompFactory.InDet.SiDetElementBoundaryLinksCondAlg_xk(name, **kwargs))
     return acc
 
 def SiDetElementBoundaryLinksCondAlg_xk_SCT_Cfg(flags, name = "InDetSiDetElementBoundaryLinksSCTCondAlg", **kwargs):
@@ -21,7 +21,7 @@ def SiDetElementBoundaryLinksCondAlg_xk_SCT_Cfg(flags, name = "InDetSiDetElement
     kwargs.setdefault("ReadKey", "SCT_DetectorElementCollection")
     kwargs.setdefault("WriteKey", "SCT_DetElementBoundaryLinks_xk")
 
-    acc.addEventAlgo(CompFactory.InDet.SiDetElementBoundaryLinksCondAlg_xk(name, **kwargs))
+    acc.addCondAlgo(CompFactory.InDet.SiDetElementBoundaryLinksCondAlg_xk(name, **kwargs))
     return acc
 
 def SiDetElementBoundaryLinksCondAlg_xk_ITkPixel_Cfg(flags, name = "ITkSiDetElementBoundaryLinksPixelCondAlg", **kwargs):
@@ -32,7 +32,7 @@ def SiDetElementBoundaryLinksCondAlg_xk_ITkPixel_Cfg(flags, name = "ITkSiDetElem
     kwargs.setdefault("WriteKey", "ITkPixelDetElementBoundaryLinks_xk")
     kwargs.setdefault("ITkGeometry", True)
 
-    acc.addEventAlgo(CompFactory.InDet.SiDetElementBoundaryLinksCondAlg_xk(name, **kwargs))
+    acc.addCondAlgo(CompFactory.InDet.SiDetElementBoundaryLinksCondAlg_xk(name, **kwargs))
     return acc
 
 def SiDetElementBoundaryLinksCondAlg_xk_ITkStrip_Cfg(flags, name = "ITkSiDetElementBoundaryLinksStripCondAlg", **kwargs):
@@ -43,7 +43,7 @@ def SiDetElementBoundaryLinksCondAlg_xk_ITkStrip_Cfg(flags, name = "ITkSiDetElem
     kwargs.setdefault("WriteKey", "ITkStripDetElementBoundaryLinks_xk")
     kwargs.setdefault("ITkGeometry", True)
 
-    acc.addEventAlgo(CompFactory.InDet.SiDetElementBoundaryLinksCondAlg_xk(name, **kwargs))
+    acc.addCondAlgo(CompFactory.InDet.SiDetElementBoundaryLinksCondAlg_xk(name, **kwargs))
     return acc
 
 def SiCombinatorialTrackFinder_xkCfg(flags, name="InDetSiComTrackFinder", **kwargs) :
@@ -125,6 +125,8 @@ def SiCombinatorialTrackFinder_xk_Trig_Cfg( flags, name="InDetTrigSiComTrackFind
   kwargs.setdefault("useSCT", flags.InDet.Tracking.ActiveConfig.useSCT)
   kwargs.setdefault("PixelClusterContainer", 'PixelTrigClusters')
   kwargs.setdefault("SCT_ClusterContainer", 'SCT_TrigClusters')
+  kwargs.setdefault("PixelDetElStatus", "")
+  kwargs.setdefault("SCTDetElStatus", "" )
 
   from TrkConfig.TrkExRungeKuttaPropagatorConfig import RungeKuttaPropagatorCfg
   propagatorTool = acc.popToolsAndMerge( RungeKuttaPropagatorCfg( flags, name="InDetTrigPatternPropagator" ) )
@@ -149,9 +151,9 @@ def SiCombinatorialTrackFinder_xk_Trig_Cfg( flags, name="InDetTrigSiComTrackFind
   kwargs.setdefault("SctSummaryTool", acc.popToolsAndMerge(
       SCT_ConditionsSummaryToolCfg(flags, withFlaggedCondTool=False, withTdaqTool=False)))
 
-  from InDetConfig.InDetBoundaryCheckToolConfig import InDetBoundaryCheckToolCfg
+  from InDetConfig.InDetBoundaryCheckToolConfig import InDetTrigBoundaryCheckToolCfg
   kwargs.setdefault("BoundaryCheckTool", acc.popToolsAndMerge(
-      InDetBoundaryCheckToolCfg(flags)))
+      InDetTrigBoundaryCheckToolCfg(flags)))
 
   acc.setPrivateTools(CompFactory.InDet.SiCombinatorialTrackFinder_xk(name, **kwargs))
   return acc

@@ -276,6 +276,7 @@ class ConfigSettings_cosmics( _ConfigSettingsBase ):
       self._Triplet_D0_PPS_Max  = 1000.0
       self._TrackInitialD0Max   = 1000.
       self._TrackZ0Max          = 1000.
+      self._RoadWidth           = 75.
       self._doFullScan      = True
       self._etaHalfWidth    = 3
       self._phiHalfWidth    = math.pi

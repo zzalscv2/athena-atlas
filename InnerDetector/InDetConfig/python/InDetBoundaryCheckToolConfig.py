@@ -34,6 +34,18 @@ def InDetBoundaryCheckToolCfg(flags, name='InDetBoundarySearchTool', **kwargs):
   result.setPrivateTools(CompFactory.InDet.InDetBoundaryCheckTool(name, **kwargs))
   return result
 
+def InDetTrigBoundaryCheckToolCfg(flags, name = "InDetTrigBoundaryCheckTool", **kwargs):
+  acc = ComponentAccumulator()
+  from SCT_ConditionsTools.SCT_ConditionsToolsConfig import SCT_ConditionsSummaryToolCfg
+
+  kwargs.setdefault("SCTDetElStatus", "")
+  kwargs.setdefault("SctSummaryTool", acc.popToolsAndMerge(SCT_ConditionsSummaryToolCfg(flags, withFlaggedCondTool=False,withTdaqTool=False)))
+
+  from InDetConfig.InDetTestPixelLayerConfig import InDetTrigTestPixelLayerToolCfg
+  kwargs.setdefault("PixelLayerTool", acc.popToolsAndMerge(InDetTrigTestPixelLayerToolCfg(flags)))
+
+  return InDetBoundaryCheckToolCfg(flags, name=name, **kwargs)
+
 def ITkBoundaryCheckToolCfg(flags, name='ITkBoundaryCheckTool', **kwargs):
   result = ComponentAccumulator()
 
