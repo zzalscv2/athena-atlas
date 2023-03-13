@@ -83,18 +83,22 @@ to build against with your local modifications, and build & set up the run:
 
 ## Using a custom libPythia8 library
 
-Using a new copy of the Pythia8 library for testing is a bit more involved,
-because you will also need to check out the `Pythia8` externals package and
+Using a new copy of the Pythia8 library for testing can be a bit more involved,
+because you will also need to check out the `Pythia8` externals package and, depending on the release, also
 override some paths to point at the new version. Here is a full set of commands
-to run (thanks to Marvin Flores), again starting from a new checkout of your Git
+to run, again starting from a new checkout of your Git
 Athena fork:
 
     setupATLAS; lsetup asetup; lsetup git
     git atlas init-workdir https://:@gitlab.cern.ch/USERNAME/athena.git athena-py8custom
     cd athena-py8custom
-    git atlas addpkg Pythia8 Pythia8_i
+    git atlas addpkg Pythia8 Pythia8_i #< or just Pythia8 if you don't plan to implement changes in Pythia8_i
 
-You now need to modify the project build instructions to pick up the external
+From now on, the procedure depends on your release version: in all cases, be sure to have followed the above steps in a new terminal, where no other `asetup` commands have been called. Check also to work in a new, clean, `build` folder, where appropriate.
+
+### Older releases (development releases in R21)
+
+If you really still need to use older R21 releases, you now need to modify the project build instructions to pick up the external
 library override, by editing `athena/Projects/WorkDir/CMakeLists.txt`:
 
 1. Just after `find_package( AtlasCMake QUIET )` add, for example,
@@ -114,25 +118,38 @@ before `find_package( Pythia8 )`:
     set( PYTHIA8_LCGVERSION 301p3 )
     set( PYTHIA8_LCGROOT /cvmfs/sft.cern.ch/lcg/releases/LCG_88/MCGenerators/pythia8/${PYTHIA8_LCGVERSION}/${LCG_PLATFORM})
 
-Before building, you should also create a `package_filters.txt` file, perhaps
+3. Before building, you should also create a `package_filters.txt` file, perhaps
 based on `athena/Projects/WorkDir/package_filters_example.txt`. This should contain the
 following lines, specifying which packages to build:
 
-    + External/Pythia8
-    + Generators/Pythia8_i
-    - .*
+        + External/Pythia8
+        + Generators/Pythia8_i #< you may comment this if you don't plan to implement changes in Pythia8_i
+        - .*
 
-Finally, (re)build:
+4. Finally, (re)build:
 
-    mkdir athena-py8custom-build && cd athena-py8custom-build
-    asetup 21.6.20,AthGeneration
-    # or: asetup 21.6,latest,AthGeneration,slc6
-    cmake -DATLAS_PACKAGE_FILTER_FILE=../package_filters.txt ../athena/Projects/WorkDir
-    make
-    source x86_64-*/setup.sh
+        mkdir athena-py8custom-build && cd athena-py8custom-build
+        asetup 21.6.20,AthGeneration
+        # or: asetup 21.6,latest,AthGeneration,slc6
+        cmake -DATLAS_PACKAGE_FILTER_FILE=../package_filters.txt ../athena/Projects/WorkDir
+        make
+        source x86_64-*/setup.sh
 
 You may wish to run a `make clean` before `make`, to ensure that everything is
 definitely rebuilt as intended.
+
+### Most recent releases (late R21, and R22/R23)
+Skip steps 1 and 2 of the procedure described above. Follow step 3. Instead of step 4, do the following:
+
+    mkdir athena-py8custom-build && cd athena-py8custom-build
+    asetup 21.6.99,AthGeneration
+    # or in R22/23: asetup AthGeneration,master,latest
+    cmake -DATLAS_PACKAGE_FILTER_FILE=../package_filters.txt -DPYTHIA8_LCGROOT=/cvmfs/sft-nightlies.cern.ch/lcg/nightlies/dev4/Thu/MCGenerators/pythia8/309/x86_64-centos7-gcc11-opt ../athena/Projects/WorkDir/
+    make
+    source */setup.sh
+
+
+where in the above example Pythia8.309 has been taken from a nightly build.
 
 ## MLM matching within Athena
 Where CKKWL cannot be applied (notably, in all loop induced processes) it can be useful to run MLM matching.
