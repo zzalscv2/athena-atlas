@@ -121,6 +121,8 @@ def standardJetBuildSequence( configFlags, dataSource, clustersKey, **jetRecoDic
 
     if jetRecoDict["recoAlg"] == "a4":
         jetModList += ["CaloEnergies"] # Needed for GSC
+        if JetRecoCommon.isPFlow(jetRecoDict):
+            jetModList += ["CaloEnergiesClus"] # Needed for FlowElement GSC
 
     jetDef.modifiers = jetModList    
     # make sure all the modifiers have their dependencies solved 
