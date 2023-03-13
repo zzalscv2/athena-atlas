@@ -70,6 +70,7 @@ def ObserverTrackStateOnSurfaceDecoratorCfg(ConfigFlags,
     kwargs.setdefault("SctMsosName", "ObservedTrack_SCT_MSOSs")
     kwargs.setdefault("TrtMsosName", "ObservedTrack_TRT_MSOSs")
     kwargs.setdefault("AddPRD", True)
+    kwargs.setdefault("StoreHoles", False)
     return TrackStateOnSurfaceDecoratorCfg(ConfigFlags, name, **kwargs)
 
 def PseudoTrackStateOnSurfaceDecoratorCfg(ConfigFlags,
@@ -81,6 +82,19 @@ def PseudoTrackStateOnSurfaceDecoratorCfg(ConfigFlags,
     kwargs.setdefault("SctMsosName", "Pseudo_SCT_MSOSs")
     kwargs.setdefault("TrtMsosName", "Pseudo_TRT_MSOSs")
     kwargs.setdefault("AddPRD", True)
+    kwargs.setdefault("StoreHoles", False)
+    return TrackStateOnSurfaceDecoratorCfg(ConfigFlags, name, **kwargs)
+
+def SiSPTrackStateOnSurfaceDecoratorCfg(ConfigFlags,
+                                        name="SiSPTrackStateOnSurfaceDecorator",
+                                        **kwargs):
+    kwargs.setdefault("ContainerName", "SiSPSeededTracksTrackParticles")
+    kwargs.setdefault("DecorationPrefix", "SiSP_")
+    kwargs.setdefault("PixelMsosName", "SiSP_Pixel_MSOSs")
+    kwargs.setdefault("SctMsosName", "SiSP_SCT_MSOSs")
+    kwargs.setdefault("TrtMsosName", "SiSP_TRT_MSOSs")
+    kwargs.setdefault("AddPRD", True)
+    kwargs.setdefault("StoreHoles", False)
     return TrackStateOnSurfaceDecoratorCfg(ConfigFlags, name, **kwargs)
 
 def ITkTrackStateOnSurfaceDecoratorCfg(ConfigFlags, name, **kwargs):

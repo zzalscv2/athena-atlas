@@ -9,11 +9,6 @@ def TrkObserverToolCfg(flags,
                        name="TrackObserverTool",
                        **kwargs):
     acc = ComponentAccumulator()
-    if "Fitter" not in kwargs:
-        from TrkConfig.CommonTrackFitterConfig import InDetTrackFitterCfg
-        ObserverFitter = acc.popToolsAndMerge(InDetTrackFitterCfg(flags))
-        acc.addPublicTool(ObserverFitter)
-        kwargs.setdefault("Fitter", ObserverFitter)
     acc.setPrivateTools(CompFactory.Trk.TrkObserverTool(name, **kwargs))
     return acc
 

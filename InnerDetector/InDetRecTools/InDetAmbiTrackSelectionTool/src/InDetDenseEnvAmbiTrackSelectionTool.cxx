@@ -93,6 +93,10 @@ std::tuple<Trk::Track*,bool> InDet::InDetDenseEnvAmbiTrackSelectionTool::getClea
 
   CacheEntry  cache;
   
+  if (m_skipAmbiInROI && inHadronicROI(ptrTrack)){
+    ATH_MSG_DEBUG("skipping ambiguity resolution for track in hadronic ROI with m_minPtBjetROI = "<<m_minPtBjetROI<<", m_phiWidth = "<<m_phiWidth<<", m_etaWidth = "<<m_etaWidth);
+    return std::make_tuple(static_cast<Trk::Track *>(nullptr),true); // keep input track
+  }
   // compute the number of shared hits from the number of max shared modules
   // reset every track as could be changed for tracks within an ROI
   // ROI matching is done within decideWhichHitsToKeep. Note mulitple ROI types
@@ -134,7 +138,7 @@ std::tuple<Trk::Track*,bool> InDet::InDetDenseEnvAmbiTrackSelectionTool::getClea
   ATH_MSG_DEBUG ("decideWhichHitsToKeep");
   decideWhichHitsToKeep( ptrTrack,  score,  splitProbContainer, prd_to_track_map, trackHitDetails, tsosDetails, &cache, trackId );
   
-  ATH_MSG_DEBUG ("decideWhichHitsToKeep" << trackHitDetails.m_trkCouldBeAccepted );
+  ATH_MSG_DEBUG ("decideWhichHitsToKeep " << trackHitDetails.m_trkCouldBeAccepted );
   
   //
   // now see what to do with the track

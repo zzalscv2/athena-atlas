@@ -469,6 +469,7 @@ namespace InDet
 
     // ROI stuff
     BooleanProperty m_useHClusSeed{this, "doHadCaloSeed", false};
+    BooleanProperty m_skipAmbiInROI{this, "doSkipAmbiInROI", false};
     FloatProperty m_minPtSplit{this, "minPtSplit", 0.};
     FloatProperty m_minPtBjetROI{this, "minPtBjetROI", 15000., "in MeV"};
     FloatProperty m_phiWidth{this, "phiWidth", 0.2};

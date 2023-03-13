@@ -529,7 +529,6 @@ def InDetTrackRecoCfg(flags):
                 result.merge(TruthTrackingCfg(current_flags))
 
                 # Old config only scheduled InDetTrackTruth for IdealPseudoTracking, while the TrackParticleCnvAlg requires it if "doTruth" is enabled
-                from InDetConfig.TrackTruthConfig import InDetTrackTruthCfg
                 PseudoTracks = 'InDetPseudoTracks'
                 result.merge(InDetTrackTruthCfg(
                     current_flags,
@@ -561,7 +560,6 @@ def InDetTrackRecoCfg(flags):
         AssociationMapName="PRDtoTrackMapCombinedInDetTracks"))
 
     if flags.Tracking.doTruth:
-        from InDetConfig.TrackTruthConfig import InDetTrackTruthCfg
         result.merge(InDetTrackTruthCfg(
             flags,
             Tracks="CombinedInDetTracks",
@@ -578,7 +576,6 @@ def InDetTrackRecoCfg(flags):
             TrackLocation=["CombinedInDetTracks"]))
 
     if flags.Tracking.doTruth:
-        from InDetConfig.TrackTruthConfig import InDetTrackTruthCfg
         result.merge(InDetTrackTruthCfg(flags))
 
         if flags.Tracking.doTIDE_AmbiTrackMonitoring:
@@ -623,6 +620,18 @@ def InDetTrackRecoCfg(flags):
             TrackContainerName=TrackContainer,
             xAODTrackParticlesFromTracksContainerName=(
                 "SiSPSeedSegmentsTrackParticles")))
+
+    if flags.InDet.Tracking.doStoreSiSPSeededTracks:
+        from xAODTrackingCnv.xAODTrackingCnvConfig import (
+            TrackParticleCnvAlgNoPIDCfg)
+        TrackContainer = "SiSPSeededTracks"
+
+        result.merge(TrackParticleCnvAlgNoPIDCfg(
+            flags,
+            name = "SiSPSeededTracksCnvAlg",
+            TrackContainerName = TrackContainer,
+            xAODTrackParticlesFromTracksContainerName = \
+            "SiSPSeededTracksTrackParticles"))
 
     # ---------------------------------------
     # --- Primary vertexing
@@ -686,6 +695,7 @@ def InDetTrackRecoCfg(flags):
         TrackStateOnSurfaceDecorator = result.getPrimaryAndMerge(
             TrackStateOnSurfaceDecoratorCfg(
                 flags, name="TrackStateOnSurfaceDecorator"))
+        TrackStateOnSurfaceDecorator.DecorationPrefix = "Reco_"
         result.addEventAlgo(
             CompFactory.DerivationFramework.CommonAugmentation(
                 "InDetCommonKernel",
@@ -710,6 +720,16 @@ def InDetTrackRecoCfg(flags):
                 CompFactory.DerivationFramework.CommonAugmentation(
                     "PseudoInDetCommonKernel",
                     AugmentationTools=[PseudoTrackStateOnSurfaceDecorator]))
+
+        if flags.InDet.Tracking.doStoreSiSPSeededTracks:
+            from DerivationFrameworkInDet.InDetToolsConfig import (
+                SiSPTrackStateOnSurfaceDecoratorCfg)
+            SiSPTrackStateOnSurfaceDecorator = result.getPrimaryAndMerge(
+                SiSPTrackStateOnSurfaceDecoratorCfg(flags))
+            result.addEventAlgo(
+                CompFactory.DerivationFramework.CommonAugmentation(
+                    "SiSPInDetCommonKernel",
+                    AugmentationTools = [SiSPTrackStateOnSurfaceDecorator]))
 
         if flags.Input.isMC:
             from InDetPhysValMonitoring.InDetPhysValDecorationConfig import (
@@ -918,6 +938,9 @@ def InDetTrackRecoOutputCfg(flags):
         if flags.Tracking.doTruth:
             toAOD += ["TrackTruthCollection#InDetObservedTrackTruthCollection"]
             toAOD += ["DetailedTrackTruthCollection#ObservedDetailedTracksTruth"]
+    if flags.InDet.Tracking.doStoreSiSPSeededTracks:
+        toAOD += ["xAOD::TrackParticleContainer#SiSPSeededTracksTrackParticles"]
+        toAOD += [f"xAOD::TrackParticleAuxContainer#SiSPSeededTracksTrackParticlesAux.{excludedAuxData}"]
 
     if flags.Tracking.doStoreTrackSeeds:
         toAOD += [

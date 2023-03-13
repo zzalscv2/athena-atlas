@@ -26,9 +26,6 @@
 //need to include the following, since its a typedef and can't be forward declared.
 #include "TrkTrack/TrackCollection.h"
 
-// Track fitter
-#include "TrkFitterInterfaces/ITrackFitter.h"
-
 // for creating xAOD with TrackParticle
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/TrackParticleAuxContainer.h"
@@ -64,8 +61,6 @@ namespace Trk {
 			// name of the observed (saved) track collection
 		    SG::WriteHandleKey<TrackCollection> m_savedTracksWriteKey;
 		    SG::WriteHandleKey<ObservedTrackMap> m_savedTracksMapWriteKey;
-			// track fitter
-		    ToolHandle<ITrackFitter> m_fitterTool;
 
 			mutable std::mutex m_mutex;
 			struct CacheEntry {

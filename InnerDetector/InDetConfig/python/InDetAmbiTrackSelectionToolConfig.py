@@ -82,6 +82,8 @@ def InDetAmbiTrackSelectionToolCfg(flags, name="InDetAmbiTrackSelectionTool", **
         # Split cluster ROI size
         kwargs.setdefault("phiWidthEM", 0.05)
         kwargs.setdefault("etaWidthEM", 0.05)
+        # Skip ambi solver in hadronic ROI
+        kwargs.setdefault("doSkipAmbiInROI", flags.InDet.Tracking.doSkipAmbiROI)
 
         if (flags.Tracking.doTIDE_AmbiTrackMonitoring and
                 flags.InDet.Tracking.ActiveConfig.extension == ""):

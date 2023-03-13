@@ -141,6 +141,10 @@ def createInDetConfigFlags():
     icf.addFlag("InDet.Tracking.doPseudoTracking", False)
     # Special pass using truth information for pattern recognition, removes assumed in-efficencies applied to PseudoTracking
     icf.addFlag("InDet.Tracking.doIdealPseudoTracking", False)
+    # Save SiSP tracks (input to the ambiguity solver)
+    icf.addFlag("InDet.Tracking.doStoreSiSPSeededTracks", False)
+    # Skip ambiguity solver in hadronic ROI
+    icf.addFlag("InDet.Tracking.doSkipAmbiROI", False)
 
 
     from InDetConfig.TrackingPassFlags import (
