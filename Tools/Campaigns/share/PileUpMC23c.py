@@ -10,7 +10,7 @@ else:
     protectedInclude('RunDependentSimData/configLumi_run450000_mc23c_MultiBeamspot.py')
 
 from Digitization.DigitizationFlags import digitizationFlags
-digitizationFlags.numberOfLowPtMinBias = 84.335
-digitizationFlags.numberOfHighPtMinBias = 0.165
+digitizationFlags.numberOfLowPtMinBias = 90.323
+digitizationFlags.numberOfHighPtMinBias = 0.177
 digitizationFlags.initialBunchCrossing = -32
 digitizationFlags.finalBunchCrossing = 6
