@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -40,7 +40,7 @@ namespace DerivationFramework {
     virtual StatusCode addBranches() const override;
 
   private:
-    StatusCode getGenFiltVars(const xAOD::TruthParticleContainer* tpc, float& genFiltHT, float& genFiltMET, float& genFiltPTZ, float& genFiltFatJ) const;
+    StatusCode getGenFiltVars(const xAOD::TruthParticleContainer* tpc, float& genFiltHT, float& genFiltHTinclNu, float& genFiltMET, float& genFiltPTZ, float& genFiltFatJ) const;
 
     bool isPrompt( const xAOD::TruthParticle* tp ) const;
 
