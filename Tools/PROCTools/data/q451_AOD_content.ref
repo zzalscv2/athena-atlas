@@ -693,6 +693,8 @@ MuonSpectrometerTrackParticles
 MuonSpectrometerTrackParticlesAux.
 Muons
 MuonsAux.
+NCB_MuonSegments
+NCB_MuonSegmentsAux.
 Photons
 PhotonsAux.
 RunNumber

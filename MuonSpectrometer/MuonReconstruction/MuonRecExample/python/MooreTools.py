@@ -45,6 +45,27 @@ muonStandaloneFlags.setDefaults()
 # segment makers
 
 #  segment selection
+def MuonPatternCalibration(name ="MuonPatternCalibration", **kwargs):
+    kwargs.setdefault("TgcPrepDataContainer",
+                      'TGC_MeasurementsAllBCs' if not muonRecFlags.useTGCPriorNextBC else 'TGC_Measurements')
+    
+    if "MdtCreator" not in kwargs:
+        # on data configure a MdtDriftCircleOnTrackCreator for the segment finding with reduced errors
+        # when using the t0 refit enlarge the time window
+        if globalflags.DataSource() == 'data' and beamFlags.beamType() == 'collisions':
+            if muonRecFlags.doSegmentT0Fit():
+                mdtCreator = getPublicToolClone( "MdtDriftCircleOnTrackCreatorSegmentFinding", "MdtDriftCircleOnTrackCreator", 
+                                                 CreateTubeHit = False, TimeWindowSetting = mdtCalibWindowNumber('Collision_t0fit') )
+            else:
+                mdtCreator = getPublicToolClone( "MdtDriftCircleOnTrackCreatorSegmentFinding", "MdtDriftCircleOnTrackCreator", 
+                                                 CreateTubeHit = False, TimeWindowSetting = mdtCalibWindowNumber('Collision_data') )
+            kwargs["MdtCreator"] = mdtCreator
+        else: kwargs.setdefault("MdtCreator", getPublicTool("MdtDriftCircleOnTrackCreator"))
+    if beamFlags.beamType == 'cosmics':
+        kwargs.setdefault("AngleCutPhi", 1e9)
+        kwargs.setdefault("DropDistance", 100000000.)
+    
+    return CfgMgr.Muon__MuonPatternCalibration(name,**kwargs)
 def MuonPatternSegmentMaker(name="MuonPatternSegmentMaker",extraFlags=None,**kwargs):
     if extraFlags is None: extraFlags = ExtraFlags()    
     beamType       = extraFlags.setFlagDefault(beamFlags.beamType)
@@ -82,12 +103,12 @@ class MuonCurvedSegmentCombiner(CfgMgr.Muon__MuonCurvedSegmentCombiner,Configure
             kwargs.setdefault( "MissedHitsCut", 100 )
         else:
             kwargs.setdefault( "MissedHitsCut", 4 )
+
         
         kwargs.setdefault("DoCosmics", muonStandaloneFlags.reconstructionMode() != 'collisions' )
         kwargs.setdefault( "AddAll2DCscs", False )
         kwargs.setdefault( "UseCscSegments", muonRecFlags.doCSCs() )
         kwargs.setdefault( "AddUnassociatedMiddleEndcapSegments", True )
-
         super(MuonCurvedSegmentCombiner,self).__init__(name,**kwargs)        
 
 # end of class MuonCurvedSegmentCombiner
@@ -182,20 +203,19 @@ def MooTrackFitter(name="MooTrackFitter", extraFlags=None, **kwargs):
     namePrefix =getattr(extraFlags,"namePrefix","")
     namePostfix=getattr(extraFlags,"namePostfix","")
 
-    kwargs.setdefault("Fitter",          "MCTBFitter")
-    kwargs.setdefault("Propagator",      "MuonPropagator")
+    kwargs.setdefault("Fitter",          getPublicTool("MCTBFitter"))
+    kwargs.setdefault("Propagator",      getPublicTool("MuonPropagator"))
     kwargs.setdefault("SLFit" ,          not jobproperties.BField.allToroidOn())
     kwargs.setdefault("ReducedChi2Cut",  muonStandaloneFlags.Chi2NDofCut())
     kwargs.setdefault("SegmentMomentum", "MuonSegmentMomentumFromField")
-    kwargs.setdefault("CleanPhiHits",              True)
     kwargs.setdefault("UsePreciseHits",            True)
     kwargs.setdefault("UsePrefit",                 False)
     kwargs.setdefault("SeedAtStartOfTrack",        False)
-
-    if muonStandaloneFlags.reconstructionMode() == 'cosmics':
+    if beamFlags.beamType() == 'cosmics':
         kwargs.setdefault("SeedWithAvePhi",            True)
         kwargs.setdefault("SeedWithSegmentTheta",      False)
         kwargs.setdefault("Cosmics",                   True)
+        kwargs.setdefault("CleanPhiHits",              False)
         kwargs.setdefault("PreCleaningReducedChi2Cut", 5000)
         kwargs.setdefault("SegmentMomentum",           "MuonSegmentMomentum")
 
@@ -211,8 +231,12 @@ def MooTrackFitter(name="MooTrackFitter", extraFlags=None, **kwargs):
     return fitter 
     
 # end of factory function MooTrackFitter
-
-
+def MooSLTrackFitter(name="MooSLTrackFitter", **kwargs):
+    kwargs.setdefault("ReducedChi2Cut", 10.)
+    kwargs.setdefault("SLFit", True)
+    kwargs.setdefault("Fitter", getPublicTool("MCTBSLFitter"))
+    kwargs.setdefault("SLFit", getPublicTool("MuonStraightLinePropagator"))
+    return MooTrackFitter(name,**kwargs)
 
 def MooTrackBuilder(name="MooTrackBuilderTemplate",
                     extraFlags=None,
@@ -222,8 +246,8 @@ def MooTrackBuilder(name="MooTrackBuilderTemplate",
     namePostfix=getattr(extraFlags,"namePostfix","")
     optimiseMomentumResolutionUsingChi2=getattr(extraFlags,"optimiseMomentumResolutionUsingChi2",False)
     
-    kwargs.setdefault("Fitter",   "MooTrackFitter")
-    kwargs.setdefault("SLFitter", "MooSLTrackFitter")
+    kwargs.setdefault("Fitter",   getPublicTool("MooTrackFitter"))
+    kwargs.setdefault("SLFitter", getPublicTool("MooSLTrackFitter"))
     kwargs.setdefault("RecalibrateMDTHitsOnTrack", ( (not muonRecFlags.doSegmentT0Fit()) and muonStandaloneFlags.reconstructionMode() == 'collisions') )
 
     # hardcode some properties before passing on to base class constructors

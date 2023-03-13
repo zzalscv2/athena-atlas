@@ -76,6 +76,7 @@ def MdtDriftCircleOnTrackCreator(name="MdtDriftCircleOnTrackCreator",**kwargs):
     MuonCalibConfig.setupMdtCondDB()
     from MuonCnvExample.MuonCalibFlags import mdtCalibFlags
     mdtCalibFlags.setDefaults()
+    
     kwargs.setdefault("DoMagneticFieldCorrection", mdtCalibFlags.correctMdtRtForBField())
     kwargs.setdefault("DoWireSag", muonRecFlags.useWireSagCorrections())
     kwargs.setdefault("DoSlewingCorrection", mdtCalibFlags.correctMdtRtForTimeSlewing())
@@ -84,10 +85,10 @@ def MdtDriftCircleOnTrackCreator(name="MdtDriftCircleOnTrackCreator",**kwargs):
 
     if beamFlags.beamType() == 'cosmics' or beamFlags.beamType() == 'singlebeam' :
         kwargs.setdefault("DoTofCorrection", False)
+        kwargs.setdefault("ApplyToF", False)
         kwargs.setdefault("DoFixedError", True)
         kwargs.setdefault("TimingMode", 1)
         kwargs.setdefault("UseParametrisedError", True)
-
     else: # collisions simulation/data settings
         kwargs.setdefault("DoTofCorrection", True)
         kwargs.setdefault("DoFixedError", False)
@@ -160,7 +161,7 @@ class MuonRotCreator(Trk__RIO_OnTrackCreator,ConfiguredBase):
 
 def MuonCombinePatternTool(name="MuonCombinePatternTool",**kwargs):
     kwargs.setdefault("UseTightAssociation", muonStandaloneFlags.reconstructionMode() == 'collisions')
-    kwargs.setdefault("UseCosmics", muonStandaloneFlags.reconstructionMode() != 'collisions' )
+    kwargs.setdefault("UseCosmics", beamFlags.beamType() != 'collisions'   )
     return CfgMgr.MuonCombinePatternTool(name,**kwargs)
 # end of factory function MuonCombinePatternTool
 
@@ -172,12 +173,13 @@ def MuonHoughPatternTool(name="MuonHoughPatternTool",**kwargs):
 # end of factory function MuonHoughPatternTool
 
 def MuonHoughPatternFinderTool(name="MuonHoughPatternFinderTool",**kwargs):
-    getPublicTool("MuonCombinePatternTool")
-    getPublicTool("MuonHoughPatternTool")
+    kwargs.setdefault("muonCombinePatternTool", getPublicTool("MuonCombinePatternTool"))
+    kwargs.setdefault("muonHoughPatternTool", getPublicTool("MuonHoughPatternTool"))
     if muonStandaloneFlags.reconstructionMode() == 'collisions':
         kwargs.setdefault("MDT_TDC_cut", False)
     if muonStandaloneFlags.reconstructionMode() == 'collisions' or ConfigFlags.Muon.MuonTrigger:
         kwargs.setdefault("RecordAll",False)
+    
     return CfgMgr.Muon__MuonHoughPatternFinderTool(name,**kwargs)
 
 #--------------------------------------------------------------------------------
@@ -284,9 +286,9 @@ def MuonParticleCreatorTool(name="MuonParticleCreatorTool",**kwargs):
 
 def MuonChi2TrackFitter(name='MuonChi2TrackFitter',**kwargs):
     from TrkGlobalChi2Fitter.TrkGlobalChi2FitterConf import Trk__GlobalChi2Fitter
-    kwargs.setdefault("ExtrapolationTool"    , "MCTBExtrapolator")
-    kwargs.setdefault("RotCreatorTool"       , "MuonRotCreator")
-    kwargs.setdefault("MeasurementUpdateTool", "MuonMeasUpdator")
+    kwargs.setdefault("ExtrapolationTool"    , getPublicTool("MCTBExtrapolator"))
+    kwargs.setdefault("RotCreatorTool"       , getPublicTool("MuonRotCreator"))
+    kwargs.setdefault("MeasurementUpdateTool", getPublicTool("MuonMeasUpdator"))
     kwargs.setdefault("StraightLine"         , False)
     kwargs.setdefault("OutlierCut"           , 3.0)
     kwargs.setdefault("GetMaterialFromTrack" , False)
@@ -321,13 +323,13 @@ except ImportError:
 def MuonPhiHitSelector(name="MuonPhiHitSelector",**kwargs):
     kwargs.setdefault("MakeClusters", True)
     kwargs.setdefault("CompetingRios", True)
-    kwargs.setdefault("DoCosmics", muonStandaloneFlags.reconstructionMode() != 'collisions')
+    kwargs.setdefault("DoCosmics", beamFlags.beamType() != 'collisions'  )
 
     return CfgMgr.MuonPhiHitSelector(name,**kwargs)
 # end of factory function MuonPhiHitSelector
 
 def MuonSegmentMomentum(name="MuonSegmentMomentum",**kwargs):
-    kwargs.setdefault("DoCosmics", muonStandaloneFlags.reconstructionMode() != 'collisions')
+    kwargs.setdefault("DoCosmics", beamFlags.beamType() != 'collisions'  )
     return CfgMgr.MuonSegmentMomentum(name,**kwargs)
 # end of factory function MuonSegmentMomentum
 
@@ -337,6 +339,8 @@ def MdtSegmentT0Fitter(name="MdtSegmentT0Fitter",**kwargs):
     from MuonCnvExample import MuonCalibConfig  # noqa: F401
     MuonCalibConfig.setupMdtCondDB()
     kwargs.setdefault("CalibrationDbTool", MuonCalibConfig.MdtCalibrationDbTool())
+    ### Enable floating of segments in the case of cosmic reconstruction
+    kwargs.setdefault("FloatSegDirection", beamFlags.beamType() != 'collisions')
     return CfgMgr.TrkDriftCircleMath__MdtSegmentT0Fitter(name,**kwargs)
 
 def MdtMathSegmentFinder(name="MdtMathSegmentFinder",extraFlags=None,**kwargs):
@@ -440,6 +444,7 @@ def MuonLayerHoughTool(name='MuonLayerHoughTool', **kwargs):
         kwargs.setdefault("DoTruth", False)
     else:
         kwargs.setdefault("DoTruth", rec.doTruth())
+
     return CfgMgr.Muon__MuonLayerHoughTool(name,**kwargs)
 
 def MuonSegmentFittingTool(name='MuonSegmentFittingTool',extraFlags=None,**kwargs):

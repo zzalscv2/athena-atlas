@@ -19,10 +19,11 @@
 #include "MuonRecToolInterfaces/IMuonClusterOnTrackCreator.h"
 #include "MuonRecToolInterfaces/IMuonSegmentMaker.h"
 #include "MuonSegment/MuonSegmentCombinationCollection.h"
+#include "MuonSegmentCombinerToolInterfaces/IMuonCurvedSegmentCombiner.h"
 #include "MuonSegmentMakerToolInterfaces/IMuonClusterSegmentFinder.h"
+#include "MuonSegmentMakerToolInterfaces/IMuonSegmentSelectionTool.h"
 #include "MuonSegmentMakerToolInterfaces/IMuonClusterSegmentFinderTool.h"
 #include "MuonSegmentMakerToolInterfaces/IMuonPatternCalibration.h"
-#include "MuonSegmentMakerToolInterfaces/IMuonPatternSegmentMaker.h"
 #include "MuonSegmentMakerToolInterfaces/IMuonSegmentOverlapRemovalTool.h"
 #include "TrkSegment/SegmentCollection.h"
 #include "TrkTruthData/PRD_MultiTruthCollection.h"
@@ -52,12 +53,7 @@ private:
         this,
         "MuonPatternCalibration",
         "Muon::MuonPatternCalibration/MuonPatternCalibration",
-    };
-    ToolHandle<Muon::IMuonPatternSegmentMaker> m_patternSegmentMaker{
-        this,
-        "MuonPatternSegmentMaker",
-        "Muon::MuonPatternSegmentMaker/MuonPatternSegmentMaker",
-    };
+    };   
     ToolHandle<Muon::IMuonSegmentMaker> m_segmentMaker{
         this,
         "SegmentMaker",
@@ -93,6 +89,12 @@ private:
         "Csc4dSegmentMaker",
         "Csc4dSegmentMaker/Csc4dSegmentMaker",
     };
+    ToolHandle<Muon::IMuonCurvedSegmentCombiner> m_curvedSegmentCombiner{this, "SegmentCombiner",
+                                                                       "Muon::MuonCurvedSegmentCombiner/MuonCurvedSegmentCombiner"};
+
+    
+    ToolHandle<Muon::IMuonSegmentSelectionTool> m_segmentSelector{this, "SegmentSelector",
+                                                                "Muon::MuonSegmentSelectionTool/MuonSegmentSelectionTool"};
 
     // the following Trk::SegmentCollection MuonSegments are standard MuonSegments, the MuGirl segments are stored in MuonCreatorAlg.h
     SG::WriteHandleKey<Trk::SegmentCollection> m_segmentCollectionKey{
@@ -150,15 +152,41 @@ private:
         "RPC PRD Multi-truth Collection",
     };
 
-    void createSegmentsWithMDTs(const Muon::MuonPatternCombination* patt, Trk::SegmentCollection* segs,
-                                const std::vector<const Muon::RpcPrepDataCollection*>& rpcCols,
-                                const std::vector<const Muon::TgcPrepDataCollection*>& tgcCols, const EventContext& ctx) const;
+    StatusCode createSegmentsWithMDTs(const EventContext& ctx, const Muon::MuonPatternCombination* patt, Trk::SegmentCollection* segs) const;
+    
     void createSegmentsFromClusters(const EventContext& ctx, const Muon::MuonPatternCombination* patt, Trk::SegmentCollection* segments, Trk::SegmentCollection* segmentsNSW) const;
+   
+    /// Retrieve the raw outputs from the Csc segment makers for the curved combination
+    StatusCode createCscSegments(const EventContext& ctx, 
+                                std::unique_ptr<MuonSegmentCombinationCollection>& csc2dSegmentCombinations,
+                                std::unique_ptr<MuonSegmentCombinationCollection>& csc4dSegmentCombinations) const;
+
+    void appendSegmentsFromCombi(const std::unique_ptr<MuonSegmentCombinationCollection>& combi_coll, 
+                                 Trk::SegmentCollection* segments) const;
+
 
     Gaudi::Property<bool> m_printSummary{this, "PrintSummary", false};
     Gaudi::Property<bool> m_doTGCClust{this, "doTGCClust", false, "selection flags for cluster based segment finding"};
     Gaudi::Property<bool> m_doRPCClust{this, "doRPCClust", false, "selection flags for cluster based segment finding"};
     Gaudi::Property<bool> m_doClusterTruth{this, "doClusterTruth", false, "selection flags for cluster based segment finding"};
+
+    /// Run segment finding with eta / phi determination
+    Gaudi::Property<bool> m_doFullFinder{this, "FullFinder", true}; 
+    /// Combined the segments of several multilayers (Only Legacy systems)
+    Gaudi::Property<bool> m_runSegCombiner{this, "RunSegmentCombiner", true};
+    /// Run the Mdt segment maker (Switched of the NCB systems)
+    Gaudi::Property<bool> m_runMdtSegments{this, "doMdtSegments", true};
+    /// Run the NSW segment maker
+    Gaudi::Property<bool> m_doSTgcSegments{this, "doStgcSegments", true};
+    Gaudi::Property<bool> m_doMMSegments{this, "doMMSegments", true};
+    /// Apply a preselection on the segments
+    Gaudi::Property<int> m_segQuality{this, "SegmentQuality", -1};
+    
+    /// load the container from storegate given a ReadHandleKey. If the key is empty
+    /// a nullptr will be returned
+    template <class ContType> StatusCode loadFromStoreGate(const EventContext& ctx,
+                                                           const SG::ReadHandleKey<ContType>& key,
+                                                           const ContType* & cont_ptr) const;
 };
 
 #endif

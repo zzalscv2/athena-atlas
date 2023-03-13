@@ -1265,7 +1265,7 @@ namespace Muon {
                 nonconstDC.reset(m_mdtCreator->createRIO_OnTrack(*riodc->prepRawData(), mdtGP, &gdir));
                 if (hasT0) ATH_MSG_WARNING("Attempted to change t0 without a properly configured MDT creator tool. ");
             } else {
-                ATH_MSG_VERBOSE(" recalibrate MDT hit with shift " << segment.t0Shift());
+                ATH_MSG_VERBOSE(" recalibrate MDT hit with shift " << segment.t0Shift()<<" "<<m_printer->print(*riodc));
                 nonconstDC.reset(m_mdtCreatorT0->createRIO_OnTrack(*riodc->prepRawData(), mdtGP, &gdir, segment.t0Shift()));
             }
 
@@ -1273,6 +1273,7 @@ namespace Muon {
                 dcit.state(TrkDriftCircleMath::DCOnTrack::OutOfTime);
                 continue;
             }
+            ATH_MSG_VERBOSE("Post calibrated hit "<<m_printer->print(*nonconstDC));
 
             // update the drift radius after recalibration, keep error
             TrkDriftCircleMath::DriftCircle new_dc(dcit.position(), std::abs(nonconstDC->driftRadius()), dcit.dr(), dcit.drPrecise(),

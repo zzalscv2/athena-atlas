@@ -789,6 +789,8 @@ MuonsAuxDyn.topoetcone40
 MuonsAuxDyn.topoetconeCorrBitset
 MuonsAuxDyn.topoetconecoreConeEnergyCorrection
 MuonsAuxDyn.z0_staco
+NCB_MuonSegments
+NCB_MuonSegmentsAux.
 Photons
 PhotonsAux.
 RunNumber
