@@ -36,6 +36,13 @@ testChains = {
     "HLT_mu14_mu14_idperf_50invmAB130_L12MU8F:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon:extra=mu_tag:te=0",
     "HLT_mu14_mu14_idperf_50invmAB130_L12MU8F:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon:extra=mu_probe:te=1",
 
+    "HLT_mu14_mu14_idtp_idZmumu_L12MU8F:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon:te=1",
+    "HLT_mu14_mu14_idtp_idZmumu_L12MU8F:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon:te=1:extra=mu_probe",
+    "HLT_mu14_mu14_idtp_idZmumu_L12MU8F:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon:te=0:extra=mu_tag",
+    "HLT_mu14_mu14_idtp_idZmumu_L12MU8F:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon:te=1",
+    "HLT_mu14_mu14_idtp_idZmumu_L12MU8F:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon:te=1:extra=mu_probe",
+    "HLT_mu14_mu14_idtp_idZmumu_L12MU8F:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon:te=0:extra=mu_tag",
+
     // "HLT_e17_lhvloose_nod0_L1EM15VH:HLT_IDTrack_Electron_FTF:HLT_Roi_FastElectron",
     // "HLT_e17_lhvloose_nod0_L1EM15VH:HLT_IDTrack_Electron_IDTrig",
     "HLT_e26_lhtight_gsf_ivarloose_L1EM22VHI:HLT_IDTrack_Electron_GSF",
