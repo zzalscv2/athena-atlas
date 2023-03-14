@@ -93,11 +93,4 @@ if DetFlags.haveRIO.SCT_on():
     from SiDetElementsRoadTool_xk.SiDetElementsRoadTool_xkConf import InDet__SiDetElementsRoadCondAlg_xk
     condSeq += InDet__SiDetElementsRoadCondAlg_xk(name = "InDet__SiDetElementsRoadCondAlg_xk")
 
-#SP formation
-from SiSpacePointTool.SiSpacePointToolConf import InDet__SiSpacePointMakerTool
-InDetTrigSiSpacePointMakerToolCosmics = InDet__SiSpacePointMakerTool(name = 'InDetTrigSiSpacePointMakerToolCosmics',
-                                                                     StripLengthTolerance = 0.05)
-if (InDetTrigFlags.doPrintConfigurables()):
-  print (InDetTrigSiSpacePointMakerToolCosmics)
-ToolSvc += InDetTrigSiSpacePointMakerToolCosmics
 

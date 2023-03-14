@@ -44,13 +44,7 @@ def makeInDetTrigPrecisionTracking( flags, config=None, verifier=False, rois='EM
                                  ( 'TrackCollection' , 'StoreGateSvc+' + config.trkTracks_FTF() )]
 
     
-    if config.newConfig:
-        log.info( "ID Trigger: NEW precision tracking configuration {} {}".format(config.input_name, signature) )
-        ambiSolvingAlgs = ambiguitySolver_builder( signature, config, summaryTool, outputTrackName=ambiTrackCollection, prefix=prefix+"Trk" )
-        log.info(ambiSolvingAlgs)
-    else:
-        log.info( "ID Trigger: OLD precision tracking configuration {} {}".format(config.input_name, signature) )
-        ambiSolvingAlgs = ambiguitySolverOld_builder( signature, config, summaryTool, outputTrackName=ambiTrackCollection, prefix=prefix )
+    ambiSolvingAlgs = ambiguitySolver_builder( signature, config, summaryTool, outputTrackName=ambiTrackCollection, prefix=prefix+"Trk" )
 
     #Loading the alg to the sequence
     ptAlgs.extend( ambiSolvingAlgs )
@@ -92,8 +86,6 @@ def makeInDetTrigPrecisionTracking( flags, config=None, verifier=False, rois='EM
     
     log.debug(trackParticleCnvAlg)
     ptAlgs.append(trackParticleCnvAlg)
-    
-    # ToolSvc.InDetTrigHoleSearchTool.SctSummaryTool.InDetTrigInDetSCT_FlaggedConditionTool.SCT_FlaggedCondData = "SCT_FlaggedCondData_TRIG"
     
     # Potentialy other algs with more collections? 
     # Might Drop the list in the end and keep just one output key
@@ -313,33 +305,6 @@ def scoringTool_builder( signature, config, summaryTool, prefix=None, SiOnly=Tru
   from InDetConfig.InDetTrackScoringToolsConfig import InDetAmbiScoringToolCfg
   scoringTool = CAtoLegacyPublicToolWrapper(InDetAmbiScoringToolCfg, **kwargs)
   return scoringTool
-
-
-
-
-def ambiguitySolverOld_builder( signature, config, summaryTool, outputTrackName=None, prefix="InDetTrigMT" ) :
-    
-    #-----------------------------------------------------------------------------
-    #                        Ambiguity solving stage
-    from .InDetTrigCommon import ambiguityScoreAlg_builder
-    from .InDetTrigCommon import ambiguitySolverAlg_builder
-    
-    # Map of tracks and their scores
-    scoreAlg = ambiguityScoreAlg_builder( name                  = prefix+'TrkAmbiguityScore_'+config.input_name,
-                                          config                = config,
-                                          inputTrackCollection  = config.trkTracks_FTF(),
-                                          outputTrackScoreMap   = 'ScoreMap'+config.input_name ) 
-    
-  
-    solverAlg = ambiguitySolverAlg_builder( name                  = prefix+'TrkAmbiguitySolver_'+config.input_name,
-                                            config                = config,
-                                            summaryTool           = summaryTool,
-                                            inputTrackScoreMap    = 'ScoreMap'+config.input_name,
-                                            outputTrackCollection = outputTrackName )
-    
-    return [ scoreAlg, solverAlg ] 
-
-
 
 
 def trtExtension_builder( signature, config, rois, summaryTool, inputTracks, outputTracks, prefix="InDetTrigMT" ): 
