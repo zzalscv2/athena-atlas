@@ -304,7 +304,7 @@ std::ostream& InDet::operator <<
 
 void InDet::SiDetElementsRoadMaker_xk::detElementsRoad
 (std::deque<Amg::Vector3D>& globalPositions,
- std::list<const InDetDD::SiDetectorElement*>& Road,
+ std::vector<const InDetDD::SiDetectorElement*>& Road,
  bool testDirection,
  SiDetElementRoadMakerData_xk & roadMakerData,
  const EventContext& ctx) const
@@ -540,7 +540,7 @@ void InDet::SiDetElementsRoadMaker_xk::detElementsRoad
  MagField::AtlasFieldCache& fieldCache,
  const Trk::TrackParameters& Tp,
  Trk::PropDirection direction,
- std::list<const InDetDD::SiDetectorElement*>& Road,
+ std::vector<const InDetDD::SiDetectorElement*>& Road,
  SiDetElementRoadMakerData_xk & roadMakerData) const
 {
   if (!m_usePIX && !m_useSCT) return;

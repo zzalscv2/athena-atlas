@@ -590,7 +590,7 @@ InDet::TRT_SeededTrackFinder_ATL::findTrack(const EventContext& ctx, MagField::A
     }
 
     //Get list of InDet Elements
-    std::list<const InDetDD::SiDetectorElement*> DE;
+    std::vector<const InDetDD::SiDetectorElement*> DE;
     m_roadmaker->detElementsRoad(ctx, fieldCache, *per,Trk::alongMomentum,DE,event_data.roadMakerData());
     if( int(DE.size()) < m_nclusmin){ //Not enough detector elements to satisfy the minimum number of clusters requirement. Stop
       ATH_MSG_DEBUG( "Too few detector elements, not expected" );

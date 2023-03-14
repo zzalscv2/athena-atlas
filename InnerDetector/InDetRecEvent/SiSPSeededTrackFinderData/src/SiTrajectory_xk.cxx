@@ -547,7 +547,7 @@ std::ostream& InDet::SiTrajectory_xk::dump( std::ostream& out ) const
 
 double InDet::SiTrajectory_xk::pTseed
  (const Trk::TrackParameters                            & Tp,
-  std::list<const InDet::SiCluster*>                    & Cl,
+  std::vector<const InDet::SiCluster*>                    & Cl,
   std::vector<const InDet::SiDetElementBoundaryLink_xk*>& DE,
   const EventContext                                    & ctx)
 {
@@ -555,7 +555,7 @@ double InDet::SiTrajectory_xk::pTseed
 
   InDet::SiClusterCollection::const_iterator  sib,sie;
   std::vector<const InDet::SiDetElementBoundaryLink_xk*>::iterator r=DE.begin(),re=DE.end();
-  std::list<const InDet::SiCluster*>                    ::iterator s=Cl.begin();
+  std::vector<const InDet::SiCluster*>                    ::iterator s=Cl.begin();
 
   int n = 0;
   if(!m_elements[n].set(1,(*r),sib,sie,(*s),ctx) ) return 0.;
@@ -581,7 +581,7 @@ bool InDet::SiTrajectory_xk::initialize
  const InDet::PixelClusterContainer*                  PIXc       ,
  const InDet::SCT_ClusterContainer*                   SCTc       ,
  const Trk::TrackParameters                          & Tp        ,
- std::list<const InDet::SiCluster*>                  & lSiCluster, 
+ std::vector<const InDet::SiCluster*>                  & lSiCluster, 
  std::vector<const InDet::SiDetElementBoundaryLink_xk*>& DE      ,
  bool                                                & rquality  ,
  const EventContext                                  & ctx       )
@@ -612,7 +612,7 @@ bool InDet::SiTrajectory_xk::initialize
 
   if(!initDeadMaterial and !m_surfacedead) m_surfacedead = std::make_unique<const Trk::CylinderSurface>(Rdead,5000.);
 
-  std::list<const InDet::SiCluster*>::iterator iter_cluster;
+  std::vector<const InDet::SiCluster*>::iterator iter_cluster;
   if (lSiCluster.size() < 2) return false;
 
   std::vector<const InDet::SiDetElementBoundaryLink_xk*>::iterator iter_boundaryLink,endBoundaryLinks=DE.end();
@@ -683,7 +683,7 @@ bool InDet::SiTrajectory_xk::initialize
               /// set our cluster pointer to point to this cluster 
               theCluster=(*iter_cluster);
               /// remove the cluster from the list 
-              lSiCluster.erase(iter_cluster);
+              iter_cluster=lSiCluster.erase(iter_cluster);
               /// and exit the loop over Si clusters. We can do this 
               /// because no two clusters are allowed to be on the same
               /// detector element 
@@ -746,7 +746,7 @@ bool InDet::SiTrajectory_xk::initialize
             m_ndfcut+=1;
             /// and update the cluster pointer, before cleaning up 
             theCluster=(*iter_cluster);
-            lSiCluster.erase(iter_cluster);
+            iter_cluster=lSiCluster.erase(iter_cluster);
             /// remember - only one cluster per detector element is possible due to 
             /// upstream filtering. So we can exit when we found one. 
             break;
@@ -916,7 +916,7 @@ bool InDet::SiTrajectory_xk::trackParametersToClusters
  const Trk::TrackParameters                              & Tp        ,
  std::vector<const InDet::SiDetElementBoundaryLink_xk*>    & DE      ,
  std::multimap<const Trk::PrepRawData*,const Trk::Track*>& PT        ,
- std::list<const InDet::SiCluster*>                      & lSiCluster) 
+ std::vector<const InDet::SiCluster*>                      & lSiCluster) 
 {
   m_nElements = 0;
   m_ndf       = 0;
@@ -1000,7 +1000,7 @@ bool InDet::SiTrajectory_xk::globalPositionsToClusters
  const std::vector<Amg::Vector3D>                          & Gp        ,
  std::vector<const InDet::SiDetElementBoundaryLink_xk*>    & DE        ,
  std::multimap<const Trk::PrepRawData*,const Trk::Track*>& PT        ,
- std::list<const InDet::SiCluster*>                      & lSiCluster)
+ std::vector<const InDet::SiCluster*>                      & lSiCluster)
 {
   std::vector<const InDet::SiDetElementBoundaryLink_xk*>::iterator iter_boundaryLink = DE.begin(), endBoundaryLinks = DE.end();
   std::vector<Amg::Vector3D>::const_iterator g,gb = Gp.begin(), ge = Gp.end();
@@ -1855,7 +1855,7 @@ bool InDet::SiTrajectory_xk::forwardExtension(bool smoother,int itmax)
 ///////////////////////////////////////////////////////////////////
 
 void InDet::SiTrajectory_xk::getClusters
-(std::list<const InDet::SiCluster*>& Cl) const
+(std::vector<const InDet::SiCluster*>& Cl) const
 {
   for (int i = m_firstElement; i<=m_lastElement; ++i) {
     int m = m_elementsMap[i];

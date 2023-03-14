@@ -243,7 +243,7 @@ namespace InDet{
       static void globalDirections(const double* p0, const double* p1, const double* p2, double* d0, double* d1, double* d2) ;
       InDet::TrackQualityCuts setTrackQualityCuts(bool simpleTrack) const;
       static void detectorElementsSelection(SiTrackMakerEventData_xk& data,
-                                     std::list<const InDetDD::SiDetectorElement*>& DE) ;
+                                     std::vector<const InDetDD::SiDetectorElement*>& DE) ;
       bool newSeed(SiTrackMakerEventData_xk& data, const std::vector<const Trk::SpacePoint*>& Sp) const;
       static int  kindSeed(const std::vector<const Trk::SpacePoint*>& Sp)  ;
       static int  rapidity(const std::vector<const Trk::SpacePoint*>& Sp) ;

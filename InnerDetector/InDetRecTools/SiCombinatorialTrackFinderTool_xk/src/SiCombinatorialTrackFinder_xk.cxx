@@ -326,7 +326,7 @@ const std::list<Trk::Track*>&  InDet::SiCombinatorialTrackFinder_xk::getTracks
  const Trk::TrackParameters& Tp,
  const std::vector<const Trk::SpacePoint*>& Sp,
  const std::vector<Amg::Vector3D>& Gp,
- std::list<const InDetDD::SiDetectorElement*>& DE,
+ std::vector<const InDetDD::SiDetectorElement*>& DE,
  const TrackQualityCuts& Cuts,
  const EventContext& ctx) const
 {
@@ -392,7 +392,7 @@ const std::list<Trk::Track*>& InDet::SiCombinatorialTrackFinder_xk::getTracks
  const Trk::TrackParameters& Tp,
  const std::vector<const Trk::SpacePoint*>& Sp,
  const std::vector<Amg::Vector3D>& Gp,
- std::list<const InDetDD::SiDetectorElement*>& DE,
+ std::vector<const InDetDD::SiDetectorElement*>& DE,
  std::multimap<const Trk::PrepRawData*, const Trk::Track*>& PT,
  const EventContext& ctx) const
 {
@@ -460,7 +460,7 @@ const std::list<Trk::Track*>&  InDet::SiCombinatorialTrackFinder_xk::getTracksWi
  const Trk::TrackParameters& Tp,
  const std::vector<const Trk::SpacePoint*>& Sp,
  const std::vector<Amg::Vector3D>& Gp,
- std::list<const InDetDD::SiDetectorElement*>& DE,
+ std::vector<const InDetDD::SiDetectorElement*>& DE,
  std::multimap<const Trk::PrepRawData*, const Trk::Track*>& PT,
  bool isCaloCompatible,
  const EventContext& ctx) const
@@ -572,8 +572,8 @@ double InDet::SiCombinatorialTrackFinder_xk::pTseed
  const std::vector<const Trk::SpacePoint*>& Sp,
  const EventContext& ctx) const
 {
-  std::list<const InDet::SiCluster*>           Cl;
-  std::list<const InDetDD::SiDetectorElement*> DE;
+  std::vector<const InDet::SiCluster*>           Cl;
+  std::vector<const InDetDD::SiDetectorElement*> DE;
   if(!spacePointsToClusters(Sp,Cl,DE)) return 0.;
 
   std::vector<const InDet::SiDetElementBoundaryLink_xk*> DEL;
@@ -590,7 +590,7 @@ InDet::SiCombinatorialTrackFinder_xk::EStat_t InDet::SiCombinatorialTrackFinder_
  const Trk::TrackParameters& Tp,
  const std::vector<const Trk::SpacePoint*>& Sp,
  const std::vector<Amg::Vector3D>& Gp,
- std::list<const InDetDD::SiDetectorElement*>& DE,
+ std::vector<const InDetDD::SiDetectorElement*>& DE,
  std::multimap<const Trk::PrepRawData*,const Trk::Track*>& PT,
  const EventContext& ctx) const
 {
@@ -616,7 +616,7 @@ InDet::SiCombinatorialTrackFinder_xk::EStat_t InDet::SiCombinatorialTrackFinder_
   }
 
   /// Cluster list preparationn
-  std::list<const InDet::SiCluster*> Cl;
+  std::vector<const InDet::SiCluster*> Cl;
   bool isTwoPointSeed = false;
 
   /// in inside-out track finding, Sp.size() is typically 3
@@ -910,10 +910,10 @@ void InDet::SiCombinatorialTrackFinder_xk::magneticFieldInit()
 ///////////////////////////////////////////////////////////////////
 
 bool InDet::SiCombinatorialTrackFinder_xk::spacePointsToClusters
-(const std::vector<const Trk::SpacePoint*>& Sp, std::list<const InDet::SiCluster*>& Sc) 
+(const std::vector<const Trk::SpacePoint*>& Sp, std::vector<const InDet::SiCluster*>& Sc) 
 {
 
-  std::list<const InDetDD::SiDetectorElement*> DE;
+  std::vector<const InDetDD::SiDetectorElement*> DE;
   return spacePointsToClusters(Sp,Sc,DE);
 
 }
@@ -923,7 +923,7 @@ bool InDet::SiCombinatorialTrackFinder_xk::spacePointsToClusters
 ///////////////////////////////////////////////////////////////////
 
 bool InDet::SiCombinatorialTrackFinder_xk::spacePointsToClusters
-(const std::vector<const Trk::SpacePoint*>& Sp, std::list<const InDet::SiCluster*>& Sc, std::list<const InDetDD::SiDetectorElement*>& DE)
+(const std::vector<const Trk::SpacePoint*>& Sp, std::vector<const InDet::SiCluster*>& Sc, std::vector<const InDetDD::SiDetectorElement*>& DE)
 {
   /// loop over all SP
   for (const Trk::SpacePoint* s: Sp) {
@@ -943,7 +943,7 @@ bool InDet::SiCombinatorialTrackFinder_xk::spacePointsToClusters
   }
 
   ///  Detector elments test
-  std::list<const InDet::SiCluster*>::iterator cluster = Sc.begin(), nextCluster, endClusters = Sc.end();
+  std::vector<const InDet::SiCluster*>::iterator cluster = Sc.begin(), nextCluster, endClusters = Sc.end();
 
   /// here we reject cases where two subsequent clusters are on the same detector element
   for (; cluster!=endClusters; ++cluster) {
@@ -966,7 +966,7 @@ bool InDet::SiCombinatorialTrackFinder_xk::spacePointsToClusters
 ///////////////////////////////////////////////////////////////////
 
 void InDet::SiCombinatorialTrackFinder_xk::detectorElementLinks
-(std::list<const InDetDD::SiDetectorElement*>        & DE,
+(std::vector<const InDetDD::SiDetectorElement*>        & DE,
  std::vector<const InDet::SiDetElementBoundaryLink_xk*>& DEL,
  const EventContext& ctx) const
 {
