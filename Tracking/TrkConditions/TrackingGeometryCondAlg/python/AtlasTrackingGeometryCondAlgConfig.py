@@ -40,7 +40,8 @@ def _setupCondDB(flags, CoolDataBaseFolder, quiet=True):
             result.merge(addFolders(flags,
                                     "/GLOBAL/TrackingGeo/LayerMaterialITK",
                                     detDb=DataBaseName,
-                                    tag=atlasMaterialTag))
+                                    tag=atlasMaterialTag,
+                                    className='Trk::LayerMaterialMap'))
         else:
             materialFileTag = atlasMaterialTag + '_'+ \
                               flags.GeoModel.AtlasVersion
