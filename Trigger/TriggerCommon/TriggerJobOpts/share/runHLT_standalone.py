@@ -20,26 +20,15 @@
 #
 class opt:
     setMenu          = None           # option to overwrite flags.Trigger.triggerMenuSetup
-    setDetDescr      = None           # OBSOLETE: force geometry tag, use flags instead
-    setGlobalTag     = None           # OBSOLETE: force global conditions tag, use flags instead
     condOverride     = {}             # overwrite conditions folder tags e.g. '{"Folder1":"Tag1", "Folder2":"Tag2"}'
     doHLT            = True           # run HLT?
-    doID             = True           # ConfigFlags.Trigger.doID
-    doCalo           = True           # ConfigFlags.Trigger.doCalo
-    doMuon           = True           # ConfigFlags.Trigger.doMuon
     doWriteRDOTrigger = False         # Write out RDOTrigger?
     doWriteBS        = True           # Write out BS?
-    doL1Unpacking    = True           # decode L1 data in input file if True, else setup emulation
     doL1Sim          = False          # (re)run L1 simulation
     doEmptyMenu      = False          # Disable all chains, except those re-enabled by specific slices
     createHLTMenuExternally = False   # Set to True if the menu is build manually outside runHLT_standalone.py
     endJobAfterGenerate = False       # Finish job after menu generation
     forceEnableAllChains = False      # if True, all HLT chains will run even if the L1 item is false
-    enableL1MuonPhase1   = None       # option to overwrite flags.Trigger.enableL1MuonPhase1
-    enableL1CaloLegacy = True         # Enable Run-2 L1Calo simulation and/or decoding (possible even if enablePhase1 is True)
-    enableL1TopoDump = False          # Enable L1Topo simulation to write inputs to txt
-    enableL1TopoBWSimulation = False  # Enable bitwise L1Topo simulation
-    enableL1NSWEmulation = False      # Enable TGC-NSW coincidence emulator : ConfigFlags.Trigger.L1MuonSim.EmulateNSW
     enableL1NSWVetoMode = True        # Enable TGC-NSW coincidence veto mode: ConfigFlags.Trigger.L1MuonSim.NSWVetoMode
     enableL1NSWMMTrigger = True       # Enable MM trigger for TGC-NSW coincidence : ConfigFlags.Trigger.L1MuonSim.doMMTrigger
     enableL1NSWPadTrigger = True      # Enable sTGC Pad trigger for TGC-NSW coincidence : ConfigFlags.Trigger.L1MuonSim.doPadTrigger
@@ -65,11 +54,24 @@ class opt:
     doCosmicSlice     = True
     doUnconventionalTrackingSlice   = True
     reverseViews      = False
-    filterViews       = False
     enabledSignatures = []
     disabledSignatures = []
     selectChains      = []
     disableChains     = []
+
+# Emit an error if any of these obsolete options is used:
+opt_obsolete = ['setDetDescr',
+                'setGlobalTag',
+                'doL1Unpacking',
+                'enableL1MuonPhase1',
+                'enableL1CaloLegacy',
+                'enableL1TopoDump',
+                'enableL1TopoBWSimulation',
+                'enableL1NSWEmulation',
+                'doID',
+                'doCalo',
+                'doMuon',
+]
 
 ################################################################################
 from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
@@ -92,11 +94,9 @@ for option in defaultOptions:
     else:
         print(' %20s = (Default) %s' % (option, getattr(opt, option)))
 
-if opt.setGlobalTag is not None:
-    log.error("setGlobalTag is not supported anymore: set flags.IOVDb.GlobalTag instead")
-
-if opt.setDetDescr is not None:
-    log.error("setDetDescr is not supported anymore: set flags.GeoModel.AtlasVersion instead")
+for option in opt_obsolete:
+    if option in globals():
+        log.error("%s is not supported anymore. Set the relevant flag instead.", option)
 
 import re
 
@@ -193,13 +193,6 @@ if flags.Input.Format is Format.BS or opt.doL1Sim:
 
 # Translate a few other flags
 flags.Trigger.doLVL1 = opt.doL1Sim
-if opt.enableL1MuonPhase1 is not None:
-    flags.Trigger.enableL1MuonPhase1 = opt.enableL1MuonPhase1
-flags.Trigger.enableL1CaloLegacy = opt.enableL1CaloLegacy
-flags.Trigger.enableL1TopoDump = opt.enableL1TopoDump
-flags.Trigger.enableL1TopoBWSimulation = opt.enableL1TopoBWSimulation
-
-flags.Trigger.L1MuonSim.EmulateNSW  = opt.enableL1NSWEmulation
 flags.Trigger.L1MuonSim.NSWVetoMode = opt.enableL1NSWVetoMode
 flags.Trigger.L1MuonSim.doMMTrigger = opt.enableL1NSWMMTrigger
 flags.Trigger.L1MuonSim.doPadTrigger = opt.enableL1NSWPadTrigger
@@ -207,9 +200,6 @@ flags.Trigger.L1MuonSim.doStripTrigger = opt.enableL1NSWStripTrigger
 flags.Trigger.L1MuonSim.doBIS78 = opt.enableL1RPCBIS78
 
 flags.Trigger.doHLT = bool(opt.doHLT)
-flags.Trigger.doID = opt.doID
-flags.Trigger.doMuon = opt.doMuon
-flags.Trigger.doCalo = opt.doCalo
 flags.InDet.useDCS = False   # DCS is in general not available online
 
 # Set legacy Cond/Geo tags:
@@ -505,13 +495,9 @@ if opt.doL1Sim:
 # ---------------------------------------------------------------
 # Add HLTSeeding providing inputs to HLT
 # ---------------------------------------------------------------
-if opt.doL1Unpacking:
-    if flags.Input.Format is Format.BS or opt.doL1Sim:
-        from HLTSeeding.HLTSeedingConfig import HLTSeedingCfg
-        CAtoGlobalWrapper(HLTSeedingCfg, flags, seqName="HLTBeginSeq")
-    else:
-        from DecisionHandling.TestUtils import L1EmulationTest
-        hltBeginSeq += L1EmulationTest()
+from HLTSeeding.HLTSeedingConfig import HLTSeedingCfg
+CAtoGlobalWrapper(HLTSeedingCfg, flags, seqName="HLTBeginSeq")
+
 
 # ---------------------------------------------------------------
 # HLT generation
@@ -628,16 +614,11 @@ if opt.doWriteBS or opt.doWriteRDOTrigger:
 #-------------------------------------------------------------
 # Debugging for view cross-dependencies
 #-------------------------------------------------------------
-if opt.reverseViews or opt.filterViews:
+if opt.reverseViews:
     from TriggerJobOpts.TriggerConfig import collectViewMakers
     viewMakers = collectViewMakers( topSequence )
-    theFilter = []
-    if opt.filterViews:
-        # no idea why the FS vertex would be needed here, but I'll add the FSJet vertex also for good measure
-        theFilter = [ "Cache", "EventInfo", "HLT_IDVertex_FS", "HLT_IDVertex_FSJet" ]
     for alg in viewMakers:
         alg.ReverseViewsDebug = opt.reverseViews
-        alg.FallThroughFilter = theFilter
 
 #-------------------------------------------------------------
 # Disable overly verbose and problematic ChronoStatSvc print-out

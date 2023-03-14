@@ -33,6 +33,7 @@ from TriggerJobOpts.TriggerConfigFlags import ROBPrefetching
 flags.Trigger.generateMenuDiagnostics = True
 flags.Trigger.triggerMenuSetup = "Dev_pp_run3_v1"
 flags.Trigger.ROBPrefetchingOptions = [ROBPrefetching.StepRoI]
+flags.Trigger.enableL1MuonPhase1 = False  # doesn't work in this minimal setup
 
 createHLTMenuExternally=True # menu will be build up explicitly here 
 doWriteRDOTrigger = False
