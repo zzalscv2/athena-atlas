@@ -21,6 +21,7 @@
 #include "GaudiKernel/EventContext.h"
 
 #include <list>
+#include <vector>
 #include <map>
 
 class MsgStream;
@@ -70,14 +71,14 @@ namespace InDet {
           SiCombinatorialTrackFinderData_xk& data, const Trk::TrackParameters&,
           const std::vector<const Trk::SpacePoint*>&,
           const std::vector<Amg::Vector3D>&,
-          std::list<const InDetDD::SiDetectorElement*>&,
+          std::vector<const InDetDD::SiDetectorElement*>&,
           const TrackQualityCuts&, const EventContext&) const = 0;
 
       virtual const std::list<Trk::Track*>& getTracks(
           SiCombinatorialTrackFinderData_xk& data, const Trk::TrackParameters&,
           const std::vector<const Trk::SpacePoint*>&,
           const std::vector<Amg::Vector3D>&,
-          std::list<const InDetDD::SiDetectorElement*>&,
+          std::vector<const InDetDD::SiDetectorElement*>&,
           std::multimap<const Trk::PrepRawData*, const Trk::Track*>&,
           const EventContext&) const = 0;
 
@@ -85,7 +86,7 @@ namespace InDet {
           SiCombinatorialTrackFinderData_xk& data, const Trk::TrackParameters&,
           const std::vector<const Trk::SpacePoint*>&,
           const std::vector<Amg::Vector3D>&,
-          std::list<const InDetDD::SiDetectorElement*>&,
+          std::vector<const InDetDD::SiDetectorElement*>&,
           std::multimap<const Trk::PrepRawData*, const Trk::Track*>&, bool,
           const EventContext&) const = 0;
 

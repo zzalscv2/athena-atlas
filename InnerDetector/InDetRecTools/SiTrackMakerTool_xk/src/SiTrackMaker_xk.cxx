@@ -683,7 +683,7 @@ std::list<Trk::Track*> InDet::SiTrackMaker_xk::getTracks
   /// This is done by extrapolating our estimated starting parameters through the detector
   /// and collecting all detector elements reasonably close to the projected trajectory.
   /// This will populate the 'DE" list.
-  std::list<const InDetDD::SiDetectorElement*> DE;
+  std::vector<const InDetDD::SiDetectorElement*> DE;
   if (!m_cosmicTrack) m_roadmaker->detElementsRoad(ctx, fieldCache, *Tp,Trk::alongMomentum,   DE, data.roadMakerData());
   else                m_roadmaker->detElementsRoad(ctx, fieldCache, *Tp,Trk::oppositeMomentum,DE, data.roadMakerData());
 
@@ -784,7 +784,7 @@ std::list<Trk::Track*> InDet::SiTrackMaker_xk::getTracks
 
   // Get detector elements road
   //
-  std::list<const InDetDD::SiDetectorElement*> DE;
+  std::vector<const InDetDD::SiDetectorElement*> DE;
   if (!m_cosmicTrack) m_roadmaker->detElementsRoad(ctx, fieldCache, Tp,Trk::alongMomentum,   DE, data.roadMakerData());
   else                m_roadmaker->detElementsRoad(ctx, fieldCache, Tp,Trk::oppositeMomentum,DE, data.roadMakerData());
 
@@ -1005,9 +1005,9 @@ InDet::TrackQualityCuts InDet::SiTrackMaker_xk::setTrackQualityCuts(bool simpleT
 ///////////////////////////////////////////////////////////////////
 
 void InDet::SiTrackMaker_xk::detectorElementsSelection(SiTrackMakerEventData_xk& data,
-                                                       std::list<const InDetDD::SiDetectorElement*>& DE) 
+                                                       std::vector<const InDetDD::SiDetectorElement*>& DE) 
 {
-  std::list<const InDetDD::SiDetectorElement*>::iterator d = DE.begin();
+  std::vector<const InDetDD::SiDetectorElement*>::iterator d = DE.begin();
   while (d!=DE.end()) {
     if ((*d)->isPixel()) {
       if (!data.pix()) {
@@ -1020,7 +1020,6 @@ void InDet::SiTrackMaker_xk::detectorElementsSelection(SiTrackMakerEventData_xk&
     }
     ++d;
   }
-
 }
 
 ///////////////////////////////////////////////////////////////////

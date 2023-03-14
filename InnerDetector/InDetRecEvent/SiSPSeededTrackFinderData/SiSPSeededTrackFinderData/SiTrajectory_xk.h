@@ -80,13 +80,13 @@ namespace InDet{
          const PixelClusterContainer*                         ,
          const SCT_ClusterContainer*                          ,
          const Trk::TrackParameters                          &,
-         std::list<const InDet::SiCluster*>                  &,
+         std::vector<const InDet::SiCluster*>                  &,
          std::vector<const InDet::SiDetElementBoundaryLink_xk*>&,
          bool                                                &,
          const EventContext&);
 
       double pTseed(const Trk::TrackParameters&,
-                    std::list<const InDet::SiCluster*>&,
+                    std::vector<const InDet::SiCluster*>&,
                     std::vector<const InDet::SiDetElementBoundaryLink_xk*>&,
                     const EventContext&);
 
@@ -96,7 +96,7 @@ namespace InDet{
          const Trk::TrackParameters                              &,
          std::vector<const InDet::SiDetElementBoundaryLink_xk*>  &,
          std::multimap<const Trk::PrepRawData*,const Trk::Track*>&,
-         std::list<const InDet::SiCluster*>                      &);
+         std::vector<const InDet::SiCluster*>                      &);
       
       bool globalPositionsToClusters
         (const PixelClusterContainer*                             ,
@@ -104,7 +104,7 @@ namespace InDet{
          const std::vector<Amg::Vector3D>                         &,
          std::vector<const InDet::SiDetElementBoundaryLink_xk*>  &,
          std::multimap<const Trk::PrepRawData*,const Trk::Track*>&,
-         std::list<const InDet::SiCluster*>                      &);
+         std::vector<const InDet::SiCluster*>                      &);
 
       bool backwardExtension(int);
       bool forwardExtension (bool,int);
@@ -119,7 +119,7 @@ namespace InDet{
        */
       const Trk::PatternTrackParameters *firstParameters() const;
       std::unique_ptr<Trk::TrackParameters> firstTrackParameters();
-      void getClusters(std::list<const InDet::SiCluster*>&) const;
+      void getClusters(std::vector<const InDet::SiCluster*>&) const;
 
       DataVector<const Trk::TrackStateOnSurface>
       convertToTrackStateOnSurface();

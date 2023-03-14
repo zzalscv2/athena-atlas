@@ -22,6 +22,7 @@
 
 #include <list>
 #include <deque>
+#include <vector>
 
 class MsgStream;
 
@@ -62,13 +63,13 @@ namespace InDet {
       /// encountered while traversing in the positive direction. 
       /// 
       /// @param[in] globalPositions: set of points along the trajectory. Will linearise between them. 
-      /// @param[out] Road: List to be populated with the elements of the search road. Will be sorted along the trajectory. 
+      /// @param[out] Road: vector to be populated with the elements of the search road. Will be sorted along the trajectory. 
       /// @param[in] testDirection: If set, avoid adding detector elements encountered only when travelling in the negative direction. Set true for inside-out tracking, false for cosmic tracking. 
       /// @param[in,out] roadMakerData: event data object used to cache information during an event in a thread-safe way 
       //@{
       virtual void detElementsRoad
       ( std::deque<Amg::Vector3D>& globalPositions,
-	      std::list<const InDetDD::SiDetectorElement*>& Road,
+	      std::vector<const InDetDD::SiDetectorElement*>& Road,
         bool testDirection, 
         InDet::SiDetElementRoadMakerData_xk & roadMakerData,
         const EventContext& ctx) const=0;
@@ -86,9 +87,9 @@ namespace InDet {
        MagField::AtlasFieldCache& fieldCache,
        const Trk::TrackParameters& Tp,
        Trk::PropDirection direction,
-       std::list<const InDetDD::SiDetectorElement*>& Road, 
+       std::vector<const InDetDD::SiDetectorElement*>& Road, 
        InDet::SiDetElementRoadMakerData_xk & roadMakerData) const=0;
-      //@} 
+      //@}
 
       ///////////////////////////////////////////////////////////////////
       /// @name Print internal tool parameters and status
