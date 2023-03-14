@@ -24,22 +24,10 @@ class CondDB:
 
 @cache
 def get_sor_params(run_number):
-   import pickle
-   cool_cache = 'AthHLT.sor.pkl'
-
-   try:
-      # Try to load the SOR record from the file cache
-      d = pickle.load(open(cool_cache, 'rb'))
-      if d['RunNumber'] != run_number:
-         raise Exception('Cache does not contain current run')
-      log.info('Reading cached SOR record for run %s from %s', run_number, cool_cache)
-      return d
-   except Exception as e:
-      d = {}
-      log.verbose('Could not read SOR record from cache: %s' % e)
-      log.info('Reading SOR record for run %s from COOL', run_number)
-
    from CoolConvUtilities import AtlCoolLib
+
+   log.info('Reading SOR record for run %s from COOL', run_number)
+
    cdb = CondDB(run_number)
    dbcon = AtlCoolLib.readOpen('COOLONL_TDAQ/%s' % cdb.db_instance())
    folder = dbcon.getFolder(cdb.sor_folder())
@@ -55,11 +43,6 @@ def get_sor_params(run_number):
 
    payload = sor.payload()
    d = {k: payload[k] for k in payload}
-   try:
-      pickle.dump(d, open(cool_cache, 'wb'))
-   except Exception:
-      log.info('Could not store SOR record in cache %s', cool_cache)
-
    return d
 
 
