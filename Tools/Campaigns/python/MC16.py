@@ -65,7 +65,7 @@ def MC16SimulationNoIoV(flags):
     """MC16 flags for simulation without specifying conditions IoVs"""
     flags.Input.MCCampaign = Campaign.MC16a
 
-    from SimulationConfig.SimEnums import SimulationFlavour, TruthStrategy
+    from SimulationConfig.SimEnums import TruthStrategy
     flags.Sim.PhysicsList = 'FTFP_BERT_ATL'
     flags.Sim.TruthStrategy = TruthStrategy.MC15aPlus
 
@@ -74,7 +74,7 @@ def MC16SimulationNoIoV(flags):
 
     from SimuJobTransforms.SimulationHelpers import enableBeamPipeKill, enableFrozenShowersFCalOnly
     enableBeamPipeKill(flags)
-    if flags.Sim.ISF.Simulator in [SimulationFlavour.FullG4MT, SimulationFlavour.FullG4MT_QS]:
+    if flags.Sim.ISF.Simulator.isFullSim():
         enableFrozenShowersFCalOnly(flags)
 
 
