@@ -58,7 +58,9 @@ namespace ActsTrk {
     ATH_MSG_DEBUG( "Executing " << name() <<" ... " );
 
     auto timer = Monitored::Timer<std::chrono::milliseconds>( "TIME_execute" );
-    auto mon = Monitored::Group( m_monTool, timer );
+    auto time_seedCreation = Monitored::Timer<std::chrono::milliseconds>( "TIME_seedCreation" );
+    auto time_parameterEstimation = Monitored::Timer<std::chrono::milliseconds>( "TIME_parameterEstimation" );
+    auto mon = Monitored::Group( m_monTool, timer, time_seedCreation, time_parameterEstimation );
     
     // ================================================== //
     // ===================== CONDS ====================== // 
@@ -151,11 +153,13 @@ namespace ActsTrk {
     // ================================================== // 
 
     ATH_MSG_DEBUG("Running Seed Finding ...");    
+    time_seedCreation.start();
     ATH_CHECK( m_seedsTool->createSeeds( ctx, 
 					 selectedSpacePoints,
 					 beamPos,
 					 bField,
 					 *seedPtrs.get() ) );
+    time_seedCreation.stop();
     ATH_MSG_DEBUG("    \\__ Created " << seedPtrs->size() << " seeds");
 
     // ================================================== //   
@@ -175,6 +179,7 @@ namespace ActsTrk {
 
     auto geo_context = m_trackingGeometryTool->getNominalGeometryContext();
 
+    time_parameterEstimation.start();
     for (const ActsTrk::Seed* seed : *seedPtrs) {
       std::optional<Acts::BoundTrackParameters> optTrackParams =
         m_paramEstimationTool->estimateTrackParameters(ctx,
@@ -189,6 +194,7 @@ namespace ActsTrk {
 	trackParams->push_back( toAdd );
       }
     }
+    time_parameterEstimation.stop();
 
     // ================================================== //   
     // ===================== STORE OUTPUT =============== //
