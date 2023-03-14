@@ -831,6 +831,7 @@ class ItemDef:
         MenuItem('L1_2MU3V_J40_XE20' ).setLogic( d.MU3V.x(2) & d.J40 & d.XE20  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_MU14FCH_J40' ).setLogic( d.MU14FCH & d.J40 & physcond).setTriggerType(TT.calo) ## ATR-14377
         MenuItem('L1_MU14FCH_XE30').setLogic( d.MU14FCH & d.XE30 & physcond).setTriggerType(TT.calo) ## ATR-14377
+        MenuItem('L1_MU14FCH_XE40').setLogic( d.MU14FCH & d.XE40 & physcond).setTriggerType(TT.calo) ## ATR-19376
         MenuItem('L1_MU14FCH_jJ80' ).setLogic( d.MU14FCH & d.jJ80 & physcond).setTriggerType(TT.calo) 
         MenuItem('L1_MU14FCH_jXE70').setLogic( d.MU14FCH & d.jXE70 & physcond).setTriggerType(TT.calo) 
 

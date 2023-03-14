@@ -18,6 +18,9 @@ def defineMenu():
         'L1_MU14FCH_jJ80',
         'L1_MU14FCH_jXE70',
 
+        # ATR-19376
+        'L1_MU14FCH_XE40',
+        'L1_MU14FCH_J50',
         # ATR-24037 
         'L1_jXEPerf100',
 

@@ -5884,6 +5884,38 @@ HLT_mu20_msonly_L1MU14FCH:
   eventCount: 0
 HLT_mu20_msonly_L1MU18VFCH:
   eventCount: 0
+HLT_mu20_msonly_iloosems_mu6noL1_msonly_nscan10_L110DR-MU14FCH-MU5VF:
+  eventCount: 0
+HLT_mu20_msonly_iloosems_mu6noL1_msonly_nscan20_L110DR-MU14FCH-MU5VF:
+  eventCount: 0
+HLT_mu20_msonly_iloosems_mu6noL1_msonly_nscan20_L1MU14FCH_J40:
+  eventCount: 0
+HLT_mu20_msonly_iloosems_mu6noL1_msonly_nscan20_L1MU14FCH_J50:
+  eventCount: 0
+HLT_mu20_msonly_iloosems_mu6noL1_msonly_nscan20_L1MU14FCH_XE30:
+  eventCount: 0
+HLT_mu20_msonly_iloosems_mu6noL1_msonly_nscan20_L1MU14FCH_XE40:
+  eventCount: 0
+HLT_mu20_msonly_iloosems_mu6noL1_msonly_nscan30_L110DR-MU14FCH-MU5VF:
+  eventCount: 0
+HLT_mu20_msonly_iloosems_mu6noL1_msonly_nscan30_L1MU14FCH_J40:
+  eventCount: 0
+HLT_mu20_msonly_iloosems_mu6noL1_msonly_nscan30_L1MU14FCH_J50:
+  eventCount: 0
+HLT_mu20_msonly_iloosems_mu6noL1_msonly_nscan30_L1MU14FCH_XE30:
+  eventCount: 0
+HLT_mu20_msonly_iloosems_mu6noL1_msonly_nscan30_L1MU14FCH_XE40:
+  eventCount: 0
+HLT_mu20_msonly_iloosems_mu6noL1_msonly_nscan40_L110DR-MU14FCH-MU5VF:
+  eventCount: 0
+HLT_mu20_msonly_iloosems_mu6noL1_msonly_nscan40_L1MU14FCH_J40:
+  eventCount: 0
+HLT_mu20_msonly_iloosems_mu6noL1_msonly_nscan40_L1MU14FCH_J50:
+  eventCount: 0
+HLT_mu20_msonly_iloosems_mu6noL1_msonly_nscan40_L1MU14FCH_XE30:
+  eventCount: 0
+HLT_mu20_msonly_iloosems_mu6noL1_msonly_nscan40_L1MU14FCH_XE40:
+  eventCount: 0
 HLT_mu20_msonly_iloosems_mu6noL1_msonly_nscan_L110DR-MU14FCH-MU5VF:
   eventCount: 0
 HLT_mu20_msonly_iloosems_mu6noL1_msonly_nscan_L1MU14FCH:
