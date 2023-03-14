@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelConfigCondAlg.h"
@@ -331,7 +331,7 @@ StatusCode PixelConfigCondAlg::execute(const EventContext& ctx) const {
       mapsPath_list3D.push_back(PathResolverFindCalibFile(m_3DFluenceMap2018[i]));
     }
   }
-  else {  // RUN3 2022
+  else if (currentRunNumber<450000) {  // RUN3 2022 (mc21a/mc23a)
     writeCdo -> setBarrelToTThreshold(m_BarrelToTThreshold2022);
     writeCdo -> setFEI3BarrelLatency(m_FEI3BarrelLatency2022);
     writeCdo -> setFEI3BarrelHitDuplication(m_FEI3BarrelHitDuplication2022);
@@ -375,7 +375,51 @@ StatusCode PixelConfigCondAlg::execute(const EventContext& ctx) const {
     for (size_t i=0; i<m_3DFluenceMap2022.size(); i++) {
       mapsPath_list3D.push_back(PathResolverFindCalibFile(m_3DFluenceMap2022[i]));
     }
+  }
+  else {  // RUN3 2023 (mc23c)
+    writeCdo -> setBarrelToTThreshold(m_BarrelToTThreshold2023);
+    writeCdo -> setFEI3BarrelLatency(m_FEI3BarrelLatency2023);
+    writeCdo -> setFEI3BarrelHitDuplication(m_FEI3BarrelHitDuplication2023);
+    writeCdo -> setFEI3BarrelSmallHitToT(m_FEI3BarrelSmallHitToT2023);
+    writeCdo -> setFEI3BarrelTimingSimTune(m_FEI3BarrelTimingSimTune2023);
+    writeCdo -> setBarrelCrossTalk(m_BarrelCrossTalk2023);
+    writeCdo -> setBarrelNoiseOccupancy(m_BarrelNoiseOccupancy2023);
+    writeCdo -> setBarrelDisableProbability(m_BarrelDisableProbability2023);
+    writeCdo -> setBarrelLorentzAngleCorr(m_BarrelLorentzAngleCorr2023);
+    writeCdo -> setDefaultBarrelBiasVoltage(m_BarrelBiasVoltage2023);
 
+    writeCdo -> setEndcapToTThreshold(m_EndcapToTThreshold2023);
+    writeCdo -> setFEI3EndcapLatency(m_FEI3EndcapLatency2023);
+    writeCdo -> setFEI3EndcapHitDuplication(m_FEI3EndcapHitDuplication2023);
+    writeCdo -> setFEI3EndcapSmallHitToT(m_FEI3EndcapSmallHitToT2023);
+    writeCdo -> setFEI3EndcapTimingSimTune(m_FEI3EndcapTimingSimTune2023);
+    writeCdo -> setEndcapCrossTalk(m_EndcapCrossTalk2023);
+    writeCdo -> setEndcapNoiseOccupancy(m_EndcapNoiseOccupancy2023);
+    writeCdo -> setEndcapDisableProbability(m_EndcapDisableProbability2023);
+    writeCdo -> setEndcapLorentzAngleCorr(m_EndcapLorentzAngleCorr2023);
+    writeCdo -> setDefaultEndcapBiasVoltage(m_EndcapBiasVoltage2023);
+
+    writeCdo -> setDBMToTThreshold(m_DBMToTThreshold2023);
+    writeCdo -> setDBMCrossTalk(m_DBMCrossTalk2023);
+    writeCdo -> setDBMNoiseOccupancy(m_DBMNoiseOccupancy2023);
+    writeCdo -> setDBMDisableProbability(m_DBMDisableProbability2023);
+    writeCdo -> setDefaultDBMBiasVoltage(m_DBMBiasVoltage2023);
+
+    writeCdo -> setBarrelNoiseShape({m_IBLNoiseShape2023, m_BLayerNoiseShape2023, m_PixelNoiseShape2023, m_PixelNoiseShape2023});
+    writeCdo -> setEndcapNoiseShape({m_PixelNoiseShape2023, m_PixelNoiseShape2023, m_PixelNoiseShape2023});
+    writeCdo -> setDBMNoiseShape({m_IBLNoiseShape2023, m_IBLNoiseShape2023, m_IBLNoiseShape2023});
+
+    // Radiation damage simulation
+    writeCdo -> setFluenceLayer(m_BarrelFluence2023);
+    for (size_t i=0; i<m_BarrelFluenceMap2023.size(); i++) {
+      mapsPath_list.push_back(PathResolverFindCalibFile(m_BarrelFluenceMap2023[i]));
+    }
+
+    // Radiation damage simulation for 3D sensor
+    writeCdo -> setFluenceLayer3D(m_3DFluence2023);
+    for (size_t i=0; i<m_3DFluenceMap2023.size(); i++) {
+      mapsPath_list3D.push_back(PathResolverFindCalibFile(m_3DFluenceMap2023[i]));
+    }
   }
 
   writeCdo -> setRadSimFluenceMapList(mapsPath_list);

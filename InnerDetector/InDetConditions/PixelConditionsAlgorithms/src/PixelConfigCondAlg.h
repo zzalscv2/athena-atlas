@@ -119,37 +119,37 @@ class PixelConfigCondAlg : public AthReentrantAlgorithm {
     // for further details.
     //
     //====================================================================================
-    // MC Project:                    RUN3                  RUN3                  RUN3
-    // Year:                          2022                  2023                  2024
-    // MC Run Number:               330000                331000                332000
-    // Reference run#:                 ---                   ---                   ---
-    // Luminosity(fb-1):     (plan) 36fb-1                85fb-1                85fb-1
+    // MC Project:                    RUN3                     RUN3                  RUN3
+    // Year:                          2022                     2023                  2024
+    // MC Run Number:               330000                   331000                332000
+    // Reference run#:                 ---                      ---                   ---
+    // Luminosity(fb-1):     (plan) 36fb-1                   85fb-1                85fb-1
     //
     // Barrel:
-    //  ToT:         [  -1,   3,   5,   5]
-    //  Latency:     [  -1, 150, 256, 256]
-    //  Duplicaiton: [ N/A,   F,   F,   F]
-    //  SmallHit:    [ N/A,   0,   0,   0]
-    //  TimingTune:  [ N/A,2018,2018,2018]
-    //  CrossTalk:   [0.30,0.12,0.12,0.12]
-    //  NoiseOcc.:   [5e-8,5e-8,5e-8,5e-8]
-    //  DisalbePix:  [9e-3,9e-3,9e-3,9e-3]
-    //  NoiseShape:  [2018,2018,2018,2018]
-    //  BiasVoltage: [ 450, 450, 300, 300]
-    //  Fluence(e14):[ 7.2, 6.8, 3.0, 2.0]
+    //  ToT:         [  -1,   3,   5,   5]    [  -1,   3,   5,   5]
+    //  Latency:     [  -1, 150, 256, 256]    [  -1, 150, 256, 256]
+    //  Duplicaiton: [ N/A,   F,   F,   F]    [ N/A,   F,   F,   F]
+    //  SmallHit:    [ N/A,   0,   0,   0]    [ N/A,   0,   0,   0]
+    //  TimingTune:  [ N/A,2022,2022,2022]    [ N/A,2022,2022,2022]
+    //  CrossTalk:   [0.30,0.12,0.12,0.12]    [0.30,0.12,0.12,0.12]
+    //  NoiseOcc.:   [5e-8,5e-8,5e-8,5e-8]    [5e-8,5e-8,5e-8,5e-8]
+    //  DisalbePix:  [9e-3,9e-3,9e-3,9e-3]    [9e-3,9e-3,9e-3,9e-3]
+    //  NoiseShape:  [2018,2018,2018,2018]    [2018,2018,2018,2018]
+    //  BiasVoltage: [ 450, 450, 300, 300]    [ 450, 450, 350, 350]
+    //  Fluence(e14):[ 7.2, 6.8, 3.0, 2.0]    [  13, 9.2, 4.5, 3.1]
     //
     // Endcap:
-    //  ToT:         [   5,   5,   5]
-    //  Latency:     [ 256, 256, 256]
-    //  Duplicaiton: [   F,   F,   F]
-    //  SmallHit:    [   0,   0,   0]
-    //  TimingTune:  [2018,2018,2018]
-    //  CrossTalk:   [0.06,0.06,0.06]
-    //  NoiseOcc.:   [5e-8,5e-8,5e-8]
-    //  DisalbePix:  [9e-3,9e-3,9e-3]
-    //  NoiseShape:  [2018,2018,2018]
-    //  BiasVoltage: [ 300, 300, 300]
-    //  Fluence(e14):[ n/a, n/a, n/a]
+    //  ToT:         [   5,   5,   5]         [   5,   5,   5]
+    //  Latency:     [ 256, 256, 256]         [ 256, 256, 256]
+    //  Duplicaiton: [   F,   F,   F]         [   F,   F,   F]
+    //  SmallHit:    [   0,   0,   0]         [   0,   0,   0]
+    //  TimingTune:  [2022,2022,2022]         [2022,2022,2022]
+    //  CrossTalk:   [0.06,0.06,0.06]         [0.06,0.06,0.06]
+    //  NoiseOcc.:   [5e-8,5e-8,5e-8]         [5e-8,5e-8,5e-8]
+    //  DisalbePix:  [9e-3,9e-3,9e-3]         [9e-3,9e-3,9e-3]
+    //  NoiseShape:  [2018,2018,2018]         [2018,2018,2018]
+    //  BiasVoltage: [ 300, 300, 300]         [ 300, 300, 300]
+    //  Fluence(e14):[ n/a, n/a, n/a]         [ n/a, n/a, n/a]
     //
     // DBM: Terminated. All values are dummy.
     //  ToT:         [  -1,  -1,  -1]
@@ -492,10 +492,10 @@ class PixelConfigCondAlg : public AthReentrantAlgorithm {
     {this, "BarrelToTThreshold2022", {-1, 3, 5, 5}, "ToT thresholds for barrel pixel layers in 2022"};
 
     Gaudi::Property<std::vector<float>> m_BarrelBiasVoltage2022
-    {this, "DefaultBarrelBiasVoltage2022", {400.0,  400.0,  250.0,  250.0}, "Default barrel bias voltage in 2022"};
+    {this, "DefaultBarrelBiasVoltage2022", {450.0,  450.0,  300.0,  300.0}, "Default barrel bias voltage in 2022"};
 
     Gaudi::Property<std::vector<double>> m_BarrelFluence2022
-    {this, "BarrelFluence2022", {5.50e14, 5.19e14, 2.28e14, 1.53e14}, "Barrel fluence for radiation damage in 2022"};
+    {this, "BarrelFluence2022", {7.20e14, 6.8e14, 3.0e14, 2.0e14}, "Barrel fluence for radiation damage in 2022"};
 
     Gaudi::Property<std::vector<std::string>> m_BarrelFluenceMap2022
     {this, "BarrelFluenceMap2022", {"PixelDigitization/maps_IBL_PL_450V_fl7_2e14.root",
@@ -514,7 +514,7 @@ class PixelConfigCondAlg : public AthReentrantAlgorithm {
     {this, "FEI3BarrelSmallHitToT2022", {-1,-1,-1,-1}, "Small hit ToT thresold for FEI3 hit-duplication of barrel pixel layers in 2022"};
 
     Gaudi::Property<std::vector<int>> m_FEI3BarrelTimingSimTune2022
-    {this, "FEI3BarrelTimingSimTune2022", {-1,2018,2018,2018}, "FEI3 timing tuning set of barrel pixel layers in 2022"};
+    {this, "FEI3BarrelTimingSimTune2022", {-1,2022,2022,2022}, "FEI3 timing tuning set of barrel pixel layers in 2022"};
 
     Gaudi::Property<std::vector<double>> m_BarrelCrossTalk2022
     {this, "BarrelCrossTalk2022", {0.30,0.12,0.12,0.12}, "Cross-talk fraction of barrel pixel layers in 2022"};
@@ -555,7 +555,7 @@ class PixelConfigCondAlg : public AthReentrantAlgorithm {
     {this, "FEI3EndcapSmallHitToT2022", {-1,-1,-1}, "Small hit ToT thresold for FEI3 hit-duplication of endcap pixel layers in 2022"};
 
     Gaudi::Property<std::vector<int>> m_FEI3EndcapTimingSimTune2022
-    {this, "FEI3EndcapTimingSimTune2022", {2018,2018,2018}, "FEI3 timing tuning set of endcap pixel layers in 2022"};
+    {this, "FEI3EndcapTimingSimTune2022", {2022,2022,2022}, "FEI3 timing tuning set of endcap pixel layers in 2022"};
 
     Gaudi::Property<std::vector<double>> m_EndcapCrossTalk2022
     {this, "EndcapCrossTalk2022", {0.06,0.06,0.06}, "Cross-talk fraction of barrel endcap layers in 2022"};
@@ -592,6 +592,113 @@ class PixelConfigCondAlg : public AthReentrantAlgorithm {
     Gaudi::Property<std::vector<std::string>> m_3DFluenceMap2022
     {this, "Barrel3DFluenceMap2022", {"PixelDigitization/maps_IBL_3D_60V_fl7_54e14_LHCb.root"},
                                       "Barrel3D fluence map for radiation damage in 2022"};
+
+    //====================================================================================
+    // Barrel RUN3 2023
+    Gaudi::Property<std::vector<int>> m_BarrelToTThreshold2023
+    {this, "BarrelToTThreshold2023", {-1, 3, 5, 5}, "ToT thresholds for barrel pixel layers in 2023"};
+
+    Gaudi::Property<std::vector<float>> m_BarrelBiasVoltage2023
+    {this, "DefaultBarrelBiasVoltage2023", {450.0,  450.0,  350.0,  350.0}, "Default barrel bias voltage in 2023"};
+
+    Gaudi::Property<std::vector<double>> m_BarrelFluence2023
+    {this, "BarrelFluence2023", {13.0e14, 9.2e14, 4.5e14, 3.1e14}, "Barrel fluence for radiation damage in 2023"};
+
+    Gaudi::Property<std::vector<std::string>> m_BarrelFluenceMap2023
+    {this, "BarrelFluenceMap2023", {"PixelDigitization/maps_IBL_PL_450V_fl13e14.root",
+                                    "PixelDigitization/maps_PIX_450V_fl9_2e14.root",
+                                    "PixelDigitization/maps_PIX_350V_fl4_5e14.root",
+                                    "PixelDigitization/maps_PIX_350V_fl3_1e14.root"},
+                                    "Barrel fluence map for radiation damage in 2023"};
+
+    Gaudi::Property<std::vector<int>> m_FEI3BarrelLatency2023
+    {this, "FEI3BarrelLatency2023", {  0,151,256,256}, "FEI3 latency for barrel pixel layers in 2023"};
+
+    Gaudi::Property<std::vector<bool>> m_FEI3BarrelHitDuplication2023
+    {this, "FEI3BarrelHitDuplication2023", {false,false,false,false}, "Use FEI3 hit-duplicaiton for barrel pixel layers in 2023"};
+
+    Gaudi::Property<std::vector<int>>  m_FEI3BarrelSmallHitToT2023
+    {this, "FEI3BarrelSmallHitToT2023", {-1,-1,-1,-1}, "Small hit ToT thresold for FEI3 hit-duplication of barrel pixel layers in 2023"};
+
+    Gaudi::Property<std::vector<int>> m_FEI3BarrelTimingSimTune2023
+    {this, "FEI3BarrelTimingSimTune2023", {-1,2022,2022,2022}, "FEI3 timing tuning set of barrel pixel layers in 2023"};
+
+    Gaudi::Property<std::vector<double>> m_BarrelCrossTalk2023
+    {this, "BarrelCrossTalk2023", {0.30,0.12,0.12,0.12}, "Cross-talk fraction of barrel pixel layers in 2023"};
+
+    Gaudi::Property<std::vector<double>> m_BarrelNoiseOccupancy2023
+    {this, "BarrelNoiseOccupancy2023", {5e-8,5e-8,5e-8,5e-8}, "Noise occupancy of barrel pixel layers in 2023"};
+
+    Gaudi::Property<std::vector<double>> m_BarrelDisableProbability2023
+    {this, "BarrelDisableProbability2023", {9e-3,9e-3,9e-3,9e-3}, "Disable probability of barrel pixel layers in 2023"};
+
+    Gaudi::Property<std::vector<double>> m_BarrelLorentzAngleCorr2023
+    {this, "BarrelLorentzAngleCorr2023", {1.0,1.0,1.0,1.0}, "Scale factor for Lorentz angle of barrel pixel layers in 2023"};
+
+    // This is ad-hoc solution.
+    Gaudi::Property<std::vector<float>> m_IBLNoiseShape2023
+    {this, "IBLNoiseShape2023", {0.0,0.0330,0.0,0.3026,0.5019,0.6760,0.8412,0.9918,0.9918,0.9918,0.9918,0.9918,0.9918,0.9918,0.9918,0.9918,1.0}, "Noise shape for IBL in 2023"};
+
+    Gaudi::Property<std::vector<float>> m_BLayerNoiseShape2023
+    {this, "BLayerNoiseShape2023", {0.0,0.0,0.0,0.0,0.2204,0.5311,0.7493,0.8954,0.9980,1.0}, "Noise shape for b-layer in 2023"};
+
+    Gaudi::Property<std::vector<float>> m_PixelNoiseShape2023
+    {this, "PixelNoiseShape2023", {0.0,0.0,0.0,0.0,0.0,0.0,0.2418,0.4397,0.5858,0.6949,0.7737,0.8414,0.8959,0.9414,0.9828,1.0}, "Noise shape for PIXEL in 2023"};
+
+    // Endcap RUN3 2023
+    Gaudi::Property<std::vector<int>> m_EndcapToTThreshold2023
+    {this, "EndcapToTThreshold2023", { 5, 5, 5}, "ToT thresholds for endcap pixel layers in 2023"};
+
+    Gaudi::Property<std::vector<float>> m_EndcapBiasVoltage2023
+    {this, "DefaultEndcapBiasVoltage2023", {350.0,350.0,350.0}, "Default endcap bias voltage in 2023"};
+
+    Gaudi::Property<std::vector<int>> m_FEI3EndcapLatency2023
+    {this, "FEI3EndcapLatency2023", {256,256,256}, "FEI3 latency for endcap pixel layers in 2023"};
+
+    Gaudi::Property<std::vector<bool>> m_FEI3EndcapHitDuplication2023
+    {this, "FEI3EndcapHitDuplication2023", {false,false,false}, "Use FEI3 hit-duplicaiton for endcap pixel layers in 2023"};
+
+    Gaudi::Property<std::vector<int>>  m_FEI3EndcapSmallHitToT2023
+    {this, "FEI3EndcapSmallHitToT2023", {-1,-1,-1}, "Small hit ToT thresold for FEI3 hit-duplication of endcap pixel layers in 2023"};
+
+    Gaudi::Property<std::vector<int>> m_FEI3EndcapTimingSimTune2023
+    {this, "FEI3EndcapTimingSimTune2023", {2022,2022,2022}, "FEI3 timing tuning set of endcap pixel layers in 2023"};
+
+    Gaudi::Property<std::vector<double>> m_EndcapCrossTalk2023
+    {this, "EndcapCrossTalk2023", {0.06,0.06,0.06}, "Cross-talk fraction of barrel endcap layers in 2023"};
+
+    Gaudi::Property<std::vector<double>> m_EndcapNoiseOccupancy2023
+    {this, "EndcapNoiseOccupancy2023", {5e-8,5e-8,5e-8}, "Noise occupancy of endcap pixel layers in 2023"};
+
+    Gaudi::Property<std::vector<double>> m_EndcapDisableProbability2023
+    {this, "EndcapDisableProbability2023", {9e-3,9e-3,9e-3}, "Disable probability of endcap pixel layers in 2023"};
+
+    Gaudi::Property<std::vector<double>> m_EndcapLorentzAngleCorr2023
+    {this, "EndcapLorentzAngleCorr2023", {1.0,1.0,1.0}, "Scale factor for Lorentz angle of endcap pixel layers in 2023"};
+
+    // DBM RUN3 2023 DUMMY
+    Gaudi::Property<std::vector<int>> m_DBMToTThreshold2023
+    {this, "DBMToTThreshold2023", {-1,-1,-1}, "ToT thresholds for DBM layers in 2023"};
+
+    Gaudi::Property<std::vector<float>> m_DBMBiasVoltage2023
+    {this, "DefaultDBMBiasVoltage2023", {500.0,500.0,500.0}, "Default DBM bias voltage in 2023"};
+
+    Gaudi::Property<std::vector<double>> m_DBMCrossTalk2023
+    {this, "DBMCrossTalk2023", {0.06,0.06,0.06}, "Cross-talk fraction of barrel DBM layers in 2023"};
+
+    Gaudi::Property<std::vector<double>> m_DBMNoiseOccupancy2023
+    {this, "DBMNoiseOccupancy2023", {5e-8,5e-8,5e-8}, "Noise occupancy of DBM layers in 2023"};
+
+    Gaudi::Property<std::vector<double>> m_DBMDisableProbability2023
+    {this, "DBMDisableProbability2023", {9e-3,9e-3,9e-3}, "Disable probability of DBM pixel layers in 2023"};
+
+    // IBL 3D RUN3 2023
+    Gaudi::Property<std::vector<double>> m_3DFluence2023
+    {this, "Barrel3DFluence2023", {8.4e14}, "Barrel3D fluence for radiation damage in 2023"};
+
+    Gaudi::Property<std::vector<std::string>> m_3DFluenceMap2023
+    {this, "Barrel3DFluenceMap2023", {"PixelDigitization/maps_IBL_3D_60V_fl8_40e14_261K_PM.root"},
+                                      "Barrel3D fluence map for radiation damage in 2023"};
 
     //====================================================================================
     // Barrel RUN1
