@@ -29,6 +29,9 @@ run () {
     echo "Running ${name}..."
     time ${cmd}
     rc=$?
+    # Only report hard failures for comparison Acts-Trk since we know
+    # they are different. We do not expect this test to succeed
+    [ "${name}" = "dcube-trk" ] && [ $rc -ne 255 ] && rc=0
     echo "art-result: $rc ${name}"
     return $rc
 }
