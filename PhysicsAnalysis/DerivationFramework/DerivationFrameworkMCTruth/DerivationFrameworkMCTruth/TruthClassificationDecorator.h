@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DERIVATIONFRAMEWORK_TRUTHCLASSIFICATIONDECORATOR_H
@@ -9,6 +9,9 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "xAODTruth/TruthParticleContainer.h"
+#include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/WriteDecorHandleKey.h"
 #include "GaudiKernel/ToolHandle.h"
 
 class IMCTruthClassifier;
@@ -25,7 +28,19 @@ namespace DerivationFramework {
 
     private:
       mutable std::atomic<unsigned int> m_ntotpart;
-      std::string m_particlesKey;
+      SG::ReadHandleKey<xAOD::TruthParticleContainer> m_particlesKey 
+         {this, "ParticlesKey", "TruthParticles", "ReadHandleKey for input TruthParticleContainer"};
+      // Decorator keys
+      SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_linkDecoratorKey
+         {this, "originalTruthParticle", m_particlesKey, "originalTruthParticle", "Link to the original truth particle"};
+      SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_originDecoratorKey
+         {this, "classifierParticleOrigin", m_particlesKey, "classifierParticleOrigin", "Particle origin decoration"};
+      SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_typeDecoratorKey
+         {this, "classifierParticleType", m_particlesKey, "classifierParticleType", "Particle type decoration"};
+      SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_outcomeDecoratorKey
+         {this, "classifierParticleOutCome", m_particlesKey, "classifierParticleOutCome", "Particle outcome decoration"};
+      SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_classificationDecoratorKey
+         {this, "Classification", m_particlesKey, "Classification", "Classification code decorator"};
       ToolHandle<IMCTruthClassifier> m_classifier;
   }; 
 }
