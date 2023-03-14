@@ -11,9 +11,11 @@
 
 class TH2;
 
-class TFCSFlatLateralShapeParametrization:public TFCSLateralShapeParametrizationHitBase {
+class TFCSFlatLateralShapeParametrization
+    : public TFCSLateralShapeParametrizationHitBase {
 public:
-  TFCSFlatLateralShapeParametrization(const char* name=nullptr, const char* title=nullptr);
+  TFCSFlatLateralShapeParametrization(const char *name = nullptr,
+                                      const char *title = nullptr);
   virtual ~TFCSFlatLateralShapeParametrization();
 
   /// set the integral of the histogram to the desired number of hits
@@ -22,7 +24,10 @@ public:
   float get_number_of_expected_hits() const;
 
   /// default for this class is to simulate poisson(integral histogram) hits
-  virtual int get_number_of_hits(TFCSSimulationState& simulstate,const TFCSTruthState* truth, const TFCSExtrapolationState* extrapol) const override;
+  virtual int
+  get_number_of_hits(TFCSSimulationState &simulstate,
+                     const TFCSTruthState *truth,
+                     const TFCSExtrapolationState *extrapol) const override;
 
   /// set the radius in which hits should be generated
   void set_dR(float _dR);
@@ -35,11 +40,15 @@ public:
   float scale() const;
 
   /// simulated one hit position with weight that should be put into simulstate
-  /// sometime later all hit weights should be resacled such that their final sum is simulstate->E(sample)
-  /// someone also needs to map all hits into cells
-  virtual FCSReturnCode simulate_hit(Hit& hit,TFCSSimulationState& simulstate,const TFCSTruthState* truth, const TFCSExtrapolationState* extrapol) override;
+  /// sometime later all hit weights should be resacled such that their final
+  /// sum is simulstate->E(sample) someone also needs to map all hits into cells
+  virtual FCSReturnCode
+  simulate_hit(Hit &hit, TFCSSimulationState &simulstate,
+               const TFCSTruthState *truth,
+               const TFCSExtrapolationState *extrapol) override;
 
   virtual void Print(Option_t *option = "") const override;
+
 protected:
   /// Simulate hits flat in radius dR
   float m_dR;
@@ -47,22 +56,18 @@ protected:
   float m_scale;
 
 private:
-
-  ClassDefOverride(TFCSFlatLateralShapeParametrization,1)  //TFCSFlatLateralShapeParametrization
+  ClassDefOverride(TFCSFlatLateralShapeParametrization,
+                   1) // TFCSFlatLateralShapeParametrization
 };
 
-inline float TFCSFlatLateralShapeParametrization::get_number_of_expected_hits() const 
-{
+inline float
+TFCSFlatLateralShapeParametrization::get_number_of_expected_hits() const {
   return m_nhits;
 }
 
-inline float TFCSFlatLateralShapeParametrization::dR() const 
-{
-  return m_dR;
-}
+inline float TFCSFlatLateralShapeParametrization::dR() const { return m_dR; }
 
-inline float TFCSFlatLateralShapeParametrization::scale() const 
-{
+inline float TFCSFlatLateralShapeParametrization::scale() const {
   return m_scale;
 }
 

@@ -13,31 +13,35 @@
 
 class TH1;
 
-class TFCSHistoLateralShapeGausLogWeight:public TFCSHistoLateralShapeWeight {
+class TFCSHistoLateralShapeGausLogWeight : public TFCSHistoLateralShapeWeight {
 public:
-  TFCSHistoLateralShapeGausLogWeight(const char* name=nullptr, const char* title=nullptr);
+  TFCSHistoLateralShapeGausLogWeight(const char *name = nullptr,
+                                     const char *title = nullptr);
   virtual ~TFCSHistoLateralShapeGausLogWeight();
 
   /// weight the energy of one hit in order to generate fluctuations
-  virtual FCSReturnCode simulate_hit(Hit& hit,TFCSSimulationState& simulstate,const TFCSTruthState* truth, const TFCSExtrapolationState* extrapol) override;
+  virtual FCSReturnCode
+  simulate_hit(Hit &hit, TFCSSimulationState &simulstate,
+               const TFCSTruthState *truth,
+               const TFCSExtrapolationState *extrapol) override;
 
 #ifdef USE_GPU
-  //will not compile by default
-  void    set_d_Hist( FH1D* hf_ptr ) { m_d_Hist = hf_ptr; };
-  const FH1D*       d_Hist() { return m_d_Hist; };
-  void             LoadHist();
-  LoadGpuHist* LdFH() { return m_LdFH; };
+  // will not compile by default
+  void set_d_Hist(FH1D *hf_ptr) { m_d_Hist = hf_ptr; };
+  const FH1D *d_Hist() { return m_d_Hist; };
+  void LoadHist();
+  LoadGpuHist *LdFH() { return m_LdFH; };
 #endif
 
 protected:
+  ClassDefOverride(TFCSHistoLateralShapeGausLogWeight,
+                   1) // TFCSHistoLateralShapeGausLogWeight
 
-  ClassDefOverride(TFCSHistoLateralShapeGausLogWeight,1)  //TFCSHistoLateralShapeGausLogWeight
-
-private:
+      private :
 
 #ifdef USE_GPU
-  FH1D*             m_d_Hist = nullptr;
-  LoadGpuHist* m_LdFH        = nullptr;
+      FH1D *m_d_Hist = nullptr;
+  LoadGpuHist *m_LdFH = nullptr;
 #endif
 };
 

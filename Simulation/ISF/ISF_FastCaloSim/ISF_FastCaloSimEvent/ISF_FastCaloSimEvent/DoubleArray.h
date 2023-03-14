@@ -11,13 +11,12 @@
 class DoubleArray : public TObject, public TArrayD {
 
 public:
-   DoubleArray();
-   DoubleArray( int );
-   ~DoubleArray();
+  DoubleArray();
+  DoubleArray(int);
+  ~DoubleArray();
 
 private:
-
-   ClassDef( DoubleArray, 1 )
+  ClassDef(DoubleArray, 1)
 };
 
 #endif
