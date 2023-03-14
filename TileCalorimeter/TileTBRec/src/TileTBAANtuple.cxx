@@ -1995,7 +1995,7 @@ StatusCode TileTBAANtuple::storeDigitsFlx() {
       ATH_MSG_DEBUG( "       Lvl1ID=" << (*itColl)->getLvl1Id()
                      << " EvBCID=" << (*itColl)->getRODBCID()
                      << " EvType=" << (*itColl)->getDetEvType() );
-
+      ATH_MSG_DEBUG( "       Headers = "<< (*itColl)->getFragExtraWords() );
 
       if (m_completeNtuple) {
         /// Store ROD header info from collection
@@ -2014,13 +2014,13 @@ StatusCode TileTBAANtuple::storeDigitsFlx() {
       // Digits in calib mode
         // check gain for first digits in collection
 
-        if (m_mdL1idVec.at(type)) {
+        if (m_mdL1idflxVec.at(type)) {
           std::vector<uint32_t> extraWords = (*itColl)->getFragExtraWords();
           if (extraWords.size() >= 10 * MAX_MINIDRAWERS) {
 
-            int* md[] = {m_mdL1idVec.at(type), m_mdBcidVec.at(type),
-                         m_mdModuleVec.at(type), m_mdRunTypeVec.at(type),m_mdPedLoVec.at(type), m_mdPedHiVec.at(type), m_mdRunVec.at(type),
-                         m_mdChargeVec.at(type), m_mdChargeTimeVec.at(type), m_mdCapacitorVec.at(type)};
+            int* md[] = {m_mdL1idflxVec.at(type), m_mdBcidflxVec.at(type),
+                         m_mdModuleflxVec.at(type), m_mdRunTypeflxVec.at(type),m_mdRunflxVec.at(type), m_mdPedLoflxVec.at(type), m_mdPedHiflxVec.at(type), 
+                         m_mdChargeflxVec.at(type), m_mdChargeTimeflxVec.at(type), m_mdCapacitorflxVec.at(type)};
 
             auto it = extraWords.begin();
             for (int i = 0; i < 10; ++i) {
@@ -4065,7 +4065,7 @@ void TileTBAANtuple::FELIX_addBranch(void)
   m_gainflxVec.reserve(MAX_DRAWERS);
   m_sampleflxVec.reserve(MAX_DRAWERS);
 
-     std::ostringstream oss;
+  std::ostringstream oss;
   oss << m_nSamplesFlx;
   std::string nSampStr_Flx=oss.str();
 
@@ -4143,27 +4143,28 @@ void TileTBAANtuple::FELIX_addBranch(void)
       float *chi2flxOpt = new float[N_CHANS];
 
 
-      int* mdL1id(nullptr);
-      int* mdBcid(nullptr);
-      int* mdModule(nullptr);
-      int* mdRunType(nullptr);
-      int* mdPedLo(nullptr);
-      int* mdPedHi(nullptr);
-      int* mdRun(nullptr);
-      int* mdCharge(nullptr);
-      int* mdChargeTime(nullptr);
-      int* mdCapacitor(nullptr);
+      int* mdL1idflx(nullptr);
+      int* mdBcidflx(nullptr);
+      int* mdModuleflx(nullptr);
+      int* mdRunTypeflx(nullptr);
+      int* mdPedLoflx(nullptr);
+      int* mdPedHiflx(nullptr);
+      int* mdRunflx(nullptr);
+      int* mdChargeflx(nullptr);
+      int* mdChargeTimeflx(nullptr);
+      int* mdCapacitorflx(nullptr);
 
 
-      mdL1id = new int[MAX_MINIDRAWERS];
-      mdBcid = new int[MAX_MINIDRAWERS];
-      mdModule = new int[MAX_MINIDRAWERS];
-      mdRunType = new int[MAX_MINIDRAWERS];
-      mdPedLo = new int[MAX_MINIDRAWERS];
-      mdRun = new int[MAX_MINIDRAWERS];
-      mdCharge = new int[MAX_MINIDRAWERS];
-      mdChargeTime = new int[MAX_MINIDRAWERS];
-      mdCapacitor = new int[MAX_MINIDRAWERS];
+      mdL1idflx = new int[MAX_MINIDRAWERS];
+      mdBcidflx = new int[MAX_MINIDRAWERS];
+      mdModuleflx = new int[MAX_MINIDRAWERS];
+      mdRunTypeflx = new int[MAX_MINIDRAWERS];
+      mdPedLoflx = new int[MAX_MINIDRAWERS];
+      mdPedHiflx = new int[MAX_MINIDRAWERS];
+      mdRunflx = new int[MAX_MINIDRAWERS];
+      mdChargeflx = new int[MAX_MINIDRAWERS];
+      mdChargeTimeflx = new int[MAX_MINIDRAWERS];
+      mdCapacitorflx = new int[MAX_MINIDRAWERS];
 
 
 
@@ -4181,16 +4182,16 @@ void TileTBAANtuple::FELIX_addBranch(void)
      m_sizeflxVec.push_back( size);
      m_evtflxVec.push_back( evt);
 
-     m_mdL1idVec.push_back(mdL1id);
-     m_mdBcidVec.push_back(mdBcid);
-     m_mdModuleVec.push_back(mdModule);
-     m_mdRunTypeVec.push_back(mdRunType);
-     m_mdPedLoVec.push_back(mdPedLo);
-     m_mdPedHiVec.push_back(mdPedHi);
-     m_mdRunVec.push_back(mdRun);
-     m_mdChargeVec.push_back(mdCharge);
-     m_mdChargeTimeVec.push_back(mdChargeTime);
-     m_mdCapacitorVec.push_back(mdCapacitor);
+     m_mdL1idflxVec.push_back(mdL1idflx);
+     m_mdBcidflxVec.push_back(mdBcidflx);
+     m_mdModuleflxVec.push_back(mdModuleflx);
+     m_mdRunTypeflxVec.push_back(mdRunTypeflx);
+     m_mdPedLoflxVec.push_back(mdPedLoflx);
+     m_mdPedHiflxVec.push_back(mdPedHiflx);
+     m_mdRunflxVec.push_back(mdRunflx);
+     m_mdChargeflxVec.push_back(mdChargeflx);
+     m_mdChargeTimeflxVec.push_back(mdChargeTimeflx);
+     m_mdCapacitorflxVec.push_back(mdCapacitorflx);
 
 
      m_gainflxVec.push_back( gain );
@@ -4206,15 +4207,15 @@ void TileTBAANtuple::FELIX_addBranch(void)
          m_ntuplePtr->Branch(("Flx_Size"+suffixArr[i]).c_str(),size,("Flx_Size"+suffixArr[i]+"/S").c_str()); // short
         }
 
-        if (mdL1id) {
-         m_ntuplePtr->Branch(("mdL1ID"+suffixArr[i]).c_str(),m_mdL1idVec.back(),("mdL1id"+suffixArr[i]+"[4]/I").c_str()); // int
-         m_ntuplePtr->Branch(("mdBCID"+suffixArr[i]).c_str(),m_mdBcidVec.back(),("mdBcid"+suffixArr[i]+"[4]/I").c_str()); // int
-         m_ntuplePtr->Branch(("mdModule"+suffixArr[i]).c_str(),m_mdModuleVec.back(),("mdModule"+suffixArr[i]+"[4]/I").c_str()); // int
-         m_ntuplePtr->Branch(("mdRunType"+suffixArr[i]).c_str(),m_mdRunTypeVec.back(),("mdRunType"+suffixArr[i]+"[4]/I").c_str()); // int
-         m_ntuplePtr->Branch(("mdPedLo"+suffixArr[i]).c_str(),m_mdPedLoVec.back(),("mdPedLo"+suffixArr[i]+"[4]/I").c_str()); // int
-         m_ntuplePtr->Branch(("mdPedHi"+suffixArr[i]).c_str(),m_mdPedHiVec.back(),("mdPedHi"+suffixArr[i]+"[4]/I").c_str()); // int
-         m_ntuplePtr->Branch(("mdChargeTime"+suffixArr[i]).c_str(),m_mdChargeTimeVec.back(),("mdChargeTime"+suffixArr[i]+"[4]/I").c_str()); // int
-         m_ntuplePtr->Branch(("mdCapacitor"+suffixArr[i]).c_str(),m_mdCapacitorVec.back(),("mdCapacitor"+suffixArr[i]+"[4]/I").c_str()); // int
+        if (mdL1idflx) {
+         m_ntuplePtr->Branch(("mdL1ID"+suffixArr[i]).c_str(),m_mdL1idflxVec.back(),("mdL1id"+suffixArr[i]+"[4]/I").c_str()); // int
+         m_ntuplePtr->Branch(("mdBCID"+suffixArr[i]).c_str(),m_mdBcidflxVec.back(),("mdBcid"+suffixArr[i]+"[4]/I").c_str()); // int
+         m_ntuplePtr->Branch(("mdModule"+suffixArr[i]).c_str(),m_mdModuleflxVec.back(),("mdModule"+suffixArr[i]+"[4]/I").c_str()); // int
+         m_ntuplePtr->Branch(("mdRunType"+suffixArr[i]).c_str(),m_mdRunTypeflxVec.back(),("mdRunType"+suffixArr[i]+"[4]/I").c_str()); // int
+         m_ntuplePtr->Branch(("mdPedLo"+suffixArr[i]).c_str(),m_mdPedLoflxVec.back(),("mdPedLo"+suffixArr[i]+"[4]/I").c_str()); // int
+         m_ntuplePtr->Branch(("mdPedHi"+suffixArr[i]).c_str(),m_mdPedHiflxVec.back(),("mdPedHi"+suffixArr[i]+"[4]/I").c_str()); // int
+         m_ntuplePtr->Branch(("mdChargeTime"+suffixArr[i]).c_str(),m_mdChargeTimeflxVec.back(),("mdChargeTime"+suffixArr[i]+"[4]/I").c_str()); // int
+         m_ntuplePtr->Branch(("mdCapacitor"+suffixArr[i]).c_str(),m_mdCapacitorflxVec.back(),("mdCapacitor"+suffixArr[i]+"[4]/I").c_str()); // int
         }
 
        m_ntuplePtr->Branch(("Flx_Gain"+suffixArr[i]).c_str(),m_gainflxVec.back(),("Flx_gain"+suffixArr[i]+"[48]/I").c_str()); // int
@@ -4267,16 +4268,16 @@ void TileTBAANtuple::FELIX_clearBranch(void)
   clear_float(m_chi2flxoptVec);
   clear_float(m_pedflxoptVec);
 
-  clear_int(m_mdL1idVec, MAX_MINIDRAWERS);
-  clear_int(m_mdBcidVec, MAX_MINIDRAWERS);
-  clear_int(m_mdModuleVec, MAX_MINIDRAWERS);
-  clear_int(m_mdRunTypeVec, MAX_MINIDRAWERS);
-  clear_int(m_mdRunVec, MAX_MINIDRAWERS);
-  clear_int(m_mdChargeVec, MAX_MINIDRAWERS);
-  clear_int(m_mdChargeTimeVec, MAX_MINIDRAWERS);
-  clear_int(m_mdCapacitorVec, MAX_MINIDRAWERS);
-  clear_int(m_mdPedLoVec, MAX_MINIDRAWERS);
-  clear_int(m_mdPedHiVec, MAX_MINIDRAWERS);
+  clear_int(m_mdL1idflxVec, MAX_MINIDRAWERS);
+  clear_int(m_mdBcidflxVec, MAX_MINIDRAWERS);
+  clear_int(m_mdModuleflxVec, MAX_MINIDRAWERS);
+  clear_int(m_mdRunTypeflxVec, MAX_MINIDRAWERS);
+  clear_int(m_mdRunflxVec, MAX_MINIDRAWERS);
+  clear_int(m_mdChargeflxVec, MAX_MINIDRAWERS);
+  clear_int(m_mdChargeTimeflxVec, MAX_MINIDRAWERS);
+  clear_int(m_mdCapacitorflxVec, MAX_MINIDRAWERS);
+  clear_int(m_mdPedLoflxVec, MAX_MINIDRAWERS);
+  clear_int(m_mdPedHiflxVec, MAX_MINIDRAWERS);
 
 }
 
