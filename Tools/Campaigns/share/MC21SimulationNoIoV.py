@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from G4AtlasApps.SimFlags import simFlags
 simFlags.PhysicsList = "FTFP_BERT_ATL"
@@ -10,18 +10,18 @@ simFlags.TightMuonStepping = True
 from ISF_Config.ISF_jobProperties import ISF_Flags
 from AthenaCommon.Resilience import protectedInclude
 
-if "_QS" in ISF_Flags.Simulator():
+if ISF_Flags.Simulator.isQuasiStable():
     protectedInclude("SimulationJobOptions/preInclude.ExtraParticles.py")
     protectedInclude("SimulationJobOptions/preInclude.G4ExtraProcesses.py")
 
 protectedInclude("SimulationJobOptions/preInclude.BeamPipeKill.py")
 
-if "ATLFAST" in ISF_Flags.Simulator() or "G4FastCalo" in ISF_Flags.Simulator():
+if ISF_Flags.Simulator.usesFastCaloSim():
     # FastCaloSim requires the Sampling Fractions to be present
     from IOVDbSvc.CondDB import conddb
     conddb.addOverride("/TILE/OFL02/CALIB/SFR","TileOfl02CalibSfr-SIM-07")
 
-if "FullG4" in ISF_Flags.Simulator():
+if ISF_Flags.Simulator.isFullSim():
     protectedInclude("SimulationJobOptions/preInclude.FrozenShowersFCalOnly.py")
 
 # enable G4 optimisations

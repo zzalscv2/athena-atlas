@@ -1,63 +1,82 @@
 #!/bin/sh
 #
-# art-description: Run G4AtlasAlg simulation, reading ttbar events, writing HITS, using MC15aPlus geometry and conditions
+# art-description: Run G4AtlasAlg simulation, reading ttbar events, writing HITS, using RUN2 geometry and conditions
 # art-include: 23.0/Athena
+# art-include: 23.0/AthSimulation
 # art-include: master/Athena
-
+# art-include: master/AthSimulation
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
 # art-output: log.*
-# art-output: HITS.pool.root
-# art-output: CA.HITS.pool.root
+# art-output: *.pool.root
 # art-output: Config*.pkl
 
 AtlasG4_tf.py \
---CA \
---conditionsTag 'default:OFLCOND-MC16-SDR-14' \
---postInclude 'PyJobTransforms.UseFrontier' \
---preInclude 'Campaigns.MC16Simulation' \
---geometryVersion 'default:ATLAS-R2-2016-01-00-01' \
---inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.evgen.EVNT.e4993.EVNT.08166201._000012.pool.root.1" \
---outputHITSFile "test.CA.HITS.pool.root" \
---maxEvents 1 \
---postExec 'with open("ConfigSimCA.pkl", "wb") as f: cfg.store(f)' \
---imf False
+    --CA \
+    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
+    --postInclude 'default:PyJobTransforms.UseFrontier' \
+    --preInclude 'AtlasG4Tf:Campaigns.MC23SimulationNoIoV' \
+    --DataRunNumber '284500' \
+    --geometryVersion 'default:ATLAS-R2-2016-01-02-01' \
+    --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.evgen.EVNT.e4993.EVNT.08166201._000012.pool.root.1" \
+    --outputHITSFile "test.CA.HITS.pool.root" \
+    --maxEvents 50 \
+    --postExec 'with open("ConfigSimCA.pkl", "wb") as f: cfg.store(f)' \
+    --imf False
 
 rc=$?
 mv log.AtlasG4Tf log.AtlasG4Tf_CA
 echo  "art-result: $rc simCA"
+status=$rc
 
-rc2=-9999
-if [ $rc -eq 0 ]
-then
-    AtlasG4_tf.py \
-    --conditionsTag 'default:OFLCOND-MC16-SDR-14' \
+AtlasG4_tf.py \
+    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-    --preInclude 'AtlasG4Tf:Campaigns/MC16Simulation.py' \
-    --geometryVersion 'default:ATLAS-R2-2016-01-00-01' \
+    --preInclude 'AtlasG4Tf:Campaigns/MC23SimulationNoIoV.py' \
+    --DataRunNumber '284500' \
+    --geometryVersion 'default:ATLAS-R2-2016-01-02-01' \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.evgen.EVNT.e4993.EVNT.08166201._000012.pool.root.1" \
     --outputHITSFile "test.CA.HITS.pool.root" \
-    --maxEvents 1 \
+    --maxEvents 50 \
     --imf False \
-   --athenaopts '"--config-only=ConfigSimCG.pkl"'
+    --athenaopts '"--config-only=ConfigSimCG.pkl"'
 
-     AtlasG4_tf.py \
-    --conditionsTag 'default:OFLCOND-MC16-SDR-14' \
+AtlasG4_tf.py \
+    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-    --preInclude 'AtlasG4Tf:Campaigns/MC16Simulation.py' \
-    --geometryVersion 'default:ATLAS-R2-2016-01-00-01' \
+    --preInclude 'AtlasG4Tf:Campaigns/MC23SimulationNoIoV.py' \
+    --DataRunNumber '284500' \
+    --geometryVersion 'default:ATLAS-R2-2016-01-02-01' \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.evgen.EVNT.e4993.EVNT.08166201._000012.pool.root.1" \
     --outputHITSFile "test.HITS.pool.root" \
-    --maxEvents 1 \
+    --maxEvents 50 \
     --imf False
-    rc2=$?
-    mv log.AtlasG4Tf log.AtlasG4Tf_OLD
-fi
+rc2=$?
+mv log.AtlasG4Tf log.AtlasG4Tf_OLD
 echo  "art-result: $rc2 simOLD"
+if [ $status -eq 0 ]
+then
+    status=$rc2
+fi
+
+rc3=-9999
+if [ $status -eq 0 ]
+then
+    acmd.py diff-root test.HITS.pool.root test.CA.HITS.pool.root --error-mode resilient --mode=semi-detailed
+    rc3=$?
+    status=$rc3
+fi
+echo  "art-result: $rc3 OLDvsCA"
+
 rc4=-9999
 if [ $rc2 -eq 0 ]
 then
-    acmd.py diff-root test.HITS.pool.root test.CA.HITS.pool.root --error-mode resilient --mode=semi-detailed --order-trees --ignore-leaves RecoTimingObj_p1_EVNTtoHITS_timings index_ref
+    ArtPackage=$1
+    ArtJobName=$2
+    art.py compare grid --entries 50 ${ArtPackage} ${ArtJobName} --mode=semi-detailed --file=test.HITS.pool.root
     rc4=$?
+    status=$rc4
 fi
-echo  "art-result: $rc4 FullG4MT_OLDvsCA"
+echo  "art-result: $rc4 regression"
+
+exit $status
