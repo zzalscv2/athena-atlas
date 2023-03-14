@@ -138,8 +138,8 @@ namespace EL
 
 
 
-  TH1 *AnaAlgorithm ::
-  hist (const std::string& name) const
+  template<> TObject *AnaAlgorithm ::
+  hist<TObject> (const std::string& name) const
   {
     return histogramWorker()->getOutputHist (name);
   }
@@ -149,10 +149,7 @@ namespace EL
   TH2 *AnaAlgorithm ::
   hist2d (const std::string& name) const
   {
-    TH2 *hist = dynamic_cast<TH2*>(histogramWorker()->getOutputHist (name));
-    if (hist == nullptr)
-      throw std::runtime_error ("histogram not a 2d-histogram: " + name);
-    return hist;
+    return hist<TH2>(name);
   }
 
 
@@ -160,10 +157,7 @@ namespace EL
   TH3 *AnaAlgorithm ::
   hist3d (const std::string& name) const
   {
-    TH3 *hist = dynamic_cast<TH3*>(histogramWorker()->getOutputHist (name));
-    if (hist == nullptr)
-      throw std::runtime_error ("histogram not a 3d-histogram: " + name);
-    return hist;
+    return hist<TH3>(name);
   }
 
 
@@ -171,10 +165,7 @@ namespace EL
   TEfficiency *AnaAlgorithm ::
   histeff (const std::string& name) const
   {
-    TEfficiency *hist = dynamic_cast<TEfficiency*>(histogramWorker()->getOutputHist (name));
-    if (hist == nullptr)
-      throw std::runtime_error ("histogram not a TEfficiency: " + name);
-    return hist;
+    return hist<TEfficiency>(name);
   }
 
 

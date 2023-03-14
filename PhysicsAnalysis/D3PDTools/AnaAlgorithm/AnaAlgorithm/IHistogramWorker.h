@@ -58,7 +58,7 @@ namespace EL
     ///   object not found
     /// \post result != 0
   public:
-    virtual TH1 *getOutputHist (const std::string& name) const = 0;
+    virtual TObject *getOutputHist (const std::string& name) const = 0;
   };
 }
 
