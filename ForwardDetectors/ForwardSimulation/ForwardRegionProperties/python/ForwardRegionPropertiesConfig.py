@@ -12,7 +12,7 @@ def resolveTwissBeamFilePath(twiss_beam, msg):
         return twiss_beam
     twiss_path = os.getenv('TwissFilesPATH')
     if not twiss_path:
-        msg.warning("resolveTwissBeamFilePath: TwissFilePATH environment variable is empty.")
+        msg.warning("resolveTwissBeamFilePath: TwissFilesPATH environment variable is empty.")
     twiss_beam_path = twiss_path + '/' + twiss_beam
     if os.access(twiss_beam_path,os.R_OK):
         return twiss_beam_path
@@ -32,7 +32,7 @@ def buildTwissFilePath(flags, msg, filename, twiss_path=None):
     if not twiss_path:
         twiss_path = os.getenv('TwissFilesPATH')
     if not twiss_path:
-        msg.warning("buildTwissFilePath: TwissFilePATH environment variable is empty.")
+        msg.warning("buildTwissFilePath: TwissFilesPATH environment variable is empty.")
     twiss_beam = os.path.join(twiss_path, twiss_energy, twiss_beta, twiss_nomreal, twiss_version, filename)
     if not os.access(twiss_beam,os.R_OK):
         raise Exception(f'Failed to find {filename} at {twiss_beam}')
