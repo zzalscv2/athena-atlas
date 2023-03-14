@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TileDigitsCollection_H
@@ -30,6 +30,16 @@ public:
     : MyBase(id,ownPolicy), m_FragSize(0), m_FragBCID(0) { m_FragExtraWords.resize(2); }
   TileDigitsCollection ( SG::OwnershipPolicy ownPolicy=SG::OWN_ELEMENTS ) 
     : MyBase(ownPolicy), m_FragSize(0), m_FragBCID(0) { m_FragExtraWords.resize(2); }
+
+  TileDigitsCollection ( SG::OwnershipPolicy ownPolicy, ID id,
+                         uint32_t lvl1Id, uint32_t lvl1Type, uint32_t detEvType, uint32_t rodBCID,
+                         const std::vector<uint32_t>& fragChipCRCWords, const std::vector<uint32_t>& fragChipCRCWordsHIGH,
+                         const std::vector<uint32_t>& fragChipHeaderWords, const std::vector<uint32_t>& fragChipHeaderWordsHIGH,
+                         const std::vector<uint32_t>& fragExtraWords, uint32_t fragSize, uint32_t fragBCID)
+    : MyBase(id, ownPolicy, lvl1Id, lvl1Type, detEvType, rodBCID),
+      m_FragChipCRCWords(fragChipCRCWords), m_FragChipCRCWordsHIGH(fragChipCRCWordsHIGH),
+      m_FragChipHeaderWords(fragChipHeaderWords), m_FragChipHeaderWordsHIGH(fragChipHeaderWordsHIGH),
+      m_FragExtraWords(fragExtraWords), m_FragSize(fragSize), m_FragBCID(fragBCID) {}
 
   /**
    * @brief Copy constructor.
