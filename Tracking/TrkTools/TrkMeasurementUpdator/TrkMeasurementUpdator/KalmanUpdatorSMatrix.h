@@ -14,13 +14,6 @@
 #ifndef TRK_KALMANUPDATORSMATRIX_H
 #define TRK_KALMANUPDATORSMATRIX_H
 
-#if __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wstrict-overflow"
-#if !defined(__clang__) && __GNUC__ >= 6
-#pragma GCC diagnostic ignored "-Wmisleading-indentation"
-#endif
-#endif
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "TrkEventPrimitives/ParamDefs.h"
@@ -408,9 +401,5 @@ KalmanUpdatorSMatrix::thetaWithinRange_5D(const SParVector5& V) const
 }
 
 } // end of namespace
-
-#if __GNUC__
-#pragma GCC diagnostic pop
-#endif
 
 #endif // TRK_KALMANUPDATOR_H
