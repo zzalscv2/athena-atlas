@@ -21,8 +21,6 @@
   * configures lowPt versions of tracking tools
 * [InDetTrigConfigRecLoadToolsBeamGas](InDetTrigConfigRecLoadToolsBeamGas.py)  
   * **removed** configures BeamGas versions of tracking tools
-* [InDetTrigCommonTools](InDetTrigCommonTools.py)           
-  * Creates and configures common tools between fast and precision tracking
 * [InDetTrigConfigRecLoadToolsCosmics](InDetTrigConfigRecLoadToolsCosmics.py)  
   * configures Cosmics versions of tracking tools
 ## Create & configure ID Conditions

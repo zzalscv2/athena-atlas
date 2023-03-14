@@ -126,15 +126,6 @@ def trigPropagator_getter():
 
 
 @makePublicTool
-def trackParticleCreatorTool_builder(name, config, trackSummaryTool ):
-  """Tool with functionality to convert Trk:Tracks into xAOD::TrackParticles"""
-  from TrkParticleCreator.TrkParticleCreatorConf import Trk__TrackParticleCreatorTool
-  return Trk__TrackParticleCreatorTool(name             = name,
-                                       KeepParameters   = config.keepTrackParameters,
-                                       TrackSummaryTool = trackSummaryTool )
-
-
-@makePublicTool
 def trackCollectionCnvTool_builder(name, trackParticleCreatorTool, config):
   """A wrapper tool around trackParticleCreatorTool that enables to run on the whole TrackCollections"""
   from xAODTrackingCnv.xAODTrackingCnvConf import xAODMaker__TrackCollectionCnvTool
@@ -310,41 +301,6 @@ def trackSelectionTool_getter(config):
       else:
         from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigAmbiTrackSelectionTool
         return InDetTrigAmbiTrackSelectionTool
-
-
-
-
-
-
-
-
-
-#--------------------------------------------------------------------------
-#                    Track Ambiguity Score algs/tools
-#
-# this does not appear to actually be needed
-@makePublicTool
-def ambiguityScoreProcessorToolOld_builder( name, config, trackSummaryTool ):
-   #   Tool contains backend functions for calculating score of a provided track
-   #   Score of each track is based on track parameters such as hits in the ID, higher score -> more likely to survive ambiguity resolving between tracks
-
-      #-----------------------
-      #Set/Get subtools
-      scoringTool = ambiguityScoringTool_builder(  name   = add_prefix( 'AmbiguityScoringTool',config.input_name ),
-                                                   config = config, 
-                                                   trackSummaryTool = trackSummaryTool )
-
-      associationTool    = associationTool_getter()
-
-      trackSelectionTool = trackSelectionTool_getter(config)
-
-      from TrkAmbiguityProcessor.TrkAmbiguityProcessorConf import Trk__DenseEnvironmentsAmbiguityScoreProcessorTool
-      return  Trk__DenseEnvironmentsAmbiguityScoreProcessorTool( name               = name,
-                                                                 ScoringTool        = scoringTool,
-                                                                 AssociationTool    = associationTool,
-                                                                 SelectionTool      = trackSelectionTool
-                                                                )
-
 
 
 

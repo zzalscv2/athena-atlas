@@ -7,12 +7,6 @@ log.info( "preinclude: effpreinclude.py" )
 
 from TrigInDetConfig.ConfigSettingsBase import _ConfigSettingsBase 
 
-def override(self):
-    self._newConfig=True
-
-_ConfigSettingsBase.override = override
-
-
 # potential future check - leave here
 # from InDetTrigRecExample.InDetTrigFlags import InDetTrigFlags ; InDetTrigFlags.cutLevel.set_Value_and_Lock(15) 
 

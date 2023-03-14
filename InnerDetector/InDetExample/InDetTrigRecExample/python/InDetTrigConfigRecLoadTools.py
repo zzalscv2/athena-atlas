@@ -32,25 +32,6 @@ TrigPixelLorentzAngleTool = getPublicTool("PixelLorentzAngleTool")
 TrigSCTLorentzAngleTool = getPrivateTool("SCTLorentzAngleTool") 
 
 
-#
-# common ClusterMakerTool
-#
-from SiClusterizationTool.SiClusterizationToolConf import InDet__ClusterMakerTool
-InDetTrigClusterMakerTool = \
-    InDet__ClusterMakerTool( name = "InDetTrigClusterMakerTool",
-                             PixelLorentzAngleTool = TrigPixelLorentzAngleTool,
-                             SCTLorentzAngleTool = TrigSCTLorentzAngleTool
-                             )
-if (InDetTrigFlags.doPrintConfigurables()):
-  print (InDetTrigClusterMakerTool)
-ToolSvc += InDetTrigClusterMakerTool
-
-from SiSpacePointTool.SiSpacePointToolConf import InDet__SiSpacePointMakerTool
-InDetTrigSiSpacePointMakerTool = InDet__SiSpacePointMakerTool(name="InDetTrigSiSpacePointMakerTool")
-if (InDetTrigFlags.doPrintConfigurables()):
-  print (InDetTrigSiSpacePointMakerTool)
-ToolSvc += InDetTrigSiSpacePointMakerTool      
-  
 
 #
 # ----------- control loading of ROT_creator
