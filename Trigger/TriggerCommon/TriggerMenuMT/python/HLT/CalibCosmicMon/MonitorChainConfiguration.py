@@ -27,8 +27,8 @@ def TimeBurnerSequenceCfg(flags):
         inputMakerSeq = seqAND("TimeBurnerSequence", [inputMaker])
 
         # TimeBurner alg works as a reject-all hypo
-        hypoAlg = TimeBurnerCfg()
-        hypoAlg.SleepTimeMillisec = 200
+        hypoAlg = TimeBurnerCfg(flags,
+                                SleepTimeMillisec = 200)
 
         return MenuSequence(flags,
             Sequence    = inputMakerSeq,
