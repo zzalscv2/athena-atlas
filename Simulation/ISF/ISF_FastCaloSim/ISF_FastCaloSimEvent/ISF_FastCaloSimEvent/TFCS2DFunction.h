@@ -12,24 +12,32 @@
 
 class TH2;
 
-class TFCS2DFunction:public TFCSFunction
-{
-  public:
-    TFCS2DFunction() {};
-    ~TFCS2DFunction() {};
+class TFCS2DFunction : public TFCSFunction {
+public:
+  TFCS2DFunction(){};
+  ~TFCS2DFunction(){};
 
-    virtual int ndim() const {return 2;};
-    
-    virtual void rnd_to_fct(float& valuex,float& valuey,float rnd0,float rnd1) const = 0;
-    virtual void rnd_to_fct(float value[],const float rnd[]) const;
+  virtual int ndim() const { return 2; };
 
-  	static double CheckAndIntegrate2DHistogram(const TH2* hist, std::vector<double>& integral_vec,int& first,int& last);
+  virtual void rnd_to_fct(float &valuex, float &valuey, float rnd0,
+                          float rnd1) const = 0;
+  virtual void rnd_to_fct(float value[], const float rnd[]) const;
 
-    static void unit_test ATLAS_NOT_THREAD_SAFE (TH2* hist=nullptr,TFCS2DFunction* rtof=nullptr,const char* outfilename="TFCS2DFunction_unit_test.root",int nrnd=10000000);
-    static void unit_tests ATLAS_NOT_THREAD_SAFE (TH2* hist=nullptr,const char* outfilename="TFCS2DFunction_unit_test.root",int nrnd=10000000);
-  private:
+  static double CheckAndIntegrate2DHistogram(const TH2 *hist,
+                                             std::vector<double> &integral_vec,
+                                             int &first, int &last);
 
-  ClassDef(TFCS2DFunction,1)  //TFCS2DFunction
+  static void unit_test ATLAS_NOT_THREAD_SAFE(
+      TH2 *hist = nullptr, TFCS2DFunction *rtof = nullptr,
+      const char *outfilename = "TFCS2DFunction_unit_test.root",
+      int nrnd = 10000000);
+  static void unit_tests ATLAS_NOT_THREAD_SAFE(
+      TH2 *hist = nullptr,
+      const char *outfilename = "TFCS2DFunction_unit_test.root",
+      int nrnd = 10000000);
+
+private:
+  ClassDef(TFCS2DFunction, 1) // TFCS2DFunction
 };
 
 #endif

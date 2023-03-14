@@ -1,9 +1,9 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#Copyright(C) 2002 - 2022 CERN for the benefit of the ATLAS collaboration
 
-# Declare the package name:
+#Declare the package name:
 atlas_subdir( ISF_FastCaloSimEvent )
 
-# External dependencies:
+#External dependencies:
 find_package( Boost )
 find_package( CLHEP )
 find_package( HepPDT )
@@ -17,10 +17,10 @@ if(USE_GPU AND CMAKE_CUDA_COMPILER)
   add_definitions( -DUSE_GPU)
 endif()
 
-# Remove the --as-needed linker flags:
+#Remove the-- as - needed linker flags:
 atlas_disable_as_needed()
 
-# Component(s) in the package:
+#Component(s) in the package:
 atlas_add_root_dictionary( ISF_FastCaloSimEvent _dictSource
                            ROOT_HEADERS ISF_FastCaloSimEvent/IntArray.h
                            ISF_FastCaloSimEvent/DoubleArray.h

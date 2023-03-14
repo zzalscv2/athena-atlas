@@ -14,35 +14,34 @@
 // Namespace for the ShowerLib related classes
 namespace ISF_FCS_Parametrization {
 
-  /**
-   *
-   *  @short Class for collection of StepInfo class (G4 hits)
-   *          copied and modified version to ISF
-   *
-   *  @author Wolfgang Ehrenfeld, University of Hamburg, Germany
-   *  @author Sasha Glazov, DESY Hamburg, Germany
-   *  @author Zdenek Hubacek, CERN
-   *
-   *  @version $Id: FCS_StepInfoCollection $
-   *
-   */
+/**
+ *
+ *  @short Class for collection of StepInfo class (G4 hits)
+ *          copied and modified version to ISF
+ *
+ *  @author Wolfgang Ehrenfeld, University of Hamburg, Germany
+ *  @author Sasha Glazov, DESY Hamburg, Germany
+ *  @author Zdenek Hubacek, CERN
+ *
+ *  @version $Id: FCS_StepInfoCollection $
+ *
+ */
 
-  class FCS_StepInfoCollection : public DataVector<FCS_StepInfo> {
+class FCS_StepInfoCollection : public DataVector<FCS_StepInfo> {
 
-  public:
+public:
+  FCS_StepInfoCollection() {}
 
-          FCS_StepInfoCollection() {}
-  private:
+private:
+};
 
-  };
-
-} // namespace ShowerLib
-
+} // namespace ISF_FCS_Parametrization
 
 #include "AthenaKernel/CLASS_DEF.h"
 
-CLASS_DEF( ISF_FCS_Parametrization::FCS_StepInfoCollection , 1330006248 , 1 )
+CLASS_DEF(ISF_FCS_Parametrization::FCS_StepInfoCollection, 1330006248, 1)
 
-SG_BASE(  ISF_FCS_Parametrization::FCS_StepInfoCollection, DataVector<ISF_FCS_Parametrization::FCS_StepInfo>);
+SG_BASE(ISF_FCS_Parametrization::FCS_StepInfoCollection,
+        DataVector<ISF_FCS_Parametrization::FCS_StepInfo>);
 
 #endif

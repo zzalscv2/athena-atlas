@@ -11,13 +11,12 @@
 class IntArray : public TObject, public TArrayI {
 
 public:
-   IntArray();
-   IntArray( int );
-   ~IntArray();
+  IntArray();
+  IntArray(int);
+  ~IntArray();
 
 private:
-
-   ClassDef( IntArray, 1 )
+  ClassDef(IntArray, 1)
 };
 
 #endif

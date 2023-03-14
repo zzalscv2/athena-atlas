@@ -1,7 +1,7 @@
 /*
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
- 
+
 //////////////////////////////////////////////////////////////////
 // TFCSGANLWTNNHandler.h, (c) ATLAS Detector software
 ///////////////////////////////////////////////////////////////////
@@ -18,21 +18,19 @@
 #include <string>
 
 class TFCSGANLWTNNHandler {
-  public:
+public:
   TFCSGANLWTNNHandler();
   virtual ~TFCSGANLWTNNHandler();
 
-  const lwt::LightweightGraph* GetGraph() const { return m_graph;}
+  const lwt::LightweightGraph *GetGraph() const { return m_graph; }
 
-  bool LoadGAN(const std::string& inputFile);   
-  
-  private:
-  
-  const lwt::LightweightGraph* m_graph; //!Do not persistify
-  std::string*     m_input=nullptr;
+  bool LoadGAN(const std::string &inputFile);
 
-  ClassDef(TFCSGANLWTNNHandler,5)  //TFCSGANLWTNNHandler
+private:
+  const lwt::LightweightGraph *m_graph; //! Do not persistify
+  std::string *m_input = nullptr;
 
+  ClassDef(TFCSGANLWTNNHandler, 5) // TFCSGANLWTNNHandler
 };
 
 #endif //> !ISF_TFCSGANLWTNNHANDLER_H
