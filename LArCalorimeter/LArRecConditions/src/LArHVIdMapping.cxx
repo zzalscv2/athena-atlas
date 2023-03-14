@@ -231,7 +231,7 @@ void LArHVIdMapping::getHVLineInCell( const Identifier& offId, std::vector<HWIde
     if( m_caloHelper->is_em_barrel(offId) && sampl == 0 ){
       // EMBPS
       Detector = 1;
-      iGapMax  = 0;
+      iGapMax  = 1;
     }
     if( m_caloHelper->is_em_endcap(offId) && sampl != 0 ){ 
       // EMEC
