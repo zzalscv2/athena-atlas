@@ -93,6 +93,8 @@ SUSYToolsAlg::SUSYToolsAlg(const std::string& name,
   declareProperty( "GRLFiles", m_GRLFiles );
   declareProperty( "maxEvts", m_maxEvts = -999 );
   declareProperty( "LumiBlockFilter", m_lbfilter = 90 );
+  declareProperty( "isPHYSLITE", isPHYSLITE = false);
+
 
   // asg Tool Handles must be dealt with differently
   m_tauTruthMatchingTool.declarePropertyFor( this, "TauTruthMatchingTool", "The TTMT" );
@@ -123,6 +125,9 @@ StatusCode SUSYToolsAlg::initialize() {
   //
   ATH_CHECK(m_SUSYTools.setProperty("ConfigFile", m_configFile) );
   m_SUSYTools.setTypeAndName("ST::SUSYObjDef_xAOD/SUSYTools");
+  if (isPHYSLITE) {
+    ATH_CHECK(m_SUSYTools.setProperty("IsPHYSLITE", true) );
+  }
   ATH_CHECK(m_SUSYTools.retrieve());
   ATH_MSG_INFO("Retrieved tool: " << m_SUSYTools->name() );
 
@@ -167,34 +172,56 @@ StatusCode SUSYToolsAlg::initialize() {
 
   // setup triggers to be checked
   m_triggers.clear();
-  m_triggers["el"] = {};
-  m_triggers["el"].push_back("HLT_e24_lhtight_nod0_ivarloose");
-  m_triggers["el"].push_back("HLT_e60_lhmedium_nod0");
-  m_triggers["el"].push_back("HLT_e26_lhtight_nod0_ivarloose");
-  m_triggers["el"].push_back("HLT_e140_lhloose_nod0");
-  m_triggers["el"].push_back("HLT_e24_lhtight_ivarloose_L1EM22VHI");
-  m_triggers["el"].push_back("HLT_e24_lhtight_ivarloose_L1eEM26M");
-  m_triggers["el"].push_back("HLT_e26_lhtight_ivarloose_L1EM22VHI");
-  m_triggers["el"].push_back("HLT_e26_lhtight_ivarloose_L1eEM26M");
-  m_triggers["el"].push_back("HLT_e60_lhvloose_L1eEM26M");
-  m_triggers["el"].push_back("HLT_e60_lhvloose_L1EM22VHI");
+  if(m_mcCampaign.find("mc20") != std::string::npos){
+    // Trigger for Run2
+    m_triggers["el"] = {};
+    m_triggers["el"].push_back("HLT_e24_lhtight_nod0_ivarloose");
+    m_triggers["el"].push_back("HLT_e60_lhmedium_nod0");
+    m_triggers["el"].push_back("HLT_e26_lhtight_nod0_ivarloose");
+    m_triggers["el"].push_back("HLT_e140_lhloose_nod0");
+    m_triggers["el"].push_back("HLT_e24_lhtight_ivarloose_L1EM22VHI");
+    m_triggers["el"].push_back("HLT_e24_lhtight_ivarloose_L1eEM26M");
+    m_triggers["el"].push_back("HLT_e26_lhtight_ivarloose_L1EM22VHI");
+    m_triggers["el"].push_back("HLT_e26_lhtight_ivarloose_L1eEM26M");
+    m_triggers["el"].push_back("HLT_e60_lhvloose_L1eEM26M");
+    m_triggers["el"].push_back("HLT_e60_lhvloose_L1EM22VHI");
 
-  m_triggers["ph"] = {};
-  m_triggers["ph"].push_back("HLT_g120_loose");
-  m_triggers["ph"].push_back("HLT_g140_loose");
-  m_triggers["ph"].push_back("HLT_g120_loose_L1eEM26M");
-  m_triggers["ph"].push_back("HLT_g120_loose_L1EM22VHI");
-  m_triggers["ph"].push_back("HLT_g140_loose_L1eEM26M");
-  m_triggers["ph"].push_back("HLT_g140_loose_L1EM22VHI");
+    m_triggers["ph"] = {};
+    m_triggers["ph"].push_back("HLT_g120_loose");
+    m_triggers["ph"].push_back("HLT_g140_loose");
+    m_triggers["ph"].push_back("HLT_g120_loose_L1eEM26M");
+    m_triggers["ph"].push_back("HLT_g120_loose_L1EM22VHI");
+    m_triggers["ph"].push_back("HLT_g140_loose_L1eEM26M");
+    m_triggers["ph"].push_back("HLT_g140_loose_L1EM22VHI");
 
-  m_triggers["mu"] = {};
-  m_triggers["mu"].push_back("HLT_mu24_ivarmedium");
-  m_triggers["mu"].push_back("HLT_mu26_ivarmedium");
-  m_triggers["mu"].push_back("HLT_mu50");
-  m_triggers["mu"].push_back("HLT_mu24_ivarmedium_L1MU14FCH");
-  m_triggers["mu"].push_back("HLT_mu24_ivarmedium_L1MU18VFCH");
-  m_triggers["mu"].push_back("HLT_mu26_ivarmedium_L1MU14FCH");
-  m_triggers["mu"].push_back("HLT_mu26_ivarmedium_L1MU18VFCH");
+    m_triggers["mu"] = {};
+    m_triggers["mu"].push_back("HLT_mu24_ivarmedium");
+    m_triggers["mu"].push_back("HLT_mu26_ivarmedium");
+    m_triggers["mu"].push_back("HLT_mu50");
+    m_triggers["mu"].push_back("HLT_mu24_ivarmedium_L1MU14FCH");
+    m_triggers["mu"].push_back("HLT_mu24_ivarmedium_L1MU18VFCH");
+    m_triggers["mu"].push_back("HLT_mu26_ivarmedium_L1MU14FCH");
+    m_triggers["mu"].push_back("HLT_mu26_ivarmedium_L1MU18VFCH");
+  }
+  else{
+    // Trigger for Run3
+    m_triggers["el"] = {};
+    m_triggers["el"].push_back("HLT_e26_lhtight_ivarloose_L1EM22VHI");
+    m_triggers["el"].push_back("HLT_e60_lhmedium_L1EM22VHI");
+    m_triggers["el"].push_back("HLT_e140_lhloose_L1EM22VHI");
+
+    m_triggers["ph"] = {};
+    m_triggers["ph"].push_back("HLT_g140_loose_L1EM22VHI");
+    m_triggers["ph"].push_back("HLT_g300_etcut_L1EM22VHI");
+
+    m_triggers["mu"] = {};
+    m_triggers["mu"].push_back("HLT_mu24_ivarmedium_L1MU14FCH");
+    m_triggers["mu"].push_back("HLT_mu50_L1MU14FCH");
+    m_triggers["mu"].push_back("HLT_mu60_0eta105_msonly_L1MU14FCH");
+    m_triggers["mu"].push_back("HLT_mu60_L1MU14FCH");
+    m_triggers["mu"].push_back("HLT_mu80_msonly_3layersEC_L1MU14FCH");
+
+  }
 
 
   // book histograms
@@ -212,11 +239,12 @@ StatusCode SUSYToolsAlg::initialize() {
   ATH_MSG_INFO( "Config file opened" );
 
   m_configDict.clear();
-  m_configDict["Jet.LargeRcollection"] = rEnv.GetValue("Jet.LargeRcollection", "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets" );
-  m_configDict["TrackJet.Collection"]  = rEnv.GetValue("TrackJet.Collection", "AntiKtVR30Rmax4Rmin02TrackJets" );
-  m_configDict["Jet.WtaggerConfig"]    = rEnv.GetValue("Jet.WtaggerConfig", "None");
-  m_configDict["Jet.ZtaggerConfig"]    = rEnv.GetValue("Jet.ZtaggerConfig", "None");
-  m_configDict["Jet.ToptaggerConfig"]  = rEnv.GetValue("Jet.ToptaggerConfig", "None");
+  m_configDict["Jet.LargeRcollection"]                    = rEnv.GetValue("Jet.LargeRcollection", "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets" );
+  m_configDict["TrackJet.Collection"]                     = rEnv.GetValue("TrackJet.Collection", "AntiKtVR30Rmax4Rmin02TrackJets" );
+  m_configDict["Jet.WtaggerConfig"]                       = rEnv.GetValue("Jet.WtaggerConfig", "None");
+  m_configDict["Jet.ZtaggerConfig"]                       = rEnv.GetValue("Jet.ZtaggerConfig", "None");
+  m_configDict["Jet.ToptaggerConfig"]                     = rEnv.GetValue("Jet.ToptaggerConfig", "None");
+
   // Trim comments and extra spaces from config entries
   std::regex comment("#.*$");
   std::regex trimspaces("^ +| +$|( ) +");
@@ -377,28 +405,28 @@ StatusCode SUSYToolsAlg::execute() {
   xAOD::ElectronContainer* electrons_nominal(0);
   xAOD::ShallowAuxContainer* electrons_nominal_aux(0);
   if (m_slices["ele"]) {
-    ATH_CHECK( m_SUSYTools->GetElectrons(electrons_nominal, electrons_nominal_aux) );
+    ATH_CHECK( m_SUSYTools->GetElectrons(electrons_nominal, electrons_nominal_aux,true, isPHYSLITE?"AnalysisElectrons":"Electrons") );
     ATH_MSG_DEBUG( "Number of electrons: " << electrons_nominal->size() );
   }
 
   xAOD::PhotonContainer* photons_nominal(0);
   xAOD::ShallowAuxContainer* photons_nominal_aux(0);
   if (m_slices["pho"]) {
-    ATH_CHECK( m_SUSYTools->GetPhotons(photons_nominal, photons_nominal_aux) );
+    ATH_CHECK( m_SUSYTools->GetPhotons(photons_nominal, photons_nominal_aux, true, isPHYSLITE?"AnalysisPhotons":"Photons") );
     ATH_MSG_DEBUG( "Number of photons: " << photons_nominal->size() );
   }
 
   xAOD::MuonContainer* muons_nominal(0);
   xAOD::ShallowAuxContainer* muons_nominal_aux(0);
   if (m_slices["mu"]) {
-    ATH_CHECK( m_SUSYTools->GetMuons(muons_nominal, muons_nominal_aux) );
+    ATH_CHECK( m_SUSYTools->GetMuons(muons_nominal, muons_nominal_aux, true, isPHYSLITE?"AnalysisMuons":"Muons") );
     ATH_MSG_DEBUG( "Number of muons: " << muons_nominal->size() );
   }
 
   xAOD::JetContainer* jets_nominal(0);
   xAOD::ShallowAuxContainer* jets_nominal_aux(0);
   if (m_slices["jet"]) {
-    ATH_CHECK( m_SUSYTools->GetJets(jets_nominal, jets_nominal_aux) );
+    ATH_CHECK( m_SUSYTools->GetJets(jets_nominal, jets_nominal_aux, true, isPHYSLITE?"AnalysisJets":"") );
     ATH_MSG_DEBUG( "Number of jets: " << jets_nominal->size() );
   }
 
@@ -471,13 +499,13 @@ StatusCode SUSYToolsAlg::execute() {
   xAOD::TauJetContainer* taus_nominal(0);
   xAOD::ShallowAuxContainer* taus_nominal_aux(0);
   if (m_slices["tau"]) {
-     if (!isData) {
-       ATH_CHECK( evtStore()->retrieve(taus_gettruth, "TauJets") );
+     if (!isData && !isPHYSLITE) {
+       ATH_CHECK( evtStore()->retrieve(taus_gettruth,"TauJets") );
        for(const auto& tau : *taus_gettruth) {
          m_tauTruthMatchingTool->getTruth(*tau);
        }
      }
-     ATH_CHECK( m_SUSYTools->GetTaus(taus_nominal, taus_nominal_aux) );
+     ATH_CHECK( m_SUSYTools->GetTaus(taus_nominal, taus_nominal_aux, true, isPHYSLITE?"AnalysisTauJets":"TauJets") );
      ATH_MSG_DEBUG( "Number of taus: " << taus_nominal->size() );
   }
 
@@ -502,12 +530,12 @@ StatusCode SUSYToolsAlg::execute() {
     ATH_CHECK( m_SUSYTools->GetMETSig(*metcst_nominal, metsig_cst, false, false) );
     ATH_MSG_DEBUG("METSignificance = " << metsig_cst);
 
-    ATH_CHECK( m_SUSYTools->GetMET(*mettst_nominal, jets_nominal, electrons_nominal, muons_nominal, photons_nominal, 0, true, true) );
+    ATH_CHECK( m_SUSYTools->GetMET(*mettst_nominal, jets_nominal, electrons_nominal, muons_nominal, photons_nominal, 0, true, true) ); // bugfix for PHYSLITE with p5511
     ATH_MSG_DEBUG("RefFinal TST etx="   << (*mettst_nominal)["Final"]->mpx()
                           << ", ety="   << (*mettst_nominal)["Final"]->mpy()
                           << ", et="    << (*mettst_nominal)["Final"]->met()
                           << ", sumet=" << (*mettst_nominal)["Final"]->sumet());
-    ATH_CHECK( m_SUSYTools->GetMETSig(*mettst_nominal, metsig_tst, true, true) );
+    ATH_CHECK( m_SUSYTools->GetMETSig(*mettst_nominal, metsig_tst, true,  true) );
     ATH_MSG_DEBUG("METSignificance = " << metsig_tst);
 
     hist("MET/met_et")    ->Fill( (*mettst_nominal)["Final"]->met()*0.001 );
@@ -528,7 +556,7 @@ StatusCode SUSYToolsAlg::execute() {
 
   //--- Trigger
   bool isRun3Trig = false;
-  if (evtStore()->contains<xAOD::TrigCompositeContainer>("TrigMatch_HLT_e24_lhtight_ivarloose_L1EM22VHI")) isRun3Trig = true;
+  if (m_mcCampaign.find("mc21") != std::string::npos) isRun3Trig = true;
 
   //--- Monitoring
   for (const auto& obj : m_objects) { for (const auto& lev : m_levels) { m_obj_count[obj][lev] = 0; } }
@@ -934,7 +962,7 @@ StatusCode SUSYToolsAlg::execute() {
         ATH_MSG_DEBUG("Get systematics-varied electrons");
         xAOD::ElectronContainer* electrons_syst(0);
         xAOD::ShallowAuxContainer* electrons_syst_aux(0);
-        ATH_CHECK( m_SUSYTools->GetElectrons(electrons_syst, electrons_syst_aux) );
+        ATH_CHECK( m_SUSYTools->GetElectrons(electrons_syst, electrons_syst_aux, true , isPHYSLITE?"AnalysisElectrons":"Electrons") );
         electrons = electrons_syst;
       }
 
@@ -942,7 +970,7 @@ StatusCode SUSYToolsAlg::execute() {
         ATH_MSG_DEBUG("Get systematics-varied photons");
         xAOD::PhotonContainer* photons_syst(0);
         xAOD::ShallowAuxContainer* photons_syst_aux(0);
-        ATH_CHECK( m_SUSYTools->GetPhotons(photons_syst, photons_syst_aux) );
+        ATH_CHECK( m_SUSYTools->GetPhotons(photons_syst, photons_syst_aux, true, isPHYSLITE?"AnalysisPhotons":"Photons") );
         photons = photons_syst;
       }
 
@@ -950,7 +978,7 @@ StatusCode SUSYToolsAlg::execute() {
         ATH_MSG_DEBUG("Get systematics-varied muons");
         xAOD::MuonContainer* muons_syst(0);
         xAOD::ShallowAuxContainer* muons_syst_aux(0);
-        ATH_CHECK( m_SUSYTools->GetMuons(muons_syst, muons_syst_aux) );
+        ATH_CHECK( m_SUSYTools->GetMuons(muons_syst, muons_syst_aux, true, isPHYSLITE?"AnalysisMuons":"Muons") );
         muons = muons_syst;
       }
 
@@ -959,7 +987,7 @@ StatusCode SUSYToolsAlg::execute() {
           ATH_MSG_DEBUG("Get systematics-varied jets");
           xAOD::JetContainer* jets_syst(0);
           xAOD::ShallowAuxContainer* jets_syst_aux(0);
-          ATH_CHECK( m_SUSYTools->GetJetsSyst(*jets_nominal, jets_syst, jets_syst_aux) );
+          ATH_CHECK( m_SUSYTools->GetJetsSyst(*jets_nominal, jets_syst, jets_syst_aux, true, isPHYSLITE?"AnalysisJets":"") );
           jets = jets_syst;
         }
         if (m_slices["fatjet"]) {
@@ -982,7 +1010,7 @@ StatusCode SUSYToolsAlg::execute() {
         ATH_MSG_DEBUG("Get systematics-varied taus");
         xAOD::TauJetContainer* taus_syst(0);
         xAOD::ShallowAuxContainer* taus_syst_aux(0);
-        ATH_CHECK( m_SUSYTools->GetTaus(taus_syst, taus_syst_aux) );
+        ATH_CHECK( m_SUSYTools->GetTaus(taus_syst, taus_syst_aux,true, isPHYSLITE?"AnalysisTauJets":"TauJets") );
         taus = taus_syst;
       }
 
@@ -1458,21 +1486,23 @@ void SUSYToolsAlg::stdHistsForObj(xAOD::IParticle *obj, const std::string& objty
    //
    if (objtype=="el" || objtype=="mu" || objtype=="ph" || objtype=="tau") {
       if ( objtype!="tau" ) {
-        //ATH_MSG_DEBUG(objtype << ", " << objlevel << ": " << obj->auxdata<int>("truthType") << ", " << obj->auxdata<int>("truthOrigin"));
+        ATH_MSG_DEBUG(objtype << ", " << objlevel << ": " << obj->auxdata<int>("truthType") << ", " << obj->auxdata<int>("truthOrigin"));
         hist(dir+objtype+"_"+objlevel+"_truthType")->Fill( obj->auxdata<int>("truthType") );
         hist(dir+objtype+"_"+objlevel+"_truthOrigin")->Fill( obj->auxdata<int>("truthOrigin") );
       } else {
-        bool istruthmatched = (bool)obj->auxdata<char>("IsTruthMatched");
-        int pid(0),ppid(0);
-        if (istruthmatched && obj->isAvailable<ElementLink<xAOD::TruthParticleContainer>>("truthParticleLink")) {
-           const auto *tp = *(obj->auxdata<ElementLink<xAOD::TruthParticleContainer>>("truthParticleLink"));
-           if (tp) {
-             pid = tp->pdgId();
-             ppid = (tp->nParents()>0)?tp->parent(0)->pdgId():0;
-           }
+        if(!isPHYSLITE){
+          bool istruthmatched = (bool)obj->auxdata<char>("IsTruthMatched");
+          int pid(0),ppid(0);
+          if (istruthmatched && obj->isAvailable<ElementLink<xAOD::TruthParticleContainer>>("truthParticleLink")) {
+            const auto *tp = *(obj->auxdata<ElementLink<xAOD::TruthParticleContainer>>("truthParticleLink"));
+            if (tp) {
+              pid = tp->pdgId();
+              ppid = (tp->nParents()>0)?tp->parent(0)->pdgId():0;
+            }
+          }
+          hist(dir+objtype+"_"+objlevel+"_pid")->Fill( pid );
+          hist(dir+objtype+"_"+objlevel+"_parentpid")->Fill( ppid );
         }
-        hist(dir+objtype+"_"+objlevel+"_pid")->Fill( pid );
-        hist(dir+objtype+"_"+objlevel+"_parentpid")->Fill( ppid );
       }
    }
    if (objtype=="tau") {

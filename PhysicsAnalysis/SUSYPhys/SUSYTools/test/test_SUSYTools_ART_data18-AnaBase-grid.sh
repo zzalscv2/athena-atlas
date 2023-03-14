@@ -9,8 +9,8 @@
 # Create empty pool file
 art.py createpoolfile
 
-echo "Running SUSYTools test: \'TestSUSYToolsAlg.py -f PHYS -t data18 -p p5440 --inputFile DAOD_PHYS.data18_13TeV.356250.data18_p5440.PHYS.pool.root --inputDir /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools/'"
-TestSUSYToolsAlg.py -f PHYS -t data18 -p p5440 --inputFile DAOD_PHYS.data18_13TeV.356250.data18_p5440.PHYS.pool.root --inputDir /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools/
+echo "Running SUSYTools test: \'TestSUSYToolsAlg.py -f PHYS -t data18 -p p5511 --inputFile DAOD_PHYS.data18_13TeV.00356250_p5511.pool.root --inputDir /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools/'"
+TestSUSYToolsAlg.py -f PHYS -t data18 -p p5511 --inputFile DAOD_PHYS.data18_13TeV.00356250_p5511.pool.root --inputDir /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools/
 echo  "art-result: $? TEST"
 
 mv submitDir/hist-*.root ./hist-data18_DAOD_PHYS.root
