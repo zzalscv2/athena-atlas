@@ -411,7 +411,7 @@ MuonChainParts = {
     'lrtInfo'        : ['d0loose','d0medium','d0tight'],
     'invMassInfo'    : ['invmJPsiOS','invmDimu'],
     'msonlyInfo'     : ['msonly'],
-    'addInfo'        : ['idperf','LRT','3layersEC','cosmic',"muonqual","nscan",'idtp'],
+    'addInfo'        : ['idperf','LRT','3layersEC','cosmic',"muonqual","nscan","nscan10","nscan20","nscan30","nscan40",'idtp'],
     'topo'           : AllowedTopos_mu,
     'flavour'        : [],
     'sigFolder'     : ['Muon'],
