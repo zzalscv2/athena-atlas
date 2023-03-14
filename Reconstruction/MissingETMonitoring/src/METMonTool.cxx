@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
@@ -678,8 +678,8 @@ StatusCode METMonTool::bookProfileHistograms(std::string& metName, const char* o
   TProfile2D* hp2 = 0;
 
   // MissingET Vs Eta
-  hName << "metVs" << objName << "Eta_" << metName.c_str();
-  hTitle << "MET Vs " << objName << " Eta Distribution (" << metName.c_str() << ")";
+  hName << "metVs" << objName << "Eta_" << metName;
+  hTitle << "MET Vs " << objName << " Eta Distribution (" << metName << ")";
   hxTitle << objName << " Eta";
   hyTitle << "MET Et (GeV)";
   hp = new TProfile(hName.str().c_str(), hTitle.str().c_str(), m_etabin, -5., +5.);
@@ -691,8 +691,8 @@ StatusCode METMonTool::bookProfileHistograms(std::string& metName, const char* o
   hTitle.str("");
   hxTitle.str(""); hyTitle.str("");
   // DeltaPhi Vs Eta
-  hName << "dphiVs" << objName << "Eta_" << metName.c_str();
-  hTitle << "DeltaPhi Vs " << objName << " Eta Distribution (" << metName.c_str() << ")";
+  hName << "dphiVs" << objName << "Eta_" << metName;
+  hTitle << "DeltaPhi Vs " << objName << " Eta Distribution (" << metName << ")";
   hxTitle << objName << " Eta";
   hyTitle << "deltaPhi (MET, " << objName << ")";
   hp = new TProfile(hName.str().c_str(), hTitle.str().c_str(), m_etabin, -5., +5.);
@@ -704,8 +704,8 @@ StatusCode METMonTool::bookProfileHistograms(std::string& metName, const char* o
   hTitle.str("");
   hxTitle.str(""); hyTitle.str("");
   // MissingET Vs Phi
-  hName << "metVs" << objName << "Phi_" << metName.c_str();
-  hTitle << "MET Vs " << objName << " Phi Distribution (" << metName.c_str() << ")";
+  hName << "metVs" << objName << "Phi_" << metName;
+  hTitle << "MET Vs " << objName << " Phi Distribution (" << metName << ")";
   hxTitle << objName << " Phi (radian)";
   hyTitle << "MET Et (GeV)";
   hp = new TProfile(hName.str().c_str(), hTitle.str().c_str(), m_phibin, -M_PI, +M_PI);
@@ -745,8 +745,8 @@ StatusCode METMonTool::bookProfileHistograms(std::string& metName, const char* o
   hxTitle.str(""); hyTitle.str("");
   */
   //DeltaPhi Vs Phi
-  hName << "dphiVs" << objName << "Phi_" << metName.c_str();
-  hTitle << "DeltaPhi Vs " << objName << " Phi Distribution (" << metName.c_str() << ")";
+  hName << "dphiVs" << objName << "Phi_" << metName;
+  hTitle << "DeltaPhi Vs " << objName << " Phi Distribution (" << metName << ")";
   hxTitle << objName << " Phi (radian)";
   hyTitle << "deltaPhi (MET, " << objName << ")";
   hp = new TProfile(hName.str().c_str(), hTitle.str().c_str(), m_phibin, -M_PI, +M_PI);
@@ -758,8 +758,8 @@ StatusCode METMonTool::bookProfileHistograms(std::string& metName, const char* o
   hTitle.str("");
   hxTitle.str(""); hyTitle.str("");
   // MissingET Vs Eta Phi
-  hName << "metVs" << objName << "EtaPhi_" << metName.c_str();
-  hTitle << "MET Vs " << objName << " EtaPhi Distribution (" << metName.c_str() << ")";
+  hName << "metVs" << objName << "EtaPhi_" << metName;
+  hTitle << "MET Vs " << objName << " EtaPhi Distribution (" << metName << ")";
   hxTitle << objName << " Eta";
   hyTitle << objName << " Phi (radian)";
   hp2 = new TProfile2D(hName.str().c_str(), hTitle.str().c_str(), m_etabin, -5., +5., m_phibin, -M_PI, +M_PI);
