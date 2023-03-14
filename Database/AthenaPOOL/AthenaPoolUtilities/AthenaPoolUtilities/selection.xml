@@ -29,7 +29,9 @@
   <class name="std::map<unsigned int, IOVRange>" />
   <class name="std::pair<unsigned int, IOVRange>" />
   <class name="CondAttrListCollAddress" />
-  <class name="CondAttrListVec" />
+  <class name="CondAttrListVec">
+    <field name="m_index" transient="true" />
+  </class>
   <class name="CondAttrListVecAddress" />
 
   <class name="TPObjRef" />
