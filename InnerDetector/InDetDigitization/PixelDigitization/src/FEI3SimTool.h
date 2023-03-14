@@ -35,6 +35,9 @@ private:
   int relativeBunch2018(const SiTotalCharge& totalCharge, int barrel_ec, int layer_disk, int moduleID,
                         const PixelModuleData* moduleData,
                         CLHEP::HepRandomEngine* rndmEngine) const;
+  int relativeBunch2022(const SiTotalCharge& totalCharge, const double tot, int barrel_ec, int layer_disk, int moduleID, 
+                        const PixelModuleData* moduleData,
+                        CLHEP::HepRandomEngine* rndmEngine) const;
 };
 
 #endif // PIXELDIGITIZATION_FEI3SimTool_H

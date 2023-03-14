@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "FEI3SimTool.h"
@@ -105,6 +105,9 @@ void FEI3SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
     unsigned int FE = m_pixelReadout->getFE(diodeID, moduleID);
     InDetDD::PixelDiodeType type = m_pixelReadout->getDiodeType(diodeID);
 
+    // charge to ToT conversion
+    double tot = calibData->getToT(type, moduleHash, FE, charge);
+
     // Apply analog threshold, timing simulation
     double th0 = calibData->getAnalogThreshold(type, moduleHash, FE);
     double ith0 = calibData->getInTimeThreshold(type, moduleHash, FE);
@@ -121,14 +124,20 @@ void FEI3SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
     if (charge > threshold) {
       int bunchSim = 0;
       if (diode.totalCharge().fromTrack()) {
-        if (moduleData->getFEI3TimingSimTune(barrel_ec, layerIndex) == 2018) {
+        if (moduleData->getFEI3TimingSimTune(barrel_ec, layerIndex) == 2022) {
+          bunchSim = relativeBunch2022(diode.totalCharge(), tot, barrel_ec, layerIndex, moduleIndex, moduleData, rndmEngine);
+        } 
+        else if (moduleData->getFEI3TimingSimTune(barrel_ec, layerIndex) == 2018) {
           bunchSim = relativeBunch2018(diode.totalCharge(), barrel_ec, layerIndex, moduleIndex, moduleData, rndmEngine);
-        } else if (moduleData->getFEI3TimingSimTune(barrel_ec, layerIndex) == 2015) {
+        } 
+        else if (moduleData->getFEI3TimingSimTune(barrel_ec, layerIndex) == 2015) {
           bunchSim = relativeBunch2015(diode.totalCharge(), barrel_ec, layerIndex, moduleIndex, moduleData, rndmEngine);
-        } else if (moduleData->getFEI3TimingSimTune(barrel_ec, layerIndex) == 2009) {
+        } 
+        else if (moduleData->getFEI3TimingSimTune(barrel_ec, layerIndex) == 2009) {
           bunchSim = relativeBunch2009(threshold, intimethreshold, diode.totalCharge(), moduleData, rndmEngine);
         }
-      } else {
+      } 
+      else {
         if (moduleData->getFEI3TimingSimTune(barrel_ec, layerIndex) > 0) {
           bunchSim = CLHEP::RandFlat::shootInt(rndmEngine, moduleData->getNumberOfBCID(barrel_ec, layerIndex));
         }
@@ -143,8 +152,6 @@ void FEI3SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
       SiHelper::belowThreshold(diode, true, true);
     }
 
-    // charge to ToT conversion
-    double tot = calibData->getToT(type, moduleHash, FE, charge);
     double totsig = calibData->getTotRes(moduleHash, FE, tot);
     int nToT = static_cast<int>(CLHEP::RandGaussZiggurat::shoot(rndmEngine, tot, totsig));
 
@@ -1276,5 +1283,453 @@ int FEI3SimTool::relativeBunch2018(const SiTotalCharge& totalCharge, int barrel_
                             moduleData->getTimeOffset(barrel_ec,
                                                       layer_disk) + timeWalk) / moduleData->getBunchSpace()));
 
+  return BCID;
+}
+
+int FEI3SimTool::relativeBunch2022(const SiTotalCharge& totalCharge, const double tot, int barrel_ec, int layer_disk, int moduleID,
+                                   const PixelModuleData* moduleData,
+                                   CLHEP::HepRandomEngine* rndmEngine) const {
+  /**
+   * 2023.03.07  Taken from timing scan data in 2022.
+   */
+
+  double prob = 0.0;
+  if (barrel_ec==0 && layer_disk==1) {    // b-layer
+    if (std::abs(moduleID)==0) {
+      if      (tot<4.5)  { prob=0.0670; } // ToT=4
+      else if (tot<5.5)  { prob=0.0311; } // ToT=5
+      else if (tot<6.5)  { prob=0.0110; } // ToT=6
+      else if (tot<7.5)  { prob=0.0098; } // ToT=7
+      else if (tot<8.5)  { prob=0.0106; } // ToT=8
+      else if (tot<9.5)  { prob=0.0072; } // ToT=9
+      else if (tot<10.5) { prob=0.0061; } // ToT=10
+      else if (tot<11.5) { prob=0.0072; } // ToT=11
+      else if (tot<12.5) { prob=0.0089; } // ToT=12
+    }
+    else  if (std::abs(moduleID)==1) {
+      if      (tot<4.5)  { prob=0.0275; } // ToT=4
+      else if (tot<5.5)  { prob=0.0123; } // ToT=5
+      else if (tot<6.5)  { prob=0.0099; } // ToT=6
+      else if (tot<7.5)  { prob=0.0098; } // ToT=7
+      else if (tot<8.5)  { prob=0.0084; } // ToT=8
+      else if (tot<9.5)  { prob=0.0079; } // ToT=9
+      else if (tot<10.5) { prob=0.0042; } // ToT=10
+      else if (tot<11.5) { prob=0.0033; } // ToT=11
+      else if (tot<12.5) { prob=0.0037; } // ToT=12
+    }
+    else  if (std::abs(moduleID)==2) {
+      if      (tot<4.5)  { prob=0.0684; } // ToT=4
+      else if (tot<5.5)  { prob=0.0275; } // ToT=5
+      else if (tot<6.5)  { prob=0.0218; } // ToT=6
+      else if (tot<7.5)  { prob=0.0142; } // ToT=7
+      else if (tot<8.5)  { prob=0.0111; } // ToT=8
+      else if (tot<9.5)  { prob=0.0077; } // ToT=9
+      else if (tot<10.5) { prob=0.0068; } // ToT=10
+      else if (tot<11.5) { prob=0.0062; } // ToT=11
+      else if (tot<12.5) { prob=0.0051; } // ToT=12
+    }
+    else  if (std::abs(moduleID)==3) {
+      if      (tot<4.5)  { prob=0.0536; } // ToT=4
+      else if (tot<5.5)  { prob=0.0134; } // ToT=5
+      else if (tot<6.5)  { prob=0.0101; } // ToT=6
+      else if (tot<7.5)  { prob=0.0081; } // ToT=7
+      else if (tot<8.5)  { prob=0.0074; } // ToT=8
+      else if (tot<9.5)  { prob=0.0051; } // ToT=9
+      else if (tot<10.5) { prob=0.0049; } // ToT=10
+      else if (tot<11.5) { prob=0.0049; } // ToT=11
+      else if (tot<12.5) { prob=0.0027; } // ToT=12
+    }
+    else  if (std::abs(moduleID)==4) {
+      if      (tot<4.5)  { prob=0.0806; } // ToT=4
+      else if (tot<5.5)  { prob=0.0340; } // ToT=5
+      else if (tot<6.5)  { prob=0.0203; } // ToT=6
+      else if (tot<7.5)  { prob=0.0225; } // ToT=7
+      else if (tot<8.5)  { prob=0.0198; } // ToT=8
+      else if (tot<9.5)  { prob=0.0121; } // ToT=9
+      else if (tot<10.5) { prob=0.0095; } // ToT=10
+      else if (tot<11.5) { prob=0.0069; } // ToT=11
+      else if (tot<12.5) { prob=0.0049; } // ToT=12
+    }
+    else  if (std::abs(moduleID)==5) {
+      if      (tot<4.5)  { prob=0.0736; } // ToT=4
+      else if (tot<5.5)  { prob=0.0164; } // ToT=5
+      else if (tot<6.5)  { prob=0.0143; } // ToT=6
+      else if (tot<7.5)  { prob=0.0113; } // ToT=7
+      else if (tot<8.5)  { prob=0.0091; } // ToT=8
+      else if (tot<9.5)  { prob=0.0079; } // ToT=9
+      else if (tot<10.5) { prob=0.0068; } // ToT=10
+      else if (tot<11.5) { prob=0.0060; } // ToT=11
+      else if (tot<12.5) { prob=0.0056; } // ToT=12
+    }
+    else  if (std::abs(moduleID)==6) {
+      if      (tot<4.5)  { prob=0.1190; } // ToT=4
+      else if (tot<5.5)  { prob=0.0275; } // ToT=5
+      else if (tot<6.5)  { prob=0.0126; } // ToT=6
+      else if (tot<7.5)  { prob=0.0125; } // ToT=7
+      else if (tot<8.5)  { prob=0.0083; } // ToT=8
+      else if (tot<9.5)  { prob=0.0076; } // ToT=9
+      else if (tot<10.5) { prob=0.0064; } // ToT=10
+      else if (tot<11.5) { prob=0.0055; } // ToT=11
+      else if (tot<12.5) { prob=0.0060; } // ToT=12
+    }
+  }
+  else if (barrel_ec==0 && layer_disk==2) {  // layer-1
+    if (std::abs(moduleID)==0) {
+      if      (tot<5.5)  { prob=0.3755; } // ToT=5
+      else if (tot<6.5)  { prob=0.0841; } // ToT=6
+      else if (tot<7.5)  { prob=0.0516; } // ToT=7
+      else if (tot<8.5)  { prob=0.0390; } // ToT=8
+      else if (tot<9.5)  { prob=0.0265; } // ToT=9
+      else if (tot<10.5) { prob=0.0206; } // ToT=10
+      else if (tot<11.5) { prob=0.0234; } // ToT=11
+      else if (tot<12.5) { prob=0.0184; } // ToT=12
+      else if (tot<13.5) { prob=0.0153; } // ToT=13
+      else if (tot<14.5) { prob=0.0122; } // ToT=14
+      else if (tot<15.5) { prob=0.0100; } // ToT=15
+      else if (tot<16.5) { prob=0.0129; } // ToT=16
+      else if (tot<17.5) { prob=0.0109; } // ToT=17
+      else if (tot<18.5) { prob=0.0088; } // ToT=18
+      else if (tot<19.5) { prob=0.0134; } // ToT=19
+      else if (tot<20.5) { prob=0.0145; } // ToT=20
+      else if (tot<21.5) { prob=0.0107; } // ToT=21
+      else if (tot<22.5) { prob=0.0104; } // ToT=22
+      else if (tot<23.5) { prob=0.0123; } // ToT=23
+      else if (tot<24.5) { prob=0.0070; } // ToT=24
+      else if (tot<25.5) { prob=0.0065; } // ToT=25
+    }
+    else if (std::abs(moduleID)==1) {
+      if      (tot<5.5)  { prob=0.4535; } // ToT=5
+      else if (tot<6.5)  { prob=0.1277; } // ToT=6
+      else if (tot<7.5)  { prob=0.0626; } // ToT=7
+      else if (tot<8.5)  { prob=0.0443; } // ToT=8
+      else if (tot<9.5)  { prob=0.0341; } // ToT=9
+      else if (tot<10.5) { prob=0.0288; } // ToT=10
+      else if (tot<11.5) { prob=0.0270; } // ToT=11
+      else if (tot<12.5) { prob=0.0224; } // ToT=12
+      else if (tot<13.5) { prob=0.0227; } // ToT=13
+      else if (tot<14.5) { prob=0.0196; } // ToT=14
+      else if (tot<15.5) { prob=0.0145; } // ToT=15
+      else if (tot<16.5) { prob=0.0163; } // ToT=16
+      else if (tot<17.5) { prob=0.0128; } // ToT=17
+      else if (tot<18.5) { prob=0.0129; } // ToT=18
+      else if (tot<19.5) { prob=0.0126; } // ToT=19
+      else if (tot<20.5) { prob=0.0144; } // ToT=20
+      else if (tot<21.5) { prob=0.0118; } // ToT=21
+      else if (tot<22.5) { prob=0.0091; } // ToT=22
+      else if (tot<23.5) { prob=0.0131; } // ToT=23
+      else if (tot<24.5) { prob=0.0120; } // ToT=24
+      else if (tot<25.5) { prob=0.0119; } // ToT=25
+    }
+    else if (std::abs(moduleID)==2) {
+      if      (tot<5.5)  { prob=0.5102; } // ToT=5
+      else if (tot<6.5)  { prob=0.1059; } // ToT=6
+      else if (tot<7.5)  { prob=0.0575; } // ToT=7
+      else if (tot<8.5)  { prob=0.0411; } // ToT=8
+      else if (tot<9.5)  { prob=0.0309; } // ToT=9
+      else if (tot<10.5) { prob=0.0333; } // ToT=10
+      else if (tot<11.5) { prob=0.0274; } // ToT=11
+      else if (tot<12.5) { prob=0.0258; } // ToT=12
+      else if (tot<13.5) { prob=0.0209; } // ToT=13
+      else if (tot<14.5) { prob=0.0209; } // ToT=14
+      else if (tot<15.5) { prob=0.0170; } // ToT=15
+      else if (tot<16.5) { prob=0.0143; } // ToT=16
+      else if (tot<17.5) { prob=0.0141; } // ToT=17
+      else if (tot<18.5) { prob=0.0164; } // ToT=18
+      else if (tot<19.5) { prob=0.0145; } // ToT=19
+      else if (tot<20.5) { prob=0.0131; } // ToT=20
+      else if (tot<21.5) { prob=0.0112; } // ToT=21
+      else if (tot<22.5) { prob=0.0159; } // ToT=22
+      else if (tot<23.5) { prob=0.0128; } // ToT=23
+      else if (tot<24.5) { prob=0.0097; } // ToT=24
+      else if (tot<25.5) { prob=0.0088; } // ToT=25
+    }
+    else if (std::abs(moduleID)==3) {
+      if      (tot<5.5)  { prob=0.4122; } // ToT=5
+      else if (tot<6.5)  { prob=0.1038; } // ToT=6
+      else if (tot<7.5)  { prob=0.0567; } // ToT=7
+      else if (tot<8.5)  { prob=0.0371; } // ToT=8
+      else if (tot<9.5)  { prob=0.0288; } // ToT=9
+      else if (tot<10.5) { prob=0.0268; } // ToT=10
+      else if (tot<11.5) { prob=0.0211; } // ToT=11
+      else if (tot<12.5) { prob=0.0238; } // ToT=12
+      else if (tot<13.5) { prob=0.0223; } // ToT=13
+      else if (tot<14.5) { prob=0.0166; } // ToT=14
+      else if (tot<15.5) { prob=0.0161; } // ToT=15
+      else if (tot<16.5) { prob=0.0175; } // ToT=16
+      else if (tot<17.5) { prob=0.0129; } // ToT=17
+      else if (tot<18.5) { prob=0.0091; } // ToT=18
+      else if (tot<19.5) { prob=0.0136; } // ToT=19
+      else if (tot<20.5) { prob=0.0126; } // ToT=20
+      else if (tot<21.5) { prob=0.0133; } // ToT=21
+      else if (tot<22.5) { prob=0.0087; } // ToT=22
+      else if (tot<23.5) { prob=0.0082; } // ToT=23
+      else if (tot<24.5) { prob=0.0077; } // ToT=24
+      else if (tot<25.5) { prob=0.0078; } // ToT=25
+    }
+    else if (std::abs(moduleID)==4) {
+      if      (tot<5.5)  { prob=0.4174; } // ToT=5
+      else if (tot<6.5)  { prob=0.0976; } // ToT=6
+      else if (tot<7.5)  { prob=0.0527; } // ToT=7
+      else if (tot<8.5)  { prob=0.0403; } // ToT=8
+      else if (tot<9.5)  { prob=0.0329; } // ToT=9
+      else if (tot<10.5) { prob=0.0245; } // ToT=10
+      else if (tot<11.5) { prob=0.0254; } // ToT=11
+      else if (tot<12.5) { prob=0.0240; } // ToT=12
+      else if (tot<13.5) { prob=0.0228; } // ToT=13
+      else if (tot<14.5) { prob=0.0203; } // ToT=14
+      else if (tot<15.5) { prob=0.0151; } // ToT=15
+      else if (tot<16.5) { prob=0.0143; } // ToT=16
+      else if (tot<17.5) { prob=0.0171; } // ToT=17
+      else if (tot<18.5) { prob=0.0124; } // ToT=18
+      else if (tot<19.5) { prob=0.0140; } // ToT=19
+      else if (tot<20.5) { prob=0.0119; } // ToT=20
+      else if (tot<21.5) { prob=0.0134; } // ToT=21
+      else if (tot<22.5) { prob=0.0090; } // ToT=22
+      else if (tot<23.5) { prob=0.0093; } // ToT=23
+      else if (tot<24.5) { prob=0.0109; } // ToT=24
+      else if (tot<25.5) { prob=0.0110; } // ToT=25
+    }
+    else if (std::abs(moduleID)==5) {
+      if      (tot<5.5)  { prob=0.4079; } // ToT=5
+      else if (tot<6.5)  { prob=0.0869; } // ToT=6
+      else if (tot<7.5)  { prob=0.0441; } // ToT=7
+      else if (tot<8.5)  { prob=0.0348; } // ToT=8
+      else if (tot<9.5)  { prob=0.0308; } // ToT=9
+      else if (tot<10.5) { prob=0.0249; } // ToT=10
+      else if (tot<11.5) { prob=0.0221; } // ToT=11
+      else if (tot<12.5) { prob=0.0216; } // ToT=12
+      else if (tot<13.5) { prob=0.0211; } // ToT=13
+      else if (tot<14.5) { prob=0.0213; } // ToT=14
+      else if (tot<15.5) { prob=0.0184; } // ToT=15
+      else if (tot<16.5) { prob=0.0163; } // ToT=16
+      else if (tot<17.5) { prob=0.0167; } // ToT=17
+      else if (tot<18.5) { prob=0.0143; } // ToT=18
+      else if (tot<19.5) { prob=0.0125; } // ToT=19
+      else if (tot<20.5) { prob=0.0111; } // ToT=20
+      else if (tot<21.5) { prob=0.0124; } // ToT=21
+      else if (tot<22.5) { prob=0.0139; } // ToT=22
+      else if (tot<23.5) { prob=0.0148; } // ToT=23
+      else if (tot<24.5) { prob=0.0104; } // ToT=24
+      else if (tot<25.5) { prob=0.0074; } // ToT=25
+    }
+    else if (std::abs(moduleID)==6) {
+      if      (tot<5.5)  { prob=0.4023; } // ToT=5
+      else if (tot<6.5)  { prob=0.1047; } // ToT=6
+      else if (tot<7.5)  { prob=0.0589; } // ToT=7
+      else if (tot<8.5)  { prob=0.0439; } // ToT=8
+      else if (tot<9.5)  { prob=0.0332; } // ToT=9
+      else if (tot<10.5) { prob=0.0292; } // ToT=10
+      else if (tot<11.5) { prob=0.0270; } // ToT=11
+      else if (tot<12.5) { prob=0.0209; } // ToT=12
+      else if (tot<13.5) { prob=0.0166; } // ToT=13
+      else if (tot<14.5) { prob=0.0192; } // ToT=14
+      else if (tot<15.5) { prob=0.0194; } // ToT=15
+      else if (tot<16.5) { prob=0.0191; } // ToT=16
+      else if (tot<17.5) { prob=0.0155; } // ToT=17
+      else if (tot<18.5) { prob=0.0149; } // ToT=18
+      else if (tot<19.5) { prob=0.0123; } // ToT=19
+      else if (tot<20.5) { prob=0.0117; } // ToT=20
+      else if (tot<21.5) { prob=0.0113; } // ToT=21
+      else if (tot<22.5) { prob=0.0103; } // ToT=22
+      else if (tot<23.5) { prob=0.0153; } // ToT=23
+      else if (tot<24.5) { prob=0.0088; } // ToT=24
+      else if (tot<25.5) { prob=0.0100; } // ToT=25
+    }
+  }
+  else if (barrel_ec==0 && layer_disk==3) {  // layer-2
+    if (std::abs(moduleID)==0) {
+      if      (tot<5.5)  { prob=0.4812; } // ToT=5
+      else if (tot<6.5)  { prob=0.1637; } // ToT=6
+      else if (tot<7.5)  { prob=0.0945; } // ToT=7
+      else if (tot<8.5)  { prob=0.0670; } // ToT=8
+      else if (tot<9.5)  { prob=0.0579; } // ToT=9
+      else if (tot<10.5) { prob=0.0451; } // ToT=10
+      else if (tot<11.5) { prob=0.0317; } // ToT=11
+      else if (tot<12.5) { prob=0.0249; } // ToT=12
+      else if (tot<13.5) { prob=0.0191; } // ToT=13
+      else if (tot<14.5) { prob=0.0270; } // ToT=14
+      else if (tot<15.5) { prob=0.0227; } // ToT=15
+      else if (tot<16.5) { prob=0.0190; } // ToT=16
+      else if (tot<17.5) { prob=0.0168; } // ToT=17
+      else if (tot<18.5) { prob=0.0205; } // ToT=18
+      else if (tot<19.5) { prob=0.0162; } // ToT=19
+      else if (tot<20.5) { prob=0.0179; } // ToT=20
+      else if (tot<21.5) { prob=0.0228; } // ToT=21
+      else if (tot<22.5) { prob=0.0169; } // ToT=22
+      else if (tot<23.5) { prob=0.0136; } // ToT=23
+      else if (tot<24.5) { prob=0.0089; } // ToT=24
+      else if (tot<25.5) { prob=0.0198; } // ToT=25
+    }
+    else if (std::abs(moduleID)==1) {
+      if      (tot<5.5)  { prob=0.5605; } // ToT=5
+      else if (tot<6.5)  { prob=0.1837; } // ToT=6
+      else if (tot<7.5)  { prob=0.1040; } // ToT=7
+      else if (tot<8.5)  { prob=0.0654; } // ToT=8
+      else if (tot<9.5)  { prob=0.0465; } // ToT=9
+      else if (tot<10.5) { prob=0.0391; } // ToT=10
+      else if (tot<11.5) { prob=0.0337; } // ToT=11
+      else if (tot<12.5) { prob=0.0325; } // ToT=12
+      else if (tot<13.5) { prob=0.0242; } // ToT=13
+      else if (tot<14.5) { prob=0.0270; } // ToT=14
+      else if (tot<15.5) { prob=0.0218; } // ToT=15
+      else if (tot<16.5) { prob=0.0191; } // ToT=16
+      else if (tot<17.5) { prob=0.0172; } // ToT=17
+      else if (tot<18.5) { prob=0.0149; } // ToT=18
+      else if (tot<19.5) { prob=0.0158; } // ToT=19
+      else if (tot<20.5) { prob=0.0153; } // ToT=20
+      else if (tot<21.5) { prob=0.0134; } // ToT=21
+      else if (tot<22.5) { prob=0.0204; } // ToT=22
+      else if (tot<23.5) { prob=0.0142; } // ToT=23
+      else if (tot<24.5) { prob=0.0131; } // ToT=24
+      else if (tot<25.5) { prob=0.0158; } // ToT=25
+    }
+    else if (std::abs(moduleID)==2) {
+      if      (tot<5.5)  { prob=0.5681; } // ToT=5
+      else if (tot<6.5)  { prob=0.1665; } // ToT=6
+      else if (tot<7.5)  { prob=0.1006; } // ToT=7
+      else if (tot<8.5)  { prob=0.0659; } // ToT=8
+      else if (tot<9.5)  { prob=0.0478; } // ToT=9
+      else if (tot<10.5) { prob=0.0417; } // ToT=10
+      else if (tot<11.5) { prob=0.0330; } // ToT=11
+      else if (tot<12.5) { prob=0.0343; } // ToT=12
+      else if (tot<13.5) { prob=0.0310; } // ToT=13
+      else if (tot<14.5) { prob=0.0271; } // ToT=14
+      else if (tot<15.5) { prob=0.0244; } // ToT=15
+      else if (tot<16.5) { prob=0.0169; } // ToT=16
+      else if (tot<17.5) { prob=0.0191; } // ToT=17
+      else if (tot<18.5) { prob=0.0223; } // ToT=18
+      else if (tot<19.5) { prob=0.0211; } // ToT=19
+      else if (tot<20.5) { prob=0.0170; } // ToT=20
+      else if (tot<21.5) { prob=0.0153; } // ToT=21
+      else if (tot<22.5) { prob=0.0193; } // ToT=22
+      else if (tot<23.5) { prob=0.0194; } // ToT=23
+      else if (tot<24.5) { prob=0.0146; } // ToT=24
+      else if (tot<25.5) { prob=0.0141; } // ToT=25
+    }
+    else if (std::abs(moduleID)==3) {
+      if      (tot<5.5)  { prob=0.5725; } // ToT=5
+      else if (tot<6.5)  { prob=0.1725; } // ToT=6
+      else if (tot<7.5)  { prob=0.0918; } // ToT=7
+      else if (tot<8.5)  { prob=0.0529; } // ToT=8
+      else if (tot<9.5)  { prob=0.0416; } // ToT=9
+      else if (tot<10.5) { prob=0.0336; } // ToT=10
+      else if (tot<11.5) { prob=0.0261; } // ToT=11
+      else if (tot<12.5) { prob=0.0273; } // ToT=12
+      else if (tot<13.5) { prob=0.0241; } // ToT=13
+      else if (tot<14.5) { prob=0.0195; } // ToT=14
+      else if (tot<15.5) { prob=0.0264; } // ToT=15
+      else if (tot<16.5) { prob=0.0178; } // ToT=16
+      else if (tot<17.5) { prob=0.0201; } // ToT=17
+      else if (tot<18.5) { prob=0.0191; } // ToT=18
+      else if (tot<19.5) { prob=0.0200; } // ToT=19
+      else if (tot<20.5) { prob=0.0150; } // ToT=20
+      else if (tot<21.5) { prob=0.0139; } // ToT=21
+      else if (tot<22.5) { prob=0.0151; } // ToT=22
+      else if (tot<23.5) { prob=0.0104; } // ToT=23
+      else if (tot<24.5) { prob=0.0121; } // ToT=24
+      else if (tot<25.5) { prob=0.0111; } // ToT=25
+    }
+    else if (std::abs(moduleID)==4) {
+      if      (tot<5.5)  { prob=0.5377; } // ToT=5
+      else if (tot<6.5)  { prob=0.1785; } // ToT=6
+      else if (tot<7.5)  { prob=0.1089; } // ToT=7
+      else if (tot<8.5)  { prob=0.0702; } // ToT=8
+      else if (tot<9.5)  { prob=0.0474; } // ToT=9
+      else if (tot<10.5) { prob=0.0476; } // ToT=10
+      else if (tot<11.5) { prob=0.0392; } // ToT=11
+      else if (tot<12.5) { prob=0.0308; } // ToT=12
+      else if (tot<13.5) { prob=0.0318; } // ToT=13
+      else if (tot<14.5) { prob=0.0290; } // ToT=14
+      else if (tot<15.5) { prob=0.0244; } // ToT=15
+      else if (tot<16.5) { prob=0.0262; } // ToT=16
+      else if (tot<17.5) { prob=0.0228; } // ToT=17
+      else if (tot<18.5) { prob=0.0163; } // ToT=18
+      else if (tot<19.5) { prob=0.0158; } // ToT=19
+      else if (tot<20.5) { prob=0.0153; } // ToT=20
+      else if (tot<21.5) { prob=0.0185; } // ToT=21
+      else if (tot<22.5) { prob=0.0157; } // ToT=22
+      else if (tot<23.5) { prob=0.0165; } // ToT=23
+      else if (tot<24.5) { prob=0.0112; } // ToT=24
+      else if (tot<25.5) { prob=0.0095; } // ToT=25
+    }
+    else if (std::abs(moduleID)==5) {
+      if      (tot<5.5)  { prob=0.5317; } // ToT=5
+      else if (tot<6.5)  { prob=0.1626; } // ToT=6
+      else if (tot<7.5)  { prob=0.0897; } // ToT=7
+      else if (tot<8.5)  { prob=0.0606; } // ToT=8
+      else if (tot<9.5)  { prob=0.0434; } // ToT=9
+      else if (tot<10.5) { prob=0.0346; } // ToT=10
+      else if (tot<11.5) { prob=0.0290; } // ToT=11
+      else if (tot<12.5) { prob=0.0289; } // ToT=12
+      else if (tot<13.5) { prob=0.0268; } // ToT=13
+      else if (tot<14.5) { prob=0.0268; } // ToT=14
+      else if (tot<15.5) { prob=0.0275; } // ToT=15
+      else if (tot<16.5) { prob=0.0262; } // ToT=16
+      else if (tot<17.5) { prob=0.0239; } // ToT=17
+      else if (tot<18.5) { prob=0.0222; } // ToT=18
+      else if (tot<19.5) { prob=0.0216; } // ToT=19
+      else if (tot<20.5) { prob=0.0213; } // ToT=20
+      else if (tot<21.5) { prob=0.0195; } // ToT=21
+      else if (tot<22.5) { prob=0.0209; } // ToT=22
+      else if (tot<23.5) { prob=0.0150; } // ToT=23
+      else if (tot<24.5) { prob=0.0186; } // ToT=24
+      else if (tot<25.5) { prob=0.0125; } // ToT=25
+    }
+    else if (std::abs(moduleID)==6) {
+      if      (tot<5.5)  { prob=0.5822; } // ToT=5
+      else if (tot<6.5)  { prob=0.1635; } // ToT=6
+      else if (tot<7.5)  { prob=0.0925; } // ToT=7
+      else if (tot<8.5)  { prob=0.0583; } // ToT=8
+      else if (tot<9.5)  { prob=0.0498; } // ToT=9
+      else if (tot<10.5) { prob=0.0434; } // ToT=10
+      else if (tot<11.5) { prob=0.0303; } // ToT=11
+      else if (tot<12.5) { prob=0.0267; } // ToT=12
+      else if (tot<13.5) { prob=0.0253; } // ToT=13
+      else if (tot<14.5) { prob=0.0247; } // ToT=14
+      else if (tot<15.5) { prob=0.0219; } // ToT=15
+      else if (tot<16.5) { prob=0.0223; } // ToT=16
+      else if (tot<17.5) { prob=0.0195; } // ToT=17
+      else if (tot<18.5) { prob=0.0141; } // ToT=18
+      else if (tot<19.5) { prob=0.0118; } // ToT=19
+      else if (tot<20.5) { prob=0.0207; } // ToT=20
+      else if (tot<21.5) { prob=0.0169; } // ToT=21
+      else if (tot<22.5) { prob=0.0121; } // ToT=22
+      else if (tot<23.5) { prob=0.0117; } // ToT=23
+      else if (tot<24.5) { prob=0.0118; } // ToT=24
+      else if (tot<25.5) { prob=0.0102; } // ToT=25
+    }
+  }
+  else if (std::abs(barrel_ec)==2) {  // Endcap
+    if      (tot<5.5)  { prob=0.4896; } // ToT=5
+    else if (tot<6.5)  { prob=0.1294; } // ToT=6
+    else if (tot<7.5)  { prob=0.0684; } // ToT=7
+    else if (tot<8.5)  { prob=0.0491; } // ToT=8
+    else if (tot<9.5)  { prob=0.0379; } // ToT=9
+    else if (tot<10.5) { prob=0.0350; } // ToT=10
+    else if (tot<11.5) { prob=0.0315; } // ToT=11
+    else if (tot<12.5) { prob=0.0275; } // ToT=12
+    else if (tot<13.5) { prob=0.0251; } // ToT=13
+    else if (tot<14.5) { prob=0.0246; } // ToT=14
+    else if (tot<15.5) { prob=0.0221; } // ToT=15
+    else if (tot<16.5) { prob=0.0186; } // ToT=16
+    else if (tot<17.5) { prob=0.0182; } // ToT=17
+    else if (tot<18.5) { prob=0.0190; } // ToT=18
+    else if (tot<19.5) { prob=0.0176; } // ToT=19
+    else if (tot<20.5) { prob=0.0133; } // ToT=20
+    else if (tot<21.5) { prob=0.0127; } // ToT=21
+    else if (tot<22.5) { prob=0.0107; } // ToT=22
+    else if (tot<23.5) { prob=0.0113; } // ToT=23
+    else if (tot<24.5) { prob=0.0096; } // ToT=24
+    else if (tot<25.5) { prob=0.0086; } // ToT=25
+  }
+
+  double G4Time = getG4Time(totalCharge);
+  double rnd = CLHEP::RandFlat::shoot(rndmEngine, 0.0, 1.0);
+
+  double timeWalk = 0.0;
+  if (rnd < prob) {
+    timeWalk = 25.0;
+  }
+  int BCID = static_cast<int>(floor((G4Time+moduleData->getTimeOffset(barrel_ec,layer_disk)+timeWalk)/moduleData->getBunchSpace()));
   return BCID;
 }
