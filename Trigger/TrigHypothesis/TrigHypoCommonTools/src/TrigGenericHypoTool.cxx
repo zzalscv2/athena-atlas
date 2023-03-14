@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigGenericHypoTool.h"
@@ -20,7 +20,6 @@ StatusCode TrigGenericHypoTool::initialize(){
 StatusCode TrigGenericHypoTool::decide(const std::vector<TrigGenericHypoTool::HypoToolInfo>& input) const{
     ATH_MSG_DEBUG("Executing decide() of " << name());
 
-    std::vector<TrigGenericHypoTool::HypoToolInfo* > positive( input.size() );
     SG::ReadDecorHandle<xAOD::TrigCompositeContainer, int> trigCompositePassed(m_passKey);
 
     for ( const TrigGenericHypoTool::HypoToolInfo& hypoInfo : input ) {
