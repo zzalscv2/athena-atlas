@@ -21,10 +21,6 @@ def CaloClusterROIPhiRZContainerMakerCfg(flags, name="CaloClusterROIPhiRZContain
     OutputROIContainerName=[]
     minPt=[]
     phiWidth=[]
-    if False : # Set to True if TRT_SeededTrackFinder_ATL.SearchInCaloROI is true @TODO introduce flag or remove support since this does not seem to work?
-        OutputROIContainerName.append('InDetCaloClusterROIPhiRZ3GeV')
-        minPt.append(flags.InDet.Tracking.ActiveConfig.minSecondaryPt)
-        phiWidth.append(0.3) # must be equal or larger than phiWidth of its clients: TRT_SeededTrackFinder_ATL (phiWidth)
 
     if flags.InDet.Tracking.ActiveConfig.RoISeededBackTracking :
         # TRT_TrackSegmentsFinder
@@ -95,6 +91,13 @@ def ITkCaloClusterROIPhiRZContainerMakerCfg(flags, name="CaloClusterROIPhiRZCont
         OutputROIContainerName.append('ITkCaloClusterROIPhiRZ10GeV')
         minPt.append(10000)
         phiWidth.append(0.05) # must be equal or larger than phiWidth of its clients: InDetAmbiTrackSelectionTool
+
+    if flags.ITk.Tracking.doBremRecovery and \
+       flags.ITk.Tracking.doCaloSeededBrem and \
+       flags.Detector.EnableCalo:
+        OutputROIContainerName.append('ITkCaloClusterROIPhiRZ5GeV')
+        minPt.append(5000)
+        phiWidth.append(0.075) # must be equal or larger than phiWidth of its clients: InDetNNScoringTool (phiWidthEM)
 
     if flags.ITk.Tracking.doConversionFinding:
         OutputROIContainerName.append('ITkCaloClusterROIPhiRZ15GeVUnordered')
