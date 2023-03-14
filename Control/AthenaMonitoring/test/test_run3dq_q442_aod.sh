@@ -1,16 +1,17 @@
 #!/bin/bash
-# art-description: ESD->HIST, R21 data ESD, Serial
+# art-description: AOD->HIST, R22 Run 2 data AOD
 # art-type: grid
-# art-memory: 4096
 # art-include: master/Athena
-# art-include: 22.0/Athena
+# art-include: 23.0/Athena
 # art-output: ExampleMonitorOutput.root
 # art-output: log*
-# art-athena-mt: 2
 
-Run3DQTestingDriver.py --threads=0 --inputFiles=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/AthenaMonitoring/q431/21.0/f946/myESD.pool.root DQ.Steering.doHLTMon=False IOVDb.GlobalTag=\"CONDBR2-BLKPA-RUN2-06\" > log.HIST_Creation 2>&1
+art.py download Tier0ChainTests test_q442.sh
+AODFILE=(./ref-*/myAOD.pool.root)
+Run3DQTestingDriver.py --inputFiles=${AODFILE} DQ.Environment=AOD DQ.Steering.doHLTMon=False > log.HIST_Creation 2>&1
 
 echo "art-result: $? HIST_Creation"
+rm -rf ref-*
 
 ArtPackage=$1
 ArtJobName=$2
