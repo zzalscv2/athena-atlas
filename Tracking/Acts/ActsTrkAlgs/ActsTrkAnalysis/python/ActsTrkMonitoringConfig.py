@@ -85,6 +85,10 @@ def ActsTrkITkPixelSeedingMonitoringCfg(flags,
     
     monTool.defineHistogram('TIME_execute', path='EXPERT', type='TH1F', title='Time for execute',
                             xbins=100, xmin=0, xmax=50000)
+    monTool.defineHistogram('TIME_seedCreation', path='EXPERT', type='TH1F', title='Time for seed creation',
+                            xbins=100, xmin=0, xmax=50000)
+    monTool.defineHistogram('TIME_parameterEstimation', path='EXPERT', type='TH1F', title='Time for parameter estimation',
+                            xbins=100, xmin=0, xmax=50000)
     
     acc.setPrivateTools(monTool)
     acc.merge(ActsTrkMonitoringHistSvcCfg(flags))     
@@ -99,6 +103,10 @@ def ActsTrkITkStripSeedingMonitoringCfg(flags,
     monTool = GenericMonitoringTool(flags, name)
     
     monTool.defineHistogram('TIME_execute', path='EXPERT', type='TH1F', title='Time for execute',
+                            xbins=100, xmin=0, xmax=50000)
+    monTool.defineHistogram('TIME_seedCreation', path='EXPERT', type='TH1F', title='Time for seed creation',
+                            xbins=100, xmin=0, xmax=50000)
+    monTool.defineHistogram('TIME_parameterEstimation', path='EXPERT', type='TH1F', title='Time for parameter estimation',
                             xbins=100, xmin=0, xmax=50000)
     
     acc.setPrivateTools(monTool)
