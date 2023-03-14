@@ -157,7 +157,7 @@ StatusCode jFexTower2SCellDecorator::execute(const EventContext& ctx) const {
                 //check that the SCell Identifier exists in the map
                 auto it_ScellID2ptr = map_ScellID2ptr.find(SCellID);
                 if(it_ScellID2ptr == map_ScellID2ptr.end()) {
-                    ATH_MSG_WARNING("Scell ID: 0x"<<std::hex<<(SCellID >> 32)<<std::dec<< " not found on map map_ScellID2ptr");
+                    ATH_MSG_DEBUG("Scell ID: 0x"<<std::hex<<(SCellID >> 32)<<std::dec<< " not found on map map_ScellID2ptr");
                     
                     scEt.push_back(0);
                     scEta.push_back(-99);
