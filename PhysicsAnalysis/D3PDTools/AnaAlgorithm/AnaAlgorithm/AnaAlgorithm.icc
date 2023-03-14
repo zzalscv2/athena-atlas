@@ -16,4 +16,19 @@
 
 namespace EL
 {
+#ifdef XAOD_STANDALONE
+  template<typename T> T *AnaAlgorithm ::
+  hist (const std::string& name) const
+  {
+    T *result = dynamic_cast<T*>(hist<TObject>(name));
+    if (result == nullptr)
+      throw std::runtime_error ("histogram not of the right type: " + name + " " + typeid(T).name());
+    return result;
+  }
+
+
+
+  template<> TObject *AnaAlgorithm ::
+  hist<TObject> (const std::string& name) const;
+#endif
 }

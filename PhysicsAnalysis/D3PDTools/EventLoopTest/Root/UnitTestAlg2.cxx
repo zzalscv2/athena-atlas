@@ -22,6 +22,7 @@
 #include <EventLoop/Worker.h>
 #include <RootCoreUtils/Assert.h>
 #include <RootCoreUtils/ThrowMsg.h>
+#include <TEfficiency.h>
 #include <TFile.h>
 #include <TH1.h>
 #include <TTree.h>
@@ -73,6 +74,12 @@ namespace EL
     getCallbacks()->Fill (CB_INITIALIZE);
 
     RCU_ASSERT_SOFT (!m_hasInitialize);
+
+    // test that we can create and then retrieve a TEfficiency
+    // histogram
+    ANA_CHECK (book (TEfficiency ("efficiency", "dummy efficiency hist", 50, 0, 50)));
+    (void) hist<TEfficiency> ("efficiency");
+    (void) histeff ("efficiency");
 
     ANA_CHECK (book (TH1F ((m_name + "2_2").c_str(), m_name.c_str(), 50, 0, 50)));
     ANA_CHECK (book (TH1F ("file_executes_2", "file executes", 1, 0, 1)));

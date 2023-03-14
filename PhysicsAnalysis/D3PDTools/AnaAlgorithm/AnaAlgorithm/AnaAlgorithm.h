@@ -159,7 +159,8 @@ namespace EL
     /// \par Failures
     ///   histogram not found
   public:
-    TH1 *hist (const std::string& name) const;
+    template<typename T=TH1>
+    T *hist (const std::string& name) const;
 
 
     /// \brief get the 2-d histogram with the given name
