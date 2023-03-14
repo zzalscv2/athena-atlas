@@ -2366,7 +2366,7 @@ class argSubstepSteering(argSubstep):
                       'doRAWtoESD': {'RAWtoALL': [('in', '-', 'BS'), ('in', '-', 'RDO'),
                                                   ('out', '-', 'ESD'), ('out', '-', 'AOD')],
                                      'RAWtoESD': [('in', '+', 'BS'), ('in', '+', 'RDO'),
-                                                  ('out', '+', 'ESD'),]},
+                                                  ('out', '+', ('ESD', 'HIST_ESD_INT')),],},
                       'doRAWtoALL': {},
                       'doTRIGtoALL': {}
                       }
