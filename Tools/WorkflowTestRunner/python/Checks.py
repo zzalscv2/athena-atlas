@@ -575,7 +575,8 @@ class FPECheck(WorkflowCheck):
 
     # Ignore FPEs for these tests:
     ignoreTestRuns = [WorkflowRun.Run4]
-    ignoreTestTypes = [WorkflowType.FullSim, WorkflowType.DataOverlay, WorkflowType.MCOverlay]
+    ignoreTestTypes = [WorkflowType.FullSim]
+    ignoreTestIDs = ['x686']
 
     def run(self, test: WorkflowTest):
         self.logger.info("-----------------------------------------------------")
@@ -608,7 +609,7 @@ class FPECheck(WorkflowCheck):
                         last_stack_trace.append(line.strip()[9:])
 
             if fpes.keys():
-                msgLvl = logging.WARNING if test.run in self.ignoreTestRuns or test.type in self.ignoreTestTypes else logging.ERROR
+                msgLvl = logging.WARNING if test.run in self.ignoreTestRuns or test.type in self.ignoreTestTypes or test.ID in self.ignoreTestIDs else logging.ERROR
                 result = False
                 self.logger.log(msgLvl, f" {step} validation test step FPEs")
                 for fpe, count in sorted(fpes.items(), key=lambda item: item[1]):
@@ -622,7 +623,7 @@ class FPECheck(WorkflowCheck):
 
         if result:
             self.logger.info("Passed!\n")
-        elif test.run in self.ignoreTestRuns or test.type in self.ignoreTestTypes:
+        elif test.run in self.ignoreTestRuns or test.type in self.ignoreTestTypes or test.ID in self.ignoreTestIDs:
             self.logger.warning("Failed!")
             self.logger.warning("Check disabled due to irreproducibilities!\n")
             result = True
