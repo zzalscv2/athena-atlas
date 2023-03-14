@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // PBdR (17Apr2007) base for the symmetric matrix (~virtual)
@@ -41,6 +41,8 @@ AlSymMatBase::AlSymMatBase(const AlSymMatBase& m)
 }
 
 //______________________________________________________________________________
+// m_size and m_ptr_data handled by derived classes.
+// cppcheck-suppress operatorEqVarError
 AlSymMatBase & AlSymMatBase::operator=(const AlSymMatBase & m)
 {
   if (this==&m)

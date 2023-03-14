@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/StatusCode.h"
@@ -77,6 +77,8 @@ AlVec&  AlVec::operator=(const double& d) {
 }
 
 //______________________________________________________________________________
+// size/m_ptr_data deliberately not copied.
+// cppcheck-suppress operatorEqVarError
 AlVec& AlVec::operator=(const AlVec& v) {
   if (this==&v) return *this;
 
