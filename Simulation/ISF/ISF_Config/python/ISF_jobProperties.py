@@ -105,6 +105,16 @@ class Simulator(JobProperty):
     def configFlagsMethodName(self):
         if self.statusOn:
             return 'configureFlags' + self.StoredValue
+    def isFullSim(self):
+        return 'FullG4' in self.StoredValue or 'PassBackG4' in self.StoredValue or 'AtlasG4' in self.StoredValue
+    def usesFastCaloSim(self):
+        return 'ATLFAST' in self.StoredValue or 'G4FastCalo' in self.StoredValue
+    def usesFatras(self):
+        return 'ATLFASTIIF' in self.StoredValue or 'ATLFAST3F' in self.StoredValue # TODO Extend for Acts::Fatras in the future
+    def isQuasiStable(self):
+        return 'QS' in self.StoredValue
+    def isMT(self):
+        return 'MT' in self.StoredValue
 
 class HITSMergingRequired(JobProperty):
     """The configured set of simulators requires merging of HITS collections"""
