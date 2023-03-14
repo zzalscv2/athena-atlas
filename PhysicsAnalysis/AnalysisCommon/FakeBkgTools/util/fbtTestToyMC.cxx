@@ -786,7 +786,7 @@ StatusCode parseArguments(int argc, char *argv[], fbtTestToyMC_config &config) {
       {0,0,0,0}
     };
 
-  char c;
+  int c;
   //  int optind;
   int longindex = 0;
 
