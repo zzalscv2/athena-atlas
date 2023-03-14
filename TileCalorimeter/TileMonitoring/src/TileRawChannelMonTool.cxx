@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -256,7 +256,7 @@ void TileRawChannelMonTool::bookHists(int ros, int drawer)
                     book2S(subDir, histName, histTitle, 51, LowX_low2D[type], HighX_low2D[type], 160, LowY_low2D[type], HighY_low2D[type]));
                 break;
               case 1: // high gain
-                if (m_calibUnit == TileRawChannelUnit::CesiumPicoCoulombs)
+                if (m_calibUnit == TileRawChannelUnit::CesiumPicoCoulombs || m_calibUnit == TileRawChannelUnit::PicoCoulombs)
                   m_data->m_hist2[ros][drawer][ch][gn & 1].push_back(
                       book2S(subDir, histName, histTitle, 51, LowX_hi2D[type], HighX_hi2D[type], 160, LowY_hi2D_pC[type], HighY_hi2D_pC[type]));
                 else
