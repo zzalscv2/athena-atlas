@@ -1,8 +1,9 @@
-#!/bin/sh
+#!/bin/bash
+#
 # art-description: RAWtoALL (q443 test), PHYSVAL production and NTUP_PHYSVAL for jets with no pT threshold
 # art-type: grid
 # art-include: master/Athena
-# art-memory: 4096
+# art-athena-mt: 8
 # art-output: *.root
 # art-output: dcube
 # art-html: dcube
