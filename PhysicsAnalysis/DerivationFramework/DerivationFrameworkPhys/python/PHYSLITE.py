@@ -285,7 +285,7 @@ def PHYSLITECfg(ConfigFlags):
         'MET_Core_AnalysisMET.name.mpx.mpy.sumet.source',
         'METAssoc_AnalysisMET.',
         'InDetTrackParticles.TTVA_AMVFVertices.TTVA_AMVFWeights.numberOfTRTHits.numberOfTRTOutliers',
-        'EventInfo.RandomRunNumber.PileupWeight_NOSYS.GenFiltHT.GenFiltMET',
+        'EventInfo.RandomRunNumber.PileupWeight_NOSYS.GenFiltHT.GenFiltMET.GenFiltHTinclNu.GenFiltPTZ.GenFiltFatJ',
         'Kt4EMPFlowEventShape.Density',
         'TauTracks.pt.eta.phi.flagSet.trackLinks',
         'AnalysisLargeRJets.pt.eta.phi.m.JetConstitScaleMomentum_pt.JetConstitScaleMomentum_eta.JetConstitScaleMomentum_phi.JetConstitScaleMomentum_m.DetectorEta.TrackSumMass.TrackSumPt.constituentLinks.ECF1.ECF2.ECF3.Tau1_wta.Tau2_wta.Tau3_wta.Split12.Split23.Qw.D2.C2',
