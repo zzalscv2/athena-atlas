@@ -8,8 +8,16 @@
 # art-html: dcube_last
 
 lastref_dir=last_results
-dcubeXml=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/dcube/config/IDPVMPlots_ITk.xml
+dcubeXml=dcube_IDPVMPlots_ACTS_CKF_ITk.xml
 rdo_23p0=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/mc15_14TeV.900040.PG_singlemu_Pt100_etaFlatnp0_43.recon.RDO.e8185_s3856_r13824/RDO.29831688._000001.pool.root.1
+
+# search in $DATAPATH for matching file
+dcubeXmlAbsPath=$(find -H ${DATAPATH//:/ } -name $dcubeXml -print -quit 2>/dev/null)
+# Don't run if dcube config not found
+if [ -z "$dcubeXmlAbsPath" ]; then
+    echo "art-result: 1 dcube-xml-config"
+    exit 1
+fi
 
 run () {
     name="${1}"
@@ -52,6 +60,6 @@ ls -la "$lastref_dir"
 run "dcube-last" \
     $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
     -p -x dcube_last \
-    -c ${dcubeXml} \
+    -c ${dcubeXmlAbsPath} \
     -r ${lastref_dir}/idpvm.root \
     idpvm.root
