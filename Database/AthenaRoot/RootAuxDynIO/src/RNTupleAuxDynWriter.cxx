@@ -109,7 +109,7 @@ namespace RootAuxDynIO
          // fill the RNTuple entry when the entire model is defined (in writeEntry)
          m_attrDataMap[ field_name ] = attr_data;
          auto field = RFieldBase::Create(field_name, attr_type).Unwrap();
-         m_model->AddField( move(field) );
+         m_model->AddField( std::move(field) );
       }
       else {
          addFieldValue(field_name, attr_data);
@@ -131,7 +131,7 @@ namespace RootAuxDynIO
                               + field_name + "new type: " + attr_type );
       }
       auto field = RFieldBase::Create(field_name, attr_type).Unwrap();
-      m_model->AddField( move(field) );
+      m_model->AddField( std::move(field) );
       m_attrDataMap[ field_name ] = nullptr;
    }
 
