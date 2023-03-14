@@ -21,7 +21,7 @@ Set up the latest recommended AnalysisBase release:
 ```bash
 setupATLAS
 lsetup git
-asetup "AnalysisBase,22.2.97"
+asetup "AnalysisBase,22.2.110"
 # or the nightly: asetup "AnalysisBase,22.2,latest"
 ```
 
@@ -29,7 +29,7 @@ Or the latest AthAnalysis release::
 
 ```bash
 setupATLAS
-asetup "AthAnalysis,22.2.97"
+asetup "AthAnalysis,22.2.110"
 # or the nightly: asetup "AthAnalysis,22.2,latest"
 ```
   

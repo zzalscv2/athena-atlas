@@ -115,11 +115,17 @@ config = AnaAlgorithmConfig( 'SUSYToolsAlg' )
 
 config.STConfigFile = "SUSYTools/SUSYTools_Default.conf"
 if (options.type == "data22" or "mc21" in options.type): config.STConfigFile = "SUSYTools/SUSYTools_Default_Run3.conf"
+
 config.DoSyst = options.dosyst
 config.DataSource = 1
 config.OutputLevel = outputlvl[options.log_level]
 config.PRWLumiCalc = []
 config.UsePRWAutoconfig = True
+if options.flav == "PHYSLITE": 
+   print("Running on PHYSLITE : ", inputFile)
+   config.isPHYSLITE = True
+   STconfig_lite = str(config.STConfigFile).replace(".conf","_LITE.conf")
+   config.STConfigFile = STconfig_lite
 if options.type != 'data18' :
     config.mcChannel = 410470
 
