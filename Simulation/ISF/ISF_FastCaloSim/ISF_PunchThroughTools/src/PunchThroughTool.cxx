@@ -623,6 +623,7 @@ ISF::ISFParticle *ISF::PunchThroughTool::getOneParticle(const ISF::ISFParticle &
   double principal_component_4 = 0.;
   std::vector<double> transformed_variables;
 
+  int loopCount = 0;
   while (energy < p->getMinEnergy()){
 
       principal_component_0 = p->getPCA0PDF()->getRand(rndmEngine, parInitEnergyEta);
@@ -648,8 +649,13 @@ ISF::ISFParticle *ISF::PunchThroughTool::getOneParticle(const ISF::ISFParticle &
       momDeltaTheta = inverseCdfTransform(transformed_variables.at(3), m_variable3_inverse_cdf);
       momDeltaPhi = inverseCdfTransform(transformed_variables.at(4), m_variable4_inverse_cdf);
 
-      ATH_MSG_DEBUG("Transformed punch through kinematics: energy = "<< energy <<" deltaTheta = "<< deltaTheta <<" deltaPhi = "<< deltaPhi <<" momDeltaTheta = "<< momDeltaTheta <<" momDeltaPhi = "<< momDeltaPhi );
+      ATH_MSG_DEBUG("Transformed punch through kinematics: energy = "<< energy <<" MeV deltaTheta = "<< deltaTheta <<" deltaPhi = "<< deltaPhi <<" momDeltaTheta = "<< momDeltaTheta <<" momDeltaPhi = "<< momDeltaPhi );
 
+      loopCount++;
+      if (loopCount > 10000) {
+        energy = p->getMinEnergy() + 10;
+        ATH_MSG_WARNING("Loop exceeds max number attempts. Setting energy to " << energy << " MeV.");
+      }
   }
 
   energy *= p->getEnergyFactor(); // scale the energy if requested
