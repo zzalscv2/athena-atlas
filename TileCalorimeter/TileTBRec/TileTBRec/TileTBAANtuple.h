@@ -458,8 +458,8 @@ class TileTBAANtuple: public AthAlgorithm {
     std::vector<int*> m_mdBcidflxVec;
     std::vector<int*> m_mdModuleflxVec;
     std::vector<int*> m_mdRunTypeflxVec;
-    std::vector<int*> m_mdPedLoVec;
-    std::vector<int*> m_mdPedHiVec;
+    std::vector<int*> m_mdPedLoflxVec;
+    std::vector<int*> m_mdPedHiflxVec;
     std::vector<int*> m_mdRunflxVec;
     std::vector<int*> m_mdChargeflxVec;
     std::vector<int*> m_mdChargeTimeflxVec;
