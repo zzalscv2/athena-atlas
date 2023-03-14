@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MESSAGEHELPER_H
@@ -105,7 +105,7 @@ inline void MessageHelper::setMaxNumberOfMessagesPrinted(unsigned int num) {
 
 inline void MessageHelper::setMessage(unsigned int messageNumber,
                                       const std::string& message) {
-  if (messageNumber > m_warningCounts.size())
+  if (messageNumber >= m_warningCounts.size())
     std::abort();
   m_warningCounts[messageNumber] = 0;
   m_warningText[messageNumber] = message;
