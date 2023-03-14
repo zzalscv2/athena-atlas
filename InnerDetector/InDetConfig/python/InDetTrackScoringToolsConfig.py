@@ -322,7 +322,7 @@ def ITkAmbiScoringToolCfg(flags, name='ITkAmbiScoringTool', **kwargs) :
     if have_calo_rois:
         from InDetConfig.InDetCaloClusterROISelectorConfig import ITkCaloClusterROIPhiRZContainerMakerCfg
         acc.merge(ITkCaloClusterROIPhiRZContainerMakerCfg(flags))
-        kwargs.setdefault("EMROIPhiRZContainer","ITkCaloClusterROIPhiRZ0GeV")
+        kwargs.setdefault("EMROIPhiRZContainer","ITkCaloClusterROIPhiRZ5GeV")
 
     kwargs.setdefault("DriftCircleCutTool", None )
     kwargs.setdefault("useAmbigFcn", True )
