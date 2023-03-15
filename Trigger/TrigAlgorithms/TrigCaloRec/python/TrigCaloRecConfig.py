@@ -6,7 +6,6 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
-from TrigCaloRec.TrigCaloRecConf import TrigCaloTowerMaker
 from TrigEDMConfig.TriggerEDMRun3 import recordable
 
 mlog = logging.getLogger ('TrigCaloRecConfig')
@@ -285,52 +284,40 @@ def hltCaloTopoClusterCalibratorCfg(flags, name, clustersin, clustersout, **kwar
     return acc
 
 
-## Heavy Ion 
-class TrigCaloTowerMaker_hijet (TrigCaloTowerMaker):
-    __slots__ = []
-    def __init__ (self, name='TrigCaloTowerMaker_hijet'):
-        super(TrigCaloTowerMaker_hijet, self).__init__(name)
-
-        # input to LArTowerBuilder:  cells in LArEM and LARHEC 
-        from LArRecUtils.LArRecUtilsConf import LArTowerBuilderTool,LArFCalTowerBuilderTool
-
-        larcmbtwrbldr = LArTowerBuilderTool("LArCmbTwrBldr",
-                                            CellContainerName = "CaloCellsFS",
-                                            IncludedCalos     = [ "LAREM", "LARHEC" ]
-                                            )
-        
-        fcalcmbtwrbldr = LArFCalTowerBuilderTool("FCalCmbTwrBldr",
-                                                 CellContainerName = "CaloCellsFS",
-                                                 MinimumEt         = 0.*MeV
-                                                 )
-
-        #input to  TileTowerBuilder:  cells in TILE
-        from TileRecUtils.TileRecUtilsConf import TileTowerBuilderTool
-        tilecmbtwrbldr = TileTowerBuilderTool("TileCmbTwrBldr",
-                                              CellContainerName = "CaloCellsFS",
-                                              #DumpTowers        = False,
-                                              #DumpWeightMap     = False
-                                              )
-
-        
-        self +=larcmbtwrbldr
-        self +=fcalcmbtwrbldr
-        self +=tilecmbtwrbldr
-        self.NumberOfPhiTowers=64
-        self.NumberOfEtaTowers=100
-        self.EtaMin=-5.0
-        self.EtaMax=5.0
-        self.DeltaEta=1.2
-        self.DeltaPhi=1.2
-        self.TowerMakerTools = [ tilecmbtwrbldr, larcmbtwrbldr, fcalcmbtwrbldr ]
-
-def hltHICaloTowerMakerCfg(flags, name, clustersKey, cellsKey="CaloCells"):
+def hltHICaloTowerMakerCfg(flags, name, towersKey, cellsKey="CaloCellsFS", RoIs=""):
     acc = ComponentAccumulator()
+    larcmbtwrbldr = CompFactory.LArTowerBuilderTool("LArCmbTwrBldr",
+                                        CellContainerName = cellsKey,
+                                        IncludedCalos     = [ "LAREM", "LARHEC" ]
+                                        )
+    
+    fcalcmbtwrbldr = CompFactory.LArFCalTowerBuilderTool("FCalCmbTwrBldr",
+                                                CellContainerName = cellsKey,
+                                                MinimumEt         = 0.*MeV
+                                                )
+
+    #input to  TileTowerBuilder:  cells in TILE
+    tilecmbtwrbldr = CompFactory.TileTowerBuilderTool("TileCmbTwrBldr",
+                                            CellContainerName = cellsKey,
+                                            # debugging aid, keep for convenience
+                                            #DumpTowers        = False,
+                                            #DumpWeightMap     = False
+                                            )
+
+
 
     alg = CompFactory.TrigCaloTowerMaker(name,
-                                             Cells=cellsKey,
-                                             CaloClusters=recordable(clustersKey),
-                                            )
+                                        Cells=cellsKey,
+                                        CaloTowers=towersKey,
+                                        NumberOfPhiTowers=64,
+                                        NumberOfEtaTowers=100,
+                                        EtaMin=-5.0,
+                                        EtaMax=5.0,
+                                        DeltaEta=1.2,
+                                        DeltaPhi=1.2,
+                                        RoIs=RoIs,
+                                        TowerMakerTools = [ tilecmbtwrbldr, larcmbtwrbldr, fcalcmbtwrbldr ]
+                                        )
     from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
     acc.merge(CaloNoiseCondAlgCfg(flags))
     acc.addEventAlgo(alg, primary=True)

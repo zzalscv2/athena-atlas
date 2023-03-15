@@ -202,7 +202,9 @@ class CFSequenceCA(CFSequence):
             log.info("created parOR %s inside seqAND %s  ", stepReco.getName(), seqAndWithFilter.getName())
             for menuseq in ChainStep.sequences:
                 self.ca.merge(menuseq.ca, sequenceName=stepReco.getName())
-            
+                if menuseq.globalRecoCA:
+                    self.ca.merge(menuseq.globalRecoCA)
+
         CFSequence.__init__(self, ChainStep,FilterAlg)
         if self.combo is not None:             
             self.ca.addEventAlgo(self.step.combo.Alg, sequenceName=seqAndWithFilter.getName())  

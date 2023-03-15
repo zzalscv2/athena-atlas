@@ -16,3 +16,6 @@ em_clusters = "HLT_TopoCaloClustersFS"
 
 # Name of the fullscan LC clusters
 lc_clusters = "HLT_TopoCaloClustersLCFS"
+
+# towers
+fs_towers = "HLT_HICaloTowerFS"

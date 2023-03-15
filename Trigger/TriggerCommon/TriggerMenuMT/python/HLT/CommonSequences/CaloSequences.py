@@ -102,11 +102,10 @@ def caloTowerHIRecoSequence(
         outputName="HLT_HICaloTowerFS"):
     """ Create the EM-level fullscan clusters for heavy-ion"""
     cell_sequence, cells_name = RecoFragmentsPool.retrieve(cellRecoSequence, flags=flags, RoIs=RoIs)
-    from TrigCaloRec.TrigCaloRecConfig import TrigCaloTowerMaker_hijet
-    alg = TrigCaloTowerMaker_hijet(
-            name,
-            )
-    alg.RoIs=RoIs
-    alg.Cells=cells_name
-    alg.CaloTowers=outputName
+    from TrigCaloRec.TrigCaloRecConfig import hltHICaloTowerMakerCfg
+    alg = algorithmCAToGlobalWrapper(hltHICaloTowerMakerCfg,
+                                     flags, name,
+                                     towersKey = outputName,
+                                     cellsKey = cells_name,
+                                     RoIs=RoIs)[0]
     return parOR(name+"RecoSequence", [cell_sequence, alg]), str(alg.CaloTowers), str(cells_name)

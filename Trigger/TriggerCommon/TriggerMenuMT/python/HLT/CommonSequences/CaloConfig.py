@@ -9,7 +9,7 @@ I have given the configuration functions very few arguments so that they can be
 easily merged, but we can revisit this design choice if necessary.
 """
 
-from .FullScanDefs import caloFSRoI, fs_cells, em_clusters, lc_clusters
+from .FullScanDefs import fs_cells, em_clusters, lc_clusters, fs_towers
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
@@ -60,7 +60,7 @@ def HICaloTowerCfg(flags):
     """ Create the towers for heavy ion """
     acc = ComponentAccumulator()
 
-    acc.merge(FSCaloCellCfg(flags))
+    acc.getPrimaryAndMerge(FSCaloCellCfg(flags))
 
     from TrigCaloRec.TrigCaloRecConfig import hltHICaloTowerMakerCfg
     # Then build the clusters
@@ -68,7 +68,7 @@ def HICaloTowerCfg(flags):
         hltHICaloTowerMakerCfg(
             flags,
             "HLTHICaloTowerMakerFS",
-            clustersKey=caloFSRoI,
+            towersKey=fs_towers,
             cellsKey=fs_cells,
         )
     )
