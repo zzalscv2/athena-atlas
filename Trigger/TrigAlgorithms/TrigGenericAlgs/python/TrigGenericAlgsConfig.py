@@ -6,26 +6,14 @@ from TrigPartialEventBuilding.TrigPartialEventBuildingConfig import getRegSelToo
 from AthenaCommon.Logging import logging
 _log = logging.getLogger( __name__ )
 
-# The hack below works only for old configurables, because Conf2 uses __slots__ and cannot be extended
-from TrigGenericAlgs.TrigGenericAlgsConf import TimeBurner
-class TimeBurnerCfg(TimeBurner):
-    def __init__(self, name="TimeBurner", **kwargs):
-        super(TimeBurnerCfg, self).__init__(name, **kwargs)
-        # Decorate the Configurable with a HypoTools property which is only required
-        # by the menu and python configuration framework, but has no use in C++ TimeBurner
-        self.HypoTools = []
 
+def TimeBurnerCfg(flags, name="TimeBurner", **kwargs):
+    return CompFactory.TimeBurner(name, **kwargs)
 
 def TimeBurnerHypoToolGen(chainDict):
-    # Dummy HypoTool implementing only the functions used by the menu and python configuration framework
-    class DummyHypo:
-        def __init__(self, name):
-            self.name = name
-        def getName(self):
-            return self.name
-
-    return DummyHypo(chainDict['chainName'])
-
+    # Dummy HypoTool (it is not even called by TimeBurner)
+    return CompFactory.TrigGenericHypoTool(chainDict['chainName'],
+                                           PassString = "")
 
 def EndOfEventROIConfirmerAlgCfg(name):
     return CompFactory.EndOfEventROIConfirmerAlg(name)

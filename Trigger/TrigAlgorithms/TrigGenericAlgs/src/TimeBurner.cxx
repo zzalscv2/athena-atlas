@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TimeBurner.h"
@@ -9,6 +9,12 @@
 
 TimeBurner::TimeBurner(const std::string& name, ISvcLocator* pSvcLocator)
 : ::HypoBase(name, pSvcLocator) {}
+
+StatusCode TimeBurner::initialize() {
+  // we don't actually need the HypoTool
+  for (auto& tool : m_hypoTools) tool.disable();
+  return StatusCode::SUCCESS;
+}
 
 StatusCode TimeBurner::execute(const EventContext& eventContext) const {
   // Create a reject decision

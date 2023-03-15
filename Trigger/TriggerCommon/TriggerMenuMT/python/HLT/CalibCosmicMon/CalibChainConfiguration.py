@@ -238,8 +238,9 @@ def acceptedEventsSequence(flags):
     inputMakerSeq = seqAND("AcceptedEventsSequence", [inputMaker])
 
     # TimeBurner alg works as a reject-all hypo
-    hypoAlg = conf2toConfigurable(TimeBurnerCfg(name="AcceptedEventsHypo"))
-    hypoAlg.SleepTimeMillisec = 0
+    hypoAlg = conf2toConfigurable(TimeBurnerCfg(flags,
+                                                name="AcceptedEventsHypo",
+                                                SleepTimeMillisec = 0))
 
     return MenuSequence(flags,
         Sequence    = inputMakerSeq,
