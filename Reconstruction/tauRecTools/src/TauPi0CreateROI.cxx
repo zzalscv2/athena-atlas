@@ -28,7 +28,7 @@ StatusCode TauPi0CreateROI::initialize() {
 
 
 
-StatusCode TauPi0CreateROI::executePi0CreateROI(xAOD::TauJet& tau, CaloCellContainer& pi0CellContainer, boost::dynamic_bitset<>& addedCellsMap) const {
+StatusCode TauPi0CreateROI::executePi0CreateROI(xAOD::TauJet& tau, CaloConstCellContainer& pi0CellContainer, boost::dynamic_bitset<>& addedCellsMap) const {
 
   // only run on 0-5 prong taus
   if (!tauRecTools::doPi0andShots(tau)) {
@@ -62,7 +62,7 @@ StatusCode TauPi0CreateROI::executePi0CreateROI(xAOD::TauJet& tau, CaloCellConta
     const IdentifierHash cellHash = cell->caloDDE()->calo_hash();
 
     if (!addedCellsMap.test(cellHash)) {
-      pi0CellContainer.push_back(cell->clone());
+      pi0CellContainer.push_back(cell);
       addedCellsMap.set(cellHash);
     }
   }

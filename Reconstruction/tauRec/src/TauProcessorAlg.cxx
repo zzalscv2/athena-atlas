@@ -96,12 +96,12 @@ StatusCode TauProcessorAlg::execute(const EventContext& ctx) const {
   ATH_CHECK(tauShotPFOHandle.record(std::make_unique<xAOD::PFOContainer>(), std::make_unique<xAOD::PFOAuxContainer>()));
   xAOD::PFOContainer* tauShotPFOContainer = tauShotPFOHandle.ptr();
 
-  CaloCellContainer* Pi0CellContainer = nullptr;
+  CaloConstCellContainer* Pi0CellContainer = nullptr;
   boost::dynamic_bitset<> addedCellsMap;
 
   if(!m_tauPi0CellOutputContainer.empty()) {
-    SG::WriteHandle<CaloCellContainer> tauPi0CellHandle( m_tauPi0CellOutputContainer, ctx );
-    ATH_CHECK(tauPi0CellHandle.record(std::make_unique<CaloCellContainer>()));
+    SG::WriteHandle<CaloConstCellContainer> tauPi0CellHandle( m_tauPi0CellOutputContainer, ctx );
+    ATH_CHECK(tauPi0CellHandle.record(std::make_unique<CaloConstCellContainer>(SG::VIEW_ELEMENTS )));
     Pi0CellContainer = tauPi0CellHandle.ptr();
 
     // Initialize the cell map per event, used to avoid dumplicate cell in TauPi0CreateROI
@@ -150,31 +150,30 @@ StatusCode TauProcessorAlg::execute(const EventContext& ctx) const {
     for (const ToolHandle<ITauToolBase>& tool : m_tools) {
       ATH_MSG_DEBUG("ProcessorAlg Invoking tool " << tool->name());
 
-      if (tool->type() == "TauVertexFinder" ) {
-	sc = tool->executeVertexFinder(*pTau);
-      }
-      else if ( tool->type() == "TauTrackFinder") {
-	sc = tool->executeTrackFinder(*pTau, *pTauTrackCont);
-      }
-      else if ( tool->type() == "tauRecTools::TauTrackRNNClassifier" ) {
-	sc = tool->executeTrackClassifier(*pTau, *pTauTrackCont);
+      if (tool->type() == "TauVertexFinder") {
+        sc = tool->executeVertexFinder(*pTau);
+      } else if (tool->type() == "TauTrackFinder") {
+        sc = tool->executeTrackFinder(*pTau, *pTauTrackCont);
+      } else if (tool->type() == "tauRecTools::TauTrackRNNClassifier") {
+        sc = tool->executeTrackClassifier(*pTau, *pTauTrackCont);
 
-	// skip candidate if it has too many classifiedCharged tracks, if skimming is required
-	if(m_maxNTracks>0 && static_cast<int>(pTau->nTracks())>m_maxNTracks) {
-	  sc = StatusCode::FAILURE;
-	  break;
-	}
+        // skip candidate if it has too many classifiedCharged tracks, if
+        // skimming is required
+        if (m_maxNTracks > 0 &&
+            static_cast<int>(pTau->nTracks()) > m_maxNTracks) {
+          sc = StatusCode::FAILURE;
+          break;
+        }
+      } else if (tool->type() == "TauShotFinder") {
+        sc = tool->executeShotFinder(*pTau, *tauShotClusContainer,
+                                     *tauShotPFOContainer);
+      } else if (tool->type() == "TauPi0CreateROI") {
+        sc = tool->executePi0CreateROI(*pTau, *Pi0CellContainer, addedCellsMap);
+      } else {
+        sc = tool->execute(*pTau);
       }
-      else if ( tool->type() == "TauShotFinder") {
-	sc = tool->executeShotFinder(*pTau, *tauShotClusContainer, *tauShotPFOContainer);
-      }
-      else if ( tool->type() == "TauPi0CreateROI") {
-	sc = tool->executePi0CreateROI(*pTau, *Pi0CellContainer, addedCellsMap);
-      }
-      else {
-	sc = tool->execute(*pTau);
-      }
-      if (sc.isFailure())  break;
+      if (sc.isFailure())
+        break;
     }
 
     if (sc.isSuccess()) {
@@ -194,14 +193,17 @@ StatusCode TauProcessorAlg::execute(const EventContext& ctx) const {
   SG::WriteHandle<CaloClusterCellLinkContainer> tauShotClusLinkHandle( m_tauShotClusLinkContainer, ctx );
   ATH_CHECK(CaloClusterStoreHelper::finalizeClusters (tauShotClusLinkHandle, tauShotClusContainer));
 
-  // Check this is needed for the cell container?
   if(Pi0CellContainer) {
+    // sort the cell container by hash 
+    // basically call the finalizer
+    ATH_CHECK( m_cellMakerTool->process(Pi0CellContainer, ctx) );
+    //Since this is recorded we can retrieve it later as const DV
+    //do it here due to symlink below
+    const CaloCellContainer* cellPtrs = Pi0CellContainer->asDataVector(); 
+    // Check this is needed for the cell container?
     // symlink as INavigable4MomentumCollection (as in CaloRec/CaloCellMaker)
-    ATH_CHECK(evtStore()->symLink(Pi0CellContainer, static_cast<INavigable4MomentumCollection*> (0)));
-    
-    // sort the cell container by hash
-    ATH_CHECK( m_cellMakerTool->process(static_cast<CaloCellContainer*> (Pi0CellContainer), ctx) );
-  }
+    ATH_CHECK(evtStore()->symLink(cellPtrs, static_cast<INavigable4MomentumCollection*> (0)));
+ }
 
   ATH_MSG_VERBOSE("The tau candidate container has been modified");
   

@@ -16,6 +16,7 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
+#include "CaloEvent/CaloConstCellContainer.h"
 #include "xAODTau/TauJet.h"
 
 /**
@@ -36,7 +37,7 @@ public:
   virtual ~TauPi0CreateROI() = default;
 
   virtual StatusCode initialize() override;
-  virtual StatusCode executePi0CreateROI(xAOD::TauJet& pTau, CaloCellContainer& Pi0CellContainer, boost::dynamic_bitset<>& map) const override;
+  virtual StatusCode executePi0CreateROI(xAOD::TauJet& pTau, CaloConstCellContainer& Pi0CellContainer, boost::dynamic_bitset<>& map) const override;
 
 private:
     

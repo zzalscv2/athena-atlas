@@ -19,9 +19,10 @@
 #include "xAODPFlow/PFOContainer.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "CaloEvent/CaloClusterCellLinkContainer.h"
+#include "CaloEvent/CaloConstCellContainer.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "TRT_ReadoutGeometry/TRT_DetElementContainer.h"
-#include "CaloInterface/ICaloCellMakerTool.h"
+#include "CaloInterface/ICaloConstCellMakerTool.h"
 
 #include "GaudiKernel/SystemOfUnits.h"
 #include "GaudiKernel/ToolHandle.h"
@@ -54,7 +55,7 @@ class TauProcessorAlg: public AthReentrantAlgorithm
   Gaudi::Property<int> m_maxNTracks {this, "MaxNTracks", -1, "maximum number of classifiedCharged tracks"};
 
   const ToolHandleArray<ITauToolBase> m_tools {this, "Tools", {}, "Tools processing taus"};
-  const ToolHandle<ICaloCellMakerTool> m_cellMakerTool {this, "CellMakerTool", "", "Tool to sort the CaloCellContainer"};
+  const ToolHandle<ICaloConstCellMakerTool> m_cellMakerTool {this, "CellMakerTool", "", "Tool to sort the CaloCellContainer"};
 
   SG::ReadHandleKey<xAOD::JetContainer> m_jetInputContainer{this,"Key_jetInputContainer","AntiKt4LCTopoJets","input jet key"};
 	
@@ -63,7 +64,7 @@ class TauProcessorAlg: public AthReentrantAlgorithm
   SG::WriteHandleKey<xAOD::CaloClusterContainer> m_tauShotClusOutputContainer{this,"Key_tauShotClusOutputContainer", "TauShotClusters", "tau shot clusters out key"};
   SG::WriteHandleKey<CaloClusterCellLinkContainer> m_tauShotClusLinkContainer{this,"Key_tauShotClusLinkContainer", "TauShotClusters_links", "tau shot clusters out key"};
   SG::WriteHandleKey<xAOD::PFOContainer> m_tauShotPFOOutputContainer{this,"Key_tauShotPFOOutputContainer", "TauShotParticleFlowObjects", "tau pfo out key"};
-  SG::WriteHandleKey<CaloCellContainer> m_tauPi0CellOutputContainer{this,"Key_tauPi0CellOutputContainer","TauCommonPi0Cells","output calo cell key"};
+  SG::WriteHandleKey<CaloConstCellContainer> m_tauPi0CellOutputContainer{this,"Key_tauPi0CellOutputContainer","TauCommonPi0Cells","output calo cell key"};
     
   const CaloCell_ID* m_cellID = nullptr;
     
