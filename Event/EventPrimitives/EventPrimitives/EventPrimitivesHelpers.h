@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -98,8 +98,10 @@ inline void compress(const AmgSymMatrix(N) & covMatrix,
     for (unsigned int j = 0; j <= i; ++j)
       vec.emplace_back(covMatrix(i, j));
 }
+
 inline void compress(const MatrixX& covMatrix, std::vector<float>& vec) {
   int rows = covMatrix.rows();
+  vec.reserve(CalculateCompressedSize(rows));
   for (int i = 0; i < rows; ++i) {
     for (int j = 0; j <= i; ++j) {
       vec.emplace_back(covMatrix(i, j));
