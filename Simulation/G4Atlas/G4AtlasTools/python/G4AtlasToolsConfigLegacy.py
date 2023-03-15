@@ -29,8 +29,10 @@ def generateFastSimulationList():
             print ('  Please try again with a different value of simFlags.LArParameterization or simFlags.CalibrationRun ')
             raise RuntimeError('Configuration not allowed')
         if simFlags.LArParameterization() > 0:
-            #FIXME If we're only using Frozen Showers in the FCAL do we really need to set up the EMB and EMEC as well?
-            FastSimulationList += ['EMBFastShower', 'EMECFastShower', 'FCALFastShower', 'FCAL2FastShower']
+            # We run production with LArParameterization==3 (FCAL Only), so the EMB and EMEC tools are not required
+            if simFlags.LArParameterization() == 1:
+                FastSimulationList += ['EMBFastShower', 'EMECFastShower']
+            FastSimulationList += ['FCALFastShower', 'FCAL2FastShower']
             if simFlags.LArParameterization.get_Value() > 1:
                  FastSimulationList += ['DeadMaterialShower']
         elif simFlags.LArParameterization() is None or simFlags.LArParameterization() == 0:

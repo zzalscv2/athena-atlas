@@ -17,19 +17,19 @@ def FastSimulationToolListCfg(flags):
             from G4FastSimulation.G4FastSimulationConfig import SimpleFastKillerCfg
             tools += [ result.popToolsAndMerge(SimpleFastKillerCfg(flags)) ]
     if flags.Detector.GeometryLAr:
-        if flags.Sim.LArParameterization is not LArParameterization.NoFrozenShowers:
-            # FIXME If we're only using Frozen Showers in the FCAL do
-            # we really need to set up the EMB and EMEC as well?
+        if flags.Sim.LArParameterization is LArParameterization.NoFrozenShowers:
+            print( "getFastSimulationMasterTool INFO No Frozen Showers" )
+        else:
             from LArG4FastSimulation.LArG4FastSimulationConfig import EMBFastShowerCfg, EMECFastShowerCfg, FCALFastShowerCfg, FCAL2FastShowerCfg
-            tools += [ result.popToolsAndMerge(EMBFastShowerCfg(flags)) ]
-            tools += [ result.popToolsAndMerge(EMECFastShowerCfg(flags)) ]
+            # We run production with LArParameterization.FrozenShowersFCalOnly, so the EMB and EMEC tools are not required
+            if flags.Sim.LArParameterization is LArParameterization.FrozenShowers:
+                tools += [ result.popToolsAndMerge(EMBFastShowerCfg(flags)) ]
+                tools += [ result.popToolsAndMerge(EMECFastShowerCfg(flags)) ]
             tools += [ result.popToolsAndMerge(FCALFastShowerCfg(flags)) ]
             tools += [ result.popToolsAndMerge(FCAL2FastShowerCfg(flags)) ]
             if flags.Sim.LArParameterization in [LArParameterization.DeadMaterialFrozenShowers, LArParameterization.FrozenShowersFCalOnly]:
                 from G4FastSimulation.G4FastSimulationConfig import DeadMaterialShowerCfg
                 tools += [ result.popToolsAndMerge(DeadMaterialShowerCfg(flags)) ]
-        else:
-            print( "getFastSimulationMasterTool INFO No Frozen Showers" )
     if flags.Detector.GeometryMuon:
         if flags.Sim.CavernBackground not in [CavernBackground.Off, CavernBackground.Read] and not flags.Sim.RecordFlux:
             from TrackWriteFastSim.TrackWriteFastSimConfig import NeutronFastSimCfg

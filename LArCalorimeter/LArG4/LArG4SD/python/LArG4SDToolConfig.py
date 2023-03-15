@@ -203,7 +203,7 @@ def LArEMBSensitiveDetectorCfg(ConfigFlags,name="LArEMBSensitiveDetector", **kwa
     kwargs.setdefault("OutputCollectionNames", [hits_collection_name])
 
     # Hook for fast simulation
-    kwargs.setdefault("UseFrozenShowers", ConfigFlags.Sim.LArParameterization is not LArParameterization.NoFrozenShowers)
+    kwargs.setdefault("UseFrozenShowers", ConfigFlags.Sim.LArParameterization is LArParameterization.FrozenShowers)
 
     from LArG4Barrel.LArG4BarrelConfig import EMBPresamplerCalculatorCfg, EMBCalculatorCfg
     kwargs.setdefault("EMBPSCalculator", result.getPrimaryAndMerge(EMBPresamplerCalculatorCfg(ConfigFlags)).name)
@@ -238,7 +238,7 @@ def LArEMECSensitiveDetectorCfg(ConfigFlags, name="LArEMECSensitiveDetector", **
     kwargs.setdefault("OutputCollectionNames", [hits_collection_name])
 
     # Hook for fast simulation
-    kwargs.setdefault("UseFrozenShowers", ConfigFlags.Sim.LArParameterization is not LArParameterization.NoFrozenShowers)
+    kwargs.setdefault("UseFrozenShowers", ConfigFlags.Sim.LArParameterization is LArParameterization.FrozenShowers)
 
     from LArG4EC.LArG4ECConfig import EMECPosInnerWheelCalculatorCfg, EMECNegInnerWheelCalculatorCfg, EMECPosOuterWheelCalculatorCfg, EMECNegOuterWheelCalculatorCfg, EMECPresamplerCalculatorCfg, EMECPosBackOuterBarretteCalculatorCfg, EMECNegBackOuterBarretteCalculatorCfg
     kwargs.setdefault("EMECPosIWCalculator", result.getPrimaryAndMerge(EMECPosInnerWheelCalculatorCfg(ConfigFlags)).name)
