@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <fstream>
@@ -12,10 +12,11 @@ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 namespace FlavorTagDiscriminants {
 
   // Constructor
-  OnnxUtil::OnnxUtil(const std::string& path_to_onnx){
-
+  OnnxUtil::OnnxUtil(const std::string& path_to_onnx)
     //load the onnx model to memory using the path m_path_to_onnx
-    m_env = std::make_unique< Ort::Env >(ORT_LOGGING_LEVEL_FATAL, "");
+    : m_env (std::make_unique< Ort::Env >(ORT_LOGGING_LEVEL_FATAL, ""))
+  {
+
 
     // initialize session options if needed
     Ort::SessionOptions session_options;

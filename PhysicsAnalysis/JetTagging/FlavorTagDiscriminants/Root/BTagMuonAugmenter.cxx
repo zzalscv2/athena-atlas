@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagDiscriminants/BTagMuonAugmenter.h"
@@ -15,6 +15,10 @@ namespace FlavorTagDiscriminants {
                                        float muonMinpT,
                                        FlipTagConfig flipConfig)
       : m_btag_track_aug("btagIp_"),
+        m_muonAssociationName(muonAssociationName),
+        m_muonMaxDR(muonMaxDR),
+        m_muonMinpT(muonMinpT),
+        m_flip_config(flipConfig),
         m_muonSelectionTool(nullptr),
         m_acc_assocMuons(muonAssociationName),
         m_acc_jetLink("jetLink"),
@@ -64,11 +68,6 @@ namespace FlavorTagDiscriminants {
                                       "expectNextToInnermostPixelLayerHit"}) {
     // you probably have to initialize something here
     using namespace FlavorTagDiscriminants;
-    m_muonAssociationName = muonAssociationName;
-    m_muonMaxDR = muonMaxDR;
-    m_muonMinpT = muonMinpT;
-    m_flip_config = flipConfig;
-
     m_muonSelectionTool.reset(new CP::MuonSelectionTool("BTaggingMuonSelectionTool"));
     StatusCode sc_init = m_muonSelectionTool->initialize();
     if (!sc_init.isSuccess()) {
