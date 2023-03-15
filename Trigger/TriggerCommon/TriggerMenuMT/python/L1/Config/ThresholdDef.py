@@ -178,7 +178,7 @@ class ThresholdDef:
             eTauThreshold('eTAUSPARE%i' % thrV, 'eTAU').setEt(thrVal_SPARE)
 
         # cTAU
-        cTAU_cuts = [20, 30, 35]
+        cTAU_cuts = [12, 20, 30, 35]
         for thrV in cTAU_cuts:
             cTauThreshold('cTAU%iM' % thrV, 'cTAU').setEt(get_threshold_cut('cTAU', thrV)).setIsolation( isolation = "Medium" )
 

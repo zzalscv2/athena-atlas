@@ -69,7 +69,7 @@ class TopoAlgoDefMultiplicity(object):
             'jTAU20'
         ]        
         ctauThresholds_3bits = [ 
-            'cTAU20M', 
+            'cTAU12M', 'cTAU20M', 
 
             #spares
             'cTAUSPARE1',
@@ -283,6 +283,6 @@ class TopoAlgoDefMultiplicity(object):
                     if conn.name==ml.conn and thrtype==ml.thrtype and algo.nbits==ml.nbit and tl.startbit>=ml.startbit and (tl.startbit+tl.nbits-1)<=ml.endbit:
                         goodAlgo = True
                 if not goodAlgo:
-                    raise RuntimeError("The multiplicity algoprithm %s with startbit %i does not fit with Topo1 and CTP FW. If this is intended, please correct the multiplicity constraints and communicate the new menu to the L1TOPO and CTP groups." % (algo.name, tl.startbit) )
+                    raise RuntimeError("The multiplicity algorithm %s with startbit %i does not fit with Topo1 and CTP FW. If this is intended, please correct the multiplicity constraints and communicate the new menu to the L1TOPO and CTP groups." % (algo.name, tl.startbit) )
 
 
