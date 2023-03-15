@@ -13,8 +13,11 @@ from TrigTRTHighTHitCounter.TrigTRTHTHCounterConfig import TrigTRTHTHCounterFex
 
 def TRTHitGeneratorSequence(flags):
 
-    from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import  getTrigEgammaKeys
+    from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
     TrigEgammaKeys = getTrigEgammaKeys()
+
+    from InDetTrigRecExample import InDetTrigCA
+    InDetTrigCA.InDetTrigConfigFlags = flags
 
     """ hipTRT step ....."""
     InViewRoIs = "TRTHitGenerator"
