@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigT1TGC )
@@ -19,6 +19,4 @@ atlas_add_component( TrigT1TGC
                      LINK_LIBRARIES TrigT1TGCLib )
 
 # Install files from the package:
-atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
-atlas_install_joboptions( share/TrigT1TGC_jobOptions.py )
 atlas_install_runtime( share/TrigT1TGCMaskedChannel*.db )

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -25,10 +25,6 @@
   The package contains the following algorithms:
 
   - LVL1TGCTrigger::LVL1TGCTrigger: Main Algorithm
-
-
-  The algorithms of the TrigT1TGC package can be configured using configurables.  See TrigT1TGC_jobOptions.py and TrigT1TGCConfig.py:
-  @include TrigT1TGC_jobOptions.py
 
   The properties of LVl1TGCTrigger can be changed by users:
   - @link LVL1TGCTrigger::LVL1TGCTrigger::LVL1TGCTrigger @endlink
