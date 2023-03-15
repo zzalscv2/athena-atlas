@@ -122,9 +122,6 @@ def makeInDetTrigFastTracking( flags, config = None, rois = 'EMViewRoIs', doFTF 
       from TrkConfig.TrkTrackSummaryToolConfig import InDetTrigTrackSummaryToolCfg
       trackSummaryTool = CAtoLegacyPublicToolWrapper(InDetTrigTrackSummaryToolCfg)
 
-      from TrkConfig.TrkParticleCreatorConfig import InDetTrigParticleCreatorToolFTFCfg
-      InDetTrigParticleCreatorToolFTF = CAtoLegacyPublicToolWrapper(InDetTrigParticleCreatorToolFTFCfg)
-      
       if config is None:
             raise ValueError('makeInDetTrigFastTracking() No signature config specified')
 
@@ -172,16 +169,9 @@ def makeInDetTrigFastTracking( flags, config = None, rois = 'EMViewRoIs', doFTF 
         viewAlgs.extend(theFTF)
 
       if not flags.InDet.Tracking.ActiveConfig.doZFinderOnly: 
-
-        from InDetTrigParticleCreation.InDetTrigParticleCreationConf import InDet__TrigTrackingxAODCnvMT
-        theTrackParticleCreatorAlg = InDet__TrigTrackingxAODCnvMT(name = "InDetTrigTrackParticleCreatorAlg" + signature,
-                                                                  TrackName = flags.InDet.Tracking.ActiveConfig.trkTracks_FTF,
-                                                                  ParticleCreatorTool = InDetTrigParticleCreatorToolFTF)
-
-        #In general all FTF trackParticle collections are recordable except beamspot to save space
-        theTrackParticleCreatorAlg.TrackParticlesName = flags.InDet.Tracking.ActiveConfig.tracks_FTF
-
-        viewAlgs.append(theTrackParticleCreatorAlg)
+        from TrigInDetConfig.TrigInDetConfig import trackFTFConverterCfg
+        xaodcnv = algorithmCAToGlobalWrapper(trackFTFConverterCfg, flags, signature)
+        viewAlgs.extend(xaodcnv)
 
         if secondStageConfig is not None:
           #have been supplied with a second stage config, create another instance of FTF
@@ -191,19 +181,11 @@ def makeInDetTrigFastTracking( flags, config = None, rois = 'EMViewRoIs', doFTF 
 
           theFTF2 = algorithmCAToGlobalWrapper(TrigFastTrackFinderCfg,flags, "TrigFastTrackFinder_" + secondStageConfig.input_name, 
                                                secondStageConfig.input_name, rois, inputTracksName = inputTracksname)
-          viewAlgs.append(theFTF2)
+          viewAlgs.extend(theFTF2)
 
           
-          from InDetTrigParticleCreation.InDetTrigParticleCreationConf import InDet__TrigTrackingxAODCnvMT
-          theTrackParticleCreatorAlg2 = InDet__TrigTrackingxAODCnvMT(name = "InDetTrigTrackParticleCreatorAlg_" + secondStageConfig.input_name,
-                                                                  TrackName = secondStageConfig.trkTracks_FTF(),
-                                                                     ParticleCreatorTool = InDetTrigParticleCreatorToolFTF)
-          
-          
-          #In general all FTF trackParticle collections are recordable except beamspot to save space
-          theTrackParticleCreatorAlg2.TrackParticlesName = secondStageConfig.tracks_FTF()
-          
-          viewAlgs.append(theTrackParticleCreatorAlg2)
+          xaodcnv2 = algorithmCAToGlobalWrapper(trackFTFConverterCfg, flags, flags.InDet.Tracking.ActiveConfig.input_name)
+          viewAlgs.extend(xaodcnv2)
 
 
       if (InDetTrigFlags.doTruth()):   

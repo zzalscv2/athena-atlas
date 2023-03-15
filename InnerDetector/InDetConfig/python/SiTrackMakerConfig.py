@@ -161,6 +161,7 @@ def TrigSiTrackMaker_xkCfg(flags, name="TrigSiTrackMaker", **kwargs):
     kwargs.setdefault("Xi2maxMultiTracks",
                       flags.InDet.Tracking.ActiveConfig.Xi2max)
     kwargs.setdefault("UseAssociationTool", False)
+
     kwargs.setdefault("useBremModel", flags.InDet.Tracking.ActiveConfig.name == "2023fix")
 
     kwargs.setdefault("CosmicTrack", flags.InDet.Tracking.ActiveConfig.input_name == "cosmics")

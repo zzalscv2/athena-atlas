@@ -160,10 +160,9 @@ def _trackConverterCfg(flags, signature, inputTracksKey, outputTrackParticleKey)
   creatorTool = acc.popToolsAndMerge(InDetTrigParticleCreatorToolFTFCfg(flags))
   acc.addPublicTool(creatorTool)
 
-  from TrigEDMConfig.TriggerEDMRun3 import recordable
   trackParticleCnv=CompFactory.InDet.TrigTrackingxAODCnvMT(name = "InDetTrigTrackParticleCreatorAlg" + signature,
                                                           TrackName           = inputTracksKey,
-                                                          TrackParticlesName  = recordable(outputTrackParticleKey),
+                                                          TrackParticlesName  = outputTrackParticleKey,
                                                           ParticleCreatorTool = creatorTool)
   acc.addEventAlgo(trackParticleCnv, primary=True)
 

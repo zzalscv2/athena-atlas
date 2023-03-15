@@ -190,7 +190,8 @@ def _muFastStepSeq(flags, is_probe_leg=False):
 
 def muFastSequence(flags, is_probe_leg=False): 
     muonflags = flags.cloneAndReplace('Muon', 'Trigger.Offline.SA.Muon')
-    selAcc , l2muFastSequence =  _muFastStepSeq(muonflags, is_probe_leg)
+    muonidflags = muonflags.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking.muon")
+    selAcc , l2muFastSequence =  _muFastStepSeq(muonidflags, is_probe_leg)
     return l2muFastSequence
 
 
@@ -226,10 +227,10 @@ def _muCombStepSeq(flags):
                                       HypoToolGen = TrigmuCombHypoToolFromDict)
 
     return (selAccL2CB , l2muCombSequence)
-
 def muCombSequence(flags, is_probe_leg=False):
     muonflagsCB = flags.cloneAndReplace('Muon', 'Trigger.Offline.Muon').cloneAndReplace('MuonCombined', 'Trigger.Offline.Combined.MuonCombined')    
-    selAccL2CB , l2muCombSequence = _muCombStepSeq(muonflagsCB)
+    muonflagsCBid = muonflagsCB.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking.muon")
+    selAccL2CB , l2muCombSequence = _muCombStepSeq(muonflagsCBid)
     return l2muCombSequence
 
 def muCombStep(flags, chainDict):
@@ -305,7 +306,7 @@ def _muEFCBStepSeq(flags, name='RoI'):
     selAccEFCB = SelectionCA("EFCBMuon_"+name)
 
     viewName = 'EFMuCBReco_'+name                                                       
-    trackName = flags.Trigger.InDetTracking.Muon.tracks_FTF
+    trackName = flags.InDet.Tracking.ActiveConfig.tracks_FTF
     muonCandName = "MuonCandidates"
     if 'FS' in name:
         muonCandName = "MuonCandidates_FS"
@@ -388,7 +389,9 @@ def _muEFCBStepSeq(flags, name='RoI'):
 
 def muEFCBSequence(flags, is_probe_leg=False):
     muonflagsCB = flags.cloneAndReplace('Muon', 'Trigger.Offline.Muon').cloneAndReplace('MuonCombined', 'Trigger.Offline.Combined.MuonCombined')
-    selAccEFCB , efmuCBSequence = _muEFCBStepSeq(muonflagsCB, name='RoI')
+    muonflagsCBid = muonflagsCB.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking.muon")
+        
+    selAccEFCB , efmuCBSequence = _muEFCBStepSeq(muonflagsCBid, name='RoI')
     return efmuCBSequence
 
 def muEFCBStep(flags, chainDict, name='RoI'):
