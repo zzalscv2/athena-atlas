@@ -1869,6 +1869,7 @@ class ItemDef:
 
             # Needed?
             MenuItem('L1_DPHI-2eEM5').setLogic( d.TOPO_27DPHI32_eEMs1_eEMs6 & physcond)
+            # Need to redefine these wrt Phase-I TE
             MenuItem('L1_DPHI-2eEM5_VTE5p24ETA49').setLogic( d.TOPO_27DPHI32_eEMs1_eEMs6 & Not(d.TE524ETA49) & physcond).setTriggerType(TT.calo) 
             MenuItem('L1_DPHI-2eEM5_VTE5p24ETA49_ALFA_EINE').setLogic( d.TOPO_27DPHI32_eEMs1_eEMs6 & Not(d.TE524ETA49) & ALFA_EINE & physcond).setTriggerType(TT.alfa)
             MenuItem('L1_DPHI-2eEM5_VTE10').setLogic( d.TOPO_27DPHI32_eEMs1_eEMs6 & Not(d.TE10) & physcond).setTriggerType(TT.calo)

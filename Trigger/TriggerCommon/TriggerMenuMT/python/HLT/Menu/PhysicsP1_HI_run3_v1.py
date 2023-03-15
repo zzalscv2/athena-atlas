@@ -12,7 +12,7 @@ from .SignatureDicts import ChainStore
 from .Physics_pp_run3_v1 import (
         SingleMuonGroup,
         #SingleElectronGroup,
-        #SingleJetGroup,
+        SingleJetGroup,
         #MultiJetGroup,
         MinBiasGroup,
         SupportGroup,
@@ -42,6 +42,9 @@ def getPhysicsHISignatures():
 
     chains['Muon'] = [
         ChainProp(name='HLT_mu4_L1MU3V', stream=[HardProbesStream], groups=SingleMuonGroup),
+        # ALFA + dimuon triggers
+        ChainProp(name='HLT_mu4_mu2noL1_L1MU3V_ALFA_ANY', l1SeedThresholds=['MU3V','FSNOSEED'], stream=['MinBias'], groups=['PS:Online','PS:NoHLTReprocessing']+SingleMuonGroup),
+        ChainProp(name='HLT_mu4_mu2noL1_L1MU3V_ALFA_EINE', l1SeedThresholds=['MU3V','FSNOSEED'], stream=['MinBias'], groups=['PS:Online','PS:NoHLTReprocessing']+SingleMuonGroup),
     ]
 
     chains['Egamma'] = [
@@ -50,6 +53,10 @@ def getPhysicsHISignatures():
 
     chains['Jet'] = [
 
+        # ALFA + jet triggers
+        ChainProp(name='HLT_j15_L1ALFA_Jet_Phys', l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=['PS:Online','PS:NoHLTReprocessing']+SingleJetGroup),
+        ChainProp(name='HLT_2j10_L1ALFA_ELAS', l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=['PS:Online','PS:NoHLTReprocessing']+SingleJetGroup),
+        ChainProp(name='HLT_2j10_L1ALFA_SYS', l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=['PS:Online','PS:NoHLTReprocessing']+SingleJetGroup),
     ]
 
 
