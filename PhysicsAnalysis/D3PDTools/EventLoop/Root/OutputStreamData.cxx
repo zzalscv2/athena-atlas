@@ -223,12 +223,10 @@ namespace EL
       {
         TH1 *const hist = dynamic_cast<TH1*> (outputObject.get());
 
+        m_outputHistMap[outputObject->GetName()] = outputObject.get();
         m_output.emplace_back (std::move (outputObject));
         if (hist)
-        {
-          m_outputHistMap[hist->GetName()] = hist;
           hist->SetDirectory (nullptr);
-        }
       }
     }
 
@@ -286,7 +284,7 @@ namespace EL
 
 
 
-    TH1 *OutputStreamData ::
+    TObject *OutputStreamData ::
     getOutputHist (const std::string& name) const noexcept
     {
       RCU_READ_INVARIANT (this);

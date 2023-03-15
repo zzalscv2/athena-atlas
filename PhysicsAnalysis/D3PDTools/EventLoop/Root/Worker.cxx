@@ -116,12 +116,12 @@ namespace EL
 
 
 
-  TH1 *Worker ::
+  TObject *Worker ::
   getOutputHist (const std::string& name) const
   {
     RCU_READ_INVARIANT (this);
 
-    TH1 *result = m_histOutput->getOutputHist (name);
+    TObject *result = m_histOutput->getOutputHist (name);
     if (result == nullptr) RCU_THROW_MSG ("unknown output histogram: " + name);
     return result;
   }

@@ -64,7 +64,7 @@ namespace EL
   hist (const std::string& name) const
   {
     RCU_READ_INVARIANT (this);
-    return wk()->getOutputHist (name);
+    return dynamic_cast<TH1*>(wk()->getOutputHist (name));
   }
 
 

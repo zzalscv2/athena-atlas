@@ -144,7 +144,7 @@ namespace EL
       /// \par Guarantee
       ///   no-fail
     public:
-      TH1 *getOutputHist (const std::string& name) const noexcept;
+      TObject *getOutputHist (const std::string& name) const noexcept;
 
 
       /// \brief get the output tree with the given name, or nullptr
@@ -171,7 +171,7 @@ namespace EL
 
       /// \brief the output histogram map
     private:
-      std::unordered_map<std::string,TH1*> m_outputHistMap;
+      std::unordered_map<std::string,TObject*> m_outputHistMap;
 
       /// \brief the output tree map
     private:

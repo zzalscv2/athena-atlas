@@ -75,7 +75,7 @@ namespace EL
     ///   object not found
     /// \post result != 0
   public:
-    TH1 *getOutputHist (const std::string& name) const final override;
+    TObject *getOutputHist (const std::string& name) const final override;
 
 
     /// effects: get the output file that goes into the dataset with
