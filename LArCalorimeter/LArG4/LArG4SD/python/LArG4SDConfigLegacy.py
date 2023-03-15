@@ -138,7 +138,7 @@ def getLArEMBSensitiveDetector(name="LArEMBSensitiveDetector", **kwargs):
     kwargs.setdefault("OutputCollectionNames", [hits_collection_name])
     # Hook for fast simulation
     from G4AtlasApps.SimFlags import simFlags
-    kwargs.setdefault("UseFrozenShowers", simFlags.LArParameterization()>0)
+    kwargs.setdefault("UseFrozenShowers", simFlags.LArParameterization()==1)
     return CfgMgr.LArG4__EMBSDTool(name, **kwargs)
 
 def getLArEMECSensitiveDetector(name="LArEMECSensitiveDetector", **kwargs):
@@ -163,7 +163,7 @@ def getLArEMECSensitiveDetector(name="LArEMECSensitiveDetector", **kwargs):
     # No effect currently
     kwargs.setdefault("OutputCollectionNames", [hits_collection_name])
     # Hook for fast simulation
-    kwargs.setdefault("UseFrozenShowers", simFlags.LArParameterization()>0)
+    kwargs.setdefault("UseFrozenShowers", simFlags.LArParameterization()==1)
     return CfgMgr.LArG4__EMECSDTool(name, **kwargs)
 
 def getLArFCALSensitiveDetector(name="LArFCALSensitiveDetector", **kwargs):
