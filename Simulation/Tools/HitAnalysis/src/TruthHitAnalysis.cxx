@@ -325,8 +325,8 @@ StatusCode TruthHitAnalysis::execute() {
 	else {
 	  m_h_part_pdgid_sec->Fill(pdg);
 	  ++npart_sec;
-	  const int gen = currentGenParticlebarcode/1000000 + 2;
-	  m_h_n_generations->Fill(gen);    
+      const int gen = currentGenParticlebarcode/HepMC::SIM_REGENERATION_INCREMENT + 2; 
+	  m_h_n_generations->Fill(gen);  
 	}
       } // End iteration over particles
 
