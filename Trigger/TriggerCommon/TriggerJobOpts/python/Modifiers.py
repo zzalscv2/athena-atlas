@@ -52,28 +52,6 @@ class BunchSpacing25ns(_modifier):
         from InDetTrigRecExample.InDetTrigFlags import InDetTrigFlags
         InDetTrigFlags.InDet25nsec.set_Value_and_Lock(True)
 
-
-class ForceMuonDataType(_modifier):
-    """
-    Hardcode muon data to be of type of atlas
-      this determines which cabling service to use
-    """
-    def preSetup(self, flags):
-        from MuonByteStream.MuonByteStreamFlags import muonByteStreamFlags
-        muonByteStreamFlags.RpcDataType = 'atlas'
-        muonByteStreamFlags.MdtDataType = 'atlas'
-        muonByteStreamFlags.TgcDataType = 'atlas'
-
-
-class useNewRPCCabling(_modifier):
-    """
-    Switch to new RPC cabling code
-    """
-    def preSetup(self, flags):
-        from MuonCnvExample.MuonCnvFlags import muonCnvFlags
-        if hasattr(muonCnvFlags,'RpcCablingMode'):
-            muonCnvFlags.RpcCablingMode.set_Value_and_Lock('new')
-
 class SolenoidOff(_modifier):
     """
     Turn solenoid field OFF
@@ -117,15 +95,6 @@ class BFieldAutoConfig(_modifier):
         if hasattr(svcMgr,'HltEventLoopMgr'):
             svcMgr.HltEventLoopMgr.setMagFieldFromPtree = True
 
-class useOracle(_modifier):
-    """
-    Disable the use of SQLite for COOL and geometry
-    """
-    def postSetup(self, flags):
-        if hasattr(svcMgr,'DBReplicaSvc'):
-            svcMgr.DBReplicaSvc.UseCOOLSQLite = False
-            svcMgr.DBReplicaSvc.UseCOOLFrontier = True
-            svcMgr.DBReplicaSvc.UseGeomSQLite = False
 
 class useOnlineLumi(_modifier):
     """
