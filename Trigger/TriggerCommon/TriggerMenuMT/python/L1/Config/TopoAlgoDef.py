@@ -129,7 +129,7 @@ class TopoAlgoDef:
         alg = AlgConf.eTauSelect( name = 'eTAUabm', inputs = 'eTauTobs', outputs = 'eTAUabm' )
         alg.addgeneric('InputWidth',  HW.eTauInputWidth)
         alg.addgeneric('OutputWidth', HW.eTauOutputWidthSelect)
-        alg.addvariable('MinET',     get_threshold_cut('eTAU', 20)*_et_conversion)
+        alg.addvariable('MinET',     get_threshold_cut('eTAU', 12)*_et_conversion)
         alg.addvariable('RCoreMin',  2)
         alg.addvariable('RHadMin',   0)
         tm.registerTopoAlgo(alg) 
@@ -463,21 +463,38 @@ class TopoAlgoDef:
         # 5. DeltaPhiMin
         # 6. DeltaPhiMax
         algolist=[
-            {"minDeta": 5, "maxDeta": 99, "minDphi": 5, "maxDphi": 99, "mult": 1, "otype1" : "MU5VFab", "nleading1": HW.muonOutputWidthSelect, "otype2" : "MU3Vab", "nleading2": HW.muonOutputWidthSelect}, #5DETA99-5DPHI99-MU5VFab-MU3Vab
-            {"minDeta": 5, "maxDeta": 99, "minDphi": 5, "maxDphi": 99, "mult": 2, "otype1" : "MU5VFab", "nleading1": HW.muonOutputWidthSelect, "otype2" : "", "nleading2": HW.muonOutputWidthSelect}, #5DETA99-5DPHI99-2MU5VFab
-            {"minDeta": 5, "maxDeta": 99, "minDphi": 5, "maxDphi": 99, "mult": 2, "otype1" : "MU3Vab",  "nleading1": HW.muonOutputWidthSelect, "otype2" : "", "nleading2": HW.muonOutputWidthSelect}, #5DETA99-5DPHI99-2MU3Vab
-            {"minDeta": 5, "maxDeta": 99, "minDphi": 5, "maxDphi": 99, "mult": 2, "otype1" : "MU3VFab",  "nleading1": HW.muonOutputWidthSelect, "otype2" : "", "nleading2": HW.muonOutputWidthSelect}, #5DETA99-5DPHI99-2MU3VFab
+            {"minDeta": 5, "maxDeta": 99, "minDphi": 5, "maxDphi": 99, "mult": 1, 
+             "otype1" : "MU5VFab", "ocut1": "", "olist1": "", "nleading1": HW.muonOutputWidthSelect, 
+             "otype2" : "MU3Vab" , "ocut2": "", "olist2": "", "nleading2": HW.muonOutputWidthSelect}, #5DETA99-5DPHI99-MU5VFab-MU3Vab
+            {"minDeta": 5, "maxDeta": 99, "minDphi": 5, "maxDphi": 99, "mult": 2, 
+             "otype1" : "MU5VFab", "ocut1": "", "olist1": "", "nleading1": HW.muonOutputWidthSelect, 
+             "otype2" : ""       , "ocut2": "", "olist2": "", "nleading2": HW.muonOutputWidthSelect}, #5DETA99-5DPHI99-2MU5VFab
+            {"minDeta": 5, "maxDeta": 99, "minDphi": 5, "maxDphi": 99, "mult": 2, 
+             "otype1" : "MU3Vab", "ocut1": "", "olist1": "", "nleading1": HW.muonOutputWidthSelect, 
+             "otype2" : ""      , "ocut2": "", "olist2": "", "nleading2": HW.muonOutputWidthSelect}, #5DETA99-5DPHI99-2MU3Vab
+            {"minDeta": 5, "maxDeta": 99, "minDphi": 5, "maxDphi": 99, "mult": 2, 
+             "otype1" : "MU3VFab", "ocut1": "", "olist1": "","nleading1": HW.muonOutputWidthSelect, 
+             "otype2" : ""       , "ocut2": "", "olist2": "","nleading2": HW.muonOutputWidthSelect}, #5DETA99-5DPHI99-2MU3VFab
+            { "minDeta": 0, "maxDeta": 24, "minDphi": 4, "maxDphi": 99, "mult": 1, 
+              "otype1" : "eTAU", "ocut1": 30, "olist1": "abm", "nleading1": HW.eTauOutputWidthSelect, 
+              "otype2" : "eTAU", "ocut2": 20, "olist2": "abm", "nleading2": HW.eTauOutputWidthSelect},#0DETA24_4DPHI99_eTAU30abm_eTAU20abm
+            { "minDeta": 0, "maxDeta": 24, "minDphi": 4, "maxDphi": 99, "mult": 1, 
+              "otype1" : "eTAU", "ocut1": 30, "olist1": "abm", "nleading1": HW.eTauOutputWidthSelect,
+              "otype2" : "eTAU", "ocut2": 12, "olist2": "abm", "nleading2": HW.eTauOutputWidthSelect},#0DETA24_4DPHI99_eTAU30abm_eTAU12abm 
+            { "minDeta": 0, "maxDeta": 24, "minDphi": 10, "maxDphi": 99, "mult": 1, 
+              "otype1" : "eTAU", "ocut1": 30, "olist1": "abm", "nleading1": HW.eTauOutputWidthSelect, 
+              "otype2" : "eTAU", "ocut2": 12, "olist2": "abm", "nleading2": HW.eTauOutputWidthSelect},#0DETA24_10DPHI99_eTAU30abm_eTAU12abm
         ]
         for x in algolist:            
             class d:
                 pass
             for k in x:
                 setattr (d, k, x[k])
-            obj1 = "%s%s" % ((str(d.mult) if d.mult>1 else ""), d.otype1)
-            obj2 = "-%s" % (d.otype2)
+            obj1 = "%s%s" % ((str(d.mult) if d.mult>1 else ""), d.otype1+str(d.ocut1)+str(d.olist1))
+            obj2 = "-%s" % (d.otype2+str(d.ocut2)+str(d.olist2))
             toponame = "%sDETA%s-%sDPHI%s-%s%s"  % (d.minDeta, d.maxDeta, d.minDphi, d.maxDphi, obj1, "" if d.mult>1 else obj2)            
             log.debug("Define %s", toponame)            
-            inputList = [d.otype1] if (d.mult>1) else [d.otype1, d.otype2]
+            inputList = [d.otype1+d.olist1] if (d.mult>1) else [d.otype1+d.olist1, d.otype2+d.olist2]
             algoname = AlgConf.DeltaEtaPhiIncl1 if (d.mult>1) else AlgConf.DeltaEtaPhiIncl2
             alg = algoname( name = toponame, inputs = inputList, outputs = [ toponame ])
             alg.addgeneric('NumResultBits', 1)            
@@ -1192,10 +1209,25 @@ class TopoAlgoDef:
         # DISAMB 3 lists with DR cut to 2nd and 3rd lists
         algolist=[
             { "disamb": 2,
-              "otype1" : "eTAU",  "ocut1": 30, "olist1": "abm","nleading1": HW.eTauOutputWidthSelect, "inputwidth1": HW.eTauOutputWidthSelect,
+              "otype1" : "eTAU", "ocut1": 30, "olist1": "abm", "nleading1": HW.eTauOutputWidthSelect, "inputwidth1": HW.eTauOutputWidthSelect,
               "otype2" : "eTAU", "ocut2": 20, "olist2": "abm", "nleading2": HW.eTauOutputWidthSelect, "inputwidth2": HW.eTauOutputWidthSelect,
-              "otype3" : "jJ", "ocut3": 55, "olist3": "ab", "nleading3": HW.jJetOutputWidthSelect, "inputwidth3": HW.jJetOutputWidthSelect,
-              "drcutmin": 0, "drcutmax": 28}, # 2DISAMB-jJ55ab-0DR28-eTAU30abm-eTAU20abm
+              "otype3" : "jJ"  , "ocut3": 55, "olist3": "ab" , "nleading3": HW.jJetOutputWidthSelect, "inputwidth3": HW.jJetOutputWidthSelect,
+              "drcutmin": 0, "drcutmax": 28}, # 2DISAMB-jJ55ab-0DR28-eTAU30abm-eTAU20abm     
+            { "disamb" : 2, 
+              "otype1" : "eTAU", "ocut1": 30, "olist1": "abm", "nleading1": HW.eTauOutputWidthSelect, "inputwidth1": HW.eTauOutputWidthSelect,
+              "otype2" : "eTAU", "ocut2": 20, "olist2": "abm", "nleading2": HW.eTauOutputWidthSelect, "inputwidth2": HW.eTauOutputWidthSelect,
+              "otype3" : "jJ"  , "ocut3": 55, "olist3": "ab" , "nleading3": HW.jJetOutputWidthSelect, "inputwidth3": HW.jJetOutputWidthSelect,
+              "drcutmin": 4    , "drcutmax": 28}, # 2DISAMB-jJ55ab-4DR28-eTAU30abm-eTAU20abm
+            { "disamb" : 2, 
+              "otype1" : "eTAU", "ocut1": 30, "olist1": "abm", "nleading1": HW.eTauOutputWidthSelect, "inputwidth1": HW.eTauOutputWidthSelect,
+              "otype2" : "eTAU", "ocut2": 20, "olist2": "abm", "nleading2": HW.eTauOutputWidthSelect, "inputwidth2": HW.eTauOutputWidthSelect,
+              "otype3" : "jJ"  , "ocut3": 55, "olist3": "ab" , "nleading3": HW.jJetOutputWidthSelect, "inputwidth3": HW.jJetOutputWidthSelect,
+              "drcutmin": 4    , "drcutmax": 32}, # 2DISAMB-jJ55ab-4DR32-eTAU30abm-eTAU20abm
+            { "disamb" : 2, 
+              "otype1" : "eTAU", "ocut1": 30, "olist1": "abm", "nleading1": HW.eTauOutputWidthSelect, "inputwidth1": HW.eTauOutputWidthSelect,
+              "otype2" : "eTAU", "ocut2": 20, "olist2": "abm", "nleading2": HW.eTauOutputWidthSelect, "inputwidth2": HW.eTauOutputWidthSelect,
+              "otype3" : "jJ"  , "ocut3": 55, "olist3": "ab" , "nleading3": HW.jJetOutputWidthSelect, "inputwidth3": HW.jJetOutputWidthSelect,
+              "drcutmin": 10   , "drcutmax": 32}, # 2DISAMB-jJ55ab-10DR32-eTAU30abm-eTAU20abm
         ]
         for x in algolist:
             class d:
@@ -1225,11 +1257,14 @@ class TopoAlgoDef:
             tm.registerTopoAlgo(alg)
 
 
-        # TLA deta
+        #TLA deta
         algoList = [
             { "minDeta": 0,  "maxDeta": 20, "otype" : "jJ",  "ocut1" : 90,  "olist" : "s",
-              "nleading1" : 1, "inputwidth1": HW.jJetOutputWidthSort, "ocut2" : 0, "nleading2": 2}, #0DETA20-jJ90s1-jJs2
-        ]
+              "nleading1" : 1, "inputwidth1": HW.jJetOutputWidthSort, "ocut2" : 0, "nleading2": 2}, #0DETA20-jJ90s1-jJs2                        
+            { "minDeta":  0, "maxDeta"  : 24, "otype" : "eTAU" , "olist"  : "abm", "inputwidth1": HW.eTauOutputWidthSelect, 
+              "ocut1"  : 30, "nleading1":  2,
+              "ocut2"  : 12, "nleading2":  2}, #0DETA24_eTAU30abm_eTAU12abm
+        ]        
         for x in algoList:
             class d:
                 pass

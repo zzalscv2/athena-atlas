@@ -29,6 +29,14 @@ def defineMenu():
         'L1_BPH-0M9-EM7-EM5',
         'L1_BPH-0DR3-EM7J15',
         'L1_cTAU20M_DR-eTAU20eTAU12-jJ40',
+
+        #ATR-26902
+        'L1_2cTAU20M_4DR28-eTAU30MeTAU20M-jJ55',
+        'L1_2cTAU20M_4DR32-eTAU30MeTAU20M-jJ55',
+        'L1_2cTAU20M_10DR32-eTAU30MeTAU20M-jJ55',
+        'L1_4jJ30p0ETA24_0DETA24_4DPHI99-eTAU30MeTAU20M',
+        'L1_4jJ30p0ETA24_0DETA24_10DPHI99-eTAU30MeTAU12M',
+        'L1_jJ85p0ETA21_3jJ40p0ETA25_cTAU20M_2cTAU12M',
     ]
 
     # To replace thresholds in the physics menu

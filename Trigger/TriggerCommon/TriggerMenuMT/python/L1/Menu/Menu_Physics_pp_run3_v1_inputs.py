@@ -198,8 +198,7 @@ def defineInputsMenu():
             None, 
 
             # cTAU thresholds for commissioning
-            ('cTAU20M',3), ('cTAUSPARE1',3), 
-
+            ('cTAU12M',3), ('cTAU20M',3),# ('cTAUSPARE1',3), 
             (None,3),
 
             'cTAU30M', 'cTAU35M', 
@@ -290,7 +289,6 @@ def defineInputsMenu():
                     TopoMenuDef( '2DISAMB-jJ55ab-0DR28-eTAU30abm-eTAU20abm', outputbits = 7 ),
                     TopoMenuDef( '0DR28-eTAU30abm-eTAU20abm',                outputbits = 8 ), 
                     TopoMenuDef( '0INVM10-3MU3VFab',                         outputbits = 9 ), # BLS
-                    
                 ]
             },
             
@@ -309,6 +307,7 @@ def defineInputsMenu():
                     TopoMenuDef( '0INVM70-27DPHI32-eEM9s1-eEM9s6',       outputbits = 7 ),
                     TopoMenuDef( '0INVM70-27DPHI32-eEM9sl1-eEM9sl6',     outputbits = 8 ),
                     TopoMenuDef( '0INVM9-eEM9ab-eEMab',                  outputbits = 9 ),
+
                 ]
             },
             
@@ -356,6 +355,9 @@ def defineInputsMenu():
                     TopoMenuDef( '0DETA20-jJ90s1-jJs2',                      outputbits = 8 ),
                     TopoMenuDef( '100RATIO-0MATCH-eTAU40si2-eEMall',         outputbits = 9 ),
                     TopoMenuDef( 'NOT-0MATCH-eTAU40si1-eEMall',              outputbits = 10),
+                    TopoMenuDef( '0DETA24-eTAU30abm-eTAU12abm',              outputbits = 11),
+                    TopoMenuDef( '0DETA24-4DPHI99-eTAU30abm-eTAU12abm',      outputbits = 12),
+
                 ]
             },
 
