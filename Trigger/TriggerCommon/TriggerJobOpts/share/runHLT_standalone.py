@@ -21,7 +21,6 @@
 class opt:
     setMenu          = None           # option to overwrite flags.Trigger.triggerMenuSetup
     condOverride     = {}             # overwrite conditions folder tags e.g. '{"Folder1":"Tag1", "Folder2":"Tag2"}'
-    doHLT            = True           # run HLT?
     doWriteRDOTrigger = False         # Write out RDOTrigger?
     doWriteBS        = True           # Write out BS?
     doL1Sim          = False          # (re)run L1 simulation
@@ -127,32 +126,22 @@ for s in slices:
 #-------------------------------------------------------------
 # Setting Global Flags
 #-------------------------------------------------------------
+from AthenaConfiguration.Enums import BeamType, Format
 from AthenaCommon.GlobalFlags import globalflags
 from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
 from AthenaCommon.BeamFlags import jobproperties
 import TriggerJobOpts.Modifiers
 
-flags.Common.isOnline = True
-
-# Auto-configuration for athena
+# athena: set flags based on input files
 if len(athenaCommonFlags.FilesInput())>0:
     flags.Input.Files = athenaCommonFlags.FilesInput()
-    import PyUtils.AthFile as athFile
-    af = athFile.fopen(athenaCommonFlags.FilesInput()[0])
-    globalflags.InputFormat = 'bytestream' if af.fileinfos['file_type']=='bs' else 'pool'
-    globalflags.DataSource = 'data' if af.fileinfos['evt_type'][0]=='IS_DATA' else 'geant4'
-    flags.Input.isMC = False if globalflags.DataSource=='data' else True
-    if globalflags.DataSource() != 'data':
-        log.info("Setting isOnline = False for MC input")
-        flags.Common.isOnline = False
+    flags.Common.isOnline = not flags.Input.isMC
     TriggerJobOpts.Modifiers._run_number = flags.Input.RunNumber[0]
     TriggerJobOpts.Modifiers._lb_number = flags.Input.LumiBlockNumber[0]
-
-else:   # athenaHLT
-    globalflags.InputFormat = 'bytestream'
-    globalflags.DataSource = 'data'
-    flags.Input.isMC = False
-    flags.Input.Files = []
+# athenaHLT: most flags are already set
+else:
+    flags.IOVDb.DatabaseInstance = 'CONDBR2'
+    globalflags.DatabaseInstance = 'CONDBR2'
     TriggerJobOpts.Modifiers._run_number = globals().get('_run_number')  # set by athenaHLT
     TriggerJobOpts.Modifiers._lb_number = globals().get('_lb_number')  # set by athenaHLT
     if '_run_number' in globals():
@@ -160,8 +149,36 @@ else:   # athenaHLT
     if '_lb_number' in globals():
         del _lb_number  # noqa, set by athenaHLT
 
-from AthenaConfiguration.Enums import BeamType, Format
-flags.Input.Format = Format.BS if globalflags.InputFormat == 'bytestream' else Format.POOL
+
+# Other defaults
+flags.Trigger.doHLT = True    # needs to be set early as other flags depend on it
+flags.Trigger.EDMVersion = 3  # Run-3 EDM
+flags.Beam.Type = BeamType.Collisions
+flags.InDet.useDCS = False    # DCS is in general not available online
+
+# Disable some forward detetors
+flags.Detector.GeometryALFA = False
+flags.Detector.GeometryFwdRegion = False
+flags.Detector.GeometryLucid = False
+
+# Increase scheduler checks and verbosity
+flags.Scheduler.CheckDependencies = True
+flags.Scheduler.ShowControlFlow = True
+flags.Scheduler.ShowDataDeps = True
+flags.Scheduler.EnableVerboseViews = True
+flags.Input.FailOnUnknownCollections = True
+flags.Scheduler.AutoLoadUnmetDependencies = False
+
+# Set legacy flags
+athenaCommonFlags.isOnline.set_Value_and_Lock(flags.Common.isOnline)
+jobproperties.Beam.beamType = flags.Beam.Type.value
+globalflags.DetDescrVersion = flags.GeoModel.AtlasVersion
+globalflags.ConditionsTag = flags.IOVDb.GlobalTag
+globalflags.InputFormat = 'bytestream' if flags.Input.Format is Format.BS else 'pool'
+globalflags.DataSource = 'geant4' if flags.Input.isMC else 'data'
+
+log.info('Configured the following global flags:')
+globalflags.print_JobProperties()
 
 # Load input collection list from POOL metadata
 from RecExConfig.ObjKeyStore import objKeyStore
@@ -169,19 +186,6 @@ if flags.Input.Format is Format.POOL:
     from PyUtils.MetaReaderPeeker import convert_itemList
     objKeyStore.addManyTypesInputFile(convert_itemList(layout='#join'))
 
-# Run-3 Trigger produces Run-3 EDM
-flags.Trigger.EDMVersion = 3
-
-# Other defaults
-jobproperties.Beam.beamType = 'collisions'
-flags.Beam.Type = BeamType(jobproperties.Beam.beamType)
-if not flags.Input.isMC:
-    globalflags.DatabaseInstance='CONDBR2'
-    flags.IOVDb.DatabaseInstance=globalflags.DatabaseInstance()
-athenaCommonFlags.isOnline.set_Value_and_Lock(flags.Common.isOnline)
-
-log.info('Configured the following global flags:')
-globalflags.print_JobProperties()
 
 # Set default doL1Sim option depending on input type (if not set explicitly)
 if 'doL1Sim' not in globals():
@@ -199,35 +203,20 @@ flags.Trigger.L1MuonSim.doPadTrigger = opt.enableL1NSWPadTrigger
 flags.Trigger.L1MuonSim.doStripTrigger = opt.enableL1NSWStripTrigger
 flags.Trigger.L1MuonSim.doBIS78 = opt.enableL1RPCBIS78
 
-flags.Trigger.doHLT = bool(opt.doHLT)
-flags.InDet.useDCS = False   # DCS is in general not available online
-
-# Set legacy Cond/Geo tags:
-globalflags.DetDescrVersion = flags.GeoModel.AtlasVersion
-globalflags.ConditionsTag = flags.IOVDb.GlobalTag
-
 if opt.setMenu:
     flags.Trigger.triggerMenuSetup = opt.setMenu
 
 # Setup list of modifiers
 # Common modifiers for MC and data
-setModifiers = ['ForceMuonDataType',
-                'useNewRPCCabling',
-                'useOracle',
-                'BunchSpacing25ns'
-]
+setModifiers = ['BunchSpacing25ns']
 
 if flags.Input.isMC:  # MC modifiers
     setModifiers += ['BFieldFromDCS']
 else:           # More data modifiers
     setModifiers += ['BFieldAutoConfig',
                      'useDynamicAlignFolders',
-                     #Check for beamspot quality flag
                      'useOnlineLumi',
-                     #for running with real data
     ]
-    if opt.doL1Sim:
-        flags.LAr.LATOME.DTInfoForL1="SC_ET_ID"
 
 
 #-------------------------------------------------------------
@@ -332,21 +321,12 @@ rec.doTruth = False
 for mod in modifierList:
     mod.preSetup(flags)
 
-#--------------------------------------------------------------
-# Increase scheduler checks and verbosity
-#--------------------------------------------------------------
-flags.Scheduler.CheckDependencies = True
-flags.Scheduler.ShowControlFlow = True
-flags.Scheduler.ShowDataDeps = True
-flags.Scheduler.EnableVerboseViews = True
-flags.Input.FailOnUnknownCollections = True
-flags.Scheduler.AutoLoadUnmetDependencies = False
 
 from AthenaCommon.AlgScheduler import AlgScheduler
-AlgScheduler.CheckDependencies( True )
-AlgScheduler.ShowControlFlow( True )
-AlgScheduler.ShowDataDependencies( True )
-AlgScheduler.EnableVerboseViews( True )
+AlgScheduler.CheckDependencies( flags.Scheduler.CheckDependencies )
+AlgScheduler.ShowControlFlow( flags.Scheduler.ShowControlFlow )
+AlgScheduler.ShowDataDependencies( flags.Scheduler.ShowDataDeps )
+AlgScheduler.EnableVerboseViews( flags.Scheduler.EnableVerboseViews )
 
 if flags.Input.FailOnUnknownCollections:
     AlgScheduler.setDataLoaderAlg("")
@@ -365,10 +345,6 @@ DetFlags.BField_setOn()
 DetFlags.simulate.all_setOff()
 DetFlags.pileup.all_setOff()
 DetFlags.overlay.all_setOff()
-# Disable some forward detetors
-flags.Detector.GeometryALFA = False
-flags.Detector.GeometryFwdRegion = False
-flags.Detector.GeometryLucid = False
 
 include ("RecExCond/AllDet_detDescr.py")
 
@@ -438,8 +414,6 @@ if overlayFlags.doTrackOverlay():
 # ----------------------------------------------------------------
 # Pool input
 # ----------------------------------------------------------------
-print("flags.Input.Format", flags.Input.Format)
-print("flags.Trigger.Online.isPartition", flags.Trigger.Online.isPartition)
 if flags.Input.Format is Format.POOL:
     import AthenaPoolCnvSvc.ReadAthenaPool   # noqa
     svcMgr.AthenaPoolCnvSvc.PoolAttributes = [ "DEFAULT_BUFFERSIZE = '2048'" ]
