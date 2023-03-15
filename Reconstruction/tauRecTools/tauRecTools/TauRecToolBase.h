@@ -44,7 +44,7 @@ class TauRecToolBase : public asg::AsgTool, virtual public ITauToolBase {
 #ifdef XAOD_ANALYSIS
   virtual StatusCode executeDev(xAOD::TauJet& pTau) override;
 #else
-  virtual StatusCode executePi0CreateROI(xAOD::TauJet& pTau, CaloCellContainer& caloCellContainer, boost::dynamic_bitset<>& map) const override;
+  virtual StatusCode executePi0CreateROI(xAOD::TauJet& pTau, CaloConstCellContainer& caloCellContainer, boost::dynamic_bitset<>& map) const override;
 #endif
   virtual StatusCode executeVertexFinder(xAOD::TauJet& pTau, 
                                          const xAOD::VertexContainer* vertexContainer = nullptr, 

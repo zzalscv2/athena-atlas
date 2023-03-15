@@ -15,7 +15,7 @@
 #include <boost/dynamic_bitset.hpp>
 
 #ifndef XAOD_ANALYSIS
-#include "CaloEvent/CaloCellContainer.h"
+#include "CaloEvent/CaloConstCellContainer.h"
 #endif
 
 /**
@@ -67,7 +67,7 @@ class ITauToolBase : virtual public asg::IAsgTool
   virtual StatusCode executeDev(xAOD::TauJet& pTau) = 0;
 #else
   // CaloCellContainer not available in AnalysisBase
-  virtual StatusCode executePi0CreateROI(xAOD::TauJet& pTau, CaloCellContainer& caloCellContainer, boost::dynamic_bitset<>& map ) const = 0;
+  virtual StatusCode executePi0CreateROI(xAOD::TauJet& pTau, CaloConstCellContainer& caloCellContainer, boost::dynamic_bitset<>& map ) const = 0;
 #endif
   
   //-----------------------------------------------------------------
