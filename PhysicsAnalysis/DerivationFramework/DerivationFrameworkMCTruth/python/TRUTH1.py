@@ -8,11 +8,6 @@ def TRUTH1Cfg(ConfigFlags):
     """Main config for TRUTH1"""
     acc = ComponentAccumulator()
 
-    # Ensure EventInfoCnvAlg is scheduled
-    if "EventInfo#EventInfo" not in ConfigFlags.Input.TypedCollections:
-        from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
-        acc.merge(EventInfoCnvAlgCfg(ConfigFlags, inputKey="McEventInfo", outputKey="EventInfo", disableBeamSpot=True)) 
-
     # Add translator from EVGEN input to xAOD-like truth
     # Add all the particle derivation tools
     # This sets up its own common kernel and adds the common tools to it
