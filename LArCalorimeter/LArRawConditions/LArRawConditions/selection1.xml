@@ -4,9 +4,12 @@
 
   <!-- base class for all containers -->
   <class name="LArConditionsContainerBase" />
+  <class name="LArCondFEBIdChanMap" />
 
   <!-- patterns for all containers -->
-  <class pattern="LArConditionsContainer<*>"  /> 
+  <class pattern="LArConditionsContainer<*>"  >
+        <field name="m_cached" transient="true" />
+  </class>
   <class pattern="LArConditionsContainerDB<*>"  /> 
   <class pattern="LArConditionsContainerDB<*>::const_iterator"  /> 
 
@@ -232,6 +235,7 @@
   <class name="LArConditionsSubset<LArMinBiasAverageP>"  id="3235F39A-7C1D-4FB9-9F56-6A6251AC3360" >
     <field name="m_subsetMap" transient="true" />
   </class>
+  <class name="DataVector<LArConditionsSubset<LArMinBiasAverageP> >"/>
   <read sourceClass="LArConditionsSubset<LArMinBiasAverageP>" version="[1-]"
         targetClass="LArConditionsSubset<LArMinBiasAverageP>" source=""
         target="" >
