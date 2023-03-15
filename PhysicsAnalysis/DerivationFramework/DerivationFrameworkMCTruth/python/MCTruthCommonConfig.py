@@ -29,7 +29,7 @@ def HepMCtoXAODTruthCfg(flags):
     isEVNT = False
 
     # Ensure EventInfoCnvAlg is scheduled
-    if ("EventInfo#EventInfo" and "xAOD::EventInfo#EventInfo") not in flags.Input.TypedCollections:
+    if "EventInfo#EventInfo" in flags.Input.TypedCollections and "xAOD::EventInfo#EventInfo" not in flags.Input.TypedCollections:
         from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
         acc.merge(EventInfoCnvAlgCfg(flags, inputKey="McEventInfo", outputKey="EventInfo", disableBeamSpot=True))
 
@@ -41,7 +41,9 @@ def HepMCtoXAODTruthCfg(flags):
         isEVNT = True 
     # Input file is simulation output (HITS)
     elif "McEventCollection#TruthEvent" in flags.Input.TypedCollections:
-        acc.merge(GEN_EVNT2xAODCfg(name="GEN_EVNT2xAOD",AODContainerName="TruthEvent"))
+        acc.merge(GEN_EVNT2xAODCfg(flags,name="GEN_EVNT2xAOD",AODContainerName="TruthEvent"))
+        # This is not really EVNT, but we do need to treat it like EVNT for Metadata
+        isEVNT = True
     # Input file already has xAOD truth. Don't do anything.
     elif "xAOD::TruthEventContainer#TruthEvents" in flags.Input.TypedCollections:
         pass
