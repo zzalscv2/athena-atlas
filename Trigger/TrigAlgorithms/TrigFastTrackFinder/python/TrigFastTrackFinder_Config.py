@@ -323,6 +323,8 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, slice_name: str, Ro
 
     acc.addPublicTool(trackSummaryTool)
 
+    from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
+    
     ftf = CompFactory.TrigFastTrackFinder(name = name,
                                           useNewLayerNumberScheme = useNewLayerNumberScheme,
                                           LayerNumberTool = numberingTool,
@@ -354,6 +356,7 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, slice_name: str, Ro
                                           TracksName     = flags.InDet.Tracking.ActiveConfig.trkTracks_FTF,
                                           doResMon = flags.InDet.Tracking.ActiveConfig.doResMon,
                                           MonTool = TrigFastTrackFinderMonitoring(flags),
+                                          Extrapolator = acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)),
                                           RoIs = RoIs,
                                           )
     
