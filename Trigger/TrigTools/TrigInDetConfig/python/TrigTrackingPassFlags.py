@@ -1,6 +1,7 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 import AthenaCommon.SystemOfUnits as Units
 from InDetConfig.TrackingPassFlags import createTrackingPassFlags
+from TrigEDMConfig.TriggerEDMRun3 import recordable
 
 
 def __flagsFromConfigSettings(settings):
@@ -17,10 +18,17 @@ def __flagsFromConfigSettings(settings):
             else:
                 flags.addFlag(setting, value)
 
+    def collToRecordable(flags,name):
+      ret = name
+      if flags.InDet.Tracking.ActiveConfig.doRecord:
+        ret = recordable(name)
+      return ret
+
     flags.addFlag("trkTracks_FTF", f'HLT_IDTrkTrack_{flags.suffix}_FTF')
-    flags.addFlag("tracks_FTF", f'HLT_IDTrack_{flags.suffix}_FTF')
+    flags.addFlag("tracks_FTF", lambda ofl: collToRecordable(ofl, f'HLT_IDTrack_{flags.suffix}_FTF'))
     flags.addFlag("trkTracks_IDTrig", f'HLT_IDTrkTrack_{flags.suffix}_IDTrig')
-    flags.addFlag("tracks_IDTrig", f"HLT_IDTrack_{flags.suffix}_IDTrig")
+    flags.addFlag("tracks_IDTrig", lambda ofl: collToRecordable(ofl, f"HLT_IDTrack_{flags.suffix}_IDTrig"))
+    
     flags.addFlag("refitROT", False) # should likely be moved to ConfigSettingsBase
     flags.addFlag("trtExtensionType", "xf") # should likely be moved to ConfigSettingsBase
     flags.minPT = flags.pTmin # hack to sync pT threshold used in offline and trigger

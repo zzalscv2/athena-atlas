@@ -248,7 +248,6 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, slice_name: str, Ro
   acc.addPublicTool(CompFactory.TrigL2LayerNumberTool(name="TrigL2LayerNumberTool_FTF",
                                                       UseNewLayerScheme = useNewLayerNumberScheme))
   numberingTool = acc.getPublicTool("TrigL2LayerNumberTool_FTF")
-  print (numberingTool)
   
   # GPU offloading config begins - perhaps set from configure
   useGPU = False
@@ -276,7 +275,129 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, slice_name: str, Ro
 
   spTool = acc.getPublicTool('TrigSpacePointConversionTool_' + remapped_type)
 
+  from TrkConfig.TrkExRungeKuttaPropagatorConfig import RungeKuttaPropagatorCfg
+  InDetTrigPatternPropagator = acc.popToolsAndMerge(RungeKuttaPropagatorCfg(flags,name="InDetTrigRKPropagator"))
+  acc.addPublicTool(InDetTrigPatternPropagator)
+  
+  acc.addPublicTool(CompFactory.InDet.SiDetElementsRoadMaker_xk(name='InDetTrigSiDetElementsRoadMaker'+remapped_type,
+                                                                PropagatorTool = InDetTrigPatternPropagator,
+                                                                usePixel     = flags.Detector.EnablePixel, 
+                                                                useSCT       = flags.Detector.EnableSCT,
+                                                                RoadWidth    = config.RoadWidth
+                                                                )
+                          )
+  InDetTrigSiDetElementsRoadMaker_FTF = acc.getPublicTool('InDetTrigSiDetElementsRoadMaker'+remapped_type)
+                          
+  from InDetConfig.SiTrackMakerConfig import TrigSiTrackMaker_xkCfg
+  TrackMaker_FTF = acc.popToolsAndMerge(
+      TrigSiTrackMaker_xkCfg(flags, name = 'InDetTrigSiTrackMaker_FTF_'+slice_name,
+                             RoadTool       = InDetTrigSiDetElementsRoadMaker_FTF,
+                             )
+  )
+  acc.addPublicTool(TrackMaker_FTF)
 
+  from TrkConfig.TrkRIO_OnTrackCreatorConfig import TrigRotCreatorCfg
+  TrigRotCreator = acc.popToolsAndMerge(TrigRotCreatorCfg(flags))
+  acc.addPublicTool(TrigRotCreator)
+  
+  acc.addPublicTool(
+      CompFactory.TrigInDetTrackFitter(
+          name = "TrigInDetTrackFitter_"+remapped_type,
+          doBremmCorrection = '2023fix' in flags.InDet.Tracking.ActiveConfig.name,
+          correctClusterPos = True,  #improved err(z0) estimates in Run 2
+          ROTcreator = TrigRotCreator,
+      )
+  )
+  theTrigInDetTrackFitter = acc.getPublicTool("TrigInDetTrackFitter_"+remapped_type)
+  
+  if (config.doZFinder):
+    theTrigZFinder = acc.popToolsAndMerge(TrigZFinderCfg(flags,numberingTool))
+      
+  if not config.doZFinderOnly:
+    
+    from TrkConfig.TrkTrackSummaryToolConfig import InDetTrigTrackSummaryToolCfg, InDetTrigFastTrackSummaryToolCfg
+    if config.holeSearch_FTF :
+      trackSummaryTool = acc.popToolsAndMerge(InDetTrigTrackSummaryToolCfg(flags,name="InDetTrigTrackSummaryTool"))
+    else:
+      trackSummaryTool = acc.popToolsAndMerge(InDetTrigFastTrackSummaryToolCfg(flags,name="InDetTrigFastTrackSummaryTool"))
+
+    acc.addPublicTool(trackSummaryTool)
+
+    ftf = CompFactory.TrigFastTrackFinder(name = name,
+                                          useNewLayerNumberScheme = useNewLayerNumberScheme,
+                                          LayerNumberTool = numberingTool,
+                                          useGPU = useGPU,
+                                          SpacePointProviderTool=spTool,
+                                          MinHits = 5, #Only process RoI with more than 5 spacepoints
+                                          Triplet_MinPtFrac = 1,
+                                          Triplet_nMaxPhiSlice = 53 if "cosmics" not in flags.InDet.Tracking.ActiveConfig.name else 2,
+                                          LRT_Mode = flags.InDet.Tracking.ActiveConfig.isLRT,
+                                          dodEdxTrk = flags.InDet.Tracking.ActiveConfig.dodEdxTrk,
+                                          doHitDV = flags.InDet.Tracking.ActiveConfig.doHitDV,
+                                          doDisappearingTrk = flags.InDet.Tracking.ActiveConfig.doDisappearingTrk,
+                                          Triplet_MaxBufferLength = 3,
+                                          doSeedRedundancyCheck = flags.InDet.Tracking.ActiveConfig.doSeedRedundancyCheck,
+                                          Triplet_D0Max         = flags.InDet.Tracking.ActiveConfig.Triplet_D0Max,
+                                          Triplet_D0_PPS_Max    = flags.InDet.Tracking.ActiveConfig.Triplet_D0_PPS_Max,
+                                          TrackInitialD0Max     = flags.InDet.Tracking.ActiveConfig.TrackInitialD0Max,
+                                          TrackZ0Max            = flags.InDet.Tracking.ActiveConfig.TrackZ0Max,
+                                          TripletDoPPS    = flags.InDet.Tracking.ActiveConfig.TripletDoPPS,
+                                          TripletDoPSS    = False,
+                                          pTmin           = flags.InDet.Tracking.ActiveConfig.pTmin,
+                                          DoubletDR_Max   = flags.InDet.Tracking.ActiveConfig.DoubletDR_Max,
+                                          SeedRadBinWidth = flags.InDet.Tracking.ActiveConfig.SeedRadBinWidth,
+                                          initialTrackMaker = TrackMaker_FTF,
+                                          trigInDetTrackFitter = theTrigInDetTrackFitter,
+                                          doZFinder = flags.InDet.Tracking.ActiveConfig.doZFinder,
+                                          TrackSummaryTool = trackSummaryTool,
+                                          doCloneRemoval = flags.InDet.Tracking.ActiveConfig.doCloneRemoval,
+                                          TracksName     = flags.InDet.Tracking.ActiveConfig.trkTracks_FTF,
+                                          doResMon = flags.InDet.Tracking.ActiveConfig.doResMon,
+                                          MonTool = TrigFastTrackFinderMonitoring(flags),
+                                          RoIs = RoIs,
+                                          )
+    
+  if config.LRT_D0Min is not None:
+    ftf.LRT_D0Min = config.LRT_D0Min
+
+  if config.LRT_HardMinPt is not None:
+    ftf.LRT_HardMinPt = config.LRT_HardMinPt
+  
+  ftf.UseTrigSeedML = config.UseTrigSeedML
+
+  if isCosmicConfig:
+    ftf.Doublet_FilterRZ = False
+
+  from TrigEDMConfig.TriggerEDMRun3 import recordable
+  if config.dodEdxTrk:
+    ftf.dEdxTrk = recordable("HLT_dEdxTrk")
+    ftf.dEdxHit = recordable("HLT_dEdxHit")
+
+  if config.doHitDV:
+    ftf.doHitDV_Seeding = True
+    ftf.RecJetRoI = "HLT_RecJETRoIs"
+    ftf.HitDVSeed = "HLT_HitDVSeed" # not 'recordable' due to HLT truncation (ATR-23958)
+    ftf.HitDVTrk  = "HLT_HitDVTrk"  # not 'recordable' due to HLT truncation (ATR-23958)
+    ftf.HitDVSP   = "HLT_HitDVSP"   # not 'recordable' due to HLT truncation (ATR-23958)
+
+  if config.doDisappearingTrk:
+    ftf.DisTrkCand = recordable("HLT_DisTrkCand")
+    from TrkConfig.TrkGlobalChi2FitterConfig import InDetTrigGlobalChi2FitterCfg
+    InDetTrigTrackFitter = acc.popToolsAndMerge(InDetTrigGlobalChi2FitterCfg(flags))
+    acc.addPublicTool(InDetTrigTrackFitter)
+    ftf.DisTrackFitter = InDetTrigTrackFitter
+
+  if config.doZFinder:
+    ftf.doZFinderOnly = config.doZFinderOnly
+    ftf.trigZFinder = theTrigZFinder
+    ftf.zVertexResolution = 1
+    ftf.doFastZVertexSeeding = True
+
+  if inputTracksName:
+    ftf.inputTracksName = inputTracksName
+    
+  acc.addEventAlgo(ftf)
+  return acc
 
 
 
