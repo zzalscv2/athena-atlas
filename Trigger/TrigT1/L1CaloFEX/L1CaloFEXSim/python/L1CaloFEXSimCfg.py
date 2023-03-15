@@ -9,7 +9,9 @@ def ReadSCellFromPoolFileCfg(flags, key='SCell'):
     acc = ComponentAccumulator()
 
     # Ensure SCell container is in the input file
-    assert key in flags.Input.Collections or not flags.Input.Collections, 'MC input file is required to contain SCell container'
+    # TODO this needs to be uncommented once all MC files used in tests contain SCells
+    # e.g. test_trig_mc_v1DevHI_build.py
+    # assert key in flags.Input.Collections or not flags.Input.Collections, 'MC input file is required to contain SCell container'
 
     # Need geometry and conditions for the SCell converter from POOL
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg

@@ -453,10 +453,12 @@ def JetHICfg(flags, clustersKey, **jetRecoDict):
         clustersKey=clustersKey,
         prefix=_jetNamePrefix,
     )
+    jetDef._internalAtt['finalPJContainer'] = "PseudoJet"+clustersKey
     jetsOut = recordable(jetDef.fullname())
 
     pj_alg = JetRecConfig.getConstitPJGAlg(jetDef.inputdef)
     acc.addEventAlgo(pj_alg)
+    
 
     from JetRec import JetOnlineMon
     acc.addEventAlgo(

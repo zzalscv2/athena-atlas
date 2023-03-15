@@ -603,6 +603,9 @@ class EmptyMenuSequenceCA(EmptyMenuSequence):
         self._maker.Alg = makerAlg
         return self._maker
 
+    @property
+    def globalRecoCA(self):
+        return None
 
 class Chain(object):
     """Basic class to define the trigger menu """
