@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -23,7 +23,7 @@ namespace InDet {
   }
 
   const InDet::SiliconProperties& SiliconPropertiesVector::getSiProperties(const IdentifierHash& elementHash) const {
-    if (m_data.size()<elementHash) return m_defaultProperties;
+    if (m_data.size()<=elementHash) return m_defaultProperties;
     return m_data[elementHash];
   }
 
