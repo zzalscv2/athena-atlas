@@ -233,6 +233,20 @@ float HIJetClusterSubtractorTool::getWeightPhi(float eta, float phi, int sample)
 
 void HIJetClusterSubtractorTool::updateSlice(xAOD::HIEventShape* slice, float ET, float phi0, float area_cluster) const
 {
+  if(area_cluster==0.)
+  {
+    area_cluster=1.;
+
+    if(ET==0.)
+    {
+      ATH_MSG_INFO("Provided cluster area was 0, check if the input file " << m_inputFile << " from " << PathResolverFindCalibFile(static_cast<std::string>(m_configDir)+m_inputFile) << " was generated with the currently used geometry. See ATLHI-472");
+    }
+    else
+    {
+      ATH_MSG_ERROR("Provided cluster area was 0, the HIEventShape will be incorrect! Check if the input file " << m_inputFile << " from " << PathResolverFindCalibFile(static_cast<std::string>(m_configDir)+m_inputFile) << " was generated with the currently used geometry. See ATLHI-472");
+    }
+  }
+  
   float area_slice=slice->area();
   float area_sf=1.;
 
