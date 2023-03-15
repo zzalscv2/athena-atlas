@@ -39,8 +39,8 @@ def Lvl1ItemByTriggerType(l1object, triggertype_pattern, triggertype_bitmask):
 ##############################
 # define the various seeds
 ##############################
-def getL1BackgroundSeed(menul1items, menu_name):
-    l1bgditems = [
+def getL1BackgroundSeed():
+    return [
         'L1_BCM_AC_CA_BGRP12',
         'L1_BCM_Wide_EMPTY', 'L1_BCM_Wide_UNPAIRED_ISO', 'L1_BCM_Wide_UNPAIRED_NONISO',
         'L1_J30p31ETA49_UNPAIRED_ISO',
@@ -58,19 +58,10 @@ def getL1BackgroundSeed(menul1items, menu_name):
         # 'L1_BCM_2A_UNPAIREDB1', 'L1_BCM_2C_UNPAIREDB1', 'L1_BCM_2A_UNPAIREDB2', 'L1_BCM_2C_UNPAIREDB2',
         # 'L1_BCM_2A_CALIB', 'L1_BCM_2C_CALIB',
         ]
-            
-    # check if all the l1 background seeds given are in the current L1 menu
-    for item in l1bgditems:
-        if item not in menul1items:
-            log.error('L1 item %s from background seeds is not in current L1 menu', item)
-
-    l1background_seeds = ','.join(l1bgditems)
-    return l1background_seeds
 
 ##############################
-def getL1_ALFA_Diff_Phys_Seeds(menul1items):        
-    # list of l1 seeds
-    l1items = [
+def getL1_ALFA_Diff_Phys_Seeds():
+    return [
         'L1_ALFA_SDIFF5','L1_ALFA_SDIFF6','L1_ALFA_SDIFF7','L1_ALFA_SDIFF8',
         'L1_MBTS_1_A_ALFA_C','L1_MBTS_1_C_ALFA_A',
         'L1_MBTS_1_A_ALFA_C_UNPAIRED_ISO','L1_MBTS_1_C_ALFA_A_UNPAIRED_ISO',
@@ -81,152 +72,119 @@ def getL1_ALFA_Diff_Phys_Seeds(menul1items):
         'L1_EM3_ALFA_ANY','L1_EM3_ALFA_ANY_UNPAIRED_ISO',
         'L1_TE5_ALFA_ANY','L1_TE5_ALFA_ANY_UNPAIRED_ISO'
     ]
-     
-    # check if all the l1 background seeds given are in the current L1 menu
-    for item in l1items:
-        if item not in menul1items:
-            log.error('L1 item %s from background seeds is not in current L1 menu', item)
-
-    l1_seeds = ','.join(l1items)
-    return l1_seeds
 
 ##############################
-def getL1_ALFA_CDiff_Phys_Seeds (menul1items):        
-    # list of l1 seeds
-    l1items = ['L1_EM3_ALFA_EINE','L1_TE5_ALFA_EINE']
-     
-    # check if all the l1 background seeds given are in the current L1 menu
-    for item in l1items:
-        if item not in menul1items:
-            log.error('L1 item %s from background seeds is not in current L1 menu', item)
-            
-    l1_seeds = ','.join(l1items)
-    return l1_seeds
+def getL1_ALFA_CDiff_Phys_Seeds():
+    return ['L1_EM3_ALFA_EINE','L1_TE5_ALFA_EINE']
 
 ##############################
-def getL1_ALFA_Jet_Phys_Seeds (menul1items):        
-    # list of l1 seeds
-    l1items = ['L1_J12_ALFA_ANY','L1_J12_ALFA_ANY_UNPAIRED_ISO']
-     
-    # check if all the l1 background seeds given are in the current L1 menu
-    for item in l1items:
-        if item not in menul1items:
-            log.error('L1 item %s from background seeds is not in current L1 menu', item)
-
-    l1_seeds = ','.join(l1items)
-    return l1_seeds
+def getL1_ALFA_Jet_Phys_Seeds():
+    return ['L1_J12_ALFA_ANY','L1_J12_ALFA_ANY_UNPAIRED_ISO']
 
 ##############################
-def getL1StandbySeed(l1items):        
-    standby_seeds    = ",".join([ x for x in l1items if "_EMPTY" not in x and "CALREQ" not in x and "ZB" not in x and "-" not in x and "CMU" not in x and "ALFA" not in x  and "RD" not in x and "BCM" not in x and "BGRP12" not in x])
+def getL1StandbySeed(l1items):
+    standby_seeds = [ x for x in l1items if \
+        "_EMPTY" not in x and "CALREQ" not in x and "ZB" not in x and \
+        "-" not in x and "CMU" not in x and "ALFA" not in x  and "RD" not in x and \
+        "BCM" not in x and "BGRP12" not in x
+    ]
     return standby_seeds
 
 ##############################
 def getL1TopoSeed(l1items):
-    l1topo_seeds = ",".join([ x for x in l1items if "-" in x or "CMU" in x ])
-    return l1topo_seeds
+    return [ x for x in l1items if "-" in x or "CMU" in x ]
 
 ##############################
 def getL1CaloSeed(l1seed, l1object):
     if ('EMPTY' in l1seed):
         #l1calo_seeds = ','.join([ x for x in Lvl1ItemByTriggerType(l1object, cl_type, cl_type) \
         #                              if (x not in calo_exceptions)  ])
-        l1calo_seeds = ','.join([ x for x in Lvl1ItemByTriggerType(l1object, cl_type, cl_type) \
-                                      if ('EMPTY' in x and 'FIRSTEMPTY' not in x)  ])
+        l1calo_seeds = [ x for x in Lvl1ItemByTriggerType(l1object, cl_type, cl_type) \
+                                      if ('EMPTY' in x and 'FIRSTEMPTY' not in x)  ]
     else:
-        l1calo_seeds = ','.join([ x for x in Lvl1ItemByTriggerType(l1object, cl_type, cl_type) if ("EMPTY" not in x or "FIRSTEMPTY" in x) \
-                                      and (x not in calo_exceptions)  ])
+        l1calo_seeds = [ x for x in Lvl1ItemByTriggerType(l1object, cl_type, cl_type) if ("EMPTY" not in x or "FIRSTEMPTY" in x) \
+                                      and (x not in calo_exceptions)  ]
     return l1calo_seeds
 
 ##############################
 def getL1TauSeed(l1items):
-
-    tau_seeds    = ",".join([ x for x in l1items if "TAU" in x and "-" not in x and  "EMPTY" not in x  and "ISO" not in x])
+    tau_seeds = [ x for x in l1items if "TAU" in x and "-" not in x and  "EMPTY" not in x  and "ISO" not in x]
     return tau_seeds
 
 ##############################
-def getL1BSSeed(menul1items):
-    l1items = ['L1_J15','L1_3J15','L1_3J10','L1_4J10']
-    # check if all the l1 background seeds given are in the current L1 menu
-    for item in l1items:
-        if item not in menul1items:
-            log.error('L1 item %s from beamspot seeds is not in current L1 menu', item)
-            
-    l1_seeds = ','.join(l1items)
-    return l1_seeds
+def getL1BSSeed():
+    return ['L1_J15','L1_3J15','L1_3J10','L1_4J10']
 
 def getL1JetBS():
-    return 'L1_J15,L1_3J15,L1_3J10,L1_4J10'
+    return ['L1_J15','L1_3J15','L1_3J10','L1_4J10']
 
 ##############################
 def getL1MuonSeed(l1seed, l1object):
     if ('EMPTY' in l1seed): # to only get MU*_EMPTY items
         muon_seeds_list = [ x for x in Lvl1ItemByTriggerType(l1object, rpcout_type, rpcout_type) if ('MU' in x and '_EMPTY' in x )  ]
         muon_seeds_list = list(set(muon_seeds_list))
-        muon_seeds      = ','.join(muon_seeds_list)
+        muon_seeds      = muon_seeds_list
     else: #this one does NOT include the EMPTY items
         muon_seeds_list = [ x for x in Lvl1ItemByTriggerType(l1object, rpcout_type, rpcout_type) if ('MU' in x and 'FIRSTEMPTY' in x )  ]
         muon_seeds_list += [ x for x in Lvl1ItemByTriggerType(l1object, rpcin_type, rpcin_type)  ]
         muon_seeds_list = list(set(muon_seeds_list))
-        muon_seeds      = ','.join(muon_seeds_list)
+        muon_seeds      = muon_seeds_list
 
     return muon_seeds
 
 ##############################
 def getEBnoL1PSSeed(l1items, l1seedname):
 
+    ebitem = l1seedname.strip('L1_').rstrip('_noPS')
     # All of these L1 items must be PS=1 for an EB campaign
-    l1EBitems = []
-    if ('L1_PhysicsHigh' in l1seedname):
-      l1EBitems = [
-        'L1_MU5VF_3MU3V',
-        'L1_EM15VH_MU8F','L1_EM22VHI','L1_2EM8VH_MU8F', 'L1_2EM15VHI',
-        'L1_EM15VHI_2TAU12IM_J25_3J12', 'L1_EM15VHI_2TAU12IM_XE35', 'L1_EM15VHI_2TAU12IM', 'L1_EM20VH_3EM10VH',
-        'L1_MU8F_TAU12IM_J25_2J12','L1_MU8F_TAU12IM_XE35','L1_MU8F_TAU20IM',
-        'L1_4J15','L1_XE50','L1_2J15_XE55',
-        'L1_TAU60','L1_TAU20IM_2TAU12IM_J25_2J20_3J12','L1_TAU20IM_2TAU12IM_XE35','L1_TAU20IM_2J20_XE45',
-        'L1_MU14FCH','L1_MU8F_3J20', 'L1_MU8F_2J20', 'L1_MU10BOM',
-        'L1_J40p0ETA25_2J15p31ETA49', 'L1_J75p31ETA49',
-        'L1_3MU5VF','L1_MU8F_2J15_J20',
-        'L1_J40p0ETA25_2J25_J20p31ETA49',
-        'L1_2MU5VF_3MU3V','L1_MU8VF_2MU5VF',
-        'L1_MJJ-500-NFF', 'L1_J45p0ETA21_3J15p0ETA25', 'L1_SC111-CJ15', 'L1_BPH-7M11-25DR99-2MU3VF',
-        'L1_HT190-J15s5pETA21', 'L1_TAU20IM_2TAU12IM_4J12p0ETA25', 'L1_DR-TAU20ITAU12I-J25'
-        ]
-    elif ('L1_PhysicsVeryHigh' in l1seedname):
-      l1EBitems = ['L1_XE300', 'L1_J400', 'L1_6J15']
-    elif ('L1_EMPTY' in l1seedname):
-      l1EBitems = ['L1_J12_EMPTY', 'L1_MU8VF_EMPTY', 'L1_TAU8_EMPTY', 'L1_TAU40_EMPTY', 'L1_EM7_EMPTY']
-    elif ('L1_FIRSTEMPTY' in l1seedname):
-      l1EBitems = ['L1_J12_FIRSTEMPTY', 'L1_TAU8_FIRSTEMPTY', 'L1_EM7_FIRSTEMPTY']
-    elif ('L1_UNPAIRED_ISO' in l1seedname):
-      l1EBitems = [
-        'L1_J12_UNPAIRED_ISO', 'L1_J15p31ETA49_UNPAIRED_ISO',
-        'L1_BCM_Wide_UNPAIRED_ISO', 'L1_BCM_AC_UNPAIRED_ISO', 'L1_BCM_CA_UNPAIRED_ISO',
-        'L1_MU3V_UNPAIRED_ISO', 'L1_EM7_UNPAIRED_ISO', 'L1_TAU8_UNPAIRED_ISO', 'L1_TAU40_UNPAIRED_ISO'
-        ]
-    elif ('L1_UNPAIRED_NONISO' in l1seedname):
-      l1EBitems = [
-        'L1_J12_UNPAIRED_NONISO', 'L1_BCM_Wide_UNPAIRED_NONISO',
-        'L1_BCM_AC_UNPAIRED_NONISO', 'L1_BCM_CA_UNPAIRED_NONISO'
-      ]
-    elif ('L1_ABORTGAPNOTCALIB' in l1seedname): 
-      l1EBitems = [] # No more items defined in this historical bunchgroup
-    else:
-      log.error('Do not know how to supply EnhancedBias L1 seeds for %s', l1seedname)
+    l1EBitems = {
+        'PhysicsHigh':
+        [
+            'L1_MU5VF_3MU3V',
+            'L1_EM15VH_MU8F','L1_EM22VHI','L1_2EM8VH_MU8F', 'L1_2EM15VHI',
+            'L1_EM15VHI_2TAU12IM_J25_3J12', 'L1_EM15VHI_2TAU12IM_XE35', 'L1_EM15VHI_2TAU12IM', 'L1_EM20VH_3EM10VH',
+            'L1_MU8F_TAU12IM_J25_2J12','L1_MU8F_TAU12IM_XE35','L1_MU8F_TAU20IM',
+            'L1_4J15','L1_XE50','L1_2J15_XE55',
+            'L1_TAU60','L1_TAU20IM_2TAU12IM_J25_2J20_3J12','L1_TAU20IM_2TAU12IM_XE35','L1_TAU20IM_2J20_XE45',
+            'L1_MU14FCH','L1_MU8F_3J20', 'L1_MU8F_2J20', 'L1_MU10BOM',
+            'L1_J40p0ETA25_2J15p31ETA49', 'L1_J75p31ETA49',
+            'L1_3MU5VF','L1_MU8F_2J15_J20',
+            'L1_J40p0ETA25_2J25_J20p31ETA49',
+            'L1_2MU5VF_3MU3V','L1_MU8VF_2MU5VF',
+            'L1_MJJ-500-NFF', 'L1_J45p0ETA21_3J15p0ETA25', 'L1_SC111-CJ15', 'L1_BPH-7M11-25DR99-2MU3VF',
+            'L1_HT190-J15s5pETA21', 'L1_TAU20IM_2TAU12IM_4J12p0ETA25', 'L1_DR-TAU20ITAU12I-J25'
+        ],
+        'PhysicsVeryHigh':
+        [
+            'L1_XE300', 'L1_J400', 'L1_6J15'
+        ],
+        'EMPTY': 
+        [
+            'L1_J12_EMPTY', 'L1_MU8VF_EMPTY', 'L1_TAU8_EMPTY', 'L1_TAU40_EMPTY', 'L1_EM7_EMPTY'
+        ],
+        'FIRSTEMPTY':
+        [
+            'L1_J12_FIRSTEMPTY', 'L1_TAU8_FIRSTEMPTY', 'L1_EM7_FIRSTEMPTY'
+        ],
+        'UNPAIRED_ISO':
+        [
+            'L1_J12_UNPAIRED_ISO', 'L1_J15p31ETA49_UNPAIRED_ISO',
+            'L1_BCM_Wide_UNPAIRED_ISO', 'L1_BCM_AC_UNPAIRED_ISO', 'L1_BCM_CA_UNPAIRED_ISO',
+            'L1_MU3V_UNPAIRED_ISO', 'L1_EM7_UNPAIRED_ISO', 'L1_TAU8_UNPAIRED_ISO', 'L1_TAU40_UNPAIRED_ISO'
+        ],
+        'UNPAIRED_NONISO':
+        [
+            'L1_J12_UNPAIRED_NONISO', 'L1_BCM_Wide_UNPAIRED_NONISO',
+            'L1_BCM_AC_UNPAIRED_NONISO', 'L1_BCM_CA_UNPAIRED_NONISO'
+        ],
+        'ABORTGAPNOTCALIB': [] # No more items defined in this historical bunchgroup
+    }[ebitem]
 
-    # check if all the l1 seeds given are in the current L1 menu
-    for item in l1EBitems:
-        if item not in l1items:
-            log.error('L1 item %s from %s seed is not in current L1 menu (EnhancedBias)', item, l1seedname)
-            
-    noL1PS_seeds = ','.join(l1EBitems)
-    return noL1PS_seeds
+    return l1EBitems
 
 ##############################
-def getL1_ALFA_Phys(l1seed):
-
-    l1bgditems = [
+def getL1_ALFA_Phys():
+    return [
         'L1_ALFA_ELAST1',  'L1_ALFA_ELAST2',
         'L1_ALFA_ELAST11', 'L1_ALFA_ELAST12', 
         'L1_ALFA_ELAST13', 'L1_ALFA_ELAST14',
@@ -234,106 +192,48 @@ def getL1_ALFA_Phys(l1seed):
         'L1_ALFA_ELAST17', 'L1_ALFA_ELAST18',
         'L1_ALFA_SHOWSYST5',
         'L1_ALFA_ANY_A_EMPTY', 'L1_ALFA_ANY_C_EMPTY'
-    ]
-
-    # check if all the l1 background seeds given are in the current L1 menu
-    for item in l1bgditems:
-        if item not in l1seed:
-            log.error('L1 item %s from L1ALFA_Phys seeds is not in current L1 menu', item)
-            
-    L1ALFA_Phys_seeds = ','.join(l1bgditems)
-    return L1ALFA_Phys_seeds
+    ]            
 
 ##############################
-def getL1_ALFA_Phys_Any(l1seed):
-
-    l1bgditems = [
+def getL1_ALFA_Phys_Any():
+    return [
         'L1_ALFA_ANY', 'L1_ALFA_ANY_EMPTY', 'L1_ALFA_ANY_FIRSTEMPTY',
         'L1_ALFA_ANY_UNPAIRED_ISO', 'L1_ALFA_ANY_UNPAIRED_NONISO', 'L1_ALFA_ANY_BGRP10'
     ]
 
-    # check if all the l1 background seeds given are in the current L1 menu
-    for item in l1bgditems:
-        if item not in l1seed:
-            log.error('L1 item %s from L1ALFA_Phys_Any_seeds seeds is not in current L1 menu', item)
-            
-    L1ALFA_Phys_Any_seeds = ','.join(l1bgditems)
-    return L1ALFA_Phys_Any_seeds
-
 ##############################
-def getL1ALFA_Calib(l1seed):
-
-    l1bgditems = [
+def getL1ALFA_Calib():
+    return [
         'L1_ALFA_B7L1U', 'L1_ALFA_B7L1L',
         'L1_ALFA_A7L1U', 'L1_ALFA_A7L1L',
         'L1_ALFA_A7R1U', 'L1_ALFA_A7R1L',
         'L1_ALFA_B7R1U', 'L1_ALFA_B7R1L'
     ]
 
-    # check if all the l1 background seeds given are in the current L1 menu
-    for item in l1bgditems:
-        if item not in l1seed:
-            log.error('L1 item %s from L1ALFA_Calib_seeds seeds is not in current L1 menu', item)
-            
-    L1ALFA_Calib_seeds = ','.join(l1bgditems)
-    return L1ALFA_Calib_seeds
-
 ##############################
-def getL1ALFA_CEP(l1seed):
-
-    l1bgditems = [
+def getL1ALFA_CEP():
+    return [
         'L1_ALFA_ELAST15', 'L1_ALFA_ELAST18',
         'L1_ALFA_SYST17',  'L1_ALFA_SYST18',
         'L1_ALFA_ELASTIC_UNPAIRED_ISO', 'L1_ALFA_ANTI_ELASTIC_UNPAIRED_ISO'
     ]
 
-    # check if all the l1 background seeds given are in the current L1 menu
-    for item in l1bgditems:
-        if item not in l1seed:
-            log.error('L1 item %s from L1ALFA_CEP_seeds seeds is not in current L1 menu', item)
-            
-    L1ALFA_CEP_seeds = ','.join(l1bgditems)
-    return L1ALFA_CEP_seeds
+##############################
+def getL1ALFA_SYS():
+    l1items = [
+        'L1_ALFA_SYST17', 'L1_ALFA_SYST18'
+    ]
+    return l1items
 
 ##############################
-def getL1ALFA_SYS(l1seed):
-
-    l1bgditems = [
-        'L1_ALFA_SYST9',  'L1_ALFA_SYST10', 'L1_ALFA_SYST11',
-        'L1_ALFA_SYST12', 'L1_ALFA_SYST17', 'L1_ALFA_SYST18'
+def getL1ALFA_ELAS():
+    return [
+        'L1_ALFA_ELAST15', 'L1_ALFA_ELAST18'
     ]
-
-    # check if all the l1 background seeds given are in the current L1 menu
-    for item in l1bgditems:
-        if item not in l1seed:
-            log.error('L1 item %s from L1ALFA_SYS_seeds seeds is not in current L1 menu', item)
-            
-    L1ALFA_SYS_seeds = ','.join(l1bgditems)
-    return L1ALFA_SYS_seeds
-
-##############################
-def getL1ALFA_ELAS(l1seed):
-
-    l1bgditems = [
-        'L1_ALFA_ELAST1',  'L1_ALFA_ELAST2',
-        'L1_ALFA_ELAST11', 'L1_ALFA_ELAST12',
-        'L1_ALFA_ELAST13', 'L1_ALFA_ELAST14',
-        'L1_ALFA_ELAST15', 'L1_ALFA_ELAST16',
-        'L1_ALFA_ELAST17', 'L1_ALFA_ELAST18'
-    ]
-
-    # check if all the l1 background seeds given are in the current L1 menu
-    for item in l1bgditems:
-        if item not in l1seed:
-            log.error('L1 item %s from L1ALFA_ELAS_seeds seeds is not in current L1 menu', item)
-            
-    L1ALFA_ELAS_seeds = ','.join(l1bgditems)
-    return L1ALFA_ELAS_seeds
 
 #####################################
-def getL1LowLumi(l1seed):
-
-    l1bgditems = [
+def getL1LowLumi():
+    return [
         'L1_EM20VH', 'L1_2EM10VH',
         'L1_2MU5VF', 'L1_3MU3V',
         'L1_EM15VH_MU8F', 'L1_EM15I_MU3V',
@@ -349,19 +249,11 @@ def getL1LowLumi(l1seed):
         'L1_3J40', 'L1_2J15_XE55',
         'L1_MU5VF_J40', 'L1_J75p31ETA49'
     ]
-
-    # check if all the l1 background seeds given are in the current L1 menu
-    for item in l1bgditems:
-        if item not in l1seed:
-            log.error('L1 item %s from L1LowLumi_seeds seeds is not in current L1 menu', item)
-            
-    L1LowLumi_seeds = ','.join(l1bgditems)
-    return L1LowLumi_seeds
         
 #####################################
-def getL1BKeePrimary(l1seed):
+def getL1BKeePrimary():
 
-    l1bgditems = [
+    return [
         'L1_2EM20VH',
         'L1_2EM15VHI',
         'L1_EM22VHI',
@@ -393,18 +285,10 @@ def getL1BKeePrimary(l1seed):
         'L1_3J15p0ETA25_XE40' 
     ]
 
-    # check if all the l1 background seeds given are in the current L1 menu
-    for item in l1bgditems:
-        if item not in l1seed:
-            log.error('L1 item %s from L1BKeePrimary_seeds seeds is not in current L1 menu', item)
-            
-    L1BKeePrimary_seeds = ','.join(l1bgditems)
-    return L1BKeePrimary_seeds
-
 #####################################
-def getL1BKeePrescaled(l1seed):
+def getL1BKeePrescaled():
 
-    l1bgditems = [
+    return [
         'L1_LFV-MU5VF',
         'L1_BPH-2M9-0DR15-MU5VFMU3V',
         'L1_BPH-2M9-0DR15-2MU3V', 
@@ -427,109 +311,76 @@ def getL1BKeePrescaled(l1seed):
         'L1_EM18VHI_3J20' #  exist in menu, but currently not used at HLT. We may drop as CTP output
     ]
 
-    # check if all the l1 background seeds given are in the current L1 menu
-    for item in l1bgditems:
-        if item not in l1seed:
-            log.error('L1 item %s from L1BKeePrescaled_seeds seeds is not in current L1 menu', item)
-            
-    L1BKeePrescaled_seeds = ','.join(l1bgditems)
-    return L1BKeePrescaled_seeds
-
 #####################################
 # assigned the seeds to the L1 names
 #####################################
+
+L1_multiseed_simple_getters = {
+    'L1_J': getL1JetBS,
+    'L1_Bkg': getL1BackgroundSeed,
+    'L1_BS': getL1BSSeed,
+    'L1_ALFA_Diff_Phys': getL1_ALFA_Diff_Phys_Seeds,
+    'L1_ALFA_CDiff_Phys': getL1_ALFA_CDiff_Phys_Seeds,
+    'L1_ALFA_Jet_Phys': getL1_ALFA_Jet_Phys_Seeds,
+    'L1_ALFA_Phys': getL1_ALFA_Phys,
+    'L1_ALFA_PhysAny': getL1_ALFA_Phys_Any,
+    'L1_ALFA_Calib': getL1ALFA_Calib,
+    'L1_ALFA_ELAS': getL1ALFA_ELAS,
+    'L1_ALFA_CEP': getL1ALFA_CEP,
+    'L1_ALFA_SYS': getL1ALFA_SYS,
+    'L1_LowLumi': getL1LowLumi,
+    'L1_BKeePrimary': getL1BKeePrimary,
+    'L1_BKeePrescaled': getL1BKeePrescaled,
+}
+
+valid_multiseeds = [
+    'L1_All',
+    # EnhancedBias
+    'L1_PhysicsHigh_noPS', 'L1_PhysicsVeryHigh_noPS',
+    'L1_EMPTY_noPS', 'L1_FIRSTEMPTY_noPS',
+    'L1_UNPAIRED_ISO_noPS', 'L1_UNPAIRED_NONISO_noPS', 'L1_ABORTGAPNOTCALIB_noPS',
+    # Trigger types
+    'L1_Calo', 'L1_Calo_EMPTY',
+    'L1_Muon', 'L1_Muon_EMPTY',
+    # Other groups defined by matching
+    'L1_Standby', 'L1_Topo', 'L1_TAU'
+] + list(L1_multiseed_simple_getters.keys())
+
 def getSpecificL1Seeds(l1seedname, l1itemobject, menu_name):
     l1items = l1itemobject.keys()
     L1Seed = ''
-    if l1seedname == 'L1_J':
-        L1Seed = getL1JetBS()
-    if (l1seedname == 'L1_Bkg'):
-        L1Seed = getL1BackgroundSeed(l1items, menu_name)
-#    elif (l1seedname == 'L1_ALFA_Diff_Phys' ):
-#        L1Seed = getL1_ALFA_Diff_Phys_Seeds(l1items)
-#    elif (l1seedname == 'L1_ALFA_CDiff_Phys' ):
-#        L1Seed = getL1_ALFA_CDiff_Phys_Seeds(l1items)
-#    elif (l1seedname == 'L1_ALFA_Jet_Phys' ):
-#        L1Seed = getL1_ALFA_Jet_Phys_Seeds(l1items)
 
+    if l1seedname == '':
+        log.error('No L1item name given!')
+        raise RuntimeError('No name provided to multiseed getter')
+
+    if l1seedname in L1_multiseed_simple_getters:
+        L1Seed = L1_multiseed_simple_getters[l1seedname]()
+    elif l1seedname == 'L1_Standby':
+        L1Seed = getL1StandbySeed(l1items)
+    elif l1seedname == 'L1_Topo':
+        L1Seed = getL1TopoSeed(l1items)
+    elif l1seedname == 'L1_TAU':
+        L1Seed = getL1TauSeed(l1items)
     elif (l1seedname in ['L1_PhysicsHigh_noPS', 'L1_PhysicsVeryHigh_noPS', 'L1_EMPTY_noPS', 'L1_FIRSTEMPTY_noPS', 'L1_UNPAIRED_ISO_noPS', 'L1_UNPAIRED_NONISO_noPS', 'L1_ABORTGAPNOTCALIB_noPS']):
         L1Seed =  getEBnoL1PSSeed(l1items, l1seedname)
-        
-    elif (l1seedname == 'L1_Standby'):
-        L1Seed = getL1StandbySeed(l1items)
-
-    elif (l1seedname == 'L1_Topo'):
-        L1Seed = getL1TopoSeed(l1items)
-
     elif (l1seedname in ['L1_Calo', 'L1_Calo_EMPTY']):
         L1Seed = getL1CaloSeed(l1seedname, l1itemobject)
-
     elif (l1seedname in ['L1_Muon', 'L1_Muon_EMPTY']):
         L1Seed = getL1MuonSeed(l1seedname, l1itemobject)
-
-    elif (l1seedname == 'L1_TAU'):
-        L1Seed = getL1TauSeed(l1items)
-
-    elif (l1seedname == 'L1_BS'):
-        L1Seed = getL1BSSeed(l1items)
-        
-#    elif (l1seedname == 'L1_ALFA_Phys'):
-#        L1Seed = getL1_ALFA_Phys(l1items)
-#
-#    elif (l1seedname == 'L1_ALFA_PhysAny'):
-#        L1Seed = getL1_ALFA_Phys_Any(l1items)
-#
-#    elif (l1seedname == 'L1_ALFA_Diff'):
-#        L1Seed = getL1ALFA_Diff(l1items)
-#
-#    elif (l1seedname == 'L1_ALFA_TRT_Diff'):
-#        L1Seed = getL1ALFA_TRT_Diff(l1items)
-#        
-    elif (l1seedname == 'L1_ALFA_Calib'):
-        L1Seed = getL1ALFA_Calib(l1items)
-#
-#    elif (l1seedname == 'L1_ALFA_ELAS'):
-#        L1Seed = getL1ALFA_ELAS(l1items)
-#
-#    elif (l1seedname == 'L1_ALFA_TRT_Calib'):
-#        L1Seed = getL1ALFA_TRT_Calib(l1items)
-#
-#    elif (l1seedname == 'L1_ALFA_Jet'):
-#        L1Seed = getL1ALFA_Jet(l1items)
-#        
-#    elif (l1seedname == 'L1_ALFA_SDiff'):
-#        L1Seed = getL1ALFA_SDiff(l1items)
-#
-#    elif (l1seedname == 'L1_ALFA_CEP'):
-#        L1Seed = getL1ALFA_CEP(l1items)
-#
-#    elif (l1seedname == 'L1_ALFA_TRT'):
-#        L1Seed = getL1ALFA_TRT(l1items)
-#
-#    elif (l1seedname == 'L1_ALFA_SYS'):
-#        L1Seed = getL1ALFA_SYS(l1items)
-
-
-    elif (l1seedname == 'L1_LowLumi'):
-        L1Seed = getL1LowLumi(l1items)
-        
-    elif (l1seedname == 'L1_BKeePrimary'):
-        L1Seed = getL1BKeePrimary(l1items)
-        
-    elif (l1seedname == 'L1_BKeePrescaled'):
-        L1Seed = getL1BKeePrescaled(l1items)
-        
     elif (l1seedname == 'L1_All'):
-        return ''
-
-    elif (l1seedname == ''):
-        log.warning('No L1item name given!')
-
+        return []
     else: 
-        #log.error('Given seed %s could not be found!' %l1seedname)
-        return 'ERROR_'+l1seedname
+        log.error('Given seed %s could not be found!', l1seedname)
+        raise RuntimeError(f'Failed to retrieve L1 item list for {l1seedname}')
 
-    L1Seed = L1Seed.split(",")
+    print(f"BAH, {l1seedname} --> {L1Seed}")
+
+    # check if all the l1 background seeds given are in the current L1 menu
+    for item in L1Seed:
+        if item not in l1items:
+            log.error('L1 item %s from %s seeds is not in current L1 menu', item, l1seedname)
+
     L1Seed.sort()
     L1Seed = ",".join(L1Seed)
 
