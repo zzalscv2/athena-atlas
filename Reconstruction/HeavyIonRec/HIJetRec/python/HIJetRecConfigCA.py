@@ -4,6 +4,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import LHCPeriod
 from OutputStreamAthenaPool.OutputStreamConfig import addToAOD, addToESD
 from JetRecConfig.JetDefinition import JetInputConstitSeq,JetInputConstit, xAODType, JetDefinition
 from JetRecConfig.JetDefinition import JetModifier, JetInputExternal
@@ -314,10 +315,15 @@ def HIEventShapeCfg(flags, clustersKey= "HICluster", suffix="_Weighted", **kwarg
     else : map_tool = CompFactory.HIEventShapeMapTool()
 
     #Add weight tool to filler tool
+    if flags.GeoModel.Run in [LHCPeriod.Run1, LHCPeriod.Run2]:
+        HITowerWeightTool_inputFile='cluster.geo.HIJING_2018.root'
+    else:
+        HITowerWeightTool_inputFile='cluster.geo.DATA_PbPb_2022.root'
+
     TWTool = CompFactory.HITowerWeightTool("WeightTool",
         ApplyCorrection=flags.HeavyIon.Jet.ApplyTowerEtaPhiCorrection,
         ConfigDir='HIJetCorrection/',
-        InputFile='cluster.geo.HIJING_2018.root')
+        InputFile=HITowerWeightTool_inputFile)
 
     #Event Shape filler
     eventShapeTool = CompFactory.HIEventShapeFillerTool( 
@@ -455,8 +461,15 @@ def AddIterationCfg(flags,seed_container,shape_name,clustersKey, **kwargs) :
             mod_tool=MakeModulatorTool(mod_shape_key,harmonics=harmicsforSub,**kwargs)
 
     if useClusters :
+        if flags.GeoModel.Run in [LHCPeriod.Run1, LHCPeriod.Run2]:
+            HIJetClusterSubtractorTool_inputFile='cluster.geo.HIJING_2018.root'
+        else:
+            HIJetClusterSubtractorTool_inputFile='cluster.geo.DATA_PbPb_2022.root'
+        
         HIJetClusterSubtractorTool = CompFactory.HIJetClusterSubtractorTool
-        sub_tool = HIJetClusterSubtractorTool("HIJetClusterSubtractor")
+        sub_tool = HIJetClusterSubtractorTool("HIJetClusterSubtractor", 
+                                              ConfigDir='HIJetCorrection/',
+                                              InputFile=HIJetClusterSubtractorTool_inputFile)
     else :
         HIJetCellSubtractorTool=CompFactory.HIJetCellSubtractorTool
         sub_tool = HIJetCellSubtractorTool("HIJetCellSubtractor")
