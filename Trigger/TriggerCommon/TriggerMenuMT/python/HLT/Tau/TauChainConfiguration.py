@@ -13,9 +13,9 @@ from TriggerMenuMT.HLT.Config.ChainConfigurationBase import ChainConfigurationBa
 from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 
 if isComponentAccumulatorCfg():
-    pass
+    from .generateTau import tauCaloMVAMenuSeq, tauFTFTauCoreSeq, tauFTFTauIsoSeq, tauFTFTauIsoBDTSeq
 else:
-    from TriggerMenuMT.HLT.Tau.TauMenuSequences import tauCaloMVAMenuSeq, tauFTFTauCoreSeq, tauFTFTauLRTSeq, tauFTFTauIsoSeq, tauFTFTauIsoBDTSeq, tauTrackTwoMVASeq, tauTrackTwoLLPSeq, tauTrackLRTSeq, tauPrecTrackIsoSeq, tauPrecTrackLRTSeq
+    from .TauMenuSequences import tauCaloMVAMenuSeq, tauFTFTauCoreSeq, tauFTFTauLRTSeq, tauFTFTauIsoSeq, tauFTFTauIsoBDTSeq, tauTrackTwoMVASeq, tauTrackTwoLLPSeq, tauTrackLRTSeq, tauPrecTrackIsoSeq, tauPrecTrackLRTSeq
 
 #--------------------------------------------------------
 # fragments generating config will be functions in new JO
