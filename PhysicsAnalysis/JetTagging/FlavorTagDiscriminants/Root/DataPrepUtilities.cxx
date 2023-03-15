@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagDiscriminants/DataPrepUtilities.h"
@@ -211,13 +211,14 @@ namespace {
 
 namespace FlavorTagDiscriminants {
 
-  FTagOptions::FTagOptions() {
-    track_prefix = "btagIp_";
-    flip = FlipTagConfig::STANDARD;
-    track_link_name = "BTagTrackToJetAssociator";
-    track_link_type = TrackLinkType::TRACK_PARTICLE;
-    default_output_value = NAN;
-    invalid_ip_key = "invalidIp";
+  FTagOptions::FTagOptions()
+    : track_prefix ("btagIp_"),
+      flip (FlipTagConfig::STANDARD),
+      track_link_name ("BTagTrackToJetAssociator"),
+      track_link_type (TrackLinkType::TRACK_PARTICLE),
+      default_output_value (NAN),
+      invalid_ip_key ("invalidIp")
+  {
   }
 
   // ________________________________________________________________________

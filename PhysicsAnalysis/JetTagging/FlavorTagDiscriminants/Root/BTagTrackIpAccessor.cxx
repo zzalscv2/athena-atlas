@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagDiscriminants/BTagTrackIpAccessor.h"
@@ -68,6 +68,8 @@ BTagSignedIP BTagTrackIpAccessor::getSignedIp(const xAOD::TrackParticle &track, 
   const double signed_z0 = std::copysign(ip_z0, (jet_threeVector.eta() - track_momentum.eta()) * ip_z0);
   ip.ip3d_signed_z0 = signed_z0;
   ip.ip3d_signed_z0_significance = signed_z0 / m_ip_z0_sigma(track);
+  ip.ip2d_grade = 0;
+  ip.ip3d_grade = 0;
   return ip;
 }
 
