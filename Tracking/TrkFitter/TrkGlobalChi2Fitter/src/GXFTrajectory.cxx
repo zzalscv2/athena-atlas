@@ -79,8 +79,10 @@ namespace Trk {
       m_caloelossstate (nullptr),
       m_upstreammat (rhs.m_upstreammat)
   {
+
+    m_states.reserve(rhs.m_states.size());
     for (const std::unique_ptr<GXFTrackState> & i : rhs.m_states) {
-      m_states.push_back(std::make_unique<GXFTrackState>(*i));
+      m_states.emplace_back(std::make_unique<GXFTrackState>(*i));
     }
    
     if (rhs.m_caloelossstate != nullptr) {
