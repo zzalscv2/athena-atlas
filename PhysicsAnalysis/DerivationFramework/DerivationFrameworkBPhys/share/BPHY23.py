@@ -765,7 +765,7 @@ for i in range(len(list_1trk1trk_obj)):
         list_1trk1trk_obj[i].ApplyJpsi2MassConstraint = True
         list_1trk1trk_obj[i].Jpsi2Mass                = list_1trk1trk_jpsi2Mass[i]
     if list_1trk1trk_psi2Mass[i] != Zcmass:
-        list_1trk1trk_obj[i].ApplyPsi1MassConstraint  = True
+        list_1trk1trk_obj[i].ApplyPsi2MassConstraint  = True
         list_1trk1trk_obj[i].Psi2Mass                 = list_1trk1trk_psi2Mass[i]
 
 ########################
@@ -847,7 +847,7 @@ for i in range(len(list_2trk1trk_obj)):
         list_2trk1trk_obj[i].ApplyJpsi2MassConstraint = True
         list_2trk1trk_obj[i].Jpsi2Mass                = list_2trk1trk_jpsi2Mass[i]
     if list_2trk1trk_psi2Mass[i] != Zcmass:
-        list_2trk1trk_obj[i].ApplyPsi1MassConstraint  = True
+        list_2trk1trk_obj[i].ApplyPsi2MassConstraint  = True
         list_2trk1trk_obj[i].Psi2Mass                 = list_2trk1trk_psi2Mass[i]
 
 #########################
@@ -928,7 +928,7 @@ for i in range(len(list_2trk2trk_obj)):
     list_2trk2trk_obj[i].Psi1Mass                 = list_2trk2trk_psi1Mass[i]
     list_2trk2trk_obj[i].ApplyJpsi2MassConstraint = True
     list_2trk2trk_obj[i].Jpsi2Mass                = list_2trk2trk_jpsi2Mass[i]
-    list_2trk2trk_obj[i].ApplyPsi1MassConstraint  = True
+    list_2trk2trk_obj[i].ApplyPsi2MassConstraint  = True
     list_2trk2trk_obj[i].Psi2Mass                 = list_2trk2trk_psi2Mass[i]
 
 
