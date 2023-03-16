@@ -5,6 +5,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import jFexInputByteStreamToolCfg
+from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import gFexInputByteStreamToolCfg
 from AthenaConfiguration.Enums import Format
 
 
@@ -16,6 +17,13 @@ def L1CaloFEXDecoratorCfg(flags, name, jTowersReadKey = 'L1_jFexDataTowers', Ext
     decorator.jTowersReadKey = jTowersReadKey 
     decorator.ExtraInfo = ExtraInfo
     acc.addEventAlgo(decorator)
+
+    return acc
+
+def L1CaloGTowerDecoratorCfg(flags, name, gTowersReadKey = 'L1_gFexDataTowers'):
+
+    acc=ComponentAccumulator() 
+    acc.addEventAlgo( CompFactory.LVL1.gFexTower2SCellDecorator(name, gTowersReadKey=gTowersReadKey) )
 
     return acc
 
@@ -63,7 +71,7 @@ if __name__ == '__main__':
     parser.add_argument('--evtMax',type=int,default=-1,help="number of events")
     parser.add_argument('--filesInput',nargs='+',help="input files",required=True)
     parser.add_argument('--outputLevel',default="WARNING",choices={ 'INFO','WARNING','DEBUG','VERBOSE'})
-    parser.add_argument('--outputs',nargs='+',choices={"jTowers","jTOBs","eTOBs"},required=True, help="What data to decode and output.")
+    parser.add_argument('--outputs',nargs='+',choices={"jTowers", "gTowers", "jTOBs","eTOBs"},required=True, help="What data to decode and output.")
     args = parser.parse_args()
 
 
@@ -171,6 +179,29 @@ if __name__ == '__main__':
     acc.addEventAlgo(decoderAlg, sequenceName='AthAlgSeq')
 
     ########################################
+    # gFEX ROIs
+    ########################################
+    if 'gTOBs' in args.outputs:
+        from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import gFexByteStreamToolCfg
+        gFexTool = gFexByteStreamToolCfg('gFexBSDecoder', flags)
+        decoderTools += [gFexTool]
+
+
+    ########################################
+    # gFEX input Data
+    ########################################
+    if 'gTowers' in args.outputs:
+        inputgFexTool = gFexInputByteStreamToolCfg('gFexInputBSDecoder', flags)
+        decoderTools += [inputgFexTool]
+        # saving/adding the gTower xAOD container
+        outputEDM += addEDM('xAOD::gFexTowerContainer', inputgFexTool.gTowersWriteKey.Path)
+
+    decoderAlg = CompFactory.L1TriggerByteStreamDecoderAlg(name="L1TriggerByteStreamDecoder",
+                                                         DecoderTools=decoderTools, OutputLevel=algLogLevel)
+
+    acc.addEventAlgo(decoderAlg, sequenceName='AthAlgSeq')
+
+    ########################################
     # Decorators   
     ########################################
     
@@ -190,6 +221,11 @@ if __name__ == '__main__':
     if 'eTOBs' in args.outputs:
         DecoratorAlgo = eFexTOBDecoratorCfg(flags,'eFexTOBDecorator')
         acc.merge(DecoratorAlgo)
+
+    # Uses SCell to decorate the gTowers
+    if 'gTowers' in args.outputs:
+        gTowerDecoratorAlgo = L1CaloGTowerDecoratorCfg(flags, 'gFexTower2SCellDecorator')   
+        acc.merge(gTowerDecoratorAlgo)
 
 
     # Saving containers

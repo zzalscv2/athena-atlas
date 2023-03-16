@@ -41,6 +41,8 @@ class gSuperCellTowerMapper: public AthAlgTool, virtual public IgSuperCellTowerM
   SG::ReadHandleKey<CaloCellContainer> m_scellsCollectionSGKey {this, "SCell", "SCell", "SCell"};
   SG::ReadHandleKey<xAOD::TriggerTowerContainer> m_triggerTowerCollectionSGKey {this, "xODTriggerTowers", "xAODTriggerTowers", "xAODTriggerTowers"};
 
+  Gaudi::Property<bool> m_apply_masking {this, "SCellMasking", false, "Applies masking. Only use for data"};
+
   virtual int FindAndConnectTower(std::unique_ptr<gTowerContainer> & my_gTowerContainerRaw,CaloSampling::CaloSample sample,
                                   const int region, const int pos_neg, const int eta_index, const int phi_index, Identifier ID,
                                   float et, int prov, bool doPrint) const override;

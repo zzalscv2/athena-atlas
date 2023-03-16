@@ -243,6 +243,7 @@ if __name__ == '__main__':
         ##################################################  
         gFEX = CompFactory.LVL1.gFEXDriver('gFEXDriver')
         gFEX.gSuperCellTowerMapperTool = CompFactory.LVL1.gSuperCellTowerMapper('gSuperCellTowerMapper')
+        gFEX.gSuperCellTowerMapperTool.SCellMasking = True
         gFEX.gFEXSysSimTool = CompFactory.LVL1.gFEXSysSim('gFEXSysSimTool')
         
         #TOBs
