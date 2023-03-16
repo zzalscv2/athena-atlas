@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -497,8 +497,10 @@ void TRT_FillCablingData_SR1::defineTables()
 	my_map->SubDet = -2;
 	//	this_phi = -my_map->Phi;  // set but not used
      }
-     else
+     else {
 	ATH_MSG_FATAL( "TRT_FillCablingData_SR1: Invalid source id " << (hex) << srcId << (dec) );
+        my_map->SubDet = 0;
+     }
 
 
      /*
