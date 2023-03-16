@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /*****************************************************************************
@@ -76,17 +76,6 @@ TrigMuonEFCbTrack::TrigMuonEFCbTrack( const TrigMuonEFTrack& rhs ) :
   m_nTrtHits(0),
   m_idTrackLink()
   { }
-
-/** Assignement operator */
-TrigMuonEFCbTrack& TrigMuonEFCbTrack::operator=( const TrigMuonEFCbTrack& rhs )
-{
-  if ( this != &rhs ) {
-    TrigMuonEFTrack::operator=( rhs );
-    m_matchChi2 = rhs.m_matchChi2;
-    m_idTrackLink = rhs.m_idTrackLink;
-  }
-  return *this;
-}
 
 /** set data member */
 void TrigMuonEFCbTrack::setMatchChi2(double theMatchChi2){
