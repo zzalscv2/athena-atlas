@@ -121,7 +121,7 @@ class TopoAlgoDef:
         alg = AlgConf.eTauSelect( name = 'eTAUab', inputs = 'eTauTobs', outputs = 'eTAUab' )
         alg.addgeneric('InputWidth',  HW.eTauInputWidth)
         alg.addgeneric('OutputWidth', HW.eTauOutputWidthSelect)
-        alg.addvariable('MinET',     get_threshold_cut('eTAU', 20)*_et_conversion)
+        alg.addvariable('MinET',     get_threshold_cut('eTAU', 12)*_et_conversion)
         alg.addvariable('RCoreMin',  0)
         alg.addvariable('RHadMin',   0)
         tm.registerTopoAlgo(alg) 

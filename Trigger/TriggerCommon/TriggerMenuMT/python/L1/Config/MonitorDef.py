@@ -184,7 +184,7 @@ class MonitorDef:
                 "L1_LLP-RO-eEM", "L1_LLP-NOMATCH-eEM",
                 "L1_SC111-CjJ40",
                 "L1_cTAU30M_2cTAU20M_DR-eTAU30MeTAU20M",
-                "L1_DY-BOX-2MU3V", "L1_DY-BOX-MU5VFMU3V",
+                "L1_DY-BOX-2MU3VF", "L1_DY-BOX-MU5VFMU3V",
                 "L1_LFV-eEM10L-MU8VF", "L1_LFV-eEM15L-MU5VF", "L1_LFV-MU5VF",
                 "L1_jMJJ-700", "L1_jMJJ-300-NFF", "L1_jMJJ-500-NFF",
                 "L1_10DR-MU14FCH-MU5VF_EMPTY",

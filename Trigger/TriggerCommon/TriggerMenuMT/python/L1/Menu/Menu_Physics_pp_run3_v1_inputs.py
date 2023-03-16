@@ -263,7 +263,7 @@ def defineInputsMenu():
                     TopoMenuDef( '2INVM9-0DR15-2MU3Vab',                 outputbits = 1 ), # BLS 
                     TopoMenuDef( 'INVM_DR_2MU5VFab',                     outputbits = (2,3), outputlines = [ '2INVM9-2DR15-2MU5VFab',      # BLS
                                                                                                              '8INVM15-0DR22-2MU5VFab' ] ), # BLS
-                    TopoMenuDef( '5DETA99-5DPHI99-2MU3Vab',              outputbits = 4 ), # Low-mass DY
+                    TopoMenuDef( '5DETA99-5DPHI99-2MU3VFab',              outputbits = 4 ), # Low-mass DY
                     TopoMenuDef( '5DETA99-5DPHI99-MU5VFab-MU3Vab',       outputbits = 5 ), # Low-mass DY
                     TopoMenuDef( '5DETA99-5DPHI99-2MU5VFab',             outputbits = 6 ), # Low-mass DY
                     TopoMenuDef( 'DR_2MU5VFab',                          outputbits = (7,8) , outputlines = [  '0DR15-2MU5VFab' ,   # LVF
@@ -289,6 +289,7 @@ def defineInputsMenu():
                     TopoMenuDef( '2DISAMB-jJ55ab-0DR28-eTAU30abm-eTAU20abm', outputbits = 7 ),
                     TopoMenuDef( '0DR28-eTAU30abm-eTAU20abm',                outputbits = 8 ), 
                     TopoMenuDef( '0INVM10-3MU3VFab',                         outputbits = 9 ), # BLS
+                    TopoMenuDef( '2DISAMB-jJ40ab-0DR10-eTAU20ab-eTAU12ab',    outputbits = 10),
                 ]
             },
             

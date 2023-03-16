@@ -38,7 +38,7 @@ l1seeds = { 'low'  : \
                 'L1_BTAG-MU3VjJ40',\
                 'L1_DR-TAU20ITAU12I',\
                 'L1_DY-BOX-2MU5VF',\
-                'L1_DY-BOX-2MU3V',\
+                'L1_DY-BOX-2MU3VF',\
                 'L1_EM15VHI_2TAU12IM_J25_3J12',\
                 #'L1_EM15_XS30',\
                 'L1_EM15VH',\
