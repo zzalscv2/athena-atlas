@@ -19,7 +19,7 @@ def TLAPhotonSequence (flags, photonsIn):
     sequenceOut = photonsIn+"_TLA"
     return (tlaPhotonAthSequence, tlaPhotonInputMakerAlg, sequenceOut)
 
-def TLAPhotonMenuSequence( flags, photonsIn ):
+def TLAPhotonMenuSequence( flags, photonsIn, is_probe_leg=False ):
     
     # retrieves the sequence, uses RecoFragmentsPool to prevent a duplicate instantiation of the sequence (and the IM algorithm)    
     (tlaPhotonAthSequence, tlaPhotonInputMakerAlg, sequenceOut) = RecoFragmentsPool.retrieve(TLAPhotonSequence, flags, photonsIn=photonsIn)  
@@ -36,6 +36,6 @@ def TLAPhotonMenuSequence( flags, photonsIn ):
                          Sequence    = tlaPhotonAthSequence,
                          Maker       = tlaPhotonInputMakerAlg,
                          Hypo        = hypo,
-                         HypoToolGen = TrigEgammaTLAPhotonHypoToolFromDict
-                         )
+                         HypoToolGen = TrigEgammaTLAPhotonHypoToolFromDict,
+                         IsProbe     = is_probe_leg)
 

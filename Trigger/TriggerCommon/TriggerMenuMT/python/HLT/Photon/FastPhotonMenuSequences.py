@@ -70,7 +70,7 @@ def fastPhotonSequence(flags):
     
 
 
-def fastPhotonMenuSequence(flags):
+def fastPhotonMenuSequence(flags, is_probe_leg=False):
     """Creates secpond step photon sequence"""
     
     TrigEgammaKeys = getTrigEgammaKeys()
@@ -90,6 +90,7 @@ def fastPhotonMenuSequence(flags):
                          Maker=l2PhotonViewsMaker,
                          Sequence=photonAthSequence,
                          Hypo=thePhotonHypo,
-                         HypoToolGen=TrigEgammaFastPhotonHypoToolFromDict
-                         )
+                         HypoToolGen=TrigEgammaFastPhotonHypoToolFromDict,
+                         IsProbe=is_probe_leg)
+                         
 
