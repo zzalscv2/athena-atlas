@@ -65,14 +65,19 @@ def GeometryBuilderCfg(flags, name='AtlasGeometryBuilder',
     if "TrackingVolumeArrayCreator" not in kwargs:
         from TrackingGeometryCondAlg.TrkDetDescrToolsConfig import (
             TrackingVolumeArrayCreatorCfg)
-        kwargs.setdefault("TrackingVolumeArrayCreator", result.popToolsAndMerge(
-            TrackingVolumeArrayCreatorCfg(flags)))
+        TrackingVolumeArrayCreator = result.popToolsAndMerge(
+            TrackingVolumeArrayCreatorCfg(flags))
+        result.addPublicTool(TrackingVolumeArrayCreator)
+        kwargs.setdefault("TrackingVolumeArrayCreator",
+                          TrackingVolumeArrayCreator)
 
     if "TrackingVolumeHelper" not in kwargs:
         from TrackingGeometryCondAlg.TrkDetDescrToolsConfig import (
             TrackingVolumeHelperCfg)
-        kwargs.setdefault("TrackingVolumeHelper", result.popToolsAndMerge(
-            TrackingVolumeHelperCfg(flags)))
+        TrackingVolumeHelper = result.popToolsAndMerge(
+            TrackingVolumeHelperCfg(flags))
+        result.addPublicTool(TrackingVolumeHelper)
+        kwargs.setdefault("TrackingVolumeHelper", TrackingVolumeHelper)
 
     # Depending on the job configuration, setup the various detector builders,
     # and add to atlas_geometry_builder
