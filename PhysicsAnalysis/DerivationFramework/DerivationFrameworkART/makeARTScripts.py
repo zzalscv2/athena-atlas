@@ -23,7 +23,7 @@ formatList = ['PHYSVAL','PHYS',
               'IDTR1',
               'EGAM1', 'EGAM2', 'EGAM3', 'EGAM4', 'EGAM5', 'EGAM6', 'EGAM7', 'EGAM8', 'EGAM9',
               'FTAG1', 'FTAG2', 'FTAG3', 'FTAG4', 'FTAG5',
-              'BPHY1', 'BPHY2', 'BPHY3', 'BPHY4', 'BPHY5', 'BPHY6', 'BPHY7', 'BPHY8', 'BPHY9', 'BPHY10', 'BPHY11', 'BPHY12', 'BPHY13', 'BPHY14','BPHY15','BPHY16', 'BPHY17', 'BPHY18','BPHY19','BPHY20','BPHY21','BPHY22','BPHY23',
+              'BPHY1', 'BPHY2', 'BPHY3', 'BPHY4', 'BPHY5', 'BPHY6', 'BPHY7', 'BPHY8', 'BPHY9', 'BPHY10', 'BPHY11', 'BPHY12', 'BPHY13', 'BPHY14','BPHY15','BPHY16', 'BPHY17', 'BPHY18','BPHY19','BPHY20','BPHY21','BPHY22','BPHY23', 'BPHY24',
               'MUON0', 'MUON1', 'MUON2', 'MUON3', 'MUON4',
               'TCAL1',
               'HION3','HION4','HION5','HION7','HION8'
@@ -54,6 +54,7 @@ dataLabel = "data18"
 truthLabel = "mc15"
 delayedStreamLabel = "data16DELAYED"
 blsStreamLabel = "data17BPHYSLS"
+mcFileBPHY24 = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/DerivationFrameworkART/mc16_13TeV.801756.P8BEG_A4_CTEQ6L1_Bd_K0_mu4mu4.recon.AOD.e8392_a875_r10724/AOD.29384833._000009.pool.root.1"
 mcFileBPHY23 = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/DerivationFrameworkART/AOD.27332925._000069.pool.root.1"
 mcFileBPHY22 = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/DerivationFrameworkART/AOD.12399377._000199.pool.root.1"
 mcFileBPHY21 = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/DerivationFrameworkART/AOD.16767830._000007.pool.root.1"
@@ -170,7 +171,7 @@ if (makeDataDAODs or makeMCDAODs):
             generateText(formatName,dataLabel,dataFile,False,False,"-1")
             generateText(formatName,delayedStreamLabel,dataFileDelayed,False,False,"-1")
             generateText(formatName,blsStreamLabel,dataFileBLS,False,False,"1000") 
-         elif formatName in ['BPHY13', 'BPHY18','BPHY21','BPHY22','BPHY23']:
+         elif formatName in ['BPHY13', 'BPHY18','BPHY21','BPHY22','BPHY23','BPHY24']:
             generateText(formatName,dataLabel,dataFile,False,False,"-1")
             generateText(formatName,blsStreamLabel,dataFileBLS,False,False,"1000") 
          elif formatName in ['BPHY10','BPHY19']:
@@ -219,6 +220,8 @@ if (makeDataDAODs or makeMCDAODs):
             generateText(formatName,mcLabel,mcFileBPHY22,False,True,"5000")
          elif formatName=="BPHY23":
             generateText(formatName,mcLabel,mcFileBPHY23,False,True,"-1")
+         elif formatName=="BPHY24":
+            generateText(formatName,mcLabel,mcFileBPHY24,False,True,"5000")
          else: generateText(formatName,mcLabel,mcFile,False,True,"-1")
 
 if (makeTruthDAODs):
