@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUON_MUONPATTERNCALIBRATION_H
 #define MUON_MUONPATTERNCALIBRATION_H
@@ -58,7 +58,7 @@ class MuonPatternCalibration : virtual public IMuonPatternCalibration, public At
     MuonPatternCalibration(const std::string&, const std::string&, const IInterface*);
     virtual ~MuonPatternCalibration() = default;
 
-    virtual StatusCode initialize();
+    virtual StatusCode initialize() override;
 
     StatusCode calibrate(const EventContext& ctx, const MuonPatternCombination& pat, ROTsPerRegion& hitsPerRegion) const override;
     int  getRegionId(const Identifier& id) const override;
