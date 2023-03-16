@@ -1,7 +1,7 @@
 // -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGMUONEVENT_TRIGMUONEFCBTRACK_H
@@ -37,8 +37,8 @@ public:
    TrigMuonEFCbTrack( const TrigMuonEFCbTrack& rhs );
    TrigMuonEFCbTrack( const TrigMuonEFTrack& rhs );
 
-   /** Assignement operator */
-   TrigMuonEFCbTrack& operator=( const TrigMuonEFCbTrack& rhs );
+   /** Assignment operator */
+   TrigMuonEFCbTrack& operator=( const TrigMuonEFCbTrack& rhs ) = default;
 
    /** Destructor */
    ~TrigMuonEFCbTrack();
