@@ -5,12 +5,6 @@
 #include <string>
 #include <vector>
 
-// Asg tool includes
-#include "AsgTools/AsgTool.h"
-#include "AsgTools/AnaToolHandle.h"
-#include <AsgMessaging/MessageCheck.h>
-#include "PathResolver/PathResolver.h"
-
 // ONNX Library
 #include <core/session/onnxruntime_cxx_api.h>
 
@@ -54,10 +48,10 @@ class ONNXWrapper {
     // name of the outputs
     std::vector<const char*> m_output_names;
     std::vector<int64_t> getShape(Ort::TypeInfo model_info);
+
   public:
     
     std::vector<const char*> m_input_names;
-
 
     // output vector - will be init with zero later
     std::vector<std::vector<float>> m_outputs;
@@ -70,6 +64,12 @@ class ONNXWrapper {
     void Run(std::map<std::string, std::vector<float>> inputs);
     void ModelINFO();
     void GetMETAData();
+    std::string GetMETADataByKey(std::string key);
+    std::vector<int64_t> getInputShape(int input_nr);
+    std::vector<int64_t> getOutputShape(int output_nr);
+    int getNumInputs();
+    int getNumOutputs();
+
     // void Run(std::vector<std::vector<float>> inputs);
 };
 #endif

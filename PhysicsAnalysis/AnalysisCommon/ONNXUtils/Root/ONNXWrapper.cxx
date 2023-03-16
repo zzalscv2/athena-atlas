@@ -1,4 +1,4 @@
-#include <MyAnalysis/ONNXUtils.h>
+#include <ONNXUtils/ONNXWrapper.h>
 
 ONNXWrapper::ONNXWrapper(std::string model_path) {
     
@@ -52,6 +52,19 @@ ONNXWrapper::ONNXWrapper(std::string model_path) {
     }
     }
 
+std::vector<int64_t> ONNXWrapper::getInputShape(int input_nr=0){
+  //put the model access for input here
+  return m_input_dims.at(input_nr);
+}
+
+std::vector<int64_t> ONNXWrapper::getOutputShape(int output_nr=0){
+  //put the model access for outputs here
+  return m_output_dims.at(output_nr);
+}
+
+int getNumInputs(){ return m_input_dims.size(); }
+int getNumOutputs(){ return m_output_dims.size(); }
+
 void ONNXWrapper::ModelINFO() {
   std::cout << "MODEL INFO"<< "\n\n";
 
@@ -88,10 +101,11 @@ void ONNXWrapper::GetMETAData() {
     if (i+1 < nkeys) std::cout << ", ";
   }
   std::cout << std::endl;
+}
 
-  // std::string val = metadata.LookupCustomMetadataMap(argv[2], allocator);
-  // std::cout << val << std::endl;
-
+std::string GetMETADataByKey(std::string key){
+  Ort::ModelMetadata metadata = m_onnxSession->GetModelMetadata();
+  return metadata.LookupCustomMetadataMap(key, m_allocator);
 }
 
 void ONNXWrapper::Run(std::map<std::string, std::vector<float>> inputs) { // ADDD custom input size
