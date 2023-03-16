@@ -7,7 +7,7 @@ from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 def InDetTrackingVolumeHelperCfg(flags, name='InDetTrackingVolumeHelper',
                                  **kwargs):
     result = ComponentAccumulator()
-    result.setPrivateTools(CompFactory.Trk.TrackingVolumeHelper(name))
+    result.setPrivateTools(CompFactory.Trk.TrackingVolumeHelper(name, **kwargs))
     return result
 
 def ITkTrackingVolumeHelperCfg(flags, name='ITkTrackingVolumeHelper', **kwargs):
@@ -20,7 +20,7 @@ def ITkTrackingVolumeHelperCfg(flags, name='ITkTrackingVolumeHelper', **kwargs):
                       flags.ITk.trackingGeometry.passiveEndcapMatRbins)
     kwargs.setdefault("EndcapLayerBinsPhi",
                       flags.ITk.trackingGeometry.passiveEndcapMatPhiBins)
-    result.setPrivateTools(CompFactory.Trk.TrackingVolumeHelper(name))
+    result.setPrivateTools(CompFactory.Trk.TrackingVolumeHelper(name, **kwargs))
     return result
 
 # Generic interface for conveniency
@@ -41,7 +41,7 @@ def HGTD_TrackingVolumeHelperCfg(flags, name='HGTD_TrackingVolumeHelper',
                       flags.HGTD.trackingGeometry.passiveEndcapMatRbins)
     kwargs.setdefault("EndcapLayerBinsPhi",
                       flags.HGTD.trackingGeometry.passiveEndcapMatPhiBins)
-    result.setPrivateTools(CompFactory.Trk.TrackingVolumeHelper(name))
+    result.setPrivateTools(CompFactory.Trk.TrackingVolumeHelper(name, **kwargs))
     return result
 
 def TrackingVolumeArrayCreatorCfg(flags, name="TrackingVolumeArrayCreator",
