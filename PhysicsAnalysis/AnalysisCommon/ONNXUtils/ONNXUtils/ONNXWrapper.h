@@ -44,24 +44,24 @@ class ONNXWrapper {
     // allocate memory
     // Ort::MemoryInfo memory_info;
     // name of the input - access name map
+    std::vector<const char*> m_input_names;
 
     // name of the outputs
     std::vector<const char*> m_output_names;
+    std::vector<std::vector<float>> m_outputs;
+
     std::vector<int64_t> getShape(Ort::TypeInfo model_info);
 
   public:
     
-    std::vector<const char*> m_input_names;
-
     // output vector - will be init with zero later
-    std::vector<std::vector<float>> m_outputs;
     // Constructor with parameters
-    ONNXWrapper(){};
+    // ONNXWrapper(){};
     // ~ONNXWrapper(){};
 
     ONNXWrapper(std::string model_path);
     // void LoadModel(std::string model_path);
-    void Run(std::map<std::string, std::vector<float>> inputs);
+    std::vector<std::vector<float>> Run(std::map<std::string, std::vector<float>> inputs);
     void ModelINFO();
     void GetMETAData();
     std::string GetMETADataByKey(std::string key);

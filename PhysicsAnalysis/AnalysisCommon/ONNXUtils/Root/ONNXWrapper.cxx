@@ -52,19 +52,6 @@ ONNXWrapper::ONNXWrapper(std::string model_path) {
     }
     }
 
-std::vector<int64_t> ONNXWrapper::getInputShape(int input_nr=0){
-  //put the model access for input here
-  return m_input_dims.at(input_nr);
-}
-
-std::vector<int64_t> ONNXWrapper::getOutputShape(int output_nr=0){
-  //put the model access for outputs here
-  return m_output_dims.at(output_nr);
-}
-
-int getNumInputs(){ return m_input_dims.size(); }
-int getNumOutputs(){ return m_output_dims.size(); }
-
 void ONNXWrapper::ModelINFO() {
   std::cout << "MODEL INFO"<< "\n\n";
 
@@ -103,12 +90,8 @@ void ONNXWrapper::GetMETAData() {
   std::cout << std::endl;
 }
 
-std::string GetMETADataByKey(std::string key){
-  Ort::ModelMetadata metadata = m_onnxSession->GetModelMetadata();
-  return metadata.LookupCustomMetadataMap(key, m_allocator);
-}
 
-void ONNXWrapper::Run(std::map<std::string, std::vector<float>> inputs) { // ADDD custom input size
+std::vector<std::vector<float>> ONNXWrapper::Run(std::map<std::string, std::vector<float>> inputs) { // ADDD custom input size
     // Create a CPU tensor to be used as input
     // std::cout << "------- Creating ONNX tensors: \n";
     Ort::MemoryInfo memory_info("Cpu", OrtDeviceAllocator, 0, OrtMemTypeDefault);
@@ -147,8 +130,39 @@ void ONNXWrapper::Run(std::map<std::string, std::vector<float>> inputs) { // ADD
                 2,
                 m_output_names.data(),
                 output_tensor.data(),
-                2);    
-    }
+                2);
+    return m_outputs; 
+}
+
+// get functions
+
+std::string GetMETADataByKey(std::string key){
+  Ort::ModelMetadata metadata = m_onnxSession->GetModelMetadata();
+  return metadata.LookupCustomMetadataMap(key, m_allocator);
+}
+
+std::vector<const char*> ONNXWrapper::getInputNames(){
+  //put the model access for input here
+  return m_input_names;
+}
+
+std::vector<const char*> ONNXWrapper::getOutputNames(){
+  //put the model access for outputs here
+  return m_output_names;
+}
+
+std::vector<int64_t> ONNXWrapper::getInputShape(int input_nr=0){
+  //put the model access for input here
+  return m_input_dims.at(input_nr);
+}
+
+std::vector<int64_t> ONNXWrapper::getOutputShape(int output_nr=0){
+  //put the model access for outputs here
+  return m_output_dims.at(output_nr);
+}
+
+int getNumInputs(){ return m_input_dims.size(); }
+int getNumOutputs(){ return m_output_dims.size(); }
 
 std::vector<int64_t> ONNXWrapper::getShape(Ort::TypeInfo model_info) {
       auto tensor_info = model_info.GetTensorTypeAndShapeInfo();
