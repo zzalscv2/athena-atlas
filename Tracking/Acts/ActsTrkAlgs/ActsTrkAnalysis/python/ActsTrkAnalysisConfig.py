@@ -153,23 +153,22 @@ def ActsTrkBaseSeedAnalysisAlgCfg(flags,
 
     kwargs.setdefault('InputSeedCollection', 'ITkPixelSeeds')
 
-    if flags.Tracking.doTruth:
-        from ActsGeometry.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        geoTool = acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags))
-        acc.addPublicTool(geoTool)
-
-        # ATLAS Converter Tool
-        from ActsTrkEventCnv.ActsTrkEventCnvConfig import ActsToTrkConverterToolCfg
-        converterTool = acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags))
-
-        # Track Param Estimation Tool
-        from ActsTrkTrackParamsEstimationTool.ActsTrkTrackParamsEstimationToolConfig import TrackParamsEstimationToolCfg
-        trackEstimationTool = acc.popToolsAndMerge(TrackParamsEstimationToolCfg(flags))
-
-        kwargs.setdefault('TrackingGeometryTool', acc.getPublicTool(geoTool.name)) # PublicToolHandle
-        kwargs.setdefault('ATLASConverterTool', converterTool)
-        kwargs.setdefault('TrackParamsEstimationTool', trackEstimationTool)
-
+    from ActsGeometry.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+    geoTool = acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags))
+    acc.addPublicTool(geoTool)
+    
+    # ATLAS Converter Tool
+    from ActsTrkEventCnv.ActsTrkEventCnvConfig import ActsToTrkConverterToolCfg
+    converterTool = acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags))
+    
+    # Track Param Estimation Tool
+    from ActsTrkTrackParamsEstimationTool.ActsTrkTrackParamsEstimationToolConfig import TrackParamsEstimationToolCfg
+    trackEstimationTool = acc.popToolsAndMerge(TrackParamsEstimationToolCfg(flags))
+    
+    kwargs.setdefault('TrackingGeometryTool', acc.getPublicTool(geoTool.name)) # PublicToolHandle
+    kwargs.setdefault('ATLASConverterTool', converterTool)
+    kwargs.setdefault('TrackParamsEstimationTool', trackEstimationTool)
+    
     monitoringAlgorithm = helper.addAlgorithm(CompFactory.ActsTrk.SeedAnalysisAlg, name, **kwargs)
     monitoringGroup = helper.addGroup(monitoringAlgorithm, 'ActsTrkSeedAnalysisAlg', 'ActsTrkAnalysis')
 
@@ -223,9 +222,9 @@ def ActsTrkPixelSeedAnalysisAlgCfg(flags, name = "ActsTrkPixelSeedAnalysisAlg", 
 
 def ActsTrkStripSeedAnalysisAlgCfg(flags, name = "ActsTrkStripSeedAnalysisAlg", **kwargs):
     kwargs.setdefault('InputSeedCollection', 'ITkStripSeeds')
+    kwargs.setdefault('UsePixel', False)
 
     if flags.Tracking.doTruth:
-        kwargs.setdefault('UsePixel', False)
         kwargs.setdefault('DetectorElements', 'ITkStripDetectorElementCollection')
         kwargs.setdefault('ITkClustersTruth', 'PRD_MultiTruthITkStrip')
 
