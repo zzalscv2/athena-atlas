@@ -1,6 +1,5 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-# $Id$
 #
 # @file D3PDMakerConfig/python/D3PDMakerFlags.py
 # @author scott snyder <snyder@bnl.gov>
@@ -146,7 +145,7 @@ class EgammaUserDataPrefix (JobProperty):
     """Prefix to use for UserData labels for egamma."""
     statusOn     = True
     allowedTypes = ['str']
-    StoredValue  = 'egammaD3PDAnalysis::'
+    StoredValue  = 'egammaD3PDAnalysis_'
 jobproperties.D3PDMakerFlags.add_JobProperty(EgammaUserDataPrefix)
 
 
@@ -170,7 +169,7 @@ class JetUserDataPrefix (JobProperty):
     """Prefix to use for UserData labels for jet."""
     statusOn     = True
     allowedTypes = ['str']
-    StoredValue  = 'JetD3PDAnalysis::'
+    StoredValue  = 'JetD3PDAnalysis_'
 jobproperties.D3PDMakerFlags.add_JobProperty(JetUserDataPrefix)
 
 
