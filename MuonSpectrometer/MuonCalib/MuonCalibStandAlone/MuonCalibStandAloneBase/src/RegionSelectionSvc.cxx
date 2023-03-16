@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // MuonGeoModel
@@ -86,10 +86,10 @@ int RegionSelectionSvc ::AddRegionNtuples(const std::string &infile, TChain *cha
             if (regname == (*nt_it)) {
                 chain->AddFile(infile.c_str(), TChain::kBigNumber, ((*nt_it) + "/" + "Segments").c_str());
                 std::list<std::string>::iterator new_it = nt_it;
-                new_it--;
+                --new_it;
                 dirnames.erase(nt_it);
                 nt_it = new_it;
-                n_trees++;
+                ++n_trees;
             }
         }
     return n_trees;
