@@ -40,7 +40,7 @@ def precisionPhotonSequence(flags, ion=False):
 
 
 
-def precisionPhotonMenuSequence(flags, name,ion=False):
+def precisionPhotonMenuSequence(flags, name,ion=False, is_probe_leg=False):
     """Creates precisionPhoton  sequence"""
 
     # This will be executed after pricisionCalo, so we need to pickup indeed the topoClusters by precisionCalo and add them here as requirements
@@ -57,5 +57,6 @@ def precisionPhotonMenuSequence(flags, name,ion=False):
                          Sequence    = sequence,
                          Maker       = precisionPhotonViewsMaker, 
                          Hypo        = thePrecisionPhotonHypo,
-                         HypoToolGen = TrigEgammaPrecisionPhotonHypoToolFromDict)
+                         HypoToolGen = TrigEgammaPrecisionPhotonHypoToolFromDict,
+                         IsProbe     = is_probe_leg)
 

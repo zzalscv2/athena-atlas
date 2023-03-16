@@ -43,7 +43,7 @@ def precisionPhotonCaloIsoSequence(flags, ion=False):
 
 
 
-def precisionPhotonCaloIsoMenuSequence(flags, name,ion=False):
+def precisionPhotonCaloIsoMenuSequence(flags, name,ion=False, is_probe_leg=False):
 
     # This will be executed after pricisionPhoton
 
@@ -65,5 +65,6 @@ def precisionPhotonCaloIsoMenuSequence(flags, name,ion=False):
                          Sequence    = sequence,
                          Maker       = precisionPhotonCaloIsoViewsMaker, 
                          Hypo        = thePrecisionPhotonCaloIsoHypo,
-                         HypoToolGen = TrigEgammaPrecisionPhotonCaloIsoHypoToolFromDict)
+                         HypoToolGen = TrigEgammaPrecisionPhotonCaloIsoHypoToolFromDict,
+                         IsProbe     = is_probe_leg)
 

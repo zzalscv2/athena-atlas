@@ -62,7 +62,7 @@ def TRTHitGeneratorSequence(flags):
 
 
 
-def hipTRTMenuSequence(flags):
+def hipTRTMenuSequence(flags, is_probe_leg=False):
     """ Creates TRTDataGenerator MENU sequence """
     (sequenceOut, trtDataSequence, trtViewsMaker) = RecoFragmentsPool.retrieve(TRTHitGeneratorSequence, flags)
 
@@ -77,6 +77,7 @@ def hipTRTMenuSequence(flags):
                          Sequence    = trtDataSequence,
                          Maker       = trtViewsMaker, 
                          Hypo        = trtHTHhypo,
-                         HypoToolGen = TrigTRTHTHhypoToolFromDict)
+                         HypoToolGen = TrigTRTHTHhypoToolFromDict,
+                         IsProbe     = is_probe_leg)
 
 
