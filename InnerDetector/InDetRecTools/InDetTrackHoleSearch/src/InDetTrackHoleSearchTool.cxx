@@ -38,7 +38,6 @@ InDet::InDetTrackHoleSearchTool::InDetTrackHoleSearchTool(const std::string& t,
   m_cosmic(false),
   m_warning(0) {
   declareInterface<ITrackHoleSearchTool>(this);
-  declareProperty("Extrapolator"         , m_extrapolator);
   declareProperty("ExtendedListOfHoles"  , m_extendedListOfHoles = false);
   declareProperty("Cosmics"              , m_cosmic);
   declareProperty("minSiHits"            , m_minSiHits = 3);
