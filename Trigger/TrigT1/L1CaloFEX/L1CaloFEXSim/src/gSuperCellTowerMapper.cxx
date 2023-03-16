@@ -52,6 +52,7 @@ StatusCode gSuperCellTowerMapper::AssignTriggerTowerMapper(std::unique_ptr<gTowe
 
 
   for(auto eachTower : *triggerTowerCollection) {
+
     if(fabs(eachTower->eta())<1.5 && eachTower->sampling()==1) {
       int tile_iphi = int(eachTower->phi()/delta_phi);
       int tower_iphi = tile_iphi/2;
@@ -60,6 +61,7 @@ StatusCode gSuperCellTowerMapper::AssignTriggerTowerMapper(std::unique_ptr<gTowe
       int nphi = 32;
       int etaSign{-1};
       int towerID_Modifier{100000};
+
 
       if (eachTower->eta() > 0) {
         etaSign = 1;
@@ -119,6 +121,12 @@ StatusCode gSuperCellTowerMapper::AssignSuperCellsToTowers(std::unique_ptr<gTowe
     float et = (cell)->energy()/cosh((cell)->eta());
     int prov = (cell)->provenance();
 
+
+    // std::cout<< ID << " " << (cell)->eta() << " " << (cell)->phi() << " " << sample << " " << region << std::endl;
+    // The following is to check if any SuperCells from data are permanently masked, and if so the masking is applied 
+    int SCprov = prov&0xFFF;
+    bool isMasked = (SCprov&0x80)==0x80;//prov looks like 0000 0000 1000 0000 if the cell is masked
+    if (isMasked and m_apply_masking) et = 0;
 
     // I removed the LOCAL TO GLOBAL ETA INDEX PATCH for gFEX
     // Since in any case the SC assignment won't be regular, the eta and phi bins are combined directly in the FindAndConnectTower
