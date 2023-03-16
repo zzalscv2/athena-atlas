@@ -285,10 +285,10 @@ def setupMenu(menu_name):
 
         # ATR-19354, low mass Drell-Yan triggers
         # L1Topo chains
-        ChainProp(name='HLT_mu4_ivarloose_mu4_7invmAB9_L1DY-BOX-2MU3V',          l1SeedThresholds=['MU3V','MU3V'], groups=MultiMuonGroup+EOFL1MuGroup+Topo2Group+['RATE:CPS_DY-BOX-2MU3V']),
-        ChainProp(name='HLT_mu4_ivarloose_mu4_b7invmAB9vtx20_L1DY-BOX-2MU3V',    l1SeedThresholds=['MU3V','MU3V'], groups=MultiMuonGroup+EOFL1MuGroup+Topo2Group+['RATE:CPS_DY-BOX-2MU3V']),
-        ChainProp(name='HLT_mu4_ivarloose_mu4_11invmAB60_L1DY-BOX-2MU3V',        l1SeedThresholds=['MU3V','MU3V'], groups=MultiMuonGroup+EOFL1MuGroup+Topo2Group+['RATE:CPS_DY-BOX-2MU3V']),
-        ChainProp(name='HLT_mu4_ivarloose_mu4_b11invmAB60vtx20_L1DY-BOX-2MU3V',  l1SeedThresholds=['MU3V','MU3V'], groups=MultiMuonGroup+EOFL1MuGroup+Topo2Group+['RATE:CPS_DY-BOX-2MU3V']),
+        ChainProp(name='HLT_mu4_ivarloose_mu4_7invmAB9_L1DY-BOX-2MU3VF',          l1SeedThresholds=['MU3VF','MU3VF'], groups=MultiMuonGroup+EOFL1MuGroup+Topo2Group+['RATE:CPS_DY-BOX-2MU3VF']),
+        ChainProp(name='HLT_mu4_ivarloose_mu4_b7invmAB9vtx20_L1DY-BOX-2MU3VF',    l1SeedThresholds=['MU3VF','MU3VF'], groups=MultiMuonGroup+EOFL1MuGroup+Topo2Group+['RATE:CPS_DY-BOX-2MU3VF']),
+        ChainProp(name='HLT_mu4_ivarloose_mu4_11invmAB60_L1DY-BOX-2MU3VF',        l1SeedThresholds=['MU3VF','MU3VF'], groups=MultiMuonGroup+EOFL1MuGroup+Topo2Group+['RATE:CPS_DY-BOX-2MU3VF']),
+        ChainProp(name='HLT_mu4_ivarloose_mu4_b11invmAB60vtx20_L1DY-BOX-2MU3VF',  l1SeedThresholds=['MU3VF','MU3VF'], groups=MultiMuonGroup+EOFL1MuGroup+Topo2Group+['RATE:CPS_DY-BOX-2MU3VF']),
         ChainProp(name='HLT_mu6_ivarloose_mu6_11invmAB24_L1DY-BOX-2MU5VF',       l1SeedThresholds=['MU5VF','MU5VF'], groups=MultiMuonGroup+EOFL1MuGroup+Topo2Group+['RATE:CPS_DY-BOX-2MU5VF']),
         ChainProp(name='HLT_mu6_ivarloose_mu6_b11invmAB24vtx20_L1DY-BOX-2MU5VF', l1SeedThresholds=['MU5VF','MU5VF'], groups=MultiMuonGroup+EOFL1MuGroup+Topo2Group+['RATE:CPS_DY-BOX-2MU5VF']),
         ChainProp(name='HLT_mu6_ivarloose_mu6_24invmAB60_L1DY-BOX-2MU5VF',       l1SeedThresholds=['MU5VF','MU5VF'], groups=MultiMuonGroup+EOFL1MuGroup+Topo2Group+['RATE:CPS_DY-BOX-2MU5VF']),
@@ -303,8 +303,8 @@ def setupMenu(menu_name):
         ChainProp(name='HLT_mu6_ivarloose_mu6_24invmAB60_L12MU5VF', l1SeedThresholds=['MU5VF','MU5VF'], groups=MultiMuonGroup+SupportGroup+['RATE:CPS_2MU5VF']),
         ChainProp(name='HLT_mu6_ivarloose_mu6_b24invmAB60vtx20_L12MU5VF', l1SeedThresholds=['MU5VF','MU5VF'], groups=MultiMuonGroup+SupportGroup+['RATE:CPS_2MU5VF']),
         # support chains
-        ChainProp(name='HLT_2mu4_7invmAA9_L1DY-BOX-2MU3V', l1SeedThresholds=['MU3V'], groups=MultiMuonGroup+SupportGroup+Topo2Group+['RATE:CPS_DY-BOX-2MU3V']),
-        ChainProp(name='HLT_2mu4_11invmAA60_L1DY-BOX-2MU3V', l1SeedThresholds=['MU3V'], groups=MultiMuonGroup+SupportGroup+Topo2Group+['RATE:CPS_DY-BOX-2MU3V']),
+        ChainProp(name='HLT_2mu4_7invmAA9_L1DY-BOX-2MU3VF', l1SeedThresholds=['MU3VF'], groups=MultiMuonGroup+SupportGroup+Topo2Group+['RATE:CPS_DY-BOX-2MU3VF']),
+        ChainProp(name='HLT_2mu4_11invmAA60_L1DY-BOX-2MU3VF', l1SeedThresholds=['MU3VF'], groups=MultiMuonGroup+SupportGroup+Topo2Group+['RATE:CPS_DY-BOX-2MU3VF']),
         ChainProp(name='HLT_2mu6_11invmAA24_L1DY-BOX-2MU5VF', l1SeedThresholds=['MU5VF'], groups=MultiMuonGroup+SupportGroup+Topo2Group+['RATE:CPS_DY-BOX-2MU5VF']),
         ChainProp(name='HLT_2mu6_24invmAA60_L1DY-BOX-2MU5VF', l1SeedThresholds=['MU5VF'], groups=MultiMuonGroup+SupportGroup+Topo2Group+['RATE:CPS_DY-BOX-2MU5VF']),
         # backup without L1Topo
@@ -1368,6 +1368,11 @@ def setupMenu(menu_name):
         ChainProp(name='HLT_tau35_mediumRNN_tracktwoMVA_tau25_mediumRNN_tracktwoMVA_03dRAB30_L1DR-TAU20ITAU12I-J25',   l1SeedThresholds=['TAU20IM','TAU12IM'], stream=[PhysicsStream,'express'], groups=PrimaryLegGroup+MultiTauGroup+LegacyTopoGroup, monGroups=['tauMon:online','tauMon:shifter']),
         ChainProp(name='HLT_tau35_mediumRNN_tracktwoMVA_tau25_mediumRNN_tracktwoMVA_03dRAB30_L1cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ55', l1SeedThresholds=['cTAU30M','cTAU20M'], stream=[PhysicsStream,'express'], groups=PrimaryPhIGroup+MultiTauGroup+Topo2Group, monGroups=['tauMon:online','tauMon:shifter']), 
         ChainProp(name='HLT_tau35_mediumRNN_tracktwoMVA_tau25_mediumRNN_tracktwoMVA_03dRAB30_L1cTAU30M_2cTAU20M_DR-eTAU30MeTAU20M-jJ55', l1SeedThresholds=['cTAU30M','cTAU20M'], groups=SupportPhIGroup+MultiTauGroup+Topo2Group, monGroups=['tauMon:t0']), # Backup item with dR between isolated eTAU
+
+        ### New Boosted Di Tau chain
+        ChainProp(name='HLT_tau20_mediumRNN_tracktwoMVA_tau20_mediumRNN_tracktwoMVA_03dRAB10_L1cTAU20M_DR-eTAU20eTAU12-jJ40', l1SeedThresholds=['cTAU20M','eTAU12'], groups=MultiTauGroup+SupportPhIGroup+Topo2Group),
+        ChainProp(name='HLT_tau20_mediumRNN_tracktwoMVA_tau20_mediumRNN_tracktwoMVA_02dRAB10_L1cTAU20M_DR-eTAU20eTAU12-jJ40', l1SeedThresholds=['cTAU20M','eTAU12'], groups=MultiTauGroup+SupportPhIGroup+Topo2Group),
+        ChainProp(name='HLT_tau25_mediumRNN_tracktwoMVA_tau20_mediumRNN_tracktwoMVA_02dRAB10_L1cTAU20M_DR-eTAU20eTAU12-jJ40', l1SeedThresholds=['cTAU20M','eTAU12'], groups=MultiTauGroup+SupportPhIGroup+Topo2Group),
 
         # 2tau+j support
         ChainProp(name='HLT_tau35_mediumRNN_tracktwoMVA_tau25_mediumRNN_tracktwoMVA_03dRAB30_L1DR-TAU20ITAU12I',   l1SeedThresholds=['TAU20IM','TAU12IM'], groups=SupportLegGroup+MultiTauGroup+LegacyTopoGroup),
