@@ -13,13 +13,9 @@ The following major branches are currently active:
 
 Branch                                                            | Purpose                      | Main Project, Release Series
 ------------------------------------------------------------------| ---------------------------- | ---------------------------------------
-[21.0](https://gitlab.cern.ch/atlas/athena/tree/21.0)             | Tier0 and MC16c              | Athena, 21.0.X
-[21.0-mc16a](https://gitlab.cern.ch/atlas/athena/tree/21.0-mc16a) | MC16a bugfixes               | Athena, 21.0.20.Y
-[21.0-mc16d](https://gitlab.cern.ch/atlas/athena/tree/21.0-mc16d) | MC16d bugfixes               | Athena, 21.0.20.Y
-[21.2](https://gitlab.cern.ch/atlas/athena/tree/21.2)             | Derivations and Analysis     | AthDerivations + (Ath)AnalysisBase, 21.2.X
-[21.6](https://gitlab.cern.ch/atlas/athena/tree/21.6)             | Event Generation             | AthGeneration, 21.6.X
-[22.0](https://gitlab.cern.ch/atlas/athena/tree/22.0)             | Run-3 Tier0 and Point1       | Athena, 22.0.X
-[master](https://gitlab.cern.ch/atlas/athena/tree/master)         | Development, Analysis, Derivations | all projects
+[master](https://gitlab.cern.ch/atlas/athena/tree/master)         | Upgrade, Analysis, Derivations | Athena 24.0.X, (Ath)AnalysisBase 24.2.X
+[23.0](https://gitlab.cern.ch/atlas/athena/tree/23.0)             | Run-3 Tier0, Point1, MCProd  | Athena 23.0.X, AthSimulation 23.0.X, AthGeneration 23.6.X
+[21.2](https://gitlab.cern.ch/atlas/athena/tree/21.2)             | Legacy run 2 derivations     | AthDerivation 21.2.X
 
 Links
 -----
