@@ -25,22 +25,22 @@
 namespace met {
 
   namespace softCaloAffSyst {
-    const static CP::SystematicVariation MET_SoftCalo_ScaleUp  ("MET_SoftCalo_ScaleUp"  );
-    const static CP::SystematicVariation MET_SoftCalo_ScaleDown("MET_SoftCalo_ScaleDown");
+    const static CP::SystematicVariation MET_SoftCalo_ScaleUp  ("MET_SoftCalo_Scale__1up"  );
+    const static CP::SystematicVariation MET_SoftCalo_ScaleDown("MET_SoftCalo_Scale__1down");
     const static CP::SystematicVariation MET_SoftCalo_Reso     ("MET_SoftCalo_Reso");
   }
 
   namespace softTrkAffSyst {
-    const static CP::SystematicVariation MET_SoftTrk_ScaleUp  ("MET_SoftTrk_ScaleUp"  );
-    const static CP::SystematicVariation MET_SoftTrk_ScaleDown("MET_SoftTrk_ScaleDown");
+    const static CP::SystematicVariation MET_SoftTrk_ScaleUp  ("MET_SoftTrk_Scale__1up"  );
+    const static CP::SystematicVariation MET_SoftTrk_ScaleDown("MET_SoftTrk_Scale__1down");
     const static CP::SystematicVariation MET_SoftTrk_ResoPara ("MET_SoftTrk_ResoPara" );
     const static CP::SystematicVariation MET_SoftTrk_ResoPerp ("MET_SoftTrk_ResoPerp" );
     const static CP::SystematicVariation MET_SoftTrk_ResoCorr ("MET_SoftTrk_ResoCorr" );
   }
 
   namespace jetTrkAffSyst {
-    const static CP::SystematicVariation MET_JetTrk_ScaleUp   ("MET_JetTrk_ScaleUp"  );
-    const static CP::SystematicVariation MET_JetTrk_ScaleDown ("MET_JetTrk_ScaleDown");
+    const static CP::SystematicVariation MET_JetTrk_ScaleUp   ("MET_JetTrk_Scale__1up"  );
+    const static CP::SystematicVariation MET_JetTrk_ScaleDown ("MET_JetTrk_Scale__1down");
   }
 
   enum SystType {
