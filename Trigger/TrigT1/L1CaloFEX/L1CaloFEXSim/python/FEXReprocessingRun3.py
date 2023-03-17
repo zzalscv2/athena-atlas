@@ -156,7 +156,7 @@ if __name__ == '__main__':
         ##################################################    
         jFEX = CompFactory.LVL1.jFEXDriver('jFEXDriver')
         jFEX.jSuperCellTowerMapperTool = CompFactory.LVL1.jSuperCellTowerMapper('jSuperCellTowerMapper')
-        jFEX.jSuperCellTowerMapperTool.SCellMasking = True
+        jFEX.jSuperCellTowerMapperTool.SCellMasking = not flags.Input.isMC
         jFEX.jFEXSysSimTool = CompFactory.LVL1.jFEXSysSim('jFEXSysSimTool')
         
         #TOBs
@@ -243,7 +243,7 @@ if __name__ == '__main__':
         ##################################################  
         gFEX = CompFactory.LVL1.gFEXDriver('gFEXDriver')
         gFEX.gSuperCellTowerMapperTool = CompFactory.LVL1.gSuperCellTowerMapper('gSuperCellTowerMapper')
-        gFEX.gSuperCellTowerMapperTool.SCellMasking = True
+        gFEX.gSuperCellTowerMapperTool.SCellMasking = not flags.Input.isMC
         gFEX.gFEXSysSimTool = CompFactory.LVL1.gFEXSysSim('gFEXSysSimTool')
         
         #TOBs
