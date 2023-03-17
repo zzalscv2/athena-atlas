@@ -3,7 +3,6 @@
 */
 #include "../AlignCondAthTest.h"
 #include "../CSCConditionsTestAlgMT.h"
-#include "../MDTConditionsTestAlg.h"
 #include "../MDTConditionsTestAlgMT.h"
 #include "../NswCondTestAlg.h"
 #include "../NswPassivationTestAlg.h"
@@ -12,7 +11,6 @@
 #include "../MdtCablMezzAlg.h"
 
 DECLARE_COMPONENT(AlignCondAthTest)
-DECLARE_COMPONENT(MDTConditionsTestAlg)
 DECLARE_COMPONENT(MDTConditionsTestAlgMT)
 DECLARE_COMPONENT(CSCConditionsTestAlgMT)
 DECLARE_COMPONENT(NswCondTestAlg)

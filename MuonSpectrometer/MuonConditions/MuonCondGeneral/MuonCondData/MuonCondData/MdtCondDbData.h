@@ -1,13 +1,12 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCONDDATA_MDTCONDDBDATA_H
 #define MUONCONDDATA_MDTCONDDBDATA_H
 
 //STL includes
-#include <string>
-#include <vector>
+#include <set>
 
 //Athena includes
 #include "AthenaKernel/CondCont.h" 
@@ -41,29 +40,29 @@ public:
     void setNoisyStation   (Identifier);
     void setNoisyChamber   (Identifier);
    
-    const std::vector<std::string>& getDeadTubes      () const;
-    const std::vector<std::string>& getDeadLayers     () const;
-    const std::vector<std::string>& getDeadMultilayers() const;
-    const std::vector<std::string>& getDeadStations   () const;
-    const std::vector<std::string>& getDeadChambers   () const;
+    const std::set<std::string>& getDeadTubes      () const;
+    const std::set<std::string>& getDeadLayers     () const;
+    const std::set<std::string>& getDeadMultilayers() const;
+    const std::set<std::string>& getDeadStations   () const;
+    const std::set<std::string>& getDeadChambers   () const;
     
-    const std::vector<Identifier>& getDeadTubesId      () const;
-    const std::vector<Identifier>& getDeadLayersId     () const;
-    const std::vector<Identifier>& getDeadMultilayersId() const;
-    const std::vector<Identifier>& getDeadStationsId   () const;
-    const std::vector<Identifier>& getDeadChambersId   () const;
+    const std::set<Identifier>& getDeadTubesId      () const;
+    const std::set<Identifier>& getDeadLayersId     () const;
+    const std::set<Identifier>& getDeadMultilayersId() const;
+    const std::set<Identifier>& getDeadStationsId   () const;
+    const std::set<Identifier>& getDeadChambersId   () const;
 
-    const std::vector<std::string>& getNoisyTubes      () const;
-    const std::vector<std::string>& getNoisyLayers     () const;
-    const std::vector<std::string>& getNoisyMultilayers() const;
-    const std::vector<std::string>& getNoisyStations   () const;
-    const std::vector<std::string>& getNoisyChambers   () const;
+    const std::set<std::string>& getNoisyTubes      () const;
+    const std::set<std::string>& getNoisyLayers     () const;
+    const std::set<std::string>& getNoisyMultilayers() const;
+    const std::set<std::string>& getNoisyStations   () const;
+    const std::set<std::string>& getNoisyChambers   () const;
     
-    const std::vector<Identifier>& getNoisyTubesId      () const;
-    const std::vector<Identifier>& getNoisyLayersId     () const;
-    const std::vector<Identifier>& getNoisyMultilayersId() const;
-    const std::vector<Identifier>& getNoisyStationsId   () const;
-    const std::vector<Identifier>& getNoisyChambersId   () const;
+    const std::set<Identifier>& getNoisyTubesId      () const;
+    const std::set<Identifier>& getNoisyLayersId     () const;
+    const std::set<Identifier>& getNoisyMultilayersId() const;
+    const std::set<Identifier>& getNoisyStationsId   () const;
+    const std::set<Identifier>& getNoisyChambersId   () const;
   
     /// Returns if the identifier (tube/multiLayer/chamber) is masked
     /// in the conditions database
@@ -80,36 +79,33 @@ public:
     bool isGoodStation   (const Identifier & Id) const;
     ///  Returns true if the complete chamber has not dead channels
     bool isGoodChamber   (const Identifier & Id) const;
-    
-    /// Alias of isGood (to be removed in a future MR)
-    bool isGoodChannel   (const MdtIdHelper *, const Identifier & Id) const;
-
+   
  
 private:
 
-    std::vector<std::string> m_cachedDeadTubes{};
-    std::vector<std::string> m_cachedDeadLayers{};
-    std::vector<std::string> m_cachedDeadMultilayers{};
-    std::vector<std::string> m_cachedDeadStations{};
-    std::vector<std::string> m_cachedDeadChambers{};
+    std::set<std::string> m_cachedDeadTubes{};
+    std::set<std::string> m_cachedDeadLayers{};
+    std::set<std::string> m_cachedDeadMultilayers{};
+    std::set<std::string> m_cachedDeadStations{};
+    std::set<std::string> m_cachedDeadChambers{};
 
-    std::vector<Identifier> m_cachedDeadTubesId{};
-    std::vector<Identifier> m_cachedDeadLayersId{};
-    std::vector<Identifier> m_cachedDeadMultilayersId{};
-    std::vector<Identifier> m_cachedDeadStationsId{};
-    std::vector<Identifier> m_cachedDeadChambersId{};
+    std::set<Identifier> m_cachedDeadTubesId{};
+    std::set<Identifier> m_cachedDeadLayersId{};
+    std::set<Identifier> m_cachedDeadMultilayersId{};
+    std::set<Identifier> m_cachedDeadStationsId{};
+    std::set<Identifier> m_cachedDeadChambersId{};
  
-    std::vector<std::string> m_cachedNoisyTubes{};
-    std::vector<std::string> m_cachedNoisyLayers{};
-    std::vector<std::string> m_cachedNoisyMultilayers{};
-    std::vector<std::string> m_cachedNoisyStations{};
-    std::vector<std::string> m_cachedNoisyChambers{};
+    std::set<std::string> m_cachedNoisyTubes{};
+    std::set<std::string> m_cachedNoisyLayers{};
+    std::set<std::string> m_cachedNoisyMultilayers{};
+    std::set<std::string> m_cachedNoisyStations{};
+    std::set<std::string> m_cachedNoisyChambers{};
 
-    std::vector<Identifier> m_cachedNoisyTubesId{};
-    std::vector<Identifier> m_cachedNoisyLayersId{};
-    std::vector<Identifier> m_cachedNoisyMultilayersId{};
-    std::vector<Identifier> m_cachedNoisyStationsId{};
-    std::vector<Identifier> m_cachedNoisyChambersId{};
+    std::set<Identifier> m_cachedNoisyTubesId{};
+    std::set<Identifier> m_cachedNoisyLayersId{};
+    std::set<Identifier> m_cachedNoisyMultilayersId{};
+    std::set<Identifier> m_cachedNoisyStationsId{};
+    std::set<Identifier> m_cachedNoisyChambersId{};
 
     const  MdtIdHelper& m_id_helper;   
 
