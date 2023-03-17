@@ -17,7 +17,6 @@ class _ConfigSettingsBase() :
       self._name                = None
       self._suffix              = None
       self._pTmin               = 1.*GeV
-      self._Xi2max              = 9.
       self._TripletDoPPS        = True
       self._Triplet_D0Max       = 4.0
       self._Triplet_D0_PPS_Max  = 1.7
@@ -141,10 +140,6 @@ class _ConfigSettingsBase() :
    @property
    def pTmin(self):
       return self._pTmin
-
-   @property
-   def Xi2max(self):
-      return self._Xi2max
 
    @property
    def TripletDoPPS(self):
@@ -420,7 +415,6 @@ class _ConfigSettingsBase() :
       log.info( " %s :", self._name )
       log.info( " %s :", self._input_name )
       log.info( "   pTmin                 : %s", self._pTmin )
-      log.info( "   Xi2max                : %s", self._Xi2max )
       log.info( "   TripletDoPPS          : %s", self._TripletDoPPS )
       log.info( "   Triplet_D0Max         : %s", self._Triplet_D0Max )
       log.info( "   Triplet_D0_PPS_Max    : %s", self._Triplet_D0_PPS_Max )
