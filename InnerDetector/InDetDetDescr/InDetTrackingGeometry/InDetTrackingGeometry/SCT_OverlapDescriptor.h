@@ -74,7 +74,7 @@ namespace InDet {
        public:
 
          /** Constructor */
-         SCT_OverlapDescriptor(bool addMoreSurfaces = false, int eta_slices = 3);
+         SCT_OverlapDescriptor(bool addMoreSurfaces = false, int eta_slices = 4);
          
          /** Destructor */
          virtual ~SCT_OverlapDescriptor() = default;

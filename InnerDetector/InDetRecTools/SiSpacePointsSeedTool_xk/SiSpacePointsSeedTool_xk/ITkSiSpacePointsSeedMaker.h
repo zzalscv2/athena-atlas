@@ -212,7 +212,7 @@ namespace ITk
     FloatProperty m_rmaxSSS{this, "radMaxSSS", 1000.};
     BooleanProperty m_isLRT{this, "isLRT", false};
     FloatProperty m_drminPPP{this, "mindRadiusPPP", 6.};
-    FloatProperty m_drmaxPPP{this, "maxdRadiusPPP", 120.};
+    FloatProperty m_drmaxPPP{this, "maxdRadiusPPP", 150.};
     FloatProperty m_zmaxPPP{this, "maxZPPP", 2700.};
     FloatProperty m_drminSSS{this, "mindRadiusSSS", 20.};
     FloatProperty m_drmaxSSS{this, "maxdRadiusSSS", 300.};
@@ -268,7 +268,7 @@ namespace ITk
     float m_COF{134 * .05 * 9};
     float m_dzMaxFast   {200.};
     float m_R2MaxFast   {2500.};        
-    float m_rmaxPPP     {140.};   
+    float m_rmaxPPP     {140.};
     float m_dzmaxSSS    {900.};    
     float m_drminSeedConf{5.};
     //@}

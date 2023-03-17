@@ -67,7 +67,8 @@ int InDet::SiTrajectoryElement_xk::searchClustersWithStereo
   double Xc  = m_xi2maxlink;     
   double bestX2  = m_xi2maxlink;
   double Xm  = m_xi2max    ;
-  int    nm  = m_tools->isITkGeometry() ? m_tools->maxclusters() : 10;
+  int nMaxClusters = m_tools->isITkGeometry() ? m_tools->maxclusters() : 9;
+  int nMaxClustersForBestChi2 = m_tools->isITkGeometry() ? nMaxClusters-1 : nMaxClusters;
 
   /// holder for best cluster seen not pasing cuts
   const InDet::SiCluster* cl = nullptr;
@@ -125,13 +126,13 @@ int InDet::SiTrajectoryElement_xk::searchClustersWithStereo
       /// so far
 
       /// If we have less than nm saved, save it in the next slot
-      if(nLinksFound<nm){
+      if(nLinksFound<=nMaxClusters) {
          L[nLinksFound++]=l;
       } else {
          /// otherwise, don't add it, and update the chi2 cut to 
          /// the worst one in our list, to get rid of further 
          /// candidates early on. 
-         Xm=L[nm-1].xi2();
+         Xm=L[nMaxClustersForBestChi2].xi2();
       }
 
       /// finally, update the chi2 cut - don't bother with anything worse
@@ -178,7 +179,8 @@ int InDet::SiTrajectoryElement_xk::searchClustersWithoutStereoPIX
   /// chi2 cuts
   double Xc  = m_xi2maxlink;
   double Xm  = m_xi2max    ;
-  int    nm  = m_tools->isITkGeometry() ? m_tools->maxclusters() : 10;
+  int nMaxClusters = m_tools->isITkGeometry() ? m_tools->maxclusters() : 9;
+  int nMaxClustersForBestChi2 = m_tools->isITkGeometry() ? nMaxClusters-1 : nMaxClusters;
 
   /// best cluster seen
   const InDet::SiCluster* cl = nullptr;
@@ -233,9 +235,10 @@ int InDet::SiTrajectoryElement_xk::searchClustersWithoutStereoPIX
       for(int i=0; i!=nLinksFound; ++i) L[i].Comparison(l);
       /// and place the worst link (remember that l is now a different link, see above)!
       /// If within capacity, increment counter and add
-      if(nLinksFound<nm) L[nLinksFound++]=l;
+      if(nLinksFound<=nMaxClusters)
+        L[nLinksFound++]=l;
       /// otherwise increment cut to avoid bothering with lower qualities in the future
-      else Xm=L[nm-1].xi2();
+      else Xm=L[nMaxClustersForBestChi2].xi2();
       /// update looser chi2 cut to match the tighter one - we found at least one good cluster
       Xc = Xm;
     }
@@ -273,7 +276,8 @@ int InDet::SiTrajectoryElement_xk::searchClustersWithoutStereoSCT
   /// chi2 cuts
   double Xc  = m_xi2maxlink;
   double Xm  = m_xi2max    ;
-  int    nm  = m_tools->isITkGeometry() ? m_tools->maxclusters() : 10;
+  int nMaxClusters = m_tools->isITkGeometry() ? m_tools->maxclusters() : 9;
+  int nMaxClustersForBestChi2 = m_tools->isITkGeometry() ? nMaxClusters-1 : nMaxClusters;
   /// best cluster seen 
   const InDet::SiCluster* cl = nullptr;
 
@@ -334,9 +338,10 @@ int InDet::SiTrajectoryElement_xk::searchClustersWithoutStereoSCT
       /// left with a link to the worst chi² one  
       for(int i=0; i!=nLinksFound; ++i) L[i].Comparison(l);
       /// and place the worst link so far at the end if space. 
-      if(nLinksFound<nm) L[nLinksFound++]=l;
+      if(nLinksFound<=nMaxClusters)
+        L[nLinksFound++]=l;
       /// otherwise, update chi2 cut to not bother with worse clusters anymore
-      else Xm=L[nm-1].xi2();
+      else Xm=L[nMaxClustersForBestChi2].xi2();
       /// update looser chi2 to match the tighter one - we have at least one good link now
       Xc = Xm;
     }
@@ -373,7 +378,8 @@ int InDet::SiTrajectoryElement_xk::searchClustersWithStereoAss
   double Xc  = m_xi2maxlink;
   double Xl  = m_xi2maxlink;
   double Xm  = m_xi2max    ;
-  int    nm  = m_tools->isITkGeometry() ? m_tools->maxclusters() : 10;
+  int nMaxClusters = m_tools->isITkGeometry() ? m_tools->maxclusters() : 9;
+  int nMaxClustersForBestChi2 = m_tools->isITkGeometry() ? nMaxClusters-1 : nMaxClusters;
 
   const InDet::SiCluster* cl = nullptr;
 
@@ -416,8 +422,9 @@ int InDet::SiTrajectoryElement_xk::searchClustersWithStereoAss
       /// it replaces in ascending chi², and we will be 
       /// left with a link to the worst chi² one  
       for(int i=0; i!=nLinksFound; ++i) L[i].Comparison(l);
-      if(nLinksFound<nm) L[nLinksFound++]=l;
-      else Xm=L[nm-1].xi2();
+      if(nLinksFound<=nMaxClusters)
+        L[nLinksFound++]=l;
+      else Xm=L[nMaxClustersForBestChi2].xi2();
       Xc = Xm+6.;
     }
     else if(!nLinksFound && x < Xl) {Xl = x; Xc = x+6.; cl = c;}
@@ -446,7 +453,8 @@ int InDet::SiTrajectoryElement_xk::searchClustersWithoutStereoAssPIX
   double PV2 = Tp_cov(1, 1);
   double Xc  = m_xi2maxlink;
   double Xm  = m_xi2max    ;
-  int    nm  = m_tools->isITkGeometry() ? m_tools->maxclusters() : 10;
+  int nMaxClusters = m_tools->isITkGeometry() ? m_tools->maxclusters() : 9;
+  int nMaxClustersForBestChi2 = m_tools->isITkGeometry() ? nMaxClusters-1 : nMaxClusters;
 
   const InDet::SiCluster* cl = nullptr;
 
@@ -480,7 +488,9 @@ int InDet::SiTrajectoryElement_xk::searchClustersWithoutStereoAssPIX
       /// it replaces in ascending chi², and we will be 
       /// left with a link to the worst chi² one  
       for(int i=0; i!=nLinksFound; ++i) L[i].Comparison(l);
-      if(nLinksFound<nm) L[nLinksFound++]=l; else Xm=L[nm-1].xi2();
+      if(nLinksFound<=nMaxClusters)
+        L[nLinksFound++]=l;
+      else Xm=L[nMaxClustersForBestChi2].xi2();
       Xc = Xm;
     }
     else if(!nLinksFound) {Xc = x; cl = c;}
@@ -509,7 +519,8 @@ int InDet::SiTrajectoryElement_xk::searchClustersWithoutStereoAssSCT
   double PV2 = Tp_cov(1, 1);
   double Xc  = m_xi2maxlink;
   double Xm  = m_xi2max    ;
-  int    nm  = m_tools->isITkGeometry() ? m_tools->maxclusters() : 10;
+  int nMaxClusters = m_tools->isITkGeometry() ? m_tools->maxclusters() : 9;
+  int nMaxClustersForBestChi2 = m_tools->isITkGeometry() ? nMaxClusters-1 : nMaxClusters;
 
   const InDet::SiCluster* cl = nullptr;
 
@@ -557,7 +568,9 @@ int InDet::SiTrajectoryElement_xk::searchClustersWithoutStereoAssSCT
       /// it replaces in ascending chi², and we will be 
       /// left with a link to the worst chi² one  
       for(int i=0; i!=nLinksFound; ++i) L[i].Comparison(l);
-      if(nLinksFound<nm) L[nLinksFound++]=l; else Xm=L[nm-1].xi2();
+      if(nLinksFound<=nMaxClusters)
+        L[nLinksFound++]=l;
+      else Xm=L[nMaxClustersForBestChi2].xi2();
       Xc = Xm;
     }
     else if(!nLinksFound) {Xc = x; cl = c;}
