@@ -1155,7 +1155,7 @@ InDet::SiLayerBuilderImpl::cylindricalLayersImpl(const InDetDD::SiDetectorElemen
       // prepare the right overlap descriptor
       std::unique_ptr<Trk::OverlapDescriptor> olDescriptor = nullptr;
       if (m_pixelCase){
-          olDescriptor = std::make_unique<InDet::PixelOverlapDescriptor>();
+          olDescriptor = std::make_unique<InDet::PixelOverlapDescriptor>(m_addMoreSurfaces);
       }
       else {
         olDescriptor = std::make_unique<InDet::SCT_OverlapDescriptor>(m_addMoreSurfaces);

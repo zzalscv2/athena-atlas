@@ -126,8 +126,8 @@ namespace InDet {
 
     IntegerArrayProperty m_layerIndicesBarrel{this, "LayerIndicesBarrel", {} }; //!< indices to be used for layer creation (used for ITk specific case)
     IntegerArrayProperty m_layerIndicesEndcap{this, "LayerIndicesEndcap", {} }; //!< indices to be used for layer creation (used for ITk specific case)
-    BooleanProperty                                          m_useRingLayout{this, "UseRingLayout", false};      //!< to enable creation of rings for ITk pixel geometry (used for ITk specific case)
-    BooleanProperty                                          m_addMoreSurfaces   {this, "AddMoreSurfaces", false};              //!< to add additional surfaces to the SCT_OverlapDescriptor (used for ITk specific case)
+    BooleanProperty m_useRingLayout{this, "UseRingLayout", false}; //!< to enable creation of rings for ITk pixel geometry (used for ITk specific case)
+    BooleanProperty m_addMoreSurfaces{this, "AddMoreSurfaces", false}; //!< to add additional surfaces to the PixelOverlapDescriptor, SCT_OverlapDescriptor and DiscOverlapDescriptor (used for ITk specific case)
 
     // Properties only in SiLayerBuilderCond
     SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_SCT_ReadKey{this, "SCT_ReadKey", "SCT_DetectorElementCollection", "Key of output SiDetectorElementCollection for SCT"};

@@ -99,7 +99,6 @@ namespace InDet{
       void setHeavyIon   (bool);
       void setFastTracking (bool);
       void setITkGeometry  (bool);
-
       const std::vector<bool> *pixelStatus() const { return m_pixelDetElStatus ? &m_pixelDetElStatus->getElementStatus() : nullptr; }
       const std::vector<bool> *sctStatus()   const { return m_sctDetElStatus ? &m_sctDetElStatus->getElementStatus() : nullptr; }
 
@@ -261,8 +260,6 @@ namespace InDet{
   {
     m_ITkGeometry = isITk;
   }
-
-
 } // end of name space
 
 #endif // SiTools_xk

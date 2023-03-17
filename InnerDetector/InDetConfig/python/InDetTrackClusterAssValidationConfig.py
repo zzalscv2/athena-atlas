@@ -48,7 +48,8 @@ def ITkTrackClusterAssValidationCfg(flags, name='ITkTrackClusterAssValidation', 
     kwargs.setdefault("RapidityCut",
                       flags.ITk.Tracking.ActiveConfig.maxEta)
     kwargs.setdefault("EtaBins", flags.ITk.Tracking.ActiveConfig.etaBins)
-    kwargs.setdefault("PtCuts", flags.ITk.Tracking.ActiveConfig.minPT)
+    kwargs.setdefault("PtCuts",
+                      (len(flags.ITk.Tracking.ActiveConfig.etaBins)-1)*[max(flags.ITk.Tracking.ActiveConfig.minPT)])
     kwargs.setdefault("MinNumberClustersCuts",
                       flags.ITk.Tracking.ActiveConfig.minClusters)
 

@@ -2242,6 +2242,12 @@ bool InDet::SiTrajectoryElement_xk::initiateState
 {
   /// Gives Tb the x and (for pix) the y of the cluster, and the corresponding cov elements, 
   /// and copies everything else from inputPars
+  if (m_tools->isITkGeometry()) {
+    // using pattern covariance for all clusters for ITk
+    Amg::MatrixX cov(2,2);
+    patternCovariances(m_cluster,cov(0,0),cov(1,0),cov(1,1));
+    return outputPars.initiate(inputPars,m_cluster->localPosition(),cov);
+  }
   return outputPars.initiate(inputPars,m_cluster->localPosition(),m_cluster->localCovariance());
 }
 

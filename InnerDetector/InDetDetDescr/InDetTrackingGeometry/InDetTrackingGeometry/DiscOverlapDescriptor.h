@@ -117,7 +117,7 @@ namespace InDet {
     
     const Trk::BinnedArray<Trk::Surface>*           m_bin_array;
     std::vector<Trk::BinUtility*>*                  m_singleBinUtils;
-    bool                                            m_pixelCase;    
+    bool                                            m_pixelCase;
   };
   
   

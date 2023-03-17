@@ -1241,7 +1241,7 @@ void SiSpacePointsSeedMaker::buildConnectionMaps(std::array<int, arraySizePhiZ> 
         }
       }
 
-      /** 
+      /**
         * z bins 3 / 7: 450mm < |z| < 925mm.: 
         * also include the central z region in the bottom SP search.  
         * likely for PPP seeds with hits in pixel barrel + endcaps
@@ -1407,11 +1407,11 @@ void SiSpacePointsSeedMaker::fillLists(EventData &data) const
       {-2500., 0},
       {-1400., 1},
       {-925., 2},
-      {-450., 3},
-      {-250, 4},
-      {250, 5},
-      {450, 6},
-      {925, 7},
+      {-500., 3},
+      {-250., 4},
+      {250., 5},
+      {500., 6},
+      {925., 7},
       {1400, 8},
       {2500, 9},
       {100000, 10}, ///< if we encounter Si hits at z > +100m, we are probably not in ATLAS anymore...
@@ -2058,7 +2058,8 @@ void SiSpacePointsSeedMaker::production3SpPPP(EventData &data,
                                               std::array<std::vector<SiSpacePointForSeed *>::iterator, arraySizeNeighbourBins> &iter_endTopCands,
                                               const int numberBottomCells, const int numberTopCells, int &nseed) const
 {
-  /** 
+
+     /**
      * This method implements the seed search for a single phi-Z region of the detector. 
      * The central SP is taken from the region, while the top and bottom SP are allowed 
      * to come from either the same or a range of neighbouring cells. 
@@ -2100,7 +2101,6 @@ void SiSpacePointsSeedMaker::production3SpPPP(EventData &data,
   /// Loop through all central space point candidates
   for (; iter_centralSP != iter_endBottomCands[0]; ++iter_centralSP)
   {
-
     const float &R = (*iter_centralSP)->radius();
    
     if(R > data.RTmax) break; ///< stop if we have moved outside our radial region of interest.
@@ -2141,11 +2141,10 @@ void SiSpacePointsSeedMaker::production3SpPPP(EventData &data,
         if(( (*iter_otherSP)->radius()- R ) >= m_drminPPP) break;
       } 
       iter_topCands[cell]=iter_otherSP; 
-      
+
       /// loop over each SP in each cell
       for (; iter_otherSP != iter_endTopCands[cell]; ++iter_otherSP)
       {
-
         /// evaluate the radial distance,
         float Rt = (*iter_otherSP)->radius();
         float dR = Rt - R;
@@ -2222,13 +2221,12 @@ void SiSpacePointsSeedMaker::production3SpPPP(EventData &data,
 
       for(; iter_otherSP!=iter_endBottomCands[cell]; ++iter_otherSP) {
         if( (R - (*iter_otherSP)->radius()) <= m_drmaxPPP) break;
-      } 
+      }
       iter_bottomCands[cell]=iter_otherSP;
 
       /// in each cell, loop over the space points
       for (; iter_otherSP != iter_endBottomCands[cell]; ++iter_otherSP)
       {
-
         /// evaluate the radial distance between the central and bottom SP
         const float &Rb = (*iter_otherSP)->radius();
         float dR = R - Rb;
@@ -2335,8 +2333,9 @@ void SiSpacePointsSeedMaker::production3SpPPP(EventData &data,
       float d0max = maxd0cut;
 
       size_t Nc = 1;
-      if (data.ITkSP[b]->radius() > m_rmaxPPP)
+      if (abs(Z)<500. or data.ITkSP[b]->radius() > m_rmaxPPP){
         Nc = 0;
+      }
       if (data.nOneSeedsQ)
         ++Nc;
 
@@ -2465,6 +2464,7 @@ void SiSpacePointsSeedMaker::production3SpPPP(EventData &data,
 
       } ///< end loop over top space point candidates
       /// now apply further cleaning on the seed candidates for this central+bottom pair.
+
       if (data.ITkCmSp.size() > Nc)
       {
         newOneSeedWithCurvaturesComparisonPPP(data, data.ITkSP[b], (*iter_centralSP), Z - R * Tzb);
@@ -3658,8 +3658,10 @@ void SiSpacePointsSeedMaker::newOneSeedWithCurvaturesComparisonPPP(EventData &da
     float Qmin = 1.e20;
     float Rb = 2. * SPb->radius();
     int NTc(2);
-    if (Rb > 280.)
+    if (abs(SP0->z())<500. or Rb > 280.) {
       NTc = 1;
+    }
+
     SiSpacePointForSeed *SPmin = nullptr;
     bool Qm = Rb < 120. || std::abs(Zob) > 150.;
 
