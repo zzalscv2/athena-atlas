@@ -560,7 +560,7 @@ Trk::EnergyLossUpdator::updateEnergyLoss(Trk::EnergyLoss& eLoss,
     }
   }
 
-  return EnergyLoss(deltaE,
+  return {deltaE,
                     sigmaDeltaE,
                     sigmaMinusDeltaE,
                     sigmaPlusDeltaE,
@@ -568,7 +568,7 @@ Trk::EnergyLossUpdator::updateEnergyLoss(Trk::EnergyLoss& eLoss,
                     sigmaDeltaE_ioni,
                     deltaE_rad,
                     sigmaDeltaE_rad,
-                    depth);
+                    depth};
 }
 
 // public interface method
