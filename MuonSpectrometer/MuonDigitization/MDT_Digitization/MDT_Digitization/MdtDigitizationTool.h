@@ -220,7 +220,7 @@ private:
     std::vector<maskedStation> m_vMaskedStations;
 
     // list of Identifiers returned by the Conditions Service to mask stations
-    std::vector<Identifier> m_IdentifiersToMask;
+    std::set<Identifier> m_IdentifiersToMask;
 
     // pile-up
     std::unique_ptr<TimedHitCollection<MDTSimHit>> m_thpcMDT{};  // the hits
