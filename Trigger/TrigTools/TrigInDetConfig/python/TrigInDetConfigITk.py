@@ -41,8 +41,8 @@ def ITkftfCfg(flags, roisKey, signature, signatureName):
                                                                     UseSctSpacePoints = False,
                                                                     layerNumberTool   = acc.getPublicTool("TrigL2LayerNumberToolITk_FTF") ) )
 
-    from TrigFastTrackFinder.TrigFastTrackFinder_Config import TrigFastTrackFinderMonitoring
-    monTool = TrigFastTrackFinderMonitoring(flags, name = "trigfasttrackfinder_" + signature, doResMon=False)
+    from TrigFastTrackFinder.TrigFastTrackFinder_Config import TrigFastTrackFinderMonitoringArg
+    monTool = TrigFastTrackFinderMonitoringArg(flags, name = "trigfasttrackfinder_" + signature, doResMon=False)
 
     ftf = CompFactory.TrigFastTrackFinder( name = "TrigFastTrackFinder_" + signature,
                                             LayerNumberTool          = acc.getPublicTool( "TrigL2LayerNumberToolITk_FTF" ),
