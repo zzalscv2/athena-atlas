@@ -16,9 +16,17 @@ where Particle = [STau1Minus, STau1Plus, STau2Minus, STau2Plus, SElectronRMinus,
 def getSleptonsPhysicsTool(name="SleptonsPhysicsTool", **kwargs):
     from G4AtlasApps.SimFlags import simFlags
     from AthenaCommon.SystemOfUnits import GeV,MeV,eplus,ns
-    GMSBStau    = eval(simFlags.specialConfiguration.get_Value().get("GMSBStau", None))
-    kwargs.setdefault("G4STau1MinusMass",             GMSBStau)
-    kwargs.setdefault("G4STau1PlusMass",              GMSBStau)
+    Stau = None
+    if simFlags.specialConfiguration.get_Value().has_key("GMSBStau"):
+        Stau    = eval(simFlags.specialConfiguration.get_Value().get("GMSBStau", None))
+    elif (simFlags.specialConfiguration.get_Value().has_key("coannihilationStau")) :
+        Stau    = eval(simFlags.specialConfiguration.get_Value().get("coannihilationStau", None))
+
+
+    kwargs.setdefault("G4STau1MinusMass",             Stau)
+    kwargs.setdefault("G4STau1PlusMass",              Stau)
+    kwargs.setdefault("G4STau2MinusMass",             Stau)
+    kwargs.setdefault("G4STau2PlusMass",              Stau)
 
     if simFlags.specialConfiguration.get_Value().has_key("GMSBSlepton"):
         GMSBSlepton = eval(simFlags.specialConfiguration.get_Value().get("GMSBSlepton", None))
@@ -33,28 +41,36 @@ def getSleptonsPhysicsTool(name="SleptonsPhysicsTool", **kwargs):
 def getAllSleptonsPhysicsTool(name="AllSleptonsPhysicsTool", **kwargs):
     from G4AtlasApps.SimFlags import simFlags
     from AthenaCommon.SystemOfUnits import GeV,MeV,eplus,ns
-    if simFlags.specialConfiguration.get_Value().has_key("GMSBStau"):
-        GMSBStau    = eval(simFlags.specialConfiguration.get_Value().get("GMSBStau", None))
-        GMSBStauTime    = eval(simFlags.specialConfiguration.get_Value().get("GMSBStauTime", None))
-        kwargs.setdefault("G4STau1MinusMass",             GMSBStau)
-        kwargs.setdefault("G4STau1MinusPDGCode",          1000015)
-        kwargs.setdefault("G4STau1MinusStable",           False)
-        kwargs.setdefault("G4STau1MinusLifetime",         GMSBStauTime)
-        
-        kwargs.setdefault("G4STau1PlusMass",              GMSBStau)
-        kwargs.setdefault("G4STau1PlusPDGCode",           -1000015)
-        kwargs.setdefault("G4STau1PlusStable",            False)
-        kwargs.setdefault("G4STau1PlusLifetime",          GMSBStauTime)
-        
-        kwargs.setdefault("G4STau2MinusMass",             GMSBStau)
-        kwargs.setdefault("G4STau2MinusPDGCode",          2000015)
-        kwargs.setdefault("G4STau2MinusStable",           False)
-        kwargs.setdefault("G4STau2MinusLifetime",         GMSBStauTime)
-        
-        kwargs.setdefault("G4STau2PlusMass",              GMSBStau)
-        kwargs.setdefault("G4STau2PlusPDGCode",           -2000015)
-        kwargs.setdefault("G4STau2PlusStable",            False)
-        kwargs.setdefault("G4STau2PlusLifetime",          GMSBStauTime)
+    Stau = None
+    StauTime = None
+    if simFlags.specialConfiguration.get_Value().has_key("GMSBStau"): # Check for GMSBStau key word in job options. If found set Stau values.
+        Stau    = eval(simFlags.specialConfiguration.get_Value().get("GMSBStau", None))
+        StauTime    = eval(simFlags.specialConfiguration.get_Value().get("GMSBStauTime", None))
+    elif simFlags.specialConfiguration.get_Value().has_key("coannihilationStau"): # Check for coannihilationStau key word in evgen special configs. This is an option that is normally put in the event gen job options file.
+        Stau = eval(simFlags.specialConfiguration.get_Value().get("coannihilationStau", None))
+        StauTime = eval(simFlags.specialConfiguration.get_Value().get("coannihilationStauTime", None))
+
+
+    kwargs.setdefault("G4STau1MinusMass",             Stau)
+    kwargs.setdefault("G4STau1MinusPDGCode",          1000015)
+    kwargs.setdefault("G4STau1MinusStable",           False)
+    kwargs.setdefault("G4STau1MinusLifetime",         StauTime)
+
+    kwargs.setdefault("G4STau1PlusMass",              Stau)
+    kwargs.setdefault("G4STau1PlusPDGCode",           -1000015)
+    kwargs.setdefault("G4STau1PlusStable",            False)
+    kwargs.setdefault("G4STau1PlusLifetime",          StauTime)
+
+    kwargs.setdefault("G4STau2MinusMass",             Stau)
+    kwargs.setdefault("G4STau2MinusPDGCode",          2000015)
+    kwargs.setdefault("G4STau2MinusStable",           False)
+    kwargs.setdefault("G4STau2MinusLifetime",         StauTime)
+
+    kwargs.setdefault("G4STau2PlusMass",              Stau)
+    kwargs.setdefault("G4STau2PlusPDGCode",           -2000015)
+    kwargs.setdefault("G4STau2PlusStable",            False)
+    kwargs.setdefault("G4STau2PlusLifetime",          StauTime)
+
 
     if simFlags.specialConfiguration.get_Value().has_key("GMSBSlepton"):
         GMSBSlepton = eval(simFlags.specialConfiguration.get_Value().get("GMSBSlepton", None))
@@ -104,6 +120,7 @@ def getAllSleptonsPhysicsTool(name="AllSleptonsPhysicsTool", **kwargs):
 
     return CfgMgr.SleptonsPhysicsTool(name, **kwargs)
 
+## Gravitino Options
 
 def getSElectronRPlusToElectronGravitino(name="SElectronRPlusToElectronGravitino", **kwargs):
     kwargs.setdefault("ParticleName","s_e_plus_R")
@@ -169,4 +186,322 @@ def getSTauRMinusToTauGravitino(name="STauRMinusToTauGravitino", **kwargs):
     kwargs.setdefault("ParticleName","s_tau_minus_2")
     kwargs.setdefault("BR", 1.0) # Branching Ratio
     kwargs.setdefault("Daughters","s_G,tau-")
+    return CfgMgr.AddPhysicsDecayTool(name, **kwargs)
+
+## Neutralino-Stau
+def getSTauRMinusToTauNeutralino(name="STauRMinusToTauNeutralino", **kwargs):
+    kwargs.setdefault("ParticleName","s_tau_minus_2")
+    kwargs.setdefault("BR", 1.0) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,tau-")
+    return CfgMgr.AddPhysicsDecayTool(name, **kwargs)
+
+def getSTauRPlusToTauNeutralino(name="STauRPlusToTauNeutralino", **kwargs):
+    kwargs.setdefault("ParticleName","s_tau_plus_2")
+    kwargs.setdefault("BR", 1.0) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,tau+")
+    return CfgMgr.AddPhysicsDecayTool(name, **kwargs)
+
+def getSTauLMinusToTauNeutralino(name="STauLMinusToTauNeutralino", **kwargs):
+    kwargs.setdefault("ParticleName","s_tau_minus_1")
+    kwargs.setdefault("BR", 1.0) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,tau-")
+    return CfgMgr.AddPhysicsDecayTool(name, **kwargs)
+
+def getSTauLPlusToTauNeutralino(name="STauLPlusToTauNeutralino", **kwargs):
+    kwargs.setdefault("ParticleName","s_tau_plus_1")
+    kwargs.setdefault("BR", 1.0) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,tau+")
+    return CfgMgr.AddPhysicsDecayTool(name, **kwargs)
+
+
+#########################################################################################
+### Neutralino-Stau Off shell tau
+## Stau-Neutralino Pion Neutrino
+#########################################################################################
+def getSTauRMinusToPionMinusNeutralino(name="STauRMinusToPionMinusNeutralino", **kwargs):
+    from G4AtlasApps.SimFlags import simFlags
+    from AthenaCommon.SystemOfUnits import GeV,MeV,eplus,ns
+    BR = .9
+    if simFlags.specialConfiguration.get_Value().has_key("coannihilationNeutralino") and eval(simFlags.specialConfiguration.get_Value().get("coannihilationStau", None)) - 1260 >  eval(simFlags.specialConfiguration.get_Value().get("coannihilationNeutralino", None)):
+        BR = .15
+    kwargs.setdefault("ParticleName","s_tau_minus_2")
+    kwargs.setdefault("BR", BR)  # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,pi-,nu_tau")
+    return CfgMgr.AddPhysicsDecayTool(name, **kwargs)
+
+def getSTauRPlusToPionPlusNeutralino(name="STauRPlusToPionPlusNeutralino", **kwargs):
+    from G4AtlasApps.SimFlags import simFlags
+    from AthenaCommon.SystemOfUnits import GeV,MeV,eplus,ns
+    BR = .9
+    if simFlags.specialConfiguration.get_Value().has_key("coannihilationNeutralino") and eval(simFlags.specialConfiguration.get_Value().get("coannihilationStau", None)) - 1260 >  eval(simFlags.specialConfiguration.get_Value().get("coannihilationNeutralino", None)):
+        BR = .15
+    kwargs.setdefault("ParticleName","s_tau_plus_2")
+    kwargs.setdefault("BR", BR) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,pi+,anti_nu_tau")
+    return CfgMgr.AddPhysicsDecayTool(name, **kwargs)
+
+def getSTauLMinusToPionMinusNeutralino(name="STauLMinusToPionMinusNeutralino", **kwargs):
+    from G4AtlasApps.SimFlags import simFlags
+    from AthenaCommon.SystemOfUnits import GeV,MeV,eplus,ns
+    BR = .9
+    if simFlags.specialConfiguration.get_Value().has_key("coannihilationNeutralino") and eval(simFlags.specialConfiguration.get_Value().get("coannihilationStau", None)) - 1260 >  eval(simFlags.specialConfiguration.get_Value().get("coannihilationNeutralino", None)):
+        BR = .15
+    kwargs.setdefault("ParticleName","s_tau_minus_1")
+    kwargs.setdefault("BR", BR) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,pi-,nu_tau")
+    return CfgMgr.AddPhysicsDecayTool(name, **kwargs)
+
+def getSTauLPlusToPionPlusNeutralino(name="STauLPlusToPionPlusNeutralino", **kwargs):
+    from G4AtlasApps.SimFlags import simFlags
+    from AthenaCommon.SystemOfUnits import GeV,MeV,eplus,ns
+    BR = .9
+    if simFlags.specialConfiguration.get_Value().has_key("coannihilationNeutralino") and eval(simFlags.specialConfiguration.get_Value().get("coannihilationStau", None)) - 1260 >  eval(simFlags.specialConfiguration.get_Value().get("coannihilationNeutralino", None)):
+        BR = .15
+    kwargs.setdefault("ParticleName","s_tau_plus_1")
+    kwargs.setdefault("BR", BR) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,pi+,anti_nu_tau")
+    return CfgMgr.AddPhysicsDecayTool(name, **kwargs)
+
+#########################################################################################
+### Neutralino-Stau Off shell tau
+### Stau-Neutralino Muon Neutrino
+#########################################################################################
+
+def getSTauRMinusToRhoMinusNeutralino(name="STauRMinusToRhoMinusNeutralino", **kwargs):
+    from G4AtlasApps.SimFlags import simFlags
+    from AthenaCommon.SystemOfUnits import GeV,MeV,eplus,ns
+    BR = 0.0
+    if simFlags.specialConfiguration.get_Value().has_key("coannihilationNeutralino") and eval(simFlags.specialConfiguration.get_Value().get("coannihilationStau", None)) - 1260 >  eval(simFlags.specialConfiguration.get_Value().get("coannihilationNeutralino", None)):
+        BR = .33
+    kwargs.setdefault("ParticleName","s_tau_minus_2")
+    kwargs.setdefault("BR", BR) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,rho-,nu_tau")
+    return CfgMgr.AddPhysicsDecayTool(name, **kwargs)
+
+def getSTauRPlusToRhoPlusNeutralino(name="STauRPlusToRhoPlusNeutralino", **kwargs):
+    from G4AtlasApps.SimFlags import simFlags
+    from AthenaCommon.SystemOfUnits import GeV,MeV,eplus,ns
+    BR = 0.0
+
+    if simFlags.specialConfiguration.get_Value().has_key("coannihilationNeutralino") and eval(simFlags.specialConfiguration.get_Value().get("coannihilationStau", None)) - 1260 >  eval(simFlags.specialConfiguration.get_Value().get("coannihilationNeutralino", None)):
+        BR = .33
+    kwargs.setdefault("ParticleName","s_tau_plus_2")
+    kwargs.setdefault("BR", BR) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,rho+,anti_nu_tau")
+    return CfgMgr.AddPhysicsDecayTool(name, **kwargs)
+
+def getSTauLMinusToRhoMinusNeutralino(name="STauLMinusToRhoMinusNeutralino", **kwargs):
+    from G4AtlasApps.SimFlags import simFlags
+    from AthenaCommon.SystemOfUnits import GeV,MeV,eplus,ns
+    BR = 0.0
+    if simFlags.specialConfiguration.get_Value().has_key("coannihilationNeutralino") and eval(simFlags.specialConfiguration.get_Value().get("coannihilationStau", None)) - 1260 >  eval(simFlags.specialConfiguration.get_Value().get("coannihilationNeutralino", None)):
+        BR = .33
+    kwargs.setdefault("ParticleName","s_tau_minus_1")
+    kwargs.setdefault("BR", BR) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,rho-,nu_tau")
+    return CfgMgr.AddPhysicsDecayTool(name, **kwargs)
+
+def getSTauLPlusToRhoPlusNeutralino(name="STauLPlusToRhoPlusNeutralino", **kwargs):
+    from G4AtlasApps.SimFlags import simFlags
+    from AthenaCommon.SystemOfUnits import GeV,MeV,eplus,ns
+    BR = 0.0
+    if simFlags.specialConfiguration.get_Value().has_key("coannihilationNeutralino") and eval(simFlags.specialConfiguration.get_Value().get("coannihilationStau", None)) - 1260 >  eval(simFlags.specialConfiguration.get_Value().get("coannihilationNeutralino", None)):
+        BR = .33
+    kwargs.setdefault("ParticleName","s_tau_plus_1")
+    kwargs.setdefault("BR", BR) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,rho+,anti_nu_tau")
+    return CfgMgr.AddPhysicsDecayTool(name, **kwargs)
+
+#########################################################################################
+### Neutralino-Stau Off shell tau
+### Stau-Neutralino Electron Neutrino
+#########################################################################################
+
+def getSTauRMinusToEMinusNeutralino(name="STauRMinusToEMinusNeutralino", **kwargs):
+    from G4AtlasApps.SimFlags import simFlags
+    from AthenaCommon.SystemOfUnits import GeV,MeV,eplus,ns
+    BR = .07
+    if simFlags.specialConfiguration.get_Value().has_key("coannihilationNeutralino") and eval(simFlags.specialConfiguration.get_Value().get("coannihilationStau", None)) - 1260 >  eval(simFlags.specialConfiguration.get_Value().get("coannihilationNeutralino", None)):
+        BR = .19
+    kwargs.setdefault("ParticleName","s_tau_minus_2")
+    kwargs.setdefault("BR", BR) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,e-,nu_tau,anti_nu_e")
+    return CfgMgr.AddPhysicsDecayTool(name, **kwargs)
+
+def getSTauRPlusToEPlusNeutralino(name="STauRPlusToEPlusNeutralino", **kwargs):
+    from G4AtlasApps.SimFlags import simFlags
+    from AthenaCommon.SystemOfUnits import GeV,MeV,eplus,ns
+    BR = .07
+    if simFlags.specialConfiguration.get_Value().has_key("coannihilationNeutralino") and eval(simFlags.specialConfiguration.get_Value().get("coannihilationStau", None)) - 1260 >  eval(simFlags.specialConfiguration.get_Value().get("coannihilationNeutralino", None)):
+        BR = .19
+    kwargs.setdefault("ParticleName","s_tau_plus_2")
+    kwargs.setdefault("BR", BR) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,e+,anti_nu_tau,nu_e")
+    return CfgMgr.AddPhysicsDecayTool(name, **kwargs)
+
+def getSTauLMinusToEMinusNeutralino(name="STauLMinusToEMinusNeutralino", **kwargs):
+    from G4AtlasApps.SimFlags import simFlags
+    from AthenaCommon.SystemOfUnits import GeV,MeV,eplus,ns
+    BR = .07
+    if simFlags.specialConfiguration.get_Value().has_key("coannihilationNeutralino") and eval(simFlags.specialConfiguration.get_Value().get("coannihilationStau", None)) - 1260 >  eval(simFlags.specialConfiguration.get_Value().get("coannihilationNeutralino", None)):
+        BR = .19
+    kwargs.setdefault("ParticleName","s_tau_minus_1")
+    kwargs.setdefault("BR", BR) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,e-,nu_tau,anti_nu_e")
+    return CfgMgr.AddPhysicsDecayTool(name, **kwargs)
+
+def getSTauLPlusToEPlusNeutralino(name="STauLPlusToEPlusNeutralino", **kwargs):
+    from G4AtlasApps.SimFlags import simFlags
+    from AthenaCommon.SystemOfUnits import GeV,MeV,eplus,ns
+    BR = .07
+    if simFlags.specialConfiguration.get_Value().has_key("coannihilationNeutralino") and eval(simFlags.specialConfiguration.get_Value().get("coannihilationStau", None)) - 1260 >  eval(simFlags.specialConfiguration.get_Value().get("coannihilationNeutralino", None)):
+        BR = .03
+    kwargs.setdefault("ParticleName","s_tau_plus_1")
+    kwargs.setdefault("BR", BR) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,e+,anti_nu_tau,nu_e")
+    return CfgMgr.AddPhysicsDecayTool(name, **kwargs)
+
+#########################################################################################
+### Neutralino-Stau Off shell tau
+### Stau-Neutralino Muon Neutrino
+#########################################################################################
+
+def getSTauRMinusToMuMinusNeutralino(name="STauRMinusToMuMinusNeutralino", **kwargs):
+    from G4AtlasApps.SimFlags import simFlags
+    from AthenaCommon.SystemOfUnits import GeV,MeV,eplus,ns
+    BR = .03
+    if simFlags.specialConfiguration.get_Value().has_key("coannihilationNeutralino") and eval(simFlags.specialConfiguration.get_Value().get("coannihilationStau", None)) - 1260 >  eval(simFlags.specialConfiguration.get_Value().get("coannihilationNeutralino", None)):
+        BR = .18
+    kwargs.setdefault("ParticleName","s_tau_minus_2")
+    kwargs.setdefault("BR", BR) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,mu-,nu_tau,anti_nu_mu")
+    return CfgMgr.AddPhysicsDecayTool(name, **kwargs)
+
+def getSTauRPlusToMuPlusNeutralino(name="STauRPlusToMuPlusNeutralino", **kwargs):
+    from G4AtlasApps.SimFlags import simFlags
+    from AthenaCommon.SystemOfUnits import GeV,MeV,eplus,ns
+    BR = .03
+    if simFlags.specialConfiguration.get_Value().has_key("coannihilationNeutralino") and eval(simFlags.specialConfiguration.get_Value().get("coannihilationStau", None)) - 1260 >  eval(simFlags.specialConfiguration.get_Value().get("coannihilationNeutralino", None)):
+        BR = .18
+    kwargs.setdefault("ParticleName","s_tau_plus_2")
+    kwargs.setdefault("BR", BR) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,mu+,anti_nu_tau,nu_mu")
+    return CfgMgr.AddPhysicsDecayTool(name, **kwargs)
+
+def getSTauLMinusToMuMinusNeutralino(name="STauLMinusToMuMinusNeutralino", **kwargs):
+    from G4AtlasApps.SimFlags import simFlags
+    from AthenaCommon.SystemOfUnits import GeV,MeV,eplus,ns
+    BR = .03
+    if simFlags.specialConfiguration.get_Value().has_key("coannihilationNeutralino") and eval(simFlags.specialConfiguration.get_Value().get("coannihilationStau", None)) - 1260 >  eval(simFlags.specialConfiguration.get_Value().get("coannihilationNeutralino", None)):
+        BR = .18
+    kwargs.setdefault("ParticleName","s_tau_minus_1")
+    kwargs.setdefault("BR", BR) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,mu-,nu_tau,anti_nu_mu")
+    return CfgMgr.AddPhysicsDecayTool(name, **kwargs)
+
+def getSTauLPlusToMuPlusNeutralino(name="STauLPlusToMuPlusNeutralino", **kwargs):
+    from G4AtlasApps.SimFlags import simFlags
+    from AthenaCommon.SystemOfUnits import GeV,MeV,eplus,ns
+    BR = .03
+    if simFlags.specialConfiguration.get_Value().has_key("coannihilationNeutralino") and eval(simFlags.specialConfiguration.get_Value().get("coannihilationStau", None)) - 1260 >  eval(simFlags.specialConfiguration.get_Value().get("coannihilationNeutralino", None)):
+        BR = .18
+    kwargs.setdefault("ParticleName","s_tau_plus_1")
+    kwargs.setdefault("BR", BR) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,mu+,anti_nu_tau,nu_mu")
+    return CfgMgr.AddPhysicsDecayTool(name, **kwargs)
+
+#########################################################################################
+### Neutralino-Stau Off shell tau
+### Stau-Neutralino Pseuddo-Vector a1(1260) meson Neutrino
+#########################################################################################
+
+def getSTauRMinusToa1MinusNeutralino(name="STauRMinusToa1MinusNeutralino", **kwargs):
+    from G4AtlasApps.SimFlags import simFlags
+    from AthenaCommon.SystemOfUnits import GeV,MeV,eplus,ns
+    BR = 0
+    if simFlags.specialConfiguration.get_Value().has_key("coannihilationNeutralino") and eval(simFlags.specialConfiguration.get_Value().get("coannihilationStau", None)) - 1260 >  eval(simFlags.specialConfiguration.get_Value().get("coannihilationNeutralino", None)):
+        BR = .15 ## Set the branching Ratio for if there is enough energy for.c
+    kwargs.setdefault("ParticleName","s_tau_minus_2")
+    kwargs.setdefault("BR", BR) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,a1(1260)-,nu_tau")
+    return CfgMgr.AddPhysicsDecayTool(name, **kwargs)
+
+def getSTauRPlusToa1PlusNeutralino(name="STauRPlusToa1PlusNeutralino", **kwargs):
+    from G4AtlasApps.SimFlags import simFlags
+    from AthenaCommon.SystemOfUnits import GeV,MeV,eplus,ns
+    BR = 0
+    if simFlags.specialConfiguration.get_Value().has_key("coannihilationNeutralino") and eval(simFlags.specialConfiguration.get_Value().get("coannihilationStau", None)) - 1260 >  eval(simFlags.specialConfiguration.get_Value().get("coannihilationNeutralino", None)):
+        BR = .15
+    kwargs.setdefault("ParticleName","s_tau_plus_2")
+    kwargs.setdefault("BR", BR) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,a1(1260)+,anti_nu_tau")
+    return CfgMgr.AddPhysicsDecayTool(name, **kwargs)
+
+def getSTauLMinusToa1MinusNeutralino(name="STauLMinusToa1MinusNeutralino", **kwargs):
+    from G4AtlasApps.SimFlags import simFlags
+    from AthenaCommon.SystemOfUnits import GeV,MeV,eplus,ns
+    BR = 0
+    if simFlags.specialConfiguration.get_Value().has_key("coannihilationNeutralino") and eval(simFlags.specialConfiguration.get_Value().get("coannihilationStau", None)) - 1260 >  eval(simFlags.specialConfiguration.get_Value().get("coannihilationNeutralino", None)):
+        BR = .15
+    kwargs.setdefault("ParticleName","s_tau_minus_1")
+    kwargs.setdefault("BR", BR) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,a1(1260)-,nu_tau")
+    return CfgMgr.AddPhysicsDecayTool(name, **kwargs)
+
+def getSTauLPlusToa1PlusNeutralino(name="STauLPlusToa1PlusNeutralino", **kwargs):
+    from G4AtlasApps.SimFlags import simFlags
+    from AthenaCommon.SystemOfUnits import GeV,MeV,eplus,ns
+    BR = 0
+    if simFlags.specialConfiguration.get_Value().has_key("coannihilationNeutralino") and eval(simFlags.specialConfiguration.get_Value().get("coannihilationStau", None)) - 1260 >  eval(simFlags.specialConfiguration.get_Value().get("coannihilationNeutralino", None)):
+        BR = .15
+    kwargs.setdefault("ParticleName","s_tau_plus_1")
+    kwargs.setdefault("BR", BR) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,a1(1260)+,anti_nu_tau")
+    return CfgMgr.AddPhysicsDecayTool(name, **kwargs)
+
+
+## Neutralino Selectron
+def getSElectronRPlusToElectronNeutralino(name="SElectronRPlusToElectronNeutralino", **kwargs):
+    kwargs.setdefault("ParticleName","s_e_plus_R")
+    kwargs.setdefault("BR", 1.0) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,e+")
+    return CfgMgr.AddPhysicsDecayTool(name, **kwargs)
+def getSElectronRMinusToElectronNeutralino(name="SElectronRMinusToElectronNeutralino", **kwargs):
+    kwargs.setdefault("ParticleName","s_e_minus_R")
+    kwargs.setdefault("BR", 1.0) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,e-")
+    return CfgMgr.AddPhysicsDecayTool(name, **kwargs)
+def getSElectronLPlusToElectronNeutralino(name="SElectronLPlusToElectronNeutralino", **kwargs):
+    kwargs.setdefault("ParticleName","s_e_plus_L")
+    kwargs.setdefault("BR", 1.0) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,e+")
+    return CfgMgr.AddPhysicsDecayTool(name, **kwargs)
+def getSElectronLMinusToElectronNeutralino(name="SElectronLMinusToElectronNeutralino", **kwargs): # TODO: getSElectronLMinusToElectronNeutralino not found later. This might be an error
+    kwargs.setdefault("ParticleName","s_e_minus_L")
+    kwargs.setdefault("BR", 1.0) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,e-")
+    return CfgMgr.AddPhysicsDecayTool(name, **kwargs)
+
+
+## Neutralino SMuon
+def getSMuonLPlusToMuonNeutralino(name="SMuonLPlusToMuonNeutralino", **kwargs):
+    kwargs.setdefault("ParticleName","s_mu_plus_L")
+    kwargs.setdefault("BR", 1.0) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,mu+")
+    return CfgMgr.AddPhysicsDecayTool(name, **kwargs)
+def getSMuonLMinusToMuonNeutralino(name="SMuonLMinusToMuonNeutralino", **kwargs):
+    kwargs.setdefault("ParticleName","s_mu_minus_L")
+    kwargs.setdefault("BR", 1.0) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,mu-")
+    return CfgMgr.AddPhysicsDecayTool(name, **kwargs)
+
+def getSMuonRPlusToMuonNeutralino(name="SMuonRPlusToMuonNeutralino", **kwargs):
+    kwargs.setdefault("ParticleName","s_mu_plus_R")
+    kwargs.setdefault("BR", 1.0) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,mu+")
+    return CfgMgr.AddPhysicsDecayTool(name, **kwargs)
+def getSMuonRMinusToMuonNeutralino(name="SMuonRMinusToMuonNeutralino", **kwargs):
+    kwargs.setdefault("ParticleName","s_mu_minus_R")
+    kwargs.setdefault("BR", 1.0) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,mu-")
     return CfgMgr.AddPhysicsDecayTool(name, **kwargs)
