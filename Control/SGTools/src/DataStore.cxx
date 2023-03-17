@@ -509,6 +509,27 @@ DataProxy* DataStore::proxy_exact(sgkey_t sgkey) const
 }
 
 
+/// Like proxy_exact, but intended to be called without holding
+/// the store lock.  However, the store lock still must be passed
+/// as an argument; it will be acquired should be need to call
+/// the auditor service.
+DataProxy* DataStore::proxy_exact_unlocked (sgkey_t sgkey,
+                                            std::recursive_mutex& mutex) const
+{
+  if (m_pSGAudSvc) {
+    std::unique_lock lock (mutex);
+    CLID clid;
+    const std::string* strkey = m_pool.keyToString (sgkey, clid);
+    if (strkey)
+      m_pSGAudSvc->SGAudit(*strkey, clid, 0, m_storeID);
+  }
+  KeyMap_t::const_iterator i = m_keyMap.find (sgkey);
+  if (i != m_keyMap.end())
+    return i->second;
+  return 0;
+}
+
+
 /// get proxy with given key. Returns 0 to flag failure
 /// the key must match exactly (no wild carding for the default key)
 DataProxy* DataStore::proxy_exact(const CLID& id,
