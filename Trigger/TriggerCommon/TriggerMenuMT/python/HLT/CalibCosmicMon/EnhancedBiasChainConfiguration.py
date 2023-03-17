@@ -1,11 +1,8 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from TrigHypoCommonTools.TrigHypoCommonToolsConf import L1InfoHypo, L1InfoHypoTool
-
+from AthenaConfiguration.ComponentFactory import CompFactory, isComponentAccumulatorCfg
 from TriggerMenuMT.HLT.Config.ChainConfigurationBase import ChainConfigurationBase
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsPool
-from DecisionHandling.DecisionHandlingConf import InputMakerForRoI, ViewCreatorInitialROITool
-from AthenaCommon.CFElements import seqAND
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InEventRecoCA, menuSequenceCAToGlobalWrapper
 
 from AthenaCommon.Logging import logging
 logging.getLogger().info("Importing %s",__name__)
@@ -59,46 +56,51 @@ l1seeds = { 'low'  : \
                 'L1_TAU20IM_2TAU12IM_XE35',\
                 'L1_TAU40',\
                 'L1_XE35',
-            ] }
-
-def enhancedBiasAthSequence(flags):
-        inputMakerAlg = InputMakerForRoI("IM_enhancedBias")
-        inputMakerAlg.RoITool = ViewCreatorInitialROITool()
-        inputMakerAlg.RoIs="enhancedBiasInputRoIs"
-        enhancedBiasSequence = seqAND("enhancedBiasSequence", [inputMakerAlg])
-
-        return (enhancedBiasAthSequence, inputMakerAlg, enhancedBiasSequence)
+            ] 
+}
 
 
-def enahncedBiasSequence_Cfg(flags):
-    return enhancedBiasMenuSequence(flags)
+def enhancedBiasReco(flags):
+    inputMakerAlg = CompFactory.InputMakerForRoI("IM_enhancedBias")
+    inputMakerAlg.RoITool = CompFactory.ViewCreatorInitialROITool()
+    inputMakerAlg.RoIs="enhancedBiasInputRoIs"
+
+    reco = InEventRecoCA("EnhancedBiasReco", inputMaker=inputMakerAlg)
+    
+    return reco
+
+
+def EnhancedBiasHypoToolGen(chainDict):
+    tool = CompFactory.L1InfoHypoTool(chainDict['chainName'])
+    tool.CTPUnpackingTool.UseTBPBits = True
+
+    key = chainDict['chainParts'][0]['algType']
+    if key not in l1seeds:
+        log.error("No configuration exist for EB chain: ", key)
+    else:
+        tool.L1ItemNames = l1seeds[key]
+
+    return tool
 
 
 def enhancedBiasMenuSequence(flags):
-        # InputMaker and sequence
-        (_, inputMakerAlg, enhancedBiasSequence) = RecoFragmentsPool.retrieve(enhancedBiasAthSequence, flags)
 
-        # Hypo
-        hypoAlg = L1InfoHypo("EnhancedBiasHypo")
+    reco = enhancedBiasReco(flags)
+    selAcc = SelectionCA("enhancedBiasSequence") 
+    selAcc.mergeReco(reco)
+    selAcc.addHypoAlgo(CompFactory.L1InfoHypo("EnhancedBiasHypo"))
 
-        # HypoToolGen
-        def EnhancedBiasHypoToolGen(chainDict):
-            tool = L1InfoHypoTool(chainDict['chainName'])
-            tool.CTPUnpackingTool.UseTBPBits = True
+    return MenuSequenceCA(flags,
+                          selAcc,
+                          HypoToolGen = EnhancedBiasHypoToolGen)
 
-            key = chainDict['chainParts'][0]['algType']
-            if key not in l1seeds:
-                log.error("No configuration exist for EB chain: ", key)
-            else:
-                tool.L1ItemNames = l1seeds[key]
 
-            return tool
 
-        return MenuSequence(flags,
-                            Sequence   = enhancedBiasSequence,
-                            Maker       = inputMakerAlg,
-                            Hypo        = hypoAlg,
-                            HypoToolGen = EnhancedBiasHypoToolGen)
+def enahncedBiasSequence_Cfg(flags):
+    if isComponentAccumulatorCfg():
+        return enhancedBiasMenuSequence(flags)
+    else:
+        return menuSequenceCAToGlobalWrapper(enhancedBiasMenuSequence, flags)
 
 
 class EnhancedBiasChainConfiguration(ChainConfigurationBase):
