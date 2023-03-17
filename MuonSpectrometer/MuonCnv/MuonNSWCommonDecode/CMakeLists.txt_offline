@@ -8,6 +8,10 @@ find_package( tdaq-common COMPONENTS DataReader EventStorage eformat eformat_wri
 find_package( Boost COMPONENTS unit_test_framework)
 find_package( ROOT REQUIRED COMPONENTS Core Hist Tree RIO Gpad Graf )
 
+set( CMAKE_CXX_FLAGS "-pg")
+set( CMAKE_EXE_LINKER_FLAGS "-pg")
+set( CMAKE_SHARED_LINKER_FLAGS "-pg")
+
 # Component(s) in the package:
 atlas_add_library (MuonNSWCommonDecode
 		   src/*.cxx src/*.cpp
