@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "sTGC_Digitization/sTgcDigitMaker.h"
@@ -841,7 +841,7 @@ StatusCode sTgcDigitMaker::readFileOfEffChamber() {
 
   // Find path to the sTGC_Digitization_EffChamber.dat file
   const std::string fileName = "sTGC_Digitization_EffChamber.dat";
-  std::string fileWithPath = PathResolver::find_file(fileName.c_str(), "DATAPATH");
+  std::string fileWithPath = PathResolver::find_file(fileName, "DATAPATH");
   if(fileWithPath.empty()) {
     ATH_MSG_FATAL("readFileOfEffChamber(): Could not find file " << fileName.c_str() );
     return StatusCode::FAILURE;
@@ -936,7 +936,7 @@ int sTgcDigitMaker::getIStationName(const std::string& stationName) const {
 StatusCode sTgcDigitMaker::readFileOfTimeArrival() {
   // Verify the file sTGC_Digitization_timeArrival.dat exists
   const std::string file_name = "sTGC_Digitization_timeArrival.dat";
-  std::string file_path = PathResolver::find_file(file_name.c_str(), "DATAPATH");
+  std::string file_path = PathResolver::find_file(file_name, "DATAPATH");
   if(file_path.empty()) {
     ATH_MSG_FATAL("readFileOfTimeWindowOffset(): Could not find file " << file_name.c_str() );
     return StatusCode::FAILURE;
@@ -1015,7 +1015,7 @@ double sTgcDigitMaker::getMostProbableArrivalTime(double distance) const {
 StatusCode sTgcDigitMaker::readFileOfTimeOffsetStrip() {
   // Verify the file sTGC_Digitization_timeOffsetStrip.dat exists
   const std::string file_name = "sTGC_Digitization_timeOffsetStrip.dat";
-  std::string file_path = PathResolver::find_file(file_name.c_str(), "DATAPATH");
+  std::string file_path = PathResolver::find_file(file_name, "DATAPATH");
   if(file_path.empty()) {
     ATH_MSG_FATAL("readFileOfTimeWindowOffset(): Could not find file " << file_name.c_str() );
     return StatusCode::FAILURE;
