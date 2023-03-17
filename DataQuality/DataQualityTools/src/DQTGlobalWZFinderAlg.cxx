@@ -253,7 +253,7 @@ StatusCode DQTGlobalWZFinderAlg::fillHistograms( const EventContext& ctx ) const
      
      doMuonLooseTP(goodmuonsTP, pVtx, ctx, isSimulation, writeTTrees, evtWeight);	
      doMuonInDetTP(goodmuonsTP, pVtx, ctx, isSimulation, writeTTrees, evtWeight);
-     doEleTP(leadingAllEle, subleadingAllEle, pVtx, ctx, writeTTrees, evtWeight);
+     doEleTP(leadingAllEle, subleadingAllEle, pVtx, ctx, writeTTrees, isSimulation, evtWeight);
      doEleContainerTP(allElectrons, goodelectrons, ctx);
 
      // Sort Candidates by Pt
@@ -457,7 +457,7 @@ void DQTGlobalWZFinderAlg::doEleTriggerTP(const xAOD::Electron* el1, const xAOD:
   } 
 }
 
-void DQTGlobalWZFinderAlg::doEleTP(const xAOD::Electron* leadingAllEle, const xAOD::Electron* subleadingAllEle, const xAOD::Vertex* pVtx, const EventContext& ctx, bool writeTTrees, const float evtWeight) const{
+void DQTGlobalWZFinderAlg::doEleTP(const xAOD::Electron* leadingAllEle, const xAOD::Electron* subleadingAllEle, const xAOD::Vertex* pVtx, const EventContext& ctx, bool writeTTrees, bool isSimulation, const float evtWeight) const{
 
   using namespace Monitored;
 
@@ -467,6 +467,12 @@ void DQTGlobalWZFinderAlg::doEleTP(const xAOD::Electron* leadingAllEle, const xA
 
   // first check we have both electrons
   if(leadingAllEle && subleadingAllEle){
+
+    // Truth matching
+    if (isSimulation) {
+      if (!(checkTruthElectron(leadingAllEle) && checkTruthElectron(subleadingAllEle))) return;
+    }
+
     // then get all the parameters we will need ready
     auto Zeecharge = Scalar("Zeecharge", (leadingAllEle->charge() + subleadingAllEle->charge()));
     auto p1(leadingAllEle->p4());
@@ -908,16 +914,6 @@ void DQTGlobalWZFinderAlg::doMuonTruthEff(std::vector<const xAOD::Muon*>& goodmu
 void DQTGlobalWZFinderAlg::doMuonLooseTP(std::vector<const xAOD::Muon*>& goodmuonsTP, const xAOD::Vertex* pVtx, const EventContext& ctx, bool isSimulation, bool writeTTrees, const float evtWeight) const{
   
   using namespace Monitored;
-  
-  if (isSimulation) {
-    int truthMatched = 0;
-    for (const auto mu: goodmuonsTP){
-      if (checkTruthMuon(mu) == true) {
-        truthMatched++;
-      }
-    }
-    if (truthMatched < 2) return;
-  }
 
   auto group_MuonLooseTP = getGroup("MuonLooseTP");
   auto osmatch = Scalar<bool>("osmatch", false);
@@ -937,6 +933,12 @@ void DQTGlobalWZFinderAlg::doMuonLooseTP(std::vector<const xAOD::Muon*>& goodmuo
   }
 
   for (const auto& tagmu : goodmuonsTP) {
+    
+    // Truth matching
+    if (isSimulation) {
+      if (!checkTruthMuon(tagmu)) continue;
+    }
+
     // only consider trigger-matched tags to avoid bias on probes
     bool matched = false;
     for (const auto &chain: m_Z_mm_trigger) {
@@ -948,6 +950,12 @@ void DQTGlobalWZFinderAlg::doMuonLooseTP(std::vector<const xAOD::Muon*>& goodmuo
     if (!matched) continue;
     auto tagmup4(tagmu->p4());
     for (const auto* trk : *idTracks) {
+      
+      // Truth matching
+      if (isSimulation) {
+        if (!checkTruthTrack(trk)) continue;
+      }
+
       if (trk->pt() <  m_muonPtCut*GeV || std::abs(trk->eta()) > m_muonMaxEta)
         continue;
       if (std::abs((trk->z0()+trk->vz()-pVtx->z())*std::sin(trk->theta())) > 2*mm)  continue;
@@ -978,13 +986,26 @@ void DQTGlobalWZFinderAlg::doMuonLooseTP(std::vector<const xAOD::Muon*>& goodmuo
 	      }
       }
 
+      osmatch   = false;
+      ssmatch   = false;
+      osnomatch = false;
+      ssnomatch = false;
+
       if (matched){
         mtype = (trk->charge() != tagmu->charge()) ? 0 : 1; 
-        (opp_sign) ? osmatch = true : ssmatch = true;
+        if (opp_sign) {
+          osmatch = true;
+        } else {
+          ssmatch = true;
+        }
       }
       else {
         mtype = (trk->charge() != tagmu->charge()) ? 2 : 3;
-        (opp_sign) ? osnomatch = true : ssnomatch = true;
+        if (opp_sign) {
+          osnomatch = true;
+        } else {
+          ssnomatch = true;
+        }
       }
       if (writeTTrees){
         fill(group_MuonLooseTP, pT, phi, eta, mass, isTruth, runNumber, LB, eventNumber, mtype, weight);
