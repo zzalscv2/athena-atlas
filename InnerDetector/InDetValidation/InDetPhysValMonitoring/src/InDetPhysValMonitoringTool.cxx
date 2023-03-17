@@ -168,6 +168,8 @@ InDetPhysValMonitoringTool::initialize() {
   if (m_doTrackInJetPlots && m_doBjetPlots){
     IDPVM::addReadDecoratorHandleKeys(*this, m_jetContainerName, empty_prefix, required_int_jet_decorations, m_intJetDecor);
   }
+
+  m_usingSpecialPileupSwitch = (m_pileupSwitch != "All");
   return StatusCode::SUCCESS;
 }
 
@@ -320,7 +322,7 @@ InDetPhysValMonitoringTool::fillHistograms() {
 
   // Mark the truth particles in our vector as "selected". 
   // This is needed because we later access the truth matching via xAOD decorations, where we do not 'know' about membership to this vector.
-  markSelectedByPileupSwitch(truthParticlesVec);
+  if (m_usingSpecialPileupSwitch) markSelectedByPileupSwitch(truthParticlesVec);
 
   IDPVM::CachedGetAssocTruth getAsTruth; // only cache one way, track->truth, not truth->tracks 
 
@@ -452,7 +454,7 @@ InDetPhysValMonitoringTool::fillHistograms() {
         tmp_truth_cutflow.update( passed.missingCuts() );
       }
 
-      if ((not std::isnan(prob)) and (prob > m_lowProb) and passed) {
+      if ((not std::isnan(prob)) and (prob > m_lowProb) and passed and (not m_usingSpecialPileupSwitch or isSelectedByPileupSwitch(*associatedTruth)) ) {
         nSelectedMatchedTracks++; 
         bool truthIsFromB = false;
         if ( m_doTruthOriginPlots and m_trackTruthOriginTool->isFrom(associatedTruth, 5) ) {
@@ -748,6 +750,7 @@ InDetPhysValMonitoringTool::bookHistograms() {
       ATH_CHECK(regTree(t.first, t.second, all));
     }
   }
+
   return StatusCode::SUCCESS;
 }
 
