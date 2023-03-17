@@ -116,8 +116,10 @@ def getFtagComponent(cfgFlags, jetcol, pvCol):
 
     jetcol_name_without_Jets = jetcol.replace('Jets','')
     track_collection = 'InDetTrackParticles'
+    input_muons = 'Muons'
     if cfgFlags.BTagging.Pseudotrack:
         track_collection = 'InDetPseudoTrackParticles'
+        input_muons = None
 
     acc = ComponentAccumulator()
     acc.merge(BTagTrackAugmenterAlgCfg(
@@ -148,6 +150,7 @@ def getFtagComponent(cfgFlags, jetcol, pvCol):
         nnList=GetTaggerTrainingMap(cfgFlags, jetcol_name_without_Jets),
         trackCollection=track_collection,
         primaryVertices=pvCol,
+        muons=input_muons,
         renameTrackJets=True,
         AddedJetSuffix='Jets',
     ))
