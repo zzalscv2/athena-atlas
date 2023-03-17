@@ -201,7 +201,7 @@ class TrigEgammaMonAlgBuilder:
 
 
   #
-  # Create all minitor algorithms
+  # Create all monitor algorithms
   #
   def configureMonitor( self ):
    
@@ -703,6 +703,7 @@ class TrigEgammaMonAlgBuilder:
     monGroup = self.addGroup( monAlg, trigger+'_Distributions_' + ("HLT" if online else "Offline"), 
                               self.basePath+'/Shifter/'+trigger+'/Distributions/' + (level if online else "Offline") )
     
+    info = self.getTrigInfo(trigger)
 
     self.addHistogram(monGroup, TH1F("Rhad", "Rhad; Rhad ; Count", 35, -0.3, 0.3))
     self.addHistogram(monGroup, TH1F("Rhad1", "Rhad1; Rhad1 ; Count", 30, -0.3, 0.3))
@@ -717,10 +718,12 @@ class TrigEgammaMonAlgBuilder:
     self.addHistogram(monGroup, TH1F("highet", "Offline E_{T}; E_{T} [GeV] ; Count", 100, 0., 500.))
     self.addHistogram(monGroup, TH1F("eta", "eta; eta ; Count", self._nEtabins, self._etabins))
     self.addHistogram(monGroup, TH1F("phi", "phi; phi ; Count", 20, -3.2, 3.2))
-    self.addHistogram(monGroup, TH1F("topoetcone20", "topoetcone20; topoetcone20 [GeV] ; Count", 100, -10.0, 10.0))
-    self.addHistogram(monGroup, TH1F("topoetcone20_rel", "topoetcone20/pt; topoetcone20/pt ; Count", 100, -0.5, 0.5))
-    self.addHistogram(monGroup, TH1F("topoetcone40_shift", "topoetcone40-2.45 GeV; topoetcone40-2.45 GeV [GeV] ; Count", 100, -10.0, 10.0))
-    self.addHistogram(monGroup, TH1F("topoetcone40_shift_rel", "(topoetcone40-2.45 GeV)/pt; (topoetcone40-2.45 GeV)/pt ; Count", 100, -0.5, 0.5))
+    
+    if not info.isElectron():
+      self.addHistogram(monGroup, TH1F("topoetcone20", "topoetcone20; topoetcone20 [GeV] ; Count", 100, -10.0, 10.0))
+      self.addHistogram(monGroup, TH1F("topoetcone20_rel", "topoetcone20/pt; topoetcone20/pt ; Count", 100, -0.5, 0.5))
+      self.addHistogram(monGroup, TH1F("topoetcone40_shift", "topoetcone40-2.45 GeV; topoetcone40-2.45 GeV [GeV] ; Count", 100, -10.0, 10.0))
+      self.addHistogram(monGroup, TH1F("topoetcone40_shift_rel", "(topoetcone40-2.45 GeV)/pt; (topoetcone40-2.45 GeV)/pt ; Count", 100, -0.5, 0.5))
 
 
   #
