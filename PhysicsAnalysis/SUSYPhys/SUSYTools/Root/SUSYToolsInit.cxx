@@ -638,9 +638,9 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       toolName = "MuonEfficiencyScaleFactors_" + muQual;
       m_muonEfficiencySFTool.setTypeAndName("CP::MuonEfficiencyScaleFactors/"+toolName);
       ATH_CHECK( m_muonEfficiencySFTool.setProperty("WorkingPoint", muQual) );
-      ATH_CHECK( m_muonEfficiencySFTool.setProperty("CalibrationRelease", m_isRun3? "230123_Preliminary_r22run3":"220725_Preliminary_r22run2") );
+      ATH_CHECK( m_muonEfficiencySFTool.setProperty("CalibrationRelease", m_isRun3? "230309_Preliminary_r22run3":"230213_Preliminary_r22run2") );
       if (m_isRun3) {
-        ATH_CHECK( m_muonEfficiencySFTool.setProperty("LowPtThreshold", 10) ); //very preliminary Run3 rec! to be updated
+        ATH_CHECK( m_muonEfficiencySFTool.setProperty("LowPtThreshold", 5) );
       }
       ATH_CHECK( m_muonEfficiencySFTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_muonEfficiencySFTool.retrieve() );
@@ -652,9 +652,9 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       m_muonEfficiencyBMHighPtSFTool.setTypeAndName("CP::MuonEfficiencyScaleFactors/"+toolName);
       ATH_CHECK( m_muonEfficiencyBMHighPtSFTool.setProperty("WorkingPoint", "BadMuonVeto_HighPt") );
       if (m_isRun3) {
-        ATH_CHECK( m_muonEfficiencyBMHighPtSFTool.setProperty("LowPtThreshold", 10) ); //very preliminary Run3 rec! to be updated
+        ATH_CHECK( m_muonEfficiencyBMHighPtSFTool.setProperty("LowPtThreshold", 5) );
       }
-      ATH_CHECK( m_muonEfficiencyBMHighPtSFTool.setProperty("CalibrationRelease", m_isRun3? "220817_Preliminary_r22run3":"220725_Preliminary_r22run2") ); //BadMuonVeto_HighPt currently not available for 230123_Preliminary_r22run3
+      ATH_CHECK( m_muonEfficiencyBMHighPtSFTool.setProperty("CalibrationRelease", m_isRun3? "220817_Preliminary_r22run3":"230213_Preliminary_r22run2") ); //BadMuonVeto_HighPt currently not available for 230123_Preliminary_r22run3
       ATH_CHECK( m_muonEfficiencyBMHighPtSFTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_muonEfficiencyBMHighPtSFTool.retrieve() );
     } else  ATH_CHECK( m_muonEfficiencyBMHighPtSFTool.retrieve() );
@@ -669,7 +669,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       toolName = "MuonTTVAEfficiencyScaleFactors";
       m_muonTTVAEfficiencySFTool.setTypeAndName("CP::MuonEfficiencyScaleFactors/"+toolName);
       ATH_CHECK( m_muonTTVAEfficiencySFTool.setProperty("WorkingPoint", "TTVA") );
-      ATH_CHECK( m_muonTTVAEfficiencySFTool.setProperty("CalibrationRelease", m_isRun3? "230123_Preliminary_r22run3":"220725_Preliminary_r22run2") );
+      ATH_CHECK( m_muonTTVAEfficiencySFTool.setProperty("CalibrationRelease", m_isRun3? "230309_Preliminary_r22run3":"230213_Preliminary_r22run2") );
       ATH_CHECK( m_muonTTVAEfficiencySFTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_muonTTVAEfficiencySFTool.retrieve() );
     } else if (m_muonTTVAEfficiencySFTool.isUserConfigured()) ATH_CHECK( m_muonTTVAEfficiencySFTool.retrieve() );
@@ -701,9 +701,9 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
   
       m_muonIsolationSFTool.setTypeAndName("CP::MuonEfficiencyScaleFactors/"+toolName);
       ATH_CHECK( m_muonIsolationSFTool.setProperty("WorkingPoint", tmp_muIso_WP + "Iso") );
-      ATH_CHECK( m_muonIsolationSFTool.setProperty("CalibrationRelease", m_isRun3? "230123_Preliminary_r22run3":"220725_Preliminary_r22run2") );
+      ATH_CHECK( m_muonIsolationSFTool.setProperty("CalibrationRelease", m_isRun3? "230309_Preliminary_r22run3":"230213_Preliminary_r22run2") );
       if (m_isRun3) {
-        ATH_CHECK( m_muonIsolationSFTool.setProperty("LowPtThreshold", 10) ); //very preliminary Run3 rec! to be updated
+        ATH_CHECK( m_muonIsolationSFTool.setProperty("LowPtThreshold", 5) );
       } 
       ATH_CHECK( m_muonIsolationSFTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_muonIsolationSFTool.retrieve() );
@@ -735,7 +735,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       m_muonHighPtIsolationSFTool.setTypeAndName("CP::MuonEfficiencyScaleFactors/"+toolName);
       // Use for the low-pt WP a dedicated set of isolation scale-factors having an extra uncertainty in place
       ATH_CHECK( m_muonHighPtIsolationSFTool.setProperty("WorkingPoint", tmp_muIsoHighPt_WP + "Iso") );
-      ATH_CHECK( m_muonHighPtIsolationSFTool.setProperty("CalibrationRelease", m_isRun3? "230123_Preliminary_r22run3":"220725_Preliminary_r22run2") );
+      ATH_CHECK( m_muonHighPtIsolationSFTool.setProperty("CalibrationRelease", m_isRun3? "230309_Preliminary_r22run3":"230213_Preliminary_r22run2") );
       ATH_CHECK( m_muonHighPtIsolationSFTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_muonHighPtIsolationSFTool.retrieve() );
   

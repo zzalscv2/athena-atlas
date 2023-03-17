@@ -1170,7 +1170,7 @@ int main( int argc, char* argv[] ) {
           else if(objTool.treatAsYear()==2016)   muonSF = objTool.GetTotalMuonSF(*muons, true, true, muTrig2016.Data());
           else if(objTool.treatAsYear()==2017)   muonSF = objTool.GetTotalMuonSF(*muons, true, true, muTrig2017.Data());
           else if(objTool.treatAsYear()==2018)   muonSF = objTool.GetTotalMuonSF(*muons, true, true, muTrig2017.Data());
-          else if(objTool.treatAsYear()==2022 && objTool.GetRandomRunNumber() < 435816)  muonSF = objTool.GetTotalMuonSF(*muons, true, true, muTrig2022.Data()); //temporary solution to avoid warning from missing SF in the latest periods (from H)
+          else if(objTool.treatAsYear()==2022)   muonSF = objTool.GetTotalMuonSF(*muons, true, true, muTrig2022.Data());
           ANA_MSG_DEBUG("MUON AFTER SF =  " << muonSF << "   " << objTool.treatAsYear() << "   "  << objTool.GetRandomRunNumber() << "    " <<  objTool.GetPileupWeight() );
         }
       }
