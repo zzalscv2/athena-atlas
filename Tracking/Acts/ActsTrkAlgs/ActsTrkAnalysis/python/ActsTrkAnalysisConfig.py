@@ -168,14 +168,12 @@ def ActsTrkBaseSeedAnalysisAlgCfg(flags,
     kwargs.setdefault('TrackingGeometryTool', acc.getPublicTool(geoTool.name)) # PublicToolHandle
     kwargs.setdefault('ATLASConverterTool', converterTool)
     kwargs.setdefault('TrackParamsEstimationTool', trackEstimationTool)
-    
+
     monitoringAlgorithm = helper.addAlgorithm(CompFactory.ActsTrk.SeedAnalysisAlg, name, **kwargs)
     monitoringGroup = helper.addGroup(monitoringAlgorithm, 'ActsTrkSeedAnalysisAlg', 'ActsTrkAnalysis')
 
     monitoringGroup.defineHistogram('Nseed', title='Number of Seeds;N;Entries', type='TH1I', path=f'{histoPath}',
                                     xbins=100, xmin=0, xmax=0)
-
-
 
     monitoringGroup.defineHistogram('z1,r1;zr1', title='Bottom SP - Z coordinate vs R;z [mm];r [mm]', type='TH2F', path=f'{histoPath}',
                                     xbins=1500, xmin=-3000, xmax=3000,
@@ -187,6 +185,64 @@ def ActsTrkBaseSeedAnalysisAlgCfg(flags,
                                     xbins=1500, xmin=-3000, xmax=3000,
                                     ybins=400, ymin=perp_min, ymax=perp_max)
 
+    monitoringGroup.defineHistogram('x1;x1', title='Bottom SP - x coordinate;x [mm];Entries;', type='TH1F', path=f'{histoPath}',
+                                    xbins=100, xmin=-perp_max, xmax=perp_max)
+    monitoringGroup.defineHistogram('y1;y1', title='Bottom SP - y coordinate;y [mm];Entries;', type='TH1F', path=f'{histoPath}',
+                                    xbins=100, xmin=-perp_max, xmax=perp_max)
+    monitoringGroup.defineHistogram('z1;z1', title='Bottom SP - z coordinate;z [mm];Entries;', type='TH1F', path=f'{histoPath}',
+                                    xbins=100, xmin=-3000, xmax=3000)
+    monitoringGroup.defineHistogram('r1;r1', title='Bottom SP - radius coordinate;r [mm];Entries;', type='TH1F', path=f'{histoPath}',
+                                    xbins=100, xmin=perp_min, xmax=perp_max)
+    
+    monitoringGroup.defineHistogram('x2;x2', title='Middle SP - x coordinate;x [mm];Entries;', type='TH1F', path=f'{histoPath}',
+                                    xbins=100, xmin=-perp_max, xmax=perp_max)
+    monitoringGroup.defineHistogram('y2;y2', title='Middle SP - y coordinate;y [mm];Entries;', type='TH1F', path=f'{histoPath}',
+                                    xbins=100, xmin=-perp_max, xmax=perp_max)
+    monitoringGroup.defineHistogram('z2;z2', title='Middle SP - z coordinate;z [mm];Entries;', type='TH1F', path=f'{histoPath}',
+                                    xbins=100, xmin=-3000, xmax=3000)
+    monitoringGroup.defineHistogram('r2;r2', title='Middle SP - radius coordinate;r [mm];Entries;', type='TH1F', path=f'{histoPath}',
+                                    xbins=100, xmin=perp_min, xmax=perp_max)
+    
+    monitoringGroup.defineHistogram('x3;x3', title='Top SP - x coordinate;x [mm];Entries;', type='TH1F', path=f'{histoPath}',
+                                    xbins=100, xmin=-perp_max, xmax=perp_max)
+    monitoringGroup.defineHistogram('y3;y3', title='Top SP - y coordinate;y [mm];Entries;', type='TH1F', path=f'{histoPath}',
+                                    xbins=100, xmin=-perp_max, xmax=perp_max)
+    monitoringGroup.defineHistogram('z3;z3', title='Top SP - z coordinate;z [mm];Entries;', type='TH1F', path=f'{histoPath}',
+                                    xbins=100, xmin=-3000, xmax=3000)
+    monitoringGroup.defineHistogram('r3;r3', title='Top SP - radius coordinate;r [mm];Entries;', type='TH1F', path=f'{histoPath}',
+                                    xbins=100, xmin=perp_min, xmax=perp_max)
+    
+    if ntupleName == 'PixelSeeds':
+        monitoringGroup.defineHistogram('pt;pT', title='Pt;Pt;Entries;', type='TH1F', path=f'{histoPath}',
+                                        xbins=100, xmin=0, xmax=100)
+        monitoringGroup.defineHistogram('d0;d0', title='d0;d0 [mm];Entries;', type='TH1F', path=f'{histoPath}',
+                                        xbins=50, xmin=0, xmax=2)
+        monitoringGroup.defineHistogram('eta;Eta', title='Pseudo-Rapidity;Pseudo-Rapidity;Entries;', type='TH1F', path=f'{histoPath}',
+                                        xbins=50, xmin=0, xmax=4.5)
+        monitoringGroup.defineHistogram('theta;Theta', title='Theta;Theta;Entries;', type='TH1F', path=f'{histoPath}',
+                                        xbins=50, xmin=0, xmax=1.6)
+        monitoringGroup.defineHistogram('penalty;Penalty', title='Penalty;Penalty;Entries;', type='TH1F', path=f'{histoPath}',
+                                        xbins=50, xmin=0, xmax=200)
+        monitoringGroup.defineHistogram('dzdr_b;dzdr_b', title='dzdr_b;;;', type='TH1F', path=f'{histoPath}',
+                                        xbins=50, xmin=-30, xmax=30)
+        monitoringGroup.defineHistogram('dzdr_t;dzdr_t', title='dzdr_t;;;', type='TH1F', path=f'{histoPath}',
+                                        xbins=50, xmin=-30, xmax=30)
+    elif ntupleName == 'StripSeeds':
+        monitoringGroup.defineHistogram('pt;pT', title='Pt;Pt;Entries;', type='TH1F', path=f'{histoPath}',
+                                        xbins=100, xmin=0, xmax=2300)
+        monitoringGroup.defineHistogram('d0;d0', title='d0;d0 [mm];Entries;', type='TH1F', path=f'{histoPath}',
+                                        xbins=50, xmin=0, xmax=120)
+        monitoringGroup.defineHistogram('eta;Eta', title='Pseudo-Rapidity;Pseudo-Rapidity;Entries;', type='TH1F', path=f'{histoPath}',
+                                        xbins=50, xmin=0, xmax=4.5)
+        monitoringGroup.defineHistogram('theta;Theta', title='Theta;Theta;Entries;', type='TH1F', path=f'{histoPath}',
+                                        xbins=50, xmin=0, xmax=1.6)
+        monitoringGroup.defineHistogram('penalty;Penalty', title='Penalty;Penalty;Entries;', type='TH1F', path=f'{histoPath}',
+                                        xbins=50, xmin=0, xmax=20000)
+        monitoringGroup.defineHistogram('dzdr_b;dzdr_b', title='dzdr_b;;;', type='TH1F', path=f'{histoPath}',
+                                        xbins=50, xmin=-6.5, xmax=6.5)
+        monitoringGroup.defineHistogram('dzdr_t;dzdr_t', title='dzdr_t;;;', type='TH1F', path=f'{histoPath}',
+                                        xbins=50, xmin=-6.5, xmax=6.5)
+                
     if flags.Tracking.doTruth:
         monitoringGroup.defineHistogram('passed,estimated_eta;EfficiencyEta', title='Efficiency vs eta;eta;Efficiency', type='TEfficiency', path=f'{histoPath}',
                                         xbins=50, xmin=-5, xmax=5)
