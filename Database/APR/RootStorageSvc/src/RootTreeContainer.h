@@ -147,11 +147,12 @@ namespace pool  {
                         const std::string& desc);
 
     /// Add BLOB
-    DbStatus addObject( const DbColumn* col, 
+    DbStatus addObject( DbDatabase& dbH,
+                        const DbColumn* col,
                         BranchDesc& dsc,
                         const std::string& desc,
-                        int defSplitLevel, 
-                        int defBufferSize,
+                        int splitLevel,
+                        int bufferSize,
                         int branchOffsetTabLen);
 
     /// Find entry identified by his number (=primary key) in the Database

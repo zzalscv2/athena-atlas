@@ -34,6 +34,8 @@ def _configureWriteAthenaPool():
     from AthenaCommon.AppMgr  import ServiceMgr as svcMgr
     # Switch off splitting by setting default SplitLevel to 0
     svcMgr.AthenaPoolCnvSvc.PoolAttributes += [ "DEFAULT_SPLITLEVEL ='0'" ]
+    svcMgr.AthenaPoolCnvSvc.PoolAttributes += [ "ContainerName = 'TTree=Dyn.'; CONTAINER_SPLITLEVEL = '1'" ]
+
     # Set as default the member-wise streaming, ROOT default
     svcMgr.AthenaPoolCnvSvc.PoolAttributes += [ "STREAM_MEMBER_WISE = '1'" ]
 
