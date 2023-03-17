@@ -289,6 +289,7 @@ namespace Rec {
          double chi2{};
          double projectedVrt=0.;
          int detachedTrack=-1;
+         double BDT=1.1;
       };
 
 
