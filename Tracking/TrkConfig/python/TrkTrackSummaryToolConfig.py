@@ -91,7 +91,7 @@ def InDetTrigFastTrackSummaryToolCfg(flags, name="InDetTrigFastTrackSummaryTool"
 def ITkTrackSummaryToolCfg(flags, name='ITkTrackSummaryTool', **kwargs):
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("doHolesInDet", True)
+    kwargs.setdefault("doHolesInDet", not flags.ITk.Tracking.doFastTracking)
 
     if 'InDetSummaryHelperTool' not in kwargs:
         if kwargs["doHolesInDet"]:
