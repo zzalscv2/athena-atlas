@@ -67,7 +67,7 @@ namespace RootAuxDynIO
    std::string getKeyFromBranch(TBranch* branch);
 
    std::unique_ptr<IRootAuxDynReader> getBranchAuxDynReader(TTree*, TBranch*);
-   std::unique_ptr<IRootAuxDynWriter> getBranchAuxDynWriter(TTree*, int offsettab_len, bool do_branch_fill);
+   std::unique_ptr<IRootAuxDynWriter> getBranchAuxDynWriter(TTree*, int bufferSize, int splitLevel, int offsettab_len, bool do_branch_fill);
    
    std::unique_ptr<IRootAuxDynReader> getNTupleAuxDynReader(const std::string&, RNTupleReader*);
    std::unique_ptr<IRNTupleWriter>    getNTupleAuxDynWriter(TFile*,  const std::string& ntupleName, int compression);

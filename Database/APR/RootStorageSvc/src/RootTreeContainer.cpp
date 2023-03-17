@@ -679,11 +679,11 @@ DbStatus RootTreeContainer::open( DbDatabase& dbH,
                    iret=addBranch(*i,dsc,"/C");
                    break;
                 case DbColumn::BLOB:
-                   iret=addObject(*i,dsc,"UCharDbArrayAthena", defSplitLevel, defBufferSize, branchOffsetTabLen);
+                   iret=addObject(dbH, *i, dsc, "UCharDbArrayAthena", defSplitLevel, defBufferSize, branchOffsetTabLen);
                    break;
                 case DbColumn::ANY:
                 case DbColumn::POINTER:
-                   iret=addObject(*i, dsc, (*i)->typeName(), containerSplitLevel, defBufferSize, branchOffsetTabLen);
+                   iret=addObject(dbH, *i, dsc, (*i)->typeName(), containerSplitLevel, defBufferSize, branchOffsetTabLen);
                    break;
                 default:
                    return Error;
@@ -741,11 +741,12 @@ DbStatus  RootTreeContainer::select(DbSelect& sel)    {
 }
 
 
-DbStatus  RootTreeContainer::addObject(const DbColumn* col,
+DbStatus  RootTreeContainer::addObject(DbDatabase& dbH,
+                                       const DbColumn* col,
                                        BranchDesc& dsc,
                                        const std::string& typ,
-                                       int defSplitLevel,
-                                       int defBufferSize,
+                                       int splitLevel,
+                                       int bufferSize,
                                        int branchOffsetTabLen)
 {
    try {
@@ -762,11 +763,12 @@ DbStatus  RootTreeContainer::addObject(const DbColumn* col,
                   if ( !::isalnum(*j) ) *j = '_';
                }
             }
+            int split = dsc.clazz->CanSplit() ? splitLevel : 0; // Do not split classes that don't allow it.
             dsc.branch  = m_tree->Branch(nam.c_str(),           // Branch name
                                          dsc.clazz->GetName(),  // Object class
                                          (void*)&dsc.buffer,    // Object address
-                                         defBufferSize,         // Buffer size
-                                         defSplitLevel);        // Split Mode (Levels)
+                                         bufferSize,            // Buffer size
+                                         split);                // Split Mode (Levels)
             if ( dsc.branch )  {
                dsc.leaf = dsc.branch->GetLeaf(nam.c_str());
                dsc.branch->SetAutoDelete(kFALSE);
@@ -780,12 +782,19 @@ DbStatus  RootTreeContainer::addObject(const DbColumn* col,
                if( RootAuxDynIO::hasAuxStore(nam, dsc.clazz) ) {
                   TClass *storeTClass = dsc.clazz->GetBaseClass("SG::IAuxStoreIO");
                   if( storeTClass ) {
+                     // Default splitting for dynamic attributes, one level less than aux store (since attributes are already separated).
+                     int dynSplitLevel = splitLevel ? splitLevel - 1 : 0;
+                     DbOption opt1("CONTAINER_SPLITLEVEL", RootAuxDynIO::AUXDYN_POSTFIX);
+                     dbH.getOption(opt1);
+                     opt1._getValue(dynSplitLevel);
+                     // Default buffer size for dynamic attributes, one quarter of other branches (since attrbutes hold less data).
+                     int dynBufferSize = bufferSize / 4;
                      // This is a class implementing SG::IAuxStoreIO
                      // Provide writers for its dynamic attibutes
                      dsc.aux_iostore_IFoffset = dsc.clazz->GetBaseClassOffset( storeTClass );
                      // TBranch Writer
                      bool do_branch_fill = isBranchContainer() && !m_treeFillMode;
-                     dsc.auxdyn_writer = RootAuxDynIO::getBranchAuxDynWriter(m_tree, branchOffsetTabLen, do_branch_fill);
+                     dsc.auxdyn_writer = RootAuxDynIO::getBranchAuxDynWriter(m_tree, dynBufferSize, dynSplitLevel, branchOffsetTabLen, do_branch_fill);
                   }
                }
                return Success;

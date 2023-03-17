@@ -39,9 +39,11 @@ namespace RootAuxDynIO
    }
 
 
-   TBranchAuxDynWriter::TBranchAuxDynWriter( TTree* tree, int offsettab_len, bool branch_fill ) :
+   TBranchAuxDynWriter::TBranchAuxDynWriter( TTree* tree, int bufferSize, int splitLevel, int offsettab_len, bool branch_fill ) :
       AthMessaging ("TBranchAuxDynWriter"),
       m_ttree( tree ),
+      m_bufferSize( bufferSize ),
+      m_splitLevel( splitLevel ),
       m_branchOffsetTabLen( offsettab_len ),
       m_branchFillMode( branch_fill )
    { }
@@ -93,11 +95,11 @@ namespace RootAuxDynIO
                error_type =" has no dictionary";
             } else {
                info.tclass = cl;
-               int split = cl->CanSplit() ? 1 : 0;
+               int split = cl->CanSplit() ? m_splitLevel : 0;
                info.branch = m_ttree->Branch( info.branch_name.c_str(),  // Branch name
                                               cl->GetName(),             // Object class
                                               (void*)&info.buffer,       // Object address
-                                              8192,                      // Buffer size
+                                              m_bufferSize,                // Buffer size
                                               split);                    // Split Mode (Levels)
             ATH_MSG_VERBOSE("MN: Created branch with name=" << info.branch_name << "  type: " << cl->GetName());
             }
