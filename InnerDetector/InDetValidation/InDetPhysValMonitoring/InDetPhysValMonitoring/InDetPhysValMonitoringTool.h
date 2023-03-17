@@ -195,5 +195,7 @@ private:
 
     std::vector<std::string> m_trackCutflowNames;
     std::vector<int> m_trackCutflow;
+
+    bool m_usingSpecialPileupSwitch {false};
 };
 #endif
