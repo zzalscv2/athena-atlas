@@ -80,12 +80,14 @@ namespace met {
   }
 
   TEST_F( METSystTest,  TestJetTrkHistosFilled ){
+    ASSERT_TRUE(tool.setProperty("ConfigPrefix", "METUtilities/data16_13TeV/rec_Dec16v1"));
+    ASSERT_TRUE(tool.setProperty("ConfigSoftTrkFile","") );
     ASSERT_TRUE(tool.setProperty("ConfigJetTrkFile" ,"JetTrackSyst.config"));
     ASSERT_TRUE(tool.initialize().isSuccess());
 
-    ASSERT_TRUE(tool.m_shiftpara_pthard_njet_mu!=nullptr);
-    ASSERT_TRUE(tool.m_resopara_pthard_njet_mu !=nullptr);
-    ASSERT_TRUE(tool.m_resoperp_pthard_njet_mu !=nullptr);
+    ASSERT_TRUE(tool.m_shiftpara_pthard_njet_mu==nullptr);
+    ASSERT_TRUE(tool.m_resopara_pthard_njet_mu ==nullptr);
+    ASSERT_TRUE(tool.m_resoperp_pthard_njet_mu ==nullptr);
     ASSERT_TRUE(tool.m_jet_systRpt_pt_eta      !=nullptr);
   }
 
@@ -349,7 +351,7 @@ namespace met {
 
   //   MissingET * correctedCopy = nullptr;
   //   ASSERT_TRUE( asg::CheckHelper<CP::CorrectionCode>::isSuccess( tool.correctedCopy(*myObj, correctedCopy) ) );
- 
+
   //   ASSERT_NE( correctedCopy, nullptr );
   //   ASSERT_TRUE( asg::CheckHelper<CP::CorrectionCode>::isSuccess( tool.applyCorrection(*myObj) ) );
   //   EXPECT_FLOAT_EQ( correctedCopy->mpx()  , myObj->mpx() );
@@ -442,7 +444,7 @@ namespace met {
 //       app = POOL::Init(); //important to do this first!
 // #endif
 //     }
-    
+
 //     IAppMgrUI* app;
 //   };
 

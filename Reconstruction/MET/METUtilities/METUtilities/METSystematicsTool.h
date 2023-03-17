@@ -146,10 +146,10 @@ namespace met {
     TRandom3* getTLSRandomGen() const;
 
     //declared properties
-    Gaudi::Property<std::string> m_configPrefix{this, "ConfigPrefix", "METUtilities/data16_13TeV/rec_Dec16v1", ""};
-    Gaudi::Property<std::string> m_configSoftTrkFile{this, "ConfigSoftTrkFile", "TrackSoftTerms.config", ""}; // TrackSoftTerms_afii.config for AFII
+    Gaudi::Property<std::string> m_configPrefix{this, "ConfigPrefix", "METUtilities/R22_PreRecs", ""};
+    Gaudi::Property<std::string> m_configSoftTrkFile{this, "ConfigSoftTrkFile", "TrackSoftTerms-pflow.config", ""};
     Gaudi::Property<std::string> m_configJetTrkFile{this, "ConfigJetTrkFile", "", ""};
-    Gaudi::Property<std::string> m_configSoftCaloFile{this, "ConfigSoftCaloFile", "", ""}; // METRefFinal_Obsolete2012_V2.config
+    Gaudi::Property<std::string> m_configSoftCaloFile{this, "ConfigSoftCaloFile", "", ""};
     Gaudi::Property<bool> m_useDevArea{this, "UseDevArea", false, ""};
 
     std::unique_ptr<TH3D> m_shiftpara_pthard_njet_mu{};
