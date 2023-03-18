@@ -42,7 +42,7 @@ GeoModelSvc::GeoModelSvc(const std::string& name,ISvcLocator* svc)
     m_useTagInfo(true),
     m_statisticsToFile(false),
     m_supportedGeometry(0),
-    m_ignoreTagSupport(false)
+    m_ignoreTagSupport(true)
 {
   declareProperty( "DetectorTools",               m_detectorTools);
   declareProperty( "AtlasVersion",                m_AtlasVersion);
