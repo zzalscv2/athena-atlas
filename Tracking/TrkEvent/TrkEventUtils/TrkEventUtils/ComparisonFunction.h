@@ -99,7 +99,12 @@ public:
     return (fabs(distOne) < fabs(distTwo));
   }
 
-private:
+  bool operator()(const std::unique_ptr<T>& one,
+                  const std::unique_ptr<T>& two) const {
+    return this->operator()(one.get(), two.get());
+  }
+
+ private:
   Amg::Vector3D m_point;
   Amg::Vector3D m_line;
   double m_radius = 0.;

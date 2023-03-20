@@ -353,15 +353,8 @@ StatusCode MdtDigitizationTool::doDigitization(const EventContext& ctx, Collecti
             ATH_MSG_WARNING(readHandle.fullKey() << " is not available.");
             return StatusCode::FAILURE;
         }
-        m_IdentifiersToMask.clear();
-        int size_id = readCdo->getDeadStationsId().size();
-        ATH_MSG_DEBUG("Number of dead/missing stations retrieved from CondService= " << size_id);
-
-        for (int k = 0; k < size_id; ++k) {
-            Identifier Id = readCdo->getDeadStationsId()[k];
-            m_IdentifiersToMask.push_back(readCdo->getDeadStationsId()[k]);
-            ATH_MSG_VERBOSE("Dead/missing chambers id from CondDB: " << m_idHelperSvc->mdtIdHelper().show_to_string(Id));
-        }
+        m_IdentifiersToMask = readCdo->getDeadStationsId();       
+        ATH_MSG_DEBUG("Number of dead/missing stations retrieved from CondService= " << readCdo->getDeadStationsId().size());
     }
 
     // get the iterator infos for this DetEl
@@ -668,9 +661,8 @@ bool MdtDigitizationTool::checkMDTSimHit(const MDTSimHit& hit) const {
 
     //+MASKING OF DEAD/MISSING CHAMBERS
     if (m_UseDeadChamberSvc) {
-        for (unsigned int i = 0; i < m_IdentifiersToMask.size(); ++i) {
-            Identifier Id = m_IdentifiersToMask[i];
-
+        for (const Identifier& Id : m_IdentifiersToMask) {
+         
             if ((stationName == m_idHelperSvc->mdtIdHelper().stationNameString(m_idHelperSvc->mdtIdHelper().stationName(Id))) &&
                 (stationEta == m_idHelperSvc->mdtIdHelper().stationEta(Id)) &&
                 (stationPhi == m_idHelperSvc->mdtIdHelper().stationPhi(Id))) {

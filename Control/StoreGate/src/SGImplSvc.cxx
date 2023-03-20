@@ -945,6 +945,15 @@ SG::DataProxy* SGImplSvc::recordObject (SG::DataObjectSharedPtr<DataObject> obj,
 }
 
 
+/// Get proxy given a hashed key+clid.
+/// Find an exact match; no handling of aliases, etc.
+/// Returns 0 to flag failure.
+SG::DataProxy* SGImplSvc::proxy_exact (SG::sgkey_t sgkey) const
+{
+  return m_pStore->proxy_exact_unlocked (sgkey, m_mutex);
+}
+
+
 /**
  * @brief Set the Hive slot number for this store.
  * @param slot The slot number.  -1 means that this isn't a Hive store.

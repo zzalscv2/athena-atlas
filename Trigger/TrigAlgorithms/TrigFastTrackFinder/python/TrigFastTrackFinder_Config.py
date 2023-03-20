@@ -5,6 +5,11 @@ from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 def TrigFastTrackFinderMonitoring(flags):
     name =    "trigfasttrackfinder_" + flags.InDet.Tracking.ActiveConfig.name
     doResMon= flags.InDet.Tracking.ActiveConfig.doResMon
+    return TrigFastTrackFinderMonitoringArg(flags, name, doResMon)
+
+    
+def TrigFastTrackFinderMonitoringArg(flags, name, doResMon):
+
 
     def addSPHistograms(montool, name):
         if name in ['FS', 'JetFS', 'FullScan', 'fullScan', 'fullScanUTT', 'jet']:

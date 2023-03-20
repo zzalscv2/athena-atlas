@@ -301,11 +301,7 @@ public:
   /// Get proxy given a hashed key+clid.
   /// Find an exact match; no handling of aliases, etc.
   /// Returns 0 to flag failure.
-  virtual SG::DataProxy* proxy_exact (SG::sgkey_t sgkey) const override final
-  {
-    lock_t lock (m_mutex);
-    return m_pStore->proxy_exact (sgkey);
-  }
+  virtual SG::DataProxy* proxy_exact (SG::sgkey_t sgkey) const override final;
     
 
   //@}

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -25,9 +25,11 @@
 #include "MuonPrepRawData/sTgcPrepData.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "MuonIdHelpers/sTgcIdHelper.h"
-
 #include "MuonRIO_OnTrack/sTgcClusterOnTrack.h"
-#include "MuonSegment/MuonSegment.h"
+
+#include "TrkToolInterfaces/IResidualPullCalculator.h"
+#include "TrkParameters/TrackParameters.h"
+
 
 // stl includes                                                                                 
 #include <string>
@@ -37,7 +39,7 @@ namespace Muon {
 }
 
 namespace GeometricSectors {
-  static const std::array<std::string, 2> sTgcSide = {"CSide", "ASide"};
+  static const std::array<std::string, 2> sTgcSide = {"C", "A"};
 }
 
 class sTgcRawDataMonAlg: public AthMonitorAlgorithm {
@@ -49,20 +51,17 @@ class sTgcRawDataMonAlg: public AthMonitorAlgorithm {
   virtual StatusCode fillHistograms(const EventContext& ctx) const override;
  private:  
   ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
-    
-  void fillsTgcOverviewHistograms(const Muon::sTgcPrepData*, const Muon::MuonPrepDataCollection<Muon::sTgcPrepData> &prd) const;
+  ToolHandle<Trk::IResidualPullCalculator> m_residualPullCalculator {this, "ResPullCalc", "Trk::ResidualPullCalculator/ResidualPullCalculator"};
+  
   void fillsTgcOccupancyHistograms(const Muon::sTgcPrepData*, const MuonGM::MuonDetectorManager*) const;
   void fillsTgcLumiblockHistograms(const Muon::sTgcPrepData*, const int lb) const;
-  void fillsTgcTimingHistograms(const Muon::sTgcPrepData*) const;
-  void fillsTgcClusterFromSegmentsHistograms(const Trk::SegmentCollection*) const;
   void fillsTgcClusterFromTrackHistograms(const xAOD::TrackParticleContainer*) const;
 
   int getSectors(const Identifier& id) const;
   int getLayer(const int multiplet, const int gasGap) const;
   
   SG::ReadHandleKey<Muon::sTgcPrepDataContainer> m_sTgcContainerKey{this,"sTgcPrepDataContainerName", "STGC_Measurements"};
-  SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_detectorManagerKey{this, "DetectorManagerKey", "MuonDetectorManager","Key of input MuonDetectorManager condition data"};
-  SG::ReadHandleKey<Trk::SegmentCollection> m_segmentManagerKey{this, "segmentManagerKey", "TrkMuonSegments", "Muon segments"}; 
+  SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_detectorManagerKey{this, "DetectorManagerKey", "MuonDetectorManager","Key of input MuonDetectorManager condition data"}; 
   SG::ReadHandleKey<xAOD::TrackParticleContainer> m_meTrkKey{this, "METrkContainer", "ExtrapolatedMuonTrackParticles"};
 
   Gaudi::Property<bool> m_dosTgcESD{this,"dosTgcESD", true};

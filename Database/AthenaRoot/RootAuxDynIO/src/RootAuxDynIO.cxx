@@ -108,8 +108,8 @@ namespace RootAuxDynIO
    /// tree -> destination tree
    /// do_branch_fill -> flag telling to Fill each TBranch immediately
    std::unique_ptr<RootAuxDynIO::IRootAuxDynWriter>
-   getBranchAuxDynWriter(TTree* tree, int offsettab_len,  bool do_branch_fill) {
-      return std::make_unique<TBranchAuxDynWriter>(tree, offsettab_len, do_branch_fill);
+   getBranchAuxDynWriter(TTree* tree, int bufferSize, int splitLevel, int offsettab_len,  bool do_branch_fill) {
+      return std::make_unique<TBranchAuxDynWriter>(tree, bufferSize, splitLevel, offsettab_len, do_branch_fill);
    }
 
    std::unique_ptr<RootAuxDynIO::IRNTupleWriter>

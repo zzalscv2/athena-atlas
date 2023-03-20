@@ -109,7 +109,6 @@ class ConfigSettings_tauIso( _ConfigSettingsBase ):
       self._vertex         = "HLT_IDVertex_Tau"
       self._electronPID    = False
       self._pTmin          = 0.8*GeV
-      #self._Xi2max         = 9     Revert to default value for 2023
       # potential change coming up ...
       # self._minNSiHits_vtx = 6
 
@@ -138,8 +137,6 @@ class ConfigSettings_bjet( _ConfigSettingsBase ):
       self._phiHalfWidth    = 0.4
       self._zedHalfWidth    = 10.0
       self._pTmin  = 0.8*GeV
-      self._Xi2max = 12
-
 
 class ConfigSettings_jetSuper( _ConfigSettingsBase ):
    def __init__( self ):

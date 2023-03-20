@@ -50,7 +50,7 @@ namespace RootAuxDynIO
    class TBranchAuxDynWriter  : public AthMessaging, public IRootAuxDynWriter
    {
    public:
-      TBranchAuxDynWriter( TTree* tree, int offsettab_len, bool branch_fill );
+      TBranchAuxDynWriter( TTree* tree, int bufferSize, int splitLevel, int offsettab_len, bool branch_fill );
       virtual ~TBranchAuxDynWriter() { }
       
       /// set Filling mode (true/false) for branch containers
@@ -75,6 +75,8 @@ namespace RootAuxDynIO
    protected:
       TFile*               m_tfile            = nullptr;
       TTree*               m_ttree            = nullptr;
+      int                  m_bufferSize       = 8192;
+      int                  m_splitLevel       = 1;
       int                  m_branchOffsetTabLen = 0;
       bool                 m_branchFillMode   = false;
       bool                 m_needsFill        = false;

@@ -472,9 +472,9 @@ Trk::Extrapolator::extrapolateStepwiseImpl(const EventContext& ctx,
   ATH_MSG_DEBUG("F-[" << cache.m_methodSequence << "] extrapolateStepwise(...) ");
   // initialize the return parameters vector
   // create a new internal helper vector
-  Trk::TrackParametersPtrVector tmp;
+  Trk::TrackParametersUVector tmp;
+  //The m_parametersOnDetElements point to it
   cache.m_parametersOnDetElements = &tmp;
-  cache.m_ownParametersOnDetElements = true;
   // Material effect updator cache
   cache.populateMatEffUpdatorCache(m_subupdaters);
   //TODO revisit when objcontainer is streamlined
@@ -484,22 +484,13 @@ Trk::Extrapolator::extrapolateStepwiseImpl(const EventContext& ctx,
     ctx, cache, prop, cache.manage(std::move(cloneInput)).index(), sf, dir, bcheck, particle));
   // assign the return parameter and set cache.m_parametersOnDetElements = 0;
   if (parameterOnSf) {
-    tmp.push_back(parameterOnSf.release());
-    cache.m_parametersOnDetElements = nullptr;
-    cache.m_ownParametersOnDetElements = false;
+    tmp.emplace_back(parameterOnSf.release());
   } else {
-
-    if (!cache.m_ownParametersOnDetElements) {
-      std::stringstream msg;
-      msg << "Will not cleanup " << static_cast<const void*>(cache.m_parametersOnDetElements);
-      throw std::logic_error(msg.str());
-    }
-    for (const Trk::TrackParameters* p : tmp) {
-      delete p;
-    }
     tmp.clear();
   }
-  return Trk::TrackParametersUVector(tmp.begin(), tmp.end());
+  //m_parametersOnDetElements point to nullptr
+  cache.m_parametersOnDetElements = nullptr;
+  return Trk::TrackParametersUVector(std::move(tmp));
 }
 
 std::pair<std::unique_ptr<Trk::TrackParameters>, const Trk::Layer*>
@@ -2870,21 +2861,20 @@ Trk::Extrapolator::extrapolateBlindlyImpl(const EventContext& ctx,
   cache.m_boundaryVolume = boundaryVol;
   // initialize the return parameters vector
   // create a new internal helper vector
-  Trk::TrackParametersPtrVector tmp;
+  Trk::TrackParametersUVector tmp;
+  //The m_parametersOnDetElements point to it
   cache.m_parametersOnDetElements = &tmp;
-  cache.m_ownParametersOnDetElements = true;
   // run the extrapolation
   {
     ManagedTrackParmPtr parameterOnSf(
       extrapolateImpl(ctx, cache, prop, parm, *m_referenceSurface, dir, bcheck, particle));
   }
-  // assign the return parameter and set cache.m_parametersOnDetElements = 0;
+  // reset the .m_parametersOnDetElements to point to nullptr
   cache.m_parametersOnDetElements = nullptr;
-  cache.m_ownParametersOnDetElements = false;
   // reset the boundary Volume
   cache.m_boundaryVolume = nullptr;
   // return what you have
-  return Trk::TrackParametersUVector(tmp.begin(), tmp.end());
+  return Trk::TrackParametersUVector(std::move(tmp));
 }
 
 // ----------------------- The private Volume extrapolation methods --------------------------
@@ -3976,7 +3966,7 @@ Trk::Extrapolator::overlapSearch(const EventContext& ctx,
   bool isStartLayer = (detSurface && detSurface == startSurface);
 
   // the temporary vector (might have to be ordered)
-  std::vector<Trk::TrackParameters*> detParametersOnLayer;
+  TrackParametersUVector detParametersOnLayer;
   bool reorderDetParametersOnLayer = false;
   // the first test for the detector surface to be hit (false test)
   // - only do this if the parameters aren't on the surface
@@ -4020,9 +4010,7 @@ Trk::Extrapolator::overlapSearch(const EventContext& ctx,
     if (surfaceHit && detSurface != startSurface && detSurface != cache.m_destinationSurface) {
       ATH_MSG_VERBOSE("  [H] Hit with detector surface recorded ! ");
       // push into the temporary vector
-      detParametersOnLayer.push_back(
-        detParameters.release()); // after this line detParameters == nullptr;
-      //      track_parm_for_overlap=TrackParmPtr(*(detParametersOnLayer.back()));
+      detParametersOnLayer.emplace_back(detParameters.release()); 
     } else if (detParameters) {
       // no hit -> fill into the garbage bin
       ATH_MSG_VERBOSE(
@@ -4071,7 +4059,7 @@ Trk::Extrapolator::overlapSearch(const EventContext& ctx,
             // distinguish whether sorting is needed or not
             reorderDetParametersOnLayer = true;
             // push back into the temporary vector
-            detParametersOnLayer.push_back(overlapParameters.release());
+            detParametersOnLayer.emplace_back(overlapParameters.release());
           } else { // the parameters have been cancelled by start/end surface
             // no hit -> fill into the garbage bin
             ATH_MSG_VERBOSE(
@@ -4093,9 +4081,8 @@ Trk::Extrapolator::overlapSearch(const EventContext& ctx,
   if (cache.m_parametersOnDetElements->empty()) {
     *(cache.m_parametersOnDetElements) = std::move(detParametersOnLayer);
   } else {
-    std::copy(detParametersOnLayer.begin(),
-              detParametersOnLayer.end(),
-              back_inserter(*(cache.m_parametersOnDetElements)));
+    std::move(detParametersOnLayer.begin(), detParametersOnLayer.end(),
+              std::back_inserter(*(cache.m_parametersOnDetElements)));
   }
 }
 
@@ -5200,7 +5187,7 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
                           particle);
           } else if (nextLayer->layerType() > 0 && nextLayer->isOnLayer(nextPar->position())) {
             ATH_MSG_VERBOSE("  [o] Collecting intersection with active layer.");
-            cache.m_parametersOnDetElements->push_back(nextPar->clone());
+            cache.m_parametersOnDetElements->emplace_back(nextPar->uniqueClone());
           }
         } // -------------------------- Fatras mode off -----------------------------------
 

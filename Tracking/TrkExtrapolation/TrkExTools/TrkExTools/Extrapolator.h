@@ -59,7 +59,6 @@ class AlignableTrackingVolume;
 class ExtrapolationCache;
 class TrackingVolume;
 
-typedef std::vector<Trk::TrackParameters*> TrackParametersPtrVector;
 typedef std::vector<std::unique_ptr<Trk::TrackParameters>> TrackParametersUVector;
 typedef std::pair<const Surface*, BoundaryCheck> DestSurf;
 

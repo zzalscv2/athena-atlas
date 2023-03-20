@@ -383,11 +383,18 @@ def readDetailsFromTRP(inputFile, runNumber, maxRanges, itemName="L1_TAU8--enabl
             lbRangeDetailsDict[lbRange] = {"avgPileup" : round(pileupAvg, 3), "minPileup" : round(min(pileupArr), 3), 
                                            "maxPileup" : round(max(pileupArr), 3), "deadtime" : round(physicsDeadtimeAvg, 3)}
 
-    except ImportError:
+    except ImportError as e:
         log.error("The pbeast python library was not found! Remember to setup tdaq release!")
+        log.debug(e)
         return {}
-    except RuntimeError:
-        log.error("Error when reading from Pbeast! Remember to export pbeast server sso: export PBEAST_SERVER_SSO_SETUP_TYPE=AutoUpdateKerberos")
+    except RuntimeError as e:
+        if "Sign in to your account" in str(e):
+            log.error("PBeast authentication failed! Remember to export pbeast server sso: export PBEAST_SERVER_SSO_SETUP_TYPE=AutoUpdateKerberos")
+        elif "cannot create CERN SSO cookie" in str(e):
+            log.error("PBeast authentication requires the cookies, please setup")
+        else:
+            log.error("Error when reading from Pbeast! ")
+        log.debug(e)
         return {}
 
     log.debug("The final lumiblock dictionary is {0}".format(lbRangeDetailsDict))

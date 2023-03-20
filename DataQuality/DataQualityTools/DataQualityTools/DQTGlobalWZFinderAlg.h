@@ -70,7 +70,7 @@ private:
   void fillEleEffHistos(bool tag_good, bool probe_good, bool probe_anti_good, bool os, double el_mass) const;
 
   void doEleTriggerTP(const xAOD::Electron* el1, const xAOD::Electron* el2, const EventContext& ctx, bool writeTTrees, const float evtWeight, bool osel, bool ssel) const;
-  void doEleTP(const xAOD::Electron* leadingAllEle, const xAOD::Electron* subleadingAllEle, const xAOD::Vertex* pVtx, const EventContext& ctx, bool writeTTrees, const float evtWeight) const; 
+  void doEleTP(const xAOD::Electron* leadingAllEle, const xAOD::Electron* subleadingAllEle, const xAOD::Vertex* pVtx, const EventContext& ctx, bool writeTTrees, bool isSimulation, const float evtWeight) const; 
   void doEleContainerTP(std::vector<const xAOD::Electron*>& allElectrons, std::vector<const xAOD::Electron*>& goodelectrons, const EventContext& ctx) const;
  
   void doMuonTriggerTP(const xAOD::Muon* mu1, const xAOD::Muon* mu2, const EventContext& ctx, bool isSimulation, bool writeTTrees, const float evtWeight) const;
