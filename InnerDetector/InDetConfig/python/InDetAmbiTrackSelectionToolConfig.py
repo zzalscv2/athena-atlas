@@ -57,21 +57,19 @@ def InDetAmbiTrackSelectionToolCfg(flags, name="InDetAmbiTrackSelectionTool", **
         kwargs.setdefault("etaWidth", 0.05)
 
         # Only split in cluster in region of interest
-        kwargs.setdefault("doEmCaloSeed",
-                          flags.InDet.Tracking.doCaloSeededAmbi)
+        kwargs.setdefault("doEmCaloSeed", flags.Tracking.doCaloSeededAmbi)
         kwargs.setdefault("EMROIPhiRZContainer",
                           "InDetCaloClusterROIPhiRZ10GeV")
-        if flags.InDet.Tracking.doCaloSeededAmbi:
+        if flags.Tracking.doCaloSeededAmbi:
             from InDetConfig.InDetCaloClusterROISelectorConfig import (
                 CaloClusterROIPhiRZContainerMakerCfg)
             acc.merge(CaloClusterROIPhiRZContainerMakerCfg(flags))
 
         # Do special cuts in region of interest
-        kwargs.setdefault("doHadCaloSeed",
-                          flags.InDet.Tracking.doCaloSeededAmbi)
+        kwargs.setdefault("doHadCaloSeed", flags.Tracking.doCaloSeededAmbi)
         kwargs.setdefault("HadROIPhiRZContainer",
                           "InDetHadCaloClusterROIPhiRZBjet")
-        if flags.InDet.Tracking.doCaloSeededAmbi:
+        if flags.Tracking.doCaloSeededAmbi:
             from InDetConfig.InDetCaloClusterROISelectorConfig import (
                 HadCaloClusterROIPhiRZContainerMakerCfg)
             acc.merge(HadCaloClusterROIPhiRZContainerMakerCfg(flags))
@@ -83,7 +81,8 @@ def InDetAmbiTrackSelectionToolCfg(flags, name="InDetAmbiTrackSelectionTool", **
         kwargs.setdefault("phiWidthEM", 0.05)
         kwargs.setdefault("etaWidthEM", 0.05)
         # Skip ambi solver in hadronic ROI
-        kwargs.setdefault("doSkipAmbiInROI", flags.InDet.Tracking.doSkipAmbiROI)
+        kwargs.setdefault("doSkipAmbiInROI",
+                          flags.InDet.Tracking.doSkipAmbiROI)
 
         if (flags.Tracking.doTIDE_AmbiTrackMonitoring and
                 flags.InDet.Tracking.ActiveConfig.extension == ""):
@@ -96,7 +95,8 @@ def InDetAmbiTrackSelectionToolCfg(flags, name="InDetAmbiTrackSelectionTool", **
         kwargs.setdefault("sharedProbCut", 0.10)
 
     if flags.InDet.Tracking.ActiveConfig.useTIDE_Ambi:
-        AmbiTrackSelectionTool = CompFactory.InDet.InDetDenseEnvAmbiTrackSelectionTool
+        AmbiTrackSelectionTool = (
+            CompFactory.InDet.InDetDenseEnvAmbiTrackSelectionTool)
     else:
         AmbiTrackSelectionTool = CompFactory.InDet.InDetAmbiTrackSelectionTool
 
@@ -161,8 +161,8 @@ def InDetTrigTrackSelectionToolCfg(flags, name='InDetTrigAmbiTrackSelectionTool'
     kwargs.setdefault("Cosmics", False)  # there is a different instance
     kwargs.setdefault("UseParameterization", False)
 
-    acc.addPublicTool(CompFactory.InDet.InDetAmbiTrackSelectionTool(
-        name, **kwargs), primary=True)
+    acc.setPrivateTools(
+        CompFactory.InDet.InDetAmbiTrackSelectionTool(name, **kwargs))
     return acc
 
 
@@ -204,17 +204,17 @@ def ITkAmbiTrackSelectionToolCfg(flags, name="ITkAmbiTrackSelectionTool", **kwar
     kwargs.setdefault("etaWidth", 0.05)
 
     # Only split in cluster in region of interest
-    kwargs.setdefault("doEmCaloSeed", flags.ITk.Tracking.doCaloSeededAmbi)
+    kwargs.setdefault("doEmCaloSeed", flags.Tracking.doCaloSeededAmbi)
     kwargs.setdefault("EMROIPhiRZContainer", "ITkCaloClusterROIPhiRZ10GeV")
-    if flags.ITk.Tracking.doCaloSeededAmbi:
+    if flags.Tracking.doCaloSeededAmbi:
         from InDetConfig.InDetCaloClusterROISelectorConfig import (
             ITkCaloClusterROIPhiRZContainerMakerCfg)
         acc.merge(ITkCaloClusterROIPhiRZContainerMakerCfg(flags))
 
     # Do special cuts in region of interest
-    kwargs.setdefault("doHadCaloSeed", flags.ITk.Tracking.doCaloSeededAmbi)
+    kwargs.setdefault("doHadCaloSeed", flags.Tracking.doCaloSeededAmbi)
     kwargs.setdefault("HadROIPhiRZContainer", "ITkHadCaloClusterROIPhiRZBjet")
-    if flags.ITk.Tracking.doCaloSeededAmbi:
+    if flags.Tracking.doCaloSeededAmbi:
         from InDetConfig.InDetCaloClusterROISelectorConfig import (
             ITkHadCaloClusterROIPhiRZContainerMakerCfg)
         acc.merge(ITkHadCaloClusterROIPhiRZContainerMakerCfg(flags))

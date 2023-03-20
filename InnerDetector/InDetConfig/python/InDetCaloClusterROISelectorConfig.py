@@ -3,7 +3,11 @@
 from AthenaConfiguration.ComponentFactory import CompFactory
 import AthenaCommon.SystemOfUnits as Units
 
-def CaloClusterROIPhiRZContainerMakerCfg(flags, name="CaloClusterROIPhiRZContainerMaker", **kwargs):
+
+def CaloClusterROIPhiRZContainerMakerCfg(
+        flags,
+        name="CaloClusterROIPhiRZContainerMaker",
+        **kwargs):
     from egammaAlgs.egammaTopoClusterCopierConfig import (
         egammaTopoClusterCopierCfg)
     result = egammaTopoClusterCopierCfg(flags)
@@ -18,35 +22,37 @@ def CaloClusterROIPhiRZContainerMakerCfg(flags, name="CaloClusterROIPhiRZContain
                       flags.Egamma.Keys.Internal.EgammaTopoClusters)
     kwargs.setdefault("EMEnergyOnly", True)
 
-    OutputROIContainerName=[]
-    minPt=[]
-    phiWidth=[]
+    OutputROIContainerName = []
+    minPt = []
+    phiWidth = []
 
-    if flags.InDet.Tracking.ActiveConfig.RoISeededBackTracking :
+    if flags.InDet.Tracking.ActiveConfig.RoISeededBackTracking:
         # TRT_TrackSegmentsFinder
         # TRT_SeededTrackFinder
         pt_cut = flags.InDet.Tracking.ActiveConfig.minRoIClusterEt
-        OutputROIContainerName.append('InDetCaloClusterROIPhiRZ%.0fGeVUnordered' % (pt_cut/Units.GeV))
+        OutputROIContainerName.append(
+            'InDetCaloClusterROIPhiRZ%.0fGeVUnordered' % (pt_cut/Units.GeV))
         minPt.append(pt_cut)
-        phiWidth.append(0.)  # no phi ordering, no Roi duplication close to +- pi
+        # no phi ordering, no Roi duplication close to +- pi
+        phiWidth.append(0.)
 
-    if flags.InDet.Tracking.doCaloSeededBrem:
+    if flags.Tracking.doCaloSeededBrem:
         OutputROIContainerName.append('InDetCaloClusterROIPhiRZ0GeV')
         minPt.append(0)
-        phiWidth.append(flags.InDet.Tracking.ActiveConfig.phiWidthBrem) # must be equal or larger than phiWidth of its clients: InDetSiTrackMaker (phiWidt)
+        # must be equal or larger than phiWidth of its clients: InDetSiTrackMaker (phiWidt)
+        phiWidth.append(flags.InDet.Tracking.ActiveConfig.phiWidthBrem)
 
-    if flags.InDet.Tracking.doCaloSeededAmbi and \
-       flags.Detector.EnableCalo:
+    if flags.Tracking.doCaloSeededAmbi:
         OutputROIContainerName.append('InDetCaloClusterROIPhiRZ10GeV')
         minPt.append(10000)
-        phiWidth.append(0.05) # must be equal or larger than phiWidth of its clients: InDetAmbiTrackSelectionTool
+        # must be equal or larger than phiWidth of its clients: InDetAmbiTrackSelectionTool
+        phiWidth.append(0.05)
 
-    if flags.InDet.Tracking.doBremRecovery and \
-       flags.InDet.Tracking.doCaloSeededBrem and \
-       flags.Detector.EnableCalo:
+    if flags.Tracking.doBremRecovery and flags.Tracking.doCaloSeededBrem:
         OutputROIContainerName.append('InDetCaloClusterROIPhiRZ5GeV')
         minPt.append(5000)
-        phiWidth.append(0.075) # must be equal or larger than phiWidth of its clients: InDetNNScoringTool (phiWidthEM)
+        # must be equal or larger than phiWidth of its clients: InDetNNScoringTool (phiWidthEM)
+        phiWidth.append(0.075)
 
     kwargs.setdefault("OutputROIContainerName", OutputROIContainerName)
     kwargs.setdefault("minPt", minPt)
@@ -58,10 +64,15 @@ def CaloClusterROIPhiRZContainerMakerCfg(flags, name="CaloClusterROIPhiRZContain
         kwargs.setdefault("egammaCaloClusterSelector", result.popToolsAndMerge(
             egammaCaloClusterSelectorCfg(flags)))
 
-    result.addEventAlgo(CompFactory.InDet.CaloClusterROIPhiRZContainerMaker(name, **kwargs), primary=True)
+    result.addEventAlgo(CompFactory.InDet.CaloClusterROIPhiRZContainerMaker(
+        name, **kwargs), primary=True)
     return result
 
-def ITkCaloClusterROIPhiRZContainerMakerCfg(flags, name="CaloClusterROIPhiRZContainerMaker", **kwargs):
+
+def ITkCaloClusterROIPhiRZContainerMakerCfg(
+        flags,
+        name="ITkCaloClusterROIPhiRZContainerMaker",
+        **kwargs):
 
     from egammaAlgs.egammaTopoClusterCopierConfig import (
         egammaTopoClusterCopierCfg)
@@ -77,32 +88,34 @@ def ITkCaloClusterROIPhiRZContainerMakerCfg(flags, name="CaloClusterROIPhiRZCont
                       flags.Egamma.Keys.Internal.EgammaTopoClusters)
     kwargs.setdefault("EMEnergyOnly", True)
 
-    OutputROIContainerName=[]
-    minPt=[]
-    phiWidth=[]
+    OutputROIContainerName = []
+    minPt = []
+    phiWidth = []
 
-    if flags.ITk.Tracking.doCaloSeededBrem:
+    if flags.Tracking.doCaloSeededBrem:
         OutputROIContainerName.append('ITkCaloClusterROIPhiRZ0GeV')
         minPt.append(0)
-        phiWidth.append(flags.ITk.Tracking.ActiveConfig.phiWidthBrem[0]) # value from central eta bin
+        # value from central eta bin
+        phiWidth.append(flags.ITk.Tracking.ActiveConfig.phiWidthBrem[0])
         # must be equal or larger than phiWidth of its clients: InDetSiTrackMaker (phiWidth)
 
-    if flags.ITk.Tracking.doCaloSeededAmbi:
+    if flags.Tracking.doCaloSeededAmbi:
         OutputROIContainerName.append('ITkCaloClusterROIPhiRZ10GeV')
         minPt.append(10000)
-        phiWidth.append(0.05) # must be equal or larger than phiWidth of its clients: InDetAmbiTrackSelectionTool
+        # must be equal or larger than phiWidth of its clients: InDetAmbiTrackSelectionTool
+        phiWidth.append(0.05)
 
-    if flags.ITk.Tracking.doBremRecovery and \
-       flags.ITk.Tracking.doCaloSeededBrem and \
-       flags.Detector.EnableCalo:
+    if flags.Tracking.doBremRecovery and flags.Tracking.doCaloSeededBrem:
         OutputROIContainerName.append('ITkCaloClusterROIPhiRZ5GeV')
         minPt.append(5000)
-        phiWidth.append(0.075) # must be equal or larger than phiWidth of its clients: InDetNNScoringTool (phiWidthEM)
+        # must be equal or larger than phiWidth of its clients: InDetNNScoringTool (phiWidthEM)
+        phiWidth.append(0.075)
 
     if flags.ITk.Tracking.doConversionFinding:
         OutputROIContainerName.append('ITkCaloClusterROIPhiRZ15GeVUnordered')
         minPt.append(15000)
-        phiWidth.append(0.) # no phi ordering, no Roi duplication close to +- pi
+        # no phi ordering, no Roi duplication close to +- pi
+        phiWidth.append(0.)
 
     kwargs.setdefault("OutputROIContainerName", OutputROIContainerName)
     kwargs.setdefault("minPt", minPt)
@@ -114,10 +127,15 @@ def ITkCaloClusterROIPhiRZContainerMakerCfg(flags, name="CaloClusterROIPhiRZCont
         kwargs.setdefault("egammaCaloClusterSelector", result.popToolsAndMerge(
             egammaCaloClusterSelectorCfg(flags)))
 
-    result.addEventAlgo(CompFactory.InDet.CaloClusterROIPhiRZContainerMaker(name, **kwargs), primary=True)
+    result.addEventAlgo(CompFactory.InDet.CaloClusterROIPhiRZContainerMaker(
+        name, **kwargs), primary=True)
     return result
 
-def HadCaloClusterROIPhiRZContainerMakerCfg(flags, name="HadCaloClusterROIPhiRZContainerMaker", **kwargs):
+
+def HadCaloClusterROIPhiRZContainerMakerCfg(
+        flags,
+        name="HadCaloClusterROIPhiRZContainerMaker",
+        **kwargs):
     from egammaAlgs.egammaTopoClusterCopierConfig import (
         egammaTopoClusterCopierCfg)
     result = egammaTopoClusterCopierCfg(flags)
@@ -130,21 +148,21 @@ def HadCaloClusterROIPhiRZContainerMakerCfg(flags, name="HadCaloClusterROIPhiRZC
         kwargs.setdefault("CaloSurfaceBuilder", result.popToolsAndMerge(
             CaloSurfaceBuilderEntranceCfg(flags)))
 
-    OutputROIContainerName=[]
-    minPt=[]
-    phiWidth=[]
+    OutputROIContainerName = []
+    minPt = []
+    phiWidth = []
 
-    if flags.InDet.Tracking.doHadCaloSeededSSS and \
-       flags.Detector.EnableCalo:
+    if flags.Tracking.doHadCaloSeededSSS:
         OutputROIContainerName.append("InDetHadCaloClusterROIPhiRZ")
         minPt.append(0)
-        phiWidth.append(flags.InDet.Tracking.ActiveConfig.phiWidthBrem) # must be equal or larger than phiWidth of its clients: InDetSiTrackMaker (phiWidth)
+        # must be equal or larger than phiWidth of its clients: InDetSiTrackMaker (phiWidth)
+        phiWidth.append(flags.InDet.Tracking.ActiveConfig.phiWidthBrem)
 
-    if flags.InDet.Tracking.doCaloSeededAmbi and \
-       flags.Detector.EnableCalo :
+    if flags.Tracking.doCaloSeededAmbi:
         OutputROIContainerName.append("InDetHadCaloClusterROIPhiRZBjet")
         minPt.append(0)
-        phiWidth.append(0.05) # must be equal or larger than phiWidth of its clients: InDetAmbiTrackSelectionTool
+        # must be equal or larger than phiWidth of its clients: InDetAmbiTrackSelectionTool
+        phiWidth.append(0.05)
 
     kwargs.setdefault("OutputROIContainerName", OutputROIContainerName)
     kwargs.setdefault("minPt", minPt)
@@ -156,10 +174,15 @@ def HadCaloClusterROIPhiRZContainerMakerCfg(flags, name="HadCaloClusterROIPhiRZC
         kwargs.setdefault("egammaCaloClusterSelector", result.popToolsAndMerge(
             egammaHadCaloClusterSelectorCfg(flags)))
 
-    result.addEventAlgo(CompFactory.InDet.CaloClusterROIPhiRZContainerMaker(name, **kwargs), primary=True)
+    result.addEventAlgo(CompFactory.InDet.CaloClusterROIPhiRZContainerMaker(
+        name, **kwargs), primary=True)
     return result
 
-def ITkHadCaloClusterROIPhiRZContainerMakerCfg(flags, name="HadCaloClusterROIPhiRZContainerMaker", **kwargs):
+
+def ITkHadCaloClusterROIPhiRZContainerMakerCfg(
+        flags,
+        name="ITkHadCaloClusterROIPhiRZContainerMaker",
+        **kwargs):
     from egammaAlgs.egammaTopoClusterCopierConfig import (
         egammaTopoClusterCopierCfg)
     result = egammaTopoClusterCopierCfg(flags)
@@ -172,20 +195,22 @@ def ITkHadCaloClusterROIPhiRZContainerMakerCfg(flags, name="HadCaloClusterROIPhi
         kwargs.setdefault("CaloSurfaceBuilder", result.popToolsAndMerge(
             CaloSurfaceBuilderEntranceCfg(flags)))
 
-    OutputROIContainerName=[]
-    minPt=[]
-    phiWidth=[]
+    OutputROIContainerName = []
+    minPt = []
+    phiWidth = []
 
-    if flags.ITk.Tracking.doHadCaloSeededSSS:
+    if flags.Tracking.doHadCaloSeededSSS:
         OutputROIContainerName.append("ITkHadCaloClusterROIPhiRZ")
         minPt.append(0)
-        phiWidth.append(flags.ITk.Tracking.ActiveConfig.phiWidthBrem[0]) # value from central eta bin
+        # value from central eta bin
+        phiWidth.append(flags.ITk.Tracking.ActiveConfig.phiWidthBrem[0])
         # must be equal or larger than phiWidth of its clients: InDetSiTrackMaker (phiWidth)
 
-    if flags.ITk.Tracking.doCaloSeededAmbi:
+    if flags.Tracking.doCaloSeededAmbi:
         OutputROIContainerName.append("ITkHadCaloClusterROIPhiRZBjet")
         minPt.append(0)
-        phiWidth.append(0.05) # must be equal or larger than phiWidth of its clients: InDetAmbiTrackSelectionTool
+        # must be equal or larger than phiWidth of its clients: InDetAmbiTrackSelectionTool
+        phiWidth.append(0.05)
 
     kwargs.setdefault("OutputROIContainerName", OutputROIContainerName)
     kwargs.setdefault("minPt", minPt)
@@ -197,5 +222,6 @@ def ITkHadCaloClusterROIPhiRZContainerMakerCfg(flags, name="HadCaloClusterROIPhi
         kwargs.setdefault("egammaCaloClusterSelector", result.popToolsAndMerge(
             egammaHadCaloClusterSelectorCfg(flags)))
 
-    result.addEventAlgo(CompFactory.InDet.CaloClusterROIPhiRZContainerMaker(name, **kwargs), primary=True)
+    result.addEventAlgo(CompFactory.InDet.CaloClusterROIPhiRZContainerMaker(
+        name, **kwargs), primary=True)
     return result
