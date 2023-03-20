@@ -4,6 +4,7 @@
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
 # art-include: 22.0/Athena
+# art-include: 23.0/Athena
 # art-include: master/Athena
 # art-output: mc21a_presampling.VarBSTruth.CG.RDO.pool.root
 # art-output: mc21a_presampling.VarBSTruth.CA.RDO.pool.root
