@@ -8,12 +8,12 @@
 # art-output: test_minbias.HITS.pool.root
 # art-output: test_minbias.HITS_FLT.pool.root
 
-Input="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EVNT/mc15_14TeV.800381.Py8EG_A3NNPDF23LO_minbias_inelastic_high_keepJets.evgen.EVNT.e8205/EVNT.22128782._000036.pool.root.1"
+Input="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EVNT/mc21_14TeV.800831.Py8EG_minbias_inelastic_highjetphotonlepton.evgen.EVNT.e8481/EVNT.30810275._000020.pool.root.1"
 Output="test_minbias.HITS.pool.root"
 OutputFilter="test_minbias.HITS_FLT.pool.root"
 
 # RUN4 setup
-# ATLAS-P2-RUN4-01-00-00 and OFLCOND-MC15c-SDR-14-05
+# ATLAS-P2-RUN4-01-01-00 and OFLCOND-MC15c-SDR-14-05
 Sim_tf.py \
 --multithreaded \
 --CA \
@@ -21,7 +21,7 @@ Sim_tf.py \
 --simulator 'FullG4MT' \
 --postInclude 'default:PyJobTransforms.UseFrontier' \
 --preInclude 'EVNTtoHITS:Campaigns.PhaseIISimulation' \
---geometryVersion 'default:ATLAS-P2-RUN4-01-00-00' \
+--geometryVersion 'default:ATLAS-P2-RUN4-01-01-00' \
 --inputEVNTFile "$Input" \
 --outputHITSFile "$Output" \
 --maxEvents 10 \

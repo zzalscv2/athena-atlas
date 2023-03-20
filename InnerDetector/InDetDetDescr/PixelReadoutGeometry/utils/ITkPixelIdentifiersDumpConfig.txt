@@ -6,7 +6,7 @@ DetDescrCnvSvc.useGeomDB_InDet = True;
 
 EventPersistencySvc.CnvServices += { "DetDescrCnvSvc" };
 
-GeoModelSvc.AtlasVersion = "ATLAS-P2-RUN4-01-00-00";
+GeoModelSvc.AtlasVersion = "ATLAS-P2-RUN4-01-01-00";
 GeoModelSvc.SupportedGeometry = 22;
 GeoModelSvc.DetectorTools = ["ITk::PixelDetectorTool/ITkPixelDetectorTool"];
 GeoModelSvc.ITkPixelDetectorTool.Alignable = False;

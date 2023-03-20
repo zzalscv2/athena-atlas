@@ -16,9 +16,9 @@ DigiOutFileNameMP0="RUN4_presampling_MP_fork_evt0.RDO.pool.root"
 DigiOutFileNameMP1="RUN4_presampling_MP_fork_evt1.RDO.pool.root"
 
 Events=50
-HSHitsFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-01-00-00/mc15_14TeV.900149.PG_single_nu_Pt50.simul.HITS.e8371_s3856/HITS.29179777._000918.pool.root.1"
-HighPtMinbiasHitsFiles="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-01-00-00/mc15_14TeV.800381.Py8EG_A3NNPDF23LO_minbias_inelastic_high_keepJets.merge.HITS.e8205_s3856_s3857/*"
-LowPtMinbiasHitsFiles="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-01-00-00/mc15_14TeV.800380.Py8EG_A3NNPDF23LO_minbias_inelastic_low_keepJets.merge.HITS.e8205_s3856_s3857/*"
+HSHitsFile="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-01-01-00/mc21_14TeV.900149.PG_single_nu_Pt50.simul.HITS.e8481_s4038/HITS.32496427._001002.pool.root.1"
+HighPtMinbiasHitsFiles="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-01-01-00/mc21_14TeV.800831.Py8EG_minbias_inelastic_highjetphotonlepton.merge.HITS.e8481_s4038_s4045/*"
+LowPtMinbiasHitsFiles="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-01-01-00/mc21_14TeV.900311.Epos_minbias_inelastic_lowjetphoton.merge.HITS.e8481_s4038_s4045/*"
 
 
 Digi_tf.py \
@@ -27,7 +27,7 @@ Digi_tf.py \
 --conditionsTag default:OFLCOND-MC15c-SDR-14-05 \
 --digiSeedOffset1 170 --digiSeedOffset2 170 \
 --digiSteeringConf 'StandardSignalOnlyTruth' \
---geometryVersion default:ATLAS-P2-RUN4-01-00-00 \
+--geometryVersion default:ATLAS-P2-RUN4-01-01-00 \
 --inputHITSFile ${HSHitsFile} \
 --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles} \
 --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles} \
@@ -50,7 +50,7 @@ Digi_tf.py \
 --conditionsTag default:OFLCOND-MC15c-SDR-14-05 \
 --digiSeedOffset1 170 --digiSeedOffset2 170 \
 --digiSteeringConf 'StandardSignalOnlyTruth' \
---geometryVersion default:ATLAS-P2-RUN4-01-00-00 \
+--geometryVersion default:ATLAS-P2-RUN4-01-01-00 \
 --inputHITSFile ${HSHitsFile} \
 --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles} \
 --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles} \
@@ -75,7 +75,7 @@ Digi_tf.py \
 --conditionsTag default:OFLCOND-MC15c-SDR-14-05 \
 --digiSeedOffset1 170 --digiSeedOffset2 170 \
 --digiSteeringConf 'StandardSignalOnlyTruth' \
---geometryVersion default:ATLAS-P2-RUN4-01-00-00 \
+--geometryVersion default:ATLAS-P2-RUN4-01-01-00 \
 --inputHITSFile ${HSHitsFile} \
 --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles} \
 --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles} \

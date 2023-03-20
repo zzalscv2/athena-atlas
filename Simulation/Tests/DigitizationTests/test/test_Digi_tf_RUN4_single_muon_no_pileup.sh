@@ -12,14 +12,14 @@ if [ -z ${ATLAS_REFERENCE_DATA+x} ]; then
 fi
 
 Events=1000
-HSHitsFile="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-01-00-00/mc15_14TeV.900040.PG_singlemu_Pt100_etaFlatnp0_43.simul.HITS.e8185_s3856/HITS.29179781._000024.pool.root.1"
+HSHitsFile="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-01-01-00/mc21_14TeV.900498.PG_single_muonpm_Pt100_etaFlatnp0_43.simul.HITS.e8481_s4038/HITS.32253538._000039.pool.root.1"
 DigiOutFileName="RUN4_muons.RDO.pool.root"
 
 Digi_tf.py \
 --CA \
 --conditionsTag default:OFLCOND-MC15c-SDR-14-05 \
 --digiSeedOffset1 170 --digiSeedOffset2 170 \
---geometryVersion default:ATLAS-P2-RUN4-01-00-00 \
+--geometryVersion default:ATLAS-P2-RUN4-01-01-00 \
 --inputHITSFile ${HSHitsFile} \
 --jobNumber 568 \
 --maxEvents ${Events} \

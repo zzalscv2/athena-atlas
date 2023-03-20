@@ -9,9 +9,9 @@
 
 lastref_dir=last_results
 dcubeXml=dcube_ART_IDPVMPlots_ITk.xml
-rdo_23p0=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/inputs/601237_ttbar_allhad_PU200_ITk_master_v1.RDO.root
+rdo_23p0=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/inputs/ATLAS-P2-RUN4-01-01-00_ttbar_mu200.RDO.root
 
-geometry=ATLAS-P2-RUN4-01-00-00
+geometry=ATLAS-P2-RUN4-01-01-00
 
 # search in $DATAPATH for matching file
 dcubeXmlAbsPath=$(find -H ${DATAPATH//:/ } -name $dcubeXml -print -quit 2>/dev/null)
