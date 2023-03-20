@@ -21,28 +21,9 @@
 
 /** Constructor **/
 ISF::GeoIDSvc::GeoIDSvc(const std::string& name,ISvcLocator* svc) :
-  base_class(name,svc),
-  m_envDefSvc("ISF_ISFEnvelopeDefSvc", name),
-  m_tolerance(1e-5),
-  m_zBins(0),
-  m_numZBins(0),
-  m_radiusBins(0),
-  m_maxRBins(AtlasDetDescr::fNumAtlasRegions+1)
-{
-  declareProperty("EnvelopeDefSvc",
-                  m_envDefSvc,
-                  "The EnvelopeDefinitionService describing the AtlasRegion boundaries.");
-  declareProperty("Tolerance",
-                  m_tolerance=1e-5,
-                  "Estimated tolerance within which coordinates are considered being equal.");
-}
-
-
-/** Destructor **/
-ISF::GeoIDSvc::~GeoIDSvc()
+  base_class(name,svc)
 {
 }
-
 
 // Athena algtool's Hooks
 StatusCode  ISF::GeoIDSvc::initialize()
@@ -50,10 +31,7 @@ StatusCode  ISF::GeoIDSvc::initialize()
   ATH_MSG_INFO("initialize() ...");
 
   // retrieve envelope definition service
-  if ( m_envDefSvc.retrieve().isFailure() ){
-    ATH_MSG_FATAL( "Could not retrieve EnvelopeDefinition service. Abort.");
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK(m_envDefSvc.retrieve());
 
   // create internal volume representations for the given dimensions
   std::vector<double>                      tmpZBins[AtlasDetDescr::fNumAtlasRegions];
@@ -64,10 +42,9 @@ StatusCode  ISF::GeoIDSvc::initialize()
 
     // retrieve a list of (r,z) pairs for the z>0
     // side of the envelope
-    RZPairList *curRZ = prepareRZPairs( AtlasDetDescr::AtlasRegion(geoID) );
-    if ( curRZ->size()==0) {
+    std::unique_ptr<RZPairList> curRZ = prepareRZPairs( AtlasDetDescr::AtlasRegion(geoID) );
+    if (curRZ->size()==0) {
       ATH_MSG_ERROR("Unable to create volume representation for geoID="<<geoID);
-      delete curRZ; // makes coverity happy (CID 13321)
       return StatusCode::FAILURE;
     }
     ATH_MSG_VERBOSE("Found " << curRZ->size() << " (r,z) pairs with positive z for geoID=" << geoID);
@@ -341,16 +318,16 @@ AtlasDetDescr::AtlasRegion ISF::GeoIDSvc::identifyNextGeoID(const Amg::Vector3D 
   return geoID;
 }
 
-ISF::RZPairList* ISF::GeoIDSvc::prepareRZPairs( AtlasDetDescr::AtlasRegion geoID) {
+std::unique_ptr<ISF::RZPairList> ISF::GeoIDSvc::prepareRZPairs( AtlasDetDescr::AtlasRegion geoID) {
   // fill RZPairLists with pairs of only positive z and only negative
   // z values respectively. it is important to keep the pairs ordered
   // in each list
   //
-  RZPairList *positiveZ = new RZPairList();
-  RZPairList *negativeZ = new RZPairList();
+  std::unique_ptr<RZPairList> positiveZ = std::make_unique<RZPairList>();
+  std::unique_ptr<RZPairList> negativeZ = std::make_unique<RZPairList>();
 
   // ensure a proper numeric value for geoID
-  assertAtlasRegion( geoID);
+  assertAtlasRegion(geoID);
 
   ATH_MSG_INFO( "Building envelope volume for '" << AtlasDetDescr::AtlasRegionHelper::getName(geoID)
                 << "' (GeoID="<< geoID << ").");
@@ -365,7 +342,6 @@ ISF::RZPairList* ISF::GeoIDSvc::prepareRZPairs( AtlasDetDescr::AtlasRegion geoID
       ATH_MSG_ERROR("Can not interpret the (r,z) pairs provided by the EnvelopeDefSvc");
       positiveZ->clear();
       negativeZ->clear();
-      delete negativeZ;
       return positiveZ;
     }
 
@@ -373,7 +349,7 @@ ISF::RZPairList* ISF::GeoIDSvc::prepareRZPairs( AtlasDetDescr::AtlasRegion geoID
     const RZPairVector &rz = m_envDefSvc->getRZBoundary( geoID );
 
     // used in the loop over the RZPairVector entries
-    RZPairList *curRZList = 0;
+    RZPairList *curRZList{};
     RZPairList::iterator curRZInsertIt;
     int signZChanges = 0;     // count the number of pos/neg transitions in z
     int prevZSign    = sign(rz.at(0).second);
@@ -393,9 +369,9 @@ ISF::RZPairList* ISF::GeoIDSvc::prepareRZPairs( AtlasDetDescr::AtlasRegion geoID
                        " curR=" <<curRZ.first );
 
       // select negative RZPairList to fill
-      if ( curZSign==-1)     curRZList = negativeZ;
+      if ( curZSign==-1)     curRZList = negativeZ.get();
       // select positive RZPairList to fill
-      else if ( curZSign==1) curRZList = positiveZ;
+      else if ( curZSign==1) curRZList = positiveZ.get();
       // ignore 0.
       else {
         ATH_MSG_WARNING("Ignoring an (r,z) pair from the EnvelopeDefSvc with z==0.");
@@ -432,7 +408,6 @@ ISF::RZPairList* ISF::GeoIDSvc::prepareRZPairs( AtlasDetDescr::AtlasRegion geoID
         ATH_MSG_ERROR("  -> provided (r,z) pairs traverse the z==0 plane more than twice" );
         positiveZ->clear();
         negativeZ->clear();
-        delete negativeZ;
         return positiveZ;
       }
     }
@@ -445,7 +420,6 @@ ISF::RZPairList* ISF::GeoIDSvc::prepareRZPairs( AtlasDetDescr::AtlasRegion geoID
     ATH_MSG_ERROR("(r,z) pairs received from EnvelopeDefSvc are not symmetric around z==0 plane");
     positiveZ->clear();
     negativeZ->clear();
-    delete negativeZ;
     return positiveZ;
   }
 
@@ -454,11 +428,10 @@ ISF::RZPairList* ISF::GeoIDSvc::prepareRZPairs( AtlasDetDescr::AtlasRegion geoID
   double frontR = positiveZ->front().first;
   double backR  = positiveZ->back().first;
   positiveZ->push_front( RZPair(frontR, 0.) );
-  positiveZ->push_back ( RZPair(backR , 0.) );
+  positiveZ->push_back( RZPair(backR , 0.) );
 
   // clear the RZPairList for negative z values
   negativeZ->clear();
-  delete negativeZ;
 
   // return the RZPairList for positive z values
   return positiveZ;
