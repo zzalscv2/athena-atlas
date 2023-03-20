@@ -3,6 +3,7 @@
 # art-description: Run 4 pile-up presampling
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
+# art-include: 23.0/Athena
 # art-include: master/Athena
 # art-output: RUN4_presampling.mu140.RDO.pool.root
 # art-output: RDOAnalysis.root

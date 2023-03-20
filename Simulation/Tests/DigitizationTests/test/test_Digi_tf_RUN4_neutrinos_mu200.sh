@@ -3,6 +3,7 @@
 # art-description: Run 4 digitization of a neutrino sample with pile-up
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
+# art-include: 23.0/Athena
 # art-include: master/Athena
 # art-output: RUN4_neutrinos.mu200.RDO.pool.root
 # art-output: RDOAnalysis.root
