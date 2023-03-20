@@ -150,11 +150,10 @@ std::unique_ptr<RegSelSiLUT> sTGC_RegSelCondAlg::createTable( const EventContext
 
       /// store the robId
       Muon::nsw::helper::NSWOfflineRobId robIdHelper(stationName,static_cast<int8_t>(stationEta),static_cast<uint8_t>(stationPhi));
-      uint32_t robId  = robIdHelper.get_id();
-
-      RegSelModule m( zmin, zmax, rmin, rmax, phimin, phimax, layerid, detid, robId, hashId );
-
-      lut->addModule( m );
+      for(uint32_t robId : robIdHelper.get_ids()){
+          RegSelModule m( zmin, zmax, rmin, rmax, phimin, phimax, layerid, detid, robId, hashId );
+          lut->addModule( m );
+      }
 
   }
 
