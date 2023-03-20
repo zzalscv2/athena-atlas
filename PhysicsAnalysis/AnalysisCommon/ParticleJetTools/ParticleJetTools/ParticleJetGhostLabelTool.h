@@ -19,6 +19,7 @@ public:
   /// Constructor
   ParticleJetGhostLabelTool(const std::string& name);
 
+  StatusCode initialize() override;
   StatusCode decorate(const xAOD::JetContainer& jets) const override;
 
 protected:
