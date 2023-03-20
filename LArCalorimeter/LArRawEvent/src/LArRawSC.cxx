@@ -33,3 +33,13 @@ void LArRawSC::setBCIds(const std::vector<unsigned short>& bcids)
 {
   m_BCId = bcids;
 }
+
+void LArRawSC::setTauEnergies( const std::vector < int >& tauEnergies)
+{
+  m_tauEnergies=tauEnergies;
+}
+
+void LArRawSC::setPassTauSelection( const std::vector < bool >& pass)
+{
+  m_passTauSelection=pass;
+}
