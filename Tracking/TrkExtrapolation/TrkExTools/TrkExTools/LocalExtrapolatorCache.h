@@ -28,7 +28,7 @@ struct Cache
   {
     using TrackParmContainer = ObjContainer<Trk::TrackParameters>;
     using ManagedTrackParmPtr = ObjPtr<Trk::TrackParameters>;
-    typedef std::vector<Trk::TrackParameters*> TrackParametersPtrVector;
+    typedef std::vector<std::unique_ptr<Trk::TrackParameters>> TrackParametersUVector;
     typedef std::vector<std::pair<std::unique_ptr<Trk::TrackParameters>, int>> identifiedParameters_t;
     using TrackParmPtr = ObjRef;
     typedef std::pair<const Surface*, BoundaryCheck> DestSurf;
@@ -45,7 +45,6 @@ struct Cache
     //!< Flag the recall solution
     bool m_recall = false;
     bool m_robustSampling = true;
-    bool m_ownParametersOnDetElements = true;
     unsigned int m_layerResolved{};
     unsigned int m_methodSequence = 0;
     const Surface* m_destinationSurface = nullptr;
@@ -60,8 +59,9 @@ struct Cache
     const Trk::TrackingVolume* m_currentStatic = nullptr;
     const Trk::TrackingVolume* m_currentDense = nullptr;
     const Trk::TrackingVolume* m_highestVolume = nullptr;
-    //!< return helper for parameters on detector elements
-    TrackParametersPtrVector* m_parametersOnDetElements = nullptr;
+    //!< Pointer (not owning) pointing 
+    //to a vector of unique parameters of detector elements
+    TrackParametersUVector* m_parametersOnDetElements = nullptr;
     //!< cache layer with last material update
     const Layer* m_lastMaterialLayer = nullptr;
     //!< cache for collecting the total X0 ans Eloss
@@ -93,8 +93,8 @@ struct Cache
     
     //methods
     Cache();
-    Cache(const std::vector<const IMaterialEffectsUpdator*> & updaters);
     ~Cache();
+    Cache(const std::vector<const IMaterialEffectsUpdator*> & updaters);
 
     TrackParmContainer& trackParmContainer() { return m_trackParmContainer; }
  

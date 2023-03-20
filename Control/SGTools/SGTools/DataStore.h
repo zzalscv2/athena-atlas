@@ -29,6 +29,7 @@
 #include <typeinfo> /*typeid*/
 #include <utility>  /*std::pair*/
 #include <unordered_map>
+#include <mutex>
 
 
 class ISvcLocator;
@@ -112,6 +113,13 @@ namespace SG {
     /// get proxy with given key. Returns 0 to flag failure
     /// the key must match exactly (no wild carding for the default key)
     SG::DataProxy* proxy_exact (sgkey_t sgkey) const;
+
+    /// Like proxy_exact, but intended to be called without holding
+    /// the store lock.  However, the store lock still must be passed
+    /// as an argument; it will be acquired should be need to call
+    /// the auditor service.
+    SG::DataProxy* proxy_exact_unlocked (sgkey_t sgkey,
+                                         std::recursive_mutex& mutex) const;
 
     /// get proxy with given id. Returns 0 to flag failure
     /// the key must match exactly (no wild carding for the default key)

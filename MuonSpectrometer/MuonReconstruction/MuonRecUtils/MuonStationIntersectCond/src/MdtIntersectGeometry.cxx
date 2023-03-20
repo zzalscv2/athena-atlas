@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonStationIntersectCond/MdtIntersectGeometry.h"
@@ -173,7 +173,7 @@ namespace Muon {
         Identifier secondIdml0 = m_idHelperSvc->mdtIdHelper().channelID(name, eta, phi, firstMlIndex, 1, 2);
         Amg::Vector3D secondTubeMl0 = transform() * (m_detElMl0->tubePos(secondIdml0));
 
-        if (m_detElMl0) fillDeadTubes(m_detElMl0, msg);
+                        fillDeadTubes(m_detElMl0, msg);
         if (m_detElMl1) fillDeadTubes(m_detElMl1, msg);
 
         // position first tube in second layer ml 0

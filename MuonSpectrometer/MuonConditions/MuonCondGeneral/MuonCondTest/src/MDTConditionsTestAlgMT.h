@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MDTConditionsTestAlgMT_H
@@ -7,25 +7,17 @@
 
 // STL
 #include <sstream>
-#include <string>
+
 
 // Gaudi
 #include "AthenaBaseComps/AthAlgorithm.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/StatusCode.h"
+#include "MuonIdHelpers/IMuonIdHelperSvc.h"
 
 // Athena
 #include "Identifier/Identifier.h"
 #include "MuonCondData/MdtCondDbData.h"
-#include "MuonCondInterface/IMDTConditionsSvc.h"
-#include "MuonCondSvc/MuonHierarchy.h"
 
-// Forward declarations
-class ISvcLocator;
-class StatusCode;
-class MdtCondDbData;
-
-/// Example class to show calling the SCT_ConditionsSummarySvc
+/// Example class to show calling the MDTConditionsTestAlgMT
 class MDTConditionsTestAlgMT : public AthAlgorithm {
 public:
     MDTConditionsTestAlgMT(const std::string &name, ISvcLocator *pSvcLocator);
@@ -36,6 +28,8 @@ public:
 
 private:
     SG::ReadCondHandleKey<MdtCondDbData> m_readKey{this, "ReadKey", "MdtCondDbData", "Key of MdtCondDbData"};
+
+    ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
 };  // end of class
 

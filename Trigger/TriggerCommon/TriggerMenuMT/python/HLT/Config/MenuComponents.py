@@ -1100,7 +1100,13 @@ def menuSequenceCAToGlobalWrapper(gen, flags, *args, **kwargs):
     with ConfigurableCABehavior():
         msca = gen(flags, *args, **kwargs)
         assert isinstance(msca, MenuSequenceCA), "Function provided to menuSequenceCAToGlobalWrapper does not generate MenuSequenceCA"
+    return appendMenuSequenceCAToAthena(msca, flags)
 
+def appendMenuSequenceCAToAthena(msca, flags):
+    """
+    Converts MenuSequenceCA into the MenuSequence, in addition appending aux stuff to global configuration.
+    For use when MSCA generator function returns a tuple instead of bare MSCA
+    """
     from AthenaCommon.AlgSequence import AthSequencer
     from AthenaCommon.CFElements import compName, isSequence
     hypo = conf2toConfigurable(msca.hypo.Alg)

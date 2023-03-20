@@ -26,15 +26,8 @@ namespace Trk{
     m_navigVolsInt.reserve(64);
     populateMatEffUpdatorCache(updaters);
   }
-    
-    Cache::~Cache()
-    {
-      if (m_ownParametersOnDetElements && m_parametersOnDetElements) {
-        for (const Trk::TrackParameters* parm : *m_parametersOnDetElements) {
-          delete parm;
-        }
-      }
-    }
+
+  Cache::~Cache() = default;
 
   IMaterialEffectsUpdator::ICache&
   Cache::subMaterialEffectsUpdatorCache( const TrackingVolume& tvol){

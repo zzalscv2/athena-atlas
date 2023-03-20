@@ -31,6 +31,7 @@ def PoolWriteCfg(flags, forceTreeAutoFlush=-1):
     PoolAttributes = []
     # Switch off splitting by setting default SplitLevel to 0
     PoolAttributes += ["DEFAULT_SPLITLEVEL ='0'"]
+    PoolAttributes += ["ContainerName = 'TTree=Dyn.'; CONTAINER_SPLITLEVEL = '1'"]
 
     # Set as default the member-wise streaming, ROOT default
     PoolAttributes += ["STREAM_MEMBER_WISE = '1'"]
@@ -153,6 +154,7 @@ def PoolWriteCfg(flags, forceTreeAutoFlush=-1):
         PoolAttributes += [ pah.setTreeAutoFlush( file_name, tree_name, auto_flush ) ]
         PoolAttributes += [ pah.setContainerSplitLevel( file_name, tree_name, split_level ) ]
         PoolAttributes += [ pah.setContainerSplitLevel( file_name, "Aux.", split_level ) ]
+        PoolAttributes += [ pah.setContainerSplitLevel( file_name, "Dyn.", 1 ) ]
         # Find the maximum AutoFlush across all formats
         if use_parallel_compression and auto_flush > max_auto_flush:
             max_auto_flush = auto_flush

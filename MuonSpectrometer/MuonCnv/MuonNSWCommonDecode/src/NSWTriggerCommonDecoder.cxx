@@ -7,6 +7,7 @@
 #include "MuonNSWCommonDecode/NSWTriggerElink.h"
 #include "MuonNSWCommonDecode/NSWTriggerMML1AElink.h"
 #include "MuonNSWCommonDecode/NSWTriggerMMMonElink.h"
+#include "MuonNSWCommonDecode/NSWTriggerSTGL1AElink.h"
 #include "MuonNSWCommonDecode/NSWPadTriggerL1a.h"
 #include "MuonNSWCommonDecode/NSWTriggerCommonDecoder.h"
 
@@ -43,6 +44,9 @@ Muon::nsw::NSWTriggerCommonDecoder::NSWTriggerCommonDecoder (const eformat::read
       } else if ( m_triggerType== "PadL1A" ) {
 	std::shared_ptr<Muon::nsw::NSWPadTriggerL1a> tmplink = std::make_shared<Muon::nsw::NSWPadTriggerL1a>(pp, remaining);
 	elink = tmplink;
+      } else if ( m_triggerType== "STGL1A" ) {
+        std::shared_ptr<Muon::nsw::NSWTriggerSTGL1AElink> tmplink = std::make_shared<Muon::nsw::NSWTriggerSTGL1AElink>(pp, remaining);
+        elink = tmplink;
       } else {
 	std::shared_ptr<Muon::nsw::NSWTriggerElink> tmplink = std::make_shared<Muon::nsw::NSWTriggerElink>(pp, remaining);
 	elink = tmplink;

@@ -97,6 +97,8 @@
 <class name="TRTCond::StrawT0ContainerTemplate<0>" />
 <class name="TRTCond::StrawT0ContainerTemplate<2>" id="773DFAFD-DFE8-4D95-A4B2-1FBE7D488AC4"/>
 <class name="TRTCond::MultChanContainer<TRTCond::StrawT0ContainerTemplate<2> >" />
+<class name="CondMultChanCollection<TRTCond::StrawT0ContainerTemplate<2> >"/>
+<class name="DataVector<TRTCond::StrawT0ContainerTemplate<2> >"/>
 <class name="TRTCond::StrawT0MultChanContainer" id="98EF6053-C576-4AEA-B58C-0E57EDB74E2B" />
 
 <class name="TRTCond::StrawDxContainerTemplate<0>" />
@@ -105,10 +107,15 @@
 <class name="TRTCond::StrawDxMultChanContainer" id="6C236AB0-DC97-4324-B5CA-B5BC8787E707" />
 
 <class name="TRTCond::RtRelationMultChanContainer" id="7FC6EBDA-8DA8-40CC-B40A-BA1C9D7347BC" />
+<class name="TRTCond::MultChanContainer<TRTCond::RtRelationLayerContainer>"/>
+<class name="CondMultChanCollection<TRTCond::NestedContainer<2,TRTCond::RtRelation*,TRTCond::NestedContainerPointerTrait<TRTCond::RtRelation*> > >"/>
+<class name="DataVector<TRTCond::NestedContainer<2,TRTCond::RtRelation*,TRTCond::NestedContainerPointerTrait<TRTCond::RtRelation*> > >"/>
 
 <class name="TRTCond::StrawStatusContainerTemplate<0>" />
 <class name="TRTCond::StrawStatusContainerTemplate<2>" id="ED8DD42D-1A67-4B82-93F4-4462D9E11705"/>
 <class name="TRTCond::MultChanContainer<TRTCond::StrawStatusContainerTemplate<2> >" />
+<class name="CondMultChanCollection<TRTCond::StrawStatusContainerTemplate<2> >"/>
+<class name="DataVector<TRTCond::StrawStatusContainerTemplate<2> >"/>
 <class name="TRTCond::StrawStatusMultChanContainer" id="F4DAED02-1987-4C00-ACAD-FEE9BE845D9B" />
 
 

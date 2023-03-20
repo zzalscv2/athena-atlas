@@ -88,7 +88,8 @@ namespace Rec{
           h.m_curTup->nTrk=NTracks < DevTuple::maxNTrk ? NTracks : DevTuple::maxNTrk ;
           h.m_curTup->n2Vrt=0;
       }
-
+   
+      std::vector<std::vector<std::tuple<int,float>>> trkCount(NTracks);
       std::unique_ptr<Trk::IVKalState> state = m_fitSvc->makeState();
       m_fitSvc->setMassInputParticles( inpMass, *state );     // Use pion masses for fit
       for (i=0; i<NTracks-1; i++) {
@@ -150,6 +151,7 @@ namespace Rec{
 // Check pixel hits vs vertex positions.
              int ihitIBL  = getIBLHit(selectedTracks[i]);
              int jhitIBL  = getIBLHit(selectedTracks[j]);
+             if( (ihitIBL==0&&jhitIBL>0) || (ihitIBL>0&&jhitIBL==0) ) continue;
              int ihitBL   = getBLHit (selectedTracks[i]);
              int jhitBL   = getBLHit (selectedTracks[j]);
 //--Very general cleaning cuts based on ID geometry and applicable to all processes
@@ -231,8 +233,43 @@ namespace Rec{
 //
              add_edge(i,j,compatibilityGraph);
              goodVrt[NTracks*i+j]=std::vector<double>{tmpVrt.fitVertex.x(),tmpVrt.fitVertex.y(),tmpVrt.fitVertex.z()};
+             trkCount[i].push_back(std::make_tuple(j,wgtSelect)); trkCount[j].push_back(std::make_tuple(i,wgtSelect));            
          }
-      } 
+      }
+      //=== Resolve -!----!- case to speed up cluster finding
+      for(int t=0; t<NTracks; t++){
+         if(trkCount[t].size()==2){
+            i=std::get<0>(trkCount[t][0]);
+            j=std::get<0>(trkCount[t][1]);
+            if(trkCount[i].size()==1 && trkCount[j].size()==1 ){
+               if( std::get<1>(trkCount[t][0]) < std::get<1>(trkCount[t][1]) ) {
+                  remove_edge(t,i,compatibilityGraph);
+                  if(t<i)goodVrt.erase(NTracks*t+i); else goodVrt.erase(NTracks*i+t);
+                  trkCount[i].clear();
+                  trkCount[t].erase(trkCount[t].begin()+0);
+               } else {
+                  remove_edge(t,j,compatibilityGraph);
+                  if(t<j)goodVrt.erase(NTracks*t+j); else goodVrt.erase(NTracks*j+t);
+                  trkCount[j].clear();
+                  trkCount[t].erase(trkCount[t].begin()+1);
+               }
+            }      
+         }
+      }
+      //=== Remove isolated 2track vertices
+      for(int t=0; t<NTracks; t++){
+         if(trkCount[t].size()==1){
+            i=std::get<0>(trkCount[t][0]);
+            if(trkCount[i].size()==1){
+               if( std::get<1>(trkCount[t][0]) < m_v2tFinBDTCut ) {
+                  remove_edge(t,i,compatibilityGraph);
+                  if(t<i)goodVrt.erase(NTracks*t+i); else goodVrt.erase(NTracks*i+t);
+                  trkCount[t].clear();
+                  trkCount[i].clear();
+               }
+            }      
+         }
+      }
 
       return;
    }

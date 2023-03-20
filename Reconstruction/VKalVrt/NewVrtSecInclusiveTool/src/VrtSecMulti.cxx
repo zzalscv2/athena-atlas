@@ -381,6 +381,7 @@ namespace Rec{
              VARS[8]=SVPV.Eta();
              VARS[9]=std::max(rhit0,rhit1);
              float wgtSelect=m_SV2T_BDT->GetGradBoostMVA(VARS);
+             curVrt.BDT=wgtSelect;
              if(m_fillHist){
                Hists& h = getHists();
                h.m_hb_fakeSVBDT->Fill(wgtSelect,1.);
@@ -440,6 +441,7 @@ namespace Rec{
 //-------------------------------------------
 // Final vertex refit for full covariance matrix and xAOD::Vertex creation
 //
+    static const SG::AuxElement::Decorator<float> wgtBDT("wgtBDT");
     int n1trVrt=0;           // Final number of good 1-track vertices
     for(auto & iv : goodVertexMap){
           WrkVrt & curVrt=iv.second;
@@ -480,7 +482,10 @@ namespace Rec{
              tmpVertex->addTrackAtVertex(TEL,1.);
              n1trVrt++;
           }
-          if(tmpVertex)finalVertices.push_back(tmpVertex);
+          if(tmpVertex){
+            wgtBDT(*tmpVertex)=curVrt.BDT;
+            finalVertices.push_back(tmpVertex);
+          }
     }
     if(m_fillHist){
       Hists& h = getHists();

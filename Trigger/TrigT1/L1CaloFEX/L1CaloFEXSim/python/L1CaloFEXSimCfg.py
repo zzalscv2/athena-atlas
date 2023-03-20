@@ -106,12 +106,14 @@ def L1CaloFEXSimCfg(flags):
     if flags.Trigger.L1.dojFex:
         jFEX = CompFactory.LVL1.jFEXDriver('jFEXDriver')
         jFEX.jSuperCellTowerMapperTool = CompFactory.LVL1.jSuperCellTowerMapper('jSuperCellTowerMapper', SCell=sCellType)
+        jFEX.jSuperCellTowerMapperTool.SCellMasking = not flags.Input.isMC
         jFEX.jFEXSysSimTool = CompFactory.LVL1.jFEXSysSim('jFEXSysSimTool')
         acc.addEventAlgo(jFEX)
 
     if flags.Trigger.L1.dogFex:
         gFEX = CompFactory.LVL1.gFEXDriver('gFEXDriver')
         gFEX.gSuperCellTowerMapperTool = CompFactory.LVL1.gSuperCellTowerMapper('gSuperCellTowerMapper', SCell=sCellType)
+        gFEX.gSuperCellTowerMapperTool.SCellMasking = not flags.Input.isMC
         gFEX.gFEXSysSimTool = CompFactory.LVL1.gFEXSysSim('gFEXSysSimTool')
         acc.addEventAlgo(gFEX)
 
