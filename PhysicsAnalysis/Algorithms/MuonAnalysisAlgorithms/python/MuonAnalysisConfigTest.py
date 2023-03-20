@@ -39,8 +39,8 @@ def makeSequence (dataType) :
     configSeq = ConfigSequence ()
 
     makeMuonCalibrationConfig (configSeq, 'AnalysisMuons')
-    makeMuonWorkingPointConfig (configSeq, 'AnalysisMuons', workingPoint='Medium.Iso', postfix='medium')
-    makeMuonWorkingPointConfig (configSeq, 'AnalysisMuons', workingPoint='Tight.Iso', postfix='tight')
+    makeMuonWorkingPointConfig (configSeq, 'AnalysisMuons', workingPoint='Medium.Loose_VarRad', postfix='medium')
+    makeMuonWorkingPointConfig (configSeq, 'AnalysisMuons', workingPoint='Tight.Loose_VarRad', postfix='tight')
 
     configAccumulator = ConfigAccumulator (dataType, algSeq)
     configSeq.fullConfigure (configAccumulator)
