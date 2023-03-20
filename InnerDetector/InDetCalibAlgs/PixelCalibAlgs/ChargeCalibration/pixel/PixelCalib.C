@@ -19,7 +19,10 @@
 //                                  eta
 //======================================================================
 
-#include "../common/pixelMapping.h"
+#include "../common/PixelMapping.h"
+
+using pix::PixelMapping; 
+
 
 double funcTot(double* x, double* par) {
   double ret = 9.9e10;
@@ -201,6 +204,12 @@ void PixelCalib() {
     TList* rodKeyList = (TList*)scanDir->GetListOfKeys();
     TIter rodItr(rodKeyList);
     TKey* rodKey;
+    PixelMapping pixmap("../common/mapping.csv");
+    if (pixmap.nModules() == 2048){
+      std::cout<< "Mapping file opened ok"<<std::endl;
+    } else {
+      std::cout<< "Mapping problem!"<<std::endl;
+    }
     while ((rodKey=(TKey*)rodItr())) {
       TString rodName(rodKey->GetName());
       TDirectoryFile* rodDir = (TDirectoryFile*)rodKey->ReadObj();
@@ -250,7 +259,7 @@ void PixelCalib() {
           int layer = -1;
           int phi_module = -1;
           int eta_module = -1;
-          pixelMapping(modStr, &hashID, &bec, &layer, &phi_module, &eta_module);
+          pixmap.mapping(modStr, &hashID, &bec, &layer, &phi_module, &eta_module);
 
           TString st(modName(3, 3));
           TString chi2HistDirPath = modName + "/" + chi2HistName + "/A0/B0";
@@ -849,6 +858,12 @@ void PixelCalib() {
     TList* rodKeyList = (TList*)scanDir->GetListOfKeys();
     TIter rodItr(rodKeyList);
     TKey* rodKey;
+    PixelMapping pixmap("../common/mapping.csv");
+    if (pixmap.nModules() == 2048){
+      std::cout<< "Mapping file opened ok"<<std::endl;
+    } else {
+      std::cout<< "Mapping problem!"<<std::endl;
+    }
     while ((rodKey=(TKey*)rodItr())) {
       TString rodName(rodKey->GetName());
       TDirectoryFile* rodDir = (TDirectoryFile*)rodKey->ReadObj();
@@ -866,7 +881,7 @@ void PixelCalib() {
         int layer = -1;
         int phi_module = -1;
         int eta_module = -1;
-        pixelMapping(modStr, &hashID, &bec, &layer, &phi_module, &eta_module);
+        pixmap.mapping(modStr, &hashID, &bec, &layer, &phi_module, &eta_module);
 
         if (pcdMap.find(modStr) == pcdMap.end()) continue;
 
@@ -1112,6 +1127,12 @@ void PixelCalib() {
     TList* rodKeyList = (TList*)scanDir->GetListOfKeys();
     TIter rodItr(rodKeyList);
     TKey* rodKey;
+    PixelMapping pixmap("../common/mapping.csv");
+    if (pixmap.nModules() == 2048){
+      std::cout<< "Mapping file opened ok"<<std::endl;
+    } else {
+      std::cout<< "Mapping problem!"<<std::endl;
+    }
     while ((rodKey=(TKey*)rodItr())) {
       TString rodName(rodKey->GetName());
       TDirectoryFile* rodDir = (TDirectoryFile*)rodKey->ReadObj();
@@ -1131,7 +1152,7 @@ void PixelCalib() {
         int layer = -1;
         int phi_module = -1;
         int eta_module = -1;
-        pixelMapping(modStr, &hashID, &bec, &layer, &phi_module, &eta_module);
+        pixmap.mapping(modStr, &hashID, &bec, &layer, &phi_module, &eta_module);
         if (pcdMap.find(modStr) == pcdMap.end()) continue;
 
         float totArrI0[ncharge];

@@ -8,13 +8,18 @@
 
 ITSNAME="[CALIB TOOL]"
 
-echo "${ITSNAME} Setup the ATLAS software environment"
+#echo "${ITSNAME} Setup the ATLAS software environment"
 
 export ATLAS_LOCAL_ROOT_BASE=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase
 alias setupATLAS='source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh'
 setupATLAS
 
 asetup master,latest,Athena
+pushd ../../../../../../build
+cmake ../athena/Projects/WorkDir
+make
+source ./x86_64-centos7-gcc11-opt/setup.sh
+popd
 echo ""
 echo ""
 
