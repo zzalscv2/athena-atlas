@@ -41,17 +41,6 @@ class _modifier:
 # Detector maps and conditions
 ###############################################################
 
-class BunchSpacing25ns(_modifier):
-    """
-    ID (and other settings) related to 25ns bunch spacing
-    """
-    def preSetup(self, flags):
-        from AthenaCommon.BeamFlags import jobproperties
-        jobproperties.Beam.bunchSpacing = 25
-        flags.Beam.BunchSpacing = 25
-        from InDetTrigRecExample.InDetTrigFlags import InDetTrigFlags
-        InDetTrigFlags.InDet25nsec.set_Value_and_Lock(True)
-
 class SolenoidOff(_modifier):
     """
     Turn solenoid field OFF
