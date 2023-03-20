@@ -36,7 +36,22 @@ class LArRawSC  {
   
   /** @brief vector of saturation flags */
   std::vector < bool > m_satur;
-  
+
+  /** @brief did pass tau selection */
+  std::vector < bool > m_passTauSelection;
+
+  /** @brief vector of taus*energies */
+  std::vector< int > m_tauEnergies;
+
+  /** @brief OFCa Overflow */
+  bool m_ofcaOverflow;
+
+  /** @brief OFCb Overflow */
+  bool m_ofcbOverflow;
+
+  /** @brief pedestal Overflow */
+  bool m_pedOverflow;
+
  public:
   /** @brief constructor 
       @param[in] channel_value  Online identifier
@@ -44,7 +59,7 @@ class LArRawSC  {
       @param[in] sample_value Reference of vector with ADC samples
   */
   LArRawSC(const HWIdentifier & channel_value, const short chan, const unsigned int sourceId, const std::vector < int > & energies, const std::vector<unsigned short>& bcids, std::vector<bool>& satur):
-    m_hardwareID(channel_value), m_chan(chan),m_sourceId(sourceId), m_energies(energies), m_BCId(bcids), m_satur(satur) {}
+    m_hardwareID(channel_value), m_chan(chan),m_sourceId(sourceId), m_energies(energies), m_BCId(bcids), m_satur(satur), m_ofcaOverflow(false), m_ofcbOverflow(false), m_pedOverflow(false){}
 
   LArRawSC(const HWIdentifier & channel_value,
            const short chan,
@@ -57,7 +72,10 @@ class LArRawSC  {
       m_sourceId(sourceId),
       m_energies(std::move(energies)),
       m_BCId(std::move(bcids)),
-      m_satur(std::move(satur))
+      m_satur(std::move(satur)),
+      m_ofcaOverflow(false),
+      m_ofcbOverflow(false),
+      m_pedOverflow(false)
   {}
     
     /** @return HWIdentifier */
@@ -81,6 +99,22 @@ class LArRawSC  {
     /** @return a reference to a stl vector containing the saturation flags */
     const std::vector < bool > & satur() const { return m_satur; }
 
+    /** @return a reference to a stl vector containing the energies*taus */
+    const std::vector < int > & tauEnergies() const { return m_tauEnergies; }
+
+    /** @return true if the channel passes the tau selection */
+    const std::vector < bool > & passTauSelection() const { return m_passTauSelection; }
+
+    /** @return OFCa Overflow */
+    bool ofcaOverflow() const { return m_ofcaOverflow; }
+
+    /** @return OFCb Overflow */
+    bool ofcbOverflow() const { return m_ofcbOverflow; }
+
+    /** @return pedestal Overflow */
+    bool pedOverflow() const { return m_pedOverflow; }
+
+
     /** @brief Conversion operator to a std::string <br> Can be used in a cast operation : (std::string) digit <br> */
     virtual operator std::string() const;
     
@@ -93,6 +127,23 @@ class LArRawSC  {
         @param[in] samples  vector of bcids
     */
     void setBCIds( const std::vector < unsigned short >& bcids);
+
+    /** @brief Set energies*taus .
+        @param[in] samples  vector of energies*taus
+    */
+    void setTauEnergies( const std::vector < int >& tauEnergies);
+
+    /** @set true if passes the tau selection */
+    void setPassTauSelection( const std::vector < bool >& pass);
+
+    /** @set OFCa Overflow */
+    void setOFCaOverflow(bool overflow){ m_ofcaOverflow=overflow; }
+
+    /** @set OFCb Overflow */
+    void setOFCbOverflow(bool overflow){ m_ofcbOverflow=overflow; }
+
+    /** @set pedestal Overflow */
+    void setPedOverflow(bool overflow){ m_pedOverflow=overflow; }
 
     /** @brief Destructor */
     virtual ~LArRawSC() { }

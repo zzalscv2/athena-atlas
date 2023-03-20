@@ -68,6 +68,9 @@ typedef LArFlatConditionsAlg<LArNoiseSC> LArCondAlgNoiseSC;
 #include "LArCOOLConditions/LArOFCFlat.h"
 typedef LArFlatConditionsAlg<LArOFCFlat> LArCondAlgOFCFlat;
 
+#include "LArCOOLConditions/LArOFCSC.h"
+typedef LArFlatConditionsAlg<LArOFCSC> LArCondAlgOFCSC;
+
 #include "LArCOOLConditions/LArPedestalSC.h"
 typedef LArFlatConditionsAlg<LArPedestalSC> LArCondAlgPedestalSC;
 

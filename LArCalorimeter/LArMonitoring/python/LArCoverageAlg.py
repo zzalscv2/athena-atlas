@@ -60,6 +60,9 @@ def LArCoverageConfigCore(helper, algoinstance,inputFlags):
     larCoverageAlg.NphiBinsEMEC2=lArDQGlobals.Cell_Variables["phiNbin"]["EMEC"]["A"]["2"]
     larCoverageAlg.NphiBinsHEC=[lArDQGlobals.Cell_Variables["phiNbin"]["HEC"]["A"]["0"],lArDQGlobals.Cell_Variables["phiNbin"]["HEC"]["A"]["1"],lArDQGlobals.Cell_Variables["phiNbin"]["HEC"]["A"]["2"],lArDQGlobals.Cell_Variables["phiNbin"]["HEC"]["A"]["3"]]
 
+    from LArConfiguration.LArConfigFlags import RawChannelSource
+    if inputFlags.LAr.RawChannelSource is RawChannelSource.Calculated:
+       larCoverageAlg.LArRawChannelKey="LArRawChannels_FromDigits"
 
     #Configure the CaloNoise
     from CaloTools.CaloNoiseCondAlg import CaloNoiseCondAlg

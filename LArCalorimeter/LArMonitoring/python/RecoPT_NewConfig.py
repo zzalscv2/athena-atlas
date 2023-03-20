@@ -21,6 +21,9 @@ def LArMonitoringConfig(ConfigFlags,CONFIG,STREAM,RunType=1):
         from LArMonitoring.LArFEBMonAlg import LArFEBMonConfig
         acc.merge(LArFEBMonConfig(ConfigFlags))
 
+        from LArROD.LArRawChannelBuilderAlgConfig import LArRawChannelBuilderAlgCfg
+        acc.merge(LArRawChannelBuilderAlgCfg(ConfigFlags))
+
         if STREAM == 'NONE': # coverage only in NoTrigSel
            from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
            acc.merge(CaloNoiseCondAlgCfg(ConfigFlags,"electronicNoise"))
@@ -31,8 +34,6 @@ def LArMonitoringConfig(ConfigFlags,CONFIG,STREAM,RunType=1):
 
 
         # adding NoisyRO monitoring, needs CaloCells
-        from LArROD.LArRawChannelBuilderAlgConfig import LArRawChannelBuilderAlgCfg
-        acc.merge(LArRawChannelBuilderAlgCfg(ConfigFlags))
         from LArCellRec.LArCellBuilderConfig import LArCellBuilderCfg,LArCellCorrectorCfg
         larCellBuilder     = acc.popToolsAndMerge(LArCellBuilderCfg(ConfigFlags))
         larCellCorrectors  = acc.popToolsAndMerge(LArCellCorrectorCfg(ConfigFlags))
@@ -88,10 +89,11 @@ def LArMonitoringConfig(ConfigFlags,CONFIG,STREAM,RunType=1):
            from LArMonitoring.LArNoiseCorrelationMonAlg import LArNoiseCorrelationMonConfig
            acc.merge(LArNoiseCorrelationMonConfig(ConfigFlags))
 
-        if 'ZeroBias' == STREAM or 'CosmicCalo' == STREAM  or 'NONE' == STREAM:
-           #cosmics
-           from LArMonitoring.LArCosmicsMonAlg import LArCosmicsMonConfig
-           acc.merge(LArCosmicsMonConfig(ConfigFlags))
+        #FIXME: broken for the moment, uncomment once it is fixed
+        #if 'ZeroBias' == STREAM or 'CosmicCalo' == STREAM  or 'NONE' == STREAM:
+        #   #cosmics
+        #   from LArMonitoring.LArCosmicsMonAlg import LArCosmicsMonConfig
+        #   acc.merge(LArCosmicsMonConfig(ConfigFlags))
 
         return acc
 
@@ -139,8 +141,6 @@ def LArMonitoringConfig(ConfigFlags,CONFIG,STREAM,RunType=1):
         acc.merge(LArCellMonConfig(ConfigFlags))
 
         # and clustering
-        from LArROD.LArRawChannelBuilderAlgConfig import LArRawChannelBuilderAlgCfg
-        acc.merge(LArRawChannelBuilderAlgCfg(ConfigFlags))
         from LArCellRec.LArCellBuilderConfig import LArCellBuilderCfg,LArCellCorrectorCfg
         larCellBuilder     = acc.popToolsAndMerge(LArCellBuilderCfg(ConfigFlags))
         larCellCorrectors  = acc.popToolsAndMerge(LArCellCorrectorCfg(ConfigFlags))
@@ -167,5 +167,12 @@ def LArMonitoringConfig(ConfigFlags,CONFIG,STREAM,RunType=1):
         mons=acc.getSequence("AthMonSeq_ClusterAthMonitorCfg")
         a=findAlgorithm(mons,"ClusterMonAlg")
         a.CaloTopoClusterContainer="CaloTopoClusters"
+
+        return acc
+
+    if "SCMon" in CONFIG:
+
+        from LArMonitoring.LArSuperCellMonAlg import  LArSuperCellMonConfig
+        acc.merge(LArSuperCellMonConfig(ConfigFlags))
 
         return acc
