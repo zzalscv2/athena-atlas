@@ -34,11 +34,14 @@ namespace Crest {
     }
   }
 
-  CrestClient::CrestClient(const std::string& _host, const std::string& _port) : m_host(_host), m_port(_port), m_mode(
+  CrestClient::CrestClient(const std::string& _host, const std::string& _port, bool check_version) : m_host(_host), m_port(_port), m_mode(
       SERVER_MODE) {
+    if (check_version == true) {
+      checkCrestVersion2();
+    }
   }
 
-  CrestClient::CrestClient(std::string_view url) : m_mode(SERVER_MODE) {
+  CrestClient::CrestClient(std::string_view url, bool check_version) : m_mode(SERVER_MODE) {
     size_t found = url.find_first_of(':');
 
     std::string_view url_new = url.substr(found + 3); //url_new is the url excluding the http part
@@ -61,13 +64,17 @@ namespace Crest {
     }
     m_port = std::string(port);
     m_host = std::string(host);
+
+    if (check_version == true) {
+      checkCrestVersion2();
+    }
   }
 
   CrestClient::~CrestClient() {
     flush();
   }
 
-std::string CrestClient::make_url(const std::string &address) const{
+ std::string CrestClient::make_url(const std::string &address) const{
   std::string str("http://");
   str += m_host;
   str += ':';
@@ -153,7 +160,7 @@ std::string CrestClient::make_url(const std::string &address) const{
     current_path += s_TAG_PATH;
 
     if (!name.empty()) {
-      std::string nameString = "?by=name:";
+      std::string nameString = "?name=";
       nameString += name;
       current_path += nameString;
       current_path += "&size=";
@@ -338,19 +345,26 @@ std::string CrestClient::make_url(const std::string &address) const{
     m_data.clear();
   }
 
-// IOVs
+// IOV methods:
 
   void CrestClient::createIov(nlohmann::json& js) {
     const char* method_name = "CrestClient::createIov";
 
     checkFsException(method_name);
 
-    std::string current_path = s_PATH;
-    current_path += s_IOV_PATH;
+    nlohmann::json iovList = nlohmann::json::array();
+    iovList.push_back(js);
+ 
+    try{
+      storeBatchIOVs(iovList);
+    }
+    catch (const std::exception& e) {
+      std::string message = "ERROR in ";
+      message += method_name;
+      message +=  e.what();
+      throw std::runtime_error(message);
+    }
 
-    std::string retv;
-
-    retv = performRequest(current_path, POST, js, method_name);
   }
 
   nlohmann::json CrestClient::findAllIovs(const std::string& tagname) {
@@ -387,7 +401,7 @@ std::string CrestClient::make_url(const std::string &address) const{
     }
 
     // http request examples:
-    // http://crest-01.cern.ch:8080/crestapi/iovs?by=tagname:test_MvG3b&size=1&page=1
+    // http://crest-01.cern.ch:9090/crestapi/iovs?method=IOVS&tagname=MuonAlignMDTBarrelAlign-RUN2-BA_ROLLING_12-BLKP-UPD4-00
     // http://crest-02.cern.ch:8090/crestapi/tags?size=10&page=2&sort=name:DESC
 
     std::string current_path = s_PATH;
@@ -596,12 +610,7 @@ std::string CrestClient::make_url(const std::string &address) const{
   void CrestClient::storeBatchIOVs(nlohmann::json& js) {
     const char* method_name = "CrestClient::storeBatchIOVs";
 
-    if (m_mode == FILESYSTEM_MODE) {
-      std::string messageL = "ERROR in ";
-      messageL += method_name;
-      messageL += " This methods is unsupported for FILESYSTEM mode";
-      throw std::runtime_error(messageL);
-    }
+    checkFsException(method_name);
 
     /*
 
@@ -632,7 +641,6 @@ std::string CrestClient::make_url(const std::string &address) const{
 
     std::string current_path = s_PATH;
     current_path += s_IOV_PATH;
-    current_path += s_STOREBATCH_PATH;
 
     std::string retv;
 
@@ -929,7 +937,7 @@ std::string CrestClient::make_url(const std::string &address) const{
     current_path += s_PAYLOAD_PATH;
     current_path += '/';
     current_path += hash;
-    current_path += s_META_PATH;
+    current_path += "?format=META";
 
     std::string retv;
 
@@ -939,7 +947,7 @@ std::string CrestClient::make_url(const std::string &address) const{
 
     nlohmann::json respond = getJson(retv, method_name);
 
-    return getResources(respond);
+    return respond;
   }
 
   std::string CrestClient::getPayloadMetaInfoAsString(const std::string& hash) {
@@ -953,7 +961,7 @@ std::string CrestClient::make_url(const std::string &address) const{
     current_path += s_PAYLOAD_PATH;
     current_path += '/';
     current_path += hash;
-    current_path += s_META_PATH;
+    current_path += "?format=META";
 
     std::string retv;
 
@@ -1084,7 +1092,7 @@ std::string CrestClient::make_url(const std::string &address) const{
 
     nlohmann::json jsObj = {};
     jsObj["datatype"] = "iovs";
-    jsObj["format"] = "IovSetDto";
+    jsObj["format"] = "StoreSetDto";
     jsObj["size"] = js.size();
     jsObj["resources"] = js;
     std::string str = jsObj.dump();
@@ -1113,7 +1121,7 @@ std::string CrestClient::make_url(const std::string &address) const{
 
     nlohmann::json jsObj = {};
     jsObj["datatype"] = "iovs";
-    jsObj["format"] = "IovSetDto";
+    jsObj["format"] = "StoreSetDto";
     jsObj["size"] = js.size();
     jsObj["resources"] = js;
     std::string str = jsObj.dump();
@@ -1219,13 +1227,21 @@ std::string CrestClient::make_url(const std::string &address) const{
       storePayloadDump(tag, since, js);
       return;
     }
-    storePayloadRequest(tag, since, js);
+
+    nlohmann::json data = nlohmann::json::array();
+    nlohmann::json itemD =
+    {
+      {"payloadHash", js},
+      {"since", since}
+    };
+
+    data.push_back(itemD);
+    storeBatchPayloads(tag, data);
   }
 
   struct data {
     char trace_ascii; /* 1 or 0 */
   };
-
 
   size_t CurlWrite_CallbackFunc_StdString(void* contents, size_t size, size_t nmemb, std::string* s) {
     size_t newLength = size * nmemb;
@@ -1242,73 +1258,6 @@ std::string CrestClient::make_url(const std::string &address) const{
     return newLength;
   }
 
-  std::string CrestClient::storePayloadRequest(const std::string& tag, uint64_t since, const std::string& js) {
-    std::string current_path = s_PATH;
-    current_path += s_PAYLOAD_PATH;
-    current_path += s_STORE_PATH;
-
-    CURL* curl;
-    CURLcode res;
-
-    struct curl_httppost* formpost = NULL;
-    struct curl_httppost* lastptr = NULL;
-
-    curl = curl_easy_init();
-    std::string stt;
-    struct curl_slist* headers = NULL;
-    if (curl) {
-      std::string url = make_url(current_path);
-      std::string s;
-
-      curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-      headers = curl_slist_append(headers, "Accept: */*");
-      headers = curl_slist_append(headers, "Content-Type:  multipart/form-data");
-      headers = curl_slist_append(headers, "Expect:");
-      curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-
-      curl_formadd(&formpost,
-                   &lastptr,
-                   CURLFORM_COPYNAME, "tag",
-                   CURLFORM_COPYCONTENTS, tag.c_str(),
-                   CURLFORM_END);
-      curl_formadd(&formpost,
-                   &lastptr,
-                   CURLFORM_COPYNAME, "since",
-                   CURLFORM_COPYCONTENTS, std::to_string(since).c_str(),
-                   CURLFORM_END);
-      curl_formadd(&formpost,
-                   &lastptr,
-                   CURLFORM_COPYNAME, "file",
-                   CURLFORM_COPYCONTENTS, js.c_str(),
-                   CURLFORM_END);
-
-      curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
-      curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CurlWrite_CallbackFunc_StdString);
-      curl_easy_setopt(curl, CURLOPT_WRITEDATA, &s);
-
-      /* Perform the request, res will get the return code */
-      res = curl_easy_perform(curl);
-
-      // data to check the errors in the server response:
-      long response_code;
-      curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
-      const char* method_name = "CrestClient::storePayload";
-
-      /* always cleanup */
-      curl_easy_cleanup(curl);
-      curl_formfree(formpost);
-      curl_slist_free_all(headers);
-
-      curl_global_cleanup();
-
-      // error checking in the server response:
-      checkResult(res, response_code, s, method_name);
-
-      return s;
-    }
-
-    throw std::runtime_error("ERROR in CrestClient::storePayload | CURL not init");
-  }
 
   std::string CrestClient::performRequest(const std::string& current_path, Action action, nlohmann::json& js,
                                           const char* method_name) {
@@ -1409,14 +1358,19 @@ std::string CrestClient::make_url(const std::string &address) const{
       boost::asio::streambuf request;
       std::ostream request_stream(&request);
 
+      std::string cmd_line = "";
+      if      (action == GET)    cmd_line = "GET";
+      else if (action == PUT)    cmd_line = "PUT";
+      else if (action == DELETE) cmd_line = "DELETE";
+
       if (js.is_null()) {
-        request_stream << action << " " << current_path << " HTTP/1.0\r\n";
-        request_stream << "Host: " << m_host << ':' << m_port << " \r\n";
+        request_stream << cmd_line  << " " << current_path << " HTTP/1.0\r\n";
+        request_stream << "Host: " << m_host << ':' << m_port << " \r\n"; 
         request_stream << "Accept: */*\r\n";
         request_stream << "Connection: close\r\n\r\n";
       } else {
         std::string s = js.dump();
-        request_stream << action << " " << current_path << " HTTP/1.0\r\n";
+        request_stream << action << " " << current_path << " HTTP/1.0\r\n"; 
         request_stream << "Host: " << m_host << ':' << m_port << " \r\n";
         request_stream << "Content-Type: application/json; \r\n";
         request_stream << "Accept: */*\r\n";
@@ -1454,12 +1408,13 @@ std::string CrestClient::make_url(const std::string &address) const{
 
       if (!response_stream || http_version.substr(0, 5) != "HTTP/") {
         std::cout << "Invalid response" << std::endl;
-        return retv; // response;
+	std::cout << "response_stream : " << status_code << std::endl; // new
+        return retv;
       }
       if (status_code != 200) {
         std::cout << "Response returned with status code " << status_code << std::endl;
 
-        return retv;// response;
+        return retv;
       }
 
       // Read the response headers, which are terminated by a blank line.
@@ -1507,13 +1462,12 @@ std::string CrestClient::make_url(const std::string &address) const{
     }
   }
 
+
 // Request method to store payloads in batch mode
 
-  //
   std::string CrestClient::storeBatchPayloadRequest(const std::string& tag, uint64_t endtime, const std::string& js) {
     std::string current_path = s_PATH;
     current_path += s_PAYLOAD_PATH;
-    current_path += s_BATCH_PATH;
 
     CURL* curl;
     CURLcode res;
@@ -1558,7 +1512,8 @@ std::string CrestClient::make_url(const std::string &address) const{
       }
       curl_formadd(&formpost,
                    &lastptr,
-                   CURLFORM_COPYNAME, "iovsetupload",
+                   // CURLFORM_COPYNAME, "iovsetupload",
+                   CURLFORM_COPYNAME, "storeset",
                    CURLFORM_COPYCONTENTS, js.c_str(),
                    CURLFORM_CONTENTTYPE, "application/json",
                    CURLFORM_END);
@@ -1593,7 +1548,6 @@ std::string CrestClient::make_url(const std::string &address) const{
     throw std::runtime_error(mes + " | CURL not init");
   }
 
-  //
 
 // end of REQUEST METHODS
 
@@ -1812,7 +1766,7 @@ std::string CrestClient::make_url(const std::string &address) const{
 
     try {
       for (auto& kvp : js) {
-        std::string payload = kvp.value("payloadHash", "");
+        std::string payload = kvp.value("data", "");
         int since = kvp.value("since", 0);
         storePayloadDump(tag_name, since, payload);
       }
@@ -1820,7 +1774,7 @@ std::string CrestClient::make_url(const std::string &address) const{
     catch (...) {
       throw std::runtime_error("ERROR in " + std::string(method_name) + " cannot store the data in a file");
     } // end of catch
-    flush(); // MvG
+    flush();
   }
 
 
@@ -2480,7 +2434,7 @@ std::string CrestClient::make_url(const std::string &address) const{
         }
         catch (...) {
           throw std::runtime_error(
-                  "ERROR in CrestClient::getSizeByTag file storage has no a tag with the name \"" + tag + "\".");
+            "ERROR in CrestClient::storePayloadDump cannot get data for tag \"" + tag + "\" from file storage.");
         }
       }
     }
@@ -2730,6 +2684,140 @@ std::string CrestClient::make_url(const std::string &address) const{
   std::string CrestClient::getFirstLetters(const std::string& str) {
     std::string result = str.substr(0, s_FS_PREFIX_LENGTH);
     return result;
+  }
+
+  nlohmann::json CrestClient::getMgmtInfo() {
+    const char* method_name = "getMgmtInfo";
+
+    checkFsException(method_name);
+
+    std::string current_path = s_MGMT_PATH + s_MGMT_INFO_PATH;
+    std::string retv;
+    nlohmann::json js = nullptr;
+
+    retv = performRequest(current_path, GET, js, method_name);
+
+    nlohmann::json respond = getJson(retv, method_name);
+
+    return respond;
+  }
+
+  std::string CrestClient::getCrestVersion() {
+    const char* method_name = "getCrestVersion";
+    checkFsException(method_name);
+
+    std::string version = "";
+    nlohmann::json info = getMgmtInfo();
+
+    auto subjectIdIter1 = info.find("build");
+    if (subjectIdIter1 != info.end()){
+      nlohmann::json  build = info["build"];
+      auto subjectIdIter2 = build.find("version");
+      if (subjectIdIter2 != build.end()){
+        version = build["version"];
+      }
+      else {
+        throw std::runtime_error("ERROR in CrestClient::" + (std::string) method_name + ": CREST Server response has no \"version\" key.");
+      } // iterator 2  
+
+    }
+    else {
+      throw std::runtime_error("ERROR in CrestClient::" + (std::string) method_name + ": CREST Server response has no \"build\" key.");
+    } // iterator 1
+
+    return version;
+  }
+
+  std::string CrestClient::getClientVersion() {
+    return s_CREST_CLIENT_VERSION;
+  }
+
+  int CrestClient::getMajorVersion(std::string& str){
+    int v = -1;
+    int n =  str.find('.'); 
+
+    if (n < 1) {
+      throw std::runtime_error("ERROR in CrestClient::getMajorVersion: string \"" + str + "\" does not contain major version.");
+    }
+ 
+    std::string vers = str.substr(0,n);
+
+    try {
+      v = std::stoi( str );
+    }
+    catch (const std::exception& e) {
+      throw std::runtime_error("ERROR in CrestClient::getMajorVersion: string \"" + str + "\" does not contain major version.");
+    }
+
+    return v;
+  }
+
+  void CrestClient::checkCrestVersion(){
+    std::string client = getClientVersion();
+    std::string server = getCrestVersion();
+
+    int clientVersion = getMajorVersion(client);
+    int serverVersion = getMajorVersion(server);
+
+    if (clientVersion != serverVersion) {
+       throw std::runtime_error("ERROR in CrestClient::checkCrestVersion: CrestApi version \"" + client + "\" does not correspond to the server version \"" + server + "\".");
+    }
+  }
+
+  // V4 version:
+
+  nlohmann::json CrestClient::getMgmtInfo2() {
+    const char* method_name = "getMgmtInfo2";
+
+    checkFsException(method_name);
+
+    std::string current_path =  s_MGMT_INFO_PATH_2;
+    std::string retv;
+    nlohmann::json js = nullptr;
+
+    retv = performRequest(current_path, GET, js, method_name);
+
+    nlohmann::json respond = getJson(retv, method_name);
+
+    return respond;
+  }
+
+  std::string CrestClient::getCrestVersion2() {
+    const char* method_name = "getCrestVersion";
+    checkFsException(method_name);
+
+    std::string version = "";
+    nlohmann::json info = getMgmtInfo2();
+
+    auto subjectIdIter1 = info.find("build");
+    if (subjectIdIter1 != info.end()){
+      nlohmann::json  build = info["build"];
+      auto subjectIdIter2 = build.find("version");
+      if (subjectIdIter2 != build.end()){
+        version = build["version"];
+      }
+      else {
+        throw std::runtime_error("ERROR in CrestClient::" + (std::string) method_name + ": CREST Server response has no \"version\" key.");
+      } // iterator 2  
+
+    }
+    else {
+      throw std::runtime_error("ERROR in CrestClient::" + (std::string) method_name + ": CREST Server response has no \"build\" key.");
+    } // iterator 1
+
+    return version;
+  }
+
+  void CrestClient::checkCrestVersion2(){
+    std::string client = getClientVersion();
+    std::string server = getCrestVersion2();
+
+    int clientVersion = getMajorVersion(client);
+    int serverVersion = getMajorVersion(server);
+
+    if (clientVersion != serverVersion) {
+       throw std::runtime_error("ERROR in CrestClient::checkCrestVersion: CrestApi version \"" + client + "\" does not correspond to the server version \"" + server + "\".");
+    }
   }
 
 } // namespace

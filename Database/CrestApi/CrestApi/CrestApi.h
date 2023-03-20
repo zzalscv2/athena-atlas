@@ -39,6 +39,7 @@
 
 
 namespace Crest {
+
 // AUXILIARY CLASS to store URL request parameters
   class urlParameters
   {
@@ -82,7 +83,7 @@ namespace Crest {
     bool m_isRewrite {};
     std::string m_currentTag {};
 
-    inline static const std::string s_PATH = "/crestapi";
+    inline static const std::string s_PATH = "/api-v4.0";
     inline static const std::string s_TAG_PATH = "/tags";
     inline static const std::string s_ADMIN_PATH = "/admin";
     inline static const std::string s_IOV_PATH = "/iovs";
@@ -95,9 +96,7 @@ namespace Crest {
     inline static const std::string s_MONITORING_PAYLOAD_PATH = "/monitoring/payloads";
     inline static const std::string s_META_PATH = "/meta";
     inline static const std::string s_DATA_PATH = "/data";
-    inline static const std::string s_STOREBATCH_PATH = "/storebatch";
-    inline static const std::string s_BATCH_PATH = "/batch";
-    inline static const std::string s_STORE_PATH = "/store";
+
     inline static const std::string s_FOLDER_PATH = "/folders";
     inline static const std::string s_RUNINFO_PATH = "/runinfo";
     inline static const std::string s_RUNINFO_LIST_PATH = "/list";
@@ -126,6 +125,12 @@ namespace Crest {
     inline static const std::string s_FS_PATH = "";
 
     inline static const int s_FS_PREFIX_LENGTH = 3;
+
+    // CREST Server data paths:
+    inline static const std::string s_MGMT_PATH = "/mgmt";
+    inline static const std::string s_MGMT_INFO_PATH = "/info";
+    inline static const std::string s_CREST_CLIENT_VERSION = "4.0";
+    inline static const std::string s_MGMT_INFO_PATH_2 = "/actuator/info";
 
     enum CrestMode {
       SERVER_MODE = 1, FILESYSTEM_MODE = 2
@@ -177,16 +182,6 @@ namespace Crest {
  */
     std::string performRequest(const std::string& current_path, Action action, nlohmann::json& js,
                                const char* method_name);
-
-
-/**
- * This is an auxillary method to make an request to store a payload.
- * (Old method name - store_payload_request)
- * @param tag - tag name.
- * @param since - since.
- * @param js - payload in the JSON format.
- */
-    std::string storePayloadRequest(const std::string& tag, uint64_t since, const std::string& js);
 
 /**
  * This is an auxillary method to make an request to store several payloads in the batch mode.
@@ -263,7 +258,12 @@ namespace Crest {
  * @param method_name - the name on a method which calls one of the perform request methods.
  */
     void checkResult(CURLcode res, long response_code, const std::string& st, const char* method_name);
+
+
   public:
+
+    inline static const bool s_CREST_CLIENT_CHECK = false;
+
 // ===================================
 // CONSTRUCTORS
 
@@ -281,13 +281,17 @@ namespace Crest {
  * CREST Server.
  * @param _host - host name of the CREST Server.
  * @param _port - port of the CREST Server.
+ * @param check_version - the parameter to switch CREST version checking, if this parameter is true,
+ * the CREST version test will be executed.
  */
-    CrestClient(const std::string& _host, const std::string& _port);
+    CrestClient(const std::string& _host, const std::string& _port, bool check_version = s_CREST_CLIENT_CHECK);
 
 /**
  * CrestClient constructor for Internet mode. If CrestClient is created with this method the data will be sent to the
  * CREST Server.
  * @param url - URL address of the CREST Server (with port).
+ * @param check_version - the parameter to switch CREST version checking, if this parameter is true,
+ * the CREST version test will be executed.
  * <br> <br>
  * Example:
  * <br>
@@ -296,7 +300,7 @@ namespace Crest {
  *    CrestClient myCrestClient = CrestClient(url);
  * </pre>
  */
-    CrestClient(std::string_view url);
+    CrestClient(std::string_view url, bool check_version = s_CREST_CLIENT_CHECK);
 
     ~CrestClient();
 
@@ -406,18 +410,6 @@ namespace Crest {
  */
     nlohmann::json listFolders();
 
-
-//=====================================================
-
-//=====================================================
-// FsApi
-//
-//
-// Dump a tag into filesystem and retrieve the tar file asynchronously.
-// This method allows to request a tar file from the server using a tag specified in input.
-// tagname = 'none' # str | tagname: the tag name {none} (default to none)
-// snapshot = 0 # int | snapshot: the snapshot time {0} (default to 0)
-// str build_tar(string tagname, int snapshot);
 
 //=====================================================
 
@@ -706,13 +698,6 @@ namespace Crest {
  */
     void createPayload(nlohmann::json& js);
 
-// Create a Payload in the database.
-// This method allows to insert a Payload.
-// Arguments: PayloadDto should be provided in the body as a JSON file.
-// file = '/path/to/file.txt' # file | The file
-// payload = 'payload_example' # str | Json body for payloaddto
-// PayloadDto create_payload_multi_form(file, PayloadDto payload);
-
 
 /**
  * This method finds payload data by hash; the payload object contains the real BLOB. The result returns as a string.
@@ -787,7 +772,7 @@ namespace Crest {
  * <pre>
  *    std::string name58 = "test_MvG3b";
  *    uint64_t endtime58 = 200;
- *    std::string str58 = "[{\"payloadHash\":\"aaa\",\"since\":100},{\"payloadHash\":\"bbb\",\"since\":150}]";
+ *    std::string str58 = "[{\"data\":\"aaa\",\"since\":100},{\"data\":\"bbb\",\"since\":150}]";
  *    myCrestClient.storeBatchPayloads(name58, endtime58, str58);
  * </pre>
  */
@@ -804,7 +789,7 @@ namespace Crest {
  * <pre>
  *    std::string name58 = "test_MvG3a";
  *    uint64_t endtime58 = 200;
- *    std::string str58 = "[{\"payloadHash\":\"aaa\",\"since\":100},{\"payloadHash\":\"bbb\",\"since\":150}]";
+ *    std::string str58 = "[{\"data\":\"aaa\",\"since\":100},{\"data\":\"bbb\",\"since\":150}]";
  *    nlohmann::json js58 = myCrestClient.getJson(str58);
  *    myCrestClient.storeBatchPayloads(name58, endtime58, js58)
  * </pre>
@@ -821,7 +806,7 @@ namespace Crest {
  * <pre>
  *    std::string name58 = "test_MvG3b";
  *    uint64_t endtime58 = 200;
- *    std::string str58 = "[{\"payloadHash\":\"aaa\",\"since\":100},{\"payloadHash\":\"bbb\",\"since\":150}]";
+ *    std::string str58 = "[{\"data\":\"aaa\",\"since\":100},{\"data\":\"bbb\",\"since\":150}]";
  *    myCrestClient.storeBatchPayloads(name58, endtime58, str58);
  * </pre>
  */
@@ -837,7 +822,7 @@ namespace Crest {
  * <pre>
  *    std::string name58 = "test_MvG3a";
  *    uint64_t endtime58 = 200;
- *    std::string str58 = "[{\"payloadHash\":\"aaa\",\"since\":100},{\"payloadHash\":\"bbb\",\"since\":150}]";
+ *    std::string str58 = "[{\"data\":\"aaa\",\"since\":100},{\"data\":\"bbb\",\"since\":150}]";
  *    nlohmann::json js58 = myCrestClient.getJson(str58);
  *    myCrestClient.storeBatchPayloads(name58, endtime58, js58)
  * </pre>
@@ -1104,7 +1089,7 @@ namespace Crest {
  * <br> Example how to use these parameters: <br>
  * <pre>
  *    std::string name39 = "test_M";
- *    std::string str39 = "[{\"payloadHash\":\"aaa\",\"since\":100},{\"payloadHash\":\"bbb\",\"since\":150}]";
+ *    std::string str39 = "[{\"data\":\"aaa\",\"since\":100},{\"data\":\"bbb\",\"since\":150}]";
  *    myCrestClient.storeBatchPayloadsFs(name39, str39);
  * </pre>
  */
@@ -1118,7 +1103,7 @@ namespace Crest {
  * <br> Example how to use these parameters: <br>
  * <pre>
  *    std::string name39 = "test_M";
- *    std::string str39 = "[{\"payloadHash\":\"aaa\",\"since\":100},{\"payloadHash\":\"bbb\",\"since\":150}]";
+ *    std::string str39 = "[{\"data\":\"aaa\",\"since\":100},{\"data\":\"bbb\",\"since\":150}]";
  *    nlohmann::json js39 = myCrestClient.getJson(str39);
  *    myCrestClient.storeBatchPayloadsFs(name39, js39);
  * </pre>
@@ -1564,7 +1549,67 @@ namespace Crest {
  * @param str - string to extract first letters.
  */
     std::string getFirstLetters(const std::string& str);
+
+
+//=====================================================
+// Methods to check the CREST Server and CrestApi versions
+//
+
+/**
+ * This is an auxillary method to read the CREST Server properties.
+ */
+    nlohmann::json getMgmtInfo();
+
+/**
+ * This method returns the full CREST Server version.
+ */
+    std::string getCrestVersion();
+
+/**
+ * This method returns the full CrestApi version.
+ */
+    std::string getClientVersion();
+
+/**
+ * This is an auxillary method to extract a major version number from 
+ * full version string.
+ */
+    int getMajorVersion(std::string& str);
+
+/**
+ * This method is a CREST version test. It checks if the major CREST server
+ * is equal to the major CrestApi vesrion.
+ * If the versions are different an error is thrown.
+ * \exception std::runtime_error - error, if the versions are different.
+ */
+    void checkCrestVersion();
+
+//===================================
+// Second version of the version checking:
+//
+
+/**
+ * This is an auxillary method to read the CREST Server properties.
+ * This method is an analogue of the getMgmtInfo() method, 
+ * but it uses another path to get the data. 
+ */
+    nlohmann::json getMgmtInfo2();
+
+/**
+ * This method returns the full CREST Server version.
+ */
+    std::string getCrestVersion2();
+
+/**
+ * This method is a CREST version test. It checks if the major CREST server
+ * is equal to the major CrestApi vesrion.
+ * If the versions are different an error is thrown.
+ * \exception std::runtime_error - error, if the versions are different.
+ */
+    void checkCrestVersion2();
+
   };
+
 } // namespace
 
 
