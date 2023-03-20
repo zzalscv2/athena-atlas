@@ -29,7 +29,7 @@ def getFlags(**kwargs):
     ]
     setupDetectorFlags(flags, custom_list=detectors, toggle_geometry=True)
     flags.TrackingGeometry.MaterialSource = "Input"
-    flags.GeoModel.AtlasVersion = "ATLAS-P2-RUN4-01-00-00"
+    flags.GeoModel.AtlasVersion = "ATLAS-P2-RUN4-01-01-00"
     flags.GeoModel.Align.Dynamic = False
 
     #Define the output database file name and add it to the flags

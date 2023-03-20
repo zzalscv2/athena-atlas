@@ -36,7 +36,7 @@ def defaultTestFlags(flags, args):
     from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
     setupDetectorFlags(flags, detectors, toggle_geometry=True)
 
-    flags.GeoModel.AtlasVersion = "ATLAS-P2-RUN4-01-00-00"
+    flags.GeoModel.AtlasVersion = "ATLAS-P2-RUN4-01-01-00"
     flags.IOVDb.GlobalTag = "OFLCOND-SIM-00-00-00"
     flags.GeoModel.Align.Dynamic = False
     # flags.Acts.TrackingGeometry.MaterialSource = "Input"

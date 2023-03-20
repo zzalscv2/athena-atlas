@@ -12,14 +12,14 @@ Input="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410
 Output="test.HITS.pool.root"
 
 # RUN4 setup
-# ATLAS-P2-RUN4-01-00-00 and OFLCOND-MC15c-SDR-14-05
+# ATLAS-P2-RUN4-01-01-00 and OFLCOND-MC15c-SDR-14-05
 Sim_tf.py \
 --CA \
 --conditionsTag 'default:OFLCOND-MC15c-SDR-14-05' \
 --simulator 'FullG4MT' \
 --postInclude 'default:PyJobTransforms.UseFrontier' \
 --preInclude 'EVNTtoHITS:Campaigns.PhaseIISimulation' \
---geometryVersion 'default:ATLAS-P2-RUN4-01-00-00' \
+--geometryVersion 'default:ATLAS-P2-RUN4-01-01-00' \
 --inputEVNTFile "$Input" \
 --outputHITSFile "$Output" \
 --maxEvents 5 \
