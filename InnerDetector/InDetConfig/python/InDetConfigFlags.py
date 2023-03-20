@@ -39,20 +39,6 @@ def createInDetConfigFlags():
 
     # Tracking parameters
 
-    # Turn on running of Brem Recovery in tracking
-    icf.addFlag("InDet.Tracking.doBremRecovery", lambda prevFlags: (
-        not (prevFlags.Tracking.doVtxLumi or
-             prevFlags.Tracking.doVtxBeamSpot or
-             prevFlags.Tracking.doLowMu or
-             prevFlags.Beam.Type is not BeamType.Collisions or
-             not prevFlags.BField.solenoidOn)))
-    # Brem Recover in tracking restricted to Calo ROIs
-    icf.addFlag("InDet.Tracking.doCaloSeededBrem", True)
-    # Use Recover SSS to Calo ROIs
-    icf.addFlag("InDet.Tracking.doHadCaloSeededSSS", False)
-    # Use Calo ROIs to seed specific cuts for the ambi
-    icf.addFlag("InDet.Tracking.doCaloSeededAmbi",
-                lambda prevFlags: prevFlags.Detector.EnableCalo)
     # Try to split pixel clusters
     icf.addFlag("InDet.Tracking.doPixelClusterSplitting",
                 lambda prevFlags: not(prevFlags.Beam.Type is BeamType.Cosmics))

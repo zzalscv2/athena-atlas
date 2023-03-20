@@ -13,9 +13,9 @@ if __name__=="__main__":
         ConfigFlags.Concurrency.NumThreads = int(os.environ['ATHENA_CORE_NUMBER'])
 
     if not calo_seeds :
-        ConfigFlags.InDet.Tracking.doCaloSeededBrem=False
-        ConfigFlags.InDet.Tracking.doHadCaloSeededSSS=False
-        ConfigFlags.InDet.Tracking.doCaloSeededAmbi=False
+        ConfigFlags.Tracking.doCaloSeededBrem=False
+        ConfigFlags.Tracking.doHadCaloSeededSSS=False
+        ConfigFlags.Tracking.doCaloSeededAmbi=False
         ConfigFlags.Detector.EnableCalo=False
 
     ConfigFlags.lock()

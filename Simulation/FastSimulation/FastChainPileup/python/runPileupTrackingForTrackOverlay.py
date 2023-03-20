@@ -37,9 +37,9 @@ flags.Detector.GeometryForward = False
 flags.Detector.EnableCalo = True
 
 # InDetConfigFlags.py is based upon InDetFlags. Dropped lots of flags. 
-flags.InDet.Tracking.doCaloSeededAmbi = False
+flags.Tracking.doCaloSeededAmbi = False
 flags.Tracking.doTIDE_Ambi = True
-flags.InDet.Tracking.doCaloSeededBrem = True
+flags.Tracking.doCaloSeededBrem = True
 flags.InDet.Tracking.doBackTracking = True
 flags.Tracking.doTruth = True #Turn running of truth matching on and off (by default on for MC off for data)
 flags.Tracking.doVertexFinding = False # from VertexFindingFlags.py
