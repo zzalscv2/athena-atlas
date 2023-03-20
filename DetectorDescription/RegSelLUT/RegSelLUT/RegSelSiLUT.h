@@ -42,7 +42,7 @@ class RegSelSiLUT : public RegSelName, virtual public IRegSelLUT {
 
 public:
 
-  typedef enum { UNDEF, PIXEL, SCT, TRT, FTK } DET;
+  typedef enum { UNDEF, PIXEL, SCT, TRT, FTK, MM, sTGC } DET;
 
 public:
   
