@@ -83,7 +83,7 @@ std::unique_ptr<RegSelSiLUT> sTGC_RegSelCondAlg::createTable( const EventContext
   
   ATH_MSG_DEBUG("createTable()");
   
-  std::unique_ptr<RegSelSiLUT> lut = std::make_unique<RegSelSiLUT>();
+  std::unique_ptr<RegSelSiLUT> lut = std::make_unique<RegSelSiLUT>(RegSelSiLUT::sTGC);
 
 
   for ( std::vector<Identifier>::const_iterator i=idfirst ; i!=idlast ; ++i ) {
