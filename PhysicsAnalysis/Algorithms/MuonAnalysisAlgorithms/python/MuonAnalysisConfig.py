@@ -114,10 +114,6 @@ class MuonWorkingPointConfig (ConfigBlock) :
         if postfix != '' and postfix[0] != '_' :
             postfix = '_' + postfix
 
-        if self.isolation not in ["Iso", "NonIso"] :
-            raise ValueError ('invalid muon isolation \"' + self.isolation +
-                              '\", allowed values are Iso, NonIso')
-
         # Setup the muon quality selection
         alg = config.createAlgorithm( 'CP::MuonSelectionAlgV2',
                                'MuonSelectionAlg' + postfix )
@@ -137,6 +133,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
             alg = config.createAlgorithm( 'CP::MuonIsolationAlg',
                                    'MuonIsolationAlg' + postfix )
             config.addPrivateTool( 'isolationTool', 'CP::IsolationSelectionTool' )
+            alg.isolationTool.MuonWP = self.isolation
             alg.isolationDecoration = 'isolated_muon' + postfix + ',as_bits'
             alg.muons = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)

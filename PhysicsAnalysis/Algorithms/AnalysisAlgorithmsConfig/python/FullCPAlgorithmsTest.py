@@ -163,7 +163,7 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
         input = 'Muons'
 
     muonSequenceMedium = makeMuonAnalysisSequence( dataType, deepCopyOutput = False, shallowViewOutput = False,
-                                                   workingPoint = 'Medium.Iso', postfix = 'medium',
+                                                   workingPoint = 'Medium.Loose_VarRad', postfix = 'medium',
                                                    enableCutflow=True, enableKinematicHistograms=True, ptSelectionOutput = True )
     # FIX ME: the current version of the `MuonSelectionTool` doesn't work
     # on the current version of PHYSLITE, and needs a new PHYSLITE production
@@ -175,7 +175,7 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
     algSeq += muonSequenceMedium
 
     muonSequenceTight = makeMuonAnalysisSequence( dataType, deepCopyOutput = False, shallowViewOutput = False,
-                                                  workingPoint = 'Tight.Iso', postfix = 'tight',
+                                                  workingPoint = 'Tight.Loose_VarRad', postfix = 'tight',
                                                   enableCutflow=True, enableKinematicHistograms=True, ptSelectionOutput = True )
     muonSequenceTight.removeStage ("calibration")
     # FIX ME: the current version of the `MuonSelectionTool` doesn't work
@@ -604,11 +604,11 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     configSeq += makeConfig ('Muons', 'AnaMuons')
     configSeq += makeConfig ('Muons.Selection', 'AnaMuons.medium')
     configSeq.setOptionValue ('.quality', 'Medium')
-    configSeq.setOptionValue ('.isolation', 'Iso')
+    configSeq.setOptionValue ('.isolation', 'Loose_VarRad')
     configSeq.setOptionValue ('.isRun3Geo', run3Muons)
     configSeq += makeConfig ('Muons.Selection', 'AnaMuons.tight')
     configSeq.setOptionValue ('.quality', 'Tight')
-    configSeq.setOptionValue ('.isolation', 'Iso')
+    configSeq.setOptionValue ('.isolation', 'Loose_VarRad')
     configSeq.setOptionValue ('.isRun3Geo', run3Muons)
 
 

@@ -194,10 +194,6 @@ def makeMuonWorkingPointSequence( seq, dataType, workingPoint, postfix = '',
                           "\", allowed values are Tight, Medium, Loose, " +
                           "VeryLoose, HighPt, LowPtEfficiency")
 
-    if not splitWP[1] in ["Iso", "NonIso"] :
-        raise ValueError ('invalid muon isolation \"' + splitWP[1] +
-                          '\", allowed values are Iso, NonIso')
-
     # Setup the muon quality selection
     alg = createAlgorithm( 'CP::MuonSelectionAlgV2',
                            'MuonSelectionAlg' + postfix )
@@ -218,6 +214,7 @@ def makeMuonWorkingPointSequence( seq, dataType, workingPoint, postfix = '',
         alg = createAlgorithm( 'CP::MuonIsolationAlg',
                                'MuonIsolationAlg' + postfix )
         addPrivateTool( alg, 'isolationTool', 'CP::IsolationSelectionTool' )
+        alg.isolationTool.MuonWP = splitWP[1]
         alg.isolationDecoration = 'isolated_muon' + postfix + ',as_bits'
         seq.append( alg, inputPropName = 'muons',
                     stageName = 'selection',

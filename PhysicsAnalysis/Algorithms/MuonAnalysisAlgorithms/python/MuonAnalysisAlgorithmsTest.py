@@ -32,7 +32,7 @@ def makeSequence (dataType) :
     # Include, and then set up the muon analysis algorithm sequence:
     from MuonAnalysisAlgorithms.MuonAnalysisSequence import makeMuonAnalysisSequence
     muonSequenceMedium = makeMuonAnalysisSequence( dataType, deepCopyOutput = True, shallowViewOutput = False,
-                                                   workingPoint = 'Medium.Iso', postfix = 'medium',
+                                                   workingPoint = 'Medium.Loose_VarRad', postfix = 'medium',
                                                    enableCutflow=True, enableKinematicHistograms=True )
     muonSequenceMedium.configure( inputName = 'Muons',
                                   outputName = 'AnalysisMuonsMedium_%SYS%' )
@@ -41,7 +41,7 @@ def makeSequence (dataType) :
     algSeq += muonSequenceMedium
 
     muonSequenceTight = makeMuonAnalysisSequence( dataType, deepCopyOutput = True, shallowViewOutput = False,
-                                                  workingPoint = 'Tight.Iso', postfix = 'tight',
+                                                  workingPoint = 'Tight.Loose_VarRad', postfix = 'tight',
                                                   enableCutflow=True, enableKinematicHistograms=True )
     muonSequenceTight.removeStage ("calibration")
     muonSequenceTight.configure( inputName = 'AnalysisMuonsMedium_%SYS%',
