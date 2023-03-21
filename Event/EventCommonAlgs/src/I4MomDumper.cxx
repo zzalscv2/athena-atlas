@@ -17,8 +17,7 @@
 #include <iomanip>
 #include <set>
 
-// Boost includes
-#include <boost/array.hpp>
+#include <array>
 
 // FrameWork includes
 #include "Gaudi/Property.h"
@@ -32,7 +31,7 @@
 // EventCommonAlgs includes
 #include "I4MomDumper.h"
 
-static const boost::array<std::string, I4MomDumper::Display::Size> s_display
+static const std::array<std::string, I4MomDumper::Display::Size> s_display
 = { { "EEtaPhiM",
       "IPtCotThPhiM",
       "PtEtaPhiM",
@@ -158,10 +157,6 @@ StatusCode I4MomDumper::execute()
 
   return StatusCode::SUCCESS;
 }
-
-/////////////////////////////////////////////////////////////////// 
-// Const methods: 
-///////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////// 
 // Non-const methods: 
