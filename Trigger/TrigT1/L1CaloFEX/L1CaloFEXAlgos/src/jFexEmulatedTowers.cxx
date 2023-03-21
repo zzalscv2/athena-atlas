@@ -150,8 +150,7 @@ StatusCode jFexEmulatedTowers::execute(const EventContext& ctx) const {
                 
             }      
             
-            //CHANGE THIS!!!!!! LAr group needs to provide the function! just a placeholder for now!
-            Total_Et_encoded = jFEXCompression::Compress(Total_Et); 
+            Total_Et_encoded = jFEXCompression::Compress( Total_Et ); 
             
         }
         else{

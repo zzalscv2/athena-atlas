@@ -50,6 +50,7 @@ StatusCode jFexTower2SCellDecorator::initialize() {
     ATH_CHECK( m_SCellEtadecorKey.initialize(m_save_extras) );
     ATH_CHECK( m_SCellPhidecorKey.initialize(m_save_extras) );
     ATH_CHECK( m_SCellIDdecorKey.initialize(m_save_extras) );
+    ATH_CHECK( m_SCellMaskdecorKey.initialize(m_save_extras) );
     ATH_CHECK( m_TileEtdecorKey.initialize(m_save_extras) );
     ATH_CHECK( m_TileEtadecorKey.initialize(m_save_extras) );
     ATH_CHECK( m_TilePhidecorKey.initialize(m_save_extras) );        
@@ -128,6 +129,7 @@ StatusCode jFexTower2SCellDecorator::execute(const EventContext& ctx) const {
         std::vector<float> scEta;
         std::vector<float> scPhi;
         std::vector<int>   scID;
+        std::vector<bool>  scMask;
         float SCellEt = 0.0;
         int   TileEt  = 0;
         float TileEta = -99.0;
@@ -164,16 +166,19 @@ StatusCode jFexTower2SCellDecorator::execute(const EventContext& ctx) const {
                     scPhi.push_back(-99);
                     // bit shifting to get only a 32 bit number
                     scID.push_back( SCellID >> 32 );                        
+                    scMask.push_back(0);                        
                     
                 }
                 else{
                     const CaloCell* myCell = it_ScellID2ptr->second;
                     
                     float et = myCell->et();
+                    bool masked = 0;
                     
                     if( (myCell->provenance() >> 7 & 0x1) and m_apply_masking ) {
                         //if masked then Et = 0
                         et = 0.0;
+                        masked = 1;
                     }
                     
                     scEt.push_back(et);
@@ -181,6 +186,7 @@ StatusCode jFexTower2SCellDecorator::execute(const EventContext& ctx) const {
                     scPhi.push_back(myCell->phi());
                     // bit shifting to get only a 32 bit number
                     scID.push_back( SCellID >> 32 );                    
+                    scMask.push_back( masked );                    
                 }
             }
             
@@ -190,7 +196,7 @@ StatusCode jFexTower2SCellDecorator::execute(const EventContext& ctx) const {
                 tmpSCellEt += tmpet;
             }
             SCellEt = tmpSCellEt;
-            jFexEtencoded = jFEXCompression::Compress( std::round( tmpSCellEt) );
+            jFexEtencoded = jFEXCompression::Compress( tmpSCellEt );
         }
         else if(source == 1){
             
@@ -232,6 +238,7 @@ StatusCode jFexTower2SCellDecorator::execute(const EventContext& ctx) const {
             SG::WriteDecorHandle<xAOD::jFexTowerContainer, std::vector<float> > jTowerSCellEta   (m_SCellEtadecorKey , ctx);
             SG::WriteDecorHandle<xAOD::jFexTowerContainer, std::vector<float> > jTowerSCellPhi   (m_SCellPhidecorKey , ctx);
             SG::WriteDecorHandle<xAOD::jFexTowerContainer, std::vector<int> >   jTowerSCellID    (m_SCellIDdecorKey  , ctx);
+            SG::WriteDecorHandle<xAOD::jFexTowerContainer, std::vector<bool> >  jTowerSCellMask  (m_SCellMaskdecorKey, ctx);
             SG::WriteDecorHandle<xAOD::jFexTowerContainer, int >                jTowerTileEt     (m_TileEtdecorKey   , ctx);
             SG::WriteDecorHandle<xAOD::jFexTowerContainer, float >              jTowerTileEta    (m_TileEtadecorKey  , ctx);
             SG::WriteDecorHandle<xAOD::jFexTowerContainer, float >              jTowerTilePhi    (m_TilePhidecorKey  , ctx);
@@ -240,6 +247,7 @@ StatusCode jFexTower2SCellDecorator::execute(const EventContext& ctx) const {
             jTowerSCellEta  (*jTower) = scEta;
             jTowerSCellPhi  (*jTower) = scPhi;
             jTowerSCellID   (*jTower) = scID;
+            jTowerSCellMask (*jTower) = scMask;
             jTowerTileEt    (*jTower) = static_cast<int>( TileEt );
             jTowerTileEta   (*jTower) = TileEta;
             jTowerTilePhi   (*jTower) = TilePhi;
