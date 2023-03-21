@@ -17,7 +17,6 @@
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/GenParticle.h"
-#include "boost/range/iterator_range_core.hpp"
 #include <utility>
 
 
@@ -305,20 +304,17 @@ TruthParticleFilterBase::addVertex (HepMC::ConstGenVertexPtr v, HepMC::GenEvent*
     ev->add_vertex (vnew);
 
     // Fill in the existing relations of the new vertex.
-    for (const HepMC::GenParticle* p :
-           boost::make_iterator_range (v->particles_in_const_begin(),
-                                       v->particles_in_const_end()))
+    for (auto ip=v->particles_in_const_begin();
+                                       ip!=v->particles_in_const_end();++ip)
     {
-      HepMC::GenParticle* pnew = ev->barcode_to_particle (p->barcode());
+      HepMC::GenParticle* pnew = ev->barcode_to_particle ((*ip)->barcode());
       if (pnew)
         vnew->add_particle_in (pnew);
     }
 
-    for (const HepMC::GenParticle* p :
-           boost::make_iterator_range (v->particles_out_const_begin(),
-                                       v->particles_out_const_end()))
+    for (auto ip = v->particles_out_const_begin();ip!= v->particles_out_const_end();++ip)
     {
-      HepMC::GenParticle* pnew = ev->barcode_to_particle (p->barcode());
+      HepMC::GenParticle* pnew = ev->barcode_to_particle ((*ip)->barcode());
       if (pnew)
         vnew->add_particle_out (pnew);
     }
