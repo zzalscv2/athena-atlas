@@ -47,10 +47,9 @@ def createTriggerFlags(doTriggerRecoFlags):
     # Enable Run-3 LVL1 muon decoding
     flags.addFlag('Trigger.enableL1MuonPhase1', lambda prevFlags: prevFlags.Trigger.EDMVersion >= 3 or prevFlags.Detector.EnableMM or prevFlags.Detector.EnablesTGC)
 
-    # Enable Run-3 LVL1 calo simulation and/or decoding for Run-3+ Reco or LVL1 simulation
+    # Enable Phase-1 LVL1 calo simulation and/or decoding for Run-3+
     flags.addFlag('Trigger.enableL1CaloPhase1', lambda prevFlags:
-                  (prevFlags.Trigger.EDMVersion >= 3 or prevFlags.GeoModel.Run >= LHCPeriod.Run3) and
-                  not prevFlags.Trigger.doHLT or prevFlags.Trigger.doLVL1)
+                  prevFlags.Trigger.EDMVersion >= 3 or prevFlags.GeoModel.Run >= LHCPeriod.Run3)
 
     # Enable L1Topo simulation to write inputs to txt
     flags.addFlag('Trigger.enableL1TopoDump', False)
