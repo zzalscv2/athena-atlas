@@ -14,8 +14,7 @@
 // STL includes
 #include <string>
 
-// Boost includes
-#include "boost/array.hpp"
+#include <array>
 
 // FrameWork includes
 #include "GaudiKernel/ServiceHandle.h"
@@ -95,23 +94,23 @@ class McAodTupleWriterTool : virtual public IIOMcAodTool,
   /// A simple representation of a @c TruthParticle
   struct McAodParticles {
     unsigned int m_nParticles;
-    boost::array<double, s_nMax> m_px;
-    boost::array<double, s_nMax> m_py;
-    boost::array<double, s_nMax> m_pz;
-    boost::array<double, s_nMax> m_m;
-    boost::array<double, s_nMax> m_ene;
-    boost::array<int,    s_nMax> m_pdgId;
-    boost::array<int,    s_nMax> m_status;
-    boost::array<int,    s_nMax> m_barcode;
+    std::array<double, s_nMax> m_px;
+    std::array<double, s_nMax> m_py;
+    std::array<double, s_nMax> m_pz;
+    std::array<double, s_nMax> m_m;
+    std::array<double, s_nMax> m_ene;
+    std::array<int,    s_nMax> m_pdgId;
+    std::array<int,    s_nMax> m_status;
+    std::array<int,    s_nMax> m_barcode;
     // et isolation stuff
-    boost::array<double, s_nMax> m_etcone10;
-    boost::array<double, s_nMax> m_etcone20;
-    boost::array<double, s_nMax> m_etcone30;
-    boost::array<double, s_nMax> m_etcone40;
-    boost::array<double, s_nMax> m_etcone45;
-    boost::array<double, s_nMax> m_etcone50;
-    boost::array<double, s_nMax> m_etcone60;
-    boost::array<double, s_nMax> m_etcone70;
+    std::array<double, s_nMax> m_etcone10;
+    std::array<double, s_nMax> m_etcone20;
+    std::array<double, s_nMax> m_etcone30;
+    std::array<double, s_nMax> m_etcone40;
+    std::array<double, s_nMax> m_etcone45;
+    std::array<double, s_nMax> m_etcone50;
+    std::array<double, s_nMax> m_etcone60;
+    std::array<double, s_nMax> m_etcone70;
   };
   /// our cached particles
   McAodParticles m_particles{};

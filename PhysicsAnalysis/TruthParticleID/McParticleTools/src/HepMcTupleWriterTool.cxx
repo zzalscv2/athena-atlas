@@ -195,15 +195,15 @@ void HepMcTupleWriterTool::bookTuple()
   // booking branches
   t->Branch( "nParts", &m_particles.m_nParticles, "nParts/I" );
 
-  t->Branch( "px", m_particles.m_px.elems,  "px[nParts]/D" );
-  t->Branch( "py", m_particles.m_py.elems,  "py[nParts]/D" );
-  t->Branch( "pz", m_particles.m_pz.elems,  "pz[nParts]/D" );
-  t->Branch( "m",  m_particles.m_m.elems,   "m[nParts]/D"  );
-  t->Branch( "e",  m_particles.m_ene.elems, "e[nParts]/D"  );
+  t->Branch( "px", m_particles.m_px.data(),  "px[nParts]/D" );
+  t->Branch( "py", m_particles.m_py.data(),  "py[nParts]/D" );
+  t->Branch( "pz", m_particles.m_pz.data(),  "pz[nParts]/D" );
+  t->Branch( "m",  m_particles.m_m.data(),   "m[nParts]/D"  );
+  t->Branch( "e",  m_particles.m_ene.data(), "e[nParts]/D"  );
 
-  t->Branch( "pdgId", m_particles.m_pdgId.elems,   "pdgId[nParts]/I" );
-  t->Branch( "sc",    m_particles.m_status.elems,  "sc[nParts]/I" );
-  t->Branch( "bc",    m_particles.m_barcode.elems, "bc[nParts]/I" );
+  t->Branch( "pdgId", m_particles.m_pdgId.data(),   "pdgId[nParts]/I" );
+  t->Branch( "sc",    m_particles.m_status.data(),  "sc[nParts]/I" );
+  t->Branch( "bc",    m_particles.m_barcode.data(), "bc[nParts]/I" );
 
   m_tuple = t;
 }

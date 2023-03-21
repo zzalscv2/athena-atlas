@@ -226,24 +226,24 @@ void McAodTupleWriterTool::bookTuple()
   // booking branches
   t->Branch( "nParts", &m_particles.m_nParticles, "nParts/i" );
 
-  t->Branch( "px", m_particles.m_px.elems,  "px[nParts]/D" );
-  t->Branch( "py", m_particles.m_py.elems,  "py[nParts]/D" );
-  t->Branch( "pz", m_particles.m_pz.elems,  "pz[nParts]/D" );
-  t->Branch( "m",  m_particles.m_m.elems,   "m[nParts]/D"  );
-  t->Branch( "e",  m_particles.m_ene.elems, "e[nParts]/D"  );
+  t->Branch( "px", m_particles.m_px.data(),  "px[nParts]/D" );
+  t->Branch( "py", m_particles.m_py.data(),  "py[nParts]/D" );
+  t->Branch( "pz", m_particles.m_pz.data(),  "pz[nParts]/D" );
+  t->Branch( "m",  m_particles.m_m.data(),   "m[nParts]/D"  );
+  t->Branch( "e",  m_particles.m_ene.data(), "e[nParts]/D"  );
 
-  t->Branch( "pdgId", m_particles.m_pdgId.elems,   "pdgId[nParts]/I" );
-  t->Branch( "sc",    m_particles.m_status.elems,  "sc[nParts]/I" );
-  t->Branch( "bc",    m_particles.m_barcode.elems, "bc[nParts]/I" );
+  t->Branch( "pdgId", m_particles.m_pdgId.data(),   "pdgId[nParts]/I" );
+  t->Branch( "sc",    m_particles.m_status.data(),  "sc[nParts]/I" );
+  t->Branch( "bc",    m_particles.m_barcode.data(), "bc[nParts]/I" );
 
-  t->Branch( "etcone10",  m_particles.m_etcone10.elems, "etcone10[nParts]/D" );
-  t->Branch( "etcone20",  m_particles.m_etcone20.elems, "etcone20[nParts]/D" );
-  t->Branch( "etcone30",  m_particles.m_etcone30.elems, "etcone30[nParts]/D" );
-  t->Branch( "etcone40",  m_particles.m_etcone40.elems, "etcone40[nParts]/D" );
-  t->Branch( "etcone45",  m_particles.m_etcone45.elems, "etcone45[nParts]/D" );
-  t->Branch( "etcone50",  m_particles.m_etcone50.elems, "etcone50[nParts]/D" );
-  t->Branch( "etcone60",  m_particles.m_etcone60.elems, "etcone60[nParts]/D" );
-  t->Branch( "etcone70",  m_particles.m_etcone70.elems, "etcone70[nParts]/D" );
+  t->Branch( "etcone10",  m_particles.m_etcone10.data(), "etcone10[nParts]/D" );
+  t->Branch( "etcone20",  m_particles.m_etcone20.data(), "etcone20[nParts]/D" );
+  t->Branch( "etcone30",  m_particles.m_etcone30.data(), "etcone30[nParts]/D" );
+  t->Branch( "etcone40",  m_particles.m_etcone40.data(), "etcone40[nParts]/D" );
+  t->Branch( "etcone45",  m_particles.m_etcone45.data(), "etcone45[nParts]/D" );
+  t->Branch( "etcone50",  m_particles.m_etcone50.data(), "etcone50[nParts]/D" );
+  t->Branch( "etcone60",  m_particles.m_etcone60.data(), "etcone60[nParts]/D" );
+  t->Branch( "etcone70",  m_particles.m_etcone70.data(), "etcone70[nParts]/D" );
 
   m_tuple = t;
 }
