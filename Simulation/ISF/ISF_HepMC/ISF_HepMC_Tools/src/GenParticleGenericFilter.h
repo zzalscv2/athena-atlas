@@ -53,8 +53,8 @@ typedef std::vector<int>      PDGCodes;
 
     /// Interface method that returns whether the given particle passes all cuts or not
 #ifdef HEPMC3
-    bool pass(HepMC::ConstGenParticlePtr particle) const;
-    inline bool  pass(HepMC::GenParticlePtr particle) const { return pass( std::const_pointer_cast<const HepMC3::GenParticle>(particle) );  }
+    bool pass(const HepMC::ConstGenParticlePtr& particle) const;
+    //inline bool  pass(HepMC::GenParticlePtr particle) const { return pass( std::const_pointer_cast<const HepMC3::GenParticle>(particle) );  }
 #else
     bool pass(const HepMC::GenParticle& particle) const;
 #endif
@@ -62,8 +62,8 @@ typedef std::vector<int>      PDGCodes;
   private:
     /// Check whether the given particle passes all configure cuts or not
 #ifdef HEPMC3
-    bool check_cuts_passed(HepMC::ConstGenParticlePtr particle) const;
-    inline bool  check_cuts_passed(HepMC::GenParticlePtr particle) const { return check_cuts_passed( std::const_pointer_cast<const HepMC3::GenParticle>(particle) );  }
+    bool check_cuts_passed(const HepMC::ConstGenParticlePtr& particle) const;
+    //inline bool  check_cuts_passed(HepMC::GenParticlePtr particle) const { return check_cuts_passed( std::const_pointer_cast<const HepMC3::GenParticle>(particle) );  }
 #else
     bool check_cuts_passed(const HepMC::GenParticle& particle) const;
 #endif

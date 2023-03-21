@@ -43,7 +43,7 @@ namespace ISF {
       virtual StatusCode initialize() override;
 #ifdef HEPMC3
       /** passes through to the private version */
-      virtual bool pass(HepMC::ConstGenParticlePtr particle ) const override;
+      virtual bool pass(const HepMC::ConstGenParticlePtr& particle ) const override;
 #else
 
       /** passes through to the private version */
