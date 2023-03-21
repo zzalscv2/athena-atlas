@@ -26,6 +26,7 @@ pflowcontexts = {
     "AnalysisLatest":("PreRec_R22_PFlow_ResPU_EtaJES_GSC_February23_230215.config","00-04-82","JetArea_Residual_EtaJES_GSC_Insitu"),
     "TrigLS2":("JES_MC16Recommendation_Consolidated_PFlow_Apr2019_Rel21_Trigger.config","00-04-82","JetArea_Residual_EtaJES_GSC_Insitu"),
     "Trigger":("JES_MC16Recommendation_Consolidated_PFlow_30May2022_Rel22_Trigger.config","00-04-82","JetArea_Residual_EtaJES_GSC_Insitu"),
+    "TrigR22Prerec":("PreRec_R22_PFlow_ResPU_EtaJES_GSC_February23_230215.config", "00-04-82", "JetArea_Residual_EtaJES_GSC_Insitu"),
 }
 
 topocontexts = {
