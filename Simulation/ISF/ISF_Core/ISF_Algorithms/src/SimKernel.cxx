@@ -14,8 +14,6 @@
 #include "ISF_Interfaces/IEventFilterTool.h"
 // FrameWork includes
 #include "Gaudi/Property.h"
-// Boost
-#include <boost/lexical_cast.hpp>
 // ATLAS cxx utils
 #include "PmbCxxUtils/CustomBenchmark.h"
 // ROOT includes
@@ -499,7 +497,7 @@ StatusCode ISF::SimKernel::execute()
 
   // dump current memory monitoring information
   if (m_doMemMon) {
-    std::string evtStr = boost::lexical_cast<std::string>( m_numISFEvents );
+    std::string evtStr = std::to_string( m_numISFEvents );
     std::string descr("after event " + evtStr);
     m_memMon->dumpCurrent( descr.c_str(), true);
 
