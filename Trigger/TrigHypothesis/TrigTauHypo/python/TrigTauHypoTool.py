@@ -126,6 +126,11 @@ def TrigEFTauMVHypoToolFromDict( flags, chainDict ):
         elif 'perf' in criteria:
             currentHypo.method      = 0
 
+        # 2023 DeepSet triggers
+        if chainPart['preselection'] == 'tracktwoMVA':
+            currentHypo.highptidthr = 200e3
+            currentHypo.highptjetthr = 420e3
+
     elif criteria in [ 'dikaonmass', 'kaonpi1', 'kaonpi2', 'dipion1', 'dipion2', 'dipion3', 'dipion4', 'singlepion' ]: # ATR-22644
         currentHypo = CompFactory.TrigEFTauDiKaonHypoTool(name)
         monTool = GenericMonitoringTool(flags, 'MonTool_' + name)
