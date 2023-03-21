@@ -232,7 +232,7 @@ def DFCommonTruthClassificationToolCfg(flags):
                                            MCTruthClassifier = DFCommonTruthClassifier)
 
 #add the 'decoration' tools for dressing and isolation
-def DFCommonTruthElectronDressingToolCfg(flags, decorationName = "FIXME_WHATSHOULDTHISBE"):
+def DFCommonTruthElectronDressingToolCfg(flags, decorationName = "dressedPhoton"):
     """Configure the electron truth dressing tool"""
     return TruthDressingToolCfg(flags,
                                 name                  = "DFCommonTruthElectronDressingTool",
@@ -242,7 +242,7 @@ def DFCommonTruthElectronDressingToolCfg(flags, decorationName = "FIXME_WHATSHOU
                                 particleIDsToDress    = [11],
                                 decorationName        = decorationName)
 
-def DFCommonTruthMuonDressingToolCfg(flags, decorationName = "FIXME_WHATSHOULDTHISBE"):
+def DFCommonTruthMuonDressingToolCfg(flags, decorationName = "dressedPhoton"):
     """Configure the muon truth dressing tool"""
     return TruthDressingToolCfg(flags,
                                 name                  = "DFCommonTruthMuonDressingTool",
