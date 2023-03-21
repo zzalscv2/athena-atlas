@@ -16,8 +16,7 @@
 #include <vector>
 #include <utility> // for std::pair
 
-// Boost includes
-#include "boost/array.hpp"
+#include <array>
 
 // Persistent ElementLink
 #include "DataModelAthenaPool/ElementLink_p1.h"
@@ -42,7 +41,7 @@ class TruthEtIsolations_p1
   /////////////////////////////////////////////////////////////////// 
 public: 
 
-  typedef boost::array<float, 
+  typedef std::array<float, 
 		       TruthParticleParameters::NbrOfCones> EtIsolations_t;
 
   typedef std::pair<int, EtIsolations_t> EtIsolBc_t;

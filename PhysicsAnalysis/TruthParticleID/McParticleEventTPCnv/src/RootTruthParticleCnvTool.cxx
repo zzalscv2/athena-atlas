@@ -6,7 +6,7 @@
 #include "GeneratorObjects/McEventCollection.h"
 #include "McParticleEvent/TruthParticle.h"
 #include "McParticleEvent/TruthParticleContainer.h"
-#include "boost/array.hpp"
+#include <array>
 #include "TError.h"
 #include "TDatabasePDG.h"
 #include "TParticlePDG.h"
@@ -19,7 +19,7 @@ namespace {
 
 /** 3*charge for basic pdgId codes -- used to parse unknown id's
     Fix from Frank for the charge of the MC Truth Particle */
-static const boost::array<int, 100> qcharge = {
+static const std::array<int, 100> qcharge = {
   {+0, -1, +2, -1, +2, -1, +2, -1, +2, +0,  // 0-9
    +0, -3, +0, -3, +0, -3, +0, -3, +0, +0,  // 10-19
    +0, +0, +0, +3, +0, +0, +0, +0, +0, +0,  // 20-29
