@@ -33,8 +33,8 @@ namespace Crest {
   public:
     CrestClientExt(bool rewriteIfExists, const std::string& root_folder = "/tmp/crest_dump") : CrestClient(
         rewriteIfExists, root_folder) {}
-    CrestClientExt(const std::string& _host, const std::string& _port) : CrestClient(_host, _port) {}
-    CrestClientExt(const std::string& url) : CrestClient(url) {}
+  CrestClientExt(const std::string& _host, const std::string& _port, bool _check_version = s_CREST_CLIENT_CHECK) : CrestClient(_host, _port, _check_version) {}
+  CrestClientExt(const std::string& url, bool check_version = s_CREST_CLIENT_CHECK) : CrestClient(url, check_version) {}
 
 // ~CrestClientExt();
 

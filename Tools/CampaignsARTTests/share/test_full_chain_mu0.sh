@@ -43,7 +43,6 @@ run "Simulation" Sim_tf.py \
   --multithreaded "True" \
   --postInclude "default:PyJobTransforms.UseFrontier" \
   --preInclude "EVNTtoHITS:Campaigns.PhaseIISimulation" \
-  --preExec "flags.HGTD.Geometry.useGeoModelXml=True" \
   --simulator "FullG4MT" \
   --inputEVNTFile ${ArtInFile} \
   --outputHITSFile "HITS.pool.root" \
@@ -64,7 +63,6 @@ run "RAWtoALL" Reco_tf.py \
   --multithreaded "True" \
   --postInclude "all:PyJobTransforms.UseFrontier" \
   --preInclude "all:Campaigns.PhaseIINoPileUp" \
-  --preExec "flags.HGTD.Geometry.useGeoModelXml=True" \
   --inputHitsFile "HITS.pool.root" \
   --outputAODFile "AOD.pool.root" \
   --maxEvents ${number_of_events}
@@ -77,7 +75,6 @@ run "AODtoDAOD_PHYSVAL" Derivation_tf.py \
   --formats "PHYSVAL" \
   --multiprocess "True" \
   --sharedWriter "True" \
-  --preExec "flags.HGTD.Geometry.useGeoModelXml=True" \
   --inputAODFile "AOD.pool.root" \
   --outputDAODFile "OUT.root" \
   --maxEvents ${number_of_events}

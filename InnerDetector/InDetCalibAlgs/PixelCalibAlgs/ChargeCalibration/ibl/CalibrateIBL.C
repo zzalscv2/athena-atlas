@@ -40,9 +40,10 @@
 #include "TVectorT.h"
 #include "THStack.h"
 #include "TRandom3.h"
-#include "../common/pixelMapping.h"
+#include "../common/PixelMapping.h"
 
-using namespace std; 
+using namespace std;
+using pix::PixelMapping; 
 
 //  Lianyou: simplely capacitor charging curve
 double funcDisp(double* x, double* par) {
@@ -88,6 +89,8 @@ double funcDispConvoluted(double* x, double* par) {
 }
 
 int main() {
+  //ensure proper location of mapping csv file
+  PixelMapping pixmap("../common/mapping.csv");
 
   // specify the input from calibration scans, please update accordingly
   TString InDir = "/eos/atlas/atlascerngroupdisk/det-ibl/charge-calibration/202211_IBL/";
@@ -585,13 +588,13 @@ int main() {
       int phi_module = -1;
       int eta_module = -1;
       int eta_moduleL = -1 , eta_moduleR = -1 ;
-      pixelMapping( modStr, &hashID, &bec, &layer, &phi_module, &eta_module ) ;
+      pixmap.mapping( modStr, &hashID, &bec, &layer, &phi_module, &eta_module ) ;
       if ( hashID == -1 )
       {
-        pixelMapping( modStr + "_1" , &hashID, &bec, &layer, &phi_module, &eta_module ) ;
+        pixmap.mapping( modStr + "_1" , &hashID, &bec, &layer, &phi_module, &eta_module ) ;
         if (  hashID != -1 ) { ibl3Dfe0 = true ; hashIDL = hashID ; eta_moduleL = eta_module ; }
          
-        pixelMapping( modStr + "_2" , &hashID, &bec, &layer, &phi_module, &eta_module ) ;
+        pixmap.mapping( modStr + "_2" , &hashID, &bec, &layer, &phi_module, &eta_module ) ;
         if (  hashID != -1 ) { ibl3Dfe1 = true  ; hashIDR = hashID; eta_moduleR = eta_module ; }
       } 
       if (  hashID == -1 ) continue ;

@@ -40,6 +40,7 @@ void RegSelSiLUT::HashIDList( const IRoiDescriptor& roi, std::vector<IdentifierH
   if ( roi.isFullscan() ) return getHashList( idlist );
   RegSelRoI roitmp( roi.zedMinus(), roi.zedPlus(), roi.phiMinus(), roi.phiPlus(), roi.etaMinus(), roi.etaPlus() );
   getHashList( roitmp, idlist );
+  if ( m_ID == MM || m_ID == sTGC ) removeDuplicates( idlist );
 }
 
 
@@ -47,6 +48,7 @@ void RegSelSiLUT::HashIDList( long layer, const IRoiDescriptor& roi, std::vector
   if ( roi.isFullscan() ) return getHashList( layer, idlist );
   RegSelRoI roitmp( roi.zedMinus(), roi.zedPlus(), roi.phiMinus(), roi.phiPlus(), roi.etaMinus(), roi.etaPlus() );
   getHashList( roitmp, layer, idlist );
+  if ( m_ID == MM || m_ID == sTGC ) removeDuplicates( idlist );
 }
 
 /// rob methods
@@ -82,12 +84,12 @@ RegSelSiLUT::RegSelSiLUT(const std::string& s) :
 
 
 // this is no longer needed, since the RegSelSiLUT now configures 
-// the number of dubdetectors and layers for each subdetector
+// the number of subdetectors and layers for each subdetector
 // automatically 
 
 void RegSelSiLUT::construct() 
 {   
-  const std::string s[5] = { "", "pixel", "sct", "trt", "ftk" };
+  const std::string s[7] = { "", "pixel", "sct", "trt", "ftk", "mm", "stgc" };
   m_name = s[m_ID];
 }
 

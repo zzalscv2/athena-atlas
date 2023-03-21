@@ -373,6 +373,9 @@ TrackParticleCnvAlg::convert(
         association_to_src(*itr_xaod, itr_xaod - xaod->begin()), container);
       if (!tpLink.isValid()) {
         ATH_MSG_WARNING("Failed to create ElementLink to Track/TrackParticle");
+      } else if(truth->empty()){
+        // This can happen if there is no HS track
+        ATH_MSG_DEBUG("No truth available");
       } else {
         auto result = truth->find(tpLink);
         if (result == truth->end()) {

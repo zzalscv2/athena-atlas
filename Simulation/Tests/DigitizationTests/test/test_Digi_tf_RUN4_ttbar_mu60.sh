@@ -3,6 +3,7 @@
 # art-description: Run 4 digitization of a ttbar sample with pile-up
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
+# art-include: 23.0/Athena
 # art-include: master/Athena
 # art-output: RUN4_ttbar.mu60.RDO.pool.root
 # art-output: RDOAnalysis.root
@@ -12,9 +13,9 @@ if [ -z ${ATLAS_REFERENCE_DATA+x} ]; then
 fi
 
 Events=25
-HSHitsFile="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-01-00-00/mc15_14TeV.600012.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.simul.HITS.e8185_s3856/HITS.29179779._000100.pool.root.1"
-HighPtMinbiasHitsFiles="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-01-00-00/mc15_14TeV.800381.Py8EG_A3NNPDF23LO_minbias_inelastic_high_keepJets.merge.HITS.e8205_s3856_s3857/*"
-LowPtMinbiasHitsFiles="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-01-00-00/mc15_14TeV.800380.Py8EG_A3NNPDF23LO_minbias_inelastic_low_keepJets.merge.HITS.e8205_s3856_s3857/*"
+HSHitsFile="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-01-01-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.simul.HITS.e8481_s4038/HITS.32253544._000100.pool.root.1"
+HighPtMinbiasHitsFiles="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-01-01-00/mc21_14TeV.800831.Py8EG_minbias_inelastic_highjetphotonlepton.merge.HITS.e8481_s4038_s4045/*"
+LowPtMinbiasHitsFiles="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-01-01-00/mc21_14TeV.900311.Epos_minbias_inelastic_lowjetphoton.merge.HITS.e8481_s4038_s4045/*"
 DigiOutFileName="RUN4_ttbar.mu60.RDO.pool.root"
 
 Digi_tf.py \
@@ -22,7 +23,7 @@ Digi_tf.py \
 --conditionsTag default:OFLCOND-MC15c-SDR-14-05 \
 --digiSeedOffset1 170 --digiSeedOffset2 170 \
 --digiSteeringConf 'StandardSignalOnlyTruth' \
---geometryVersion default:ATLAS-P2-RUN4-01-00-00 \
+--geometryVersion default:ATLAS-P2-RUN4-01-01-00 \
 --inputHITSFile ${HSHitsFile} \
 --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles} \
 --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles} \

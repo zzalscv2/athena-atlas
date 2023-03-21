@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARMONITORING_LARDIGITALTRIGGMON_H
@@ -17,12 +17,15 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
+#include "GaudiKernel/ToolHandle.h"
 
 //Events infos:
 #include "xAODEventInfo/EventInfo.h"
+#include "LumiBlockComps/ILumiBlockMuTool.h"
 #include "LArRawEvent/LArDigitContainer.h"
 #include "LArRawEvent/LArRawSCContainer.h"
 #include "LArCabling/LArOnOffIdMapping.h"
+#include "LumiBlockData/LuminosityCondData.h"
 #include <mutex>
 
 class LArEM_ID;
@@ -46,8 +49,7 @@ public:
   
   virtual StatusCode fillHistograms(const EventContext& ctx) const override;
   
-private:
-  
+private:  
   /**declaration variables used in joboptions*/
   Gaudi::Property<std::string> m_MonGroupName  {this, "LArDigitTriggMonGroupName", "LArDigitTriggMonGroup"};
   /**Range to check for the max sample. If min and max=0, the range is set dynamically	*/
@@ -63,7 +65,6 @@ private:
   /** Switch to online/offline mode*/
   Gaudi::Property<bool>        m_IsOnline      {this, "IsOnline", false}; 
   Gaudi::Property<int>         m_NLatomeBins{this, "NLatomeBins", 117};
-  Gaudi::Property<int>         m_NLatomeBins_side{this, "NLatomeBins_side", 56};
 
 
   Gaudi::Property<std::string>        m_EtName{this, "EtName", "Dummy"};
@@ -83,11 +84,10 @@ private:
   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this,"EventInfo","EventInfo","SG Key of EventInfo object"};
 
   /** Handle to digits */
-  SG::ReadHandleKey<LArDigitContainer> m_digitContainerKey{this,"LArDigitContainerKey","SC","SG key of LArDigitContainer read from Bytestream"}; //raw ADC 12 bits - ADC axis up to 4096
-  SG::ReadHandleKey<LArRawSCContainer> m_rawSCContainerKey{this,"LArRawSCContainerKey","SC_ET","SG key of LArRawSCContainer read from Bytestream"};
+  SG::ReadHandleKey<LArDigitContainer> m_digitContainerKey{this,"LArDigitContainerKey","dummy","SG key of LArDigitContainer read from Bytestream"}; //raw ADC 12 bits - ADC axis up to 4096
+  SG::ReadHandleKey<LArRawSCContainer> m_rawSCContainerKey{this,"LArRawSCContainerKey","dummy","SG key of LArRawSCContainer read from Bytestream"};
 
-  SG::ReadHandleKey<LArDigitContainer> m_digitBaselineContainerKey{this,"LArDigitBaselineContainerKey","SC_ADC_BAS","SG key of LArDigitContainer read from Bytestream"}; //raw ADC 12 bits - ADC axis up to 4096
-  SG::ReadHandleKey<LArRawSCContainer> m_rawSCEtIdContainerKey{this,"LArRawSCEtIdContainerKey","SC_ET_ID","SG key of LArRawSCContainer read from Bytestream"};
+  SG::ReadHandleKey<LArRawSCContainer> m_rawSCEtRecoContainerKey{this,"LArRawSCEtRecoContainerKey","SC_ET_RECO","SG key of LArRawSCContainer read from Bytestream"};
   
   /** Handle to pedestal */
   SG::ReadCondHandleKey<ILArPedestal>    m_keyPedestalSC{this,"LArPedestalKeySC","LArPedestalSC","SG key of LArPedestal CDO"};
@@ -98,12 +98,15 @@ private:
       ,"CaloSuperCellDetDescrManager"
       ,"SG key of the resulting CaloSuperCellDetDescrManager"};
 
+  SG::ReadDecorHandleKey<xAOD::EventInfo> m_actualMuKey {this, "actualInteractionsPerCrossing",
+           "EventInfo.actualInteractionsPerCrossing","Decoration for Actual Number of Interactions Per Crossing"};
   // SC_ET_ID cuts on taus selection, SC_ET just takes everything
 
   /* Id helpers */
   const LArOnlineID* m_LArOnlineIDHelper;
   const LArEM_ID* m_LArEM_IDHelper;
   const CaloCell_SuperCell_ID*  m_SCID_helper;
+
 
   int WhatPartition(HWIdentifier id, int side) const; 
   int getXbinFromSourceID(int sourceID) const;
@@ -129,6 +132,8 @@ private:
 
 
   //From: https://gitlab.cern.ch/atlas-lar-online/atlas-moncfg/-/blob/master/tools/LATOMEMonitoring.py#L82
+  std::set<std::string> m_badSCs;
+
   std::map <std::string, std::pair<std::string, int> > m_LatomeDetBinMapping = {
     {"0x48",{"FCALC",1}},
     {"0x4c",{"EMEC/HECC",3}},

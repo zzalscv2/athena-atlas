@@ -12,7 +12,7 @@
 lastref_dir=last_results
 dcubeXml="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/dcube/config/IDPVMPlots_ITk_FastTrackFinder.xml"
 
-geometry=ATLAS-P2-RUN4-01-00-00
+geometry=ATLAS-P2-RUN4-01-01-00
 
 run () {
     name="${1}"

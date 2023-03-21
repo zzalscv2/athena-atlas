@@ -58,7 +58,6 @@ run "RAWtoALL" Reco_tf.py \
   --multithreaded "True" \
   --postInclude "all:PyJobTransforms.UseFrontier" \
   --preInclude "all:Campaigns.PhaseIIPileUp1" \
-  --preExec "flags.HGTD.Geometry.useGeoModelXml=True" \
   --inputHITSFile ${HSHitsFile} \
   --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles} \
   --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles} \
@@ -73,7 +72,6 @@ run "AODtoDAOD_PHYSVAL" Derivation_tf.py \
   --formats "PHYSVAL" \
   --multiprocess "True" \
   --sharedWriter "True" \
-  --preExec "flags.HGTD.Geometry.useGeoModelXml=True" \
   --inputAODFile "AOD.pool.root" \
   --outputDAODFile "OUT.root" \
   --maxEvents ${number_of_events}

@@ -27,6 +27,7 @@ namespace ParticleJetTools {
     std::string childLxy;
     std::string childPt;
     std::string childPdgId;
+    void check();
   };
 
   struct LabelDecorators {

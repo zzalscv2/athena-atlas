@@ -3,6 +3,7 @@
 # art-description: Run 4 digitization of a ttbar sample without pile-up
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
+# art-include: 23.0/Athena
 # art-include: master/Athena
 # art-output: RUN4_ttbar.RDO.pool.root
 # art-output: RDOAnalysis.root
@@ -12,14 +13,14 @@ if [ -z ${ATLAS_REFERENCE_DATA+x} ]; then
 fi
 
 Events=25
-HSHitsFile="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-01-00-00/mc15_14TeV.600012.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.simul.HITS.e8185_s3856/HITS.29179779._000100.pool.root.1"
+HSHitsFile="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-01-01-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.simul.HITS.e8481_s4038/HITS.32253544._000100.pool.root.1"
 DigiOutFileName="RUN4_ttbar.RDO.pool.root"
 
 Digi_tf.py \
 --CA \
 --conditionsTag default:OFLCOND-MC15c-SDR-14-05 \
 --digiSeedOffset1 170 --digiSeedOffset2 170 \
---geometryVersion default:ATLAS-P2-RUN4-01-00-00 \
+--geometryVersion default:ATLAS-P2-RUN4-01-01-00 \
 --inputHITSFile ${HSHitsFile} \
 --jobNumber 568 \
 --maxEvents ${Events} \

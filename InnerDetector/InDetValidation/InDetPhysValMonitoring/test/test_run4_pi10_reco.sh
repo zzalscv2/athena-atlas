@@ -13,7 +13,7 @@ lastref_dir=last_results
 dcubeXml=dcube_ART_IDPVMPlots_ITk.xml
 ref_21p9=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/900038_piplus10_ITk_21p9_v1.IDPVM.root  # Ref release = 21.9.26
 
-geometry=ATLAS-P2-RUN4-01-00-00
+geometry=ATLAS-P2-RUN4-01-01-00
 
 # search in $DATAPATH for matching file
 dcubeXmlAbsPath=$(find -H ${DATAPATH//:/ } -name $dcubeXml -print -quit 2>/dev/null)

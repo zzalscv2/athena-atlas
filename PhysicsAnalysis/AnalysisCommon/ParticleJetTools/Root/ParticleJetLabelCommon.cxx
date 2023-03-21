@@ -113,6 +113,26 @@ namespace ParticleJetTools {
   // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   // End of code copied from ParticleJetDeltaRLabelTool
 
+  void LabelNames::check() {
+    auto chk = [](const std::string& s, const std::string& varname) {
+      if (s.empty()) throw std::runtime_error(
+        "name for '" + varname + "' is not specified in particle jet tools"
+        " configuration");
+    };
+#define CHECK(var) chk(var, #var)
+    CHECK(singleint);
+    CHECK(doubleint);
+    CHECK(pt);
+    CHECK(pt_scaled);
+    CHECK(Lxy);
+    CHECK(dr);
+    CHECK(pdgId);
+    CHECK(barcode);
+    CHECK(childLxy);
+    CHECK(childPt);
+    CHECK(childPdgId);
+#undef CHECK
+  }
 
   LabelDecorators::LabelDecorators(const LabelNames& n):
     singleint(n.singleint),

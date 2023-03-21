@@ -14,9 +14,9 @@ using namespace xAOD;
 ParticleJetDeltaRLabelTool::ParticleJetDeltaRLabelTool(const std::string& name)
         : AsgTool(name) {
     declareProperties(*this, &m_labelnames);
-    declareProperty("BLabelName", m_bottomlabelname="", "Name of the attribute to be added for matched B hadrons.");
-    declareProperty("CLabelName", m_charmlabelname="", "Name of the attribute to be added for matched C hadrons.");
-    declareProperty("TauLabelName", m_taulabelname="", "Name of the attribute to be added for matched taus.");
+    declareProperty("BLabelName", m_bottomlabelname="ConeExclBHadronsFinal", "Name of the attribute to be added for matched B hadrons.");
+    declareProperty("CLabelName", m_charmlabelname="ConeExclCHadronsFinal", "Name of the attribute to be added for matched C hadrons.");
+    declareProperty("TauLabelName", m_taulabelname="ConeExclTausFinal", "Name of the attribute to be added for matched taus.");
     declareProperty("PartPtMin", m_partptmin=5000, "Minimum pT of particles for labeling (MeV)");
     declareProperty("JetPtMin", m_jetptmin=10000, "Minimum pT of jets to be lebeled (MeV)");
     declareProperty("DRMax", m_drmax=0.3, "Maximum deltaR between a particle and jet to be labeled");
@@ -31,6 +31,8 @@ namespace {
 
 
 StatusCode ParticleJetDeltaRLabelTool::initialize(){
+
+  m_labelnames.check();
 
   // initialize keys
   ATH_CHECK(m_tauPartCollectionKey.initialize());

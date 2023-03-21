@@ -4,6 +4,7 @@
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
 # art-include: 22.0/Athena
+# art-include: 23.0/Athena
 # art-include: master/Athena
 # art-output: mc21a_ttbar.CG.RDO.pool.root
 # art-output: mc21a_ttbar.CA.RDO.pool.root

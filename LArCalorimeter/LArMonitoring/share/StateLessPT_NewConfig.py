@@ -9,9 +9,10 @@ if __name__=='__main__':
    if len(sys.argv)>1 and (sys.argv[1]=="-h" or sys.argv[1]=="--help"):
         print("Usage:")
         print(" ")
-        print("StateLessPT_NewConfig.py {--config XXX} {--stream YYY}")
+        print("StateLessPT_NewConfig.py {--config XXX} {--stream YYY} {--run Z}")
         print("                         default XXX: LArMon")
         print("                         default YYY: ''")
+        print("                         default Z: '435946'")
 
    # #####################################################
    #  Read jobOpt configuration options
@@ -20,11 +21,12 @@ if __name__=='__main__':
    #some defaults
    CONFIG = 'LArMon'
    STREAM = "NONE"
+   RUNN   = 435946
    if len(sys.argv)>1:
       for ii in range(1,len(sys.argv)):
          print(ii," ",sys.argv[ii])
       try:
-         opts,args=getopt.getopt(sys.argv[1:],"t:",["config=","stream="])
+         opts,args=getopt.getopt(sys.argv[1:],"t:",["config=","stream=","run="])
       except getopt.GetoptError as e:
          print("Failed to interpret arguments")
          print(e)
@@ -36,6 +38,7 @@ if __name__=='__main__':
              print("Got option --config: ",a)
              CONFIG=a
           if o=="--stream": STREAM=a
+          if o=="--run": RUNN=int(a)
 
    from AthenaConfiguration.Enums import Format
 
@@ -57,7 +60,8 @@ if __name__=='__main__':
    
    ### ATLAS partition: Read Global Run Parameters to configure the jobs
    from AthenaConfiguration.Enums import BeamType
-   if partition == "ATLAS":
+   runnumber = RUNN
+   if partition == "ATLAS" or partition[0:3] == "LAr":
        try:
            y = ISObject(p, 'RunParams.SOR_RunParams', 'RunParams')
        except:
@@ -90,14 +94,12 @@ if __name__=='__main__':
       NSamples = 4
       LArFormat = 1
       RunType = 2
-      runnumber = 423433
       #for splash test
       #ReadDigits = True
       #FirstSample = 6
       #NSamples = 32
       #LArFormat = 0
       #RunType = 0
-      #runnumber = 418554
    else:
       try:
          x.checkout()
@@ -108,14 +110,12 @@ if __name__=='__main__':
          NSamples = 4
          LArFormat = 1
          RunType = 2
-         runnumber = 423433
          #for splash test
          #ReadDigits = True
          #FirstSample = 6
          #NSamples = 32
          #LArFormat = 0
          #RunType = 0
-         #runnumber = 418554
       else:
          RunType = x.runType
          LArFormat = x.format
@@ -135,7 +135,7 @@ if __name__=='__main__':
    from AthenaConfiguration.AllConfigFlags import initConfigFlags
    flags = initConfigFlags()
    from AthenaMonitoring.DQConfigFlags import allSteeringFlagsOff
-   allSteeringFlagsOff(flags)
+   allSteeringFlagsOff()
 
    ### Set Beam Type
    flags.Beam.Type=beamType 
@@ -172,6 +172,8 @@ if __name__=='__main__':
    flags.Trigger.doLVL1=False
    flags.Trigger.Online.isPartition=True
    flags.Trigger.triggerConfig='DB'
+   flags.Trigger.DecisionMakerValidation.Execute=False
+   flags.Trigger.enableL1CaloPhase1=False
 
    flags.DQ.doMonitoring=True
    flags.DQ.disableAtlasReadyFilter=True
@@ -181,6 +183,9 @@ if __name__=='__main__':
    
    flags.LAr.doAlign=False
    flags.LAr.doHVCorr=False
+
+   if RunType == 0:
+      flags.LAr.ROD.forceIter=True
 
    flags.Calo.TopoCluster.doTopoClusterLocalCalib=False
 
@@ -196,7 +201,7 @@ if __name__=='__main__':
    if 'CaloMon' in CONFIG: # needs Lumi access
       flags.DQ.enableLumiAccess=False
    else:
-      flags.DQ.enableLumiAccess=False
+      flags.DQ.enableLumiAccess=True
 
    flags.lock()
 
@@ -390,13 +395,17 @@ if __name__=='__main__':
    print("MaybeMissingROBs: ",l1bsdec.MaybeMissingROBs)
    l1bsdec.MaybeMissingROBs += [0x770001, 0x7500ac, 0x7500ad, 0x7300a8, 0x7300a9, 0x7300aa, 0x7300ab]
 
-   from LArMonitoring.RecoPT_NewConfig import LArMonitoringConfig
    print('CONFIG ',CONFIG)
    print('STREAM ',STREAM)
-   acc.merge(LArMonitoringConfig(flags,CONFIG,STREAM,RunType))
+   if CONFIG!="LArDTMon":
+      from LArMonitoring.RecoPT_NewConfig import LArMonitoringConfig
+      acc.merge(LArMonitoringConfig(flags,CONFIG,STREAM,RunType))
+   else:
+      from LArMonitoring.RecoPT_Phase1NewConfig import LArDTMonitoringConfig
+      acc.merge(LArDTMonitoringConfig(flags,STREAM))
    
    # fixes for splashes
-   if RunType == 0:
+   if RunType == 0 and CONFIG!="LArDTMon":
       acc.getEventAlgo("LArRawDataReadingAlg").LArRawChannelKey="" 
 
    #example for blocking the folder not filled during cosmics
@@ -429,4 +438,5 @@ if __name__=='__main__':
    #acc.getService("StoreGateSvc").Dump=True
    #acc.getService("StoreGateSvc").OutputLevel=DEBUG
 
+   acc.printConfig()
    acc.run()

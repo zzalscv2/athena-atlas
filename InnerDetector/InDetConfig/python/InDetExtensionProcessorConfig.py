@@ -4,6 +4,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType
 
+
 def InDetExtensionProcessorCfg(flags, name="InDetExtensionProcessor", **kwargs):
     acc = ComponentAccumulator()
 
@@ -14,7 +15,7 @@ def InDetExtensionProcessorCfg(flags, name="InDetExtensionProcessor", **kwargs):
             InDetExtensionFitter = acc.popToolsAndMerge(
                 InDetTrackFitterHoleSearchCfg(
                     flags,
-                    name = 'InDetTrackFitter_TRTExtension' + \
+                    name='InDetTrackFitter_TRTExtension' +
                     flags.InDet.Tracking.ActiveConfig.extension))
         else:
             from TrkConfig.CommonTrackFitterConfig import (
@@ -22,15 +23,12 @@ def InDetExtensionProcessorCfg(flags, name="InDetExtensionProcessor", **kwargs):
             InDetExtensionFitter = acc.popToolsAndMerge(
                 InDetTrackFitterLowPtHoleSearchCfg(
                     flags,
-                    name = 'InDetTrackFitter_TRTExtension' + \
+                    name='InDetTrackFitter_TRTExtension' +
                     flags.InDet.Tracking.ActiveConfig.extension))
 
         acc.addPublicTool(InDetExtensionFitter)
         kwargs.setdefault("TrackFitter", InDetExtensionFitter)
 
-    #
-    # --- load scoring for extension
-    #
     if "ScoringTool" not in kwargs:
         if flags.Beam.Type is BeamType.Cosmics:
             from InDetConfig.InDetTrackScoringToolsConfig import (
@@ -52,18 +50,19 @@ def InDetExtensionProcessorCfg(flags, name="InDetExtensionProcessor", **kwargs):
             InDetTrackSummaryToolCfg(flags)))
 
     kwargs.setdefault("suppressHoleSearch", False)
-    kwargs.setdefault("tryBremFit", flags.InDet.Tracking.doBremRecovery)
-    kwargs.setdefault("caloSeededBrem", flags.InDet.Tracking.doCaloSeededBrem \
-                      and flags.Detector.EnableCalo)
+    kwargs.setdefault("tryBremFit", flags.Tracking.doBremRecovery)
+    kwargs.setdefault("caloSeededBrem", flags.Tracking.doCaloSeededBrem)
     kwargs.setdefault("pTminBrem", flags.InDet.Tracking.ActiveConfig.minPTBrem)
     kwargs.setdefault("RefitPrds", False)
-    kwargs.setdefault("matEffects", flags.Tracking.materialInteractionsType \
+    kwargs.setdefault("matEffects",
+                      flags.Tracking.materialInteractionsType
                       if flags.Tracking.materialInteractions else 0)
     kwargs.setdefault("Cosmics", flags.Beam.Type is BeamType.Cosmics)
 
     acc.addEventAlgo(CompFactory.InDet.InDetExtensionProcessor(
         name + flags.InDet.Tracking.ActiveConfig.extension, **kwargs))
     return acc
+
 
 def TrigInDetExtensionProcessorCfg(flags, name="InDetTrigMTExtensionProcessor", **kwargs):
     acc = ComponentAccumulator()
@@ -76,9 +75,6 @@ def TrigInDetExtensionProcessorCfg(flags, name="InDetTrigMTExtensionProcessor", 
         acc.addPublicTool(InDetExtensionFitter)
         kwargs.setdefault("TrackFitter", InDetExtensionFitter)
 
-    #
-    # --- load scoring for extension
-    #
     if "ScoringTool" not in kwargs:
         from InDetConfig.InDetTrackScoringToolsConfig import (
             InDetTrigAmbiScoringToolCfg)
