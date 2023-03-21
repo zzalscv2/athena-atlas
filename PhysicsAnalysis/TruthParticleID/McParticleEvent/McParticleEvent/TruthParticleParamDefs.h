@@ -11,8 +11,8 @@
 #ifndef MCPARTICLEEVENT_TRUTHPARTICLEPARAMDEFS_H
 #define MCPARTICLEEVENT_TRUTHPARTICLEPARAMDEFS_H
 
-// boost includes
-#include "boost/array.hpp"
+
+#include <array>
 
 namespace TruthParticleParameters { 
 
@@ -31,7 +31,7 @@ namespace TruthParticleParameters {
     NbrOfCones = 8
   };
 
-  typedef boost::array<double, TruthParticleParameters::NbrOfCones> ConeCuts_t;
+  typedef std::array<double, TruthParticleParameters::NbrOfCones> ConeCuts_t;
 
   /// The actual definition of delta R cuts for each cone
   inline
@@ -56,7 +56,7 @@ namespace McAod {
 
   /// An array of doubles of fixed size to modelize the Et isolations
   /// for different values of isolation radii' cones.
-  typedef boost::array<double, TruthParticleParameters::NbrOfCones>
+  typedef std::array<double, TruthParticleParameters::NbrOfCones>
           EtIsolations;
 
 } //> end namespace McAod
