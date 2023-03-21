@@ -146,7 +146,7 @@ bool GenObjectsFilterTool::isBC(int pdg) const{
 
 bool GenObjectsFilterTool::isKeep(int pdg) const{
   for(unsigned int i=0; i<m_keepParticleWithPdgId.size(); ++i){
-    if(abs(pdg)==m_keepParticleWithPdgId[i])return true;
+    if(std::abs(pdg)==m_keepParticleWithPdgId[i])return true;
   }
 
   return false;
@@ -162,7 +162,7 @@ bool GenObjectsFilterTool::isLeptonicWZ(HepMC::ConstGenParticlePtr part) const{
 
   HepMC::ConstGenVertexPtr end = part->end_vertex();
   if(end){
-    for(auto Child: *end){
+    for(const auto& Child: *end){
       int cpdg = Child->pdg_id();
       if(std::abs(cpdg) == 11 || std::abs(cpdg) == 13 || std::abs(cpdg) == 15){
 	return true;
@@ -197,7 +197,7 @@ bool GenObjectsFilterTool::isRequested( HepMC::ConstGenParticlePtr part) const{
        bool isfromhadron=false;
 #ifdef HEPMC3
      std::vector<HepMC3::ConstGenParticlePtr> ancestors = HepMC::ancestor_particles(part);
-     for (auto parent: ancestors) if (isBCHadron(parent)) { isfromhadron=true; break;}
+     for (const auto& parent: ancestors) if (isBCHadron(parent)) { isfromhadron=true; break;}
 #else
 
        HepMC::GenVertex* prod = part->production_vertex();
@@ -226,13 +226,13 @@ bool GenObjectsFilterTool::isRequested( HepMC::ConstGenParticlePtr part) const{
      /// keep parents of b/c quarks
 #ifdef HEPMC3
     std::vector<HepMC3::ConstGenParticlePtr> descendants = HepMC::ancestor_particles(part);
-    for (auto child: descendants) 
+    for (const auto& child: descendants) 
     {
 	 if( isBC(child->pdg_id()) ){
 	   /// check that this quark is not from hadron (HERWIG)
 	   bool isfromhadron=false;
 	   std::vector<HepMC3::ConstGenParticlePtr> ancestors = HepMC::ancestor_particles(child);
-	   for (auto parent: ancestors) if (isBCHadron(parent)) { isfromhadron=true; break;}
+	   for (const auto& parent: ancestors) if (isBCHadron(parent)) { isfromhadron=true; break;}
 	   if(!isfromhadron)return true;
 	 }
     }
@@ -273,7 +273,7 @@ bool GenObjectsFilterTool::isRequested( HepMC::ConstGenParticlePtr part) const{
 	   bool isfromhadron=false;
 #ifdef HEPMC3
        std::vector<HepMC3::ConstGenParticlePtr> ancestors = HepMC::ancestor_particles(part);
-       for (auto parent: ancestors) if (isBCHadron(parent)) { isfromhadron=true; break;}
+       for (const auto& parent: ancestors) if (isBCHadron(parent)) { isfromhadron=true; break;}
 #else   
 	   HepMC::GenVertex* prod = part->production_vertex();
 	   if(prod){
@@ -307,7 +307,7 @@ bool GenObjectsFilterTool::isRequested( HepMC::ConstGenParticlePtr part) const{
        bool isleptonicWZ=false;
 #ifdef HEPMC3
        std::vector<HepMC3::ConstGenParticlePtr> ancestors = HepMC::ancestor_particles(part);
-       for (auto parent: ancestors)  {
+       for (const auto& parent: ancestors)  {
          if( std::abs(parent->pdg_id())==24 || std::abs(parent->pdg_id())==23){
            if (isLeptonicWZ(parent)) { isleptonicWZ=true; break;}
          }
@@ -351,13 +351,13 @@ bool GenObjectsFilterTool::isRequested( HepMC::ConstGenParticlePtr part) const{
 
 
    if(m_keepStatusOneLeptonsFromWZ){
-     if(abs(pdg) == 11 || abs(pdg) == 13 || abs(pdg) == 15 ){
+     if(std::abs(pdg) == 11 || abs(pdg) == 13 || abs(pdg) == 15 ){
        if(!HepMC::is_simulation_particle(barcode) && status == 1){
 
 	 bool isleptonicWZ=false;
 #ifdef HEPMC3
        std::vector<HepMC3::ConstGenParticlePtr> ancestors = HepMC::ancestor_particles(part);
-       for (auto parent: ancestors)  {
+       for (const auto& parent: ancestors)  {
          if( std::abs(parent->pdg_id())==24 || std::abs(parent->pdg_id())==23){
            if (isLeptonicWZ(parent)) { isleptonicWZ=true; break;}
          }

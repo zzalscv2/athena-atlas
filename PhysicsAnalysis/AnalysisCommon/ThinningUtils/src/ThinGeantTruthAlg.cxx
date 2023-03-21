@@ -389,7 +389,7 @@ ThinGeantTruthAlg::isStatus1BSMParticle(const xAOD::TruthParticle* part)
       (600 < abs(pdg) && std::abs(pdg) < 607) || // scalar leptoquarks
       (1000000 < std::abs(pdg) &&
        std::abs(pdg) < 2000000) || // left-handed SUSY (including R-Hadrons)
-      (2000000 < abs(pdg) &&
+      (2000000 < std::abs(pdg) &&
        std::abs(pdg) < 3000000) || // right-handed SUSY (including R-Hadrons)
       std::abs(pdg) == 6000005 ||  // X5/3
       std::abs(pdg) == 6000006 ||  // T2/3
