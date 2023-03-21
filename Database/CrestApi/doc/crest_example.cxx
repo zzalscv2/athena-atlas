@@ -46,9 +46,9 @@ bool createDirTree(const std::string& full_path) {
 // Tag Method Tests
 //===================================================
 
-void testCreateTag(std::string tagname) {
+void testCreateTag(const std::string& tagname) {
   std::cout << std::endl << "test: createTag" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   nlohmann::json js =
   {
@@ -75,7 +75,7 @@ void testCreateTag(std::string tagname) {
 
 void testCreateTag2() {
   std::cout << std::endl << "test: createTag2" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   // real tag creation example:
   // curl --header "Content-Type: application/json" --request POST --data
@@ -105,7 +105,7 @@ void testCreateTag2() {
 
 // Method to create a tag on the local storage (on disk).
 
-void testCreateTagF(std::string tagname) {
+void testCreateTagF(const std::string& tagname) {
   std::cout << std::endl << "test: createTagF" << std::endl;
 
   bool rewrite = true;
@@ -139,7 +139,7 @@ void testCreateTagF(std::string tagname) {
 
 void testListTags() {
   std::cout << std::endl << "test: listTag" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   try {
     nlohmann::json tag_list = myCrestClient.listTags();
@@ -199,7 +199,7 @@ void testListTagsParams(const std::string& name) {
 
 void testFindTag(const std::string& tagname) {
   std::cout << std::endl << "test: findTag" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   try {
     nlohmann::json tag_info = myCrestClient.findTag(tagname);
@@ -214,7 +214,7 @@ void testFindTag(const std::string& tagname) {
 
 void testRemoveTag(const std::string& tagname) {
   std::cout << std::endl << "test: removeTag" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   try {
     myCrestClient.removeTag(tagname);
@@ -228,7 +228,7 @@ void testRemoveTag(const std::string& tagname) {
 
 void testUpdateTag(const std::string& tagname) {
   std::cout << std::endl << "test: updateTag" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   nlohmann::json js = {{"objectType", "json3"},
                        {"description", "test"}};
@@ -245,7 +245,7 @@ void testUpdateTag(const std::string& tagname) {
 
 void testUpdateTagSpecification(const std::string& tagname) {
   std::cout << std::endl << "test: updateTagSpecification" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   std::string newObjectType = "json4";
 
@@ -263,9 +263,9 @@ void testUpdateTagSpecification(const std::string& tagname) {
 // Global Tag Method Tests
 //===================================================
 
-void testCreateGlobalTag(std::string tagname) {
+void testCreateGlobalTag(const std::string& tagname) {
   std::cout << std::endl << "test: createGlobalTag" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   nlohmann::json js =
   {
@@ -294,7 +294,7 @@ void testCreateGlobalTag(std::string tagname) {
 
 void testFindGlobalTag(const std::string& tagname) {
   std::cout << std::endl << "test: findGlobalTag" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   try {
     nlohmann::json tag_info = myCrestClient.findGlobalTag(tagname);
@@ -309,7 +309,7 @@ void testFindGlobalTag(const std::string& tagname) {
 
 void testListGlobalTags() {
   std::cout << std::endl << "test: listGlobalTags" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   try{
     nlohmann::json tag_info9 = myCrestClient.listGlobalTags();
@@ -324,7 +324,7 @@ void testListGlobalTags() {
 
 void testListGlobalTagsAsString() {
   std::cout << std::endl << "test: listGlobalTagsAsString" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   try{
     nlohmann::json tag_info9 = myCrestClient.listGlobalTagsAsString();
@@ -337,7 +337,7 @@ void testListGlobalTagsAsString() {
   }
 }
 
-void testListGlobalTagsParams(std::string name, int size, int page) {
+void testListGlobalTagsParams(const std::string& name, int size, int page) {
   std::cout << std::endl << "test: listGlobalTagsParams with additional parameters" << std::endl;
   CrestClientExt myCrestClient = CrestClientExt(SURL);
 
@@ -346,15 +346,14 @@ void testListGlobalTagsParams(std::string name, int size, int page) {
     nlohmann::json list_2 = myCrestClient.listGlobalTagsParams(_name = name, _size = size, _page = page);
     nlohmann::json list_3 = myCrestClient.listGlobalTagsParams(_name = "", _size = size, _page = page);
 
-    //
+    
     std::cout << std::endl << "test: listGlobalTagsParams (result A) =" << std::endl;
     std::cout << list_1.dump(4) << std::endl;
-    //
 
-    //
+
     std::cout << std::endl << "test: listGlobalTagsParams (result B) =" << std::endl;
     std::cout << list_2.dump(4) << std::endl;
-    //
+
 
     std::cout << std::endl << "test: listGlobalTagsParams (result C) =" << std::endl;
     std::cout << list_3.dump(4) << std::endl;
@@ -367,7 +366,7 @@ void testListGlobalTagsParams(std::string name, int size, int page) {
 
 void testRemoveGlobalTag(const std::string& tagname) {
   std::cout << std::endl << "test: removeGlobalTag" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   try{
     myCrestClient.removeGlobalTag(tagname);
@@ -378,9 +377,9 @@ void testRemoveGlobalTag(const std::string& tagname) {
   }
 }
 
-void testUpdateGlobalTag(std::string tagname) {
+void testUpdateGlobalTag(const std::string& tagname) {
   std::cout << std::endl << "test: updateGlobalTag" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   nlohmann::json js =
   {
@@ -409,7 +408,7 @@ void testUpdateGlobalTag(std::string tagname) {
 
 void testFindGlobalTagAsString(const std::string& tagname) {
   std::cout << std::endl << "test: findGlobalTagAsString" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   try {
     nlohmann::json tag_info = myCrestClient.findGlobalTagAsString(tagname);
@@ -428,7 +427,7 @@ void testFindGlobalTagAsString(const std::string& tagname) {
 
 void testCreateRunLumiInfo() {
   std::cout << std::endl << "test: createRunLumiInfo" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   std::string str =
     "{\"since\":\"10\",\"run\":\"7777771\",\"lb\":\"62\",\"starttime\":\"10\",\"endtime\":\"200\"}";
@@ -448,7 +447,7 @@ void testCreateRunLumiInfo() {
 
 void testCreateRunLumiInfo2() {
   std::cout << std::endl << "test: createRunLumiInfo2" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   nlohmann::json jsRes =
   {
@@ -504,7 +503,7 @@ void testCreateRunLumiInfo2() {
 
 void testListRunLumiInfo() {
   std::cout << std::endl << "test: listRunLumiInfo" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   try{
     nlohmann::json info16 = myCrestClient.listRunLumiInfo();
@@ -523,7 +522,7 @@ void testListRunLumiInfo() {
 
 void testFindGlobalTagMap(const std::string& mapname) {
   std::cout << std::endl << "test: findGlobalTagMap" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   try{
     nlohmann::json tag_info = myCrestClient.findGlobalTagMap(mapname);
@@ -537,9 +536,9 @@ void testFindGlobalTagMap(const std::string& mapname) {
 }
 
 // global tag and tag have to exist
-void testCreateGlobalTagMap(std::string globaltag, std::string tagname) {
+void testCreateGlobalTagMap(const std::string& globaltag, const std::string& tagname) {
   std::cout << std::endl << "test: createGlobalTagMap" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   nlohmann::json js =
   {
@@ -565,7 +564,7 @@ void testCreateGlobalTagMap(std::string globaltag, std::string tagname) {
 
 void testGetJson() {
   std::cout << std::endl << "test: getJson" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   std::string stra =
     "{\"tagName\":\"IndetBeampos-nominal\",\"since\":0,\"insertionTime\":\"2019-02-21T13:52:06.222+0000\",\"payloadHash\":\"de9afd9a5bb526d175265d1e66520ac1e7a81816cc3081925625759583e9107f\"}";
@@ -597,7 +596,7 @@ void testGetJson() {
 // Be carrful tag has to be creted before this test!
 void testStorePayload(const std::string& tagname) {
   std::cout << std::endl << "test: storePayload" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   // payload + tag name (command line example):
   // curl --form file=@./test.txt --form tag="SB_TAG-PYLD" --form since=0
@@ -650,7 +649,7 @@ void testStorePayloadDump(const std::string& tagname) {
 
 void testFindAllIovs(const std::string& tagname) {
   std::cout << std::endl << "test: findAllIovs" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   try{
     nlohmann::json tag_info = myCrestClient.findAllIovs(tagname);
@@ -663,7 +662,7 @@ void testFindAllIovs(const std::string& tagname) {
   }
 }
 
-void testFindAllIovsParams(std::string tagname, int size, int page) {
+void testFindAllIovsParams(const std::string& tagname, int size, int page) {
   std::cout << std::endl << "test: findAllIovs with additional parameters" << std::endl;
   CrestClientExt myCrestClient = CrestClientExt(SURL);
 
@@ -759,7 +758,7 @@ void testSelectIovsFS(const std::string& tagname, long since, long until) {
 
 void testSelectIovs(const std::string& tagname) {
   std::cout << std::endl << "test: selectIovs" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   try{
     nlohmann::json tag_info = myCrestClient.selectIovs(tagname);
@@ -774,7 +773,7 @@ void testSelectIovs(const std::string& tagname) {
 
 void testSelectIovs(const std::string& tagname, long since, long until, long snapshot) {
   std::cout << std::endl << "test: selectIovs, all paprams" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   try{
     nlohmann::json tag_info = myCrestClient.selectIovs(tagname, since, until, snapshot);
@@ -789,7 +788,7 @@ void testSelectIovs(const std::string& tagname, long since, long until, long sna
 
 void testSelectGroups(const std::string& tagname) {
   std::cout << std::endl << "test: selectGroups" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   try{
     nlohmann::json tag_info = myCrestClient.selectGroups(tagname);
@@ -809,9 +808,9 @@ void testSelectGroups(const std::string& tagname) {
 // Tag Meta Info Method Tests
 //===================================================
 
-void testCreateTagMetaInfo(std::string tagname) {
+void testCreateTagMetaInfo(const std::string& tagname) {
   std::cout << std::endl << "test: createTagMetainfo" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   nlohmann::json js =
   {
@@ -833,9 +832,10 @@ void testCreateTagMetaInfo(std::string tagname) {
 }
 
 // Test for the method with 2 arguments:
-void testCreateTagMetaInfo2Args(std::string tagname) {
+
+void testCreateTagMetaInfo2Args(const std::string& tagname) {
   std::cout << std::endl << "test: createTagMetainfo" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   nlohmann::json js =
   {
@@ -859,7 +859,6 @@ void testCreateTagMetaInfo2Args(std::string tagname) {
   try{
     std::cout << "test B:" << std::endl;
     myCrestClient.createTagMetaInfo("test", js);
-    // myCrestClient.createTagMetaInfo(js);
     std::cout << "test: createTagMetaInfo (success)" << std::endl;
   }
   catch (const std::exception& e) {
@@ -869,9 +868,9 @@ void testCreateTagMetaInfo2Args(std::string tagname) {
 }
 
 // analogue
-void testCreateTagMetaInfo2(std::string tagname) {
+void testCreateTagMetaInfo2(const std::string& tagname) {
   std::cout << std::endl << "test: createTagMetainfo2" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   nlohmann::json js =
   {
@@ -894,9 +893,9 @@ void testCreateTagMetaInfo2(std::string tagname) {
 }
 
 // Example with more detailed parametrs:
-void testCreateTagMetaInfoDetailed(std::string tagname) {
+void testCreateTagMetaInfoDetailed(const std::string& tagname) {
   std::cout << std::endl << "test: createTagMetainfoDetailed" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   nlohmann::json channel = {{"0", "ATLAS_PREFERRED"}};
 
@@ -941,7 +940,7 @@ void testCreateTagMetaInfoDetailed(std::string tagname) {
 
 void testGetTagMetaInfo(const std::string& tagname) {
   std::cout << std::endl << "test: getTagMetaInfo" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   try{
     nlohmann::json js = myCrestClient.getTagMetaInfo(tagname);
@@ -954,9 +953,9 @@ void testGetTagMetaInfo(const std::string& tagname) {
   }
 }
 
-void testUpdateTagMetainfo(std::string tagname) {
+void testUpdateTagMetainfo(const std::string& tagname) {
   std::cout << std::endl << "test: updateTagMetainfo" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   nlohmann::json js =
   {
@@ -980,7 +979,7 @@ void testUpdateTagMetainfo(std::string tagname) {
 
 void testCreateTagMetaInfoIOVDbSvc(const std::string& tagname) {
   std::cout << std::endl << "test: createTagMetainfoIOVDbSvc" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
   std::string description = "meta tag description";
 
   nlohmann::json channel1 = {{"0", "ATLAS_PREFERRED0"}};
@@ -1008,7 +1007,7 @@ void testCreateTagMetaInfoIOVDbSvc(const std::string& tagname) {
 
 void testGetTagMetaInfoIOVDbSvc(const std::string& tagname) {
   std::cout << std::endl << "test: getTagMetaInfoIOVDbSvc" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   try{
     nlohmann::json js68 = myCrestClient.getTagMetaInfoIOVDbSvc(tagname);
@@ -1023,7 +1022,7 @@ void testGetTagMetaInfoIOVDbSvc(const std::string& tagname) {
 
 void testConvertTagMetaInfo2CREST() {
   std::cout << std::endl << "test: convertTagMetaInfo2CREST" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   std::string tagname = "test_MvG4";
 
@@ -1060,7 +1059,7 @@ void testConvertTagMetaInfo2CREST() {
 
 void testListPayloadTagInfo() {
   std::cout << std::endl << "test: listPayloadTagInfo" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   try {
     nlohmann::json tag_list = myCrestClient.listPayloadTagInfo();
@@ -1075,7 +1074,7 @@ void testListPayloadTagInfo() {
 
 void testListPayloadTagInfo(const std::string& tagname) {
   std::cout << std::endl << "test: listPayloadTagInfo with tag " << tagname << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   try {
     nlohmann::json tag_list = myCrestClient.listPayloadTagInfo(tagname);
@@ -1095,7 +1094,7 @@ void testListPayloadTagInfo(const std::string& tagname) {
 
 void testGetBlobInStream(const std::string& hash) {
   std::cout << std::endl << "test: getBlobInStream" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   try{
     remove("data.txt");
@@ -1103,10 +1102,10 @@ void testGetBlobInStream(const std::string& hash) {
     std::ofstream out8;          // stream for writing
     out8.open("data.txt"); // open the file to write
     if (out8.is_open()) {
-      string tag_info8 = myCrestClient.getBlobInStream(hash, out8);
-      std::cout << std::endl << "test: getBlobInStream (result) =" << std::endl;
-      std::cout << tag_info8 << std::endl;
-      std::cout << std::endl << "test: getBlobInStream" << std::endl;
+      myCrestClient.getBlobInStream(hash, out8);
+      std::cout << std::endl << "test: getBlobInStream test finished." << std::endl;
+      std::cout << std::endl << "The blob for hash \"" << hash 
+                << "\" was written in the file \"data.txt\"." << std::endl;
     }
   }
   catch (const std::exception& e) {
@@ -1117,7 +1116,7 @@ void testGetBlobInStream(const std::string& hash) {
 
 void testGetBlob(const std::string& hash) {
   std::cout << std::endl << "test: getBlob" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   try{
     string tag_info7 = myCrestClient.getBlob(hash);
@@ -1133,7 +1132,7 @@ void testGetBlob(const std::string& hash) {
 
 void testGetPayloadAsJson(const std::string& hash) {
   std::cout << std::endl << "test: getPayloadAsJson" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   try{
     nlohmann::json info26 = myCrestClient.getPayloadAsJson(hash);
@@ -1149,7 +1148,7 @@ void testGetPayloadAsJson(const std::string& hash) {
 
 void testGetPayloadAsString(const std::string& hash) {
   std::cout << std::endl << "test: getPayloadAsString" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   try{
     std::string info27 = myCrestClient.getPayloadAsString(hash);
@@ -1165,7 +1164,7 @@ void testGetPayloadAsString(const std::string& hash) {
 
 void testGetPayloadMetaInfoAsString(const std::string& hash) {
   std::cout << std::endl << "test: getPayloadMetaInfoAsString" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   try{
     std::string info15 = myCrestClient.getPayloadMetaInfoAsString(hash);
@@ -1181,7 +1180,7 @@ void testGetPayloadMetaInfoAsString(const std::string& hash) {
 
 void testGetPayloadMetaInfo(const std::string& hash) {
   std::cout << std::endl << "test: getPayloadMetaInfo" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   try{
     nlohmann::json info14 = myCrestClient.getPayloadMetaInfo(hash);
@@ -1202,7 +1201,7 @@ void testGetPayloadMetaInfo(const std::string& hash) {
 // Tag Meta Info:
 
 // Example with detailed parametrs:
-void testCreateTagMetaInfoDetailedFs(std::string tagname) {
+void testCreateTagMetaInfoDetailedFs(const std::string& tagname) {
   std::cout << std::endl << "test: createTagMetainfoDetailedFs" << std::endl;
 
   CrestClient myCrestClient = CrestClient(true);
@@ -1264,7 +1263,7 @@ void testGetTagMetaInfoFs(const std::string& tagname) {
   }
 }
 
-void testUpdateTagMetaInfoFs(std::string tagname) {
+void testUpdateTagMetaInfoFs(const std::string& tagname) {
   std::cout << std::endl << "test: updateTagMetainfoFs" << std::endl;
   CrestClient myCrestClient = CrestClient(true);
 
@@ -1329,7 +1328,7 @@ void testFindTagFs(const std::string& tagname) {
   }
 }
 
-void testCreateTagFs(std::string tagname) {
+void testCreateTagFs(const std::string& tagname) {
   std::cout << std::endl << "test: createTagFs" << std::endl;
 
   bool rewrite = true;
@@ -1367,13 +1366,12 @@ void testStoreBatchPayloadsFs(const std::string& tagname) {
   CrestClient myCrestClient = CrestClient(rewrite);
 
   uint64_t endtime = 200;
-  std::string str = "[{\"payloadHash\":\"aaa\",\"since\":100},{\"payloadHash\":\"bbb\",\"since\":150}]";
+  std::string str = "[{\"data\":\"aaa\",\"since\":100},{\"data\":\"bbb\",\"since\":150}]";
   nlohmann::json js = myCrestClient.getJson(str);
 
   try {
     myCrestClient.storeBatchPayloads(tagname, endtime, js);
     std::cout << std::endl << "test: storeBatchPayloads (success) " << std::endl;
-    //myCrestClient.flush();
   }
   catch (const std::exception& e) {
     std::cout << std::endl << "test: storeBatchPayloads (failed)" << std::endl;
@@ -1383,7 +1381,7 @@ void testStoreBatchPayloadsFs(const std::string& tagname) {
 
 // Global Tag Methods:
 
-void testCreateGlobalTagFs(std::string tagname) {
+void testCreateGlobalTagFs(const std::string& tagname) {
   std::cout << std::endl << "test: createGlobalTagFs" << std::endl;
 
   bool rewrite = true;
@@ -1432,7 +1430,7 @@ void testFindGlobalTagFs(const std::string& tagname) {
 
 // Global Tag Map Methods:
 
-void testCreateGlobalTagMapFs(std::string globaltag, std::string tagname) {
+void testCreateGlobalTagMapFs(const std::string& globaltag, const std::string& tagname) {
   std::cout << std::endl << "test: createGlobalTagMapFs" << std::endl;
   bool rewrite = true;
   CrestClient myCrestClient = CrestClient(rewrite);
@@ -1475,12 +1473,12 @@ void testFindGlobalTagMapFs(const std::string& tagname) {
 
 void testGetHash(const std::string& str) {
   std::cout << std::endl << "test: getHash" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   std::cout << myCrestClient.getHash(str) << std::endl;
 }
 
-void hashCalculationTest(std::string str) {
+void hashCalculationTest(const std::string& str) {
   std::cout << "Hash(" << str << ") = ";
   std::string hash_hex_str = picosha2::hash256_hex_string(str.begin(), str.end());
   std::cout << hash_hex_str << std::endl;
@@ -1490,7 +1488,7 @@ void hashCalculationTest(std::string str) {
 
 void testCreateGlobalTag(const std::string& tagname, const std::string& description) {
   std::cout << std::endl << "test: createGlobalTag (2 parameters)" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   try {
     myCrestClient.createGlobalTag(tagname, description);
@@ -1503,10 +1501,10 @@ void testCreateGlobalTag(const std::string& tagname, const std::string& descript
 }
 
 // global tag and tag have to exist
-void testCreateGlobalTagMap(std::string globaltag, std::string tagname,
-                            std::string record, std::string label) {
+void testCreateGlobalTagMap(const std::string& globaltag, const std::string& tagname,
+                            const std::string& record, const std::string& label) {
   std::cout << std::endl << "test: createGlobalTagMap (all parameters)" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   nlohmann::json js =
   {
@@ -1530,7 +1528,7 @@ void testCreateGlobalTagMap(std::string globaltag, std::string tagname,
 
 void testGetDateAndTime() {
   std::cout << std::endl << "test: getDateAndTime" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   try{
     std::string time = myCrestClient.getDateAndTime();
@@ -1644,7 +1642,7 @@ void testGetBlobFS(const std::string& hash) {
 
 void testReturnJArray() {
   std::cout << std::endl << "test: returnJArray" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   nlohmann::json js = {
     {"name", "test"}
@@ -1671,10 +1669,10 @@ void testReturnJArray() {
 
 void testStoreBatchPayloads(const std::string& tagname) {
   std::cout << std::endl << "test: storeBatchPayloads" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   uint64_t endtime = 200;
-  std::string str = "[{\"payloadHash\":\"aaa\",\"since\":100},{\"payloadHash\":\"bbb\",\"since\":150}]";
+  std::string str = "[{\"data\":\"aaa\",\"since\":100},{\"data\":\"bbb\",\"since\":150}]";
   nlohmann::json js = myCrestClient.getJson(str);
 
   try {
@@ -1691,13 +1689,13 @@ void testStoreBatchPayloads(const std::string& tagname) {
 
 void testStoreBatchPayloadsB(const std::string& tagname) {
   std::cout << std::endl << "test: storeBatchPayloads2" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   uint64_t endtime = 200;
   std::string d1 = "\"" + myCrestClient.getDateAndTime() + "_A\"";
   std::string d2 = "\"" + myCrestClient.getDateAndTime() + "_B\"";
 
-  std::string str = "[{\"payloadHash\":" + d1 + ",\"since\":100},{\"payloadHash\":" + d2 + ",\"since\":150}]";
+  std::string str = "[{\"data\":" + d1 + ",\"since\":100},{\"data\":" + d2 + ",\"since\":150}]";
   nlohmann::json js = myCrestClient.getJson(str);
 
   try {
@@ -1712,7 +1710,7 @@ void testStoreBatchPayloadsB(const std::string& tagname) {
 
 // This test creates n IOVs/payloads for the tag with name tagname
 
-void testTagAndStoreBatchFsNItems(std::string tagname, int n) {
+void testTagAndStoreBatchFsNItems(const std::string& tagname, int n) {
   std::cout << std::endl << "test: createTagFs" << std::endl;
 
   bool rewrite = true;
@@ -1751,7 +1749,7 @@ void testTagAndStoreBatchFsNItems(std::string tagname, int n) {
 
     nlohmann::json itemD =
     {
-      {"payloadHash", d},
+      {"data", d},
       {"since", since}
     };
 
@@ -1770,7 +1768,7 @@ void testTagAndStoreBatchFsNItems(std::string tagname, int n) {
 
 // The test to create a tag with the iovs/payloads together.
 
-void testTagAndStoreBatchFs(std::string tagname) {
+void testTagAndStoreBatchFs(const std::string& tagname) {
   std::cout << std::endl << "test: createTagFs" << std::endl;
 
   bool rewrite = true;
@@ -1799,13 +1797,12 @@ void testTagAndStoreBatchFs(std::string tagname) {
   }
 
   uint64_t endtime = 200;
-  std::string str = "[{\"payloadHash\":\"aaa\",\"since\":100},{\"payloadHash\":\"bbb\",\"since\":150}]";
+  std::string str = "[{\"data\":\"aaa\",\"since\":100},{\"data\":\"bbb\",\"since\":150}]";
   nlohmann::json js2 = myCrestClient.getJson(str);
 
   try {
     myCrestClient.storeBatchPayloads(tagname, endtime, js2);
     std::cout << std::endl << "test: storeBatchPayloads (success) " << std::endl;
-    //myCrestClient.flush();
   }
   catch (const std::exception& e) {
     std::cout << std::endl << "test: storeBatchPayloads (failed)" << std::endl;
@@ -1813,7 +1810,7 @@ void testTagAndStoreBatchFs(std::string tagname) {
   }
 }
 
-void testTagAndStoreBatchFsB(std::string tagname) {
+void testTagAndStoreBatchFsB(const std::string& tagname) {
   std::cout << std::endl << "test: createTagFs" << std::endl;
 
   bool rewrite = true;
@@ -1860,7 +1857,7 @@ void testTagAndStoreBatchFsB(std::string tagname) {
   d1 = "\"" + myCrestClient.getDateAndTime() + "_C\"";
   d2 = "\"" + myCrestClient.getDateAndTime() + "_D\"";
 
-  str = "[{\"payloadHash\":" + d1 + ",\"since\":200},{\"payloadHash\":" + d2 + ",\"since\":250}]";
+  str = "[{\"data\":" + d1 + ",\"since\":200},{\"data\":" + d2 + ",\"since\":250}]";
   js2 = myCrestClient.getJson(str);
 
   try {
@@ -1877,7 +1874,7 @@ void testTagAndStoreBatchFsB(std::string tagname) {
 
 void testGetSize(const std::string& tagname) {
   std::cout << std::endl << "test: getSize" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   try {
     int info = myCrestClient.getSize(tagname);
@@ -1962,7 +1959,7 @@ void testGetTagDataInfo(const std::string& tagname) {
 
 void testGetFirstLetters(const std::string& str) {
   std::cout << std::endl << "test: getFirstLetters" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
+  CrestClient myCrestClient = CrestClient(SURL,false);
 
   std::cout << "string to test = " << str << std::endl;
 
@@ -1976,76 +1973,430 @@ void testGetFirstLetters(const std::string& str) {
   }
 }
 
-//----------------------
+
+void testCreateIOV(const std::string& tagname1, const std::string& tagname2) {
+  std::cout << std::endl << "test: createIOV" << std::endl;
+
+  CrestClient myCrestClient = CrestClient(SURL,false);
+
+  nlohmann::json js =
+  {
+    {"description", "none"},
+    {"endOfValidity", 0},
+    {"insertionTime", "2018-12-06T11:18:35.641+0000"},
+    {"lastValidatedTime", 0},
+    {"modificationTime", "2018-12-06T11:18:35.641+0000"},
+    {"name", tagname1},
+    {"payloadSpec", "stave: Int32, eta: Int32, mag: Float, base: Float, free: Float"},
+    {"synchronization", "none"},
+    {"timeType", "time"}
+  };
+
+  std::cout << "tag 1 = " << std::endl << js.dump(4) << std::endl;
+
+  try{
+    myCrestClient.createTag(js);
+    std::cout << std::endl << "Tag " << tagname1 << " created" << std::endl;
+  }
+  catch (const std::exception& e) {
+    std::cout << std::endl << "ERROR: tag " << tagname1 << " creation failed" << std::endl;
+    std::cout << e.what() << std::endl;
+    exit(0);
+  }
+
+  js["name"] = tagname2;
+
+  std::cout << "tag 2 = " << std::endl << js.dump(4) << std::endl;
+
+  try{
+    myCrestClient.createTag(js);
+    std::cout << std::endl << "Tag " << tagname2 << " created" << std::endl;
+  }
+  catch (const std::exception& e) {
+    std::cout << std::endl << "ERROR: tag " << tagname2 << " creation failed" << std::endl;
+    std::cout << e.what() << std::endl;
+    exit(0);
+  }
+
+  // payloads and IOVs:
+
+  uint64_t endtime = 200;
+  std::string d1 = "\"" + myCrestClient.getDateAndTime() + "_A\"";
+  std::string d2 = "\"" + myCrestClient.getDateAndTime() + "_B\"";
+
+  std::string str = "[{\"data\":" + d1 + ",\"since\":100},{\"data\":" + d2 + ",\"since\":150}]";
+  nlohmann::json js2 = myCrestClient.getJson(str);
+
+  try {
+    myCrestClient.storeBatchPayloads(tagname1, endtime, js2);
+    std::cout << std::endl << "2 IOVs created in tag " << tagname1 << std::endl;
+  }
+  catch (const std::exception& e) {
+    std::cout << std::endl << "ERROR: payloads and IOVs were not created." << std::endl;
+    std::cerr << e.what() << std::endl;
+    exit(0);
+  }
+
+  // copy the data to tag 2:
+
+  try{
+    nlohmann::json iovList = myCrestClient.findAllIovs(tagname1);
+    std::cout << std::endl << "IOV list for tag " << tagname1 << " =" << std::endl;
+    std::cout << iovList.dump(4) << std::endl;
+
+    int listSize = iovList.size();
+
+    for (int j = 0; j < listSize; j++) {
+      
+      nlohmann::json iov = iovList[j];
+      nlohmann::json newIov = iov; 
+
+      newIov["tagName"] = tagname2;
+
+      try{
+        myCrestClient.createIov(newIov);  
+      }  
+      catch (const std::exception& e) {
+        std::cout << "ERROR: Cannot write the IOV for the tag \"" << tagname2 << "\"" << std::endl;
+        std::cerr << e.what() << std::endl;
+        exit(0);
+      } 
+ 
+    } // j
+  }
+  catch (const std::exception& e) {
+    std::cout << std::endl << "ERROR: cannot get IOV list for tag " << tagname1 << std::endl;
+    std::cerr << e.what() << std::endl;
+    exit(0);
+  }
+
+  try{
+    nlohmann::json iovList = myCrestClient.findAllIovs(tagname2);
+    std::cout << std::endl << "IOV list for tag " << tagname2 << " =" << std::endl;
+    std::cout << iovList.dump(4) << std::endl;
+  }
+  catch (const std::exception& e) {
+    std::cout << std::endl << "ERROR: cannot get IOV list for tag " << tagname2 << std::endl;
+    std::cerr << e.what() << std::endl;
+    exit(0);
+  }  
+
+}
+
+void testStoreBatchIOVs(const std::string& tagname1, const std::string& tagname2) {
+  std::cout << std::endl << "test: storeBatchIOVs" << std::endl;
+  CrestClient myCrestClient = CrestClient(SURL,false);
+
+  nlohmann::json js =
+  {
+    {"description", "none"},
+    {"endOfValidity", 0},
+    {"insertionTime", "2018-12-06T11:18:35.641+0000"},
+    {"lastValidatedTime", 0},
+    {"modificationTime", "2018-12-06T11:18:35.641+0000"},
+    {"name", tagname1},
+    {"payloadSpec", "stave: Int32, eta: Int32, mag: Float, base: Float, free: Float"},
+    {"synchronization", "none"},
+    {"timeType", "time"}
+  };
+
+  std::cout << "tag 1 = " << std::endl << js.dump(4) << std::endl;
+
+  try{
+    myCrestClient.createTag(js);
+    std::cout << std::endl << "Tag " << tagname1 << " created" << std::endl;
+  }
+  catch (const std::exception& e) {
+    std::cout << std::endl << "ERROR: tag " << tagname1 << " creation failed" << std::endl;
+    std::cout << e.what() << std::endl;
+    exit(0);
+  }
+
+  js["name"] = tagname2;
+
+  std::cout << "tag 2 = " << std::endl << js.dump(4) << std::endl;
+
+  try{
+    myCrestClient.createTag(js);
+    std::cout << std::endl << "Tag " << tagname2 << " created" << std::endl;
+  }
+  catch (const std::exception& e) {
+    std::cout << std::endl << "ERROR: tag " << tagname2 << " creation failed" << std::endl;
+    std::cout << e.what() << std::endl;
+    exit(0);
+  }
+
+  // payloads and IOVs:
+
+  uint64_t endtime = 200;
+  std::string d1 = "\"" + myCrestClient.getDateAndTime() + "_A\"";
+  std::string d2 = "\"" + myCrestClient.getDateAndTime() + "_B\"";
+
+  std::string str = "[{\"data\":" + d1 + ",\"since\":100},{\"data\":" + d2 + ",\"since\":150}]";
+  nlohmann::json js2 = myCrestClient.getJson(str);
+
+  try {
+    myCrestClient.storeBatchPayloads(tagname1, endtime, js2);
+    std::cout << std::endl << "2 IOVs created in tag " << tagname1 << std::endl;
+  }
+  catch (const std::exception& e) {
+    std::cout << std::endl << "ERROR: payloads and IOVs were not created." << std::endl;
+    std::cerr << e.what() << std::endl;
+    exit(0);
+  }
+
+  // copy the data to tag 2:
+
+  try{
+    nlohmann::json iovList = myCrestClient.findAllIovs(tagname1);
+    std::cout << std::endl << "IOV list for tag " << tagname1 << " =" << std::endl;
+    std::cout << iovList.dump(4) << std::endl;
+
+    int listSize = iovList.size();
+    nlohmann::json newIovList = nlohmann::json::array();
+
+    for (int j = 0; j < listSize; j++) {
+      
+      nlohmann::json iov = iovList[j];
+      nlohmann::json newIov = iov; 
+
+      newIov["tagName"] = tagname2;
+      newIovList.push_back(newIov);
+ 
+    } // j
+
+
+    try{
+      myCrestClient.storeBatchIOVs(newIovList);
+    }
+    catch (const std::exception& e) {
+      std::cout << "ERROR: Cannot write the IOVs for the tag \"" << tagname2 << "\"" << std::endl;
+      std::cerr << e.what() << std::endl;
+      exit(0);
+    } 
+
+  }
+  catch (const std::exception& e) {
+    std::cout << std::endl << "ERROR: cannot get IOV list for tag " << tagname1 << std::endl;
+    std::cerr << e.what() << std::endl;
+    exit(0);
+  }
+
+  try{
+    nlohmann::json iovList = myCrestClient.findAllIovs(tagname2);
+    std::cout << std::endl << "IOV list for tag " << tagname2 << " =" << std::endl;
+    std::cout << iovList.dump(4) << std::endl;
+  }
+  catch (const std::exception& e) {
+    std::cout << std::endl << "ERROR: cannot get IOV list for tag " << tagname2 << std::endl;
+    std::cerr << e.what() << std::endl;
+    exit(0);
+  }  
+
+}
+
+
+void testGetMgmtInfo() {
+  std::cout << std::endl << "test: getMgmtInfo" << std::endl;
+  CrestClient myCrestClient = CrestClient(SURL,false);
+
+  try {
+    nlohmann::json tag_info = myCrestClient.getMgmtInfo();
+    std::cout << std::endl << "test: getMgmtInfo (result) =" << std::endl
+              << tag_info.dump(4) << std::endl;
+  }
+  catch (const std::exception& e) {
+    std::cout << std::endl << "test: getMgmtInfo (failed)" << std::endl;
+    std::cout << e.what() << std::endl;
+  }
+}
+
+void testGetCrestVersion() {
+  std::cout << std::endl << "test: getCrestVersion" << std::endl;
+  CrestClient myCrestClient = CrestClient(SURL,false);
+
+  try {
+    std::string version = myCrestClient.getCrestVersion();
+    std::cout << std::endl << "test: CREST server version = " 
+              << version << std::endl;
+  }
+  catch (const std::exception& e) {
+    std::cout << std::endl << "test: getCrestVersion (failed)" << std::endl;
+    std::cout << e.what() << std::endl;
+  }
+}
+
+void testGetClientVersion() {
+  std::cout << std::endl << "test: getClientVersion" << std::endl;
+  CrestClient myCrestClient = CrestClient(SURL,false);
+
+  try {
+    std::string version = myCrestClient.getClientVersion();
+    std::cout << std::endl << "test: CrestApi version = " 
+              << version << std::endl;
+  }
+  catch (const std::exception& e) {
+    std::cout << std::endl << "test: getClientVersion (failed)" << std::endl;
+    std::cout << e.what() << std::endl;
+  }
+}
+
+void testGetMajorVersion() {
+  std::cout << std::endl << "test: getMajorVersion" << std::endl;
+  CrestClient myCrestClient = CrestClient(SURL,false);
+
+  std::string A = "4.1";           // good version
+    std::string B = "abracadabra"; // wrong version
+    std::string C = ".2";          // wrong version
+    std::string D = "aaa.2";       // wrong version
+
+  try {
+    int versionA = myCrestClient.getMajorVersion(A);
+    std::cout << std::endl << "test: major version (" << A << ") = "
+              << versionA << std::endl;
+  }
+  catch (const std::exception& e) {
+    std::cout << std::endl << "test: getMajorVersion (failed)" << std::endl;
+    std::cout << e.what() << std::endl;
+  }
+
+  try {
+    int versionB = myCrestClient.getMajorVersion(B);
+    std::cout << std::endl << "test: major version (" << B << ") = "
+              << versionB << std::endl;
+  }
+  catch (const std::exception& e) {
+    std::cout << std::endl << "test: getMajorVersion (failed)" << std::endl;
+    std::cout << e.what() << std::endl;
+  }
+
+  try {
+    int versionC = myCrestClient.getMajorVersion(C);
+    std::cout << std::endl << "test: major version (" << C <<  ") = "
+              << versionC << std::endl;
+  }
+  catch (const std::exception& e) {
+    std::cout << std::endl << "test: getMajorVersion (failed)" << std::endl;
+    std::cout << e.what() << std::endl;
+  }
+
+  try {
+    int versionD = myCrestClient.getMajorVersion(D);
+    std::cout << std::endl << "test: major version (" << D <<  ") = "
+              << versionD << std::endl;
+  }
+  catch (const std::exception& e) {
+    std::cout << std::endl << "test: getMajorVersion (failed)" << std::endl;
+    std::cout << e.what() << std::endl;
+  }
+}
+
+
+void testCheckCrestVersion() {
+  std::cout << std::endl << "test: checkCrestVersion" << std::endl;
+  CrestClient myCrestClient = CrestClient(SURL,false);
+
+  try {
+    myCrestClient.checkCrestVersion();
+    std::cout << "test is OK." << std::endl;
+  }
+  catch (const std::exception& e) {
+    std::cout << std::endl << "test: checkCrestVersion (failed)" << std::endl;
+    std::cout << e.what() << std::endl;
+  }
+}
+
+// V4 tests:
+
+void testGetCrestVersion2() {
+  std::cout << std::endl << "test: getCrestVersion2" << std::endl;
+  CrestClient myCrestClient = CrestClient(SURL,false);
+
+  try {
+    std::string version = myCrestClient.getCrestVersion2();
+    std::cout << std::endl << "test: CREST server version = " 
+              << version << std::endl;
+  }
+  catch (const std::exception& e) {
+    std::cout << std::endl << "test: getCrestVersion2 (failed)" << std::endl;
+    std::cout << e.what() << std::endl;
+  }
+}
+
+void testCheckCrestVersion2() {
+  std::cout << std::endl << "test: checkCrestVersion2" << std::endl;
+  CrestClient myCrestClient = CrestClient(SURL,false);
+
+  try {
+    myCrestClient.checkCrestVersion2();
+    std::cout << "test is OK." << std::endl;
+  }
+  catch (const std::exception& e) {
+    std::cout << std::endl << "test: checkCrestVersion2 (failed)" << std::endl;
+    std::cout << e.what() << std::endl;
+  }
+}
+
 
 int main(int argc, char* argv[]) {
   if (argc == 2) {
-    // print_path();
 
     SURL = argv[1];
     print_path();
 
-    // TO RUN TEST UNCOMMENT A LINE!
-    // (and check parameters)
+    // TO RUN TEST UNCOMMENT IT!
+    // (and check parameters!)
 
-    testCreateTag("test_MvG3b"); // error !
-    // testListTags();
-    testFindTag("test_MvG3b");
-    // testRemoveTag("test_MvG3b");
-    // testUpdateTag("test_MvG3b");
-    // testUpdateTagSpecification("test_MvG3b");
+    std::string tagname = "test_tag_01"; // write your tag name
 
-    // testCreateGlobalTag("MvG_TEST_01");
-    // testFindGlobalTag("MvG_TEST_01");
-    // testFindGlobalTagAsString("MvG_TEST_01");
-    // testListGlobalTags();
-    // testListGlobalTagsAsString();
-    // testRemoveGlobalTag("MvG_TEST_01");
-    // testUpdateGlobalTag("MvG_TEST_01");
+    // Test: tag crestion, tag reading and removing.
 
-    // testCreateRunLumiInfo(); // it works on crest-01.cern.ch:8080
-    // testListRunLumiInfo(); // it works on crest-01.cern.ch:8080
+    // testRemoveTag(tagname); // remove tag if it exist
+    testCreateTag(tagname);
+    testFindTag(tagname);
+    testRemoveTag(tagname);
 
-    // testCreateGlobalTagMap("MvG_TEST_01","test_MvG3b"); // global tag and tag have to exist
-    // testFindGlobalTagMap("MvG_TEST_01");
-
-    // testStorePayload("test_MvG3b");
-
-    // testCreateTagF("test_MvG3b"); // Create a tag on a file storage
-    // testStorePayloadDump("test_MvG3b");
-    testStoreBatchPayloads("test_MvG3b");
-
-    // testGetJson();
-
-    // iovs tests (begin)
-    testFindAllIovs("test_MvG3b");
-    // iovs tests (end)
-
-    testCreateTagMetaInfo("test_MvG3b");
-    // testUpdateTagMetainfo("test_MvG3b");
-    testGetTagMetaInfo("test_MvG3b");
+    // Test: tag creation, IOVs and payloads storing.
+    /*
+    testRemoveTag(tagname);
+    testCreateTag(tagname);
+    testFindAllIovs(tagname);
+    testStoreBatchPayloadsB(tagname); // new test
+    // testStoreBatchPayloads(tagname); // old test
+    testFindTag(tagname);
+    testFindAllIovs(tagname);
+    testRemoveTag(tagname);
+    */
 
 
-    // testCreateTagMetaInfoIOVDbSvc("test_MvG3b"); // it works on crest-01.cern.ch:8080
-    // testGetTagMetaInfoIOVDbSvc("test_MvG3b"); // problem on crest-01.cern.ch:8080
-    // testConvertTagMetaInfo2CREST();
+    // Test: tag and global tag creation.
+    /*
+    testRemoveTag(tagname);
+    testCreateTag(tagname);
+    testCreateGlobalTag("MvG_TEST_01");
+    testFindGlobalTag("MvG_TEST_01");
+    testCreateGlobalTagMap("MvG_TEST_01",tagname); 
+    testFindGlobalTagMap("MvG_TEST_01");
 
-    // testCreateTag("test_MvG3c");
-    // testCreateTagMetainfoIOVDbSvc("test_MvG3c"); // it works on crest-01.cern.ch:8080
-    // testGetTagMetaInfoIOVDbSvc("test_MvG3c"); // problem on crest-01.cern.ch:8080  // uncomment
-    // testGetTagMetaInfo("test_MvG3c");
+    testRemoveGlobalTag("MvG_TEST_01");
+    testFindGlobalTag("MvG_TEST_01");
+    testFindGlobalTagMap("MvG_TEST_01");
+    */
 
-    // testListTagsParams();
-    // testFindAllIovsParams("test_MvG3c", 1,1);
-    // testListTags(); // added for test
-    // testListPayloadTagInfo();
-    // testListPayloadTagInfo("test_MvG3b");
-    // testFindAllIovsParams("PixCalib-DATA-RUN2-UPD4-10", 2, 2);
 
-    testCreateTagMetaInfo2("test_MvG3b");
-    testCreateTag2();
-    // testGetBlobInStream("3e744b9dc39389baf0c5a0660589b8402f3dbb49b89b3e75f2c9355852a3c677");
-    // testGetBlobInStream("9834876dcfb05cb167a5c24953eba58c4ac89b1adf57f28f2f9d09af107ee8f0");
+    // Test: tag meta info creation.
+    /* 
+    testRemoveTag(tagname);
+    testCreateTag(tagname);
+    testCreateTagMetaInfo(tagname);
+    // testCreateTagMetaInfo2(tagname); // variant 2
+    testGetTagMetaInfo(tagname);
+    testUpdateTagMetainfo(tagname);
+    testGetTagMetaInfo(tagname);
+    testRemoveTag(tagname);
+    */
+
+
   } else {
     std::cout << "CREST Server path not found" << std::endl;
     std::cout << "Please, run this program with a server path:" << std::endl;

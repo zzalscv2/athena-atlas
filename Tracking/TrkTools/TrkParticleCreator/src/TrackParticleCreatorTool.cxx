@@ -1008,14 +1008,8 @@ TrackParticleCreatorTool::addDetailedHitInformation(const DataVector<const Track
     const InDetDD::SiDetectorElement* detEl = dynamic_cast<const InDetDD::SiDetectorElement*>(rot->detectorElement());
     InDetDD::DetectorType type = detEl->design().type();
     if(type==InDetDD::PixelInclined)  region = Trk::pixelBarrelInclined;
-    else if(m_pixelID->is_barrel(id)) region = Trk::pixelBarrelFlat;
+    else if(type==InDetDD::PixelBarrel) region = Trk::pixelBarrelFlat;
     else region = Trk::pixelEndcap;
-
-    // DetectorType defaults to InDetDD::PixelBarrel for ATLAS-P2-RUN4-01-00-00 so workaround used for now
-    // Can be ultimately updated in a new geotag with
-    //
-    // else if(type==InDetDD::PixelBarrel) region = Trk::pixelBarrelFlat;
-    // else region = Trk::pixelEndcap;
 
     detailedInfo.addHit(region, m_pixelID->layer_disk(id), m_pixelID->eta_module(id));
 

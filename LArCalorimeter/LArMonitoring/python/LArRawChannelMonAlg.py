@@ -125,6 +125,10 @@ def LArRawChannelMonConfigCore(helper, instance, inputFlags, cosmics, stream, do
     ]
     alg.db_and_ofc_only = True
 
+    from LArConfiguration.LArConfigFlags import RawChannelSource
+    if inputFlags.LAr.RawChannelSource is RawChannelSource.Calculated:
+       alg.LArRawChannelContainerKey="LArRawChannels_FromDigits"
+
     # Histograms for different partitions are handled together via a
     # GenericMonitoringArray, but since some of the ranges and titles
     # vary between partitions, the definition of histograms must be

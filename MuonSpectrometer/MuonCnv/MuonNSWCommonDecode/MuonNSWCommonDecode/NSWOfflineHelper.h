@@ -51,10 +51,10 @@ namespace Muon
 	NSWOfflineRobId (const std::string &station_name, int8_t station_eta, uint8_t station_phi);
 	virtual ~NSWOfflineRobId () {};
 
-	uint32_t get_id () const {return m_sourceId;};
+	const std::vector<uint32_t>& get_ids () const {return m_sourceIds;};
 
        private:
-	uint32_t m_sourceId;
+	std::vector<uint32_t> m_sourceIds;
       };
 
       static const std::map <const std::pair <std::string, bool>, const uint32_t> s_station_to_detector_map =

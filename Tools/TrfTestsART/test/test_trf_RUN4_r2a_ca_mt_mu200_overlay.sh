@@ -9,11 +9,16 @@ if [ -z ${ATLAS_REFERENCE_DATA+x} ]; then
   ATLAS_REFERENCE_DATA="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art"
 fi
 
-HSHitsFile="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-01-00-00/mc15_14TeV.600012.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.simul.HITS.e8185_s3856/HITS.29179779._000100.pool.root.1"
-RDOFile="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/RDO_BKG/ATLAS-P2-RUN4-01-00-00/mu200.50events.RDO.pool.root"
+HSHitsFile="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-01-01-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.simul.HITS.e8481_s4038/HITS.32253544._000100.pool.root.1"
+RDOFile="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/RDO_BKG/ATLAS-P2-RUN4-01-00-00/RUN4_presampling.mu200.50events.RDO.pool.root"
 
 Reco_tf.py \
-  --AMIConfig r14001 \
+  --CA \
+  --conditionsTag OFLCOND-MC15c-SDR-14-05 \
+  --geometryVersion ATLAS-P2-RUN4-01-01-00 \
+  --steering "doOverlay" "doRAWtoALL" \
+  --preInclude "all:Campaigns.PhaseIIPileUp200" \
+  --postInclude "all:PyJobTransforms.UseFrontier.py" \
   --inputHITSFile "${HSHitsFile}" \
   --inputRDO_BKGFile "$RDOFile" \
   --outputAODFile RUN4.AOD.pool.root \

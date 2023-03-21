@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( PixelCalibAlgs )
@@ -6,10 +6,12 @@ atlas_subdir( PixelCalibAlgs )
 # External dependencies:
 find_package( ROOT COMPONENTS Graf Core Tree MathCore Hist RIO MathMore Physics
    Matrix Gpad )
+   
+find_package( Boost COMPONENTS unit_test_framework)
 
 # Libraries in the package:
 atlas_add_library( PixelCalibAlgsLib
-   PixelCalibAlgs/*.h src/*.cxx
+   PixelCalibAlgs/*.h src/*.cxx ChargeCalibration/common/*.h ChargeCalibration/common/*.cxx
    PUBLIC_HEADERS PixelCalibAlgs
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps CxxUtils GaudiKernel InDetConditionsSummaryService 
@@ -25,4 +27,13 @@ atlas_add_executable( makeInactiveModuleList
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} CxxUtils PixelConditionsData PixelCalibAlgsLib )
 
-atlas_install_runtime ( share/HashVSdcsID.dat share/table_Run2.txt share/PixelMapping_Run2.dat )
+
+   
+atlas_add_test( PixelMapping_test
+   SOURCES ChargeCalibration/common/PixelMapping.cxx test/PixelMapping_test.cxx
+   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+   LINK_LIBRARIES ${Boost_LIBRARIES} PathResolver
+   POST_EXEC_SCRIPT "nopost.sh"
+)
+
+atlas_install_runtime ( share/HashVSdcsID.dat share/table_Run2.txt share/PixelMapping_Run2.dat ChargeCalibration/common/mapping.csv)

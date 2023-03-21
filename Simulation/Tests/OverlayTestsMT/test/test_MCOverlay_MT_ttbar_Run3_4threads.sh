@@ -5,6 +5,7 @@
 # art-architecture:  '#x86_64-intel'
 # art-athena-mt: 8
 # art-include: 22.0/Athena
+# art-include: 23.0/Athena
 # art-include: master/Athena
 
 # art-output: MC_plus_MC.RDO.pool.root

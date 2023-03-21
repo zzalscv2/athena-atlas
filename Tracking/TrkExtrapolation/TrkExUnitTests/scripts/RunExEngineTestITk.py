@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.AllConfigFlags import ConfigFlags
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg    
 from AthenaCommon.Logging import log
@@ -21,7 +21,7 @@ if ConfigFlags.ITk.Geometry.AllLocal:
 
 ConfigFlags.Detector.GeometryHGTD = False
 
-ConfigFlags.GeoModel.AtlasVersion = "ATLAS-P2-RUN4-01-00-00"
+ConfigFlags.GeoModel.AtlasVersion = "ATLAS-P2-RUN4-01-01-00"
 ConfigFlags.IOVDb.GlobalTag = "OFLCOND-SIM-00-00-00"
 ConfigFlags.GeoModel.Align.Dynamic = False
 

@@ -87,7 +87,7 @@ std::unique_ptr<RegSelSiLUT> MM_RegSelCondAlg::createTable( const EventContext& 
   
   ATH_MSG_DEBUG("createTable()");
   
-  std::unique_ptr<RegSelSiLUT> lut = std::make_unique<RegSelSiLUT>();
+  std::unique_ptr<RegSelSiLUT> lut = std::make_unique<RegSelSiLUT>(RegSelSiLUT::MM);
 
 
   for ( std::vector<Identifier>::const_iterator i=idfirst ; i!=idlast ; ++i ) {
@@ -152,11 +152,10 @@ std::unique_ptr<RegSelSiLUT> MM_RegSelCondAlg::createTable( const EventContext& 
 
       /// store the robId
       Muon::nsw::helper::NSWOfflineRobId robIdHelper(stationName,static_cast<int8_t>(stationEta),static_cast<uint8_t>(stationPhi));
-      uint32_t robId  = robIdHelper.get_id();
-
-      RegSelModule m( zmin, zmax, rmin, rmax, phimin, phimax, layerid, detid, robId, hashId );
-
-      lut->addModule( m );
+      for(uint32_t robId : robIdHelper.get_ids()){ // if the NSW is read out in a split ROB configuration there are multiple ROB ids associated to one region of interest
+          RegSelModule m( zmin, zmax, rmin, rmax, phimin, phimax, layerid, detid, robId, hashId );
+          lut->addModule( m );
+      }
 
   }
 

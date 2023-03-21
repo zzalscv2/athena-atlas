@@ -40,7 +40,8 @@ LArNoiseSCCondAlg            =  CompFactory.getComp("LArFlatConditionsAlg<LArNoi
 LArMinBiasSCCondAlg          =  CompFactory.getComp("LArFlatConditionsAlg<LArMinBiasSC>")
 LArAutoCorrSCCondAlg         =  CompFactory.getComp("LArFlatConditionsAlg<LArAutoCorrSC>")
 LArPileupAverageSCCondAlg    =  CompFactory.getComp("LArFlatConditionsAlg<LArMinBiasAverageSC>")
-LArMphysOverMcalSCCondAlg    =  CompFactory.getComp("LArFlatConditionsAlg<LArHVScaleCorrSC>")
+LArMphysOverMcalSCCondAlg    =  CompFactory.getComp("LArFlatConditionsAlg<LArMphysOverMcalSC>")
+LArOFCSCCondAlg              =  CompFactory.getComp("LArFlatConditionsAlg<LArOFCSC>")
 
 
 def LArElecCalibDbCfg(ConfigFlags,condObjs):
@@ -116,15 +117,15 @@ def LArElecCalibDBRun2Cfg(ConfigFlags,condObjs):
 
 def LArElecCalibDBSCCfg(ConfigFlags,condObjs):
 
-    _larCondDBFoldersDataSC = {"Ramp":("LArRamp","/LAR/ElecCalibFlatSC/Ramp", LArRampSCCondAlg ),
-                               "DAC2uA":("LArDAC2uA","/LAR/ElecCalibFlatSC/DAC2uA",LArDAC2uASCCondAlg),
-                               "Pedestal":("LArPedestal","/LAR/ElecCalibFlatSC/Pedestal",LArPedestalSCCondAlg),
-                               "uA2MeV":("LAruA2MeV","/LAR/ElecCalibFlatSC/uA2MeV", LAruA2MeVSCCondAlg),
-                               "MphysOverMcal":("LArMphysOverMcal","/LAR/ElecCalibFlatSC/MphysOverMcal",LArMphysOverMcalSCCondAlg),
-                               "OFC":("LArOFC","/LAR/ElecCalibFlatSC/OFC",LArOFCCondAlg),
-                               "Shape":("LArShape","/LAR/ElecCalibFlatSC/Shape",LArShapeSCCondAlg),
-                               "HVScaleCorr":("LArHVScaleCorr","/LAR/ElecCalibFlatSC/HVScaleCorr",LArHVScaleCorrSCCondFlatAlg),
-                               "fSampl":("LArfSampl","/LAR/ElecCalibMCSC/fSampl",LArfSamplSCCondAlg),
+    _larCondDBFoldersDataSC = {"Ramp":("LArRampSC","/LAR/ElecCalibFlatSC/Ramp", LArRampSCCondAlg ),
+                               "DAC2uA":("LArDAC2uASC","/LAR/ElecCalibFlatSC/DAC2uA",LArDAC2uASCCondAlg),
+                               "Pedestal":("LArPedestalSC","/LAR/ElecCalibFlatSC/Pedestal",LArPedestalSCCondAlg),
+                               "uA2MeV":("LAruA2MeVSC","/LAR/ElecCalibFlatSC/uA2MeV", LAruA2MeVSCCondAlg),
+                               "MphysOverMcal":("LArMphysOverMcalSC","/LAR/ElecCalibFlatSC/MphysOverMcal",LArMphysOverMcalSCCondAlg),
+                               "OFC":("LArOFCSC","/LAR/ElecCalibFlatSC/OFC",LArOFCSCCondAlg),
+                               "Shape":("LArShapeSC","/LAR/ElecCalibFlatSC/Shape",LArShapeSCCondAlg),
+                               "HVScaleCorr":("LArHVScaleCorrSC","/LAR/ElecCalibFlatSC/HVScaleCorr",LArHVScaleCorrSCCondFlatAlg),
+                               "fSampl":("LArfSamplSC","/LAR/ElecCalibMCSC/fSampl",LArfSamplSCCondAlg),
                            }
 
     result=IOVDbSvcCfg(ConfigFlags)

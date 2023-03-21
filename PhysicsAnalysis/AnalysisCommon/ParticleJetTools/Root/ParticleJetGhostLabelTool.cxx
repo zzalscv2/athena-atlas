@@ -19,6 +19,11 @@ ParticleJetGhostLabelTool::ParticleJetGhostLabelTool(const std::string& name)
     declareProperty("PartPtMin", m_partptmin=5000, "Minimum pT of particles for labeling (MeV)");
 }
 
+StatusCode ParticleJetGhostLabelTool::initialize()
+{
+  m_labelnames.check();
+  return StatusCode::SUCCESS;
+}
 
 StatusCode ParticleJetGhostLabelTool::decorate(const JetContainer& jets) const
 {

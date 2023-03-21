@@ -3,6 +3,7 @@
 # art-description: Run 4 digitization of a ttbar sample with pile-up (saving in-time truth)
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
+# art-include: 23.0/Athena
 # art-include: master/Athena
 # art-output: RUN4_ttbar.puTruth.RDO.pool.root
 # art-output: RDOAnalysis.root
@@ -20,7 +21,6 @@ DigiOutFileName="RUN4_ttbar.puTruth.RDO.pool.root"
 Digi_tf.py \
 --CA \
 --conditionsTag default:OFLCOND-MC15c-SDR-14-05 \
---preExec="ConfigFlags.HGTD.Geometry.useGeoModelXml = True" \
 --preInclude 'HITtoRDO:Campaigns.PhaseIIPileUp1' \
 --postInclude 'PyJobTransforms.UseFrontier' \
 --runNumber="601229" \

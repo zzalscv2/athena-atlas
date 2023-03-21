@@ -3,6 +3,7 @@
 # art-description: MC+MC Overlay without reco for Run 4, ttbar, mu=200
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
+# art-include: 23.0/Athena
 # art-include: master/Athena
 
 # art-output: *.root
@@ -16,15 +17,15 @@ if [ -z ${ATLAS_REFERENCE_DATA+x} ]; then
 fi
 
 events=25
-HITS_File="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-01-00-00/mc15_14TeV.900149.PG_single_nu_Pt50.simul.HITS.e8371_s3856/HITS.29179777._000918.pool.root.1"
-RDO_BKG_File="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/RDO_BKG/ATLAS-P2-RUN4-01-00-00/mu200.25events.RDO.pool.root"
+HITS_File="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-01-01-00/mc21_14TeV.900149.PG_single_nu_Pt50.simul.HITS.e8481_s4038/HITS.32496427._001002.pool.root.1"
+RDO_BKG_File="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/RDO_BKG/ATLAS-P2-RUN4-01-01-00/RUN4_presampling.mu200.25events.RDO.pool.root"
 OverlayOutFile="RUN4_neutrinos.mu200.overlay.RDO.pool.root"
 
 Overlay_tf.py \
 --CA \
 --conditionsTag OFLCOND-MC15c-SDR-14-05 \
 --digiSeedOffset1 170 --digiSeedOffset2 170 \
---geometryVersion ATLAS-P2-RUN4-01-00-00 \
+--geometryVersion ATLAS-P2-RUN4-01-01-00 \
 --inputHITSFile ${HITS_File} \
 --inputRDO_BKGFile ${RDO_BKG_File} \
 --maxEvents ${events} \

@@ -83,12 +83,9 @@ def SimpleAmbiguityProcessorToolCfg(flags,
         not flags.InDet.Tracking.ActiveConfig.doAmbiguityProcessorTrackFit)
     kwargs.setdefault("SuppressHoleSearch", False)
     kwargs.setdefault("tryBremFit",
-                      flags.InDet.Tracking.doBremRecovery and
-                      (flags.InDet.Tracking.ActiveConfig.extension == "" or
-                       flags.InDet.Tracking.ActiveConfig.extension == "BLS"))
-    kwargs.setdefault("caloSeededBrem",
-                      flags.InDet.Tracking.doCaloSeededBrem and
-                      flags.Detector.EnableCalo)
+                      flags.Tracking.doBremRecovery and
+                      flags.InDet.Tracking.ActiveConfig.extension in ["", "BLS"])
+    kwargs.setdefault("caloSeededBrem", flags.Tracking.doCaloSeededBrem)
     kwargs.setdefault("pTminBrem", flags.InDet.Tracking.ActiveConfig.minPTBrem)
     kwargs.setdefault("RefitPrds", True)
     kwargs.setdefault("MatEffects", flags.Tracking.materialInteractionsType
@@ -159,9 +156,8 @@ def SimpleAmbiguityProcessorTool_TRT_Cfg(
         not flags.InDet.Tracking.ActiveConfig.doAmbiguityProcessorTrackFit)
     kwargs.setdefault("SuppressHoleSearch", False)
     kwargs.setdefault("ScoringTool", InDetTRT_SeededScoringTool)
-    kwargs.setdefault("MatEffects",
-                      (flags.Tracking.materialInteractionsType
-                       if flags.Tracking.materialInteractions else 0))
+    kwargs.setdefault("MatEffects", flags.Tracking.materialInteractionsType
+                      if flags.Tracking.materialInteractions else 0)
 
     acc.setPrivateTools(
         CompFactory.Trk.SimpleAmbiguityProcessorTool(name, **kwargs))
@@ -183,10 +179,9 @@ def SimpleAmbiguityProcessorTool_Trig_Cfg(
     kwargs.setdefault("SuppressHoleSearch", False)
     # kwargs.setdefault("RefitPrds", False)
     # #TODO clarify this setting False if flags.InDet.Tracking.ActiveConfig.name == 'cosmics' else True
-    kwargs.setdefault("tryBremFit", True
-                      if flags.InDet.Tracking.ActiveConfig.name == 'electron'
-                      and flags.InDet.Tracking.doBremRecovery
-                      else False)
+    kwargs.setdefault("tryBremFit",
+                      flags.InDet.Tracking.ActiveConfig.name == 'electron' and
+                      flags.Tracking.doBremRecovery)
     kwargs.setdefault("pTminBrem", 5*Units.GeV)
     kwargs.setdefault("MatEffects", 3)
 
@@ -211,13 +206,13 @@ def SimpleAmbiguityProcessorTool_Trig_Cfg(
     if "AssociationTool" not in kwargs:
         from InDetConfig.InDetAssociationToolsConfig import (
             TrigPRDtoTrackMapToolGangedPixelsCfg)
-        kwargs.setdefault("AssociationTool", acc.getPrimaryAndMerge(
+        kwargs.setdefault("AssociationTool", acc.popToolsAndMerge(
             TrigPRDtoTrackMapToolGangedPixelsCfg(flags)))
 
     if "SelectionTool" not in kwargs:
         from InDetConfig.InDetAmbiTrackSelectionToolConfig import (
             InDetTrigTrackSelectionToolCfg)
-        kwargs.setdefault("SelectionTool", acc.getPrimaryAndMerge(
+        kwargs.setdefault("SelectionTool", acc.popToolsAndMerge(
             InDetTrigTrackSelectionToolCfg(flags)))
 
     acc.setPrivateTools(
@@ -441,18 +436,16 @@ def DenseEnvironmentsAmbiguityProcessorToolCfg(
     kwargs.setdefault("InputClusterSplitProbabilityName",
                       'SplitProb'+flags.InDet.Tracking.ActiveConfig.extension)
     kwargs.setdefault("OutputClusterSplitProbabilityName",
-                      ('InDetAmbiguityProcessorSplitProb' +
-                       flags.InDet.Tracking.ActiveConfig.extension))
+                      'InDetAmbiguityProcessorSplitProb' +
+                      flags.InDet.Tracking.ActiveConfig.extension)
     kwargs.setdefault(
         "SuppressTrackFit",
         not flags.InDet.Tracking.ActiveConfig.doAmbiguityProcessorTrackFit)
     kwargs.setdefault("SuppressHoleSearch", False)
-    kwargs.setdefault("tryBremFit", flags.InDet.Tracking.doBremRecovery and (
-        flags.InDet.Tracking.ActiveConfig.extension == "" or
-        flags.InDet.Tracking.ActiveConfig.extension == "BLS"))
-    kwargs.setdefault(
-        "caloSeededBrem", flags.InDet.Tracking.doCaloSeededBrem and
-        flags.Detector.EnableCalo)
+    kwargs.setdefault("tryBremFit",
+                      flags.Tracking.doBremRecovery and
+                      flags.InDet.Tracking.ActiveConfig.extension in ["", "BLS"])
+    kwargs.setdefault("caloSeededBrem", flags.Tracking.doCaloSeededBrem)
     kwargs.setdefault("pTminBrem", flags.InDet.Tracking.ActiveConfig.minPTBrem)
     kwargs.setdefault("RefitPrds", True)
     kwargs.setdefault("KeepHolesFromBeforeRefit", False)
@@ -466,6 +459,7 @@ def DenseEnvironmentsAmbiguityProcessorToolCfg(
         TrkObserverTool = acc.popToolsAndMerge(TrkObserverToolCfg(flags))
         acc.addPublicTool(TrkObserverTool)
         kwargs.setdefault("ObserverTool", TrkObserverTool)
+
         TrkObserverToolWriter = acc.popToolsAndMerge(
             WriterTrkObserverToolCfg(flags))
         acc.addPublicTool(TrkObserverToolWriter)
@@ -534,21 +528,19 @@ def ITkDenseEnvironmentsAmbiguityProcessorToolCfg(
     kwargs.setdefault("InputClusterSplitProbabilityName",
                       'SplitProb'+flags.ITk.Tracking.ActiveConfig.extension)
     kwargs.setdefault("OutputClusterSplitProbabilityName",
-                      ('ITkAmbiguityProcessorSplitProb' +
-                       flags.ITk.Tracking.ActiveConfig.extension))
+                      'ITkAmbiguityProcessorSplitProb' +
+                      flags.ITk.Tracking.ActiveConfig.extension)
     kwargs.setdefault(
         "SuppressTrackFit",
         not flags.ITk.Tracking.ActiveConfig.doAmbiguityProcessorTrackFit)
     kwargs.setdefault("SuppressHoleSearch", False)
 
     # Disabled for second passes in reco
-    kwargs.setdefault(
-        "tryBremFit", flags.ITk.Tracking.doBremRecovery and
-        flags.Detector.EnableCalo and
-        flags.ITk.Tracking.ActiveConfig.extension == "")
-    kwargs.setdefault(
-        "caloSeededBrem", flags.ITk.Tracking.doCaloSeededBrem and
-        flags.Detector.EnableCalo)
+    kwargs.setdefault("tryBremFit",
+                      flags.Tracking.doBremRecovery and
+                      flags.Detector.EnableCalo and
+                      flags.ITk.Tracking.ActiveConfig.extension == "")
+    kwargs.setdefault("caloSeededBrem", flags.Tracking.doCaloSeededBrem)
     kwargs.setdefault("pTminBrem",
                       flags.ITk.Tracking.ActiveConfig.minPTBrem[0])
     kwargs.setdefault("RefitPrds", True)

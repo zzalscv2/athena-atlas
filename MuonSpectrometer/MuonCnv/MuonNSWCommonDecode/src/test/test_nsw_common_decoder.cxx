@@ -204,7 +204,12 @@ int test_nsw_common_decoder_event (const eformat::read::FullEventFragment &f, co
     else if (s == eformat::MUON_STGC_ENDCAP_A_SIDE  || s == eformat::MUON_STGC_ENDCAP_C_SIDE)
       is_nsw = is_stg = true;
 
-    if (is_nsw && m < sectors)
+    // Sector id is in bits 0:3. In order to be sure these are L1A detector data
+    // we need to mask the bits 8 and 9 used to identify multiple ROBs for the same sector, in case
+    // that configuration is used (I hope never :))
+    // All the others should be 0.
+
+    if (is_nsw && ((m & ~0x0300) < sectors))
     {
       if (params.detectors.size () == 0 ||
 	  ((std::find (params.detectors.begin (), params.detectors.end (), "MMG") != params.detectors.end () && is_mmg) ||

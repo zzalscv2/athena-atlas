@@ -7,18 +7,18 @@
 # art-architecture:  '#x86_64-intel'
 # art-output: test_muons.HITS.pool.root
 
-Input="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EVNT/mc15_14TeV.422036.ParticleGun_single_mu_Pt100.evgen.EVNT.e5286/EVNT.09244578._000001.pool.root.1"
+Input="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EVNT/mc21_14TeV.900498.PG_single_muonpm_Pt100_etaFlatnp0_43.evgen.EVNT.e8481/EVNT.30802154._000010.pool.root.1"
 Output="test_muons.HITS.pool.root"
 
 # RUN4 setup
-# ATLAS-P2-RUN4-01-00-00 and OFLCOND-MC15c-SDR-14-05
+# ATLAS-P2-RUN4-01-01-00 and OFLCOND-MC15c-SDR-14-05
 Sim_tf.py \
 --CA \
 --conditionsTag 'default:OFLCOND-MC15c-SDR-14-05' \
 --simulator 'FullG4MT' \
 --postInclude 'default:PyJobTransforms.UseFrontier' \
 --preInclude 'EVNTtoHITS:Campaigns.PhaseIISimulation' \
---geometryVersion 'default:ATLAS-P2-RUN4-01-00-00' \
+--geometryVersion 'default:ATLAS-P2-RUN4-01-01-00' \
 --inputEVNTFile "$Input" \
 --outputHITSFile "$Output" \
 --maxEvents 1000 \

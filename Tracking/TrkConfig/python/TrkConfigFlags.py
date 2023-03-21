@@ -36,6 +36,21 @@ def createTrackingConfigFlags():
     icf.addFlag("Tracking.materialInteractionsType", lambda prevFlags:
                 2 if prevFlags.Beam.Type is BeamType.Cosmics else 3)
 
+    # Turn on running of Brem Recovery in tracking
+    icf.addFlag("Tracking.doBremRecovery", lambda prevFlags: (
+        not (prevFlags.Tracking.doVtxLumi or
+             prevFlags.Tracking.doVtxBeamSpot or
+             prevFlags.Tracking.doLowMu or
+             prevFlags.Beam.Type is not BeamType.Collisions or
+             not prevFlags.BField.solenoidOn)))
+    # Brem Recover in tracking restricted to Calo ROIs
+    icf.addFlag("Tracking.doCaloSeededBrem", lambda prevFlags:
+                prevFlags.Detector.EnableCalo)
+    # Use Recover SSS to Calo ROIs
+    icf.addFlag("Tracking.doHadCaloSeededSSS", False)
+    # Use Calo ROIs to seed specific cuts for the ambi
+    icf.addFlag("Tracking.doCaloSeededAmbi", lambda prevFlags:
+                prevFlags.Detector.EnableCalo)
     # control if the shared hits are recorded in TrackPatricles
     icf.addFlag("Tracking.doSharedHits", True)
     # Switch for running TIDE Ambi
@@ -48,11 +63,11 @@ def createTrackingConfigFlags():
 
     def doLargeD0(flags):
         if flags.GeoModel.Run<=LHCPeriod.Run3:
-           return not(flags.Beam.Type in [BeamType.SingleBeam, \
-                                          BeamType.Cosmics] or \
-                      flags.Reco.EnableHI or \
-                      flags.Tracking.doHighPileup or \
-                      flags.Tracking.doVtxLumi or \
+           return not((flags.Beam.Type in
+                       [BeamType.SingleBeam, BeamType.Cosmics]) or
+                      flags.Reco.EnableHI or
+                      flags.Tracking.doHighPileup or
+                      flags.Tracking.doVtxLumi or
                       flags.Tracking.doVtxBeamSpot)
         else: # LRT disabled by default for Run4 for now
             return False
@@ -68,10 +83,10 @@ def createTrackingConfigFlags():
 
     # Toggle track slimming
     icf.addFlag("Tracking.doSlimming", lambda prevFlags:
-                not(prevFlags.Beam.Type in [BeamType.SingleBeam,
-                                            BeamType.Cosmics] \
-                    or prevFlags.Tracking.doHighPileup \
-                    or prevFlags.Tracking.doVtxLumi) )
+                not((prevFlags.Beam.Type in
+                     [BeamType.SingleBeam, BeamType.Cosmics]) or
+                    prevFlags.Tracking.doHighPileup or
+                    prevFlags.Tracking.doVtxLumi))
 
     ####################################################################
 

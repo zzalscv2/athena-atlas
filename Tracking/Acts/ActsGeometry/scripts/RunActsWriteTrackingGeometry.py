@@ -25,7 +25,7 @@ parser.add_argument("-V", "--verboseAccumulators", default=False,
 parser.add_argument("-S", "--verboseStoreGate", default=False,
                     action="store_true",
                     help="Dump the StoreGate(s) each event iteration")
-parser.add_argument("--geometrytag",default="ATLAS-P2-RUN4-01-00-00", type=str,
+parser.add_argument("--geometrytag",default="ATLAS-P2-RUN4-01-01-00", type=str,
                     help="The geometry tag to use")
 args = parser.parse_args()
 

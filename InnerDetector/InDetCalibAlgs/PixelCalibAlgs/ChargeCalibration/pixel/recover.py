@@ -1,10 +1,12 @@
-#-*- coding: utf-8 -*-
+#Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import csv
 import sys
 import os
 import datetime
 import shutil
+sys.path.append("../common")
+from parseMapping import *
 
 def fix_result_file():
   if not os.path.exists("template.dat"):
@@ -64,25 +66,10 @@ def create_reference():
   print(last3)
   sort_dict = {}
   golden_dict = {}
-#The following is truly horrible; it parses the .h file to read module names.
-  golden_modules = []
-  module_file = open('../common/pixelMapping.h', 'r')
-  module_data = module_file.read()
-  module_lines = module_data.splitlines()
-  found_names=False
-  for modules in module_lines:
-    modulename = ""
-    modules = modules.split()
-    if len(modules) != 0:
-      if found_names:
-        if "};" in modules: #end of list in code
-          break
-        geographicalID = modules[0].split('"')
-        modulename = geographicalID[1]
-        golden_modules.append(modulename)
-        print(modulename)
-      if "names" in modules: #beginning of list in code
-        found_names=True
+  #imported function reading the csv in common
+  module_dict = create_mapping('../common/mapping.csv')
+  #python 3 syntax for unpacking keys to a list
+  golden_modules=[*module_dict]
 
   # seek the latest run
   run_numbers = []
@@ -187,54 +174,14 @@ def count_bad_fittings():
 #---------------- Fix ID for 3D Module -------------
 def fix_module_id():
   golden_modules = []
-  module_file = open('pixelMapping.h', 'r')
-  module_data = module_file.read()
-  module_lines = module_data.splitlines()
-
-  for modules in module_lines:
-    modulename = ""
-    modules = modules.split()
-    if len(modules) != 0:
-      if modules[0] == "else" and modules[1] == "if":
-        geographicalID = modules[2].split('"')
-        modulename = geographicalID[1]
-      elif modules[0] == "if":
-        geographicalID = modules[1].split('"')
-        modulename = geographicalID[1]
-    if modulename:
-      golden_modules.append(modulename)
-
   golden_hash = []
-  for modules in module_lines:
-    modulehash = ""
-    goldens = modules.split('=')
-    modules = modules.split()
-    if len(modules) != 0:
-      if modules[0] == "else" and modules[1] == "if":
-        golden_hashID = " : " + goldens[3].split(';')[0]
-        golden_bec = goldens[4].split(';')[0].strip()
-        golden_layer = goldens[5].split(';')[0].strip()
-        golden_phi = goldens[6].split(';')[0].strip()
-        golden_eta = goldens[7].split(';')[0].strip()
-        modulehash = golden_hashID + " " + golden_bec + "," + golden_layer + "," + golden_phi + "," + golden_eta
-      elif modules[0] == "if":
-        golden_hashIds = modules[4].split(';')[0]
-        golden_bec = modules[5].split('=')[1].split(';')[0]
-        golden_layer = modules[6].split('=')[1].split(';')[0]
-        golden_phi = modules[8].split(';')[0]
-        golden_eta = modules[10].split(';')[0].strip()
-        if len(golden_hashIds) == 1:
-          golden_hashID = " :    " + golden_hashIds
-        elif len(golden_hashIds) == 2:
-          golden_hashID = " :   " + golden_hashIds
-        elif len(golden_hashIds) == 3:
-          golden_hashID = " :  " +  golden_hashIds
-        elif len(golden_hashIds) == 4:
-          golden_hashID = " : " +  golden_hashIds
-        modulehash = golden_hashID + " " + golden_bec + "," + golden_layer + "," + golden_phi + "," + golden_eta
-    if modulehash:
-      golden_hash.append(modulehash)
-
+  #imported function
+  module_dict = create_mapping('../common/mapping.csv')
+  #produce a list of keys (module names)
+  for (k,v) in module_dict.items():
+    golden_modules.append(k)
+    #produces string of format ': 2035 2,2,47,0'
+    golden_hash.append(convertToOldFormat(v))
   golden_dict = {}
   for i, item in enumerate(golden_modules):
     golden_dict[item] = i
@@ -632,54 +579,14 @@ def read_header_and_get_macro(header_filepath):
 
 def sort_module(module_list, all_recover):
   golden_modules = []
-  module_file = open('pixelMapping.h', 'r')
-  module_data = module_file.read()
-  module_lines = module_data.splitlines()
-
-  for modules in module_lines:
-    modulename = ""
-    modules = modules.split()
-    if len(modules) != 0:
-      if modules[0] == "else" and modules[1] == "if":
-        geographicalID = modules[2].split('"')
-        modulename = geographicalID[1]
-      elif modules[0] == "if":
-        geographicalID = modules[1].split('"')
-        modulename = geographicalID[1]
-    if modulename:
-      golden_modules.append(modulename)
-
   golden_hash = []
-  for modules in module_lines:
-    modulehash = ""
-    goldens = modules.split('=')
-    modules = modules.split()
-    if len(modules) != 0:
-      if modules[0] == "else" and modules[1] == "if":
-        golden_hashID = " : " + goldens[3].split(';')[0]
-        golden_bec = goldens[4].split(';')[0].strip()
-        golden_layer = goldens[5].split(';')[0].strip()
-        golden_phi = goldens[6].split(';')[0].strip()
-        golden_eta = goldens[7].split(';')[0].strip()
-        modulehash = golden_hashID + " " + golden_bec + "," + golden_layer + "," + golden_phi + "," + golden_eta
-      elif modules[0] == "if":
-        golden_hashIds = modules[4].split(';')[0]
-        golden_bec = modules[5].split('=')[1].split(';')[0]
-        golden_layer = modules[6].split('=')[1].split(';')[0]
-        golden_phi = modules[8].split(';')[0]
-        golden_eta = modules[10].split(';')[0].strip()
-        if len(golden_hashIds) == 1:
-          golden_hashID = " :    " + golden_hashIds
-        elif len(golden_hashIds) == 2:
-          golden_hashID = " :   " + golden_hashIds
-        elif len(golden_hashIds) == 3:
-          golden_hashID = " :  " +  golden_hashIds
-        elif len(golden_hashIds) == 4:
-          golden_hashID = " : " +  golden_hashIds
-        modulehash = golden_hashID + " " + golden_bec + "," + golden_layer + "," + golden_phi + "," + golden_eta
-    if modulehash:
-      golden_hash.append(modulehash)
-
+   #imported function reading the csv in common
+  module_dict = create_mapping('../common/mapping.csv')
+  for (k,v) in module_dict.items():
+    golden_modules.append(k)
+    #produces string of format ': 2035 2,2,47,0'
+    golden_hash.append(convertToOldFormat(v))
+  
   list_sa = list(set(golden_modules) - set(module_list))
 
   all_recover.close()
