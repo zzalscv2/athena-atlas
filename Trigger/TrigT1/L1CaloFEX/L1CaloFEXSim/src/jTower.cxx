@@ -152,7 +152,7 @@ void jTower::Do_LAr_encoding(){
     
     //multi linear digitisation encoding
     for(uint layer=0; layer<m_et_float_raw.size(); layer++){
-        unsigned int ecode = jFEXCompression::Compress( std::round( m_et_float_raw[layer]) ); 
+        unsigned int ecode = jFEXCompression::Compress( m_et_float_raw[layer] ); 
         int outET = jFEXCompression::Expand(ecode); 
         m_et[layer] = outET;         
     }
