@@ -15,11 +15,12 @@ AtlasG4_tf.py \
     --CA \
     --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --postInclude 'default:PyJobTransforms.UseFrontier' \
-    --preInclude 'AtlasG4Tf:Campaigns.MC23SimulationMultipleIoV' \
+    --preInclude 'AtlasG4Tf:Campaigns.MC23aSimulationMultipleIoV' \
     --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.evgen.EVNT.e4993.EVNT.08166201._000012.pool.root.1" \
     --outputHITSFile "test.CA.HITS.pool.root" \
     --maxEvents 50 \
+    --jobNumber 857 \
     --postExec 'with open("ConfigSimCA.pkl", "wb") as f: cfg.store(f)' \
     --imf False
 
@@ -31,22 +32,24 @@ status=$rc
 AtlasG4_tf.py \
     --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-    --preInclude 'AtlasG4Tf:Campaigns/MC23SimulationMultipleIoV.py' \
+    --preInclude 'AtlasG4Tf:Campaigns/MC23aSimulationMultipleIoV.py' \
     --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.evgen.EVNT.e4993.EVNT.08166201._000012.pool.root.1" \
     --outputHITSFile "test.CA.HITS.pool.root" \
     --maxEvents 50 \
+    --jobNumber 857 \
     --imf False \
     --athenaopts '"--config-only=ConfigSimCG.pkl"'
 
 AtlasG4_tf.py \
     --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-    --preInclude 'AtlasG4Tf:Campaigns/MC23SimulationMultipleIoV.py' \
+    --preInclude 'AtlasG4Tf:Campaigns/MC23aSimulationMultipleIoV.py' \
     --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.evgen.EVNT.e4993.EVNT.08166201._000012.pool.root.1" \
     --outputHITSFile "test.HITS.pool.root" \
     --maxEvents 50 \
+    --jobNumber 857 \
     --imf False
 rc2=$?
 mv log.AtlasG4Tf log.AtlasG4Tf_OLD
