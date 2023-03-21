@@ -12,8 +12,8 @@
 // STL includes
 #include <string>
 
-// Boost includes
-#include "boost/array.hpp"
+
+#include <array>
 
 // FrameWork includes
 #include "GaudiKernel/ServiceHandle.h"
@@ -86,14 +86,14 @@ class HepMcTupleWriterTool : virtual public IIOHepMcTool, public AthAlgTool
   /// A simple representation of a HepMc particle
   struct HepMcParticles {
     int m_nParticles;
-    boost::array<double, s_nMax> m_px;
-    boost::array<double, s_nMax> m_py;
-    boost::array<double, s_nMax> m_pz;
-    boost::array<double, s_nMax> m_m;
-    boost::array<double, s_nMax> m_ene;
-    boost::array<int,    s_nMax> m_pdgId;
-    boost::array<int,    s_nMax> m_status;
-    boost::array<int,    s_nMax> m_barcode;
+    std::array<double, s_nMax> m_px;
+    std::array<double, s_nMax> m_py;
+    std::array<double, s_nMax> m_pz;
+    std::array<double, s_nMax> m_m;
+    std::array<double, s_nMax> m_ene;
+    std::array<int,    s_nMax> m_pdgId;
+    std::array<int,    s_nMax> m_status;
+    std::array<int,    s_nMax> m_barcode;
   };
   /// our cached particles
   HepMcParticles m_particles{};
