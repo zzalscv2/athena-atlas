@@ -5778,6 +5778,30 @@ HLT_e30_lhvloose_L1eEM26M:
     4: 5
     5: 5
     6: 5
+HLT_e30_lhvloose_nopix_lrttight_L1EM22VHI:
+  eventCount: 0
+  stepCounts:
+    0: 7
+    1: 7
+  stepFeatures:
+    0: 7
+    1: 7
+HLT_e30_lhvloose_nopix_lrtvxtight_L1EM22VHI:
+  eventCount: 0
+  stepCounts:
+    0: 7
+    1: 7
+  stepFeatures:
+    0: 7
+    1: 7
+HLT_e30_lhvloose_nopix_lrtxtight_L1EM22VHI:
+  eventCount: 0
+  stepCounts:
+    0: 7
+    1: 7
+  stepFeatures:
+    0: 7
+    1: 7
 HLT_e35_lhloose_nopix_lrtmedium_L1EM22VHI:
   eventCount: 0
   stepCounts:
@@ -7680,18 +7704,6 @@ HLT_g25_medium_tau25_dipion2_tracktwoMVA_50invmAB_L1EM22VHI:
     2: 32
     3: 30
 HLT_g25_medium_tau25_dipion2_tracktwoMVA_50invmAB_L1eEM26M:
-  eventCount: 0
-  stepCounts:
-    0: 11
-    1: 10
-    2: 10
-    3: 8
-  stepFeatures:
-    0: 46
-    1: 44
-    2: 39
-    3: 37
-HLT_g25_medium_tau25_dipion4_tracktwoMVA_50invmAB_L1eEM26M:
   eventCount: 0
   stepCounts:
     0: 11

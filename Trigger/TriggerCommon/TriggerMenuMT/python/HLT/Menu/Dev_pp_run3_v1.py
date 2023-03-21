@@ -129,6 +129,12 @@ def getDevSignatures():
         ChainProp(name='HLT_e9_lhvloose_nogsf_bBeeM6000_L1BPH-0DR3-EM7J15', l1SeedThresholds=['EM7'], stream=['BphysDelayed'], groups=BphysElectronGroup+DevGroup+LegacyTopoGroup),
         ChainProp(name='HLT_g20_loose_noiso_L1EM15VH', groups=SupportLegGroup+SinglePhotonGroup+['RATE:CPS_EM15VH']),
 
+        # ATR-27096 - Test rates for LRT electron veryloose chain at high d0
+        ChainProp(name='HLT_e30_lhvloose_nopix_lrttight_L1EM22VHI', l1SeedThresholds=['EM22VHI'], groups=SingleElectronGroup+DevGroup),
+        ChainProp(name='HLT_e30_lhvloose_nopix_lrtxtight_L1EM22VHI', l1SeedThresholds=['EM22VHI'], groups=SingleElectronGroup+DevGroup),
+        ChainProp(name='HLT_e30_lhvloose_nopix_lrtvxtight_L1EM22VHI', l1SeedThresholds=['EM22VHI'], groups=SingleElectronGroup+DevGroup),
+
+
         # Photon chains for TLA
         ChainProp(name='HLT_g35_loose_PhysicsTLA_L1EM22VHI',stream=['TLA'], groups=SinglePhotonGroup+DevGroup),
 
