@@ -7,7 +7,7 @@
 
 #include "IBender.h"
 #include "FPTracker/FPTrackerConstants.h" // Bendplane enum
-#include "boost/shared_ptr.hpp"
+#include <memory>
 
 namespace FPTracker{
   class IParticle; 
@@ -24,7 +24,7 @@ namespace FPTracker{
     
     void bend(IParticle&)                const;
     std::string label()                  const;
-    boost::shared_ptr< IBender > clone() const;
+    std::shared_ptr< IBender > clone() const;
   private:
     
     static const std::string s_label;

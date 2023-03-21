@@ -17,7 +17,7 @@
 #include "FPTracker/beamlineXPosition.h"
 #include "FPTracker/IBeamElement.h"
 #include "FPTracker/Particle.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <algorithm>
 //#include <cassert>
 #include <iostream>
@@ -28,7 +28,7 @@ namespace FPTracker{
 			 const ConfigData& configData,
 			 const Side& side,
 			 int magver,
-			 boost::shared_ptr< std::ifstream> magfile 
+			 std::shared_ptr< std::ifstream> magfile 
 			 )
   {
     
@@ -78,9 +78,9 @@ namespace FPTracker{
     Beamline beamline(elements.begin(), elements.end());
 
     double pbeam = configData.pbeam0;
-    boost::shared_ptr<IParticle> ip = (side ==  beam1) ? 
-      boost::shared_ptr<IParticle>(new Particle(0., 0., 0., 0., 0.,     pbeam) ):
-      boost::shared_ptr<IParticle>(new Particle(0., 0., 0., 0., 0., -1.*pbeam) );
+    std::shared_ptr<IParticle> ip = (side ==  beam1) ? 
+      std::shared_ptr<IParticle>(new Particle(0., 0., 0., 0., 0.,     pbeam) ):
+      std::shared_ptr<IParticle>(new Particle(0., 0., 0., 0., 0., -1.*pbeam) );
     beamline.calibrate( *ip );
 
 

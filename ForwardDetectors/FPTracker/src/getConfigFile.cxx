@@ -8,10 +8,10 @@
 
 namespace FPTracker{
 
-  boost::shared_ptr< std::ifstream >  getConfigFile(const std::string& dir, const std::string& fn)
+  std::shared_ptr< std::ifstream >  getConfigFile(const std::string& dir, const std::string& fn)
   {
     std::ifstream infile;
-    boost::shared_ptr<std::ifstream> pfile(new std::ifstream);
+    std::shared_ptr<std::ifstream> pfile(new std::ifstream);
     FPTracker::openFile(dir, fn, pfile);
     return pfile;
   }
