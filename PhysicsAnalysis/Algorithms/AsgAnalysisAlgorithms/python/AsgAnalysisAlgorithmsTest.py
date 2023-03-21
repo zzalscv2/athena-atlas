@@ -51,7 +51,7 @@ def makeOverlapSequence (dataType) :
 
     # Include, and then set up the muon analysis algorithm sequence:
     from MuonAnalysisAlgorithms.MuonAnalysisSequence import makeMuonAnalysisSequence
-    muonSequence = makeMuonAnalysisSequence( dataType, 'Tight.Iso' )
+    muonSequence = makeMuonAnalysisSequence( dataType, 'Tight.Loose_VarRad' )
     muonSequence.configure( inputName = 'Muons',
                             outputName = 'AnalysisMuons_%SYS%' )
     algSeq += muonSequence
