@@ -670,7 +670,7 @@ bool EvtInclusiveDecay::passesUserSelection(HepMC::GenEvent* hepMC) {
   bool passed(false);
   std::vector<HepMC::GenParticlePtr> *muons = new std::vector<HepMC::GenParticlePtr>;
 
-  for ( auto p:  *hepMC) {
+  for ( const auto& p:  *hepMC) {
     if( std::abs(p->pdg_id()) == 13 )
       muons->push_back(p);
   }
@@ -849,7 +849,7 @@ unsigned int EvtInclusiveDecay::printTree(HepMC::GenParticlePtr p,
 std::string EvtInclusiveDecay::pdgName(HepMC::ConstGenParticlePtr p, bool statusHighlighting, std::set<HepMC::GenParticlePtr>* barcodeList) {
   std::ostringstream buf;
   bool inlist=false;
-  if (barcodeList) for (auto pinl: *barcodeList) if (pinl&&p) if (pinl.get()==p.get()) inlist=true;
+  if (barcodeList) for (const auto& pinl: *barcodeList) if (pinl&&p) if (pinl.get()==p.get()) inlist=true;
   if (statusHighlighting) {
     if ( ((barcodeList!=0) && (inlist)) ||
          ((barcodeList==0) && isToBeDecayed(p,false)) )
