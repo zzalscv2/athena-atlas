@@ -20,6 +20,7 @@ run.args += ' Trigger.triggerMenuSetup="Dev_pp_run3_v1"'
 run.args += ' Trigger.doRuntimeNaviVal=True'
 run.args += ' ITk.doTruth=False'
 run.args += ' Tracking.doTruth=False'
+run.args += ' Trigger.enableL1CaloPhase1=False'
 run.prmon = False
 
 
