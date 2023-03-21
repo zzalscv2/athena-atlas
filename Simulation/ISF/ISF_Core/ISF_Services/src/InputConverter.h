@@ -100,11 +100,7 @@ namespace ISF {
 #endif
 
     /** get all generator particles which pass filters */
-#ifdef HEPMC3
     std::vector<HepMC::GenParticlePtr > getSelectedParticles(HepMC::GenEvent& evnt, bool legacyOrdering=false) const;
-#else
-    std::vector<HepMC::GenParticlePtr > getSelectedParticles(HepMC::GenEvent& evnt, bool legacyOrdering=false) const;
-#endif
 
     /** check if the given particle passes all filters */
 #ifdef HEPMC3
