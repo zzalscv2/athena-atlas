@@ -10,7 +10,7 @@
 #include "FPTrackerConstants.h"
 #include "IBender.h"
 #include "Particle.h"
-#include "boost/shared_ptr.hpp"
+#include <memory>
 #include <vector>
 #include <iosfwd>
 
@@ -58,7 +58,7 @@ namespace FPTracker{
     IBeamElement::ConstPtr_t clone() const;
 
 
-    typedef boost::shared_ptr< Magnet >     Ptr_t;
+    typedef std::shared_ptr< Magnet >     Ptr_t;
     typedef std::vector< Ptr_t >            Container_t;
     
     enum Type {hbDipole, hfQuadrupole, vfQuadrupole, vbDipole, notAMagnet};
