@@ -6,6 +6,7 @@
 
 // STL includes
 #include <vector>
+#include <cmath>
 
 // FrameWork includes
 #include "GaudiKernel/IToolSvc.h"
@@ -149,7 +150,7 @@ namespace ZeeValidation {
       if ( electron -> pt()*(1./GeV) < m_PtCentCut ) continue;
       nrecel++;
 
-      bool inAcceptance = (TMath::Abs(electron -> eta()) > m_EtaCrackHighCut || TMath::Abs(electron -> eta()) < m_EtaCrackLowCut) && TMath::Abs(electron -> eta()) < m_EtaCentCut;
+      bool inAcceptance = (std::abs(electron -> eta()) > m_EtaCrackHighCut || std::abs(electron -> eta()) < m_EtaCrackLowCut) && std::abs(electron -> eta()) < m_EtaCentCut;
 
       if (inAcceptance)
 	m_ReconElectronsPlots.fill(eventInfo, vertices);
@@ -236,11 +237,11 @@ namespace ZeeValidation {
 	for(auto truth_part : *truth_particles)
 	  {
 	    // Select truth particle which passed pT, eta cuts and have pid=11
-	    if( TMath::Abs(truth_part -> pdgId()) != 11 || truth_part -> status() != 1  || truth_part -> barcode() > 100000 ) continue;
+	    if( std::abs(truth_part -> pdgId()) != 11 || truth_part -> status() != 1  || truth_part -> barcode() > 100000 ) continue;
 	    if( truth_part -> pt()*(1./GeV) < m_PtCentCut ) continue;
-	    if(TMath::Abs(truth_part -> eta()) > m_EtaCentCut ) continue;
+	    if(std::abs(truth_part -> eta()) > m_EtaCentCut ) continue;
 
-	    bool inAcceptance = TMath::Abs(truth_part -> eta()) > m_EtaCrackHighCut || TMath::Abs(truth_part -> eta()) < m_EtaCrackLowCut;
+	    bool inAcceptance = std::abs(truth_part -> eta()) > m_EtaCrackHighCut || std::abs(truth_part -> eta()) < m_EtaCrackLowCut;
 	    // Fill plots with all truth particles passed cuts
 	    m_TrueElectronsPlots.fill(truth_part, 0);
 	    if( inAcceptance )
@@ -324,9 +325,9 @@ namespace ZeeValidation {
 	for (auto truth_part : *truth_particles){
 	  
 	  //select truth particle which passed fwd pT, eta cuts and have pid=11
-	  if ( TMath::Abs(truth_part -> pdgId()) != 11 || truth_part -> status() != 1  || truth_part -> barcode() > 100000 ) continue;
+	  if ( std::abs(truth_part -> pdgId()) != 11 || truth_part -> status() != 1  || truth_part -> barcode() > 100000 ) continue;
 	  if ( truth_part -> pt()*(1./GeV) < m_PtFwdCut ) continue;
-	  if (TMath::Abs( truth_part -> eta() ) < m_EtaLowFwdCut || TMath::Abs(  truth_part -> eta() ) > m_EtaHighFwdCut ) continue;
+	  if (std::abs( truth_part -> eta() ) < m_EtaLowFwdCut || std::abs(  truth_part -> eta() ) > m_EtaHighFwdCut ) continue;
 	  
 	  //fill plots with all truth particles passed fwd cuts
 	  m_TrueFwdElectronsPlots.fill(truth_part, 0);
@@ -470,7 +471,7 @@ namespace ZeeValidation {
 	    el4v[i] = TLorentzVector(px, py, pz, e);	    
 	  }
 	}
-	inAcceptance[i] = (TMath::Abs(elclus4v[i].Eta()) > m_EtaCrackHighCut || TMath::Abs(elclus4v[i].Eta()) < m_EtaCrackLowCut) && TMath::Abs(elclus4v[i].Eta()) < m_EtaCentCut;
+	inAcceptance[i] = (std::abs(elclus4v[i].Eta()) > m_EtaCrackHighCut || std::abs(elclus4v[i].Eta()) < m_EtaCrackLowCut) && std::abs(elclus4v[i].Eta()) < m_EtaCentCut;
       }
    	             
       TLorentzVector z = el4v[0] + el4v[1];
@@ -644,10 +645,10 @@ namespace ZeeValidation {
 	float pz = e * std::tanh(eta);
 	
 	elfwd4v[0] = TLorentzVector(px, py, pz, e);	
-	inAcceptance[0] = (TMath::Abs(etaclus) > m_EtaCrackHighCut || TMath::Abs(etaclus) < m_EtaCrackLowCut) && TMath::Abs(etaclus) < m_EtaCentCut;
+	inAcceptance[0] = (std::abs(etaclus) > m_EtaCrackHighCut || std::abs(etaclus) < m_EtaCrackLowCut) && std::abs(etaclus) < m_EtaCentCut;
 
 	elfwd4v[1] = zfwd_el[1] -> p4();
-	inAcceptance[1] = TMath::Abs(elfwd4v[1].Eta()) > m_EtaLowFwdCut && TMath::Abs(elfwd4v[1].Eta()) < m_EtaHighFwdCut;
+	inAcceptance[1] = std::abs(elfwd4v[1].Eta()) > m_EtaLowFwdCut && std::abs(elfwd4v[1].Eta()) < m_EtaHighFwdCut;
 	
 	bool tight_cent = false, loose_fwd = false, tight_fwd = false;
 	bool oq_fwd = false;
