@@ -20,9 +20,7 @@
 
 // STL includes
 #include <string>
-
-// boost includes
-#include <boost/array.hpp>
+#include <array>
 
 namespace PerfMon {
 
@@ -40,7 +38,7 @@ namespace PerfMon {
       Size
     };
   };
-  typedef boost::array<std::string, State::Size> Steps_t;
+  typedef std::array<std::string, State::Size> Steps_t;
   static const Steps_t Steps = { {
     "ini", 
     //"run", 
