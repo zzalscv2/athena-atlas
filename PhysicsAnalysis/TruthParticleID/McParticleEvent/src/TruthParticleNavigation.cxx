@@ -9,11 +9,7 @@
 // Author: S.Binet<binet@cern.ch>
 /////////////////////////////////////////////////////////////////// 
 
-
-// STL includes
-
-// Boost includes
-#include <boost/any.hpp>
+#include <any>
 
 // Navigation includes
 #include "Navigation/INavigationToken.h"
