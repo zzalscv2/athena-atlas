@@ -4,16 +4,14 @@
 atlas_subdir( McParticleEventTPCnv )
 
 # External dependencies:
-find_package( Boost )
 find_package( ROOT COMPONENTS EG Core Tree MathCore Hist RIO pthread )
 
 # Component(s) in the package:
 atlas_add_tpcnv_library( McParticleEventTPCnv
                          src/*.cxx
                          PUBLIC_HEADERS McParticleEventTPCnv
-                         INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
                          PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                         LINK_LIBRARIES LINK_LIBRARIES ${Boost_LIBRARIES} AthenaPoolCnvSvcLib DataModelAthenaPoolLib GeneratorObjects McParticleEvent McParticleKernel
+                         LINK_LIBRARIES LINK_LIBRARIES  AthenaPoolCnvSvcLib DataModelAthenaPoolLib GeneratorObjects McParticleEvent McParticleKernel
                          PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaKernel AtlasHepMCLib GaudiKernel )
 
 atlas_add_dictionary( McParticleEventTPCnvDict
@@ -35,5 +33,4 @@ atlas_add_test( TruthParticleContainerCnv_p6_test
 atlas_add_test( TruthEtIsolationsCnv_p1_test
                 SOURCES
                 test/TruthEtIsolationsCnv_p1_test.cxx
-                INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-                LINK_LIBRARIES ${Boost_LIBRARIES} AthenaPoolCnvSvcLib DataModelAthenaPoolLib GaudiKernel GeneratorObjects McParticleEvent McParticleEventTPCnv SGTools TestTools CxxUtils )
+                LINK_LIBRARIES AthenaPoolCnvSvcLib DataModelAthenaPoolLib GaudiKernel GeneratorObjects McParticleEvent McParticleEventTPCnv SGTools TestTools CxxUtils )
