@@ -1073,12 +1073,14 @@ if doTileNtuple:
 
     TileNtuple.CheckDCS = TileUseDCS
 
-
-    beamElemContainer   = getattr (TileNtuple,
-                                   'TileBeamElemContainer',
-                                   TileNtuple.getDefaultProperty('TileBeamElemContainer'))
-    if str(beamElemContainer):
-        dqStatus.TileBeamElemContainer = beamElemContainer
+    if TilePhysTiming or TilePhysRun:
+        dqStatus.TileBeamElemContainer = ""
+    else:
+        beamElemContainer   = getattr (TileNtuple,
+                                       'TileBeamElemContainer',
+                                       TileNtuple.getDefaultProperty('TileBeamElemContainer'))
+        if str(beamElemContainer):
+            dqStatus.TileBeamElemContainer = beamElemContainer
 
     digitsContainer     = getattr (TileNtuple,
                                    'TileDigitsContainer',
@@ -1107,7 +1109,7 @@ if doTileMon:
             from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
             from AthenaConfiguration.AllConfigFlags import ConfigFlags
 
-            runTypes = {0 : 'PHY', 1 : 'PHY', 2 : 'LAS', 4 : 'PHY', 8 : 'CIS'}
+            runTypes = {0 : 'PHY', 1 : 'PHY', 2 : 'LAS', 4 : 'PED', 8 : 'CIS'}
             runTypeName = runTypes[jobproperties.TileRecFlags.TileRunType()]
 
             ConfigFlags.Input.Files = FileNameVec
@@ -1218,6 +1220,7 @@ if doTileMon:
             theTileRawChannelMon.overlaphists = True
 
         theTileRawChannelMon.MinAmpForCorrectedTime = 0.1
+        theTileRawChannelMon.CalibUnit = 1
 
         TileMon.AthenaMonTools += [ theTileRawChannelMon ]
         printfunc (theTileRawChannelMon)
@@ -1476,6 +1479,8 @@ if doTileCalib:
             theTileRawChNoiseCalibAlg.doOpt   = False
             theTileRawChNoiseCalibAlg.doDsp   = True
             theTileRawChNoiseCalibAlg.UseforCells=3 # i.e. from TileRawChannelCnt (like DSP)
+        else:
+            theTileRawChNoiseCalibAlg.doDsp   = False
 
     elif TileCisRun:
         # CIS calibration using top calib alg
