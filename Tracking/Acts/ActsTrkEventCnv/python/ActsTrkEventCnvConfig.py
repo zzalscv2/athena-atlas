@@ -27,8 +27,8 @@ if __name__ == "__main__":
     args = flags.fillFromArgs()
 
     flags.Input.Files = [
-        '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ActsTrkEventCnv/RUN4.ESD.pool.root']
-    flags.IOVDb.GlobalTag = "OFLCOND-MC21-SDR-RUN3-07"
+        '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/ESD/ATLAS-P2-RUN4-01-01-00/ESD.ttbar_mu0.pool.root']
+    flags.IOVDb.GlobalTag = "OFLCOND-MC15c-SDR-14-05"
     flags.Scheduler.ShowDataDeps=True
     flags.Scheduler.ShowDataFlow=True
     flags.Scheduler.CheckDependencies=True
