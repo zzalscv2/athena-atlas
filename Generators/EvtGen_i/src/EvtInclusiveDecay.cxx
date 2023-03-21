@@ -905,6 +905,18 @@ double EvtInclusiveAtRndmGen::random() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+static void local_split( std::vector <std::string>& tokens,const std::string& input, const char sep) {
+    size_t start = 0, end = 0;
+    for (size_t i = 0; i <= input.size(); i++) {
+        if (input[i] == sep || i == input.size()) {
+            end = i;
+            if (end!=start) tokens.push_back(input.substr(start,end - start));
+            start = end + 1;
+        }
+    }
+}
+
 std::string EvtInclusiveDecay::xmlpath(){
 
   char *cmtpath = getenv("CMTPATH");
@@ -915,7 +927,7 @@ std::string EvtInclusiveDecay::xmlpath(){
   if(cmtpath != 0 && cmtconfig != 0){
 
     std::vector<std::string> cmtpaths;
-    boost::split(cmtpaths, cmtpath, boost::is_any_of(std::string(":")));
+    local_split(cmtpaths, cmtpath,':');
 
     std::string installPath = "/InstallArea/" + std::string(cmtconfig) + "/share/Pythia8/xmldoc";
 
