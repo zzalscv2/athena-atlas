@@ -409,8 +409,10 @@ def createTriggerRecoFlags():
     # enables or disables the addition of VR track jet reconstruction sequence
     flags.addFlag("Trigger.Jet.doVRJets", False)
 
-    # use online-derived calibration for HLT PFlow jets
-    flags.addFlag("Trigger.Jet.useTriggerCalib", False)
+    # chooses calibration config file for HLT small-R jets (mapping in: Reconstruction/Jet/JetCalibTools/python/JetCalibToolsConfig.py)
+    # All calib keys for HLT jets have to start with "Trig" otherwise the JetCalibTool config fails!
+    flags.addFlag("Trigger.Jet.pflowCalibKey", "TrigLS2")
+    flags.addFlag("Trigger.Jet.emtopoCalibKey", "TrigLS2")
 
     def __httFlags():
         """Additional function delays import"""
