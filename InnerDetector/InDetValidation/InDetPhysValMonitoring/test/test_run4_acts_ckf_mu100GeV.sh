@@ -12,7 +12,7 @@ dcubeXml=dcube_IDPVMPlots_ACTS_CKF_ITk.xml
 rdo_23p0=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/mc15_14TeV.900040.PG_singlemu_Pt100_etaFlatnp0_43.recon.RDO.e8185_s3856_r13824/RDO.29831688._000001.pool.root.1
 
 # search in $DATAPATH for matching file
-dcubeXmlAbsPath=$(find -H ${DATAPATH//:/ } -name $dcubeXml -print -quit 2>/dev/null)
+dcubeXmlAbsPath=$(find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 1 -name $dcubeXml -print -quit 2>/dev/null)
 # Don't run if dcube config not found
 if [ -z "$dcubeXmlAbsPath" ]; then
     echo "art-result: 1 dcube-xml-config"
