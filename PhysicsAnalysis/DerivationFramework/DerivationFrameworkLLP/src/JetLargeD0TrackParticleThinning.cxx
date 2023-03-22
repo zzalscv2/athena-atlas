@@ -121,7 +121,7 @@ StatusCode DerivationFramework::JetLargeD0TrackParticleThinning::doThinning() co
             }
         }
     } else { // check only jets passing user selection string
-        for (xAOD::JetContainer::const_iterator jetIt=importedJets->begin(); jetIt!=importedJets->end(); ++jetIt) {
+        for (std::vector<const xAOD::Jet*>::const_iterator jetIt=jetToCheck.begin(); jetIt!=jetToCheck.end(); ++jetIt) {
             const std::vector< ElementLink<DataVector<xAOD::IParticle> > > &jetTrackLinks = ghostTrackLRT( **jetIt ); 
             for (const auto &jetTrkIt : jetTrackLinks) {
               const xAOD::TrackParticle* trackPart = dynamic_cast<const xAOD::TrackParticle*>(*jetTrkIt);
