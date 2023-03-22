@@ -498,14 +498,14 @@ StatusCode CompactHardTruth::execute() {
       if (pvtx->particles_in().size() == 1 && pvtx->particles_out().size() == 1) {
         // Incoming particle to parent vertex
         HepMC::GenParticlePtr pp = pvtx->particles_in().front();
-        if (!pp || HepMC::barcode(pp) == 0) {
+        if (!pp || pp->parent_event() == nullptr) {
           ATH_MSG_DEBUG("1->1: missing pp for fp " << fp);
           ++m_missCount;
           continue;
         }
         // Its parent vertex
         HepMC::GenVertexPtr ppvtx = pp->production_vertex();
-        if (!ppvtx || HepMC::barcode(ppvtx) == 0) {
+        if (!ppvtx || ppvtx->parent_event() == nullptr) {
           ATH_MSG_DEBUG("1->1: missing ppvtx for fp " << fp);
           ++m_missCount;
           continue;
@@ -538,12 +538,12 @@ StatusCode CompactHardTruth::execute() {
         // Their parent vertices
         HepMC::GenVertexPtr ppvtx1 = pp1->production_vertex();
         HepMC::GenVertexPtr ppvtx2 = pp2->production_vertex();
-        if (!ppvtx1 || HepMC::barcode(ppvtx1) == 0) {
+        if (!ppvtx1 || ppvtx1->parent_event() == nullptr) {
           ATH_MSG_DEBUG("2->1: missing ppvtx1 for fp " << fp);
           ++m_missCount;
           continue;
         }
-        if (!ppvtx2 || HepMC::barcode(ppvtx2) == 0) {
+        if (!ppvtx2 || ppvtx2->parent_event() == nullptr) {
           ATH_MSG_DEBUG("2->1: missing ppvtx2 for fp " << fp);
           ++m_missCount;
           continue;
@@ -608,7 +608,7 @@ StatusCode CompactHardTruth::execute() {
         }
         // Associated vertices
         HepMC::GenVertexPtr ppvtx = pp->production_vertex();
-        if (!ppvtx || HepMC::barcode(ppvtx) == 0) {
+        if (!ppvtx || ppvtx->parent_event() == nullptr) {
           ATH_MSG_DEBUG("1->2: missing ppvtx for fp " << fp);
           ++m_missCount;
           continue;
@@ -1195,7 +1195,7 @@ StatusCode CompactHardTruth::execute() {
       // Sherpa does 1-body decay of incoming protons :-(
       if (pin == beams[0] || pin == beams[1]) continue;
       HepMC::GenVertexPtr pvtx = pin->production_vertex();
-      if (!pvtx || HepMC::barcode(pvtx) == 0) {
+      if (!pvtx || pvtx->parent_event() == nullptr) {
         ATH_MSG_DEBUG("1->1: missing pvtx for vertex " << v);
         ++m_missCount;
         continue;
