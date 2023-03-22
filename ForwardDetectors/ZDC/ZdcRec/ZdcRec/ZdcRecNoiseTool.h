@@ -15,10 +15,6 @@
 
 #include <string>
 #include <map>
-//#include <boost/accumulators/accumulators.hpp>
-//#include <boost/accumulators/statistics/min.hpp>
-//#include <boost/accumulators/statistics/max.hpp>
-//#include <boost/accumulators/statistics/mean.hpp>
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
@@ -62,11 +58,6 @@ private:
 
 	ZdcDigitsCollection* m_pedestalData{};
 
-	//Boost accumulator
-	//boost::accumulators::accumulator_set< double, boost::accumulators::features<
-	//															boost::accumulators::tag::min,
-	//															boost::accumulators::tag::max,
-	//															boost::accumulators::tag::mean > > m_acc;
 };
 
 #endif /* ZDCRECNOISETOOL_H_ */
