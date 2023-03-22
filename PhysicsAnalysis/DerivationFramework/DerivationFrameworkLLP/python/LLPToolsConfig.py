@@ -34,6 +34,15 @@ def JetLargeD0TrackParticleThinningCfg(ConfigFlags, name, **kwargs):
                       primary = True)
     return acc
 
+# RC jet substructure computation tool
+def RCJetSubstructureAugCfg(ConfigFlags, name, **kwargs):
+    """Configure the RC jet substructure computation tool"""
+    acc = ComponentAccumulator()
+    RCJetSubstructureAug = CompFactory.DerivationFramework.RCJetSubstructureAug
+    acc.addPublicTool(RCJetSubstructureAug(name, **kwargs),
+                      primary = True)
+    return acc
+
 
 def LLP1TriggerSkimmingToolCfg(ConfigFlags, name, **kwargs):
 
@@ -48,9 +57,10 @@ def LLP1TriggerSkimmingToolCfg(ConfigFlags, name, **kwargs):
     trig_elmu = TriggerAPI.getLowestUnprescaledAnyPeriod(allperiods, triggerType=TriggerType.el, additionalTriggerType=TriggerType.mu,  livefraction=0.8)
     trig_mug = TriggerAPI.getLowestUnprescaledAnyPeriod(allperiods, triggerType=TriggerType.mu, additionalTriggerType=TriggerType.g,  livefraction=0.8)
 
+    trig_EJ_Run3 = ["HLT_j200_0eta180_emergingPTF0p08dR1p2_a10sd_cssk_pf_jes_ftf_preselj200_L1J100", "HLT_j460_a10r_L1J100"]
     trig_VBF_2018 =["HLT_j55_gsc80_bmv2c1070_split_j45_gsc60_bmv2c1085_split_j45_320eta490", "HLT_j45_gsc55_bmv2c1070_split_2j45_320eta490_L1J25.0ETA23_2J15.31ETA49", "HLT_j80_0eta240_j60_j45_320eta490_AND_2j35_gsc45_bmv2c1070_split", "HLT_ht300_2j40_0eta490_invm700_L1HT150-J20s5.ETA31_MJJ-400-CF_AND_2j35_gsc45_bmv2c1070_split", "HLT_j70_j50_0eta490_invm1100j70_dphi20_deta40_L1MJJ-500-NFF"]
 
-    triggers = trig_el + trig_mu + trig_g + trig_elmu + trig_mug + trig_VBF_2018
+    triggers = trig_el + trig_mu + trig_g + trig_elmu + trig_mug + trig_VBF_2018 + trig_EJ_Run3
     #remove duplicates
     triggers = sorted(list(set(triggers)))
 

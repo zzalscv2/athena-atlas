@@ -85,8 +85,38 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
                           LLP1LRTMaxCellDecoratorTool ]
 
     # Common augmentations
+    
+    # Reclustered jets definitions
+    from JetRecConfig.JetRecConfig import registerAsInputConstit, JetRecCfg
+    from JetRecConfig.StandardSmallRJets import AntiKt4Truth, AntiKt4EMTopo
+    from JetRecConfig.JetDefinition import JetDefinition
+    from JetRecConfig.StandardJetConstits import stdConstitDic as cst
+    from JetRecConfig.JetConfigFlags import jetInternalFlags
+
+    jetInternalFlags.isRecoJob = True
+    registerAsInputConstit(AntiKt4EMTopo)
+    registerAsInputConstit(AntiKt4Truth)
+    cst.AntiKt4EMTopoJets.label = "EMTopoRC"
+    cst.AntiKt4TruthJets.label = "TruthRC"
+
+    AntiKt10RCEMTopo = JetDefinition(   "AntiKt",1.0,cst.AntiKt4EMTopoJets,
+                                        ghostdefs = ["Track", "TrackLRT", "LCTopo"],
+                                        modifiers = ("Sort", "Filter:200000",),
+                                        standardRecoMode = True,
+                                        lock = True,
+    )
+    if ConfigFlags.Input.isMC:
+        AntiKt10RCTruth = JetDefinition("AntiKt",1.0,cst.AntiKt4TruthJets,
+                                        ghostdefs = [],
+                                        modifiers = ("Sort", "Filter:200000",),
+                                        standardRecoMode = True,   
+                                        lock = True
+        )
+
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
     acc.merge(PhysCommonAugmentationsCfg(ConfigFlags, TriggerListsHelper = kwargs['TriggerListsHelper']))
+    acc.merge(JetRecCfg(ConfigFlags,AntiKt10RCEMTopo))
+    if ConfigFlags.Input.isMC: acc.merge(JetRecCfg(ConfigFlags,AntiKt10RCTruth))
 
     # LRT Egamma
     from DerivationFrameworkEGamma.EGammaLRTConfig import EGammaLRTCfg
@@ -237,6 +267,14 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
                                                                                JetKey                  = "AntiKt4EMTopoJets",
                                                                                SelectionString         = "(AntiKt4EMTopoJets.pt > 20.*GeV) && (abs(AntiKt4EMTopoJets.eta) < 2.5)",
                                                                                InDetTrackParticlesKey  = "InDetTrackParticles"))
+    
+    LLP1FatJetTPThinningTool = acc.getPrimaryAndMerge(JetTrackParticleThinningCfg(  ConfigFlags,
+                                                                                    name                    = "LLP1FatJetTPThinningTool",
+                                                                                    StreamName              = kwargs['StreamName'],
+                                                                                    JetKey                  = "AntiKt10EMTopoRCJets",
+                                                                                    SelectionString         = "(AntiKt10EMTopoRCJets.pt > 200.*GeV) && (abs(AntiKt10EMTopoRCJets.eta) < 2.5)",
+                                                                                    InDetTrackParticlesKey  = "InDetTrackParticles",
+                                                                                    ))
 
     # LRT Tracks associated with jets
     if ConfigFlags.Tracking.doLargeD0:
@@ -246,6 +284,14 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
                                                                                              JetKey                  = "AntiKt4EMTopoJets",
                                                                                              SelectionString         = "(AntiKt4EMTopoJets.pt > 20.*GeV) && (abs(AntiKt4EMTopoJets.eta) < 2.5)",
                                                                                              InDetTrackParticlesKey  = "InDetLargeD0TrackParticles"))
+
+        LLP1LRTFatJetTPThinningTool = acc.getPrimaryAndMerge(JetLargeD0TrackParticleThinningCfg(ConfigFlags,
+                                                                                                name                    = "LLP1LRTFatJetTPThinningTool",
+                                                                                                StreamName              = kwargs['StreamName'],
+                                                                                                JetKey                  = "AntiKt10EMTopoRCJets",
+                                                                                                SelectionString         = "(AntiKt10EMTopoRCJets.pt > 200.*GeV) && (abs(AntiKt10EMTopoRCJets.eta) < 2.5)",
+                                                                                                InDetTrackParticlesKey  = "InDetLargeD0TrackParticles",
+                                                                                                ))
 
     # Finally the kernel itself
     thinningTools = [LLP1TrackParticleThinningTool,
@@ -259,10 +305,27 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
                      LLP1DiTauLowPtTPThinningTool,
                      LLP1VSITPThinningTool,
                      LLP1LRTVSITPThinningTool,
-                     LLP1JetTPThinningTool]
+                     LLP1JetTPThinningTool,
+                     LLP1FatJetTPThinningTool]
 
     if ConfigFlags.Tracking.doLargeD0:
         thinningTools.append(LLP1LRTJetTPThinningTool)
+        thinningTools.append(LLP1LRTFatJetTPThinningTool)
+    
+    # Additionnal augmentations
+
+    # Compute RC substructure variables from energy clusters
+    from DerivationFrameworkLLP.LLPToolsConfig import RCJetSubstructureAugCfg
+    LLP1RCJetSubstructureAugTool = acc.getPrimaryAndMerge(RCJetSubstructureAugCfg(ConfigFlags,
+                                                                                    name                              = "LLP1RCJetSubstructureAugTool",
+                                                                                    StreamName                        = kwargs['StreamName'],
+                                                                                    JetContainerKey                   = "AntiKt10EMTopoRCJets",
+                                                                                    SelectionString                   = "(AntiKt10EMTopoRCJets.pt > 200.*GeV) && (abs(AntiKt10EMTopoRCJets.eta) < 2.5)",
+                                                                                    GhostClusterName                  = "GhostLCTopo",
+                                                                                    Suffix                            = "cluster"
+                                                                                    ))
+    RCSubstructureAug = CompFactory.DerivationFramework.CommonAugmentation("RCSubstructureAug", AugmentationTools = [LLP1RCJetSubstructureAugTool])
+    acc.addEventAlgo(RCSubstructureAug)
 
     # Skimming
     skimmingTools = []
@@ -350,12 +413,11 @@ def LLP1Cfg(ConfigFlags):
     StaticContent += ["xAOD::VertexAuxContainer#SoftBVrtClusterTool_Medium_VerticesAux." + excludedVertexAuxData]
     StaticContent += ["xAOD::VertexContainer#SoftBVrtClusterTool_Loose_Vertices"]
     StaticContent += ["xAOD::VertexAuxContainer#SoftBVrtClusterTool_Loose_VerticesAux." + excludedVertexAuxData]
+    StaticContent += ["xAOD::JetContainer#AntiKt10EMTopoRCJets","xAOD::JetAuxContainer#AntiKt10EMTopoRCJetsAux.-PseudoJet"]
 
     for wp in LLP1VrtSecInclusiveSuffixes:
         StaticContent += ["xAOD::VertexContainer#VrtSecInclusive_SecondaryVertices" + wp]
         StaticContent += ["xAOD::VertexAuxContainer#VrtSecInclusive_SecondaryVertices" + wp + "Aux."]
-
-    LLP1SlimmingHelper.StaticContent = StaticContent
 
     LLP1SlimmingHelper.ExtraVariables += ["AntiKt10TruthTrimmedPtFrac5SmallR20Jets.Tau1_wta.Tau2_wta.Tau3_wta.D2.GhostBHadronsFinalCount",
                                           "Electrons.LHValue.DFCommonElectronsLHVeryLooseNoPixResult.maxEcell_time.maxEcell_energy.maxEcell_gain.maxEcell_onlId.maxEcell_x.maxEcell_y.maxEcell_z.f3",
@@ -367,8 +429,8 @@ def LLP1Cfg(ConfigFlags):
                                           "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.PartonTruthLabelID.DFCommonJets_fJvt.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.GhostBHadronsFinal.GhostCHadronsFinal",
                                           "AntiKtVR30Rmax4Rmin02TrackJets_BTagging201903.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.GhostTausFinal.GhostTausFinalCount",
                                           "AntiKtVR30Rmax4Rmin02TrackJets_BTagging201810.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.GhostTausFinal.GhostTausFinalCount",
-                                          "TruthPrimaryVertices.t.x.y.z",
-                                          "PrimaryVertices.t.x.y.z",
+                                          "TruthPrimaryVertices.t.x.y.z.sumPt2",
+                                          "PrimaryVertices.t.x.y.z.sumPt2",
                                           "InDetTrackParticles.d0.z0.vz.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.truthParticleLink.truthMatchProbability.radiusOfFirstHit.hitPattern",
                                           "InDetLargeD0TrackParticles.d0.z0.vz.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.truthParticleLink.truthMatchProbability.radiusOfFirstHit.hitPattern",
                                           "GSFTrackParticles.d0.z0.vz.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.truthParticleLink.truthMatchProbability.radiusOfFirstHit.numberOfPixelHoles.numberOfSCTHoles.numberDoF.chiSquared.hitPattern",
@@ -397,13 +459,16 @@ def LLP1Cfg(ConfigFlags):
 
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
         addTruth3ContentToSlimmerTool(LLP1SlimmingHelper)
-        LLP1SlimmingHelper.AllVariables += ['TruthHFWithDecayParticles','TruthHFWithDecayVertices','TruthCharm','TruthPileupParticles','InTimeAntiKt4TruthJets','OutOfTimeAntiKt4TruthJets']
+        LLP1SlimmingHelper.AllVariables += ['TruthHFWithDecayParticles','TruthHFWithDecayVertices','TruthCharm','TruthPileupParticles','InTimeAntiKt4TruthJets','OutOfTimeAntiKt4TruthJets', 'AntiKt4TruthJets']
         LLP1SlimmingHelper.ExtraVariables += ["Electrons.TruthLink",
                                               "LRTElectrons.TruthLink",
                                               "Muons.TruthLink",
                                               "MuonsLRT.TruthLink",
                                               "Photons.TruthLink"]
 
+        StaticContent += ["xAOD::JetContainer#AntiKt10TruthRCJets","xAOD::JetAuxContainer#AntiKt10TruthRCJetsAux.-PseudoJet"]
+
+    LLP1SlimmingHelper.StaticContent = StaticContent
 
     # Trigger content
     LLP1SlimmingHelper.IncludeTriggerNavigation = False
