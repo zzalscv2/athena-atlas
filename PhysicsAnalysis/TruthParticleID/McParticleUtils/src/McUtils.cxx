@@ -13,9 +13,7 @@
 #include <stdexcept>
 #include <cstring>
 #include <string>
-
-// boost includes
-#include "boost/array.hpp"
+#include <array>
 
 // FrameWork includes
 #include "GaudiKernel/IPartPropSvc.h"
@@ -31,7 +29,7 @@ namespace {
 
 /** 3*charge for basic pdgId codes -- used to parse unknown id's
     Fix from Frank for the charge of the MC Truth Particle */
-static const boost::array<int, 100> qcharge =
+static const std::array<int, 100> qcharge =
   {{+0, -1, +2, -1, +2, -1, +2, -1, +2, +0,  //  0- 9
     +0, -3, +0, -3, +0, -3, +0, -3, +0, +0,  // 10-19
     +0, +0, +0, +3, +0, +0, +0, +0, +0, +0,  // 20-29
@@ -49,7 +47,6 @@ static const boost::array<int, 100> qcharge =
 double McUtils::chargeFromPdgId( const int pdgId, 
 				 const HepPDT::ParticleDataTable* pdt )
 {
-  using std::abs;
   if ( !pdt ) {
     throw std::invalid_argument( "Null pointer to HepPDT::ParticleDataTable !" );
   }
@@ -58,7 +55,7 @@ double McUtils::chargeFromPdgId( const int pdgId,
       the charge of the MC particle
       Problem : how do we handle particles which are not in the
       PDGTABLE.MeV file ? */
-  const HepPDT::ParticleData* ap = pdt->particle( abs( pdgId ) );
+  const HepPDT::ParticleData* ap = pdt->particle( std::abs( pdgId ) );
   if ( ap ) {
     return ( pdgId < 0 ) 
       ? -(ap->charge()) 
@@ -74,15 +71,15 @@ double McUtils::chargeFromPdgId( const int pdgId,
 	i == 0:           meson, j kbar quarks    l = 2*spin+1
 	i != 0:           baryon, i j k quarks    l = 2*spin+1
 	Default is 0; */
-    const int idmod = abs(pdgId) % 10000;
+    const int idmod = std::abs(pdgId) % 10000;
     const int q1 = (idmod/10) % 10;
     const int q2 = (idmod/100) % 10;
     const int q3 = (idmod/1000) % 10;
     double q = 0;
 
-    if (abs(pdgId) >= 1000000000) {
+    if (std::abs(pdgId) >= 1000000000) {
       // Seems to be a nucleus: 100pppnnn0
-      q = (abs(pdgId) / 10000) % 1000;
+      q = (std::abs(pdgId) / 10000) % 1000;
     }
     else if( idmod < 100 ) {
       q = qcharge[idmod]/3.;
