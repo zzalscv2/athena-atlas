@@ -18,17 +18,10 @@
 #include <stdexcept>
 #include <sstream>
 
-// boost includes
-// #include <boost/algorithm/string/split.hpp>
-// #include <boost/algorithm/string/erase.hpp>
-// #include <boost/algorithm/string/regex.hpp>
-// #include <boost/algorithm/string/trim.hpp>
-// #include <boost/algorithm/string/compare.hpp>
-
 // McParticleUtils includes
 #include "McParticleUtils/DecayParser.h"
 
-// namespace balg = boost::algorithm;
+
 
 namespace {
   PyObject *fetch_py_parse_fct();
@@ -37,25 +30,11 @@ namespace {
 }
 
 /////////////////////////////////////////////////////////////////// 
-// Static data
-/////////////////////////////////////////////////////////////////// 
-
-// const std::string  DecayParser::m_slotSep =          "+"    ;
-// const boost::regex DecayParser::m_candidateSep     ( "\\|" );
-// const boost::regex DecayParser::m_decayArrow       ( "->"  );
-// const boost::regex DecayParser::m_wildCardParticle ( "\\*" );
-
-/////////////////////////////////////////////////////////////////// 
 /// Public methods: 
 /////////////////////////////////////////////////////////////////// 
 
 /// Constructors
 ////////////////
-// DecayParser::DecayParser() :
-//   m_parseFct (0),
-//   m_parents  ( ),
-//   m_children ( )
-// {}
 
 DecayParser::DecayParser( const std::string& cmd ) :
   m_parseFct (0),
@@ -66,11 +45,6 @@ DecayParser::DecayParser( const std::string& cmd ) :
   parse(cmd);
 }
 
-// DecayParser::DecayParser( const DecayParser& rhs ) :
-//   m_parseFct (0),
-//   m_parents  ( rhs.m_parents   ),
-//   m_children ( rhs.m_children  )
-// {}
 
 /// Destructor
 ///////////////
@@ -120,22 +94,7 @@ void DecayParser::parse( const std::string& inputCmd )
   m_parents.clear();
   m_children.clear();
 
-//   /// Test if there is an arrow to enforce our syntax
-//   if ( inputCmd.find (m_decayArrow.str()) == std::string::npos ) {
-//     // Malformed command
-//     std::string error = "";
-//     error += "Malformed command : <"+inputCmd+"> !!\n";
-//     error += "You should enter an arrow... ex: 23 -> -13 +13 or 22-> 11 + -11";
-//     throw std::invalid_argument(error);
-//   }
 
-//   std::string cmd = inputCmd;
-
-//   /// remove spaces to ease further parsing
-//   rmSpaces(cmd);
-
-//   if ( cmd == m_decayArrow.str() ) {
-//   }
 
   // real parsing takes place now.
   PyObject *res = PyObject_CallFunction (m_parseFct,
@@ -233,24 +192,6 @@ void DecayParser::parse( const std::string& inputCmd )
 /// Protected methods: 
 /////////////////////////////////////////////////////////////////// 
 
-// void 
-// DecayParser::parseCandidates( const std::string& inString,
-// 			      McUtils::Strings& outList ) const
-// {
-//   McUtils::Strings tmpList;
-//   balg::split_regex (tmpList, inString, m_candidateSep);
-//   outList.clear();
-//   outList.reserve (tmpList.size());
-//   const McUtils::Strings::const_iterator tmpListEnd = tmpList.end();
-//   for ( McUtils::Strings::const_iterator i = tmpList.begin();
-// 	i != tmpListEnd;
-// 	++i ) {
-//     if ( !i->empty() ) {
-//       outList.push_back( *i );
-//     }
-//   }
-//   return;
-// }
 
 void 
 DecayParser::printMcUtilsStrings( const std::vector<McUtils::Strings>& list ) const
@@ -276,58 +217,6 @@ DecayParser::printMcUtilsStrings( const std::vector<McUtils::Strings>& list ) co
   return;
 }
 
-// McUtils::Strings 
-// DecayParser::tokenizeString( const std::string& stringList ) const
-// {
-//   std::cerr << "==DecayParser== tokenizeString (" << stringList << ")...\n";
-// //   std::cerr << "  ==> slotSep: [" << m_slotSep << "]\n"
-// // 	    << "  ==> candSep: [" << m_candidateSep << "]\n"
-// // 	    << "  ==> dcyArrw: [" << m_decayArrow << "]\n"
-// // 	    << "  ==> wildCrd: [" << m_wildCardParticle << "]\n";
-
-//   std::string nameList = stringList;
-//   /// Removes all the spaces in the strings : " " -> ""
-//   rmSpaces(nameList);
-
-//   McUtils::Strings out;
-//   balg::split (out, nameList, balg::is_any_of(m_slotSep));
-//   return out;
-// }
-
-// void DecayParser::fillToken( const McUtils::Strings& token,
-// 			     std::vector<McUtils::Strings>& tokens ) const
-// {
-//   std::cerr << "==DecayParser== fillToken (" << token.size() << ")...\n";
-//   for ( McUtils::Strings::const_iterator itr = token.begin();
-// 	  itr != token.end();
-// 	++itr ) {
-//     //std::cout << "Parsing : <" << *itr << ">..." << std::endl;
-//     /// this is the list of matching candidates for each child
-//     McUtils::Strings candidates;
-//     /// parse the child string to unmangle the possible choices for each
-//     /// of the children ( resolves that e-|mu- can be either a muon or
-//     /// an electron )
-//     parseCandidates( *itr, candidates );
-//     if ( !candidates.empty() ) {
-//       tokens.push_back( candidates );
-//     }
-//   }
-//   return;
-// }
-
-// void DecayParser::processBlock( const std::string& tokenString,
-// 				std::vector<McUtils::Strings>& tokens ) const
-// {
-//   std::cerr << "==DecayParser== processBlock ("
-// 	    << tokenString <<", tokens=" << tokens.size() 
-// 	    << ")...\n";
-
-//   // cut the tokenString into slots
-//   McUtils::Strings tokenNames = tokenizeString( tokenString );
-
-//   // cut each slot into a list of candidates
-//   fillToken( tokenNames, tokens );
-// }
 
 /////////////////////////////////////////////////////////////////// 
 // Operators: 
