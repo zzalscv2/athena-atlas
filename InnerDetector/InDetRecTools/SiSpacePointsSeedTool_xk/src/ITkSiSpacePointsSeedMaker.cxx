@@ -2333,7 +2333,7 @@ void SiSpacePointsSeedMaker::production3SpPPP(EventData &data,
       float d0max = maxd0cut;
 
       size_t Nc = 1;
-      if (abs(Z)<500. or data.ITkSP[b]->radius() > m_rmaxPPP){
+      if (data.ITkSP[b]->radius() > m_rmaxPPP){
         Nc = 0;
       }
       if (data.nOneSeedsQ)
@@ -3658,7 +3658,7 @@ void SiSpacePointsSeedMaker::newOneSeedWithCurvaturesComparisonPPP(EventData &da
     float Qmin = 1.e20;
     float Rb = 2. * SPb->radius();
     int NTc(2);
-    if (abs(SP0->z())<500. or Rb > 280.) {
+    if (Rb > 280.) {
       NTc = 1;
     }
 
