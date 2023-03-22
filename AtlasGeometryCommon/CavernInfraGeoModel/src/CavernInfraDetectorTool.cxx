@@ -10,7 +10,7 @@
 #include "GeoModelInterfaces/IGeoDbTagSvc.h"
 #include "GeoModelUtilities/GeoModelExperiment.h"
 #include "RDBAccessSvc/IRDBAccessSvc.h"
-#include "boost/algorithm/string/predicate.hpp"
+
 
 CavernInfraDetectorTool::CavernInfraDetectorTool( const std::string& type, 
 						  const std::string& name,
@@ -57,7 +57,7 @@ StatusCode CavernInfraDetectorTool::create()
     return sc;
   }
 
-  if (boost::starts_with (cavernInfraVersion, "CavernInfra")) {
+  if (cavernInfraVersion.rfind("CavernInfra",0) == 0) { //starts with "CavernInfra"
     std::string geoVersion = cavernInfraVersion.substr(12,2);
     if(geoVersion=="00" || geoVersion=="01") {
       msg(MSG::ERROR) << "ERROR. Version " << cavernInfraVersion << " is obsolete and cannot be supported anymore" << endmsg;
