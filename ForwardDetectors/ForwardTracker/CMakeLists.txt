@@ -14,9 +14,7 @@ find_package( Boost COMPONENTS program_options filesystem thread system )
 # Component(s) in the package:
 atlas_add_library( ForwardTracker
                    src/*.cxx
-                   PUBLIC_HEADERS ForwardTracker
-                   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${Boost_LIBRARIES} )
+                   PUBLIC_HEADERS ForwardTracker)
 
 atlas_add_executable( forwardTrackerMain
                       test/forwardTrackerMain.cxx
