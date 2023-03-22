@@ -11,6 +11,7 @@
 #include <GeoModelKernel/GeoPhysVol.h>
 #include <GeoModelUtilities/GeoModelExperiment.h>
 #include <SGTools/DataProxy.h>
+#include "GeoModelRead/ReadGeoModel.h"
 
 
 namespace ITk
@@ -42,7 +43,7 @@ StatusCode StripDetectorTool::create()
   std::string node{"SCT"};
   std::string table{"ITKXDD"};
 
-  const GeoModelIO::ReadGeoModel* sqlreader = getSqliteReader();
+  GeoModelIO::ReadGeoModel* sqlreader = getSqliteReader();
 
   if(!sqlreader){
       if (!isAvailable(node, table)) {
@@ -70,6 +71,12 @@ StatusCode StripDetectorTool::create()
   // empty strings are the (optional) containing detector and envelope names
   // allowed to pass a null sqlreader ptr - it will be used to steer the source of the geometry
   const GeoVPhysVol* topVolume = createTopVolume(world, gmxInterface, node, table,"","",sqlreader);
+  // if we are using SQLite inputs, 
+  if(sqlreader){
+        ATH_MSG_INFO("Building Strip Readout Geometry from SQLite using "<<m_geoDbTagSvc->getParamSvcName());
+        gmxInterface.buildReadoutGeometryFromSqlite(m_sqliteReadSvc.operator->(),sqlreader);
+  }
+
   if (topVolume) { //see that a valid pointer is returned
     manager->addTreeTop(topVolume);
     doNumerology(manager);
