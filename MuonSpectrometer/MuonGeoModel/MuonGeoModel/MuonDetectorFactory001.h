@@ -68,6 +68,7 @@ namespace MuonGM {
         inline void hasSTgc(bool value);
         inline void hasMM(bool value);
         inline void setNSWABLineAsciiPath(const std::string &);
+        inline void setNSWAsBuiltAsciiPath(const std::string &, const std::string &);
 
       private:
 
@@ -105,7 +106,9 @@ namespace MuonGM {
         bool m_hasMM{true};
 
         std::string m_NSWABLineAsciiPath{};
-
+        std::string m_NSWAsBuiltAsciiPathMM{};
+        std::string m_NSWAsBuiltAsciiPathSTgc{};
+        
         std::vector<std::string> m_selectedStations;
         std::vector<int> m_selectedStEta;
         std::vector<int> m_selectedStPhi;
@@ -156,6 +159,13 @@ namespace MuonGM {
     void MuonDetectorFactory001::hasSTgc(bool value) { m_hasSTgc = value; }
     void MuonDetectorFactory001::hasMM(bool value) { m_hasMM = value; }
     void MuonDetectorFactory001::setNSWABLineAsciiPath(const std::string &str) { m_NSWABLineAsciiPath = str; }
+    void MuonDetectorFactory001::setNSWAsBuiltAsciiPath(const std::string &strMM, const std::string &strSTgc) { 
+        m_NSWAsBuiltAsciiPathMM = strMM; 
+        m_NSWAsBuiltAsciiPathSTgc = strSTgc; 
+    }
+        
+        
+        
 } // namespace MuonGM
 
 #endif

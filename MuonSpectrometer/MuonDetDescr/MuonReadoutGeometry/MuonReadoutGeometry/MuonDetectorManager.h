@@ -177,7 +177,8 @@ namespace MuonGM {
         void setCacheFillingFlag(int value);
         inline int cacheFillingFlag() const;
 
-        void setNSWABLineAsciiPath(const std::string& str);
+        void setNSWABLineAsciiPath(const std::string &);
+        void setNSWAsBuiltAsciiPath(const std::string &, const std::string &);
 
         void setMinimalGeoFlag(int flag);
         inline int  MinimalGeoFlag() const;
@@ -370,6 +371,8 @@ namespace MuonGM {
         std::string m_DBMuonVersion{};    // name of the MuonVersion table-collection in Oracle
 
         std::string m_NSWABLineAsciiPath{};
+        bool m_NSWAsBuiltAsciiOverrideMM{false};
+        bool m_NSWAsBuiltAsciiOverrideSTgc{false};
 
         // pointers to IdHelpers
         const MdtIdHelper* m_mdtIdHelper{nullptr};
@@ -450,8 +453,6 @@ namespace MuonGM {
     const TgcIdHelper* MuonDetectorManager::tgcIdHelper() const { return m_tgcIdHelper; }
     const sTgcIdHelper* MuonDetectorManager::stgcIdHelper() const { return m_stgcIdHelper; }
     const MmIdHelper* MuonDetectorManager::mmIdHelper() const { return m_mmIdHelper; }
-
-
 
     const GenericRPCCache* MuonDetectorManager::getGenericRpcDescriptor() const { return &m_genericRPC; }
     const GenericMDTCache* MuonDetectorManager::getGenericMdtDescriptor() const { return &m_genericMDT; }
