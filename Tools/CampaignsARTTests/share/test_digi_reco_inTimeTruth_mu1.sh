@@ -86,6 +86,7 @@ run "NTUP_PHYSVAL" Derivation_tf.py \
   --outputNTUP_PHYSVALFile "NTUP_PHYSVAL.root" \
   --validationFlags doInDet, doMET, doEgamma, doTau, doJet, doTopoCluster, doPFlow, doMuon \
   --format NTUP_PHYSVAL \
+  --preExec "flags.PhysVal.IDPVM.setTruthStrategy='All'" \
   --maxEvents ${number_of_events}
 
 mv runargs.PhysicsValidation.py runargs.PhysicsValidation.Main.py
