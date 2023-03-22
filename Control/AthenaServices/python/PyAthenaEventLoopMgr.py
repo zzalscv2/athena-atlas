@@ -6,6 +6,7 @@
 
 import GaudiPython.Bindings as PyGaudi
 
+
 # The following method is setup at ApplicationMgr creation time; this works
 # because the event loop manager, which imports this module if it is the
 # python one at initialization time, will instantiate the event selector in
@@ -56,7 +57,11 @@ def enable_seeking(silent=False):
    return
 
 def _setupEvtSelForSeekOps():
-   return enable_seeking(silent=True)
+   from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
+   if isComponentAccumulatorCfg():
+      return
+   else:
+      return enable_seeking(silent=True)
 
 _setupEvtSelForSeekOps()
 del _setupEvtSelForSeekOps
@@ -114,22 +119,18 @@ class PyAthenaEventLoopMgr( PyGaudi.iService ):
       return super( PyAthenaEventLoopMgr, self ).__getattr__( attr )
 
    def executeAlgorithms( self, cppcontext ):
-      try:                   import GaudiPython.Bindings as PyGaudi
-      except AttributeError: import GaudiPython          as PyGaudi
-      except ImportError:    import gaudimodule          as PyGaudi
-      from AthenaCommon.AppMgr import theApp
 
+      from AthenaPython.PyAthena import py_svc
+      from AthenaPython.PyAthenaComps import StatusCode
+      appmgr = py_svc('ApplicationMgr',iface="IProperty")      
+      algmgr = py_svc('ApplicationMgr',iface='IAlgManager')
+     
       import cppyy
       ctx = cppyy.bind_object(cppcontext, "EventContext")
 
-      result = PyGaudi.SUCCESS
-
       try:
-         for name in theApp.TopAlg:
-            alg = theApp.algorithm( name[ name.find('/')+1 : ] )
-            if not alg._ialg:
-               alg.retrieveInterface()
-            ialg = alg._ialg
+         for name in appmgr.getProperty("TopAlg"):
+            ialg=algmgr.algorithm(name).get()
             ialg.execState(ctx).reset()
             result = ialg.sysExecute(ctx)
             if result.isFailure():
@@ -139,6 +140,6 @@ class PyAthenaEventLoopMgr( PyGaudi.iService ):
       except KeyboardInterrupt:
          from AthenaCommon.Logging import log as msg
          msg.critical( "event loop stopped by user interrupt" )
-         return PyGaudi.FAILURE.getCode()
+         return StatusCode.Failure
 
-      return result.getCode()
+      return StatusCode.Success

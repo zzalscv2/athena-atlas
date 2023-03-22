@@ -438,6 +438,7 @@ class AthConfigFlags(object):
         import argparse
         parser= argparse.ArgumentParser()
         parser.add_argument("-d","--debug", default=None, help="attach debugger (gdb) before run, <stage>: init, exec, fini")
+        parser.add_argument("-i","--interactive", default=None, help="Drop into interactive mode before <stage>: init or run")
         parser.add_argument("--evtMax", type=int, default=None, help="Max number of events to process")
         parser.add_argument("--skipEvents", type=int, default=None, help="Number of events to skip")
         parser.add_argument("--filesInput", default=None, help="Input file(s), supports * wildcard")
@@ -468,6 +469,11 @@ class AthConfigFlags(object):
             if args.debug not in DbgStage.allowed_values:
                 raise ValueError("Unknown debug stage, allowed values {}".format(DbgStage.allowed_values))
             self.Exec.DebugStage=args.debug
+
+        if args.interactive:
+            if args.interactive not in ("init","run"):
+                raise ValueError("Unknown value for interactive, allowed values are 'init' and 'run'")
+            self.Exec.Interactive=args.interactive
 
         if args.evtMax:
             self.Exec.MaxEvents=args.evtMax
