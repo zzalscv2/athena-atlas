@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -55,6 +55,7 @@ namespace OverlayTesting {
   };   // PixelOverlay_test fixture
 
 
+  // cppcheck-suppress syntaxError
   TEST_F(PixelOverlay_test, set_properties) {
     EventContext ctx(0,0);
     ctx.setExtension( Atlas::ExtendedEventContext( m_sg, 0 ) );
