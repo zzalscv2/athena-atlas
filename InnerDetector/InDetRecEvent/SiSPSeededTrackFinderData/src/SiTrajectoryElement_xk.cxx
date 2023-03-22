@@ -2271,6 +2271,7 @@ void InDet::SiTrajectoryElement_xk::patternCovariances
   const Amg::MatrixX& v = c->localCovariance();
   covX  = c->width().phiR(); 
   covX*=(covX*s_oneOverTwelve);  /// sigma ~pitch / sqrt(12)
+  covXY = c->localCovariance()(1,0);
 
   if(!m_tools->useFastTracking()){
     if(covX < v(0,0)) covX=v(0,0);  /// if larger error in cluster covariance, replace covx by it
