@@ -673,5 +673,82 @@ BOOST_FIXTURE_TEST_CASE(TrackStateProxyAllocations, EmptyMTJ) {
   BOOST_CHECK(!tsall.has<"calibrated"_hash>());
 }
 
+
+BOOST_FIXTURE_TEST_CASE(TrackStateProxyShare, EmptyMTJ) {
+  std::default_random_engine rng(12345);
+  TestTrackState pc(rng, 2u);
+
+  {
+    size_t ia = mtj->addTrackState(TrackStatePropMask::All);
+    size_t ib = mtj->addTrackState(TrackStatePropMask::None);
+
+    auto tsa = mtj->getTrackState(ia);
+    auto tsb = mtj->getTrackState(ib);
+
+    fillTrackState(pc, TrackStatePropMask::All, tsa);
+
+    BOOST_CHECK(tsa.hasPredicted());
+    BOOST_CHECK(!tsb.hasPredicted());
+    tsb.shareFrom(tsa, TrackStatePropMask::Predicted);
+    BOOST_CHECK(tsa.hasPredicted());
+    BOOST_CHECK(tsb.hasPredicted());
+    BOOST_CHECK_EQUAL(tsa.predicted(), tsb.predicted());
+    BOOST_CHECK_EQUAL(tsa.predictedCovariance(), tsb.predictedCovariance());
+
+    BOOST_CHECK(tsa.hasFiltered());
+    BOOST_CHECK(!tsb.hasFiltered());
+    tsb.shareFrom(tsa, TrackStatePropMask::Filtered);
+    BOOST_CHECK(tsa.hasFiltered());
+    BOOST_CHECK(tsb.hasFiltered());
+    BOOST_CHECK_EQUAL(tsa.filtered(), tsb.filtered());
+    BOOST_CHECK_EQUAL(tsa.filteredCovariance(), tsb.filteredCovariance());
+
+    BOOST_CHECK(tsa.hasSmoothed());
+    BOOST_CHECK(!tsb.hasSmoothed());
+    tsb.shareFrom(tsa, TrackStatePropMask::Smoothed);
+    BOOST_CHECK(tsa.hasSmoothed());
+    BOOST_CHECK(tsb.hasSmoothed());
+    BOOST_CHECK_EQUAL(tsa.smoothed(), tsb.smoothed());
+    BOOST_CHECK_EQUAL(tsa.smoothedCovariance(), tsb.smoothedCovariance());
+
+    BOOST_CHECK(tsa.hasJacobian());
+    BOOST_CHECK(!tsb.hasJacobian());
+    tsb.shareFrom(tsa, TrackStatePropMask::Jacobian);
+    BOOST_CHECK(tsa.hasJacobian());
+    BOOST_CHECK(tsb.hasJacobian());
+    BOOST_CHECK_EQUAL(tsa.jacobian(), tsb.jacobian());
+  }
+
+  {
+    size_t i = mtj->addTrackState(TrackStatePropMask::All &
+                                  ~TrackStatePropMask::Filtered &
+                                  ~TrackStatePropMask::Smoothed);
+
+    auto ts = mtj->getTrackState(i);
+
+    BOOST_CHECK(ts.hasPredicted());
+    BOOST_CHECK(!ts.hasFiltered());
+    BOOST_CHECK(!ts.hasSmoothed());
+    ts.predicted().setRandom();
+    ts.predictedCovariance().setRandom();
+
+    ts.shareFrom(TrackStatePropMask::Predicted, TrackStatePropMask::Filtered);
+    BOOST_CHECK(ts.hasPredicted());
+    BOOST_CHECK(ts.hasFiltered());
+    BOOST_CHECK(!ts.hasSmoothed());
+    BOOST_CHECK_EQUAL(ts.predicted(), ts.filtered());
+    BOOST_CHECK_EQUAL(ts.predictedCovariance(), ts.filteredCovariance());
+
+    ts.shareFrom(TrackStatePropMask::Predicted, TrackStatePropMask::Smoothed);
+    BOOST_CHECK(ts.hasPredicted());
+    BOOST_CHECK(ts.hasFiltered());
+    BOOST_CHECK(ts.hasSmoothed());
+    BOOST_CHECK_EQUAL(ts.predicted(), ts.filtered());
+    BOOST_CHECK_EQUAL(ts.predicted(), ts.smoothed());
+    BOOST_CHECK_EQUAL(ts.predictedCovariance(), ts.filteredCovariance());
+    BOOST_CHECK_EQUAL(ts.predictedCovariance(), ts.smoothedCovariance());
+  }
+}
+
 // TODO remaining tests
 BOOST_AUTO_TEST_SUITE_END()
