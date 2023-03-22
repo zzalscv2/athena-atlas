@@ -6,7 +6,7 @@
 include ("GeneratorFilters/CreatexAODSlimContainers.py")
 
 from GeneratorFilters.GeneratorFiltersConf import xAODDecaysFinalStateFilter
-xAODDecaysFinalState = xAODDecaysFinalState("xAODDecaysFinalStateFilter")  
+xAODDecaysFinalStateFilter = xAODDecaysFinalStateFilter("xAODDecaysFinalStateFilter")  
 filtSeq += xAODDecaysFinalStateFilter
 
 # to modify cuts put into JOs e.g.:
