@@ -135,7 +135,9 @@ StatusCode JetTagMonitorAlgorithm::fillHistograms( const EventContext& ctx ) con
   }
   
   PV_n = vertices->size();
-  PV_n_on_mu = PV_n/Run_mu;
+  if (Run_mu > 0) {
+    PV_n_on_mu = PV_n/Run_mu;
+  }
   fill(tool,PV_n,PV_n_on_mu);
   
   if (vertices->size() < 2) {
