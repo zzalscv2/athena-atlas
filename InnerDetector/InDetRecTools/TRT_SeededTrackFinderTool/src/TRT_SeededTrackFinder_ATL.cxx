@@ -88,13 +88,14 @@ namespace{
 InDet::TRT_SeededTrackFinder_ATL::TRT_SeededTrackFinder_ATL
 (const std::string& t,const std::string& n,const IInterface* p)
   : AthAlgTool(t,n,p),
+    m_fieldmode("MapSolenoid"),
     m_roadmaker("InDet::SiDetElementsRoadMaker_xk"),
     m_proptool("Trk::RungeKuttaPropagator/InDetPropagator"),
     m_updatorTool("Trk::KalmanUpdator_xk/InDetPatternUpdator"),
     m_tracksfinder("InDet::SiCombinatorialTrackFinder_xk", this),
-    m_trtId(nullptr)
+    m_trtId(nullptr),
+    m_errorScale {1., 1., 1., 1., 1.}
 {
-  m_fieldmode    = "MapSolenoid"    ;   //Field Mode
   m_xi2max       = 15.              ;   //Maximum chi2 per DOF to accept track candidate
   m_xi2maxNoAdd  = 50.              ;   //Chi2 to accept as hit
   m_xi2maxlink   = 100.             ;   //Chi2 during cluster search
@@ -106,7 +107,6 @@ InDet::TRT_SeededTrackFinder_ATL::TRT_SeededTrackFinder_ATL
   m_bremCorrect  = false            ;   //Repeat seed search after brem correction
   m_propR        = false            ;   //Clean-up seeds by propagating to the first endcap hit
   m_useassoTool  = false            ;   //Use prd-track association tool during combinatorial track finding
-  m_errorScale   = {1., 1., 1., 1., 1.};
   m_outlierCut   = 25.              ;
   m_searchInCaloROI   = false       ;
   m_phiWidth     = .3                 ;
