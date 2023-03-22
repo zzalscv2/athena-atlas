@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //============================================================================
@@ -1316,7 +1316,7 @@ namespace DerivationFramework {
   std::string BPhysVertexTrackBase::buildBranchBaseName(unsigned int its,
                                                         unsigned int ipv,
                                                         unsigned int itt,
-                                                        std::string preSuffix)
+                                                        const std::string& preSuffix)
     const {
     
     ATH_MSG_DEBUG("BPhysVertexTrackBase::buildBranchBaseName -- begin");
