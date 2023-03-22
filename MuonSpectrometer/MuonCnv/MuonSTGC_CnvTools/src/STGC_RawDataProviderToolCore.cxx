@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <atomic>
@@ -42,7 +42,7 @@ StatusCode Muon::STGC_RawDataProviderToolCore::convertIntoContainer(const std::v
   // add the RDO collections created from the data of this ROB into the identifiable container.
   for (auto& [hash, collection]: rdo_map) {
 
-    if (!collection->size()) continue; // skip empty collections
+    if ((!collection) or collection->empty()) continue; // skip empty collections
 
     STGC_RawDataContainer::IDC_WriteHandle lock = stgcRdoContainer.getWriteHandle(hash);
 
