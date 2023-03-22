@@ -24,9 +24,6 @@
 
 #include <G4HadronElasticProcess.hh>
 
-// Boost
-#include <boost/math/special_functions/round.hpp>
-
 // Trk inlcude
 #include "TrkGeometry/MaterialProperties.h"
 
