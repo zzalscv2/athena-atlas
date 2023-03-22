@@ -367,6 +367,7 @@ namespace ActsTrk {
     filterCfg.centralSeedConfirmationRange = m_finderCfg.centralSeedConfirmationRange;
     filterCfg.forwardSeedConfirmationRange = m_finderCfg.forwardSeedConfirmationRange;
     filterCfg.impactWeightFactor = m_impactWeightFactor;
+    filterCfg.zOriginWeightFactor = m_zOriginWeightFactor;
     filterCfg.compatSeedWeight = m_compatSeedWeight;
     filterCfg.compatSeedLimit = m_compatSeedLimit;
     filterCfg.seedWeightIncrement = m_seedWeightIncrement;

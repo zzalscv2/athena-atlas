@@ -142,7 +142,9 @@ namespace ActsTrk {
       {1, 2, 3, 4, 11, 10, 9, 8, 6, 5, 7} , "defines order of z bins for looping"};
     Gaudi::Property< bool > m_useVariableMiddleSPRange {this, "useVariableMiddleSPRange", true,
       "Enable variable range to search for middle SPs"};
-    Gaudi::Property< std::vector<std::vector<double>> > m_rRangeMiddleSP {this, "rRangeMiddleSP", {}, "radial range for middle SP"};
+    Gaudi::Property< std::vector<std::vector<double>> > m_rRangeMiddleSP {this, "rRangeMiddleSP", 
+      {{40.0, 90.0}, {40.0, 200.0}, {46.0, 200.0}, {46.0, 200.0}, {46.0, 250.0}, {46.0, 250.0}, {46.0, 250.0}, {46.0, 200.0}, {46.0, 200.0}, {40.0, 200.0}, {40.0, 90.0}}, 
+      "radial range for middle SP"};
     Gaudi::Property< float > m_deltaRMiddleMinSPRange {this, "deltaRMiddleMinSPRange", 10.,
       "delta R for middle SP range (min)"};
     Gaudi::Property< float > m_deltaRMiddleMaxSPRange {this, "deltaRMiddleMaxSPRange", 10.,
@@ -202,9 +204,9 @@ namespace ActsTrk {
 
     Gaudi::Property<float> m_toleranceParam {this, "toleranceParam", 1.1 * Acts::UnitConstants::mm, 
       "tolerance parameter used to check the compatibility of SPs coordinates in xyz"};
-    Gaudi::Property<float> m_phiMin {this, "phiMin", - M_PI, ""};
-    Gaudi::Property<float> m_phiMax {this, "phiMax", M_PI, ""};
-    Gaudi::Property<float> m_rMin {this, "rMin", 33 * Acts::UnitConstants::mm, ""};    
+    Gaudi::Property<float> m_phiMin {this, "phiMin", 0, ""};
+    Gaudi::Property<float> m_phiMax {this, "phiMax", 2 * M_PI, ""};
+    Gaudi::Property<float> m_rMin {this, "rMin", 0 * Acts::UnitConstants::mm, ""};    
     Gaudi::Property<float> m_zAlign {this, "zAlign", 0 * Acts::UnitConstants::mm, ""};
     Gaudi::Property<float> m_rAlign {this, "rAlign", 0 * Acts::UnitConstants::mm, ""};
     Gaudi::Property<float> m_sigmaError {this, "sigmaError", 5, ""};
@@ -212,6 +214,7 @@ namespace ActsTrk {
     // Properties to set SeedFilterConfig
     Gaudi::Property< float > m_impactWeightFactor {this, "impactWeightFactor", 100.,
       "the impact parameters (d0) is multiplied by this factor and subtracted from weight"};
+    Gaudi::Property< float > m_zOriginWeightFactor {this, "zOriginWeightFactor", 1.};
     Gaudi::Property< float > m_compatSeedWeight {this, "compatSeedWeight", 100.,
       "seed weight increased by this value if a compatible seed has been found"};
     Gaudi::Property< std::size_t > m_compatSeedLimit {this, "compatSeedLimit", 3,
@@ -224,9 +227,9 @@ namespace ActsTrk {
       "sort seed vectors by curvature"};
     Gaudi::Property< bool > m_seedConfirmationInFilter {this, "seedConfirmationInFilter", true,
       "run seed confirmation"};
-    Gaudi::Property< int > m_maxSeedsPerSpMConf {this, "maxSeedsPerSpMConf", 5,
+    Gaudi::Property< std::size_t > m_maxSeedsPerSpMConf {this, "maxSeedsPerSpMConf", 5,
       "Maximum number of lower quality seeds in seed confirmation."};
-    Gaudi::Property< int > m_maxQualitySeedsPerSpMConf {this, "maxQualitySeedsPerSpMConf", 5,
+    Gaudi::Property< std::size_t > m_maxQualitySeedsPerSpMConf {this, "maxQualitySeedsPerSpMConf", 5,
       "Maximum number of quality seeds for each middle-bottom SP-duplet in seed confirmation."};
     Gaudi::Property< bool > m_useDeltaRorTopRadius {this, "useDeltaRorTopRadius", true,
       "use deltaR (top radius - middle radius) instead of top radius"};

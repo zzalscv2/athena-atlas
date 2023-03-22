@@ -8,7 +8,10 @@ from ActsInterop.ActsConfigFlags import SeedingStrategy
 def ActsTrkITkPixelSeedingToolCfg(flags,
                                   **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
-    ## For ITkPixel, use default values for ActsTrk::SeedingTool
+    ## For ITkPixel
+    kwargs.setdefault("numSeedIncrement" , float("inf"))
+    kwargs.setdefault("deltaZMax" , float("inf"))
+    kwargs.setdefault("maxPtScattering", float("inf"))
     acc.setPrivateTools(CompFactory.ActsTrk.SeedingTool(name = "ActsSeedingTool_ITkPixel", **kwargs))
     return acc
 
@@ -34,6 +37,7 @@ def ActsTrkITkStripSeedingToolCfg(flags,
     kwargs.setdefault("deltaRMiddleMinSPRange" , 30 * UnitConstants.mm)
     kwargs.setdefault("deltaRMiddleMaxSPRange" , 150 * UnitConstants.mm)
     kwargs.setdefault("useDetailedDoubleMeasurementInfo" , True)
+    kwargs.setdefault("maxPtScattering", float("inf"))
     # For SeedFilterConfig
     kwargs.setdefault("useDeltaRorTopRadius" , False)
     kwargs.setdefault("seedConfirmationInFilter" , False)
@@ -41,8 +45,8 @@ def ActsTrkITkStripSeedingToolCfg(flags,
     kwargs.setdefault("compatSeedLimit" , 4)
     kwargs.setdefault("numSeedIncrement" , 1.)
     kwargs.setdefault("seedWeightIncrement" , 10100.)
-    kwargs.setdefault("maxSeedsPerSpMConf" , 10e6)
-    kwargs.setdefault("maxQualitySeedsPerSpMConf" , 10e6)
+    kwargs.setdefault("maxSeedsPerSpMConf" , 100)
+    kwargs.setdefault("maxQualitySeedsPerSpMConf" , 100)
     # For seeding algorithm
     kwargs.setdefault("zBinNeighborsBottom" , [(0,1),(0,1),(0,1),(0,2),(0,1),(0,0),(-1,0),(-2,0),(-1,0),(-1,0),(-1,0)])
 
@@ -66,7 +70,6 @@ def ActsTrkITkStripOrthogonalSeedingToolCfg(flags,
     kwargs.setdefault("deltaRMaxTopSP" , 300. * UnitConstants.mm)
     kwargs.setdefault("deltaRMinBottomSP" , 20. * UnitConstants.mm)
     kwargs.setdefault("deltaRMaxBottomSP" , 300. * UnitConstants.mm)
-    kwargs.setdefault("maxSeedsPerSpMConf" , 10e6)
     kwargs.setdefault("deltaZMax" , 900. * UnitConstants.mm)
     kwargs.setdefault("interactionPointCut" , False)
     kwargs.setdefault("skipPreviousTopSP", False)
@@ -75,8 +78,8 @@ def ActsTrkITkStripOrthogonalSeedingToolCfg(flags,
     kwargs.setdefault("seedWeightIncrement" , 10100.)
     kwargs.setdefault("numSeedIncrement" , 1.)
     kwargs.setdefault("seedConfirmationInFilter" , False)
-    kwargs.setdefault("maxSeedsPerSpMConf" , 10e6)
-    kwargs.setdefault("maxQualitySeedsPerSpMConf" , 10e6)
+    kwargs.setdefault("maxSeedsPerSpMConf" , 100)
+    kwargs.setdefault("maxQualitySeedsPerSpMConf" , 100)
     kwargs.setdefault("useDeltaRorTopRadius" , False)
     kwargs.setdefault("rMinMiddle", 33. * UnitConstants.mm)
     kwargs.setdefault("rMaxMiddle", 1200. * UnitConstants.mm)
