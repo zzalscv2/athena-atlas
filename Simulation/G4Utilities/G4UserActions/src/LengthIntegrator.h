@@ -13,7 +13,7 @@
 
 #include "G4UserEventAction.hh"
 #include "G4UserSteppingAction.hh"
-
+//#include "AthenaBaseComps/AthMessaging.h"
 #include <string>
 #include <map>
 
@@ -39,7 +39,7 @@ namespace G4UA
   /// finalization of the LengthIntegratorTool.
   ///
   class LengthIntegrator final : public G4UserEventAction,
-                                 public G4UserSteppingAction
+    public G4UserSteppingAction
   {
 
     public:
@@ -80,9 +80,13 @@ namespace G4UA
       std::vector<double> m_collected_L0;
 
       std::vector<float> m_collected_hitr;
+      std::vector<float> m_collected_hitx;
+      std::vector<float> m_collected_hity;
       std::vector<float> m_collected_hitz;
 
       std::vector<float> m_collected_outhitr;
+      std::vector<float> m_collected_outhitx;
+      std::vector<float> m_collected_outhity;
       std::vector<float> m_collected_outhitz;
 
       std::vector<float> m_collected_density;

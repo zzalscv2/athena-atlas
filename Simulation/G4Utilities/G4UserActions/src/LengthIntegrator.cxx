@@ -139,12 +139,16 @@ namespace G4UA
 
     m_tree->Branch("collected_X0",              &m_collected_X0); //Vector
     m_tree->Branch("collected_L0",              &m_collected_L0); //Vector
-   
+
     m_tree->Branch("collected_inhitr",            &m_collected_hitr); //Vector
     m_tree->Branch("collected_inhitz",            &m_collected_hitz); //Vector
+    m_tree->Branch("collected_inhitx",            &m_collected_hitx); //Vector
+    m_tree->Branch("collected_inhity",            &m_collected_hity); //Vector
 
     m_tree->Branch("collected_outhitr",          &m_collected_outhitr); //Vector
     m_tree->Branch("collected_outhitz",          &m_collected_outhitz); //Vector
+    m_tree->Branch("collected_outhitx",          &m_collected_outhitx); //Vector
+    m_tree->Branch("collected_outhity",          &m_collected_outhity); //Vector
 
     m_tree->Branch("collected_material",        &m_collected_material); //Vector
     m_tree->Branch("collected_density",         &m_collected_density); //Vector
@@ -394,9 +398,13 @@ namespace G4UA
       m_collected_L0.clear();
       
       m_collected_hitr.clear();
+      m_collected_hitx.clear();
+      m_collected_hity.clear();
       m_collected_hitz.clear();
 
       m_collected_outhitr.clear();
+      m_collected_outhitx.clear();
+      m_collected_outhity.clear();
       m_collected_outhitz.clear();
 
       m_collected_material.clear();
@@ -447,9 +455,13 @@ namespace G4UA
 
     m_collected_hitr.push_back(hitPoint.perp());
     m_collected_hitz.push_back(hitPoint.z());
+    m_collected_hitx.push_back(hitPoint.x());
+    m_collected_hity.push_back(hitPoint.y());
 
     m_collected_outhitr.push_back(endPoint.perp());
     m_collected_outhitz.push_back(endPoint.z());
+    m_collected_outhitx.push_back(endPoint.x());
+    m_collected_outhity.push_back(endPoint.y());
 
     std::string groupmaterial = getMaterialClassification(matName);
 
