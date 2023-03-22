@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALORIMETER_CALOTRACKINGGEOMETRYBUILDERIMPL_H
@@ -10,8 +10,13 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "GaudiKernel/SystemOfUnits.h"
 // Trk
+#include "TrkDetDescrInterfaces/ICaloTrackingVolumeBuilder.h"
 #include "TrkDetDescrInterfaces/IGeometryBuilderCond.h"
+#include "TrkDetDescrInterfaces/ITrackingVolumeArrayCreator.h"
+#include "TrkDetDescrInterfaces/ITrackingVolumeCreator.h"
+#include "TrkDetDescrInterfaces/ITrackingVolumeHelper.h"
 #include "TrkDetDescrUtils/GeometrySignature.h"
 #include "TrkDetDescrUtils/LayerIndexSampleMap.h"
 #include "TrkGeometry/Material.h"
@@ -28,13 +33,7 @@
 namespace Trk {
 class Layer;
 class MagneticFieldProperties;
-class ICaloTrackingVolumeBuilder;
-class ITrackingVolumeCreator;
-class ITrackingVolumeHelper;
-class ITrackingVolumeArrayCreator;
 }  // namespace Trk
-
-class IEnvelopeDefSvc;
 
 namespace Calo {
 
@@ -76,37 +75,37 @@ class CaloTrackingGeometryBuilderImpl : public AthAlgTool {
                                   const IInterface*);
 
   //!< Helper Tool to create TrackingVolume Arrays
-  ToolHandle<Trk::ITrackingVolumeArrayCreator> m_trackingVolumeArrayCreator;
+  PublicToolHandle<Trk::ITrackingVolumeArrayCreator> m_trackingVolumeArrayCreator{this, "TrackingVolumeArrayCreator", "Trk::TrackingVolumeArrayCreator/TrackingVolumeArrayCreator"};
   //!< Helper Tool to create TrackingVolumes
-  ToolHandle<Trk::ITrackingVolumeHelper> m_trackingVolumeHelper;
+  PublicToolHandle<Trk::ITrackingVolumeHelper> m_trackingVolumeHelper{this, "TrackingVolumeHelper", "Trk::TrackingVolumeHelper/TrackingVolumeHelper"};
   //!< Second helper for volume creation
-  ToolHandle<Trk::ITrackingVolumeCreator> m_trackingVolumeCreator;
+  PublicToolHandle<Trk::ITrackingVolumeCreator> m_trackingVolumeCreator{this, "TrackingVolumeCreator", "Trk::CylinderVolumeCreator/TrackingVolumeCreator"};
   //!< Volume Builder for the Liquid Argon Calorimeter
-  ToolHandle<Trk::ICaloTrackingVolumeBuilder> m_lArVolumeBuilder;
+  PublicToolHandle<Trk::ICaloTrackingVolumeBuilder> m_lArVolumeBuilder{this, "LArVolumeBuilder", "LAr::LArVolumeBuilder/LArVolumeBuilder"};
   //!< Volume Builder for the Tile Calorimeter
-  ToolHandle<Trk::ICaloTrackingVolumeBuilder> m_tileVolumeBuilder;
+  PublicToolHandle<Trk::ICaloTrackingVolumeBuilder> m_tileVolumeBuilder{this, "TileVolumeBuilder", "Tile::TileVolumeBuilder/TileVolumeBuilder"};
 
   //!< Material properties
-  Trk::Material m_caloMaterial; 
-  Trk::Material m_Ar;  
-  Trk::Material m_Al;  
-  Trk::Material m_Scint;
-  Trk::Material m_crackMaterial;
+  Trk::Material m_caloMaterial{};
+  Trk::Material m_Ar{140.036, 856.32, 39.948, 18., 0.0014};
+  Trk::Material m_Al{88.93, 388.62, 26.98, 13., 0.0027};
+  Trk::Material m_Scint{424.35, 707.43, 11.16, 5.61, 0.001};  // from G4 definition
+  Trk::Material m_crackMaterial{424.35, 707.43, 11.16, 5.61, 0.001}; // Scintillator/Glue (G4 def.)
 
-  double m_caloEnvelope;  //!< Envelope cover for Gap Layers
+  DoubleProperty m_caloEnvelope{this, "GapLayerEnvelope", 25 * Gaudi::Units::mm};  //!< Envelope cover for Gap Layers
   // enclosing endcap/cylindervolume
-  ServiceHandle<IEnvelopeDefSvc> m_enclosingEnvelopeSvc;
+  ServiceHandle<IEnvelopeDefSvc> m_enclosingEnvelopeSvc{this, "EnvelopeDefinitionSvc", "AtlasGeometry_EnvelopeDefSvc"};
 
-  double m_caloDefaultRadius;       //!< the radius if not built from GeoModel
-  double m_caloDefaultHalflengthZ;  //!< the halflength in z if not built from
+  DoubleProperty m_caloDefaultRadius{this, "CalorimeterRadius", 4250.};       //!< the radius if not built from GeoModel
+  DoubleProperty m_caloDefaultHalflengthZ{this, "CalorimeterHalflengthZ", 6500.};  //!< the halflength in z if not built from
                                     //!< GeoModel
 
-  bool m_indexStaticLayers;  //!< forces robust indexing for layers
+  BooleanProperty m_indexStaticLayers{this, "IndexStaticLayers", true};  //!< forces robust indexing for layers
 
-  bool m_recordLayerIndexCaloSampleMap;       //!< for deposition methods
-  std::string m_layerIndexCaloSampleMapName;  //!< name to record it
+  BooleanProperty m_recordLayerIndexCaloSampleMap{this, "RecordLayerIndexCaloSampleMap", true};       //!< for deposition methods
+  StringProperty m_layerIndexCaloSampleMapName{this, "LayerIndexCaloSampleMapName", "LayerIndexCaloSampleMap"};  //!< name to record it
 
-  bool m_buildMBTS;  //!< MBTS like detectors
+  BooleanProperty m_buildMBTS{this, "BuildMBTS", true};  //!< MBTS like detectors
   // //!< MBTS like detectors
   std::vector<double> m_mbtsRadiusGap;    //!< MBTS like detectors
   std::vector<int> m_mbtsPhiSegments;     //!< MBTS like detectors
@@ -114,8 +113,8 @@ class CaloTrackingGeometryBuilderImpl : public AthAlgTool {
   std::vector<double> m_mbtsPositionZ;    //!< MBTS like detectors
   std::vector<double> m_mbtsStaggeringZ;  //!< MBTS like detectors
 
-  std::string m_entryVolume;  //!< name of the Calo entrance
-  std::string m_exitVolume;   //!< name of the Calo container
+  StringProperty m_entryVolume{this, "EntryVolumeName", "Calo::Container::EntryVolume"};  //!< name of the Calo entrance
+  StringProperty m_exitVolume{this, "ExitVolumeName", "Calo::Container"};   //!< name of the Calo container
 
   /** method to establish a link between the LayerIndex and the CaloCell_ID in
    * an associative container */

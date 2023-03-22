@@ -1,16 +1,12 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Calo
 #include "CaloTrackingGeometry/CaloTrackingGeometryBuilderImpl.h"
 // Trk
-#include "TrkDetDescrInterfaces/ICaloTrackingVolumeBuilder.h"
 #include "TrkDetDescrInterfaces/IDynamicLayerCreator.h"
 #include "TrkDetDescrInterfaces/ILayerArrayCreator.h"
-#include "TrkDetDescrInterfaces/ITrackingVolumeArrayCreator.h"
-#include "TrkDetDescrInterfaces/ITrackingVolumeCreator.h"
-#include "TrkDetDescrInterfaces/ITrackingVolumeHelper.h"
 #include "TrkDetDescrUtils/BinUtility.h"
 #include "TrkDetDescrUtils/BinnedArray.h"
 #include "TrkDetDescrUtils/BinnedArray1D1D.h"
@@ -40,52 +36,7 @@
 // constructor
 Calo::CaloTrackingGeometryBuilderImpl::CaloTrackingGeometryBuilderImpl(
     const std::string& t, const std::string& n, const IInterface* p)
-    : AthAlgTool(t, n, p),
-      m_trackingVolumeArrayCreator(
-          "Trk::TrackingVolumeArrayCreator/TrackingVolumeArrayCreator"),
-      m_trackingVolumeHelper("Trk::TrackingVolumeHelper/TrackingVolumeHelper"),
-      m_trackingVolumeCreator(
-          "Trk::CylinderVolumeCreator/TrackingVolumeCreator"),
-      m_lArVolumeBuilder("LAr::LArVolumeBuilder/LArVolumeBuilder"),
-      m_tileVolumeBuilder("Tile::TileVolumeBuilder/TileVolumeBuilder"),
-      m_caloMaterial{},
-      m_Ar(140.036, 856.32, 39.948, 18., 0.0014),
-      m_Al(88.93, 388.62, 26.98, 13., 0.0027),
-      m_Scint(424.35, 707.43, 11.16, 5.61, 0.001),  //from G4 definition
-      m_crackMaterial( 424.35, 707.43, 11.16, 5.61, 0.001), //Scintillator/Glue (G4 def.)
-      m_caloEnvelope(25 * Gaudi::Units::mm),
-      m_enclosingEnvelopeSvc("AtlasGeometry_EnvelopeDefSvc", n),
-      m_caloDefaultRadius(4250.),
-      m_caloDefaultHalflengthZ(6500.),
-      m_indexStaticLayers(true),
-      m_recordLayerIndexCaloSampleMap(false),
-      m_layerIndexCaloSampleMapName("LayerIndexCaloSampleMap"),
-      m_buildMBTS(true),
-      // m_mbstSurfaceShape(2),
-      m_entryVolume("Calo::Container::EntryVolume"),
-      m_exitVolume("Calo::Container") {
-  // declare the properties via Python
-  declareProperty("LArVolumeBuilder", m_lArVolumeBuilder);
-  declareProperty("TileVolumeBuilder", m_tileVolumeBuilder);
-  declareProperty("TrackingVolumeArrayCreator", m_trackingVolumeArrayCreator);
-  declareProperty("TrackingVolumeHelper", m_trackingVolumeHelper);
-  declareProperty("TrackingVolumeCreator", m_trackingVolumeCreator);
-  declareProperty("GapLayerEnvelope", m_caloEnvelope);
-  // envelope definition service
-  declareProperty("EnvelopeDefinitionSvc", m_enclosingEnvelopeSvc);
-  // empty calorimeter to be built
-  declareProperty("CalorimeterRadius", m_caloDefaultRadius);
-  declareProperty("CalorimeterHalflengthZ", m_caloDefaultHalflengthZ);
-  // unique layer handling
-  declareProperty("IndexStaticLayers", m_indexStaticLayers);
-  // for energy deposition
-  declareProperty("RecordLayerIndexCaloSampleMap",
-                  m_recordLayerIndexCaloSampleMap);
-  declareProperty("LayerIndexCaloSampleMapName", m_layerIndexCaloSampleMapName);
-  // MBTS like detectors
-  declareProperty("BuildMBTS", m_buildMBTS);
-  declareProperty("EntryVolumeName", m_entryVolume);
-  declareProperty("ExitVolumeName", m_exitVolume);
+    : AthAlgTool(t, n, p) {
 }
 
 // destructor
