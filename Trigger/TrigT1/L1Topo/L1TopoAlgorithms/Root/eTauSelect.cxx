@@ -21,6 +21,8 @@ TCS::eTauSelect::eTauSelect(const std::string & name) : SortingAlg(name) {
    defineParameter( "MinET", 0 );
    defineParameter( "RCoreMin", 0 );
    defineParameter( "RHadMin", 0 );
+   defineParameter( "MinEta", 0 );
+   defineParameter( "MaxEta", 196 );
 }
 
 

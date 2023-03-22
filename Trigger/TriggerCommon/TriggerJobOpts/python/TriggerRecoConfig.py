@@ -70,6 +70,10 @@ def TriggerRecoCfgData(flags):
         if flags.Input.Format is Format.BS:
             from L1TopoByteStream.L1TopoByteStreamConfig import L1TopoRawDataContainerBSCnvCfg
             acc.merge( L1TopoRawDataContainerBSCnvCfg(flags) )
+            topoEDM = ['xAOD::L1TopoRawDataContainer#L1TopoRawData',
+                       'xAOD::L1TopoRawDataAuxContainer#L1TopoRawDataAux.']
+            acc.merge(addToESD(flags, topoEDM))
+            acc.merge(addToAOD(flags, topoEDM))
 
     acc.merge(TriggerEDMCfg(flags))
 

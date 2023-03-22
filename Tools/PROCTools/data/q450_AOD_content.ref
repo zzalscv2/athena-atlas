@@ -588,6 +588,8 @@ L1TopoErrorFlags_Legacy
 L1TopoErrorFlags_LegacyAux.
 L1TopoRawData
 L1TopoRawDataAux.
+L1_Phase1L1TopoRAWData
+L1_Phase1L1TopoRAWDataAux.
 L1_cTauRoI
 L1_cTauRoIAux.
 L1_eEMRoI

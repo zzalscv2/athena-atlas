@@ -5,6 +5,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, appen
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
+
 class L1TopoSimulation ( LVL1__L1TopoSimulation ):
 
     def __init__( self, name = "L1TopoSimulation" ):
@@ -60,7 +61,7 @@ def L1LegacyTopoSimulationCfg(flags):
     acc.addEventAlgo(topoSimAlg)
     return acc
 
-def L1TopoSimulationCfg(flags):
+def L1TopoSimulationCfg(flags, doMonitoring=True):
 
     acc = ComponentAccumulator()
 
@@ -79,6 +80,9 @@ def L1TopoSimulationCfg(flags):
     emtauProvider = CompFactory.LVL1.eFexInputProvider("eFexInputProvider")
     jetProvider = CompFactory.LVL1.jFexInputProvider("jFexInputProvider")
     energyProvider = CompFactory.LVL1.gFexInputProvider("gFexInputProvider")
+
+    controlHistSvc = CompFactory.LVL1.ControlHistSvc("ControlHistSvc")
+    
     if not flags.Trigger.enableL1CaloPhase1:
         emtauProvider.eFexEMRoIKey = ""
         emtauProvider.eFexTauRoIKey = ""
@@ -101,16 +105,18 @@ def L1TopoSimulationCfg(flags):
                                                     EMTAUInputProvider = emtauProvider,
                                                     JetInputProvider = jetProvider,
                                                     EnergyInputProvider = energyProvider,
+                                                    ControlHistSvc = controlHistSvc if doMonitoring else "",
                                                     IsLegacyTopo = False,
                                                     EnableInputDump = flags.Trigger.enableL1TopoDump,
                                                     UseBitwise = flags.Trigger.enableL1TopoBWSimulation
                                                     )
 
     acc.addEventAlgo(topoSimAlg)
-    
-    from L1TopoOnlineMonitoring import L1TopoOnlineMonitoringConfig as TopoMonConfig
-    acc.addEventAlgo(TopoMonConfig.getL1TopoPhase1OnlineMonitor(flags,'L1/L1TopoSimDecisions'))
-    
+
+    if doMonitoring:
+        from L1TopoOnlineMonitoring import L1TopoOnlineMonitoringConfig as TopoMonConfig
+        acc.addEventAlgo(TopoMonConfig.getL1TopoPhase1OnlineMonitor(flags,'L1/L1TopoSimDecisions'))
+
     return acc
 
 def L1TopoSimulationOldStyleCfg(flags, isLegacy):
