@@ -72,13 +72,13 @@ int main(int argc, char** argv) {
 
   int magver = 3;
   
-  boost::shared_ptr< std::ifstream > magfile1 = getAlfaMagnetConfigFiles(confDir, beam1);
-  boost::shared_ptr< std::ifstream > magfile2 = getAlfaMagnetConfigFiles(confDir, beam2);
+  std::shared_ptr< std::ifstream > magfile1 = getAlfaMagnetConfigFiles(confDir, beam1);
+  std::shared_ptr< std::ifstream > magfile2 = getAlfaMagnetConfigFiles(confDir, beam2);
   
   Beamline fBeamline1 = setupBeamline(configData, beam1, magver, magfile1); std::cout << fBeamline1;
   Beamline fBeamline2 = setupBeamline(configData, beam2, magver, magfile2); std::cout << fBeamline2;
   
-  boost::shared_ptr<IParticle> iParticle(new Particle(particleX, particleY, particleZ, particlePX, particlePY, particlePZ));
+  std::shared_ptr<IParticle> iParticle(new Particle(particleX, particleY, particleZ, particlePX, particlePY, particlePZ));
 
   IParticle& fParticle = *iParticle;
 

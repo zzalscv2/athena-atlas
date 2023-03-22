@@ -8,6 +8,7 @@
 #include "FPTracker/FPTrackerConstants.h"
 #include <cmath>
 #include <sstream>
+#include <cassert>
 namespace FPTracker{
 
   const std::string Plane::s_label="Plane";

@@ -7,7 +7,7 @@
 
 
 #include "FPTracker/FPTrackerConstants.h"
-#include "boost/shared_ptr.hpp"
+#include <memory>
 
 #include <string>
 #include <vector>
@@ -35,10 +35,10 @@ namespace FPTracker{
     virtual void calibrate(IParticle&)                = 0;
     virtual std::string str()                   const = 0;
     
-    virtual boost::shared_ptr< const IBeamElement > clone()  const = 0;
+    virtual std::shared_ptr< const IBeamElement > clone()  const = 0;
 
-    typedef boost::shared_ptr< const IBeamElement >  ConstPtr_t;
-    typedef boost::shared_ptr< IBeamElement >        Ptr_t;
+    typedef std::shared_ptr< const IBeamElement >  ConstPtr_t;
+    typedef std::shared_ptr< IBeamElement >        Ptr_t;
 
     typedef std::vector< Ptr_t >                     Container_t;
     typedef Container_t::iterator                    Iter_t;

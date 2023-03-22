@@ -402,7 +402,7 @@ def AddTruthEnergyDensityCfg(flags):
                                                         AbsRapidityMax      = 1.5,
                                                         OutputContainer     = "TruthIsoCentralEventShape",
                                                        )
-    acc.addPublicTool(DFCommonTruthCentralEDTool, primary = True)
+    acc.addPublicTool(DFCommonTruthCentralEDTool)
     acc.addEventAlgo(EventDensityAthAlg("DFCommonTruthCentralEDAlg", EventDensityTool = DFCommonTruthCentralEDTool ))
     DFCommonTruthForwardEDTool = configEventDensityTool("DFCommonTruthForwardEDTool",
                                                         cst.Truth,
@@ -411,7 +411,7 @@ def AddTruthEnergyDensityCfg(flags):
                                                         AbsRapidityMax      = 3.0,
                                                         OutputContainer     = "TruthIsoForwardEventShape",
                                                        )
-    acc.addPublicTool(DFCommonTruthForwardEDTool, primary = True)
+    acc.addPublicTool(DFCommonTruthForwardEDTool)
     acc.addEventAlgo(EventDensityAthAlg("DFCommonTruthForwardEDAlg", EventDensityTool = DFCommonTruthForwardEDTool ))
 
     # Now add the tool to do the decoration
@@ -420,7 +420,7 @@ def AddTruthEnergyDensityCfg(flags):
                                                                                 EnergyDensityKeys=["TruthIsoCentralEventShape","TruthIsoForwardEventShape"],
                                                                                 DecorationSuffix="_rho"
                                                                                )
-    acc.addPublicTool(DFCommonTruthEDDecorator, primary = True)
+    acc.addPublicTool(DFCommonTruthEDDecorator)
     
     DFCommonTruthEDKernel = CompFactory.DerivationFramework.CommonAugmentation
     acc.addEventAlgo(DFCommonTruthEDKernel("DFCommonTruthEDKernel", AugmentationTools = [DFCommonTruthEDDecorator] ))

@@ -17,7 +17,9 @@ const int jFEXCompression::s_steps[] = {25, 50, 100, 200, 400};
 const int jFEXCompression::s_minET[] = {-3150, 6400, 25600, 102400, 409600};
 const int jFEXCompression::s_minCode[] = {2, 384, 768, 1536, 3072};
 
-unsigned int jFEXCompression::Compress(int Et) {
+unsigned int jFEXCompression::Compress(float floatEt) {
+    
+    int Et = std::round(floatEt);
 
     // Check for overflow
     if (Et >= s_maxET) return s_LArOverflow;

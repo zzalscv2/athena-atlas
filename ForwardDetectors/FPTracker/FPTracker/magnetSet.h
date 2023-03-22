@@ -16,6 +16,6 @@ namespace FPTracker{
 				 const ConfigData&, 
 				 const Side& side,
 				 int magversion,
-				 boost::shared_ptr< std::ifstream> magfile);
+				 std::shared_ptr< std::ifstream> magfile);
 }
 #endif

@@ -38,7 +38,6 @@ class sTgcDigit : public MuonDigit {
 
   // get BC Tag
   uint16_t bcTag() const;
-  enum {BC_UNDEFINED=0, BC_PREVIOUS, BC_CURRENT, BC_NEXT};
 
   // get the charge
   float charge() const;

@@ -46,7 +46,7 @@ namespace ISF {
 
       /** passes through to the private version */
 #ifdef HEPMC3
-      bool pass(HepMC::ConstGenParticlePtr particle ) const;
+      bool pass(const HepMC::ConstGenParticlePtr& particle ) const;
 #else
       bool pass(const HepMC::GenParticle& particle ) const;
 #endif
@@ -54,7 +54,7 @@ namespace ISF {
      private:
       /** returns true if the the particle and all daughters are on the white list */
 #ifdef HEPMC3
-      bool pass(HepMC::ConstGenParticlePtr particle , std::vector<int> & used_vertices ) const;
+      bool pass(const HepMC::ConstGenParticlePtr& particle , std::vector<int> & used_vertices ) const;
 #else
       bool pass(const HepMC::GenParticle& particle , std::vector<int> & used_vertices ) const;
 #endif

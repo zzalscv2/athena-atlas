@@ -4,12 +4,12 @@
 
 #ifndef FPTRACKER_READCONFIGDATA_H
 #define FPTRACKER_READCONFIGDATA_H
-#include "boost/shared_ptr.hpp"
+#include <memory>
 #include <fstream>
 
 namespace FPTracker{
   class ConfigData;
-  bool readConfigData(boost::shared_ptr< std::ifstream >  confDir, ConfigData&);
+  bool readConfigData(std::shared_ptr< std::ifstream >  confDir, ConfigData&);
 }
 
 #endif

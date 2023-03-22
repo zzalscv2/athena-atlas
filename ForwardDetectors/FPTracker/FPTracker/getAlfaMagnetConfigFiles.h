@@ -6,13 +6,13 @@
 #define FPTRACKER_GETALFAMAGNETCONFIGFILES_H
 
 #include "FPTracker/FPTrackerConstants.h"
-#include "boost/shared_ptr.hpp"
+#include <memory>
 #include <string>
 #include <map>
 
 
 namespace FPTracker{
-  boost::shared_ptr< std::ifstream >  getAlfaMagnetConfigFiles(const std::string& dir, const Side& side);
+  std::shared_ptr< std::ifstream >  getAlfaMagnetConfigFiles(const std::string& dir, const Side& side);
 }
 
 #endif

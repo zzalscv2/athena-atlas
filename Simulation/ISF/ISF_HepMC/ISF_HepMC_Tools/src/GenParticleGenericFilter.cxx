@@ -83,7 +83,7 @@ StatusCode  ISF::GenParticleGenericFilter::finalize()
 
 /** Returns whether the given particle passes all cuts or not */
 #ifdef HEPMC3
-bool ISF::GenParticleGenericFilter::pass(HepMC::ConstGenParticlePtr particle) const
+bool ISF::GenParticleGenericFilter::pass(const HepMC::ConstGenParticlePtr& particle) const
 {
   bool pass = true;
   HepMC::ConstGenVertexPtr productionVertex = particle?particle->production_vertex():nullptr;
@@ -119,7 +119,7 @@ bool ISF::GenParticleGenericFilter::pass(const HepMC::GenParticle& particle) con
 
 /** Check whether the given particle passes all configure cuts or not */
 #ifdef HEPMC3
-bool ISF::GenParticleGenericFilter::check_cuts_passed(HepMC::ConstGenParticlePtr particle) const {
+bool ISF::GenParticleGenericFilter::check_cuts_passed(const HepMC::ConstGenParticlePtr& particle) const {
   const auto momentum = particle?particle->momentum():HepMC::FourVector(0,0,0,0);
   int pdg = particle?particle->pdg_id():0;
 #else

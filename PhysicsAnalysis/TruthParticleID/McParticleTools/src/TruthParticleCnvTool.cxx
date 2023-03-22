@@ -12,9 +12,6 @@
 // STL includes
 #include <sstream>
 
-// boost includes
-#include "boost/array.hpp"
-
 // FrameWork includes
 #include "GaudiKernel/IPartPropSvc.h"
 #include "GaudiKernel/ThreadLocalContext.h"

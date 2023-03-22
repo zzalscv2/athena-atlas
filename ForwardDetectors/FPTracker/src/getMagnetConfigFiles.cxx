@@ -48,7 +48,7 @@ namespace FPTracker{
 
 
 
-  boost::shared_ptr<std::ifstream> getMagnetConfigFiles(const std::string& dir, int IP, int magVer, const Side& side)
+  std::shared_ptr<std::ifstream> getMagnetConfigFiles(const std::string& dir, int IP, int magVer, const Side& side)
   {
     return  getConfigFile( dir, determineMagnetConfigFileName(IP, side, magVer) );
   }

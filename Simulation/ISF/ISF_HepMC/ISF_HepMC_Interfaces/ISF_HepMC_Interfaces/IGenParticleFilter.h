@@ -39,7 +39,7 @@ namespace ISF {
        
 #ifdef HEPMC3
        /** Returns a boolean if the particle has passed or not */
-       virtual bool pass(HepMC::ConstGenParticlePtr particle) const = 0;
+       virtual bool pass(const HepMC::ConstGenParticlePtr& particle) const = 0;
 #else
        /** Returns a boolean if the particle has passed or not */
        virtual bool pass(const HepMC::GenParticle& particle) const = 0;

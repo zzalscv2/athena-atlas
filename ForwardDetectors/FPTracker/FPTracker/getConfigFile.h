@@ -7,10 +7,10 @@
 
 #include <string>
 #include <fstream>
-#include "boost/shared_ptr.hpp"
+#include <memory>
 
 namespace FPTracker{
-    boost::shared_ptr< std::ifstream>  getConfigFile(const std::string& dir, const std::string& fn);
+    std::shared_ptr< std::ifstream>  getConfigFile(const std::string& dir, const std::string& fn);
 }
 
 #endif

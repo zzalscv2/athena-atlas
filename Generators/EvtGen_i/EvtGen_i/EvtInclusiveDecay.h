@@ -23,8 +23,6 @@
 #ifndef GENERATORMODULESEVTDECAYINCLUSIVE_H
 #define GENERATORMODULESEVTDECAYINCLUSIVE_H
 
-#include <boost/algorithm/string.hpp>
-
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenParticle.h"
 

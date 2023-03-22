@@ -15,6 +15,7 @@
 #include <stdexcept>
 #include <cmath>
 #include <cassert>
+#include <algorithm>
 //#include  <iostream>
 namespace FPTracker
 {
@@ -56,7 +57,7 @@ namespace FPTracker
   }
   
   // Magnet::Container_t magnetSet(const ConfigData& cData, int sideSelect, const std::vector< std::istream& >& magfiles){
-  Magnet::Container_t magnetSet(const ConfigData& cData, const Side& side, int magver, boost::shared_ptr< std::ifstream> magfile)
+  Magnet::Container_t magnetSet(const ConfigData& cData, const Side& side, int magver, std::shared_ptr< std::ifstream> magfile)
   {
     //  Coordinate system: take z = forwards, x= to left , y = up.
     //  For quadrupoles, input the quantity K1L.  type = 1,2 if K1L is +,-ve.

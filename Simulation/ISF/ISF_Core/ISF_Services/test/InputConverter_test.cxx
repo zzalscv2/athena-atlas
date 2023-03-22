@@ -67,7 +67,7 @@ class MockFilterTool : public AthAlgTool,
 
   // mock method which will be called by tested code
 #ifdef HEPMC3
-  MOCK_CONST_METHOD1(pass, bool(HepMC::ConstGenParticlePtr));
+  MOCK_CONST_METHOD1(pass, bool(const HepMC::ConstGenParticlePtr&));
 #else
   MOCK_CONST_METHOD1(pass, bool(const HepMC::GenParticle&));
 #endif
