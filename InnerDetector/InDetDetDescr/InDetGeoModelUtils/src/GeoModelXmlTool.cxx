@@ -27,6 +27,7 @@ StatusCode GeoModelXmlTool::createBaseTool()
 {
   ATH_CHECK(m_geoDbTagSvc.retrieve());
   ATH_CHECK(m_rdbAccessSvc.retrieve());
+  ATH_CHECK(m_sqliteReadSvc.retrieve());
 
   return StatusCode::SUCCESS;
 }
@@ -165,6 +166,6 @@ void GeoModelXmlTool::createVolume(GeoPhysVol* world, GmxInterface& gmxInterface
   Gmx2Geo gmx2Geo(gmxInput, world, gmxInterface, flags);  
 }
 
-const GeoModelIO::ReadGeoModel* GeoModelXmlTool::getSqliteReader() const{
+GeoModelIO::ReadGeoModel* GeoModelXmlTool::getSqliteReader() const{
   return m_geoDbTagSvc->getSqliteReader();
 }

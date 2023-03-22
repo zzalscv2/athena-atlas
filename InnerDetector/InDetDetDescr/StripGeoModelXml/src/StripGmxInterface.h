@@ -13,6 +13,12 @@
 #include <string>
 #include <sstream>
 
+class IRDBAccessSvc;
+
+namespace GeoModelIO{
+  class ReadGeoModel;
+}
+
 namespace InDetDD
 {
 
@@ -52,6 +58,8 @@ public:
                             std::map<std::string, int> &index,
                             GeoVFullPhysVol *fpv,
                             GeoAlignableTransform *transform) override final;
+
+   void buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccessSvc, GeoModelIO::ReadGeoModel* sqlreader);
 
 private:
   void makeSiStripBox(const std::string& typeName,

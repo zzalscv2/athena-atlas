@@ -32,7 +32,7 @@ protected:
 
   // method to check if we are using the Run4 geometry workflow, from a single sqlite file, and if so, return the reader
   // NB return can be null - used downstream to check if we are using sqlite inputs or not
-  const GeoModelIO::ReadGeoModel* getSqliteReader() const;
+  GeoModelIO::ReadGeoModel* getSqliteReader() const;
 
   // (optional) containingDetector/envelopeVolume can be used if the geometry tree needs to be further descended to add "topVolume"
   // (optional) sqlreader steers if using a pre-built sqlite input, or parsing the geometry xml files to build it here
@@ -41,6 +41,7 @@ protected:
   Gaudi::Property<std::string> m_gmxFilename{this, "GmxFilename", "", "The name of the local file to read the geometry from"};
   Gaudi::Property<std::string> m_detectorName{this, "DetectorName", "ITkStrip", ""};
   ServiceHandle<IRDBAccessSvc> m_rdbAccessSvc{this, "RDBAccessSvc", "RDBAccessSvc", ""};
+  ServiceHandle<IRDBAccessSvc> m_sqliteReadSvc{this, "SqliteReadSvc", "SqliteReadSvc", ""};
   ServiceHandle<IGeoDbTagSvc> m_geoDbTagSvc{this, "GeoDbTagSvc", "GeoDbTagSvc", ""};
   Gaudi::Property<std::string> m_dtdName{this, "OverrideDtdName", "", "Override standard .dtd file from GeoModelXml"};
 
