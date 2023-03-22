@@ -18,7 +18,7 @@ def createActsConfigFlags():
     # a path to a local JSON file
     # 'Default' : material map source is evaluated from the geometry tag
     # 'None'    : no material map is provided
-    actscf.addFlag('Acts.TrackingGeometry.MaterialSource', 'None')
+    actscf.addFlag('Acts.TrackingGeometry.MaterialSource', 'Default')
     actscf.addFlag('Acts.TrackingGeometry.MaterialCalibrationFolder', 'ACTS/MaterialMaps/ITk')
 
     # Monitoring
