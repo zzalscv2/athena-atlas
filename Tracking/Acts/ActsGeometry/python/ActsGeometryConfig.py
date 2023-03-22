@@ -66,9 +66,13 @@ def ActsTrackingGeometrySvcCfg(flags, name = "ActsTrackingGeometrySvc", **kwargs
                                                                 **kwargs)
   if flags.Detector.GeometryITk:
     if flags.Acts.TrackingGeometry.MaterialSource == "Default":
+      extension = "ITk"
+      if flags.Detector.GeometryHGTD:
+        extension += "-HGTD"
       actsTrackingGeometrySvc.UseMaterialMap = True
       actsTrackingGeometrySvc.MaterialMapCalibFolder = flags.Acts.TrackingGeometry.MaterialCalibrationFolder
-      actsTrackingGeometrySvc.MaterialMapInputFile = "material-maps-" + flags.GeoModel.AtlasVersion +".json"
+      actsTrackingGeometrySvc.MaterialMapInputFile = \
+        "material-maps-" + flags.GeoModel.AtlasVersion + "-" + extension + ".json"
     elif flags.Acts.TrackingGeometry.MaterialSource.find(".json") != -1:
       actsTrackingGeometrySvc.UseMaterialMap = True
       actsTrackingGeometrySvc.MaterialMapCalibFolder = flags.Acts.TrackingGeometry.MaterialCalibrationFolder
