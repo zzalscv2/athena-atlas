@@ -31,7 +31,7 @@ class jFEXCompression {
 
 public: 
   /** Compress data */
-  static unsigned int Compress(int Et);
+  static unsigned int Compress(float floatEt);
   /** Uncompress data */
   static int Expand(unsigned int code);
   /** Apply threshold to compressed data */

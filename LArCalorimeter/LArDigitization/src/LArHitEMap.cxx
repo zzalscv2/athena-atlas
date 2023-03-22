@@ -84,7 +84,7 @@ bool LArHitEMap::BuildWindows(const McEventCollection* mcCollptr,
     McEventCollection::const_iterator itr;
 //    std::cout << " start loop over particles " << std::endl;
     for (itr = mcCollptr->begin(); itr!=mcCollptr->end(); ++itr) {
-      for (auto part: *(*itr))
+      for (const auto& part: *(*itr))
       {
          //works only for photons(22) and electrons(11) primary particle (+pi0 in case not decayed by generator)
          // with pt>5 GeV

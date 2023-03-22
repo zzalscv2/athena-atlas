@@ -228,7 +228,7 @@ if [ $onerun -eq 1 ] || [ $lbnumbere -ge 0 ]; then
 else   
    pref=""
 fi
-pref="${pref}sqlite=\"${outputSqlite}\";OutputFile=\"${outputTextFile}\";Folder=\"${Folder}\";GlobalTag=\"${gtages}\";"
+pref="${pref}sqlite=\"${outputSqlite}\";OutputFile=\"${outputTextFile}\";Folder=\"${Folder}\";GlobalTag=\"${gtages}\";tag=\"${fldtag}-RUN2-UPD3-01\""
 echo "Running athena to test readback of sqlite database file"
 athena.py  -c ${pref} LArBadChannelTool/LArMissingFebs2Ascii.py > sqlite2ascii.log 2>&1
 

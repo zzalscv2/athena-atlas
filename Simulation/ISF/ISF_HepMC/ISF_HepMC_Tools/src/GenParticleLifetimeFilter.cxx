@@ -28,18 +28,15 @@ ISF::GenParticleLifetimeFilter::GenParticleLifetimeFilter( const std::string& t,
 
 /** does the given particle pass the filter? */
 #ifdef HEPMC3
-bool ISF::GenParticleLifetimeFilter::pass(HepMC::ConstGenParticlePtr particle) const
-#else
-bool ISF::GenParticleLifetimeFilter::pass(const HepMC::GenParticle& particle) const
-#endif
-{
+bool ISF::GenParticleLifetimeFilter::pass(const HepMC::ConstGenParticlePtr& particle) const {
   // the GenParticle end vertex
-#ifdef HEPMC3
   auto  endVtx = particle->end_vertex();
 #else
+bool ISF::GenParticleLifetimeFilter::pass(const HepMC::GenParticle& particle) const {
+  // the GenParticle end vertex
   auto endVtx = particle.end_vertex();
 #endif
-  // no production vertex?
+  // no end vertex?
   if (!endVtx) {
     ATH_MSG_DEBUG("GenParticle does not have an end vertex, this is fine");
     return true;

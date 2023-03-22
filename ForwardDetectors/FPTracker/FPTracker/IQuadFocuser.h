@@ -6,7 +6,7 @@
 #define FPTRACKER_IQUADFOCUSER_H
 
 
-#include "boost/shared_ptr.hpp"
+#include <memory>
 #include <string>
 
 namespace FPTracker{
@@ -27,7 +27,7 @@ namespace FPTracker{
     virtual double yae()                             const = 0;
     virtual std::string label()                      const = 0;
 
-    typedef boost::shared_ptr< IQuadFocuser >        Ptr_t; // not const as focus is not const.... improve me
+    typedef std::shared_ptr< IQuadFocuser >        Ptr_t; // not const as focus is not const.... improve me
 
   };
 

@@ -44,10 +44,10 @@ namespace ISF {
 
 #ifdef HEPMC3
       /** Returns the Particle Stack, should register truth */
-      bool pass(HepMC::ConstGenParticlePtr particle) const;
+      bool pass(const HepMC::ConstGenParticlePtr& particle) const;
         private:
       /** checks if the particle is in its final state (no end vertex) */
-      bool isFinalState( HepMC::ConstGenParticlePtr p) const;
+      bool isFinalState(const HepMC::ConstGenParticlePtr& p) const;
 #else
 
       /** Returns the Particle Stack, should register truth */

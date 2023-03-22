@@ -55,6 +55,7 @@ class jFexTower2SCellDecorator : public AthReentrantAlgorithm{
         SG::WriteDecorHandleKey<xAOD::jFexTowerContainer> m_SCellEtadecorKey   { this, "SCellEtadecorKey"   , m_jTowersReadKey, "SCellEta"   , "SCell Eta information of the jTower"};
         SG::WriteDecorHandleKey<xAOD::jFexTowerContainer> m_SCellPhidecorKey   { this, "SCellPhidecorKey"   , m_jTowersReadKey, "SCellPhi"   , "SCell Phi information of the jTower"};
         SG::WriteDecorHandleKey<xAOD::jFexTowerContainer> m_SCellIDdecorKey    { this, "SCellIDdecorKey"    , m_jTowersReadKey, "SCellID"    , "SCell IDs information of the jTower"};
+        SG::WriteDecorHandleKey<xAOD::jFexTowerContainer> m_SCellMaskdecorKey  { this, "SCellMaskdecorKey"  , m_jTowersReadKey, "SCellMask"  , "SCell masking information of the jTower"};
         SG::WriteDecorHandleKey<xAOD::jFexTowerContainer> m_TileEtdecorKey     { this, "TileEtdecorKey"     , m_jTowersReadKey, "TileEt"     , "Tile Tower Et information in Encoded from cpET"};
         SG::WriteDecorHandleKey<xAOD::jFexTowerContainer> m_TileEtadecorKey    { this, "TileEtadecorKey"    , m_jTowersReadKey, "TileEta"    , "Tile Tower Eta information in MeV"};
         SG::WriteDecorHandleKey<xAOD::jFexTowerContainer> m_TilePhidecorKey    { this, "TilePhidecorKey"    , m_jTowersReadKey, "TilePhi"    , "Tile Tower Phi information in MeV"};    

@@ -8,7 +8,7 @@
 #include "IBeamElement.h"
 #include "Point.h"
 #include "FPTrackerConstants.h"
-#include "boost/shared_ptr.hpp"
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -35,7 +35,7 @@ namespace FPTracker{
     void track(IParticle&)            const;
     void calibrate(IParticle&);
 
-    typedef boost::shared_ptr< const Plane >   ConstPtr_t;
+    typedef std::shared_ptr< const Plane >   ConstPtr_t;
     typedef std::vector< ConstPtr_t >          Container_t;
 
 

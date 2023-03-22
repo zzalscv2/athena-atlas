@@ -43,7 +43,7 @@ namespace FPTracker{
     void track(IParticle&) const;
     void calibrate(IParticle&);
 
-    typedef boost::shared_ptr< const EmptySpaceElement >  ConstPtr_t;
+    typedef std::shared_ptr< const EmptySpaceElement >  ConstPtr_t;
 
   private:
 

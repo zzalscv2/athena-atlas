@@ -9,13 +9,14 @@ from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import gFexInputByteStreamToo
 from AthenaConfiguration.Enums import Format
 
 
-def L1CaloFEXDecoratorCfg(flags, name, jTowersReadKey = 'L1_jFexDataTowers', ExtraInfo = False):
+def L1CaloFEXDecoratorCfg(flags, name, jTowersReadKey = 'L1_jFexDataTowers', ExtraInfo = False, SCMasking = True):
 
     acc=ComponentAccumulator()
     
     decorator = CompFactory.LVL1.jFexTower2SCellDecorator(name)
     decorator.jTowersReadKey = jTowersReadKey 
     decorator.ExtraInfo = ExtraInfo
+    decorator.SCellMasking = SCMasking
     acc.addEventAlgo(decorator)
 
     return acc

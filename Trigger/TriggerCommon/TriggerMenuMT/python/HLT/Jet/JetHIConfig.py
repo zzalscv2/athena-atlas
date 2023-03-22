@@ -42,15 +42,6 @@ def jetHIEventShapeSequence(configFlags, clustersKey, towerKey):
     from HIEventUtils.HIEventUtilsConf import HIEventShapeMapTool
     theMapTool=HIEventShapeMapTool(eventShapeMapToolKey)
 
-    from AthenaConfiguration.Enums import LHCPeriod
-    if configFlags.GeoModel.Run in [LHCPeriod.Run1, LHCPeriod.Run2]:
-        weightInputFile='cluster.geo.HIJING_2018.root'
-    else:
-        weightInputFile='cluster.geo.DATA_PbPb_2022.root'
-
-    from HIJetRec.HIJetRecConf import HIJetClusterSubtractorTool
-    cl_subtr_tool=HIJetClusterSubtractorTool("HLTHIJetClusterSubtractor", ConfigDir='HIJetCorrection/', InputFile=weightInputFile)
-    cl_subtr_tool.UseSamplings=False
 
     #Make new event shape at tower level
     from HIGlobal.HIGlobalConf import HIEventShapeMaker
@@ -74,11 +65,16 @@ def jetHIEventShapeSequence(configFlags, clustersKey, towerKey):
     ESFiller.UseClusters=True
     
     #Add weight tool to filler tool
+    from AthenaConfiguration.Enums import LHCPeriod
     from HIEventUtils.HIEventUtilsConf import HITowerWeightTool
     TWTool=HITowerWeightTool()
     TWTool.ApplyCorrection=True
     TWTool.ConfigDir='HIJetCorrection/'
-    TWTool.InputFile=weightInputFile
+    if configFlags.GeoModel.Run in [LHCPeriod.Run1, LHCPeriod.Run2]:
+        TWTool.InputFile='cluster.geo.HIJING_2018.root'
+    else:
+        TWTool.InputFile='cluster.geo.DATA_PbPb_2022.root'
+
     from AthenaCommon.AppMgr import ToolSvc
     ToolSvc += HITowerWeightTool()
     ESFiller.TowerWeightTool=TWTool

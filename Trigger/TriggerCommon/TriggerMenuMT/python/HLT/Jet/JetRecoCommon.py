@@ -12,6 +12,8 @@ from ..Menu.SignatureDicts import JetRecoKeys as recoKeys
 from JetRecConfig import StandardJetContext
 # this is to define trigger specific JetModifiers (ex: ConstitFourMom_copy) : 
 from . import TriggerJetMods
+from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
+
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
@@ -191,11 +193,6 @@ def getPrefilterCleaningString(prefilters_list):
 # the calibration config helper
 def getCalibMods(flags,jetRecoDict,dataSource,rhoKey="auto"):
 
-    ## Importing temporay validation flag for testing new online derived calibration
-    calibKey = "Trigger" if flags.Trigger.Jet.useTriggerCalib else "TrigLS2"
-
-    from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
-
     config = getInDetTrigConfig( 'jet' )
 
     # Minimum modifier set for calibration w/o track GSC
@@ -212,6 +209,7 @@ def getCalibMods(flags,jetRecoDict,dataSource,rhoKey="auto"):
             raise ValueError("Pileup residual calibration requested but no track source provided!")
 
         if jetRecoDict["constitType"] == "tc":
+            calibKey = flags.Trigger.Jet.emtopoCalibKey
             calibContext,calibSeq = {
                 ("a4","subjes"):         (calibKey,"JetArea_EtaJES_GSC"),          # Calo GSC only ( + insitu in data)
                 ("a4","subjesIS"):       (calibKey,"JetArea_EtaJES_GSC"),          # Calo GSC only (no insitu)
@@ -219,8 +217,8 @@ def getCalibMods(flags,jetRecoDict,dataSource,rhoKey="auto"):
                 ("a4","subresjesgscIS"): (calibKey,"JetArea_Residual_EtaJES_GSC"), # pu residual + calo+trk GSC ( + insitu in data)
                 ("a4","subjesgsc"):      (calibKey,"JetArea_EtaJES_GSC"),          # Calo+Trk GSC (no insitu)
                 ("a4","subresjesgsc"):   (calibKey,"JetArea_Residual_EtaJES_GSC"), # pu residual + calo+trk GSC (no insitu)
-                ("a10","subjes"):  ("TrigUngroomed","JetArea_EtaJES"),
-                ("a10t","jes"):    ("TrigTrimmed","EtaJES_JMS"),
+                ("a10","subjes"):        ("TrigUngroomed","JetArea_EtaJES"),
+                ("a10t","jes"):          ("TrigTrimmed","EtaJES_JMS"),
                 }[(jetRecoDict["recoAlg"],jetRecoDict["jetCalib"])]
 
             pvname = ""
@@ -235,6 +233,8 @@ def getCalibMods(flags,jetRecoDict,dataSource,rhoKey="auto"):
                 calibContext = "TrigSoftDrop"
                 calibSeq = "EtaJES_JMS"
             else:
+                calibKey = flags.Trigger.Jet.pflowCalibKey # small-R pflow
+                gscDepth = "trackWIDTH"
                 calibContext,calibSeq = {
                   ("a4","subjesgsc"):    (calibKey,"JetArea_EtaJES_GSC"),            # w/o pu residual  + calo+trk GSC
                   ("a4","subresjesgsc"): (calibKey,"JetArea_Residual_EtaJES_GSC"),   # pu residual + calo+trk GSC

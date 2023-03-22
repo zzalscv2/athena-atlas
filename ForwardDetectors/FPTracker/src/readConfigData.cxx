@@ -56,7 +56,7 @@ namespace FPTracker{
   };
       
 
-  bool readConfigData(boost::shared_ptr< std::ifstream> p_mydata, ConfigData& configData){
+  bool readConfigData(std::shared_ptr< std::ifstream> p_mydata, ConfigData& configData){
     // ConfigData readConfigData(std::string& dir){
     // Read data cards from Data.txt file 
 

@@ -670,7 +670,7 @@ bool EvtInclusiveDecay::passesUserSelection(HepMC::GenEvent* hepMC) {
   bool passed(false);
   std::vector<HepMC::GenParticlePtr> *muons = new std::vector<HepMC::GenParticlePtr>;
 
-  for ( auto p:  *hepMC) {
+  for ( const auto& p:  *hepMC) {
     if( std::abs(p->pdg_id()) == 13 )
       muons->push_back(p);
   }
@@ -849,7 +849,7 @@ unsigned int EvtInclusiveDecay::printTree(HepMC::GenParticlePtr p,
 std::string EvtInclusiveDecay::pdgName(HepMC::ConstGenParticlePtr p, bool statusHighlighting, std::set<HepMC::GenParticlePtr>* barcodeList) {
   std::ostringstream buf;
   bool inlist=false;
-  if (barcodeList) for (auto pinl: *barcodeList) if (pinl&&p) if (pinl.get()==p.get()) inlist=true;
+  if (barcodeList) for (const auto& pinl: *barcodeList) if (pinl&&p) if (pinl.get()==p.get()) inlist=true;
   if (statusHighlighting) {
     if ( ((barcodeList!=0) && (inlist)) ||
          ((barcodeList==0) && isToBeDecayed(p,false)) )
@@ -905,6 +905,18 @@ double EvtInclusiveAtRndmGen::random() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+static void local_split( std::vector <std::string>& tokens,const std::string& input, const char sep) {
+    size_t start = 0, end = 0;
+    for (size_t i = 0; i <= input.size(); i++) {
+        if (input[i] == sep || i == input.size()) {
+            end = i;
+            if (end!=start) tokens.push_back(input.substr(start,end - start));
+            start = end + 1;
+        }
+    }
+}
+
 std::string EvtInclusiveDecay::xmlpath(){
 
   char *cmtpath = getenv("CMTPATH");
@@ -915,7 +927,7 @@ std::string EvtInclusiveDecay::xmlpath(){
   if(cmtpath != 0 && cmtconfig != 0){
 
     std::vector<std::string> cmtpaths;
-    boost::split(cmtpaths, cmtpath, boost::is_any_of(std::string(":")));
+    local_split(cmtpaths, cmtpath,':');
 
     std::string installPath = "/InstallArea/" + std::string(cmtconfig) + "/share/Pythia8/xmldoc";
 

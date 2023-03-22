@@ -4,7 +4,6 @@
 atlas_subdir( EvtGen_i )
 
 # External dependencies:
-find_package( Boost COMPONENTS filesystem thread system )
 find_package( CLHEP )
 find_package( HepPDT )
 if (HEPMC3_USE)

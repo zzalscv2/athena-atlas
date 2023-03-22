@@ -35,7 +35,7 @@ namespace ISF {
 
     /** does the given particle pass the filter? */
 #ifdef HEPMC3
-    bool pass(HepMC::ConstGenParticlePtr particle) const;
+    bool pass(const HepMC::ConstGenParticlePtr& particle) const;
 #else
     bool pass(const HepMC::GenParticle& particle) const;
 #endif

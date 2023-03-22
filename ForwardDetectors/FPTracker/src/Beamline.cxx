@@ -6,7 +6,7 @@
 #include "FPTracker/STLHelpers.h"
 #include "FPTracker/IParticle.h"
 #include "FPTracker/IBeamElement.h"
-#include "boost/shared_ptr.hpp"
+#include <memory>
 #include <algorithm>
 #include <cassert>
 #include <string>
@@ -153,7 +153,7 @@ namespace FPTracker{
     }
     std::string str() const {return m_ost->str();}
   private:
-    boost::shared_ptr< std::stringstream > m_ost;
+    std::shared_ptr< std::stringstream > m_ost;
   };
     
   std::string Beamline::str() const{

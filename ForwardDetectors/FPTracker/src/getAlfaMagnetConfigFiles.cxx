@@ -11,7 +11,7 @@
 namespace FPTracker{
 
 
-  boost::shared_ptr<std::ifstream> getAlfaMagnetConfigFiles(const std::string& dir, const Side& side)
+  std::shared_ptr<std::ifstream> getAlfaMagnetConfigFiles(const std::string& dir, const Side& side)
   {
     std::string fn = (side == beam1) ? "alfaTwiss1.txt":"alfaTwiss2.txt";
     return  getConfigFile( dir, fn );

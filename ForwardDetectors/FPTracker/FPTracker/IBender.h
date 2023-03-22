@@ -5,7 +5,7 @@
 #ifndef FPTRACKER_IBENDER_H
 #define FPTRACKER_IBENDER_H
 
-#include "boost/shared_ptr.hpp"
+#include <memory>
 #include <string>
 
 namespace FPTracker{
@@ -15,7 +15,7 @@ namespace FPTracker{
    virtual ~IBender();
    virtual void bend(IParticle&)         const = 0;
    virtual std::string label()           const = 0;
-   typedef boost::shared_ptr< IBender >  ConstPtr_t;
+   typedef std::shared_ptr< IBender >  ConstPtr_t;
   };
 
 }

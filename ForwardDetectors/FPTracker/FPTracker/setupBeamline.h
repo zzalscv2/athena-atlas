@@ -6,7 +6,7 @@
 #define FPTRACKER_SETUPBEAMLINE_H
 
 #include "FPTracker/FPTrackerConstants.h"
-#include "boost/shared_ptr.hpp"
+#include <memory>
 #include <fstream>
 
 
@@ -17,7 +17,7 @@ namespace FPTracker{
 			 const ConfigData&,
 			 const Side&,
 			 int magver,
-			 boost::shared_ptr< std::ifstream >
+			 std::shared_ptr< std::ifstream >
 			 );
 }
 #endif

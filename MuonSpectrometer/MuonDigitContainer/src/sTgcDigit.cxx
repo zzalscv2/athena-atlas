@@ -4,13 +4,13 @@
 
 #include "MuonDigitContainer/sTgcDigit.h"
 
-sTgcDigit::sTgcDigit() : m_bcTag (BC_UNDEFINED), m_charge(-1), m_time(0) { }
+sTgcDigit::sTgcDigit() : m_bcTag (0), m_charge(-1), m_time(0) { }
  
 //**********************************************************************
 // Full constructor from Identifier.
 sTgcDigit::sTgcDigit(const Identifier& id, float time)
   : MuonDigit(id),
-    m_bcTag(BC_CURRENT),
+    m_bcTag(0),
     m_charge(-1.),
     m_time(time),
     m_isDead(false),

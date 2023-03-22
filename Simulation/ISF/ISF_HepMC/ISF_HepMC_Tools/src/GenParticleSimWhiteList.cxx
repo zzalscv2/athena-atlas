@@ -78,7 +78,7 @@ StatusCode  ISF::GenParticleSimWhiteList::initialize()
 
 /** passes through to the private version of the filter */
 #ifdef HEPMC3
-bool ISF::GenParticleSimWhiteList::pass(HepMC::ConstGenParticlePtr particle) const
+bool ISF::GenParticleSimWhiteList::pass(const HepMC::ConstGenParticlePtr& particle) const
 {
 
   ATH_MSG_VERBOSE( "Checking whether " << particle << " passes the filter." );
@@ -133,7 +133,7 @@ bool ISF::GenParticleSimWhiteList::pass(const HepMC::GenParticle& particle) cons
 
 /** returns true if the the particle and all daughters are on the white list */
 #ifdef HEPMC3
-bool ISF::GenParticleSimWhiteList::pass(HepMC::ConstGenParticlePtr particle , std::vector<int> & used_vertices ) const
+bool ISF::GenParticleSimWhiteList::pass(const HepMC::ConstGenParticlePtr& particle , std::vector<int> & used_vertices ) const
 {
   // See if the particle is in the white list
   bool passFilter = std::binary_search( m_pdgId.begin() , m_pdgId.end() , particle->pdg_id() ) || MC::PID::isNucleus( particle->pdg_id() );

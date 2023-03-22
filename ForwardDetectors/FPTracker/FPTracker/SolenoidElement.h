@@ -71,7 +71,7 @@ namespace FPTracker{
     void track(IParticle&) const;
     void calibrate(IParticle&);
 
-    typedef boost::shared_ptr< const SolenoidElement >  ConstPtr_t;
+    typedef std::shared_ptr< const SolenoidElement >  ConstPtr_t;
 
   private:
 

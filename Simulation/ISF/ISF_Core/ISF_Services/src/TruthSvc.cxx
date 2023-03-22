@@ -470,7 +470,7 @@ HepMC::GenVertexPtr  ISF::TruthSvc::createGenVertexFromTruthIncident( ISF::ITrut
       newVtx->add_particle_in( parent );
 
 #ifdef HEPMC3
-      ATH_MSG_VERBOSE("createGVfromTI Replacement QS GenVertex: " << newVtx << ", barcode: " << HepMC::barcode(newVtx) );
+      ATH_MSG_VERBOSE("createGVfromTI Replacement QS GenVertex: " << newVtx );
       mcEvent->add_vertex(newVtx);
       HepMC::suggest_barcode( newVtx, vtxbcode );
       newVtx->add_attribute("weights",std::make_shared<HepMC3::VectorDoubleAttribute>(weights));

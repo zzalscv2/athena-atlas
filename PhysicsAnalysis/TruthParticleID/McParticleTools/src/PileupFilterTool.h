@@ -95,10 +95,10 @@ class PileupFilterTool : public TruthParticleFilterBaseTool
   /////////////////////////////////////////////////////////////////// 
  protected: 
 
-  /** List of particles (in fact their unique barcode) which have been
+  /** List of particles  which have been
    *  labelled as "special"
    */
-  std::set<int> m_barcodes;
+  std::set<HepMC::ConstGenParticlePtr> m_particles;
 
   /** deltaR isolation energy cut for electrons, muons, taus and photons
    */

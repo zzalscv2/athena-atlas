@@ -4,7 +4,6 @@
 atlas_subdir( ISF_Algorithms )
 
 # External dependencies:
-find_package( Boost COMPONENTS filesystem thread system )
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
 find_package( GTest )
 find_package( GMock )
@@ -16,8 +15,8 @@ endif()
 # Component(s) in the package:
 atlas_add_component( ISF_Algorithms
    src/*.h src/*.cxx src/components/*.cxx
-   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} GaudiKernel AtlasHepMCLib CxxUtils
+   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+   LINK_LIBRARIES  ${ROOT_LIBRARIES} GaudiKernel AtlasHepMCLib CxxUtils
    AthenaBaseComps StoreGateLib AtlasDetDescr GeneratorObjects HepMC_InterfacesLib
    ISF_Event ISF_InterfacesLib ISF_HepMC_Interfaces PmbCxxUtils InDetSimEvent
    CaloSimEvent LArSimEvent TileSimEvent MuonSimEvent TrackRecordLib

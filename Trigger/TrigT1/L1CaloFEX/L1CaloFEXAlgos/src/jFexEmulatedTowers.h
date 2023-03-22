@@ -48,7 +48,7 @@ class jFexEmulatedTowers : public AthReentrantAlgorithm{
         SG::ReadHandleKey<xAOD::TriggerTowerContainer> m_triggerTowerKey {this, "xODTriggerTowers", "xAODTriggerTowers", "xAODTriggerTowers container"};
         
         //Writehhanlde for EmulatedTowers container
-        SG::WriteHandleKey < xAOD::jFexTowerContainer > m_jTowersWriteKey    {this,"jTowersWriteKey"   ,"L1_jFexEmulatedDataTowers", "Write jFexEDM Trigger Tower container"};
+        SG::WriteHandleKey < xAOD::jFexTowerContainer > m_jTowersWriteKey    {this,"jTowersWriteKey"   ,"L1_jFexEmulatedTowers", "Write jFexEDM Trigger Tower container"};
         
         // FiberMapping property required by the interface
         Gaudi::Property<std::string> m_FiberMapping {this, "jFexTowerMapping", PathResolver::find_calib_file("L1CaloFEXByteStream/2022-10-19/jFexTowerMap.txt"), "Text file to convert from hardware fiber to eta-phi location"};

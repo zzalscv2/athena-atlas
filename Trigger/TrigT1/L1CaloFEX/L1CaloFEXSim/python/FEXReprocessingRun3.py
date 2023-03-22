@@ -152,7 +152,7 @@ if __name__ == '__main__':
         
     if "jFex" in args.outputs:
         ##################################################
-        # jFEX simulation
+        # jFEX Simulated TOBs
         ##################################################    
         jFEX = CompFactory.LVL1.jFEXDriver('jFEXDriver')
         jFEX.jSuperCellTowerMapperTool = CompFactory.LVL1.jSuperCellTowerMapper('jSuperCellTowerMapper')
@@ -190,7 +190,7 @@ if __name__ == '__main__':
         
         
         ##################################################
-        # jFEX decoded TOBs
+        # jFEX Data TOBs
         ##################################################       
         from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import jFexRoiByteStreamToolCfg
         jFexRoiByteStreamTool = jFexRoiByteStreamToolCfg('jFexBSDecoderTool', flags=flags, writeBS=False)
@@ -219,7 +219,7 @@ if __name__ == '__main__':
         outputEDM += addEDM('xAOD::jFexMETRoIContainer'  , 'L1_jFexMETxRoI'  ) 
 
         ##################################################
-        # jFEX decoded Towers
+        # jFEX Data Towers
         ##################################################  
         from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import jFexInputByteStreamToolCfg
         inputjFexTool = jFexInputByteStreamToolCfg('jFexInputBSDecoder', flags)
@@ -233,8 +233,19 @@ if __name__ == '__main__':
         
         # Uses SCell to decorate the jTowers
         from L1CaloFEXAlgos.L1CaloFEXAlgosConfig import L1CaloFEXDecoratorCfg
-        DecoratorAlgo = L1CaloFEXDecoratorCfg(flags, name = 'jFexTower2SCellDecorator', ExtraInfo=True)
+        DecoratorAlgo = L1CaloFEXDecoratorCfg(flags, name = 'jFexTower2SCellDecorator', ExtraInfo=True, SCMasking=True)
         acc.merge(DecoratorAlgo)    
+
+        ##################################################
+        # jFEX Emulated Towers
+        ##################################################  
+        from L1CaloFEXAlgos.FexEmulatedTowersConfig import jFexEmulatedTowersCfg
+        jFEXEmulatorAlgo = jFexEmulatedTowersCfg(flags, name = 'jFexTowerEmulator')
+        acc.merge(jFEXEmulatorAlgo) 
+                   
+        # saving/adding the emulated jTower xAOD container
+        outputEDM += addEDM('xAOD::jFexTowerContainer', "L1_jFexEmulatedTowers") 
+        
 
     if "gFex" in args.outputs:    
 
