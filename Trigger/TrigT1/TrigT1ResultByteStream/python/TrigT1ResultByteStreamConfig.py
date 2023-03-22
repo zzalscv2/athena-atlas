@@ -288,7 +288,7 @@ def L1TriggerByteStreamDecoderCfg(flags, returnEDM=False):
   ########################################
   # Run-3 L1Topo decoding
   ########################################
-  if flags.Trigger.L1.doTopo and flags.Trigger.enableL1CaloPhase1 and flags.Trigger.L1.doTopoPhase1 and flags.Trigger.doHLT:
+  if flags.Trigger.L1.doTopo and flags.Trigger.enableL1CaloPhase1 and flags.Trigger.L1.doTopoPhase1:
     topoByteStreamTool = L1TopoPhase1ByteStreamToolCfg("L1TopoBSDecoderTool",
                                                        flags=flags,
                                                        writeBS=False)

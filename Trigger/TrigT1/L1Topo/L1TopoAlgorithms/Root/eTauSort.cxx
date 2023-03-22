@@ -26,6 +26,8 @@ TCS::eTauSort::eTauSort(const std::string & name) : SortingAlg(name) {
    defineParameter( "OutputWidth", 6 );
    defineParameter( "RCoreMin", 0 );
    defineParameter( "RHadMin", 0 );
+   defineParameter( "MinEta", 0 );
+   defineParameter( "MaxEta", 196 );
 }
 
 
