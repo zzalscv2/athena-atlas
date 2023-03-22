@@ -188,7 +188,10 @@ def TrackParticleCnvAlgPIDCheckCfg(flags, name,
     result.merge(TrackParticleCnvAlgCfg(flags, name, **kwargs))
     return result
 
-def TrackParticleCnvAlgNoPIDCfg(flags, name, **kwargs):
+def TrackParticleCnvAlgNoPIDCfg(flags, name,
+                                ClusterSplitProbabilityName = "",
+                                AssociationMapName = "",
+                                **kwargs):
     result = ComponentAccumulator()
 
     if "TrackParticleCreator" not in kwargs:
@@ -197,9 +200,13 @@ def TrackParticleCnvAlgNoPIDCfg(flags, name, **kwargs):
             TrackParticleCreatorToolNoPIDCfg(
                 flags,
                 name = kwargs["xAODTrackParticlesFromTracksContainerName"] \
-                + "CreatorTool")))
+                + "CreatorTool",
+                ClusterSplitProbabilityName = ClusterSplitProbabilityName,
+                AssociationMapName = AssociationMapName)))
 
-    result.merge(TrackParticleCnvAlgCfg(flags, name, **kwargs))
+    result.merge(TrackParticleCnvAlgCfg(flags, name,
+                                        ClusterSplitProbabilityName,
+                                        AssociationMapName, **kwargs))
     return result
 
 def ObserverTrackParticleCnvAlgCfg(flags, name="ObserverTrackParticleCnvAlg",
