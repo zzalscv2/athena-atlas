@@ -140,6 +140,20 @@ class MultiTrajectory final
   void unset_impl(Acts::TrackStatePropMask target,
                   ActsTrk::MultiTrajectory<RWState>::IndexType istate);
 
+  
+  /**
+   * @brief shares from a given state
+   *
+   * @param shareSource, shareTarget - property 
+   * @param iself, iother  - indexes
+   */
+
+  void shareFrom_impl(ActsTrk::MultiTrajectory<RWState>::IndexType iself,
+                                           ActsTrk::MultiTrajectory<RWState>::IndexType iother,
+                                           Acts::TrackStatePropMask shareSource,
+                                           Acts::TrackStatePropMask shareTarget);
+
+
   /**
    * @brief obtains proxy to the track state under given index
    *

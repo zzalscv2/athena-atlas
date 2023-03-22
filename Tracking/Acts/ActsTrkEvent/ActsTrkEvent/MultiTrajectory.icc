@@ -363,3 +363,62 @@ const std::any ActsTrk::MultiTrajectory<RWState>::decorationGetter(
       el->auxdecor<T>(name));  // yeah, xAOD auxdecor returns nonconst ref even
                                // for const AuxElements, here we shield
 }
+
+
+// Implementation of shareFrom
+template <bool RWState>
+void ActsTrk::MultiTrajectory<RWState>::shareFrom_impl(ActsTrk::MultiTrajectory<RWState>::IndexType iself,
+                                           ActsTrk::MultiTrajectory<RWState>::IndexType iother,
+                                           Acts::TrackStatePropMask shareSource,
+                                           Acts::TrackStatePropMask shareTarget) {
+  auto self  = (*m_trackStates)[iself];
+  auto other = (*m_trackStates)[iother];
+
+  assert(ACTS_CHECK_BIT(getTrackState(iother).getMask(), shareSource) &&
+         "Source has incompatible allocation");
+
+  using PM = Acts::TrackStatePropMask;
+  // set kInvalid
+  using Acts::MultiTrajectoryTraits::kInvalid;
+
+  IndexType sourceIndex{kInvalid};
+  switch (shareSource) {
+    case PM::Predicted:
+      sourceIndex = other->predicted();
+      break;
+    case PM::Filtered:
+      sourceIndex = other->filtered();
+      break;
+    case PM::Smoothed:
+      sourceIndex = other->smoothed();
+      break;
+    case PM::Jacobian:
+      sourceIndex = other->jacobian();
+      break;
+    default:
+      throw std::domain_error{"Unable to share this component"};
+  }
+
+  assert(sourceIndex != kInvalid);
+
+  switch (shareTarget) {
+    case PM::Predicted:
+      assert(shareSource != PM::Jacobian);
+      self->setPredicted(sourceIndex);
+      break;
+    case PM::Filtered:
+      assert(shareSource != PM::Jacobian);
+      self->setFiltered(sourceIndex);
+      break;
+    case PM::Smoothed:
+      assert(shareSource != PM::Jacobian);
+      self->setSmoothed(sourceIndex);
+      break;
+    case PM::Jacobian:
+      assert(shareSource == PM::Jacobian);
+      self->setJacobian(sourceIndex);
+      break;
+    default:
+      throw std::domain_error{"Unable to share this component"};
+  }
+}
