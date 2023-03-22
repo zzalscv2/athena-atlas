@@ -191,15 +191,20 @@ def addMainSequences(flags, cfg):
 
 
 def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
-    # Run a serial job for threads=0
-    if flags.Concurrency.NumThreads > 0:
-        if flags.Concurrency.NumConcurrentEvents==0:
-            raise Exception("Requested Concurrency.NumThreads>0 and Concurrency.NumConcurrentEvents==0, "
-                            "which will not process events!")
-        LoopMgr = "AthenaHiveEventLoopMgr"
 
-    if flags.Concurrency.NumProcs > 0:
-        LoopMgr = "AthMpEvtLoopMgr"
+    if flags.Exec.Interactive == "run":
+        print ("Interactive mode, switch to PyAthenaEventLoopMgr")
+        LoopMgr="PyAthenaEventLoopMgr"
+    else:
+        # Run a serial job for threads=0
+        if flags.Concurrency.NumThreads > 0:
+            if flags.Concurrency.NumConcurrentEvents==0:
+                raise Exception("Requested Concurrency.NumThreads>0 and Concurrency.NumConcurrentEvents==0, "
+                                "which will not process events!")
+            LoopMgr = "AthenaHiveEventLoopMgr"
+
+        if flags.Concurrency.NumProcs > 0:
+            LoopMgr = "AthMpEvtLoopMgr"
 
     # Core components needed for serial and threaded jobs:
     cfg = MainServicesMiniCfg(flags, loopMgr=LoopMgr, masterSequence='AthMasterSeq')
@@ -231,6 +236,8 @@ def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
 
     if flags.Exec.DebugStage != "":
         cfg.setDebugStage(flags.Exec.DebugStage)
+
+    cfg.interactive=flags.Exec.Interactive
 
     if flags.Concurrency.NumProcs > 0:
         from AthenaMP.AthenaMPConfig import AthenaMPCfg
