@@ -35,7 +35,6 @@
 #include "FourMomUtils/xAODP4Helpers.h"
 #include "xAODPFlow/FEHelpers.h"
 
-#include "boost/format.hpp"
 #include <cmath>
 
 #include "PathResolver/PathResolver.h"
