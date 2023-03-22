@@ -271,7 +271,8 @@ namespace FlavorTagDiscriminants {
     // return the decorators for the NNs
     std::tuple<
       std::map<std::string, internal::OutNode>,
-      FTagDataDependencyNames>
+      FTagDataDependencyNames,
+      std::set<std::string>>
     createDecorators(
       const lwt::GraphConfig& config,
       const FTagOptions& options);
@@ -280,9 +281,15 @@ namespace FlavorTagDiscriminants {
     std::tuple<
       std::function<char(const internal::Tracks&)>,
       std::vector<SG::AuxElement::Decorator<char>>,
-      FTagDataDependencyNames>
+      FTagDataDependencyNames,
+      std::set<std::string>>
     createIpChecker(
       const lwt::GraphConfig&, const FTagOptions&);
+
+    // check that all the remapping was used
+    void checkForUnusedRemaps(
+      const std::map<std::string, std::string>& requested,
+      const std::set<std::string>& used);
   }
 }
 #endif
