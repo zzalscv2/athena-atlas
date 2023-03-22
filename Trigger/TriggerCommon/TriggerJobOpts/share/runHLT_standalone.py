@@ -208,7 +208,7 @@ if opt.setMenu:
 
 # Setup list of modifiers
 # Common modifiers for MC and data
-setModifiers = ['BunchSpacing25ns']
+setModifiers = []
 
 if not flags.Input.isMC:  # data modifiers
     setModifiers += ['BFieldAutoConfig',
