@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -184,7 +184,7 @@ namespace Trk
     
     if (primaryVertex==nullptr) {
       std::cout << "ERROR. No valid primary vertex pointer provided to the JetFitterInitializationHelper." << std::endl;
-      throw;
+      throw std::runtime_error ("No valid primary vertex pointer provided to the JetFitterInitializationHelper.");
     }
     AmgVector(5) startPosition;
     startPosition[Trk::jet_xv]=primaryVertex->position().x();
@@ -285,7 +285,7 @@ namespace Trk
 	  numTrack+=1;
 	} else {
 	  std::cout << "Warning in JetFitterInitializationHelper.Inconsistency found. Pointer to VxVertexOnJetAxis should be different from zero. Skipping track..." << std::endl;
-	  throw;
+	  throw std::runtime_error ("Warning in JetFitterInitializationHelper.Inconsistency found. Pointer to VxVertexOnJetAxis should be different from zero. Skipping track...");
 	}
       }
       
@@ -325,7 +325,7 @@ namespace Trk
 	
       } else if (numRow(numTrack)<sizeOfRecVertex) {
 	std::cout << "Strange: size of RecVertexPosition's position in JetFitterInitializationHelper is bigger than actual numTracks plus 5. CHECK..." << std::endl;
-	throw;
+	throw std::runtime_error ("Strange: size of RecVertexPosition's position in JetFitterInitializationHelper is bigger than actual numTracks plus 5. CHECK...");
       }
     
     }
