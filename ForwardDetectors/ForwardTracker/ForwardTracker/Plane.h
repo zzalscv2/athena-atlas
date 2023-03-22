@@ -30,7 +30,7 @@ namespace ForwardTracker {
 
     void track(IParticle&) const;
   
-    typedef boost::shared_ptr<const Plane> ConstPtr_t;
+    typedef std::shared_ptr<const Plane> ConstPtr_t;
     typedef std::vector<ConstPtr_t>        Container_t;
 
     std::string str() const;

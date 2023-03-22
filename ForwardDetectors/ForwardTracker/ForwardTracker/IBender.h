@@ -5,7 +5,7 @@
 #ifndef FORWARDTRACKER_IBENDER_H
 #define FORWARDTRACKER_IBENDER_H
 
-#include "boost/shared_ptr.hpp"
+#include <memory>
 
 namespace ForwardTracker {
 
@@ -18,7 +18,7 @@ namespace ForwardTracker {
     virtual ~IBender() {}
     virtual void bend(IParticle&) const = 0;
 
-    typedef boost::shared_ptr<IBender> ConstPtr_t;
+    typedef std::shared_ptr<IBender> ConstPtr_t;
   };
 }
 

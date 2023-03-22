@@ -8,11 +8,11 @@
 #include "ConfigData.h"
 #include "ForwardTrackerConstants.h"
 
-#include "boost/shared_ptr.hpp"
+#include <memory>
 
 namespace ForwardTracker {
 
-  boost::shared_ptr<std::ifstream> TwissFile(const ConfigData&, const Side&);
+  std::shared_ptr<std::ifstream> TwissFile(const ConfigData&, const Side&);
 
   double GetBeamEnergy (std::ifstream&);
   void   TwissFilePrint(std::ifstream&, double endMarker);
