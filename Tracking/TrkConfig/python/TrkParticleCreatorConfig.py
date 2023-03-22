@@ -35,13 +35,13 @@ def TrackParticleCreatorToolCfg(flags,
         result.addPublicTool(TrackSummaryTool)
         kwargs.setdefault("TrackSummaryTool", TrackSummaryTool)
 
-    if "TRT_ElectronPidTool" not in kwargs:
+    if "TRT_ElectronPidTool" not in kwargs and flags.Detector.EnableTRT:
         from InDetConfig.TRT_ElectronPidToolsConfig import (
             TRT_ElectronPidToolCfg)
         kwargs.setdefault("TRT_ElectronPidTool", result.popToolsAndMerge(
             TRT_ElectronPidToolCfg(flags, name="InDetTRT_ElectronPidTool")))
 
-    if 'PixelToTPIDTool' not in kwargs:
+    if 'PixelToTPIDTool' not in kwargs and flags.Detector.EnablePixel:
         from InDetConfig.PixelToTPIDToolConfig import PixelToTPIDToolCfg
         kwargs.setdefault("PixelToTPIDTool", result.popToolsAndMerge(
             PixelToTPIDToolCfg(flags)))
