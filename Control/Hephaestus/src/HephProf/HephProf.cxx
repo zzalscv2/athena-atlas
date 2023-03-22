@@ -18,7 +18,7 @@
 
 #include <sys/stat.h>
 
-#include <tr1/unordered_map>
+#include <unordered_map>
 #include "boost/io/ios_state.hpp"
 
 
@@ -34,7 +34,7 @@ int Usage( const char* prog ) {
 //- helper classes
 class CallPoint;
 typedef unsigned long Address_t;
-typedef std::tr1::unordered_map< Address_t, std::string >  Symbols_t;
+typedef std::unordered_map< Address_t, std::string >  Symbols_t;
 typedef std::pair< Address_t, Address_t > CallInfo_t;
 typedef std::map< CallInfo_t, CallPoint > CallTree_t;
 
