@@ -857,7 +857,8 @@ namespace FlavorTagDiscriminants {
     // the EDM.
     std::tuple<
       std::map<std::string, internal::OutNode>,
-      FTagDataDependencyNames>
+      FTagDataDependencyNames,
+      std::set<std::string>>
     createDecorators(
       const lwt::GraphConfig& config,
       const FTagOptions& options)
@@ -865,6 +866,7 @@ namespace FlavorTagDiscriminants {
       FTagDataDependencyNames deps;
       std::map<std::string, internal::OutNode> decorators;
       std::map<std::string, std::string> remap = options.remap_scalar;
+      std::set<std::string> used_remap;
 
       for (const auto& out_node: config.outputs) {
         std::string node_name = out_node.first;
@@ -874,7 +876,10 @@ namespace FlavorTagDiscriminants {
           std::string name = node_name + "_" + element;
 
           // let user rename the output
-          if (auto h = remap.extract(name)) name = h.mapped();
+          if (auto h = remap.extract(name)){
+            name = h.mapped();
+            used_remap.insert(h.key());
+          }
           deps.bTagOutputs.insert(name);
 
           SG::AuxElement::Decorator<float> f(name);
@@ -883,28 +888,21 @@ namespace FlavorTagDiscriminants {
         decorators[node_name] = node;
       }
 
-      // we want to make sure every remapping was used
-      if (remap.size() > 0) {
-        std::string outputs;
-        for (const auto& item: remap) {
-          outputs.append(item.first);
-          if (item != *remap.rbegin()) outputs.append(", ");
-        }
-        throw std::logic_error("found unused output remapping(s): " + outputs);
-      }
-
-      return std::make_tuple(decorators, deps);
+      return std::make_tuple(decorators, deps, used_remap);
     }
 
     // return a function to check IP validity
     std::tuple<
       std::function<char(const internal::Tracks&)>,
       std::vector<SG::AuxElement::Decorator<char>>,
-      FTagDataDependencyNames>
+      FTagDataDependencyNames,
+      std::set<std::string>>
     createIpChecker(
       const lwt::GraphConfig& gc, const FTagOptions& opts) {
       using namespace internal;
       FTagDataDependencyNames deps;
+      std::map<std::string, std::string> remap = opts.remap_scalar;
+      std::set<std::string> used_remap;
       // dummy if there's no invalid check key
       std::function checker = [](const Tracks&) -> char {return 0;};
       // if we do have a key, return 1 for invalid
@@ -923,11 +921,35 @@ namespace FlavorTagDiscriminants {
       for (const auto& output: gc.outputs) {
         std::string basename = output.first;
         std::string dec_name = basename + "_isDefaults";
+        if (auto h = remap.extract(dec_name)) {
+          dec_name = h.mapped();
+          used_remap.insert(h.key());
+        }
         default_decs.emplace_back(dec_name);
         deps.bTagOutputs.insert(dec_name);
       }
-      return {checker, default_decs, deps};
+      return {checker, default_decs, deps, used_remap};
     }
+
+    void checkForUnusedRemaps(
+      const std::map<std::string, std::string>& requested,
+      const std::set<std::string>& used)
+    {
+      // we want to make sure every remapping was used
+      std::set<std::string> unused;
+      for (auto [k, v]: requested) {
+        if (!used.count(k)) unused.insert(k);
+      }
+      if (unused.size() > 0) {
+        std::string outputs;
+        for (const auto& item: unused) {
+          outputs.append(item);
+          if (item != *unused.rbegin()) outputs.append(", ");
+        }
+        throw std::logic_error("found unused output remapping(s): " + outputs);
+      }
+    }
+
 
   } // end of datapre namespace
 
