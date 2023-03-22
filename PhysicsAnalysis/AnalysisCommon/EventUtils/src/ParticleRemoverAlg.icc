@@ -12,10 +12,6 @@
 #include "xAODCore/ShallowCopy.h"
 #include "AthContainers/ConstDataVector.h"
 
-// boost includes
-#include <boost/algorithm/string/predicate.hpp>
-
-
 
 template<class CONT>
 StatusCode ParticleRemoverAlg::removeParticles( const std::vector<bool>& keepParticleVec )

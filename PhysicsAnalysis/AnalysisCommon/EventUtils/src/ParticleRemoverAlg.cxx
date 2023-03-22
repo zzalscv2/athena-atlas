@@ -25,10 +25,6 @@
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODParticleEvent/CompositeParticleContainer.h"
 
-// boost includes
-#include <boost/algorithm/string/predicate.hpp>
-
-
 ParticleRemoverAlg::ParticleRemoverAlg( const std::string& name, ISvcLocator* pSvcLocator )
   : AthAlgorithm( name, pSvcLocator ),
   m_inCont(""),
@@ -105,7 +101,7 @@ StatusCode ParticleRemoverAlg::initialize()
   for ( std::size_t i=1; i<totSize; ++i ) {
     const std::string& currentSuffix = m_suffixes.value()[i-1];
     ATH_MSG_VERBOSE("Using current suffix " << currentSuffix << " to search for matching containers");
-    if (boost::starts_with( currentSuffix, m_separator.value() )) {
+    if ( currentSuffix.rfind( m_separator.value(),0 ) == 0 ) { // If the currentSuffix starts with m_separator.value()
       m_inContNameList[i]  = m_inCont.value()  + currentSuffix;
       m_outContNameList[i] = m_outCont.value() + currentSuffix;
     }
