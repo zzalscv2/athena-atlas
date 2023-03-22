@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -271,7 +271,7 @@ namespace Trk
           }
         } else {
           ATH_MSG_WARNING( "Warning in JetFitterInitializationHelper.Inconsistency found. Pointer to VxVertexOnJetAxis should be different from zero. Skipping track..." );
-          throw;
+          throw ("Warning in JetFitterInitializationHelper.Inconsistency found. Pointer to VxVertexOnJetAxis should be different from zero. Skipping track...");
         }
       }
 
