@@ -18,9 +18,6 @@
 #include <stdlib.h>
 #include <boost/lexical_cast.hpp> 
 
-// boost libraries
-#include <boost/foreach.hpp>
-
 using namespace std;
 using boost::property_tree::ptree;
 

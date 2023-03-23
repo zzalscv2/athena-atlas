@@ -11,8 +11,6 @@
 #include "L1TopoCoreSim/SortingConnector.h"
 #include "L1TopoCoreSim/InputConnector.h"
 
-#include "boost/foreach.hpp"
-
 using namespace std;
 using namespace TCS;
  
