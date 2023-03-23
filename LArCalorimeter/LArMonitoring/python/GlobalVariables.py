@@ -361,10 +361,7 @@ for sdet in lArDQGlobals.SubDet:
                   
                   lArDQGlobals.Cell_Variables["etaRange"][sdet]["A"][Lay]=currange
                   #The C side is just the symmeteric of the A side
-                  if sdet=="FCal":
-                        lArDQGlobals.Cell_Variables["etaRange"][sdet]["C"][Lay] = lArDQGlobals.Cell_Variables["etaRange"][sdet]["A"][Lay]
-                  else: #all other partitions
-                        lArDQGlobals.Cell_Variables["etaRange"][sdet]["C"][Lay] =list(map(lambda x: x*-1,lArDQGlobals.Cell_Variables["etaRange"][sdet]["A"][Lay]))[::-1]
+                  lArDQGlobals.Cell_Variables["etaRange"][sdet]["C"][Lay] =list(map(lambda x: x*-1,lArDQGlobals.Cell_Variables["etaRange"][sdet]["A"][Lay]))[::-1]
 
 #CNF
 lArDQGlobals.CNFN_tot = 80
