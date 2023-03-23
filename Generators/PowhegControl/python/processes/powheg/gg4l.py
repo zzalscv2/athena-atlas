@@ -221,6 +221,31 @@ class gg4l(PowhegRES):
         if "\'" not in self.contr:
             self.contr = "\'"+self.contr+"\'"
 
+        #Modify unsupported decay configuration in ZZ production
+        if (self.proc == "'ZZ'" and ((self.vdecaymodeV1 == self.vdecaymodeV2) or self.vdecaymodeV1 == 15 or self.vdecaymodeV2 == 15)): 
+            logger.warning("Powheg/gg4l does support directly 4e, 4mu or tau final states.")
+            if(self.vdecaymodeV1 == 11 and self.vdecaymodeV2 == 11):
+                logger.warning("Ask to generate 2e2mu decays and hack the LHE files to have 4e final states - make sure to validate!")
+                self.add_algorithm("mu2e")
+            elif(self.vdecaymodeV1 == 13 and self.vdecaymodeV2 == 13):
+                logger.warning("Ask to generate 2e2mu decays and hack the LHE files to have 4mu final states - make sure to validate!")
+                self.add_algorithm("e2mu")
+            elif(self.vdecaymodeV1 == 15 and self.vdecaymodeV2 == 15):
+                logger.warning("Ask to generate 2e2mu decays and hack the LHE files to have 4tau final states - make sure to validate!")
+                self.add_algorithm("e2tau")
+                self.add_algorithm("mu2tau")
+            elif(self.vdecaymodeV1 == 11 and self.vdecaymodeV2 == 15) or (self.vdecaymodeV1 == 15 and self.vdecaymodeV2 == 11):
+                logger.warning("Ask to generate 2e2mu decays and hack the LHE files to have 2e2tau final states - make sure to validate!")
+                self.add_algorithm("mu2tau")
+            elif(self.vdecaymodeV1 == 13 and self.vdecaymodeV2 == 15) or (self.vdecaymodeV1 == 15 and self.vdecaymodeV2 == 13):
+                logger.warning("Ask to generate 2e2mu decays and hack the LHE files to have 2mu2tau final states - make sure to validate!")
+                self.add_algorithm("e2tau")
+            
+            self.vdecaymodeV1 = 11
+            self.vdecaymodeV2 = 13
+            self.parameters_by_keyword("vdecaymodeV1")[0].value = self.vdecaymodeV1
+            self.parameters_by_keyword("vdecaymodeV2")[0].value = self.vdecaymodeV2
+
         #check if the setting is allowed
         if self.proc not in self.allowed_process_modes:
             logger.warning("Process mode {} not recognised!".format(self.proc))
