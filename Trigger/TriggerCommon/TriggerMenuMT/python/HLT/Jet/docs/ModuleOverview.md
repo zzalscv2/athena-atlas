@@ -152,7 +152,7 @@ The following possible types of `ChainStep` are defined:
 2. Calo Reco ChainStep: a step that performs calo (cell+topocluster) reco with a passthrough hypo, which should be followed by a Tracking Hypo ChainStep. No jets are reconstructed.
 3. Calo Presel ChainStep: a step that performs calo reco with a preselection hypo, which should be followed by a Tracking Hypo ChainStep. Calo jets will be reconstructed and used as input to the preselection hypo. The preselection criteria are determined from the "preselNjX" entry in the chain dictionary.
 4. Tracking Hypo ChainStep: a step that performs (FullScan) tracking reco, possibly including Particle Flow, then reconstructs jets with tracks, and performs the final hypo selection on these. Must follow either a Calo Reco or a Calo Presel ChainStep.
-5. TLA ChainStep: This step is appended for TLA chains, following the terminal hypo (calo or tracking). It performs no selection, and only flags a subset of the reconstructed jets to be written to file. Configuration for this is in `JetTLASequences.py`
+5. TLA ChainStep: This step is appended for TLA chains, following the terminal hypo (calo or tracking). It performs no selection, and only flags a subset of the reconstructed jets to be written to file. Configuration for this is in `JetTLASequenceConfig.py`
 
 [JetMenuSequences](../JetMenuSequences.py)
 -----
@@ -205,7 +205,7 @@ For preselection steps, the default `trigJetHypoToolFromDict` function is wrappe
 
 Helper functions to configure the jet tracking instance and to define track-related modifiers and collections within the jet domain.
 
-[JetTLASequences](../JetTLASequences.py)
+[JetTLASequenceConfig](../JetTLASequenceConfig.py)
 -----
 
 Helper functions to configure the TLA jet sequence.

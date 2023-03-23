@@ -1,11 +1,14 @@
 #
 #  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
-from TriggerMenuMT.HLT.Config.MenuComponents import ChainStep, RecoFragmentsPool
+from TriggerMenuMT.HLT.Config.MenuComponents import ChainStep, menuSequenceCAToGlobalWrapper
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 from ..Jet.JetChainConfiguration import JetChainConfiguration
 from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import NoCAmigration
+from ..Photon.PrecisionPhotonTLAMenuSequenceConfig import PhotonTLAMenuSequenceCfg
+from ..Jet.JetTLASequenceConfig import JetTLAMenuSequenceCfg
+from ..Muon.MuonTLASequenceConfig import MuonTLAMenuSequenceCfg
 log = logging.getLogger(__name__)
 
 
@@ -45,16 +48,19 @@ def getTLASignatureSequence(flags, chainDict, chainPart):
     signature= chainPart['signature']
     
     if signature == 'Photon':    
-        from ..Photon.PrecisionPhotonTLAMenuSequences import TLAPhotonMenuSequence
         photonOutCollectionName = "HLT_egamma_Photons"
-        return RecoFragmentsPool.retrieve(TLAPhotonMenuSequence, flags, photonsIn=photonOutCollectionName)
+        if isComponentAccumulatorCfg():
+            return PhotonTLAMenuSequenceCfg(flags, photonsIn=photonOutCollectionName)
+        else:
+            return menuSequenceCAToGlobalWrapper(PhotonTLAMenuSequenceCfg,flags, photonsIn=photonOutCollectionName)
     
     elif signature == 'Muon':    
-        from ..Muon.TLAMuonSequence import TLAMuonMenuSequence        
-        return TLAMuonMenuSequence (flags, muChainPart=chainPart)
+        if isComponentAccumulatorCfg():
+            return MuonTLAMenuSequenceCfg(flags, muChainPart=chainPart)
+        else:
+            return menuSequenceCAToGlobalWrapper(MuonTLAMenuSequenceCfg,flags, muChainPart=chainPart)
     
     elif signature  == 'Jet' or signature  == 'Bjet':   
-        from ..Jet.JetTLASequences import TLAJetMenuSequence
         jetDef = JetChainConfiguration(chainDict)
         jetInputCollectionName = jetDef.jetName
         log.debug(f"TLA jet input collection = {jetInputCollectionName}")
@@ -65,7 +71,10 @@ def getTLASignatureSequence(flags, chainDict, chainPart):
         # Thus, BTag recording will always run for PFlow jets, creating an empty container if no btagging exists. 
         attachBtag = True
         if jetDef.recoDict["trkopt"] == "notrk": attachBtag = False
-        return RecoFragmentsPool.retrieve(TLAJetMenuSequence, flags, jetsIn=jetInputCollectionName, attachBtag=attachBtag)
+        if isComponentAccumulatorCfg():
+            return JetTLAMenuSequenceCfg(flags, jetsIn=jetInputCollectionName, attachBtag=attachBtag)
+        else:
+            return menuSequenceCAToGlobalWrapper(JetTLAMenuSequenceCfg, flags, jetsIn=jetInputCollectionName, attachBtag=attachBtag)
 
 
 def findTLAStep(chainConfig):
