@@ -92,7 +92,7 @@ public:
                                  G4double maxEnergy);
 
 
-#if G4VERSION_NUMBER > 1009
+#if G4VERSION_NUMBER < 1100
   virtual G4double SampleFluctuations(const G4MaterialCutsCouple* material,
                                       const G4DynamicParticle* dp,
                                       G4double tmax,
@@ -104,16 +104,18 @@ public:
                               G4double tmax,
                               G4double length);
 #else
-  virtual G4double SampleFluctuations(const G4Material*,
-                                      const G4DynamicParticle*,
-                                      G4double& tmax,
-                                      G4double& length,
-                                      G4double& meanLoss);
+  virtual G4double SampleFluctuations(const G4MaterialCutsCouple* material,
+                                      const G4DynamicParticle* dp,
+                                      const G4double tcut,
+                                      const G4double tmax,
+                                      const G4double length,
+                                      const G4double meanLoss);
 
   virtual G4double Dispersion(const G4Material*,
                               const G4DynamicParticle*,
-                              G4double& tmax,
-                              G4double& length);
+                              const G4double tcut,
+                              const G4double tmax,
+                              const G4double length);
 #endif
 
 protected:

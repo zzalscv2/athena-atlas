@@ -6,6 +6,7 @@
 #include "LArG4Code/LArG4Identifier.h"
 #include "LArG4HEC/HECGeometry.h"
 
+#include "G4Version.hh"
 #include "G4ThreeVector.hh"
 #include "G4StepPoint.hh"
 #include "G4Step.hh"
@@ -265,9 +266,11 @@ namespace LArG4 {
 
       // ------- ACTIVE and INACTIVE volumes -----------------------
       // (They are all inside a Depth (and some DM, too))
-
+#if G4VERSION_NUMBER < 1100
       if ( volumeName.contains("LArMgr::LAr::HEC::Module::Depth") )
-
+#else
+      if ( G4StrUtil::contains(volumeName, "LArMgr::LAr::HEC::Module::Depth") )
+#endif
         {
 
           const int depthVol= m_g4historyDepth+2 ; // geant depth of the HEC::Module::Depth
@@ -379,7 +382,11 @@ namespace LArG4 {
           else   // (has to be dead)
             {
               int itype = 2;
+#if G4VERSION_NUMBER < 1100
               if ( volumeName.contains("LArMgr::LAr::HEC::Module::Depth::FirstAbsorber") )   {
+#else
+              if ( G4StrUtil::contains(volumeName, "LArMgr::LAr::HEC::Module::Depth::FirstAbsorber") )   {
+#endif
                 itype = 1;
                 sampling = 2;
                 iphi = moduleIndex;

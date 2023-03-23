@@ -40,6 +40,7 @@
 
 #include "G4AtlasHadronPhysicsFTFP_BERT_ATL_HP.hh"
 
+#include "G4Version.hh"
 #include "globals.hh"
 #include "G4ios.hh"
 #include "G4SystemOfUnits.hh"
@@ -55,7 +56,13 @@
 #include "G4ChipsKaonZeroInelasticXS.hh"
 #include "G4CrossSectionDataSetRegistry.hh"
 
+#if G4VERSION_NUMBER < 1100
 #include "G4HadronCaptureProcess.hh"
+#include "G4HadronFissionProcess.hh"
+#else
+#include "G4NeutronCaptureProcess.hh"
+#include "G4NeutronFissionProcess.hh"
+#endif
 #include "G4NeutronRadCapture.hh"
 #include "G4NeutronCaptureXS.hh"
 #include "G4NeutronHPCaptureData.hh"
@@ -226,7 +233,11 @@ void G4AtlasHadronPhysicsFTFP_BERT_ATL_HP::ConstructProcess()
     }
   }
   if ( ! capture ) {
+#if G4VERSION_NUMBER < 1100
     capture = new G4HadronCaptureProcess("nCapture");
+#else
+    capture = new G4NeutronCaptureProcess("nCapture");
+#endif
     pmanager->AddDiscreteProcess(capture);
   }
   tpdata->xsNeutronCaptureXS = (G4NeutronCaptureXS*)G4CrossSectionDataSetRegistry::Instance()->GetCrossSectionDataSet(G4NeutronCaptureXS::Default_Name());
@@ -236,7 +247,11 @@ void G4AtlasHadronPhysicsFTFP_BERT_ATL_HP::ConstructProcess()
   theNeutronRadCapture->SetMinEnergy( 19.9*MeV ); 
   capture->RegisterMe( theNeutronRadCapture );
   if ( ! fission ) {
+#if G4VERSION_NUMBER < 1100
     fission = new G4HadronFissionProcess("nFission");
+#else
+    fission = new G4NeutronFissionProcess("nFission");
+#endif
     pmanager->AddDiscreteProcess(fission);
   }
   G4LFission* theNeutronLEPFission = new G4LFission();

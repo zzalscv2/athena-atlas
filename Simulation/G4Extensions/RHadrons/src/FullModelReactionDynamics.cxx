@@ -49,11 +49,16 @@
 // J. Allison, 17-Jun-99:  Replaced a min function to get correct behaviour on DEC.
 
 #include "FullModelReactionDynamics.hh"
+#include "G4Version.hh"
 #include "G4AntiProton.hh"
 #include "G4AntiNeutron.hh"
 #include "Randomize.hh"
 #include <iostream>
+#if G4VERSION_NUMBER < 1100
 #include "G4HadReentrentException.hh"
+#else
+#include "G4HadronicException.hh"
+#endif
 #include <signal.h>
 //#include "G4ParticleTable.hh"
 
@@ -460,7 +465,11 @@ G4bool FullModelReactionDynamics::GenerateXandPt(
                     {
                       for(G4int i=0; i<vecLen; i++) delete vec[i];
                       vecLen = 0;
+#if G4VERSION_NUMBER < 1100
                       throw G4HadReentrentException(__FILE__, __LINE__,
+#else
+                      throw G4HadronicException(__FILE__, __LINE__,
+#endif
                                                     "FullModelReactionDynamics::GenerateXandPt : a pion has been counted as a backward nucleon");
                     }
                   vec[i]->SetSide( -3 );
@@ -1504,7 +1513,11 @@ G4bool FullModelReactionDynamics::TwoCluster(
         {
           for(G4int i=0; i<vecLen; i++) delete vec[i];
           vecLen = 0;
+#if G4VERSION_NUMBER < 1100
           throw G4HadReentrentException(__FILE__, __LINE__,
+#else
+          throw G4HadronicException(__FILE__, __LINE__,
+#endif
                                         "FullModelReactionDynamics::TwoCluster: Negative number of particles");
         }
       delete vec[vecLen-1];

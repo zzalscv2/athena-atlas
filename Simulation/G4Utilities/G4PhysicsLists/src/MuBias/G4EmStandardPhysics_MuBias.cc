@@ -93,7 +93,6 @@ using G4UrbanMscModel=G4UrbanMscModel96;
 
 #include "G4hIonisation.hh"
 #include "G4ionIonisation.hh"
-#include "G4alphaIonisation.hh"
 
 #include "G4Gamma.hh"
 #include "G4Electron.hh"

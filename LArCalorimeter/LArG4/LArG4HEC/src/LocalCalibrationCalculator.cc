@@ -4,6 +4,7 @@
 
 #include "LocalCalibrationCalculator.h"
 
+#include "G4Version.hh"
 #include "G4Step.hh"
 #include "G4TouchableHistory.hh"
 
@@ -86,10 +87,17 @@ namespace LArG4 {
            const G4TouchableHistory* theTouchable = static_cast<const G4TouchableHistory*>(pre_step_point->GetTouchable());
            // Volume name 
            G4String hitVolume = theTouchable->GetVolume(0)->GetName();
+#if G4VERSION_NUMBER < 1100
           if(hitVolume.contains("::") ) {
              const int last = hitVolume.last(':');
              hitVolume.remove(0,last+1);
           }
+#else
+          if(G4StrUtil::contains(hitVolume, "::") ) {
+             const int last = hitVolume.rfind(':');
+             hitVolume.erase(0,last+1);
+          }
+#endif
           static const G4String sliceVolume("Slice");
           static const G4String absorberVolume("Absorber");
           static const G4String electrodeVolume("Electrode");

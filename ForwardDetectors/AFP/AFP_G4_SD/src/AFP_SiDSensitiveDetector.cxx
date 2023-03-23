@@ -9,6 +9,7 @@
 #include "AFP_Geometry/AFP_constants.h"
 
 // Geant4 headers
+#include "G4Version.hh"
 #include "G4TouchableHistory.hh"
 #include "G4Step.hh"
 #include "G4Track.hh"
@@ -147,8 +148,11 @@ bool AFP_SiDSensitiveDetector::ProcessHits(G4Step* pStep, G4TouchableHistory*)
   m_nHitID++;
 
   /////////////////////////////////////////////////////
-
+#if G4VERSION_NUMBER < 1100
   if (VolumeName.contains("SIDSensor") || (bIsSIDAuxVSID=VolumeName.contains("SIDVacuumSensor"))){
+#else
+  if (G4StrUtil::contains(VolumeName, "SIDSensor") || (bIsSIDAuxVSID=G4StrUtil::contains(VolumeName, "SIDVacuumSensor"))){
+#endif
 
     if(!bIsSIDAuxVSID && !(fEnergyDeposit>0.0))
       {

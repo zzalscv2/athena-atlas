@@ -55,6 +55,7 @@
 #ifndef MONOPOLE_G4mplAtlasIonisation_h
 #define MONOPOLE_G4mplAtlasIonisation_h 1
 
+#include "G4Version.hh"
 #include "G4VEnergyLossProcess.hh"
 #include "globals.hh"
 #include "G4VEmModel.hh"
@@ -104,12 +105,15 @@ private:
 inline G4bool G4mplAtlasIonisation::IsApplicable(const G4ParticleDefinition& p)
 {
   G4String lowPartName = p.GetParticleName();
+#if G4VERSION_NUMBER < 1100
   lowPartName.toLower();
-  //  G4String lowPartName = (p.GetParticleName()).toLower();
-
-  //  return ((p.GetParticleName() == "monopole") || (p.GetParticleName() == "monopolebar"));
   return  ( (lowPartName.contains("monopole")) ||
             (lowPartName.contains("dyon")) );
+#else
+  G4StrUtil::to_lower(lowPartName);
+  return ( (G4StrUtil::contains(lowPartName, "monopole")) ||
+           (G4StrUtil::contains(lowPartName, "dyon")) );
+#endif
 }
 
 

@@ -12,6 +12,7 @@
 #include "G4PionPlus.hh"
 #include "G4PionMinus.hh"
 #include "G4PionZero.hh"
+#include "G4Version.hh"
 
 namespace G4DebuggingHelpers {
 
@@ -97,8 +98,13 @@ namespace G4DebuggingHelpers {
          ||   ( nom.length() >= 4  && nom.substr(0, 4)  == "Muon" )
          ||   ( nom.length() >= 9  && nom.substr(0, 9)  == "DriftTube" )
          ||   ( nom.length() >= 12 && nom.substr(0, 12) == "SensitiveGas" )
+#if G4VERSION_NUMBER < 1100
          ||     nom.contains("MDT")
          ||     nom.contains("station") ) {
+#else
+         ||     G4StrUtil::contains(nom, "MDT")
+         ||     G4StrUtil::contains(nom, "station") ) {
+#endif
       return "Muon";
     }
     else if ( nom.length() >= 8 && nom.substr(0, 8) == "ITkPixel" ) {

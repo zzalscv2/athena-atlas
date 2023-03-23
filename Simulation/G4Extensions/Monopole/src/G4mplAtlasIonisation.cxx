@@ -50,7 +50,12 @@
 // package headers
 #include "G4mplAtlasIonisationWithDeltaModel.hh"
 // Geant4 headers
+#include "G4Version.hh"
+
+#if G4VERSION_NUMBER < 1100
 #include "G4BohrFluctuations.hh"
+#endif
+
 #include "G4Electron.hh"
 #include "G4EmProcessSubType.hh"
 #include "G4Version.hh"

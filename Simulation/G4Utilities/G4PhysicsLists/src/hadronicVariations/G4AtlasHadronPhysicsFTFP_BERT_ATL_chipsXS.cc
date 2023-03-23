@@ -39,6 +39,7 @@
 
 #include "G4AtlasHadronPhysicsFTFP_BERT_ATL_chipsXS.hh"
 
+#include "G4Version.hh"
 #include "globals.hh"
 #include "G4ios.hh"
 #include "G4SystemOfUnits.hh"
@@ -58,7 +59,11 @@
 #include "G4ChipsProtonInelasticXS.hh"
 #include "G4CrossSectionDataSetRegistry.hh"
 
+#if G4VERSION_NUMBER < 1100
 #include "G4HadronCaptureProcess.hh"
+#else
+#include "G4NeutronCaptureProcess.hh"
+#endif
 #include "G4NeutronRadCapture.hh"
 #include "G4NeutronCaptureXS.hh"
 
@@ -235,7 +240,11 @@ void G4AtlasHadronPhysicsFTFP_BERT_ATL_chipsXS::ConstructProcess()
     }
   }
   if ( ! capture ) {
+#if G4VERSION_NUMBER < 1100
     capture = new G4HadronCaptureProcess("nCapture");
+#else
+    capture = new G4NeutronCaptureProcess("nCapture");
+#endif
     pmanager->AddDiscreteProcess(capture);
   }
   tpdata->xsNeutronCaptureXS = (G4NeutronCaptureXS*)G4CrossSectionDataSetRegistry::Instance()->GetCrossSectionDataSet(G4NeutronCaptureXS::Default_Name());
