@@ -5,7 +5,10 @@
 # art-include: master/Athena
 # art-include: 23.0/Athena
 # art-output: run_*
+# art-output: log.*
+# art-output: *.pkl
 # art-output: *.txt
+# art-output: *DO.pool.root
 # art-output: pkldiff.log
 # art-architecture: '#x86_64-intel'
 
@@ -44,12 +47,19 @@ FastChain_tf.py \
     --imf False
 
 ca=$?
-echo  "art-result: $rc EVNTtoRDO_CA"
+echo  "art-result: $ca EVNTtoRDO_CA"
 status=$ca
+cp log.EVNTtoRDO ../log.EVNTtoRDO_CA
+cp ${RDO_File} ../CA.${RDO_File}
+capkl=-9999
+if [ -f "ConfigCA.pkl" ]; then
+    capkl=0
+    cp ConfigCA.pkl ../ConfigCA.pkl
+fi
 cd ../
 
 
-mkdir ./run_cg_pkl; cd run_cg_pkl
+mkdir -p ./run_cg_pkl; cd run_cg_pkl
 FastChain_tf.py \
     --runNumber 601229 \
     --simulator 'ATLFAST3F_G4MS' \
@@ -79,6 +89,7 @@ FastChain_tf.py \
 cgpkl=-9999
 if [ -f "ConfigCG.pkl" ]; then
     cgpkl=0
+    cp ConfigCG.pkl ../ConfigCG.pkl
 fi
 echo "art-result: $cgpkl EVNTtoRDO_CG_PKL"
 cd ../
@@ -103,12 +114,14 @@ FastChain_tf.py \
     --digiSeedOffset2 '727' \
     --geometryVersion default:ATLAS-R3S-2021-03-00-00 \
     --conditionsTag default:OFLCOND-MC21-SDR-RUN3-07 \
-    --preInclude 'all:Campaigns/MC21a.py,Campaigns/PileUpMC21a.py' \
+    --preInclude 'all:Campaigns/MC21a.py,Campaigns/PileUpMC21a.py,Campaigns/MC21SimulationNoIoV.py' \
     --postInclude='PyJobTransforms/UseFrontier.py' \
     --postExec 'from AthenaCommon.ConfigurationShelve import saveToAscii;saveToAscii("LegacyConfig.txt")' \
     --imf False
 
 cg=$?
+cp log.EVNTtoRDO ../log.EVNTtoRDO_CG
+cp ${RDO_File} ../${RDO_File}
 echo "art-result: $cg EVNTtoRDO_CG"
 if [ $status -eq 0 ]
 then
@@ -117,7 +130,7 @@ fi
 cd ../
 
 pkldiff=-9999
-if [ $cgpkl -eq 0 ] && [ $ca -eq 0 ]
+if [ $cgpkl -eq 0 ] && [ $capkl -eq 0 ]
 then
    confTool.py --diff --ignoreIrrelevant --shortenDefaultComponents --ignoreDefaults "run_cg_pkl/ConfigCG.pkl" "run_ca/ConfigCA.pkl" > pkldiff.log
    pkldiff=$(grep -o 'differ' pkldiff.log | wc -l)
@@ -136,7 +149,7 @@ echo  "art-result: $diff OLDvsCA"
 reg=-9999
 if [ $cg -eq 0 ]
 then
-   art.py compare --file run_cg/${RDO_File} --mode=semi-detailed --entries 10
+   art.py compare --file ${RDO_File} --mode=semi-detailed --entries 10
    reg=$?
    status=$reg
 fi
