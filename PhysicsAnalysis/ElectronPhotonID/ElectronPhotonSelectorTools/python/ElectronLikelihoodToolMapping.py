@@ -34,6 +34,11 @@ ElectronLHMapOfflineMC20 = {
     LikeEnum.LooseBL: (LikeEnum.CustomOperatingPoint, ElectronLikelihoodMenuDefs.ElectronLikelihoodLooseBLOfflineConfigMC20),
     LikeEnum.Medium: (LikeEnum.CustomOperatingPoint, ElectronLikelihoodMenuDefs.ElectronLikelihoodMediumOfflineConfigMC20),
     LikeEnum.Tight: (LikeEnum.CustomOperatingPoint, ElectronLikelihoodMenuDefs.ElectronLikelihoodTightOfflineConfigMC20),
+
+    LikeEnum.VeryLooseLLP: (LikeEnum.CustomOperatingPoint, ElectronLikelihoodMenuDefs.ElectronLikelihoodVeryLooseLLPOfflineConfigMC20),
+    LikeEnum.LooseLLP: (LikeEnum.CustomOperatingPoint, ElectronLikelihoodMenuDefs.ElectronLikelihoodLooseLLPOfflineConfigMC20),
+    LikeEnum.MediumLLP: (LikeEnum.CustomOperatingPoint, ElectronLikelihoodMenuDefs.ElectronLikelihoodMediumLLPOfflineConfigMC20),
+    LikeEnum.TightLLP: (LikeEnum.CustomOperatingPoint, ElectronLikelihoodMenuDefs.ElectronLikelihoodTightLLPOfflineConfigMC20),
 }
 
 ElectronLHMapOfflineMC21 = {
@@ -42,6 +47,11 @@ ElectronLHMapOfflineMC21 = {
     LikeEnum.LooseBL: (LikeEnum.CustomOperatingPoint, ElectronLikelihoodMenuDefs.ElectronLikelihoodLooseBLOfflineConfigMC21),
     LikeEnum.Medium: (LikeEnum.CustomOperatingPoint, ElectronLikelihoodMenuDefs.ElectronLikelihoodMediumOfflineConfigMC21),
     LikeEnum.Tight: (LikeEnum.CustomOperatingPoint, ElectronLikelihoodMenuDefs.ElectronLikelihoodTightOfflineConfigMC21),
+
+    LikeEnum.VeryLooseLLP: (LikeEnum.CustomOperatingPoint, ElectronLikelihoodMenuDefs.ElectronLikelihoodVeryLooseLLPOfflineConfigMC21),
+    LikeEnum.LooseLLP: (LikeEnum.CustomOperatingPoint, ElectronLikelihoodMenuDefs.ElectronLikelihoodLooseLLPOfflineConfigMC21),
+    LikeEnum.MediumLLP: (LikeEnum.CustomOperatingPoint, ElectronLikelihoodMenuDefs.ElectronLikelihoodMediumLLPOfflineConfigMC21),
+    LikeEnum.TightLLP: (LikeEnum.CustomOperatingPoint, ElectronLikelihoodMenuDefs.ElectronLikelihoodTightLLPOfflineConfigMC21),
 }
 
 def ElectronLikelihoodMap(quality, menu):

@@ -113,42 +113,50 @@ def LRTElectronMergerAlg(ConfigFlags, name="LLP1_ElectronLRTMergingAlg", **kwarg
     return acc
 
 # Electron LLH setup for LLP1
-# because the egamma config does not support setting the conf file
 def LRTElectronLHSelectorsCfg(ConfigFlags):
-    
-    AsgElectronLikelihoodTool = CompFactory.AsgElectronLikelihoodTool
+
     acc = ComponentAccumulator()
 
-    ElectronLHSelectorVeryLooseNoPix = AsgElectronLikelihoodTool(
-        "ElectronLHSelectorVeryLooseNoPix",
-        ConfigFile = "ElectronPhotonSelectorTools/trigger/rel22_20210611/ElectronLikelihoodVeryLooseTriggerConfig_NoPix.conf")
+    from ElectronPhotonSelectorTools.AsgElectronLikelihoodToolsConfig import AsgElectronLikelihoodToolCfg
+    from ElectronPhotonSelectorTools.ElectronLikelihoodToolMapping import electronLHmenu
+    from ROOT import LikeEnum
+
+    lhMenu = electronLHmenu.offlineMC21
+    from AtlasGeoModel.CommonGMJobProperties import CommonGeometryFlags as geoFlags
+    if geoFlags.Run() == "RUN2" :
+        lhMenu = electronLHmenu.offlineMC20
+
+    ElectronLHSelectorVeryLooseNoPix = acc.popToolsAndMerge(AsgElectronLikelihoodToolCfg(
+        ConfigFlags,
+        name="ElectronLHSelectorVeryLooseNoPix",
+        quality=LikeEnum.VeryLooseLLP,
+        menu=lhMenu)
+    )
     ElectronLHSelectorVeryLooseNoPix.primaryVertexContainer = "PrimaryVertices"
-    ElectronLHSelectorVeryLooseNoPix.usePVContainer = ConfigFlags.Tracking.doVertexFinding
-    acc.addPublicTool(ElectronLHSelectorVeryLooseNoPix)
-
-
-    ElectronLHSelectorLooseNoPix = AsgElectronLikelihoodTool(
-        "ElectronLHSelectorLooseNoPix",
-        ConfigFile = "ElectronPhotonSelectorTools/trigger/rel22_20210611/ElectronLikelihoodLooseTriggerConfig_NoPix.conf")
+    
+    ElectronLHSelectorLooseNoPix = acc.popToolsAndMerge(AsgElectronLikelihoodToolCfg(
+        ConfigFlags,
+        name="ElectronLHSelectorLooseNoPix",
+        quality=LikeEnum.LooseLLP,
+        menu=lhMenu)
+    )
     ElectronLHSelectorLooseNoPix.primaryVertexContainer = "PrimaryVertices"
-    ElectronLHSelectorLooseNoPix.usePVContainer = ConfigFlags.Tracking.doVertexFinding
-    acc.addPublicTool(ElectronLHSelectorLooseNoPix)
 
-
-    ElectronLHSelectorMediumNoPix = AsgElectronLikelihoodTool(
-        "ElectronLHSelectorMediumNoPix",
-        ConfigFile = "ElectronPhotonSelectorTools/trigger/rel22_20210611/ElectronLikelihoodMediumTriggerConfig_NoPix.conf")
+    ElectronLHSelectorMediumNoPix = acc.popToolsAndMerge(AsgElectronLikelihoodToolCfg(
+        ConfigFlags,
+        name="ElectronLHSelectorMediumNoPix",
+        quality=LikeEnum.MediumLLP,
+        menu=lhMenu)
+    )
     ElectronLHSelectorMediumNoPix.primaryVertexContainer = "PrimaryVertices"
-    ElectronLHSelectorMediumNoPix.usePVContainer = ConfigFlags.Tracking.doVertexFinding
-    acc.addPublicTool(ElectronLHSelectorMediumNoPix)
 
-
-    ElectronLHSelectorTightNoPix = AsgElectronLikelihoodTool(
-        "ElectronLHSelectorTightNoPix",
-        ConfigFile = "ElectronPhotonSelectorTools/trigger/rel22_20210611/ElectronLikelihoodTightTriggerConfig_NoPix.conf")
+    ElectronLHSelectorTightNoPix = acc.popToolsAndMerge(AsgElectronLikelihoodToolCfg(
+        ConfigFlags,
+        name="ElectronLHSelectorTightNoPix",
+        quality=LikeEnum.TightLLP,
+        menu=lhMenu)
+    )
     ElectronLHSelectorTightNoPix.primaryVertexContainer = "PrimaryVertices"
-    ElectronLHSelectorTightNoPix.usePVContainer = ConfigFlags.Tracking.doVertexFinding
-    acc.addPublicTool(ElectronLHSelectorTightNoPix)
 
     from DerivationFrameworkEGamma.EGammaToolsConfig import EGElectronLikelihoodToolWrapperCfg
 
