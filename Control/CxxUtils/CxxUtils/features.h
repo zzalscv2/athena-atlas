@@ -12,7 +12,7 @@
 #ifndef CXXUTILS_FEATURES_H
 #define CXXUTILS_FEATURES_H
 
-#if defined(__GLIBC__)
+#if !defined(__APPLE__)
 #include <features.h>
 #endif
 
