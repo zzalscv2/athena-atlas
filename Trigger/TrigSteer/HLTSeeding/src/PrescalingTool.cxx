@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include "PrescalingTool.h"
 
@@ -43,6 +43,11 @@ StatusCode PrescalingTool::initialize() {
 
 
 StatusCode PrescalingTool::start() {
+
+   // Cleanup in case there was a stop/start transition
+   m_CPSGroups.clear();
+   m_nonCPSChains.clear();
+
    SG::ReadHandle<TrigConf::HLTMenu>  hltMenuHandle = SG::makeHandle( m_HLTMenuKey );
    ATH_CHECK( hltMenuHandle.isValid() );
 
