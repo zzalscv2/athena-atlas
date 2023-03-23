@@ -110,7 +110,8 @@ def createRecoConfigFlags():
 
     # Enable alg for decorating EventInfo with BeamSpot info
     # (maybe not always available for calibration runs, etc)
-    flags.addFlag("Reco.EnableBeamSpotDecoration", True)
+    flags.addFlag("Reco.EnableBeamSpotDecoration",
+                  lambda prevFlags: not prevFlags.Common.isOnline)
 
     # Enable common thinning and other post-processing
     flags.addFlag("Reco.EnablePostProcessing", True)

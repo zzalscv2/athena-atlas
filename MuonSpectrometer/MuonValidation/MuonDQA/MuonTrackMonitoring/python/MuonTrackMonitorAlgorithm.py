@@ -3,7 +3,7 @@ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 2020 Matthias Schott - Uni Mainz
 """
 
-from AthenaConfiguration.Enums import BeamType, Format
+from AthenaConfiguration.Enums import BeamType
 
 
 def MuonTrackConfig(flags, isOld=False, **kwargs):
@@ -19,13 +19,8 @@ def MuonTrackConfig(flags, isOld=False, **kwargs):
     helper = AthMonitorCfgHelper(flags, "MuonTrackMonitoringConfig")
     if flags.Beam.Type != BeamType.Collisions:
         kwargs.setdefault("PrimaryVerticesKey", "")
+    if flags.Common.isOnline or flags.Beam.Type != BeamType.Collisions:
         kwargs.setdefault("RequireBeamSpot", False)
-    elif flags.Input.Format is Format.BS:
-        # TODO: not sure if this is needed at all, probably it was needed due to wrapping
-        # it has been agreed on that beamspot decoration is done once centrally during RAWtoALL
-        from xAODEventInfoCnv.EventInfoBeamSpotDecoratorAlgConfig import (
-            EventInfoBeamSpotDecoratorAlgCfg)
-        helper.resobj.merge(EventInfoBeamSpotDecoratorAlgCfg(flags))
 
     muonTrackAlg = helper.addAlgorithm(MuonTrackMonitorAlgorithm, "MuonTrackMonitorAlg", **kwargs)
 

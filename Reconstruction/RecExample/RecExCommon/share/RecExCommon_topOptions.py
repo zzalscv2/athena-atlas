@@ -496,7 +496,10 @@ if rec.readRDO():
 # Write beamspot information into xAOD::EventInfo.
 #
 if globalflags.InputFormat.is_bytestream() and not athenaCommonFlags.isOnline() and InDetFlags.enableBeamSpotDecoration():
-    topSequence += CfgMgr.xAODMaker__EventInfoBeamSpotDecoratorAlg()
+    from xAODEventInfoCnv.EventInfoBeamSpotDecoratorAlgConfig import EventInfoBeamSpotDecoratorAlgCfg
+    from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
+    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    CAtoGlobalWrapper(EventInfoBeamSpotDecoratorAlgCfg, ConfigFlags)
     pass
 
 #
