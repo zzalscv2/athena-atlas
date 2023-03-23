@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 # Script that is used by the build_externals.sh scripts of the individual
 # projects.
@@ -146,6 +146,14 @@ source "${ATLAS_BUILD_SCRIPTS_DIR}/TDAQ_RELEASE_BASE.sh"
 
 # Include the timing function.
 source "${ATLAS_BUILD_SCRIPTS_DIR}/atlas_build_time.sh"
+
+# Set the shell's language, in case it's not set explicitly already.
+if [[ -z "${LANG}" || "${LANG}" == "C" ]]; then
+   export LANG=en_US.UTF-8
+fi
+if [[ -z "${LC_ALL}" || "${LC_ALL}" == "C" ]]; then
+   export LC_ALL=en_US.UTF-8
+fi
 
 # Flag for triggering the build of RPMs for the externals.
 RPMOPTIONS="-r ${ATLAS_BUILD_DIR}"
