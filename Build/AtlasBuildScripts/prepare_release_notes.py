@@ -1,28 +1,24 @@
 #!/bin/env python3
-"""Prepare ATLAS release notes with a list of merge requests
+#
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#
+# Original Author: davide.gerbaudo@gmail.com, Jul 2017
+# Modified by edward.moyse@cern.ch, Dec 2020
+#
 
-davide.gerbaudo@gmail.com
-Jul 2017
+"""Create merge request lists for releases and sweeps. Supports two modes:
+ - Release mode [default], to create release notes for a release built from nightly:
+   > prepare_release_notes.py release/22.0.82 nightly/22.0/2022-08-02T2101
+ - Sweep mode, to create the MR diff of the currently checked out branch:
+   > prepare_release_notes.py --sweep
 
-Modified by edward.moyse@cern.ch
-Dec 2020
 """
+
 from collections import defaultdict
 import subprocess
 import re
 import os
 import argparse
-usage = """%prog target_release nightly_tag
-
-where
-  target_release is the release you are creating, e.g. release/21.1.6
-  nightly_tag is the nightly tag the release will be based on, e.g. nightly/21.1/2017-06-07T2215
-
-Example:
-  git clone ssh://git@gitlab.cern.ch:7999/atlas/athena.git
-  cd athena
-  %prog release/21.1.6 nightly/21.1/2017-06-07T2215
-"""
 
 
 gitlab_available = True
@@ -33,31 +29,43 @@ except ImportError:
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description=__doc__,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('-p', '--previous',
                         help='previous release wrt. which we diff')
     parser.add_argument('-o', '--output', default='release_notes.md',
                         help='where the notes are written')
     parser.add_argument('-r', '--relaxed', action='store_true',
                         help='do not stop on dubious configurations')
+    parser.add_argument('-s', '--sweep', action='store_true',
+                        help='prepare notes for a sweep')
     parser.add_argument('-v', '--verbose',
                         action='store_true', help='print more info')
     parser.add_argument('--group-merge-requests', action='store_true',
                         help='Group merge requests with the same labels together.')
     parser.add_argument(
         '-t', '--token', help='Optionally pass a gitlab token to get more information.')
-    parser.add_argument('target', help='Target release')
-    parser.add_argument('nightly', help='Nightly tag to use')
+    parser.add_argument('target', nargs='?', help='Target release')
+    parser.add_argument('nightly', nargs='?', help='Nightly tag to use')
     args = parser.parse_args()
 
     if args.token and not gitlab_available:
         print('WARNING - passing a token but was not able to import gitlab. You probably need to setup python-gitlab first (i.e. lsetup gitlab) or install it locally (see https://python-gitlab.readthedocs.io)')
 
-    target_release = args.target
-    nightly_tag = args.nightly
-    sanitize_args(target_release, nightly_tag, keep_going=args.relaxed)
-    previous_release = guess_previous_and_check(
-        target_release=target_release) if not args.previous else args.previous
+    if args.sweep:
+        target_release = ''         # not used
+        previous_release = 'HEAD^'  # parent of merge commit
+        nightly_tag = 'HEAD'        # current HEAD
+    else:
+        if args.target is None or args.nightly is None:
+            parser.error('target and nightly are required in release mode')
+
+        target_release = args.target
+        nightly_tag = args.nightly
+        sanitize_args(target_release, nightly_tag, keep_going=args.relaxed)
+        previous_release = guess_previous_and_check(
+            target_release=target_release) if not args.previous else args.previous
+
     verbose = args.verbose
     pretty_format = '%b'  # perhaps some combination of '%s%n%b' ?
     cmd = "git log "+previous_release+".."+nightly_tag + \
@@ -79,11 +87,14 @@ def main():
     print('About to parse the MRs. Depending on the number, this could take a few minutes (run with --verbose to get more output while this is happening).')
     merged_mrs = parse_mrs_from_log(output_log['stdout'].decode("utf-8"),
                                     pretty_format=pretty_format, verbose=verbose, gl_project=gl_project)
-    release_notes = fill_template(target_release, nightly_tag, previous_release,
-                  merged_mrs, output_filename=args.output, verbose=verbose, gl_project=gl_project, group_mrs=args.group_merge_requests)
+
+    release_notes = fill_template(sweep_template() if args.sweep else default_template(),
+                                  target_release, nightly_tag, previous_release,
+                                  merged_mrs, output_filename=args.output, verbose=verbose,
+                                  gl_project=gl_project, group_mrs=args.group_merge_requests)
 
     print()
-    if args.token and gitlab_available:
+    if not args.sweep and args.token and gitlab_available:
         msg = 'Would you like me to create the release for you in gitlab (i.e. make the tag and fill in the release notes)?'
         if input("%s (y/N) " % msg).lower() == 'y':
             print('Is there a ticket associated with the release build request e.g. ATLINFR-XXXX? (press return to skip)')
@@ -244,6 +255,11 @@ https://gitlab.cern.ch/atlas/athena/compare/{previous_release:s}...{target_relea
 
 """
 
+def sweep_template():
+    return """
+This sweep contains the following MRs:
+{formatted_list_of_merge_requests:s}
+"""
 
 def format_mrs_from_gitlab(merged_mrs, group_mrs=False):
     # FIXME - we don't want to dump all labels, so have an approved list
@@ -274,7 +290,7 @@ def format_mrs_from_gitlab(merged_mrs, group_mrs=False):
     return '\n'.join(lines)
 
 
-def fill_template(target_release, nightly_tag, previous_release,
+def fill_template(template, target_release, nightly_tag, previous_release,
                   merged_mrs=[], output_filename='foo.md', verbose=False, gl_project=None, group_mrs=False):
     formatted_mrs = ""
     if gl_project:
@@ -286,13 +302,14 @@ def fill_template(target_release, nightly_tag, previous_release,
     def formatted_tag_link(tag=''):
         base_url = 'https://gitlab.cern.ch/atlas/athena/tags'
         return "[%s](%s)" % (tag, base_url+'/'+tag)
-    filled_template = default_template().format(**{'target_release': target_release,
-                                                   'target_release_link': formatted_tag_link(target_release),
-                                                   'nightly_tag': nightly_tag,
-                                                   'nightly_tag_link': formatted_tag_link(nightly_tag),
-                                                   'previous_release': previous_release,
-                                                   'previous_release_link': formatted_tag_link(previous_release),
-                                                   'formatted_list_of_merge_requests': formatted_mrs})
+
+    filled_template = template.format(**{'target_release': target_release,
+                                         'target_release_link': formatted_tag_link(target_release),
+                                         'nightly_tag': nightly_tag,
+                                         'nightly_tag_link': formatted_tag_link(nightly_tag),
+                                         'previous_release': previous_release,
+                                         'previous_release_link': formatted_tag_link(previous_release),
+                                         'formatted_list_of_merge_requests': formatted_mrs})
     out_file = open(output_filename, 'w')
     out_file.write(filled_template)
     out_file.close()
