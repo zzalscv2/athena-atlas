@@ -3,20 +3,21 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-
 def TrigEDMCheckerCfg(flags, name="TrigEDMChecker", doDumpAll=True):
+    from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
     cfg = ComponentAccumulator()
-    edmchecker = CompFactory.TrigEDMChecker(name, doDumpAll = doDumpAll)
+    edmchecker = CompFactory.TrigEDMChecker(
+        name,
+        doDumpAll = doDumpAll,
+        TriggerDecisionTool = cfg.getPrimaryAndMerge(TrigDecisionToolCfg(flags)) )
 
     if doDumpAll:
         from MuonConfig.MuonRecToolsConfig import MuonEDMPrinterToolCfg
         from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg, MuonIdHelperSvcCfg
-        from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
         cfg.merge(MuonGeoModelCfg(flags))
         cfg.merge(MuonIdHelperSvcCfg(flags))
         edmchecker.MuonPrinter = CompFactory.Rec.MuonPrintingTool(
             MuonStationPrinter = cfg.popToolsAndMerge(MuonEDMPrinterToolCfg(flags)) )
-        edmchecker.TriggerDecisionTool = cfg.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
 
     cfg.addEventAlgo(edmchecker)
 

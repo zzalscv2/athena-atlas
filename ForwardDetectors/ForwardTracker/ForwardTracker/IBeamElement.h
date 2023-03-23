@@ -7,7 +7,7 @@
 
 #include "ForwardTracker/ForwardTrackerConstants.h"
 
-#include "boost/shared_ptr.hpp"
+#include <memory>
 
 #include <string>
 #include <vector>
@@ -34,9 +34,9 @@ namespace ForwardTracker {
 
     virtual void track(IParticle&) const = 0;
     
-    virtual boost::shared_ptr<const IBeamElement> clone() const = 0;
+    virtual std::shared_ptr<const IBeamElement> clone() const = 0;
 
-    typedef boost::shared_ptr<const IBeamElement> ConstPtr_t;
+    typedef std::shared_ptr<const IBeamElement> ConstPtr_t;
     typedef std::vector<ConstPtr_t>               Container_t;
     typedef Container_t::iterator                 Iter_t;
     typedef Container_t::const_iterator           ConstIter_t;

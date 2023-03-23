@@ -3,7 +3,7 @@ This Module contains the TrigFastTrackFinder Algorithm that performs Fast Track 
 Configured instances of TrigFastTrackFinder are provided to signatures by the [TrigInDetConfig](../../TrigTools/TrigInDetConfig/python) package. The README in that packackage gives details of how to include TrigFastTrackFinder and other Inner Detector algorithms in signature TriggerMenuMT sequences.
  
 ## Files in this Module
-* Configuration: [TrigFastTrackFinder_Config.py](python/TrigFastTrackFinder_Config.py)    
+* Configuration: [TrigFastTrackFinderConfig.py](python/TrigFastTrackFinderConfig.py)    
 * Algorithm implementation: [TrigFastTrackFinder.cxx](src/TrigFastTrackFinder.cxx), [TrigFastTrackFinder.h](src/TrigFastTrackFinder.h)
 * Module Entries: [TrigFastTrackFinder_entries](src/components/TrigFastTrackFinder_entries.cxx)
 * LUT Data file: [trigseed_ml_pixel_barrel_kde.lut](share/trigseed_ml_pixel_barrel_kde.lut) 

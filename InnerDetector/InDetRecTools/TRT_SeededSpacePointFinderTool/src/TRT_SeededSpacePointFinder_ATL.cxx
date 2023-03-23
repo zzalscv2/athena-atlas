@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -43,9 +43,9 @@ using namespace std;
 InDet::TRT_SeededSpacePointFinder_ATL::TRT_SeededSpacePointFinder_ATL
 (const std::string& t,const std::string& n,const IInterface* p)
   : AthAlgTool(t,n,p),
+    m_fieldmode("MapSolenoid"),
     m_sctId(nullptr)
 {
-  m_fieldmode = "MapSolenoid"              ;
   m_ptmin     =   500.  ;  //Lowest pT of track.Up to 2000MeV bending in (r,phi) is +-4
   m_r_rmax      = 600.  ;  //Max radial extend of Si ID
   m_r_rmin      = 0.    ;  //Min radial extend for loading SPs in ID

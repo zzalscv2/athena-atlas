@@ -32,10 +32,12 @@ def createInDetConfigFlags():
     icf.addFlag("InDet.checkDeadElementsOnTrack", True)
     # Turn running of Event Info TRT Occupancy Filling Alg on and off (also whether it is used in TRT PID calculation)
     icf.addFlag("InDet.doTRTGlobalOccupancy", False)
-    icf.addFlag("InDet.noTRTTiming",
-                lambda prevFlags: prevFlags.Beam.Type is BeamType.SingleBeam)
-    icf.addFlag("InDet.doTRTPhase",
-                lambda prevFlags: prevFlags.Beam.Type is BeamType.Cosmics)
+    icf.addFlag("InDet.noTRTTiming", lambda prevFlags:
+                prevFlags.Beam.Type is BeamType.SingleBeam and
+                prevFlags.Detector.EnableTRT)
+    icf.addFlag("InDet.doTRTPhase", lambda prevFlags:
+                prevFlags.Beam.Type is BeamType.Cosmics and
+                prevFlags.Detector.EnableTRT)
 
     # Tracking parameters
 
@@ -64,25 +66,33 @@ def createInDetConfigFlags():
     # Turn running of track segment creation in pixel on and off
     icf.addFlag("InDet.Tracking.doTrackSegmentsPixel",
                 lambda prevFlags: (
-                    prevFlags.Tracking.doMinBias or
-                    prevFlags.Tracking.doLowMu or
-                    prevFlags.Beam.Type is BeamType.Cosmics))
+                    prevFlags.Detector.EnablePixel and (
+                        prevFlags.Tracking.doMinBias or
+                        prevFlags.Tracking.doLowMu or
+                        prevFlags.Beam.Type is BeamType.Cosmics)))
     # Turn running of track segment creation in SCT on and off
     icf.addFlag("InDet.Tracking.doTrackSegmentsSCT",
-                lambda prevFlags: (prevFlags.Tracking.doLowMu or
-                                   prevFlags.Beam.Type is BeamType.Cosmics))
+                lambda prevFlags: (
+                    prevFlags.Detector.EnableSCT and (
+                        prevFlags.Tracking.doLowMu or
+                        prevFlags.Beam.Type is BeamType.Cosmics)))
     # Turn running of track segment creation in TRT on and off
     icf.addFlag("InDet.Tracking.doTrackSegmentsTRT",
-                lambda prevFlags: (prevFlags.Tracking.doLowMu or
-                                   prevFlags.Beam.Type is BeamType.Cosmics))
+                lambda prevFlags: (
+                    prevFlags.Detector.EnableTRT and
+                    (prevFlags.Tracking.doLowMu or
+                     prevFlags.Beam.Type is BeamType.Cosmics)))
     # turn on / off TRT extensions
-    icf.addFlag("InDet.Tracking.doTRTExtension", True)
+    icf.addFlag("InDet.Tracking.doTRTExtension",
+                lambda prevFlags: prevFlags.Detector.EnableTRT)
     # control to run TRT Segment finding (do it always after new tracking!)
     icf.addFlag("InDet.Tracking.doTRTSegments",
-                lambda prevFlags: (prevFlags.InDet.Tracking.doBackTracking or
-                                   prevFlags.InDet.Tracking.doTRTStandalone))
+                lambda prevFlags: (prevFlags.Detector.EnableTRT and
+                                   (prevFlags.InDet.Tracking.doBackTracking or
+                                    prevFlags.InDet.Tracking.doTRTStandalone)))
     # Turn running of backtracking on and off
     icf.addFlag("InDet.Tracking.doBackTracking", lambda prevFlags: (
+        prevFlags.Detector.EnableTRT and
         not(prevFlags.Beam.Type in [BeamType.SingleBeam, BeamType.Cosmics] or
             prevFlags.Reco.EnableHI or
             prevFlags.Tracking.doHighPileup or
@@ -95,6 +105,7 @@ def createInDetConfigFlags():
     icf.addFlag("InDet.Tracking.doVeryLowPt", False)
     # control TRT Standalone
     icf.addFlag("InDet.Tracking.doTRTStandalone", lambda prevFlags: (
+        prevFlags.Detector.EnableTRT and
         not(prevFlags.Reco.EnableHI or
             prevFlags.Tracking.doHighPileup or
             prevFlags.Tracking.doVtxLumi or

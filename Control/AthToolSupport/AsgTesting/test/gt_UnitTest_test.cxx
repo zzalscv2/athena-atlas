@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -55,6 +55,7 @@ namespace asg
   }
 
 
+  // cppcheck-suppress syntaxError
   TEST (AssertTest, success_success)
   {
     ASSERT_SUCCESS (functionSuccess());

@@ -15,18 +15,19 @@ def CTPUnpackingMonitoring(flags, maxItems, maxChains):
     return tool
 
 
-def RoIsUnpackingMonitoring(flags, prefix, maxCount, maxEta=3.):
+def RoIsUnpackingMonitoring(flags, prefix, maxCount, maxEta=3., phiOffset=0.,etaOffset=0.):
     tool = GenericMonitoringTool(flags, 'MonTool')
     tool.HistPath = f'HLTFramework/HLTSeeding/RoIs_{prefix}'
     tool.defineHistogram('count', path='EXPERT', type='TH1F', title=f'Number of {prefix} RoIs;N RoIs;N Events',
                          xbins=maxCount, xmin=0, xmax=maxCount),
     tool.defineHistogram('eta', path='EXPERT', type='TH1F', title=f'{prefix} RoIs eta;eta;N RoIs',
-                         xbins=int(20*maxEta), xmin=-maxEta, xmax=maxEta),
+                         xbins=int(20*maxEta), xmin=-(maxEta-etaOffset), xmax=(maxEta+etaOffset)),
     tool.defineHistogram('phi', path='EXPERT', type='TH1F', title=f'{prefix} RoIs phi;phi;N RoIs',
-                         xbins=64, xmin=-(math.pi+0.1), xmax=math.pi+0.1),
+                         xbins=64, xmin=-(math.pi-phiOffset), xmax=(math.pi+phiOffset)),
     tool.defineHistogram('eta,phi', path='EXPERT', type='TH2F', title=f'{prefix} RoIs eta-phi;eta;phi;N RoIs',
-                         xbins=int(10*maxEta), xmin=-maxEta, xmax=maxEta,
-                         ybins=32, ymin=-(math.pi+0.1), ymax=math.pi+0.1)
+                         xbins=int(20*maxEta), xmin=-(maxEta-etaOffset), xmax=(maxEta+etaOffset),
+                         ybins=64, ymin=-(math.pi-phiOffset), ymax=(math.pi+phiOffset))
+    
     return tool
 
 

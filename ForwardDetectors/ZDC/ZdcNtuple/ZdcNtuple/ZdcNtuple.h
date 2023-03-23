@@ -35,7 +35,6 @@
 #include "PATInterfaces/SystematicVariation.h"
 #include "PATInterfaces/SystematicRegistry.h"
 
-#include "boost/unordered_map.hpp"
 #include "ZdcAnalysis/IZdcAnalysisTool.h"
 
 class ZdcNtuple : public EL::AnaAlgorithm

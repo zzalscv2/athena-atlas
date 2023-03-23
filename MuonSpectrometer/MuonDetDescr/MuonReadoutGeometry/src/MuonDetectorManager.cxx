@@ -744,7 +744,7 @@ namespace MuonGM {
 
 #ifndef SIMULATIONBASE
         if (m_stgcIdHelper && m_mmIdHelper && !(m_NSWABLineAsciiPath.empty())) {
-			log << MSG::DEBUG << "Using NSW AB lines from file: " << m_NSWABLineAsciiPath << endmsg;
+	    log << MSG::DEBUG << "Using NSW AB lines from file: " << m_NSWABLineAsciiPath << endmsg;
             ALineMapContainer writeALines;
             BLineMapContainer writeBLines;
             MuonCalib::NSWCondUtils::setNSWABLinesFromAscii(m_NSWABLineAsciiPath, writeALines, writeBLines, m_stgcIdHelper, m_mmIdHelper);
@@ -1413,6 +1413,7 @@ namespace MuonGM {
     }
 
     void MuonDetectorManager::setMMAsBuiltCalculator(const NswAsBuiltDbData* nswAsBuiltData) {
+        if (m_NSWAsBuiltAsciiOverrideMM) return; // test-mode using AsBuilt conditions from an ascii file
 #ifndef SIMULATIONBASE
         m_MMAsBuiltCalculator.reset();  // unset any previous instance
         m_MMAsBuiltCalculator = std::make_unique<NswAsBuilt::StripCalculator>();
@@ -1429,6 +1430,7 @@ namespace MuonGM {
     }
 
     void MuonDetectorManager::setStgcAsBuiltCalculator(const NswAsBuiltDbData* nswAsBuiltData) {
+        if (m_NSWAsBuiltAsciiOverrideSTgc) return; // test-mode using AsBuilt conditions from an ascii file
 #ifndef SIMULATIONBASE
         m_StgcAsBuiltCalculator.reset();  // unset any previous instance
         m_StgcAsBuiltCalculator = std::make_unique<NswAsBuilt::StgcStripCalculator>();
@@ -1592,8 +1594,39 @@ namespace MuonGM {
             return m_mdt_BMG_stName;
         return stationIndex;
     }
-    
+
+    // functions that override standard condition input for tests
     void MuonDetectorManager::setNSWABLineAsciiPath(const std::string& str) { m_NSWABLineAsciiPath = str; }
+    void MuonDetectorManager::setNSWAsBuiltAsciiPath(const std::string &strMM, const std::string &strSTgc) {
+        if (!strMM.empty()) {
+            MsgStream log(Athena::getMessageSvc(), "MGM::MuonDetectorManager");
+            log << MSG::INFO << "Overriding standard MM As-Built conditions with an external ascii file" << endmsg;
+            std::ifstream thefile(strMM);
+            std::stringstream buffer;
+            buffer << thefile.rdbuf();
+            std::string str = buffer.str();
+            thefile.close();
+            std::unique_ptr<NswAsBuiltDbData> readNswAsBuilt = std::make_unique<NswAsBuiltDbData>();
+            readNswAsBuilt->setMmData(str);
+            setMMAsBuiltCalculator(readNswAsBuilt.get());
+            m_NSWAsBuiltAsciiOverrideMM = true;
+        }
+
+        if (!strSTgc.empty()) {
+            MsgStream log(Athena::getMessageSvc(), "MGM::MuonDetectorManager");
+            log << MSG::INFO << "Overriding standard sTGC As-Built conditions with an external ascii file" << endmsg;
+            std::ifstream thefile(strSTgc);
+            std::stringstream buffer;
+            buffer << thefile.rdbuf();
+            std::string str = buffer.str();
+            thefile.close();
+            std::unique_ptr<NswAsBuiltDbData> readNswAsBuilt = std::make_unique<NswAsBuiltDbData>();
+            readNswAsBuilt->setSTgcData(str);
+            setStgcAsBuiltCalculator(readNswAsBuilt.get());
+            m_NSWAsBuiltAsciiOverrideSTgc = true;
+        }
+    }
+    
     void MuonDetectorManager::setCacheFillingFlag(int value) { m_cacheFillingFlag = value; }
     void MuonDetectorManager::setCachingFlag(int value) { m_cachingFlag = value; }
     void MuonDetectorManager::set_DBMuonVersion(const std::string& version) { m_DBMuonVersion = version; }

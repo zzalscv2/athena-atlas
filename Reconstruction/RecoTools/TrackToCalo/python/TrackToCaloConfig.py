@@ -47,7 +47,10 @@ def EMParticleCaloExtensionToolCfg(flags,
         from TrkConfig.AtlasExtrapolatorConfig import egammaCaloExtrapolatorCfg
         kwargs["Extrapolator"] = acc.popToolsAndMerge(
             egammaCaloExtrapolatorCfg(flags))
-    return ParticleCaloExtensionToolCfg(flags, **kwargs)
+
+    acc.setPrivateTools(acc.popToolsAndMerge(
+        ParticleCaloExtensionToolCfg(flags, **kwargs)))
+    return acc
 
 
 def HLTPF_ParticleCaloExtensionToolCfg(flags,
