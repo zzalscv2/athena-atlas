@@ -194,4 +194,6 @@ if __name__=="__main__":
    flags = defaultOnlineFlags()
    flags.lock()
 
-   TrigServicesCfg(flags)
+   cfg = ComponentAccumulator()
+   cfg.merge( TrigServicesCfg(flags) )
+   cfg.wasMerged()
