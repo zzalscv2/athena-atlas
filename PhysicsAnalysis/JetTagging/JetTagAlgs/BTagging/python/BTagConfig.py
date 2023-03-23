@@ -46,6 +46,7 @@ def GetTaggerTrainingMap(inputFlags, jet_collection_list):
             "BTagging/20220314/dipsLoose/antikt4empflow/network.json",  # new r22 training
             "BTagging/20220509/dl1dLoose/antikt4empflow/network.json",  # new "recommended tagger" named DL1dv01 in EDM
             "BTagging/20220509/gn1/antikt4empflow/network.onnx",
+            "BTagging/20230306/gn2v00/antikt4empflow/network.onnx",
         ],
         # PFlow jet with custom vertex definition used in HIGG1D1 
         "AntiKt4EMPFlowCustomVtx": [
@@ -58,7 +59,8 @@ def GetTaggerTrainingMap(inputFlags, jet_collection_list):
             "BTagging/20210824r22/dl1r/antikt4empflow/network.json",
             "BTagging/20220314/dipsLoose/antikt4empflow/network.json",  # new r22 training
             "BTagging/20220509/dl1dLoose/antikt4empflow/network.json",  # new "recommended tagger" named DL1dv01 in EDM    
-            "BTagging/20220509/gn1/antikt4empflow/network.onnx"
+            "BTagging/20220509/gn1/antikt4empflow/network.onnx",
+            "BTagging/20230306/gn2v00/antikt4empflow/network.onnx",
         ],
         "AntiKt4EMTopo": [
             "BTagging/201903/rnnip/antikt4empflow/network.json",
@@ -75,14 +77,9 @@ def GetTaggerTrainingMap(inputFlags, jet_collection_list):
         "AntiKtVR30Rmax4Rmin02Track": [
             "BTagging/201903/rnnip/antiktvr30rmax4rmin02track/network.json",
             "BTagging/201903/dl1r/antiktvr30rmax4rmin02track/network.json",
-            "BTagging/20210519r22/dl1r/antikt4empflow/network.json",
-            "BTagging/20210729/dipsLoose/antikt4empflow/network.json",  # old r22 trainings
-            "BTagging/20210729/dips/antikt4empflow/network.json",
-            "BTagging/20210824r22/dl1dLoose/antikt4empflow/network.json",  # “recommended tagger” which is DL1dLoose20210824r22 named DL1dv00 in EDM
-            "BTagging/20210824r22/dl1d/antikt4empflow/network.json",
-            "BTagging/20210824r22/dl1r/antikt4empflow/network.json",
-            "BTagging/20220314/dipsLoose/antikt4empflow/network.json",  # new r22 training
-            "BTagging/20220509/dl1dLoose/antikt4empflow/network.json",  # new "recommended tagger" named DL1dv01 in EDM
+            "BTagging/20230208/dipsLoose/antiktvr30rmax4rmin02track/network.json",  # new r22 training for VR track jets
+            "BTagging/20230307/DL1dv01/antiktvr30rmax4rmin02track/network.json",  # new "recommended tagger" for VR track jets named DL1dv01 in EDM
+            "BTagging/20230307/gn2v00/antiktvr30rmax4rmin02track/network.onnx",
         ],
     }
 
