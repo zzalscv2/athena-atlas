@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef __EGSelectorConfigurationMapping__
@@ -15,7 +15,7 @@ namespace EgammaSelectors {
 // Note: keep this conf file up to date with the PhotonIsEMTightSelectorConfig
 // function in python/PhotonIsEMTightSelectorCutDefs.py
 
-// This is the internal part , We need to  map string to latest reccomendations
+// This is the internal part , We need to  map string to latest recommendations
 const std::map<std::string, std::string> LHPointToConfFile = {
   { "VeryLooseLHElectron",
     "ElectronPhotonSelectorTools/offline/mc20_20210514/"
@@ -47,6 +47,18 @@ const std::map<std::string, std::string> LHPointToConfFile = {
   { "TightLHElectron_Run2",
     "ElectronPhotonSelectorTools/offline/mc20_20210514/"
     "ElectronLikelihoodTightOfflineConfig2017_Smooth.conf" },
+  { "VeryLooseLHElectron_LLP",
+    "ElectronPhotonSelectorTools/trigger/rel22_20210611/"
+    "ElectronLikelihoodVeryLooseTriggerConfig_NoPix.conf" },
+  { "LooseLHElectron_LLP",
+    "ElectronPhotonSelectorTools/trigger/rel22_20210611/"
+    "ElectronLikelihoodLooseTriggerConfig_NoPix.conf" },
+  { "MediumLHElectron_LLP",
+    "ElectronPhotonSelectorTools/trigger/rel22_20210611/"
+    "ElectronLikelihoodMediumTriggerConfig_NoPix.conf" },
+  { "TightLHElectron_LLP",
+    "ElectronPhotonSelectorTools/trigger/rel22_20210611/"
+    "ElectronLikelihoodTightTriggerConfig_NoPix.conf" },
 };
 const std::map<std::string, std::string> PhotonCutPointToConfFile = {
   { "LoosePhoton",

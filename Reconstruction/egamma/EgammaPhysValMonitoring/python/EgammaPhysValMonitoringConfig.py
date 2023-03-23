@@ -27,32 +27,51 @@ def EgammaPhysValMonitoringToolCfg(flags, **kwargs):
     if flags.Tracking.doLargeD0:
         kwargs.setdefault("LRTElectronContainerName", "LRTElectrons")
 
-    # VeryLooseNoPix
-    ElectronLHSelectorVeryLooseNoPix = CompFactory.AsgElectronLikelihoodTool(
-        "ElectronLHSelectorVeryLooseNoPix",
-        ConfigFile = "ElectronPhotonSelectorTools/trigger/rel22_20210611/ElectronLikelihoodVeryLooseTriggerConfig_NoPix.conf",
-        primaryVertexContainer = "PrimaryVertices")
-    kwargs.setdefault("ElectronLHSelectorVeryLooseNoPix", ElectronLHSelectorVeryLooseNoPix)
 
+    from ElectronPhotonSelectorTools.AsgElectronLikelihoodToolsConfig import AsgElectronLikelihoodToolCfg
+    from ElectronPhotonSelectorTools.ElectronLikelihoodToolMapping import electronLHmenu
+    from ROOT import LikeEnum
+
+    lhMenu = electronLHmenu.offlineMC21
+
+    # VeryLooseNoPix
+    ElectronLHSelectorVeryLooseNoPix = acc.popToolsAndMerge(AsgElectronLikelihoodToolCfg(
+        flags,
+        name="ElectronLHSelectorVeryLooseNoPix",
+        quality=LikeEnum.VeryLooseLLP,
+        menu=lhMenu)
+    )
+    ElectronLHSelectorVeryLooseNoPix.primaryVertexContainer = "PrimaryVertices"
+    kwargs.setdefault("ElectronLHSelectorVeryLooseNoPix", ElectronLHSelectorVeryLooseNoPix)
+    
     # LooseNoPix
-    ElectronLHSelectorLooseNoPix = CompFactory.AsgElectronLikelihoodTool(
-        "ElectronLHSelectorLooseNoPix",
-        ConfigFile = "ElectronPhotonSelectorTools/trigger/rel22_20210611/ElectronLikelihoodLooseTriggerConfig_NoPix.conf",
-        primaryVertexContainer = "PrimaryVertices")
+    ElectronLHSelectorLooseNoPix = acc.popToolsAndMerge(AsgElectronLikelihoodToolCfg(
+        flags,
+        name="ElectronLHSelectorLooseNoPix",
+        quality=LikeEnum.LooseLLP,
+        menu=lhMenu)
+    )
+    ElectronLHSelectorLooseNoPix.primaryVertexContainer = "PrimaryVertices"
     kwargs.setdefault("ElectronLHSelectorLooseNoPix", ElectronLHSelectorLooseNoPix)
 
     # MediumNoPix
-    ElectronLHSelectorMediumNoPix = CompFactory.AsgElectronLikelihoodTool(
-        "ElectronLHSelectorMediumNoPix",
-        ConfigFile = "ElectronPhotonSelectorTools/trigger/rel22_20210611/ElectronLikelihoodMediumTriggerConfig_NoPix.conf",
-        primaryVertexContainer = "PrimaryVertices")
+    ElectronLHSelectorMediumNoPix = acc.popToolsAndMerge(AsgElectronLikelihoodToolCfg(
+        flags,
+        name="ElectronLHSelectorMediumNoPix",
+        quality=LikeEnum.MediumLLP,
+        menu=lhMenu)
+    )
+    ElectronLHSelectorMediumNoPix.primaryVertexContainer = "PrimaryVertices"
     kwargs.setdefault("ElectronLHSelectorMediumNoPix", ElectronLHSelectorMediumNoPix)
 
     # TightNoPix
-    ElectronLHSelectorTightNoPix = CompFactory.AsgElectronLikelihoodTool(
-        "ElectronLHSelectorTightNoPix",
-        ConfigFile = "ElectronPhotonSelectorTools/trigger/rel22_20210611/ElectronLikelihoodTightTriggerConfig_NoPix.conf",
-        primaryVertexContainer = "PrimaryVertices")
+    ElectronLHSelectorTightNoPix = acc.popToolsAndMerge(AsgElectronLikelihoodToolCfg(
+        flags,
+        name="ElectronLHSelectorTightNoPix",
+        quality=LikeEnum.TightLLP,
+        menu=lhMenu)
+    )
+    ElectronLHSelectorTightNoPix.primaryVertexContainer = "PrimaryVertices"
     kwargs.setdefault("ElectronLHSelectorTightNoPix", ElectronLHSelectorTightNoPix)
 
     acc.setPrivateTools(

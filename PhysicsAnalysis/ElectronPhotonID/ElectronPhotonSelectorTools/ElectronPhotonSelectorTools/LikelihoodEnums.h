@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef _LIKELIHOODENUMS_H
@@ -15,7 +15,11 @@ namespace LikeEnum {
     Tight,
     VeryTight,
     LooseRelaxed,
-    CustomOperatingPoint
+    CustomOperatingPoint,
+    VeryLooseLLP,
+    LooseLLP,
+    MediumLLP,
+    TightLLP
   };
 
    struct ROOT6_NamespaceAutoloadHook{};
