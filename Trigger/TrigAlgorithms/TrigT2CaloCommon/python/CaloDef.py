@@ -2,7 +2,6 @@
 
 from AthenaCommon.CFElements import seqAND, parOR
 from AthenaConfiguration.ComponentFactory import CompFactory
-from TrigEDMConfig.TriggerEDMRun3 import recordable
 from TriggerMenuMT.HLT.Config.MenuComponents import algorithmCAToGlobalWrapper
 from TriggerMenuMT.HLT.CommonSequences.FullScanDefs import caloFSRoI
 
@@ -78,25 +77,21 @@ def _algoL2Egamma(flags, inputEDM="", ClustersName="HLT_FastCaloEMClusters", Rin
         # using jet seeds for testing. we should use EM as soon as we have EM seeds into the L1
         inputEDM = mapThresholdToL1RoICollection("EM")
 
-    from TrigT2CaloEgamma.TrigT2CaloEgammaConfig import T2CaloEgamma_ReFastAlgo
-    algo=T2CaloEgamma_ReFastAlgo(flags, "FastCaloL2EgammaAlg", doRinger=True, RingerKey=RingerKey)
-    algo.RoIs=inputEDM
+    extraInputs=[ ( 'LArMCSym', 'ConditionStore+LArMCSym'), ('LArOnOffIdMapping' , 'ConditionStore+LArOnOffIdMap' ), ('LArFebRodMapping'  , 'ConditionStore+LArFebRodMap' ), ('CaloDetDescrManager', 'ConditionStore+CaloDetDescrManager') ]
+    from TrigT2CaloEgamma.TrigT2CaloEgammaConfig import t2CaloEgamma_ReFastAlgoCfg
+    if (not doForward) and (not doAll) and (not doAllEm ) :
+       algo=algorithmCAToGlobalWrapper(t2CaloEgamma_ReFastAlgoCfg,flags, "FastCaloL2EgammaAlg", doRinger=True, RingerKey=RingerKey,RoIs=inputEDM,ExtraInputs=extraInputs, ClustersName = ClustersName)
     if doForward:
-        from TrigT2CaloEgamma.TrigT2CaloEgammaConfig import T2CaloEgamma_ReFastFWDAlgo
-        algo=T2CaloEgamma_ReFastFWDAlgo(flags, "FastCaloL2EgammaAlg_FWD", doRinger=True, RingerKey=RingerKey)
-        algo.RoIs=inputEDM
+        from TrigT2CaloEgamma.TrigT2CaloEgammaConfig import t2CaloEgamma_ReFastFWDAlgoCfg
+        algo=algorithmCAToGlobalWrapper(t2CaloEgamma_ReFastFWDAlgoCfg,flags, "FastCaloL2EgammaAlg_FWD", doRinger=True, RingerKey=RingerKey,RoIs=inputEDM,ExtraInputs=extraInputs, ClustersName = ClustersName)
     else:
         if ( doAllEm or doAll ) :
           if ( doAllEm ):
-            from TrigT2CaloEgamma.TrigT2CaloEgammaConfig import T2CaloEgamma_AllEm
-            algo=T2CaloEgamma_AllEm(flags, "L2CaloLayersEmFex")
-            algo.RoIs=inputEDM
+            from TrigT2CaloEgamma.TrigT2CaloEgammaConfig import t2CaloEgamma_AllEmCfg
+            algo=algorithmCAToGlobalWrapper(t2CaloEgamma_AllEmCfg,flags, "L2CaloLayersEmFex",RoIs=inputEDM,ExtraInputs=extraInputs, ClustersName = ClustersName)
           else : # can only be doAll
-            from TrigT2CaloEgamma.TrigT2CaloEgammaConfig import T2CaloEgamma_All
-            algo=T2CaloEgamma_All(flags, "L2CaloLayersFex")
-            algo.RoIs=inputEDM
-    algo.ExtraInputs+=[ ( 'LArBadChannelCont', 'ConditionStore+LArBadChannel'), ( 'LArMCSym', 'ConditionStore+LArMCSym'), ('LArOnOffIdMapping' , 'ConditionStore+LArOnOffIdMap' ), ('LArFebRodMapping'  , 'ConditionStore+LArFebRodMap' ), ('CaloDetDescrManager', 'ConditionStore+CaloDetDescrManager') ]
-    algo.ClustersName=recordable(ClustersName)
+            from TrigT2CaloEgamma.TrigT2CaloEgammaConfig import t2CaloEgamma_AllCfg
+            algo=algorithmCAToGlobalWrapper(t2CaloEgamma_AllCfg,flags, "L2CaloLayersFex",RoIs=inputEDM,ExtraInputs=extraInputs, ClustersName = ClustersName)
     return algo
 
 ####################################
@@ -122,7 +117,7 @@ def fastCaloRecoSequence(flags, InViewRoIs, ClustersName="HLT_FastCaloEMClusters
         name = 'fastCaloInViewSequenceAll'    
 
     fastCaloInViewSequence = seqAND( name, [fastCaloVDV, fastCaloAlg] )
-    sequenceOut = fastCaloAlg.ClustersName
+    sequenceOut = fastCaloAlg[0].ClustersName
     return (fastCaloInViewSequence, sequenceOut)
 
 
@@ -136,7 +131,7 @@ def fastCaloRecoFWDSequence(flags, InViewRoIs, ClustersName="HLT_FastCaloEMClust
     fastCaloVDV.DataObjects = [( 'CaloBCIDAverage' , 'StoreGateSvc+CaloBCIDAverage' ),
                                ( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+FSJETMETCaloRoI' )]
     fastCaloInViewSequence = seqAND('fastCaloInViewSequence_FWD' , [fastCaloVDV, fastCaloAlg] )
-    sequenceOut = fastCaloAlg.ClustersName
+    sequenceOut = fastCaloAlg[0].ClustersName
     return (fastCaloInViewSequence, sequenceOut)
 
 
