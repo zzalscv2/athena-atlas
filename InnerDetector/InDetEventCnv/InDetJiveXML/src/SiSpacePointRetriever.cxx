@@ -9,6 +9,7 @@
 #include "AthContainers/DataVector.h"
 #include "StoreGate/ReadHandle.h"
 
+#include "InDetIdentifier/PixelID.h"
 #include "InDetIdentifier/SCT_ID.h"
 #include "TrkSpacePoint/SpacePoint.h"
 #include "TrkSpacePoint/SpacePointCollection.h"
@@ -205,8 +206,14 @@ namespace JiveXML
           Identifier idSecond = (clusterList.second != NULL) ? clusterList.second->identify() : Identifier();
 
           //Get phi and eta of the module in detector coordinates of the first cluster
-          phiModule.push_back(DataType(m_geo->SCTIDHelper()->phi_module(idFirst)));
-          etaModule.push_back(DataType(m_geo->SCTIDHelper()->eta_module(idFirst)));
+          if (clusterList.first->type(Trk::PrepRawDataType::SCT_Cluster)) {
+                phiModule.push_back(DataType(m_geo->SCTIDHelper()->phi_module(idFirst)));
+                etaModule.push_back(DataType(m_geo->SCTIDHelper()->eta_module(idFirst)));
+          }
+          else {
+             phiModule.push_back(DataType(m_geo->PixelIDHelper()->phi_module(idFirst)));
+             etaModule.push_back(DataType(m_geo->PixelIDHelper()->eta_module(idFirst)));
+          }
 
           // Store the cluster(s) identifier (pair)
           clusters.push_back(DataType(idFirst.get_compact()));   
