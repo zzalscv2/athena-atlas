@@ -31,14 +31,12 @@ def InDetPixelClusterOnTrackToolBaseCfg(flags, name="PixelClusterOnTrackTool", *
         kwargs.setdefault("ErrorStrategy", 0)
         kwargs.setdefault("PositionStrategy", 0)
 
-    kwargs.setdefault(
-        "applyNNcorrection",
-        flags.InDet.Tracking.doPixelClusterSplitting and
-        flags.InDet.Tracking.pixelClusterSplittingType == "NeuralNet")
-    kwargs.setdefault(
-        "NNIBLcorrection",
-        flags.InDet.Tracking.doPixelClusterSplitting and
-        flags.InDet.Tracking.pixelClusterSplittingType == "NeuralNet")
+    kwargs.setdefault("applyNNcorrection",
+                      flags.Tracking.doPixelClusterSplitting and
+                      flags.Tracking.pixelClusterSplittingType == "NeuralNet")
+    kwargs.setdefault("NNIBLcorrection",
+                      flags.Tracking.doPixelClusterSplitting and
+                      flags.Tracking.pixelClusterSplittingType == "NeuralNet")
     split_cluster_map_extension = (
         flags.InDet.Tracking.ActiveConfig.extension
         if flags.InDet.Tracking.ActiveConfig.useTIDE_Ambi else "")
@@ -59,8 +57,8 @@ def InDetPixelClusterOnTrackToolDigitalCfg(flags, name="InDetPixelClusterOnTrack
 def InDetPixelClusterOnTrackToolNNSplittingCfg(flags, name="InDetPixelClusterOnTrackToolNNSplitting", **kwargs):
     acc = ComponentAccumulator()
 
-    if (flags.InDet.Tracking.doPixelClusterSplitting and
-        flags.InDet.Tracking.pixelClusterSplittingType == "NeuralNet" and
+    if (flags.Tracking.doPixelClusterSplitting and
+        flags.Tracking.pixelClusterSplittingType == "NeuralNet" and
             "NnClusterizationFactory" not in kwargs):
         from InDetConfig.SiClusterizationToolConfig import (
             NnClusterizationFactoryCfg)
@@ -154,8 +152,8 @@ def ITkPixelClusterOnTrackToolBaseCfg(flags, name="ITkPixelClusterOnTrackTool", 
 def ITkPixelClusterOnTrackToolTruthSplittingCfg(flags, name='ITkPixelClusterOnTrackToolTruthSplitting', **kwargs):
     acc = ComponentAccumulator()
 
-    if (flags.ITk.Tracking.doPixelClusterSplitting and
-            flags.ITk.Tracking.pixelClusterSplittingType == "Truth"):
+    if (flags.Tracking.doPixelClusterSplitting and
+            flags.Tracking.pixelClusterSplittingType == "Truth"):
         if 'NnClusterizationFactory' not in kwargs:
             from InDetConfig.SiClusterizationToolConfig import (
                 ITkTruthClusterizationFactoryCfg)
