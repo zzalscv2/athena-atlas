@@ -71,8 +71,8 @@ StatusCode TruthClosureCheck::sanityCheck(const HepMC::GenEvent& event) const {
 }
 
 #ifdef HEPMC3
-void TruthClosureCheck::printGenVertex(HepMC::ConstGenVertexPtr origVertex,
-                                       HepMC::ConstGenVertexPtr resetVertex) const
+void TruthClosureCheck::printGenVertex(const HepMC::ConstGenVertexPtr& origVertex,
+                                       const HepMC::ConstGenVertexPtr& resetVertex) const
 {
   ATH_MSG_INFO("----------------------------------");
   ATH_MSG_INFO("Original Vertex:");
@@ -136,8 +136,8 @@ void TruthClosureCheck::printGenVertex(const HepMC::GenVertex& origVertex,
 #endif
 
 #ifdef HEPMC3
-StatusCode TruthClosureCheck::compareGenVertex(HepMC::ConstGenVertexPtr origVertex,
-                                               HepMC::ConstGenVertexPtr resetVertex) const
+StatusCode TruthClosureCheck::compareGenVertex(const HepMC::ConstGenVertexPtr& origVertex,
+                                               const HepMC::ConstGenVertexPtr& resetVertex) const
 {
   if (!origVertex && !resetVertex) return StatusCode::SUCCESS;
   if (!origVertex || !resetVertex) return StatusCode::FAILURE;
@@ -292,8 +292,8 @@ StatusCode TruthClosureCheck::compareMomenta(const HepMC::FourVector& origMoment
 }
 
 #ifdef HEPMC3
-StatusCode TruthClosureCheck::compareGenParticle(HepMC::ConstGenParticlePtr origParticle,
-                                                 HepMC::ConstGenParticlePtr resetParticle) const
+StatusCode TruthClosureCheck::compareGenParticle(const HepMC::ConstGenParticlePtr& origParticle,
+                                                 const HepMC::ConstGenParticlePtr& resetParticle) const
 {
   if (!origParticle && !resetParticle) return StatusCode::SUCCESS;
   if (!origParticle || !resetParticle) return StatusCode::FAILURE;

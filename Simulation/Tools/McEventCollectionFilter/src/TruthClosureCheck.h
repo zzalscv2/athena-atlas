@@ -23,12 +23,12 @@ public:
   private:
    StatusCode sanityCheck(const HepMC::GenEvent& event) const;
 #ifdef HEPMC3
-   StatusCode compareGenVertex(HepMC::ConstGenVertexPtr origVertex,
-                               HepMC::ConstGenVertexPtr resetVertex) const;
-   StatusCode compareGenParticle(HepMC::ConstGenParticlePtr origParticle,
-                                 HepMC::ConstGenParticlePtr resetParticle) const;
-   void printGenVertex(HepMC::ConstGenVertexPtr origVertex,
-                       HepMC::ConstGenVertexPtr resetVertex) const;
+   StatusCode compareGenVertex(const HepMC::ConstGenVertexPtr& origVertex,
+                               const HepMC::ConstGenVertexPtr& resetVertex) const;
+   StatusCode compareGenParticle(const HepMC::ConstGenParticlePtr& origParticle,
+                                 const HepMC::ConstGenParticlePtr& resetParticle) const;
+   void printGenVertex(const HepMC::ConstGenVertexPtr& origVertex,
+                       const HepMC::ConstGenVertexPtr& resetVertex) const;
 #else
    StatusCode compareGenVertex(const HepMC::GenVertex& origVertex,
                                const HepMC::GenVertex& resetVertex) const;
