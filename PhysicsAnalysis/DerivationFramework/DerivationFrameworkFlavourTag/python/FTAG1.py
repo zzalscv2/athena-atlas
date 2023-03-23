@@ -35,19 +35,13 @@ def FTAG1KernelCfg(flags, name='FTAG1Kernel', **kwargs):
     return acc
 
 
-def FTAG1Cfg(flags):
+def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_AllVariables=None, trigger_option=''):
+
+    if extra_SmartCollections is None: extra_SmartCollections = []
+    if extra_AllVariables is None: extra_AllVariables = []
+
 
     acc = ComponentAccumulator()
-
-    # Get the lists of triggers needed for trigger matching.
-    # This is needed at this scope (for the slimming) and further down in the config chain
-    # for actually configuring the matching, so we create it here and pass it down
-    # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
-    from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    FTAG1TriggerListsHelper = TriggerListsHelper(flags)
-
-    # Common augmentations
-    acc.merge(FTAG1KernelCfg(flags, name="FTAG1Kernel", StreamName = 'StreamDAOD_FTAG1', TriggerListsHelper = FTAG1TriggerListsHelper))
 
     # ============================
     # Define contents of the format
@@ -55,7 +49,7 @@ def FTAG1Cfg(flags):
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
-    FTAG1SlimmingHelper = SlimmingHelper("FTAG1SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
+    FTAG1SlimmingHelper = SlimmingHelper(name_tag+"SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
 
     # Many of these are added to AllVariables below as well. We add
     # these items in both places in case some of the smart collections
@@ -74,6 +68,11 @@ def FTAG1Cfg(flags):
                                            "AntiKt10UFOCSSKJets",
                                            "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
                                           ]
+    if len(extra_SmartCollections)>0:
+        for a_container in extra_SmartCollections:
+            if a_container not in FTAG1SlimmingHelper.SmartCollections:
+                FTAG1SlimmingHelper.SmartCollections.append(a_container)
+
     FTAG1SlimmingHelper.AllVariables = [
             "EventInfo",
             "PrimaryVertices",
@@ -95,6 +94,10 @@ def FTAG1Cfg(flags):
             "TruthVertices",
             "TruthBottom", "TruthElectrons","TruthMuons","TruthTaus",
             ]
+    if len(extra_AllVariables)>0:
+        for a_container in extra_AllVariables:
+            if a_container not in FTAG1SlimmingHelper.AllVariables:
+                FTAG1SlimmingHelper.AllVariables.append(a_container)
 
     if flags.BTagging.Pseudotrack:
         FTAG1SlimmingHelper.AllVariables += [ "InDetPseudoTrackParticles" ]
@@ -111,14 +114,6 @@ def FTAG1Cfg(flags):
                                                        'NVSI_SecVrt_Loose' : 'xAOD::VertexContainer','NVSI_SecVrt_LooseAux' : 'xAOD::VertexAuxContainer'})
 
     # Append to dictionary
-    FTAG1SlimmingHelper.AppendToDictionary['GlobalChargedParticleFlowObjects'] ='xAOD::FlowElementContainer'
-    FTAG1SlimmingHelper.AppendToDictionary['GlobalChargedParticleFlowObjectsAux'] ='xAOD::FlowElementAuxContainer'
-    FTAG1SlimmingHelper.AppendToDictionary['GlobalNeutralParticleFlowObjects'] = 'xAOD::FlowElementContainer'
-    FTAG1SlimmingHelper.AppendToDictionary['GlobalNeutralParticleFlowObjectsAux'] = 'xAOD::FlowElementAuxContainer'
-    FTAG1SlimmingHelper.AppendToDictionary['CHSGChargedParticleFlowObjects'] = 'xAOD::FlowElementContainer'
-    FTAG1SlimmingHelper.AppendToDictionary['CHSGChargedParticleFlowObjectsAux'] = 'xAOD::ShallowAuxContainer'
-    FTAG1SlimmingHelper.AppendToDictionary['CHSGNeutralParticleFlowObjects'] = 'xAOD::FlowElementContainer'
-    FTAG1SlimmingHelper.AppendToDictionary['CHSGNeutralParticleFlowObjectsAux'] = 'xAOD::ShallowAuxContainer'
 
 
     from DerivationFrameworkFlavourTag import FtagBaseContent
@@ -166,14 +161,36 @@ def FTAG1Cfg(flags):
     FtagBaseContent.add_ExtraVariables_to_SlimmingHelper(FTAG1SlimmingHelper)
    
     # Trigger content
-    FtagBaseContent.trigger_setup(FTAG1SlimmingHelper)
+    FtagBaseContent.trigger_setup(FTAG1SlimmingHelper, trigger_option)
 
 
     # Output stream    
     FTAG1ItemList = FTAG1SlimmingHelper.GetItemList()
-    acc.merge(OutputStreamCfg(flags, "DAOD_FTAG1", ItemList=FTAG1ItemList, AcceptAlgs=["FTAG1Kernel"]))
+    acc.merge(OutputStreamCfg(flags, "DAOD_"+name_tag, ItemList=FTAG1ItemList, AcceptAlgs=[name_tag+"Kernel"]))
 
     return acc
+
+def FTAG1Cfg(flags):
+
+    acc = ComponentAccumulator()
+
+    # Get the lists of triggers needed for trigger matching.
+    # This is needed at this scope (for the slimming) and further down in the config chain
+    # for actually configuring the matching, so we create it here and pass it down
+    # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
+    from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
+    FTAG1TriggerListsHelper = TriggerListsHelper(flags)
+   
+    # name_tag has to be consistent between KernelCfg and CoreCfg
+    FTAG1_name_tag = 'FTAG1'
+
+    # Common augmentations
+    acc.merge(FTAG1KernelCfg(flags, name=FTAG1_name_tag + "Kernel", StreamName = 'StreamDAOD_'+FTAG1_name_tag, TriggerListsHelper = FTAG1TriggerListsHelper))
+    # Content of FTAG1 
+    acc.merge(FTAG1CoreCfg(flags, FTAG1_name_tag))
+
+    return acc
+
 
 def V0ToolCfg(flags, augmentationTools=None, tool_name_prefix="FTAG1", container_name_prefix="FTAG"):
     
