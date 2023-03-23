@@ -164,13 +164,35 @@ StatusCode TileRawChannelBuilder::initialize() {
 
   ATH_CHECK( m_cablingSvc.retrieve());
     
-  const TileCablingService* cabling = m_cablingSvc->cablingService();
-  if (!cabling) {
+  m_cabling = m_cablingSvc->cablingService();
+  if (!m_cabling) {
     ATH_MSG_ERROR( "Unable to retrieve TileCablingService" );
     return StatusCode::FAILURE;
   }
   
-  m_notUpgradeCabling = (cabling->getCablingType() != TileCablingService::UpgradeABC);
+  m_notUpgradeCabling = (m_cabling->getCablingType() != TileCablingService::UpgradeABC);
+
+  int runPeriod = m_cabling->runPeriod();
+  std::ostringstream os;
+  if (runPeriod==3) {
+    if ( m_demoFragIDs.empty() ) {
+      std::vector<int> v = { 0x10d }; // LBA14 is demonstrator in RUN3
+      m_demoFragIDs = v;
+    }
+    os << " in RUN3";
+  }
+
+  if ( !m_demoFragIDs.empty() ) {
+    std::sort(m_demoFragIDs.begin(),m_demoFragIDs.end());
+    os << " (frag IDs):";
+    for (int fragID : m_demoFragIDs) {
+      if (fragID>0)
+        os << " 0x" << std::hex << fragID << std::dec;
+      else
+        os << " " << fragID;
+    }
+    ATH_MSG_INFO("Enable special treatment for demonstrator modules" << os.str());
+  }
 
   if (m_calibrateEnergy) {
     ATH_CHECK( m_tileToolEmscale.retrieve() );
