@@ -114,7 +114,7 @@ namespace ISF {
     Amg::Vector3D propagator(double theta, double phi) const;
 
     //apply the inverse PCA transform
-    std::vector<double> inversePCA(std::vector<double> &variables) const;
+    std::vector<double> inversePCA(int pcaCdfIterator, std::vector<double> &variables) const;
 
     //apply the inverse CDF trainsform
     static double inverseCdfTransform(double variable, std::map<double, double> inverse_cdf_map) ;
@@ -130,6 +130,15 @@ namespace ISF {
 
     //apply eta interpolation
     double interpolateEta(const double &eta, CLHEP::HepRandomEngine* rndmEngine) const;
+
+    //helper function to convert comma separated string into vector
+    static std::vector<std::string> str_to_list(std::string str);
+
+    //get the infoMap from xml file based on the xmlpathname and also name of mainNode
+    std::vector<std::map<std::string,std::string>> getInfoMap(std::string mainNode, const std::string &xmlFilePath);
+
+    //decide the pca / cdf part to read based on pdgId and eta
+    static int passedParamIterator(int pid, double eta, std::vector<std::map<std::string,std::string>> mapvect);
 
     //load inverse quantile transformer from XML
     StatusCode initializeInverseCDF(const std::string & quantileTransformerConfigFile);
@@ -206,14 +215,20 @@ namespace ISF {
     /** beam pipe radius */
     DoubleProperty                                  m_beamPipe{this, "BeamPipeRadius", 500.};
 
-    std::vector<std::vector<double>> m_inverse_PCA_matrix;
-    std::vector<double> m_PCA_means;
+    /** pca vectors */
+    std::vector<std::vector<std::vector<double>>> m_inverse_PCA_matrix;
+    std::vector<std::vector<double>> m_PCA_means;
 
-    std::map<double, double>  m_variable0_inverse_cdf;
-    std::map<double, double>  m_variable1_inverse_cdf;
-    std::map<double, double>  m_variable2_inverse_cdf;
-    std::map<double, double>  m_variable3_inverse_cdf;
-    std::map<double, double>  m_variable4_inverse_cdf;
+    /** infoMaps */
+    std::vector<std::map<std::string, std::string>> m_xml_info_pca;
+    std::vector<std::map<std::string, std::string>> m_xml_info_cdf;
+
+    /** (vector of map) for CDF mappings */
+    std::vector<std::map<double, double>>  m_variable0_inverse_cdf;
+    std::vector<std::map<double, double>>  m_variable1_inverse_cdf;
+    std::vector<std::map<double, double>>  m_variable2_inverse_cdf;
+    std::vector<std::map<double, double>>  m_variable3_inverse_cdf;
+    std::vector<std::map<double, double>>  m_variable4_inverse_cdf;
   };
 }
 
