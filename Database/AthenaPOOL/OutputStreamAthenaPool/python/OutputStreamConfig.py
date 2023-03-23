@@ -2,12 +2,13 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, ConfigurationError
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import Format, ProductionStep
+from AthenaConfiguration.Enums import ProductionStep
 from AthenaCommon.Logging import logging
 
 
 def OutputStreamCfg(flags, streamName, ItemList=[], MetadataItemList=[],
-                    disableEventTag=False, trigNavThinningSvc=None, AcceptAlgs=[]):
+                    disableEventTag=False, trigNavThinningSvc=None,
+                    AcceptAlgs=[], HelperTools=[]):
    eventInfoKey = "EventInfo"
    if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
       eventInfoKey = f"{flags.Overlay.BkgPrefix}EventInfo"
@@ -62,6 +63,7 @@ def OutputStreamCfg(flags, streamName, ItemList=[], MetadataItemList=[],
       ItemList=finalItemList,
       MetadataItemList=MetadataItemList,
       OutputFile=fileName,
+      HelperTools=HelperTools,
    )
    outputStream.AcceptAlgs += AcceptAlgs
    outputStream.ExtraOutputs += [("DataHeader", f"StoreGateSvc+{outputStreamName}")]
@@ -89,55 +91,6 @@ def OutputStreamCfg(flags, streamName, ItemList=[], MetadataItemList=[],
    result.merge(EventFormatCfg(flags,
                                stream=outputStream,
                                streamName=outputStreamName))
-
-   # Setup FileMetaData
-   from xAODMetaDataCnv.FileMetaDataConfig import FileMetaDataCfg
-   result.merge(FileMetaDataCfg(flags,
-                                stream=outputStream,
-                                streamName=outputStreamName))
-
-   # Setup additional MetaData
-
-   # ======================================================
-   # TODO:
-   # ======================================================
-   # For the time being we're adding common MetaData items
-   # and configure the necessary tools/services en masse.
-   # Ideally, we should introduce a self-sufficienct config
-   # for each item and merge them here.
-   # ======================================================
-   if any([ x in streamName for x in ['AOD','ESD'] ]):
-      # LumiBlockMetaDataTool seems to cause crashes in MP derivation jobs
-      # As done in RecExCommon_topOptions.py use the algorithm in MP jobs
-      # This needs to be checked and confirmed...
-      mdToolNames = []
-      # Propagate cutbookkeepers
-      if 'CutBookkeepers' in flags.Input.MetadataItems:
-         mdToolNames.append('BookkeeperTool')
-
-      if flags.Input.Format == Format.BS and not flags.Common.isOnline:
-         from LumiBlockComps.CreateLumiBlockCollectionFromFileConfig import CreateLumiBlockCollectionFromFileCfg
-         result.merge(CreateLumiBlockCollectionFromFileCfg(flags))
-      elif "LumiBlock" in flags.Input.MetadataItems:
-         mdToolNames.append('LumiBlockMetaDataTool')
-
-      outputStream.MetadataItemList += ['xAOD::TriggerMenuContainer#*'
-                                       ,'xAOD::TriggerMenuAuxContainer#*'
-                                       ,'xAOD::TriggerMenuJsonContainer#*'
-                                       ,'xAOD::TriggerMenuJsonAuxContainer#*'
-                                       ,'xAOD::LumiBlockRangeContainer#*'
-                                       ,'xAOD::LumiBlockRangeAuxContainer#*'
-                                       ,'ByteStreamMetadataContainer#*'
-                                       ,'xAOD::TruthMetaDataContainer#TruthMetaData'
-                                       ,'xAOD::TruthMetaDataAuxContainer#TruthMetaDataAux.']
-      # TODO: temporary   
-      from EventBookkeeperTools.EventBookkeeperToolsConfig import CutFlowOutputList
-      outputStream.MetadataItemList += CutFlowOutputList(flags)
-
-      from AthenaServices.MetaDataSvcConfig import MetaDataSvcCfg
-      result.merge(MetaDataSvcCfg(flags,
-                                  tools = [CompFactory.xAODMaker.TriggerMenuMetaDataTool('TriggerMenuMetaDataTool')],
-                                  toolNames = mdToolNames))
 
    # Support for MT thinning.
    thinningCacheTool = CompFactory.Athena.ThinningCacheTool(f"ThinningCacheTool_Stream{streamName}",
@@ -197,3 +150,21 @@ def addToAOD(flags, itemOrList, **kwargs):
       return ComponentAccumulator()
    items = [itemOrList] if isinstance(itemOrList, str) else itemOrList
    return OutputStreamCfg(flags, "AOD", ItemList=items, **kwargs)
+
+def addToMetaData(flags, streamName, itemOrList, AcceptAlgs=[], HelperTools=[], **kwargs):
+   """
+   Adds Metadata items to the stream named streamName
+
+   Similar to addToESD/AOD, itemOrList can be either a list of items or just one time
+   The additional arguments, AcceptAlgs and HelperTools, are passed to the underlying stream
+   The former is needed when there are special kernels, e.g., simulation/derivation
+   The latter is needed primarily for the propagation of the FileMetaData tool
+
+   Returns CA to be merged
+   """
+   if not hasattr(flags.Output, f"doWrite{streamName}") or not getattr(flags.Output, f"doWrite{streamName}"):
+       return ComponentAccumulator()
+   items = [itemOrList] if isinstance(itemOrList, str) else itemOrList
+   acceptAlgs = [f"{streamName.strip('DAOD_')}Kernel"] if "DAOD" in streamName else AcceptAlgs
+   return OutputStreamCfg(flags, streamName, MetadataItemList=items,
+                          AcceptAlgs=acceptAlgs, HelperTools=HelperTools, **kwargs)

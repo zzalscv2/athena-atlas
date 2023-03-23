@@ -226,18 +226,27 @@ def RecoSteering(flags):
 
     # setup output
     acc.flagPerfmonDomain('IO')
+    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
     if flags.Output.doWriteESD:
         # Needed for Trk::Tracks TPCnv
         from TrkEventCnvTools.TrkEventCnvToolsConfigCA import (
             TrkEventCnvSuperToolCfg)
         acc.merge(TrkEventCnvSuperToolCfg(flags))
+        # Needed for MetaData
+        acc.merge(InfileMetaDataCfg(flags, "ESD"))
         log.info("ESD ItemList: %s", acc.getEventAlgo(
             "OutputStreamESD").ItemList)
+        log.info("ESD MetadataItemList: %s", acc.getEventAlgo(
+            "OutputStreamESD").MetadataItemList)
         log.info("---------- Configured ESD writing")
 
     if flags.Output.doWriteAOD:
+        # Needed for MetaData
+        acc.merge(InfileMetaDataCfg(flags, "AOD"))
         log.info("AOD ItemList: %s", acc.getEventAlgo(
             "OutputStreamAOD").ItemList)
+        log.info("AOD MetadataItemList: %s", acc.getEventAlgo(
+            "OutputStreamAOD").MetadataItemList)
         log.info("---------- Configured AOD writing")
 
     # Set up PerfMon

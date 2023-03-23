@@ -70,6 +70,10 @@ def fromRunArgs(runArgs):
     cfg.merge(OutputStreamCfg(flags, 'HITS', disableEventTag="xAOD::EventInfo#EventInfo" not in flags.Input.TypedCollections))
     cfg.getEventAlgo('OutputStreamHITS').TakeItemsFromInput = True
 
+    # Add in-file MetaData
+    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
+    cfg.merge(InfileMetaDataCfg(flags, "HITS"))
+
     # Post-include
     processPostInclude(runArgs, flags, cfg)
 
