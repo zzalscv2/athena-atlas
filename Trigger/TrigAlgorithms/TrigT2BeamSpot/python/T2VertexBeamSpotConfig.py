@@ -116,3 +116,4 @@ if __name__=="__main__":
 
     cfg = MainServicesCfg(flags)
     cfg.addEventAlgo( T2VertexBeamSpot_activeAllTE(flags) )
+    cfg.wasMerged()
