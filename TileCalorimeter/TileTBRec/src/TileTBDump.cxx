@@ -1133,12 +1133,12 @@ void TileTBDump::dump_digi(unsigned int subdet_id, const uint32_t* roddata, unsi
                                       "      PhotoDiode 7",
                                       "      PhotoDiode 8",
                                       "      PhotoDiode 9",
-                                      "             PMT 0",
                                       "    External CIS 0",
                                       "      Internal CIS",
                                       "      Diode Phocal",
-                                      "             PMT 1",
                                       "    External CIS 1",
+                                      "             PMT 0",
+                                      "             PMT 1",
                                       "         TDC 1 & 0"
               };
               

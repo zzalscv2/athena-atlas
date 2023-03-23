@@ -106,6 +106,7 @@ class TileRawChannelBuilderFitFilter: public TileRawChannelBuilder {
     const TilePulseShapesStruct* m_pulseShapes;
 
     bool m_disableNegativeAmp;
+    int m_specialDemoShape;
 
     ToolHandle<TileCondToolNoiseSample> m_tileToolNoiseSample{this,
         "TileCondToolNoiseSample", "TileCondToolNoiseSample", "Tile sample noise tool"};

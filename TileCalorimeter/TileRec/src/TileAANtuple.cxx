@@ -1091,9 +1091,14 @@ TileAANtuple::storeDigits(const EventContext& ctx
     }
     
     /// Store ROD header info from collection
-    /// (should be just one per ROD, i.e. 4 subsequent drawers give the same ROD number)
-    int rod = (rosL*N_MODULES + drawer) >> 2;
-    
+    /// should be just one per ROD, i.e. either 64(in RUN1)  or 128(starting from RUN2) different values
+    int rod = (rosL*N_MODULES + drawer);
+    if (N_RODS<128) {
+      rod >>= 2;
+    } else if (N_RODS<256) {
+      rod = (((rod>>2)<<1) | (rod&1));
+    }
+
     m_l1ID[rod] = (*itColl)->getLvl1Id();
     m_l1Type[rod] = (*itColl)->getLvl1Type();
     m_evType[rod] = (*itColl)->getDetEvType();
@@ -1640,10 +1645,11 @@ void TileAANtuple::TRIGGER_addBranch(void) {
   m_ntuplePtr->Branch("OFLunits",&m_rchUnit,"OFLunits/S");
   
   if (m_bsInput) {
-    m_ntuplePtr->Branch("L1ID",   m_l1ID,   "L1ID[65]/I");
-    m_ntuplePtr->Branch("L1Type", m_l1Type, "L1Type[65]/I");
-    m_ntuplePtr->Branch("EvType", m_evType, "EvType[65]/I");
-    m_ntuplePtr->Branch("EvBCID", m_evBCID, "EvBCID[65]/I");
+    std::string dim = "[" + std::to_string(N_RODS) + "]/I";
+    m_ntuplePtr->Branch("L1ID",   m_l1ID,   NAME2("L1ID",  dim));
+    m_ntuplePtr->Branch("L1Type", m_l1Type, NAME2("L1Type",dim));
+    m_ntuplePtr->Branch("EvType", m_evType, NAME2("EvType",dim));
+    m_ntuplePtr->Branch("EvBCID", m_evBCID, NAME2("EvBCID",dim));
   }
 }
 
@@ -1706,7 +1712,7 @@ void TileAANtuple::LASER_addBranch(void) {
     
     const char* gainnames[2]  = {"LG","HG"};
     const char* channames[16] = {"Diode0","Diode1","Diode2","Diode3","Diode4","Diode5","Diode6","Diode7",
-      "Diode8","Diode9","PMT1","ExtCIS0","IntCIS","DiodePhocal","PMT2","ExtCIS1"};
+      "Diode8","Diode9","ExiCIS0","IntCIS","DiodePhocal","ExtCIS1","PMT1","PMT2"};
     
     m_ntuplePtr->Branch("LASER_BCID", &m_las_BCID, "LASER_BCID/I");
     
@@ -1872,6 +1878,12 @@ void TileAANtuple::DIGI_addBranch(void)
     imax = 2;
   }
   
+  if (!m_mfRawChannelContainerKey.empty()) {
+    int size = sample_size * (imax-imin);
+    m_arrays->m_eMF = (float *) malloc(size*sizeof(float));
+    m_arrays->m_tMF = (float *) malloc(size*sizeof(float));
+  }
+
   for (int i = imin; i < imax; ++i) {
     
     std::string f_suf(suf[i]);
@@ -1892,13 +1904,15 @@ void TileAANtuple::DIGI_addBranch(void)
           
         } else {
           
+          std::string samples = "[4][64][48][" + std::to_string(m_nSamples) + "]/S";
+
           if (!m_fltDigitsContainerKey.empty()) {
             if (!m_digitsContainerKey.empty()) { // should use different names for two containers
               
-              m_ntuplePtr->Branch(NAME2("sampleFlt",f_suf),   &(m_arrays->m_sample[is]),     NAME5("sampleFlt",    f_suf,"[4][64][48][",std::to_string(m_nSamples),"]/S")); // short 
+              m_ntuplePtr->Branch(NAME2("sampleFlt",f_suf),   &(m_arrays->m_sample[is]),     NAME3("sampleFlt",    f_suf, samples)); // short
               m_ntuplePtr->Branch(NAME2("gainFlt",f_suf),     m_arrays->m_gainFlt[ir],       NAME3("gainFlt",      f_suf,"[4][64][48]/S"));    // short
             } else {
-              m_ntuplePtr->Branch(NAME2("sample",f_suf),      &(m_arrays->m_sampleFlt[is]),     NAME5("sampleFlt",    f_suf,"[4][64][48][",std::to_string(m_nSamples),"]/S")); // short 
+              m_ntuplePtr->Branch(NAME2("sample",f_suf),      &(m_arrays->m_sampleFlt[is]),  NAME3("sampleFlt",    f_suf, samples)); // short
               if (!m_rawChannelContainerKey.empty()
                   || !m_fitRawChannelContainerKey.empty()
                   || !m_fitcRawChannelContainerKey.empty()
@@ -1917,7 +1931,7 @@ void TileAANtuple::DIGI_addBranch(void)
           }
           
           if (!m_digitsContainerKey.empty()) {
-            m_ntuplePtr->Branch(NAME2("sample",f_suf),          &(m_arrays->m_sample[is]),        NAME5("sample",       f_suf,"[4][64][48][",std::to_string(m_nSamples),"]/S")); // short 
+            m_ntuplePtr->Branch(NAME2("sample",f_suf),          &(m_arrays->m_sample[is]),     NAME3("sample",       f_suf, samples)); // short
             m_ntuplePtr->Branch(NAME2("gain",f_suf),            m_arrays->m_gain[ir],          NAME3("gain",         f_suf,"[4][64][48]/S"));    // short
             
             if (m_bsInput) {
@@ -1999,8 +2013,9 @@ void TileAANtuple::DIGI_addBranch(void)
     }
     
     if (!m_mfRawChannelContainerKey.empty()) {
-      m_ntuplePtr->Branch(NAME2("eMF",f_suf),        &(m_arrays->m_eMF[is]),               NAME3("eMF",f_suf,NAME3("[4][64][48][",std::to_string(m_nSamples),"]/F"))); // float 
-      m_ntuplePtr->Branch(NAME2("tMF",f_suf),        &(m_arrays->m_tMF[is]),               NAME3("tMF",f_suf,NAME3("[4][64][48][",std::to_string(m_nSamples),"]/F"))); // float 
+      std::string f_samples = "[4][64][48][" + std::to_string(m_nSamples) + "]/F";
+      m_ntuplePtr->Branch(NAME2("eMF",f_suf),        &(m_arrays->m_eMF[is]),            NAME3("eMF",f_suf,f_samples)); // float
+      m_ntuplePtr->Branch(NAME2("tMF",f_suf),        &(m_arrays->m_tMF[is]),            NAME3("tMF",f_suf,f_samples)); // float
       m_ntuplePtr->Branch(NAME2("chi2MF",f_suf),     m_arrays->m_chi2MF[ir],         NAME3("chi2MF",f_suf,"[4][64][48]/F")); // float
       m_ntuplePtr->Branch(NAME2("pedMF",f_suf),      m_arrays->m_pedMF[ir],           NAME3("pedMF",f_suf,"[4][64][48]/F")); // float
     }

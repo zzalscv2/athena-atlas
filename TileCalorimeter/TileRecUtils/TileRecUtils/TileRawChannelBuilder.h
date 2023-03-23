@@ -179,6 +179,11 @@ class TileRawChannelBuilder: public AthAlgTool {
     ServiceHandle<TileCablingSvc> m_cablingSvc{ this,
         "TileCablingSvc", "TileCablingSvc", "The Tile cabling service"};
 
+    const TileCablingService* m_cabling; //!< TileCabling instance
+
+    Gaudi::Property<std::vector<int>> m_demoFragIDs{this,
+          "DemoFragIDs", {}, "List of Tile frag IDs with new electronics (demonstrator)"};
+
     int m_trigType;
     bool m_idophys;   // Phys fitting
     bool m_idolas; // Laser fitting
