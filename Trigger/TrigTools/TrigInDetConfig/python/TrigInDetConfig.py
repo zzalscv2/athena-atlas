@@ -228,7 +228,7 @@ def trigInDetFastTrackingCfg( inflags, roisKey="EMRoIs", signatureName='', in_vi
   #i.e. remove RoadTool arg from TrigSiTrackMaker
   acc.addCondAlgo(CompFactory.InDet.SiDetElementsRoadCondAlg_xk(name = "SiDetElementsRoadCondAlg_xk"))
 
-  from TrigFastTrackFinder.TrigFastTrackFinder_Config import TrigFastTrackFinderCfg
+  from TrigFastTrackFinder.TrigFastTrackFinderConfig import TrigFastTrackFinderCfg
   acc.merge(TrigFastTrackFinderCfg(flags, "TrigFastTrackFinder_"+signatureName, signatureName, roisKey))
   
   acc.merge(trackFTFConverterCfg(flags, signature))
