@@ -26,6 +26,11 @@ atlas_add_test( MdtCabling_Run2Data
                   PROPERTIES TIMEOUT 600
                   POST_EXEC_SCRIPT nopost.sh)
 
+atlas_add_test( MdtCabling_Run2MC
+                  SCRIPT python -m MuonCondTest.MdtCablingTester -i /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/WorkflowReferences/master/q443/v9/myESD.pool.root
+                  PROPERTIES TIMEOUT 600
+                  POST_EXEC_SCRIPT nopost.sh)
+
 atlas_add_test( MdtCabling_Run3MC
                 SCRIPT python -m MuonCondTest.MdtCablingTester -i /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/WorkflowReferences/22.0/q445/v20/myESD.pool.root
                 PROPERTIES TIMEOUT 600
