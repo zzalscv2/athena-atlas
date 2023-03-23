@@ -222,6 +222,81 @@ def mu2tau(input_event):
         event_lines += output_line if output_line is not None else input_line
     return (is_event_changed, event_lines)
 
+def e2tau(input_event):
+    """! 
+    Swap out electrons for taus, and electron neutrinos for tau neutrinos.
+    Note no momentum reshuffling is done, but Pythia appears to restore the correct tau mass.
+    """
+    is_event_changed = False
+    event_lines = ""
+    for input_line in input_event.splitlines(True):
+        output_line = None
+        try:  # interpret line as a particle
+            tokens = re.split(r"(\s+)", input_line)
+            if len(tokens) < 25: raise ValueError
+            IDUP = int(tokens[2])
+            if abs(IDUP) == 11 or abs(IDUP) == 12:  # this is a electron or electron neutrino
+                if IDUP > 0:
+                    IDUP += 4
+                else:
+                    IDUP -= 4
+                is_event_changed = True
+                output_line = "".join("".join(tokens[:2])+str(IDUP)+"".join(tokens[3:]))
+        except ValueError:  # this is not a particle line
+            pass
+        event_lines += output_line if output_line is not None else input_line
+    return (is_event_changed, event_lines)
+
+def mu2e(input_event):
+    """! 
+    Swap out muons for electrons, and muon neutrinos for electron neutrinos.
+    Note no momentum reshuffling is done.
+    """
+    is_event_changed = False
+    event_lines = ""
+    for input_line in input_event.splitlines(True):
+        output_line = None
+        try:  # interpret line as a particle
+            tokens = re.split(r"(\s+)", input_line)
+            if len(tokens) < 25: raise ValueError
+            IDUP = int(tokens[2])
+            if abs(IDUP) == 13 or abs(IDUP) == 14:  # this is a muon or muon neutrino
+                if IDUP > 0:
+                    IDUP -= 2
+                else:
+                    IDUP += 2
+                is_event_changed = True
+                output_line = "".join("".join(tokens[:2])+str(IDUP)+"".join(tokens[3:]))
+        except ValueError:  # this is not a particle line
+            pass
+        event_lines += output_line if output_line is not None else input_line
+    return (is_event_changed, event_lines)
+
+def e2mu(input_event):
+    """! 
+    Swap out electrons for muons, and electron neutrinos for muon neutrinos.
+    Note no momentum reshuffling is done.
+    """
+    is_event_changed = False
+    event_lines = ""
+    for input_line in input_event.splitlines(True):
+        output_line = None
+        try:  # interpret line as a particle
+            tokens = re.split(r"(\s+)", input_line)
+            if len(tokens) < 25: raise ValueError
+            IDUP = int(tokens[2])
+            if abs(IDUP) == 11 or abs(IDUP) == 12:  # this is an electron or electron neutrino
+                if IDUP > 0:
+                    IDUP += 2
+                else:
+                    IDUP -= 2
+                is_event_changed = True
+                output_line = "".join("".join(tokens[:2])+str(IDUP)+"".join(tokens[3:]))
+        except ValueError:  # this is not a particle line
+            pass
+        event_lines += output_line if output_line is not None else input_line
+    return (is_event_changed, event_lines)
+
 
 def update_XWGTUP_with_reweighted_nominal(input_event, wgtid_for_old_XWGTUP_value = None):
     """! Ensure that XWGTUP is equal to the reweighted nominal."""

@@ -8,6 +8,9 @@ from .integration_gridpack_creator import integration_gridpack_creator
 from .integration_grid_tester import integration_grid_tester
 from .madspin import MadSpin
 from .mu2tau import mu2tau
+from .mu2e import mu2e
+from .e2mu import e2mu
+from .e2tau import e2tau
 from .nnlo_reweighter import NNLO_reweighter
 from .output_file_renamer import output_file_renamer
 from .output_tarball_preparer import output_tarball_preparer
