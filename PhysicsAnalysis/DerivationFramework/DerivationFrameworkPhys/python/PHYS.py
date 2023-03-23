@@ -162,7 +162,7 @@ def PHYSCfg(ConfigFlags):
             msg = logging.getLogger('PHYSCfg')
             msg.warn('doEDMVersionConversion is still in validation, WRITING FULL TRIGGER EDM TO THE DAOD!')
             addTrigEDMSetToOutput(ConfigFlags, PHYSSlimmingHelper, "AODFULL")
-            PHYSSlimmingHelper.AppendToDictionary.update({'HLTNav_R2ToR3Summary':'xAOD::TrigCompositeContainer'})
+            PHYSSlimmingHelper.AppendToDictionary.update({'HLTNav_R2ToR3Summary':'xAOD::TrigCompositeContainer','HLTNav_R2ToR3SummaryAux':'xAOD::TrigCompositeAuxContainer'})
             PHYSSlimmingHelper.AllVariables += ['HLTNav_R2ToR3Summary']
         ##
         #####################################################
