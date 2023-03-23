@@ -254,7 +254,7 @@ def DenseEnvironmentsAmbiguityScoreProcessorToolCfg(
         kwargs.setdefault(
             "SplitProbTool",
             (acc.popToolsAndMerge(NnPixelClusterSplitProbToolCfg(flags))
-             if flags.InDet.Tracking.doPixelClusterSplitting else None))
+             if flags.Tracking.doPixelClusterSplitting else None))
 
     if "AssociationTool" not in kwargs:
         from InDetConfig.InDetAssociationToolsConfig import (
@@ -273,9 +273,9 @@ def DenseEnvironmentsAmbiguityScoreProcessorToolCfg(
 
     if flags.InDet.Tracking.ActiveConfig.useTIDE_Ambi:
         kwargs.setdefault("sharedProbCut",
-                          flags.InDet.Tracking.pixelClusterSplitProb1)
+                          flags.Tracking.pixelClusterSplitProb1)
         kwargs.setdefault("sharedProbCut2",
-                          flags.InDet.Tracking.pixelClusterSplitProb2)
+                          flags.Tracking.pixelClusterSplitProb2)
         kwargs.setdefault(
             "SplitClusterMap_new",
             f"SplitClusterAmbiguityMap{flags.InDet.Tracking.ActiveConfig.extension}")
@@ -328,7 +328,7 @@ def ITkDenseEnvironmentsAmbiguityScoreProcessorToolCfg(
         kwargs.setdefault(
             "SplitProbTool",
             (acc.popToolsAndMerge(ITkTruthPixelClusterSplitProbToolCfg(flags))
-             if flags.ITk.Tracking.doPixelClusterSplitting else None))
+             if flags.Tracking.doPixelClusterSplitting else None))
 
     if "AssociationTool" not in kwargs:
         from InDetConfig.InDetAssociationToolsConfig import (
@@ -342,10 +342,8 @@ def ITkDenseEnvironmentsAmbiguityScoreProcessorToolCfg(
         kwargs.setdefault("AssociationToolNotGanged", acc.popToolsAndMerge(
             PRDtoTrackMapToolCfg(flags)))
 
-    kwargs.setdefault("sharedProbCut",
-                      flags.ITk.Tracking.pixelClusterSplitProb1)
-    kwargs.setdefault("sharedProbCut2",
-                      flags.ITk.Tracking.pixelClusterSplitProb2)
+    kwargs.setdefault("sharedProbCut", flags.Tracking.pixelClusterSplitProb1)
+    kwargs.setdefault("sharedProbCut2", flags.Tracking.pixelClusterSplitProb2)
     kwargs.setdefault("SplitClusterMap_new", 'SplitClusterAmbiguityMap' +
                       flags.ITk.Tracking.ActiveConfig.extension)
     kwargs.setdefault("AssociationMapName", 'ITkPRDToTrackMap' +

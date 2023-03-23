@@ -3,10 +3,12 @@
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import BeamType, LHCPeriod, FlagEnum
 
+
 class TrackFitterType(FlagEnum):
     DistributedKalmanFilter = 'DistributedKalmanFilter'
     GlobalChi2Fitter = 'GlobalChi2Fitter'
     GaussianSumFilter = 'GaussianSumFilter'
+
 
 class KalmanUpdatorType(FlagEnum):
     KalmanUpdator = 'KalmanUpdator'
@@ -55,21 +57,32 @@ def createTrackingConfigFlags():
     icf.addFlag("Tracking.doSharedHits", True)
     # Switch for running TIDE Ambi
     icf.addFlag("Tracking.doTIDE_Ambi", lambda prevFlags:
-                not(prevFlags.Beam.Type is BeamType.Cosmics))
+                not (prevFlags.Beam.Type is BeamType.Cosmics))
+    # Try to split pixel clusters
+    icf.addFlag("Tracking.doPixelClusterSplitting",
+                lambda prevFlags: not (prevFlags.Beam.Type is BeamType.Cosmics))
+    # choose splitter type: NeuralNet or AnalogClus
+    icf.addFlag("Tracking.pixelClusterSplittingType", "NeuralNet")
+    # Cut value for splitting clusters into two parts
+    icf.addFlag("Tracking.pixelClusterSplitProb1",
+                lambda prevFlags: (0.5 if prevFlags.GeoModel.Run is LHCPeriod.Run1 else 0.55))
+    # Cut value for splitting clusters into three parts
+    icf.addFlag("Tracking.pixelClusterSplitProb2",
+                lambda prevFlags: (0.5 if prevFlags.GeoModel.Run is LHCPeriod.Run1 else 0.45))
 
     # Express track parameters wrt. to : 'BeamLine','BeamSpot','Vertex' (first primary vertex)
     icf.addFlag("Tracking.perigeeExpression", lambda prevFlags:
                 "Vertex" if prevFlags.Reco.EnableHI else "BeamLine")
 
     def doLargeD0(flags):
-        if flags.GeoModel.Run<=LHCPeriod.Run3:
-           return not((flags.Beam.Type in
-                       [BeamType.SingleBeam, BeamType.Cosmics]) or
-                      flags.Reco.EnableHI or
-                      flags.Tracking.doHighPileup or
-                      flags.Tracking.doVtxLumi or
-                      flags.Tracking.doVtxBeamSpot)
-        else: # LRT disabled by default for Run4 for now
+        if flags.GeoModel.Run <= LHCPeriod.Run3:
+            return not ((flags.Beam.Type in
+                        [BeamType.SingleBeam, BeamType.Cosmics]) or
+                        flags.Reco.EnableHI or
+                        flags.Tracking.doHighPileup or
+                        flags.Tracking.doVtxLumi or
+                        flags.Tracking.doVtxBeamSpot)
+        else:  # LRT disabled by default for Run4 for now
             return False
 
     icf.addFlag("Tracking.doLargeD0", doLargeD0)
@@ -83,10 +96,10 @@ def createTrackingConfigFlags():
 
     # Toggle track slimming
     icf.addFlag("Tracking.doSlimming", lambda prevFlags:
-                not((prevFlags.Beam.Type in
+                not ((prevFlags.Beam.Type in
                      [BeamType.SingleBeam, BeamType.Cosmics]) or
-                    prevFlags.Tracking.doHighPileup or
-                    prevFlags.Tracking.doVtxLumi))
+                     prevFlags.Tracking.doHighPileup or
+                     prevFlags.Tracking.doVtxLumi))
 
     ####################################################################
 
