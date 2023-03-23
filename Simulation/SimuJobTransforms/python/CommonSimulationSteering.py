@@ -141,4 +141,8 @@ def CommonSimulationCfg(flags, log):
         from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
         cfg.merge(PerfMonMTSvcCfg(flags))
 
+    # Add in-file MetaData
+    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
+    cfg.merge(InfileMetaDataCfg(flags, "HITS", AcceptAlgs=AcceptAlgNames))
+
     return cfg
