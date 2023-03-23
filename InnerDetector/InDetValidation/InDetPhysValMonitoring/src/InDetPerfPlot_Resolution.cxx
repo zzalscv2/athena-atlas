@@ -328,17 +328,10 @@ InDetPerfPlot_Resolution::getPlots(float weight) {
     if(iparam == PT) continue;
     m_pull[iparam]->Fill(m_pullP[iparam], weight);
     m_res[iparam]->Fill(m_resP[iparam], weight);
-    if(iparam == QOVERPT){
-      m_sigma[iparam]->Fill(m_sigP[iparam], weight);
-      m_sigma_vs_eta[iparam]->Fill(eta,  m_sigP[iparam], weight);
-      m_sigma_vs_pt[iparam]->Fill(m_truetrkP[PT], m_sigP[iparam], weight);
-      m_sigma_vs_lowpt[iparam]->Fill(m_truetrkP[PT], m_sigP[iparam], weight);
-    } else {
-      m_sigma[iparam]->Fill(m_sigP[iparam], weight);
-      m_sigma_vs_eta[iparam]->Fill(eta, m_sigP[iparam], weight);
-      m_sigma_vs_pt[iparam]->Fill(m_truetrkP[PT], m_sigP[iparam], weight);
-      m_sigma_vs_lowpt[iparam]->Fill(m_truetrkP[PT], m_sigP[iparam], weight);
-    }
+    m_sigma[iparam]->Fill(m_sigP[iparam], weight);
+    m_sigma_vs_eta[iparam]->Fill(eta, m_sigP[iparam], weight);
+    m_sigma_vs_pt[iparam]->Fill(m_truetrkP[PT], m_sigP[iparam], weight);
+    m_sigma_vs_lowpt[iparam]->Fill(m_truetrkP[PT], m_sigP[iparam], weight);
     m_resHelpereta[iparam]->Fill(eta, m_resP[iparam], weight);
     m_resHelperpt[iparam]->Fill(m_truetrkP[PT], m_resP[iparam], weight);
     m_resHelperlowpt[iparam]->Fill(m_truetrkP[PT], m_resP[iparam], weight);

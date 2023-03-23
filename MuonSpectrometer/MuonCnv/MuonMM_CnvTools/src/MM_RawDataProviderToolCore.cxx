@@ -1,9 +1,14 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <atomic>
+
 #include "MM_RawDataProviderToolCore.h"
+#include "Identifier/IdentifierHash.h"
+#include <atomic>
+#include <memory> //for unique_ptr
+#include <unordered_map>
+
 using OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment;
 
 //================ Constructor =================================================
@@ -13,7 +18,8 @@ Muon::MM_RawDataProviderToolCore::MM_RawDataProviderToolCore(const std::string& 
 { }
 
 //================ Initialisation ==============================================
-StatusCode Muon::MM_RawDataProviderToolCore::initialize()
+StatusCode 
+Muon::MM_RawDataProviderToolCore::initialize()
 {
   ATH_CHECK(AthAlgTool::initialize());
   ATH_CHECK(m_idHelperSvc.retrieve());
@@ -27,7 +33,8 @@ StatusCode Muon::MM_RawDataProviderToolCore::initialize()
 }
 
 //==============================================================================
-StatusCode Muon::MM_RawDataProviderToolCore::convertIntoContainer(const std::vector<const ROBFragment*>& vecRobs, const std::vector<IdentifierHash>& rdoIdhVect, MM_RawDataContainer& mmRdoContainer) const
+StatusCode 
+Muon::MM_RawDataProviderToolCore::convertIntoContainer(const std::vector<const ROBFragment*>& vecRobs, const std::vector<IdentifierHash>& rdoIdhVect, MM_RawDataContainer& mmRdoContainer) const
 {
   // Since there can be multiple ROBFragments contributing to the same RDO collection a temporary cache is setup and passed to fillCollection by reference. Once all ROBFragments are processed the collections are added into the rdo container
 
@@ -45,7 +52,7 @@ StatusCode Muon::MM_RawDataProviderToolCore::convertIntoContainer(const std::vec
   // add the RDO collections created from the data of this ROB into the identifiable container.
   for (auto& [hash, collection]: rdo_map) {
 
-    if (!collection->size()) continue; // skip empty collections
+    if ((!collection) or collection->empty()) continue; // skip empty collections
 
     MM_RawDataContainer::IDC_WriteHandle lock = mmRdoContainer.getWriteHandle(hash);
 

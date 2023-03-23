@@ -27,6 +27,7 @@ def initConfigFlags():
     acf.addFlag('Exec.MaxEvents',-1)
     acf.addFlag('Exec.SkipEvents',0)
     acf.addFlag('Exec.DebugStage','')
+    acf.addFlag('Exec.Interactive',"")
     acf.addFlag('Exec.FPE',0) #-2: No FPE check at all, -1: Abort with core-dump, 0: FPE Auditor w/o stack-tace (default) , >0: number of stack-trace printed by the job
 
     #Custom messaging for components, see Utils.setupLoggingLevels

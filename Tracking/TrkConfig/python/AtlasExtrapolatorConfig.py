@@ -420,7 +420,9 @@ def MCTBExtrapolatorCfg(flags, name='MCTBExtrapolator', **kwargs):
     kwargs.setdefault("EnergyLossUpdater", result.popToolsAndMerge(
         TC.AtlasEnergyLossUpdatorCfg(flags, UseTrkUtils=True)))
 
-    return MuonExtrapolatorCfg(flags, name, **kwargs)
+    result.setPrivateTools(result.popToolsAndMerge(
+        MuonExtrapolatorCfg(flags, name, **kwargs)))
+    return result
 
 
 if __name__ == "__main__":

@@ -68,7 +68,7 @@ int main(int argc, char** argv) {
   Beamline fBeamline1 = BeamlineSetup(cData, beam1); std::cout << fBeamline1;
   Beamline fBeamline2 = BeamlineSetup(cData, beam2); std::cout << fBeamline2;
     
-  boost::shared_ptr<IParticle> iParticle(new Particle(particleX, particleY, particleZ, particlePX, particlePY, particlePZ, 1));
+  std::shared_ptr<IParticle> iParticle(new Particle(particleX, particleY, particleZ, particlePX, particlePY, particlePZ, 1));
 
   IParticle& fParticle = *iParticle;
   

@@ -51,10 +51,12 @@ namespace FlavorTagDiscriminants {
     m_trackSequenceBuilders = tsb;
     m_dataDependencyNames += td;
 
-    auto [decorators, dd] = dataprep::createDecorators(
+    auto [decorators, dd, rd] = dataprep::createDecorators(
       config, options);
     m_decorators = decorators;
     m_dataDependencyNames += dd;
+
+    dataprep::checkForUnusedRemaps(options.remap_scalar, rd);
 
   }
   GNN::GNN(GNN&&) = default;

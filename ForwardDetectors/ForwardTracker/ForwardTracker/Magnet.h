@@ -35,7 +35,7 @@ namespace ForwardTracker {
     
     enum Type {hbDipole, hfQuadrupole, vfQuadrupole, vbDipole, notAMagnet};
 
-    typedef boost::shared_ptr<const Magnet> ConstPtr_t;
+    typedef std::shared_ptr<const Magnet> ConstPtr_t;
     typedef std::vector<ConstPtr_t>         Container_t;
     
     std::string label()        const { return m_label; }

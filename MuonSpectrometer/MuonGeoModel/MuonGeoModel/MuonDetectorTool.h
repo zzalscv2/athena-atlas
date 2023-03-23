@@ -70,12 +70,14 @@ class MuonDetectorTool final : public GeoModelTool {
     
     Gaudi::Property<bool> m_cachingFlag{this, "CachingFlag", true, "Turn on/off caching of ReadoutElement surfaces etc. (i.e. for MDTs)"};
     // the following two properties are for local validation, not for production
-    Gaudi::Property<std::string> m_NSWABLineAsciiPath{this, "NSWABLineAsciiPath", "", "Pass A/B Lines for NSW from an Ascii file"};
+    Gaudi::Property<std::string> m_NSWABLineAsciiPath{this,  "NSWABLineAsciiPath", "", "Pass A/B lines for NSW from an Ascii file"};
+    Gaudi::Property<std::string> m_NSWAsBuiltAsciiPathMM{this,   "NSWAsBuiltAsciiPathMM",   "", "Pass As-Built parameters for MM chambers from an Ascii file"};
+    Gaudi::Property<std::string> m_NSWAsBuiltAsciiPathSTgc{this, "NSWAsBuiltAsciiPathSTgc", "", "Pass As-Built parameters for sTGC chambers from an Ascii file"};
     
-    Gaudi::Property<bool> m_enableMdtDeformations{this, "EnableMdtDeformations", true};
+    Gaudi::Property<bool> m_enableMdtDeformations{this,      "EnableMdtDeformations", true};
     Gaudi::Property<bool> m_enableMdtAsBuiltParameters{this, "EnableMdtAsBuiltParameters", false};
     Gaudi::Property<bool> m_enableNswAsBuiltParameters{this, "EnableNswAsBuiltParameters", false};
-    Gaudi::Property<std::string> m_altMdtAsBuiltFile{this, "AlternateAsBuiltParamAlignFile", "" };
+    Gaudi::Property<std::string> m_altMdtAsBuiltFile{this,   "AlternateAsBuiltParamAlignFile", "" };
 
     MuonGM::MuonDetectorManager* m_manager{nullptr};
 };

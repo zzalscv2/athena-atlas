@@ -219,6 +219,7 @@ class ItemDef:
         MenuItem('L1_2eEM24L').setLogic(d.eEM24L.x(2) & physcond).setTriggerType(TT.calo)
         MenuItem('L1_3eEM12L').setLogic(d.eEM12L.x(3) & physcond).setTriggerType(TT.calo)
         MenuItem('L1_eEM24L_3eEM12L').setLogic(d.eEM24L & d.eEM12L.x(3) & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_2eEM9').setLogic(d.eEM9.x(2) & physcond).setTriggerType(TT.calo)
 
         # 4xEM
         MenuItem('L1_EM15VH_3EM7'         ).setLogic( d.EM15VH & d.EM7.x(3)      & physcond).setTriggerType( TT.calo )

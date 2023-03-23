@@ -13,6 +13,11 @@
 #include "MuonMM_CnvTools/IMM_ROD_Decoder.h"
 
 #include "MuonRDO/MM_RawDataContainer.h"
+#include "ByteStreamData/RawEvent.h" //OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment (typedef)
+#include <string>
+#include <vector>
+
+class IdentifierHash;
 
 namespace Muon {
 

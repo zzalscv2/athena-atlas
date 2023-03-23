@@ -36,7 +36,7 @@ def ITkFastTrackFinderStandaloneCfg(flags):
                                                                     UseSctSpacePoints = False,
                                                                     layerNumberTool   = acc.getPublicTool("TrigL2LayerNumberTool_FTF") ) )
 
-    from TrigFastTrackFinder.TrigFastTrackFinder_Config import TrigFastTrackFinderMonitoringArg
+    from TrigFastTrackFinder.TrigFastTrackFinderConfig import TrigFastTrackFinderMonitoringArg
     from TriggerJobOpts.TriggerHistSvcConfig import TriggerHistSvcConfig
     acc.merge(TriggerHistSvcConfig(newflags))
     monTool = TrigFastTrackFinderMonitoringArg(flags, name = "FullScan", doResMon=False)

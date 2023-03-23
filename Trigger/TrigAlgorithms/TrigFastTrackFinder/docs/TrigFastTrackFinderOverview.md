@@ -3,7 +3,7 @@ TrigFastTrackFinder performs fast track finding for the High Level Trigger using
 
 First track seeds are created from triplets of SpacePoints. This is followed by Track Following that extends seeds to the other silicon layers, and Track Fitting.
 
-According to configuration, the seeds considered can be any of pixel-only (PPP), SCT only (SSS), or mixed (if TripletDoPPS is set True in [ConfigSettings.py](../../../../TrigTool/TrigInDetConfig/python/ConfigSettings.py). In principle PSS mixed seeds can also be included (if TripletDoPSS=True), but this is disabled in [TrigFastTrackFinderConfig.py](../python/TrigFastTrackFinder_Config.py).
+According to configuration, the seeds considered can be any of pixel-only (PPP), SCT only (SSS), or mixed (if TripletDoPPS is set True in [ConfigSettings.py](../../../../TrigTool/TrigInDetConfig/python/ConfigSettings.py). In principle PSS mixed seeds can also be included (if TripletDoPSS=True), but this is disabled in [TrigFastTrackFinderConfig.py](../python/TrigFastTrackFinderConfig.py).
 
 ## Special Reconstruction Modes for Unconventional Track Triggers:
 * **LRT_mode=True**: Configuration used for Large Radius Tracking to reconstruct track starting at large radius i.e. from ~10mm to ~300mm. It configures the seedmaker to only use SSS seeds. If an input track collection is provided, it uses this to remove the already used clusters from the pool of clusters used by track seeding. This supports a workflow where standard tracking is followed by LRT tracking running on the unused clusters. 
@@ -12,7 +12,7 @@ According to configuration, the seeds considered can be any of pixel-only (PPP),
 * **doDisappearingTrk=True**: Configuration to reconstruct Disappearing Tracks i.e. short tracks starting at the IP but ending within the volume of the Si tracker. The trackMaker tool is configured to return information for failed tracks.
 
 ## Special Reconstruction Mode for Beamspot and Minbias
-* **doZFinder=True**: Used for beamspot and minbias trigger chains. The [IDScanZFinder](../../../../Trigger/TrigTools/IDScanZFinder) uses pixel spacepoint to find the z coordinates of primary vertices.  Only the N highest occupancy vertices are returned by the IDScanZFinder, where N is determined by the NumberOfPeaks property of the IDScanZFinder that is set in [TrigFastTrackFinder_Config.py](../python/TrigFastTrackFinder_Config.py). 
+* **doZFinder=True**: Used for beamspot and minbias trigger chains. The [IDScanZFinder](../../../../Trigger/TrigTools/IDScanZFinder) uses pixel spacepoint to find the z coordinates of primary vertices.  Only the N highest occupancy vertices are returned by the IDScanZFinder, where N is determined by the NumberOfPeaks property of the IDScanZFinder that is set in [TrigFastTrackFinderConfig.py](../python/TrigFastTrackFinderConfig.py). 
 * **doFastZVertexSeeding=True**: In the BeamSpot trigger chains, the z co-ordinate of the primary vertices (created for doZFinder=True) are used as input to seed making. Only seeds compatible with one of the primary vertices are kept, speeding up track reconstruction. 
 * **doZFinderOnly=True**: Used in conjunction with doZFinder=True. The IDScanZfinder is executed and primary vertex information stored in a TrigVertexCollection. The subsequent tracking steps (seeding, following, fitting) are skipped. **Note: the TrigVertexCollection is not currently output**. 
 

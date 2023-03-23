@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -336,6 +336,7 @@ namespace OverlayTesting {
   };   // TRTOverlay_test fixture
 
 
+  // cppcheck-suppress syntaxError
   TEST_F(TRTOverlay_test, missing_inputs_alg_execute) {
     EventContext ctx = initEventContext(m_sg);
     ASSERT_TRUE( m_alg->initialize().isSuccess() );

@@ -387,14 +387,14 @@ def jetTrackingRecoSequences(configFlags, RoIs, clustersKey, **jetRecoDict):
 
     return [jetTrkSeq,jetRecoSeq], jetsOut, jetDef
 
-## record event variables (NPV and rho to a TrigCompositeContainer: needed for online-derived calibration
+## record event variables (NPV, mu and rho) to a TrigCompositeContainer: Required for online-derived calibration
 def eventinfoRecordSequence(configFlags, suffix, pvKey, rhoKey_PFlow = 'HLT_Kt4EMPFlowEventShape', rhoKey_EMTopo = 'HLT_Kt4EMTopoEventShape'):
-    eventInfoRecorderAlg = TrigEventInfoRecorderAlgCfg("TrigEventInfoRecorderAlg_jet")
-    eventInfoRecorderAlg.decorateTLA = True #misnomer in this case: just means write our PV&rho event variables to container
-    eventInfoRecorderAlg.trigEventInfoKey = recordable(f"HLT_TCEventInfo_{suffix}")
-    eventInfoRecorderAlg.primaryVertexInputName = pvKey
-    eventInfoRecorderAlg.RhoKey_PFlow = rhoKey_PFlow
-    eventInfoRecorderAlg.RhoKey_EMTopo = rhoKey_EMTopo
+    trig_evt_info_key = recordable(f"HLT_TCEventInfo_{suffix}")
+    eventInfoRecorderAlg = algorithmCAToGlobalWrapper(TrigEventInfoRecorderAlgCfg, configFlags,
+                                                      name=f"TrigEventInfoRecorderAlg_{suffix}",
+                                                      decorateTLA=True,
+                                                      trigEventInfoKey=trig_evt_info_key, primaryVertexInputName=pvKey,
+                                                      RhoKey_EMTopo=rhoKey_EMTopo, RhoKey_PFlow=rhoKey_PFlow)
     recordSeq = parOR(f"TrigEventInfoRecorderSeq_{suffix}", [eventInfoRecorderAlg])
     return recordSeq 
 

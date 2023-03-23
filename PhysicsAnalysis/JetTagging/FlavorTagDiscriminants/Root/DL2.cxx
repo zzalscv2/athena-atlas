@@ -50,16 +50,20 @@ namespace FlavorTagDiscriminants {
     m_dataDependencyNames += td;
     m_trackSequenceBuilders = tsb;
 
-    auto [decorators, dd] = dataprep::createDecorators(
+    auto [decorators, dd, rd] = dataprep::createDecorators(
       graph_config, options);
     m_dataDependencyNames += dd;
     m_decorators = decorators;
 
-    auto [track_validity, is_defaults, ipdd] = dataprep::createIpChecker(
+    auto [track_validity, is_defaults, ipdd, rc] = dataprep::createIpChecker(
       graph_config, options);
     m_invalid_track_checker = track_validity;
     m_is_defaults = is_defaults;
     m_dataDependencyNames += ipdd;
+
+    // check that all remapping was used
+    rd.merge(rc);
+    dataprep::checkForUnusedRemaps(options.remap_scalar, rd);
   }
 
   void DL2::decorate(const xAOD::BTagging& btag) const {

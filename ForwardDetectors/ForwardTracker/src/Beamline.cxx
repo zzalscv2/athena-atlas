@@ -97,7 +97,7 @@ namespace ForwardTracker {
 
   private:
     
-    boost::shared_ptr<std::stringstream> m_ost;
+    std::shared_ptr<std::stringstream> m_ost;
   };
   
   std::string Beamline::str() const { return (std::for_each(m_elements.begin(), m_elements.end(), Stringer())).str(); }

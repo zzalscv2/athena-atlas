@@ -7,8 +7,11 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import Format, BeamType
 
+
 def TRTPreProcessingCfg(flags, **kwargs):
     acc = ComponentAccumulator()
+    if not flags.Detector.EnableTRT:
+        return acc
 
     if flags.Input.Format is Format.BS or 'TRT_RDOs' in flags.Input.Collections:
 
@@ -16,31 +19,39 @@ def TRTPreProcessingCfg(flags, **kwargs):
         # --- TRT_RIO_Maker Algorithm
         #
         if flags.Beam.Type is BeamType.Cosmics:
-            from InDetConfig.InDetPrepRawDataFormationConfig import InDetTRT_NoTime_RIO_MakerCfg
+            from InDetConfig.InDetPrepRawDataFormationConfig import (
+                InDetTRT_NoTime_RIO_MakerCfg)
             acc.merge(InDetTRT_NoTime_RIO_MakerCfg(flags))
         else:
-            from InDetConfig.InDetPrepRawDataFormationConfig import InDetTRT_RIO_MakerCfg
+            from InDetConfig.InDetPrepRawDataFormationConfig import (
+                InDetTRT_RIO_MakerCfg)
             acc.merge(InDetTRT_RIO_MakerCfg(flags))
 
         if flags.InDet.doSplitReco:
-            from InDetConfig.InDetPrepRawDataFormationConfig import InDetTRT_RIO_MakerPUCfg
+            from InDetConfig.InDetPrepRawDataFormationConfig import (
+                InDetTRT_RIO_MakerPUCfg)
             acc.merge(InDetTRT_RIO_MakerPUCfg(flags))
 
         #
         #    Include alg to save the local occupancy inside xAOD::EventInfo
         #
         if flags.InDet.doTRTGlobalOccupancy:
-            from InDetConfig.TRT_ElectronPidToolsConfig import TRTOccupancyIncludeCfg
+            from InDetConfig.TRT_ElectronPidToolsConfig import (
+                TRTOccupancyIncludeCfg)
             acc.merge(TRTOccupancyIncludeCfg(flags))
 
     #
     # --- we need to do truth association if requested (not for uncalibrated hits in cosmics)
     #
-    if flags.InDet.doTruth and flags.Beam.Type is not BeamType.Cosmics and 'PRD_MultiTruthTRT' not in flags.Input.Collections:
-        from InDetConfig.InDetTruthAlgsConfig import InDetPRD_MultiTruthMakerTRTCfg
+    if flags.InDet.doTruth and (
+            flags.Beam.Type is not BeamType.Cosmics and
+            'PRD_MultiTruthTRT' not in flags.Input.Collections):
+        from InDetConfig.InDetTruthAlgsConfig import (
+            InDetPRD_MultiTruthMakerTRTCfg)
         acc.merge(InDetPRD_MultiTruthMakerTRTCfg(flags))
-        if flags.InDet.doSplitReco :
-            from InDetConfig.InDetTruthAlgsConfig import InDetPRD_MultiTruthMakerTRTPUCfg
+        if flags.InDet.doSplitReco:
+            from InDetConfig.InDetTruthAlgsConfig import (
+                InDetPRD_MultiTruthMakerTRTPUCfg)
             acc.merge(InDetPRD_MultiTruthMakerTRTPUCfg(flags))
     return acc
 
@@ -50,13 +61,14 @@ if __name__ == "__main__":
     flags = initConfigFlags()
 
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    flags.Input.Files=defaultTestFiles.RDO_RUN2
+    flags.Input.Files = defaultTestFiles.RDO_RUN2
 
     # TODO: TRT only?
 
-    numThreads=1
-    flags.Concurrency.NumThreads=numThreads
-    flags.Concurrency.NumConcurrentEvents=numThreads # Might change this later, but good enough for the moment.
+    numThreads = 1
+    flags.Concurrency.NumThreads = numThreads
+    # Might change this later, but good enough for the moment.
+    flags.Concurrency.NumConcurrentEvents = numThreads
 
     flags.lock()
     flags.dump()
@@ -78,6 +90,6 @@ if __name__ == "__main__":
     top_acc.merge(TRTPreProcessingCfg(flags))
 
     iovsvc = top_acc.getService('IOVDbSvc')
-    iovsvc.OutputLevel=5
+    iovsvc.OutputLevel = 5
     top_acc.run(25)
     top_acc.store(open("test_TRTPrepocessing.pkl", "wb"))

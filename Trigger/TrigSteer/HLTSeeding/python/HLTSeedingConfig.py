@@ -101,7 +101,7 @@ def createLegacyCaloRoIUnpackers(flags):
     emUnpacker = CompFactory.EMRoIsUnpackingTool(Decisions = mapThresholdToL1DecisionCollection("EM"),
                                                  DecisionsProbe = mapThresholdToL1DecisionCollection("PROBEEM"),
                                                  OutputTrigRoIs = recordable(mapThresholdToL1RoICollection("EM")),
-                                                 MonTool = RoIsUnpackingMonitoring( flags, prefix="EM", maxCount=30 ))
+                                                 MonTool = RoIsUnpackingMonitoring( flags, prefix="EM", maxCount=30, etaOffset=0.05, phiOffset=math.pi/64., maxEta=2.5 ))
 
     metUnpacker = CompFactory.METRoIsUnpackingTool(Decisions = mapThresholdToL1DecisionCollection("XE"))
 
@@ -110,7 +110,7 @@ def createLegacyCaloRoIUnpackers(flags):
                                                    DecisionsProbe = mapThresholdToL1DecisionCollection("PROBETAU"),
                                                    OutputTrigRoIs = recordable("HLT_TAURoI"))
 
-    tauUnpacker.MonTool = RoIsUnpackingMonitoring( flags, prefix="TAU", maxCount=30 )
+    tauUnpacker.MonTool = RoIsUnpackingMonitoring( flags, prefix="TAU", maxCount=30, etaOffset=0.05, phiOffset=math.pi/64., maxEta=2.5  )
 
     jUnpacker = CompFactory.JRoIsUnpackingTool(Decisions = mapThresholdToL1DecisionCollection("J"),
                                                OutputTrigRoIs = recordable(mapThresholdToL1RoICollection("J")) )
@@ -131,14 +131,14 @@ def createCaloRoIUnpackers(flags):
             OutputTrigRoIs = recordable(mapThresholdToL1RoICollection("eEM")),
             RoIHalfWidthEta = 0.2,
             RoIHalfWidthPhi = 0.2,
-            MonTool = RoIsUnpackingMonitoring(flags, prefix="eEM", maxCount=maxRoICount_eFex))
+            MonTool = RoIsUnpackingMonitoring(flags, prefix="eEM", maxCount=maxRoICount_eFex, maxEta=2.5))
         eFexTauUnpacker = CompFactory.eFexTauRoIsUnpackingTool(
             Decisions = mapThresholdToL1DecisionCollection("eTAU"),
             DecisionsProbe = mapThresholdToL1DecisionCollection("PROBEeTAU"),
             OutputTrigRoIs = recordable(mapThresholdToL1RoICollection("eTAU")),
             RoIHalfWidthEta = 0.4,
             RoIHalfWidthPhi = math.pi/8,
-            MonTool = RoIsUnpackingMonitoring(flags, prefix="eTAU", maxCount=maxRoICount_eFex))
+            MonTool = RoIsUnpackingMonitoring(flags, prefix="eTAU", maxCount=maxRoICount_eFex, maxEta=2.5))
         tools += [eFexEMUnpacker, eFexTauUnpacker]
 
     if flags.Trigger.L1.dojFex:

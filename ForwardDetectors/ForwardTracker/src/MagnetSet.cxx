@@ -11,6 +11,7 @@
 #include "ForwardTracker/TransverseShift.h"
 
 #include <fstream>
+#include <algorithm>
 
 namespace ForwardTracker {
   
@@ -18,7 +19,7 @@ namespace ForwardTracker {
 
     Magnet::Container_t magnets; // (x, y, z) = (left, up, forward)
 
-    boost::shared_ptr<std::ifstream> twissFile = TwissFile(cData, side);   
+    std::shared_ptr<std::ifstream> twissFile = TwissFile(cData, side);   
     
     std::ifstream& pfile = *twissFile;
 

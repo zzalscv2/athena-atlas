@@ -9,11 +9,11 @@ log.info( "preinclude: TIDAcloneremoval.py" )
 
 from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
 
-getInDetTrigConfig("electron")._doCloneRemoval = False
-getInDetTrigConfig("electron")._Xi2max = 12
+from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+flags.Trigger.InDetTracking.electron.Xi2max=12.
 
 
 log.info( "Setting clone removal: "+str(getInDetTrigConfig("electron").doCloneRemoval) )
-log.info( "Setting clone removal: "+str(getInDetTrigConfig("electron").Xi2max) )
+log.info( f"Setting Xi2max: {flags.Trigger.InDetTracking.electron.Xi2max}" )
 
 

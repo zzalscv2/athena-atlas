@@ -10,9 +10,6 @@
 
 #include "TrigT1EventTPCnv/MuCTPIL1TopoCandidate_p1.h"
 
-// Forward declaration of the converter:
-class MuCTPIL1TopoCnv_p1;
-
 /**
  *   @short Persistent representation of MuCTPIL1Topo
  *

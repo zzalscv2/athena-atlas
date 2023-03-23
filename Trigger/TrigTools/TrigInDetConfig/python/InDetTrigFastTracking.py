@@ -162,7 +162,7 @@ def makeInDetTrigFastTracking( flags, config = None, rois = 'EMViewRoIs', doFTF 
 
       else:
 
-        from TrigFastTrackFinder.TrigFastTrackFinder_Config import TrigFastTrackFinderCfg
+        from TrigFastTrackFinder.TrigFastTrackFinderConfig import TrigFastTrackFinderCfg
         #TODO: eventually adapt IDTrigConfig also in FTF configuration (pass as additional param)
         theFTF = algorithmCAToGlobalWrapper(TrigFastTrackFinderCfg, flags, "TrigFastTrackFinder_" + signature, 
                                             flags.InDet.Tracking.ActiveConfig.input_name, rois, inputTracksName = LRTInputCollection)

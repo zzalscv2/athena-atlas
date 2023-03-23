@@ -11,13 +11,13 @@
 
 namespace ForwardTracker {
  
-  boost::shared_ptr<std::ifstream> TwissFile(const ConfigData& cData, const Side& side) {
+  std::shared_ptr<std::ifstream> TwissFile(const ConfigData& cData, const Side& side) {
     
     if (side != beam1 && side != beam2) throw std::runtime_error("Allowed side values are beam1 or beam2.");
     
     std::string fn = (side == beam1) ? cData.twissFile1 : cData.twissFile2;
     
-    boost::shared_ptr<std::ifstream> twissFile(new std::ifstream);
+    std::shared_ptr<std::ifstream> twissFile(new std::ifstream);
     
     ForwardTracker::openFile(fn, twissFile);
 

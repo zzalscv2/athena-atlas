@@ -119,6 +119,7 @@ class ComponentAccumulator:
         self._creationCallStack = Context.hint if "trackCA" not in ComponentAccumulator.debugMode else shortCallStack()
         self._componentsContext = dict()
         self._debugStage = DbgStage()
+        self.interactive = ""
 
     def setAsTopLevel(self):
         self._isMergable = False
@@ -1100,6 +1101,12 @@ class ComponentAccumulator:
             else:
                 maxEvents=-1
 
+        if self.interactive == 'init':
+            printInteractiveMsg_init()
+            from sys import exit # noqa: F401
+            import code
+            code.interact(local=locals())
+
         #At this point, we don't need the internal structures of this CA any more, clean them up
         self._cleanup()
 
@@ -1117,10 +1124,19 @@ class ComponentAccumulator:
 
         if (self._debugStage.value=="exec"):
             hookDebugger()
-        sc = app.run(maxEvents)
-        if not sc.isSuccess():
-            self._msg.error("Failure running application")
-            return sc
+
+
+        if self.interactive == 'run':
+            printInteractiveMsg_run()
+            import code
+            from AthenaPython.PyAthena import py_svc
+            sg=py_svc("StoreGateSvc/StoreGateSvc")
+            code.interact(local=locals())
+        else:
+            sc = app.run(maxEvents)
+            if not sc.isSuccess():
+                self._msg.error("Failure running application")
+                return sc
 
         app.stop().ignore()
 
@@ -1157,3 +1173,21 @@ class ComponentAccumulator:
 from AthenaConfiguration.LegacySupport import (conf2toConfigurable,  # noqa: F401 (for client use)
                                                CAtoGlobalWrapper,
                                                appendCAtoAthena)
+
+
+def printInteractiveMsg_init():
+    print("Interactive mode")
+    print("\tThe ComponentAccumulator is known as 'self', you can inspect it but changes are not taken into account")
+    print("\tThe application is known as 'app' but not yet initialized")
+    print("\t^D will exit the interactive mode and athena will continue")
+    print("\texit() will terminate the program now")
+    return 
+
+
+def printInteractiveMsg_run():
+    print("Interactive mode")
+    print("\tThe application is known as 'app' and initialized")
+    print("\tYou process n events with 'app.run(n)'") 
+    print("\tStoreGate is accessible as 'sg'") 
+    print("\t^D will exit the interactive mode and athena will finalize")
+    return 

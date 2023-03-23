@@ -73,7 +73,6 @@
 
 #include "FastCaloSimAthenaPool/FastShowerInfo.h"
 #include "FastCaloSimAthenaPool/FastShowerInfoContainer.h"
-#include "boost/algorithm/string.hpp"
 #include <string>
 #include <iostream>
 #include <sstream>
@@ -443,7 +442,7 @@ StatusCode FastShowerCellBuilderTool::OpenParamSource(std::string insource)
 {
   if(insource.empty()) return StatusCode::SUCCESS;
 
-  if(boost::starts_with (insource, "DB=")) {
+  if(insource.rfind("DB=",0) == 0) {
     const unsigned int maxdbINFOoutput=2;
     if(m_DB_folder.size()>=maxdbINFOoutput && ( !msgLvl(MSG::DEBUG) ) ) {
       if(m_DB_folder.size()==maxdbINFOoutput) ATH_MSG_INFO("... skipping extra INFO output for further DB registration ...");

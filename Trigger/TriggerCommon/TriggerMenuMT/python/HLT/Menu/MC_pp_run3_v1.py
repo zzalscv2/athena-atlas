@@ -165,8 +165,6 @@ def getMCSignatures():
         ChainProp(name='HLT_e26_etcut_L1EM22VHI', groups=SingleElectronGroup),
         ChainProp(name='HLT_e26_lhtight_L1EM22VHI', groups=SingleElectronGroup,monGroups=['egammaMon:t0_tp']),
         ChainProp(name='HLT_e26_lhtight_ivarloose_L1EM22VH', groups=SingleElectronGroup),
-        ChainProp(name='HLT_e26_lhtight_ivarloose_L1eEM26', groups=SingleElectronGroup,monGroups=['egammaMon:t0_tp']),
-        ChainProp(name='HLT_e26_lhtight_ivarloose_L1eEM26T', groups=SingleElectronGroup),
 
         # Ringer development / validation also ATR-24384
         ChainProp(name='HLT_g20_loose_ringer_L1EM15VHI', groups=SinglePhotonGroup,monGroups=['egammaMon:shifter']),
@@ -176,6 +174,16 @@ def getMCSignatures():
         ChainProp(name='HLT_g20_loose_L1EM15VHI',  groups=SinglePhotonGroup,monGroups=['egammaMon:shifter']),
         ChainProp(name='HLT_g20_medium_L1EM15VHI', groups=SinglePhotonGroup,monGroups=['egammaMon:shifter']),
         
+        #  ATR-27156
+        #  Migration of legacy EM seeded items to Phase 1 eEM seeded - EGamma chains
+        ChainProp(name='HLT_e26_lhtight_ivarloose_nogsf_L1EM22VHI', groups=SupportLegGroup+SingleElectronGroup+['RATE:CPS_EM22VHI']),
+        ChainProp(name='HLT_e26_lhtight_ivarloose_nogsf_L1eEM26M', groups=SupportPhIGroup+SingleElectronGroup+['RATE:CPS_eEM26M']), #Phase-1
+        ChainProp(name='HLT_e60_lhmedium_nogsf_L1EM22VHI', groups=SupportLegGroup+SingleElectronGroup+['RATE:CPS_EM22VHI']),
+        ChainProp(name='HLT_e60_lhmedium_nogsf_L1eEM26M', groups=SupportPhIGroup+SingleElectronGroup+['RATE:CPS_eEM26M']), #Phase-1
+        ChainProp(name='HLT_g25_tight_icalotight_L1EM20VH', groups=SupportLegGroup+SinglePhotonGroup+['RATE:CPS_EM20VH']),
+        ChainProp(name='HLT_g25_tight_icalotight_L1eEM24L', groups=SupportPhIGroup+SinglePhotonGroup+['RATE:CPS_eEM24L']), #Phase-1
+        ChainProp(name='HLT_g25_tight_icalomedium_L1EM20VH', groups=SupportLegGroup+SinglePhotonGroup+['RATE:CPS_EM20VH']),        
+        ChainProp(name='HLT_g25_tight_icalomedium_L1eEM24L', groups=SupportPhIGroup+SinglePhotonGroup+['RATE:CPS_eEM24L']),#Phase-1
         
     ]
 

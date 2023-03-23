@@ -14,21 +14,17 @@ if( NOT XAOD_STANDALONE )
   set( extra_lib_private CaloEvent CaloUtilsLib TrkCaloExtension TrkParameters TrackToCaloLib )
 endif()
 
-# External dependencies:
-find_package( Boost )
-
 # Component(s) in the package:
 atlas_add_library( IsolationToolLib
    IsolationTool/*.h Root/*.cxx
    PUBLIC_HEADERS IsolationTool
-   PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
    LINK_LIBRARIES AsgTools xAODBase xAODCaloEvent xAODCore xAODEgamma
    xAODEventShape xAODMuon xAODPFlow xAODPrimitives xAODTracking
    AsgDataHandlesLib InDetTrackSelectionToolLib
    IsolationCorrectionsLib RecoToolInterfaces
    TrackVertexAssociationToolLib
    ${extra_lib}
-   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} CaloGeoHelpers FourMomUtils PathResolver
+   PRIVATE_LINK_LIBRARIES CaloGeoHelpers FourMomUtils PathResolver
    ${extra_lib_private}
    )
 

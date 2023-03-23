@@ -298,6 +298,7 @@ StatusCode MuonDetectorTool::createFactory(MuonGM::MuonDetectorManager * & mgr) 
         theFactory.setDBkey(detectorKey);
         theFactory.setDBnode(detectorNode);
         theFactory.setNSWABLineAsciiPath(m_NSWABLineAsciiPath);
+        theFactory.setNSWAsBuiltAsciiPath(m_NSWAsBuiltAsciiPathMM, m_NSWAsBuiltAsciiPathSTgc);
         theFactory.setAmdcDb(isAmdcDb);
         theFactory.setLayout(tempLayout);
         theFactory.setCutoutsFlag(m_includeCutouts);
