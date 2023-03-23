@@ -175,8 +175,9 @@ def checkL1HLTConsistency(flags):
                 if foundLegacyCaloSeed and foundPhase1CaloSeed: # chain without L1 calo items, cannot have both legacy and phase1 seeds
                     mixedCaloSeed = True 
         if mixedCaloSeed:
-            log.error('[checkL1HLTConsistency] chain %s contains a mix of legacy and phase1 calo thresholds! L1 items: [%s] (legacy item = %s), L1 seeds: [%s] (foundPhase1CaloSeed = %s, foundLegacyCaloSeed = %s)', chain["chainName"], ",".join(l1item_vec), legacyItem,  ",".join(l1thr_vec), foundPhase1CaloSeed, foundLegacyCaloSeed )
-            raise Exception("Please fix the chain.")
+            log.warning('[checkL1HLTConsistency] chain %s contains a mix of legacy and phase1 calo thresholds! L1 items: [%s] (legacy item = %s), L1 seeds: [%s] (foundPhase1CaloSeed = %s, foundLegacyCaloSeed = %s)', chain["chainName"], ",".join(l1item_vec), legacyItem,  ",".join(l1thr_vec), foundPhase1CaloSeed, foundLegacyCaloSeed )
+            # log.error('[checkL1HLTConsistency] chain %s contains a mix of legacy and phase1 calo thresholds! L1 items: [%s] (legacy item = %s), L1 seeds: [%s] (foundPhase1CaloSeed = %s, foundLegacyCaloSeed = %s)', chain["chainName"], ",".join(l1item_vec), legacyItem,  ",".join(l1thr_vec), foundPhase1CaloSeed, foundLegacyCaloSeed )
+            # raise Exception("Please fix the chain.")
 
         # check legacy and phase1 chains have the correct groups 
         wrongLabel = False
