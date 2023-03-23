@@ -92,8 +92,10 @@ void LucidPhysicsTool::ConstructProcess()
   theCerenkovProcess->SetMaxNumPhotonsPerStep(MaxNumPhotons);
 
   theScintillationProcess->SetTrackSecondariesFirst(true);
+#if G4VERSION_NUMBER < 1100
+  // This should be defaulted to 1. in 11.0 and newer
   theScintillationProcess->SetScintillationYieldFactor(1.);
-
+#endif
 
   PARTICLEITERATOR->reset();
 

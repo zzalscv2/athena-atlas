@@ -9,6 +9,7 @@
 #include "AFP_Geometry/AFP_constants.h"
 
 // Geant4 headers
+#include "G4Version.hh"
 #include "G4TouchableHistory.hh"
 #include "G4Step.hh"
 #include "G4Track.hh"
@@ -162,8 +163,11 @@ bool AFP_SensitiveDetector::ProcessHits(G4Step* pStep, G4TouchableHistory*)
 
   m_nHitID++;
 
-
+#if G4VERSION_NUMBER < 1100
   if (  (VolumeName.contains("TDSensor")) )
+#else
+  if (  (G4StrUtil::contains(VolumeName, "TDSensor")) )
+#endif
     {
       nQuarticID=szbuff[7]-0x30;
       if ( pStep->GetPostStepPoint()->GetProcessDefinedStep() == 0 ) return 1;
@@ -178,7 +182,11 @@ bool AFP_SensitiveDetector::ProcessHits(G4Step* pStep, G4TouchableHistory*)
     }
 
   //////////////// Fast Cherenkov ///////////////////
+#if G4VERSION_NUMBER < 1100
   if ( (bRes=VolumeName.contains("TDQuarticBar[")) )
+#else
+  if ( (bRes=G4StrUtil::contains(VolumeName, "TDQuarticBar[")) )
+#endif
     {
       nQuarticID=szbuff[7]-0x30;
 
@@ -229,9 +237,14 @@ bool AFP_SensitiveDetector::ProcessHits(G4Step* pStep, G4TouchableHistory*)
 
       //G4int Rsize   = Rind->Entries() - 1;
       //G4double Pmin = Rind->GetMinPhotonEnergy();     // 800 nm
+#if G4VERSION_NUMBER < 1100
       G4double Pmin = Rind->GetMinLowEdgeEnergy();
       //G4double Pmax = Rind->GetMaxPhotonEnergy();  // 200 nm
       G4double Pmax = Rind->GetMaxLowEdgeEnergy();
+#else
+      G4double Pmin = Rind->GetMinEnergy();
+      G4double Pmax = Rind->GetMaxEnergy();
+#endif
       G4double dp   = Pmax - Pmin;
       //G4double maxCosTheta  = BetaInverse / Rind->GetMinProperty();
       G4double maxCosTheta  = BetaInverse / Rind->GetMinValue();
@@ -384,9 +397,11 @@ bool AFP_SensitiveDetector::ProcessHits(G4Step* pStep, G4TouchableHistory*)
         }
     }
   /////////////////////////////////////////////////////
-
+#if G4VERSION_NUMBER < 1100
   else if (VolumeName.contains("SIDSensor") || (bIsSIDAuxVSID=VolumeName.contains("SIDVacuumSensor"))){
-
+#else
+  else if (G4StrUtil::contains(VolumeName, "SIDSensor") || (bIsSIDAuxVSID=G4StrUtil::contains(VolumeName, "SIDVacuumSensor"))){
+#endif
     if(!bIsSIDAuxVSID && !(fEnergyDeposit>0.0))
       {
         //hit in SID sensor but with zero deposited energy (transportation)

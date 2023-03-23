@@ -6,6 +6,7 @@
 #include "VoxelDensityTool.h"
 
 // Geant4 includes
+#include "G4Version.hh"
 #include "G4LogicalVolumeStore.hh"
 
 //=============================================================================
@@ -50,7 +51,11 @@ StatusCode VoxelDensityTool::postGeometryConfigure() const
 
     //Now for any volumes set via job property std::pair<volume name, value>...
     for (auto& volToSet:m_volumeVoxelDensityLevel) {
+#if G4VERSION_NUMBER < 1100
       if (ilv->GetName().contains(volToSet.first)) {
+#else
+      if (G4StrUtil::contains(ilv->GetName(), std::string_view(volToSet.first))) {
+#endif
         ilv->SetSmartless(volToSet.second);
         ATH_MSG_INFO("Set VoxelDensity for "<<ilv->GetName()<<" to "<<volToSet.second);
       }

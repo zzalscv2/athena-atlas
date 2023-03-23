@@ -6,6 +6,7 @@
 #include "AFP_TDSensitiveDetector.h"
 
 // Geant4 headers
+#include "G4Version.hh"
 #include "G4TouchableHistory.hh"
 #include "G4Step.hh"
 #include "G4Track.hh"
@@ -182,7 +183,11 @@ bool AFP_TDSensitiveDetector::ProcessHits(G4Step* pStep, G4TouchableHistory*)
     }
   */
 
+#if G4VERSION_NUMBER < 1100
   if ( (VolumeName.contains("TDQuarticBarVacBorder")) && pParticleDefinition->GetPDGCharge() !=0 )
+#else
+  if ( (G4StrUtil::contains(VolumeName, "TDQuarticBarVacBorder")) && pParticleDefinition->GetPDGCharge() !=0 )
+#endif
     {
       nQuarticID=szbuff[7]-0x30;
       /*
@@ -197,7 +202,11 @@ bool AFP_TDSensitiveDetector::ProcessHits(G4Step* pStep, G4TouchableHistory*)
     }
 
   //////////////// Fast Cherenkov ///////////////////
+#if G4VERSION_NUMBER < 1100
   if ( (bRes=VolumeName.contains("TDQuarticBar[")) )
+#else
+  if ( (bRes=G4StrUtil::contains(VolumeName, "TDQuarticBar[")) )
+#endif
     {
       nQuarticID=szbuff[7]-0x30;
 
@@ -259,9 +268,14 @@ bool AFP_TDSensitiveDetector::ProcessHits(G4Step* pStep, G4TouchableHistory*)
 
       //G4int Rsize   = Rind->Entries() - 1;
       //G4double Pmin = Rind->GetMinPhotonEnergy();     // 800 nm
+#if G4VERSION_NUMBER < 1100
       G4double Pmin = Rind->GetMinLowEdgeEnergy();
       //G4double Pmax = Rind->GetMaxPhotonEnergy();  // 200 nm
       G4double Pmax = Rind->GetMaxLowEdgeEnergy();
+#else
+      G4double Pmin = Rind->GetMinEnergy();
+      G4double Pmax = Rind->GetMaxEnergy();
+#endif
       G4double dp   = Pmax - Pmin;
       //G4double maxCosTheta  = BetaInverse / Rind->GetMinProperty();
       G4double maxCosTheta  = BetaInverse / Rind->GetMinValue();

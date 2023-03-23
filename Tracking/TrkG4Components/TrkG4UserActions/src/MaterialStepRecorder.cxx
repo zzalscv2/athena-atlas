@@ -159,7 +159,7 @@ namespace G4UA
 
         for (size_t iel = 0; iel < elNumber; ++iel) {
 
-          G4Element*  currentEl  = (*elVector)[iel];
+          const G4Element*  currentEl  = (*elVector)[iel];
           double      currentNum = atVector ? atVector[iel] : 1.;
           double      relNbAtoms = currentNum/totAtoms;
 

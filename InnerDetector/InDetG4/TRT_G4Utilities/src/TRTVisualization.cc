@@ -58,7 +58,7 @@ void TRTVisualization::Visualize(G4LogicalVolume* pLogicalVolume,
   switch(colourIndex)
   {
     case 0:
-      pLogicalVolume->SetVisAttributes(G4VisAttributes::Invisible);
+      pLogicalVolume->SetVisAttributes(G4VisAttributes::GetInvisible());
       break;
     case 1:
       pLogicalVolume->SetVisAttributes(m_pVisAttributeRed);

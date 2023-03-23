@@ -46,6 +46,7 @@
 
 #include "HadronPhysicsQGSP_BERT_MuBias.hh"
 
+#include "G4Version.hh"
 #include "globals.hh"
 #include "G4ios.hh"
 #include "G4SystemOfUnits.hh"
@@ -57,7 +58,11 @@
 #include "G4ShortLivedConstructor.hh"
 #include "G4IonConstructor.hh"
 
+#if G4VERSION_NUMBER < 1100
 #include "G4HadronCaptureProcess.hh"
+#else
+#include "G4NeutronCaptureProcess.hh"
+#endif
 #include "G4NeutronRadCapture.hh"
 #include "G4NeutronInelasticXS.hh"
 #include "G4NeutronCaptureXS.hh"
@@ -236,7 +241,11 @@ void G4HadronPhysicsQGSP_BERT_MuBias::ConstructProcess()
     }
   }
   if ( ! capture ) {
+#if G4VERSION_NUMBER < 1100
     capture = new G4HadronCaptureProcess("nCapture");
+#else
+    capture = new G4NeutronCaptureProcess("nCapture");
+#endif
     pmanager->AddDiscreteProcess(capture);
   }
   s_tpdata->xsNeutronCaptureXS = new G4NeutronCaptureXS();

@@ -20,6 +20,7 @@
 
 #include "TestActionTimer.h"
 
+#include "G4Version.hh"
 #include "G4Run.hh"
 #include "G4Event.hh"
 #include "G4Step.hh"
@@ -41,6 +42,15 @@
 
 namespace G4UA
 {
+  // Helper for G4String changes
+  bool G4StrContains(const G4String& s, const char* v)
+  {
+#if G4VERSION_NUMBER < 1100
+    return s.contains(v);
+#else
+    return G4StrUtil::contains(s, v);
+#endif
+  }
 
   TestActionTimer::TestActionTimer()
     : m_report(),
@@ -259,95 +269,95 @@ namespace G4UA
   int TestActionTimer::ClassifyVolume( G4String& nom ) const
   {
     if( nom.length() >= 17 &&
-        nom(13,4) == "EMEC" ){
+        nom.substr(13,4) == "EMEC" ){
       return eEMEC;
     }
     else if ( nom.length() >= 16 &&
-              nom(13,3) == "EMB" ){
+              nom.substr(13,3) == "EMB" ){
       return eEMB;
     }
     else if( nom.length() >= 25 &&
-             nom(21,4) == "Cryo" ) {
+             nom.substr(21,4) == "Cryo" ) {
       return eCry;
     }
     else if( nom.length() >= 26 &&
-             nom(13,13) == "FCAL::Module1"){
+             nom.substr(13,13) == "FCAL::Module1"){
       return eFC1;
     }
     else if( nom.length() >= 25 &&
-             nom(13,12) == "FCAL::Module" ){
+             nom.substr(13,12) == "FCAL::Module" ){
       return eFC23;
     }
     else if ( nom.length() >= 17 &&
-              nom(13,4) == "FCAL" ){
+              nom.substr(13,4) == "FCAL" ){
       return eFCO;
     }
     else if ( nom.length() >= 16 &&
-              nom(13,3) == "HEC" ){
+              nom.substr(13,3) == "HEC" ){
       return eHEC;
     }
     else if( nom.length() >= 31 &&
-             nom(21,10) == "Presampler" ) {
+             nom.substr(21,10) == "Presampler" ) {
       return ePre;
     }
     else if ( nom.length() >= 3 &&
-              nom(0,3) == "LAr" ){
+              nom.substr(0,3) == "LAr" ){
       return eLAr;
     }
     else if( ( (nom.length() >= 4 &&
-                nom(0,4) == "Muon") ||
-               nom(0,4) == "MUON" ) ||
+                nom.substr(0,4) == "Muon") ||
+               nom.substr(0,4) == "MUON" ) ||
              ( nom.length() >= 9 &&
-               nom(0,9) == "DriftTube" ) ||
-             nom.contains("MDT") ||
+               nom.substr(0,9) == "DriftTube" ) ||
+             G4StrContains(nom, "MDT") ||
              ( nom.length() >= 12 &&
-               nom(0,12) == "SensitiveGas" ) ||
-             nom.contains("MDT") ||
-             nom.contains("station") ){
+               nom.substr(0,12) == "SensitiveGas" ) ||
+             G4StrContains(nom, "MDT") ||
+             G4StrContains(nom, "station") ){
       return eMu;
     }
     else if ( nom.length() >= 8 &&
-              nom(0,8) == "ITkPixel" ){
+              nom.substr(0,8) == "ITkPixel" ){
       return eITkPix;
     }
     else if ( nom.length() >= 8 &&
-              nom(0,8) == "ITkStrip" ){
+              nom.substr(0,8) == "ITkStrip" ){
       return eITkStrip;
     }
     else if ((nom.length() >= 5 &&
-              nom(0,5) == "Pixel") ||
+              nom.substr(0,5) == "Pixel") ||
              nom == "Outside Barrel Service"){
       return ePx;
     }
     else if ( nom.length() >= 3 &&
-              nom(0,3) == "SCT" ){
+              nom.substr(0,3) == "SCT" ){
       return eSct;
     }
     else if ( ( nom.length() >= 3 &&
-                nom(0,3) == "TRT" ) ||
+                nom.substr(0,3) == "TRT" ) ||
               nom == "GasMANeg" ){
       return eTrt;
     }
     else if ( nom.length() >= 4 &&
-              nom(0,4) == "Tile"){
+              nom.substr(0,4) == "Tile"){
       return eHCB;
     }
     else if ( ( nom.length() >= 12 &&
-                nom(0,12) == "InDetServMat" ) ||
+                nom.substr(0,12) == "InDetServMat" ) ||
               ( nom.length() >= 4 &&
-                nom(0,4) == "IDET" ) ||
+                nom.substr(0,4) == "IDET" ) ||
               ( nom.length() >= 3 &&
-                nom(0,3) == "ITK" ) ||
+                nom.substr(0,3) == "ITK" ) ||
               ( nom.length() >= 8 &&
-                nom(0,8) == "BeamPipe" ) ||
+                nom.substr(0,8) == "BeamPipe" ) ||
               ( nom.length() >= 7 &&
-                nom(0,7) == "Section" ) ||
+                nom.substr(0,7) == "Section" ) ||
               ( nom.length() >= 3 &&
-                ( nom(0,3) == "BLM" ||
-                  nom(0,3) == "BCM" ||
-                  nom(0,3) == "PLR" ) ) ||
+                ( nom.substr(0,3) == "BLM" ||
+                  nom.substr(0,3) == "BCM" ||
+                  nom.substr(0,3) == "PLR" ) ) ||
               ( nom.length() >= 8 &&
-                nom(0,8) == "BCMPrime" ) ){
+                nom.substr(0,8) == "BCMPrime" ) ){
       return eSev;
     }
     return eOther;

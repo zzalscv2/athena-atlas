@@ -454,7 +454,7 @@ namespace LArG4 {
           const G4int copyNumber = physical->GetCopyNo();
           G4String volumeName = physical->GetLogicalVolume()->GetName();
 
-          if(volumeName.index("LArMgr::") == 0) volumeName.erase(0,8);
+          if(volumeName.find("LArMgr::") == 0) volumeName.erase(0,8);
 
 
 #ifdef DEBUG_HITS

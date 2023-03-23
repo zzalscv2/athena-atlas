@@ -5,6 +5,7 @@
 #ifndef DEBUGSTEPPINGACTION_H
 #define DEBUGSTEPPINGACTION_H
 
+#include "G4Types.hh"
 #include "G4LorentzVector.hh"
 #include "G4UserSteppingAction.hh"
 
