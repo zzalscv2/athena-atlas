@@ -43,7 +43,7 @@ StatusCode DerivationFramework::RCJetSubstructureAug::initialize()
 
     // Set up the text-parsing machinery for selectiong the jet directly according to user cuts
     if (!m_selectionString.empty()) {
-       ATH_CHECK( initializeParser( { m_selectionString } ));
+       ATH_CHECK( initializeParser( m_selectionString ));
     }
 
     // Init moment struct
