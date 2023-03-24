@@ -580,7 +580,8 @@ class TrigEgammaMonAlgBuilder:
           self.bookEfficiencies( monAlg, trigger, "FastPhoton" if info.isPhoton() else "FastElectron", doEmulation=True)         
           self.bookEfficiencies( monAlg, trigger, "HLT" , doEmulation=True)
 
-
+        # Inefficiencies
+        self.bookInefficiencies(monAlg, trigger)
 
 
 
@@ -812,6 +813,13 @@ class TrigEgammaMonAlgBuilder:
     self.addHistogram(monGroup, TProfile("et_slice2,et_slice2_passed", "#epsilon(E_T) in [1.37 < |#eta| <= 1.54]; E_{T} [GeV]  ; Efficiency", self._nEtbins, self._etbins))
     self.addHistogram(monGroup, TProfile("et_slice3,et_slice3_passed", "#epsilon(E_T) in [1.54 < |#eta| <= 2.50]; E_{T} [GeV]  ; Efficiency", self._nEtbins, self._etbins))
 
+
+  def bookInefficiencies(self, monAlg, trigger):
+    
+    monGroup = self.addGroup( monAlg, trigger+'_Inefficiency', self.basePath+'/Expert/'+trigger+'/Inefficiency' )
+    levelLabels = ["L1Calo","L2Calo","L2","EFCalo","HLT"]
+    monGroup.defineHistogram("InneficiencyCounts", type='TH1F', path='', title="Inefficiency; Steps ; Count",xbins=len(levelLabels), xmin=0, xmax=len(levelLabels), xlabels=levelLabels)
+    
 
   def bookL1CaloResolutions(self, monAlg, trigger):
 
