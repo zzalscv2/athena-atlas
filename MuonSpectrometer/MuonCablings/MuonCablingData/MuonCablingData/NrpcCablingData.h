@@ -6,6 +6,7 @@
 #define MUON_CABLING_NRPCCABLINGDATA_H
 
 #include <iostream>
+#include <cstdint>
 /*
  * @brief: Helper struct containing all information to convert from the offline identifiers to the online identifiers
  */
