@@ -3,7 +3,8 @@
 if __name__=="__main__":
     from AthenaConfiguration.AllConfigFlags import ConfigFlags
     
-    ConfigFlags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecExRecoTest/data18_13TeV/data18_13TeV.00357750.physics_Main.daq.RAW/data18_13TeV.00357750.physics_Main.daq.RAW._lb0083._SFO-1._0001.data']
+    from RecExRecoTest.RecExReco_setupData22 import RecExReco_setupData22
+    RecExReco_setupData22(ConfigFlags)
     from egammaConfig.egammaOnlyFromRawFlags import egammaOnlyFromRaw
     egammaOnlyFromRaw(ConfigFlags)
     ConfigFlags.lock()

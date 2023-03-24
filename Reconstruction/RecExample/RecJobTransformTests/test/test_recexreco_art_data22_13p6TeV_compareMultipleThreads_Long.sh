@@ -10,19 +10,18 @@
 # art-runon: Monday
 
 preExecString="flags.Reco.EnableTrigger=False;flags.DQ.doMonitoring=False"
-postExecString="cfg.getCondAlgo(\"PixelConfigCondAlg\").doRUN3PIXLinearExtrapolation=True" 
 conditionsTagString="CONDBR2-BLKPA-2022-09"
 geometryVersionString="ATLAS-R3S-2021-03-01-00"
 
 mkdir runOne; cd runOne
-Reco_tf.py --CA --athenaopts="--threads=8"  --preExec "${preExecString}" --postExec "${postExecString}" --conditionsTag="${conditionsTagString}" --geometryVersion="${geometryVersionString}" --inputBSFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecJobTransformTests/data22_13p6TeV/data22_13p6TeV.00430536.physics_Main.daq.RAW/data22_13p6TeV.00430536.physics_Main.daq.RAW._lb1015._SFO-20._0001.data  --outputAODFile=myAOD.pool.root --outputESDFile=myESD.pool.root  --maxEvents=1000 | tee athenarunOne.log
+Reco_tf.py --CA --athenaopts="--threads=8"  --preExec "${preExecString}" --conditionsTag="${conditionsTagString}" --geometryVersion="${geometryVersionString}" --inputBSFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecJobTransformTests/data22_13p6TeV/data22_13p6TeV.00430536.physics_Main.daq.RAW/data22_13p6TeV.00430536.physics_Main.daq.RAW._lb1015._SFO-20._0001.data  --outputAODFile=myAOD.pool.root --outputESDFile=myESD.pool.root  --maxEvents=1000 | tee athenarunOne.log
 rc1=${PIPESTATUS[0]}
 xAODDigest.py myAOD.pool.root | tee digestOne.log
 echo "art-result: $rc1 runOne"
 
 cd ../
 mkdir runTwo; cd runTwo
-Reco_tf.py --CA --athenaopts="--threads=8" --preExec "${preExecString}" --postExec "${postExecString}" --conditionsTag="${conditionsTagString}" --geometryVersion="${geometryVersionString}" --inputBSFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecJobTransformTests/data22_13p6TeV/data22_13p6TeV.00430536.physics_Main.daq.RAW/data22_13p6TeV.00430536.physics_Main.daq.RAW._lb1015._SFO-20._0001.data  --outputAODFile=myAOD.pool.root --outputESDFile=myESD.pool.root  --maxEvents=1000 | tee athenarunTwo.log
+Reco_tf.py --CA --athenaopts="--threads=8" --preExec "${preExecString}" --conditionsTag="${conditionsTagString}" --geometryVersion="${geometryVersionString}" --inputBSFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecJobTransformTests/data22_13p6TeV/data22_13p6TeV.00430536.physics_Main.daq.RAW/data22_13p6TeV.00430536.physics_Main.daq.RAW._lb1015._SFO-20._0001.data  --outputAODFile=myAOD.pool.root --outputESDFile=myESD.pool.root  --maxEvents=1000 | tee athenarunTwo.log
 rc2=${PIPESTATUS[0]}
 xAODDigest.py myAOD.pool.root | tee digestTwo.log
 echo "art-result: $rc2 runTwo"
