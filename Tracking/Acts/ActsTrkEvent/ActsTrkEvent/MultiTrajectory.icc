@@ -374,7 +374,7 @@ void ActsTrk::MultiTrajectory<RWState>::shareFrom_impl(ActsTrk::MultiTrajectory<
   auto self  = (*m_trackStates)[iself];
   auto other = (*m_trackStates)[iother];
 
-  assert(ACTS_CHECK_BIT(getTrackState(iother).getMask(), shareSource) &&
+  assert(ACTS_CHECK_BIT(this->getTrackState(iother).getMask(), shareSource) &&
          "Source has incompatible allocation");
 
   using PM = Acts::TrackStatePropMask;
