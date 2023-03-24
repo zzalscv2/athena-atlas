@@ -27,6 +27,12 @@
 InDet::TrackClusterAssValidation::TrackClusterAssValidation
 (const std::string& name,ISvcLocator* pSvcLocator)
   : AthReentrantAlgorithm(name,pSvcLocator),
+    m_spacepointsSCTname("SCT_SpacePoints"),
+    m_spacepointsPixelname("PixelSpacePoints"),
+    m_spacepointsOverlapname("OverlapSpacePoints"),
+    m_clustersSCTname("SCT_Clusters"),
+    m_clustersPixelname("PixelClusters"),
+    m_clustersTRTname("TRT_DriftCircles"),
     m_truth_locationPixel( "PRD_MultiTruthPixel" ),
     m_truth_locationSCT(   "PRD_MultiTruthSCT" ),
     m_truth_locationTRT(   "PRD_MultiTruthTRT" )
@@ -34,12 +40,6 @@ InDet::TrackClusterAssValidation::TrackClusterAssValidation
 
   // TrackClusterAssValidation steering parameters
   //
-  m_spacepointsSCTname     = std::string("SCT_SpacePoints")   ;
-  m_spacepointsPixelname   = "PixelSpacePoints"               ;
-  m_spacepointsOverlapname = "OverlapSpacePoints"             ;
-  m_clustersPixelname      = "PixelClusters"                  ;
-  m_clustersSCTname        = std::string("SCT_Clusters")      ;
-  m_clustersTRTname        = "TRT_DriftCircles"               ;
   m_ptcut                  = 1000.                            ;
   m_ptcutmax               = 1.e20                            ;
   m_rapcut                 = 2.6                              ;
