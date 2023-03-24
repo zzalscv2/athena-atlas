@@ -835,7 +835,7 @@ StatusCode SUSYObjDef_xAOD::initialize() {
       std::string simFlavour = "";
       ATH_CHECK( AthAnalysisHelper::retrieveMetadata("/Simulation/Parameters", "SimulationFlavour", simFlavour, inputMetaStore() ) );
       boost::to_upper(simFlavour);
-      local_isAtlfast = (simFlavour.find("ATLFASTII") != std::string::npos);
+      local_isAtlfast = (simFlavour.find("ATLFAST") != std::string::npos);
     }
     if (local_isData) {m_dataSource = Data;}
     else {
@@ -940,7 +940,8 @@ StatusCode SUSYObjDef_xAOD::autoconfigurePileupRWTool(const std::string& PRWfile
     float dsid = -999;
     std::string amiTag("");
     std::string mcCampaignMD("");
-    std::string simType = (isAtlfast() ? "AFII" : "FS");
+    std::string simFlavour("");
+    std::string simType(""); 
     const xAOD::FileMetaData* fmd = nullptr;
 
     // configure PRW rtag options from m_autoconfigPRWRtags string
@@ -966,6 +967,12 @@ StatusCode SUSYObjDef_xAOD::autoconfigurePileupRWTool(const std::string& PRWfile
     if ( inputMetaStore()->contains<xAOD::FileMetaData>("FileMetaData") && inputMetaStore()->retrieve(fmd,"FileMetaData").isSuccess() ) {
       fmd->value(xAOD::FileMetaData::mcProcID, dsid);
       fmd->value(xAOD::FileMetaData::amiTag, amiTag);
+      fmd->value(xAOD::FileMetaData::simFlavour, simFlavour);
+
+      if(simFlavour.find("ATLFASTII")==0) simType = "AFII";
+      else if(simFlavour.find("ATLFAST3")==0) simType = "AF3";
+      else simType = "FS";
+
       bool found = false;
       while ( mcCampaignMD.empty() ) {
          for ( const auto& campaign_rtags : PRWRtags ) {                                 // consider all campaigns
