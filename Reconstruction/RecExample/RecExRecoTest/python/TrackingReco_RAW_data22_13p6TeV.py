@@ -3,7 +3,8 @@
 if __name__=="__main__":
     from AthenaConfiguration.AllConfigFlags import ConfigFlags
     
-    ConfigFlags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecExRecoTest/data18_13TeV/data18_13TeV.00357750.physics_Main.daq.RAW/data18_13TeV.00357750.physics_Main.daq.RAW._lb0083._SFO-1._0001.data']
+    from RecExRecoTest.RecExReco_setupData22 import RecExReco_setupData22
+    RecExReco_setupData22(ConfigFlags)
     ConfigFlags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -12,5 +13,10 @@ if __name__=="__main__":
     from CaloRec.CaloRecoConfig import CaloRecoCfg
     acc.merge(CaloRecoCfg(ConfigFlags))
 
-    acc.run(100)
+    from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
+    acc.merge(InDetTrackRecoCfg(ConfigFlags))
 
+    with open("config.pkl", "wb") as file:
+      acc.store(file)
+
+    acc.run(100)
