@@ -133,9 +133,9 @@ namespace InDet {
       public:
     /** Constructor.  Takes strings of TrackCollectionKey and Track TruthCollectionKey. Assume that
 	truth collections will be used, but let user specify if they intentionally will not be.*/
-    TrackStatHelper     (std::string, std::string, bool careAboutTruth = true);
+    TrackStatHelper     (const std::string&, const std::string&, bool careAboutTruth = true);
     /** Sets the cuts such as the eta regions (barrel, transition,endcap) and the hit fraction fake cuts and the track matching cut*/
-    void     SetCuts(struct cuts);
+    void     SetCuts(const struct cuts&);
     /** Adds hit, track and matching information for each event.  Called at each event*/
     void     addEvent   (const TrackCollection *, 
 			       std::vector<const Trk::Track *> &, 
