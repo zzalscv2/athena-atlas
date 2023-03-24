@@ -1,5 +1,6 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 from AthenaCommon import Logging
@@ -136,6 +137,7 @@ class METAssocConfig:
                  modConstKey="",
                  modClusColls={}
                  ):
+        self.accumulator = ComponentAccumulator()
         # Set some sensible defaults
         modConstKey_tmp = modConstKey
         modClusColls_tmp = modClusColls
@@ -172,7 +174,7 @@ class METAssocConfig:
         self.trkisotool.TrackSelectionTool = self.trkseltool # As configured above
         from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg  
         extrapCfg = AtlasExtrapolatorCfg(inputFlags)
-        CaloExtensionTool= CompFactory.getComp("Trk::ParticleCaloExtensionTool")(Extrapolator = extrapCfg.popPrivateTools())
+        CaloExtensionTool= CompFactory.getComp("Trk::ParticleCaloExtensionTool")(Extrapolator = self.accumulator.popToolsAndMerge(extrapCfg))
         CaloCellAssocTool =  CompFactory.getComp("Rec::ParticleCaloCellAssociationTool")(ParticleCaloExtensionTool = CaloExtensionTool)
         self.caloisotool = CompFactory.getComp("xAOD::CaloIsolationTool")("CaloIsolationTool_MET",
                                                           saveOnlyRequestedCorrections=True,
