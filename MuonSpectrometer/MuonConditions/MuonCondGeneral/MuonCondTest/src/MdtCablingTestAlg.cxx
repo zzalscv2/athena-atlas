@@ -16,6 +16,7 @@ StatusCode MdtCablingTestAlg::initialize(){
   ATH_CHECK(m_idHelperSvc.retrieve());
   ATH_CHECK(m_DetectorManagerKey.initialize());
   ATH_CHECK(m_cablingKey.initialize());
+  ATH_CHECK(m_deadChanKey.initialize(!m_deadChanKey.empty()));
   return StatusCode::SUCCESS;
 } 
 
@@ -79,11 +80,23 @@ StatusCode MdtCablingTestAlg::execute(){
      ATH_MSG_ERROR("Failed to retrieve the Mdt cabling "<<m_cablingKey.fullKey());
      return StatusCode::FAILURE;
   }
-  const MdtIdHelper& idHelper = m_idHelperSvc->mdtIdHelper();
-  unsigned int n_elements{0}, n_success{0};
-  bool failure{false};
-  for (unsigned int hash = 0; hash < MuonGM::MuonDetectorManager::MdtRElMaxHash; ++hash){
-    const IdentifierHash id_hash{hash};
+
+  const MdtCondDbData* deadChan{nullptr};
+  if (!m_deadChanKey.empty()) {
+     SG::ReadCondHandle<MdtCondDbData> deadChanHandle{m_deadChanKey,ctx};
+     if (!deadChanHandle.isValid()) {
+        ATH_MSG_FATAL("Failed to retrieve Mdt conditions "<<m_deadChanKey.fullKey());
+        return StatusCode::FAILURE;
+     }
+     deadChan = deadChanHandle.cptr();
+
+  }
+  
+   const MdtIdHelper& idHelper = m_idHelperSvc->mdtIdHelper();
+   unsigned int n_elements{0}, n_success{0};
+   bool failure{false};
+   for (unsigned int hash = 0; hash < MuonGM::MuonDetectorManager::MdtRElMaxHash; ++hash){
+     const IdentifierHash id_hash{hash};
 
     const MuonGM::MdtReadoutElement* readEle = detectorMgr->getMdtReadoutElement(id_hash);
     if (!readEle) {
@@ -91,6 +104,11 @@ StatusCode MdtCablingTestAlg::execute(){
         continue;
     }
     const Identifier station_id = idHelper.elementID(readEle->identify());
+    
+    if (deadChan && !deadChan->isGoodStation(station_id)) {
+      ATH_MSG_ALWAYS("Dead station found "<<m_idHelperSvc->toString(station_id));
+      continue;
+    }
     ATH_MSG_DEBUG("Check station "<<m_idHelperSvc->toString(station_id));
     for (int layer = 1 ; layer <= readEle->getNLayers(); ++layer){
       for (int tube = 1 ; tube <= readEle->getNtubesperlayer(); ++tube){
@@ -100,22 +118,28 @@ StatusCode MdtCablingTestAlg::execute(){
             ATH_MSG_VERBOSE("Invalid element");
             continue;
           }
+          if (deadChan && !deadChan->isGood(tube_id)) {
+            ATH_MSG_ALWAYS("Dead dube detected "<<m_idHelperSvc->toString(tube_id));
+            continue;
+          }
           ++n_elements;
           /// Create the cabling object
           MdtCablingData cabling_data{};
           cabling->convert(tube_id,cabling_data);
           /// Test if the online channel can be found
           if (!cabling->getOnlineId(cabling_data,msgStream())){
-             ATH_MSG_ERROR("Could no retrieve a valid online channel for "<<m_idHelperSvc->toString(tube_id));
+             ATH_MSG_ERROR("Could no retrieve a valid online channel for "<<m_idHelperSvc->toString(tube_id)<<" from station ID "<<m_idHelperSvc->toString(readEle->identify()));
+             failure = true;
              continue;
           }
           /// Test if the online channel can be transformed back
           
           /// Reset the offline cabling          
           const MdtCablingOffData off_data{};
-          cabling_data.MdtCablingOffData::operator=(off_data);
+          static_cast<MdtCablingOffData&> (cabling_data) = off_data;
           if (!cabling->getOfflineId(cabling_data, msgStream())){
             ATH_MSG_ERROR("Could not convert the online cabling "<<cabling_data<<" to an offline identifier. Initial identifier "<<m_idHelperSvc->toString(tube_id));
+            failure = true;
             continue;
           }
           
@@ -128,12 +152,11 @@ StatusCode MdtCablingTestAlg::execute(){
           if (test_id != tube_id){
             ATH_MSG_ERROR("The forward -> backward conversion failed. Started with "<<m_idHelperSvc->toString(tube_id)<<" ended with "<<m_idHelperSvc->toString(test_id));
             failure = true;
-            return StatusCode::FAILURE;
             continue;
           }
           
           /// Reset the offline cabling again
-          cabling_data.MdtCablingOffData::operator=(off_data);
+          static_cast<MdtCablingOffData&>(cabling_data) = off_data;
           
           /// Test whether the online module can be decoded successfully
           cabling_data.tdcId = 0xff;

@@ -875,3 +875,5 @@ if __name__=="__main__":
         if not sc.isSuccess():
             import sys
             sys.exit("Execution failed")
+    else:
+        cfg.wasMerged()

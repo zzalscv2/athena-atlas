@@ -19,8 +19,7 @@
 #include "CxxUtils/SimpleUpdater.h"
 #include "GaudiKernel/ClassID.h"
 #include "GaudiKernel/StatusCode.h"
-#include <boost/array.hpp>
-#include <boost/type_traits/transform_traits.hpp>
+
 #include <exception>
 #include <list>
 #include <vector>

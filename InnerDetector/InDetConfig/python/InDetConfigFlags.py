@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
-from AthenaConfiguration.Enums import BeamType, LHCPeriod
+from AthenaConfiguration.Enums import BeamType
 
 def createInDetConfigFlags():
     icf = AthConfigFlags()
@@ -41,17 +41,6 @@ def createInDetConfigFlags():
 
     # Tracking parameters
 
-    # Try to split pixel clusters
-    icf.addFlag("InDet.Tracking.doPixelClusterSplitting",
-                lambda prevFlags: not(prevFlags.Beam.Type is BeamType.Cosmics))
-    # choose splitter type: NeuralNet or AnalogClus
-    icf.addFlag("InDet.Tracking.pixelClusterSplittingType", "NeuralNet")
-    # Cut value for splitting clusters into two parts
-    icf.addFlag("InDet.Tracking.pixelClusterSplitProb1",
-                lambda prevFlags: (0.5 if prevFlags.GeoModel.Run is LHCPeriod.Run1 else 0.55))
-    # Cut value for splitting clusters into three parts
-    icf.addFlag("InDet.Tracking.pixelClusterSplitProb2",
-                lambda prevFlags: (0.5 if prevFlags.GeoModel.Run is LHCPeriod.Run1 else 0.45))
     # use beam spot position in pixel NN
     icf.addFlag("InDet.Tracking.useBeamSpotInfoNN", True)
     # Enable check for dead modules and FEs

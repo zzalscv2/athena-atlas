@@ -75,6 +75,9 @@ def trigger_setup(SlimmingHelper, option=''):
         SlimmingHelper.IncludeEGammaTriggerContent = True
         SlimmingHelper.IncludeBJetTriggerContent = True
         SlimmingHelper.IncludeBPhysTriggerContent = True
+    if option == 'FTAG3':
+        SlimmingHelper.IncludeJetTriggerContent = True
+
 
 def trigger_matching(SlimmingHelper, TriggerListsHelper, ConfigFlags):
     # Trigger matching

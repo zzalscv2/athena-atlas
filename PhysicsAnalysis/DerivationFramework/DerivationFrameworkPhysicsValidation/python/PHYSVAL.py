@@ -271,6 +271,9 @@ def PHYSVALCfg(ConfigFlags):
                                          OutputContainerPrefix = "TrigMatch_",
                                          TriggerList = PHYSVALTriggerListsHelper.Run3TriggerNamesNoTau)
 
+    # Full trigger content (needed for T0-style monitoring)
+    from DerivationFrameworkTrigger.TrigSlimmingHelper import addTrigEDMSetToOutput
+    addTrigEDMSetToOutput(ConfigFlags, PHYSVALSlimmingHelper, "AODFULL")
 
     # Output stream
     PHYSVALItemList = PHYSVALSlimmingHelper.GetItemList()

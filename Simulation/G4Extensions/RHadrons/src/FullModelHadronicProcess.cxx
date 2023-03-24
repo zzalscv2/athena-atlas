@@ -3,11 +3,18 @@
 */
 
 #include "FullModelHadronicProcess.hh"
+#include "G4Version.hh"
 #include "G4ProcessManager.hh"
 #include "G4ProcessHelper.hh"
 #include "G4ParticleTable.hh"
 #include "FullModelReactionDynamics.hh"
+
+#if G4VERSION_NUMBER < 1100
 #include "G4HadReentrentException.hh"
+#else
+#include "G4HadronicException.hh"
+#endif
+
 #include "CustomPDGParser.h"
 #include "CustomParticle.h"
 
@@ -554,11 +561,19 @@ void FullModelHadronicProcess::CalculateMomenta(
                                                            targetHasChanged, leadFlag,
                                                            leadingStrangeParticle );
         }
+#if G4VERSION_NUMBER < 1100
       catch(G4HadReentrentException& aC)
         {
           aC.Report(G4cout);
           throw G4HadReentrentException(__FILE__, __LINE__, "Failing to calculate momenta");
         }
+#else
+      catch(G4HadronicException& aC)
+        {
+          aC.Report(G4cout);
+          throw G4HadronicException(__FILE__, __LINE__, "Failing to calculate momenta");
+        }
+#endif
     }
   if( finishedTwoClu )
     {

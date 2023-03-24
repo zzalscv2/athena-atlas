@@ -224,6 +224,10 @@ def fromRunArgs(runArgs):
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     cfg.merge( OutputStreamCfg(flags, "HITS", ItemList=getStreamHITS_ItemList(flags), disableEventTag="xAOD::EventInfo#EventInfo" not in flags.Input.TypedCollections) )
 
+    # Add in-file MetaData
+    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
+    cfg.merge(InfileMetaDataCfg(flags, "HITS"))
+
     # Post-include
     processPostInclude(runArgs, flags, cfg)
 

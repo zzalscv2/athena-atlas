@@ -33,13 +33,13 @@ def InDetAmbiTrackSelectionToolCfg(flags, name="InDetAmbiTrackSelectionTool", **
     kwargs.setdefault("UseParameterization", False)
     kwargs.setdefault("Cosmics", flags.Beam.Type is BeamType.Cosmics)
     kwargs.setdefault("doPixelSplitting",
-                      flags.InDet.Tracking.doPixelClusterSplitting)
+                      flags.Tracking.doPixelClusterSplitting)
 
     if flags.InDet.Tracking.ActiveConfig.useTIDE_Ambi:
         kwargs.setdefault("sharedProbCut",
-                          flags.InDet.Tracking.pixelClusterSplitProb1)
+                          flags.Tracking.pixelClusterSplitProb1)
         kwargs.setdefault("sharedProbCut2",
-                          flags.InDet.Tracking.pixelClusterSplitProb2)
+                          flags.Tracking.pixelClusterSplitProb2)
         kwargs.setdefault("minSiHitsToAllowSplitting",
                           8 if flags.GeoModel.Run is LHCPeriod.Run1 else 9)
         kwargs.setdefault("minUniqueSCTHits", 4)
@@ -134,7 +134,7 @@ def InDetTRTAmbiTrackSelectionToolCfg(flags, name='InDetTRT_SeededAmbiTrackSelec
                       flags.InDet.Tracking.ActiveConfig.useParameterizedTRTCuts)
     kwargs.setdefault("Cosmics", flags.Beam.Type is BeamType.Cosmics)
     kwargs.setdefault("doPixelSplitting",
-                      flags.InDet.Tracking.doPixelClusterSplitting)
+                      flags.Tracking.doPixelClusterSplitting)
 
     acc.setPrivateTools(
         CompFactory.InDet.InDetAmbiTrackSelectionTool(name, **kwargs))
@@ -181,13 +181,13 @@ def ITkAmbiTrackSelectionToolCfg(flags, name="ITkAmbiTrackSelectionTool", **kwar
     kwargs.setdefault("UseParameterization", False)
     kwargs.setdefault("Cosmics", flags.Beam.Type is BeamType.Cosmics)
     kwargs.setdefault("doPixelSplitting",
-                      flags.ITk.Tracking.doPixelClusterSplitting)
+                      flags.Tracking.doPixelClusterSplitting)
     kwargs.setdefault("doITk", True)
 
     kwargs.setdefault("sharedProbCut",
-                      flags.ITk.Tracking.pixelClusterSplitProb1)
+                      flags.Tracking.pixelClusterSplitProb1)
     kwargs.setdefault("sharedProbCut2",
-                      flags.ITk.Tracking.pixelClusterSplitProb2)
+                      flags.Tracking.pixelClusterSplitProb2)
     kwargs.setdefault("minSiHitsToAllowSplitting", 9)
     kwargs.setdefault("minUniqueSCTHits", 4)
     kwargs.setdefault("minTrackChi2ForSharedHits", 3)

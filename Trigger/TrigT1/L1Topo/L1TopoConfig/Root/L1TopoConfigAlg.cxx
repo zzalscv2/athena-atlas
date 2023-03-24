@@ -5,8 +5,6 @@
 #include "L1TopoConfig/L1TopoConfigAlg.h"
 #include "L1TopoCommon/Exception.h"
 
-#include "boost/foreach.hpp"
-
 #include <iostream>
 #include <iomanip>
 #include <algorithm>

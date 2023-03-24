@@ -18,7 +18,6 @@
  ***********************************************************************************/
 #include <string>
 #include <vector>
-#include <boost/algorithm/string.hpp>
 
 #include "TrigDecisionInterface/GroupProperties.h"
 

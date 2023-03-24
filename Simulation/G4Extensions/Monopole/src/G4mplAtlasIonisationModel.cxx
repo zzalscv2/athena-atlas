@@ -177,25 +177,26 @@ G4double G4mplAtlasIonisationModel::ComputeDEDXPerVolume(const G4Material* mater
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo....
 
 G4double G4mplAtlasIonisationModel::SampleFluctuations(
-#if G4VERSION_NUMBER > 1009
+#if G4VERSION_NUMBER < 1100
                                                        const G4MaterialCutsCouple* material,
                                                        const G4DynamicParticle* dp,
                                                        G4double tmax,
                                                        G4double length,
-                                                       G4double meanLoss
+                                                       G4double meanLoss)
 #else
-                                                       const G4Material* material,
+                                                       const G4MaterialCutsCouple* material,
                                                        const G4DynamicParticle* dp,
-                                                       G4double& tmax,
-                                                       G4double& length,
-                                                       G4double& meanLoss
+                                                       const G4double tcut,
+                                                       const G4double tmax,
+                                                       const G4double length,
+                                                       const G4double meanLoss)
+
 #endif
-                                                       )
 {
-#if G4VERSION_NUMBER > 1009
+#if G4VERSION_NUMBER < 1100
   G4double siga = Dispersion(material->GetMaterial(),dp,tmax,length);
 #else
-  G4double siga = Dispersion(material,dp,tmax,length);
+  G4double siga = Dispersion(material->GetMaterial(),dp,tcut,tmax,length);
 #endif
   G4double loss = meanLoss;
   siga = sqrt(siga);

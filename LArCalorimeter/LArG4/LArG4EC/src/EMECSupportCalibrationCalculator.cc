@@ -223,7 +223,7 @@ namespace LArG4 {
 
       G4String name = a_step->GetPreStepPoint()->GetPhysicalVolume()->GetName();
 
-      if(name.index("LArMgr::") == 0) name.erase(0,8);
+      if(name.find("LArMgr::") == 0) name.erase(0,8);
 
 #if defined (DEBUG_VOLUMES) || defined (DEBUG_HITS)
       // The 'copy' variable is used only inside defines
@@ -241,14 +241,14 @@ namespace LArG4 {
         << ", phi=" << phi << std::endl;
 #endif
 
-      if ( (name.index("LAr::EMEC::Front")==0) ||
-           (name.index("LAr::EMEC::MotherBoard::")==0) ||
-           (name.index("LAr::EMEC::Outer")==0) ||
-           (name.index("LAr::EMEC::TopIndexing")==0) ||
-           (name.index("LAr::EMEC::WideStretcher")==0) ||
-           (name.index("LAr::EMEC::NarrowStretcher")==0) ||
-           (name.index("LAr::EMEC::InnerAluCone")==0) ||
-           (name.index("LAr::EMEC::ExtraCyl_afterPS")==0) || 
+      if ( (name.find("LAr::EMEC::Front")==0) ||
+           (name.find("LAr::EMEC::MotherBoard::")==0) ||
+           (name.find("LAr::EMEC::Outer")==0) ||
+           (name.find("LAr::EMEC::TopIndexing")==0) ||
+           (name.find("LAr::EMEC::WideStretcher")==0) ||
+           (name.find("LAr::EMEC::NarrowStretcher")==0) ||
+           (name.find("LAr::EMEC::InnerAluCone")==0) ||
+           (name.find("LAr::EMEC::ExtraCyl_afterPS")==0) || 
            (name=="LAr::EMEC::Mother" && fabs(p.z()) < m_par->m_zInFrontOfSpanishFan) )
       {
         // case 1  // Front + Outer + Inner of EMEC
@@ -363,7 +363,7 @@ namespace LArG4 {
           }
         }
 
-      } else if ((name.index("LAr::EMEC::Back")==0) ||
+      } else if ((name.find("LAr::EMEC::Back")==0) ||
                   (name=="LAr::EMEC::Mother" && fabs(p.z()) < m_par->m_zInFrontOfHEC) ) {
         // case 3  - between EMEC and HEC
         type = 1;

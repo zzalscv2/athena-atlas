@@ -27,7 +27,7 @@ namespace CP
             if (m_electronLLHToolVeryLooseNoPix.empty())
             {
                 asg::AsgToolConfig config("AsgElectronLikelihoodTool/ElectronLHSelectorVeryLooseNoPix");
-                ATH_CHECK(config.setProperty("ConfigFile", "ElectronPhotonSelectorTools/trigger/rel22_20210611/ElectronLikelihoodVeryLooseTriggerConfig_NoPix.conf"));
+                ATH_CHECK(config.setProperty("WorkingPoint", "VeryLooseLHElectron_LLP"));
                 ATH_CHECK(config.makePrivateTool(m_electronLLHToolVeryLooseNoPix));
             }
 
@@ -37,7 +37,7 @@ namespace CP
             if (m_electronLLHToolLooseNoPix.empty())
             {
                 asg::AsgToolConfig config("AsgElectronLikelihoodTool/ElectronLHSelectorLooseNoPix");
-                ATH_CHECK(config.setProperty("ConfigFile", "ElectronPhotonSelectorTools/trigger/rel22_20210611/ElectronLikelihoodLooseTriggerConfig_NoPix.conf"));
+                ATH_CHECK(config.setProperty("WorkingPoint", "LooseLHElectron_LLP"));
                 ATH_CHECK(config.makePrivateTool(m_electronLLHToolLooseNoPix));
             }
 
@@ -47,7 +47,7 @@ namespace CP
             if (m_electronLLHToolMediumNoPix.empty())
             {
                 asg::AsgToolConfig config("AsgElectronLikelihoodTool/ElectronLHSelectorMediumNoPix");
-                ATH_CHECK(config.setProperty("ConfigFile", "ElectronPhotonSelectorTools/trigger/rel22_20210611/ElectronLikelihoodMediumTriggerConfig_NoPix.conf"));
+                ATH_CHECK(config.setProperty("WorkingPoint", "MediumLHElectron_LLP"));
                 ATH_CHECK(config.makePrivateTool(m_electronLLHToolMediumNoPix));
             }
 
@@ -57,7 +57,7 @@ namespace CP
             if (m_electronLLHToolTightNoPix.empty())
             {
                 asg::AsgToolConfig config("AsgElectronLikelihoodTool/ElectronLHSelectorTightNoPix");
-                ATH_CHECK(config.setProperty("ConfigFile", "ElectronPhotonSelectorTools/trigger/rel22_20210611/ElectronLikelihoodTightTriggerConfig_NoPix.conf"));
+                ATH_CHECK(config.setProperty("WorkingPoint", "TightLHElectron_LLP"));
                 ATH_CHECK(config.makePrivateTool(m_electronLLHToolTightNoPix));
             }
 

@@ -76,7 +76,7 @@
 #define N_DMUS 16
 #define N_CHANS 48
 #define N_SAMPLES 7
-#define N_RODS 65
+#define N_RODS 129
 #define N_CISPAR 110
 #define N_TMDBCHANS 8 // 4 in EB and 8 in B
 #define N_TMDBDECISIONS 4

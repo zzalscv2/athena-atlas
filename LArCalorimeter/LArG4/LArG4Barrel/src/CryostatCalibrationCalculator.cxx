@@ -521,13 +521,13 @@ namespace LArG4 {
                  << G4endl;
 #endif
 
-          if(volumeName.index("LArMgr::") == 0) volumeName.erase(0,8);
-          if(volumeName.index("LAr::Barrel::Cryostat::Sector")==0) { // ears, legs, Ti blocks
+          if(volumeName.find("LArMgr::") == 0) volumeName.erase(0,8);
+          if(volumeName.find("LAr::Barrel::Cryostat::Sector")==0) { // ears, legs, Ti blocks
             volumeName = "LAr::Barrel::Cryostat::Sector";
             if(copyNumber != 7 && copyNumber !=12) copyNumber=1; // assignment arbitrary copyNumber to Ti block
-          }else if(volumeName.index("LAr::Barrel::Cryostat::Cylinder")==0){
+          }else if(volumeName.find("LAr::Barrel::Cryostat::Cylinder")==0){
             volumeName = "LAr::Barrel::Cryostat::Cylinder";
-          }else if(volumeName.index("LAr::Barrel::Cryostat::InnerWall")==0){
+          }else if(volumeName.find("LAr::Barrel::Cryostat::InnerWall")==0){
             volumeName = "LAr::Barrel::Cryostat::InnerWall";
             copyNumber = 1; // assignment arbitrary copyNumber
           }

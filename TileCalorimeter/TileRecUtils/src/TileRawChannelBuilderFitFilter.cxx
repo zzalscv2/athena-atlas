@@ -70,6 +70,8 @@ TileRawChannelBuilderFitFilter::TileRawChannelBuilderFitFilter(const std::string
   declareProperty("MaxTimeFromPeak",m_maxTimeFromPeak = 250.0);
 
   declareProperty("DisableNegativeAmp",m_disableNegativeAmp = false);
+
+  declareProperty("SpecialDemoShape",m_specialDemoShape = -1); // if >=0 - pulse shape for Demo is stored in non-default structures
 }
 
 /**
@@ -127,6 +129,21 @@ StatusCode TileRawChannelBuilderFitFilter::initialize() {
                 << " min_tau=" << m_minTau
                 << " max_tau=" << m_maxTau );
 
+  if ( !m_demoFragIDs.empty() ) {
+    switch (m_specialDemoShape) {
+      case 1:
+        ATH_MSG_DEBUG( "Demonstrator channels use pulse shape from physics structures"); break;
+      case 2:
+        ATH_MSG_DEBUG( "Demonstrator channels use pulse shape from laser structures"); break;
+      case 3:
+        ATH_MSG_DEBUG( "Demonstrator channels use pulse shape from laser(for 100pF) and physics(for 5.2pF) structures"); break;
+      case 8:
+        ATH_MSG_DEBUG( "Demonstrator channels use pulse shape from cis structures"); break;
+      default:
+        ATH_MSG_DEBUG( "Demonstrator channels use the same pulse shape as legacy"); break;
+    }
+  }
+
   // Speedup for physics processing (max_iter=1):
   //  read initial pulse shapes into arrays
   m_fnParameters[0] = 0.0;
@@ -162,7 +179,7 @@ StatusCode TileRawChannelBuilderFitFilter::initialize() {
         break;
       case 3:
         msg(MSG::DEBUG) << " noise for all channels from Conditions DB ";
-        if (TileCablingService::getInstance()->getTestBeam()) {
+        if (m_cabling->getTestBeam()) {
           const EventContext &ctx = Gaudi::Hive::currentContext();
           msg(MSG::DEBUG) << " rmsLow(LBA01/0) = " << m_tileToolNoiseSample->getHfn(20, 0, TileID::LOWGAIN, TileRawChannelUnit::ADCcounts, ctx)
                           << " rmsHi(LBA01/0) = " << m_tileToolNoiseSample->getHfn(20, 0, TileID::HIGHGAIN, TileRawChannelUnit::ADCcounts, ctx)
@@ -281,6 +298,8 @@ void TileRawChannelBuilderFitFilter::pulseFit(const TileDigits *digit
   int drawer = m_tileHWID->drawer(adcId);
   unsigned int drawerIdx = TileCalibUtils::getDrawerIdx(ros, drawer);
 
+  bool demo = (m_specialDemoShape > 0) && std::binary_search(m_demoFragIDs.begin(), m_demoFragIDs.end(), (ros << 8) | drawer);
+
   // Estimate channel noise
   double rms = 0.0;
   int noise_channel = (ros < 3) ? channel : channel + 48;
@@ -346,7 +365,8 @@ void TileRawChannelBuilderFitFilter::pulseFit(const TileDigits *digit
                   << " idolas=" << m_idolas
                   << " idocis=" << m_idocis
                   << " CISchan=" << m_cischan
-                  << " capdaq=" << m_capdaq );
+                  << " capdaq=" << m_capdaq
+                  << " demoCh=" << ((demo)?"true":"false")  );
 
   std::vector<float> samples = digit->samples();
   samples.erase(samples.begin(),samples.begin()+m_firstSample);
@@ -461,7 +481,15 @@ void TileRawChannelBuilderFitFilter::pulseFit(const TileDigits *digit
   const std::vector<double>* tdleak = &m_dummy;
   const std::vector<double>* dleak = &m_dummy;
   
-  if (m_idocis && ((m_cischan == -1) || (channel == m_cischan))) { // CIS pulse
+
+  bool docis = m_idocis;
+  bool dolas = m_idolas;
+  if (demo) { // special treatment for Demo drawers - select different pulse shape
+    dolas = ((m_specialDemoShape == 2) || (m_specialDemoShape == 3 && m_capdaq > 10));
+    docis = (m_specialDemoShape == 8);
+  }
+
+  if (docis && ((m_cischan == -1) || (channel == m_cischan) || demo)) { // CIS pulse
     if (igain == 0) { // low gain
       if (m_capdaq > 10) { // 100 pF capacitor
         tpulse = &(m_pulseShapes->m_tlcis);
@@ -504,7 +532,7 @@ void TileRawChannelBuilderFitFilter::pulseFit(const TileDigits *digit
       }
     }
   } else {
-    if (m_idolas) { // laser pulse
+    if (dolas) { // laser pulse
       if (igain == 0) { // low gain
         tpulse = &(m_pulseShapes->m_tllas);
         ypulse = &(m_pulseShapes->m_yllas);
@@ -531,6 +559,11 @@ void TileRawChannelBuilderFitFilter::pulseFit(const TileDigits *digit
     }
   }
   
+  if (demo) {
+    docis = false;                  // never fit demo channels as CIS with signal and leakage pulses
+    dolas = (m_idocis || m_idolas); // use laser option, i.e. just single pulse without leakage pulse
+  }
+
   // Variables used for iterative fitting
   double gval, gpval, sy, syg, sygp, sg, sgp, sgg, sgpgp, sggp, serr, err2;
   double dgg0, dgg, dggp, dgpgp, dyg, dygp, dg, dc, xd;
@@ -557,7 +590,7 @@ void TileRawChannelBuilderFitFilter::pulseFit(const TileDigits *digit
     m_fnParameters[2] = 1.0;
 
     // CIS events linear fit
-    if (m_idocis && ((m_cischan == -1) || (channel == m_cischan))) {
+    if (docis && ((m_cischan == -1) || (channel == m_cischan))) {
       ATH_MSG_VERBOSE ( "Fit time with leakage" );
       // CIS Part (A): fit for time using leakage pulse
       sllp = 0.0;
@@ -810,7 +843,7 @@ void TileRawChannelBuilderFitFilter::pulseFit(const TileDigits *digit
         serr = 0.0;
 
         for (int isamp = 0; isamp < nfit; ++isamp) {
-          if (!m_idolas) {
+          if (!dolas) {
             // Use initial values for speeding up the physics events
             int jsamp = (int) xvec[isamp] - delta_peak;
             if (jsamp < 0)
@@ -891,7 +924,7 @@ void TileRawChannelBuilderFitFilter::pulseFit(const TileDigits *digit
         serr = 0.0;
 
         for (int isamp = 0; isamp < nfit; ++isamp) {
-          if ((niter == 1) && (!m_idolas)) {
+          if ((niter == 1) && (!dolas)) {
             // Use initial function values stored in array for niter=1 physics
             // XXX: double->int
             int jsamp = (int) xvec[isamp] - delta_peak;
@@ -1078,7 +1111,7 @@ void TileRawChannelBuilderFitFilter::pulseFit(const TileDigits *digit
   
 //  NGO never use the 2par fit result if non-pedestal event was detected!
 //  if ((fabs(fixchi2) <= fabs(p_chi2))
-//      && !(m_idocis && ((m_cischan == -1) || (channel == m_cischan)))) {
+//      && !(docis && ((m_cischan == -1) || (channel == m_cischan)))) {
 //    /* results from 2-par fit */
 //    p_time = fixtau;
 //    p_pedestal = fixped;
@@ -1111,7 +1144,7 @@ void TileRawChannelBuilderFitFilter::pulseFit(const TileDigits *digit
     m_fnParameters[2] = 1.0;
 
     // CIS events linear fit
-    if (m_idocis && ((m_cischan == -1) || (channel == m_cischan))) {
+    if (docis && ((m_cischan == -1) || (channel == m_cischan))) {
       if (!fixedTime) {
         ATH_MSG_VERBOSE ( "Fit time with leakage" );
         // CIS Part (A): fit for time using leakage pulse

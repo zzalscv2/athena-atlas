@@ -154,9 +154,10 @@ if __name__ == '__main__':
         ##################################################
         # jFEX Simulated TOBs
         ##################################################    
-        jFEX = CompFactory.LVL1.jFEXDriver('jFEXDriver')
-        jFEX.jSuperCellTowerMapperTool = CompFactory.LVL1.jSuperCellTowerMapper('jSuperCellTowerMapper')
-        jFEX.jSuperCellTowerMapperTool.SCellMasking = not flags.Input.isMC
+        jFEXInputs = CompFactory.LVL1.jTowerMakerFromSuperCells('jTowerMakerFromSuperCells')
+        jFEXInputs.jSuperCellTowerMapperTool = CompFactory.LVL1.jSuperCellTowerMapper('jSuperCellTowerMapper')
+        jFEXInputs.jSuperCellTowerMapperTool.SCellMasking = not flags.Input.isMC
+        jFEX = CompFactory.LVL1.jFEXDriver('jFEXDriver')        
         jFEX.jFEXSysSimTool = CompFactory.LVL1.jFEXSysSim('jFEXSysSimTool')
         
         #TOBs
@@ -186,6 +187,7 @@ if __name__ == '__main__':
         outputEDM += addEDM('xAOD::jFexTauRoIContainer'  , 'L1_jFexTauxRoISim'   )
         outputEDM += addEDM('xAOD::jFexFwdElRoIContainer', 'L1_jFexFwdElxRoISim' )
         
+        acc.addEventAlgo(jFEXInputs, sequenceName='AthAlgSeq')
         acc.addEventAlgo(jFEX, sequenceName='AthAlgSeq')   
         
         

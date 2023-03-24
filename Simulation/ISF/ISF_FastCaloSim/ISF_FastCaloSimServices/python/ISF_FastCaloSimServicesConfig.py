@@ -17,9 +17,9 @@ from FastCaloSim.FastCaloSimFactoryNew import (NITimedExtrapolatorCfg,
 
 def PunchThroughClassifierCfg(flags, name="ISF_PunchThroughClassifier", **kwargs):
     acc = ComponentAccumulator()
-    kwargs.setdefault("ScalerConfigFileName"     , "FastCaloSim/MC16/TFCSparam_mpt_classScaler_v02.xml" )
-    kwargs.setdefault("NetworkConfigFileName"     , "FastCaloSim/MC16/TFCSparam_mpt_classNet_v02.json" )
-    kwargs.setdefault("CalibratorConfigFileName"    , "FastCaloSim/MC16/TFCSparam_mpt_classCalib_v02.xml")
+    kwargs.setdefault("ScalerConfigFileName"     , "FastCaloSim/MC23/TFCSparam_mpt_classScaler_v03.xml" )
+    kwargs.setdefault("NetworkConfigFileName"     , "FastCaloSim/MC23/TFCSparam_mpt_classNet_v03.json" )
+    kwargs.setdefault("CalibratorConfigFileName"    , "FastCaloSim/MC23/TFCSparam_mpt_classCalib_v03.xml")
     acc.setPrivateTools(CompFactory.ISF.PunchThroughClassifier(name, **kwargs))
     return acc
 
@@ -34,9 +34,9 @@ def PunchThroughToolCfg(flags, name="ISF_PunchThroughTool", **kwargs):
         acc.addPublicTool(PT_classifier)
         kwargs.setdefault("PunchThroughClassifier", acc.getPublicTool(PT_classifier.name))
 
-    kwargs.setdefault("FilenameLookupTable"     , "FastCaloSim/MC16/TFCSparam_mpt_v05.root")
-    kwargs.setdefault("FilenameInverseCdf"      , "FastCaloSim/MC16/TFCSparam_mpt_inverseCdf_v02.xml")
-    kwargs.setdefault("FilenameInversePca"      , "FastCaloSim/MC16/TFCSparam_mpt_inversePca_v02.xml")
+    kwargs.setdefault("FilenameLookupTable"     , "FastCaloSim/MC23/TFCSparam_mpt_v06.root")
+    kwargs.setdefault("FilenameInverseCdf"      , "FastCaloSim/MC23/TFCSparam_mpt_inverseCdf_v03.xml")
+    kwargs.setdefault("FilenameInversePca"      , "FastCaloSim/MC23/TFCSparam_mpt_inversePca_v03.xml")
     kwargs.setdefault("PunchThroughInitiators"  , [ 211, 321, 311, 310, 130, 2212, 2112]        )
     kwargs.setdefault("InitiatorsMinEnergy"     , [ 65536, 65536, 65536, 65536, 65536, 65536, 65536]                                         )
     kwargs.setdefault("InitiatorsEtaRange"      , [ -3.2,   3.2 ]                               )

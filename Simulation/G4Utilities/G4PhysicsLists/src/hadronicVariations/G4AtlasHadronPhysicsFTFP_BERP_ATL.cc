@@ -54,15 +54,18 @@
 #include "G4ChipsKaonZeroInelasticXS.hh"
 #include "G4CrossSectionDataSetRegistry.hh"
 
-#include "G4HadronCaptureProcess.hh"
 #include "G4NeutronRadCapture.hh"
 #include "G4NeutronInelasticXS.hh"
 #include "G4NeutronCaptureXS.hh"
 
 #include "G4ProcessManager.hh"
 #include "G4BGGNucleonInelasticXS.hh"
+#if G4VERSION_NUMBER < 1100
 #include "G4PiNuclearCrossSection.hh"
 #include "G4CrossSectionPairGG.hh"
+#else
+#include "G4BGGPionInelasticXS.hh"
+#endif
 #include "G4ComponentAntiNuclNuclearXS.hh"
 #include "G4CrossSectionInelastic.hh"
 
@@ -114,7 +117,8 @@ G4AtlasHadronPhysicsFTFP_BERP_ATL::G4AtlasHadronPhysicsFTFP_BERP_ATL(G4int)
     , theAntiTritonInelastic(0)
     , theAntiHe3Inelastic(0)
     , theAntiAlphaInelastic(0)
-    , thePiXS(0)
+    , thePiPlusXS(0)
+    , thePiMinusXS(0)
     , theChipsHyperonInelasticXS(0)
     , theAntiNucleonXS(0)
     , theChipsKaonMinusXS(0)
@@ -165,7 +169,8 @@ G4AtlasHadronPhysicsFTFP_BERP_ATL::G4AtlasHadronPhysicsFTFP_BERP_ATL(const G4Str
     , theAntiTritonInelastic(0)
     , theAntiHe3Inelastic(0)
     , theAntiAlphaInelastic(0)
-    , thePiXS(0)
+    , thePiPlusXS(0)
+    , thePiMinusXS(0)
     , theChipsHyperonInelasticXS(0)
     , theAntiNucleonXS(0)
     , theChipsKaonMinusXS(0)
@@ -230,7 +235,14 @@ void G4AtlasHadronPhysicsFTFP_BERP_ATL::CreateModels()
   theNeutronCaptureModel->SetMaxEnergy( 100.0*TeV );
 
   // Cross sections
-  thePiXS = new G4CrossSectionPairGG( new G4PiNuclearCrossSection(), 91*GeV );
+#if G4VERSION_NUMBER < 1100
+  thePiPlusXS = new G4CrossSectionPairGG( new G4PiNuclearCrossSection(), 91*GeV );
+  thePiMinusXS = thePiPlusXS; 
+#else
+  thePiPlusXS = new G4BGGPionInelasticXS( G4PionPlus::Definition() );
+  thePiMinusXS = new G4BGGPionInelasticXS( G4PionMinus::Definition() );
+#endif
+
   theAntiNucleonXS = new G4CrossSectionInelastic( new G4ComponentAntiNuclNuclearXS() );
   theChipsHyperonInelasticXS = G4CrossSectionDataSetRegistry::Instance()->GetCrossSectionDataSet( G4ChipsHyperonInelasticXS::Default_Name() );
   theChipsKaonMinusXS        = G4CrossSectionDataSetRegistry::Instance()->GetCrossSectionDataSet( G4ChipsKaonMinusInelasticXS::Default_Name() );
@@ -267,176 +279,285 @@ void G4AtlasHadronPhysicsFTFP_BERP_ATL::ConstructProcess()
 
   G4ProcessManager * aProcMan = 0;
 
+#if G4VERSION_NUMBER < 1100
   theNeutronInelastic = new G4NeutronInelasticProcess();
+#else
+  theNeutronInelastic = new G4HadronInelasticProcess( "NeutronInelastic", G4Neutron::Definition() );
+#endif  
   theNeutronInelastic->RegisterMe( theModel1 );
   theNeutronInelastic->RegisterMe( theBertini1 );
   theNeutronInelastic->AddDataSet( new G4BGGNucleonInelasticXS( G4Neutron::Neutron() ) );
   theNeutronInelastic->AddDataSet( theNeutronInelasticXS );
   aProcMan = G4Neutron::Neutron()->GetProcessManager();
   aProcMan->AddDiscreteProcess( theNeutronInelastic );
+
+#if G4VERSION_NUMBER < 1100
   theNeutronCaptureProcess = new G4HadronCaptureProcess();
+#else
+  theNeutronCaptureProcess = new G4NeutronCaptureProcess();
+#endif
   theNeutronCaptureProcess->RegisterMe( theNeutronCaptureModel );
   theNeutronCaptureProcess->AddDataSet( theNeutronCaptureXS );
   aProcMan->AddDiscreteProcess( theNeutronCaptureProcess );
 
+#if G4VERSION_NUMBER < 1100
   theProtonInelastic = new G4ProtonInelasticProcess();
+#else
+  theProtonInelastic = new G4HadronInelasticProcess( "ProtonInelastic", G4Proton::Definition() );
+#endif
   theProtonInelastic->RegisterMe( theModel1 );
   theProtonInelastic->RegisterMe( theBertini1 );
   theProtonInelastic->AddDataSet( new G4BGGNucleonInelasticXS( G4Proton::Proton() ) );
   aProcMan = G4Proton::Proton()->GetProcessManager();
   aProcMan->AddDiscreteProcess( theProtonInelastic );
 
+#if G4VERSION_NUMBER < 1100
   thePionMinusInelastic = new G4PionMinusInelasticProcess();
+#else
+  thePionMinusInelastic = new G4HadronInelasticProcess( "PionMinusInelastic", G4PionMinus::Definition() );
+#endif
   thePionMinusInelastic->RegisterMe( theModel1 );
   thePionMinusInelastic->RegisterMe( theBertini1 );
-  thePionMinusInelastic->AddDataSet( thePiXS );
+  thePionMinusInelastic->AddDataSet( thePiMinusXS );
   aProcMan = G4PionMinus::PionMinus()->GetProcessManager();
   aProcMan->AddDiscreteProcess( thePionMinusInelastic );
 
+#if G4VERSION_NUMBER < 1100
   thePionPlusInelastic = new G4PionPlusInelasticProcess();
+#else
+  thePionPlusInelastic = new G4HadronInelasticProcess( "PionPlusInelastic", G4PionPlus::Definition() );
+#endif
   thePionPlusInelastic->RegisterMe( theModel1 );
   thePionPlusInelastic->RegisterMe( theBertini1 );
-  thePionPlusInelastic->AddDataSet( thePiXS );
+  thePionPlusInelastic->AddDataSet( thePiPlusXS );
   aProcMan = G4PionPlus::PionPlus()->GetProcessManager();
   aProcMan->AddDiscreteProcess( thePionPlusInelastic );
 
+#if G4VERSION_NUMBER < 1100
   theKaonMinusInelastic = new G4KaonMinusInelasticProcess();
+#else
+  theKaonMinusInelastic = new G4HadronInelasticProcess( "KaonMinusInelastic", G4KaonMinus::Definition() );
+#endif
   theKaonMinusInelastic->RegisterMe( theModel1 );
   theKaonMinusInelastic->RegisterMe( theBertini1 );
   theKaonMinusInelastic->AddDataSet( theChipsKaonMinusXS );
   aProcMan = G4KaonMinus::KaonMinus()->GetProcessManager();
   aProcMan->AddDiscreteProcess( theKaonMinusInelastic );
 
+#if G4VERSION_NUMBER < 1100
   theKaonPlusInelastic = new G4KaonPlusInelasticProcess();
+#else
+  theKaonPlusInelastic = new G4HadronInelasticProcess( "KaonPlusInelastic", G4KaonPlus::Definition() );
+#endif
   theKaonPlusInelastic->RegisterMe( theModel1 );
   theKaonPlusInelastic->RegisterMe( theBertini1 );
   theKaonPlusInelastic->AddDataSet( theChipsKaonPlusXS );
   aProcMan = G4KaonPlus::KaonPlus()->GetProcessManager();
   aProcMan->AddDiscreteProcess( theKaonPlusInelastic );
 
+#if G4VERSION_NUMBER < 1100
   theKaonZeroLInelastic = new G4KaonZeroLInelasticProcess();
+#else
+  theKaonZeroLInelastic = new G4HadronInelasticProcess( "KaonZeroLInelastic", G4KaonZeroLong::Definition() );
+#endif
   theKaonZeroLInelastic->RegisterMe( theModel1 );
   theKaonZeroLInelastic->RegisterMe( theBertini1 );
   theKaonZeroLInelastic->AddDataSet( theChipsKaonZeroXS );
   aProcMan = G4KaonZeroLong::KaonZeroLong()->GetProcessManager();
   aProcMan->AddDiscreteProcess( theKaonZeroLInelastic );
 
+#if G4VERSION_NUMBER < 1100
   theKaonZeroSInelastic = new G4KaonZeroSInelasticProcess();
+#else
+  theKaonZeroSInelastic = new G4HadronInelasticProcess( "KaonZeroSInelastic", G4KaonZeroShort::Definition() );
+#endif
   theKaonZeroSInelastic->RegisterMe( theModel1 );
   theKaonZeroSInelastic->RegisterMe( theBertini1 );
   theKaonZeroSInelastic->AddDataSet( theChipsKaonZeroXS );
   aProcMan = G4KaonZeroShort::KaonZeroShort()->GetProcessManager();
   aProcMan->AddDiscreteProcess( theKaonZeroSInelastic );
 
+#if G4VERSION_NUMBER < 1100
   theLambdaInelastic = new G4LambdaInelasticProcess();
+#else
+  theLambdaInelastic = new G4HadronInelasticProcess( "LambdaInelastic", G4Lambda::Definition() );
+#endif
   theLambdaInelastic->RegisterMe( theModel2 );
   theLambdaInelastic->RegisterMe( theBertini2 );
   theLambdaInelastic->AddDataSet( theChipsHyperonInelasticXS );
   aProcMan = G4Lambda::Lambda()->GetProcessManager();
   aProcMan->AddDiscreteProcess( theLambdaInelastic );
 
+#if G4VERSION_NUMBER < 1100
   theAntiLambdaInelastic = new G4AntiLambdaInelasticProcess();
+#else
+  theAntiLambdaInelastic = new G4HadronInelasticProcess( "AntiLambdaInelastic", G4AntiLambda::Definition() );
+#endif
   theAntiLambdaInelastic->RegisterMe( theModel3 );
   theAntiLambdaInelastic->AddDataSet( theChipsHyperonInelasticXS );
   aProcMan = G4AntiLambda::AntiLambda()->GetProcessManager();
   aProcMan->AddDiscreteProcess( theAntiLambdaInelastic );
 
+#if G4VERSION_NUMBER < 1100
   theSigmaMinusInelastic = new G4SigmaMinusInelasticProcess();
+#else
+  theSigmaMinusInelastic = new G4HadronInelasticProcess( "SigmaMinusInelastic", G4SigmaMinus::Definition() );
+#endif
   theSigmaMinusInelastic->RegisterMe( theModel2 );
   theSigmaMinusInelastic->RegisterMe( theBertini2 );
   theSigmaMinusInelastic->AddDataSet( theChipsHyperonInelasticXS );
   aProcMan = G4SigmaMinus::SigmaMinus()->GetProcessManager();
   aProcMan->AddDiscreteProcess( theSigmaMinusInelastic );
 
+#if G4VERSION_NUMBER < 1100
   theAntiSigmaMinusInelastic = new G4AntiSigmaMinusInelasticProcess();
+#else
+  theAntiSigmaMinusInelastic = new G4HadronInelasticProcess( "AntiSigmaMinusInelastic", G4AntiSigmaMinus::Definition() );
+#endif
   theAntiSigmaMinusInelastic->RegisterMe( theModel3 );
   theAntiSigmaMinusInelastic->AddDataSet( theChipsHyperonInelasticXS );
   aProcMan = G4AntiSigmaMinus::AntiSigmaMinus()->GetProcessManager();
   aProcMan->AddDiscreteProcess( theAntiSigmaMinusInelastic );
 
+#if G4VERSION_NUMBER < 1100
   theSigmaPlusInelastic = new G4SigmaPlusInelasticProcess();
+#else
+  theSigmaPlusInelastic = new G4HadronInelasticProcess( "SigmaPlusInelastic", G4SigmaPlus::Definition() );
+#endif
   theSigmaPlusInelastic->RegisterMe( theModel2 );
   theSigmaPlusInelastic->RegisterMe( theBertini2 );
   theSigmaPlusInelastic->AddDataSet( theChipsHyperonInelasticXS );
   aProcMan = G4SigmaPlus::SigmaPlus()->GetProcessManager();
   aProcMan->AddDiscreteProcess( theSigmaPlusInelastic );
 
+#if G4VERSION_NUMBER < 1100
   theAntiSigmaPlusInelastic = new G4AntiSigmaPlusInelasticProcess();
+#else
+  theAntiSigmaPlusInelastic = new G4HadronInelasticProcess( "AntiSigmaPlusInelastic", G4AntiSigmaPlus::Definition() );
+#endif
   theAntiSigmaPlusInelastic->RegisterMe( theModel3 );
   theAntiSigmaPlusInelastic->AddDataSet( theChipsHyperonInelasticXS );
   aProcMan = G4AntiSigmaPlus::AntiSigmaPlus()->GetProcessManager();
   aProcMan->AddDiscreteProcess( theAntiSigmaPlusInelastic );
 
+#if G4VERSION_NUMBER < 1100
   theXiMinusInelastic = new G4XiMinusInelasticProcess();
+#else
+  theXiMinusInelastic = new G4HadronInelasticProcess( "XiMinusInelastic", G4XiMinus::Definition() );
+#endif
   theXiMinusInelastic->RegisterMe( theModel2 );
   theXiMinusInelastic->RegisterMe( theBertini2 );
   theXiMinusInelastic->AddDataSet( theChipsHyperonInelasticXS );
   aProcMan = G4XiMinus::XiMinus()->GetProcessManager();
   aProcMan->AddDiscreteProcess( theXiMinusInelastic );
 
+#if G4VERSION_NUMBER < 1100
   theAntiXiMinusInelastic = new G4AntiXiMinusInelasticProcess();
+#else
+  theAntiXiMinusInelastic = new G4HadronInelasticProcess( "AntiXiMinusInelastic", G4AntiXiMinus::Definition() );
+#endif
   theAntiXiMinusInelastic->RegisterMe( theModel3 );
   theAntiXiMinusInelastic->AddDataSet( theChipsHyperonInelasticXS );
   aProcMan = G4AntiXiMinus::AntiXiMinus()->GetProcessManager();
   aProcMan->AddDiscreteProcess( theAntiXiMinusInelastic );
 
+#if G4VERSION_NUMBER < 1100
   theXiZeroInelastic = new G4XiZeroInelasticProcess();
+#else
+  theXiZeroInelastic = new G4HadronInelasticProcess( "XiZeroInelastic", G4XiZero::Definition() );
+#endif
   theXiZeroInelastic->RegisterMe( theModel2 );
   theXiZeroInelastic->RegisterMe( theBertini2 );
   theXiZeroInelastic->AddDataSet( theChipsHyperonInelasticXS );
   aProcMan = G4XiZero::XiZero()->GetProcessManager();
   aProcMan->AddDiscreteProcess( theXiZeroInelastic );
 
+#if G4VERSION_NUMBER < 1100
   theAntiXiZeroInelastic = new G4AntiXiZeroInelasticProcess();
+#else
+  theAntiXiZeroInelastic = new G4HadronInelasticProcess( "AntiXiZeroInelastic", G4AntiXiZero::Definition() );
+#endif
   theAntiXiZeroInelastic->RegisterMe( theModel3 );
   theAntiXiZeroInelastic->AddDataSet( theChipsHyperonInelasticXS );
   aProcMan = G4AntiXiZero::AntiXiZero()->GetProcessManager();
   aProcMan->AddDiscreteProcess( theAntiXiZeroInelastic );
 
+#if G4VERSION_NUMBER < 1100
   theOmegaMinusInelastic = new G4OmegaMinusInelasticProcess();
+#else
+  theOmegaMinusInelastic = new G4HadronInelasticProcess( "OmegaMinusInelastic", G4OmegaMinus::Definition() );
+#endif
   theOmegaMinusInelastic->RegisterMe( theModel2 );
   theOmegaMinusInelastic->RegisterMe( theBertini2 );
   theOmegaMinusInelastic->AddDataSet( theChipsHyperonInelasticXS );
   aProcMan = G4OmegaMinus::OmegaMinus()->GetProcessManager();
   aProcMan->AddDiscreteProcess( theOmegaMinusInelastic );
 
+#if G4VERSION_NUMBER < 1100
   theAntiOmegaMinusInelastic = new G4AntiOmegaMinusInelasticProcess();
+#else
+  theAntiOmegaMinusInelastic = new G4HadronInelasticProcess( "AntiOmegaMinusInelastic", G4AntiOmegaMinus::Definition() );
+#endif
   theAntiOmegaMinusInelastic->RegisterMe( theModel3 );
   theAntiOmegaMinusInelastic->AddDataSet( theChipsHyperonInelasticXS );
   aProcMan = G4AntiOmegaMinus::AntiOmegaMinus()->GetProcessManager();
   aProcMan->AddDiscreteProcess( theAntiOmegaMinusInelastic );
 
+#if G4VERSION_NUMBER < 1100
   theAntiProtonInelastic = new G4AntiProtonInelasticProcess();
+#else
+  theAntiProtonInelastic = new G4HadronInelasticProcess( "AntiProtonInelastic", G4AntiProton::Definition() );
+#endif
   theAntiProtonInelastic->RegisterMe( theModel3 );
   theAntiProtonInelastic->AddDataSet( theAntiNucleonXS );
   aProcMan = G4AntiProton::AntiProton()->GetProcessManager();
   aProcMan->AddDiscreteProcess( theAntiProtonInelastic );
 
+#if G4VERSION_NUMBER < 1100
   theAntiNeutronInelastic = new G4AntiNeutronInelasticProcess();
+#else
+  theAntiNeutronInelastic = new G4HadronInelasticProcess( "AntiNeutronInelastic", G4AntiNeutron::Definition() );
+#endif
   theAntiNeutronInelastic->RegisterMe( theModel3 );
   theAntiNeutronInelastic->AddDataSet( theAntiNucleonXS );
   aProcMan = G4AntiNeutron::AntiNeutron()->GetProcessManager();
   aProcMan->AddDiscreteProcess( theAntiNeutronInelastic );
 
+#if G4VERSION_NUMBER < 1100
   theAntiDeuteronInelastic = new G4AntiDeuteronInelasticProcess();
+#else
+  theAntiDeuteronInelastic = new G4HadronInelasticProcess( "AntiDeuteronInelastic", G4AntiDeuteron::Definition() );
+#endif
   theAntiDeuteronInelastic->RegisterMe( theModel3 );
   theAntiDeuteronInelastic->AddDataSet( theAntiNucleonXS );
   aProcMan = G4AntiDeuteron::AntiDeuteron()->GetProcessManager();
   aProcMan->AddDiscreteProcess( theAntiDeuteronInelastic );
 
+#if G4VERSION_NUMBER < 1100
   theAntiTritonInelastic = new G4AntiTritonInelasticProcess();
+#else
+  theAntiTritonInelastic = new G4HadronInelasticProcess( "AntiTritonInelastic", G4AntiTriton::Definition() );
+#endif
   theAntiTritonInelastic->RegisterMe( theModel3 );
   theAntiTritonInelastic->AddDataSet( theAntiNucleonXS );
   aProcMan = G4AntiTriton::AntiTriton()->GetProcessManager();
   aProcMan->AddDiscreteProcess( theAntiTritonInelastic );
 
+#if G4VERSION_NUMBER < 1100
   theAntiHe3Inelastic = new G4AntiHe3InelasticProcess();
+#else
+  theAntiHe3Inelastic = new G4HadronInelasticProcess( "AntiHe3Inelastic", G4AntiHe3::Definition() );
+#endif
   theAntiHe3Inelastic->RegisterMe( theModel3 );
   theAntiHe3Inelastic->AddDataSet( theAntiNucleonXS );
   aProcMan = G4AntiHe3::AntiHe3()->GetProcessManager();
   aProcMan->AddDiscreteProcess( theAntiHe3Inelastic );
 
+#if G4VERSION_NUMBER < 1100
   theAntiAlphaInelastic = new G4AntiAlphaInelasticProcess();
+#else
+  theAntiAlphaInelastic = new G4HadronInelasticProcess( "AntiAlphaInelastic", G4AntiAlpha::Definition() );
+#endif
   theAntiAlphaInelastic->RegisterMe( theModel3 );
   theAntiAlphaInelastic->AddDataSet( theAntiNucleonXS );
   aProcMan = G4AntiAlpha::AntiAlpha()->GetProcessManager();

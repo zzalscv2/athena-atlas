@@ -50,6 +50,7 @@
 #ifndef MONOPOLE_G4mplAtlasIonisationModel_h
 #define MONOPOLE_G4mplAtlasIonisationModel_h 1
 
+#include "G4Version.hh"
 #include "G4VEmModel.hh"
 #include "G4VEmFluctuationModel.hh"
 #include "G4Version.hh"
@@ -80,6 +81,7 @@ public:
                                       G4double maxEnergy) override final;
 
 
+#if G4VERSION_NUMBER < 1100
   virtual G4double SampleFluctuations(const G4MaterialCutsCouple* material,
                                       const G4DynamicParticle* dp,
                                       G4double tmax,
@@ -90,6 +92,20 @@ public:
                                       const G4DynamicParticle*,
                                       G4double tmax,
                                       G4double length) override final;
+#else
+  virtual G4double SampleFluctuations(const G4MaterialCutsCouple* material,
+                                      const G4DynamicParticle* dp,
+                                      const G4double tcut,
+                                      const G4double tmax,
+                                      const G4double length,
+                                      const G4double meanLoss) override final;
+
+  virtual G4double Dispersion(        const G4Material*,
+                                      const G4DynamicParticle*,
+                                      const G4double tcut,
+                                      const G4double tmax,
+                                      const G4double length) override final;
+#endif 
 
   // hide assignment operator and copy constructor
   G4mplAtlasIonisationModel & operator=(const  G4mplAtlasIonisationModel &right) = delete;
@@ -126,10 +142,18 @@ inline void G4mplAtlasIonisationModel::SampleSecondaries(
 {;}
 
 inline G4double G4mplAtlasIonisationModel::Dispersion(
+#if G4VERSION_NUMBER < 1100
                                                       const G4Material* material,
                                                       const G4DynamicParticle* dp,
                                                       G4double tmax,
                                                       G4double length)
+#else
+                                                      const G4Material* material,
+                                                      const G4DynamicParticle* dp,
+                                                      const G4double /*tcut*/,
+                                                      const G4double tmax,
+                                                      const G4double length)
+#endif
 {
   G4double siga = 0.0;
   G4double tau   = dp->GetKineticEnergy()/mass;

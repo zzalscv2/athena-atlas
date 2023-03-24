@@ -15,7 +15,6 @@
 #include <cstdlib>
 #include <string>
 #include <iostream>
-#include <boost/foreach.hpp>
 #include <vector>
 
 using namespace std;

@@ -16,17 +16,11 @@
 #include "FPTracker/getMagnetConfigFiles.h"
 #include "FPTracker/getAlfaMagnetConfigFiles.h"
 #include "FPTracker/ConfigData.h"
-//#include "FPTracker/readConfigData.h"
 #include "FPTracker/FPTrackerConstants.h"
 #include "FPTracker/Point.h"
-//Boost
-#include "boost/program_options/cmdline.hpp"
-#include "boost/program_options/options_description.hpp"
-#include "boost/program_options/parsers.hpp"
-#include "boost/program_options/variables_map.hpp"
 
 
-
+#include <memory>
 #include <iostream>
 #include <utility>
 

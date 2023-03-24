@@ -189,6 +189,10 @@ def DigitizationMainContentCfg(flags):
         from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
         acc.merge(PerfMonMTSvcCfg(flags))
 
+    # Add in-file MetaData
+    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
+    acc.merge(InfileMetaDataCfg(flags, "RDO"))
+
     return acc
 
 

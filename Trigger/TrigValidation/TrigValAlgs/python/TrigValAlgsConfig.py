@@ -57,3 +57,4 @@ if __name__ == '__main__':
     cfg = ComponentAccumulator()
     cfg.merge( TrigEDMCheckerCfg(flags) )
     cfg.merge( TrigEDMAuxCheckerCfg(flags) )
+    cfg.wasMerged()

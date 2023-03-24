@@ -10,6 +10,7 @@
 #include "LArG4TBECBeamChCalculator.h"
 #include "LArG4TBECBeamChHit.h"
 
+#include "G4Version.hh"
 #include "G4Step.hh"
 #include "G4ios.hh"
 
@@ -25,11 +26,16 @@ LArG4TBECBeamChSensitiveDetector::LArG4TBECBeamChSensitiveDetector(G4String a_na
   // a sensitive detector.  Hit collection names can't have any
   // slashes ("/"), because that confuses the name with the sensitive
   // detector names.
+#if G4VERSION_NUMBER < 1100
   G4String HCname = m_detectorName.strip(G4String::both,'/');
   if ( HCname.contains('/') )
+#else
+  G4String HCname = G4StrUtil::strip_copy(m_detectorName,'/');
+  if ( G4StrUtil::contains(HCname, '/') )
+#endif
     {
-      G4int lastSlash = HCname.last('/');
-      HCname.remove(0,lastSlash+1);
+      G4int lastSlash = HCname.rfind('/');
+      HCname.erase(0,lastSlash+1);
     }
 
   // This is the name to search for in the hit-collection table.

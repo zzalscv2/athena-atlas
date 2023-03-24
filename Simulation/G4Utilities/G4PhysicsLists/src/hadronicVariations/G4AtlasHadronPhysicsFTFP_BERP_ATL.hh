@@ -38,6 +38,7 @@
 #ifndef G4AtlasHadronPhysicsFTFP_BERP_ATL_h
 #define G4AtlasHadronPhysicsFTFP_BERP_ATL_h 1
 
+#include "G4Version.hh"
 #include "globals.hh"
 #include "G4ios.hh"
 
@@ -55,8 +56,13 @@
 #include "G4QuasiElasticChannel.hh"
 #include "G4CascadeInterface.hh"
 
-#include "G4HadronFissionProcess.hh"
+#if G4VERSION_NUMBER < 1100
 #include "G4HadronCaptureProcess.hh"
+#else
+#include "G4NeutronCaptureProcess.hh"
+#endif
+
+#if G4VERSION_NUMBER < 1100
 
 #include "G4NeutronInelasticProcess.hh"
 #include "G4ProtonInelasticProcess.hh"
@@ -86,6 +92,10 @@
 #include "G4AntiTritonInelasticProcess.hh"
 #include "G4AntiHe3InelasticProcess.hh"
 #include "G4AntiAlphaInelasticProcess.hh"
+
+#else
+#include "G4HadronInelasticProcess.hh"
+#endif
 
 #include "G4ChipsHyperonInelasticXS.hh"
 
@@ -119,8 +129,13 @@ class G4AtlasHadronPhysicsFTFP_BERP_ATL : public G4VPhysicsConstructor
     G4CascadeInterface * theBertini1;
     G4CascadeInterface * theBertini2;
 
+#if G4VERSION_NUMBER < 1100
     G4HadronCaptureProcess * theNeutronCaptureProcess;
+#else
+    G4NeutronCaptureProcess * theNeutronCaptureProcess;
+#endif
 
+#if G4VERSION_NUMBER < 1100
     G4NeutronInelasticProcess *   theNeutronInelastic;
     G4ProtonInelasticProcess *    theProtonInelastic;
     G4PionMinusInelasticProcess * thePionMinusInelastic;
@@ -149,8 +164,39 @@ class G4AtlasHadronPhysicsFTFP_BERP_ATL : public G4VPhysicsConstructor
     G4AntiTritonInelasticProcess *   theAntiTritonInelastic;
     G4AntiHe3InelasticProcess *      theAntiHe3Inelastic;
     G4AntiAlphaInelasticProcess *    theAntiAlphaInelastic;
+#else
+    G4HadronInelasticProcess*   theNeutronInelastic;
+    G4HadronInelasticProcess*    theProtonInelastic;
+    G4HadronInelasticProcess* thePionMinusInelastic;
+    G4HadronInelasticProcess*  thePionPlusInelastic;
+    G4HadronInelasticProcess* theKaonMinusInelastic;
+    G4HadronInelasticProcess*  theKaonPlusInelastic;
+    G4HadronInelasticProcess* theKaonZeroLInelastic;
+    G4HadronInelasticProcess* theKaonZeroSInelastic;
 
-    G4VCrossSectionDataSet * thePiXS;
+    G4HadronInelasticProcess*         theLambdaInelastic;
+    G4HadronInelasticProcess*     theAntiLambdaInelastic;
+    G4HadronInelasticProcess*     theSigmaMinusInelastic;
+    G4HadronInelasticProcess* theAntiSigmaMinusInelastic;
+    G4HadronInelasticProcess*      theSigmaPlusInelastic;
+    G4HadronInelasticProcess*  theAntiSigmaPlusInelastic;
+    G4HadronInelasticProcess*         theXiZeroInelastic;
+    G4HadronInelasticProcess*     theAntiXiZeroInelastic;
+    G4HadronInelasticProcess*        theXiMinusInelastic;
+    G4HadronInelasticProcess*    theAntiXiMinusInelastic;
+    G4HadronInelasticProcess*     theOmegaMinusInelastic;
+    G4HadronInelasticProcess* theAntiOmegaMinusInelastic;
+
+    G4HadronInelasticProcess*   theAntiProtonInelastic;
+    G4HadronInelasticProcess*  theAntiNeutronInelastic;
+    G4HadronInelasticProcess* theAntiDeuteronInelastic;
+    G4HadronInelasticProcess*   theAntiTritonInelastic;
+    G4HadronInelasticProcess*      theAntiHe3Inelastic;
+    G4HadronInelasticProcess*    theAntiAlphaInelastic;
+#endif
+
+    G4VCrossSectionDataSet * thePiPlusXS;
+    G4VCrossSectionDataSet * thePiMinusXS;
     G4VCrossSectionDataSet * theChipsHyperonInelasticXS;
     G4VCrossSectionDataSet * theAntiNucleonXS;
     G4VCrossSectionDataSet * theChipsKaonMinusXS;

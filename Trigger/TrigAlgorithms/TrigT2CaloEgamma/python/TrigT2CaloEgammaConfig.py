@@ -1,7 +1,9 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
+from TrigEDMConfig.TriggerEDMRun3 import recordable
 from TrigT2CaloCalibration.EgammaCalibrationConfig import (EgammaHitsCalibrationBarrelConfig,
                                                            EgammaHitsCalibrationEndcapConfig,
                                                            EgammaGapCalibrationConfig,
@@ -18,6 +20,9 @@ _T2CaloEgamma_ExtraInputs = [
     ('LArBadChannelCont' , 'ConditionStore+LArBadChannel')
 ]
 
+#local variable
+from HLTSeeding.HLTSeedingConfig import mapThresholdToL1RoICollection
+inputEDM = mapThresholdToL1RoICollection("FSNOSEED")
 
 def RingerReFexConfig(flags, name="RingerReMaker", RingerKey="FastCaloRings",
                       ClustersName="HLT_FastCaloEMClusters"):
@@ -72,7 +77,8 @@ def AsymRingerReFexConfig(flags, name="AsymRingerReMaker"):
 
 #=======================================================================
 
-def T2CaloEgamma_All(flags, name="T2CaloEgamma_All"):
+def t2CaloEgamma_AllCfg(flags, name="T2CaloEgamma_All",RoIs=inputEDM,ExtraInputs=[], ClustersName="HLT_FastCaloEMClusters"):
+    acc = ComponentAccumulator()
     tool = CompFactory.EgammaAllFex("EgammaAllFex",
                                     IncludeHad=True,
                                     ExtraInputs=[('TileEMScale','ConditionStore+TileEMScale'),
@@ -82,12 +88,16 @@ def T2CaloEgamma_All(flags, name="T2CaloEgamma_All"):
                                              EtaWidth = 0.1,
                                              PhiWidth = 0.1,
                                              ExtraInputs = _T2CaloEgamma_ExtraInputs)
-    return alg
+    alg.RoIs=RoIs
+    alg.ExtraInputs+=ExtraInputs
+    alg.ClustersName = recordable(ClustersName)
+    acc.addEventAlgo(alg)
+    return acc
 
 #=======================================================================
 
-def T2CaloEgamma_AllEm(flags, name="T2CaloEgamma_AllEm"):
-
+def t2CaloEgamma_AllEmCfg(flags, name="T2CaloEgamma_AllEm", RoIs=inputEDM, ExtraInputs=[], ClustersName="HLT_FastCaloEMClusters"):
+    acc = ComponentAccumulator()
     tool = CompFactory.EgammaAllFex("EgammaAllEmFex",
                                     ExtraInputs=[('TileEMScale','ConditionStore+TileEMScale'),
                                                  ('TileBadChannels','ConditionStore+TileBadChannels')])
@@ -97,12 +107,17 @@ def T2CaloEgamma_AllEm(flags, name="T2CaloEgamma_AllEm"):
                                              EtaWidth = 0.1,
                                              PhiWidth = 0.1,
                                              ExtraInputs = _T2CaloEgamma_ExtraInputs)
-    return alg
+    alg.RoIs=RoIs
+    alg.ExtraInputs+=ExtraInputs
+    alg.ClustersName = recordable(ClustersName)
+    acc.addEventAlgo(alg)
+    return acc
 
 #=======================================================================
 
-def T2CaloEgamma_ReFastAlgo(flags, name="T2CaloEgamma_ReFastAlgo", ClustersName="HLT_FastCaloEMClusters",
-                            doRinger=False, RingerKey="HLT_FastCaloRinger"):
+def t2CaloEgamma_ReFastAlgoCfg(flags, name="T2CaloEgamma_ReFastAlgo", ClustersName="HLT_FastCaloEMClusters",
+                            doRinger=False, RingerKey="HLT_FastCaloRinger", RoIs=inputEDM, ExtraInputs=[]):
+    acc = ComponentAccumulator()
 
     samp2 = CompFactory.EgammaReSamp2Fex("ReFaAlgoSamp2FexConfig",
                                          MaxDetaHotCell=0.15, MaxDphiHotCell=0.15 )
@@ -111,6 +126,15 @@ def T2CaloEgamma_ReFastAlgo(flags, name="T2CaloEgamma_ReFastAlgo", ClustersName=
     samph = CompFactory.EgammaReHadEnFex("ReFaAlgoHadEnFexConfig",
                                          ExtraInputs=[('TileEMScale','ConditionStore+TileEMScale'),
                                                       ('TileBadChannels','ConditionStore+TileBadChannels')])
+    monTool = GenericMonitoringTool(flags, 'MonTool')
+    monTool.defineHistogram('TrigEMCluster_eT', path='EXPERT', type='TH1F', title="T2Calo Egamma E_T; E_T [ GeV ] ; Nclusters", xbins=80, xmin=0.0, xmax=80.0)
+    monTool.defineHistogram('TrigEMCluster_had1', path='EXPERT', type='TH1F', title="T2Calo Egamma had E_T samp1; had E_T samp1 [ GeV ] ; Nclusters", xbins=80, xmin=0.0, xmax=8.0)
+    monTool.defineHistogram('TrigEMCluster_eta', path='EXPERT', type='TH1F', title="T2Calo Egamma #eta; #eta ; Nclusters", xbins=100, xmin=-2.5, xmax=2.5)
+    monTool.defineHistogram('TrigEMCluster_phi', path='EXPERT', type='TH1F', title="T2Calo Egamma #phi; #phi ; Nclusters", xbins=128, xmin=-3.2, xmax=3.2)
+    monTool.defineHistogram('TrigEMCluster_eta,TrigEMCluster_phi', path='EXPERT', type='TH2F', title="T2Calo Egamma Number of Clusters; #eta ; #phi ; Number of Clusters", xbins=100, xmin=-2.5, xmax=2.5, ybins=128, ymin=-3.2, ymax=3.2)
+    monTool.defineHistogram('TrigEMCluster_rEta', path='EXPERT', type='TH1F', title="T2Calo Egamma rEta; rEta (e237/e277) ; Nclusters", xbins=140, xmin=-0.2, xmax=1.2)
+    monTool.defineHistogram('TIME_exec', path='EXPERT', type='TH1F', title="T2Calo Egamma time; time [ us ] ; Nruns", xbins=80, xmin=0.0, xmax=8000.0)
+    monTool.defineHistogram('TrigEMCluster_eta,TIME_exec', path='EXPERT', type='TH2F', title="T2Calo Egamma time vs #eta ; #eta ; time [ us ]", xbins=100, xmin=-2.5, xmax=2.5, ybins=80, ymin=0.0, ymax=8000.0)
 
     alg = CompFactory.T2CaloEgammaReFastAlgo(
         name,
@@ -118,6 +142,7 @@ def T2CaloEgamma_ReFastAlgo(flags, name="T2CaloEgamma_ReFastAlgo", ClustersName=
         ExtraInputs = _T2CaloEgamma_ExtraInputs,
         EtaWidth = 0.2,
         PhiWidth = 0.2,
+        MonTool = monTool,
         CalibListBarrel = [EgammaSshapeCalibrationBarrelConfig(),
                            EgammaHitsCalibrationBarrelConfig(),
                            EgammaGapCalibrationConfig(),
@@ -132,31 +157,29 @@ def T2CaloEgamma_ReFastAlgo(flags, name="T2CaloEgamma_ReFastAlgo", ClustersName=
                                    ClustersName = ClustersName)
         alg.IReAlgToolList += [ringer]
 
-    monTool = GenericMonitoringTool(flags, 'MonTool')
-    monTool.defineHistogram('TrigEMCluster_eT', path='EXPERT', type='TH1F', title="T2Calo Egamma E_T; E_T [ GeV ] ; Nclusters", xbins=80, xmin=0.0, xmax=80.0)
-    monTool.defineHistogram('TrigEMCluster_had1', path='EXPERT', type='TH1F', title="T2Calo Egamma had E_T samp1; had E_T samp1 [ GeV ] ; Nclusters", xbins=80, xmin=0.0, xmax=8.0)
-    monTool.defineHistogram('TrigEMCluster_eta', path='EXPERT', type='TH1F', title="T2Calo Egamma #eta; #eta ; Nclusters", xbins=100, xmin=-2.5, xmax=2.5)
-    monTool.defineHistogram('TrigEMCluster_phi', path='EXPERT', type='TH1F', title="T2Calo Egamma #phi; #phi ; Nclusters", xbins=128, xmin=-3.2, xmax=3.2)
-    monTool.defineHistogram('TrigEMCluster_eta,TrigEMCluster_phi', path='EXPERT', type='TH2F', title="T2Calo Egamma Number of Clusters; #eta ; #phi ; Number of Clusters", xbins=100, xmin=-2.5, xmax=2.5, ybins=128, ymin=-3.2, ymax=3.2)
-    monTool.defineHistogram('TrigEMCluster_rEta', path='EXPERT', type='TH1F', title="T2Calo Egamma rEta; rEta (e237/e277) ; Nclusters", xbins=140, xmin=-0.2, xmax=1.2)
-    monTool.defineHistogram('TIME_exec', path='EXPERT', type='TH1F', title="T2Calo Egamma time; time [ us ] ; Nruns", xbins=80, xmin=0.0, xmax=8000.0)
-    monTool.defineHistogram('TrigEMCluster_eta,TIME_exec', path='EXPERT', type='TH2F', title="T2Calo Egamma time vs #eta ; #eta ; time [ us ]", xbins=100, xmin=-2.5, xmax=2.5, ybins=80, ymin=0.0, ymax=8000.0)
-
-    alg.MonTool = monTool
-    return alg
+    alg.RoIs=RoIs
+    alg.ExtraInputs+=ExtraInputs
+    alg.ClustersName = recordable(ClustersName)
+    acc.addEventAlgo(alg)
+    return acc
 
 #=======================================================================
 
-def T2CaloEgamma_ReFastFWDAlgo(flags, name="T2CaloEgamma_ReFastFWDAlgo",
+def t2CaloEgamma_ReFastFWDAlgoCfg(flags,  name="T2CaloEgamma_ReFastFWDAlgo",
                                ClustersName="HLT_FWDFastCaloEMClusters",
-                               doRinger=False, RingerKey="HLT_FWDFastCaloRinger"):
+                               doRinger=False, RingerKey="HLT_FWDFastCaloRinger", RoIs=inputEDM, ExtraInputs=[]):
+    acc = ComponentAccumulator()
 
     alg = CompFactory.T2CaloEgammaForwardReFastAlgo(name,
                                                     IReAlgToolList = [],
                                                     ExtraInputs = _T2CaloEgamma_ExtraInputs,
                                                     EtaWidth = 0.2,
                                                     PhiWidth = 0.2)
-    return alg
+    alg.RoIs=RoIs
+    alg.ExtraInputs+=ExtraInputs
+    alg.ClustersName = recordable(ClustersName)
+    acc.addEventAlgo(alg)
+    return acc
 
 #=======================================================================
 
@@ -165,5 +188,8 @@ if __name__ == '__main__':
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
     flags.lock()
-    alg = T2CaloEgamma_ReFastAlgo(flags, doRinger=True)
-    print(alg)
+    t2CaloEgamma_ReFastAlgoCfg(flags, "FastCaloL2EgammaAlgo_noRinger").printConfig(withDetails=True,summariseProps=True)
+    t2CaloEgamma_ReFastAlgoCfg(flags, "FastCaloL2EgammaAlgo", doRinger=True).printConfig(withDetails=True,summariseProps=True)
+    t2CaloEgamma_AllCfg(flags).printConfig(withDetails=True,summariseProps=True)
+    t2CaloEgamma_AllEmCfg(flags).printConfig(withDetails=True,summariseProps=True)
+    t2CaloEgamma_ReFastFWDAlgoCfg(flags, ClustersName="HLT_FastCaloEMClusters", doRinger=True).printConfig(withDetails=True,summariseProps=True)

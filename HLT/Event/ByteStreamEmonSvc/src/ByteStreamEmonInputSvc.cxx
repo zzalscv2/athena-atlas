@@ -34,9 +34,6 @@
 #include <csignal>
 #include <sstream>
 
-#include <boost/algorithm/string.hpp>
-#include <boost/preprocessor/repetition.hpp>
-
 #include <memory>
 
 namespace {

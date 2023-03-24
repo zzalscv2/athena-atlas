@@ -5112,7 +5112,11 @@ HLT_e26_lhtight_ivarloose_tau160_mediumRNN_tracktwoMVA_probe_03dRAB_L1EM22VHI:
   eventCount: 0
   stepFeatures:
     0: 7
-HLT_e26_lhtight_ivarloose_tau160_mediumRNN_tracktwoMVA_probe_03dRAB_L1eEM26M:
+HLT_e26_lhtight_ivarloose_tau160_mediumRNN_tracktwoMVA_probe_L1TAU100_03dRAB_L1eEM26M:
+  eventCount: 0
+  stepFeatures:
+    0: 8
+HLT_e26_lhtight_ivarloose_tau160_mediumRNN_tracktwoMVA_probe_L1eTAU140_03dRAB_L1eEM26M:
   eventCount: 0
   stepCounts:
     0: 1
@@ -5134,7 +5138,11 @@ HLT_e26_lhtight_ivarloose_tau180_mediumRNN_tracktwoLLP_probe_03dRAB_L1EM22VHI:
   eventCount: 0
   stepFeatures:
     0: 7
-HLT_e26_lhtight_ivarloose_tau180_mediumRNN_tracktwoLLP_probe_03dRAB_L1eEM26M:
+HLT_e26_lhtight_ivarloose_tau180_mediumRNN_tracktwoLLP_probe_L1TAU100_03dRAB_L1eEM26M:
+  eventCount: 0
+  stepFeatures:
+    0: 8
+HLT_e26_lhtight_ivarloose_tau180_mediumRNN_tracktwoLLP_probe_L1eTAU140_03dRAB_L1eEM26M:
   eventCount: 0
   stepCounts:
     0: 1
@@ -5179,7 +5187,34 @@ HLT_e26_lhtight_ivarloose_tau20_mediumRNN_tracktwoMVA_probe_03dRAB_L1EM22VHI:
     9: 14
     10: 14
     11: 3
-HLT_e26_lhtight_ivarloose_tau20_mediumRNN_tracktwoMVA_probe_03dRAB_L1eEM26M:
+HLT_e26_lhtight_ivarloose_tau20_mediumRNN_tracktwoMVA_probe_L1TAU8_03dRAB_L1eEM26M:
+  eventCount: 0
+  stepCounts:
+    0: 8
+    1: 8
+    2: 6
+    3: 6
+    4: 6
+    5: 6
+    6: 6
+    7: 6
+    8: 6
+    9: 6
+    10: 6
+  stepFeatures:
+    0: 8
+    1: 8
+    2: 10
+    3: 6
+    4: 6
+    5: 6
+    6: 6
+    7: 17
+    8: 17
+    9: 17
+    10: 17
+    11: 4
+HLT_e26_lhtight_ivarloose_tau20_mediumRNN_tracktwoMVA_probe_L1eTAU12_03dRAB_L1eEM26M:
   eventCount: 0
   stepCounts:
     0: 8
@@ -5233,7 +5268,34 @@ HLT_e26_lhtight_ivarloose_tau25_mediumRNN_tracktwoMVA_probe_03dRAB_L1EM22VHI:
     9: 8
     10: 8
     11: 3
-HLT_e26_lhtight_ivarloose_tau25_mediumRNN_tracktwoMVA_probe_03dRAB_L1eEM26M:
+HLT_e26_lhtight_ivarloose_tau25_mediumRNN_tracktwoMVA_probe_L1TAU12IM_03dRAB_L1eEM26M:
+  eventCount: 0
+  stepCounts:
+    0: 8
+    1: 8
+    2: 6
+    3: 6
+    4: 6
+    5: 6
+    6: 6
+    7: 6
+    8: 6
+    9: 6
+    10: 6
+  stepFeatures:
+    0: 8
+    1: 8
+    2: 10
+    3: 6
+    4: 6
+    5: 6
+    6: 6
+    7: 10
+    8: 10
+    9: 10
+    10: 10
+    11: 4
+HLT_e26_lhtight_ivarloose_tau25_mediumRNN_tracktwoMVA_probe_L1cTAU20M_03dRAB_L1eEM26M:
   eventCount: 0
   stepCounts:
     0: 8
@@ -5287,7 +5349,34 @@ HLT_e26_lhtight_ivarloose_tau35_mediumRNN_tracktwoMVA_probe_03dRAB_L1EM22VHI:
     9: 8
     10: 8
     11: 3
-HLT_e26_lhtight_ivarloose_tau35_mediumRNN_tracktwoMVA_probe_03dRAB_L1eEM26M:
+HLT_e26_lhtight_ivarloose_tau35_mediumRNN_tracktwoMVA_probe_L1TAU20IM_03dRAB_L1eEM26M:
+  eventCount: 0
+  stepCounts:
+    0: 8
+    1: 8
+    2: 6
+    3: 6
+    4: 6
+    5: 6
+    6: 6
+    7: 6
+    8: 6
+    9: 6
+    10: 6
+  stepFeatures:
+    0: 8
+    1: 8
+    2: 10
+    3: 6
+    4: 6
+    5: 6
+    6: 6
+    7: 9
+    8: 9
+    9: 9
+    10: 9
+    11: 3
+HLT_e26_lhtight_ivarloose_tau35_mediumRNN_tracktwoMVA_probe_L1cTAU30M_03dRAB_L1eEM26M:
   eventCount: 0
   stepCounts:
     0: 8
@@ -5341,7 +5430,34 @@ HLT_e26_lhtight_ivarloose_tau40_mediumRNN_tracktwoMVA_probe_03dRAB_L1EM22VHI:
     9: 7
     10: 7
     11: 3
-HLT_e26_lhtight_ivarloose_tau40_mediumRNN_tracktwoMVA_probe_03dRAB_L1eEM26M:
+HLT_e26_lhtight_ivarloose_tau40_mediumRNN_tracktwoMVA_probe_L1TAU25IM_03dRAB_L1eEM26M:
+  eventCount: 0
+  stepCounts:
+    0: 8
+    1: 8
+    2: 6
+    3: 6
+    4: 6
+    5: 6
+    6: 6
+    7: 6
+    8: 6
+    9: 6
+    10: 6
+  stepFeatures:
+    0: 8
+    1: 8
+    2: 10
+    3: 6
+    4: 6
+    5: 6
+    6: 6
+    7: 8
+    8: 8
+    9: 8
+    10: 8
+    11: 3
+HLT_e26_lhtight_ivarloose_tau40_mediumRNN_tracktwoMVA_probe_L1cTAU35M_03dRAB_L1eEM26M:
   eventCount: 0
   stepCounts:
     0: 8
@@ -5395,7 +5511,34 @@ HLT_e26_lhtight_ivarloose_tau60_mediumRNN_tracktwoLLP_probe_03dRAB_L1EM22VHI:
     9: 4
     10: 4
     11: 2
-HLT_e26_lhtight_ivarloose_tau60_mediumRNN_tracktwoLLP_probe_03dRAB_L1eEM26M:
+HLT_e26_lhtight_ivarloose_tau60_mediumRNN_tracktwoLLP_probe_L1TAU40_03dRAB_L1eEM26M:
+  eventCount: 0
+  stepCounts:
+    0: 7
+    1: 7
+    2: 5
+    3: 5
+    4: 5
+    5: 5
+    6: 5
+    7: 4
+    8: 4
+    9: 4
+    10: 4
+  stepFeatures:
+    0: 8
+    1: 7
+    2: 9
+    3: 5
+    4: 5
+    5: 5
+    6: 5
+    7: 5
+    8: 5
+    9: 5
+    10: 5
+    11: 2
+HLT_e26_lhtight_ivarloose_tau60_mediumRNN_tracktwoLLP_probe_L1eTAU60_03dRAB_L1eEM26M:
   eventCount: 0
   stepCounts:
     0: 7
@@ -5449,7 +5592,34 @@ HLT_e26_lhtight_ivarloose_tau60_mediumRNN_tracktwoMVA_probe_03dRAB_L1EM22VHI:
     9: 4
     10: 4
     11: 2
-HLT_e26_lhtight_ivarloose_tau60_mediumRNN_tracktwoMVA_probe_03dRAB_L1eEM26M:
+HLT_e26_lhtight_ivarloose_tau60_mediumRNN_tracktwoMVA_probe_L1TAU40_03dRAB_L1eEM26M:
+  eventCount: 0
+  stepCounts:
+    0: 7
+    1: 7
+    2: 5
+    3: 5
+    4: 5
+    5: 5
+    6: 5
+    7: 4
+    8: 4
+    9: 4
+    10: 4
+  stepFeatures:
+    0: 8
+    1: 7
+    2: 9
+    3: 5
+    4: 5
+    5: 5
+    6: 5
+    7: 5
+    8: 5
+    9: 5
+    10: 5
+    11: 2
+HLT_e26_lhtight_ivarloose_tau60_mediumRNN_tracktwoMVA_probe_L1eTAU60_03dRAB_L1eEM26M:
   eventCount: 0
   stepCounts:
     0: 7
@@ -5503,7 +5673,34 @@ HLT_e26_lhtight_ivarloose_tau80_mediumRNN_tracktwoLLP_probe_03dRAB_L1EM22VHI:
     9: 1
     10: 1
     11: 1
-HLT_e26_lhtight_ivarloose_tau80_mediumRNN_tracktwoLLP_probe_03dRAB_L1eEM26M:
+HLT_e26_lhtight_ivarloose_tau80_mediumRNN_tracktwoLLP_probe_L1TAU60_03dRAB_L1eEM26M:
+  eventCount: 0
+  stepCounts:
+    0: 6
+    1: 6
+    2: 4
+    3: 4
+    4: 4
+    5: 4
+    6: 4
+    7: 2
+    8: 2
+    9: 2
+    10: 2
+  stepFeatures:
+    0: 8
+    1: 6
+    2: 7
+    3: 4
+    4: 4
+    5: 4
+    6: 4
+    7: 2
+    8: 2
+    9: 2
+    10: 2
+    11: 1
+HLT_e26_lhtight_ivarloose_tau80_mediumRNN_tracktwoLLP_probe_L1eTAU80_03dRAB_L1eEM26M:
   eventCount: 0
   stepCounts:
     0: 6
@@ -5557,7 +5754,34 @@ HLT_e26_lhtight_ivarloose_tau80_mediumRNN_tracktwoMVA_probe_03dRAB_L1EM22VHI:
     9: 1
     10: 1
     11: 1
-HLT_e26_lhtight_ivarloose_tau80_mediumRNN_tracktwoMVA_probe_03dRAB_L1eEM26M:
+HLT_e26_lhtight_ivarloose_tau80_mediumRNN_tracktwoMVA_probe_L1TAU60_03dRAB_L1eEM26M:
+  eventCount: 0
+  stepCounts:
+    0: 6
+    1: 6
+    2: 4
+    3: 4
+    4: 4
+    5: 4
+    6: 4
+    7: 2
+    8: 2
+    9: 2
+    10: 2
+  stepFeatures:
+    0: 8
+    1: 6
+    2: 7
+    3: 4
+    4: 4
+    5: 4
+    6: 4
+    7: 2
+    8: 2
+    9: 2
+    10: 2
+    11: 1
+HLT_e26_lhtight_ivarloose_tau80_mediumRNN_tracktwoMVA_probe_L1eTAU80_03dRAB_L1eEM26M:
   eventCount: 0
   stepCounts:
     0: 6
