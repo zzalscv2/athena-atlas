@@ -48,6 +48,8 @@ def LArBadChannelDBAlgCfg(flags,InputFile,dbname="LAR_OFL",folder=None,tag=None,
     theLArDBAlg=CompFactory.LArBadChannelDBAlg()
     theLArDBAlg.WritingMode = 0
     theLArDBAlg.DBFolder=folder
+    if flags.LArCalib.isSC:
+       theLArDBAlg.SuperCell=True
     result.addEventAlgo(theLArDBAlg)
 
     from RegistrationServices.OutputConditionsAlgConfig import OutputConditionsAlgCfg

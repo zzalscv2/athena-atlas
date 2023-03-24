@@ -96,29 +96,6 @@ namespace LArBadChannelDBTools {
       }
     }
 
-    if ( attrListColl->size() == 1) {
-      // Protect against collections with a single element: currently Athena cannot 
-      // read them back. We just add an empty EMBA or EMBC channel to the collection...
-      LArBadChannelState::CoolChannelEnum cc = LArBadChannelState::EMBA;
-      if (!bcState.coolChannel( cc).empty()) cc = LArBadChannelState::EMBC;
-      AthenaAttributeList* ilist = 
-	createChanPayload( bcState.coolChannel( cc).stateVector(), *spec);
-      CondAttrListCollection::ChanNum chanNum = cc;
-      attrListColl->add(chanNum, *ilist);
-    }
-    else if (attrListColl->size() == 0) {
-      // Create empty collection with two COOL channels to maks sure it is stored 
-      // as a collection
-      for (int i=0; i<2; i++) {
-	LArBadChannelState::CoolChannelEnum cc = 
-	  static_cast<LArBadChannelState::CoolChannelEnum>(i);
-	LArBadChannelState::CoolChannelData emptyChan(cc);
-	AthenaAttributeList* ilist = createChanPayload( emptyChan.stateVector(), *spec);
-	CondAttrListCollection::ChanNum chanNum = i;
-	attrListColl->add(chanNum, *ilist);
-      }
-    }
-
     return attrListColl;
   }
 

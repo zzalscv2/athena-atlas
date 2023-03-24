@@ -97,10 +97,10 @@ StatusCode LArBadChannelDBAlg::finalize() {
    LArBadChannelDBTools::createCoolCollection(bcState);
 
    ATH_CHECK( detStore()->record( attrListColl, m_dbFolder) );
-   ATH_MSG_INFO ( "Creating AthenaAttributeList in folder " << m_dbFebFolder );
   }
 
   if (m_mode == 1) {
+    ATH_MSG_INFO ( "Creating AthenaAttributeList in folder " << m_dbFebFolder );
 
     SG::ReadCondHandle<LArBadFebCont> readHandle{m_BFKey};
     const LArBadFebCont *bfCont {*readHandle};
@@ -118,8 +118,8 @@ StatusCode LArBadChannelDBAlg::finalize() {
 
       ATH_CHECK( detStore()->record( attrList, m_dbFebFolder) );
     }
-  }
     ATH_MSG_INFO ( "exiting finalize successfully " << m_dbFebFolder );
+  }
 
   return StatusCode::SUCCESS;
 }
