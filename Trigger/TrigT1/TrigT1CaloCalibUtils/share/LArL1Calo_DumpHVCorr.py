@@ -130,7 +130,48 @@ theL1CaloHVDummyContainers = L1CaloHVDummyContainers("L1CaloHVDummyContainers")
 topSequence += theL1CaloHVDummyContainers
 
 # setup l1calo database
-include('TrigT1CaloCalibConditions/L1CaloCalibConditions_jobOptions.py')
+# FIXME:
+#include('TrigT1CaloCalibConditions/L1CaloCalibConditionsRun2_jobOptions.py')
+# hack because of deleted files from trigger:
+from IOVDbSvc.CondDB import conddb
+from TrigT1CaloCondSvc.TrigT1CaloCondSvcConf import L1CaloCondSvc
+ServiceMgr += L1CaloCondSvc()
+L1CaloFolderList = []
+L1CaloFolderList += ["/TRIGGER/L1Calo/V1/Calibration/PpmDeadChannels"]
+L1CaloFolderList += ["/TRIGGER/L1Calo/V1/Conditions/DisabledTowers"]
+L1CaloFolderList += ["/TRIGGER/L1Calo/V1/Conditions/RunParameters"]
+L1CaloFolderList += ["/TRIGGER/L1Calo/V1/Configuration/PprChanDefaults"]
+L1CaloFolderList += ["/TRIGGER/L1Calo/V2/Configuration/PprChanDefaults"]
+
+L1CaloFolderList += ["/TRIGGER/L1Calo/V2/Configuration/PprChanStrategy"]
+L1CaloFolderList += ["/TRIGGER/L1Calo/V1/Calibration/Physics/PprChanCalib"]
+
+L1CaloFolderList += ["/TRIGGER/L1Calo/V2/Calibration/Physics/PprChanCalib"]
+L1CaloFolderList += ["/TRIGGER/L1Calo/V2/Calibration/Physics/PprChanCommon"]
+L1CaloFolderList += ["/TRIGGER/L1Calo/V2/Calibration/Physics/PprChanLowMu"]
+L1CaloFolderList += ["/TRIGGER/L1Calo/V2/Calibration/Physics/PprChanHighMu"]
+
+L1CaloFolderList += ["/TRIGGER/L1Calo/V2/Calibration/Calib1/PprChanCalib"]
+L1CaloFolderList += ["/TRIGGER/L1Calo/V2/Calibration/Calib1/PprChanCommon"]
+L1CaloFolderList += ["/TRIGGER/L1Calo/V2/Calibration/Calib1/PprChanLowMu"]
+L1CaloFolderList += ["/TRIGGER/L1Calo/V2/Calibration/Calib1/PprChanHighMu"]
+
+L1CaloFolderList += ["/TRIGGER/L1Calo/V2/Calibration/Calib2/PprChanCalib"]
+L1CaloFolderList += ["/TRIGGER/L1Calo/V2/Calibration/Calib2/PprChanCommon"]
+L1CaloFolderList += ["/TRIGGER/L1Calo/V2/Calibration/Calib2/PprChanLowMu"]
+L1CaloFolderList += ["/TRIGGER/L1Calo/V2/Calibration/Calib2/PprChanHighMu"]
+
+
+L1CaloFolderList += ["/TRIGGER/L1Calo/V1/Conditions/RunParameters"]
+L1CaloFolderList += ["/TRIGGER/L1Calo/V1/Conditions/DerivedRunPars"]
+L1CaloFolderList += ["/TRIGGER/Receivers/Conditions/VgaDac"]
+L1CaloFolderList += ["/TRIGGER/Receivers/Conditions/Strategy"]
+
+
+for l1calofolder in L1CaloFolderList:
+   conddb.addFolderWithTag("TRIGGER", l1calofolder, "HEAD", className="CondAttrListCollection")
+# end of the hack
+
 svcMgr.IOVDbSvc.overrideTags += ["<prefix>/LAR/Identifier/LArTTCellMapAtlas</prefix> <tag>LARIdentifierLArTTCellMapAtlas-RUN2-HadFcalFix2</tag>"]
 from IOVDbSvc.CondDB import conddb
 conddb.addFolderWithTag("CALO_ONL", "/CALO/Identifier/CaloTTOnOffIdMapAtlas", "CALOIdentifierCaloTTOnOffIdMapAtlas-RUN2-0002")
