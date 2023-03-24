@@ -9,6 +9,7 @@
 
 #include "StoreGate/StoreGateSvc.h"
 #include "StoreGate/tools/SGImplSvc.h"
+#include "SGTools/DataStore.h"
 
 #include "Gaudi/Interfaces/IOptionsSvc.h"
 #include "GaudiKernel/IAppMgrUI.h"
