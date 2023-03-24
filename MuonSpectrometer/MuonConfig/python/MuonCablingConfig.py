@@ -104,11 +104,9 @@ def TGCCablingConfigCfg(flags):
 
 # This should be checked by experts since I just wrote it based on 
 # athena/MuonSpectrometer/MuonCnv/MuonCnvExample/python/MuonCablingConfig.py
-def MDTCablingConfigCfg(flags):
+def MDTCablingConfigCfg(flags, name = "MuonMDT_CablingAlg", **kwargs):
     acc = ComponentAccumulator()
-
-    MuonMDT_CablingAlg=CompFactory.MuonMDT_CablingAlg
-    MDTCablingAlg = MuonMDT_CablingAlg("MuonMDT_CablingAlg")
+    MDTCablingAlg = CompFactory.MuonMDT_CablingAlg(name, **kwargs)
    
     from IOVDbSvc.IOVDbSvcConfig import addFolders
     if flags.Input.isMC is True:
@@ -122,7 +120,7 @@ def MDTCablingConfigCfg(flags):
         acc.merge( addFolders( flags, ["/MDT/CABLING/MAP_SCHEMA",
                                        "/MDT/CABLING/MEZZANINE_SCHEMA"], 'MDT', className="CondAttrListCollection") )
 
-    acc.addCondAlgo( MDTCablingAlg )
+    acc.addCondAlgo( MDTCablingAlg, primary = True )
    
     return acc
 

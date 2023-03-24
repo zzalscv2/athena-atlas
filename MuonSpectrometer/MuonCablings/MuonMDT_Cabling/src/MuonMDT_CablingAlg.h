@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -19,9 +19,7 @@
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
-
-class IIOVSvc;
-class IIOVDbSvc;
+#include "MuonReadoutGeometry/MuonDetectorManager.h"
 
 class MuonMDT_CablingAlg : public AthAlgorithm {
 public:
@@ -45,11 +43,38 @@ private:
     /// Retrieves the channel info from the coral attribute
     bool extractLayerInfo(std::vector<std::string>&, CablingData& map_data) const;
 
-    /// Load the mezzanine schem into the cabling
-    StatusCode loadMezzanineSchema(const EventContext& ctx, EventIDRange& iov_range, MuonMDT_CablingMap& cabling_map) const;
+    /// Load the mezzanine schema into the cabling
+    StatusCode loadMezzanineSchema(const EventContext& ctx,SG::WriteCondHandle<MuonMDT_CablingMap>& writeHandle,
+                                   MuonMDT_CablingMap& cabling_map) const;
+    
+    StatusCode loadMezzanineFromJSON(const EventContext& ctx,SG::WriteCondHandle<MuonMDT_CablingMap>& writeHandle,
+                                     MuonMDT_CablingMap& cabling_map) const;
+    
+    StatusCode loadMezzanineFromJSON(const std::string& payload, MuonMDT_CablingMap& cabling_map) const;
+    
     /// Load the cabling schema of the tubes
 
-    StatusCode loadCablingSchema(const EventContext& ctx, EventIDRange& iov_range, MuonMDT_CablingMap& cabling_map) const;
+    StatusCode loadCablingSchema(const EventContext& ctx,SG::WriteCondHandle<MuonMDT_CablingMap>& writeHandle,
+                                 MuonMDT_CablingMap& cabling_map) const;
+
+    StatusCode loadCablingSchemaFromJSON(const EventContext& ctx,
+                                         SG::WriteCondHandle<MuonMDT_CablingMap>& writeHandle,
+                                         MuonMDT_CablingMap& cabling_map) const;
+
+    StatusCode loadCablingSchemaFromJSON(const std::string& payload, MuonMDT_CablingMap& cabling_map) const;
+    
+    Gaudi::Property<std::string> m_mezzJSON{this, "MezzanineJSON", "" , 
+                                            "External JSON file to read the mezzanine mapping from"};
+
+    Gaudi::Property<std::string> m_chambJSON{this, "CablingJSON", "", 
+                                             "External JSON file to read the MDT cabling from"};
+
+    Gaudi::Property<bool> m_useJSONFormat{this, "UseJSONFormat", false, 
+                                          "Read out the cabling database JSON based"};
+    
+    SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_muonManagerKey{this, "MuonManagerKey", "MuonDetectorManager", 
+                                                                       "MuonManager ReadKey for IOV Range intersection"};
+
 };
 
 #endif
