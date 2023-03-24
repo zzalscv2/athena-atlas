@@ -60,16 +60,20 @@ if [ ! -z "${Athena_DIR}" ]
     topScriptSearchPath="$topScriptSearchPath $Athena_DIR/python" 
 fi
 
-#Now search for the top-level script:
-for pp in $topScriptSearchPath
-do
-    if [ -f "$pp/$topscriptfile" ]
-	then
-	topscript="$pp/$topscriptfile"
-	break
-    fi
-done
-
+if [ -f $topscriptfile ]
+ then #Script found, local or absolute path
+    topscript="$topscriptfile"
+else
+    #Now search for the top-level script:
+    for pp in $topScriptSearchPath
+    do
+	if [ -f "$pp/$topscriptfile" ]
+	 then
+	    topscript="$pp/$topscriptfile"
+	    break
+	fi
+    done
+fi
 
 if [ -z "$topscript" ];
     then
