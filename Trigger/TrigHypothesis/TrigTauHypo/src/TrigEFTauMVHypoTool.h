@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGEFTAUMVHYPOTOOL_H
@@ -40,6 +40,9 @@ class TrigEFTauMVHypoTool : public extends<AthAlgTool, ITrigEFTauMVHypoTool> {
   Gaudi::Property<double>  m_highpttrkthr{ this, "highpttrkthr", 200000. , "Track threshold for high pt taus" };
   Gaudi::Property<double>  m_highptidthr{ this, "highptidthr", 280000., "pT threshold for loosening ID level cut" };
   Gaudi::Property<double>  m_highptjetthr{ this, "highptjetthr", 440000., "pT threshold for disabling ID level cut" };
+
+  // this property is to override the track pt cut of the InDetTrackSelectorTool (1 GeV) when counting tracks in the 'perf' step
+  Gaudi::Property<double>  m_perfTrackPtCut{ this, "perfTrackPtCut", 0., "Count tracks above pt threshold in perf step" };
 
   Gaudi::Property<bool>  m_acceptAll{ this, "AcceptAll", false, "Ignore selection" };
 
