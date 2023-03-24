@@ -95,7 +95,7 @@ std::size_t TruthEtIsolations::genEventIdx() const
 }
 
 bool 
-TruthEtIsolations::hasEtIsol( HepMC::ConstGenParticlePtr p ) const
+TruthEtIsolations::hasEtIsol(const HepMC::ConstGenParticlePtr& p ) const
 {
   return ( 0 == p ) 
     ? false
@@ -103,7 +103,7 @@ TruthEtIsolations::hasEtIsol( HepMC::ConstGenParticlePtr p ) const
 }
 
 const TruthEtIsolations::EtIsol_t* 
-TruthEtIsolations::etIsolations( HepMC::ConstGenParticlePtr p ) const
+TruthEtIsolations::etIsolations(const HepMC::ConstGenParticlePtr& p ) const
 {
   return ( 0 == p ) 
     ? 0
@@ -111,7 +111,7 @@ TruthEtIsolations::etIsolations( HepMC::ConstGenParticlePtr p ) const
 }
   
 double 
-TruthEtIsolations::etIsol( HepMC::ConstGenParticlePtr p,
+TruthEtIsolations::etIsol(const HepMC::ConstGenParticlePtr& p,
 			   const TruthParticleParameters::ConeSize idx ) const
 {
   return ( 0 == p ) 
@@ -124,7 +124,7 @@ TruthEtIsolations::etIsol( HepMC::ConstGenParticlePtr p,
 /////////////////////////////////////////////////////////////////// 
 
 void 
-TruthEtIsolations::setEtIsol( HepMC::ConstGenParticlePtr genParticle,
+TruthEtIsolations::setEtIsol(const HepMC::ConstGenParticlePtr& genParticle,
 			      const TruthParticleParameters::ConeSize coneIdx,
 			      const double etIsol )
 {
@@ -132,16 +132,11 @@ TruthEtIsolations::setEtIsol( HepMC::ConstGenParticlePtr genParticle,
 }
 
 void 
-TruthEtIsolations::setEtIsol( HepMC::ConstGenParticlePtr genParticle,
+TruthEtIsolations::setEtIsol(const HepMC::ConstGenParticlePtr& genParticle,
 			      const std::vector<double>& etIsols )
 {
   EtIsol_t& et = m_etIsolations[HepMC::barcode(genParticle)];
-  for ( std::size_t 
-	  i    = 0, 
-	  iMax = std::min<std::size_t>( etIsols.size(), 
-					TruthParticleParameters::NbrOfCones ); 
-	i != iMax;
-	++i ) {
+  for ( std::size_t i = 0, iMax = std::min<std::size_t>( etIsols.size(), TruthParticleParameters::NbrOfCones ); i != iMax;++i ) {
     et[i] = etIsols[i];
   }
 
@@ -149,7 +144,7 @@ TruthEtIsolations::setEtIsol( HepMC::ConstGenParticlePtr genParticle,
 }
   
 void 
-TruthEtIsolations::setEtIsol( HepMC::ConstGenParticlePtr genParticle,
+TruthEtIsolations::setEtIsol( const HepMC::ConstGenParticlePtr& genParticle,
 			      const EtIsol_t& etIsols )
 {
   m_etIsolations[HepMC::barcode(genParticle)] = etIsols;
@@ -165,15 +160,10 @@ operator<<( std::ostream& out, const TruthEtIsolations& etIsols )
   out << "nbr of EtIsols: " << nEtIsols;
   std::ostringstream buf; 
   buf << std::right << std::scientific << std::setprecision(8);
-  for ( TruthEtIsolations::const_iterator
-	  i    = etIsols.begin(),
-	  iEnd = etIsols.end();
-	i != iEnd;
-	++i ) {
+  for ( TruthEtIsolations::const_iterator i = etIsols.begin(), iEnd = etIsols.end(); i != iEnd; ++i ) {
     buf.str("");
     buf << "\nbc: " << i->first << " [ ";
-    std::copy( i->second.begin(), i->second.end(),
-	       std::ostream_iterator<double>( buf, " " ) );
+    std::copy( i->second.begin(), i->second.end(), std::ostream_iterator<double>( buf, " " ) );
     out << buf.str() << "]";
   }
   return out;
