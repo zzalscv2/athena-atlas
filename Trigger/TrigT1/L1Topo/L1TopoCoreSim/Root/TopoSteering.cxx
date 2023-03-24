@@ -29,13 +29,9 @@
 #include <iomanip>
 #include <string>
 
-// boost libraries
-#include <boost/lexical_cast.hpp>
-
 using namespace std;
 using namespace TCS;
 using namespace TrigConf;
-using boost::lexical_cast;
 
 
 TopoSteering::TopoSteering() :

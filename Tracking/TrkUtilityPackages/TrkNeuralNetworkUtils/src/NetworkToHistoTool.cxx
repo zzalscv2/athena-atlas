@@ -11,9 +11,6 @@
 #include <cassert>
 #include <cstdlib> // rand
 #include <boost/format.hpp>
-//#include <boost/lexical_cast.hpp>
-
-// ClassImp( TNetworkToHistoTool)
 
 std::map<std::string,TH1*> 
 NetworkToHistoTool::histsFromNetwork(const TTrainedNetwork* trainedNetwork) 

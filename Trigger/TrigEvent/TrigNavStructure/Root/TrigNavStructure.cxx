@@ -7,8 +7,6 @@
 #include <algorithm>
 #include <iterator> // need it for advance
 
-#include <boost/lexical_cast.hpp>
-
 #include "TrigNavStructure/TypelessHolder.h"
 #include "TrigNavStructure/TrigNavStructure.h"
 

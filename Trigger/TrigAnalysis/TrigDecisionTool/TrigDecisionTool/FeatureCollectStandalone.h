@@ -23,7 +23,6 @@
 #include <set>
 #include "boost/type_traits/is_same.hpp"
 #include "boost/shared_ptr.hpp"
-#include "boost/lexical_cast.hpp"
 
 #include "TrigDecisionTool/Conditions.h"
 #include "TrigDecisionTool/TDTUtilities.h"

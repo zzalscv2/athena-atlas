@@ -11,6 +11,7 @@
 #include "TrigConfHLTData/HLTSignature.h"
 #include "TrigConfHLTData/HLTTriggerElement.h"
 
+#include "boost/lexical_cast.hpp"
 
 #include "./DBHelper.h"
 
