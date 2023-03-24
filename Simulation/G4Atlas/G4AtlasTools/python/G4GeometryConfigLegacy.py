@@ -314,12 +314,20 @@ def getATLAS_RegionCreatorList():
                 print ('  Such a configuration is not allowed, and would give junk calibration hits where the showers are modified.')
                 print ('  Please try again with a different value of either simFlags.LArParameterization (' + str(simFlags.LArParameterization()) + ') or simFlags.CalibrationRun ('+str(simFlags.CalibrationRun.get_Value())+')')
                 raise RuntimeError('Configuration not allowed')
+            fullCommandList = '\t'.join(simFlags.G4Commands.get_Value())
+            if simFlags.LArParameterization() == 1 or 'EMECPara' in fullCommandList:
+                # EMECPara Physics region is used by Woodcock tracking
+                # and by EMEC Frozen Showers (the latter is not part
+                # of production configurations).  NB The 'EMB'
+                # PhysicsRegion seems to be used by the Frozen Showers
+                # parametrization also. Unclear if this is correct -
+                # not a big issue as Frozen Showers are not used in
+                # the EMB in production configurations.
+                regionCreatorList += ['EMECParaPhysicsRegionTool']
             if simFlags.LArParameterization() > 0:
                 regionCreatorList += ['EMBPhysicsRegionTool', 'EMECPhysicsRegionTool',
                                       'HECPhysicsRegionTool', 'FCALPhysicsRegionTool']
-                # FIXME 'EMBPhysicsRegionTool' used for parametrization also - do we need a second instance??
-                regionCreatorList += ['EMECParaPhysicsRegionTool',
-                                      'FCALParaPhysicsRegionTool', 'FCAL2ParaPhysicsRegionTool']
+                regionCreatorList += ['FCALParaPhysicsRegionTool', 'FCAL2ParaPhysicsRegionTool']
                 if simFlags.LArParameterization.get_Value() > 1:
                     regionCreatorList += ['PreSampLArPhysicsRegionTool', 'DeadMaterialPhysicsRegionTool']
             elif simFlags.LArParameterization() is None or simFlags.LArParameterization() == 0:
