@@ -44,7 +44,9 @@ def InDetTrigBoundaryCheckToolCfg(flags, name = "InDetTrigBoundaryCheckTool", **
   from InDetConfig.InDetTestPixelLayerConfig import InDetTrigTestPixelLayerToolCfg
   kwargs.setdefault("PixelLayerTool", acc.popToolsAndMerge(InDetTrigTestPixelLayerToolCfg(flags)))
 
-  return InDetBoundaryCheckToolCfg(flags, name=name, **kwargs)
+  acc.setPrivateTools(acc.popToolsAndMerge(
+    InDetBoundaryCheckToolCfg(flags, name=name, **kwargs)))
+  return acc
 
 def ITkBoundaryCheckToolCfg(flags, name='ITkBoundaryCheckTool', **kwargs):
   result = ComponentAccumulator()
