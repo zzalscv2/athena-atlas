@@ -1048,8 +1048,6 @@ StatusCode BTaggingTruthTaggingTool::getDirectTaggedJets(TRFinfo &trfinf,std::ve
 
 float BTaggingTruthTaggingTool::getEvtSF(TRFinfo &trfinf, std::vector<int>& quantiles){
 
-  ANA_CHECK_SET_TYPE (StatusCode);
-
   float SF = 1.;
 
   if (m_ignoreSF) 
