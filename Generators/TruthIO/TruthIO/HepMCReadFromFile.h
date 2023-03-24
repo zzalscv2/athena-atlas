@@ -28,7 +28,7 @@ private:
   StoreGateSvc* m_sgSvc;
 
 #ifdef HEPMC3
-  std::unique_ptr<HepMC3::ReaderAsciiHepMC2> m_hepmcio;
+  std::shared_ptr<HepMC3::Reader> m_hepmcio;
 #else
   std::unique_ptr<HepMC::IO_GenEvent> m_hepmcio;
 #endif
