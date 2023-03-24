@@ -24,6 +24,13 @@ def SetupArgParser():
 def setupServicesCfg(flags):
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     result = MainServicesCfg(flags)
+    ### Setup the file reading
+    from AthenaConfiguration.Enums import Format
+    if flags.Input.Format is Format.POOL:
+        from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
+        result.merge(PoolReadCfg(flags))
+       
+
     from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
     result.merge(MuonGeoModelCfg(flags))
     from MuonConfig.MuonGeometryConfig import MuonIdHelperSvcCfg
@@ -35,7 +42,12 @@ def MdtCablingTestAlgCfg(flags, name = "MdtCablingTestAlg"):
     from AthenaConfiguration.ComponentFactory import CompFactory
     result = setupServicesCfg(flags)
     from MuonConfig.MuonCablingConfig import MDTCablingConfigCfg
-    result.merge(MDTCablingConfigCfg(flags))
+    from MuonConfig.MuonCondAlgConfig import MdtCondDbAlgCfg
+    result.merge(MdtCondDbAlgCfg(flags))
+    result.merge(MDTCablingConfigCfg(flags,
+                                #MezzanineJSON="MezzMapping.json",
+                                #CablingJSON="MdtCabling.json"
+                                ))
     event_algo = CompFactory.MdtCablingTestAlg(name)
     result.addEventAlgo(event_algo, primary = True)
     return result
@@ -49,20 +61,13 @@ if __name__ == "__main__":
     flags.Concurrency.NumConcurrentEvents = args.threads  # Might change this later, but good enough for the moment.
     flags.Output.ESDFileName = args.output
     flags.Input.Files = args.inputFile
+    flags.Input.RunNumber = 310000
     flags.lock()   
     
     cfg = MdtCablingTestAlgCfg(flags)
-    msgService = cfg.getService('MessageSvc')
-    msgService.Format = "S:%s E:%e % F%128W%S%7W%R%T  %0W%M"
-
     cfg.printConfig(withDetails=True, summariseProps=True)
-
     flags.dump()
-
-    f = open("MdtCablingTester.pkl", "wb")
-    cfg.store(f)
-    f.close()
-
+   
     sc = cfg.run(1)
     if not sc.isSuccess():
         import sys

@@ -334,8 +334,12 @@ if __name__ == "__main__":
     flags.Input.isMC=False
     flags.GeoModel.Run=LHCPeriod.Run3
     flags.lock()    
-    hltCaloCellSeedlessMakerCfg(flags).printConfig(withDetails=True)
-    hltCaloCellMakerCfg(flags, "SthFS").printConfig(withDetails=True)
-    hltTopoClusterMakerCfg(flags, "TrigCaloClusterMaker_topo").printConfig(withDetails=True,summariseProps=True)
-    hltCaloTopoClusterCalibratorCfg(flags,"Calibrator",
-       clustersin="clustersIn",clustersout="clustersOut").printConfig(withDetails=True, summariseProps=True)
+    CAs = [hltCaloCellSeedlessMakerCfg(flags),
+           hltCaloCellMakerCfg(flags, "SthFS"),
+           hltTopoClusterMakerCfg(flags, "TrigCaloClusterMaker_topo"),
+           hltCaloTopoClusterCalibratorCfg(flags,"Calibrator",
+                                           clustersin="clustersIn",clustersout="clustersOut")]
+
+    for ca in CAs:
+        ca.printConfig(withDetails=True, summariseProps=True)
+        ca.wasMerged()

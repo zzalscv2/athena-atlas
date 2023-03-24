@@ -146,4 +146,8 @@ def OverlayMainContentCfg(configFlags):
         acc.merge(CopySCT_ClusterContainerCfg(configFlags))
         acc.merge(CopyTRT_DriftCircleContainerCfg(configFlags))
 
+    # Add in-file MetaData
+    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
+    acc.merge(InfileMetaDataCfg(configFlags, "RDO"))
+
     return acc

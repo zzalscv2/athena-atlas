@@ -10,6 +10,7 @@
 #include "CaloG4Sim/VEscapedEnergyProcessing.h"
 
 #include "G4ios.hh"
+#include "G4Version.hh"
 #include "globals.hh"
 
 #include <map>
@@ -106,7 +107,11 @@ EscapedEnergyRegistry* EscapedEnergyRegistry::GetInstance()
     // m_processingMap = consists of pair< G4String, VEscapedEnergyProcessing* >
 
     for (auto& [key, storedProcess] : m_processingMap) {
+#if G4VERSION_NUMBER < 1100
       if ( volumeName.contains(key) )
+#else
+      if ( G4StrUtil::contains(volumeName, key) )
+#endif
         return storedProcess.get();
     }
 

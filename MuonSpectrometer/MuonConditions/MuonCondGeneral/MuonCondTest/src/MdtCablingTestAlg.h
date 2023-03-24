@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -15,7 +15,7 @@
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
-
+#include "MuonCondData/MdtCondDbData.h"
 
 
 class MdtCablingTestAlg : public AthAlgorithm {
@@ -35,6 +35,8 @@ private:
                                                                                 "Key of input MuonDetectorManager condition data"};
 
     SG::ReadCondHandleKey<MuonMDT_CablingMap> m_cablingKey{this, "WriteKey", "MuonMDT_CablingMap", "Key of input MDT cabling map"};
+
+    SG::ReadCondHandleKey<MdtCondDbData> m_deadChanKey{this, "ReadKey", "MdtCondDbData", "Key of MdtCondDbData"};
     
 };
 

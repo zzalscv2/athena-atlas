@@ -1,48 +1,22 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-def SetupArgParser():
-    from argparse import ArgumentParser
-
-    parser = ArgumentParser()
-    parser.add_argument("-t", "--threads", dest="threads", type=int, help="number of threads", default=1)
-
-    parser.add_argument("-o", "--output", dest="output", default='newESD.pool.root', help="write ESD to FILE", metavar="FILE")
-
-    parser.add_argument("--run",
-                        help="Run directly from the python. If false, just stop once the pickle is written.",
-                        action="store_true",
-                        default=True)
-
-    parser.add_argument("--forceclone",
-                        help="Override default cloneability of algorithms to force them to run in parallel",
-                        action="store_true")
-    parser.add_argument("-d", "--debug", default=None, help="attach debugger (gdb) before run, <stage>: conf, init, exec, fini")
-    parser.add_argument("--inputFile", "-i", default=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/WorkflowReferences/22.0/q445/v20/myESD.pool.root"], 
-                        help="Input file to run on ", nargs="+")
-    return parser
-    
-def setupServicesCfg(flags):
-    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    result = MainServicesCfg(flags)
-    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
-    result.merge(MuonGeoModelCfg(flags))
-    from MuonConfig.MuonGeometryConfig import MuonIdHelperSvcCfg
-    result.merge(MuonIdHelperSvcCfg(flags))    
-    return result
-
 def RpcCablingTestAlgCfg(flags, name = "RpcCablingTestAlg"):
     from AthenaConfiguration.ComponentFactory import CompFactory
+    from MuonCondTest.MdtCablingTester import setupServicesCfg
     result = setupServicesCfg(flags)
     from MuonConfig.MuonCablingConfig import NRPCCablingConfigCfg
     from AthenaCommon.Constants import DEBUG
-    result.getPrimaryAndMerge(NRPCCablingConfigCfg(flags, JSONFile = "CablingFile.json")).OutputLevel = DEBUG
+    result.merge(NRPCCablingConfigCfg(flags, JSONFile = "CablingFile.json", OutputLevel = DEBUG ))
     event_algo = CompFactory.RpcCablingTestAlg(name, OutputLevel = DEBUG)
     result.addEventAlgo(event_algo, primary = True)
     return result
 
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    args = SetupArgParser().parse_args()
+    from MuonCondTest.MdtCablingTester import SetupArgParser
+    parser = SetupArgParser()
+    parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/WorkflowReferences/22.0/q445/v20/myESD.pool.root"])
+    args = parser.parse_args()
 
     flags = initConfigFlags()
     flags.Concurrency.NumThreads = args.threads
@@ -51,18 +25,10 @@ if __name__ == "__main__":
     flags.Input.Files = args.inputFile
     flags.lock()   
     
-    cfg = RpcCablingTestAlgCfg(flags)
-    msgService = cfg.getService('MessageSvc')
-    msgService.Format = "S:%s E:%e % F%128W%S%7W%R%T  %0W%M"
-
+    cfg = RpcCablingTestAlgCfg(flags)  
     cfg.printConfig(withDetails=True, summariseProps=True)
-
     flags.dump()
-
-    f = open("RpcCablingTester.pkl", "wb")
-    cfg.store(f)
-    f.close()
-
+   
     sc = cfg.run(1)
     if not sc.isSuccess():
         import sys

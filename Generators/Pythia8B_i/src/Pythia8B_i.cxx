@@ -15,7 +15,6 @@
 #include "Pythia8B_i/UserSelections.h"
 #include "GeneratorObjects/McEventCollection.h"
 #include "AtlasHepMC/GenEvent.h"
-#include <boost/algorithm/string.hpp>
 
 // calls to fortran routines
 #include "AthenaKernel/RNGWrapper.h"

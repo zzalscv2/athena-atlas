@@ -69,10 +69,11 @@ def fromRunArgs(runArgs):
 
     # Output files
     for runArg in dir(runArgs):
-        if 'output' in runArg and 'File' in runArg and 'NTUP_PHYSVAL' not in runArg:
+        if 'output' in runArg and 'File' in runArg and 'Type' not in runArg and 'NTUP_PHYSVAL' not in runArg:
             outputFileName = getattr(runArgs, runArg)
             flagString = f'Output.{runArg.strip("output")}Name'
             flags.addFlag(flagString, outputFileName)
+            flags.addFlag(f'Output.doWrite{runArg.removeprefix("output").removesuffix("File")}', True)
             flags.Output.doWriteDAOD = True
 
     # Pre-include
@@ -101,9 +102,12 @@ def fromRunArgs(runArgs):
     from EventBookkeeperTools.EventBookkeeperToolsConfig import CutFlowSvcCfg
     cfg.merge(CutFlowSvcCfg(flags))
 
+    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
     for formatName in formats:
         derivationConfig = getattr(DerivationConfigList, f'{formatName}Cfg')
         cfg.merge(derivationConfig(flags))
+        # Needed for MetaData
+        cfg.merge(InfileMetaDataCfg(flags, f"DAOD_{formatName}"))
 
     # Pass-through mode (ignore skimming and accept all events)
     if hasattr(runArgs, 'passThrough'):

@@ -80,6 +80,7 @@ from DerivationFrameworkEGamma.EGAM10 import EGAM10Cfg
 # FTAG derivations
 from DerivationFrameworkFlavourTag.FTAG1 import FTAG1Cfg
 from DerivationFrameworkFlavourTag.FTAG2 import FTAG2Cfg
+from DerivationFrameworkFlavourTag.FTAG3 import FTAG3Cfg
 
 # Jet/Etmiss derivations
 # JETM1: dijet for MC calibrations, JER, MJB, eta-intercalibration
@@ -112,7 +113,7 @@ __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg',
            'TRUTH0Cfg','TRUTH1Cfg','TRUTH3Cfg',
            'PHYSCfg','PHYSLITECfg',
            'PHYSVALCfg',
-           'FTAG1Cfg', 'FTAG2Cfg',
+           'FTAG1Cfg', 'FTAG2Cfg', 'FTAG3Cfg',
            'HIGG1D1Cfg',
            'LLP1Cfg',
            'IDTR2Cfg',

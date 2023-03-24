@@ -28,6 +28,7 @@ def ElectronLikelihoodTightTriggerConfig2015(theTool):
     '''
     theTool.ConfigFile = "ElectronPhotonSelectorTools/trigger/mc15_20150712/ElectronLikelihoodTightTriggerConfig2015.conf"
 
+# Standard configuration MC20
 def ElectronLikelihoodVeryLooseOfflineConfigMC20(theTool):
     '''
     This is for the custom implementation of the VeryLoose offline likelihood for MC20 / Run2 / Release 22.
@@ -60,7 +61,34 @@ def ElectronLikelihoodTightOfflineConfigMC20(theTool):
     '''
     theTool.ConfigFile = "ElectronPhotonSelectorTools/offline/mc20_20210514/ElectronLikelihoodTightOfflineConfig2017_Smooth.conf"
 
+# LLP Configuration MC20
+def ElectronLikelihoodVeryLooseLLPOfflineConfigMC20(theTool):
+    '''
+    This is for the custom implementation of the VeryLooseLLP offline likelihood for LRT electrons for MC20 / Run2 / Release 22.
+    '''
+    theTool.ConfigFile = "ElectronPhotonSelectorTools/trigger/rel22_20210611/ElectronLikelihoodVeryLooseTriggerConfig_NoPix.conf"
 
+
+def ElectronLikelihoodLooseLLPOfflineConfigMC20(theTool):
+    '''
+    This is for the custom implementation of the LooseLLP offline likelihood for LRT electrons  for MC20 / Run2 / Release 22.
+    '''
+    theTool.ConfigFile = "ElectronPhotonSelectorTools/trigger/rel22_20210611/ElectronLikelihoodLooseTriggerConfig_NoPix.conf"
+
+def ElectronLikelihoodMediumLLPOfflineConfigMC20(theTool):
+    '''
+    This is for the custom implementation of the MediumLLP offline likelihood for LRT electrons  for MC20 / Run2 / Release 22.
+    (NOTE: same signal eff as offline Mediumpp + 1%)
+    '''
+    theTool.ConfigFile = "ElectronPhotonSelectorTools/trigger/rel22_20210611/ElectronLikelihoodMediumTriggerConfig_NoPix.conf"
+
+def ElectronLikelihoodTightLLPOfflineConfigMC20(theTool):
+    '''
+    This is for the custom implementation of the TightLLP offline likelihood for LRT electrons  for MC20 / Run2 / Release 22.
+    '''
+    theTool.ConfigFile = "ElectronPhotonSelectorTools/trigger/rel22_20210611/ElectronLikelihoodTightTriggerConfig_NoPix.conf"
+
+# Standard configuration MC21
 def ElectronLikelihoodVeryLooseOfflineConfigMC21(theTool):
     '''
     This is for the custom implementation of the VeryLoose offline likelihood for MC21 / Run3 / Release 22.
@@ -90,3 +118,28 @@ def ElectronLikelihoodTightOfflineConfigMC21(theTool):
     This is for the custom implementation of the Tight offline likelihood for MC21 / Run3 / Release 22.
     '''
     theTool.ConfigFile = "ElectronPhotonSelectorTools/offline/mc20_20210514/ElectronLikelihoodTightOfflineConfig2017_Smooth.conf"
+
+# LLP Configuration MC21
+def ElectronLikelihoodVeryLooseLLPOfflineConfigMC21(theTool):
+    '''
+    This is for the custom implementation of the VeryLooseLLP offline likelihood for LRT electrons  for MC21 / Run3 / Release 22.
+    '''
+    theTool.ConfigFile = "ElectronPhotonSelectorTools/trigger/rel22_20210611/ElectronLikelihoodVeryLooseTriggerConfig_NoPix.conf"
+
+def ElectronLikelihoodLooseLLPOfflineConfigMC21(theTool):
+    '''
+    This is for the custom implementation of the LooseLLP offline likelihood for LRT electrons  for MC21 / Run3 / Release 22.
+    '''
+    theTool.ConfigFile = "ElectronPhotonSelectorTools/trigger/rel22_20210611/ElectronLikelihoodLooseTriggerConfig_NoPix.conf"
+
+def ElectronLikelihoodMediumLLPOfflineConfigMC21(theTool):
+    '''
+    This is for the custom implementation of the MediumLLP offline likelihood for LRT electrons  for MC21 / Run3 / Release 22.
+    '''
+    theTool.ConfigFile = "ElectronPhotonSelectorTools/trigger/rel22_20210611/ElectronLikelihoodMediumTriggerConfig_NoPix.conf"
+
+def ElectronLikelihoodTightLLPOfflineConfigMC21(theTool):
+    '''
+    This is for the custom implementation of the TightLLP offline likelihood for LRT electrons  for MC21 / Run3 / Release 22.
+    '''
+    theTool.ConfigFile = "ElectronPhotonSelectorTools/trigger/rel22_20210611/ElectronLikelihoodTightTriggerConfig_NoPix.conf"

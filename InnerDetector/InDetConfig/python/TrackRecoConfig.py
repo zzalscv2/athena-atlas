@@ -506,8 +506,9 @@ def InDetTrackRecoCfg(flags):
                     InputCollections=InputCombinedInDetTracks,
                     ClusterSplitProbContainer=ClusterSplitProbContainer))
 
-                ClusterSplitProbContainer = "InDetTRT_SeededAmbiguityProcessorSplitProb" + \
-                    current_flags.InDet.Tracking.ActiveConfig.extension
+                ClusterSplitProbContainer = (
+                    "InDetTRT_SeededAmbiguityProcessorSplitProb" +
+                    current_flags.InDet.Tracking.ActiveConfig.extension)
                 TRTSeededTracks = "TRTSeededTracks"
                 ResolvedTRTSeededTracks = "ResolvedTRTSeededTracks"
                 InputCombinedInDetTracks += [ResolvedTRTSeededTracks]
@@ -736,7 +737,7 @@ def InDetTrackRecoCfg(flags):
             result.addEventAlgo(
                 CompFactory.DerivationFramework.CommonAugmentation(
                     "SiSPInDetCommonKernel",
-                    AugmentationTools = [SiSPTrackStateOnSurfaceDecorator]))
+                    AugmentationTools=[SiSPTrackStateOnSurfaceDecorator]))
 
         if flags.Input.isMC:
             from InDetPhysValMonitoring.InDetPhysValDecorationConfig import (
@@ -824,7 +825,7 @@ def InDetTrackRecoOutputCfg(flags):
         "InDet::TRT_DriftCircleContainer#TRT_DriftCircles",
         "InDet::PixelGangedClusterAmbiguities#PixelClusterAmbiguitiesMap",
     ]
-    if flags.InDet.Tracking.doPixelClusterSplitting:
+    if flags.Tracking.doPixelClusterSplitting:
         toESD += ["InDet::PixelGangedClusterAmbiguities#SplitClusterAmbiguityMap"]
     toESD += ["IDCInDetBSErrContainer#SCT_FlaggedCondData"]
     toESD += ["Trk::ClusterSplitProbabilityContainer#" +
@@ -947,7 +948,8 @@ def InDetTrackRecoOutputCfg(flags):
             toAOD += ["DetailedTrackTruthCollection#ObservedDetailedTracksTruth"]
     if flags.InDet.Tracking.doStoreSiSPSeededTracks:
         toAOD += ["xAOD::TrackParticleContainer#SiSPSeededTracksTrackParticles"]
-        toAOD += [f"xAOD::TrackParticleAuxContainer#SiSPSeededTracksTrackParticlesAux.{excludedAuxData}"]
+        toAOD += [
+            f"xAOD::TrackParticleAuxContainer#SiSPSeededTracksTrackParticlesAux.{excludedAuxData}"]
 
     if flags.Tracking.doStoreTrackSeeds:
         toAOD += [

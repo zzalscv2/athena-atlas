@@ -33,6 +33,9 @@ BTaggingStandardRun3Aux = \
     , "dipsLoose20220314v2_pu"
     , "dipsLoose20220314v2_pc"
     , "dipsLoose20220314v2_pb"
+    , "dipsLooseVR20230208_pu"
+    , "dipsLooseVR20230208_pc"
+    , "dipsLooseVR20230208_pb"
 
     , "SV1_NGTinSvx"
     , "SV1_masssvx"
@@ -56,7 +59,9 @@ BTaggingStandardRun3Aux = \
     , "GN120220509_pb"
     , "GN120220509_pc"
     , "GN120220509_pu"
-
+    , "GN2v00_pb"
+    , "GN2v00_pc"
+    , "GN2v00_pu"
     ]
 
 BTaggingStandardRun4Aux = [

@@ -12,6 +12,13 @@
 #include "L1CaloFEXSim/eFEXegAlgo.h"
 #include "L1CaloFEXSim/eFEXTOBEtTool.h"
 #include "L1CaloFEXSim/eFEXNtupleWriter.h"
+#include "L1CaloFEXSim/eFEXFPGATowerIdProvider.h"
+#include "L1CaloFEXSim/eTowerMakerFromSuperCells.h"
+#include "../eTowerMakerFromEfexTowers.h"
+#include "L1CaloFEXSim/eFEXSuperCellTowerIdProvider.h"
+#include "L1CaloFEXSim/eFakeTower.h"
+
+
 #include "L1CaloFEXSim/jFEXDriver.h"
 #include "L1CaloFEXSim/jFEXSysSim.h"
 #include "L1CaloFEXSim/jFEXSim.h"
@@ -24,13 +31,9 @@
 #include "L1CaloFEXSim/jFEXForwardJetsAlgo.h"
 #include "L1CaloFEXSim/jFEXForwardElecAlgo.h"
 #include "L1CaloFEXSim/jFEXNtupleWriter.h"
-#include "L1CaloFEXSim/eFEXFPGATowerIdProvider.h"
-#include "L1CaloFEXSim/eTowerMakerFromSuperCells.h"
-#include "../eTowerMakerFromEfexTowers.h"
-#include "L1CaloFEXSim/eFEXSuperCellTowerIdProvider.h"
-#include "L1CaloFEXSim/eFakeTower.h"
 #include "L1CaloFEXSim/jFEXPileupAndNoise.h"
 #include "L1CaloFEXSim/jFEXFormTOBs.h"
+#include "L1CaloFEXSim/jTowerMakerFromSuperCells.h"
 
 #include "L1CaloFEXSim/gFEXDriver.h"
 #include "L1CaloFEXSim/gFEXSysSim.h"
@@ -79,6 +82,7 @@ DECLARE_COMPONENT(jFEXForwardJetsAlgo)
 DECLARE_COMPONENT(jFEXForwardElecAlgo)
 DECLARE_COMPONENT(jFEXNtupleWriter)
 DECLARE_COMPONENT(jFEXFormTOBs)
+DECLARE_COMPONENT(jTowerMakerFromSuperCells)
 
 DECLARE_COMPONENT(gFEXDriver)
 DECLARE_COMPONENT(gFEXSysSim)

@@ -52,7 +52,7 @@ def LArCosmicsMonConfigCore(helper, algoinstance,inputFlags):
 
     cosmic_path="Cosmics/"
 
-    EM_bins=lArDQGlobals.Cell_Variables["etaRange"]["EMEC"]["C"]["2"]+lArDQGlobals.Cell_Variables["etaRange"]["EMB"]["C"]["2"]+lArDQGlobals.Cell_Variables["etaRange"]["EMB"]["A"]["2"]+lArDQGlobals.Cell_Variables["etaRange"]["EMEC"]["A"]["2"]
+    EM_bins=sorted(list(set(lArDQGlobals.Cell_Variables["etaRange"]["EMEC"]["C"]["2"]+lArDQGlobals.Cell_Variables["etaRange"]["EMB"]["C"]["2"]+lArDQGlobals.Cell_Variables["etaRange"]["EMB"]["A"]["2"]+lArDQGlobals.Cell_Variables["etaRange"]["EMEC"]["A"]["2"])))
     cosmicMonGroup.defineHistogram('mon_eta_EM,mon_phi;Muon2DHitsECAL',
                                    type='TH2F', 
                                    path=cosmic_path,
@@ -60,7 +60,7 @@ def LArCosmicsMonConfigCore(helper, algoinstance,inputFlags):
                                    xbins=EM_bins,
                                    ybins=lArDQGlobals.Cell_Variables["phiRange"]["EMB"]["A"]["2"])
 
-    HEC_bins=lArDQGlobals.Cell_Variables["etaRange"]["HEC"]["C"]["1"]+lArDQGlobals.Cell_Variables["etaRange"]["HEC"]["A"]["1"]
+    HEC_bins=sorted(list(set(lArDQGlobals.Cell_Variables["etaRange"]["HEC"]["C"]["1"]+lArDQGlobals.Cell_Variables["etaRange"]["HEC"]["A"]["1"])))
     cosmicMonGroup.defineHistogram('mon_eta_HEC,mon_phi;Muon2DHitsHCAL',
                                    type='TH2F', 
                                    path=cosmic_path,
@@ -68,7 +68,7 @@ def LArCosmicsMonConfigCore(helper, algoinstance,inputFlags):
                                    xbins=HEC_bins,
                                    ybins=lArDQGlobals.Cell_Variables["phiRange"]["HEC"]["A"]["1"])
 
-    FCal_bins=lArDQGlobals.Cell_Variables["etaRange"]["FCal"]["C"]["2"]+lArDQGlobals.Cell_Variables["etaRange"]["FCal"]["A"]["2"]
+    FCal_bins=sorted(list(set(lArDQGlobals.Cell_Variables["etaRange"]["FCal"]["C"]["2"]+lArDQGlobals.Cell_Variables["etaRange"]["FCal"]["A"]["2"])))
     cosmicMonGroup.defineHistogram('mon_eta_FCal,mon_phi;Muon2DHitsFCAL',
                                    type='TH2F', 
                                    path=cosmic_path,

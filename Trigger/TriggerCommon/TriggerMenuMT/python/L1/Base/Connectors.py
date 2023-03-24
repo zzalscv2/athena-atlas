@@ -221,11 +221,8 @@ class ElectricalConnector(Connector):
                     if signal is None:
                         startbit += nbits
                         continue
-                    flatindex = 0
-                    if connDef["name"]=="LegacyTopoMerged":
-                        flatindex = 2*startbit + clock
-                    else: # AlfaCtpin
-                        flatindex = 32*clock + startbit 
+                    # use a single flatindex value for ALFA and Topo legacy boards
+                    flatindex = 2*startbit + clock
                     tl = TriggerLine( name = signal, startbit = startbit, flatindex = flatindex, nbits = nbits, fpga = None, clock = clock)
                     startbit += nbits
                     self.addTriggerLine(tl, 0, clock)

@@ -24,7 +24,6 @@
 #include <algorithm>
 #include "boost/algorithm/string.hpp"
 #include <boost/tokenizer.hpp>
-#include <boost/foreach.hpp>
 #include "LArRecEvent/LArEventBitInfo.h"
 #include "StoreGate/ReadHandle.h"
 

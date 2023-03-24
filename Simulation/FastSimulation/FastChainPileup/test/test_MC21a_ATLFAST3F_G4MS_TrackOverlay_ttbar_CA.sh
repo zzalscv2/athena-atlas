@@ -5,7 +5,10 @@
 # art-include: master/Athena
 # art-include: 23.0/Athena
 # art-output: run_*
+# art-output: log.*
+# art-output: *.pkl
 # art-output: *.txt
+# art-output: RDO.pool.root
 # art-architecture: '#x86_64-intel'
 
 events=50
@@ -40,13 +43,18 @@ FastChain_tf.py \
   --imf False
 ca=$?
 echo  "art-result: $ca EVNTtoRDO_CA"
+cp log.* ../
+cp ${RDO_File} ../${RDO_File}
+if [ -f "ConfigCA.pkl" ]; then
+    cp ConfigCA.pkl ../ConfigCA.pkl
+fi
 status=$ca
 cd ../
 
 reg=-9999
 if [ $ca -eq 0 ]
 then
-   art.py compare --file run_ca/${RDO_File} --mode=semi-detailed --entries 10
+   art.py compare --file ${RDO_File} --mode=semi-detailed --entries 10
    reg=$?
    status=$reg
 fi

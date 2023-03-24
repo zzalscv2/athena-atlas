@@ -280,7 +280,7 @@ StatusCode LArLATOMEBuilderAlg::execute(const EventContext& ctx) const {
 /// reproduce LDPB package computation in https://gitlab.cern.ch/atlas-lar-online/onlinelatomedb/-/blob/master/src/CondFloatDB.cpp
 bool LArLATOMEBuilderAlg::floatToInt(float val, int &newval, int hardpoint, int size) const{
   
-  if( isnan(val) )return false;
+  if( std::isnan(val) )return false;
   int intVal = round(val*pow(2,hardpoint));
   bool isNeg = (intVal<0);
   unsigned int posVal = abs(intVal);

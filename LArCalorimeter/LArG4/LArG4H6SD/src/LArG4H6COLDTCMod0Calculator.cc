@@ -9,6 +9,7 @@
 #include "LArG4Code/LArG4Identifier.h"
 
 // Geant4 includes
+#include "G4Version.hh"
 #include "G4NavigationHistory.hh"
 #include "G4LogicalVolume.hh"
 #include "G4VPhysicalVolume.hh"
@@ -116,9 +117,13 @@ G4bool LArG4H6COLDTCMod0Calculator::Process(const G4Step* a_step, std::vector<LA
   /////////////////////////////////////
   // Strip the name of the volume:
   G4String hitVolume = pre_step_point->GetTouchable()->GetVolume(0)->GetName();
+#if G4VERSION_NUMBER < 1100
   if(hitVolume.contains("::") ) {
-           int last = hitVolume.last(':');
-            hitVolume.remove(0,last+1);
+#else
+  if(G4StrUtil::contains(hitVolume,"::") ) {
+#endif
+           int last = hitVolume.rfind(':');
+            hitVolume.erase(0,last+1);
   }
   int volnum = 0;
   if( hitVolume == "Gap") {

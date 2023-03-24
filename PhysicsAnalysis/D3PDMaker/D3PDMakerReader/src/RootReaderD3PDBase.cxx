@@ -7,9 +7,6 @@
 // ROOT include(s):
 #include <Rtypes.h>
 
-// Boost include(s):
-#include <boost/algorithm/string.hpp>
-
 // Gaudi/Athena include(s):
 #include "GaudiKernel/System.h"
 #include "AthenaKernel/errorcheck.h"

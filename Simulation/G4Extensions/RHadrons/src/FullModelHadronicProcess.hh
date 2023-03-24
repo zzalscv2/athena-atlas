@@ -6,6 +6,7 @@
 #define FullModelHadronicProcess_h 
 
 #include "globals.hh"
+#include "G4FastVector.hh"
 #include "G4VDiscreteProcess.hh"
 #include "G4EnergyRangeManager.hh"
 #include "G4Nucleus.hh"

@@ -54,8 +54,8 @@ G4bool LArG4H6BeamSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /*Touchable
   //dubina=theTouchable->GetHistoryDepth();
 //
   G4String lname(ime1);
-  G4int kk = lname.last(':');
-  lname.remove(0,kk+1);
+  G4int kk = lname.rfind(':');
+  lname.erase(0,kk+1);
 #ifdef DEBUG_HITS
   std::cout<<"**** LArG4H6BeamSD: "<<SensitiveDetectorName.data()<<" :ProcessHits: lname: "<<lname.data()<<std::endl;
 #endif

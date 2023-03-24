@@ -10,8 +10,7 @@ find_package( Boost )
 atlas_add_library( SGTools
                    src/*.cxx
                    PUBLIC_HEADERS SGTools
-                   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${Boost_LIBRARIES} AthenaKernel CxxUtils GaudiKernel
+                   LINK_LIBRARIES AthenaKernel CxxUtils GaudiKernel
                    PRIVATE_LINK_LIBRARIES SGAudCore )
 
 atlas_add_dictionary( SGToolsDict
@@ -38,12 +37,14 @@ atlas_add_test( StringPool_test
 atlas_add_test( DataProxy_test
                 SOURCES
                 test/DataProxy_test.cxx
-                LINK_LIBRARIES SGTools )
+                INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+                LINK_LIBRARIES SGTools  ${Boost_LIBRARIES} )
 
 atlas_add_test( DataStore_test
                 SOURCES
                 test/DataStore_test.cxx
-                LINK_LIBRARIES SGTools TestTools )
+                INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+                LINK_LIBRARIES SGTools TestTools ${Boost_LIBRARIES} )
 
 atlas_add_test( TransientAddress_test
                 SOURCES

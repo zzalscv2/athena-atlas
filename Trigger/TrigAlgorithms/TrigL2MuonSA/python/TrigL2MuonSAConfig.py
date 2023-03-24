@@ -384,3 +384,4 @@ if __name__ == "__main__":
 
     cfg = l2MuFastAlgCfg(flags, roisKey="MURoIs")
     cfg.printConfig(withDetails=True, summariseProps=True)
+    cfg.wasMerged()

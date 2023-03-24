@@ -43,8 +43,6 @@
 
 #include "DBReplicaSvc/IDBReplicaSvc.h"
 
-#include <boost/algorithm/string.hpp> // for starts_with()
-
 #include <cstdlib> 	// for getenv()
 #include <cstring> 	// for strcmp()
 #include <sys/stat.h> 	// for struct stat

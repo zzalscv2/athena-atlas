@@ -21,10 +21,6 @@
 #include <fstream>
 #include <unordered_map>
 
-// Utility includes
-#include "boost/algorithm/string.hpp" // this one to replace std::string names
-
-
 //xAOD includes
 #include "AsgTools/AsgTool.h"
 #include "PATInterfaces/ISystematicsTool.h"
