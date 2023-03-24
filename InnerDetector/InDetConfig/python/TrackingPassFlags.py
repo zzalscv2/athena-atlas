@@ -452,9 +452,10 @@ def createITkFastTrackingPassFlags():
 ### ITk with FTF standalone mode ####
 def createITkFTFPassFlags():
 
-    icf = createITkTrackingPassFlags()
-
-    icf.extension = "_FTF"
+    icf = createITkFastTrackingPassFlags()
+    
+    icf.minPT                 = [0.9 * Units.GeV, 0.4 * Units.GeV, 0.4 * Units.GeV]
+    icf.minPTSeed             = 0.9 * Units.GeV
 
     return icf
 
