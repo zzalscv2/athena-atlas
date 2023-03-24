@@ -159,7 +159,6 @@ class ConfigSettings_jetSuper( _ConfigSettingsBase ):
       self._SeedRadBinWidth = 10
       self._TripletDoPPS    = False
       self._nClustersMin    = 8
-      self._RoadWidth       = 5
       self._UseTrigSeedML   = 4
 
 
@@ -217,7 +216,6 @@ class ConfigSettings_fullScan( _ConfigSettingsBase ):
       self._SeedRadBinWidth = 10
       self._TripletDoPPS    = False
       self._nClustersMin    = 8
-      self._RoadWidth       = 5
       self._UseTrigSeedML   = 4
       self._dodEdxTrk         = True
       self._doHitDV           = True
@@ -238,7 +236,6 @@ class ConfigSettings_beamSpotFS( _ConfigSettingsBase ):
       self._SeedRadBinWidth = 10
       self._TripletDoPPS    = False
       self._nClustersMin    = 8
-      self._RoadWidth       = 5
       self._UseTrigSeedML   = 4
       self._doRecord        = False
 
@@ -257,7 +254,6 @@ class ConfigSettings_fullScanUTT( _ConfigSettingsBase ):
       self._SeedRadBinWidth = 10
       self._TripletDoPPS    = False
       self._nClustersMin    = 8
-      self._RoadWidth       = 5
       self._UseTrigSeedML   = 4
       self._vertex          = "HLT_IDVertex_FS"
       self._actsVertex      = True
@@ -273,7 +269,6 @@ class ConfigSettings_cosmics( _ConfigSettingsBase ):
       self._Triplet_D0_PPS_Max  = 1000.0
       self._TrackInitialD0Max   = 1000.
       self._TrackZ0Max          = 1000.
-      self._RoadWidth           = 75.
       self._doFullScan      = True
       self._etaHalfWidth    = 3
       self._phiHalfWidth    = math.pi
