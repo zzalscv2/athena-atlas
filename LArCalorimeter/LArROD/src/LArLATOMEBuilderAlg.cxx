@@ -64,25 +64,31 @@ StatusCode LArLATOMEBuilderAlg::execute(const EventContext& ctx) const {
   //Get Conditions input
   SG::ReadCondHandle<ILArPedestal> pedHdl(m_keyPedestalSC,ctx);
   const LArPedestalSC* Peds=dynamic_cast<const LArPedestalSC*>(pedHdl.cptr());
+  if (!Peds) return StatusCode::FAILURE;
 
   SG::ReadCondHandle<ILArOFC> ofcHdl(m_keyOFCSC,ctx);
   const LArOFCSC* OFCs=dynamic_cast<const LArOFCSC*>(ofcHdl.cptr());
+  if (!OFCs) return StatusCode::FAILURE;
 
   SG::ReadCondHandle<ILArRamp> rampHdl(m_keyRampSC,ctx);
   const LArRampSC* Ramps=dynamic_cast<const LArRampSC*>(rampHdl.cptr());
+  if (!Ramps) return StatusCode::FAILURE;
 
   SG::ReadCondHandle<ILArDAC2uA> dac2uaHdl(m_keyDAC2uASC,ctx);
   const LArDAC2uASC* DAC2uAs=dynamic_cast<const LArDAC2uASC*>(dac2uaHdl.cptr());
+  if (!DAC2uAs) return StatusCode::FAILURE;
 
   SG::ReadCondHandle<ILAruA2MeV> ua2mevHdl(m_keyuA2MeVSC,ctx);
   const LAruA2MeVSC* uA2MeVs=dynamic_cast<const LAruA2MeVSC*>(ua2mevHdl.cptr());
+  if (!uA2MeVs) return StatusCode::FAILURE;
 
   SG::ReadCondHandle<ILArMphysOverMcal> mphysHdl(m_keyMphysOverMcalSC,ctx);
   const LArMphysOverMcalSC* MphysOverMcals=dynamic_cast<const LArMphysOverMcalSC*>(mphysHdl.cptr());
-
+  if (!MphysOverMcals) return StatusCode::FAILURE;
+  
   SG::ReadCondHandle<ILArHVScaleCorr> hvHdl(m_keyHVScaleCorrSC,ctx);
   const LArHVScaleCorrSC* HVScaleCorrs=dynamic_cast<const LArHVScaleCorrSC*>(hvHdl.cptr());
-
+  if (!HVScaleCorrs) return StatusCode::FAILURE;
 
   SG::ReadCondHandle<LArOnOffIdMapping> cabling(m_cablingKey,ctx);
   
@@ -232,20 +238,20 @@ StatusCode LArLATOMEBuilderAlg::execute(const EventContext& ctx) const {
       newBCIDs[ss]=bcid;
       for(unsigned int is=0; is<firsamples; ++is){
 	int sample=samples[startSample+ss+is];
-	if(!m_isADCBas)sample*=pow(2,pedHardpoint);
-	computedE+=(sample-peda_int)*ofca_int[is];
-	computedEtau+=(sample-pedb_int)*ofcb_int[is];
+	if(!m_isADCBas)sample*=std::pow(2,pedHardpoint);
+	computedE+= static_cast<int64_t>(sample-peda_int)*ofca_int[is];
+	computedEtau+=static_cast<int64_t>(sample-pedb_int)*ofcb_int[is];
       }
       computedE=computedE>>firLSBdropped;
       computedEtau=computedEtau>>satLSBdropped;
 
-      if(abs(computedE)>pow(2,nMaxBitsEnergy-1)){
-	if(computedE>=0)computedE=pow(2,nMaxBitsEnergy-1)-1;
+      if(std::abs(computedE)>std::pow(2,nMaxBitsEnergy-1)){
+	if(computedE>=0)computedE=std::pow(2,nMaxBitsEnergy-1)-1;
 	else computedE=0;
       }
-      if(abs(computedEtau)>pow(2,nMaxBitsEnergyTau-1)){
-      if(computedEtau>=0)computedEtau=pow(2,nMaxBitsEnergyTau-1)-1;
-      else computedEtau=-pow(2,nMaxBitsEnergyTau-1)+1;
+      if(std::abs(computedEtau)>std::pow(2,nMaxBitsEnergyTau-1)){
+      if(computedEtau>=0)computedEtau=std::pow(2,nMaxBitsEnergyTau-1)-1;
+      else computedEtau=-std::pow(2,nMaxBitsEnergyTau-1)+1;
       }
       newEnergies[ss]=computedE;
       tauEnergies[ss]=computedEtau;
@@ -283,7 +289,7 @@ bool LArLATOMEBuilderAlg::floatToInt(float val, int &newval, int hardpoint, int 
   if( std::isnan(val) )return false;
   int intVal = round(val*pow(2,hardpoint));
   bool isNeg = (intVal<0);
-  unsigned int posVal = abs(intVal);
+  unsigned int posVal = std::abs(intVal);
   if( (posVal >> (size -1)) != 0 ) return false;
   newval=posVal;
   if(isNeg)newval=-posVal;
