@@ -5,7 +5,6 @@
 #include "ALFA_Raw2Digit/ALFA_Raw2Digit.h"
 
 #include "GaudiKernel/MsgStream.h"
-#include <boost/lexical_cast.hpp>
 #include "PathResolver/PathResolver.h"
 
 #include <stdexcept>
