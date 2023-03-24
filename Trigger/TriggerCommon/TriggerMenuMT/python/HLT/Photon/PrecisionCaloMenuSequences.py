@@ -7,7 +7,9 @@ from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsP
 from AthenaCommon.CFElements import seqAND
 from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
 from DecisionHandling.DecisionHandlingConf import ViewCreatorPreviousROITool
-
+from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys	  import getTrigEgammaKeys
+from TriggerMenuMT.HLT.Config.MenuComponents import algorithmCAToGlobalWrapper
+from AthenaCommon.CFElements import parOR
 
 def tag(ion):
     return 'precision' + ('HI' if ion is True else '') + 'CaloPhoton'
@@ -15,8 +17,9 @@ def tag(ion):
 
 def precisionCaloSequence(flags, ion=False):
     """ Creates PrecisionCalo sequence """
+    TrigEgammaKeys = getTrigEgammaKeys(ion=ion)
     # EV creator
-    InViewRoIs="PrecisionCaloRoIs"     
+    InViewRoIs="PrecisionCaloRoIs"    
     precisionCaloViewsMaker = EventViewCreatorAlgorithm('IM' + tag(ion))
     precisionCaloViewsMaker.ViewFallThrough = True
     precisionCaloViewsMaker.RoIsLink = "initialRoI" # Merge inputs based on their initial L1 ROI
@@ -31,13 +34,29 @@ def precisionCaloSequence(flags, ion=False):
     precisionCaloViewsMaker.RequireParentView = True
 
     # reco sequence
+    hiInfo = 'HI' if ion is True else ''
     from TriggerMenuMT.HLT.Photon.PrecisionCaloRecoSequences import precisionCaloRecoSequence
-    (precisionCaloInViewSequence, sequenceOut) = precisionCaloRecoSequence(flags, InViewRoIs, ion)
-        
+    precisionCaloSequence = algorithmCAToGlobalWrapper(precisionCaloRecoSequence,flags, InViewRoIs,'gPrecisionCaloRecoSequence'+hiInfo, ion)
+   
+    import AthenaCommon.CfgMgr as CfgMgr
+    HLTRoITopoRecoSequenceVDV = CfgMgr.AthViews__ViewDataVerifier(tag(ion)+'VDV')
+    dataObjects= [( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+PrecisionCaloRoIs' ),
+                  ( 'CaloBCIDAverage' , 'StoreGateSvc+CaloBCIDAverage' ),
+                  ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing' )]
+    if ion:
+        dataObjects += [( 'xAOD::HIEventShapeContainer' , 'StoreGateSvc+' + TrigEgammaKeys.egEventShape ),
+                        ( 'CaloBCIDAverage' , 'StoreGateSvc+CaloBCIDAverage' ),
+                        ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing' )]
+
+
+    HLTRoITopoRecoSequenceVDV.DataObjects = dataObjects
+    precisionCaloInViewSequence = parOR("photonRoITopoRecoSequence"+hiInfo, [HLTRoITopoRecoSequenceVDV, precisionCaloSequence])
+
     precisionCaloViewsMaker.ViewNodeName = precisionCaloInViewSequence.name()
 
     theSequence = seqAND(tag(ion) + 'Sequence', [])
 
+    sequenceOut = TrigEgammaKeys.precisionPhotonCaloClusterContainer
     if ion is True:
         # add UE subtraction for heavy ion e/gamma triggers
         # NOTE: UE subtraction requires an average pedestal to be calculated
