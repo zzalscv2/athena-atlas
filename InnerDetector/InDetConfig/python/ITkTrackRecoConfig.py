@@ -17,7 +17,10 @@ def CombinedTrackingPassFlagSets(flags):
     flags_set = []
 
     # Primary Pass
-    if flags.ITk.Tracking.doFastTracking:
+    if flags.ITk.Tracking.useFTF:
+        flags = flags.cloneAndReplace("ITk.Tracking.ActiveConfig", 
+                                      "ITk.Tracking.FTFPass")
+    elif flags.ITk.Tracking.doFastTracking:
         flags = flags.cloneAndReplace("ITk.Tracking.ActiveConfig",
                                       "ITk.Tracking.FastPass")
     else:

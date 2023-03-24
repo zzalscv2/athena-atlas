@@ -31,8 +31,7 @@ run "Reconstruction" \
     --outputAODFile AOD.root \
     --steering doRAWtoALL \
     --preInclude InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude \
-    --postInclude TrigFastTrackFinder.ITkFastTrackFinderStandaloneConfig.ITkFastTrackFinderStandaloneCfg \
-    --preExec "ConfigFlags.ITk.Tracking.doFastTracking=True"
+    --preExec "ConfigFlags.ITk.Tracking.useFTF=True"
 
 
 run "IDPVM" \
@@ -42,7 +41,7 @@ run "IDPVM" \
     --doHitLevelPlots \
     --doExpertPlots \
     --truthMinPt=1000 \
-    --validateExtraTrackCollections {'TrigFastTrackFinder_FTF_','TrigFastTrackFinder_IDTrig_'}
+    --doMuonMatchedTracks
 
 reco_rc=$?
 if [ $reco_rc != 0 ]; then

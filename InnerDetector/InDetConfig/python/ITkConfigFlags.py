@@ -61,6 +61,7 @@ def createITkConfigFlags():
   itkcf.addFlag("ITk.Tracking.writeExtendedPRDInfo", False)
   # Turn running of doLowPt second pass on and off
   itkcf.addFlag("ITk.Tracking.doLowPt", False)
+  itkcf.addFlag("ITk.Tracking.useFTF", False) # Allows TrigFastTrackFinder to be run as an offline algorithm by replacing SiSPSeededTrackFinder
 
   
   # config flags for tracking geometry configuration
