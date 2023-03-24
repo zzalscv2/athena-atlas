@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibUtils/LArAutoCorrDecoderTool.h"
@@ -35,7 +35,7 @@ StatusCode LArAutoCorrDecoderTool::initialize()
 
 const Eigen::MatrixXd LArAutoCorrDecoderTool::AutoCorr( const HWIdentifier&  CellID, int gain, unsigned nSamples=5 ) const
 {
-  if (m_decodemode==1)
+  if (m_decodemode==1u)
     return ACPhysics(CellID,gain,nSamples);
   else
     return ACDiagonal(CellID,gain,nSamples);
