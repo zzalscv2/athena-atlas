@@ -9,6 +9,7 @@
 #include "AthenaKernel/CLASS_DEF.h"
 #include "Identifier/Identifier.h"
 #include "MuonCablingData/MdtTdcMap.h"
+
 /**********************************************
  *
  * @brief MDT map data object
@@ -74,9 +75,16 @@ public:
     /** Add a new line describing a mezzanine type */
     bool addMezzanineLine(const int type, const int layer, const int sequence, MsgStream& log);
 
-    /** Add a new mezzanine */
+    /** Adds a new mezzanine card mapping*/
+    bool addMezanineLayout(std::unique_ptr<MdtMezzanineCard> card, MsgStream& log);
+
+    enum class DataSource{
+        JSON,
+        LegacyCOOL
+    };
+    /** Add a new fully configured mezzanine card */
     /** the indexes multilayer, layer, tube refer to the tube connected to the channelZero */
-    bool addMezzanine(const CablingData& cabling_data, MsgStream& log);
+    bool addMezzanine(CablingData cabling_data, DataSource source, MsgStream& log);
 
     /** return the offline id given the online id */
     bool getOfflineId(CablingData& cabling_data, MsgStream& log) const;
@@ -102,7 +110,7 @@ public:
 
     /** return the ROD id of a given chamber */
     const ListOfROB& getAllROBId() const;
-
+   
     /// Returns the map to convert the online -> offline identifiers
     const OnlToOffMap& getOnlineConvMap() const;
     /// Returns hte map to convert the offline -> online identifiers
@@ -120,16 +128,16 @@ public:
     unsigned int csmNumOnChamber(const CablingData& map_data, MsgStream& log) const;
     /// Returns if the cabling map has found multilayers connected to 2 CSM cards
     bool has2CsmML() const;
+    ///
+    using MezzCardPtr = MdtMezzanineCard::MezzCardPtr;
+    MezzCardPtr getHedgeHogMapping(uint8_t mezzCardId ) const;
 
 private:
     /** private function to add a chamber to the ROD map */
     bool addChamberToROBMap(const CablingData& cabling_data, MsgStream& log);
 
-    /** List of mezzanine types, to be initialized from the conditions db */
-    MezzanineTypes m_listOfMezzanineTypes;
-
     /** Pointer to the MdtIdHelper */
-    const MdtIdHelper* m_mdtIdHelper{};
+    const MdtIdHelper* m_mdtIdHelper{nullptr};
 
     /** assignment and copy constructor operator (hidden) */
     MuonMDT_CablingMap& operator=(const MuonMDT_CablingMap& right) = delete;
@@ -151,9 +159,17 @@ private:
     ChamberToROBMap m_multilayerToROB{};
     /** Switch to check whether the layout has chambers with 2 CSM chips*/
     bool m_2CSM_cham{false};
+    
+    /// @brief  List of mezzanine cards    
+    using MezzCardList = std::vector<MezzCardPtr>;
+    MezzCardList m_mezzCards{};
+    /// In the legacy data format several transformations on the hedgehog layout were applied
+    /// during the final TdcMap build
+    MezzCardPtr legacyHedgehogCard(CablingData& cabling, MsgStream& msg) const;
+
+
 };
 
-//#include "CLIDSvc/CLASS_DEF.h"
 CLASS_DEF(MuonMDT_CablingMap, 51038731, 1)
 #include "AthenaKernel/CondCont.h"
 CLASS_DEF(CondCont<MuonMDT_CablingMap>, 34552845, 0)
