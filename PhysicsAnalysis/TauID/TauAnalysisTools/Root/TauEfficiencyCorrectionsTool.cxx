@@ -455,7 +455,7 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2022_prerec()
       // the path must be updated once RNN eVeto SFs are available
       if (m_sInputFilePathEleIDElectron.empty()) {
         if (m_sAFII) ATH_MSG_WARNING("No fast-sim recommendation for tau electron veto, using full sim");
-	m_sInputFilePathEleIDElectron = sDirectory+ "EleRNN_TrueElectron_2022-mc20-prerec.root";
+	m_sInputFilePathEleIDElectron = sDirectory+ "EleRNN_TrueElectron_2022-mc20-prerec-v2.root";
       }
       if (m_sVarNameEleIDElectron.empty()) m_sVarNameEleIDElectron = "TauScaleFactorEleIDElectron";
 

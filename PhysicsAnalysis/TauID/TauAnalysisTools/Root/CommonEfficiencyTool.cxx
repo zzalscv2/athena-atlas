@@ -535,6 +535,11 @@ void CommonEfficiencyTool::ReadInputs(const TFile& fFile)
         m_fX = &truthTauPt;
         ATH_MSG_DEBUG("using truth pT for x-axis");
       }
+      if (sTitle == "|eta|")
+      {
+        m_fX = &finalTauAbsEta;
+        ATH_MSG_DEBUG("using absolute tau eta for x-axis");
+      }
 
       continue;
     }
