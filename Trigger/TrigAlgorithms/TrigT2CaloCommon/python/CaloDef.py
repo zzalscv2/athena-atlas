@@ -17,7 +17,7 @@ def _algoHLTCaloCell(flags, name="HLTCaloCellMaker", inputEDM='', outputEDM='Cel
 
    from AthenaCommon.AppMgr import ServiceMgr as svcMgr
    from TrigCaloRec.TrigCaloRecConfig import HLTCaloCellMaker
-   algo=HLTCaloCellMaker(flags, name)
+   algo=HLTCaloCellMaker(flags, name, roisKey=inputEDM)
    #"HLTCaloCellMaker"
    algo.RoIs=inputEDM
    algo.TrigDataAccessMT=svcMgr.TrigCaloDataAccessSvc
