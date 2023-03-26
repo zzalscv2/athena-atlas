@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtCalibSvc/MdtCalibrationTool.h"
@@ -294,7 +294,7 @@ bool MdtCalibrationTool::driftRadiusFromTime( MdtCalibHit &hit,
   double r(0.);
   double reso(1.);
   double t = hit.driftTime();
-  double t_inrange = hit.driftTime();
+  double t_inrange = t;
   bool calibOk = true;
   Muon::MdtDriftCircleStatus timeStatus = driftTimeStatus(t, rtRelation, settings);
   if( rtRelation->rt() ){
@@ -424,7 +424,7 @@ bool MdtCalibrationTool::twinPositionFromTwinHits( MdtCalibHit &hit,
   MuonCalib::MdtFullCalibData dataSecond = m_dbTool->getCalibration( geoSecond->collectionHash(), geoSecond->detectorElementHash() );
 
   double inversePropSpeed = m_imp->m_inversePropagationSpeed;
-  double inversePropSpeedSecond = m_imp->m_inversePropagationSpeed;
+  double inversePropSpeedSecond = inversePropSpeed;
 
   // access t0 for the give tube
   if( data.tubeCalib ){

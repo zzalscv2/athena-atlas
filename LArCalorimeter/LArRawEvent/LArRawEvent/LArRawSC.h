@@ -1,10 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARRAWSC_H
 #define LARRAWSC_H
 #include <vector>
+#include <utility> //for std::move
+#include <string> //for the string conversion operator
 
 #include "Identifier/HWIdentifier.h"
 
@@ -20,7 +22,7 @@ class LArRawSC  {
  private:
   
   /** @brief Online Identifier */
-  HWIdentifier m_hardwareID;
+  HWIdentifier m_hardwareID{};
   
   /** @brief Latome channel */
   short m_chan = 0;
@@ -44,13 +46,13 @@ class LArRawSC  {
   std::vector< int > m_tauEnergies;
 
   /** @brief OFCa Overflow */
-  bool m_ofcaOverflow;
+  bool m_ofcaOverflow{};
 
   /** @brief OFCb Overflow */
-  bool m_ofcbOverflow;
+  bool m_ofcbOverflow{};
 
   /** @brief pedestal Overflow */
-  bool m_pedOverflow;
+  bool m_pedOverflow{};
 
  public:
   /** @brief constructor 

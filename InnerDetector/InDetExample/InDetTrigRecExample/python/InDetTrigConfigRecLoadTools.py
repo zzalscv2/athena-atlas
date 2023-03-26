@@ -415,63 +415,6 @@ if (InDetTrigFlags.doPrintConfigurables()):
   print (  InDetTrigTRTDriftCircleCut)
 
   
-if InDetTrigFlags.doNewTracking():
-  # SCT and Pixel detector elements road builder
-  #
-  from SiDetElementsRoadTool_xk.SiDetElementsRoadTool_xkConf import InDet__SiDetElementsRoadMaker_xk
-
-  InDetTrigSiDetElementsRoadMaker = \
-                                  InDet__SiDetElementsRoadMaker_xk(name = 'InDetTrigSiDetElementsRoadMaker',
-                                                                   PropagatorTool = InDetTrigPatternPropagator,
-                                                                   usePixel     = DetFlags.haveRIO.pixel_on(), 
-                                                                   useSCT       = DetFlags.haveRIO.SCT_on(),
-                                                                   RoadWidth    = InDetTrigCutValues.RoadWidth()
-                                                                   )
-  ToolSvc += InDetTrigSiDetElementsRoadMaker
-
-  # Condition algorithm for InDet__SiDetElementsRoadMaker_xk
-  if DetFlags.haveRIO.SCT_on():
-    from AthenaCommon.AlgSequence import AthSequencer
-    condSeq = AthSequencer("AthCondSeq")
-    if not hasattr(condSeq, "InDet__SiDetElementsRoadCondAlg_xk"):
-      from SiDetElementsRoadTool_xk.SiDetElementsRoadTool_xkConf import InDet__SiDetElementsRoadCondAlg_xk
-      condSeq += InDet__SiDetElementsRoadCondAlg_xk(name = "InDet__SiDetElementsRoadCondAlg_xk")
-
-  # Local combinatorial track finding using space point seed and detector element road
-  #
-  from SiCombinatorialTrackFinderTool_xk.SiCombinatorialTrackFinderTool_xkConf import InDet__SiCombinatorialTrackFinder_xk
-  InDetTrigSiComTrackFinder = \
-                            InDet__SiCombinatorialTrackFinder_xk(name = 'InDetTrigSiComTrackFinder',
-                                                                 PropagatorTool	= InDetTrigPatternPropagator,
-                                                                 UpdatorTool	= InDetTrigPatternUpdator,
-                                                                 RIOonTrackTool   = InDetTrigRotCreator,
-                                                                 usePixel         = DetFlags.haveRIO.pixel_on(),
-                                                                 useSCT           = DetFlags.haveRIO.SCT_on(),   
-                                                                 PixelClusterContainer = 'PixelTrigClusters',
-                                                                 SCT_ClusterContainer = 'SCT_TrigClusters',
-                                                                 PixelSummaryTool = InDetTrigPixelConditionsSummaryTool,
-                                                                 SctSummaryTool = InDetTrigSCTConditionsSummaryTool,
-                                                                 BoundaryCheckTool = InDetTrigBoundaryCheckTool
-                                                                 )															
-  if DetFlags.haveRIO.pixel_on():
-    # Condition algorithm for SiCombinatorialTrackFinder_xk
-    from AthenaCommon.AlgSequence import AthSequencer
-    condSeq = AthSequencer("AthCondSeq")
-    if not hasattr(condSeq, "InDetSiDetElementBoundaryLinksPixelCondAlg"):
-      from SiCombinatorialTrackFinderTool_xk.SiCombinatorialTrackFinderTool_xkConf import InDet__SiDetElementBoundaryLinksCondAlg_xk
-      condSeq += InDet__SiDetElementBoundaryLinksCondAlg_xk(name = "InDetSiDetElementBoundaryLinksPixelCondAlg",
-                                                            ReadKey = "PixelDetectorElementCollection",
-                                                            WriteKey = "PixelDetElementBoundaryLinks_xk")
-  if DetFlags.haveRIO.SCT_on():
-    # Condition algorithm for SiCombinatorialTrackFinder_xk
-    from AthenaCommon.AlgSequence import AthSequencer
-    condSeq = AthSequencer("AthCondSeq")
-    if not hasattr(condSeq, "InDetSiDetElementBoundaryLinksSCTCondAlg"):
-      from SiCombinatorialTrackFinderTool_xk.SiCombinatorialTrackFinderTool_xkConf import InDet__SiDetElementBoundaryLinksCondAlg_xk
-      condSeq += InDet__SiDetElementBoundaryLinksCondAlg_xk(name = "InDetSiDetElementBoundaryLinksSCTCondAlg",
-                                                            ReadKey = "SCT_DetectorElementCollection",
-                                                            WriteKey = "SCT_DetElementBoundaryLinks_xk")
-      #to here
 
 import InDetRecExample.TrackingCommon as TrackingCommon
 from InDetAmbiTrackSelectionTool.InDetAmbiTrackSelectionToolConf import InDet__InDetAmbiTrackSelectionTool

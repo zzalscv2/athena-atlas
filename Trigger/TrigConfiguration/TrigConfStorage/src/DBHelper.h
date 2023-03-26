@@ -15,8 +15,6 @@
 #include "RelationalAccess/ICursor.h"
 #include "RelationalAccess/IQuery.h"
 
-#include "boost/lexical_cast.hpp"
-
 #include <string>
 
 namespace TrigConf {

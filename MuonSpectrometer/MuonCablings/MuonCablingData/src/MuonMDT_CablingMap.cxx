@@ -1,15 +1,22 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCablingData/MuonMDT_CablingMap.h"
-
+#include "MuonReadoutGeometry/ArrayHelper.h"
 #include <cmath>
-
+#include <set>
 #include "GaudiKernel/ISvcLocator.h"
-#include "MuonCablingData/MdtMezzanineType.h"
 #include "MuonIdHelpers/MdtIdHelper.h"
 #include "StoreGate/StoreGateSvc.h"
+
+namespace {
+    /// Four mezzanine channels explicitly break the cabling schema in the legacy
+    /// database layout structure. The four channels are associated with BIS78 & BMG
+    /// hedgehog cards.
+    static const std::set<uint8_t> special_cards{50, 60, 61, 71};
+}
+using MezzCardPtr = MuonMDT_CablingMap::MezzCardPtr;
 
 MuonMDT_CablingMap::MuonMDT_CablingMap() {
     // initialize the message service
@@ -47,39 +54,16 @@ bool MuonMDT_CablingMap::convert(const Identifier& module_id, CablingData& cabli
 
 /** add a new line from the database, describing a mezzanine type */
 bool MuonMDT_CablingMap::addMezzanineLine(const int type, const int layer, const int sequence, MsgStream& log) {
-    bool added = true;
-    bool debug = (log.level() <= MSG::VERBOSE);
-    if (debug) { log << MSG::VERBOSE << "Now in MuonMDT_CablingMap::addMezzanineLine" << endmsg; }
-
-    MdtMezzanineType* mezType;
-
-    MezzanineTypes::const_iterator it = m_listOfMezzanineTypes.find(type);
-
-    // check if the type already exists, if yes, retrieve it
-    bool isNewMezzanine;
-    if (it != m_listOfMezzanineTypes.end()) {
-        // if the attempt is to initialize all layers of a mezzanine already
-        // initialized, return an error message
-        if (!layer) {
-            log << MSG::ERROR << "The mezzanine type " << type << "has been already initialized" << endmsg;
-            return false;
-        }
-        mezType = it->second.get();
-        isNewMezzanine = false;
+    
+    const bool debug = (log.level() <= MSG::VERBOSE);
+    if (special_cards.count(type)) {
+        if (debug) log<<MSG::VERBOSE<<"Mezzanine type "
+                      <<type<<" breaks the legacy database format. No need to add the card if it's hardcoded in C++"<<endmsg;
+        return true;    
     }
-    // if it does not exist, create the new type
-    else {
-        if (debug) { log << MSG::VERBOSE << "Creating a new mezzanine type: " << type << endmsg; }
-        mezType = new MdtMezzanineType(type);
-        // insert the new mezzanine in the map
-        m_listOfMezzanineTypes.insert(MezzanineTypes::value_type(type, mezType));
-        isNewMezzanine = true;
-    }
-
-    int ntubes = 0;
-    int number = sequence;
-    int nOfLayers;
-    std::array<int, 8> newseq{0};
+    
+    int nOfLayers{0}, ntubes{0}, number{sequence};
+    std::array<int, 8> newseq{};
     // now decode the sequence, up to 8 tubes per sequence
     int tube = number % 10;
 
@@ -104,13 +88,12 @@ bool MuonMDT_CablingMap::addMezzanineLine(const int type, const int layer, const
         log << MSG::ERROR << "in type " << type << ": number of tubes per mezzanine layer can be only 6 or 8 ! what are you doing ???"
             << endmsg;
         return false;
-    } else {
-        nOfLayers = 24 / ntubes;
-        if (layer > nOfLayers) {
-            log << MSG::ERROR << "The maximum number of layers for this mezzanine is: " << nOfLayers
-                << " so you can't initialize layer: " << layer << endmsg;
-            return false;
-        }
+    } 
+    nOfLayers = 24 / ntubes;
+    if (layer > nOfLayers) {
+        log << MSG::ERROR << "The maximum number of layers for this mezzanine is: " << nOfLayers
+            << " so you can't initialize layer: " << layer << endmsg;
+        return false;
     }
 
     if (debug) {
@@ -119,53 +102,65 @@ bool MuonMDT_CablingMap::addMezzanineLine(const int type, const int layer, const
     }
 
     // now swap the sequence to have it as in the DB and create the real layers
-    MdtLayer newLayer{};
+    std::array<uint8_t, 8> newLayer{};
     for (int i = 0; i < ntubes; ++i) { newLayer[i] = newseq[ntubes - i - 1]; }
+    MezzCardList::iterator itr = std::find_if(m_mezzCards.begin(), m_mezzCards.end(), 
+                                                [type](const MezzCardPtr& card){
+                                                    return type == card->id();
+                                                });
+    
+    using MezzMapping = MdtMezzanineCard::Mapping;
+    MezzMapping new_map = itr != m_mezzCards.end() ? (**itr).tdcToTubeMap() 
+                                                   : make_array<uint8_t,24>(MdtMezzanineCard::NOTSET);
 
-    // the mezzanine is new, add the
-    if (isNewMezzanine) {
-        // check if the mapping is valid for all layers
-        if (layer == 0) {
-            // setting all the layers of this mezzanine
-            for (int ll = 1; ll < nOfLayers + 1; ++ll) { mezType->addLayer(ll, newLayer, log); }
+    MdtMezzanineCard dummy_card(new_map, nOfLayers, 0);
+    
+    for (int i =0; i < ntubes; ++i) {
+        if (layer) { 
+            const int chStart = ntubes*(layer -1);    
+            new_map[chStart +i] = dummy_card.tubeNumber(layer, newLayer[i]);
         } else {
-            mezType->addLayer(layer, newLayer, log);
-        }
+            for (int lay = 1 ; lay <= nOfLayers ; ++lay) {
+                const int chStart = ntubes*(lay -1);
+                new_map[chStart +i] = dummy_card.tubeNumber(lay, newLayer[i]);               
+            }
+        }       
     }
-    // this is an existing mezzanine so just add the single layer, but first
-    // check that the layer does not exist yet
-    else {
-        if (mezType->hasLayer(layer)) {
-            log << MSG::ERROR << "Layer: " << layer << " has been already initialized for mezzanine " << type << endmsg;
+    /// Overwrite the old mezzanine card pointer
+    if (itr != m_mezzCards.end()) {
+         if (!layer) {
+            log << MSG::ERROR << "The mezzanine type " << type << "has been already initialized" << endmsg;
             return false;
         }
-        mezType->addLayer(layer, newLayer, log);
+        (*itr) = std::make_unique<MdtMezzanineCard>(new_map, nOfLayers, type);
+        if (debug) log << MSG::VERBOSE <<"Updated mezzanine "<<(**itr)<<endmsg;
+    } else {
+        m_mezzCards.emplace_back(std::make_unique<MdtMezzanineCard>(new_map, nOfLayers, type));    
+        if (debug) log << MSG::VERBOSE <<" Added new mezzanine "<<(*m_mezzCards.back())<<endmsg;
     }
-    return added;
+    return true;    
+}
+MezzCardPtr MuonMDT_CablingMap::getHedgeHogMapping(uint8_t mezzCardId) const{
+    MezzCardPtr mezzaType{nullptr};
+    MezzCardList::const_iterator it = std::find_if(m_mezzCards.begin(), m_mezzCards.end(),
+                                        [&](const MezzCardPtr& card) {
+                                            return card->id() == mezzCardId;});
+    return it != m_mezzCards.end() ? (*it) : nullptr;    
 }
 /** Add a new mezzanine to the map */
-bool MuonMDT_CablingMap::addMezzanine(const CablingData& map_data, MsgStream& log) {
+bool MuonMDT_CablingMap::addMezzanine(CablingData map_data, DataSource source, MsgStream& log) {
     bool debug = (log.level() <= MSG::VERBOSE);
-    /// New and hopefully easier to maintain version
-    std::vector<std::unique_ptr<MdtTdcMap>>::const_iterator found_tdc =
-        std::find_if(m_tdcs.begin(), m_tdcs.end(), [&map_data](const std::unique_ptr<MdtTdcMap>& tdc) {
-            return tdc->offId() == map_data && tdc->moduleId() == map_data.tdcId && map_data.channelId == tdc->tdcZero() &&
-                   map_data.tube == tdc->tubeZero() && map_data.layer == tdc->layerZero();
-        });
-    if (found_tdc != m_tdcs.end()) {
-        log << MSG::ERROR << "Tdc with " << map_data << " already exists" << (*found_tdc)->offId() << endmsg;
+    
+    
+    MezzCardPtr mezzaType = source == DataSource::LegacyCOOL ? legacyHedgehogCard(map_data, log) 
+                                                             : getHedgeHogMapping(map_data.mezzanine_type);
+    if (!mezzaType) {
+        log << MSG::ERROR << "Mezzanine Type: " << static_cast<int>(map_data.mezzanine_type) 
+                          << " not found in the list !" << endmsg;
         return false;
-    }
+    } else if (source == DataSource::LegacyCOOL && !mezzaType->checkConsistency(log)) return false;
 
-    const MdtMezzanineType* mezzaType{nullptr};
-    MezzanineTypes::const_iterator it = m_listOfMezzanineTypes.find(map_data.mezzanine_type);
-    if (it != m_listOfMezzanineTypes.end()) {
-        mezzaType = (*it).second.get();
-    } else {
-        log << MSG::ERROR << "Mezzanine Type: " << map_data.mezzanine_type << " not found in the list !" << endmsg;
-        return false;
-    }
-    std::unique_ptr<MdtTdcMap> newTdc = std::make_unique<MdtTdcMap>(mezzaType, map_data, m_mdtIdHelper, log);
+    std::unique_ptr<MdtTdcMap> newTdc = std::make_unique<MdtTdcMap>(mezzaType, map_data, m_mdtIdHelper);
     if (debug) { log << MSG::VERBOSE << " Added new readout channel " << map_data << endmsg; }
     MdtOffChModule& offModule = m_toOnlineConv[map_data];
     offModule.cards.emplace(newTdc.get());
@@ -206,10 +201,9 @@ bool MuonMDT_CablingMap::getOfflineId(CablingData& cabling_map, MsgStream& log) 
             return false;
         }
         if (!module_itr->second.zero_module->offlineId(cabling_map, log)) {
-            log << MSG::WARNING << "MdtTdMap::getOfflineId() -- Channel: 0x" << MSG::hex << static_cast<unsigned>(cabling_map.channelId)
-                << MSG::dec << " Tdc: 0x" << MSG::hex << static_cast<unsigned>(cabling_map.tdcId) << MSG::dec << " not found in CSM: 0x"
-                << MSG::hex << MSG::dec << " subdetector: 0x" << MSG::hex << static_cast<unsigned>(cabling_map.subdetectorId) << MSG::dec
-                << endmsg;
+            log << MSG::WARNING << "MdtTdMap::getOfflineId() -- Channel: " << static_cast<unsigned>(cabling_map.channelId)
+                 << " Tdc: " << static_cast<unsigned>(cabling_map.tdcId)  << " not found in "
+                 << static_cast<const MdtCablingOnData&>(cabling_map) << endmsg;
             return false;
         }
     } else {
@@ -221,30 +215,24 @@ bool MuonMDT_CablingMap::getOfflineId(CablingData& cabling_map, MsgStream& log) 
         }
         const MdtTdcOnlSorter& TdcItr = attachedTdcs.at(cabling_map.tdcId);
         if (!TdcItr) {
-            log << MSG::WARNING << "getOfflineId() -- Tdc: 0x" << MSG::hex << static_cast<unsigned>(cabling_map.tdcId) << MSG::dec
-                << " not found in CSM: 0x" << MSG::hex << static_cast<unsigned>(cabling_map.csm) << MSG::dec << " of MROD: 0x" << MSG::hex
-                << static_cast<unsigned>(cabling_map.mrod) << MSG::dec << " subdetector: 0x" << MSG::hex
-                << static_cast<unsigned>(cabling_map.subdetectorId) << MSG::dec << endmsg;
+            log << MSG::WARNING << "getOfflineId() -- Tdc: " << static_cast<unsigned>(cabling_map.tdcId) 
+                << " not found in " <<static_cast<const MdtCablingOnData&>(cabling_map)<< endmsg;
             return false;
         }
         if (!TdcItr->offlineId(cabling_map, log)) {
-            log << MSG::WARNING << "MdtTdMap::getOfflineId() -- Channel: 0x" << MSG::hex << static_cast<unsigned>(cabling_map.channelId)
-                << MSG::dec << " Tdc: 0x" << MSG::hex << static_cast<unsigned>(cabling_map.tdcId) << MSG::dec << " not found in CSM: 0x"
-                << MSG::hex << MSG::dec << " subdetector: 0x" << MSG::hex << static_cast<unsigned>(cabling_map.subdetectorId) << MSG::dec
-                << endmsg;
+            log << MSG::WARNING << "MdtTdMap::getOfflineId() -- channel: "<<static_cast<unsigned>(cabling_map.channelId)
+                                << " Tdc: " << static_cast<unsigned>(cabling_map.tdcId) << " not found in "
+                                << static_cast<const MdtCablingOnData&>(cabling_map)<<endmsg;
             return false;
         }
     }
     if (log.level() <= MSG::VERBOSE) {
-        log << MSG::VERBOSE << "Channel: 0x" << MSG::hex << static_cast<unsigned>(cabling_map.channelId) << MSG::dec << " Tdc: 0x"
-            << MSG::hex << static_cast<unsigned>(cabling_map.tdcId) << MSG::dec << " CSM: 0x" << MSG::hex
-            << static_cast<unsigned>(cabling_map.csm) << MSG::dec << " of MROD: 0x" << MSG::hex << static_cast<unsigned>(cabling_map.mrod)
-            << MSG::dec << " subdetector: 0x" << MSG::hex << static_cast<unsigned>(cabling_map.subdetectorId) << MSG::dec << endmsg;
+        log << MSG::VERBOSE << "Channel: " << static_cast<unsigned>(cabling_map.channelId) << " Tdc: "
+            << static_cast<unsigned>(cabling_map.tdcId)  << " "
+            << static_cast<const MdtCablingOnData&>(cabling_map)<< endmsg;
 
-        log << MSG::VERBOSE << "Mapped to: Station: " << static_cast<int>(cabling_map.stationIndex)
-            << " eta: " << static_cast<int>(cabling_map.eta) << " phi: " << static_cast<int>(cabling_map.phi)
-            << " multiLayer: " << static_cast<int>(cabling_map.multilayer) << " layer: " << cabling_map.layer
-            << " tube: " << cabling_map.tube << endmsg;
+        log << MSG::VERBOSE << "Mapped to  " << static_cast<const MdtCablingOffData&>(cabling_map)
+                            << " layer: " << cabling_map.layer << " tube: " << cabling_map.tube << endmsg;
     }
     return true;
 }
@@ -253,7 +241,8 @@ bool MuonMDT_CablingMap::getOfflineId(CablingData& cabling_map, MsgStream& log) 
 bool MuonMDT_CablingMap::getOnlineId(CablingData& cabling_map, MsgStream& log) const {
     OffToOnlMap::const_iterator module_itr = m_toOnlineConv.find(cabling_map);
     if (module_itr == m_toOnlineConv.end()) {
-        log << MSG::WARNING << "Could not find a cabling module to recieve online Id for " << cabling_map << endmsg;
+        log << MSG::WARNING << "getOnlineId() --- Could not find a cabling CSM set recieve online Id for " 
+                            << static_cast<MdtCablingOffData&>(cabling_map) << endmsg;
         return false;
     }
     const TdcOffSet& attachedTdcs = module_itr->second.cards;
@@ -292,8 +281,8 @@ bool MuonMDT_CablingMap::addChamberToROBMap(const CablingData& map_data, MsgStre
 
     uint32_t hardId = (sub << 16) | rod;
     if (debug) {
-        log << MSG::VERBOSE << "Adding the chamber with Id: " << chamberId << " and subdetector+rod ID: 0x" << MSG::hex << hardId
-            << MSG::dec << endmsg;
+        log << MSG::VERBOSE << "Adding the chamber with Id: " << chamberId << " and subdetector+rod ID: " << hardId
+             << endmsg;
     }
 
     // check if the chamber has already been put into the map
@@ -306,7 +295,7 @@ bool MuonMDT_CablingMap::addChamberToROBMap(const CablingData& map_data, MsgStre
     // now check if the ROB is already in the list of ROB vector
     const bool robInitialized = std::find(m_listOfROB.begin(), m_listOfROB.end(), hardId) != m_listOfROB.end();
     if (!robInitialized) {
-        if (debug) { log << MSG::VERBOSE << "Adding the ROB 0x" << MSG::hex << hardId << MSG::dec << " to the list" << endmsg; }
+        if (debug) { log << MSG::VERBOSE << "Adding the ROB " << hardId  << " to the list" << endmsg; }
         m_listOfROB.push_back(hardId);
     }
     return true;
@@ -368,7 +357,7 @@ std::vector<uint32_t> MuonMDT_CablingMap::getROBId(const std::vector<IdentifierH
         if (!robId) {
             log << MSG::ERROR << "ROB id not found for Hash Id: " << mdtHashVector[i] << endmsg;
         } else if (debug) {
-            log << MSG::VERBOSE << "Found ROB id 0x" << MSG::hex << robId << MSG::dec << " for hashId " << mdtHashVector[i] << endmsg;
+            log << MSG::VERBOSE << "Found ROB id " << robId  << " for hashId " << mdtHashVector[i] << endmsg;
         }
         robVector.push_back(robId);
     }
@@ -405,7 +394,10 @@ bool MuonMDT_CablingMap::finalize_init(MsgStream& log) {
         log << MSG::ERROR << "No tdc maps were loaded " << endmsg;
         return false;
     }
-
+    for (const MezzCardPtr& card : m_mezzCards) {
+        if (!card->checkConsistency(log)) return false;
+    }
+    
     const unsigned int offToOnlChan = std::accumulate(m_toOnlineConv.begin(), m_toOnlineConv.end(), 0,
                                                       [](unsigned int N, const auto& map) { return N + map.second.cards.size(); });
     const unsigned int onlToOffChan =
@@ -421,8 +413,10 @@ bool MuonMDT_CablingMap::finalize_init(MsgStream& log) {
     }
     for (auto& toOff : m_toOfflineConv) {
         MdtTdcModule& mod = toOff.second;
-        TdcOnlSet::const_iterator itr =
-            std::find_if(mod.begin(), mod.end(), [](const MdtTdcOnlSorter& sorter) { return sorter && sorter->tdcZero() == 0; });
+        TdcOnlSet::const_iterator itr = std::find_if(mod.begin(), mod.end(), 
+                                            [](const MdtTdcOnlSorter& sorter) { 
+                                                return sorter && sorter->tdcZero() == 0; 
+                                        });
         if (itr == mod.end()) {
             log << MSG::ERROR << "There is no tdc with channel 0 in " << toOff.first
                 << ". That is important to decode the station names later" << endmsg;
@@ -430,7 +424,150 @@ bool MuonMDT_CablingMap::finalize_init(MsgStream& log) {
         }
         mod.zero_module = (*itr);
     }
-    m_listOfMezzanineTypes.clear();
+    m_mezzCards.clear();
     log << MSG::INFO << "MdtCabling successfully loaded. Found in total " << m_tdcs.size() << " channels." << endmsg;
     return true;
+}
+bool MuonMDT_CablingMap::addMezanineLayout(std::unique_ptr<MdtMezzanineCard> card, MsgStream& log) {
+    if (!card->checkConsistency(log)) return false;
+    MezzCardList::const_iterator itr = std::find_if(m_mezzCards.begin(),m_mezzCards.end(), 
+        [&card](const MezzCardPtr& existing){
+            return existing->id() == card->id();
+        });
+    if (itr != m_mezzCards.end()) {
+       log<<MSG::ERROR<<"Mezzanine card "<<std::endl<<(*card)<<" has already been added "<<std::endl<<
+          (**itr)<<std::endl<<" please check. "<<endmsg;
+        return false; 
+    }
+    m_mezzCards.push_back(std::move(card));
+    return true;
+}
+MezzCardPtr MuonMDT_CablingMap::legacyHedgehogCard(CablingData& cabling, MsgStream& msg) const {
+    using MezzMapping = MdtMezzanineCard::Mapping;
+    MezzMapping chMap{make_array<uint8_t, 24>(MdtMezzanineCard::NOTSET)};
+
+    const int mezzType = cabling.mezzanine_type;
+    const int chanZero = cabling.channelId;
+    const int layerZero = cabling.layer;
+    const int tubeZero = cabling.tube;
+    
+    cabling.tube = MdtIdHelper::maxNTubesPerLayer;
+    const bool debug = msg.level() <= MSG::VERBOSE;
+    
+    if (special_cards.count(mezzType)) {
+        const MdtMezzanineCard dummy_card(chMap, 4, mezzType);
+       if (debug) msg<<MSG::VERBOSE<<"legacyHedgehogCard() -- Special layout given "<<mezzType<<endmsg;
+       for (size_t chan = 0 ; chan < chMap.size() ; ++chan) {
+            uint8_t tube_chan = ((chan - chan % 4) / 4);
+            /// Octoberfest chambers need a mirror in the tube channel numbering 
+            /// https://its.cern.ch/jira/browse/ATLASRECTS-7411
+            if (mezzType == 71) {
+                tube_chan = 5 - tube_chan;
+            }
+            int layer{0}, tube{0};
+            // special case of the BME of end 2013 and BMG 2017
+            /*
+            * cases 50 and 60 follow the same rules. hedgehog card 50 is the mirror image of card 60,
+            * but the rules concerning how to decode the tube mapping are the same.
+            * channel 0 of a mezzanine card for case 50 is either top right or bottom left,
+            * while for case 60 it is top left or bottom right.
+            * Another thing to keep in mind for BMG is, that tube counting in some cases is along |z|,
+            * while in some other cases it is opposite.
+            *
+            *  E.g: Numbering from top to bottom -> Tube counting along z
+            *
+            *       Layer |         Tube number
+            *       4     |  0     4      8    12     16   20
+            *       3     |  1     5      9    13     17   21
+            *       2     |  2     6     10    14     18   22
+            *       1     |  3     7     11    15     19   23
+            */
+            if (mezzType == 50 || mezzType == 60 || mezzType == 61) {
+                /// Tube numbering is from bottom to top
+                if (layerZero == 1) {
+                    layer = chan % 4 + 1;
+                }
+                // Tube numbering is from top to bottom
+                else {
+                    layer = 4 - chan % 4;
+                }
+                if ((tubeZero - 1) % 6 == 0) {
+                    tube = tubeZero + tube_chan;
+                } else {
+                    tube = tubeZero - tube_chan;
+                }
+            }
+            /*  Few mezzanine cards in the BIS78 chambers are collateral vicitms of the famous
+             *  regional customs happening in the Bavarian autumun. The tube staggering is kind
+             *  of discontinous where the upper two layers are swapped with the bottom two
+             *    1     5      9     13     17      21
+             *    0     4      8     12     16      20
+             *    3     7     11     15     19      23
+             *    2     6     10     14     18      22
+             */
+            else if (mezzType == 71) {
+                layer = (chan % 4);
+                layer += 2 * (layer > 1 ? -1 : +1) + 1;
+                tube = tubeZero - tube_chan;
+            }
+            cabling.tube = std::min(cabling.tube, tube);
+            chMap[chan] = dummy_card.tubeNumber(layer, tube);
+            if (debug) msg<<MSG::VERBOSE<<"legacyHedgehogCard() -- Channel "<<chan<<" mapped to "<<layer<<", "<<tube<<endmsg;           
+       }
+       return std::make_unique<MdtMezzanineCard>(chMap, 4, mezzType);
+    }
+    /// Legacy tube mapping
+    MezzCardPtr card = getHedgeHogMapping(mezzType);
+    if (!card) return nullptr;
+    if (debug) msg<<MSG::VERBOSE<<"Assign local tube mapping from "<<(*card)<<std::endl<<
+    "to connect "<<cabling<<" tubeZero: "<<tubeZero<<endmsg;
+    const int stationName = cabling.stationIndex;
+    const int stationEta = std::abs(cabling.eta);
+    
+    for (size_t chan = 0 ; chan < chMap.size() ; ++chan) {
+        // calculate the layer
+        int layer{0}, tube{0};
+        if (layerZero == 1) {
+            layer = chan / (card->numTubesPerLayer()) + 1;
+        } else {
+            layer = layerZero - chan / (card->numTubesPerLayer());
+        }
+        
+        // calculate the tube in layer
+        uint8_t localchan = chan % (card->numTubesPerLayer());
+
+        // special case of the BIR with 3 tubes overlapping to another mezzanine
+        if ((chanZero == 5 && stationName == 7 && stationEta == 3 ) &&
+            ((card->id() > 40 && localchan % 2 == 0) || (card->id() < 40 && localchan < 3)))
+            continue;
+        
+        using OfflineCh = MdtMezzanineCard::OfflineCh;
+        OfflineCh locTubeLay = card->offlineTube(localchan + (layer -1)*card->numTubesPerLayer(), msg);
+        OfflineCh zeroTubeLay = card->offlineTube(chanZero + (layer -1)*card->numTubesPerLayer(), msg);
+        if (!locTubeLay.isValid || !zeroTubeLay.isValid) continue;
+        
+        tube = (static_cast<int>(locTubeLay.tube) - 
+                static_cast<int>(zeroTubeLay.tube) + tubeZero);
+        
+        if (debug) msg<<MSG::VERBOSE<<"legacyHedgehogCard() -- Channel "<<chan<<" mapped to "<<layer<<", "<<tube<<
+                    " locTube: "<<static_cast<int>(locTubeLay.tube)<<" zeroTubeLay: "<<static_cast<int>(zeroTubeLay.tube)<<endmsg;           
+      
+        if (tube < 1 || tube >= MdtIdHelper::maxNTubesPerLayer) continue;
+        cabling.tube = std::min(cabling.tube, tube);
+        chMap[chan] = card->tubeNumber(layer, tube);                 
+    }
+    std::unique_ptr<MdtMezzanineCard> to_ret = std::make_unique<MdtMezzanineCard>(chMap, card->numTubeLayers(), mezzType);
+    const uint8_t tubeZeroOff = (cabling.tube -1) % to_ret->numTubesPerLayer();
+    if (!tubeZeroOff) return to_ret;
+    chMap = make_array<uint8_t, 24>(MdtMezzanineCard::NOTSET);
+    for (size_t chan = 0 ; chan < chMap.size() ; ++chan) {
+       using OfflineCh = MdtMezzanineCard::OfflineCh;
+       OfflineCh tube_lay = to_ret->offlineTube(chan, msg);
+       if (!tube_lay.isValid) continue;
+       uint8_t tubeNumber = tube_lay.tube + tubeZeroOff + 1;
+       chMap[chan] = card->tubeNumber(tube_lay.layer, tubeNumber);
+    }
+    if (debug) msg<<MSG::VERBOSE<<"Final mapping "<<cabling<<endmsg;
+    
+    return std::make_unique<MdtMezzanineCard>(chMap, card->numTubeLayers(), mezzType);
 }

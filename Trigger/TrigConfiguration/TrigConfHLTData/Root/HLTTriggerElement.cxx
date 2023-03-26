@@ -8,7 +8,6 @@
 #include <iostream>
 #include <fstream>
 #include <stdexcept>
-#include <boost/lexical_cast.hpp>
 
 using namespace std;
 using namespace TrigConf;

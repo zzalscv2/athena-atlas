@@ -19,8 +19,10 @@ def _caloSeq(flags):
     from TrigCaloRec.TrigCaloRecConfig import hltCaloTopoClusteringCfg
     recoAcc.mergeReco(hltCaloTopoClusteringCfg(flags,
                                                     namePrefix="Tau",
+                                                    nameSuffix="",
                                                     roisKey=recoAcc.inputMaker().InViewRoIs,
-                                                    clustersKey='HLT_TopoCaloClustersLC'))
+                                                    clustersKey='HLT_TopoCaloClustersLC',
+                                                    doLC = True))
 
     from TrigTauRec.TrigTauRecConfig import trigTauRecMergedCaloOnlyMVACfg
     recoAcc.addRecoAlgo(CompFactory.TrigTauCaloRoiUpdater("TauCaloRoiUpdater",

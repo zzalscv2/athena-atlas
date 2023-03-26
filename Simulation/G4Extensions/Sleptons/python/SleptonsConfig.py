@@ -23,6 +23,8 @@ G4ParticleShortlived (default False)
 where Particle = [STau1Minus, STau1Plus, STau2Minus, STau2Plus, SElectronRMinus, SElectronRLinus, SElectronRPlus, SElectronLPlus, SMuonRMinus, SMuonLMinus, SMuonRPlus, SMuonLPlus]
 """
 
+# The mass of the a1(1260) meson.  The a1(1260) meson is the heaviest of the decay products when the tau is off shell.
+Mass_a1Meson = 1260. # MeV
 
 @AccumulatorCache
 def get_and_fix_PDGTABLE_GMSB(replace):
@@ -56,7 +58,7 @@ def get_and_fix_PDGTABLE_GMSB(replace):
         update.write(''.join(lines))
         update.close()
 
-        print ('modfied PDGTABLE\n%s\n' % ''.join(lines))
+        print ('modified PDGTABLE\n%s\n' % ''.join(lines))
         sys.stdout.flush()
 
 
@@ -165,7 +167,7 @@ def get_and_fix_PDGTABLE_sleptons(flags, replace):
         update.write(''.join(lines))
         update.close()
 
-        print('modfied PDGTABLE\n%s\n' % ''.join(lines))
+        print('modified PDGTABLE\n%s\n' % ''.join(lines))
         sys.stdout.flush()
 
 
@@ -191,6 +193,25 @@ def load_files_for_sleptonLLP_scenario(flags):
                 (1000039, eval(simdict.get("GMSBGravitino",'0')), '~G', '0'),
                 ])
         pdgcodes += [1000039]
+    if "coannihilationStau" in simdict:
+        get_and_fix_PDGTABLE_sleptons([
+                (2000015, eval(simdict.get("coannihilationStau",'0')), '~tau(R)', '-'),
+                (1000015, eval(simdict.get("coannihilationStau",'0')), '~tau(L)', '-'),
+                ])
+        pdgcodes += [-2000015,2000015,-1000015,1000015]
+    if "coannihilationSlepton" in simdict:
+        get_and_fix_PDGTABLE_sleptons([
+            (2000011, eval(simdict.get("coannihilationSlepton", '0')), '~e(R)', '-'),
+            (2000013, eval(simdict.get("coannihilationSlepton", '0')), '~mu(R)', '-'),
+            (1000011, eval(simdict.get("coannihilationSlepton", '0')), '~e(L)', '-'),
+            (1000013, eval(simdict.get("coannihilationSlepton", '0')), '~mu(L)', '-'),
+        ])
+        pdgcodes += [-2000011, 2000011, -2000013, 2000013, -1000011, 1000011, -1000013, 1000013]
+    if "coannihilationNeutralino" in simdict:
+        get_and_fix_PDGTABLE_sleptons([
+                (1000022, eval(simdict.get("coannihilationNeutralino", '0')), '~chi(0,1)', '0'),
+                ])
+        pdgcodes += [1000022]
 
     from ExtraParticles.PDGHelpers import updateExtraParticleWhiteList
     updateExtraParticleWhiteList('G4particle_whitelist_ExtraParticles.txt', pdgcodes)
@@ -198,12 +219,22 @@ def load_files_for_sleptonLLP_scenario(flags):
 
 def SleptonsPhysicsToolCfg(flags, name="SleptonsPhysicsTool", **kwargs):
     result = ComponentAccumulator()
-    GMSBStau    = eval(flags.Input.SpecialConfiguration.get("GMSBStau", None))
-    kwargs.setdefault("G4STau1MinusMass",             GMSBStau)
-    kwargs.setdefault("G4STau1PlusMass",              GMSBStau)
+    if "GMSBStau" in flags.Input.SpecialConfiguration or "coannihilationStau" in flags.Input.SpecialConfiguration:
+        StauMass = None
+        if "GMSBStau" in flags.Input.SpecialConfiguration:
+            StauMass = eval(flags.Input.SpecialConfiguration.get("GMSBStau", "None"))
+            kwargs.setdefault("G4STau1MinusMass",             StauMass)
+            kwargs.setdefault("G4STau1PlusMass",              StauMass)
+            # TODO Check whether G4STau2(Plus/Minus)Mass should also be set here
+        elif "coannihilationStau" in flags.Input.SpecialConfiguration:
+            StauMass = eval(flags.Input.SpecialConfiguration.get("coannihilationStau", "None"))
+            kwargs.setdefault("G4STau1MinusMass",             StauMass)
+            kwargs.setdefault("G4STau1PlusMass",              StauMass)
+            kwargs.setdefault("G4STau2MinusMass",             StauMass)
+            kwargs.setdefault("G4STau2PlusMass",              StauMass)
 
     if "GMSBSlepton" in flags.Input.SpecialConfiguration:
-        GMSBSlepton = eval(flags.Input.SpecialConfiguration.get("GMSBSlepton", None))
+        GMSBSlepton = eval(flags.Input.SpecialConfiguration.get("GMSBSlepton", "None"))
 
         kwargs.setdefault("G4SElectronRMinusMass",        GMSBSlepton)
         kwargs.setdefault("G4SElectronRPlusMass",         GMSBSlepton)
@@ -216,32 +247,39 @@ def SleptonsPhysicsToolCfg(flags, name="SleptonsPhysicsTool", **kwargs):
 
 def AllSleptonsPhysicsToolCfg(flags, name="AllSleptonsPhysicsTool", **kwargs):
     result = ComponentAccumulator()
-    if "GMSBStau" in flags.Input.SpecialConfiguration:
-        GMSBStau    = eval(flags.Input.SpecialConfiguration.get("GMSBStau", None))
-        GMSBStauTime    = eval(flags.Input.SpecialConfiguration.get("GMSBStauTime", None))
-        kwargs.setdefault("G4STau1MinusMass",             GMSBStau)
+    if "GMSBStau" in flags.Input.SpecialConfiguration or "coannihilationStau" in flags.Input.SpecialConfiguration:
+        StauMass = None
+        StauLifetime = None
+        if "GMSBStau" in flags.Input.SpecialConfiguration: # Check for GMSBStau key word in job options. If found set Stau values.
+            StauMass = eval(flags.Input.SpecialConfiguration.get("GMSBStau", "None"))
+            StauLifetime = eval(flags.Input.SpecialConfiguration.get("GMSBStauTime", "None"))
+        elif "coannihilationStau" in flags.Input.SpecialConfiguration: # Check for coannihilationStau key word in evgen special configs. This is an option that is normally put in the event gen job options file.
+            StauMass = eval(flags.Input.SpecialConfiguration.get("coannihilationStau", "None"))
+            StauLifetime = eval(flags.Input.SpecialConfiguration.get("coannihilationStauTime", "None"))
+
+        kwargs.setdefault("G4STau1MinusMass",             StauMass)
         kwargs.setdefault("G4STau1MinusPDGCode",          1000015)
         kwargs.setdefault("G4STau1MinusStable",           False)
-        kwargs.setdefault("G4STau1MinusLifetime",         GMSBStauTime)
+        kwargs.setdefault("G4STau1MinusLifetime",         StauLifetime)
 
-        kwargs.setdefault("G4STau1PlusMass",              GMSBStau)
+        kwargs.setdefault("G4STau1PlusMass",              StauMass)
         kwargs.setdefault("G4STau1PlusPDGCode",           -1000015)
         kwargs.setdefault("G4STau1PlusStable",            False)
-        kwargs.setdefault("G4STau1PlusLifetime",          GMSBStauTime)
+        kwargs.setdefault("G4STau1PlusLifetime",          StauLifetime)
 
-        kwargs.setdefault("G4STau2MinusMass",             GMSBStau)
+        kwargs.setdefault("G4STau2MinusMass",             StauMass)
         kwargs.setdefault("G4STau2MinusPDGCode",          2000015)
         kwargs.setdefault("G4STau2MinusStable",           False)
-        kwargs.setdefault("G4STau2MinusLifetime",         GMSBStauTime)
+        kwargs.setdefault("G4STau2MinusLifetime",         StauLifetime)
 
-        kwargs.setdefault("G4STau2PlusMass",              GMSBStau)
+        kwargs.setdefault("G4STau2PlusMass",              StauMass)
         kwargs.setdefault("G4STau2PlusPDGCode",           -2000015)
         kwargs.setdefault("G4STau2PlusStable",            False)
-        kwargs.setdefault("G4STau2PlusLifetime",          GMSBStauTime)
+        kwargs.setdefault("G4STau2PlusLifetime",          StauLifetime)
 
     if "GMSBSlepton" in flags.Input.SpecialConfiguration:
-        GMSBSlepton = eval(flags.Input.SpecialConfiguration.get("GMSBSlepton", None))
-        GMSBSleptonTime = eval(flags.Input.SpecialConfiguration.get("GMSBSleptonTime", None))
+        GMSBSlepton = eval(flags.Input.SpecialConfiguration.get("GMSBSlepton", "None"))
+        GMSBSleptonTime = eval(flags.Input.SpecialConfiguration.get("GMSBSleptonTime", "None"))
 
         kwargs.setdefault("G4SElectronLMinusMass",        GMSBSlepton)
         kwargs.setdefault("G4SElectronLMinusPDGCode",     1000011)
@@ -286,6 +324,7 @@ def AllSleptonsPhysicsToolCfg(flags, name="AllSleptonsPhysicsTool", **kwargs):
     return result
 
 
+## Gravitino Options
 def SElectronRPlusToElectronGravitinoCfg(flags, name="SElectronRPlusToElectronGravitino", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("ParticleName","s_e_plus_R")
@@ -393,6 +432,438 @@ def STauRMinusToTauGravitinoCfg(flags, name="STauRMinusToTauGravitino", **kwargs
     result.setPrivateTools( CompFactory.AddPhysicsDecayTool(name, **kwargs) )
     return result
 
+
+## Neutralino-Stau
+def STauRMinusToTauNeutralinoCfg(flags, name="STauRMinusToTauNeutralino", **kwargs):
+    result = ComponentAccumulator()
+    kwargs.setdefault("ParticleName","s_tau_minus_2")
+    kwargs.setdefault("BR", 1.0) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,tau-")
+    result.setPrivateTools( CompFactory.AddPhysicsDecayTool(name, **kwargs) )
+    return result
+
+
+def STauRPlusToTauNeutralinoCfg(flags, name="STauRPlusToTauNeutralino", **kwargs):
+    result = ComponentAccumulator()
+    kwargs.setdefault("ParticleName","s_tau_plus_2")
+    kwargs.setdefault("BR", 1.0) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,tau+")
+    result.setPrivateTools( CompFactory.AddPhysicsDecayTool(name, **kwargs) )
+    return result
+
+
+def STauLMinusToTauNeutralinoCfg(flags, name="STauLMinusToTauNeutralino", **kwargs):
+    result = ComponentAccumulator()
+    kwargs.setdefault("ParticleName","s_tau_minus_1")
+    kwargs.setdefault("BR", 1.0) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,tau-")
+    result.setPrivateTools( CompFactory.AddPhysicsDecayTool(name, **kwargs) )
+    return result
+
+
+def STauLPlusToTauNeutralinoCfg(flags, name="STauLPlusToTauNeutralino", **kwargs):
+    result = ComponentAccumulator()
+    kwargs.setdefault("ParticleName","s_tau_plus_1")
+    kwargs.setdefault("BR", 1.0) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,tau+")
+    result.setPrivateTools( CompFactory.AddPhysicsDecayTool(name, **kwargs) )
+    return result
+
+
+#########################################################################################
+### Neutralino-Stau Off shell tau
+## Stau-Neutralino Pion Neutrino
+#########################################################################################
+def STauRMinusToPionMinusNeutralinoCfg(flags, name="STauRMinusToPionMinusNeutralino", **kwargs):
+    result = ComponentAccumulator()
+    BR = .9
+    # coannihilation Neutralino and Stau masses
+    NeutralinoMass = eval(flags.Input.SpecialConfiguration.get("coannihilationNeutralino", "None"))
+    StauMass = eval(flags.Input.SpecialConfiguration.get("coannihilationStau", "None"))
+    if NeutralinoMass is not None and StauMass is not None and StauMass - Mass_a1Meson > NeutralinoMass: ## adjust branching ratio to ensure enough energy to decay to the a1 meson.
+        BR = .15
+    kwargs.setdefault("ParticleName","s_tau_minus_2")
+    kwargs.setdefault("BR", BR)  # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,pi-,nu_tau")
+    result.setPrivateTools( CompFactory.AddPhysicsDecayTool(name, **kwargs) )
+    return result
+
+
+def STauRPlusToPionPlusNeutralinoCfg(flags, name="STauRPlusToPionPlusNeutralino", **kwargs):
+    result = ComponentAccumulator()
+    BR = .9
+    # coannihilation Neutralino and Stau masses
+    NeutralinoMass = eval(flags.Input.SpecialConfiguration.get("coannihilationNeutralino", "None"))
+    StauMass = eval(flags.Input.SpecialConfiguration.get("coannihilationStau", "None"))
+    if NeutralinoMass is not None and StauMass is not None and StauMass - Mass_a1Meson > NeutralinoMass: ## adjust branching ratio to ensure enough energy to decay to the a1 meson.
+        BR = .15
+    kwargs.setdefault("ParticleName","s_tau_plus_2")
+    kwargs.setdefault("BR", BR) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,pi+,anti_nu_tau")
+    result.setPrivateTools( CompFactory.AddPhysicsDecayTool(name, **kwargs) )
+    return result
+
+
+def STauLMinusToPionMinusNeutralinoCfg(flags, name="STauLMinusToPionMinusNeutralino", **kwargs):
+    result = ComponentAccumulator()
+    BR = .9
+    # coannihilation Neutralino and Stau masses
+    NeutralinoMass = eval(flags.Input.SpecialConfiguration.get("coannihilationNeutralino", "None"))
+    StauMass = eval(flags.Input.SpecialConfiguration.get("coannihilationStau", "None"))
+    if NeutralinoMass is not None and StauMass is not None and StauMass - Mass_a1Meson > NeutralinoMass: ## adjust branching ratio to ensure enough energy to decay to the a1 meson.
+        BR = .15
+    kwargs.setdefault("ParticleName","s_tau_minus_1")
+    kwargs.setdefault("BR", BR) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,pi-,nu_tau")
+    result.setPrivateTools( CompFactory.AddPhysicsDecayTool(name, **kwargs) )
+    return result
+
+
+def STauLPlusToPionPlusNeutralinoCfg(flags, name="STauLPlusToPionPlusNeutralino", **kwargs):
+    result = ComponentAccumulator()
+    BR = .9
+    # coannihilation Neutralino and Stau masses
+    NeutralinoMass = eval(flags.Input.SpecialConfiguration.get("coannihilationNeutralino", "None"))
+    StauMass = eval(flags.Input.SpecialConfiguration.get("coannihilationStau", "None"))
+    if NeutralinoMass is not None and StauMass is not None and StauMass - Mass_a1Meson > NeutralinoMass: ## adjust branching ratio to ensure enough energy to decay to the a1 meson.
+        BR = .15
+    kwargs.setdefault("ParticleName","s_tau_plus_1")
+    kwargs.setdefault("BR", BR) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,pi+,anti_nu_tau")
+    result.setPrivateTools( CompFactory.AddPhysicsDecayTool(name, **kwargs) )
+    return result
+
+
+#########################################################################################
+### Neutralino-Stau Off shell tau
+### Stau-Neutralino Muon Neutrino
+#########################################################################################
+def STauRMinusToRhoMinusNeutralinoCfg(flags, name="STauRMinusToRhoMinusNeutralino", **kwargs):
+    result = ComponentAccumulator()
+    BR = 0.0
+    # coannihilation Neutralino and Stau masses
+    NeutralinoMass = eval(flags.Input.SpecialConfiguration.get("coannihilationNeutralino", "None"))
+    StauMass = eval(flags.Input.SpecialConfiguration.get("coannihilationStau", "None"))
+    if NeutralinoMass is not None and StauMass is not None and StauMass - Mass_a1Meson > NeutralinoMass: ## adjust branching ratio to ensure enough energy to decay to the a1 meson.
+        BR = .33
+    kwargs.setdefault("ParticleName","s_tau_minus_2")
+    kwargs.setdefault("BR", BR) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,rho-,nu_tau")
+    result.setPrivateTools( CompFactory.AddPhysicsDecayTool(name, **kwargs) )
+    return result
+
+
+def STauRPlusToRhoPlusNeutralinoCfg(flags, name="STauRPlusToRhoPlusNeutralino", **kwargs):
+    result = ComponentAccumulator()
+    BR = 0.0
+    # coannihilation Neutralino and Stau masses
+    NeutralinoMass = eval(flags.Input.SpecialConfiguration.get("coannihilationNeutralino", "None"))
+    StauMass = eval(flags.Input.SpecialConfiguration.get("coannihilationStau", "None"))
+    if NeutralinoMass is not None and StauMass is not None and StauMass - Mass_a1Meson > NeutralinoMass: ## adjust branching ratio to ensure enough energy to decay to the a1 meson.
+        BR = .33
+    kwargs.setdefault("ParticleName","s_tau_plus_2")
+    kwargs.setdefault("BR", BR) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,rho+,anti_nu_tau")
+    result.setPrivateTools( CompFactory.AddPhysicsDecayTool(name, **kwargs) )
+    return result
+
+
+def STauLMinusToRhoMinusNeutralinoCfg(flags, name="STauLMinusToRhoMinusNeutralino", **kwargs):
+    result = ComponentAccumulator()
+    BR = 0.0
+    # coannihilation Neutralino and Stau masses
+    NeutralinoMass = eval(flags.Input.SpecialConfiguration.get("coannihilationNeutralino", "None"))
+    StauMass = eval(flags.Input.SpecialConfiguration.get("coannihilationStau", "None"))
+    if NeutralinoMass is not None and StauMass is not None and StauMass - Mass_a1Meson > NeutralinoMass: ## adjust branching ratio to ensure enough energy to decay to the a1 meson.
+        BR = .33
+    kwargs.setdefault("ParticleName","s_tau_minus_1")
+    kwargs.setdefault("BR", BR) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,rho-,nu_tau")
+    result.setPrivateTools( CompFactory.AddPhysicsDecayTool(name, **kwargs) )
+    return result
+
+
+def STauLPlusToRhoPlusNeutralinoCfg(flags, name="STauLPlusToRhoPlusNeutralino", **kwargs):
+    result = ComponentAccumulator()
+    BR = 0.0
+    # coannihilation Neutralino and Stau masses
+    NeutralinoMass = eval(flags.Input.SpecialConfiguration.get("coannihilationNeutralino", "None"))
+    StauMass = eval(flags.Input.SpecialConfiguration.get("coannihilationStau", "None"))
+    if NeutralinoMass is not None and StauMass is not None and StauMass - Mass_a1Meson > NeutralinoMass: ## adjust branching ratio to ensure enough energy to decay to the a1 meson.
+        BR = .33
+    kwargs.setdefault("ParticleName","s_tau_plus_1")
+    kwargs.setdefault("BR", BR) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,rho+,anti_nu_tau")
+    result.setPrivateTools( CompFactory.AddPhysicsDecayTool(name, **kwargs) )
+    return result
+
+
+#########################################################################################
+### Neutralino-Stau Off shell tau
+### Stau-Neutralino Electron Neutrino
+#########################################################################################
+def STauRMinusToEMinusNeutralinoCfg(flags, name="STauRMinusToEMinusNeutralino", **kwargs):
+    result = ComponentAccumulator()
+    BR = .07
+    # coannihilation Neutralino and Stau masses
+    NeutralinoMass = eval(flags.Input.SpecialConfiguration.get("coannihilationNeutralino", "None"))
+    StauMass = eval(flags.Input.SpecialConfiguration.get("coannihilationStau", "None"))
+    if NeutralinoMass is not None and StauMass is not None and StauMass - Mass_a1Meson > NeutralinoMass: ## adjust branching ratio to ensure enough energy to decay to the a1 meson.
+        BR = .19
+    kwargs.setdefault("ParticleName","s_tau_minus_2")
+    kwargs.setdefault("BR", BR) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,e-,nu_tau,anti_nu_e")
+    result.setPrivateTools( CompFactory.AddPhysicsDecayTool(name, **kwargs) )
+    return result
+
+
+def STauRPlusToEPlusNeutralinoCfg(flags, name="STauRPlusToEPlusNeutralino", **kwargs):
+    result = ComponentAccumulator()
+    BR = .07
+    # coannihilation Neutralino and Stau masses
+    NeutralinoMass = eval(flags.Input.SpecialConfiguration.get("coannihilationNeutralino", "None"))
+    StauMass = eval(flags.Input.SpecialConfiguration.get("coannihilationStau", "None"))
+    if NeutralinoMass is not None and StauMass is not None and StauMass - Mass_a1Meson > NeutralinoMass: ## adjust branching ratio to ensure enough energy to decay to the a1 meson.
+        BR = .19
+    kwargs.setdefault("ParticleName","s_tau_plus_2")
+    kwargs.setdefault("BR", BR) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,e+,anti_nu_tau,nu_e")
+    result.setPrivateTools( CompFactory.AddPhysicsDecayTool(name, **kwargs) )
+    return result
+
+
+def STauLMinusToEMinusNeutralinoCfg(flags, name="STauLMinusToEMinusNeutralino", **kwargs):
+    result = ComponentAccumulator()
+    BR = .07
+    # coannihilation Neutralino and Stau masses
+    NeutralinoMass = eval(flags.Input.SpecialConfiguration.get("coannihilationNeutralino", "None"))
+    StauMass = eval(flags.Input.SpecialConfiguration.get("coannihilationStau", "None"))
+    if NeutralinoMass is not None and StauMass is not None and StauMass - Mass_a1Meson > NeutralinoMass: ## adjust branching ratio to ensure enough energy to decay to the a1 meson.
+        BR = .19
+    kwargs.setdefault("ParticleName","s_tau_minus_1")
+    kwargs.setdefault("BR", BR) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,e-,nu_tau,anti_nu_e")
+    result.setPrivateTools( CompFactory.AddPhysicsDecayTool(name, **kwargs) )
+    return result
+
+
+def STauLPlusToEPlusNeutralinoCfg(flags, name="STauLPlusToEPlusNeutralino", **kwargs):
+    result = ComponentAccumulator()
+    BR = .07
+    # coannihilation Neutralino and Stau masses
+    NeutralinoMass = eval(flags.Input.SpecialConfiguration.get("coannihilationNeutralino", "None"))
+    StauMass = eval(flags.Input.SpecialConfiguration.get("coannihilationStau", "None"))
+    if NeutralinoMass is not None and StauMass is not None and StauMass - Mass_a1Meson > NeutralinoMass: ## adjust branching ratio to ensure enough energy to decay to the a1 meson.
+        BR = .03
+    kwargs.setdefault("ParticleName","s_tau_plus_1")
+    kwargs.setdefault("BR", BR) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,e+,anti_nu_tau,nu_e")
+    result.setPrivateTools( CompFactory.AddPhysicsDecayTool(name, **kwargs) )
+    return result
+
+
+#########################################################################################
+### Neutralino-Stau Off shell tau
+### Stau-Neutralino Muon Neutrino
+#########################################################################################
+def STauRMinusToMuMinusNeutralinoCfg(flags, name="STauRMinusToMuMinusNeutralino", **kwargs):
+    result = ComponentAccumulator()
+    BR = .03
+    # coannihilation Neutralino and Stau masses
+    NeutralinoMass = eval(flags.Input.SpecialConfiguration.get("coannihilationNeutralino", "None"))
+    StauMass = eval(flags.Input.SpecialConfiguration.get("coannihilationStau", "None"))
+    if NeutralinoMass is not None and StauMass is not None and StauMass - Mass_a1Meson > NeutralinoMass: ## adjust branching ratio to ensure enough energy to decay to the a1 meson.
+        BR = .18
+    kwargs.setdefault("ParticleName","s_tau_minus_2")
+    kwargs.setdefault("BR", BR) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,mu-,nu_tau,anti_nu_mu")
+    result.setPrivateTools( CompFactory.AddPhysicsDecayTool(name, **kwargs) )
+    return result
+
+
+def STauRPlusToMuPlusNeutralinoCfg(flags, name="STauRPlusToMuPlusNeutralino", **kwargs):
+    result = ComponentAccumulator()
+    BR = .03
+    # coannihilation Neutralino and Stau masses
+    NeutralinoMass = eval(flags.Input.SpecialConfiguration.get("coannihilationNeutralino", "None"))
+    StauMass = eval(flags.Input.SpecialConfiguration.get("coannihilationStau", "None"))
+    if NeutralinoMass is not None and StauMass is not None and StauMass - Mass_a1Meson > NeutralinoMass: ## adjust branching ratio to ensure enough energy to decay to the a1 meson.
+        BR = .18
+    kwargs.setdefault("ParticleName","s_tau_plus_2")
+    kwargs.setdefault("BR", BR) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,mu+,anti_nu_tau,nu_mu")
+    result.setPrivateTools( CompFactory.AddPhysicsDecayTool(name, **kwargs) )
+    return result
+
+
+def STauLMinusToMuMinusNeutralinoCfg(flags, name="STauLMinusToMuMinusNeutralino", **kwargs):
+    result = ComponentAccumulator()
+    BR = .03
+    # coannihilation Neutralino and Stau masses
+    NeutralinoMass = eval(flags.Input.SpecialConfiguration.get("coannihilationNeutralino", "None"))
+    StauMass = eval(flags.Input.SpecialConfiguration.get("coannihilationStau", "None"))
+    if NeutralinoMass is not None and StauMass is not None and StauMass - Mass_a1Meson > NeutralinoMass: ## adjust branching ratio to ensure enough energy to decay to the a1 meson.
+        BR = .18
+    kwargs.setdefault("ParticleName","s_tau_minus_1")
+    kwargs.setdefault("BR", BR) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,mu-,nu_tau,anti_nu_mu")
+    result.setPrivateTools( CompFactory.AddPhysicsDecayTool(name, **kwargs) )
+    return result
+
+
+def STauLPlusToMuPlusNeutralinoCfg(flags, name="STauLPlusToMuPlusNeutralino", **kwargs):
+    result = ComponentAccumulator()
+    BR = .03
+    # coannihilation Neutralino and Stau masses
+    NeutralinoMass = eval(flags.Input.SpecialConfiguration.get("coannihilationNeutralino", "None"))
+    StauMass = eval(flags.Input.SpecialConfiguration.get("coannihilationStau", "None"))
+    if NeutralinoMass is not None and StauMass is not None and StauMass - Mass_a1Meson > NeutralinoMass: ## adjust branching ratio to ensure enough energy to decay to the a1 meson.
+        BR = .18
+    kwargs.setdefault("ParticleName","s_tau_plus_1")
+    kwargs.setdefault("BR", BR) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,mu+,anti_nu_tau,nu_mu")
+    result.setPrivateTools( CompFactory.AddPhysicsDecayTool(name, **kwargs) )
+    return result
+
+
+#########################################################################################
+### Neutralino-Stau Off shell tau
+### Stau-Neutralino Pseuddo-Vector a1(1260) meson Neutrino
+#########################################################################################
+def STauRMinusToa1MinusNeutralinoCfg(flags, name="STauRMinusToa1MinusNeutralino", **kwargs):
+    result = ComponentAccumulator()
+    BR = 0
+    # coannihilation Neutralino and Stau masses
+    NeutralinoMass = eval(flags.Input.SpecialConfiguration.get("coannihilationNeutralino", "None"))
+    StauMass = eval(flags.Input.SpecialConfiguration.get("coannihilationStau", "None"))
+    if NeutralinoMass is not None and StauMass is not None and StauMass - Mass_a1Meson > NeutralinoMass: ## adjust branching ratio to ensure enough energy to decay to the a1 meson.
+        BR = .15 ## Set the branching Ratio for if there is enough energy for.c
+    kwargs.setdefault("ParticleName","s_tau_minus_2")
+    kwargs.setdefault("BR", BR) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,a1(1260)-,nu_tau")
+    result.setPrivateTools( CompFactory.AddPhysicsDecayTool(name, **kwargs) )
+    return result
+
+
+def STauRPlusToa1PlusNeutralinoCfg(flags, name="STauRPlusToa1PlusNeutralino", **kwargs):
+    result = ComponentAccumulator()
+    BR = 0
+    # coannihilation Neutralino and Stau masses
+    NeutralinoMass = eval(flags.Input.SpecialConfiguration.get("coannihilationNeutralino", "None"))
+    StauMass = eval(flags.Input.SpecialConfiguration.get("coannihilationStau", "None"))
+    if NeutralinoMass is not None and StauMass is not None and StauMass - Mass_a1Meson > NeutralinoMass: ## adjust branching ratio to ensure enough energy to decay to the a1 meson.
+        BR = .15
+    kwargs.setdefault("ParticleName","s_tau_plus_2")
+    kwargs.setdefault("BR", BR) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,a1(1260)+,anti_nu_tau")
+    result.setPrivateTools( CompFactory.AddPhysicsDecayTool(name, **kwargs) )
+    return result
+
+
+def STauLMinusToa1MinusNeutralinoCfg(flags, name="STauLMinusToa1MinusNeutralino", **kwargs):
+    result = ComponentAccumulator()
+    BR = 0
+    # coannihilation Neutralino and Stau masses
+    NeutralinoMass = eval(flags.Input.SpecialConfiguration.get("coannihilationNeutralino", "None"))
+    StauMass = eval(flags.Input.SpecialConfiguration.get("coannihilationStau", "None"))
+    if NeutralinoMass is not None and StauMass is not None and StauMass - Mass_a1Meson > NeutralinoMass: ## adjust branching ratio to ensure enough energy to decay to the a1 meson.
+        BR = .15
+    kwargs.setdefault("ParticleName","s_tau_minus_1")
+    kwargs.setdefault("BR", BR) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,a1(1260)-,nu_tau")
+    result.setPrivateTools( CompFactory.AddPhysicsDecayTool(name, **kwargs) )
+    return result
+
+
+def STauLPlusToa1PlusNeutralinoCfg(flags, name="STauLPlusToa1PlusNeutralino", **kwargs):
+    result = ComponentAccumulator()
+    BR = 0
+    # coannihilation Neutralino and Stau masses
+    NeutralinoMass = eval(flags.Input.SpecialConfiguration.get("coannihilationNeutralino", "None"))
+    StauMass = eval(flags.Input.SpecialConfiguration.get("coannihilationStau", "None"))
+    if NeutralinoMass is not None and StauMass is not None and StauMass - Mass_a1Meson > NeutralinoMass: ## adjust branching ratio to ensure enough energy to decay to the a1 meson.
+        BR = .15
+    kwargs.setdefault("ParticleName","s_tau_plus_1")
+    kwargs.setdefault("BR", BR) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,a1(1260)+,anti_nu_tau")
+    result.setPrivateTools( CompFactory.AddPhysicsDecayTool(name, **kwargs) )
+    return result
+
+
+## Neutralino Selectron
+def SElectronRPlusToElectronNeutralinoCfg(flags, name="SElectronRPlusToElectronNeutralino", **kwargs):
+    result = ComponentAccumulator()
+    kwargs.setdefault("ParticleName","s_e_plus_R")
+    kwargs.setdefault("BR", 1.0) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,e+")
+    result.setPrivateTools( CompFactory.AddPhysicsDecayTool(name, **kwargs) )
+    return result
+
+
+def SElectronRMinusToElectronNeutralinoCfg(flags, name="SElectronRMinusToElectronNeutralino", **kwargs):
+    result = ComponentAccumulator()
+    kwargs.setdefault("ParticleName","s_e_minus_R")
+    kwargs.setdefault("BR", 1.0) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,e-")
+    result.setPrivateTools( CompFactory.AddPhysicsDecayTool(name, **kwargs) )
+    return result
+
+
+def SElectronLPlusToElectronNeutralinoCfg(flags, name="SElectronLPlusToElectronNeutralino", **kwargs):
+    result = ComponentAccumulator()
+    kwargs.setdefault("ParticleName","s_e_plus_L")
+    kwargs.setdefault("BR", 1.0) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,e+")
+    result.setPrivateTools( CompFactory.AddPhysicsDecayTool(name, **kwargs) )
+    return result
+
+
+def SElectronLMinusToElectronNeutralinoCfg(flags, name="SElectronLMinusToElectronNeutralino", **kwargs):
+    result = ComponentAccumulator()
+    kwargs.setdefault("ParticleName","s_e_minus_L")
+    kwargs.setdefault("BR", 1.0) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,e-")
+    result.setPrivateTools( CompFactory.AddPhysicsDecayTool(name, **kwargs) )
+    return result
+
+
+## Neutralino SMuon
+def SMuonLPlusToMuonNeutralinoCfg(flags, name="SMuonLPlusToMuonNeutralino", **kwargs):
+    result = ComponentAccumulator()
+    kwargs.setdefault("ParticleName","s_mu_plus_L")
+    kwargs.setdefault("BR", 1.0) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,mu+")
+    result.setPrivateTools( CompFactory.AddPhysicsDecayTool(name, **kwargs) )
+    return result
+
+
+def SMuonLMinusToMuonNeutralinoCfg(flags, name="SMuonLMinusToMuonNeutralino", **kwargs):
+    result = ComponentAccumulator()
+    kwargs.setdefault("ParticleName","s_mu_minus_L")
+    kwargs.setdefault("BR", 1.0) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,mu-")
+    result.setPrivateTools( CompFactory.AddPhysicsDecayTool(name, **kwargs) )
+    return result
+
+
+def SMuonRPlusToMuonNeutralinoCfg(flags, name="SMuonRPlusToMuonNeutralino", **kwargs):
+    result = ComponentAccumulator()
+    kwargs.setdefault("ParticleName","s_mu_plus_R")
+    kwargs.setdefault("BR", 1.0) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,mu+")
+    result.setPrivateTools( CompFactory.AddPhysicsDecayTool(name, **kwargs) )
+    return result
+
+
+def SMuonRMinusToMuonNeutralinoCfg(flags, name="SMuonRMinusToMuonNeutralino", **kwargs):
+    result = ComponentAccumulator()
+    kwargs.setdefault("ParticleName","s_mu_minus_R")
+    kwargs.setdefault("BR", 1.0) # Branching Ratio
+    kwargs.setdefault("Daughters","s_chi_0_1,mu-")
+    result.setPrivateTools( CompFactory.AddPhysicsDecayTool(name, **kwargs) )
+    return result
+
+
 def SleptonsLLPCfg(flags):
     result = ComponentAccumulator()
     load_files_for_sleptonLLP_scenario(flags)
@@ -416,6 +887,49 @@ def SleptonsLLPCfg(flags):
             physicsOptions += [ result.popToolsAndMerge(STauLPlusToTauGravitinoCfg(flags)) ]
             physicsOptions += [ result.popToolsAndMerge(STauRMinusToTauGravitinoCfg(flags)) ]
             physicsOptions += [ result.popToolsAndMerge(STauLMinusToTauGravitinoCfg(flags)) ]
+        if "coannihilationStau" in flags.Input.SpecialConfiguration:
+            MassStau = eval(flags.Input.SpecialConfiguration.get("coannihilationStau",'0'))
+            MassNeutralino = eval(flags.Input.SpecialConfiguration.get("coannihilationNeutralino",'0'))
+            MassTau = 1776. # MeV
+            if MassStau > MassNeutralino + MassTau: ## Check that there is energy to decay to tau.
+                physicsOptions += [ result.popToolsAndMerge(STauRPlusToTauNeutralinoCfg(flags)) ]
+                physicsOptions += [ result.popToolsAndMerge(STauLPlusToTauNeutralinoCfg(flags)) ]
+                physicsOptions += [ result.popToolsAndMerge(STauRMinusToTauNeutralinoCfg(flags)) ]
+                physicsOptions += [ result.popToolsAndMerge(STauLMinusToTauNeutralinoCfg(flags)) ]
+            else: ## Do off shell decay for tau.
+                # FIXME Dislike hard-coded numbers here
+                if (abs(MassStau-MassNeutralino - 300) > .05  and abs(MassStau-MassNeutralino - 1700) > 0.05):
+                    print('Warning: Branching ratios are wrong. Mass splitting of stau neutralino %s currently has no available values.' % (MassStau - MassNeutralino))
+                physicsOptions += [ result.popToolsAndMerge(STauRMinusToPionMinusNeutralinoCfg(flags)) ]
+                physicsOptions += [ result.popToolsAndMerge(STauRPlusToPionPlusNeutralinoCfg(flags)) ]
+                physicsOptions += [ result.popToolsAndMerge(STauLMinusToPionMinusNeutralinoCfg(flags)) ]
+                physicsOptions += [ result.popToolsAndMerge(STauLPlusToPionPlusNeutralinoCfg(flags)) ]
+                physicsOptions += [ result.popToolsAndMerge(STauRMinusToRhoMinusNeutralinoCfg(flags)) ]
+                physicsOptions += [ result.popToolsAndMerge(STauRPlusToRhoPlusNeutralinoCfg(flags)) ]
+                physicsOptions += [ result.popToolsAndMerge(STauLMinusToRhoMinusNeutralinoCfg(flags)) ]
+                physicsOptions += [ result.popToolsAndMerge(STauLPlusToRhoPlusNeutralinoCfg(flags)) ]
+                physicsOptions += [ result.popToolsAndMerge(STauRMinusToEMinusNeutralinoCfg(flags)) ]
+                physicsOptions += [ result.popToolsAndMerge(STauRPlusToEPlusNeutralinoCfg(flags)) ]
+                physicsOptions += [ result.popToolsAndMerge(STauLMinusToEMinusNeutralinoCfg(flags)) ]
+                physicsOptions += [ result.popToolsAndMerge(STauLPlusToEPlusNeutralinoCfg(flags)) ]
+                physicsOptions += [ result.popToolsAndMerge(STauRMinusToMuMinusNeutralinoCfg(flags)) ]
+                physicsOptions += [ result.popToolsAndMerge(STauRPlusToMuPlusNeutralinoCfg(flags)) ]
+                physicsOptions += [ result.popToolsAndMerge(STauLMinusToMuMinusNeutralinoCfg(flags)) ]
+                physicsOptions += [ result.popToolsAndMerge(STauLPlusToMuPlusNeutralinoCfg(flags)) ]
+                physicsOptions += [ result.popToolsAndMerge(STauRMinusToa1MinusNeutralinoCfg(flags)) ]
+                physicsOptions += [ result.popToolsAndMerge(STauRPlusToa1PlusNeutralinoCfg(flags)) ]
+                physicsOptions += [ result.popToolsAndMerge(STauLMinusToa1MinusNeutralinoCfg(flags)) ]
+                physicsOptions += [ result.popToolsAndMerge(STauLPlusToa1PlusNeutralinoCfg(flags)) ]
+        if "coannihilationSlepton" in flags.Input.SpecialConfiguration:
+            physicsOptions += [ result.popToolsAndMerge(SElectronRPlusToElectronNeutralinoCfg(flags)) ]
+            physicsOptions += [ result.popToolsAndMerge(SElectronLPlusToElectronNeutralinoCfg(flags)) ]
+            physicsOptions += [ result.popToolsAndMerge(SElectronRMinusToElectronNeutralinoCfg(flags)) ]
+            physicsOptions += [ result.popToolsAndMerge(SElectronLMinusToElectronNeutralinoCfg(flags)) ]
+            physicsOptions += [ result.popToolsAndMerge(SMuonRPlusToMuonNeutralinoCfg(flags)) ]
+            physicsOptions += [ result.popToolsAndMerge(SMuonLPlusToMuonNeutralinoCfg(flags)) ]
+            physicsOptions += [ result.popToolsAndMerge(SMuonRMinusToMuonNeutralinoCfg(flags)) ]
+            physicsOptions += [ result.popToolsAndMerge(SMuonLMinusToMuonNeutralinoCfg(flags)) ]
+
         result.getService("PhysicsListSvc").PhysOption += physicsOptions
     return result
 

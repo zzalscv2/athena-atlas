@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <fstream>
@@ -295,7 +295,7 @@ ClassIDSvc::fillDB() {
   for (const std::string& DBFile : m_DBFiles) {
     DirSearchPath::path clidDB(DBFile);
 
-    if (clidDB.is_complete()) {
+    if (clidDB.is_absolute()) {
       allOK = processCLIDDB(clidDB.string());
     } else {
       std::list<DirSearchPath::path> paths(m_clidDBPath.find_all(clidDB));

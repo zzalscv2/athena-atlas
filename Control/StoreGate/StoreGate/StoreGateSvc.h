@@ -55,7 +55,6 @@
 #include "StoreGate/SGIterator.h"
 #include "StoreGate/DataHandle.h"
 #include "StoreGate/SGWPtr.h"
-#include "SGTools/DataStore.h"
 #include "StoreGate/SGObjectWithVersion.h"
 #include "CxxUtils/checker_macros.h"
 

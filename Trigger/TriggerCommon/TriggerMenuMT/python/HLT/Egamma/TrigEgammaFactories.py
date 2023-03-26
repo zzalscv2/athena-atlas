@@ -13,6 +13,8 @@ Offline configurations are available here:
 
 # athena imports
 from AthenaConfiguration.Enums import BeamType
+from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 # Calo tools imports
 from CaloTools.CaloToolsConf import CaloAffectedTool
@@ -41,6 +43,7 @@ TrigEgammaKeys_GSF = getTrigEgammaKeys('_GSF')
 TrigEgammaKeys_LRTGSF = getTrigEgammaKeys('_LRTGSF') 
 TrigEgammaKeys_HI = getTrigEgammaKeys(ion=True) 
 
+
 """Configuring egammaRecBuilder """
 TrigEgammaRec   = AlgFactory( egammaAlgsConf.egammaRecBuilder,
                             name = 'TrigEgammaRec',
@@ -54,6 +57,19 @@ TrigEgammaRec   = AlgFactory( egammaAlgsConf.egammaRecBuilder,
                             ConversionBuilderTool     = None,  # Don't want to use these for trigger....
                             )
 
+
+def trigEgammaRecCfg(flags, name= "trigEgammaRec"):
+    acc = ComponentAccumulator()
+    egammaRec = CompFactory.egammaRecBuilder( name = name,
+                                                  InputClusterContainerName = TrigEgammaKeys.precisionCaloTopoCollection, # input,
+                                                  egammaRecContainer        = TrigEgammaKeys.precisionCaloEgammaRecCollection, # output,
+                                                  doTrackMatching           = False,
+                                                  # Builder tools
+                                                  TrackMatchBuilderTool     = None, # Don't want to use these for trigger....
+                                                  ConversionBuilderTool     = None,
+                                                  doConversions             = False)
+    acc.addEventAlgo(egammaRec)
+    return acc
 
 def TrigEgammaSuperClusterBuilderCfg(flags, name='TrigEgammaSuperClusterBuilder'):
     TrigEgammaSuperClusterBuilder = AlgFactory( egammaAlgsConf.egammaSuperClusterBuilder,

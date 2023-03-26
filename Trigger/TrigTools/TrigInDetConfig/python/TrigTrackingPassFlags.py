@@ -14,6 +14,12 @@ def signatureSpecificSettingOfFlags(flags,mode):
     flags.nHolesMax           = 2
     flags.nHolesGapMax        = 2
     flags.nWeightedClustersMin= 6
+    flags.roadWidth           =10.
+    if flags.input_name in ['jet','jetSuper','fullScan','fullScanUTT']:
+      flags.roadWidth =         5.
+    elif flags.input_name == 'cosmics':
+      flags.roadWidth =        75.
+                            
     
   else:                         #ITk specific settings can be done here while we rely on ConfigSettings
     flags.minPT = [flags.pTmin] #ITk flags have eta dependant settings

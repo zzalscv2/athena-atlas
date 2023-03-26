@@ -139,13 +139,6 @@ def makeInDetPatternRecognition( flags, config, verifier = 'IDTrigViewDataVerifi
                                                                      WriteKey = "PixelDetElementBoundaryLinks_xk",)
 
 
-         if True: #FIXME trackingCuts.useSCT()? ATR-22756
-            from AthenaCommon.AlgSequence import AthSequencer
-            condSeq = AthSequencer("AthCondSeq")
-            if not hasattr(condSeq, "InDet__SiDetElementsRoadCondAlg_xk"):
-               from SiDetElementsRoadTool_xk.SiDetElementsRoadTool_xkConf import InDet__SiDetElementsRoadCondAlg_xk
-               condSeq += InDet__SiDetElementsRoadCondAlg_xk(name = "InDet__SiDetElementsRoadCondAlg_xk")
-
             if not hasattr(condSeq, "InDetSiDetElementBoundaryLinksSCTCondAlg"):
                from SiCombinatorialTrackFinderTool_xk.SiCombinatorialTrackFinderTool_xkConf import InDet__SiDetElementBoundaryLinksCondAlg_xk
                condSeq += InDet__SiDetElementBoundaryLinksCondAlg_xk(name     = "InDetSiDetElementBoundaryLinksSCTCondAlg",

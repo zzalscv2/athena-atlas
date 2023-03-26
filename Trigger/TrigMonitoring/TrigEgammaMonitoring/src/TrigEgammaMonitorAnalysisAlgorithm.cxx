@@ -53,8 +53,13 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiencies( const std::vector< st
 
   for( auto pairObj : pairObjs ){
 
-
 	  if(pairObj.first->type()==xAOD::Type::Electron){
+
+        auto passBits=tdt()->isPassedBits(info.trigger);
+          if(!((passBits & TrigDefs::L1_isPassedAfterVeto)  && ((passBits & TrigDefs::EF_prescaled)==0))){
+            ATH_MSG_DEBUG("Prescaled trigger: " << info.trigger << " Skipping to normalize efficiencies");
+            continue;
+          }
 		  const xAOD::Electron* el = static_cast<const xAOD::Electron *> (pairObj.first);
 		  float et = getEt(el)/Gaudi::Units::GeV;
 		  if(et < info.etthr-5.0) continue; 
@@ -72,7 +77,6 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiencies( const std::vector< st
 			  continue; // pass FixedCutLoose offline isolation
 		  }
 	  } // Offline photon
-  
 
     
     // Good pair to be measure
@@ -89,8 +93,6 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiencies( const std::vector< st
             emu_accept_iso_vec.push_back(acceptData);
         }
     }
-
-
 
     // Good pair to be measure
     { // Efficiency
@@ -119,6 +121,7 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiencies( const std::vector< st
   fillEfficiency( "PrecisionCalo" , "EFCalo"   , info.pidname, info, pair_vec , accept_vec, dirname);
   fillEfficiency( "HLT"           , "HLT"      , info.pidname, info, pair_vec , accept_vec, dirname);
   
+  
   if( m_detailedHists ){
     for( const auto& pid : m_isemname ){
       fillEfficiency( "HLT_" + pid, "HLT", pid, info, pair_vec , accept_vec, dirname);
@@ -140,6 +143,8 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiencies( const std::vector< st
       fillEfficiency( "HLT"           , "HLT"      , info.pidname, info, pair_vec , emu_accept_vec, dirname);
   }
 
+    // Fill Inefficiencies
+    fillInefficiency( info.pidname, info, pair_vec , accept_vec);
 
 }
 
@@ -152,16 +157,10 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiency( const std::string &subg
                                                          std::vector< asg::AcceptData > acceptObjs ,
                                                          const std::string& dirname ) const
 {
-
-
-    
     const float etthr = info.etthr;
     const std::string trigger = info.trigger;
-
-
     auto monGroup = getGroup( trigger + "_"+dirname+"_" + subgroup );
 
-    
     std::vector<float> et_vec, highet_vec, pt_vec, eta_vec, phi_vec, avgmu_vec, npvtx_vec,et_slice0_vec,et_slice1_vec,et_slice2_vec,et_slice3_vec;
     std::vector<float> match_et_vec, match_highet_vec, match_pt_vec, match_eta_vec, match_phi_vec, match_avgmu_vec, match_npvtx_vec;
     std::vector<bool> et_passed_vec, et_failed_vec, highet_passed_vec, highet_failed_vec, pt_passed_vec, eta_passed_vec, eta_failed_vec, phi_passed_vec, avgmu_passed_vec, npvtx_passed_vec;
@@ -208,7 +207,7 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiency( const std::string &subg
     unsigned iObj=0;
 
     for( auto pairObj : pairObjs ){
-       
+        
         bool pid=true;
         bool isPassed = acceptObjs[iObj].getCutResult( level );
         float et=0.;
@@ -330,8 +329,46 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiency( const std::string &subg
 }
 // *********************************************************************************
 
+void TrigEgammaMonitorAnalysisAlgorithm::fillInefficiency( const std::string &pidword,
+                                                         const TrigInfo& info,
+                                                         const std::vector< std::pair< const xAOD::Egamma *, 
+                                                         const TrigCompositeUtils::Decision* >>& pairObjs,
+                                                         std::vector< asg::AcceptData > acceptObjs ) const
+{
+    auto monGroup = getGroup(info.trigger+"_Inefficiency");
+    unsigned iObj=0;
+    for( auto pairObj : pairObjs ){
+        
+        bool pid=true;
+        bool isPassedL1Calo     = acceptObjs[iObj].getCutResult( "L1Calo");
+        bool isPassedL2Calo     = acceptObjs[iObj].getCutResult( "L2Calo");
+        bool isPassedL2         = acceptObjs[iObj].getCutResult( "L2"    );
+        bool isPassedEFCalo     = acceptObjs[iObj].getCutResult( "EFCalo");
+        bool isPassedHLT        = acceptObjs[iObj].getCutResult( "HLT"   );
 
-
+        const auto *eg = pairObj.first;
+        if(xAOD::EgammaHelpers::isElectron(eg)){
+            ATH_MSG_DEBUG("Offline Electron with pidword " << pidword);
+            const xAOD::Electron* el =static_cast<const xAOD::Electron*> (eg);
+            pid=el->auxdecor<bool>("is"+pidword);
+            ATH_MSG_DEBUG("Electron pid " << pid);
+        }
+        if(pid){
+            if(!isPassedL1Calo){
+                fillLabel(monGroup, "InneficiencyCounts", "L1Calo"  );
+            }if(!isPassedL2Calo){
+                fillLabel(monGroup, "InneficiencyCounts", "L2Calo"  );
+            }if(!isPassedL2){
+                fillLabel(monGroup, "InneficiencyCounts", "L2"      );
+            }if(!isPassedEFCalo){
+                fillLabel(monGroup, "InneficiencyCounts", "EFCalo"  );
+            }if(!isPassedHLT){
+                fillLabel(monGroup, "InneficiencyCounts", "HLT"     );
+            }
+        }
+      iObj++;
+    } 
+}
 
 
 void TrigEgammaMonitorAnalysisAlgorithm::fillDistributions( const std::vector< std::pair< const xAOD::Egamma*, const TrigCompositeUtils::Decision * >>& pairObjs,
@@ -482,9 +519,8 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillDistributions( const std::vector< s
       ATH_MSG_INFO( "Chain type not specified" );
   }
 
-
-  
 }
+
 
 
 

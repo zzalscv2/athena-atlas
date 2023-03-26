@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BCM_CollisionTime_H
@@ -31,7 +31,7 @@ class BcmCollisionTime
   //BcmCollisionTime( int multiLG, int multiHG, bool IsCol, bool IsBkg, std::vector<float> deltaT);
 
   /** @brief constructor; initialize all data members in constructor and include vector*/
-  BcmCollisionTime( int multiLG, int multiHG, std::vector<float> deltaT);
+  BcmCollisionTime( int multiLG, int multiHG, const std::vector<float>& deltaT);
 
   /** @brief destructor; initialize all data members in constructor and include vector*/
   //~BcmCollisionTime();
@@ -72,7 +72,7 @@ CLASS_DEF(BcmCollisionTime,79775858,0)
 /*inline BcmCollisionTime::BcmCollisionTime( int multiLG, int multiHG, bool IsCol, bool IsBkg)
   : m_multiLG(multiLG), m_multiHG(multiHG), m_IsCol(IsCol), m_IsBkg(IsBkg){}*/
 
-inline BcmCollisionTime::BcmCollisionTime( int multiLG, int multiHG, std::vector<float> deltaT)
+inline BcmCollisionTime::BcmCollisionTime( int multiLG, int multiHG, const std::vector<float>& deltaT)
   : m_multiLG(multiLG), m_multiHG(multiHG), m_deltaT(deltaT){}
 
 /*inline BcmCollisionTime::BcmCollisionTime( int multiLG, int multiHG, bool IsCol, bool IsBkg, std::vector<float> deltaT)

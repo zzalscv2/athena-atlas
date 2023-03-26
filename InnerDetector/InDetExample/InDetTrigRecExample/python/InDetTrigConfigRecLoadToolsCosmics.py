@@ -53,7 +53,6 @@ if (InDetTrigFlags.doPrintConfigurables()):
   print (     InDetTrigScoringToolCosmics_SiPattern)
 
 
-from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigPrdAssociationTool  # noqa: F401
 from InDetAmbiTrackSelectionTool.InDetAmbiTrackSelectionToolConf import InDet__InDetAmbiTrackSelectionTool
 from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigTRTDriftCircleCut
 import InDetRecExample.TrackingCommon as TrackingCommon
@@ -73,24 +72,5 @@ InDetTrigAmbiTrackSelectionToolCosmicsN = InDet__InDetAmbiTrackSelectionTool \
 ToolSvc += InDetTrigAmbiTrackSelectionToolCosmicsN
 
 
-from InDetTrigRecExample.InDetTrigConfigRecLoadTools import \
-     InDetTrigPatternPropagator
-from AthenaCommon.DetFlags import DetFlags
-
-from SiDetElementsRoadTool_xk.SiDetElementsRoadTool_xkConf import InDet__SiDetElementsRoadMaker_xk
-InDetTrigSiDetElementsRoadMakerCosmics = \
-    InDet__SiDetElementsRoadMaker_xk( name = 'InDetTrigSiDetElementsRoadMakerCosmics',
-                                      PropagatorTool = InDetTrigPatternPropagator,
-                                      usePixel     = DetFlags.haveRIO.pixel_on(), 
-                                      useSCT       = DetFlags.haveRIO.SCT_on(),
-                                      RoadWidth          = 75.     #wider for cosmics
-                                      )
-# Condition algorithm for InDet__SiDetElementsRoadMaker_xk
-if DetFlags.haveRIO.SCT_on():
-  from AthenaCommon.AlgSequence import AthSequencer
-  condSeq = AthSequencer("AthCondSeq")
-  if not hasattr(condSeq, "InDet__SiDetElementsRoadCondAlg_xk"):
-    from SiDetElementsRoadTool_xk.SiDetElementsRoadTool_xkConf import InDet__SiDetElementsRoadCondAlg_xk
-    condSeq += InDet__SiDetElementsRoadCondAlg_xk(name = "InDet__SiDetElementsRoadCondAlg_xk")
 
 

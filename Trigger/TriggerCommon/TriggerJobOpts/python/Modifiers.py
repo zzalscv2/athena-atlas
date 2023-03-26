@@ -69,15 +69,6 @@ class BFieldAutoConfig(_modifier):
             svcMgr.HltEventLoopMgr.setMagFieldFromPtree = True
 
 
-class useOnlineLumi(_modifier):
-    """
-    Use online LuminosityTool
-    """
-    def preSetup(self, flags):
-        from LumiBlockComps.LuminosityCondAlgDefault import LuminosityCondAlgOnlineDefault
-        LuminosityCondAlgOnlineDefault()
-
-
 class forceConditions(_modifier):
     """
     Force all conditions (except prescales) to match run from input file

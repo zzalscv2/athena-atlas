@@ -45,6 +45,7 @@
 // StoreGateSvc. must come before SGImplSvc.h
 #include "StoreGate/StoreGateSvc.h"
 #include "StoreGate/tools/SGImplSvc.h"
+#include "SGTools/DataStore.h"
 
 using std::ostringstream;
 using std::setw;

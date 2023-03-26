@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonMDT_CablingAlg.h"
@@ -18,6 +18,10 @@
 #include "MuonIdHelpers/MdtIdHelper.h"
 #include "PathResolver/PathResolver.h"
 #include "SGTools/TransientAddress.h"
+#include "nlohmann/json.hpp"
+
+using DataSource = MuonMDT_CablingMap::DataSource;
+
 MuonMDT_CablingAlg::MuonMDT_CablingAlg(const std::string& name, ISvcLocator* pSvcLocator) : AthAlgorithm(name, pSvcLocator) {}
 
 StatusCode MuonMDT_CablingAlg::initialize() {
@@ -26,6 +30,8 @@ StatusCode MuonMDT_CablingAlg::initialize() {
     ATH_CHECK(m_readKeyMap.initialize());
     ATH_CHECK(m_writeKey.initialize());
     ATH_CHECK(m_idHelperSvc.retrieve());
+
+    ATH_CHECK(m_muonManagerKey.initialize(!m_mezzJSON.value().empty() || !m_chambJSON.value().empty()));
     m_isRun3 = m_idHelperSvc->hasMM() || m_idHelperSvc->hasSTgc();
     return StatusCode::SUCCESS;
 }
@@ -44,47 +50,34 @@ StatusCode MuonMDT_CablingAlg::execute() {
     ATH_MSG_INFO("Load the Mdt cabling");
     std::unique_ptr<MuonMDT_CablingMap> writeCdo{std::make_unique<MuonMDT_CablingMap>()};
 
-    EventIDRange rangeMez;
-    ATH_CHECK(loadMezzanineSchema(ctx, rangeMez, *writeCdo));
-
-    EventIDRange rangeMap;
-    ATH_CHECK(loadCablingSchema(ctx, rangeMap, *writeCdo));
+    ATH_CHECK(loadMezzanineSchema(ctx, writeHandle, *writeCdo));
+    ATH_CHECK(loadCablingSchema(ctx, writeHandle, *writeCdo));
     if (!writeCdo->finalize_init(msgStream())) return StatusCode::FAILURE;
-    // Create an intersection of input IOVs
-    EventIDRange rangeIntersection = EventIDRange::intersect(rangeMez, rangeMap);
-    if (rangeIntersection.start() > rangeIntersection.stop()) {
-        ATH_MSG_ERROR("Invalid intersection range: " << rangeIntersection);
-        return StatusCode::FAILURE;
-    }
-
-    if (writeHandle.record(rangeIntersection, std::move(writeCdo)).isFailure()) {
-        ATH_MSG_FATAL("Could not record MuonMDT_CablingMap " << writeHandle.key() << " with EventRange " << rangeIntersection
-                                                             << " into Conditions Store");
-        return StatusCode::FAILURE;
-    }
-    ATH_MSG_INFO("recorded new " << writeHandle.key() << " with range " << rangeIntersection << " into Conditions Store");
+    
+    ATH_CHECK(writeHandle.record(std::move(writeCdo)));
+    ATH_MSG_INFO("recorded new " << writeHandle.key() << " with range " << writeHandle.getRange() << " into Conditions Store");
     return StatusCode::SUCCESS;
 }
-StatusCode MuonMDT_CablingAlg::loadCablingSchema(const EventContext& ctx, EventIDRange& iov_range, MuonMDT_CablingMap& cabling_map) const {
+StatusCode MuonMDT_CablingAlg::loadCablingSchema(const EventContext& ctx, SG::WriteCondHandle<MuonMDT_CablingMap>& writeHandle,
+                                                 MuonMDT_CablingMap& cabling_map)  const {
+    
+    if (m_useJSONFormat || m_chambJSON.value().size()){
+        return loadCablingSchemaFromJSON(ctx, writeHandle, cabling_map);
+    }
     SG::ReadCondHandle<CondAttrListCollection> readHandleMap{m_readKeyMap, ctx};
-    const CondAttrListCollection* readCdoMap{*readHandleMap};
-    if (!readCdoMap) {
-        ATH_MSG_ERROR("Null pointer to the read conditions object");
+    if (!readHandleMap.isValid()) {
+        ATH_MSG_ERROR("Null pointer to the read conditions object "<<readHandleMap.fullKey());
         return StatusCode::FAILURE;
     }
-
-    if (!readHandleMap.range(iov_range)) {
-        ATH_MSG_ERROR("Failed to retrieve validity range for " << readHandleMap.key());
-        return StatusCode::FAILURE;
-    }
-    ATH_MSG_INFO("Size of CondAttrListCollection " << readHandleMap.fullKey() << " readCdoMap->size()= " << readCdoMap->size());
-    ATH_MSG_INFO("Range of input is " << iov_range);
-
-    ATH_MSG_VERBOSE("Collection CondAttrListCollection CLID " << readCdoMap->clID());
+    writeHandle.addDependency(readHandleMap);
+    
+    ATH_MSG_INFO("Size of CondAttrListCollection " << readHandleMap.fullKey() << " readCdoMap->size()= " << readHandleMap->size());
+   
+    ATH_MSG_VERBOSE("Collection CondAttrListCollection CLID " << readHandleMap->clID());
 
     // access to Map Schema Table to obtained the Map
     CondAttrListCollection::const_iterator itrMap;
-    for (itrMap = readCdoMap->begin(); itrMap != readCdoMap->end(); ++itrMap) {
+    for (itrMap = readHandleMap->begin(); itrMap != readHandleMap->end(); ++itrMap) {
         const coral::AttributeList& atr = itrMap->second;
 
         CablingData map_data;
@@ -99,7 +92,7 @@ StatusCode MuonMDT_CablingAlg::loadCablingSchema(const EventContext& ctx, EventI
             /// now this mezzanine can be added to the map:
             ATH_MSG_VERBOSE("Adding new mezzanine stationName: " << m_idHelperSvc->mdtIdHelper().stationNameString(map_data.stationIndex)
                                                                  << " " << map_data);
-            if (!cabling_map.addMezzanine(map_data, msgStream())) {
+            if (!cabling_map.addMezzanine(map_data, DataSource::LegacyCOOL, msgStream())) {
                 ATH_MSG_ERROR("Failed to add cabling " << map_data);
                 return StatusCode::FAILURE;
             } else
@@ -158,7 +151,7 @@ StatusCode MuonMDT_CablingAlg::loadCablingSchema(const EventContext& ctx, EventI
                     if (extractLayerInfo(db_coding, bis78_data)) {
                         ATH_MSG_VERBOSE("Adding new mezzanine stationName: "
                                         << m_idHelperSvc->mdtIdHelper().stationNameString(bis78_data.stationIndex) << " " << bis78_data);
-                        if (!cabling_map.addMezzanine(bis78_data, msgStream())) {
+                        if (!cabling_map.addMezzanine(bis78_data, DataSource::LegacyCOOL, msgStream())) {
                             ATH_MSG_ERROR("Failed to add mezzanine card " << bis78_data);
                             return StatusCode::FAILURE;
                         }
@@ -218,10 +211,7 @@ bool MuonMDT_CablingAlg::extractStationInfo(const coral::AttributeList& atr, Cab
     // convert the subdetector id to integer
     map_data.subdetectorId = atoi(subdetector_id.c_str());
 
-    ATH_MSG_VERBOSE("Data load is: /n"
-                    << "Chamber_Name = " << chamber_name << " eta= " << map_data.eta << "   Phi= " << map_data.phi
-                    << " sub_id = " << subdetector_id << "  mrod = " << int(map_data.mrod) << " csm = " << int(map_data.csm)
-                    << "  chan= " << int(map_data.channelId) << " mezzanine_type= " << int(map_data.mezzanine_type) << " FINISHED HERE ");
+    ATH_MSG_VERBOSE("Data load is chamber_Name = " << chamber_name <<" translated to "<<map_data<<" FINISHED HERE ");
 
     if (map_data.stationIndex < 0) {
         static std::atomic<bool> stWarningPrinted{false};
@@ -266,26 +256,24 @@ bool MuonMDT_CablingAlg::extractLayerInfo(std::vector<std::string>& info_map, Ca
     return decoded_full_block;
 }
 
-StatusCode MuonMDT_CablingAlg::loadMezzanineSchema(const EventContext& ctx, EventIDRange& iov_range,
-                                                   MuonMDT_CablingMap& cabling_map) const {
+StatusCode MuonMDT_CablingAlg::loadMezzanineSchema(const EventContext& ctx,SG::WriteCondHandle<MuonMDT_CablingMap>& writeHandle,
+                                                    MuonMDT_CablingMap& cabling_map) const{
+    if (m_useJSONFormat || m_mezzJSON.value().size()){
+        return loadMezzanineFromJSON(ctx, writeHandle, cabling_map);
+    }
+
     /// Read Cond Handle
-
-    SG::ReadCondHandle<CondAttrListCollection> readHandleMez{m_readKeyMez, ctx};
-    const CondAttrListCollection* readCdoMez{*readHandleMez};
-    if (!readHandleMez.range(iov_range)) {
-        ATH_MSG_ERROR("Failed to retrieve validity range for " << readHandleMez.key());
+    SG::ReadCondHandle<CondAttrListCollection> readHandleMez{m_readKeyMez, ctx};    
+    if (!readHandleMez.isValid()) {
+        ATH_MSG_ERROR("Null pointer to the read conditions object "<<m_readKeyMez.fullKey());
         return StatusCode::FAILURE;
     }
-    if (!readCdoMez) {
-        ATH_MSG_ERROR("Null pointer to the read conditions object");
-        return StatusCode::FAILURE;
-    }
+    writeHandle.addDependency(readHandleMez);
 
-    ATH_MSG_INFO("Size of CondAttrListCollection " << readHandleMez.fullKey() << " readCdoMez->size()= " << readCdoMez->size());
-    ATH_MSG_INFO("Range of input is " << iov_range);
-
+    ATH_MSG_INFO("Size of CondAttrListCollection " << readHandleMez.fullKey() << " readCdoMez->size()= " << readHandleMez->size());
+   
     CondAttrListCollection::const_iterator itrMez;
-    for (itrMez = readCdoMez->begin(); itrMez != readCdoMez->end(); ++itrMez) {
+    for (itrMez = readHandleMez->begin(); itrMez != readHandleMez->end(); ++itrMez) {
         const coral::AttributeList& atr = itrMez->second;
         int sequence{0}, layer{0}, mezzanine_type{0};
 
@@ -302,17 +290,98 @@ StatusCode MuonMDT_CablingAlg::loadMezzanineSchema(const EventContext& ctx, Even
         } else {
             ATH_MSG_VERBOSE("Sequence added successfully to the map");
         }
-    }
-    /// Add the October fest mezznines
-    if (m_isRun3) {
-        if (!cabling_map.addMezzanineLine(61, 0, 666666, msgStream())) {
-            ATH_MSG_ERROR("Failed to add the BIS78 regular mezzanines.");
+    }    
+    return StatusCode::SUCCESS;
+}
+StatusCode MuonMDT_CablingAlg::loadMezzanineFromJSON(const EventContext& ctx, SG::WriteCondHandle<MuonMDT_CablingMap>& writeHandle,
+                                MuonMDT_CablingMap& cabling_map) const {
+    
+    if (m_mezzJSON.value().size()) {
+        SG::ReadCondHandle<MuonGM::MuonDetectorManager> detMgr{m_muonManagerKey, ctx};
+        if (!detMgr.isValid()) {
+            ATH_MSG_FATAL("Failed to load the muon detector manager "<<m_muonManagerKey.fullKey());
             return StatusCode::FAILURE;
         }
-        if (!cabling_map.addMezzanineLine(71, 0, 666666, msgStream())) {
-            ATH_MSG_ERROR("There's the common idiom: everything that happens @ bavarian regional customs also remains there");
+        writeHandle.addDependency(detMgr);
+        std::ifstream in_json{m_mezzJSON};
+        if (!in_json.good()) {
+            ATH_MSG_FATAL("Failed to open external JSON file "<<m_mezzJSON);
             return StatusCode::FAILURE;
+        }
+        std::string json_content{};
+        while(std::getline(in_json, json_content)){
+            ATH_CHECK(loadMezzanineFromJSON( json_content, cabling_map));  
         }
     }
     return StatusCode::SUCCESS;
 }
+StatusCode MuonMDT_CablingAlg::loadMezzanineFromJSON(const std::string& theJSON, MuonMDT_CablingMap& cabling_map) const {
+    if (theJSON.empty()) return StatusCode::SUCCESS;
+    nlohmann::json payload = nlohmann::json::parse(theJSON);
+
+    using MezzMapping = MdtMezzanineCard::Mapping;
+    for (const auto &cabl_chan : payload.items()) {
+        nlohmann::json mezz_payload = cabl_chan.value();
+        const uint8_t id = mezz_payload["mezzId"];
+        const uint8_t nLay = mezz_payload["nTubeLayer"];
+        const MezzMapping mapping = mezz_payload["tdcToTubeMap"];        
+        if(!cabling_map.addMezanineLayout(std::make_unique<MdtMezzanineCard>(mapping, nLay, id), 
+                                        msgStream())) return StatusCode::FAILURE;
+    }
+    return StatusCode::SUCCESS;
+}
+
+StatusCode MuonMDT_CablingAlg::loadCablingSchemaFromJSON(const EventContext& ctx,
+                                         SG::WriteCondHandle<MuonMDT_CablingMap>& writeHandle,
+                                         MuonMDT_CablingMap& cabling_map) const {
+
+    if (m_chambJSON.value().size()) {
+        SG::ReadCondHandle<MuonGM::MuonDetectorManager> detMgr{m_muonManagerKey, ctx};
+        if (!detMgr.isValid()) {
+            ATH_MSG_FATAL("Failed to load the muon detector manager "<<m_muonManagerKey.fullKey());
+            return StatusCode::FAILURE;
+        }
+        writeHandle.addDependency(detMgr);
+        std::ifstream in_json{m_chambJSON};
+        if (!in_json.good()) {
+            ATH_MSG_FATAL("Failed to open external JSON file "<<m_chambJSON);
+            return StatusCode::FAILURE;
+        }
+        std::string json_content{};
+        while(std::getline(in_json, json_content)){
+            ATH_CHECK(loadCablingSchemaFromJSON( json_content, cabling_map));  
+        }
+    }
+    return StatusCode::SUCCESS;
+}
+
+StatusCode MuonMDT_CablingAlg::loadCablingSchemaFromJSON(const std::string& theJSON, MuonMDT_CablingMap& cabling_map) const {
+    if (theJSON.empty()) return StatusCode::SUCCESS;
+    nlohmann::json payload = nlohmann::json::parse(theJSON);
+    const MdtIdHelper& id_helper = m_idHelperSvc->mdtIdHelper();
+    for (const auto &db_channel : payload.items()) {
+        nlohmann::json ms_payload = db_channel.value();
+        CablingData ms_channel{};
+        ms_channel.stationIndex = id_helper.stationNameIndex(ms_payload["station"]);
+        ms_channel.eta = ms_payload["eta"];
+        ms_channel.phi = ms_payload["phi"];
+        ms_channel.multilayer = ms_payload["ml"];
+
+        ms_channel.subdetectorId = ms_payload["subDet"];
+        ms_channel.csm = ms_payload["csm"];
+        ms_channel.mrod = ms_payload["mrod"];
+
+        ms_channel.mezzanine_type = ms_payload["mezzId"];
+        ms_channel.tdcId = ms_payload["tdcId"];
+        ms_channel.tube = ms_payload["tubeZero"];
+
+        ms_channel.layer = 1;
+        MdtMezzanineCard::MezzCardPtr hedgeHogCard = cabling_map.getHedgeHogMapping(ms_channel.mezzanine_type);
+        ms_channel.channelId = hedgeHogCard ? (*std::min_element(
+                                                    hedgeHogCard->tubeToTdcMap().begin(),
+                                                    hedgeHogCard->tubeToTdcMap().end())) : 0;
+        if (!cabling_map.addMezzanine(ms_channel, DataSource::JSON, msgStream())) return StatusCode::FAILURE;   
+    }
+    return StatusCode::SUCCESS;
+}
+    

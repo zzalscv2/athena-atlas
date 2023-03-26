@@ -26,7 +26,6 @@ namespace pix{
   private:
     typedef std::array<int,5> Coordinates;
     std::unordered_map<std::string,Coordinates > m_internalMap;
-    bool m_filled{};
   };
 
 }//end of ibl namespace
