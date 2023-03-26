@@ -146,7 +146,7 @@ bool CachedParticlePtr::isValid () const
 #if HEPMCPARTICLELINK_USE_STANDALONE_ATOMIC
   return std::atomic_load (&m_ptr) != nullptr;
 #else
-  return m_ptr != nullptr;
+  return m_ptr.load() != nullptr;
 #endif
 }
 

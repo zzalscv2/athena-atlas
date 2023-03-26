@@ -71,22 +71,28 @@ def InDetTrigTrackSummaryToolCfg(flags,name="InDetTrigTrackSummaryTool",**kwargs
     acc.setPrivateTools(CompFactory.Trk.TrackSummaryTool(name = name, **kwargs))
     return acc
 
-def InDetTrigFastTrackSummaryToolCfg(flags, name="InDetTrigFastTrackSummaryTool", **kwargs):
+def InDetTrigFastTrackSummaryToolCfg(
+        flags, name="InDetTrigFastTrackSummaryTool", **kwargs):
     """
     faster instance without hole search and TRT 
     """
 
     acc = ComponentAccumulator()
-    from InDetConfig.InDetTrackSummaryHelperToolConfig import TrigTrackSummaryHelperToolSiOnlyCfg
-    summaryHelperTool = acc.popToolsAndMerge(
-        TrigTrackSummaryHelperToolSiOnlyCfg(flags,
-                                            ))
+
+    from InDetConfig.InDetTrackSummaryHelperToolConfig import (
+        TrigTrackSummaryHelperToolSiOnlyCfg)
+
+    kwargs.setdefault("doHolesInDet", False)
         
-    return InDetTrigTrackSummaryToolCfg(flags,
-                                        name = name,
-                                        doHolesInDet = False,
-                                        InDetSummaryHelperTool=summaryHelperTool,
-                                        **kwargs)
+    acc.setPrivateTools(acc.popToolsAndMerge(
+        InDetTrigTrackSummaryToolCfg(
+            flags, name,
+            # Prevents summary helper tool to be incorrectly set to something
+            # else through kwargs
+            InDetSummaryHelperTool = acc.popToolsAndMerge(
+                TrigTrackSummaryHelperToolSiOnlyCfg(flags)),
+            **kwargs)))
+    return acc
 
 def ITkTrackSummaryToolCfg(flags, name='ITkTrackSummaryTool', **kwargs):
     acc = ComponentAccumulator()

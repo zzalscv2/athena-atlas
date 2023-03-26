@@ -26,18 +26,19 @@ public:JetEfficiencyMonitorAlgorithm( const std::string& name, ISvcLocator* pSvc
   virtual StatusCode fillHistograms( const EventContext& ctx ) const override;
 private:
   StringProperty m_packageName{this,"PackageName","JetEfficiencyMonitor","group name for histograming"};
-  StringProperty m_bootstrap_trigger{this,"BootstrapTrigger","L1_J100","the bootstrapping trigger"};
+  StringProperty m_bootstrap_trigger{this,"BootstrapTrigger","L1_J15","the bootstrapping trigger"};
+  StringProperty m_orthogonal_trigger{this,"OrthogonalTrigger","L1_RD0_FILLED","the orthogonal trigger"};
   Gaudi::Property<bool> m_emulated{this,"Emulated",0,"boolean of if we want to emulate the gfex triggers"};
+  Gaudi::Property<bool> m_passedb4Prescale{this,"PassedBeforePrescale",0,"boolean of if we want to measure the efficiency based on passed before prescale"};
 
-  Gaudi::Property<std::vector<std::string>> m_L1TriggerList{this,"L1TriggerList",{},"Vector of L1 offline jet triggers"};
-  Gaudi::Property<std::vector<std::string>> m_SRgfexTriggerList{this,"SRgfexTriggerList",{},"Vector of SR gfex jet triggers"};
-  Gaudi::Property<std::vector<std::string>> m_LRgfexTriggerList{this,"LRgfexTriggerList",{},"Vector of LR gfex jet triggers"};
-  Gaudi::Property<std::vector<std::string>> m_TriggerList{this,"TriggerList",{},"Vector of triggers firing for jets over 100GeV"};
+  Gaudi::Property<std::vector<std::string>> m_multi_jet_TriggerList{this,"multi_jet_TriggerList",{},"Vector of single jet L1 triggers"};
+  Gaudi::Property<std::vector<std::string>> m_all_triggers_for_SR{this,"all_triggers_for_SRList",{},"Vector of all SR triggers"};
+  Gaudi::Property<std::vector<std::string>> m_all_triggers_for_LR{this,"all_triggers_for_LRList",{},"Vector of all SR triggers"};
 
   
   // container keys including steering parameter and description
-  SG::ReadHandleKey<xAOD::JetContainer> m_jetKey{ this, "JetKey" , "AntiKt4EMPFlowJets", ""}; //offline jets git
-   SG::ReadHandleKey<xAOD::JetContainer> m_LRjetKey{ this, "LRJetKey" , "HLT_AntiKt10LCTopoTrimmedPtFrac4SmallR20Jets_nojcalib", ""}; //LR offline jets for Run3
+  SG::ReadHandleKey<xAOD::JetContainer> m_jetKey{ this, "JetKey" , "AntiKt4EMPFlowJets", ""}; //offline jets
+  SG::ReadHandleKey<xAOD::JetContainer> m_LRjetKey{ this, "LRJetKey" , "HLT_AntiKt10LCTopoJets_subjes", ""}; //offline LR jets
   SG::ReadHandleKey<xAOD::gFexJetRoIContainer> m_gFexSRJetContainerKey{ this, "mygFexSRJetRoIContainer" , "L1_gFexSRJetRoI" , ""}; //gfex SR jets
   SG::ReadHandleKey<xAOD::gFexJetRoIContainer> m_gFexLRJetContainerKey{ this, "mygFexLRJetRoIContainer" , "L1_gFexLRJetRoI" , ""}; //gfex LR jets
 

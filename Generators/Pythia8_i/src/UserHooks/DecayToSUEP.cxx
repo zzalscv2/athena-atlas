@@ -5,8 +5,6 @@
 #include "UserHooksUtils.h"
 #include "UserSetting.h"
 #include "Pythia8_i/UserHooksFactory.h"
-// #include "boost/lexical_cast.hpp"
-//#include "boost/bind.hpp"
 #include <boost/phoenix/bind.hpp>
 #include <boost/math/tools/roots.hpp>
 #include <math.h>

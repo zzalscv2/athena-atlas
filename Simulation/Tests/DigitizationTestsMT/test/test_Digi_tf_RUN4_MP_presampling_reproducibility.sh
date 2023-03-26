@@ -12,6 +12,10 @@
 
 export ATHENA_CORE_NUMBER=4
 
+if [ -z ${ATLAS_REFERENCE_DATA+x} ]; then
+  ATLAS_REFERENCE_DATA="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art"
+fi
+
 DigiOutFileNameSP="RUN4_presampling_SP.RDO.pool.root"
 DigiOutFileNameMP0="RUN4_presampling_MP_fork_evt0.RDO.pool.root"
 DigiOutFileNameMP1="RUN4_presampling_MP_fork_evt1.RDO.pool.root"

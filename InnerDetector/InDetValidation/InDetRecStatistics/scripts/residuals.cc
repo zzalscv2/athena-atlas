@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // File: $Id: residuals.cc,v 1.10 2008-07-23 20:51:23 adye Exp $
@@ -98,17 +98,26 @@ void residuals(TTree *ntuple, const string & plotprefix="", const string & plote
 
   if (*hit_cut.GetTitle()) cout << "cut: " << hit_cut.GetTitle() << endl;
 
+  // cppcheck-suppress incorrectStringBooleanError; TCut overrides &&
   TCut pixcut (hit_cut && "hit_dettype==0");
+  // cppcheck-suppress incorrectStringBooleanError; TCut overrides &&
   TCut pixcut1 (pixcut && "hit_layer==0");
+  // cppcheck-suppress incorrectStringBooleanError; TCut overrides &&
   TCut pixcut2 (pixcut && "hit_layer==1");
+  // cppcheck-suppress incorrectStringBooleanError; TCut overrides &&
   TCut pixcut3 (pixcut && "hit_layer==2");
 
   TCut bcut ("hit_isbarrel==0");
   TCut ecut ("hit_isbarrel!=0");
+  // cppcheck-suppress incorrectStringBooleanError; TCut overrides &&
   TCut sctcut (hit_cut && "hit_dettype==1");
+  // cppcheck-suppress incorrectStringBooleanError; TCut overrides &&
   TCut sctcut1 (sctcut && "hit_layer==0");
+  // cppcheck-suppress incorrectStringBooleanError; TCut overrides &&
   TCut sctcut2 (sctcut && "hit_layer==1");
+  // cppcheck-suppress incorrectStringBooleanError; TCut overrides &&
   TCut sctcut3 (sctcut && "hit_layer==2");
+  // cppcheck-suppress incorrectStringBooleanError; TCut overrides &&
   TCut sctcut4 (sctcut && "hit_layer==3");
 #if DUPOLD==1
   TCut sctmapcut ("hit_dettype==1 && hit_isbarrel!=0 && hit_layer==0");
@@ -116,6 +125,7 @@ void residuals(TTree *ntuple, const string & plotprefix="", const string & plote
   TCut sctmapcut (sctcut1 && ecut);
 #endif
 
+  // cppcheck-suppress incorrectStringBooleanError; TCut overrides &&
   TCut trtcut (hit_cut && "hit_dettype==2");
 
   ntuple->Project("xrespix1",    "hit_unbiasedresidualx*1000", pixcut1);
@@ -154,9 +164,13 @@ void residuals(TTree *ntuple, const string & plotprefix="", const string & plote
   ntuple->Project("yressct3",    "hit_unbiasedresidualx*1000", sctcut3 && ecut);
   ntuple->Project("yressct4",    "hit_unbiasedresidualx*1000", sctcut4 && ecut);
 
+  // cppcheck-suppress incorrectStringBooleanError; TCut overrides &&
   ntuple->Project("xrestrt2",    "hit_unbiasedresidualx*1000", trtcut && "hit_isbarrel==-2 ");
+  // cppcheck-suppress incorrectStringBooleanError; TCut overrides &&
   ntuple->Project("xrestrt3",    "hit_unbiasedresidualx*1000", trtcut && "hit_isbarrel==-1 ");
+  // cppcheck-suppress incorrectStringBooleanError; TCut overrides &&
   ntuple->Project("xrestrt4",    "hit_unbiasedresidualx*1000", trtcut && "hit_isbarrel== 1 ");
+  // cppcheck-suppress incorrectStringBooleanError; TCut overrides &&
   ntuple->Project("xrestrt5",    "hit_unbiasedresidualx*1000", trtcut && "hit_isbarrel== 2 ");
 
 

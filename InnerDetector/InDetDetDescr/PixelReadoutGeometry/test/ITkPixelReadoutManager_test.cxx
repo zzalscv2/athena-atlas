@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -114,6 +114,7 @@ namespace ITk
   //   ASSERT_TRUE( m_svc->initialize().isSuccess() );
   // }
 
+  // cppcheck-suppress syntaxError
   TEST_F(PixelReadoutManager_test, barrel) {
     ASSERT_TRUE( m_svc->initialize().isSuccess() );
 

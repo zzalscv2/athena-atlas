@@ -83,6 +83,15 @@ def hltCaloCellMakerCfg(flags, name=None, roisKey='UNSPECIFIED', CellsName=None,
     acc.addEventAlgo(cellMaker, primary=True)
     return acc
 
+def hltCaloCellCorrectorCfg(flags,name='HLTCaloCellCorrector', inputEDM='CellsClusters', outputEDM='CorrectedCellsClusters', eventShape='HIEventShape'):
+    acc = ComponentAccumulator()
+    cellCorrector = CompFactory.HLTCaloCellCorrector(name = name,
+                                                     EventShapeCollection = eventShape,
+                                                     InputCellKey = inputEDM,
+                                                     OutputCellKey = outputEDM)
+    acc.addEventAlgo(cellCorrector)
+    return acc           
+  
 
 def hltCaloCellSeedlessMakerCfg(flags, roisKey='UNSPECIFIED'):
     acc = ComponentAccumulator()
@@ -229,19 +238,29 @@ def hltTopoClusterMakerCfg(flags, name, clustersKey="HLT_TopoCaloClustersFS",
 
 
 def hltCaloTopoClusteringCfg(
-    flags, namePrefix=None, roisKey="UNSPECIFIED", clustersKey="HLT_TopoCaloClustersRoI"
-):
+    flags, namePrefix=None,nameSuffix=None, CellsName=None, roisKey="UNSPECIFIED",clustersKey="HLT_TopoCaloClustersRoI", doLC=False):
     acc = ComponentAccumulator()
     acc.merge(
-        hltCaloCellMakerCfg(flags, namePrefix + "HLTCaloCellMaker", roisKey=roisKey)
+        hltCaloCellMakerCfg(flags, namePrefix + "HLTCaloCellMaker"+nameSuffix, roisKey=roisKey, CellsName=CellsName)
     )
     acc.merge(
         hltTopoClusterMakerCfg(
-            flags, namePrefix + "TrigCaloClusterMaker_topo", clustersKey=clustersKey
+            flags, namePrefix + "TrigCaloClusterMaker_topo"+nameSuffix, clustersKey=clustersKey, doLC=doLC
         )
     )
     return acc
 
+def hltCaloTopoClusteringHICfg(
+    flags, namePrefix=None, CellsName=None, roisKey="UNSPECIFIED", doLC=False,algSuffix='HIRoI', ion=True):
+    from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import  getTrigEgammaKeys
+    TrigEgammaKeys = getTrigEgammaKeys(ion=ion)
+    eventShape = TrigEgammaKeys.egEventShape
+    clustersKey = TrigEgammaKeys.precisionTopoClusterContainer
+    acc = ComponentAccumulator()
+    acc.merge(hltCaloCellMakerCfg(flags, namePrefix + "HLTCaloCellMaker"+algSuffix, roisKey=roisKey, CellsName=CellsName))
+    acc.merge(hltCaloCellCorrectorCfg(flags,name='HLTRoICaloCellCorrector', inputEDM='CaloCells', outputEDM='CorrectedRoICaloCells', eventShape=eventShape))
+    acc.merge(hltTopoClusterMakerCfg(flags, namePrefix + "TrigCaloClusterMaker_topo"+algSuffix, clustersKey=clustersKey,cellsKey="CorrectedRoICaloCells", doLC=doLC))
+    return acc
 
 def hltCaloTopoClusterCalibratorCfg(flags, name, clustersin, clustersout, **kwargs):
     """ Create the LC calibrator """

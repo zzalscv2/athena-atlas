@@ -138,9 +138,6 @@ def makeInDetTrigFastTracking( flags, config = None, rois = 'EMViewRoIs', doFTF 
                                                                 ReadKey  = "PixelDetectorElementCollection",
                                                                 WriteKey = "PixelDetElementBoundaryLinks_xk",)
 
-        if not hasattr(condSeq, "InDet__SiDetElementsRoadCondAlg_xk"):
-          from SiDetElementsRoadTool_xk.SiDetElementsRoadTool_xkConf import InDet__SiDetElementsRoadCondAlg_xk
-          condSeq += InDet__SiDetElementsRoadCondAlg_xk(name = "InDet__SiDetElementsRoadCondAlg_xk")
 
         if not hasattr(condSeq, "InDetSiDetElementBoundaryLinksSCTCondAlg"):
           from SiCombinatorialTrackFinderTool_xk.SiCombinatorialTrackFinderTool_xkConf import InDet__SiDetElementBoundaryLinksCondAlg_xk

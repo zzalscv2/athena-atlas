@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -140,11 +140,11 @@ namespace InDet {
       SG::ReadHandleKeyArray<TrackCollection>        m_RecTrackCollection_keys;
       SG::ReadHandleKeyArray<TrackTruthCollection>   m_TrackTruthCollection_keys;
 
-      mutable std::atomic<bool>      m_pullWarning    ATLAS_THREAD_SAFE{}; //!< warn only once, if pull cannot be calculated
-      mutable std::atomic<bool>      m_UpdatorWarning ATLAS_THREAD_SAFE{}; //!< warn only once, if unbiased track states can not be calculated
-      mutable std::atomic<int>       m_isUnbiased     ATLAS_THREAD_SAFE;  //!< if can get unbiased residuals
+      mutable std::atomic<bool>      m_pullWarning    {}; //!< warn only once, if pull cannot be calculated
+      mutable std::atomic<bool>      m_UpdatorWarning {}; //!< warn only once, if unbiased track states can not be calculated
+      mutable std::atomic<int>       m_isUnbiased     ;  //!< if can get unbiased residuals
 
-      mutable std::atomic<long> m_events_processed    ATLAS_THREAD_SAFE;//!< number of events processed
+      mutable std::atomic<long> m_events_processed    ;//!< number of events processed
          // statistics counters
       enum ECounter {
          kN_rec_tracks_without_perigee, //!< number of tracks w/o perigee

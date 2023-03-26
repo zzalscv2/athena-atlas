@@ -8,7 +8,7 @@
 
 export ATHENA_CORE_NUMBER=8
 #The setup for 2022 data is described in test_data22_13p6TeV.sh      
-Reco_tf.py  --CA --multithreaded  --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecJobTransformTests/data22_13p6TeV/data22_13p6TeV.00435229.physics_Main.daq.RAW/data22_13p6TeV.00435229.physics_Main.daq.RAW._lb1526._SFO-12._0001.data --conditionsTag="CONDBR2-BLKPA-2022-09" --geometryVersion="ATLAS-R3S-2021-03-01-00" --postExec="cfg.getCondAlgo(\"PixelConfigCondAlg\").doRUN3PIXLinearExtrapolation=True" --outputESDFile myESD.pool.root --outputAODFile myAOD.pool.root --outputHISTFile myHist.root --maxEvents=10
+Reco_tf.py  --CA --multithreaded  --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecJobTransformTests/data22_13p6TeV/data22_13p6TeV.00435229.physics_Main.daq.RAW/data22_13p6TeV.00435229.physics_Main.daq.RAW._lb1526._SFO-12._0001.data --conditionsTag="CONDBR2-BLKPA-2022-09" --geometryVersion="ATLAS-R3S-2021-03-01-00" --outputESDFile myESD.pool.root --outputAODFile myAOD.pool.root --outputHISTFile myHist.root --maxEvents=10
 #Remember retval of transform as art result
 RES=$?
 

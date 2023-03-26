@@ -547,12 +547,20 @@ def ATLAS_RegionCreatorListCfg(flags):
                 result.popToolsAndMerge(EMECPhysicsRegionToolCfg(flags)),
                 result.popToolsAndMerge(HECPhysicsRegionToolCfg(flags)),
                 result.popToolsAndMerge(FCALPhysicsRegionToolCfg(flags))]
-            if flags.Sim.LArParameterization is not LArParameterization.NoFrozenShowers:
-                # FIXME 'EMBPhysicsRegionTool' used for parametrization also - do we need a second instance??
+            fullCommandList = '\t'.join(flags.Sim.G4Commands)
+            if flags.Sim.LArParameterization is LArParameterization.FrozenShowers or 'EMECPara' in fullCommandList:
+                # EMECPara Physics region is used by Woodcock tracking
+                # and by EMEC Frozen Showers (the latter is not part
+                # of production configurations).  NB The 'EMB'
+                # PhysicsRegion seems to be used by the Frozen Showers
+                # parametrization also. Unclear if this is correct -
+                # not a big issue as Frozen Showers are not used in
+                # the EMB in production configurations.
                 regionCreatorList += [
-                    result.popToolsAndMerge(EMECParaPhysicsRegionToolCfg(flags)),
-                    result.popToolsAndMerge(FCALParaPhysicsRegionToolCfg(flags)),
-                    result.popToolsAndMerge(FCAL2ParaPhysicsRegionToolCfg(flags))]
+                    result.popToolsAndMerge(EMECParaPhysicsRegionToolCfg(flags))]
+            if flags.Sim.LArParameterization is not LArParameterization.NoFrozenShowers:
+                regionCreatorList += [result.popToolsAndMerge(FCALParaPhysicsRegionToolCfg(flags)),
+                                      result.popToolsAndMerge(FCAL2ParaPhysicsRegionToolCfg(flags))]
                 if flags.Sim.LArParameterization in [LArParameterization.DeadMaterialFrozenShowers, LArParameterization.FrozenShowersFCalOnly]:
                     pass
                     #todo - add the line below

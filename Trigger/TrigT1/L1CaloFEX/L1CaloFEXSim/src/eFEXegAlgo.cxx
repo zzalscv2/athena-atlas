@@ -270,18 +270,15 @@ unsigned int LVL1::eFEXegAlgo::getET() {
   unsigned int L3_ET_1, L3_ET_2;
   getWindowET(3, 1, 0, L3_ET_1); getWindowET(3, phiUpDownID, 0, L3_ET_2);
 
-  /// Layer sums
-  unsigned int PS_ET = PS_ET_1 + PS_ET_2;
-  unsigned int L1_ET = L1_ET_1 + L1_ET_2 + L1_ET_3 + L1_ET_4 + L1_ET_5 + L1_ET_6;
-  unsigned int L2_ET = L2_ET_1 + L2_ET_2 + L2_ET_3 + L2_ET_4 + L2_ET_5 + L2_ET_6;
+  /// Layer sums (including dead material corrections if requested)
+  unsigned int PS_ET = dmCorrection(PS_ET_1, 0) + dmCorrection(PS_ET_2, 0);
+  unsigned int L1_ET = dmCorrection(L1_ET_1, 1) + dmCorrection(L1_ET_2, 1) 
+                     + dmCorrection(L1_ET_3, 1) + dmCorrection(L1_ET_4, 1) 
+                     + dmCorrection(L1_ET_5, 1) + dmCorrection(L1_ET_6, 1);
+  unsigned int L2_ET = dmCorrection(L2_ET_1, 2) + dmCorrection(L2_ET_2, 2) 
+                     + dmCorrection(L2_ET_3, 2) + dmCorrection(L2_ET_4, 2) 
+                     + dmCorrection(L2_ET_5, 2) + dmCorrection(L2_ET_6, 2);
   unsigned int L3_ET = L3_ET_1 + L3_ET_2;
-
-  /// Apply dead material corrections
-  if (m_dmCorr) {
-     PS_ET = dmCorrection(PS_ET, 0);
-     L1_ET = dmCorrection(L1_ET, 1);
-     L2_ET = dmCorrection(L2_ET, 2);
-  }
 
   /// Final ET sum
   unsigned int totET = PS_ET + L1_ET + L2_ET + L3_ET;
@@ -294,8 +291,9 @@ unsigned int LVL1::eFEXegAlgo::getET() {
 }
 
 unsigned int LVL1::eFEXegAlgo::dmCorrection(unsigned int ET, unsigned int layer) {
-  /// Check layer is valid, otherwise do nothing
-  if (layer > 2) return ET;
+  /// Check corrections are required and layer in range
+
+  if ( !m_dmCorr || layer > 2 ) return ET;
 
   /// Get correction factor
   /// Start by calculating RoI |eta| with range 0-24

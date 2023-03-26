@@ -52,7 +52,6 @@
 #include "AthenaKernel/IIOVSvc.h"
 #include "StoreGate/SGIterator.h"
 #include "StoreGate/SGWPtr.h"
-#include "SGTools/DataStore.h"
 #include "SGTools/SGVersionedKey.h"
 #include "StoreGate/SGObjectWithVersion.h"
 #include "AthAllocators/Arena.h"
@@ -66,6 +65,7 @@ namespace SG {
   struct RemapImpl;
   class AuxVectorBase;
   class AuxElement;
+  class DataStore;
 }
 
 class DataObject;

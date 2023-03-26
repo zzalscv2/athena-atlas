@@ -1,8 +1,7 @@
 #!/bin/bash
 
-if [[ $# < 4 ]] || [[ $# > 8 ]];
+if [[ $# < 4 ]] || [[ $# > 9 ]];
 then
-    echo "Syntax: $0 [-append] [-openiov] <tag> <Run1> <LB1>  <File> [Run2] [LB2]"
     echo "Syntax: $0 [-append] [-openiov] [-supercell] <tag> <Run1> <LB1>  <File> [Run2] [LB2]"
     echo "optional -append is adding the content of File to a DB"
     echo "optional -openiov is updating UPD4 with open end IOV, if Run2/LB2 is not given" 
@@ -283,7 +282,7 @@ do
       then
       iovEnd=""
   else
-      if  [[ $runnumber2 > 0 && $lbnumber2 > 0 ]]
+      if  [[ $runnumber2 > 0 ]]
       then
           iovEnd="--runnumber2  $runnumber2 --lbnumber2 $lbnumber2"
       else  
@@ -328,7 +327,7 @@ do
   if [ $t == ${upd4TagName} ]
   then
      echo "Copying UPD4 to Bulk as well..."
-     AtlCoolCopy "sqlite://;schema=${outputSqlite};dbname=CONDBR2"  "sqlite://;schema=${outputSqlite};dbname=CONDBR2"  -f ${folder} -t ${folder//\//}-${upd4TagName} -of ${folder} -ot ${folder//\//}-${BulkTagName} -a -c > AtlCoolCopy.ofl.log 2>&1
+     AtlCoolCopy "sqlite://;schema=${outputSqlite};dbname=CONDBR2"  "sqlite://;schema=${outputSqlite};dbname=CONDBR2"  -f ${folder} -t ${folder//\//}-${upd4TagName} -of ${folder} -ot ${folder//\//}-${BulkTagName}  -c > AtlCoolCopy.ofl.log 2>&1
   fi   
 
   if [ $t == ${upd1TagName} ]

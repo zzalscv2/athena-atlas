@@ -67,6 +67,7 @@ opt_obsolete = ['setDetDescr',
                 'enableL1TopoDump',
                 'enableL1TopoBWSimulation',
                 'enableL1NSWEmulation',
+                'useOnlineLumi',
                 'doID',
                 'doCalo',
                 'doMuon',
@@ -211,10 +212,7 @@ if opt.setMenu:
 setModifiers = []
 
 if not flags.Input.isMC:  # data modifiers
-    setModifiers += ['BFieldAutoConfig',
-                     'useOnlineLumi',
-                     ]
-
+    setModifiers += ['BFieldAutoConfig']
 
 #-------------------------------------------------------------
 # Modifiers
@@ -449,8 +447,12 @@ else:
     topSequence.SGInputLoader.Load += [( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' )]
 
 # ---------------------------------------------------------------
-# Add LumiBlockMuWriter creating xAOD::EventInfo decorations for pileup values
+# Luminosity
 # ---------------------------------------------------------------
+from LumiBlockComps.LuminosityCondAlgConfig import LuminosityCondAlgCfg
+CAtoGlobalWrapper(LuminosityCondAlgCfg, flags, useOnlineLumi=True)  # useOnlineLumi ignored for MC
+
+# Add LumiBlockMuWriter creating xAOD::EventInfo decorations for pileup values
 from LumiBlockComps.LumiBlockMuWriterConfig import LumiBlockMuWriterCfg
 CAtoGlobalWrapper(LumiBlockMuWriterCfg, flags, seqName="HLTBeginSeq")
 

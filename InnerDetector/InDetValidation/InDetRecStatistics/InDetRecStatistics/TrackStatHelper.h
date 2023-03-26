@@ -133,9 +133,9 @@ namespace InDet {
       public:
     /** Constructor.  Takes strings of TrackCollectionKey and Track TruthCollectionKey. Assume that
 	truth collections will be used, but let user specify if they intentionally will not be.*/
-    TrackStatHelper     (std::string, std::string, bool careAboutTruth = true);
+    TrackStatHelper     (const std::string&, const std::string&, bool careAboutTruth = true);
     /** Sets the cuts such as the eta regions (barrel, transition,endcap) and the hit fraction fake cuts and the track matching cut*/
-    void     SetCuts(struct cuts);
+    void     SetCuts(const struct cuts&);
     /** Adds hit, track and matching information for each event.  Called at each event*/
     void     addEvent   (const TrackCollection *, 
 			       std::vector<const Trk::Track *> &, 
@@ -183,8 +183,8 @@ namespace InDet {
     std::string  m_TrackCollectionKey;//!< StoreGate Track Collection Key
     std::string  m_TrackTruthCollectionKey;  //!< StoreGate Track Truth Collection Key
 
-    mutable std::atomic<bool>  m_author_found ATLAS_THREAD_SAFE [Trk::TrackInfo::NumberOfTrackFitters]{}; //!<Number of tracking authors found
-    mutable std::atomic<long>  m_events ATLAS_THREAD_SAFE {} ;//!< Number of events
+    mutable std::atomic<bool>  m_author_found [Trk::TrackInfo::NumberOfTrackFitters]{}; //!<Number of tracking authors found
+    mutable std::atomic<long>  m_events {} ;//!< Number of events
 
     template <int N_Categories, int N_Types, int N_Regions, typename T_Int=long>
     struct Counter {
@@ -288,7 +288,7 @@ namespace InDet {
     };
     static const Trk::SummaryType       s_summaryTypes                      [kNSummaryTypes]; //!< summary types for which statistics
                                                                                               //!  are gathered
-    static const char            *const s_summaryTypeName ATLAS_THREAD_SAFE [kNSummaryTypes]; //!< table column labels for summary
+    static const char            *const s_summaryTypeName [kNSummaryTypes]; //!< table column labels for summary
                                                                                               //!  type statistics.
 
     using TrackSummaryCounter = Counter4D<kNTrackSummaryCounter,
@@ -324,11 +324,11 @@ namespace InDet {
        }
     }
 
-    mutable std::atomic<bool>  m_truthMissing ATLAS_THREAD_SAFE; //!< Flag for if track truth is missing
+    mutable std::atomic<bool>  m_truthMissing; //!< Flag for if track truth is missing
     bool  m_careAboutTruth;
     struct cuts m_cuts;
 
-    mutable std::mutex m_authorMutex ATLAS_THREAD_SAFE;
+    mutable std::mutex m_authorMutex;
     mutable std::bitset<Trk::TrackInfo::NumberOfTrackRecoInfo>   m_recoInfo ATLAS_THREAD_SAFE;
     mutable std::bitset<Trk::TrackInfo::NumberOfTrackProperties> m_patternProperties ATLAS_THREAD_SAFE;
 

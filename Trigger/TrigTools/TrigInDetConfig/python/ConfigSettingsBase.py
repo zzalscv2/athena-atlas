@@ -43,7 +43,6 @@ class _ConfigSettingsBase() :
       self._TrackZ0Max          = 300.0
       self._isLRT               = False
       self._UseTrigSeedML       = 0
-      self._RoadWidth           = 10
       self._nClustersMin        = 7
       self._roi                 = None
       self._isLRT               = False
@@ -256,10 +255,6 @@ class _ConfigSettingsBase() :
    @property
    def UseTrigSeedML(self):
       return self._UseTrigSeedML
-
-   @property
-   def RoadWidth(self):
-      return self._RoadWidth
 
    @property
    def nClustersMin(self):

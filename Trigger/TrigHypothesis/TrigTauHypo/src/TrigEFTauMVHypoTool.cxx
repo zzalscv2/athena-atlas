@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <list>
@@ -43,6 +43,7 @@ StatusCode TrigEFTauMVHypoTool::initialize()
   ATH_MSG_INFO( "param Level " << m_level );
   ATH_MSG_INFO( "param Method " << m_method );
   ATH_MSG_INFO( "param Highpt with thrs " << m_highpt << " " << m_highpttrkthr <<  " " << m_highptidthr << " " << m_highptjetthr );
+  if (m_perfTrackPtCut>0.) ATH_MSG_INFO( "param perfTrackPtCut: " << m_perfTrackPtCut );
   ATH_MSG_INFO( "------ ");
 
   if( (m_numTrackMin >  m_numTrackMax) || m_level == -1 || (m_highptidthr > m_highptjetthr))
@@ -124,9 +125,21 @@ bool TrigEFTauMVHypoTool::decide(const ITrigEFTauMVHypoTool::TauJetInfo& input )
     PassedCuts++;
     ptAccepted = EFet;
 
-    int numTrack = Tau->nTracks();
-    int numWideTrack = Tau->nTracksIsolation();
-    
+    int numTrack = 0, numWideTrack = 0;
+    // raise the track pt threshold when counting tracks in the 'perf' step, to reduce sensitivity to pileup tracks
+    if (m_perfTrackPtCut>0.) {
+      for (const auto* track : Tau->tracks(xAOD::TauJetParameters::TauTrackFlag::classifiedCharged)) {
+	if (track->pt() > m_perfTrackPtCut) numTrack ++;
+      }
+      for (const auto* track : Tau->tracks(xAOD::TauJetParameters::TauTrackFlag::classifiedIsolation)) {
+	if (track->pt() > m_perfTrackPtCut) numWideTrack++;
+      }
+    }
+    else {
+      numTrack = Tau->nTracks();
+      numWideTrack = Tau->nTracksIsolation();
+    }
+
     ATH_MSG_DEBUG( "Track size "<<numTrack );	
     ATH_MSG_DEBUG( "Wide Track size "<<numWideTrack );
 

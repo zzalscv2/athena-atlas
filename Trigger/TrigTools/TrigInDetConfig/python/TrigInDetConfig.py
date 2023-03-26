@@ -224,10 +224,6 @@ def trigInDetFastTrackingCfg( inflags, roisKey="EMRoIs", signatureName='', in_vi
   from InDetConfig.SiSpacePointFormationConfig import TrigSiTrackerSpacePointFinderCfg
   acc.merge(TrigSiTrackerSpacePointFinderCfg(flags, name="InDetSiTrackerSpacePointFinder_"+signature))
   
-  #this should not be needed once SiDetElementsRoadMaker_xkCfg invoked internally (causes count changes atm)
-  #i.e. remove RoadTool arg from TrigSiTrackMaker
-  acc.addCondAlgo(CompFactory.InDet.SiDetElementsRoadCondAlg_xk(name = "SiDetElementsRoadCondAlg_xk"))
-
   from TrigFastTrackFinder.TrigFastTrackFinderConfig import TrigFastTrackFinderCfg
   acc.merge(TrigFastTrackFinderCfg(flags, "TrigFastTrackFinder_"+signatureName, signatureName, roisKey))
   

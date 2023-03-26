@@ -14,7 +14,6 @@
 #include "UserSetting.h"
 #include <iostream>
 #include <cassert>
-#include "boost/lexical_cast.hpp"
 #include <stdexcept>
 
 struct{

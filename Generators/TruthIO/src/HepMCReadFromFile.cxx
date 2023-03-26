@@ -8,6 +8,7 @@
 #include "AtlasHepMC/IO_HEPEVT.h"
 #include "AtlasHepMC/HEPEVT_Wrapper.h"
 #include "AtlasHepMC/GenCrossSection.h" 
+#include "AtlasHepMC/ReaderFactory.h" 
 #include "GaudiKernel/DataSvc.h"
 
 #include "StoreGate/StoreGateSvc.h"
@@ -34,7 +35,7 @@ StatusCode HepMCReadFromFile::initialize() {
   
   // Initialize input file and event number
 #ifdef HEPMC3
-  m_hepmcio.reset( new HepMC3::ReaderAsciiHepMC2(m_input_file.c_str()) );
+  m_hepmcio = HepMC3::deduce_reader(m_input_file);
 #else
   m_hepmcio.reset( new HepMC::IO_GenEvent(m_input_file.c_str(), std::ios::in) );
 #endif
