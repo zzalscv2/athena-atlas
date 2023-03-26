@@ -204,8 +204,8 @@ namespace ActsTrk {
 
     Gaudi::Property<float> m_toleranceParam {this, "toleranceParam", 1.1 * Acts::UnitConstants::mm, 
       "tolerance parameter used to check the compatibility of SPs coordinates in xyz"};
-    Gaudi::Property<float> m_phiMin {this, "phiMin", 0, ""};
-    Gaudi::Property<float> m_phiMax {this, "phiMax", 2 * M_PI, ""};
+    Gaudi::Property<float> m_phiMin {this, "phiMin", -M_PI, ""};
+    Gaudi::Property<float> m_phiMax {this, "phiMax", M_PI, ""};
     Gaudi::Property<float> m_rMin {this, "rMin", 0 * Acts::UnitConstants::mm, ""};    
     Gaudi::Property<float> m_zAlign {this, "zAlign", 0 * Acts::UnitConstants::mm, ""};
     Gaudi::Property<float> m_rAlign {this, "rAlign", 0 * Acts::UnitConstants::mm, ""};
