@@ -7,6 +7,7 @@
 # art-output: dcube*
 # art-html: dcube_last
 
+lastref_dir=last_results
 dcubeXml=dcube_ART_ACTS_SEEDS_R22.xml
 input_rdo=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/inputs/ATLAS-P2-RUN4-01-01-00_ttbar_mu200.RDO.root
 
