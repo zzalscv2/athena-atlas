@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # The earliest bunch crossing time for which interactions will be sent
 # to the Fast Pixel Digitization code.
@@ -46,17 +46,7 @@ def FastClusterMakerTool(name="FastClusterMakerTool", **kwargs):
         from PixelConditionsAlgorithms.PixelConditionsAlgorithmsConf import PixelConfigCondAlg
         IdMappingDat="PixelCabling/Pixels_Atlas_IdMapping_2016.dat"
         # ITk:
-        if geoFlags.isSLHC():
-            IdMappingDat = "ITk_Atlas_IdMapping.dat"
-            if "BrlIncl4.0_ref" == commonGeoFlags.GeoType():
-                IdMappingDat = "ITk_Atlas_IdMapping_InclBrl4.dat"
-            elif "IBrlExt4.0ref" == commonGeoFlags.GeoType():
-                IdMappingDat = "ITk_Atlas_IdMapping_IExtBrl4.dat"
-            elif "BrlExt4.0_ref" == commonGeoFlags.GeoType():
-                IdMappingDat = "ITk_Atlas_IdMapping_ExtBrl4.dat"
-            elif "BrlExt3.2_ref" == commonGeoFlags.GeoType():
-                IdMappingDat = "ITk_Atlas_IdMapping_ExtBrl32.dat"
-        elif (geoFlags.isIBL() is False):
+        if (geoFlags.isIBL() is False):
             IdMappingDat="PixelCabling/Pixels_Atlas_IdMapping.dat"
         else:
             # Planar IBL
@@ -163,7 +153,6 @@ def commonPixelFastDigitizationConfig(name,**kwargs):
 
     # Import Digitization job properties
     from Digitization.DigitizationFlags import digitizationFlags
-    from AtlasGeoModel.CommonGMJobProperties import CommonGeometryFlags as commonGeoFlags
     kwargs.setdefault("RndmEngine", "FastPixelDigitization")
 
     if digitizationFlags.doXingByXingPileUp():
@@ -183,17 +172,7 @@ def commonPixelFastDigitizationConfig(name,**kwargs):
         from AtlasGeoModel.InDetGMJobProperties import InDetGeometryFlags as geoFlags
         IdMappingDat="PixelCabling/Pixels_Atlas_IdMapping_2016.dat"
         # ITk:
-        if geoFlags.isSLHC():
-            IdMappingDat = "ITk_Atlas_IdMapping.dat"
-            if "BrlIncl4.0_ref" == commonGeoFlags.GeoType():
-                IdMappingDat = "ITk_Atlas_IdMapping_InclBrl4.dat"
-            elif "IBrlExt4.0ref" == commonGeoFlags.GeoType():
-                IdMappingDat = "ITk_Atlas_IdMapping_IExtBrl4.dat"
-            elif "BrlExt4.0_ref" == commonGeoFlags.GeoType():
-                IdMappingDat = "ITk_Atlas_IdMapping_ExtBrl4.dat"
-            elif "BrlExt3.2_ref" == commonGeoFlags.GeoType():
-                IdMappingDat = "ITk_Atlas_IdMapping_ExtBrl32.dat"
-        elif (geoFlags.isIBL() is False):
+        if (geoFlags.isIBL() is False):
             IdMappingDat="PixelCabling/Pixels_Atlas_IdMapping.dat"
         else:
             # Planar IBL
