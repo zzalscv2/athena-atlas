@@ -28,7 +28,7 @@ if [[ $rc1 -eq 0 ]] && [[ $rc2 -eq 0 ]]; then
   meta-diff -x diff -s std.aod.pool.root ca.aod.pool.root -d file_guid file_size
   rc3=$?
   # EventData
-  acmd diff-root --nan-equal std.aod.pool.root ca.aod.pool.root
+  acmd diff-root --exact-branches --nan-equal std.aod.pool.root ca.aod.pool.root
   rc4=$?
 fi
 
