@@ -94,9 +94,9 @@ namespace ActsTrk {
       "enable non equidistant binning in z"}; // Used in SeedfinderConfig as well
     Gaudi::Property< float > m_gridRMax {this, "gridRMax", 320. * Acts::UnitConstants::mm,
       "radial extension of subdetector to be used in grid building"};
-    Gaudi::Property< float > m_gridPhiMin {this, "gridPhiMin", 0,
+    Gaudi::Property< float > m_gridPhiMin {this, "gridPhiMin", -M_PI,
       "phi min for space point grid formation"};
-    Gaudi::Property< float > m_gridPhiMax {this, "gridPhiMax", 2*M_PI,
+    Gaudi::Property< float > m_gridPhiMax {this, "gridPhiMax", M_PI,
       "phi max for space point grid formation"};
     Gaudi::Property< int > m_phiBinDeflectionCoverage {this, "phiBinDeflectionCoverage", 3,
       "sets of consecutive phi bins to cover full deflection of minimum pT particle"};
