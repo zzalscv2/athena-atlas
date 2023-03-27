@@ -42,7 +42,8 @@ run "Reconstruction" \
     --outputAODFile AOD.root \
     --steering doRAWtoALL \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsInterop.ActsCIFlags.actsArtFlags" \
-    --postInclude "ActsInterop.ActsPostIncludes.PersistifyActsEDMCfg"
+    --postInclude "ActsInterop.ActsPostIncludes.PersistifyActsEDMCfg" \
+    --maxEvents 20
 
 reco_rc=$?
 if [ $reco_rc != 0 ]; then
