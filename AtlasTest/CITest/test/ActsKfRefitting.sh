@@ -6,7 +6,7 @@ n_events=5
 
 Reco_tf.py --CA \
    --detectors Bpipe ITkPixel ITkStrip \
-   --preExec "ConfigFlags.Reco.EnableHGTDExtension=False;" \
+   --preExec "flags.Reco.EnableHGTDExtension=False;" \
    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
    --postInclude "ActsTrkFittingAlgs.ActsTrkFittingAlgsConfig.ActsReFitterAlgCfg" \
    --inputRDOFile ${input_rdo} \
