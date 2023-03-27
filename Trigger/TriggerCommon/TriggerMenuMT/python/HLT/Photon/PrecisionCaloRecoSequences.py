@@ -37,7 +37,7 @@ def precisionCaloRecoSequence(flags, RoIs, name = None, ion=False):
     tag = 'HI' if ion is True else '' 
     
     copier = CompFactory.egammaTopoClusterCopier('gTrigEgammaTopoClusterCopier'+  tag + RoIs,
-                                                 InputTopoCollection='HLT_TopoCaloClustersRoI',
+                                                 InputTopoCollection=TrigEgammaKeys.precisionTopoClusterContainer,
                                                  OutputTopoCollection= TrigEgammaKeys.precisionCaloTopoCollection,
                                                  OutputTopoCollectionShallow='tmp_'+TrigEgammaKeys.precisionCaloTopoCollection)
     acc.addEventAlgo(copier)
