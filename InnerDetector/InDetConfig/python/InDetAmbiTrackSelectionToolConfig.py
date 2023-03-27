@@ -141,11 +141,15 @@ def InDetTRTAmbiTrackSelectionToolCfg(flags, name='InDetTRT_SeededAmbiTrackSelec
     return acc
 
 
-def InDetTrigTrackSelectionToolCfg(flags, name='InDetTrigAmbiTrackSelectionTool', **kwargs):
+def InDetTrigAmbiTrackSelectionToolCfg(flags, name='InDetTrigAmbiTrackSelectionTool', **kwargs):
     acc = ComponentAccumulator()
+    # TODO add AmbiTrackSelectionTool for cosmics
 
-    # TODO add configurations for beamgas and cosmic see: trackSelectionTool_getter
-    kwargs.setdefault("DriftCircleCutTool", None)
+    if "DriftCircleCutTool" not in kwargs:
+        from InDetConfig.InDetTrackSelectorToolConfig import (
+            InDetTrigTRTDriftCircleCutToolCfg)
+        kwargs.setdefault("DriftCircleCutTool", acc.popToolsAndMerge(
+            InDetTrigTRTDriftCircleCutToolCfg(flags)))
 
     if "AssociationTool" not in kwargs:
         from InDetConfig.InDetAssociationToolsConfig import (

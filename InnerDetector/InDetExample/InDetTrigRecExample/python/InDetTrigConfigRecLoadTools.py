@@ -401,41 +401,12 @@ if InDetTrigFlags.doNewTracking() or InDetTrigFlags.doBackTracking() or InDetTri
 #
 # TRT segment minimum number of drift circles tool
 #
+from InDetConfig.InDetTrackSelectorToolConfig import (InDetTrigTRTDriftCircleCutToolCfg)
+InDetTrigTRTDriftCircleCut = CAtoLegacyPublicToolWrapper(InDetTrigTRTDriftCircleCutToolCfg)
 
-from InDetTrackSelectorTool.InDetTrackSelectorToolConf import InDet__InDetTrtDriftCircleCutTool
-InDetTrigTRTDriftCircleCut = InDet__InDetTrtDriftCircleCutTool(
-  name             = 'InDetTrigTRTDriftCircleCut',
-  MinOffsetDCs     = 5,
-  UseNewParameterization = True,
-  UseActiveFractionSvc   = True #DetFlags.haveRIO.TRT_on()  # Use Thomas's new parameterization by default
-  )
+from InDetConfig.InDetAmbiTrackSelectionToolConfig import InDetTrigAmbiTrackSelectionToolCfg
+InDetTrigAmbiTrackSelectionTool = CAtoLegacyPublicToolWrapper(InDetTrigAmbiTrackSelectionToolCfg)
 
-ToolSvc += InDetTrigTRTDriftCircleCut
-if (InDetTrigFlags.doPrintConfigurables()):
-  print (  InDetTrigTRTDriftCircleCut)
-
-  
-
-import InDetRecExample.TrackingCommon as TrackingCommon
-from InDetAmbiTrackSelectionTool.InDetAmbiTrackSelectionToolConf import InDet__InDetAmbiTrackSelectionTool
-InDetTrigAmbiTrackSelectionTool = \
-    InDet__InDetAmbiTrackSelectionTool(name               = 'InDetTrigAmbiTrackSelectionTool',
-                                       DriftCircleCutTool = InDetTrigTRTDriftCircleCut,
-                                       AssociationTool = TrackingCommon.getInDetTrigPRDtoTrackMapToolGangedPixels(),
-                                       minHits         = InDetTrigCutValues.minClusters(),
-                                       minNotShared    = InDetTrigCutValues.minSiNotShared(),
-                                       maxShared       = InDetTrigCutValues.maxShared(),
-                                       minTRTHits      = 0,  # used for Si only tracking !!!
-                                       Cosmics         = False,  #there is a different instance
-                                       UseParameterization = False,
-                                       # sharedProbCut   = 0.10,
-                                       # doPixelSplitting = InDetTrigFlags.doPixelClusterSplitting()
-                                       )
- 
- 
-ToolSvc += InDetTrigAmbiTrackSelectionTool
-if (InDetTrigFlags.doPrintConfigurables()):
-  print (InDetTrigAmbiTrackSelectionTool)
 
 if InDetTrigFlags.doNewTracking():
 
