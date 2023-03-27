@@ -101,6 +101,18 @@ def StreamerDiElecFastComboHypoCfg(flags, name):
     else:
         return ConfigurationComboHypo(flags, **kwargs)
 
+def StreamerDiElecNoringerFastComboHypoCfg(flags, name):
+    log.debug('StreamerDiElecNoringerFastComboHypoCfg.name = %s ', name)
+    kwargs = {"isStreamer" : True,
+        "trigSequenceName" : 'DiElecNoringerFast',
+        "trigLevel" : 'L2',
+        "doElectrons" : True,
+        "TrackCollectionKey" : 'HLT_IDTrack_Electron_FTF'}
+    if not isComponentAccumulatorCfg():
+        return algorithmCAToGlobalWrapper(ConfigurationComboHypo, flags, **kwargs)[0]
+    else:
+        return ConfigurationComboHypo(flags, **kwargs)
+
 def StreamerNoMuonDiElecFastComboHypoCfg(flags, name):
     log.debug('StreamerNoMuonDiElecFastComboHypoCfg.name = %s ', name)
     kwargs = {"isStreamer" : True,
@@ -119,7 +131,6 @@ def DiElecPrecisionComboHypoCfg(flags, name):
         "trigSequenceName" : 'DiElecPrecision',
         "trigLevel" : 'EF',
         "doElectrons" : True,
-        "mergedElectronChains" : [ 'BPH-0DR3-EM7J15', 'HLT_e5_lhvloose_bBeeM6000_L1EM22VHI', 'HLT_e5_lhvloose_bBeeM6000_L14J15', 'HLT_e5_lhvloose_bBeeM6000_L1BKeePrimary', 'HLT_e5_lhvloose_bBeeM6000_L1BKeePrescaled', 'HLT_e5_lhvloose_bBeeM6000_L1All' ],
         "TrigBphysCollectionKey" : 'HLT_DiElecPrecision'}
     if not isComponentAccumulatorCfg():
         return algorithmCAToGlobalWrapper(ConfigurationComboHypo, flags, **kwargs)[0]
@@ -132,7 +143,6 @@ def NoMuonDiElecPrecisionComboHypoCfg(flags, name):
         "trigSequenceName" : 'NoMuonDiElecPrecision',
         "trigLevel" : 'EF',
         "doElectrons" : True,
-        "mergedElectronChains" : [ 'BPH-0DR3-EM7J15', 'HLT_e5_lhvloose_bBeeM6000_L1EM22VHI', 'HLT_e5_lhvloose_bBeeM6000_L14J15', 'HLT_e5_lhvloose_bBeeM6000_L1BKeePrimary', 'HLT_e5_lhvloose_bBeeM6000_L1BKeePrescaled', 'HLT_e5_lhvloose_bBeeM6000_L1All' ],
         "TrigBphysCollectionKey" : 'HLT_NoMuonDiElecPrecision'}
     if not isComponentAccumulatorCfg():
         return algorithmCAToGlobalWrapper(ConfigurationComboHypo, flags, **kwargs)[0]
@@ -145,7 +155,6 @@ def DiElecPrecisionGSFComboHypoCfg(flags, name):
         "trigSequenceName" : 'DiElecPrecisionGSF',
         "trigLevel" : 'EF',
         "doElectrons" : True,
-        "mergedElectronChains" : [ 'BPH-0DR3-EM7J15', 'HLT_e5_lhvloose_bBeeM6000_L1EM22VHI', 'HLT_e5_lhvloose_bBeeM6000_L14J15', 'HLT_e5_lhvloose_bBeeM6000_L1BKeePrimary', 'HLT_e5_lhvloose_bBeeM6000_L1BKeePrescaled', 'HLT_e5_lhvloose_bBeeM6000_L1All' ],
         "TrigBphysCollectionKey" : 'HLT_DiElecPrecisionGSF'}
     if not isComponentAccumulatorCfg():
         return algorithmCAToGlobalWrapper(ConfigurationComboHypo, flags, **kwargs)[0]
@@ -157,7 +166,6 @@ def NoMuonDiElecPrecisionGSFComboHypoCfg(flags, name):
     kwargs = {"isStreamer" : False,
         "trigSequenceName" : 'NoMuonDiElecPrecisionGSF',
         "trigLevel" : 'EF',
-        "mergedElectronChains" : [ 'BPH-0DR3-EM7J15', 'HLT_e5_lhvloose_bBeeM6000_L1EM22VHI', 'HLT_e5_lhvloose_bBeeM6000_L14J15', 'HLT_e5_lhvloose_bBeeM6000_L1BKeePrimary', 'HLT_e5_lhvloose_bBeeM6000_L1BKeePrescaled', 'HLT_e5_lhvloose_bBeeM6000_L1All' ],
         "doElectrons" : True,
         "TrigBphysCollectionKey" : 'HLT_NoMuonDiElecPrecisionGSF' }
     if not isComponentAccumulatorCfg():
@@ -231,6 +239,7 @@ def ConfigurationComboHypo(flags, trigSequenceName = 'Dimu', **kwargs):
        kwargs.setdefault("nTracks",  [ 2 ])
        kwargs.setdefault("trackPtThresholds",  [ [ 4000., 4000. ] ])
        kwargs.setdefault("massRange",   [ (100., 20000.) ])
+       kwargs.setdefault("mergedElectronChains", [ 'BPH-0DR3-EM7J15', 'HLT_e5_lhvloose_bBeeM6000', 'HLT_e5_lhvloose_noringer_bBeeM6000' ])
        alg = CompFactory.TrigMultiTrkComboHypo(
          name = baseName+'ComboHypo',
          VertexFitter = acc.popToolsAndMerge(TrigBPHY_TrkVKalVrtFitterCfg(flags, baseName)),

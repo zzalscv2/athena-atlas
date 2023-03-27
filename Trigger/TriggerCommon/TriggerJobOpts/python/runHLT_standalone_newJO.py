@@ -68,7 +68,8 @@ flags.Trigger.disableChains= lambda pf: [] if "HI" in pf.Trigger.triggerMenuSetu
     "HLT_e5_lhvloose_bBeeM6000_L1BKeePrimary", "HLT_2e5_lhvloose_bBeeM6000_L1BKeePrimary",
     "HLT_e5_lhvloose_bBeeM6000_L1BKeePrescaled", "HLT_2e5_lhvloose_bBeeM6000_L1BKeePrescaled",
     "HLT_e5_lhvloose_bBeeM6000_L1EM22VHI", "HLT_e5_lhvloose_bBeeM6000_L14J15",     
-    "HLT_e5_lhvloose_bBeeM6000_L1All"
+    "HLT_e5_lhvloose_bBeeM6000_L1All",
+    "HLT_e5_lhvloose_noringer_bBeeM6000_L1BKeePrimary", "HLT_2e5_lhvloose_noringer_bBeeM6000_L1BKeePrimary", "HLT_e5_lhvloose_noringer_bBeeM6000_L1BKeePrescaled", "HLT_2e5_lhvloose_noringer_bBeeM6000_L1BKeePrescaled", "HLT_e5_lhvloose_noringer_bBeeM6000_L1All", "HLT_2e5_lhvloose_noringer_bBeeM6000_L1All", "HLT_e5_lhvloose_noringer_bBeeM6000_L1EM22VHI", "HLT_2e5_lhvloose_noringer_bBeeM6000_L1EM22VHI", "HLT_e5_lhvloose_noringer_bBeeM6000_L14J15", "HLT_2e5_lhvloose_noringer_bBeeM6000_L14J15"
     ]
 
 #--------------#
