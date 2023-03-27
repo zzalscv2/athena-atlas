@@ -175,6 +175,7 @@ def DCMathSegmentMakerCfg(flags,
     kwargs.setdefault("UsePreciseError", True)
     kwargs.setdefault("SinAngleCut", 0.4)
 
+    doSegmentT0Fit =  doSegmentT0Fit or flags.Beam.Type in [BeamType.SingleBeam, BeamType.Cosmics]
     if flags.Beam.Type in [BeamType.SingleBeam, BeamType.Cosmics]:
         kwargs.setdefault("SinAngleCut", 0.9)
         kwargs.setdefault("AddUnassociatedPhiHits", True)
