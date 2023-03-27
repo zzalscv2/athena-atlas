@@ -114,7 +114,7 @@ private:
 #if HEPMCPARTICLELINK_USE_STANDALONE_ATOMIC
   mutable HepMC::ConstGenParticlePtr m_ptr ATLAS_THREAD_SAFE;
 #else
-  mutable std::atomic<HepMC::ConstGenParticlePtr> m_ptr;
+  mutable std::atomic<HepMC::ConstGenParticlePtr> m_ptr ATLAS_THREAD_SAFE;
 #endif
 };
 
