@@ -1,9 +1,15 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
- 
- 
+
+// gcc12 gives false positive warnings from copying boost::small_vector,
+// as the sort operation in show_all_ids.
+#if __GNUC__ >= 12
+# pragma GCC diagnostic ignored "-Wstringop-overread"
+#endif
+
+
 #include "Identifier/Range.h" 
  
 #include <algorithm> 
@@ -2842,7 +2848,7 @@ void MultiRange::show_all_ids (std::vector <ExpandedIdentifier>& unique_ids,
           ++f; 
         } 
     } 
- 
+
   std::sort (ids.begin (), ids.end ()); 
  
   std::vector<ExpandedIdentifier>::const_iterator it; 
