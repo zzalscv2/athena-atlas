@@ -37,6 +37,8 @@ private:
     SG::ReadCondHandleKey<MuonMDT_CablingMap> m_cablingKey{this, "WriteKey", "MuonMDT_CablingMap", "Key of input MDT cabling map"};
 
     SG::ReadCondHandleKey<MdtCondDbData> m_deadChanKey{this, "ReadKey", "MdtCondDbData", "Key of MdtCondDbData"};
+
+    Gaudi::Property<std::string> m_dumpFile{this, "DumpMap", "" , "Text file to which every cabling channel is dumped"};
     
 };
 

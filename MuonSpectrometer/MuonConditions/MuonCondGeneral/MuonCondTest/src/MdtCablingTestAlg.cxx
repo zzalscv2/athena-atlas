@@ -6,7 +6,7 @@
 #include "MuonReadoutGeometry/MdtReadoutElement.h"
 #include "MuonCablingData/MdtMezzanineCard.h"
 
-
+#include <fstream>
 
 MdtCablingTestAlg::MdtCablingTestAlg(const std::string& name, ISvcLocator* pSvcLocator):
     AthAlgorithm(name,pSvcLocator) {}
@@ -22,7 +22,9 @@ StatusCode MdtCablingTestAlg::initialize(){
 
 StatusCode MdtCablingTestAlg::execute(){
   const EventContext& ctx = Gaudi::Hive::currentContext();
-  ATH_MSG_INFO("Start validation of the Mdt cabling");
+  std::unique_ptr<std::fstream> f_dump = !m_dumpFile.value().empty() ? 
+                                         std::make_unique<std::fstream>(m_dumpFile, std::fstream::out) : nullptr;
+  ATH_MSG_INFO("Start validation of the Mdt cabling. Dump complete mapping into "<<m_dumpFile);
   {
     using Mapping = MdtMezzanineCard::Mapping;
     using OffChnl = MdtMezzanineCard::OfflineCh;
@@ -132,6 +134,7 @@ StatusCode MdtCablingTestAlg::execute(){
              failure = true;
              continue;
           }
+          if (f_dump) (*f_dump)<<cabling_data<<std::endl;
           /// Test if the online channel can be transformed back
           
           /// Reset the offline cabling          
@@ -173,7 +176,7 @@ StatusCode MdtCablingTestAlg::execute(){
              continue;
           }
           /// There might be channels sitting on the same CSM but on differnt stations
-          if (idHelper.elementID(test_id) != station_id && mrod_module.MdtCablingOnData::operator!=(cabling_data)) {
+          if (idHelper.elementID(test_id) != station_id && static_cast<const MdtCablingOnData&>(mrod_module)!=(cabling_data)) {
               ATH_MSG_ERROR("Failed to decode module "<<m_idHelperSvc->toString(tube_id)<<" got "<<m_idHelperSvc->toString(test_id) );
               failure = true;
           } else ++n_success;
