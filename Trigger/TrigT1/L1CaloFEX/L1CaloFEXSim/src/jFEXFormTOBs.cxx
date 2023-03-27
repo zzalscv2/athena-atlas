@@ -71,6 +71,7 @@ uint32_t jFEXFormTOBs::formTauTOB(int jFEX, int iPhi, int iEta, int EtClus, int 
 
 int jFEXFormTOBs::Get_calibrated_SRj_ET(int Energy, int jfex){
     
+/***********    MAYBE WILL BE NEEDED IN THE FUTURE... DO NOT REMOVE FOR NOW   
     int Et_edge[8] = {20,30,40,50,65,80,110,150};
     int et_range = -1;
     
@@ -89,6 +90,10 @@ int jFEXFormTOBs::Get_calibrated_SRj_ET(int Energy, int jfex){
     
     int et = (Energy * FEXAlgoSpaceDefs::SRJ_Calib_params[jfex][et_range]) >> 7;
     return et;
+*/
+
+    return Energy * FEXAlgoSpaceDefs::SRJ_Calib_params[jfex];
+
 }
 
 
@@ -139,10 +144,10 @@ uint32_t jFEXFormTOBs::formSRJetTOB(int jFEX, int iPhi, int iEta, int EtClus, in
     }
     
     // COMENTED FOR NOW, Appliying jet calibration
-    //jFEXSmallRJetTOBEt = Get_calibrated_SRj_ET(EtClus,jFEX)/Resolution;
+    jFEXSmallRJetTOBEt = Get_calibrated_SRj_ET(EtClus,jFEX)/Resolution;
     
     //In the firmware the calibration is not applied yet.
-    jFEXSmallRJetTOBEt = EtClus/Resolution;
+    //jFEXSmallRJetTOBEt = EtClus/Resolution;
     
     if(jFEXSmallRJetTOBEt > 0x7ff) {
         jFEXSmallRJetTOBEt = 0x7ff;
