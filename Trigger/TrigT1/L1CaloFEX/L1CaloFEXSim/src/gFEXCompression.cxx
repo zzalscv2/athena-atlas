@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gFEXCompression - Energy encoder/decoder for gFEX
@@ -8,6 +8,7 @@
 //     email                : cecilia.tosciri@cern.ch
 //***************************************************************************
 #include "L1CaloFEXSim/gFEXCompression.h"
+#include <cmath>
 
 namespace LVL1 {
 
@@ -16,32 +17,34 @@ const int gFEXCompression::s_minET[] = {-101200, -50000, -12800, 12800, 51200, 2
 const int gFEXCompression::s_minCode[] = {2, 6, 750, 1774, 2542, 4030};
 
 
-unsigned int gFEXCompression::compress(int Et) {
+unsigned int gFEXCompression::compress(float floatEt) {
 
-  // Check for overflow
-  if (Et >= s_maxET) return s_LArOverflow;
+    int Et = std::round(floatEt);
 
-  // Find which range the ET value is in
-  int range = -1;
-  for (unsigned int i = 0; i < s_nRanges; i++) {
-    if (Et < s_minET[i]) break;
-    range = i;
-  }
+    // Check for overflow
+    if (Et >= s_maxET) return s_LArOverflow;
 
-  // Calculate code
-  unsigned int code = 0;
+    // Find which range the ET value is in
+    int range = -1;
+    for (unsigned int i = 0; i < s_nRanges; i++) {
+        if (Et < s_minET[i]) break;
+        range = i;
+    }
 
-  if (range < 0) {
-    // Below minimum value
-    code = s_LArUnderflow;
-  }
-  else {
-    // Lies inside one of the value ranges
-    int steps = (Et - s_minET[range])/s_steps[range];
-    code = s_minCode[range] + steps;
-  }
+    // Calculate code
+    unsigned int code = 0;
 
-  return code;
+    if (range < 0) {
+        // Below minimum value
+        code = s_LArUnderflow;
+    }
+    else {
+        // Lies inside one of the value ranges
+        int steps = (Et - s_minET[range])/s_steps[range];
+        code = s_minCode[range] + steps;
+    }
+
+    return code;
 }
 
 int gFEXCompression::expand(unsigned int code) {

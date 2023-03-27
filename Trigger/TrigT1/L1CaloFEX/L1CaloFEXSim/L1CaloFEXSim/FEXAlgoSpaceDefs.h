@@ -132,7 +132,10 @@ namespace LVL1 {
       constexpr static int jTE_Et_upperBit  = 16;
       constexpr static int jTE_Et_lowerBit  = 1; 
       constexpr static int jTE_Sat_lowerBit = 0; 
-      
+
+
+//  OLD JFEX JET CALIBRATION PARAMETERS - DO NOT REMOVE FOR NOW
+/*      
     // jFEX SRJet Et Calibration (Calculated by performancy group, Elena Michelle Villhauer's QT)
     constexpr static int SRJ_Calib_params[6][9] =
     {   //<20  <30  <40  <50  <65  <80 <110 <150 <inf  GeV
@@ -143,6 +146,12 @@ namespace LVL1 {
         { 376, 328, 297, 278, 261, 246, 237, 224, 200 },// jFEX 4  Central  
         { 320, 278, 250, 237, 220, 209, 200, 185, 170 } // jFEX 5  FCal 
     }; 
+*/
+  
+    // jFEX SRJet Et Calibration (Depending on eta region...)
+                                            //          jFex 0,     jFex 1,     jFex 2,     jFex 3,     jFex 4,     jFex 5 
+    constexpr static float SRJ_Calib_params[6] = {    1.65343915, 1.97160883, 1.66666667, 1.66666667, 1.97160883, 1.65343915 };
+        
 
   
 

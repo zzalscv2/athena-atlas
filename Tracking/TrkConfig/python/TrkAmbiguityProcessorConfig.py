@@ -211,9 +211,9 @@ def SimpleAmbiguityProcessorTool_Trig_Cfg(
 
     if "SelectionTool" not in kwargs:
         from InDetConfig.InDetAmbiTrackSelectionToolConfig import (
-            InDetTrigTrackSelectionToolCfg)
+            InDetTrigAmbiTrackSelectionToolCfg)
         kwargs.setdefault("SelectionTool", acc.popToolsAndMerge(
-            InDetTrigTrackSelectionToolCfg(flags)))
+            InDetTrigAmbiTrackSelectionToolCfg(flags)))
 
     acc.setPrivateTools(
         CompFactory.Trk.SimpleAmbiguityProcessorTool(name, **kwargs))

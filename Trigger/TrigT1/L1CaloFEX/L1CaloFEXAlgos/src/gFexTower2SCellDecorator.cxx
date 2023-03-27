@@ -182,7 +182,7 @@ StatusCode gFexTower2SCellDecorator::execute(const EventContext& ctx) const {
             tmpSCellEt += tmpet;
         }
 
-        scSumEtEncoded = gFEXCompression::compress( std::round( tmpSCellEt) );
+        scSumEtEncoded = gFEXCompression::compress( tmpSCellEt );
 
         // Decorating the tower with the corresponding information
         gTowerSCellEt       (*gTower) = scEt;
