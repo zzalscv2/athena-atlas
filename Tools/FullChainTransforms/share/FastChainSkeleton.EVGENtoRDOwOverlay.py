@@ -100,21 +100,6 @@ else:
 # Don't use the SeedsG4 override
 simFlags.SeedsG4.set_Off()
 
-# Set the Run Number
-if hasattr(runArgs,"DataRunNumber"):
-    if runArgs.DataRunNumber>0:
-        FastChainLog.info( 'Overriding run number to be: %s ' % runArgs.DataRunNumber )
-        simFlags.RunNumber=runArgs.DataRunNumber
-        digitizationFlags.dataRunNumber=runArgs.DataRunNumber
-elif hasattr(runArgs,'jobNumber'):
-    if runArgs.jobNumber>=0:
-        FastChainLog.info( 'Using job number '+str(runArgs.jobNumber)+' to derive run number.' )
-        simFlags.RunNumber = simFlags.RunDict.GetRunNumber( runArgs.jobNumber )
-        FastChainLog.info( 'Set run number based on dictionary to '+str(simFlags.RunNumber) )
-else:
-    #FastChainLog.info( 'Run number should be defined!' )
-    raise RuntimeError("No run number defined!")
-
 # runNumber is MC channel number in reco
 if hasattr(runArgs, 'runNumber'):
     # always set it in legacy config
@@ -286,8 +271,10 @@ if nThreads > 0:
 else:
     EventLoop = Service("AthenaEventLoopMgr")
 
-EventLoop.RequireInputAttributeList = True 
-EventLoop.UseSecondaryEventNumber = False
+EventLoop.RequireInputAttributeList = True
+# The EVNT file is the secondary input in MC Overlay jobs, so we want
+# to take the event number from that.
+EventLoop.UseSecondaryEventNumber = True
 svcMgr += EventLoop
 
 FastChainLog.info('**** Transformation run arguments')
@@ -343,7 +330,7 @@ from OverlayConfiguration.OverlayHelpersLegacy import setupOverlayLegacyDetector
 DetFlags = setupOverlayLegacyDetectorFlags(overlayDetectors)
 
 DetFlags.Truth_setOn()
-DetFlags.Forward_setOff() 
+DetFlags.Forward_setOff()
 
 if hasattr(runArgs, 'triggerConfig') and runArgs.triggerConfig == 'NONE':
     DetFlags.LVL1_setOff()
