@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gFEXCompression - Energy encoder/decoder for gFEX
@@ -27,7 +27,7 @@ class gFEXCompression {
 
 public:
   /** Compress data */
-  static unsigned int compress(int Et);
+  static unsigned int compress(float Energy);
   /** Uncompress data */
   static int expand(unsigned int code);
   /** Apply threshold to compressed data */
