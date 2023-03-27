@@ -2,8 +2,8 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ACTSTRKSEEDING_TRACKFINDINGALG_H
-#define ACTSTRKSEEDING_TRACKFINDINGALG_H 1
+#ifndef ACTSTRKFINDING_TRACKFINDINGALG_H
+#define ACTSTRKFINDING_TRACKFINDINGALG_H 1
 
 // Base Class
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
@@ -26,7 +26,6 @@
 
 // Handle Keys
 #include "StoreGate/ReadCondHandleKey.h"
-#include "StoreGate/ReadHandleKeyArray.h"
 #include "StoreGate/WriteHandleKey.h"
 
 namespace ActsTrk

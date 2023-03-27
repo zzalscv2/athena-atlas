@@ -5,10 +5,12 @@
 #ifndef ACTSTRKTOOLINTERFACES_ITRACKFINDINGTOOL_H
 #define ACTSTRKTOOLINTERFACES_ITRACKFINDINGTOOL_H 1
 
-// Athena
+// Base
 #include "GaudiKernel/IAlgTool.h"
+
+// Athena
+#include "GeoPrimitives/GeoPrimitives.h"
 #include "GaudiKernel/EventContext.h"
-#include "TrkFitterUtils/FitterTypes.h"
 #include "TrkTrack/TrackCollection.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "xAODInDetMeasurement/PixelClusterContainer.h"

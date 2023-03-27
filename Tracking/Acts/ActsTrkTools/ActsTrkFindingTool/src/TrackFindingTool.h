@@ -5,13 +5,14 @@
 #ifndef ACTSTRKFINDINGTOOL_TRACKFINDINGTOOL_H
 #define ACTSTRKFINDINGTOOL_TRACKFINDINGTOOL_H 1
 
-// ATHENA
+// BASE
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "GeoPrimitives/GeoPrimitives.h"
+#include "ActsTrkToolInterfaces/ITrackFindingTool.h"
+
+// ATHENA
 #include "TrkToolInterfaces/IExtendedTrackSummaryTool.h"
 #include "TrkToolInterfaces/IBoundaryCheckTool.h"
 #include "TrkToolInterfaces/IRIO_OnTrackCreator.h"
-#include "TrkParameters/TrackParameters.h"
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
 
 // ACTS CORE
@@ -20,15 +21,15 @@
 #include "Acts/TrackFinding/CombinatorialKalmanFilter.hpp"
 #include "Acts/TrackFinding/MeasurementSelector.hpp"
 #include "Acts/EventData/VectorTrackContainer.hpp"
-#include "Acts/Geometry/GeometryIdentifier.hpp"
 
 // PACKAGE
-#include "ActsTrkToolInterfaces/ITrackFindingTool.h"
+#include "src/ITrackStatePrinter.h"
 #include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 #include "ActsTrkEventCnv/IActsToTrkConverterTool.h"
 
 // Other
+#include <memory>
 #include <atomic>
 
 namespace ActsTrk
@@ -37,8 +38,6 @@ namespace ActsTrk
   {
 
   public:
-    using traj_Type = Acts::VectorMultiTrajectory;
-
     TrackFindingTool(const std::string &type, const std::string &name,
                      const IInterface *parent);
     virtual ~TrackFindingTool(); // define in .cxx so std::unique_ptr can delete incomplete type (pimpl)
@@ -62,6 +61,7 @@ namespace ActsTrk
     ToolHandle<ActsTrk::IActsToTrkConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", "ActsToTrkConverterTool"};
     ToolHandle<Trk::IBoundaryCheckTool> m_boundaryCheckTool{this, "BoundaryCheckTool", "InDet::InDetBoundaryCheckTool", "Boundary checking tool for detector sensitivities"};
     ToolHandle<Trk::IRIO_OnTrackCreator> m_RotCreatorTool{this, "RotCreatorTool", "", "optional RIO_OnTrack creator tool"};
+    ToolHandle<ActsTrk::ITrackStatePrinter> m_trackStatePrinter{this, "TrackStatePrinter", "", "optional track state printer"};
 
     // Configuration
     Gaudi::Property<unsigned int> m_maxPropagationStep{this, "maxPropagationStep", 1000, "Maximum number of steps for one propagate call"};
@@ -69,7 +69,6 @@ namespace ActsTrk
     Gaudi::Property<std::vector<double>> m_etaBins{this, "etaBins", {}, "MeasurementSelector: bins in |eta| to specify variable selections"};
     Gaudi::Property<std::vector<double>> m_chi2CutOff{this, "chi2CutOff", {std::numeric_limits<double>::max()}, "MeasurementSelector: maximum local chi2 contribution"};
     Gaudi::Property<std::vector<size_t>> m_numMeasurementsCutOff{this, "numMeasurementsCutOff", {1}, "MeasurementSelector: maximum number of associated measurements on a single surface"};
-    Gaudi::Property<bool> m_doPrintTrackStates{this, "doPrintTrackStates", false, "Print tables of input measurements/seeds and output track parameters/states"};
 
     // Create tracks from one seed's CKF result, appending to tracksContainer
     size_t
@@ -91,7 +90,7 @@ namespace ActsTrk
     // CKF configuration
     Acts::PropagatorPlainOptions m_pOptions;
     std::unique_ptr<Acts::MeasurementSelector> m_measurementSelector;
-    Acts::CombinatorialKalmanFilterExtensions<traj_Type> m_ckfExtensions;
+    Acts::CombinatorialKalmanFilterExtensions<Acts::VectorMultiTrajectory> m_ckfExtensions;
 
     // statistics
     mutable std::atomic<size_t> m_nTotalSeeds{0};
