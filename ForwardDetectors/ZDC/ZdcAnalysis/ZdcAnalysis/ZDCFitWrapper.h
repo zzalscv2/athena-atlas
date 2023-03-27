@@ -2,8 +2,10 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef _ZDCFitWrapper_h
-#define _ZDCFitWrapper_h
+#ifndef ZDCANALYSIS_ZDCFITWRAPPER_H
+#define ZDCANALYSIS_ZDCFITWRAPPER_H
+
+#include "CxxUtils/checker_macros.h"
 
 // Base class that defines the interface
 //
@@ -13,7 +15,7 @@
 double ZDCFermiExpFit(const double* xvec, const double* pvec);
 double ZDCFermiExpFitRefl(const double* xvec, const double* pvec);
 
-class ZDCFitWrapper
+class ATLAS_NOT_THREAD_SAFE ZDCFitWrapper
 {
 private:
    std::shared_ptr<TF1> m_wrapperTF1;
@@ -100,7 +102,7 @@ public:
   virtual TF1* GetWrapperTF1RawPtr() const {return m_wrapperTF1.get();}
 };
 
-class ZDCPrePulseFitWrapper : public ZDCFitWrapper
+class ATLAS_NOT_THREAD_SAFE ZDCPrePulseFitWrapper : public ZDCFitWrapper
 {
 protected:
   float m_preT0Min;
@@ -128,7 +130,7 @@ public:
   virtual float GetExpAmp()  const = 0;
 };
 
-class ZDCFitExpFermiVariableTaus : public ZDCFitWrapper
+class ATLAS_NOT_THREAD_SAFE ZDCFitExpFermiVariableTaus : public ZDCFitWrapper
 {
 protected:
   bool m_fixTau1;
@@ -194,7 +196,7 @@ public:
 //   signals to send a copy to LHCf DAQ. It's not really a reflection but an artifact introduced
 //   by the bandwidth limit of the linear fan-in/fan-out module that we used.
 //
-class ZDCFitExpFermiVariableTausLHCf : public ZDCFitWrapper
+class ATLAS_NOT_THREAD_SAFE ZDCFitExpFermiVariableTausLHCf : public ZDCFitWrapper
 {
 protected:
   bool m_fixTau1;
@@ -254,13 +256,13 @@ public:
   virtual void UnconstrainFit() override;
 };
 
-class ZDCFitExpFermiVariableTausRun3 : public ZDCFitExpFermiVariableTaus
+class ATLAS_NOT_THREAD_SAFE ZDCFitExpFermiVariableTausRun3 : public ZDCFitExpFermiVariableTaus
 {
 public:
   ZDCFitExpFermiVariableTausRun3(const std::string& tag, float tmin, float tmax, bool fixTau1, bool fixTau2, float tau1, float tau2);
 };
 
-class ZDCFitExpFermiFixedTaus : public ZDCFitWrapper
+class ATLAS_NOT_THREAD_SAFE ZDCFitExpFermiFixedTaus : public ZDCFitWrapper
 {
 private:
   float m_tau1;
@@ -324,7 +326,7 @@ public:
   }
 };
 
-class ZDCFitExpFermiPrePulse : public ZDCPrePulseFitWrapper
+class ATLAS_NOT_THREAD_SAFE ZDCFitExpFermiPrePulse : public ZDCPrePulseFitWrapper
 {
 private:
   float m_tau1;
@@ -429,7 +431,7 @@ public:
 };
 
 // ----------------------------------------------------------------------
-class ZDCFitExpFermiLinearFixedTaus : public ZDCFitWrapper
+class ATLAS_NOT_THREAD_SAFE ZDCFitExpFermiLinearFixedTaus : public ZDCFitWrapper
 {
 private:
   float m_tau1;
@@ -494,7 +496,7 @@ public:
 };
 
 // ----------------------------------------------------------------------
-class ZDCFitExpFermiLinearPrePulse : public ZDCPrePulseFitWrapper
+class ATLAS_NOT_THREAD_SAFE ZDCFitExpFermiLinearPrePulse : public ZDCPrePulseFitWrapper
 {
 private:
   float m_tau1;
@@ -607,7 +609,7 @@ public:
 
 
 // ----------------------------------------------------------------------
-class ZDCFitComplexPrePulse : public ZDCPrePulseFitWrapper
+class ATLAS_NOT_THREAD_SAFE ZDCFitComplexPrePulse : public ZDCPrePulseFitWrapper
 {
 private:
   float m_tau1;
@@ -722,7 +724,7 @@ public:
 
 
 // ----------------------------------------------------------------------
-class ZDCFitGeneralPulse : public ZDCPrePulseFitWrapper
+class ATLAS_NOT_THREAD_SAFE ZDCFitGeneralPulse : public ZDCPrePulseFitWrapper
 {
 private:
   float m_tau1;
