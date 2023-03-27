@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MCAST_MUONCALIBTOOL_H
@@ -73,7 +73,7 @@ namespace CP {
         Gaudi::Property<bool> m_isRun3{this, "IsRun3Geo", false, "Needed for MuonSelectionTool"}; 
 
         // Properties of the tool
-        Gaudi::Property<std::string> m_release{this, "release", "Recs2022_08_16_Run3PreRecs",     "Release"};
+        Gaudi::Property<std::string> m_release{this, "release", "Recs2023_03_22_Run3",     "Release"};
         // Systematics scheme 
         Gaudi::Property<std::string> m_sysScheme{this, "systematicScheme", "Corr_Scale",     "Systematic scheme to be configured"};
 
