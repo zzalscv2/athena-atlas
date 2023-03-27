@@ -3,5 +3,7 @@
 */
 
 #include "src/TrackFindingTool.h"
+#include "src/TrackStatePrinter.h"
 
 DECLARE_COMPONENT( ActsTrk::TrackFindingTool )
+DECLARE_COMPONENT( ActsTrk::TrackStatePrinter )

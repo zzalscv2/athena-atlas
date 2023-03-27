@@ -112,7 +112,7 @@ namespace ActsTrk
                                              {{pixelClusterContainer, pixelDetEleColl},
                                               {stripClusterContainer, stripDetEleColl}},
                                              *estimatedTrackParameters,
-                                             *trackPtrs.get()));
+                                             *trackPtrs));
     ATH_MSG_DEBUG("    \\__ Created " << trackPtrs->size() << " tracks");
 
     // ================================================== //
