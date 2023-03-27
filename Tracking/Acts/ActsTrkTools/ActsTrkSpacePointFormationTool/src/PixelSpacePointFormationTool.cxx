@@ -61,8 +61,8 @@ namespace ActsTrk {
 
         // use xz, yz, zz terms of rotation matrix to scale the covariance term
         const Amg::Transform3D &Tp = element.surface().transform();
-        float cov_z = 6.*covTerm*(float(Tp(0, 2))*float(Tp(0, 2))+float(Tp(1, 2))*float(Tp(1, 2)));
-        float cov_r = 6.*covTerm*(float(Tp(2, 2))*float(Tp(2, 2)));
+        float cov_z = 6.*covTerm*static_cast<float>(Tp(0, 2)*Tp(0, 2)+Tp(1, 2)*Tp(1, 2));
+        float cov_r = 6.*covTerm*static_cast<float>(Tp(2, 2)*Tp(2, 2));
 
 	sp.setSpacePoint(cluster.identifierHash(),
 			 cluster.globalPosition(),
