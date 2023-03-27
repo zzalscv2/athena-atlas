@@ -163,17 +163,18 @@ def _muFastStepSeq(flags, is_probe_leg=False):
     # Step 1 (L2MuonSA)
     selAcc = SelectionCA("L2MuFastSel",  is_probe_leg)
     # Set EventViews for L2MuonSA step
-    reco = InViewRecoCA("L2MuFastReco", isProbe=is_probe_leg)
+    recoName = "L2MuFastReco"
+    reco = InViewRecoCA(recoName, isProbe=is_probe_leg)
 
     #external data loading to view
     reco.mergeReco( MuFastViewDataVerifier(flags) )
 
     # decoding
-    decodeAcc = muonDecodeCfg(flags, reco.name+"RoIs")
+    decodeAcc = muonDecodeCfg(flags, recoName+"RoIs")
     reco.mergeReco(decodeAcc)
 
     #L2 SA alg
-    reco.mergeReco(l2MuFastAlgCfg( flags, roisKey=reco.name+"RoIs"))
+    reco.mergeReco(l2MuFastAlgCfg( flags, roisKey=recoName+"RoIs"))
 
     selAcc.mergeReco(reco)
 
@@ -203,12 +204,12 @@ def muFastStep(flags, chainDict):
 
 
 @AccumulatorCache
-def _muCombStepSeq(flags):
+def _muCombStepSeq(flags, is_probe_leg=False):
     ### Set muon step2 - L2muComb ###
-    selAccL2CB = SelectionCA("L2MuonCB")
+    selAccL2CB = SelectionCA("L2MuonCB", is_probe_leg)
 
     # L2MuonCB reco
-    recoL2CB = l2MuCombRecoCfg(flags)
+    recoL2CB = l2MuCombRecoCfg(flags, is_probe_leg=is_probe_leg)
 
     #external data loading to view
     recoL2CB.mergeReco( MuCombViewDataVerifier() )
@@ -230,7 +231,7 @@ def _muCombStepSeq(flags):
 def muCombSequence(flags, is_probe_leg=False):
     muonflagsCB = flags.cloneAndReplace('Muon', 'Trigger.Offline.Muon').cloneAndReplace('MuonCombined', 'Trigger.Offline.Combined.MuonCombined')    
     muonflagsCBid = muonflagsCB.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking.muon")
-    selAccL2CB , l2muCombSequence = _muCombStepSeq(muonflagsCBid)
+    selAccL2CB , l2muCombSequence = _muCombStepSeq(muonflagsCBid, is_probe_leg=is_probe_leg)
     return l2muCombSequence
 
 def muCombStep(flags, chainDict):
@@ -241,13 +242,13 @@ def muCombStep(flags, chainDict):
 
 def muCombOvlpRmSequence(flags, is_probe_leg=False):
     log.warning("FAKE muCombOvlpRmSequence replaced by single muCombSequence")
-    return muCombSequence(flags)
+    return muCombSequence(flags, is_probe_leg)
 
 
 @AccumulatorCache
-def _muEFSAStepSeq(flags, name='RoI'):
+def _muEFSAStepSeq(flags, name='RoI', is_probe_leg=False):
     #EF MS only
-    selAccMS = SelectionCA('EFMuMSSel_'+name)
+    selAccMS = SelectionCA('EFMuMSSel_'+name, is_probe_leg)
     
     viewName="EFMuMSReco_"+name
     if 'FS' in name:
@@ -259,12 +260,12 @@ def _muEFSAStepSeq(flags, name='RoI'):
         roiTool         = ViewCreatorFetchFromViewROITool(RoisWriteHandleKey="Roi_L2SAMuonForEF", InViewRoIs = "forMS", ViewToFetchFrom = "L2MuFastRecoViews")
         requireParentView = True
                                                          
-    recoMS = InViewRecoCA(name=viewName, RoITool = roiTool, RequireParentView = requireParentView)
+    recoMS = InViewRecoCA(name=viewName, RoITool = roiTool, RequireParentView = requireParentView, isProbe=is_probe_leg)
     
     recoMS.mergeReco(EFMuonViewDataVerifierCfg(flags, name))
 
     # decoding
-    recoMS.mergeReco(muonDecodeCfg(flags, recoMS.name+"RoIs"))
+    recoMS.mergeReco(muonDecodeCfg(flags, viewName+"RoIs"))
 
     #Reco
     recoMS.mergeReco( MooSegmentFinderAlgCfg(flags,name="TrigMooSegmentFinder_"+name,UseTGCNextBC=False, UseTGCPriorBC=False))
@@ -291,7 +292,7 @@ def _muEFSAStepSeq(flags, name='RoI'):
 
 def muEFSASequence(flags, name='RoI', is_probe_leg=False):
     muonflags = flags.cloneAndReplace('Muon', 'Trigger.Offline.SA.Muon')
-    selAccMS , efmuMSSequence = _muEFSAStepSeq(muonflags, name)
+    selAccMS , efmuMSSequence = _muEFSAStepSeq(muonflags, name, is_probe_leg=is_probe_leg)
     return efmuMSSequence
 
 def muEFSAStep(flags, chainDict, name='RoI'):
@@ -301,9 +302,9 @@ def muEFSAStep(flags, chainDict, name='RoI'):
     return ChainStep( name=selAccMS.name, Sequences=[efmuMSSequence], chainDicts=[chainDict] )
 
 @AccumulatorCache
-def _muEFCBStepSeq(flags, name='RoI'):
+def _muEFCBStepSeq(flags, name='RoI', is_probe_leg=False):
     #EF combined muons
-    selAccEFCB = SelectionCA("EFCBMuon_"+name)
+    selAccEFCB = SelectionCA("EFCBMuon_"+name, is_probe_leg)
 
     viewName = 'EFMuCBReco_'+name                                                       
     trackName = flags.InDet.Tracking.ActiveConfig.tracks_FTF
@@ -323,12 +324,12 @@ def _muEFCBStepSeq(flags, name='RoI'):
                                                              InViewRoIs      = viewName+'RoIs',
                                                              Views           = viewName+'Views',
                                                              ViewNodeName    = viewName+"InView")
-        recoCB = InViewRecoCA("EFMuCBReco_"+name, viewMaker=viewMakerAlg)
+        recoCB = InViewRecoCA("EFMuCBReco_"+name, viewMaker=viewMakerAlg, isProbe=is_probe_leg)
         #ID tracking
         recoCB.mergeReco(trigInDetFastTrackingCfg( flags, roisKey=recoCB.inputMaker().InViewRoIs, signatureName="MuonFS" ))
         trackName = flags.Trigger.InDetTracking.MuonFS.tracks_FTF
     else:
-        recoCB = InViewRecoCA(viewName)
+        recoCB = InViewRecoCA(viewName, isProbe=is_probe_leg)
         recoCB.inputMaker().RequireParentView = True
 
     recoCB.mergeReco(EFMuonCBViewDataVerifierCfg(flags, name))
@@ -391,7 +392,7 @@ def muEFCBSequence(flags, is_probe_leg=False):
     muonflagsCB = flags.cloneAndReplace('Muon', 'Trigger.Offline.Muon').cloneAndReplace('MuonCombined', 'Trigger.Offline.Combined.MuonCombined')
     muonflagsCBid = muonflagsCB.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking.muon")
         
-    selAccEFCB , efmuCBSequence = _muEFCBStepSeq(muonflagsCBid, name='RoI')
+    selAccEFCB , efmuCBSequence = _muEFCBStepSeq(muonflagsCBid, name='RoI', is_probe_leg=is_probe_leg)
     return efmuCBSequence
 
 def muEFCBStep(flags, chainDict, name='RoI'):
