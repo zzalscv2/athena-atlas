@@ -3,7 +3,6 @@
 from TriggerMenuMT.HLT.Config.Utility.HLTMenuConfig import HLTMenuConfig
 from TriggerMenuMT.HLT.Config.ControlFlow.MenuComponentsNaming import CFNaming
 from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import (NoHypoToolCreated, 
-                                                             NoCAmigration,
                                                              algColor, 
                                                              isHypoBase, 
                                                              isComboHypoAlg, 
@@ -22,7 +21,6 @@ from HLTSeeding.HLTSeedingConfig import mapThresholdToL1DecisionCollection
 from TrigCompositeUtils.TrigCompositeUtils import legName
 from AthenaConfiguration.ComponentAccumulator import appendCAtoAthena, conf2toConfigurable
 from TriggerJobOpts.TriggerConfigFlags import ROBPrefetching
-
 
 from collections.abc import MutableSequence
 import collections.abc
@@ -368,15 +366,13 @@ class MenuSequence(object):
 
     def __init__(self, flags, Sequence, Maker,  Hypo, HypoToolGen, IsProbe=False):
         assert compName(Maker).startswith("IM"), "The input maker {} name needs to start with letter: IM".format(compName(Maker))        
-        from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import isCAMenu 
         # For probe legs we need to substitute the inputmaker and hypo alg
         # so we will use temp variables for both
         if IsProbe: 
-            if isCAMenu():    
-                #_Hypo = Hypo
-                #_Maker = Maker
-                #_Sequence = Sequence 
-                log.warning(str(NoCAmigration('[MenuSequence] found a probe leg, dont know how to clone, no sequence {0}_probe created for CA components'.format(compName(Hypo))) ))                                                
+            #CA based config should have probe IM set up already, so use existing IM/Hypo if it's already probe
+            if 'probe' in Maker.getName():
+                _Maker=Maker
+                _Hypo = Hypo
             else:
                 _Hypo = RecoFragmentsPool.retrieve(MenuSequence.getProbeHypo,flags,basehypo=Hypo)
                 # Reset this so that HypoAlgNode.addOutput will actually do something
@@ -411,32 +407,31 @@ class MenuSequence(object):
         self._hypo.addOutput(hypo_output)
         self._hypo.setPreviousDecision( input_maker_output )
 
-        if IsProbe:
+        #probe legs in lagacy config need the IM cloned
+        #CA based chains should use SelectionCA which does the probe leg changes directly, so skip if already a probe sequence
+        if IsProbe and 'probe' not in Sequence.getName():
             def getProbeSequence(baseSeq,probeIM):
-                if isCAMenu():
-                    probeSeq = None #baseSeq
-                    #probeSeq.name= baseSeq.getName()+"_probe"
-                    log.warning(str(NoCAmigration('[MenuSequence] found a probe leg, dont know how to clone, no sequence {0}_probe created for CA components'.format(compName(Hypo))) ))                                
-                else:
-                    # Add IM and sequence contents to duplicated sequence
-                    probeSeq = baseSeq.clone(baseSeq.getName()+"_probe")
-                    probeSeq += probeIM                
-                    if isinstance(probeIM,CompFactory.EventViewCreatorAlgorithm):
-                        for child in baseSeq.getChildren()[1:]:
-                            probeChild = child.clone(child.getName()+"_probe")
-                            if hasProp(child,'ROBPrefetchingInputDecisions') and (ROBPrefetching.StepRoI in flags.Trigger.ROBPrefetchingOptions):
-                                # child is a ROB prefetching alg, map the probe IM decisions
-                                probeChild.ROBPrefetchingInputDecisions = [str(probeIM.InputMakerOutputDecisions)]
-                            elif probeIM.ViewNodeName == child.getName():
-                                # child is the view alg sequence, map it to the probe sequence
-                                probeIM.ViewNodeName = probeChild.getName()
-                                for viewalg in child.getChildren():
-                                    probeChild += viewalg
-                            probeSeq += probeChild
+                # Add IM and sequence contents to duplicated sequence
+                probeSeq = baseSeq.clone(baseSeq.getName()+"_probe")
+                probeSeq += probeIM                
+                if isinstance(probeIM,CompFactory.EventViewCreatorAlgorithm):
+                    for child in baseSeq.getChildren()[1:]:
+                        probeChild = child.clone(child.getName()+"_probe")
+                        if hasProp(child,'ROBPrefetchingInputDecisions') and (ROBPrefetching.StepRoI in flags.Trigger.ROBPrefetchingOptions):
+                            # child is a ROB prefetching alg, map the probe IM decisions
+                            probeChild.ROBPrefetchingInputDecisions = [str(probeIM.InputMakerOutputDecisions)]
+                        elif probeIM.ViewNodeName == child.getName():
+                            # child is the view alg sequence, map it to the probe sequence
+                            probeIM.ViewNodeName = probeChild.getName()
+                            for viewalg in child.getChildren():
+                                probeChild += viewalg
+                        probeSeq += probeChild
                 return probeSeq
             # Make sure nothing was lost
             _Sequence = getProbeSequence(baseSeq=Sequence,probeIM=_Maker)
             assert len(_Sequence.getChildren()) == len(Sequence.getChildren()), f'Different number of children in sequence {_Sequence.getName()} vs {Sequence.getName()} ({len(_Sequence.getChildren())} vs {len(Sequence.getChildren())})'
+        else:
+            _Sequence = Sequence
 
         self._sequence = Node( Alg=_Sequence)
 
@@ -994,29 +989,53 @@ class InViewRecoCA(ComponentAccumulator):
     def __init__(self, name, viewMaker=None, isProbe=False, **viewMakerArgs):
         super( InViewRecoCA, self ).__init__()
         self.name = name +"_probe" if isProbe else name
+        def updateHandle(baseTool, probeTool, handleName):
+            if hasattr(baseTool, handleName) and getattr(baseTool, handleName).Path!="StoreGateSvc+":
+                setattr(probeTool, handleName, getattr(probeTool, handleName).Path + "_probe")
 
         if len(viewMakerArgs) != 0:
             assert viewMaker is None, "No support for explicitly passed view maker and args for EventViewCreatorAlgorithm" 
 
         if viewMaker:
             assert len(viewMakerArgs) == 0, "No support for explicitly passed view maker and args for EventViewCreatorAlgorithm" 
-            self.viewMakerAlg = viewMaker
+            if isProbe:
+                self.viewMakerAlg = viewMaker.__class__(viewMaker.getName()+'_probe', **viewMaker._properties)
+                self.viewMakerAlg.Views = viewMaker.Views+'_probe'
+                roiTool = self.viewMakerAlg.RoITool.__class.__(self.viewMakerAlg.RoITool.getName()+'_probe', **self.viewMakerAlg.RoITool._properties)
+                updateHandle(viewMakerArgs['RoITool'], roiTool, "RoisWriteHandleKey")
+                if hasattr(viewMakerArgs['RoITool'], "RoiCreator"):
+                    updateHandle(viewMakerArgs['RoITool'], roiTool, "ExtraPrefetchRoIsKey")
+                    updateHandle(viewMakerArgs['RoITool'].RoiCreator, roiTool.RoiCreator, "RoisWriteHandleKey")
+
+                self.viewMakerAlg.RoITool = roiTool
+            else:
+                self.viewMakerAlg = viewMaker
         else:
             assert 'name' not in viewMakerArgs, "The name of view maker is predefined by the name of sequence"
             assert 'Views' not in viewMakerArgs, "The Views is predefined by the name of sequence"
             assert 'ViewsNodeName' not in viewMakerArgs, "The ViewsNodeName is predefined by the name of sequence"
-            args = {'name': f'IM_{name}', 
+            if 'RoITool' in viewMakerArgs:
+                roiTool = viewMakerArgs['RoITool']
+            else:
+                roiTool = CompFactory.ViewCreatorInitialROITool()
+
+
+            args = {'name': f'IM_{self.name}', 
                     'ViewFallThrough'   : True,
                     'RoIsLink'          : 'initialRoI',
-                    'RoITool'           : CompFactory.ViewCreatorInitialROITool(),
+                    'RoITool'           : roiTool,
                     'InViewRoIs'        : f'{name}RoIs',
-                    'Views'             : f'{name}Views',
-                    'ViewNodeName'      : f'{name}InViews', 
+                    'Views'             : f'{name}Views'+'_probe' if isProbe else f'{name}Views',
+                    'ViewNodeName'      : f'{name}InViews'+'_probe' if isProbe else f'{name}InViews', 
                     'RequireParentView' : False,
                     'mergeUsingFeature' : False }
             args.update(**viewMakerArgs)
             self.viewMakerAlg = CompFactory.EventViewCreatorAlgorithm(**args)
-
+            if isProbe:
+                updateHandle(args['RoITool'], roiTool, "RoisWriteHandleKey")
+                if hasattr(args['RoITool'], "RoiCreator"):
+                    updateHandle(args['RoITool'], roiTool, "ExtraPrefetchRoIsKey")
+                    updateHandle(args['RoITool'].RoiCreator, roiTool.RoiCreator, "RoisWriteHandleKey")
         self.viewsSeq = parOR( self.viewMakerAlg.ViewNodeName )
         self.addSequence( self.viewsSeq )
 

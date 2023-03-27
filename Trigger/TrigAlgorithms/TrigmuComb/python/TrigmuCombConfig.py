@@ -50,13 +50,14 @@ def muCombCfg(flags, postFix="", useBackExtrp=True):
     return acc, muCombAlg
 
     
-def l2MuCombRecoCfg(flags, name="L2MuCombReco"):
+def l2MuCombRecoCfg(flags, name="L2MuCombReco", is_probe_leg=False):
 
     from TriggerMenuMT.HLT.Config.MenuComponents import InViewRecoCA
     ViewCreatorFetchFromViewROITool=CompFactory.ViewCreatorFetchFromViewROITool
     reco = InViewRecoCA(name, 
                         RequireParentView = True, 
-                        RoITool = ViewCreatorFetchFromViewROITool(RoisWriteHandleKey="Roi_L2SAMuon", InViewRoIs = "forID", ViewToFetchFrom = "L2MuFastRecoViews"))
+                        RoITool = ViewCreatorFetchFromViewROITool(RoisWriteHandleKey="Roi_L2SAMuon", InViewRoIs = "forID", ViewToFetchFrom = "L2MuFastRecoViews"),
+                        isProbe=is_probe_leg)
 
     acc, alg = muCombCfg(flags)
     alg.L2StandAloneMuonContainerName=muFastInfo
