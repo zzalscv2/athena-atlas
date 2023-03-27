@@ -157,7 +157,11 @@ namespace CP{
     TH1* histo = (isData ? m_hData : m_hMC);
     if (!histo)
       return 0;
-    return histo->Interpolate(eta, phi);
+    constexpr float epsilon=1e-5;
+    if (std::fabs(eta)==2.5)
+      return histo->Interpolate(eta*(1-epsilon), phi);
+    else
+      return histo->Interpolate(eta, phi);
   }
   
   float ShowerDepthTool::getEtaDirection(const float& zvertex,const float& R,const float& z) 
