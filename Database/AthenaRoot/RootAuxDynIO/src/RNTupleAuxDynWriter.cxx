@@ -73,8 +73,7 @@ namespace RootAuxDynIO
          if( m_model )  goodBranches.insert(field_name);
          else {
             if( goodBranches.count(field_name) == 0 ) {
-               if( badBranches.count(field_name) == 0 ) {
-                  badBranches.insert(field_name);
+               if( badBranches.insert(field_name).second ) {
                   ATH_MSG_WARNING("ignoring late attribute " << field_name);
                }
                continue;
