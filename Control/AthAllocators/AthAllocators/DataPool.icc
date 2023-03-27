@@ -16,6 +16,10 @@ const typename DataPool<VALUE, clear>::alloc_t::Params DataPool<VALUE, clear>::s
   = DataPool<VALUE, clear>::initParams();
 
 
+#if __GNUC__ >= 12
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Waddress"
+#endif
 DATAPOOL_T
 typename DataPool<VALUE, clear>::alloc_t::Params DataPool<VALUE, clear>::initParams()
 {
@@ -25,6 +29,9 @@ typename DataPool<VALUE, clear>::alloc_t::Params DataPool<VALUE, clear>::initPar
   }
   return params;
 }
+#if __GNUC__ >= 12
+# pragma GCC diagnostic pop
+#endif
 
 
 DATAPOOL_T
