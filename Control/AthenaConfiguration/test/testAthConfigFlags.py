@@ -215,9 +215,10 @@ class FlagsFromArgsTest(unittest.TestCase):
         self.flags.addFlag('Input.Files',[])
         self.flags.addFlag('detA.flagB',0)
         self.flags.addFlag("detA.flagC","")
+        self.flags.addFlag("detA.flagD",[])
 
     def test(self):
-        argline="-l VERBOSE --evtMax=10 --skipEvents=3 --filesInput=bla1.data,bla2.data detA.flagB=7 detA.flagC=a.2"
+        argline="-l VERBOSE --evtMax=10 --skipEvents=3 --filesInput=bla1.data,bla2.data detA.flagB=7 detA.flagC=a.2 detA.flagD+=['val']"
         if isGaudiEnv():
             argline += " --debug exec"
         print (f"Interpreting arguments: '{argline}'")
@@ -229,6 +230,7 @@ class FlagsFromArgsTest(unittest.TestCase):
         self.assertEqual(self.flags.Input.Files,["bla1.data","bla2.data"],"Failed to set FileInput from args")
         self.assertEqual(self.flags.detA.flagB,7,"Failed to set arbitrary from args")
         self.assertEqual(self.flags.detA.flagC,"a.2","Failed to set arbitrary unquoted string from args")
+        self.assertEqual(self.flags.detA.flagD,["val"],"Failed to append to list flag")
 
 
 
