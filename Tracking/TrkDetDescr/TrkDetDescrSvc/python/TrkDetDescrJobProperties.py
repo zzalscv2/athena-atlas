@@ -117,13 +117,6 @@ class MaterialValidation(JobProperty) :
     statusOn     = True
     allowedTypes = ['bool']
     StoredValue  = False
-    
-# switch to sLHC version
-class SLHC_Geometry(JobProperty) :
-    """ Boolean switch to a local material database """
-    statusOn     = True
-    allowedTypes = ['bool']
-    StoredValue  = False
 
 # switch to FastGeoModel geometry version
 class XMLFastCustomGeometry(JobProperty) :
@@ -759,7 +752,6 @@ jobproperties.TrkDetDescrJobProperties.add_JobProperty(MaterialValidation)
 jobproperties.TrkDetDescrJobProperties.add_JobProperty(MagneticFieldMode)
 jobproperties.TrkDetDescrJobProperties.add_JobProperty(MagneticFieldSynchronisation)
 jobproperties.TrkDetDescrJobProperties.add_JobProperty(MagneticFieldCallbackEnforced)
-jobproperties.TrkDetDescrJobProperties.add_JobProperty(SLHC_Geometry)
 jobproperties.TrkDetDescrJobProperties.add_JobProperty(XMLFastCustomGeometry)
 jobproperties.TrkDetDescrJobProperties.add_JobProperty(InDetTrackingGeometryBuilderName)
 jobproperties.TrkDetDescrJobProperties.add_JobProperty(ISF_FatrasCustomGeometry)
