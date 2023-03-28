@@ -6497,9 +6497,11 @@ HLT_e30_lhloose_nopix_lrtmedium_L1eEM26M:
   stepCounts:
     0: 8
     1: 8
+    2: 1
   stepFeatures:
     0: 8
     1: 8
+    2: 1
 HLT_e30_lhloose_nopix_lrtmedium_probe_g25_medium_L1EM20VH:
   eventCount: 0
   stepCounts:

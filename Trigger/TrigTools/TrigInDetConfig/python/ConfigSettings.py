@@ -306,6 +306,7 @@ class ConfigSettings_electronLRT( _ConfigSettingsBase ):
       self._Triplet_D0Max       = 300.
       self._TrackInitialD0Max   = 300.
       self._TrackZ0Max          = 500.
+      self._zedHalfWidth        = 225.
       self._keepTrackParameters = True
       self._doSeedRedundancyCheck = True
       self._nClustersMin        = 8
@@ -336,6 +337,7 @@ class ConfigSettings_muonLRT( _ConfigSettingsBase ):
       self._Triplet_D0Max       = 300.
       self._TrackInitialD0Max   = 300.
       self._TrackZ0Max          = 500.
+      self._zedHalfWidth        = 225.
       self._doSeedRedundancyCheck = True
       self._nClustersMin        = 8
       self._isLRT               = True
