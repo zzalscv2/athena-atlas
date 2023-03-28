@@ -15,6 +15,10 @@ def addTrigEDMSetToOutput(flags, helper: SlimmingHelper, edmSet: str, edmVersion
     if edmVersion is None:
         edmVersion = flags.Trigger.EDMVersion
 
+    # Do nothing if there is no trigger payload in the input file
+    if edmVersion == -1:
+        return
+
     edmList = getTriggerEDMList(edmSet, edmVersion)
     # This list is a mapping from container type to a list of required container names
     # This includes the Aux containers and their lists of aux variables.
