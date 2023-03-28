@@ -117,7 +117,6 @@ from TriggerJobOpts.TriggerHistSvcConfig import TriggerHistSvcConfig
 acc.merge(TriggerHistSvcConfig(flags))
 
 
-
 from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import generateMenuMT
 from TriggerJobOpts.TriggerConfig import triggerRunCfg
 menu = triggerRunCfg(flags, menu=generateMenuMT)
