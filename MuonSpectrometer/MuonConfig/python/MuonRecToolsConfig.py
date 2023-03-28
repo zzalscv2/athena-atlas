@@ -272,14 +272,32 @@ def MuonRefitToolCfg(flags, name="MuonRefitTool", **kwargs):
     result.setPrivateTools(CompFactory.Muon.MuonRefitTool(name, **kwargs))
     return result
 
-def  SimpleMMClusterBuilderToolCfg(flags, name = "SimpleMMClusterBuilderTool", **kwargs):
+def SimpleMMClusterBuilderToolCfg(flags, name = "SimpleMMClusterBuilderTool", **kwargs):
     result = ComponentAccumulator()
     the_tool = CompFactory.Muon.SimpleMMClusterBuilderTool(name,**kwargs)
+    result.setPrivateTools(the_tool)   
+    return result
+
+def UTPCMMClusterBuilderToolCfg(flags, name = "UTPCMMClusterBuilderTool", **kwargs):
+    result = ComponentAccumulator()
+    the_tool = CompFactory.Muon.UTPCMMClusterBuilderTool(name,**kwargs)
+    result.setPrivateTools(the_tool)   
+    return result
+
+def ClusterTimeProjectionMMClusterBuilderToolCfg(flags, name = "ClusterTimeProjectionMMClusterBuilderTool", **kwargs):
+    result = ComponentAccumulator()
+    the_tool = CompFactory.Muon.ClusterTimeProjectionMMClusterBuilderTool(name,**kwargs)
     result.setPrivateTools(the_tool)   
     return result
   
 def SimpleSTgcClusterBuilderToolCfg(flags, name = "SimpleSTgcClusterBuilderTool", **kwargs):
     result = ComponentAccumulator()
     the_tool = CompFactory.Muon.SimpleSTgcClusterBuilderTool(name,**kwargs)
+    result.setPrivateTools(the_tool) 
+    return result
+
+def CaruanaSTgcClusterBuilderToolCfg(flags, name = "CaruanaSTgcClusterBuilderTool", **kwargs):
+    result = ComponentAccumulator()
+    the_tool = CompFactory.Muon.CaruanaSTgcClusterBuilderTool(name,**kwargs)
     result.setPrivateTools(the_tool) 
     return result
