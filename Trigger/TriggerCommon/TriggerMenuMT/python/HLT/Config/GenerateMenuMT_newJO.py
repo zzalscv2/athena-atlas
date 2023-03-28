@@ -79,7 +79,13 @@ def generateMenuMT(flags):
     """         
     global _isCAMenu
     _isCAMenu = True
-    
+
+    # generate L1 menu
+    # This probably will go to TriggerConfig.triggerRunCfg
+    from TrigConfigSvc.TrigConfigSvcCfg import generateL1Menu, createL1PrescalesFileFromMenu
+    generateL1Menu(flags)
+    createL1PrescalesFileFromMenu(flags)
+
     # Generate the menu, stolen from HLT_standalone
     from TriggerMenuMT.HLT.Config.GenerateMenuMT import GenerateMenuMT
     menu = GenerateMenuMT() 
@@ -98,11 +104,6 @@ def generateMenuMT(flags):
     log.info("Making the HLT configuration tree")
     menuAcc=makeHLTTree(flags)
 
-    # generate L1 menu
-    # This probably will go to TriggerConfig.triggerRunCfg
-    from TrigConfigSvc.TrigConfigSvcCfg import generateL1Menu, createL1PrescalesFileFromMenu
-    generateL1Menu(flags)
-    createL1PrescalesFileFromMenu(flags)
     return menuAcc
     
 
