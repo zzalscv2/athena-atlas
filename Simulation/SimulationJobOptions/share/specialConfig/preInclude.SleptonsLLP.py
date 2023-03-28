@@ -40,11 +40,6 @@ def get_and_fix_PDGTABLE(replace):
 
 def load_files_for_sleptonLLP_scenario(simdict):
     pdgcodes = []
-
-    print 'load_files_for_sleptonLLP_scenario() simdict keys are '
-    for key in simdict.keys():
-        print ' ', key
-
     if "GMSBSlepton" in simdict:
         get_and_fix_PDGTABLE([
                 (2000011, eval(simdict.get("GMSBSlepton",'0')), '~e(R)', '-'),
@@ -64,16 +59,12 @@ def load_files_for_sleptonLLP_scenario(simdict):
                 (1000039, eval(simdict.get("GMSBGravitino",'0')), '~G', '0'),
                 ])
         pdgcodes += [1000039]
-
     if "coannihilationStau" in simdict:
-        print 'Fixing PDGTABLE for stau of mass' , simdict.get("coannihilationStau",'0')
-
         get_and_fix_PDGTABLE([
                 (2000015, eval(simdict.get("coannihilationStau",'0')), '~tau(R)', '-'),
                 (1000015, eval(simdict.get("coannihilationStau",'0')), '~tau(L)', '-'),
                 ])
         pdgcodes += [-2000015,2000015,-1000015,1000015]
-
     if "coannihilationSlepton" in simdict:
         get_and_fix_PDGTABLE([
             (2000011, eval(simdict.get("coannihilationSlepton", '0')), '~e(R)', '-'),
@@ -82,13 +73,11 @@ def load_files_for_sleptonLLP_scenario(simdict):
             (1000013, eval(simdict.get("coannihilationSlepton", '0')), '~mu(L)', '-'),
         ])
         pdgcodes += [-2000011, 2000011, -2000013, 2000013, -1000011, 1000011, -1000013, 1000013]
-
     if "coannihilationNeutralino" in simdict:
         get_and_fix_PDGTABLE([
                 (1000022, eval(simdict.get("coannihilationNeutralino", '0')), '~chi(0,1)', '0'),
                 ])
         pdgcodes += [1000022]
-
 
     from ExtraParticles.PDGHelpers import updateExtraParticleWhiteList
     updateExtraParticleWhiteList('G4particle_whitelist_ExtraParticles.txt', pdgcodes)
@@ -115,10 +104,6 @@ except:
 
 load_files_for_sleptonLLP_scenario(simdict)
 
-MassStau = eval(simdict.get("coannihilationStau",'0'))
-MassNeutralino = eval(simdict.get("coannihilationNeutralino",'0'))
-
-
 if doG4SimConfig:
     localPhysicsOptions = ["GauginosPhysicsTool","AllSleptonsPhysicsTool"]
     # Slepton decays from SleptonsConfig
@@ -131,27 +116,31 @@ if doG4SimConfig:
         localPhysicsOptions += ["STauRPlusToTauGravitino","STauLPlusToTauGravitino"]
         localPhysicsOptions += ["STauRMinusToTauGravitino","STauLMinusToTauGravitino"]
     if "coannihilationStau" in simdict:
-        if MassStau > MassNeutralino + 1776: ## Check that there is energy to decay to tau.
+        MassStau = eval(simdict.get("coannihilationStau",'0'))
+        MassNeutralino = eval(simdict.get("coannihilationNeutralino",'0'))
+        MassTau = 1776. # in MeV
+        if MassStau > MassNeutralino + MassTau: ## Check that there is energy to decay to tau.
             localPhysicsOptions += ["STauRPlusToTauNeutralino", "STauLPlusToTauNeutralino"]
             localPhysicsOptions += ["STauRMinusToTauNeutralino", "STauLMinusToTauNeutralino"]
         else: ## Do off shell decay for tau.
-            if (abs(MassStau-MassNeutralino - 300) > .05  or abs(MassStau-MassNeutralino - 1700) > 0.05):
+            # FIXME Dislike hard-coded numbers here
+            if (abs(MassStau-MassNeutralino - 300) > .05  and abs(MassStau-MassNeutralino - 1700) > 0.05):
                 print 'Warning: Branching ratios are wrong. Mass splitting of stau neutralino %s currently has no available values.' % (MassStau - MassNeutralino)
-            localPhysicsOptions += ["STauRMinusToPionMinusNeutralino",  "STauRPlusToPionPlusNeutralino"]
-            localPhysicsOptions += ["STauLMinusToPionMinusNeutralino",  "STauLPlusToPionPlusNeutralino"]
-            localPhysicsOptions += ["STauRMinusToRhoMinusNeutralino",   "STauRPlusToRhoPlusNeutralino"]
-            localPhysicsOptions += ["STauLMinusToRhoMinusNeutralino",   "STauLPlusToRhoPlusNeutralino"]
-            localPhysicsOptions += ["STauRMinusToEMinusNeutralino",     "STauRPlusToEPlusNeutralino"]
-            localPhysicsOptions += ["STauLMinusToEMinusNeutralino",     "STauLPlusToEPlusNeutralino"]
-            localPhysicsOptions += ["STauRMinusToMuMinusNeutralino",    "STauRPlusToMuPlusNeutralino"]
-            localPhysicsOptions += ["STauLMinusToMuMinusNeutralino",    "STauLPlusToMuPlusNeutralino"]
-            localPhysicsOptions += ["STauRMinusToa1MinusNeutralino",    "STauRPlusToa1PlusNeutralino"]
-            localPhysicsOptions += ["STauLMinusToa1MinusNeutralino",    "STauLPlusToa1PlusNeutralino"]
+            localPhysicsOptions += ["STauRMinusToPionMinusNeutralino", "STauRPlusToPionPlusNeutralino"]
+            localPhysicsOptions += ["STauLMinusToPionMinusNeutralino", "STauLPlusToPionPlusNeutralino"]
+            localPhysicsOptions += ["STauRMinusToRhoMinusNeutralino", "STauRPlusToRhoPlusNeutralino"]
+            localPhysicsOptions += ["STauLMinusToRhoMinusNeutralino", "STauLPlusToRhoPlusNeutralino"]
+            localPhysicsOptions += ["STauRMinusToEMinusNeutralino", "STauRPlusToEPlusNeutralino"]
+            localPhysicsOptions += ["STauLMinusToEMinusNeutralino", "STauLPlusToEPlusNeutralino"]
+            localPhysicsOptions += ["STauRMinusToMuMinusNeutralino", "STauRPlusToMuPlusNeutralino"]
+            localPhysicsOptions += ["STauLMinusToMuMinusNeutralino", "STauLPlusToMuPlusNeutralino"]
+            localPhysicsOptions += ["STauRMinusToa1MinusNeutralino", "STauRPlusToa1PlusNeutralino"]
+            localPhysicsOptions += ["STauLMinusToa1MinusNeutralino", "STauLPlusToa1PlusNeutralino"]
     if "coannihilationSlepton" in simdict:
-        localPhysicsOptions += ["SElectronRPlusToTauNeutralino", "SElectronLPlusToTauNeutralino"]
-        localPhysicsOptions += ["SElectronRMinusToTauNeutralino", "SElectronMinusToTauNeutralino"]
-        localPhysicsOptions += ["SMuonRPlusToTauNeutralino", "SMuonLPlusToTauNeutralino"]
-        localPhysicsOptions += ["SMuonRMinusToTauNeutralino", "SMuonLMinusToTauNeutralino"]
+        localPhysicsOptions += ["SElectronRPlusToElectronNeutralino", "SElectronLPlusToElectronNeutralino"]
+        localPhysicsOptions += ["SElectronRMinusToElectronNeutralino", "SElectronLMinusToElectronNeutralino"]
+        localPhysicsOptions += ["SMuonRPlusToMuonNeutralino", "SMuonLPlusToMuonNeutralino"]
+        localPhysicsOptions += ["SMuonRMinusToMuonNeutralino", "SMuonLMinusToMuonNeutralino"]
 
     simFlags.PhysicsOptions += localPhysicsOptions
 del doG4SimConfig, simdict
