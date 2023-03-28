@@ -1,14 +1,11 @@
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.CfgGetter import addTool
-
-#######################################################################################################################
-#Gravitino Section.
-#######################################################################################################################
-
 addTool("Sleptons.SleptonsConfig.getSleptonsPhysicsTool"          , "SleptonsPhysicsTool" )
-addTool("Sleptons.SleptonsConfig.getSleptonsRPhysicsTool"         , "SleptonsRPhysicsTool" )
 addTool("Sleptons.SleptonsConfig.getAllSleptonsPhysicsTool"         , "AllSleptonsPhysicsTool" )
+#####################################################
+#Gravitino Section.
+#####################################################
 addTool("Sleptons.SleptonsConfig.getSElectronRPlusToElectronGravitino"         , "SElectronRPlusToElectronGravitino" )
 addTool("Sleptons.SleptonsConfig.getSElectronRMinusToElectronGravitino"        , "SElectronRMinusToElectronGravitino" )
 addTool("Sleptons.SleptonsConfig.getSMuonRPlusToMuonGravitino"       , "SMuonRPlusToMuonGravitino" )
@@ -21,11 +18,10 @@ addTool("Sleptons.SleptonsConfig.getSMuonLPlusToMuonGravitino"        , "SMuonLP
 addTool("Sleptons.SleptonsConfig.getSMuonLMinusToMuonGravitino"       , "SMuonLMinusToMuonGravitino" )
 addTool("Sleptons.SleptonsConfig.getSTauRPlusToTauGravitino"       , "STauRPlusToTauGravitino" )
 addTool("Sleptons.SleptonsConfig.getSTauRMinusToTauGravitino"      , "STauRMinusToTauGravitino" )
-
-#######################################################################################################################
+#####################################################
 #On shell Tau+Neutralino
 #Needed for connanihlation model.
-#######################################################################################################################
+#####################################################
 addTool("Sleptons.SleptonsConfig.getSElectronRPlusToElectronNeutralino"         , "SElectronRPlusToElectronNeutralino" )
 addTool("Sleptons.SleptonsConfig.getSElectronRMinusToElectronNeutralino"        , "SElectronRMinusToElectronNeutralino" )
 addTool("Sleptons.SleptonsConfig.getSMuonRPlusToMuonNeutralino"       , "SMuonRPlusToMuonNeutralino" )
@@ -39,10 +35,10 @@ addTool("Sleptons.SleptonsConfig.getSMuonLMinusToMuonNeutralino"       , "SMuonL
 addTool("Sleptons.SleptonsConfig.getSTauRPlusToTauNeutralino"       , "STauRPlusToTauNeutralino" )
 addTool("Sleptons.SleptonsConfig.getSTauRMinusToTauNeutralino"      , "STauRMinusToTauNeutralino" )
 
-#######################################################################################################################
+#####################################################
 #Off shell Tau+Neutralino
 #
-#######################################################################################################################
+#####################################################
 addTool("Sleptons.SleptonsConfig.getSTauRMinusToPionMinusNeutralino"        , "STauRMinusToPionMinusNeutralino" )
 addTool("Sleptons.SleptonsConfig.getSTauRPlusToPionPlusNeutralino"          , "STauRPlusToPionPlusNeutralino" )
 addTool("Sleptons.SleptonsConfig.getSTauLMinusToPionMinusNeutralino"        , "STauLMinusToPionMinusNeutralino" )
