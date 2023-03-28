@@ -125,9 +125,11 @@ def AthenaMPCfg(flags):
         if flags.Concurrency.NumThreads > 0:
             if mpevtloop.IsPileup:
                 raise Exception('Running pileup digitization in mixed MP+MT currently not supported')
-            queue_consumer = CompFactory.SharedEvtQueueConsumer(UseSharedWriter=use_shared_writer,
-                                                                EventsBeforeFork=mpevtloop.EventsBeforeFork,
-                                                                Debug=debug_worker)
+            from AthenaConfiguration.MainServicesConfig import AthenaMtesEventLoopMgrCfg
+            result.merge(AthenaMtesEventLoopMgrCfg(flags))
+            queue_consumer = CompFactory.SharedHiveEvtQueueConsumer(UseSharedWriter=use_shared_writer,
+                                                                    EventsBeforeFork=mpevtloop.EventsBeforeFork,
+                                                                    Debug=debug_worker)
         else:
             queue_consumer = CompFactory.SharedEvtQueueConsumer(UseSharedReader=use_shared_reader,
                                                                 UseSharedWriter=use_shared_writer,
