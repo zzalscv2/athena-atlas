@@ -257,7 +257,7 @@ ISF::InputConverter::getSelectedParticles(HepMC::GenEvent& evnt, bool legacyOrde
 
 /** get all generator particles which pass filters */
 ISF::ISFParticle*
-ISF::InputConverter::convertParticle(HepMC::GenParticlePtr genPartPtr, EBC_EVCOLL kindOfCollection) const {
+ISF::InputConverter::convertParticle(const HepMC::GenParticlePtr& genPartPtr, EBC_EVCOLL kindOfCollection) const {
   if (!genPartPtr) { return nullptr; }
 
   auto  pVertex = genPartPtr->production_vertex();
@@ -341,7 +341,7 @@ ISF::InputConverter::convertParticle(HepMC::GenParticlePtr genPartPtr, EBC_EVCOL
 /** get right GenParticle mass */
 #ifdef HEPMC3
 double
-ISF::InputConverter::getParticleMass(HepMC::ConstGenParticlePtr part) const{
+ISF::InputConverter::getParticleMass(const HepMC::ConstGenParticlePtr& part) const{
   // default value: generated particle mass
   double mass = part->generated_mass();
   ATH_MSG_VERBOSE("part->generated_mass, mass="<<mass);
@@ -392,7 +392,7 @@ ISF::InputConverter::getParticleMass(const HepMC::GenParticle &part) const
 /** check if the given particle passes all filters */
 #ifdef HEPMC3
 bool
-ISF::InputConverter::passesFilters(HepMC::ConstGenParticlePtr part) const
+ISF::InputConverter::passesFilters(const HepMC::ConstGenParticlePtr& part) const
 {
   // TODO: implement this as a std::find_if with a lambda function
   for ( const auto& filter : m_genParticleFilters ) {
@@ -517,7 +517,7 @@ double SetProperTimeFromDetectorFrameDecayLength(G4PrimaryParticle& g4particle,c
 
 //________________________________________________________________________
 #ifdef HEPMC3
-G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(HepMC::GenParticlePtr genpart) const{
+G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(const HepMC::GenParticlePtr& genpart) const{
  ATH_MSG_VERBOSE("Creating G4PrimaryParticle from GenParticle.");
 
   const G4ParticleDefinition *particleDefinition = this->getG4ParticleDefinition(genpart->pdg_id());

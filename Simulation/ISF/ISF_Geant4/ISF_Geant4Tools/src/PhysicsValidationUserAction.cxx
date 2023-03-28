@@ -234,23 +234,23 @@ namespace G4UA{
 	
 	VTrackInformation * trackInfo= static_cast<VTrackInformation*>(track->GetUserInformation());
 	HepMC::GenParticlePtr genpart= trackInfo ? trackInfo->GetHepMCParticle() : nullptr;
-	HepMC::GenVertexPtr vtx = genpart ? genpart->production_vertex() : 0;
+	HepMC::GenVertexPtr vtx = genpart ? genpart->production_vertex() : nullptr;
 	m_gen = genpart? 0 : -1;
 	
 	if (genpart)  { // mc truth known
 	  while (genpart && vtx ) {
 	    int pdgID=genpart->pdg_id();
 #ifdef HEPMC3
-	    HepMC::GenParticlePtr  genmom = vtx->particles_in().size()>0 ? vtx->particles_in().front() : nullptr;
+	    const HepMC::GenParticlePtr  genmom = vtx->particles_in().size()>0 ? vtx->particles_in().front() : nullptr;
 	    if ( genmom && pdgID!=genmom->pdg_id() ) m_gen++;
 	    else if (vtx->particles_out().size()>0 && genpart!=vtx->particles_out().front()) m_gen++;
 
 #else
-	    HepMC::GenParticlePtr genmom = vtx->particles_in_size()>0 ? *(vtx->particles_in_const_begin()) : 0;
+	    HepMC::GenParticlePtr genmom = vtx->particles_in_size()>0 ? *(vtx->particles_in_const_begin()) : nullptr;
 	    if ( genmom && pdgID!=genmom->pdg_id() ) m_gen++;
 	    else if (vtx->particles_out_size()>0 && genpart!=*(vtx->particles_out_const_begin())) m_gen++;
 #endif
-	    vtx = genmom ? genmom->production_vertex() : 0;
+	    vtx = genmom ? genmom->production_vertex() : nullptr;
 	    genpart = genmom;
 	  }
 	} else {

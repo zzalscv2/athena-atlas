@@ -80,7 +80,7 @@ namespace ISF {
     const G4ParticleDefinition* getG4ParticleDefinition(int pdgcode) const;
 
 #ifdef HEPMC3
-    G4PrimaryParticle* getG4PrimaryParticle(HepMC::GenParticlePtr gp) const;
+    G4PrimaryParticle* getG4PrimaryParticle(const HepMC::GenParticlePtr& gp) const;
 #else
     G4PrimaryParticle* getG4PrimaryParticle(HepMC::GenParticle& gp) const;
 #endif
@@ -94,7 +94,7 @@ namespace ISF {
 
     /** get right GenParticle mass */
 #ifdef HEPMC3
-    double getParticleMass(HepMC::ConstGenParticlePtr p) const;
+    double getParticleMass(const HepMC::ConstGenParticlePtr& p) const;
 #else
     double getParticleMass(const HepMC::GenParticle& p) const;
 #endif
@@ -104,13 +104,13 @@ namespace ISF {
 
     /** check if the given particle passes all filters */
 #ifdef HEPMC3
-    bool passesFilters(HepMC::ConstGenParticlePtr p) const;
+    bool passesFilters(const HepMC::ConstGenParticlePtr& p) const;
 #else
     bool passesFilters(const HepMC::GenParticle& p) const;
 #endif
 
     /** convert GenParticle to ISFParticle */
-    ISF::ISFParticle* convertParticle(HepMC::GenParticlePtr genPartPtr, EBC_EVCOLL kindOfCollection=EBC_MAINEVCOLL) const;
+    ISF::ISFParticle* convertParticle(const HepMC::GenParticlePtr& genPartPtr, EBC_EVCOLL kindOfCollection=EBC_MAINEVCOLL) const;
 
     /** ParticlePropertyService and ParticleDataTable */
     ServiceHandle<IPartPropSvc>           m_particlePropSvc;          //!< particle properties svc to retrieve PDT
