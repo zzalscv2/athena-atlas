@@ -70,6 +70,7 @@ StatusCode jFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
     ATH_CHECK(jTowersContainer.record(std::make_unique<xAOD::jFexTowerContainer>(), std::make_unique<xAOD::jFexTowerAuxContainer>()));
     ATH_MSG_DEBUG("Recorded jFexTowerContainer with key " << jTowersContainer.key());
     
+    
 
     // Iterate over ROBFragments to decode
     for (const ROBF* rob : vrobf) {
@@ -86,7 +87,6 @@ StatusCode jFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
         
         const auto dataArray = CxxUtils::span{rob->rod_data(), rob->rod_ndata()};
         std::vector<uint32_t> vec_words(dataArray.begin(),dataArray.end());
-
         
         // jFEX to ROD trailer position
         unsigned int trailers_pos = rob->rod_ndata();
@@ -95,6 +95,11 @@ StatusCode jFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
         bool READ_WORDS = true;
         while(READ_WORDS){
             
+            if( trailers_pos < jBits::jFEX2ROD_WORDS ){
+                ATH_MSG_WARNING("There are not enough words ("<< trailers_pos <<") for the jFEX to ROD trailer decoder. Expected at least " << jBits::jFEX2ROD_WORDS<<". Skipping this FPGA(?)");
+                READ_WORDS = false;
+                continue;
+            }
             const auto [payload, jfex, fpga]                      = jFEXtoRODTrailer  ( vec_words.at(trailers_pos-2), vec_words.at(trailers_pos-1) );
             
             if(payload % jBits::DATA_BLOCKS != 0){
@@ -117,7 +122,7 @@ StatusCode jFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
                ATH_MSG_ERROR(C.B_RED<<"Block size error in fragment 0x"<< std::hex << rob->rob_source_id() << std::dec<<". Words available: " << trailers_pos << ". Number of words wanted to decode: " << Max_iter <<C.END);
                return StatusCode::FAILURE;
             }
-                        
+            
             for (unsigned int iblock = 0; iblock < Max_iter; iblock++){
                 const auto [channel, saturation] = BulkStreamTrailer(vec_words.at(wordIndex-1),vec_words.at(wordIndex-2));
                 
