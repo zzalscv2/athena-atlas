@@ -117,8 +117,8 @@
 	<hist1D name="localCovXX_endcap" plotopts="logy" tests="KS" type="TH1F"/>
         <hist1D name="sizeX_barrel" plotopts="logy" tests="KS" type="TH1F"/>
         <hist1D name="sizeX_endcap" plotopts="logy" tests="KS" type="TH1F"/>
-        <hist1D name="hitsInThirdTimeBin_barrel" plotopts="" tests="KS" type="TH1F"/>
-        <hist1D name="hitsInThirdTimeBin_endcap" plotopts="" tests="KS" type="TH1F"/>
+        <hist1D name="hitsInThirdTimeBin_barrel" plotopts="logy" tests="KS" type="TH1F"/>
+        <hist1D name="hitsInThirdTimeBin_endcap" plotopts="logy" tests="KS" type="TH1F"/>
       </TDirectory>
       <TDirectory name="ITkPixelSpacePoints">
 	<hist2D name="global_xy_barrel" plotopts="box" tests="KS" type="TH2F"/>
