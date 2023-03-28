@@ -22,12 +22,11 @@ Sim_tf.py \
     --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --simulator 'FullG4MT' \
     --postInclude 'PyJobTransforms.UseFrontier' \
-    --preInclude 'EVNTtoHITS:Campaigns.MC23aSimulationMultipleIoV' \
+    --preInclude 'EVNTtoHITS:Campaigns.MC23SimulationSingleIoV' \
     --geometryVersion 'default:ATLAS-R3S-2021-03-01-00' \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/EVNT/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8453/EVNT.29328277._003902.pool.root.1" \
     --outputHITSFile "test.CA.HITS.pool.root" \
     --maxEvents 50 \
-    --jobNumber 1 \
     --postExec 'EVNTtoHITS:with open("ConfigSimCA.pkl", "wb") as f: cfg.store(f)' \
     --imf False
 
@@ -43,12 +42,11 @@ Sim_tf.py \
     --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --simulator 'FullG4MT' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-    --preInclude 'EVNTtoHITS:Campaigns/MC23aSimulationMultipleIoV.py' \
+    --preInclude 'EVNTtoHITS:Campaigns/MC23SimulationSingleIoV.py' \
     --geometryVersion 'default:ATLAS-R3S-2021-03-01-00' \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/EVNT/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8453/EVNT.29328277._003902.pool.root.1" \
     --outputHITSFile "test.CA.HITS.pool.root" \
     --maxEvents 50 \
-    --jobNumber 1 \
     --imf False \
     --athenaopts 'EVNTtoHITS:"--config-only=ConfigSimCG.pkl"'
 
@@ -57,12 +55,11 @@ Sim_tf.py \
     --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --simulator 'FullG4MT' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-    --preInclude 'EVNTtoHITS:Campaigns/MC23aSimulationMultipleIoV.py' \
+    --preInclude 'EVNTtoHITS:Campaigns/MC23SimulationSingleIoV.py' \
     --geometryVersion 'default:ATLAS-R3S-2021-03-01-00' \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/EVNT/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8453/EVNT.29328277._003902.pool.root.1" \
     --outputHITSFile "test.CG.HITS.pool.root" \
     --maxEvents 50 \
-    --jobNumber 1 \
     --imf False
 
 rc2=$?
