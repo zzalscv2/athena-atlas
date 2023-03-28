@@ -25,6 +25,8 @@ def fastTrackingSequence(flags, variant=''):
     roiTool.RoisWriteHandleKey = TrigEgammaKeys.fastTrackingRoIContainer
     roiTool.RoIEtaWidth = IDTrigConfig.etaHalfWidth
     roiTool.RoIPhiWidth = IDTrigConfig.phiHalfWidth
+    if IDTrigConfig.zedHalfWidth > 0 :
+        roiTool.RoIZedWidth = IDTrigConfig.zedHalfWidth
     fastTrackingViewsMaker.RoITool = roiTool
     fastTrackingViewsMaker.InViewRoIs = RoIs
     fastTrackingViewsMaker.Views = "EMFastTrackingViews"+variant

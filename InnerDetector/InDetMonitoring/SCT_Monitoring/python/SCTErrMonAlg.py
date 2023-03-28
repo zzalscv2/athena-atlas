@@ -9,33 +9,33 @@
 '''
 
 
-def SCTErrMonAlgConfig(inputFlags):
+def SCTErrMonAlgConfig(flags):
 
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     result = ComponentAccumulator()
 
     from AthenaMonitoring import AthMonitorCfgHelper
-    helper = AthMonitorCfgHelper(inputFlags, 'SCTErrMonCfg')
+    helper = AthMonitorCfgHelper(flags, 'SCTErrMonCfg')
 
     from AthenaConfiguration.ComponentFactory import CompFactory
     myMonAlg = helper.addAlgorithm(CompFactory.SCTErrMonAlg, 'SCTErrMonAlg')
     myMonAlg.TriggerChain = ""
 
     from SCT_ConditionsTools.SCT_ConditionsToolsConfig import SCT_ConditionsSummaryToolCfg
-    myMonAlg.SCT_ConditionsSummaryTool = result.popToolsAndMerge( SCT_ConditionsSummaryToolCfg(inputFlags) )
+    myMonAlg.SCT_ConditionsSummaryTool = result.popToolsAndMerge( SCT_ConditionsSummaryToolCfg(flags) )
 
     # Pass the InDet.useDCS flag to the algorithm
-    myMonAlg.UseDCS = inputFlags.InDet.useDCS
+    myMonAlg.UseDCS = flags.InDet.useDCS
 
     ## The following does not work when running Reco_tf.py
     ## because it configures condition algorithms
     ## and they conflict with ones configured in the old framework.
     # from SCT_ConditionsTools.SCT_ConditionsToolsConfig import SCT_ByteStreamErrorsToolCfg, SCT_ConfigurationConditionsToolCfg
-    # myMonAlg.conditionsTool = result.popToolsAndMerge(SCT_ConfigurationConditionsToolCfg(inputFlags))
-    # myMonAlg.SCT_ByteStreamErrorsTool = result.popToolsAndMerge(SCT_ByteStreamErrorsToolCfg(inputFlags))
-    # if inputFlags.InDet.useDCS:
+    # myMonAlg.conditionsTool = result.popToolsAndMerge(SCT_ConfigurationConditionsToolCfg(flags))
+    # myMonAlg.SCT_ByteStreamErrorsTool = result.popToolsAndMerge(SCT_ByteStreamErrorsToolCfg(flags))
+    # if flags.InDet.useDCS:
     #     from SCT_ConditionsTools.SCT_ConditionsToolsConfig import SCT_DCSConditionsCfg
-    #     myMonAlg.SCT_DCSConditionsTool = result.popToolsAndMerge(SCT_DCSConditionsCfg(inputFlags))
+    #     myMonAlg.SCT_DCSConditionsTool = result.popToolsAndMerge(SCT_DCSConditionsCfg(flags))
     # else:
     #     myMonAlg.UseDCS = False
 
@@ -43,12 +43,10 @@ def SCTErrMonAlgConfig(inputFlags):
     # There seems no new configureation corresponding to
     # from AthenaMonitoring.FilledBunchFilterTool import GetFilledBunchFilterTool
 
-
-    from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
-    myMonAlg.doOnlineMon = athenaCommonFlags.isOnline
+    myMonAlg.doOnlineMon = flags.Common.isOnline
 
     from LumiBlockComps.BunchCrossingCondAlgConfig import BunchCrossingCondAlgCfg
-    result.merge(BunchCrossingCondAlgCfg(inputFlags))
+    result.merge(BunchCrossingCondAlgCfg(flags))
 
     myMonGroup = helper.addGroup(myMonAlg, "SCTErrMonitor", "SCT/")
 

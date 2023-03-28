@@ -148,6 +148,8 @@ namespace met {
     declareProperty("JetTrkPtMuPt",       m_jetTrkPtMuPt = 0.8                       );
     declareProperty("muIDPTJetPtRatioMuOlap", m_muIDPTJetPtRatioMuOlap = 2.0         );
 
+    declareProperty("MissingObjWarnThreshold", m_missObjWarningPtThreshold = 7.0e3   );
+
     declareProperty("TrackSelectorTool",  m_trkseltool                               );
   }
 
@@ -228,6 +230,7 @@ namespace met {
       ATH_MSG_INFO("Applying additional jet rejection criterium in MET calculation: " << m_jetRejectionDec);
     }
 
+    ATH_MSG_INFO("Suppressing warnings of objects missing in METAssociationMap for objects with pT < " << m_missObjWarningPtThreshold/1e3 << " GeV.");
 
     return StatusCode::SUCCESS;
   }
@@ -368,8 +371,35 @@ namespace met {
         if(!originalInputs) { orig = *acc_originalObject(*obj); }
         std::vector<const xAOD::MissingETAssociation*> assocs = xAOD::MissingETComposition::getAssociations(map,orig);
         if(assocs.empty()) {
-          ATH_MSG_WARNING("Object is not in association map. Did you make a deep copy but fail to set the \"originalObjectLinks\" decoration?");
-          ATH_MSG_WARNING("If not, Please apply xAOD::setOriginalObjectLinks() from xAODBase/IParticleHelpers.h");
+          std::string message = "Object is not in association map. Did you make a deep copy but fail to set the \"originalObjectLinks\" decoration? "
+                                "If not, Please apply xAOD::setOriginalObjectLinks() from xAODBase/IParticleHelpers.h";
+          // Avoid warnings for leptons with pT below threshold for association map
+          if (orig->pt()>m_missObjWarningPtThreshold) {
+              ATH_MSG_WARNING(message);
+          } else {
+              ATH_MSG_DEBUG(message);
+          }
+          // if this is an uncalibrated electron below the threshold, then we put it into the soft term
+          if(orig->type()==xAOD::Type::Electron){
+            iplink_t objLink;
+            if(collectionSgKey == 0) {
+              const xAOD::IParticleContainer* ipc = static_cast<const xAOD::IParticleContainer*>(obj->container());
+              objLink = iplink_t(*ipc, obj->index());
+            } else {
+              objLink = iplink_t(collectionSgKey, obj->index());
+            }
+            uniqueLinks.emplace_back( objLink );
+            uniqueWeights.emplace_back( 0. );
+            message = "Missing an electron from the MET map. Included as a track in the soft term. pT: " + std::to_string(obj->pt()/1e3) + " GeV";
+            if (orig->pt()>m_missObjWarningPtThreshold) {
+                ATH_MSG_WARNING(message);
+            } else {
+                ATH_MSG_DEBUG(message);
+            }
+            continue;
+          } else {
+            ATH_MSG_ERROR("Missing an object: " << orig->type() << " pT: " << obj->pt()/1e3 << " GeV, may be duplicated in the soft term.");
+          }
         }
 
         // If the object has already been selected and processed, ignore it.

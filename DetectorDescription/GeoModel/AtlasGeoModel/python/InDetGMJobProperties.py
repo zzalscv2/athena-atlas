@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 #
 # InDet GeoModel initialization
@@ -39,11 +39,6 @@ class IBLLayout(JobProperty):
      allowedValues=["planar","3D","noIBL","UNDEFINED"]
      StoredValue  = "UNDEFINED"
 
-class isSLHC(JobProperty):
-     """ SLHC geometry"""
-     statusOn     = True
-     allowedTypes = ['bool']
-     StoredValue  = False
 
 class isDBM(JobProperty):
      """ DBM monitoring system defined or not"""
@@ -73,7 +68,6 @@ class InDetGeometryFlags_JobProperties(JobPropertyContainer):
         dbGeomCursor.ConnectAndBrowseGeoDB()
         params = PixelGeoDB.InitializeGeometryParameters(dbGeomCursor)
 
-        self.isSLHC.set_Value_and_Lock(params["SLHC"] )
         self.isIBL.set_Value_and_Lock(params["IBL"] )
         self.isDBM.set_Value_and_Lock(params["DBM"])
         self.IBLLayout.set_Value_and_Lock(params["IBLlayout"])
@@ -81,8 +75,7 @@ class InDetGeometryFlags_JobProperties(JobPropertyContainer):
         self.GeoLayout.set_Value_and_Lock(params["Layout"])
 
     def reset(self,geoTagName="none"):
-        
-        self.isSLHC.unlock()
+
         self.isIBL.unlock()
         self.isDBM.unlock()
         self.IBLLayout.unlock()
@@ -97,7 +90,6 @@ class InDetGeometryFlags_JobProperties(JobPropertyContainer):
         Logging.log.info("Layout      = %s", self.GeoLayout())
         Logging.log.info("DBM         = %s", self.isDBM())
 
-        Logging.log.info("SLHC flag : %s", self.isSLHC())
         Logging.log.info("IBL flag   : %s", self.isIBL())
         Logging.log.info("IBL layout : %s", self.IBLLayout())
         Logging.log.info("Dynamic alignment : %s", self.useDynamicAlignFolders())
@@ -108,7 +100,6 @@ jobproperties.InDetGeometryFlags_JobProperties.add_JobProperty(GeoVersionName)
 jobproperties.InDetGeometryFlags_JobProperties.add_JobProperty(GeoLayout)
 jobproperties.InDetGeometryFlags_JobProperties.add_JobProperty(isIBL)
 jobproperties.InDetGeometryFlags_JobProperties.add_JobProperty(IBLLayout)
-jobproperties.InDetGeometryFlags_JobProperties.add_JobProperty(isSLHC)
 jobproperties.InDetGeometryFlags_JobProperties.add_JobProperty(isDBM)
 jobproperties.InDetGeometryFlags_JobProperties.add_JobProperty(useDynamicAlignFolders)
 

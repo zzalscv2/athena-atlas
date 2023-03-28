@@ -187,28 +187,30 @@ class CFSequenceCA(CFSequence):
     """Class to describe the flow of decisions through ChainStep + filter with their connections (input, output)
     A Filter can have more than one input/output if used in different chains, so this class stores and manages all of them (when doing the connect)
     """
-    def __init__(self, ChainStep, FilterAlg):
-        log.debug(" *** Create CFSequence %s with Filter %s", ChainStep.name, FilterAlg.Alg.getName())
+    def __init__(self, chainStep, filterAlg):
+        log.debug(" *** Create CFSequence %s with Filter %s", chainStep.name, filterAlg.Alg.getName())
         self.ca = ComponentAccumulator()
-        self.empty= ChainStep.isEmpty
+        self.empty= chainStep.isEmpty
         #empty step: add the PassSequence, one instance only is appended to the tree
-        seqAndWithFilter = FilterAlg.Alg if self.empty else seqAND(ChainStep.name)        
+        seqAndWithFilter = filterAlg.Alg if self.empty else seqAND(chainStep.name)        
         self.ca.addSequence(seqAndWithFilter)
         self.seq = seqAndWithFilter
         if not self.empty: 
-            self.ca.addEventAlgo(FilterAlg.Alg, sequenceName=seqAndWithFilter.getName())
-            stepReco = parOR(ChainStep.name + CFNaming.RECO_POSTFIX)  # all reco algorithms from all the sequences in a parallel sequence                            
-            self.ca.addSequence(stepReco, parentName=seqAndWithFilter.getName())
-            log.info("created parOR %s inside seqAND %s  ", stepReco.getName(), seqAndWithFilter.getName())
-            for menuseq in ChainStep.sequences:
-                self.ca.merge(menuseq.ca, sequenceName=stepReco.getName())
-                if menuseq.globalRecoCA:
-                    self.ca.merge(menuseq.globalRecoCA)
-
-        CFSequence.__init__(self, ChainStep,FilterAlg)
+            self.ca.addEventAlgo(filterAlg.Alg, sequenceName=seqAndWithFilter.getName())
+            self.stepReco = parOR(chainStep.name + CFNaming.RECO_POSTFIX)  # all reco algorithms from all the sequences in a parallel sequence                            
+            self.ca.addSequence(self.stepReco, parentName=seqAndWithFilter.getName())
+            log.info("created parOR %s inside seqAND %s  ", self.stepReco.getName(), seqAndWithFilter.getName())
+            self.mergeStepSequences(chainStep)
+            
+        CFSequence.__init__(self, chainStep, filterAlg)
         if self.combo is not None:             
             self.ca.addEventAlgo(self.step.combo.Alg, sequenceName=seqAndWithFilter.getName())  
 
+    def mergeStepSequences(self, chainStep):
+        for menuseq in chainStep.sequences:
+            self.ca.merge(menuseq.ca, sequenceName=self.stepReco.getName())
+            if menuseq.globalRecoCA:
+                self.ca.merge(menuseq.globalRecoCA)
 
     @lru_cache(None)
     def findComboHypoAlg(self):

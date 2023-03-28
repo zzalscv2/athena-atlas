@@ -73,15 +73,33 @@ StatusCode ViewCreatorCentredOnClusterROITool::attachROILinks(TrigCompositeUtils
       const double rphim = rphi - m_roiPhiWidth;
 
       ATH_MSG_DEBUG( "  New ROI for xAOD::TrigEMCluster ET="<< c->et() 
-        << " eta="<< c->eta() << " +- " << m_roiEtaWidth 
-        << " phi="<< c->phi() << " +- " << m_roiPhiWidth );
+		     << " eta="<< c->eta() << " +- " << m_roiEtaWidth 
+		     << " phi="<< c->phi() << " +- " << m_roiPhiWidth );
 
-      std::unique_ptr<TrigRoiDescriptor> roi = std::make_unique<TrigRoiDescriptor>(reta, retam, retap, rphi, rphim, rphip);
-      if (m_allowMultipleClusters) {
-        roisWriteHandle->back()->push_back( roi.release() ); // Note: manageConstituents=true, superRoI will handle deletion of roi
-      } else {
-        roisWriteHandle->push_back( roi.release() ); // Note: roi now owned by roisWriteHandle
+      if ( m_roiZedWidth==0 ) { 
+	std::unique_ptr<TrigRoiDescriptor> roi = std::make_unique<TrigRoiDescriptor>(reta, retam, retap, rphi, rphim, rphip);
+	if (m_allowMultipleClusters) {
+	  roisWriteHandle->back()->push_back( roi.release() ); // Note: manageConstituents=true, superRoI will handle deletion of roi
+	} else {
+	  roisWriteHandle->push_back( roi.release() ); // Note: roi now owned by roisWriteHandle
+	}
       }
+      else {
+	/// should really use some z position from somewhere, since we might be using this 
+	/// function after some tracking, so to always assume that z=0 is maybe not ideal 
+	const double rzed  = 0;
+	const double rzedm = rzed - m_roiZedWidth;
+	const double rzedp = rzed + m_roiZedWidth;
+
+	std::unique_ptr<TrigRoiDescriptor> roi = std::make_unique<TrigRoiDescriptor>(reta, retam, retap, rphi, rphim, rphip, rzed, rzedm, rzedp );
+	if (m_allowMultipleClusters) {
+	  roisWriteHandle->back()->push_back( roi.release() ); // Note: manageConstituents=true, superRoI will handle deletion of roi
+	} else {
+	  roisWriteHandle->push_back( roi.release() ); // Note: roi now owned by roisWriteHandle
+	}
+      }
+      
+    
     }
 
     // Link this ROI into the navigation. It will be used to spawn the Event View for this Decision Object.

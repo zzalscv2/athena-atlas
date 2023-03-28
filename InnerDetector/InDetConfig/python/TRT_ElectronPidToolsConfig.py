@@ -23,6 +23,15 @@ def TRT_LocalOccupancyCfg(flags, name="TRT_LocalOccupancy", **kwargs):
     acc.setPrivateTools(CompFactory.InDet.TRT_LocalOccupancy(name, **kwargs))
     return acc
 
+def TrigTRT_LocalOccupancyCfg(flags, name="TrigTRT_LocalOccupancy", **kwargs):
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault("isTrigger", True)
+    kwargs.setdefault("TRT_DriftCircleCollection", "TRT_TrigDriftCircles")
+
+    acc.setPrivateTools(acc.popToolsAndMerge(TRT_LocalOccupancyCfg(flags,name,**kwargs)))
+    return acc
+
 
 def TRT_OverlayLocalOccupancyCfg(flags, name="TRT_OverlayLocalOccupancy", **kwargs):
     """Return a ComponentAccumulator for overlay TRT_LocalOccupancy Tool"""
@@ -56,6 +65,18 @@ def TRT_dEdxToolCfg(flags, name="TRT_dEdxTool", **kwargs):
     acc.setPrivateTools(CompFactory.TRT_ToT_dEdx(name, **kwargs))
     return acc
 
+def TrigTRT_dEdxToolCfg(flags, name="TrigTRT_dEdxTool", **kwargs):
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault("TRT_dEdx_isData", not flags.Input.isMC)
+    kwargs.setdefault("TRT_LocalOccupancyTool", acc.popToolsAndMerge(TrigTRT_LocalOccupancyCfg(flags)))
+
+    from InDetConfig.InDetAssociationToolsConfig import TrigPrdAssociationToolCfg
+    kwargs.setdefault("AssociationTool", acc.popToolsAndMerge(TrigPrdAssociationToolCfg(flags)))
+
+    acc.setPrivateTools(acc.popToolsAndMerge(TRT_dEdxToolCfg(flags,name,**kwargs)))
+    return acc
+
 
 def TRT_ElectronPidToolCfg(flags, name="TRT_ElectronPidTool", **kwargs):
     from TRT_ConditionsAlgs.TRT_ConditionsAlgsConfig import TRTHTCondAlgCfg, TRTPIDNNCondAlgCfg
@@ -73,6 +94,23 @@ def TRT_ElectronPidToolCfg(flags, name="TRT_ElectronPidTool", **kwargs):
     kwargs.setdefault("CalculateNNPid", True)
 
     acc.setPrivateTools(CompFactory.InDet.TRT_ElectronPidToolRun2(name, **kwargs))
+    return acc
+
+def TrigTRT_ElectronPidToolCfg(flags, name="InDetTrigTRT_ElectronPidTool", **kwargs):
+
+    acc = ComponentAccumulator()
+
+    from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_StrawStatusSummaryToolCfg
+    StrawStatusTool = acc.popToolsAndMerge(TRT_StrawStatusSummaryToolCfg(flags,name="InDetTrigTRTStrawStatusSummaryTool"))
+    acc.addPublicTool(StrawStatusTool)  # public as it is has many clients to save some memory
+    kwargs.setdefault("TRTStrawSummaryTool", StrawStatusTool)
+
+    kwargs.setdefault("TRT_LocalOccupancyTool", acc.popToolsAndMerge(TrigTRT_LocalOccupancyCfg(flags)))
+    kwargs.setdefault("TRT_ToT_dEdx_Tool", acc.popToolsAndMerge(TrigTRT_dEdxToolCfg(flags)))
+
+    kwargs.setdefault("CalculateNNPid", False)
+
+    acc.setPrivateTools(acc.popToolsAndMerge(TRT_ElectronPidToolCfg(flags,name,**kwargs)))
     return acc
 
 def GSFBuildTRT_ElectronPidToolCfg(flags, name="GSFBuildTRT_ElectronPidTool", **kwargs):

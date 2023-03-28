@@ -6,9 +6,6 @@
 #include <numeric>
 #include <memory>
 
-#include "CxxUtils/checker_macros.h"
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // standalone ROOT analysis code
-
 void ZDCFitWrapper::Initialize(float initialAmp, float initialT0, float ampMin, float ampMax)
 {
   // If we adjusted the time range on the previous event, restore to default

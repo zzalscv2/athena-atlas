@@ -453,6 +453,7 @@ def JetHICfg(flags, clustersKey, **jetRecoDict):
     jetsOut = recordable(jetDef.fullname())
 
     pj_alg = JetRecConfig.getConstitPJGAlg(jetDef.inputdef)
+    pj_alg.name = pj_alg.name+"HI" # poormans fix conflict of teh config, TODO make jet config to create HI specific cell maker
     acc.addEventAlgo(pj_alg)
     
 

@@ -67,12 +67,12 @@ namespace met {
     declareProperty( "CentralTrackPtThr",  m_cenTrackPtThr = 30e+3               );
     declareProperty( "ForwardTrackPtThr",  m_forTrackPtThr = 30e+3               );
     declareProperty( "CleanCPFO",          m_cleanChargedPFO = true              );
-    declareProperty( "UsePFOLinks",        m_usePFOLinks = false                 ); 
-    declareProperty( "UseFELinks",         m_useFELinks = false                  ); 
-    declareProperty( "NeutralPFOLinksKey", m_neutralPFOLinksKey = "neutralpfoLinks"); 
-    declareProperty( "ChargedPFOLinksKey", m_chargedPFOLinksKey = "chargedpfoLinks"); 
-    declareProperty( "NeutralFELinksKey",  m_neutralFELinksKey  = "neutralGlobalFELinks"); 
-    declareProperty( "ChargedFELinksKey",  m_chargedFELinksKey  = "chargedGlobalFELinks"); 
+    declareProperty( "UsePFOLinks",        m_usePFOLinks = false                 );
+    declareProperty( "UseFELinks",         m_useFELinks = false                  );
+    declareProperty( "NeutralPFOLinksKey", m_neutralPFOLinksKey = "neutralpfoLinks");
+    declareProperty( "ChargedPFOLinksKey", m_chargedPFOLinksKey = "chargedpfoLinks");
+    declareProperty( "NeutralFELinksKey",  m_neutralFELinksKey  = "neutralGlobalFELinks");
+    declareProperty( "ChargedFELinksKey",  m_chargedFELinksKey  = "chargedGlobalFELinks");
   }
 
   // Destructor
@@ -109,7 +109,7 @@ namespace met {
     //initialise read handle keys
     ATH_CHECK( m_pvcollKey.initialize(m_useTracks));
     ATH_CHECK( m_trkcollKey.initialize(m_useTracks));
-    
+
     ATH_CHECK(m_fecollKey.initialize(m_pflow && !m_fecollKey.key().empty()));
     ATH_CHECK( m_pfcollKey.initialize(m_pflow && m_fecollKey.key().empty()));
     if(m_pflow){
@@ -311,7 +311,7 @@ namespace met {
     std::sort(hardObjs_tmp.begin(),hardObjs_tmp.end(),greaterPt);
 
     for(const auto& obj : hardObjs_tmp) {
-      if(obj->pt()<5e3 && obj->type()!=xAOD::Type::Muon) continue;
+      if(obj->pt()<4e3 && obj->type()!=xAOD::Type::Muon) continue;
       constlist.clear();
       ATH_MSG_VERBOSE( "Object type, pt, eta, phi = " << obj->type() << ", " << obj->pt() << ", " << obj->eta() << "," << obj->phi() );
       if(m_pflow){
@@ -378,10 +378,10 @@ namespace met {
       float ptcone20 = 0., isolfrac = 0., etcone10 = 0., EoverP = 0.;
       // ptcone
       TrackIsolation trkIsoResult;
-      std::vector<Iso::IsolationType> trkIsoCones; 
+      std::vector<Iso::IsolationType> trkIsoCones;
       trkIsoCones.push_back(xAOD::Iso::IsolationType::ptcone20);
       xAOD::TrackCorrection trkIsoCorr;
-      trkIsoCorr.trackbitset.set(xAOD::Iso::IsolationTrackCorrection::coreTrackPtr); 
+      trkIsoCorr.trackbitset.set(xAOD::Iso::IsolationTrackCorrection::coreTrackPtr);
       m_trkIsolationTool->trackIsolation(trkIsoResult,
                                          *trk,
                                          trkIsoCones,
@@ -390,11 +390,11 @@ namespace met {
       isolfrac = ptcone20/trk->pt();
       // etcone
       CaloIsolation caloIsoResult;
-      std::vector<Iso::IsolationType> caloIsoCones; 
+      std::vector<Iso::IsolationType> caloIsoCones;
       // We can't actually configure the tool to give etcone10, so instead we have to compute etcone20,
       // applying the core cone correction.
       // Then, we retrieve the correction value, which is etcone10, rather than the isolation value
-      caloIsoCones.push_back(xAOD::Iso::IsolationType::etcone20); 
+      caloIsoCones.push_back(xAOD::Iso::IsolationType::etcone20);
       xAOD::CaloCorrection caloIsoCorr_coreCone;
       caloIsoCorr_coreCone.calobitset.set(xAOD::Iso::IsolationCaloCorrection::coreCone); // this is etcone10
       m_caloIsolationTool->caloTopoClusterIsolation(caloIsoResult,
@@ -408,7 +408,7 @@ namespace met {
         ATH_MSG_WARNING("isGoodEoverP: Failed to retrieve the isolation core correction (etcone10)! Setting etcone10=0");
         etcone10 = 0.;
       }
-      EoverP   =  etcone10/trk->pt(); 
+      EoverP   =  etcone10/trk->pt();
       /////////////////////////////////////////////////////////////////////////
       ATH_MSG_VERBOSE( "Track isolation fraction: " << isolfrac );
       ATH_MSG_VERBOSE( "Track E/P = " << EoverP );

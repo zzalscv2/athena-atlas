@@ -77,9 +77,10 @@ class TrigEgammaBremCollectionBuilder (egammaAlgsConf.EMBremCollectionBuilder):
                 TRT_DriftCircleCollection = TrigTRTKeys.DriftCircles,
                 isTrigger=True)
 
+            from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigPrdAssociationTool
             TRT_ToT_dEdx_Tool = TrackingCommon.getInDetTRT_dEdxTool(
                     TRT_LocalOccupancyTool=TRT_LocalOccupancyTool,
-                    AssociationTool="InDetTrigPrdAssociationTool")
+                    AssociationTool=InDetTrigPrdAssociationTool)
 
             GSFBuildTRT_ElectronPidTool = TrackingCommon.getInDetTRT_ElectronPidTool(
                 name="GSFBuildTRT_ElectronPidTool",

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon import CfgMgr
 
@@ -18,20 +18,6 @@ def getSctSensorSD(name="SctSensorSD", **kwargs):
                                              "SCT::ECSensor2","SCT::ECSensor3"])
     kwargs.setdefault("OutputCollectionNames", [hits_collection_name])
     return CfgMgr.SctSensorSDTool(name, **kwargs)
-
-
-def getSLHC_SctSensorSD(name="SLHC_SctSensorSD", **kwargs):
-    kwargs.setdefault("LogicalVolumeNames", ["ITkStrip::BRLSensorSS","ITkStrip::BRLSensorMS",
-                                             "ITkStrip::ECSensor0","ITkStrip::ECSensor1","ITkStrip::ECSensor2",
-                                             "ITkStrip::ECSensor3","ITkStrip::ECSensor4","ITkStrip::ECSensor5",
-                                             "ITkStrip::ECSensorBack0","ITkStrip::ECSensorBack1","ITkStrip::ECSensorBack2",
-                                             "ITkStrip::ECSensorBack3","ITkStrip::ECSensorBack4","ITkStrip::ECSensorBack5"])
-    return getSctSensorSD(name, **kwargs)
-
-
-def getSLHC_SctSensorSD_Gmx(name="SLHC_SctSensorSD_Gmx", **kwargs):
-    kwargs.setdefault("GmxSensor", True )
-    return getSLHC_SctSensorSD(name, **kwargs)
 
 
 def getSctSensor_CTB(name="SctSensor_CTB", **kwargs):

@@ -443,7 +443,7 @@ def createDataFlow(flags, chains, allDicts):
             if not foundCFSeq:
                 sequenceFilter = buildFilter(filterName, filterInput, chainStep.isEmpty)
                 if isCAMenu():
-                    CFseq = CFSequenceCA( ChainStep = chainStep, FilterAlg = sequenceFilter)
+                    CFseq = CFSequenceCA( chainStep = chainStep, filterAlg = sequenceFilter)
                 else:
                     CFseq = CFSequence( ChainStep = chainStep, FilterAlg = sequenceFilter)
                 CFseq.connect(filterOutput)
@@ -455,6 +455,16 @@ def createDataFlow(flags, chains, allDicts):
                    log.error("Found more than one sequence containing filter %s", filterName)
                 
                 lastCFseq = foundCFSeq[0]
+                if isCAMenu():
+                    # skip re-merging
+                    if flags.Trigger.fastMenuGeneration:
+                        for menuseq in chainStep.sequences:
+                            menuseq.ca.wasMerged()
+                            if menuseq.globalRecoCA:
+                                menuseq.globalRecoCA.wasMerged()
+                    else:
+                        lastCFseq.mergeStepSequences(chainStep)
+
                 sequenceFilter = lastCFseq.filter
                 if len(list(set(sequenceFilter.getInputList()).intersection(filterInput))) != len(list(set(filterInput))):
                     [ sequenceFilter.addInput(inputName) for inputName in filterInput ]
@@ -496,7 +506,6 @@ def createDataFlow(flags, chains, allDicts):
 
     log.debug("End of createDataFlow for %d chains and total %d steps", len(chains), NSTEPS)
     return (finalDecisions, CFseqList)
-
 
 def createControlFlow(flags, HLTNode, CFseqList):
     """ Creates Control Flow Tree starting from the CFSequences"""
@@ -545,7 +554,7 @@ def createControlFlow(flags, HLTNode, CFseqList):
         for cseq in sequences:             
             log.debug(" *** Create CF Tree for CFSequence %s", cseq.step.name)
             if isCAMenu():
-                acc.merge( cseq.ca, sequenceName = stepCFReco.getName())
+                acc.merge(cseq.ca, sequenceName=stepCFReco.getName())
             else:
                 filterAlg = cseq.filter.Alg  
                 if len(cseq.step.sequences) == 0:  

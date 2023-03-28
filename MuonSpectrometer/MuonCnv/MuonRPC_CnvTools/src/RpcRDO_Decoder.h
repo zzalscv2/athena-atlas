@@ -26,10 +26,10 @@ namespace Muon {
 
         virtual StatusCode initialize() override;
 
-        virtual std::vector<RpcDigit*>* getDigit(const RpcFiredChannel* fChan, uint16_t& sectorID, uint16_t& padId, uint16_t& cmaId,
+        virtual std::vector<std::unique_ptr<RpcDigit>> getDigit(const RpcFiredChannel* fChan, uint16_t& sectorID, uint16_t& padId, uint16_t& cmaId,
                                                  const RpcCablingCondData* rpcCab) const override;
 
-        virtual std::vector<Identifier>* getOfflineData(const RpcFiredChannel* fChan, uint16_t& sectorID, uint16_t& padId, uint16_t& cmaId,
+        virtual std::vector<Identifier> getOfflineData(const RpcFiredChannel* fChan, uint16_t& sectorID, uint16_t& padId, uint16_t& cmaId,
                                                         double& time, const RpcCablingCondData* rpcCab) const override;
 
     private:

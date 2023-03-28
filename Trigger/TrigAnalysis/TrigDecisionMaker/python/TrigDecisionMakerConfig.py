@@ -68,10 +68,11 @@ class WriteTrigDecision ( object ) :
 def Run1Run2DecisionMakerCfg(flags):
     """Configures HLTNavigation(tool) -> xAODNavigation and TrigDec::TrigDecision -> xAOD::TrigDecision """
     acc = ComponentAccumulator()
-    doL1=True
-    doL2=True
-    doEF=True
-    doHLT=True
+    doL1=flags.Trigger.L1.doCTP
+    doL2=flags.Trigger.DecodeHLT
+    doEF=flags.Trigger.DecodeHLT
+    doHLT=flags.Trigger.DecodeHLT
+
 
     if 'HLT' not in flags.Trigger.availableRecoMetadata:
         doL2=False
@@ -88,7 +89,7 @@ def Run1Run2DecisionMakerCfg(flags):
         doEF = False
 
     L1ResultKey = "" if flags.Input.Format is Format.BS else "Lvl1Result"
-
+    
     decMaker = CompFactory.TrigDec.TrigDecisionMaker( 'TrigDecMaker', 
                                                       doL1 = doL1,
                                                       doL2 = doL2,
@@ -111,19 +112,19 @@ def Run1Run2DecisionMakerCfg(flags):
         decCnv.EventInfoKey=""
 
     acc.addEventAlgo(decCnv)
+    if doHLT or doEF:
+        # TrigNavigationCnvAlg runs on the original HLTResult in the bytestream as it used
+        # to be in serial athena, i.e. it does not run on the modified HLTResult created by
+        # TrigBSExtraction. See also ATLASRECTS-6453.
+        from SGComps.AddressRemappingConfig import InputRenameCfg
 
-    # TrigNavigationCnvAlg runs on the original HLTResult in the bytestream as it used
-    # to be in serial athena, i.e. it does not run on the modified HLTResult created by
-    # TrigBSExtraction. See also ATLASRECTS-6453.
-    from SGComps.AddressRemappingConfig import InputRenameCfg
+        # Even for Run-1, we only convert the EF result:
+        aodKey = "HLTResult_HLT" if doHLT else "HLTResult_EF"
 
-    # Even for Run-1, we only convert the EF result:
-    aodKey = "HLTResult_HLT" if doHLT else "HLTResult_EF"
-
-    acc.merge(InputRenameCfg("HLT::HLTResult", aodKey, aodKey+"_BS"))
-    acc.addEventAlgo( CompFactory.xAODMaker.TrigNavigationCnvAlg('TrigNavigationCnvAlg',
-                                                                 AODKey = aodKey,
-                                                                 xAODKey = "TrigNavigation") )
+        acc.merge(InputRenameCfg("HLT::HLTResult", aodKey, aodKey+"_BS"))
+        acc.addEventAlgo( CompFactory.xAODMaker.TrigNavigationCnvAlg('TrigNavigationCnvAlg',
+                                                                    AODKey = aodKey,
+                                                                    xAODKey = "TrigNavigation") )
 
     return acc
 

@@ -1,4 +1,3 @@
-// $Id$
 /**
  * @file CxxUtils/Root/MD5.cxx
  * @author scott snyder <snyder@bnl.gov>, from public domain code.
@@ -53,6 +52,7 @@
 // C++ wrapper functions.
 
 
+// cppcheck-suppress uninitMemberVar; false positive
 MD5::MD5 (const unsigned char* buffer, unsigned long len)
 {
   init();
@@ -61,6 +61,7 @@ MD5::MD5 (const unsigned char* buffer, unsigned long len)
 }
 
 
+// cppcheck-suppress uninitMemberVar; false positive
 MD5::MD5 (const char* buffer, size_t len)
 {
   init();
@@ -69,6 +70,7 @@ MD5::MD5 (const char* buffer, size_t len)
 }
 
 
+// cppcheck-suppress uninitMemberVar; false positive
 MD5::MD5 (const std::string& s)
 {
   init();

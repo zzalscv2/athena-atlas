@@ -312,6 +312,9 @@ def createTriggerFlags(doTriggerRecoFlags):
     # debug output from control flow generation
     flags.addFlag('Trigger.generateMenuDiagnostics', False)
 
+    # avoid re-merging CAs that were already seen once
+    flags.addFlag('Trigger.fastMenuGeneration', True)
+
     # disable Consistent Prescale Sets, for testing only, useful when using selectChains (ATR-24744)
     flags.addFlag('Trigger.disableCPS', False)
 

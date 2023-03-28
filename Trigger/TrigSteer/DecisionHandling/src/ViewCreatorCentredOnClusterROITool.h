@@ -52,6 +52,9 @@ public:
   Gaudi::Property< double > m_roiPhiWidth{this,"RoIPhiWidth",0.05,
     "Extent of the ROI in phi from its centre"};
 
+  Gaudi::Property< double > m_roiZedWidth{this,"RoIZedWidth",0.0,
+    "Extent of the ROI in zed from its centre"};
+
 };
 
 #endif //> !DECISIONHANDLING_VIEWCREATORCENTREDONCLUSTERROITOOL_H

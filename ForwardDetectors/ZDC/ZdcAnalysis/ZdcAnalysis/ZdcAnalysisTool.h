@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZDCANALYSIS_ZDCANALYSISTOOL_H
@@ -21,12 +21,13 @@
 #include "TMath.h"
 
 #include "xAODEventInfo/EventInfo.h"
+#include "CxxUtils/checker_macros.h"
 
 
 namespace ZDC
 {
 
-class ZdcAnalysisTool : public virtual IZdcAnalysisTool, public asg::AsgTool
+class ATLAS_NOT_THREAD_SAFE ZdcAnalysisTool : public virtual IZdcAnalysisTool, public asg::AsgTool
 {
 
   ASG_TOOL_CLASS(ZdcAnalysisTool, ZDC::IZdcAnalysisTool)

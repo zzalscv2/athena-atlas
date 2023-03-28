@@ -140,7 +140,7 @@ StatusCode MuonRdoToMuonDigitTool::decodeMdtRDO(const EventContext& ctx, MdtDigi
     MdtDigitMap_t mdtDigitMap;
 
     // now decode RDO into digits
-    for (const MdtCsm* rdoColl : *rdoContainer) { ATH_CHECK(this->decodeMdt(*rdoColl, mdtDigitMap)); }
+    for (const MdtCsm* rdoColl : *rdoContainer) { ATH_CHECK(decodeMdt(*rdoColl, mdtDigitMap)); }
 
     for (auto& p : mdtDigitMap) { ATH_CHECK(mdtContainer->addCollection(p.second.release(), p.first)); }
 
@@ -162,7 +162,7 @@ StatusCode MuonRdoToMuonDigitTool::decodeCscRDO(const EventContext& ctx, CscDigi
     CscDigitMap_t cscDigitMap;
 
     // now decode RDO into digits
-    for (const CscRawDataCollection* rdoColl : *rdoContainer) { ATH_CHECK(this->decodeCsc(*rdoColl, cscDigitMap)); }
+    for (const CscRawDataCollection* rdoColl : *rdoContainer) { ATH_CHECK(decodeCsc(*rdoColl, cscDigitMap)); }
 
     for (auto& p : cscDigitMap) { ATH_CHECK(cscContainer->addCollection(p.second.release(), p.first)); }
 
@@ -190,7 +190,7 @@ StatusCode MuonRdoToMuonDigitTool::decodeRpcRDO(const EventContext& ctx, RpcDigi
     RpcDigitMap_t rpcDigitMap;
 
     for (const RpcPad* rpcPad : *rdoContainer) {
-        if (!rpcPad->empty()) { ATH_CHECK(this->decodeRpc(*rpcPad, rpcDigitMap, rpcCabling)); }
+        if (!rpcPad->empty()) { ATH_CHECK(decodeRpc(*rpcPad, rpcDigitMap, rpcCabling)); }
     }
 
     for (auto& p : rpcDigitMap) { ATH_CHECK(rpcContainer->addCollection(p.second.release(), p.first)); }
@@ -217,7 +217,7 @@ StatusCode MuonRdoToMuonDigitTool::decodeTgcRDO(const EventContext& ctx, TgcDigi
 
     TgcRdoContainer::const_iterator tgcRDO = rdoContainer->begin();
     for (; tgcRDO != rdoContainer->end(); ++tgcRDO) {
-        if (!(*tgcRDO)->empty()) { ATH_CHECK(this->decodeTgc(**tgcRDO, tgcDigitMap)); }
+        if (!(*tgcRDO)->empty()) { ATH_CHECK(decodeTgc(**tgcRDO, tgcDigitMap)); }
     }
 
     for (auto& p : tgcDigitMap) { ATH_CHECK(tgcContainer->addCollection(p.second.release(), p.first)); }
@@ -242,7 +242,7 @@ StatusCode MuonRdoToMuonDigitTool::decodeSTGC_RDO(const EventContext& ctx, sTgcD
     ATH_MSG_DEBUG("Converting sTGC RDOs to Digits");
     for (const Muon::STGC_RawDataCollection* rdoColl : *sTgcRDO) {  // Go through RDO container
         ATH_MSG_DEBUG("rdoColl size = " << rdoColl->size());
-        ATH_CHECK(this->decodeSTGC(*rdoColl, stgcDigitMap));
+        ATH_CHECK(decodeSTGC(*rdoColl, stgcDigitMap));
     }
 
     for (auto& p : stgcDigitMap) { ATH_CHECK(stgcContainer->addCollection(p.second.release(), p.first)); }
@@ -268,7 +268,7 @@ StatusCode MuonRdoToMuonDigitTool::decodeMM_RDO(const EventContext& ctx, MmDigit
     ATH_MSG_DEBUG("Converting MM RDOs to Digits");
     for (const Muon::MM_RawDataCollection* rdoColl : *MmRDO) {  // Go through RDO container
         ATH_MSG_DEBUG("rdoColl size = " << rdoColl->size());
-        ATH_CHECK(this->decodeMM(*rdoColl, mmDigitMap));
+        ATH_CHECK(decodeMM(*rdoColl, mmDigitMap));
     }
 
     for (auto& p : mmDigitMap) { ATH_CHECK(mmContainer->addCollection(p.second.release(), p.first)); }
@@ -403,15 +403,10 @@ StatusCode MuonRdoToMuonDigitTool::decodeRpc(const RpcPad& rdoColl, RpcDigitMap_
 
         // For each CM, loop on the fired channels
         for (const RpcFiredChannel* rpcChan : *cm) {
-            std::unique_ptr<std::vector<RpcDigit*> > digitVec(m_rpcRdoDecoderTool->getDigit(rpcChan, sectorId, padId, cmaId, rpcCab));
-
-            if (!digitVec) {
-                ATH_MSG_FATAL("Error in the RPC RDO decoder ");
-                return StatusCode::FAILURE;
-            }
+            std::vector<std::unique_ptr<RpcDigit>> digitVec{m_rpcRdoDecoderTool->getDigit(rpcChan, sectorId, padId, cmaId, rpcCab)};
 
             // Loop on the digits corresponding to the fired channel
-            for (RpcDigit* newDigit : *digitVec) {
+            for (std::unique_ptr<RpcDigit>& newDigit : digitVec) {
                 elementId = m_idHelperSvc->rpcIdHelper().elementID(newDigit->identify());
 
                 IdentifierHash coll_hash;
@@ -425,7 +420,7 @@ StatusCode MuonRdoToMuonDigitTool::decodeRpc(const RpcPad& rdoColl, RpcDigitMap_
                 evtStore()->makeCurrent();
                 std::unique_ptr<RpcDigitCollection>& coll = rpcDigitMap[coll_hash];
                 if (!coll) { coll = std::make_unique<RpcDigitCollection>(elementId, coll_hash); }
-                coll->push_back(newDigit);
+                coll->push_back(std::move(newDigit));
             }
         }
     }

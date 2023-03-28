@@ -129,9 +129,8 @@ def TrigEFTauMVHypoToolFromDict( flags, chainDict ):
         # 2023 DeepSet triggers
         if chainPart['preselection'] == 'tracktwoMVA':
             currentHypo.highptidthr = 200e3
-            currentHypo.highptjetthr = 420e3
-            # deploy after validation
-            #currentHypo.perfTrackPtCut = 1.5e3
+            currentHypo.highptjetthr = 430e3
+            currentHypo.perfTrackPtCut = 1.5e3
 
     elif criteria in [ 'dikaonmass', 'kaonpi1', 'kaonpi2', 'dipion1', 'dipion2', 'dipion3', 'dipion4', 'singlepion' ]: # ATR-22644
         currentHypo = CompFactory.TrigEFTauDiKaonHypoTool(name)

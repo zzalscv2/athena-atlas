@@ -152,8 +152,7 @@ StatusCode LarEMSamplingFraction::execute()
 #ifdef HEPMC3
   const HepMC::ConstGenParticlePtr&  gen = truthEvent->at(0)->particles().front();
 #else
-  HepMC::GenEvent::particle_const_iterator pit  = truthEvent->at(0)->particles_begin();
-  HepMC::ConstGenParticlePtr   gen  = *pit;
+  HepMC::ConstGenParticlePtr   gen  = *(truthEvent->at(0)->particles_begin());
 #endif
   m_mc_pdg = gen->pdg_id();
   m_mc_eta = gen->momentum().pseudoRapidity();

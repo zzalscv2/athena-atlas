@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from METReconstruction.METRecoCfg import BuildConfig, METConfig,getMETRecoAlg
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -14,6 +14,7 @@ def METCalo_Cfg(configFlags):
                     doRegions=True,
                     doOriginCorrClus=False
                     )
+    components.merge(cfg_emt.accumulator)
 
     ############################################################################
     # LocHadTopo
@@ -22,6 +23,8 @@ def METCalo_Cfg(configFlags):
                     doRegions=True,
                     doOriginCorrClus=False
                     )
+    components.merge(cfg_lht.accumulator)
+
 
     ############################################################################
     # Calo regions
@@ -32,6 +35,7 @@ def METCalo_Cfg(configFlags):
                      [BuildConfig('CaloReg')],
                      doCells=False
                      )
+    components.merge(cfg_calo.accumulator)
 
     recoAlg_calo = getMETRecoAlg(algName='METRecoAlg_Calo',configs={"EMTopo":cfg_emt,"LocHadTopo":cfg_lht,"Calo":cfg_calo})
     components.addEventAlgo(recoAlg_calo)

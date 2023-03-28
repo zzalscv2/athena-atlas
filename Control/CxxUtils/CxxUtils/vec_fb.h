@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/vec_fb.h
@@ -27,6 +27,7 @@ template<typename T, size_t N>
 class vec_fb
 {
 public:
+  // cppcheck-suppress uninitMemberVar; deliberate
   vec_fb() = default;
   vec_fb(const vec_fb&) = default;
   vec_fb& operator=(const vec_fb&) = default;

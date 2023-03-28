@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtCalibT0/ADCMTHistos.h"
@@ -58,7 +58,7 @@ namespace MuonCalib {
     }
 
     bool ADCMTHistos::FitAdc() {
-        m_adc_fit = new TF1("adc_fun", adcfitf_skewnormal, 50, 320, 4);
+        m_adc_fit = std::make_unique<TF1>("adc_fun", adcfitf_skewnormal, 50, 320, 4);
         Double_t average = m_adc->GetMean();
         Double_t max = m_adc->GetMaximum();
         m_adc_fit->SetParameters(max, average, 40, 1);  // initialize value

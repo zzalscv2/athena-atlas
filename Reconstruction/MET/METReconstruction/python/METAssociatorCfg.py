@@ -77,6 +77,7 @@ def METAssociatorCfg(configFlags, jetType):
     
 def getAssocCA(config,METName=''):
     components = ComponentAccumulator()
+    components.merge(config.accumulator)
     assocAlg = getMETAssocAlg(algName='METAssociation_'+METName,configs={config.suffix:config})
     components.addEventAlgo(assocAlg)
     return components

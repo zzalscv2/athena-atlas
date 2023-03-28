@@ -71,8 +71,8 @@ def EGammaCommonCfg(ConfigFlags):
     from ElectronPhotonSelectorTools.ElectronLikelihoodToolMapping import electronLHmenu
 
     lhMenu = electronLHmenu.offlineMC21
-    from AtlasGeoModel.CommonGMJobProperties import CommonGeometryFlags as geoFlags
-    if geoFlags.Run() == "RUN2" :
+    from AthenaConfiguration.Enums import LHCPeriod
+    if ConfigFlags.GeoModel.Run is LHCPeriod.Run2:
         lhMenu = electronLHmenu.offlineMC20
 
     # Very Loose

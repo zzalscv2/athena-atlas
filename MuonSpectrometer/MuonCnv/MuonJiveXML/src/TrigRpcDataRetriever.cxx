@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigRpcDataRetriever.h"
@@ -37,7 +37,7 @@ namespace JiveXML {
   StatusCode TrigRpcDataRetriever::retrieve(ToolHandle<IFormatTool> &FormatTool) {
 
     //be verbose
-    if (msgLvl(MSG::DEBUG)) ATH_MSG_DEBUG("Retrieving " << dataTypeName());
+    ATH_MSG_DEBUG("Retrieving " << dataTypeName());
 
     // retrieve the collection of RDO
     SG::ReadHandle<RpcPadContainer> rdoContainer(m_sgKey);
@@ -77,7 +77,7 @@ namespace JiveXML {
       if ( itColl->size() == 0 ) continue;
 
       ipad++;
-      if (msgLvl(MSG::DEBUG)) ATH_MSG_DEBUG("Ipad " << ipad);
+      ATH_MSG_DEBUG("Ipad " << ipad);
       //Get pad online id and sector id
       uint16_t padId         = itColl->onlineId(); 
       uint16_t sectorId  = itColl->sector()  ;
@@ -94,7 +94,7 @@ namespace JiveXML {
         RpcCoinMatrix::const_iterator itD_e = (*itCM)->end();
         for (; itD != itD_e ; ++itD) {
           const RpcFiredChannel * rpcChan = (*itD);
-          if (msgLvl(MSG::DEBUG)) ATH_MSG_DEBUG("RpcFiredChannel: " <<
+          ATH_MSG_DEBUG("RpcFiredChannel: " <<
                                     " sectorId " <<  sectorId           <<
                                     " padId "    <<  padId              <<
                                     " cmId "     <<  cmaId              <<
@@ -115,10 +115,10 @@ namespace JiveXML {
 
                 //write trigger hit only once
                 if(idata1==0){
-                  std::vector<Identifier>* digitVec = m_rpcDecoder->getOfflineData(rpcChan, sectorId, padId, cmaId, time, rpcCabling);
+                  std::vector<Identifier> digitVec{m_rpcDecoder->getOfflineData(rpcChan, sectorId, padId, cmaId, time, rpcCabling)};
                   // Loop on the digits corresponding to the fired channel
                   ///// following still unused
-                  if (msgLvl(MSG::DEBUG)) ATH_MSG_DEBUG("Number of digits: "   << digitVec->size());
+                  ATH_MSG_DEBUG("Number of digits: "   << digitVec.size());
 
                   // transform the pad sectorId according to the cabling convention
                   uint16_t side                   = (sectorId<32) ? 0 : 1;
@@ -127,7 +127,7 @@ namespace JiveXML {
                   std::list<Identifier>::const_iterator it_list;
                   for (it_list=stripList.begin() ; it_list != stripList.end() ; ++it_list) {
                     Identifier stripOfflineId = *it_list;
-                    if (msgLvl(MSG::DEBUG)) ATH_MSG_DEBUG(" cablingId " << m_idHelperSvc->rpcIdHelper().show_to_string(stripOfflineId));
+                    ATH_MSG_DEBUG(" cablingId " << m_idHelperSvc->rpcIdHelper().show_to_string(stripOfflineId));
   
                     const MuonGM::RpcReadoutElement* element = MuonDetMgr->getRpcReadoutElement(stripOfflineId);
                     char ChID[100];
@@ -148,11 +148,10 @@ namespace JiveXML {
 		    idVec.push_back(DataType( m_idHelperSvc->rpcIdHelper().show_to_string(stripOfflineId) )); 
                     barcode.push_back(DataType(0));        
                   }
-		  delete digitVec;
-                }
+		            }
                 idata1++; 
 
-                if (msgLvl(MSG::DEBUG)) ATH_MSG_DEBUG("RpcFiredChannel1:"    <<
+                ATH_MSG_DEBUG("RpcFiredChannel1:"    <<
                                           " sectorId1 " <<  sectorId            <<
                                           " padId1 "    <<  padId               <<
                                           " cmId1 "     <<  cmaId               <<
@@ -162,10 +161,10 @@ namespace JiveXML {
                                           " ch1   "     <<  rpcChan1->channel());
                
                 //write confirm hits
-                std::vector<Identifier>* digitVec1 = m_rpcDecoder->getOfflineData(rpcChan1, sectorId, padId, cmaId, time1, rpcCabling);
+                std::vector<Identifier> digitVec1{m_rpcDecoder->getOfflineData(rpcChan1, sectorId, padId, cmaId, time1, rpcCabling)};
                 // Loop on the digits corresponding to the fired channel
 
-                if (msgLvl(MSG::DEBUG)) ATH_MSG_DEBUG("Number of digits: "   << digitVec1->size());
+                ATH_MSG_DEBUG("Number of digits: "   << digitVec1.size());
 
                  // transform the pad sectorId according to the cabling convention
                 uint16_t side                   = (sectorId<32) ? 0 : 1;
@@ -174,7 +173,7 @@ namespace JiveXML {
                 std::list<Identifier>::const_iterator it_list1;
                 for (it_list1=stripList1.begin() ; it_list1 != stripList1.end() ; ++it_list1) {
                   Identifier stripOfflineId1 = *it_list1;
-                  if (msgLvl(MSG::DEBUG)) ATH_MSG_DEBUG(" cablingId1 " << m_idHelperSvc->rpcIdHelper().show_to_string(stripOfflineId1));
+                  ATH_MSG_DEBUG(" cablingId1 " << m_idHelperSvc->rpcIdHelper().show_to_string(stripOfflineId1));
   
                   const MuonGM::RpcReadoutElement* element1 = MuonDetMgr->getRpcReadoutElement(stripOfflineId1);
 
@@ -196,7 +195,6 @@ namespace JiveXML {
 		  idVec.push_back(DataType( m_idHelperSvc->rpcIdHelper().show_to_string(stripOfflineId1) ));
                   barcode.push_back(DataType(0));        
                 }
-               delete digitVec1;
               }//write hits
             }//look for confirm
           }//found trigger hit                
@@ -216,7 +214,7 @@ namespace JiveXML {
     myDataMap["barcode"] = barcode;
 
     //Be verbose
-    if (msgLvl(MSG::DEBUG)) ATH_MSG_DEBUG(dataTypeName() << ": "<< x.size());
+    ATH_MSG_DEBUG(dataTypeName() << ": "<< x.size());
 
     //forward data to formating tool
     return FormatTool->AddToEvent(dataTypeName(), m_sgKey.key(), &myDataMap);  

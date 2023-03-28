@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /* Athena includes */
@@ -39,11 +39,8 @@ do {                                 \
 
 
 FastCaloSimCaloExtrapolation::FastCaloSimCaloExtrapolation(const std::string& t, const std::string& n, const IInterface* p)
-  : AthAlgTool(t,n,p)
-  , m_extrapolator("TimedExtrapolator")
-  , m_CaloGeometryHelper("FastCaloSimGeometryHelper")
+  : base_class(t,n,p)
 {
-  declareInterface<IFastCaloSimCaloExtrapolation>(this);
 
   m_surfacelist.resize(0);
   m_surfacelist.push_back(CaloCell_ID_FCS::PreSamplerB);
@@ -51,18 +48,9 @@ FastCaloSimCaloExtrapolation::FastCaloSimCaloExtrapolation(const std::string& t,
   m_surfacelist.push_back(CaloCell_ID_FCS::EME1);
   m_surfacelist.push_back(CaloCell_ID_FCS::EME2);
   m_surfacelist.push_back(CaloCell_ID_FCS::FCAL0);
-  
-  declareProperty("CaloBoundaryR",      m_CaloBoundaryR);
-  declareProperty("CaloBoundaryZ",      m_CaloBoundaryZ);
-  declareProperty("CaloMargin",         m_calomargin);
-  declareProperty("Surfacelist",        m_surfacelist);
-  declareProperty("Extrapolator",       m_extrapolator);
-  declareProperty("CaloEntrance",       m_caloEntranceName);
-  declareProperty("CaloGeometryHelper", m_CaloGeometryHelper);
-}
 
-FastCaloSimCaloExtrapolation::~FastCaloSimCaloExtrapolation()
-= default;
+  declareProperty("Surfacelist",        m_surfacelist);
+}
 
 StatusCode FastCaloSimCaloExtrapolation::initialize()
 {
@@ -383,8 +371,8 @@ void FastCaloSimCaloExtrapolation::extrapolateToID(TFCSExtrapolationState& resul
 
   for (unsigned int surfID = 0; surfID<3; surfID++){
 
-    double R = m_CaloBoundaryR.at(surfID);
-    double Z = m_CaloBoundaryZ.at(surfID);
+    double R = m_CaloBoundaryR.value().at(surfID);
+    double Z = m_CaloBoundaryZ.value().at(surfID);
 
     ATH_MSG_DEBUG("[ExtrapolateToID] Extrapolating to ID-Calo boundary with ID="<<surfID<<" R="<<R<<" Z="<<Z);
 

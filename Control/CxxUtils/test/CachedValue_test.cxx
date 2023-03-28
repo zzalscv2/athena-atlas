@@ -1,8 +1,6 @@
 /*
- * Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  */
-
-// $Id$
 /**
  * @file CxxUtils/CachedValue_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -106,6 +104,7 @@ void test2()
   assert (!cv1.isValid());
   assert (!cv1.ptr()->valid());
 
+  cv1 = CxxUtils::CachedValue<Payload>();
   CxxUtils::CachedValue<Payload> cv3 (std::move (cv1));
   assert (!cv3.isValid());
 

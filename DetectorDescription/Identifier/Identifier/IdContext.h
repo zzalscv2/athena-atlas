@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -7,22 +7,12 @@
  -----------------------------------------
  ***************************************************************************/
 
-//<doc><file>	$Id: IdContext.h,v 1.3 2003-08-05 17:03:19 schaffer Exp $
-//<version>	$Name: not supported by cvs2svn $
 
 #ifndef IDENTIFIER_IDCONTEXT_H
 # define IDENTIFIER_IDCONTEXT_H
 
-//<<<<<< INCLUDES                                                       >>>>>>
-
 #include "Identifier/ExpandedIdentifier.h"
 
-//<<<<<< PUBLIC DEFINES                                                 >>>>>>
-//<<<<<< PUBLIC CONSTANTS                                               >>>>>>
-//<<<<<< PUBLIC TYPES                                                   >>>>>>
-//<<<<<< PUBLIC VARIABLES                                               >>>>>>
-//<<<<<< PUBLIC FUNCTIONS                                               >>>>>>
-//<<<<<< CLASS DECLARATIONS                                             >>>>>>
 
 /**
  *  class IdContext
@@ -51,8 +41,14 @@ public:
 
     // default constructor
     IdContext();
+    // with no prefix
+    IdContext(size_type begin_index, 
+	      size_type end_index);
     // constructor with full initialization
-    IdContext(ExpandedIdentifier prefix, 
+    IdContext(const ExpandedIdentifier& prefix, 
+	      size_type begin_index, 
+	      size_type end_index);
+    IdContext(ExpandedIdentifier&& prefix, 
 	      size_type begin_index, 
 	      size_type end_index);
 
@@ -81,21 +77,15 @@ private:
 
     
 
-
-//<<<<<< INLINE PUBLIC FUNCTIONS                                        >>>>>>
-//<<<<<< INLINE MEMBER FUNCTIONS                                        >>>>>>
-
 inline IdContext::IdContext()
     :
     m_begin_index(0),
     m_end_index(0)
 {}
 
-inline IdContext::IdContext(ExpandedIdentifier prefix, 
-			    size_type begin_index, 
+inline IdContext::IdContext(size_type begin_index, 
 			    size_type end_index)
     :
-    m_prefix(std::move(prefix)),
     m_begin_index(begin_index),
     m_end_index(end_index)
 {}
