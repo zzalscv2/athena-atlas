@@ -50,14 +50,21 @@ StatusCode ViewCreatorCentredOnIParticleROITool::attachROILinks(TrigCompositeUti
 
          const xAOD::Muon* muon = dynamic_cast< const xAOD::Muon*>(*p4EL); //get muon of this found object
          double zed0  = 0.0; //initialization
+      
+         bool update_z_width = true;
+      
+         if ( m_useZedPosition ) { 
+	    if ( muon && muon->primaryTrackParticle() ) { 
+	       zed0 = muon->primaryTrackParticle()->z0();
+	       if ( m_useBeamspot ) zed0 += muon->primaryTrackParticle()->vz();
+	    }
+	    else update_z_width = false;
+         }
+    
+	 if ( update_z_width ) { 
 
-         if ( muon && muon->primaryTrackParticle() ) {
-
-	     zed0 = muon->primaryTrackParticle()->z0();
-	     if ( m_useBeamspot ) zed0 += muon->primaryTrackParticle()->vz();
-	    
-             double zed0p   = zed0 + m_roiZedWidth; // in mm
-             double zed0m   = zed0 - m_roiZedWidth; // in mm
+	     double zed0p   = zed0 + m_roiZedWidth; // in mm
+	     double zed0m   = zed0 - m_roiZedWidth; // in mm
 	     
 	     if ( m_roiZedSinThetaFlag ) { 
 	       /// 1/sin(theta) = cosh( eta ) 
@@ -66,32 +73,31 @@ StatusCode ViewCreatorCentredOnIParticleROITool::attachROILinks(TrigCompositeUti
 	       zed0m   = zed0 - m_roiZedWidth*cosheta; // in mm
 	     }
 	     
-             ATH_MSG_DEBUG( "New ROI for xAOD::Particle ET="<< (*p4EL)->p4().Et()
+	     ATH_MSG_DEBUG( "New ROI for xAOD::Particle ET="<< (*p4EL)->p4().Et()
 			    << " eta="<< (*p4EL)->eta() << " +- " << m_roiEtaWidth
 			    << " phi="<< (*p4EL)->phi() << " +- " << m_roiPhiWidth
 			    << " zed0="<<  zed0 << " +- " << m_roiZedWidth );
-
-             newROI = new TrigRoiDescriptor( reta, retam, retap,
+	   
+	     newROI = new TrigRoiDescriptor( reta, retam, retap,
 					     rphi, rphim, rphip,
 					     zed0, zed0m, zed0p );
-
-         }
-         else {
-             newROI = new TrigRoiDescriptor( reta, retam, retap,
-					     rphi, rphim, rphip);
-         }
-    }   
+	 }
+	 else {
+	   newROI = new TrigRoiDescriptor( reta, retam, retap,
+					   rphi, rphim, rphip);
+	 }   
+    }
     else {
       newROI = new TrigRoiDescriptor( reta, retam, retap,
 				      rphi, rphim, rphip);
     }
-
+    
     roisWriteHandle->push_back( newROI );
     
-     const ElementLink<TrigRoiDescriptorCollection> roiEL = ElementLink<TrigRoiDescriptorCollection>(*roisWriteHandle, roisWriteHandle->size() - 1, ctx);
-
-     outputDecision->setObjectLink(roiString(), roiEL);
-   }
-
+    const ElementLink<TrigRoiDescriptorCollection> roiEL = ElementLink<TrigRoiDescriptorCollection>(*roisWriteHandle, roisWriteHandle->size() - 1, ctx);
+    
+    outputDecision->setObjectLink(roiString(), roiEL);
+  }
+  
   return StatusCode::SUCCESS;
 }

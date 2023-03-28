@@ -277,12 +277,17 @@ def muCombSequence(flags, is_probe_leg=False):
 def muCombLRTAlgSequence(flags):
     ### set the EVCreator ###
     l2muCombLRTViewsMaker = EventViewCreatorAlgorithm("IMl2muCombLRT")
-    newRoITool = ViewCreatorCentredOnIParticleROITool()
+    newRoITool = ViewCreatorCentredOnIParticleROITool("l2muCombLRTROITool")
 
     from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
     IDConfig = getInDetTrigConfig("muonLRT")
     newRoITool.RoIEtaWidth=IDConfig.etaHalfWidth
     newRoITool.RoIPhiWidth=IDConfig.phiHalfWidth
+    if IDConfig.zedHalfWidth > 0 :
+        newRoITool.RoIZedWidth=IDConfig.zedHalfWidth
+        # for the LRT instance we want a *wider* roi z width, and *don't* want to 
+        # update the z position for the central z
+        newRoITool.UseZedPosition=False
     newRoITool.RoisWriteHandleKey = recordable("HLT_Roi_L2SAMuon_LRT") #RoI collection recorded to EDM
 
     #
