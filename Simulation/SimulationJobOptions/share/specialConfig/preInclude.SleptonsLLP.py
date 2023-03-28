@@ -125,8 +125,8 @@ if doG4SimConfig:
             localPhysicsOptions += ["STauRMinusToTauNeutralino", "STauLMinusToTauNeutralino"]
         else: ## Do off shell decay for tau.
             # FIXME Dislike hard-coded numbers here
-            if (abs(MassStau-MassNeutralino - 300) > .05  and abs(MassStau-MassNeutralino - 1700) > 0.05):
-                print 'Warning: Branching ratios are wrong. Mass splitting of stau neutralino %s currently has no available values.' % (MassStau - MassNeutralino)
+            if abs(MassStau-MassNeutralino - 300) > 0.05 and abs(MassStau-MassNeutralino - 1700) > 0.05:
+                print('Warning: Branching ratios are wrong. Mass splitting of stau neutralino %s currently has no available values.' % (MassStau - MassNeutralino))
             localPhysicsOptions += ["STauRMinusToPionMinusNeutralino", "STauRPlusToPionPlusNeutralino"]
             localPhysicsOptions += ["STauLMinusToPionMinusNeutralino", "STauLPlusToPionPlusNeutralino"]
             localPhysicsOptions += ["STauRMinusToRhoMinusNeutralino", "STauRPlusToRhoPlusNeutralino"]
