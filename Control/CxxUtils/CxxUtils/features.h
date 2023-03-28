@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/features.h
@@ -12,8 +12,15 @@
 #ifndef CXXUTILS_FEATURES_H
 #define CXXUTILS_FEATURES_H
 
-#if !defined(__APPLE__)
-#include <features.h>
+// cppcheck-suppress preprocessorErrorDirective
+#if __has_include( <features.h> )
+# include <features.h>
+#endif
+
+// If we're using glibc, this should have been defined by features.h.
+// Otherwise, define a dummy.
+#ifndef __GLIBC_PREREQ
+# define __GLIBC_PREREQ(MAJOR, MINOR) 0
 #endif
 
 /// Do we support the compatible set of GCC and clang extensions
@@ -90,28 +97,19 @@
 
 // Do we have mallinfo2?  Present in glibc 2.33,
 // in which mallinfo is deprecated.
-#if defined(__GLIBC__)
 # if __GLIBC_PREREQ(2, 33)
-#  define HAVE_MALLINFO2 1
-# else
-#  define HAVE_MALLINFO2 0
-# endif
+# define HAVE_MALLINFO2 1
 #else
 # define HAVE_MALLINFO2 0
 #endif
 
 
 // Do we have malloc hooks?  They were removed in glibc 2.34.
-#if defined(__GLIBC__)
-# if !__GLIBC_PREREQ(2, 34)
-#  define HAVE_MALLOC_HOOKS 1
-# else
-#  define HAVE_MALLOC_HOOKS 0
-# endif
+#if !__GLIBC_PREREQ(2, 34)
+# define HAVE_MALLOC_HOOKS 1
 #else
 # define HAVE_MALLOC_HOOKS 0
 #endif
-
 
 // Do we have feenableexcept/fedisableexcept
 #if defined(__GLIBC__)
