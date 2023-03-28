@@ -104,9 +104,7 @@ def TauCaloAlgCfg(flags):
     CaloTopoForTausMaker.ClusterCorrectionTools += [result.popToolsAndMerge(tauTools.TauCaloClusterBadChannelCfg(flags))]
     CaloTopoForTausMaker.ClusterCorrectionTools += [result.popToolsAndMerge(tauTools.TauCaloClusterMomentsMakerCfg(flags))]
 
-    # calo flag to migrate - currently false
-    from CaloRec.CaloTopoClusterFlags import jobproperties
-    if jobproperties.CaloTopoClusterFlags.doCellWeightCalib():
+    if flags.Calo.TopoCluster.doCellWeightCalib:
         CaloTopoForTausMaker.ClusterCorrectionTools += [result.popToolsAndMerge(tauTools.TauCaloClusterCellWeightCalibCfg(flags))]
 
     if flags.Calo.TopoCluster.doTopoClusterLocalCalib:
