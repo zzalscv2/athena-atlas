@@ -14,8 +14,6 @@ __doc__    = "InDetTrigConfigRecLoadToolsPost"
 # common things
 from AthenaCommon.AppMgr import ToolSvc
 from InDetTrigRecExample.InDetTrigFlags import InDetTrigFlags
-from InDetTrigRecExample.ConfiguredNewTrackingTrigCuts import EFIDTrackingCuts
-InDetTrigCutValues = EFIDTrackingCuts
 
 from InDetTrigRecExample.InDetTrigCommonTools import CAtoLegacyPublicToolWrapper
 
@@ -30,31 +28,11 @@ InDetTrigTrackSummaryTool = CAtoLegacyPublicToolWrapper(InDetTrigTrackSummaryToo
 # AssociationMapName = "TrigInDetPRDtoTrackMap"
 
 from TrkParticleCreator.TrkParticleCreatorConf import Trk__TrackParticleCreatorTool
-InDetTrigParticleCreatorTool = \
-    Trk__TrackParticleCreatorTool( name = "InDetTrigParticleCreatorTool",
-                                   TrackSummaryTool = InDetTrigTrackSummaryTool,
-                                   KeepParameters = False,
-                                   DoSharedSiHits = False
-                                   #ForceTrackSummaryUpdate = False,
-                                   )
 
-ToolSvc += InDetTrigParticleCreatorTool
-if (InDetTrigFlags.doPrintConfigurables()):
-    print (InDetTrigParticleCreatorTool)
+from TrkConfig.TrkParticleCreatorConfig import InDetTrigParticleCreatorToolCfg,InDetTrigParticleCreatorToolTRTPidCfg
+InDetTrigParticleCreatorTool = CAtoLegacyPublicToolWrapper(InDetTrigParticleCreatorToolCfg)
+InDetTrigParticleCreatorToolTRTPid = CAtoLegacyPublicToolWrapper(InDetTrigParticleCreatorToolTRTPidCfg)
 
-InDetTrigParticleCreatorToolWithSummary = \
-    Trk__TrackParticleCreatorTool( name = "InDetTrigParticleCreatorToolWithSummary",
-                                   TrackSummaryTool = InDetTrigTrackSummaryTool,
-                                   TestPixelLayerTool = InDetTrigTestPixelLayerToolInner,
-                                   KeepParameters = True,
-                                   ComputeAdditionalInfo = True,
-                                   DoSharedSiHits = False
-                                   #ForceTrackSummaryUpdate = True,
-                                   )
-
-ToolSvc += InDetTrigParticleCreatorToolWithSummary
-if (InDetTrigFlags.doPrintConfigurables()):
-    print (InDetTrigParticleCreatorToolWithSummary)
 
 InDetTrigTRT_ElectronPidTool = None
 from AthenaCommon.DetFlags import DetFlags

@@ -69,13 +69,15 @@ def signatureSpecificSettingOfFlags(flags,mode):
       
     return ret
 
-  flags.addFlag("trkTracks_FTF", f'HLT_IDTrkTrack_{flags.suffix}_FTF')
-  flags.addFlag("tracks_FTF", collToRecordable(flags, f'HLT_IDTrack_{flags.suffix}_FTF'))
+  flags.addFlag("trkTracks_FTF",    f'HLT_IDTrkTrack_{flags.suffix}_FTF')
   flags.addFlag("trkTracks_IDTrig", f'HLT_IDTrkTrack_{flags.suffix}_IDTrig')
-  flags.addFlag("tracks_IDTrig", collToRecordable(flags, f"HLT_IDTrack_{flags.suffix}_IDTrig"))
+  flags.addFlag("tracks_FTF",    
+                collToRecordable(flags, f'HLT_IDTrack_{flags.suffix}_FTF'))
+  flags.addFlag("tracks_IDTrig", 
+                collToRecordable(flags, "HLT_IDTrack_{}_IDTrig".format(flags.suffix if flags.input_name != "tauIso" else "Tau")))
 
-  flags.addFlag("refitROT", False) # should likely be moved to ConfigSettingsBase
-  flags.addFlag("trtExtensionType", "xf") # should likely be moved to ConfigSettingsBase
+  flags.addFlag("refitROT", False) 
+  flags.addFlag("trtExtensionType", "xf") 
 
 
     
