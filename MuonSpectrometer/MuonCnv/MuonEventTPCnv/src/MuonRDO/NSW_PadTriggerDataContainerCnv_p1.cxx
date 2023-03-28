@@ -88,7 +88,7 @@ void NSW_PadTriggerDataContainerCnv_p1::transToPers(const NSW_PadTriggerDataCont
         pCollection.m_bcid_rel = tCollection->getBcidRels();
         pCollection.m_bcid_status = tCollection->getBcidStatuses();
         pCollection.m_bcid_multzero = tCollection->getBcidMultZeros();
-        pCollection.m_bcid_multzero = tCollection->getBcidMultiplicities();
+        pCollection.m_bcid_multiplicity = tCollection->getBcidMultiplicities();
         persistentObj->m_collections.push_back(std::move(pCollection));
     }
 }
