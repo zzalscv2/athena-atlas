@@ -41,6 +41,8 @@ namespace H5Utils {
       float u_float;
       double u_double;
       bool u_bool;
+      short u_short;
+      unsigned short u_ushort;
     };
 
     /**
@@ -83,6 +85,14 @@ namespace H5Utils {
     template <> struct H5Traits<bool> {
       static const H5::DataType type;
       static bool& ref(data_buffer_t& buf) { return buf.u_bool; }
+    };
+    template <> struct H5Traits<short> {
+      static const H5::DataType type;
+      static short& ref(data_buffer_t& buf) { return buf.u_short; }
+    };
+    template <> struct H5Traits<unsigned short> {
+      static const H5::DataType type;
+      static unsigned short& ref(data_buffer_t& buf) { return buf.u_ushort; }
     };
 
   }

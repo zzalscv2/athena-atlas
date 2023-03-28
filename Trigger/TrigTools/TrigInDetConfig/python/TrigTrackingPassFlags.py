@@ -9,6 +9,10 @@ def signatureSpecificSettingOfFlags(flags,mode):
   #temporary - to be reworked
   if mode=="InDet":
     flags.minPT = flags.pTmin   #hack to sync pT threshold used in offline and trigger
+    
+    flags.minClusters         = 7   #hardcoded to preserve trigger settings (not used for FTF config)
+    flags.minSiNotShared      = 5
+    flags.maxShared           = 2
     flags.Xi2max              = 9. if flags.input_name != "bjet" else 12.
     flags.Xi2maxNoAdd         = 25.
     flags.nHolesMax           = 2
@@ -19,7 +23,8 @@ def signatureSpecificSettingOfFlags(flags,mode):
       flags.roadWidth =         5.
     elif flags.input_name == 'cosmics':
       flags.roadWidth =        75.
-                            
+      
+    flags.useNewParameterizationTRT = True
     
   else:                         #ITk specific settings can be done here while we rely on ConfigSettings
     flags.minPT = [flags.pTmin] #ITk flags have eta dependant settings

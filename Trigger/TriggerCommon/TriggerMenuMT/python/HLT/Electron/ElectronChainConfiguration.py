@@ -298,10 +298,14 @@ class ElectronChainConfiguration(ChainConfigurationBase):
         return self.getStep(flags,2,stepName,[ fastTrackingSequenceCfg_lrt],is_probe_leg=is_probe_leg)
 
     def getFastElectron(self, flags, is_probe_leg=False):
-        from TrigBphysHypo.TrigMultiTrkComboHypoConfig import StreamerNoMuonDiElecFastComboHypoCfg, StreamerDiElecFastComboHypoCfg
-        if "bBeeM6000" in self.chainDict['topo'] and 'BPH-0DR3-EM7J15' not in self.chainDict['L1item']:
+        from TrigBphysHypo.TrigMultiTrkComboHypoConfig import StreamerNoMuonDiElecFastComboHypoCfg, StreamerDiElecFastComboHypoCfg, StreamerDiElecNoringerFastComboHypoCfg
+        n = sum([m for s, m in zip(self.chainDict['signatures'], self.chainDict['chainMultiplicities']) if s == 'Electron'])
+        if "bBeeM6000" in self.chainDict['topo'] and n == 2:
             signatures = self.chainDict['signatures']
-            if signatures.count(signatures[0]) == len(signatures):
+            if 'noringer' in self.chainPart['L2IDAlg']:
+                stepName = "fast_electron_noringer_bBee"
+                return self.getStep(flags,3,stepName,sequenceCfgArray=[fastElectronSequenceCfg], comboHypoCfg=StreamerDiElecNoringerFastComboHypoCfg, is_probe_leg=is_probe_leg)
+            elif signatures.count(signatures[0]) == len(signatures):
                 stepName = "noMuon_fast_electron_bBee"
                 return self.getStep(flags,3,stepName,sequenceCfgArray=[fastElectronSequenceCfg], comboHypoCfg=StreamerNoMuonDiElecFastComboHypoCfg, is_probe_leg=is_probe_leg)
             else:

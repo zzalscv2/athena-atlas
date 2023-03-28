@@ -22,6 +22,8 @@ namespace H5Utils {
     const H5::DataType H5Traits<float>::type = PT::NATIVE_FLOAT;
     const H5::DataType H5Traits<double>::type = PT::NATIVE_DOUBLE;
     const H5::DataType H5Traits<bool>::type = get_bool_type();
+    const H5::DataType H5Traits<short>::type = PT::NATIVE_SHORT;
+    const H5::DataType H5Traits<unsigned short>::type = PT::NATIVE_USHORT;
 
     // define the spaciel bool case
     H5::DataType get_bool_type() {
