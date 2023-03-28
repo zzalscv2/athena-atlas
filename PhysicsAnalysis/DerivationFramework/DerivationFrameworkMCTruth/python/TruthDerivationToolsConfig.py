@@ -224,12 +224,14 @@ def HardScatterCollectionMakerCfg(flags, name, **kwargs):
 #add the 'decoration' tool to dress the main truth collection with the classification
 def DFCommonTruthClassificationToolCfg(flags):
     """dress the main truth collection with the classification"""
-    acc = ComponentAccumulator() 
-    DFCommonTruthClassifier = acc.getPrimaryAndMerge(DFCommonMCTruthClassifierCfg(flags))
-    return TruthClassificationDecoratorCfg(flags,
-                                           name = "DFCommonTruthClassificationTool",
-                                           ParticlesKey = "TruthParticles",
-                                           MCTruthClassifier = DFCommonTruthClassifier)
+    accMCTC = DFCommonMCTruthClassifierCfg(flags)
+    DFCommonTruthClassifier = accMCTC.getPrimary()
+    acc = TruthClassificationDecoratorCfg(flags,
+                                          name = "DFCommonTruthClassificationTool",
+                                          ParticlesKey = "TruthParticles",
+                                          MCTruthClassifier = DFCommonTruthClassifier)
+    acc.merge(accMCTC)
+    return acc
 
 #add the 'decoration' tools for dressing and isolation
 def DFCommonTruthElectronDressingToolCfg(flags, decorationName = "dressedPhoton"):
