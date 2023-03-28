@@ -8,24 +8,17 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ThreadLocalContext.h"
 
-// #include "valgrind/callgrind.h"
-
-#define padMaxIndex 600
-#define slMaxIndex 200
-
 using OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment;
 
 Muon::RPC_RawDataProviderToolMT::RPC_RawDataProviderToolMT(const std::string& t, const std::string& n, const IInterface* p) :
-    base_class(t, n, p) {
-    declareProperty("RpcContainerCacheKey", m_rdoContainerCacheKey, "Optional external cache for the RPC container");
+    base_class(t, n, p) {    
 }
-
-Muon::RPC_RawDataProviderToolMT::~RPC_RawDataProviderToolMT() {}
 
 StatusCode Muon::RPC_RawDataProviderToolMT::initialize() {
     ATH_CHECK(RPC_RawDataProviderToolCore::initialize());
 
     ATH_CHECK(m_rdoContainerCacheKey.initialize(!m_rdoContainerCacheKey.key().empty()));
+    ATH_CHECK(m_idHelperSvc.retrieve());
 
     // We should only turn off the sector logic when running with cached data a la trigger mode
     if (!m_rdoContainerCacheKey.key().empty() && m_WriteOutRpcSectorLogic) {
@@ -114,7 +107,7 @@ StatusCode Muon::RPC_RawDataProviderToolMT::convert(const ROBFragmentList& vecRo
     // Split the methods to have one where we use the cache and one where we just setup the container
     const bool externalCacheRDO = !m_rdoContainerCacheKey.key().empty();
     if (!externalCacheRDO) {
-        ATH_CHECK(rdoContainerHandle.record(std::make_unique<RpcPadContainer>(padMaxIndex)));
+        ATH_CHECK(rdoContainerHandle.record(std::make_unique<RpcPadContainer>(m_idHelperSvc->rpcIdHelper().module_hash_max())));
         ATH_MSG_DEBUG("Created RpcPadContainer");
     } else {
         SG::UpdateHandle<RpcPad_Cache> update(m_rdoContainerCacheKey, ctx);

@@ -17,9 +17,9 @@ StatusCode Muon::RpcRDO_Decoder::initialize() {
     return StatusCode::SUCCESS;
 }
 
-std::vector<RpcDigit*>* Muon::RpcRDO_Decoder::getDigit(const RpcFiredChannel* fChan, uint16_t& sectorID, uint16_t& padId, uint16_t& cmaId,
+std::vector<std::unique_ptr<RpcDigit>> Muon::RpcRDO_Decoder::getDigit(const RpcFiredChannel* fChan, uint16_t& sectorID, uint16_t& padId, uint16_t& cmaId,
                                                        const RpcCablingCondData* rpcCab) const {
-    std::vector<RpcDigit*>* rpcDigitVec = new std::vector<RpcDigit*>;
+    std::vector<std::unique_ptr<RpcDigit>> rpcDigitVec{};
 
     uint16_t side = (sectorID < 32) ? 0 : 1;
     uint16_t slogic = sectorID - side * 32;
@@ -39,22 +39,19 @@ std::vector<RpcDigit*>* Muon::RpcRDO_Decoder::getDigit(const RpcFiredChannel* fC
     // online identifier
     std::list<Identifier> idList = rpcCab->give_strip_id(side, slogic, padId, cmaId, ijk, channel, &m_idHelperSvc->rpcIdHelper());
 
-    std::list<Identifier>::const_iterator it_list;
-    rpcDigitVec->reserve(idList.size());
-    for (it_list = idList.begin(); it_list != idList.end(); ++it_list) {
-        // and add the digit to the collection
-        Identifier stripOfflineId = *it_list;
-
-        RpcDigit* rpcDigit = new RpcDigit(stripOfflineId, time);
-        rpcDigitVec->push_back(rpcDigit);
+    rpcDigitVec.reserve(idList.size());
+    for (const Identifier& stripOfflineId: idList) {
+        // and add the digit to the collection       
+        std::unique_ptr<RpcDigit> rpcDigit = std::make_unique<RpcDigit>(stripOfflineId, time);
+        rpcDigitVec.push_back(std::move(rpcDigit));
     }
 
     return rpcDigitVec;
 }
 
-std::vector<Identifier>* Muon::RpcRDO_Decoder::getOfflineData(const RpcFiredChannel* fChan, uint16_t& sectorID, uint16_t& padId,
+std::vector<Identifier> Muon::RpcRDO_Decoder::getOfflineData(const RpcFiredChannel* fChan, uint16_t& sectorID, uint16_t& padId,
                                                               uint16_t& cmaId, double& time, const RpcCablingCondData* rpcCab) const {
-    std::vector<Identifier>* rpcIdVec = new std::vector<Identifier>;
+    std::vector<Identifier> rpcIdVec{};
 
     uint16_t side = (sectorID < 32) ? 0 : 1;
     uint16_t slogic = sectorID - side * 32;
@@ -74,7 +71,7 @@ std::vector<Identifier>* Muon::RpcRDO_Decoder::getOfflineData(const RpcFiredChan
     // online identifier
     std::list<Identifier> idList = rpcCab->give_strip_id(side, slogic, padId, cmaId, ijk, channel, &m_idHelperSvc->rpcIdHelper());
 
-    rpcIdVec->assign(idList.begin(), idList.end());
+    rpcIdVec.assign(idList.begin(), idList.end());
 
     return rpcIdVec;
 }

@@ -16,28 +16,39 @@ using namespace MuonGM;
 using namespace Trk;
 
 /////////////////////////////////////////////////////////////////////////////
-Muon::RpcRdoToPrepDataToolMT::State::State(const RpcIdHelper& idHelper, MsgStream& msg) :
-    m_localPrepData(idHelper.module_hash_max()),
-    m_localCoinData(idHelper.module_hash_max()),
-    m_getPrepCollection([&](Identifier id) -> Muon::RpcPrepDataCollection* {
-        Muon::RpcPrepDataCollection*& mappedCollection = m_rpcPrepDataCollections[id];
-        if (!mappedCollection) {
-            mappedCollection =
-                Muon::IDC_Helper::addCollection<RpcPrepDataContainer, RpcIdHelper>(id, m_rpcPrepDataContainer, idHelper, msg);
-        }
-        return mappedCollection;
-    }),
-    m_getCoinCollection([&](Identifier id) -> Muon::RpcCoinDataCollection* {
-        Muon::RpcCoinDataCollection*& mappedCollection = m_rpcCoinDataCollections[id];
-        if (!mappedCollection) {
-            mappedCollection =
-                Muon::IDC_Helper::addCollection<RpcCoinDataContainer, RpcIdHelper>(id, m_rpcCoinDataContainer, idHelper, msg);
-        }
-        return mappedCollection;
-    }) {
-    m_rpcPrepDataContainer = &m_localPrepData;
-    m_rpcCoinDataContainer = &m_localCoinData;
+Muon::RpcRdoToPrepDataToolMT::State::State(const RpcIdHelper& idHelper) :
+   m_rpcIdHelper{idHelper} {
+
 }
+
+Muon::RpcPrepDataCollection* Muon::RpcRdoToPrepDataToolMT::State::getPrepCollection(const IdentifierHash& rpcHashId, MsgStream& msg) {
+    std::unique_ptr<Muon::RpcPrepDataCollection>& coll = m_rpcPrepDataCollections[rpcHashId];
+    if (!coll) {
+        Identifier id{0};
+        if (m_rpcIdHelper.get_id(rpcHashId, id, &m_modContext)) {
+            msg << MSG::ERROR << "Module hash creation failed. " << id << endmsg;
+            return nullptr;
+        }
+        coll = std::make_unique<Muon::RpcPrepDataCollection>(rpcHashId);
+        coll->setIdentifier(id);
+    }
+    return coll.get();
+}
+Muon::RpcCoinDataCollection* Muon::RpcRdoToPrepDataToolMT::State::getCoinCollection(const IdentifierHash& rpcHashId, MsgStream& msg) {
+    std::unique_ptr<Muon::RpcCoinDataCollection>& coll = m_rpcCoinDataCollections[rpcHashId];
+    if (!coll) {
+        Identifier id{0};
+        if (m_rpcIdHelper.get_id(rpcHashId, id, &m_modContext)) {
+            msg << MSG::ERROR << "Module hash creation failed. " << id << endmsg;
+            return nullptr;
+        }
+        coll = std::make_unique<Muon::RpcCoinDataCollection>(rpcHashId);
+        coll->setIdentifier(id);
+    }
+    return coll.get();
+}
+
+///
 Muon::RpcRdoToPrepDataToolMT::RpcRdoToPrepDataToolMT(const std::string& type, const std::string& name, const IInterface* parent) :
     base_class(type, name, parent){}
 
@@ -71,144 +82,114 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::initialize() {
     ATH_CHECK(m_coindataContainerCacheKey.initialize(SG::AllowEmpty));
     return StatusCode::SUCCESS;
 }
+StatusCode Muon::RpcRdoToPrepDataToolMT::loadProcessedChambers(const EventContext& ctx, State& state) const {
+    if (!m_prdContainerCacheKey.key().empty()) {
+        SG::UpdateHandle<RpcPrepDataCollection_Cache> update{m_prdContainerCacheKey, ctx};
+        if (!update.isValid()) {
+            ATH_MSG_FATAL("Invalid UpdateHandle " << m_prdContainerCacheKey.key());
+            return StatusCode::FAILURE;
+        }
+        state.m_prepDataCont = std::make_unique<Muon::RpcPrepDataContainer>(update.ptr());
+        for (const RpcPrepDataCollection* coll : *state.m_prepDataCont) {
+                state.m_decodedOfflineHashIds.insert(coll->identifyHash());
+        }
+     } else state.m_prepDataCont = std::make_unique<Muon::RpcPrepDataContainer>(m_idHelperSvc->rpcIdHelper().module_hash_max());
+
+    if (m_coindataContainerCacheKey.key().empty()) {
+        // without the cache we just record the container
+        state.m_coinDataCont = std::make_unique<Muon::RpcCoinDataContainer>(m_idHelperSvc->rpcIdHelper().module_hash_max());
+    } else {
+        // use the cache to get the container
+        SG::UpdateHandle<RpcCoinDataCollection_Cache> update{m_coindataContainerCacheKey, ctx};
+        if (!update.isValid()) {
+            ATH_MSG_FATAL("Invalid UpdateHandle " << m_coindataContainerCacheKey.key());
+            return StatusCode::FAILURE;
+        }
+        state.m_coinDataCont = std::make_unique<Muon::RpcCoinDataContainer>(update.ptr());
+        for (const RpcCoinDataCollection* coll : *state.m_coinDataCont) {
+                state.m_decodedOfflineHashIds.insert(coll->identifyHash());
+        }        
+    }
+
+    return StatusCode::SUCCESS;
+}
 /// This code is thread-safe as we will propagate local thread collection contents to a thread-safe one
 StatusCode Muon::RpcRdoToPrepDataToolMT::decode(std::vector<IdentifierHash>& idVect, std::vector<IdentifierHash>& selectedIdVect) const {
+    const EventContext& ctx = Gaudi::Hive::currentContext();
     ATH_MSG_DEBUG("Calling Core decode function from MT decode function (hash vector)");
-    State state(m_idHelperSvc->rpcIdHelper(), msg());
+    State state{m_idHelperSvc->rpcIdHelper()};
+    ATH_CHECK(loadProcessedChambers(ctx, state));
 
-    ATH_CHECK(decodeImpl(state, state.m_getPrepCollection, state.m_getCoinCollection, idVect, selectedIdVect, true));
+    ATH_CHECK(decodeImpl(ctx, state, idVect, selectedIdVect, true));
     ATH_MSG_DEBUG("Core decode processed in MT decode (hash vector)");
 
-    ATH_CHECK(transferAndRecordPrepData(state.m_localPrepData));
-    ATH_CHECK(transferAndRecordCoinData(state.m_localCoinData));
+    ATH_CHECK(transferAndRecordPrepData(ctx, state));
+    ATH_CHECK(transferAndRecordCoinData(ctx, state));
     return StatusCode::SUCCESS;
 }
 
 /// This code is thread-safe as we will propagate local thread collection contents to a thread-safe one
 StatusCode Muon::RpcRdoToPrepDataToolMT::decode(const std::vector<uint32_t>& robIds) const {
+    const EventContext& ctx = Gaudi::Hive::currentContext();
     ATH_MSG_DEBUG("Calling Core decode function from MT decode function (ROB vector)");
-    State state(m_idHelperSvc->rpcIdHelper(), msg());
+    State state{m_idHelperSvc->rpcIdHelper()};
+    ATH_CHECK(loadProcessedChambers(ctx, state));
 
-    ATH_CHECK(decodeImpl(state, state.m_getPrepCollection, state.m_getCoinCollection, robIds, true));
+    ATH_CHECK(decodeImpl(ctx, state,  robIds, true));
     ATH_MSG_DEBUG("Core decode processed in MT decode (ROB vector)");
 
-    ATH_CHECK(transferAndRecordPrepData(state.m_localPrepData));
-    ATH_CHECK(transferAndRecordCoinData(state.m_localCoinData));
+    ATH_CHECK(transferAndRecordPrepData(ctx, state));
+    ATH_CHECK(transferAndRecordCoinData(ctx, state));
     return StatusCode::SUCCESS;
 }
 
-StatusCode Muon::RpcRdoToPrepDataToolMT::transferAndRecordPrepData(Muon::RpcPrepDataContainer& localContainer) const {
-    // We will need to retrieve from cache even in different threads
-    SG::WriteHandle<Muon::RpcPrepDataContainer> rpcPRDHandle(m_rpcPrepDataContainerKey);
-
-    // Caching of PRD container
-    const bool externalCachePRD = !m_prdContainerCacheKey.key().empty();
-
-    if (!externalCachePRD) {
-        // without the cache we just record the container
-        StatusCode status =
-            rpcPRDHandle.record(std::make_unique<Muon::RpcPrepDataContainer>(m_idHelperSvc->rpcIdHelper().module_hash_max()));
-        if (status.isFailure() || !rpcPRDHandle.isValid()) {
-            ATH_MSG_FATAL("Could not record container of RPC PrepData Container at " << m_rpcPrepDataContainerKey.key());
-            return StatusCode::FAILURE;
-        }
-        ATH_MSG_DEBUG("Created container " << m_rpcPrepDataContainerKey.key());
-    } else {
-        // use the cache to get the container
-        SG::UpdateHandle<RpcPrepDataCollection_Cache> update(m_prdContainerCacheKey);
-        if (!update.isValid()) {
-            ATH_MSG_FATAL("Invalid UpdateHandle " << m_prdContainerCacheKey.key());
-            return StatusCode::FAILURE;
-        }
-        StatusCode status = rpcPRDHandle.record(std::make_unique<Muon::RpcPrepDataContainer>(update.ptr()));
-        if (status.isFailure() || !rpcPRDHandle.isValid()) {
-            ATH_MSG_FATAL("Could not record container of RPC PrepData Container using cache " << m_prdContainerCacheKey.key() << " - "
-                                                                                              << m_rpcPrepDataContainerKey.key());
-            return StatusCode::FAILURE;
-        }
-        ATH_MSG_DEBUG("Created container using cache for " << m_prdContainerCacheKey.key());
-    }
-
-    // Take localContainer and transfer contents to rpcPRDHandle
-    auto prd_hashes = localContainer.GetAllCurrentHashes();  // deliberately GetAllCurrentHashes
-    for (auto hash : prd_hashes) {
-        // Remove collection from local-thread container and place into unique_ptr to move to cache
-        std::unique_ptr<Muon::RpcPrepDataCollection> coll(localContainer.removeCollection(hash));
-        // Check if it is present in the cache container
-        bool isHashInCache = rpcPRDHandle->tryAddFromCache(hash);
-        if (isHashInCache) {
-            ATH_MSG_DEBUG("PRD hash " << hash << " exists inside cache container");
-            continue;
-        }
+StatusCode Muon::RpcRdoToPrepDataToolMT::transferAndRecordPrepData(const EventContext& ctx, State& state) const {
+    
+    for (auto& [hash, collection] : state.m_rpcPrepDataCollections) {
+        if (!collection || collection->empty()) continue;       
         // If not present, get a write lock for the hash and move collection
-        RpcPrepDataContainer::IDC_WriteHandle lock = rpcPRDHandle->getWriteHandle(hash);
-        ATH_CHECK(lock.addOrDelete(std::move(coll)));
+        RpcPrepDataContainer::IDC_WriteHandle lock = state.m_prepDataCont->getWriteHandle(hash);
+        if (lock.alreadyPresent()) {
+           ATH_MSG_DEBUG("RpcPrepDataCollection already contained in IDC " <<m_idHelperSvc->toString(collection->identify()));
+           continue;          
+        }
+        ATH_CHECK(lock.addOrDelete(std::move(collection)));
         ATH_MSG_DEBUG("PRD hash " << hash << " has been moved to cache container");
     }
+    state.m_rpcPrepDataCollections.clear();
 
     if (msgLvl(MSG::DEBUG)) {
-        for (const auto& [hash, ptr] : rpcPRDHandle->GetAllHashPtrPair()) {
+        for (const auto& [hash, ptr] : state.m_prepDataCont->GetAllHashPtrPair()) {
             ATH_MSG_DEBUG("Contents of CONTAINER in this view : " << hash);
         }
     }
-
-    // For additional information on the contents of the cache-based container, this function can be used
-    // printMTPrepData (*rpcPRDHandle);
-
+    SG::WriteHandle<Muon::RpcPrepDataContainer> rpcPRDHandle{m_rpcPrepDataContainerKey, ctx};
+    ATH_CHECK(rpcPRDHandle.record(std::move(state.m_prepDataCont)));
+    ATH_MSG_DEBUG("Created container " << m_rpcPrepDataContainerKey.key());
     return StatusCode::SUCCESS;
 }
 
-StatusCode Muon::RpcRdoToPrepDataToolMT::transferAndRecordCoinData(Muon::RpcCoinDataContainer& localContainer) const {
+StatusCode Muon::RpcRdoToPrepDataToolMT::transferAndRecordCoinData(const EventContext& ctx, State& state) const {
     if (!m_producePRDfromTriggerWords) { return StatusCode::SUCCESS; }
 
-    // Handle coin data if being used
-    SG::WriteHandle<Muon::RpcCoinDataContainer> rpcCoinHandle(m_rpcCoinDataContainerKey);
-    const bool externalCacheCoinData = !m_coindataContainerCacheKey.key().empty();
-    if (!externalCacheCoinData) {
-        // without the cache we just record the container
-        StatusCode status =
-            rpcCoinHandle.record(std::make_unique<Muon::RpcCoinDataContainer>(m_idHelperSvc->rpcIdHelper().module_hash_max()));
-        if (status.isFailure() || !rpcCoinHandle.isValid()) {
-            ATH_MSG_FATAL("Could not record container of RPC Coin Data Container at " << m_rpcCoinDataContainerKey.key());
-            return StatusCode::FAILURE;
-        }
-        ATH_MSG_DEBUG("Created container " << m_rpcCoinDataContainerKey.key());
-    } else {
-        // use the cache to get the container
-        SG::UpdateHandle<RpcCoinDataCollection_Cache> update(m_coindataContainerCacheKey);
-        if (!update.isValid()) {
-            ATH_MSG_FATAL("Invalid UpdateHandle " << m_coindataContainerCacheKey.key());
-            return StatusCode::FAILURE;
-        }
-        StatusCode status = rpcCoinHandle.record(std::make_unique<Muon::RpcCoinDataContainer>(update.ptr()));
-        if (status.isFailure() || !rpcCoinHandle.isValid()) {
-            ATH_MSG_FATAL("Could not record container of RPC Coin Data Container using cache " << m_coindataContainerCacheKey.key() << " - "
-                                                                                               << m_rpcCoinDataContainerKey.key());
-            return StatusCode::FAILURE;
-        }
-        ATH_MSG_DEBUG("Created container using cache for " << m_coindataContainerCacheKey.key());
-    }
-
     // Take localContainer and transfer contents to rpcCoinHandle
-    auto coin_hashes = localContainer.GetAllCurrentHashes();  // deliberately GetAllCurrentHashes
-    for (auto hash : coin_hashes) {
-        // Remove collection from local-thread container and place into unique_ptr to move to cache
-        std::unique_ptr<Muon::RpcCoinDataCollection> coll(localContainer.removeCollection(hash));
-        // Check if it is present in the cache container
-        bool isHashInCache = rpcCoinHandle->tryAddFromCache(hash);
-        if (isHashInCache) {
-            ATH_MSG_DEBUG("Coin hash " << hash << " exists inside cache container");
-            continue;
-        }
+    for (auto& [hash, collection] : state.m_rpcCoinDataCollections) {
+        if (!collection || collection->empty()) continue;       
         // If not present, get a write lock for the hash and move collection
-        RpcCoinDataContainer::IDC_WriteHandle lock = rpcCoinHandle->getWriteHandle(hash);
-        ATH_CHECK(lock.addOrDelete(std::move(coll)));
+        RpcCoinDataContainer::IDC_WriteHandle lock = state.m_coinDataCont->getWriteHandle(hash);
+        if (lock.alreadyPresent()) {
+           ATH_MSG_DEBUG("RpcCoinDataCollection already contained in IDC " <<m_idHelperSvc->toString(collection->identify()));
+           continue;            
+        }
+        ATH_CHECK(lock.addOrDelete(std::move(collection)));
         ATH_MSG_DEBUG("Coin hash " << hash << " has been moved to cache container");
     }
-
+    state.m_rpcCoinDataCollections.clear();
     if (msgLvl(MSG::DEBUG)) {
-        for (const auto& [hash, ptr] : rpcCoinHandle->GetAllHashPtrPair()) { ATH_MSG_DEBUG("Contents of LOCAL in this view : " << hash); }
+        for (const auto& [hash, ptr] : state.m_coinDataCont->GetAllHashPtrPair()) { ATH_MSG_DEBUG("Contents of LOCAL in this view : " << hash); }
     }
+    SG::WriteHandle<Muon::RpcCoinDataContainer> rpcCoinHandle{m_rpcCoinDataContainerKey, ctx};
+    ATH_CHECK(rpcCoinHandle.record(std::move(state.m_coinDataCont)));
 
     // For additional information on the contents of the cache-based container, this function can be used
     // printMTCoinData (*rpcCoinHandle);
@@ -216,28 +197,18 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::transferAndRecordCoinData(Muon::RpcCoin
     return StatusCode::SUCCESS;
 }
 
-void Muon::RpcRdoToPrepDataToolMT::printMTPrepData(Muon::RpcPrepDataContainer& prepData) const {
+void Muon::RpcRdoToPrepDataToolMT::printMTPrepData(const Muon::RpcPrepDataContainer& prepData) const {
     msg(MSG::INFO) << "********************************************************************************************************" << endmsg;
     msg(MSG::INFO) << "***************** Listing RpcPrepData collections content **********************************************" << endmsg;
 
     if (prepData.size() <= 0) msg(MSG::INFO) << "No RpcPrepRawData collections found" << endmsg;
 
-    int ncoll = 0;
-    int ict = 0;
-    int ictphi = 0;
-    int icteta = 0;
-    int icttrg = 0;
+    int ncoll{0}, ict{0}, ictphi{0}, icteta{0}, icttrg{0};
     msg(MSG::INFO) << "--------------------------------------------------------------------------------------------" << endmsg;
-    for (IdentifiableContainer<Muon::RpcPrepDataCollection>::const_iterator rpcColli = prepData.begin(); rpcColli != prepData.end();
-         ++rpcColli) {
-        const Muon::RpcPrepDataCollection* rpcColl = *rpcColli;
-
+    for (const Muon::RpcPrepDataCollection* rpcColl : prepData) {
         if (rpcColl->size() > 0) {
-            msg(MSG::INFO) << "PrepData Collection ID " << m_idHelperSvc->rpcIdHelper().show_to_string(rpcColl->identify()) << endmsg;
-            RpcPrepDataCollection::const_iterator it_rpcPrepData;
-            int icc = 0;
-            int iccphi = 0;
-            int icceta = 0;
+            msg(MSG::INFO) << "PrepData Collection ID " << m_idHelperSvc->toString(rpcColl->identify()) << endmsg;            
+            int icc{0}, iccphi{0}, icceta{0};
             for (const RpcPrepData* rpc : *rpcColl) {
                 icc++;
                 ict++;
@@ -250,7 +221,7 @@ void Muon::RpcRdoToPrepDataToolMT::printMTPrepData(Muon::RpcPrepDataContainer& p
                     icteta++;
                 }
                 msg(MSG::INFO) << ict << " in this coll. " << icc
-                               << " prepData id = " << m_idHelperSvc->rpcIdHelper().show_to_string(rpc->identify()) << " time "
+                               << " prepData id = " << m_idHelperSvc->toString(rpc->identify()) << " time "
                                << rpc->time() << " ambiguityFlag " << rpc->ambiguityFlag() << endmsg;
             }
             ncoll++;
@@ -263,36 +234,19 @@ void Muon::RpcRdoToPrepDataToolMT::printMTPrepData(Muon::RpcPrepDataContainer& p
     msg(MSG::INFO) << "--------------------------------------------------------------------------------------------" << endmsg;
 }
 
-void Muon::RpcRdoToPrepDataToolMT::printMTCoinData(Muon::RpcCoinDataContainer& coinData) const {
+void Muon::RpcRdoToPrepDataToolMT::printMTCoinData(const Muon::RpcCoinDataContainer& coinData) const {
     msg(MSG::INFO) << "********************************************************************************************************" << endmsg;
     msg(MSG::INFO) << "***************** Listing RpcCoinData collections content **********************************************" << endmsg;
 
     if (coinData.size() <= 0) msg(MSG::INFO) << "No RpcCoinData collections found" << endmsg;
 
-    int ncoll = 0;
-    int ict = 0;
-    int ictphi = 0;
-    int icteta = 0;
-    int ictphilc = 0;
-    int ictphihc = 0;
-    int ictetalc = 0;
-    int ictetahc = 0;
+    int ncoll{0}, ict{0}, ictphi{0}, icteta{0}, ictphilc{0}, ictphihc{0}, ictetalc{0}, ictetahc{0};
     msg(MSG::INFO) << "--------------------------------------------------------------------------------------------" << endmsg;
-    for (IdentifiableContainer<Muon::RpcCoinDataCollection>::const_iterator rpcColli = coinData.begin(); rpcColli != coinData.end();
-         ++rpcColli) {
-        const Muon::RpcCoinDataCollection* rpcColl = *rpcColli;
-
+    for (const Muon::RpcCoinDataCollection* rpcColl: coinData) {
+       
         if (rpcColl->size() > 0) {
-            msg(MSG::INFO) << "CoinData Collection ID " << m_idHelperSvc->rpcIdHelper().show_to_string(rpcColl->identify()) << endmsg;
-            RpcCoinDataCollection::const_iterator it_rpcCoinData;
-            int icc = 0;
-            int iccphi = 0;
-            int icceta = 0;
-            int iccphilc = 0;
-            int iccetahc = 0;
-            int iccphihc = 0;
-            int iccetalc = 0;
-
+            msg(MSG::INFO) << "CoinData Collection ID " << m_idHelperSvc->toString(rpcColl->identify()) << endmsg;
+            int icc{0}, iccphi{0}, icceta{0}, iccphilc{0}, iccetahc{0}, iccphihc{0}, iccetalc{0};
             for (const RpcCoinData* rpc : *rpcColl) {
                 icc++;
                 ict++;
@@ -319,7 +273,7 @@ void Muon::RpcRdoToPrepDataToolMT::printMTCoinData(Muon::RpcCoinDataContainer& c
                     }
                 }
                 msg(MSG::INFO) << ict << " in this coll. " << icc
-                               << " coinData id = " << m_idHelperSvc->rpcIdHelper().show_to_string(rpc->identify()) << " time "
+                               << " coinData id = " << m_idHelperSvc->toString(rpc->identify()) << " time "
                                << rpc->time() << " ijk = " << rpc->ijk() << " cm/pad/sl ids = " << rpc->parentCmId() << "/"
                                << rpc->parentPadId() << "/" << rpc->parentSectorId() << "/"
                                << " isLowPtCoin/HighPtCoin/LowPtInputToHighPt " << rpc->isLowPtCoin() << "/" << rpc->isHighPtCoin() << "/"
@@ -345,21 +299,20 @@ void Muon::RpcRdoToPrepDataToolMT::printPrepData() const {
 }
 
 //___________________________________________________________________________
-StatusCode Muon::RpcRdoToPrepDataToolMT::decodeImpl(State& state, getPrepCollection_func& getPrepCollection,
-                                                      getCoinCollection_func& getCoinCollection, std::vector<IdentifierHash>& idVect,
+StatusCode Muon::RpcRdoToPrepDataToolMT::decodeImpl(const EventContext& ctx, State& state, std::vector<IdentifierHash>& idVect,
                                                       std::vector<IdentifierHash>& idWithDataVect, bool firstTimeInTheEvent) const {
     int sizeVectorRequested = idVect.size();
     ATH_MSG_DEBUG("Decode method called for " << sizeVectorRequested << " offline collections");
     if (sizeVectorRequested == 0) ATH_MSG_DEBUG("Decoding the entire event");
 
-    StatusCode status = StatusCode::SUCCESS;
+    
 
     // clear output vector of selected data collections containing data
     idWithDataVect.clear();
 
     // create an empty vector of hash ids to be decoded (will be filled if RoI-based and left empty if full-scan)
-    std::vector<IdentifierHash> idVectToBeDecoded;
-    idVectToBeDecoded.reserve(0);
+    std::vector<IdentifierHash> idVectToBeDecoded; 
+    idVectToBeDecoded.reserve(idVect.size());
 
     if (firstTimeInTheEvent) {
         if (sizeVectorRequested == 0)
@@ -369,7 +322,7 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::decodeImpl(State& state, getPrepCollect
     } else {
         if (state.m_fullEventDone) {
             ATH_MSG_DEBUG("Whole event has already been decoded; nothing to do.");
-            return status;
+            return StatusCode::SUCCESS;
         }
         if (sizeVectorRequested == 0) state.m_fullEventDone = true;
     }
@@ -377,18 +330,18 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::decodeImpl(State& state, getPrepCollect
     if (sizeVectorRequested != 0) {
         // the program goes in here only if RoI-based decoding has been called and the full event is not already decoded
         // this code ensures decoding of every offline hash id is called only once
-        for (auto itHashId = idVect.begin(); itHashId != idVect.end(); ++itHashId) {
-            if (state.m_decodedOfflineHashIds.insert(*itHashId).second) idVectToBeDecoded.push_back(*itHashId);
+        for (const IdentifierHash& itHashId:  idVect) {
+            if (state.m_decodedOfflineHashIds.insert(itHashId).second) idVectToBeDecoded.push_back(itHashId);
         }
-        if (idVectToBeDecoded.size() == 0) {
+        if (idVectToBeDecoded.empty()) {
             ATH_MSG_DEBUG("All requested offline collections have already been decoded; nothing to do.");
-            return status;
+            return StatusCode::SUCCESS;
         } else {
             ATH_MSG_DEBUG(idVectToBeDecoded.size() << " offline collections have not yet been decoded and will be decoded now.");
             if (msgLvl(MSG::VERBOSE)) {
                 ATH_MSG_VERBOSE("The list of offline collection hash ids to be decoded:");
-                for (auto itHashId = idVectToBeDecoded.begin(); itHashId != idVectToBeDecoded.end(); ++itHashId)
-                    ATH_MSG_VERBOSE((int)*itHashId << " ");
+                for (const IdentifierHash& itHashId : idVectToBeDecoded)
+                    ATH_MSG_VERBOSE(itHashId << " ");
             }
         }
     }
@@ -396,12 +349,12 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::decodeImpl(State& state, getPrepCollect
     // if RPC decoding is switched off stop here
     if (!m_decodeData) {
         ATH_MSG_DEBUG("Stored empty container. Decoding RPC RDO into RPC PrepRawData is switched off");
-        return status;
+        return StatusCode::SUCCESS;
     }
 
     ATH_MSG_DEBUG("Decoding RPC RDO into RPC PrepRawData");
 
-    SG::ReadCondHandle<RpcCablingCondData> cablingCondData{m_rpcReadKey, Gaudi::Hive::currentContext()};
+    SG::ReadCondHandle<RpcCablingCondData> cablingCondData{m_rpcReadKey, ctx};
     const RpcCablingCondData* rpcCabling{*cablingCondData};
 
     // if the vector requested has size 0, we need to perform a scan of the entire RDO container
@@ -409,8 +362,7 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::decodeImpl(State& state, getPrepCollect
     std::vector<IdentifierHash> rdoHashVec;
     if (sizeVectorRequested != 0) {
         ATH_MSG_DEBUG("Looking for pads IdHash to be decoded for the requested collection Ids");
-        StatusCode sc = rpcCabling->giveRDO_fromPRD(idVectToBeDecoded, rdoHashVec);
-        if (StatusCode::SUCCESS != sc) return sc;  //!< fix me - define a SW type of error
+        ATH_CHECK(rpcCabling->giveRDO_fromPRD(idVectToBeDecoded, rdoHashVec));
     }
 
     /// RPC context
@@ -418,10 +370,10 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::decodeImpl(State& state, getPrepCollect
 
     // we come here if the rdo container is already in SG (for example in MC RDO!)
     ATH_MSG_DEBUG("Retrieving Rpc PAD container from the store");
-    auto rdoContainerHandle = SG::makeHandle(m_rdoContainerKey);
+    auto rdoContainerHandle = SG::makeHandle(m_rdoContainerKey, ctx);
     if (!rdoContainerHandle.isValid()) {
-        ATH_MSG_WARNING("Retrieval of RPC RDO container failed !");
-        return StatusCode::SUCCESS;
+        ATH_MSG_ERROR("Retrieval of RPC RDO container failed !");
+        return StatusCode::FAILURE;
     }
 
     ///////////// here the RDO container is retrieved and filled -whatever input type we start with- => check the size
@@ -433,15 +385,11 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::decodeImpl(State& state, getPrepCollect
     ATH_MSG_DEBUG("Not empty pad container in this event ");
 
     // start here to process the RDO (for the full event of for a fraction of it)
-    bool processingetaview = true;
-    bool processingphiview = false;
+    bool processingetaview{true}, processingphiview{false};
     if (!m_solvePhiAmbiguities) processingetaview = false;
     bool doingSecondLoopAmbigColls = false;
     while (processingetaview || processingphiview || (!m_solvePhiAmbiguities)) {
-        int ipad = 0;
-        int nPrepRawData = 0;
-        int nPhiPrepRawData = 0;
-        int nEtaPrepRawData = 0;
+        int ipad{0}, nPrepRawData{0},nPhiPrepRawData{0}, nEtaPrepRawData{0};
         if (processingphiview) state.m_ambiguousCollections.clear();
         if (msgLvl(MSG::DEBUG)) {
             if (processingetaview)
@@ -449,40 +397,34 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::decodeImpl(State& state, getPrepCollect
             else
                 ATH_MSG_DEBUG("*** Processing phi view ");
         }
-
-        const RpcPad* rdoColl;
         // seeded decoding
         if (sizeVectorRequested != 0) {
             ATH_MSG_DEBUG("Start loop over pads hashes - seeded mode ");
-            for (std::vector<IdentifierHash>::const_iterator iPadHash = rdoHashVec.begin(); iPadHash != rdoHashVec.end(); ++iPadHash) {
-                const RpcPad* rdoColl = rdoContainerHandle->indexFindPtr(*iPadHash);
-                if (rdoColl != nullptr) {
-                    ++ipad;
+            for (const IdentifierHash& iPadHash: rdoHashVec) {
+                const RpcPad* rdoColl = rdoContainerHandle->indexFindPtr(iPadHash);
+                if (!rdoColl) {
+                    ATH_MSG_DEBUG("Requested pad with online id " << iPadHash << " not found in the rdoContainerHandle.");
+                    continue;
+                }
+                ++ipad;
 
-                    ATH_MSG_DEBUG("A new pad here n. " << ipad << ", online id " << (int)(rdoColl->identifyHash()) << ", with "
-                                                       << rdoColl->size() << " CM inside ");
-                    StatusCode sc =
-                        processPad(state, getPrepCollection, getCoinCollection, rdoColl, processingetaview, processingphiview, nPrepRawData,
-                                   idVectToBeDecoded, idWithDataVect, rpcContext, doingSecondLoopAmbigColls, state.m_ambiguousCollections);
-                    if (sc != StatusCode::SUCCESS) return sc;
-                } else {
-                    ATH_MSG_DEBUG("Requested pad with online id " << (int)(*iPadHash) << " not found in the rdoContainerHandle.");
-                }  // end of if (pad collection exist in the container)
+                ATH_MSG_DEBUG("A new pad here n. " << ipad << ", online id " << (int)(rdoColl->identifyHash()) << ", with "
+                                                << rdoColl->size() << " CM inside ");
+                ATH_CHECK(processPad(ctx, state, rdoColl, processingetaview, processingphiview, nPrepRawData,
+                                   idVectToBeDecoded, idWithDataVect,  doingSecondLoopAmbigColls));                    
+               
             }      // end loop over requested pads hashes
         } else {   // unseeded // whole event
             ATH_MSG_DEBUG("Start loop over pads - unseeded mode ");
-            for (RpcPadContainer::const_iterator rdoColli = rdoContainerHandle->begin(); rdoColli != rdoContainerHandle->end();
-                 ++rdoColli) {
+            for (const RpcPad* rdoColl: *rdoContainerHandle) {
                 // loop over all elements of the pad container
-                rdoColl = *rdoColli;
                 if (rdoColl->empty()) continue;
                 ++ipad;
                 ATH_MSG_DEBUG("A new pad here n. " << ipad << ", online id " << (int)(rdoColl->identifyHash()) << ", with "
                                                    << rdoColl->size() << " CM inside ");
-                StatusCode sc =
-                    processPad(state, getPrepCollection, getCoinCollection, rdoColl, processingetaview, processingphiview, nPrepRawData,
-                               idVectToBeDecoded, idWithDataVect, rpcContext, doingSecondLoopAmbigColls, state.m_ambiguousCollections);
-                if (sc != StatusCode::SUCCESS) return sc;
+                
+                ATH_CHECK(processPad(ctx, state, rdoColl, processingetaview, processingphiview, nPrepRawData,
+                               idVectToBeDecoded, idWithDataVect,  doingSecondLoopAmbigColls));               
             }  // end loop over pads
         }
 
@@ -499,17 +441,15 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::decodeImpl(State& state, getPrepCollect
                 // loop again for unrequested collections stored with ambiguous phi hits
                 doingSecondLoopAmbigColls = true;
                 processingetaview = true;
-                if (msgLvl(MSG::DEBUG)) ATH_MSG_DEBUG(state.m_ambiguousCollections.size() << " ambiguous collections were stored:");
+                ATH_MSG_DEBUG(state.m_ambiguousCollections.size() << " ambiguous collections were stored:");
                 idVectToBeDecoded.clear();
                 rdoHashVec.clear();
-                for (auto itAmbiColl = state.m_ambiguousCollections.begin(); itAmbiColl != state.m_ambiguousCollections.end();
-                     ++itAmbiColl) {
-                    if (msgLvl(MSG::DEBUG)) ATH_MSG_DEBUG((int)*itAmbiColl << " ");
-                    idVectToBeDecoded.push_back(*itAmbiColl);
-                    state.m_decodedOfflineHashIds.insert(*itAmbiColl);
+                for (const IdentifierHash&  itAmbiColl : state.m_ambiguousCollections) {
+                    ATH_MSG_DEBUG((int)itAmbiColl << " ");
+                    idVectToBeDecoded.push_back(itAmbiColl);
+                    state.m_decodedOfflineHashIds.insert(itAmbiColl);
                 }
-                StatusCode sc = rpcCabling->giveRDO_fromPRD(idVectToBeDecoded, rdoHashVec);
-                if (StatusCode::SUCCESS != sc) return sc;
+                ATH_CHECK(rpcCabling->giveRDO_fromPRD(idVectToBeDecoded, rdoHashVec));              
             }
         }
         if (!m_solvePhiAmbiguities) {
@@ -521,54 +461,36 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::decodeImpl(State& state, getPrepCollect
     ATH_MSG_DEBUG("*** Final Cleanup ");
     // remove empty collections listed in idWithDataVect
     std::vector<IdentifierHash> temIdWithDataVect;
-    int nn = 0;
-    for (std::vector<IdentifierHash>::const_iterator ii = idWithDataVect.begin(); ii != idWithDataVect.end(); ++ii) {
-        ++nn;
-        ATH_MSG_VERBOSE("hash = " << (int)(*ii) << " is the " << nn << "-th in this event ");
-        auto rpcColl = state.m_rpcPrepDataContainer->indexFindPtr(*ii);
-        if (rpcColl != nullptr) {
-            if (!rpcColl->empty()) {
-                temIdWithDataVect.push_back(*ii);
-                ATH_MSG_VERBOSE("Accepting non empty coll. " << m_idHelperSvc->rpcIdHelper().show_to_string(rpcColl->identify())
-                                                             << " hash = " << (int)*ii << " in PREPDATA container at "
-                                                             << state.m_rpcPrepDataContainer);
-            } else {
-                ATH_MSG_DEBUG("Removing from the rpc prep data container empty coll. "
-                              << m_idHelperSvc->rpcIdHelper().show_to_string(rpcColl->identify()) << " hash = " << (int)*ii
-                              << " in PREPDATA container at " << state.m_rpcPrepDataContainer);
-                delete state.m_rpcPrepDataContainer->removeCollection(*ii);  // from Scott Snyder #43275 // fix mem.leak
-            }
-        } else
-            ATH_MSG_DEBUG("collection with id = " << (int)(*ii) << " not found in the PREPDATA container at "
-                                                  << state.m_rpcPrepDataContainer);
-    }
-    idWithDataVect.clear();
-    idWithDataVect = temIdWithDataVect;
+    for (const IdentifierHash& idhash : idWithDataVect) {
+        Muon::RpcPrepDataCollection* rpcColl = state.getPrepCollection(idhash, msgStream());
+        if (!rpcColl->empty()) {
+            temIdWithDataVect.push_back(idhash);
+            ATH_MSG_VERBOSE("Accepting non empty coll. " << m_idHelperSvc->toString(rpcColl->identify())
+                                                             << " hash = " <<idhash << " in PREPDATA container");
+        }
+    }    
+    idWithDataVect = std::move(temIdWithDataVect);
 
     // sort and remove duplicate entries in idWithDataVect
     ATH_MSG_DEBUG("sorting and removing duplicates in the accepted collections vector");
-    sort(idWithDataVect.begin(), idWithDataVect.end());
-    idWithDataVect.erase(unique(idWithDataVect.begin(), idWithDataVect.end()), idWithDataVect.end());
-
+    std::sort(idWithDataVect.begin(), idWithDataVect.end());
+   
     if (msgLvl(MSG::DEBUG)) {
         for (IdentifierHash hashId : idWithDataVect) { ATH_MSG_DEBUG("Accepted collection with hashId: " << (unsigned int)hashId); }
     }
 
-    return status;
+    return StatusCode::SUCCESS;
 }
 
 //___________________________________________________________________________
-StatusCode Muon::RpcRdoToPrepDataToolMT::decodeImpl(State& state, getPrepCollection_func& getPrepCollection,
-                                                      getCoinCollection_func& getCoinCollection, const std::vector<uint32_t>& robIds,
+StatusCode Muon::RpcRdoToPrepDataToolMT::decodeImpl(const EventContext& ctx, State& state, const std::vector<uint32_t>& robIds,
                                                       bool firstTimeInTheEvent) const {
     // ROB-based decoding is only applied in seeded mode. Full scan should use the hashId-based method with empty requested collections
     // vector.
 
     int sizeVectorRequested = robIds.size();
     ATH_MSG_DEBUG("Decode method called for " << sizeVectorRequested << " ROBs");
-
-    StatusCode status = StatusCode::SUCCESS;
-
+   
     std::vector<uint32_t> robIdsToBeDecoded;
     robIdsToBeDecoded.reserve(robIds.size());
 
@@ -577,7 +499,7 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::decodeImpl(State& state, getPrepCollect
     } else {
         if (state.m_fullEventDone) {
             ATH_MSG_DEBUG("Whole event has already been decoded; nothing to do.");
-            return status;
+            return StatusCode::SUCCESS;
         }
     }
 
@@ -588,16 +510,16 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::decodeImpl(State& state, getPrepCollect
 
     if (robIdsToBeDecoded.size() == 0) {
         ATH_MSG_DEBUG("All requested ROBs have already been decoded; nothing to do.");
-        return status;
-    } else {
-        ATH_MSG_DEBUG(robIdsToBeDecoded.size() << " ROBs have not yet been decoded and will be decoded now.");
-        if (msgLvl(MSG::VERBOSE)) {
-            ATH_MSG_VERBOSE("The list of ROB Ids to be decoded:");
-            for (uint32_t robid : robIdsToBeDecoded) ATH_MSG_VERBOSE("0x" << MSG::hex << robid << MSG::dec << " ");
-        }
+        return StatusCode::SUCCESS;
     }
+    ATH_MSG_DEBUG(robIdsToBeDecoded.size() << " ROBs have not yet been decoded and will be decoded now.");
+    if (msgLvl(MSG::VERBOSE)) {
+        ATH_MSG_VERBOSE("The list of ROB Ids to be decoded:");
+        for (uint32_t robid : robIdsToBeDecoded) ATH_MSG_VERBOSE("0x" << MSG::hex << robid << MSG::dec << " ");
+    }
+    
 
-    SG::ReadCondHandle<RpcCablingCondData> cablingCondData{m_rpcReadKey, Gaudi::Hive::currentContext()};
+    SG::ReadCondHandle<RpcCablingCondData> cablingCondData{m_rpcReadKey, ctx};
     const RpcCablingCondData* rpcCabling{*cablingCondData};
 
     // if all robs will be decoded after the current execution of the method, set the flag m_fullEventDone
@@ -606,26 +528,21 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::decodeImpl(State& state, getPrepCollect
     // if RPC decoding is switched off stop here
     if (!m_decodeData) {
         ATH_MSG_DEBUG("Stored empty container. Decoding RPC RDO into RPC PrepRawData is switched off");
-        return status;
+        return StatusCode::SUCCESS;
     }
 
     ATH_MSG_DEBUG("Decoding RPC RDO into RPC PrepRawData");
 
-    /// RPC context
-    IdContext rpcContext = m_idHelperSvc->rpcIdHelper().module_context();
-
     // we come here if the rdo container is already in SG (for example in MC RDO!)
     ATH_MSG_DEBUG("Retrieving Rpc PAD container from the store");
-    auto rdoContainerHandle = SG::makeHandle(m_rdoContainerKey);
+    auto rdoContainerHandle = SG::makeHandle(m_rdoContainerKey, ctx);
     if (!rdoContainerHandle.isValid()) {
         ATH_MSG_WARNING("Retrieval of RPC RDO container failed !");
         return StatusCode::SUCCESS;
-    } else {
-        ATH_MSG_DEBUG("Retrieval of RPC RDO container success !");
-    }
+    } 
 
     // here the RDO container is retrieved and filled -whatever input type we start with- => check the size
-    if (rdoContainerHandle->begin() == rdoContainerHandle->end()) {
+    if (rdoContainerHandle->size() == 0) {
         // empty pad container - no rpc rdo in this event
         ATH_MSG_DEBUG("Empty pad container - no rpc rdo in this event ");
         return StatusCode::SUCCESS;
@@ -644,10 +561,7 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::decodeImpl(State& state, getPrepCollect
     bool processingphiview = false;
     if (!m_solvePhiAmbiguities) processingetaview = false;
     while (processingetaview || processingphiview || (!m_solvePhiAmbiguities)) {
-        int ipad = 0;
-        int nPrepRawData = 0;
-        int nPhiPrepRawData = 0;
-        int nEtaPrepRawData = 0;
+        int ipad{0}, nPrepRawData{0}, nPhiPrepRawData{0}, nEtaPrepRawData{0};
         if (processingphiview) state.m_ambiguousCollections.clear();
 
         if (processingetaview)
@@ -658,17 +572,17 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::decodeImpl(State& state, getPrepCollect
         // seeded decoding (for full scan, use the hashId-based method)
         ATH_MSG_DEBUG("Start loop over pads hashes - seeded mode ");
 
-        for (IdentifierHash padHashId : rdoHashVec) {
+        for (const IdentifierHash& padHashId : rdoHashVec) {
             const RpcPad* rdoColl = rdoContainerHandle->indexFindPtr(padHashId);
-            if (rdoColl == nullptr) {
+            if (!rdoColl) {
                 ATH_MSG_DEBUG("Requested pad with online id " << (unsigned int)padHashId << " not found in the rdoContainerHandle.");
                 continue;
             }
             ++ipad;
             ATH_MSG_DEBUG("A new pad here n." << ipad << ", online id " << (int)(rdoColl->identifyHash()) << ", with " << rdoColl->size()
                                               << " CM inside ");
-            CHECK(processPad(state, getPrepCollection, getCoinCollection, rdoColl, processingetaview, processingphiview, nPrepRawData,
-                             rdoHashVec, idWithDataVect, rpcContext, false, state.m_ambiguousCollections));
+            CHECK(processPad(ctx, state,  rdoColl, processingetaview, processingphiview, nPrepRawData,
+                             rdoHashVec, idWithDataVect, false));
         }
 
         if (processingetaview) {
@@ -690,40 +604,24 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::decodeImpl(State& state, getPrepCollect
     ATH_MSG_DEBUG("*** Final Cleanup ");
     // remove empty collections listed in idWithDataVect
     std::vector<IdentifierHash> temIdWithDataVect;
-    int nn = 0;
-    for (IdentifierHash hashId : idWithDataVect) {
-        ++nn;
-        ATH_MSG_VERBOSE("collection n. " << nn << " has hashId = " << (unsigned int)hashId);
-        auto rpcColl = state.m_rpcPrepDataContainer->indexFindPtr(hashId);
-        if (rpcColl != nullptr) {
-            if (!rpcColl->empty()) {
-                temIdWithDataVect.push_back(hashId);
-                ATH_MSG_VERBOSE("Accepting non empty coll. " << m_idHelperSvc->rpcIdHelper().show_to_string(rpcColl->identify())
-                                                             << " hashId = " << (unsigned int)hashId << " in PREPDATA container at "
-                                                             << state.m_rpcPrepDataContainer);
-            } else {
-                ATH_MSG_DEBUG("Removing from the rpc prep data container empty coll. "
-                              << m_idHelperSvc->rpcIdHelper().show_to_string(rpcColl->identify()) << " hashId = " << (unsigned int)hashId
-                              << " in PREPDATA container at " << state.m_rpcPrepDataContainer);
-                delete state.m_rpcPrepDataContainer->removeCollection(hashId);
-            }
-        } else
-            ATH_MSG_DEBUG("collection with hashId = " << (unsigned int)hashId << " not found in the PREPDATA container at "
-                                                      << state.m_rpcPrepDataContainer);
+    for (const IdentifierHash& hashId : idWithDataVect) {
+        const RpcPrepDataCollection* rpcColl = state.getPrepCollection(hashId, msgStream());
+        if (!rpcColl->empty()) {
+            temIdWithDataVect.push_back(hashId);
+            ATH_MSG_VERBOSE("Accepting non empty coll. " << m_idHelperSvc->toString(rpcColl->identify())
+                                                            << " hashId = " << (unsigned int)hashId << " in PREPDATA container");
+        } 
     }
-    idWithDataVect.clear();
-    idWithDataVect = temIdWithDataVect;
+    idWithDataVect = std::move(temIdWithDataVect);
 
     // sort and remove duplicate entries in idWithDataVect
     ATH_MSG_DEBUG("sorting and removing duplicates in the accepted collections vector");
-    sort(idWithDataVect.begin(), idWithDataVect.end());
-    idWithDataVect.erase(unique(idWithDataVect.begin(), idWithDataVect.end()), idWithDataVect.end());
-
+    std::sort(idWithDataVect.begin(), idWithDataVect.end());
     if (msgLvl(MSG::DEBUG)) {
-        for (IdentifierHash hashId : idWithDataVect) { ATH_MSG_DEBUG("Accepted collection with hashId: " << (unsigned int)hashId); }
+        for (const IdentifierHash& hashId : idWithDataVect) { ATH_MSG_DEBUG("Accepted collection with hashId: " << (unsigned int)hashId); }
     }
 
-    return status;
+    return StatusCode::SUCCESS;;
 }
 
 //___________________________________________________________________________
@@ -764,7 +662,7 @@ void Muon::RpcRdoToPrepDataToolMT::printInputRdo() const {
         Identifier rdoId;
         int code = m_idHelperSvc->rpcIdHelper().get_id(rpcHashId, rdoId, &rpcContext);
         if (code != 0) ATH_MSG_INFO(" A problem in hash -> id conversion for hashId= " << (int)rpcHashId);
-        std::string extIdstring = m_idHelperSvc->rpcIdHelper().show_to_string(rdoId);
+        std::string extIdstring = m_idHelperSvc->toString(rdoId);
         ATH_MSG_INFO("*** Offine HashId = " << static_cast<unsigned int>(rpcHashId) << " extended = " << extIdstring);
 
         // For each pad, loop on the coincidence matrices
@@ -823,19 +721,12 @@ void Muon::RpcRdoToPrepDataToolMT::printPrepDataImpl(const Muon::RpcPrepDataCont
 
     if (rpcPrepDataContainer.size() <= 0) ATH_MSG_INFO("No RpcPrepRawData collections found");
 
-    int ncoll = 0;
-    int ict = 0;
-    int ictphi = 0;
-    int icteta = 0;
-    int icttrg = 0;
+    int ncoll{0}, ict{0}, ictphi{0}, icteta{0}, icttrg{0};
     ATH_MSG_INFO("--------------------------------------------------------------------------------------------");
     for (const Muon::RpcPrepDataCollection* rpcColl : rpcPrepDataContainer) {
         if (rpcColl->size() > 0) {
-            ATH_MSG_INFO("PrepData Collection ID " << m_idHelperSvc->rpcIdHelper().show_to_string(rpcColl->identify()));
-            RpcPrepDataCollection::const_iterator it_rpcPrepData;
-            int icc = 0;
-            int iccphi = 0;
-            int icceta = 0;
+            ATH_MSG_INFO("PrepData Collection ID " << m_idHelperSvc->toString(rpcColl->identify()));
+            int icc{0}, iccphi{0}, icceta{0};
             for (const RpcPrepData* rpc : *rpcColl) {
                 icc++;
                 ict++;
@@ -848,7 +739,7 @@ void Muon::RpcRdoToPrepDataToolMT::printPrepDataImpl(const Muon::RpcPrepDataCont
                     icteta++;
                 }
                 ATH_MSG_INFO(ict << " in this coll. " << icc
-                                 << " prepData id = " << m_idHelperSvc->rpcIdHelper().show_to_string(rpc->identify()) << " time "
+                                 << " prepData id = " << m_idHelperSvc->toString(rpc->identify()) << " time "
                                  << rpc->time() /*<<" triggerInfo "<<rpc->triggerInfo()*/
                                  << " ambiguityFlag " << rpc->ambiguityFlag());
             }
@@ -871,29 +762,12 @@ void Muon::RpcRdoToPrepDataToolMT::printCoinDataImpl(const Muon::RpcCoinDataCont
 
     if (rpcCoinDataContainer.size() <= 0) ATH_MSG_INFO("No RpcCoinData collections found");
 
-    int ncoll = 0;
-    int ict = 0;
-    int ictphi = 0;
-    int icteta = 0;
-    int ictphilc = 0;
-    int ictphihc = 0;
-    int ictetalc = 0;
-    int ictetahc = 0;
+    int ncoll{0}, ict{0}, ictphi{0}, icteta{0}, ictphilc{0}, ictphihc{0}, ictetalc{0}, ictetahc{0};
     ATH_MSG_INFO("--------------------------------------------------------------------------------------------");
-    for (IdentifiableContainer<Muon::RpcCoinDataCollection>::const_iterator rpcColli = rpcCoinDataContainer.begin();
-         rpcColli != rpcCoinDataContainer.end(); ++rpcColli) {
-        const Muon::RpcCoinDataCollection* rpcColl = *rpcColli;
-
+    for (const Muon::RpcCoinDataCollection* rpcColl: rpcCoinDataContainer) {
         if (rpcColl->size() > 0) {
-            ATH_MSG_INFO("CoinData Collection ID " << m_idHelperSvc->rpcIdHelper().show_to_string(rpcColl->identify()));
-            RpcCoinDataCollection::const_iterator it_rpcCoinData;
-            int icc = 0;
-            int iccphi = 0;
-            int icceta = 0;
-            int iccphilc = 0;
-            int iccetahc = 0;
-            int iccphihc = 0;
-            int iccetalc = 0;
+            ATH_MSG_INFO("CoinData Collection ID " << m_idHelperSvc->toString(rpcColl->identify()));
+            int icc{0}, iccphi{0}, icceta{0}, iccphilc{0}, iccetahc{0}, iccphihc{0}, iccetalc{0};
             for (const RpcCoinData* rpc : *rpcColl) {
                 icc++;
                 ict++;
@@ -919,7 +793,7 @@ void Muon::RpcRdoToPrepDataToolMT::printCoinDataImpl(const Muon::RpcCoinDataCont
                     }
                 }
                 ATH_MSG_INFO(
-                    ict << " in this coll. " << icc << " coinData id = " << m_idHelperSvc->rpcIdHelper().show_to_string(rpc->identify())
+                    ict << " in this coll. " << icc << " coinData id = " << m_idHelperSvc->toString(rpc->identify())
                         << " time " << rpc->time() << " ijk = " << rpc->ijk() /*<<" triggerInfo "<<rpc->triggerInfo()*/
                         << " cm/pad/sl ids = " << rpc->parentCmId() << "/" << rpc->parentPadId() << "/" << rpc->parentSectorId() << "/"
                         << " isLowPtCoin/HighPtCoin/LowPtInputToHighPt " << rpc->isLowPtCoin() << "/" << rpc->isHighPtCoin() << "/"
@@ -938,12 +812,14 @@ void Muon::RpcRdoToPrepDataToolMT::printCoinDataImpl(const Muon::RpcCoinDataCont
     ATH_MSG_INFO("--------------------------------------------------------------------------------------------");
 }
 
-StatusCode Muon::RpcRdoToPrepDataToolMT::processPad(
-    State& state, getPrepCollection_func& getPrepCollection, getCoinCollection_func& getCoinCollection, const RpcPad* rdoColl,
+StatusCode Muon::RpcRdoToPrepDataToolMT::processPad(const EventContext& ctx,
+    State& state, const RpcPad* rdoColl,
     bool& processingetaview, bool& processingphiview, int& nPrepRawData,
     std::vector<IdentifierHash>& idVect,          // if empty, turns off decoding of additional RDOs for ambiguity solving
     std::vector<IdentifierHash>& idWithDataVect,  // filled with IDs of created PrepRawData collections
-    IdContext& rpcContext, bool doingSecondLoopAmbigColls, std::set<IdentifierHash>& ambiguousCollections) const {
+    bool doingSecondLoopAmbigColls) const {
+    
+    std::set<IdentifierHash>& ambiguousCollections{state.m_ambiguousCollections};
     ATH_MSG_DEBUG("***************** Start of processPad eta/phiview "
                   << processingetaview << "/" << processingphiview << " ---# of coll.s with data until now is " << idWithDataVect.size());
     //{processPad
@@ -953,21 +829,20 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::processPad(
     ATH_MSG_DEBUG("***************** for Pad online Id " << padId << " m_logic sector ID " << sectorId);
 
     // Create an RPC PrepDataCollection
-    Identifier oldId;
-    Identifier oldIdTrg;
+    Identifier oldId{0}, oldIdTrg{0};
     ATH_MSG_VERBOSE("Init pointer to RpcPrepDataCollection ");
-    RpcPrepDataCollection* collection(nullptr);
-    RpcCoinDataCollection* collectionTrg(nullptr);
-    IdentifierHash rpcHashId;
+    RpcPrepDataCollection* collection{nullptr};
+    RpcCoinDataCollection* collectionTrg{nullptr};
+    IdentifierHash rpcHashId{0};
 
-    SG::ReadCondHandle<RpcCablingCondData> cablingCondData{m_rpcReadKey, Gaudi::Hive::currentContext()};
+    SG::ReadCondHandle<RpcCablingCondData> cablingCondData{m_rpcReadKey, ctx};
     const RpcCablingCondData* rpcCabling{*cablingCondData};
 
     // For each pad, loop on the coincidence matrices
     RpcPad::const_iterator itCM = rdoColl->begin();
     RpcPad::const_iterator itCM_e = rdoColl->end();
     int icm = 0;
-    SG::ReadHandle<xAOD::EventInfo> evtInfo(m_eventInfo);
+    SG::ReadHandle<xAOD::EventInfo> evtInfo{m_eventInfo, ctx};
     for (; itCM != itCM_e; ++itCM) {
         icm++;
         bool etaview = false;
@@ -1042,14 +917,10 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::processPad(
 
             // here decode (get offline ids for the online indices of this hit)
             double time = 0.;
-            std::vector<Identifier>* digitVec = m_rpcRdoDecoderTool->getOfflineData(rpcChan, sectorId, padId, cmaId, time, rpcCabling);
+            std::vector<Identifier> digitVec{m_rpcRdoDecoderTool->getOfflineData(rpcChan, sectorId, padId, cmaId, time, rpcCabling)};
             time += (double)m_timeShift;
 
-            if (!digitVec) {
-                ATH_MSG_WARNING("Error in the RPC RDO decoder ");
-                return StatusCode::RECOVERABLE;
-            }
-
+          
             int nMatchingEtaHits = 0;
             int nDuplicatePhiHits = 0;
             bool unsolvedAmbiguity = false;
@@ -1062,27 +933,19 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::processPad(
             // If all phi digits do not have a eta match, they will be all recorded as PrepRawData
             // in the second iteration (the ambiguity will remain unsolved)
             while (notFinished) {
-                // Loop on the digits corresponding to the fired channel
-                std::vector<Identifier>::iterator itVec = digitVec->begin();
-                std::vector<Identifier>::iterator itVec_e = digitVec->end();
-
-                unsigned int offlineDataSize = digitVec->size();
-                ATH_MSG_DEBUG("size of the corresponding list of ID = " << offlineDataSize);
-                if (offlineDataSize <= 0) {
+                // Loop on the digits corresponding to the fired channel               
+                ATH_MSG_DEBUG("size of the corresponding list of ID = " << digitVec.size());
+                if (digitVec.empty()) {
                     ATH_MSG_DEBUG("going to next CM hit");
                     notFinished = false;
                     continue;
                 }
-                for (; itVec != itVec_e; ++itVec) {
+                for (const Identifier& channelId : digitVec) {
                     // Prepare the prepdata for this identifier
                     // channel Id
-                    Identifier channelId = *itVec;
                     Identifier parentId = m_idHelperSvc->rpcIdHelper().elementID(channelId);
-                    if (m_idHelperSvc->rpcIdHelper().get_hash(parentId, rpcHashId, &rpcContext)) {
-                        ATH_MSG_WARNING("Unable to get RPC hash id from RPC collection "
-                                        << "context begin_index = " << rpcContext.begin_index()
-                                        << " context end_index  = " << rpcContext.end_index() << " the identifier is ");
-                        parentId.show();
+                    if (m_idHelperSvc->rpcIdHelper().get_module_hash(parentId, rpcHashId)) {
+                        ATH_MSG_WARNING("Unable to get RPC hash id from RPC collection "<<m_idHelperSvc->toString(parentId));                       
                     }
 
                     // There is some ambiguity in the channel/sectorId's, so need to explicitly filter
@@ -1091,55 +954,37 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::processPad(
                         if (std::find(idVect.begin(), idVect.end(), rpcHashId) == idVect.end()) continue;
                     }
                     if (msgLvl(MSG::DEBUG)) {
-                        ATH_MSG_DEBUG("CM Hit decoded into offline Id " << m_idHelperSvc->rpcIdHelper().show_to_string(channelId)
+                        ATH_MSG_DEBUG("CM Hit decoded into offline Id " << m_idHelperSvc->toString(channelId)
                                                                         << " time " << time);
                         ATH_MSG_DEBUG("           Parent collection   "
-                                      << m_idHelperSvc->rpcIdHelper().show_to_string(parentId)
-                                      << " oldID = " << m_idHelperSvc->rpcIdHelper().show_to_string(oldId)
-                                      << " oldIDtrg = " << m_idHelperSvc->rpcIdHelper().show_to_string(oldIdTrg));
+                                      << m_idHelperSvc->toString(parentId)
+                                      << " oldID = " << m_idHelperSvc->toString(oldId)
+                                      << " oldIDtrg = " << m_idHelperSvc->toString(oldIdTrg));
                     }
                     bool hasAMatchingEtaHit = 0;
                     // current collection has Id "parentId"; get it from the container !
                     if (triggerHit) {
-                        if ((oldIdTrg != parentId) || collectionTrg == nullptr) {
+                        if ((oldIdTrg != parentId) || !collectionTrg) {
                             // Get collection from IDC if it exists, or create it and add it if not.
                             ATH_MSG_DEBUG(" Looking/Creating a collection with ID = "
-                                          << m_idHelperSvc->rpcIdHelper().show_to_string(parentId)
-                                          << " hash = " << static_cast<unsigned int>(rpcHashId) << " in COINDATA container at "
-                                          << state.m_rpcCoinDataContainer);
-                            collectionTrg = getCoinCollection(parentId);
-                            if (collectionTrg == nullptr) ATH_MSG_WARNING("Failed to get/create RpcCoinData collection");
+                                          << m_idHelperSvc->toString(parentId)
+                                          << " hash = " << static_cast<unsigned int>(rpcHashId));
+                            collectionTrg = state.getCoinCollection(rpcHashId, msgStream());
                             oldIdTrg = parentId;
                             ATH_MSG_DEBUG(
-                                " Resetting oldIDtrg to current parentID = " << m_idHelperSvc->rpcIdHelper().show_to_string(oldIdTrg));
+                                " Resetting oldIDtrg to current parentID = " << m_idHelperSvc->toString(oldIdTrg));
                         }
-                    } else {
-                        if ((oldId != parentId) || collection == nullptr) {
-                            // Get collection from IDC if it exists, or create it and add it if not.
-                            ATH_MSG_DEBUG(" Looking/Creating a collection with ID = "
-                                          << m_idHelperSvc->rpcIdHelper().show_to_string(parentId)
-                                          << " hash = " << static_cast<unsigned int>(rpcHashId) << " in PREPDATA container at "
-                                          << state.m_rpcPrepDataContainer);
-                            collection = getPrepCollection(parentId);
-                            if (collection) {
-                                bool alreadyRecorded = false;
-                                for (std::vector<IdentifierHash>::const_iterator ii = idWithDataVect.begin(); ii != idWithDataVect.end();
-                                     ++ii) {
-                                    if (*ii == rpcHashId) {
-                                        alreadyRecorded = true;
-                                        break;
-                                    }
-                                }
-                                if (!alreadyRecorded) {
-                                    idWithDataVect.push_back(rpcHashId);  // Record that this collection contains data
-                                    ATH_MSG_DEBUG(" A new collection add to the RPC PrepData container with identifier "
-                                                  << m_idHelperSvc->rpcIdHelper().show_to_string(collection->identify()));
-                                }
-                            } else
-                                ATH_MSG_WARNING("Failed to get/create RpcPrepData collection");
-                            oldId = parentId;
-                            ATH_MSG_DEBUG(" Resetting oldID to current parentID = " << m_idHelperSvc->rpcIdHelper().show_to_string(oldId));
+                    } else if ((oldId != parentId) || !collection) {
+                        // Get collection from IDC if it exists, or create it and add it if not.
+                        ATH_MSG_DEBUG(" Looking/Creating a collection with ID = "
+                                        << m_idHelperSvc->toString(parentId)
+                                        << " hash = " << static_cast<unsigned int>(rpcHashId));
+                        collection = state.getPrepCollection(rpcHashId, msgStream());
+                        if (std::find(idWithDataVect.begin(),idWithDataVect.end(), rpcHashId) == idWithDataVect.end()){
+                            idWithDataVect.push_back(rpcHashId);
                         }
+                        oldId = parentId;
+                        ATH_MSG_DEBUG(" Resetting oldID to current parentID = " << m_idHelperSvc->toString(oldId));
                     }
 
                     // check if the data has already ben recorded
@@ -1149,9 +994,7 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::processPad(
                         if (collection->begin() != collection->end()) {
                             RpcPrepDataCollection::iterator it_rpcPrepData;
                             ATH_MSG_VERBOSE("Check for duplicates in coll. with size " << collection->size());
-                            int current_dbphi = 0;
-                            int current_dbz = 0;
-                            int current_gg = 0;
+                            int current_dbphi{0}, current_dbz{0}, current_gg{0};
                             if (processingphiview) {
                                 current_dbphi = m_idHelperSvc->rpcIdHelper().doubletPhi(channelId);
                                 current_dbz = m_idHelperSvc->rpcIdHelper().doubletZ(channelId);
@@ -1166,7 +1009,7 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::processPad(
                                     hasAMatchingEtaHit = false;  // we don't want to increment the number of strips with
                                     // a matching eta due to a cabling overlap
                                     ATH_MSG_VERBOSE("Duplicated RpcPrepData(not recorded) = "
-                                                    << m_idHelperSvc->rpcIdHelper().show_to_string(channelId));
+                                                    << m_idHelperSvc->toString(channelId));
                                     float previous_time = rpc->time();
                                     // choose the smallest time within timeTolerance
                                     if (time < previous_time) {
@@ -1190,7 +1033,7 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::processPad(
                                                                 hasAMatchingEtaHit = true;
                                                                 ATH_MSG_VERBOSE(
                                                                     "There's a matching eta hit with id "
-                                                                    << m_idHelperSvc->rpcIdHelper().show_to_string(rpc->identify()));
+                                                                    << m_idHelperSvc->toString(rpc->identify()));
                                                                 // here there can be a break ? NO, we need to keep looping in order to check
                                                                 //  if this preprawdata has been already recorded (due to cabling overlaps)
                                                             }
@@ -1248,7 +1091,7 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::processPad(
                                     }
                                 }
                             }
-                            SG::ReadCondHandle<MuonGM::MuonDetectorManager> muDetMgrHandle{m_muDetMgrKey};
+                            SG::ReadCondHandle<MuonGM::MuonDetectorManager> muDetMgrHandle{m_muDetMgrKey, ctx};
                             const MuonGM::MuonDetectorManager* muDetMgr = muDetMgrHandle.cptr();
                             const RpcReadoutElement* descriptor = muDetMgr->getRpcReadoutElement(channelId);
 
@@ -1258,7 +1101,7 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::processPad(
                                 hasAMatchingEtaHit = false;
                                 duplicate = false;
                                 ATH_MSG_WARNING("Detector Element not found for Identifier from the cabling service <"
-                                                << m_idHelperSvc->rpcIdHelper().show_to_string(channelId) << ">  =>>ignore this hit");
+                                                << m_idHelperSvc->toString(channelId) << ">  =>>ignore this hit");
                                 continue;
                             } else if (!descriptor->containsId(channelId)) {
                                 hasAMatchingEtaHit = false;
@@ -1266,15 +1109,15 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::processPad(
                                 if (m_idHelperSvc->rpcIdHelper().stationNameString(m_idHelperSvc->rpcIdHelper().stationName(channelId)) ==
                                     "BOG")
                                     ATH_MSG_DEBUG("Identifier from the cabling service <"
-                                                  << m_idHelperSvc->rpcIdHelper().show_to_string(channelId)
+                                                  << m_idHelperSvc->toString(channelId)
                                                   << "> inconsistent with the geometry of detector element <"
-                                                  << m_idHelperSvc->rpcIdHelper().show_to_string(descriptor->identify())
+                                                  << m_idHelperSvc->toString(descriptor->identify())
                                                   << ">  =>>ignore this hit /// there are unmasked channels in BOG");
                                 else
                                     ATH_MSG_WARNING("Identifier from the cabling service <"
-                                                    << m_idHelperSvc->rpcIdHelper().show_to_string(channelId)
+                                                    << m_idHelperSvc->toString(channelId)
                                                     << "> inconsistent with the geometry of detector element <"
-                                                    << m_idHelperSvc->rpcIdHelper().show_to_string(descriptor->identify())
+                                                    << m_idHelperSvc->toString(descriptor->identify())
                                                     << ">  =>>ignore this hit");
                                 continue;
                             }
@@ -1286,18 +1129,17 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::processPad(
                                             << tempGlobalPosition.x() << ", " << tempGlobalPosition.y() << ", " << tempGlobalPosition.z()
                                             << ") ");
                             // Local position
-                            Amg::Vector2D pointLocPos;
+                            Amg::Vector2D pointLocPos{Amg::Vector2D::Zero()};
                             descriptor->surface(channelId).globalToLocal(tempGlobalPosition, tempGlobalPosition, pointLocPos);
 
                             // List of Digits in the cluster (self)
-                            std::vector<Identifier> identifierList;
-                            identifierList.push_back(channelId);
-
+                            std::vector<Identifier> identifierList{channelId};
+                            
                             // width of the cluster (self)
                             float stripWidth = descriptor->StripWidth(m_idHelperSvc->rpcIdHelper().measuresPhi(channelId));
 
                             // Error matrix
-                            double errPos = stripWidth / sqrt(12.0);
+                            double errPos = stripWidth / std::sqrt(12.0);
                             Amg::MatrixX mat(1, 1);
                             mat.setIdentity();
                             mat *= errPos * errPos;
@@ -1307,14 +1149,14 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::processPad(
                             if (solvePhiAmb_thisHit) {
                                 if (processingetaview) ambiguityFlag = 1;
                                 if (unsolvedAmbiguity)
-                                    ambiguityFlag = offlineDataSize;
+                                    ambiguityFlag =  digitVec.size();
                                 else if (hasAMatchingEtaHit)
                                     ambiguityFlag = nMatchingEtaHits;
                             }
 
                             // correct prd time from cool db
                             if (m_RPCInfoFromDb) {
-                                SG::ReadCondHandle<RpcCondDbData> readHandle{m_readKey};
+                                SG::ReadCondHandle<RpcCondDbData> readHandle{m_readKey, ctx};
                                 const RpcCondDbData* readCdo{*readHandle};
                                 ATH_MSG_DEBUG(" Time correction from COOL "
                                               << " size of  RPC_TimeMapforStrip " << readCdo->getStripTimeMap().size());
@@ -1336,7 +1178,7 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::processPad(
                                 // record the new data in the collection
                                 ATH_MSG_DEBUG(" Adding RpcCoinData @ "
                                               << newCoinData << " to collection "
-                                              << m_idHelperSvc->rpcIdHelper().show_to_string(collectionTrg->identify()));
+                                              << m_idHelperSvc->toString(collectionTrg->identify()));
 
                                 newCoinData->setHashAndIndex(collectionTrg->identifyHash(), collectionTrg->size());
                                 collectionTrg->push_back(newCoinData);
@@ -1350,7 +1192,7 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::processPad(
 
                                 // record the new data in the collection
                                 ATH_MSG_DEBUG(" Adding digit @ " << newPrepData << " to collection "
-                                                                 << m_idHelperSvc->rpcIdHelper().show_to_string(collection->identify()));
+                                                                 << m_idHelperSvc->toString(collection->identify()));
 
                                 newPrepData->setHashAndIndex(collection->identifyHash(), collection->size());
                                 collection->push_back(newPrepData);
@@ -1379,8 +1221,7 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::processPad(
                     notFinished = false;
                 else
                     notFinished = false;
-            }  // end of not finished
-            delete digitVec;
+            }  // end of not finished            
         }  // end loop over CM hits
     }      // end loop over CMs
 

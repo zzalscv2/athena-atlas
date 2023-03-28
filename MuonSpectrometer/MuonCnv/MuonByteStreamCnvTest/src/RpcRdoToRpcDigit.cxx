@@ -85,21 +85,17 @@ StatusCode RpcRdoToRpcDigit::decodeRpc(const RpcPad* rdoColl, TempDigitContainer
 
         // For each CM, loop on the fired channels
         for (const RpcFiredChannel* rpcChan : *coinMatrix) {
-            std::unique_ptr<const std::vector<RpcDigit*>> digitVec{m_rpcRdoDecoderTool->getDigit(rpcChan, 
-                                                                                                sectorId, 
-                                                                                                padId, 
-                                                                                                cmaId, 
-                                                                                                rpcCab)};
-
-            if (!digitVec) {
-                ATH_MSG_FATAL("Error in the RPC RDO decoder ");
-                return StatusCode::FAILURE;
-            }
-            if (digitVec->empty()) continue;
+            std::vector<std::unique_ptr<RpcDigit>> digitVec{m_rpcRdoDecoderTool->getDigit(rpcChan, 
+                                                                        sectorId, 
+                                                                        padId, 
+                                                                        cmaId, 
+                                                                        rpcCab)};
+           
+            if (digitVec.empty()) continue;
             
             
             // Loop on the digits corresponding to the fired channel
-            for (RpcDigit* newDigit : *digitVec) {
+            for (std::unique_ptr<RpcDigit>& newDigit : digitVec) {
                 Identifier elementId = m_idHelperSvc->rpcIdHelper().elementID(newDigit->identify());
                 IdentifierHash coll_hash{0};
                 if (m_idHelperSvc->rpcIdHelper().get_module_hash(elementId, coll_hash)) {
@@ -109,7 +105,7 @@ StatusCode RpcRdoToRpcDigit::decodeRpc(const RpcPad* rdoColl, TempDigitContainer
                 }
                 RpcDigitCollection* collection{nullptr};
                 ATH_CHECK(container.findCollection(elementId,coll_hash,collection, msgStream()));
-                collection->push_back(newDigit);
+                collection->push_back(std::move(newDigit));
             }          
         }
     }
