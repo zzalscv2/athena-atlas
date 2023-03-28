@@ -268,17 +268,9 @@ if DetFlags.haveRIO.SCT_on():
 else:
   InDetTrigSCTConditionsSummaryTool = None
 
-#
 # ------load association tool from Inner Detector to handle pixel ganged ambiguities
-#
-if InDetTrigFlags.loadAssoTool():
-  from InDetAssociationTools.InDetAssociationToolsConf import InDet__InDetPRD_AssociationToolGangedPixels
-  InDetTrigPrdAssociationTool = InDet__InDetPRD_AssociationToolGangedPixels(name = "InDetTrigPrdAssociationTool",
-                                                                             PixelClusterAmbiguitiesMapName = "TrigPixelClusterAmbiguitiesMap")
-   
-  ToolSvc += InDetTrigPrdAssociationTool
-  if (InDetTrigFlags.doPrintConfigurables()):
-    print (     InDetTrigPrdAssociationTool)
+from InDetConfig.InDetAssociationToolsConfig import TrigPrdAssociationToolCfg
+InDetTrigPrdAssociationTool = CAtoLegacyPublicToolWrapper(TrigPrdAssociationToolCfg)
 
 #
 # ----------- control loading of Summary Tool

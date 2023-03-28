@@ -107,6 +107,51 @@ def TrackParticleCreatorToolNoPIDCfg(flags,
     return TrackParticleCreatorToolCfg(flags, name, **kwargs)
 
 
+def InDetTrigParticleCreatorToolCfg(flags,
+                                         name="InDetTrigParticleCreatorTool",
+                                         **kwargs):
+    kwargs.setdefault("TRT_ElectronPidTool", None)
+    return InDetTrigParticleCreatorToolTRTPidCfg(flags, name, **kwargs)
+
+    
+def InDetTrigParticleCreatorToolTRTPidCfg(flags,
+                                         name="InDetTrigParticleCreatorToolTRTPid",
+                                         **kwargs):
+    
+    result = ComponentAccumulator()
+
+    kwargs.setdefault("PixelToTPIDTool", None)
+
+    if "TRT_ElectronPidTool" not in kwargs and flags.Detector.EnableTRT:
+        from InDetConfig.TRT_ElectronPidToolsConfig import (
+            TrigTRT_ElectronPidToolCfg)
+        kwargs.setdefault("TRT_ElectronPidTool", result.popToolsAndMerge(
+            TrigTRT_ElectronPidToolCfg(flags)))
+
+    if "TrackSummaryTool" not in kwargs:
+        from TrkConfig.TrkTrackSummaryToolConfig import InDetTrigTrackSummaryToolCfg
+        TrackSummaryTool = result.popToolsAndMerge(
+            InDetTrigTrackSummaryToolCfg(flags))
+        result.addPublicTool(TrackSummaryTool)
+        kwargs.setdefault("TrackSummaryTool", TrackSummaryTool)
+
+    if 'TestPixelLayerTool' not in kwargs and flags.Detector.EnablePixel:
+        from InDetConfig.InDetTestPixelLayerConfig import (
+            InDetTrigTestPixelLayerToolInnerCfg)
+        kwargs.setdefault("TestPixelLayerTool", result.popToolsAndMerge(
+            InDetTrigTestPixelLayerToolInnerCfg(flags)))
+
+    kwargs.setdefault("RunningTIDE_Ambi", False)   #flags.Tracking.doTIDE_Ambi)
+
+    kwargs.setdefault("BadClusterID", 3)    #2023fix
+
+    kwargs.setdefault("KeepParameters", True)   #TODO #2023fix not necessary for all signatures
+    kwargs.setdefault("PerigeeExpression", "BeamLine")
+
+    result.setPrivateTools(result.popToolsAndMerge(TrackParticleCreatorToolCfg(flags, name, **kwargs)))
+    return result
+
+
 def InDetTrigParticleCreatorToolFTFCfg(flags,
                                        name="InDetTrigParticleCreatorToolFTF",
                                        **kwargs):
@@ -138,6 +183,7 @@ def InDetTrigParticleCreatorToolFTFCfg(flags,
     result.setPrivateTools(
         CompFactory.Trk.TrackParticleCreatorTool(name, **kwargs))
     return result
+
 
 
 def ITkTrackParticleCreatorToolCfg(flags,
