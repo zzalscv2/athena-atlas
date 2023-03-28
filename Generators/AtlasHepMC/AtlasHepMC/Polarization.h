@@ -18,7 +18,7 @@ public:
     double theta() const  { return m_theta;}
     double phi() const { return m_phi;}
     bool is_defined() const { return m_is_defined; }
-    inline bool operator ==(const Polarization &a) { return (std::abs(a.phi() - phi()) <= 0.00001) && (std::abs(a.theta() - theta()) <= 0.00001);}
+    inline bool operator ==(const Polarization &a) const { return (std::abs(a.phi() - phi()) <= 0.00001) && (std::abs(a.theta() - theta()) <= 0.00001);}
 private:
     double m_theta;
     double m_phi;
