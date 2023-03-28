@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtCalibRt/AdaptiveResidualSmoothing.h"
@@ -202,6 +202,7 @@ RtRelationLookUp AdaptiveResidualSmoothing::performSmoothing(const IRtRelation &
     nb_bins = static_cast<unsigned int>(std::sqrt(m_residual_point.size() / 6.));
 
     // calculate min_nb_per_bin
+    if (nb_bins == 0) { nb_bins = 1; }
     min_nb_entries_per_bin = m_residual_point.size() / nb_bins;
 
     //////////////////////////////////////
@@ -213,7 +214,6 @@ RtRelationLookUp AdaptiveResidualSmoothing::performSmoothing(const IRtRelation &
         log << MSG::WARNING << "performSmoothing() - No residuals are stored. no correction applied to r(t)!" << endmsg;
     }
 
-    if (nb_bins == 0) { nb_bins = 1; }
     step_size = r_max / static_cast<double>(nb_bins);
 
     //////////////////////////////////////////////////////////////
