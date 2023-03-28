@@ -7,33 +7,33 @@
 @date 2019-07-24
 @brief Adapted from ExampleLArMonitorAlgorithm.py by C. D. Burton and P. Onyisi 
 '''
-def LArCoverageConfigOld(inputFlags):
+def LArCoverageConfigOld(flags):
     from AthenaMonitoring import AthMonitorCfgHelperOld
     from LArMonitoring.LArMonitoringConf import LArCoverageAlg
 
-    helper = AthMonitorCfgHelperOld(inputFlags, 'LArCoverageAlgOldCfg')
-    LArCoverageConfigCore(helper,LArCoverageAlg,inputFlags)
+    helper = AthMonitorCfgHelperOld(flags, 'LArCoverageAlgOldCfg')
+    LArCoverageConfigCore(helper,LArCoverageAlg,flags)
 
     return helper.result()
 
-def LArCoverageConfig(inputFlags):
+def LArCoverageConfig(flags):
     '''Function to configures some algorithms in the monitoring system.'''
 
     # The following class will make a sequence, configure algorithms, and link
     # them to GenericMonitoringTools
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     from AthenaMonitoring import AthMonitorCfgHelper
-    helper = AthMonitorCfgHelper(inputFlags,'LArCoverageCfgAlg')
+    helper = AthMonitorCfgHelper(flags,'LArCoverageCfgAlg')
 
 
     from AthenaConfiguration.ComponentFactory import CompFactory
-    LArCoverageConfigCore(helper, CompFactory.LArCoverageAlg,inputFlags)
+    LArCoverageConfigCore(helper, CompFactory.LArCoverageAlg,flags)
 
     rv = ComponentAccumulator()
     rv.merge(helper.result())
     return rv
 
-def LArCoverageConfigCore(helper, algoinstance,inputFlags):
+def LArCoverageConfigCore(helper, algoinstance,flags):
 
     larCoverageAlg = helper.addAlgorithm(algoinstance,'LArCoverageAlg')
     larCoverageAlg.ProblemsToMask=["highNoiseHG","highNoiseMG","highNoiseLG","deadReadout","deadPhys"]
@@ -61,12 +61,16 @@ def LArCoverageConfigCore(helper, algoinstance,inputFlags):
     larCoverageAlg.NphiBinsHEC=[lArDQGlobals.Cell_Variables["phiNbin"]["HEC"]["A"]["0"],lArDQGlobals.Cell_Variables["phiNbin"]["HEC"]["A"]["1"],lArDQGlobals.Cell_Variables["phiNbin"]["HEC"]["A"]["2"],lArDQGlobals.Cell_Variables["phiNbin"]["HEC"]["A"]["3"]]
 
     from LArConfiguration.LArConfigFlags import RawChannelSource
-    if inputFlags.LAr.RawChannelSource is RawChannelSource.Calculated:
+    if flags.LAr.RawChannelSource is RawChannelSource.Calculated:
        larCoverageAlg.LArRawChannelKey="LArRawChannels_FromDigits"
 
     #Configure the CaloNoise
-    from CaloTools.CaloNoiseCondAlg import CaloNoiseCondAlg
-    CaloNoiseCondAlg(noisetype="electronicNoise")
+    if not hasattr(helper, 'resobj'):
+        from CaloTools.CaloNoiseCondAlg import CaloNoiseCondAlg
+        CaloNoiseCondAlg(noisetype="electronicNoise")
+    else:
+        from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
+        helper.resobj.merge(CaloNoiseCondAlgCfg(flags, noisetype="electronicNoise"))
 
     #-- caloNoise groups --
     caloNoiseToolArrayEM = helper.addArray([nLayers],larCoverageAlg,caloNoiseToolGroupName+"EM",topPath='/')
