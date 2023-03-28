@@ -18,6 +18,10 @@
 #include "G4MuIonisation.hh"
 #include "G4ProcessManager.hh"
 #include "G4Version.hh"
+#include "G4DecayTable.hh"
+#include "G4VDecayChannel.hh"
+#include "G4PhaseSpaceDecayChannel.hh"
+#include "G4ParticleTable.hh"
 //CLHEP headers
 #include "CLHEP/Units/SystemOfUnits.h"
 
