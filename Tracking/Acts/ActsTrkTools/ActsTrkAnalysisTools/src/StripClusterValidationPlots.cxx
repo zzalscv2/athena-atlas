@@ -48,8 +48,8 @@ namespace ActsTrk {
     m_sizeX_barrel = Book1D("sizeX_barrel", "StripCluster_sizeX_barrel;Size X;Entries;", 100, 0, 400, false);
     m_sizeX_endcap = Book1D("sizeX_endcap", "StripCluster_sizeX_endcap;Size X;Entries;", 100, 0, 400, false);
 
-    m_hitsInThirdTimeBin_barrel = Book1D("hitsInThirdTimeBin_barrel", "StripCluster_hitsInThirdTimeBin_barrel;Hits In Third Time Bin;Entries", 4, -2, 2, false);
-    m_hitsInThirdTimeBin_endcap = Book1D("hitsInThirdTimeBin_endcap", "StripCluster_hitsInThirdTimeBin_endcap;Hits In Third Time Bin;Entries", 4, -2, 2, false);
+    m_hitsInThirdTimeBin_barrel = Book1D("hitsInThirdTimeBin_barrel", "StripCluster_hitsInThirdTimeBin_barrel;Hits In Third Time Bin;Entries", 100, 0, 70000, false);
+    m_hitsInThirdTimeBin_endcap = Book1D("hitsInThirdTimeBin_endcap", "StripCluster_hitsInThirdTimeBin_endcap;Hits In Third Time Bin;Entries", 100, 0, 70000, false);
 
     m_global_xy_barrel = Book2D("global_xy_barrel", "StripCluster_global_xy_barrel;x [mm];y [mm];", 100, -1100, 1100, 100, -1100, 1100, false);
     m_global_xy_endcap = Book2D("global_xy_endcap", "StripCluster_global_xy_endcap;x [mm];y [mm];", 100, -1100, 1100, 100, -1100, 1100, false);
