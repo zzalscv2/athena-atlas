@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HIEventUtils/HIEventShapeSummaryTool.h"
@@ -29,7 +29,6 @@ HIEventShapeSummaryTool::HIEventShapeSummaryTool(const std::string& n) : asg::As
   declareProperty("Samplings",m_samp_names );
   declareProperty("SubCalos",m_subcalo_names);
   declareProperty("DoPositiveNegativeSides",m_do_sides=false);
-  if(initialize().isFailure()) ATH_MSG_WARNING("Initial configuration of tool failed");
 
 }
 

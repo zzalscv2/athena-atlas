@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef HIEVENTUTILS_HIEVENTSHAPESUMMARYTOOL_H
@@ -34,7 +34,7 @@ class HIEventShapeSummaryTool : virtual public asg::AsgTool, virtual public IHIE
       int layer;
       function_t func;
 
-      summary_info_t(std::string n, float emin, float emax, int ll, function_t ff) : name(n), eta_min(emin), eta_max(emax), layer(ll), func(ff) {};
+      summary_info_t(const std::string& n, float emin, float emax, int ll, function_t ff) : name(n), eta_min(emin), eta_max(emax), layer(ll), func(ff) {};
     };
 
 
