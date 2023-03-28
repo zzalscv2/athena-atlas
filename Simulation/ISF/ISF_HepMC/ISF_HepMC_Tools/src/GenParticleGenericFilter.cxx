@@ -86,7 +86,7 @@ StatusCode  ISF::GenParticleGenericFilter::finalize()
 bool ISF::GenParticleGenericFilter::pass(const HepMC::ConstGenParticlePtr& particle) const
 {
   bool pass = true;
-  HepMC::ConstGenVertexPtr productionVertex = particle?particle->production_vertex():nullptr;
+  const HepMC::ConstGenVertexPtr productionVertex = particle?particle->production_vertex():nullptr;
   if (!productionVertex || productionVertex->position().perp()<=m_maxApplicableRadius) {
       pass = check_cuts_passed(particle);
   }
