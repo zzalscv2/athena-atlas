@@ -235,29 +235,6 @@ class InDetTrigTrackingCuts :
     if self.__indetflags.cutLevel() >= mxlevel:
       log.info('using cutLevel %d/%d', mxlevel, self.__indetflags.cutLevel())
 
-    # --- SLHC setup
-    if mode == "SLHC":
-      self.__extension        = "SLHC"
-      # --- higher pt cut and impact parameter cut
-      self.__minPT                   = 1.0 * Units.GeV
-      self.__maxPrimaryImpact        = 2.0 * Units.mm # highlumi
-      # --- cluster cuts
-      self.__minClusters             = 9
-      self.__minSiNotShared          = 8
-      self.__maxShared               = 5
-      self.__maxHoles                = 3
-      self.__maxPixelHoles           = self.__maxHoles
-      self.__maxSctHoles             = self.__maxHoles
-      self.__maxDoubleHoles          = 2
-      # --- also tighten patter cuts
-      self.__radMax                  = 1000. * Units.mm
-      self.__seedFilterLevel         = 1
-      self.__nHolesMax               = self.__maxHoles
-      self.__nHolesGapMax            = 2*self.__maxDoubleHoles
-      #self.__Xi2max                  = 15.0
-      #self.__Xi2maxNoAdd             = 35.0
-      self.__nWeightedClustersMin    = self.__minClusters-1
-
     # --- changes for Pixel/SCT segments
     from AthenaCommon.DetFlags    import DetFlags
     if ( DetFlags.haveRIO.pixel_on() and not DetFlags.haveRIO.SCT_on() ):

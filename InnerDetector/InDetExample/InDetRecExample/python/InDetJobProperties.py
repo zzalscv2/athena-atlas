@@ -593,10 +593,10 @@ class primaryVertexSetup(InDetFlagsJobProperty):
     StoredValue  = 'GaussAdaptiveMultiFinding'
 
 class primaryVertexCutSetup(InDetFlagsJobProperty):
-    """ string to store the type of cuts to be used in PV reconstruction: 'Offline', 'IBL', 'SLHC' 'HeavyIon' """
+    """ string to store the type of cuts to be used in PV reconstruction: 'Offline', 'IBL', 'HeavyIon' """
     statusOn     = True
     allowedTypes = ['str']
-    allowedValues= ['Offline', 'LowPt', 'IBL', 'SLHC', 'HeavyIon']
+    allowedValues= ['Offline', 'LowPt', 'IBL', 'HeavyIon']
     StoredValue  = 'Offline'
 
 class priVtxCutLevel(InDetFlagsJobProperty):

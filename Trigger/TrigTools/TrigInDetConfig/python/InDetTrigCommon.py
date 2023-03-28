@@ -473,7 +473,7 @@ def siTrackMakerTool_builder( name, config, siDetElementsRoadMakerTool, trackFin
    else:
       trackPatternRecoInfo = 'SiSPSeededFinder'
 
-   useBremMode = trackingCuts.mode() == "Offline" or trackingCuts.mode() == "SLHC"
+   useBremMode = trackingCuts.mode() == "Offline"
 
    kwargs = {}
 

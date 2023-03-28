@@ -128,7 +128,7 @@ class ConfiguredVertexingCuts :
    if (self.__indetflags.doMinBias()):
      self.__minPT   = 100. * Units.MeV
 
-   if not (self.__indetflags.useBeamConstraint()) and not (mode == "HeavyIon") and not (mode == "SLHC"):
+   if not (self.__indetflags.useBeamConstraint()) and not (mode == "HeavyIon"):
      # Cut on multiplicity for IterativeFinder if no beamspot constraint, to avoid timeouts
      self.__doMaxTracksCut = True
      self.__MaxTracks = 3000
@@ -180,25 +180,7 @@ class ConfiguredVertexingCuts :
       self.__nHitSct             = 5
       self.__nHitSi              = 7
       self.__useTrackQualityInfo = True 
-      
-#-------------"Heavy Ion running mode"-----------------------------------
-# For the moment, same as above, but just explicitely request the special
-# mode for the Fast(or Full)VertexFinder, since it is in the single vertex
-# mode anyways
 
-   if mode == "SLHC":  
-
-      self.__minPT               = 500. * Units.MeV
-      self.__IPd0Max             = 1.
-      self.__sigIPd0Max          = 0.35
-      self.__sigIPz0Max          = 2.5
-      self.__d0significanceMax   = 4.
-
-     #cluster and track quality cuts   
-
-      self.__nHitSct             = 5
-      self.__nHitSi              = 7
-      self.__useTrackQualityInfo = True      
 
 #-------------"Heavy Ion running mode"-----------------------------------
 # For the moment, same as above, but just explicitely request the special

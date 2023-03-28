@@ -146,7 +146,6 @@ InDetFlags.doTruth       = (globalflags.DataSource == 'geant4' and globalflags.I
 
 #InDetFlags.doIBL = True
 #InDetFlags.doHighPileup = True
-#InDetFlags.doSLHC = True
 
 # --- possibility to run tracking on subdetectors separately (and independent from each other)
 #InDetFlags.doTrackSegmentsPixel = True
