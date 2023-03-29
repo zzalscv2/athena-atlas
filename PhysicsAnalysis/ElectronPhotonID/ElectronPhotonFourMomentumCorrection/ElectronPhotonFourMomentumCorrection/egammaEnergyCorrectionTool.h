@@ -154,7 +154,7 @@ namespace egEnergyCorr {
       MatIDUp, MatIDDown, MatCryoUp, MatCryoDown, MatCaloUp, MatCaloDown,
 
       // ... Gain correction
-      L1GainUp, L1GainDown, L2GainUp, L2GainDown,
+      L1GainUp, L1GainDown, L2GainUp, L2GainDown, L2MediumGainDown, L2MediumGainUp, L2LowGainDown, L2LowGainUp,
 
       // ... Pedestal
       PedestalUp, PedestalDown,
@@ -471,6 +471,8 @@ namespace AtlasRoot {
 
     double nearestEtaBEC( double cl_eta ) const;
 
+    double getInterpolateConvSyst2D (TH2 *conv_hist,double aeta, double ET) const;
+
  /** @brief get resolution and its uncertainty)
      @brief particle type : 0=electron, 1=reco unconverted photon, 2=reco converted photon
      @brief energy = Energy in MeV
@@ -575,6 +577,8 @@ namespace AtlasRoot {
     std::unique_ptr<TH1>         m_convRadius;
     std::unique_ptr<TH1>         m_convFakeRate;
     std::unique_ptr<TH1>         m_convRecoEfficiency;
+    std::unique_ptr<TH2>         m_convFakeRate_2D;
+    std::unique_ptr<TH2>         m_convRecoEfficiency_2D;
 
     std::unique_ptr<TH1>         m_leakageConverted;
     std::unique_ptr<TH1>         m_leakageUnconverted;
