@@ -168,7 +168,7 @@ namespace InDet {
     /** defines 'good' reco tracks*/
     bool     PassTrackCuts(const Trk::TrackParameters *para) const;
     /** classifies gen particle as primary, secondary or truncated */
-    int      ClassifyParticle( HepMC::ConstGenParticlePtr particle, const double prob) const;
+    int      ClassifyParticle( const HepMC::ConstGenParticlePtr& particle, const double prob) const;
 
 
     static std::string getSummaryTypeHeader();
