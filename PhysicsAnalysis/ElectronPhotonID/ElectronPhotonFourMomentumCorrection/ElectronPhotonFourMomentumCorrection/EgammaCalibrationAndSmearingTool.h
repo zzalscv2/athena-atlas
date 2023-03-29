@@ -220,6 +220,26 @@ private:
 		return result;
 	}
 
+  struct DoubleOrAbsEtaCaloPredicate
+  {
+    DoubleOrAbsEtaCaloPredicate(double eta1_min, double eta1_max, double eta2_min, double eta2_max) :
+    m_eta1_min(eta1_min), m_eta1_max(eta1_max), m_eta2_min(eta2_min), m_eta2_max(eta2_max) {}
+
+    bool operator()(const xAOD::Egamma& p) {
+      const double aeta = std::abs(xAOD::get_eta_calo(*p.caloCluster(),p.author()));
+      return ((aeta >= m_eta1_min and aeta < m_eta1_max) or (aeta >= m_eta2_min and aeta < m_eta2_max));
+    }
+
+  private:
+    float m_eta1_min, m_eta1_max, m_eta2_min, m_eta2_max;
+  };
+
+  const EgammaPredicate DoubleOrAbsEtaCaloPredicateFactory(double eta1_min, double eta1_max, double eta2_min, double eta2_max) const
+	{
+	  return DoubleOrAbsEtaCaloPredicate(eta1_min, eta1_max, eta2_min, eta2_max);
+	}
+
+
   PATCore::ParticleType::Type xAOD2ptype(const xAOD::Egamma& particle) const;
 public:
   virtual double getEnergy(xAOD::Egamma*, const xAOD::EventInfo*);

@@ -891,8 +891,8 @@ namespace AtlasRoot {
 	m_convRecoEfficiency.reset( dynamic_cast< TH1* >( m_rootFile->Get("Conversions/es2012c/convRecoEfficiency")));              m_convRecoEfficiency->SetDirectory(nullptr);
       }
       else if (m_esmodel == egEnergyCorr::es2022_R21_Precision) {
-	m_convFakeRate.reset( dynamic_cast< TH1* >( m_rootFile->Get("Conversions/es2022_R21_Precision/convFakeRate")));             m_convFakeRate->SetDirectory(nullptr);
-	m_convRecoEfficiency.reset( dynamic_cast< TH1* >( m_rootFile->Get("Conversions/es2022_R21_Precision/convRecoEfficiency"))); m_convRecoEfficiency->SetDirectory(nullptr);
+	m_convFakeRate_2D.reset( dynamic_cast< TH2* >( m_rootFile->Get("Conversions/es2022_R21_Precision/convFakeRate")));             m_convFakeRate_2D->SetDirectory(nullptr);
+	m_convRecoEfficiency_2D.reset( dynamic_cast< TH2* >( m_rootFile->Get("Conversions/es2022_R21_Precision/convRecoEfficiency"))); m_convRecoEfficiency_2D->SetDirectory(nullptr);
       }
       else {
 	m_convFakeRate.reset( dynamic_cast< TH1* >( m_rootFile->Get("Conversions/es2017_summer/convFakeRate")));                    m_convFakeRate->SetDirectory(nullptr);
@@ -969,13 +969,21 @@ namespace AtlasRoot {
         gain_tool_run_2_filename = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v11/gain_uncertainty_specialRun.root"); 
       }
       else if (m_esmodel == egEnergyCorr::es2022_R21_Precision) {
-	      gain_tool_run_2_filename = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v28/gain_uncertainty_specialRun.root");
+	      gain_tool_run_2_filename = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v29/gain_uncertainty_specialRun.root");
+        
       }
       else
       {
         gain_tool_run_2_filename = PathResolverFindCalibFile("ElectronPhotonFourMomentumCorrection/v14/gain_uncertainty_specialRun.root");
       }
-      m_gain_tool_run2.reset(new egGain::GainUncertainty(gain_tool_run_2_filename));
+
+      if (m_esmodel == egEnergyCorr::es2022_R21_Precision){
+        m_gain_tool_run2.reset(new egGain::GainUncertainty(gain_tool_run_2_filename,true));
+      }
+      else{
+        m_gain_tool_run2.reset(new egGain::GainUncertainty(gain_tool_run_2_filename)); 
+      }
+
       m_gain_tool_run2->msg().setLevel(this->msg().level());
       
       m_e1hg_tool.reset( new e1hg_systematics());
@@ -1634,8 +1642,10 @@ namespace AtlasRoot {
 
     // L2 Gain switch contribution
     double daL2GainSwitch = 0.;
+    double daL2MediumGainSwitch = 0.;
+    double daL2LowGainSwitch = 0.;
 
-    if (var == egEnergyCorr::Scale::L2GainUp || var == egEnergyCorr::Scale::L2GainDown) {
+    if (m_esmodel != egEnergyCorr::es2022_R21_Precision && (var == egEnergyCorr::Scale::L2GainUp || var == egEnergyCorr::Scale::L2GainDown)) {
       if (m_gain_tool) { // recipe for run1
         if (!(std::abs(cl_eta) < 1.52 && std::abs(cl_eta) > 1.37) && std::abs(cl_eta) < 2.4) {
 	  double evar = m_gain_tool->CorrectionGainTool(cl_eta, energy/GeV, energyS2/GeV, ptype);
@@ -1657,6 +1667,33 @@ namespace AtlasRoot {
         daL2GainSwitch = 0.;
       }
     }
+
+    if (m_esmodel == egEnergyCorr::es2022_R21_Precision && (var == egEnergyCorr::Scale::L2MediumGainUp || var == egEnergyCorr::Scale::L2MediumGainDown)) {
+      if (m_gain_tool_run2) { // recipe for run 2, see ATLASEG-44
+        if(m_useL2GainInterpolation)m_gain_tool_run2->setInterpolation();
+        daL2MediumGainSwitch = m_gain_tool_run2->getUncertainty(cl_etaCalo, Et, ptype, m_useL2GainCorrection,egGain::GainUncertainty::GainType::MEDIUM);
+        if (var == egEnergyCorr::Scale::L2GainDown) daL2MediumGainSwitch *= -1;
+        ATH_MSG_DEBUG("L2 gain Medium uncertainty: " <<  daL2MediumGainSwitch);
+      }
+      else {
+        ATH_MSG_ERROR("trying to compute gain systematic, but no tool for doing it has been instantiated, setting sys to 0");
+        daL2MediumGainSwitch = 0.;
+      }
+    }
+
+    if (m_esmodel == egEnergyCorr::es2022_R21_Precision && (var == egEnergyCorr::Scale::L2LowGainUp || var == egEnergyCorr::Scale::L2LowGainDown)) {
+      if (m_gain_tool_run2) { // recipe for run 2, see ATLASEG-44
+        if(m_useL2GainInterpolation)m_gain_tool_run2->setInterpolation();
+        daL2LowGainSwitch = m_gain_tool_run2->getUncertainty(cl_etaCalo, Et, ptype, m_useL2GainCorrection,egGain::GainUncertainty::GainType::LOW);
+        if (var == egEnergyCorr::Scale::L2GainDown) daL2LowGainSwitch *= -1;
+        ATH_MSG_DEBUG("L2 gain Low uncertainty: " <<  daL2LowGainSwitch);
+      }
+      else {
+        ATH_MSG_ERROR("trying to compute Low gain systematic, but no tool for doing it has been instantiated, setting sys to 0");
+        daL2LowGainSwitch = 0.;
+      }
+    }
+    
 
     // pp0 (and IBL)
     double dapp0 = 0.;
@@ -1743,6 +1780,8 @@ namespace AtlasRoot {
     alphaTot += daLeakage;
     alphaTot += daL1GainSwitch;
     alphaTot += daL2GainSwitch;
+    alphaTot += daL2MediumGainSwitch;
+    alphaTot += daL2LowGainSwitch;
     alphaTot += daConvSyst;
     alphaTot += daPedestal;
     alphaTot += daWtots1;
@@ -3463,9 +3502,9 @@ namespace AtlasRoot {
       else if (var == egEnergyCorr::Scale::ConvEfficiencyDown && m_esmodel != egEnergyCorr::es2022_R21_Precision)
 	alpha = -m_convRecoEfficiency->GetBinContent( m_convRecoEfficiency->FindBin(aeta) );
       else if (var == egEnergyCorr::Scale::ConvRecoUp && m_esmodel == egEnergyCorr::es2022_R21_Precision)
-	alpha =  m_convRecoEfficiency->GetBinContent( m_convRecoEfficiency->FindBin(aeta,ET) );
+	alpha = getInterpolateConvSyst2D(m_convRecoEfficiency_2D.get(),aeta,ET);
       else if (var == egEnergyCorr::Scale::ConvRecoDown && m_esmodel == egEnergyCorr::es2022_R21_Precision)
-	alpha = -m_convRecoEfficiency->GetBinContent( m_convRecoEfficiency->FindBin(aeta,ET) );
+	alpha = -1.*getInterpolateConvSyst2D(m_convRecoEfficiency_2D.get(),aeta,ET);
 
     } else if (ptype==PATCore::ParticleType::ConvertedPhoton) {
 
@@ -3474,9 +3513,9 @@ namespace AtlasRoot {
       else if (var == egEnergyCorr::Scale::ConvFakeRateDown && m_esmodel != egEnergyCorr::es2022_R21_Precision)
 	alpha = -m_convFakeRate->GetBinContent( m_convFakeRate->FindBin(aeta) );
       else if (var == egEnergyCorr::Scale::ConvRecoUp && m_esmodel == egEnergyCorr::es2022_R21_Precision)
-	alpha =  m_convFakeRate->GetBinContent( m_convFakeRate->FindBin(aeta,ET) );
+	alpha =  getInterpolateConvSyst2D(m_convFakeRate_2D.get(),aeta,ET);
       else if (var == egEnergyCorr::Scale::ConvRecoDown && m_esmodel == egEnergyCorr::es2022_R21_Precision)
-	alpha = -m_convFakeRate->GetBinContent( m_convFakeRate->FindBin(aeta,ET) );
+	alpha = -1.*getInterpolateConvSyst2D(m_convFakeRate_2D.get(),aeta,ET);
       else if (var == egEnergyCorr::Scale::ConvRadiusUp)
 	alpha =  m_convRadius->GetBinContent( m_convRadius->FindBin(aeta, ET/GeV) );
       else if (var == egEnergyCorr::Scale::ConvRadiusDown)
@@ -3486,6 +3525,48 @@ namespace AtlasRoot {
 
     return alpha*varSF;
 
+  }
+
+
+  double egammaEnergyCorrectionTool::getInterpolateConvSyst2D (TH2 *conv_hist,double aeta, double ET) const {
+
+ 
+    // use one bin in eta and linear interpolation in Et between 2 bins
+    int ieta = conv_hist->GetXaxis()->FindBin(aeta);
+    
+    int ipt = conv_hist->GetYaxis()->FindBin(ET);
+    double ptBin = conv_hist->GetYaxis()->GetBinCenter(ipt);
+   
+    int i1,i2;
+    double pt1,pt2;
+    if (ET>ptBin) {
+      i1=ipt;
+      i2=ipt+1;
+      pt1=ptBin;
+      pt2= conv_hist->GetYaxis()->GetBinCenter(i2);
+    }
+    else {
+      i1=ipt-1;
+      i2=ipt;
+      pt1=conv_hist->GetYaxis()->GetBinCenter(i1);
+      pt2=ptBin;
+    }
+    
+    int nbins=conv_hist->GetYaxis()->GetNbins();
+    double value=0;
+    if (i1>=1 && i1 < nbins) {
+      double v1 = conv_hist->GetBinContent(ieta,i1);
+      double v2 = conv_hist->GetBinContent(ieta,i2);
+      value =  (v1*(pt2-ET) + v2*(ET-pt1)) / (pt2-pt1);
+    }
+    else{
+      if (ipt<1) ipt=1;
+      if (ipt>nbins) ipt=nbins;
+      value=conv_hist->GetBinContent(ieta,ipt);
+    }
+
+    return value;
+    
   }
 
   double egammaEnergyCorrectionTool::getAlphaPedestal(double cl_eta, double energy, double eraw,
@@ -3884,6 +3965,10 @@ namespace AtlasRoot {
     case egEnergyCorr::Scale::L1GainDown: return "L1GainDown";
     case egEnergyCorr::Scale::L2GainUp: return "L2GainUp";
     case egEnergyCorr::Scale::L2GainDown: return "L2GainDown";
+    case egEnergyCorr::Scale::L2LowGainDown: return "L2LowGainDown";
+    case egEnergyCorr::Scale::L2LowGainUp: return "L2LowGainUp";
+    case egEnergyCorr::Scale::L2MediumGainDown: return "L2MediumGainDown";
+    case egEnergyCorr::Scale::L2MediumGainUp: return "L2MediumGainUp";
     case egEnergyCorr::Scale::ADCLinUp: return "ADCLinUp";
     case egEnergyCorr::Scale::ADCLinDown: return "ADCLinDown";
     case egEnergyCorr::Scale::LeakageUnconvUp: return "LeakageUnconvUp";

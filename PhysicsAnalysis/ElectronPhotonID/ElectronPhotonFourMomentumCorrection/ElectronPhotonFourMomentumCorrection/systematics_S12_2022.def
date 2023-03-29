@@ -9,7 +9,6 @@ SYSMACRO(EG_SCALE_MATID,          0, decorrelation_edges_MATERIAL, egEnergyCorr:
 SYSMACRO(EG_SCALE_MATCRYO,        0, decorrelation_edges_TWELVE,   egEnergyCorr::Scale::MatCryoUp,        egEnergyCorr::Scale::MatCryoDown)
 SYSMACRO(EG_SCALE_MATCALO,        0, decorrelation_edges_TWELVE,   egEnergyCorr::Scale::MatCaloUp,        egEnergyCorr::Scale::MatCaloDown)
 SYSMACRO(EG_SCALE_L1GAIN,         1, std::vector<double>(),        egEnergyCorr::Scale::L1GainUp,         egEnergyCorr::Scale::L1GainDown)
-SYSMACRO(EG_SCALE_L2GAIN,         1, std::vector<double>(),        egEnergyCorr::Scale::L2GainUp,         egEnergyCorr::Scale::L2GainDown)
 SYSMACRO(EG_SCALE_PEDESTAL,       1, std::vector<double>(),        egEnergyCorr::Scale::PedestalUp,       egEnergyCorr::Scale::PedestalDown)
 SYSMACRO(PH_SCALE_LEAKAGEUNCONV,  1, std::vector<double>(),        egEnergyCorr::Scale::LeakageUnconvUp,  egEnergyCorr::Scale::LeakageUnconvDown)
 SYSMACRO(PH_SCALE_LEAKAGECONV,    1, std::vector<double>(),        egEnergyCorr::Scale::LeakageConvUp,    egEnergyCorr::Scale::LeakageConvDown)

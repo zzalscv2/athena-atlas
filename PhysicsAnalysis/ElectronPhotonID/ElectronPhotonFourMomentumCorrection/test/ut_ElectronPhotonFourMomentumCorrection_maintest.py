@@ -418,7 +418,7 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
         # _test_list_syst("es2015PRE", "FULL_v1", None, None, 158)
         # _test_list_syst("es2015PRE", None, "FULL_v1", "FULL_v1", 158)
         # _test_list_syst("es2015PRE", None, None, None, 158)
-        _test_list_syst("es2022_R21_Precision", None, None, None, 158)
+        _test_list_syst("es2022_R21_Precision", None, None, None, 162)
 
         # these works, but generate FATALS, as expected
         # _test_list_syst("es2016PRE", "1NP_v1", "1NP_v1", "1NP_v1", [], success=False)
@@ -546,18 +546,18 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
                 self.assertAlmostEqual(pt1, pt2)
                 self.assertAlmostEqual(eta1, eta2)
 
-    def test_1NP_vs_FULL_es2017(self):
+    def test_1NP_vs_FULL_es2022(self):
         """ check that the 1NP model is the squared sum of the single systematics """
-        tool_1NP = ROOT.CP.EgammaCalibrationAndSmearingTool("tool_es2016data_mc15c_1NP")
-        tool_1NP.setProperty("ESModel", "es2016data_mc15c").ignore()
+        tool_1NP = ROOT.CP.EgammaCalibrationAndSmearingTool("tool_es2022_R21_Precision_1NP")
+        tool_1NP.setProperty("ESModel", "es2022_R21_Precision").ignore()
         tool_1NP.setProperty("decorrelationModel", "1NP_v1").ignore()
         tool_1NP.setProperty["int"]("randomRunNumber", RUN2015).ignore()
         tool_1NP.msg().setLevel(ROOT.MSG.WARNING)
 
         tool_1NP.initialize().ignore()
 
-        tool_FULL = ROOT.CP.EgammaCalibrationAndSmearingTool("tool_es2016data_mc15c_FULL")
-        tool_FULL.setProperty("ESModel", "es2016data_mc15c").ignore()
+        tool_FULL = ROOT.CP.EgammaCalibrationAndSmearingTool("tool_es2022_R21_Precision_FULL")
+        tool_FULL.setProperty("ESModel", "es2022_R21_Precision").ignore()
         tool_FULL.setProperty["int"]("randomRunNumber", RUN2015).ignore()
         # use ETACORRELATED to compare. FULL_v1 will differ (very small difference) since by default
         # FULL_v1 divide the ZEESTAT by the sqrt(#bins)

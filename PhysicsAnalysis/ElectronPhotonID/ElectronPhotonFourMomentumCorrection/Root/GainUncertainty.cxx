@@ -27,7 +27,7 @@ namespace egGain {
 
 //--------------------------------------
 
-  GainUncertainty::GainUncertainty(const std::string& filename, const std::string& name) : asg::AsgMessaging(name) {
+  GainUncertainty::GainUncertainty(const std::string& filename, bool splitGainUnc, const std::string& name ) : asg::AsgMessaging(name) {
 
     ATH_MSG_INFO("opening file " << filename);
     std::unique_ptr<TFile> gainFile(TFile::Open( filename.c_str(), "READ"));
@@ -47,6 +47,28 @@ namespace egGain {
       sprintf(name,"gain_Impact_unco_%d",i);
       m_gain_Impact_unco[i].reset(checked_cast<TH1*>(gainFile->Get(name)));
       m_gain_Impact_unco[i]->SetDirectory(nullptr);
+
+      if (splitGainUnc){
+        sprintf(name,"gain_Impact_elec_%d_medium",i);
+        m_gain_Impact_elec_medium[i].reset(checked_cast<TH1*>(gainFile->Get(name)));
+        m_gain_Impact_elec_medium[i]->SetDirectory(nullptr);
+        sprintf(name,"gain_Impact_conv_%d_medium",i);
+        m_gain_Impact_conv_medium[i].reset(checked_cast<TH1*>(gainFile->Get(name)));
+        m_gain_Impact_conv_medium[i]->SetDirectory(nullptr);
+        sprintf(name,"gain_Impact_unco_%d_medium",i);
+        m_gain_Impact_unco_medium[i].reset(checked_cast<TH1*>(gainFile->Get(name)));
+        m_gain_Impact_unco_medium[i]->SetDirectory(nullptr);
+
+        sprintf(name,"gain_Impact_elec_%d_low",i);
+        m_gain_Impact_elec_low[i].reset(checked_cast<TH1*>(gainFile->Get(name)));
+        m_gain_Impact_elec_low[i]->SetDirectory(nullptr);
+        sprintf(name,"gain_Impact_conv_%d_low",i);
+        m_gain_Impact_conv_low[i].reset(checked_cast<TH1*>(gainFile->Get(name)));
+        m_gain_Impact_conv_low[i]->SetDirectory(nullptr);
+        sprintf(name,"gain_Impact_unco_%d_low",i);
+        m_gain_Impact_unco_low[i].reset(checked_cast<TH1*>(gainFile->Get(name)));
+        m_gain_Impact_unco_low[i]->SetDirectory(nullptr);
+      }
     }
 
   }
@@ -56,7 +78,8 @@ namespace egGain {
 
   double GainUncertainty::getUncertainty(double etaCalo_input, double et_input,
 					 PATCore::ParticleType::Type ptype,
-					 bool useL2GainUncertainty) const {
+					 bool useL2GainUncertainty, GainType gainType) const {
+  
     double aeta = std::abs(etaCalo_input);
     int ibin = -1;
     if (aeta<0.8) ibin=0;
@@ -66,26 +89,59 @@ namespace egGain {
     else if (aeta<2.50) ibin=4;
     if (ibin<0) return 0.;
 
-    //Protection needed as the histograms stops at 1 TeV
-    if(et_input>999999.) et_input = 999999.;
-
     ATH_MSG_VERBOSE("GainUncertainty::getUncertainty "
 		    << etaCalo_input << " "
 		    << et_input << " "
 		    << ptype << " ibin " << ibin);
 
     TH1 *hImpact = nullptr;
-    if (ptype == PATCore::ParticleType::Electron)
-      hImpact = m_gain_Impact_elec[ibin].get();
-    else if (ptype == PATCore::ParticleType::ConvertedPhoton)
-      hImpact = m_gain_Impact_conv[ibin].get();
-    else if (ptype == PATCore::ParticleType::UnconvertedPhoton)
-      hImpact = m_gain_Impact_unco[ibin].get();
-    if (hImpact == nullptr) {
-      ATH_MSG_WARNING("Trying to get Gain correction of not allowed particle type");
-      return 0;
+    //Medium+Low gain effect
+    if (gainType==GainType::MEDIUMLOW){
+      if (ptype == PATCore::ParticleType::Electron)
+        hImpact = m_gain_Impact_elec[ibin].get();
+      else if (ptype == PATCore::ParticleType::ConvertedPhoton)
+        hImpact = m_gain_Impact_conv[ibin].get();
+      else if (ptype == PATCore::ParticleType::UnconvertedPhoton)
+        hImpact = m_gain_Impact_unco[ibin].get();
+      if (hImpact == nullptr) {
+        ATH_MSG_WARNING("Trying to get Gain correction of not allowed particle type");
+        return 0;
+      }
     }
-    
+    //Medium gain effect
+    else if (gainType==GainType::MEDIUM){
+      if (ptype == PATCore::ParticleType::Electron)
+        hImpact = m_gain_Impact_elec_medium[ibin].get();
+      else if (ptype == PATCore::ParticleType::ConvertedPhoton)
+        hImpact = m_gain_Impact_conv_medium[ibin].get();
+      else if (ptype == PATCore::ParticleType::UnconvertedPhoton)
+        hImpact = m_gain_Impact_unco_medium[ibin].get();
+      if (hImpact == nullptr) {
+        ATH_MSG_WARNING("Trying to get Gain correction of not allowed particle type");
+        return 0;
+      }
+    }
+    //Low gain effect
+    else if (gainType==GainType::LOW){
+      if (ptype == PATCore::ParticleType::Electron)
+        hImpact = m_gain_Impact_elec_low[ibin].get();
+      else if (ptype == PATCore::ParticleType::ConvertedPhoton)
+        hImpact = m_gain_Impact_conv_low[ibin].get();
+      else if (ptype == PATCore::ParticleType::UnconvertedPhoton)
+        hImpact = m_gain_Impact_unco_low[ibin].get();
+      if (hImpact == nullptr) {
+        ATH_MSG_WARNING("Trying to get Gain correction of not allowed particle type");
+        return 0;
+      }
+    }
+
+    double max_et = hImpact->GetXaxis()->GetBinUpEdge(hImpact->GetNbinsX()); 
+    //Protection needed to match maximum Et in the histogram
+    if ( 0.001*et_input > max_et) {
+       et_input = (max_et-1.)*1000.;
+    }
+
+
     double impact = 0;
     if(m_useInterpolation){
       impact = hImpact->Interpolate(0.001*et_input);
