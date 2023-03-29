@@ -6,6 +6,7 @@ atlas_subdir( APRTests )
 # External dependencies:
 find_package( CppUnit )
 find_package( ROOT )
+find_package( Boost )
 
 # Extend the include directories for all components:
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/TestDictionary )
