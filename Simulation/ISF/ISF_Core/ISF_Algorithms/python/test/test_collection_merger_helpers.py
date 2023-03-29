@@ -7,7 +7,7 @@ from AthenaCommon.CfgGetter import getAlgorithm
 from G4AtlasApps.SimFlags import simFlags
 from ISF_Algorithms.collection_merger_helpers import generate_mergeable_collection_name
 from ISF_Config.ISF_jobProperties import ISF_Flags
-
+from AthenaCommon.Include import include # So that it is clear that this is legacy configuration
 
 class Test_generate_mergeable_collection_name(unittest.TestCase):
 
