@@ -1712,7 +1712,7 @@ void TileAANtuple::LASER_addBranch(void) {
     
     const char* gainnames[2]  = {"LG","HG"};
     const char* channames[16] = {"Diode0","Diode1","Diode2","Diode3","Diode4","Diode5","Diode6","Diode7",
-      "Diode8","Diode9","ExiCIS0","IntCIS","DiodePhocal","ExtCIS1","PMT1","PMT2"};
+      "Diode8","Diode9","ExtCIS0","IntCIS","DiodePhocal","ExtCIS1","PMT1","PMT2"};
     
     m_ntuplePtr->Branch("LASER_BCID", &m_las_BCID, "LASER_BCID/I");
     
