@@ -403,7 +403,7 @@ bool SCT_DigitizationTool::digitizeElement(const EventContext& ctx, SiChargedDio
 
   // Loop over the hits and created charged diodes:
   while (i != e) {
-    TimedHitPtr<SiHit> phit{*i++};
+    const TimedHitPtr<SiHit>& phit{*i++};
 
     // skip hits which are more than 10us away
     if (std::abs(phit->meanTime()) < 10000. * CLHEP::ns) {

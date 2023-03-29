@@ -565,7 +565,7 @@ selectGenSignal  (const McEventCollection* SimTracks,
 #else
       counter.m_counter[kN_gen_tracks_processed] += genEvent->particles_size();
 #endif
-      for (auto particle: *genEvent){
+      for (const auto& particle: *genEvent){
 	  // require stable particle from generation or simulation
 	  if ((particle->status()%1000) != 1 ) continue;
 	  int   pdgCode = particle->pdg_id();

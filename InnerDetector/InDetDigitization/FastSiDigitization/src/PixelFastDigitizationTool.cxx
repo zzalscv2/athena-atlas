@@ -433,7 +433,7 @@ StatusCode PixelFastDigitizationTool::digitize(const EventContext& ctx,
 
     while (i != e) {
 
-      TimedHitPtr<SiHit> hit(*i++);
+      const TimedHitPtr<SiHit>& hit(*i++);
 
 
       const int barrelEC = hit->getBarrelEndcap();

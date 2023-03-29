@@ -668,7 +668,7 @@ std::vector<SiHit> PixelPrepDataToxAOD::findAllHitsCompatibleWithCluster( const 
       
       float energyDep(0);
       float time(0);
-      for( auto& siHit :  ajoiningHits){
+      for( const auto& siHit :  ajoiningHits){
         energyDep += siHit->energyLoss();
         time += siHit->meanTime();    
       }

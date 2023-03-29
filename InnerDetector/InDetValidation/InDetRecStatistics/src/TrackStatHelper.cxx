@@ -846,7 +846,7 @@ bool InDet::TrackStatHelper::PassTrackCuts(const Trk::TrackParameters *para) con
 
 }
 
-int InDet::TrackStatHelper::ClassifyParticle( HepMC::ConstGenParticlePtr particle, const double prob) const {
+int InDet::TrackStatHelper::ClassifyParticle( const HepMC::ConstGenParticlePtr& particle, const double prob) const {
 
   int partClass=-999;
 
