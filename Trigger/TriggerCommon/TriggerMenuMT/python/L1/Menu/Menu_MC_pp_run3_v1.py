@@ -112,7 +112,6 @@ def defineMenu():
         'L1_jJ80p0ETA25':'',
         'L1_jJ85p0ETA21':'',
         'L1_jJ140':'',
-        'L1_jJ180':'',
         'L1_jLJ180':'',
 
         # other non-primary
