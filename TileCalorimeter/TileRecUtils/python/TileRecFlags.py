@@ -252,6 +252,13 @@ class correctTimeJumps(JobProperty):
     allowedTypes = ['bool']
     StoredValue  = True
 
+#
+class useOnlineChannelStatus(JobProperty):
+    """ use online DB with channel/adc status
+    """
+    statusOn     = True
+    allowedTypes = ['bool']
+    StoredValue  = True
 
 # Defines the container for the performance monitoring flags  
 class TileRecFlags(JobPropertyContainer):
@@ -294,7 +301,8 @@ list_jobproperties = [
     simulateTrips,
     zeroAmplitudeWithoutDigits,
     correctPedestalDifference,
-    correctTimeJumps
+    correctTimeJumps,
+    useOnlineChannelStatus
     ]
 
 for i in list_jobproperties:
