@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FastCaloSimCaloExtrapolation_H
@@ -37,13 +37,13 @@ struct CylinderIntersections
 };
 
 
-class FastCaloSimCaloExtrapolation: public AthAlgTool, virtual public IFastCaloSimCaloExtrapolation
+class FastCaloSimCaloExtrapolation: public extends<AthAlgTool, IFastCaloSimCaloExtrapolation>
 {
 
 public:
   
   FastCaloSimCaloExtrapolation(const std::string& t, const std::string& n, const IInterface* p);
-  ~FastCaloSimCaloExtrapolation();
+  ~FastCaloSimCaloExtrapolation() = default;
 
   virtual StatusCode initialize() override final;
   virtual StatusCode finalize() override final;
@@ -131,19 +131,19 @@ protected:
   HepPDT::ParticleDataTable*     m_particleDataTable{nullptr};
 
   //uniquely defined ID-Calo surfaces
-  std::vector<float> m_CaloBoundaryR{1148.0,120.0,41.0};
-  std::vector<float> m_CaloBoundaryZ{3550.0,4587.0,4587.0};
-  double m_calomargin{100};
+  FloatArrayProperty m_CaloBoundaryR{this, "CaloBoundaryR", {1148.0,120.0,41.0}};
+  FloatArrayProperty m_CaloBoundaryZ{this, "CaloBoundaryZ", {3550.0,4587.0,4587.0}};
+  DoubleProperty m_calomargin{this, "CaloMargin", 100};
 
   std::vector<int> m_surfacelist;
 
-  ToolHandle<Trk::ITimedExtrapolator>    m_extrapolator;
+  PublicToolHandle<Trk::ITimedExtrapolator>    m_extrapolator{this, "Extrapolator", "TimedExtrapolator"};
   CxxUtils::CachedPointer<const Trk::TrackingVolume> m_caloEntrance;
-  std::string                            m_caloEntranceName{""};
+  StringProperty                            m_caloEntranceName{this, "CaloEntrance", ""};
 
   Trk::PdgToParticleHypothesis           m_pdgToParticleHypothesis;
 
-  ToolHandle<IFastCaloSimGeometryHelper> m_CaloGeometryHelper;
+  PublicToolHandle<IFastCaloSimGeometryHelper> m_CaloGeometryHelper{this, "CaloGeometryHelper", "FastCaloSimGeometryHelper"};
 
 };
 

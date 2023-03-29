@@ -178,6 +178,9 @@ namespace met {
     std::unique_ptr<SG::AuxElement::ConstAccessor<float > > m_acc_jetJvtMoment;
     std::unique_ptr<SG::AuxElement::ConstAccessor<char > > m_acc_jetRejectionDec;
 
+    // pT threshold for suppressing warnings of objects missing in association map
+    float m_missObjWarningPtThreshold;
+
     bool m_jetCorrectPhi;
     double m_jetMinEfrac;
     double m_jetMinWeightedPt;

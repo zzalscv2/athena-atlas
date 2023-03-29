@@ -31,9 +31,7 @@ namespace Muon {
     /////////////////////////////////////////////////////////////////////////////
 
     class RpcRdoToPrepDataToolMT : public extends<AthAlgTool, IMuonRdoToPrepDataTool> {
-    public:
-        using getPrepCollection_func = std::function<RpcPrepDataCollection*(Identifier)>;
-        using getCoinCollection_func = std::function<RpcCoinDataCollection*(Identifier)>;
+    public:        
 
         RpcRdoToPrepDataToolMT(const std::string&, const std::string&, const IInterface*);
 
@@ -52,41 +50,53 @@ namespace Muon {
         virtual void printPrepData() const override;
 
     protected:
-        StatusCode transferAndRecordPrepData(Muon::RpcPrepDataContainer& localContainer) const;
-        StatusCode transferAndRecordCoinData(Muon::RpcCoinDataContainer& localContainer) const;
-        void printMTPrepData(Muon::RpcPrepDataContainer& prepData) const;
-        void printMTCoinData(Muon::RpcCoinDataContainer& prepData) const;
-
-   
         struct State;
 
+        /// Stores the PrepData container into store gate
+        StatusCode transferAndRecordPrepData(const EventContext& ctx, State& state) const;
+        /// Stores the CoinData container into store gate
+        StatusCode transferAndRecordCoinData(const EventContext& ctx, State& state) const;
+        /// Load the hashes of the processed chambers 
+        StatusCode loadProcessedChambers(const EventContext& ctx, State& state) const;
+        
+        void printMTPrepData(const Muon::RpcPrepDataContainer& prepData) const;
+        void printMTCoinData(const Muon::RpcCoinDataContainer& prepData) const;
+
+   
+      
+
         // decoding method
-        StatusCode decodeImpl(State& state, getPrepCollection_func& getPrepCollection, getCoinCollection_func& getCoinCollection,
+        StatusCode decodeImpl(const EventContext& ctx, State& state, 
                               std::vector<IdentifierHash>& idVect, std::vector<IdentifierHash>& selectedIdVect,
                               bool firstTimeInTheEvent) const;
-        StatusCode decodeImpl(State& state, getPrepCollection_func& getPrepCollection, getCoinCollection_func& getCoinCollection,
+        StatusCode decodeImpl(const EventContext& ctx, State& state, 
                               const std::vector<uint32_t>& robIds, bool firstTimeInTheEvent) const;
 
-        StatusCode processPad(State& state, getPrepCollection_func& getPrepCollection, getCoinCollection_func& getCoinCollection,
+        StatusCode processPad(const EventContext& ctx, State& state, 
                               const RpcPad* rdoColl, bool& processingetaview, bool& processingphiview, int& nPrepRawData,
-                              std::vector<IdentifierHash>& idVect, std::vector<IdentifierHash>& idWithDataVect, IdContext& rpcContext,
-                              bool doingSecondLoopAmbigColls, std::set<IdentifierHash>& ambiguousCollections) const;
+                              std::vector<IdentifierHash>& idVect, std::vector<IdentifierHash>& idWithDataVect,
+                              bool doingSecondLoopAmbigColls) const;
 
         void processTriggerHitHypothesis(RpcCoinMatrix::const_iterator itD, RpcCoinMatrix::const_iterator itD_end,
                                          bool highptpad,  // these are inputs
                                          bool& triggerHit, unsigned short& threshold, unsigned short& overlap, bool& toSkip) const;
 
         struct State {
-            State(const RpcIdHelper& idHelper, MsgStream& msg);
+            State(const RpcIdHelper& idHelper);
+           
+            Muon::RpcPrepDataCollection* getPrepCollection(const IdentifierHash& hash, MsgStream& msg);
+            Muon::RpcCoinDataCollection* getCoinCollection(const IdentifierHash& hash, MsgStream& msg);
 
-            Muon::RpcPrepDataContainer m_localPrepData;
-            Muon::RpcCoinDataContainer m_localCoinData;
-            getPrepCollection_func m_getPrepCollection;
-            getCoinCollection_func m_getCoinCollection;
+            
+            const RpcIdHelper& m_rpcIdHelper;
 
-            std::unordered_map<Identifier, Muon::RpcPrepDataCollection*> m_rpcPrepDataCollections{};
-            std::unordered_map<Identifier, Muon::RpcCoinDataCollection*> m_rpcCoinDataCollections{};
+            std::map<IdentifierHash, std::unique_ptr<Muon::RpcPrepDataCollection>> m_rpcPrepDataCollections{};
+            std::map<IdentifierHash, std::unique_ptr<Muon::RpcCoinDataCollection>> m_rpcCoinDataCollections{};
 
+            /// Pointer of the prep container stored in store gate
+            std::unique_ptr<Muon::RpcPrepDataContainer> m_prepDataCont{nullptr};            
+            /// Pointer of the coin container stored in store gate
+            std::unique_ptr<Muon::RpcCoinDataContainer> m_coinDataCont{nullptr};
             // keepTrackOfFullEventDecoding
             bool m_fullEventDone{false};
 
@@ -99,8 +109,7 @@ namespace Muon {
             // the set of already requested and decoded ROBs
             std::set<uint32_t> m_decodedRobIds{};
 
-            Muon::RpcPrepDataContainer* m_rpcPrepDataContainer{nullptr};
-            Muon::RpcCoinDataContainer* m_rpcCoinDataContainer{nullptr};
+            const IdContext m_modContext{m_rpcIdHelper.module_context()};
         };
       
         //!< 15 ns should be the max.diff. in prop.time in phi and eta strips

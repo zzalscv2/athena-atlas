@@ -38,3 +38,28 @@ def enableG4Optimizations(flags):
     # must be added if it's not done before (see lines above) 
     # More info: https://its.cern.ch/jira/browse/ATLASSIM-5079
     flags.Sim.G4Commands+=["/process/em/useWoodcockTracking EMECPara"]
+
+
+def WoodcockTrackingInEMEC(flags):
+    # Use Woodcock Tracking in the EMEC rather than EMECPara
+    # G4Region. This preInclude should be added at the end of the list
+    # of preIncludes.
+    commands = flags.Sim.G4Commands
+    commands.remove("/process/em/useWoodcockTracking EMECPara")
+    flags.Sim.G4Commands = commands + ["/process/em/useWoodcockTracking EMEC"]
+
+
+def PostIncludeTweakPhysicsRegionsCfg(flags, cfg):
+    # This postInclude drops BeamPipe::SectionF198 and
+    # BeamPipe::SectionF199 from the DeadMaterial G4Region, to avoid a
+    # clash with the BeampipeFwdCut G4Region.
+    from AthenaConfiguration.ComponentAccumulator import ConfigurationError
+    detConTool = None
+    try:
+        detConTool = cfg.getPublicTool('G4AtlasDetectorConstructionTool')
+    except ConfigurationError:
+        pass
+    if detConTool is None:
+        return
+    detConTool.RegionCreators['DeadMaterialPhysicsRegionTool'].VolumeList.remove('BeamPipe::SectionF198')
+    detConTool.RegionCreators['DeadMaterialPhysicsRegionTool'].VolumeList.remove('BeamPipe::SectionF199')

@@ -32,7 +32,7 @@ def createDefaultBunchGroupSet():
         name = L1MenuFlags.MenuSetup().partition('_')[0]
         bgs = BunchGroupSet(name)
         bgs.addBunchGroup( BunchGroupSet.BunchGroup(name = 'BCRVeto', internalNumber = 0).addRange(0,3539).addRange(3561,3563).normalize() )\
-           .addBunchGroup( BunchGroupSet.BunchGroup(name = 'Paired', internalNumber = 1).addTrain(0,3564).normalize() )
+           .addBunchGroup( BunchGroupSet.BunchGroup(name = 'Paired', internalNumber = 1).addTrain(0,3445).addTrain(3536,4).addTrain(3561,3).normalize() )
         from AthenaCommon.BeamFlags import jobproperties
         if jobproperties.Beam.beamType == 'cosmics':
             bgs.addBunchGroup( BunchGroupSet.BunchGroup(name = 'EMPTY', internalNumber = 3).addTrain(0,3564).normalize() )

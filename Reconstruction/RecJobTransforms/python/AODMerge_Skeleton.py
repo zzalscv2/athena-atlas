@@ -69,6 +69,10 @@ def fromRunArgs(runArgs):
     StreamAOD.ForceRead = True
     StreamAOD.TakeItemsFromInput = True
 
+    # Add in-file MetaData
+    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
+    cfg.merge(InfileMetaDataCfg(flags, 'AOD'))
+
     # This part is needed for (un)packing cell containers
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
     cfg.merge(LArGMCfg(flags))

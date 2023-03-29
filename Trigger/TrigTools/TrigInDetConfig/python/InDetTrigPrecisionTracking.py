@@ -19,20 +19,22 @@ def makeInDetTrigPrecisionTracking( flags, config=None, verifier=False, rois='EM
         raise ValueError('PrecisionTracking No configuration provided!')
 
     from InDetTrigRecExample import InDetTrigCA
-    InDetTrigCA.InDetTrigConfigFlags = flags.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking."+config.name)
+    InDetTrigCA.InDetTrigConfigFlags = flags.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking."+config.input_name)
     
+    flags = InDetTrigCA.InDetTrigConfigFlags
+
     from TrkConfig.TrkTrackSummaryToolConfig import InDetTrigTrackSummaryToolCfg
     summaryTool = CAtoLegacyPublicToolWrapper(InDetTrigTrackSummaryToolCfg)
 
-    doTRT = config.doTRT
+    doTRT = flags.InDet.Tracking.ActiveConfig.doTRT
 
     # Add suffix to the algorithms
-    signature =  "_{}".format( config.input_name )
+    signature =  "_{}".format( flags.InDet.Tracking.ActiveConfig.input_name )
     
     # Name settings for output Tracks/TrackParticles
-    outTrkTracks        = config.trkTracks_IDTrig() # Final output Track collection
-    outTrackParticles   = config.tracks_IDTrig() # Final output xAOD::TrackParticle collection
-    ambiTrackCollection = config.trkTracks_IDTrig()+"_Amb"  # Ambiguity solver tracks
+    outTrkTracks        = flags.InDet.Tracking.ActiveConfig.trkTracks_IDTrig # Final output Track collection
+    outTrackParticles   = flags.InDet.Tracking.ActiveConfig.tracks_IDTrig # Final output xAOD::TrackParticle
+    ambiTrackCollection = outTrkTracks+"_Amb"  # Ambiguity solver tracks
     
     #  Verifying input data for the algorithms
   
@@ -41,7 +43,7 @@ def makeInDetTrigPrecisionTracking( flags, config=None, verifier=False, rois='EM
     if verifier:
         from .InDetTrigCollectionKeys import TrigPixelKeys
         verifier.DataObjects += [( 'InDet::PixelGangedClusterAmbiguities' , 'StoreGateSvc+' + TrigPixelKeys.PixelClusterAmbiguitiesMap ),
-                                 ( 'TrackCollection' , 'StoreGateSvc+' + config.trkTracks_FTF() )]
+                                 ( 'TrackCollection' , 'StoreGateSvc+' + flags.InDet.Tracking.ActiveConfig.trkTracks_FTF )]
 
     
     ambiSolvingAlgs = ambiguitySolver_builder( signature, config, summaryTool, outputTrackName=ambiTrackCollection, prefix=prefix+"Trk" )
@@ -55,34 +57,25 @@ def makeInDetTrigPrecisionTracking( flags, config=None, verifier=False, rois='EM
         finalTrackCollection = outTrkTracks
         trtAlgs = trtExtension_builder( signature, config, rois, summaryTool, inputTracks=ambiTrackCollection, outputTracks=outTrkTracks, prefix=prefix ) 
         ptAlgs.extend( trtAlgs )
-  
-    #
-    #  Track PRD association algorithm, can be enabled to restore shared hit computation in TrackParticleCreatorTool
-    #
-    # from .InDetTrigCommon import trackPRD_Association_builder
-    # trackPRD_AssociationAlg = trackPRD_Association_builder(name = prefix+'trackPRD_AssociationAlg'+config.input_name+'_IDTrig',
-    #                                                        inTrackCollections = [finalTrackCollection],
-    #                                                        associationMapName = "TrigInDetPRDtoTrackMap")
 
-    # ptAlgs.append( trackPRD_AssociationAlg )
-
-    #
+        
     #  Track particle conversion algorithm
-    #
-    from .InDetTrigCommon import trackParticleCnv_builder
-    from InDetTrigRecExample.InDetTrigConfigRecLoadToolsPost import InDetTrigParticleCreatorToolWithSummary, \
-        InDetTrigParticleCreatorToolWithSummaryTRTPid
 
-    creatorTool = InDetTrigParticleCreatorToolWithSummary
+    from .InDetTrigCommon import trackParticleCnv_builder
+    from InDetTrigRecExample.InDetTrigConfigRecLoadToolsPost import InDetTrigParticleCreatorTool, \
+        InDetTrigParticleCreatorToolTRTPid
+
+    creatorTool = InDetTrigParticleCreatorTool
     if config.electronPID:
-      creatorTool = InDetTrigParticleCreatorToolWithSummaryTRTPid
+      creatorTool = InDetTrigParticleCreatorToolTRTPid
     
-    trackParticleCnvAlg = trackParticleCnv_builder( flags,
-                                                    name                 = prefix+'xAODParticleCreatorAlg'+config.input_name+'_IDTrig',
-                                                    config               = config,
-                                                    inTrackCollectionKey = finalTrackCollection,
-                                                    outTrackParticlesKey = outTrackParticles,
-                                                    trackParticleCreatorTool     =  creatorTool)
+    trackParticleCnvAlg = trackParticleCnv_builder( 
+        flags,
+        name                 = prefix+'xAODParticleCreatorAlg'+flags.InDet.Tracking.ActiveConfig.input_name+'_IDTrig',
+        config               = config,
+        inTrackCollectionKey = finalTrackCollection,
+        outTrackParticlesKey = outTrackParticles,
+        trackParticleCreatorTool     =  creatorTool)
     
     log.debug(trackParticleCnvAlg)
     ptAlgs.append(trackParticleCnvAlg)

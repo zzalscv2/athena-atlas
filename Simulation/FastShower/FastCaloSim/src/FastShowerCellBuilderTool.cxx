@@ -1883,7 +1883,7 @@ FastShowerCellBuilderTool::flag_simul_sate FastShowerCellBuilderTool::Is_below_v
     if(!ver) return zero_state;
 #ifdef HEPMC3
     if(ver->particles_in().size()!=1) return zero_state;
-    HepMC::ConstGenParticlePtr par_in = ver->particles_in().front();
+    const HepMC::ConstGenParticlePtr& par_in = ver->particles_in().front();
 #else
     if(ver->particles_in_size()!=1) return zero_state;
     const HepMC::GenParticle* par_in = *(ver->particles_in_const_begin());

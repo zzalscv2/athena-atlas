@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONRPC_CNVTOOL_IRPC_RDO_Decoder_H
@@ -21,10 +21,10 @@ namespace Muon {
     public:
         DeclareInterfaceID(IRPC_RDO_Decoder, 1, 0);
 
-        virtual std::vector<RpcDigit*>* getDigit(const RpcFiredChannel* fChan, uint16_t& sectorID, uint16_t& padId, uint16_t& cmaId,
+        virtual std::vector<std::unique_ptr<RpcDigit>> getDigit(const RpcFiredChannel* fChan, uint16_t& sectorID, uint16_t& padId, uint16_t& cmaId,
                                                  const RpcCablingCondData* rpcCab) const = 0;
 
-        virtual std::vector<Identifier>* getOfflineData(const RpcFiredChannel* fChan, uint16_t& sectorID, uint16_t& padId, uint16_t& cmaId,
+        virtual std::vector<Identifier> getOfflineData(const RpcFiredChannel* fChan, uint16_t& sectorID, uint16_t& padId, uint16_t& cmaId,
                                                         double& time, const RpcCablingCondData* rpcCab) const = 0;
     };
 

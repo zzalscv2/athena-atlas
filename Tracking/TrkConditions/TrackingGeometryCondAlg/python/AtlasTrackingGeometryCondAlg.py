@@ -203,13 +203,6 @@ class ConfiguredTrackingGeometryCondAlg( Trk__TrackingGeometryCondAlg ) :
                 if TrkDetFlags.ConfigurationOutputLevel() < 3 :
                     print ('[ TrackingGeometryCondAlg ] Using Local Database: '+DataBaseConnection)
                 # make sure that the pool files are in the catalog
-            elif TrkDetFlags.SLHC_Geometry() :
-                # set the folder to the SLHC location        
-                CoolDataBaseFolder = '/GLOBAL/TrackingGeo/LayerMaterialITK'
-                ctag = AtlasMaterialTag+TrkDetFlags.MaterialMagicTag()
-                cfoldertag = CoolDataBaseFolder+' <tag>'+ctag+'</tag>'
-                conddb.addFolderSplitMC('GLOBAL',cfoldertag,cfoldertag,
-                                        className = 'Trk::LayerMaterialMap')
             else :
                 print ('[ TrackingGeometryCondAlg ]     base material tag : ', AtlasMaterialTag)
                 cfolder = CoolDataBaseFolder +'<tag>TagInfoMajor/'+AtlasMaterialTag+'/GeoAtlas</tag>'

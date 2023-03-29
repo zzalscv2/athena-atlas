@@ -1,5 +1,6 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 from AthenaCommon import Logging
@@ -195,6 +196,7 @@ class METConfig:
                  doCells=False,doTriggerMET=True,duplicateWarning=True,
                  doOriginCorrClus=False):
         metlog.info("{} Creating MET config {}".format(prefix,suffix))
+        self.accumulator = ComponentAccumulator()
         self.suffix = suffix
         self.doSum = doSum
         self.doTracks = doTracks
@@ -224,17 +226,15 @@ class METConfig:
                                                                   maxD0=2,
                                                                   minPt=500)
             #
-            from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-            components = ComponentAccumulator()
             from TrackVertexAssociationTool.TTVAToolConfig import TTVAToolCfg
-            self.trkvxtool=components.popToolsAndMerge(TTVAToolCfg(inputFlags, "TrackVertexAssociationTool_MET",addDecoAlg=True, WorkingPoint="Nonprompt_All_MaxWeight"))
+            self.trkvxtool=self.accumulator.popToolsAndMerge(TTVAToolCfg(inputFlags, "TrackVertexAssociationTool_MET",addDecoAlg=True, WorkingPoint="Nonprompt_All_MaxWeight"))
             #
             self.trkisotool = CompFactory.getComp("xAOD::TrackIsolationTool")("TrackIsolationTool_MET")
             self.trkisotool.TrackSelectionTool = self.trkseltool # As configured above
             ###
             from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
             extrapCfg = AtlasExtrapolatorCfg(inputFlags)
-            CaloExtensionTool= CompFactory.getComp("Trk::ParticleCaloExtensionTool")(Extrapolator = extrapCfg.popPrivateTools())
+            CaloExtensionTool= CompFactory.getComp("Trk::ParticleCaloExtensionTool")(Extrapolator = self.accumulator.popToolsAndMerge(extrapCfg))
             CaloCellAssocTool = CompFactory.getComp("Rec::ParticleCaloCellAssociationTool")(ParticleCaloExtensionTool = CaloExtensionTool)
             self.caloisotool = CompFactory.getComp("xAOD::CaloIsolationTool")("CaloIsolationTool_MET",
                                                               saveOnlyRequestedCorrections=True,

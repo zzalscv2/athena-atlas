@@ -11,14 +11,13 @@
 #
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory # CompFactory creates old or new configs depending on the enva
-from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
 from AthenaCommon.Logging import logging
 _log = logging.getLogger(__name__)
     
 def _condAlgName(detector):
     return "RegSelCondAlg_"+detector
 
-def _createRegSelCondAlg( detector,  CondAlgConstructor ):
+def _createRegSelCondAlg( detector,  CondAlgConstructor, isOnline ):
     """
     Creates conditions alg that provides data to a RegSel Tool
     """
@@ -32,7 +31,7 @@ def _createRegSelCondAlg( detector,  CondAlgConstructor ):
                                       PrintTable  = False,
                                       RegSelLUT = ("RegSelLUTCondData_"+detector) )
 
-    if detector == "MDT" and athenaCommonFlags.isOnline:
+    if detector == "MDT" and isOnline:
          condAlg.Conditions = "" 
     elif detector == "Pixel":
         condAlg.DetEleCollKey = "PixelDetectorElementCollection"
@@ -83,7 +82,8 @@ def _makeRegSelTool( detector, enable, CondAlgConstructor ):
     condseq = AthSequencer('AthCondSeq')
 
     if enable and not hasattr( condseq, _condAlgName( detector ) ):
-        condseq += _createRegSelCondAlg( detector, CondAlgConstructor )
+        from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
+        condseq += _createRegSelCondAlg( detector, CondAlgConstructor, athenaCommonFlags.isOnline )
 
     return _createRegSelTool( detector, enable )
 
@@ -116,6 +116,7 @@ def makeRegSelTool_MDT() :
     from AthenaCommon.DetFlags import DetFlags
     enabled = DetFlags.detdescr.MDT_on()
     from MuonRegionSelector.MuonRegionSelectorConf import MDT_RegSelCondAlg
+    from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
     if enabled and not athenaCommonFlags.isOnline:
         from AthenaCommon.AlgSequence import AthSequencer
         from MuonCondAlg.MuonTopCondAlgConfigRUN2 import MdtCondDbAlg
@@ -216,7 +217,7 @@ def regSelToolCfg(flags, detector, algorithm, readout_geometry=None, conditions=
     if conditions:
         ca.merge(conditions)
     ca.setPrivateTools(_createRegSelTool(detector, True))
-    the_alg = _createRegSelCondAlg(detector, algorithm)
+    the_alg = _createRegSelCondAlg(detector, algorithm, flags.Common.isOnline)
     if detector == "MDT" and flags.Common.isOnline:
         the_alg.Conditions = ""
     ca.addCondAlgo(the_alg)

@@ -100,6 +100,20 @@ def AthenaHiveEventLoopMgrCfg(flags):
     return cfg
 
 
+def AthenaMtesEventLoopMgrCfg(flags):
+    cfg = ComponentAccumulator()
+
+    scheduler = cfg.getPrimaryAndMerge(AvalancheSchedulerSvcCfg(flags))
+
+    elmgr = CompFactory.AthenaMtesEventLoopMgr(
+        WhiteboardSvc = "EventDataSvc",
+        SchedulerSvc = scheduler.getName())
+
+    cfg.addService( elmgr )
+
+    return cfg
+
+
 def MessageSvcCfg(flags):
     cfg = ComponentAccumulator()
     msgsvc = CompFactory.MessageSvc()

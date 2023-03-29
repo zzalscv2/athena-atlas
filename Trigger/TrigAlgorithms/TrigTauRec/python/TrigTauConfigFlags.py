@@ -18,17 +18,17 @@ def createTrigTauConfigFlags():
                                                  'DeepSetID_MC23_v2_1p.json',
                                                  'DeepSetID_MC23_v2_mp.json']
 
-    flags.Trigger.Offline.Tau.TauJetRNNWPConfig = ['DeepSetID_MC23_v2_flat_0p.root',
-                                                   'DeepSetID_MC23_v2_flat_1p.root',
-                                                   'DeepSetID_MC23_v2_flat_mp.root']
+    flags.Trigger.Offline.Tau.TauJetRNNWPConfig = ['DeepSetID_MC23_v2_newPerf_flat_0p.root',
+                                                   'DeepSetID_MC23_v2_newPerf_flat_1p.root',
+                                                   'DeepSetID_MC23_v2_newPerf_flat_mp.root']
 
     # these flags only exists in the trigger, but 'cloneAndReplace' in 'addFlagsCategory'
     # assumes a 'Trigger.Offline.Tau' structure
     flags.addFlag("Trigger.Offline.Tau.FTFTauCoreBDTConfig", 'FTF_tauCore_BDT_v1.root')
 
-    flags.addFlag("Trigger.Offline.Tau.TauJetRNNTargetEff", [ [0.98,  0.90, 0.65, 0.50],    # 0p WPs: VL, L, M, T
-                                                              [0.992, 0.99, 0.97, 0.94],    # 1p WPs: VL, L, M, T
-                                                              [0.99,  0.98, 0.91, 0.80] ] ) # mp WPs: VL, L, M, T
+    flags.addFlag("Trigger.Offline.Tau.TauJetRNNTargetEff", [ [0.98,  0.90, 0.65,  0.50],    # 0p WPs: VL, L, M, T
+                                                              [0.992, 0.99, 0.97,  0.94],    # 1p WPs: VL, L, M, T
+                                                              [0.99,  0.94, 0.895, 0.80] ] ) # mp WPs: VL, L, M, T
 
     flags.addFlag("Trigger.Offline.Tau.TauJetRNNConfigLLP", ['llpdev/net_experimental_llz_0p.json',
                                                              'llpdev/net_experimental_llz_1p.json',

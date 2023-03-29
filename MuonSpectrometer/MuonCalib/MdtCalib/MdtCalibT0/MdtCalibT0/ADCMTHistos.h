@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //   ADCMTHistos.h
@@ -15,6 +15,7 @@
 
 // c - c++
 #include <iostream>
+#include <memory>
 
 // root
 #include "TH1.h"
@@ -44,14 +45,14 @@ namespace MuonCalib {
     public:
         //---------------------------constructor----------------------------------------
         /** Default Constructor */
-        inline ADCMTHistos() : m_adc(NULL), m_id(-1), m_adc_fit(NULL), m_adc_ok(false) {}
+        inline ADCMTHistos() : m_adc(NULL), m_id(-1), m_adc_ok(false) {}
         /** Initializing constructor
             @param id tube id
             @param settings t0-fit settings: settings will be asked about histogram binning
 
         */
         inline ADCMTHistos(int id, const T0MTSettings *settings, const char *hname = NULL) :
-            m_adc(NULL), m_id(-1), m_adc_fit(NULL), m_adc_ok(false) {
+            m_adc(NULL), m_id(-1), m_adc_ok(false) {
             Initialize(id, settings, hname);
         }
         //---------------------------public member functions----------------------------
@@ -90,7 +91,7 @@ namespace MuonCalib {
         //! tube id;
         int m_id;
         //! function which is fitted to the adc-spectrum
-        TF1 *m_adc_fit;
+        std::unique_ptr<TF1> m_adc_fit;
         //! is true if the adc-fit is ok;
         bool m_adc_ok;
         //! Pointer to settings class

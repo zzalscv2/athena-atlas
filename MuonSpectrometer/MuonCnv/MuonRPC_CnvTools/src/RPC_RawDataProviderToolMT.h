@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONRPCRAWDATAPROVIDERTOOLMT_H
@@ -10,6 +10,7 @@
 #include "MuonCnvToolInterfaces/IMuonRawDataProviderTool.h"
 #include "MuonRDO/RpcPad_Cache.h"
 #include "RPC_RawDataProviderToolCore.h"
+#include "MuonIdHelpers/IMuonIdHelperSvc.h"
 
 namespace Muon {
     class IRpcROD_Decoder;
@@ -25,7 +26,7 @@ namespace Muon {
     public:
         RPC_RawDataProviderToolMT(const std::string& t, const std::string& n, const IInterface* p);
 
-        virtual ~RPC_RawDataProviderToolMT();
+        virtual ~RPC_RawDataProviderToolMT() = default;
 
         virtual StatusCode initialize() override;
 
@@ -45,9 +46,12 @@ namespace Muon {
 
     private:
         /// RPC container cache key
-        SG::UpdateHandleKey<RpcPad_Cache> m_rdoContainerCacheKey;
+        SG::UpdateHandleKey<RpcPad_Cache> m_rdoContainerCacheKey{this,"RpcContainerCacheKey", 
+                                                "", "Optional external cache for the RPC container"};
         /// Turn on/off RpcSectorConfig writing
         Gaudi::Property<bool> m_WriteOutRpcSectorLogic{this, "WriteOutRpcSectorLogic", true, "Turn on/off RpcSectorLogic writing"};
+   
+        ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
     };
 
 }  // namespace Muon

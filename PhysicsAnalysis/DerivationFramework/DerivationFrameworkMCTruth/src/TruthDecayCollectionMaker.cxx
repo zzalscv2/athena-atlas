@@ -63,15 +63,15 @@ StatusCode DerivationFramework::TruthDecayCollectionMaker::initialize()
     // Decorators
     m_originDecoratorKey = m_particlesKey.key()+".classifierParticleOrigin";
     ATH_CHECK(m_originDecoratorKey.initialize());
-    m_typeDecoratorKey.key()+".classifierParticleType";
+    m_typeDecoratorKey = m_typeDecoratorKey.key()+".classifierParticleType";
     ATH_CHECK(m_typeDecoratorKey.initialize());
-    m_outcomeDecoratorKey.key()+".classifierParticleOutCome";
+    m_outcomeDecoratorKey = m_outcomeDecoratorKey.key()+".classifierParticleOutCome";
     ATH_CHECK(m_outcomeDecoratorKey.initialize());
-    m_classificationDecoratorKey.key()+".Classification";
+    m_classificationDecoratorKey = m_classificationDecoratorKey.key()+".Classification";
     ATH_CHECK(m_classificationDecoratorKey.initialize());
-    m_motherIDDecoratorKey.key()+".motherID";
+    m_motherIDDecoratorKey = m_motherIDDecoratorKey.key()+".motherID";
     ATH_CHECK(m_motherIDDecoratorKey.initialize());
-    m_daughterIDDecoratorKey.key()+".daughterID";
+    m_daughterIDDecoratorKey = m_daughterIDDecoratorKey.key()+".daughterID";
     ATH_CHECK(m_daughterIDDecoratorKey.initialize());
 
     return StatusCode::SUCCESS;

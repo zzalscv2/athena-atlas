@@ -24,8 +24,7 @@ Sim_tf.py \
     --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --simulator 'FullG4MT_QS' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-    --preInclude 'EVNTtoHITS:Campaigns/MC23aSimulationMultipleIoV.py' \
-    --jobNumber 1 \
+    --preInclude 'EVNTtoHITS:Campaigns/MC23SimulationSingleIoV.py' \
     --imf False \
     --athenaopts '"--config-only=ConfigSimMP.pkl"'
 
@@ -38,8 +37,7 @@ Sim_tf.py \
     --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --simulator 'FullG4MT_QS' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-    --preInclude 'EVNTtoHITS:Campaigns/MC23aSimulationMultipleIoV.py' \
-    --jobNumber 1 \
+    --preInclude 'EVNTtoHITS:Campaigns/MC23SimulationSingleIoV.py' \
     --imf False
 
 rc=$?
@@ -57,8 +55,7 @@ Sim_tf.py \
     --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --simulator 'FullG4MT_QS' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-    --preInclude 'EVNTtoHITS:Campaigns/MC23aSimulationMultipleIoV.py' \
-    --jobNumber 1 \
+    --preInclude 'EVNTtoHITS:Campaigns/MC23SimulationSingleIoV.py' \
     --imf False \
     --athenaopts '"--config-only=ConfigSimST.pkl"'
 
@@ -70,8 +67,7 @@ Sim_tf.py \
     --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --simulator 'FullG4MT_QS' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-    --preInclude 'EVNTtoHITS:Campaigns/MC23aSimulationMultipleIoV.py' \
-    --jobNumber 1 \
+    --preInclude 'EVNTtoHITS:Campaigns/MC23SimulationSingleIoV.py' \
     --imf False
 
 mv log.EVNTtoHITS log.EVNTtoHITS.ST

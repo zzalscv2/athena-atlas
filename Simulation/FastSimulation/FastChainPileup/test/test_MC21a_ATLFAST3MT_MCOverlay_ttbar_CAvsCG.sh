@@ -26,8 +26,6 @@ FastChain_tf.py \
   --simulator ATLFAST3MT \
   --physicsList FTFP_BERT_ATL \
   --useISF True \
-  --jobNumber 1 \
-  --DataRunNumber 410000 \
   --randomSeed 123 \
   --inputEVNTFile ${EVNT_File} \
   --inputRDO_BKGFile ${RDO_BKG_File} \
@@ -61,8 +59,6 @@ FastChain_tf.py \
   --steering doFCwOverlay \
   --physicsList FTFP_BERT_ATL \
   --useISF True \
-  --jobNumber 1 \
-  --DataRunNumber 410000 \
   --randomSeed 123 \
   --inputEVNTFile ${EVNT_File} \
   --inputRDO_BKGFile ${RDO_BKG_File} \
@@ -94,8 +90,6 @@ FastChain_tf.py \
   --steering doFCwOverlay \
   --physicsList FTFP_BERT_ATL \
   --useISF True \
-  --jobNumber 1 \
-  --DataRunNumber 410000 \
   --randomSeed 123 \
   --inputEVNTFile ${EVNT_File} \
   --inputRDO_BKGFile ${RDO_BKG_File} \

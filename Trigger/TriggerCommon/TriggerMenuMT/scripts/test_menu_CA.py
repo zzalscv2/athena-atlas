@@ -22,7 +22,7 @@ flags.addFlag("Trigger.enabledSignatures",[])
 flags.addFlag("Trigger.disabledSignatures",[])
 flags.addFlag("Trigger.selectChains",[])
 flags.addFlag("Trigger.disableChains",[])
-flags.Trigger.enabledSignatures = ['Muon', 'Photon','Electron', 'MinBias', 'HeavyIon']
+flags.Trigger.enabledSignatures = ['Muon', 'Photon','Electron', 'MinBias', 'HeavyIon', 'Jet']
 
 flags.Trigger.generateMenuDiagnostics = True
 
@@ -35,16 +35,14 @@ flags.fillFromArgs()
 flags.lock()
 flags.dump()
 
-
 acc = ComponentAccumulator()
-from TrigConfigSvc.TrigConfigSvcCfg import L1ConfigSvcCfg
-acc.merge(L1ConfigSvcCfg(flags))
-
 from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import generateMenuMT 
 menu = generateMenuMT(flags)
 acc.merge(menu)
 
 acc.printConfig()
+with open(flags.Trigger.triggerMenuSetup+".pkl", "wb") as f:
+    acc.store(f)
 AccumulatorDecorator.printStats()
 
 

@@ -13,8 +13,8 @@
 #include "MuonRPC_CnvTools/IRpcROD_Decoder.h"
 #include "RPC_CondCabling/RpcCablingCondData.h"
 #include "StoreGate/ReadCondHandleKey.h"
+#include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h"
 
-class IROBDataProviderSvc;
 
 namespace Muon {
     /**
@@ -30,7 +30,7 @@ namespace Muon {
 
         virtual ~RPC_RawDataProviderToolCore() = default;
 
-        virtual StatusCode initialize();
+        virtual StatusCode initialize() override;
 
     protected:
         // This function does all the actual work of decoding the data
