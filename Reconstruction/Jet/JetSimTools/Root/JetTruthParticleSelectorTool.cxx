@@ -193,9 +193,6 @@ JetTruthParticleSelectorTool::JetTruthParticleSelectorTool(const std::string& n)
 
   declareProperty("useChargedParticlesOnly",   m_useOnlyCharged);
   declareProperty("MakeListOfStableParticles", m_listPDGofStables);
-
-
-  declareProperty("useChargedParticlesOnly",     m_useOnlyCharged);
   declareProperty("SelectionMode",     m_selectionModeName);
 
 
