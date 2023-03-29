@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # File: CaloRec/python/ToolConstantsCondAlgDefault.py
 # Created: Jun 2020, sss
@@ -6,7 +6,7 @@
 
 
 from AthenaCommon.AlgSequence import AthSequencer
-from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaCommon import CfgMgr
 
 
 def ToolConstantsCondAlgDefault (key, DetStoreKey='', COOLFolder=''):
@@ -28,7 +28,7 @@ def ToolConstantsCondAlgDefault (key, DetStoreKey='', COOLFolder=''):
     if hasattr (condSeq, name):
         return getattr (condSeq, name)
 
-    ToolConstantsCondAlg = CompFactory.ToolConstantsCondAlg # CaloRec
+    ToolConstantsCondAlg = CfgMgr.ToolConstantsCondAlg # CaloRec
     alg = ToolConstantsCondAlg (name,
                                 COOLFolderKey = COOLFolder,
                                 ToolConstantsKey = key,
