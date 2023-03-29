@@ -8,7 +8,6 @@
 // Calculate isolation at truth level for given lists of truth particles
 
 #include "DerivationFrameworkMCTruth/TruthIsolationTool.h"
-#include "xAODTruth/TruthEventContainer.h"
 #include "HepPID/ParticleIDMethods.hh"
 #include "TruthUtils/PIDHelpers.h"
 #include <vector>
@@ -22,26 +21,6 @@ DerivationFramework::TruthIsolationTool::TruthIsolationTool(const std::string& t
   AthAlgTool(t,n,p)
 {
     declareInterface<DerivationFramework::IAugmentationTool>(this);
-    declareProperty ("isoParticlesKey",
-            m_isoParticlesKey = "TruthParticles",
-            "Name of TruthParticle key for input");
-    declareProperty ("allParticlesKey",
-            m_allParticlesKey = "TruthParticles",
-            "Name of Truthparticle key to find in iso cone");
-    declareProperty ("IsolationConeSizes", m_coneSizes = std::vector<float>{0.2},
-            "Vector of sizes of dR cone in which to include particles");
-    declareProperty ("ChargedParticlesOnly", m_chargedOnly = false,
-            "Only keep charged particles in isolation cone");
-    declareProperty ("particleIDsToCalculate", m_listOfPIDs = std::vector<int>{11,13,22},
-            "List of the pdgIDs of particles for which to calculate isolation");
-    declareProperty ("excludeIDsFromCone", m_excludeFromCone = std::vector<int>(),
-            "List of the pdgIDs of particles to exclude from the cone when calculating isolation");
-    declareProperty ("IsolationVarNamePrefix", m_isoVarNamePrefix,
-            "Prefix of name of the variable to add to output xAOD");
-    declareProperty ("IncludeNonInteracting", m_includeNonInteracting=false,
-            "Include non-interacting particles in the isolation definition");
-    declareProperty ("VariableR", m_variableR  = false,
-            "Use radius that shrinks with pT in isolation");
 }
 
 // Destructor
@@ -51,9 +30,23 @@ DerivationFramework::TruthIsolationTool::~TruthIsolationTool() {
 // Athena initialize
 StatusCode DerivationFramework::TruthIsolationTool::initialize()
 {
+
+    // Initialise input keys
+    ATH_CHECK(m_isoParticlesKey.initialize());
+    ATH_CHECK(m_allParticlesKey.initialize());
+
     //sort (descsending) the cone sizes vector to optimize calculation
     m_coneSizesSort = m_coneSizes;
     std::sort(m_coneSizesSort.begin(), m_coneSizesSort.end(), [](float a, float b){return a>b;});
+
+    // Decorations depend on the list of cone sizes
+    for ( auto csize_itr : m_coneSizesSort ) { 
+      std::ostringstream sizess;
+      if (m_variableR) sizess << "var"; 
+      sizess << m_isoVarNamePrefix << (int)((csize_itr)*100.);
+      m_isoDecorKeys.emplace_back(sizess.str());
+    }
+    ATH_CHECK(m_isoDecorKeys.initialize());
 
     return StatusCode::SUCCESS;
 }
@@ -61,25 +54,20 @@ StatusCode DerivationFramework::TruthIsolationTool::initialize()
 // Function to do isolation calc, implements interface in IAugmentationTool
 StatusCode DerivationFramework::TruthIsolationTool::addBranches() const
 {
-    // Retrieve the truth collections
-    const xAOD::TruthParticleContainer* importedIsoTruthParticles(nullptr);
-    if (evtStore()->retrieve(importedIsoTruthParticles, m_isoParticlesKey).isFailure()) {
-        ATH_MSG_ERROR("No TruthParticleContainer with name " << m_isoParticlesKey << " found in StoreGate!");
-        return StatusCode::FAILURE;
-    }
-    const xAOD::TruthParticleContainer* importedAllTruthParticles(nullptr);
-    if (evtStore()->retrieve(importedAllTruthParticles, m_allParticlesKey).isFailure()) {
-        ATH_MSG_ERROR("No TruthParticleContainer with name " << m_allParticlesKey << " found in StoreGate!");
-        return StatusCode::FAILURE;
-    }
+    // Event context 
+    const EventContext& ctx = Gaudi::Hive::currentContext(); 
 
-    //define the output variables
-    std::vector<SG::AuxElement::Decorator< float > > decorators_iso;
-    for ( auto csize_itr : m_coneSizesSort ) {
-      std::ostringstream sizess;
-      if (m_variableR) sizess << "var";
-      sizess << m_isoVarNamePrefix << (int)((csize_itr)*100.);
-      decorators_iso.emplace_back(sizess.str() );
+    // Retrieve the truth collections
+    SG::ReadHandle<xAOD::TruthParticleContainer> isoTruthParticles(m_isoParticlesKey, ctx);
+    if (!isoTruthParticles.isValid()) {
+      ATH_MSG_ERROR("Couldn't retrieve collection with name " << m_isoParticlesKey);
+      return StatusCode::FAILURE;
+    }
+  
+    SG::ReadHandle<xAOD::TruthParticleContainer> allTruthParticles(m_allParticlesKey, ctx);
+    if (!allTruthParticles.isValid()) {
+      ATH_MSG_ERROR("Couldn't retrieve collection with name " << m_allParticlesKey);
+      return StatusCode::FAILURE;
     }
 
     //get struct of helper functions
@@ -87,14 +75,14 @@ StatusCode DerivationFramework::TruthIsolationTool::addBranches() const
 
     // Isolation is applied to selected particles only
     std::vector<const xAOD::TruthParticle*> listOfParticlesForIso;
-    decayHelper.constructListOfFinalParticles(importedIsoTruthParticles, listOfParticlesForIso, m_listOfPIDs);
+    decayHelper.constructListOfFinalParticles(isoTruthParticles.ptr(), listOfParticlesForIso, m_listOfPIDs);
 
     // Vectors to store particles which will be dressed
     std::vector<const xAOD::TruthParticle*>  candidateParticlesList;
 
     std::vector<int> emptyList;
     //make a list of all candidate particles that could fall inside the cone of the particle of interest from listOfParticlesForIso
-    decayHelper.constructListOfFinalParticles(importedAllTruthParticles, candidateParticlesList, emptyList, true, m_chargedOnly);
+    decayHelper.constructListOfFinalParticles(allTruthParticles.ptr(), candidateParticlesList, emptyList, true, m_chargedOnly);
 
     // Standard particle loop over final state particles of interest
     for (const auto& part : listOfParticlesForIso) {
@@ -102,7 +90,8 @@ StatusCode DerivationFramework::TruthIsolationTool::addBranches() const
       calcIsos(part, candidateParticlesList, isolationsCalcs);
 
       for ( unsigned int icone = 0; icone < m_coneSizesSort.size(); ++icone ) {
-        decorators_iso.at(icone)(*part) = isolationsCalcs.at(icone);
+        SG::WriteDecorHandle< xAOD::TruthParticleContainer, float > decorator_iso(m_isoDecorKeys.at(icone), ctx);
+        decorator_iso(*part) = isolationsCalcs.at(icone);
       }
     }
 

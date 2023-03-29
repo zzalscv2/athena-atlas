@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DERIVATIONFRAMEWORK_TRUTHISOLATIONTOOL_H
@@ -8,6 +8,9 @@
 #include <string>
 
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/WriteDecorHandleKeyArray.h"
+#include "Gaudi/Property.h"
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "DerivationFrameworkMCTruth/DecayGraphHelper.h"
 #include "xAODTruth/TruthParticleContainer.h"
@@ -24,23 +27,35 @@ namespace DerivationFramework {
 
     private:
       /// Parameter: input collection key
-      std::string m_isoParticlesKey;
+      SG::ReadHandleKey<xAOD::TruthParticleContainer> m_isoParticlesKey
+        {this, "isoParticlesKey", "TruthParticles",  "Name of TruthParticle key for input"};      
       /// Parameter: input collection key for particles used in calculation
-      std::string m_allParticlesKey;
+      SG::ReadHandleKey<xAOD::TruthParticleContainer> m_allParticlesKey
+        {this, "allParticlesKey", "TruthParticles", "Name of Truthparticle key to find in iso cone"}; 
+      /// Decor handle key array
+      SG::WriteDecorHandleKeyArray<xAOD::TruthParticleContainer> m_isoDecorKeys
+        {this, "DoNotSet_isoDecorKeys", {}, "WriteDecorHandleKeyArray - set internally but must be property"}; 
       /// Parameter: Cone size for Isolation
-      std::vector<float> m_coneSizes;
+      Gaudi::Property<std::vector<float> > m_coneSizes
+        {this, "IsolationConeSizes", {0.2}, "Vector of sizes of dR cone in which to include particles"};
       /// Parameter: only use charged particles for iso?
-      bool m_chargedOnly;
+      Gaudi::Property<bool> m_chargedOnly
+        {this, "ChargedParticlesOnly", false, "Only keep charged particles in isolation cone"};
       /// Parameter: List of pdgIDs of particles to dress
-      std::vector<int> m_listOfPIDs;
+      Gaudi::Property<std::vector<int> > m_listOfPIDs
+        {this, "particleIDsToCalculate", {11,13,22}, "List of the pdgIDs of particles for which to calculate isolation"};
       /// Parameter: List of pdgIDs to exclude from cone calculation
-      std::vector<int> m_excludeFromCone;
+      Gaudi::Property<std::vector<int> > m_excludeFromCone
+        {this, "excludeIDsFromCone", {}, "List of the pdgIDs of particles to exclude from the cone when calculating isolation"};
       /// Parameter: name of output variable
-      std::string m_isoVarNamePrefix;
+      Gaudi::Property<std::string> m_isoVarNamePrefix
+        {this, "IsolationVarNamePrefix", "", "Prefix of name of the variable to add to output xAOD"};
       /// Parameter: Include non-interacting particles?
-      bool m_includeNonInteracting;
+      Gaudi::Property<bool> m_includeNonInteracting
+        {this, "IncludeNonInteracting", false, "Include non-interacting particles in the isolation definition"};
       /// Parameter: Use variable radius?
-      bool m_variableR;
+      Gaudi::Property<bool>  m_variableR
+        {this, "VariableR", false, "Use radius that shrinks with pT in isolation"};
 
       std::vector<float> m_coneSizesSort;
 
