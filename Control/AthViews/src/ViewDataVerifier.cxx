@@ -75,7 +75,7 @@ StatusCode ViewDataVerifier::execute(const EventContext& ctx) const
     {
       ATH_MSG_DEBUG( "Found " << obj.key() << " in " << viewProxy->name() );
     }
-    else if ( obj.key().find( "DetectorStore" ) != std::string::npos )
+    else if ( obj.key().rfind( "DetectorStore", 0 ) != std::string::npos )
     {
       ATH_MSG_DEBUG( "Ignoring DetectorStore data " << obj.key() );
     }
