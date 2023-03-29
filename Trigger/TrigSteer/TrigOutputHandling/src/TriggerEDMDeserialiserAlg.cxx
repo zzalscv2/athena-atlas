@@ -311,10 +311,10 @@ StatusCode TriggerEDMDeserialiserAlg::deserialise( const Payload* dataptr ) cons
                      transientTypeName << " # " << key << " failed" );
       return StatusCode::FAILURE;
     }
-    const bool isxAODInterfaceContainer = (transientTypeName.find("xAOD") != std::string::npos and
+    const bool isxAODInterfaceContainer = (transientTypeName.rfind("xAOD", 0) != std::string::npos and
                                            transientTypeName.find("Aux") == std::string::npos and
                                            transientTypeName.find("ElementLink") == std::string::npos);
-    const bool isxAODAuxContainer       = (transientTypeName.find("xAOD") != std::string::npos and
+    const bool isxAODAuxContainer       = (transientTypeName.rfind("xAOD", 0) != std::string::npos and
                                            transientTypeName.find("Aux") != std::string::npos);
     const bool isxAODDecoration	        = transientTypeName.find("vector") != std::string::npos;
     const bool isTPContainer	        = persistentTypeName.find("_p")	!= std::string::npos;

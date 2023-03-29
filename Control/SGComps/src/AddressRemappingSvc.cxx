@@ -455,7 +455,7 @@ void AddressRemappingSvc::initDeletes()
 
       for (const DataObjID& dobj : alg->outputDataObjs()) {
         static const std::string pref = "StoreGateSvc+";
-        if (dobj.key().compare (0, pref.size(), pref)==0) {
+        if (dobj.key().rfind(pref, 0) != std::string::npos) {
           std::string key = dobj.key().substr (pref.size());
           m_deletes.emplace (key, dobj.clid());
 
