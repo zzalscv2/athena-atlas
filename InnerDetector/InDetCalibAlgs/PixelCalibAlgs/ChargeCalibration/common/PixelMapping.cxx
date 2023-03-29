@@ -34,7 +34,7 @@ namespace pix{
       std::pair<std::string, PixelMapping::Coordinates> result{};
       if (m.size()!=expectedSize) return result;
       const std::string name = m[1];
-      Coordinates coords;
+      Coordinates coords{};
       
       for (size_t i(0); i!=coords.size();++i){
         try{
