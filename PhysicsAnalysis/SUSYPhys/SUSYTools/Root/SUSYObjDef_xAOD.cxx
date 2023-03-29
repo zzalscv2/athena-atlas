@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local include(s):
@@ -1551,7 +1551,7 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_trkMETsyst, "MET.DoTrkSyst", rEnv, true);
   configFromFile(m_caloMETsyst, "MET.DoCaloSyst", rEnv, false);
   configFromFile(m_trkJetsyst, "MET.DoTrkJetSyst", rEnv, false);
-  configFromFile(m_metsysConfigPrefix, "METSys.ConfigPrefix", rEnv, "METUtilities/data17_13TeV/prerec_Jan16");
+  configFromFile(m_metsysConfigPrefix, "METSys.ConfigPrefix", rEnv, "METUtilities/R22_PreRecs");
   configFromFile(m_metJetSelection, "MET.JetSelection", rEnv, "Tight"); // Loose, Tight (default), Tighter, Tenacious
   configFromFile(m_softTermParam, "METSig.SoftTermParam", rEnv, met::Random);
   configFromFile(m_treatPUJets, "METSig.TreatPUJets", rEnv, true);

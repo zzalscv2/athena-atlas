@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -259,8 +259,6 @@ int main( int argc, char* argv[] ) {
   ANA_CHECK( objTool.setProperty("DataSource", datasource) ) ;
   if(!config_file.empty())
     ANA_CHECK( objTool.setProperty("ConfigFile", config_file) );
-  ANA_CHECK( objTool.setBoolProperty("METDoTrkSyst", true) );
-  ANA_CHECK( objTool.setBoolProperty("METDoCaloSyst", false) );
 
   ///////////////////////////////////////////////////////////////////////////////////////////
   ////                                                                                   ////
