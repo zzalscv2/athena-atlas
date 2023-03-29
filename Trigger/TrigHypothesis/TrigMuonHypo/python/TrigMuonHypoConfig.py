@@ -717,12 +717,31 @@ class TrigMuonEFMSonlyHypoConfig(object):
     def ConfigurationHypoTool( self, toolName, thresholds, overlap, flags ):
         log = logging.getLogger(self.__class__.__name__)
         tool = CompFactory.TrigMuonEFHypoTool( toolName )
-        
+        if 'nscan10' in toolName:
+            conesize = 0.1
+            narrowscan = True
+        elif 'nscan20' in toolName:
+            conesize = 0.2
+            narrowscan = True
+        elif 'nscan30' in toolName:
+            conesize = 0.3
+            narrowscan = True
+        elif 'nscan40' in toolName:
+            conesize = 0.4
+            narrowscan = True
+        elif 'nscan' in toolName:
+            conesize = 0.5
+            narrowscan = True
+        else:
+            narrowscan = False
+            conesize = 0.0        
         nt = len(thresholds)
         log.debug('Set %d thresholds', nt)
         tool.PtBins = [ [ 0, 2.5 ] ] * nt
         tool.PtThresholds = [ [ 5.49 * GeV ] ] * nt
         tool.RequireSAMuons=True
+        tool.NarrowScan=narrowscan
+        tool.ConeSize=conesize
         tool.RemoveOverlaps=overlap
         tool.RunCommissioningChain=flags.Muon.runCommissioningChain
         if '3layersEC' in toolName:
@@ -764,24 +783,24 @@ def TrigMuonEFCombinerHypoToolFromDict( flags, chainDict ) :
     else:
        muonquality = False
 
-    if 'nscan' in chainDict['chainParts'][0]['addInfo']:
-       narrowscan = True
-       conesize = 5
-    elif 'nscan10' in chainDict['chainParts'][0]['addInfo']:
-       conesize = 1
+    if 'nscan10' in chainDict['chainParts'][0]['addInfo']:
+       conesize = 0.1
        narrowscan = True
     elif 'nscan20' in chainDict['chainParts'][0]['addInfo']:
-       conesize = 2
+       conesize = 0.2
        narrowscan = True
     elif 'nscan30' in chainDict['chainParts'][0]['addInfo']:
-       conesize = 3
+       conesize = 0.3
        narrowscan = True
     elif 'nscan40' in chainDict['chainParts'][0]['addInfo']:
-       conesize = 4
+       conesize = 0.4
+       narrowscan = True
+    elif 'nscan' in chainDict['chainParts'][0]['addInfo']:
+       conesize = 0.5
        narrowscan = True
     else:
        narrowscan = False
-       conesize = 0
+       conesize = 0.0
 
     if 'noL1' not in chainDict['chainParts'][0]['extra']:
         overlap=True
@@ -830,24 +849,24 @@ def TrigMuonEFCombinerHypoToolFromName( flags, chainDict ):
                 thr =thr.replace('noL1','')
             for i in range(1,int(mult)+1):
                 thresholds.append(thr)
-    if 'nscan' in chainDict['chainParts'][0]['addInfo']:
-       narrowscan = True
-       conesize = 5
-    elif 'nscan10' in chainDict['chainParts'][0]['addInfo']:
-       conesize = 1
+    if 'nscan10' in chainDict['chainParts'][0]['addInfo']:
+       conesize = 0.1
        narrowscan = True
     elif 'nscan20' in chainDict['chainParts'][0]['addInfo']:
-       conesize = 2
+       conesize = 0.2
        narrowscan = True
     elif 'nscan30' in chainDict['chainParts'][0]['addInfo']:
-       conesize = 3
+       conesize = 0.3
        narrowscan = True
     elif 'nscan40' in chainDict['chainParts'][0]['addInfo']:
-       conesize = 4
+       conesize = 0.4
+       narrowscan = True
+    if 'nscan' in chainDict['chainParts'][0]['addInfo']:
+       conesize = 0.5
        narrowscan = True
     else:
        narrowscan = False
-       conesize = 0
+       conesize = 0.0
 
     if 'muonqual' in chainDict['chainParts'][0]['addInfo']:
        muonquality = True
