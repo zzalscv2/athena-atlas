@@ -250,6 +250,8 @@ class GenerateMenuMT(object, metaclass=Singleton):
               # is greater than the number of electron steps combined chain. Assume that the max length of an electron chain occurs 
               # in a combined chain.
 
+              log.debug("[generateAllChainConfigs] chain %s has config lengths %s and alignment groups %s", chainDict['chainName'], lengthOfChainConfigs, chainDict['alignmentGroups'])
+ 
               alignmentGroups = chainDict['alignmentGroups']
             
               #parallel-merged single-signature chains or single signature chains. Anything that needs no splitting!
@@ -395,6 +397,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
                 log.debug(str(NoCAmigration("[__generateChainConfigs] Chain {0} removed leg because is incomplete".format(chainPartDict['chainName'])) ))       
             else:
                 listOfChainConfigs.append(chainPartConfig)
+                log.debug("[__generateChainConfigs] adding to the perSig_lengthOfChainConfigs list (%s, %s)",chainPartConfig.nSteps,chainPartConfig.alignmentGroups)
                 perSig_lengthOfChainConfigs.append((chainPartConfig.nSteps,chainPartConfig.alignmentGroups))
                 
         # this will be a list of lists for inter-sig combined chains and a list with one 
@@ -426,7 +429,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
                     lengthOfChainConfigs = [] 
                     for nSteps, aGrps in perSig_lengthOfChainConfigs:
                         if len(nSteps) != len(aGrps):
-                            log.error("Chain part has %s steps and %s alignment groups - these don't match!",nSteps,aGrps)
+                            log.error("Post-merged chain part has %s steps and %s alignment groups - these don't match!",nSteps,aGrps)
                         else:
                             for a,b in zip(nSteps,aGrps):
                                 lengthOfChainConfigs.append((a,b))
@@ -474,7 +477,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
             
 
 
-        log.debug('ChainConfigs  %s ', theChainConfig)
+        log.debug('[__generateChainConfigs] lengthOfChainConfigs %s, ChainConfigs  %s ', lengthOfChainConfigs, theChainConfig)
         return theChainConfig,lengthOfChainConfigs
  
     

@@ -757,8 +757,8 @@ class Chain(object):
         self.topoMap[step] = topoPair
 
     def __repr__(self):
-        return "-*- Chain %s -*- \n + Seeds: %s \n + Steps: \n %s \n"%(\
-                    self.name, ' '.join(map(str, self.L1decisions)), '\n '.join(map(str, self.steps)))
+        return "-*- Chain %s -*- \n + Seeds: %s, Steps: %s, AlignmentGroups: %s \n + Steps: \n %s \n"%(\
+                    self.name, ' '.join(map(str, self.L1decisions)), self.nSteps, self.alignmentGroups, '\n '.join(map(str, self.steps)))
 
 
 
