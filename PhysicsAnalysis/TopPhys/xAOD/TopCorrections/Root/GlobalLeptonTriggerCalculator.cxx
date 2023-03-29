@@ -178,6 +178,7 @@ namespace top {
                                      };
 
     // compute and store trigger SF for current variation
+    isLoose=( isLoose && (!m_config->applyTightSFsInLooseTree())); 
     auto&& globalTriggerTool = (isLoose ? m_globalTriggerSFLoose : m_globalTriggerSF);
     auto decorateEventForCurrentVariation = [&]() {
                                               double sf;
