@@ -21,19 +21,19 @@ xAOD::StripCluster_v1::VectorMap xAOD::StripCluster_v1::globalPosition() {
 }
 
 void xAOD::StripCluster_v1::setRDOlist(const std::vector< Identifier >& rdoList) {
-    std::vector< Identifier::value_type > rdos;
-    rdos.reserve(rdoList.size());
-    for (auto& rdo : rdoList)
-        rdos.push_back(rdo.get_compact());
+    std::vector< Identifier::value_type > rdos(rdoList.size());
+    for (std::size_t i(0); i<rdos.size(); ++i) {
+      rdos[i] = rdoList[i].get_compact();
+    }
     rdoListAcc(*this) = rdos;
 }
 
 const std::vector< Identifier > xAOD::StripCluster_v1::rdoList() const {
-    std::vector< Identifier::value_type > values = rdoListAcc(*this);
-    std::vector< Identifier > rdos;
-    rdos.reserve(values.size());
-    for (auto& value : values)
-        rdos.push_back(Identifier(value));
+    const std::vector< Identifier::value_type >& values = rdoListAcc(*this);
+    std::vector< Identifier > rdos(values.size());
+    for (std::size_t i(0); i<rdos.size(); ++i) {
+      rdos[i].set_literal(values[i]);
+    }
     return rdos;
 }
 
