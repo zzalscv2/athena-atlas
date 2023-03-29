@@ -258,6 +258,7 @@ if __name__ == '__main__':
   parser.add_argument("-ifex","--doCaloInput",action="store_true", dest="doCaloInput", help="Decoding L1Calo inputs",default=False, required=False)
   parser.add_argument("-fCtp","--forceCtp",action="store_true", dest="forceCtp", help="Force to CTP monitoring as primary in Sim/Hdw comparison.",default=False, required=False)
   parser.add_argument("-hdwMon","--algoHdwMon",action="store_true", dest="algoHdwMon", help="Fill algorithm histograms based on hardware decision.",default=False, required=False)
+  parser.add_argument("-perfMon","--perfMonitoring",action="store_true", dest="perfmon", help="Enable performance monitoring",default=False, required=False)
   parser.add_argument("-l","--logLevel",action="store", dest="log", help="Log level.",default="warning", required=False)
   parser.add_argument("-n","--nevent", type=int, action="store", dest="nevent", help="Maximum number of events will be executed.",default=0, required=False)
   parser.add_argument("-s","--skipEvents", type=int, action="store", dest="skipEvents", help="How many events will be skipped.",default=0, required=False)
@@ -293,10 +294,17 @@ if __name__ == '__main__':
   flags.Trigger.enableL1MuonPhase1 = True
   flags.Trigger.L1.doMuonTopoInputs = True
   flags.Trigger.enableL1TopoBWSimulation = args.useBW
+  flags.PerfMon.doFullMonMT = args.perfmon
+  flags.PerfMon.OutputJSON = 'perfmonmt_test.json'
+  
   flags.lock()
 
   from AthenaConfiguration.MainServicesConfig import MainServicesCfg
   acc = MainServicesCfg(flags)
+
+  if args.perfmon:
+      from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
+      acc.merge(PerfMonMTSvcCfg(flags))
 
   from TriggerJobOpts.TriggerByteStreamConfig import ByteStreamReadCfg
   acc.merge(ByteStreamReadCfg(flags, type_names=['CTP_RDO/CTP_RDO']))
@@ -354,7 +362,8 @@ if __name__ == '__main__':
       muonRoiTool = acc.popToolsAndMerge(MuonRoIByteStreamToolCfg(name="L1MuonBSDecoderTool",flags=flags,writeBS=False))
       decoderTools += [muonRoiTool]
       outputEDM += addEDM('xAOD::MuonRoIContainer'     , '*')
-      outputEDM += ['LVL1::MuCTPIL1Topo#*']
+      if flags.Trigger.L1.doMuonTopoInputs:
+          outputEDM += ['LVL1::MuCTPIL1Topo#*']
       maybeMissingRobs += muonRoiTool.ROBIDs
 
   if 'jFex' in subsystem:
@@ -459,7 +468,7 @@ if __name__ == '__main__':
   log.debug('Adding the following output EDM to ItemList: %s', outputEDM)
   acc.merge(OutputStreamCfg(flags, 'AOD', ItemList=outputEDM))
 
-  if args.log == 'verbose':
+  if args.log == 'verbose' or args.perfmon:
       acc.printConfig(withDetails=True, summariseProps=True, printDefaults=True)
   
   if acc.run().isFailure():
