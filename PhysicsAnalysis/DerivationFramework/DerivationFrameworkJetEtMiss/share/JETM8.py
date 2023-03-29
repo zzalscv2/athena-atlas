@@ -345,7 +345,8 @@ JETM8SlimmingHelper.ExtraVariables += ['AntiKt10LCTopoJets.SizeParameter',
                                        'AntiKt10TrackCaloClusterTrimmedPtFrac5SmallR20Jets.GhostTrack',
                                        'AntiKt10UFOCSSKTrimmedPtFrac5SmallR20Jets.GhostTrack',
                                        'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.GhostTrack',
-                                       'AntiKt10UFOCSSKBottomUpSoftDropBeta100Zcut5Jets.GhostTrack'
+                                       'AntiKt10UFOCSSKBottomUpSoftDropBeta100Zcut5Jets.GhostTrack',
+                                       'InDetTrackParticles.truthMatchProbability'
                                        ]
 
 
