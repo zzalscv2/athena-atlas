@@ -151,7 +151,7 @@ class H1Calibration(object):
                 return H1Calibration.calibdicV14
     #-- get calibration parameters 
     @staticmethod
-    def getCalibDBParams(finder,mainparam,input, onlyCellWeight=False, isMC=False):
+    def getCalibDBParams(finder,mainparam,input, onlyCellWeight=False, isMC=False, flags=None):
         """ Retrieves calibration DB parameters from jet finder specs, returns a triplet (key,folder,tag)
         """
         #-- adapt to DB convention
@@ -160,7 +160,7 @@ class H1Calibration(object):
         if param == '7':
             param = ''
         #-- get dictionary
-        caldict = H1Calibration.calibration_dict()
+        caldict = H1Calibration.calibration_dict("", flags)
 
         calibtype = finder+param+input
         #-- specific calibration
@@ -180,8 +180,8 @@ class H1Calibration(object):
             if onlyCellWeight: 
                 # then we don't really care : just give back Cone4Tower or Cone4Topo
                 # and avoid the warning below.
-                if 'Topo' in input: return  H1Calibration.getCalibDBParams('Cone',0.4,'H1Topo',onlyCellWeight,isMC)
-                else:               return  H1Calibration.getCalibDBParams('Cone',0.4,'H1Tower',onlyCellWeight,isMC)
+                if 'Topo' in input: return  H1Calibration.getCalibDBParams('Cone',0.4,'H1Topo',onlyCellWeight,isMC, flags)
+                else:               return  H1Calibration.getCalibDBParams('Cone',0.4,'H1Tower',onlyCellWeight,isMC, flags)
             # else try to find a good fall back
             _logger.warning("getCalibDBParams: no dedicated calibration for %s %s %s", finder,mainparam,input)
             if finder not in [ 'Kt', 'Cone' ]    : finder = 'Cone'     # fall back to ATLAS Cone
@@ -190,7 +190,7 @@ class H1Calibration(object):
             else:               l = [ 0.4, 0.7 ]
             (m,mainparam) = min( [ (abs(p-mainparam),p) for p in l ] ) # main parameter optimization (??)
             _logger.warning("getCalibDBParams: defaulted calibration to %s %s %s", finder,mainparam,input)
-            return H1Calibration.getCalibDBParams(finder,mainparam,input,onlyCellWeight,isMC)
+            return H1Calibration.getCalibDBParams(finder,mainparam,input,onlyCellWeight,isMC, flags)
     #-- load DB folder
     @staticmethod
     def loadCaloFolder(folder,tag,isMC=False):
@@ -240,7 +240,7 @@ def getCellWeightTool(finder="Cone",mainparam=0.4,input="Topo", onlyCellWeight=F
         #ComponentAccumulator case
         from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
         result=ComponentAccumulator()
-        (key,folder,tag) = H1Calibration.getCalibDBParams(finder,mainparam,input, onlyCellWeight, flags.Input.isMC)
+        (key,folder,tag) = H1Calibration.getCalibDBParams(finder,mainparam,input, onlyCellWeight, flags.Input.isMC, flags)
         from IOVDbSvc.IOVDbSvcConfig import addFolders
         result.merge(addFolders(flags,folder,'CALO_OFL' if flags.Input.isMC else 'CALO',className = 'CaloRec::ToolConstants',
                                 tag=tag if H1Calibration.overrideFolder(flags) else None))

@@ -41,7 +41,7 @@ def createTauConfigFlags():
     # Run2 settings and calibration files
     tau_cfg.addFlag("Tau.tauRecToolsCVMFSPath", "tauRecTools/R22_preprod")
     tau_cfg.addFlag("Tau.tauRNNTrackClassConfig", "RNNTrackClassifier_2021-07-19_14-25-14_90_25_30.json")
-    tau_cfg.addFlag("Tau.CalibrateLCConfig", "CaloTES_R22_v1.root")
+    tau_cfg.addFlag("Tau.CalibrateLCConfig", "CaloTES_R22_Round2.5.root")
     tau_cfg.addFlag("Tau.CombinedTESConfig", "CombinedTES_R22_Round2.5.root")
     tau_cfg.addFlag("Tau.MvaTESConfig0p", "MvaTES_0p_R23.root")
     tau_cfg.addFlag("Tau.MvaTESConfig", "MvaTES_R23.root")
