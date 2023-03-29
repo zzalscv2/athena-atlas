@@ -32,4 +32,7 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.doRotCorrection', True)
     actscf.addFlag('Acts.doPrintTrackStates', False)
 
+    # Track fitting
+    actscf.addFlag('Acts.writeTrackCollection', False) # save to file (ESD, AOD) the Resolved and Refitted track collections
+
     return actscf
