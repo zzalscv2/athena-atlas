@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileRawChannelTimeMonitorAlgorithm.h"
@@ -25,16 +25,20 @@ StatusCode TileRawChannelTimeMonitorAlgorithm::initialize() {
   ATH_CHECK( m_DQstatusKey.initialize() );
   ATH_CHECK( m_badChannelsKey.initialize() );
   ATH_CHECK( m_DCSStateKey.initialize(m_checkDCS) );
+  ATH_CHECK( m_emScaleKey.initialize() );
 
   using Tile = TileCalibUtils;
   using namespace Monitored;
   const int nDigitizers = 8;
 
   m_timeGroups = buildToolMap<int>(m_tools, "TileAverageTime", Tile::MAX_ROS - 1);
+  m_uncorrTimeGroups = buildToolMap<int>(m_tools, "TileAverageUncorrectedTime", Tile::MAX_ROS - 1);
   m_timeLBGroups = buildToolMap<int>(m_tools, "TileAverageTimeLB", Tile::MAX_ROS - 1);
   m_timeDiffLBGroups = buildToolMap<int>(m_tools, "TileAverageTimeDifferenceLB", m_partitionTimeDifferencePairs.size());
   m_digiTimeLBGroups = buildToolMap<std::vector<std::vector<int>>>(m_tools, "TileDigitizerTimeLB",
                                                                    Tile::MAX_ROS - 1, Tile::MAX_DRAWER, nDigitizers);
+
+  m_amplitudeGroups = buildToolMap<int>(m_tools, "TileAverageAmplitude", Tile::MAX_ROS - 1);
 
   return StatusCode::SUCCESS;
 }
@@ -47,19 +51,33 @@ StatusCode TileRawChannelTimeMonitorAlgorithm::fillHistograms( const EventContex
   // In case you want to measure the execution time
   auto timer = Monitored::Timer("TIME_execute");
 
+  const xAOD::EventInfo* eventInfo = GetEventInfo(ctx).get();
+
+  unsigned int lvl1TriggerType = eventInfo->level1TriggerType();
+  if (!m_triggerTypes.empty()
+      && std::find( m_triggerTypes.begin(), m_triggerTypes.end(), lvl1TriggerType) == m_triggerTypes.end()) {
+    fill("TileRawChanTimeMonExecuteTime", timer);
+    return StatusCode::SUCCESS;
+  }
+
   std::vector<int> drawers[Tile::MAX_ROS - 1];
   std::vector<int> channels[Tile::MAX_ROS - 1];
   std::vector<double> channelTimes[Tile::MAX_ROS - 1];
-
-  const xAOD::EventInfo* eventInfo = GetEventInfo(ctx).get();
+  std::vector<double> channelUncorrectedTimes[Tile::MAX_ROS - 1];
+  std::vector<double> channelAmplitudes[Tile::MAX_ROS - 1];
 
   const TileDQstatus* dqStatus = SG::makeHandle(m_DQstatusKey, ctx).get();
   const TileDCSState* dcsState = m_checkDCS ? SG::ReadCondHandle(m_DCSStateKey, ctx).cptr() : nullptr;
+
+  SG::ReadCondHandle<TileEMScale> emScale(m_emScaleKey, ctx);
+  ATH_CHECK( emScale.isValid() );
 
   SG::ReadCondHandle<TileBadChannels> badChannels(m_badChannelsKey, ctx);
 
   SG::ReadHandle<TileRawChannelContainer> rawChannelContainer(m_rawChannelContainerKey, ctx);
   ATH_CHECK( rawChannelContainer.isValid() );
+
+  TileRawChannelUnit::UNIT rawChannelUnit = rawChannelContainer->get_unit();
 
   for (const TileRawChannelCollection* rawChannelCollection : *rawChannelContainer) {
     if (rawChannelCollection->empty() ) continue;
@@ -67,7 +85,7 @@ StatusCode TileRawChannelTimeMonitorAlgorithm::fillHistograms( const EventContex
     HWIdentifier adc_id = rawChannelCollection->front()->adc_HWID();
     int ros = m_tileHWID->ros(adc_id);
     int drawer = m_tileHWID->drawer(adc_id);
-    // unsigned int drawerIdx = TileCalibUtils::getDrawerIdx(ros, drawer);
+    unsigned int drawerIdx = TileCalibUtils::getDrawerIdx(ros, drawer);
     int partition = ros - 1;
 
     for (const TileRawChannel* rawChannel : *rawChannelCollection) {
@@ -105,7 +123,11 @@ StatusCode TileRawChannelTimeMonitorAlgorithm::fillHistograms( const EventContex
       drawers[partition].push_back(drawer);
       channels[partition].push_back(channel);
       channelTimes[partition].push_back(rawChannel->time());
+      channelUncorrectedTimes[partition].push_back(rawChannel->uncorrTime());
 
+      float amplitude = rawChannel->amplitude();
+      amplitude = emScale->calibrateChannel(drawerIdx, channel, adc, amplitude, rawChannelUnit, TileRawChannelUnit::PicoCoulombs);
+      channelAmplitudes[partition].push_back(amplitude);
     }
   }
 
@@ -153,8 +175,14 @@ StatusCode TileRawChannelTimeMonitorAlgorithm::fillHistograms( const EventContex
       auto monTime = Monitored::Collection("time", channelTimes[partition]);
       fill(m_tools[m_timeGroups[partition]], monModule, monChannel, monTime);
 
+      auto monUncorrTime = Monitored::Collection("time", channelUncorrectedTimes[partition]);
+      fill(m_tools[m_uncorrTimeGroups[partition]], monModule, monChannel, monUncorrTime);
+
       auto monPartitionTime = Monitored::Scalar<float>("time", partitionTime[partition]);
       fill(m_tools[m_timeLBGroups[partition]], monLumiBlock, monPartitionTime);
+
+      auto monAmplitude = Monitored::Collection("amplitude", channelAmplitudes[partition]);
+      fill(m_tools[m_amplitudeGroups[partition]], monModule, monChannel, monAmplitude);
 
       for (unsigned int channelIdx = 0; channelIdx < channels[partition].size(); ++ channelIdx) {
         int drawer = drawers[partition][channelIdx];
