@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SUSYTools/SUSYObjDef_xAOD.h"
@@ -1511,25 +1511,12 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
   
       if (m_trkMETsyst) {
         ATH_CHECK( m_metSystTool.setProperty("ConfigSoftCaloFile", "") );
-        ATH_CHECK( m_metSystTool.setProperty("ConfigSoftTrkFile", "TrackSoftTerms.config") );
-        if (m_jetInputType == xAOD::JetInput::EMPFlow) {
-          ATH_CHECK( m_metSystTool.setProperty("ConfigSoftTrkFile", "TrackSoftTerms-pflow.config") );
-        }
-        if (isAtlfast()) {
-          ATH_CHECK( m_metSystTool.setProperty("ConfigSoftTrkFile", "TrackSoftTerms_AFII.config") );
-        }
+        ATH_CHECK( m_metSystTool.setProperty("ConfigSoftTrkFile", "TrackSoftTerms-pflow.config") );
       }
   
       if (m_caloMETsyst) {
         ATH_MSG_WARNING( "CST is no longer recommended by Jet/MET group");
         ATH_CHECK( m_metSystTool.setProperty("ConfigSoftTrkFile", "") );
-        // Recommendations from a thread with TJ.  CST is not officially supported, but might be used for cross-checks
-        ATH_CHECK( m_metSystTool.setProperty("DoIsolMuonEloss",true) );
-        ATH_CHECK( m_metSystTool.setProperty("DoMuonEloss",true) );
-        if ("AntiKt4EMTopoJets"==jetcoll) {
-          // Recommendation from TJ: if we are using EM topo jets, make sure the clusters are considered at LC scale
-          ATH_CHECK( m_metSystTool.setProperty("JetConstitScaleMom","JetLCScaleMomentum") );
-        }
       } 
   
       if (m_trkJetsyst) {

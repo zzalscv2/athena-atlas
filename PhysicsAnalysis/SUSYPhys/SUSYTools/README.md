@@ -21,16 +21,14 @@ Set up the latest recommended AnalysisBase release:
 ```bash
 setupATLAS
 lsetup git
-asetup "AnalysisBase,22.2.110"
-# or the nightly: asetup "AnalysisBase,22.2,latest"
+asetup "AnalysisBase,24.2.0"
 ```
 
 Or the latest AthAnalysis release::
 
 ```bash
 setupATLAS
-asetup "AthAnalysis,22.2.110"
-# or the nightly: asetup "AthAnalysis,22.2,latest"
+asetup "AthAnalysis,24.2.0"
 ```
   
 For working with code, a sparse checkout is pretty straightforward.  
