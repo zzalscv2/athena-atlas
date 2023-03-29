@@ -463,6 +463,8 @@ def getTileBadChanTool(source = 'FILE', name = 'TileBadChanTool', **kwargs):
     from AthenaCommon.AlgSequence import AthSequencer
     condSequence = AthSequencer("AthCondSeq")
 
+    from TileRecUtils.TileRecFlags import jobproperties
+
     #do some check for global flag here: if source='' and flag set, adopt flag
 
     tool = None
@@ -481,14 +483,20 @@ def getTileBadChanTool(source = 'FILE', name = 'TileBadChanTool', **kwargs):
             else:
                 offlineBadChannelsProxy = getTileCondProxy('COOL','Bch','oflStatAdc','TileCondProxyCool_OflBch')
 
-            onlineBadChannelsProxy = getTileCondProxy('COOL','Bch','onlStatAdc','TileCondProxyCool_OnlBch')
+            if jobproperties.TileRecFlags.useOnlineChannelStatus:
+                onlineBadChannelsProxy = getTileCondProxy('COOL','Bch','onlStatAdc','TileCondProxyCool_OnlBch')
+            else:
+                onlineBadChannelsProxy = None
         else:
             #========================================================
             #=== Connect FILE TileCondProxies to the tool (default)
             #========================================================
-            onlineBadChannelsProxy = getTileCondProxy('FILE','Bch','TileDefault.onlBch','TileCondProxyFile_OnlBch')
-            offlineBadChannelsProxy = getTileCondProxy('FILE','Bch','TileDefault.oflBch','TileCondProxyFile_OflBch')
+            if jobproperties.TileRecFlags.useOnlineChannelStatus:
+                onlineBadChannelsProxy = getTileCondProxy('FILE','Bch','TileDefault.onlBch','TileCondProxyFile_OnlBch')
+            else:
+                onlineBadChannelsProxy = None
 
+            offlineBadChannelsProxy = getTileCondProxy('FILE','Bch','TileDefault.oflBch','TileCondProxyFile_OflBch')
 
         from TileConditions.TileConditionsConf import TileBadChannelsCondAlg
         condSequence += TileBadChannelsCondAlg( name = badChannelsCondAlg,

@@ -70,8 +70,8 @@ class TileBadChannelsCondAlg: public AthAlgorithm {
     std::vector<const TileBchDecoder*> m_tileBchDecoder;
 
 
+    bool m_useOnlBch;
     bool m_useOflBch;
-
 };
 
 

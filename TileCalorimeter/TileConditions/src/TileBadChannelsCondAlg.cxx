@@ -1,6 +1,6 @@
 //Dear emacs, this is -*- c++ -*-
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -50,18 +50,23 @@ StatusCode TileBadChannelsCondAlg::initialize() {
   //=== TileCondIdTransforms
   CHECK( m_tileIdTrans.retrieve() );
 
-  ATH_CHECK( m_onlBchProxy.retrieve() );
+  m_useOnlBch = !(m_onlBchProxy.empty());
+  //=== retrieve online proxy
+  ATH_CHECK( m_onlBchProxy.retrieve(EnableTool{m_useOnlBch}) );
 
   m_useOflBch = !(m_oflBchProxy.empty());
-  if (m_useOflBch) {
-    //=== retrieve offline proxy
-    CHECK( m_oflBchProxy.retrieve() );
-    ATH_MSG_INFO("ProxyOnlBch and ProxyOflBch will be used for bad channel status");
-  } else {
-    m_oflBchProxy.disable();
-    ATH_MSG_INFO("Only ProxyOnlBch will be used for bad channel status");
-  }
+  //=== retrieve offline proxy
+  ATH_CHECK( m_oflBchProxy.retrieve(EnableTool{m_useOflBch}) );
 
+  if (m_useOnlBch && m_useOflBch) {
+    ATH_MSG_INFO("ProxyOnlBch and ProxyOflBch will be used for bad channel status");
+  } else if (m_useOnlBch) {
+    ATH_MSG_INFO("Only ProxyOnlBch will be used for bad channel status");
+  } else if (m_useOflBch) {
+    ATH_MSG_INFO("Only ProxyOflBch will be used for bad channel status");
+  } else {
+    ATH_MSG_INFO("ProxyOnlBch and ProxyOflBch will not be used for bad channel status => all channels are good");
+  }
 
   return StatusCode::SUCCESS;
 }
@@ -82,8 +87,11 @@ StatusCode TileBadChannelsCondAlg::execute() {
   std::unique_ptr<TileCalibData<TileCalibDrawerBch>> onlBchData
     = std::make_unique<TileCalibData<TileCalibDrawerBch>>();
 
-  ATH_CHECK( m_onlBchProxy->fillCalibData(*onlBchData, eventRange) );
-
+  if (m_useOnlBch) {
+    EventIDRange onlBchRange;
+    ATH_CHECK( m_onlBchProxy->fillCalibData(*onlBchData, onlBchRange) );
+    eventRange = EventIDRange::intersect(eventRange, onlBchRange);
+  }
 
   std::unique_ptr<TileCalibData<TileCalibDrawerBch>> oflBchData
     = std::make_unique<TileCalibData<TileCalibDrawerBch>>();
@@ -119,16 +127,21 @@ StatusCode TileBadChannelsCondAlg::execute() {
 
         m_tileIdTrans->getIndices(adcId, drawerIdx, channel, adc);
 
-        //=== online status ...
-        const TileCalibDrawerBch* calibDrawer = onlBchData->getCalibDrawer(drawerIdx);
-        TileBchDecoder::BitPatVer bitPatVer = calibDrawer->getBitPatternVersion();
-        calibDrawer->getStatusWords(channel, adc, adcBits, channelBits);
-        TileBchStatus adcStatus(m_tileBchDecoder[bitPatVer]->decode(channelBits, adcBits));
+        TileBchStatus adcStatus;
+
+        std::vector<const TileCalibDrawerBch*> calibDrawers;
+        if (m_useOnlBch) {
+          //=== online status ...
+          calibDrawers.push_back( onlBchData->getCalibDrawer(drawerIdx) );
+        }
 
         if (m_useOflBch) {
           //=== ... add offline status
-          calibDrawer = oflBchData->getCalibDrawer(drawerIdx);
-          bitPatVer = calibDrawer->getBitPatternVersion();
+          calibDrawers.push_back( oflBchData->getCalibDrawer(drawerIdx) );
+        }
+
+        for (const TileCalibDrawerBch*  calibDrawer : calibDrawers) {
+          TileBchDecoder::BitPatVer bitPatVer = calibDrawer->getBitPatternVersion();
           calibDrawer->getStatusWords(channel, adc, adcBits, channelBits);
           adcStatus += m_tileBchDecoder[bitPatVer]->decode(channelBits, adcBits);
         }

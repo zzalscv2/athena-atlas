@@ -34,8 +34,12 @@ def TileBadChannelsCondAlgCfg(flags, **kwargs):
         folders = TileFolders(isMC = flags.Input.isMC, isOnline = flags.Common.isOnline)
 
         TileCondProxyCoolBch=CompFactory.getComp("TileCondProxyCool<TileCalibDrawerBch>")
-        onlineFolder = folders.addSplitMC('/TILE/ONL01/STATUS/ADC', '/TILE/ONL01/STATUS/ADC')
-        onlineBadChannelsProxy = TileCondProxyCoolBch('TileCondProxyCool_OnlBch', Source = onlineFolder)
+
+        if flags.Tile.useOnlineChannelStatus:
+            onlineFolder = folders.addSplitMC('/TILE/ONL01/STATUS/ADC', '/TILE/ONL01/STATUS/ADC')
+            onlineBadChannelsProxy = TileCondProxyCoolBch('TileCondProxyCool_OnlBch', Source = onlineFolder)
+        else:
+            onlineBadChannelsProxy = None
 
         if flags.IOVDb.DatabaseInstance  == 'CONDBR2':
             if not flags.Common.isOnline:
@@ -53,7 +57,10 @@ def TileBadChannelsCondAlgCfg(flags, **kwargs):
     else:
         # Connect FILE Tile conditions proxies to the algorithm
         TileCondProxyFileBch=CompFactory.getComp("TileCondProxyFile<TileCalibDrawerBch>")
-        onlineBadChannelsProxy = TileCondProxyFileBch('TileCondProxyFile_OnlBch', Source = 'TileDefault.onlBch')
+        if flags.Tile.useOnlineChannelStatus:
+            onlineBadChannelsProxy = TileCondProxyFileBch('TileCondProxyFile_OnlBch', Source = 'TileDefault.onlBch')
+        else:
+            onlineBadChannelsProxy = None
         offlineBadChannelsProxy = TileCondProxyFileBch('TileCondProxyFile_OflBch', Source = 'TileDefault.oflBch')
         
 
