@@ -14524,7 +14524,7 @@ HLT_mu10_bJpsimutrk_L1MU8F:
     4: 1
   stepFeatures:
     0: 10
-    1: 11
+    1: 9
     2: 7
     3: 7
     4: 7
@@ -14539,7 +14539,7 @@ HLT_mu10_bJpsimutrk_MuonTrkPEB_L1MU8F:
     5: 1
   stepFeatures:
     0: 10
-    1: 11
+    1: 9
     2: 7
     3: 7
     4: 7
@@ -15173,7 +15173,7 @@ HLT_mu20_bBmux_BdmuDpX_L1MU14FCH:
     4: 1
   stepFeatures:
     0: 7
-    1: 9
+    1: 8
     2: 5
     3: 5
     4: 5
@@ -15187,7 +15187,7 @@ HLT_mu20_bBmux_BdmuDpX_L1MU18VFCH:
     4: 1
   stepFeatures:
     0: 7
-    1: 9
+    1: 8
     2: 5
     3: 5
     4: 5
@@ -15201,7 +15201,7 @@ HLT_mu20_bBmux_BdmuDstarX_L1MU14FCH:
     4: 1
   stepFeatures:
     0: 7
-    1: 9
+    1: 8
     2: 5
     3: 5
     4: 5
@@ -15215,7 +15215,7 @@ HLT_mu20_bBmux_BdmuDstarX_L1MU18VFCH:
     4: 1
   stepFeatures:
     0: 7
-    1: 9
+    1: 8
     2: 5
     3: 5
     4: 5
@@ -15229,7 +15229,7 @@ HLT_mu20_bBmux_BpmuD0X_L1MU14FCH:
     4: 1
   stepFeatures:
     0: 7
-    1: 9
+    1: 8
     2: 5
     3: 5
     4: 5
@@ -15243,7 +15243,7 @@ HLT_mu20_bBmux_BpmuD0X_L1MU18VFCH:
     4: 1
   stepFeatures:
     0: 7
-    1: 9
+    1: 8
     2: 5
     3: 5
     4: 5
@@ -15257,7 +15257,7 @@ HLT_mu20_bBmux_BsmuDsX_L1MU14FCH:
     4: 1
   stepFeatures:
     0: 7
-    1: 9
+    1: 8
     2: 5
     3: 5
     4: 5
@@ -15271,7 +15271,7 @@ HLT_mu20_bBmux_BsmuDsX_L1MU18VFCH:
     4: 1
   stepFeatures:
     0: 7
-    1: 9
+    1: 8
     2: 5
     3: 5
     4: 5
@@ -15285,7 +15285,7 @@ HLT_mu20_bBmux_LbmuLcX_L1MU14FCH:
     4: 1
   stepFeatures:
     0: 7
-    1: 9
+    1: 8
     2: 5
     3: 5
     4: 5
@@ -15299,7 +15299,7 @@ HLT_mu20_bBmux_LbmuLcX_L1MU18VFCH:
     4: 1
   stepFeatures:
     0: 7
-    1: 9
+    1: 8
     2: 5
     3: 5
     4: 5
@@ -15313,7 +15313,7 @@ HLT_mu20_bJpsimutrk_L1MU14FCH:
     4: 1
   stepFeatures:
     0: 7
-    1: 9
+    1: 8
     2: 5
     3: 5
     4: 5
@@ -15327,7 +15327,7 @@ HLT_mu20_bJpsimutrk_L1MU18VFCH:
     4: 1
   stepFeatures:
     0: 7
-    1: 9
+    1: 8
     2: 5
     3: 5
     4: 5
@@ -15342,7 +15342,7 @@ HLT_mu20_bJpsimutrk_MuonTrkPEB_L1MU14FCH:
     5: 1
   stepFeatures:
     0: 7
-    1: 9
+    1: 8
     2: 5
     3: 5
     4: 5
@@ -15358,7 +15358,7 @@ HLT_mu20_bJpsimutrk_MuonTrkPEB_L1MU18VFCH:
     5: 1
   stepFeatures:
     0: 7
-    1: 9
+    1: 8
     2: 5
     3: 5
     4: 5
@@ -18484,7 +18484,7 @@ HLT_mu4_bJpsimutrk_MuonTrkPEB_L1MU3V:
     5: 1
   stepFeatures:
     0: 12
-    1: 22
+    1: 19
     2: 12
     3: 11
     4: 11
@@ -18500,7 +18500,7 @@ HLT_mu4_bJpsimutrk_MuonTrkPEB_L1MU3VF:
     5: 1
   stepFeatures:
     0: 12
-    1: 22
+    1: 19
     2: 12
     3: 11
     4: 11
@@ -18875,7 +18875,7 @@ HLT_mu4_l2io_L1MU3V:
     3: 8
   stepFeatures:
     0: 12
-    1: 22
+    1: 19
     2: 12
     3: 11
 HLT_mu4_mu4_idperf_1invmAB5_L12MU3VF:
@@ -18926,45 +18926,45 @@ HLT_mu50_L1MU18VFCH:
     2: 5
     3: 3
 HLT_mu60_0eta105_msonly_L1MU14FCH:
-  eventCount: 1
+  eventCount: 2
   stepCounts:
-    0: 2
-    1: 1
+    0: 3
+    1: 2
   stepFeatures:
-    0: 2
-    1: 1
+    0: 3
+    1: 2
 HLT_mu60_0eta105_msonly_L1MU18VFCH:
-  eventCount: 1
+  eventCount: 2
   stepCounts:
-    0: 2
-    1: 1
+    0: 3
+    1: 2
   stepFeatures:
-    0: 2
-    1: 1
+    0: 3
+    1: 2
 HLT_mu60_L1MU14FCH:
-  eventCount: 2
+  eventCount: 3
   stepCounts:
-    0: 4
-    1: 2
-    2: 2
-    3: 2
+    0: 5
+    1: 3
+    2: 3
+    3: 3
   stepFeatures:
-    0: 4
-    1: 2
-    2: 2
-    3: 2
+    0: 5
+    1: 3
+    2: 3
+    3: 3
 HLT_mu60_L1MU18VFCH:
-  eventCount: 2
+  eventCount: 3
   stepCounts:
-    0: 4
-    1: 2
-    2: 2
-    3: 2
+    0: 5
+    1: 3
+    2: 3
+    3: 3
   stepFeatures:
-    0: 4
-    1: 2
-    2: 2
-    3: 2
+    0: 5
+    1: 3
+    2: 3
+    3: 3
 HLT_mu6_2mu4_bDimu2700_L1MU5VF_3MU3V:
   eventCount: 0
 HLT_mu6_2mu4_bDimu2700_L1MU5VF_3MU3VF:
@@ -19008,7 +19008,7 @@ HLT_mu6_bJpsimutrk_MuonTrkPEB_L1MU5VF:
     5: 1
   stepFeatures:
     0: 11
-    1: 15
+    1: 13
     2: 11
     3: 10
     4: 10
@@ -19024,7 +19024,7 @@ HLT_mu6_bJpsimutrk_lowpt_MuonTrkPEB_L1MU5VF:
     5: 1
   stepFeatures:
     0: 11
-    1: 15
+    1: 13
     2: 11
     3: 10
     4: 10
@@ -19669,37 +19669,45 @@ HLT_mu6_xe30_mht_L1XE30:
     3: 6
     4: 4
 HLT_mu80_L1MU14FCH:
-  eventCount: 0
+  eventCount: 1
   stepCounts:
-    0: 4
-    1: 1
+    0: 5
+    1: 2
+    2: 1
+    3: 1
   stepFeatures:
-    0: 4
-    1: 1
+    0: 5
+    1: 2
+    2: 1
+    3: 1
 HLT_mu80_L1MU18VFCH:
-  eventCount: 0
+  eventCount: 1
   stepCounts:
-    0: 4
-    1: 1
+    0: 5
+    1: 2
+    2: 1
+    3: 1
   stepFeatures:
-    0: 4
-    1: 1
+    0: 5
+    1: 2
+    2: 1
+    3: 1
 HLT_mu80_msonly_3layersEC_L1MU14FCH:
-  eventCount: 1
+  eventCount: 2
   stepCounts:
-    0: 4
-    1: 1
+    0: 5
+    1: 2
   stepFeatures:
-    0: 4
-    1: 1
+    0: 5
+    1: 2
 HLT_mu80_msonly_3layersEC_L1MU18VFCH:
-  eventCount: 1
+  eventCount: 2
   stepCounts:
-    0: 4
-    1: 1
+    0: 5
+    1: 2
   stepFeatures:
-    0: 4
-    1: 1
+    0: 5
+    1: 2
 HLT_mu8_L1MU5VF:
   eventCount: 7
   stepCounts:
