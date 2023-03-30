@@ -78,7 +78,7 @@ def remapToOffline( name ):
    else:
        return name
 
-def makeInDetPatternRecognition( flags, config, verifier = 'IDTrigViewDataVerifier' ):
+def makeInDetPatternRecognition( inflags, config, verifier = 'IDTrigViewDataVerifier' ):
       viewAlgs = [] #list of all algs running in this module
 
       dataVerifier = None
@@ -96,10 +96,22 @@ def makeInDetPatternRecognition( flags, config, verifier = 'IDTrigViewDataVerifi
          from InDetRecExample.ConfiguredNewTrackingCuts import ConfiguredNewTrackingCuts
          trackingCuts = ConfiguredNewTrackingCuts( mode_name ) 
       #trackingCuts.printInfo() 
+      
+      try:
+        if inflags.InDet.Tracking.ActiveConfig.input_name == config.input_name:
+          log.debug("flags.InDet.Tracking.ActiveConfig is for %s", inflags.InDet.Tracking.ActiveConfig.input_name)
+          flags = inflags
+        else:
+          log.warning("flags.InDet.Tracking.ActiveConfig is not for %s but %s", 
+                      config.input_name, inflags.InDet.Tracking.ActiveConfig.input_name)
+          raise RuntimeError("EFIDTracking invoked with incorrect flags instance")
+      except RuntimeError:
+        log.info("Menu code invoked ID config without or with incorrect flags.InDet.Tracking.ActiveConfig for %s", config.input_name)
+        flags = inflags.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking."+config.input_name)
 
       from InDetTrigRecExample import InDetTrigCA
-
-      InDetTrigCA.InDetTrigConfigFlags = flags.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking."+config.name)
+      InDetTrigCA.InDetTrigConfigFlags = flags
+      
 
       from TrkConfig.TrkTrackSummaryToolConfig import InDetTrigTrackSummaryToolCfg
       summaryTool = CAtoLegacyPublicToolWrapper(InDetTrigTrackSummaryToolCfg)
