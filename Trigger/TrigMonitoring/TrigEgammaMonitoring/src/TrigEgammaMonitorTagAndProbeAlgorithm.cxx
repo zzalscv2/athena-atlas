@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************
@@ -67,8 +67,6 @@ StatusCode TrigEgammaMonitorTagAndProbeAlgorithm::initialize() {
 
 
 
-
-
 StatusCode TrigEgammaMonitorTagAndProbeAlgorithm::fillHistograms( const EventContext& ctx ) const  {
    
     std::vector<std::shared_ptr<const xAOD::Electron>> probes;
@@ -131,7 +129,6 @@ StatusCode TrigEgammaMonitorTagAndProbeAlgorithm::fillHistograms( const EventCon
 bool TrigEgammaMonitorTagAndProbeAlgorithm::executeTandP( const EventContext& ctx, std::vector<std::shared_ptr<const xAOD::Electron>> &probeElectrons) const
 {
    
-
     auto monGroup = getGroup( m_anatype );
     
     fillLabel(monGroup, "CutCounter", "Events");
@@ -150,9 +147,6 @@ bool TrigEgammaMonitorTagAndProbeAlgorithm::executeTandP( const EventContext& ct
     }
 
     fillLabel(monGroup, "CutCounter", "LAr");
-
- 
-    
     SG::ReadHandle<xAOD::ElectronContainer> offElectrons(m_offElectronKey, ctx);
 
     if(!offElectrons.isValid())
@@ -163,10 +157,6 @@ bool TrigEgammaMonitorTagAndProbeAlgorithm::executeTandP( const EventContext& ct
 
     fillLabel(monGroup, "CutCounter", "RetrieveElectrons");
 
- 
- 
-
-
     ATH_MSG_DEBUG( "Electron size is " << offElectrons->size() );
 
     // Check Size of Electron Container
@@ -176,8 +166,6 @@ bool TrigEgammaMonitorTagAndProbeAlgorithm::executeTandP( const EventContext& ct
     }
     
     fillLabel(monGroup, "CutCounter", "TwoElectrons");
- 
- 
 
     
     SG::ReadHandle<xAOD::JetContainer> jets(m_jetKey,ctx);
@@ -187,7 +175,6 @@ bool TrigEgammaMonitorTagAndProbeAlgorithm::executeTandP( const EventContext& ct
     }
 
     ATH_MSG_DEBUG( "Jet size is " << jets->size());
-
 
     if(!m_tagTrigList.empty()){
       if(m_applyMinimalTrigger){ 
@@ -201,6 +188,11 @@ bool TrigEgammaMonitorTagAndProbeAlgorithm::executeTandP( const EventContext& ct
     }
 
  
+ 
+
+
+    
+
 
 
     
@@ -288,7 +280,6 @@ bool TrigEgammaMonitorTagAndProbeAlgorithm::minimalTriggerRequirement() const {
             return true;
     }
 
-
     return false;
 }
 
@@ -309,13 +300,10 @@ void TrigEgammaMonitorTagAndProbeAlgorithm::matchObjects(const std::string& prob
 
 
 
-
-
 bool TrigEgammaMonitorTagAndProbeAlgorithm::isTagElectron( const ToolHandle<GenericMonitoringTool>& monGroup, 
                                                const xAOD::Electron *el) const 
 {
     fillLabel(monGroup, "TagCutCounter", "Electrons");
-
 
     // Tag the event
     // Require offline tight electron
@@ -331,7 +319,6 @@ bool TrigEgammaMonitorTagAndProbeAlgorithm::isTagElectron( const ToolHandle<Gene
 
     fillLabel(monGroup, "TagCutCounter", "HasTrack");
 
-
     ATH_MSG_DEBUG("Track pt " << trk->pt());
     const xAOD::CaloCluster *clus = el->caloCluster();
     if(!el->caloCluster()){
@@ -341,15 +328,10 @@ bool TrigEgammaMonitorTagAndProbeAlgorithm::isTagElectron( const ToolHandle<Gene
 
     fillLabel(monGroup, "TagCutCounter", "HasCluster");
 
-
-
     ATH_MSG_DEBUG("Cluster E "<<clus->e());
     ATH_MSG_DEBUG("Selecting Tag Electron PID");
     if (!ApplyElectronPid(el, m_offTagTightness)) return false;
     fillLabel(monGroup, "TagCutCounter", "GoodPid");
-
-
-    
 
     ATH_MSG_DEBUG("Selecting Tag Electron Et");
     //Require Et > 25 GeV
@@ -359,9 +341,6 @@ bool TrigEgammaMonitorTagAndProbeAlgorithm::isTagElectron( const ToolHandle<Gene
     
     fillLabel(monGroup, "TagCutCounter", "Et");
 
-
-    
-
     ATH_MSG_DEBUG("Selecting Tag Electron Eta");
     //fiducial detector acceptance region
     float absEta = fabs(el->caloCluster()->etaBE(2));
@@ -369,25 +348,18 @@ bool TrigEgammaMonitorTagAndProbeAlgorithm::isTagElectron( const ToolHandle<Gene
         return false;
     }
 
-
     fillLabel(monGroup, "TagCutCounter", "Eta");
-
-
 
     ATH_MSG_DEBUG("Checking electron object quality");
     if (!el->isGoodOQ(xAOD::EgammaParameters::BADCLUSELECTRON)) return false;
     
     fillLabel(monGroup, "TagCutCounter", "IsGoodOQ");
 
-
-
-    
     if(m_tagTrigList.empty())
     {
       ATH_MSG_DEBUG("Found a tag electron"); 
       return true;
     }
-
 
     ATH_MSG_DEBUG("Selecting Tag Electron Decision");
     // Check matching to a given trigger
@@ -400,14 +372,12 @@ bool TrigEgammaMonitorTagAndProbeAlgorithm::isTagElectron( const ToolHandle<Gene
       }
     }
 
-
     if(!tagPassed) {
         ATH_MSG_DEBUG("Failed tag trigger "); 
         return false;
     }
     
     fillLabel(monGroup, "TagCutCounter", "PassTrigger");
-
 
     ATH_MSG_DEBUG("Matching Tag Electron FC");
     bool tagMatched=false;
@@ -430,14 +400,10 @@ bool TrigEgammaMonitorTagAndProbeAlgorithm::isTagElectron( const ToolHandle<Gene
 
 
 
-
-
-
 bool TrigEgammaMonitorTagAndProbeAlgorithm::isGoodProbeElectron( const ToolHandle<GenericMonitoringTool>& monGroup, 
                                                    const xAOD::Electron *el,
                                                    const xAOD::JetContainer *jets ) const 
 {
-
 
     //Check constituents
     if(!el->trackParticle()){
@@ -463,7 +429,6 @@ bool TrigEgammaMonitorTagAndProbeAlgorithm::isGoodProbeElectron( const ToolHandl
     }
 
     fillLabel(monGroup, "ProbeCutCounter", "Eta");
-
 
     ATH_MSG_DEBUG("Checking electron object quality");
     if (!el->isGoodOQ(xAOD::EgammaParameters::BADCLUSELECTRON)) return false;
@@ -517,15 +482,12 @@ void TrigEgammaMonitorTagAndProbeAlgorithm::dressPid(const xAOD::Electron *eg) c
 
 
 
-
-
-
-
 float TrigEgammaMonitorTagAndProbeAlgorithm::getPseudoLifetime(const xAOD::Electron *el1,const xAOD::Electron *el2) const 
 {
 
   TLorentzVector el1track;
   TLorentzVector el2track;
+  float simple = -99999.;
 
   float Et1=hypot(el1->caloCluster()->m(),el1->caloCluster()->pt())/cosh(el1->trackParticle()->eta());
   float Et2=hypot(el2->caloCluster()->m(),el2->caloCluster()->pt())/cosh(el1->trackParticle()->eta());
@@ -541,7 +503,10 @@ float TrigEgammaMonitorTagAndProbeAlgorithm::getPseudoLifetime(const xAOD::Elect
 
   float  ptEECalo  = (el1track+el2track).Pt();
 
-  return lxy*3096.916/(0.299792458*ptEECalo);
+  float den = (0.299792458*ptEECalo);
+  if(fabs(den) < 1e-6) return simple;
+
+  return lxy*3096.916/den;
 
 }
 
@@ -557,14 +522,21 @@ double TrigEgammaMonitorTagAndProbeAlgorithm::simple_lxy(int flag,   double d1, 
 
   double simpleXv = (-d2*cos(phi1) + d1*cos(phi2)) / den;
   double simpleYv = (-d2*sin(phi1) + d1*sin(phi2)) / den;
-  double rxy  = sqrt((simpleXv-vx)*(simpleXv-vx) +
-                     (simpleYv-vy)*(simpleYv-vy) );
+  double argxy = (simpleXv-vx)*(simpleXv-vx) + (simpleYv-vy)*(simpleYv-vy);
+  
+  if(argxy < 0) return simple;
+
+  double rxy  = sqrt(argxy);
 
   double f1 = (fabs(pt1)*cos(phi1)+fabs(pt2)*cos(phi2));
   double f2 = (fabs(pt1)*sin(phi1)+fabs(pt2)*sin(phi2));
-  double  c = sqrt( f1*f1 + f2*f2 );
+  double argm = f1*f1 + f2*f2;
 
-  if ( c == 0 ) return simple;
+  if(argm < 0) return simple;
+
+  double  c = sqrt( argm );
+
+  if ( fabs(c) < 1e-6 ) return simple;
 
   double a =  (simpleXv-vx)*f1;
   double b =  (simpleYv-vy)*f2;
@@ -574,7 +546,3 @@ double TrigEgammaMonitorTagAndProbeAlgorithm::simple_lxy(int flag,   double d1, 
   else
     return (a+b)/c;
 }
-
-
-
-
