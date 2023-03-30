@@ -6,10 +6,11 @@ Functions creating ComponentAccumulator with ByteStream converters for L1Topo ob
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from TriggerJobOpts.TriggerByteStreamConfig import ByteStreamReadCfg
 
-def L1TopoPhase1ByteStreamToolCfg(name, flags, writeBS=False):
+def L1TopoPhase1ByteStreamToolCfg(flags, name, writeBS=False):
     from libpyeformat_helper import SourceIdentifier, SubDetector
     from AthenaConfiguration.ComponentFactory import CompFactory
     
+    acc = ComponentAccumulator()
     tool = CompFactory.L1TopoPhase1ByteStreamTool(name)
     moduleids = [0x1800]
     tool.ROBIDs = [int(SourceIdentifier(SubDetector.TDAQ_CALO_TOPO_PROC, moduleid)) for moduleid in moduleids]
@@ -21,7 +22,8 @@ def L1TopoPhase1ByteStreamToolCfg(name, flags, writeBS=False):
         tool.L1TopoPhase1RAWDataReadContainer = ""
         tool.L1TopoPhase1RAWDataWriteContainer = "L1_Phase1L1TopoRAWData"
     
-    return tool
+    acc.setPrivateTools(tool)
+    return acc
     
 def L1TopoRDOCollectionBSCnvCfg(flags):
     typeNamesToDecode = ["L1TopoRDOCollection/L1TopoRDOCollection",

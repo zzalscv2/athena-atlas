@@ -325,7 +325,7 @@ if __name__ == '__main__':
   maybeMissingRobs = []
 
   from TrigT1ResultByteStream.TrigT1ResultByteStreamConfig import RoIBResultByteStreamToolCfg
-  roibResultTool = RoIBResultByteStreamToolCfg(name="RoIBResultBSDecoderTool", flags=flags, writeBS=False)
+  roibResultTool = acc.popToolsAndMerge(RoIBResultByteStreamToolCfg(flags, name="RoIBResultBSDecoderTool", writeBS=False))
   decoderTools += [roibResultTool]
 
   for module_id in roibResultTool.L1TopoModuleIds:
@@ -359,7 +359,7 @@ if __name__ == '__main__':
       acc.merge(tgcdecodingAcc)
       
       from TrigT1ResultByteStream.TrigT1ResultByteStreamConfig import MuonRoIByteStreamToolCfg
-      muonRoiTool = acc.popToolsAndMerge(MuonRoIByteStreamToolCfg(name="L1MuonBSDecoderTool",flags=flags,writeBS=False))
+      muonRoiTool = acc.popToolsAndMerge(MuonRoIByteStreamToolCfg(flags, name="L1MuonBSDecoderTool", writeBS=False))
       decoderTools += [muonRoiTool]
       outputEDM += addEDM('xAOD::MuonRoIContainer'     , '*')
       if flags.Trigger.L1.doMuonTopoInputs:
@@ -368,7 +368,7 @@ if __name__ == '__main__':
 
   if 'jFex' in subsystem:
       from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import jFexRoiByteStreamToolCfg,jFexInputByteStreamToolCfg
-      jFexTool = jFexRoiByteStreamToolCfg('jFexBSDecoder', flags, writeBS=False)
+      jFexTool = acc.popToolsAndMerge(jFexRoiByteStreamToolCfg(flags, 'jFexBSDecoder', writeBS=False))
       decoderTools += [jFexTool]
       outputEDM += addEDM('xAOD::jFexSRJetRoIContainer', jFexTool.jJRoIContainerWriteKey.Path)
       outputEDM += addEDM('xAOD::jFexLRJetRoIContainer', jFexTool.jLJRoIContainerWriteKey.Path)
@@ -378,7 +378,7 @@ if __name__ == '__main__':
       outputEDM += addEDM('xAOD::jFexMETRoIContainer'  , jFexTool.jXERoIContainerWriteKey.Path)
       maybeMissingRobs += jFexTool.ROBIDs
       if args.doCaloInput:
-          jFexInputByteStreamTool = jFexInputByteStreamToolCfg('jFexInputBSDecoderTool',flags=flags,writeBS=False)
+          jFexInputByteStreamTool = acc.popToolsAndMerge(jFexInputByteStreamToolCfg(flags, 'jFexInputBSDecoderTool', writeBS=False))
           decoderTools += [jFexInputByteStreamTool]
           outputEDM += addEDM('xAOD::jFexTowerContainer', jFexInputByteStreamTool.jTowersWriteKey.Path)
           maybeMissingRobs += jFexInputByteStreamTool.ROBIDs
@@ -386,7 +386,7 @@ if __name__ == '__main__':
 
   if 'eFex' in subsystem:
       from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import eFexByteStreamToolCfg
-      eFexTool = eFexByteStreamToolCfg('eFexBSDecoder', flags, writeBS=False, decodeInputs=args.doCaloInput)
+      eFexTool = acc.popToolsAndMerge(eFexByteStreamToolCfg(flags, 'eFexBSDecoder', writeBS=False, decodeInputs=args.doCaloInput))
       decoderTools += [eFexTool]
       outputEDM += addEDM('xAOD::eFexEMRoIContainer', eFexTool.eEMContainerWriteKey.Path)
       outputEDM += addEDM('xAOD::eFexTauRoIContainer', eFexTool.eTAUContainerWriteKey.Path)
@@ -397,7 +397,7 @@ if __name__ == '__main__':
 
   if 'gFex' in subsystem:
       from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import gFexByteStreamToolCfg,gFexInputByteStreamToolCfg
-      gFexTool = gFexByteStreamToolCfg('gFexBSDecoder', flags, writeBS=False)
+      gFexTool = acc.popToolsAndMerge(gFexByteStreamToolCfg(flags, 'gFexBSDecoder', writeBS=False))
       decoderTools += [gFexTool]
       outputEDM += addEDM('xAOD::gFexJetRoIContainer', gFexTool.gFexRhoOutputContainerWriteKey.Path)
       outputEDM += addEDM('xAOD::gFexJetRoIContainer', gFexTool.gFexSRJetOutputContainerWriteKey.Path)
@@ -412,14 +412,14 @@ if __name__ == '__main__':
       outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', gFexTool.gScalarERmsOutputContainerWriteKey.Path)
       maybeMissingRobs += gFexTool.ROBIDs
       if args.doCaloInput:
-          gFexInputByteStreamTool = gFexInputByteStreamToolCfg('gFexInputByteStreamTool',flags=flags,writeBS=False)
+          gFexInputByteStreamTool = acc.popToolsAndMerge(gFexInputByteStreamToolCfg(flags, 'gFexInputByteStreamTool', writeBS=False))
           decoderTools += [gFexInputByteStreamTool]
           outputEDM += addEDM('xAOD::gFexTowerContainer', gFexInputByteStreamTool.gTowersWriteKey.Path)
           maybeMissingRobs += gFexInputByteStreamTool.ROBIDs
 
   if 'Topo' in subsystem:
       from L1TopoByteStream.L1TopoByteStreamConfig import L1TopoPhase1ByteStreamToolCfg
-      l1topoBSTool = L1TopoPhase1ByteStreamToolCfg("L1TopoBSDecoderTool",flags)
+      l1topoBSTool = acc.popToolsAndMerge(L1TopoPhase1ByteStreamToolCfg(flags, "L1TopoBSDecoderTool"))
       decoderTools += [l1topoBSTool]
       outputEDM += addEDM('xAOD::L1TopoRawDataContainer', l1topoBSTool.L1TopoPhase1RAWDataWriteContainer.Path)
       maybeMissingRobs += l1topoBSTool.ROBIDs

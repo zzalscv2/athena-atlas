@@ -16,7 +16,8 @@ from TrigT1MuctpiPhase1.TrigT1MuctpiPhase1Config import TrigThresholdDecisionToo
 
 _log = logging.getLogger('TrigT1ResultByteStreamConfig')
 
-def RoIBResultByteStreamToolCfg(name, flags, writeBS=False):
+def RoIBResultByteStreamToolCfg(flags, name, writeBS=False):
+  acc = ComponentAccumulator()
   tool = CompFactory.RoIBResultByteStreamTool(name)
 
   if not flags.Trigger.L1.doCTP:
@@ -44,9 +45,12 @@ def RoIBResultByteStreamToolCfg(name, flags, writeBS=False):
     # read BS == write RDO
     tool.RoIBResultReadKey=""
     tool.RoIBResultWriteKey="RoIBResult"
-  return tool
 
-def ExampleL1TriggerByteStreamToolCfg(name, writeBS=False):
+  acc.setPrivateTools(tool)
+  return acc
+
+def ExampleL1TriggerByteStreamToolCfg(flags, name, writeBS=False):
+  acc = ComponentAccumulator()
   tool = CompFactory.ExampleL1TriggerByteStreamTool(name)
   muctpi_moduleid = 0
   muctpi_robid = int(SourceIdentifier(SubDetector.TDAQ_MUON_CTP_INTERFACE, muctpi_moduleid))
@@ -60,17 +64,19 @@ def ExampleL1TriggerByteStreamToolCfg(name, writeBS=False):
     # read BS == write xAOD
     tool.MuonRoIContainerReadKey=""
     tool.MuonRoIContainerWriteKey=recordable("LVL1MuonRoIs")
-  return tool
+  acc.setPrivateTools(tool)
+  return acc
 
-def MuonRoIByteStreamToolCfg(name, flags, writeBS=False):
+def MuonRoIByteStreamToolCfg(flags, name, writeBS=False):
+  acc = ComponentAccumulator()
   tool = CompFactory.MuonRoIByteStreamTool(name)
   muctpi_moduleid = 0  # No RoIB in Run 3, we always read the DAQ ROB
   muctpi_robid = int(SourceIdentifier(SubDetector.TDAQ_MUON_CTP_INTERFACE, muctpi_moduleid)) # 0x760000
   tool.ROBIDs = [muctpi_robid]
   tool.DoTopo = flags.Trigger.L1.doMuonTopoInputs
 
-  from TrigT1ResultByteStream.TrigT1ResultByteStreamMonitoring import L1MuonBSConverterMonitoring
-  tool.MonTool = L1MuonBSConverterMonitoring(name, flags, writeBS)
+  from TrigT1ResultByteStream.TrigT1ResultByteStreamMonitoringConfig import L1MuonBSConverterMonitoringCfg
+  tool.MonTool = acc.popToolsAndMerge(L1MuonBSConverterMonitoringCfg(flags, name, writeBS))
 
   # Build container names for each bunch crossing in the maximum readout window (size 5)
   containerBaseName = "LVL1MuonRoIs"
@@ -96,8 +102,6 @@ def MuonRoIByteStreamToolCfg(name, flags, writeBS=False):
     # read BS == write xAOD
     tool.MuonRoIContainerWriteKeys += [recordable(c) for c in containerNames]
     tool.L1TopoOutputLocID += topocontainerNames
-
-  acc = ComponentAccumulator()
 
   tool.RPCRecRoiTool = acc.popToolsAndMerge(RPCRecRoiToolCfg(flags))
   tool.TGCRecRoiTool = acc.popToolsAndMerge(TGCRecRoiToolCfg(flags))
@@ -137,7 +141,8 @@ def L1TriggerByteStreamDecoderCfg(flags, returnEDM=False):
   ########################################
   if not flags.Trigger.doLVL1: #if we rerun L1, don't decode the original RoIBResult
     if doRoIBResult(flags):
-      roibResultTool = RoIBResultByteStreamToolCfg(name="RoIBResultBSDecoderTool", flags=flags, writeBS=False)
+      roibResultTool = acc.popToolsAndMerge(RoIBResultByteStreamToolCfg(
+        flags, name="RoIBResultBSDecoderTool", writeBS=False))
       decoderTools += [roibResultTool]
       # Always treat L1Topo as "maybe missing" as it was under commissioning in Run 2 and had readout issues in Run 3
       for module_id in roibResultTool.L1TopoModuleIds:
@@ -153,9 +158,8 @@ def L1TriggerByteStreamDecoderCfg(flags, returnEDM=False):
   # Run-3 L1Muon decoding (only when running HLT - offline we read it from HLT result)
   ########################################
   if flags.Trigger.L1.doMuon and flags.Trigger.enableL1MuonPhase1 and flags.Trigger.doHLT:
-    muonRoiTool = acc.popToolsAndMerge(MuonRoIByteStreamToolCfg(name="L1MuonBSDecoderTool",
-                                                                flags=flags,
-                                                                writeBS=False))
+    muonRoiTool = acc.popToolsAndMerge(MuonRoIByteStreamToolCfg(
+      flags, name="L1MuonBSDecoderTool", writeBS=False))
     decoderTools += [muonRoiTool]
 
   ########################################
@@ -177,32 +181,38 @@ def L1TriggerByteStreamDecoderCfg(flags, returnEDM=False):
     if flags.Trigger.L1.doeFex:
       # Online case in HLT with TOB decoding only
       if flags.Trigger.doHLT:
-        eFexByteStreamTool = eFexByteStreamToolCfg('eFexBSDecoderTool',
-                                                   flags=flags,
-                                                   writeBS=False,
-                                                   TOBs=True,
-                                                   xTOBs=False,
-                                                   multiSlice=False)
+        eFexByteStreamTool = acc.popToolsAndMerge(eFexByteStreamToolCfg(
+          flags,
+          'eFexBSDecoderTool',
+          writeBS=False,
+          TOBs=True,
+          xTOBs=False,
+          multiSlice=False
+        ))
       # Reco/monitoring case with temporarily added decoding of TOBs
       elif _decodeTOBsOfflineDuringCommissioning:
-        eFexByteStreamTool = eFexByteStreamToolCfg('eFexBSDecoderTool',
-                                                   flags=flags,
-                                                   writeBS=False,
-                                                   TOBs=True,
-                                                   xTOBs=True,
-                                                   multiSlice=True,
-                                                   decodeInputs=flags.Trigger.L1.doCaloInputs)
+        eFexByteStreamTool = acc.popToolsAndMerge(eFexByteStreamToolCfg(
+          flags,
+          'eFexBSDecoderTool',
+          writeBS=False,
+          TOBs=True,
+          xTOBs=True,
+          multiSlice=True,
+          decodeInputs=flags.Trigger.L1.doCaloInputs
+        ))
         eFexByteStreamTool.eEMContainerWriteKey.Path += _extraOfflineTOBSuffix
         eFexByteStreamTool.eTAUContainerWriteKey.Path += _extraOfflineTOBSuffix
       # Reco/monitoring case (either online but downstream from HLT, or at Tier-0) with xTOB, input tower and multi-slice decoding
       else:
-        eFexByteStreamTool = eFexByteStreamToolCfg('eFexBSDecoderTool',
-                                                   flags=flags,
-                                                   writeBS=False,
-                                                   TOBs=False,
-                                                   xTOBs=True,
-                                                   multiSlice=True,
-                                                   decodeInputs=flags.Trigger.L1.doCaloInputs)
+        eFexByteStreamTool = acc.popToolsAndMerge(eFexByteStreamToolCfg(
+          flags,
+          'eFexBSDecoderTool',
+          writeBS=False,
+          TOBs=False,
+          xTOBs=True,
+          multiSlice=True,
+          decodeInputs=flags.Trigger.L1.doCaloInputs
+        ))
       decoderTools += [eFexByteStreamTool]
       maybeMissingRobs += eFexByteStreamTool.ROBIDs  # Allow the data to be missing during commissioning of the phase-1 L1Calo (2022)
 
@@ -212,32 +222,40 @@ def L1TriggerByteStreamDecoderCfg(flags, returnEDM=False):
     if flags.Trigger.L1.dojFex:
       # Online case in HLT with TOB decoding only
       if flags.Trigger.doHLT:
-        jFexRoiByteStreamTool = jFexRoiByteStreamToolCfg('jFexBSDecoderTool',
-                                                         flags=flags,
-                                                         writeBS=False)
+        jFexRoiByteStreamTool = acc.popToolsAndMerge(jFexRoiByteStreamToolCfg(
+          flags,
+          'jFexBSDecoderTool',
+          writeBS=False
+        ))
       # Reco/monitoring case (either online but downstream from HLT, or at Tier-0) with xTOB decoding only
       else:
-        jFexRoiByteStreamTool = jFexRoiByteStreamToolCfg('jFexBSDecoderTool',
-                                                        flags=flags,
-                                                        writeBS=False,
-                                                        xTOBs=True)
+        jFexRoiByteStreamTool = acc.popToolsAndMerge(jFexRoiByteStreamToolCfg(
+          flags,
+          'jFexBSDecoderTool',
+          writeBS=False,
+          xTOBs=True
+        ))
       decoderTools += [jFexRoiByteStreamTool]
       maybeMissingRobs += jFexRoiByteStreamTool.ROBIDs  # Allow the data to be missing during commissioning of the phase-1 L1Calo (2022)
 
       # Input towers decoding
       if flags.Trigger.L1.doCaloInputs:
-        jFexInputByteStreamTool = jFexInputByteStreamToolCfg('jFexInputBSDecoderTool',
-                                                             flags=flags,
-                                                             writeBS=False)
+        jFexInputByteStreamTool = acc.popToolsAndMerge(jFexInputByteStreamToolCfg(
+          flags,
+          'jFexInputBSDecoderTool',
+          writeBS=False
+        ))
         decoderTools += [jFexInputByteStreamTool]
         maybeMissingRobs += jFexInputByteStreamTool.ROBIDs  # Allow the data to be missing during commissioning of the phase-1 L1Calo (2022)
 
       # Temporary addition of TOB decoding to reco/monitoring case:
       if _decodeTOBsOfflineDuringCommissioning and not flags.Trigger.doHLT:
-        jFexRoiByteStreamTool_TOB = jFexRoiByteStreamToolCfg('jFexBSDecoderTool_TOB',
-                                                             flags=flags,
-                                                             writeBS=False,
-                                                             xTOBs=False)
+        jFexRoiByteStreamTool_TOB = acc.popToolsAndMerge(jFexRoiByteStreamToolCfg(
+          flags,
+          'jFexBSDecoderTool_TOB',
+          writeBS=False,
+          xTOBs=False
+        ))
         jFexRoiByteStreamTool_TOB.jJRoIContainerWriteKey.Path += _extraOfflineTOBSuffix
         jFexRoiByteStreamTool_TOB.jLJRoIContainerWriteKey.Path += _extraOfflineTOBSuffix
         jFexRoiByteStreamTool_TOB.jTauRoIContainerWriteKey.Path += _extraOfflineTOBSuffix
@@ -253,16 +271,20 @@ def L1TriggerByteStreamDecoderCfg(flags, returnEDM=False):
     if flags.Trigger.L1.dogFex:
       # Online case in HLT with TOB decoding (no 'else' case because gFex doesn't have xTOBs to decode offline)
       if flags.Trigger.doHLT:
-        gFexByteStreamTool = gFexByteStreamToolCfg('gFexBSDecoderTool',
-                                                   flags=flags,
-                                                   writeBS=False)
+        gFexByteStreamTool = acc.popToolsAndMerge(gFexByteStreamToolCfg(
+          flags,
+          'gFexBSDecoderTool',
+          writeBS=False
+        ))
         decoderTools += [gFexByteStreamTool]
         maybeMissingRobs += gFexByteStreamTool.ROBIDs  # Allow the data to be missing during commissioning of the phase-1 L1Calo (2022)
       # Reco/monitoring case with temporarily added decoding of TOBs
       elif _decodeTOBsOfflineDuringCommissioning:
-        gFexByteStreamTool_TOB = gFexByteStreamToolCfg('gFexBSDecoderTool_TOB',
-                                                       flags=flags,
-                                                       writeBS=False)
+        gFexByteStreamTool_TOB = acc.popToolsAndMerge(gFexByteStreamToolCfg(
+          flags,
+          'gFexBSDecoderTool_TOB',
+          writeBS=False
+        ))
         gFexByteStreamTool_TOB.gFexRhoOutputContainerWriteKey.Path += _extraOfflineTOBSuffix
         gFexByteStreamTool_TOB.gFexSRJetOutputContainerWriteKey.Path += _extraOfflineTOBSuffix
         gFexByteStreamTool_TOB.gFexLRJetOutputContainerWriteKey.Path += _extraOfflineTOBSuffix
@@ -279,9 +301,11 @@ def L1TriggerByteStreamDecoderCfg(flags, returnEDM=False):
 
       # Input towers decoding
       if flags.Trigger.L1.doCaloInputs:
-        gFexInputByteStreamTool = gFexInputByteStreamToolCfg('gFexInputBSDecoderTool',
-                                                             flags=flags,
-                                                             writeBS=False)
+        gFexInputByteStreamTool = acc.popToolsAndMerge(gFexInputByteStreamToolCfg(
+          flags,
+          'gFexInputBSDecoderTool',
+          writeBS=False
+        ))
         decoderTools += [gFexInputByteStreamTool]
         maybeMissingRobs += gFexInputByteStreamTool.ROBIDs  # Allow the data to be missing during commissioning of the phase-1 L1Calo (2022)
 
@@ -289,9 +313,11 @@ def L1TriggerByteStreamDecoderCfg(flags, returnEDM=False):
   # Run-3 L1Topo decoding
   ########################################
   if flags.Trigger.L1.doTopo and flags.Trigger.enableL1CaloPhase1 and flags.Trigger.L1.doTopoPhase1:
-    topoByteStreamTool = L1TopoPhase1ByteStreamToolCfg("L1TopoBSDecoderTool",
-                                                       flags=flags,
-                                                       writeBS=False)
+    topoByteStreamTool = acc.popToolsAndMerge(L1TopoPhase1ByteStreamToolCfg(
+      flags,
+      "L1TopoBSDecoderTool",
+      writeBS=False
+    ))
     decoderTools += [topoByteStreamTool]
     maybeMissingRobs += topoByteStreamTool.ROBIDs  # Allow the data to be missing during commissioning of the phase-1 L1Topo (2022)
 
@@ -299,8 +325,9 @@ def L1TriggerByteStreamDecoderCfg(flags, returnEDM=False):
                                                          DecoderTools=decoderTools,
                                                          MaybeMissingROBs=list(set(maybeMissingRobs)))
 
-  from TrigT1ResultByteStream.TrigT1ResultByteStreamMonitoring import L1TriggerByteStreamDecoderMonitoring
-  decoderAlg.MonTool = L1TriggerByteStreamDecoderMonitoring(decoderAlg.getName(), flags, decoderTools)
+  if flags.Trigger.doHLT or flags.DQ.Steering.doHLTMon:
+    from TrigT1ResultByteStream.TrigT1ResultByteStreamMonitoringConfig import L1TriggerByteStreamDecoderMonitoringCfg
+    decoderAlg.MonTool = acc.popToolsAndMerge(L1TriggerByteStreamDecoderMonitoringCfg(flags, decoderAlg.getName(), decoderTools))
 
   acc.addEventAlgo(decoderAlg, primary=True)
 
@@ -331,14 +358,14 @@ def L1TriggerByteStreamEncoderCfg(flags):
 
   # Legacy encoding via RoIBResult
   if doRoIBResult(flags):
-    roibResultTool = RoIBResultByteStreamToolCfg(name="RoIBResultBSEncoderTool", flags=flags, writeBS=True)
+    roibResultTool = acc.popToolsAndMerge(RoIBResultByteStreamToolCfg(
+      flags, name="RoIBResultBSEncoderTool", writeBS=True))
     acc.addPublicTool(roibResultTool)
 
   # Run-3 L1Muon encoding
   if flags.Trigger.L1.doMuon and flags.Trigger.enableL1MuonPhase1:
-    muonRoiTool = acc.popToolsAndMerge(MuonRoIByteStreamToolCfg(name="L1MuonBSEncoderTool",
-                                                                flags=flags,
-                                                                writeBS=True))
+    muonRoiTool = acc.popToolsAndMerge(MuonRoIByteStreamToolCfg(
+      flags, name="L1MuonBSEncoderTool", writeBS=True))
     acc.addPublicTool(muonRoiTool)
 
   # TODO: Run-3 L1Calo, L1Topo, CTP
@@ -464,7 +491,8 @@ if __name__ == '__main__':
     xRoIBResultAcc, xRoIBResultOutputs = RoIBResultToxAODCfg(flags)
     acc.merge(xRoIBResultAcc)
 
-    roibResultTool = RoIBResultByteStreamToolCfg(name="RoIBResultBSDecoderTool", flags=flags, writeBS=False)
+    roibResultTool = acc.popToolsAndMerge(RoIBResultByteStreamToolCfg(
+      flags, name="RoIBResultBSDecoderTool", writeBS=False))
     decoderTools += [roibResultTool]
 
     outputEDM += addEDM('xAOD::JetEtRoI'         , 'LVL1JetEtRoI')
@@ -499,7 +527,8 @@ if __name__ == '__main__':
   # jFEX ROIs
   ########################################
   if 'jTOBs' in args.outputs:
-    jFexTool = jFexRoiByteStreamToolCfg('jFexBSDecoder_TOB', flags)
+    jFexTool = acc.popToolsAndMerge(jFexRoiByteStreamToolCfg(
+      flags, 'jFexBSDecoder_TOB'))
     for module_id in jFexTool.ROBIDs:
         maybeMissingRobs.append(module_id)
 
@@ -509,7 +538,8 @@ if __name__ == '__main__':
   # jFEX xTOBs
   ########################################
   if 'jxTOBs' in args.outputs:
-    jFexTool = jFexRoiByteStreamToolCfg('jFexBSDecoder_xTOB', flags, xTOBs=True)
+    jFexTool = acc.popToolsAndMerge(jFexRoiByteStreamToolCfg(
+      flags, 'jFexBSDecoder_xTOB', xTOBs=True))
     for module_id in jFexTool.ROBIDs:
         maybeMissingRobs.append(module_id)
 
@@ -519,7 +549,8 @@ if __name__ == '__main__':
   # jFEX input Data
   ########################################
   if 'jTowers' in args.outputs:
-    inputjFexTool = jFexInputByteStreamToolCfg('jFexInputBSDecoder', flags)
+    inputjFexTool = acc.popToolsAndMerge(jFexInputByteStreamToolCfg(
+      flags, 'jFexInputBSDecoder'))
     for module_id in inputjFexTool.ROBIDs:
         maybeMissingRobs.append(module_id)
 
@@ -529,7 +560,13 @@ if __name__ == '__main__':
   # eFEX ROIs and Input data
   ########################################
   if any( [x in args.outputs for x in ['eTOBs','exTOBs','eDataTowers']] ):
-    eFexTool = eFexByteStreamToolCfg('eFexBSDecoder', flags,TOBs='eTOBs' in args.outputs,xTOBs='exTOBs' in args.outputs,decodeInputs='eDataTowers' in args.outputs)
+    eFexTool = acc.popToolsAndMerge(eFexByteStreamToolCfg(
+      flags,
+      'eFexBSDecoder',
+      TOBs='eTOBs' in args.outputs,
+      xTOBs='exTOBs' in args.outputs,
+      decodeInputs='eDataTowers' in args.outputs
+    ))
     # eFexTool_xTOBs = eFexByteStreamToolCfg('eFexBSDecoder_xTOBs', flags,xTOBs=True)
     decoderTools += [eFexTool]
 
@@ -540,21 +577,24 @@ if __name__ == '__main__':
   # gFEX ROIs
   ########################################
   if 'gTOBs' in args.outputs:
-    gFexTool = gFexByteStreamToolCfg('gFexBSDecoder', flags)
+    gFexTool = acc.popToolsAndMerge(gFexByteStreamToolCfg(
+      flags, 'gFexBSDecoder'))
     decoderTools += [gFexTool]
 
   ########################################
   # gFEX input Data
   ########################################
   if 'gCaloTowers' in args.outputs:
-    inputgFexTool = gFexInputByteStreamToolCfg('gFexInputBSDecoder', flags)
+    inputgFexTool = acc.popToolsAndMerge(gFexInputByteStreamToolCfg(
+      flags, 'gFexInputBSDecoder'))
     decoderTools += [inputgFexTool]
 
   ########################################
   # Topo data
   ########################################
   if 'Topo' in args.outputs:
-    l1topoBSTool = L1TopoPhase1ByteStreamToolCfg("L1TopoBSDecoderTool", flags)
+    l1topoBSTool = acc.popToolsAndMerge(L1TopoPhase1ByteStreamToolCfg(
+      flags, "L1TopoBSDecoderTool"))
     decoderTools += [l1topoBSTool]
     # allow for missing Topo ROBs:
     maybeMissingRobs += l1topoBSTool.ROBIDs

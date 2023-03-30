@@ -1,10 +1,12 @@
 #
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 from libpyeformat_helper import SourceIdentifier, SubDetector
 
-def L1MuonBSConverterMonitoring(name, flags, encoder=False):
+def L1MuonBSConverterMonitoringCfg(flags, name, encoder=False):
+    acc = ComponentAccumulator()
     tool = GenericMonitoringTool(flags, 'MonTool')
     tool.HistPath = f'HLTFramework/L1BSConverters/{name}'
     tool.defineHistogram('NumWordsInROD', path='EXPERT', type='TH1F',
@@ -67,9 +69,11 @@ def L1MuonBSConverterMonitoring(name, flags, encoder=False):
                                  title=f'pT threshold [GeV] of output Topo TOBs in the {subsysName} subsystem;pT threshold [GeV];N TOBs',
                                 xbins=50, xmin=0, xmax=50)
 
-    return tool
+    acc.setPrivateTools(tool)
+    return acc
 
-def L1TriggerByteStreamDecoderMonitoring(name, flags, decoderTools):
+def L1TriggerByteStreamDecoderMonitoringCfg(flags, name, decoderTools):
+    acc = ComponentAccumulator()
 
     if flags.Trigger.doHLT:
         monTool = GenericMonitoringTool(flags, 'MonTool', HistPath = f'HLTFramework/L1BSConverters/{name}')
@@ -79,8 +83,9 @@ def L1TriggerByteStreamDecoderMonitoring(name, flags, decoderTools):
         helper = AthMonitorCfgHelper(flags, 'HLTFramework')
         monTool = helper.addGroup(None, f'{name}MonTool', f'/HLT/HLTFramework/L1BSConverters/{name}')
         topDir = None
+        acc.merge(helper.result())
     else:
-        return None
+        return acc
 
     monTool.defineHistogram('TIME_execute', path=topDir, type='TH1F',
                             title='Time of the alg execute() method;Time [ms];N events',
@@ -138,4 +143,5 @@ def L1TriggerByteStreamDecoderMonitoring(name, flags, decoderTools):
                             title='Count of erroneous optional ROBs;ROB ID;N events with ROB errors',
                             xbins=len(robIdLabels), xmin=0, xmax=len(robIdLabels), xlabels=robIdLabels)
 
-    return monTool
+    acc.setPrivateTools(monTool)
+    return acc
