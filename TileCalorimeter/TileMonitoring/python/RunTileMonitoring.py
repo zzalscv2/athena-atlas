@@ -312,7 +312,7 @@ if __name__=='__main__':
 
     from TileRecUtils.TileRawChannelMakerConfig import TileRawChannelMakerCfg
     cfg.merge( TileRawChannelMakerCfg(flags) )
-    if args.threads > 1:
+    if args.threads and (args.threads > 1):
         rawChMaker = cfg.getEventAlgo('TileRChMaker')
         rawChMaker.Cardinality = args.threads
 
