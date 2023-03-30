@@ -1062,8 +1062,10 @@ class SelectionCA(ComponentAccumulator):
         self.stepViewSequence = seqAND(self.name)
         self.addSequence(self.stepViewSequence)
 
-    def mergeReco(self, recoCA):
+    def mergeReco(self, recoCA, robPrefetchCA=None):
         self.addEventAlgo(recoCA.inputMaker(), sequenceName=self.stepViewSequence.name)
+        if robPrefetchCA:
+             self.merge(robPrefetchCA, self.stepViewSequence.name)
         self.merge(recoCA, sequenceName=self.stepViewSequence.name)
 
     def mergeHypo(self, other):
