@@ -642,9 +642,7 @@ TrigHTTSGToRawHitsTool::readTruthTracks(std::vector <HTTTruthTrack>& truth, cons
         << primaryVtx.x() << "\t" << primaryVtx.y() << "\t" << primaryVtx.z());
     }
 
-    //    for (HepMC::GenEvent::particle_const_iterator it = genEvent->particles_begin(), ft = genEvent->particles_end(); it != ft; ++it) {
-    for (auto it = HepMC::begin(*genEvent), ft = HepMC::end(*genEvent); it != ft; ++it) {
-      HepMC::ConstGenParticlePtr particle = *it;
+    for (const auto& particle: *genEvent) {
 
       const int pdgcode = particle->pdg_id();
       // reject generated particles without a production vertex.
