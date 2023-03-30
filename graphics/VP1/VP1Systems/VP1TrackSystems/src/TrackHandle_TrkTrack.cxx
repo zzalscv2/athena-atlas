@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -360,7 +360,7 @@ void TrackHandle_TrkTrack::updateObjectBrowser(){
       continue;
     }
     
-    if (!asc->browserTreeItem() && browserTreeItem()){
+    if (!asc->browserTreeItem()){
       // not set yet - so need to do this now. Can we just use the index?
       asc->setBrowserTreeItem(browserTreeItem()->child(numOfTSOS));
     }
