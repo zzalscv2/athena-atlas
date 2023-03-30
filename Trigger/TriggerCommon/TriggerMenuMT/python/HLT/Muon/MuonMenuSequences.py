@@ -10,7 +10,7 @@ log = logging.getLogger(__name__)
 
 from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
 from DecisionHandling.DecisionHandlingConf import ViewCreatorInitialROITool, ViewCreatorNamedROITool, \
-  ViewCreatorFSROITool, ViewCreatorCentredOnIParticleROITool, ViewCreatorFetchFromViewROITool
+  ViewCreatorCentredOnIParticleROITool, ViewCreatorFetchFromViewROITool
 
 #muon container names (for RoI based sequences)
 from .MuonRecoSequences import muonNames
@@ -29,7 +29,7 @@ def muFastAlgSequence(flags):
     l2MuViewsMaker.RoIsLink = "initialRoI" # ROI is from L1
     l2MuViewsMaker.RoITool = ViewCreatorInitialROITool() # ROI is from L1
     #
-    l2MuViewsMaker.Views = "MUViewRoIs"
+    l2MuViewsMaker.Views = "L2MuFastRecoViews"
     l2MuViewsMaker.InViewRoIs = "MURoIs"
     #
     l2MuViewsMaker.ViewFallThrough = True
@@ -405,60 +405,51 @@ def mul2mtCBOvlpRmSequence(flags, is_probe_leg=False):
 ######################
 ###  EFSA step ###
 ######################
-def muEFSAAlgSequence(flags):
+def muEFSAAlgSequenceCfg(flags, is_probe_leg=False):
 
-    efsaViewsMaker = EventViewCreatorAlgorithm("IMefsa")
-    #
-    efsaViewsMaker.RoIsLink = "initialRoI" # Merge based on initial RoI
+    selAccMS = SelectionCA('EFMuMSSel_RoI', isProbe=is_probe_leg)
+    
+    viewName="EFMuMSReco_RoI"
+    ViewCreatorFetchFromViewROITool=CompFactory.ViewCreatorFetchFromViewROITool
+    roiTool         = ViewCreatorFetchFromViewROITool(RoisWriteHandleKey="HLT_Roi_L2SAMuonForEF", InViewRoIs = "forMS", ViewToFetchFrom = "L2MuFastRecoViews")
+    requireParentView = True
 
-    newRoITool = ViewCreatorFetchFromViewROITool()
-    newRoITool.RoisWriteHandleKey = recordable("HLT_Roi_L2SAMuonForEF") #RoI collection recorded to EDM
-    newRoITool.InViewRoIs = "forMS" #input RoIs from L2 SA views
-    newRoITool.ViewToFetchFrom = "MUViewRoIs"
-    efsaViewsMaker.RoITool = newRoITool # Create a new ROI centred on the L2 SA muon from Step 1
-    #
-    efsaViewsMaker.Views = "MUEFSAViewRoIs"
-    efsaViewsMaker.InViewRoIs = "MUEFSARoIs"
-    #
-    efsaViewsMaker.RequireParentView = True
-    efsaViewsMaker.ViewFallThrough = True
+    recoMS = InViewRecoCA(name=viewName, RoITool = roiTool, RequireParentView = requireParentView, isProbe=is_probe_leg)
+
 
     #Clone and replace offline flags so we can set muon trigger specific values
     muonflags = flags.cloneAndReplace('Muon', 'Trigger.Offline.SA.Muon')
-    from .MuonRecoSequences import muEFSARecoSequence, muonDecodeCfg
+    from .MuonRecoSequences import muEFSARecoSequenceCfg, muonDecodeCfg
     #Run decoding again since we are using updated RoIs
-    viewAlgs_MuonPRD = algorithmCAToGlobalWrapper(muonDecodeCfg,muonflags,RoIs=efsaViewsMaker.InViewRoIs.path())
+    recoMS.mergeReco(muonDecodeCfg(muonflags,RoIs=viewName+"RoIs"))
     ### get EF reco sequence ###    
-    muEFSARecoSequence, sequenceOut = muEFSARecoSequence(muonflags, efsaViewsMaker.InViewRoIs, 'RoI' )
-
-    muefSASequence = parOR("muEFSARecoSequence", [viewAlgs_MuonPRD, muEFSARecoSequence])
-    efsaViewsMaker.ViewNodeName = muefSASequence.name()
+    muEFSARecoSequenceAcc, sequenceOut = muEFSARecoSequenceCfg(muonflags, viewName+'RoIs', 'RoI' )
+    recoMS.mergeReco(muEFSARecoSequenceAcc)
 
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Muon
-    robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Muon, flags, nameSuffix=efsaViewsMaker.name())[0]
+    prefetch=ROBPrefetchingAlgCfg_Muon(flags, nameSuffix=viewName+'_probe' if is_probe_leg else viewName)
+    selAccMS.mergeReco(recoMS, robPrefetchCA=prefetch)
 
-    muonEFSAonlySequence = seqAND( "muonEFSAonlySequence", [efsaViewsMaker, robPrefetchAlg, muefSASequence ] )
+    return (selAccMS, sequenceOut)
 
-    return (muonEFSAonlySequence, efsaViewsMaker, sequenceOut)
 
 def muEFSASequence(flags, is_probe_leg=False):
 
-    (muonEFSAonlySequence, efsaViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(muEFSAAlgSequence, flags)
+    (selAcc, sequenceOut) = muEFSAAlgSequenceCfg(flags, is_probe_leg)
 
-    # setup EFSA hypo
-    from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFHypoAlg
-    trigMuonEFSAHypo = TrigMuonEFHypoAlg( "TrigMuonEFSAHypoAlg", IncludeSAmuons=True )
-    trigMuonEFSAHypo.MuonDecisions = sequenceOut
+    from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFHypoAlgCfg, TrigMuonEFMSonlyHypoToolFromDict
+    efmuMSHypo = TrigMuonEFHypoAlgCfg( flags,
+                              name = 'TrigMuonEFMSonlyHypo_RoI',
+                              MuonDecisions = sequenceOut,
+                              IncludeSAmuons=True)
 
-    from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFMSonlyHypoToolFromDict
+    selAcc.addHypoAlgo(efmuMSHypo)
+    
+    efmuMSSequence = MenuSequenceCA(flags, selAcc,
+                                    HypoToolGen = TrigMuonEFMSonlyHypoToolFromDict, isProbe=is_probe_leg)
 
-    return MenuSequence( flags,
-                         Sequence    = muonEFSAonlySequence,
-                         Maker       = efsaViewsMaker,
-                         Hypo        = trigMuonEFSAHypo,
-                         HypoToolGen = TrigMuonEFMSonlyHypoToolFromDict,
-                         IsProbe     = is_probe_leg )
 
+    return efmuMSSequence
 
 
 ######################
@@ -640,51 +631,50 @@ def muEFCBLRTIDperfSequence(flags, is_probe_leg=False):
 ######################
 ### EF SA full scan ###
 ######################
-def muEFSAFSAlgSequence(flags):
+def muEFSAFSAlgSequenceCfg(flags):
 
-    efsafsInputMaker = EventViewCreatorAlgorithm("IMMuonFS")
-    fsRoiTool = ViewCreatorFSROITool()
-    fsRoiTool.RoisWriteHandleKey = "MuonFS_RoIs"
-    #
-    efsafsInputMaker.RoIsLink = "initialRoI" # Only expect to get in one FS RI
-    efsafsInputMaker.RoITool = fsRoiTool # Use new FS roi (note: the ViewCreatorInitialROITool should work excactly the same here)
-    #
-    efsafsInputMaker.Views = "MUFSViewRoI"
-    efsafsInputMaker.InViewRoIs = "MUFSRoIs"
-    #
-    efsafsInputMaker.ViewFallThrough=True
+    selAccMS = SelectionCA('EFMuMSSel_FS')
+    
+    viewName="EFMuMSReco_FS"
+    ViewCreatorFSROITool=CompFactory.ViewCreatorFSROITool
+    roiTool         = ViewCreatorFSROITool(RoisWriteHandleKey="MuonFS_RoIs")
+    requireParentView = False
+                                                         
+    recoMS = InViewRecoCA(name=viewName, RoITool = roiTool, RequireParentView = requireParentView)
 
-    ### get EF reco sequence ###    
+
     #Clone and replace offline flags so we can set muon trigger specific values
     muonflags = flags.cloneAndReplace('Muon', 'Trigger.Offline.SA.Muon')
-    from .MuonRecoSequences import muEFSARecoSequence, muonDecodeCfg
-    viewAlgs_MuonPRD = algorithmCAToGlobalWrapper(muonDecodeCfg,muonflags,RoIs=efsafsInputMaker.InViewRoIs.path())
-    muEFSAFSRecoSequence, sequenceOut = muEFSARecoSequence(muonflags, efsafsInputMaker.InViewRoIs,'FS' )
+    from .MuonRecoSequences import muEFSARecoSequenceCfg, muonDecodeCfg
+    recoMS.mergeReco(muonDecodeCfg(muonflags,RoIs=recoMS.name+"RoIs"))
+    ### get EF reco sequence ###    
+    muEFSARecoSequenceAcc, sequenceOut = muEFSARecoSequenceCfg(muonflags, recoMS.name+'RoIs', 'FS' )
+    recoMS.mergeReco(muEFSARecoSequenceAcc)
 
-    muEFFSRecoSequence = parOR("muEFSAFSRecoSequence",[viewAlgs_MuonPRD, muEFSAFSRecoSequence])
-    efsafsInputMaker.ViewNodeName = muEFFSRecoSequence.name()
+    selAccMS.mergeReco(recoMS)
 
-    muonEFSAFSSequence = seqAND( "muonEFSAFSSequence", [efsafsInputMaker, muEFFSRecoSequence ] )
+    return (selAccMS, sequenceOut)
 
-    return (muonEFSAFSSequence, efsafsInputMaker, sequenceOut)
 
 def muEFSAFSSequence(flags, is_probe_leg=False):
 
-    (muonEFSAFSSequence, efsafsInputMaker, sequenceOut) = RecoFragmentsPool.retrieve(muEFSAFSAlgSequence, flags)
+    (selAcc, sequenceOut) = muEFSAFSAlgSequenceCfg(flags)
 
-    # setup EFSA hypo
-    from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFHypoAlg
-    trigMuonEFSAFSHypo = TrigMuonEFHypoAlg( "TrigMuonEFSAFSHypoAlg", IncludeSAmuons=True )
-    trigMuonEFSAFSHypo.MuonDecisions = sequenceOut
+    from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFHypoAlgCfg, TrigMuonEFMSonlyHypoToolFromName
 
-    from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFMSonlyHypoToolFromName
+    efmuMSHypo = TrigMuonEFHypoAlgCfg( flags,
+                              name = 'TrigMuonEFMSonlyHypo_FS',
+                              MuonDecisions = sequenceOut,
+                              IncludeSAmuons=True)
 
-    return MenuSequence( flags,
-                         Sequence    = muonEFSAFSSequence,
-                         Maker       = efsafsInputMaker,
-                         Hypo        = trigMuonEFSAFSHypo,
-                         HypoToolGen = TrigMuonEFMSonlyHypoToolFromName,
-                         IsProbe     = is_probe_leg )
+    selAcc.addHypoAlgo(efmuMSHypo)
+    
+    efmuMSSequence = MenuSequenceCA(flags, selAcc,
+                                    HypoToolGen = TrigMuonEFMSonlyHypoToolFromName, isProbe=is_probe_leg)
+
+
+    return efmuMSSequence
+
 
 ######################
 ### EF CB full scan ###
