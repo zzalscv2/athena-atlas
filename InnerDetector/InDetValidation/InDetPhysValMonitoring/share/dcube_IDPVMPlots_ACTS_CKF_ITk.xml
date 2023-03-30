@@ -1,11 +1,11 @@
 <?xml version="1.0" ?>
 <!--
- DCube configuration XML file = dcube_config.xml
- auto-generated using DCube 4.6692016 ($Rev: 217525 $ $Date$) by Krzysztof Daniel Ciba (Krzysztof.Ciba@NOSPAMgmail.com)
- on Tue, 07 Apr 2020 17:46:00 CEST
- from Root reference file: IDPVM/PHYSVAL.root
+ DCube configuration XML file = dcube_IDPVMPlots_ACTS_CKF_ITk.xml
+ auto-generated using DCube 5.4 by Krzysztof Daniel Ciba (Krzysztof.Ciba@NOSPAMgmail.com)
+ on Wed, 29 Mar 2023 16:20:57 BST
+ from Root reference file: ttbar_pu200/idpvm.root
  Statistics tests:
- "['KS', 'meany']"
+ "['KS']"
  Legend:
  * KS    - Kolmogorov-Smirnov test (default)
  * chi2  - chi2 test
@@ -33,17 +33,13 @@
   [3] cmtconfig: *
   [4] project: *
   [5] jobId: *
-  [6] reference root file: /eos/home-n/npetters/www/dcube/IDPVM/PHYSVAL.root
+  [6] reference root file: ttbar_pu200/idpvm.root
   [7] p-values limits FAIL = 0.750000 WARN = 0.950000
   ###################################################
 -->
-  <reference file="/eos/atlas/atlascerngroupdisk/data-art/grid-input/InDetPhysValMonitoring/ReferenceHistograms/physval_mu1GeV.root"/>
-  <ref_desc>
-   PUT YOUR REFERENCE DESCRIPTION HERE
-  </ref_desc>
-  <test_desc>
-   PUT YOUR TEST DESCRIPTION HERE
-  </test_desc>
+  <reference file="ttbar_pu200/idpvm.root"/>
+  <ref_desc></ref_desc>
+  <test_desc></test_desc>
   <plimit fail="0.75" warn="0.95"/>
   <TDirectory name="/">
    <TDirectory name="SquirrelPlots">
@@ -63,6 +59,7 @@
        <hist1D name="reco_ndof" plotopts="" tests="KS" type="TH1F"/>
        <hist1D name="reco_chi2Overndof" plotopts="" tests="KS" type="TH1F"/>
        <hist1D name="reco_author" plotopts="" tests="KS" type="TH1F"/>
+       <hist1D name="reco_time" plotopts="" tests="KS" type="TH1F"/>
        <hist1D name="truth_d0" plotopts="" tests="KS" type="TH1F"/>
        <hist1D name="truth_z0" plotopts="" tests="KS" type="TH1F"/>
        <hist1D name="truth_z0sin" plotopts="" tests="KS" type="TH1F"/>
@@ -78,60 +75,66 @@
       <TDirectory name="HitsOnTracks">
        <hist1D name="nPixelHits" plotopts="" tests="KS" type="TH1F"/>
        <hist1D name="nSCTHits" plotopts="" tests="KS" type="TH1F"/>
-       <hist1D name="nInnerMostPixelHits_vs_eta" plotopts="" tests="meany" type="TProfile"/>
-       <hist1D name="nNextToInnerMostPixelHits_vs_eta" plotopts="" tests="meany" type="TProfile"/>
-       <hist1D name="nPixelHits_vs_eta" plotopts="" tests="meany" type="TProfile"/>
-       <hist1D name="nSCTHits_vs_eta" plotopts="" tests="meany" type="TProfile"/>
-       <hist1D name="nPixelHoles_vs_eta" plotopts="" tests="meany" type="TProfile"/>
-       <hist1D name="nSCTHoles_vs_eta" plotopts="" tests="meany" type="TProfile"/>
-       <hist1D name="nInnerMostPixelHits_vs_phi" plotopts="" tests="meany" type="TProfile"/>
-       <hist1D name="nNextToInnerMostPixelHits_vs_phi" plotopts="" tests="meany" type="TProfile"/>
-       <hist1D name="nPixelHits_vs_phi" plotopts="" tests="meany" type="TProfile"/>
-       <hist1D name="nSCTHits_vs_phi" plotopts="" tests="meany" type="TProfile"/>
-       <hist1D name="nPixelHoles_vs_phi" plotopts="" tests="meany" type="TProfile"/>
-       <hist1D name="nSCTHoles_vs_phi" plotopts="" tests="meany" type="TProfile"/>
-       <hist1D name="nInnerMostPixelOutliers_vs_eta" plotopts="" tests="meany" type="TProfile"/>
-       <hist1D name="nInnerMostPixelSharedHits_vs_eta" plotopts="" tests="meany" type="TProfile"/>
-       <hist1D name="nInnerMostPixelSplitHits_vs_eta" plotopts="" tests="meany" type="TProfile"/>
-       <hist1D name="nExpectedInnerMostPixelHits_vs_eta" plotopts="" tests="meany" type="TProfile"/>
-       <hist1D name="nExpectedNextToInnerMostPixelHits_vs_eta" plotopts="" tests="meany" type="TProfile"/>
-       <hist1D name="nPixelOutliers_vs_eta" plotopts="" tests="meany" type="TProfile"/>
-       <hist1D name="nPixelContribLayers_vs_eta" plotopts="" tests="meany" type="TProfile"/>
-       <hist1D name="nPixelSharedHits_vs_eta" plotopts="" tests="meany" type="TProfile"/>
-       <hist1D name="nPixelSplitHits_vs_eta" plotopts="" tests="meany" type="TProfile"/>
-       <hist1D name="nPixelGangedHits_vs_eta" plotopts="" tests="meany" type="TProfile"/>
-       <hist1D name="nPixelGangedHitsFlaggedFakes_vs_eta" plotopts="" tests="meany" type="TProfile"/>
-       <hist1D name="nSCTOutliers_vs_eta" plotopts="" tests="meany" type="TProfile"/>
-       <hist1D name="nSCTDoubleHoles_vs_eta" plotopts="" tests="meany" type="TProfile"/>
-       <hist1D name="nSCTSharedHits_vs_eta" plotopts="" tests="meany" type="TProfile"/>
-       <hist1D name="nPixelDeadSensors_vs_eta" plotopts="" tests="meany" type="TProfile"/>
-       <hist1D name="nSCTDeadSensors_vs_eta" plotopts="" tests="meany" type="TProfile"/>
-       <hist1D name="nInnerMostPixelOutliers_vs_phi" plotopts="" tests="meany" type="TProfile"/>
-       <hist1D name="nInnerMostPixelSharedHits_vs_phi" plotopts="" tests="meany" type="TProfile"/>
-       <hist1D name="nInnerMostPixelSplitHits_vs_phi" plotopts="" tests="meany" type="TProfile"/>
-       <hist1D name="nExpectedInnerMostPixelHits_vs_phi" plotopts="" tests="meany" type="TProfile"/>
-       <hist1D name="nExpectedNextToInnerMostPixelHits_vs_phi" plotopts="" tests="meany" type="TProfile"/>
-       <hist1D name="nPixelOutliers_vs_phi" plotopts="" tests="meany" type="TProfile"/>
-       <hist1D name="nPixelContribLayers_vs_phi" plotopts="" tests="meany" type="TProfile"/>
-       <hist1D name="nPixelSharedHits_vs_phi" plotopts="" tests="meany" type="TProfile"/>
-       <hist1D name="nPixelSplitHits_vs_phi" plotopts="" tests="meany" type="TProfile"/>
-       <hist1D name="nPixelGangedHits_vs_phi" plotopts="" tests="meany" type="TProfile"/>
-       <hist1D name="nPixelGangedHitsFlaggedFakes_vs_phi" plotopts="" tests="meany" type="TProfile"/>
-       <hist1D name="nSCTOutliers_vs_phi" plotopts="" tests="meany" type="TProfile"/>
-       <hist1D name="nSCTDoubleHoles_vs_phi" plotopts="" tests="meany" type="TProfile"/>
-       <hist1D name="nSCTSharedHits_vs_phi" plotopts="" tests="meany" type="TProfile"/>
-       <hist1D name="nPixelDeadSensors_vs_phi" plotopts="" tests="meany" type="TProfile"/>
-       <hist1D name="nSCTDeadSensors_vs_phi" plotopts="" tests="meany" type="TProfile"/>
+       <hist1D name="nPixelHoles" plotopts="" tests="KS" type="TH1F"/>
+       <hist1D name="nSCTHoles" plotopts="" tests="KS" type="TH1F"/>
+       <hist1D name="nInnerMostPixelHits_vs_eta" plotopts="" tests="KS" type="TProfile"/>
+       <hist1D name="nNextToInnerMostPixelHits_vs_eta" plotopts="" tests="KS" type="TProfile"/>
+       <hist1D name="nPixelHits_vs_eta" plotopts="" tests="KS" type="TProfile"/>
+       <hist1D name="nSCTHits_vs_eta" plotopts="" tests="KS" type="TProfile"/>
+       <hist1D name="nPixelHoles_vs_eta" plotopts="" tests="KS" type="TProfile"/>
+       <hist1D name="nSCTHoles_vs_eta" plotopts="" tests="KS" type="TProfile"/>
+       <hist1D name="nInnerMostPixelHits_vs_phi" plotopts="" tests="KS" type="TProfile"/>
+       <hist1D name="nNextToInnerMostPixelHits_vs_phi" plotopts="" tests="KS" type="TProfile"/>
+       <hist1D name="nPixelHits_vs_phi" plotopts="" tests="KS" type="TProfile"/>
+       <hist1D name="nSCTHits_vs_phi" plotopts="" tests="KS" type="TProfile"/>
+       <hist1D name="nPixelHoles_vs_phi" plotopts="" tests="KS" type="TProfile"/>
+       <hist1D name="nSCTHoles_vs_phi" plotopts="" tests="KS" type="TProfile"/>
+       <hist1D name="nPixelSharedHits" plotopts="" tests="KS" type="TH1F"/>
+       <hist1D name="nSCTSharedHits" plotopts="" tests="KS" type="TH1F"/>
+       <hist1D name="nInnerMostPixelSharedHits_vs_eta" plotopts="" tests="KS" type="TProfile"/>
+       <hist1D name="nPixelSharedHits_vs_eta" plotopts="" tests="KS" type="TProfile"/>
+       <hist1D name="nSCTSharedHits_vs_eta" plotopts="" tests="KS" type="TProfile"/>
+       <hist1D name="nInnerMostPixelSharedHits_vs_phi" plotopts="" tests="KS" type="TProfile"/>
+       <hist1D name="nPixelSharedHits_vs_phi" plotopts="" tests="KS" type="TProfile"/>
+       <hist1D name="nSCTSharedHits_vs_phi" plotopts="" tests="KS" type="TProfile"/>
+       <hist1D name="nPixelOutliers" plotopts="" tests="KS" type="TH1F"/>
+       <hist1D name="nPixelContribLayers" plotopts="" tests="KS" type="TH1F"/>
+       <hist1D name="nPixelSplitHits" plotopts="" tests="KS" type="TH1F"/>
+       <hist1D name="nSCTOutliers" plotopts="" tests="KS" type="TH1F"/>
+       <hist1D name="nSCTDoubleHoles" plotopts="" tests="KS" type="TH1F"/>
+       <hist1D name="nInnerMostPixelOutliers_vs_eta" plotopts="" tests="KS" type="TProfile"/>
+       <hist1D name="nInnerMostPixelSplitHits_vs_eta" plotopts="" tests="KS" type="TProfile"/>
+       <hist1D name="nExpectedInnerMostPixelHits_vs_eta" plotopts="" tests="KS" type="TProfile"/>
+       <hist1D name="nExpectedNextToInnerMostPixelHits_vs_eta" plotopts="" tests="KS" type="TProfile"/>
+       <hist1D name="nPixelOutliers_vs_eta" plotopts="" tests="KS" type="TProfile"/>
+       <hist1D name="nPixelContribLayers_vs_eta" plotopts="" tests="KS" type="TProfile"/>
+       <hist1D name="nPixelSplitHits_vs_eta" plotopts="" tests="KS" type="TProfile"/>
+       <hist1D name="nSCTOutliers_vs_eta" plotopts="" tests="KS" type="TProfile"/>
+       <hist1D name="nSCTDoubleHoles_vs_eta" plotopts="" tests="KS" type="TProfile"/>
+       <hist1D name="nInnerMostPixelOutliers_vs_phi" plotopts="" tests="KS" type="TProfile"/>
+       <hist1D name="nInnerMostPixelSplitHits_vs_phi" plotopts="" tests="KS" type="TProfile"/>
+       <hist1D name="nExpectedInnerMostPixelHits_vs_phi" plotopts="" tests="KS" type="TProfile"/>
+       <hist1D name="nExpectedNextToInnerMostPixelHits_vs_phi" plotopts="" tests="KS" type="TProfile"/>
+       <hist1D name="nPixelOutliers_vs_phi" plotopts="" tests="KS" type="TProfile"/>
+       <hist1D name="nPixelContribLayers_vs_phi" plotopts="" tests="KS" type="TProfile"/>
+       <hist1D name="nPixelSplitHits_vs_phi" plotopts="" tests="KS" type="TProfile"/>
+       <hist1D name="nSCTOutliers_vs_phi" plotopts="" tests="KS" type="TProfile"/>
+       <hist1D name="nSCTDoubleHoles_vs_phi" plotopts="" tests="KS" type="TProfile"/>
       </TDirectory>
      </TDirectory>
      <TDirectory name="Tracks">
       <hist1D name="ntrack" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="ntracksel" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="nparticle" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="nparticlesel" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="num_truthmatch_match" plotopts="" tests="KS" type="TH1F"/>
      </TDirectory>
      <TDirectory name="Matched">
       <TDirectory name="Resolutions">
        <TDirectory name="Primary">
+        <hist1D name="pull_d0" plotopts="" tests="KS" type="TH1F"/>
+        <hist1D name="res_d0" plotopts="" tests="KS" type="TH1F"/>
+        <hist1D name="sigma_d0" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="resolution_vs_eta_d0" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="resmean_vs_eta_d0" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="resolution_vs_pt_d0" plotopts="" tests="KS" type="TH1F"/>
@@ -140,8 +143,11 @@
         <hist1D name="pullmean_vs_eta_d0" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="pullwidth_vs_pt_d0" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="pullmean_vs_pt_d0" plotopts="" tests="KS" type="TH1F"/>
-        <hist1D name="sigma_vs_eta_d0" plotopts="" tests="meany" type="TProfile"/>
-        <hist1D name="sigma_vs_pt_d0" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="sigma_vs_eta_d0" plotopts="" tests="KS" type="TProfile"/>
+        <hist1D name="sigma_vs_pt_d0" plotopts="" tests="KS" type="TProfile"/>
+        <hist1D name="pull_z0" plotopts="" tests="KS" type="TH1F"/>
+        <hist1D name="res_z0" plotopts="" tests="KS" type="TH1F"/>
+        <hist1D name="sigma_z0" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="resolution_vs_eta_z0" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="resmean_vs_eta_z0" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="resolution_vs_pt_z0" plotopts="" tests="KS" type="TH1F"/>
@@ -150,8 +156,21 @@
         <hist1D name="pullmean_vs_eta_z0" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="pullwidth_vs_pt_z0" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="pullmean_vs_pt_z0" plotopts="" tests="KS" type="TH1F"/>
-        <hist1D name="sigma_vs_eta_z0" plotopts="" tests="meany" type="TProfile"/>
-        <hist1D name="sigma_vs_pt_z0" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="sigma_vs_eta_z0" plotopts="" tests="KS" type="TProfile"/>
+        <hist1D name="sigma_vs_pt_z0" plotopts="" tests="KS" type="TProfile"/>
+        <hist1D name="pull_qoverp" plotopts="" tests="KS" type="TH1F"/>
+        <hist1D name="res_qoverp" plotopts="" tests="KS" type="TH1F"/>
+        <hist1D name="sigma_qoverp" plotopts="" tests="KS" type="TH1F"/>
+        <hist1D name="resolution_vs_eta_qoverp" plotopts="" tests="KS" type="TH1F"/>
+        <hist1D name="resmean_vs_eta_qoverp" plotopts="" tests="KS" type="TH1F"/>
+        <hist1D name="resolution_vs_pt_qoverp" plotopts="" tests="KS" type="TH1F"/>
+        <hist1D name="resmean_vs_pt_qoverp" plotopts="" tests="KS" type="TH1F"/>
+        <hist1D name="pullwidth_vs_eta_qoverp" plotopts="" tests="KS" type="TH1F"/>
+        <hist1D name="pullmean_vs_eta_qoverp" plotopts="" tests="KS" type="TH1F"/>
+        <hist1D name="pullwidth_vs_pt_qoverp" plotopts="" tests="KS" type="TH1F"/>
+        <hist1D name="pullmean_vs_pt_qoverp" plotopts="" tests="KS" type="TH1F"/>
+        <hist1D name="sigma_vs_eta_qoverp" plotopts="" tests="KS" type="TProfile"/>
+        <hist1D name="sigma_vs_pt_qoverp" plotopts="" tests="KS" type="TProfile"/>
         <hist1D name="pull_ptqopt" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="res_ptqopt" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="sigma_ptqopt" plotopts="" tests="KS" type="TH1F"/>
@@ -163,15 +182,11 @@
         <hist1D name="pullmean_vs_eta_ptqopt" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="pullwidth_vs_pt_ptqopt" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="pullmean_vs_pt_ptqopt" plotopts="" tests="KS" type="TH1F"/>
-        <hist1D name="sigma_vs_eta_ptqopt" plotopts="" tests="meany" type="TProfile"/>
-        <hist1D name="sigma_vs_pt_ptqopt" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="sigma_vs_eta_ptqopt" plotopts="" tests="KS" type="TProfile"/>
+        <hist1D name="sigma_vs_pt_ptqopt" plotopts="" tests="KS" type="TProfile"/>
         <hist1D name="pull_theta" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="res_theta" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="sigma_theta" plotopts="" tests="KS" type="TH1F"/>
-        <hist2D name="resHelper_eta_theta" plotopts="" tests="KS" type="TH2F"/>
-        <hist2D name="resHelper_pt_theta" plotopts="" tests="KS" type="TH2F"/>
-        <hist2D name="pullHelper_eta_theta" plotopts="" tests="KS" type="TH2F"/>
-        <hist2D name="pullHelper_pt_theta" plotopts="" tests="KS" type="TH2F"/>
         <hist1D name="resolution_vs_eta_theta" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="resmean_vs_eta_theta" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="resolution_vs_pt_theta" plotopts="" tests="KS" type="TH1F"/>
@@ -180,15 +195,11 @@
         <hist1D name="pullmean_vs_eta_theta" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="pullwidth_vs_pt_theta" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="pullmean_vs_pt_theta" plotopts="" tests="KS" type="TH1F"/>
-        <hist1D name="sigma_vs_eta_theta" plotopts="" tests="meany" type="TProfile"/>
-        <hist1D name="sigma_vs_pt_theta" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="sigma_vs_eta_theta" plotopts="" tests="KS" type="TProfile"/>
+        <hist1D name="sigma_vs_pt_theta" plotopts="" tests="KS" type="TProfile"/>
         <hist1D name="pull_phi" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="res_phi" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="sigma_phi" plotopts="" tests="KS" type="TH1F"/>
-        <hist2D name="resHelper_eta_phi" plotopts="" tests="KS" type="TH2F"/>
-        <hist2D name="resHelper_pt_phi" plotopts="" tests="KS" type="TH2F"/>
-        <hist2D name="pullHelper_eta_phi" plotopts="" tests="KS" type="TH2F"/>
-        <hist2D name="pullHelper_pt_phi" plotopts="" tests="KS" type="TH2F"/>
         <hist1D name="resolution_vs_eta_phi" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="resmean_vs_eta_phi" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="resolution_vs_pt_phi" plotopts="" tests="KS" type="TH1F"/>
@@ -197,15 +208,11 @@
         <hist1D name="pullmean_vs_eta_phi" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="pullwidth_vs_pt_phi" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="pullmean_vs_pt_phi" plotopts="" tests="KS" type="TH1F"/>
-        <hist1D name="sigma_vs_eta_phi" plotopts="" tests="meany" type="TProfile"/>
-        <hist1D name="sigma_vs_pt_phi" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="sigma_vs_eta_phi" plotopts="" tests="KS" type="TProfile"/>
+        <hist1D name="sigma_vs_pt_phi" plotopts="" tests="KS" type="TProfile"/>
         <hist1D name="pull_z0sin" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="res_z0sin" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="sigma_z0sin" plotopts="" tests="KS" type="TH1F"/>
-        <hist2D name="resHelper_eta_z0sin" plotopts="" tests="KS" type="TH2F"/>
-        <hist2D name="resHelper_pt_z0sin" plotopts="" tests="KS" type="TH2F"/>
-        <hist2D name="pullHelper_eta_z0sin" plotopts="" tests="KS" type="TH2F"/>
-        <hist2D name="pullHelper_pt_z0sin" plotopts="" tests="KS" type="TH2F"/>
         <hist1D name="resolution_vs_eta_z0sin" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="resmean_vs_eta_z0sin" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="resolution_vs_pt_z0sin" plotopts="" tests="KS" type="TH1F"/>
@@ -214,33 +221,47 @@
         <hist1D name="pullmean_vs_eta_z0sin" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="pullwidth_vs_pt_z0sin" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="pullmean_vs_pt_z0sin" plotopts="" tests="KS" type="TH1F"/>
-        <hist1D name="sigma_vs_eta_z0sin" plotopts="" tests="meany" type="TProfile"/>
-        <hist1D name="sigma_vs_pt_z0sin" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="sigma_vs_eta_z0sin" plotopts="" tests="KS" type="TProfile"/>
+        <hist1D name="sigma_vs_pt_z0sin" plotopts="" tests="KS" type="TProfile"/>
        </TDirectory>
       </TDirectory>
      </TDirectory>
      <TDirectory name="FakeRate">
-      <graph name="fakerate_vs_eta" plotopts="" type="TEfficiency"/>
-      <graph name="fakerate_vs_pt" plotopts="" type="TEfficiency"/>
-      <graph name="fakerate_vs_phi" plotopts="" type="TEfficiency"/>
-      <graph name="fakerate_vs_d0" plotopts="" type="TEfficiency"/>
-      <graph name="fakerate_vs_z0" plotopts="" type="TEfficiency"/>
+      <graph name="fakerate_vs_eta" plotopts="" tests="KS" type="TEfficiency"/>
+      <graph name="fakerate_vs_pt" plotopts="" tests="KS" type="TEfficiency"/>
+      <graph name="fakerate_vs_lowpt" plotopts="" tests="KS" type="TEfficiency"/>
+      <graph name="fakerate_vs_phi" plotopts="" tests="KS" type="TEfficiency"/>
+      <graph name="fakerate_vs_d0" plotopts="" tests="KS" type="TEfficiency"/>
+      <graph name="fakerate_vs_z0" plotopts="" tests="KS" type="TEfficiency"/>
      </TDirectory>
      <TDirectory name="Unlinked">
       <TDirectory name="FakeRate">
-       <graph name="fakerate_vs_eta" plotopts="" type="TEfficiency"/>
+       <graph name="fakerate_vs_eta" plotopts="" tests="KS" type="TEfficiency"/>
       </TDirectory>
      </TDirectory>
      <TDirectory name="Efficiency">
-      <graph name="efficiency_vs_eta" plotopts="" type="TEfficiency"/>
-      <graph name="efficiency_vs_pt" plotopts="" type="TEfficiency"/>
-      <graph name="efficiency_vs_phi" plotopts="" type="TEfficiency"/>
-      <graph name="efficiency_vs_d0" plotopts="" type="TEfficiency"/>
-      <graph name="efficiency_vs_z0" plotopts="" type="TEfficiency"/>
-      <graph name="efficiency_vs_R" plotopts="" type="TEfficiency"/>
-      <graph name="efficiency_vs_Z" plotopts="" type="TEfficiency"/>
-      <graph name="efficiency_vs_prodR" plotopts="" type="TEfficiency"/>
-      <graph name="efficiency_vs_prodZ" plotopts="" type="TEfficiency"/>
+      <graph name="efficiency_vs_eta" plotopts="" tests="KS" type="TEfficiency"/>
+      <graph name="efficiency_vs_pt" plotopts="" tests="KS" type="TEfficiency"/>
+      <graph name="efficiency_vs_pt_low" plotopts="" tests="KS" type="TEfficiency"/>
+      <graph name="efficiency_vs_pt_high" plotopts="" tests="KS" type="TEfficiency"/>
+      <graph name="efficiency_vs_lowpt" plotopts="" tests="KS" type="TEfficiency"/>
+      <graph name="efficiency_vs_phi" plotopts="" tests="KS" type="TEfficiency"/>
+      <graph name="efficiency_vs_d0" plotopts="" tests="KS" type="TEfficiency"/>
+      <graph name="efficiency_vs_d0_abs" plotopts="" tests="KS" type="TEfficiency"/>
+      <graph name="efficiency_vs_z0" plotopts="" tests="KS" type="TEfficiency"/>
+      <graph name="efficiency_vs_z0_abs" plotopts="" tests="KS" type="TEfficiency"/>
+      <graph name="efficiency_vs_R" plotopts="" tests="KS" type="TEfficiency"/>
+      <graph name="efficiency_vs_Z" plotopts="" tests="KS" type="TEfficiency"/>
+      <graph name="extended_efficiency_vs_d0" plotopts="" tests="KS" type="TEfficiency"/>
+      <graph name="extended_efficiency_vs_d0_abs" plotopts="" tests="KS" type="TEfficiency"/>
+      <graph name="extended_efficiency_vs_z0" plotopts="" tests="KS" type="TEfficiency"/>
+      <graph name="extended_efficiency_vs_z0_abs" plotopts="" tests="KS" type="TEfficiency"/>
+      <graph name="efficiency_vs_prodR" plotopts="" tests="KS" type="TEfficiency"/>
+      <graph name="efficiency_vs_prodR_extended" plotopts="" tests="KS" type="TEfficiency"/>
+      <graph name="efficiency_vs_prodZ" plotopts="" tests="KS" type="TEfficiency"/>
+      <graph name="efficiency_vs_prodZ_extended" plotopts="" tests="KS" type="TEfficiency"/>
+      <graph name="efficiency_vs_pt_log" plotopts="" tests="KS" type="TEfficiency"/>
+      <graph name="efficiency_vs_pteta" plotopts="" tests="KS" type="TEfficiency"/>
      </TDirectory>
     </TDirectory>
     <TDirectory name="Vertices">
@@ -266,6 +287,9 @@
       <hist1D name="vx_track_err_d0" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="vx_track_z0" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="vx_track_err_z0" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="vx_type_truth" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="vx_z_diff" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="vx_z_diff_pull" plotopts="" tests="KS" type="TH1F"/>
      </TDirectory>
     </TDirectory>
    </TDirectory>
