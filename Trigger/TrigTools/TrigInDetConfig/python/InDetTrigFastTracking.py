@@ -9,12 +9,12 @@ log = logging.getLogger("InDetTrigFastTracking")
 
 include("InDetTrigRecExample/InDetTrigRec_jobOptions.py")
 
-def makeInDetTrigFastTrackingNoView( flags, config = None, rois = 'EMViewRoIs', doFTF = True, secondStageConfig = None, LRTInputCollection = None ):
+def makeInDetTrigFastTrackingNoView( inflags, config = None, rois = 'EMViewRoIs', doFTF = True, secondStageConfig = None, LRTInputCollection = None ):
 
-  viewAlgs, viewVerify = makeInDetTrigFastTracking( flags, config, rois, doFTF, None, secondStageConfig, LRTInputCollection)
+  viewAlgs, viewVerify = makeInDetTrigFastTracking( inflags, config, rois, doFTF, None, secondStageConfig, LRTInputCollection)
   return viewAlgs
 
-def makeInDetTrigFastTracking( flags, config = None, rois = 'EMViewRoIs', doFTF = True, viewVerifier='IDViewDataVerifier', secondStageConfig = None, LRTInputCollection = None):
+def makeInDetTrigFastTracking( inflags, config = None, rois = 'EMViewRoIs', doFTF = True, viewVerifier='IDViewDataVerifier', secondStageConfig = None, LRTInputCollection = None):
 
   if config is None :
     raise ValueError('makeInDetTrigFastTracking() No config provided!')
@@ -26,11 +26,23 @@ def makeInDetTrigFastTracking( flags, config = None, rois = 'EMViewRoIs', doFTF 
 
   from TriggerMenuMT.HLT.Config.MenuComponents import algorithmCAToGlobalWrapper
   from InDetTrigRecExample.InDetTrigCommonTools import CAtoLegacyPublicToolWrapper
-  from InDetTrigRecExample import InDetTrigCA
-  
-  InDetTrigCA.InDetTrigConfigFlags = flags.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking."+config.input_name)
-  flags = InDetTrigCA.InDetTrigConfigFlags
 
+  try:
+    if inflags.InDet.Tracking.ActiveConfig.input_name == config.input_name:
+      log.debug("flags.InDet.Tracking.ActiveConfig is for %s", inflags.InDet.Tracking.ActiveConfig.input_name)
+      flags = inflags
+    else:
+      log.warning("flags.InDet.Tracking.ActiveConfig is not for %s but %s", 
+                  config.input_name, inflags.InDet.Tracking.ActiveConfig.input_name)
+      raise RuntimeError("makeInDetTrigFastTracking invoked with incorrect flags instance")
+  except RuntimeError:
+    log.info("Menu code invoked ID config without or with incorrect flags.InDet.Tracking.ActiveConfig for %s", config.input_name)
+    flags = inflags.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking."+config.input_name)
+
+  #temporary until imports of public tools via CAtoLegacyPublicToolWrapper not needed anymore  
+  from InDetTrigRecExample import InDetTrigCA
+  InDetTrigCA.InDetTrigConfigFlags = flags
+     
   #Add suffix to the algorithms
   signature =  '_{}'.format( flags.InDet.Tracking.ActiveConfig.input_name )
   
@@ -174,14 +186,14 @@ def makeInDetTrigFastTracking( flags, config = None, rois = 'EMViewRoIs', doFTF 
           #have been supplied with a second stage config, create another instance of FTF
 
           inputTracksname = flags.InDet.Tracking.ActiveConfig.trkTracks_FTF   #before ActiveConfig gets replaced -needs restructuring
-          flags = flags.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking."+secondStageConfig.name)
+          myflags2 = flags.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking."+secondStageConfig.name)
 
-          theFTF2 = algorithmCAToGlobalWrapper(TrigFastTrackFinderCfg,flags, "TrigFastTrackFinder_" + secondStageConfig.input_name, 
+          theFTF2 = algorithmCAToGlobalWrapper(TrigFastTrackFinderCfg,myflags2, "TrigFastTrackFinder_" + secondStageConfig.input_name, 
                                                secondStageConfig.input_name, rois, inputTracksName = inputTracksname)
           viewAlgs.extend(theFTF2)
 
           
-          xaodcnv2 = algorithmCAToGlobalWrapper(trackFTFConverterCfg, flags, flags.InDet.Tracking.ActiveConfig.input_name)
+          xaodcnv2 = algorithmCAToGlobalWrapper(trackFTFConverterCfg, myflags2, myflags2.InDet.Tracking.ActiveConfig.input_name)
           viewAlgs.extend(xaodcnv2)
 
 
