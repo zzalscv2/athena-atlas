@@ -27,8 +27,8 @@ StatusCode CP::TElectronTestAlg::initialize() {
   m_pimpl->msg().setLevel(this->msg().level());
   //
   std::string mapFileName = PathResolverFindCalibFile(m_mapFile);
-  std::string key =
-      ElRecomFileHelpers::convertToOneKey(m_recoKey, m_idKey, "", "");
+  std::string key = ElRecomFileHelpers::convertToOneKey(m_recoKey, m_idKey,
+                                                        m_isoKey, m_triggerKey);
   std::string value = ElRecomFileHelpers::getValueByKey(mapFileName, key);
   std::string filename = PathResolverFindCalibFile(value);
   if (filename.empty()) {
