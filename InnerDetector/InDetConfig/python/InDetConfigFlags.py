@@ -39,17 +39,6 @@ def createInDetConfigFlags():
                 prevFlags.Beam.Type is BeamType.Cosmics and
                 prevFlags.Detector.EnableTRT)
 
-    # Tracking parameters
-
-    # use beam spot position in pixel NN
-    icf.addFlag("InDet.Tracking.useBeamSpotInfoNN", True)
-    # Enable check for dead modules and FEs
-    icf.addFlag("InDet.Tracking.nnCutLargeD0Threshold", -1.0)
-    icf.addFlag("InDet.Tracking.useBroadPixClusterErrors",
-                False)  # Use broad cluster errors for Pixel
-    icf.addFlag("InDet.Tracking.useBroadSCTClusterErrors",
-                False)  # Use broad cluster errors for SCT
-
     # Tracking passes/configurations scheduled
 
     # Turn running of track segment creation in pixel on and off
