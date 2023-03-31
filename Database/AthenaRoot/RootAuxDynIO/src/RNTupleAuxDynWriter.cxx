@@ -91,7 +91,6 @@ namespace RootAuxDynIO
       if( !m_entry ) makeNewEntry();
       if( m_model ) {
          // first event - create Fields and update NTuple Model
-         ATH_MSG_VERBOSE( "MN: adding attribute to NTuple, name: " <<  field_name << " type: " << attr_type << "   |ptr=" << attr_data);
          auto field = RFieldBase::Create(field_name, attr_type).Unwrap();
          m_entry->CaptureValue( field->CaptureValue( attr_data ) );
          m_ntupleFieldMap[ field_name ] = field.get();
@@ -107,6 +106,7 @@ namespace RootAuxDynIO
          // first event - only update NTuple Model and store tha data pointer locally
          // fill the RNTuple entry when the entire model is defined (in writeEntry)
          m_attrDataMap[ field_name ] = attr_data;
+         ATH_MSG_VERBOSE("Adding new attribute column, name="<< field_name << " of type " << attr_type);
          auto field = RFieldBase::Create(field_name, attr_type).Unwrap();
          m_model->AddField( std::move(field) );
       }
@@ -118,6 +118,7 @@ namespace RootAuxDynIO
 
 
    /// Add a new field to the RNTuple - for now only allowed before the first write
+   /// Used for data objects from RNTupleContainer, not for dynamic attributes
    void RNTupleAuxDynWriter::addField( const std::string& field_name, const std::string& attr_type )
    {
       if( !m_model ) {
@@ -129,6 +130,7 @@ namespace RootAuxDynIO
          throw std::runtime_error( std::string("Attempt to add existing field.  name: ")
                               + field_name + "new type: " + attr_type );
       }
+      ATH_MSG_VERBOSE("Adding new object column, name="<< field_name << " of type " << attr_type);
       auto field = RFieldBase::Create(field_name, attr_type).Unwrap();
       m_model->AddField( std::move(field) );
       m_attrDataMap[ field_name ] = nullptr;
@@ -148,6 +150,7 @@ namespace RootAuxDynIO
          // already started writing
          if( !m_entry ) makeNewEntry();
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 27, 0 )
+         ATH_MSG_VERBOSE("Setting field data for field: " << field_name );
          m_entry->CaptureValueUnsafe( field_name, attr_data );
 #else
          // MN: ROOT 6.26 version not tested
@@ -167,6 +170,7 @@ namespace RootAuxDynIO
          makeNewEntry();
          // attach the attribute values rememberd internally during model creation
          for( const auto& attr: m_attrDataMap ) {
+            ATH_MSG_VERBOSE("Setting field data for field: " << attr.first << "  data=" << std::hex << attr.second << std::dec );
             m_entry->CaptureValueUnsafe( attr.first, attr.second );
          }
       }
@@ -176,6 +180,7 @@ namespace RootAuxDynIO
       if( m_entry ) {
          for( auto& attr: m_attrDataMap ) {
             if( !attr.second ) {
+               ATH_MSG_VERBOSE("Generating default object for field: " << attr.first );
                // MN: the default object created here needs to be deleted - should use REntry::AddValue()
                attr.second = m_entry->GetValue(attr.first).GetField()->GenerateValue().GetRawPtr();
                m_entry->CaptureValueUnsafe( attr.first, attr.second );
@@ -204,3 +209,4 @@ namespace RootAuxDynIO
    RNTupleAuxDynWriter::~RNTupleAuxDynWriter() {}
 
 }// namespace
+

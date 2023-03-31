@@ -33,8 +33,6 @@
 #include "TTree.h"
 #include "TTreeCache.h"
 #include "TSystem.h"
-#include "Compression.h"
-#include "TKey.h"
 
 #include "ROOT/RNTuple.hxx"
 
@@ -1092,10 +1090,7 @@ RootDatabase::getNTupleWriter(std::string ntuple_name, bool create)
 {
    auto& writer = m_ntupleWriterMap[ntuple_name];
    if( !writer and create ) {
-      DbPrint log(m_file->GetName());
-      auto compr = ROOT::CompressionSettings( (ROOT::ECompressionAlgorithm)m_defCompressionAlg, m_defCompression );
-      //if( mn ) log << DbPrintLvl::Debug << "Creating RNTuple '" << ntuple_name << "'" << DbPrint::endmsg;
-      writer = RootAuxDynIO::getNTupleAuxDynWriter(m_file, string("RNT:")+ntuple_name, compr);
+      writer = RootAuxDynIO::getNTupleAuxDynWriter(m_file, string("RNT:")+ntuple_name, m_file->GetCompressionSettings() );
    }
    if( writer and create ) {
       // treat the create flag as an indication of a new container client and count them
