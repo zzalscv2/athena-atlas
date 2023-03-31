@@ -282,6 +282,7 @@ class Registry(metaclass=Singleton):
         self.add_default("MadSpin_taus_are_leptons", True, description="whether lepton definitions should include taus. [False: do not include taus, True: include taus]")
         self.add_default("MadSpin_max_weight_ps_point", -1, description="max_weight_ps_point parameter for MadSpin card to improve madspin integration. [-1: would use MadSpin default; any positive value: include it in the MadSpin run card]")
         self.add_default("MadSpin_Nevents_for_max_weight", -1, description="Nevents_for_max_weight parameter for MadSpin card to improve madspin integration. [-1: would use MadSpin default; any positive value: include it in the MadSpin run card]")
+        self.add_default("MadSpin_paramcard", "", description="If not an empty string, use the specified paramcard in the runDir to mimic the MadGraph output by Powheg.")
         self.add_default("m4lmax", 100)
         self.add_default("m4lmin", 1)
         self.add_default("m4l_sampling", 2, description="gg4l: 0: flat   1: exponential   2:Breit-Wigner")     
