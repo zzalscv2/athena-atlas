@@ -177,6 +177,7 @@ def PHYSLITECfg(ConfigFlags):
     # Define contents of the format
     # =============================
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
     PHYSLITESlimmingHelper = SlimmingHelper("PHYSLITESlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
@@ -300,6 +301,7 @@ def PHYSLITECfg(ConfigFlags):
     PHYSLITEItemList = PHYSLITESlimmingHelper.GetItemList()
     formatString = 'D2AOD_PHYSLITE' if 'StreamDAOD_PHYS' in ConfigFlags.Input.ProcessingTags else 'DAOD_PHYSLITE'
     acc.merge(OutputStreamCfg(ConfigFlags, formatString, ItemList=PHYSLITEItemList, AcceptAlgs=["PHYSLITEKernel"]))
+    acc.merge(InfileMetaDataCfg(ConfigFlags, formatString, AcceptAlgs=["PHYSLITEKernel"]))
     
     return acc
 

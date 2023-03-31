@@ -309,6 +309,7 @@ def BPHY5Cfg(ConfigFlags):
    for t in  augTools : acc.addPublicTool(t)
    from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+   from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
    BPHY5SlimmingHelper = SlimmingHelper("BPHY5SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
    AllVariables  = getDefaultAllVariables()
@@ -387,5 +388,6 @@ def BPHY5Cfg(ConfigFlags):
    BPHY5SlimmingHelper.SmartCollections = SmartVar
    BPHY5ItemList = BPHY5SlimmingHelper.GetItemList()
    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_BPHY5", ItemList=BPHY5ItemList, AcceptAlgs=["BPHY5Kernel"]))
+   acc.merge(InfileMetaDataCfg(ConfigFlags, "DAOD_BPHY5", AcceptAlgs=["BPHY5Kernel"]))
    acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True, printComponentsOnly=False)
    return acc

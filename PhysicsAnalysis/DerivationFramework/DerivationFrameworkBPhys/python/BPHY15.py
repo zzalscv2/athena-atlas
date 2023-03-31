@@ -498,6 +498,7 @@ def BPHY15Cfg(ConfigFlags):
    
    from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+   from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
    BPHY15SlimmingHelper = SlimmingHelper("BPHY15SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
    AllVariables  = getDefaultAllVariables()
@@ -555,5 +556,6 @@ def BPHY15Cfg(ConfigFlags):
 
    BPHY15ItemList = BPHY15SlimmingHelper.GetItemList()
    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_BPHY15", ItemList=BPHY15ItemList, AcceptAlgs=["BPHY15Kernel"]))
+   acc.merge(InfileMetaDataCfg(ConfigFlags, "DAOD_BPHY15", AcceptAlgs=["BPHY15Kernel"]))
    acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True, printComponentsOnly=False)
    return acc

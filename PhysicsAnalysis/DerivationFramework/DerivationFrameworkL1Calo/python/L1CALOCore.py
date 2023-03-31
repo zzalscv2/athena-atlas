@@ -7,6 +7,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
 from AthenaCommon.Constants import INFO
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -312,6 +313,7 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
     # Output stream    
     L1CaloItemList = L1CaloSlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(flags, streamNameStem, ItemList=L1CaloItemList, AcceptAlgs=["DFL1CALO_KERN"]))
+    acc.merge(InfileMetaDataCfg(flags, streamNameStem, AcceptAlgs=["DFL1CALO_KERN"]))
 
     return acc
 
