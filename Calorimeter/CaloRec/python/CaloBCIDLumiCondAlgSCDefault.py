@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # File: CaloRec/python/CaloBCIDLumiCondAlgSCDefault.py
 # Created: Mar 2020, sss
@@ -6,7 +6,7 @@
 
 
 from AthenaCommon.AlgSequence import AthSequencer
-from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaCommon import CfgMgr
 
 
 def CaloBCIDLumiCondAlgSCDefault():
@@ -30,7 +30,7 @@ def CaloBCIDLumiCondAlgSCDefault():
         from LumiBlockComps.BunchCrossingCondAlgDefault import BunchCrossingCondAlgDefault
         BunchCrossingCondAlgDefault()
 
-    CaloBCIDLumiCondAlg = CompFactory.CaloBCIDLumiCondAlg # CaloRec
+    CaloBCIDLumiCondAlg = CfgMgr.CaloBCIDLumiCondAlg # CaloRec
     alg = CaloBCIDLumiCondAlg (name,
                                CoeffsKey = 'CaloBCIDCoeffsSC',
                                BunchCrossingCondDataKey = 'BunchCrossingData',

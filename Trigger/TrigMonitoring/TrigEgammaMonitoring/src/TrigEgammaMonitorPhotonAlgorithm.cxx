@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigEgammaMonitorPhotonAlgorithm.h"
@@ -84,10 +84,8 @@ StatusCode TrigEgammaMonitorPhotonAlgorithm::fillHistograms( const EventContext&
 			} else {
 				ATH_MSG_DEBUG("BS trigger passed!");
 			}
-		}
-
-        
-        
+		
+    }
           
         std::vector< std::pair<std::shared_ptr<const xAOD::Egamma>, const TrigCompositeUtils::Decision * >> pairObjs;
     

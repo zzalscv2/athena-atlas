@@ -59,12 +59,17 @@ Muon::nsw::NSWTriggerCommonDecoder::NSWTriggerCommonDecoder (const eformat::read
       remaining = nWords - wCount;
 
     }
-    catch (Muon::nsw::NSWTriggerElinkException &e)
-    {
+    catch (Muon::nsw::NSWTriggerElinkException &e) {
+      //known expections
       //could think of an error msg print in case needed
       m_has_error = true;
       break;
     }    
+    catch (std::exception &e) {
+      //better to be ready to capture generic ones as well
+      m_has_error = true;
+      break;
+    }
   }
 }
 

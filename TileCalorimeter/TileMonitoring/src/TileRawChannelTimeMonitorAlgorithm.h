@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILEMONITORING_TILERAWCHANNELTIMEMONITORALGORITHM_H
@@ -38,6 +38,10 @@ class TileRawChannelTimeMonitorAlgorithm : public AthMonitorAlgorithm {
   private:
 
     Gaudi::Property<bool> m_checkDCS{this, "CheckDCS", false, "Check Tile DCS status"};
+
+    Gaudi::Property<std::vector<unsigned int>> m_triggerTypes{this,
+        "TriggerTypes", {}, "Given trigger types only events with these TTs will be used, otherwise all"};
+
     Gaudi::Property<std::vector<double>> m_energyThresholds{this,
          "EnergyThresholds", {10, 40}, "Energy thresholds [LG, HG]"};
 
@@ -66,6 +70,12 @@ class TileRawChannelTimeMonitorAlgorithm : public AthMonitorAlgorithm {
     SG::ReadCondHandleKey<TileBadChannels> m_badChannelsKey{this,
         "TileBadChannels", "TileBadChannels", "Input Tile bad channel status"};
 
+   /**
+    * @brief Name of TileEMScale in condition store
+    */
+     SG::ReadCondHandleKey<TileEMScale> m_emScaleKey{this,
+         "TileEMScale", "TileEMScale", "Input Tile EMS calibration constants"};
+
     /**
      * @brief Name of Tile cabling service
      */
@@ -76,9 +86,11 @@ class TileRawChannelTimeMonitorAlgorithm : public AthMonitorAlgorithm {
     const TileCablingService* m_cabling{nullptr};
 
     std::vector<int> m_timeGroups;
+    std::vector<int> m_uncorrTimeGroups;
     std::vector<int> m_timeLBGroups;
     std::vector<int> m_timeDiffLBGroups;
     std::vector<std::vector<std::vector<int>>> m_digiTimeLBGroups;
+    std::vector<int> m_amplitudeGroups;
 };
 
 

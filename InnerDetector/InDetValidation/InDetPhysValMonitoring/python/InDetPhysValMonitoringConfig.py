@@ -11,6 +11,15 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
+
+def extractCollectionPrefix(track_collection_name):
+    suffixes = ['Tracks', 'TrackParticles']
+    for suffix in suffixes:
+        if track_collection_name.endswith(suffix):
+            return track_collection_name.removesuffix(suffix)
+    return track_collection_name
+
+
 def HistogramDefinitionSvcCfg(flags, **kwargs):
     acc = ComponentAccumulator()
     if flags.Detector.GeometryID:
@@ -22,19 +31,23 @@ def HistogramDefinitionSvcCfg(flags, **kwargs):
     acc.addService(histoSvc)
     return acc
 
-def InDetRttTruthSelectionToolCfg(flags, name="InDetRttTruthSelectionTool", **kwargs):
+
+def InDetRttTruthSelectionToolCfg(
+        flags, name="InDetRttTruthSelectionTool", **kwargs):
     acc = ComponentAccumulator()
 
     kwargs.setdefault("requireStatus1", True)
     kwargs.setdefault("requireCharged", True)
     kwargs.setdefault("selectedCharge", flags.PhysVal.IDPVM.selectedCharge)
-    kwargs.setdefault("maxBarcode", (200*1000 if kwargs.pop("OnlyDressPrimaryTracks", True) else 2**31-1))
-    kwargs.setdefault("maxProdVertRadius", 300.)
-    if flags.Detector.GeometryITk:
-        kwargs.setdefault("maxEta", 4.)
-    else:
-        kwargs.setdefault("maxEta", 2.5)
+    kwargs.setdefault("maxBarcode",
+                      200*1000 if kwargs.pop("OnlyDressPrimaryTracks", True)
+                      else 2**31-1)
+    kwargs.setdefault("maxProdVertRadius",
+                      flags.PhysVal.IDPVM.maxProdVertRadius)
+    kwargs.setdefault("maxEta", 4. if flags.Detector.GeometryITk else 2.5)
     kwargs.setdefault("minPt", flags.PhysVal.IDPVM.truthMinPt)
+    kwargs.setdefault("ancestorList", flags.PhysVal.IDPVM.ancestorIDs)
+    kwargs.setdefault("requireSiHit", flags.PhysVal.IDPVM.requiredSiHits)
 
     if "radiusCylinder" in kwargs or "zDisc" in kwargs:
         from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
@@ -44,9 +57,9 @@ def InDetRttTruthSelectionToolCfg(flags, name="InDetRttTruthSelectionTool", **kw
     else:
         kwargs.setdefault("Extrapolator", None)
 
-    tool = CompFactory.AthTruthSelectionTool(name = name, **kwargs)
-    acc.setPrivateTools(tool)
+    acc.setPrivateTools(CompFactory.AthTruthSelectionTool(name, **kwargs))
     return acc
+
 
 def GoodRunsListSelectionToolCfg(flags, **kwargs):
     acc = ComponentAccumulator()
@@ -60,36 +73,42 @@ def GoodRunsListSelectionToolCfg(flags, **kwargs):
         '2022': cvmfs + 'data22_13p6TeV/20220902/data22_13p6TeV.periodF_DetStatus-v108-pro28_MERGED_PHYS_StandardGRL_All_Good_25ns.xml'
     }
 
-    tool = CompFactory.GoodRunsListSelectionTool(
+    acc.setPrivateTools(CompFactory.GoodRunsListSelectionTool(
         name="GoodRunsListSelectionTool",
         GoodRunsListVec=[grldict[p] for p in flags.PhysVal.IDPVM.GRL],
         **kwargs
-    )
-    acc.setPrivateTools(tool)
+    ))
     return acc
+
 
 def InDetVertexTruthMatchToolCfg(flags, **kwargs):
-    acc  = ComponentAccumulator()
-    tool = CompFactory.InDetVertexTruthMatchTool(**kwargs)
-    acc.setPrivateTools(tool)
+    acc = ComponentAccumulator()
+    acc.setPrivateTools(CompFactory.InDetVertexTruthMatchTool(**kwargs))
     return acc
 
+
 def LRTTrackParticleMergerCfg(flags, name="MergeLRTAndStandard", **kwargs):
-    kwargs.setdefault("TrackParticleLocation", ["InDetTrackParticles","InDetLargeD0TrackParticles"])
-    kwargs.setdefault("OutputTrackParticleLocation", "InDetWithLRTTrackParticles")
+    kwargs.setdefault("TrackParticleLocation",
+                      ["InDetTrackParticles", "InDetLargeD0TrackParticles"])
+    kwargs.setdefault("OutputTrackParticleLocation",
+                      "InDetWithLRTTrackParticles")
     kwargs.setdefault("CreateViewColllection", True)
     from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleMergerCfg
     return TrackParticleMergerCfg(flags, name, **kwargs)
 
-def LRTMergerCfg(flags, **kwargs):
+
+def LRTMergerCfg(flags, name="InDetLRTMerge", **kwargs):
     acc = ComponentAccumulator()
-    tool = acc.getPrimaryAndMerge(LRTTrackParticleMergerCfg(flags))
-    LRTMergeAug = CompFactory.DerivationFramework.CommonAugmentation("InDetLRTMerge", AugmentationTools = tool)
-    acc.addEventAlgo(LRTMergeAug)
+    kwargs.setdefault("AugmentationTools", acc.getPrimaryAndMerge(
+        LRTTrackParticleMergerCfg(flags)))
+    acc.addEventAlgo(
+        CompFactory.DerivationFramework.CommonAugmentation(name, **kwargs))
     return acc
 
+
 def InDetPhysValMonitoringToolCfg(flags, **kwargs):
-    from InDetPhysValMonitoring.InDetPhysValDecorationConfig import AddDecoratorIfNeededCfg
+    from InDetPhysValMonitoring.InDetPhysValDecorationConfig import (
+        AddDecoratorIfNeededCfg)
     acc = AddDecoratorIfNeededCfg(flags)
     kwargs.setdefault("useTrackSelection", False)
     kwargs.setdefault("EnableLumi", False)
@@ -99,61 +118,64 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
     # if we are running with sumpT(w) hard scatter selection, we need to schedule jet finding
     if flags.PhysVal.IDPVM.hardScatterStrategy == 2:
 
-        from InDetPhysValMonitoring.addRecoJetsConfig import AddRecoJetsIfNotExistingCfg
-        acc.merge(AddRecoJetsIfNotExistingCfg(flags, flags.PhysVal.IDPVM.jetsNameForHardScatter))
+        from InDetPhysValMonitoring.addRecoJetsConfig import (
+            AddRecoJetsIfNotExistingCfg)
+        acc.merge(AddRecoJetsIfNotExistingCfg(
+            flags, flags.PhysVal.IDPVM.jetsNameForHardScatter))
 
     if flags.PhysVal.IDPVM.GRL:
-        grlTool = acc.popToolsAndMerge(GoodRunsListSelectionToolCfg(flags))
         kwargs.setdefault("useGRL", True)
-        kwargs.setdefault('GoodRunsListSelectionTool', grlTool)
+        kwargs.setdefault('GoodRunsListSelectionTool', acc.popToolsAndMerge(
+            GoodRunsListSelectionToolCfg(flags)))
 
     if flags.Input.isMC and not flags.PhysVal.IDPVM.doRecoOnly:
         kwargs.setdefault("TruthParticleContainerName", "TruthParticles")
         if 'TruthSelectionTool' not in kwargs:
-            TruthSelectionTool = acc.popToolsAndMerge(InDetRttTruthSelectionToolCfg(flags))
-            TruthSelectionTool.maxProdVertRadius = flags.PhysVal.IDPVM.maxProdVertRadius
-            TruthSelectionTool.minPt = flags.PhysVal.IDPVM.truthMinPt
-            TruthSelectionTool.ancestorList = flags.PhysVal.IDPVM.ancestorIDs
-            TruthSelectionTool.requireSiHit = flags.PhysVal.IDPVM.requiredSiHits
-            kwargs.setdefault("TruthSelectionTool", TruthSelectionTool)
+            kwargs.setdefault("TruthSelectionTool", acc.popToolsAndMerge(
+                InDetRttTruthSelectionToolCfg(flags)))
 
         if 'hardScatterSelectionTool' not in kwargs:
             from InDetConfig.InDetHardScatterSelectionToolConfig import (
                 InDetHardScatterSelectionToolCfg)
-            hardScatterSelectionTool = acc.popToolsAndMerge(
-                InDetHardScatterSelectionToolCfg(flags))
-            hardScatterSelectionTool.RedoHardScatter=True
-            # for sumpt(w), make sure the HS selection tool picks up the correct jets
-            if flags.PhysVal.IDPVM.hardScatterStrategy == 2:
-                hardScatterSelectionTool.JetContainer = flags.PhysVal.IDPVM.jetsNameForHardScatter
-            hardScatterSelectionTool.SelectionMode = flags.PhysVal.IDPVM.hardScatterStrategy
-            kwargs.setdefault("hardScatterSelectionTool", hardScatterSelectionTool)
+            kwargs.setdefault("hardScatterSelectionTool", acc.popToolsAndMerge(
+                InDetHardScatterSelectionToolCfg(
+                    flags,
+                    RedoHardScatter=True,
+                    SelectionMode=flags.PhysVal.IDPVM.hardScatterStrategy,
+                    # make sure the HS selection tool picks up the correct jets
+                    JetContainer=flags.PhysVal.IDPVM.jetsNameForHardScatter
+                )))
 
         if flags.PhysVal.IDPVM.doValidateTracksInJets:
-            jets_name = 'AntiKt4EMPFlowJets'
-            kwargs.setdefault("JetContainerName", jets_name)
+            kwargs.setdefault("JetContainerName", 'AntiKt4EMPFlowJets')
             kwargs.setdefault("FillTrackInJetPlots", True)
 
-            if "xAOD::JetContainer#AntiKt4TruthJets" not in flags.Input.TypedCollections:
-                from InDetPhysValMonitoring.addTruthJetsConfig import AddTruthJetsIfNotExistingCfg
+            if ("xAOD::JetContainer#AntiKt4TruthJets"
+                    not in flags.Input.TypedCollections):
+                from InDetPhysValMonitoring.addTruthJetsConfig import (
+                    AddTruthJetsIfNotExistingCfg)
                 acc.merge(AddTruthJetsIfNotExistingCfg(flags))
 
             if flags.PhysVal.IDPVM.doValidateTracksInBJets:
                 kwargs.setdefault("FillTrackInBJetPlots", True)
 
         else:
-            kwargs.setdefault("JetContainerName",'')
+            kwargs.setdefault("JetContainerName", '')
             kwargs.setdefault("FillTrackInJetPlots", False)
 
-        kwargs.setdefault("FillTruthToRecoNtuple", flags.PhysVal.IDPVM.doValidateTruthToRecoNtuple)
-        kwargs.setdefault("doTruthOriginPlots",    flags.PhysVal.IDPVM.doTruthOriginPlots)
-        kwargs.setdefault("doPerAuthorPlots",      flags.PhysVal.IDPVM.doPerAuthorPlots)
-        kwargs.setdefault("doHitLevelPlots",       flags.PhysVal.IDPVM.doHitLevelPlots)
+        kwargs.setdefault("FillTruthToRecoNtuple",
+                          flags.PhysVal.IDPVM.doValidateTruthToRecoNtuple)
+        kwargs.setdefault("doTruthOriginPlots",
+                          flags.PhysVal.IDPVM.doTruthOriginPlots)
+        kwargs.setdefault("doPerAuthorPlots",
+                          flags.PhysVal.IDPVM.doPerAuthorPlots)
+        kwargs.setdefault("doHitLevelPlots",
+                          flags.PhysVal.IDPVM.doHitLevelPlots)
 
         # adding the VertexTruthMatchingTool
-        VertexTruthMatchTool = acc.popToolsAndMerge(InDetVertexTruthMatchToolCfg(flags))
         kwargs.setdefault("useVertexTruthMatchTool", True)
-        kwargs.setdefault("VertexTruthMatchTool", VertexTruthMatchTool)
+        kwargs.setdefault("VertexTruthMatchTool", acc.popToolsAndMerge(
+            InDetVertexTruthMatchToolCfg(flags)))
 
         if "trackTruthOriginTool" not in kwargs:
             from InDetTrackSystematicsTools.InDetTrackSystematicsToolsConfig import InDetTrackTruthOriginToolCfg
@@ -161,9 +183,11 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
                 InDetTrackTruthOriginToolCfg(flags)))
 
         # Options for Truth Strategy : Requires full pile-up truth containers for some
-        if flags.PhysVal.IDPVM.setTruthStrategy == 'All' or flags.PhysVal.IDPVM.setTruthStrategy == 'PileUp':
-            if "xAOD::TruthPileupEventContainer#TruthPileupEvents" in flags.Input.TypedCollections:
-                kwargs.setdefault("PileupSwitch", flags.PhysVal.IDPVM.setTruthStrategy)
+        if flags.PhysVal.IDPVM.setTruthStrategy in ['All', 'PileUp']:
+            if ("xAOD::TruthPileupEventContainer#TruthPileupEvents"
+                    in flags.Input.TypedCollections):
+                kwargs.setdefault("PileupSwitch",
+                                  flags.PhysVal.IDPVM.setTruthStrategy)
             else:
                 print('WARNING Truth Strategy for InDetPhysValMonitoring set to %s but TruthPileupEvents are missing in the input; resetting to HardScatter only' % (
                     flags.PhysVal.IDPVM.setTruthStrategy))
@@ -185,7 +209,7 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
         kwargs.setdefault("FillTruthToRecoNtuple", False)
 
     if flags.Detector.GeometryITk:
-        #Disable vertex container for now
+        # Disable vertex container for now
         kwargs.setdefault("doTRTExtensionPlots", False)
 
     # Control the number of output histograms
@@ -198,144 +222,160 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
     # for IDTIDE derivation
     if flags.PhysVal.IDPVM.doIDTIDE:
         kwargs.setdefault("doIDTIDEPlots", True)
-        jets_name = 'AntiKt4EMPFlowJets'
-        kwargs.setdefault("JetContainerName", jets_name)
+        kwargs.setdefault("JetContainerName", 'AntiKt4EMPFlowJets')
         kwargs.setdefault("FillTrackInJetPlots", True)
         kwargs.setdefault("FillTrackInJetPlots", True)
 
-    tool = CompFactory.InDetPhysValMonitoringTool(**kwargs)
-    acc.setPrivateTools(tool)
+    acc.setPrivateTools(CompFactory.InDetPhysValMonitoringTool(**kwargs))
     return acc
+
 
 def InDetPhysValMonitoringToolLooseCfg(flags, **kwargs):
     acc = ComponentAccumulator()
 
     if 'TrackSelectionTool' not in kwargs:
-        from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_Loose_Cfg
-        TrackSelectionTool = acc.popToolsAndMerge(InDetTrackSelectionTool_Loose_Cfg(flags))
-        kwargs.setdefault("TrackSelectionTool", TrackSelectionTool)
+        from InDetConfig.InDetTrackSelectionToolConfig import (
+            InDetTrackSelectionTool_Loose_Cfg)
+        kwargs.setdefault("TrackSelectionTool", acc.popToolsAndMerge(
+            InDetTrackSelectionTool_Loose_Cfg(flags)))
 
     kwargs.setdefault("SubFolder", 'Loose/')
     kwargs.setdefault("useTrackSelection", True)
 
-    return InDetPhysValMonitoringToolCfg(flags, name="InDetPhysValMonitoringToolLoose", **kwargs)
+    acc.setPrivateTools(acc.popToolsAndMerge(InDetPhysValMonitoringToolCfg(
+        flags, name="InDetPhysValMonitoringToolLoose", **kwargs)))
+    return acc
+
 
 def InDetPhysValMonitoringToolTightPrimaryCfg(flags, **kwargs):
     acc = ComponentAccumulator()
 
     if 'TrackSelectionTool' not in kwargs:
-        from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_TightPrimary_Cfg
-        TrackSelectionTool = acc.popToolsAndMerge(InDetTrackSelectionTool_TightPrimary_Cfg(flags))
-        kwargs.setdefault("TrackSelectionTool", TrackSelectionTool)
+        from InDetConfig.InDetTrackSelectionToolConfig import (
+            InDetTrackSelectionTool_TightPrimary_Cfg)
+        kwargs.setdefault("TrackSelectionTool", acc.popToolsAndMerge(
+            InDetTrackSelectionTool_TightPrimary_Cfg(flags)))
 
     kwargs.setdefault("SubFolder", 'TightPrimary/')
     kwargs.setdefault("useTrackSelection", True)
 
-    return InDetPhysValMonitoringToolCfg(flags, name="InDetPhysValMonitoringToolTightPrimary", **kwargs)
+    acc.setPrivateTools(acc.popToolsAndMerge(InDetPhysValMonitoringToolCfg(
+        flags, name="InDetPhysValMonitoringToolTightPrimary", **kwargs)))
+    return acc
+
 
 def InDetPhysValMonitoringToolGSFCfg(flags, **kwargs):
     kwargs.setdefault("SubFolder", 'GSF/')
     kwargs.setdefault("TrackParticleContainerName", 'GSFTrackParticles')
     kwargs.setdefault("useTrackSelection", True)
+    return InDetPhysValMonitoringToolCfg(
+        flags, name="InDetPhysValMonitoringToolGSF", **kwargs)
 
-    return InDetPhysValMonitoringToolCfg(flags, name="InDetPhysValMonitoringToolGSF", **kwargs)
 
 def InDetPhysValMonitoringToolElectronsCfg(flags, **kwargs):
     acc = ComponentAccumulator()
 
-    TruthSelectionTool = acc.popToolsAndMerge(InDetRttTruthSelectionToolCfg(flags, name="AthTruthSelectionToolForIDPVM_Electrons", **kwargs))
-    TruthSelectionTool.pdgId = 11
-    TruthSelectionTool.minPt = 5000.
-
-    kwargs.setdefault("TruthSelectionTool", TruthSelectionTool)
+    kwargs.setdefault("TruthSelectionTool", acc.popToolsAndMerge(
+        InDetRttTruthSelectionToolCfg(
+            flags, name="AthTruthSelectionToolForIDPVM_Electrons",
+            pdgId=11,
+            minPt=5000.
+        )))
     kwargs.setdefault("onlyFillTruthMatched", True)
     kwargs.setdefault("SubFolder", 'Electrons/')
 
-    return InDetPhysValMonitoringToolCfg(flags, name='InDetPhysValMonitoringToolElectrons', **kwargs)
+    acc.setPrivateTools(acc.popToolsAndMerge(InDetPhysValMonitoringToolCfg(
+        flags, name='InDetPhysValMonitoringToolElectrons', **kwargs)))
+    return acc
+
 
 def InDetPhysValMonitoringToolMuonsCfg(flags, **kwargs):
     acc = ComponentAccumulator()
 
-    TruthSelectionTool = acc.popToolsAndMerge(InDetRttTruthSelectionToolCfg(flags, name = "AthTruthSelectionToolForIDPVM_Muons", **kwargs))
-    TruthSelectionTool.pdgId = 13
-    TruthSelectionTool.minPt = 5000.
-
-    kwargs.setdefault("TruthSelectionTool", TruthSelectionTool)
+    kwargs.setdefault("TruthSelectionTool", acc.popToolsAndMerge(
+        InDetRttTruthSelectionToolCfg(
+            flags, name="AthTruthSelectionToolForIDPVM_Muons",
+            pdgId=13,
+            minPt=5000.
+        )))
     kwargs.setdefault("onlyFillTruthMatched", True)
     kwargs.setdefault("SubFolder", 'Muons/')
 
-    return InDetPhysValMonitoringToolCfg(flags, name='InDetPhysValMonitoringToolMuons', **kwargs)
+    acc.setPrivateTools(acc.popToolsAndMerge(InDetPhysValMonitoringToolCfg(
+        flags, name='InDetPhysValMonitoringToolMuons', **kwargs)))
+    return acc
+
 
 def InDetLargeD0PhysValMonitoringToolCfg(flags, **kwargs):
     acc = ComponentAccumulator()
 
-    TruthSelectionTool = acc.popToolsAndMerge(InDetRttTruthSelectionToolCfg(flags, name = "AthTruthSelectionToolForIDPVM_LargeD0", **kwargs))
-    TruthSelectionTool.maxProdVertRadius = flags.PhysVal.IDPVM.maxProdVertRadius
-    TruthSelectionTool.minPt = flags.PhysVal.IDPVM.truthMinPt
-    TruthSelectionTool.ancestorList = flags.PhysVal.IDPVM.ancestorIDs
-    TruthSelectionTool.requireSiHit = flags.PhysVal.IDPVM.requiredSiHits
-
     kwargs.setdefault("SubFolder", 'LRT/')
-    kwargs.setdefault("TruthSelectionTool", TruthSelectionTool)
+    kwargs.setdefault("TruthSelectionTool", acc.popToolsAndMerge(
+        InDetRttTruthSelectionToolCfg(flags)))
     kwargs.setdefault("TrackParticleContainerName",
-                      'InDetLargeD0TrackParticles' \
-                      if flags.Tracking.storeSeparateLargeD0Container else \
+                      'InDetLargeD0TrackParticles'
+                      if flags.Tracking.storeSeparateLargeD0Container else
                       'InDetTrackParticles')
     kwargs.setdefault("useTrackSelection", True)
 
-    return InDetPhysValMonitoringToolCfg(flags, name='InDetPhysValMonitoringToolLargeD0', **kwargs)
+    acc.setPrivateTools(acc.popToolsAndMerge(InDetPhysValMonitoringToolCfg(
+        flags, name='InDetPhysValMonitoringToolLargeD0', **kwargs)))
+    return acc
+
 
 def InDetMergedLargeD0PhysValMonitoringToolCfg(flags, **kwargs):
     acc = ComponentAccumulator()
 
-    TruthSelectionTool = acc.popToolsAndMerge(InDetRttTruthSelectionToolCfg(flags, name = "AthTruthSelectionToolForIDPVM_MergedLargeD0", **kwargs))
-    TruthSelectionTool.maxProdVertRadius = flags.PhysVal.IDPVM.maxProdVertRadius
-    TruthSelectionTool.minPt = flags.PhysVal.IDPVM.truthMinPt
-    TruthSelectionTool.ancestorList = flags.PhysVal.IDPVM.ancestorIDs
-    TruthSelectionTool.requireSiHit = flags.PhysVal.IDPVM.requiredSiHits
-
     kwargs.setdefault("SubFolder", 'LRTMerged/')
-    kwargs.setdefault("TruthSelectionTool", TruthSelectionTool)
+    kwargs.setdefault("TruthSelectionTool", acc.popToolsAndMerge(
+        InDetRttTruthSelectionToolCfg(flags)))
     kwargs.setdefault("TrackParticleContainerName",
-                      'InDetWithLRTTrackParticles' \
-                      if flags.Tracking.storeSeparateLargeD0Container else \
+                      'InDetWithLRTTrackParticles'
+                      if flags.Tracking.storeSeparateLargeD0Container else
                       'InDetTrackParticles')
     kwargs.setdefault("useTrackSelection", True)
 
-    return InDetPhysValMonitoringToolCfg(flags, name='InDetPhysValMonitoringToolMergedLargeD0', **kwargs)
+    acc.setPrivateTools(acc.popToolsAndMerge(InDetPhysValMonitoringToolCfg(
+        flags, name='InDetPhysValMonitoringToolMergedLargeD0', **kwargs)))
+    return acc
+
 
 def InDetPhysValMonitoringCfg(flags):
     acc = ComponentAccumulator()
 
-    #from InDetPhysValMonitoring.InDetPhysValDecorationConfig import AddDecoratorIfNeededCfg
-    #acc.merge(AddDecoratorIfNeededCfg(flags))
-
     if flags.PhysVal.IDPVM.doValidateMergedLargeD0Tracks:
         acc.merge(LRTMergerCfg(flags))
 
-    mons = [ (True                                       ,  InDetPhysValMonitoringToolCfg ),
-             (flags.PhysVal.IDPVM.doValidateMuonMatchedTracks    ,  InDetPhysValMonitoringToolMuonsCfg ),
-             (flags.PhysVal.IDPVM.doValidateElectronMatchedTracks,  InDetPhysValMonitoringToolElectronsCfg ),
-             (flags.PhysVal.IDPVM.doValidateLargeD0Tracks        ,  InDetLargeD0PhysValMonitoringToolCfg ),
-             (flags.PhysVal.IDPVM.doValidateMergedLargeD0Tracks  ,  InDetMergedLargeD0PhysValMonitoringToolCfg),
-             (flags.PhysVal.IDPVM.doValidateLooseTracks          ,  InDetPhysValMonitoringToolLooseCfg ),
-             (flags.PhysVal.IDPVM.doValidateTightPrimaryTracks   ,  InDetPhysValMonitoringToolTightPrimaryCfg ),
-             (flags.PhysVal.IDPVM.doValidateGSFTracks            ,  InDetPhysValMonitoringToolGSFCfg )
-    ]
+    mons = [(True,
+             InDetPhysValMonitoringToolCfg),
+            (flags.PhysVal.IDPVM.doValidateMuonMatchedTracks,
+             InDetPhysValMonitoringToolMuonsCfg),
+            (flags.PhysVal.IDPVM.doValidateElectronMatchedTracks,
+             InDetPhysValMonitoringToolElectronsCfg),
+            (flags.PhysVal.IDPVM.doValidateLargeD0Tracks,
+             InDetLargeD0PhysValMonitoringToolCfg),
+            (flags.PhysVal.IDPVM.doValidateMergedLargeD0Tracks,
+             InDetMergedLargeD0PhysValMonitoringToolCfg),
+            (flags.PhysVal.IDPVM.doValidateLooseTracks,
+             InDetPhysValMonitoringToolLooseCfg),
+            (flags.PhysVal.IDPVM.doValidateTightPrimaryTracks,
+             InDetPhysValMonitoringToolTightPrimaryCfg),
+            (flags.PhysVal.IDPVM.doValidateGSFTracks,
+             InDetPhysValMonitoringToolGSFCfg)
+            ]
 
     tools = []
-    for enabled, creator in mons :
-        if enabled :
+    for enabled, creator in mons:
+        if enabled:
             tools.append(acc.popToolsAndMerge(creator(flags)))
 
-    from  InDetPhysValMonitoring.ConfigUtils import extractCollectionPrefix
-    for col in flags.PhysVal.IDPVM.validateExtraTrackCollections :
-        prefix=extractCollectionPrefix(col)
-        tool = acc.popToolsAndMerge(InDetPhysValMonitoringToolCfg(flags, name = 'InDetPhysValMonitoringTool'+prefix))
-        tool.SubFolder = prefix+'Tracks/'
-        tool.TrackParticleContainerName = prefix+'TrackParticles'
-
-        tools.append(tool)
+    for col in flags.PhysVal.IDPVM.validateExtraTrackCollections:
+        prefix = extractCollectionPrefix(col)
+        tools.append(acc.popToolsAndMerge(InDetPhysValMonitoringToolCfg(
+            flags, name='InDetPhysValMonitoringTool'+prefix,
+            SubFolder=prefix+'Tracks/',
+            TrackParticleContainerName=prefix+'TrackParticles'
+        )))
 
     from PhysValMonitoring.PhysValMonitoringConfig import PhysValMonitoringCfg
     acc.merge(PhysValMonitoringCfg(flags, tools=tools))

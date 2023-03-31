@@ -6,6 +6,7 @@
 
 #include "MuonCalibEvent/MdtCalibHit.h"
 #include "xAODTrigMuon/TrigMuonDefs.h"
+#include "MdtRegionDefiner.h"
 
 // --------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
@@ -179,6 +180,17 @@ StatusCode TrigL2MuonSA::MuFastPatternFinder::findPatterns(const TrigL2MuonSA::M
 
      ATH_MSG_DEBUG("... chamber/Z/R/aw/bw/residual/rWidth="
 		   << chamber << "/" << Z << "/" << R << "/" << aw << "/" << bw << "/" << residual << "/" << rWidth);
+
+     int stationPhi = mdtHits[i_hit].StationPhi;
+     std::string name = m_idHelperSvc->mdtIdHelper().stationNameString(mdtHits[i_hit].name);
+     int chamber_this = 99;
+     int sector_this = 99;
+     bool isEndcap;
+     MdtRegionDefiner::find_station_sector(name, stationPhi, isEndcap, chamber_this, sector_this);
+     if( !isEndcap && sector_this != muonRoad.MDT_sector_trigger ) {
+       mdtHits[i_hit].isOutlier   = 3;
+       continue;
+     }
 
      if( std::abs(residual) > rWidth ) {
        mdtHits[i_hit].isOutlier   = 2;

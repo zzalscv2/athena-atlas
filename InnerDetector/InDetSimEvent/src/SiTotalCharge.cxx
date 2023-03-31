@@ -17,15 +17,13 @@
 // Implicit constructor:
 SiTotalCharge::SiTotalCharge() :
   m_charge(0),
-  m_chargeComposition(),
-  m_emptyLink()
+  m_chargeComposition()
 {}
 
 // Copy constructor:
 SiTotalCharge::SiTotalCharge(const SiTotalCharge &totalCharge) :
   m_charge(totalCharge.m_charge),
-  m_chargeComposition(totalCharge.m_chargeComposition),
-  m_emptyLink()
+  m_chargeComposition(totalCharge.m_chargeComposition)
 {}
 
 // Assignment operator:
@@ -34,7 +32,6 @@ SiTotalCharge &SiTotalCharge::operator=(const SiTotalCharge &totalCharge)
   if (this!=&totalCharge) {
     m_charge=totalCharge.m_charge;
     m_chargeComposition=totalCharge.m_chargeComposition;
-    m_emptyLink=totalCharge.m_emptyLink;
   } else {}
   return *this;
 }
@@ -134,3 +131,4 @@ std::ostream &operator<<(std::ostream &out,const SiTotalCharge &totalCharge)
   return out;
 }
 
+const HepMcParticleLink SiTotalCharge::m_emptyLink = HepMcParticleLink();

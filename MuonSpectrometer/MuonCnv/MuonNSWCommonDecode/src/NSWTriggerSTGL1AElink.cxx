@@ -6,7 +6,7 @@
 #include <sstream>
 #include <string>
 #include <stdexcept>
-#include <cmath> 
+#include <cmath>
 #include "ers/ers.h"
 
 #include "MuonNSWCommonDecode/NSWSTGTPDecodeBitmaps.h"
@@ -47,7 +47,7 @@ Muon::nsw::NSWTriggerSTGL1AElink::NSWTriggerSTGL1AElink (const uint32_t *bs, con
   //not checked during decoding but must be checked at some point
   unsigned int max_pp = (m_wordCountFlx-1) * sizeof(uint32_t) * 8; // we use this to make sure we are consistent with the size
   while ( pp < remaining * sizeof(uint32_t) * 8 && pp < (m_wordCountFlx-1) * sizeof(uint32_t) * 8 ){
-    // DEBUG 
+    // DEBUG
     ERS_DEBUG (2, "pp: " << pp << " rem: " << remaining << " wc: " << m_wordCountFlx );
     //a -2 needed cause remaining includes felix header words
     uint32_t current_stream_head_nbits =     bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::STGTPL1A::size_stream_head_nbits-1);     pp+= Muon::nsw::STGTPL1A::size_stream_head_nbits;
@@ -55,30 +55,33 @@ Muon::nsw::NSWTriggerSTGL1AElink::NSWTriggerSTGL1AElink (const uint32_t *bs, con
     uint32_t current_stream_head_fifo_size = bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::STGTPL1A::size_stream_head_fifo_size-1); pp+= Muon::nsw::STGTPL1A::size_stream_head_fifo_size;
     uint32_t current_stream_head_streamID =  bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::STGTPL1A::size_stream_head_streamID-1);  pp+= Muon::nsw::STGTPL1A::size_stream_head_streamID;
 
+    //zero padding to multiples of 16bits - TP logic - this is the real number of bits to read
+    current_stream_head_nbits = current_stream_head_nbits%16? ((current_stream_head_nbits+15)/16)*16 : current_stream_head_nbits;
+
     m_stream_head_nbits.push_back ( current_stream_head_nbits );
     m_stream_head_nwords.push_back ( current_stream_head_nwords );
     m_stream_head_fifo_size.push_back ( current_stream_head_fifo_size );
     m_stream_head_streamID.push_back ( current_stream_head_streamID );
 
-    int dataSize = ceil(current_stream_head_nbits/32.0); 
+    int dataSize = ceil(current_stream_head_nbits/32.0);
     std::vector<std::vector<uint32_t>> current_stream_data;
-   
+
     // DEBUG
     ERS_DEBUG (2," stream_head_nbits: " << current_stream_head_nbits );
     ERS_DEBUG (2," stream_head_nwords: "  << current_stream_head_nwords);
     ERS_DEBUG (2," stream_head_fifo_size: " << current_stream_head_fifo_size);
     ERS_DEBUG (2," stream_head_streamID: " << current_stream_head_streamID);
-    
+
     unsigned int total_expected_size = dataSize * current_stream_head_nwords;
-    // DEBUG 
+    // DEBUG
     ERS_DEBUG (2, "total_expected_size: " << dataSize * current_stream_head_nwords);
     ERS_DEBUG (2, "m_wordCountFlx: " << m_wordCountFlx << " ceil(pp/32.0): " << ceil(pp/32.0));
-    
+
     if (total_expected_size > m_wordCountFlx-ceil(pp/32.0) + 1)
     {
        throw std::length_error("STG stream inconsistent size inconsistent with expected packet size");
     }
-   
+
     //this block data agnostic
     for (uint i = 0; i<current_stream_head_nwords; i++){
       std::vector<uint32_t> data;
@@ -93,15 +96,15 @@ Muon::nsw::NSWTriggerSTGL1AElink::NSWTriggerSTGL1AElink (const uint32_t *bs, con
   for (uint i=0; i<m_stream_data.size(); i++){
      for (uint j=0; j<m_stream_data.at(i).size(); j++)
      {
-        if (m_stream_head_streamID[i] == Muon::nsw::STGTPPad::pad_stream_header){ 
-          int inconsistent_message_size = (m_stream_data.at(i).at(j).size()  != std::ceil(m_stream_head_nbits[i]/32.0)); 
+        if (m_stream_head_streamID[i] == Muon::nsw::STGTPPad::pad_stream_header){
+          int inconsistent_message_size = (m_stream_data.at(i).at(j).size()  != std::ceil(m_stream_head_nbits[i]/32.0));
           if (inconsistent_message_size){
             throw std::length_error("Pad stream inconsistent size inconsistent with integer number of pad-messages");
           }
           std::vector<uint32_t> pad_packet = m_stream_data.at(i).at(j);
 	  m_pad_packets.push_back( std::make_shared<STGTPPadPacket>(pad_packet));
           continue;
-        }  
+        }
         if (m_stream_head_streamID[i] == Muon::nsw::STGTPSegments::merge_stream_header){
           int inconsistent_message_size = (m_stream_data.at(i).at(j).size() != std::ceil(m_stream_head_nbits[i]/32.0));
           if (inconsistent_message_size){
@@ -114,5 +117,5 @@ Muon::nsw::NSWTriggerSTGL1AElink::NSWTriggerSTGL1AElink (const uint32_t *bs, con
    }
   //warning: how the swROD is behaving if the last work is a uint16 only? Just 0-padding?
   m_trailer_CRC = bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::STGTPL1A::size_trailer_CRC-1); pp+= Muon::nsw::STGTPL1A::size_trailer_CRC;
- 
+
 }

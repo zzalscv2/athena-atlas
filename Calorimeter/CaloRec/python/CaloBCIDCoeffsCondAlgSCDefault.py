@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # File: CaloRec/python/CaloBCIDCoeffsCondAlgSCDefault.py
 # Created: Mar 2020, sss
@@ -6,7 +6,7 @@
 
 
 from AthenaCommon.AlgSequence import AthSequencer
-from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaCommon import CfgMgr
 from IOVDbSvc.CondDB import conddb
 
 def addLArFlatFolder (db, obj, calg, folder_base='/LAR/ElecCalibFlat/',qual=''):
@@ -52,7 +52,7 @@ def CaloBCIDCoeffsCondAlgSCDefault():
         # we might need to add the condition algorithm for shape here
         ShapeKey = 'LArShapeSC'
 
-    CaloBCIDCoeffsCondAlg = CompFactory.CaloBCIDCoeffsCondAlg # CaloRec
+    CaloBCIDCoeffsCondAlg = CfgMgr.CaloBCIDCoeffsCondAlg # CaloRec
     alg = CaloBCIDCoeffsCondAlg (name,
                                  MCSymKey = '',
                                  OFCKey = 'LArOFCSC',

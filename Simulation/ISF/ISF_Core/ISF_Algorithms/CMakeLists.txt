@@ -35,6 +35,10 @@ atlas_add_test(collection_merger_helpers_tests
                SCRIPT python/test/test_collection_merger_helpers.py
                POST_EXEC_SCRIPT nopost.sh)
 
+atlas_add_test(collection_merger_helpers_CA_tests
+               SCRIPT python/test/test_CollectionMergerConfig.py
+               POST_EXEC_SCRIPT nopost.sh)
+
 atlas_add_test( SimKernelMT_test
                 SOURCES
                 test/SimKernelMT_test.cxx

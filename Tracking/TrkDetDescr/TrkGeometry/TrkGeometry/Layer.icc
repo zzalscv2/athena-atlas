@@ -50,7 +50,7 @@ size_t Layer::getCompatibleSurfaces(std::vector<SurfaceIntersection> &cSurfaces,
                                 : pars.momentum().unit();
 
   // check if you need to force the momentum direction
-  bool fDirection = (pDir == anyDirection ? false : true);
+  const bool fDirection = (pDir != anyDirection);
 
   // check if you have to stop at the endSurface
   double maxPathLength = 10e10;
@@ -62,67 +62,69 @@ size_t Layer::getCompatibleSurfaces(std::vector<SurfaceIntersection> &cSurfaces,
     // indicates wrong direction or faulty setup
     // -> do not return compatible surfaces since they may lead you on a wrong
     // navigation path
-    if (endInter.valid && endInter.pathLength > 0.)
+    if (endInter.valid && endInter.pathLength > 0.) {
       maxPathLength = endInter.pathLength;
-    else
+    } else {
       return 0;
+    }
   }
 
-  // clear the vector, just in case
-  cSurfaces.clear();
-
-  // create a new for for the moment because there are two different modes:
+  // create a for loop for the moment because there are two different modes:
   // - the layer does the intersection already
   // - you do the intersection
-  // !< TODO harmonise this
-  std::vector<SurfaceIntersection> testSurfaces;
-
   // get the main target surface
   const Surface *tSurface = subSurface(pos);
-  //!< @TODO allow also a 0 target in the future
-  if (tSurface) {
-    // get the reachable surfaces, the target surface will be added
-    bool acceptSurfaces = m_overlapDescriptor->reachableSurfaces(
-        testSurfaces, *tSurface, pos, dir);
-    // boolean said you can directly take the surfaces from the reachable
-    // surfaces
-    if (acceptSurfaces) {
+  // clear the vector, just in case
+  cSurfaces.clear();
+  if (!tSurface) {
+    return 0;
+  }
+ // get the reachable surfaces, the target surface will be added
+  std::vector<SurfaceIntersection> testSurfaces;
+  const bool acceptSurfaces =
+      m_overlapDescriptor->reachableSurfaces(testSurfaces, *tSurface, pos, dir);
+
+  if (acceptSurfaces) {
+    if (!startSurface && !endSurface && !materialSurfacesOnly) {
       // no start nor end surface is given - accept totally if not configured to
       // only collect material surfaces
-      if (!startSurface && !endSurface && !materialSurfacesOnly)
-        cSurfaces = testSurfaces;
-      else { // endSurface was given - check for maxPathLength && endSurface
-        for (auto &tSurface : testSurfaces) {
-          // exclude the startSurface and endSurface from this loop
-          if (tSurface.object == endSurface || tSurface.object == startSurface)
-            continue;
-          // accept if in path range
-          if (tSurface.intersection.pathLength < maxPathLength &&
-              (!materialSurfacesOnly || tSurface.object->materialLayer()))
-            cSurfaces.push_back(tSurface);
-        }
-      }
-    } else if (!testSurfaces.empty()) {
-      for (auto &tSurface : testSurfaces) {
-        // exclude the endSurface
-        if (tSurface.object == endSurface || tSurface.object == startSurface)
+      cSurfaces = std::move(testSurfaces);
+    } else {
+      cSurfaces.reserve(testSurfaces.size());
+      // endSurface was given - check for maxPathLength && endSurface
+      for (const auto &tSurface : testSurfaces) {
+        // exclude the startSurface and endSurface from this loop
+        if (tSurface.object == endSurface || tSurface.object == startSurface) {
           continue;
-        // minimize the computational cost
-        Intersection tsfInter = tSurface.object->straightLineIntersection(
-            pos, dir, fDirection, false);
-        // check if the intersection is valid and the maxPathLength has not been
-        // exceeded
-        if (tsfInter.valid && tsfInter.pathLength < maxPathLength) {
-          // resulting propDirection
-          PropDirection rDir =
-              fDirection ? pDir
-                         : (tsfInter.pathLength > 0 ? alongMomentum
-                                                    : oppositeMomentum);
-          // and the surfaces & direction to push back - take only material
-          // surfaces if configured to do so
-          if (!materialSurfacesOnly || tSurface.object->materialLayer())
-            cSurfaces.emplace_back(tsfInter, tSurface.object, rDir);
         }
+        // accept if in path range
+        if (tSurface.intersection.pathLength < maxPathLength &&
+            (!materialSurfacesOnly || tSurface.object->materialLayer()))
+          cSurfaces.push_back(tSurface);
+      }
+    }
+  } else if (!testSurfaces.empty()) {
+    cSurfaces.reserve(testSurfaces.size());
+    for (const auto &tSurface : testSurfaces) {
+      // exclude the endSurface
+      if (tSurface.object == endSurface || tSurface.object == startSurface){
+        continue;
+      }
+      // minimize the computational cost
+      Intersection tsfInter = tSurface.object->straightLineIntersection(
+          pos, dir, fDirection, false);
+      // check if the intersection is valid and the maxPathLength has not been
+      // exceeded
+      if (tsfInter.valid && tsfInter.pathLength < maxPathLength) {
+        // resulting propDirection
+        PropDirection rDir =
+            fDirection
+                ? pDir
+                : (tsfInter.pathLength > 0 ? alongMomentum : oppositeMomentum);
+        // and the surfaces & direction to push back - take only material
+        // surfaces if configured to do so
+        if (!materialSurfacesOnly || tSurface.object->materialLayer())
+          cSurfaces.emplace_back(tsfInter, tSurface.object, rDir);
       }
     }
   }

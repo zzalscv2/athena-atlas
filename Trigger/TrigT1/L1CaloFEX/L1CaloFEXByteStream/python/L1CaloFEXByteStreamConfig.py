@@ -1,11 +1,13 @@
 #
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from libpyeformat_helper import SourceIdentifier, SubDetector
 
 
-def eFexByteStreamToolCfg(name, flags, *, writeBS=False, TOBs=True, xTOBs=False, multiSlice=False, decodeInputs=False):
+def eFexByteStreamToolCfg(flags, name, *, writeBS=False, TOBs=True, xTOBs=False, multiSlice=False, decodeInputs=False):
+  acc = ComponentAccumulator()  
   tool = CompFactory.eFexByteStreamTool(name)
 
   if writeBS:
@@ -58,10 +60,12 @@ def eFexByteStreamToolCfg(name, flags, *, writeBS=False, TOBs=True, xTOBs=False,
                             opt=['kCanRebin'])
     tool.MonTool = monTool
 
-  return tool
+  acc.setPrivateTools(tool)
+  return acc
 
 
-def jFexRoiByteStreamToolCfg(name, flags, *, writeBS=False, xTOBs=False):
+def jFexRoiByteStreamToolCfg(flags, name, *, writeBS=False, xTOBs=False):
+  acc = ComponentAccumulator()
   tool = CompFactory.jFexRoiByteStreamTool(name)
   tool.ConvertExtendedTOBs = xTOBs
   jfex_roi_moduleids = [0x2000]
@@ -97,10 +101,12 @@ def jFexRoiByteStreamToolCfg(name, flags, *, writeBS=False, xTOBs=False):
     tool.jTERoIContainerWriteKey = "L1_jFexSumETxRoI" if xTOBs else "L1_jFexSumETRoI"
     tool.jXERoIContainerWriteKey = "L1_jFexMETxRoI"   if xTOBs else "L1_jFexMETRoI"
 
-  return tool
+  acc.setPrivateTools(tool)
+  return acc
 
  
-def gFexByteStreamToolCfg(name, flags, *, writeBS=False):
+def gFexByteStreamToolCfg(flags, name, *, writeBS=False):
+  acc = ComponentAccumulator()
   tool = CompFactory.gFexByteStreamTool(name)
   gfex_roi_moduleids = [0x3000]
   tool.ROBIDs = [int(SourceIdentifier(SubDetector.TDAQ_CALO_FEAT_EXTRACT_ROI, moduleid)) for moduleid in gfex_roi_moduleids]
@@ -157,10 +163,12 @@ def gFexByteStreamToolCfg(name, flags, *, writeBS=False):
     tool.gScalarENoiseCutOutputContainerWriteKey        ="L1_gScalarENoiseCut"
     tool.gScalarERmsOutputContainerWriteKey             ="L1_gScalarERms"
 
-  return tool
+  acc.setPrivateTools(tool)
+  return acc
 
 
-def jFexInputByteStreamToolCfg(name, flags, *, writeBS=False):
+def jFexInputByteStreamToolCfg(flags, name, *, writeBS=False):
+  acc = ComponentAccumulator()
   tool = CompFactory.jFexInputByteStreamTool(name)
   jfex_roi_moduleids = [0x2000,0x2010,0x2020,0x2030,0x2040,0x2050]
   tool.ROBIDs = [int(SourceIdentifier(SubDetector.TDAQ_CALO_FEAT_EXTRACT_DAQ, moduleid)) for moduleid in jfex_roi_moduleids]  
@@ -176,11 +184,13 @@ def jFexInputByteStreamToolCfg(name, flags, *, writeBS=False):
     tool.jTowersReadKey   =""
 
     tool.jTowersWriteKey  = "L1_jFexDataTowers"
-    
-  return tool
+
+  acc.setPrivateTools(tool)
+  return acc
 
 
-def gFexInputByteStreamToolCfg(name, flags, *, writeBS=False):
+def gFexInputByteStreamToolCfg(flags, name, *, writeBS=False):
+  acc = ComponentAccumulator()
   tool = CompFactory.gFexInputByteStreamTool(name)
   gfex_roi_moduleids = [0x3000]
   tool.ROBIDs = [int(SourceIdentifier(SubDetector.TDAQ_CALO_FEAT_EXTRACT_DAQ, moduleid)) for moduleid in gfex_roi_moduleids]  
@@ -196,5 +206,6 @@ def gFexInputByteStreamToolCfg(name, flags, *, writeBS=False):
     tool.gTowersReadKey   =""
   
     tool.gTowersWriteKey  = "L1_gFexDataTowers"
-    
-  return tool
+
+  acc.setPrivateTools(tool)
+  return acc

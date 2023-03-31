@@ -757,8 +757,8 @@ class Chain(object):
         self.topoMap[step] = topoPair
 
     def __repr__(self):
-        return "-*- Chain %s -*- \n + Seeds: %s \n + Steps: \n %s \n"%(\
-                    self.name, ' '.join(map(str, self.L1decisions)), '\n '.join(map(str, self.steps)))
+        return "-*- Chain %s -*- \n + Seeds: %s, Steps: %s, AlignmentGroups: %s \n + Steps: \n %s \n"%(\
+                    self.name, ' '.join(map(str, self.L1decisions)), self.nSteps, self.alignmentGroups, '\n '.join(map(str, self.steps)))
 
 
 
@@ -1062,8 +1062,10 @@ class SelectionCA(ComponentAccumulator):
         self.stepViewSequence = seqAND(self.name)
         self.addSequence(self.stepViewSequence)
 
-    def mergeReco(self, recoCA):
+    def mergeReco(self, recoCA, robPrefetchCA=None):
         self.addEventAlgo(recoCA.inputMaker(), sequenceName=self.stepViewSequence.name)
+        if robPrefetchCA:
+             self.merge(robPrefetchCA, self.stepViewSequence.name)
         self.merge(recoCA, sequenceName=self.stepViewSequence.name)
 
     def mergeHypo(self, other):

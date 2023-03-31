@@ -258,7 +258,7 @@ StatusCode SCT_FastDigitizationTool::digitize(const EventContext& ctx,
       std::vector<Identifier> detEl;
       while (i != e)
         {
-          TimedHitPtr<SiHit> currentSiHit(*i++);
+          const TimedHitPtr<SiHit>& currentSiHit(*i++);
 
           const Identifier waferId = m_sct_ID->wafer_id(currentSiHit->getBarrelEndcap(), currentSiHit->getLayerDisk(), currentSiHit->getPhiModule(), currentSiHit->getEtaModule(), currentSiHit->getSide());
           const IdentifierHash waferHash = m_sct_ID->wafer_hash(waferId);

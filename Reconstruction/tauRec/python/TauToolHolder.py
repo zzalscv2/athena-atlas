@@ -13,7 +13,6 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.Enums import ProductionStep
 from AthenaCommon.SystemOfUnits import GeV, MeV, deg
-from tauRec.tauRecFlags import tauFlags
 
 
 ########################################################################
@@ -193,7 +192,7 @@ def EnergyCalibrationLCCfg(flags):
 
     TauCalibrateLC = CompFactory.getComp("TauCalibrateLC")
     TauCalibrateLC = TauCalibrateLC(name = _name,
-                                    calibrationFile = tauFlags.tauRecCalibrateLCConfig(),
+                                    calibrationFile = flags.Tau.CalibrateLCConfig,
                                     Key_vertexInputContainer = flags.Tau.ActiveConfig.VertexCollection)
             
     result.setPrivateTools(TauCalibrateLC)

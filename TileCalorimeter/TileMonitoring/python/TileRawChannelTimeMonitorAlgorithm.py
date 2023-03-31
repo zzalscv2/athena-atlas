@@ -26,12 +26,16 @@ def TileRawChannelTimeMonitoringConfig(flags, **kwargs):
     from TileConditions.TileBadChannelsConfig import TileBadChannelsCondAlgCfg
     result.merge( TileBadChannelsCondAlgCfg(flags, **kwargs) )
 
+    from TileConditions.TileEMScaleConfig import TileEMScaleCondAlgCfg
+    result.merge( TileEMScaleCondAlgCfg(flags) )
+
     kwargs.setdefault('CheckDCS', flags.Tile.useDCS)
     if kwargs['CheckDCS']:
         from TileConditions.TileDCSConfig import TileDCSCondAlgCfg
         result.merge( TileDCSCondAlgCfg(flags) )
 
     kwargs.setdefault('TriggerChain', '')
+    kwargs.setdefault('TriggerTypes', [0x34]) # Laser event Trigger type - 0x34, CIS trigger type - 0x32
 
     # Partition pairs to monitor average time difference between partitions (ROS - 1)
     partitionPairs = [[0, 1], [0, 2], [0, 3], [1, 2], [1, 3], [2, 3]]
@@ -39,7 +43,10 @@ def TileRawChannelTimeMonitoringConfig(flags, **kwargs):
 
     partitionTimeCorrections = [0, 0, 0, 0]
     if flags.Input.RunNumber[0] > 400000: # Update partition time corrections for Run 3
-        partitionTimeCorrections = [-28.65, -45.2, 25.24, 24.94]
+        if 'LAS' in flags.Tile.RunType:
+            partitionTimeCorrections = [-28.65, -45.2, 25.24, 24.94]
+        elif 'CIS' in flags.Tile.RunType:
+            partitionTimeCorrections = [0, 0, 0, 0]
     else:
         partitionTimeCorrections = [-15.18, -15.37, 47.65, 47.42]
 
@@ -59,6 +66,7 @@ def TileRawChannelTimeMonitoringConfig(flags, **kwargs):
         setattr(tileRawChanTimeMonAlg, k, v)
 
     run = str(flags.Input.RunNumber[0])
+    eventsType = 'CIS' if 'CIS' in flags.Tile.RunType else 'Laser'
 
     # 1) Configure histogram with TileRawChannelTimeMonAlg algorithm execution time
     executeTimeGroup = helper.addGroup(tileRawChanTimeMonAlg, 'TileRawChanTimeMonExecuteTime', 'Tile/')
@@ -71,17 +79,29 @@ def TileRawChannelTimeMonitoringConfig(flags, **kwargs):
 
     # 2) Configure histograms with status of Tile channel time per partition
     addTileModuleChannelMapsArray(helper, tileRawChanTimeMonAlg, name = 'TileAverageTime',
-                                  title = 'Tile average time with laser (partition average time is subracted)',
+                                  title = f'Tile average time with {eventsType} (partition average time is subracted)',
                                   path = 'Tile/RawChannelTime/Summary',
                                   type = 'TProfile2D', value = 'time', run = run)
+
+    # 2.b) Configure histograms with average of Tile channel uncorrected time per partition
+    addTileModuleChannelMapsArray(helper, tileRawChanTimeMonAlg, name = 'TileAverageUncorrectedTime',
+                                  title = f'Tile average uncorrected time with {eventsType}',
+                                  path = 'Tile/RawChannelTime/Summary',
+                                  type = 'TProfile2D', value = 'time', run = run)
+
+    # 2.c) Configure histograms with average of Tile channel amplitude per partition
+    addTileModuleChannelMapsArray(helper, tileRawChanTimeMonAlg, name = 'TileAverageAmplitude',
+                                  title = f'Tile average amplitude [pC] with {eventsType}',
+                                  path = 'Tile/RawChannelTime/Summary',
+                                  type = 'TProfile2D', value = 'amplitude', run = run)
 
     from TileMonitoring.TileMonitoringCfgHelper import addTile2DHistogramsArray
 
     # 3) Configure histograms with Tile partition average time vs luminosity block per partition
     partitionAverageTimeTitle = {}
-    partitionAverageTimeTitleTemplate = 'Tile average time with laser corrected by %+0.0f [ns] vs LumiBlock;LumiBlock;t [ns]'
+    partitionAverageTimeTitleTemplate = f'Tile average time with {eventsType} corrected by %+0.0f [ns] vs LumiBlock;LumiBlock;t [ns]'
     for ros in range(1,5):
-        partitionAverageTimeTitle[getPartitionName(ros)] = partitionAverageTimeTitleTemplate % (partitionTimeCorrections[ros - 1])
+        partitionAverageTimeTitle[getPartitionName(ros)] = partitionAverageTimeTitleTemplate % (-partitionTimeCorrections[ros - 1])
     addTile2DHistogramsArray(helper, tileRawChanTimeMonAlg, name = 'TileAverageTimeLB',
                              xvalue = 'lumiBlock', yvalue = 'time', type='TH2D',
                              title = partitionAverageTimeTitle, opt = 'kAddBinsDynamically', merge = 'merge',
@@ -100,8 +120,8 @@ def TileRawChannelTimeMonitoringConfig(flags, **kwargs):
         partitionTimeCorrection1 = partitionTimeCorrections[ros1]
         partitionTimeCorrection2 = partitionTimeCorrections[ros2]
 
-        title = 'Run %s: Average time with laser between %s and %s' % (run, partitionName1, partitionName2)
-        title += ' corrected by %+0.0f [ns]' % (partitionTimeCorrection2 - partitionTimeCorrection1)
+        title = f'Run {run}: Average time with {eventsType} between {partitionName1} and {partitionName2}'
+        title += ' corrected by %+0.0f [ns]' % (partitionTimeCorrection1 - partitionTimeCorrection2)
         title += ' vs luminosity block;LumiBlock;t [ns]'
         name = 'lumiBlock,time;TileAverageTimeDifferenceLB_%s-%s' % (partitionName1, partitionName2)
 
