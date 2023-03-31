@@ -541,6 +541,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       if (m_isRun3) ATH_CHECK( m_muonCalibTool.setProperty("IsRun3Geo", true ));
       ATH_CHECK( m_muonCalibTool.setProperty("calibMode", m_muCalibrationMode) );
       ATH_CHECK( m_muonCalibTool.setProperty("OutputLevel", this->msg().level()) );
+      ATH_CHECK( m_muonCalibTool.setProperty("release", m_isRun3 ? "Recs2023_03_22_Run3" : "Recs2022_08_16_Run3PreRecs" ));
       int IdBaselineInt = m_muIdBaseline;
       if (IdBaselineInt == 4) {
         ATH_CHECK( m_muonCalibTool.setProperty("do2StationsHighPt", true) );
