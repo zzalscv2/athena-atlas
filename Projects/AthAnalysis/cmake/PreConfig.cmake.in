@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 # Pre-config script to propagate variables to downstream projects
 #
@@ -16,6 +16,10 @@ set( ATLAS_FLAKE8 @ATLAS_FLAKE8@
    CACHE STRING "Default flake8 command" )
 set( ATLAS_PYTHON_CHECKER @ATLAS_PYTHON_CHECKER@
    CACHE STRING "Python checker command to run during Python module compilation" )
+
+# Child projects should not use the ATLAS CPack install scripts.
+set( ATLAS_USE_CUSTOM_CPACK_INSTALL_SCRIPT FALSE
+   CACHE BOOL "Don't use the custom ATLAS CPack install scripts" )
 
 # Compilation flag(s).
 add_definitions( -DXAOD_ANALYSIS )
