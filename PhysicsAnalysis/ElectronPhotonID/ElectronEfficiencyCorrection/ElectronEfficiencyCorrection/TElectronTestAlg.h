@@ -52,6 +52,12 @@ class TElectronTestAlg : public EL::AnaReentrantAlgorithm {
   Gaudi::Property<std::string> m_idKey{
       this, "IdKey", "", "Key associated with identification working point"};
 
+  Gaudi::Property<std::string> m_isoKey{
+      this, "IsoKey", "", "Key associated with isolation working point"};
+
+  Gaudi::Property<std::string> m_triggerKey{
+      this, "TriggerKey", "", "Key associated with trigger working point"};
+
   Gaudi::Property<int> m_dataType{this, "dataType",
                                   PATCore::ParticleDataType::Full,
                                   "Particle Data Type Full/Fast"};
