@@ -1,7 +1,8 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include <algorithm>
+#include "InDetPrepRawData/PixelCluster.h"
 #include "SpacePointCopier.h"
 
 SpacePointCopier::SpacePointCopier(const std::string& name, ISvcLocator* pSvcLocator) :
@@ -61,6 +62,9 @@ StatusCode SpacePointCopier::execute(const EventContext& context) const
     static const SG::AuxElement::Accessor< float > x ("x");
     static const SG::AuxElement::Accessor< float > y ("y");
     static const SG::AuxElement::Accessor< float > z ("z");
+    static const SG::AuxElement::Accessor< float > tot ("tot");
+    static const SG::AuxElement::Accessor< short > csize ("csize");
+
 
     for ( auto coll: *pixelSPContainer ) {
       for ( auto sp: *coll ) {
@@ -69,6 +73,10 @@ StatusCode SpacePointCopier::execute(const EventContext& context) const
         x(*item) =  float(sp->globalPosition().x());
         y(*item) =  float(sp->globalPosition().y());
         z(*item) =  float(sp->globalPosition().z());
+        const InDet::PixelCluster* cluster = static_cast<const InDet::PixelCluster *>(sp->clusterList().first);
+        tot(*item) = float(cluster->totalToT());
+        csize(*item) = short(cluster->totList().size());
+
       }
     }
 
@@ -79,7 +87,10 @@ StatusCode SpacePointCopier::execute(const EventContext& context) const
         output->push_back( item );
         x(*item) =  float(sp->globalPosition().x());
         y(*item) =  float(sp->globalPosition().y());
-        z(*item) =  float(sp->globalPosition().z());        
+        z(*item) =  float(sp->globalPosition().z());   
+        tot(*item) = 0;
+        csize(*item) = 0;
+     
       }
     }
     for ( size_t i = 0; i < std::min(10ul, output->size()); ++i ) {
