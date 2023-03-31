@@ -15,7 +15,7 @@ import re
 # matching the pattern, then recreate the full analysis string using all the
 # matched chains - can take an individual analysis pattern, or a list of them
 
-def getchains( analyses, monlevel=None ):
+def getchains( flags, analyses, monlevel=None ):
 
     if isinstance( analyses, list ):
         a = analyses
@@ -28,7 +28,7 @@ def getchains( analyses, monlevel=None ):
         if ":" in analysis:
         
             parts   = analysis.split( ":", 1 )    
-            cchains = getconfiguredchains( parts[0], monlevel )
+            cchains = getconfiguredchains( flags, parts[0], monlevel )
 
             for c in cchains:
                 if parts[1] is not None: 
@@ -44,11 +44,11 @@ def getchains( analyses, monlevel=None ):
 
 
 
-def getconfiguredchains( regex, monlevel=None ):
+def getconfiguredchains( flags, regex, monlevel=None ):
     if monlevel is None:
-        return _getconfiguredchains( regex )
+        return _getconfiguredchains( flags, regex )
     else:
-        return _getmonchains( regex, monlevel )
+        return _getmonchains( flags, regex, monlevel )
 
 
 
@@ -56,7 +56,7 @@ def getconfiguredchains( regex, monlevel=None ):
 
 _chains = None
 
-def _getconfiguredchains( regex ):
+def _getconfiguredchains( flags, regex ):
 
     global _chains
 
@@ -64,10 +64,14 @@ def _getconfiguredchains( regex ):
 #       from datetime import datetime
 #       print( datetime.now(), "getting trigger configuration" )
 
-        from AthenaConfiguration.AllConfigFlags import ConfigFlags
         from TrigConfigSvc.TriggerConfigAccess import getHLTMenuAccess
 
-        _chains = getHLTMenuAccess( ConfigFlags )
+        if flags is None:
+
+            from AthenaConfiguration.AllConfigFlags import ConfigFlags
+            flags = ConfigFlags
+
+        _chains = getHLTMenuAccess( flags )
 
 #       print( datetime.now(), "configured chains: ", len(_chains) )
 
@@ -84,7 +88,7 @@ def _getconfiguredchains( regex ):
 
 
 
-def _getmonchains( regex, monlevel=None ):
+def _getmonchains( flags, regex, monlevel=None ):
 
     chains = []
 
@@ -109,10 +113,14 @@ def _getmonchains( regex, monlevel=None ):
 #       from datetime import datetime
 #       print( datetime.now(), "getting trigger configuration" )
 
-        from AthenaConfiguration.AllConfigFlags import ConfigFlags
-
         from TrigConfigSvc.TriggerConfigAccess import getHLTMonitoringAccess
-        moniAccess = getHLTMonitoringAccess(ConfigFlags)
+
+        if flags is None:
+            from AthenaConfiguration.AllConfigFlags import ConfigFlags
+            flags = ConfigFlags
+
+        moniAccess = getHLTMonitoringAccess(flags)
+
         _monchains = moniAccess.monitoredChains( signatures=sig, monLevels=levels )
 
 #       print( datetime.now(), "configured chains: ", len(_monchains) )
