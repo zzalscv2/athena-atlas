@@ -105,7 +105,6 @@ namespace ActsTrk {
     ATH_MSG_DEBUG("   " << m_deltaRMin);
     ATH_MSG_DEBUG("   " << m_maxSeedsPerSpM);
     ATH_MSG_DEBUG("   " << m_useDeltaRorTopRadius);
-    ATH_MSG_DEBUG("   " << m_curvatureSortingInFilter);
     ATH_MSG_DEBUG("   " << m_seedConfirmationInFilter);
     if (m_seedConfirmationInFilter) {
       ATH_MSG_DEBUG("   " << m_maxSeedsPerSpMConf);
@@ -255,12 +254,33 @@ namespace ActsTrk {
     
     //TODO POSSIBLE OPTIMISATION come back here: see MR !52399 ( i.e. use static thread_local)
     typename decltype(m_finder)::SeedingState state;
+    state.spacePointData.resize(std::distance(spBegin, spEnd),
+				m_useDetailedDoubleMeasurementInfo);
 
-    auto group = spacePointsGrouping.begin();
-    auto groupEnd = spacePointsGrouping.end();
-    for (; group != groupEnd; ++group) {
-      m_finder.createSeedsForGroup(finderOpts, state, std::back_inserter(seeds), group.bottom(),
-				   group.middle(), group.top(), rMiddleSPRange);
+    if (m_useDetailedDoubleMeasurementInfo) {
+      for (std::size_t idx(0); idx < spacePointsGrouping.grid().size(); ++idx) {
+        const std::vector<std::unique_ptr<Acts::InternalSpacePoint<xAOD::SpacePoint>>>& collection = spacePointsGrouping.grid().at(idx);
+        for (const std::unique_ptr<Acts::InternalSpacePoint<xAOD::SpacePoint>>& sp : collection) {
+	  std::size_t index = sp->index();
+          state.spacePointData.setTopHalfStripLength(index,
+                                                     m_finderCfg.getTopHalfStripLength(sp->sp()));
+          state.spacePointData.setBottomHalfStripLength(index,
+                                                        m_finderCfg.getBottomHalfStripLength(sp->sp()));
+          state.spacePointData.setTopStripDirection(index,
+                                                    m_finderCfg.getTopStripDirection(sp->sp()));
+          state.spacePointData.setBottomStripDirection(index,
+                                                       m_finderCfg.getBottomStripDirection(sp->sp()));
+          state.spacePointData.setStripCenterDistance(index,
+                                                      m_finderCfg.getStripCenterDistance(sp->sp()));
+          state.spacePointData.setTopStripCenterPosition(index,
+                                                         m_finderCfg.getTopStripCenterPosition(sp->sp()));
+        }
+      }
+    }
+
+    for (const auto [bottom, middle, top] : spacePointsGrouping) {
+      m_finder.createSeedsForGroup(finderOpts, state, spacePointsGrouping.grid(), 
+          std::back_inserter(seeds), bottom, middle, top, rMiddleSPRange);
     }
 
     return StatusCode::SUCCESS;
@@ -281,7 +301,6 @@ namespace ActsTrk {
     m_finderCfg.zBinEdges = m_zBinEdges;
     m_finderCfg.rMax = m_rMax;
     m_finderCfg.binSizeR = m_binSizeR;
-    m_finderCfg.forceRadialSorting = m_forceRadialSorting;
     m_finderCfg.deltaRMin = m_deltaRMin;
     m_finderCfg.deltaRMax = m_deltaRMax;
     m_finderCfg.deltaRMinTopSP = m_deltaRMinTopSP;
@@ -360,7 +379,6 @@ namespace ActsTrk {
     filterCfg.deltaRMin = m_deltaRMin;
     filterCfg.maxSeedsPerSpM = m_maxSeedsPerSpM;
     filterCfg.useDeltaRorTopRadius = m_useDeltaRorTopRadius;
-    filterCfg.curvatureSortingInFilter = m_curvatureSortingInFilter;
     filterCfg.seedConfirmation = m_seedConfirmationInFilter;
     filterCfg.maxSeedsPerSpMConf = m_maxSeedsPerSpMConf;
     filterCfg.maxQualitySeedsPerSpMConf = m_maxQualitySeedsPerSpMConf;

@@ -57,7 +57,6 @@ namespace ActsTrk {
     ATH_MSG_DEBUG("   " << m_maxSeedsPerSpM);
     ATH_MSG_DEBUG("   " << m_compatSeedLimit);
 
-    ATH_MSG_DEBUG("   " << m_curvatureSortingInFilter);
     ATH_MSG_DEBUG("   " << m_seedWeightIncrement);
     ATH_MSG_DEBUG("   " << m_numSeedIncrement);
 
@@ -137,7 +136,6 @@ namespace ActsTrk {
     filterCfg.deltaRMin = m_deltaRMin;
     filterCfg.maxSeedsPerSpM = m_maxSeedsPerSpM;
     filterCfg.compatSeedLimit = m_compatSeedLimit;
-    filterCfg.curvatureSortingInFilter = m_curvatureSortingInFilter;
     filterCfg.seedWeightIncrement = m_seedWeightIncrement;
     filterCfg.numSeedIncrement = m_numSeedIncrement;
     filterCfg.seedConfirmation = m_seedConfirmationInFilter;

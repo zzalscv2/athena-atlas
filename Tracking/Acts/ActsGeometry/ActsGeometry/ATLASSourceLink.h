@@ -108,7 +108,7 @@ struct ATLASSourceLinkCalibrator final
 template <typename trajectory_t, typename sourceLink_t>
 void ATLASSourceLinkCalibrator::calibrate(const Acts::GeometryContext& /*gctx*/,
 					  typename Acts::MultiTrajectory<trajectory_t>::TrackStateProxy trackState) {
-  const auto& sourceLink = trackState.uncalibratedSourceLink().template get<sourceLink_t>();
+  auto sourceLink = trackState.getUncalibratedSourceLink().template get<sourceLink_t>();
   trackState.allocateCalibrated(sourceLink.dim());
   if (sourceLink.dim() == 0)
   {

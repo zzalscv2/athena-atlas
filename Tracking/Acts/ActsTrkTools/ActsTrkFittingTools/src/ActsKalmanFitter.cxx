@@ -160,7 +160,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
   auto result = m_fitter->fit(begin, end,			      
     scaledInitialParams, kfOptions, tracks);
   if (result.ok()) {
-    track = makeTrack<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail_tc::ValueHolder>(ctx, tgContext, tracks, result);
+    track = makeTrack<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail::ValueHolder>(ctx, tgContext, tracks, result);
   }
   return track;
 }
@@ -229,7 +229,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
   auto result = m_fitter->fit(begin, end,
     initialParams, kfOptions, tracks);
   if (result.ok()) {
-    track = makeTrack<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail_tc::ValueHolder>(ctx, tgContext, tracks, result);
+    track = makeTrack<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail::ValueHolder>(ctx, tgContext, tracks, result);
   }
   return track;
 }
@@ -330,7 +330,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
   auto result = m_fitter->fit(begin, end,
     initialParams, kfOptions, tracks);
   if (result.ok()) {
-    track = makeTrack<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail_tc::ValueHolder>(ctx, tgContext, tracks, result);
+    track = makeTrack<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail::ValueHolder>(ctx, tgContext, tracks, result);
   }
   return track;
 }
@@ -439,7 +439,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
   auto result = m_fitter->fit(begin, end,
     scaledInitialParams, kfOptions, tracks);
   if (result.ok()) {
-    track = makeTrack<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail_tc::ValueHolder>(ctx, tgContext, tracks, result);
+    track = makeTrack<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail::ValueHolder>(ctx, tgContext, tracks, result);
   }
   return track;
 }

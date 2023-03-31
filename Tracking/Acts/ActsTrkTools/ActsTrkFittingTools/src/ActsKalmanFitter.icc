@@ -19,8 +19,8 @@ template<typename track_container_t, typename traj_t,
 std::unique_ptr<Trk::Track> 
 ActsKalmanFitter::makeTrack(const EventContext& ctx,
 			    Acts::GeometryContext& tgContext,
-			    Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail_tc::ValueHolder>& tracks,
-			    Acts::Result<typename  Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail_tc::ValueHolder>::TrackProxy, std::error_code>& fitResult) const {
+			    Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail::ValueHolder>& tracks,
+			    Acts::Result<typename  Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail::ValueHolder>::TrackProxy, std::error_code>& fitResult) const {
 			  
 			
   if (not fitResult.ok()) 
@@ -124,7 +124,7 @@ ActsKalmanFitter::makeTrack(const EventContext& ctx,
 
     std::unique_ptr<const Trk::MeasurementBase> measState;
     if (state.hasUncalibratedSourceLink()){
-      const auto& sl = state.uncalibratedSourceLink().template get<ATLASSourceLink>();
+      auto sl = state.getUncalibratedSourceLink().template get<ATLASSourceLink>();
       measState = sl.atlasHit().uniqueClone();
     }
     double nDoF = state.calibratedSize();

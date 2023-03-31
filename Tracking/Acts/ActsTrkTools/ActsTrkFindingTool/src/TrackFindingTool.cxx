@@ -420,8 +420,8 @@ namespace ActsTrk
   size_t
   TrackFindingTool::makeTracks(const EventContext &ctx,
                                const Acts::GeometryContext &tgContext,
-                               const Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail_tc::ValueHolder> &tracks,
-                               const std::vector<typename Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail_tc::ValueHolder>::TrackProxy> &fitResult,
+                               const Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail::ValueHolder> &tracks,
+                               const std::vector<typename Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail::ValueHolder>::TrackProxy> &fitResult,
                                ::TrackCollection &tracksContainer) const
   {
     size_t ntracks = 0;
@@ -516,7 +516,7 @@ namespace ActsTrk
             std::unique_ptr<const Trk::MeasurementBase> measState;
             if (state.hasUncalibratedSourceLink())
             {
-              const auto &sl = state.uncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
+              auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
               const xAOD::UncalibratedMeasurement &uncalibMeas = sl.atlasHit();
               measState = makeRIO_OnTrack(uncalibMeas, parm.get());
             }
