@@ -59,6 +59,7 @@ namespace FlavorTagDiscriminants {
   {
     std::string name;
     EDMType type;
+    bool flip_sign;
   };
   struct FTagTrackSequenceConfig
   {
