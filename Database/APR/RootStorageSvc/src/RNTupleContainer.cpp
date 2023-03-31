@@ -172,14 +172,14 @@ DbStatus RNTupleContainer::open( DbDatabase& dbH, const std::string& nam,
             log << DbPrintLvl::Debug << "Grouped Container '" << ntupleName << "/" << fieldName << "'" << DbPrint::endmsg;
          }
       }
+      // prepare descriptions for all object data members (aka columns)
       m_fieldDescs.reserve( cols.size() );
       for( const auto& col : cols ) {
-         string fname = fieldName.empty()? col->name() : fieldName;
-         for( auto& c : fname )  if( !::isalnum(c) ) c = '_';
-
          m_fieldDescs.emplace_back( *col );
          FieldDesc& dsc = m_fieldDescs.back();
-         dsc.fieldname = fname;
+         dsc.fieldname = fieldName.empty()? col->name() : fieldName;
+         dsc.sgkey = dsc.fieldname;  // remember the original name (usually coming from SG Key)
+         for( auto& c : dsc.fieldname )  if( !std::isalnum(c) ) c = '_';
          if( dsc.typeID() == DbColumn::BLOB or dsc.typeID() == DbColumn::ANY or dsc.typeID() == DbColumn::POINTER ) {
             if( initObjectFieldDesc(dsc) != Success )
                return Error;
@@ -250,16 +250,16 @@ RNTupleContainer::initObjectFieldDesc( FieldDesc& dsc )
    if( dsc.clazz )  {
       if ( dsc.clazz->GetStreamerInfo() and dsc.clazz->HasDictionary() )  {
          // AUX STORE specifics
-         if( RootAuxDynIO::hasAuxStore(dsc.fieldname, dsc.clazz) ) {
+         if( RootAuxDynIO::hasAuxStore(dsc.sgkey, dsc.clazz) ) {
             TClass *storeTClass = dsc.clazz->GetBaseClass("SG::IAuxStoreIO");
             if( storeTClass ) {
                // This is a class implementing SG::IAuxStoreIO
                // Provide writers for its dynamic attibutes
                dsc.aux_iostore_IFoffset = dsc.clazz->GetBaseClassOffset( storeTClass );
+               // get rid of the AUX_POSTFIX dot at the end (converter to _ earlier)
+               auto last = dsc.fieldname.end() - 1;
+               if( *last == '_' )  *last = ':';
             }
-            // get rid of the dot at the end of AUX_POSTFIX
-            auto last = dsc.fieldname.end() - 1;
-            if( *last == '.' )  *last = ':';
          }
          return Success;
       } else {

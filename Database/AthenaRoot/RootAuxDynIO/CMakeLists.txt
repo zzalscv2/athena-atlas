@@ -10,7 +10,8 @@ find_package( VDT )
 atlas_add_library( RootAuxDynIO
                    src/*.cxx
                    PUBLIC_HEADERS RootAuxDynIO
-                   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}  ${VDT_INCLUDE_DIRS}
+                   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+                      ${VDT_INCLUDE_DIRS} #VDT needed by RNTuple 
                    LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps
                    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES}
                      AthContainers AthContainersInterfaces AthContainersRoot CxxUtils RootUtils

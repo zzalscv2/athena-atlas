@@ -47,9 +47,9 @@ namespace pool  {
       struct FieldDesc : public DbColumn
       {
          std::string    fieldname;
+         std::string    sgkey;
          TClass*        clazz  = nullptr;
          void*          object = nullptr;
-         void*          buffer = nullptr;
 
          // ----  extra variables used for AuxDyn attributes
          // number of rows written to this branch so far
