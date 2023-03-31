@@ -37,13 +37,6 @@ ToolSvc += cfgtool
 jps.AthenaCommonFlags.FilesInput = FilesInput
 
 
-##### Histogram File Part #################
-from AthenaMonitoring.AthenaMonitoringConf import AthenaMonManager
-
-HLTMonManager = CfgMgr.AthenaMonManager( "HLTMonManager")
-algseq += HLTMonManager
-# HLTMonManager = algseq.HLTMonManager
-
 doTier0Mon = False
 
 if 'doTIDATier0' in locals():
