@@ -315,6 +315,7 @@ def IDTIDECfg(configFlags):
     # Define contents of the format
     # =============================
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     IDTIDESlimmingHelper = SlimmingHelper("IDTIDESlimmingHelper", NamesAndTypes = configFlags.Input.TypedCollections, ConfigFlags = configFlags)
 
@@ -434,6 +435,7 @@ def IDTIDECfg(configFlags):
     # Output stream    
     IDTIDEItemList = IDTIDESlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(configFlags, "DAOD_IDTIDE", ItemList=IDTIDEItemList, AcceptAlgs=["IDTIDEKernel"]))
+    acc.merge(InfileMetaDataCfg(configFlags, "DAOD_IDTIDE", AcceptAlgs=["IDTIDEKernel"]))
 
     return acc
 

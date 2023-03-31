@@ -46,6 +46,7 @@ def TEST6Cfg(ConfigFlags):
     acc.merge(TEST6KernelCfg(ConfigFlags, name="TEST6Kernel", PreselectionName="TEST6PreselectionKernel"))
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     TEST6SlimmingHelper = SlimmingHelper("TEST6SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
     TEST6SlimmingHelper.SmartCollections = ["EventInfo",
@@ -68,5 +69,6 @@ def TEST6Cfg(ConfigFlags):
     TEST6ItemList = TEST6SlimmingHelper.GetItemList()
 
     acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_TEST6", ItemList=TEST6ItemList, AcceptAlgs=["TEST6Kernel"]))
+    acc.merge(InfileMetaDataCfg(ConfigFlags, "DAOD_TEST6", AcceptAlgs=["TEST6Kernel"]))
 
     return acc

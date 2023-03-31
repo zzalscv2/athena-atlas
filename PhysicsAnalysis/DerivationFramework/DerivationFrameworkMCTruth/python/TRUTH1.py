@@ -83,12 +83,11 @@ def TRUTH1Cfg(ConfigFlags):
     from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
     addTruth3ContentToSlimmerTool(TRUTH1SlimmingHelper)
     
-    # Metadata
-    TRUTH1MetaDataItems = [ "xAOD::TruthMetaDataContainer#TruthMetaData", "xAOD::TruthMetaDataAuxContainer#TruthMetaDataAux." ] 
-
     # Generate item list and create stream 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
     TRUTH1ItemList = TRUTH1SlimmingHelper.GetItemList()
-    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_TRUTH1", ItemList=TRUTH1ItemList, MetadataItemList=TRUTH1MetaDataItems))
+    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_TRUTH1", ItemList=TRUTH1ItemList))
+    acc.merge(InfileMetaDataCfg(ConfigFlags, "DAOD_TRUTH1"))
 
     return acc

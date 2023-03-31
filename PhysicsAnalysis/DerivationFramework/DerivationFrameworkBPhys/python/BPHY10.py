@@ -257,6 +257,7 @@ def BPHY10Cfg(ConfigFlags):
                                                      ThinningTools     = []))
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
     BPHY10SlimmingHelper = SlimmingHelper("BPHY10SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
     AllVariables  = getDefaultAllVariables()
@@ -321,5 +322,6 @@ def BPHY10Cfg(ConfigFlags):
     BPHY10SlimmingHelper.SmartCollections = []
     BPHY10ItemList = BPHY10SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_BPHY10", ItemList=BPHY10ItemList, AcceptAlgs=["BPHY10Kernel"]))
+    acc.merge(InfileMetaDataCfg(ConfigFlags, "DAOD_BPHY10", AcceptAlgs=["BPHY10Kernel"]))
     acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True, printComponentsOnly=False)
     return acc

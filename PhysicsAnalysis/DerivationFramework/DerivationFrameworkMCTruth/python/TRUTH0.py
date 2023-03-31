@@ -37,12 +37,11 @@ def TRUTH0Cfg(ConfigFlags):
                                           'TruthVertices',
                                           'TruthParticles']
 
-    # Metadata
-    TRUTH0MetaDataItems = [ "xAOD::TruthMetaDataContainer#TruthMetaData", "xAOD::TruthMetaDataAuxContainer#TruthMetaDataAux." ]
-
     # Create output stream 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
     TRUTH0ItemList = TRUTH0SlimmingHelper.GetItemList()
-    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_TRUTH0", ItemList=TRUTH0ItemList, MetadataItemList=TRUTH0MetaDataItems))
+    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_TRUTH0", ItemList=TRUTH0ItemList))
+    acc.merge(InfileMetaDataCfg(ConfigFlags, "DAOD_TRUTH0"))
  
     return acc
