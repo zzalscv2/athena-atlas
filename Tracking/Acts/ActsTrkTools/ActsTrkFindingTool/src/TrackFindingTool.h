@@ -74,8 +74,8 @@ namespace ActsTrk
     size_t
     makeTracks(const EventContext &ctx,
                const Acts::GeometryContext &tgContext,
-               const Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail_tc::ValueHolder> &tracks,
-               const std::vector<typename Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail_tc::ValueHolder>::TrackProxy> &fitOutput,
+               const Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail::ValueHolder> &tracks,
+               const std::vector<typename Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail::ValueHolder>::TrackProxy> &fitOutput,
                ::TrackCollection &tracksContainer) const;
 
     std::unique_ptr<const Trk::MeasurementBase>

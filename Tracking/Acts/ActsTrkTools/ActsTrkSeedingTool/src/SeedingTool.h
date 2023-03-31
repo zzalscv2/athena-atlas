@@ -106,8 +106,6 @@ namespace ActsTrk {
       "limiting location of measurements"};
     Gaudi::Property< float > m_binSizeR {this, "binSizeR", 1. * Acts::UnitConstants::mm,
       "defining radial bin for space point sorting"};
-    Gaudi::Property< bool > m_forceRadialSorting {this, "forceRadialSorting", true,
-      "enable radial sorting in space point grid"};
     Gaudi::Property< float > m_deltaRMin {this, "deltaRMin", 20. * Acts::UnitConstants::mm,
       "minimum distance in r between two measurements within one seed"}; // Used in SeedFilterConfig as well
     Gaudi::Property< float > m_deltaRMinTopSP {this, "deltaRMinTopSP", 6. * Acts::UnitConstants::mm,
@@ -128,7 +126,7 @@ namespace ActsTrk {
       "how many sigmas of scattering angle should be considered"};
     Gaudi::Property< float > m_maxPtScattering {this, "maxPtScattering", 10e6,
       "Upper pt limit for scattering calculation"};
-    Gaudi::Property< float > m_radLengthPerSeed {this, "radLengthPerSeed", 0.1,
+    Gaudi::Property< float > m_radLengthPerSeed {this, "radLengthPerSeed", 0.0975,
       "average radiation lengths of material on the length of a seed. used for scattering"};
     Gaudi::Property< int > m_maxSeedsPerSpM {this, "maxSeedsPerSpM", 4,
       "In dense environments many seeds may be found per middle space point. Only seeds with the highest weight will be kept if this limit is reached."}; // Used in SeedFilterConfig as well
@@ -223,8 +221,6 @@ namespace ActsTrk {
       "increment in seed weight if needed"};
     Gaudi::Property< float > m_numSeedIncrement {this, "numSeedIncrement", 10e6,
       "increment in seed weight is applied if the number of compatible seeds is larger than numSeedIncrement"};
-    Gaudi::Property< bool > m_curvatureSortingInFilter {this, "curvatureSortingInFilter", true,
-      "sort seed vectors by curvature"};
     Gaudi::Property< bool > m_seedConfirmationInFilter {this, "seedConfirmationInFilter", true,
       "run seed confirmation"};
     Gaudi::Property< std::size_t > m_maxSeedsPerSpMConf {this, "maxSeedsPerSpMConf", 5,

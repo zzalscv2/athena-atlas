@@ -455,8 +455,8 @@ namespace ActsTrk
 
   void
   TrackStatePrinter::printTracks(const Acts::GeometryContext &tgContext,
-                                 const Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail_tc::ValueHolder> &tracks,
-                                 const std::vector<typename Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail_tc::ValueHolder>::TrackProxy> &fitResult,
+                                 const Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail::ValueHolder> &tracks,
+                                 const std::vector<typename Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail::ValueHolder>::TrackProxy> &fitResult,
                                  const Acts::BoundTrackParameters &seed,
                                  size_t iseed,
                                  size_t ntracks) const

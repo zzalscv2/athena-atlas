@@ -130,9 +130,6 @@ namespace ActsTrk {
     Gaudi::Property<std::size_t> m_compatSeedLimit {this, "compatSeedLimit", 3,
 	"How often do you want to increase the weight of a seed for finding a compatible seed"};
 
-    Gaudi::Property<bool> m_curvatureSortingInFilter {this, "curvatureSortingInFilter", true,
-	"Sort vectors by curvature"};
-
     Gaudi::Property<float> m_seedWeightIncrement {this, "seedWeightIncrement", 0};
     Gaudi::Property<float> m_numSeedIncrement {this, "numSeedIncrement", 3.40282e+38}; // cannot use std::numeric_limits<float>::infinity() 
 
