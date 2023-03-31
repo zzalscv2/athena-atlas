@@ -686,7 +686,7 @@ namespace top {
       met::METSystematicsTool* metSyst = new met::METSystematicsTool("met::METSystematicsTool");
       
       std::string METconfigDir = m_config->METUncertaintiesConfigDir();
-      if (METconfigDir == "Latest") METconfigDir = "METUtilities/run2_13TeV/"; //Find calib files here: /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/METUtilities/
+      if (METconfigDir == "Latest") METconfigDir = "METUtilities/R22_PreRecs"; //Find calib files here: /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/METUtilities/
       top::check(metSyst->setProperty("ConfigPrefix", METconfigDir), "Failed to set METsyst calibration area"); //Set calib area explicitly - removes potential for crash when default area is changed in METSyst code
       // TST (Track soft terms)
       if (m_config->useParticleFlowJets()) {
