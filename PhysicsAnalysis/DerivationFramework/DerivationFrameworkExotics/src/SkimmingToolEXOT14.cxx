@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -79,7 +79,7 @@ StatusCode DerivationFramework::SkimmingToolEXOT14::initialize()
 
   ////////////////////////////
   // trigger decision tool
-  if(m_trigDecisionTool.retrieve().isFailure()) {
+  if(m_trigDecisionTool.retrieve(DisableTool{!m_reqTrigger}).isFailure()) {
     ATH_MSG_FATAL("Failed to retrieve tool: " << m_trigDecisionTool);
     return StatusCode::FAILURE;
   }
