@@ -612,11 +612,6 @@ def getDevSignatures():
         ChainProp(name="HLT_tau160_idperf_trackLRT_L1TAU100", groups=DevGroup, monGroups=['tauMon:t0']), 
 
         
-        # [ATR-26629 ] Request of adding support tau20_idperf/perf chains
-        ChainProp(name="HLT_tau20_perf_tracktwoMVA_L1TAU8", groups=DevGroup),
-        ChainProp(name="HLT_tau20_idperf_tracktwoMVA_L1TAU8", groups=DevGroup),
-        ChainProp(name="HLT_tau20_perf_tracktwoMVA_L1eTAU12", groups=DevGroup),
-        ChainProp(name="HLT_tau20_idperf_tracktwoMVA_L1eTAU12", groups=DevGroup),
     ]
 
     chains['Bphysics'] = [
