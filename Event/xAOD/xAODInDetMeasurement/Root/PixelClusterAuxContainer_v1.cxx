@@ -14,6 +14,7 @@ namespace xAOD {
         AUX_VARIABLE(rdoList);
         AUX_VARIABLE(channelsInPhi);
         AUX_VARIABLE(channelsInEta);
+	AUX_VARIABLE(widthInEta);
         AUX_VARIABLE(omegaX);
         AUX_VARIABLE(omegaY);
         AUX_VARIABLE(totList);

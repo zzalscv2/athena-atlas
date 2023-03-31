@@ -112,6 +112,7 @@ public:
 	pixelCl->setChargelist(chargeList);
 	pixelCl->setLVL1A(lvl1a);
 	pixelCl->setChannelsInPhiEta(width.colRow()[0], width.colRow()[1]);
+	pixelCl->setWidthInEta(static_cast<float>(width.widthPhiRZ()[1]));
 	pixelCl->setOmegas(omegax, omegay);
 	pixelCl->setIsSplit(split);
 	pixelCl->setSplitProbabilities(splitProb1, splitProb2);

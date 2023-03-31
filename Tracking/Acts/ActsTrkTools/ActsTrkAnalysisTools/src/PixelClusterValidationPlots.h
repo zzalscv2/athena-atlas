@@ -76,6 +76,9 @@ namespace ActsTrk {
     TH1* m_sizeY_barrel {};
     TH1* m_sizeY_endcap {};
 
+    TH1* m_widthY_barrel {};
+    TH1* m_widthY_endcap {};
+
     TH2* m_global_xy_barrel {};
     TH2* m_global_xy_endcap {};
 

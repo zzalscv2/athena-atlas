@@ -33,6 +33,7 @@ namespace xAOD {
         std::vector < std::vector < Identifier::value_type > > rdoList;
         std::vector < int > channelsInPhi;
         std::vector < int > channelsInEta;
+	std::vector < float > widthInEta;
         std::vector < float > omegaX;
         std::vector < float > omegaY;
         std::vector < std::vector < int > > totList;
