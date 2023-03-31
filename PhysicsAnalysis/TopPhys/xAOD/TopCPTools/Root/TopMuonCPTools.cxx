@@ -297,7 +297,8 @@ namespace top {
                    "Failed to set CustomInputFolder property for MuonEfficiencyScaleFactors tool");
       }
       if (m_config->isRun3()) {
-        top::check(asg::setProperty(tool, "CalibrationRelease", "230123_Preliminary_r22run3"),
+	// the MuonEfficiencyScaleFactors tool is set up for Run 2 by default
+        top::check(asg::setProperty(tool, "CalibrationRelease", "230309_Preliminary_r22run3"),
                    "Failed to set CalibrationRelease property for MuonEfficiencyScaleFactors tool");
       }
       top::check(asg::setProperty(tool, "BreakDownSystematics", m_config->muonBreakDownSystematics()), 
@@ -326,6 +327,11 @@ namespace top {
       if (m_config->isMC() && m_config->forceRandomRunNumber() > 0) {
         top::check(asg::setProperty(tool, "useRandomRunNumber", false),
                    "Failed to set useRandomRunNumber for " + name + " tool");
+      }
+      if (!m_config->isRun3()) {
+	// the MuonCalib tool is set up for Run 3 by default
+	top::check(asg::setProperty(tool, "release", "Recs2022_08_16_Run3PreRecs"),
+		   "Failed to set Run 2 release for " + name + " tool");
       }
       if (m_config->muonCalibMode() == "correctData_CB")
         top::check(asg::setProperty(tool, "calibMode", CP::MuonCalibTool::CalibMode::correctData_CB), "Failed to set calibrationMode for " + name + " tool");
