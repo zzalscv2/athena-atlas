@@ -145,6 +145,7 @@ be enabled by setting the tops as undecayed (for example
 |    `PowhegConfig.MadSpin_nFlavours`     |                     4 | which flavour scheme to use                                          |
 |     `PowhegConfig.MadSpin_process`      |     process-dependent | process that MadSpin is operating on                                 |
 | `PowhegConfig.MadSpin_taus_are_leptons` |                  True | whether lepton definitions should include taus                       |
+|     `PowhegConfig.MadSpin_paramcard`    |       an empty string | if not empty, dump the param card from the string into the lhe file  |
 
 **You** are responsible for ensuring that the options passed to MadSpin
 are correct. A common error is requesting `MadSpin_decays` or
