@@ -10,6 +10,8 @@ from .chi1chi1 import chi1chi1
 from .DMGG import DMGG
 from .DMS_tloop import DMS_tloop
 from .DMV import DMV
+from .DY_VLQ import DY_VLQ
+from .DY_SLQ import DY_SLQ
 from .fourtops import fourtops
 from .gg4l import gg4l
 from .ggF_H import ggF_H
