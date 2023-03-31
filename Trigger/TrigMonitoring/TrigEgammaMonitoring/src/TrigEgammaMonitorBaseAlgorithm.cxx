@@ -311,7 +311,11 @@ float TrigEgammaMonitorBaseAlgorithm::getDEmaxs1(const xAOD::Egamma *eg) const{
         eg->showerShapeValue(emax2, xAOD::EgammaParameters::e2tsts1);
         float emax=0.;
         eg->showerShapeValue(emax, xAOD::EgammaParameters::emaxs1);
-        float val = fabs(emax+emax2)>0. ? (emax-emax2)/(emax+emax2) : 0.;
+        float den = emax+emax2;
+        
+        if (fabs(den) < 1e-6) return -99.;
+
+        float val = (emax-emax2)/(den);
         return val;
     }
     else return -99.;
@@ -324,10 +328,12 @@ float TrigEgammaMonitorBaseAlgorithm::rTRT  (const xAOD::Electron* eg) const{
         eg->trackParticleSummaryValue(trtHits,xAOD::numberOfTRTHits);
         uint8_t trtHTHits = 0;
         eg->trackParticleSummaryValue(trtHTHits,xAOD::numberOfTRTHighThresholdHits);
-        if(trtHits!=0) {
+        if (fabs(trtHits) < 1e-6) {
+            return -99.;
+        }
+        else{
             return ( (double)trtHTHits / (double)trtHits );
         }
-        else return -99.;
     }
     else return -99.;
 }
@@ -354,12 +360,13 @@ float TrigEgammaMonitorBaseAlgorithm::getD0sig(const xAOD::Electron *eg) const{
     float d0sigma=0.;
     if (t)
     {
-
         float vard0 = t->definingParametersCovMatrix()(0,0);
         if (vard0 > 0) {
             d0sigma=sqrtf(vard0);
         }
         else return -99.;
+
+        if (fabs(d0sigma) < 1e-6) return -99.;
         return t->d0()/d0sigma;
     }
     else return -99.;
@@ -427,10 +434,6 @@ float TrigEgammaMonitorBaseAlgorithm::getE0Eaccordion(const xAOD::Egamma *eg) co
     }
     else return 0.;
 }
-
-
-
-
 
 
 /*! Macros for plotting */

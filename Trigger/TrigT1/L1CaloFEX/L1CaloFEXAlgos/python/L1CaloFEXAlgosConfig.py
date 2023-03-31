@@ -139,7 +139,7 @@ if __name__ == '__main__':
     ########################################
     if 'jTOBs' in args.outputs:
         from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import jFexRoiByteStreamToolCfg
-        jFexTool = jFexRoiByteStreamToolCfg('jFexBSDecoder', flags)
+        jFexTool = acc.popToolsAndMerge(jFexRoiByteStreamToolCfg(flags, 'jFexBSDecoder'))
         for module_id in jFexTool.ROBIDs:
             maybeMissingRobs.append(module_id)
 
@@ -150,7 +150,7 @@ if __name__ == '__main__':
     # jFEX input Data
     ########################################
     if 'jTowers' in args.outputs:
-        inputjFexTool = jFexInputByteStreamToolCfg('jFexInputBSDecoder', flags)
+        inputjFexTool = acc.popToolsAndMerge(jFexInputByteStreamToolCfg(flags, 'jFexInputBSDecoder'))
         for module_id in inputjFexTool.ROBIDs:
             maybeMissingRobs.append(module_id)
 
@@ -164,7 +164,7 @@ if __name__ == '__main__':
     ########################################
     if 'eTOBs' in args.outputs:
         from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import eFexByteStreamToolCfg
-        eFexTool = eFexByteStreamToolCfg('eFexBSDecoder', flags, TOBs=True, xTOBs=False, decodeInputs=False)
+        eFexTool = acc.popToolsAndMerge(eFexByteStreamToolCfg(flags, 'eFexBSDecoder', TOBs=True, xTOBs=False, decodeInputs=False))
         for module_id in eFexTool.ROBIDs:
             maybeMissingRobs.append(module_id)
 
@@ -184,7 +184,7 @@ if __name__ == '__main__':
     ########################################
     if 'gTOBs' in args.outputs:
         from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import gFexByteStreamToolCfg
-        gFexTool = gFexByteStreamToolCfg('gFexBSDecoder', flags)
+        gFexTool = acc.popToolsAndMerge(gFexByteStreamToolCfg(flags, 'gFexBSDecoder'))
         decoderTools += [gFexTool]
 
 
@@ -192,7 +192,7 @@ if __name__ == '__main__':
     # gFEX input Data
     ########################################
     if 'gTowers' in args.outputs:
-        inputgFexTool = gFexInputByteStreamToolCfg('gFexInputBSDecoder', flags)
+        inputgFexTool = acc.popToolsAndMerge(gFexInputByteStreamToolCfg(flags, 'gFexInputBSDecoder'))
         decoderTools += [inputgFexTool]
         # saving/adding the gTower xAOD container
         outputEDM += addEDM('xAOD::gFexTowerContainer', inputgFexTool.gTowersWriteKey.Path)

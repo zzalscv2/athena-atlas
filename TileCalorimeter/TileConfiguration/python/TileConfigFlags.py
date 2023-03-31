@@ -37,6 +37,7 @@ def createTileConfigFlags():
      tcf.addFlag('Tile.useDCS', _useDCS)
      tcf.addFlag('Tile.TimingType', _getTimingType)
      tcf.addFlag('Tile.doTimingHistogramsForGain', -1) # Production of Tile timing histograms per channel (< 0: switched off)
+     tcf.addFlag('Tile.useOnlineChannelStatus', True) # Use online DB with channel/adc status
 
      return tcf
 

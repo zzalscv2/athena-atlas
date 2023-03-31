@@ -6,7 +6,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import Format
 
-def jFexEmulatedTowersCfg(  flags, name, writeKey="L1_jFexEmulatedTowers"):
+def jFexEmulatedTowersCfg(flags, name, writeKey="L1_jFexEmulatedTowers"):
     """
     Config for emulating jFex input data from LATOME readout
     """
@@ -124,13 +124,12 @@ if __name__ == '__main__':
     # Emulated jFex Towers
     ########################################
     if 'jTowers' in args.outputs:
-        jFexEmulatedTool = jFexEmulatedTowersCfg(flags,'jFexEmulatedTowers')
-        acc.merge(jFexEmulatedTool)
+        acc.merge(jFexEmulatedTowersCfg(flags,'jFexEmulatedTowers'))
         outputEDM += addEDM('xAOD::jFexTowerContainer', 'L1_jFexEmulatedTowers')
         
         # decode any data towers for comparison with emulated
         from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import jFexInputByteStreamToolCfg
-        inputjFexTool = jFexInputByteStreamToolCfg('jFexInputBSDecoder', flags)
+        inputjFexTool = acc.popToolsAndMerge(jFexInputByteStreamToolCfg(flags, 'jFexInputBSDecoder'))
         for module_id in inputjFexTool.ROBIDs:
             maybeMissingRobs.append(module_id)
 
@@ -142,13 +141,13 @@ if __name__ == '__main__':
     # Emulated eFex     
     ########################################
     if 'eTowers' in args.outputs:
-        eFexEmulatedTool = eFexEmulatedTowersCfg(flags,'L1_eFexEmulatedTowers')
-        acc.merge(eFexEmulatedTool)
+        acc.merge(eFexEmulatedTowersCfg(flags,'L1_eFexEmulatedTowers'))
         outputEDM += addEDM('xAOD::eFexTowerContainer', 'L1_eFexEmulatedTowers')
 
         # decode any data towers for comparison with emulated
         from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import eFexByteStreamToolCfg
-        inputeFexTool = eFexByteStreamToolCfg('eFexBSDecoder', flags,TOBs=False,xTOBs=False,decodeInputs=True)
+        inputeFexTool = acc.popToolsAndMerge(eFexByteStreamToolCfg(
+            flags,'eFexBSDecoder',TOBs=False,xTOBs=False,decodeInputs=True))
         for module_id in inputeFexTool.ROBIDs:
             maybeMissingRobs.append(module_id)    
 

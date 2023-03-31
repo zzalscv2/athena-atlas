@@ -52,6 +52,14 @@ Muon::nsw::NSWTriggerMML1AElink::NSWTriggerMML1AElink (const uint32_t *bs, const
     uint32_t current_stream_head_fifo_size = bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPL1A::size_stream_head_fifo_size-1); pp+= Muon::nsw::MMTPL1A::size_stream_head_fifo_size;
     uint32_t current_stream_head_streamID =  bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPL1A::size_stream_head_streamID-1);  pp+= Muon::nsw::MMTPL1A::size_stream_head_streamID;
 
+    //zero padding to multiples of 16bits - TP logic - this is the real number of bits to read
+    current_stream_head_nbits = current_stream_head_nbits%16? ((current_stream_head_nbits+15)/16)*16 : current_stream_head_nbits;
+
+    if (current_stream_head_nwords*current_stream_head_nbits > ((m_wordCountFlx-1) * sizeof(uint32_t) * 8 - pp)){
+      Muon::nsw::NSWTriggerElinkException e ("Stream header corruption? Trying to read more bits than available");
+      throw e;
+    }
+
     m_stream_head_nbits.push_back ( current_stream_head_nbits );
     m_stream_head_nwords.push_back ( current_stream_head_nwords );
     m_stream_head_fifo_size.push_back ( current_stream_head_fifo_size );

@@ -925,38 +925,45 @@ bool InDet::SiCombinatorialTrackFinder_xk::spacePointsToClusters
 bool InDet::SiCombinatorialTrackFinder_xk::spacePointsToClusters
 (const std::vector<const Trk::SpacePoint*>& Sp, std::vector<const InDet::SiCluster*>& Sc, std::vector<const InDetDD::SiDetectorElement*>& DE)
 {
+  Sc.reserve(Sp.size());
   /// loop over all SP
-  for (const Trk::SpacePoint* s: Sp) {
-    /// get the first cluster on an SP
-    const Trk::PrepRawData* p = s->clusterList().first;
-    if (p) {
-      /// add to list
-      const InDet::SiCluster* c = static_cast<const InDet::SiCluster*>(p);
-      if (c) Sc.push_back(c);
-    }
-    /// for strips, also make sure to pick up the second one!
-    p = s->clusterList().second;
-    if (p) {
-      const InDet::SiCluster* c = static_cast<const InDet::SiCluster*>(p);
-      if (c) Sc.push_back(c);
-    }
+  for (const Trk::SpacePoint* s : Sp) {
+     /// get the first cluster on an SP
+     const Trk::PrepRawData* p = s->clusterList().first;
+     if (p) {
+        /// add to list
+        const InDet::SiCluster* c = static_cast<const InDet::SiCluster*>(p);
+        if (c){
+          Sc.push_back(c);
+        }
+     }
+     /// for strips, also make sure to pick up the second one!
+     p = s->clusterList().second;
+     if (p) {
+        const InDet::SiCluster* c = static_cast<const InDet::SiCluster*>(p);
+        if (c){
+          Sc.push_back(c);
+        }
+     }
   }
 
   ///  Detector elments test
   std::vector<const InDet::SiCluster*>::iterator cluster = Sc.begin(), nextCluster, endClusters = Sc.end();
 
-  /// here we reject cases where two subsequent clusters are on the same detector element
-  for (; cluster!=endClusters; ++cluster) {
+  /// here we reject cases where two subsequent clusters are on the same
+  /// detector element
+  for (; cluster != endClusters; ++cluster) {
 
-    const InDetDD::SiDetectorElement* de = (*cluster)->detectorElement();
-    DE.push_back(de);
+     const InDetDD::SiDetectorElement* de = (*cluster)->detectorElement();
+     DE.push_back(de);
 
-    nextCluster = cluster;
-    ++nextCluster;
-    for (; nextCluster!=endClusters; ++nextCluster) {
-      if (de == (*nextCluster)->detectorElement()) return false;
-    }
-
+     nextCluster = cluster;
+     ++nextCluster;
+     for (; nextCluster != endClusters; ++nextCluster) {
+        if (de == (*nextCluster)->detectorElement()){
+          return false;
+        }
+     }
   }
   return true;
 }

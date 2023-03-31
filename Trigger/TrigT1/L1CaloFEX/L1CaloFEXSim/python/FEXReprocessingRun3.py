@@ -139,7 +139,8 @@ if __name__ == '__main__':
         ##################################################       
         from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import eFexByteStreamToolCfg
         
-        eFexTool = eFexByteStreamToolCfg('eFexBSDecoder', flags,TOBs='eTOBs',xTOBs='exTOBs')
+        eFexTool = acc.popToolsAndMerge(eFexByteStreamToolCfg(
+            flags,'eFexBSDecoder',TOBs='eTOBs',xTOBs='exTOBs'))
         
         decoderTools += [eFexTool]
         maybeMissingRobs += eFexTool.ROBIDs        
@@ -195,7 +196,7 @@ if __name__ == '__main__':
         # jFEX Data TOBs
         ##################################################       
         from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import jFexRoiByteStreamToolCfg
-        jFexRoiByteStreamTool = jFexRoiByteStreamToolCfg('jFexBSDecoderTool', flags=flags, writeBS=False)
+        jFexRoiByteStreamTool = acc.popToolsAndMerge(jFexRoiByteStreamToolCfg(flags, 'jFexBSDecoderTool', writeBS=False))
         
         decoderTools += [jFexRoiByteStreamTool]
         maybeMissingRobs += jFexRoiByteStreamTool.ROBIDs
@@ -208,7 +209,8 @@ if __name__ == '__main__':
         outputEDM += addEDM('xAOD::jFexMETRoIContainer'  , 'L1_jFexMETRoI'  )
         
         #xTOBs 
-        jFexxRoiByteStreamTool = jFexRoiByteStreamToolCfg('jFexBSDecoderTool_xtobs', flags=flags, writeBS=False,xTOBs=True)
+        jFexxRoiByteStreamTool = acc.popToolsAndMerge(jFexRoiByteStreamToolCfg(
+            flags, 'jFexBSDecoderTool_xtobs', writeBS=False, xTOBs=True))
         
         decoderTools += [jFexxRoiByteStreamTool]
         maybeMissingRobs += jFexxRoiByteStreamTool.ROBIDs
@@ -224,7 +226,7 @@ if __name__ == '__main__':
         # jFEX Data Towers
         ##################################################  
         from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import jFexInputByteStreamToolCfg
-        inputjFexTool = jFexInputByteStreamToolCfg('jFexInputBSDecoder', flags)
+        inputjFexTool = acc.popToolsAndMerge(jFexInputByteStreamToolCfg(flags, 'jFexInputBSDecoder'))
         for module_id in inputjFexTool.ROBIDs:
             maybeMissingRobs.append(module_id)
 
@@ -291,7 +293,7 @@ if __name__ == '__main__':
         # gFEX decoded TOBs
         ##################################################       
         from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import gFexByteStreamToolCfg
-        gFexTool = gFexByteStreamToolCfg('gFexBSDecoder', flags)
+        gFexTool = acc.popToolsAndMerge(gFexByteStreamToolCfg(flags, 'gFexBSDecoder'))
         decoderTools += [gFexTool]
                 
         outputEDM += addEDM('xAOD::gFexJetRoIContainer'   , 'L1_gFexRhoRoI'            )
@@ -307,7 +309,7 @@ if __name__ == '__main__':
 
 
         from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import gFexInputByteStreamToolCfg
-        gFexInputTool = gFexInputByteStreamToolCfg('gFexInputBSDecoder', flags)
+        gFexInputTool = acc.popToolsAndMerge(gFexInputByteStreamToolCfg(flags, 'gFexInputBSDecoder'))
         decoderTools += [gFexInputTool]
         outputEDM += addEDM('xAOD::gFexTowerContainer'    , 'L1_gFexDataTowers'        )                
 

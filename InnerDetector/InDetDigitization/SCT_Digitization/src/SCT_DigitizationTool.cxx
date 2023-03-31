@@ -403,7 +403,7 @@ bool SCT_DigitizationTool::digitizeElement(const EventContext& ctx, SiChargedDio
 
   // Loop over the hits and created charged diodes:
   while (i != e) {
-    TimedHitPtr<SiHit> phit{*i++};
+    const TimedHitPtr<SiHit>& phit{*i++};
 
     // skip hits which are more than 10us away
     if (std::abs(phit->meanTime()) < 10000. * CLHEP::ns) {
@@ -468,7 +468,7 @@ StatusCode SCT_DigitizationTool::processBunchXing(int bunchXing,
 		      m_inputObjectName << " found");
     }
 
-    TimedHitCollList::iterator endColl{hitCollList.end()};
+    const TimedHitCollList::iterator endColl{hitCollList.end()};
     for (TimedHitCollList::iterator iColl{hitCollList.begin()}; iColl != endColl; ++iColl) {
       std::unique_ptr<SiHitCollection> hitCollPtr{std::make_unique<SiHitCollection>(*iColl->second)};
       PileUpTimeEventIndex timeIndex{iColl->first};
@@ -565,7 +565,7 @@ std::unique_ptr<SCT_RDO_Collection> SCT_DigitizationTool::createRDO(SiChargedDio
   p_rdocoll->setIdentifier(id_de);
 
   SiChargedDiodeIterator i_chargedDiode{collection->begin()};
-  SiChargedDiodeIterator i_chargedDiode_end{collection->end()};
+  const SiChargedDiodeIterator i_chargedDiode_end{collection->end()};
   // Choice of producing SCT1_RawData or SCT3_RawData
   if (m_WriteSCT1_RawData.value()) {
     for (; i_chargedDiode != i_chargedDiode_end; ++i_chargedDiode) {
@@ -765,14 +765,14 @@ void SCT_DigitizationTool::addSDO(SiChargedDiodeCollection* collection, SG::Writ
   deposits.reserve(5); // no idea what a reasonable number for this would be
   // with pileup
   // loop over the charged diodes
-  SiChargedDiodeIterator EndOfDiodeCollection{collection->end()};
+  const SiChargedDiodeIterator EndOfDiodeCollection{collection->end()};
   for (SiChargedDiodeIterator i_chargedDiode{collection->begin()}; i_chargedDiode != EndOfDiodeCollection; ++i_chargedDiode) {
     deposits.clear();
     const list_t& charges{(*i_chargedDiode).second.totalCharge().chargeComposition()};
 
     bool real_particle_hit{false};
     // loop over the list
-    list_t::const_iterator EndOfChargeList{charges.end()};
+    const list_t::const_iterator EndOfChargeList{charges.end()};
     for (list_t::const_iterator i_ListOfCharges{charges.begin()}; i_ListOfCharges != EndOfChargeList; ++i_ListOfCharges) {
       const HepMcParticleLink& trkLink{i_ListOfCharges->particleLink()};
       const int barcode{trkLink.barcode()};

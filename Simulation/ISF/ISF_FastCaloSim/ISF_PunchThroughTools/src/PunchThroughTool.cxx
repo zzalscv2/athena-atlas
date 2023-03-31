@@ -473,7 +473,7 @@ int ISF::PunchThroughTool::getAllParticles(const ISF::ISFParticle &isfp, ISFPart
       // and ensure that we do not create too many particles
       do
         {
-          numParticles = lround( p->getNumParticlesPDF()->getRand(rndmEngine, parameters) );
+          numParticles = int( p->getNumParticlesPDF()->getRand(rndmEngine, parameters) );
 
           // scale the number of particles if requested
           numParticles = lround( numParticles *= p->getNumParticlesFactor() );

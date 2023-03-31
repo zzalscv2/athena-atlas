@@ -56,6 +56,7 @@ namespace TrigL2MuonSA {
 			     const TrigL2MuonSA::TgcFitResult& tgcFitResult,
 			     TrigL2MuonSA::MuonRoad&           muonRoad,
 			     TrigL2MuonSA::MdtRegion&          mdtRegion) const;
+    static void find_station_sector(const std::string& name, int phi, bool& endcap, int& chamber, int& sector);
     
   private:
     StatusCode prepareTgcPoints(const TrigL2MuonSA::TgcHits& tgcHits);
@@ -67,8 +68,6 @@ namespace TrigL2MuonSA {
 			  float zMax, float rMax,
 			  float& etaMin, float& etaMax) const;
     void find_phi_min_max(float phiMiddle, float& phiMin, float& phiMax) const;
-        
-    void find_station_sector(std::string name, int phi, bool& endcap, int& chamber, int& sector) const;
 
     StatusCode computePhi(const TrigRoiDescriptor*          p_roids,
 			  const TrigL2MuonSA::RpcFitResult& rpcFitResult,

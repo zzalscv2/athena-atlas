@@ -20,7 +20,9 @@
 //======================================================================
 
 #include "../common/PixelMapping.h"
+#include  <filesystem>
 
+namespace fs = std::filesystem;
 using pix::PixelMapping; 
 
 
@@ -38,7 +40,7 @@ double funcDisp(double* x, double* par) {
   return ret;
 }
 
-string getDatetodayStr() {
+std::string getDatetodayStr() {
   time_t t = time(nullptr);
   const tm* localTime = localtime(&t);
   std::stringstream s;
@@ -48,8 +50,8 @@ string getDatetodayStr() {
   return s.str();
 }
 
-void PixelCalib() {
-
+void PixelCalib(bool test=false) {
+  std::cout<<"here we go"<<std::endl;
   /*  Calibration during TS2 September 19, 2017
   IBL:
     THR: 67422 (Note that LI_S06_C_M1_C1 does not have its final tuning here.
@@ -75,6 +77,7 @@ void PixelCalib() {
      Endcap : 4500e
 
   */
+  
 
  //******************************************************************
   int WhichPart = 1; // 0=IBL, 1=BLayer, 2=L1L2, 3=disk, 4=L1, 5=L2;
@@ -100,6 +103,12 @@ void PixelCalib() {
      inThrFile = "/eos/atlas/atlascerngroupdisk/det-ibl/charge-calibration/202207_ALL/SCAN_S000087719.root";
      inTimFile = "/eos/atlas/atlascerngroupdisk/det-ibl/charge-calibration/202207_ALL/SCAN_S000087717.root";
      inTotFile = "/eos/atlas/atlascerngroupdisk/det-ibl/charge-calibration/202207_ALL/SCAN_S000087710.root";
+     if (test){
+       std::cout<<"Selected test files with small samples of input are used"<<std::endl;
+       inThrFile = "../../test/SAMPLE_S000087719.root";
+       inTimFile = "../../test/SAMPLE_S000087717.root";
+       inTotFile = "../../test/SAMPLE_S000087710.root";
+     }
      Output = "Out_BLayer";
   }
   if (WhichPart==2) {
@@ -190,6 +199,13 @@ void PixelCalib() {
     //std::cout << std::endl << "INFO =>> threshold scan analysis..." << std::endl;
 
     TFile riThrFile(inThrFile.c_str(),"READ");
+    if (not riThrFile.IsOpen()){
+      std::cout<<"File "<<inThrFile<<" could not be opened."<<std::endl;
+      return;
+    } else {
+      std::cout<<"File "<<inThrFile<<" opened."<<std::endl;
+    }
+      
     TString chi2HistName = "SCURVE_CHI2";
     TString thrHistName = "SCURVE_MEAN";
     TString sigHistName = "SCURVE_SIGMA";
@@ -204,6 +220,10 @@ void PixelCalib() {
     TList* rodKeyList = (TList*)scanDir->GetListOfKeys();
     TIter rodItr(rodKeyList);
     TKey* rodKey;
+    if (not fs::exists("../common/mapping.csv")){
+      std::cout<< "Mapping problem!"<<std::endl;
+      return;
+    }
     PixelMapping pixmap("../common/mapping.csv");
     if (pixmap.nModules() == 2048){
       std::cout<< "Mapping file opened ok"<<std::endl;
@@ -851,7 +871,12 @@ void PixelCalib() {
 
   if (!inTimFile.empty()) {
     TFile riTimFile(inTimFile.c_str(),"READ");
-
+    if (not riTimFile.IsOpen()){
+      std::cout<<"File "<<inTimFile<<" could not be opened."<<std::endl;
+      return;
+    } else {
+      std::cout<<"File "<<inTimFile<<" opened."<<std::endl;
+    }
     TString timHistName = "SCURVE_MEAN";
 
     TDirectoryFile* scanDir = (TDirectoryFile*)((TKey*)riTimFile.GetListOfKeys()->First())->ReadObj();
@@ -1119,6 +1144,12 @@ void PixelCalib() {
     std::cout << std::endl << "INFO =>> tot calib analysis..." << std::endl;
 
     TFile riTotFile(inTotFile.c_str(),"READ");
+    if (not riTotFile.IsOpen()){
+      std::cout<<"File "<<inTotFile<<" could not be opened."<<std::endl;
+      return;
+    } else {
+      std::cout<<"File "<<inTotFile<<" opened."<<std::endl;
+    }
     TString totHistName = "TOT_MEAN";
     TString totSigHistName = "TOT_SIGMA";
     TH1F h1dTot7("h1dTot7","",64,0,16);
@@ -1261,6 +1292,7 @@ void PixelCalib() {
           TString totHistDirPath = modName + "/" + totHistName + "/A0/B0/C";
           totHistDirPath += i;
           TDirectoryFile* totHistDir = (TDirectoryFile*)rodDir->Get(totHistDirPath);
+          if (not totHistDir) continue;
           TH2F* h2dTot = (TH2F*)((TKey*)totHistDir->GetListOfKeys()->First())->ReadObj();
           TString totSigHistDirPath = modName + "/" + totSigHistName + "/A0/B0/C";
           totSigHistDirPath += i;

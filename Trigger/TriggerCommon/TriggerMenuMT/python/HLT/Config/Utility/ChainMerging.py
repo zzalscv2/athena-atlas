@@ -95,6 +95,7 @@ def mergeChainDefs(listOfChainDefs, chainDict, perSig_lengthOfChainConfigs = Non
             log.debug("[mergeChainDefs] serial merging first")
             return mergeSerial(tmp_merged, merged_ordering) #shouldn't need to modify it here!  
         else:
+            log.debug("[mergeChainDefs] returning mergeSerial result and perSig_lengthOfChainConfigs %s",perSig_lengthOfChainConfigs)
             return mergeSerial(tmp_merged, merged_ordering), perSig_lengthOfChainConfigs #shouldn't need to modify it here!  
         
     else:
@@ -119,7 +120,7 @@ def check_leg_lengths(perSig_lengthOfChainConfigs):
     log.debug("[check_leg_lengths] leg lengths: %s",leg_length_dict)
     for grp,lengths in leg_length_dict.items():
         if len(set(lengths)) > 1: #a mismatch! 
-            log.debug("[check_leg_lengths] found mismatch for %s given %s %s", grp, lengths)
+            log.debug("[check_leg_lengths] found mismatch for %s given %s", grp, lengths)
             if found_mismatch:
                 log.error("[check_leg_lengths] Second mismatch in the same chain! I don't know how to deal with this, please resolve. Chain leg lengths: %s",perSig_lengthOfChainConfigs)
                 log.error("[check_leg_lengths] Second mismatch in the same chain! lengths,grp: %s,%s",lengths, grp)
@@ -451,7 +452,7 @@ def mergeSerial(chainDefList, chainDefListOrdering):
         #allSteps is ordered such that the first entry in the list is what we want to *run* first 
         allSteps.append(cConfig.steps)
         legOrdering.append(leg_order)
-        nSteps.append(len(cConfig.steps))
+        nSteps.extend(cConfig.nSteps)
         l1Thresholds.extend(cConfig.vseeds)
         alignmentGroups.extend(cConfig.alignmentGroups)
 
@@ -467,7 +468,7 @@ def mergeSerial(chainDefList, chainDefListOrdering):
     combinedChainDef = Chain(chainName, ChainSteps=combChainSteps, L1Thresholds=l1Thresholds,
                                nSteps = nSteps, alignmentGroups = alignmentGroups)
 
-    log.debug("[mergeSerial] Serial merged chain %s with these steps:", chainName)
+    log.debug("[mergeSerial] Serial merged chain %s with number of steps/leg %s with these steps:", chainName, combinedChainDef.nSteps)
     for step in combinedChainDef.steps:
         log.debug('   %s', step)
 

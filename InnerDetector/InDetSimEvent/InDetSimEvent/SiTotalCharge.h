@@ -105,7 +105,7 @@ private:
 private:
   double m_charge; // total deposited charge in this element
   list_t m_chargeComposition; // list of individual charges
-  HepMcParticleLink m_emptyLink;
+  static const HepMcParticleLink m_emptyLink; // An empty link
 };
 
 ///////////////////////////////////////////////////////////////////
@@ -161,7 +161,7 @@ inline const HepMcParticleLink& SiTotalCharge::particleLink() const
 {
   if(m_chargeComposition.empty())
     {
-      return m_emptyLink;
+      return SiTotalCharge::m_emptyLink;
     }
   return mainCharge().particleLink();
 }

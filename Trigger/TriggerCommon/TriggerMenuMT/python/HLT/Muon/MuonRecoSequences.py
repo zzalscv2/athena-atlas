@@ -378,75 +378,66 @@ def EFMuSADataPrepViewDataVerifierCfg(flags, RoIs, roiName):
   result=ComponentAccumulator()
   dataobjects=[( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' ),
                ( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s' % RoIs )]
+
   alg = CompFactory.AthViews.ViewDataVerifier( name = "VDVMuEFSA_"+roiName,
                                                DataObjects = dataobjects)
   result.addEventAlgo(alg)
   return result
 
-def muEFSARecoSequence( flags, RoIs, name ):
+
+@AccumulatorCache
+def muEFSARecoSequenceCfg( flags, RoIs, name ):
 
 
-  from AthenaCommon.CFElements import parOR
   from MuonCombinedAlgs.MuonCombinedAlgsMonitoring import MuonCreatorAlgMonitoring
   from MuonConfig.MuonSegmentFindingConfig import MooSegmentFinderAlgCfg, MuonSegmentFinderAlgCfg, MuonLayerHoughAlgCfg, MuonSegmentFilterAlgCfg
   from MuonConfig.MuonTrackBuildingConfig import MuPatTrackBuilderCfg, EMEO_MuPatTrackBuilderCfg
   from xAODTrackingCnv.xAODTrackingCnvConfig import MuonStandaloneTrackParticleCnvAlgCfg
   from MuonCombinedConfig.MuonCombinedReconstructionConfig import MuonCombinedMuonCandidateAlgCfg, MuonCreatorAlgCfg
 
-  muEFSARecoSequence = parOR("efmsViewNode_"+name)
+  acc = ComponentAccumulator()
 
-
-
-  muEFSARecoSequence+= algorithmCAToGlobalWrapper(EFMuSADataPrepViewDataVerifierCfg, flags, RoIs, name)
+  acc.merge(EFMuSADataPrepViewDataVerifierCfg(flags, RoIs, name))
 
   if flags.Detector.GeometrysTGC and flags.Detector.GeometryMM:
-      theMuonLayerHough = algorithmCAToGlobalWrapper(MuonLayerHoughAlgCfg, flags, "TrigMuonLayerHoughAlg")
-      muEFSARecoSequence+=theMuonLayerHough
+      acc.merge(MuonLayerHoughAlgCfg(flags, "TrigMuonLayerHoughAlg"))
 
       # if NSW is excluded from reconstruction (during commissioning)
       if flags.Muon.runCommissioningChain:
-        theSegmentFinderAlg = algorithmCAToGlobalWrapper(MuonSegmentFinderAlgCfg, flags, name="TrigMuonSegmentMaker_"+name,SegmentCollectionName="TrackMuonSegments_withNSW") 
-        theSegmentFilterAlg = algorithmCAToGlobalWrapper(MuonSegmentFilterAlgCfg, flags, name="TrigMuonSegmentFilter_"+name,SegmentCollectionName="TrackMuonSegments_withNSW",
-                                                   FilteredCollectionName="TrackMuonSegments", TrashUnFiltered=False, ThinStations={}) 
+        acc.merge(MuonSegmentFinderAlgCfg(flags, name="TrigMuonSegmentMaker_"+name,SegmentCollectionName="TrackMuonSegments_withNSW"))
+        acc.merge(MuonSegmentFilterAlgCfg(flags, name="TrigMuonSegmentFilter_"+name,SegmentCollectionName="TrackMuonSegments_withNSW",
+                                                   FilteredCollectionName="TrackMuonSegments", TrashUnFiltered=False, ThinStations={}))
       else:
-        theSegmentFinderAlg = algorithmCAToGlobalWrapper(MuonSegmentFinderAlgCfg, flags, "TrigMuonSegmentMaker_"+name)
+        acc.merge(MuonSegmentFinderAlgCfg(flags, "TrigMuonSegmentMaker_"+name))
 
   else:
-    theSegmentFinderAlg = algorithmCAToGlobalWrapper(MooSegmentFinderAlgCfg,flags,name="TrigMuonSegmentMaker_"+name, UseTGCNextBC=False, UseTGCPriorBC=False)
+    acc.merge(MooSegmentFinderAlgCfg(flags,name="TrigMuonSegmentMaker_"+name, UseTGCNextBC=False, UseTGCPriorBC=False))
 
   from MuonSegmentTrackMaker.MuonTrackMakerAlgsMonitoring import MuPatTrackBuilderMonitoring
 
   if flags.Muon.runCommissioningChain:
-    TrackBuilder = algorithmCAToGlobalWrapper(EMEO_MuPatTrackBuilderCfg, flags, name="TrigMuPatTrackBuilder_"+name ,MuonSegmentCollection = "TrackMuonSegments", MonTool = MuPatTrackBuilderMonitoring(flags, "MuPatTrackBuilderMonitoringSA_"+name), SpectrometerTrackOutputLocation="MuonSpectrometerTracks")
+    acc.merge(EMEO_MuPatTrackBuilderCfg(flags, name="TrigMuPatTrackBuilder_"+name ,MuonSegmentCollection = "TrackMuonSegments", MonTool = MuPatTrackBuilderMonitoring(flags, "MuPatTrackBuilderMonitoringSA_"+name), SpectrometerTrackOutputLocation="MuonSpectrometerTracks"))
 
   else:
-    TrackBuilder = algorithmCAToGlobalWrapper(MuPatTrackBuilderCfg, flags, name="TrigMuPatTrackBuilder_"+name ,MuonSegmentCollection = "TrackMuonSegments", MonTool = MuPatTrackBuilderMonitoring(flags, "MuPatTrackBuilderMonitoringSA_"+name))
+    acc.merge(MuPatTrackBuilderCfg(flags, name="TrigMuPatTrackBuilder_"+name ,MuonSegmentCollection = "TrackMuonSegments", MonTool = MuPatTrackBuilderMonitoring(flags, "MuPatTrackBuilderMonitoringSA_"+name)))
 
-  xAODTrackParticleCnvAlg = algorithmCAToGlobalWrapper(MuonStandaloneTrackParticleCnvAlgCfg,flags, name = "TrigMuonStandaloneTrackParticleCnvAlg_"+name)
-  theMuonCandidateAlg=algorithmCAToGlobalWrapper(MuonCombinedMuonCandidateAlgCfg, flags, name="TrigMuonCandidateAlg_"+name)
+  acc.merge(MuonStandaloneTrackParticleCnvAlgCfg(flags, name = "TrigMuonStandaloneTrackParticleCnvAlg_"+name))
+  acc.merge(MuonCombinedMuonCandidateAlgCfg(flags, name="TrigMuonCandidateAlg_"+name))
 
   msMuonName = muNames.EFSAName
   if 'FS' in name:
     msMuonName = muNamesFS.EFSAName
 
-  themuoncreatoralg = algorithmCAToGlobalWrapper(MuonCreatorAlgCfg, flags, name="TrigMuonCreatorAlg_"+name, CreateSAmuons=True, TagMaps=[], MuonContainerLocation=msMuonName,
-                                     ExtrapolatedLocation = "HLT_MSExtrapolatedMuons_"+name, MSOnlyExtrapolatedLocation = "HLT_MSOnlyExtrapolatedMuons_"+name,
-                                     MonTool = MuonCreatorAlgMonitoring(flags, "MuonCreatorAlgSA_"+name))
+  acc.merge(MuonCreatorAlgCfg(flags, name="TrigMuonCreatorAlg_"+name, CreateSAmuons=True, TagMaps=[], MuonContainerLocation=msMuonName,
+                              ExtrapolatedLocation = "HLT_MSExtrapolatedMuons_"+name, MSOnlyExtrapolatedLocation = "HLT_MSOnlyExtrapolatedMuons_"+name,
+                              MonTool = MuonCreatorAlgMonitoring(flags, "MuonCreatorAlgSA_"+name)))
 
 
-  #Algorithms to views
-  muEFSARecoSequence+=theSegmentFinderAlg
-  if flags.Muon.runCommissioningChain:
-    muEFSARecoSequence+=theSegmentFilterAlg
-  muEFSARecoSequence+=TrackBuilder
-  muEFSARecoSequence+=xAODTrackParticleCnvAlg
-  muEFSARecoSequence+=theMuonCandidateAlg
-  muEFSARecoSequence+=themuoncreatoralg
 
 
   sequenceOut = msMuonName
 
-  return muEFSARecoSequence, sequenceOut
+  return acc, sequenceOut
 
 
 

@@ -13,7 +13,7 @@ def createTrigEgammaConfigFlags():
     flags.addFlag('Trigger.egamma.electronHIPidVersion'        , 'ElectronPhotonSelectorTools/trigger/rel22_20210611/')
     flags.addFlag('Trigger.egamma.photonPidVersion'            , 'ElectronPhotonSelectorTools/trigger/rel22_20210611/')
     flags.addFlag('Trigger.egamma.dnnVersion'                  , 'ElectronPhotonSelectorTools/trigger/rel21_20220421/')
-    flags.addFlag('Trigger.egamma.ringerVersion'               , 'RingerSelectorTools/trigger/Run2_20230227_v8')
+    flags.addFlag('Trigger.egamma.ringerVersion'               , 'RingerSelectorTools/trigger/Run3_20230316_v1')
 
     # cluster correction version, allowed value is: None or v12phiflip_noecorrnogap
     flags.addFlag('Trigger.egamma.clusterCorrectionVersion', 'v12phiflip_noecorrnogap')

@@ -124,7 +124,8 @@ if not 'FileNameVec' in dir():
     else:
         FileNameVec = [ FileName ]
 
-log.info("InputDirectory is " + str(InputDirectory))
+if 'InputDirectory' in dir():
+    log.info("InputDirectory is " + str(InputDirectory))
 log.info("RunNumber is " + str(RunNumber))
 log.info("FullFileName is " + str(FileNameVec))
 

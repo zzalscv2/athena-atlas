@@ -31,7 +31,6 @@ def PoolWriteCfg(flags, forceTreeAutoFlush=-1):
     PoolAttributes = []
     # Switch off splitting by setting default SplitLevel to 0
     PoolAttributes += ["DEFAULT_SPLITLEVEL ='0'"]
-    PoolAttributes += ["ContainerName = 'TTree=Dyn.'; CONTAINER_SPLITLEVEL = '1'"]
 
     # Set as default the member-wise streaming, ROOT default
     PoolAttributes += ["STREAM_MEMBER_WISE = '1'"]

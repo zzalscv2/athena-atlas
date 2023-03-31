@@ -763,7 +763,7 @@ StatusCode SiSmearedDigitizationTool::digitize(const EventContext& ctx,
     while (i != e) {
       m_useDiscSurface = false;
 
-      TimedHitPtr<SiHit> hit(*i++);
+      const TimedHitPtr<SiHit>& hit(*i++);
       int barrelEC  = hit->getBarrelEndcap();
       int layerDisk = hit->getLayerDisk();
       int phiModule = hit->getPhiModule();

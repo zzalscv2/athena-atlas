@@ -138,7 +138,7 @@ StatusCode TriggerEDMSerialiserTool::addCollectionToSerialise(const std::string&
   ATH_MSG_DEBUG( "Transient type " << transientType << " persistent type " << persistentType << " will be written to " << moduleIdVec.size() << " result ROBFragments with IDs: "
       << moduleIdVec << "" );
 
-  if ( persistentType.find("xAOD") != std::string::npos ) { // xAOD - either interface of Aux
+  if ( persistentType.rfind("xAOD", 0) != std::string::npos ) { // xAOD - either interface of Aux
     xAOD::AuxSelection sel;
     if ( typeKeyAux.find('.') != std::string::npos ) { // Aux, possibly with selection of variables
       ATH_MSG_DEBUG( "with aux content: "  );
