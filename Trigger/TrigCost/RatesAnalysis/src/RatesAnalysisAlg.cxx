@@ -595,6 +595,10 @@ StatusCode RatesAnalysisAlg::execute() {
   const xAOD::EventInfo* eventInfo(nullptr);
   uint32_t distance = 0;
   ATH_CHECK( evtStore()->retrieve(eventInfo, "EventInfo") );
+  if (eventInfo->actualInteractionsPerCrossing()==0) { // check if the event is empty
+    ATH_MSG_DEBUG("Event " << m_eventCounter << " is empty");
+    return StatusCode::SUCCESS;
+  }
   ATH_CHECK( m_enhancedBiasRatesTool->getDistanceIntoTrain(eventInfo, distance) );
 
   // Get the weighting & scaling characteristics
