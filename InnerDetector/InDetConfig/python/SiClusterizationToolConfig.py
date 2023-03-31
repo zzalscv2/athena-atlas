@@ -297,7 +297,7 @@ def NnPixelClusterSplitProbToolCfg(flags, name="NnPixelClusterSplitProbTool"):
     kwargs["NnClusterizationFactory"] = acc.popToolsAndMerge(
         NnClusterizationFactoryCfg(flags))
     kwargs["PriorMultiplicityContent"] = [1, 1, 1]
-    kwargs["useBeamSpotInfo"] = flags.InDet.Tracking.useBeamSpotInfoNN
+    kwargs["useBeamSpotInfo"] = flags.Tracking.useBeamSpotInfoNN
 
     acc.setPrivateTools(
         CompFactory.InDet.NnPixelClusterSplitProbTool(name, **kwargs))

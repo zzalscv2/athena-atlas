@@ -31,7 +31,7 @@ def SimpleAmbiguityProcessorToolCfg(flags,
             InDetAmbiScoringTool = acc.popToolsAndMerge(
                 InDetCosmicsScoringToolCfg(flags))
         elif (flags.InDet.Tracking.ActiveConfig.extension == "R3LargeD0" and
-              flags.InDet.Tracking.nnCutLargeD0Threshold > 0):
+              flags.Tracking.nnCutLargeD0Threshold > 0):
             # Set up NN config
             from InDetConfig.InDetTrackScoringToolsConfig import (
                 InDetNNScoringToolSiCfg)
@@ -235,8 +235,8 @@ def DenseEnvironmentsAmbiguityScoreProcessorToolCfg(
                 InDetCosmicsScoringToolCfg)
             InDetAmbiScoringTool = acc.popToolsAndMerge(
                 InDetCosmicsScoringToolCfg(flags))
-        elif (flags.InDet.Tracking.ActiveConfig.extension == "R3LargeD0"
-              and flags.InDet.Tracking.nnCutLargeD0Threshold > 0):
+        elif (flags.InDet.Tracking.ActiveConfig.extension == "R3LargeD0" and
+              flags.Tracking.nnCutLargeD0Threshold > 0):
             from InDetConfig.InDetTrackScoringToolsConfig import (
                 InDetNNScoringToolSiCfg)
             InDetAmbiScoringTool = acc.popToolsAndMerge(
@@ -375,7 +375,7 @@ def DenseEnvironmentsAmbiguityProcessorToolCfg(
             InDetAmbiScoringTool = acc.popToolsAndMerge(
                 InDetCosmicsScoringToolCfg(flags))
         elif (flags.InDet.Tracking.ActiveConfig.extension == "R3LargeD0" and
-              flags.InDet.Tracking.nnCutLargeD0Threshold > 0):
+              flags.Tracking.nnCutLargeD0Threshold > 0):
             from InDetConfig.InDetTrackScoringToolsConfig import (
                 InDetNNScoringToolSiCfg)
             InDetAmbiScoringTool = acc.popToolsAndMerge(

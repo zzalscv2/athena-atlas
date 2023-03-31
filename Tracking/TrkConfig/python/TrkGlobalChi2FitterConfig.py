@@ -101,8 +101,8 @@ def InDetGlobalChi2FitterCfg(flags,
     kwargs.setdefault(
         'MinPHFCut', flags.InDet.Tracking.ActiveConfig.minTRTPrecFrac)
 
-    if ((flags.InDet.Tracking.useBroadPixClusterErrors or
-        flags.InDet.Tracking.useBroadSCTClusterErrors)):
+    if ((flags.Tracking.useBroadPixClusterErrors or
+         flags.Tracking.useBroadSCTClusterErrors)):
         kwargs.setdefault('RecalibrateSilicon', False)
 
     if flags.InDet.Tracking.doRobustReco:
