@@ -86,8 +86,8 @@ void ZDCPulseAnalyzer::CombinedPulsesFCN(int& /*numParam*/, double*, double& f, 
 }
 
 
-ZDCPulseAnalyzer::ZDCPulseAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, std::string tag, int Nsample, float deltaTSample, size_t preSampleIdx, int pedestal,
-                                   float gainHG, std::string fitFunction, int peak2ndDerivMinSample,
+ZDCPulseAnalyzer::ZDCPulseAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, const std::string& tag, int Nsample, float deltaTSample, size_t preSampleIdx, int pedestal,
+                                   float gainHG, const std::string& fitFunction, int peak2ndDerivMinSample,
                                    float peak2ndDerivMinThreshHG, float peak2ndDerivMinThreshLG) :
   m_msgFunc_p(msgFunc_p),
   m_tag(tag), m_Nsample(Nsample),

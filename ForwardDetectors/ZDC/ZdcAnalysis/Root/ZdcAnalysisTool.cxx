@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ZdcAnalysis/ZdcAnalysisTool.h"
@@ -1177,7 +1177,7 @@ void ZdcAnalysisTool::setEnergyCalibrations(unsigned int runNumber)
     {
         for (int imod = 0; imod < 4; imod++)
         {
-            sprintf(name, "ZDC_Gcalib_run%d_s%d_m%d", runNumber, iside, imod);
+            sprintf(name, "ZDC_Gcalib_run%u_s%d_m%d", runNumber, iside, imod);
             ATH_MSG_INFO("Searching for graph " << name);
             TGraph* g = (TGraph*) fCalib->GetObjectChecked(name, "TGraph");
             if (!g && m_doCalib)
@@ -1204,7 +1204,7 @@ void ZdcAnalysisTool::setEnergyCalibrations(unsigned int runNumber)
 
 void ZdcAnalysisTool::setTimeCalibrations(unsigned int runNumber)
 {
-    char name[128];
+    char name[128] = {0};
     std::string filename = PathResolverFindCalibFile( "ZdcAnalysis/" + m_zdcTimeCalibFileName );
     ATH_MSG_INFO("Opening time calibration file " << filename);
     std::unique_ptr<TFile> fCalib (TFile::Open(filename.c_str(), "READ"));
@@ -1218,7 +1218,7 @@ void ZdcAnalysisTool::setTimeCalibrations(unsigned int runNumber)
         {
             for (int imod = 0; imod < 4; imod++)
             {
-                sprintf(name, "ZDC_T0calib_run%d_HG_s%d_m%d", runNumber, iside, imod);
+                sprintf(name, "ZDC_T0calib_run%u_HG_s%d_m%d", runNumber, iside, imod);
                 spline.reset (static_cast<TSpline3*>(fCalib->GetObjectChecked(name, "TSpline3")));
                 if (spline)
                 {
@@ -1229,7 +1229,7 @@ void ZdcAnalysisTool::setTimeCalibrations(unsigned int runNumber)
                     ATH_MSG_WARNING("No time calib. spline " << name);
                 }
 
-                sprintf(name, "ZDC_T0calib_run%d_LG_s%d_m%d", runNumber, iside, imod);
+                sprintf(name, "ZDC_T0calib_run%u_LG_s%d_m%d", runNumber, iside, imod);
                 spline.reset (static_cast<TSpline3*>(fCalib->GetObjectChecked(name, "TSpline3")));
                 if (spline)
                 {

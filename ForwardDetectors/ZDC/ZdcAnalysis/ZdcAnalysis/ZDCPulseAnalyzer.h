@@ -334,12 +334,12 @@ private:
 
 public:
 
-  ZDCPulseAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, std::string tag, int Nsample, float deltaTSample, size_t preSampleIdx, int pedestal, float gainHG,
-                   std::string fitFunction, int peak2ndDerivMinSample, float peak2DerivMinThreshHG, float peak2DerivMinThreshLG);
+  ZDCPulseAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, const std::string& tag, int Nsample, float deltaTSample, size_t preSampleIdx, int pedestal, float gainHG,
+                   const std::string& fitFunction, int peak2ndDerivMinSample, float peak2DerivMinThreshHG, float peak2DerivMinThreshLG);
 
   ~ZDCPulseAnalyzer(){}
 
-  static void SetFitOPtions(std::string fitOptions) { s_fitOptions = fitOptions;}
+  static void SetFitOPtions(const std::string& fitOptions) { s_fitOptions = fitOptions;}
   static void SetQuietFits  (bool quiet) {s_quietFits = quiet;}
   static void SetSaveFitFunc(bool save ) {s_saveFitFunc = save;}
   static bool QuietFits() {return s_quietFits;}
@@ -376,14 +376,14 @@ public:
 
   void SetADCOverUnderflowValues(int HGOverflowADC, int HGUnderflowADC, int LGOverflowADC);
 
-  void SetTimingCorrParams(std::vector<float> HGT0CorrParams, std::vector<float> LGT0CorrParams)
+  void SetTimingCorrParams(const std::vector<float>& HGT0CorrParams, const std::vector<float>& LGT0CorrParams)
   {
     if (HGT0CorrParams.size() == 4 && LGT0CorrParams.size() == 4) {
       m_HGT0CorrParams = HGT0CorrParams;
       m_LGT0CorrParams = LGT0CorrParams;
       m_haveTimingCorrections = true;
     }
-    else throw;
+    else throw std::runtime_error ("SetTimingCorrParams");
   }
 
   void SetFitTimeMax(float tmax);
@@ -392,7 +392,7 @@ public:
   {
     //  Check for valid length
     //
-    if (params.size() != 2) throw;
+    if (params.size() != 2) throw std::runtime_error ("SetNonlinCorrParams");
 
     (*m_msgFunc_p)(ZDCMsg::Info, ("Setting non-linear parameters for module: " + m_tag + ", vlues = " + std::to_string(params[0]) + ", " + std::to_string(params[1])));
 
