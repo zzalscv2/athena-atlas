@@ -21,7 +21,7 @@ namespace MuonPRDTest {
         for (auto it : *truthContainer) {
             const HepMC::GenEvent* subEvent = it;
 #ifdef HEPMC3
-            for (auto vertex : subEvent->vertices()) {
+            for (const auto& vertex : subEvent->vertices()) {
 #else
             // Vertex
             HepMC::ConstGenEventVertexRange vertex_range = subEvent->vertex_range();
@@ -34,7 +34,7 @@ namespace MuonPRDTest {
             }
 
 #ifdef HEPMC3
-            for (auto particle : subEvent->particles()) {
+            for (const auto& particle : subEvent->particles()) {
 #else
             // Particle
             HepMC::ConstGenEventParticleRange particle_range = subEvent->particle_range();

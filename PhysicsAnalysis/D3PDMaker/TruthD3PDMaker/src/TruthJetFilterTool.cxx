@@ -351,7 +351,7 @@ bool TruthJetFilterTool::isLeptonFromTau(HepMC::ConstGenParticlePtr part) const{
   if(!prod) return false; // no parent.
 #ifdef HEPMC3
   // Loop over the parents of this particle.
-  for(auto itrParent: prod->particles_in()){
+  for(const auto& itrParent: prod->particles_in()){
     int parentId = itrParent->pdg_id();
     if(std::abs(parentId) == 15) {
       ATH_MSG_DEBUG("Particle with pdgId = " << pdg << ", matched to tau");
