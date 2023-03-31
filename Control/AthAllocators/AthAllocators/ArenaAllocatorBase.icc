@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: ArenaAllocatorBase.icc 470529 2011-11-24 23:54:22Z ssnyder $
 /**
  * @file  AthAllocators/ArenaAllocatorBase.icc
  * @author scott snyder
@@ -20,7 +18,7 @@ namespace SG {
  */
 template <class T>
 ArenaAllocatorBase::func_t*
-ArenaAllocatorBase::makeConstructor (const boost::false_type&)
+ArenaAllocatorBase::makeConstructor (const std::false_type&)
 {
   return &construct_fcn<T>;
 }
@@ -31,7 +29,7 @@ ArenaAllocatorBase::makeConstructor (const boost::false_type&)
  */
 template <class T>
 ArenaAllocatorBase::func_t*
-ArenaAllocatorBase::makeConstructor (const boost::true_type&)
+ArenaAllocatorBase::makeConstructor (const std::true_type&)
 {
   return 0;
 }
@@ -42,7 +40,7 @@ ArenaAllocatorBase::makeConstructor (const boost::true_type&)
  */
 template <class T>
 ArenaAllocatorBase::func_t*
-ArenaAllocatorBase::makeDestructor (const boost::false_type&)
+ArenaAllocatorBase::makeDestructor (const std::false_type&)
 {
   return &destroy_fcn<T>;
 }
@@ -53,7 +51,7 @@ ArenaAllocatorBase::makeDestructor (const boost::false_type&)
  */
 template <class T>
 ArenaAllocatorBase::func_t*
-ArenaAllocatorBase::makeDestructor (const boost::true_type&)
+ArenaAllocatorBase::makeDestructor (const std::true_type&)
 {
   return 0;
 }
@@ -64,7 +62,7 @@ ArenaAllocatorBase::makeDestructor (const boost::true_type&)
  */
 template <class T>
 ArenaAllocatorBase::func_t*
-ArenaAllocatorBase::makeClear (const boost::false_type&)
+ArenaAllocatorBase::makeClear (const std::false_type&)
 {
   return &clear_fcn<T>;
 }
@@ -75,7 +73,7 @@ ArenaAllocatorBase::makeClear (const boost::false_type&)
  */
 template <class T>
 ArenaAllocatorBase::func_t*
-ArenaAllocatorBase::makeClear (const boost::true_type&)
+ArenaAllocatorBase::makeClear (const std::true_type&)
 {
   return 0;
 }
@@ -156,16 +154,16 @@ ArenaAllocatorBase::initParams<T, clear, no_ctor, no_dtor>::params() const
   // Set up the constructor/destructor.
   // We want the pointers to be null if they're trivial.
   params.constructor =
-    makeConstructor<T> (::boost::integral_constant<bool, 
-                          ::boost::has_trivial_constructor<T>::value ||
+    makeConstructor<T> (::std::integral_constant<bool, 
+                          ::std::is_trivially_constructible<T>::value ||
                           no_ctor>());
   params.destructor =
-    makeDestructor<T> (::boost::integral_constant<bool, 
-                          ::boost::has_trivial_destructor<T>::value ||
+    makeDestructor<T> (::std::integral_constant<bool, 
+                          ::std::is_trivially_destructible<T>::value ||
                           no_dtor>());
 
   // Set up the clear function --- only if the flag is set!
-  params.clear = makeClear<T> (::boost::integral_constant<bool, !clear>());
+  params.clear = makeClear<T> (::std::integral_constant<bool, !clear>());
 
   return params;
 }
