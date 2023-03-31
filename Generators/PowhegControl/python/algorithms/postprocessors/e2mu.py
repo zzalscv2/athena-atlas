@@ -25,7 +25,7 @@ def e2mu(powheg_LHE_output):
     
     n_events = 0
     powheg_LHE_mu = "{}.mu".format(powheg_LHE_output)
-    with open(powheg_LHE_mu, "wb") as f_output:
+    with open(powheg_LHE_mu, "w") as f_output:
         f_output.write("{}\n".format(preamble))
         for input_event in LHE.event_iterator(powheg_LHE_output):
             is_event_changed, output_event = LHE.e2mu(input_event)

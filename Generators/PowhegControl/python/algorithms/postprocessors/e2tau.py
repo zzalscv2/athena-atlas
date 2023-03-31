@@ -25,7 +25,7 @@ def e2tau(powheg_LHE_output):
     
     n_events = 0
     powheg_LHE_tau = "{}.tau".format(powheg_LHE_output)
-    with open(powheg_LHE_tau, "wb") as f_output:
+    with open(powheg_LHE_tau, "w") as f_output:
         f_output.write("{}\n".format(preamble))
         for input_event in LHE.event_iterator(powheg_LHE_output):
             is_event_changed, output_event = LHE.e2tau(input_event)
