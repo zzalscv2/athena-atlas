@@ -86,6 +86,8 @@
         <hist1D name="sizeX_endcap" plotopts="logy" tests="KS" type="TH1F"/>
         <hist1D name="sizeY_barrel" plotopts="logy" tests="KS" type="TH1F"/>
         <hist1D name="sizeY_endcap" plotopts="logy" tests="KS" type="TH1F"/>
+        <hist1D name="widthY_barrel" plotopts="logy" tests="KS" type="TH1F"/>
+        <hist1D name="widthY_endcap" plotopts="logy" tests="KS" type="TH1F"/>
       </TDirectory>
       <TDirectory name="ITkStripClusters">
 	<hist2D name="global_xy_barrel" plotopts="box" tests="KS" type="TH2F"/>

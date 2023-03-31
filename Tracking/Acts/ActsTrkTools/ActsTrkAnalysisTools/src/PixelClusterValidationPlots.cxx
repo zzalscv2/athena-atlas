@@ -60,6 +60,9 @@ namespace ActsTrk {
     m_sizeY_barrel = Book1D("sizeY_barrel", "PixelCluster_sizeY_barrel;Size Y;Entries;", 100, 0, 400, false);
     m_sizeY_endcap = Book1D("sizeY_endcap", "PixelCluster_sizeY_endcap;Size Y;Entries;", 100, 0, 400, false);
 
+    m_widthY_barrel = Book1D("widthY_barrel", "PixelCluster_widthY_barrel;Width Y;Entries;", 60, 0, 30, false); 
+    m_widthY_endcap = Book1D("widthY_endcap", "PixelCluster_widthY_endcap;Width Y;Entries;", 60, 0, 30, false); 
+
     m_global_xy_barrel = Book2D("global_xy_barrel", "PixelCluster_global_xy_barrel;x [mm];y [mm];", 64, -320, 320, 64, -350, 350, false);
     m_global_xy_endcap = Book2D("global_xy_endcap", "PixelCluster_global_xy_endcap;x [mm];y [mm];", 64, -320, 320, 64, -350, 350, false);
 
@@ -110,6 +113,8 @@ namespace ActsTrk {
       m_sizeX_barrel->Fill(cluster->channelsInPhi(), beamSpotWeight);
       m_sizeY_barrel->Fill(cluster->channelsInEta(), beamSpotWeight);
 
+      m_widthY_barrel->Fill(cluster->widthInEta(), beamSpotWeight);
+
       m_global_xy_barrel->Fill(globalPos(0, 0), globalPos(1, 0), beamSpotWeight);
       m_global_zr_barrel->Fill(globalPos(2, 0), globalPosition.perp(), beamSpotWeight);
     } else {
@@ -134,6 +139,8 @@ namespace ActsTrk {
       
       m_sizeX_endcap->Fill(cluster->channelsInPhi(), beamSpotWeight);
       m_sizeY_endcap->Fill(cluster->channelsInEta(), beamSpotWeight);
+
+      m_widthY_endcap->Fill(cluster->widthInEta(), beamSpotWeight);
 
       m_global_xy_endcap->Fill(globalPos(0, 0), globalPos(1, 0), beamSpotWeight);
       m_global_zr_endcap->Fill(globalPos(2, 0), globalPosition.perp(), beamSpotWeight);

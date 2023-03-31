@@ -122,6 +122,10 @@ namespace ActsTrk {
 					       [] (const auto* cluster) -> int					       
 					       { return cluster->channelsInEta(); });
 
+    auto monitor_widthY = Monitored::Collection("widthY", *inputPixelClusterContainer,
+						[] (const auto* cluster) -> float
+						{ return cluster->widthInEta(); });
+
     fill("ActsTrkClusterAnalysisAlg",
 	 monitor_barrelEndcap, monitor_layerDisk,
 	 monitor_phiModule, monitor_etaModule,
@@ -130,7 +134,8 @@ namespace ActsTrk {
 	 monitor_globalX, monitor_globalY, monitor_globalZ,
 	 monitor_localX, monitor_localY,
 	 monitor_localCovXX, monitor_localCovYY,
-	 monitor_sizeX, monitor_sizeY);
+	 monitor_sizeX, monitor_sizeY,
+	 monitor_widthY);
     
     return StatusCode::SUCCESS;
   }

@@ -48,6 +48,8 @@ void xAOD::PixelCluster_v1::setChannelsInPhiEta(int channelsInPhi, int channelsI
     chanEtaAcc(*this) = channelsInEta;
 }
 
+AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( xAOD::PixelCluster_v1, float, widthInEta, setWidthInEta )
+
 void xAOD::PixelCluster_v1::setOmegas(float omegaX, float omegaY) {
     static const SG::AuxElement::Accessor< float > omegaXAcc( "omegaX" );
     omegaXAcc(*this) = omegaX;

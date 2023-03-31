@@ -29,29 +29,8 @@ namespace ActsTrk {
                                                          const std::vector<std::size_t>& measIndexes,
                                                          const InDetDD::SiDetectorElement& element) const
     {
-        // evaluate the cluster width for space point covariance evaluation
-        const InDetDD::PixelModuleDesign* design
-          (dynamic_cast<const InDetDD::PixelModuleDesign*>(&element.design()));
-        if (not design){
-            ATH_MSG_ERROR("Cast to InDetDD::PixelModuleDesign failed.");
-            return StatusCode::FAILURE;
-        }
-
-        // Implementing space point covariance calculation as defined in
-        // InnerDetector/InDetRecEvent/SiSPSeededTrackFinderData/src/ITkSiSpacePointForSeed.cxx
-        // SiSpacePointForSeed::set(const Trk::SpacePoint*const& sp,const float* r)
-
-        auto rdoList = cluster.rdoList();
-        auto min_max =
-          std::minmax_element(rdoList.begin(), rdoList.end(),
-                              [this] (Identifier const& lh, Identifier const& rh) {
-                                  return m_pixelId->eta_index(lh) < m_pixelId->eta_index(rh);
-                              });
-
-        // this is the width expressed in mm
-        float width =
-          design->widthFromColumnRange(m_pixelId->eta_index(*min_max.first),
-                                       m_pixelId->eta_index(*min_max.second));
+      // this is the width expressed in mm
+        float width = cluster.widthInEta();
 
         // using width to scale the cluster covariance for space points
         float covTerm = width*width*s_oneOverTwelve;

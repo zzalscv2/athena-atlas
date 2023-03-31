@@ -113,6 +113,7 @@ StatusCode InDetToXAODClusterConversion::execute(const EventContext& ctx) const 
             pixelCl->setChargelist(charges);
             pixelCl->setLVL1A(theCluster->LVL1A());
             pixelCl->setChannelsInPhiEta(width.colRow()[0], width.colRow()[1]);
+	    pixelCl->setWidthInEta(static_cast<float>(width.widthPhiRZ()[1]));
             pixelCl->setOmegas(omegaX, omegaY);
             pixelCl->setIsSplit(isSplit);
             pixelCl->setSplitProbabilities(splitProbability1, splitProbability2);

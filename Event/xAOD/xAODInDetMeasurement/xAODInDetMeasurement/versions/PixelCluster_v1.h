@@ -44,6 +44,9 @@ namespace xAOD {
         int channelsInPhi() const;
         int channelsInEta() const;
 
+	/// Returns the width of the cluster in phi (x) and eta (y) directions, respectively
+	float widthInEta() const;
+
         /// Returns omegax and omegay, i.e. the charge
         /// balance between the first and last rows and colums, respectively,
         /// building the cluster, and are numbers between 0 and 1.
@@ -83,6 +86,9 @@ namespace xAOD {
 
         /// Sets the dimensions of the cluster in numbers of channels in phi (x) and eta (y) directions
         void setChannelsInPhiEta(int channelsInPhi, int channelsInEta);
+
+	/// Sets the width of the cluster in eta (y) direction
+	void setWidthInEta(float widthInEta);
 
         /// Sets omegax and omegay, i.e. the charge
         /// balance between the first and last rows and colums, respectively,
