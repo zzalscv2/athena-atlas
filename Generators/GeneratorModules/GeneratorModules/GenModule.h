@@ -10,9 +10,7 @@
 #include "CLHEP/Random/RandomEngine.h"
 #include "CLHEP/Random/RandPoisson.h"
 #include <memory>
-#ifdef HEPMC3
 #include "AtlasHepMC/GenEvent.h"
-#endif
 
 
 /// @brief Base class for common behaviour of generator interfaces.

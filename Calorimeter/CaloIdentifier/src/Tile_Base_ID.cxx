@@ -1040,43 +1040,37 @@ IdentifierHash  Tile_Base_ID::cell_hash  (const Identifier& id) const
 IdContext	
 Tile_Base_ID::region_context  (void)  const
 {
-    ExpandedIdentifier id;
-    return {id, 0, m_SIDE_INDEX};
+    return {0, m_SIDE_INDEX};
 }
 
 IdContext	
 Tile_Base_ID::module_context  (void)  const
 {
-    ExpandedIdentifier id;
-    return {id, 0, m_MODULE_INDEX};
+    return {0, m_MODULE_INDEX};
 }
 
 IdContext	
 Tile_Base_ID::tower_context   (void)  const
 {
-    ExpandedIdentifier id;
-    return {id, 0, m_TOWER_INDEX};
+    return {0, m_TOWER_INDEX};
 }
 
 IdContext	
 Tile_Base_ID::cell_context    (void)  const
 {
-    ExpandedIdentifier id;
-    return {id, 0, m_SAMPLE_INDEX};
+    return {0, m_SAMPLE_INDEX};
 }
 
 IdContext	
 Tile_Base_ID::pmt_context     (void)  const
 {
-    ExpandedIdentifier id;
-    return {id, 0, m_PMT_INDEX};
+    return {0, m_PMT_INDEX};
 }
 
 IdContext	
 Tile_Base_ID::adc_context     (void)  const
 {
-    ExpandedIdentifier id;
-    return {id, 0, m_ADC_INDEX};
+    return {0, m_ADC_INDEX};
 }
 
 int

@@ -109,10 +109,10 @@ def FlavorTagNNCfg(ConfigFlags, BTaggingCollection, TrackCollection, NNFile = ""
     NNFile_extension = NNFile.split(".")[-1]
     if NNFile_extension == "json":
         nn_name = NNFile.replace("/", "_").replace("_network.json", "")
-        decorator = acc.popToolsAndMerge(DL2ToolCfg(ConfigFlags, NNFile,FlipConfig=FlipConfig ,**options))
+        decorator = acc.popToolsAndMerge(DL2ToolCfg(ConfigFlags, NNFile, FlipConfig=FlipConfig, **options))
     elif NNFile_extension == "onnx":
         nn_name = NNFile.replace("/", "_").replace(".onnx", "")
-        decorator = acc.popToolsAndMerge(GNNToolCfg(ConfigFlags, NNFile, **options))
+        decorator = acc.popToolsAndMerge(GNNToolCfg(ConfigFlags, NNFile, flipTagConfig=FlipConfig, **options))
     else:
         raise ValueError("FlavorTagNNCfg: Wrong NNFile extension. Please check the NNFile argument")
 

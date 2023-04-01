@@ -262,7 +262,7 @@ bool EtaPtFilterTool::isAccepted( HepMC::ConstGenVertexPtr vtx ) const
   //
 #ifdef HEPMC3
   // check the parent branch
-  for ( auto p: vtx->particles_in() ) {
+  for ( const auto& p: vtx->particles_in() ) {
     if ( isAccepted(p) ) {
       return true;
     }

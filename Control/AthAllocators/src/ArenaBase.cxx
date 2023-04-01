@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file  AthAllocators/src/ArenaBase.cxx
  * @author scott snyder
@@ -16,6 +14,7 @@
 #include "AthAllocators/ArenaBase.h"
 #include "AthAllocators/ArenaAllocatorBase.h"
 #include "AthAllocators/ArenaAllocatorRegistry.h"
+#include <ostream>
 
 
 namespace SG {

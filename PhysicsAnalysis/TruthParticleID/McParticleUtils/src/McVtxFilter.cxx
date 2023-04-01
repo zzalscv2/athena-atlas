@@ -144,7 +144,7 @@ bool McVtxFilter::isAccepted( HepMC::ConstGenVertexPtr vtx ) const
        m_parentList.size()       == static_cast<unsigned int>( 0 ) &&
        number_particles_out == static_cast<unsigned int>( 1 ) ) {
 #ifdef HEPMC3
-    HepMC::ConstGenParticlePtr part = vtx->particles_out().at(0);
+    const HepMC::ConstGenParticlePtr& part = vtx->particles_out().front();
 #else
     HepMC::ConstGenParticlePtr part = *(vtx->particles_out_const_begin());
 #endif

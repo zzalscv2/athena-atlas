@@ -1,10 +1,8 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: ArenaAllocatorBase.h 470529 2011-11-24 23:54:22Z ssnyder $
 
 /**
  * @file  AthAllocators/ArenaAllocatorBase.h
@@ -23,7 +21,7 @@
 #include <new>
 #include <string>
 #include <iosfwd>
-#include "boost/type_traits.hpp"
+#include <type_traits>
 
 
 namespace SG {
@@ -344,27 +342,27 @@ public:
 
   /// Make a constructor function pointer for a non-trivial constructor.
   template <class T>
-  static func_t* makeConstructor (const boost::false_type&);
+  static func_t* makeConstructor (const std::false_type&);
 
   /// Make a constructor function pointer for a trivial constructor.
   template <class T>
-  static func_t* makeConstructor (const boost::true_type&);
+  static func_t* makeConstructor (const std::true_type&);
 
   /// Make a constructor function pointer for a non-trivial destructor.
   template <class T>
-  static func_t* makeDestructor (const boost::false_type&);
+  static func_t* makeDestructor (const std::false_type&);
 
   /// Make a constructor function pointer for a trivial destructor.
   template <class T>
-  static func_t* makeDestructor (const boost::true_type&);
+  static func_t* makeDestructor (const std::true_type&);
 
   /// Make a function pointer for a @c clear function.
   template <class T>
-  static func_t* makeClear (const boost::false_type&);
+  static func_t* makeClear (const std::false_type&);
 
   /// Make a dummy @c clear function pointer.
   template <class T>
-  static func_t* makeClear (const boost::true_type&);
+  static func_t* makeClear (const std::true_type&);
 
 private:
   /**

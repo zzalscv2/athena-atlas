@@ -21,6 +21,7 @@ namespace {
   using FlavorTagDiscriminants::FTagTrackSequenceConfig;
   using FlavorTagDiscriminants::FTagInputConfig;
   using FlavorTagDiscriminants::FTagTrackInputConfig;
+  using FlavorTagDiscriminants::FlipTagConfig;
   // ____________________________________________________________________
   // High level adapter stuff
   //
@@ -52,11 +53,13 @@ namespace {
     const std::vector<std::pair<std::string, std::vector<std::string>>>& names,
     const TypeRegexes& type_regexes,
     const SortRegexes& sort_regexes,
-    const TrkSelRegexes& select_regexes);
+    const TrkSelRegexes& select_regexes,
+    const std::regex& re,
+    const FlipTagConfig& flip_config);
 
   // replace strings for flip taggers
   void rewriteFlipConfig(lwt::GraphConfig&, const StringRegexes&);
-  void flipSequenceSigns(lwt::GraphConfig&, const std::regex&);
+
 
   //_______________________________________________________________________
   // Implementation of the above functions
@@ -149,7 +152,9 @@ namespace {
     const std::vector<std::pair<std::string, std::vector<std::string>>>& names,
     const TypeRegexes& type_regexes,
     const SortRegexes& sort_regexes,
-    const TrkSelRegexes& select_regexes) {
+    const TrkSelRegexes& select_regexes,
+    const std::regex& re,
+    const FlipTagConfig& flip_config) {
     std::vector<FTagTrackSequenceConfig> nodes;
     for (const auto& name_node: names) {
       FTagTrackSequenceConfig node;
@@ -163,6 +168,12 @@ namespace {
         input.name = varname;
         input.type = match_first(type_regexes, varname,
                                  "track type matching");
+
+        input.flip_sign=false;
+        if ((flip_config != FlipTagConfig::STANDARD) && std::regex_match(varname, re)){
+          input.flip_sign=true;
+        }
+        
         node.inputs.push_back(input);
       }
       nodes.push_back(node);
@@ -191,17 +202,7 @@ namespace {
     config.outputs = new_outputs;
   }
 
-  void flipSequenceSigns(lwt::GraphConfig& config,
-                         const std::regex& re) {
-    for (auto& node: config.input_sequences) {
-      for (auto& var: node.variables) {
-        if (std::regex_match(var.name, re)) {
-          var.offset *= -1.0;
-          var.scale *= -1.0;
-        }
-      }
-    }
-  }
+
 
 }
 
@@ -553,6 +554,7 @@ namespace FlavorTagDiscriminants {
           case EDMType::CUSTOM_GETTER: {
             return customNamedSeqGetterWithDeps(
               cfg.name, options.track_prefix);
+
           }
           default: {
             throw std::logic_error("Unknown EDM type for tracks");
@@ -636,14 +638,23 @@ namespace FlavorTagDiscriminants {
       TrackLinkType track_link_type
     ){
 
+      // determine name based on flip config
+      std::string flip_name = "";
+      if (flip_config == FlipTagConfig::FLIP_SIGN) {
+        flip_name = "Flip";
+      }
+      if (flip_config == FlipTagConfig::NEGATIVE_IP_ONLY) {
+        flip_name = "Neg";
+      }
+
       // we rewrite the inputs if we're using flip taggers
       StringRegexes flip_converters {
-        {"(GN1[^_]*)"_r, "$1Flip"},
+        {"(GN1[^_]*|GN2[^_]*)"_r, "$1" + flip_name},
         {"(IP[23]D)_(.*)"_r, "$1Neg_$2"},
         {"(rnnip|dips[^_]*)_(.*)"_r, "$1flip_$2"},
         {"(JetFitter|SV1|JetFitterSecondaryVertex)_(.*)"_r, "$1Flip_$2"},
         {"(rnnip|dips[^_]*)"_r, "$1flip"},
-        {"^(DL1|DL1r[^_]*|DL1rmu|DL1d[^_]*)$"_r, "$1Flip"},
+        {"^(DL1|DL1r[^_]*|DL1rmu|DL1d[^_]*)$"_r, "$1" + flip_name},
         {"pt|abs_eta|eta"_r, "$&"},
         {"softMuon.*|smt.*"_r, "$&"}
       };
@@ -654,7 +665,7 @@ namespace FlavorTagDiscriminants {
 
       if (flip_config != FlipTagConfig::STANDARD) {
         rewriteFlipConfig(config, flip_converters);
-        flipSequenceSigns(config, flip_sequences);
+
       }
 
       // build the standard inputs
@@ -760,7 +771,7 @@ namespace FlavorTagDiscriminants {
       };
 
       auto trk_config = get_track_input_config(
-        trk_names, trk_type_regexes, trk_sort_regexes, trk_select_regexes);
+        trk_names, trk_type_regexes, trk_sort_regexes, trk_select_regexes,flip_sequences,flip_config);
 
       // some additional options
       FTagOptions options;
@@ -839,7 +850,18 @@ namespace FlavorTagDiscriminants {
         for (const FTagTrackInputConfig& input_cfg: cfg.inputs) {
           auto [seqGetter, deps] = internal::get::seqFromTracks(
             input_cfg, options);
-          track_getter.sequencesFromTracks.push_back(seqGetter);
+
+          if(input_cfg.flip_sign){
+            auto seqGetter_flip=[g=seqGetter](const xAOD::Jet&jet, const internal::Tracks& trks){
+              auto [n,v] = g(jet,trks);
+              std::for_each(v.begin(), v.end(), [](double &n){ n=-1.0*n; });
+              return std::make_pair(n,v);
+            };
+            track_getter.sequencesFromTracks.push_back(seqGetter_flip);
+          }
+          else{
+            track_getter.sequencesFromTracks.push_back(seqGetter);
+          }
           track_data_deps.merge(deps);
         }
         trackSequenceBuilders.push_back(track_getter);

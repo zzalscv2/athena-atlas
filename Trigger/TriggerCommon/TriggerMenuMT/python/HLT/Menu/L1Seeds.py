@@ -282,7 +282,19 @@ def getL1BKeePrimary():
         'L1_J100',
         'L1_4J15', 
         'L1_3J35p0ETA23',
-        'L1_3J15p0ETA25_XE40' 
+        'L1_3J15p0ETA25_XE40',
+        'L1_2eEM24L',
+        'L1_2eEM18M',
+        'L1_eEM26M',
+        'L1_eEM28M',
+        'L1_eEM24L_3eEM12L',
+        'L1_eEM22M_jMJJ-300',
+        'L1_eEM18L_MU8F',
+        'L1_2eEM10L_MU8F',
+        'L1_BPH-0M9-eEM9-eEM7_2MU3V',
+        'L1_MU18VFCH',
+        'L1_eTAU80_2eTAU60',
+        'L1_jJ160'
     ]
 
 #####################################
@@ -308,7 +320,11 @@ def getL1BKeePrescaled():
         'L1_2EM15VH',#  already requested as support trigger, so OK. what PS?
         'L1_3J25p0ETA23', # exist in menu, but currently not used at HLT. We may drop as CTP output
         'L1_EM20VH_3J20', # exist in menu, but currently not used at HLT. We may drop as CTP output
-        'L1_EM18VHI_3J20' #  exist in menu, but currently not used at HLT. We may drop as CTP output
+        'L1_EM18VHI_3J20', #  exist in menu, but currently not used at HLT. We may drop as CTP output
+        'L1_eTAU80',
+        'L1_eEM26L',
+        'L1_eEM18',
+        'L1_2eEM18L'
     ]
 
 #####################################

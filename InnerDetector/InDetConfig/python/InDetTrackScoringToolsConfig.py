@@ -229,7 +229,7 @@ def InDetNNScoringToolBaseCfg(flags, name='InDetNNScoringTool', **kwargs):
     kwargs.setdefault("nnCutConfig",
                       "dev/TrackingCP/LRTAmbiNetwork/20200727_225401/nn-config.json")
     kwargs.setdefault("nnCutThreshold",
-                      flags.InDet.Tracking.nnCutLargeD0Threshold)
+                      flags.Tracking.nnCutLargeD0Threshold)
 
     kwargs.setdefault("useAmbigFcn", True)
     kwargs.setdefault("useTRT_AmbigFcn", False)
