@@ -18,11 +18,8 @@ def InDetRotCreatorCfg(flags, name='InDetRotCreator', **kwargs):
 
     acc = ComponentAccumulator()
 
-    use_broad_cluster_pix = flags.InDet.Tracking.useBroadPixClusterErrors
-    use_broad_cluster_sct = flags.InDet.Tracking.useBroadSCTClusterErrors
-
     if 'ToolPixelCluster' not in kwargs:
-        if use_broad_cluster_pix:
+        if flags.Tracking.useBroadPixClusterErrors:
             from InDetConfig.SiClusterOnTrackTool_PixelConfig import (
                 InDetBroadPixelClusterOnTrackToolCfg)
             ToolPixelCluster = acc.popToolsAndMerge(
@@ -35,7 +32,7 @@ def InDetRotCreatorCfg(flags, name='InDetRotCreator', **kwargs):
         kwargs.setdefault("ToolPixelCluster", ToolPixelCluster)
 
     if 'ToolSCT_Cluster' not in kwargs:
-        if use_broad_cluster_sct:
+        if flags.Tracking.useBroadSCTClusterErrors:
             from InDetConfig.SiClusterOnTrackTool_SCTStripConfig import (
                 InDetBroadSCT_ClusterOnTrackToolCfg)
             ToolSCT_Cluster = acc.popToolsAndMerge(

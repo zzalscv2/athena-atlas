@@ -357,8 +357,10 @@ def _get_flip_config(nn_path):
     #flipping of DL1r with 2019 taggers does not work at the moment
     if (('dl1d' in nn_path) or ('dl1r' in nn_path and '201903' not in nn_path)):
         return ['FLIP_SIGN']
-    if 'rnnip' in nn_path or 'dips' in nn_path or 'gn1' in nn_path:
+    if 'rnnip' in nn_path or 'dips' in nn_path:
         return ['NEGATIVE_IP_ONLY']
+    if 'gn1' in nn_path or 'gn2' in nn_path:
+        return ['FLIP_SIGN', 'NEGATIVE_IP_ONLY']
     else:
         return []
 

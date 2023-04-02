@@ -62,7 +62,9 @@ def createTrackingConfigFlags():
     icf.addFlag("Tracking.doPixelClusterSplitting",
                 lambda prevFlags: not (prevFlags.Beam.Type is BeamType.Cosmics))
     # choose splitter type: NeuralNet or AnalogClus
-    icf.addFlag("Tracking.pixelClusterSplittingType", "NeuralNet")
+    icf.addFlag("Tracking.pixelClusterSplittingType", lambda prevFlags:
+                "NeuralNet" if prevFlags.GeoModel.Run <= LHCPeriod.Run3
+                else "Truth")
     # Cut value for splitting clusters into two parts
     icf.addFlag("Tracking.pixelClusterSplitProb1",
                 lambda prevFlags: (0.5 if prevFlags.GeoModel.Run is LHCPeriod.Run1 else 0.55))
@@ -135,6 +137,16 @@ def createTrackingConfigFlags():
     icf.addFlag("Tracking.doStats", False)
     # Switch for track observer tool
     icf.addFlag("Tracking.doTIDE_AmbiTrackMonitoring", False)
+    # use beam spot position in pixel NN
+    icf.addFlag("Tracking.useBeamSpotInfoNN", True)
+    # Threshold for NN cut in large D0 tracking for tracks in ambi
+    icf.addFlag("Tracking.nnCutLargeD0Threshold", -1.0)
+    # Use broad cluster errors for Pixel
+    icf.addFlag("Tracking.useBroadPixClusterErrors", False)
+    # Use broad cluster errors for SCT
+    icf.addFlag("Tracking.useBroadSCTClusterErrors", False)
+
+    ####################################################################
 
     # Vertexing flags
     from TrkConfig.VertexFindingFlags import (

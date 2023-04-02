@@ -86,6 +86,11 @@ def getDevSignatures():
 
         ChainProp(name='HLT_mu6_ivarmedium_L1MU5VF', groups=DevGroup+SingleMuonGroup),
 
+        # ATR-22782 4muon
+        ChainProp(name='HLT_2mu4_L1BPH-7M11-25DR99-2MU3VF', l1SeedThresholds=['MU3VF'], stream=['BphysDelayed'], groups=MultiMuonGroup+SupportGroup+DevGroup),
+        ChainProp(name='HLT_2mu4_ivarloose_L1BPH-7M14-0DR25-MU5VFMU3VF', l1SeedThresholds=['MU3VF'], stream=['BphysDelayed'], groups=MultiMuonGroup+SupportGroup+DevGroup),
+        ChainProp(name='HLT_mu4_ivarloose_mu4_mu3noL1_L1BPH-7M14-0DR25-MU5VFMU3VF', l1SeedThresholds=['MU3VF', 'MU3VF', 'FSNOSEED'], stream=['BphysDelayed'], groups=MultiMuonGroup+SupportGroup+DevGroup),
+
         # Test ID T&P
         ChainProp(name='HLT_mu14_idtp_L1MU8F', groups=SingleMuonGroup+SupportGroup, monGroups=['idMon:shifter','idMon:t0']),
 
@@ -612,11 +617,6 @@ def getDevSignatures():
         ChainProp(name="HLT_tau160_idperf_trackLRT_L1TAU100", groups=DevGroup, monGroups=['tauMon:t0']), 
 
         
-        # [ATR-26629 ] Request of adding support tau20_idperf/perf chains
-        ChainProp(name="HLT_tau20_perf_tracktwoMVA_L1TAU8", groups=DevGroup),
-        ChainProp(name="HLT_tau20_idperf_tracktwoMVA_L1TAU8", groups=DevGroup),
-        ChainProp(name="HLT_tau20_perf_tracktwoMVA_L1eTAU12", groups=DevGroup),
-        ChainProp(name="HLT_tau20_idperf_tracktwoMVA_L1eTAU12", groups=DevGroup),
     ]
 
     chains['Bphysics'] = [
@@ -721,9 +721,6 @@ def getDevSignatures():
 
         # Maintain consistency with old naming conventions for validation
         ChainProp(name='HLT_e26_lhtight_ivarloose_mu22noL1_j20_0eta290_020jvt_pf_ftf_boffperf_L1EM22VHI', l1SeedThresholds=['EM22VHI','FSNOSEED','FSNOSEED'], stream=[PhysicsStream,'express'], groups=DevGroup+EgammaBjetGroup, monGroups=['bJetMon:shifter']),
-        ChainProp(name='HLT_e26_lhtight_ivarloose_mu22noL1_2j20_0eta290_020jvt_bgn185_pf_ftf_L1EM22VHI', l1SeedThresholds=['EM22VHI','FSNOSEED','FSNOSEED'], stream=[PhysicsStream,'express'], groups=DevGroup+EgammaBjetGroup, monGroups=['bJetMon:shifter']),
-
-
     ]
 
     chains['Beamspot'] = [

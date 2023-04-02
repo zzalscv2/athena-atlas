@@ -55,12 +55,6 @@ class TrigMETMonitorAlgorithm : public AthMonitorAlgorithm {
   SG::ReadHandleKey<xAOD::VertexContainer> m_offline_vertex_key{this, "offline_vertex_key", "PrimaryVertices", "Offline vertex container name"};
 
   SG::ReadHandleKey<xAOD::EnergySumRoI> m_lvl1_roi_key{this, "l1_roi_key", "LVL1EnergySumRoI", "L1 energy sum ROI container name"};
-  SG::ReadHandleKey<xAOD::EnergySumRoI> m_lvl1_jnc_key{this, "l1_jnc_key", "jNOISECUT_MET", "jNOISE Cut MET container name"};
-  SG::ReadHandleKey<xAOD::EnergySumRoI> m_lvl1_jrho_key{this, "l1_jrho_key", "jXERHO_MET", "jXERHO MET container name"};
-  SG::ReadHandleKey<xAOD::EnergySumRoI> m_lvl1_gnc_key{this, "l1_gnc_key", "gXENOISECUT_MET", "gXENOISECUT MET container name"};
-  SG::ReadHandleKey<xAOD::EnergySumRoI> m_lvl1_grho_key{this, "l1_grho_key", "gXERHO_MET", "gXERHO MET container name"};
-  SG::ReadHandleKey<xAOD::EnergySumRoI> m_lvl1_gjwoj_key{this, "l1_gjwoj_key", "gXEJWOJ_MET", "gXERJWOW MET container name"};
-  SG::ReadHandleKey<xAOD::EnergySumRoI> m_lvl1_gpufit_key{this, "l1_gpufit_key", "gXEPUFIT_MET", "gXEPUFIT MET container name"};
 
   SG::ReadHandleKey<xAOD::jFexMETRoIContainer> m_l1_jFexMet_key{this, "l1_jFexMet_key", "L1_jFexMETRoI", "L1 jFex MET container name"};
   SG::ReadHandleKey<xAOD::jFexSumETRoIContainer> m_l1_jFexSumEt_key{this, "l1_jFexSumEt_key", "L1_jFexSumETRoI", "L1 jFex sumEt container name"};
@@ -99,7 +93,6 @@ class TrigMETMonitorAlgorithm : public AthMonitorAlgorithm {
   Gaudi::Property<std::vector<std::string>> m_algsHLTPreSel{this, "algsHLTPreSel", {}, "HLTPreSel algorithms to monitor"};
   Gaudi::Property<std::vector<std::string>> m_LArNoiseBurstVetoAlgs{this, "LArNoiseBurstVetoAlgs", {}, "MET histograms with LAr NoiseBurst Veto Applied"};
   Gaudi::Property<std::vector<std::string>> m_algsHLT2d{this, "algsHLT2d", {}, "HLT algorithms for 2d eta-phi plots"};
-  Gaudi::Property<std::vector<std::string>> m_algsL1Expert{this, "algsL1Expert", {}, "L1 algorithms for Expert"};
   Gaudi::Property<std::vector<std::string>> m_algsHLTExpert{this, "algsHLTExpert", {}, "HLT algorithms for Expert"};
   Gaudi::Property<std::vector<std::string>> m_algsMET2d_tcpufit{this, "algsMET2d_tcpufit", {}, "HLT algorithms for 2D MET wrt tcpufit"};
   Gaudi::Property<std::vector<std::string>> m_compNames{this, "compNames", {}, "Calorimeter component names"};

@@ -77,7 +77,7 @@ public:
 
   ZDCMsg::MessageFunctionPtr MakeMessageFunction()
   {
-    std::function<bool(int, std::string)> msgFunction = [this](int level, std::string message)-> bool
+    std::function<bool(int, std::string)> msgFunction = [this](int level, const std::string& message)-> bool
     {
       MSG::Level theLevel = static_cast<MSG::Level>(level);
       bool test = theLevel >= this->msg().level();
