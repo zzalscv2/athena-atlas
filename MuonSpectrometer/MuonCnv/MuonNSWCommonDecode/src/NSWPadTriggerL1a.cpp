@@ -65,7 +65,7 @@ Muon::nsw::NSWPadTriggerL1a::NSWPadTriggerL1a(const uint32_t* bs, const uint32_t
         getOneBcOfCompressedData(words, bitIndex, relbcid, mapPadTriggerToTds, numberOfChannels)
       );
     } catch (const std::exception& ex) {
-      ERS_INFO(ex.what());
+      ERS_DEBUG(1, ex.what());
       m_decoded.data.clear();
       break;
     }
