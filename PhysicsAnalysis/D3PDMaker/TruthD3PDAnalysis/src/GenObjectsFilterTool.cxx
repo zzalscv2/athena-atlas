@@ -129,7 +129,7 @@ bool GenObjectsFilterTool::pass( const HepMC::GenEvent* evt,
 
 
 
-bool GenObjectsFilterTool::isBCHadron(HepMC::ConstGenParticlePtr part) const{
+bool GenObjectsFilterTool::isBCHadron(const HepMC::ConstGenParticlePtr& part) const{
 
   if(HepMC::is_simulation_particle(part)) return false;
   int type = HadronClass::type(part->pdg_id()).second;
@@ -152,7 +152,7 @@ bool GenObjectsFilterTool::isKeep(int pdg) const{
   return false;
 }
 
-bool GenObjectsFilterTool::isLeptonicWZ(HepMC::ConstGenParticlePtr part) const{
+bool GenObjectsFilterTool::isLeptonicWZ(const HepMC::ConstGenParticlePtr& part) const{
 
   int pdg = part->pdg_id();
 
@@ -177,7 +177,7 @@ bool GenObjectsFilterTool::isLeptonicWZ(HepMC::ConstGenParticlePtr part) const{
 
 }
 
-bool GenObjectsFilterTool::isRequested( HepMC::ConstGenParticlePtr part) const{
+bool GenObjectsFilterTool::isRequested(const HepMC::ConstGenParticlePtr& part) const{
 
 
    const HepMC::FourVector& p4 = part->momentum();
@@ -389,7 +389,7 @@ bool GenObjectsFilterTool::isRequested( HepMC::ConstGenParticlePtr part) const{
    return false;
 }
 
-bool GenObjectsFilterTool::passParticleCuts( HepMC::ConstGenParticlePtr part) const{
+bool GenObjectsFilterTool::passParticleCuts( const HepMC::ConstGenParticlePtr& part) const{
 
   if(isRequested(part)) return true;
   if(m_removeUnrequestedParticles) return false;
@@ -407,7 +407,7 @@ bool GenObjectsFilterTool::passParticleCuts( HepMC::ConstGenParticlePtr part) co
 }
 
 
-bool GenObjectsFilterTool::pass( HepMC::ConstGenParticlePtr part,
+bool GenObjectsFilterTool::pass( const HepMC::ConstGenParticlePtr& part,
                                  const McEventCollection* coll ) const {
 
    // Check if the particle is coming from a "good" GenEvent:
@@ -442,7 +442,7 @@ bool GenObjectsFilterTool::pass( HepMC::ConstGenParticlePtr part,
    return true;
 }
 
-bool GenObjectsFilterTool::pass( HepMC::ConstGenVertexPtr vtx,
+bool GenObjectsFilterTool::pass( const HepMC::ConstGenVertexPtr& vtx,
                                  const McEventCollection* coll ) const {
 
   const HepMC::GenEvent* event = vtx->parent_event();

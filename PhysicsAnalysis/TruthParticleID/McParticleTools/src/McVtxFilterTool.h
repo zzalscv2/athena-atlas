@@ -120,7 +120,7 @@ class McVtxFilterTool : virtual public IMcVtxFilterTool,
 
   /** Return true if one of the McVtxFilters accept this GenVertex
    */
-  virtual bool isAccepted( HepMC::ConstGenVertexPtr vtx ) const;
+  virtual bool isAccepted( const HepMC::ConstGenVertexPtr& vtx ) const;
 
   /////////////////////////////////////////////////////////////////// 
   // Non-const methods: 
