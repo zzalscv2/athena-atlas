@@ -34,7 +34,8 @@ Threads = 8
 Slots   = 8
 Input   = 'Bphys_JpsiPhi'    # defined in TrigValTools/share/TrigValInputs.json
 
-preinclude_file = 'all:TrigInDetValidation/TIDV_cond_fix.py' #conditions fix for ATR-23982. In future find a more recent RDO  
+preinclude_file = 'RDOtoRDOTrigger:TrigInDetValidation/TIDV_cond_fix.py' #conditions fix for ATR-23982. In future find a more recent RDO
+postinclude_file = 'RAWtoALL:TrigInDetValidation.TIDV_cond_fix'
 
 Jobs = [ ( "Truth",       " TIDAdata-run3.dat                    -o data-hists.root -p 13" ),
          ( "Offline",     " TIDAdata-run3-offline.dat -r Offline -o data-hists-offline.root" ) ]
@@ -51,6 +52,3 @@ Comp = [ ( "L2muon",              "L2muon",      "data-hists.root",         " -c
 
 from AthenaCommon.Include import include 
 include("TrigInDetValidation/TrigInDetValidation_Base.py")
-
-
- 

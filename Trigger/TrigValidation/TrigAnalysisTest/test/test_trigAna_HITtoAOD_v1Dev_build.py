@@ -36,7 +36,8 @@ rdo2aod.input = ''
 rdo2aod.explicit_input = True
 rdo2aod.threads = 1
 rdo2aod.args = '--inputRDOFile=RDO.pool.root --outputRDO_TRIGFile=RDO_TRIG.pool.root --outputAODFile=AOD.pool.root'
-rdo2aod.args += ' --steering "doRDO_TRIG" "doTRIGtoALL"'
+rdo2aod.args += ' --steering "doRDO_TRIG"'
+rdo2aod.args += ' --CA "default:True" "RDOtoRDOTrigger:False"'
 rdo2aod.args += ' --preExec="setMenu=\'Dev_pp_run3_v1_TriggerValidation_prescale\'"'
 rdo2aod.args += ' --conditionsTag="all:OFLCOND-MC16-SDR-RUN2-09"'
 

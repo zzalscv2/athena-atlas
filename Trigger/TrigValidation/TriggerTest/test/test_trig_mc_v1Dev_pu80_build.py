@@ -19,7 +19,7 @@ precommand = ''.join([
    "setMenu='Dev_pp_run3_v1_TriggerValidation_prescale';",
    "doWriteBS=False;",
    "doWriteRDOTrigger=True;",
-   "from AthenaConfiguration.AllConfigFlags import ConfigFlags;ConfigFlags.IOVDb.GlobalTag='OFLCOND-RUN12-SDR-31';from IOVDbSvc.CondDB import conddb;conddb.addOverride('/PIXEL/PixelModuleFeMask','PixelModuleFeMask-SIM-MC16-000-03');conddb.addOverride('/TRT/Calib/PID_NN', 'TRTCalibPID_NN_v1')"
+   "from AthenaConfiguration.AllConfigFlags import ConfigFlags;ConfigFlags.IOVDb.GlobalTag='OFLCOND-RUN12-SDR-31';from IOVDbSvc.CondDB import conddb;conddb.addOverride('/PIXEL/PixelModuleFeMask','PixelModuleFeMask-SIM-MC16-000-03');conddb.addOverride('/TRT/Calib/PID_NN', 'TRTCalibPID_NN_v1');ConfigFlags.Trigger.enableL1CaloPhase1=False;"
 ])
 ex.args = '-c "{:s}"'.format(precommand)
 
