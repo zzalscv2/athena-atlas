@@ -310,6 +310,7 @@ def JETM1Cfg(ConfigFlags):
     # Define contents of the format
     # =============================
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
     JETM1SlimmingHelper = SlimmingHelper("JETM1SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
@@ -371,6 +372,7 @@ def JETM1Cfg(ConfigFlags):
     # Output stream    
     JETM1ItemList = JETM1SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_JETM1", ItemList=JETM1ItemList, AcceptAlgs=["JETM1Kernel"]))
+    acc.merge(InfileMetaDataCfg(ConfigFlags, "DAOD_JETM1", AcceptAlgs=["JETM1Kernel"]))
 
     return acc
 

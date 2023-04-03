@@ -123,6 +123,7 @@ def BPHY3Cfg(ConfigFlags):
     for t in augCollections +BPHY3ThinningTools +skimCollections : acc.addPublicTool(t)
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
     BPHY3SlimmingHelper = SlimmingHelper("BPHY3SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
     AllVariables  = getDefaultAllVariables()
@@ -143,5 +144,6 @@ def BPHY3Cfg(ConfigFlags):
     BPHY3SlimmingHelper.StaticContent = StaticContent
     BPHY3ItemList = BPHY3SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_BPHY3", ItemList=BPHY3ItemList, AcceptAlgs=["BPHY3Kernel"]))
+    acc.merge(InfileMetaDataCfg(ConfigFlags, "DAOD_BPHY3", AcceptAlgs=["BPHY3Kernel"]))
     acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True, printComponentsOnly=False)
     return acc

@@ -120,6 +120,7 @@ def BPHY1Cfg(ConfigFlags):
     for tool in BPHY1ThinningTools : acc.addPublicTool(tool)
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
     AllVariables  = getDefaultAllVariables()
@@ -163,5 +164,6 @@ def BPHY1Cfg(ConfigFlags):
     BPHY1ItemList = BPHY1SlimmingHelper.GetItemList()
 
     acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_BPHY1", ItemList=BPHY1ItemList, AcceptAlgs=["BPHY1Kernel"]))
+    acc.merge(InfileMetaDataCfg(ConfigFlags, "DAOD_BPHY1", AcceptAlgs=["BPHY1Kernel"]))
     acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True, printComponentsOnly=False)
     return acc
