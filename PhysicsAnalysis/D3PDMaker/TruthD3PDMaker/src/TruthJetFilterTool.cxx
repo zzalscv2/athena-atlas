@@ -198,9 +198,8 @@ StatusCode
 TruthJetFilterTool::filterEvent (const HepMC::GenEvent* ev_in,
 				 HepMC::GenEvent* ev_out)
 {
+    m_used.clear();
   // Loop over particles.
-  // (range-based for doesn't work here because particle_const_iterator
-  // isn't consistent in the use of const...)
   for (auto  ip: *ev_in) {
     // Copy the particle if we want to keep it.
     if (acceptParticle (ip)) CHECK( addParticle (ip, ev_out) );
@@ -224,41 +223,56 @@ TruthJetFilterTool::addParticle (HepMC::ConstGenParticlePtr  p, HepMC::GenEvent*
     REPORT_MESSAGE (MSG::ERROR) << "Encountered GenParticle with no vertices!";
     return StatusCode::FAILURE;
   }
-
 #ifdef HEPMC3
-  // Find the particle in the event.
-  // If it doesn't exist yet, copy it.
-  HepMC::GenParticlePtr pnew = HepMC::barcode_to_particle (ev,HepMC::barcode(p));
-  if (!pnew) pnew = std::make_shared<HepMC3::GenParticle> (*p);
+  // Find if the particle was used.
+  HepMC::GenParticlePtr pnew = nullptr;
+  if (p && m_used.count(p->id()) == 0) pnew = std::make_shared<HepMC::GenParticle>(*p);
   // Add ourself to our vertices.
-  if (p->production_vertex()) {
-    HepMC::GenVertexPtr v = HepMC::barcode_to_vertex (ev, HepMC::barcode(p->production_vertex()));
-    if (v) v->add_particle_out (pnew);
+  if (p && p->production_vertex() && m_used.count(p->production_vertex()->id()) == 0) {
+    HepMC::GenVertexPtr v = std::make_shared<HepMC::GenVertex>(*p->production_vertex());
+    ev -> add_vertex(v);
+    m_used.insert(p->production_vertex()->id());
+    v->add_particle_out (pnew);
+    m_used.insert(p->id());
+    HepMC::suggest_barcode (v,HepMC::barcode(p->production_vertex()));
+    HepMC::suggest_barcode (pnew,HepMC::barcode(p));
   }
-  if (p->end_vertex()) {
-    HepMC::GenVertexPtr v = HepMC::barcode_to_vertex (ev, HepMC::barcode(p->end_vertex()));
-    if (v) v->add_particle_in (pnew);
+  if (p && p->end_vertex() && m_used.count(p->end_vertex()->id()) == 0 ) {
+    HepMC::GenVertexPtr v =  std::make_shared<HepMC::GenVertex>(*p->end_vertex());
+    ev -> add_vertex(v);
+    m_used.insert(p->end_vertex()->id());
+    v->add_particle_in (pnew);
+    m_used.insert(p->id());
+    HepMC::suggest_barcode (v,HepMC::barcode(p->end_vertex()));
+    HepMC::suggest_barcode (pnew,HepMC::barcode(p));
   }
+
 #else
   // Find the particle in the event.
   // If it doesn't exist yet, copy it.
-  HepMC::GenParticle* pnew = ev->barcode_to_particle (p->barcode());
-  if (!pnew)
+  HepMC::GenParticle* pnew = nullptr; 
+  if (m_used.count(p->barcode()) == 0 && (p->production_vertex() || p->end_vertex()))
     pnew = new HepMC::GenParticle (*p);
 
   // Add ourself to our vertices.
-  if (p->production_vertex()) {
-    HepMC::GenVertex* v =
-      ev->barcode_to_vertex (p->production_vertex()->barcode());
-    if (v)
-      v->add_particle_out (pnew);
+  if (p->production_vertex() &&  m_used.count(p->production_vertex()->barcode()) == 0 ) {
+    HepMC::GenVertex* v = new HepMC::GenVertex (*p->production_vertex()); 
+    ev->add_vertex(v);
+    v->add_particle_out (pnew);
+    m_used.insert(p->production_vertex()->barcode());
+    m_used.insert(p->barcode());
+    HepMC::suggest_barcode (v,HepMC::barcode(p->production_vertex()));
+    HepMC::suggest_barcode (pnew,HepMC::barcode(p));
   }
 
-  if (p->end_vertex()) {
-    HepMC::GenVertex* v =
-      ev->barcode_to_vertex (p->end_vertex()->barcode());
-    if (v)
-      v->add_particle_in (pnew);
+  if (p->end_vertex() &&  m_used.count(p->end_vertex()->barcode()) == 0 ) {
+    HepMC::GenVertex* v = new HepMC::GenVertex (*p->end_vertex()); 
+    ev->add_vertex(v);
+    v->add_particle_in (pnew);
+    m_used.insert(p->end_vertex()->barcode());
+    m_used.insert(p->barcode());
+    HepMC::suggest_barcode (v,HepMC::barcode(p->end_vertex()));
+    HepMC::suggest_barcode (pnew,HepMC::barcode(p));
   }
 #endif
 
@@ -274,61 +288,71 @@ TruthJetFilterTool::addVertex (HepMC::ConstGenVertexPtr v,HepMC::GenEvent* ev)
 {
 #ifdef HEPMC3
   // See if this vertex has already been copied.
-  HepMC::GenVertexPtr vnew = HepMC::barcode_to_vertex (ev,HepMC::barcode(v));
-  if (!vnew) {
+  if (m_used.count(v->id()) == 0)
+   {
     // No ... make a new one.
-    vnew = HepMC::newGenVertexPtr();
+    HepMC::GenVertexPtr vnew = HepMC::newGenVertexPtr();
     ev->add_vertex (vnew);
     vnew->set_position (v->position());
     vnew->set_status (v->status());
     HepMC::suggest_barcode (vnew,HepMC::barcode(v));
-    //AV: here should be code to copy the weights, but these are never used. Skip. Please don't remove this comment. vnew->weights() = v->weights();
+    m_used.insert(v->id());
+//AV: Are these needed?FIXME?    vnew->weights() = v->weights();
     // Fill in the existing relations of the new vertex.
     for (const auto&  p : v->particles_in())
     {
-      HepMC::GenParticlePtr pnew = HepMC::barcode_to_particle (ev,HepMC::barcode(p));
-      if (pnew) vnew->add_particle_in (pnew);
-    }
-
-    for (const auto& p : v->particles_out())
+      if (m_used.count(p->id()) !=  0) continue;
+      auto pnew = std::make_shared<HepMC::GenParticle>(*p);
+      vnew->add_particle_in (pnew);
+      m_used.insert(p->id());
+      HepMC::suggest_barcode (pnew,HepMC::barcode(p));    }
+    
+   for (const auto&  p :v->particles_out())
     {
-      HepMC::GenParticlePtr pnew = HepMC::barcode_to_particle (ev,HepMC::barcode(p));
-      if (pnew) vnew->add_particle_out (pnew);
+      if (m_used.count(p->id()) !=  0) continue;
+      auto pnew = std::make_shared<HepMC::GenParticle>(*p);
+      vnew->add_particle_out (pnew);
+      m_used.insert(p->id());
+      HepMC::suggest_barcode (pnew,HepMC::barcode(p));
     }
   }
+
 #else
   // See if this vertex has already been copied.
-  HepMC::GenVertex* vnew = ev->barcode_to_vertex (v->barcode());
-  if (!vnew) {
+  if (m_used.count(HepMC::barcode(v)) == 0)
+   {
     // No ... make a new one.
-    vnew = new HepMC::GenVertex;
+    HepMC::GenVertex* vnew = new HepMC::GenVertex();
     vnew->set_position (v->position());
     vnew->set_id (v->id());
-    vnew->suggest_barcode (v->barcode());
     vnew->weights() = v->weights();
     ev->add_vertex (vnew);
+    m_used.insert(HepMC::barcode(v));
+    HepMC::suggest_barcode (vnew,HepMC::barcode(v));    
 
     // Fill in the existing relations of the new vertex.
-    for (const HepMC::GenParticle* p :
-           boost::make_iterator_range (v->particles_in_const_begin(),
-                                       v->particles_in_const_end()))
+    for (auto ip=v->particles_in_const_begin();ip!=v->particles_in_const_end();++ip)
     {
-      HepMC::GenParticle* pnew = ev->barcode_to_particle (p->barcode());
-      if (pnew)
-        vnew->add_particle_in (pnew);
+      auto p = *ip;
+      if (m_used.count(HepMC::barcode(p)) != 0) continue;
+      HepMC::GenParticle* pnew = new HepMC::GenParticle(*p);
+      vnew->add_particle_in (pnew);
+      m_used.insert(HepMC::barcode(p));
+      HepMC::suggest_barcode (pnew,HepMC::barcode(p));
     }
-
-    for (const HepMC::GenParticle* p :
-           boost::make_iterator_range (v->particles_out_const_begin(),
-                                       v->particles_out_const_end()))
+    for (auto ip = v->particles_out_const_begin();ip!= v->particles_out_const_end();++ip)
     {
-      HepMC::GenParticle* pnew = ev->barcode_to_particle (p->barcode());
-      if (pnew)
-        vnew->add_particle_out (pnew);
+      auto p = *ip;
+      if (m_used.count(HepMC::barcode(p)) != 0) continue;
+      HepMC::GenParticle* pnew = new HepMC::GenParticle(*p);
+      vnew->add_particle_out (pnew);
+      m_used.insert(HepMC::barcode(p));
+      HepMC::suggest_barcode (pnew,HepMC::barcode(p));
     }
   }
 #endif
 
+  return StatusCode::SUCCESS;
   return StatusCode::SUCCESS;
 }
 
