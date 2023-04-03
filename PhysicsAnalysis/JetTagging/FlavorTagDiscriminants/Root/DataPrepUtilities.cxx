@@ -681,7 +681,7 @@ namespace FlavorTagDiscriminants {
         {"(rnnip|iprnn|dips[^_]*)(flip)?_p(b|c|u|tau)"_r, EDMType::FLOAT},
         {"(JetFitter|SV1|JetFitterSecondaryVertex)(Flip)?_[Nn].*"_r, EDMType::INT},
         {"(JetFitter|SV1|JetFitterSecondaryVertex).*"_r, EDMType::FLOAT},
-        {"(log_)?pt|abs_eta|eta|phi|energy"_r, EDMType::CUSTOM_GETTER},
+        {"(log_)?pt|abs_eta|eta|phi|energy|mass"_r, EDMType::CUSTOM_GETTER},
         {"softMuon_p[bcu]"_r, EDMType::FLOAT},
         {"softMuon_.*"_r, EDMType::FLOAT},
       };
@@ -703,7 +703,7 @@ namespace FlavorTagDiscriminants {
         {"iprnn_.*"_r, ""},
         {"smt_.*"_r, "softMuon_isDefaults"},
         {"softMuon_.*"_r, "softMuon_isDefaults"},
-        {"((log_)?pt|abs_eta|eta|phi|energy)"_r, ""}}; // no default for custom cases
+        {"((log_)?pt|abs_eta|eta|phi|energy|mass)"_r, ""}}; // no default for custom cases
 
       std::vector<FTagInputConfig> input_config;
       for (auto& node: config.inputs){
