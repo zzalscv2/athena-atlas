@@ -19,5 +19,5 @@ ArtPackage=$1
 ArtJobName=$2
 art.py download ${ArtPackage} ${ArtJobName}
 REFFILE=(./ref-*/ExampleMonitorOutput.root)
-hist_diff.sh ExampleMonitorOutput.root $REFFILE -x "(TIME_execute|TotalEnergyVsEtaPhi.*_CSCveto|CandidateMNBFebs)" -i > log.HIST_Diff 2>&1
+hist_diff.sh ExampleMonitorOutput.root $REFFILE -x "(TIME_(execute|convert|prepareROBs)|TotalEnergyVsEtaPhi.*_CSCveto|CandidateMNBFebs)" -i > log.HIST_Diff 2>&1
 echo "art-result: $? HIST_Diff"

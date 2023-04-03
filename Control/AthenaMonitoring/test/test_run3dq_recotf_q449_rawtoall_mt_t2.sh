@@ -17,5 +17,5 @@ ArtPackage=$1
 ArtJobName=$2
 art.py download ${ArtPackage} ${ArtJobName}
 REFFILE=(./ref-*/myHIST.root)
-hist_diff.sh myHIST.root $REFFILE -x "(TIME_execute|L1Calo/CPM_CMX/Errors/Transmission_Simulation/MismatchEventNumbers|CandidateMNBFebs)" -i > log.HIST_Diff 2>&1
+hist_diff.sh myHIST.root $REFFILE -x "(TIME_(execute|convert|prepareROBs)|L1Calo/CPM_CMX/Errors/Transmission_Simulation/MismatchEventNumbers|CandidateMNBFebs)" -i > log.HIST_Diff 2>&1
 echo "art-result: $? HIST_Diff"
