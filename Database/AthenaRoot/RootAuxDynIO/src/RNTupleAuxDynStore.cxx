@@ -18,11 +18,13 @@ using RFieldValue   = ROOT::Experimental::Detail::RFieldValue;
 using RNTupleReader = ROOT::Experimental::RNTupleReader;
 using REntry = ROOT::Experimental::REntry;
 
+using namespace RootAuxDynIO;
 
-RNTupleAuxDynStore::RNTupleAuxDynStore( RNTupleAuxDynReader& aux_reader, RNTupleReader* rnt_reader,
-                                          const std::string& branchName,
-                                          long long entry, bool standalone,
-                                          std::recursive_mutex* iomtx)
+RNTupleAuxDynStore::RNTupleAuxDynStore( RNTupleAuxDynReader& aux_reader,
+                                        RNTupleReader* rnt_reader,
+                                        const std::string& branchName,
+                                        long long entry, bool standalone,
+                                        std::recursive_mutex* iomtx)
    : RootAuxDynStore( aux_reader, entry, standalone, iomtx ),
      m_reader( aux_reader ),
      m_ntupleReader( rnt_reader ),

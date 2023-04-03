@@ -13,7 +13,7 @@
  */
 
 #include "RootAuxDynStore.h"
-class RNTupleAuxDynReader;
+namespace RootAuxDynIO { class RNTupleAuxDynReader; }
 
 namespace ROOT { namespace Experimental { class RNTupleReader; } }
 using RNTupleReader   = ROOT::Experimental::RNTupleReader;
@@ -22,7 +22,8 @@ using RNTupleReader   = ROOT::Experimental::RNTupleReader;
 class RNTupleAuxDynStore : public RootAuxDynStore
 {
 public:
-   RNTupleAuxDynStore( RNTupleAuxDynReader& aux_reader, RNTupleReader *reader,
+   RNTupleAuxDynStore( RootAuxDynIO::RNTupleAuxDynReader& aux_reader,
+                         RNTupleReader *reader,
                          const std::string& base_branch, 
                          long long entry, bool standalone,
                          std::recursive_mutex* iomtx = nullptr);
@@ -33,7 +34,7 @@ protected:
    /// read data from ROOT and store it in m_vecs. Returns False on error
    virtual bool readData(SG::auxid_t auxid) override final;
 
-   RNTupleAuxDynReader&         m_reader;
+   RootAuxDynIO::RNTupleAuxDynReader& m_reader;
    RNTupleReader*               m_ntupleReader = nullptr;
    std::string                  m_baseBranchName;
 };
