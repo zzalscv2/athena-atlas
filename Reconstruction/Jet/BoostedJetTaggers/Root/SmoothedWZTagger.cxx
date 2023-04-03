@@ -140,26 +140,18 @@ StatusCode SmoothedWZTagger::initialize() {
   ATH_MSG_INFO( "  " << m_decPassD2Key.key() << " : pass D2 cut" );
   ATH_MSG_INFO( "  " << m_decCutD2Key.key() << " : D2 cut" );
 
-  if ( m_useNtrk ) {
+  m_decPassNtrkKey = m_containerName + "." + m_decorationName + "_" + m_decPassNtrkKey.key();
+  m_decCutNtrkKey = m_containerName + "." + m_decorationName + "_" + m_decCutNtrkKey.key();
   
-    m_decPassNtrkKey = m_containerName + "." + m_decorationName + "_" + m_decPassNtrkKey.key();
-    m_decCutNtrkKey = m_containerName + "." + m_decorationName + "_" + m_decCutNtrkKey.key();
-    
-    ATH_CHECK( m_decPassNtrkKey.initialize() );
-    ATH_CHECK( m_decCutNtrkKey.initialize() );
-    
-    ATH_MSG_INFO( "  " << m_decPassNtrkKey.key() << " : pass Ntrk cut" );
-    ATH_MSG_INFO( "  " << m_decCutNtrkKey.key() << " : Ntrk cut" );
-
-  }
-
-  if ( m_calcSF ) {
-    
-    m_decAcceptKey = m_containerName + "." + m_decorationName + "_" + m_decAcceptKey.key();
-    ATH_CHECK( m_decAcceptKey.initialize() );
+  ATH_CHECK( m_decPassNtrkKey.initialize() );
+  ATH_CHECK( m_decCutNtrkKey.initialize() );
   
-  }
+  ATH_MSG_INFO( "  " << m_decPassNtrkKey.key() << " : pass Ntrk cut" );
+  ATH_MSG_INFO( "  " << m_decCutNtrkKey.key() << " : Ntrk cut" );
 
+  m_decAcceptKey = m_containerName + "." + m_decorationName + "_" + m_decAcceptKey.key();
+  ATH_CHECK( m_decAcceptKey.initialize() );
+  
   return StatusCode::SUCCESS;
 
 }
