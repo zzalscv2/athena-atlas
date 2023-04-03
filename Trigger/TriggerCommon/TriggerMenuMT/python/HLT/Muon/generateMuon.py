@@ -117,7 +117,7 @@ def MuFastViewDataVerifier(flags):
                    ( 'RpcPrepDataCollection_Cache' , 'StoreGateSvc+RpcPrdCache' ),
                    ( 'TgcRdo_Cache' , 'StoreGateSvc+TgcRdoCache' ),
                    ( 'MdtCsm_Cache' , 'StoreGateSvc+MdtCsmRdoCache' ),
-                   ( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+L2MuFastRecoRoIs' )]
+                   ( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+L2MuFastRecoNewJORoIs' )]
     if flags.Detector.GeometryCSC:
         dataobjects += [( 'CscRawDataCollection_Cache' , 'StoreGateSvc+CscRdoCache' )]
     if flags.Trigger.enableL1MuonPhase1:
@@ -163,7 +163,7 @@ def _muFastStepSeq(flags, is_probe_leg=False):
     # Step 1 (L2MuonSA)
     selAcc = SelectionCA("L2MuFastSel",  is_probe_leg)
     # Set EventViews for L2MuonSA step
-    recoName = "L2MuFastReco"
+    recoName = "L2MuFastRecoNewJO"
     reco = InViewRecoCA(recoName, isProbe=is_probe_leg)
 
     #external data loading to view
@@ -257,7 +257,7 @@ def _muEFSAStepSeq(flags, name='RoI', is_probe_leg=False):
         requireParentView = False
     else:
         ViewCreatorFetchFromViewROITool=CompFactory.ViewCreatorFetchFromViewROITool
-        roiTool         = ViewCreatorFetchFromViewROITool(RoisWriteHandleKey="Roi_L2SAMuonForEF", InViewRoIs = "forMS", ViewToFetchFrom = "L2MuFastRecoViews")
+        roiTool         = ViewCreatorFetchFromViewROITool(RoisWriteHandleKey="Roi_L2SAMuonForEF", InViewRoIs = "forMS", ViewToFetchFrom = "L2MuFastRecoNewJOViews")
         requireParentView = True
                                                          
     recoMS = InViewRecoCA(name=viewName, RoITool = roiTool, RequireParentView = requireParentView, isProbe=is_probe_leg)

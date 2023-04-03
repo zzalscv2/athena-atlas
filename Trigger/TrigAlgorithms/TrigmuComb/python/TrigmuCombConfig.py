@@ -56,7 +56,7 @@ def l2MuCombRecoCfg(flags, name="L2MuCombReco", is_probe_leg=False):
     ViewCreatorFetchFromViewROITool=CompFactory.ViewCreatorFetchFromViewROITool
     reco = InViewRecoCA(name, 
                         RequireParentView = True, 
-                        RoITool = ViewCreatorFetchFromViewROITool(RoisWriteHandleKey="Roi_L2SAMuon", InViewRoIs = "forID", ViewToFetchFrom = "L2MuFastRecoViews"),
+                        RoITool = ViewCreatorFetchFromViewROITool(RoisWriteHandleKey="Roi_L2SAMuon", InViewRoIs = "forID", ViewToFetchFrom = "L2MuFastRecoNewJOViews"),
                         isProbe=is_probe_leg)
 
     acc, alg = muCombCfg(flags)
