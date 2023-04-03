@@ -2,12 +2,12 @@
 #  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
-from egammaAlgs import egammaAlgsConf
-from egammaRec.Factories import AlgFactory
-from AthenaCommon.CFElements import parOR
-from TriggerMenuMT.HLT.Config.MenuComponents import RecoFragmentsPool
-from TriggerMenuMT.HLT.Egamma.TrigEgammaFactories import TrigEgammaRec, TrigEgammaSuperClusterBuilderCfg
-from AthenaCommon.Logging import logging
+from AthenaCommon.Logging    import logging
+from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys      import getTrigEgammaKeys
+from TriggerMenuMT.HLT.Egamma.TrigEgammaFactoriesCfg import TrigEgammaRecCfg, TrigEgammaSuperClusterBuilderCfg
+from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+
 
 log = logging.getLogger(__name__)
 
@@ -15,41 +15,46 @@ log = logging.getLogger(__name__)
 # in the RecoFragmentsPool -- only the RoIs are used to distinguish
 # different sequences. New convention is just to pass "None" for flags
 # taken from Jet/JetRecoSequences.py
-def precisionCaloRecoSequence(flags, RoIs, ion=False, variant=''):
+def precisionCaloRecoSequence(flags, RoIs, name = None, ion=False, variant=''):
+    acc = ComponentAccumulator()
+
+    TrigEgammaKeys = getTrigEgammaKeys(variant, ion = ion)
+
     log.debug('flags = %s',flags)
     log.debug('RoIs = %s',RoIs)
 
-    from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import  getTrigEgammaKeys
-    TrigEgammaKeys = getTrigEgammaKeys(variant, ion=ion)
+    from TrigCaloRec.TrigCaloRecConfig import hltCaloTopoClusteringCfg, hltCaloTopoClusteringHICfg
 
-    from TrigT2CaloCommon.CaloDef import HLTRoITopoRecoSequence, HLTHIRoITopoRecoSequence
-    topoRecoSequence = HLTHIRoITopoRecoSequence if ion is True else HLTRoITopoRecoSequence
-    (caloRecoSequence, caloclusters) = RecoFragmentsPool.retrieve(topoRecoSequence, flags, RoIs=RoIs, algSuffix=variant)
-
-    log.debug('topoRecoSequence output conmtainer = %s',caloclusters)
+    if ion:
+        topoCluster = hltCaloTopoClusteringHICfg(flags,
+                                                 namePrefix='',
+                                                 CellsName = "CaloCells",
+                                                 roisKey=RoIs)
+    else:
+        topoCluster = hltCaloTopoClusteringCfg(flags,
+                                               namePrefix='',
+                                               nameSuffix='RoI'+variant,
+                                               CellsName = "CaloCells",
+                                               roisKey=RoIs,
+                                               clustersKey=TrigEgammaKeys.precisionTopoClusterContainer) 
+    acc.merge(topoCluster)
     tag = 'HI' if ion is True else '' 
+    
+    copier = CompFactory.egammaTopoClusterCopier('eTrigEgammaTopoClusterCopier'+  tag + RoIs,
+                                                 InputTopoCollection=TrigEgammaKeys.precisionTopoClusterContainer,
+                                                 OutputTopoCollection= TrigEgammaKeys.precisionCaloTopoCollection,
+                                                 OutputTopoCollectionShallow='tmp_'+TrigEgammaKeys.precisionCaloTopoCollection)
+    acc.addEventAlgo(copier)
 
-    egammaTopoClusterCopier = AlgFactory( egammaAlgsConf.egammaTopoClusterCopier,
-                                          name = 'eTrigEgammaTopoClusterCopier' + tag + RoIs + variant ,
-                                          InputTopoCollection = caloclusters,
-                                          OutputTopoCollection = TrigEgammaKeys.precisionCaloTopoCollection,
-                                          OutputTopoCollectionShallow = "tmp_" + TrigEgammaKeys.precisionCaloTopoCollection,
-                                          doAdd = False )
+    trigEgammaRec = TrigEgammaRecCfg(flags, name = 'eTrigEgammaRec'+tag + RoIs +variant)
+        
+    acc.merge(trigEgammaRec)
 
-    outputCaloClusters = TrigEgammaKeys.precisionElectronCaloClusterContainer
-    log.debug('precisionOutputCaloClusters = %s',outputCaloClusters)
+    trigEgammaSuperClusterBuilder = TrigEgammaSuperClusterBuilderCfg(flags,
+                                                                     'eTrigEgammaSuperClusterBuilder' + tag + RoIs,
+                                                                     'electron', 
+                                                                     TrigEgammaKeys.precisionElectronCaloClusterContainer,
+                                                                     TrigEgammaKeys.precisionEgammaSuperClusterRecCollection)
+    acc.merge(trigEgammaSuperClusterBuilder)
 
-    algo = egammaTopoClusterCopier()
-    precisionRecoSequence = parOR( "electronRoITopoRecoSequence"+tag + variant)
-    precisionRecoSequence += caloRecoSequence
-    precisionRecoSequence += algo
-    trigEgammaRec = TrigEgammaRec(name = 'eTrigEgammaRec' + tag + RoIs + variant)
-    precisionRecoSequence += trigEgammaRec
-    trigEgammaSuperClusterBuilder = TrigEgammaSuperClusterBuilderCfg(flags, name = 'eTrigEgammaSuperClusterBuilder' + tag + RoIs + variant)
-    trigEgammaSuperClusterBuilder.SuperClusterCollectionName = outputCaloClusters
-    trigEgammaSuperClusterBuilder.CalibrationType = 'electron'
-    precisionRecoSequence +=  trigEgammaSuperClusterBuilder
-    sequenceOut = outputCaloClusters
-
-    return (precisionRecoSequence, sequenceOut)
-
+    return acc
