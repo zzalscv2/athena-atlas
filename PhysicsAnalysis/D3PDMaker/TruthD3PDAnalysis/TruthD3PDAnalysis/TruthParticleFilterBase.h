@@ -128,6 +128,8 @@ private:
    *  See McParticleEvent/TruthParticleParameters.h for cone cuts.
    */
   IsolTool_t m_isolationTool;
+  /// Used objects 
+  std::set<int> m_used;
 };
 
 

@@ -146,6 +146,10 @@ private:
 
   // Parameter: photon summation cone (only used if m_excludeWZdecays)
   float m_photonCone;
+
+  /// Used objects 
+  std::set<int> m_used;
+
 };
 
 
