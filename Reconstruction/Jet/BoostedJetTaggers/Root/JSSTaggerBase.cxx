@@ -173,7 +173,7 @@ StatusCode JSSTaggerBase::initialize() {
 
   m_readNtrk500Key = m_containerName + "." + m_readNtrk500Key.key();
   ATH_CHECK( m_readNtrk500Key.initialize() );
-  
+
   ATH_CHECK( m_decTaggedKey.initialize() );
   ATH_CHECK( m_decValidPtRangeHighKey.initialize() );
   ATH_CHECK( m_decValidPtRangeLowKey.initialize() );
@@ -190,56 +190,48 @@ StatusCode JSSTaggerBase::initialize() {
   ATH_MSG_INFO( "  " << m_decValidJetContentKey.key() << " : has valid jet content" );
   ATH_MSG_INFO( "  " << m_decValidEventContentKey.key() << " : has valid event content" );
 
-  if ( m_useMassCut ) {
 
-    m_decPassMassKey = m_containerName + "." + m_decorationName + "_" + m_decPassMassKey.key();
-    m_decCutMLowKey = m_containerName + "." + m_decorationName + "_" + m_decCutMLowKey.key();
-    m_decCutMHighKey = m_containerName + "." + m_decorationName + "_" + m_decCutMHighKey.key();
+  m_decPassMassKey = m_containerName + "." + m_decorationName + "_" + m_decPassMassKey.key();
+  m_decCutMLowKey = m_containerName + "." + m_decorationName + "_" + m_decCutMLowKey.key();
+  m_decCutMHighKey = m_containerName + "." + m_decorationName + "_" + m_decCutMHighKey.key();
 
-    ATH_CHECK( m_decPassMassKey.initialize() );
-    ATH_CHECK( m_decCutMLowKey.initialize() );
-    ATH_CHECK( m_decCutMHighKey.initialize() );
+  ATH_CHECK( m_decPassMassKey.initialize() );
+  ATH_CHECK( m_decCutMLowKey.initialize() );
+  ATH_CHECK( m_decCutMHighKey.initialize() );
 
-    ATH_MSG_INFO( "  " << m_decPassMassKey.key() << " : pass mass cut" );
-    ATH_MSG_INFO( "  " << m_decCutMLowKey.key() << " : lower mass cut" );
-    ATH_MSG_INFO( "  " << m_decCutMHighKey.key() << " : upper mass cut" );
+  ATH_MSG_INFO( "  " << m_decPassMassKey.key() << " : pass mass cut" );
+  ATH_MSG_INFO( "  " << m_decCutMLowKey.key() << " : lower mass cut" );
+  ATH_MSG_INFO( "  " << m_decCutMHighKey.key() << " : upper mass cut" );
 
-  }
 
-  if ( m_useScoreCut ) {
-  
-    m_decPassScoreKey = m_containerName + "." + m_decorationName + "_" + m_decPassScoreKey.key();
-    m_decScoreCutKey = m_containerName + "." + m_decorationName + "_" + m_decScoreCutKey.key();
-    m_decScoreValueKey = m_containerName + "." + m_decorationName + "_" + m_decScoreValueKey.key();
+  m_decPassScoreKey = m_containerName + "." + m_decorationName + "_" + m_decPassScoreKey.key();
+  m_decScoreCutKey = m_containerName + "." + m_decorationName + "_" + m_decScoreCutKey.key();
+  m_decScoreValueKey = m_containerName + "." + m_decorationName + "_" + m_decScoreValueKey.key();
 
-    ATH_CHECK( m_decPassScoreKey.initialize() );
-    ATH_CHECK( m_decScoreCutKey.initialize() );
-    ATH_CHECK( m_decScoreValueKey.initialize() );
+  ATH_CHECK( m_decPassScoreKey.initialize() );
+  ATH_CHECK( m_decScoreCutKey.initialize() );
+  ATH_CHECK( m_decScoreValueKey.initialize() );
 
-    ATH_MSG_INFO( "  " << m_decPassScoreKey.key() << " : pass MVA score cut" );
-    ATH_MSG_INFO( "  " << m_decScoreCutKey.key() << " : MVA score cut" );
-    ATH_MSG_INFO( "  " << m_decScoreValueKey.key() << " : evaluated MVA score" );
+  ATH_MSG_INFO( "  " << m_decPassScoreKey.key() << " : pass MVA score cut" );
+  ATH_MSG_INFO( "  " << m_decScoreCutKey.key() << " : MVA score cut" );
+  ATH_MSG_INFO( "  " << m_decScoreValueKey.key() << " : evaluated MVA score" );
 
-  }
 
-  if ( m_calcSF ) {
-  
-    m_decWeightKey = m_containerName + "." + m_decorationName + "_" + m_weightDecorationName;
-    m_decEfficiencyKey = m_containerName + "." + m_decorationName + "_" + m_decEfficiencyKey.key();
-    m_decEffSFKey = m_containerName + "." +m_decorationName + "_" + m_decEffSFKey.key();
-    m_decSigeffSFKey = m_containerName + "." +m_decorationName + "_" + m_decSigeffSFKey.key();
-    
-    ATH_CHECK( m_decWeightKey.initialize() );
-    ATH_CHECK( m_decEfficiencyKey.initialize() );
-    ATH_CHECK( m_decEffSFKey.initialize() );
-    ATH_CHECK( m_decSigeffSFKey.initialize() );
-    
-    ATH_MSG_INFO( "  " << m_decWeightKey.key() << " : tagging SF" );
-   
-    m_readTruthLabelKey = m_containerName + "." + m_truthLabelName;
-    ATH_CHECK( m_readTruthLabelKey.initialize() );
-  
-  }
+  m_decWeightKey = m_containerName + "." + m_decorationName + "_" + m_weightDecorationName;
+  m_decEfficiencyKey = m_containerName + "." + m_decorationName + "_" + m_decEfficiencyKey.key();
+  m_decEffSFKey = m_containerName + "." +m_decorationName + "_" + m_decEffSFKey.key();
+  m_decSigeffSFKey = m_containerName + "." +m_decorationName + "_" + m_decSigeffSFKey.key();
+
+  ATH_CHECK( m_decWeightKey.initialize() );
+  ATH_CHECK( m_decEfficiencyKey.initialize() );
+  ATH_CHECK( m_decEffSFKey.initialize() );
+  ATH_CHECK( m_decSigeffSFKey.initialize() );
+
+  ATH_MSG_INFO( "  " << m_decWeightKey.key() << " : tagging SF" );
+
+  m_readTruthLabelKey = m_containerName + "." + m_truthLabelName;
+  ATH_CHECK( m_readTruthLabelKey.initialize() );
+
 
   /// Initialize SFs if they are needed
   if ( m_calcSF ) {
