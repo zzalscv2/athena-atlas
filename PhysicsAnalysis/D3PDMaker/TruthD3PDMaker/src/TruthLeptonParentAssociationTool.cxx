@@ -55,15 +55,11 @@ TruthLeptonParentAssociationTool::reset (const TruthParticle& p)
   // Just add the daughters in... but have to find it in the full record first
   const McEventCollection* mcec{nullptr};
   if (evtStore()->retrieve<McEventCollection>(mcec,"GEN_EVENT").isSuccess()){ // Always run on EVGEN anyway...
-    // Loop over GenEvent's.
-    for (const HepMC::GenEvent* ev_in : *mcec) {
-      if (!ev_in) continue;
-      auto Part = HepMC::barcode_to_particle(ev_in,p.barcode());
+      auto Part =p.genParticle();
       if (Part){
           // Found it!
           addLeptonParent( (Part) );
       }
-    } // Loop over events
   } // Successful retrieve
 
   const TruthParticleContainer* tpc{nullptr};
