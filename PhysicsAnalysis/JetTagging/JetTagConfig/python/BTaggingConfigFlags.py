@@ -56,6 +56,20 @@ def calibrationTag(flags):
     return ""
 
 
+def saveSv1(prevFlags):
+    return prevFlags.Common.ProductionStep is ProductionStep.Derivation or prevFlags.GeoModel.Run >= LHCPeriod.Run4
+
+
+def runOldSecVrtSecIncl(prevFlags):
+    return prevFlags.Common.ProductionStep is ProductionStep.Derivation
+
+
+def runFlipTag(flags):
+    derivation = flags.Common.ProductionStep is ProductionStep.Derivation
+    before_the_future = flags.GeoModel.Run < LHCPeriod.Run4
+    return derivation and before_the_future
+
+
 def createBTaggingConfigFlags():
     btagcf = AthConfigFlags()
 
@@ -80,13 +94,13 @@ def createBTaggingConfigFlags():
 
 
     # Taggers for validation
-    btagcf.addFlag("BTagging.SaveSV1Probabilities", lambda prevFlags: prevFlags.Common.ProductionStep is ProductionStep.Derivation or prevFlags.GeoModel.Run >= LHCPeriod.Run4)
+    btagcf.addFlag("BTagging.SaveSV1Probabilities", saveSv1)
     #Do we really need this in AthConfigFlags?
     #Comments in BTaggingConfiguration.py
     btagcf.addFlag("BTagging.OutputFiles.Prefix", "BTagging_")
     btagcf.addFlag("BTagging.GeneralToolSuffix",'') #Not sure it will stay like that later on. Was '', 'Trig, or 'AODFix'
     # Run the flip taggers
-    btagcf.addFlag("BTagging.RunFlipTaggers", lambda prevFlags: prevFlags.Common.ProductionStep is ProductionStep.Derivation and prevFlags.GeoModel.Run < LHCPeriod.Run4)
+    btagcf.addFlag("BTagging.RunFlipTaggers", runFlipTag)
 
    # Trackless approach
     btagcf.addFlag("BTagging.Trackless", False)
@@ -94,16 +108,19 @@ def createBTaggingConfigFlags():
     btagcf.addFlag("BTagging.Trackless_JetPtMin", 300) #in GeV
     btagcf.addFlag("BTagging.Trackless_dR", 0.4)
 
+    # more aggressive trackless approach
+    btagcf.addFlag("BTagging.savePixelHits", False)
+
     # experimental flags
     btagcf.addFlag("BTagging.Pseudotrack", False)
 
     #NewVrtSecInclusiveAlg
-    btagcf.addFlag("BTagging.RunNewVrtSecInclusive", lambda prevFlags: prevFlags.Common.ProductionStep is ProductionStep.Derivation)
+    btagcf.addFlag("BTagging.RunNewVrtSecInclusive", runOldSecVrtSecIncl)
 
     # track classification tool flags
     btagcf.addFlag("BTagging.TrkClassFiveBinMode",False)
-    
-    # a flag to add V0finder 
+
+    # a flag to add V0finder
     btagcf.addFlag("BTagging.AddV0Finder", False)
 
     return btagcf

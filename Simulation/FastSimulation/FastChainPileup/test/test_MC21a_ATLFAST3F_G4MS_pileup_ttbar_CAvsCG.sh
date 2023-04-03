@@ -28,7 +28,6 @@ FastChain_tf.py \
     --physicsList 'FTFP_BERT_ATL' \
     --useISF True \
     --jobNumber 1 \
-    --DataRunNumber 410000 \
     --randomSeed 123 \
     --digiSteeringConf "StandardSignalOnlyTruth" \
     --inputEVNTFile ${EVNT_File} \
@@ -41,7 +40,7 @@ FastChain_tf.py \
     --digiSeedOffset2 '727' \
     --geometryVersion 'ATLAS-R3S-2021-03-00-00' \
     --conditionsTag 'OFLCOND-MC21-SDR-RUN3-07' \
-    --preInclude 'Campaigns.MC21a' \
+    --preInclude 'Campaigns.MC21a' 'Campaigns.MC21SimulationNoIoV' \
     --postInclude 'PyJobTransforms.UseFrontier' 'Digitization.DigitizationSteering.DigitizationTestingPostInclude' \
     --postExec 'with open("ConfigCA.pkl", "wb") as f: cfg.store(f)' \
     --imf False
@@ -66,7 +65,6 @@ FastChain_tf.py \
     --physicsList 'FTFP_BERT_ATL' \
     --useISF True \
     --jobNumber 1 \
-    --DataRunNumber 410000 \
     --randomSeed 123 \
     --digiSteeringConf "StandardSignalOnlyTruth" \
     --inputEVNTFile ${EVNT_File} \
@@ -79,7 +77,7 @@ FastChain_tf.py \
     --digiSeedOffset2 '727' \
     --geometryVersion default:ATLAS-R3S-2021-03-00-00 \
     --conditionsTag default:OFLCOND-MC21-SDR-RUN3-07 \
-    --preInclude 'all:Campaigns/MC21a.py,Campaigns/PileUpMC21a.py' \
+    --preInclude 'all:Campaigns/MC21a.py,Campaigns/PileUpMC21a.py,Campaigns/MC21SimulationNoIoV.py' \
     --postInclude='PyJobTransforms/UseFrontier.py' \
     --postExec 'default:job+=CfgMgr.JobOptsDumperAlg(FileName="PileupLegacyConfig.txt");from AthenaCommon.ConfigurationShelve import saveToAscii;saveToAscii("LegacyConfig.txt")' \
     --athenaopts '"--config-only=ConfigCG.pkl"'\
@@ -101,7 +99,6 @@ FastChain_tf.py \
     --physicsList 'FTFP_BERT_ATL' \
     --useISF True \
     --jobNumber 1 \
-    --DataRunNumber 410000 \
     --randomSeed 123 \
     --digiSteeringConf "StandardSignalOnlyTruth" \
     --inputEVNTFile ${EVNT_File} \

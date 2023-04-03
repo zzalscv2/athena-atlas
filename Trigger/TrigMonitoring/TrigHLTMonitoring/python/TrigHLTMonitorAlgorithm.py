@@ -1,11 +1,12 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file TrigHLTMonitorAlgorithm.py
 @date 2019-09-10
 @date 2020-09-18
 @date 2022-02-21
+@date 2023-03-17
 @brief TrigHLTMonitoring top-level files
 '''
 
@@ -13,24 +14,20 @@ def createHLTDQConfigFlags():
     from AthenaConfiguration.AthConfigFlags import AthConfigFlags
     acf=AthConfigFlags()
 
-    # need to (temporarily) block signature monitoring by default when it is
-    # running on bytestream. Remove when ATR-23720 is completed
     from AthenaConfiguration.Enums import Format
     from AthenaConfiguration.Enums import BeamType
+
     acf.addFlag('DQ.Steering.HLT.doGeneral', True)
-
-    # b-jets disabled for cosmics following ATR-25036
-    acf.addFlag('DQ.Steering.HLT.doBjet', lambda flags: flags.Input.Format is Format.POOL and flags.Beam.Type is BeamType.Collisions)
-
-    acf.addFlag('DQ.Steering.HLT.doInDet', lambda flags: flags.Input.Format is Format.POOL)
-    acf.addFlag('DQ.Steering.HLT.doBphys', lambda flags: flags.Input.Format is Format.POOL)
-    acf.addFlag('DQ.Steering.HLT.doCalo', True) #Switched to true to enable monitoring
-    acf.addFlag('DQ.Steering.HLT.doEgamma', lambda flags: flags.Input.Format is Format.POOL)
-    acf.addFlag('DQ.Steering.HLT.doJet', lambda flags: flags.Input.Format is Format.POOL)
-    acf.addFlag('DQ.Steering.HLT.doMET', lambda flags: flags.Input.Format is Format.POOL)
-    acf.addFlag('DQ.Steering.HLT.doMinBias', lambda flags: flags.Input.Format is Format.POOL)
-    acf.addFlag('DQ.Steering.HLT.doMuon', lambda flags: flags.Input.Format is Format.POOL)
-    acf.addFlag('DQ.Steering.HLT.doTau', lambda flags: flags.Input.Format is Format.POOL)
+    acf.addFlag('DQ.Steering.HLT.doBjet', lambda flags: flags.Beam.Type is BeamType.Collisions) # b-jets disabled for cosmics following ATR-25036
+    acf.addFlag('DQ.Steering.HLT.doBphys', True) 
+    acf.addFlag('DQ.Steering.HLT.doCalo', True) 
+    acf.addFlag('DQ.Steering.HLT.doEgamma', True) 
+    acf.addFlag('DQ.Steering.HLT.doInDet', lambda flags: flags.Input.Format is Format.POOL) #keep disabled until ATR-27005 is fixed
+    acf.addFlag('DQ.Steering.HLT.doJet', lambda flags: flags.Input.Format is Format.POOL) #keep disabled until ATLASRECTS-7168 is fixed
+    acf.addFlag('DQ.Steering.HLT.doMET', lambda flags: flags.Input.Format is Format.POOL) #keep disabled until ATR-27007 is fixed
+    acf.addFlag('DQ.Steering.HLT.doMinBias', True) 
+    acf.addFlag('DQ.Steering.HLT.doMuon', True) 
+    acf.addFlag('DQ.Steering.HLT.doTau', True) 
 
     return acf
 
