@@ -26,7 +26,6 @@ FastChain_tf.py \
     --simulator 'ATLFAST3F_G4MS' \
     --physicsList 'FTFP_BERT_ATL' \
     --useISF True \
-    --DataRunNumber 410000 \
     --jobNumber 1 \
     --randomSeed 123 \
     --digiSteeringConf "StandardSignalOnlyTruth" \
@@ -40,8 +39,8 @@ FastChain_tf.py \
     --digiSeedOffset2 '727' \
     --geometryVersion default:ATLAS-R2-2016-01-00-01 \
     --conditionsTag default:OFLCOND-MC16-SDR-RUN2-09 \
-    --preInclude 'Campaigns.MC20a' \
-    --postInclude='PyJobTransforms/UseFrontier.py' \
+    --preInclude 'Campaigns.MC20a' 'Campaigns.MC16SimulationNoIoV' \
+    --postInclude='PyJobTransforms.UseFrontier' \
     --postExec 'from IOVDbSvc.CondDB import conddb;conddb.addOverride("/TILE/OFL02/CALIB/SFR","TileOfl02CalibSfr-SIM-05")' 'with open("ConfigCA.pkl", "wb") as f: cfg.store(f)' \
     --imf False
 
@@ -64,7 +63,6 @@ FastChain_tf.py \
     --physicsList 'FTFP_BERT_ATL' \
     --useISF True \
     --jobNumber 1 \
-    --DataRunNumber 410000 \
     --randomSeed 123 \
     --digiSteeringConf "StandardSignalOnlyTruth" \
     --inputEVNTFile ${EVNT_File} \
@@ -77,7 +75,7 @@ FastChain_tf.py \
     --digiSeedOffset2 '727' \
     --geometryVersion default:ATLAS-R2-2016-01-00-01 \
     --conditionsTag default:OFLCOND-MC16-SDR-RUN2-09 \
-    --preSimInclude 'Campaigns/MC20a.py' 'Campaigns/PileUpMC20a.py' \
+    --preSimInclude 'Campaigns/MC20a.py,Campaigns/PileUpMC20a.py,Campaigns/MC16SimulationNoIoV.py' \
     --postInclude='PyJobTransforms/UseFrontier.py' \
     --postExec 'from IOVDbSvc.CondDB import conddb;conddb.addOverride("/TILE/OFL02/CALIB/SFR","TileOfl02CalibSfr-SIM-05")' \
     --athenaopts '"--config-only=ConfigCG.pkl"' \
@@ -97,7 +95,6 @@ FastChain_tf.py \
     --physicsList 'FTFP_BERT_ATL' \
     --useISF True \
     --jobNumber 1 \
-    --DataRunNumber 410000 \
     --randomSeed 123 \
     --digiSteeringConf "StandardSignalOnlyTruth" \
     --inputEVNTFile ${EVNT_File} \
@@ -110,7 +107,7 @@ FastChain_tf.py \
     --digiSeedOffset2 '727' \
     --geometryVersion default:ATLAS-R2-2016-01-00-01 \
     --conditionsTag default:OFLCOND-MC16-SDR-RUN2-09 \
-    --preSimInclude 'Campaigns/MC20a.py' 'Campaigns/PileUpMC20a.py' \
+    --preSimInclude 'Campaigns/MC20a.py,Campaigns/PileUpMC20a.py,Campaigns/MC16SimulationNoIoV.py' \
     --postInclude='PyJobTransforms/UseFrontier.py' \
     --postExec 'from IOVDbSvc.CondDB import conddb;conddb.addOverride("/TILE/OFL02/CALIB/SFR","TileOfl02CalibSfr-SIM-05")' \
     --imf False

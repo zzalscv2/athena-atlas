@@ -144,6 +144,11 @@ else:
 # Need to be set up after globalflags.DetDescrVersion() are set
 from AtlasGeoModel.MuonGMJobProperties import MuonGeometryFlags
 
+if hasattr(runArgs, 'detectors'):
+    fastChainDetectors = runArgs.detectors
+else:
+    fastChainDetectors = None
+
 ## AthenaCommon flags
 # Jobs should stop if an include fails.
 if hasattr(runArgs, "IgnoreConfigError"):
@@ -200,15 +205,15 @@ else:
 # Job Configuration parameters:
 #==============================================================
 ## Pre-exec
-if hasattr(runArgs, "preSimExec"):
+if hasattr(runArgs, "preExec"):
     fast_chain_log.info("transform pre-sim exec")
-    for cmd in runArgs.preSimExec:
+    for cmd in runArgs.preExec:
         fast_chain_log.info(cmd)
         exec(cmd)
 
 ## Pre-include
-if hasattr(runArgs, "preSimInclude"):
-    for fragment in runArgs.preSimInclude:
+if hasattr(runArgs, "preInclude"):
+    for fragment in runArgs.preInclude:
         include(fragment)
 
 if hasattr(runArgs, "inputEVNT_TRFile"):
@@ -230,7 +235,15 @@ if jobproperties.Beam.beamType.get_Value() != 'cosmics':
         not (hasattr(simFlags,'StoppedParticleFile') and simFlags.StoppedParticleFile.statusOn and simFlags.StoppedParticleFile.get_Value()!=''):
         include('SimulationJobOptions/preInclude.G4WriteCavern.py')
 
+fast_chain_log.info("================ DetFlags ================ ")
+
 from AthenaCommon.DetFlags import DetFlags
+
+from OverlayConfiguration.OverlayHelpersLegacy import setupOverlayLegacyDetectorFlags
+DetFlags = setupOverlayLegacyDetectorFlags(fastChainDetectors)
+
+DetFlags.Truth_setOn()
+DetFlags.Forward_setOff()
 
 #Trial block: Set off tasks at start
 ## Switch off tasks
@@ -255,40 +268,16 @@ from AthenaCommon.DetFlags import DetFlags
 #Tasks we want switched ON (write RDOPool) - want this for all detectors that we want ON:
 #DetFlags.writeRDOPool.all_setOn()
 
-#### this flag turns all the detectors ON that we want for simulation.
-try:
-    from ISF_Config import FlagSetters
-    FlagSetters.configureFlagsBase()
-    ## Check for any simulator-specific configuration
-    configureFlags = getattr(FlagSetters, ISF_Flags.Simulator.configFlagsMethodName(), None)
-    if configureFlags is not None:
-        configureFlags()
-    possibleSubDetectors=['pixel','SCT','TRT','BCM','Lucid','ZDC','ALFA','AFP','FwdRegion','LAr','HGTD','Tile','MDT','CSC','TGC','RPC','MM','sTGC','Truth']
-    for subdet in possibleSubDetectors:
-        simattr = subdet+"_on"
-        simcheck = getattr(DetFlags.simulate, simattr, None)
-        if simcheck is not None and simcheck():
-            attrname = subdet+"_setOn"
-            checkfn = getattr(DetFlags, attrname, None)
-            if checkfn is not None:
-                checkfn()
+# Check for any simulator-specific configuration
+from ISF_Config import FlagSetters
+configureFlags = getattr(FlagSetters, ISF_Flags.Simulator.configFlagsMethodName(), None)
+if configureFlags is not None:
+    configureFlags()
+if not DetFlags.simulate.BCM_on():
+    DetFlags.digitize.BCM_setOff()
+    DetFlags.overlay.BCM_setOff()
 
-except:
-    ## Select detectors
-    if 'DetFlags' not in dir():
-        # from AthenaCommon.DetFlags import DetFlags
-        ## If you configure one det flag, you're responsible for configuring them all!
-        DetFlags.all_setOn()
-
-
-#DetFlags.all_setOn()
 DetFlags.LVL1_setOff()
-DetFlags.Truth_setOn()
-DetFlags.Forward_setOff() # Forward dets are off by default
-DetFlags.FTK_setOff()
-checkHGTDOff = getattr(DetFlags, 'HGTD_setOff', None)
-if checkHGTDOff is not None:
-    checkHGTDOff() #Default for now
 
 # turn off DetFlags for muon detectors which are not part of the layout
 if not MuonGeometryFlags.hasCSC(): DetFlags.CSC_setOff()
@@ -962,6 +951,7 @@ if hasattr(runArgs,"preDigiInclude"):
 
 # Add TruthJet containers
 if DetFlags.Truth_on():
+    digitizationFlags.experimentalDigi += ['PileUpTruthParticles']
     digitizationFlags.experimentalDigi += ['PileUpAntiKt4TruthJets']
     digitizationFlags.experimentalDigi += ['PileUpAntiKt6TruthJets']
 

@@ -202,11 +202,15 @@ def configureFlagsATLFASTIIF():
     # geometry task which is used to determine whether a detector has
     # been simulated (see ISF_Example/python/ISF_Output.py)
     DetFlags.geometry.BCM_setOff()
+    DetFlags.digitize.BCM_setOff() # For Fast Chain
+    DetFlags.BCM_setOff() # For Fast Chain
     from G4AtlasApps.SimFlags import simFlags
     simFlags.CalibrationRun.set_Off() # Switch off DeadMaterial Hits
     simFlags.SimulationFlavour = "ATLFASTIIF"
     from TrkDetDescrSvc.TrkDetDescrJobProperties import TrkDetFlags
     TrkDetFlags.MaterialVersion=21
+    TrkDetFlags.TRT_EndcapLayerMaterialBinsR = 25
+    TrkDetFlags.TRT_BarrelLayerMaterialBinsZ = 25
     TrkDetFlags.TRT_BuildStrawLayers=True
     from ISF_Config.ISF_jobProperties import ISF_Flags
     mergeDict = {'ID':True, 'CALO':True, 'MUON':True}

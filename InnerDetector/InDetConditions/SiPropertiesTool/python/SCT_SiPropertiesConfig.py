@@ -26,7 +26,7 @@ def SCT_SiPropertiesCondAlgCfg(flags, name="SCTSiPropertiesCondAlg", **kwargs):
     return acc
 
 
-def SCT_SiPropertiesToolCfg(flags, name="SCTSiPropertiesTool", **kwargs):
+def SCT_SiPropertiesToolCfg(flags, name="SCT_SiPropertiesTool", **kwargs):
     """Return configured ComponentAccumulator and tool for SCT_SiProperties
 
     SiConditionsTool and/or DCSConditionsTool may be provided in kwargs
