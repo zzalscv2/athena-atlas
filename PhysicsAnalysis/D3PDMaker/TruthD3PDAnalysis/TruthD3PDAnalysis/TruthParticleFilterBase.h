@@ -88,22 +88,22 @@ public:
   virtual StatusCode filterEvent (const HepMC::GenEvent* ev_in,
                                   HepMC::GenEvent* ev_out);
 
-  /// Add a @c GenParticle (and its production vertex) to a @c GenEvent.
-  virtual StatusCode addParticle (HepMC::ConstGenParticlePtr p,
-                                  HepMC::GenEvent* ev);
-
-  /// Add a @c GenVertex to a @c GenEvent.
-  virtual StatusCode addVertex (HepMC::ConstGenVertexPtr p,
-                                HepMC::GenEvent* ev);
-
   /// Test to see if we want to keep a particle.
-  virtual bool isAccepted (HepMC::ConstGenParticlePtr p);
+  virtual bool isAccepted (const HepMC::ConstGenParticlePtr& p);
 
   /// Return the container of isolation energies that we built.
   StatusCode isolations (TruthEtIsolationsContainer const* & isocont);
 
 
 private:
+  /// Add a @c GenParticle (and its production vertex) to a @c GenEvent.
+  StatusCode addParticle (const HepMC::ConstGenParticlePtr& p,
+                                  HepMC::GenEvent* ev);
+
+  /// Add a @c GenVertex to a @c GenEvent.
+  StatusCode addVertex (const HepMC::ConstGenVertexPtr& p,
+                                HepMC::GenEvent* ev);
+
   /// Parameter: SG key for input @c McEventCollection.
   std::string m_mcEventsName;
 

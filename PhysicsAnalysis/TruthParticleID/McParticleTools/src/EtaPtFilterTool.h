@@ -97,20 +97,20 @@ class EtaPtFilterTool : public TruthParticleFilterBaseTool
 
   /** Check if a given particle is within the acceptance (pt+eta)
    */
-  bool isAccepted( HepMC::ConstGenParticlePtr mcPart ) const;
+  bool isAccepted( const HepMC::ConstGenParticlePtr& mcPart ) const;
 
   /** Check if a given vertex has at least one in-going
    *  or out-going particle within the acceptance (pt+eta)
    */
-  bool isAccepted( HepMC::ConstGenVertexPtr vtx ) const;
+  bool isAccepted( const HepMC::ConstGenVertexPtr& vtx ) const;
 
   /** Check if a given vertex is the signal process vertex. */
-  bool isSignalProcessVertex( HepMC::ConstGenVertexPtr vtx, 
+  bool isSignalProcessVertex( const HepMC::ConstGenVertexPtr& vtx, 
 			      const HepMC::GenEvent* evt );
 
   /** Helper method to copy a given vertex and add it to a GenEvent
    */
-  StatusCode addVertex( HepMC::ConstGenVertexPtr srcVtx, HepMC::GenEvent* evt,
+  StatusCode addVertex( const HepMC::ConstGenVertexPtr& srcVtx, HepMC::GenEvent* evt,
                         VertexMap_t& vmap,
                         ParticleMap_t& pmap,
 			bool isSignalVertex = false ) const;
@@ -127,7 +127,7 @@ class EtaPtFilterTool : public TruthParticleFilterBaseTool
    *   - check that there are 2 incoming partons. This is done using
    *  a @c McVtxFilter predicate.
    */
-  bool isFromHardScattering( HepMC::ConstGenVertexPtr vtx ) const;
+  bool isFromHardScattering( const HepMC::ConstGenVertexPtr& vtx ) const;
   
   /////////////////////////////////////////////////////////////////// 
   // Non-const methods: 

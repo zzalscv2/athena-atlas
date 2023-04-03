@@ -190,7 +190,7 @@ StatusCode
 TruthParticleFilterBase::filterEvent (const HepMC::GenEvent* ev_in, HepMC::GenEvent* ev_out)
 {
   // Loop over particles.
-   for (auto ip: *ev_in)
+   for (const auto& ip: *ev_in)
   {
     // Copy the particle if we want to keep it.
     if (isAccepted (ip))
@@ -204,7 +204,7 @@ TruthParticleFilterBase::filterEvent (const HepMC::GenEvent* ev_in, HepMC::GenEv
  * @brief Add a @c GenParticle (and its production vertex) to a @c GenEvent.
  */
 StatusCode
-TruthParticleFilterBase::addParticle (HepMC::ConstGenParticlePtr p, HepMC::GenEvent* ev)
+TruthParticleFilterBase::addParticle (const HepMC::ConstGenParticlePtr& p, HepMC::GenEvent* ev)
 {
   // Add parent vertex if it exists.  Otherwise, add decay vertex.
   if (p->production_vertex())
@@ -264,7 +264,7 @@ TruthParticleFilterBase::addParticle (HepMC::ConstGenParticlePtr p, HepMC::GenEv
  * @brief Add a @c GenVertex to a @c GenEvent.
  */
 StatusCode
-TruthParticleFilterBase::addVertex (HepMC::ConstGenVertexPtr v, HepMC::GenEvent* ev)
+TruthParticleFilterBase::addVertex (const HepMC::ConstGenVertexPtr& v, HepMC::GenEvent* ev)
 {
 #ifdef HEPMC3
   // See if this vertex has already been copied.
@@ -329,7 +329,7 @@ TruthParticleFilterBase::addVertex (HepMC::ConstGenVertexPtr v, HepMC::GenEvent*
  * @brief Test to see if we want to keep a particle.
  */
 bool
-TruthParticleFilterBase::isAccepted (HepMC::ConstGenParticlePtr /*p*/)
+TruthParticleFilterBase::isAccepted (const HepMC::ConstGenParticlePtr& /*p*/)
 {
   // Default implementation accepts everything.
   return true;
