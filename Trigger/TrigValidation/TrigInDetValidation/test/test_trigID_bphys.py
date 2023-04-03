@@ -34,7 +34,8 @@ Threads = 8
 Slots   = 8
 Input   = 'Bphys_JpsiPhi'    # defined in TrigValTools/share/TrigValInputs.json
 
-preinclude_file = 'all:TrigInDetValidation/TIDV_cond_fix.py' #conditions fix for ATR-23982. In future find a more recent RDO  
+preinclude_file = 'RDOtoRDOTrigger:TrigInDetValidation/TIDV_cond_fix.py' #conditions fix for ATR-23982. In future find a more recent RDO
+postinclude_file = 'RAWtoALL:TrigInDetValidation.TIDV_cond_fix'
 
 ExtraAna = " -c 'parentpdgid=531' "
 

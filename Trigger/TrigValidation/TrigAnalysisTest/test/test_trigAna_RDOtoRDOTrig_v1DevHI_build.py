@@ -16,6 +16,7 @@ preExec = ';'.join([
   'doWriteRDOTrigger=True',
   'from AthenaConfiguration.AllConfigFlags import ConfigFlags',
   'ConfigFlags.Trigger.AODEDMSet=\'AODFULL\'',
+  'ConfigFlags.Trigger.enableL1CaloPhase1=False',
 ])
 
 ex = ExecStep.ExecStep()

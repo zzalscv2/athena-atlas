@@ -25,7 +25,6 @@ from TrigAnalysisTest.TrigAnalysisSteps import add_analysis_steps
 
 preExec = ';'.join([
   'setMenu=\'Dev_pp_run3_v1_TriggerValidation_prescale\'',
-  'from AthenaConfiguration.AllConfigFlags import ConfigFlags',
   'ConfigFlags.Trigger.AODEDMSet=\'AODFULL\'',
 ])
 
@@ -35,7 +34,8 @@ rdo2aod.input = 'ttbar'
 rdo2aod.max_events = 800
 rdo2aod.threads = 4
 rdo2aod.concurrent_events = 4
-rdo2aod.args = '--outputAODFile=AOD.pool.root --steering "doRDO_TRIG" "doTRIGtoALL"'
+rdo2aod.args = '--outputAODFile=AOD.pool.root --steering "doRDO_TRIG"'
+rdo2aod.args += ' --CA "default:True" "RDOtoRDOTrigger:False"'
 rdo2aod.args += ' --preExec="all:{:s};"'.format(preExec)
 
 test = Test.Test()

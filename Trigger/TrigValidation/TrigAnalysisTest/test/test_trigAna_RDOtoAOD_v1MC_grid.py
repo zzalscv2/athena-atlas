@@ -2,7 +2,7 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
-# art-description: Test of transform RDO->RDO_TRIG->ESD->AOD->DAOD with threads=4, MC_pp_run3_v1 and AODSLIM
+# art-description: Test of transform RDO->RDO_TRIG->AOD->DAOD with threads=4, MC_pp_run3_v1 and AODSLIM
 # art-type: grid
 # art-include: master/Athena
 # art-include: 23.0/Athena
@@ -26,7 +26,6 @@ from TrigAnalysisTest.TrigAnalysisSteps import add_analysis_steps
 
 preExec = ';'.join([
   'setMenu=\'MC_pp_run3_v1\'',
-  'from AthenaConfiguration.AllConfigFlags import ConfigFlags',
   'ConfigFlags.Trigger.AODEDMSet=\'AODSLIM\'',
 ])
 
@@ -36,7 +35,8 @@ rdo2aod.input = 'ttbar'
 rdo2aod.max_events = 800
 rdo2aod.threads = 4
 rdo2aod.concurrent_events = 4
-rdo2aod.args = '--outputAODFile=AOD.pool.root --steering "doRDO_TRIG" "doTRIGtoALL"'
+rdo2aod.args = '--outputAODFile=AOD.pool.root --steering "doRDO_TRIG"'
+rdo2aod.args += ' --CA "default:True" "RDOtoRDOTrigger:False"'
 rdo2aod.args += ' --preExec="all:{:s};"'.format(preExec)
 
 aod2daod = ExecStep.ExecStep('AODtoDAOD')

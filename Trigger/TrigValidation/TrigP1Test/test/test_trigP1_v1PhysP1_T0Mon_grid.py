@@ -45,27 +45,26 @@ filter_bs.args = '-s Main ' + find_file('*_HLTMPPy_output.*.data')
 
 # Tier-0 reco step (BS->AOD)
 tzrecoPreExec = ' '.join([
-  "from AthenaConfiguration.AllConfigFlags import ConfigFlags;",
-  f"ConfigFlags.Trigger.triggerMenuSetup=\'{triggermenu}\';",
-  "ConfigFlags.Trigger.AODEDMSet=\'AODFULL\';",
-  "from AthenaMonitoring.DQMonFlags import DQMonFlags;",
-  "DQMonFlags.set_All_Off();",
-  "DQMonFlags.doDataFlowMon=True;",
-  "DQMonFlags.doHLTMon=True;",
-  "DQMonFlags.doLVL1CaloMon=True;",
-  "DQMonFlags.doGlobalMon=True;", 
-  "DQMonFlags.doLVL1InterfacesMon=True;",
-  "DQMonFlags.doCTPMon=True;",
-  "ConfigFlags.DQ.Steering.HLT.doBjet=True;",
-  "ConfigFlags.DQ.Steering.HLT.doInDet=True;",
-  "ConfigFlags.DQ.Steering.HLT.doBphys=True;",
-  "ConfigFlags.DQ.Steering.HLT.doCalo=True;",
-  "ConfigFlags.DQ.Steering.HLT.doEgamma=True;",
-  "ConfigFlags.DQ.Steering.HLT.doJet=True;",
-  "ConfigFlags.DQ.Steering.HLT.doMET=True;",
-  "ConfigFlags.DQ.Steering.HLT.doMinBias=True;",
-  "ConfigFlags.DQ.Steering.HLT.doMuon=True;",
-  "ConfigFlags.DQ.Steering.HLT.doTau=True;",
+  f"flags.Trigger.triggerMenuSetup=\'{triggermenu}\';",
+  "flags.Trigger.AODEDMSet=\'AODFULL\';",
+  "from AthenaMonitoring.DQConfigFlags import allSteeringFlagsOff;",
+  "allSteeringFlagsOff(flags);",
+  "flags.DQ.Steering.doDataFlowMon=True;",
+  "flags.DQ.Steering.doHLTMon=True;",
+  "flags.DQ.Steering.doLVL1CaloMon=True;",
+  "flags.DQ.Steering.doGlobalMon=True;",
+  "flags.DQ.Steering.doLVL1InterfacesMon=True;",
+  "flags.DQ.Steering.doCTPMon=True;",
+  "flags.DQ.Steering.HLT.doBjet=True;",
+  "flags.DQ.Steering.HLT.doInDet=True;",
+  "flags.DQ.Steering.HLT.doBphys=True;",
+  "flags.DQ.Steering.HLT.doCalo=True;",
+  "flags.DQ.Steering.HLT.doEgamma=True;",
+  "flags.DQ.Steering.HLT.doJet=True;",
+  "flags.DQ.Steering.HLT.doMET=True;",
+  "flags.DQ.Steering.HLT.doMinBias=True;",
+  "flags.DQ.Steering.HLT.doMuon=True;",
+  "flags.DQ.Steering.HLT.doTau=True;",
 ])
 
 tzreco = ExecStep.ExecStep('Tier0Reco')
@@ -79,8 +78,7 @@ tzreco.args += ' --outputAODFile=AOD.pool.root'
 tzreco.args += ' --outputHISTFile=hist.root'
 tzreco.args += ' --conditionsTag=\'CONDBR2-BLKPA-2022-08\' --geometryVersion=\'ATLAS-R3S-2021-03-00-00\''
 tzreco.args += ' --preExec="{:s}"'.format(tzrecoPreExec)
-tzreco.args += ' --postInclude="TriggerTest/disableChronoStatSvcPrintout.py"'
-tzreco.args += ' --steering doRAWtoALL'
+tzreco.args += ' --CA'
 
 aod2daod = ExecStep.ExecStep('AODtoDAOD')
 aod2daod.type = 'Derivation_tf'
