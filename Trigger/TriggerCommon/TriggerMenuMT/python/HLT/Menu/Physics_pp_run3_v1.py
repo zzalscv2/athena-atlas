@@ -122,19 +122,19 @@ def setupMenu(menu_name):
         ChainProp(name='HLT_mu22_mu10noL1_L1MU14FCH', l1SeedThresholds=['MU14FCH','FSNOSEED'], groups=PrimaryL1MuGroup+MultiMuonGroup),
         ChainProp(name='HLT_mu24_mu8noL1_L1MU14FCH',  l1SeedThresholds=['MU14FCH','FSNOSEED'], groups=PrimaryL1MuGroup+MultiMuonGroup),
         # ATR-25512
-        ChainProp(name='HLT_mu22_mu8noL1_L1MU18VFCH',  l1SeedThresholds=['MU18VFCH','FSNOSEED'], groups=PrimaryL1MuGroup+MultiMuonGroup, stream=[PhysicsStream,'express'], monGroups=['muonMon:online','muonMon:shifter']),
-        ChainProp(name='HLT_mu22_mu10noL1_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','FSNOSEED'], groups=PrimaryL1MuGroup+MultiMuonGroup),
+        ChainProp(name='HLT_mu23_mu8noL1_L1MU18VFCH',  l1SeedThresholds=['MU18VFCH','FSNOSEED'], groups=PrimaryL1MuGroup+MultiMuonGroup, stream=[PhysicsStream,'express'], monGroups=['muonMon:online','muonMon:shifter']),
+        ChainProp(name='HLT_mu23_mu10noL1_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','FSNOSEED'], groups=PrimaryL1MuGroup+MultiMuonGroup),
         ChainProp(name='HLT_mu24_mu8noL1_L1MU18VFCH',  l1SeedThresholds=['MU18VFCH','FSNOSEED'], groups=PrimaryL1MuGroup+MultiMuonGroup),
 
         ChainProp(name='HLT_2mu14_L12MU8F', groups=PrimaryL1MuGroup+MultiMuonGroup, stream=[PhysicsStream,'express'], monGroups=['muonMon:online','muonMon:shifter']),
         ChainProp(name='HLT_2mu15_L12MU8F', groups=PrimaryL1MuGroup+MultiMuonGroup),
         ChainProp(name='HLT_mu20_ivarmedium_mu8noL1_L1MU14FCH', l1SeedThresholds=['MU14FCH','FSNOSEED'], groups=PrimaryL1MuGroup+MultiMuonGroup),
         # ATR-25512
-        ChainProp(name='HLT_mu20_ivarmedium_mu8noL1_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','FSNOSEED'], groups=PrimaryL1MuGroup+MultiMuonGroup),
+        ChainProp(name='HLT_mu23_ivarmedium_mu8noL1_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','FSNOSEED'], groups=PrimaryL1MuGroup+MultiMuonGroup),
         #ATR-22107
         ChainProp(name='HLT_mu20_ivarmedium_mu4noL1_10invmAB70_L1MU14FCH', l1SeedThresholds=['MU14FCH','FSNOSEED'], groups=PrimaryL1MuGroup+MultiMuonGroup),
         # ATR-25512
-        ChainProp(name='HLT_mu20_ivarmedium_mu4noL1_10invmAB70_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','FSNOSEED'], groups=PrimaryL1MuGroup+MultiMuonGroup),
+        ChainProp(name='HLT_mu23_ivarmedium_mu4noL1_10invmAB70_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','FSNOSEED'], groups=PrimaryL1MuGroup+MultiMuonGroup),
 
         #-- 2 mu iso invm
         ChainProp(name='HLT_mu10_ivarmedium_mu10_10invmAB70_L12MU8F', groups=PrimaryL1MuGroup+MultiMuonGroup),
@@ -142,8 +142,7 @@ def setupMenu(menu_name):
         ChainProp(name='HLT_mu20_2mu4noL1_L1MU14FCH', l1SeedThresholds=['MU14FCH','FSNOSEED'], groups=PrimaryL1MuGroup+MultiMuonGroup),
         ChainProp(name='HLT_mu22_2mu4noL1_L1MU14FCH', l1SeedThresholds=['MU14FCH','FSNOSEED'], groups=PrimaryL1MuGroup+MultiMuonGroup),
         #ATR-25512
-        ChainProp(name='HLT_mu20_2mu4noL1_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','FSNOSEED'], groups=PrimaryL1MuGroup+MultiMuonGroup),
-        ChainProp(name='HLT_mu22_2mu4noL1_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','FSNOSEED'], groups=PrimaryL1MuGroup+MultiMuonGroup),
+        ChainProp(name='HLT_mu23_2mu4noL1_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','FSNOSEED'], groups=PrimaryL1MuGroup+MultiMuonGroup),
         
         ChainProp(name='HLT_3mu6_L13MU5VF', l1SeedThresholds=['MU5VF'],   groups=PrimaryL1MuGroup+MultiMuonGroup, monGroups=['muonMon:online']),
         ChainProp(name='HLT_3mu6_msonly_L13MU5VF', l1SeedThresholds=['MU5VF'],   groups=PrimaryL1MuGroup+MultiMuonGroup, monGroups=['muonMon:online']),
@@ -156,8 +155,8 @@ def setupMenu(menu_name):
         ChainProp(name='HLT_mu20_LRT_d0loose_L1MU14FCH',  groups=PrimaryL1MuGroup+SingleMuonGroup, monGroups=['muonMon:online']),
         ChainProp(name='HLT_mu20_LRT_d0tight_L1MU14FCH',  groups=PrimaryL1MuGroup+SingleMuonGroup), #back-up
         # ATR-25512
-        ChainProp(name='HLT_mu20_LRT_d0loose_L1MU18VFCH',  groups=PrimaryL1MuGroup+SingleMuonGroup, monGroups=['muonMon:online']),
-        ChainProp(name='HLT_mu20_LRT_d0tight_L1MU18VFCH',  groups=PrimaryL1MuGroup+SingleMuonGroup), #back-up
+        ChainProp(name='HLT_mu23_LRT_d0loose_L1MU18VFCH',  groups=PrimaryL1MuGroup+SingleMuonGroup, monGroups=['muonMon:online']),
+        ChainProp(name='HLT_mu23_LRT_d0tight_L1MU18VFCH',  groups=PrimaryL1MuGroup+SingleMuonGroup), #back-up
 
         # -- LLP mu RoI Cluster Trigger (ATR-22697)
         ChainProp(name='HLT_mu3vtx_L12MU8F', l1SeedThresholds=['MU8F'], groups=PrimaryL1MuGroup+MultiMuonGroup),
@@ -196,10 +195,10 @@ def setupMenu(menu_name):
         ChainProp(name='HLT_mu40_idperf_L1MU14FCH', stream=[PhysicsStream,'express'], groups=SupportGroup+SingleMuonGroup+['RATE:CPS_MU14FCH'],monGroups=['idMon:t0']),
 
         # ATR-25512
-        ChainProp(name='HLT_mu20_msonly_L1MU18VFCH', groups=SupportGroup+SingleMuonGroup+['RATE:CPS_MU18VFCH']),
+        ChainProp(name='HLT_mu23_msonly_L1MU18VFCH', groups=SupportGroup+SingleMuonGroup+['RATE:CPS_MU18VFCH']),
         ChainProp(name='HLT_mu26_L1MU18VFCH', groups=SupportGroup+SingleMuonGroup+['RATE:CPS_MU18VFCH']),
         ChainProp(name='HLT_mu24_idperf_L1MU18VFCH', stream=[PhysicsStream,'express'], groups=SupportGroup+SingleMuonGroup+['RATE:CPS_MU18VFCH'], monGroups=['idMon:t0']),
-        ChainProp(name='HLT_mu20_LRT_idperf_L1MU18VFCH', stream=[PhysicsStream,'express'],   groups=SupportGroup+SingleMuonGroup+['RATE:CPS_MU18VFCH'], monGroups=['idMon:t0']),
+        ChainProp(name='HLT_mu23_LRT_idperf_L1MU18VFCH', stream=[PhysicsStream,'express'],   groups=SupportGroup+SingleMuonGroup+['RATE:CPS_MU18VFCH'], monGroups=['idMon:t0']),
         ChainProp(name='HLT_mu26_ivarperf_L1MU18VFCH', stream=[PhysicsStream,'express'], groups=SupportGroup+SingleMuonGroup+['RATE:CPS_MU18VFCH'], monGroups=['idMon:t0']), # ATR-21905
         ChainProp(name='HLT_mu40_idperf_L1MU18VFCH', stream=[PhysicsStream,'express'], groups=SupportGroup+SingleMuonGroup+['RATE:CPS_MU18VFCH'], monGroups=['muonMon:shifter']),
 
@@ -209,7 +208,7 @@ def setupMenu(menu_name):
         ChainProp(name='HLT_mu24_ivarperf_L1MU14FCH', stream=[PhysicsStream,'express'], groups=SupportGroup+SingleMuonGroup+['RATE:CPS_MU14FCH'], monGroups=['muonMon:shifter']),
 
         # ATR-25512
-        ChainProp(name='HLT_mu22_L1MU18VFCH', stream=[PhysicsStream,'express'], groups=SupportGroup+SingleMuonGroup+['RATE:CPS_MU18VFCH'], monGroups=['muonMon:shifter']),
+        ChainProp(name='HLT_mu23_L1MU18VFCH', stream=[PhysicsStream,'express'], groups=SupportGroup+SingleMuonGroup+['RATE:CPS_MU18VFCH'], monGroups=['muonMon:shifter']),
 
         # Support for l2io and l2mt, ATR-24844
         ChainProp(name='HLT_mu4_L1MU3V', stream=[PhysicsStream,'express'], groups=SupportGroup+SingleMuonGroup+['RATE:CPS_MU3V'], monGroups=['muonMon:shifter']),
@@ -225,9 +224,12 @@ def setupMenu(menu_name):
         # ATR-25512 Duplicate tag and probe mu26_ivarmedium -> mu24_ivarmedium
         ChainProp(name='HLT_mu24_ivarmedium_mu6_l2io_probe_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEMU5VF'], groups=TagAndProbeGroup+SingleMuonGroup, monGroups=['muonMon:shifter']),
         ChainProp(name='HLT_mu24_ivarmedium_mu6_l2mt_probe_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEMU5VF'], groups=TagAndProbeGroup+SingleMuonGroup),
+        ChainProp(name='HLT_mu24_ivarmedium_mu6_l2io_probe_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEMU5VF'], groups=TagAndProbeGroup+SingleMuonGroup, monGroups=['muonMon:shifter']),
+        ChainProp(name='HLT_mu24_ivarmedium_mu6_l2mt_probe_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEMU5VF'], groups=TagAndProbeGroup+SingleMuonGroup),
         # JPsi tag-and-probe
         # ATR-23614
         ChainProp(name='HLT_mu20_mu2noL1_invmJPsiOS_L1MU14FCH',  l1SeedThresholds=['MU14FCH','FSNOSEED'], groups=SupportGroup+MultiMuonGroup+['RATE:CPS_MU14FCH']),
+        ChainProp(name='HLT_mu23_mu2noL1_invmJPsiOS_L1MU18VFCH',  l1SeedThresholds=['MU18VFCH','FSNOSEED'], groups=SupportGroup+MultiMuonGroup+['RATE:CPS_MU18VFCH']),
 
         ## ATR-24198
         ChainProp(name='HLT_mu26_ivarmedium_mu4_probe_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEMU3V'], groups=SingleMuonGroup+TagAndProbeGroup),
@@ -236,17 +238,17 @@ def setupMenu(menu_name):
         ChainProp(name='HLT_mu26_ivarmedium_mu20_probe_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEMU14FCH'], groups=SingleMuonGroup+TagAndProbeGroup),        
         ChainProp(name='HLT_mu26_ivarmedium_mu22_probe_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEMU14FCH'], groups=SingleMuonGroup+TagAndProbeGroup),
         ChainProp(name='HLT_mu26_ivarmedium_mu24_probe_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEMU14FCH'], groups=SingleMuonGroup+TagAndProbeGroup),
-        ChainProp(name='HLT_mu26_ivarmedium_mu14_ivarloose_probe_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEMU8F'], groups=SingleMuonGroup+TagAndProbeGroup),
-        ChainProp(name='HLT_mu26_ivarmedium_mu10_ivarmedium_probe_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEMU8F'], groups=SingleMuonGroup+TagAndProbeGroup),
-        ChainProp(name='HLT_mu26_ivarmedium_mu20_ivarloose_probe_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEMU14FCH'], groups=SingleMuonGroup+TagAndProbeGroup),
-        ChainProp(name='HLT_mu26_ivarmedium_mu20_ivarmedium_probe_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEMU14FCH'], groups=SingleMuonGroup+TagAndProbeGroup),
-        # ATR-25512
         ChainProp(name='HLT_mu26_ivarmedium_mu4_probe_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEMU3V'], groups=SingleMuonGroup+TagAndProbeGroup),
         ChainProp(name='HLT_mu26_ivarmedium_mu6_probe_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEMU5VF'], groups=SingleMuonGroup+TagAndProbeGroup),
         ChainProp(name='HLT_mu26_ivarmedium_mu14_probe_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEMU8F'], groups=SingleMuonGroup+TagAndProbeGroup),        
         ChainProp(name='HLT_mu26_ivarmedium_mu20_probe_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEMU14FCH'], groups=SingleMuonGroup+TagAndProbeGroup),        
         ChainProp(name='HLT_mu26_ivarmedium_mu22_probe_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEMU14FCH'], groups=SingleMuonGroup+TagAndProbeGroup),
         ChainProp(name='HLT_mu26_ivarmedium_mu24_probe_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEMU14FCH'], groups=SingleMuonGroup+TagAndProbeGroup),
+        ChainProp(name='HLT_mu26_ivarmedium_mu14_ivarloose_probe_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEMU8F'], groups=SingleMuonGroup+TagAndProbeGroup),
+        ChainProp(name='HLT_mu26_ivarmedium_mu10_ivarmedium_probe_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEMU8F'], groups=SingleMuonGroup+TagAndProbeGroup),
+        ChainProp(name='HLT_mu26_ivarmedium_mu20_ivarloose_probe_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEMU14FCH'], groups=SingleMuonGroup+TagAndProbeGroup),
+        ChainProp(name='HLT_mu26_ivarmedium_mu20_ivarmedium_probe_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEMU14FCH'], groups=SingleMuonGroup+TagAndProbeGroup),
+        # ATR-25512
         ChainProp(name='HLT_mu26_ivarmedium_mu14_ivarloose_probe_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEMU8F'], groups=SingleMuonGroup+TagAndProbeGroup),
         ChainProp(name='HLT_mu26_ivarmedium_mu10_ivarmedium_probe_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEMU8F'], groups=SingleMuonGroup+TagAndProbeGroup),
         ChainProp(name='HLT_mu26_ivarmedium_mu20_ivarloose_probe_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEMU14FCH'], groups=SingleMuonGroup+TagAndProbeGroup),
@@ -258,10 +260,20 @@ def setupMenu(menu_name):
         ChainProp(name='HLT_mu24_ivarmedium_mu20_probe_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEMU14FCH'], groups=SingleMuonGroup+TagAndProbeGroup),        
         ChainProp(name='HLT_mu24_ivarmedium_mu22_probe_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEMU14FCH'], groups=SingleMuonGroup+TagAndProbeGroup),
         ChainProp(name='HLT_mu24_ivarmedium_mu24_probe_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEMU14FCH'], groups=SingleMuonGroup+TagAndProbeGroup),
+        ChainProp(name='HLT_mu24_ivarmedium_mu4_probe_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEMU3V'], groups=SingleMuonGroup+TagAndProbeGroup),
+        ChainProp(name='HLT_mu24_ivarmedium_mu6_probe_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEMU5VF'], groups=SingleMuonGroup+TagAndProbeGroup),
+        ChainProp(name='HLT_mu24_ivarmedium_mu14_probe_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEMU8F'], groups=SingleMuonGroup+TagAndProbeGroup),        
+        ChainProp(name='HLT_mu24_ivarmedium_mu20_probe_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEMU14FCH'], groups=SingleMuonGroup+TagAndProbeGroup),        
+        ChainProp(name='HLT_mu24_ivarmedium_mu22_probe_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEMU14FCH'], groups=SingleMuonGroup+TagAndProbeGroup),
+        ChainProp(name='HLT_mu24_ivarmedium_mu24_probe_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEMU14FCH'], groups=SingleMuonGroup+TagAndProbeGroup),
         ChainProp(name='HLT_mu24_ivarmedium_mu14_ivarloose_probe_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEMU8F'], groups=SingleMuonGroup+TagAndProbeGroup),
         ChainProp(name='HLT_mu24_ivarmedium_mu10_ivarmedium_probe_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEMU8F'], groups=SingleMuonGroup+TagAndProbeGroup),
         ChainProp(name='HLT_mu24_ivarmedium_mu20_ivarloose_probe_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEMU14FCH'], groups=SingleMuonGroup+TagAndProbeGroup),
         ChainProp(name='HLT_mu24_ivarmedium_mu20_ivarmedium_probe_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEMU14FCH'], groups=SingleMuonGroup+TagAndProbeGroup),
+        ChainProp(name='HLT_mu24_ivarmedium_mu14_ivarloose_probe_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEMU8F'], groups=SingleMuonGroup+TagAndProbeGroup),
+        ChainProp(name='HLT_mu24_ivarmedium_mu10_ivarmedium_probe_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEMU8F'], groups=SingleMuonGroup+TagAndProbeGroup),
+        ChainProp(name='HLT_mu24_ivarmedium_mu20_ivarloose_probe_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEMU14FCH'], groups=SingleMuonGroup+TagAndProbeGroup),
+        ChainProp(name='HLT_mu24_ivarmedium_mu20_ivarmedium_probe_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEMU14FCH'], groups=SingleMuonGroup+TagAndProbeGroup),
         ## msonlyProbe
         ChainProp(name='HLT_mu26_ivarmedium_mu6_msonly_probe_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEMU5VF'], groups=SingleMuonGroup+TagAndProbeGroup),
         ChainProp(name='HLT_mu26_ivarmedium_mu8_msonly_probe_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEMU5VF'], groups=SingleMuonGroup+TagAndProbeGroup),
@@ -271,6 +283,8 @@ def setupMenu(menu_name):
         # ATR-25512 Duplicate tag and probe chains mu26_ivarmedium -> mu24_ivarmedium
         ChainProp(name='HLT_mu24_ivarmedium_mu6_msonly_probe_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEMU5VF'], groups=SingleMuonGroup+TagAndProbeGroup),
         ChainProp(name='HLT_mu24_ivarmedium_mu8_msonly_probe_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEMU5VF'], groups=SingleMuonGroup+TagAndProbeGroup),
+        ChainProp(name='HLT_mu24_ivarmedium_mu6_msonly_probe_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEMU5VF'], groups=SingleMuonGroup+TagAndProbeGroup),
+        ChainProp(name='HLT_mu24_ivarmedium_mu8_msonly_probe_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEMU5VF'], groups=SingleMuonGroup+TagAndProbeGroup),
 
         # ATR-24399, support chains for the measurement dimuon trigger efficiency (replacement for HLT_2mu4_bDimu_novtx_noos_L12MU3V)
         ChainProp(name='HLT_2mu4_l2io_invmDimu_L12MU3V', l1SeedThresholds=['MU3V'], stream=['BphysDelayed'], groups=MultiMuonGroup+SupportGroup+['RATE:CPS_2MU3V']),
@@ -321,11 +335,13 @@ def setupMenu(menu_name):
      
         # ATR-26929 (muon tag&probe for 2023)
         ChainProp(name="HLT_mu24_ivarmedium_mu14_idtp_idZmumu_L1MU14FCH", l1SeedThresholds=['MU14FCH']*2, stream=[PhysicsStream, 'express'], groups=MultiMuonGroup+SupportGroup, monGroups=['idMon:shifter']),
+        ChainProp(name="HLT_mu24_ivarmedium_mu14_idtp_idZmumu_L1MU18VFCH", l1SeedThresholds=['MU18VFCH','MU14FCH'], stream=[PhysicsStream, 'express'], groups=MultiMuonGroup+SupportGroup, monGroups=['idMon:shifter']),
         ChainProp(name="HLT_mu26_ivarmedium_mu14_idtp_idZmumu_L1MU14FCH", l1SeedThresholds=['MU14FCH']*2, stream=[PhysicsStream, 'express'], groups=MultiMuonGroup+SupportGroup, monGroups=['idMon:shifter']),
         ChainProp(name="HLT_mu26_ivarmedium_mu14_idtp_idZmumu_L1MU18VFCH", l1SeedThresholds=['MU18VFCH']*2, stream=[PhysicsStream, 'express'], groups=MultiMuonGroup+SupportGroup, monGroups=['idMon:shifter']),
 
         # ATR-26151
         ChainProp(name='HLT_mu24_ivarmedium_mu14_idperf_probe_50invmAB130_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEMU8F'], stream=[PhysicsStream,'express'], groups=MultiMuonGroup+SupportGroup, monGroups=['idMon:shifter','idMon:t0']),
+        ChainProp(name='HLT_mu24_ivarmedium_mu14_idperf_probe_50invmAB130_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEMU8F'], stream=[PhysicsStream,'express'], groups=MultiMuonGroup+SupportGroup, monGroups=['idMon:shifter','idMon:t0']),
         ChainProp(name='HLT_mu26_ivarmedium_mu14_idperf_probe_50invmAB130_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEMU8F'], stream=[PhysicsStream,'express'], groups=MultiMuonGroup+SupportGroup, monGroups=['idMon:shifter','idMon:t0']),
         ChainProp(name='HLT_mu26_ivarmedium_mu14_idperf_probe_50invmAB130_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEMU8F'], stream=[PhysicsStream,'express'], groups=MultiMuonGroup+SupportGroup, monGroups=['idMon:shifter','idMon:t0']),
     ]
@@ -1998,8 +2014,8 @@ ChainProp(name='HLT_j20_pf_ftf_preselj140_PhysicsTLA_L1jJ90',  l1SeedThresholds=
         ChainProp(name='HLT_2g10_loose_mu20_L1MU14FCH', l1SeedThresholds=['EM7','MU14FCH'], stream=[PhysicsStream], groups=PrimaryLegGroup+EgammaMuonGroup), # unsure what EM seed should be
         ChainProp(name='HLT_2g10_loose_L1eEM9_mu20_L1MU14FCH', l1SeedThresholds=['eEM9','MU14FCH'], stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaMuonGroup), # unsure what eEM seed should be
         # ATR-25512
-        ChainProp(name='HLT_2g10_loose_mu20_L1MU18VFCH', l1SeedThresholds=['EM7','MU18VFCH'], stream=[PhysicsStream], groups=PrimaryLegGroup+EgammaMuonGroup), # unsure what EM seed should be
-        ChainProp(name='HLT_2g10_loose_L1eEM9_mu20_L1MU18VFCH', l1SeedThresholds=['eEM9','MU18VFCH'], stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaMuonGroup), # unsure what eEM seed should be
+        ChainProp(name='HLT_2g10_loose_mu23_L1MU18VFCH', l1SeedThresholds=['EM7','MU18VFCH'], stream=[PhysicsStream], groups=PrimaryLegGroup+EgammaMuonGroup), # unsure what EM seed should be
+        ChainProp(name='HLT_2g10_loose_L1eEM9_mu23_L1MU18VFCH', l1SeedThresholds=['eEM9','MU18VFCH'], stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaMuonGroup), # unsure what eEM seed should be
         
         #---------- support 2m + 1g + ZRad triggers
         ChainProp(name='HLT_2mu14_g20_tight_probe_L12MU8F', l1SeedThresholds=['MU8F','PROBEEM15VHI'],groups=TagAndProbeLegGroup+EgammaMuonGroup),
@@ -2036,7 +2052,7 @@ ChainProp(name='HLT_j20_pf_ftf_preselj140_PhysicsTLA_L1jJ90',  l1SeedThresholds=
         ChainProp(name='HLT_e9_lhvloose_mu20_mu8noL1_L1MU14FCH', l1SeedThresholds=['EM3','MU14FCH','FSNOSEED'], stream=[PhysicsStream], groups=PrimaryLegGroup+EgammaMuonGroup),
         
         # ATR-25512
-        ChainProp(name='HLT_e9_lhvloose_mu20_mu8noL1_L1MU18VFCH', l1SeedThresholds=['EM3','MU18VFCH','FSNOSEED'], stream=[PhysicsStream], groups=PrimaryLegGroup+EgammaMuonGroup),
+        ChainProp(name='HLT_e9_lhvloose_mu23_mu8noL1_L1MU18VFCH', l1SeedThresholds=['EM3','MU18VFCH','FSNOSEED'], stream=[PhysicsStream], groups=PrimaryLegGroup+EgammaMuonGroup),
         
         ChainProp(name='HLT_g35_loose_mu15_mu2noL1_L1EM24VHI', l1SeedThresholds=['EM24VHI','MU5VF','FSNOSEED'], stream=[PhysicsStream], groups=PrimaryLegGroup+EgammaMuonGroup),
         ChainProp(name='HLT_g35_tight_icalotight_mu18noL1_L1EM24VHI', l1SeedThresholds=['EM24VHI','FSNOSEED'], stream=[PhysicsStream], groups=PrimaryLegGroup+EgammaMuonGroup),
@@ -2055,7 +2071,7 @@ ChainProp(name='HLT_j20_pf_ftf_preselj140_PhysicsTLA_L1jJ90',  l1SeedThresholds=
         # tau + muon triggers
         ChainProp(name='HLT_mu20_ivarloose_tau20_mediumRNN_tracktwoMVA_03dRAB_L1MU14FCH', l1SeedThresholds=['MU14FCH','TAU8'], stream=[PhysicsStream], groups=PrimaryLegGroup+MuonTauGroup),
         # ATR 25512
-        ChainProp(name='HLT_mu20_ivarloose_tau20_mediumRNN_tracktwoMVA_03dRAB_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','TAU8'], stream=[PhysicsStream], groups=PrimaryLegGroup+MuonTauGroup),
+        ChainProp(name='HLT_mu23_ivarloose_tau20_mediumRNN_tracktwoMVA_03dRAB_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','TAU8'], stream=[PhysicsStream], groups=PrimaryLegGroup+MuonTauGroup),
         
         ChainProp(name='HLT_mu14_ivarloose_tau35_mediumRNN_tracktwoMVA_03dRAB_L1MU8F_TAU20IM', l1SeedThresholds=['MU8F','TAU20IM'], stream=[PhysicsStream], groups=PrimaryLegGroup+MuonTauGroup),
         ChainProp(name='HLT_mu14_ivarloose_tau25_mediumRNN_tracktwoMVA_03dRAB_L1MU8F_TAU12IM_3J12', l1SeedThresholds=['MU8F','TAU12IM'], stream=[PhysicsStream], groups=PrimaryLegGroup+MuonTauGroup),
