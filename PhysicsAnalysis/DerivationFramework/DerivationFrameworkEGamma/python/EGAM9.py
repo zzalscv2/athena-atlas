@@ -277,6 +277,7 @@ def EGAM9Cfg(ConfigFlags):
 
     # configure slimming
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     EGAM9SlimmingHelper = SlimmingHelper(
         'EGAM9SlimmingHelper',
@@ -434,6 +435,8 @@ def EGAM9Cfg(ConfigFlags):
                               'DAOD_EGAM9',
                               ItemList = EGAM9ItemList,
                               AcceptAlgs = ['EGAM9Kernel']))
+    acc.merge(InfileMetaDataCfg(ConfigFlags, 'DAOD_EGAM9',
+                                AcceptAlgs=['EGAM9Kernel']))
 
     return acc
     

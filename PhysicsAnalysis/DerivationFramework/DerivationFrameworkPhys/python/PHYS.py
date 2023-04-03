@@ -67,6 +67,7 @@ def PHYSCfg(ConfigFlags):
     # Define contents of the format
     # =============================
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
     PHYSSlimmingHelper = SlimmingHelper("PHYSSlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
@@ -170,6 +171,7 @@ def PHYSCfg(ConfigFlags):
     # Output stream    
     PHYSItemList = PHYSSlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_PHYS", ItemList=PHYSItemList, AcceptAlgs=["PHYSKernel"]))
+    acc.merge(InfileMetaDataCfg(ConfigFlags, "DAOD_PHYS", AcceptAlgs=["PHYSKernel"]))
 
     return acc
 

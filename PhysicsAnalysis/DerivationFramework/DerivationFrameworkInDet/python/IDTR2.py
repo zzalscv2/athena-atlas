@@ -134,6 +134,7 @@ def IDTR2Cfg(ConfigFlags):
     # Define contents of the format
     # =============================
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
 
     IDTR2SlimmingHelper = SlimmingHelper("IDTR2SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
@@ -178,6 +179,7 @@ def IDTR2Cfg(ConfigFlags):
 
     IDTR2ItemList = IDTR2SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_IDTR2", ItemList=IDTR2ItemList, AcceptAlgs=["IDTR2Kernel"]))
+    acc.merge(InfileMetaDataCfg(ConfigFlags, "DAOD_IDTR2", AcceptAlgs=["IDTR2Kernel"]))
 
     return acc
 

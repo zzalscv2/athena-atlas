@@ -330,6 +330,7 @@ def EGAM5Cfg(ConfigFlags):
 
     # configure slimming
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     EGAM5SlimmingHelper = SlimmingHelper(
         'EGAM5SlimmingHelper',
@@ -469,6 +470,8 @@ def EGAM5Cfg(ConfigFlags):
                               'DAOD_EGAM5',
                               ItemList = EGAM5ItemList,
                               AcceptAlgs = ['EGAM5Kernel']))
+    acc.merge(InfileMetaDataCfg(ConfigFlags, 'DAOD_EGAM5',
+                                AcceptAlgs=['EGAM5Kernel']))
 
     return acc
     

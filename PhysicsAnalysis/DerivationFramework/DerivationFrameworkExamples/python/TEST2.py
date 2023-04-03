@@ -31,6 +31,7 @@ def TEST2Cfg(ConfigFlags):
     acc.merge(TEST2KernelCfg(ConfigFlags, name="TEST2Kernel"))
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     TEST2SlimmingHelper = SlimmingHelper("TEST2SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
     TEST2SlimmingHelper.SmartCollections = ["EventInfo",
@@ -53,5 +54,6 @@ def TEST2Cfg(ConfigFlags):
     TEST2ItemList = TEST2SlimmingHelper.GetItemList()
 
     acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_TEST2", ItemList=TEST2ItemList, AcceptAlgs=["TEST2Kernel"]))
+    acc.merge(InfileMetaDataCfg(ConfigFlags, "DAOD_TEST2", AcceptAlgs=["TEST2Kernel"]))
 
     return acc

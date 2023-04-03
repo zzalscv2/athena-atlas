@@ -203,6 +203,7 @@ def HIGG1D1Cfg(ConfigFlags):
     # Define contents of the format
     # =============================
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
     HIGG1D1SlimmingHelper = SlimmingHelper("HIGG1D1SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
@@ -422,5 +423,6 @@ def HIGG1D1Cfg(ConfigFlags):
     # Output stream    
     HIGG1D1ItemList = HIGG1D1SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_HIGG1D1", ItemList=HIGG1D1ItemList, AcceptAlgs=["HIGG1D1Kernel"]))
+    acc.merge(InfileMetaDataCfg(ConfigFlags, "DAOD_HIGG1D1", AcceptAlgs=["HIGG1D1Kernel"]))
 
     return acc

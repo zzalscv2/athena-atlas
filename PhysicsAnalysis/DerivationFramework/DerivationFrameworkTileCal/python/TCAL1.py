@@ -130,6 +130,7 @@ def TCAL1Cfg(ConfigFlags):
     acc.merge(TCAL1KernelCfg(ConfigFlags, name="TCAL1Kernel", StreamName="OutputStreamDAOD_TCAL1", Prefix=TCAL1Prefix,  TriggerListsHelper=TCAL1TriggerListsHelper))
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     TCAL1SlimmingHelper = SlimmingHelper("TCAL1SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
     TCAL1SlimmingHelper.SmartCollections = ['EventInfo', 'Muons', 'AntiKt4EMTopoJets', 'AntiKt4EMPFlowJets', 'MET_Baseline_AntiKt4EMTopo', 'MET_Baseline_AntiKt4EMPFlow', 'PrimaryVertices']
@@ -177,5 +178,6 @@ def TCAL1Cfg(ConfigFlags):
 
     TCAL1ItemList = TCAL1SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_TCAL1", ItemList=TCAL1ItemList, AcceptAlgs=["TCAL1Kernel"]))
+    acc.merge(InfileMetaDataCfg(ConfigFlags, "DAOD_TCAL1", AcceptAlgs=["TCAL1Kernel"]))
 
     return acc

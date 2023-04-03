@@ -92,6 +92,7 @@ def FTAG2Cfg(ConfigFlags):
     # Define contents of the format
     # =============================
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
     FTAG2SlimmingHelper = SlimmingHelper("FTAG2SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
@@ -139,6 +140,7 @@ def FTAG2Cfg(ConfigFlags):
     # Output stream    
     FTAG2ItemList = FTAG2SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_FTAG2", ItemList=FTAG2ItemList, AcceptAlgs=["FTAG2Kernel"]))
+    acc.merge(InfileMetaDataCfg(ConfigFlags, "DAOD_FTAG2", AcceptAlgs=["FTAG2Kernel"]))
 
     return acc
 

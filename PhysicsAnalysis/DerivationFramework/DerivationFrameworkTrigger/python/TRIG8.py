@@ -171,6 +171,7 @@ def TRIG8Cfg(ConfigFlags):
     # Define contents of the format
     # =============================
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
 
     TRIG8SlimmingHelper = SlimmingHelper("TRIG8SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections)
@@ -332,6 +333,7 @@ def TRIG8Cfg(ConfigFlags):
     # Output stream
     TRIG8ItemList = TRIG8SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_TRIG8", ItemList=TRIG8ItemList, AcceptAlgs=["TRIG8Kernel"]))
+    acc.merge(InfileMetaDataCfg(ConfigFlags, "DAOD_TRIG8", AcceptAlgs=["TRIG8Kernel"]))
 
     return acc
 

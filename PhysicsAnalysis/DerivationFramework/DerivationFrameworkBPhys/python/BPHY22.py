@@ -274,6 +274,7 @@ def BPHY22Cfg(ConfigFlags):
 
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
     BPHY22SlimmingHelper = SlimmingHelper("BPHY22SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
 
     # Needed for trigger objects
@@ -321,5 +322,6 @@ def BPHY22Cfg(ConfigFlags):
     BPHY22SlimmingHelper.StaticContent = StaticContent
     BPHY22ItemList = BPHY22SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_BPHY22", ItemList=BPHY22ItemList, AcceptAlgs=["BPHY22Kernel"]))
+    acc.merge(InfileMetaDataCfg(ConfigFlags, "DAOD_BPHY22", AcceptAlgs=["BPHY22Kernel"]))
     acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True, printComponentsOnly=False)
     return acc
