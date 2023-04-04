@@ -77,9 +77,7 @@ topSequence += LArCellContFakeReader( "LArCellContFakeReader" )
 #--------------------------------------------------------------
 svcMgr.MessageSvc.OutputLevel = WARNING
 svcMgr.MessageSvc.debugLimit  = 100000
-LArCellContFakeReader.OutputLevel = DEBUG
-
-#svcMgr.AthenaEventLoopMgr.OutputLevel = DEBUG
+LArCellContFakeReader.OutputLevel = INFO
 
 from AthenaServices import AthenaServicesConf
 AthenaEventLoopMgr = AthenaServicesConf.AthenaEventLoopMgr()

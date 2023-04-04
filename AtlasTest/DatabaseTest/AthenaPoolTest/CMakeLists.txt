@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AthenaPoolTest )
@@ -38,7 +38,7 @@ function (athenapooltest_run_test testName jo pattern)
                   SCRIPT athena.py AthenaPoolTest/${jo}.py
                   ${_extraArgs}
                   LOG_SELECT_PATTERN ${pattern}
-                  LOG_IGNORE_PATTERN "0x[0-9a-f]{4,}|DEBUG Try item:|AthenaAttribute.*DB=|AtlasRelease|Release version"
+                  LOG_IGNORE_PATTERN "0x[0-9a-f]{4,}|DEBUG Try item:|AthenaAttribute.*DB=|AtlasRelease|Release version|data dependencies"
                   PROPERTIES TIMEOUT 900
                   DEPENDS ${ARG_DEPENDS} )
 endfunction (athenapooltest_run_test)
