@@ -37,6 +37,16 @@ else:
         'maxjetflavor': 5
     })
     _nQuarksMerge = 5
+    if define_pj_5FS:
+        # Add the 5FS p and j definition to the beginning of the process string
+        process = "define p = g u c d s b u~ c~ d~ s~ b~\ndefine j = g u c d s b u~ c~ d~ s~ b~\n" + process
+        # Check that if p and j get redefined that it is consistent with 5FS otherwise raise error
+        for l in process.split('\n'):
+            l_nocomment = l.split('#')[0]
+            if ("define p" in l_nocomment or "define j" in l_nocomment) and l_nocomment.count("=") == 1:
+                l_equals = (l_nocomment.split("=")[-1]).split(" ")
+                if not set(['g', 'u', 'c', 'd', 's', 'b', 'u~', 'c~', 'd~', 's~', 'b~']) <= set(l_equals):
+                    raise RuntimeError('Invalid definition found for p or j in process string while using 5FS')
 
 # systematic variation
 if 'scup' in phys_short:
