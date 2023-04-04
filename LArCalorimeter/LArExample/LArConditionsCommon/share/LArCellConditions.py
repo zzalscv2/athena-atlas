@@ -138,9 +138,9 @@ else:
 from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg 
 cfg.merge(LArOnOffIdMappingCfg(ConfigFlags))
 
-from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDbCfg
+from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBCfg
 requiredConditions=["Pedestal","Ramp","DAC2uA","uA2MeV","MphysOverMcal","HVScaleCorr"]
-cfg.merge(LArElecCalibDbCfg(ConfigFlags,requiredConditions))
+cfg.merge(LArElecCalibDBCfg(ConfigFlags,requiredConditions))
 
 from LArBadChannelTool.LArBadChannelConfig import LArBadChannelCfg
 cfg.merge(LArBadChannelCfg(ConfigFlags))

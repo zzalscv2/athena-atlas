@@ -68,9 +68,9 @@ def LArPileUpAutoCorrCfg(flags):
        mapKey="LArOnOffIdMapSC"
        bcKey = "LArBadChannelSC"
     else:
-       from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDbCfg
+       from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBCfg
        #requiredConditions=["Ramp","DAC2uA","uA2MeV","MphysOverMcal","HVScaleCorr","Pedestal"]
-       result.merge(LArElecCalibDbCfg(flags,requiredConditions))
+       result.merge(LArElecCalibDBCfg(flags,requiredConditions))
        mapKey="LArOnOffIdMap"
        bcKey = "LArBadChannel"
 
