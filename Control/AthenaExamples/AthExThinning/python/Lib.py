@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # @file: AthExThinning/python/Lib.py
 # @purpose: a set of Py-components to tests py-thinning
@@ -105,20 +105,20 @@ class PyWriteThinnedData( PyAthena.Alg ):
                               self.Elephantino )
             return StatusCode.Failure
 
-        self.msg.debug( "IN particles: %i", particles.size() )
-        self.msg.debug( "IN decay:" )
-        self.msg.debug( " p1: px= %r", decay.p1().px() / Units.GeV )
-        self.msg.debug( " p2: px= %r", decay.p2().px() / Units.GeV )
-        self.msg.debug( " l1: px= %r", decay.l1().px() / Units.GeV )
-        self.msg.debug( " l2: px= %r", decay.l2().px() / Units.GeV )
+        self.msg.info( "IN particles: %i", particles.size() )
+        self.msg.info( "IN decay:" )
+        self.msg.info( " p1: px= %r", decay.p1().px() / Units.GeV )
+        self.msg.info( " p2: px= %r", decay.p2().px() / Units.GeV )
+        self.msg.info( " l1: px= %r", decay.l1().px() / Units.GeV )
+        self.msg.info( " l2: px= %r", decay.l2().px() / Units.GeV )
 
-        self.msg.debug( "IN elephantino:" )
-        self.msg.debug( " leg1: px= %r", elephantino.leg1().px() / Units.GeV )
-        self.msg.debug( " leg2: px= %r", elephantino.leg2().px() / Units.GeV )
-        self.msg.debug( " leg3: px= %r", elephantino.leg3().px() / Units.GeV )
-        self.msg.debug( " leg4: px= %r", elephantino.leg4().px() / Units.GeV )
-        self.msg.debug( " ear1: px= %r", elephantino.ear1().px() / Units.GeV )
-        self.msg.debug( " ear2: px= %r", elephantino.ear2().px() / Units.GeV )
+        self.msg.info( "IN elephantino:" )
+        self.msg.info( " leg1: px= %r", elephantino.leg1().px() / Units.GeV )
+        self.msg.info( " leg2: px= %r", elephantino.leg2().px() / Units.GeV )
+        self.msg.info( " leg3: px= %r", elephantino.leg3().px() / Units.GeV )
+        self.msg.info( " leg4: px= %r", elephantino.leg4().px() / Units.GeV )
+        self.msg.info( " ear1: px= %r", elephantino.ear1().px() / Units.GeV )
+        self.msg.info( " ear2: px= %r", elephantino.ear2().px() / Units.GeV )
 
         ## thinning
         dec = ROOT.SG.ThinningDecision (particlesName)

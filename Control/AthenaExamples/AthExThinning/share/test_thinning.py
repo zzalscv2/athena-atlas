@@ -1,14 +1,8 @@
 #!/usr/bin/env python
 
-from __future__ import print_function
-
-import sys
 import os
-from AthenaCommon import ChapPy
-
-from future import standard_library
-standard_library.install_aliases()
 import subprocess
+from AthenaCommon import ChapPy
 
 ###-----------------------------------------------------
 EVTMAX = 5
@@ -123,7 +117,7 @@ print ("#"*80)
 sc,out = doValidation( "WriteThinnedData",
                        workDir("WriteThinnedData.ref"),
                        workDir("thinned.data.pool.log"),
-                       "grep \"^WriteThinnedData \" | grep -v \"Property update for OutputLevel\" | grep -v \"input handles\" | grep -v \"output handles\" | grep -v \"Data Deps for\"" )
+                       "grep \"^WriteThinnedData \"" )
 if sc != 0:
     raise SystemExit("ERROR")
 

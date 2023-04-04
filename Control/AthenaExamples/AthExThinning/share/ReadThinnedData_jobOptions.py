@@ -49,7 +49,7 @@ topSequence += AthExThinning__ReadThinnedData(
    Particles   = "Particles",
    Decay       = "TwoBodyDecay",
    Elephantino = "PinkElephantino",
-   OutputLevel = DEBUG
+   OutputLevel = INFO
    )
 
 #--------------------------------------------------------------
