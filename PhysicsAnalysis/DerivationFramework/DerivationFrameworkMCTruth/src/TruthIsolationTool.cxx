@@ -42,9 +42,9 @@ StatusCode DerivationFramework::TruthIsolationTool::initialize()
     // Decorations depend on the list of cone sizes
     for ( auto csize_itr : m_coneSizesSort ) { 
       std::ostringstream sizess;
-      if (m_variableR) sizess << "var"; 
-      sizess << m_isoVarNamePrefix << (int)((csize_itr)*100.);
-      m_isoDecorKeys.emplace_back(sizess.str());
+      if (m_variableR) sizess << "var";
+      sizess << m_isoVarNamePrefix.value() << (int)((csize_itr)*100.);
+      m_isoDecorKeys.emplace_back(m_isoParticlesKey.key()+"."+sizess.str());
     }
     ATH_CHECK(m_isoDecorKeys.initialize());
 
