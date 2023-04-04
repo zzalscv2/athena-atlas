@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCalibTools/IdToFixedIdTool.h"
@@ -9,6 +9,7 @@
 #include <string>
 
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
+#include "MuonIdHelpers/sTgcIdHelper.h"
 
 namespace MuonCalib {
 
@@ -103,6 +104,146 @@ namespace MuonCalib {
         return tmp;
     }
 
+    MuonFixedLongId IdToFixedIdTool::idToFixedLongId(const Identifier& id) const {
+        bool done{false};
+        MuonFixedLongId fixedId;
+
+        if (!(m_idHelperSvc->isMuon(id))) {
+            ATH_MSG_DEBUG(" MuonIdentifier doesn't correspond to a muon ");
+        } else {
+            // setting the Muon specific fields
+            done = fixedId.setStationName(fixedId.stationStringToFixedStationNumber(
+                m_idHelperSvc->mdtIdHelper().stationNameString(m_idHelperSvc->mdtIdHelper().stationName(id))));
+            if (!done) ATH_MSG_INFO("Something went wrong in the conversion id->fid (general) ");
+            if (m_idHelperSvc->isMdt(id)) {
+                done = fixedId.setTechnology(MuonFixedLongId::technologyMDT);  // MDT = 0;
+                // setting the Mdt specific fields
+                if (done) done = fixedId.setStationEta(m_idHelperSvc->mdtIdHelper().stationEta(id));
+                if (done) done = fixedId.setStationPhi(m_idHelperSvc->mdtIdHelper().stationPhi(id));
+
+                if (done) done = fixedId.setMdtTube(m_idHelperSvc->mdtIdHelper().tube(id));
+                if (done) done = fixedId.setMdtTubeLayer(m_idHelperSvc->mdtIdHelper().tubeLayer(id));
+                if (done) done = fixedId.setMdtMultilayer(m_idHelperSvc->mdtIdHelper().multilayer(id));
+                if (!done) ATH_MSG_INFO("Something went wrong in the conversion id->fid (MDT) ");
+            } else if (m_idHelperSvc->isRpc(id)) {
+                done = fixedId.setTechnology(MuonFixedLongId::technologyRPC);  // RPC = 3;
+                // setting the Rpc specific fields
+                if (done) done = fixedId.setStationEta(m_idHelperSvc->rpcIdHelper().stationEta(id));
+                if (done) done = fixedId.setStationPhi(m_idHelperSvc->rpcIdHelper().stationPhi(id));
+
+                if (done) done = fixedId.setRpcDoubletR(m_idHelperSvc->rpcIdHelper().doubletR(id));
+                if (done) done = fixedId.setRpcDoubletZ(m_idHelperSvc->rpcIdHelper().doubletZ(id));
+                if (done) done = fixedId.setRpcDoubletPhi(m_idHelperSvc->rpcIdHelper().doubletPhi(id));
+                if (done) done = fixedId.setRpcGasGap(m_idHelperSvc->rpcIdHelper().gasGap(id));
+                if (done) done = fixedId.setRpcMeasuresPhi(m_idHelperSvc->rpcIdHelper().measuresPhi(id));
+                if (done) done = fixedId.setRpcStrip(m_idHelperSvc->rpcIdHelper().strip(id));
+                if (!done) ATH_MSG_INFO("Something went wrong in the conversion id->fid (RPC) ");
+            } else if (m_idHelperSvc->isCsc(id)) {
+                done = fixedId.setTechnology(MuonFixedLongId::technologyCSC);  // CSC = 1;
+                // setting the Csc specific fields
+                if (done) done = fixedId.setStationEta(m_idHelperSvc->cscIdHelper().stationEta(id));
+                if (done) done = fixedId.setStationPhi(m_idHelperSvc->cscIdHelper().stationPhi(id));
+
+                if (done) done = fixedId.setCscChamberLayer(m_idHelperSvc->cscIdHelper().chamberLayer(id));
+                if (done) done = fixedId.setCscWireLayer(m_idHelperSvc->cscIdHelper().wireLayer(id));
+                if (done) done = fixedId.setCscMeasuresPhi(m_idHelperSvc->cscIdHelper().measuresPhi(id));
+                if (done) done = fixedId.setCscStrip(m_idHelperSvc->cscIdHelper().strip(id));
+                if (!done) ATH_MSG_INFO("Something went wrong in the conversion id->fid (CSC) ");
+            } else if (m_idHelperSvc->isTgc(id)) {
+                done = fixedId.setTechnology(MuonFixedLongId::technologyTGC);  // TGC = 2;
+                // setting the Tgc specific fields
+                if (done) done = fixedId.setStationEta(m_idHelperSvc->tgcIdHelper().stationEta(id));
+                if (done) done = fixedId.setStationPhi(m_idHelperSvc->tgcIdHelper().stationPhi(id));
+
+                if (done) done = fixedId.setTgcGasGap(m_idHelperSvc->tgcIdHelper().gasGap(id));
+                if (done) done = fixedId.setTgcIsStrip(m_idHelperSvc->tgcIdHelper().isStrip(id));
+                if (done) done = fixedId.setTgcChannel(m_idHelperSvc->tgcIdHelper().channel(id));
+                if (!done) ATH_MSG_INFO("Something went wrong in the conversion id->fid (TGC) ");
+            } else if (m_idHelperSvc->isMM(id)) {
+              done = fixedId.setTechnology(MuonFixedLongId::technologyMMG);
+              // setting the MMG specific fields
+              if (done) done = fixedId.setStationEta(m_idHelperSvc->mmIdHelper().stationEta(id));
+              if (done) done = fixedId.setStationPhi(m_idHelperSvc->mmIdHelper().stationPhi(id));
+
+              if (done) done = fixedId.setMmgMultilayer(m_idHelperSvc->mmIdHelper().multilayer(id));
+              if (done) done = fixedId.setMmgGasGap(m_idHelperSvc->mmIdHelper().gasGap(id));
+              if (done) done = fixedId.setMmgStrip(m_idHelperSvc->mmIdHelper().channel(id));
+              if (!done) ATH_MSG_INFO("Something went wrong in the conversion id->fid (MMG) ");
+            } else if (m_idHelperSvc->issTgc(id)) {
+              done = fixedId.setTechnology(MuonFixedLongId::technologySTG);
+              // setting the sTGC specific fields
+              if (done) done = fixedId.setStationEta(m_idHelperSvc->stgcIdHelper().stationEta(id));
+              if (done) done = fixedId.setStationPhi(m_idHelperSvc->stgcIdHelper().stationPhi(id));
+
+              // Convert the channel type enum
+              MuonFixedLongId::StgChannelType channelType;
+              switch (m_idHelperSvc->stgcIdHelper().channelType(id)) {
+                case sTgcIdHelper::sTgcChannelTypes::Pad:
+                  channelType = MuonFixedLongId::StgChannelType::stgChannelPad;
+                  break;
+                case sTgcIdHelper::sTgcChannelTypes::Strip:
+                  channelType = MuonFixedLongId::StgChannelType::stgChannelStrip;
+                  break;
+                case sTgcIdHelper::sTgcChannelTypes::Wire:
+                  channelType = MuonFixedLongId::StgChannelType::stgChannelWire;
+                  break;
+                default:
+                  ATH_MSG_WARNING("Cannot convert StgChannelType");
+                  done = false;
+                  break;
+              }
+
+              if (done) done = fixedId.setStgMultilayer(m_idHelperSvc->stgcIdHelper().multilayer(id));
+              if (done) done = fixedId.setStgGasGap(m_idHelperSvc->stgcIdHelper().gasGap(id));
+              if (done) done = fixedId.setStgChannelType(channelType);
+              if (done) done = fixedId.setStgChannel(m_idHelperSvc->stgcIdHelper().channel(id));
+              if (!done) ATH_MSG_INFO("Something went wrong in the conversion id->fid (STG) ");
+            }
+        }
+        return fixedId;
+    }
+
+    Identifier IdToFixedIdTool::fixedLongIdToId(const MuonFixedLongId& fid) const {
+        Identifier tmp;
+        if (fid.is_mdt()) {
+            tmp = m_idHelperSvc->mdtIdHelper().channelID(std::string(fid.stationNameString()), fid.eta(), fid.phi(), fid.mdtMultilayer(),
+                                                         fid.mdtTubeLayer(), fid.mdtTube());
+        } else if (fid.is_rpc()) {
+            tmp =
+                m_idHelperSvc->rpcIdHelper().channelID(std::string(fid.stationNameString()), fid.eta(), fid.phi(), fid.rpcDoubletR(), fid.rpcDoubletZ(),
+                                                       fid.rpcDoubletPhi(), fid.rpcGasGap(), fid.rpcMeasuresPhi(), fid.rpcStrip());
+        } else if (m_idHelperSvc->hasCSC() && fid.is_csc()) {
+            tmp = m_idHelperSvc->cscIdHelper().channelID(std::string(fid.stationNameString()), fid.eta(), fid.phi(), fid.cscChamberLayer(),
+                                                         fid.cscWireLayer(), fid.cscMeasuresPhi(), fid.cscStrip());
+        } else if (fid.is_tgc()) {
+            tmp = m_idHelperSvc->tgcIdHelper().channelID(std::string(fid.stationNameString()), fid.eta(), fid.phi(), fid.tgcGasGap(), fid.tgcIsStrip(),
+                                                         fid.tgcChannel());
+        } else if (fid.is_mmg()) {
+          tmp = m_idHelperSvc->mmIdHelper().channelID(std::string(fid.stationNameString()), fid.eta(), fid.phi(),
+              fid.mmgMultilayer(), fid.mmgGasGap(), fid.mmgStrip());
+        } else if (fid.is_stg()) {
+          // Convert the channel type enum
+          sTgcIdHelper::sTgcChannelTypes channelType = sTgcIdHelper::sTgcChannelTypes::Pad;
+          switch (fid.stgChannelType()) {
+            case MuonFixedLongId::StgChannelType::stgChannelPad:
+              channelType = sTgcIdHelper::sTgcChannelTypes::Pad;
+              break;
+            case MuonFixedLongId::StgChannelType::stgChannelStrip:
+              channelType = sTgcIdHelper::sTgcChannelTypes::Strip;
+              break;
+            case MuonFixedLongId::StgChannelType::stgChannelWire:
+              channelType = sTgcIdHelper::sTgcChannelTypes::Wire;
+              break;
+            default:
+              ATH_MSG_WARNING("Cannot convert StgChannelType");
+              break;
+          }
+          tmp = m_idHelperSvc->stgcIdHelper().channelID(std::string(fid.stationNameString()), fid.eta(), fid.phi(),
+              fid.stgMultilayer(), fid.stgGasGap(), channelType, fid.stgChannel());
+        }
+        return tmp;
+    }
+
     Identifier IdToFixedIdTool::regionKeyToId(std::string region) const {
         // unpack the region key string used by the calibration framework and return
         // an Athena Identifier
@@ -153,5 +294,7 @@ namespace MuonCalib {
     }
 
     void IdToFixedIdTool::print(const MuonFixedId& fid) const { ATH_MSG_INFO("MuonFixedId conversion yields: " << fid); }
+
+    void IdToFixedIdTool::print(const MuonFixedLongId& fid) const { ATH_MSG_INFO("MuonFixedLongId conversion yields: " << fid); }
 
 }  // namespace MuonCalib

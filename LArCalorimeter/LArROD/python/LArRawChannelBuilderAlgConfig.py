@@ -2,7 +2,7 @@
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import LHCPeriod, ProductionStep
 from LArRecUtils.LArADC2MeVCondAlgConfig import LArADC2MeVCondAlgCfg
-from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDbCfg
+from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBCfg
 from LArRecUtils.LArRecUtilsConfig import LArOFCCondAlgCfg
 from LArConfiguration.LArConfigFlags import RawChannelSource
 
@@ -35,7 +35,7 @@ def LArRawChannelBuilderAlgCfg(configFlags, **kwargs):
         else:
             kwargs.setdefault("LArDigitKey", "LArDigitContainer_MC")
     else:
-        acc.merge(LArElecCalibDbCfg(configFlags,("OFC","Shape","Pedestal")))
+        acc.merge(LArElecCalibDBCfg(configFlags,("OFC","Shape","Pedestal")))
         if configFlags.Overlay.DataOverlay:
             kwargs.setdefault("LArDigitKey", "LArDigitContainer_MC")
             kwargs.setdefault("LArRawChannelKey", "LArRawChannels")

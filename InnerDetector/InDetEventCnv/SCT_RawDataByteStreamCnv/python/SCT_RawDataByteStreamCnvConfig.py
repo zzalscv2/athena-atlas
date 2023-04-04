@@ -35,26 +35,29 @@ def SCTRawDataProviderCfg(flags, prefix="InDet", suffix="", **kwargs):
                                                     **kwargs))
     return acc
 
+
+
 def TrigSCTRawDataProviderCfg(flags, suffix, RoIs):
     """ Configures the SCT raw data decoding with trigger args """
 
-    acc = ComponentAccumulator()    
     from RegionSelector.RegSelToolConfig import regSelTool_SCT_Cfg
-    regSelTool = acc.popToolsAndMerge(regSelTool_SCT_Cfg(flags))
 
+    regSelAcc = regSelTool_SCT_Cfg(flags)
+    regSelTools = regSelAcc.popPrivateTools()
     trigargs = {
         'prefix' : 'Trig',
         'suffix' : suffix,
-        'RegSelTool' : regSelTool,
+        'RegSelTool' : regSelTools,
         'RDOKey' : 'SCT_RDOs',
         'RoIs' : RoIs,   
         'isRoI_Seeded': True,
         'RDOCacheKey' : 'SctRDOCache',
         'BSErrCacheKey' : 'SctBSErrCache'
     }
-    
-    return SCTRawDataProviderCfg(flags, **trigargs)
 
+    dataPrepAcc = SCTRawDataProviderCfg(flags, **trigargs)
+    dataPrepAcc.merge(regSelAcc)
+    return dataPrepAcc
 
 def SCTOverlayRawDataProviderCfg(flags, prefix="InDet", suffix="", **kwargs):
     """ Configures the main algorithm for SCT raw data decoding for data overlay """

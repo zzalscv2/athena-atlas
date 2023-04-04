@@ -473,7 +473,7 @@ InDet::PixelClusterOnTrackTool::correctDefault
             erreta = width.z() * TOPHAT_SIGMA;
           } else {
             int bin = 0;
-            while (etaloc > m_etax[bin + 1]) {
+            while (bin < s_nbineta && etaloc > m_etax[bin + 1]) {
               ++bin;
             }
             if (bin >= s_nbineta) {

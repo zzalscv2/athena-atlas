@@ -18,7 +18,6 @@
 #include "TrigConfData/L1Menu.h"
 
 #include "xAODTrigger/MuonRoI.h"
-#include "xAODTrigger/MuonRoIContainer.h"
 
 #include "TrigT1MuctpiBits/HelpersPhase1.h"
 
@@ -49,13 +48,15 @@ MuonInputProvider::initialize() {
    CHECK(m_MuCTPItoL1TopoLocation.initialize(!m_MuCTPItoL1TopoLocation.key().empty()));
    
    if(!m_MuCTPItoL1TopoLocationPlusOne.key().empty())
-      m_MuCTPItoL1TopoLocationPlusOne = m_MuCTPItoL1TopoLocation.key()+std::to_string(1);
+     {m_MuCTPItoL1TopoLocationPlusOne = m_MuCTPItoL1TopoLocation.key()+std::to_string(1);}
    
    CHECK(m_MuCTPItoL1TopoLocationPlusOne.initialize(!m_MuCTPItoL1TopoLocationPlusOne.key().empty()));
 
-   CHECK(m_muonROILocation.initialize(!m_muonROILocation.key().empty()));
-   CHECK(m_roibLocation.initialize(!m_roibLocation.key().empty()));
-
+   // MuCTPIL1Topo from muon RoI
+   if (!m_MuonL1RoILocation.key().empty())
+     {m_MuonL1RoILocation = m_MuonL1RoILocation.key() + "FromMuonRoI";}
+   CHECK(m_MuonL1RoILocation.initialize(!m_MuonL1RoILocation.key().empty()));
+   
    if (!m_monTool.empty()) ATH_CHECK(m_monTool.retrieve());
 
    return StatusCode::SUCCESS;
@@ -89,6 +90,8 @@ TCS::MuonTOB MuonInputProvider::createMuonTOB(const xAOD::MuonRoI & muonRoI, con
    int etaTopo = topoIndex(eta,40);
    int phiTopo = topoIndex(phi,20) % 128;
 
+   ATH_MSG_DEBUG("Muon ROI: " << muonRoI.getSource() << " thrvalue = " << thrNumber << " eta = " << etaTopo << " phi = " << phiTopo << " BW2or3 " << muonRoI.getBW3Coincidence() << " Good MF " << muonRoI.getGoodMF() << " Inner Coincidence " << muonRoI.getInnerCoincidence() << " Charge " << muonRoI.getCharge() << ", w   = " << MSG::hex << std::setw( 8 ) << muonRoI.getRoI() << MSG::dec);
+   
    TCS::MuonTOB muon( EtTopo, 0, etaTopo, static_cast<unsigned int>(phiTopo), muonRoI.getRoI() );
    muon.setEtDouble(static_cast<double>(EtTopo/10.));
    muon.setEtaDouble(static_cast<double>(etaTopo/40.));
@@ -129,26 +132,6 @@ TCS::MuonTOB MuonInputProvider::createMuonTOB(const xAOD::MuonRoI & muonRoI, con
 
    return muon;
 }
-
-TCS::MuonTOB
-MuonInputProvider::createMuonTOB(uint32_t roiword, const TrigConf::L1Menu * l1menu) const {
-
-   LVL1::RecMuonRoI roi( roiword, m_recRPCRoiTool.get(), m_recTGCRoiTool.operator->(), l1menu );
-
-   ATH_MSG_DEBUG("Muon ROI: thrvalue = " << roi.getThresholdValue() << " eta = " << roi.eta() << " phi = " << roi.phi() << ", w   = " << MSG::hex << std::setw( 8 ) << roi.roiWord() << MSG::dec);
-         
-   TCS::MuonTOB muon( roi.getThresholdValue(), 0, int(10*roi.eta()), int(10*roi.phi()), roi.roiWord() );
-   muon.setEtaDouble( roi.eta() );
-   muon.setPhiDouble( roi.phi() );
-
-   auto mon_hPt = Monitored::Scalar("MuonTOBPt", muon.EtDouble());
-   auto mon_hEta = Monitored::Scalar("MuonTOBEta",muon.eta());
-   auto mon_hPhi = Monitored::Scalar("MuonTOBPhi",muon.phi());
-   Monitored::Group(m_monTool, mon_hPt, mon_hEta, mon_hPhi);
-   
-   return muon;
-}
-
 
 TCS::MuonTOB
 MuonInputProvider::createMuonTOB(const MuCTPIL1TopoCandidate & roi) const {
@@ -290,7 +273,7 @@ MuonInputProvider::topoFlag(bool flag) const {
 StatusCode
 MuonInputProvider::fillTopoInputEvent(TCS::TopoInputEvent& inputEvent) const {
 
-      if (!m_MuonL1RoIKey.empty()) {
+  if (!m_MuonL1RoILocation.key().empty()) {
 
         ATH_MSG_DEBUG("Using muon inputs from L1 RoI");
 
@@ -302,7 +285,7 @@ MuonInputProvider::fillTopoInputEvent(TCS::TopoInputEvent& inputEvent) const {
         auto rpcPtValues = exMU.knownRpcPtValues();
         auto tgcPtValues = exMU.knownTgcPtValues();
 
-        SG::ReadHandle<xAOD::MuonRoIContainer> muonROIs (m_MuonL1RoIKey);
+        SG::ReadHandle<xAOD::MuonRoIContainer> muonROIs (m_MuonL1RoILocation);
         for (auto muonRoi : *muonROIs) {
 
             inputEvent.addMuon( MuonInputProvider::createMuonTOB( *muonRoi, rpcPtValues, tgcPtValues) );

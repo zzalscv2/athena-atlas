@@ -72,7 +72,7 @@ public:
     * @returns <code>true</code> if the object should be selected,
     *          <code>false</code> otherwise
     */
-   virtual bool pass( HepMC::ConstGenParticlePtr part,
+   virtual bool pass( const HepMC::ConstGenParticlePtr& part,
                       const McEventCollection* coll = 0 ) const = 0;
 
    /// Function selecting GenVertex objects
@@ -85,7 +85,7 @@ public:
     * @returns <code>true</code> if the object should be selected,
     *          <code>false</code> otherwise
     */
-   virtual bool pass( HepMC::ConstGenVertexPtr vtx,
+   virtual bool pass( const HepMC::ConstGenVertexPtr& vtx,
                       const McEventCollection* coll = 0 ) const = 0;
 
 }; // class IGenObjectsFilterTool

@@ -1463,6 +1463,7 @@ class argPOOLFile(argAthenaFile):
         myMergeConf = executorConfig(myargdict, myDataDictionary)
         myMerger = athenaExecutor(name='POOLMergeAthenaMP{0}{1}'.format(self._subtype, counter), conf=myMergeConf, 
                                   skeletonFile = 'RecJobTransforms/skeleton.MergePool_tf.py',
+                                  skeletonCA = 'RecJobTransforms.MergePool_Skeleton',
                                   inData=set(['POOL_MRG_INPUT']), outData=set(['POOL_MRG_OUTPUT']),
                                   disableMT=True, disableMP=True)
         myMerger.doAll(input=set(['POOL_MRG_INPUT']), output=set(['POOL_MRG_OUTPUT']))

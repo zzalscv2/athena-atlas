@@ -1,7 +1,7 @@
 //  -*- c++ -*- 
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETMONITORING_TOOLHANDLEHISTOHELPER_H
@@ -25,7 +25,7 @@ namespace ToolHandleHistoHelper {
 
   struct HistoRetriever {
 
-    std::string afterlastdot(const std::string s){
+    std::string afterlastdot(const std::string& s){
       size_t i = s.find_last_of(".");
       return s.substr( i+1, s.size() );
     }

@@ -4,7 +4,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 def LArADC2MeVSCCondAlgCfg(configFlags):
-    from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDbCfg, LArElecCalibDBMCSCCfg
+    from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBCfg, LArElecCalibDBMCSCCfg
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
 
     result=ComponentAccumulator()
@@ -34,7 +34,7 @@ def LArADC2MeVSCCondAlgCfg(configFlags):
             theADC2MeVCondAlg.LAruA2MeVKey="LAruA2MeVSC"
             theADC2MeVCondAlg.LArDAC2uAKey="LArDAC2uASC"
         result.merge(LArFebConfigCondAlgCfg(configFlags))
-        result.merge(LArElecCalibDbCfg(configFlags,requiredConditions))
+        result.merge(LArElecCalibDBCfg(configFlags,requiredConditions))
     result.addCondAlgo(theADC2MeVCondAlg,primary=True)
     return result
 

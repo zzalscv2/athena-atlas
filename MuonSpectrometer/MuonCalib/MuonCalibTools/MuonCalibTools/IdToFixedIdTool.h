@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -45,13 +45,16 @@ namespace MuonCalib {
 
         StatusCode initialize();  //!< IdToFixedIdTool initialization: retrieve all the IdHelpers needed to do strap the ATHENA Identifier
 
-        void print(const Identifier& id) const;  //!< print method to output an ATHENA Identifier, warning the user when the conversion and
-                                                 //!< reconversion yields different results.
-        void print(const MuonFixedId& fid) const;  //!< dump MuonFixedId
+        void print(const Identifier& id) const override;  //!< print method to output an ATHENA Identifier, warning the user when the conversion and
+                                                          //!< reconversion yields different results.
+        void print(const MuonFixedId& fid) const override;  //!< dump MuonFixedId
+        void print(const MuonFixedLongId& fid) const override; //!< dump MuonFixedLongId
 
-        Identifier fixedIdToId(const MuonFixedId& fid) const;  //!< Convert MuonFixedId to ATHENA Identifier
-        MuonFixedId idToFixedId(const Identifier& id) const;   //!< Convert ATHENA Identifier to MuonFixedId
-        Identifier regionKeyToId(std::string region) const;    //!< Returns an ATHENA Identifier for a given Region key.
+        Identifier fixedIdToId(const MuonFixedId& fid) const override;  //!< Convert MuonFixedId to ATHENA Identifier
+        MuonFixedId idToFixedId(const Identifier& id) const override;   //!< Convert ATHENA Identifier to MuonFixedId
+        Identifier fixedLongIdToId(const MuonFixedLongId& fid) const override;  //!< Convert MuonFixedLongId to ATHENA Identifier
+        MuonFixedLongId idToFixedLongId(const Identifier& id) const override;   //!< Convert ATHENA Identifier to MuonFixedLongId
+        Identifier regionKeyToId(std::string region) const override;    //!< Returns an ATHENA Identifier for a given Region key.
 
     private:
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};

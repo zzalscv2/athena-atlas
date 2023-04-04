@@ -287,13 +287,13 @@ namespace Muon {
                 if (clus) masked_segs[layerNumber(clus)].insert(clus->identify());
             }
         }
-        if (out_segments.size()) {
+        if (!out_segments.empty()) {
             clustPostStereo.reserve(muonClusters.size());
             for (const Muon::MuonClusterOnTrack* clus : muonClusters) {
                 if (!masked_segs[layerNumber(clus)].count(clus->identify())) clustPostStereo.push_back(clus);
             }
         }
-        const std::vector<const Muon::MuonClusterOnTrack*>& segmentInput = out_segments.size() ? clustPostStereo : muonClusters;
+        const std::vector<const Muon::MuonClusterOnTrack*>& segmentInput = !out_segments.empty() ? clustPostStereo : muonClusters;
 
         /// All segments
         {
@@ -465,12 +465,12 @@ namespace Muon {
 
             Amg::Vector3D perpos = gpos_seg - 10 * gdir_seg.unit();
             if (perpos.dot(gdir_seg) < 0) gdir_seg *= -1;
-            std::unique_ptr<Trk::TrackParameters> startpar = std::make_unique<Trk::Perigee>(perpos, gdir_seg, 0, perpos);
-            ATH_MSG_VERBOSE(" start parameter " << perpos << " pp " << startpar->position() << " gd " << gdir_seg.unit() << " pp "
-                                                << startpar->momentum().unit());
+            const auto startpar = Trk::Perigee(perpos, gdir_seg, 0, perpos);
+            ATH_MSG_VERBOSE(" start parameter " << perpos << " pp " << startpar.position() << " gd " << gdir_seg.unit() << " pp "
+                                                << startpar.momentum().unit());
 
             // fit the hits
-            hitsToTrack(ctx, etaHitVec, phiHitVec, *startpar, segTrkColl);
+            hitsToTrack(ctx, etaHitVec, phiHitVec, startpar, segTrkColl);
         }
         /// Resolve the ambiguities amongsty the tracks and convert the result
         return resolveAmbiguities(ctx, segTrkColl);
@@ -492,7 +492,8 @@ namespace Muon {
 
         // store the resolved segments
         for (const Trk::Track* trk : *resolvedTracks) {
-            const bool has_eta = std::find_if(trk->measurementsOnTrack()->begin(), trk->measurementsOnTrack()->end(),
+            const auto* measurements = trk->measurementsOnTrack();
+            const bool has_eta = std::find_if(measurements->begin(), measurements->end(),
                                               [this](const Trk::MeasurementBase* meas) {
                                                   Identifier id = m_edmHelperSvc->getIdentifier(*meas);
                                                   return id.is_valid() && !m_idHelperSvc->measuresPhi(id);
@@ -586,7 +587,7 @@ namespace Muon {
 
                 Amg::Vector3D perpos = gpos_seg - 10 * gdir_seg.unit();
                 if (perpos.dot(gdir_seg) < 0) gdir_seg *= -1;
-                std::unique_ptr<Trk::TrackParameters> startpar = std::make_unique<Trk::Perigee>(perpos, gdir_seg, 0, perpos);
+                const auto startpar = Trk::Perigee(perpos, gdir_seg, 0, perpos);
 
                 NSWSeed seed3D{this, perpos, gdir_seg};
 
@@ -600,7 +601,7 @@ namespace Muon {
                 MeasVec etaHitsCalibrated = getCalibratedClusters(seed2D);
 
                 // fit
-                if (hitsToTrack(ctx, etaHitsCalibrated, phiHitVec, *startpar, segTrkColl)) {
+                if (hitsToTrack(ctx, etaHitsCalibrated, phiHitVec, startpar, segTrkColl)) {
                     is3Dseg = true;
                     ATH_MSG_VERBOSE("Segment successfully fitted for wedge "<<singleWedge<<std::endl<<
                                    m_printer->print(segTrkColl.back()->measurementsOnTrack()->stdcont()));
@@ -916,20 +917,21 @@ namespace Muon {
         // reference prds on the outermost hit surfaces
         const sTgcPrepData* prdL1 = sTgcIP.front().front();
         const sTgcPrepData* prdL2 = sTgcHO.front().front();
+        const auto& surfPrdL1 = prdL1->detectorElement()->surface();
+        const auto& surfPrdL2 = prdL2->detectorElement()->surface();
 
         // create a seed for each combination of IP and HO points
         for (const std::pair<double, double>& range1 : sTgcIP_phiRanges) {
             double midPhi1 = 0.5 * (range1.first + range1.second);
             Amg::Vector2D lp1(midPhi1, prdL1->localPosition().y());
             Amg::Vector3D gpL1{Amg::Vector3D::Zero()};
-            prdL1->detectorElement()->surface().localToGlobal(lp1, gpL1, gpL1);
+            surfPrdL1.localToGlobal(lp1, gpL1, gpL1);
 
             for (const std::pair<double, double>& range2 : sTgcHO_phiRanges) {
                 double midPhi2 = 0.5 * (range2.first + range2.second);
                 Amg::Vector2D lp2(midPhi2, prdL2->localPosition().y());
                 Amg::Vector3D gpL2{Amg::Vector3D::Zero()};
-                prdL2->detectorElement()->surface().localToGlobal(lp2, gpL2, gpL2);
-
+                surfPrdL2.localToGlobal(lp2, gpL2, gpL2);
                 // create the seed taking the average position (w.r.t. IP)
                 // as global direction (as for an infinite momentum track).
                 Amg::Vector3D gDir = (gpL2 + gpL1).unit();

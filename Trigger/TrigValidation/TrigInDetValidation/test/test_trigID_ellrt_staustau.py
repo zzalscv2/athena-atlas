@@ -40,7 +40,7 @@ Release = "current"
 
 ExtraAna = ' -c LRT="True" '
 
-preinclude_file = 'all:TrigInDetValidation/TIDAlrt_preinclude.py'
+preinclude_file = 'RDOtoRDOTrigger:TrigInDetValidation/TIDAlrt_preinclude.py'
 
 
 Jobs = [ ( "Truth",  " TIDAdata-run3-lrt.dat -o data-hists.root -p 11", "Test_bin_lrt.dat" ),

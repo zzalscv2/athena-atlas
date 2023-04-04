@@ -18,11 +18,11 @@ echo "Running for $RUN"
 
 export AtlasSetup=/afs/cern.ch/atlas/software/dist/AtlasSetup
 pushd /afs/cern.ch/user/a/atlasdqm/ws/DCSCalc/prodarea > /dev/null
-source $AtlasSetup/scripts/asetup.sh 22.0.72,Athena
+source $AtlasSetup/scripts/asetup.sh 24.0.0,Athena
 source /afs/cern.ch/user/a/atlasdqm/DQCalculators/DCSCalc/prodarea/build/x86_64-centos7-gcc11-opt/setup.sh
 
-CORAL_AUTH_PATH=/afs/cern.ch/user/a/atlasdqm/private
-CORAL_DBLOOKUP_PATH=/afs/cern.ch/user/a/atlasdqm/private
+export CORAL_AUTH_PATH=/afs/cern.ch/user/a/atlasdqm/private
+export CORAL_DBLOOKUP_PATH=/afs/cern.ch/user/a/atlasdqm/private
 #export FRONTIER_LOG_LEVEL=debug
 
 #dcsc.py -h

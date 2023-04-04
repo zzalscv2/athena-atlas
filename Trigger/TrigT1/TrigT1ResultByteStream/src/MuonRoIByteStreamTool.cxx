@@ -17,6 +17,10 @@
 // TDAQ includes
 #include "eformat/SourceIdentifier.h"
 
+// get bitsmasks from common definition source:
+#include "TrigT1MuctpiBits/MuCTPI_Bits.h"
+
+using namespace LVL1::MuCTPIBits;
 
 using ROBF = OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment;
 using WROBF = OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment;
@@ -130,11 +134,12 @@ StatusCode MuonRoIByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
   }
 
   // Create a WriteHandle for L1Topo output
-  std::vector<SG::WriteHandle<LVL1::MuCTPIL1Topo>> topoHandles;
+  std::vector<SG::WriteHandle<xAOD::MuonRoIContainer>> topoHandles;
   if (m_doTopo.value()) {
     topoHandles = m_MuCTPIL1TopoKeys.makeHandles(eventContext);
     for (auto& topoHandle : topoHandles) {
-      ATH_CHECK(topoHandle.record(std::make_unique<LVL1::MuCTPIL1Topo>()));
+      ATH_CHECK(topoHandle.record(std::make_unique<xAOD::MuonRoIContainer>(),
+                               std::make_unique<xAOD::MuonRoIAuxContainer>()));
       ATH_MSG_DEBUG("Recorded MuCTPIL1Topo with key " << topoHandle.key());
     }
   }
@@ -296,7 +301,7 @@ StatusCode MuonRoIByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
     Monitored::Scalar<short> monBCOffset{"BCOffset", bcOffset};
     Monitored::Scalar<size_t> monNumRoIs{"NumOutputRoIs", roiHandle->size()};
     if (m_doTopo.value()) {
-      Monitored::Scalar<size_t> monNumTopo{"NumOutputTopoTOBs", topoHandle->getCandidates().size()};
+      Monitored::Scalar<size_t> monNumTopo{"NumOutputTopoTOBs", topoHandle->size()};
       Monitored::Scalar<int> monNumDiff{"NumOutputDiffRoITopo", static_cast<int>(monNumRoIs)-static_cast<int>(monNumTopo)};
       ATH_MSG_DEBUG("Decoded " << monNumRoIs << " RoIs into the " << roiHandle.key() << " container "
                     "and " << monNumTopo << " Topo TOBs into the " << topoHandle.key() << " container");
@@ -486,24 +491,24 @@ StatusCode MuonRoIByteStreamTool::decodeRoiSlices(const uint32_t* data,
 // -----------------------------------------------------------------------------
 StatusCode MuonRoIByteStreamTool::decodeTopoSlices(const uint32_t* data,
                                                    const std::vector<std::pair<size_t,size_t>>& slices,
-                                                   std::vector<SG::WriteHandle<LVL1::MuCTPIL1Topo>>& handles,
+                                                   std::vector<SG::WriteHandle<xAOD::MuonRoIContainer>>& handles,
                                                    size_t outputOffset,
                                                    const EventContext& /*eventContext*/) const {
   int toposliceiterator = -1;
   int nomBCID_slice = slices.size() / 2 ;
   int topobcidOffset = 0;
   unsigned short subsystem = 0;
+
+  float eta=0, phi=0;
+  unsigned int et=0;
   //in case something is found to not be correctly decoded by the L1Topo group - can clean this extra-debug printouts later if wished
-  constexpr static bool local_topo_debug{false};
+  constexpr static bool local_topo_debug{true};
 
   const TrigConf::L1Menu * l1menu = nullptr;
   ATH_CHECK( detStore()->retrieve(l1menu) );
  
   const auto & exMU = l1menu->thrExtraInfo().MU();
   auto tgcPtValues = exMU.knownTgcPtValues();
-
-  //the cand usage should be optimised!
-  LVL1::MuCTPIL1TopoCandidate cand;
 
   auto outputIt = handles.begin();
   std::advance(outputIt, outputOffset);
@@ -512,11 +517,14 @@ StatusCode MuonRoIByteStreamTool::decodeTopoSlices(const uint32_t* data,
     toposliceiterator++;
     for (const uint32_t word : CxxUtils::span{data+sliceStart, sliceSize}) {
       //the cand usage should be optimised!
-      cand = LVL1::MuCTPIL1TopoCandidate{};
       std::stringstream sectorName;
       subsystem = 0;
 
       topobcidOffset = toposliceiterator - nomBCID_slice;
+      
+      // Create a new xAOD::MuonRoI object for this candidate in the output container
+      (*outputIt)->push_back(std::make_unique<xAOD::MuonRoI>());
+
       ATH_MSG_DEBUG("MuCTPIL1Topo: Decoding Topo word 0x" << std::hex << word << std::dec << " into the " << outputIt->key() << " container");
 
       // NOTE the convention:
@@ -570,33 +578,27 @@ StatusCode MuonRoIByteStreamTool::decodeTopoSlices(const uint32_t* data,
             ATH_MSG_DEBUG("MuCTPIL1Topo eta value: " <<  coord.eta);
             ATH_MSG_DEBUG("MuCTPIL1Topo phi value: " <<  coord.phi);
           }
-          
-          // See: TrigT1Interfaces/MuCTPIL1TopoCandidate.h
-          cand.setCandidateData(sectorName.str(),
-                                roi, //0 in topoheader, but reconstructed via L1TopoLUT above
-                                topobcidOffset,
-                                0,//ptThresholdID
-                                0,//ptCode,       removed Run3
-                                tgcPtValues[topoheader.pt],
-                                coord.eta,
-                                coord.phi,
-                                0,//etacode,      removed Run3
-                                0,//phicode,      removed Run3
-                                coord.eta_min,
-                                coord.eta_max,
-                                coord.phi_min,
-                                coord.phi_max,
-                                0,//mioctID,      removed Run3
-                                coord.ieta,
-                                coord.iphi);
+
           // Documentation / translation for the flag setting below
           if (local_topo_debug) {
             ATH_MSG_DEBUG("MuCTPIL1Topo phiOvl(0): " << topoheader.flag0);
             ATH_MSG_DEBUG("MuCTPIL1Topo is2cand(1):" << topoheader.flag1);
           }
-          // bool phiOvl  = topoheader.flag0;
-          // bool is2cand = topoheader.flag1;
-          cand.setRPCFlags(topoheader.flag1, topoheader.flag0);
+	  
+	  // Create RoI Word
+	  uint32_t roiWord = 0;
+	  roiWord |= (static_cast<uint32_t>(topoheader.pt/2) & RUN3_CAND_PT_MASK) << RUN3_CAND_PT_SHIFT;
+	  roiWord |= (static_cast<uint32_t>(topoheader.flag1) & ROI_OVERFLOW_MASK) << RUN3_ROI_OVERFLOW_SHIFT;
+
+	  // Fill the xAOD::MuonRoI object
+	  (*outputIt)->back()->initialize(roiWordAddOfflineRun3Flag(roiWord),
+					  coord.eta,
+					  coord.phi,
+					  "",
+					  tgcPtValues[topoheader.pt]);
+	  et = topoheader.pt;
+	  eta = coord.eta;
+	  phi = coord.phi;
         } // Barrel
       else { // EC and FWD
         LVL1MUCTPIPHASE1::L1TopoCoordinates coord = m_l1topoLUT.getCoordinates(topoheader.hemi ,subsystem ,topoheader.sec ,topoheader.roi);
@@ -610,35 +612,37 @@ StatusCode MuonRoIByteStreamTool::decodeTopoSlices(const uint32_t* data,
           ATH_MSG_DEBUG("MuCTPIL1Topo coord.phi_max " <<  coord.phi_max);
           ATH_MSG_DEBUG("MuCTPIL1Topo coord.ieta    " <<  coord.ieta);
           ATH_MSG_DEBUG("MuCTPIL1Topo coord.iphi    " <<  coord.iphi);
-          }
-        cand.setCandidateData(sectorName.str(),
-                              topoheader.roi,
-                              topobcidOffset,
-                              0,//ptThresholdID,
-                              0,//ptCode,       removed Run3
-                              tgcPtValues[topoheader.pt],
-                              coord.eta,
-                              coord.phi,
-                              0,//etacode,      removed Run3
-                              0,//phicode,      removed Run3
-                              coord.eta_min,
-                              coord.eta_max,
-                              coord.phi_min,
-                              coord.phi_max,
-                              0,//mioctID,      removed Run3
-                              coord.ieta,
-                              coord.iphi);
+	}
+
         // Documentation / translation for the flag setting below
         if (local_topo_debug) {
-        ATH_MSG_DEBUG("MuCTPIL1Topo charge    (0):" << topoheader.flag0);
-        ATH_MSG_DEBUG("MuCTPIL1Topo bw2or3    (1):" << topoheader.flag1);
-        ATH_MSG_DEBUG("MuCTPIL1Topo innerCoin (2):" << topoheader.flag2);
-        ATH_MSG_DEBUG("MuCTPIL1Topo goodMF    (3):" << topoheader.flag3);
+	  ATH_MSG_DEBUG("MuCTPIL1Topo charge    (0):" << topoheader.flag0);
+	  ATH_MSG_DEBUG("MuCTPIL1Topo bw2or3    (1):" << topoheader.flag1);
+	  ATH_MSG_DEBUG("MuCTPIL1Topo innerCoin (2):" << topoheader.flag2);
+	  ATH_MSG_DEBUG("MuCTPIL1Topo goodMF    (3):" << topoheader.flag3);
         }
-        cand.setTGCFlags(topoheader.flag1, topoheader.flag2, topoheader.flag3, topoheader.flag0);
+	// Create RoI Word
+	uint32_t roiWord = 0;
+	roiWord |= (static_cast<uint32_t>(topoheader.pt) & RUN3_CAND_PT_MASK) << RUN3_CAND_PT_SHIFT;
+	// Only needed to tell this is TGC
+	roiWord |= (FORWARD_ADDRESS_MASK & CAND_SECTOR_ADDRESS_MASK) << RUN3_CAND_SECTOR_ADDRESS_SHIFT;
+	if (topoheader.flag0) {roiWord |= (0x1) << RUN3_CAND_TGC_CHARGE_SIGN_SHIFT;}
+	if (topoheader.flag1) {roiWord |= (0x1) << RUN3_CAND_TGC_BW2OR3_SHIFT;}
+	if (topoheader.flag2) {roiWord |= (0x1) << RUN3_CAND_TGC_INNERCOIN_SHIFT;}
+	if (topoheader.flag3) {roiWord |= (0x1) << RUN3_CAND_TGC_GOODMF_SHIFT;}
+
+	// Fill the xAOD::MuonRoI object
+	(*outputIt)->back()->initialize(roiWordAddOfflineRun3Flag(roiWord),
+					coord.eta,
+					coord.phi,
+					"",
+					tgcPtValues[topoheader.pt]);
+
+	et = topoheader.pt;
+	eta = coord.eta;
+	phi = coord.phi;
       }// EC and FWD
-      // Push the candidate into SG
-      (*outputIt)->addCandidate(cand);
+      
       ATH_MSG_DEBUG("MuCTPIL1Topo: L1Topo output recorded to StoreGate with key " << outputIt->key() << " and bcidOffset: " << topobcidOffset);
 
       // Fill per-candidate monitoring histograms
@@ -646,16 +650,16 @@ StatusCode MuonRoIByteStreamTool::decodeTopoSlices(const uint32_t* data,
       using SubsysID_ut = std::underlying_type_t<SubsysID_t>;
       SubsysID_t subsysID{SubsysID_t::Undefined};
       switch (subsystem) {
-        case 0: {subsysID=SubsysID_t::Barrel; break;}
-        case 1: {subsysID=SubsysID_t::Endcap; break;} // Mind the swap in numbering E<->F, see comments above
-        case 2: {subsysID=SubsysID_t::Forward; break;}
-        default: {break;}
+      case 0: {subsysID=SubsysID_t::Barrel; break;}
+      case 1: {subsysID=SubsysID_t::Endcap; break;} // Mind the swap in numbering E<->F, see comments above
+      case 2: {subsysID=SubsysID_t::Forward; break;}
+      default: {break;}
       }
       Monitored::Scalar<SubsysID_ut> monSubsysID{"topoSubsysID", static_cast<SubsysID_ut>(subsysID)};
       std::string subsysName{s_sectorNames[static_cast<size_t>(subsysID)]};
-      Monitored::Scalar<float> monEta{"topoEta_"+subsysName, (*outputIt)->getCandidates().back().geteta()};
-      Monitored::Scalar<float> monPhi{"topoPhi_"+subsysName, (*outputIt)->getCandidates().back().getphi()};
-      Monitored::Scalar<unsigned int> monPtThr{"topoPtThreshold_"+subsysName, (*outputIt)->getCandidates().back().getptValue()};
+      Monitored::Scalar<float> monEta{"topoEta_"+subsysName, eta};
+      Monitored::Scalar<float> monPhi{"topoPhi_"+subsysName, phi};
+      Monitored::Scalar<unsigned int> monPtThr{"topoPtThreshold_"+subsysName, et};
       Monitored::Group(m_monTool, monSubsysID, monEta, monPhi, monPtThr);
     }
     ++outputIt;

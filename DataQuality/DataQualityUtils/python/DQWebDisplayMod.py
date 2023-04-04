@@ -432,7 +432,7 @@ def DQWebDisplay( inputFilePath, runAccumulating, c ):
         if not uploadAllowed:
             print('hancool run and upload to DB switched off by request')
             
-        if (uploadAllowed and len(c.dbConnection)>0) and (len(c.dqmfOfl)>0):
+        if (uploadAllowed and c.dbConnection):
             print("")
             print("Now calling hancool ...")
             #stream = os.path.basename(outputHanResultsDir)
@@ -455,7 +455,7 @@ def DQWebDisplay( inputFilePath, runAccumulating, c ):
 
             if (doUpload):
                 print('isESn?', isESn)
-                _local_apply(hancool, (int(rN),outputHanResultsDir,c.dbConnection,c.dqmfOfl,uploadTag,c.shiftOfl,c.dbTagNameShiftOfl,isESn))
+                _local_apply(hancool, (int(rN),outputHanResultsDir,c.dbConnection,isESn))
 
     if runAccumulating:
         os.unlink(inputFilePath)

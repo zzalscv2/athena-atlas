@@ -37,7 +37,7 @@ GridFiles = False
 ExtraAna = ' -c LRT="True" '
 Release = "current"
 
-preinclude_file = 'all:TrigInDetValidation/TIDAlrt_preinclude.py'
+preinclude_file = 'RDOtoRDOTrigger:TrigInDetValidation/TIDAlrt_preinclude.py'
 
 Jobs = [ ( "Truth",  " TIDAdata-run3-fslrt.dat -o data-hists.root ", "Test_bin_lrt.dat" ),
          ( "Offline",    " TIDAdata-run3-offline-fslrt.dat -r Offline+InDetLargeD0TrackParticles -o data-hists-offline.root", "Test_bin_lrt.dat" ) ]
