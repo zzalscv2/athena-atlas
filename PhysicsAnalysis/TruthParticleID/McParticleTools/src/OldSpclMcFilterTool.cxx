@@ -301,9 +301,7 @@ StatusCode OldSpclMcFilterTool::selectSpclMcBarcodes()
 StatusCode OldSpclMcFilterTool::shapeGenEvent( McEventCollection* genAod )
 {
   //now remove all the particles except those whose barcodes are marked
-  for ( McEventCollection::iterator evt = genAod->begin();
-        evt != genAod->end();
-        ++evt) {
+  for ( McEventCollection::iterator evt = genAod->begin(); evt != genAod->end();++evt) {
     std::vector<HepMC::GenParticlePtr> going_out;
 
     std::list<int> evtBarcodes;
@@ -311,33 +309,15 @@ StatusCode OldSpclMcFilterTool::shapeGenEvent( McEventCollection* genAod )
       evtBarcodes.push_back( HepMC::barcode(p) );
     }
 
-    for ( std::list<int>::const_iterator itrBc = evtBarcodes.begin();
-	  itrBc != evtBarcodes.end();
-	  ++itrBc ) {
+    for ( std::list<int>::const_iterator itrBc = evtBarcodes.begin();itrBc != evtBarcodes.end(); ++itrBc ) {
 //AV: We modify event      
       HepMC::GenParticlePtr p = HepMC::barcode_to_particle((HepMC::GenEvent*)(*evt),*itrBc);
-      ATH_MSG_DEBUG("[pdg,bc]= " << p->pdg_id() << ", " <<HepMC::barcode( p));
-      if ( m_barcodes.find(HepMC::barcode(p)) == m_barcodes.end() ) { 
-	going_out.push_back(p); // list of useless particles
-	auto pvtx = p->production_vertex();
-	auto evtx = p->end_vertex();
-
-	std::pair<int,int> bcNext( 0, 0 );
-	if ( msgLvl(MSG::DEBUG) ) {
-	  msg(MSG::DEBUG)
-	    << "Removing [" 
-	    << p->pdg_id() << ", " 
-	    << HepMC::barcode(p) << "]" 
-	    << "\tprod/endVtx: " << pvtx 
-	    << "/"  << evtx 
-	    << endmsg;
-	  std::list<int>::const_iterator pNext = itrBc;
-	  ++pNext;
-	  if ( pNext != evtBarcodes.end() ) {
-	    bcNext.first =  HepMC::barcode(HepMC::barcode_to_particle(&(**evt),*pNext));
-	  }
-	}
-	
+      int pBC = HepMC::barcode(p);
+      ATH_MSG_DEBUG("[pdg,bc]= " << p->pdg_id() << ", " << pBC);
+      if ( m_barcodes.count(pBC) == 0 ) { 
+        going_out.push_back(p); // list of useless particles
+        auto pvtx = p->production_vertex();
+        auto evtx = p->end_vertex();
 #ifdef HEPMC3
 	if (pvtx) pvtx->remove_particle_out(p); //remove from production vertex from useless partilcle
 	if (evtx) { // if it has end vertex, may need to move the out partilces
@@ -367,20 +347,6 @@ StatusCode OldSpclMcFilterTool::shapeGenEvent( McEventCollection* genAod )
 	}//> end if [decay vertex]
 
 #endif
-	if ( msgLvl(MSG::DEBUG) ) {
-	  std::list<int>::const_iterator pNext = itrBc;
-	  ++pNext;
-	  if ( pNext != evtBarcodes.end() ) {
-	    bcNext.second = HepMC::barcode(HepMC::barcode_to_particle(*evt,*pNext));
-	  }
-
-	  if ( bcNext.first != bcNext.second ) {
-	    ATH_MSG_WARNING("\tIterator has been CORRUPTED !!" << endmsg << "\tbcNext: " << bcNext.first << " --> " << bcNext.second);
-	  } else {
-	    ATH_MSG_DEBUG("\tIterator OK:" << endmsg << "\tbcNext: " << bcNext.first << " --> " << bcNext.second);
-	  }
-	}
-
       }//> particle has to be removed
     }//> loop over particles (via their barcode)
 
@@ -391,7 +357,7 @@ StatusCode OldSpclMcFilterTool::shapeGenEvent( McEventCollection* genAod )
     std::vector<HepMC::ConstGenVertexPtr> going_out_again;
     for ( HepMC::ConstGenVertexPtr v: (*evt)->vertices()) {
       if ( v->particles_in().empty() && v->particles_out().empty() ){
-	going_out_again.push_back(v);
+        going_out_again.push_back(v);
       }
     }//> loop over vertices
 //HepMC3 uses smart pointers
@@ -424,24 +390,22 @@ StatusCode OldSpclMcFilterTool::shapeGenEvent( McEventCollection* genAod )
   }//> loop over GenEvents in McEventCollection
   
   // Set the signal_process_vertex to NULL if not to be recorded 
-  for ( McEventCollection::iterator evt = genAod->begin(); 
-	evt != genAod->end(); 
-	++evt) { 
+  for ( McEventCollection::iterator evt = genAod->begin();  evt != genAod->end(); ++evt) {
 #ifdef HEPMC3
     auto sigProcVtx = HepMC::signal_process_vertex(*evt); 
     if (!sigProcVtx) continue;
       const int sigProcBC = HepMC::barcode(sigProcVtx); 
       bool isInColl = false; 
       for ( const auto& itrVtx: (*evt)->vertices() ) { 
-	if ( sigProcBC == HepMC::barcode(itrVtx) ) { 
-	  isInColl = true; 
-	  break; 
-	} 
+        if ( sigProcBC == HepMC::barcode(itrVtx) ) { 
+          isInColl = true; 
+          break; 
+        } 
       }  //> loop over vertices 
 //AV: We don't set nullptr as signal vertex in HepMC3
-	if ( !isInColl ) { 
-	  (*evt)->remove_attribute("signal_process_vertex");
-	}
+    if ( !isInColl ) { 
+       (*evt)->remove_attribute("signal_process_vertex");
+    }
 #else
     const HepMC::GenVertex * sigProcVtx = (*evt)->signal_process_vertex(); 
     if ( 0 != sigProcVtx ) { 
@@ -579,7 +543,7 @@ StatusCode OldSpclMcFilterTool::rebuildLinks( const HepMC::GenEvent * mcEvt,
      for ( const auto& itrPart : itrVtx->particles_in()) {
       bcChildPart.push_front( HepMC::barcode(itrPart) );
       if ( itrPart->pdg_id() == pdgId ) {
-	foundPdgId = true;
+        foundPdgId = true;
       }
     }//> loop over in-going particles of this vertex
     if ( foundPdgId ) {
@@ -619,9 +583,7 @@ StatusCode OldSpclMcFilterTool::rebuildLinks( const HepMC::GenEvent * mcEvt,
   // 
 #ifdef HEPMC3
  std::list<int>::const_iterator bcVtxEnd = bcChildVert.end();
-  for ( std::list<int>::const_iterator itrBcVtx = bcChildVert.begin();
-	itrBcVtx != bcVtxEnd;
-	++itrBcVtx ) {
+  for ( std::list<int>::const_iterator itrBcVtx = bcChildVert.begin(); itrBcVtx != bcVtxEnd; ++itrBcVtx ) {
     HepMC::GenVertexPtr childVtx = HepMC::barcode_to_vertex(outEvt,*itrBcVtx);
     if ( childVtx ) {
       if ( !childVtx->particles_in().empty() ) {
