@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file TrkVertexSeedFinderTools/src/VertexSeedFinderTestAlg.cxx
@@ -135,7 +135,7 @@ StatusCode VertexSeedFinderTestAlg::initialize()
  */
 StatusCode VertexSeedFinderTestAlg::execute()
 {
-  ATH_MSG_VERBOSE ("execute");
+  ATH_MSG_INFO ("execute");
   const EventContext& ctx = Gaudi::Hive::currentContext();
 
   double vx = 0;
@@ -163,7 +163,7 @@ StatusCode VertexSeedFinderTestAlg::execute()
   std::vector<const Trk::TrackParameters*> v1b { p1c.get(), p1a.get(), p1b.get() };
 
   if (!m_expected1.empty()) {
-    ATH_MSG_VERBOSE ("testing 1");
+    ATH_MSG_INFO ("testing 1");
     Amg::Vector3D p = m_finder->findSeed (vx, vy, v1a);
     assertVec3D ("1a", p,  m_expected1);
 
@@ -213,7 +213,7 @@ StatusCode VertexSeedFinderTestAlg::execute()
   initVertex (vert1);
 
   if (!m_expected2.empty()) {
-    ATH_MSG_VERBOSE ("testing 2");
+    ATH_MSG_INFO ("testing 2");
     Amg::Vector3D p = m_finder->findSeed (vx, vy, v1a, &vert1);
     assertVec3D ("2a", p, m_expected2);
 
@@ -258,7 +258,7 @@ StatusCode VertexSeedFinderTestAlg::execute()
   }
 
   if (!m_expected3.empty()) {
-    ATH_MSG_VERBOSE ("testing 3");
+    ATH_MSG_INFO ("testing 3");
     if (m_expected3.size() == 3) {
       Amg::Vector3D p = m_finder->findSeed (vx, vy, pvec);
       assertVec3D ("3a", p, m_expected3);
