@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file AthenaOutputStream_test.cxx
  * @brief  unit test for AthenaOutputStream
  *
  * @author Paolo Calafiura <pcalafiura@lbl.gov> -ATLAS Collaboration
- * $Id: AthenaOutputStream_test.cxx,v 1.5 2007-05-18 17:02:25 calaf Exp $
  **/
 
 #undef NDEBUG
@@ -117,7 +116,7 @@ int main() {
     DataBucketBase* dbb = dynamic_cast<DataBucketBase*> (obj);
     if (!dbb) std::abort();
     const SG::DataProxy* proxy = pStore->proxy (dbb->object());
-    std::cout << dbb->clID() << " " << proxy->name() << "\n";
+    std::cout << appName << " " << dbb->clID() << " " << proxy->name() << "\n";
   }
 
   const SG::SelectionVetoes* selvetoes = nullptr;
