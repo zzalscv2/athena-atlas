@@ -1,6 +1,8 @@
-/*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-*/
+//
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+//
+// Dear emacs, this is -*- c++ -*-
+//
 
 //Dear emacs, this is -*-c++-*-
 
@@ -8,8 +10,6 @@
 #define CALORECGPU_BASICGPUTOATHENAIMPORTER_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-
-#include "CLHEP/Units/SystemOfUnits.h"
 
 #include "CaloRecGPU/CaloClusterGPUTransformers.h"
 #include "StoreGate/ReadHandleKey.h"
@@ -35,8 +35,8 @@ class BasicGPUToAthenaImporter :
 
   virtual StatusCode initialize() override;
 
-  virtual StatusCode convert (const EventContext & ctx, const ConstantDataHolder & constant_data,
-                              EventDataHolder & event_data, xAOD::CaloClusterContainer * cluster_collection) const override;
+  virtual StatusCode convert (const EventContext & ctx, const CaloRecGPU::ConstantDataHolder & constant_data,
+                              CaloRecGPU::EventDataHolder & event_data, xAOD::CaloClusterContainer * cluster_collection) const override;
 
   virtual StatusCode finalize() override;
 
@@ -61,30 +61,17 @@ class BasicGPUToAthenaImporter :
    */
   Gaudi::Property<SG::ReadHandleKey<CaloCellContainer>> m_cellsKey {this, "CellsName", "", "Name(s) of Cell Containers"};
 
-  /**
-  * @brief if set to @p true cluster cuts are on \f$|E|_\perp\f$, if @p false on \f$E_\perp\f$. Default is @p true.
-  *
-  */
-  Gaudi::Property<bool> m_cutClustersInAbsE {this, "ClusterCutsInAbsE", true, "Do cluster cuts in Abs E instead of E"};
-
-  /**
-   * @brief \f$E_\perp\f$ cut on the clusters.
-   *
-   * The clusters have to pass this cut (which is on \f$E_\perp\f$
-   * or \f$|E|_\perp\f$ of the cluster depending on the above switch)
-   * in order to be inserted into the CaloClusterContainer.  */
-
-  Gaudi::Property<float> m_clusterETThreshold {this, "ClusterEtorAbsEtCut", 0.*CLHEP::MeV, "Cluster E_t or Abs E_t cut"};
-
-  /// Cluster size. Set accordingly to the threshold.
-  Gaudi::Property<std::string> m_clusterSizeString{this, "ClusterSize", "Topo_420", "The size/type of the clusters"};
+  /// Cluster size. Should be set accordingly to the threshold.
+  Gaudi::Property<std::string> m_clusterSizeString {this, "ClusterSize", "Topo_420", "The size/type of the clusters"};
 
   xAOD::CaloCluster::ClusterSize m_clusterSize;
-
+  
   /**
    * @brief Pointer to Calo ID Helper
    */
-  const CaloCell_ID* m_calo_id{nullptr};
+  const CaloCell_ID* m_calo_id {nullptr};
+
+
 };
 
 #endif //CALORECGPU_BASICGPUTOATHENAIMPORTER_H

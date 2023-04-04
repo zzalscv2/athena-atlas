@@ -1,8 +1,8 @@
-/*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-*/
-
-//Dear emacs, this is -*-c++-*-
+//
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+//
+// Dear emacs, this is -*- c++ -*-
+//
 
 #ifndef CALORECGPU_CALOGPUTIMED_H
 #define CALORECGPU_CALOGPUTIMED_H
@@ -95,7 +95,7 @@ class CaloGPUTimed
   }
 
   template <class ... Args>
-  inline void record_times(const size_t event_num, const size_t & val) const
+  inline void record_times(const size_t event_num, const size_t & value) const
   {
     const size_t time_size = 1;
 
@@ -109,11 +109,11 @@ class CaloGPUTimed
       m_eventNumbers.push_back(event_num);
     }
 
-    record_times_helper(old_size, val);
+    record_times_helper(old_size, value);
   }
   
   template <class ... Args>
-  inline void record_times(const size_t event_num, const size_t & val, Args && ... args) const
+  inline void record_times(const size_t event_num, const size_t & value, Args && ... args) const
   {
     const size_t time_size = sizeof...(args) + 1;
 
@@ -127,12 +127,16 @@ class CaloGPUTimed
       m_eventNumbers.push_back(event_num);
     }
 
-    record_times_helper(old_size, val, std::forward<Args>(args)...);
+    record_times_helper(old_size, value, std::forward<Args>(args)...);
 
   }
 
   inline void print_times(const std::string & header, const size_t time_size) const
   {
+    if (m_timeFileName.size() == 0)
+    {
+      return;
+    }
 
     std::vector<size_t> indices(m_eventNumbers.size());
     std::iota(indices.begin(), indices.end(), 0);

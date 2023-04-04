@@ -1,6 +1,8 @@
-/*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-*/
+//
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+//
+// Dear emacs, this is -*- c++ -*-
+//
 
 #include "BasicGPUClusterInfoCalculator.h"
 #include "BasicGPUClusterInfoCalculatorImpl.h"
@@ -19,30 +21,12 @@ BasicGPUClusterInfoCalculator::BasicGPUClusterInfoCalculator(const std::string &
 
 StatusCode BasicGPUClusterInfoCalculator::initialize()
 {
-
-  if (m_numPreAllocatedGPUData > 0)
-    {
-      ATH_MSG_DEBUG("Pre-allocating temporaries for " << m_numPreAllocatedGPUData << " events.");
-
-      m_temporariesHolder.resize(m_numPreAllocatedGPUData);
-      //This will allocate the object holders.
-
-      m_temporariesHolder.operate_on_all( [&](BasicGPUClusterInfoCalculatorTemporariesHolder & tth)
-      {
-        tth.allocate();
-      }
-                                        );
-      //This will allocate all the memory at this point.
-      //Also useful to prevent/debug potential allocation issues?
-      //But the main point is really reducing the execute times...
-    }
-
   return StatusCode::SUCCESS;
 }
 
-StatusCode BasicGPUClusterInfoCalculator::execute(const EventContext & ctx, const ConstantDataHolder & constant_data, EventDataHolder & event_data) const
+StatusCode BasicGPUClusterInfoCalculator::execute(const EventContext & ctx, const ConstantDataHolder & constant_data,
+                                                  EventDataHolder & event_data, void * temporary_buffer) const
 {
-
   using clock_type = boost::chrono::thread_clock;
   auto time_cast = [](const auto & before, const auto & after)
   {
@@ -51,22 +35,15 @@ StatusCode BasicGPUClusterInfoCalculator::execute(const EventContext & ctx, cons
 
   const auto start = clock_type::now();
 
-  BasicGPUClusterInfoCalculatorTemporariesHolder * temp_data_ptr = nullptr;
-
-  Helpers::separate_thread_accessor<BasicGPUClusterInfoCalculatorTemporariesHolder> sep_th_acc(m_temporariesHolder, temp_data_ptr);
-  //This is a RAII wrapper to access an object held by Helpers::separate_thread_holder,
-  //to ensure the event data is appropriately released when we are done processing.
-
-  temp_data_ptr->allocate();
-  //Does nothing if it is already allocated.
+  Helpers::CUDA_kernel_object<ClusterInfoCalculatorTemporaries> temporaries((ClusterInfoCalculatorTemporaries *) temporary_buffer);
 
   const auto before_seed_properties = clock_type::now();
 
-  updateSeedCellProperties(event_data, *temp_data_ptr, constant_data, m_measureTimes);
+  updateSeedCellProperties(event_data, temporaries, constant_data, m_measureTimes);
 
   const auto before_calculating = clock_type::now();
 
-  calculateClusterProperties(event_data, *temp_data_ptr, constant_data, m_measureTimes);
+  calculateClusterProperties(event_data, temporaries, constant_data, m_measureTimes, m_cutClustersInAbsE, m_clusterETThreshold);
 
   const auto end = clock_type::now();
 

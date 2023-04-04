@@ -1,0 +1,1795 @@
+//
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+//
+// Dear emacs, this is -*- c++ -*-
+//
+
+#include "CaloRecGPU/Helpers.h"
+#include "CaloRecGPU/CUDAFriendlyClasses.h"
+#include "GPUClusterInfoAndMomentsCalculatorImpl.h"
+#include "FPHelpers.h"
+
+
+#include "CaloGeoHelpers/CaloSampling.h"
+//Just enums and stuff, CUDA compatible.
+
+#include <cmath>
+
+using namespace CaloRecGPU;
+
+void CMCOptionsHolder::allocate()
+{
+  m_options.allocate();
+  m_options_dev.allocate();
+}
+
+void CMCOptionsHolder::sendToGPU(const bool clear_CPU)
+{
+  m_options_dev = m_options;
+  if (clear_CPU)
+    {
+      m_options.clear();
+    }
+}
+
+constexpr static int ClusterPassBlockSize = 1024;
+constexpr static int CellPassBlockSize = 1024;
+constexpr static int FinalClusterPassBlocksize = 1024;
+//Maximize throughput?
+//Needs measurements, perhaps...
+
+namespace
+{
+
+  namespace CMCHack
+  {
+    //A generic TempSpecifier has typedef called "type" to specify the type of the return array
+    //(e. g. should be float for most things), a static constexpr unsigned int number
+    //to count the number of the array (or, more accurately, the number of other 4-byte
+    //arrays before this one), and a static constexpr bool reverse to mark temporaries
+    //that we being storing from the end of the moments array...
+    //In practice, for our use cases, we will specialize this
+    //to be sure there is no overlap...
+    template <class TempSpecifier>
+    __host__ __device__ typename TempSpecifier::type * get_temporary_array(Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr)
+    {
+      char * c_ptr = (char *) ((ClusterMomentsArr *) moments_arr);
+      if (TempSpecifier::reverse)
+        {
+          return (typename TempSpecifier::type * ) ( c_ptr + (NMaxClusters * TempSpecifier::number * sizeof(float)) );
+          //I know. sizeof(char) == 1. Clearer this way, still...
+        }
+      else
+        {
+          return (typename TempSpecifier::type * ) ( c_ptr + sizeof(ClusterMomentsArr) - (NMaxClusters * (TempSpecifier::number + 1) * sizeof(float)) );
+          //I know. sizeof(char) == 1. Clearer this way, still...
+        }
+    }
+  }
+
+  struct SeedCellPhi
+  {
+    using type = float;
+  };
+
+  struct EnergyDensityNormalization
+  {
+    using type = float;
+  };
+
+  struct SumAbsEnergyNonMoments
+  {
+    using type = float;
+  };
+
+  struct MaxCellEnergyAndCell
+  {
+    using type = unsigned long long int;
+  };
+
+  struct SecondMaxCellEnergyAndCell
+  {
+    using type = unsigned long long int;
+  };
+
+  //For later:
+
+  struct MaxCells
+  {
+    using type = int;
+  };
+
+  struct SecondMaxCells
+  {
+    using type = int;
+  };
+
+  //-----------------
+
+  struct NumberEmptySamplings
+  {
+    using type = int[NMaxClusters];
+  };
+
+  struct NumberNonEmptySamplings
+  {
+    using type = int[NMaxClusters];
+  };
+
+  struct MX
+  {
+    using type = float;
+  };
+  struct MY
+  {
+    using type = float;
+  };
+  struct MZ
+  {
+    using type = float;
+  };
+
+  struct MaxMomentsEnergyPerSample
+  {
+    using type = unsigned int[NMaxClusters];
+    //Stored as unsigned ints because there's no atomicMax for floats in CUDA...
+  };
+
+  struct MaxSignificanceAndSampling
+  {
+    using type = unsigned long long int;
+  };
+
+  struct Matrix00
+  {
+    using type = float;
+  };
+  struct Matrix10
+  {
+    using type = float;
+  };
+  struct Matrix20
+  {
+    using type = float;
+  };
+  struct Matrix11
+  {
+    using type = float;
+  };
+  struct Matrix21
+  {
+    using type = float;
+  };
+  struct Matrix22
+  {
+    using type = float;
+  };
+  struct SumSquareEnergies
+  {
+    using type = float;
+  };
+  struct TimeNormalization
+  {
+    using type = float;
+  };
+  struct AverageLArQNorm
+  {
+    using type = float;
+  };
+  struct AverageTileQNorm
+  {
+    using type = float;
+  };
+
+  struct ShowerAxisX
+  {
+    using type = float;
+  };
+
+  struct ShowerAxisY
+  {
+    using type = float;
+  };
+
+  struct ShowerAxisZ
+  {
+    using type = float;
+  };
+
+  struct AbsoluteEnergyPerSample
+  {
+    using type = float[NMaxClusters];
+  };
+
+  struct LateralNormalization
+  {
+    using type = float;
+  };
+  struct LongitudinalNormalization
+  {
+    using type = float;
+  };
+  struct MaxEnergyAndCellPerSample
+  {
+    using type = unsigned long long int[NMaxClusters];
+  };
+
+  struct MaxECellPerSample
+  {
+    using type = int[NMaxClusters];
+  };
+
+
+  namespace CMCHack
+//Special cases, to prevent overlap.
+  {
+    template <>
+    __host__ __device__ typename SeedCellPhi::type * get_temporary_array<SeedCellPhi>(Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr)
+    {
+      return (SeedCellPhi::type *) moments_arr->engCalibFracRest;
+    }
+
+    template <>
+    __host__ __device__ typename EnergyDensityNormalization::type * get_temporary_array<EnergyDensityNormalization>(Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr)
+    {
+      return (EnergyDensityNormalization::type *) moments_arr->etaCaloFrame;
+    }
+
+    template <>
+    __host__ __device__ typename SumAbsEnergyNonMoments::type * get_temporary_array<SumAbsEnergyNonMoments>(Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr)
+    {
+      return (SumAbsEnergyNonMoments::type *) moments_arr->engCalibFracHad;
+    }
+
+    template <>
+    __host__ __device__ typename MaxCellEnergyAndCell::type * get_temporary_array<MaxCellEnergyAndCell>(Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr)
+    {
+      return (MaxCellEnergyAndCell::type *) moments_arr->engCalibDeadUnclass;
+    }
+
+    template <>
+    __host__ __device__ typename SecondMaxCellEnergyAndCell::type * get_temporary_array<SecondMaxCellEnergyAndCell>(Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr)
+    {
+      return (SecondMaxCellEnergyAndCell::type *) moments_arr->engCalibDeadFCAL;
+    }
+
+    template <>
+    __host__ __device__ typename MaxCells::type * get_temporary_array<MaxCells>(Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr)
+    {
+      return (MaxCells::type *) moments_arr->engBadHVCells;
+    }
+    template <>
+    __host__ __device__ typename SecondMaxCells::type * get_temporary_array<SecondMaxCells>(Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr)
+    {
+      return (SecondMaxCells::type *) moments_arr->nBadHVCells;
+    }
+
+    template <>
+    __host__ __device__ typename NumberEmptySamplings::type * get_temporary_array<NumberEmptySamplings>(Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr)
+    {
+      return (NumberEmptySamplings::type *) moments_arr->maxEPerSample;
+    }
+
+    template <>
+    __host__ __device__ typename NumberNonEmptySamplings::type * get_temporary_array<NumberNonEmptySamplings>(Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr)
+    {
+      return (NumberNonEmptySamplings::type *) moments_arr->maxPhiPerSample;
+    }
+
+    template <>
+    __host__ __device__ typename MaxMomentsEnergyPerSample::type * get_temporary_array<MaxMomentsEnergyPerSample>(Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr)
+    {
+      return (MaxMomentsEnergyPerSample::type *) moments_arr->maxEtaPerSample;
+    }
+
+    template <>
+    __host__ __device__ typename MaxSignificanceAndSampling::type * get_temporary_array<MaxSignificanceAndSampling>(Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr)
+    {
+      return (MaxSignificanceAndSampling::type *) moments_arr->eta1CaloFrame;
+    }
+
+
+    template <>
+    __host__ __device__ typename MX::type * get_temporary_array<MX>(Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr)
+    {
+      return (MX::type *) moments_arr->engCalibOutL;
+    }
+
+    template <>
+    __host__ __device__ typename MY::type * get_temporary_array<MY>(Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr)
+    {
+      return (MY::type *) moments_arr->engCalibOutM;
+    }
+
+    template <>
+    __host__ __device__ typename MZ::type * get_temporary_array<MZ>(Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr)
+    {
+      return (MZ::type *) moments_arr->engCalibOutT;
+    }
+
+    template <>
+    __host__ __device__ typename Matrix00::type * get_temporary_array<Matrix00>(Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr)
+    {
+      return (Matrix00::type *) moments_arr->engCalibDeadT;
+    }
+    template <>
+    __host__ __device__ typename Matrix10::type * get_temporary_array<Matrix10>(Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr)
+    {
+      return (Matrix10::type *) moments_arr->engCalibEMB0;
+    }
+    template <>
+    __host__ __device__ typename Matrix20::type * get_temporary_array<Matrix20>(Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr)
+    {
+      return (Matrix20::type *) moments_arr->engCalibEME0;
+    }
+    template <>
+    __host__ __device__ typename Matrix11::type * get_temporary_array<Matrix11>(Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr)
+    {
+      return (Matrix11::type *) moments_arr->engCalibTileG3;
+    }
+    template <>
+    __host__ __device__ typename Matrix21::type * get_temporary_array<Matrix21>(Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr)
+    {
+      return (Matrix21::type *) moments_arr->engCalibDeadTot;
+    }
+    template <>
+    __host__ __device__ typename Matrix22::type * get_temporary_array<Matrix22>(Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr)
+    {
+      return (Matrix22::type *) moments_arr->engCalibDeadEMB0;
+    }
+    template <>
+    __host__ __device__ typename SumSquareEnergies::type * get_temporary_array<SumSquareEnergies>(Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr)
+    {
+      return (SumSquareEnergies::type *) moments_arr->engCalibDeadTile0;
+    }
+    template <>
+    __host__ __device__ typename TimeNormalization::type * get_temporary_array<TimeNormalization>(Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr)
+    {
+      return (TimeNormalization::type *) moments_arr->engCalibDeadTileG3;
+    }
+    template <>
+    __host__ __device__ typename AverageLArQNorm::type * get_temporary_array<AverageLArQNorm>(Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr)
+    {
+      return (AverageLArQNorm::type *) moments_arr->engCalibDeadEME0;
+    }
+    template <>
+    __host__ __device__ typename AverageTileQNorm::type * get_temporary_array<AverageTileQNorm>(Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr)
+    {
+      return (AverageTileQNorm::type *) moments_arr->engCalibDeadHEC0;
+    }
+
+
+    template <>
+    __host__ __device__ ShowerAxisX::type * get_temporary_array<ShowerAxisX>(Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr)
+    {
+      return (ShowerAxisX::type *) moments_arr->EMProbability;
+    }
+    template <>
+    __host__ __device__ ShowerAxisY::type * get_temporary_array<ShowerAxisY>(Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr)
+    {
+      return (ShowerAxisY::type *) moments_arr->hadWeight;
+    }
+    template <>
+    __host__ __device__ ShowerAxisZ::type * get_temporary_array<ShowerAxisZ>(Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr)
+    {
+      return (ShowerAxisZ::type *) moments_arr->OOCweight;
+    }
+
+    template <>
+    __host__ __device__ typename AbsoluteEnergyPerSample::type * get_temporary_array<AbsoluteEnergyPerSample>(Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr)
+    {
+      return (AbsoluteEnergyPerSample::type *) moments_arr->vertexFraction;
+    }
+
+
+    template <>
+    __host__ __device__ LateralNormalization::type * get_temporary_array<LateralNormalization>(Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr)
+    {
+      return moments_arr->DMweight;
+    }
+    template <>
+    __host__ __device__ LongitudinalNormalization::type * get_temporary_array<LongitudinalNormalization>(Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr)
+    {
+      return moments_arr->tileConfidenceLevel;
+    }
+    template <>
+    __host__ __device__ MaxEnergyAndCellPerSample::type * get_temporary_array<MaxEnergyAndCellPerSample>(Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr)
+    {
+      return (MaxEnergyAndCellPerSample::type *) moments_arr->maxPhiPerSample;
+    }
+
+    template <>
+    __host__ __device__ typename MaxECellPerSample::type * get_temporary_array<MaxECellPerSample>(Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr)
+    {
+      return (MaxECellPerSample::type *) moments_arr->vertexFraction;
+    }
+  }
+
+}
+
+//The per-sample things might very well benefit from being
+//struct-of-arrays instead of pure array-of-structs
+//since we do the samplings in parallel.
+//However, it'd be less clean when it came
+//to the temporary array thing...
+
+
+__device__  static inline
+float regularize_angle(const float b, const float a = 0.f)
+//a. k. a. proxim in Athena code.
+{
+  const float diff = b - a;
+  const float divi = (fabsf(diff) - Helpers::Constants::pi<float>) / (2 * Helpers::Constants::pi<float>);
+  return b - ceilf(divi) * ((b > a + Helpers::Constants::pi<float>) - (b < a - Helpers::Constants::pi<float>)) * 2 * Helpers::Constants::pi<float>;
+}
+
+__device__ static inline
+float angular_difference(const float x, const float y)
+{
+  return regularize_angle(x - y, 0.f);
+  //Might be problematic if x and y have a significant difference
+  //in terms of factors of pi, in which case one should add
+  //a regularize_angle(x) and regularize_angle(y) in there.
+  //For our use case, I think this will be fine.
+  //(The Athena ones are even worse,
+  // being a branchy thing that only
+  // takes care of one factor of 2 pi...)
+}
+
+constexpr int WarpSize = 32;
+//Let's do this per warp...
+//In sufficiently new hardware,
+//independent thread scheduling
+//might very well ensure all the threads
+//that are updating the same moments
+//get executed together,
+//while the warp-wide broadcasting
+//will possibly improve memory accesses
+//(and, in general, doing the moments
+// in parallel will be a net performance gain
+// when compared to have all of them being updated in a single thread...))
+
+static_assert(NumSamplings <= 28, "We wrote the code under the assumption of 28 samplings at most.");
+
+/******************************************************************************
+ * Clear invalid cells first. (The algorithm doesn't invalidate clusters.)    *
+ ******************************************************************************/
+
+__global__ static
+void clearInvalidCells(Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
+                       const Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr)
+{
+  const int index = blockIdx.x * blockDim.x + threadIdx.x;
+  if (index < NCaloCells)
+    {
+      const ClusterTag tag = cell_state_arr->clusterTag[index];
+      if (tag.is_part_of_cluster())
+        {
+          if (tag.is_shared_between_clusters())
+            {
+              const int first_cluster = tag.cluster_index();
+              const int second_cluster = tag.secondary_cluster_index();
+
+              const int first_seed = clusters_arr->seedCellID[first_cluster];
+              const int second_seed = clusters_arr->seedCellID[second_cluster];
+
+              if (first_seed < 0 && second_seed < 0)
+                {
+                  cell_state_arr->clusterTag[index] = ClusterTag:: make_invalid_tag();
+                }
+              else if (first_seed < 0)
+                {
+                  cell_state_arr->clusterTag[index] = ClusterTag::make_tag(second_cluster);
+                }
+              else if (second_seed < 0)
+                {
+                  cell_state_arr->clusterTag[index] = ClusterTag::make_tag(first_cluster);
+                }
+              else /*if (first_seed >= 0 && second_seed >= 0)*/
+                {
+                  //Do nothing: the tag's already OK.
+                }
+            }
+          else
+            {
+              if (clusters_arr->seedCellID[tag.cluster_index()] < 0)
+                {
+                  cell_state_arr->clusterTag[index] = ClusterTag:: make_invalid_tag();
+                }
+            }
+        }
+    }
+}
+
+
+/******************************************************************************
+ * First Pass                                                                 *
+ ******************************************************************************/
+
+__global__ static
+void zerothClusterPassKernel( Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr,
+                              Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr,
+                              const Helpers::CUDA_kernel_object<GeometryArr> geometry,
+                              const int cluster_number)
+{
+
+  const int index   = blockIdx.x * blockDim.x + threadIdx.x;
+  const int cluster = index / WarpSize;
+  const int moment  = threadIdx.x % WarpSize;
+  if (cluster < cluster_number)
+    {
+      if (moment < NumSamplings)
+        {
+          const int sampling = moment;
+          moments_arr->energyPerSample[sampling][cluster] = 0.f;
+          moments_arr->nCellSampling[sampling][cluster] = 0;
+          CMCHack::get_temporary_array< NumberEmptySamplings      >(moments_arr)[sampling][cluster] = 0;
+          CMCHack::get_temporary_array< NumberNonEmptySamplings   >(moments_arr)[sampling][cluster] = 0;
+          CMCHack::get_temporary_array< MaxMomentsEnergyPerSample >(moments_arr)[sampling][cluster] = 0;
+        }
+      else
+        {
+          switch (moment - NumSamplings)
+            //NumSamplings == 28
+            {
+              case 0:
+                moments_arr->centerX[cluster] = 0.f;
+                moments_arr->centerY[cluster] = 0.f;
+                moments_arr->centerZ[cluster] = 0.f;
+                moments_arr->firstEngDens[cluster] = 0.f;
+                moments_arr->secondEngDens[cluster] = 0.f;
+                break;
+              case 1:
+                moments_arr->engFracEM[cluster] = 0.f;
+                moments_arr->engPos[cluster] = 0.f;
+                clusters_arr->clusterEnergy[cluster] = 0.f;
+                CMCHack::get_temporary_array<SumAbsEnergyNonMoments>(moments_arr)[cluster] = 0.f;
+                CMCHack::get_temporary_array<EnergyDensityNormalization>(moments_arr)[cluster] = 0.f;
+                break;
+              case 2:
+                CMCHack::get_temporary_array<MX>(moments_arr)[cluster] = 0.f;
+                CMCHack::get_temporary_array<MY>(moments_arr)[cluster] = 0.f;
+                CMCHack::get_temporary_array<MaxCellEnergyAndCell>(moments_arr)[cluster] = 0ULL;
+                CMCHack::get_temporary_array<SecondMaxCellEnergyAndCell>(moments_arr)[cluster] = 0ULL;
+                clusters_arr->clusterEta[cluster] = 0.f;
+                break;
+              case 3:
+                CMCHack::get_temporary_array<MZ>(moments_arr)[cluster] = 0.f;
+                clusters_arr->clusterPhi[cluster] = 0.f;
+                {
+                  const int seed_cell = clusters_arr->seedCellID[cluster];
+                  if (seed_cell >= 0 && seed_cell < NCaloCells)
+                    {
+                      CMCHack::get_temporary_array<SeedCellPhi>(moments_arr)[cluster] = geometry->phi[seed_cell];
+                    }
+                }
+                break;
+              default:
+                break;
+            }
+        }
+    }
+}
+
+
+__global__ static
+void firstCellPassKernel( Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr,
+                          Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr,
+                          const Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
+                          const Helpers::CUDA_kernel_object<CellInfoArr> cell_info_arr,
+                          const Helpers::CUDA_kernel_object<GeometryArr> geometry,
+                          const bool use_abs_energy)
+{
+  const int index = blockIdx.x * blockDim.x + threadIdx.x;
+  const int cell = index / WarpSize;
+  const int in_warp_index = threadIdx.x % WarpSize;
+  if (cell < NCaloCells)
+    {
+      const ClusterTag tag = cell_state_arr->clusterTag[cell];
+
+      const     int   sampling       = geometry->caloSample[cell];
+
+      if (tag.is_part_of_cluster())
+        {
+          const float energy         = cell_info_arr->energy[cell];
+          const float abs_energy     = fabsf(energy);
+          const float moments_energy = (use_abs_energy || energy > 0.f ? abs_energy : 0.f);
+          const float x              = geometry->x[cell];
+          const float y              = geometry->y[cell];
+          const float z              = geometry->z[cell];
+          const float eta            = geometry->eta[cell];
+          const float phi            = geometry->phi[cell];
+          const float volume         = geometry->volume[cell];
+
+          auto accumulateForCluster = [&](const int cluster, const float weight, const int this_moment)
+          {
+            const float weighted_energy = moments_energy * weight;
+            switch (this_moment)
+              {
+                case 0:
+                  atomicAdd(&(moments_arr->energyPerSample[sampling][cluster]), energy * weight);
+                  break;
+                case 1:
+                  atomicAdd(&(moments_arr->nCellSampling[sampling][cluster]), 1);
+                  break;
+                case 2:
+                  atomicMax(&(CMCHack::get_temporary_array<MaxMomentsEnergyPerSample>(moments_arr)[sampling][cluster]), __float_as_uint(weighted_energy));
+                  break;
+                case 3:
+                  atomicAdd(&(moments_arr->centerX[cluster]), x * weighted_energy);
+                  break;
+                case 4:
+                  atomicAdd(&(moments_arr->centerY[cluster]), y * weighted_energy);
+                  break;
+                case 5:
+                  atomicAdd(&(moments_arr->centerZ[cluster]), z * weighted_energy);
+                  break;
+                case 6:
+                  if ( sampling == CaloSampling::EMB1   ||
+                       sampling == CaloSampling::EMB2   ||
+                       sampling == CaloSampling::EMB3   ||
+                       sampling == CaloSampling::EME1   ||
+                       sampling == CaloSampling::EME2   ||
+                       sampling == CaloSampling::EME3   ||
+                       sampling == CaloSampling::FCAL0     )
+                    {
+                      atomicAdd(&(moments_arr->engFracEM[cluster]), weighted_energy);
+                    }
+                  break;
+                case 7:
+                  if (volume > 0)
+                    {
+                      const float w_E_over_V = weighted_energy / volume;
+                      atomicAdd(&(moments_arr->firstEngDens[cluster]), weighted_energy * w_E_over_V);
+                      atomicAdd(&(moments_arr->secondEngDens[cluster]), weighted_energy * w_E_over_V * w_E_over_V);
+                      atomicAdd(&(CMCHack::get_temporary_array<EnergyDensityNormalization>(moments_arr)[cluster]), weighted_energy);
+                    }
+                  break;
+                case 8:
+                  {
+                    const float dir = x * x + y * y + z * z;
+                    const float r_dir = (dir > 0.f ? 1.f / sqrtf(dir) : 0.f);
+                    const float w_E_r_dir = weighted_energy * r_dir;
+                    const float mx = w_E_r_dir * x;
+                    atomicAdd(&(CMCHack::get_temporary_array<MX>(moments_arr)[cluster]), mx);
+                  }
+                  break;
+                case 9:
+                  {
+                    const float dir = x * x + y * y + z * z;
+                    const float r_dir = (dir > 0.f ? 1.f / sqrtf(dir) : 0.f);
+                    const float w_E_r_dir = weighted_energy * r_dir;
+                    const float my = w_E_r_dir * y;
+                    atomicAdd(&(CMCHack::get_temporary_array<MY>(moments_arr)[cluster]), my);
+                  }
+                  break;
+                case 10:
+                  {
+                    const float dir = x * x + y * y + z * z;
+                    const float r_dir = (dir > 0.f ? 1.f / sqrtf(dir) : 0.f);
+                    const float w_E_r_dir = weighted_energy * r_dir;
+                    const float mz = w_E_r_dir * z;
+                    atomicAdd(&(CMCHack::get_temporary_array<MZ>(moments_arr)[cluster]), mz);
+                  }
+                  break;
+                case 11:
+                  atomicAdd(&(moments_arr->engPos[cluster]), weighted_energy);
+                  break;
+                case 12:
+                  {
+                    unsigned long long int energy_and_cell = __float_as_uint(weighted_energy);
+                    //Energy is positive, so no need to switch to total ordering...
+                    energy_and_cell = (energy_and_cell << 32) | (cell + 1);
+
+                    const unsigned long long int old_enc = atomicMax(&(CMCHack::get_temporary_array<MaxCellEnergyAndCell>(moments_arr)[cluster]), energy_and_cell);
+                    atomicMax(&(CMCHack::get_temporary_array<SecondMaxCellEnergyAndCell>(moments_arr)[cluster]), min(old_enc, energy_and_cell));
+                  }
+                  break;
+                case 13:
+                  atomicAdd(&(clusters_arr->clusterEnergy[cluster]), energy * weight);
+                  atomicAdd(&(CMCHack::get_temporary_array<SumAbsEnergyNonMoments>(moments_arr)[cluster]), abs_energy * weight);
+                  break;
+                case 14:
+                  atomicAdd(&(clusters_arr->clusterEta[cluster]), abs_energy * weight * eta);
+                  break;
+                case 15:
+                  {
+                    const float phi_0 = CMCHack::get_temporary_array<SeedCellPhi>(moments_arr)[cluster];
+                    const float phi_real = regularize_angle(phi, phi_0);
+                    atomicAdd(&(clusters_arr->clusterPhi[cluster]), phi_real * abs_energy * weight);
+                  }
+                  break;
+                default:
+                  break;
+              }
+          };
+
+          if (tag.is_shared_between_clusters())
+            {
+              const float secondary_weight = __uint_as_float(tag.secondary_cluster_weight());
+              if (in_warp_index >= WarpSize / 2)
+                {
+                  accumulateForCluster(tag.secondary_cluster_index(), secondary_weight, in_warp_index - WarpSize / 2);
+                }
+              else
+                {
+                  accumulateForCluster(tag.cluster_index(), 1.0f - secondary_weight, in_warp_index);
+                }
+            }
+          else
+            {
+              accumulateForCluster(tag.cluster_index(), 1.0f, in_warp_index);
+            }
+        }
+
+      //Optimization for our neighbour handling:
+      //since we are using all2D,
+      //which assures max neighbours < 32,
+      //and which also encompasses
+      //all of its smaller options,
+      //we can have each thread knowing where to check
+      //instead of building an actual neighbour list.
+      //Also, this is symmetric,
+      //that is, A being in the list of neighbours of B
+      //implies B is in the list of neighbours of A.
+
+      constexpr int neighbour_option_num = 4;
+
+      const int num_relevant_neighbours = NeighOffsets(geometry->neighbours.offsets[cell]).get_end_cell(neighbour_option_num);
+
+      int cluster_to_check = 0;
+
+      if (in_warp_index < num_relevant_neighbours)
+        {
+          const int neigh = geometry->neighbours.get_neighbour(cell, in_warp_index);
+          const ClusterTag neigh_tag = cell_state_arr->clusterTag[neigh];
+
+          if (neigh_tag.is_part_of_cluster())
+            {
+              cluster_to_check = neigh_tag.cluster_index() + 1;
+              //We add 1 because 0 means no cluster to check here.
+              //Also, since the cluster indices are 16 bit,
+              //of course there's no issue here.
+            }
+        }
+
+      const unsigned int mask = (1U << num_relevant_neighbours) - 1;
+
+      for (int i = 1; i < num_relevant_neighbours && in_warp_index < num_relevant_neighbours; ++i)
+        {
+          const int to_check = in_warp_index + i;
+          const int warp_to_check = to_check % num_relevant_neighbours;
+          const int other = __shfl_sync(mask, cluster_to_check, warp_to_check);
+          if (warp_to_check < to_check && abs(other) == cluster_to_check)
+            {
+              cluster_to_check = -cluster_to_check;
+              //Mark this cluster as already considered.
+            }
+        }
+
+      //Maybe there is a solution that uses sorting instead?
+      //Best choice here would be a sorting network
+      //(bitonic sorting or Batcher's odd-even),
+      //but then we'd need to eliminate the equal clusters too...
+      //All in all, probably something like C ln(n)(ln(n) + 1) + 2 operations
+      //per thread, with C somewhere around 2 rather than 0.5.
+      //And, with n = 32, does the added complexity
+      //really justify this? I would need a good reason
+      //before considering to implement that sort of thing,
+      //and I strongly suspect the performance benefits
+      //not to be that significant. Still...
+
+      if (cluster_to_check > 0)
+        //Valid and non-repeated.
+        {
+          const int neigh_cluster = cluster_to_check - 1;
+          if (tag.is_part_of_cluster())
+            {
+
+              if (tag.cluster_index() != neigh_cluster)
+                {
+                  atomicAdd(&(CMCHack::get_temporary_array<NumberNonEmptySamplings>(moments_arr)[sampling][neigh_cluster]), 1);
+                }
+            }
+          else
+            {
+              atomicAdd(&(CMCHack::get_temporary_array<NumberEmptySamplings>(moments_arr)[sampling][neigh_cluster]), 1);
+            }
+        }
+    }
+}
+
+//Finalize/normalize the first pass moments,
+//zero out what is needed for the second pass...
+
+__global__ static
+void firstClusterPassKernel( Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr,
+                             Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr,
+                             const int cluster_number)
+{
+
+  const int index   = blockIdx.x * blockDim.x + threadIdx.x;
+  const int cluster = index / WarpSize;
+  const int moment  = threadIdx.x % WarpSize;
+  if (cluster < cluster_number)
+    {
+      const float sum_energies = moments_arr->engPos[cluster];
+      if (moment < NumSamplings)
+        {
+          const int sampling = moment;
+          const float sampling_energy = moments_arr->energyPerSample[sampling][cluster];
+          const unsigned int max_energy_pattern = CMCHack::get_temporary_array<MaxMomentsEnergyPerSample>(moments_arr)[sampling][cluster];
+          const float sampling_max_energy = __uint_as_float(max_energy_pattern);
+          const int sampling_empty = CMCHack::get_temporary_array<NumberEmptySamplings>(moments_arr)[sampling][cluster];
+          const int sampling_non_empty = CMCHack::get_temporary_array<NumberNonEmptySamplings>(moments_arr)[sampling][cluster];
+
+          int total = sampling_empty + sampling_non_empty;
+
+          float isolation = 0.f, isolation_norm = 0.f, eng_frac_core = sampling_max_energy;
+
+          if (total > 0 && sampling_energy > 0)
+            {
+              isolation = (sampling_energy * sampling_empty) / total;
+              isolation_norm = sampling_energy;
+            }
+
+          const unsigned int mask = 0x0FFFFFFFU;
+          //28 samplings, so without the last 4 threads.
+
+          for (int i = 1; i < WarpSize; i *= 2)
+            {
+              const int origin = sampling ^ i;
+              const float other_isol = __shfl_xor_sync(mask, isolation, i);
+              const float other_isol_norm = __shfl_xor_sync(mask, isolation_norm, i);
+              const float other_efc = __shfl_xor_sync(mask, eng_frac_core, i);
+              if (origin < NumSamplings)
+                {
+                  isolation += other_isol;
+                  isolation_norm += other_isol_norm;
+                  eng_frac_core += other_efc;
+                }
+            }
+
+          switch (moment)
+            {
+              case 0:
+                moments_arr->isolation[cluster] = (isolation_norm != 0.f ? isolation / isolation_norm : 0.f);
+                break;
+              case NumSamplings - 1:
+                moments_arr->engFracCore[cluster] = (sum_energies > 0.f) * eng_frac_core / sum_energies;
+                break;
+              default:
+                break;
+            }
+        }
+      else
+        {
+          switch (moment - NumSamplings)
+            {
+              case 0:
+                {
+                  moments_arr->centerX[cluster] /= (sum_energies > 0.f ? sum_energies : 1.f);
+                  moments_arr->centerY[cluster] /= (sum_energies > 0.f ? sum_energies : 1.f);
+                  moments_arr->centerZ[cluster] /= (sum_energies > 0.f ? sum_energies : 1.f);
+                  const float energy_density_norm = CMCHack::get_temporary_array<EnergyDensityNormalization>(moments_arr)[cluster];
+                  moments_arr->firstEngDens[cluster] /= (energy_density_norm > 0.f ? energy_density_norm : 1.f);
+                  moments_arr->secondEngDens[cluster] /= (energy_density_norm > 0.f ? energy_density_norm : 1.f);
+                }
+                break;
+              case 1:
+                {
+                  moments_arr->engFracEM[cluster] /= (sum_energies > 0.f ? sum_energies : 1.f);
+
+                  const float mx = CMCHack::get_temporary_array<MX>(moments_arr)[cluster];
+                  const float my = CMCHack::get_temporary_array<MY>(moments_arr)[cluster];
+                  const float mz = CMCHack::get_temporary_array<MZ>(moments_arr)[cluster];
+                  const float sqrd_mass = sum_energies * sum_energies - mx * mx - my * my - mz * mz;
+                  moments_arr->mass[cluster] = sum_energies <= 0.f ? 0.f : sqrtf(fabsf(sqrd_mass)) * (sqrd_mass < 0.f ? -1.f : 1.f);
+                }
+                break;
+              case 2:
+                {
+                  unsigned long long int max_E_and_cell = CMCHack::get_temporary_array<MaxCellEnergyAndCell>(moments_arr)[cluster];
+                  const int max_cell = (max_E_and_cell & 0x7FFFFFFF) - 1;
+                  const float max_E = __uint_as_float(max_E_and_cell >> 32);
+                  moments_arr->engFracMax[cluster] = max_E / (sum_energies > 0.f ? sum_energies : 1.f);
+                  CMCHack::get_temporary_array<MaxCells>(moments_arr)[cluster] = max_cell;
+
+                  const unsigned long long int second_max_E_and_cell = CMCHack::get_temporary_array<SecondMaxCellEnergyAndCell>(moments_arr)[cluster];
+                  const int second_max_cell = (second_max_E_and_cell & 0x7FFFFFFF) - 1;
+                  CMCHack::get_temporary_array<SecondMaxCells>(moments_arr)[cluster] = second_max_cell;
+                }
+                break;
+              case 3:
+                {
+                  const float abs_energy = CMCHack::get_temporary_array<SumAbsEnergyNonMoments>(moments_arr)[cluster];
+                  if (abs_energy > 0)
+                    {
+                      const float tempeta = clusters_arr->clusterEta[cluster] / abs_energy;
+
+                      clusters_arr->clusterEta[cluster] = tempeta;
+
+                      const float temp_ET = clusters_arr->clusterEnergy[cluster] / coshf(abs(tempeta));
+
+                      clusters_arr->clusterEt[cluster] = temp_ET;
+                      clusters_arr->clusterPhi[cluster] = regularize_angle(clusters_arr->clusterPhi[cluster] / abs_energy, 0.f);
+                    }
+                  else
+                    {
+                      //clusters_arr->seedCellID[cluster] = -1;
+                    }
+                }
+                break;
+              default:
+                break;
+            }
+        }
+
+      switch (moment)
+        {
+          //Avoid 0 and NumSamplings - 1
+          //since they set the sampling things...
+          case 1:
+            moments_arr->engBadCells[cluster] = 0.f;
+            break;
+          case 2:
+            moments_arr->nBadCells[cluster] = 0;
+            break;
+          case 3:
+            moments_arr->nBadCellsCorr[cluster] = 0;
+            break;
+          case 4:
+            moments_arr->badCellsCorrE[cluster] = 0.f;
+            break;
+          case 5:
+            moments_arr->badLArQFrac[cluster] = 0.f;
+            break;
+          case 6:
+            moments_arr->avgLArQ[cluster] = 0.f;
+            break;
+          case 7:
+            moments_arr->avgTileQ[cluster] = 0.f;
+            break;
+          case 8:
+            moments_arr->PTD[cluster] = 0.f;
+            break;
+          case 9:
+            moments_arr->numCells[cluster] = 0;
+            break;
+          case 10:
+            CMCHack::get_temporary_array<SumSquareEnergies>(moments_arr)[cluster] = 0.f;
+            break;
+          case 11:
+            CMCHack::get_temporary_array<Matrix22>(moments_arr)[cluster] = 0.f;
+            break;
+          case 12:
+            CMCHack::get_temporary_array<Matrix21>(moments_arr)[cluster] = 0.f;
+            break;
+          case 13:
+            CMCHack::get_temporary_array<Matrix11>(moments_arr)[cluster] = 0.f;
+            break;
+          case 14:
+            CMCHack::get_temporary_array<Matrix20>(moments_arr)[cluster] = 0.f;
+            break;
+          case 15:
+            CMCHack::get_temporary_array<Matrix10>(moments_arr)[cluster] = 0.f;
+            break;
+          case 16:
+            CMCHack::get_temporary_array<Matrix00>(moments_arr)[cluster] = 0.f;
+            break;
+          case 17:
+            moments_arr->time[cluster] = 0.f;
+            break;
+          case 18:
+            moments_arr->secondTime[cluster] = 0.f;
+            break;
+          case 19:
+            CMCHack::get_temporary_array<TimeNormalization>(moments_arr)[cluster] = 0.f;
+            break;
+          case 20:
+            CMCHack::get_temporary_array<AverageLArQNorm>(moments_arr)[cluster] = 0.f;
+            break;
+          case 21:
+            CMCHack::get_temporary_array<AverageTileQNorm>(moments_arr)[cluster] = 0.f;
+            break;
+          case 22:
+            CMCHack::get_temporary_array<MaxSignificanceAndSampling>(moments_arr)[cluster] = 0ULL;
+            break;
+          case 23:
+            moments_arr->significance[cluster] = 0.f;
+            break;
+          default:
+            break;
+        }
+    }
+}
+
+/******************************************************************************
+ * Second pass.                                                               *
+ ******************************************************************************/
+
+__global__ static
+void secondCellPassKernel( Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr,
+                           const Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
+                           const Helpers::CUDA_kernel_object<CellInfoArr> cell_info_arr,
+                           const Helpers::CUDA_kernel_object<GeometryArr> geometry,
+                           const Helpers::CUDA_kernel_object<CellNoiseArr> noise_arr,
+                           const bool use_abs_energy, const bool use_two_gaussian_noise,
+                           const float min_LAr_quality)
+{
+  const int index = blockIdx.x * blockDim.x + threadIdx.x;
+  const int cell = index / WarpSize;
+  const int in_warp_index = threadIdx.x % WarpSize;
+  if (cell < NCaloCells)
+    {
+      const ClusterTag tag = cell_state_arr->clusterTag[cell];
+      if (tag.is_part_of_cluster())
+        {
+          const float energy              = cell_info_arr->energy[cell];
+          const float abs_energy          = fabsf(energy);
+          const float moments_energy      = (use_abs_energy || energy > 0.f ? abs_energy : 0.f);
+          const float time                = cell_info_arr->time[cell];
+          const float x                   = geometry->x[cell];
+          const float y                   = geometry->y[cell];
+          const float z                   = geometry->z[cell];
+          const bool  is_tile             = geometry->is_tile(cell);
+          const int   sampling            = geometry->caloSample[cell];
+          const int   gain                = cell_info_arr->gain[cell];
+          //No need to check for invalid cells as they won't be part of clusters...
+          const float noise               = (is_tile && use_two_gaussian_noise ?
+                                             0.f : //To be fixed in the future...
+                                             noise_arr->noise[gain][cell]);
+
+          const QualityProvenance qp      = cell_info_arr->qualityProvenance[cell];
+          const bool              is_bad  = cell_info_arr->is_bad(is_tile, qp, false);
+          auto accumulateForCluster = [&](const int cluster, const float weight, const int this_moment)
+          {
+            const float weighted_energy = moments_energy * weight;
+            const float weighted_energy_or_negative = (use_abs_energy ? fabsf(energy) : energy) * weight;
+            const float square_w_E      = weighted_energy * weighted_energy;
+            const float center_x        = moments_arr->centerX[cluster];
+            const float center_y        = moments_arr->centerY[cluster];
+            const float center_z        = moments_arr->centerZ[cluster];
+            switch (this_moment)
+              {
+                case 0:
+                  if (is_bad)
+                    {
+                      atomicAdd(&(moments_arr->engBadCells[cluster]), weighted_energy_or_negative);
+                      atomicAdd(&(moments_arr->nBadCells[cluster]), 1);
+                    }
+                  break;
+                case 1:
+                  if (is_bad && energy != 0.f)
+                    {
+                      atomicAdd(&(moments_arr->badCellsCorrE[cluster]), weighted_energy_or_negative);
+                      atomicAdd(&(moments_arr->nBadCellsCorr[cluster]), 1);
+                    }
+                  break;
+                case 2:
+                  if (!is_bad && !is_tile && ((qp.provenance() & 0x2800U) == 0x2000U) && qp.quality() > min_LAr_quality)
+                    {
+                      atomicAdd(&(moments_arr->badLArQFrac[cluster]), weighted_energy_or_negative);
+                    }
+                  break;
+                case 3:
+                  if (!is_bad && !is_tile && ((qp.provenance() & 0x2800U) == 0x2000U))
+                    {
+                      const float square_E_or_neg = weighted_energy_or_negative * weighted_energy_or_negative;
+                      atomicAdd(&(moments_arr->avgLArQ[cluster]), square_E_or_neg * qp.quality());
+                      atomicAdd(&(CMCHack::get_temporary_array<AverageLArQNorm>(moments_arr)[cluster]), square_E_or_neg);
+                    }
+                  break;
+                case 4:
+                  if (!is_bad && is_tile && qp.tile_qual1() != 0xFFU && qp.tile_qual2() != 0xFFU)
+                    {
+                      const float square_E_or_neg = weighted_energy_or_negative * weighted_energy_or_negative;
+                      atomicAdd(&(moments_arr->avgTileQ[cluster]), square_E_or_neg * max((unsigned int) qp.tile_qual1(), (unsigned int) qp.tile_qual2()));
+                      atomicAdd(&(CMCHack::get_temporary_array<AverageTileQNorm>(moments_arr)[cluster]), square_E_or_neg);
+                    }
+                  break;
+                case 5:
+                  atomicAdd(&(moments_arr->PTD[cluster]), square_w_E);
+
+                  //Comment on there:
+                  //
+                  //  +--------------- begin comment on there ---------------+
+                  //  |                                                      |
+                  //  | do not convert to pT since clusters are small and    |
+                  //  | there is virtually no difference and cosh just costs |
+                  //  | time ...                                             |
+                  //  |                                                      |
+                  //  +---------------- end comment on there ----------------+
+                  //
+                  //So maybe we could change this here?
+
+                  atomicAdd(&(moments_arr->numCells[cluster]), 1);
+                  break;
+                case 6:
+                  atomicAdd(&(CMCHack::get_temporary_array<Matrix00>(moments_arr)[cluster]), square_w_E * (x - center_x) * (x - center_x));
+                  break;
+                case 7:
+                  atomicAdd(&(CMCHack::get_temporary_array<Matrix10>(moments_arr)[cluster]), square_w_E * (x - center_x) * (y - center_y));
+                  break;
+                case 8:
+                  atomicAdd(&(CMCHack::get_temporary_array<Matrix20>(moments_arr)[cluster]), square_w_E * (x - center_x) * (z - center_z));
+                  break;
+                case 9:
+                  atomicAdd(&(CMCHack::get_temporary_array<Matrix11>(moments_arr)[cluster]), square_w_E * (y - center_y) * (y - center_y));
+                  break;
+                case 10:
+                  atomicAdd(&(CMCHack::get_temporary_array<Matrix21>(moments_arr)[cluster]), square_w_E * (y - center_y) * (z - center_z));
+                  break;
+                case 11:
+                  atomicAdd(&(CMCHack::get_temporary_array<Matrix22>(moments_arr)[cluster]), square_w_E * (z - center_z) * (z - center_z));
+                  break;
+                case 12:
+                  atomicAdd(&(CMCHack::get_temporary_array<SumSquareEnergies>(moments_arr)[cluster]), square_w_E);
+                  break;
+                //Note: exclusion of PreSamplerB/E.
+                case 13:
+                  if ( ((is_tile && (qp.provenance() & 0x8080U)) || (!is_tile && (qp.provenance() & 0x2000U))) &&
+                       sampling != CaloSampling::PreSamplerB && sampling != CaloSampling::PreSamplerE          )
+                    {
+                      const float normE = weight * energy;
+                      const float squared_norm = normE * normE;
+                      atomicAdd(&(moments_arr->time[cluster]), time * squared_norm);
+                      atomicAdd(&(moments_arr->secondTime[cluster]), time * time * squared_norm);
+                      atomicAdd(&(CMCHack::get_temporary_array<TimeNormalization>(moments_arr)[cluster]), squared_norm);
+                    }
+                  break;
+                case 14:
+                  atomicAdd(&(moments_arr->significance[cluster]), noise * noise);
+                  break;
+                case 15:
+                  {
+                    const float max_sig = noise > 0 ? energy * weight / noise : 0.f;
+                    unsigned long long int max_S_and_S = __float_as_uint(fabsf(max_sig));
+                    max_S_and_S = max_S_and_S << 32 | (((unsigned long long int) sampling << 1)) | (max_sig > 0);
+                    atomicMax(&(CMCHack::get_temporary_array<MaxSignificanceAndSampling>(moments_arr)[cluster]), max_S_and_S);
+                  }
+                  break;
+                default:
+                  break;
+              }
+          };
+
+          if (tag.is_shared_between_clusters())
+            {
+              const float secondary_weight = __uint_as_float(tag.secondary_cluster_weight());
+              if (in_warp_index >= WarpSize / 2)
+                {
+                  accumulateForCluster(tag.secondary_cluster_index(), secondary_weight, in_warp_index - WarpSize / 2);
+                }
+              else
+                {
+                  accumulateForCluster(tag.cluster_index(), 1.0f - secondary_weight, in_warp_index);
+                }
+            }
+          else
+            {
+              accumulateForCluster(tag.cluster_index(), 1.0f, in_warp_index);
+            }
+        }
+    }
+}
+
+__global__ static
+void secondClusterPassKernel( Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr,
+                              Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr,
+                              const int cluster_number, const float max_axis_angle)
+{
+
+  const int index   = blockIdx.x * blockDim.x + threadIdx.x;
+  const int cluster = index / WarpSize;
+  const int moment  = threadIdx.x % WarpSize;
+  if (cluster < cluster_number)
+    {
+      const float sum_energies = moments_arr->engPos[cluster];
+      const float cluster_energy = clusters_arr->clusterEnergy[cluster];
+      switch (moment)
+        {
+          case WarpSize - 1:
+          case WarpSize - 2:
+          case WarpSize - 3:
+            {
+              const float center_x   = moments_arr->centerX[cluster];
+              const float center_y   = moments_arr->centerY[cluster];
+              const float center_z   = moments_arr->centerZ[cluster];
+              const float center_mag = sqrtf(center_x * center_x + center_y * center_y + center_z * center_z);
+              moments_arr->centerMag[cluster] = center_mag;
+              float axis_x = center_x / center_mag;
+              float axis_y = center_y / center_mag;
+              float axis_z = center_z / center_mag;
+              float delta_phi = 0, delta_theta = 0, delta_alpha = 0;
+              if (moments_arr->numCells[cluster] > 2)
+                {
+                  const float norm = CMCHack::get_temporary_array<SumSquareEnergies>(moments_arr)[cluster];
+                  RealSymmetricMatrixSolver<double> solver { CMCHack::get_temporary_array<Matrix00>(moments_arr)[cluster] / norm,
+                                                             CMCHack::get_temporary_array<Matrix11>(moments_arr)[cluster] / norm,
+                                                             CMCHack::get_temporary_array<Matrix22>(moments_arr)[cluster] / norm,
+                                                             CMCHack::get_temporary_array<Matrix10>(moments_arr)[cluster] / norm,
+                                                             CMCHack::get_temporary_array<Matrix21>(moments_arr)[cluster] / norm,
+                                                             CMCHack::get_temporary_array<Matrix20>(moments_arr)[cluster] / norm  };
+                  //If we need more speed at the cost of some precision,
+                  //we could use floats all throughout.
+                  //However, with certain combinations of values,
+                  //the lambdas can be smaller than 1e-6 on the CPU
+                  //but give results larger than that here,
+                  //which leads to differences in delta_phi,
+                  //delta_theta and delta_alpha.
+                  
+                  float lambda = 0, vec[3];
+                  
+                  switch (moment)
+                    {
+                      case WarpSize - 1:
+                        solver.get_solution_pair_2(lambda, vec, true);
+                        break;
+                      case WarpSize - 2:
+                        solver.get_solution_pair_3(lambda, vec, true);
+                        break;
+                      //2 and 3 are switched compared to the Eigen solution.
+                      case WarpSize - 3:
+                        solver.get_solution_pair_1(lambda, vec, true);
+                        break;
+                      default:
+                        break;
+                    }
+
+                  const float min_lambdas = 1.e-6f;
+
+                  const unsigned int mask = 0xE0000000U;
+                  //The last three threads.
+
+                  const float lambda_1 = __shfl_sync(mask, lambda, WarpSize - 3);
+                  const float lambda_2 = __shfl_sync(mask, lambda, WarpSize - 2);
+                  const float lambda_3 = __shfl_sync(mask, lambda, WarpSize - 1);
+
+                  if ( solver.well_defined(lambda_1, lambda_2, lambda_3)  &&
+                       fabsf(lambda_1) >= min_lambdas                     &&
+                       fabsf(lambda_2) >= min_lambdas                     &&
+                       fabsf(lambda_3) >= min_lambdas                         )
+                    {
+                      const float prod = (vec[0] * axis_x + vec[1] * axis_y + vec[2] * axis_z);
+                      const float raw_angle = acosf(prod > 1.f ? 1.f : (prod < -1.f ? -1.f : prod));
+
+                      float this_angle = raw_angle;
+
+                      if (raw_angle > Helpers::Constants::pi<float> / 2)
+                        {
+                          this_angle = Helpers::Constants::pi<float> - raw_angle;
+                          vec[0] *= -1;
+                          vec[1] *= -1;
+                          vec[2] *= -1;
+                        }
+
+                      const float angle_1 = __shfl_sync(mask, this_angle, WarpSize - 3);
+                      const float angle_2 = __shfl_sync(mask, this_angle, WarpSize - 2);
+                      const float angle_3 = __shfl_sync(mask, this_angle, WarpSize - 1);
+
+                      float chosen_angle, chosen_vec[3];
+
+                      if (angle_1 <= angle_2 && angle_1 <= angle_3)
+                        {
+                          chosen_angle = angle_1;
+                          chosen_vec[0] = __shfl_sync(mask, vec[0], WarpSize - 3);
+                          chosen_vec[1] = __shfl_sync(mask, vec[1], WarpSize - 3);
+                          chosen_vec[2] = __shfl_sync(mask, vec[2], WarpSize - 3);
+                        }
+                      else if (angle_2 <= angle_3)
+                        {
+                          chosen_angle = angle_2;
+                          chosen_vec[0] = __shfl_sync(mask, vec[0], WarpSize - 2);
+                          chosen_vec[1] = __shfl_sync(mask, vec[1], WarpSize - 2);
+                          chosen_vec[2] = __shfl_sync(mask, vec[2], WarpSize - 2);
+                        }
+                      else
+                        {
+                          chosen_angle = angle_3;
+                          chosen_vec[0] = __shfl_sync(mask, vec[0], WarpSize - 1);
+                          chosen_vec[1] = __shfl_sync(mask, vec[1], WarpSize - 1);
+                          chosen_vec[2] = __shfl_sync(mask, vec[2], WarpSize - 1);
+                        }
+
+                      auto calc_phi = [](const float x, const float y, const float z)
+                      {
+                        return atan2f(y, x);
+                      };
+                      auto calc_theta = [](const float x, const float y, const float z)
+                      {
+                        return atan2f(sqrtf(x * x + y * y), z);
+                      };
+
+                      switch (moment)
+                        {
+                          case WarpSize - 3:
+                            delta_phi = angular_difference(calc_phi(axis_x, axis_y, axis_z), calc_phi(chosen_vec[0], chosen_vec[1], chosen_vec[2]));
+                            if (chosen_angle < max_axis_angle)
+                              {
+                                axis_x = chosen_vec[0];
+                              }
+                            break;
+                          case WarpSize - 2:
+                            delta_theta = calc_theta(axis_x, axis_y, axis_z) - calc_theta(chosen_vec[0], chosen_vec[1], chosen_vec[2]);
+                            if (chosen_angle < max_axis_angle)
+                              {
+                                axis_y = chosen_vec[1];
+                              }
+                            break;
+                          case WarpSize - 1:
+                            delta_alpha = chosen_angle;
+                            if (chosen_angle < max_axis_angle)
+                              {
+                                axis_z = chosen_vec[2];
+                              }
+                            break;
+                          default:
+                            break;
+                        }
+                    }
+                }
+              switch (moment)
+                {
+                  case WarpSize - 3:
+                    CMCHack::get_temporary_array<ShowerAxisX>(moments_arr)[cluster] = axis_x;
+                    moments_arr->deltaPhi[cluster] = delta_phi;
+                    break;
+                  case WarpSize - 2:
+                    CMCHack::get_temporary_array<ShowerAxisY>(moments_arr)[cluster] = axis_y;
+                    moments_arr->deltaTheta[cluster] = delta_theta;
+                    break;
+                  case WarpSize - 1:
+                    CMCHack::get_temporary_array<ShowerAxisZ>(moments_arr)[cluster] = axis_z;
+                    moments_arr->deltaAlpha[cluster] = delta_alpha;
+                    break;
+                  default:
+                    break;
+                }
+            }
+            break;
+          case 0:
+            {
+              moments_arr->badLArQFrac[cluster] /= (cluster_energy != 0.f ? cluster_energy : 1.f);
+            }
+            break;
+          case 1:
+            {
+              const float prev_v = moments_arr->significance[cluster];
+              moments_arr->significance[cluster] = (prev_v > 0.f ? cluster_energy / sqrtf(prev_v) : 0.f);
+            }
+            break;
+          case 2:
+            {
+              const unsigned long long int max_sig_and_samp = CMCHack::get_temporary_array<MaxSignificanceAndSampling>(moments_arr)[cluster];
+              const float max_sig = __uint_as_float(max_sig_and_samp >> 32);
+              const int max_samp = (max_sig_and_samp & 0xFFFFFFFEU) >> 1;
+              moments_arr->cellSignificance[cluster] = max_sig * (max_sig_and_samp & 1 ? 1.f : -1.f);
+              moments_arr->cellSigSampling[cluster] = max_samp;
+            }
+            break;
+          case 3:
+            {
+              const float norm = CMCHack::get_temporary_array<AverageLArQNorm>(moments_arr)[cluster];
+              moments_arr->avgLArQ[cluster] /= (norm > 0.f ? norm : 1.0f);
+            }
+            break;
+          case 4:
+            {
+              const float norm = CMCHack::get_temporary_array<AverageTileQNorm>(moments_arr)[cluster];
+              moments_arr->avgTileQ[cluster] /= (norm > 0.f ? norm : 1.0f);
+            }
+            break;
+          case 5:
+            {
+              const float old = moments_arr->PTD[cluster];
+              moments_arr->PTD[cluster] = sqrtf(old) / (sum_energies > 0.f ? sum_energies : 1.f);
+              //See before: maybe to be revised?
+            }
+            break;
+          case 6:
+            {
+              const float norm = CMCHack::get_temporary_array<TimeNormalization>(moments_arr)[cluster];
+              if (norm != 0.f)
+                {
+                  const float time = moments_arr->time[cluster] / norm;
+                  const float second_sum = moments_arr->secondTime[cluster];
+                  moments_arr->time[cluster] = time;
+                  moments_arr->secondTime[cluster] = (second_sum / norm) - (time * time);
+                }
+              else
+                {
+                  moments_arr->time[cluster] = 0.f;
+                  moments_arr->secondTime[cluster] = 0.f;
+                }
+            }
+            break;
+          case 7:
+            if (moments_arr->numCells[cluster] <= 0)
+              {
+                //clusters_arr->seedCellID[cluster] = -1;
+              }
+            break;
+          default:
+            break;
+        }
+
+      __syncwarp();
+
+      //Now zero out what we need for the final (!) moments.
+      //Avoid overburdening WarpSize - 3 to WarpSize - 1.
+      //Also use 0 to NumSamplings - 1 for the sampling-based ones,
+      //so try to load-balance with those that did less before.
+
+      switch (moment)
+        {
+          case 8:
+            moments_arr->firstPhi[cluster] = 0.f;
+            break;
+          case 9:
+            moments_arr->firstEta[cluster] = 0.f;
+            break;
+          case 10:
+            moments_arr->secondR[cluster] = 0.f;
+            break;
+          case 11:
+            moments_arr->secondLambda[cluster] = 0.f;
+            break;
+          case 12:
+            moments_arr->lateral[cluster] = 0.f;
+            break;
+          case 13:
+            moments_arr->longitudinal[cluster] = 0.f;
+            break;
+          case 14:
+            moments_arr->nExtraCellSampling[cluster] = 0;
+            break;
+          case 15:
+            CMCHack::get_temporary_array<LateralNormalization>(moments_arr)[cluster] = 0.f;
+            break;
+          case 16:
+            CMCHack::get_temporary_array<LongitudinalNormalization>(moments_arr)[cluster] = 0.f;
+            break;
+          default:
+            break;
+        }
+      if (moment < NumSamplings)
+        {
+          const int sampling = moment;
+          CMCHack::get_temporary_array<MaxEnergyAndCellPerSample>(moments_arr)[sampling][cluster] = 0;
+          moments_arr->etaPerSample[sampling][cluster] = 0.f;
+          moments_arr->phiPerSample[sampling][cluster] = 0.f;
+          CMCHack::get_temporary_array<AbsoluteEnergyPerSample>(moments_arr)[sampling][cluster] = 0.f;
+        }
+    }
+}
+
+/******************************************************************************
+ * Third pass.                                                                *
+ ******************************************************************************/
+
+__global__ static
+void thirdCellPassKernel( Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr,
+                          const Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
+                          const Helpers::CUDA_kernel_object<CellInfoArr> cell_info_arr,
+                          const Helpers::CUDA_kernel_object<GeometryArr> geometry,
+                          const bool use_abs_energy, const float eta_inner_wheel,
+                          const float min_l_longitudinal, const float min_r_lateral)
+{
+  const int index = blockIdx.x * blockDim.x + threadIdx.x;
+  const int cell = index / WarpSize;
+  const int in_warp_index = threadIdx.x % WarpSize;
+  if (cell < NCaloCells)
+    {
+      const ClusterTag tag = cell_state_arr->clusterTag[cell];
+      if (tag.is_part_of_cluster())
+        {
+          const float energy         = cell_info_arr->energy[cell];
+          const float abs_energy     = fabsf(energy);
+          const float moments_energy = (use_abs_energy || energy > 0.f ? abs_energy : 0.f);
+          const float x              = geometry->x[cell];
+          const float y              = geometry->y[cell];
+          const float z              = geometry->z[cell];
+          const float eta            = geometry->eta[cell];
+          const float phi            = geometry->phi[cell];
+          const int   sampling       = geometry->caloSample[cell];
+
+          auto accumulateForCluster = [&](const int cluster, const float weight, const int this_moment)
+          {
+            const float weighted_energy = moments_energy * weight;
+            const float center_x        = moments_arr->centerX[cluster];
+            const float center_y        = moments_arr->centerY[cluster];
+            const float center_z        = moments_arr->centerZ[cluster];
+            const float axis_x          = CMCHack::get_temporary_array<ShowerAxisX>(moments_arr)[cluster];
+            const float axis_y          = CMCHack::get_temporary_array<ShowerAxisY>(moments_arr)[cluster];
+            const float axis_z          = CMCHack::get_temporary_array<ShowerAxisZ>(moments_arr)[cluster];
+            const int   max_cell        = CMCHack::get_temporary_array<MaxCells>(moments_arr)[cluster];
+            const int   second_max_cell = CMCHack::get_temporary_array<SecondMaxCells>(moments_arr)[cluster];
+
+            auto cross_p_mag = [](const float x1, const float x2, const float x3,
+                                  const float y1, const float y2, const float y3)
+            {
+              const float a = x2 * y3 - x3 * y2;
+              const float b = x3 * y1 - x1 * y3;
+              const float c = x1 * y2 - x2 * y1;
+              return sqrtf(a * a + b * b + c * c);
+            };
+
+            auto dot_p = [](const float x1, const float x2, const float x3,
+                            const float y1, const float y2, const float y3)
+            {
+              return x1 * y1 + x2 * y2 + x3 * y3;
+            };
+
+            const float r      = cross_p_mag(x - center_x, y - center_y, z - center_z, axis_x, axis_y, axis_z);
+            const float lambda = dot_p(x - center_x, y - center_y, z - center_z, axis_x, axis_y, axis_z);
+
+            switch (this_moment)
+              {
+                case 0:
+                  {
+                    const float phi_0 = CMCHack::get_temporary_array<SeedCellPhi>(moments_arr)[cluster];
+                    const float phi_real = regularize_angle(phi, phi_0);
+                    atomicAdd(&(moments_arr->firstPhi[cluster]), weighted_energy * phi_real);
+                  }
+                  break;
+                case 1:
+                  atomicAdd(&(moments_arr->firstEta[cluster]), weighted_energy * eta);
+                  break;
+                case 2:
+                  atomicAdd(&(moments_arr->secondR[cluster]), weighted_energy * r * r);
+                  break;
+                case 3:
+                  atomicAdd(&(moments_arr->secondLambda[cluster]), weighted_energy * lambda * lambda);
+                  break;
+                case 4:
+                  atomicAdd(&(moments_arr->etaPerSample[sampling][cluster]), abs_energy * weight * eta);
+                  break;
+                case 5:
+                  {
+                    const float phi_0 = CMCHack::get_temporary_array<SeedCellPhi>(moments_arr)[cluster];
+                    const float phi_real = regularize_angle(phi, phi_0);
+                    atomicAdd(&(moments_arr->phiPerSample[sampling][cluster]), abs_energy * weight * phi_real);
+                  }
+                  break;
+                case 6:
+                  atomicAdd(&(CMCHack::get_temporary_array<AbsoluteEnergyPerSample>(moments_arr)[sampling][cluster]), abs_energy * weight);
+                  break;
+                case 7:
+                  if (sampling == CaloSampling::EME2 && fabsf(eta) > eta_inner_wheel)
+                    {
+                      atomicAdd(&(moments_arr->nExtraCellSampling[cluster]), 1);
+                    }
+                  break;
+                case 8:
+                  if (cell != max_cell && cell != second_max_cell)
+                    {
+                      atomicAdd(&(moments_arr->lateral[cluster]), weighted_energy * r * r);
+                    }
+                  break;
+                case 9:
+                  if (cell != max_cell && cell != second_max_cell)
+                    {
+                      atomicAdd(&(CMCHack::get_temporary_array<LateralNormalization>(moments_arr)[cluster]), weighted_energy * r * r);
+                    }
+                  else
+                    {
+                      const float real_r = max(r, min_r_lateral);
+                      atomicAdd(&(CMCHack::get_temporary_array<LateralNormalization>(moments_arr)[cluster]), weighted_energy * real_r * real_r);
+                    }
+                  break;
+                case 10:
+                  if (cell != max_cell && cell != second_max_cell)
+                    {
+                      atomicAdd(&(moments_arr->longitudinal[cluster]), weighted_energy * lambda * lambda);
+                    }
+                  break;
+                case 11:
+                  if (cell != max_cell && cell != second_max_cell)
+                    {
+                      atomicAdd(&(CMCHack::get_temporary_array<LongitudinalNormalization>(moments_arr)[cluster]), weighted_energy * lambda * lambda);
+                    }
+                  else
+                    {
+                      const float real_lambda = max(lambda, min_l_longitudinal);
+                      atomicAdd(&(CMCHack::get_temporary_array<LongitudinalNormalization>(moments_arr)[cluster]), weighted_energy * real_lambda * real_lambda);
+                    }
+                  break;
+                case 12:
+                  {
+                    const unsigned int energy_pattern = __float_as_uint(energy * weight);
+                    unsigned long long int E_and_cell = FloatingPointHelpers::StandardFloat::to_total_ordering(energy_pattern);
+                    E_and_cell = (E_and_cell << 32) | cell;
+                    atomicMax(&(CMCHack::get_temporary_array<MaxEnergyAndCellPerSample>(moments_arr)[sampling][cluster]), E_and_cell);
+                  }
+                  break;
+                default:
+                  break;
+              }
+          };
+
+          if (tag.is_shared_between_clusters())
+            {
+              const float secondary_weight = __uint_as_float(tag.secondary_cluster_weight());
+              if (in_warp_index >= WarpSize / 2)
+                {
+                  accumulateForCluster(tag.secondary_cluster_index(), secondary_weight, in_warp_index - WarpSize / 2);
+                }
+              else
+                {
+                  accumulateForCluster(tag.cluster_index(), 1.0f - secondary_weight, in_warp_index);
+                }
+            }
+          else
+            {
+              accumulateForCluster(tag.cluster_index(), 1.0f, in_warp_index);
+            }
+        }
+    }
+}
+
+
+__global__ static
+void thirdClusterPassKernel( Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr,
+                             const int cluster_number)
+{
+
+  const int index   = blockIdx.x * blockDim.x + threadIdx.x;
+  const int cluster = index / WarpSize;
+  const int moment  = threadIdx.x % WarpSize;
+  if (cluster < cluster_number)
+    {
+      const float sum_energies = moments_arr->engPos[cluster];
+      if (moment < NumSamplings)
+        {
+          const int sampling = moment;
+          const float sampling_normalization = CMCHack::get_temporary_array<AbsoluteEnergyPerSample>(moments_arr)[sampling][cluster];
+
+          const unsigned long long int energy_and_cell = CMCHack::get_temporary_array<MaxEnergyAndCellPerSample>(moments_arr)[sampling][cluster];
+
+          const int cell = sampling_normalization > 0.f ? (int) (energy_and_cell & 0x7FFFFFFF) : -1;
+
+          CMCHack::get_temporary_array<MaxECellPerSample>(moments_arr)[sampling][cluster] = cell;
+
+          moments_arr->etaPerSample[sampling][cluster] /= sampling_normalization;
+
+          const float old_phi = moments_arr->phiPerSample[sampling][cluster];
+
+          moments_arr->phiPerSample[sampling][cluster] = regularize_angle(old_phi / sampling_normalization, 0.f);
+        }
+      else
+        {
+          switch (moment - NumSamplings)
+            {
+              case 0:
+                {
+                  const float old_first_phi = moments_arr->firstPhi[cluster];
+                  moments_arr->firstPhi[cluster] = regularize_angle(old_first_phi / (sum_energies > 0.f ? sum_energies : 1.f));
+                  moments_arr->firstEta[cluster] /= (sum_energies > 0.f ? sum_energies : 1.f);
+                }
+                break;
+              case 1:
+                moments_arr->secondR[cluster] /= (sum_energies > 0.f ? sum_energies : 1.f);
+                moments_arr->secondLambda[cluster] /= (sum_energies > 0.f ? sum_energies : 1.f);
+                break;
+              case 2:
+                moments_arr->lateral[cluster] /= CMCHack::get_temporary_array<LateralNormalization>(moments_arr)[cluster];
+                break;
+              case 3:
+                moments_arr->longitudinal[cluster] /= CMCHack::get_temporary_array<LongitudinalNormalization>(moments_arr)[cluster];
+                break;
+              default:
+                break;
+            }
+        }
+    }
+}
+
+__global__ static
+void finalClusterPassKernel( Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr,
+                             const Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
+                             const Helpers::CUDA_kernel_object<CellInfoArr> cell_info_arr,
+                             const Helpers::CUDA_kernel_object<GeometryArr> geometry,
+                             const int cluster_number)
+{
+  const int index    = blockIdx.x * blockDim.x + threadIdx.x;
+  const int cluster  = index / NumSamplings;
+  const int sampling = index % NumSamplings;
+  if (cluster < cluster_number)
+    {
+      const int max_cell = CMCHack::get_temporary_array<MaxECellPerSample>(moments_arr)[sampling][cluster];
+      if (max_cell >= 0 && max_cell < NCaloCells)
+        {
+          const ClusterTag tag = cell_state_arr->clusterTag[max_cell];
+          const float sec_weight = __uint_as_float(tag.secondary_cluster_weight());
+
+          moments_arr->maxEPerSample[sampling][cluster]   = cell_info_arr->energy[max_cell] * (tag.cluster_index() == cluster ? 1.0f - sec_weight : sec_weight);
+          //The cell can belong to either the first or second cluster.
+
+          moments_arr->maxPhiPerSample[sampling][cluster] = geometry->phi[max_cell];
+          moments_arr->maxEtaPerSample[sampling][cluster] = geometry->eta[max_cell];
+        }
+    }
+}
+
+/******************************************************************************
+ * Actual kernel calling code                                                 *
+ * (uses dynamic parallelism since we depend on numbers of clusters...)       *
+ ******************************************************************************/
+
+__global__ static
+void calculateClusterPropertiesAndMomentsDeferKernel( Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr,
+                                                      Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr,
+                                                      Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
+                                                      const Helpers::CUDA_kernel_object<CellInfoArr> cell_info_arr,
+                                                      const Helpers::CUDA_kernel_object<GeometryArr> geometry,
+                                                      const Helpers::CUDA_kernel_object<CellNoiseArr> noise_arr,
+                                                      const Helpers::CUDA_kernel_object<ClusterMomentCalculationOptions> opts)
+{
+  const int index = blockIdx.x * blockDim.x + threadIdx.x;
+  if (index == 0)
+    {
+      const int cluster_number = clusters_arr->number;
+
+      const int i_dimBlockClusters = ClusterPassBlockSize;
+      const int i_dimGridClusters = Helpers::int_ceil_div(cluster_number, Helpers::int_floor_div(i_dimBlockClusters, WarpSize));
+      const dim3 dimBlockClusters(i_dimBlockClusters, 1, 1);
+      const dim3 dimGridClusters(i_dimGridClusters, 1, 1);
+
+      const int i_dimBlockCells = CellPassBlockSize;
+      const int i_dimGridCells = Helpers::int_ceil_div(NCaloCells, Helpers::int_floor_div(i_dimBlockCells, WarpSize));
+      const dim3 dimBlockCells(i_dimBlockCells, 1, 1);
+      const dim3 dimGridCells(i_dimGridCells, 1, 1);
+
+      const int i_dimBlockFinal = FinalClusterPassBlocksize;
+      const int i_dimGridFinal = Helpers::int_ceil_div(cluster_number * NumSamplings, i_dimBlockFinal);
+      const dim3 dimBlockFinal(i_dimBlockFinal, 1, 1);
+      const dim3 dimGridFinal(i_dimGridFinal, 1, 1);
+
+      clearInvalidCells <<< dimGridCells, dimBlockCells>>>(cell_state_arr, clusters_arr);
+
+      zerothClusterPassKernel <<< dimGridClusters, dimBlockClusters>>>(moments_arr, clusters_arr, geometry, cluster_number);
+
+      firstCellPassKernel <<< dimGridCells, dimBlockCells>>>(moments_arr, clusters_arr, cell_state_arr, cell_info_arr, geometry, opts->use_abs_energy);
+      firstClusterPassKernel <<< dimGridClusters, dimBlockClusters>>>(moments_arr, clusters_arr, cluster_number);
+
+      secondCellPassKernel <<< dimGridCells, dimBlockCells>>>(moments_arr, cell_state_arr, cell_info_arr, geometry, noise_arr,
+                                                              opts->use_abs_energy, opts->use_two_gaussian_noise, opts->min_LAr_quality);
+      secondClusterPassKernel <<< dimGridClusters, dimBlockClusters>>>(moments_arr, clusters_arr, cluster_number, opts->max_axis_angle);
+
+      thirdCellPassKernel <<< dimGridCells, dimBlockCells>>>(moments_arr, cell_state_arr, cell_info_arr, geometry, opts->use_abs_energy,
+                                                             opts->eta_inner_wheel, opts->min_l_longitudinal, opts->min_r_lateral);
+      thirdClusterPassKernel <<< dimGridClusters, dimBlockClusters>>>(moments_arr, cluster_number);
+
+      finalClusterPassKernel <<< dimGridFinal, dimBlockFinal>>>(moments_arr, cell_state_arr, cell_info_arr, geometry, cluster_number);
+
+      //We could have split this up and not rely so much on dynamic parallelism.
+      //However, if not using CUDA 12 (which we probably won't be for a while),
+      //we'd have to dyn-par our way through the number of clusters at every cluster-related kernel.
+      //With tail calls, it's a bit simpler, but we'd have a mess of #ifdef and so on
+      //until we could drop support for CUDA less than 12.
+      //So I am currently taking the shortcut of just calling everything from here
+      //and only calculating block sizes once...
+    }
+}
+
+
+
+
+void calculateClusterPropertiesAndMoments(CaloRecGPU::EventDataHolder & holder,
+                                          const ConstantDataHolder & instance_data,
+                                          const CMCOptionsHolder & options,
+                                          const bool synchronize,
+                                          CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream)
+{
+  const cudaStream_t & stream_to_use = (stream != nullptr ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
+
+  calculateClusterPropertiesAndMomentsDeferKernel <<< 1, 1, 0, stream_to_use>>>(holder.m_clusters_dev, holder.m_moments_dev, holder.m_cell_state_dev, holder.m_cell_info_dev,
+                                                                                instance_data.m_geometry_dev, instance_data.m_cell_noise_dev, options.m_options_dev);
+
+  if (synchronize)
+    {
+      CUDA_ERRCHECK(cudaPeekAtLastError());
+      CUDA_ERRCHECK(cudaStreamSynchronize(stream_to_use));
+    }
+}

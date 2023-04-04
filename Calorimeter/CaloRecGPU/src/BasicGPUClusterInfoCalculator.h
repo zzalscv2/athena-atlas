@@ -1,5 +1,7 @@
 //
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+//
+// Dear emacs, this is -*- c++ -*-
 //
 
 
@@ -13,11 +15,14 @@
 #include "CaloRecGPU/CaloGPUTimed.h"
 #include "BasicGPUClusterInfoCalculatorImpl.h"
 
+#include "CLHEP/Units/SystemOfUnits.h"
+
 /**
  * @class BasicGPUClusterInfoCalculator
  * @author Nuno Fernandes <nuno.dos.santos.fernandes@cern.ch>
  * @date 11 August 2022
- * @brief Standard tool to calculate cluster info (energy, transverse energy, pseudo-rapidity and azimuthal angle).
+ * @brief Standard tool to calculate cluster info (energy, transverse energy, pseudo-rapidity and azimuthal angle)
+ *        and apply E/ET cuts on clusters if desired.
  */
 
 
@@ -30,26 +35,37 @@ class BasicGPUClusterInfoCalculator:
 
   virtual StatusCode initialize() override;
 
-  virtual StatusCode execute (const EventContext & ctx, const ConstantDataHolder & constant_data, EventDataHolder & event_data) const override;
+  virtual StatusCode execute (const EventContext & ctx,
+                              const CaloRecGPU::ConstantDataHolder & constant_data,
+                              CaloRecGPU::EventDataHolder & event_data,
+                              void * temporary_buffer) const override;
 
   virtual StatusCode finalize() override;
 
   virtual ~BasicGPUClusterInfoCalculator();
 
+  virtual size_t size_of_temporaries() const
+  {
+    return sizeof(ClusterInfoCalculatorTemporaries);
+  };
+
  private:
 
   /**
-   * @brief Number of events for which to pre-allocate space on GPU memory
-   * (should ideally be set to the expected number of threads to be run with).
-   *
-   */
-  Gaudi::Property<size_t> m_numPreAllocatedGPUData {this, "NumPreAllocatedDataHolders", 0, "Number of temporary data holders to pre-allocate on GPU memory"};
-
-  /** @brief A way to reduce allocations over multiple threads by keeping a cache
-  *   of previously allocated objects that get assigned to the threads as they need them.
-  *   It's all thread-safe due to an internal mutex ensuring no objects get assigned to different threads.
+  * @brief if set to @p true cluster cuts are on \f$|E|_\perp\f$, if @p false on \f$E_\perp\f$. Default is @p true.
+  *
   */
-  mutable CaloRecGPU::Helpers::separate_thread_holder<BasicGPUClusterInfoCalculatorTemporariesHolder> m_temporariesHolder ATLAS_THREAD_SAFE;
+  Gaudi::Property<bool> m_cutClustersInAbsE {this, "ClusterCutsInAbsEt", true, "Do cluster cuts in Abs Et instead of Et"};
+
+  /**
+   * @brief \f$E_\perp\f$ cut on the clusters.
+   *
+   * The clusters have to pass this cut (which is on \f$E_\perp\f$
+   * or \f$|E|_\perp\f$ of the cluster depending on the above switch)
+   * in order to be inserted into the CaloClusterContainer.  */
+
+  Gaudi::Property<float> m_clusterETThreshold {this, "ClusterEtorAbsEtCut", 0.*CLHEP::MeV, "Cluster E_t or Abs E_t cut"};
+
 };
 
 #endif //CALORECGPU_TOPOAUTOMATONCLUSTERING_H

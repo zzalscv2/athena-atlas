@@ -1,6 +1,7 @@
-// Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+//
+// Dear emacs, this is -*- c++ -*-
 //
 
 #ifndef CALORECGPU_STANDALONEDATAIO_H
@@ -19,6 +20,17 @@
 
 #include <boost/filesystem.hpp>
 
+
+//Note to self and/or anyone who may worry about that:
+//we aren't using anything fancier than file extension + file size
+//to detect the versions of the files.
+//I know this is unelegant and hardly scalable,
+//but it's easier and works fine for our purposes.
+//The only possible side-effect of this is that
+//file extensions can become a bit larger than 3
+//("clusterinfo", 11 characters),
+//but this should pose no problem in our days...
+
 struct StandaloneDataIO
 {
   enum class ErrorState
@@ -29,13 +41,13 @@ struct StandaloneDataIO
  protected:
 
 
-  constexpr static int current_version = 4;
+  constexpr static int current_version = 6;
 
   template <class T>
   inline static ErrorState read_from_file(const boost::filesystem::path & file, T * obj_ptr, const size_t offset = 0, const bool can_have_bool_at_start = true)
   {
     std::ifstream in(file.native(), std::ios_base::binary);
-    if (boost::filesystem::file_size(file) && can_have_bool_at_start)
+    if (boost::filesystem::file_size(file) > sizeof(T) + offset && can_have_bool_at_start)
       //Some of our output versions had an extra bool at the start.
       {
         in.ignore(sizeof(bool) + offset);
@@ -43,6 +55,10 @@ struct StandaloneDataIO
           {
             return ErrorState::ReadError;
           }
+      }
+    else if (offset)
+      {
+        in.ignore(offset);
       }
     in.read((char *) obj_ptr, sizeof(T));
     if (in.fail())
@@ -68,10 +84,36 @@ struct StandaloneDataIO
       {
         return 3;
       }
-    else if (filepath.extension() == ".clusters" || filepath.extension() == ".geo" || filepath.extension() == ".noise" || filepath.extension() == ".cells")
+    else if (filepath.extension() == ".cellsold")
       {
         return 4;
       }
+    else if (filepath.extension() == ".clusters" || filepath.extension() == ".cells")
+      {
+        return 5;
+      }
+    else if (filepath.extension() == ".geo")
+      {
+        if (abs(ptrdiff_t( boost::filesystem::file_size(filepath)) - ptrdiff_t(sizeof(ConstantInformation::GeometryArr_v2))) > ptrdiff_t(sizeof(bool)))
+          //There might be a bool in the beginning due to the old way of binary output...
+          {
+            return 5;
+          }
+        else
+          {
+            return 3;
+          }
+      }
+    else if ( filepath.extension() == ".geometry" || filepath.extension() == ".noise" ||
+              filepath.extension() == ".clusterinfo" || filepath.extension() == ".cellinfo" ||
+              filepath.extension() == ".cellstate"                                              )
+      {
+        return 6;
+      }
+    //Most recent ones. Hopefully final.
+    //(Additional objects, e. g. cluster moments,
+    // might get added, but hopefully the objects
+    // will remain the same, size and structure-wise.)
     else
       {
         return -1;
@@ -90,8 +132,9 @@ struct StandaloneDataIO
 
   struct ConstantInformation
   {
+    friend class StandaloneDataIO;
    protected:
-    constexpr static int NMaxNeighbours = 26;
+    constexpr static int NMaxNeighboursOld = 26;
     constexpr static int NCaloCells = 187652;
 
     struct GeometryArr_v1
@@ -104,8 +147,56 @@ struct StandaloneDataIO
       float  phi[NCaloCells];
       float  noise[NCaloCells];
       unsigned int nNeighbours[NCaloCells];
-      unsigned int neighbours[NCaloCells][NMaxNeighbours];
+      unsigned int neighbours[NCaloCells][NMaxNeighboursOld];
     };
+
+    struct GeometryArr_v2
+    {
+      int    caloSample[NCaloCells];
+      float  x[NCaloCells];
+      float  y[NCaloCells];
+      float  z[NCaloCells];
+      float  eta[NCaloCells];
+      float  phi[NCaloCells];
+      int nNeighbours[NCaloCells];
+      int neighbours[NCaloCells][NMaxNeighboursOld];
+      int nReverseNeighbours[NCaloCells];
+      int reverseNeighbours[NCaloCells][NMaxNeighboursOld];
+    };
+
+    struct NeighArr_v5
+    {
+      int total_number[NCaloCells];
+      unsigned long long int offsets[NCaloCells];
+      //don't forget to correct for the last offsets now being 6 bit!
+      int cells[NMaxNeighboursOld][NCaloCells];
+    };
+
+    struct GeometryArr_v5
+    {
+      int   caloSample[NCaloCells];
+      float x[NCaloCells];
+      float y[NCaloCells];
+      float z[NCaloCells];
+      float eta[NCaloCells];
+      float phi[NCaloCells];
+      float volume[NCaloCells];
+
+      NeighArr_v5 neighbours;
+
+      int tileStart, tileEnd;
+    };
+
+    inline static unsigned long long int old_to_new_offset(unsigned long long int old_offset)
+    {
+      unsigned long long int ret = old_offset & 0xC000000000000000ULL;
+      //Keep the two last bits (to mark limited neighbours)
+      for (int i = 0; i < CaloRecGPU::NumNeighOptions; ++i)
+        {
+          ret += CaloRecGPU::NeighOffsets::offset_delta(i) * ((old_offset >> (i * 5)) & 0x1FULL);
+        }
+      return ret;
+    }
 
    public:
 
@@ -115,7 +206,7 @@ struct StandaloneDataIO
         {
           return ErrorState::VersionError;
         }
-      else if (version < 4)
+      else if (version < 3)
         {
           CaloRecGPU::Helpers::CPU_object<GeometryArr_v1> temp(true);
           if (read_from_file<GeometryArr_v1>(file, temp) != ErrorState::OK)
@@ -132,14 +223,72 @@ struct StandaloneDataIO
               geo->z[i] = temp->z[i];
               geo->eta[i] = temp->eta[i];
               geo->phi[i] = temp->phi[i];
-              geo->nNeighbours[i] = temp->nNeighbours[i];
-              for (int j = 0; j < NMaxNeighbours; ++j)
+              geo->volume[i] = 0;
+              //We weren't caring about volume then.
+              geo->neighbours.total_number[i] = temp->nNeighbours[i];
+              geo->neighbours.offsets[i] = 0;
+              for (int j = 0; j < NMaxNeighboursOld; ++j)
                 {
-                  geo->neighbours[i][j] = temp->neighbours[i][j];
+                  geo->neighbours.cells[j][i] = temp->neighbours[i][j];
+                  //We switched the order!
                 }
             }
         }
-      else if (version == 4)
+      else if (version == 3)
+        {
+          CaloRecGPU::Helpers::CPU_object<GeometryArr_v2> temp(true);
+          if (read_from_file<GeometryArr_v2>(file, temp) != ErrorState::OK)
+            {
+              report_error(file, "reading geometry");
+              return ErrorState::ReadError;
+            }
+          geo.allocate();
+          for (int i = 0; i < NCaloCells; ++i)
+            {
+              geo->caloSample[i] = temp->caloSample[i];
+              geo->x[i] = temp->x[i];
+              geo->y[i] = temp->y[i];
+              geo->z[i] = temp->z[i];
+              geo->eta[i] = temp->eta[i];
+              geo->phi[i] = temp->phi[i];
+              geo->volume[i] = 0;
+              //We weren't caring about volume then.
+              geo->neighbours.total_number[i] = temp->nReverseNeighbours[i];
+              geo->neighbours.offsets[i] = 0;
+              for (int j = 0; j < NMaxNeighboursOld; ++j)
+                {
+                  geo->neighbours.cells[j][i] = temp->reverseNeighbours[i][j];
+                  //We switched the order!
+                }
+            }
+        }
+      else if (version == 4 || version == 5)
+        {
+          CaloRecGPU::Helpers::CPU_object<GeometryArr_v5> temp(true);
+          if (read_from_file<GeometryArr_v5>(file, temp) != ErrorState::OK)
+            {
+              report_error(file, "reading geometry");
+              return ErrorState::ReadError;
+            }
+          geo.allocate();
+          for (int i = 0; i < NCaloCells; ++i)
+            {
+              geo->caloSample[i] = temp->caloSample[i];
+              geo->x[i] = temp->x[i];
+              geo->y[i] = temp->y[i];
+              geo->z[i] = temp->z[i];
+              geo->eta[i] = temp->eta[i];
+              geo->phi[i] = temp->phi[i];
+              geo->volume[i] = temp->volume[i];
+              geo->neighbours.total_number[i] = temp->neighbours.total_number[i];
+              for (int j = 0; j < NMaxNeighboursOld; ++j)
+                {
+                  geo->neighbours.cells[j][i] = temp->neighbours.cells[j][i];
+                }
+              geo->neighbours.offsets[i] = old_to_new_offset(temp->neighbours.offsets[i]);
+            }
+        }
+      else if (version == 6)
         {
           std::ifstream in(file.native(), std::ios_base::binary);
           geo.binary_input(in);
@@ -182,7 +331,7 @@ struct StandaloneDataIO
                 }
             }
         }
-      else if (version == 4)
+      else if (version == 4 || version == 5 || version == 6)
         {
           std::ifstream in(file.native(), std::ios_base::binary);
           noise.binary_input(in);
@@ -208,7 +357,7 @@ struct StandaloneDataIO
         {
           return ErrorState::VersionError;
         }
-      else if (version < 4)
+      else if (version < 3)
         {
           CaloRecGPU::Helpers::CPU_object<GeometryArr_v1> temp(true);
           if (read_from_file<GeometryArr_v1>(file, temp) != ErrorState::OK)
@@ -226,16 +375,20 @@ struct StandaloneDataIO
               geo->z[i] = temp->z[i];
               geo->eta[i] = temp->eta[i];
               geo->phi[i] = temp->phi[i];
+              geo->volume[i] = 0;
+              //We weren't caring about volume then.
               for (int j = 0; j < CaloRecGPU::NumGainStates; ++j)
                 {
                   noise->noise[j][i] = temp->noise[i];
                   //Wrongfully assuming the same noise for all gain states,
                   //but that's what was being done...
                 }
-              geo->nNeighbours[i] = temp->nNeighbours[i];
-              for (int j = 0; j < NMaxNeighbours; ++j)
+              geo->neighbours.total_number[i] = temp->nNeighbours[i];
+              geo->neighbours.offsets[i] = 0;
+              for (int j = 0; j < NMaxNeighboursOld; ++j)
                 {
-                  geo->neighbours[i][j] = temp->neighbours[i][j];
+                  geo->neighbours.cells[j][i] = temp->neighbours[i][j];
+                  //We switched the order!
                 }
             }
         }
@@ -268,7 +421,7 @@ struct StandaloneDataIO
 
     inline static ErrorState write_geometry(boost::filesystem::path file, const CaloRecGPU::Helpers::CPU_object<CaloRecGPU::GeometryArr> & geo)
     {
-      file.replace_extension(".geo");
+      file.replace_extension(".geometry");
       std::ofstream out(file, std::ios_base::binary);
       geo.binary_output(out);
       if (out.fail())
@@ -297,6 +450,7 @@ struct StandaloneDataIO
 
   struct EventInformation
   {
+    friend class StandaloneDataIO;
    protected:
     constexpr static int NMaxNeighbours = 26;
     constexpr static int NCaloCells = 187652;
@@ -341,17 +495,23 @@ struct StandaloneDataIO
       float clusterPhi[NMaxClusters];
     };
 
-    inline static void cluster_tag_adjust(CaloRecGPU::tag_type & tag, const int old_tag, const int index)
+
+    struct CellInfoArr_v4
+    {
+      float energy[NCaloCells];
+      signed char gain[NCaloCells];
+    };
+
+    inline static void cluster_tag_adjust(CaloRecGPU::tag_type & tag, const int old_tag, const int /*index*/)
     {
       if (old_tag < 0)
         //Old way of storing had cells not part of clusters having tag -1.
         {
-          tag = CaloRecGPU::Tags::InvalidTag;
+          tag = CaloRecGPU::ClusterTag::make_invalid_tag();
         }
       else
         {
-          tag = CaloRecGPU::Tags::make_seed_tag(0x7f7fffff, index, old_tag);
-          //0x7f7fffff is the largest possible valid (finite non-NaN) floating point value.
+          tag = CaloRecGPU::ClusterTag::make_tag(old_tag);
         }
     }
 
@@ -453,7 +613,7 @@ struct StandaloneDataIO
           //One would need to recalculate if using this for old versions...
 
         }
-      else if (version == 4)
+      else if (version == 4 || version == 5 || version == 6)
         {
           clusters.allocate();
 
@@ -491,8 +651,60 @@ struct StandaloneDataIO
 
     inline static ErrorState read_cell_info(const boost::filesystem::path & file,
                                             CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellInfoArr> & cell_info,
-                                            CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellStateArr> & cell_state,
                                             const int version)
+    {
+      if (version <= 0 || version > current_version)
+        {
+          return ErrorState::VersionError;
+        }
+      else if (version == 6)
+        {
+          std::ifstream in(file.native(), std::ios_base::binary);
+          cell_info.binary_input(in);
+          if (in.fail())
+            {
+              report_error(file, "reading cell info");
+              return ErrorState::ReadError;
+            }
+          in.close();
+        }
+      else
+        {
+          return ErrorState::VersionError;
+        }
+      return ErrorState::OK;
+    }
+
+    inline static ErrorState read_cell_state(const boost::filesystem::path & file,
+                                             CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellStateArr> & cell_state,
+                                             const int version)
+    {
+      if (version <= 0 || version > current_version)
+        {
+          return ErrorState::VersionError;
+        }
+      else if (version == 6)
+        {
+          std::ifstream in(file.native(), std::ios_base::binary);
+          cell_state.binary_input(in);
+          if (in.fail())
+            {
+              report_error(file, "reading cell state");
+              return ErrorState::ReadError;
+            }
+          in.close();
+        }
+      else
+        {
+          return ErrorState::VersionError;
+        }
+      return ErrorState::OK;
+    }
+
+    inline static ErrorState read_cell_info_and_state(const boost::filesystem::path & file,
+                                                      CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellInfoArr> & cell_info,
+                                                      CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellStateArr> & cell_state,
+                                                      const int version)
     {
       if (version <= 0 || version > current_version)
         {
@@ -517,6 +729,8 @@ struct StandaloneDataIO
               //We don't have varying gains in this case,
               //so we just assume it's constant and equal to the first type.
               //(A guess as good as any...)
+              cell_info->time[i] = 0;
+              cell_info->qualityProvenance[i] = 0;
             }
         }
       else if (version == 2)
@@ -563,15 +777,67 @@ struct StandaloneDataIO
               //We don't have varying gains in this case,
               //so we just assume it's constant and equal to the first type.
               //(A guess as good as any...)
+              cell_info->time[i] = 0;
+              cell_info->qualityProvenance[i] = 0;
 
               cluster_tag_adjust(cell_state->clusterTag[i], temp->clusterTag[i], i);
             }
         }
       else if (version == 4)
         {
+          cell_info.allocate();
+          cell_state.allocate();
+
+          CaloRecGPU::Helpers::CPU_object<CellInfoArr_v4> temp(true);
+
+          std::ifstream in(file.native(), std::ios_base::binary);
+          temp.binary_input(in);
+          cell_state.binary_input(in);
+
+          if (in.fail())
+            {
+              report_error(file, "reading cells");
+              return ErrorState::ReadError;
+            }
+          in.close();
+
+          for (int i = 0; i < NCaloCells; ++i)
+            {
+              cell_info->energy[i] = temp->energy[i];
+              cell_info->gain[i] = temp->gain[i];
+              cell_info->time[i] = 0;
+              cell_info->qualityProvenance[i] = 0;
+
+              CaloRecGPU::ClusterTag tag = cell_state->clusterTag[i];
+
+              unsigned int weight_pattern = tag.secondary_cluster_weight();
+              float weight = 0;
+              std::memcpy(&weight, &weight_pattern, sizeof(float));
+              weight = 1.0f - weight;
+              //We changed the definition.
+              std::memcpy(&weight_pattern, &weight, sizeof(float));
+
+              tag = tag.override_secondary_cluster_weight(weight_pattern);
+            }
+        }
+      else if (version == 5)
+        {
           std::ifstream in(file.native(), std::ios_base::binary);
           cell_info.binary_input(in);
           cell_state.binary_input(in);
+          for (int i = 0; i < NCaloCells; ++i)
+            {
+              CaloRecGPU::ClusterTag tag = cell_state->clusterTag[i];
+
+              unsigned int weight_pattern = tag.secondary_cluster_weight();
+              float weight = 0;
+              std::memcpy(&weight, &weight_pattern, sizeof(float));
+              weight = 1.0f - weight;
+              //We changed the definition.
+              std::memcpy(&weight_pattern, &weight, sizeof(float));
+
+              tag = tag.override_secondary_cluster_weight(weight_pattern);
+            }
           if (in.fail())
             {
               report_error(file, "reading cells");
@@ -706,6 +972,8 @@ struct StandaloneDataIO
               //We don't have varying gains in this case,
               //so we just assume it's constant and equal to the first type.
               //(A guess as good as any...)
+              cell_info->time[i] = 0;
+              cell_info->qualityProvenance[i] = 0;
 
               cluster_tag_adjust(cell_state->clusterTag[i], temp->clusterTag[i], i);
             }
@@ -722,11 +990,21 @@ struct StandaloneDataIO
       return read_cluster_info(file, clusters, guess_version(file));
     }
 
-    inline static ErrorState read_cell_info(const boost::filesystem::path & file,
-                                            CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellInfoArr> & cell_info,
-                                            CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellStateArr> & cell_state)
+    inline static ErrorState read_cell_info(const boost::filesystem::path & file, CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellInfoArr> & cell_info)
     {
-      return read_cell_info(file, cell_info, cell_state, guess_version(file));
+      return read_cell_info(file, cell_info, guess_version(file));
+    }
+
+    inline static ErrorState read_cell_state(const boost::filesystem::path & file, CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellStateArr> & cell_state)
+    {
+      return read_cell_state(file, cell_state, guess_version(file));
+    }
+
+    inline static ErrorState read_cell_info_and_state(const boost::filesystem::path & file,
+                                                      CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellInfoArr> & cell_info,
+                                                      CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellStateArr> & cell_state)
+    {
+      return read_cell_info_and_state(file, cell_info, cell_state, guess_version(file));
     }
 
     inline static ErrorState read_cell_and_cluster_info(const boost::filesystem::path & file,
@@ -739,7 +1017,7 @@ struct StandaloneDataIO
 
     inline static ErrorState write_cluster_info(boost::filesystem::path file, const CaloRecGPU::Helpers::CPU_object<CaloRecGPU::ClusterInfoArr> & clusters)
     {
-      file.replace_extension(".clusters");
+      file.replace_extension(".clusterinfo");
       std::ofstream out(file, std::ios_base::binary);
 
       out.write((char *) & (clusters->number), sizeof(int));
@@ -759,16 +1037,29 @@ struct StandaloneDataIO
     }
 
     inline static ErrorState write_cell_info(boost::filesystem::path file,
-                                             const CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellInfoArr> & cell_info,
-                                             const CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellStateArr> & cell_state)
+                                             const CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellInfoArr> & cell_info)
     {
-      file.replace_extension(".cells");
+      file.replace_extension(".cellinfo");
       std::ofstream out(file, std::ios_base::binary);
       cell_info.binary_output(out);
+      if (out.fail())
+        {
+          report_error(file, "writing cell info");
+          return ErrorState::WriteError;
+        }
+      out.close();
+      return ErrorState::OK;
+    }
+
+    inline static ErrorState write_cell_state(boost::filesystem::path file,
+                                              const CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellStateArr> & cell_state)
+    {
+      file.replace_extension(".cellstate");
+      std::ofstream out(file, std::ios_base::binary);
       cell_state.binary_output(out);
       if (out.fail())
         {
-          report_error(file, "writing cells");
+          report_error(file, "writing cell state");
           return ErrorState::WriteError;
         }
       out.close();
@@ -888,25 +1179,28 @@ struct StandaloneDataIO
       return folder / build_filename(prefix, event_ID, suffix, ext);
     };
 
-    if (EventInformation::write_cell_info(filename("cells"), cell_info, cell_state) != ErrorState::OK)
+    if (EventInformation::write_cell_info(filename("cellinfo"), cell_info) != ErrorState::OK)
       {
         return ErrorState::WriteError;
       }
-    if (EventInformation::write_cluster_info(filename("clusters"), clusters) != ErrorState::OK)
+    if (EventInformation::write_cell_state(filename("cellstate"), cell_state) != ErrorState::OK)
+      {
+        return ErrorState::WriteError;
+      }
+    if (EventInformation::write_cluster_info(filename("clusterinfo"), clusters) != ErrorState::OK)
       {
         return ErrorState::WriteError;
       }
     return ErrorState::OK;
   }
 
-  inline static ErrorState save_cells_to_folder(const size_t event_number,
-                                                const boost::filesystem::path & folder,
-                                                const CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellInfoArr> & cell_info,
-                                                const CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellStateArr> & cell_state,
-                                                const std::string & prefix = "",
-                                                const std::string & suffix = "",
-                                                const unsigned int num_width = 9,
-                                                const bool output_errors = true)
+  inline static ErrorState save_cell_state_to_folder(const size_t event_number,
+                                                     const boost::filesystem::path & folder,
+                                                     const CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellStateArr> & cell_state,
+                                                     const std::string & prefix = "",
+                                                     const std::string & suffix = "",
+                                                     const unsigned int num_width = 9,
+                                                     const bool output_errors = true)
   {
     if (!create_or_check_folder(folder, output_errors))
       {
@@ -922,7 +1216,36 @@ struct StandaloneDataIO
       return folder / build_filename(prefix, event_ID, suffix, ext);
     };
 
-    if (EventInformation::write_cell_info(filename("cells"), cell_info, cell_state) != ErrorState::OK)
+    if (EventInformation::write_cell_state(filename("cellstate"), cell_state) != ErrorState::OK)
+      {
+        return ErrorState::WriteError;
+      }
+    return ErrorState::OK;
+  }
+
+  inline static ErrorState save_cell_info_to_folder(const size_t event_number,
+                                                    const boost::filesystem::path & folder,
+                                                    const CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellInfoArr> & cell_info,
+                                                    const std::string & prefix = "",
+                                                    const std::string & suffix = "",
+                                                    const unsigned int num_width = 9,
+                                                    const bool output_errors = true)
+  {
+    if (!create_or_check_folder(folder, output_errors))
+      {
+        return ErrorState::WriteError;
+      }
+
+    std::ostringstream event_ID_format;
+    event_ID_format << std::setfill('0') << std::setw(num_width) << event_number;
+    const std::string event_ID = event_ID_format.str();
+
+    auto filename = [&] (const std::string & ext)
+    {
+      return folder / build_filename(prefix, event_ID, suffix, ext);
+    };
+
+    if (EventInformation::write_cell_info(filename("cellinfo"), cell_info) != ErrorState::OK)
       {
         return ErrorState::WriteError;
       }
@@ -962,22 +1285,48 @@ struct StandaloneDataIO
   {
     std::map<std::string, CaloRecGPU::Helpers::CPU_object<CaloRecGPU::GeometryArr>> geometry;
     std::map<std::string, CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellNoiseArr>> noise;
-    std::map<std::string, CaloRecGPU::Helpers::CPU_object<CaloRecGPU::ClusterInfoArr>> clusters;
+    std::map<std::string, CaloRecGPU::Helpers::CPU_object<CaloRecGPU::ClusterInfoArr>> cluster_info;
     std::map<std::string, CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellInfoArr>> cell_info;
     std::map<std::string, CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellStateArr>> cell_state;
   };
 
+  /*! @class FolderLoadOptions
 
+      The members of this structure should all be initialised by default to @c false.
+      It is the function caller's responsibility to specify what should be loaded.
+  */
+  struct FolderLoadOptions
+  {
+    bool load_cluster_info = false,
+         load_cell_state = false,
+         load_cell_info = false,
+         load_geometry = false,
+         load_noise = false;
+
+    static constexpr FolderLoadOptions None()
+    {
+      FolderLoadOptions ret;
+      return ret;
+      //By design, all options are initialized as false...
+    }
+    static constexpr FolderLoadOptions All()
+    {
+      FolderLoadOptions ret{true, true, true, true, true};
+      return ret;
+    }
+  };
+
+
+  /*! @param filter_function receives a std::string (the filename),
+             returns `true` if the file should be filtered out.
+  */
   template <class F>
   inline static FolderLoad load_folder_filter(F && filter_function,
                                               //Receives a std::string (the filename),
                                               //returns `true` if the file should be filtered out.
                                               const boost::filesystem::path & folder,
                                               int max_events = -1,
-                                              const bool load_clusters = true,
-                                              const bool load_cells = true,
-                                              const bool load_geometry = true,
-                                              const bool load_noise = true,
+                                              const FolderLoadOptions & flo = FolderLoadOptions::None(),
                                               const bool output_messages = true)
   {
     FolderLoad ret;
@@ -993,16 +1342,20 @@ struct StandaloneDataIO
     int event_count = 0;
     for (const boost::filesystem::path & file : boost::filesystem::directory_iterator(folder))
       {
-        if (max_events > 0 && event_count >= max_events && ret.geometry.size() > 0 && ret.noise.size() > 0)
+        if ( max_events > 0 && event_count >= max_events &&
+             ret.geometry.size() > 0 && ret.noise.size() > 0 )
           {
             break;
           }
+
         const bool can_load_events = (max_events < 0) || (event_count < max_events);
         const std::string filename = file.stem().native();
+
         if (filter_function(filename))
           {
             continue;
           }
+
         auto check_error = [&](const ErrorState & es, const std::string & str)
         {
           if (es == ErrorState::OK)
@@ -1015,6 +1368,7 @@ struct StandaloneDataIO
             }
           return true;
         };
+
         auto output_loading_message = [&](const std::string & str)
         {
           if (output_messages)
@@ -1022,9 +1376,99 @@ struct StandaloneDataIO
               std::cout << "Loaded " << str << " from '" << file << "'." << std::endl;
             }
         };
-        if (file.extension() == ".geo")
+
+
+        if (file.extension() == ".geometry")
           {
-            if (!load_geometry)
+            if (!flo.load_geometry)
+              {
+                continue;
+              }
+            CaloRecGPU::Helpers::CPU_object<CaloRecGPU::GeometryArr> tempgeo(true);
+            if (check_error(ConstantInformation::read_geometry(file, tempgeo), "geometry"))
+              {
+                continue;
+              }
+            ret.geometry[filename] = std::move(tempgeo);
+            output_loading_message("geometry");
+          }
+        else if (file.extension() == ".cellstate")
+          {
+            if (!flo.load_cell_state || !can_load_events)
+              {
+                continue;
+              }
+            CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellStateArr> tempcellstate(true);
+            if (check_error(EventInformation::read_cell_state(file, tempcellstate), "cell state"))
+              {
+                continue;
+              }
+            ret.cell_state[filename] = std::move(tempcellstate);
+            output_loading_message("cell state");
+            if ((ret.cluster_info.count(filename) > 0 || !flo.load_cluster_info) &&
+                (ret.cell_info.count(filename) > 0 || !flo.load_cell_info))
+              {
+                ++event_count;
+              }
+          }
+        else if (file.extension() == ".cellinfo")
+          {
+            if (!flo.load_cell_info || !can_load_events)
+              {
+                continue;
+              }
+            CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellInfoArr> tempcellinfo(true);
+            if (check_error(EventInformation::read_cell_info(file, tempcellinfo), "cell info"))
+              {
+                continue;
+              }
+            ret.cell_info[filename] = std::move(tempcellinfo);
+            output_loading_message("cell info");
+            if ((ret.cluster_info.count(filename) > 0 || !flo.load_cluster_info) &&
+                (ret.cell_state.count(filename) > 0 || !flo.load_cell_state))
+              {
+                ++event_count;
+              }
+          }
+        else if (file.extension() == ".clusterinfo")
+          {
+            if (!flo.load_cluster_info || !can_load_events)
+              {
+                continue;
+              }
+            CaloRecGPU::Helpers::CPU_object<CaloRecGPU::ClusterInfoArr> tempclu(true);
+            if (check_error(EventInformation::read_cluster_info(file, tempclu), "cluster info"))
+              {
+                continue;
+              }
+            ret.cluster_info[filename] = std::move(tempclu);
+            output_loading_message("cluster info");
+            if ((ret.cell_state.count(filename) > 0 || !flo.load_cell_state) &&
+                (ret.cell_info.count(filename) > 0 || !flo.load_cell_info))
+              {
+                ++event_count;
+              }
+          }
+        else if (file.extension() == ".noise")
+          {
+            if (!flo.load_noise)
+              {
+                continue;
+              }
+            CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellNoiseArr> tempnois(true);
+            if (check_error(ConstantInformation::read_noise(file, tempnois), "noise"))
+              {
+                continue;
+              }
+            ret.noise[filename] = std::move(tempnois);
+            output_loading_message("noise");
+          }
+
+        //Legacy versions start now...
+
+        else if (file.extension() == ".geo")
+          {
+            if (!flo.load_geometry)
               {
                 continue;
               }
@@ -1038,7 +1482,7 @@ struct StandaloneDataIO
           }
         else if (filename.find("geometry") != std::string::npos)
           {
-            if (!load_geometry && !load_noise)
+            if (!flo.load_geometry && !flo.load_noise)
               {
                 continue;
               }
@@ -1048,71 +1492,64 @@ struct StandaloneDataIO
               {
                 continue;
               }
-            if (load_geometry)
+            if (flo.load_geometry)
               {
                 ret.geometry[filename] = std::move(tempgeo);
               }
-            if (load_noise)
+            if (flo.load_noise)
               {
                 ret.noise[filename] = std::move(tempnois);
               }
             output_loading_message("geometry and noise");
           }
-        else if (file.extension() == ".noise")
-          {
-            if (!load_noise)
-              {
-                continue;
-              }
-            CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellNoiseArr> tempnois(true);
-            if (check_error(ConstantInformation::read_noise(file, tempnois), "noise"))
-              {
-                continue;
-              }
-            ret.noise[filename] = std::move(tempnois);
-            output_loading_message("noise");
-          }
         else if (file.extension() == ".clusters")
           {
-            if (!load_clusters || !can_load_events)
+            if (!flo.load_cluster_info || !can_load_events)
               {
                 continue;
               }
             CaloRecGPU::Helpers::CPU_object<CaloRecGPU::ClusterInfoArr> tempclu(true);
-            if (check_error(EventInformation::read_cluster_info(file, tempclu), "clusters"))
+            if (check_error(EventInformation::read_cluster_info(file, tempclu), "cluster info"))
               {
                 continue;
               }
-            ret.clusters[filename] = std::move(tempclu);
-            output_loading_message("clusters");
-            if (ret.cell_info.count(filename) > 0 || !load_cells)
+            ret.cluster_info[filename] = std::move(tempclu);
+            output_loading_message("cluster info");
+            if ((ret.cell_state.count(filename) > 0 || !flo.load_cell_state) &&
+                (ret.cell_info.count(filename) > 0 || !flo.load_cell_info))
               {
                 ++event_count;
               }
           }
         else if (file.extension() == ".cells")
           {
-            if (!load_cells || !can_load_events)
+            if (!(flo.load_cell_info || flo.load_cell_state) || !can_load_events)
               {
                 continue;
               }
             CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellInfoArr> tempcellinfo(true);
             CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellStateArr> tempcellstate(true);
-            if (check_error(EventInformation::read_cell_info(file, tempcellinfo, tempcellstate), "cells"))
+            if (check_error(EventInformation::read_cell_info_and_state(file, tempcellinfo, tempcellstate), "cell info and state"))
               {
                 continue;
               }
-            ret.cell_info[filename] = std::move(tempcellinfo);
-            ret.cell_state[filename] = std::move(tempcellstate);
-            output_loading_message("cells");
-            if (ret.clusters.count(filename) > 0 || !load_clusters)
+            if (flo.load_cell_info)
+              {
+                ret.cell_info[filename] = std::move(tempcellinfo);
+              }
+            if (flo.load_cell_state)
+              {
+                ret.cell_state[filename] = std::move(tempcellstate);
+              }
+            output_loading_message("cell info and state");
+            if (ret.cluster_info.count(filename) > 0 || !flo.load_cluster_info)
               {
                 ++event_count;
               }
           }
         else if ((file.extension() == ".diag" || file.extension() == ".abrv"))
           {
-            if (!(load_cells || load_clusters) || !can_load_events)
+            if (!(flo.load_cell_info || flo.load_cell_state || flo.load_cluster_info) || !can_load_events)
               {
                 continue;
               }
@@ -1123,24 +1560,27 @@ struct StandaloneDataIO
               {
                 continue;
               }
-            if (load_cells)
+            if (flo.load_cell_info)
               {
                 ret.cell_info[filename] = std::move(tempcellinfo);
+              }
+            if (flo.load_cell_state)
+              {
                 ret.cell_state[filename] = std::move(tempcellstate);
               }
-            if (load_clusters)
+            if (flo.load_cluster_info)
               {
-                ret.clusters[filename] = std::move(tempclu);
+                ret.cluster_info[filename] = std::move(tempclu);
               }
-            if (load_cells && load_clusters)
+            if ((flo.load_cell_info || flo.load_cell_state) && flo.load_cluster_info)
               {
                 output_loading_message("cells and clusters");
               }
-            else if (load_cells)
+            else if (flo.load_cell_info || flo.load_cell_state)
               {
                 output_loading_message("cells");
               }
-            else if (load_clusters)
+            else if (flo.load_cluster_info)
               {
                 output_loading_message("clusters");
               }
@@ -1148,10 +1588,11 @@ struct StandaloneDataIO
           }
         else if (file.extension() == ".dat")
           {
-            if (!(load_cells || load_clusters) || !can_load_events)
+            if (!(flo.load_cell_info || flo.load_cell_state || flo.load_cluster_info) || !can_load_events)
               {
                 continue;
               }
+
             const auto str_starts_with = [ ](const std::string & str, const std::string & start)
             {
               for (size_t i = 0; i < start.size(); ++i)
@@ -1166,23 +1607,24 @@ struct StandaloneDataIO
 
             if (str_starts_with(filename, "cellData_"))
               {
-                if (!load_cells)
+                if (!(flo.load_cell_info || flo.load_cell_state))
                   {
                     continue;
                   }
                 const std::string real_name = filename.substr(9);
-                if (read_one_part_of_v1_cells.count(real_name) > 0 && ret.cell_info.count(real_name) == 0)
+                if ( read_one_part_of_v1_cells.count(real_name) > 0 &&
+                     (ret.cell_info.count(real_name) == 0 && ret.cell_state.count(real_name) == 0) )
                   {
                     //The other part of the event information was not properly loaded.
                     continue;
                   }
                 else if (read_one_part_of_v1_cells.count(real_name) > 0)
                   {
-                    if (check_error(EventInformation::read_cell_info(file, ret.cell_info[real_name], ret.cell_state[real_name]), "cells"))
+                    if (check_error(EventInformation::read_cell_info_and_state(file, ret.cell_info[real_name], ret.cell_state[real_name]), "cells"))
                       {
                         ret.cell_info.erase(real_name);
                         ret.cell_state.erase(real_name);
-                        ret.clusters.erase(real_name);
+                        ret.cluster_info.erase(real_name);
                         continue;
                       }
                     ++event_count;
@@ -1193,41 +1635,46 @@ struct StandaloneDataIO
                     CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellInfoArr> tempcellinfo(true);
                     CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellStateArr> tempcellstate(true);
                     CaloRecGPU::Helpers::CPU_object<CaloRecGPU::ClusterInfoArr> tempclu(true);
-                    if (check_error(EventInformation::read_cell_info(file, tempcellinfo, tempcellstate), "cells"))
+                    if (check_error(EventInformation::read_cell_info_and_state(file, tempcellinfo, tempcellstate), "cells"))
                       {
                         continue;
                       }
-                    if (load_cells)
+                    if (flo.load_cell_info)
                       {
                         ret.cell_info[filename] = std::move(tempcellinfo);
+                      }
+                    if (flo.load_cell_state)
+                      {
                         ret.cell_state[filename] = std::move(tempcellstate);
                       }
-                    if (load_clusters)
+                    if (flo.load_cluster_info)
                       {
-                        ret.clusters[filename] = std::move(tempclu);
+                        ret.cluster_info[filename] = std::move(tempclu);
                       }
                   }
                 output_loading_message("partial cell data");
               }
             else if (str_starts_with(filename, "clusterData_"))
               {
-                if (!load_cells && !load_clusters)
+                if (!(flo.load_cell_info || flo.load_cell_state) && !flo.load_cluster_info)
                   {
                     continue;
                   }
                 const std::string real_name = filename.substr(12);
-                if (read_one_part_of_v1_cells.count(real_name) > 0 && ret.cell_info.count(real_name) == 0 && load_cells)
+                if ( read_one_part_of_v1_cells.count(real_name) > 0 &&
+                     (ret.cell_info.count(real_name) == 0 && flo.load_cell_info) &&
+                     (ret.cell_state.count(real_name) == 0 && flo.load_cell_state)  )
                   {
                     //The other part of the event information was not properly loaded.
                     continue;
                   }
                 else if (read_one_part_of_v1_cells.count(real_name) > 0)
                   {
-                    if (check_error(EventInformation::read_cell_and_cluster_info(file, ret.cell_info[real_name], ret.cell_state[real_name], ret.clusters[real_name]), "cells and clusters"))
+                    if (check_error(EventInformation::read_cell_and_cluster_info(file, ret.cell_info[real_name], ret.cell_state[real_name], ret.cluster_info[real_name]), "cells and clusters"))
                       {
                         ret.cell_info.erase(real_name);
                         ret.cell_state.erase(real_name);
-                        ret.clusters.erase(real_name);
+                        ret.cluster_info.erase(real_name);
                         continue;
                       }
                     ++event_count;
@@ -1242,14 +1689,17 @@ struct StandaloneDataIO
                       {
                         continue;
                       }
-                    if (load_cells)
+                    if (flo.load_cell_info)
                       {
                         ret.cell_info[filename] = std::move(tempcellinfo);
+                      }
+                    if (flo.load_cell_state)
+                      {
                         ret.cell_state[filename] = std::move(tempcellstate);
                       }
-                    if (load_clusters)
+                    if (flo.load_cluster_info)
                       {
-                        ret.clusters[filename] = std::move(tempclu);
+                        ret.cluster_info[filename] = std::move(tempclu);
                       }
                   }
                 output_loading_message("clusters and partial cell data");
@@ -1275,17 +1725,14 @@ struct StandaloneDataIO
 
   inline static FolderLoad load_folder(const boost::filesystem::path & folder,
                                        int max_events = -1,
-                                       const bool load_clusters = true,
-                                       const bool load_cells = true,
-                                       const bool load_geometry = true,
-                                       const bool load_noise = true,
+                                       const FolderLoadOptions & flo = FolderLoadOptions::None(),
                                        const bool output_messages = true)
   {
     return load_folder_filter([&](const std::string &)
     {
       return false;
     },
-    folder, max_events, load_clusters, load_cells, load_geometry, load_noise, output_messages);
+    folder, max_events, flo, output_messages);
   }
 
 };

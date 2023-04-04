@@ -1,13 +1,14 @@
-/*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-*/
+//
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+//
+// Dear emacs, this is -*- c++ -*-
+//
 
 #include "CaloCellsCounterCPU.h"
 #include "CaloRecGPU/Helpers.h"
 #include "CaloRecGPU/CUDAFriendlyClasses.h"
 #include "CaloRecGPU/StandaloneDataIO.h"
 #include "StoreGate/DataHandle.h"
-#include "CaloUtils/CaloBadCellHelper.h"
 
 #include <map>
 
@@ -28,38 +29,27 @@ StatusCode CaloCellsCounterCPU::initialize()
   return StatusCode::SUCCESS;
 }
 
-static inline bool passCellTimeCut(const CaloCell * pCell, float threshold)
-//Copied from the standard algorithm.
-//Could possibly make better use of available info
-//in the point where this gets executed,
-//but I hope the compiler is smart enough to figure it out.
-{
-  // get the cell time to cut on (the same as in CaloEvent/CaloCluster.h)
-
-  // need sampling number already for time
-  CaloSampling::CaloSample sam = pCell->caloDDE()->getSampling();
-  // check for unknown sampling
-  if (sam != CaloSampling::PreSamplerB && sam != CaloSampling::PreSamplerE && sam != CaloSampling::Unknown)
-    {
-      const unsigned pmask = pCell->caloDDE()->is_tile() ? 0x8080 : 0x2000;
-      //0x2000 is used to tell that time and quality information are available for this channel
-      //(from TWiki: https://twiki.cern.ch/twiki/bin/viewauth/AtlasComputing/CaloEventDataModel#The_Raw_Data_Model)
-      // Is time defined?
-      if (pCell->provenance() & pmask)
-        {
-          return std::abs(pCell->time()) < threshold;
-        }
-    }
-  return true;
-}
-
 struct size_struct
 {
-  unsigned int total = 0, seed = 0, grow = 0, term = 0, invalid = 0, bad = 0;
+  unsigned int total = 0, seed = 0, grow = 0, term = 0, invalid = 0, shared = 0;
   template <class Str>
   friend Str & operator << (Str & s, const size_struct & sst)
   {
-    s << sst.total << " " << sst.seed << " " << sst.grow << " " << sst.term << " " << sst.invalid << " " << sst.bad;
+    s << sst.total << " " << sst.seed << " " << sst.grow << " " << sst.term << " " << sst.invalid << " " << sst.shared;
+    return s;
+  }
+};
+
+struct cluster_info_struct
+{
+  size_struct size;
+  float seed_snr = -9e99;
+  float seed_energy = -9e99;
+  int seed_index = -1;
+  template <class Str>
+  friend Str & operator << (Str & s, const cluster_info_struct & cis)
+  {
+    s << cis.seed_index << " "  << cis.size << " (" << cis.seed_snr << " " << cis.seed_energy << ")";
     return s;
   }
 };
@@ -88,72 +78,63 @@ StatusCode CaloCellsCounterCPU::execute (const EventContext & ctx, xAOD::CaloClu
 
       const float energy = cell->energy();
 
-      const float SNR = std::abs( energy / noise_tool->getNoise(m_calo_id->calo_cell_hash(cell->ID()), cell->gain()) );
+      float SNR = energy / noise_tool->getNoise(m_calo_id->calo_cell_hash(cell->ID()), cell->gain());
 
-      int gain = static_cast<int>(GainConversion::from_standard_gain(cell->gain()));
-
-      if (CaloBadCellHelper::isBad(cell, m_treatL1PredictedCellsAsGood))
-        {
-          GainConversion::mark_bad_cell(gain);
-        }
-
-      if (m_cutCellsInTime && !GainConversion::is_bad_cell(gain))
-        {
-          if (!passCellTimeCut(cell, m_timeThreshold))
-            {
-              if (std::abs(SNR) >= m_seedThreshold)
-                //We'll not worry about the cases with negative snr here
-                //since it's reasonable to expect these cells to be excluded
-                //from clustering anyway in the non-abs case, so no worries
-                //excluding them from yet another perspective...
-                {
-                  if (!m_keepSignificantCells || SNR <= m_thresholdForKeeping)
-                    //If SNR > m_thresholdForKeeping and m_keepSignificantCells is true,
-                    //we still keep it as seed so the energy keeps the original value!
-                    {
-                      if (!m_excludeCutSeedsFromClustering)
-                        //If m_excludeCutSeedsFromClustering is false,
-                        //seed cells are still kept as candidates for neighbour or terminal.
-                        {
-                          GainConversion::mark_invalid_seed_cell(gain);
-                        }
-                      else
-                        {
-                          GainConversion::mark_invalid_cell(gain);
-                        }
-                    }
-                }
-            }
-        }
+      const unsigned int gain = GainConversion::from_standard_gain(cell->gain());
 
       ++gain_counts[gain - GainConversion::min_gain_value()];
 
-      if (GainConversion::is_normal_cell(gain))
+      SNR = std::abs(SNR);
+
+      if (SNR > m_seedThreshold)
         {
-          if (SNR > m_seedThreshold)
-            {
-              ++global_counts.seed;
-            }
-          else if (SNR > m_growThreshold)
-            {
-              ++global_counts.grow;
-            }
-          else if (SNR > m_cellThreshold)
-            {
-              ++global_counts.term;
-            }
-          else
-            {
-              ++global_counts.invalid;
-            }
+          ++global_counts.seed;
+        }
+      else if (SNR > m_growThreshold)
+        {
+          ++global_counts.grow;
+        }
+      else if (SNR > m_cellThreshold)
+        {
+          ++global_counts.term;
         }
       else
         {
-          ++global_counts.bad;
+          ++global_counts.invalid;
         }
     }
 
-  std::map<IdentifierHash, size_struct> cluster_sizes;
+  struct cluster_cell_info
+  {
+    const xAOD::CaloCluster * cl_1 = nullptr, * cl_2 = nullptr;
+    double w_1 = -1, w_2 = -1, energy = -9e99, SNR = -9e99;
+    void add_cluster(const int cell_id, const xAOD::CaloCluster * cl, const double w)
+    {
+      if (cl_1 == nullptr)
+        {
+          cl_1 = cl;
+          w_1 = w;
+        }
+      else if (cl_2 == nullptr)
+        {
+          cl_2 = cl;
+          w_2 = w;
+        }
+      else
+        {
+          std::cout << "WARNING! Multiple shared cell: " << cell_id << " " << cl_1 << " " << cl_2 << " " << cl << std::endl;
+        }
+    }
+
+    bool is_shared() const
+    {
+      return cl_1 != nullptr && cl_2 != nullptr;
+    }
+
+  };
+
+  std::map<int, cluster_cell_info> cluster_cells;
+
 
   for (const xAOD::CaloCluster * cluster : *cluster_collection)
     {
@@ -165,96 +146,119 @@ StatusCode CaloCellsCounterCPU::execute (const EventContext & ctx, xAOD::CaloClu
           return StatusCode::FAILURE;
         }
 
-      float max_snr = -1;
-      IdentifierHash max_snr_hash;
-
-      size_struct num_cells;
-
-      for (const CaloCell * cell : (*cell_links))
+      for (auto it = cell_links->begin(); it != cell_links->end(); ++it)
         {
-          if (cell == nullptr)
+          const CaloCell * cell = *it;
+          const float weight = it.weight();
+
+          const float this_energy = std::abs(cell->energy());
+
+          const float this_snr = std::abs(this_energy / noise_tool->getNoise(m_calo_id->calo_cell_hash(cell->ID()), cell->gain()));
+
+          const IdentifierHash this_hash = m_calo_id->calo_cell_hash(cell->ID());
+
+          auto & info = cluster_cells[this_hash];
+
+          info.energy = this_energy;
+          info.SNR = this_snr;
+
+          info.add_cluster(this_hash, cluster, weight);
+
+        }
+    }
+
+  std::unordered_map<const xAOD::CaloCluster *, cluster_info_struct> cluster_sizes;
+
+  auto update_clusters = [&](const cluster_cell_info & cci, const int cell)
+  {
+    auto update_one = [&](const xAOD::CaloCluster * cl)
+    {
+      if (cl)
+        {
+          auto & c_info = cluster_sizes[cl];
+          ++c_info.size.total;
+          if (cci.SNR > m_seedThreshold)
             {
-              continue;
+              ++c_info.size.seed;
             }
-
-
-          const float this_snr = std::abs(cell->energy()) / noise_tool->getNoise(m_calo_id->calo_cell_hash(cell->ID()), cell->gain());
-
-          if (this_snr > max_snr)
+          else if (cci.SNR > m_growThreshold)
             {
-              max_snr = this_snr;
-              max_snr_hash = m_calo_id->calo_cell_hash(cell->ID());
+              ++c_info.size.grow;
             }
-
-          int gain = static_cast<int>(GainConversion::from_standard_gain(cell->gain()));
-
-          if (CaloBadCellHelper::isBad(cell, m_treatL1PredictedCellsAsGood))
+          else if (cci.SNR > m_cellThreshold)
             {
-              GainConversion::mark_bad_cell(gain);
-            }
-
-          if (m_cutCellsInTime && !GainConversion::is_bad_cell(gain))
-            {
-              if (!passCellTimeCut(cell, m_timeThreshold))
-                {
-                  if (std::abs(this_snr) >= m_seedThreshold)
-                    //We'll not worry about the cases with negative snr here
-                    //since it's reasonable to expect these cells to be excluded
-                    //from clustering anyway in the non-abs case, so no worries
-                    //excluding them from yet another perspective...
-                    {
-                      if (!m_keepSignificantCells || this_snr <= m_thresholdForKeeping)
-                        //If SNR > m_thresholdForKeeping and m_keepSignificantCells is true,
-                        //we still keep it as seed so the energy keeps the original value!
-                        {
-                          if (!m_excludeCutSeedsFromClustering)
-                            //If m_excludeCutSeedsFromClustering is false,
-                            //seed cells are still kept as candidates for neighbour or terminal.
-                            {
-                              GainConversion::mark_invalid_seed_cell(gain);
-                            }
-                          else
-                            {
-                              GainConversion::mark_invalid_cell(gain);
-                            }
-                        }
-                    }
-                }
-            }
-
-          if (GainConversion::is_normal_cell(gain))
-            {
-              if (this_snr > m_seedThreshold)
-                {
-                  ++global_cluster_counts.seed;
-                  ++num_cells.seed;
-                }
-              else if (this_snr > m_growThreshold)
-                {
-                  ++global_cluster_counts.grow;
-                  ++num_cells.grow;
-                }
-              else if (this_snr > m_cellThreshold)
-                {
-                  ++global_cluster_counts.term;
-                  ++num_cells.term;
-                }
-              else
-                {
-                  ++global_cluster_counts.invalid;
-                  ++num_cells.invalid;
-                }
+              ++c_info.size.term;
             }
           else
             {
-              ++global_cluster_counts.bad;
-              ++num_cells.bad;
+              ++c_info.size.invalid;
             }
 
-          ++num_cells.total;
+          if (cci.is_shared())
+            {
+              ++c_info.size.shared;
+            }
+          else
+            {
+              if (cci.SNR > c_info.seed_snr || (cci.SNR == c_info.seed_snr && cell > c_info.seed_index))
+                {
+                  c_info.seed_index = cell;
+                  c_info.seed_snr = cci.SNR;
+                  c_info.seed_energy = cci.energy;
+                }
+            }
         }
-      cluster_sizes[max_snr_hash] = num_cells;
+    };
+
+    if (cci.cl_1 != nullptr || cci.cl_2 != nullptr)
+      {
+        ++global_cluster_counts.total;
+        if (cci.SNR > m_seedThreshold)
+          {
+            ++global_cluster_counts.seed;
+          }
+        else if (cci.SNR > m_growThreshold)
+          {
+            ++global_cluster_counts.grow;
+          }
+        else if (cci.SNR > m_cellThreshold)
+          {
+            ++global_cluster_counts.term;
+          }
+        else
+          {
+            ++global_cluster_counts.invalid;
+          }
+        if (cci.is_shared())
+          {
+            ++global_cluster_counts.shared;
+          }
+      }
+
+    update_one(cci.cl_1);
+    update_one(cci.cl_2);
+  };
+
+  for (auto & it : cluster_cells)
+    {
+      update_clusters(it.second, it.first);
     }
+
+  std::vector<cluster_info_struct> sorted_info;
+
+  sorted_info.reserve(cluster_sizes.size());
+
+  for (auto & v : cluster_sizes)
+    {
+      sorted_info.push_back(v.second);
+    }
+
+  std::sort(sorted_info.begin(), sorted_info.end(),
+            [](const auto & a, const auto & b)
+  {
+    return a.seed_index < b.seed_index;
+  });
+
 
   const auto err1 = StandaloneDataIO::prepare_folder_for_output(std::string(m_savePath));
   if (err1 != StandaloneDataIO::ErrorState::OK)
@@ -263,8 +267,7 @@ StatusCode CaloCellsCounterCPU::execute (const EventContext & ctx, xAOD::CaloClu
     }
 
   const boost::filesystem::path save_file = m_savePath + "/" + StandaloneDataIO::build_filename((m_filePrefix.size() > 0 ? m_filePrefix + "_counts" : "counts"),
-                                                                                              ctx.evt(), m_fileSuffix, "txt", m_numWidth);
-
+                                                                                                ctx.evt(), m_fileSuffix, "txt", m_numWidth);
 
   std::ofstream out_file(save_file);
 
@@ -273,17 +276,16 @@ StatusCode CaloCellsCounterCPU::execute (const EventContext & ctx, xAOD::CaloClu
       return StatusCode::FAILURE;
     }
 
-  out_file << global_counts << "\n\n";
-  out_file << global_cluster_counts << "\n\n";
-  for (int i = 0; i < GainConversion::num_gain_values(); ++i)
+  out_file << "Cell counts: " << global_counts << "\n\n";
+
+  out_file << "Cells in clusters count: " << global_cluster_counts << "\n\n";
+  out_file << "Clusters:\n\n";
+
+  for (const auto & info : sorted_info)
     {
-      out_file << gain_counts[i] << " ";
+      out_file << info << "\n";
     }
-  out_file << "\n\n";
-  for (const auto & it : cluster_sizes)
-    {
-      out_file << it.first << " " << it.second << "\n";
-    }
+
   out_file << std::endl;
 
   if (!out_file.good())

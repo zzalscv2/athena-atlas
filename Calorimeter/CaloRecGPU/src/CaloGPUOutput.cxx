@@ -1,6 +1,8 @@
-/*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-*/
+//
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+//
+// Dear emacs, this is -*- c++ -*-
+//
 
 #include "CaloGPUOutput.h"
 
@@ -17,21 +19,38 @@ CaloGPUOutput::CaloGPUOutput(const std::string & type, const std::string & name,
   declareInterface<CaloClusterGPUProcessor> (this);
 }
 
-StatusCode CaloGPUOutput::execute(const EventContext & ctx, const ConstantDataHolder & constant_data, EventDataHolder & event_data) const
+StatusCode CaloGPUOutput::execute(const EventContext & ctx, const ConstantDataHolder & constant_data, EventDataHolder & event_data, void * /*temporary_buffer*/) const
 {
-  if (!m_constantDataSaved.load()){
+  if (!m_constantDataSaved.load())
+    {
       std::lock_guard<std::mutex> lock_guard(m_mutex);
-      if (!m_constantDataSaved.load()){
-        const auto err1 = StandaloneDataIO::save_constants_to_folder(std::string(m_savePath), constant_data.m_geometry,
-                          constant_data.m_cell_noise, m_filePrefix, m_fileSuffix);
-        if (err1 != StandaloneDataIO::ErrorState::OK){
-            return StatusCode::FAILURE;
+      if (!m_constantDataSaved.load())
+        {
+          const auto err1 = StandaloneDataIO::save_constants_to_folder(std::string(m_savePath), constant_data.m_geometry_dev,
+                                                                       constant_data.m_cell_noise_dev, m_filePrefix, m_fileSuffix);
+          if (err1 != StandaloneDataIO::ErrorState::OK)
+            {
+              return StatusCode::FAILURE;
+            }
+          m_constantDataSaved.store(true);
         }
-        m_constantDataSaved.store(true);
-      }
-  }
+    }
 
   Helpers::CPU_object<CellInfoArr> cell_info(event_data.m_cell_info_dev);
+
+  if (m_onlyCellInfo)
+    {
+      const auto err2 = StandaloneDataIO::save_cell_info_to_folder(ctx.evt(), std::string(m_savePath), cell_info, m_filePrefix, m_fileSuffix, m_numWidth);
+
+      if (err2 != StandaloneDataIO::ErrorState::OK)
+        {
+          return StatusCode::FAILURE;
+        }
+
+      return StatusCode::SUCCESS;
+    }
+
+
   Helpers::CPU_object<CellStateArr> cell_state(event_data.m_cell_state_dev);
   Helpers::CPU_object<ClusterInfoArr> clusters(event_data.m_clusters_dev);
 
@@ -64,10 +83,7 @@ StatusCode CaloGPUOutput::execute(const EventContext & ctx, const ConstantDataHo
       for (size_t i = 0; i < cluster_order.size(); ++i)
         {
           const int this_id = cluster_order[i];
-          if ( clusters->seedCellID[this_id] < 0 ||
-               (m_cutClustersInAbsE ?
-                std::abs(clusters->clusterEt[this_id]) :
-                clusters->clusterEt[this_id])             < m_clusterETThreshold )
+          if (clusters->seedCellID[this_id] < 0)
             {
               tag_map[this_id] = -1;
               --real_cluster_numbers;
@@ -92,31 +108,51 @@ StatusCode CaloGPUOutput::execute(const EventContext & ctx, const ConstantDataHo
         }
 
     }
+  size_t shared_count = 0;
   for (int i = 0; i < NCaloCells; ++i)
     {
-      const tag_type this_tag = cell_state->clusterTag[i];
-      if (!Tags::is_part_of_cluster(this_tag) || GainConversion::is_invalid_cell(cell_info->gain[i]))
+      if (!cell_info->is_valid(i))
         {
-          cell_state->clusterTag[i] = Tags::InvalidTag;
+          continue;
         }
-      else if (Tags::is_part_of_cluster(this_tag) && m_sortedAndCutClusters)
+      const ClusterTag this_tag = cell_state->clusterTag[i];
+      if (!this_tag.is_part_of_cluster())
         {
-          const int old_idx = Tags::get_index_from_tag(this_tag);
+          cell_state->clusterTag[i] = ClusterTag::make_invalid_tag();
+        }
+      else if (this_tag.is_part_of_cluster() && m_sortedAndCutClusters)
+        {
+          const int old_idx = this_tag.cluster_index();
           const int new_idx = tag_map[old_idx];
-          if (new_idx < 0)
+          const int old_idx2 = this_tag.is_shared_between_clusters() ? this_tag.secondary_cluster_index() : -1;
+          const int new_idx2 = old_idx2 >= 0 ? tag_map[old_idx2] : -1;
+          if (new_idx < 0 && new_idx2 < 0)
             {
-              cell_state->clusterTag[i] = Tags::InvalidTag;
+              cell_state->clusterTag[i] = ClusterTag::make_invalid_tag();
+            }
+          else if (new_idx < 0)
+            {
+              cell_state->clusterTag[i] = ClusterTag::make_tag(new_idx2);
+            }
+          else if (new_idx2 < 0)
+            {
+              cell_state->clusterTag[i] = ClusterTag::make_tag(new_idx);
             }
           else
             {
-              cell_state->clusterTag[i] = Tags::make_seed_tag(0x7f7fffff, clusters->seedCellID[new_idx], new_idx);
-              //To match what we do on the CPU side...
+              ++shared_count;
+              cell_state->clusterTag[i] = ClusterTag::make_tag(new_idx, this_tag.secondary_cluster_weight(), new_idx2);
             }
         }
     }
 
-  const auto err2 =  StandaloneDataIO::save_event_to_folder(ctx.evt(), std::string(m_savePath), cell_info, cell_state, clusters,
-                     m_filePrefix, m_fileSuffix, m_numWidth);
+
+  ATH_MSG_INFO("Clusters:     " << clusters->number << " (" << tag_map.size() << " total)");
+  ATH_MSG_INFO("Shared Cells: " << shared_count);
+
+
+  const auto err2 = StandaloneDataIO::save_event_to_folder(ctx.evt(), std::string(m_savePath), cell_info, cell_state, clusters,
+                                                           m_filePrefix, m_fileSuffix, m_numWidth);
 
   if (err2 != StandaloneDataIO::ErrorState::OK)
     {

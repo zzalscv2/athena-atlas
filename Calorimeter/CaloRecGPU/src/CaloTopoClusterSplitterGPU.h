@@ -1,5 +1,7 @@
 //
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+//
+// Dear emacs, this is -*- c++ -*-
 //
 
 
@@ -36,11 +38,19 @@ class CaloTopoClusterSplitterGPU :
 
   virtual StatusCode initialize() override;
 
-  virtual StatusCode execute (const EventContext & ctx, const ConstantDataHolder & constant_data, EventDataHolder & event_data) const override;
+  virtual StatusCode execute (const EventContext & ctx,
+                              const CaloRecGPU::ConstantDataHolder & constant_data,
+                              CaloRecGPU::EventDataHolder & event_data,
+                              void * temporary_buffer) const override;
 
   virtual StatusCode finalize() override;
 
   virtual ~CaloTopoClusterSplitterGPU();
+
+  virtual size_t size_of_temporaries() const
+  {
+    return sizeof(GPUSplitterTemporaries);
+  };
 
  private:
 
@@ -124,18 +134,9 @@ class CaloTopoClusterSplitterGPU :
   Gaudi::Property<bool> m_absOpt {this, "WeightingOfNegClusters", false, "Should absolute value be used to identify potential seed cells"};
 
   /**
-   * @brief Number of events for which to pre-allocate space on GPU memory
-   * (should ideally be set to the expected number of threads to be run with).
-   *
-   */
-  Gaudi::Property<size_t> m_numPreAllocatedGPUData {this, "NumPreAllocatedDataHolders", 0, "Number of temporary data holders to pre-allocate on GPU memory"};
-
-  /** @brief A way to reduce allocations over multiple threads by keeping a cache
-  *   of previously allocated objects that get assigned to the threads as they need them.
-  *   It's all thread-safe due to an internal mutex ensuring no objects get assigned to different threads.
-  */
-  mutable CaloRecGPU::Helpers::separate_thread_holder<GPUSplitterTemporariesHolder> m_temporariesHolder ATLAS_THREAD_SAFE;
-
+   * @brief if set to true treat cells with a dead OTX which can be
+   * predicted by L1 trigger info as good instead of bad cells */
+  Gaudi::Property<bool> m_treatL1PredictedCellsAsGood {this, "TreatL1PredictedCellsAsGood", true, "Treat bad cells with dead OTX if predicted from L1 as good"};
 
   /** @brief Options for the algorithm, held in a GPU-friendly way.
   */

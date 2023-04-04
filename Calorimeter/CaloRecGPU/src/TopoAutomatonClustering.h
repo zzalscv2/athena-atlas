@@ -1,5 +1,7 @@
 //
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+//
+// Dear emacs, this is -*- c++ -*-
 //
 
 
@@ -12,9 +14,11 @@
 
 #include "CaloRecGPU/CaloClusterGPUProcessor.h"
 #include "CaloRecGPU/CaloGPUTimed.h"
-#include "TopoAutomatonClusteringGPU.h"
+#include "TopoAutomatonClusteringImpl.h"
 #include <string>
 #include <mutex>
+
+#include "CLHEP/Units/SystemOfUnits.h"
 
 /**
  * @class TopoAutomatonClustering
@@ -33,14 +37,32 @@ class TopoAutomatonClustering :
 
   virtual StatusCode initialize() override;
   
-  virtual StatusCode execute (const EventContext & ctx, const ConstantDataHolder & constant_data, EventDataHolder & event_data) const override;
+  virtual StatusCode execute (const EventContext & ctx,
+                              const CaloRecGPU::ConstantDataHolder & constant_data,
+                              CaloRecGPU::EventDataHolder & event_data,
+                              void * temporary_buffer) const override;
 
   virtual StatusCode finalize() override;
   
   virtual ~TopoAutomatonClustering();
+  
+  virtual size_t size_of_temporaries() const
+  {
+    return sizeof(TopoAutomatonTemporaries);
+  };
 
  private:
 
+  /** 
+   * @brief vector of names of the calorimeters to consider.
+   *
+   * The default is to use all calorimeters (i.e. LAREM, LARHEC,
+   * LARFCAL, TILE).  Cells which belong to one of the input cell
+   * containers and to one of the calorimeters in this vector are used
+   * as input for the cluster maker.  This property is used in order
+   * to ignore a certain subsystem (e.g. for LAREM only clusters
+   * specify only LAREM in the jobOptions).  */
+  Gaudi::Property<std::vector<std::string>>  m_caloNames {this, "CalorimeterNames", {}, "Name(s) of Calorimeters to use for clustering"};  
 
   /**
    * @brief vector of names of the calorimeter samplings to consider
@@ -120,6 +142,34 @@ class TopoAutomatonClustering :
    * on energy and transverse energy instead.  */
   Gaudi::Property<bool> m_cellCutsInAbsE {this, "CellCutsInAbsE", true, "Cell (terminal) cuts in Abs E instead of E"};
 
+  /**
+   * if set to true, time cut is applied to seed cells, no cut otherwise
+   */
+  Gaudi::Property<bool> m_cutCellsInTime {this, "SeedCutsInT", false, "Do seed cuts in time"};
+
+  /**
+   * threshold used for timing cut on seed cells. Implemented as |seed_cell_time|<m_timeThreshold. No such cut on neighbouring cells.*/
+  Gaudi::Property<float> m_timeThreshold {this, "SeedThresholdOnTAbs", 12.5 * CLHEP::ns, "Time thresholds (in abs. val.)"};
+
+  /**
+   * upper limit on the energy significance, for applying the cell time cut */
+  Gaudi::Property<float> m_thresholdForKeeping {this, "TimeCutUpperLimit", 20., "Significance upper limit for applying time cut"};
+
+
+  /**
+   * @brief if set to true treat cells with a dead OTX which can be
+   * predicted by L1 trigger info as good instead of bad cells */
+  Gaudi::Property<bool> m_treatL1PredictedCellsAsGood {this, "TreatL1PredictedCellsAsGood", true, "Treat bad cells with dead OTX if predicted from L1 as good"};
+
+  /**
+   * @brief if set to true, seed cells failing the time cut are also excluded from cluster at all
+   */
+  Gaudi::Property<bool> m_excludeCutSeedsFromClustering {this, "CutOOTseed", true, "Exclude out-of-time seeds from neighbouring and cell stage"};
+
+  /**
+   * @brief if set to true, the time cut is not applied on cell of large significance
+   */
+  Gaudi::Property<bool> m_keepSignificantCells {this, "UseTimeCutUpperLimit", false, "Do not apply time cut on cells of large significance"};
 
   /**
    * @brief if set to true use 2-gaussian noise description for
@@ -131,18 +181,53 @@ class TopoAutomatonClustering :
 
 
   /**
-   * @brief Number of events for which to pre-allocate space on GPU memory
-   * (should ideally be set to the expected number of threads to be run with).
+   * @brief type of neighbor relations to use.
    *
-   */
-  Gaudi::Property<size_t> m_numPreAllocatedGPUData {this, "NumPreAllocatedDataHolders", 0, "Number of temporary data holders to pre-allocate on GPU memory"};
+   * The CaloIdentifier package defines different types of neighbors
+   * for the calorimeter cells. Currently supported neighbor relations
+   * for topological clustering are:
+   *
+   * @li "all2D" for all cells in the same layer (sampling or module)
+   *      of one calorimeter subsystem. Note that endcap and barrel
+   *      will be unconnected in this case even for the LAREM.
+   *
+   * @li "all3D" for all cells in the same calorimeter. This means all
+   *      the "all2D" neighbors for each cell plus the cells in
+   *      adjacent samplings overlapping at least partially in
+   *      \f$\eta\f$ and \f$\phi\f$ with the cell. Note that endcap
+   *      and barrel will be connected in this case for the LAREM.
+   *
+   * @li "super3D" for all cells. This means all the "all3D" neighbors
+   *      for each cell plus the cells in adjacent samplings from
+   *      other subsystems overlapping at least partially in
+   *      \f$\eta\f$ and \f$\phi\f$ with the cell. All calorimeters
+   *      are connected in this case.
+   *
+   * The default setting is "super3D".  */
+  Gaudi::Property<std::string> m_neighborOptionString {this, "NeighborOption", "super3D",
+                                                       "Neighbor option to be used for cell neighborhood relations"};
 
-  /** @brief A way to reduce allocations over multiple threads by keeping a cache
-  *   of previously allocated objects that get assigned to the threads as they need them.
-  *   It's all thread-safe due to an internal mutex ensuring no objects get assigned to different threads.
-  */
-  mutable CaloRecGPU::Helpers::separate_thread_holder<TACTemporariesHolder> m_temporariesHolder ATLAS_THREAD_SAFE;
+  /**
+   * @brief if set to true limit the neighbors in HEC IW and FCal2&3.
+   *
+   * The cells in HEC IW and FCal2&3 get very large in terms of eta
+   * and phi.  Since this might pose problems on certain jet
+   * algorithms one might need to avoid expansion in eta and phi for
+   * those cells. If this property is set to true the 2d neighbors of
+   * these cells are not used - only the next sampling neighbors are
+   * probed. */
+  Gaudi::Property<bool> m_restrictHECIWandFCalNeighbors {this, "RestrictHECIWandFCalNeighbors",
+                                                         false, "Limit the neighbors in HEC IW and FCal2&3"};
 
+  /**
+   * @brief if set to true limit the neighbors in presampler Barrel and Endcap.
+   *
+   * The presampler cells add a lot of PileUp in the Hilum
+   * samples. With this option set to true the presampler cells do not
+   * expand the cluster in the presampler layer.  Only the next
+   * sampling is used as valid neighbor source. */
+  Gaudi::Property<bool> m_restrictPSNeighbors {this, "RestrictPSNeighbors",
+                                                         false, "Limit the neighbors in presampler Barrel and Endcap"};
 
   /** @brief Options for the algorithm, held in a GPU-friendly way.
   */

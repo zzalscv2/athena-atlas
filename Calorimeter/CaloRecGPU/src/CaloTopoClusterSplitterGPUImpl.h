@@ -1,5 +1,7 @@
 //
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+//
+// Dear emacs, this is -*- c++ -*-
 //
 
 #ifndef CALORECGPU_CALOTOPOCLUSTERSPLITTERGPU_CUDA_H
@@ -18,7 +20,7 @@ struct GPUSplitterTemporaries
 
   int splitter_seeds[CaloRecGPU::NMaxClusters];
   int secondary_splitter_seeds[CaloRecGPU::NMaxClusters];
-  
+
 };
 
 struct CaloTopoClusterSplitterMetadata
@@ -47,8 +49,9 @@ struct CaloTopoClusterSplitterMetadata
   float m_emShowerScale;
   bool m_shareBorderCells;
   bool m_absOpt;
-  
-  
+  bool m_treatL1PredictedCellsAsGood;
+
+
   constexpr bool uses_sampling(const int sampling) const
   {
     return (m_useSampling >> sampling) & 1;
@@ -57,15 +60,6 @@ struct CaloTopoClusterSplitterMetadata
   {
     return (m_useSecondarySampling >> sampling) & 1;
   }
-};
-
-struct GPUSplitterTemporariesHolder
-{
-  //Helpers::CPU_object<TopoAutomatonTemporaries> m_temporaries;
-
-  CaloRecGPU::Helpers::CUDA_object<GPUSplitterTemporaries> m_temporaries_dev;
-
-  void allocate();
 };
 
 struct GPUSplitterOptionsHolder
@@ -78,16 +72,20 @@ struct GPUSplitterOptionsHolder
   void sendToGPU(const bool clear_CPU = true);
 };
 
-void preProcessingPreparation(EventDataHolder & holder, GPUSplitterTemporariesHolder & temps,
-                              const ConstantDataHolder & instance_data, const GPUSplitterOptionsHolder & options, const bool synchronize = false);
+void preProcessingPreparation(CaloRecGPU::EventDataHolder & holder,
+                              CaloRecGPU::Helpers::CUDA_kernel_object<GPUSplitterTemporaries> temps,
+                              const CaloRecGPU::ConstantDataHolder & instance_data, const GPUSplitterOptionsHolder & options, const bool synchronize = false);
 
-void findLocalMaxima(EventDataHolder & holder, GPUSplitterTemporariesHolder & temps,
-                     const ConstantDataHolder & instance_data, const GPUSplitterOptionsHolder & options, const bool synchronize = false);
+void findLocalMaxima(CaloRecGPU::EventDataHolder & holder,
+                     CaloRecGPU::Helpers::CUDA_kernel_object<GPUSplitterTemporaries> temps,
+                     const CaloRecGPU::ConstantDataHolder & instance_data, const GPUSplitterOptionsHolder & options, const bool synchronize = false);
 
-void propagateTags(EventDataHolder & holder, GPUSplitterTemporariesHolder & temps,
-                   const ConstantDataHolder & instance_data, const GPUSplitterOptionsHolder & options, const bool synchronize = false);
+void propagateTags(CaloRecGPU::EventDataHolder & holder,
+                   CaloRecGPU::Helpers::CUDA_kernel_object<GPUSplitterTemporaries> temps,
+                   const CaloRecGPU::ConstantDataHolder & instance_data, const GPUSplitterOptionsHolder & options, const bool synchronize = false);
 
-void refillClusters(EventDataHolder & holder, GPUSplitterTemporariesHolder & temps,
-                    const ConstantDataHolder & instance_data, const GPUSplitterOptionsHolder & options, const bool synchronize = false);
+void refillClusters(CaloRecGPU::EventDataHolder & holder,
+                    CaloRecGPU::Helpers::CUDA_kernel_object<GPUSplitterTemporaries> temps,
+                    const CaloRecGPU::ConstantDataHolder & instance_data, const GPUSplitterOptionsHolder & options, const bool synchronize = false);
 
 #endif //CALORECGPU_CALOTOPOCLUSTERSPLITTERGPU_CUDA_H

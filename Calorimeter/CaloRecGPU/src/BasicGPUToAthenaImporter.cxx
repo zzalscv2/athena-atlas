@@ -1,6 +1,8 @@
-/*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-*/
+//
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+//
+// Dear emacs, this is -*- c++ -*-
+//
 
 #include "BasicGPUToAthenaImporter.h"
 
@@ -33,6 +35,7 @@ BasicGPUToAthenaImporter::BasicGPUToAthenaImporter(const std::string & type, con
 StatusCode BasicGPUToAthenaImporter::initialize()
 {
   ATH_CHECK( m_cellsKey.value().initialize() );
+
   ATH_CHECK( detStore()->retrieve(m_calo_id, "CaloCell_ID") );
 
   auto get_option_from_string = [](const std::string & str, bool & failed)
@@ -109,13 +112,15 @@ StatusCode BasicGPUToAthenaImporter::convert (const EventContext & ctx,
     }
   const DataLink<CaloCellContainer> cell_collection_link (cell_collection.name(), ctx);
 
-  ed.returnToCPU(!m_keepGPUData, true);
+  ed.returnToCPU(!m_keepGPUData, true, true, false);
 
   const auto after_send = clock_type::now();
 
   std::vector<std::unique_ptr<CaloClusterCellLink>> cell_links;
 
   cell_links.reserve(ed.m_clusters->number);
+
+  size_t valid_clusters = 0;
 
   for (int i = 0; i < ed.m_clusters->number; ++i)
     {
@@ -124,6 +129,7 @@ StatusCode BasicGPUToAthenaImporter::convert (const EventContext & ctx,
           cell_links.emplace_back(std::make_unique<CaloClusterCellLink>(cell_collection_link));
           cell_links.back()->reserve(256);
           //To be adjusted.
+          ++valid_clusters;
         }
       else
         {
@@ -134,24 +140,122 @@ StatusCode BasicGPUToAthenaImporter::convert (const EventContext & ctx,
 
   const auto after_creation = clock_type::now();
 
-  CaloCellContainer::const_iterator iCells = cell_collection->begin();
-
-  for (int cell_count = 0; iCells != cell_collection->end(); ++iCells, ++cell_count)
+  if (cell_collection->isOrderedAndComplete())
+    //Fast path: cell indices within the collection and identifierHashes match!
     {
-      const CaloCell * cell = (*iCells);
-
-      const int index = m_calo_id->calo_cell_hash(cell->ID());
-
-      const tag_type this_tag = ed.m_cell_state->clusterTag[index];
-
-      if (Tags::is_part_of_cluster(this_tag))
+      for (int cell_index = 0; cell_index < NCaloCells; ++cell_index)
         {
-          const int this_index = Tags::get_index_from_tag(this_tag);
-          cell_links[this_index]->addCell(cell_count, 1.);
-          //So we put this in the right cell link.
+          const ClusterTag this_tag = ed.m_cell_state->clusterTag[cell_index];
+
+          if (this_tag.is_part_of_cluster())
+            {
+              const int this_index = this_tag.cluster_index();
+              const int32_t weight_pattern = this_tag.secondary_cluster_weight();
+
+              float tempf = 1.0f;
+
+              std::memcpy(&tempf, &weight_pattern, sizeof(float));
+              //C++20 would give us bit cast to do this more properly.
+              //Still, given how the bit pattern is created,
+              //it should be safe.
+
+              const float reverse_weight = tempf;
+
+              const float this_weight = 1.0f - reverse_weight;
+
+              cell_links[this_index]->addCell(cell_index, this_weight);
+
+              if (cell_index == ed.m_clusters->seedCellID[this_index] && cell_links[this_index]->size() > 1)
+                //Seed cells aren't shared,
+                //so no need to check this on the other case.
+                {
+                  CaloClusterCellLink::iterator begin_it = cell_links[this_index]->begin();
+                  CaloClusterCellLink::iterator back_it  = (--cell_links[this_index]->end());
+
+                  const unsigned int first_idx = begin_it.index();
+                  const double first_wgt = begin_it.weight();
+
+                  begin_it.reindex(back_it.index());
+                  begin_it.reweight(back_it.weight());
+
+                  back_it.reindex(first_idx);
+                  back_it.reweight(first_wgt);
+                  
+                  //Of course, this is to ensure the first cell is the seed cell,
+                  //in accordance to the way some cluster properties
+                  //(mostly phi-related) are calculated.
+                }
+                
+              if (this_tag.is_shared_between_clusters())
+                {
+                  const int other_index = this_tag.secondary_cluster_index();
+                  cell_links[other_index]->addCell(cell_index, reverse_weight);
+                }
+            }
         }
     }
+  else
+    //Slow path: be careful.
+    {
+      CaloCellContainer::const_iterator iCells = cell_collection->begin();
 
+      for (int cell_count = 0; iCells != cell_collection->end(); ++iCells, ++cell_count)
+        {
+          const CaloCell * cell = (*iCells);
+
+          //const int cell_index = m_calo_id->calo_cell_hash(cell->ID());
+          const int cell_index = cell->caloDDE()->calo_hash();
+          
+          const ClusterTag this_tag = ed.m_cell_state->clusterTag[cell_index];
+
+          if (this_tag.is_part_of_cluster())
+            {
+              const int this_index = this_tag.cluster_index();
+              const int32_t weight_pattern = this_tag.secondary_cluster_weight();
+
+              float tempf = 1.0f;
+
+              std::memcpy(&tempf, &weight_pattern, sizeof(float));
+              //C++20 would give us bit cast to do this more properly.
+              //Still, given how the bit pattern is created,
+              //it should be safe.
+
+              const float reverse_weight = tempf;
+
+              const float this_weight = 1.0f - reverse_weight;
+
+              cell_links[this_index]->addCell(cell_count, this_weight);
+              //So we put this in the right cell link.
+
+              if (cell_index == ed.m_clusters->seedCellID[this_index] && cell_links[this_index]->size() > 1)
+                //Seed cells aren't shared,
+                //so no need to check this on the other case.
+                {
+                  CaloClusterCellLink::iterator begin_it = cell_links[this_index]->begin();
+                  CaloClusterCellLink::iterator back_it  = (--cell_links[this_index]->end());
+
+                  const unsigned int first_idx = begin_it.index();
+                  const double first_wgt = begin_it.weight();
+
+                  begin_it.reindex(back_it.index());
+                  begin_it.reweight(back_it.weight());
+
+                  back_it.reindex(first_idx);
+                  back_it.reweight(first_wgt);
+                  
+                  //Of course, this is to ensure the first cell is the seed cell,
+                  //in accordance to the way some cluster properties
+                  //(mostly phi-related) are calculated.
+                }
+                
+              if (this_tag.is_shared_between_clusters())
+                {
+                  const int other_index = this_tag.secondary_cluster_index();
+                  cell_links[other_index]->addCell(cell_count, reverse_weight);
+                }
+            }
+        }
+    }
   const auto after_cells = clock_type::now();
 
   std::vector<int> cluster_order(ed.m_clusters->number);
@@ -179,10 +283,7 @@ StatusCode BasicGPUToAthenaImporter::convert (const EventContext & ctx,
     {
       const int cluster_index = cluster_order[i];
 
-      const float cluster_Et = ed.m_clusters->clusterEt[cluster_index];
-
-      if ( cell_links[cluster_index] != nullptr && cell_links[cluster_index]->size() > 0 &&
-           (m_cutClustersInAbsE ? std::abs(cluster_Et) : cluster_Et) > m_clusterETThreshold )
+      if (cell_links[cluster_index] != nullptr && cell_links[cluster_index]->size() > 0)
         {
           xAOD::CaloCluster * cluster = new xAOD::CaloCluster();
           cluster_container->push_back(cluster);
