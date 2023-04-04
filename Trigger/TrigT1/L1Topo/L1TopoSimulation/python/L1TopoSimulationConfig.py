@@ -53,9 +53,9 @@ def L1LegacyTopoSimulationCfg(flags):
                                                    )
 
     # No muon inputs to legacy Topo
-    topoSimAlg.MuonInputProvider.ROIBResultLocation = ""
-    topoSimAlg.MuonInputProvider.MuonROILocation = ""
     topoSimAlg.MuonInputProvider.locationMuCTPItoL1Topo = ""
+    topoSimAlg.MuonInputProvider.locationMuCTPItoL1Topo1 = ""
+    topoSimAlg.MuonInputProvider.locationMuonRoI = ""
     topoSimAlg.MuonInputProvider.ROIBResultLocation = ""
 
     acc.addEventAlgo(topoSimAlg)
@@ -67,10 +67,14 @@ def L1TopoSimulationCfg(flags, doMonitoring=True):
 
     #Configure the MuonInputProvider
     
-    muProvider = CompFactory.LVL1.MuonInputProvider("MuonInputProvider",
-                                                    ROIBResultLocation = "", #disable input from RoIBResult
-                                                    MuonROILocation = "",
-                                                    MuonEncoding = 1)
+    muProvider = CompFactory.LVL1.MuonInputProvider("MuonInputProvider")
+
+    """
+    If muons coming from the decoding, we use MuonRoI, otherwise MuCTPIL1Topo
+    So here we should be adding proper flag for P1, and when input file is RAW
+    Simply, if muons are simulated, we will use MuCTPIL1Topo, if decoded MuonRoI
+    """
+    muProvider.locationMuonRoI = ""
                                                     
     #Configure the MuonRoiTools for the MIP
     from TrigT1MuonRecRoiTool.TrigT1MuonRecRoiToolConfig import RPCRecRoiToolCfg, TGCRecRoiToolCfg
@@ -139,20 +143,16 @@ def L1TopoSimulationOldStyleCfg(flags, isLegacy):
 
     # Muon inputs only for phase-1 Topo
     if isLegacy:
-        topoSimSeq.MuonInputProvider.ROIBResultLocation = ""
-        topoSimSeq.MuonInputProvider.MuonROILocation = ""
         topoSimSeq.MuonInputProvider.locationMuCTPItoL1Topo = ""
-        topoSimSeq.MuonInputProvider.ROIBResultLocation = ""
+        topoSimSeq.MuonInputProvider.locationMuCTPItoL1Topo1 = ""
+        topoSimSeq.MuonInputProvider.locationMuonRoI = ""
     else:
-        if flags.Trigger.doLVL1:
-            topoSimSeq.MuonInputProvider.ROIBResultLocation = "" #disable input from RoIBResult
 
         from TrigT1MuonRecRoiTool.TrigT1MuonRecRoiToolConfig import RPCRecRoiToolCfg, TGCRecRoiToolCfg
         acc = ComponentAccumulator()
         topoSimSeq.MuonInputProvider.RecRpcRoiTool = acc.popToolsAndMerge(RPCRecRoiToolCfg(flags))
         topoSimSeq.MuonInputProvider.RecTgcRoiTool = acc.popToolsAndMerge(TGCRecRoiToolCfg(flags))
-        topoSimSeq.MuonInputProvider.MuonROILocation = ""
-        topoSimSeq.MuonInputProvider.MuonEncoding = 1
+        topoSimSeq.MuonInputProvider.locationMuonRoI = ""
         appendCAtoAthena(acc)
 
     return topoSimSeq
@@ -170,10 +170,13 @@ def L1TopoSimulationStandaloneCfg(flags, outputEDM=[], doMuons = False):
     #Configure the MuonInputProvider
     muProvider=""
     if doMuons:
-        muProvider = CompFactory.LVL1.MuonInputProvider("MuonInputProvider",
-                                                        ROIBResultLocation = "", #disable input from RoIBResult
-                                                        MuonROILocation = "",
-                                                        MuonL1RoIKey="") #"LVL1MuonRoIs" to enable reading from L1 RoI
+        muProvider = CompFactory.LVL1.MuonInputProvider("MuonInputProvider")
+
+        if flags.Trigger.L1.doMuonTopoInputs:
+            muProvider.locationMuCTPItoL1Topo = ""
+            muProvider.locationMuCTPItoL1Topo1 = ""
+        else:
+            muProvider.locationMuonRoI = ""
 
         #Configure the MuonRoiTools for the MIP
         from TrigT1MuonRecRoiTool.TrigT1MuonRecRoiToolConfig import RPCRecRoiToolCfg, TGCRecRoiToolCfg
@@ -362,8 +365,6 @@ if __name__ == '__main__':
       muonRoiTool = acc.popToolsAndMerge(MuonRoIByteStreamToolCfg(flags, name="L1MuonBSDecoderTool", writeBS=False))
       decoderTools += [muonRoiTool]
       outputEDM += addEDM('xAOD::MuonRoIContainer'     , '*')
-      if flags.Trigger.L1.doMuonTopoInputs:
-          outputEDM += ['LVL1::MuCTPIL1Topo#*']
       maybeMissingRobs += muonRoiTool.ROBIDs
 
   if 'jFex' in subsystem:

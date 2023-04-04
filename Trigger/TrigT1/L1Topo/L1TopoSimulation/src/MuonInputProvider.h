@@ -16,7 +16,7 @@
 #include "TrigT1Interfaces/TrigT1StoreGateKeys.h"
 #include "TrigT1Interfaces/ITrigT1MuonRecRoiTool.h"
 
-#include "xAODTrigger/MuonRoI.h"
+#include "xAODTrigger/MuonRoIContainer.h"
 
 #include <vector>
 
@@ -45,20 +45,8 @@ namespace LVL1 {
 
    private:
       TCS::MuonTOB createMuonTOB(const xAOD::MuonRoI & muonRoI, const std::vector<unsigned int> & rpcPtValues, const std::vector<unsigned int> & tgcPtValues) const;
-      TCS::MuonTOB createMuonTOB(uint32_t roiword, const TrigConf::L1Menu *l1menu) const;
       TCS::MuonTOB createMuonTOB(const MuCTPIL1TopoCandidate & roi) const;
       TCS::LateMuonTOB createLateMuonTOB(const MuCTPIL1TopoCandidate & roi) const;
-      /**
-         @brief convert the 2-bit value from MuCTPIL1TopoCandidate::getptL1TopoCode() to an actual pt
-
-         The muon TOB encodes pt values in 2 bits.
-         A MuCTPIL1TopoCandidate provides the encoded 2-bit value with
-         the function getptL1TopoCode().
-         This function uses the information from the l1 trigger menu
-         configuration to convert the threshold to an actual pt value.
-         For more details, see ATR-16781.
-      */
-      unsigned int topoMuonPtThreshold(const MuCTPIL1TopoCandidate &mctpiCand) const;
       /* 
          @brief calculate the eta and phi L1Topo indices
 
@@ -78,12 +66,9 @@ namespace LVL1 {
       ToolHandle<LVL1::ITrigT1MuonRecRoiTool> m_recTGCRoiTool{this, "RecTgcRoiTool", "LVL1::TrigT1TGCRecRoiTool/TrigT1TGCRecRoiTool", "TGC RoI reconstruction tool"};
       ToolHandle<GenericMonitoringTool> m_monTool {this, "MonTool", "", "Monitoring tool to create online histograms"};
 
-      SG::ReadHandleKey<L1MUINT::MuCTPIToRoIBSLink> m_muonROILocation { this, "MuonROILocation", LVL1MUCTPI::DEFAULT_MuonRoIBLocation, "Storegate key for the Muon ROIs" };
-      SG::ReadHandleKey<ROIB::RoIBResult> m_roibLocation{ this, "ROIBResultLocation", ROIB::DEFAULT_RoIBRDOLocation, "Storegate key for the reading the ROIBResult" };
       SG::ReadHandleKey<LVL1::MuCTPIL1Topo> m_MuCTPItoL1TopoLocation { this, "locationMuCTPItoL1Topo", LVL1MUCTPI::DEFAULT_MuonL1TopoLocation, "Storegate key for MuCTPItoL1Topo "};
       SG::ReadHandleKey<LVL1::MuCTPIL1Topo> m_MuCTPItoL1TopoLocationPlusOne { this, "locationMuCTPItoL1Topo1", LVL1MUCTPI::DEFAULT_MuonL1TopoLocation, "Storegate key for MuCTPItoL1TopoPlusOne"};
-      Gaudi::Property<uint16_t> m_MuonEncoding {this, "MuonEncoding", 0, "0=full granularity Mu ROIs, 1=MuCTPiToTopo granularity"};
-      Gaudi::Property<std::string> m_MuonL1RoIKey {this, "MuonL1RoIKey", "", "Empty=Use Muctpi, LVL1MuonRoIs=Use reading from xAOD L1 RoI"};
+      SG::ReadHandleKey<xAOD::MuonRoIContainer> m_MuonL1RoILocation {this, "locationMuonRoI", LVL1MUCTPI::DEFAULT_MuonL1TopoLocation, "Empty=Use Muctpi, LVL1MuonRoIs=Use reading from xAOD L1 RoI"};
  
    };
 }
