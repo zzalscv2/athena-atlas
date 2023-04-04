@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -10,7 +10,6 @@
  *
  * @author RD Schaffer <R.D.Schaffer@cern.ch>
  *
- * $Id: LArCellContFakeReader.cxx,v 1.10 2008-11-22 16:59:48 schaffer Exp $
  *
  */
 
@@ -127,7 +126,7 @@ void LArCellContFakeReader::printCells(const CaloCellContainer* caloCont) const
     
     for(; first != last; ++first) {
 	
-	ATH_MSG_DEBUG("CaloCell: id "
+	ATH_MSG_INFO("CaloCell: id "
 	    << m_calocellId->show_to_string((*first)->ID())
 	    << std::setprecision(5)
 	    << " energy  " << (*first)->energy()

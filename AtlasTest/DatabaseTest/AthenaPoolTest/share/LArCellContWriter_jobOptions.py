@@ -83,8 +83,7 @@ Stream1.ItemList+=["EventInfo#*"]
 svcMgr.MessageSvc.OutputLevel     = WARNING
 svcMgr.MessageSvc.debugLimit      = 100000
 svcMgr.MessageSvc.errorLimit      = 100000
-#svcMgr.ClassIDSvc.OutputLevel     = DEBUG
-LArCellContFakeWriter.OutputLevel = DEBUG
+LArCellContFakeWriter.OutputLevel = INFO
 
 from AthenaServices import AthenaServicesConf
 AthenaEventLoopMgr = AthenaServicesConf.AthenaEventLoopMgr()
