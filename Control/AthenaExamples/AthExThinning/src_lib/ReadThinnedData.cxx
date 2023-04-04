@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // ReadThinnedData.cxx 
@@ -149,40 +149,40 @@ StatusCode ReadThinnedData::checkTest( const std::string& testName )
   }
 
   const double igev = 1. / Gaudi::Units::GeV;
-  ATH_MSG_DEBUG 
+  ATH_MSG_INFO
     ("IN  particles: " <<  particles->size() << endmsg
      << "IN iparticles: " << iparticles->size() << endmsg
      << "IN decay: " << endmsg
      << " p1: px= " << decay->p1()->px() * igev << endmsg
      << " p2: px= " << decay->p2()->px() * igev);
 
-  msg(MSG::DEBUG) << " l1: px= ";
-  if ( decay->l1() ) { msg(MSG::DEBUG) << decay->l1()->px() * igev << endmsg;
-  } else             { msg(MSG::DEBUG) << "[thinned!]"            << endmsg;
+  msg(MSG::INFO) << " l1: px= ";
+  if ( decay->l1() ) { msg(MSG::INFO) << decay->l1()->px() * igev << endmsg;
+  } else             { msg(MSG::INFO) << "[thinned!]"            << endmsg;
   }
-  msg(MSG::DEBUG) << " l2: px= ";
-  if ( decay->l2() ) { msg(MSG::DEBUG) << decay->l2()->px() * igev << endmsg;
-  } else             { msg(MSG::DEBUG) << "[thinned!]"            << endmsg;
+  msg(MSG::INFO) << " l2: px= ";
+  if ( decay->l2() ) { msg(MSG::INFO) << decay->l2()->px() * igev << endmsg;
+  } else             { msg(MSG::INFO) << "[thinned!]"            << endmsg;
   }
 
-  msg(MSG::DEBUG)
+  msg(MSG::INFO)
     << "IN elephantino: " << endmsg
     << " leg1: px= " << elephantino->leg1()->px() * igev << endmsg
     << " leg2: px= " << elephantino->leg2()->px() * igev << endmsg
     << " leg3: px= " << elephantino->leg3()->px() * igev << endmsg
     << " leg4: px= " << elephantino->leg4()->px() * igev << endmsg;
 
-  msg(MSG::DEBUG) << " ear1: px= ";
+  msg(MSG::INFO) << " ear1: px= ";
   if ( elephantino->ear1() ) { 
-    msg(MSG::DEBUG) << elephantino->ear1()->px() * igev << endmsg;
+    msg(MSG::INFO) << elephantino->ear1()->px() * igev << endmsg;
   } else { 
-    msg(MSG::DEBUG) << "[thinned!]" << endmsg;
+    msg(MSG::INFO) << "[thinned!]" << endmsg;
   }
-  msg(MSG::DEBUG) << " ear2: px= ";
+  msg(MSG::INFO) << " ear2: px= ";
   if ( elephantino->ear2() ) { 
-    msg(MSG::DEBUG) << elephantino->ear2()->px() * igev << endmsg;
+    msg(MSG::INFO) << elephantino->ear2()->px() * igev << endmsg;
   } else { 
-    msg(MSG::DEBUG) << "[thinned!]" << endmsg;
+    msg(MSG::INFO) << "[thinned!]" << endmsg;
   }
 
   msg(MSG::INFO) << "Particles | IParticles : " << endmsg;

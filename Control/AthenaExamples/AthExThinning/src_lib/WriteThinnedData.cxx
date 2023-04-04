@@ -159,14 +159,14 @@ StatusCode WriteThinnedData::test( const EventContext& ctx,
   SG::ReadHandle<AthExElephantino> elephantino (m_elephantinoKeys[testNum], ctx);
 
   const double igev = 1. / Gaudi::Units::GeV;
-  ATH_MSG_DEBUG("IN particles: " << particles->size() << endmsg
+  ATH_MSG_INFO("IN particles: " << particles->size() << endmsg
 		<< "IN decay: " << endmsg
 		<< " p1: px= " << decay->p1()->px() * igev << endmsg
 		<< " p2: px= " << decay->p2()->px() * igev << endmsg
 		<< " l1: px= " << decay->l1()->px() * igev << endmsg
 		<< " l2: px= " << decay->l2()->px() * igev);
 
-  ATH_MSG_DEBUG("IN elephantino: " << endmsg
+  ATH_MSG_INFO("IN elephantino: " << endmsg
 		<< " leg1: px= " << elephantino->leg1()->px() * igev << endmsg
 		<< " leg2: px= " << elephantino->leg2()->px() * igev << endmsg
 		<< " leg3: px= " << elephantino->leg3()->px() * igev << endmsg

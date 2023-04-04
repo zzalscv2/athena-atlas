@@ -1,21 +1,20 @@
 Py:WriteThinnedData    INFO Initializing WriteThinnedData
-Py:WriteThinnedData   DEBUG Executing WriteThinnedData...
 Py:WriteThinnedData    INFO Performing thinning test [test1]...
 Py:WriteThinnedData    INFO particles: 10
 Py:WriteThinnedData    INFO iparticles: 10
-Py:WriteThinnedData   DEBUG IN particles: 10
-Py:WriteThinnedData   DEBUG IN decay:
-Py:WriteThinnedData   DEBUG  p1: px= 10.0
-Py:WriteThinnedData   DEBUG  p2: px= 50.0
-Py:WriteThinnedData   DEBUG  l1: px= 20.0
-Py:WriteThinnedData   DEBUG  l2: px= 100.0
-Py:WriteThinnedData   DEBUG IN elephantino:
-Py:WriteThinnedData   DEBUG  leg1: px= 10.0
-Py:WriteThinnedData   DEBUG  leg2: px= 50.0
-Py:WriteThinnedData   DEBUG  leg3: px= 80.0
-Py:WriteThinnedData   DEBUG  leg4: px= 90.0
-Py:WriteThinnedData   DEBUG  ear1: px= 20.0
-Py:WriteThinnedData   DEBUG  ear2: px= 100.0
+Py:WriteThinnedData    INFO IN particles: 10
+Py:WriteThinnedData    INFO IN decay:
+Py:WriteThinnedData    INFO  p1: px= 10.0
+Py:WriteThinnedData    INFO  p2: px= 50.0
+Py:WriteThinnedData    INFO  l1: px= 20.0
+Py:WriteThinnedData    INFO  l2: px= 100.0
+Py:WriteThinnedData    INFO IN elephantino:
+Py:WriteThinnedData    INFO  leg1: px= 10.0
+Py:WriteThinnedData    INFO  leg2: px= 50.0
+Py:WriteThinnedData    INFO  leg3: px= 80.0
+Py:WriteThinnedData    INFO  leg4: px= 90.0
+Py:WriteThinnedData    INFO  ear1: px= 20.0
+Py:WriteThinnedData    INFO  ear2: px= 100.0
 Py:WriteThinnedData    INFO Particles | filter :
 Py:WriteThinnedData    INFO        10 | keep
 Py:WriteThinnedData    INFO        20 | remove
@@ -70,19 +69,19 @@ Py:WriteThinnedData    INFO [test1] has been performed.
 Py:WriteThinnedData    INFO Performing thinning test [test2]...
 Py:WriteThinnedData    INFO particles: 10
 Py:WriteThinnedData    INFO iparticles: 10
-Py:WriteThinnedData   DEBUG IN particles: 10
-Py:WriteThinnedData   DEBUG IN decay:
-Py:WriteThinnedData   DEBUG  p1: px= 10.0
-Py:WriteThinnedData   DEBUG  p2: px= 50.0
-Py:WriteThinnedData   DEBUG  l1: px= 20.0
-Py:WriteThinnedData   DEBUG  l2: px= 100.0
-Py:WriteThinnedData   DEBUG IN elephantino:
-Py:WriteThinnedData   DEBUG  leg1: px= 10.0
-Py:WriteThinnedData   DEBUG  leg2: px= 50.0
-Py:WriteThinnedData   DEBUG  leg3: px= 80.0
-Py:WriteThinnedData   DEBUG  leg4: px= 90.0
-Py:WriteThinnedData   DEBUG  ear1: px= 20.0
-Py:WriteThinnedData   DEBUG  ear2: px= 100.0
+Py:WriteThinnedData    INFO IN particles: 10
+Py:WriteThinnedData    INFO IN decay:
+Py:WriteThinnedData    INFO  p1: px= 10.0
+Py:WriteThinnedData    INFO  p2: px= 50.0
+Py:WriteThinnedData    INFO  l1: px= 20.0
+Py:WriteThinnedData    INFO  l2: px= 100.0
+Py:WriteThinnedData    INFO IN elephantino:
+Py:WriteThinnedData    INFO  leg1: px= 10.0
+Py:WriteThinnedData    INFO  leg2: px= 50.0
+Py:WriteThinnedData    INFO  leg3: px= 80.0
+Py:WriteThinnedData    INFO  leg4: px= 90.0
+Py:WriteThinnedData    INFO  ear1: px= 20.0
+Py:WriteThinnedData    INFO  ear2: px= 100.0
 Py:WriteThinnedData    INFO Particles | filter :
 Py:WriteThinnedData    INFO        10 | keep
 Py:WriteThinnedData    INFO        20 | remove
@@ -137,19 +136,19 @@ Py:WriteThinnedData    INFO [test2] has been performed.
 Py:WriteThinnedData    INFO Performing thinning test [test3]...
 Py:WriteThinnedData    INFO particles: 10
 Py:WriteThinnedData    INFO iparticles: 10
-Py:WriteThinnedData   DEBUG IN particles: 10
-Py:WriteThinnedData   DEBUG IN decay:
-Py:WriteThinnedData   DEBUG  p1: px= 10.0
-Py:WriteThinnedData   DEBUG  p2: px= 50.0
-Py:WriteThinnedData   DEBUG  l1: px= 20.0
-Py:WriteThinnedData   DEBUG  l2: px= 100.0
-Py:WriteThinnedData   DEBUG IN elephantino:
-Py:WriteThinnedData   DEBUG  leg1: px= 10.0
-Py:WriteThinnedData   DEBUG  leg2: px= 50.0
-Py:WriteThinnedData   DEBUG  leg3: px= 80.0
-Py:WriteThinnedData   DEBUG  leg4: px= 90.0
-Py:WriteThinnedData   DEBUG  ear1: px= 20.0
-Py:WriteThinnedData   DEBUG  ear2: px= 100.0
+Py:WriteThinnedData    INFO IN particles: 10
+Py:WriteThinnedData    INFO IN decay:
+Py:WriteThinnedData    INFO  p1: px= 10.0
+Py:WriteThinnedData    INFO  p2: px= 50.0
+Py:WriteThinnedData    INFO  l1: px= 20.0
+Py:WriteThinnedData    INFO  l2: px= 100.0
+Py:WriteThinnedData    INFO IN elephantino:
+Py:WriteThinnedData    INFO  leg1: px= 10.0
+Py:WriteThinnedData    INFO  leg2: px= 50.0
+Py:WriteThinnedData    INFO  leg3: px= 80.0
+Py:WriteThinnedData    INFO  leg4: px= 90.0
+Py:WriteThinnedData    INFO  ear1: px= 20.0
+Py:WriteThinnedData    INFO  ear2: px= 100.0
 Py:WriteThinnedData    INFO IParticles | filter :
 Py:WriteThinnedData    INFO        10 | keep
 Py:WriteThinnedData    INFO        20 | remove
@@ -201,23 +200,22 @@ Py:WriteThinnedData    INFO  leg4: px= 90.0
 Py:WriteThinnedData    INFO  ear1: px= 20.0
 Py:WriteThinnedData    INFO  ear2: px= 100.0
 Py:WriteThinnedData    INFO [test3] has been performed.
-Py:WriteThinnedData   DEBUG Executing WriteThinnedData...
 Py:WriteThinnedData    INFO Performing thinning test [test1]...
 Py:WriteThinnedData    INFO particles: 10
 Py:WriteThinnedData    INFO iparticles: 10
-Py:WriteThinnedData   DEBUG IN particles: 10
-Py:WriteThinnedData   DEBUG IN decay:
-Py:WriteThinnedData   DEBUG  p1: px= 10.0
-Py:WriteThinnedData   DEBUG  p2: px= 50.0
-Py:WriteThinnedData   DEBUG  l1: px= 20.0
-Py:WriteThinnedData   DEBUG  l2: px= 100.0
-Py:WriteThinnedData   DEBUG IN elephantino:
-Py:WriteThinnedData   DEBUG  leg1: px= 10.0
-Py:WriteThinnedData   DEBUG  leg2: px= 50.0
-Py:WriteThinnedData   DEBUG  leg3: px= 80.0
-Py:WriteThinnedData   DEBUG  leg4: px= 90.0
-Py:WriteThinnedData   DEBUG  ear1: px= 20.0
-Py:WriteThinnedData   DEBUG  ear2: px= 100.0
+Py:WriteThinnedData    INFO IN particles: 10
+Py:WriteThinnedData    INFO IN decay:
+Py:WriteThinnedData    INFO  p1: px= 10.0
+Py:WriteThinnedData    INFO  p2: px= 50.0
+Py:WriteThinnedData    INFO  l1: px= 20.0
+Py:WriteThinnedData    INFO  l2: px= 100.0
+Py:WriteThinnedData    INFO IN elephantino:
+Py:WriteThinnedData    INFO  leg1: px= 10.0
+Py:WriteThinnedData    INFO  leg2: px= 50.0
+Py:WriteThinnedData    INFO  leg3: px= 80.0
+Py:WriteThinnedData    INFO  leg4: px= 90.0
+Py:WriteThinnedData    INFO  ear1: px= 20.0
+Py:WriteThinnedData    INFO  ear2: px= 100.0
 Py:WriteThinnedData    INFO Particles | filter :
 Py:WriteThinnedData    INFO        10 | keep
 Py:WriteThinnedData    INFO        20 | remove
@@ -272,19 +270,19 @@ Py:WriteThinnedData    INFO [test1] has been performed.
 Py:WriteThinnedData    INFO Performing thinning test [test2]...
 Py:WriteThinnedData    INFO particles: 10
 Py:WriteThinnedData    INFO iparticles: 10
-Py:WriteThinnedData   DEBUG IN particles: 10
-Py:WriteThinnedData   DEBUG IN decay:
-Py:WriteThinnedData   DEBUG  p1: px= 10.0
-Py:WriteThinnedData   DEBUG  p2: px= 50.0
-Py:WriteThinnedData   DEBUG  l1: px= 20.0
-Py:WriteThinnedData   DEBUG  l2: px= 100.0
-Py:WriteThinnedData   DEBUG IN elephantino:
-Py:WriteThinnedData   DEBUG  leg1: px= 10.0
-Py:WriteThinnedData   DEBUG  leg2: px= 50.0
-Py:WriteThinnedData   DEBUG  leg3: px= 80.0
-Py:WriteThinnedData   DEBUG  leg4: px= 90.0
-Py:WriteThinnedData   DEBUG  ear1: px= 20.0
-Py:WriteThinnedData   DEBUG  ear2: px= 100.0
+Py:WriteThinnedData    INFO IN particles: 10
+Py:WriteThinnedData    INFO IN decay:
+Py:WriteThinnedData    INFO  p1: px= 10.0
+Py:WriteThinnedData    INFO  p2: px= 50.0
+Py:WriteThinnedData    INFO  l1: px= 20.0
+Py:WriteThinnedData    INFO  l2: px= 100.0
+Py:WriteThinnedData    INFO IN elephantino:
+Py:WriteThinnedData    INFO  leg1: px= 10.0
+Py:WriteThinnedData    INFO  leg2: px= 50.0
+Py:WriteThinnedData    INFO  leg3: px= 80.0
+Py:WriteThinnedData    INFO  leg4: px= 90.0
+Py:WriteThinnedData    INFO  ear1: px= 20.0
+Py:WriteThinnedData    INFO  ear2: px= 100.0
 Py:WriteThinnedData    INFO Particles | filter :
 Py:WriteThinnedData    INFO        10 | keep
 Py:WriteThinnedData    INFO        20 | remove
@@ -339,19 +337,19 @@ Py:WriteThinnedData    INFO [test2] has been performed.
 Py:WriteThinnedData    INFO Performing thinning test [test3]...
 Py:WriteThinnedData    INFO particles: 10
 Py:WriteThinnedData    INFO iparticles: 10
-Py:WriteThinnedData   DEBUG IN particles: 10
-Py:WriteThinnedData   DEBUG IN decay:
-Py:WriteThinnedData   DEBUG  p1: px= 10.0
-Py:WriteThinnedData   DEBUG  p2: px= 50.0
-Py:WriteThinnedData   DEBUG  l1: px= 20.0
-Py:WriteThinnedData   DEBUG  l2: px= 100.0
-Py:WriteThinnedData   DEBUG IN elephantino:
-Py:WriteThinnedData   DEBUG  leg1: px= 10.0
-Py:WriteThinnedData   DEBUG  leg2: px= 50.0
-Py:WriteThinnedData   DEBUG  leg3: px= 80.0
-Py:WriteThinnedData   DEBUG  leg4: px= 90.0
-Py:WriteThinnedData   DEBUG  ear1: px= 20.0
-Py:WriteThinnedData   DEBUG  ear2: px= 100.0
+Py:WriteThinnedData    INFO IN particles: 10
+Py:WriteThinnedData    INFO IN decay:
+Py:WriteThinnedData    INFO  p1: px= 10.0
+Py:WriteThinnedData    INFO  p2: px= 50.0
+Py:WriteThinnedData    INFO  l1: px= 20.0
+Py:WriteThinnedData    INFO  l2: px= 100.0
+Py:WriteThinnedData    INFO IN elephantino:
+Py:WriteThinnedData    INFO  leg1: px= 10.0
+Py:WriteThinnedData    INFO  leg2: px= 50.0
+Py:WriteThinnedData    INFO  leg3: px= 80.0
+Py:WriteThinnedData    INFO  leg4: px= 90.0
+Py:WriteThinnedData    INFO  ear1: px= 20.0
+Py:WriteThinnedData    INFO  ear2: px= 100.0
 Py:WriteThinnedData    INFO IParticles | filter :
 Py:WriteThinnedData    INFO        10 | keep
 Py:WriteThinnedData    INFO        20 | remove
@@ -403,23 +401,22 @@ Py:WriteThinnedData    INFO  leg4: px= 90.0
 Py:WriteThinnedData    INFO  ear1: px= 20.0
 Py:WriteThinnedData    INFO  ear2: px= 100.0
 Py:WriteThinnedData    INFO [test3] has been performed.
-Py:WriteThinnedData   DEBUG Executing WriteThinnedData...
 Py:WriteThinnedData    INFO Performing thinning test [test1]...
 Py:WriteThinnedData    INFO particles: 10
 Py:WriteThinnedData    INFO iparticles: 10
-Py:WriteThinnedData   DEBUG IN particles: 10
-Py:WriteThinnedData   DEBUG IN decay:
-Py:WriteThinnedData   DEBUG  p1: px= 10.0
-Py:WriteThinnedData   DEBUG  p2: px= 50.0
-Py:WriteThinnedData   DEBUG  l1: px= 20.0
-Py:WriteThinnedData   DEBUG  l2: px= 100.0
-Py:WriteThinnedData   DEBUG IN elephantino:
-Py:WriteThinnedData   DEBUG  leg1: px= 10.0
-Py:WriteThinnedData   DEBUG  leg2: px= 50.0
-Py:WriteThinnedData   DEBUG  leg3: px= 80.0
-Py:WriteThinnedData   DEBUG  leg4: px= 90.0
-Py:WriteThinnedData   DEBUG  ear1: px= 20.0
-Py:WriteThinnedData   DEBUG  ear2: px= 100.0
+Py:WriteThinnedData    INFO IN particles: 10
+Py:WriteThinnedData    INFO IN decay:
+Py:WriteThinnedData    INFO  p1: px= 10.0
+Py:WriteThinnedData    INFO  p2: px= 50.0
+Py:WriteThinnedData    INFO  l1: px= 20.0
+Py:WriteThinnedData    INFO  l2: px= 100.0
+Py:WriteThinnedData    INFO IN elephantino:
+Py:WriteThinnedData    INFO  leg1: px= 10.0
+Py:WriteThinnedData    INFO  leg2: px= 50.0
+Py:WriteThinnedData    INFO  leg3: px= 80.0
+Py:WriteThinnedData    INFO  leg4: px= 90.0
+Py:WriteThinnedData    INFO  ear1: px= 20.0
+Py:WriteThinnedData    INFO  ear2: px= 100.0
 Py:WriteThinnedData    INFO Particles | filter :
 Py:WriteThinnedData    INFO        10 | keep
 Py:WriteThinnedData    INFO        20 | remove
@@ -474,19 +471,19 @@ Py:WriteThinnedData    INFO [test1] has been performed.
 Py:WriteThinnedData    INFO Performing thinning test [test2]...
 Py:WriteThinnedData    INFO particles: 10
 Py:WriteThinnedData    INFO iparticles: 10
-Py:WriteThinnedData   DEBUG IN particles: 10
-Py:WriteThinnedData   DEBUG IN decay:
-Py:WriteThinnedData   DEBUG  p1: px= 10.0
-Py:WriteThinnedData   DEBUG  p2: px= 50.0
-Py:WriteThinnedData   DEBUG  l1: px= 20.0
-Py:WriteThinnedData   DEBUG  l2: px= 100.0
-Py:WriteThinnedData   DEBUG IN elephantino:
-Py:WriteThinnedData   DEBUG  leg1: px= 10.0
-Py:WriteThinnedData   DEBUG  leg2: px= 50.0
-Py:WriteThinnedData   DEBUG  leg3: px= 80.0
-Py:WriteThinnedData   DEBUG  leg4: px= 90.0
-Py:WriteThinnedData   DEBUG  ear1: px= 20.0
-Py:WriteThinnedData   DEBUG  ear2: px= 100.0
+Py:WriteThinnedData    INFO IN particles: 10
+Py:WriteThinnedData    INFO IN decay:
+Py:WriteThinnedData    INFO  p1: px= 10.0
+Py:WriteThinnedData    INFO  p2: px= 50.0
+Py:WriteThinnedData    INFO  l1: px= 20.0
+Py:WriteThinnedData    INFO  l2: px= 100.0
+Py:WriteThinnedData    INFO IN elephantino:
+Py:WriteThinnedData    INFO  leg1: px= 10.0
+Py:WriteThinnedData    INFO  leg2: px= 50.0
+Py:WriteThinnedData    INFO  leg3: px= 80.0
+Py:WriteThinnedData    INFO  leg4: px= 90.0
+Py:WriteThinnedData    INFO  ear1: px= 20.0
+Py:WriteThinnedData    INFO  ear2: px= 100.0
 Py:WriteThinnedData    INFO Particles | filter :
 Py:WriteThinnedData    INFO        10 | keep
 Py:WriteThinnedData    INFO        20 | remove
@@ -541,19 +538,19 @@ Py:WriteThinnedData    INFO [test2] has been performed.
 Py:WriteThinnedData    INFO Performing thinning test [test3]...
 Py:WriteThinnedData    INFO particles: 10
 Py:WriteThinnedData    INFO iparticles: 10
-Py:WriteThinnedData   DEBUG IN particles: 10
-Py:WriteThinnedData   DEBUG IN decay:
-Py:WriteThinnedData   DEBUG  p1: px= 10.0
-Py:WriteThinnedData   DEBUG  p2: px= 50.0
-Py:WriteThinnedData   DEBUG  l1: px= 20.0
-Py:WriteThinnedData   DEBUG  l2: px= 100.0
-Py:WriteThinnedData   DEBUG IN elephantino:
-Py:WriteThinnedData   DEBUG  leg1: px= 10.0
-Py:WriteThinnedData   DEBUG  leg2: px= 50.0
-Py:WriteThinnedData   DEBUG  leg3: px= 80.0
-Py:WriteThinnedData   DEBUG  leg4: px= 90.0
-Py:WriteThinnedData   DEBUG  ear1: px= 20.0
-Py:WriteThinnedData   DEBUG  ear2: px= 100.0
+Py:WriteThinnedData    INFO IN particles: 10
+Py:WriteThinnedData    INFO IN decay:
+Py:WriteThinnedData    INFO  p1: px= 10.0
+Py:WriteThinnedData    INFO  p2: px= 50.0
+Py:WriteThinnedData    INFO  l1: px= 20.0
+Py:WriteThinnedData    INFO  l2: px= 100.0
+Py:WriteThinnedData    INFO IN elephantino:
+Py:WriteThinnedData    INFO  leg1: px= 10.0
+Py:WriteThinnedData    INFO  leg2: px= 50.0
+Py:WriteThinnedData    INFO  leg3: px= 80.0
+Py:WriteThinnedData    INFO  leg4: px= 90.0
+Py:WriteThinnedData    INFO  ear1: px= 20.0
+Py:WriteThinnedData    INFO  ear2: px= 100.0
 Py:WriteThinnedData    INFO IParticles | filter :
 Py:WriteThinnedData    INFO        10 | keep
 Py:WriteThinnedData    INFO        20 | remove
@@ -605,23 +602,22 @@ Py:WriteThinnedData    INFO  leg4: px= 90.0
 Py:WriteThinnedData    INFO  ear1: px= 20.0
 Py:WriteThinnedData    INFO  ear2: px= 100.0
 Py:WriteThinnedData    INFO [test3] has been performed.
-Py:WriteThinnedData   DEBUG Executing WriteThinnedData...
 Py:WriteThinnedData    INFO Performing thinning test [test1]...
 Py:WriteThinnedData    INFO particles: 10
 Py:WriteThinnedData    INFO iparticles: 10
-Py:WriteThinnedData   DEBUG IN particles: 10
-Py:WriteThinnedData   DEBUG IN decay:
-Py:WriteThinnedData   DEBUG  p1: px= 10.0
-Py:WriteThinnedData   DEBUG  p2: px= 50.0
-Py:WriteThinnedData   DEBUG  l1: px= 20.0
-Py:WriteThinnedData   DEBUG  l2: px= 100.0
-Py:WriteThinnedData   DEBUG IN elephantino:
-Py:WriteThinnedData   DEBUG  leg1: px= 10.0
-Py:WriteThinnedData   DEBUG  leg2: px= 50.0
-Py:WriteThinnedData   DEBUG  leg3: px= 80.0
-Py:WriteThinnedData   DEBUG  leg4: px= 90.0
-Py:WriteThinnedData   DEBUG  ear1: px= 20.0
-Py:WriteThinnedData   DEBUG  ear2: px= 100.0
+Py:WriteThinnedData    INFO IN particles: 10
+Py:WriteThinnedData    INFO IN decay:
+Py:WriteThinnedData    INFO  p1: px= 10.0
+Py:WriteThinnedData    INFO  p2: px= 50.0
+Py:WriteThinnedData    INFO  l1: px= 20.0
+Py:WriteThinnedData    INFO  l2: px= 100.0
+Py:WriteThinnedData    INFO IN elephantino:
+Py:WriteThinnedData    INFO  leg1: px= 10.0
+Py:WriteThinnedData    INFO  leg2: px= 50.0
+Py:WriteThinnedData    INFO  leg3: px= 80.0
+Py:WriteThinnedData    INFO  leg4: px= 90.0
+Py:WriteThinnedData    INFO  ear1: px= 20.0
+Py:WriteThinnedData    INFO  ear2: px= 100.0
 Py:WriteThinnedData    INFO Particles | filter :
 Py:WriteThinnedData    INFO        10 | keep
 Py:WriteThinnedData    INFO        20 | remove
@@ -676,19 +672,19 @@ Py:WriteThinnedData    INFO [test1] has been performed.
 Py:WriteThinnedData    INFO Performing thinning test [test2]...
 Py:WriteThinnedData    INFO particles: 10
 Py:WriteThinnedData    INFO iparticles: 10
-Py:WriteThinnedData   DEBUG IN particles: 10
-Py:WriteThinnedData   DEBUG IN decay:
-Py:WriteThinnedData   DEBUG  p1: px= 10.0
-Py:WriteThinnedData   DEBUG  p2: px= 50.0
-Py:WriteThinnedData   DEBUG  l1: px= 20.0
-Py:WriteThinnedData   DEBUG  l2: px= 100.0
-Py:WriteThinnedData   DEBUG IN elephantino:
-Py:WriteThinnedData   DEBUG  leg1: px= 10.0
-Py:WriteThinnedData   DEBUG  leg2: px= 50.0
-Py:WriteThinnedData   DEBUG  leg3: px= 80.0
-Py:WriteThinnedData   DEBUG  leg4: px= 90.0
-Py:WriteThinnedData   DEBUG  ear1: px= 20.0
-Py:WriteThinnedData   DEBUG  ear2: px= 100.0
+Py:WriteThinnedData    INFO IN particles: 10
+Py:WriteThinnedData    INFO IN decay:
+Py:WriteThinnedData    INFO  p1: px= 10.0
+Py:WriteThinnedData    INFO  p2: px= 50.0
+Py:WriteThinnedData    INFO  l1: px= 20.0
+Py:WriteThinnedData    INFO  l2: px= 100.0
+Py:WriteThinnedData    INFO IN elephantino:
+Py:WriteThinnedData    INFO  leg1: px= 10.0
+Py:WriteThinnedData    INFO  leg2: px= 50.0
+Py:WriteThinnedData    INFO  leg3: px= 80.0
+Py:WriteThinnedData    INFO  leg4: px= 90.0
+Py:WriteThinnedData    INFO  ear1: px= 20.0
+Py:WriteThinnedData    INFO  ear2: px= 100.0
 Py:WriteThinnedData    INFO Particles | filter :
 Py:WriteThinnedData    INFO        10 | keep
 Py:WriteThinnedData    INFO        20 | remove
@@ -743,19 +739,19 @@ Py:WriteThinnedData    INFO [test2] has been performed.
 Py:WriteThinnedData    INFO Performing thinning test [test3]...
 Py:WriteThinnedData    INFO particles: 10
 Py:WriteThinnedData    INFO iparticles: 10
-Py:WriteThinnedData   DEBUG IN particles: 10
-Py:WriteThinnedData   DEBUG IN decay:
-Py:WriteThinnedData   DEBUG  p1: px= 10.0
-Py:WriteThinnedData   DEBUG  p2: px= 50.0
-Py:WriteThinnedData   DEBUG  l1: px= 20.0
-Py:WriteThinnedData   DEBUG  l2: px= 100.0
-Py:WriteThinnedData   DEBUG IN elephantino:
-Py:WriteThinnedData   DEBUG  leg1: px= 10.0
-Py:WriteThinnedData   DEBUG  leg2: px= 50.0
-Py:WriteThinnedData   DEBUG  leg3: px= 80.0
-Py:WriteThinnedData   DEBUG  leg4: px= 90.0
-Py:WriteThinnedData   DEBUG  ear1: px= 20.0
-Py:WriteThinnedData   DEBUG  ear2: px= 100.0
+Py:WriteThinnedData    INFO IN particles: 10
+Py:WriteThinnedData    INFO IN decay:
+Py:WriteThinnedData    INFO  p1: px= 10.0
+Py:WriteThinnedData    INFO  p2: px= 50.0
+Py:WriteThinnedData    INFO  l1: px= 20.0
+Py:WriteThinnedData    INFO  l2: px= 100.0
+Py:WriteThinnedData    INFO IN elephantino:
+Py:WriteThinnedData    INFO  leg1: px= 10.0
+Py:WriteThinnedData    INFO  leg2: px= 50.0
+Py:WriteThinnedData    INFO  leg3: px= 80.0
+Py:WriteThinnedData    INFO  leg4: px= 90.0
+Py:WriteThinnedData    INFO  ear1: px= 20.0
+Py:WriteThinnedData    INFO  ear2: px= 100.0
 Py:WriteThinnedData    INFO IParticles | filter :
 Py:WriteThinnedData    INFO        10 | keep
 Py:WriteThinnedData    INFO        20 | remove
@@ -807,23 +803,22 @@ Py:WriteThinnedData    INFO  leg4: px= 90.0
 Py:WriteThinnedData    INFO  ear1: px= 20.0
 Py:WriteThinnedData    INFO  ear2: px= 100.0
 Py:WriteThinnedData    INFO [test3] has been performed.
-Py:WriteThinnedData   DEBUG Executing WriteThinnedData...
 Py:WriteThinnedData    INFO Performing thinning test [test1]...
 Py:WriteThinnedData    INFO particles: 10
 Py:WriteThinnedData    INFO iparticles: 10
-Py:WriteThinnedData   DEBUG IN particles: 10
-Py:WriteThinnedData   DEBUG IN decay:
-Py:WriteThinnedData   DEBUG  p1: px= 10.0
-Py:WriteThinnedData   DEBUG  p2: px= 50.0
-Py:WriteThinnedData   DEBUG  l1: px= 20.0
-Py:WriteThinnedData   DEBUG  l2: px= 100.0
-Py:WriteThinnedData   DEBUG IN elephantino:
-Py:WriteThinnedData   DEBUG  leg1: px= 10.0
-Py:WriteThinnedData   DEBUG  leg2: px= 50.0
-Py:WriteThinnedData   DEBUG  leg3: px= 80.0
-Py:WriteThinnedData   DEBUG  leg4: px= 90.0
-Py:WriteThinnedData   DEBUG  ear1: px= 20.0
-Py:WriteThinnedData   DEBUG  ear2: px= 100.0
+Py:WriteThinnedData    INFO IN particles: 10
+Py:WriteThinnedData    INFO IN decay:
+Py:WriteThinnedData    INFO  p1: px= 10.0
+Py:WriteThinnedData    INFO  p2: px= 50.0
+Py:WriteThinnedData    INFO  l1: px= 20.0
+Py:WriteThinnedData    INFO  l2: px= 100.0
+Py:WriteThinnedData    INFO IN elephantino:
+Py:WriteThinnedData    INFO  leg1: px= 10.0
+Py:WriteThinnedData    INFO  leg2: px= 50.0
+Py:WriteThinnedData    INFO  leg3: px= 80.0
+Py:WriteThinnedData    INFO  leg4: px= 90.0
+Py:WriteThinnedData    INFO  ear1: px= 20.0
+Py:WriteThinnedData    INFO  ear2: px= 100.0
 Py:WriteThinnedData    INFO Particles | filter :
 Py:WriteThinnedData    INFO        10 | keep
 Py:WriteThinnedData    INFO        20 | remove
@@ -878,19 +873,19 @@ Py:WriteThinnedData    INFO [test1] has been performed.
 Py:WriteThinnedData    INFO Performing thinning test [test2]...
 Py:WriteThinnedData    INFO particles: 10
 Py:WriteThinnedData    INFO iparticles: 10
-Py:WriteThinnedData   DEBUG IN particles: 10
-Py:WriteThinnedData   DEBUG IN decay:
-Py:WriteThinnedData   DEBUG  p1: px= 10.0
-Py:WriteThinnedData   DEBUG  p2: px= 50.0
-Py:WriteThinnedData   DEBUG  l1: px= 20.0
-Py:WriteThinnedData   DEBUG  l2: px= 100.0
-Py:WriteThinnedData   DEBUG IN elephantino:
-Py:WriteThinnedData   DEBUG  leg1: px= 10.0
-Py:WriteThinnedData   DEBUG  leg2: px= 50.0
-Py:WriteThinnedData   DEBUG  leg3: px= 80.0
-Py:WriteThinnedData   DEBUG  leg4: px= 90.0
-Py:WriteThinnedData   DEBUG  ear1: px= 20.0
-Py:WriteThinnedData   DEBUG  ear2: px= 100.0
+Py:WriteThinnedData    INFO IN particles: 10
+Py:WriteThinnedData    INFO IN decay:
+Py:WriteThinnedData    INFO  p1: px= 10.0
+Py:WriteThinnedData    INFO  p2: px= 50.0
+Py:WriteThinnedData    INFO  l1: px= 20.0
+Py:WriteThinnedData    INFO  l2: px= 100.0
+Py:WriteThinnedData    INFO IN elephantino:
+Py:WriteThinnedData    INFO  leg1: px= 10.0
+Py:WriteThinnedData    INFO  leg2: px= 50.0
+Py:WriteThinnedData    INFO  leg3: px= 80.0
+Py:WriteThinnedData    INFO  leg4: px= 90.0
+Py:WriteThinnedData    INFO  ear1: px= 20.0
+Py:WriteThinnedData    INFO  ear2: px= 100.0
 Py:WriteThinnedData    INFO Particles | filter :
 Py:WriteThinnedData    INFO        10 | keep
 Py:WriteThinnedData    INFO        20 | remove
@@ -945,19 +940,19 @@ Py:WriteThinnedData    INFO [test2] has been performed.
 Py:WriteThinnedData    INFO Performing thinning test [test3]...
 Py:WriteThinnedData    INFO particles: 10
 Py:WriteThinnedData    INFO iparticles: 10
-Py:WriteThinnedData   DEBUG IN particles: 10
-Py:WriteThinnedData   DEBUG IN decay:
-Py:WriteThinnedData   DEBUG  p1: px= 10.0
-Py:WriteThinnedData   DEBUG  p2: px= 50.0
-Py:WriteThinnedData   DEBUG  l1: px= 20.0
-Py:WriteThinnedData   DEBUG  l2: px= 100.0
-Py:WriteThinnedData   DEBUG IN elephantino:
-Py:WriteThinnedData   DEBUG  leg1: px= 10.0
-Py:WriteThinnedData   DEBUG  leg2: px= 50.0
-Py:WriteThinnedData   DEBUG  leg3: px= 80.0
-Py:WriteThinnedData   DEBUG  leg4: px= 90.0
-Py:WriteThinnedData   DEBUG  ear1: px= 20.0
-Py:WriteThinnedData   DEBUG  ear2: px= 100.0
+Py:WriteThinnedData    INFO IN particles: 10
+Py:WriteThinnedData    INFO IN decay:
+Py:WriteThinnedData    INFO  p1: px= 10.0
+Py:WriteThinnedData    INFO  p2: px= 50.0
+Py:WriteThinnedData    INFO  l1: px= 20.0
+Py:WriteThinnedData    INFO  l2: px= 100.0
+Py:WriteThinnedData    INFO IN elephantino:
+Py:WriteThinnedData    INFO  leg1: px= 10.0
+Py:WriteThinnedData    INFO  leg2: px= 50.0
+Py:WriteThinnedData    INFO  leg3: px= 80.0
+Py:WriteThinnedData    INFO  leg4: px= 90.0
+Py:WriteThinnedData    INFO  ear1: px= 20.0
+Py:WriteThinnedData    INFO  ear2: px= 100.0
 Py:WriteThinnedData    INFO IParticles | filter :
 Py:WriteThinnedData    INFO        10 | keep
 Py:WriteThinnedData    INFO        20 | remove

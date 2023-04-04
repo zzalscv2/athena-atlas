@@ -4,6 +4,8 @@
 #
 #==============================================================
 #
+import os
+
 import AthenaCommon.AtlasUnixStandardJob
 
 from AthenaCommon.Constants   import VERBOSE,DEBUG,INFO,WARNING,ERROR
@@ -55,12 +57,12 @@ topSequence += WriteThinnedData(
    Elephantino = "PinkElephantino",
    Filter      = [ True,  False,  False, False, True,
                    False, False,  True,  True,  False ],
-   OutputLevel = DEBUG )
+   OutputLevel = INFO )
 
 #--------------------------------------------------------------
 # POOL Persistency
 #--------------------------------------------------------------
-import AthenaPoolCnvSvc.WriteAthenaPool as wap
+import AthenaPoolCnvSvc.WriteAthenaPool
 from OutputStreamAthenaPool.CreateOutputStreams import createOutputStream
 
 if 'OUTPUT' not in dir():

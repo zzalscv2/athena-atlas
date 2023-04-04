@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AthExThinning )
@@ -47,10 +47,10 @@ atlas_install_runtime( test/*.ref )
 atlas_add_test( test_thinning
                 SCRIPT test/test_thinning.sh
                 PROPERTIES TIMEOUT 900
-                LOG_IGNORE_PATTERN ":::running" )
+                POST_EXEC_SCRIPT nopost.sh )
 
 atlas_add_test( test_pythinning
                 SCRIPT test/test_pythinning.sh
                 PROPERTIES TIMEOUT 900
-                LOG_IGNORE_PATTERN ":::running"
-                DEPENDS test_thinning )
+                DEPENDS test_thinning
+                POST_EXEC_SCRIPT nopost.sh )
