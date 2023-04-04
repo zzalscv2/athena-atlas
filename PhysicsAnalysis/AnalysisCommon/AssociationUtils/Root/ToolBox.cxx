@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local includes
@@ -99,10 +99,13 @@ namespace ORUtils
       ATH_MSG_DEBUG("  type " << handle.type());
       ATH_MSG_DEBUG("  isInitialized  " << handle.isInitialized());
 
-      // Initialize it
-      if(!handle.isInitialized()) {
-        ATH_CHECK( handle.initialize() );
-      }
+      // Initialize the handle - WB: NO DON'T DO THIS ...
+      // the naming of the tool implies it's a subtool, so it mustn't be created before
+      // the parent tool is, because otherwise the parent tool doesn't get configured properly
+      // if the configuration has been done on the C++ side (the state of the joboptionsvc hasn't
+      // been updated yet) ... triggering the initialization would trigger the creation of the master tool
+      // because it's deemed to be a parent by the naming convention parent.child
+      
       // Add it to the master tool
       if(!masterTool.empty()) {
         ATH_CHECK( masterTool.setProperty(key, handle) );
