@@ -102,24 +102,27 @@ def stringGetResult(file, rootFolder):
 
 def hancool(runNumber=3070,
             filePath="/afs/cern.ch/user/a/atlasdqm/dqmdisk/han_results/tier0/FDR2/NoStream/",
-            dbConnection="sqlite://;schema=MyCOOL.db;dbname=CONDBR2", dqmfOfl="/GLOBAL/DETSTATUS/DQMFOFL",
-            db_tag="HEAD", shiftOfl="", shiftOfl_db_tag="HEAD", isESn=True):
+            dbConnection="sqlite://;schema=MyCOOL.db;dbname=CONDBR2", isESn=True):
 
     logger.info('====> Running hancool_defects')
-    hancool_defects(runNumber, filePath, dbConnection, 'HEAD', isESn)
+    hancool_defects(runNumber, filePath, dbConnection, isESn)
     logger.info('<==== Done with hancool_defects')
 
 
-def detmask_defects(runNumber, ddb):
+def detmask_defects(runNumber):
     from . import detmaskmod
     blacks = detmaskmod.decodeBlack(detmaskmod.getRunMask(runNumber),
                                     defects=True)
     nlbs = detmaskmod.getNumLumiBlocks(runNumber)
+    toinsert = []
     for defect in blacks:
-        ddb.insert(defect, since=(runNumber << 32 | 1),
-                   until=(runNumber << 32 | (nlbs+1)),
-                   comment='Automatically added by hancool',
-                   added_by='sys:hancool')
+        toinsert.append(defect_iov(since=1,
+                                   until=nlbs+1,
+                                   defect=defect,
+                                   recoverable=False,
+                                   comment='Automatically added by hancool')
+        )
+    return toinsert
 
         
 def ctp_defects(d, i, runNumber):
@@ -309,7 +312,7 @@ def dqmf_node_defect(node, defect, badstatuses=['Red']):
     return dqmf_node_defect_core
 
 
-def hancool_defects(runNumber, filePath="./", dbConnection="", db_tag='HEAD', isESn=True):
+def hancool_defects(runNumber, filePath="./", dbConnection="", isESn=True):
     from . import pix_defect
     analyzers = []
     if isESn:
@@ -367,24 +370,25 @@ def hancool_defects(runNumber, filePath="./", dbConnection="", db_tag='HEAD', is
             logging.warning('Unable to execute pixel hancool code')
             logging.warning('--> %s: %s', type(e).__name__, e)
 
-    from DQDefects import DefectsDB
+    from DQDefects import DefectsDB, DEFECT_IOV
+    from DQUtils.sugar import RunLumi
+    import json
     ddb = DefectsDB(dbConnection, read_only=False)
     if isESn:
         logging.info('Running detmask_defects')
-        detmask_defects(runNumber, ddb)
-    with ddb.storage_buffer:
-        for defect in iovs_merge(defects):
-            logger.debug('Uploading %s', defect)
-            ddb.insert(defect.defect, since=(runNumber << 32 | defect.since),
-                       until=(runNumber << 32 | defect.until),
-                       comment=defect.comment,
-                       recoverable=defect.recoverable,
-                       added_by='sys:hancool')
+        dm_defects = detmask_defects(runNumber)
 
-    # Assign Pixel defect
-    #globname_pix = filePath+"run_"+str(runNumber)+"_han.root"
-    #filename_pix = "run_"+str(runNumber)+"_han.root"
-    #from DQDefects import DefectsDB
-    #ddb = DefectsDB(dbConnection, read_only=False, tag="HEAD")
-    #import pix_defect
-    #pix_defect.execute(runNumber, globname_pix, until-1, 'sys:hancool', ddb)
+        defectlist = []
+        for defect in dm_defects + iovs_merge(defects):
+            logger.debug('Working with %s', defect)
+            defectlist.append(DEFECT_IOV(RunLumi(runNumber, defect.since),
+                                         RunLumi(runNumber, defect.until),
+                                         channel=defect.defect,
+                                         comment=defect.comment,
+                                         present=True,
+                                         recoverable=defect.recoverable,
+                                         user='sys:hancool'))
+        secret_path=os.environ.get('COOLFLASK_SECRET', '/afs/cern.ch/user/a/atlasdqm/private/coolflask_secret/coolflask_secret.json')
+        auth = json.loads(open(secret_path).read())
+        logger.debug('Flask upload')
+        ddb.insert_multiple(defectlist, use_flask=True, flask_auth=auth)

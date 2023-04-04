@@ -51,4 +51,4 @@ if __name__ == "__main__":
       dqmfOfl       = "/GLOBAL/DETSTATUS/DQMFOFL"
       db_tag = "HEAD"
 
-  mod.hancool(runNumber,filePath,dbConnection,dqmfOfl, db_tag)
+  mod.hancool(runNumber,filePath,dbConnection)
