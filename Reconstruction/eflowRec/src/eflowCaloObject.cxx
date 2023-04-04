@@ -19,6 +19,7 @@ CREATED:  22nd November, 2004
 #include "eflowRec/eflowLayerIntegrator.h"
 #include "eflowRec/eflowEEtaBinnedParameters.h"
 #include "eflowRec/eflowRingSubtractionManager.h"
+#include "eflowRec/PFEnergyPredictorTool.h"
 
 eflowCaloObject::~eflowCaloObject() = default;
 
@@ -60,7 +61,8 @@ double eflowCaloObject::getClusterEnergy() const {
   return clusterEnergy;
 }
 
-void eflowCaloObject::simulateShower(eflowLayerIntegrator *integrator, const eflowEEtaBinnedParameters* binnedParameters, bool useUpdated2015ChargedShowerSubtraction){
+void eflowCaloObject::simulateShower(eflowLayerIntegrator *integrator, const eflowEEtaBinnedParameters* binnedParameters, bool useUpdated2015ChargedShowerSubtraction,
+const PFEnergyPredictorTool* energyP){
 
   for (auto *thisEfRecTrack : m_eflowRecTracks) {
 
@@ -98,7 +100,7 @@ void eflowCaloObject::simulateShower(eflowLayerIntegrator *integrator, const efl
     cellSubtractionManager.getOrdering(binnedParameters, trackE, trackEM1eta, j1st);
 
     /* Set expected energy in the eflowRecTrack object */
-    const double expectedEnergy = cellSubtractionManager.fudgeMean() * thisEfRecTrack->getTrack()->e();
+    const double expectedEnergy = energyP ? energyP->nnEnergyPrediction(thisEfRecTrack) : cellSubtractionManager.fudgeMean() * thisEfRecTrack->getTrack()->e();     
     const double expectedEnergySigma = fabs(cellSubtractionManager.fudgeStdDev() * thisEfRecTrack->getTrack()->e());
 
     const std::vector<eflowTrackClusterLink*>* bestClusters_015 = thisEfRecTrack->getAlternativeClusterMatches("cone_015");

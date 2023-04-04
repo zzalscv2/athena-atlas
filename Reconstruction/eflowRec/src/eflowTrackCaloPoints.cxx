@@ -44,10 +44,33 @@ eflowTrackCaloPoints::eflowTrackCaloPoints(const std::map<eflowCalo::LAYER, cons
 
 }
 
+eflowTrackCaloPoints::eflowTrackCaloPoints(const std::map<eflowCalo::LAYER, const Trk::TrackParameters*> & trackParameters,
+  std::map<CaloCell_ID::CaloSample,const Trk::TrackParameters*>& tileTrackParamaters) :
+  m_isEM1Barrel(trackParameters.begin()->first == eflowCalo::EMB1){
+     /* Fill etaPhiPositions map */
+    std::map<eflowCalo::LAYER, const Trk::TrackParameters*>::const_iterator itPars = trackParameters.begin();
+    std::map<eflowCalo::LAYER, const Trk::TrackParameters*>::const_iterator endPars = trackParameters.end();
+    m_isEM2Barrel = false;
+    for (; itPars != endPars; ++itPars) {
+      setEtaPhi(itPars->first, parToPosition(itPars->second));
+      if (itPars->first == eflowCalo::EMB2) m_isEM2Barrel = true;
+      m_positions[itPars->first] = parToPosition(itPars->second);
+      m_directions[itPars->first] = parToDirection(itPars->second);
+    }
+
+  for (auto firstTileParam : tileTrackParamaters) setEtaPhiTile(firstTileParam.first,parToPosition(firstTileParam.second));
+
+  }
+
 eflowTrackCaloPoints::~eflowTrackCaloPoints() = default;
 
 void eflowTrackCaloPoints::setEtaPhi(eflowCalo::LAYER lay, const Amg::Vector3D& vec) {
   m_etaPhiPositions[lay] = (vec != m_nullVector) ? eflowEtaPhiPosition(vec.eta(), vec.phi())
+                                                 : m_defaultEtaPhiPosition;
+}
+
+void eflowTrackCaloPoints::setEtaPhiTile(CaloCell_ID::CaloSample lay, const Amg::Vector3D& vec) {
+  m_tileEtaPhiPositions[lay] = (vec != m_nullVector) ? eflowEtaPhiPosition(vec.eta(), vec.phi())
                                                  : m_defaultEtaPhiPosition;
 }
 
@@ -64,6 +87,12 @@ const eflowEtaPhiPosition& eflowTrackCaloPoints::getEtaPhiPos(eflowCalo::LAYER l
   std::map< eflowCalo::LAYER, eflowEtaPhiPosition>::const_iterator it = m_etaPhiPositions.find(layer);
   return (it == m_etaPhiPositions.end()) ? m_defaultEtaPhiPosition : it->second;
 }
+
+const eflowEtaPhiPosition& eflowTrackCaloPoints::getTileEtaPhiPos(CaloCell_ID::CaloSample  layer) const {
+  std::map< CaloCell_ID::CaloSample , eflowEtaPhiPosition>::const_iterator it = m_tileEtaPhiPositions.find(layer);
+  return (it == m_tileEtaPhiPositions.end()) ? m_defaultEtaPhiPosition : it->second;
+}
+
 
 Amg::Vector3D eflowTrackCaloPoints::getPosition(eflowCalo::LAYER layer) {
   std::map<eflowCalo::LAYER, Amg::Vector3D>::const_iterator it = m_positions.find(layer);
