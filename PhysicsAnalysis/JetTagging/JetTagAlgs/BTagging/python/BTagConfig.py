@@ -17,6 +17,7 @@ from JetTagCalibration.JetTagCalibConfig import JetTagCalibCfg
 from BTagging.BTaggingFlags import BTaggingFlags
 from BTagging.BTaggingConfiguration import getConfiguration
 from OutputStreamAthenaPool.OutputStreamConfig import addToESD, addToAOD
+from JetHitAssociation.JetHitAssociationConfig import JetHitAssociationCfg
 
 # this is where you add the new trainings!
 def GetTaggerTrainingMap(inputFlags, jet_collection_list):
@@ -151,25 +152,33 @@ def BTagRecoSplitCfg(inputFlags, JetCollection=['AntiKt4EMTopo','AntiKt4EMPFlow'
 
     # By default, in Run3 we don't write out BTagging containers in AOD or ESD
     # following allows to write them out when using Reco_tf.py --CA run 3 style configuration
-    
+
     if inputFlags.Output.doWriteAOD and inputFlags.Jet.WriteToAOD:
-     result.merge(addBTagToOutput(inputFlags, JetCollection, toAOD=True, toESD=False))     
-     
+     result.merge(addBTagToOutput(inputFlags, JetCollection, toAOD=True, toESD=False))
+
     if inputFlags.Output.doWriteESD:
      result.merge(addBTagToOutput(inputFlags, JetCollection, toAOD=False, toESD=True))
-    
+
     # Invoking the alhorithm saving hits in the vicinity of jets, with proper flags
     if inputFlags.BTagging.Trackless:
         BTaggingFlags.DoJetHitAssociation=True
-        from JetHitAssociation.JetHitAssociationConfig import JetHitAssociationCfg
         result.merge(JetHitAssociationCfg(inputFlags))
-        BTaggingAODList = ['xAOD::TrackMeasurementValidationContainer#JetAssociatedPixelClusters',
-                           'xAOD::TrackMeasurementValidationAuxContainer#JetAssociatedPixelClustersAux.']
-        BTaggingAODList += ['xAOD::TrackMeasurementValidationContainer#JetAssociatedSCTClusters',
-                            'xAOD::TrackMeasurementValidationAuxContainer#JetAssociatedSCTClustersAux.']
+        BTaggingAODList = _track_measurement_list('JetAssociatedPixelClusters')
+        BTaggingAODList += _track_measurement_list('JetAssociatedSCTClusters')
         result.merge(addToAOD(inputFlags, BTaggingAODList))
 
+    if inputFlags.BTagging.savePixelHits:
+        result.merge(JetHitAssociationCfg(inputFlags))
+        result.merge(addToAOD(inputFlags, _track_measurement_list("PixelClusters")))
+
     return result
+
+
+def _track_measurement_list(container_name):
+    return [
+        f'xAOD::TrackMeasurementValidationContainer#{container_name}',
+        f'xAOD::TrackMeasurementValidationAuxContainer#{container_name}Aux.'
+    ]
 
 
 def BTagAlgsCfg(inputFlags,
@@ -293,7 +302,7 @@ def BTagAlgsCfg(inputFlags,
             TrackCollection=trackCollection,
         )
     )
-    
+
     #add also Flip tagger information
     if inputFlags.BTagging.RunFlipTaggers:
        result.merge(
@@ -304,9 +313,9 @@ def BTagAlgsCfg(inputFlags,
                TrackCollection=trackCollection,
                doFlipTagger=True,
            )
-       ) 
+       )
 
-    
+
     if muons:
         result.merge(
             BTagMuonAugmenterAlgCfg(

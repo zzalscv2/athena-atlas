@@ -429,7 +429,7 @@ inline bool valid_beam_particles(const GenEvent* e) {
   return true;
 }
 
-template <class T> bool suggest_barcode(T p, int i) {
+template <class T> bool suggest_barcode(T& p, int i) {
   if (!p->parent_event()) return false;
   auto barcodes = p->parent_event()->template attribute<GenEventBarcodes> ("barcodes");
   if (!barcodes) {

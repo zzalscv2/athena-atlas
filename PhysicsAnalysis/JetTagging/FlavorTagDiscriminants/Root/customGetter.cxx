@@ -34,6 +34,9 @@ namespace {
     if (name == "energy") {
       return [](const xAOD::Jet& j) -> float {return j.e();};
     }
+    if (name == "mass") {
+      return [](const xAOD::Jet& j) -> float {return j.m();};
+    }
 
     throw std::logic_error("no match for custom getter " + name);
   }

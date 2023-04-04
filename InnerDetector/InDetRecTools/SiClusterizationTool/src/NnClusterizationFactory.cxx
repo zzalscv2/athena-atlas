@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -46,9 +46,6 @@ namespace {
     
     return {static_cast<int>(d), d != v};
   }
-  
- 
-
 }
 
 
@@ -791,17 +788,19 @@ namespace InDet {
     SG::ReadCondHandle<PixelChargeCalibCondData> calibDataHandle(m_chargeDataKey);
     const PixelChargeCalibCondData *calibData = *calibDataHandle;
     const std::vector<Identifier>& rdos  = pCluster.rdoList();
-    ATH_MSG_VERBOSE(" Number of RDOs: " << rdos.size() );
+    const size_t rdoSize = rdos.size();
+    ATH_MSG_VERBOSE(" Number of RDOs: " << rdoSize );
     const std::vector<float>& chList     = pCluster.chargeList();
     const std::vector<int>&  totList     = pCluster.totList();
     std::vector<float> chListRecreated{};
+    chListRecreated.reserve(rdoSize);
     ATH_MSG_VERBOSE(" Number of charges: " << chList.size() );
     std::vector<int>::const_iterator tot = totList.begin();
     std::vector<Identifier>::const_iterator rdosBegin = rdos.begin();
     std::vector<Identifier>::const_iterator rdosEnd = rdos.end();
     std::vector<int>  totListRecreated{};
+    totListRecreated.reserve(rdoSize);
     std::vector<int>::const_iterator totRecreated = totListRecreated.begin();
-    //
     // Recreate both charge list and ToT list to correct for the IBL ToT overflow (and later for small hits):
     ATH_MSG_VERBOSE("Charge list is not filled ... re-creating it.");
     for ( ; rdosBegin!= rdosEnd and  tot != totList.end(); ++tot, ++rdosBegin, ++totRecreated ){
@@ -837,13 +836,6 @@ namespace InDet {
       Identifier rId =  *rdosBegin;
       int row = pixelID.phi_index(rId);
       int col = pixelID.eta_index(rId);
-      if(msgLvl(MSG::VERBOSE)){
-        if (!m_useToT){
-          ATH_MSG_VERBOSE(" Adding pixel row: " << row << " col: " << col << " charge: " << *charge << " tot " << *tot );
-        } else {
-          ATH_MSG_VERBOSE(" Adding pixel row: " << row << " col: " << col << " tot " << *tot );
-        }
-      }
       InDetDD::SiLocalPosition siLocalPosition (design->positionFromColumnRow(col,row));
       if (not m_useToT){
         sumOfWeightedPositions += (*charge)*siLocalPosition;
@@ -899,13 +891,6 @@ namespace InDet {
       Identifier rId =  *rdosBegin;
       unsigned int  absrow = pixelID.phi_index(rId)-rowWeightedPosition+centralIndexX;
       unsigned int  abscol = pixelID.eta_index(rId)-columnWeightedPosition+centralIndexY;
-      if(msgLvl(MSG::VERBOSE)){
-        if (not m_useToT){
-          ATH_MSG_VERBOSE(" phi Index: " << pixelID.phi_index(rId) << " absrow: " << absrow << " eta Idx: " << pixelID.eta_index(rId) << " abscol: " << abscol << " charge " << *charge );
-        } else {
-          ATH_MSG_VERBOSE(" phi Index: " << pixelID.phi_index(rId) << " absrow: " << absrow << " eta Idx: " << pixelID.eta_index(rId) << " abscol: " << abscol << " tot " << *tot );
-        }
-      }
       if (absrow > m_sizeX){
         ATH_MSG_WARNING(" problem with index: " << absrow << " min: " << 0 << " max: " << m_sizeX);
         return input;
@@ -917,7 +902,6 @@ namespace InDet {
       InDetDD::SiCellId cellId = element->cellIdFromIdentifier(*rdosBegin);
       InDetDD::SiDiodesParameters diodeParameters = design->parameters(cellId);
       double pitchY = diodeParameters.width().xEta();
-      ATH_MSG_VERBOSE(" PitchY: " << pitchY );
       if (not m_useToT) {
         input.matrixOfToT[absrow][abscol]=*charge;
       } else {

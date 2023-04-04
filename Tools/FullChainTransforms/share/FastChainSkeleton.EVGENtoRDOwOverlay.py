@@ -351,6 +351,9 @@ from ISF_Config import FlagSetters
 configureFlags = getattr(FlagSetters, ISF_Flags.Simulator.configFlagsMethodName(), None)
 if configureFlags is not None:
     configureFlags()
+if not DetFlags.simulate.BCM_on():
+    DetFlags.digitize.BCM_setOff()
+    DetFlags.overlay.BCM_setOff()
 
 # DetFlags.makeRIO.all_setOff() # needed for MT TRT conditions
 DetFlags.pileup.all_setOff()

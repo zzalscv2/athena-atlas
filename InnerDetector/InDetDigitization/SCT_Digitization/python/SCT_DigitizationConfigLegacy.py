@@ -80,7 +80,7 @@ def getSCT_SurfaceChargesGenerator(name="SCT_SurfaceChargesGenerator", **kwargs)
         return SCT_DetailedSurfaceChargesGenerator(name, **kwargs)
     else:
         from SCT_ConditionsTools.SCT_ConditionsToolsConf import SCT_RadDamageSummaryTool
-        kwargs.setdefault("RadDamageSummaryTool", SCT_RadDamageSummaryTool(name = "InDetSCT_RadDamageSummaryTool"))
+        kwargs.setdefault("RadDamageSummaryTool", SCT_RadDamageSummaryTool(name = "SCT_RadDamageSummaryTool"))
         from SCT_Digitization.SCT_DigitizationConf import SCT_SurfaceChargesGenerator
         return SCT_SurfaceChargesGenerator(name, **kwargs)
 
