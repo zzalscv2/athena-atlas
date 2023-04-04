@@ -29,14 +29,14 @@ public:
   void SetFieldValue(const std::string& name, int n, HitID& targetID) const;
   int  GetFieldValue(const std::string& name, HitID targetID) const;
   void PrintFields();
-  void Print(int id);
+  static void Print(int id);
 protected:
   IdFields m_IDs;
   int m_currentStorage;
-  void SetBit(int& i, int bitpos) const;
-  void UnsetBit(int& i, int bitpos) const;
-  void Store(int& id, int value, int first, int field) const;
-  int  Retrieve(int id, int first, int field) const;
+  static void SetBit(int& i, int bitpos) ;
+  static void UnsetBit(int& i, int bitpos) ;
+  static void Store(int& id, int value, int first, int field) ;
+  static int  Retrieve(int id, int first, int field) ;
 };
 
 #endif
