@@ -367,26 +367,6 @@ void HforTool::findHFQuarks() {
     findHFQuarksHerwig(finalstate_q) ;
   else if ( m_ShowerGenerator == "PYTHIA" ) {
     findHFQuarksPythia(finalstate_q) ;
-    // print out vtx -5 (the Alpgen ME process) if there are HF quarks and
-    // only in DEBUG mode
-    // Actually it does not make much sense.
-    if ( msgLvl(MSG::DEBUG) && finalstate_q.size() ) {
-      ATH_MSG_DEBUG("print out vertex -5") ;
-
-#ifdef HEPMC3
-    auto vtx5 = evt->vertices().at(5-1);
-    if (vtx5) {
-     for ( const auto& pin:  vtx5->particles_in()) ATH_MSG_DEBUG("    incoming: " << pin);
-     for ( const auto& pout: vtx5->particles_out()) ATH_MSG_DEBUG("    outgoing: " << pout);
-    }
-#else
-   auto vtx5 = HepMC::barcode_to_vertex(evt,-5) ;
-   if (vtx5) {
-	for ( auto pin = vtx5->particles_begin(HepMC::parents) ; pin != vtx5->particles_end(HepMC::parents); ++pin)      ATH_MSG_DEBUG("    incoming: " << (*pin));
-	for ( auto pout = vtx5->particles_begin(HepMC::children) ; pout != vtx5->particles_end(HepMC::children); ++pout) ATH_MSG_DEBUG("    outgoing: " << (*pout));
-   }
-#endif
-    } // print out vtx -5 if there are HF quarks and in DEBUG mode
   } // Pythia shower
   else if ( m_ShowerGenerator == "UNKNOWN" ) {
     // simply loop over all the final state partons and call them "unknown"
