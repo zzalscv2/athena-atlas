@@ -216,9 +216,10 @@ class FlagsFromArgsTest(unittest.TestCase):
         self.flags.addFlag('detA.flagB',0)
         self.flags.addFlag("detA.flagC","")
         self.flags.addFlag("detA.flagD",[])
+        self.flags.addFlag("Format", Format.BS, enum=Format)
 
     def test(self):
-        argline="-l VERBOSE --evtMax=10 --skipEvents=3 --filesInput=bla1.data,bla2.data detA.flagB=7 detA.flagC=a.2 detA.flagD+=['val']"
+        argline="-l VERBOSE --evtMax=10 --skipEvents=3 --filesInput=bla1.data,bla2.data detA.flagB=7 Format=Format.BS detA.flagC=a.2 detA.flagD+=['val']"
         if isGaudiEnv():
             argline += " --debug exec"
         print (f"Interpreting arguments: '{argline}'")
@@ -231,7 +232,7 @@ class FlagsFromArgsTest(unittest.TestCase):
         self.assertEqual(self.flags.detA.flagB,7,"Failed to set arbitrary from args")
         self.assertEqual(self.flags.detA.flagC,"a.2","Failed to set arbitrary unquoted string from args")
         self.assertEqual(self.flags.detA.flagD,["val"],"Failed to append to list flag")
-
+        self.assertEqual(self.flags.Format, Format.BS,"Failed to set FlagEnum")
 
 
 if __name__ == "__main__":

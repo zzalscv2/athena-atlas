@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from copy import copy, deepcopy
 from AthenaCommon.Logging import logging
@@ -476,6 +476,7 @@ class AthConfigFlags(object):
         """
         Used to set flags from command-line parameters, like ConfigFlags.fillFromArgs(sys.argv[1:])
         """
+        import importlib
         import sys
 
         self._tryModify()
@@ -561,8 +562,6 @@ class AthConfigFlags(object):
             self.Concurrency.NumProcs = args.nprocs
 
         #All remaining arguments are assumed to be key=value pairs to set arbitrary flags:
-
-
         for arg in leftover:
             if arg=='--':
                 argList += ["---"]
@@ -573,9 +572,10 @@ class AthConfigFlags(object):
                 if do_help:
                     argList += arg.split(".") # put arg back into list
                     continue # allow fallover when doing help
-                raise ValueError("Can't interpret argument {}, expected a key=value format".format( arg ) )
+                raise ValueError(f"Can't interpret argument {arg}, expected a key=value format")
 
             key=argsplit[0].strip()
+            value=argsplit[1].strip()
 
             # also allow key+=value to append
             oper = "="
@@ -586,21 +586,23 @@ class AthConfigFlags(object):
             if not self.hasFlag(key):
                 self._loadDynaFlags( '.'.join(key.split('.')[:-1]) ) # for a flag A.B.C dymanic flags from category A.B
             if not self.hasFlag(key):
-                raise KeyError("{} is not a known configuration flag".format( key ) )
+                raise KeyError(f"{key} is not a known configuration flag")
 
-            value=argsplit[1].strip()
+            enum = self._flagdict[key]._enum
+            # Regular flag
+            if enum is None:
+                try:
+                    exec(f"type({value})")
+                except (NameError, SyntaxError): #Can't determine type, assume we got an un-quoted string
+                    value=f"\"{value}\""
+            # FlagEnum
+            else:
+                # import the module containing the FlagEnum class
+                ENUM = importlib.import_module(enum.__module__)  # noqa: F841 (used in exec)
+                value=f"ENUM.{value}"
 
-            try:
-                exec("type({})".format( value ) )
-            except (NameError, SyntaxError): #Can't determine type, assume we got an un-quoted string
-                value="\"{}\"".format( value )
-
-            #Arg looks good enough, just exec it:
-            argToExec="self.{}{}{}".format( key,oper, value )
-            exec(argToExec)
-
-            print("Set flag {}={}".format(key,repr(self._flagdict[key].get(self))))
-            pass
+            # Set the value
+            exec(f"self.{key}{oper}{value}")
 
         if do_help:
             if parser.epilog is None: parser.epilog=""
@@ -634,6 +636,7 @@ class AthConfigFlags(object):
             parser.parse_known_args(argList + ["--help"])
 
         self._args = args
+
         return args
 
 
