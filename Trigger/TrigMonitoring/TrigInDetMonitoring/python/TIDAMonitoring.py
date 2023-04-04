@@ -451,30 +451,31 @@ if __name__=='__main__':
     log.info( "test running" )
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+
+    flags = initConfigFlags()
 
     # Input files
     # AOD file to be run w/ MT access and Mon Groups implemented
     file = 'AOD.pool.root'
 
-    ConfigFlags.Input.Files = [file]
-    ConfigFlags.Input.isMC  = True
+    flags.Input.Files = [file]
+    flags.Input.isMC  = True
 
-    ConfigFlags.Output.HISTFileName = 'duff.root'
+    flags.Output.HISTFileName = 'duff.root'
 
-    ConfigFlags.lock()
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
+    cfg = MainServicesCfg(flags)
 
-    cfg.merge( PoolReadCfg(ConfigFlags) )
+    cfg.merge( PoolReadCfg(flags) )
 
-    cfg.merge( histsvc(ConfigFlags) )
+    cfg.merge( histsvc(flags) )
 
-#   cfg.merge( TrigInDetMonConfig( ConfigFlags, "bJetMon:t0" ) ) 
-    cfg.merge( TrigInDetMonConfig( ConfigFlags ) ) 
+    cfg.merge( TrigInDetMonConfig( flags ) ) 
 
     # If you want to turn on more detailed messages ...
     cfg.printConfig(withDetails=False) # set True for exhaustive info
