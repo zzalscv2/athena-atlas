@@ -12,6 +12,7 @@
 #include "eflowRec/EtaPhiLUT.h"
 #include "eflowRec/IPFSubtractionTool.h"
 #include "eflowRec/PFData.h"
+#include "eflowRec/PFEnergyPredictorTool.h"
 #include "eflowRec/PFMatchPositions.h"
 #include "eflowRec/PFTrackClusterMatchingTool.h"
 #include "eflowRec/PFCalcRadialEnergyProfiles.h"
@@ -94,6 +95,14 @@ private:
   PFSubtractionStatusSetter m_pfSubtractionStatusSetter{};
   PFSubtractionEnergyRatioCalculator m_pfSubtractionEnergyRatioCalculator{};
   eflowSubtract::Subtractor m_subtractor{};
+
+  /** Tool for getting predictiing the energy using an ONNX model */
+  ToolHandle<PFEnergyPredictorTool> m_NNEnergyPredictorTool{this, "NNEnergyPredictorTool", "","Tool for getting predictiing the energy using an ONNX model "};
+  
+  /** Toggle whether we use the neural net energy */
+  Gaudi::Property<bool> m_useNNEnergy{this, "useNNEnergy", false, "Toggle whether we use the neural net energy"};
+
+
 };
 
 #endif

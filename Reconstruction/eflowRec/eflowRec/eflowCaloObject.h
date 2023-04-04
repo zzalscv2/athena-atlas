@@ -25,6 +25,7 @@ class eflowRecTrack;
 class eflowTrackClusterLink;
 class eflowLayerIntegrator;
 class eflowEEtaBinnedParameters;
+class PFEnergyPredictorTool;
 
 /**
 An internal EDM object which stores information about systems of associated tracks and calorimeter clusters. Specifically it stores vectors of pointers to eflowRecTracks, eflowRecClusters and eflowTrackClusterLinks. In addition it stores links to an xAOD::CaloClusterContainer and its associated aux container. This class also calculates the expected energy deposit in the calorimeter from a track in the system, and stores that information so that clients can retrieve it. It also calculates the calorimeter cell ordering to be used in the subtraction. Both of these things are done in the simulateShower method which uses the data stored in an eflowEEtaBinnedParameters object, which is filled by e.g the eflowCellEOverP_mc12_JetETMiss tool.
@@ -68,7 +69,8 @@ public:
   double getExpectedVariance() const;
   double getClusterEnergy() const ;
 
-  void simulateShower(eflowLayerIntegrator *integrator, const eflowEEtaBinnedParameters* binnedParameters, bool useUpdated2015ChargedShowerSubtraction);
+  void simulateShower(eflowLayerIntegrator *integrator, const eflowEEtaBinnedParameters* binnedParameters, bool useUpdated2015ChargedShowerSubtraction,
+  const PFEnergyPredictorTool* energyP);
 
 private:
 

@@ -39,6 +39,8 @@ StatusCode PFSubtractionTool::initialize()
   ATH_CHECK(m_theMatchingToolForPull_015.retrieve());
   ATH_CHECK(m_theMatchingToolForPull_02.retrieve());
 
+  if (!m_NNEnergyPredictorTool.empty()) ATH_CHECK(m_NNEnergyPredictorTool.retrieve());
+
   //Set the level of the helpers to the same as the tool here
   m_pfCalc.msg().setLevel(this->msg().level());
   m_pfSubtractionStatusSetter.msg().setLevel(this->msg().level());
@@ -196,7 +198,7 @@ unsigned int PFSubtractionTool::matchAndCreateEflowCaloObj(PFData &data) const{
   //For each eflowCaloObject we calculate the expected energy deposit in the calorimeter and cell ordering for subtraction.  
   for (unsigned int iCalo = nCaloObj; iCalo < data.caloObjects->size(); ++iCalo) {  
     eflowCaloObject* thisEflowCaloObject = data.caloObjects->at(iCalo);
-    thisEflowCaloObject->simulateShower(&integrator, m_binnedParameters.get(), true);        
+    thisEflowCaloObject->simulateShower(&integrator, m_binnedParameters.get(), true, m_useNNEnergy ? &(*m_NNEnergyPredictorTool) : nullptr);        
   }
 
   if (!m_recoverSplitShowers) return nMatches;

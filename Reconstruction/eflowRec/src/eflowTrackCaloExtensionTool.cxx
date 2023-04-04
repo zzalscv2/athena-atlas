@@ -79,6 +79,7 @@ std::unique_ptr<eflowTrackCaloPoints> eflowTrackCaloExtensionTool::execute(const
 
   /*Create a map to index the TrackParameters at calo (owned by the extension) wrt to layers*/
   std::map<eflowCalo::LAYER, const Trk::TrackParameters*> parametersMap;
+  std::map<CaloCell_ID::CaloSample,const Trk::TrackParameters*> tileParametersMap;
 
   /*get the CaloExtension object*/
   const Trk::CaloExtension * extension = nullptr;
@@ -121,14 +122,25 @@ std::unique_ptr<eflowTrackCaloPoints> eflowTrackCaloExtensionTool::execute(const
       } else if (m_trackParametersIdHelper->isEntryToVolume(clParameter.cIdentifier())) {
         parametersMap[getLayer(&clParameter)] = &clParameter;
       }
+
+      CaloCell_ID::CaloSample caloSample = m_trackParametersIdHelper->caloSample(clParameter.cIdentifier());
+
+      if (tileParametersMap[caloSample] == nullptr){
+        tileParametersMap[caloSample] = &clParameter;
+      } else if (m_trackParametersIdHelper->isEntryToVolume(clParameter.cIdentifier())){
+        tileParametersMap[caloSample] = &clParameter;
+      }
+
     }
+
+
     /*
       parametersMap may have several entries for Tile1,2,3.
       The impact is negligible as the eta/phi of these entries are very similar
       https://its.cern.ch/jira/browse/ATLJETMET-242
     */
     
-    return std::make_unique<eflowTrackCaloPoints>(parametersMap);
+    return std::make_unique<eflowTrackCaloPoints>(parametersMap,tileParametersMap);
 
   }
   else{
