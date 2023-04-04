@@ -13,7 +13,7 @@
   implements the underlying logic of accessing the ROOT files containing the
   recommendations.
   @authors Kristin Lohwasser, Karsten Koeneke, Felix Buehrer
-  @updated by Christos Anastopoulos 2017-2018
+  @updated by Christos Anastopoulos 2017-2022
   */
 
 // STL includes
@@ -79,14 +79,14 @@ public:
   /// Initialize this class
   int initialize();
 
-  /** The main calculate method: the actual cuts are applied here
+  /** The main calculate method:
    *  @c dataType PATCore::ParticleDataType::DataType (e.g DATA,FULL etc)
-   *  @ runnumber the run number 1st dimension of the stored measurements
-   *  @ cluster_eta the cluster eta 2nd dimension of the stored measurements
-   *  @ et third dimension of the stored measurments
+   *  @ runnumber the run number. 1st dimension of the stored measurements
+   *  @ cluster_eta the cluster eta. 2nd dimension of the stored measurements
+   *  @ electron et. third dimension of the stored measurments
    *  @ result struct filled with
    *  SF, Total uncertainty, Stat uncertainty, Uncorr uncertainty
-   *  @ index_of_corr systematic
+   *  @ onlyTotal do only the "total" systematic
    *  returns 0 in failure
    *
    *  Toy production is controlled by internal flags

@@ -340,9 +340,8 @@ Root::TElectronEfficiencyCorrectionTool::calculate(
   result.UnCorr = val;
   /*
    * Do the correlated part
-   * The previous setup is becoming cumbersome
-   * for the N~16 systematic variations.
-   * So we keep them in a vector of vector of HistArray
+   * For the N~16 systematic variations
+   * we keep them in a vector of vector of HistArray
    * The first vector index being the runnumber
    * The second the systematic
    * And them the HistArray for high low etc.
@@ -362,7 +361,7 @@ Root::TElectronEfficiencyCorrectionTool::calculate(
     }
   }
   /*
-   * Do the toys if requested  and exit early
+   * Do the toys if requested
    */
   if (m_doToyMC || m_doCombToyMC) {
     result.toys.resize(static_cast<size_t>(m_nToyMC));

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -33,7 +33,7 @@
 #define MAXETA 2.47
 #define MIN_ET 7000.0
 
-using Result = Root::TPhotonEfficiencyCorrectionTool::Result;
+using Result = Root::TElectronEfficiencyCorrectionTool::Result;
 
 
 // =============================================================================
@@ -48,8 +48,8 @@ AsgPhotonEfficiencyCorrectionTool::AsgPhotonEfficiencyCorrectionTool( const std:
 {
 
   // Create an instances of the underlying ROOT tools
-  m_rootTool_unc = new Root::TPhotonEfficiencyCorrectionTool();
-  m_rootTool_con = new Root::TPhotonEfficiencyCorrectionTool();
+  m_rootTool_unc = new Root::TElectronEfficiencyCorrectionTool();
+  m_rootTool_con = new Root::TElectronEfficiencyCorrectionTool();
 
   // Declare the needed properties
   declareProperty( "CorrectionFileNameConv", m_corrFileNameConv="",
@@ -161,7 +161,7 @@ StatusCode AsgPhotonEfficiencyCorrectionTool::initialize()
   // We need to initialize the underlying ROOT TSelectorTool
   if ( (0 == m_rootTool_con->initialize()) || (0 == m_rootTool_unc->initialize()) )
     {
-      ATH_MSG_ERROR("Could not initialize the TPhotonEfficiencyCorrectionTool!");
+      ATH_MSG_ERROR("Could not initialize the TElectronEfficiencyCorrectionTool!");
       return StatusCode::FAILURE;
     }
 
@@ -225,70 +225,73 @@ CP::CorrectionCode AsgPhotonEfficiencyCorrectionTool::calculate( const xAOD::Ega
 
   // Check if photon in the range to get the SF
   if (std::abs(eta2) > MAXETA) {
-    result.scaleFactor = 1;
-    result.totalUncertainty = 1;
+    result.SF = 1;
+    result.Total = 1;
     ATH_MSG_DEBUG("No correction factor provided for eta "
                   << eta2 << " Returning SF = 1 + / - 1");
     return CP::CorrectionCode::OutOfValidityRange;
   }
   if (et < MIN_ET) {
-    result.scaleFactor = 1;
-    result.totalUncertainty = 1;
+    result.SF = 1;
+    result.Total = 1;
     ATH_MSG_DEBUG("No correction factor provided for eT "
                   << et << " Returning SF = 1 + / - 1");
     return CP::CorrectionCode::OutOfValidityRange;
   }
   if (itr_pt != m_pteta_bins.end() && et < itr_pt->first) {
-    result.scaleFactor = 1;
-    result.totalUncertainty = 1;
+    result.SF = 1;
+    result.Total = 1;
     ATH_MSG_DEBUG("No scale factor uncertainty provided for et "
                   << et / 1e3 << "GeV Returning SF = 1 + / - 1");
     return CP::CorrectionCode::OutOfValidityRange;
   }
 
   // Get the run number
-  const xAOD::EventInfo* eventInfo = evtStore()->retrieve< const xAOD::EventInfo> ("EventInfo");
-  if(!eventInfo){
-    ATH_MSG_ERROR ( "Could not retrieve EventInfo object!" );
+  const xAOD::EventInfo* eventInfo =
+      evtStore()->retrieve<const xAOD::EventInfo>("EventInfo");
+  if (!eventInfo) {
+    ATH_MSG_ERROR("Could not retrieve EventInfo object!");
     return CP::CorrectionCode::Error;
   }
 
-  //Retrieve the proper random Run Number
+  // Retrieve the proper random Run Number
   unsigned int runnumber = m_defaultRandomRunNumber;
   if (m_useRandomRunNumber) {
-    static const SG::AuxElement::Accessor<unsigned int> randomrunnumber("RandomRunNumber");
+    static const SG::AuxElement::Accessor<unsigned int> randomrunnumber(
+        "RandomRunNumber");
     if (!randomrunnumber.isAvailable(*eventInfo)) {
       ATH_MSG_WARNING(
           "Pileup tool not run before using PhotonEfficiencyTool! SFs do not "
           "reflect PU distribution in data");
       return CP::CorrectionCode::Error;
     }
-        runnumber = randomrunnumber(*(eventInfo));
+    runnumber = randomrunnumber(*(eventInfo));
   }
-    
-  // Get the DataType of the current egamma object
-//!  PATCore::ParticleDataType::DataType dataType = (PATCore::ParticleDataType::DataType) (egam->dataType());
-//!  ATH_MSG_VERBOSE( "The egamma object with author=" << egam->author()
-//!                   << " has PATCore::ParticleDataType::DataType=" << dataType
-//!                   << " and EventKernel::ParticleDataType::DataType=" << egam->dataType() );
-  /* For now the dataType must be set by the user. May be added to the IParticle class later.  */
+
+  /* For now the dataType must be set by the user. May be added to the IParticle
+   * class later.  */
   // probably event info should be able to tell us if it's data, fullsim, AF,..
-  PATCore::ParticleDataType::DataType dataType = PATCore::ParticleDataType::DataType::Data;
-  if ( m_dataTypeOverwrite >= 0 ) dataType = (PATCore::ParticleDataType::DataType)m_dataTypeOverwrite;
+  PATCore::ParticleDataType::DataType dataType =
+      PATCore::ParticleDataType::DataType::Data;
+  if (m_dataTypeOverwrite >= 0)
+    dataType = (PATCore::ParticleDataType::DataType)m_dataTypeOverwrite;
 
   // check if converted
-  const bool isConv=xAOD::EgammaHelpers::isConvertedPhoton(egam);
+  const bool isConv = xAOD::EgammaHelpers::isConvertedPhoton(egam);
 
-  // Call the ROOT tool to get an answer, check if the SF is for isolation or ID
-  const int status = isConv ? m_rootTool_con->calculate( dataType,runnumber,eta2,et,result) : m_rootTool_unc->calculate( dataType,runnumber,eta2,et,result);
+  // Call the ROOT tool to get an answer (for photons we need just the total)
+  const int status = isConv ? m_rootTool_con->calculate(dataType, runnumber,
+                                                        eta2, et, result, true)
+                            : m_rootTool_unc->calculate(dataType, runnumber,
+                                                        eta2, et, result, true);
 
   // if status 0 something went wrong
   if (!status) {
-    result.scaleFactor = 1;
-    result.totalUncertainty = 1;
+    result.SF = 1;
+    result.Total = 1;
     return CP::CorrectionCode::OutOfValidityRange;
   }
-  
+
   return CP::CorrectionCode::Ok;
 }
 
@@ -302,14 +305,14 @@ CP::CorrectionCode AsgPhotonEfficiencyCorrectionTool::getEfficiencyScaleFactor(c
   }
 
   if(m_appliedSystematics==nullptr){
-    efficiencyScaleFactor=sfresult.scaleFactor;
+    efficiencyScaleFactor=sfresult.SF;
     return CP::CorrectionCode::Ok;
   }
   
   //Get the result + the uncertainty
   float sigma(0);
   sigma=appliedSystematics().getParameterByBaseName("PH_EFF_"+m_sysSubstring+"Uncertainty");
-  efficiencyScaleFactor=sfresult.scaleFactor+sigma*sfresult.totalUncertainty;
+  efficiencyScaleFactor=sfresult.SF+sigma*sfresult.Total;
   return  CP::CorrectionCode::Ok;
 }
 
@@ -322,7 +325,7 @@ CP::CorrectionCode AsgPhotonEfficiencyCorrectionTool::getEfficiencyScaleFactorEr
     return status;
   }
 
-  efficiencyScaleFactorError=sfresult.totalUncertainty;
+  efficiencyScaleFactorError=sfresult.Total;
   return  CP::CorrectionCode::Ok;
 }
 
@@ -387,14 +390,12 @@ applySystematicVariation ( const CP::SystematicSet& systConfig )
   // If it's a new input set, we need to filter it
   if( itr == m_systFilter.end() ){
 
-  // New systematic. We need to parse it. MP 26.11.15 remove the static from <<< static CP::SystematicSet affectingSys = affectingSystematics(); >>>
     CP::SystematicSet affectingSys = affectingSystematics();
     CP::SystematicSet filteredSys;   
-	if (!CP::SystematicSet::filterForAffectingSystematics(systConfig, affectingSys, filteredSys)){
+    if (!CP::SystematicSet::filterForAffectingSystematics(systConfig, affectingSys, filteredSys)){
       ATH_MSG_ERROR("Unsupported combination of systematics passed to the tool!");
       return StatusCode::FAILURE;
     }
-	
     // Insert filtered set into the map
     itr = m_systFilter.insert(std::make_pair(systConfig, filteredSys)).first;
   }
@@ -450,6 +451,3 @@ std::string AsgPhotonEfficiencyCorrectionTool::getFileName(const std::string& is
   return value;
 
 }
-
-
-

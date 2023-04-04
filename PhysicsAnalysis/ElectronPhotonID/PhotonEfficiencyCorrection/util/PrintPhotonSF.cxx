@@ -18,7 +18,7 @@
 #include "TH2F.h"
 
 // Local include(s):
-#include "PhotonEfficiencyCorrection/TPhotonEfficiencyCorrectionTool.h"
+#include "ElectronEfficiencyCorrection/TElectronEfficiencyCorrectionTool.h"
 #include "AsgMessaging/MessageCheck.h"
 #include "AsgTools/StandaloneToolHandle.h"
 #define GEV 1000.0
@@ -72,10 +72,10 @@ int main (int argc, const char * argv[]) {
 	if(getenv("ROOTCOREDIR")==nullptr){
 	  cout << "Please setup RootCore before running the PrintPhotonSF [file]"<<endl;
 	  return 0.;
-        }
+  }
 
 	// Create and initialize an instance for both types of photons
-	Root::TPhotonEfficiencyCorrectionTool tool_SF;
+	Root::TElectronEfficiencyCorrectionTool tool_SF;
 	tool_SF.addFileName(file.Data());
 
 	if(!tool_SF.initialize()){
@@ -112,9 +112,9 @@ int main (int argc, const char * argv[]) {
 	  else printf("|%2.0f-%2.0f\t\t|",pTbounds[i-1]/GEV,pTbounds[i]/GEV);
 	  for(int j=1;j<=nEtabins;j++){
 	    eta=0.5*(Etabounds[j-1]+Etabounds[j]);
-	    Root::TPhotonEfficiencyCorrectionTool::Result sf;
-	    tool_SF.calculate(datatype,run_number,eta,pt,sf);
-	    printf("%2.2f+/-%2.4f\t|",sf.scaleFactor,sf.totalUncertainty);
+	    Root::TElectronEfficiencyCorrectionTool::Result sf;
+	    tool_SF.calculate(datatype,run_number,eta,pt,sf,true);
+	    printf("%2.2f+/-%2.4f\t|",sf.SF,sf.Total);
 	  } cout << endl;
 	}
 	cout << dash_line.Data() <<endl;
