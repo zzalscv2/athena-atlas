@@ -98,5 +98,4 @@ def LVL1CaloMonitoringConfig(flags):
         result.merge(JfexMonitoringConfig(flags))
 
 
-
     return result

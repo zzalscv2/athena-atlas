@@ -31,9 +31,9 @@ private:
   Gaudi::Property<bool> m_emulated{this,"Emulated",0,"boolean of if we want to emulate the gfex triggers"};
   Gaudi::Property<bool> m_passedb4Prescale{this,"PassedBeforePrescale",0,"boolean of if we want to measure the efficiency based on passed before prescale"};
 
-  Gaudi::Property<std::vector<std::string>> m_multi_jet_TriggerList{this,"multi_jet_TriggerList",{},"Vector of single jet L1 triggers"};
-  Gaudi::Property<std::vector<std::string>> m_all_triggers_for_SR{this,"all_triggers_for_SRList",{},"Vector of all SR triggers"};
-  Gaudi::Property<std::vector<std::string>> m_all_triggers_for_LR{this,"all_triggers_for_LRList",{},"Vector of all SR triggers"};
+  Gaudi::Property<std::vector<std::string>> m_multiJet_LegacySmallRadiusTriggers{this,"multiJet_LegacySmallRadiusTriggers",{},"Vector of single jet L1 triggers"};
+  Gaudi::Property<std::vector<std::string>> m_SmallRadiusJetTriggers_phase1_and_legacy{this,"SmallRadiusJetTriggers_phase1_and_legacy",{},"Vector of all SR triggers"};
+  Gaudi::Property<std::vector<std::string>> m_LargeRadiusJetTriggers_phase1_and_legacy{this,"LargeRadiusJetTriggers_phase1_and_legacy",{},"Vector of all SR triggers"};
 
   
   // container keys including steering parameter and description
