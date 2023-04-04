@@ -115,7 +115,7 @@ StatusCode JetJvtEfficiency::initialize(){
     // setup the NNJvt tool for recalculating NNJvt scores
     if (m_NNJvtTool_handle.empty()) {
       asg::AsgToolConfig config_NNjvt ("JetPileupTag::JetVertexNNTagger/NNJvt");
-      ATH_CHECK(config_NNjvt.setProperty("JetContainer", m_jetContainerName));
+      ATH_CHECK(config_NNjvt.setProperty("JetContainer", m_jetContainerName+"_NNJvtCopy"));
       ATH_CHECK(config_NNjvt.setProperty("NNParamFile", m_NNJvtParamFile));
       ATH_CHECK(config_NNjvt.setProperty("NNCutFile", m_NNJvtCutFile));
       ATH_CHECK(config_NNjvt.setProperty("SuppressInputDependence", true)); // otherwise decorations can't be accessed properly
