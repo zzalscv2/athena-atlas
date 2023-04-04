@@ -1,8 +1,8 @@
 //
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 //
-
-//Dear emacs, this is -*-c++-*-
+// Dear emacs, this is -*- c++ -*-
+//
 
 #ifndef CALORECGPU_CALOCELLSCOUNTERGPU_H
 #define CALORECGPU_CALOCELLSCOUNTERGPU_H
@@ -27,7 +27,10 @@ class CaloCellsCounterGPU :
 
   CaloCellsCounterGPU(const std::string & type, const std::string & name, const IInterface * parent);
 
-  virtual StatusCode execute (const EventContext & ctx, const ConstantDataHolder & constant_data, EventDataHolder & event_data) const override;
+  virtual StatusCode execute (const EventContext & ctx,
+                              const CaloRecGPU::ConstantDataHolder & constant_data,
+                              CaloRecGPU::EventDataHolder & event_data,
+                              void * temporary_buffer) const override;
 
   virtual ~CaloCellsCounterGPU();
 
@@ -54,22 +57,22 @@ class CaloCellsCounterGPU :
    * @brief The number of digits to reserve for the events. 9 by default.
    */
   Gaudi::Property<unsigned int> m_numWidth{this, "NumberWidth", 9, "The number of digits to reserve for the events"};
-    
+
   /** @brief Value to consider for the seed threshold. Should be consistent with the
    *  one used in Topological Clustering to ensure cell classification is correct.
    */
   Gaudi::Property<float> m_seedThreshold {this, "SeedThresholdOnEorAbsEinSigma", 4., "Seed threshold (in units of noise Sigma)"};
-  
+
   /** @brief Value to consider for the seed threshold. Should be consistent with the
    *  one used in Topological Clustering to ensure cell classification is correct.
    */
   Gaudi::Property<float> m_growThreshold {this, "NeighborThresholdOnEorAbsEinSigma", 2., "Neighbor (grow) threshold (in units of noise Sigma)"};
-  
+
   /** @brief Value to consider for the seed threshold. Should be consistent with the
    *  one used in Topological Clustering to ensure cell classification is correct.
    */
   Gaudi::Property<float> m_cellThreshold {this, "CellThresholdOnEorAbsEinSigma", 0., "Cell (terminal) threshold (in units of noise Sigma)"};
-  
+
 
 };
 

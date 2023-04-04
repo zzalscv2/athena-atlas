@@ -1,9 +1,17 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import Format
-from AthenaCommon.SystemOfUnits import MeV, ns, cm
+from AthenaCommon.SystemOfUnits import MeV, ns, cm, deg
+
+def SingleToolToPlot(tool_name, prefix):
+    return (tool_name, prefix)
+
+def ComparedToolsToPlot(tool_ref, tool_test, prefix, match_in_energy = False):
+    return (tool_ref, tool_test, prefix, match_in_energy)
+
+def MatchingOptions(min_similarity = 0.25, terminal_weight = 10., grow_weight = 250., seed_weight = 5000.):
+    return (min_similarity, terminal_weight, grow_weight, seed_weight)
 
 class CaloRecGPUConfigurator:
     def __init__ (self, configFlags = None, cellsname ="AllCalo"):
@@ -13,6 +21,8 @@ class CaloRecGPUConfigurator:
         self.TopoClusterSNRSeedThreshold = 4.0
         self.TopoClusterSNRGrowThreshold = 2.0
         self.TopoClusterSNRCellThreshold = 0.0
+        self.ClusterSize = "Topo_420"
+        
         self.TopoClusterSeedCutsInAbsE = True
         self.TopoClusterNeighborCutsInAbsE = True
         self.TopoClusterCellCutsInAbsE = True
@@ -32,6 +42,9 @@ class CaloRecGPUConfigurator:
         self.NeighborOption = "super3D"
         self.RestrictHECIWandFCalNeighbors  = False
         self.RestrictPSNeighbors  = True
+        self.AlsoRestrictPSOnGPUSplitter = False
+        #This is to override vanilla behaviour with the possibility of also
+        #restricting neighbours in out GPU splitter.
         
         if configFlags is not None:
             self.SeedCutsInT = configFlags.Calo.TopoCluster.doTimeCut
@@ -47,7 +60,7 @@ class CaloRecGPUConfigurator:
         
         self.SeedThresholdOnTAbs = 12.5 * ns
         
-        self.CutClustersInAbsEt = True
+        self.CutClustersInAbsEt = None
         self.ClusterEtorAbsEtCut = 0.0*MeV
         
         if configFlags is not None:
@@ -66,35 +79,87 @@ class CaloRecGPUConfigurator:
                                                "TileExt0","TileExt1","TileExt2",
                                                "HEC0","HEC1","HEC2","HEC3",
                                                "FCAL1","FCAL2"]
-        self.SplitterShareBorderCells = False # True
-                                              # NSF: As far as I am aware, this option does not yet work
-                                              #      on the GPU implementation we currently have available...
-        self.EMShowerScale = 5.0 * cm
+        self.SplitterShareBorderCells = True
         
+        self.EMShowerScale = 5.0 * cm
         
         if configFlags is not None:
             self.SplitterUseNegativeClusters = configFlags.Calo.TopoCluster.doTreatEnergyCutAsAbsolute
         else:
             self.SplitterUseNegativeClusters = False
+         
+        if configFlags is not None:
+            self.UseAbsEnergyMoments = configFlags.Calo.TopoCluster.doTreatEnergyCutAsAbsolute
+        else:
+            self.UseAbsEnergyMoments = False
         
+        self.MomentsMaxAxisAngle = 20 * deg
         
-        self.MeasureTimes = True
-        self.TestGPUGrowing = False
-        self.TestGPUSplitting = False
-        self.OutputCountsToFile = False
-        self.OutputClustersToFile = False
+        self.MomentsMinBadLArQuality = 4000
+        
+        self.MomentsToCalculate = [ "FIRST_PHI",
+                                    "FIRST_ETA",
+                                    "SECOND_R",
+                                    "SECOND_LAMBDA",
+                                    "DELTA_PHI",
+                                    "DELTA_THETA",
+                                    "DELTA_ALPHA",
+                                    "CENTER_X",
+                                    "CENTER_Y",
+                                    "CENTER_Z",
+                                    "CENTER_MAG",
+                                    "CENTER_LAMBDA",
+                                    "LATERAL",
+                                    "LONGITUDINAL",
+                                    "ENG_FRAC_EM",
+                                    "ENG_FRAC_MAX",
+                                    "ENG_FRAC_CORE",
+                                    "FIRST_ENG_DENS",
+                                    "SECOND_ENG_DENS",
+                                    "ISOLATION",
+                                    "ENG_BAD_CELLS",
+                                    "N_BAD_CELLS",
+                                    "N_BAD_CELLS_CORR",
+                                    "BAD_CELLS_CORR_E",
+                                    "BADLARQ_FRAC",
+                                    "ENG_POS",
+                                    "SIGNIFICANCE",
+                                    "CELL_SIGNIFICANCE",
+                                    "CELL_SIG_SAMPLING",
+                                    "AVG_LAR_Q",
+                                    "AVG_TILE_Q",
+                                    "PTD",
+                                    "MASS",
+                                    "SECOND_TIME",
+                                    "NCELL_SAMPLING" ]
+        
+        self.MomentsMinRLateral = 4 * cm
+        self.MomentsMinLLongitudinal = 10 * cm
+        
+        if configFlags is not None:
+            if not configFlags.Common.isOnline:
+                self.MomentsToCalculate += ["ENG_BAD_HV_CELLS",
+                                            "N_BAD_HV_CELLS"  ]
+                
         self.ClustersOutputName = "Clusters"
         
+        self.MeasureTimes = False
+        self.OutputCountsToFile = False
+        self.OutputClustersToFile = False
+        
+        self.DoMonitoring = False
+                
         self.NumPreAllocatedDataHolders = 0
-            
+
+        self.FillMissingCells = True
+        #We want a full (and ordered) cell container
+        #to get to the fast path.
+                    
     def BasicConstantDataExporterToolConf(self, name = "ConstantDataExporter"):
         result=ComponentAccumulator()
         ConstantDataExporter = CompFactory.BasicConstantGPUDataExporter(name)
         ConstantDataExporter.MeasureTimes = False
         ConstantDataExporter.TimeFileOutput = "ConstantDataExporterTimes.txt"
-        ConstantDataExporter.NeighborOption = self.NeighborOption
-        ConstantDataExporter.RestrictHECIWandFCalNeighbors  = self.RestrictHECIWandFCalNeighbors
-        ConstantDataExporter.RestrictPSNeighbors  = self.RestrictPSNeighbors
         result.setPrivateTools(ConstantDataExporter)
         return result
 
@@ -104,13 +169,6 @@ class CaloRecGPUConfigurator:
         EventDataExporter.MeasureTimes = self.MeasureTimes
         EventDataExporter.TimeFileOutput = "EventDataExporterTimes.txt"
         EventDataExporter.CellsName = self.CellsName
-        EventDataExporter.SeedCutsInT = self.SeedCutsInT
-        EventDataExporter.CutOOTseed = self.CutOOTseed
-        EventDataExporter.UseTimeCutUpperLimit = self.UseTimeCutUpperLimit
-        EventDataExporter.TimeCutUpperLimit = self.TimeCutUpperLimit
-        EventDataExporter.SeedThresholdOnEorAbsEinSigma = self.TopoClusterSNRSeedThreshold
-        EventDataExporter.SeedThresholdOnTAbs = self.SeedThresholdOnTAbs
-        EventDataExporter.TreatL1PredictedCellsAsGood = self.TreatL1PredictedCellsAsGood
         result.setPrivateTools(EventDataExporter)
         return result
 
@@ -120,8 +178,7 @@ class CaloRecGPUConfigurator:
         AthenaClusterImporter.MeasureTimes = self.MeasureTimes
         AthenaClusterImporter.TimeFileOutput = "ClusterImporterTimes.txt"
         AthenaClusterImporter.CellsName = self.CellsName
-        AthenaClusterImporter.ClusterCutsInAbsE = self.CutClustersInAbsEt
-        AthenaClusterImporter.ClusterEtorAbsEtCut = self.ClusterEtorAbsEtCut
+        AthenaClusterImporter.ClusterSize = self.ClusterSize
         result.setPrivateTools(AthenaClusterImporter)
         return result
 
@@ -131,41 +188,44 @@ class CaloRecGPUConfigurator:
         result.setPrivateTools(ClusterDeleter)
         return result
         
-    def CPUOutputToolConf(self, folder, name = "CPUOutput", prefix = "", suffix = ""):
+    def CPUOutputToolConf(self, folder = "output", name = "CPUOutput", prefix = "", suffix = ""):
         result=ComponentAccumulator()
         CPUOutput = CompFactory.CaloCPUOutput(name)
         CPUOutput.SavePath = folder
         CPUOutput.FilePrefix = prefix
         CPUOutput.FileSuffix = suffix
         CPUOutput.CellsName = self.CellsName
-        CPUOutput.SeedCutsInT = self.SeedCutsInT
-        CPUOutput.CutOOTseed = self.CutOOTseed
-        CPUOutput.UseTimeCutUpperLimit = self.UseTimeCutUpperLimit
-        CPUOutput.TimeCutUpperLimit = self.TimeCutUpperLimit
-        CPUOutput.SeedThresholdOnEorAbsEinSigma = self.TopoClusterSNRSeedThreshold
-        CPUOutput.SeedThresholdOnTAbs = self.SeedThresholdOnTAbs
-        CPUOutput.TreatL1PredictedCellsAsGood = self.TreatL1PredictedCellsAsGood
         result.setPrivateTools(CPUOutput)
         return result
 
-    def GPUOutputToolConf(self, folder, name = "GPUOutput", prefix = "", suffix = ""):
+    def GPUOutputToolConf(self, folder = "output", name = "GPUOutput", prefix = "", suffix = "", OnlyOutputCells = None):
         result=ComponentAccumulator()
         GPUOutput = CompFactory.CaloGPUOutput(name)
         GPUOutput.SavePath = folder
         GPUOutput.FilePrefix = prefix
         GPUOutput.FileSuffix = suffix
-        GPUOutput.ClusterCutsInAbsE = self.CutClustersInAbsEt
-        GPUOutput.ClusterEtorAbsEtCut = self.ClusterEtorAbsEtCut
         GPUOutput.UseSortedAndCutClusters = True
+        if OnlyOutputCells is not None:
+            GPUOutput.OnlyOutputCellInfo = OnlyOutputCells
         result.setPrivateTools(GPUOutput)
         return result
         
-    def ClusterInfoCalcToolConf(self, name = "GPUClusterInfoCalculator"):
+    def ClusterInfoCalcToolConf(self, name = "GPUClusterInfoCalculator", do_cut = True):
         result=ComponentAccumulator()
         CalcTool = CompFactory.BasicGPUClusterInfoCalculator(name)
         CalcTool.MeasureTimes = self.MeasureTimes
         CalcTool.TimeFileOutput = name + "Times.txt"
-        CalcTool.NumPreAllocatedDataHolders = self.NumPreAllocatedDataHolders
+        if do_cut:
+            if self.CutClustersInAbsEt is None:
+                CalcTool.ClusterCutsInAbsEt = self.TopoClusterSeedCutsInAbsE
+            else:
+                CalcTool.ClusterCutsInAbsEt = self.CutClustersInAbsEt
+            CalcTool.ClusterEtorAbsEtCut = self.ClusterEtorAbsEtCut
+        else:
+            CalcTool.ClusterCutsInAbsEt = True
+            CalcTool.ClusterEtorAbsEtCut = -1
+            #Cutting on absolute value with a negative value => not cutting at all.
+            
         result.setPrivateTools(CalcTool)
         return result
                 
@@ -177,6 +237,8 @@ class CaloRecGPUConfigurator:
         TAClusterMaker.MeasureTimes = self.MeasureTimes
         TAClusterMaker.TimeFileOutput = "TopoAutomatonClusteringTimes.txt"
 
+        TAClusterMaker.CalorimeterNames= self.CalorimeterNames
+        
         TAClusterMaker.SeedSamplingNames = self.TopoClusterSeedSamplingNames
         
         TAClusterMaker.CellThresholdOnEorAbsEinSigma = self.TopoClusterSNRCellThreshold
@@ -188,8 +250,18 @@ class CaloRecGPUConfigurator:
         TAClusterMaker.CellCutsInAbsE = self.TopoClusterCellCutsInAbsE
         
         TAClusterMaker.TwoGaussianNoise = self.TwoGaussianNoise
+                
+                
+        TAClusterMaker.SeedCutsInT = self.SeedCutsInT
+        TAClusterMaker.CutOOTseed = self.CutOOTseed
+        TAClusterMaker.UseTimeCutUpperLimit = self.UseTimeCutUpperLimit
+        TAClusterMaker.TimeCutUpperLimit = self.TimeCutUpperLimit
+        TAClusterMaker.SeedThresholdOnTAbs = self.SeedThresholdOnTAbs
+        TAClusterMaker.TreatL1PredictedCellsAsGood = self.TreatL1PredictedCellsAsGood
         
-        TAClusterMaker.NumPreAllocatedDataHolders = self.NumPreAllocatedDataHolders
+        TAClusterMaker.NeighborOption = self.NeighborOption
+        TAClusterMaker.RestrictHECIWandFCalNeighbors  = self.RestrictHECIWandFCalNeighbors
+        TAClusterMaker.RestrictPSNeighbors  = self.RestrictPSNeighbors
         
         result.setPrivateTools(TAClusterMaker)
         return result
@@ -226,6 +298,32 @@ class CaloRecGPUConfigurator:
         return result
         
         
+    def TopoAutomatonSplitterToolConf(self, name = "TopoAutomatonSplitter"):
+        result=ComponentAccumulator()
+        # maker tools
+        Splitter = CompFactory.TopoAutomatonSplitting(name)
+
+        Splitter.MeasureTimes = self.MeasureTimes
+        Splitter.TimeFileOutput = "ClusterSplitterTimes.txt"
+        
+        Splitter.NumberOfCellsCut = self.SplitterNumberOfCellsCut
+        Splitter.EnergyCut = self.SplitterEnergyCut
+        Splitter.SamplingNames = self.SplitterSamplingNames
+        Splitter.SecondarySamplingNames = self.SplitterSecondarySamplingNames
+        Splitter.ShareBorderCells = self.SplitterShareBorderCells
+        Splitter.EMShowerScale = self.EMShowerScale
+        Splitter.WeightingOfNegClusters = self.SplitterUseNegativeClusters
+                
+        Splitter.TreatL1PredictedCellsAsGood = self.TreatL1PredictedCellsAsGood
+        
+        Splitter.NeighborOption = self.NeighborOption
+        Splitter.RestrictHECIWandFCalNeighbors  = self.RestrictHECIWandFCalNeighbors
+        Splitter.RestrictPSNeighbors = self.RestrictPSNeighbors and self.AlsoRestrictPSOnGPUSplitter
+        #Since the CPU version does not restrict this!
+        
+        result.setPrivateTools(Splitter)
+        return result
+        
     def GPUClusterSplitterToolConf(self, name = "GPUClusterSplitter"):
         result=ComponentAccumulator()
         # maker tools
@@ -241,8 +339,8 @@ class CaloRecGPUConfigurator:
         Splitter.ShareBorderCells = self.SplitterShareBorderCells
         Splitter.EMShowerScale = self.EMShowerScale
         Splitter.WeightingOfNegClusters = self.SplitterUseNegativeClusters
-        
-        Splitter.NumPreAllocatedDataHolders = self.NumPreAllocatedDataHolders
+                
+        Splitter.TreatL1PredictedCellsAsGood = self.TreatL1PredictedCellsAsGood
         
         result.setPrivateTools(Splitter)
         return result
@@ -271,31 +369,97 @@ class CaloRecGPUConfigurator:
         
         result.setPrivateTools(TopoSplitter)
         return result
+      
+    def GPUClusterMomentsCalculatorToolConf(self, name = "GPUTopoMoments"):
+        
+        result=ComponentAccumulator()
+        GPUTopoMoments = CompFactory.GPUClusterInfoAndMomentsCalculator(name)
+        
+        GPUTopoMoments.MeasureTimes = self.MeasureTimes
+        
+        if self.UseAbsEnergyMoments is None:
+            GPUTopoMoments.WeightingOfNegClusters = self.TopoClusterSeedCutsInAbsE
+        else:
+            GPUTopoMoments.WeightingOfNegClusters = self.UseAbsEnergyMoments
+            
+        GPUTopoMoments.MaxAxisAngle = self.MomentsMaxAxisAngle
+        
+        GPUTopoMoments.TwoGaussianNoise = self.TwoGaussianNoise
+        
+        GPUTopoMoments.MinBadLArQuality = self.MomentsMinBadLArQuality
+        
+        GPUTopoMoments.MinRLateral = self.MomentsMinRLateral
+        GPUTopoMoments.MinLLongitudinal = self.MomentsMinLLongitudinal
+                            
+        result.setPrivateTools(GPUTopoMoments)
+        return result
         
         
-    def CellsCounterCPUToolConf(self, folder, name = "CPUCounts", prefix = "CPU", suffix = ""):
+    def DefaultClusterMomentsCalculatorToolConf(self, name = "TopoMoments"):
+        result=ComponentAccumulator()
+        TopoMoments = CompFactory.CaloClusterMomentsMaker(name)
+        
+        if self.UseAbsEnergyMoments is None:
+            TopoMoments.WeightingOfNegClusters = self.TopoClusterSeedCutsInAbsE
+        else:
+            TopoMoments.WeightingOfNegClusters = self.UseAbsEnergyMoments
+            
+        TopoMoments.MaxAxisAngle = self.MomentsMaxAxisAngle
+        
+        TopoMoments.TwoGaussianNoise = self.TwoGaussianNoise
+        
+        TopoMoments.MinBadLArQuality = self.MomentsMinBadLArQuality
+        
+        TopoMoments.MomentsNames = self.MomentsToCalculate
+        
+        TopoMoments.MinRLateral = self.MomentsMinRLateral
+        TopoMoments.MinLLongitudinal = self.MomentsMinLLongitudinal
+
+        if not self.ConfigFlags.Common.isOnline:
+            if self.ConfigFlags.Input.isMC:
+                TopoMoments.LArHVFraction=CompFactory.LArHVFraction(HVScaleCorrKey="LArHVScaleCorr")
+            else:
+                TopoMoments.LArHVFraction=CompFactory.LArHVFraction(HVScaleCorrKey="LArHVScaleCorrRecomputed")
+        
+        result.setPrivateTools(TopoMoments)
+        return result
+        
+    def AthenaClusterAndMomentsImporterToolConf(self, name = "AthenaClusterImporter"):
+        result=ComponentAccumulator()
+        AthenaClusterImporter = CompFactory.GPUToAthenaImporterWithMoments(name)
+        AthenaClusterImporter.CellsName = self.CellsName
+        AthenaClusterImporter.ClusterSize = self.ClusterSize
+        
+        AthenaClusterImporter.MeasureTimes = self.MeasureTimes
+        AthenaClusterImporter.TimeFileOutput = "ClusterAndMomentsImporterTimes.txt"
+                
+        if not self.ConfigFlags.Common.isOnline:
+            if self.ConfigFlags.Input.isMC:
+                AthenaClusterImporter.LArHVFraction=CompFactory.LArHVFraction(HVScaleCorrKey="LArHVScaleCorr")
+            else:
+                AthenaClusterImporter.LArHVFraction=CompFactory.LArHVFraction(HVScaleCorrKey="LArHVScaleCorrRecomputed")
+        
+        AthenaClusterImporter.MomentsNames = self.MomentsToCalculate
+        
+        result.setPrivateTools(AthenaClusterImporter)
+        return result
+        
+    def CellsCounterCPUToolConf(self, folder = "counts", name = "CPUCounts", prefix = "CPU", suffix = ""):
         result=ComponentAccumulator()
         CPUCount = CompFactory.CaloCellsCounterCPU(name)
         CPUCount.SavePath = folder
         CPUCount.FilePrefix = prefix
         CPUCount.FileSuffix = suffix
         CPUCount.CellsName = self.CellsName
-        CPUCount.SeedCutsInT = self.SeedCutsInT
-        CPUCount.CutOOTseed = self.CutOOTseed
-        CPUCount.UseTimeCutUpperLimit = self.UseTimeCutUpperLimit
-        CPUCount.TimeCutUpperLimit = self.TimeCutUpperLimit
         
         CPUCount.CellThresholdOnEorAbsEinSigma = self.TopoClusterSNRCellThreshold
         CPUCount.NeighborThresholdOnEorAbsEinSigma = self.TopoClusterSNRGrowThreshold
         CPUCount.SeedThresholdOnEorAbsEinSigma = self.TopoClusterSNRSeedThreshold
         
-        CPUCount.SeedThresholdOnTAbs = self.SeedThresholdOnTAbs
-        CPUCount.TreatL1PredictedCellsAsGood = self.TreatL1PredictedCellsAsGood
-        
         result.setPrivateTools(CPUCount)
         return result
         
-    def CellsCounterGPUToolConf(self, folder, name = "GPUCounts", prefix = "GPU", suffix = ""):
+    def CellsCounterGPUToolConf(self, folder = "counts", name = "GPUCounts", prefix = "GPU", suffix = ""):
         result=ComponentAccumulator()
         GPUCount = CompFactory.CaloCellsCounterGPU(name)
         GPUCount.SavePath = folder
@@ -309,10 +473,60 @@ class CaloRecGPUConfigurator:
         result.setPrivateTools(GPUCount)
         return result
         
-    
+    def MomentsDumperToolConf(self, folder = "moments", name = "MomentsDumper", prefix = "", suffix = ""):
+        result=ComponentAccumulator()
+        GPUCount = CompFactory.CaloMomentsDumper(name)
+        GPUCount.SavePath = folder
+        GPUCount.FilePrefix = prefix
+        GPUCount.FileSuffix = suffix
         
+        result.setPrivateTools(GPUCount)
+        return result
+        
+    def PlotterMonitoringToolConf(self, name = "PlotterMonitoring"):
+        result=ComponentAccumulator()
+        PloTool = CompFactory.CaloGPUClusterAndCellDataMonitor(name)
+        
+        PloTool.CellThreshold = self.TopoClusterSNRCellThreshold
+        PloTool.NeighborThreshold = self.TopoClusterSNRGrowThreshold
+        PloTool.SeedThreshold = self.TopoClusterSNRSeedThreshold
+        
+        PloTool.CellsName = self.CellsName
+        
+        PloTool.ClusterMatchingParameters = MatchingOptions()
+        
+        #Tools and Combinations to plot
+        #should be set by the end user.
+        
+        from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
+        
+        PloTool.MonitoringTool = GenericMonitoringTool(self.ConfigFlags, "PlotterMonitoringTool")
+        
+        result.setPrivateTools(PloTool)
+        return result
     
-    def DefaultCaloCellMakerConf(self):
+    def MonitorizationToolConf(self, name = "MonTool"):       
+        from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
+        
+        monTool = GenericMonitoringTool(self.ConfigFlags, name)
+        
+        maxNumberOfClusters=2500.0
+        
+        monTool.defineHistogram('container_size', path='EXPERT', type='TH1F',  title="Container Size; Number of Clusters; Number of Events", xbins=50, xmin=0.0, xmax=maxNumberOfClusters)
+        monTool.defineHistogram('Et', path='EXPERT', type='TH1F',  title="Cluster E_T; E_T [ MeV ] ; Number of Clusters", xbins=135, xmin=-200.0, xmax=2500.0)
+        monTool.defineHistogram('Eta', path='EXPERT', type='TH1F', title="Cluster #eta; #eta ; Number of Clusters", xbins=100, xmin=-2.5, xmax=2.5)
+        monTool.defineHistogram('Phi', path='EXPERT', type='TH1F', title="Cluster #phi; #phi ; Number of Clusters", xbins=64, xmin=-3.2, xmax=3.2)
+        monTool.defineHistogram('Eta,Phi', path='EXPERT', type='TH2F', title="Number of Clusters; #eta ; #phi ; Number of Clusters", xbins=100, xmin=-2.5, xmax=2.5, ybins=128, ymin=-3.2, ymax=3.2)
+        monTool.defineHistogram('clusterSize', path='EXPERT', type='TH1F', title="Cluster Type; Type ; Number of Clusters", xbins=13, xmin=0.5, xmax=13.5)
+        monTool.defineHistogram('signalState', path='EXPERT', type='TH1F', title="Signal State; Signal State ; Number of Clusters", xbins=4, xmin=-1.5, xmax=2.5)
+        monTool.defineHistogram('size', path='EXPERT', type='TH1F', title="Cluster Size; Size [Cells] ; Number of Clusters", xbins=125, xmin=0.0, xmax=250.0)
+        monTool.defineHistogram('N_BAD_CELLS', path='EXPERT', type='TH1F', title="N_BAD_CELLS; N_BAD_CELLS ; Number of Clusters", xbins=250, xmin=0.5, xmax=250.5)
+        monTool.defineHistogram('ENG_FRAC_MAX', path='EXPERT', type='TH1F', title="ENG_FRAC_MAX; ENG_FRAC_MAX ; Number of Clusters", xbins=50, xmin=0.0, xmax=1.1)
+        monTool.defineHistogram('mu', path='EXPERT', type='TH1F',  title="mu; mu; Number of Events", xbins=50, xmin=0.0, xmax=100)
+        monTool.defineHistogram('mu,container_size', path='EXPERT', type='TH2F',  title="Container Size versus #mu; #mu; cluster container size", xbins=50, xmin=20.0, xmax=70, ybins=50, ymin=0.0, ymax=maxNumberOfClusters)
+        return monTool
+        
+    def DefaultCaloCellMakerConf(self, should_be_primary = False):
         from LArCellRec.LArCellBuilderConfig import LArCellBuilderCfg,LArCellCorrectorCfg
         from TileRecUtils.TileCellBuilderConfig import TileCellBuilderCfg
         from CaloCellCorrection.CaloCellCorrectionConfig import CaloCellPedestalCorrCfg, CaloCellNeighborsAverageCorrCfg, CaloCellTimeCorrCfg, CaloEnergyRescalerCfg
@@ -328,9 +542,12 @@ class CaloRecGPUConfigurator:
         larCellCorrectors  = result.popToolsAndMerge(LArCellCorrectorCfg(self.ConfigFlags))
         tileCellBuilder = result.popToolsAndMerge(TileCellBuilderCfg(self.ConfigFlags))
         cellFinalizer  = CompFactory.CaloCellContainerFinalizerTool()
-
+        
+        if self.FillMissingCells:
+            tileCellBuilder.fakeCrackCells = True
+        
         cellMakerTools=[larCellBuilder,tileCellBuilder,cellFinalizer]+larCellCorrectors
-
+        
         #Add corrections tools that are not LAr or Tile specific:
         if self.ConfigFlags.Calo.Cell.doPileupOffsetBCIDCorr or self.ConfigFlags.Cell.doPedestalCorr:
             theCaloCellPedestalCorr=CaloCellPedestalCorrCfg(self.ConfigFlags)
@@ -354,82 +571,30 @@ class CaloRecGPUConfigurator:
             theCaloTimeCorr=CaloCellTimeCorrCfg(self.ConfigFlags)
             cellMakerTools.append(result.popToolsAndMerge(theCaloTimeCorr))
 
-
-        #Old Config:
-        #CaloCellMakerToolNames': PrivateToolHandleArray(['LArCellBuilderFromLArRawChannelTool/LArCellBuilderFromLArRawChannelTool','TileCellBuilder/TileCellBuilder','CaloCellContainerFinalizerTool/CaloCellContainerFinalizerTool','LArCellNoiseMaskingTool/LArCellNoiseMaskingTool','CaloCellPedestalCorr/CaloCellPedestalCorr','CaloCellNeighborsAverageCorr/CaloCellNeighborsAverageCorr','CaloCellContainerCheckerTool/CaloCellContainerCheckerTool']),
-
-        print(cellMakerTools)
-
         cellAlgo=CompFactory.CaloCellMaker(CaloCellMakerToolNames = cellMakerTools,
                                            CaloCellsOutputName = self.CellsName)
-        result.addEventAlgo(cellAlgo,primary=False)
+        result.addEventAlgo(cellAlgo, primary = should_be_primary)
         return result
         
-    
-    def StandardConfigurationPreClusterAlgorithmsConf(self, clustersname = None):
-        doLCCalib = self.ConfigFlags.Calo.TopoCluster.doTopoClusterLocalCalib
-        
-        if clustersname is None:
-            clustersname = "CaloCalTopoClusters" if doLCCalib else "CaloTopoClusters"
-        
-        if clustersname=="CaloTopoClusters" and doLCCalib is True: 
-            raise RuntimeError("Inconistent arguments: Name must not be 'CaloTopoClusters' if doLCCalib is True")
-        
-        self.ClustersOutputName = clustersname
-        
-        result=ComponentAccumulator()
-        
-        if self.ConfigFlags.Input.Format is Format.BS:
-            #Data-case: Schedule ByteStream reading for LAr & Tile
-            from LArByteStream.LArRawDataReadingConfig import LArRawDataReadingCfg
-            result.merge(LArRawDataReadingCfg(self.ConfigFlags))
-
-            from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-
-            result.merge(ByteStreamReadCfg(self.ConfigFlags,type_names=['TileDigitsContainer/TileDigitsCnt',
-                                                                   'TileRawChannelContainer/TileRawChannelCnt',
-                                                                   'TileMuonReceiverContainer/TileMuRcvCnt']))
-            result.getService("ByteStreamCnvSvc").ROD2ROBmap=["-1"]
-            if self.ConfigFlags.Output.doWriteESD:
-                from TileRecAlgs.TileDigitsFilterConfig import TileDigitsFilterOutputCfg
-                result.merge(TileDigitsFilterOutputCfg(self.ConfigFlags))
-            else: #Mostly for wrapping in RecExCommon
-                from TileRecAlgs.TileDigitsFilterConfig import TileDigitsFilterCfg
-                result.merge(TileDigitsFilterCfg(self.ConfigFlags))
-
-            from LArROD.LArRawChannelBuilderAlgConfig import LArRawChannelBuilderAlgCfg
-            result.merge(LArRawChannelBuilderAlgCfg(self.ConfigFlags))
-
-            from TileRecUtils.TileRawChannelMakerConfig import TileRawChannelMakerCfg
-            result.merge(TileRawChannelMakerCfg(self.ConfigFlags))
-
-        if not self.ConfigFlags.Input.isMC and not self.ConfigFlags.Common.isOnline:
-            from LArCellRec.LArTimeVetoAlgConfig import LArTimeVetoAlgCfg
-            result.merge(LArTimeVetoAlgCfg(self.ConfigFlags))
-
-        if not self.ConfigFlags.Input.isMC and not self.ConfigFlags.Overlay.DataOverlay:
-            from LArROD.LArFebErrorSummaryMakerConfig import LArFebErrorSummaryMakerCfg
-            result.merge(LArFebErrorSummaryMakerCfg(self.ConfigFlags))
-            
-        if self.ConfigFlags.Input.Format is Format.BS or 'StreamRDO' in self.ConfigFlags.Input.ProcessingTags:
-            result.merge(self.DefaultCaloCellMakerConf())
-
-        from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
-        
-        # Schedule total noise cond alg
-        result.merge(CaloNoiseCondAlgCfg(self.ConfigFlags,"totalNoise"))
-        # Schedule electronic noise cond alg (needed for LC weights)
-        result.merge(CaloNoiseCondAlgCfg(self.ConfigFlags,"electronicNoise"))
-        return result
-        
-    def HybridClusterProcessorConf(self, clustersname=None):
-        result = self.StandardConfigurationPreClusterAlgorithmsConf(clustersname)
+    #This simply uses the GPU versions.
+    #For the tests, we will build our own
+    #depending on what we want to compare against.
+    def HybridClusterProcessorConf(self, clustersname = None, should_be_primary = True):
+        result = ComponentAccumulator()
         
         HybridClusterProcessor = CompFactory.CaloGPUHybridClusterProcessor("HybridClusterProcessor")
         HybridClusterProcessor.ClustersOutputName = self.ClustersOutputName
         HybridClusterProcessor.MeasureTimes = self.MeasureTimes
         HybridClusterProcessor.TimeFileOutput = "GlobalTimes.txt"
         HybridClusterProcessor.DeferConstantDataPreparationToFirstEvent = True
+        HybridClusterProcessor.DoPlots = False
+        HybridClusterProcessor.PlotterTool = None
+        HybridClusterProcessor.DoMonitoring = self.DoMonitoring
+        
+        if self.DoMonitoring:
+            histSvc = CompFactory.THistSvc(Output = ["EXPERT DATAFILE='expert-monitoring.root', OPT='RECREATE'"])
+            result.addService(histSvc)
+            HybridClusterProcessor.MonitoringTool = self.MonitorizationToolConf()
         
         HybridClusterProcessor.NumPreAllocatedDataHolders = self.NumPreAllocatedDataHolders
         
@@ -441,7 +606,7 @@ class CaloRecGPUConfigurator:
         
         ConstantDataExporter = result.popToolsAndMerge( self.BasicConstantDataExporterToolConf() )
         EventDataExporter = result.popToolsAndMerge( self.BasicEventDataExporterToolConf() )
-        AthenaClusterImporter = result.popToolsAndMerge( self.BasicAthenaClusterImporterToolConf() )
+        AthenaClusterImporter = result.popToolsAndMerge( self.AthenaClusterAndMomentsImporterToolConf() )
         
         HybridClusterProcessor.ConstantDataToGPUTool = ConstantDataExporter
         HybridClusterProcessor.EventDataToGPUTool = EventDataExporter
@@ -449,124 +614,21 @@ class CaloRecGPUConfigurator:
         
         HybridClusterProcessor.BeforeGPUTools = []
        
-        if self.TestGPUGrowing or self.TestGPUSplitting:
-            DefaultClustering = result.popToolsAndMerge( self.DefaultTopologicalClusteringToolConf("DefaultGrowing") )
-            
-            HybridClusterProcessor.BeforeGPUTools += [DefaultClustering]
-            
-            if self.TestGPUGrowing:
-                if self.OutputCountsToFile:
-                    CPUCount1 = result.popToolsAndMerge( self.CellsCounterCPUToolConf("./counts", "DefaultGrowCounter", "default_grow") )
-                    HybridClusterProcessor.BeforeGPUTools += [CPUCount1]
-                if self.OutputClustersToFile:
-                    CPUOut1 = result.popToolsAndMerge( self.CPUOutputToolConf("./val_default_grow", "DefaultGrowOutput") )
-                    HybridClusterProcessor.BeforeGPUTools += [CPUOut1]
-            
-                
-            if self.TestGPUSplitting:
-                FirstSplitter = result.popToolsAndMerge( self.DefaultClusterSplittingToolConf("DefaultSplitting") )
-                HybridClusterProcessor.BeforeGPUTools += [FirstSplitter]
-                
-                if self.OutputCountsToFile:
-                    CPUCount2 = result.popToolsAndMerge( self.CellsCounterCPUToolConf("./counts", "DefaultGrowAndSplitCounter", "default_grow_split") )
-                    HybridClusterProcessor.BeforeGPUTools += [CPUCount2]
-                if self.OutputClustersToFile:
-                    CPUOut2 = result.popToolsAndMerge( self.CPUOutputToolConf("./val_default_grow_split", "DefaultSplitOutput") )
-                    HybridClusterProcessor.BeforeGPUTools += [CPUOut2]
-            
-            if self.TestGPUGrowing:
-                Deleter = result.popToolsAndMerge( self.CaloClusterDeleterToolConf())
-                HybridClusterProcessor.BeforeGPUTools += [Deleter]                
-                if self.TestGPUSplitting:
-                    SecondDefaultClustering = result.popToolsAndMerge( self.DefaultTopologicalClusteringToolConf("SecondDefaultGrowing") )
-                    HybridClusterProcessor.BeforeGPUTools += [SecondDefaultClustering]
-            
         HybridClusterProcessor.GPUTools = []
         
-        if self.TestGPUSplitting:
-            if not self.TestGPUGrowing:
-                GPUClusterSplitting1 = result.popToolsAndMerge( self.GPUClusterSplitterToolConf("GPUSplitter"))
-                HybridClusterProcessor.GPUTools += [GPUClusterSplitting1]
-                PropCalc1 = result.popToolsAndMerge( self.ClusterInfoCalcToolConf("PropCalcPostSplitting"))
-                HybridClusterProcessor.GPUTools += [PropCalc1]
-            else:
-                GPUClusterSplitting1 = result.popToolsAndMerge( self.GPUClusterSplitterToolConf("FirstGPUSplitter"))
-                GPUClusterSplitting1.TimeFileOutput = "ignore.txt" #Not the most elegant solution, but...
-                HybridClusterProcessor.GPUTools += [GPUClusterSplitting1]
-                PropCalc1 = result.popToolsAndMerge( self.ClusterInfoCalcToolConf("PropCalc1"))
-                PropCalc1.TimeFileOutput = "ignore.txt" #Not the most elegant solution, but...
-                HybridClusterProcessor.GPUTools += [PropCalc1]
-            
-            if self.OutputCountsToFile:
-                GPUCount1 = result.popToolsAndMerge( self.CellsCounterGPUToolConf("./counts", "DefaultGrowModifiedSplitCounter", "default_grow_modified_split") )
-                HybridClusterProcessor.GPUTools += [GPUCount1]
-            if self.OutputClustersToFile:
-                GPUOut1 = result.popToolsAndMerge( self.GPUOutputToolConf("./val_default_grow_modified_split", "DefaultGrowModifiedSplitOutput") )
-                HybridClusterProcessor.GPUTools += [GPUOut1]
-            
+        TopoAutomatonClusteringDef = result.popToolsAndMerge( self.TopoAutomatonClusteringToolConf("TopoAutomatonClustering"))
+        HybridClusterProcessor.GPUTools += [TopoAutomatonClusteringDef]
         
-        if self.TestGPUGrowing:
-            TopoAutomatonClustering1 = result.popToolsAndMerge( self.TopoAutomatonClusteringToolConf("GPUGrowing"))
-            HybridClusterProcessor.GPUTools += [TopoAutomatonClustering1]
-            
-            PropCalc2 = result.popToolsAndMerge( self.ClusterInfoCalcToolConf("PropCalcPostGrowing"))
-            HybridClusterProcessor.GPUTools += [PropCalc2]
-            if self.OutputCountsToFile:
-                GPUCount2 = result.popToolsAndMerge( self.CellsCounterGPUToolConf("./counts", "ModifiedGrowCounter", "modified_grow") )
-                HybridClusterProcessor.GPUTools += [GPUCount2]
-            if self.OutputClustersToFile:
-                GPUOut2 = result.popToolsAndMerge( self.GPUOutputToolConf("./val_modified_grow", "ModifiedGrowOutput") )
-                HybridClusterProcessor.GPUTools += [GPUOut2]
+        FirstPropCalcDef = result.popToolsAndMerge( self.ClusterInfoCalcToolConf("PostGrowGPUClusterPropertiesCalculator", True))
+        HybridClusterProcessor.GPUTools += [FirstPropCalcDef]
         
-        if self.TestGPUGrowing and self.TestGPUSplitting:
-            GPUClusterSplitting2 = result.popToolsAndMerge( self.GPUClusterSplitterToolConf("GPUSplitter"))
-            HybridClusterProcessor.GPUTools += [GPUClusterSplitting2]
-            
-            PropCalc3 = result.popToolsAndMerge( self.ClusterInfoCalcToolConf("PropCalcPostSplitting"))
-            HybridClusterProcessor.GPUTools += [PropCalc3]
-            
-            if self.OutputCountsToFile:
-                GPUCount3 = result.popToolsAndMerge( self.CellsCounterGPUToolConf("./counts", "ModifiedGrowSplitCounter", "modified_grow_split") )
-                HybridClusterProcessor.GPUTools += [GPUCount3]
-            if self.OutputClustersToFile:
-                GPUOut3 = result.popToolsAndMerge( self.GPUOutputToolConf("./val_modified_grow_split", "ModifiedGrowSplitOutput") )
-                HybridClusterProcessor.GPUTools += [GPUOut3]
-            
-            TopoAutomatonClustering2 = result.popToolsAndMerge( self.TopoAutomatonClusteringToolConf("SecondGPUGrowing"))
-            TopoAutomatonClustering2.TimeFileOutput = "ignore.txt" #Not the most elegant solution, but...
-            HybridClusterProcessor.GPUTools += [TopoAutomatonClustering2]
-            
-            PropCalc4 = result.popToolsAndMerge( self.ClusterInfoCalcToolConf("PropCalc4"))
-            PropCalc4.TimeFileOutput = "ignore.txt" #Not the most elegant solution, but...
-            HybridClusterProcessor.GPUTools += [PropCalc4]
-            
-        if not (self.TestGPUGrowing or self.TestGPUSplitting):
-            TopoAutomatonClusteringDef = result.popToolsAndMerge( self.TopoAutomatonClusteringToolConf("TopoAutomatonClustering"))
-            HybridClusterProcessor.GPUTools += [TopoAutomatonClusteringDef]
-            
-            GPUClusterSplittingDef = result.popToolsAndMerge( self.GPUClusterSplitterToolConf("GPUTopoSplitter"))
-            HybridClusterProcessor.GPUTools += [GPUClusterSplittingDef]
-            
-            PropCalcDef = result.popToolsAndMerge( self.ClusterInfoCalcToolConf("GPUClusterPropertiesCalculator"))
-            HybridClusterProcessor.GPUTools += [PropCalcDef]
-            
-            
+        GPUClusterSplittingDef = result.popToolsAndMerge( self.TopoAutomatonSplitterToolConf("GPUSplitter") )
+        HybridClusterProcessor.GPUTools += [GPUClusterSplittingDef]
         
+        GPUMomentsCalcDef = result.popToolsAndMerge( self.GPUClusterMomentsCalculatorToolConf("GPUTopoMoments") )
+        HybridClusterProcessor.GPUTools += [GPUMomentsCalcDef]
+            
         HybridClusterProcessor.AfterGPUTools = []
-        
-        if self.TestGPUGrowing:
-        
-            TopoSplitter = result.popToolsAndMerge( self.DefaultClusterSplittingToolConf() )
-            HybridClusterProcessor.AfterGPUTools += [TopoSplitter]
-            
-            if self.TestGPUSplitting:
-                if self.OutputCountsToFile:
-                    CPUCount3 = result.popToolsAndMerge( self.CellsCounterCPUToolConf("./counts", "ModifiedGrowDefaultSplitCounter", "modified_grow_default_split") )
-                    HybridClusterProcessor.AfterGPUTools += [CPUCount3]
-                if self.OutputClustersToFile:
-                    CPUOut3 = result.popToolsAndMerge( self.CPUOutputToolConf("./val_modified_grow_default_split", "ModifiedGrowDefaultSplitOutput") )
-                    HybridClusterProcessor.AfterGPUTools += [CPUOut3]
-                
         
         from CaloBadChannelTool.CaloBadChanToolConfig import CaloBadChanToolCfg
         caloBadChanTool = result.popToolsAndMerge( CaloBadChanToolCfg(self.ConfigFlags) )
@@ -574,82 +636,21 @@ class CaloRecGPUConfigurator:
         BadChannelListCorr = CaloClusterBadChannelList(badChannelTool = caloBadChanTool)
         HybridClusterProcessor.AfterGPUTools += [BadChannelListCorr]
 
-        from CaloRec.CaloTopoClusterConfig import getTopoMoments
-        
-        momentsMaker=result.popToolsAndMerge(getTopoMoments(self.ConfigFlags))
-        HybridClusterProcessor.AfterGPUTools += [momentsMaker]
             
         if self.ConfigFlags.Calo.TopoCluster.doTopoClusterLocalCalib:    
             #Took out CaloClusterSnapshot that wanted to be a part of a CaloClusterMaker.
             #Possibly change in the future?
             from CaloRec.CaloTopoClusterConfig import getTopoClusterLocalCalibTools
             HybridClusterProcessor.AfterGPUTools += getTopoClusterLocalCalibTools(self.ConfigFlags)
-
+        
             from CaloRec.CaloTopoClusterConfig import caloTopoCoolFolderCfg
             result.merge(caloTopoCoolFolderCfg(self.ConfigFlags))
 
-        result.addEventAlgo(HybridClusterProcessor,primary=True)
+        result.addEventAlgo(HybridClusterProcessor, primary = should_be_primary)
 
         return result
         
-    
-    def PrepareTest(self, default_files):
-    
-        import argparse
-        
-        parser = argparse.ArgumentParser()
-        
-        parser.add_argument('-events','--numevents', default = 10)
-        parser.add_argument('-threads','--numthreads', default = 1)
-        parser.add_argument('-f','--files', action = 'extend', nargs = '*')
-        parser.add_argument('-t','--measuretimes', action = 'store_true')
-        parser.add_argument('-o','--outputclusters', action = 'store_true')
-        parser.add_argument('-c','--outputcounts', action = 'store_true')
-        
-        args = parser.parse_args()
-        
-        from AthenaConfiguration.AllConfigFlags import ConfigFlags
 
-        if args.files is None:
-            ConfigFlags.Input.Files = default_files
-        elif len(args.files) == 0:
-            ConfigFlags.Input.Files = default_files
-        elif len(args.files) == 1:
-            if args.files[0] == 'default':
-                ConfigFlags.Input.Files = default_files
-            elif args.files[0] == 'ttbar':
-                ConfigFlags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/mc15_13TeV.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.recon.RDO.e3698_s2608_s2183_r7195/RDO.06752780._000001.pool.root.1",
-                                           "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/mc15_13TeV.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.recon.RDO.e3698_s2608_s2183_r7195/RDO.06752780._000002.pool.root.1",
-                                           "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/mc15_13TeV.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.recon.RDO.e3698_s2608_s2183_r7195/RDO.06752780._000003.pool.root.1" ]
-                
-            elif args.files[0] == 'jets':
-                ConfigFlags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigEgammaValidation/valid3.147917.Pythia8_AU2CT10_jetjet_JZ7W.recon.RDO.e3099_s2578_r6596_tid05293007_00/RDO.05293007._000001.pool.root.1"]
-            else:
-                ConfigFlags.Input.Files = args.files
-        else:
-            ConfigFlags.Input.Files = args.files
-               
-        #ConfigFlags.Input.Files = defaultTestFiles.RDO_RUN2
-        ConfigFlags.Concurrency.NumThreads = int(args.numthreads)
-        ConfigFlags.Concurrency.NumConcurrentEvents = int(args.numthreads)
-        #This is to ensure the measurments are multi-threaded in the way we expect, I guess?
-        ConfigFlags.lock()
-        
-        self.ConfigFlags = ConfigFlags
 
-        from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-        from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 
-        cfg=MainServicesCfg(ConfigFlags)
-        cfg.merge(PoolReadCfg(ConfigFlags))
-        
-        self.MeasureTimes = args.measuretimes
-        self.OutputClustersToFile = args.outputclusters
-        self.OutputCountsToFile = args.outputcounts
-        
-        #self.NumPreAllocatedDataHolders = int(args.numthreads)
-        
-        if 'StreamRDO' in self.ConfigFlags.Input.ProcessingTags:
-            cfg.addEventAlgo(CompFactory.xAODMaker.EventInfoCnvAlg(),sequenceName="AthAlgSeq")
-        
-        return (cfg, int(args.numevents))
+

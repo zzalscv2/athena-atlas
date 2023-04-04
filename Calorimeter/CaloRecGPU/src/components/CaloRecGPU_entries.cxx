@@ -1,5 +1,9 @@
 //
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+//
+// Dear emacs, this is -*- c++ -*-
+//
+// Dear emacs, this is -*- c++ -*-
 //
 
 // Local include(s).
@@ -14,7 +18,12 @@
 #include "../CaloCellsCounterGPU.h"
 #include "../CaloTopoClusterSplitterGPU.h"
 #include "../BasicGPUClusterInfoCalculator.h"
+#include "../TopoAutomatonSplitting.h"
 #include "../CaloClusterDeleter.h"
+#include "../CaloGPUClusterAndCellDataMonitor.h"
+#include "../GPUClusterInfoAndMomentsCalculator.h"
+#include "../GPUToAthenaImporterWithMoments.h"
+#include "../CaloMomentsDumper.h"
 
 // Declare the "components".
 DECLARE_COMPONENT( CaloGPUHybridClusterProcessor )
@@ -29,5 +38,9 @@ DECLARE_COMPONENT( CaloCellsCounterGPU )
 DECLARE_COMPONENT( CaloTopoClusterSplitterGPU )
 DECLARE_COMPONENT( BasicGPUClusterInfoCalculator )
 DECLARE_COMPONENT( CaloClusterDeleter )
-
+DECLARE_COMPONENT( TopoAutomatonSplitting )
+DECLARE_COMPONENT( CaloGPUClusterAndCellDataMonitor )
+DECLARE_COMPONENT( GPUClusterInfoAndMomentsCalculator )
+DECLARE_COMPONENT( GPUToAthenaImporterWithMoments )
+DECLARE_COMPONENT( CaloMomentsDumper )
 

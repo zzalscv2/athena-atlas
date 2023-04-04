@@ -1,6 +1,8 @@
-/*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-*/
+//
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+//
+// Dear emacs, this is -*- c++ -*-
+//
 
 #include "BasicEventDataGPUExporter.h"
 
@@ -9,8 +11,8 @@
 #include "AthenaKernel/errorcheck.h"
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "StoreGate/DataHandle.h"
-#include "CaloUtils/CaloBadCellHelper.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
+#include "TileEvent/TileCell.h"
 
 #include "boost/chrono/chrono.hpp"
 #include "boost/chrono/thread_clock.hpp"
@@ -24,44 +26,18 @@ BasicEventDataGPUExporter::BasicEventDataGPUExporter(const std::string & type, c
   declareInterface<ICaloClusterGPUInputTransformer> (this);
 }
 
-
 StatusCode BasicEventDataGPUExporter::initialize()
 {
 
-  ATH_CHECK( m_noiseCDOKey.initialize() );
   ATH_CHECK( m_cellsKey.value().initialize() );
+
   ATH_CHECK( detStore()->retrieve(m_calo_id, "CaloCell_ID") );
+
   return StatusCode::SUCCESS;
 }
 
-
-static inline bool passCellTimeCut(const CaloCell * pCell, const float threshold)
-//Copied from the standard algorithm.
-//Could possibly make better use of available info
-//in the point where this gets executed,
-//but I hope the compiler is smart enough to figure it out.
-{
-  // get the cell time to cut on (the same as in CaloEvent/CaloCluster.h)
-
-  // need sampling number already for time
-  CaloSampling::CaloSample sam = pCell->caloDDE()->getSampling();
-  // check for unknown sampling
-  if (sam != CaloSampling::PreSamplerB && sam != CaloSampling::PreSamplerE && sam != CaloSampling::Unknown)
-    {
-      const unsigned pmask = pCell->caloDDE()->is_tile() ? 0x8080 : 0x2000;
-      //0x2000 is used to tell that time and quality information are available for this channel
-      //(from TWiki: https://twiki.cern.ch/twiki/bin/viewauth/AtlasComputing/CaloEventDataModel#The_Raw_Data_Model)
-      // Is time defined?
-      if (pCell->provenance() & pmask)
-        {
-          return std::abs(pCell->time()) < threshold;
-        }
-    }
-  return true;
-}
-
 StatusCode BasicEventDataGPUExporter::convert(const EventContext & ctx,
-                                              const ConstantDataHolder & cd,
+                                              const ConstantDataHolder & /*cd*/,
                                               const xAOD::CaloClusterContainer * cluster_collection,
                                               EventDataHolder & ed) const
 {
@@ -81,67 +57,102 @@ StatusCode BasicEventDataGPUExporter::convert(const EventContext & ctx,
       ATH_MSG_ERROR( " Cannot retrieve CaloCellContainer: " << cell_collection.name()  );
       return StatusCode::RECOVERABLE;
     }
-  for (int i = 0; i < NCaloCells; ++i)
+
+
+
+  if (cell_collection->isOrderedAndComplete())
+    //Fast path: cell indices within the collection and identifierHashes match!
     {
-      ed.m_cell_info->energy[i] = 0;
-      ed.m_cell_info->gain[i] = 0;
-
-      GainConversion::mark_invalid_cell(ed.m_cell_info->gain[i]);
-    }
-
-  SG::ReadCondHandle<CaloNoise> noise_handle(m_noiseCDOKey, ctx);
-  const CaloNoise * noise_tool = *noise_handle;
-
-  for (CaloCellContainer::const_iterator iCells = cell_collection->begin(); iCells != cell_collection->end(); ++iCells)
-    {
-      const CaloCell * cell = (*iCells);
-
-      const int index = m_calo_id->calo_cell_hash(cell->ID());
-
-      const float energy = cell->energy();
-
-      const int gain = static_cast<int>(GainConversion::from_standard_gain(cell->gain()));
-
-      ed.m_cell_info->energy[index] = energy;
-      ed.m_cell_info->gain[index] = gain;
-
-      if (CaloBadCellHelper::isBad(cell, m_treatL1PredictedCellsAsGood))
+      int cell_index = 0;
+      for (CaloCellContainer::const_iterator iCells = cell_collection->begin(); iCells != cell_collection->end(); ++iCells, ++cell_index)
         {
-          GainConversion::mark_bad_cell(ed.m_cell_info->gain[index]);
-
-          continue;
-        }
-
-      if (m_cutCellsInTime)
-        {
-          if (!passCellTimeCut(cell, m_timeThreshold))
+          const CaloCell * cell = (*iCells);
+        
+          const int alt_index = cell->caloDDE()->calo_hash();
+          if (alt_index != cell_index)
+          {
+            std::cout << alt_index << " " << cell_index << std::endl;
+          }
+        
+          const float energy = cell->energy();
+          const unsigned int gain = GainConversion::from_standard_gain(cell->gain());
+          ed.m_cell_info->energy[cell_index] = energy;
+          ed.m_cell_info->gain[cell_index] = gain;
+          ed.m_cell_info->time[cell_index] = cell->time();
+          if (CaloRecGPU::GeometryArr::is_tile(cell_index))
             {
-              const float snr = energy / (m_useCPUStoredNoise ? cd.m_cell_noise->noise[gain][index] : noise_tool->getNoise(index, cell->gain()));
+              const TileCell * tile_cell = (TileCell *) cell;
 
-              if (std::abs(snr) >= m_seedThreshold)
-                //We'll not worry about the cases with negative snr here
-                //since it's reasonable to expect these cells to be excluded
-                //from clustering anyway in the non-abs case, so no worries
-                //excluding them from yet another perspective...
-                {
-                  if (!m_keepSignificantCells || snr <= m_thresholdForKeeping)
-                    //If snr > m_thresholdForKeeping and m_keepSignificantCells is true,
-                    //we still keep it as seed so the energy keeps the original value!
-                    {
-                      if (!m_excludeCutSeedsFromClustering)
-                        //If m_excludeCutSeedsFromClustering is false,
-                        //seed cells are still kept as candidates for neighbour or terminal.
-                        {
-                          GainConversion::mark_invalid_seed_cell(ed.m_cell_info->gain[index]);
-                        }
-                      else
-                        {
-                          GainConversion::mark_invalid_cell(ed.m_cell_info->gain[index]);
-                        }
-                    }
-                }
+              ed.m_cell_info->qualityProvenance[cell_index] = QualityProvenance{tile_cell->qual1(),
+                                                                                tile_cell->qual2(),
+                                                                                tile_cell->qbit1(),
+                                                                                tile_cell->qbit2()};
+            }
+          else
+            {
+              ed.m_cell_info->qualityProvenance[cell_index] = QualityProvenance{cell->quality(), cell->provenance()};
             }
         }
+    }
+  else
+    //Slow path: be careful.
+    {
+      /*
+      std::vector<bool> has_cell(NCaloCells, false);
+      // */
+      for (int cell_index = 0; cell_index < NCaloCells; ++cell_index)
+        {
+          //ed.m_cell_info->energy[cell_index] = 0;
+          ed.m_cell_info->gain[cell_index] = GainConversion::invalid_gain();
+          //ed.m_cell_info->time[cell_index] = 0;
+          //ed.m_cell_info->qualityProvenance[cell_index] = 0;
+        }
+
+      for (CaloCellContainer::const_iterator iCells = cell_collection->begin(); iCells != cell_collection->end(); ++iCells)
+        {
+          const CaloCell * cell = (*iCells);
+
+          //const int cell_index = m_calo_id->calo_cell_hash(cell->ID());
+          const int cell_index = cell->caloDDE()->calo_hash();
+          //See calodde
+          
+          /*
+          has_cell[cell_index] = true;
+          // */
+        
+          const float energy = cell->energy();
+
+          const unsigned int gain = GainConversion::from_standard_gain(cell->gain());
+
+          ed.m_cell_info->energy[cell_index] = energy;
+          ed.m_cell_info->gain[cell_index] = gain;
+          ed.m_cell_info->time[cell_index] = cell->time();
+          if (CaloRecGPU::GeometryArr::is_tile(cell_index))
+            {
+              const TileCell * tile_cell = (TileCell *) cell;
+
+              ed.m_cell_info->qualityProvenance[cell_index] = QualityProvenance{tile_cell->qual1(),
+                                                                                tile_cell->qual2(),
+                                                                                tile_cell->qbit1(),
+                                                                                tile_cell->qbit2()};
+            }
+          else
+            {
+              ed.m_cell_info->qualityProvenance[cell_index] = QualityProvenance{cell->quality(), cell->provenance()};
+            }
+        }
+
+      /*
+      for (size_t i = 0; i < has_cell.size(); ++i)
+        {
+          if (!has_cell[i])
+            {
+              const auto identifier = m_calo_id->cell_id(i);
+              const auto sampling = m_calo_id->calo_sample(m_calo_id->cell_id((IdentifierHash) i));
+              std::cout << i << " " << sampling << std::endl;
+            }
+        }
+      // */
     }
 
   const auto post_cells = clock_type::now();
@@ -153,7 +164,7 @@ StatusCode BasicEventDataGPUExporter::convert(const EventContext & ctx,
 
       for (int i = 0; i < NCaloCells; ++i)
         {
-          ed.m_cell_state->clusterTag[i] = Tags::InvalidTag;
+          ed.m_cell_state->clusterTag[i] = ClusterTag::make_invalid_tag();
         }
 
       const auto cluster_end = cluster_collection->end();
@@ -163,11 +174,6 @@ StatusCode BasicEventDataGPUExporter::convert(const EventContext & ctx,
         {
           const xAOD::CaloCluster * cluster = (*cluster_iter);
           const CaloClusterCellLink * cell_links = cluster->getCellLinks();
-          if (!cell_links)
-            {
-              ATH_MSG_ERROR("Can't get valid links to CaloCells (CaloClusterCellLink)!");
-              return StatusCode::FAILURE;
-            }
 
           ed.m_clusters->clusterEnergy[cluster_number] = cluster->e();
           ed.m_clusters->clusterEt[cluster_number] = cluster->et();
@@ -178,25 +184,75 @@ StatusCode BasicEventDataGPUExporter::convert(const EventContext & ctx,
 
           ed.m_clusters->seedCellID[cluster_number] = seed_cell_index;
 
-          const tag_type tag = Tags::make_seed_tag(0x7f7fffff, seed_cell_index, cluster_number);
-          //0x7f7fffff is the largest possible valid (finite non-NaN) floating point value.
-
-          for (const CaloCell * cell : (*cell_links))
+          for (auto it = cell_links->begin(); it != cell_links->end(); ++it)
             {
-              IdentifierHash tmpHashid = m_calo_id->calo_cell_hash(cell->ID());
-              const int cell_ID = tmpHashid;
-              ed.m_cell_state->clusterTag[cell_ID] = tag;
+              if (m_considerSharedcells)
+                {
+                  const int cell_ID = m_calo_id->calo_cell_hash(it->ID());
+                  const float weight = it.weight();
+
+                  uint32_t weight_as_int = 0;
+                  std::memcpy(&weight_as_int, &weight, sizeof(float));
+                  //On the platforms we expect to be running this, it should be fine.
+                  //Still UB.
+                  //With C++20, we could do that bit-cast thing.
+
+                  if (weight_as_int == 0)
+                    {
+                      weight_as_int = 1;
+                      //Subnormal,
+                      //but just to distinguish from
+                      //a non-shared cluster.
+                    }
+
+                  const ClusterTag other_tag = ed.m_cell_state->clusterTag[cell_ID];
+
+                  const int other_index = other_tag.is_part_of_cluster() ? other_tag.cluster_index() : -1;
+
+                  if (other_index < 0)
+                    {
+                      if (weight < 0.5f)
+                        {
+                          ed.m_cell_state->clusterTag[cell_ID] = ClusterTag::make_tag(cluster_number, weight_as_int, 0);
+                        }
+                      else
+                        {
+                          ed.m_cell_state->clusterTag[cell_ID] = ClusterTag::make_tag(cluster_number);
+                        }
+                    }
+                  else if (weight > 0.5f)
+                    {
+                      ed.m_cell_state->clusterTag[cell_ID] = ClusterTag::make_tag(cluster_number, other_tag.secondary_cluster_weight(), other_index < 0 ? 0 : other_index);
+                    }
+                  else if (weight == 0.5f)
+                    //Unlikely, but...
+                    {
+                      const int max_cluster = cluster_number > other_index ? cluster_number : other_index;
+                      const int min_cluster = cluster_number > other_index ? other_index : cluster_number;
+                      ed.m_cell_state->clusterTag[cell_ID] = ClusterTag::make_tag(max_cluster, weight_as_int, min_cluster);
+                    }
+                  else /*if (weight < 0.5f)*/
+                    {
+                      ed.m_cell_state->clusterTag[cell_ID] = ClusterTag::make_tag(other_index, weight_as_int, cluster_number);
+                    }
+                }
+              else
+                {
+                  ed.m_cell_state->clusterTag[m_calo_id->calo_cell_hash(it->ID())] = ClusterTag::make_tag(cluster_number);
+                }
             }
         }
 
       ed.m_clusters->number = cluster_collection->size();
+
+      //std::cout << "Number: " << ed.m_clusters->number << std::endl;
     }
 
   const auto post_clusters = clock_type::now();
-  
+
   const bool has_cluster_info = cluster_collection->size() > 0;
 
-  ed.sendToGPU(!m_keepCPUData, has_cluster_info, has_cluster_info, false);
+  ed.sendToGPU(!m_keepCPUData, has_cluster_info, has_cluster_info, false, false);
 
   const auto post_send = clock_type::now();
 

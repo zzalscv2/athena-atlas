@@ -1,8 +1,8 @@
 //
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 //
-
-//Dear emacs, this is -*-c++-*-
+// Dear emacs, this is -*- c++ -*-
+//
 
 #ifndef CALORECGPU_CALOGPUOUTPUT_H
 #define CALORECGPU_CALOGPUOUTPUT_H
@@ -12,8 +12,6 @@
 #include <string>
 #include <mutex>
 #include <atomic>
-
-#include "CLHEP/Units/SystemOfUnits.h"
 
 /**
  * @class CaloGPUOutput
@@ -33,7 +31,10 @@ class CaloGPUOutput :
 
   CaloGPUOutput(const std::string & type, const std::string & name, const IInterface * parent);
 
-  virtual StatusCode execute (const EventContext & ctx, const ConstantDataHolder & constant_data, EventDataHolder & event_data) const override;
+  virtual StatusCode execute (const EventContext & ctx,
+                              const CaloRecGPU::ConstantDataHolder & constant_data,
+                              CaloRecGPU::EventDataHolder & event_data,
+                              void * temporary_buffer) const override;
 
   virtual ~CaloGPUOutput();
 
@@ -60,29 +61,17 @@ class CaloGPUOutput :
    * @brief The number of digits to reserve for the events. 9 by default.
    */
   Gaudi::Property<unsigned int> m_numWidth{this, "NumberWidth", 9, "The number of digits to reserve for the events"};
-  
+
   /**
-   * @brief If @p true, sort the clusters by transverse energy, apply a cut and compactify the tags
-            to ensure sequentiality.
+   * @brief If @p true, sort the clusters by transverse energy and compactify the tags to ensure sequentiality.
    */
   Gaudi::Property<bool> m_sortedAndCutClusters {this, "UseSortedAndCutClusters", true, "Sort the clusters by transverse energy, apply a cut and ensure contiguous tags"};
-  
-  /**
-  * @brief if set to @p true cluster cuts are on \f$|E|_\perp\f$, if @p false on \f$E_\perp\f$. Default is @p true.
-  *
-  */
-  Gaudi::Property<bool> m_cutClustersInAbsE {this, "ClusterCutsInAbsE", true, "Do cluster cuts in Abs E instead of E"};
 
   /**
-   * @brief \f$E_\perp\f$ cut on the clusters.
-   *
-   * The clusters have to pass this cut (which is on \f$E_\perp\f$
-   * or \f$|E|_\perp\f$ of the cluster depending on the above switch)
-   * in order to be inserted into the CaloClusterContainer.  */
-
-  Gaudi::Property<float> m_clusterETThreshold {this, "ClusterEtorAbsEtCut", 0.*CLHEP::MeV, "Cluster E_t or Abs E_t cut"};
+   * @brief If @p true, only output cell info (useful for reducing disk usage when running the full standalone version of the algorithms).
+   */
+  Gaudi::Property<bool> m_onlyCellInfo {this, "OnlyOutputCellInfo", false, "Only output cell info"};
   
-
   /**
    * @brief A flag to signal that the constant data has been adequately saved.
     *  This is required for everything to work properly in a multi-threaded context...

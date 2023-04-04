@@ -1,5 +1,7 @@
 //
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+//
+// Dear emacs, this is -*- c++ -*-
 //
 
 #ifndef CALORECGPU_BASICGPUCLUSTERINFOCALCULATORIMPL_H
@@ -13,19 +15,13 @@ struct ClusterInfoCalculatorTemporaries
   float seedCellPhi[CaloRecGPU::NMaxClusters];
 };
 
-struct BasicGPUClusterInfoCalculatorTemporariesHolder
-{
-  //Helpers::CPU_object<TopoAutomatonTemporaries> m_temporaries;
+void updateSeedCellProperties(CaloRecGPU::EventDataHolder & holder, CaloRecGPU::Helpers::CUDA_kernel_object<ClusterInfoCalculatorTemporaries> temps,
+                              const CaloRecGPU::ConstantDataHolder & instance_data, const bool synchronize = false,
+                              CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream_to_use = {});
 
-  CaloRecGPU::Helpers::CUDA_object<ClusterInfoCalculatorTemporaries> m_temporaries_dev;
-
-  void allocate();
-};
-
-void updateSeedCellProperties(EventDataHolder & holder, BasicGPUClusterInfoCalculatorTemporariesHolder & temps,
-                              const ConstantDataHolder & instance_data, const bool synchronize = false);
-
-void calculateClusterProperties(EventDataHolder & holder, BasicGPUClusterInfoCalculatorTemporariesHolder & temps,
-                                const ConstantDataHolder & instance_data, const bool synchronize = false);
+void calculateClusterProperties(CaloRecGPU::EventDataHolder & holder, CaloRecGPU::Helpers::CUDA_kernel_object<ClusterInfoCalculatorTemporaries> temps,
+                                const CaloRecGPU::ConstantDataHolder & instance_data, const bool synchronize = false,
+                                const bool cut_in_absolute_ET = true, const float absolute_ET_threshold = -1,
+                                CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream_to_use = {});
 
 #endif //CALORECGPU_BASICGPUCLUSTERINFOCALCULATORIMPL_H

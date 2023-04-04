@@ -1,6 +1,8 @@
-/*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-*/
+//
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+//
+// Dear emacs, this is -*- c++ -*-
+//
 
 #include "CaloTopoClusterSplitterGPU.h"
 #include "CaloTopoClusterSplitterGPUImpl.h"
@@ -146,32 +148,16 @@ StatusCode CaloTopoClusterSplitterGPU::initialize()
   m_options.m_options->m_emShowerScale = m_emShowerScale;
   m_options.m_options->m_shareBorderCells = m_shareBorderCells;
   m_options.m_options->m_absOpt = m_absOpt;
+  m_options.m_options->m_treatL1PredictedCellsAsGood = m_treatL1PredictedCellsAsGood;
 
   m_options.sendToGPU(true);
-
-
-  if (m_numPreAllocatedGPUData > 0)
-    {
-      ATH_MSG_DEBUG("Pre-allocating temporaries for " << m_numPreAllocatedGPUData << " events.");
-
-      m_temporariesHolder.resize(m_numPreAllocatedGPUData);
-      //This will allocate the object holders.
-
-      m_temporariesHolder.operate_on_all( [&](GPUSplitterTemporariesHolder & tth)
-      {
-        tth.allocate();
-      }
-                                        );
-      //This will allocate all the memory at this point.
-      //Also useful to prevent/debug potential allocation issues?
-      //But the main point is really reducing the execute times...
-    }
 
   return StatusCode::SUCCESS;
 
 }
 
-StatusCode CaloTopoClusterSplitterGPU::execute(const EventContext & ctx, const ConstantDataHolder & constant_data, EventDataHolder & event_data) const
+StatusCode CaloTopoClusterSplitterGPU::execute(const EventContext & ctx, const ConstantDataHolder & constant_data,
+                                               EventDataHolder & event_data, void * temporary_buffer                ) const
 {
 
   using clock_type = boost::chrono::thread_clock;
@@ -182,36 +168,21 @@ StatusCode CaloTopoClusterSplitterGPU::execute(const EventContext & ctx, const C
 
   const auto start = clock_type::now();
 
-  GPUSplitterTemporariesHolder * temp_data_ptr = nullptr;
+  Helpers::CUDA_kernel_object<GPUSplitterTemporaries> temporaries((GPUSplitterTemporaries *) temporary_buffer);
 
-  Helpers::separate_thread_accessor<GPUSplitterTemporariesHolder> sep_th_acc(m_temporariesHolder, temp_data_ptr);
-  //This is a RAII wrapper to access an object held by Helpers::separate_thread_holder,
-  //to ensure the event data is appropriately released when we are done processing.
-
-  if (temp_data_ptr == nullptr)
-    {
-      ATH_MSG_ERROR("Could not get valid Temporary Data Holder! Event: " << ctx.evt() );
-      return StatusCode::FAILURE;
-    }
-
-  temp_data_ptr->allocate();
-  //Does nothing if it is already allocated
-  //(which it should be unless a new holder had to be created
-  // due to m_numPreAllocatedGPUData being less than the number of threads.)
-
-  preProcessingPreparation(event_data, *temp_data_ptr, constant_data, m_options, m_measureTimes);
+  preProcessingPreparation(event_data, temporaries, constant_data, m_options, m_measureTimes);
 
   const auto before_maxima = clock_type::now();
 
-  findLocalMaxima(event_data, *temp_data_ptr, constant_data, m_options, m_measureTimes);
+  findLocalMaxima(event_data, temporaries, constant_data, m_options, m_measureTimes);
 
   const auto before_propagate = clock_type::now();
 
-  propagateTags(event_data, *temp_data_ptr, constant_data, m_options, m_measureTimes);
+  propagateTags(event_data, temporaries, constant_data, m_options, m_measureTimes);
 
   const auto before_refill = clock_type::now();
 
-  refillClusters(event_data, *temp_data_ptr, constant_data, m_options, m_measureTimes);
+  refillClusters(event_data, temporaries, constant_data, m_options, m_measureTimes);
 
   const auto end = clock_type::now();
 

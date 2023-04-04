@@ -162,7 +162,13 @@ class CaloClusterCellLink {
      * @param newWeight The new weight
      */
     void reweight(const weight_t newWeight) {m_it->second=newWeight;}
+
+    /**@brief Update the index 
+     * @param newWIndex The new index
+     */
+    void reindex(const unsigned newIndex) {m_it->first=newIndex;}
  
+    
   private:
     const CaloCellContainer* m_ccc;
     linkAndWeightCollType::iterator m_it;
