@@ -365,9 +365,9 @@ def setupMenu(menu_name):
         ChainProp(name='HLT_e28_lhtight_ivarloose_L1eEM26M', groups=PrimaryPhIGroup+SingleElectronGroup, monGroups=['egammaMon:t0_tp']),
         ChainProp(name='HLT_e28_lhtight_ivarloose_L1eEM26T', groups=PrimaryPhIGroup+SingleElectronGroup, monGroups=['egammaMon:t0_tp']),
         
-        ChainProp(name='HLT_e60_lhmedium_L1eEM26M',  groups=PrimaryPhIGroup+SingleElectronGroup, monGroups=['egammaMon:t0_tp']),
-        ChainProp(name='HLT_e140_lhloose_L1eEM26M', groups=PrimaryPhIGroup+SingleElectronGroup, monGroups=['egammaMon:t0_tp']),
-        ChainProp(name='HLT_e300_etcut_L1eEM26M', groups=PrimaryPhIGroup+SingleElectronGroup, monGroups=['egammaMon:t0','caloMon:t0']),
+        ChainProp(name='HLT_e60_lhmedium_L1eEM26M', stream=[PhysicsStream,'express'],  groups=PrimaryPhIGroup+SingleElectronGroup, monGroups=['egammaMon:t0_tp']),
+        ChainProp(name='HLT_e140_lhloose_L1eEM26M', stream=[PhysicsStream,'express'], groups=PrimaryPhIGroup+SingleElectronGroup, monGroups=['egammaMon:t0_tp']),
+        ChainProp(name='HLT_e300_etcut_L1eEM26M', stream=[PhysicsStream,'express'], groups=PrimaryPhIGroup+SingleElectronGroup, monGroups=['egammaMon:t0','caloMon:t0']),
 
         #--------- primary 1e
         ChainProp(name='HLT_e26_lhtight_ivarmedium_L1EM22VHI', groups=PrimaryLegGroup+SingleElectronGroup, monGroups=['egammaMon:shifter_tp']),
