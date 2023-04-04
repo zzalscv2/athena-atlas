@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -7,6 +7,8 @@
 // Create a single decoration for flavor tagging of truth jets
 
 #include "DerivationFrameworkMCTruth/TruthQGDecorationTool.h"
+#include "StoreGate/ReadHandle.h"
+#include "StoreGate/WriteDecorHandle.h"
 #include "xAODJet/JetContainer.h"
 #include <string>
 
@@ -17,26 +19,35 @@ DerivationFramework::TruthQGDecorationTool::TruthQGDecorationTool(const std::str
     AthAlgTool(t,n,p)
 {
   declareInterface<DerivationFramework::IAugmentationTool>(this);
-  declareProperty ("JetCollection",
-          m_jetsKey = "AntiKt4TruthWZJets",
-          "Name of jet collection for decoration");
-  declareProperty ("OutputDecoration",
-          m_decOutput = "TrueFlavor",
-          "Name of the output decoration on the jet");
 }
 
 // Destructor
 DerivationFramework::TruthQGDecorationTool::~TruthQGDecorationTool() {
 }
 
+// Initialize
+StatusCode DerivationFramework::TruthQGDecorationTool::initialize() {
+
+  ATH_CHECK(m_jetsKey.initialize());
+  ATH_CHECK(m_decOutput.initialize());
+  return StatusCode::SUCCESS; 
+
+}
+
 // Function to do dressing, implements interface in IAugmentationTool
 StatusCode DerivationFramework::TruthQGDecorationTool::addBranches() const
 {
-  // Retrieve the truth collections
-  const xAOD::JetContainer* inputJets(nullptr);
-  CHECK(evtStore()->retrieve(inputJets, m_jetsKey));
+  // Event context
+  const EventContext& ctx = Gaudi::Hive::currentContext();
 
-  SG::AuxElement::Decorator<int> output_decorator(m_decOutput);
+  // Retrieve the jet container
+  SG::ReadHandle<xAOD::JetContainer> inputJets(m_jetsKey, ctx);
+  if (!inputJets.isValid()) {
+    ATH_MSG_ERROR("Couldn't retrieve container with name " << m_jetsKey);
+    return StatusCode::FAILURE;
+  }
+
+  SG::WriteDecorHandle<xAOD::JetContainer,int> output_decorator(m_decOutput, ctx); 
 
   for (const auto *ajet : *inputJets){
     if (!ajet->isAvailable<int>("PartonTruthLabelID") ){
