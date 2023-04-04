@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTS_STRIP_CLUSTERING_TOOL_H
@@ -52,7 +52,6 @@ public:
 			const IInterface* parent);
 
     virtual StatusCode initialize() override;
-    virtual StatusCode finalize() override;
 
     virtual StatusCode
     clusterize(const InDetRawDataCollection<StripRDORawData>& RDOs,
@@ -82,7 +81,7 @@ private:
 			   double LorentzShift,
 			   const StripID& stripID,
 			   const InDetDD::SiDetectorElement* element,
-			   xAOD::StripClusterContainer& container) const;
+			   xAOD::StripCluster& container) const;
 
     StringProperty m_timeBinStr{this, "timeBins", ""};
 

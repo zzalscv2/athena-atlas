@@ -35,6 +35,12 @@ private:
     ToolHandle<IPixelClusteringTool> m_clusteringTool {this, "PixelClusteringTool", "", "Pixel Clustering Tool"};
     ToolHandle<GenericMonitoringTool> m_monTool {this, "MonTool", "", "Monitoring tool"};
 
+    // expected number of clusters for RDO
+    // This values is used for reserving enough memory of the cluster container
+    // reserve = m_expectedClustersPerRDO * nRDOs
+    // The default values has been computed on a tt-bar PU200 sample comparing the memory usage and the container capacity
+    Gaudi::Property<int> m_expectedClustersPerRDO {this, "expectedClustersPerRDO", 32, "Expected number of clusters for RDO"};
+
     const PixelID* m_idHelper = nullptr;
 };
 

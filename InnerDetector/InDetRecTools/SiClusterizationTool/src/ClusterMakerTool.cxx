@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -78,8 +78,8 @@ InDet::PixelCluster* newInDetpixelCluster(const Identifier& RDOId,
 // to not crash
 class AddNewxAODpixelCluster {
 public:
-    AddNewxAODpixelCluster(xAOD::PixelClusterContainer& container)
-	: m_container(container) {}
+    AddNewxAODpixelCluster(xAOD::PixelCluster& cluster)
+	: m_cluster(&cluster) {}
 
     xAOD::PixelCluster* operator()(const Identifier& /*RDOId*/,
 				   const Amg::Vector2D& locpos,
@@ -96,8 +96,6 @@ public:
 				   bool split,
 				   float splitProb1,
 				   float splitProb2) {
-	xAOD::PixelCluster * pixelCl = new xAOD::PixelCluster();
-	m_container.push_back(pixelCl);
 	IdentifierHash idHash = detEl->identifyHash();
 
 	Eigen::Matrix<float,2,1> localPosition(locpos.x(), locpos.y());
@@ -105,23 +103,23 @@ public:
 	localCovariance(0, 0) = locErrMat(0, 0);
 	localCovariance(1, 1) = locErrMat(1, 1);
 
-	pixelCl->setMeasurement<2>(idHash, localPosition, localCovariance);
-	pixelCl->setRDOlist(rdoList);
-	pixelCl->globalPosition() = globpos.cast<float>();
-	pixelCl->setToTlist(totList);
-	pixelCl->setChargelist(chargeList);
-	pixelCl->setLVL1A(lvl1a);
-	pixelCl->setChannelsInPhiEta(width.colRow()[0], width.colRow()[1]);
-	pixelCl->setWidthInEta(static_cast<float>(width.widthPhiRZ()[1]));
-	pixelCl->setOmegas(omegax, omegay);
-	pixelCl->setIsSplit(split);
-	pixelCl->setSplitProbabilities(splitProb1, splitProb2);
+	m_cluster->setMeasurement<2>(idHash, localPosition, localCovariance);
+	m_cluster->setRDOlist(rdoList);
+	m_cluster->globalPosition() = globpos.cast<float>();
+	m_cluster->setToTlist(totList);
+	m_cluster->setChargelist(chargeList);
+	m_cluster->setLVL1A(lvl1a);
+	m_cluster->setChannelsInPhiEta(width.colRow()[0], width.colRow()[1]);
+	m_cluster->setWidthInEta(static_cast<float>(width.widthPhiRZ()[1]));
+	m_cluster->setOmegas(omegax, omegay);
+	m_cluster->setIsSplit(split);
+	m_cluster->setSplitProbabilities(splitProb1, splitProb2);
 
-	return pixelCl;
+	return m_cluster;
     }
 
 private:
-    xAOD::PixelClusterContainer& m_container;
+  xAOD::PixelCluster *m_cluster;
 };
 
 
@@ -583,7 +581,7 @@ PixelCluster* ClusterMakerTool::pixelCluster(
 
 
 xAOD::PixelCluster* ClusterMakerTool::xAODpixelCluster(
-    xAOD::PixelClusterContainer& container,
+    xAOD::PixelCluster& cluster,
     const Amg::Vector2D& localPos,
     const std::vector<Identifier>& rdoList,
     const int lvl1a,
@@ -611,7 +609,7 @@ xAOD::PixelCluster* ClusterMakerTool::xAODpixelCluster(
 	split,
 	splitProb1,
 	splitProb2,
-	AddNewxAODpixelCluster(container));
+	AddNewxAODpixelCluster(cluster));
 }
 
 

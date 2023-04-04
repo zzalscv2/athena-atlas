@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "StripClusterizationAlg.h"
@@ -64,9 +64,12 @@ StatusCode StripClusterizationAlg::execute(const EventContext& ctx) const
 	return StatusCode::FAILURE;
     }
 
-    ATH_CHECK(
-	clusterHandle.record(std::make_unique<xAOD::StripClusterContainer>(),
-			     std::make_unique<xAOD::StripClusterAuxContainer>()));
+    std::unique_ptr<xAOD::StripClusterContainer> stripContainer = std::make_unique<xAOD::StripClusterContainer>();
+    std::unique_ptr<xAOD::StripClusterAuxContainer> stripAuxContainer = std::make_unique<xAOD::StripClusterAuxContainer>();
+    stripContainer->setStore(stripAuxContainer.get());
+
+    // Reserve space, estimate of mean clusters to reduce re-allocations
+    stripContainer->reserve( m_expectedClustersPerRDO.value() * rdoContainer->size() );
 
     for (const InDetRawDataCollection<SCT_RDORawData> *rdos : *rdoContainer) {
 	if (rdos == nullptr or rdos->empty()) {
@@ -98,16 +101,11 @@ StatusCode StripClusterizationAlg::execute(const EventContext& ctx) const
 		      *m_idHelper,
 		      stripDetEle->getDetectorElement(idHash),
 		      m_stripDetElStatus.empty() ? nullptr : status.cptr(),
-		      *clusterHandle));
+		      *stripContainer.get()));
 		
     }
 	    
-    return StatusCode::SUCCESS;
-}
-
-StatusCode StripClusterizationAlg::finalize()
-{
-    ATH_MSG_DEBUG("Finalizing " << name() << "...");
+    ATH_CHECK(clusterHandle.record(std::move(stripContainer), std::move(stripAuxContainer)));
     return StatusCode::SUCCESS;
 }
 

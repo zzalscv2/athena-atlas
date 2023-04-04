@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from ActsTrkClusterizationTools.ActsTrkClusterizationToolsConfig import ActsTrkITkPixelClusteringToolCfg, ActsTrkITkStripClusteringToolCfg
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -19,7 +19,7 @@ def ActsTrkITkPixelClusterizationAlgCfg(flags, name='ActsTrkITkPixelClusterizati
     return acc
 
 
-def ActsTrkITkStripClusterizationAlgCfg(flags, name='ActsTrkItkStripClusterizationAlg', **kwargs):
+def ActsTrkITkStripClusterizationAlgCfg(flags, name='ActsTrkITkStripClusterizationAlg', **kwargs):
     acc = ComponentAccumulator()
     kwargs.setdefault("StripRDOContainerKey", "ITkStripRDOs")
     kwargs.setdefault("StripClustersKey", "ITkStripClusters")

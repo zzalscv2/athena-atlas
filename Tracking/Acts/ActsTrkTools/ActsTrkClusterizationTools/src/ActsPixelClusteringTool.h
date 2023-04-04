@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTS_PIXEL_CLUSTERING_TOOL_H
@@ -68,7 +68,7 @@ private:
     StatusCode makeCluster(const PixelClusteringTool::Cluster &cluster,
 			   const PixelID& pixelID,
 			   const InDetDD::SiDetectorElement* element,
-			   xAOD::PixelClusterContainer& container) const;
+			   xAOD::PixelCluster& container) const;
 
     BooleanProperty m_addCorners{this, "AddCorners", true};
     ToolHandle<InDet::PixelRDOTool> m_pixelRDOTool {this, "PixelRDOTool", "InDet::PixelRDOTool"};
