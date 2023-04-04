@@ -68,7 +68,7 @@ def JetEfficiencyMonitoringConfig(inputFlags):
     orthogonal_trigger =  JetEfficiencyMonAlg.OrthogonalTrigger
     
 
-    JetEfficiencyMonAlg.BootstrapTrigger='L1_J15'
+    JetEfficiencyMonAlg.BootstrapTrigger='L1_J15' 
     bootstrap_trigger = JetEfficiencyMonAlg.BootstrapTrigger
 
 
@@ -101,9 +101,9 @@ def JetEfficiencyMonitoringConfig(inputFlags):
     all_SR_singletriggers = single_triggers + gfex_SR_triggers + jfex_SR_triggers
     all_LR_singletriggers = LR_triggers + gfex_LR_triggers + jfex_LR_triggers
     
-    JetEfficiencyMonAlg.all_triggers_for_SRList = all_SR_singletriggers
-    JetEfficiencyMonAlg.all_triggers_for_LRList = all_LR_singletriggers
-    JetEfficiencyMonAlg.multi_jet_TriggerList = multijet_triggers
+    JetEfficiencyMonAlg.SmallRadiusJetTriggers_phase1_and_legacy = all_SR_singletriggers
+    JetEfficiencyMonAlg.LargeRadiusJetTriggers_phase1_and_legacy = all_LR_singletriggers
+    JetEfficiencyMonAlg.multiJet_LegacySmallRadiusTriggers = multijet_triggers
 
     if passedb4Prescale: 
         prescale_title_add = " (PassBeforePrescale) "
