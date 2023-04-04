@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRKCLUSTERIZATION_STRIPCLUSTERIZATIONALG_H
@@ -23,7 +23,6 @@ public:
     StripClusterizationAlg(const std::string& name, ISvcLocator* pSvcLocator);
     virtual ~StripClusterizationAlg() = default;
     virtual StatusCode initialize() override;
-    virtual StatusCode finalize() override;
     virtual StatusCode execute(const EventContext& ctx) const override;
 
 private:
@@ -83,6 +82,11 @@ private:
 	"Check bad modules using the conditions summary tool"
     };
 
+    // expected number of clusters for RDO
+    // This values is used for reserving enough memory of the cluster container
+    // reserve = m_expectedClustersPerRDO * nRDOs
+    // The default values has been computed on a tt-bar PU200 sample comparing the memory usage and the container capacity
+    Gaudi::Property<int> m_expectedClustersPerRDO {this, "expectedClustersPerRDO", 6, "Expected number of clusters for RDO"};
 
     const StripID* m_idHelper = nullptr;
 };

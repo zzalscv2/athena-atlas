@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ActsStripClusteringTool.h"
@@ -90,17 +90,26 @@ StripClusteringTool::clusterize(const InDetRawDataCollection<StripRDORawData>& R
     ClusterCollection clusters =
 	Acts::Ccl::createClusters<CellCollection, ClusterCollection, 1>(cells);
 
+    std::size_t previousSizeContainer = container.size();
+    // Fast insertion trick
+    std::vector<xAOD::StripCluster*> toAddCollection;
+    toAddCollection.reserve(clusters.size());
+    for (std::size_t i(0); i<clusters.size(); ++i)
+      toAddCollection.push_back(new xAOD::StripCluster());
+    container.insert(container.end(), toAddCollection.begin(), toAddCollection.end());
+
     double lorentzShift
 	= m_lorentzAngleTool->getLorentzShift(element->identifyHash());
 
-    for (Cluster& cl : clusters) {
+    for (std::size_t i(0); i<clusters.size(); ++i) {
+      Cluster& cl = clusters[i];
 	// Bad strips on a module invalidates the hitsInThirdTimeBin word.
 	// Therefore set it to 0 if that's the case.
 	if (badStripOnModule) {
 	    cl.hitsInThirdTimeBin = 0;
 	}
 	try {
-	    ATH_CHECK(makeCluster(cl, lorentzShift, stripID, element, container));
+	    ATH_CHECK(makeCluster(cl, lorentzShift, stripID, element, *container[previousSizeContainer+i]));
 	} catch (const std::exception& e) {
 	    ATH_MSG_FATAL("Exception thrown while creating xAOD::StripCluster:"
 			  << e.what());
@@ -162,20 +171,18 @@ StripClusteringTool::makeCluster(const Cluster &cluster,
 				 double lorentzShift,
 				 const StripID& stripID,
 				 const InDetDD::SiDetectorElement* element,
-				 xAOD::StripClusterContainer& container) const
+				 xAOD::StripCluster& cl) const
 {
 
     IdentifierHash idHash = element->identifyHash();
     auto [localPos, localCov, globalPos]
 	= computePosition(cluster, lorentzShift, stripID, element);
 
-    xAOD::StripCluster *cl = new xAOD::StripCluster();
-    container.push_back(cl);
-    cl->setMeasurement<1>(idHash, localPos, localCov);
-    cl->globalPosition() = globalPos;
-    cl->setRDOlist(cluster.ids);
-    cl->setChannelsInPhi(cluster.ids.size());
-    cl->setHitsInThirdTimeBin(cluster.hitsInThirdTimeBin);
+    cl.setMeasurement<1>(idHash, localPos, localCov);
+    cl.globalPosition() = globalPos;
+    cl.setRDOlist(cluster.ids);
+    cl.setChannelsInPhi(cluster.ids.size());
+    cl.setHitsInThirdTimeBin(cluster.hitsInThirdTimeBin);
 
     return StatusCode::SUCCESS;
 }
@@ -253,12 +260,6 @@ StripClusteringTool::unpackRDOs(const InDetRawDataCollection<StripRDORawData>& R
 	}
     }
     return std::make_pair(cells, badStripOnModule);
-}
-
-StatusCode StripClusteringTool::finalize()
-{
-    ATH_MSG_DEBUG("Finalizing " << name() << "...");
-    return StatusCode::SUCCESS;
 }
 
 } // namespace ActsTrk

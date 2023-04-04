@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -120,7 +120,7 @@ public:
 			     double splitProb1 = 0.,
 			     double splitProb2 = 0.) const;
 
-  xAOD::PixelCluster* xAODpixelCluster(xAOD::PixelClusterContainer& container,
+  xAOD::PixelCluster* xAODpixelCluster(xAOD::PixelCluster& cluster,
 				       const Amg::Vector2D& localPos,
 				       const std::vector<Identifier>& rdoList,
 				       const int lvl1a,

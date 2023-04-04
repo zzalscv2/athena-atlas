@@ -9,7 +9,7 @@ def ActsTrkMonitoringHistSvcCfg(flags) -> ComponentAccumulator:
     return acc
 
 def ActsTrkITkPixelClusterizationMonitoringToolCfg(flags,
-                                                   name: str = "ActsTrkItkPixelClusterizationMonitoringTool",
+                                                   name: str = "ActsTrkITkPixelClusterizationMonitoringTool",
                                                    **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     
@@ -24,7 +24,7 @@ def ActsTrkITkPixelClusterizationMonitoringToolCfg(flags,
     return acc
 
 def ActsTrkITkStripClusterizationMonitoringToolCfg(flags,
-                                                   name: str = "ActsTrkItkStripClusterizationMonitoringTool",
+                                                   name: str = "ActsTrkITkStripClusterizationMonitoringTool",
                                                    **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     

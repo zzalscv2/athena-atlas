@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include "PixelClusterizationAlg.h"
 #include "AthenaMonitoringKernel/Monitored.h"
@@ -31,23 +31,27 @@ StatusCode PixelClusterizationAlg::execute(const EventContext& ctx) const
     auto timer = Monitored::Timer<std::chrono::milliseconds>( "TIME_execute" );
     auto mon = Monitored::Group( m_monTool, timer );
 
-    SG::ReadHandle<PixelRDO_Container> rdoContainer(m_rdoContainerKey, ctx);
+    SG::ReadHandle<PixelRDO_Container> rdoContainer = SG::makeHandle(m_rdoContainerKey, ctx);
     ATH_CHECK(rdoContainer.isValid());
 
     SG::WriteHandle<xAOD::PixelClusterContainer> clusterHandle
 	= SG::makeHandle(m_clusterContainerKey, ctx);
 
-    ATH_CHECK(clusterHandle.record(std::make_unique<xAOD::PixelClusterContainer>(),
-				   std::make_unique<xAOD::PixelClusterAuxContainer>()));
+    std::unique_ptr<xAOD::PixelClusterContainer> pixelContainer = std::make_unique<xAOD::PixelClusterContainer>();
+    std::unique_ptr<xAOD::PixelClusterAuxContainer> pixelAuxContainer = std::make_unique<xAOD::PixelClusterAuxContainer>();
+    pixelContainer->setStore(pixelAuxContainer.get());
+
+    // Reserve space, estimate of mean clusters to reduce re-allocations
+    pixelContainer->reserve( m_expectedClustersPerRDO.value() * rdoContainer->size() );
 
     for (const InDetRawDataCollection<PixelRDORawData> *rdos: *rdoContainer) {
 	if (rdos != nullptr && !rdos->empty())
-	    ATH_CHECK(m_clusteringTool->clusterize(*rdos, *m_idHelper, ctx, *clusterHandle));
+	  ATH_CHECK(m_clusteringTool->clusterize(*rdos, *m_idHelper, ctx, *pixelContainer.get()));
 	else
 	    ATH_MSG_DEBUG("No input RDOs for this container element");
     }
 
-
+    ATH_CHECK(clusterHandle.record(std::move(pixelContainer), std::move(pixelAuxContainer)));
     return StatusCode::SUCCESS;
 }
 
