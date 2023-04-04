@@ -1,7 +1,6 @@
 ## @file AthenaPoolExample_WriteJobOptions.py
 ## @brief Example job options file to illustrate how to write event data to Pool.
 ## @author Peter van Gemmeren <gemmeren@anl.gov>
-## $Id: SplittableData_jo.py,v 1.24 2009-05-01 13:51:40 cranshaw Exp $
 ###############################################################
 #
 # This Job option:
@@ -110,7 +109,6 @@ include( "AthenaPoolExampleConverter/AthenaPoolExampleConverter_jobOption.py" )
 svcMgr.MessageSvc.OutputLevel = INFO
 svcMgr.PoolSvc.OutputLevel = DEBUG
 svcMgr.AthenaPoolCnvSvc.OutputLevel = DEBUG
-topSequence.WriteData.OutputLevel = DEBUG
 DataStream.OutputLevel = DEBUG
 #
 # End of job options file
