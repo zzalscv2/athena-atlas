@@ -58,17 +58,13 @@ include( "AthenaPoolMultiTest/ExampleStreamConfig.py" )
 from AthenaPoolMultiTest.AthenaPoolMultiTestConf import EventSplit
 
 Splitter1 = EventSplit("Splitter1")  # Accept bit 1
-Splitter1.L1bitmask = 1 
-Splitter1.OutputLevel = DEBUG 
+Splitter1.L1bitmask = 1
 Splitter2 = EventSplit("Splitter2")  # Accept bit 2
-Splitter2.L1bitmask = 2 
-Splitter2.OutputLevel = INFO
+Splitter2.L1bitmask = 2
 Splitter3 = EventSplit("Splitter3")  # Accept bit 3
 Splitter3.L1bitmask = 4 
-Splitter3.OutputLevel = DEBUG
 Triggered = EventSplit("Triggered")   # Accept all bits
 Triggered.L1bitmask = 65535   # assume -1 will set all bits on
-Triggered.OutputLevel = INFO
 
 topSequence+=Splitter1
 topSequence+=Splitter2

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -66,7 +66,7 @@ StatusCode EventSplit::execute()
    }
 
    // Now check for requested bits in L1 
-   ATH_MSG_DEBUG( "Trigmask = " << static_cast<int>(eh->bits())  );
+   ATH_MSG_INFO( "Trigmask = " << static_cast<int>(eh->bits())  );
    if (m_l1bits & eh->bits()) {
      setFilterPassed(true);
      ATH_MSG_INFO( "L1 passed"  );
