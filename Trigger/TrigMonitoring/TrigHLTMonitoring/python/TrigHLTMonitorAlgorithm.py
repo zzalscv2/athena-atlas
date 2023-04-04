@@ -22,7 +22,7 @@ def createHLTDQConfigFlags():
     acf.addFlag('DQ.Steering.HLT.doBphys', True) 
     acf.addFlag('DQ.Steering.HLT.doCalo', True) 
     acf.addFlag('DQ.Steering.HLT.doEgamma', True) 
-    acf.addFlag('DQ.Steering.HLT.doInDet', lambda flags: flags.Input.Format is Format.POOL) #keep disabled until ATR-27005 is fixed
+    acf.addFlag('DQ.Steering.HLT.doInDet', True)
     acf.addFlag('DQ.Steering.HLT.doJet', lambda flags: flags.Input.Format is Format.POOL) #keep disabled until ATLASRECTS-7168 is fixed
     acf.addFlag('DQ.Steering.HLT.doMET', lambda flags: flags.Input.Format is Format.POOL) #keep disabled until ATR-27007 is fixed
     acf.addFlag('DQ.Steering.HLT.doMinBias', True) 
