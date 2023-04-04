@@ -205,6 +205,16 @@ def TrigBjetMonConfig(inputFlags):
                                              path='Shifter/'+chain[2:],xbins=100,xmin=0.,xmax=20.0)
 
 
+            HistName = 'wGN1_' + chain[2:] + ',RelPt_' + chain[2:]
+            if chain[0:1] == "E" :
+                BjetMonGroup.defineHistogram(HistName,type='TH2F',title='RelPt vs GN1 weight;GN1 weight;RelPt',
+                                             path='Expert/'+chain[2:],xbins=20,xmin=-20.0,xmax=+20.0,ybins=20,ymin=0.,ymax=20.)
+
+            if chain[0:1] == "S" :
+                BjetMonGroup.defineHistogram(HistName,type='TH2F',title='RelPt vs GN1 weight;GN1 weight;RelPt',
+                                             path='Shifter/'+chain[2:],xbins=20,xmin=-20.0,xmax=+20.0,ybins=20,ymin=0.,ymax=20.)
+
+
             HistName = 'wDL1d_' + chain[2:] + ',RelPt_' + chain[2:]
             if chain[0:1] == "E" :
                 BjetMonGroup.defineHistogram(HistName,type='TH2F',title='RelPt vs DL1d weight;DL1d weight;RelPt',
@@ -213,6 +223,7 @@ def TrigBjetMonConfig(inputFlags):
             if chain[0:1] == "S" :
                 BjetMonGroup.defineHistogram(HistName,type='TH2F',title='RelPt vs DL1d weight;DL1d weight;RelPt',
                                              path='Shifter/'+chain[2:],xbins=20,xmin=-20.0,xmax=+20.0,ybins=20,ymin=0.,ymax=20.)
+
 
             HistName = 'DeltaR_' + chain[2:]
             if chain[0:1] == "E" :
@@ -518,6 +529,40 @@ def TrigBjetMonConfig(inputFlags):
 
 
 
+            HistName = 'GN1_pu_tr_' + chain[2:]
+            if chain[0:1] == "E" :
+                BjetMonGroup.defineHistogram(HistName, title='Distribution of GN1_pu probability;GN1_pu;Events',
+                                             path='Expert/'+chain[2:],xbins=200,xmin=0.0,xmax=1.0)
+            if chain[0:1] == "S" :
+                BjetMonGroup.defineHistogram(HistName, title='Distribution of GN1_pu probability;GN1_pu;Events',
+                                             path='Shifter/'+chain[2:],xbins=200,xmin=0.0,xmax=1.0)
+
+            HistName = 'GN1_pc_tr_' + chain[2:]
+            if chain[0:1] == "E" :
+                BjetMonGroup.defineHistogram(HistName, title='Distribution of GN1_pc probability;GN1_pc;Events',
+                                             path='Expert/'+chain[2:],xbins=200,xmin=0.0,xmax=1.0)
+            if chain[0:1] == "S" :
+                BjetMonGroup.defineHistogram(HistName, title='Distribution of GN1_pc probability;GN1_pc;Events',
+                                             path='Shifter/'+chain[2:],xbins=200,xmin=0.0,xmax=1.0)
+
+            HistName = 'GN1_pb_tr_' + chain[2:]
+            if chain[0:1] == "E" :
+                BjetMonGroup.defineHistogram(HistName, title='Distribution of GN1_pb probability;GN1_pb;Events',
+                                             path='Expert/'+chain[2:],xbins=200,xmin=0.0,xmax=1.0)
+            if chain[0:1] == "S" :
+                BjetMonGroup.defineHistogram(HistName, title='Distribution of GN1_pb probability;GN1_pb;Events',
+                                             path='Shifter/'+chain[2:],xbins=200,xmin=0.0,xmax=1.0)
+
+            HistName = 'GN1_mv_tr_' + chain[2:]
+            if chain[0:1] == "E" :
+                BjetMonGroup.defineHistogram(HistName, title='Distribution of GN1_mv LLR;GN1_mv;Events',
+                                             path='Expert/'+chain[2:],xbins=200,xmin=-50.,xmax=50.)
+            if chain[0:1] == "S" :
+                BjetMonGroup.defineHistogram(HistName, title='Distribution of GN1_mv LLR;GN1_mv;Events',
+                                             path='Shifter/'+chain[2:],xbins=200,xmin=-50.,xmax=50.)
+
+
+
             HistName = 'DL1d_pu_tr_' + chain[2:]
             if chain[0:1] == "E" :
                 BjetMonGroup.defineHistogram(HistName, title='Distribution of DL1d_pu probability;DL1d_pu;Events',
@@ -608,7 +653,7 @@ if __name__=='__main__':
 
     # Input files
     # AOD file to be run w/ MT access and Mon Groups implemented
-    file = '/eos/user/e/enagy/ARTfiles/MCtest171022.AOD.pool.root'
+    file = '/eos/user/e/enagy/ARTfiles/MCtest271022.AOD.pool.root'
 
     flags.Input.Files = [file]
     flags.Input.isMC = True
