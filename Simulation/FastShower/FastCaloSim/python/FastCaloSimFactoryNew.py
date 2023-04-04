@@ -15,8 +15,8 @@ def NITimedExtrapolatorCfg(flags, name="ISF_NITimedExtrapolator", **kwargs):
     from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
     result.merge(AtlasFieldCacheCondAlgCfg(flags))
     # add LAr calibration (resolve LAr dependancies)
-    from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDbCfg
-    result.merge(LArElecCalibDbCfg(flags, ["fSampl"]))
+    from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBCfg
+    result.merge(LArElecCalibDBCfg(flags, ["fSampl"]))
 
     TimedPropagators = []
     TimedUpdators    = []

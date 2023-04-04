@@ -142,8 +142,8 @@ def getTopoMoments(flags):
 
 
     if not flags.Common.isOnline:
-        from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDbCfg
-        result.merge(LArElecCalibDbCfg(flags,["HVScaleCorr"]))
+        from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBCfg
+        result.merge(LArElecCalibDBCfg(flags,["HVScaleCorr"]))
         if flags.Input.isMC:
             TopoMoments.LArHVFraction=CompFactory.LArHVFraction(HVScaleCorrKey="LArHVScaleCorr")
         else:

@@ -14,8 +14,8 @@ def LArHVScaleCorr2NtupleCfg(flags, rootfile="hvcorr_read.root"):
     from LArBadChannelTool.LArBadChannelConfig import LArBadChannelCfg
     result.merge(LArBadChannelCfg(flags))
 
-    from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDbCfg
-    result.merge(LArElecCalibDbCfg(flags,["HVScaleCorr"]))
+    from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBCfg
+    result.merge(LArElecCalibDBCfg(flags,["HVScaleCorr"]))
 
 
     theLArHVScaleCorr2Ntuple = CompFactory.LArHVScaleCorr2Ntuple("LArHVScaleCorr2Ntuple")

@@ -207,8 +207,8 @@ if __name__=='__main__':
    #cfg.merge(LArRawCalibDataReadingCfg(ConfigFlags,gain="HIGH",doCalibDigit=True))
    from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg
    cfg.merge(LArOnOffIdMappingCfg(ConfigFlags))
-   from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDbCfg
-   cfg.merge(LArElecCalibDbCfg(ConfigFlags,["Pedestal"]))
+   from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBCfg
+   cfg.merge(LArElecCalibDBCfg(ConfigFlags,["Pedestal"]))
 
    feblist=[]
    for ft in [11,12,23,24]:

@@ -46,8 +46,8 @@ def LArHVScaleCfg(configFlags):
                                          HVPAthologyKey="LArHVPathology")
         result.addCondAlgo(hvpath)
 
-        from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDbCfg
-        result.merge(LArElecCalibDbCfg(configFlags,["HVScaleCorr",]))
+        from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBCfg
+        result.merge(LArElecCalibDBCfg(configFlags,["HVScaleCorr",]))
 
         if configFlags.GeoModel.Run is not LHCPeriod.Run1:
            hvcond = LArHVCondAlg(HVPathologies="LArHVPathology")
