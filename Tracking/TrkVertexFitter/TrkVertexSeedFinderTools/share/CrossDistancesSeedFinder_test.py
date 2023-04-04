@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration.
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
 #
 # File: TrkVertexSeedFinderTools/share/CrossDistancesSeedFinder_test.py
 # Author: scott snyder <snyder@bnl.gov>
@@ -8,16 +8,12 @@
 #
 
 
-from __future__ import print_function
-
-
 include ('TrkVertexSeedFinderTools/VertexSeedFinderTestCommon.py')
 
 from TrkVertexSeedFinderTools.TrkVertexSeedFinderToolsConf import \
     Trk__VertexSeedFinderTestAlg, Trk__CrossDistancesSeedFinder
 finder = Trk__CrossDistancesSeedFinder ('CrossDistancesSeedFinder', OutputLevel = INFO)
 testalg1 = Trk__VertexSeedFinderTestAlg ('testalg1',
-                                         OutputLevel = VERBOSE,
                                          VertexSeedFinderTool = finder,
                                          Expected1 = [8.58978, 8.67507, -6.4581],
                                          Expected2 = [3.44328, 3.25688, -7.88419],
