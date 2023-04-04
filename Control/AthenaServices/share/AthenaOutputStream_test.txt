@@ -1,9 +1,8 @@
 /// job opts for AthenaOutputStream unit test
 
-// $Id: AthenaOutputStream_test.txt,v 1.5 2007-06-24 05:37:15 calaf Exp $
-
 MessageSvc.OutputLevel = 2;
 StoreGateSvc.OutputLevel = 2;
+ApplicationMgr.ExtSvc += { "StoreGateSvc/DetectorStore" };
 
 AthenaOutputStream.OutputLevel = 1;
 
