@@ -26,7 +26,7 @@
 #include "PATInterfaces/ISystematicsTool.h"
 #include "PATInterfaces/SystematicRegistry.h"
 #include "PATInterfaces/CorrectionCode.h"
-#include "PhotonEfficiencyCorrection/TPhotonEfficiencyCorrectionTool.h"
+#include "ElectronEfficiencyCorrection/TElectronEfficiencyCorrectionTool.h"
 #include "EgammaAnalysisInterfaces/IAsgPhotonEfficiencyCorrectionTool.h"
 
 #include "xAODEgamma/Egamma.h"
@@ -79,13 +79,13 @@ public:
 
   // Private member variables
 private:
-  typedef Root::TPhotonEfficiencyCorrectionTool::Result Result;
+  typedef Root::TElectronEfficiencyCorrectionTool::Result Result;
   /// I think these calculate methods are only used internally
   CP::CorrectionCode calculate( const xAOD::Egamma* egam, Result& result ) const;
 
   /// Pointer to the underlying ROOT based tool
-  Root::TPhotonEfficiencyCorrectionTool* m_rootTool_unc;
-  Root::TPhotonEfficiencyCorrectionTool* m_rootTool_con;
+  Root::TElectronEfficiencyCorrectionTool* m_rootTool_unc;
+  Root::TElectronEfficiencyCorrectionTool* m_rootTool_con;
   
   /// Systematics filter map
   std::unordered_map<CP::SystematicSet, CP::SystematicSet> m_systFilter;
