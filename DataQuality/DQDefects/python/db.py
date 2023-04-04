@@ -23,7 +23,7 @@ from DQUtils.sugar.iovtype import IOVType
 from DQUtils.channel_mapping import list_to_channelselection
 from DQUtils.sugar import RunLumi
 
-from DQDefects import DEFAULT_CONNECTION_STRING
+from . import DEFAULT_CONNECTION_STRING, DEFECTS_FOLDER
 
 from .exceptions import DefectExistsError, DefectUnknownError
 from .folders import DefectsDBFoldersMixin
@@ -31,7 +31,7 @@ from .ids import DefectsDBIDsNamesMixin, choose_new_defect_id
 from .tags import DefectsDBTagsMixin, tagtype
 from .virtual_mixin import DefectsDBVirtualDefectsMixin
 from .virtual_calculator import calculate_virtual_defects
-from typing import Union, Tuple, Optional, Iterable, Collection
+from typing import Union, Tuple, Optional, Iterable, Collection, Mapping
 
 import six
 
@@ -159,7 +159,7 @@ class DefectsDB(DefectsDBVirtualDefectsMixin,
     def retrieve(self, since: Optional[Union[int, Tuple[int,int], RunLumi]] = None,
                  until: Optional[Union[int, Tuple[int,int], RunLumi]] = None, 
                  channels: Optional[Iterable[Union[str,int]]] = None, nonpresent: bool = False,
-                 primary_only: bool = False, ignore: Collection[str] = None,
+                 primary_only: bool = False, ignore: Optional[Collection[str]] = None,
                  with_primary_dependencies: bool = False, intersect: bool = False,
                  with_time: bool = False, evaluate_full: bool = True) -> IOVSet:
         """
@@ -348,3 +348,81 @@ class DefectsDB(DefectsDBVirtualDefectsMixin,
         
         store(since, until, p, defect_id, tag.encode('ascii'),
               (True if tag != 'HEAD' else False))
+
+    def insert_multiple(self, defect_list: Iterable[IOVType],
+                        tag: str = 'HEAD', use_flask: bool = False,
+                        flask_cool_target: str = 'oracle://ATONR_COOLOFL_GPN/ATLAS_COOLOFL_GLOBAL',
+                        flask_auth: Mapping[str, str] = {},
+                        flask_db: str = 'CONDBR2'
+                        ):
+        if not use_flask:
+            for defect in defect_list:
+                self._insert_iov(defect, tag)
+        else:
+            self._insert_multiple_flask(defect_list, tag, flask_cool_target, flask_auth, flask_db)
+
+    def _insert_multiple_flask(self, defect_list: Iterable[IOVType],
+                               tag: str, 
+                               flask_cool_target: str,
+                               flask_auth: Mapping[str, str],
+                               flask_db: str):
+        import requests
+        import json
+        import urllib.parse
+        from DQUtils.oracle import get_authentication
+        data = {'grant_type':'client_credentials',
+                'audience': 'cool-flask-server'}
+        data.update(flask_auth)
+        auth = requests.post('https://auth.cern.ch/auth/realms/cern/api-access/token',
+                             data=data
+                            )
+        if not auth:
+            raise RuntimeError('Cannot authenticate to Flask server')
+        else:
+            token = auth.json()['access_token']
+            log.debug(f'auth succeeded {token}')
+            username, password = get_authentication(flask_cool_target)
+            p = urllib.parse.urlparse(flask_cool_target)
+            server, schema = p.hostname.upper(), p.path[1:]
+
+            submit_map = {'cmd': 'addIov',
+                            'COOLDEST': flask_cool_target,
+                            'ORA_SCHEMA': schema,
+                            'ORA_INST': flask_db,
+                            'COOLOPTS': 'None',
+                            'COOLSINST': flask_db,
+                            'ORA_SRV': server,
+                            'COOLXP': password,
+                            'ORA_USER': username,
+                            'cool_data': {
+                                'folder': DEFECTS_FOLDER,
+                                'description': '',
+                                'tag': tag,
+                                'record': {'present': 'Bool', 'recoverable': 'Bool',
+                                        'user': 'String255', 'comment': 'String255'},
+                                'size': 0,
+                                'iovs': []
+                            }}
+
+            for defect in defect_list:
+                submit_map['cool_data']['iovs'].append(
+                    {'channel': self.defect_chan_as_id(defect.channel, True),
+                     'since': defect.since,
+                     'until': defect.until,
+                     'payload': {'present': defect.present,
+                                 'recoverable': defect.recoverable,
+                                 'user': defect.user,
+                                 'comment': defect.comment
+                                 }
+                    }
+                )
+                submit_map['cool_data']['size'] += 1
+            r = requests.post('https://aiatlas003.cern.ch:5001/cool/multi_iovs',
+                            headers={'Authorization': f'Bearer {token}'},
+                          files={'file': ('iov.json', 
+                                          json.dumps({'cool_multi_iov_request': submit_map}))},
+                                          verify=False
+                        )
+            log.debug(r.content)
+            if not r or r.json()['code'] != 0:
+                raise RuntimeError(f'Unable to upload defects. Flask server returned error:\n{r.json()["message"]}')

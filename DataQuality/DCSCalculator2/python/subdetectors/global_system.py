@@ -39,7 +39,7 @@ class TDAQ_Busy(DCSC_Defect_Global_Variable):
     as run-LB
     """
     input_db = 'COOLOFL_TRIGGER/CONDBR2'
-    fetch_args = dict(tag="OflLumiAcct-Run3-001")
+    fetch_args = dict(tag="OflLumiAcct-Run3-003")
     deadfraction_threshold = 0.9
     
     def make_good_iovs(self, iovs):

@@ -63,6 +63,9 @@ def parse_options(argv):
     O('--email-on-failure', action="store_true",
       help="Send an email to atlas-dqm-core if a system fails")
 
+    O('-f', '--flask', action="store_true",
+      help="Use COOLFLASK mechanism to write")
+
     global opts, args                
     opts, args = optp.parse_args(argv)
     
