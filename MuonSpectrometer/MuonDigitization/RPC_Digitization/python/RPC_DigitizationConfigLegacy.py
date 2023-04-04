@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from Digitization.DigitizationFlags import jobproperties
 from AthenaCommon import CfgMgr
@@ -47,7 +47,7 @@ def RpcDigitizationTool(name="RpcDigitizationTool", **kwargs):
     kwargs.setdefault("turnON_efficiency"              ,True  )  
     kwargs.setdefault("turnON_clustersize"             ,True  )  
     kwargs.setdefault("testbeam_clustersize"           ,0     )  
-    kwargs.setdefault("ClusterSize1_2uncorr"           ,0     ) 
+    kwargs.setdefault("ClusterSize1_2uncorr"           ,False)
     kwargs.setdefault("CutProjectedTracks"             ,100   ) 
     kwargs.setdefault("RPCInfoFromDb"                  ,True  )  
     kwargs.setdefault("Efficiency_fromCOOL"            ,True  )
