@@ -22,7 +22,10 @@
 
 namespace DerivationFramework {
 
-  static const SG::AuxElement::Decorator<float> sumPt2("sumPt2");  
+  static const SG::AuxElement::Decorator<float> sumPt2("sumPt2"); 
+  static const SG::AuxElement::Decorator<float> vertices_dPhi("vertices_dPhi");
+  static const SG::AuxElement::Decorator<float> vertices_sumPt("vertices_sumPt");
+  static const SG::AuxElement::Decorator<float> vertices_sumPt2("vertices_sumPt2"); 
   static const SG::AuxElement::Decorator<std::vector<ElementLink<xAOD::TrackParticleContainer> > > electronTrackLinksDecor("ElectronTrackLinks");
 
   ZeeVertexRefittingTool::ZeeVertexRefittingTool(const std::string& t,
@@ -125,10 +128,52 @@ namespace DerivationFramework {
         xAOD::EgammaHelpers::getOriginalTrackParticle( electrons->at(pair[0]) ),
         xAOD::EgammaHelpers::getOriginalTrackParticle( electrons->at(pair[1]) )
       };
+
+      TLorentzVector v0, v1, egamVec;
+      if(electrons->at(pair[0])->caloCluster())
+      {
+           v0.SetPtEtaPhiM(electrons->at(pair[0])->e()/cosh(electrons->at(pair[0])->caloCluster()->etaBE(2)),
+           electrons->at(pair[0])->caloCluster()->etaBE(2),
+           electrons->at(pair[0])->caloCluster()->phiBE(2),
+           0.0);
+      }
+
+      if(electrons->at(pair[1])->caloCluster())
+      {
+           v1.SetPtEtaPhiM(electrons->at(pair[1])->e()/cosh(electrons->at(pair[1])->caloCluster()->etaBE(2)),
+           electrons->at(pair[1])->caloCluster()->etaBE(2),
+           electrons->at(pair[1])->caloCluster()->phiBE(2),
+           0.0);
+      }
+
+      egamVec = v0+v1;
+
       ATH_MSG_DEBUG("Refitting PV for e tracks: " << tps[0] << " " << tps[1]);      
       xAOD::Vertex* pv_ref = m_pvrefitter->refitVertex(pv,tps);
       if (pv_ref) {                
       	refittedPVContainer->push_back(pv_ref);
+        
+	int ipv = 0;
+        for (const xAOD::Vertex* v : *pv_cont) {
+        	xAOD::Vertex * nv = new xAOD::Vertex();
+                nv->makePrivateStore(v);
+                if(ipv !=0 ) refittedPVContainer->push_back(nv);
+                ipv++;
+        }        
+
+        for ( xAOD::Vertex *v : *refittedPVContainer )
+        {
+            float vert_sumpt = (log10(xAOD::PVHelpers::getVertexSumPt(v)));
+            float vert_sumpt2 = (log10(xAOD::PVHelpers::getVertexSumPt(v,2, false)));
+
+            TLorentzVector vtxmom = xAOD::PVHelpers::getVertexMomentum(v, true, "");
+            float vert_dphi = (fabs(vtxmom.DeltaPhi(egamVec)));
+	    //fill vertex variables
+            vertices_sumPt(*v) = vert_sumpt;
+            vertices_sumPt2(*v) = vert_sumpt2;
+            vertices_dPhi(*v) = vert_dphi;
+        }
+
 
         ATH_MSG_DEBUG("refitted PV nTP: " << pv_ref->nTrackParticles() << " -- " << pv->nTrackParticles());
         ATH_MSG_DEBUG("refitted PV z: " << pv_ref->z() << " -- " << pv->z());
