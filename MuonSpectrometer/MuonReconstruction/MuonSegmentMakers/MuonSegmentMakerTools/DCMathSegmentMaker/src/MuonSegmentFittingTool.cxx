@@ -48,7 +48,7 @@ namespace Muon {
         Amg::Vector3D gdir = gDir;
 
         double gdirNorm = gdir.mag();
-        bool isCurvedSegment = (gdirNorm > 1.5 ? true : false);
+        bool isCurvedSegment = (gdirNorm > 1.5);
         if (isCurvedSegment) {
             // re-normalize the gdir
             gdir = Amg::Vector3D(gdir.x() / gdirNorm, gdir.y() / gdirNorm, gdir.z() / gdirNorm);
