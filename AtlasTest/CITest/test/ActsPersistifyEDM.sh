@@ -14,7 +14,7 @@ Reco_tf.py --CA \
 
 # Check we can retrieve the EDM, and related quantities, with our analysis algorithms
 ActsReadEDM.py \
-   --filesInput AOD.pool.root \
+   --filesInput AOD.pool.root -- \
    readClusters=True \
    readSpacePoints=True
 
