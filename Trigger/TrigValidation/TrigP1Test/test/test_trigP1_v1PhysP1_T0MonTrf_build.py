@@ -29,30 +29,40 @@ hlt.args += ' --runNumber 431885'  # RunNumber is set by Panda, but ignored by T
 hlt.input = 'data'
 
 #====================================================================================================
-# Tier-0 reco step BS->ESD->AOD
+# Tier-0 reco step (BS->AOD)
 tzrecoPreExec = ' '.join([
- "from AthenaConfiguration.AllConfigFlags import ConfigFlags;",
- f"ConfigFlags.Trigger.triggerMenuSetup=\'{triggermenu}\';",
- "ConfigFlags.Trigger.AODEDMSet=\'AODFULL\';",
- "from AthenaMonitoring.DQMonFlags import DQMonFlags;",
- "DQMonFlags.set_All_Off();",
- "DQMonFlags.doDataFlowMon=True;",
- "DQMonFlags.doHLTMon=True;",
- "DQMonFlags.doLVL1CaloMon=True;",
- "DQMonFlags.doGlobalMon=True;", 
- "DQMonFlags.doLVL1InterfacesMon=True;",
- "DQMonFlags.doCTPMon=True;"
+  "from AthenaConfiguration.AllConfigFlags import ConfigFlags;",
+  f"ConfigFlags.Trigger.triggerMenuSetup=\'{triggermenu}\';",
+  "ConfigFlags.Trigger.AODEDMSet=\'AODFULL\';",
+  "from AthenaMonitoring.DQMonFlags import DQMonFlags;",
+  "DQMonFlags.set_All_Off();",
+  "DQMonFlags.doDataFlowMon=True;",
+  "DQMonFlags.doHLTMon=True;",
+  "DQMonFlags.doLVL1CaloMon=True;",
+  "DQMonFlags.doGlobalMon=True;",
+  "DQMonFlags.doLVL1InterfacesMon=True;",
+  "DQMonFlags.doCTPMon=True;"
+  "ConfigFlags.DQ.Steering.HLT.doBjet=True;",
+  "ConfigFlags.DQ.Steering.HLT.doInDet=True;",
+  "ConfigFlags.DQ.Steering.HLT.doBphys=True;",
+  "ConfigFlags.DQ.Steering.HLT.doCalo=True;",
+  "ConfigFlags.DQ.Steering.HLT.doEgamma=True;",
+  "ConfigFlags.DQ.Steering.HLT.doJet=True;",
+  "ConfigFlags.DQ.Steering.HLT.doMET=True;",
+  "ConfigFlags.DQ.Steering.HLT.doMinBias=True;",
+  "ConfigFlags.DQ.Steering.HLT.doMuon=True;",
+  "ConfigFlags.DQ.Steering.HLT.doTau=True;",
 ])
 
+# Trig_reco_tf only uses RAWtoALL steering
 tzreco = ExecStep.ExecStep('Tier0Reco')
 tzreco.type = 'Trig_reco_tf'
 tzreco.threads = 4
 tzreco.concurrent_events = 4
-tzreco.explicit_input = True
 tzreco.input = ''
+tzreco.explicit_input = True
 tzreco.max_events = 50
 tzreco.args = '--inputBSFile=RAW.pool.root'  # output of the previous step
-# TODO: add RAWtoALL steering (ATR-26605)
 tzreco.args += ' --outputAODFile=AOD.pool.root'
 tzreco.args += ' --outputNTUP_TRIGRATEFile=rate.ntup.root'
 tzreco.args += ' --outputHISTFile=hist.root'
