@@ -1,18 +1,19 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetMonitoring/EfficiencyResponseHistos.h"
 
 #include "JetMonitoring/ToolHandleHistoHelper.h"
 #include "JetUtils/JetDistances.h"
+#include "AthenaKernel/Units.h"
 
 #include "TH1.h"
 #include "TH2.h"
 #include "TProfile.h"
 
 
-#define toGeV 1/1000.
+using Athena::Units::GeV;
 
 
 EfficiencyResponseHistos::EfficiencyResponseHistos(const std::string &t) : JetHistoBase(t) 
@@ -80,7 +81,7 @@ int EfficiencyResponseHistos::fillHistosFromContainer(const xAOD::JetContainer &
     listJets.erase(itmin);
     
     double dr = sqrt(dr2min);
-    double refPt = refjet->pt() * toGeV;
+    double refPt = refjet->pt() / GeV;
 
     m_eff1->Fill(refPt, dr<0.1 ?  weight : 0 ); // 0 weight if not matching close enough
     m_eff2->Fill(refPt, dr<0.2 ?  weight : 0 ); // 0 weight if not matching close enough
@@ -92,8 +93,8 @@ int EfficiencyResponseHistos::fillHistosFromContainer(const xAOD::JetContainer &
       double relDiff = -999;
       double response = -999;
       if (refPt > 0.){
-	relDiff = ( matched->pt()* toGeV - refPt )/refPt;
-	response = (matched->pt()* toGeV)/refPt;
+	relDiff = ( matched->pt() / GeV - refPt )/refPt;
+	response = (matched->pt() / GeV)/refPt;
       }
       m_etres->Fill( relDiff, weight );
       m_etres_eta->Fill( refjet->eta(), relDiff, weight);
