@@ -63,14 +63,15 @@ usePMGSettings = True
 # Do we need to use a custom plugin?
 plugin = None
 
-# Do we want 4FS or 5FS? 4 is default
+# Do we want 4FS or 5FS? 5 is now default
 # * 5-flavor scheme always should use nQuarksMerge=5 [5FS -> nQuarksMerge=5]
 # * 4-flavor scheme with light-flavor MEs (p p > go go j , with j = g d u s c)
 #       should use nQuarksMerge=4 [4FS -> nQuarksMerge=4]
 # * 4-flavor scheme with HF MEs (p p > go go j, with j = g d u s c b) should
 #       use nQuarksMerge=5 [4FS + final state b -> nQuarksMerge=5]
-flavourScheme = 4
-finalStateB = False
+flavourScheme = 5
+define_pj_5FS = True # Defines p and j to include b in process string with 5FS
+finalStateB = False # Used with 4FS
 
 from MadGraphControl.MadGraphUtilsHelpers import get_physics_short
 phys_short = get_physics_short()
@@ -98,3 +99,86 @@ else:
     include("Pythia8_i/Pythia8_A14_NNPDF23LO_EvtGen_Common.py")
 
 include("Pythia8_i/Pythia8_MadGraph.py")
+
+# Helper function that can be called from control file to use common mixing matrices
+def common_mixing_matrix(mtype):
+    param_blocks = {}
+    # Include various cases for common mixing matrices here
+    if mtype == 'higgsino':
+        # Off-diagonal chargino mixing matrix V
+        param_blocks['VMIX']={}
+        param_blocks['VMIX']['1 1']='0.00E+00'
+        param_blocks['VMIX']['1 2']='1.00E+00'
+        param_blocks['VMIX']['2 1']='1.00E+00'
+        param_blocks['VMIX']['2 2']='0.00E+00'
+        # Off-diagonal chargino mixing matrix U
+        param_blocks['UMIX']={}
+        param_blocks['UMIX']['1 1']='0.00E+00'
+        param_blocks['UMIX']['1 2']='1.00E+00'
+        param_blocks['UMIX']['2 1']='1.00E+00'
+        param_blocks['UMIX']['2 2']='0.00E+00'
+        # Neutralino mixing matrix chi_i0 = N_ij (B,W,H_d,H_u)_j
+        param_blocks['NMIX']={}
+        param_blocks['NMIX']['1  1']=' 0.00E+00'   # N_11 bino
+        param_blocks['NMIX']['1  2']=' 0.00E+00'   # N_12
+        param_blocks['NMIX']['1  3']=' 7.07E-01'   # N_13
+        param_blocks['NMIX']['1  4']='-7.07E-01'   # N_14
+        param_blocks['NMIX']['2  1']=' 0.00E+00'   # N_21
+        param_blocks['NMIX']['2  2']=' 0.00E+00'   # N_22
+        param_blocks['NMIX']['2  3']='-7.07E-01'   # N_23 higgsino
+        param_blocks['NMIX']['2  4']='-7.07E-01'   # N_24 higgsino
+        param_blocks['NMIX']['3  1']=' 1.00E+00'   # N_31
+        param_blocks['NMIX']['3  2']=' 0.00E+00'   # N_32
+        param_blocks['NMIX']['3  3']=' 0.00E+00'   # N_33 higgsino
+        param_blocks['NMIX']['3  4']=' 0.00E+00'   # N_34 higgsino
+        param_blocks['NMIX']['4  1']=' 0.00E+00'   # N_41
+        param_blocks['NMIX']['4  2']='-1.00E+00'   # N_42 wino
+        param_blocks['NMIX']['4  3']=' 0.00E+00'   # N_43
+        param_blocks['NMIX']['4  4']=' 0.00E+00'   # N_44
+    elif mtype == 'winobino':
+        # Chargino mixing matrix V
+        param_blocks['VMIX']={}
+        param_blocks['VMIX']['1 1']='9.72557835E-01'     # V_11
+        param_blocks['VMIX']['1 2']='-2.32661249E-01'    # V_12
+        param_blocks['VMIX']['2 1']='2.32661249E-01'     # V_21
+        param_blocks['VMIX']['2 2']='9.72557835E-01'     # V_22
+        # Chargino mixing matrix U
+        param_blocks['UMIX']={}
+        param_blocks['UMIX']['1 1']='9.16834859E-01'     # U_11
+        param_blocks['UMIX']['1 2']='-3.99266629E-01'    # U_12
+        param_blocks['UMIX']['2 1']='3.99266629E-01'     # U_21
+        param_blocks['UMIX']['2 2']='9.16834859E-01'     # U_22
+        # Neutralino mixing matrix
+        param_blocks['NMIX']={}
+        param_blocks['NMIX']['1  1']='9.86364430E-01'    # N_11
+        param_blocks['NMIX']['1  2']='-5.31103553E-02'   # N_12
+        param_blocks['NMIX']['1  3']='1.46433995E-01'    # N_13
+        param_blocks['NMIX']['1  4']='-5.31186117E-02'   # N_14
+        param_blocks['NMIX']['2  1']='9.93505358E-02'    # N_21
+        param_blocks['NMIX']['2  2']='9.44949299E-01'    # N_22
+        param_blocks['NMIX']['2  3']='-2.69846720E-01'   # N_23
+        param_blocks['NMIX']['2  4']='1.56150698E-01'    # N_24
+        param_blocks['NMIX']['3  1']='-6.03388002E-02'   # N_31
+        param_blocks['NMIX']['3  2']='8.77004854E-02'    # N_32
+        param_blocks['NMIX']['3  3']='6.95877493E-01'    # N_33
+        param_blocks['NMIX']['3  4']='7.10226984E-01'    # N_34
+        param_blocks['NMIX']['4  1']='-1.16507132E-01'   # N_41
+        param_blocks['NMIX']['4  2']='3.10739017E-01'    # N_42
+        param_blocks['NMIX']['4  3']='6.49225960E-01'    # N_43
+        param_blocks['NMIX']['4  4']='-6.84377823E-01'   # N_44
+    elif mtype == 'stau_maxmix':
+        param_blocks['selmix'] = {}
+        # use maximally mixed staus
+        param_blocks['selmix'][ '3   3' ] = '0.70710678118' # # RRl3x3
+        param_blocks['selmix'][ '3   6' ] = '0.70710678118' # # RRl3x6
+        param_blocks['selmix'][ '6   3' ] = '-0.70710678118' # # RRl6x3
+        param_blocks['selmix'][ '6   6' ] = '0.70710678118' # # RRl6x6
+    elif mtype == 'stau_nomix':
+        param_blocks['selmix'] = {}
+        # No mixing
+        param_blocks['selmix'][ '3   3' ] = '1.0' # # RRl3x3
+        param_blocks['selmix'][ '3   6' ] = '0.0' # # RRl3x6
+        param_blocks['selmix'][ '6   3' ] = '0.0' # # RRl6x3
+        param_blocks['selmix'][ '6   6' ] = '1.0' # # RRl6x6
+
+    return param_blocks
