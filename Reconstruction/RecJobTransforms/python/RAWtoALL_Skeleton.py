@@ -82,6 +82,7 @@ def fromRunArgs(runArgs):
         flagString = 'Output.DAOD_IDTIDEFileName'
         flags.addFlag(flagString, runArgs.outputDAOD_IDTIDEFile)
         flags.Output.doWriteDAOD = True
+        flags.addFlag('Output.doWriteDAOD_IDTIDE', True)
         log.info("---------- Configured DAOD_IDTIDE output")
 
     if hasattr(runArgs, 'outputDESDM_MCPFile'):
@@ -106,12 +107,14 @@ def fromRunArgs(runArgs):
         flagString = 'Output.DAOD_L1CALO1FileName'
         flags.addFlag(flagString, runArgs.outputDAOD_L1CALO1File)
         flags.Output.doWriteDAOD = True
+        flags.addFlag('Output.doWriteDAOD_L1CALO1', True)
         log.info("---------- Configured DAOD_L1CALO1 output")
 
     if hasattr(runArgs, 'outputDAOD_L1CALO2File'):
         flagString = 'Output.DAOD_L1CALO2FileName'
         flags.addFlag(flagString, runArgs.outputDAOD_L1CALO2File)
         flags.Output.doWriteDAOD = True
+        flags.addFlag('Output.doWriteDAOD_L1CALO2', True)
         log.info("---------- Configured DAOD_L1CALO2 output")
 
     if hasattr(runArgs, 'outputDESDM_PHOJETFile'):
