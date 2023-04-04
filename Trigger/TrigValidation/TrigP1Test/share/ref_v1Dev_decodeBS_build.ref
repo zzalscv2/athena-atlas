@@ -7044,6 +7044,46 @@ HLT_mu24_ivarmedium_tau80_mediumRNN_tracktwoMVA_probe_03dRAB_L1MU14FCH:
   eventCount: 0
 HLT_mu24_ivarmedium_tau80_mediumRNN_tracktwoMVA_probe_L1eTAU80_03dRAB_L1MU14FCH:
   eventCount: 0
+HLT_mu24_ivarmedium_xe0_cell_L1MU14FCH:
+  eventCount: 0
+HLT_mu24_ivarmedium_xe0_cell_L1MU18VFCH:
+  eventCount: 0
+HLT_mu24_ivarmedium_xe0_mhtpufit_em_L1MU14FCH:
+  eventCount: 0
+HLT_mu24_ivarmedium_xe0_mhtpufit_em_L1MU18VFCH:
+  eventCount: 0
+HLT_mu24_ivarmedium_xe0_mhtpufit_pf_L1MU14FCH:
+  eventCount: 0
+HLT_mu24_ivarmedium_xe0_mhtpufit_pf_L1MU18VFCH:
+  eventCount: 0
+HLT_mu24_ivarmedium_xe0_nn_L1MU14FCH:
+  eventCount: 0
+HLT_mu24_ivarmedium_xe0_nn_L1MU18VFCH:
+  eventCount: 0
+HLT_mu24_ivarmedium_xe0_pfopufit_L1MU14FCH:
+  eventCount: 0
+HLT_mu24_ivarmedium_xe0_pfopufit_L1MU18VFCH:
+  eventCount: 0
+HLT_mu24_ivarmedium_xe0_pfsum_L1MU14FCH:
+  eventCount: 0
+HLT_mu24_ivarmedium_xe0_pfsum_L1MU18VFCH:
+  eventCount: 0
+HLT_mu24_ivarmedium_xe0_pfsum_cssk_L1MU14FCH:
+  eventCount: 0
+HLT_mu24_ivarmedium_xe0_pfsum_cssk_L1MU18VFCH:
+  eventCount: 0
+HLT_mu24_ivarmedium_xe0_pfsum_vssk_L1MU14FCH:
+  eventCount: 0
+HLT_mu24_ivarmedium_xe0_pfsum_vssk_L1MU18VFCH:
+  eventCount: 0
+HLT_mu24_ivarmedium_xe0_tcpufit_L1MU14FCH:
+  eventCount: 0
+HLT_mu24_ivarmedium_xe0_tcpufit_L1MU18VFCH:
+  eventCount: 0
+HLT_mu24_ivarmedium_xe0_trkmht_L1MU14FCH:
+  eventCount: 0
+HLT_mu24_ivarmedium_xe0_trkmht_L1MU18VFCH:
+  eventCount: 0
 HLT_mu24_ivarperf_L1MU14FCH:
   eventCount: 0
 HLT_mu24_mu6_L1MU14FCH:
@@ -9708,6 +9748,64 @@ HLT_tau80_tightRNN_tracktwoLLP_tau60_tightRNN_tracktwoLLP_03dRAB_L1eTAU80_2eTAU6
     2: 3
     3: 3
     4: 1
+HLT_xe0_cell_L1XE50:
+  eventCount: 0
+HLT_xe0_cell_L1XE55:
+  eventCount: 0
+HLT_xe0_mhtpufit_em_L1XE50:
+  eventCount: 0
+HLT_xe0_mhtpufit_em_L1XE55:
+  eventCount: 0
+HLT_xe0_mhtpufit_em_L1ZB:
+  eventCount: 0
+HLT_xe0_mhtpufit_pf_L1XE50:
+  eventCount: 0
+HLT_xe0_mhtpufit_pf_L1XE55:
+  eventCount: 0
+HLT_xe0_mhtpufit_pf_L1ZB:
+  eventCount: 0
+HLT_xe0_nn_L1XE50:
+  eventCount: 0
+HLT_xe0_nn_L1XE55:
+  eventCount: 0
+HLT_xe0_nn_L1ZB:
+  eventCount: 0
+HLT_xe0_pfopufit_L1XE50:
+  eventCount: 0
+HLT_xe0_pfopufit_L1XE55:
+  eventCount: 0
+HLT_xe0_pfopufit_L1ZB:
+  eventCount: 0
+HLT_xe0_pfsum_L1XE50:
+  eventCount: 0
+HLT_xe0_pfsum_L1XE55:
+  eventCount: 0
+HLT_xe0_pfsum_L1ZB:
+  eventCount: 0
+HLT_xe0_pfsum_cssk_L1XE50:
+  eventCount: 0
+HLT_xe0_pfsum_cssk_L1XE55:
+  eventCount: 0
+HLT_xe0_pfsum_cssk_L1ZB:
+  eventCount: 0
+HLT_xe0_pfsum_vssk_L1XE50:
+  eventCount: 0
+HLT_xe0_pfsum_vssk_L1XE55:
+  eventCount: 0
+HLT_xe0_pfsum_vssk_L1ZB:
+  eventCount: 0
+HLT_xe0_tcpufit_L1XE50:
+  eventCount: 0
+HLT_xe0_tcpufit_L1XE55:
+  eventCount: 0
+HLT_xe0_tcpufit_L1ZB:
+  eventCount: 0
+HLT_xe0_trkmht_L1XE50:
+  eventCount: 0
+HLT_xe0_trkmht_L1XE55:
+  eventCount: 0
+HLT_xe0_trkmht_L1ZB:
+  eventCount: 0
 HLT_xe110_mht_L1XE50:
   eventCount: 0
 HLT_xe110_pfsum_L1XE50:
@@ -9902,6 +10000,8 @@ HLT_xe65_cell_xe105_mhtpufit_em_L1jXE100:
     0: 2
 HLT_xe65_cell_xe105_nn_L1XE50:
   eventCount: 0
+HLT_xe65_cell_xe105_nn_L1XE55:
+  eventCount: 0
 HLT_xe65_cell_xe105_nn_L1gXEJWOJ100:
   eventCount: 0
 HLT_xe65_cell_xe105_nn_L1jXE100:
@@ -9917,6 +10017,8 @@ HLT_xe65_cell_xe110_tcpufit_sig30_L1XE50:
 HLT_xe65_cell_xe110_tcpufit_sig30_L1XE55:
   eventCount: 0
 HLT_xe65_cell_xe90_nn_L1XE50:
+  eventCount: 0
+HLT_xe65_cell_xe90_nn_L1XE55:
   eventCount: 0
 HLT_xe65_cell_xe90_nn_L1gXEJWOJ100:
   eventCount: 0
