@@ -87,7 +87,7 @@ def MuonRoIByteStreamToolCfg(flags, name, writeBS=False):
     containerBaseName + "BCp1",
     containerBaseName + "BCp2",
   ]
-  topocontainerBaseName = "L1MuCTPItoL1TopoLocation"
+  topocontainerBaseName = "L1MuCTPItoL1TopoLocationFromMuonRoI"
   topocontainerNames = [
     topocontainerBaseName + "-2",
     topocontainerBaseName + "-1",
