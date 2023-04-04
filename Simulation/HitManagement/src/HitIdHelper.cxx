@@ -3,9 +3,9 @@
 */
 
 #include "HitManagement/HitIdHelper.h"
-#include <iostream>
+#include <cassert>
 #include <cmath>
-#include <assert.h>
+#include <iostream>
 
 void HitIdHelper::InitializeField(const std::string& n, int vmn, int vmx)
 {
@@ -80,13 +80,13 @@ void HitIdHelper::Print(int id)
   std::cout<<std::endl;
 }
 
-void HitIdHelper::SetBit(int& i, int bitpos) const
+void HitIdHelper::SetBit(int& i, int bitpos) 
 {
   int l=1;
   l<<=(bitpos-1);
   i|=l;
 }
-void HitIdHelper::UnsetBit(int& i, int bitpos) const
+void HitIdHelper::UnsetBit(int& i, int bitpos) 
 {
   int l=0;
   SetBit(l,bitpos);
@@ -94,7 +94,7 @@ void HitIdHelper::UnsetBit(int& i, int bitpos) const
   i&=k;
 }
 
-void HitIdHelper::Store(int& id, int value, int firstbit, int field) const
+void HitIdHelper::Store(int& id, int value, int firstbit, int field) 
 {
   int l=0;
   for (int i=0;i<field;i++)
@@ -103,7 +103,7 @@ void HitIdHelper::Store(int& id, int value, int firstbit, int field) const
   id |= l;
 }
 
-int  HitIdHelper::Retrieve(int id, int first, int field) const
+int  HitIdHelper::Retrieve(int id, int first, int field) 
 {
   int j=0;
   for (int i=0;i<field;i++)
