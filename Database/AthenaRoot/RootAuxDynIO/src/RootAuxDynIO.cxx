@@ -29,7 +29,9 @@ namespace RootAuxDynIO
    hasAuxStore(std::string_view fieldname, TClass *tc) {
       // check the name first, and only if it does not match AUX_POSTFIX ask TClass
       return endsWithAuxPostfix(fieldname)
-         or ( tc and tc->GetBaseClass("SG::IAuxStore") );
+         or ( tc and ( tc->GetBaseClass("SG::IAuxStore")
+                       // the IAuxStore property is used in DataModelTests
+                       or RootType(tc).Properties().HasProperty("IAuxStore") ));
    }
 
 
