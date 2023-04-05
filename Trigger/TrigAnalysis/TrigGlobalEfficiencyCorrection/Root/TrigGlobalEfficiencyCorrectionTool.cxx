@@ -778,8 +778,10 @@ CP::CorrectionCode TrigGlobalEfficiencyCorrectionTool::getEfficiency(unsigned ru
 	}
 	else
 	{
-		m_cpCode.ignore();
-		m_cpCode = CP::CorrectionCode::Error;
+		if(m_cpCode == CP::CorrectionCode::Ok)
+		{
+			m_cpCode = CP::CorrectionCode::Error;
+		}
 	}
 	return m_cpCode;
 }
