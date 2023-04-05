@@ -940,8 +940,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
 	      new GetAmountHisto1DErrorDown(*histo_ps_tot_error));
   }
   else {
-    std::cerr << tune << " is not a valid tune" << std::endl;
-    assert(false);
+    throw std::runtime_error(tune+" is not a valid tune");
   }
 }
 
@@ -1147,8 +1146,7 @@ egammaLayerRecalibTool::create(const std::string& type, const std::string& args)
     else { assert(false); }
   }
   else {
-    std::cerr << "cannot understand argument " << args << std::endl;
-    assert(false);
+    throw std::invalid_argument("cannot understand argument "+args);
   }
 
   if ("bias-E0" == type)                { modifier = new ScaleE0(InputModifier::ZEROBASED); type_name = "E0"; }
