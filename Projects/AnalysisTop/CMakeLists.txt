@@ -67,6 +67,7 @@ install( FILES ${CMAKE_SCRIPT_OUTPUT_DIRECTORY}/load_packages.C
 configure_file( ${CMAKE_SOURCE_DIR}/PostConfig.cmake.in
    ${CMAKE_BINARY_DIR}/PostConfig.cmake @ONLY )
 install( FILES ${CMAKE_BINARY_DIR}/PostConfig.cmake
+               ${CMAKE_SOURCE_DIR}/PreConfig.cmake
    DESTINATION ${CMAKE_INSTALL_CMAKEDIR} )
 
 # Generate replacement rules for the installed paths:
