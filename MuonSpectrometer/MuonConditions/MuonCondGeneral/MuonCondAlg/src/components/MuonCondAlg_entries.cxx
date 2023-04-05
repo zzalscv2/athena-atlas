@@ -10,7 +10,6 @@
 #include "MuonCondAlg/TgcDigitTimeOffsetCondAlg.h"
 #include "MuonCondAlg/TgcDigitCrosstalkCondAlg.h"
 #include "MuonCondAlg/NswCalibDbAlg.h"
-#include "MuonCondAlg/NswDcsDbAlg.h"
 #include "MuonCondAlg/NswPassivationDbAlg.h"
 
 DECLARE_COMPONENT(CscCondDbAlg)
@@ -25,5 +24,4 @@ DECLARE_COMPONENT(TgcDigitASDposCondAlg)
 DECLARE_COMPONENT(TgcDigitTimeOffsetCondAlg)
 DECLARE_COMPONENT(TgcDigitCrosstalkCondAlg)
 DECLARE_COMPONENT(NswCalibDbAlg)
-DECLARE_COMPONENT(NswDcsDbAlg)
 DECLARE_COMPONENT(NswPassivationDbAlg)
