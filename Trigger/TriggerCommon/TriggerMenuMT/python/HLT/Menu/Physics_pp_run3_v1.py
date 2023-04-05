@@ -770,7 +770,7 @@ def setupMenu(menu_name):
     ]
 
     chains['MET'] += [
-        ChainProp(name='HLT_xe65_cell_xe90_pfopufit_L1XE50', l1SeedThresholds=['FSNOSEED']*2, groups=PrimaryLegGroup+METGroup, monGroups=['metMon:shifter','caloMon:t0']),
+        ChainProp(name='HLT_xe65_cell_xe90_pfopufit_L1XE50', l1SeedThresholds=['FSNOSEED']*2, stream=[PhysicsStream,'express'], groups=PrimaryLegGroup+METGroup, monGroups=['metMon:shifter','caloMon:t0']),
         # ATR-25512
         ChainProp(name='HLT_xe65_cell_xe100_pfopufit_L1XE50', l1SeedThresholds=['FSNOSEED']*2, groups=PrimaryLegGroup+METGroup, monGroups=['metMon:t0']),
         ChainProp(name='HLT_xe75_cell_xe100_pfopufit_L1XE50', l1SeedThresholds=['FSNOSEED']*2, groups=PrimaryLegGroup+METGroup, monGroups=['metMon:t0']),
@@ -792,7 +792,7 @@ def setupMenu(menu_name):
         ChainProp(name='HLT_xe80_cell_xe115_tcpufit_L1XE50',l1SeedThresholds=['FSNOSEED']*2, groups=PrimaryLegGroup+METGroup, monGroups=['metMon:shifter', 'caloMon:t0']),
 
         # Higher threshold due to L1 rate & ROS impact
-        ChainProp(name='HLT_xe65_cell_xe90_pfopufit_L1XE55', l1SeedThresholds=['FSNOSEED']*2, groups=PrimaryLegGroup+METGroup, monGroups=['metMon:t0']),
+        ChainProp(name='HLT_xe65_cell_xe90_pfopufit_L1XE55', l1SeedThresholds=['FSNOSEED']*2, stream=[PhysicsStream,'express'], groups=PrimaryLegGroup+METGroup, monGroups=['metMon:t0']),
         ChainProp(name='HLT_xe65_cell_xe100_pfopufit_L1XE55', l1SeedThresholds=['FSNOSEED']*2, groups=PrimaryLegGroup+METGroup, monGroups=['metMon:t0']),
         ChainProp(name='HLT_xe75_cell_xe100_pfopufit_L1XE55', l1SeedThresholds=['FSNOSEED']*2, groups=PrimaryLegGroup+METGroup, monGroups=['metMon:t0']),
         
