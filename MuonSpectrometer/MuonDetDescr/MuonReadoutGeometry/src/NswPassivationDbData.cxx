@@ -56,9 +56,20 @@ NswPassivationDbData::getChannelIds() const {
 }
 
 const NswPassivationDbData::PCBPassivation&  NswPassivationDbData::getPassivation(const Identifier& id) const {
-    unsigned long long channelId = m_mmIdHelper.pcbID(id).get_compact();
+    unsigned long long channelId = buildChannelId(id);
     std::map<unsigned long long, PCBPassivation>::const_iterator itr = m_data.find(channelId);
     if (itr != m_data.end()) return itr->second;
     static const PCBPassivation dummy{};
     return dummy;    
+}
+// buildChannelId
+unsigned long long
+NswPassivationDbData::buildChannelId(const Identifier& chnlId) const {
+	int chnl       = m_mmIdHelper.channel(chnlId);
+	int pcb        = (chnl-1)/1024+1; // int division should round downwards
+	int newChnl    = (pcb -1)*1024+1; // normalizing to the first strip
+	Identifier boardId = m_mmIdHelper.channelID(m_mmIdHelper.elementID (chnlId), 
+	                                            m_mmIdHelper.multilayer(chnlId), 
+	                                            m_mmIdHelper.gasGap    (chnlId), newChnl);
+	return boardId.get_compact();
 }

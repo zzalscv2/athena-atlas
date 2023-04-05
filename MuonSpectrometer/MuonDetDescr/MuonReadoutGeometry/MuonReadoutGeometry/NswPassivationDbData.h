@@ -45,6 +45,8 @@ public:
  
 private:
 
+	unsigned long long buildChannelId(const Identifier& id) const;
+
 	// containers
 	std::map<unsigned long long, PCBPassivation> m_data{};
 
