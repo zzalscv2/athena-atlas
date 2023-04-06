@@ -291,10 +291,12 @@ VertexSeedFinderTestAlg::makeMcEventCollection (const EventContext& ctx) const
   auto *evt1 = new HepMC::GenEvent();
   auto *evt2 = new  HepMC::GenEvent();
   auto *evt3 = new HepMC::GenEvent();
-
-  HepMC::set_signal_process_vertex (evt1,HepMC::newGenVertexPtr(HepMC::FourVector{1*mm,   2*mm,  12*mm,0.0}));
-  HepMC::set_signal_process_vertex (evt2,HepMC::newGenVertexPtr(HepMC::FourVector{0.3*mm,-0.7*mm,-3*mm,0.0}));
-  HepMC::set_signal_process_vertex (evt3,HepMC::newGenVertexPtr(HepMC::FourVector{0.6*mm, 0.2*mm, 7*mm,0.0}));
+  auto v1 = HepMC::newGenVertexPtr(HepMC::FourVector{1*mm,   2*mm,  12*mm,0.0});
+  auto v2 = HepMC::newGenVertexPtr(HepMC::FourVector{0.3*mm,-0.7*mm,-3*mm,0.0});
+  auto v3 = HepMC::newGenVertexPtr(HepMC::FourVector{0.6*mm, 0.2*mm, 7*mm,0.0});
+  HepMC::set_signal_process_vertex (evt1,v1);
+  HepMC::set_signal_process_vertex (evt2,v2);
+  HepMC::set_signal_process_vertex (evt3,v3);
  
   Athena_test::uniform_real_distribution<double> ptdist (0.1*GeV, 100*GeV);
   Athena_test::uniform_real_distribution<double> phidist (-M_PI, M_PI);

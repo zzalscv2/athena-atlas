@@ -102,8 +102,10 @@ void McEventCollectionCnv_p2::persToTrans( const McEventCollection_p2* persObj,
 
     // set the signal process vertex
     const int sigProcVtx = persEvt.m_signalProcessVtx;
-    if ( sigProcVtx ) HepMC::set_signal_process_vertex(genEvt, HepMC::barcode_to_vertex(genEvt, sigProcVtx ) );
-
+    if ( sigProcVtx ) {
+      auto Vtx=HepMC::barcode_to_vertex(genEvt, sigProcVtx );
+      HepMC::set_signal_process_vertex(genEvt, Vtx );
+    }
     // connect particles to their end vertices
     for ( const auto& p:  partToEndVtx) {
       auto decayVtx = HepMC::barcode_to_vertex(genEvt, p.second );
