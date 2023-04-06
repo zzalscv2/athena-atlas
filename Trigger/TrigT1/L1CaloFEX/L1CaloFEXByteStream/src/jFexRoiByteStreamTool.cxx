@@ -105,6 +105,13 @@ StatusCode jFexRoiByteStreamTool::initialize() {
     //Reading from CVMFS TOB mapping
     ATH_CHECK(ReadfromFile(PathResolver::find_calib_file(m_TobMapping)));
     
+    // Initialize monitoring tool if not empty
+    if (!m_monTool.empty()) {
+        ATH_CHECK(m_monTool.retrieve());
+        ATH_MSG_INFO("Logging errors to " << m_monTool.name() << " monitoring tool");
+        m_UseMonitoring = true;
+    }
+    
     return StatusCode::SUCCESS;
 }
 
@@ -150,8 +157,6 @@ StatusCode jFexRoiByteStreamTool::start() {
 // BS->xAOD conversion
 StatusCode jFexRoiByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vrobf, const EventContext& ctx) const {
     
-    //std::cout<<C.RED<<"SERGI"<<C.END<<std::endl;
-    
     //WriteHandle for jFEX EDMs
     
     //---SRJet EDM
@@ -185,18 +190,24 @@ StatusCode jFexRoiByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
     ATH_MSG_DEBUG("Recorded jFexMETRoIContainer with key " << jXEContainer.key());    
     
     
-
+    
 
     // Iterate over ROBFragments to decode
     for (const ROBF* rob : vrobf) {
         // Iterate over ROD words and decode
         
-        
         ATH_MSG_DEBUG("Starting to decode " << rob->rod_ndata() << " ROD words from ROB 0x" << std::hex << rob->rob_source_id() << std::dec);
         
         //There is no data to decode.. not even the ROD trailers
         if(rob->rod_ndata() <= 0){
-            //printf("ERROR No ROD words read. rob->rod_ndata() =%3d  \n",rob->rod_ndata());
+            std::stringstream sdetail;
+            sdetail  << "Not enough ROB words to read: "<<rob->rod_ndata() ;
+            std::stringstream slocation;
+            slocation  << "0x"<< std::hex << rob->rob_source_id();
+            std::stringstream stitle;
+            stitle  << "Invalid amount of ROB words" ;
+            printError(slocation.str(),stitle.str(),m_WARNING,sdetail.str());             
+            
             continue;
         }
         
@@ -219,7 +230,14 @@ StatusCode jFexRoiByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
         unsigned int trailers_pos = rob->rod_ndata() - jBits::ROD_WORDS;
         
         if(vec_words.size() < (jBits::ROD_WORDS+jBits::jFEX2ROD_WORDS) || trailers_pos < (jBits::ROD_WORDS+jBits::jFEX2ROD_WORDS) ){
-            ATH_MSG_WARNING("Not enough jFEX TOB words to decode (<4). Number of word to decode: "<<vec_words.size()<< ". Position within the vector: "<<trailers_pos);
+            std::stringstream sdetail;
+            sdetail  << "Not enough jFEX TOB words to decode (<4). Number of word to decode: "<<vec_words.size()<< ". Position within the vector: "<<trailers_pos ;
+            std::stringstream slocation;
+            slocation  << "0x"<< std::hex << rob->rob_source_id();
+            std::stringstream stitle;
+            stitle  << "Less than 4 trailers" ;
+            printError(slocation.str(),stitle.str(),m_WARNING,sdetail.str());              
+            
             continue;
         }
         
@@ -246,14 +264,26 @@ StatusCode jFexRoiByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
             }
             
             if(payload != (total_tobs + jBits::TOB_TRAILERS + paddingWord)){
-                //printf("%s !! ERROR Payload=%-4d is different from TOBs+Trailers=%-4d -> SKIPPED %s\n",C.RED.c_str(),payload,(total_tobs + jBits::TOB_TRAILERS),C.END.c_str());
-                ATH_MSG_WARNING("Payload="<< payload<<" is different from TOBs+Trailers+padding words="<< total_tobs + jBits::TOB_TRAILERS + paddingWord <<" in FPGA: "<< fpga << " and jFEX: "<< jfex <<". SKIPPED!");
+                std::stringstream sdetail;
+                sdetail  << "Payload="<< payload<<" is different from TOBs+Trailers+padding words="<< total_tobs + jBits::TOB_TRAILERS + paddingWord <<" in FPGA: "<< fpga << " and jFEX: "<< jfex <<". SKIPPED!" ;
+                std::stringstream slocation;
+                slocation  << "jFEX "<< jfex << " FPGA "<< fpga << " in 0x"<< std::hex << rob->rob_source_id();
+                std::stringstream stitle;
+                stitle  << "Wrong payload" ;
+                printError(slocation.str(),stitle.str(),m_WARNING,sdetail.str());                        
                 
                 //Checking if we can continue decoding data for the rest of FPGAs. No negative positions
                 int neg_positions = trailers_pos - (payload + jBits::TOB_TRAILERS);
                 //If negative, whole event must be discarded!
                 if(neg_positions < 0){
-                    ATH_MSG_DEBUG("jFEX TOB decoder has discarded the whole event");
+                    std::stringstream sdetail;
+                    sdetail  << "jFEX TOB decoder has discarded the whole event. Due to a wrong payload cannot continue decoding" ;
+                    std::stringstream slocation;
+                    slocation  << "jFEX "<< jfex << " FPGA "<< fpga << " in 0x"<< std::hex << rob->rob_source_id();
+                    std::stringstream stitle;
+                    stitle  << "Event discarded" ;
+                    
+                    printError(slocation.str(),stitle.str(),m_DEBUG,sdetail.str());                     
                     break;
                 }
                 
@@ -269,8 +299,14 @@ StatusCode jFexRoiByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
             
             //The minimum number for the payload should be 2 (The TOB/xTOB counters). If lower send an error message
             if(payload < jBits::TOB_TRAILERS){
-                ATH_MSG_WARNING("Payload="<< payload<<" is lower than the expected size (at least" << jBits::TOB_TRAILERS << "trailers)");
-                //printf("ERROR Payload is lower than the TOB/xTOB trailers. (Payload = %3d < %3d = TOB Trailer) \n",payload,jBits::TOB_TRAILERS);
+                std::stringstream sdetail;
+                sdetail  << "Payload: "<< payload<<" is lower than the expected size (at least" << jBits::TOB_TRAILERS << "trailers)" ;
+                std::stringstream slocation;
+                slocation  << "jFEX "<< jfex << " FPGA "<< fpga << " in 0x"<< std::hex << rob->rob_source_id();
+                std::stringstream stitle;
+                stitle  << "Event discarded" ;
+                
+                printError(slocation.str(),stitle.str(),m_WARNING,sdetail.str());                  
                 break;
             }
                         
@@ -392,7 +428,15 @@ StatusCode jFexRoiByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
             trailers_pos -= (payload + jBits::jFEX2ROD_WORDS);
             
             if(trailers_pos != tobIndex){
-                ATH_MSG_ERROR("Something went wrong decoding jFEX BS data. Trailer position: " << trailers_pos << " should match the TOB index position:" << tobIndex );
+                std::stringstream sdetail;
+                sdetail  << "Something went wrong decoding jFEX BS data. Trailer position: " << trailers_pos << " should match the TOB index position:" << tobIndex ;
+                std::stringstream slocation;
+                slocation  << "jFEX "<< jfex << " FPGA "<< fpga << " in 0x"<< std::hex << rob->rob_source_id();
+                std::stringstream stitle;
+                stitle  << "Wrong amount of words" ;
+                
+                printError(slocation.str(),stitle.str(),m_ERROR,sdetail.str());                    
+                
                 return StatusCode::FAILURE;
             }
             
@@ -572,17 +616,6 @@ std::array<float,2> jFexRoiByteStreamTool::getEtaPhi  (unsigned int jfex, unsign
     
 }
 
-
-
-
-
-
-
-
-
-
-
-
 /// xAOD->BS conversion
 StatusCode jFexRoiByteStreamTool::convertToBS(std::vector<WROBF*>& /*vrobf*/, const EventContext& /*eventContext*/) {
     
@@ -614,3 +647,33 @@ StatusCode jFexRoiByteStreamTool::convertToBS(std::vector<WROBF*>& /*vrobf*/, co
     return StatusCode::SUCCESS;
 }
 
+
+void  jFexRoiByteStreamTool::printError(const std::string& location, const std::string& title, const uint8_t type, const std::string& detail) const{
+    
+    if(m_UseMonitoring){
+        Monitored::Group(m_monTool,
+                     Monitored::Scalar("jfexDecoderErrorLocation",location.empty() ? std::string("UNKNOWN") : location),
+                     Monitored::Scalar("jfexDecoderErrorTitle"   ,title.empty()    ? std::string("UNKNOWN") : title)
+                     );
+    }
+    else {
+
+        switch(type) {
+        case m_DEBUG:
+            ATH_MSG_DEBUG(detail);
+            break;
+        case m_WARNING:
+            ATH_MSG_WARNING(detail);
+            break;
+        case m_ERROR:
+            ATH_MSG_ERROR(detail);
+            break;
+        case m_FATAL:
+            ATH_MSG_FATAL(detail);
+            break;
+        default:
+            ATH_MSG_DEBUG("No type defined CHECK!. -> " << detail);
+        }
+
+    }
+}

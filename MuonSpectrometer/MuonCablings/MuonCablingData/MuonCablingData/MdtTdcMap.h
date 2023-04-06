@@ -33,8 +33,7 @@ public:
     /** arguments are the mezzanine type, one channel (usually chan 0) and the */
     /** corresponding offline informations */
     MdtTdcMap(const MezzCardPtr mezType, 
-              const MdtCablingData& cabling_data, 
-              const MdtIdHelper* helper);
+              const MdtCablingData& cabling_data);
 
     /** destructor */
     ~MdtTdcMap() = default;
@@ -79,7 +78,6 @@ private:
     /** tube corresponding to each tdc channel */
     MdtCablingData m_statId{};
     MezzCardPtr m_mezzCard{nullptr};
-    const MdtIdHelper* m_mdtIdHelper{nullptr};
 
     int8_t m_minTube{24};
     int8_t m_maxTube{-24};

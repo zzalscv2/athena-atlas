@@ -1,6 +1,6 @@
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HLTSeeding.h"
@@ -159,7 +159,12 @@ StatusCode HLTSeeding::execute (const EventContext& ctx) const {
   }
   if (decodexAOD) {
     for ( auto unpacker: m_roiUnpackers_xaod ) {
-      ATH_CHECK( unpacker->unpack( ctx, *l1TriggerResult, activeChainSet ) );
+      try {
+        ATH_CHECK( unpacker->unpack( ctx, *l1TriggerResult, activeChainSet ) );
+      } catch (const std::exception& ex) {
+        ATH_MSG_ERROR("Exception in " << unpacker->name() << "::unpack: " << ex.what());
+        return StatusCode::FAILURE;
+      }
     }
   }
 

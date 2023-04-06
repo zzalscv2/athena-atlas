@@ -386,15 +386,19 @@ class GenerateMenuMT(object, metaclass=Singleton):
                 log.error('Available signature(s): %s', self.availableSignatures)
                 raise Exception('Stopping the execution. Please correct the configuration.')
 
-            log.debug("Chain %s \n chain configs: %s",chainPartDict['chainName'],chainPartConfig)            
+            log.debug("Chain %s \n chain config: %s",chainPartDict['chainName'],chainPartConfig)
             import itertools   
             
             # check if there are not migrated steps between migrated ones
             # if built-up steps are not consecutive, do not build the chain because it's incomplete  
-            not_migrated |= (chainPartConfig is None or  \
+            leg_not_migrated = (chainPartConfig is None or  \
                 len([k for k, g in itertools.groupby(["_MissingCA" in step.name for step in chainPartConfig.steps]) if k==0])!=1)                    
-            if isCAMenu() and not_migrated:                      
-                log.debug(str(NoCAmigration("[__generateChainConfigs] Chain {0} removed leg because is incomplete".format(chainPartDict['chainName'])) ))       
+            not_migrated |= leg_not_migrated
+            if isCAMenu() and leg_not_migrated:
+                if chainPartConfig is None:
+                    log.debug(str(NoCAmigration("[__generateChainConfigs] Chain {0} chainPartConfig is None, because of failure of merging chains".format(chainPartDict['chainName'])) ))                    
+                else:
+                    listOfChainConfigs.append(chainPartConfig)                                        
             else:
                 listOfChainConfigs.append(chainPartConfig)
                 log.debug("[__generateChainConfigs] adding to the perSig_lengthOfChainConfigs list (%s, %s)",chainPartConfig.nSteps,chainPartConfig.alignmentGroups)
@@ -405,7 +409,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
         # here, we flatten it accordingly (works for both cases!)
         lengthOfChainConfigs = []
         if isCAMenu() and not_migrated: 
-             log.debug(str(NoCAmigration("[__generateChainConfigs] Chain {0} removed because is incomplete".format(chainPartDict['chainName'])) ))       
+            log.debug(str(NoCAmigration("[__generateChainConfigs] Chain {0} removed because is incomplete".format(chainPartDict['chainName'])) ))                           
         else:        
             for nSteps, aGrps in perSig_lengthOfChainConfigs:
                 if len(nSteps) != len(aGrps):
@@ -456,6 +460,8 @@ class GenerateMenuMT(object, metaclass=Singleton):
             raise Exception('[__generateChainConfigs] Stopping menu generation. Please investigate the exception shown above.')
         except NoCAmigration as e:
             log.warning(str(e))
+            # flag as merged all CAs created , but not used
+            [seq.ca.wasMerged() for chainPartConfig in listOfChainConfigs for step in chainPartConfig.steps for seq in step.sequences  ]                      
             return None,[]
 
         # Configure event building strategy

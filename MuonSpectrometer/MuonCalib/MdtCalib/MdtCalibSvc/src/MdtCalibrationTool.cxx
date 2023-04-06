@@ -185,7 +185,7 @@ bool MdtCalibrationTool::driftRadiusFromTime( MdtCalibHit &hit,
   }
 
   // get calibration constants from DbTool
-  MuonCalib::MdtFullCalibData data = m_dbTool->getCalibration( geo->collectionHash(),
+  MuonCalib::MdtFullCalibData data = m_dbTool->getCalibration( geo->identifyHash(),
 								     geo->detectorElementHash() );
 
   // require at least the MdtRtRelation to be available
@@ -420,8 +420,8 @@ bool MdtCalibrationTool::twinPositionFromTwinHits( MdtCalibHit &hit,
     return false;
   }
   // get calibration constants from DbTool
-  MuonCalib::MdtFullCalibData data = m_dbTool->getCalibration( geo->collectionHash(), geo->detectorElementHash() );
-  MuonCalib::MdtFullCalibData dataSecond = m_dbTool->getCalibration( geoSecond->collectionHash(), geoSecond->detectorElementHash() );
+  MuonCalib::MdtFullCalibData data = m_dbTool->getCalibration( geo->identifyHash(), geo->detectorElementHash() );
+  MuonCalib::MdtFullCalibData dataSecond = m_dbTool->getCalibration( geoSecond->identifyHash(), geoSecond->detectorElementHash() );
 
   double inversePropSpeed = m_imp->m_inversePropagationSpeed;
   double inversePropSpeedSecond = inversePropSpeed;

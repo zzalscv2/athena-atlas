@@ -269,7 +269,7 @@ def sTgcPadTriggerBytestreamDecodeCfg(flags, name="MuonsTgcPadTriggerRawDataProv
 
 
     # Setup the RAW data provider tool
-    keyName = flags.Overlay.BkgPrefix + "sTGCPadTriggerRDO" if flags.Common.isOverlay else "sTGCPadTriggerRDO"
+    keyName = flags.Overlay.BkgPrefix + "NSW_PadTrigger_RDO" if flags.Common.isOverlay else "NSW_PadTrigger_RDO"
     Muon__PadTrig_RawDataProviderToolMT = CompFactory.Muon.PadTrig_RawDataProviderToolMT
     MuonsTgcPadTriggerRawDataProviderTool = Muon__PadTrig_RawDataProviderToolMT(name = "sTgcPadTriggerRawDataProviderTool",
                                                                                 Decoder = STGCPadTriggerRodDecoder,

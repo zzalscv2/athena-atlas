@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagDiscriminants/DL2.h"
@@ -45,7 +45,7 @@ namespace FlavorTagDiscriminants {
     m_varsFromJet = vj;
     m_dataDependencyNames += ds;
 
-    auto [tsb, td] = dataprep::createTrackGetters(
+    auto [tsb, td, rt] = dataprep::createTrackGetters(
       track_sequences, options);
     m_dataDependencyNames += td;
     m_trackSequenceBuilders = tsb;
@@ -63,6 +63,7 @@ namespace FlavorTagDiscriminants {
 
     // check that all remapping was used
     rd.merge(rc);
+    rd.merge(rt);
     dataprep::checkForUnusedRemaps(options.remap_scalar, rd);
   }
 

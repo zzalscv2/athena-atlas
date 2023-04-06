@@ -160,7 +160,7 @@ bool MuonMDT_CablingMap::addMezzanine(CablingData map_data, DataSource source, M
         return false;
     } else if (source == DataSource::LegacyCOOL && !mezzaType->checkConsistency(log)) return false;
 
-    std::unique_ptr<MdtTdcMap> newTdc = std::make_unique<MdtTdcMap>(mezzaType, map_data, m_mdtIdHelper);
+    std::unique_ptr<MdtTdcMap> newTdc = std::make_unique<MdtTdcMap>(mezzaType, map_data);
     if (debug) { log << MSG::VERBOSE << " Added new readout channel " << map_data << endmsg; }
     MdtOffChModule& offModule = m_toOnlineConv[map_data];
     offModule.cards.emplace(newTdc.get());

@@ -824,7 +824,7 @@ bool MdtDigitizationTool::createDigits(Collections_t& collections, MuonSimDataCo
         if (insideMatch || insideMask) {
             // get calibration constants from DbTool
             double t0 = m_offsetTDC;
-            const MuonCalib::MdtFullCalibData data = m_calibrationDbTool->getCalibration(geo->collectionHash(), geo->detectorElementHash());
+            const MuonCalib::MdtFullCalibData data = m_calibrationDbTool->getCalibration(geo->identifyHash(), geo->detectorElementHash());
             if (data.tubeCalib) {
                 int ml = m_idHelperSvc->mdtIdHelper().multilayer(idDigit) - 1;
                 int layer = m_idHelperSvc->mdtIdHelper().tubeLayer(idDigit) - 1;

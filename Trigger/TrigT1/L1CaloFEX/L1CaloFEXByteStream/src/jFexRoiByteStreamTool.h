@@ -34,6 +34,8 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "PathResolver/PathResolver.h"
 
+#include "AthenaMonitoringKernel/Monitored.h"
+
 // Gaudi includes
 #include "Gaudi/Property.h"
 
@@ -64,6 +66,11 @@ class jFexRoiByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamToo
 
     private:
         // ------------------------- Properties --------------------------------------
+        ToolHandle<GenericMonitoringTool> m_monTool{this,"MonTool","","Monitoring tool"};
+        bool m_UseMonitoring = false;        
+        
+        
+        
         // ROBIDs property required by the interface
         Gaudi::Property<std::vector<uint32_t>> m_robIds {this, "ROBIDs", {}, "List of ROB IDs required for conversion to/from xAOD RoI"};
         Gaudi::Property<bool> m_convertExtendedTOBs {this, "ConvertExtendedTOBs", false, "Convert xTOBs instead of TOBs"};
@@ -119,6 +126,13 @@ class jFexRoiByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamToo
         // hash the index into one integer in the format 0xJFCCT (hexadecimal)
         constexpr static unsigned int mapIndex(unsigned int jfex, unsigned int fpga, unsigned int iEta, unsigned int iPhi);
         std::unordered_map<unsigned int, std::array<float,2> > m_TobPos_map; /// {map index, {eta,phi}}
+        
+        void printError(const std::string& location, const std::string& title, const uint8_t type, const std::string& detail) const;
+        
+        static constexpr uint8_t m_DEBUG=0;
+        static constexpr uint8_t m_WARNING=1;
+        static constexpr uint8_t m_ERROR=2;
+        static constexpr uint8_t m_FATAL=3;
         
         
 };

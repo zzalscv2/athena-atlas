@@ -264,7 +264,8 @@ namespace FlavorTagDiscriminants {
     // return the track getter functions for the NNs
     std::tuple<
       std::vector<internal::TrackSequenceBuilder>,
-      FTagDataDependencyNames>
+      FTagDataDependencyNames,
+      std::set<std::string>>
     createTrackGetters(
       const std::vector<FTagTrackSequenceConfig>& track_sequences,
       const FTagOptions& options);

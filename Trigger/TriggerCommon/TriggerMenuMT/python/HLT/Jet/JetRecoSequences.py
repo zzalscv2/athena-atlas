@@ -4,24 +4,24 @@
 
 from AthenaCommon.CFElements import parOR
 from AthenaCommon.Configurable import ConfigurableCABehavior
-from TriggerMenuMT.HLT.Config.ChainConfigurationBase import RecoFragmentsPool
+from ..Config.ChainConfigurationBase import RecoFragmentsPool
 from JetRecConfig import JetInputConfig, JetRecConfig
 from JetRecConfig.DependencyHelper import solveDependencies, solveGroomingDependencies
 
 from TrigEDMConfig.TriggerEDMRun3 import recordable
 
 from . import JetRecoCommon
-from TriggerMenuMT.HLT.CommonSequences.CaloSequences import caloClusterRecoSequence, LCCaloClusterRecoSequence
+from ..CommonSequences.CaloSequences import caloClusterRecoSequence, LCCaloClusterRecoSequence
 from eflowRec.PFHLTSequence import PFHLTSequence
 from eflowRec.PFHLTSequence import trackvtxcontainers
 from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
 from TrigInDetConfig.InDetTrigFastTracking import makeInDetTrigFastTracking, makeInDetTrigFastTrackingNoView
 from TrigInDetConfig.InDetTrigVertices import makeInDetTrigVertices
-from .JetTrackingConfig import jetTTVA
-from JetRec.JetRecConf import JetViewAlg
+from .JetTrackingConfig import addJetTTVA
+from .JetRecoSequencesConfig import JetViewAlgCfg
 
 from TrigGenericAlgs.TrigGenericAlgsConfig import TrigEventInfoRecorderAlgCfg
-from ..Config.MenuComponents import algorithmCAToGlobalWrapper
+from ..Config.MenuComponents import algorithmCAToGlobalWrapper, extractAlgorithmsAndAppendCA
 
 # this code uses CA internally, needs to be in this context manager,
 # at least until ATLASRECTS-6635 is closed
@@ -37,8 +37,6 @@ log = logging.getLogger(__name__)
 
 # The top-level sequence, forwards arguments as appropriate to 
 # standard jet reco, grooming or reclustering sequences
-# If tracking is required, then the trkcolls dict (returned by the
-# JetFSTrackingSequence) must also be passed as kwargs
 def jetRecoSequence( configFlags, clustersKey, **jetRecoDict ):
 
     jetalg, jetradius, extra = JetRecoCommon.interpretRecoAlg(jetRecoDict["recoAlg"])
@@ -68,15 +66,9 @@ def jetRecoSequence( configFlags, clustersKey, **jetRecoDict ):
 # jetPtMin is minimum jet pt in GeV for jets to be seen by hypo
 def getJetViewAlg(configFlags,jetsIn,jetPtMin=10,**jetRecoDict):
 
-    decorList = JetRecoCommon.getDecorList(jetRecoDict)
-    filteredJetsName = f"{jetsIn}_pt{int(jetPtMin)}"
-    jetViewAlg= JetViewAlg("jetview_"+filteredJetsName,
-                          InputContainer=jetsIn,
-                          OutputContainer=filteredJetsName,
-                          PtMin=jetPtMin*1e3, #MeV
-                          DecorDeps=decorList
-    )
-    jetsOut = filteredJetsName
+    with ConfigurableCABehavior():
+        jetViewAcc, jetsOut = JetViewAlgCfg(configFlags,jetsIn,jetPtMin,**jetRecoDict)
+    jetViewAlg = extractAlgorithmsAndAppendCA(jetViewAcc)[0]
 
     return jetViewAlg,jetsOut
 
@@ -91,8 +83,7 @@ def standardJetBuildSequence( configFlags, dataSource, clustersKey, **jetRecoDic
 
     """
     
-    jetDefString = JetRecoCommon.jetRecoDictToString(jetRecoDict)
-    buildSeq = parOR( "JetBuildSeq_"+jetDefString, [])
+    buildSeq = parOR( "JetBuildSeq_"+jetRecoDict['jetDefStr'], [])
     doesFSTracking = JetRecoCommon.doFSTracking(jetRecoDict)
 
     context = JetRecoCommon.getJetContext(jetRecoDict)
@@ -178,18 +169,18 @@ def standardJetBuildSequence( configFlags, dataSource, clustersKey, **jetRecoDic
     return buildSeq, jetsOut, jetDef
 
 def standardJetRecoSequence( configFlags, dataSource, clustersKey, **jetRecoDict ):
-    jetDefString = JetRecoCommon.jetRecoDictToString(jetRecoDict)
-
     # Schedule reconstruction w/o calibration
     # This is just a starting point -- will change so that
     # the calibration is only ever done at the end for ungroomed
-    _jetRecoDictNoJCalib = dict(jetRecoDict)
-    _jetRecoDictNoJCalib["jetCalib"] = "nojcalib"
+    _jetRecoDictNoJCalib = JetRecoCommon.cloneAndUpdateJetRecoDict(
+        jetRecoDict,
+        jetCalib = "nojcalib"
+    )
 
     buildSeq, jetsNoCalib, jetDefNoCalib = RecoFragmentsPool.retrieve( standardJetBuildSequence, configFlags, dataSource=dataSource,
                                                             clustersKey=clustersKey, **_jetRecoDictNoJCalib)
 
-    recoSeq = parOR( "JetRecSeq_"+jetDefString, [buildSeq])
+    recoSeq = parOR( "JetRecSeq_"+jetRecoDict['jetDefStr'], [buildSeq])
 
     # prepare and return here if original calibration is nojcalib - no further calibration or modifiers required
     if jetRecoDict["jetCalib"]=="nojcalib":
@@ -225,8 +216,7 @@ def standardJetRecoSequence( configFlags, dataSource, clustersKey, **jetRecoDict
 
     #Configuring jet cleaning mods now
     if not JetRecoCommon.isPFlow(jetRecoDict) and jetRecoDict['recoAlg']=='a4': #Add jet cleaning decorations only to small-R non-PFlow jets for now
-        from TriggerMenuMT.HLT.Jet.JetRecoCommon import cleaningDict
-        for key,cleanWP in cleaningDict.items(): jetDef.modifiers.append(f"Cleaning:{cleanWP}")
+        for key,cleanWP in JetRecoCommon.cleaningDict.items(): jetDef.modifiers.append(f"Cleaning:{cleanWP}")
 
     # Get online monitoring tool
     from JetRec import JetOnlineMon
@@ -244,13 +234,15 @@ def standardJetRecoSequence( configFlags, dataSource, clustersKey, **jetRecoDict
         and jetRecoDict['jetCalib']==jetCalibDef # exclude jets with not full default calibration
     ):
 
+        context = JetRecoCommon.getJetContext(jetRecoDict)
+
         # Adding Fast flavor tagging
         jetFTagSeq = getFastFlavourTaggingSequence(
             configFlags,
             "jetFtagSeq_"+jetRecoDict["trkopt"],
             jetDef.fullname(),
-            jetRecoDict["Vertices"],
-            jetRecoDict["Tracks"],
+            context["Vertices"],
+            context["Tracks"],
             isPFlow=True,
         )
         recoSeq += jetFTagSeq
@@ -282,7 +274,7 @@ def jetCaloRecoSequences( configFlags, RoIs, **jetRecoDict ):
     if JetRecoCommon.doTracking(jetRecoDict):
         raise ValueError("Calorimeter jet reco called with a tracking option!")
 
-    log.debug("Generating jetCaloRecoSequences for configuration %s",JetRecoCommon.jetRecoDictToString(jetRecoDict))
+    log.debug("Generating jetCaloRecoSequences for configuration %s",jetRecoDict['jetDefStr'])
 
     # Get the topocluster reconstruction sequence
     topoClusterSequence, clustersKey = RecoFragmentsPool.retrieve(
@@ -311,8 +303,6 @@ def JetFSTrackingSequence(flags,trkopt,RoIs):
 
     IDTrigConfig = getInDetTrigConfig( 'jet' )
 
-    trackcollmap = None
-
     viewAlgs = makeInDetTrigFastTrackingNoView(flags, config = IDTrigConfig, rois=RoIs)
 
     # add the collections for the eflowRec reconstriction in the trigger
@@ -325,9 +315,9 @@ def JetFSTrackingSequence(flags,trkopt,RoIs):
         vtxAlgs += makeInDetTrigVertices( flags, "amvf", IDTrigConfig.tracks_FTF(), IDTrigConfig.vertex, IDTrigConfig, IDTrigConfig.adaptiveVertex )
 
     jetTrkSeq = parOR(f"JetFSTracking_{trkopt}_RecoSequence", viewAlgs+vtxAlgs)
-    trackcollmap = jetTTVA( flags, "jet", jetTrkSeq, trkopt, IDTrigConfig, verticesname=IDTrigConfig.vertex_jet,  adaptiveVertex=IDTrigConfig.adaptiveVertex_jet )
+    addJetTTVA( flags, jetTrkSeq, trkopt, IDTrigConfig, verticesname=IDTrigConfig.vertex_jet,  adaptiveVertex=IDTrigConfig.adaptiveVertex_jet )
 
-    return jetTrkSeq, trackcollmap
+    return jetTrkSeq
 
 
 def getFastFtaggedJetCopyAlg(flags,jetsIn,jetRecoDict):
@@ -373,17 +363,17 @@ def jetTrackingRecoSequences(configFlags, RoIs, clustersKey, **jetRecoDict):
     if not JetRecoCommon.doFSTracking(jetRecoDict):
         raise ValueError("Jet reco with tracks called without full scan tracking option 'ftf'!")
 
-    log.debug("Generating jetTrackingRecoSequences for configuration %s",JetRecoCommon.jetRecoDictToString(jetRecoDict))
+    log.debug("Generating jetTrackingRecoSequences for configuration %s",jetRecoDict['jetDefStr'])
 
     # Get the track reconstruction sequence
-    (jetTrkSeq, trkcolls) = RecoFragmentsPool.retrieve(
+    jetTrkSeq = RecoFragmentsPool.retrieve(
         JetFSTrackingSequence, configFlags, trkopt=jetRecoDict["trkopt"], RoIs=RoIs)
 
     # Get the jet reconstruction sequence including the jet definition and output collection
     # Pass in the cluster and track collection names
     jetRecoSeq, jetsOut, jetDef  = RecoFragmentsPool.retrieve(
         jetRecoSequence,
-        configFlags, clustersKey=clustersKey, **trkcolls, **jetRecoDict )
+        configFlags, clustersKey=clustersKey, **jetRecoDict )
 
     return [jetTrkSeq,jetRecoSeq], jetsOut, jetDef
 
@@ -401,12 +391,15 @@ def eventinfoRecordSequence(configFlags, suffix, pvKey, rhoKey_PFlow = 'HLT_Kt4E
 # Grooming needs the ungroomed jets to be built first,
 # so call the basic jet reco seq, then add a grooming alg
 def groomedJetRecoSequence( configFlags, dataSource, clustersKey, **jetRecoDict ):
-    jetDefString = JetRecoCommon.jetRecoDictToString(jetRecoDict)
-    recoSeq = parOR( "JetGroomSeq_"+jetDefString, [])
+    recoSeq = parOR( "JetGroomSeq_"+jetRecoDict['jetDefStr'], [])
 
-    ungroomedJetRecoDict = dict(jetRecoDict)
-    ungroomedJetRecoDict["recoAlg"] = ungroomedJetRecoDict["recoAlg"].rstrip("tsd") # Drop grooming spec
-    ungroomedJetRecoDict["jetCalib"] = "nojcalib" # No need to calibrate
+    ungroomedJetRecoDict = JetRecoCommon.cloneAndUpdateJetRecoDict(
+        jetRecoDict,
+        # Drop grooming spec
+        recoAlg = jetRecoDict["recoAlg"].rstrip("tsd"),
+        # No need to calibrate
+        jetCalib = "nojcalib"
+    )
 
     # Only jet building -- we do jet calib in a larger sequence via copy+calib
     (ungroomedJetBuildSequence,ungroomedJetsName,ungroomedDef) = RecoFragmentsPool.retrieve(
@@ -436,11 +429,14 @@ def groomedJetRecoSequence( configFlags, dataSource, clustersKey, **jetRecoDict 
 # Reclustering -- call the basic jet reco and add this to the sequence,
 # then add another jet algorithm to run the reclustering step
 def reclusteredJetRecoSequence( configFlags, dataSource, clustersKey, **jetRecoDict ):
-    jetDefString = JetRecoCommon.jetRecoDictToString(jetRecoDict)
-    recoSeq = parOR( "JetReclusterSeq_"+jetDefString, [])
+    recoSeq = parOR( "JetReclusterSeq_"+jetRecoDict['jetDefStr'], [])
 
-    basicJetRecoDict = dict(jetRecoDict)
-    basicJetRecoDict["recoAlg"] = "a4" # Standard size for reclustered
+    basicJetRecoDict = JetRecoCommon.cloneAndUpdateJetRecoDict(
+        jetRecoDict,
+        # Standard size for reclustered inputs
+        recoAlg = "a4"
+    )
+    
     (basicJetRecoSequence,basicJetsFiltered, basicJetDef) = RecoFragmentsPool.retrieve(
         standardJetRecoSequence,
         configFlags, dataSource=dataSource, clustersKey=clustersKey,
@@ -456,7 +452,7 @@ def reclusteredJetRecoSequence( configFlags, dataSource, clustersKey, **jetRecoD
     rcModList = [] # Could set substructure mods
     rcJetDef.modifiers = rcModList
 
-    rcConstitPJAlg = JetRecConfig.getConstitPJGAlg( rcJetDef.inputdef, suffix=jetDefString)
+    rcConstitPJAlg = JetRecConfig.getConstitPJGAlg( rcJetDef.inputdef, suffix=jetRecoDict['jetDefStr'])
     rcConstitPJKey = str(rcConstitPJAlg.OutputContainer)
     recoSeq += rcConstitPJAlg
 

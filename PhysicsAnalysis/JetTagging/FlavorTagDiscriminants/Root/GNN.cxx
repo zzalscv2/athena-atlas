@@ -46,7 +46,7 @@ namespace FlavorTagDiscriminants {
     m_varsFromJet = vj;
     m_dataDependencyNames = ds;
 
-    auto [tsb, td] = dataprep::createTrackGetters(
+    auto [tsb, td, rt] = dataprep::createTrackGetters(
       track_sequences, options);
     m_trackSequenceBuilders = tsb;
     m_dataDependencyNames += td;
@@ -56,6 +56,7 @@ namespace FlavorTagDiscriminants {
     m_decorators = decorators;
     m_dataDependencyNames += dd;
 
+    rd.merge(rt);
     dataprep::checkForUnusedRemaps(options.remap_scalar, rd);
 
   }

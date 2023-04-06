@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -21,7 +21,7 @@
 #include <vector>
 
 
-class SCT3_RawData : public SCT_RDORawData{
+class SCT3_RawData final: public SCT_RDORawData{
 
   ///////////////////////////////////////////////////////////////////
   // Public methods:
@@ -43,7 +43,7 @@ public:
   ///////////////////////////////////////////////////////////////////
 
   // decode group of strips
-  virtual int getGroupSize() const;
+  virtual int getGroupSize() const override final;
 
   // decode time bin information for the 3 consecutive bunch crossings
   // This information is stored in 3 bits where the most significant bit
@@ -60,7 +60,6 @@ public:
 
   const std::vector<int>& getErrorCondensedHit() const;
 
-public:
   // public default constructor needed for I/O, but should not be
   // called from an alg
   SCT3_RawData();
@@ -74,9 +73,6 @@ public:
   // Default move assignment operator
   SCT3_RawData& operator=(SCT3_RawData&&) = default;
 
-  ///////////////////////////////////////////////////////////////////
-  // Private data:
-  ///////////////////////////////////////////////////////////////////
 private:
 
   std::vector<int> m_errorCondensedHit;

@@ -104,14 +104,13 @@ class JetChainConfiguration(ChainConfigurationBase):
                     break
         if not subJetChainDict:
             raise ValueError("sub Jet Chain dictionary is empty. Cannot define jet collection name on empty dictionary")
-        jetRecoDict = JetRecoCommon.extractRecoDict(subJetChainDict["chainParts"])
-        clustersKey = JetRecoCommon.getClustersKey(jetRecoDict)
+        clustersKey = JetRecoCommon.getClustersKey(self.recoDict)
         prefix = JetRecoCommon.getHLTPrefix()
-        suffix = "_"+jetRecoDict["jetCalib"]
-        if JetRecoCommon.jetDefNeedsTracks(jetRecoDict):
-            suffix += "_{}".format(jetRecoDict["trkopt"])
-        inputDef = JetRecoCommon.defineJetConstit(jetRecoDict, clustersKey = clustersKey, pfoPrefix=prefix+jetRecoDict["trkopt"])
-        jetalg, jetradius, jetextra = JetRecoCommon.interpretRecoAlg(jetRecoDict["recoAlg"])
+        suffix = "_"+self.recoDict["jetCalib"]
+        if JetRecoCommon.jetDefNeedsTracks(self.recoDict):
+            suffix += "_{}".format(self.recoDict["trkopt"])
+        inputDef = JetRecoCommon.defineJetConstit(self.recoDict, clustersKey = clustersKey, pfoPrefix=prefix+self.recoDict["trkopt"])
+        jetalg, jetradius, jetextra = JetRecoCommon.interpretRecoAlg(self.recoDict["recoAlg"])
         actualradius = float(jetradius)/10
         self.jetName = prefix+buildJetAlgName("AntiKt", actualradius)+inputDef.label+"Jets"+suffix
         if inputDef.basetype == xAODType.CaloCluster:
@@ -184,9 +183,7 @@ class JetChainConfiguration(ChainConfigurationBase):
     # Configuration of steps
     # --------------------
     def getJetCaloHypoChainStep(self, flags):
-        jetDefStr = JetRecoCommon.jetRecoDictToString(self.recoDict)
-
-        stepName = "MainStep_jet_"+jetDefStr
+        stepName = "MainStep_jet_"+self.recoDict['jetDefStr']
         jetSeq, jetDef = callGenerator( jetCaloHypoMenuSequence,
                                                      flags, isPerf=self.isPerf, **self.recoDict )
         jetCollectionName = str(jetSeq.hypo.Alg.Jets)
@@ -202,17 +199,13 @@ class JetChainConfiguration(ChainConfigurationBase):
         return jetCollectionName, jetDef, ChainStep(stepName, [jetSeq], multiplicity=[1], chainDicts=[self.dict])
 
     def getJetRoITrackJetTagHypoChainStep(self, flags, jetsInKey):
-        jetDefStr = JetRecoCommon.jetRecoDictToString(self.recoDict)
-
-        stepName = "RoIFTFStep_jet_sel_"+jetDefStr
+        stepName = "RoIFTFStep_jet_sel_"+self.recoDict['jetDefStr']
         jetSeq = callGenerator( jetRoITrackJetTagHypoMenuSequence,
                                              flags, jetsIn=jetsInKey, isPresel=False, **self.recoDict )
         return ChainStep(stepName, [jetSeq], multiplicity=[1], chainDicts=[self.dict])
 
     def getJetFSTrackingHypoChainStep(self, flags, clustersKey):
-        jetDefStr = JetRecoCommon.jetRecoDictToString(self.recoDict)
-
-        stepName = "MainStep_jet_"+jetDefStr
+        stepName = "MainStep_jet_"+self.recoDict['jetDefStr']
         jetSeq, jetDef = callGenerator( jetFSTrackingHypoMenuSequence,
                                                      flags, clustersKey=clustersKey,
                                                      isPerf=self.isPerf,
@@ -238,9 +231,7 @@ class JetChainConfiguration(ChainConfigurationBase):
         #Getting the outcome of the regex reco option (it should correspond to a4 or a10 depending by which chain you are configuring)
         preselRecoDict = JetPresel.getPreselRecoDict(matched_reco.group())
 
-        jetDefStr = JetRecoCommon.jetRecoDictToString(preselRecoDict)
-
-        stepName = "PreselStep_jet_"+jetDefStr
+        stepName = "PreselStep_jet_"+preselRecoDict['jetDefStr']
         jetSeq, jetDef, clustersKey = callGenerator( jetCaloPreselMenuSequence,
                                                                   flags, **preselRecoDict )
 
@@ -262,9 +253,7 @@ class JetChainConfiguration(ChainConfigurationBase):
 
         assert preselRecoDict['trkopt'] == 'roiftf', 'getJetRoITrackJetTagPreselChainStep: you requested a RoI tracking preselection but the reco dictionary has \'trkopt\' set to {0}'.format(preselRecoDict['trkopt'])
 
-        jetDefStr = JetRecoCommon.jetRecoDictToString(preselRecoDict)
-
-        stepName = "RoIFTFStep_jet_"+jetDefStr
+        stepName = "RoIFTFStep_jet_"+self.recoDict['jetDefStr']
         jetSeq = callGenerator(jetRoITrackJetTagHypoMenuSequence,
                                             flags, jetsIn=jetsInKey, isPresel=True, **preselRecoDict)
 

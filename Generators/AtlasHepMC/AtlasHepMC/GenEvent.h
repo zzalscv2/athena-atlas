@@ -413,7 +413,7 @@ inline void set_mpi(GenEvent* e, const int i=0) {
 inline void set_random_states(GenEvent* e, std::vector<long int>& a) {
     e->add_attribute("random_states",std::make_shared<HepMC3::VectorLongIntAttribute>(a));
 }
-template <class T> void set_signal_process_vertex(GenEvent* e, T v) {
+template <class T> void set_signal_process_vertex(GenEvent* e, T& v) {
     if (!v || !e) return;
 /* AV: HepMC2 adds the vertex to event */
     e->add_vertex(v);
