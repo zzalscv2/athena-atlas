@@ -44,7 +44,7 @@ LArMphysOverMcalSCCondAlg    =  CompFactory.getComp("LArFlatConditionsAlg<LArMph
 LArOFCSCCondAlg              =  CompFactory.getComp("LArFlatConditionsAlg<LArOFCSC>")
 
 
-def LArElecCalibDBCfg(ConfigFlags,condObjs):
+def LArElecCalibDBCfg(ConfigFlags,condObjs,sqlite=None):
     
     #Check MC case
     if ConfigFlags.Input.isMC:
@@ -57,12 +57,12 @@ def LArElecCalibDBCfg(ConfigFlags,condObjs):
         return LArElecCalibDBRun1Cfg(ConfigFlags,condObjs)
 
     #Everything else, eg run 2 (and 3?) data
-    return LArElecCalibDBRun2Cfg(ConfigFlags,condObjs)
+    return LArElecCalibDBRun2Cfg(ConfigFlags,condObjs,sqlite)
     
 
     
 
-def LArElecCalibDBRun2Cfg(ConfigFlags,condObjs):
+def LArElecCalibDBRun2Cfg(ConfigFlags,condObjs,sqlite=None):
 
     _larCondDBFoldersDataR2 = {"Ramp":("LArRamp","/LAR/ElecCalibFlat/Ramp", LArRampCondAlg ),
                                "DAC2uA":("LArDAC2uA","/LAR/ElecCalibFlat/DAC2uA",LArDAC2uACondAlg),
@@ -79,6 +79,9 @@ def LArElecCalibDBRun2Cfg(ConfigFlags,condObjs):
     iovDbSvc=result.getService("IOVDbSvc")
     condLoader=result.getCondAlgo("CondInputLoader")
 
+    if sqlite and 'dbname' not in sqlite:
+        sqlite="sqlite://;schema="+sqlite+";dbname=CONDBR2"
+
 
     for condData in condObjs:
         try:
@@ -86,20 +89,20 @@ def LArElecCalibDBRun2Cfg(ConfigFlags,condObjs):
         except KeyError:
             raise ConfigurationError("No conditions data %s found for Run-2 data" % condData)
             
-        dbString="<db>COOLONL_LAR/CONDBR2</db>"
+
         persClass="CondAttrListCollection"
         # Potential special treatment for OFC/Shape: Load them from offline DB
         if ConfigFlags.LAr.OFCShapeFolder and condData == "OFC":
             fldr="/LAR/ElecCalibOfl/OFC/PhysWave/RTM/"+ConfigFlags.LAr.OFCShapeFolder
-            dbString="<db>COOLOFL_LAR/CONDBR2</db>"
+            dbString=sqlite or "<db>COOLOFL_LAR/CONDBR2</db>"
             persClass="LArOFCComplete"
             calg = None
-        if ConfigFlags.LAr.OFCShapeFolder and condData == "Shape":
+        elif ConfigFlags.LAr.OFCShapeFolder and condData == "Shape":
             fldr="/LAR/ElecCalibOfl/Shape/RTM/"+ConfigFlags.LAr.OFCShapeFolder
-            dbString="<db>COOLOFL_LAR/CONDBR2</db>"
+            dbString=sqlite or "<db>COOLOFL_LAR/CONDBR2</db>"
             persClass="LArShapeComplete"
             calg = None
-        if condData == "fSampl":
+        elif condData == "fSampl":
             if not ConfigFlags.Overlay.DataOverlay:
                 raise ConfigurationError("fSampl is only supported for data overlay")
             dbString="<db>COOLOFL_LAR/OFLP200</db>"
@@ -107,6 +110,8 @@ def LArElecCalibDBRun2Cfg(ConfigFlags,condObjs):
             result.addCondAlgo(CompFactory.LArMCSymCondAlg(ReadKey="LArOnOffIdMap"))
             result.addCondAlgo(calg(ReadKey="LArfSampl", WriteKey=outputKey))
             calg = None
+        else:
+            dbString="<db>COOLONL_LAR/CONDBR2</db>"            
 
         iovDbSvc.Folders.append(fldr+dbString)# (addFolder(ConfigFlags,fldr,"LAR_ONL",'CondAttrListCollection'))
         condLoader.Load.append((persClass,fldr))
@@ -115,7 +120,7 @@ def LArElecCalibDBRun2Cfg(ConfigFlags,condObjs):
 
     return result
 
-def LArElecCalibDBSCCfg(ConfigFlags,condObjs):
+def LArElecCalibDBSCCfg(ConfigFlags,condObjs,sqlite=None):
 
     _larCondDBFoldersDataSC = {"Ramp":("LArRampSC","/LAR/ElecCalibFlatSC/Ramp", LArRampSCCondAlg ),
                                "DAC2uA":("LArDAC2uASC","/LAR/ElecCalibFlatSC/DAC2uA",LArDAC2uASCCondAlg),
@@ -132,6 +137,9 @@ def LArElecCalibDBSCCfg(ConfigFlags,condObjs):
     iovDbSvc=result.getService("IOVDbSvc")
     condLoader=result.getCondAlgo("CondInputLoader")
 
+    if sqlite and 'dbname' not in sqlite:
+        sqlite="sqlite://;schema="+sqlite+";dbname=CONDBR2"
+
 
     for condData in condObjs:
         try:
@@ -139,13 +147,15 @@ def LArElecCalibDBSCCfg(ConfigFlags,condObjs):
         except KeyError:
             raise ConfigurationError("No conditions data %s found for SCdata" % condData)
             
-        dbString="<db>COOLONL_LAR/CONDBR2</db>"
+
         persClass="CondAttrListCollection"
         if condData == "fSampl":
+            #Sampling Fraction is always read from MC-db
             dbString="<db>COOLOFL_LAR/OFLP200</db>"
             result.addCondAlgo(calg(ReadKey="LArfSampl", WriteKey=outputKey))
             calg = None
-
+        else:
+            dbString=sqlite or "<db>COOLONL_LAR/CONDBR2</db>"
         iovDbSvc.Folders.append(fldr+dbString)# (addFolder(ConfigFlags,fldr,"LAR_ONL",'CondAttrListCollection'))
         condLoader.Load.append((persClass,fldr))
         if calg is not None:
@@ -186,7 +196,7 @@ def LArElecCalibDBRun1Cfg(ConfigFlags,condObjs):
     return result
 
 
-def LArElecCalibDBMCCfg(ConfigFlags,folders):
+def LArElecCalibDBMCCfg(ConfigFlags,folders,detdb="LAR_OFL"):
     _larCondDBFoldersMC = {
                            "Ramp":("LArRampMC","/LAR/ElecCalibMC/Ramp","LArRamp", LArRampSymAlg ),
                            "AutoCorr":("LArAutoCorrMC","/LAR/ElecCalibMC/AutoCorr","LArAutoCorr", LArAutoCorrSymAlg),
@@ -215,7 +225,7 @@ def LArElecCalibDBMCCfg(ConfigFlags,folders):
         except KeyError:
             raise ConfigurationError("No conditions data %s found for Monte Carlo" % folder)
 
-        folderlist+=[(fldr,"LAR_OFL",classname),]
+        folderlist+=[(fldr,detdb,classname),]
         if calg is not None:
             result.addCondAlgo(calg(ReadKey=key,WriteKey=key+"Sym"))
 
@@ -223,7 +233,7 @@ def LArElecCalibDBMCCfg(ConfigFlags,folders):
     return result
 
 
-def LArElecCalibDBMCSCCfg(ConfigFlags,folders):
+def LArElecCalibDBMCSCCfg(ConfigFlags,folders,detdb="LAR_OFL"):
     _larCondDBFoldersMC = {
                            "RampSC":('CondAttrListCollection',"/LAR/ElecCalibMCSC/Ramp","LArRampSC", LArRampSCCondAlg ),
                            "DAC2uASC":('CondAttrListCollection',"/LAR/ElecCalibMCSC/DAC2uA","LArDAC2uASC",LArDAC2uASCCondAlg),
@@ -245,7 +255,7 @@ def LArElecCalibDBMCSCCfg(ConfigFlags,folders):
         except KeyError:
             raise ConfigurationError("No conditions data %s found for Monte Carlo" % folder)
 
-        folderlist+=[(fldr,"LAR_OFL",classname),]
+        folderlist+=[(fldr,detdb,classname),]
         if calg is not None:
             result.addCondAlgo(calg(ReadKey=fldr,WriteKey=key))
 
