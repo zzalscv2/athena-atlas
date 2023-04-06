@@ -1021,13 +1021,13 @@ void MuonGMCheck::checkreadoutmmgeo() {
                     fout << "Found MMRE in A side; identified with: " << helper.show_to_string(idA) << " From Id: StName/Eta/Phi/ML = <"
                          << helper.stationNameString(helper.stationName(idA)) << ">=" << helper.stationName(idA) << "/"
                          << helper.stationEta(idA) << "/" << helper.stationPhi(idA) << "/" << helper.multilayer(idA)
-                         << " CollHash = " << mmA->collectionHash() << " REhash = " << mmA->detectorElementHash()
+                         << " CollHash = " << mmA->identifyHash() << " REhash = " << mmA->detectorElementHash()
                          << " number of layers(from geo)= " << mmA->numberOfLayers(true) << std::endl;
 
                     fout << "Found MMRE in C side; identified with: " << helper.show_to_string(idC) << " From Id: StName/Eta/Phi/ML = <"
                          << helper.stationNameString(helper.stationName(idA)) << ">=" << helper.stationName(idC) << "/"
                          << helper.stationEta(idC) << "/" << helper.stationPhi(idC) << "/" << helper.multilayer(idC)
-                         << " CollHash = " << mmC->collectionHash() << " REhash = " << mmC->detectorElementHash()
+                         << " CollHash = " << mmC->identifyHash() << " REhash = " << mmC->detectorElementHash()
                          << " number of layers(from geo)= " << mmC->numberOfLayers(true) << std::endl;
                     fout << helper.show_to_string(idA) << " # of gas gaps = " << helper.gasGapMax(idA) - helper.gasGapMin(idA) + 1
                          << " ggMax = " << helper.gasGapMax(idA) << " number of layers(from geo)= " << mmA->numberOfLayers(true)
@@ -1118,13 +1118,13 @@ void MuonGMCheck::checkreadoutstgcgeo() {
                     fout << "Found MMRE in A side; identified with: " << helper.show_to_string(idA) << " From Id: StName/Eta/Phi/ML = <"
                          << helper.stationNameString(helper.stationName(idA)) << ">=" << helper.stationName(idA) << "/"
                          << helper.stationEta(idA) << "/" << helper.stationPhi(idA) << "/" << helper.multilayer(idA)
-                         << " CollHash = " << mmA->collectionHash()
+                         << " CollHash = " << mmA->identifyHash()
                          << " REhash = " /*<<mmA->detectorElementHash()<<" number of layers= "<<mmA->numberOfLayers()*/
                          << std::endl;
                     fout << "Found MMRE in C side; identified with: " << helper.show_to_string(idC) << " From Id: StName/Eta/Phi/ML = <"
                          << helper.stationNameString(helper.stationName(idA)) << ">=" << helper.stationName(idC) << "/"
                          << helper.stationEta(idC) << "/" << helper.stationPhi(idC) << "/" << helper.multilayer(idC)
-                         << " CollHash = " << mmC->collectionHash()
+                         << " CollHash = " << mmC->identifyHash()
                          << " REhash = " /*<<mmC->detectorElementHash()<<" number of layers= "<<mmC->numberOfLayers()*/
                          << std::endl;
                     fout << "# of gas gaps = " << helper.gasGapMax(idA) - helper.gasGapMin(idA) + 1 << std::endl;
