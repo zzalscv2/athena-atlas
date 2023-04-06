@@ -33,6 +33,7 @@ Events  = 4000
 Threads = 8 
 Slots   = 8
 Release = "current"
+preinclude_file = 'RDOtoRDOTrigger:TrigInDetValidation/TIDAcosmic_preinclude.py'
 preexec_reco = [
   "from AthenaCommon.BeamFlags import jobproperties",
   "jobproperties.Beam.beamType.set_Value_and_Lock('cosmics')",
