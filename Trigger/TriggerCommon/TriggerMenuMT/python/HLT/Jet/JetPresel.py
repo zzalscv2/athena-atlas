@@ -5,7 +5,7 @@ log = logging.getLogger(__name__)
 
 import re
 
-from .JetRecoCommon import getJetCalibDefaultString, jetChainParts, etaRangeAbbrev
+from .JetRecoCommon import getJetCalibDefaultString, jetChainParts, etaRangeAbbrev, jetRecoDictToString
 from ..Menu.SignatureDicts import JetChainParts_Default
 from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import NoHypoToolCreated
 
@@ -34,6 +34,8 @@ def getPreselRecoDict(reco,roiftf=False):
     
     # Overwriting tracking option to roiftf tracking
     if roiftf: preselRecoDict['trkopt'] = 'roiftf'
+
+    preselRecoDict['jetDefStr'] = jetRecoDictToString(preselRecoDict)
 
     return preselRecoDict
 

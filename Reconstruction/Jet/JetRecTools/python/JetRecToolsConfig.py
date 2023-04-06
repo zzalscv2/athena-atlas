@@ -54,7 +54,7 @@ def getTrackSelAlg(trkOpt="default", trackSelOpt=False):
     return trkSelAlg
 
 
-def getJetTrackVtxAlg( trkOpt,   algname="jetTVA", **ttva_overide):
+def getJetTrackVtxAlg( trkOpt, algname="jetTVA", **ttva_overide):
     """  theSequence and ttva_overide are options used in trigger  (HLT/Jet/JetTrackingConfig.py)"""
     from TrackVertexAssociationTool.getTTVAToolForReco import getTTVAToolForReco
     from JetRecConfig.StandardJetContext import jetContextDic
@@ -63,7 +63,7 @@ def getJetTrackVtxAlg( trkOpt,   algname="jetTVA", **ttva_overide):
 
     ttva_options = dict(
         returnCompFactory = True,
-        addDecoAlg = not isAnalysisRelease(), # ?? it seems mandatory ??
+        addDecoAlg = False, # We add it ourselves for sequence management
         TrackContName = trkProperties["Tracks"],
         VertexContName = trkProperties["Vertices"],
     )
@@ -81,7 +81,6 @@ def getJetTrackVtxAlg( trkOpt,   algname="jetTVA", **ttva_overide):
     return alg
 
 
-
 def getPV0TrackVertexAssoAlg(trkOpt="", theSequence=None):
     if trkOpt: "_{}".format(trkOpt)
     from TrackVertexAssociationTool.getTTVAToolForReco import getTTVAToolForReco
@@ -93,7 +92,6 @@ def getPV0TrackVertexAssoAlg(trkOpt="", theSequence=None):
                                 TrackContName = trkProperties["JetTracks"],
                                 VertexContName = trkProperties["Vertices"],
                                 returnCompFactory = True,
-                                add2Seq = theSequence,
                                 addDecoAlg = False, #setting this to True causes error in reconstruction because of there not being aux store associated with one of the decorations
                                                     #It has also been set to false in buildPV0TrackSel function in JetRecConfig/python/JetInputConfig.py 
                                 )
@@ -116,26 +114,6 @@ def getPV0TrackSelAlg(tvaTool, trkOpt="default"):
             TVATool = tvaTool,
             )
     return pv0trackselalg
-
-def getTrackUsedInFitTool(trkOpt=""):
-    if trkOpt: "_{}".format(trkOpt)
-    # InDet decorator tool:
-    from JetRecConfig.StandardJetContext import jetContextDic
-
-    trkProperties = jetContextDic[trkOpt]
-    IDUsedInFitTrkDecoTool = CompFactory.getComp("InDet::InDetUsedInFitTrackDecoratorTool")(
-        "IDUsedInFitTrkDecoTool",
-        TrackContainer       = trkProperties["Tracks"],
-        VertexContainer      = trkProperties["Vertices"],
-        AMVFVerticesDecoName = "TTVA_AMVFVertices_forReco",
-        AMVFWeightsDecoName  = "TTVA_AMVFWeights_forReco"
-    )
-    # Jet wrapper:
-    JetUsedInFitTrkDecoTool = CompFactory.JetUsedInFitTrackDecoratorTool(
-        "JetUsedInFitTrkDecoTool",
-        Decorator = IDUsedInFitTrkDecoTool
-    )
-    return JetUsedInFitTrkDecoTool
 
 def getPFlowSelAlg():
     # PFlow objects matched to electrons/muons filtering algorithm 
