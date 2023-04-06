@@ -21,7 +21,7 @@ log = logging.getLogger(__name__)
 
 def jetRecoDictForMET(**recoDict):
     """Get a jet reco dict that's usable for the MET slice"""
-    from ..Jet.JetRecoCommon import getJetCalibDefaultString
+    from ..Jet.JetRecoCommon import getJetCalibDefaultString, jetRecoDictToString
     from ..Jet.JetRecoCommon import recoKeys as jetRecoKeys
     from ..Menu.SignatureDicts import JetChainParts_Default
 
@@ -42,6 +42,7 @@ def jetRecoDictForMET(**recoDict):
             jrd["jetCalib"] = "subjesgscIS"
         else:
             jrd["jetCalib"] = getJetCalibDefaultString(jrd)
+    jrd["jetDefStr"] = jetRecoDictToString(jrd)
     return jrd
 
 
@@ -205,16 +206,20 @@ class TrackingInputConfig(AlgInputConfig):
 
     def create_sequence(self, flags, inputs, RoIs, recoDict):
         from ..Jet.JetRecoSequences import JetFSTrackingSequence
+        from ..Jet.JetRecoCommon import getJetContext
+        jetRecoDict = jetRecoDictForMET(trkopt="ftf", **recoDict)
 
-        trkSeq, trkColls = RecoFragmentsPool.retrieve(
+        trkSeq = RecoFragmentsPool.retrieve(
             JetFSTrackingSequence, flags, trkopt="ftf", RoIs=RoIs
         )
-        return [trkSeq], trkColls
+        return [trkSeq], getJetContext(jetRecoDict)
 
     def create_accumulator(self, flags, inputs, RoIs, recoDict):
         from ..Jet.JetTrackingConfig import JetFSTrackingCfg
+        from ..Jet.JetRecoCommon import getJetContext
+        jetRecoDict = jetRecoDictForMET(trkopt="ftf", **recoDict)
 
-        return JetFSTrackingCfg(flags, "ftf", RoIs)
+        return JetFSTrackingCfg(flags, "ftf", RoIs), getJetContext(jetRecoDict)
 
 
 default_inputs.add_input(TrackingInputConfig())
@@ -549,7 +554,6 @@ class JetInputConfig(AlgInputConfig):
 
     def create_sequence(self, flags, inputs, RoIs, recoDict):
         from ..Jet.JetRecoSequences import jetRecoSequence
-        from ..Jet.JetRecoCommon import getTrkColls
 
         trkopt = "ftf" if self._use_tracks(recoDict) else "notrk"
         recoDict = {k: v for k, v in recoDict.items() if k != "forceTracks"}
@@ -557,21 +561,16 @@ class JetInputConfig(AlgInputConfig):
         # hard code to em (for now) - there are no LC jets in EDM
         jetRecoDict["clusterCalib"] = "em"
 
-        # Extract the track collections part from our input dict
-        trkcolls = {} if trkopt == "notrk" else getTrkColls(inputs)
-
         jetSeq, jetName, jetDef = RecoFragmentsPool.retrieve(
             jetRecoSequence,
             flags,
             clustersKey=inputs[self._input_clusters(recoDict)],
-            **trkcolls,
             **jetRecoDict,
         )
         return [jetSeq], {"Jets": jetName, "JetDef": jetDef}
 
     def create_accumulator(self, flags, inputs, RoIs, recoDict):
         from ..Jet.JetRecoSequencesConfig import JetRecoCfg
-        from ..Jet.JetRecoCommon import getTrkColls
 
         trkopt = "ftf" if self._use_tracks(recoDict) else "notrk"
         recoDict = {k: v for k, v in recoDict.items() if k != "forceTracks"}
@@ -579,12 +578,9 @@ class JetInputConfig(AlgInputConfig):
         # hard code to em (for now) - there are no LC jets in EDM
         jetRecoDict["clusterCalib"] = "em"
 
-        trkcolls = {} if trkopt == "notrk" else getTrkColls(inputs)
-
         acc, jetName, jetDef = JetRecoCfg(
             flags,
             clustersKey=inputs[self._input_clusters(recoDict)],
-            trkcolls=trkcolls,
             **jetRecoDict,
         )
         return acc, {"Jets": jetName, "JetDef": jetDef}

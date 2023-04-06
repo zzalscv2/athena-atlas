@@ -57,7 +57,7 @@ def jetCRMenuSequence(flags, jetsIn, name):
 
     from .JetRecoSequences import JetFSTrackingSequence
     from .JetMenuSequences import getTrackingInputMaker
-    trkSeq, trkColls = RecoFragmentsPool.retrieve(
+    trkSeq = RecoFragmentsPool.retrieve(
         JetFSTrackingSequence, flags, trkopt='ftf', RoIs=trkFSRoI
     )
 

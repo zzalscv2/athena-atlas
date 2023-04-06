@@ -4,11 +4,10 @@
 from enum import Enum
 from TriggerMenuMT.HLT.Config.MenuComponents import RecoFragmentsPool, MenuSequence, algorithmCAToGlobalWrapper
 from AthenaCommon.CFElements import seqAND, parOR
-from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable
 from AthenaConfiguration.ComponentFactory import CompFactory
 from ..CommonSequences.FullScanDefs import  trkFSRoI
 from TrigEDMConfig.TriggerEDMRun3 import recordable
-from .JetRecoCommon import jetRecoDictToString, isPFlow
+from .JetRecoCommon import isPFlow
 from .JetRecoSequences import jetClusterSequence, jetCaloRecoSequences, jetTrackingRecoSequences, jetHICaloRecoSequences, JetRoITrackJetTagSequence, getJetViewAlg, getFastFtaggedJetCopyAlg, eventinfoRecordSequence
 from .JetMenuSequencesConfig import getCaloInputMaker, getTrackingInputMaker
 
@@ -40,24 +39,24 @@ class JetHypoAlgType(Enum):
 
 def makeMenuSequence(flags,jetSeq,IMAlg,jetsIn,jetDefString,hypoType=JetHypoAlgType.STANDARD):
     def trigStreamerHypoTool(chain_dict):
-        return conf2toConfigurable(CompFactory.TrigStreamerHypoTool(chain_dict["chainName"]))
+        return CompFactory.TrigStreamerHypoTool(chain_dict["chainName"])
 
     hyponame = "TrigJetHypoAlg_"+jetDefString
     trigHypoToolGen = trigJetHypoToolFromDict
     if hypoType==JetHypoAlgType.PASSTHROUGH:
         hyponame = "TrigStreamerHypoAlg_passthrough"
-        hypo = conf2toConfigurable(CompFactory.TrigStreamerHypoAlg(hyponame))
+        hypo = CompFactory.TrigStreamerHypoAlg(hyponame)
         trigHypoToolGen = trigStreamerHypoTool
     elif hypoType==JetHypoAlgType.CALOPRESEL:
         hyponame += "_calopresel"
-        hypo = conf2toConfigurable(CompFactory.TrigJetHypoAlg(hyponame, Jets=jetsIn, DoPresel=True))
+        hypo = CompFactory.TrigJetHypoAlg(hyponame, Jets=jetsIn, DoPresel=True)
         trigHypoToolGen = caloPreselJetHypoToolFromDict
     elif hypoType==JetHypoAlgType.ROIPRESEL:
         hyponame += "_roipresel"
-        hypo = conf2toConfigurable(CompFactory.TrigJetHypoAlg(hyponame, Jets=jetsIn, DoPresel=True))
+        hypo = CompFactory.TrigJetHypoAlg(hyponame, Jets=jetsIn, DoPresel=True)
         trigHypoToolGen = roiPreselJetHypoToolFromDict
     else:
-        hypo = conf2toConfigurable(CompFactory.TrigJetHypoAlg(hyponame, Jets=jetsIn))
+        hypo = CompFactory.TrigJetHypoAlg(hyponame, Jets=jetsIn)
 
     log.debug("Generating jet menu sequence for hypo %s",hyponame)
 
@@ -81,12 +80,11 @@ def jetCaloPreselMenuSequence(flags, **jetRecoDict):
         jetCaloRecoSequences,
         flags, RoIs='', **jetRecoDict)
 
-    jetDefString = jetRecoDictToString(jetRecoDict)
-    jetAthRecoSeq = parOR(f"jetSeqCaloPresel_{jetDefString}_RecoSequence", jetRecoSequences)
-    log.debug("Generating jet preselection menu sequence for reco %s",jetDefString)
-    jetAthMenuSeq = seqAND(f"jetSeqCaloPresel_{jetDefString}_MenuSequence_calopresel",[InputMakerAlg,jetAthRecoSeq])
+    jetAthRecoSeq = parOR(f"jetSeqCaloPresel_{jetRecoDict['jetDefStr']}_RecoSequence", jetRecoSequences)
+    log.debug("Generating jet preselection menu sequence for reco %s",jetRecoDict['jetDefStr'])
+    jetAthMenuSeq = seqAND(f"jetSeqCaloPresel_{jetRecoDict['jetDefStr']}_MenuSequence_calopresel",[InputMakerAlg,jetAthRecoSeq])
 
-    return makeMenuSequence(flags,jetAthMenuSeq,InputMakerAlg,jetsIn,jetDefString,
+    return makeMenuSequence(flags,jetAthMenuSeq,InputMakerAlg,jetsIn,jetRecoDict['jetDefStr'],
                             hypoType=JetHypoAlgType.CALOPRESEL), jetDef, clustersKey
 
 # A null preselection, which will only run the cluster making (step 1)
@@ -112,17 +110,16 @@ def jetCaloHypoMenuSequence(flags, isPerf, **jetRecoDict):
     jetRecoSequences, jetsIn, jetDef, clustersKey = RecoFragmentsPool.retrieve(
         jetCaloRecoSequences,
         flags, RoIs='', **jetRecoDict)
-    jetDefString = jetRecoDictToString(jetRecoDict)
-    jetAthRecoSeq = parOR(f"jetSeqCaloHypo_{jetDefString}_RecoSequence", jetRecoSequences)
-    log.debug("Generating jet calo hypo menu sequence for reco %s",jetDefString)
+    jetAthRecoSeq = parOR(f"jetSeqCaloHypo_{jetRecoDict['jetDefStr']}_RecoSequence", jetRecoSequences)
+    log.debug("Generating jet calo hypo menu sequence for reco %s",jetRecoDict['jetDefStr'])
 
     menuseq_suffix = ''
     hypoType = JetHypoAlgType.STANDARD
     if isPerf:
         hypoType = JetHypoAlgType.PASSTHROUGH
         menuseq_suffix = '_passthrough'
-    jetAthMenuSeq = seqAND(f"jetSeqCaloHypo_{jetDefString}_MenuSequence{menuseq_suffix}",[InputMakerAlg,jetAthRecoSeq])
-    return makeMenuSequence(flags,jetAthMenuSeq,InputMakerAlg,jetsIn,jetDefString,hypoType) ,jetDef
+    jetAthMenuSeq = seqAND(f"jetSeqCaloHypo_{jetRecoDict['jetDefStr']}_MenuSequence{menuseq_suffix}",[InputMakerAlg,jetAthRecoSeq])
+    return makeMenuSequence(flags,jetAthMenuSeq,InputMakerAlg,jetsIn,jetRecoDict['jetDefStr'],hypoType) ,jetDef
 
 # A full hypo selecting only on heavy ion calo jets (step 1)
 # Passing isPerf = True disables the hypo
@@ -159,8 +156,7 @@ def jetFSTrackingHypoMenuSequence(flags, clustersKey, isPerf, **jetRecoDict):
         jetTrackingRecoSequences,
         flags, RoIs=trkFSRoI, clustersKey=clustersKey, **jetRecoDict)
 
-    jetDefString = jetRecoDictToString(jetRecoDict)
-    jetAthRecoSeq = parOR(f"jetFSTrackingHypo_{jetDefString}_RecoSequence", jetRecoSequences)
+    jetAthRecoSeq = parOR(f"jetFSTrackingHypo_{jetRecoDict['jetDefStr']}_RecoSequence", jetRecoSequences)
 
     jetAthMenuSeqList = [InputMakerAlg,jetAthRecoSeq]
 
@@ -171,15 +167,15 @@ def jetFSTrackingHypoMenuSequence(flags, clustersKey, isPerf, **jetRecoDict):
             flags, suffix='jet', pvKey=pvKey)
         jetAthMenuSeqList+=[evtInfoRecordSeq]
 
-    log.debug("Generating jet tracking hypo menu sequence for reco %s",jetDefString)
+    log.debug("Generating jet tracking hypo menu sequence for reco %s",jetRecoDict['jetDefStr'])
 
     menuseq_suffix = ''
     hypoType = JetHypoAlgType.STANDARD
     if isPerf:
         hypoType = JetHypoAlgType.PASSTHROUGH
         menuseq_suffix = '_passthrough'
-    jetAthMenuSeq = seqAND(f"jetFSTrackingHypo_{jetDefString}_MenuSequence{menuseq_suffix}",jetAthMenuSeqList)
-    return makeMenuSequence(flags,jetAthMenuSeq,InputMakerAlg,jetsIn,jetDefString,hypoType), jetDef
+    jetAthMenuSeq = seqAND(f"jetFSTrackingHypo_{jetRecoDict['jetDefStr']}_MenuSequence{menuseq_suffix}",jetAthMenuSeqList)
+    return makeMenuSequence(flags,jetAthMenuSeq,InputMakerAlg,jetsIn,jetRecoDict['jetDefStr'],hypoType), jetDef
 
 # A full hypo selecting on jets with RoI track reco (step 2)
 # Needs to be preceded by a presel sequence, and be provided
@@ -190,8 +186,7 @@ def jetFSTrackingHypoMenuSequence(flags, clustersKey, isPerf, **jetRecoDict):
 def jetRoITrackJetTagHypoMenuSequence(flags, jetsIn, isPresel=True, **jetRecoDict):
     InputMakerAlg = getTrackingInputMaker(jetRecoDict['trkopt'])
 
-    jetDefString = jetRecoDictToString(jetRecoDict)
-    log.debug("Generating jet tracking hypo menu sequence for reco %s",jetDefString)
+    log.debug("Generating jet tracking hypo menu sequence for reco %s",jetRecoDict['jetDefStr'])
 
     ftaggedJetsCopyAlg, ftaggedJetsIn = getFastFtaggedJetCopyAlg(flags,jetsIn=jetsIn,jetRecoDict=jetRecoDict)
     ftaggedJetsIn=recordable(ftaggedJetsIn)
@@ -206,7 +201,7 @@ def jetRoITrackJetTagHypoMenuSequence(flags, jetsIn, isPresel=True, **jetRecoDic
     jetViewAlg, filtered_jetsIn = getJetViewAlg(flags,jetsIn=ftaggedJetsIn,**jetRecoDict)
 
     # NOTE: Forcing non-parallel reco seq here else we get stalls from the EventView algs executing before the JetCopyAlg.
-    jetAthRecoSeq = seqAND(f"jetRoITrackJetTagHypo_{jetDefString}_RecoSequence",[ftaggedJetsCopyAlg,jetTrkFtagSeq,jetViewAlg])
+    jetAthRecoSeq = seqAND(f"jetRoITrackJetTagHypo_{jetRecoDict['jetDefStr']}_RecoSequence",[ftaggedJetsCopyAlg,jetTrkFtagSeq,jetViewAlg])
 
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
     robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Si, flags, nameSuffix=InputMakerAlg.name())[0]
@@ -217,7 +212,7 @@ def jetRoITrackJetTagHypoMenuSequence(flags, jetsIn, isPresel=True, **jetRecoDic
     if isPresel:
         hypoType = JetHypoAlgType.ROIPRESEL
         menuseq_suffix = '_roipresel'
-    jetAthMenuSeq = seqAND(f"jetRoITrackJetTagHypo_{jetDefString}_MenuSequence{menuseq_suffix}",
+    jetAthMenuSeq = seqAND(f"jetRoITrackJetTagHypo_{jetRecoDict['jetDefStr']}_MenuSequence{menuseq_suffix}",
                        [InputMakerAlg,robPrefetchAlg,jetAthRecoSeq])
 
-    return makeMenuSequence(flags,jetAthMenuSeq,InputMakerAlg,filtered_jetsIn,jetDefString,hypoType)
+    return makeMenuSequence(flags,jetAthMenuSeq,InputMakerAlg,filtered_jetsIn,jetRecoDict['jetDefStr'],hypoType)

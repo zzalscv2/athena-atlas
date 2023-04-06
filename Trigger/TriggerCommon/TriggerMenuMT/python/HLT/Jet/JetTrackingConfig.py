@@ -10,7 +10,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, conf2
 from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
 from TrigInDetConfig.TrigInDetConfig import trigInDetFastTrackingCfg
 from InDetConfig.InDetPriVxFinderConfig import InDetTrigPriVxFinderCfg
-from TrackVertexAssociationTool.TTVAToolConfig import TTVAToolCfg
+from InDetUsedInVertexFitTrackDecorator.UsedInVertexFitTrackDecoratorCfg import getUsedInVertexFitTrackDecoratorAlg
 
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
@@ -83,14 +83,41 @@ def JetFSTrackingCfg(flags, trkopt, RoIs):
 
     # get the jetContext for trkopt (and build it if not existing yet)
     jetContext, trkKeys = retrieveJetContext(trkopt)
+    IDTrigConfig = getInDetTrigConfig( 'jet' )
 
     acc.merge(
-        JetVertexCfg(
-            flags, trkopt, jetContext,
+        InDetTrigPriVxFinderCfg(
+            flags,
+            name="InDetTrigPriVxFinder_jetFS",
+            signature = "jet",
+            TracksName = jetContext["Tracks"],
+            VxCandidatesOutputName = jetContext["Vertices"]
         ),
         seqname
     )
 
+    acc.addEventAlgo(
+        getUsedInVertexFitTrackDecoratorAlg(
+            trackCont = jetContext["Tracks"],
+            vtxCont   = jetContext["Vertices"]
+        ),
+        seqname
+    )
+
+    # Create the TTVA
+    acc.addEventAlgo(
+        JetRecToolsConfig.getJetTrackVtxAlg(
+            trkopt, algname="jetalg_TrackPrep"+trkopt,
+            # # parameters for the CP::TrackVertexAssociationTool (or the TrackVertexAssociationTool.getTTVAToolForReco function) :
+            #WorkingPoint = "Nonprompt_All_MaxWeight", # this is the new default in offline (see also CHS configuration in StandardJetConstits.py)
+            WorkingPoint = "Custom",
+            d0_cut       = 2.0, 
+            dzSinTheta_cut = 2.0, 
+            doPVPriority = IDTrigConfig.adaptiveVertex,
+        ),
+        seqname
+    )
+    
     # Add the pseudo-jet creator
     acc.addEventAlgo(
         CompFactory.PseudoJetAlgorithm(
@@ -103,10 +130,7 @@ def JetFSTrackingCfg(flags, trkopt, RoIs):
         seqname
     )
 
-    # make sure we output only the key,value related to tracks (otherwise, alg duplication issues)
-    outmap = { k:jetContext[k] for k in trkKeys }
-    
-    return acc, outmap
+    return acc
 
 @AccumulatorCache
 def JetRoITrackingCfg(flags, jetsIn, trkopt, RoIs):
@@ -152,7 +176,7 @@ def JetRoITrackingCfg(flags, jetsIn, trkopt, RoIs):
     return acc, outmap
 
 
-def jetTTVA( flags, signature, jetseq, trkopt, config, verticesname=None, adaptiveVertex=None, selector=None ):
+def addJetTTVA( flags, jetseq, trkopt, config, verticesname=None, adaptiveVertex=None, selector=None ):
 
     tracksname = config.tracks_FTF()
 
@@ -161,21 +185,24 @@ def jetTTVA( flags, signature, jetseq, trkopt, config, verticesname=None, adapti
     # get the jetContext for trkopt (and build it if not existing yet)
     jetContext, trkKeys = retrieveJetContext(trkopt)
 
-    # *****************************
-    # Jet track selection algorithm
-    jettrackselalg = JetRecToolsConfig.getTrackSelAlg( trkopt )
-    
+    vtxFitDecoAlg = getUsedInVertexFitTrackDecoratorAlg(
+        trackCont = jetContext["Tracks"],
+        vtxCont   = jetContext["Vertices"]
+    )
+
     # *****************************
     # Track-vtx association.
-    jettrkprepalg = JetRecToolsConfig.getJetTrackVtxAlg(trkopt, algname="jetalg_TrackPrep"+trkopt,
-                                             # # parameters for the CP::TrackVertexAssociationTool (or the TrackVertexAssociationTool.getTTVAToolForReco function) :
-                                             #WorkingPoint = "Nonprompt_All_MaxWeight", # this is the new default in offline (see also CHS configuration in StandardJetConstits.py)
-                                             WorkingPoint = "Custom",
-                                             d0_cut       = 2.0, 
-                                             dzSinTheta_cut = 2.0, 
-                                             doPVPriority = adaptiveVertex,
-                                             add2Seq = jetseq,
-                                             )
+    jettrkprepalg = JetRecToolsConfig.getJetTrackVtxAlg(
+        trkopt, algname="jetalg_TrackPrep"+trkopt,
+        # # parameters for the CP::TrackVertexAssociationTool (or the TrackVertexAssociationTool.getTTVAToolForReco function) :
+        #WorkingPoint = "Nonprompt_All_MaxWeight", # this is the new default in offline (see also CHS configuration in StandardJetConstits.py)
+        WorkingPoint = "Custom",
+        d0_cut       = 2.0, 
+        dzSinTheta_cut = 2.0, 
+        doPVPriority = adaptiveVertex,
+        # schedules track decoration alg with used-in-fit links
+        add2Seq = jetseq
+    )
 
     # Pseudojets for ghost tracks
     pjgalg = CompFactory.PseudoJetAlgorithm(
@@ -187,62 +214,12 @@ def jetTTVA( flags, signature, jetseq, trkopt, config, verticesname=None, adapti
     )
 
     # Add the 3 algs to the sequence :
-    jetseq += conf2toConfigurable( jettrackselalg )
-    jetseq += conf2toConfigurable( jettrkprepalg )
-    jetseq += conf2toConfigurable( pjgalg )
+    jetseq += vtxFitDecoAlg
+    jetseq += jettrkprepalg
+    jetseq += pjgalg
 
     if flags.Trigger.Jet.doVRJets:
         pv0_jettvassoc, pv0_ttvatool = JetRecToolsConfig.getPV0TrackVertexAssoAlg(trkopt, jetseq)
         pv0trackselalg = JetRecToolsConfig.getPV0TrackSelAlg(pv0_ttvatool, trkopt)
         jetseq += conf2toConfigurable( pv0_jettvassoc )
         jetseq += conf2toConfigurable( pv0trackselalg )
-
-    # make sure we output only the key,value related to tracks (otherwise, alg duplication issues)
-    outmap = { k:jetContext[k] for k in trkKeys }
-    return outmap
-
-@AccumulatorCache
-def JetVertexCfg(flags, trkopt, jetContext):
-    """ Create the jet vertexing """
-
-    acc = InDetTrigPriVxFinderCfg(
-        flags,
-        name="InDetTrigPriVxFinder_jetFS",
-        signature = "jet",
-        TracksName = jetContext["Tracks"],
-        VxCandidatesOutputName = jetContext["Vertices"])
-
-    IDTrigConfig = getInDetTrigConfig( 'jet' )
-
-    # Create the track selection tool
-    # TODO - this is not used anywhere that I can see so I'm skipping it
-
-    # TODO - it would be better not to use this strange JetAlgorithm approach
-    # Create the TTVA
-    acc.addEventAlgo(
-        CompFactory.JetAlgorithm(
-            f"jetalg_TrackPrep{trkopt}",
-            Tools = [
-                CompFactory.TrackVertexAssociationTool(
-                    "jettvassoc",
-                    TrackParticleContainer = jetContext["Tracks"],
-                    TrackVertexAssociation = jetContext["TVA"],
-                    VertexContainer = jetContext["Vertices"],
-                    TrackVertexAssoTool = acc.popToolsAndMerge(
-                        TTVAToolCfg(
-                            flags,
-                            f"trigJetTTVA{trkopt}",
-                            WorkingPoint = "Custom",
-                            d0_cut = 2.0,
-                            dzSinTheta_cut = 2.0,
-                            doPVPriority = IDTrigConfig.adaptiveVertex,
-                            TrackContName = jetContext["Tracks"],
-                            VertexContName = jetContext["Vertices"],
-                        )
-                    ),
-                )
-            ]
-        )
-    )
-    return acc
-
