@@ -42,7 +42,7 @@ def main():
 def getTransform():
     executorSet = set()
     executorSet.add(hybridPOOLMergeExecutor(name = 'AODMerge', skeletonFile = 'RecJobTransforms/skeleton.MergePool_tf.py',
-                                   skeletonCA = 'RecJobTransforms.AODMerge_Skeleton', inData = ['AOD'], outData = ['AOD_MRG']))
+                                   skeletonCA = 'RecJobTransforms.MergePool_Skeleton', inData = ['AOD'], outData = ['AOD_MRG']))
     executorSet.add(athenaExecutor(name = 'AODtoTAG', skeletonFile = 'RecJobTransforms/skeleton.AODtoTAG_tf.py',
                                    inData = ['AOD_MRG'], outData = ['TAG'],))
 

@@ -41,7 +41,7 @@ def main():
 def getTransform():
     executorSet = set()
     executorSet.add(hybridPOOLMergeExecutor(name = 'ESDMerge', skeletonFile = 'RecJobTransforms/skeleton.MergePool_tf.py',
-                                   inData = ['ESD'], outData = ['ESD_MRG']))
+                                   skeletonCA = 'RecJobTransforms.MergePool_Skeleton', inData = ['ESD'], outData = ['ESD_MRG']))
 
     trf = transform(executor = executorSet)
     
