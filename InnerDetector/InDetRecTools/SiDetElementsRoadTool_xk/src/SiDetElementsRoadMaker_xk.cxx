@@ -509,9 +509,10 @@ void InDet::SiDetElementsRoadMaker_xk::detElementsRoad
   }
   auto vec2 = lDE; 
   std::sort(lDE.begin(),lDE.end(),InDet::compDetElementWays());
-  // Fill list pointers to detector elements
+  // Fill pointers to detector elements
+  Road.reserve(lDE.size());
   for (auto & d : lDE){
-    if (testDirection && d.way() < 0) continue; 
+    if (testDirection && d.way() < 0) {continue;}
     Road.push_back(d.link()->detElement());
   }
 }
