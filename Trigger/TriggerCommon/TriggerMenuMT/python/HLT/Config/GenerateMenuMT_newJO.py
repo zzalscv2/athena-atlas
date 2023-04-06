@@ -115,8 +115,7 @@ def makeHLTTree(flags):
     acc = ComponentAccumulator()
     
     steps = seqAND('HLTAllSteps')
-    finalDecisions, menuAcc = decisionTreeFromChains(flags, steps, HLTMenuConfig.configsList(), HLTMenuConfig.dictsList(), newJO=False)        
-    menuAcc.wasMerged()
+    finalDecisions, menuAcc = decisionTreeFromChains(flags, steps, HLTMenuConfig.configsList(), HLTMenuConfig.dictsList(), newJO=False)
     if log.getEffectiveLevel() <= logging.DEBUG:
         menuAcc.printConfig()
 
@@ -139,7 +138,7 @@ def makeHLTTree(flags):
 
     from AthenaCommon.CFElements import checkSequenceConsistency 
     checkSequenceConsistency(steps)
-    return menuAcc
+    return acc
 
 
 if __name__ == "__main__":

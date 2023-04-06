@@ -15,16 +15,17 @@ import re
 
 log = logging.getLogger( __name__ )
 
-
 def mergeChainDefs(listOfChainDefs, chainDict, perSig_lengthOfChainConfigs = None):
     #chainDefList is a list of Chain() objects
     #one for each part in the chain
     
-    # protect against serial merging in the signature code
+    # protect against serial merging in the signature code (to be fixed)
     if isCAMenu():
         try:           
             for chainPartConfig in listOfChainDefs:
                 if any ([ "_MissingCA" in step.name for step in chainPartConfig.steps]):
+                    # flag as merged all CAs created , but not used   
+                    [seq.ca.wasMerged() for chainPartConfig in listOfChainDefs for step in chainPartConfig.steps for seq in step.sequences  ]                                     
                     raise NoCAmigration ('[mergeChainDefs] not possible for chain {0} due to missing configurations'.format(chainDict['chainName']))
         except NoCAmigration as e:
             log.warning(str(e))
