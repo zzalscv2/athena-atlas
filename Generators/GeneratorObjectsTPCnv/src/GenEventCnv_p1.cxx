@@ -102,7 +102,8 @@ void GenEventCnv_p1::persToTrans( const GenEvent_p1* persObj,
   // set the signal process vertex
   const int sigProcVtx = persObj->m_signalProcessVtx;
   if ( sigProcVtx != 0 ) {
-    HepMC::set_signal_process_vertex(transObj, HepMC::barcode_to_vertex(transObj,sigProcVtx ) );
+    auto Vtx = HepMC::barcode_to_vertex(transObj,sigProcVtx );
+    HepMC::set_signal_process_vertex(transObj, Vtx );
   }
 
   // connect particles to their end vertices
