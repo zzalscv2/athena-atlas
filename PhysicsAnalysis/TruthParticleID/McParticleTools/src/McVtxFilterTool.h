@@ -146,7 +146,7 @@ class McVtxFilterTool : virtual public IMcVtxFilterTool,
    *  vertex. (Default: just add the vertex, not the whole tree of children)
    */
   void addVertex(  const HepMC::ConstGenVertexPtr& vtx, HepMC::GenEvent * evt,
-		  const VtxType::Flag vtxType = VtxType::IsNotRootVertex ) const;
+		  const VtxType::Flag vtxType = VtxType::IsNotRootVertex, bool isSignal=false ) const;
 
   /** Helper function: return true if we are at a root vertex (i.e., a vertex
    *  that satisfies one of the chosen decay modes) and if the PDG of the particle
