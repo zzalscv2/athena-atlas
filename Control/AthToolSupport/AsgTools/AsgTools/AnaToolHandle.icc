@@ -825,6 +825,9 @@ namespace asg
     if (m_handleUser->isSet())
       return detail::AnaToolHandleMode::USER;
 
+    if (m_config.empty() && m_name.empty())
+        return detail::AnaToolHandleMode::EMPTY;
+
     if (!m_originalTypeAndName.empty() &&
         m_handleUser->typeAndName() != m_originalTypeAndName)
       return detail::AnaToolHandleMode::USER;
@@ -865,9 +868,6 @@ namespace asg
 
     if (m_config.empty() && !m_handleUser->typeAndName().empty() && (m_handleUser->type() != this->type() || m_handleUser->name() != this->name()))
       return detail::AnaToolHandleMode::USER;
-
-    if (m_config.empty() && m_name.empty())
-      return detail::AnaToolHandleMode::EMPTY;
 
     if (isPublic())
       return detail::AnaToolHandleMode::CREATE_SHARED;
