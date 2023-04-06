@@ -210,10 +210,8 @@ McVtxFilterTool::filterMcEventCollection( const McEventCollection* mcColl,
     return;
   }
 
-  /// Create a map to store the GenVertex barcodes which have been
-  /// recorded by a "full-vertex" (McVtxFilter which has a parent branch
-  /// and a child branch)
-  std::map<int, bool> bcToFullVtx;
+  /// Create a set with ids of copied vertices.
+  std::set<int> bcToFullVtx;
 
   /// Local copy of the GenEvent from StoreGate
   const HepMC::GenEvent * evtSrc = (*mcColl->begin());
@@ -221,39 +219,23 @@ McVtxFilterTool::filterMcEventCollection( const McEventCollection* mcColl,
   /// Create the event container, with Signal Process 
   /// and event number from the GenEvent source
   HepMC::GenEvent * evt = HepMC::copyemptyGenEvent(evtSrc);
-
   for ( const auto& itrPart: *evtSrc) {
     auto dcyVtx = itrPart->end_vertex();
-    if ( dcyVtx ) {
-      int vtxBC = HepMC::barcode(dcyVtx);
-      ATH_MSG_VERBOSE("Doing vtx: " << vtxBC);
+    if ( !dcyVtx ) continue;
+    int vtxBC = HepMC::barcode_or_id(dcyVtx);
+    if (bcToFullVtx.count(vtxBC)!=0) continue;
+    ATH_MSG_VERBOSE("Doing vtx: " << dcyVtx);
 
-      int i = 0;
-      bool added = false;
-      for( DataVector<McVtxFilter>::const_iterator filter = m_filters.begin(); filter != m_filters.end(); ++filter,++i ) {
-	ATH_MSG_VERBOSE("Processing with filter[" << i << "]...");
-	if ( (*filter)->isAccepted( dcyVtx ) ) {
-	  m_counter[i] += 1;
-	  ATH_MSG_VERBOSE("Filter[" << i << "] accepted this vtx : " << vtxBC);
-
-	  /// Check if this vertex has already been recorded 
-	  /// in the new GenEvent
-	  if ( !added && HepMC::barcode_to_vertex(evt,vtxBC) ) {
-	    added = true;
-	    //
-	    // nothing to do
-	    //
-	    continue;
-	  } else {
-	    /// this is a whole new GenVertex which has to added
-	    /// so we add it in the list of barcodes
-	    bcToFullVtx.insert(std::pair<int,bool>( vtxBC,(*filter)->isFullVtx() ) );
-	    addVertex( dcyVtx, evt, VtxType::IsRootVertex );
-	  }//> (part of the) vertex has already been recorded
-
-	}//> accepted
-      }//> end loop over filters
-    }//> valid decay vertex
+    int i = 0;
+    for( DataVector<McVtxFilter>::const_iterator filter = m_filters.begin(); filter != m_filters.end(); ++filter,++i ) {
+      ATH_MSG_VERBOSE("Processing with filter[" << i << "]...");
+      if ( !(*filter)->isAccepted( dcyVtx ) ) continue;
+      m_counter[i] += 1;
+      ATH_MSG_VERBOSE("Filter[" << i << "] accepted this vtx : " << dcyVtx);
+      bcToFullVtx.insert(vtxBC);
+      addVertex( dcyVtx, evt, VtxType::IsRootVertex );
+      break;
+    }//> end loop over filters
   }//> loop over particles
 
   if ( m_doSignalProcessVtx ) {
@@ -266,21 +248,12 @@ McVtxFilterTool::filterMcEventCollection( const McEventCollection* mcColl,
     /// chance or because it was just meant to be)
     auto sigProcVtx = HepMC::signal_process_vertex(evtSrc);
     if ( sigProcVtx ) {
-      if ( HepMC::barcode_to_vertex(evt,HepMC::barcode(sigProcVtx)) ) {
-	/// it has already been copied
-      } else {
-	/// copy it
-	addVertex( sigProcVtx, evt );
-
-	auto vtx = HepMC::barcode_to_vertex(evt,HepMC::barcode(sigProcVtx));
-	HepMC::set_signal_process_vertex(evt, vtx );
-
+      if ( bcToFullVtx.count(HepMC::barcode_or_id(sigProcVtx)) == 0) {
+        addVertex( sigProcVtx, evt,VtxType::IsNotRootVertex, true );
       }//> signal process vertex has to be added
     } else {
       //> Original GenEvent has a NO signal process vertex set-up
-      ATH_MSG_DEBUG("You asked to record signal_process_vertex but :"
-		    << endmsg
-		    << " there is NO signal_process_vertex in this event !!");
+      ATH_MSG_DEBUG("You asked to record signal_process_vertex but :" << endmsg << " there is NO signal_process_vertex in this event !!");
     }
   
   } //> end do SignalProcessVtx
@@ -297,7 +270,7 @@ McVtxFilterTool::filterMcEventCollection( const McEventCollection* mcColl,
 
 void McVtxFilterTool::addVertex( const HepMC::ConstGenVertexPtr& srcVtx, 
 				 HepMC::GenEvent * evt,
-				 const VtxType::Flag vtxType ) const
+				 const VtxType::Flag vtxType, bool isSignal ) const
 {
   ATH_MSG_VERBOSE("In McVtxFilterTool::addVertex( vtxType= "<<vtxType<< " )");
 #ifdef HEPMC3
@@ -310,7 +283,7 @@ void McVtxFilterTool::addVertex( const HepMC::ConstGenVertexPtr& srcVtx,
     HepMC::suggest_barcode(vtx, HepMC::barcode(srcVtx) );
     vtx->add_attribute("weights",srcVtx->attribute<HepMC3::VectorDoubleAttribute> ("weights"));
   }
-  
+  if (isSignal)  HepMC::set_signal_process_vertex(evt, vtx );
   /// Fill the parent branch
   for ( const auto& parent:  srcVtx->particles_in()) {
     HepMC::GenParticlePtr  mother = (evt == parent->parent_event()) ? std::const_pointer_cast<HepMC3::GenParticle>(parent) : nullptr ;
@@ -376,7 +349,7 @@ void McVtxFilterTool::addVertex( const HepMC::ConstGenVertexPtr& srcVtx,
     vtx->weights() = srcVtx->weights();
     evt->add_vertex(vtx);
   }
-  
+  if (isSignal)  HepMC::set_signal_process_vertex(evt, vtx );
   /// Fill the parent branch
   for ( HepMC::GenVertex::particles_in_const_iterator parent = srcVtx->particles_in_const_begin();
 	parent != srcVtx->particles_in_const_end();
