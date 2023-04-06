@@ -459,7 +459,7 @@ double Muon::MdtDriftCircleOnTrackCreator::getErrorFromRt(const Muon::MdtDriftCi
   double t = DCT.driftTime();
   const MuonGM::MdtReadoutElement* detEl = DCT.detectorElement();
 
-  MuonCalib::MdtFullCalibData data = m_mdtCalibrationDbTool->getCalibration( detEl->collectionHash(), detEl->detectorElementHash() );
+  MuonCalib::MdtFullCalibData data = m_mdtCalibrationDbTool->getCalibration( detEl->identifyHash(), detEl->detectorElementHash() );
   const MuonCalib::MdtRtRelation* rtRelation = data.rtRelation;
   if( !rtRelation ){
     ATH_MSG_WARNING("no calibration found for tube " << m_idHelperSvc->toString(DCT.identify()));
@@ -606,7 +606,7 @@ Muon::MdtDriftCircleStatus Muon::MdtDriftCircleOnTrackCreator::driftCircleStatus
   }
   
   // access rt relation
-  MuonCalib::MdtFullCalibData data = m_mdtCalibrationDbTool->getCalibration( detEl->collectionHash(), detEl->detectorElementHash() );
+  MuonCalib::MdtFullCalibData data = m_mdtCalibrationDbTool->getCalibration( detEl->identifyHash(), detEl->detectorElementHash() );
   const MuonCalib::MdtRtRelation* rtRelation = data.rtRelation;
   if( !rtRelation ){
     ATH_MSG_WARNING("no calibration found for tube " << m_idHelperSvc->toString(DCT.identify()));
