@@ -162,7 +162,7 @@ def addToMetaData(flags, streamName, itemOrList, AcceptAlgs=[], HelperTools=[], 
 
    Returns CA to be merged
    """
-   if not hasattr(flags.Output, f"doWrite{streamName}") or not getattr(flags.Output, f"doWrite{streamName}"):
+   if not getattr(flags.Output, f"doWrite{streamName}"):
        return ComponentAccumulator()
    items = [itemOrList] if isinstance(itemOrList, str) else itemOrList
    return OutputStreamCfg(flags, streamName, MetadataItemList=items,
