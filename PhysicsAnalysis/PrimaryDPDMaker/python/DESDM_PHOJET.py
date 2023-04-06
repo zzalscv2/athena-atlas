@@ -46,6 +46,7 @@ def DESDM_PHOJETCfg(configFlags):
     # Define contents of the format
     # =============================
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
 
     items = ['xAOD::EventInfo#*', 'xAOD::EventAuxInfo#*',
              # Standard CP objects
@@ -121,6 +122,7 @@ def DESDM_PHOJETCfg(configFlags):
                   'xAOD::TruthEventContainer#*','xAOD::TruthEventAuxContainer#*']
 
     acc.merge( OutputStreamCfg( configFlags, 'DESDM_PHOJET', ItemList=items, AcceptAlgs=["DESDM_PHOJETKernel"]) )
+    acc.merge(InfileMetaDataCfg(configFlags, 'DESDM_PHOJET', AcceptAlgs=["DESDM_PHOJETKernel"]))
 
     return acc
 
