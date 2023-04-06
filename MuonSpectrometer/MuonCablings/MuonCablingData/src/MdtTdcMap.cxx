@@ -6,8 +6,8 @@
 #include "MuonIdHelpers/MdtIdHelper.h"
 
 // constructor
-MdtTdcMap::MdtTdcMap(MezzCardPtr mezType, const MdtCablingData& cabling_data, const MdtIdHelper* helper) :
-    m_statId{cabling_data}, m_mezzCard{mezType}, m_mdtIdHelper{helper} {   
+MdtTdcMap::MdtTdcMap(MezzCardPtr mezType, const MdtCablingData& cabling_data) :
+    m_statId{cabling_data}, m_mezzCard{mezType} {   
 
         for (uint8_t globTube : m_mezzCard->tdcToTubeMap()) {
             if (globTube == NOTSET) continue;
