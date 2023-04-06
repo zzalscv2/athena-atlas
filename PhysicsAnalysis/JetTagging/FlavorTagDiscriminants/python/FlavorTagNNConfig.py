@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -25,6 +25,15 @@ def DL2ToolCfg(ConfigFlags, NNFile = '', FlipConfig='STANDARD' , **options):
         for aggragate in ['minimum','maximum','average']:
             remap[f'{aggragate}TrackRelativeEta'] = (
                 f'JetFitterSecondaryVertex_{aggragate}AllJetTrackRelativeEta')
+
+    # Similar hack for 21.9-based upgrade training
+    if '20221008' in NNFile and 'dips' in NNFile:
+        for aggragate in ['InnermostPixelLayer', 'NextToInnermostPixelLayer',
+                          'InnermostPixelLayerShared',
+                          'InnermostPixelLayerSplit']:
+            remap[f'numberOf{aggragate}Hits'] = (
+                f'numberOf{aggragate}Hits21p9')
+
     options['variableRemapping'] = remap
 
     dl2 = CompFactory.FlavorTagDiscriminants.DL2Tool(**options)
@@ -38,6 +47,19 @@ def GNNToolCfg(ConfigFlags, NNFile = '', **options):
 
     options['nnFile'] = NNFile
     options['name'] = "decorator"
+
+    # this map lets us change the names of EDM inputs with respect to
+    # the values we store in the saved NN
+    remap = {}
+
+    if '20221010' in NNFile and 'GN1' in NNFile:
+        for aggragate in ['InnermostPixelLayer', 'NextToInnermostPixelLayer',
+                          'InnermostPixelLayerShared',
+                          'InnermostPixelLayerSplit']:
+            remap[f'numberOf{aggragate}Hits'] = (
+                f'numberOf{aggragate}Hits21p9')
+
+    options['variableRemapping'] = remap
 
     gnntool = CompFactory.FlavorTagDiscriminants.GNNTool(**options)
 

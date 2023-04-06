@@ -665,7 +665,6 @@ namespace FlavorTagDiscriminants {
 
       if (flip_config != FlipTagConfig::STANDARD) {
         rewriteFlipConfig(config, flip_converters);
-
       }
 
       // build the standard inputs
@@ -729,7 +728,10 @@ namespace FlavorTagDiscriminants {
       // build the track inputs
 
       std::vector<std::pair<std::string, std::vector<std::string> > > trk_names;
-      for (const auto& node: config.input_sequences) {
+      for (auto& node: config.input_sequences) {
+        remap_inputs(node.variables, remap_scalar,
+		     node.defaults);
+
         std::vector<std::string> names;
         for (const auto& var: node.variables) {
           names.push_back(var.name);
@@ -738,6 +740,11 @@ namespace FlavorTagDiscriminants {
       }
 
       TypeRegexes trk_type_regexes {
+        // Some innermost / next-to-innermost hit variables had a different
+        // definition in 21p9, recomputed here with customGetter to reuse
+        // existing training
+        // EDMType picked correspond to the first matching regex
+        {"numberOf.*21p9"_r, EDMType::CUSTOM_GETTER},
         {"numberOf.*"_r, EDMType::UCHAR},
         {"btagIp_(d0|z0SinTheta)Uncertainty"_r, EDMType::FLOAT},
         {"(numberDoF|chiSquared|qOverP|theta)"_r, EDMType::FLOAT},
@@ -830,13 +837,16 @@ namespace FlavorTagDiscriminants {
     // code for the track inputs is above.
     std::tuple<
       std::vector<internal::TrackSequenceBuilder>,
-      FTagDataDependencyNames>
+      FTagDataDependencyNames,
+      std::set<std::string>>
     createTrackGetters(
       const std::vector<FTagTrackSequenceConfig>& track_sequences,
       const FTagOptions& options)
     {
       FTagDataDependencyNames deps;
       std::vector<internal::TrackSequenceBuilder> trackSequenceBuilders;
+      std::map<std::string, std::string> remap = options.remap_scalar;
+      std::set<std::string> used_remap;
 
       for (const FTagTrackSequenceConfig& cfg: track_sequences) {
         internal::TrackSequenceBuilder track_getter(
@@ -863,13 +873,18 @@ namespace FlavorTagDiscriminants {
             track_getter.sequencesFromTracks.push_back(seqGetter);
           }
           track_data_deps.merge(deps);
+
+	  if (auto h = remap.extract(input_cfg.name)){
+            used_remap.insert(h.key());
+          }
+
         }
         trackSequenceBuilders.push_back(track_getter);
         deps.trackInputs.merge(track_data_deps);
         deps.bTagInputs.insert(options.track_link_name);
       }
 
-      return std::make_tuple(trackSequenceBuilders, deps);
+      return std::make_tuple(trackSequenceBuilders, deps, used_remap);
     }
 
 
