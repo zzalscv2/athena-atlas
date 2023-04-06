@@ -4,7 +4,6 @@
 from enum import Enum
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InEventRecoCA
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
 from .JetRecoCommon import jetRecoDictToString
 from ..CommonSequences.FullScanDefs import  trkFSRoI, em_clusters, lc_clusters
@@ -98,7 +97,6 @@ class JetHypoAlgType(Enum):
     ROIPRESEL = 2
     PASSTHROUGH = 3
 
-@AccumulatorCache
 def jetSelectionCfg(flags, reco, jetsIn, hypoType):
     selname = reco.name.replace('RecoSequence','MenuSequence')
     if hypoType==JetHypoAlgType.PASSTHROUGH:
