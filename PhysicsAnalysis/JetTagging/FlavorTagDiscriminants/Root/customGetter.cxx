@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include "FlavorTagDiscriminants/customGetter.h"
 #include "FlavorTagDiscriminants/BTagTrackIpAccessor.h"
@@ -251,6 +251,35 @@ namespace {
         return sct_hits(t) + sct_dead(t);
       });
     }
+    if (name == "numberOfInnermostPixelLayerHits21p9") {
+      SG::AuxElement::ConstAccessor<unsigned char> barrel_hits("numberOfInnermostPixelLayerHits");
+      SG::AuxElement::ConstAccessor<unsigned char> endcap_hits("numberOfInnermostPixelLayerEndcapHits");
+      return TJGetter([barrel_hits, endcap_hits](const Tp& t, const Jet&) {
+        return barrel_hits(t) + endcap_hits(t);
+      });
+    }
+    if (name == "numberOfNextToInnermostPixelLayerHits21p9") {
+      SG::AuxElement::ConstAccessor<unsigned char> barrel_hits("numberOfNextToInnermostPixelLayerHits");
+      SG::AuxElement::ConstAccessor<unsigned char> endcap_hits("numberOfNextToInnermostPixelLayerEndcapHits");
+      return TJGetter([barrel_hits, endcap_hits](const Tp& t, const Jet&) {
+        return barrel_hits(t) + endcap_hits(t);
+      });
+    }
+    if (name == "numberOfInnermostPixelLayerSharedHits21p9") {
+      SG::AuxElement::ConstAccessor<unsigned char> barrel_hits("numberOfInnermostPixelLayerSharedHits");
+      SG::AuxElement::ConstAccessor<unsigned char> endcap_hits("numberOfInnermostPixelLayerSharedEndcapHits");
+      return TJGetter([barrel_hits, endcap_hits](const Tp& t, const Jet&) {
+        return barrel_hits(t) + endcap_hits(t);
+      });
+    }
+    if (name == "numberOfInnermostPixelLayerSplitHits21p9") {
+      SG::AuxElement::ConstAccessor<unsigned char> barrel_hits("numberOfInnermostPixelLayerSplitHits");
+      SG::AuxElement::ConstAccessor<unsigned char> endcap_hits("numberOfInnermostPixelLayerSplitEndcapHits");
+      return TJGetter([barrel_hits, endcap_hits](const Tp& t, const Jet&) {
+        return barrel_hits(t) + endcap_hits(t);
+      });
+    }
+
 
     return std::nullopt;
   }

@@ -233,114 +233,69 @@ GenAodValidationTool::executeTool( const HepMC::GenEvent* refMcEvts,
 	       << std::endl;
 
 #ifdef HEPMC3   
-  // loop over reference vertices
-  for ( const auto&  vtx: refMcEvts->vertices()) {
-    if ( m_ppFilter.isAccepted(vtx) &&
-	 !m_showerFilter.isAccepted(vtx) ) {
-      HepMC::Print::line(*m_outFile,vtx);
-      HepMC::ConstGenVertexPtr checkVtx = HepMC::barcode_to_vertex(checkMcEvts,HepMC::barcode(vtx));
-      if ( !checkVtx ) {
-	ATH_MSG_WARNING
-	  ("Output GenEvent is missing the selected HardScattering Vtx !!"
-	   << " (" << vtx << ")");
-      } else {
-	(*m_outFile) << "---------" << std::endl;
-	 HepMC::Print::line(*m_outFile,checkVtx);
-	if ( !compareVtx( vtx, checkVtx ) ) {
-	  ATH_MSG_WARNING("Selected HardScattering vertices are NOT the same !!"
-			  << " at Event [" << evtNbr << "]"
-			  << " refVtx = " << vtx);
-	}
-      }
-    }
+  std::map<int,int> ref_bc_to_id;
+  const auto& refvertices = refMcEvts->vertices();
+  for ( const auto&  vtx: refvertices) {
+    if ( m_ppFilter.isAccepted(vtx) &&  !m_showerFilter.isAccepted(vtx) ) {
+      ref_bc_to_id[HepMC::barcode(vtx)] = vtx->id();
+   }
   }
-  (*m_outFile) << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << std::endl;
-  // loop over slimmed HepMC::GenEvent and check that vertices
-  // are comparable
-  // loop over reference vertices
-  for (const auto& checkVtx: checkMcEvts->vertices()) {
-    HepMC::ConstGenVertexPtr refVtx = HepMC::barcode_to_vertex(refMcEvts,HepMC::barcode(checkVtx));
-    if (!refVtx) {
-      ATH_MSG_WARNING("In Event [" << evtNbr
-		      << "]: got null ref-vertex ( " 
-		      << checkVtx << ")");
-      continue;
-    }
-    if ( !compareVtx( refVtx, checkVtx ) ) {
-      ATH_MSG_WARNING("In Event [" << evtNbr
-		      << "]: vertices are not the SAME (" 
-		      << refVtx << ")");
-      std::stringstream refVtxStr;
-      HepMC::Print::line(refVtxStr,refVtx);
-      std::stringstream checkVtxStr;
-      HepMC::Print::line(checkVtxStr,checkVtx);
-      msg(MSG::WARNING) << std::endl
-			<< "######### Ref vertex:" << std::endl
-			<< refVtxStr.str()
-			<< std::endl
-			<< "######### Check vertex:" << std::endl
-			<< checkVtxStr.str()
-			<< endmsg;
-    }
-  }  
+  std::map<int,int> che_bc_to_id;
+  const auto& chevertices = checkMcEvts->vertices();
+  for (const auto& checkVtx: chevertices) {
+    che_bc_to_id[HepMC::barcode(checkVtx)] = checkVtx->id();
+  }
+  std::set<int> allbarcodes;
+  for (const auto &[bc,id]: ref_bc_to_id) allbarcodes.insert(bc);
+  for (const auto &[bc,id]: che_bc_to_id) allbarcodes.insert(bc);
+  for (const auto &bc: allbarcodes){
+   auto ref_it = ref_bc_to_id.find(bc);
+   auto che_it = che_bc_to_id.find(bc);
+   if (ref_it == ref_bc_to_id.end()) {ATH_MSG_WARNING("In Event [" << evtNbr << "]: got null ref-vertex (barcode: " << bc << ")");  continue; }
+   if (che_it == che_bc_to_id.end()) {ATH_MSG_WARNING("Output GenEvent is missing the selected HardScattering Vtx !!"<< " (" << bc << ")"); continue; }
+   if (-ref_it->second > int(refvertices.size()) ) { continue; } 
+   if (-che_it->second > int(chevertices.size()) ) { continue; } 
+   const auto& refvtx = refvertices[-ref_it->second-1];
+   const auto& chevtx = chevertices[-che_it->second-1];
+   (*m_outFile) << refvtx << std::endl;
+   (*m_outFile) << chevtx << std::endl;
+   (*m_outFile) << "---------" << std::endl;
+   if ( !compareVtx( refvtx, chevtx ) ) {
+        ATH_MSG_WARNING("Selected HardScattering vertices are NOT the same !!"<< " at Event [" << evtNbr << "]"<< " refVtx = " << refvtx<<" chevtx = " << chevtx);
+   }
+  }
+  (*m_outFile) << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << std::endl;  
 #else
-  // loop over reference vertices
-  for ( HepMC::GenEvent::vertex_const_iterator vtx = refMcEvts->vertices_begin();
-	vtx != refMcEvts->vertices_end(); 
-	++vtx ) {
-    if ( m_ppFilter.isAccepted(*vtx) &&
-	 !m_showerFilter.isAccepted(*vtx) ) {
-      (*vtx)->print(*m_outFile);
-      const HepMC::GenVertex* checkVtx = checkMcEvts->barcode_to_vertex((*vtx)->barcode());
-      if ( 0 == checkVtx ) {
-	ATH_MSG_WARNING
-	  ("Output GenEvent is missing the selected HardScattering Vtx !!"
-	   << " (" << (*vtx)->barcode() << ")");
-      } else {
-	(*m_outFile) << "---------" << std::endl;
-	checkVtx->print(*m_outFile);
-	if ( !compareVtx( *vtx, checkVtx ) ) {
-	  ATH_MSG_WARNING("Selected HardScattering vertices are NOT the same !!"
-			  << " at Event [" << evtNbr << "]"
-			  << " refVtx = " << (*vtx)->barcode());
-	}
-      }
-    }
+  std::set<int> ref_bc;
+  for ( auto vtxIt = refMcEvts->vertices_begin(); vtxIt != refMcEvts->vertices_end(); ++vtxIt ) {
+    auto vtx =*vtxIt;
+    if ( m_ppFilter.isAccepted(vtx) &&  !m_showerFilter.isAccepted(vtx) ) {
+      ref_bc.insert(vtx->barcode());
+   }
   }
-
+  std::set<int> che_bc;
+  for ( auto vtxIt = checkMcEvts->vertices_begin(); vtxIt != checkMcEvts->vertices_end(); ++vtxIt ) {
+    auto vtx =*vtxIt;
+    che_bc.insert(vtx->barcode());
+  }
+  std::set<int> allbarcodes;
+  for (const auto &bc: ref_bc) allbarcodes.insert(bc);
+  for (const auto &bc: che_bc) allbarcodes.insert(bc);
+  for (const auto &bc: allbarcodes){
+   auto ref_it = ref_bc.find(bc);
+   auto che_it = che_bc.find(bc);
+   if (ref_it == ref_bc.end()) {ATH_MSG_WARNING("In Event [" << evtNbr << "]: got null ref-vertex (barcode: " << bc << ")"); continue; }
+   if (che_it == che_bc.end()) {ATH_MSG_WARNING("Output GenEvent is missing the selected HardScattering Vtx !!"<< " (" << bc << ")"); continue; }
+   const auto refvtx = refMcEvts->barcode_to_vertex(bc);
+   const auto chevtx = checkMcEvts->barcode_to_vertex(bc);
+   (*m_outFile) << refvtx << std::endl;
+   (*m_outFile) << chevtx << std::endl;
+   (*m_outFile) << "---------" << std::endl;
+   if ( !compareVtx( refvtx, chevtx ) ) {
+     ATH_MSG_WARNING("Selected HardScattering vertices are NOT the same !!"<< " at Event [" << evtNbr << "]"<< " refVtx = " << refvtx<<" chevtx = " << chevtx);
+   }
+  }
   (*m_outFile) << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << std::endl;
-
-  // loop over slimmed HepMC::GenEvent and check that vertices
-  // are comparable
-  // loop over reference vertices
-  for ( HepMC::GenEvent::vertex_const_iterator vtx = checkMcEvts->vertices_begin();
-	vtx != checkMcEvts->vertices_end(); 
-	++vtx ) {
-    const HepMC::GenVertex* checkVtx = *vtx;
-    const HepMC::GenVertex* refVtx = refMcEvts->barcode_to_vertex(checkVtx->barcode());
-    if (0 == refVtx) {
-      ATH_MSG_WARNING("In Event [" << evtNbr
-		      << "]: got null ref-vertex (barcode: " 
-		      << checkVtx->barcode() << ")");
-      continue;
-    }
-    if ( !compareVtx( refVtx, checkVtx ) ) {
-      ATH_MSG_WARNING("In Event [" << evtNbr
-		      << "]: vertices are not the SAME (" 
-		      << refVtx->barcode() << ")");
-      std::stringstream refVtxStr;
-      refVtx->print(refVtxStr);
-      std::stringstream checkVtxStr;
-      checkVtx->print(checkVtxStr);
-      msg(MSG::WARNING) << std::endl
-			<< "######### Ref vertex:" << std::endl
-			<< refVtxStr.str()
-			<< std::endl
-			<< "######### Check vertex:" << std::endl
-			<< checkVtxStr.str()
-			<< endmsg;
-    }
-  }  
 #endif
 
   return StatusCode::SUCCESS;

@@ -12,7 +12,6 @@
 LArShape2Ntuple::LArShape2Ntuple(const std::string& name, ISvcLocator* pSvcLocator): 
   LArCond2NtupleBase(name, pSvcLocator)
 {
-  declareProperty("ContainerKey", m_contKey  = "LArShape");
   declareProperty("NtupleName",   m_ntName   = "SHAPE");
   declareProperty("NtupleFile",   m_ntFile   = "FILE1");
   declareProperty("isComplete",   m_isComplete=false);
@@ -24,6 +23,7 @@ LArShape2Ntuple::~LArShape2Ntuple()
 
 
 StatusCode LArShape2Ntuple::initialize() {
+  ATH_CHECK(m_contKey.initialize());
   m_ntTitle="Pulse Shape";
   m_ntpath=std::string("/NTUPLES/")+m_ntFile+std::string("/")+m_ntName;
   return LArCond2NtupleBase::initialize();
@@ -54,11 +54,17 @@ StatusCode LArShape2Ntuple::stop() {
   const LArShapeComplete* larShapeComplete = NULL ;
 
   if (m_isComplete) {
-    ATH_CHECK(detStore()->retrieve(larShapeComplete,m_contKey));
+    ATH_CHECK(detStore()->retrieve(larShapeComplete,m_contKey.key()));
     larShape=larShapeComplete; //Cast to base-class
   }
   else { //Use just the abstract interface (works also for LArShapeFlat and LArShapeMC)
-    ATH_CHECK(detStore()->retrieve(larShape,m_contKey));
+    // For compatibility with existing configurations, look in the detector
+    // store first, then in conditions.
+    larShape=detStore()->tryConstRetrieve<ILArShape> (m_contKey.key());
+    if (!larShape) {
+      SG::ReadCondHandle<ILArShape> shapeHandle{m_contKey};
+      larShape=*shapeHandle;
+    }
   }
 
   const LArOnOffIdMapping *cabling=0;

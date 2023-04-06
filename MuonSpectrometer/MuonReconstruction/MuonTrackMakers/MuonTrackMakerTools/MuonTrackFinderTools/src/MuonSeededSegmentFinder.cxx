@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonSeededSegmentFinder.h"
@@ -143,8 +143,7 @@ namespace Muon {
                 ATH_MSG_WARNING(" Requested chamber does not exist in geometry:   " << m_idHelperSvc->toStringChamber(*chit));
                 continue;
             }
-            IdentifierHash hash_id = detEl->collectionHash();
-            chIdHs.insert(hash_id);
+            chIdHs.insert(detEl->identifyHash());
         }
 
         // vector to store pointers to collections

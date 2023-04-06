@@ -116,10 +116,10 @@ if __name__=="__main__":
 
 
     CaloCellDumper=CompFactory.CaloCellDumper
-    acc.addEventAlgo(CaloCellDumper())
+    acc.addEventAlgo(CaloCellDumper(),sequenceName="AthAlgSeq")
 
     ClusterDumper=CompFactory.ClusterDumper
-    acc.addEventAlgo(ClusterDumper("TopoDumper",ContainerName="CaloCalTopoClusters",FileName="TopoCluster.txt"))
+    acc.addEventAlgo(ClusterDumper("TopoDumper",ContainerName="CaloCalTopoClusters",FileName="TopoCluster.txt"),sequenceName="AthAlgSeq")
 
     f=open("CaloRec.pkl","wb")
     acc.store(f)

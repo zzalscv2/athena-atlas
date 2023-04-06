@@ -64,6 +64,9 @@ def saveMetadata(inputFile, argsMetadata={}, processingWarnings=[], doTRPDetails
             for detail in detailsPerLb["Global"]:
                 metadata.append({detail : detailsPerLb["Global"][detail]})
             metadata.append({"LumiblockDetails" : detailsPerLb["PerLb"]})
+            metadata[1]['Details'] += " Monitored time: {0} - {1} avg <mu> {2} deadtime {3}".format(
+                detailsPerLb["Global"]["DataRangeStart"], detailsPerLb["Global"]["DataRangeEnd"], 
+                detailsPerLb["Global"]["GlobalMeanPileup"], detailsPerLb["Global"]["GlobalMeanDeadtime"])
         else:
             log.error("Reading lumiblock details for TRP failed!")
 
