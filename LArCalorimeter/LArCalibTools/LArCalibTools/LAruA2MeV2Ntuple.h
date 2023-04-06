@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -18,6 +18,9 @@
 #ifndef LARUA2MEV2NTUPLE_H
 #define LARUA2MEV2NTUPLE_H
 #include "LArCalibTools/LArCond2NtupleBase.h"
+#include "LArElecCalib/ILAruA2MeV.h"
+#include "LArElecCalib/ILArDAC2uA.h"
+#include "StoreGate/ReadHandleKey.h"
 
 class LAruA2MeV2Ntuple : public LArCond2NtupleBase
 {
@@ -25,12 +28,13 @@ class LAruA2MeV2Ntuple : public LArCond2NtupleBase
   LAruA2MeV2Ntuple(const std::string & name, ISvcLocator * pSvcLocator);
   ~LAruA2MeV2Ntuple();
 
-  //standard algorithm methods
+ //standard algorithm methods
+  StatusCode initialize(); 
   virtual StatusCode stop();
   StatusCode finalize(){return StatusCode::SUCCESS;}
  private:
-
-  std::string m_uA2MeVKey, m_DAC2uAKey;
+  SG::ReadCondHandleKey<ILAruA2MeV> m_uA2MeVKey{this,"uA2MeVKey","LAruA2MeV"};
+  SG::ReadCondHandleKey<ILArDAC2uA> m_DAC2uAKey{this,"DAC2uAKey","LArDAC2uA"};
  
 };
 
