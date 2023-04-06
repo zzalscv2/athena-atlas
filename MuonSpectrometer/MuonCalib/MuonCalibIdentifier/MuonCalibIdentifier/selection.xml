@@ -2,6 +2,7 @@
 
  <class name="MuonCalib::FixedIdDecoder" />
  <class name="MuonCalib::MuonFixedId" />
+ <class name="MuonCalib::MuonFixedLongId" />
  <function name="MuonCalib::OnlineToOffline" />
  
 </lcgdict>

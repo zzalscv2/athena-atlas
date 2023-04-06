@@ -186,7 +186,7 @@ void McVtxFilterTool::stats() const
   }
   }
 
-bool McVtxFilterTool::isAccepted( HepMC::ConstGenVertexPtr vtx ) const
+bool McVtxFilterTool::isAccepted( const HepMC::ConstGenVertexPtr& vtx ) const
 {
   for(const auto *filter : m_filters) {
     if ( filter->isAccepted( vtx ) ) {

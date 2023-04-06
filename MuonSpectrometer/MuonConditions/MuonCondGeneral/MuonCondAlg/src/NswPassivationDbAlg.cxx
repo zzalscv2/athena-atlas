@@ -81,7 +81,12 @@ NswPassivationDbAlg::loadData(const EventContext& ctx) const {
 		nlohmann::json yy = nlohmann::json::parse(data);
 		for (auto &kt : yy.items()) {
 			nlohmann::json jt = kt.value();
-			Identifier channelId = buildChannelId(jt["stationName"], jt["stationEta"], jt["stationPhi"], jt["multiLayer"], jt["gasGap"], jt["pcbPos"]);
+			bool isValid=false;
+			Identifier channelId = m_idHelperSvc->mmIdHelper().pcbID(int(jt["stationName"]), jt["stationEta"], jt["stationPhi"], jt["multiLayer"], jt["gasGap"], jt["pcbPos"], isValid);
+			if(!isValid){
+				ATH_MSG_VERBOSE("Cannot find PCB Id!");
+				continue;
+			}
 			writeCdo->setData(channelId, jt["pcbPos"], jt["indiv"], jt["extra"], jt["position"]);
 			++nChns;
 		}
@@ -102,17 +107,4 @@ NswPassivationDbAlg::loadData(const EventContext& ctx) const {
 	return StatusCode::SUCCESS;
 }
 
-
-// buildChannelId
-Identifier
-NswPassivationDbAlg::buildChannelId(const int station, const int stationEta, const int stationPhi, const int multiLayer, const int gasGap, const int pcbPos) const {
-
-	// channelNumber is counted 1-5120 for PCBs 1-5, and 1-3072 for PCBs 6-8
-	int pcb  = abs(stationEta)==1 ? pcbPos : pcbPos-5;
-	int chnl = (pcb-1)*1024+1;
-
-	Identifier chnlId = m_idHelperSvc->mmIdHelper().channelID(station, stationEta, stationPhi, multiLayer, gasGap, chnl);
-
-	return chnlId;
-}
 

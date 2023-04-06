@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -16,6 +16,7 @@
 
 #include "GaudiKernel/IAlgTool.h"
 #include "MuonCalibIdentifier/MuonFixedId.h"
+#include "MuonCalibIdentifier/MuonFixedLongId.h"
 #include "Identifier/Identifier.h"
 #include <string>
 
@@ -36,8 +37,11 @@ namespace MuonCalib {
     
     virtual void print(const Identifier& id) const = 0;               //!< pure virtual member to print (ATHENA) Identifier 
     virtual void print(const MuonFixedId& fid) const = 0;             //!< pure virtual member to print (Calib-EDM) MuonFixedId 
+    virtual void print(const MuonFixedLongId& fid) const = 0;         //!< pure virtual member to print (Calib-EDM) MuonFixedLongId 
     virtual Identifier fixedIdToId(const MuonFixedId& fid) const = 0; //!< pure virtual member to convert (Calib-EDM) MuonFixedId to (ATHENA) Identifier
     virtual MuonFixedId idToFixedId(const Identifier& id) const = 0;  //!< pure virtual member to convert (ATHENA) Identifier to (Calib-EDM) MuonFixedId
+    virtual Identifier fixedLongIdToId(const MuonFixedLongId& fid) const = 0; //!< pure virtual member to convert (Calib-EDM) MuonFixedLongId to (ATHENA) Identifier
+    virtual MuonFixedLongId idToFixedLongId(const Identifier& id) const = 0;  //!< pure virtual member to convert (ATHENA) Identifier to (Calib-EDM) MuonFixedLongId
     virtual Identifier regionKeyToId(std::string key) const = 0;      //!< pure virtual member to retrieve an (ATHENA) Identifier for a given regionKey
   };
 }

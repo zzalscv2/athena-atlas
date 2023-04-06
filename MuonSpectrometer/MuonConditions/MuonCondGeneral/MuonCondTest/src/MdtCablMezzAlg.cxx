@@ -126,11 +126,12 @@ StatusCode MdtCablMezzAlg::execute(){
            }
         }
         /// Check whether the same layout is already used somewhere
+        Mapping& mtmp = mezz_mapping; // Work around clang15 compilation error.
         std::vector<MdtMezzanineCard>::const_iterator itr = std::find_if(cached_cards.begin(), cached_cards.end(), 
-            [&dummy_card, &mezz_mapping](const MdtMezzanineCard& card ){
+            [&dummy_card, &mtmp](const MdtMezzanineCard& card ){
                if (dummy_card.numTubeLayers() != card.numTubeLayers()) return false;
-               for (size_t ch =0; ch < mezz_mapping.size(); ++ch) {
-                  if (mezz_mapping[ch] != card.tdcToTubeMap()[ch]) return false;
+               for (size_t ch =0; ch < mtmp.size(); ++ch) {
+                  if (mtmp[ch] != card.tdcToTubeMap()[ch]) return false;
                }
               return true;
         });

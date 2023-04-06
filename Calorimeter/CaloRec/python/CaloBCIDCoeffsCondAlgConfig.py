@@ -34,8 +34,8 @@ def CaloBCIDCoeffsCondAlgCfg (flags):
 
         ShapeKey = 'LArShape32Sym'
 
-        from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDbCfg
-        result.merge (LArElecCalibDbCfg (flags, ['OFC']))
+        from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBCfg
+        result.merge (LArElecCalibDBCfg (flags, ['OFC']))
     else:
         from LArRecUtils.LArADC2MeVCondAlgConfig import LArADC2MeVCondAlgCfg
         from LArRecUtils.LArRecUtilsConfig import LArOFCCondAlgCfg, LArAutoCorrTotalCondAlgCfg

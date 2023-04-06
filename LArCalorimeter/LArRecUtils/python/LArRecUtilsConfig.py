@@ -6,7 +6,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Logging import logging
 from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg
-from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDbCfg
+from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBCfg
 
 
 def LArMCSymCondAlgCfg(flags, name="LArMCSymCondAlg", **kwargs):
@@ -24,7 +24,7 @@ def LArAutoCorrNoiseCondAlgCfg(flags, name="LArAutoCorrNoiseCondAlg", **kwargs):
     # The LArAutoCorrNoiseCondAlgCfg needs the cabling, the sym-object and the AutoCorr
     acc = LArOnOffIdMappingCfg(flags)
     acc.merge(LArMCSymCondAlgCfg(flags))
-    acc.merge(LArElecCalibDbCfg(flags,["AutoCorr",]))
+    acc.merge(LArElecCalibDBCfg(flags,["AutoCorr",]))
     kwargs.setdefault("nSampl", flags.LAr.ROD.nSamples)
     acc.addCondAlgo(LArAutoCorrNoiseCondAlg(name, **kwargs))
     return acc
@@ -43,7 +43,7 @@ def LArOFCCondAlgCfg (flags, name = 'LArOFCCondAlg', **kwargs):
     #The LArPileUpTool needs: Calbling, Shape, Noise, Pedestal and the (total) AutoCorr
     acc = LArOnOffIdMappingCfg(flags)
     requiredConditons=["Shape","Noise","Pedestal"]
-    acc.merge(LArElecCalibDbCfg(flags,requiredConditons))
+    acc.merge(LArElecCalibDBCfg(flags,requiredConditons))
     acc.merge(LArAutoCorrTotalCondAlgCfg(flags))
     LArOFCCondAlg=CompFactory.LArOFCCondAlg
     acc.addCondAlgo (LArOFCCondAlg (name, **kwargs))
@@ -104,7 +104,7 @@ def LArAutoCorrTotalCondAlgCfg (flags, name = 'LArAutoCorrTotalCondAlg', **kwarg
     #Shape, AutoCorr, Noise, Pedestal, fSampl and MinBias
     acc = LArOnOffIdMappingCfg(flags)
     requiredConditons=["Shape","AutoCorr","Noise","Pedestal","fSampl","MinBias"]
-    acc.merge(LArElecCalibDbCfg(flags,requiredConditons))
+    acc.merge(LArElecCalibDBCfg(flags,requiredConditons))
     LArAutoCorrTotalCondAlg=CompFactory.LArAutoCorrTotalCondAlg
     acc.addCondAlgo (LArAutoCorrTotalCondAlg (name, **kwargs))
     return acc

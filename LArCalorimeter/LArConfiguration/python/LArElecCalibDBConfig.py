@@ -44,7 +44,7 @@ LArMphysOverMcalSCCondAlg    =  CompFactory.getComp("LArFlatConditionsAlg<LArMph
 LArOFCSCCondAlg              =  CompFactory.getComp("LArFlatConditionsAlg<LArOFCSC>")
 
 
-def LArElecCalibDbCfg(ConfigFlags,condObjs):
+def LArElecCalibDBCfg(ConfigFlags,condObjs):
     
     #Check MC case
     if ConfigFlags.Input.isMC:
@@ -261,7 +261,7 @@ if __name__ == "__main__":
     flags1 = initConfigFlags()
     flags1.Input.Files = defaultTestFiles.RAW_RUN2
     flags1.lock()
-    acc1 = LArElecCalibDbCfg (flags1, ['Ramp', 'Pedestal'])
+    acc1 = LArElecCalibDBCfg (flags1, ['Ramp', 'Pedestal'])
     acc1.printCondAlgs(summariseProps=True)
     print ('IOVDbSvc:', acc1.getService('IOVDbSvc').Folders)
     acc1.wasMerged()
@@ -272,7 +272,7 @@ if __name__ == "__main__":
     from AthenaConfiguration.Enums import LHCPeriod
     flags2.GeoModel.Run=LHCPeriod.Run1
     flags2.lock()
-    acc2 = LArElecCalibDbCfg (flags2, ['Ramp', 'Pedestal'])
+    acc2 = LArElecCalibDBCfg (flags2, ['Ramp', 'Pedestal'])
     acc2.printCondAlgs(summariseProps=True)
     print ('IOVDbSvc:', acc2.getService('IOVDbSvc').Folders)
     acc2.wasMerged()
@@ -281,7 +281,7 @@ if __name__ == "__main__":
     flags3 = initConfigFlags()
     flags3.Input.Files = defaultTestFiles.ESD
     flags3.lock()
-    acc3 = LArElecCalibDbCfg (flags3, ['Ramp', 'Pedestal'])
+    acc3 = LArElecCalibDBCfg (flags3, ['Ramp', 'Pedestal'])
     acc3.printCondAlgs(summariseProps=True)
     print ('IOVDbSvc:', acc3.getService('IOVDbSvc').Folders)
     acc3.wasMerged()

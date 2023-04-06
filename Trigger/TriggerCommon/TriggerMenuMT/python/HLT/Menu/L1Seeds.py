@@ -390,8 +390,6 @@ def getSpecificL1Seeds(l1seedname, l1itemobject, menu_name):
         log.error('Given seed %s could not be found!', l1seedname)
         raise RuntimeError(f'Failed to retrieve L1 item list for {l1seedname}')
 
-    print(f"BAH, {l1seedname} --> {L1Seed}")
-
     # check if all the l1 background seeds given are in the current L1 menu
     for item in L1Seed:
         if item not in l1items:

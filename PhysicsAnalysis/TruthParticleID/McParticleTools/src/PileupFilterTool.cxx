@@ -327,7 +327,7 @@ StatusCode PileupFilterTool::shapeGenEvent( McEventCollection* genAod )
     // there may be a bunch of vertices with no particles connected to them:
     // ==> Get rid of them
     std::vector<HepMC::ConstGenVertexPtr> going_out_again;
-    for ( HepMC::ConstGenVertexPtr v: (*evt)->vertices() ) {
+    for ( auto& v: (*evt)->vertices() ) {
       if ( v->particles_in().empty() && v->particles_out().empty() ){
         going_out_again.push_back(v);
       }

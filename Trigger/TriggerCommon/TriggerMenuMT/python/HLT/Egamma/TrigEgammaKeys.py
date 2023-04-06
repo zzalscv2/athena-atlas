@@ -47,6 +47,9 @@ class TrigEgammaKeysBase(object):
         self.precisionElectronSuperClusterCollection    = 'HLT_ElectronSuperClusters'
         self.precisionElectronContainer                 = recordable('HLT_egamma_Electrons')
 
+        """Static class to collect all string manipulation in precision egamma sequences """
+        self.precisionEgammaSuperClusterRecCollection    = 'HLT_EgammaSuperRecCollection'
+
         #
         # Track configuration
         #
@@ -84,6 +87,7 @@ class TrigEgammaKeys_LRT(TrigEgammaKeysBase):
         self.precisionElectronEMClusterContainer    = recordable('HLT_TrigEMClusters_Electrons_LRT')
         self.precisionElectronCaloClusterContainer  = recordable("HLT_CaloEMClusters_LRT")
         self.precisionElectronContainer             = recordable('HLT_egamma_Electrons_LRT')
+        self.precisionTopoClusterContainer          = recordable("HLT_TopoCaloClustersRoI_LRT")
         self._IDTrigConfig                          = getInDetTrigConfig('electronLRT')
 
 

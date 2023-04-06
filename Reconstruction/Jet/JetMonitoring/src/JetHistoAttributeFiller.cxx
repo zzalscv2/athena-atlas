@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
 #include "JetMonitoring/JetHistoAttributeFiller.h"
@@ -92,10 +92,10 @@ namespace {
     gr.setAutoFill(false);
 
     for(const xAOD::Jet* j:jets){
+      auto vecX = vX->vector(*j);
       auto vecY = vY->vector(*j);
-      auto vecX = vY->vector(*j);
       size_t Nx= vecX.size();
-      size_t Ny= vecX.size();
+      size_t Ny= vecY.size();
       size_t N =  Nx<Ny  ? Nx : Ny;
       for(size_t i=0;i<N;i++) {sX=vecX[i];sY=vecY[i]; gr.fill(); }          
     }        

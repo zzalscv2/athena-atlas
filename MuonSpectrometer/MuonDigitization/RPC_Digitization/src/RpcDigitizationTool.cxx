@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -2031,7 +2031,7 @@ int RpcDigitizationTool::ClusterSizeEvaluation(const EventContext& ctx, const Id
         } else {
             ClusterSize = 1;
         }
-        if (m_ClusterSize1_2uncorr == 1) {
+        if (m_ClusterSize1_2uncorr) {
             float rndmCS1_2 = CLHEP::RandFlat::shoot(rndmEngine, 1);
             ClusterSize = 1;
             if (rndmCS1_2 < FracClusterSize2norm) ClusterSize = 2;

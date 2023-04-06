@@ -61,7 +61,7 @@ def getPFTrackClusterMatchingTool(inputFlags,matchCut,distanceType,clusterPositi
 
 def getPFCellLevelSubtractionTool(inputFlags,toolName):
     PFCellLevelSubtractionToolFactory = CompFactory.PFSubtractionTool
-    PFCellLevelSubtractionTool = PFCellLevelSubtractionToolFactory(toolName)
+    PFCellLevelSubtractionTool = PFCellLevelSubtractionToolFactory(toolName,useNNEnergy = inputFlags.PF.useMLEOverP)
 
     if inputFlags.GeoModel.Run <= LHCPeriod.Run3:
         eflowCellEOverPTool_Run2_mc20_JetETMiss = CompFactory.eflowCellEOverPTool_Run2_mc20_JetETMiss
@@ -84,11 +84,15 @@ def getPFCellLevelSubtractionTool(inputFlags,toolName):
     PFCellLevelSubtractionTool.PFTrackClusterMatchingTool_015 = getPFTrackClusterMatchingTool(inputFlags,0.15,"EtaPhiSquareDistance","PlainEtaPhi","MatchingTool_Pull_015")
     PFCellLevelSubtractionTool.PFTrackClusterMatchingTool_02 = getPFTrackClusterMatchingTool(inputFlags,0.2,"EtaPhiSquareDistance","PlainEtaPhi","MatchingTool_Pull_02")
 
+    if inputFlags.PF.useMLEOverP:
+        PFEnergyPredictorTool = CompFactory.PFEnergyPredictorTool("PFCellLevelEnergyPredcictorTool",ModelPath = inputFlags.PF.EOverP_NN_Model)
+        PFCellLevelSubtractionTool.NNEnergyPredictorTool = PFEnergyPredictorTool
+
     return PFCellLevelSubtractionTool
 
 def getPFRecoverSplitShowersTool(inputFlags,toolName):
     PFRecoverSplitShowersToolFactory = CompFactory.PFSubtractionTool
-    PFRecoverSplitShowersTool = PFRecoverSplitShowersToolFactory(toolName)
+    PFRecoverSplitShowersTool = PFRecoverSplitShowersToolFactory(toolName,useNNEnergy = inputFlags.PF.useMLEOverP)
 
     if inputFlags.GeoModel.Run <= LHCPeriod.Run3:
         eflowCellEOverPTool_Run2_mc20_JetETMiss = CompFactory.eflowCellEOverPTool_Run2_mc20_JetETMiss
@@ -98,6 +102,10 @@ def getPFRecoverSplitShowersTool(inputFlags,toolName):
         PFRecoverSplitShowersTool.eflowCellEOverPTool = eflowCellEOverPTool_mc12_HLLHC ()
 
     PFRecoverSplitShowersTool.RecoverSplitShowers = True
+
+    if inputFlags.PF.useMLEOverP:
+        PFEnergyPredictorTool = CompFactory.PFEnergyPredictorTool("PFRecoverSplitShowersEnergyPredcictorTool",ModelPath = inputFlags.PF.EOverP_NN_Model)
+        PFRecoverSplitShowersTool.NNEnergyPredictorTool = PFEnergyPredictorTool
 
     return PFRecoverSplitShowersTool
 

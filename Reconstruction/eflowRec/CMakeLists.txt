@@ -5,6 +5,7 @@ atlas_subdir( eflowRec )
 
 # External dependencies:
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
+find_package( onnxruntime )
 
 # Component(s) in the package:
 atlas_add_component( eflowRec
@@ -14,7 +15,7 @@ atlas_add_component( eflowRec
                      LINK_LIBRARIES ${ROOT_LIBRARIES} CaloEvent CaloIdentifier AthContainers AthLinks AthenaBaseComps CxxUtils AthenaKernel GeoPrimitives Identifier xAODBase 
 		     xAODCaloEvent xAODCore xAODEgamma xAODMuon xAODPFlow xAODTau xAODTracking GaudiKernel InDetReadoutGeometry TRT_ReadoutGeometry Particle RecoToolInterfaces 
 		     TrkParameters CaloDetDescrLib CaloUtilsLib StoreGateLib FourMomUtils PathResolver TrkCaloExtension TrkParametersIdentificationHelpers FourMomUtils 
-		     InDetTrackSelectionToolLib AthenaMonitoringKernelLib ICaloTrkMuIdTools AsgMessagingLib)
+		     InDetTrackSelectionToolLib AthenaMonitoringKernelLib ICaloTrkMuIdTools AsgMessagingLib AthOnnxruntimeServiceLib)
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

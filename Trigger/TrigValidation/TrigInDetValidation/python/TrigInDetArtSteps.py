@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -39,28 +39,25 @@ class TrigInDetReco(ExecStep):
         self.preinclude_trig  = preinclude_file
         self.release = 'current'
         self.preexec_reco =  ';'.join([
-            'from RecExConfig.RecFlags import rec',
-            'rec.doForwardDet=False',
-            'rec.doEgamma=True',
-            'rec.doMuonCombined=True',
-            'rec.doJetMissingETTag=False',
-            'rec.doTau=False',
-            'from ParticleBuilderOptions.AODFlags import AODFlags',
-            'AODFlags.ThinGeantTruth.set_Value_and_Lock(False)',
-            'AODFlags.ThinNegativeEnergyCaloClusters.set_Value_and_Lock(False)',
-            'AODFlags.ThinNegativeEnergyNeutralPFOs.set_Value_and_Lock(False)',
-            'AODFlags.ThinInDetForwardTrackParticles.set_Value_and_Lock(False)'
+            'flags.Reco.EnableEgamma=True',
+            'flags.Reco.EnableCombinedMuon=True',
+            'flags.Reco.EnableJet=False',
+            'flags.Reco.EnableMet=False',
+            'flags.Reco.EnableBTagging=False',
+            'flags.Reco.EnablePFlow=False',
+            'flags.Reco.EnableTau=False',
+            'flags.Reco.EnablePostProcessing=False',
         ])
 
         self.preexec_all = ';'.join([
-            'from AthenaConfiguration.AllConfigFlags import ConfigFlags',
             'ConfigFlags.Trigger.AODEDMSet=\'AODFULL\'',
         ])
         self.postexec_trig = "from AthenaCommon.AppMgr import ServiceMgr; ServiceMgr.AthenaPoolCnvSvc.MaxFileSizes=['tmp.RDO_TRIG=100000000000']"
         # no longer needed if we don't write ESDs?
         #self.postexec_reco = "from AthenaCommon.AppMgr import ServiceMgr; ServiceMgr.AthenaPoolCnvSvc.MaxFileSizes=['tmp.ESD=100000000000']"
         self.postexec_reco = ''
-        self.args = '--outputAODFile=AOD.pool.root --steering "doRDO_TRIG" "doTRIGtoALL"'
+        self.args = '--outputAODFile=AOD.pool.root --steering "doRDO_TRIG"'
+        self.args += ' --CA "default:True" "RDOtoRDOTrigger:False"'
        
         if ( self.postinclude_trig != '' ) : 
             print( "postinclude_trig: ", self.postinclude_trig )
@@ -176,9 +173,14 @@ class TrigInDetReco(ExecStep):
         else:
             print( "Using current release for offline Reco steps  " )
 
-
-        self.args += ' --preExec "RDOtoRDOTrigger:{:s};" "all:{:s};" "RAWtoALL:{:s};"'.format(
-            self.preexec_trig, self.preexec_all, self.preexec_reco)
+        if self.preexec_trig != '' or self.preexec_reco != '' or self.preexec_all != '':
+            self.args += ' --preExec'
+            if self.preexec_trig != '':
+                self.args += ' "RDOtoRDOTrigger:{:s};"'.format(self.preexec_trig)
+            if self.preexec_reco != '':
+                self.args += ' "RAWtoALL:{:s};"'.format(self.preexec_reco)
+            if self.preexec_all != '':
+                self.args += ' "all:{:s};"'.format(self.preexec_all)
         if self.postexec_trig != '' or self.postexec_reco != '':
             self.args += ' --postExec'
             if self.postexec_trig != '':
@@ -270,9 +272,8 @@ class TrigTZReco(ExecStep):
         super(TrigTZReco, self).__init__(name)
         self.type = 'Reco_tf'
         tzrecoPreExec = ' '.join([
-            "from AthenaConfiguration.AllConfigFlags import ConfigFlags;",
-            "ConfigFlags.Trigger.triggerMenuSetup=\'Cosmic_run3_v1\';",
-            "ConfigFlags.Trigger.AODEDMSet=\'AODFULL\';",
+            "flags.Trigger.triggerMenuSetup=\'Cosmic_run3_v1\';",
+            "flags.Trigger.AODEDMSet=\'AODFULL\';",
             ])
         self.threads = 1
         self.concurrent_events = 1
@@ -283,9 +284,7 @@ class TrigTZReco(ExecStep):
         self.args += ' --outputAODFile=AOD.pool.root'
         self.args += ' --conditionsTag=\'CONDBR2-BLKPA-2022-08\' --geometryVersion=\'ATLAS-R3S-2021-03-00-00\''
         self.args += ' --preExec="{:s}"'.format(tzrecoPreExec)
-        self.args += ' --postInclude="TriggerTest/disableChronoStatSvcPrintout.py"'
-        self.args += ' --steering "doRAWtoALL"'
-
+        self.args += ' --CA'
 
 
 ##################################################

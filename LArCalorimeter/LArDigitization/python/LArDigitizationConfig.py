@@ -13,7 +13,7 @@ from LArRecUtils.LArADC2MeVCondAlgConfig import LArADC2MeVCondAlgCfg
 from LArRecUtils.LArXTalkWeightCondAlgConfig import LArXTalkWeightCondAlgCfg
 from LArRecUtils.LArRecUtilsConfig import LArAutoCorrNoiseCondAlgCfg
 from LArBadChannelTool.LArBadChannelConfig import LArBadFebCfg,LArBadChannelCfg
-from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDbCfg
+from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBCfg
 from Digitization.PileUpToolsConfig import PileUpToolsCfg
 from Digitization.PileUpMergeSvcConfig import PileUpMergeSvcCfg, PileUpXingFolderCfg
 # for Digitization
@@ -168,7 +168,7 @@ def LArHitEMapToDigitAlgCfg(flags, name="LArHitEMapToDigitAlg", **kwargs):
         requiredConditons=["fSampl", "Pedestal", "Shape"]
     else:
         requiredConditons=["Noise", "fSampl", "Pedestal", "Shape"]
-    acc.merge(LArElecCalibDbCfg(flags,requiredConditons))
+    acc.merge(LArElecCalibDBCfg(flags,requiredConditons))
 
     if not flags.Common.isOverlay:
         acc.merge(LArAutoCorrNoiseCondAlgCfg(flags))

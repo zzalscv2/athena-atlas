@@ -31,14 +31,20 @@ class eflowTrackCaloPoints {
  public:
 
   eflowTrackCaloPoints(const std::map<eflowCalo::LAYER, const Trk::TrackParameters*> & trackParameters);
+  eflowTrackCaloPoints(const std::map<eflowCalo::LAYER, const Trk::TrackParameters*> & trackParameters,
+  std::map<CaloCell_ID::CaloSample,const Trk::TrackParameters*>& tileTrackParamaters);
  eflowTrackCaloPoints() : m_isEM1Barrel(false), m_isEM2Barrel(false)  {}
   ~eflowTrackCaloPoints();
 
   const std::pair<float, float> operator[] (eflowCalo::LAYER layer) const;
   const eflowEtaPhiPosition& getEtaPhiPos(eflowCalo::LAYER layer) const;
+  const eflowEtaPhiPosition& getTileEtaPhiPos(CaloCell_ID::CaloSample layer) const;
 
   double getEta(eflowCalo::LAYER layer) const {return getEtaPhiPos(layer).getEta();}
   double getPhi(eflowCalo::LAYER layer) const {return getEtaPhiPos(layer).getPhiD();}
+
+  double getTileEta(CaloCell_ID::CaloSample layer) const {return getTileEtaPhiPos(layer).getEta();}
+  double getTilePhi(CaloCell_ID::CaloSample layer) const {return getTileEtaPhiPos(layer).getPhiD();}
 
   const std::pair<float, float> getEM2etaPhi() const  {return (*this)[getEM2Layer()]; }
   const eflowEtaPhiPosition& getEM2etaPhiPos() const  {return getEtaPhiPos(getEM2Layer()); }
@@ -55,6 +61,7 @@ class eflowTrackCaloPoints {
   inline bool haveLayer(eflowCalo::LAYER layer) const { return getEta(layer) != m_defaultEtaPhiPair.first;  }
 
   void setEtaPhi(eflowCaloENUM secondLayer, double eta, double phi);
+  void setEtaPhiTile(CaloCell_ID::CaloSample secondLayer, const Amg::Vector3D& vec);
   void setEtaPhi(eflowCalo::LAYER lay, const Amg::Vector3D& vec);
   void copyEtaPhi(eflowCalo::LAYER fromLay, eflowCalo::LAYER toLay);
 
@@ -78,6 +85,7 @@ class eflowTrackCaloPoints {
   std::map<eflowCalo::LAYER, Amg::Vector3D > m_positions;
   std::map<eflowCalo::LAYER, Amg::Vector3D > m_directions;
   std::map<eflowCalo::LAYER, eflowEtaPhiPosition>  m_etaPhiPositions;
+  std::map<CaloCell_ID::CaloSample,eflowEtaPhiPosition> m_tileEtaPhiPositions;
 };
 
 inline void eflowTrackCaloPoints::copyEtaPhi(eflowCalo::LAYER fromLay, eflowCalo::LAYER toLay) {

@@ -411,7 +411,10 @@ def muEFSAAlgSequenceCfg(flags, is_probe_leg=False):
     
     viewName="EFMuMSReco_RoI"
     ViewCreatorFetchFromViewROITool=CompFactory.ViewCreatorFetchFromViewROITool
-    roiTool         = ViewCreatorFetchFromViewROITool(RoisWriteHandleKey="HLT_Roi_L2SAMuonForEF", InViewRoIs = "forMS", ViewToFetchFrom = "L2MuFastRecoViews")
+    #temporarily using different view names until L2 SA sequence is migrated to CA
+    from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import isCAMenu 
+    viewname = "L2MuFastRecoNewJOViews" if isCAMenu() else "L2MuFastRecoViews"
+    roiTool         = ViewCreatorFetchFromViewROITool(RoisWriteHandleKey="HLT_Roi_L2SAMuonForEF", InViewRoIs = "forMS", ViewToFetchFrom = viewname)
     requireParentView = True
 
     recoMS = InViewRecoCA(name=viewName, RoITool = roiTool, RequireParentView = requireParentView, isProbe=is_probe_leg)

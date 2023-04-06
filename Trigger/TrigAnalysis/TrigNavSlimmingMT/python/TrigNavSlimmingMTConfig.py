@@ -144,15 +144,8 @@ def TrigNavSlimmingMTCfg(flags):
     log.debug("Nothing to do as Trigger.doNavigationSlimming is False")
     return ca
 
-  # TODO remove when deprecated
-  from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
-  if isComponentAccumulatorCfg():
-    doESD = flags.Output.doWriteESD
-    doAOD = flags.Output.doWriteAOD
-  else:
-    from RecExConfig.RecFlags import rec
-    doESD = flags.Output.doWriteESD or rec.doWriteESD() or rec.doESD()
-    doAOD = flags.Output.doWriteAOD or rec.doWriteAOD() or rec.doAOD()
+  doESD = flags.Output.doWriteESD
+  doAOD = flags.Output.doWriteAOD
 
   # NOTE: Derivations currently have a different configuration hook, see TrigNavSlimmingMTDerivationCfg above.
 
