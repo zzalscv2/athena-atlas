@@ -47,26 +47,3 @@ Pixel1RawData::Pixel1RawData(const Identifier rdoId,
 		 +((LVL1A&0xF)<<24) ) 
 {}
 
-
-// Destructor:
-//should I be destructing something here?
-Pixel1RawData::~Pixel1RawData()
-{}
-
-
-
-
-//Pixel1RawData *Pixel1RawData::newObject(const Identifier rdoId, const unsigned int word)
-//{
-//  Pixel1RawData *p_rdo=0;
-
-  // create a new object and check
-//  try {
-//    p_rdo=new Pixel1RawData(rdoId, word);
-//  } catch (...) {
-//    p_rdo=0;
-//  }
-//  return p_rdo;
-//}
-
-

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -19,65 +19,38 @@
 // Base class
 #include "InDetRawData/PixelRDORawData.h"
 
-// Data members classes
 
+class Pixel1RawData final : public PixelRDORawData{
 
-
-class Pixel1RawData : public PixelRDORawData{
-
-  ///////////////////////////////////////////////////////////////////
-  // Public methods:
-  ///////////////////////////////////////////////////////////////////
 public:
-
   // Constructor with parameters:
   // offline hashId of the readout element, 
   // the word
-  Pixel1RawData(const Identifier rdoId, const unsigned int word);
 
+ Pixel1RawData();
+ Pixel1RawData(const Identifier rdoId, const unsigned int word);
+ //
+ Pixel1RawData(const Pixel1RawData&) = default;
+ Pixel1RawData(Pixel1RawData&&) noexcept = default;
+ Pixel1RawData& operator=(const Pixel1RawData&) = default;
+ Pixel1RawData& operator=(Pixel1RawData&&) noexcept = default;
+ virtual ~Pixel1RawData() = default;
 
-  // Constructor with full parameter list: hashId, ToT, BCO ID, 
-  // LVL1 accept, ATLAS wide LVL1
-  Pixel1RawData(const Identifier rdoId, 
-		const unsigned int ToT,
-		const unsigned int BCID,
-		const unsigned int LVL1ID,
-		const unsigned int LVL1A=0
-		);
+ // Constructor with full parameter list: hashId, ToT, BCO ID,
+ // LVL1 accept, ATLAS wide LVL1
+ Pixel1RawData(const Identifier rdoId, const unsigned int ToT,
+               const unsigned int BCID, const unsigned int LVL1ID,
+               const unsigned int LVL1A = 0);
 
-  // Destructor:
-  virtual ~Pixel1RawData();
+ ///////////////////////////////////////////////////////////////////
+ // Virtual methods
+ ///////////////////////////////////////////////////////////////////
 
-  ///////////////////////////////////////////////////////////////////
-  // Virtual methods 
-  ///////////////////////////////////////////////////////////////////
-
-
-  virtual int getToT() const;    // Time over Threshold value 0-255
-  virtual int getBCID() const;   // Beam Crossing ID
-  virtual int getLVL1A() const; // Level 1 accept, 0-15, used if reading 
-                           // consecutive BCOs
-  virtual int getLVL1ID() const;  // ATLAS LVL1 0-255
-
-  ///////////////////////////////////////////////////////////////////
-  // Static methods:
-  ///////////////////////////////////////////////////////////////////
-
-
-
-  // Create a new Pixel1RawData and return a pointer to it:
-  //  static Pixel1RawData *newObject(const Identifier rdoId, const unsigned int word);
-
-public:
-  // public default constructor needed for I/O, but should not be
-  // called from an alg
-  Pixel1RawData();
-
-  ///////////////////////////////////////////////////////////////////
-  // Private data:
-  ///////////////////////////////////////////////////////////////////
-private:
-
+ virtual int getToT() const override;    // Time over Threshold value 0-255
+ virtual int getBCID() const override;   // Beam Crossing ID
+ virtual int getLVL1A() const override;  // Level 1 accept, 0-15, used if
+                                         // reading consecutive BCOs
+ virtual int getLVL1ID() const override;  // ATLAS LVL1 0-255
 };
 
 ///////////////////////////////////////////////////////////////////
