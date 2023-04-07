@@ -163,44 +163,42 @@ def _muFastStepSeq(flags, is_probe_leg=False):
     # Step 1 (L2MuonSA)
     selAcc = SelectionCA("L2MuFastSel",  is_probe_leg)
     # Set EventViews for L2MuonSA step
+
     recoName = "L2MuFastRecoNewJO"
     reco = InViewRecoCA(recoName, isProbe=is_probe_leg)
 
     #external data loading to view
     reco.mergeReco( MuFastViewDataVerifier(flags) )
-
+    
     # decoding
     decodeAcc = muonDecodeCfg(flags, recoName+"RoIs")
     reco.mergeReco(decodeAcc)
 
     #L2 SA alg
-    reco.mergeReco(l2MuFastAlgCfg( flags, roisKey=recoName+"RoIs"))
-
+    reco.mergeReco(l2MuFastAlgCfg( flags, roisKey=recoName+"RoIs"))    
     selAcc.mergeReco(reco)
-
+    
+    
     l2muFastHypo = l2MuFastHypoCfg( flags,
                                     name = 'TrigL2MuFastHypo',
                                     muFastInfo = 'MuonL2SAInfo' )
 
-    selAcc.addHypoAlgo(l2muFastHypo)
-
-    l2muFastSequence = MenuSequenceCA(flags, selAcc,
-                                      HypoToolGen = TrigMufastHypoToolFromDict, isProbe=is_probe_leg )
-
-    return (selAcc , l2muFastSequence)
+    selAcc.addHypoAlgo(l2muFastHypo)    
+    return selAcc
+    
 
 def muFastSequence(flags, is_probe_leg=False): 
     muonflags = flags.cloneAndReplace('Muon', 'Trigger.Offline.SA.Muon')
     muonidflags = muonflags.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking.muon")
-    selAcc , l2muFastSequence =  _muFastStepSeq(muonidflags, is_probe_leg)
-    return l2muFastSequence
+    selAcc=  _muFastStepSeq(muonidflags, is_probe_leg)
+    return MenuSequenceCA(flags, selAcc,HypoToolGen = TrigMufastHypoToolFromDict, isProbe=is_probe_leg )
+
 
 
 def muFastStep(flags, chainDict):
-
-    selAcc , l2muFastSequence = _muFastStepSeq(flags)
-
-    return ChainStep( name=selAcc.name, Sequences=[l2muFastSequence], chainDicts=[chainDict] )
+    """ can be removed"""
+    l2muFastSequence = muFastSequence(flags)
+    return ChainStep( name=l2muFastSequence.name, Sequences=[l2muFastSequence], chainDicts=[chainDict] )
 
 
 @AccumulatorCache
@@ -224,21 +222,20 @@ def _muCombStepSeq(flags, is_probe_leg=False):
                                    muCombInfo = 'HLT_MuonL2CBInfo' )
 
     selAccL2CB.addHypoAlgo(l2muCombHypo)
-    l2muCombSequence = MenuSequenceCA(flags, selAccL2CB,
-                                      HypoToolGen = TrigmuCombHypoToolFromDict)
+    return selAccL2CB
+    
 
-    return (selAccL2CB , l2muCombSequence)
 def muCombSequence(flags, is_probe_leg=False):
     muonflagsCB = flags.cloneAndReplace('Muon', 'Trigger.Offline.Muon').cloneAndReplace('MuonCombined', 'Trigger.Offline.Combined.MuonCombined')    
     muonflagsCBid = muonflagsCB.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking.muon")
-    selAccL2CB , l2muCombSequence = _muCombStepSeq(muonflagsCBid, is_probe_leg=is_probe_leg)
-    return l2muCombSequence
+    selAcc = _muCombStepSeq(muonflagsCBid, is_probe_leg=is_probe_leg)
+    return MenuSequenceCA(flags, selAcc, HypoToolGen = TrigmuCombHypoToolFromDict)
+    
 
 def muCombStep(flags, chainDict):
-
-    selAccL2CB , l2muCombSequence = _muCombStepSeq(flags)
-
-    return ChainStep( name=selAccL2CB.name, Sequences=[l2muCombSequence], chainDicts=[chainDict] )
+    """ can be removed """
+    l2muCombSequence = muCombSequence(flags)
+    return ChainStep( name=l2muCombSequence.name, Sequences=[l2muCombSequence], chainDicts=[chainDict] )
 
 def muCombOvlpRmSequence(flags, is_probe_leg=False):
     log.warning("FAKE muCombOvlpRmSequence replaced by single muCombSequence")
@@ -283,23 +280,19 @@ def _muEFSAStepSeq(flags, name='RoI', is_probe_leg=False):
                               inputMuons = "Muons_"+name,
                               doSA=True)
 
-    selAccMS.addHypoAlgo(efmuMSHypo)
-    
-    efmuMSSequence = MenuSequenceCA(flags, selAccMS,
-                                    HypoToolGen = TrigMuonEFMSonlyHypoToolFromDict)
-
-    return (selAccMS , efmuMSSequence)
+    selAccMS.addHypoAlgo(efmuMSHypo)    
+    return selAccMS
 
 def muEFSASequence(flags, name='RoI', is_probe_leg=False):
     muonflags = flags.cloneAndReplace('Muon', 'Trigger.Offline.SA.Muon')
-    selAccMS , efmuMSSequence = _muEFSAStepSeq(muonflags, name, is_probe_leg=is_probe_leg)
-    return efmuMSSequence
+    selAccMS = _muEFSAStepSeq(muonflags, name, is_probe_leg=is_probe_leg)
+    return MenuSequenceCA(flags, selAccMS, HypoToolGen = TrigMuonEFMSonlyHypoToolFromDict)
+    
 
 def muEFSAStep(flags, chainDict, name='RoI'):
-
-    selAccMS , efmuMSSequence = _muEFSAStepSeq(flags, name)
-
-    return ChainStep( name=selAccMS.name, Sequences=[efmuMSSequence], chainDicts=[chainDict] )
+    """ can be removed """
+    efmuMSSequence = muEFSASequence(flags)
+    return ChainStep( name=efmuMSSequence.name, Sequences=[efmuMSSequence], chainDicts=[chainDict] )
 
 @AccumulatorCache
 def _muEFCBStepSeq(flags, name='RoI', is_probe_leg=False):
@@ -381,25 +374,20 @@ def _muEFCBStepSeq(flags, name='RoI', is_probe_leg=False):
                               name = 'TrigMuonEFCBHypo_'+name,
                               inputMuons = finalMuons )
 
-    selAccEFCB.addHypoAlgo(efmuCBHypo)
-
-    efmuCBSequence = MenuSequenceCA(flags, selAccEFCB,
-                                    HypoToolGen = TrigMuonEFCombinerHypoToolFromDict)
+    selAccEFCB.addHypoAlgo(efmuCBHypo)    
    
-    return (selAccEFCB , efmuCBSequence)
+    return selAccEFCB
 
 def muEFCBSequence(flags, is_probe_leg=False):
     muonflagsCB = flags.cloneAndReplace('Muon', 'Trigger.Offline.Muon').cloneAndReplace('MuonCombined', 'Trigger.Offline.Combined.MuonCombined')
-    muonflagsCBid = muonflagsCB.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking.muon")
-        
-    selAccEFCB , efmuCBSequence = _muEFCBStepSeq(muonflagsCBid, name='RoI', is_probe_leg=is_probe_leg)
-    return efmuCBSequence
+    muonflagsCBid = muonflagsCB.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking.muon")        
+    selAccEFCB = _muEFCBStepSeq(muonflagsCBid, name='RoI', is_probe_leg=is_probe_leg)
+    return MenuSequenceCA(flags, selAccEFCB, HypoToolGen = TrigMuonEFCombinerHypoToolFromDict)    
 
 def muEFCBStep(flags, chainDict, name='RoI'):
-
-    selAccEFCB , efmuCBSequence = _muEFCBStepSeq(flags, name)
-    
-    return ChainStep( name=selAccEFCB.name, Sequences=[efmuCBSequence], chainDicts=[chainDict] )
+    """ can be removed """
+    efmuCBSequence = muEFCBSequence(flags)    
+    return ChainStep( name=efmuCBSequence.name, Sequences=[efmuCBSequence], chainDicts=[chainDict] )
 
 @AccumulatorCache
 def _muEFIsoStepSeq(flags):
@@ -433,19 +421,20 @@ def _muEFIsoStepSeq(flags):
     efmuIsoHypo = efMuIsoHypoConf( flags,
                                   name = 'TrigMuonIsoHypo',
                                   inputMuons = "MuonsIso" )
-    selAccEFIso.addHypoAlgo(efmuIsoHypo)
+    selAccEFIso.addHypoAlgo(efmuIsoHypo)       
+    return selAccEFIso
 
-    efmuIsoSequence = MenuSequenceCA(flags, selAccEFIso,
-                                     HypoToolGen = TrigMuonEFTrackIsolationHypoToolFromDict)
-    
-    return (selAccEFIso , efmuIsoSequence)
+def muEFIsoSequence(flags, is_probe_leg=False):
+    selAccEFIso = _muEFIsoStepSeq(flags)
+    return MenuSequenceCA(flags, selAccEFIso, HypoToolGen = TrigMuonEFTrackIsolationHypoToolFromDict)
 
 def muEFIsoStep(flags, chainDict):
-    selAccEFIso , efmuIsoSequence = _muEFIsoStepSeq(flags)
-    
-    return ChainStep( name=selAccEFIso.name, Sequences=[efmuIsoSequence], chainDicts=[chainDict] )
+    """ can be removed"""
+    efmuIsoSequence=muEFIsoSequence(flags)
+    return ChainStep( name=efmuIsoSequence.name, Sequences=[efmuIsoSequence], chainDicts=[chainDict] )
 
 def generateChains( flags, chainDict ):
+    """can be removed"""
     chainDict = splitChainDict(chainDict)[0]
 
     #Clone and replace offline flags so we can set muon trigger specific values

@@ -27,25 +27,19 @@ def MuonTLASequenceCfg(flags, muons):
     recoAcc = InEventRecoCA("MuonTLARecoSeq_"+ muons,inputMaker=tlaMuonInputMakerAlg)
     
     sequenceOut = recordable(muons+"_TLA")
-
-    return  recoAcc, sequenceOut
-
-@AccumulatorCache
-def MuonTLAMenuSequenceCfg( flags, muChainPart):
-
-    muonsIn = getMuonCollections(muChainPart)    
-
-    # retrieve the sequence
-    (recoAcc, sequenceOut) = MuonTLASequenceCfg(flags, muons=muonsIn)
-
     #  add the hypo
-    hypo = CompFactory.TrigMuonTLAHypoAlg("TrigMuonTLAHypoAlg_"+muonsIn)  
+    hypo = CompFactory.TrigMuonTLAHypoAlg("TrigMuonTLAHypoAlg_"+muons)  
     hypo.TLAOutputName = sequenceOut  
     hypo.MonTool = TrigMuonTLAHypoMonitoring(flags, "TrigMuonTLAHypoAlg/")
 
-    selAcc = SelectionCA("TrigMuonTLAMainSeq_"+muonsIn)
+    selAcc = SelectionCA("TrigMuonTLAMainSeq_"+muons)
     selAcc.mergeReco(recoAcc)
     selAcc.addHypoAlgo(hypo)
+    return selAcc
+
+def MuonTLAMenuSequenceCfg( flags, muChainPart):
+    muonsIn = getMuonCollections(muChainPart)  
+    selAcc=MuonTLASequenceCfg(flags, muons=muonsIn)
 
     return MenuSequenceCA( flags,
                            selAcc,
