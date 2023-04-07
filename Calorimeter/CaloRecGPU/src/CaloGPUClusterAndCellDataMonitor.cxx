@@ -448,7 +448,7 @@ StatusCode CaloGPUClusterAndCellDataMonitor::convert_to_GPU_data_structures(cons
                 }
               else if (weight > 0.5f)
                 {
-                  ret_state->clusterTag[cell_ID] = ClusterTag::make_tag(cluster_number, other_tag.secondary_cluster_weight(), other_index < 0 ? 0 : other_index);
+                  ret_state->clusterTag[cell_ID] = ClusterTag::make_tag(cluster_number, other_tag.secondary_cluster_weight(), other_index);
                 }
               else if (weight == 0.5f)
                 //Unlikely, but...
@@ -1745,7 +1745,7 @@ StatusCode CaloGPUClusterAndCellDataMonitor::add_combination(const EventContext 
                 same_abs_energy_1 = 0, same_abs_energy_2 = 0,
                 same_snr_1 = 0, same_snr_2 = 0,
                 same_abs_snr_1 = 0, same_abs_snr_2 = 0,
-                same_cluster_cells_count, diff_cluster_cells_count;
+                same_cluster_cells_count=0, diff_cluster_cells_count=0;
 
   std::set<double> energies_1, energies_2, snrs_1, snrs_2;
 

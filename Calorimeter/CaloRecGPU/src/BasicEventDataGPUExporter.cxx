@@ -222,7 +222,7 @@ StatusCode BasicEventDataGPUExporter::convert(const EventContext & ctx,
                     }
                   else if (weight > 0.5f)
                     {
-                      ed.m_cell_state->clusterTag[cell_ID] = ClusterTag::make_tag(cluster_number, other_tag.secondary_cluster_weight(), other_index < 0 ? 0 : other_index);
+                      ed.m_cell_state->clusterTag[cell_ID] = ClusterTag::make_tag(cluster_number, other_tag.secondary_cluster_weight(), other_index);
                     }
                   else if (weight == 0.5f)
                     //Unlikely, but...
