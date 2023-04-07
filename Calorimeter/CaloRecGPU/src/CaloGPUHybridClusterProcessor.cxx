@@ -184,11 +184,14 @@ StatusCode CaloGPUHybridClusterProcessor::execute(const EventContext & ctx) cons
   simple_GPU_pointer_holder * temporaries_data_ptr_holder = nullptr;
 
   Helpers::separate_thread_accessor<simple_GPU_pointer_holder> sep_th_acc_2(m_temporariesThreadedHolder, temporaries_data_ptr_holder);
-
+  if (not temporaries_data_ptr_holder){
+    ATH_MSG_ERROR("temporaries_data_ptr_holder is null in CaloGPUHybridClusterProcessor::execute" );
+    return StatusCode::FAILURE;
+  }
   temporaries_data_ptr_holder->allocate(m_temporariesSize);
   //This will not perform any allocations if they've already been done.
 
-  if ((temporaries_data_ptr_holder == nullptr || temporaries_data_ptr_holder->get_pointer() == nullptr) &&
+  if ((temporaries_data_ptr_holder->get_pointer() == nullptr) &&
       (m_preConvert || m_postConvert || m_GPUoperations.size())                                            )
     {
       ATH_MSG_ERROR("Could not get valid temporary buffer holder! Event: " << ctx.evt() );

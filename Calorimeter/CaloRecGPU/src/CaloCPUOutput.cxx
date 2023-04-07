@@ -138,7 +138,7 @@ StatusCode CaloCPUOutput::execute (const EventContext & ctx, xAOD::CaloClusterCo
             }
           else if (weight > 0.5f)
             {
-              ret_state->clusterTag[cell_ID] = ClusterTag::make_tag(cluster_number, other_tag.secondary_cluster_weight(), other_index < 0 ? 0 : other_index);
+              ret_state->clusterTag[cell_ID] = ClusterTag::make_tag(cluster_number, other_tag.secondary_cluster_weight(), other_index);
               ++shared_count;
             }
           else if (weight == 0.5f)

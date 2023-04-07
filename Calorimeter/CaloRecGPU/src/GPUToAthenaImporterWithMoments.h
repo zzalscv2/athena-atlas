@@ -17,6 +17,7 @@
 
 #include "CaloDetDescr/CaloDepthTool.h"
 #include "CaloInterface/ILArHVFraction.h"
+#include <stdexcept>
 
 class CaloCell_ID;
 
@@ -92,7 +93,7 @@ class GPUToAthenaImporterWithMoments :
   struct MomentsOptionsArray
   {
     static constexpr int num_moments = 72;
-    bool array[num_moments] = {0};
+    bool array[num_moments]{};
     //Initialize to false.
     
     static constexpr int moment_to_linear(const xAOD::CaloCluster::MomentType moment)
@@ -250,11 +251,19 @@ class GPUToAthenaImporterWithMoments :
     
     bool & operator[] (const xAOD::CaloCluster::MomentType moment)
     {
+      const int idx=moment_to_linear(moment); //this can return 72
+      if (idx == num_moments) {
+        throw std::out_of_range("index out of range in bool & MomentsOptionsArray[]");
+      }
       return array[moment_to_linear(moment)];
     }
     
     bool operator[] (const xAOD::CaloCluster::MomentType moment) const
-    {
+    { 
+      const int idx=moment_to_linear(moment); //this can return 72
+      if (idx == num_moments) {
+        throw std::out_of_range("index out of range in bool MomentsOptionsArray[] const");
+      }
       return array[moment_to_linear(moment)];
     }
   };
