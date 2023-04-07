@@ -48,12 +48,10 @@ StatusCode sTgcRawDataMonAlg::fillHistograms(const EventContext& ctx) const {
  
   const int lumiblock = GetEventInfo(ctx) -> lumiBlock();
   
-  if (m_dosTgcESD && m_dosTgcOverview) {
-    for(const Muon::sTgcPrepDataCollection* coll : *sTgcContainer) {
-      for (const Muon::sTgcPrepData* prd : *coll) {
-	fillsTgcOccupancyHistograms(prd, detectorManagerKey.cptr());
-	fillsTgcLumiblockHistograms(prd, lumiblock);
-      }
+  for(const Muon::sTgcPrepDataCollection* coll : *sTgcContainer) {
+    for (const Muon::sTgcPrepData* prd : *coll) {
+      fillsTgcOccupancyHistograms(prd, detectorManagerKey.cptr());
+      fillsTgcLumiblockHistograms(prd, lumiblock);
     }
   }
   
@@ -173,26 +171,26 @@ void sTgcRawDataMonAlg::fillsTgcLumiblockHistograms(const Muon::sTgcPrepData* sT
   int multiplet           = m_idHelperSvc -> stgcIdHelper().multilayer(id);
   int gasGap              = m_idHelperSvc -> stgcIdHelper().gasGap(id);    
   int channelType         = m_idHelperSvc -> stgcIdHelper().channelType(id);
-  int sector              = m_idHelperSvc -> sector(id);
   int layer               = getLayer(multiplet, gasGap);
-  int stationEtaShiftedModified = (stationEta < 0) ? stationEta - 1 - 3*(sector - 1) : stationEta + 3*(sector - 1);
+  int sectorsTotal        = getSectors(id);
+  int sectorsTotalShifted = (sectorsTotal < 0) ? sectorsTotal - 1: sectorsTotal;
 
   if (channelType == sTgcIdHelper::sTgcChannelTypes::Pad) {
-    auto padStationEtaMon = Monitored::Scalar<int>("padStationEta_layer_" + std::to_string(layer), stationEtaShiftedModified);
-    auto padLumiblockMon  = Monitored::Scalar<int>("padLumiblock_layer_" + std::to_string(layer), lb);
-    fill("sTgcLumiblock", padStationEtaMon, padLumiblockMon);
+    auto padStationEtaMon = Monitored::Scalar<int>("padStationEta_quad_" + std::to_string(std::abs(stationEta)) + "_layer_" + std::to_string(layer), sectorsTotalShifted);
+    auto padLumiblockMon  = Monitored::Scalar<int>("padLumiblock_quad_" + std::to_string(std::abs(stationEta)) + "_layer_" + std::to_string(layer), lb);
+    fill("sTgcLumiblockPad_quad_" + std::to_string(std::abs(stationEta)), padStationEtaMon, padLumiblockMon);
   }
 
   else if (channelType == sTgcIdHelper::sTgcChannelTypes::Strip) {
-    auto stripStationEtaMon = Monitored::Scalar<int>("stripStationEta_layer_" + std::to_string(layer), stationEtaShiftedModified);
-    auto stripLumiblockMon  = Monitored::Scalar<int>("stripLumiblock_layer_" + std::to_string(layer), lb);
-    fill("sTgcLumiblock", stripStationEtaMon, stripLumiblockMon);
+    auto stripStationEtaMon = Monitored::Scalar<int>("stripStationEta_quad_" + std::to_string(std::abs(stationEta)) + "_layer_" + std::to_string(layer), sectorsTotalShifted);
+    auto stripLumiblockMon  = Monitored::Scalar<int>("stripLumiblock_quad_" + std::to_string(std::abs(stationEta)) + "_layer_" + std::to_string(layer), lb);
+    fill("sTgcLumiblockStrip_quad_" + std::to_string(std::abs(stationEta)), stripStationEtaMon, stripLumiblockMon);
   }
 
   else if (channelType == sTgcIdHelper::sTgcChannelTypes::Wire) {
-    auto wireGroupStationEtaMon = Monitored::Scalar<int>("wireGroupStationEta_layer_" + std::to_string(layer), stationEtaShiftedModified);
-    auto wireGroupLumiblockMon  = Monitored::Scalar<int>("wireGroupLumiblock_layer_" + std::to_string(layer), lb);
-    fill("sTgcLumiblock", wireGroupStationEtaMon, wireGroupLumiblockMon);
+    auto wireStationEtaMon = Monitored::Scalar<int>("wireStationEta_quad_" + std::to_string(std::abs(stationEta)) + "_layer_" + std::to_string(layer), sectorsTotalShifted);
+    auto wireLumiblockMon  = Monitored::Scalar<int>("wireLumiblock_quad_" + std::to_string(std::abs(stationEta)) + "_layer_" + std::to_string(layer), lb);
+    fill("sTgcLumiblockWire_quad_" + std::to_string(std::abs(stationEta)), wireStationEtaMon, wireLumiblockMon);
   }
 }
 
@@ -253,6 +251,8 @@ void sTgcRawDataMonAlg::fillsTgcClusterFromTrackHistograms(const xAOD::TrackPart
 	const std::vector<Identifier>& stripIds = prd->rdoList();
 	unsigned int csize = stripIds.size();
 	
+	if (csize < m_clusterSizeCut) continue;
+
 	std::vector<short int> stripTimesVec = prd -> stripTimes();
 	std::vector<int> stripChargesVec = prd -> stripCharges();
 
