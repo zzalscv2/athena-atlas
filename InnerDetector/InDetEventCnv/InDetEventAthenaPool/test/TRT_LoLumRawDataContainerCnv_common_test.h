@@ -16,8 +16,11 @@
 
 #include "GaudiKernel/MsgStream.h"
 
+#include "AthAllocators/DataPool.h"
+
 #include <cassert>
 #include <iostream>
+
 
 
 void compare(const TRT_LoLumRawData& p1,
@@ -79,6 +82,13 @@ template<typename TCnv, typename T>
 void test1 ATLAS_NOT_THREAD_SAFE ()
 {
   std::cout << "test1\n";
+  {
+    // Need to instantiate an instance of this before Leakcheck,
+    // to get the allocator created.  But the instance will also
+    // hold a lock on the allocator, so can't leave this live
+    // or we'll deadlock.
+    DataPool<TRT_LoLumRawData> pooldum;
+  }
   Athena_test::Leakcheck check;
   // Build a TRT_RDO_Container
   const unsigned int containerSize(19008);
