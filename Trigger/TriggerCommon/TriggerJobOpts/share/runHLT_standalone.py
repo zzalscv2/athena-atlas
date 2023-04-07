@@ -156,6 +156,7 @@ flags.Trigger.doHLT = True    # needs to be set early as other flags depend on i
 flags.Trigger.EDMVersion = 3  # Run-3 EDM
 flags.Beam.Type = BeamType.Collisions
 flags.InDet.useDCS = False    # DCS is in general not available online
+flags.Muon.MuonTrigger = True # Setup muon reconstruction for trigger
 
 # Disable some forward detetors
 flags.Detector.GeometryALFA = False
@@ -204,9 +205,36 @@ flags.Trigger.L1MuonSim.doPadTrigger = opt.enableL1NSWPadTrigger
 flags.Trigger.L1MuonSim.doStripTrigger = opt.enableL1NSWStripTrigger
 flags.Trigger.L1MuonSim.doBIS78 = opt.enableL1RPCBIS78
 
+#-------------------------------------------------------------
+# Switch off CPS mechanism if we only run selected
+# signatures or chains, to avoid single-chain sets
+#-------------------------------------------------------------
+if len(opt.enabledSignatures)==1 or opt.selectChains:
+    flags.Trigger.disableCPS = True
+
 if opt.setMenu:
     flags.Trigger.triggerMenuSetup = opt.setMenu
 
+#-------------------------------------------------------------
+# Output flags
+#-------------------------------------------------------------
+from RecExConfig.RecFlags import rec
+if opt.doWriteRDOTrigger:
+    if flags.Trigger.Online.isPartition:
+        log.error('Cannot use doWriteRDOTrigger in athenaHLT or partition')
+        theApp.exit(1)
+    rec.doWriteRDO = False  # RecExCommon flag
+    flags.Output.doWriteRDO = True  # new JO flag
+    if not flags.Output.RDOFileName:
+        flags.Output.RDOFileName = 'RDO_TRIG.pool.root'  # new JO flag
+if opt.doWriteBS:
+    rec.doWriteBS = True  # RecExCommon flag
+    flags.Output.doWriteBS = True  # new JO flag
+    flags.Trigger.writeBS = True  # new JO flag
+
+#-------------------------------------------------------------
+# Modifiers
+#-------------------------------------------------------------
 # Setup list of modifiers
 # Common modifiers for MC and data
 setModifiers = []
@@ -214,9 +242,6 @@ setModifiers = []
 if not flags.Input.isMC:  # data modifiers
     setModifiers += ['BFieldAutoConfig']
 
-#-------------------------------------------------------------
-# Modifiers
-#-------------------------------------------------------------
 modifierList=[]
 from TrigConfigSvc.TrigConfMetaData import TrigConfMetaData
 meta = TrigConfMetaData()
@@ -237,23 +262,6 @@ for mod in dir(TriggerJobOpts.Modifiers):
 
 if setModifiers:
     log.error('Unknown modifier(s): %s', setModifiers)
-
-#-------------------------------------------------------------
-# Output flags
-#-------------------------------------------------------------
-from RecExConfig.RecFlags import rec
-if opt.doWriteRDOTrigger:
-    if flags.Trigger.Online.isPartition:
-        log.error('Cannot use doWriteRDOTrigger in athenaHLT or partition')
-        theApp.exit(1)
-    rec.doWriteRDO = False  # RecExCommon flag
-    flags.Output.doWriteRDO = True  # new JO flag
-    if not flags.Output.RDOFileName:
-        flags.Output.RDOFileName = 'RDO_TRIG.pool.root'  # new JO flag
-if opt.doWriteBS:
-    rec.doWriteBS = True  # RecExCommon flag
-    flags.Output.doWriteBS = True  # new JO flag
-    flags.Trigger.writeBS = True  # new JO flag
 
 # never include this
 include.block("RecExCond/RecExCommon_flags.py")
@@ -287,8 +295,6 @@ else:
 if flags.Trigger.doMuon:
     DetFlags.detdescr.Muon_setOn()
     DetFlags.makeRIO.all_setOn()
-    # Setup muon reconstruction for trigger
-    flags.Muon.MuonTrigger=True
 else:
     DetFlags.Muon_setOff()
 
@@ -316,6 +322,11 @@ rec.doTruth = False
 for mod in modifierList:
     mod.preSetup(flags)
 
+#-------------------------------------------------------------
+# Lock flags !
+#-------------------------------------------------------------
+from TriggerJobOpts import runHLT
+runHLT.lock_and_restrict(flags)
 
 from AthenaCommon.AlgScheduler import AlgScheduler
 AlgScheduler.CheckDependencies( flags.Scheduler.CheckDependencies )
@@ -351,21 +362,6 @@ if flags.Trigger.doID:
     InDetFlags.doPrintConfigurables = log.getEffectiveLevel() <= logging.DEBUG
     include("InDetRecExample/InDetRecConditionsAccess.py")
 
-#-------------------------------------------------------------
-# Switch off CPS mechanism if we only run selected
-# signatures or chains, to avoid single-chain sets
-#-------------------------------------------------------------
-if len(opt.enabledSignatures)==1 or opt.selectChains:
-    flags.Trigger.disableCPS=True
-
-#-------------------------------------------------------------
-# Lock flags !
-#
-# This is the earliest we can lock since InDetJobProperties.py
-# above still modifies the flags.
-
-from TriggerJobOpts import runHLT
-runHLT.lock_and_restrict(flags)
 
 # Only import this here to avoid we accidentally use CAs before locking
 from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper

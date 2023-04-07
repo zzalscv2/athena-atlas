@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -19,9 +19,10 @@
 #ifndef LARShape2NTUPLE_H
 #define LARShape2NTUPLE_H
 #include "LArCalibTools/LArCond2NtupleBase.h"
+#include "LArElecCalib/ILArShape.h"
 
 class LArShape2Ntuple : public LArCond2NtupleBase {
- public:
+public:
 
   LArShape2Ntuple(const std::string & name, ISvcLocator * pSvcLocator);
   ~LArShape2Ntuple();
@@ -32,11 +33,11 @@ class LArShape2Ntuple : public LArCond2NtupleBase {
   StatusCode finalize(){return StatusCode::SUCCESS;}
   
 
- private:
-   std::string m_contKey;
-   std::string m_ntName;
-   std::string m_ntFile;
-   bool m_isComplete;
+
+  SG::ReadCondHandleKey<ILArShape> m_contKey{this,"ContainerKey","LArShape"};
+  std::string m_ntName;
+  std::string m_ntFile;
+  bool m_isComplete;
    
 };
 

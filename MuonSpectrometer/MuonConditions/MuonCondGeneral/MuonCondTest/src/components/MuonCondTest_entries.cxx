@@ -5,7 +5,6 @@
 #include "../CSCConditionsTestAlgMT.h"
 #include "../MDTConditionsTestAlgMT.h"
 #include "../NswCondTestAlg.h"
-#include "../NswDcsTestAlg.h"
 #include "../NswPassivationTestAlg.h"
 #include "../MdtCablingTestAlg.h"
 #include "../RpcCablingTestAlg.h"
@@ -15,7 +14,6 @@ DECLARE_COMPONENT(AlignCondAthTest)
 DECLARE_COMPONENT(MDTConditionsTestAlgMT)
 DECLARE_COMPONENT(CSCConditionsTestAlgMT)
 DECLARE_COMPONENT(NswCondTestAlg)
-DECLARE_COMPONENT(NswDcsTestAlg)
 DECLARE_COMPONENT(NswPassivationTestAlg)
 DECLARE_COMPONENT(MdtCablingTestAlg)
 DECLARE_COMPONENT(RpcCablingTestAlg)

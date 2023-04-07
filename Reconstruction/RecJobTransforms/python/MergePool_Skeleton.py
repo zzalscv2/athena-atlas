@@ -1,16 +1,11 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-# temporarily force no global config flags
-from AthenaConfiguration import AllConfigFlags
-del AllConfigFlags.ConfigFlags
-import re
-
 def fromRunArgs(runArgs):
 
     # Setup logging
     from AthenaCommon.Logging import logging
     log = logging.getLogger('MergePool_Skeleton')
-    log.info( '****************** STARTING MergePool MERGING *****************' )
+    log.info('****************** STARTING MergePool MERGING *****************')
 
     # Print arguments
     log.info('**** Transformation run arguments')
@@ -24,39 +19,68 @@ def fromRunArgs(runArgs):
     flags = initConfigFlags()
     commonRunArgsToFlags(runArgs, flags)
 
-    DAODStream = ''
-    if hasattr(runArgs, "inputPOOL_MRG_INPUTFile"):
-        flags.Input.Files = runArgs.inputPOOL_MRG_INPUTFile
-        if runArgs.inputPOOL_MRG_INPUTFileType == "AOD":
-            # Extract DAODStream from filename since it's not stored in the runArgs
-            m = re.search(r'DAOD_[A-Z,0-9]+', runArgs.outputPOOL_MRG_OUTPUTFile)
+    # This will be used to store the stream type that's being merged
+    streamToMerge = None
+
+    # First deal w/ the generic case
+    if hasattr(runArgs, 'inputPOOL_MRG_INPUTFile'):
+        # Cache the input file type from runArgs
+        fileType = runArgs.inputPOOL_MRG_INPUTFileType
+        if fileType == 'AOD':
+            # See if we're dealing w/ a DAOD file instead of a primary AOD one
+            # Extract stream from filename since it's not stored in the runArgs
+            # We MUST find a better way of doing this...
+            import re
+            m = re.search(r'DAOD_[A-Z,0-9]+', runArgs.inputPOOL_MRG_INPUTFile[0])
             if m:
-                 DAODStream = m.group(0)
-                 outputFileName = runArgs.outputPOOL_MRG_OUTPUTFile
-                 flagString = f'Output.{DAODStream}FileName'
-                 flags.addFlag(flagString, outputFileName)
-                 flags.addFlag(f'Output.doWrite{DAODStream}', True)
-                 flags.Output.doWriteDAOD = True
-                 flags.Output.doWriteAOD = False
-                 log.info(f'**** Found DAODStream {DAODStream}')
-                 log.info(flags.dump())
-            else:
-                 flags.Output.AODFileName = runArgs.outputPOOL_MRG_OUTPUTFile
+                fileType = m.group(0)
+        elif fileType == 'ESD':
+            # Here do something if we'd like to treat DESDs differently like DAODs
+            # Currently DESDs are treated as primary ESDs
+            pass
 
-        elif runArgs.inputPOOL_MRG_INPUTFileType == "ESD":
-            flags.Output.ESDFileName = runArgs.outputPOOL_MRG_OUTPUTFile
-    else:
-        raise RuntimeError('Please provide an inputPOOL_MRG_INPUTFile')
+        # Now set the input file name appropriately
+        setattr(runArgs, f'input{fileType}File', runArgs.inputPOOL_MRG_INPUTFile)
 
-    # DAOD comes in many flavours, so automate transforming this into a "standard" AOD argument
-    # This is not used in the POOLMergeAthena step
-    DAOD_Input_Key = [ k for k in dir(runArgs) if k.startswith("inputDAOD") and k.endswith("File") ]
+        # Now set the output file name appropriately
+        if hasattr(runArgs, 'outputPOOL_MRG_OUTPUTFile'):
+            setattr(runArgs, f'output{fileType}_MRGFile', runArgs.outputPOOL_MRG_OUTPUTFile)
+        else:
+            raise RuntimeError('Please provide an output POOL file (via --outputPOOL_MRG_OUTPUTFile)')
+
+    # Deal w/ the AOD specific case
+    if hasattr(runArgs, 'inputAODFile'):
+        streamToMerge = 'AOD'
+        flags.Input.Files = runArgs.inputAODFile
+        if hasattr(runArgs, 'outputAOD_MRGFile'):
+            flags.Output.AODFileName = runArgs.outputAOD_MRGFile
+        else:
+            raise RuntimeError('Please provide an output AOD file (via --outputAOD_MRGFile)')
+
+    # Deal w/ the ESD specific case
+    if hasattr(runArgs, 'inputESDFile'):
+        streamToMerge = 'ESD'
+        flags.Input.Files = runArgs.inputESDFile
+        if hasattr(runArgs, 'outputESD_MRGFile'):
+            flags.Output.ESDFileName = runArgs.outputESD_MRGFile
+        else:
+            raise RuntimeError('Please provide an output ESD file (via --outputESD_MRGFile)')
+
+    # DAOD comes in many flavours, so automate transforming this into a 'standard' AOD argument
+    DAOD_Input_Key = [ k for k in dir(runArgs) if k.startswith('inputDAOD') and k.endswith('File') ]
     if len(DAOD_Input_Key) == 1:
+        streamToMerge = DAOD_Input_Key[0].removeprefix('input').removesuffix('File')
         flags.Input.Files = getattr(runArgs, DAOD_Input_Key[0])
+        if hasattr(runArgs, f'output{streamToMerge}_MRGFile'):
+            flags.addFlag(f'Output.{streamToMerge}FileName', getattr(runArgs, f'output{streamToMerge}_MRGFile'))
+            flags.addFlag(f'Output.doWrite{streamToMerge}', True)
+            flags.Output.doWriteDAOD = True
+        else:
+            raise RuntimeError(f'Please provide an output {streamToMerge} file (via --output{streamToMerge}_MRGFile)')
 
-    DAOD_Output_Key = [ k for k in dir(runArgs) if k.startswith("outputDAOD") and k.endswith("_MRGFile") ]
-    if len(DAOD_Output_Key) == 1:
-        flags.Output.AODFileName = getattr(runArgs, DAOD_Output_Key[0])
+    # Double check we have something to merge
+    if not streamToMerge:
+        raise RuntimeError('Could not figure out what stream type is being merged [allowed: ESD, AOD, or any DAOD type]')
 
     # Setup perfmon flags from runargs
     from PerfMonComps.PerfMonConfigHelpers import setPerfmonFlagsFromRunArgs
@@ -88,53 +112,32 @@ def fromRunArgs(runArgs):
 
     # Output writing
 
-    if flags.Output.doWriteAOD:
-        # Configure AOD output
-        from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-        cfg.merge(OutputStreamCfg(flags, 'AOD'))
-        StreamAOD = cfg.getEventAlgo('OutputStreamAOD')
-        StreamAOD.ForceRead = True
-        StreamAOD.TakeItemsFromInput = True
-        # Add in-file MetaData
-        from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
-        cfg.merge(InfileMetaDataCfg(flags, 'AOD'))
-        log.info("**** Configured AOD writing")
+    # Configure the output stream
+    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    cfg.merge(OutputStreamCfg(flags, streamToMerge))
+    Stream = cfg.getEventAlgo(f'OutputStream{streamToMerge}')
+    Stream.ForceRead = True
+    Stream.TakeItemsFromInput = True
+    # Add in-file MetaData
+    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
+    cfg.merge(InfileMetaDataCfg(flags, streamToMerge))
+    log.info(f'**** Configured {streamToMerge} writing')
 
-    if flags.Output.doWriteDAOD:
-        # Configure DAOD output
-        from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-        cfg.merge(OutputStreamCfg(flags, f'{DAODStream}'))
-        StreamDAOD = cfg.getEventAlgo(f'OutputStream{DAODStream}')
-        StreamDAOD.ForceRead = True
-        StreamDAOD.TakeItemsFromInput = True
-        # Add in-file MetaData
-        from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
-        cfg.merge(InfileMetaDataCfg(flags, f'{DAODStream}'))
-        log.info("**** Configured DAOD writing")
-
-    if flags.Output.doWriteESD:
-        # Configure ESD output
-        from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-        cfg.merge(OutputStreamCfg(flags, 'ESD'))
-        StreamESD = cfg.getEventAlgo('OutputStreamESD')
-        StreamESD.ForceRead = True
-        StreamESD.TakeItemsFromInput = True
-
-        # Needed for Trk::Tracks TPCnv
-        from TrkEventCnvTools.TrkEventCnvToolsConfigCA import (TrkEventCnvSuperToolCfg)
-        cfg.merge(TrkEventCnvSuperToolCfg(flags))
-        # Needed for MetaData
-        from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
-        cfg.merge(InfileMetaDataCfg(flags, "ESD"))
-        log.info("ESD ItemList: %s", cfg.getEventAlgo("OutputStreamESD").ItemList)
-        log.info("ESD MetadataItemList: %s", cfg.getEventAlgo("OutputStreamESD").MetadataItemList)
-        log.info("**** Configured ESD writing")
-
-    # This part is needed for (un)packing cell containers
-    from LArGeoAlgsNV.LArGMConfig import LArGMCfg
-    cfg.merge(LArGMCfg(flags))
-    from TileGeoModel.TileGMConfig import TileGMCfg
-    cfg.merge(TileGMCfg(flags))
+    # Configure extra bits that are needed for TP conversion
+    for item in flags.Input.TypedCollections:
+        ctype, cname = item.split('#')
+        if ctype.startswith('Trk'):
+            from TrkEventCnvTools.TrkEventCnvToolsConfigCA import TrkEventCnvSuperToolCfg
+            cfg.merge(TrkEventCnvSuperToolCfg(flags))
+        if ctype.startswith('Calo') or ctype.startswith('LAr'):
+            from LArGeoAlgsNV.LArGMConfig import LArGMCfg
+            cfg.merge(LArGMCfg(flags))
+        if ctype.startswith('Calo') or ctype.startswith('Tile'):
+            from TileGeoModel.TileGMConfig import TileGMCfg
+            cfg.merge(TileGMCfg(flags))
+        if ctype.startswith('Muon'):
+            from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
+            cfg.merge(MuonGeoModelCfg(flags))
 
     # Add PerfMon
     if flags.PerfMon.doFastMonMT or flags.PerfMon.doFullMonMT:
@@ -142,7 +145,7 @@ def fromRunArgs(runArgs):
         cfg.merge(PerfMonMTSvcCfg(flags))
 
     # Set EventPrintoutInterval to 100 events
-    cfg.getService(cfg.getAppProps()["EventLoop"]).EventPrintoutInterval = 100
+    cfg.getService(cfg.getAppProps()['EventLoop']).EventPrintoutInterval = 100
 
     # Post-include
     log.info('**** Processing postInclude')

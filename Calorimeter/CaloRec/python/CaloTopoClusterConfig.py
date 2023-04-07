@@ -457,7 +457,7 @@ if __name__=="__main__":
     cfg.addEventAlgo(theNegativeEnergyCaloClustersThinner,"AthAlgSeq")
 
     
-    cfg.addEventAlgo(CompFactory.ClusterDumper("TopoDumper",ContainerName=theKey,FileName="NewTopoClusters.txt"))
+    cfg.addEventAlgo(CompFactory.ClusterDumper("TopoDumper",ContainerName=theKey,FileName="NewTopoClusters.txt"),sequenceName="AthAlgSeq")
 
 #    cfg.getService("StoreGateSvc").Dump=True
 

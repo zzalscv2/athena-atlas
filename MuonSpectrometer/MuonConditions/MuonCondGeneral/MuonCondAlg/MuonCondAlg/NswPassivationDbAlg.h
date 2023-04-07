@@ -44,6 +44,8 @@ private:
 
 	StatusCode loadData(const EventContext& ctx) const;
 
+	Identifier buildChannelId(const int station, const int stationEta, const int stationPhi, const int multiLayer, const int gasGap, const int pcbPos) const;
+    
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
  
     writeKey_t m_writeKey{this, "WriteKey", "NswPassivationDbData", "Key of output passivation data" };

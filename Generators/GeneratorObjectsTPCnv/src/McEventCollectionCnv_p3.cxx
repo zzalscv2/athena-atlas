@@ -134,7 +134,8 @@ void McEventCollectionCnv_p3::persToTrans( const McEventCollection_p3* persObj,
     // set the signal process vertex
     const int sigProcVtx = persEvt.m_signalProcessVtx;
     if ( sigProcVtx != 0 ) {
-      HepMC::set_signal_process_vertex(genEvt, HepMC::barcode_to_vertex(genEvt, sigProcVtx ) );
+      auto Vtx=HepMC::barcode_to_vertex(genEvt, sigProcVtx );
+      HepMC::set_signal_process_vertex(genEvt, Vtx );
     }
 
     // connect particles to their end vertices

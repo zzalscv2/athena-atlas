@@ -301,14 +301,3 @@ def MuonStationIntersectCondAlgCfg(flags, name='MuonStationIntersectCondAlg',**k
     muon_station_intersect_condalg = CompFactory.MuonStationIntersectCondAlg(name=name, **kwargs)
     result.addCondAlgo(muon_station_intersect_condalg, primary=True)
     return result
-
-def NswDcsDbAlgCfg(flags, **kwargs):
-    acc = ComponentAccumulator()
-    if flags.GeoModel.Run!=LHCPeriod.Run3: return acc
-    if flags.Input.isMC: return acc
-    acc.merge(addFolders(flags, "/MMG/DCS/TSTHV", "DCS_OFL", className="CondAttrListCollection"))
-    acc.merge(addFolders(flags, "/STG/DCS/TSTHV", "DCS_OFL", className="CondAttrListCollection"))
-    alg = CompFactory.NswDcsDbAlg("NswDcsDbAlg", **kwargs)
-    acc.addCondAlgo(alg)
-    return acc
-

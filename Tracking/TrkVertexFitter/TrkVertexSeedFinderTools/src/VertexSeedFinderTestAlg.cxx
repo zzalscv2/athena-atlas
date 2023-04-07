@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file TrkVertexSeedFinderTools/src/VertexSeedFinderTestAlg.cxx
@@ -135,7 +135,7 @@ StatusCode VertexSeedFinderTestAlg::initialize()
  */
 StatusCode VertexSeedFinderTestAlg::execute()
 {
-  ATH_MSG_VERBOSE ("execute");
+  ATH_MSG_INFO ("execute");
   const EventContext& ctx = Gaudi::Hive::currentContext();
 
   double vx = 0;
@@ -163,7 +163,7 @@ StatusCode VertexSeedFinderTestAlg::execute()
   std::vector<const Trk::TrackParameters*> v1b { p1c.get(), p1a.get(), p1b.get() };
 
   if (!m_expected1.empty()) {
-    ATH_MSG_VERBOSE ("testing 1");
+    ATH_MSG_INFO ("testing 1");
     Amg::Vector3D p = m_finder->findSeed (vx, vy, v1a);
     assertVec3D ("1a", p,  m_expected1);
 
@@ -213,7 +213,7 @@ StatusCode VertexSeedFinderTestAlg::execute()
   initVertex (vert1);
 
   if (!m_expected2.empty()) {
-    ATH_MSG_VERBOSE ("testing 2");
+    ATH_MSG_INFO ("testing 2");
     Amg::Vector3D p = m_finder->findSeed (vx, vy, v1a, &vert1);
     assertVec3D ("2a", p, m_expected2);
 
@@ -258,7 +258,7 @@ StatusCode VertexSeedFinderTestAlg::execute()
   }
 
   if (!m_expected3.empty()) {
-    ATH_MSG_VERBOSE ("testing 3");
+    ATH_MSG_INFO ("testing 3");
     if (m_expected3.size() == 3) {
       Amg::Vector3D p = m_finder->findSeed (vx, vy, pvec);
       assertVec3D ("3a", p, m_expected3);
@@ -291,10 +291,12 @@ VertexSeedFinderTestAlg::makeMcEventCollection (const EventContext& ctx) const
   auto *evt1 = new HepMC::GenEvent();
   auto *evt2 = new  HepMC::GenEvent();
   auto *evt3 = new HepMC::GenEvent();
-
-  HepMC::set_signal_process_vertex (evt1,HepMC::newGenVertexPtr(HepMC::FourVector{1*mm,   2*mm,  12*mm,0.0}));
-  HepMC::set_signal_process_vertex (evt2,HepMC::newGenVertexPtr(HepMC::FourVector{0.3*mm,-0.7*mm,-3*mm,0.0}));
-  HepMC::set_signal_process_vertex (evt3,HepMC::newGenVertexPtr(HepMC::FourVector{0.6*mm, 0.2*mm, 7*mm,0.0}));
+  auto v1 = HepMC::newGenVertexPtr(HepMC::FourVector{1*mm,   2*mm,  12*mm,0.0});
+  auto v2 = HepMC::newGenVertexPtr(HepMC::FourVector{0.3*mm,-0.7*mm,-3*mm,0.0});
+  auto v3 = HepMC::newGenVertexPtr(HepMC::FourVector{0.6*mm, 0.2*mm, 7*mm,0.0});
+  HepMC::set_signal_process_vertex (evt1,v1);
+  HepMC::set_signal_process_vertex (evt2,v2);
+  HepMC::set_signal_process_vertex (evt3,v3);
  
   Athena_test::uniform_real_distribution<double> ptdist (0.1*GeV, 100*GeV);
   Athena_test::uniform_real_distribution<double> phidist (-M_PI, M_PI);

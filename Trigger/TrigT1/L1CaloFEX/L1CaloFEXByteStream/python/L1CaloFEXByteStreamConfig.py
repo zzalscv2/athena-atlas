@@ -53,6 +53,7 @@ def eFexByteStreamToolCfg(flags, name, *, writeBS=False, TOBs=True, xTOBs=False,
       helper = AthMonitorCfgHelper(flags, 'HLTFramework')
       monTool = helper.addGroup(None, f'{name}MonTool', f'/HLT/HLTFramework/L1BSConverters/{name}')
       topDir = None
+      acc.merge(helper.result())
     monTool.defineHistogram('efexDecoderErrorTitle,efexDecoderErrorLocation;errors', path=topDir, type='TH2I',
                             title='Decoder Errors;Title;Location',
                             xbins=1, xmin=0, xmax=1, xlabels=["UNKNOWN"],
