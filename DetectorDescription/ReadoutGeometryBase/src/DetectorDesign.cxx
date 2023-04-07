@@ -127,11 +127,6 @@ SiIntersect DetectorDesign::inDetector(const SiLocalPosition &localPosition,
     return state;
 }
 
-SiIntersect DetectorDesign::inDetector(const SiLocalPosition &localPosition,
-                                       double phiTol, double etaTol, bool /*forceStringent*/ ) const {
-  return inDetector(localPosition,phiTol,etaTol);
-}
-
   const Amg::Transform3D DetectorDesign::moduleShift() const {
     return Amg::Transform3D::Identity();
   }

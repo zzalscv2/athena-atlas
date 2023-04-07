@@ -175,10 +175,6 @@ public:
     virtual std::pair<int,int> getStripRow(SiCellId id) const;
     /** Test if point is in the active part of the detector with specified tolerances */
     virtual SiIntersect inDetector(const SiLocalPosition &localPosition, double phiTol, double etaTol) const override;
-    /** Test if point is in the active part of the detector with specified tolerances  - allows forcing of most stringent check*/
-    virtual SiIntersect inDetector(const SiLocalPosition &localPosition, double phiTol, double etaTol, bool forceStringentCheck) const override;
-
-
 
 private:
     SCT_ModuleSideDesign();

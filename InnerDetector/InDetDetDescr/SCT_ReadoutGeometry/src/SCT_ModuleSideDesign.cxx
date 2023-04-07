@@ -126,18 +126,7 @@ std::pair<int,int> SCT_ModuleSideDesign::getStripRow(SiCellId /*id*/) const {
    return {0,0};
  }
 
-  SiIntersect SCT_ModuleSideDesign::inDetector(const SiLocalPosition &localPosition, double phiTol, double etaTol, bool forceStringent) const {
-    
-    //if we are not doing a stringent check, we should first see if there is
-    //a motherDesign, and if so, do the check based on that instead
-    if(!forceStringent){
-      
-      const SCT_ModuleSideDesign * mother = getMother();
-      
-      //Stringent check on mother, to skip checking for "grandmother"
-      if(mother) return mother->inDetector(localPosition,phiTol,etaTol, true); 
-    
-    }
+  SiIntersect SCT_ModuleSideDesign::inDetector(const SiLocalPosition &localPosition, double phiTol, double etaTol) const {
 
     double etaDist = 0;
     double phiDist = 0;
@@ -159,11 +148,6 @@ std::pair<int,int> SCT_ModuleSideDesign::getStripRow(SiCellId /*id*/) const {
     // Near boundary.
     state.setNearBoundary();
     return state;
-}
-
-SiIntersect SCT_ModuleSideDesign::inDetector(const SiLocalPosition &localPosition, double phiTol, double etaTol) const {
-  //default check is not "stringent" - i.e it will use a mother if one exists
-  return inDetector(localPosition,phiTol,etaTol, false);
 }
 
 } // namespace InDetDD
