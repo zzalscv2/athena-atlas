@@ -259,7 +259,7 @@ def muFastSteeringCfg( flags, roisKey="", setup="", **kwargs ):
         muFastAlg.Scale_Road_BarrelMiddle = 1
         muFastAlg.Scale_Road_BarrelOuter  = 1
 
-    if setup == 'MuonCalib':
+    if setup == 'Calib':
         muFastAlg.DoCalibrationStream = True
         muFastAlg.MuonCalDataScouting = False
         muFastAlg.MuonCalBufferSize   = 1024*1024
