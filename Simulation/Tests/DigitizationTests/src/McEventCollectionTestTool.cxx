@@ -4,7 +4,6 @@
 
 #include "McEventCollectionTestTool.h"
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
-//#include <boost/io/ios_state.hpp>
 #include "GeneratorObjects/McEventCollection.h"
 #include <TH2D.h>
 #include <TProfile.h>

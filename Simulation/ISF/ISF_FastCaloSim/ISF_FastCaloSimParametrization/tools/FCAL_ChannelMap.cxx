@@ -13,8 +13,6 @@
 //****************************************************************************
 
 #include "LArReadoutGeometry/FCAL_ChannelMap.h"
-//#include "CLHEP/Units/SystemOfUnits.h"
-//#include "boost/io/ios_state.hpp"
 #include <sstream>
 #include <iostream>
 #include <iomanip>
@@ -451,7 +449,6 @@ FCAL_ChannelMap::print_tubemap( int imap) const
 {
   FCAL_ChannelMap::tubemap_const_iterator it = m_tubeMap[imap-1].begin();
 
-  //boost::io::ios_all_saver ias (std::cout);
   std::cout << "First 10 elements of the New FCAL tube map : " << imap << std::endl;
   std::cout.precision(5);
   for ( int i=0;  i<10; ++i, ++it)

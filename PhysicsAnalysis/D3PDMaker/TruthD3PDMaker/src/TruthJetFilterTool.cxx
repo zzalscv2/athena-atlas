@@ -17,7 +17,6 @@
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/MagicNumbers.h"
 #include "CLHEP/Vector/LorentzVector.h"
-#include "boost/range/iterator_range_core.hpp"
 #include <utility>
 
 
