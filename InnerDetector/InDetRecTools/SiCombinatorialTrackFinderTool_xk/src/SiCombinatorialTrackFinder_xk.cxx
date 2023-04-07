@@ -952,6 +952,7 @@ bool InDet::SiCombinatorialTrackFinder_xk::spacePointsToClusters
 
   /// here we reject cases where two subsequent clusters are on the same
   /// detector element
+  DE.reserve(Sc.size());
   for (; cluster != endClusters; ++cluster) {
 
      const InDetDD::SiDetectorElement* de = (*cluster)->detectorElement();
