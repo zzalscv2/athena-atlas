@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // ITrkVKalVrtFitter.h  - old VKalVrtInterface
@@ -65,7 +65,7 @@ class Track;
         IVKalState& istate,
         bool ifCovV0 = false) const = 0;
 
-      virtual StatusCode VKalVrtFit(const std::vector<const Track*>& list,
+      virtual StatusCode VKalVrtFit(const std::vector<const Perigee*>& list,
                                     Amg::Vector3D& Vertex,
                                     TLorentzVector& Momentum,
                                     long int& Charge,
@@ -110,9 +110,10 @@ class Track;
         IVKalState& istate) const = 0;
       //.........................................................................................
 
-      virtual Track* CreateTrkTrack(const std::vector<double>& VKPerigee,
-                                    const std::vector<double>& VKCov,
-                                    IVKalState& istate) const = 0;
+      virtual std::unique_ptr<Perigee>
+	CreatePerigee(const std::vector<double>& VKPerigee,
+		      const std::vector<double>& VKCov,
+		      IVKalState& istate) const = 0;
 
       virtual StatusCode VKalGetTrkWeights(std::vector<double>& Weights,
                                            const IVKalState& istate) const = 0;
@@ -158,7 +159,7 @@ class Track;
                                    std::vector<double>& ImpactError,
                                    IVKalState& istate) const = 0;
 
-      virtual double VKalGetImpact(const Track*,
+      virtual double VKalGetImpact(const Perigee*,
                                    const Amg::Vector3D& Vertex,
                                    const long int Charge,
                                    std::vector<double>& Impact,
@@ -171,11 +172,12 @@ class Track;
                                    std::vector<double>& Impact,
                                    std::vector<double>& ImpactError) const = 0;
 
-      virtual double VKalGetImpact(const Track*,
+      virtual double VKalGetImpact(const Perigee*,
                                    const Amg::Vector3D& Vertex,
                                    const long int Charge,
                                    std::vector<double>& Impact,
                                    std::vector<double>& ImpactError) const = 0;
+
       //----------------------------------------------------------------------------------------------------
    };
 

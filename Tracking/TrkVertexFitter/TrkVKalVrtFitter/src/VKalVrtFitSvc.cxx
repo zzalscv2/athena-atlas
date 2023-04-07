@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header include
@@ -30,16 +30,16 @@
 //                        Interface
 //
 
-StatusCode TrkVKalVrtFitter::VKalVrtFit(const std::vector<const Track*>& InpTrk,
-        Amg::Vector3D& Vertex,
-	TLorentzVector&   Momentum,
-	long int& Charge,
-	dvect& ErrorMatrix, 
-	dvect& Chi2PerTrk, 
-        std::vector< std::vector<double> >& TrkAtVrt,
-	double& Chi2,
-        IVKalState& istate,
-        bool ifCovV0 /*= false*/) const
+   StatusCode TrkVKalVrtFitter::VKalVrtFit(const std::vector<const Perigee*>& InpPerigee,
+                                           Amg::Vector3D& Vertex,
+                                           TLorentzVector& Momentum,
+                                           long int& Charge,
+                                           dvect& ErrorMatrix,
+                                           dvect& Chi2PerTrk,
+                                           std::vector< std::vector<double> >& TrkAtVrt,
+                                           double& Chi2,
+                                           IVKalState& istate,
+                                           bool ifCovV0 /*= false*/) const
 {
     assert(dynamic_cast<State*> (&istate)!=nullptr);
     State& state = static_cast<State&> (istate);
@@ -48,7 +48,7 @@ StatusCode TrkVKalVrtFitter::VKalVrtFit(const std::vector<const Track*>& InpTrk,
 //
 
     int ntrk=0;
-    StatusCode sc=CvtTrkTrack(InpTrk,ntrk,state);
+    StatusCode sc = CvtPerigee(InpPerigee, ntrk, state);
     if(sc.isFailure())return StatusCode::FAILURE;
 
     int ierr = VKalVrtFit3( ntrk, Vertex, Momentum, Charge, ErrorMatrix, 
