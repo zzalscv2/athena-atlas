@@ -106,11 +106,6 @@ public:
     virtual SiIntersect inDetector(const SiLocalPosition &localPosition, double phiTol,
                         double etaTol) const;
 
-         /** Test if point is in the active part of the detector with specified tolerances  - allows forcing of most stringent check*/
-    virtual SiIntersect inDetector(const SiLocalPosition &localPosition, double phiTol,
-                        double etaTol, bool forceStringentCheck) const;
-
-
     /** Override default symmetries to prevent swapping of axes.
        NB. Flags can be changed from true to false but not false to true. */
     void setSymmetry(bool phiSymmetric, bool etaSymmetric, bool depthSymmetric);
