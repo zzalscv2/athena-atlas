@@ -55,8 +55,6 @@ def createITkConfigFlags():
   itkcf.addFlag("ITk.Tracking.doConversionFinding",True) # Turn running of ConversionFinding second pass on and off
   itkcf.addFlag("ITk.Tracking.writeSeedValNtuple", False) # Turn writing of seed validation ntuple on and off
   itkcf.addFlag("ITk.Tracking.writeExtendedPRDInfo", False)
-  # Turn running of doLowPt second pass on and off
-  itkcf.addFlag("ITk.Tracking.doLowPt", False)
 
   
   # config flags for tracking geometry configuration

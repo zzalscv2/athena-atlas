@@ -150,7 +150,7 @@ def MuonCombinedInDetCandidateAlgCfg(flags, name="MuonCombinedInDetCandidateAlg"
     from MuonCombinedConfig.MuonCombinedRecToolsConfig import MuonSystemExtensionToolCfg
     result = MuonCombinedInDetDetailedTrackSelectorToolCfg(flags)
     kwargs.setdefault("TrackSelector", result.popPrivateTools())
-    if flags.MuonCombined.doSiAssocForwardMuons and flags.InDet.Tracking.doForwardTracks:
+    if flags.MuonCombined.doSiAssocForwardMuons and flags.Tracking.doForwardTracks:
         kwargs.setdefault("DoSiliconAssocForwardMuons", True)
         kwargs.setdefault("InDetForwardTrackSelector", result.popToolsAndMerge(
             MuonCombinedInDetDetailedForwardTrackSelectorToolCfg(flags)))
