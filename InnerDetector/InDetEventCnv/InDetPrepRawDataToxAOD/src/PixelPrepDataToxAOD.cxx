@@ -1018,7 +1018,7 @@ void  PixelPrepDataToxAOD::addNNTruthInfo(  xAOD::TrackMeasurementValidation* xp
   // lorentz shift correction    
   double shift = m_lorentzAngleTool->getLorentzShift(de->identifyHash());
   unsigned hitNumber(0);
-  for( auto& siHit : matchingHits ){
+  for( const auto& siHit : matchingHits ){
     
     HepGeom::Point3D<double> averagePosition = (siHit.localStartPosition() + siHit.localEndPosition()) * 0.5;
     
