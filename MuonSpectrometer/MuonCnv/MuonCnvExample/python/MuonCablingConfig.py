@@ -15,6 +15,8 @@ from MuonMDT_Cabling.MuonMDT_CablingConf import MuonMDT_CablingAlg
 condSequence = AthSequencer("AthCondSeq")
 if DetFlags.MDT_on():
     condSequence += MuonMDT_CablingAlg("MuonMDT_CablingAlg")
+    from AtlasGeoModel.CommonGMJobProperties import CommonGeometryFlags
+    condSequence.MuonMDT_CablingAlg.isRun3 = CommonGeometryFlags.Run not in ["RUN1","RUN2"]
 
 # defaults have to be re-set now since the jobproperties and trigger flags are now available # SS
 muonCnvFlags.setDefaults()
