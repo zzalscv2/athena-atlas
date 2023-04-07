@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AmbiguityProcessorBase.h"
@@ -140,7 +140,7 @@ namespace Trk {
     if (m_trackSummaryTool.isEnabled()) {
        m_trackSummaryTool->computeAndReplaceTrackSummary(*atrack,suppressHoleSearch);
     }
-    score = m_scoringTool->score( *atrack, suppressHoleSearch );
+    score = m_scoringTool->score( *atrack );
     if (m_observerTool.isEnabled()){
       m_observerTool->updateScore(parentTrackId, static_cast<double>(score));
     }
@@ -185,7 +185,7 @@ namespace Trk {
         if (m_trackSummaryTool.isEnabled()) {
           m_trackSummaryTool->computeAndReplaceTrackSummary(*bremTrack, suppressHoleSearch);
         }
-        score = m_scoringTool->score( *bremTrack, suppressHoleSearch );
+        score = m_scoringTool->score( *bremTrack );
         if (m_observerTool.isEnabled()){
           m_observerTool->updateScore(newTrackId, static_cast<double>(score));
         }

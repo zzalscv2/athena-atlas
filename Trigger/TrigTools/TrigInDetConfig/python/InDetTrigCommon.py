@@ -75,7 +75,7 @@ def ambiguityProcessorToolOld_builder( name, config, trackSummaryTool ):
    #trackFitterTool    = trackFitterTool_getter(config),
 
    scoringTool        = ambiguityScoringTool_builder( name=add_prefix( 'AmbiguityScoringTool',config.input_name), 
-                                                      config=config, trackSummaryTool=trackSummaryTool )
+                                                      config=config )
    associationTool    = associationTool_getter()
    trackSelectionTool = trackSelectionTool_getter(config)
 
@@ -201,7 +201,7 @@ def trackPRD_Association_builder(name, inTrackCollections, associationMapName):
 #--------------------------------------------------------------------------------------
 ## Scoring tools
 
-def ambiguityScoringTool_builder(name, config, trackSummaryTool ):
+def ambiguityScoringTool_builder(name, config):
 
     if config.name == 'cosmics':
         #Can potentially recreate the isntance of the tool here and in the if config just have a list of parameters needed to be changed for the tool
@@ -242,7 +242,6 @@ def ambiguityScoringTool_builder(name, config, trackSummaryTool ):
     kwargs = setDefaults( kwargs,
                           Extrapolator        = InDetTrigExtrapolator,
                           DriftCircleCutTool  = InDetTrigTRTDriftCircleCut,
-                          SummaryTool         = trackSummaryTool, 
                           #to have a steeper turn-n curve
                           minPt               = config.pTmin, #TODO: double check values, implement 0.95 for MinBias?  #InDetTrigCutValues.minPT(), #config.pTmin(),
                           maxRPhiImp          = InDetTrigCutValues.maxPrimaryImpact(),
