@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 //
 //   @file    RoiUtil.cxx         
@@ -10,7 +10,6 @@
 //   @author M.Sutton
 // 
 //
-//   $Id: RoiUtil.cxx, v0.0   Sat 31 Oct 2015 09:54:33 CET sutt $
 
 
 #include "IRegionSelector/IRoiDescriptor.h"
@@ -33,9 +32,9 @@ namespace RoiUtil {
 class range_error : public std::exception { 
 public:
   range_error( const char* s ) : std::exception(), m_str(s) { } 
-  virtual const char* what() const throw() { return m_str; } 
+  virtual const char* what() const throw() { return m_str.c_str(); }
 private:
-  const char*  m_str;
+  std::string m_str;
 };
   
 }
