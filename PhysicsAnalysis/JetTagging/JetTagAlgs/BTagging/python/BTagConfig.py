@@ -170,6 +170,9 @@ def BTagRecoSplitCfg(inputFlags, JetCollection=['AntiKt4EMTopo','AntiKt4EMPFlow'
     if inputFlags.BTagging.savePixelHits:
         result.merge(JetHitAssociationCfg(inputFlags))
         result.merge(addToAOD(inputFlags, _track_measurement_list("PixelClusters")))
+    if inputFlags.BTagging.saveSCTHits:
+        result.merge(JetHitAssociationCfg(inputFlags))
+        result.merge(addToAOD(inputFlags, _track_measurement_list("SCT_Clusters")))
 
     return result
 
