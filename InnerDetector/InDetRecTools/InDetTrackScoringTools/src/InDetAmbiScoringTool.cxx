@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////
@@ -7,12 +7,10 @@
 /////////////////////////////////
 
 #include "InDetTrackScoringTools/InDetAmbiScoringTool.h"
-#include "InDetRecToolInterfaces/ITrtDriftCircleCutTool.h"
 #include "TrkTrack/Track.h"
 #include "TrkTrackSummary/TrackSummary.h"
 #include "TrkEventPrimitives/FitQuality.h"
 #include "TrkParameters/TrackParameters.h"
-#include "TrkExInterfaces/IExtrapolator.h"
 #include "CLHEP/GenericFunctions/CumulativeChiSquare.hh"
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "StoreGate/ReadHandle.h"
@@ -37,7 +35,6 @@ InDet::InDetAmbiScoringTool::InDetAmbiScoringTool(const std::string& t,
   m_maxPixelHits(-1),
   m_maxPixLay(-1),
   m_maxGangedFakes(-1),
-  m_trkSummaryTool("Trk::TrackSummaryTool", this),
   m_selectortool("InDet::InDetTrtDriftCircleCutTool", this),
   m_summaryTypeScore(Trk::numberOfTrackSummaryTypes),
   m_extrapolator("Trk::Extrapolator", this)
@@ -71,7 +68,6 @@ InDet::InDetAmbiScoringTool::InDetAmbiScoringTool(const std::string& t,
 
   // tools
   declareProperty("Extrapolator",      m_extrapolator);
-  declareProperty("SummaryTool" ,      m_trkSummaryTool);
   declareProperty("DriftCircleCutTool",m_selectortool );
 
   declareProperty("maxRPhiImpEM",      m_maxRPhiImpEM  = 50.  );
@@ -108,22 +104,10 @@ InDet::InDetAmbiScoringTool::InDetAmbiScoringTool(const std::string& t,
 
 //---------------------------------------------------------------------------------------------------------------------
 
-InDet::InDetAmbiScoringTool::~InDetAmbiScoringTool()
-= default;
-
-//---------------------------------------------------------------------------------------------------------------------
-
 StatusCode InDet::InDetAmbiScoringTool::initialize()
 {
   StatusCode sc = AlgTool::initialize();
   if (sc.isFailure()) return sc;
-  
-  sc = m_trkSummaryTool.retrieve();
-  if (sc.isFailure()) {
-    msg(MSG::FATAL) << "Failed to retrieve tool " << m_trkSummaryTool << endmsg;
-    return StatusCode::FAILURE;
-  } else 
-    msg(MSG::DEBUG) << "Retrieved tool " << m_trkSummaryTool << endmsg;
   
   sc = m_extrapolator.retrieve();
   if (sc.isFailure()) {
@@ -157,17 +141,8 @@ StatusCode InDet::InDetAmbiScoringTool::initialize()
 
 //---------------------------------------------------------------------------------------------------------------------
 
-StatusCode InDet::InDetAmbiScoringTool::finalize()
+Trk::TrackScore InDet::InDetAmbiScoringTool::score( const Trk::Track& track ) const
 {
-  StatusCode sc = AlgTool::finalize();
-  return sc;
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-
-Trk::TrackScore InDet::InDetAmbiScoringTool::score( const Trk::Track& track, const bool suppressHoleSearch ) const
-{
-   (void) suppressHoleSearch;
    if (!track.trackSummary()) {
       ATH_MSG_FATAL("Track without a summary");
    }

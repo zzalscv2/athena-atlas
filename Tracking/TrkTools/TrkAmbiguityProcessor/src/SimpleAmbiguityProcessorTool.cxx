@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SimpleAmbiguityProcessorTool.h"
@@ -163,9 +163,13 @@ void Trk::SimpleAmbiguityProcessorTool::addNewTracks(const TrackCollection &trac
   const std::array<CounterIndex, 2> categoryMapping {CounterIndex::kNcandScoreZero, CounterIndex::kNcandDouble};
   for(const Track *pTrack : tracks) {
     stat.incrementCounterByRegion(CounterIndex::kNcandidates,pTrack);
-    TrackScore score = m_scoringTool->score( *pTrack, true);
-    const auto category = AmbiguityProcessor::categoriseTrack(*pTrack, score, m_dropDouble, m_assoTool, prdToTrackMap, prdSigSet);
-    if (category < categoryMapping.size()) stat.incrementCounterByRegion(categoryMapping[category],pTrack);
+    TrackScore score = m_scoringTool->score( *pTrack );
+    const auto category =
+      AmbiguityProcessor::categoriseTrack(*pTrack, score, m_dropDouble,
+					  m_assoTool, prdToTrackMap, prdSigSet);
+    if (category < categoryMapping.size()) {
+      stat.incrementCounterByRegion(categoryMapping[category],pTrack);
+    }
     ATH_MSG_DEBUG(AmbiguityProcessor::debugMessage[category]);
     if (category == AmbiguityProcessor::TrackAccepted){
       ATH_MSG_VERBOSE ("Track  ("<< pTrack <<") has score "<<score);
@@ -311,7 +315,7 @@ void Trk::SimpleAmbiguityProcessorTool::dumpTracks( const TrackCollection& track
   TrackCollection::const_iterator itEnd = tracks.end();
   for (; it != itEnd ; ++it){
     // score track:
-    const TrackScore score = m_scoringTool->score( **it, m_suppressHoleSearch );
+    const TrackScore score = m_scoringTool->score( **it );
     ATH_MSG_VERBOSE (num++<<"\tTrack :"<<*it<<"\tScore: "<<score);
     totalScore+=score;
   }

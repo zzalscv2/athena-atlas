@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -10,7 +10,6 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "TrkEventPrimitives/TrackScore.h"
 #include "TrkToolInterfaces/ITrackScoringTool.h"
-#include "TrkToolInterfaces/ITrackSummaryTool.h"
 #include <vector>
 #include <string>
 
@@ -30,21 +29,17 @@ class InDetCosmicScoringTool : virtual public Trk::ITrackScoringTool, public Ath
 
 public:
   InDetCosmicScoringTool(const std::string&,const std::string&,const IInterface*);
-  virtual ~InDetCosmicScoringTool ();
-  virtual StatusCode initialize() override;
-  virtual StatusCode finalize  () override;
+  virtual ~InDetCosmicScoringTool () = default;
+
   /** create a score based on how good the passed track is*/
   virtual
-  Trk::TrackScore score( const Trk::Track& track, const bool suppressHoleSearch ) const override;
+  Trk::TrackScore score( const Trk::Track& track ) const override;
   
   /** create a score based on how good the passed TrackSummary is*/
   virtual
   Trk::TrackScore simpleScore( const Trk::Track& track, const Trk::TrackSummary& trackSum ) const override;
   
  private:
-  
-  /**\todo make this const, once createSummary method is const*/
-  ToolHandle<Trk::ITrackSummaryTool> m_trkSummaryTool;
 
   int m_nWeightedClustersMin; 
   int m_minTRTHits;

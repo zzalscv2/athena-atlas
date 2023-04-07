@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////
@@ -16,7 +16,6 @@
 #include "TrkCaloClusterROI/ROIPhiRZContainer.h"
 #include "TrkEventPrimitives/TrackScore.h"
 #include "TrkToolInterfaces/ITrackScoringTool.h"
-#include "TrkToolInterfaces/ITrackSummaryTool.h"
 #include "lwtnn/lightweight_network_config.hh"
 #include "lwtnn/LightweightNeuralNetwork.hh"
 #include "lwtnn/LightweightGraph.hh"
@@ -51,11 +50,10 @@ class InDetNNScoringTool : virtual public Trk::ITrackScoringTool,
 
  public:
   InDetNNScoringTool(const std::string&,const std::string&,const IInterface*);
-  virtual ~InDetNNScoringTool ();
+  virtual ~InDetNNScoringTool () = default;
   virtual StatusCode initialize() override;
-  virtual StatusCode finalize  () override;
   /** create a score based on how good the passed track is*/
-  virtual Trk::TrackScore score( const Trk::Track& track, const bool suppressHoleSearch ) const override;
+  virtual Trk::TrackScore score( const Trk::Track& track ) const override;
   
   /** create a score based on how good the passed TrackSummary is*/
   virtual Trk::TrackScore simpleScore( const Trk::Track& track, const Trk::TrackSummary& trackSum ) const override;
@@ -81,9 +79,6 @@ class InDetNNScoringTool : virtual public Trk::ITrackScoringTool,
     m_factorSigmaChi2, m_factorB_LayerHits, m_factorPixelHits, m_factorPixLay, m_factorHoles, m_factorGangedFakes;
   std::vector<double> m_boundsSigmaChi2, m_boundsHits,
     m_boundsTrtRatio, m_factorTrtRatio, m_boundsTrtFittedRatio, m_factorTrtFittedRatio;
-  
-  /**\todo make this const, once createSummary method is const*/
-  ToolHandle<Trk::ITrackSummaryTool>         m_trkSummaryTool;
 
   /** Returns minimum number of expected TRT drift circles depending on eta. */
   ToolHandle<ITrtDriftCircleCutTool>          m_selectortool;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DenseEnvironmentsAmbiguityScoreProcessorTool.h"
@@ -175,25 +175,40 @@ Trk::DenseEnvironmentsAmbiguityScoreProcessorTool::addNewTracks(const TrackColle
   for(const Track* pThisTrack : tracks) {
     ATH_MSG_VERBOSE ("Processing track candidate "<<pThisTrack);
     stat.incrementCounterByRegion(ScoreCategory::kNcandidates,pThisTrack); // @TODO should go to the score processor
-    TrackScore score = m_scoringTool->score( *pThisTrack, true);
-    const auto category = AmbiguityProcessor::categoriseTrack(*pThisTrack, score, dropDuplicateTracks, m_assoTool, *prdToTrackMap, prdSigSet);
-    if (category<categoryMapping.size()) stat.incrementCounterByRegion(categoryMapping[category],pThisTrack);
+    TrackScore score = m_scoringTool->score(*pThisTrack);
+    const auto category =
+      AmbiguityProcessor::categoriseTrack(*pThisTrack, score,
+					  dropDuplicateTracks,
+					  m_assoTool, *prdToTrackMap,
+					  prdSigSet);
+    if (category<categoryMapping.size()) {
+      stat.incrementCounterByRegion(categoryMapping[category],pThisTrack);
+    }
     ATH_MSG_DEBUG(AmbiguityProcessor::debugMessage[category]);
+
     if (category == AmbiguityProcessor::TrackAccepted){
       ATH_MSG_VERBOSE ("Track  ("<< pThisTrack <<") has score "<<score);
       trackScoreTrackMap->push_back(std::make_pair(pThisTrack, -score));
       if (m_observerTool.isEnabled()) {
         nToMap++;
       }
-    } else if (m_observerTool.isEnabled() && category == AmbiguityProcessor::ScoreIsZero){
+    } else if (m_observerTool.isEnabled() &&
+	       category == AmbiguityProcessor::ScoreIsZero){
       int input_track_uid = AmbiguityProcessor::getUid();
       m_observerTool->addInputTrack(input_track_uid, *pThisTrack);
-      m_observerTool->updateTrackMap(input_track_uid, static_cast<double>(score), xAOD::RejectionStep::addNewTracks, xAOD::RejectionReason::trackScoreZero);
+      m_observerTool->updateTrackMap(input_track_uid,
+				     static_cast<double>(score),
+				     xAOD::RejectionStep::addNewTracks,
+				     xAOD::RejectionReason::trackScoreZero);
       nZeroScore++;
-    } else if (m_observerTool.isEnabled() && category == AmbiguityProcessor::TrackIsDuplicate){
+    } else if (m_observerTool.isEnabled() &&
+	       category == AmbiguityProcessor::TrackIsDuplicate){
       int input_track_uid = AmbiguityProcessor::getUid();
       m_observerTool->addInputTrack(input_track_uid, *pThisTrack);
-      m_observerTool->updateTrackMap(input_track_uid, static_cast<double>(score), xAOD::RejectionStep::addNewTracks, xAOD::RejectionReason::duplicateTrack);
+      m_observerTool->updateTrackMap(input_track_uid,
+				     static_cast<double>(score),
+				     xAOD::RejectionStep::addNewTracks,
+				     xAOD::RejectionReason::duplicateTrack);
       nDuplicates++;
     }
   }

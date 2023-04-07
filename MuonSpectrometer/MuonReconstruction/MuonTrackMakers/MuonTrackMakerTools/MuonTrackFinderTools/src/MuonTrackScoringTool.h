@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTRACKSCORINGTOOL_H
@@ -30,7 +30,7 @@ namespace Muon {
         virtual StatusCode initialize() override;
 
         /** create a score based on how good the passed track is*/
-        virtual Trk::TrackScore score(const Trk::Track& track, const bool suppressHoleSearch) const override;
+        virtual Trk::TrackScore score(const Trk::Track& track) const override;
 
         /** create a score based on how good the passed TrackSummary is*/
         virtual Trk::TrackScore simpleScore(const Trk::Track& track, const Trk::TrackSummary& trackSummary) const override;

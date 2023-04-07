@@ -8,9 +8,6 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 # InDet configs
 #########################
 
-# InDetAmbiScoringTool
-
-
 def InDetAmbiScoringToolBaseCfg(flags, name='InDetAmbiScoringTool', **kwargs):
     acc = ComponentAccumulator()
 
@@ -18,11 +15,6 @@ def InDetAmbiScoringToolBaseCfg(flags, name='InDetAmbiScoringTool', **kwargs):
         from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
         kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(
             InDetExtrapolatorCfg(flags)))
-
-    if "SummaryTool" not in kwargs:
-        from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
-        kwargs.setdefault("SummaryTool", acc.popToolsAndMerge(
-            InDetTrackSummaryToolCfg(flags)))
 
     if 'DriftCircleCutTool' not in kwargs:
         from InDetConfig.InDetTrackSelectorToolConfig import (
@@ -116,12 +108,6 @@ def InDetTRT_SeededScoringToolCfg(flags, name='InDetTRT_SeededScoringTool', **kw
 def InDetTrigAmbiScoringToolCfg(flags, name='InDetTrigMT_AmbiguityScoringTool', **kwargs):
     acc = ComponentAccumulator()
 
-    if "SummaryTool" not in kwargs:
-        from TrkConfig.TrkTrackSummaryToolConfig import (
-            InDetTrigTrackSummaryToolCfg)
-        kwargs.setdefault("SummaryTool", acc.popToolsAndMerge(
-            InDetTrigTrackSummaryToolCfg(flags)))
-
     if "Extrapolator" not in kwargs:
         # TODO using offline, consider porting
         from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
@@ -147,8 +133,6 @@ def InDetTrigAmbiScoringToolCfg(flags, name='InDetTrigMT_AmbiguityScoringTool', 
         name+flags.InDet.Tracking.ActiveConfig.name, **kwargs))
     return acc
 
-# InDetCosmicScoringTool
-
 
 def InDetCosmicsScoringToolCfg(flags, name='InDetCosmicsScoringTool', **kwargs):
     acc = ComponentAccumulator()
@@ -156,13 +140,6 @@ def InDetCosmicsScoringToolCfg(flags, name='InDetCosmicsScoringTool', **kwargs):
     kwargs.setdefault("nWeightedClustersMin",
                       flags.InDet.Tracking.ActiveConfig.nWeightedClustersMin)
     kwargs.setdefault("minTRTHits", 0)
-
-    if 'SummaryTool' not in kwargs:
-        from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
-        InDetTrackSummaryTool = acc.popToolsAndMerge(
-            InDetTrackSummaryToolCfg(flags))
-        acc.addPublicTool(InDetTrackSummaryTool)
-        kwargs.setdefault("SummaryTool", InDetTrackSummaryTool)
 
     acc.setPrivateTools(CompFactory.InDet.InDetCosmicScoringTool(
         name+flags.InDet.Tracking.ActiveConfig.extension, **kwargs))
@@ -177,24 +154,9 @@ def InDetCosmicExtenScoringToolCfg(flags, name='InDetCosmicExtenScoringTool', **
 
 
 def InDetCosmicScoringTool_TRTCfg(flags, name='InDetCosmicScoringTool_TRT', **kwargs):
-    acc = ComponentAccumulator()
-
-    if 'SummaryTool' not in kwargs:
-        from TrkConfig.TrkTrackSummaryToolConfig import (
-            InDetTrackSummaryToolNoHoleSearchCfg)
-        InDetTrackSummaryToolNoHoleSearch = acc.popToolsAndMerge(
-            InDetTrackSummaryToolNoHoleSearchCfg(flags))
-        acc.addPublicTool(InDetTrackSummaryToolNoHoleSearch)
-        kwargs.setdefault("SummaryTool", InDetTrackSummaryToolNoHoleSearch)
-
     kwargs.setdefault("minTRTHits",
                       flags.InDet.Tracking.ActiveConfig.minSecondaryTRTonTrk)
-
-    acc.setPrivateTools(acc.popToolsAndMerge(
-        InDetCosmicExtenScoringToolCfg(flags, name, **kwargs)))
-    return acc
-
-# InDetNNScoringTool
+    return InDetCosmicExtenScoringToolCfg(flags, name, **kwargs)
 
 
 def InDetNNScoringToolBaseCfg(flags, name='InDetNNScoringTool', **kwargs):
@@ -214,11 +176,6 @@ def InDetNNScoringToolBaseCfg(flags, name='InDetNNScoringTool', **kwargs):
         from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
         kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(
             InDetExtrapolatorCfg(flags)))
-
-    if "SummaryTool" not in kwargs:
-        from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
-        kwargs.setdefault("SummaryTool", acc.popToolsAndMerge(
-            InDetTrackSummaryToolCfg(flags)))
 
     if 'DriftCircleCutTool' not in kwargs:
         from InDetConfig.InDetTrackSelectorToolConfig import (
@@ -271,8 +228,6 @@ def InDetNNScoringToolSiCfg(flags, name='InDetNNScoringToolSi', **kwargs):
     kwargs.setdefault('DriftCircleCutTool', None)
     return InDetNNScoringToolCfg(flags, name, **kwargs)
 
-# InDetTrtTrackScoringTool
-
 
 def InDetTRT_StandaloneScoringToolCfg(flags, name='InDetTRT_StandaloneScoringTool', **kwargs):
     acc = ComponentAccumulator()
@@ -320,8 +275,6 @@ def InDetTRT_TrackSegmentScoringToolCfg(flags, name='InDetTRT_TrackSegmentScorin
 # ITk configs
 #########################
 
-# InDetAmbiScoringTool
-
 
 def ITkAmbiScoringToolCfg(flags, name='ITkAmbiScoringTool', **kwargs):
     acc = ComponentAccumulator()
@@ -330,11 +283,6 @@ def ITkAmbiScoringToolCfg(flags, name='ITkAmbiScoringTool', **kwargs):
         from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
         kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(
             AtlasExtrapolatorCfg(flags)))
-
-    if 'SummaryTool' not in kwargs:
-        from TrkConfig.TrkTrackSummaryToolConfig import ITkTrackSummaryToolCfg
-        kwargs.setdefault("SummaryTool", acc.popToolsAndMerge(
-            ITkTrackSummaryToolCfg(flags)))
 
     if 'InDetEtaDependentCutsSvc' not in kwargs:
         from InDetConfig.InDetEtaDependentCutsConfig import (
@@ -366,18 +314,9 @@ def ITkAmbiScoringToolCfg(flags, name='ITkAmbiScoringTool', **kwargs):
         name + flags.ITk.Tracking.ActiveConfig.extension, **kwargs))
     return acc
 
-# InDetCosmicScoringTool
-
 
 def ITkCosmicsScoringToolCfg(flags, name='ITkCosmicsScoringTool', **kwargs):
     acc = ComponentAccumulator()
-
-    if 'SummaryTool' not in kwargs:
-        from TrkConfig.TrkTrackSummaryToolConfig import ITkTrackSummaryToolCfg
-        ITkTrackSummaryTool = acc.popToolsAndMerge(
-            ITkTrackSummaryToolCfg(flags))
-        acc.addPublicTool(ITkTrackSummaryTool)
-        kwargs.setdefault("SummaryTool", ITkTrackSummaryTool)
 
     kwargs.setdefault("nWeightedClustersMin",
                       flags.ITk.Tracking.ActiveConfig.nWeightedClustersMin)

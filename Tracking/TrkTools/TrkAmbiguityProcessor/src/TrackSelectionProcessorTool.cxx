@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrackSelectionProcessorTool.h"
@@ -114,8 +114,7 @@ Trk::TrackSelectionProcessorTool::addNewTracks(TrackScoreMap &trackScoreTrackMap
       continue;
     }
     bool reject = false;
-    // only fitted tracks get hole search, input is not fitted
-    TrackScore score = m_scoringTool->score( *a_track, true );
+    TrackScore score = m_scoringTool->score( *a_track );
     // veto tracks with score 0
     if (score==0) { 
       ATH_MSG_DEBUG ("Track score is zero, reject it");
@@ -220,7 +219,7 @@ Trk::TrackSelectionProcessorTool::dumpTracks( const TrackCollection& tracks ) co
   TrackCollection::const_iterator itEnd = tracks.end();
   for (; it != itEnd ; ++it){
     // score track:
-    const TrackScore score = m_scoringTool->score( **it, true );
+    const TrackScore score = m_scoringTool->score( **it );
     ATH_MSG_VERBOSE (num++<<"\tTrack :"<<*it<<"\tScore: "<<score);
     totalScore+=score;
   }

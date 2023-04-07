@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////
@@ -14,10 +14,11 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "InDetRecToolInterfaces/IInDetEtaDependentCutsSvc.h"
+#include "InDetRecToolInterfaces/ITrtDriftCircleCutTool.h"
 #include "TrkCaloClusterROI/ROIPhiRZContainer.h"
 #include "TrkEventPrimitives/TrackScore.h"
+#include "TrkExInterfaces/IExtrapolator.h"
 #include "TrkToolInterfaces/ITrackScoringTool.h"
-#include "TrkToolInterfaces/ITrackSummaryTool.h"
 #include "TrkParameters/TrackParameters.h"
 #include "AthenaKernel/CLASS_DEF.h"
 #include "AthenaKernel/IOVSvcDefs.h"
@@ -29,7 +30,6 @@
 #include "BeamSpotConditionsData/BeamSpotData.h"
 
 namespace Trk {
-  class IExtrapolator;
   class Track;
   class TrackSummary;
 
@@ -37,7 +37,6 @@ namespace Trk {
 class EventContext;
 
 namespace InDet {
-class ITrtDriftCircleCutTool;
 
 /**Concrete implementation of the ITrackScoringTool pABC*/
 class InDetAmbiScoringTool : virtual public Trk::ITrackScoringTool,  
@@ -46,11 +45,10 @@ class InDetAmbiScoringTool : virtual public Trk::ITrackScoringTool,
 
  public:
   InDetAmbiScoringTool(const std::string&,const std::string&,const IInterface*);
-  virtual ~InDetAmbiScoringTool ();
+  virtual ~InDetAmbiScoringTool () = default;
   virtual StatusCode initialize() override;
-  virtual StatusCode finalize  () override;
   /** create a score based on how good the passed track is*/
-  virtual Trk::TrackScore score( const Trk::Track& track, const bool suppressHoleSearch ) const override;
+  virtual Trk::TrackScore score( const Trk::Track& track ) const override;
   
   /** create a score based on how good the passed TrackSummary is*/
   virtual Trk::TrackScore simpleScore( const Trk::Track& track, const Trk::TrackSummary& trackSum ) const override;
@@ -72,9 +70,6 @@ class InDetAmbiScoringTool : virtual public Trk::ITrackScoringTool,
     m_factorSigmaChi2, m_factorB_LayerHits, m_factorPixelHits, m_factorPixLay, m_factorHoles, m_factorGangedFakes;
   std::vector<double> m_boundsSigmaChi2, m_boundsHits,
     m_boundsTrtRatio, m_factorTrtRatio, m_boundsTrtFittedRatio, m_factorTrtFittedRatio;
-  
-  /**\todo make this const, once createSummary method is const*/
-  ToolHandle<Trk::ITrackSummaryTool>         m_trkSummaryTool;
 
   /** Returns minimum number of expected TRT drift circles depending on eta. */
   ToolHandle<ITrtDriftCircleCutTool>          m_selectortool;

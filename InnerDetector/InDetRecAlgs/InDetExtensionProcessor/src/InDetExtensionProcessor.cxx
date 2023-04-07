@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 ///////////////////////////////////////////////////////////////////
@@ -314,9 +314,9 @@ InDet::InDetExtensionProcessor::createExtendedTracks(const EventContext& ctx,
           m_trackSummaryTool->computeAndReplaceTrackSummary(ctx, *newtrack, m_suppressHoleSearch);
         }
         // score old and new tool and decide which one to push back
-        Trk::TrackScore oldScore = m_scoringTool->score(*thisTrack, m_suppressHoleSearch);
+        Trk::TrackScore oldScore = m_scoringTool->score(*thisTrack);
         ATH_MSG_DEBUG("original track has score : " << oldScore);
-        Trk::TrackScore newScore = m_scoringTool->score(*newtrack, m_suppressHoleSearch);
+        Trk::TrackScore newScore = m_scoringTool->score(*newtrack);
         ATH_MSG_DEBUG("new track has score      : " << newScore);
         // do we need to recover with a brem fit
         if (newScore < oldScore && m_tryBremFit &&
@@ -339,7 +339,7 @@ InDet::InDetExtensionProcessor::createExtendedTracks(const EventContext& ctx,
             if (m_trackSummaryTool.isEnabled()) {
               m_trackSummaryTool->computeAndReplaceTrackSummary(ctx, *newBremTrack, m_suppressHoleSearch);
             }
-            newScore = m_scoringTool->score(*newtrack, m_suppressHoleSearch);
+            newScore = m_scoringTool->score(*newtrack);
             ATH_MSG_DEBUG("recovered new track has score      : " << newScore);
             // copy pointer
             newtrack = std::move(newBremTrack);
@@ -459,7 +459,7 @@ InDet::InDetExtensionProcessor::trackPlusExtension(
   if (m_trackSummaryTool.isEnabled()) {
     m_trackSummaryTool->computeAndReplaceTrackSummary(ctx, *extTrack, m_suppressHoleSearch);
   }
-  Trk::TrackScore extScore = m_scoringTool->score(*extTrack, m_suppressHoleSearch);
+  Trk::TrackScore extScore = m_scoringTool->score(*extTrack);
   ATH_MSG_DEBUG("rejected extension saved as Trk::Track with " << nSiStates <<
                 " fitted hits and " << nExtStates << " additional Outliers, score :" << extScore);
   return extTrack;

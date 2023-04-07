@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETTRTTRACKSCORINGTOOL_H
@@ -10,7 +10,6 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "TrkEventPrimitives/TrackScore.h"
 #include "TrkToolInterfaces/ITrackScoringTool.h"
-#include "TrkToolInterfaces/ITrackSummaryTool.h"
 // MagField cache
 #include "MagFieldConditions/AtlasFieldCacheCondObj.h"
 #include "MagFieldElements/AtlasFieldCache.h"
@@ -41,12 +40,10 @@ public:
   InDetTrtTrackScoringTool(const std::string&,
                            const std::string&,
                            const IInterface*);
-  virtual ~InDetTrtTrackScoringTool();
+  virtual ~InDetTrtTrackScoringTool() = default;
   virtual StatusCode initialize() override;
-  virtual StatusCode finalize() override;
   /** create a score based on how good the passed track is*/
-  virtual Trk::TrackScore score(const Trk::Track& track,
-                                const bool suppressHoleSearch) const override;
+  virtual Trk::TrackScore score(const Trk::Track& track) const override;
 
   /** create a score based on how good the passed TrackSummary is*/
   virtual Trk::TrackScore simpleScore(

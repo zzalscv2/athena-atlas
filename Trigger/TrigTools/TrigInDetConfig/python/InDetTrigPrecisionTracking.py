@@ -158,7 +158,7 @@ def ambiguityScoreNN_builder( signature, config, scoreMap, prefix=None ):
     ToolSvc += TrigNnPixelClusterSplitProbTool
     from TrkAmbiguityProcessor.TrkAmbiguityProcessorConf import Trk__DenseEnvironmentsAmbiguityScoreProcessorTool
     trackMapTool = TrackingCommon.getInDetTrigPRDtoTrackMapToolGangedPixels()
-    scoringTool = scoringTool_builder( signature, config, summaryTool=ToolSvc.InDetTrigTrackSummaryTool, prefix=None )
+    scoringTool = scoringTool_builder( signature, config, prefix=None )
     ambiguityScoreProcessor = Trk__DenseEnvironmentsAmbiguityScoreProcessorTool( name               = "%sInDetTrigMT_AmbiguityScoreProcessorTool_%s"%(prefix, config.input_name),
                                                                  ScoringTool        = scoringTool,
                                                                  AssociationTool    = trackMapTool,
@@ -199,7 +199,7 @@ def ambiguityProcessorTool_builder( signature, config, summaryTool ,prefix=None 
     from InDetRecExample import TrackingCommon as TrackingCommon
     trackMapTool = TrackingCommon.getInDetTrigPRDtoTrackMapToolGangedPixels()
 
-    scoringTool = scoringTool_builder( signature, config, summaryTool, prefix )
+    scoringTool = scoringTool_builder( signature, config, prefix )
     
     from TrkAmbiguityProcessor.TrkAmbiguityProcessorConf import Trk__SimpleAmbiguityProcessorTool 
     ambiguityProcessorTool = Trk__SimpleAmbiguityProcessorTool( name             = '%sAmbiguityProcessor_%s'%(prefix,config.input_name),
@@ -222,7 +222,7 @@ def ambiguityProcessorToolNN_builder( signature, config, summaryTool ,prefix=Non
     from InDetRecExample import TrackingCommon as TrackingCommon
     trackMapTool = TrackingCommon.getInDetTrigPRDtoTrackMapToolGangedPixels()
 
-    scoringTool = scoringTool_builder( signature, config, summaryTool, prefix )
+    scoringTool = scoringTool_builder( signature, config, prefix )
    
     InDetTrigAmbiTrackSelectionTool.doPixelSplitting=True 
     from TrkAmbiguityProcessor.TrkAmbiguityProcessorConf import Trk__DenseEnvironmentsAmbiguityProcessorTool as ProcessorTool
@@ -245,7 +245,7 @@ def ambiguityProcessorToolNN_builder( signature, config, summaryTool ,prefix=Non
 
 
 
-def scoringTool_builder( signature, config, summaryTool, prefix=None, SiOnly=True ):
+def scoringTool_builder( signature, config, prefix=None, SiOnly=True ):
 
   from InDetRecExample.TrackingCommon import setDefaults
 
@@ -262,7 +262,6 @@ def scoringTool_builder( signature, config, summaryTool, prefix=None, SiOnly=Tru
                        name = scoringToolName,
                        minPt        = config.pTmin, 
                        doEmCaloSeed = False,
-                       SummaryTool  = summaryTool,
                        minTRTonTrk        = 0,
                        DriftCircleCutTool = InDetTrigTRTDriftCircleCut)
   
@@ -506,7 +505,7 @@ def trtExtensionProcessor_builder( signature, config, summaryTool, inputTracks, 
     # TODO In Run2 option for cosmic
     # InDetTrigExtensionFitter = InDetTrigTrackFitter
 
-    scoringTool = scoringTool_builder( signature, config, summaryTool=ToolSvc.InDetTrigTrackSummaryTool, prefix=prefix, SiOnly=False )
+    scoringTool = scoringTool_builder( signature, config, prefix=prefix, SiOnly=False )
     ToolSvc += scoringTool
 
 
