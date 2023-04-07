@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2013 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -20,7 +20,7 @@
 #define LARMPHYSOVERMCAL2NTUPLE_H
 
 #include "LArCalibTools/LArCond2NtupleBase.h"
-
+#include "LArElecCalib/ILArMphysOverMcal.h"
 
 class LArMphysOverMcal2Ntuple : public LArCond2NtupleBase
 {
@@ -28,12 +28,14 @@ class LArMphysOverMcal2Ntuple : public LArCond2NtupleBase
   LArMphysOverMcal2Ntuple(const std::string & name, ISvcLocator * pSvcLocator);
   ~LArMphysOverMcal2Ntuple();
 
+  StatusCode initialize();
+
   //standard algorithm methods
   virtual StatusCode stop();
   StatusCode finalize(){return StatusCode::SUCCESS;}
  private:
+  SG::ReadCondHandleKey<ILArMphysOverMcal> m_contKey{this,"ContainerKey","LArMphysOverMcal"};
 
-  std::string m_contKey;
 };
 
 #endif
