@@ -10,9 +10,17 @@
 # art-html: dcube_last
 
 lastref_dir=last_results
-dcubeXml="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/dcube/config/IDPVMPlots_ITk_FastTrackFinder.xml"
+dcubeXml=dcube_ART_IDPVMPlots_ITk.xml
 
 geometry=ATLAS-P2-RUN4-01-01-00
+
+# search in $DATAPATH for matching file
+dcubeXmlAbsPath=$(find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 1 -name $dcubeXml -print -quit 2>/dev/null)
+# Don't run if dcube config not found
+if [ -z "$dcubeXmlAbsPath" ]; then
+    echo "art-result: 1 dcube-xml-config"
+    exit 1
+fi
 
 run () {
     name="${1}"
@@ -66,8 +74,8 @@ run "IDPVM" \
     runIDPVM.py \
     --filesInput AOD.root \
     --outputFile idpvm.root \
+    --doTightPrimary \
     --doHitLevelPlots \
-    --doExpertPlots \
     --truthMinPt=1000
 
 reco_rc=$?
