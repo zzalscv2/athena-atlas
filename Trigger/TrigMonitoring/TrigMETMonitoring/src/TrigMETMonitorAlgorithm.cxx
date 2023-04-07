@@ -285,39 +285,47 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
     act_IPBC = eventInfo->actualInteractionsPerCrossing();
 
     // access lepton values
-    float leadingElectronPt = 0.0;
-    float leadingElectronEta = 0.0;
-    if ( hlt_electron_cont.isValid() && hlt_electron_cont->size() > 0 ) {
+    if ( hlt_electron_cont.isValid() ){
       hlt_el_mult = hlt_electron_cont->size();
-      if (hlt_el_mult > 0) fill(tool,hlt_el_mult);
-      for (auto Electron: *hlt_electron_cont) {
-        hlt_el_pt = Electron->pt()/Gaudi::Units::GeV;
-        if(hlt_el_pt > leadingElectronPt){
-          leadingElectronPt = hlt_el_pt;
-          leadingElectronEta = (Electron->eta());
-        }
-
-        if (hlt_el_pt > 0) {
-          fill(tool, hlt_el_pt);
+      fill(tool,hlt_el_mult);
+      if( hlt_electron_cont->size() > 0 ) {
+        for (auto Electron: *hlt_electron_cont) {
+          hlt_el_pt = Electron->pt()/Gaudi::Units::GeV;
+          bool passedPrimaryEl = false;
+          // check which electrons pass the primary electron triggers
+          for (const std::string& chain : m_hltChainEl){ 
+            if(getTrigDecisionTool()->isPassed(chain)){
+              passedPrimaryEl = true;
+              break;
+            }
+          }
+          // fill plots with the electrons that passed the primary muon triggers
+          if(passedPrimaryEl){
+            fill(tool, hlt_el_pt);
+          }
+  
         }
       }
     }
 
-    float leadingMuonPt = 0.0;
-    float leadingMuonEta = 0.0;
-    if( hlt_muon_cont.isValid() && hlt_muon_cont->size() > 0){
+    if( hlt_muon_cont.isValid() ){
       hlt_mu_mult = hlt_muon_cont->size();
-      if (hlt_mu_mult > 0) fill(tool,hlt_mu_mult);
-      for(auto Muon : *hlt_muon_cont){
-        hlt_mu_pt = Muon->pt()/Gaudi::Units::GeV;
-
-        if(hlt_mu_pt > leadingMuonPt){
-          leadingMuonPt = hlt_mu_pt;
-          leadingMuonEta = (Muon->eta());
-        }
-
-        if(hlt_mu_pt > 0){
-          fill(tool, hlt_mu_pt);
+      fill(tool,hlt_mu_mult);
+      if ( hlt_muon_cont->size() > 0 ){
+        for(auto Muon : *hlt_muon_cont){
+          hlt_mu_pt = Muon->pt()/Gaudi::Units::GeV;
+          bool passedPrimaryMu = false;
+          // check which electrons pass the primary electron triggers
+          for (const std::string& chain : m_hltChainMu){ 
+            if(getTrigDecisionTool()->isPassed(chain)){
+              passedPrimaryMu = true;
+              break;
+            }
+          }
+          // fill plots with the electrons that passed the primary muon triggers
+          if(passedPrimaryMu){
+            fill(tool, hlt_mu_pt);
+          }
         }
       }
     }
@@ -912,7 +920,15 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
         float hlt_eta = v.Eta();
         float hlt_phi = v.Phi();
 
-        if(leadingElectronPt > m_electronPtCut && fabs(leadingElectronEta) < m_electronEtaCut){
+//      access events with electron passing primary single electron chain
+        bool passedPrimaryEl = false;
+        for (const std::string& chain : m_hltChainEl){ 
+          if(getTrigDecisionTool()->isPassed(chain)){
+            passedPrimaryEl = true;
+            break;
+          }
+        }
+        if(passedPrimaryEl){
           auto met_Ex = Monitored::Scalar<float>(alg+"_SigEl_Ex", static_cast<float>(hlt_Ex));
           auto met_Ey = Monitored::Scalar<float>(alg+"_SigEl_Ey", static_cast<float>(hlt_Ey));
           auto met_Et = Monitored::Scalar<float>(alg+"_SigEl_Et", static_cast<float>(hlt_Et));
@@ -925,10 +941,18 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
           auto met_phi = Monitored::Scalar<float>(alg+"_SigEl_phi", static_cast<float>(hlt_phi));
           fill(tool,met_Ex,met_Ey,met_Et,met_sumEt,
             met_Ex_log,met_Ey_log,met_Et_log,met_sumEt_log,
-            met_eta,met_phi);  
+            met_eta,met_phi);
         }
 
-        if(leadingMuonPt > m_muonPtCut && fabs(leadingMuonEta) < m_muonEtaCut){
+//      access events with electron passing primary single electron chain
+        bool passedPrimaryMu = false;
+        for (const std::string& chain : m_hltChainMu){ 
+          if(getTrigDecisionTool()->isPassed(chain)){
+            passedPrimaryMu = true;
+            break;
+          }
+        }
+        if(passedPrimaryMu){
           auto met_Ex = Monitored::Scalar<float>(alg+"_SigMu_Ex", static_cast<float>(hlt_Ex));
           auto met_Ey = Monitored::Scalar<float>(alg+"_SigMu_Ey", static_cast<float>(hlt_Ey));
           auto met_Et = Monitored::Scalar<float>(alg+"_SigMu_Et", static_cast<float>(hlt_Et));
@@ -942,7 +966,7 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
           fill(tool,met_Ex,met_Ey,met_Et,met_sumEt,
             met_Ex_log,met_Ey_log,met_Et_log,met_sumEt_log,
             met_eta,met_phi);  
-        } 
+        }
       }
     }
 
