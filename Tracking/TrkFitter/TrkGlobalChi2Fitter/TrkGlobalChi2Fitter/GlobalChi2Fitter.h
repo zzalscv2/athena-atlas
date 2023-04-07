@@ -342,11 +342,6 @@ namespace Trk {
     ) const override;
 
   private:
-    static void calculateJac(
-      Eigen::Matrix<double, 5, 5> &,
-      Eigen::Matrix<double, 5, 5> &,
-      int, int
-    ) ;
 
     Track * fitIm(
       const EventContext& ctx,
@@ -946,7 +941,6 @@ namespace Trk {
     Gaudi::Property<bool> m_calomat {this, "MuidMat", false};
     Gaudi::Property<bool> m_extmat {this, "ExtrapolatorMaterial", true};
     Gaudi::Property<bool> m_fillderivmatrix {this, "FillDerivativeMatrix", false};
-    Gaudi::Property<bool> m_printderivs {this, "PrintDerivatives", false};
     Gaudi::Property<bool> m_straightlineprop {this, "StraightLine", true};
     Gaudi::Property<bool> m_extensioncuts {this, "TRTExtensionCuts", true};
     Gaudi::Property<bool> m_sirecal {this, "RecalibrateSilicon", false};
