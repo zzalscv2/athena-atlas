@@ -1879,12 +1879,11 @@ StatusCode MdtRawDataValAlg::handleEvent_effCalc(
                     for (int i_tube = m_idHelperSvc->mdtIdHelper().tubeMin(newId); i_tube <= tubeMax; i_tube++) {
                         for (int i_layer = m_idHelperSvc->mdtIdHelper().tubeLayerMin(newId); i_layer <= tubeLayerMax; i_layer++) {
                             const MuonGM::MdtReadoutElement* MdtRoEl = MuonDetMgr->getMdtReadoutElement(newId);
+                            Identifier tubeId = m_idHelperSvc->mdtIdHelper().channelID(newId, ML, i_layer, i_tube);
                             if (m_BMGpresent && m_idHelperSvc->mdtIdHelper().stationName(newId) == m_BMGid) {
                                 std::map<Identifier, std::vector<Identifier> >::iterator myIt = m_DeadChannels.find(MdtRoEl->identify());
                                 if (myIt != m_DeadChannels.end()) {
-                                    Identifier tubeId = m_idHelperSvc->mdtIdHelper().channelID(
-                                        hardware_name.substr(0, 3), m_idHelperSvc->mdtIdHelper().stationEta(station_id),
-                                        m_idHelperSvc->mdtIdHelper().stationPhi(station_id), ML, i_layer, i_tube);
+                                    
                                     if (std::find((myIt->second).begin(), (myIt->second).end(), tubeId) != (myIt->second).end()) {
                                         ATH_MSG_DEBUG("Skipping tube with identifier "
                                                       << m_idHelperSvc->mdtIdHelper().show_to_string(tubeId));
@@ -1892,11 +1891,9 @@ StatusCode MdtRawDataValAlg::handleEvent_effCalc(
                                     }
                                 }
                             }
-                            Amg::Vector3D TubePos = MdtRoEl->GlobalToAmdbLRSCoords(MdtRoEl->tubePos(ML, i_layer, i_tube));
-                            Amg::Vector3D tube_position = Amg::Vector3D(TubePos.x(), TubePos.y(), TubePos.z());
-                            Amg::Vector3D tube_direction = Amg::Vector3D(1, 0, 0);
+                            Amg::Vector3D TubePos = MdtRoEl->GlobalToAmdbLRSCoords(MdtRoEl->tubePos(tubeId));
                             MuonCalib::MTStraightLine tube_track =
-                                MuonCalib::MTStraightLine(tube_position, tube_direction, Amg::Vector3D(0, 0, 0), Amg::Vector3D(0, 0, 0));
+                                MuonCalib::MTStraightLine(TubePos, Amg::Vector3D::UnitX(), Amg::Vector3D(0, 0, 0), Amg::Vector3D(0, 0, 0));
                             double distance = std::abs(segment_track.signDistFrom(tube_track));
                             if (distance < (MdtRoEl->innerTubeRadius())) {
                                 traversed_station_id.push_back(station_id);
