@@ -44,10 +44,14 @@ FastCaloSimCaloExtrapolation::FastCaloSimCaloExtrapolation(const std::string& t,
 
   m_surfacelist.resize(0);
   m_surfacelist.push_back(CaloCell_ID_FCS::PreSamplerB);
+  m_surfacelist.push_back(CaloCell_ID_FCS::TileGap3);
   m_surfacelist.push_back(CaloCell_ID_FCS::PreSamplerE);
   m_surfacelist.push_back(CaloCell_ID_FCS::EME1);
   m_surfacelist.push_back(CaloCell_ID_FCS::EME2);
   m_surfacelist.push_back(CaloCell_ID_FCS::FCAL0);
+  m_surfacelist.push_back(CaloCell_ID_FCS::EME3);
+  m_surfacelist.push_back(CaloCell_ID_FCS::HEC0);
+  m_surfacelist.push_back(CaloCell_ID_FCS::TileGap2);
 
   declareProperty("Surfacelist",        m_surfacelist);
 }
@@ -165,7 +169,7 @@ bool FastCaloSimCaloExtrapolation::getCaloSurface(TFCSExtrapolationState& result
 
       double pT=(*it).trackParms->momentum().perp();
 
-      ATH_MSG_COND("only entrance to calo entrance layer found, no surface : eta="<<result.CaloSurface_eta()<<" phi="<<result.CaloSurface_phi()<<" r="<<result.CaloSurface_r()<<" z="<<result.CaloSurface_z()<<" pT="<<pT, std::abs(result.CaloSurface_eta())>4.9 || pT<500 || (std::abs(result.CaloSurface_eta())>4 && pT<1000));
+      ATH_MSG_COND("only entrance to calo entrance layer found, no surface : eta="<<result.CaloSurface_eta()<<" phi="<<result.CaloSurface_phi()<<" r="<<result.CaloSurface_r()<<" z="<<result.CaloSurface_z()<<" pT="<<pT, std::abs(result.CaloSurface_eta())>4.9 || pT<1000 || (std::abs(result.CaloSurface_eta())>4 && pT<1500));
     
     } //sample
   else ATH_MSG_DEBUG("entrance to calo surface : sample="<<result.CaloSurface_sample()<<" eta="<<result.CaloSurface_eta()<<" phi="<<result.CaloSurface_phi()<<" r="<<result.CaloSurface_r()<<" z="<<result.CaloSurface_z()<<" deta="<<min_calo_surf_dist);
@@ -464,21 +468,21 @@ void FastCaloSimCaloExtrapolation::extrapolateToLayers(TFCSExtrapolationState& r
             
             float cylR, cylZ;
             if(isCaloBarrel(sample)){
-              cylR = std::abs(rpos(sample, result.CaloSurface_eta(), subpos));
+              cylR = std::abs(rpos(sample, result.IDCaloBoundary_eta(), subpos));
               //EMB0 - EMB3 use z position of EME1 front end surface for extrapolation
               //else extrapolate to cylinder with symmetrized maximum Z bounds
               //set eta to a dummy value of 1000 and -1000 to force detector side
-              if(sample < 4) cylZ = result.CaloSurface_eta() > 0 ? std::abs(zpos(5, 1000, 1)) : std::abs(zpos(5, -1000, 1));
+              if(sample < 4) cylZ = result.IDCaloBoundary_eta() > 0 ? std::abs(zpos(5, 1000, 1)) : std::abs(zpos(5, -1000, 1));
               else cylZ = 0.5*(std::abs(zpos(sample, 1000, subpos)) + std::abs(zpos(sample, -1000, subpos)));
             }
             else{
               //if we are not at barrel surface, extrapolate to cylinder with maximum R to reduce extrapolation length
-              cylZ = std::abs(zpos(sample, result.CaloSurface_eta(), subpos));
+              cylZ = std::abs(zpos(sample, result.IDCaloBoundary_eta(), subpos));
               //calculate radius of cylinder we will extrapolate to
               double mineta, maxeta, eta;
-              minmaxeta(sample, result.CaloSurface_eta(), mineta, maxeta);
+              minmaxeta(sample, result.IDCaloBoundary_eta(), mineta, maxeta);
               //get eta where we will look up the layer radius
-              eta = result.CaloSurface_eta() > 0 ? mineta : maxeta;
+              eta = result.IDCaloBoundary_eta() > 0 ? mineta : maxeta;
               //calculate azimuthal angle from pseudorapidity
               double theta = 2*std::atan(std::exp(-eta));
               //calculate maximum R of last cell of layer from z and theta
