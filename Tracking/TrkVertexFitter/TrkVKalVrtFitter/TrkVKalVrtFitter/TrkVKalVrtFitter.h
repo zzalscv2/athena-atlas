@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // TrkVKalVrtFitter.h
@@ -185,7 +185,7 @@ namespace Trk{
           bool ifCovV0 = false) const override final;
 
         virtual StatusCode VKalVrtFit(
-          const std::vector<const Track*>&,
+          const std::vector<const Perigee*>&,
           Amg::Vector3D& Vertex,
           TLorentzVector& Momentum,
           long int& Charge,
@@ -231,11 +231,11 @@ namespace Trk{
           const std::vector<const TrackParameters*>&,
           Amg::Vector3D& Vertex,
           IVKalState& istate) const override final;
-        //-----
-        virtual
-        Trk::Track* CreateTrkTrack(const std::vector<double>& VKPerigee,
-                                   const std::vector<double>& VKCov,
-                                   IVKalState& istate) const override final;
+
+        virtual std::unique_ptr<Trk::Perigee>
+          CreatePerigee(const std::vector<double>& VKPerigee,
+                        const std::vector<double>& VKCov,
+                        IVKalState& istate) const override final;
 
         virtual StatusCode VKalGetTrkWeights(
           dvect& Weights,
@@ -295,7 +295,7 @@ namespace Trk{
                                      dvect& ImpactError,
                                      IVKalState& istate) const override final;
 
-        virtual double VKalGetImpact(const Track*,
+        virtual double VKalGetImpact(const Trk::Perigee*,
                                      const Amg::Vector3D& Vertex,
                                      const long int Charge,
                                      dvect& Impact,
@@ -308,7 +308,7 @@ namespace Trk{
                                      dvect& Impact,
                                      dvect& ImpactError) const override final;
 
-        virtual double VKalGetImpact(const Track*,
+        virtual double VKalGetImpact(const Trk::Perigee*,
                                      const Amg::Vector3D& Vertex,
                                      const long int Charge,
                                      dvect& Impact,
@@ -509,9 +509,9 @@ namespace Trk{
                                      double,
                                      State& state) const;
 
-        StatusCode CvtTrkTrack(const std::vector<const Track*>& list,
-                               int& ntrk,
-                               State& state) const;
+        StatusCode CvtPerigee(const std::vector<const Perigee*>& list,
+                              int& ntrk,
+                              State& state) const;
 
         StatusCode CvtTrackParticle(
           const std::vector<const xAOD::TrackParticle*>& list,
@@ -555,11 +555,11 @@ namespace Trk{
                         bool ifCovV0) const;
 
         std::unique_ptr<Perigee> CreatePerigee(double Vx,
-                               double Vy,
-                               double Vz,
-                               const std::vector<double>& VKPerigee,
-                               const std::vector<double>& VKCov,
-                               State& state) const;
+					       double Vy,
+					       double Vz,
+					       const std::vector<double>& VKPerigee,
+					       const std::vector<double>& VKCov,
+					       State& state) const;
 
         //
         //
