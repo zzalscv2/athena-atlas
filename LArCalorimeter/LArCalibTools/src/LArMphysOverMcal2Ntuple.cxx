@@ -3,8 +3,6 @@
 */
 
 #include "LArCalibTools/LArMphysOverMcal2Ntuple.h"
-#include "LArRawConditions/LArMphysOverMcalComplete.h"
-#include "LArRawConditions/LArMphysOverMcalMC.h"
 #include "CaloIdentifier/CaloGain.h"
 
 #include "LArIdentifier/LArOnlineID.h"
@@ -13,7 +11,6 @@
 
 LArMphysOverMcal2Ntuple::LArMphysOverMcal2Ntuple(const std::string& name, ISvcLocator* pSvcLocator): 
   LArCond2NtupleBase(name, pSvcLocator) { 
-  declareProperty("ContainerKey",m_contKey);
   m_ntTitle="MphysOverMcal";
   m_ntpath="/NTUPLES/FILE1/MPMC";
 
@@ -22,18 +19,33 @@ LArMphysOverMcal2Ntuple::LArMphysOverMcal2Ntuple(const std::string& name, ISvcLo
 LArMphysOverMcal2Ntuple::~LArMphysOverMcal2Ntuple() 
 {}
 
+StatusCode LArMphysOverMcal2Ntuple::initialize() {
+  ATH_CHECK(m_contKey.initialize());
+  return LArCond2NtupleBase::initialize();
+}
+
+
 StatusCode LArMphysOverMcal2Ntuple::stop() {
-  const ILArMphysOverMcal* larMphysOverMcal = NULL;
-  StatusCode sc;
-  sc=m_detStore->retrieve(larMphysOverMcal,m_contKey);
-  if (sc!=StatusCode::SUCCESS) {
-     ATH_MSG_ERROR( "Unable to retrieve ILArMphysOverMcal with key " 
-               << m_contKey << " from DetectorStore" );
-     return StatusCode::FAILURE;
+
+  // For compatibility with existing configurations, look in the detector
+  // store first, then in conditions.
+  const ILArMphysOverMcal* larMphysOverMcal= detStore()->tryConstRetrieve<ILArMphysOverMcal>(m_contKey.key());
+  if (!larMphysOverMcal) {
+    SG::ReadCondHandle<ILArMphysOverMcal> mpmcHandle{m_contKey};
+    larMphysOverMcal=*mpmcHandle;
   }
 
- NTuple::Item<long> cellIndex,gain;
- NTuple::Item<float> mpmc;
+  if (!larMphysOverMcal) {
+    ATH_MSG_ERROR( "Unable to retrieve ILArMphysOverMcal with key " 
+		   << m_contKey.key() << " from DetectorStore nor from ConditionsStore");
+    return StatusCode::FAILURE;
+  } 
+
+  
+
+  StatusCode sc;
+  NTuple::Item<long> cellIndex,gain;
+  NTuple::Item<float> mpmc;
 
  sc=m_nt->addItem("icell",cellIndex,0,2000);
  if (sc!=StatusCode::SUCCESS)
