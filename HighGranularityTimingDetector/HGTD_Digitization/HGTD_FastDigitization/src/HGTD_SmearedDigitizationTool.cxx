@@ -173,7 +173,7 @@ StatusCode HGTD_SmearedDigitizationTool::digitize(const EventContext& ctx) {
   TimedHitCollection<SiHit>::const_iterator i, e;
 
   while (m_timed_hit_collection->nextDetectorElement(i, e) and i != e) {
-    TimedHitPtr<SiHit> hit(*i++);
+    const TimedHitPtr<SiHit>& hit(*i++);
 
     // FIXME should I cut on the deposited energy??
     // n electrons = hit->energyLoss() / electron ionisation energy
