@@ -18,7 +18,8 @@ int SoftDropObservablesTool::modifyJet(xAOD::Jet &injet) const {
   // Groomed jet moments
   float zg_value = -999, rg_value = -999;
 
-  if (decorate) {
+  //For these variables, the jet needs at least two constituents
+  if (decorate && injet.numConstituents() > 1) {
     JetSubStructureUtils::SoftDropObservables zgGetter("zg");
     JetSubStructureUtils::SoftDropObservables rgGetter("rg");
 
