@@ -99,6 +99,9 @@ namespace xAOD {
 
       /// Data decoded from the TOB/RoI word and eFEX number
 
+      /// Tau Algorithm version (currently heuristic = 0, BDT = 1)
+      unsigned int tobVersion() const;
+
       /// Object type (TOB or xTOB)
       ObjectType type() const;
 
@@ -124,10 +127,19 @@ namespace xAOD {
       /// Tau Condition 1 (rCore) results
       unsigned int rCoreThresholds() const;
 
-      /// Tau Condition 2 (none) results
+      /// Alternative Tau Condition 1 (BDT) results
+      unsigned int bdtThresholds() const;
+
+      /// Tau Condition 2 (Had/EM) results
       unsigned int rHadThresholds() const;
 
-      /// Tau Condition 3 (none) results
+      /// Tau Condition 1 (generic) results
+      unsigned int tauOneThresholds() const;
+
+      /// Tau Condition 2 (generic) results
+      unsigned int tauTwoThresholds() const;
+
+      /// Tau Condition 3 (unused) results
       unsigned int tauThreeThresholds() const;
 
       /// Seed = max flag. Is this really useful?
@@ -135,6 +147,9 @@ namespace xAOD {
 
       //? Bunch crossing number (last 4 bits, xTOB only)
       unsigned int bcn4() const;
+
+      /// BDT Score (xTOB only)
+      unsigned int bdtScore() const;
 
    private:
 
@@ -159,11 +174,13 @@ namespace xAOD {
       static const int s_seedBit         = 16;
       static const int s_updownBit       = 15;
       static const int s_maxBit          = 14;
+      static const int s_versionBit      = 12;
       static const int s_etBit           =  0;
       static const int s_etBitXTOB       =  2;
       static const int s_bcn4Bit         = 28;
       static const int s_shelfBit        = 24;
       static const int s_eFexBit         = 20;
+      static const int s_bdtScoreBit     =  0;
 
       //  Data masks
       static const int s_fpgaMask        = 0x3;
@@ -175,11 +192,13 @@ namespace xAOD {
       static const int s_seedMask        = 0x3;
       static const int s_updownMask      = 0x1;
       static const int s_maxMask         = 0x1;
+      static const int s_versionMask     = 0x3;
       static const int s_etMask          = 0xfff;
       static const int s_etFullMask      = 0xffff;
       static const int s_bcn4Mask        = 0xf;
       static const int s_eFexMask        = 0xf;
       static const int s_shelfMask       = 0xf;
+      static const int s_bdtScoreMask    = 0x7ff;
 
       // For decoding coordinates
       // 
