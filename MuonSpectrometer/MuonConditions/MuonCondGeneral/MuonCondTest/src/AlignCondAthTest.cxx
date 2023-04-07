@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AlignCondAthTest.h"
@@ -10,30 +10,17 @@
 #include "MuonReadoutGeometry/MdtReadoutElement.h"
 #include "MuonReadoutGeometry/RpcReadoutElement.h"
 #include "MuonReadoutGeometry/TgcReadoutElement.h"
+#include "EventPrimitives/EventPrimitivesToStringConverter.h"
 
 AlignCondAthTest::AlignCondAthTest(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthAlgorithm(name, pSvcLocator),
-    m_alinePrint(true),
-    m_blinePrint(true),
-    m_mdtPrint(true),
-    m_rpcPrint(true),
-    m_tgcPrint(true),
-    m_cscPrint(true) {
-    declareProperty("ALinePrint", m_alinePrint);
-    declareProperty("BLinePrint", m_blinePrint);
-    declareProperty("MdtPrint", m_mdtPrint);
-    declareProperty("RpcPrint", m_rpcPrint);
-    declareProperty("TgcPrint", m_tgcPrint);
-    declareProperty("CscPrint", m_cscPrint);
+    AthAlgorithm(name, pSvcLocator) {
+    
 }
 
 StatusCode AlignCondAthTest::initialize() {
     ATH_CHECK(detStore()->retrieve(m_MuonDetMgrDS));
-
     ATH_CHECK(m_idHelperSvc.retrieve());
-
     ATH_CHECK(m_DetectorManagerKey.initialize());
-
     return StatusCode::SUCCESS;
 }
 
@@ -161,27 +148,22 @@ StatusCode AlignCondAthTest::checkMdtGeometry(const MuonGM::MuonDetectorManager*
         const MuonGM::MdtReadoutElement* detEl = manager->getMdtReadoutElement(hash_id);
         if (!detEl) continue;
         const std::vector<const Trk::Surface*>& Nsurf = detEl->surfaces();
-        fout << " New " << m_idHelperSvc->mdtIdHelper().print_to_string(detEl->identify()) << " nlayers " << detEl->getNLayers()
+        fout << " New " << m_idHelperSvc->toString(detEl->identify()) << " nlayers " << detEl->getNLayers()
              << " ntubes " << detEl->getNtubesperlayer() << " Nsurf " << Nsurf.size() << std::endl
              << Amg::toString(detEl->transform(), 6) << std::endl;
 
-        const int i4 = detEl->getMultilayer();
-        for (int tl = 0; tl < detEl->getNLayers(); ++tl) {
-            for (int t = 0; t < detEl->getNtubesperlayer(); ++t) {
+        for (int tl = 1; tl <= detEl->getNLayers(); ++tl) {
+            for (int t = 1; t <= detEl->getNtubesperlayer(); ++t) {
+                const Identifier chId = m_idHelperSvc->mdtIdHelper().channelID(detEl->identify(), detEl->getMultilayer(), tl, t);
                 const Trk::Surface& surf = detEl->surface(tl + 1, t + 1);
                 fout << " New tube: layer " << tl << " tube " << t << std::endl
-                     << " X, Y, Z:       " << detEl->tubePos(i4, tl + 1, t + 1).x() << ", " << detEl->tubePos(i4, tl + 1, t + 1).y() << ", "
-                     << detEl->tubePos(i4, tl + 1, t + 1).z() << std::endl
-                     << " Local X, Y, Z: " << detEl->localTubePos(i4, tl + 1, t + 1).x() << ", "
-                     << detEl->localTubePos(i4, tl + 1, t + 1).y() << ", " << detEl->localTubePos(i4, tl + 1, t + 1).z() << std::endl
-                     << " Cent X, Y, Z: " << detEl->center(tl + 1, t + 1).x() << ", " << detEl->center(tl + 1, t + 1).y() << ", "
-                     << detEl->center(tl + 1, t + 1).z() << std::endl
-                     << " Norm X, Y, Z: " << detEl->normal(tl + 1, t + 1).x() << ", " << detEl->normal(tl + 1, t + 1).y() << ", "
-                     << detEl->normal(tl + 1, t + 1).z() << std::endl
-                     << " TNor X, Y, Z: " << detEl->tubeNormal(tl + 1, t + 1).x() << ", " << detEl->tubeNormal(tl + 1, t + 1).y() << ", "
-                     << detEl->tubeNormal(tl + 1, t + 1).z() << std::endl
+                     << " X, Y, Z:       " << Amg::toString(detEl->tubePos(chId)) << std::endl
+                     << " Local X, Y, Z: " << Amg::toString(detEl->localTubePos(chId)) << std::endl
+                     << " Cent X, Y, Z: " << Amg::toString(detEl->center(chId))<< std::endl
+                     << " Norm X, Y, Z: " << Amg::toString(detEl->normal()) << std::endl
+                     << " TNor X, Y, Z: " << Amg::toString(detEl->tubeNormal(chId)) << std::endl
                      << Amg::toString(surf.transform(), 6) << std::endl
-                     << detEl->bounds(tl + 1, t + 1) << std::endl;
+                     << detEl->bounds(tl, t) << std::endl;
             }
         }
     }
@@ -198,10 +180,10 @@ StatusCode AlignCondAthTest::checkRpcGeometry(const MuonGM::MuonDetectorManager*
         Identifier id = detEl->identify();
         const Amg::Vector3D stripPos = detEl->stripPos(id);
         const Amg::Vector3D localStripPos = detEl->localStripPos(id);
-        fout << " New " << m_idHelperSvc->rpcIdHelper().print_to_string(detEl->identify()) << " NphiStripPanels "
+        fout << " New " << m_idHelperSvc->toString(detEl->identify()) << " NphiStripPanels "
              << detEl->NphiStripPanels() << " Nsurf " << Nsurf.size() << std::endl
-             << " X, Y, Z:       " << stripPos.x() << ", " << stripPos.y() << ", " << stripPos.z() << std::endl
-             << " Local X, Y, Z: " << localStripPos.x() << ", " << localStripPos.y() << ", " << localStripPos.z() << std::endl
+             << " X, Y, Z:       " << Amg::toString(stripPos)<< std::endl
+             << " Local X, Y, Z: " << Amg::toString(localStripPos) << std::endl
              << Amg::toString(detEl->transform(), 6) << std::endl;
 
         for (int dbPhi = 1; dbPhi <= detEl->NphiStripPanels(); ++dbPhi) {
@@ -227,9 +209,9 @@ StatusCode AlignCondAthTest::checkTgcGeometry(const MuonGM::MuonDetectorManager*
         Identifier id = detEl->identify();
         const Amg::Vector3D stripPos = detEl->stripPos(id);
         const Amg::Vector3D localStripPos = detEl->localStripPos(id);
-        fout << " New " << m_idHelperSvc->tgcIdHelper().print_to_string(detEl->identify()) << " Nsurf " << Nsurf.size() << std::endl
-             << " X, Y, Z:       " << stripPos.x() << ", " << stripPos.y() << ", " << stripPos.z() << std::endl
-             << " Local X, Y, Z: " << localStripPos.x() << ", " << localStripPos.y() << ", " << localStripPos.z() << std::endl
+        fout << " New " << m_idHelperSvc->toString(detEl->identify()) << " Nsurf " << Nsurf.size() << std::endl
+             << " X, Y, Z:       " << Amg::toString(stripPos) << std::endl
+             << " Local X, Y, Z: " << Amg::toString(localStripPos) << std::endl
              << Amg::toString(detEl->transform(), 6) << std::endl;
 
         for (int gp = 0; gp < 2; ++gp) {
@@ -253,9 +235,9 @@ StatusCode AlignCondAthTest::checkCscGeometry(const MuonGM::MuonDetectorManager*
         Identifier id = detEl->identify();
         const Amg::Vector3D stripPos = detEl->stripPos(id);
         const Amg::Vector3D localStripPos = detEl->localStripPos(id);
-        fout << " New " << m_idHelperSvc->tgcIdHelper().print_to_string(detEl->identify()) << " Nsurf " << Nsurf.size() << std::endl
-             << " X, Y, Z:       " << stripPos.x() << ", " << stripPos.y() << ", " << stripPos.z() << std::endl
-             << " Local X, Y, Z: " << localStripPos.x() << ", " << localStripPos.y() << ", " << localStripPos.z() << std::endl
+        fout << " New " << m_idHelperSvc->toString(detEl->identify()) << " Nsurf " << Nsurf.size() << std::endl
+             << " X, Y, Z:       " << Amg::toString(stripPos) << std::endl
+             << " Local X, Y, Z: " << Amg::toString(localStripPos) << std::endl
              << Amg::toString(detEl->transform(), 6) << std::endl;
 
         for (int gp = 0; gp < 4; ++gp) {
