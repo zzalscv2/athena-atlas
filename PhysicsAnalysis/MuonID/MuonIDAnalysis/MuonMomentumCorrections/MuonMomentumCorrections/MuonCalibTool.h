@@ -33,6 +33,7 @@ namespace CP {
             correctData_CB = 0,
             correctData_IDMS = 1,
             notCorrectData_IDMS = 2,
+            notCorrectData_CB = 3,
             userDefined = 99,
         };
 
