@@ -82,7 +82,7 @@ if __name__ == "__main__":
     # Disable calo for this test
     flags.Detector.EnableCalo = False
 
-    flags.InDet.Tracking.doTRTExtension = True
+    flags.Tracking.doTRTExtension = True
 
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     flags.Input.Files = defaultTestFiles.RDO_RUN2

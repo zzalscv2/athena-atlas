@@ -205,8 +205,7 @@ def createTrackingPassFlags():
     icf.addFlag("usePrdAssociationTool", False)
     icf.addFlag("isLowPt", False)
     icf.addFlag("useTIDE_Ambi", lambda pcf: pcf.Tracking.doTIDE_Ambi)
-    icf.addFlag("useTRTExtension",
-                lambda pcf: pcf.InDet.Tracking.doTRTExtension)
+    icf.addFlag("useTRTExtension", lambda pcf: pcf.Tracking.doTRTExtension)
     icf.addFlag("storeSeparateContainer", False)
     icf.addFlag("doAmbiguityProcessorTrackFit", True)
 
@@ -238,8 +237,9 @@ def createTrackingPassFlags():
     icf.addFlag("maxSctHoles", 2)
     icf.addFlag("maxDoubleHoles", 1)
 
-    icf.addFlag("maxPrimaryImpact", lambda pcf: 10.0 * Units.mm if pcf.InDet.Tracking.doBLS
-                else maxPrimaryImpact_ranges(pcf) )
+    icf.addFlag("maxPrimaryImpact", lambda pcf:
+                10.0 * Units.mm if pcf.Tracking.doBLS
+                else maxPrimaryImpact_ranges(pcf))
     icf.addFlag("maxEMImpact", 50.0 * Units.mm)
     icf.addFlag("maxZImpact", maxZImpact_ranges )
 
@@ -261,8 +261,9 @@ def createTrackingPassFlags():
     icf.addFlag("seedFilterLevel", seedFilterLevel_ranges )
     icf.addFlag("maxTracksPerSharedPRD", 0)  ## is 0 ok for default??
     icf.addFlag("maxdImpactPPSSeeds", 2)
-    icf.addFlag("maxdImpactSSSSeeds", lambda pcf: 10.0 * Units.mm if pcf.InDet.Tracking.doBLS
-                else maxdImpactSSSSeeds_ranges(pcf) )
+    icf.addFlag("maxdImpactSSSSeeds", lambda pcf:
+                10.0 * Units.mm if pcf.Tracking.doBLS
+                else maxdImpactSSSSeeds_ranges(pcf))
     icf.addFlag("maxZSpacePointsPPPSeeds", 2700.0 * Units.mm )
     icf.addFlag("maxZSpacePointsSSSSeeds", 2700.0 * Units.mm )
     icf.addFlag("maxSeedsPerSP_Pixels", maxSeedsPerSP_Pixels_ranges )
@@ -554,7 +555,7 @@ def createHighPileupTrackingPassFlags():
 def createMinBiasTrackingPassFlags():
     icf = createTrackingPassFlags()
     icf.extension                 = "MinBias"
-    icf.minPT = lambda pcf: (0.3 if  pcf.InDet.Tracking.doHIP300 else 0.1) * Units.GeV
+    icf.minPT = lambda pcf: (0.3 if  pcf.Tracking.doHIP300 else 0.1) * Units.GeV
 
     icf.minClusters               = 5
     icf.minSecondaryPt            = 0.4 * Units.GeV  # Pt cut for back tracking + segment finding for these
@@ -913,8 +914,8 @@ def createPixelTrackingPassFlags():
         if pcf.Reco.EnableHI:
             return 0.1 * Units.GeV
         if pcf.Tracking.doMinBias:
-            if pcf.InDet.Tracking.doHIP300:
-                return 0.300 * Units.GeV
+            if pcf.Tracking.doHIP300:
+                return 0.3 * Units.GeV
             else:
                 return 0.05 * Units.GeV
         return 0.1 * Units.GeV
@@ -999,7 +1000,7 @@ def createSCTTrackingPassFlags():
             if pcf.Beam.Type is BeamType.Cosmics:
                 return cosmics
             if pcf.Tracking.doMinBias:
-                if pcf.InDet.Tracking.doHIP300:
+                if pcf.Tracking.doHIP300:
                     return hion
                 else:
                     return minbias

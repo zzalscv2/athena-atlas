@@ -21,45 +21,42 @@ import AthenaCommon.SystemOfUnits as Units
 #########################
 # InDet configs
 #########################
-def InDetGlobalChi2FitterBaseCfg(flags,
-                                 name='GlobalChi2FitterBase',
-                                 **kwargs):
+def InDetGlobalChi2FitterBaseCfg(
+        flags, name='GlobalChi2FitterBase', **kwargs):
     acc = ComponentAccumulator()
 
     if 'TrackingGeometryReadKey' not in kwargs:
         from TrackingGeometryCondAlg.AtlasTrackingGeometryCondAlgConfig import (
             TrackingGeometryCondAlgCfg)
         cond_alg = TrackingGeometryCondAlgCfg(flags)
-        geom_cond_key = cond_alg.getPrimary().TrackingGeometryWriteKey
         acc.merge(cond_alg)
-        kwargs.setdefault("TrackingGeometryReadKey", geom_cond_key)
+        kwargs.setdefault("TrackingGeometryReadKey",
+                          cond_alg.getPrimary().TrackingGeometryWriteKey)
 
     from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
+    kwargs.setdefault("ExtrapolationTool", acc.popToolsAndMerge(
+        InDetExtrapolatorCfg(flags)))
+
     from TrkConfig.AtlasExtrapolatorToolsConfig import (
         AtlasNavigatorCfg, AtlasEnergyLossUpdatorCfg,
         InDetMaterialEffectsUpdatorCfg, InDetMultipleScatteringUpdatorCfg)
-
-    InDetExtrapolator = acc.getPrimaryAndMerge(InDetExtrapolatorCfg(flags))
-    InDetNavigator = acc.popToolsAndMerge(
-        AtlasNavigatorCfg(flags, name="InDetNavigator"))
-    ELossUpdator = acc.popToolsAndMerge(AtlasEnergyLossUpdatorCfg(flags))
-    InDetMaterialEffectsUpdator = acc.popToolsAndMerge(
-        InDetMaterialEffectsUpdatorCfg(flags))
-    MultipleScatteringUpdator = acc.popToolsAndMerge(
-        InDetMultipleScatteringUpdatorCfg(flags))
+    kwargs.setdefault("NavigatorTool", acc.popToolsAndMerge(
+        AtlasNavigatorCfg(flags, name="InDetNavigator")))
+    kwargs.setdefault("EnergyLossTool", acc.popToolsAndMerge(
+        AtlasEnergyLossUpdatorCfg(flags)))
+    kwargs.setdefault("MaterialUpdateTool", acc.popToolsAndMerge(
+        InDetMaterialEffectsUpdatorCfg(flags)))
+    kwargs.setdefault("MultipleScatteringTool", acc.popToolsAndMerge(
+        InDetMultipleScatteringUpdatorCfg(flags)))
 
     from TrkConfig.TrkExRungeKuttaPropagatorConfig import InDetPropagatorCfg
-    InDetPropagator = acc.popToolsAndMerge(InDetPropagatorCfg(flags))
-    from TrkConfig.TrkMeasurementUpdatorConfig import InDetUpdatorCfg
-    InDetUpdator = acc.popToolsAndMerge(InDetUpdatorCfg(flags))
+    kwargs.setdefault("PropagatorTool", acc.popToolsAndMerge(
+        InDetPropagatorCfg(flags)))
 
-    kwargs.setdefault("ExtrapolationTool", InDetExtrapolator)
-    kwargs.setdefault("NavigatorTool", InDetNavigator)
-    kwargs.setdefault("PropagatorTool", InDetPropagator)
-    kwargs.setdefault("MultipleScatteringTool", MultipleScatteringUpdator)
-    kwargs.setdefault("EnergyLossTool", ELossUpdator)
-    kwargs.setdefault("MeasurementUpdateTool", InDetUpdator)
-    kwargs.setdefault("MaterialUpdateTool", InDetMaterialEffectsUpdator)
+    from TrkConfig.TrkMeasurementUpdatorConfig import InDetUpdatorCfg
+    kwargs.setdefault("MeasurementUpdateTool", acc.popToolsAndMerge(
+        InDetUpdatorCfg(flags)))
+
     kwargs.setdefault("StraightLine", not flags.BField.solenoidOn)
     kwargs.setdefault("OutlierCut", 4)
     kwargs.setdefault("SignedDriftRadius", True)
@@ -72,63 +69,57 @@ def InDetGlobalChi2FitterBaseCfg(flags,
     kwargs.setdefault("RecalculateDerivatives",
                       flags.Tracking.doMinBias or
                       flags.Beam.Type is BeamType.Cosmics or
-                      flags.InDet.Tracking.doBeamGas)
+                      flags.Tracking.doBeamGas)
     kwargs.setdefault("TRTExtensionCuts", True)
     kwargs.setdefault("TrackChi2PerNDFCut", 7)
 
-    GlobalChi2Fitter = CompFactory.Trk.GlobalChi2Fitter(name, **kwargs)
-    acc.setPrivateTools(GlobalChi2Fitter)
+    acc.setPrivateTools(CompFactory.Trk.GlobalChi2Fitter(name, **kwargs))
     return acc
 
 
-def InDetGlobalChi2FitterCfg(flags,
-                             name='InDetGlobalChi2Fitter',
-                             **kwargs):
+def InDetGlobalChi2FitterCfg(flags, name='InDetGlobalChi2Fitter', **kwargs):
     acc = ComponentAccumulator()
 
     if 'RotCreatorTool' not in kwargs:
         from TrkConfig.TrkRIO_OnTrackCreatorConfig import InDetRotCreatorCfg
-        InDetRotCreator = acc.popToolsAndMerge(InDetRotCreatorCfg(flags))
-        kwargs.setdefault('RotCreatorTool', InDetRotCreator)
+        kwargs.setdefault('RotCreatorTool', acc.popToolsAndMerge(
+            InDetRotCreatorCfg(flags)))
     if 'BroadRotCreatorTool' not in kwargs:
         from TrkConfig.TrkRIO_OnTrackCreatorConfig import (
             InDetBroadRotCreatorCfg)
-        InDetBroadRotCreator = acc.popToolsAndMerge(
-            InDetBroadRotCreatorCfg(flags))
-        kwargs.setdefault('BroadRotCreatorTool', InDetBroadRotCreator)
+        kwargs.setdefault('BroadRotCreatorTool', acc.popToolsAndMerge(
+            InDetBroadRotCreatorCfg(flags)))
 
     # PHF cut during fit iterations to save CPU time
-    kwargs.setdefault(
-        'MinPHFCut', flags.InDet.Tracking.ActiveConfig.minTRTPrecFrac)
+    kwargs.setdefault('MinPHFCut',
+                      flags.InDet.Tracking.ActiveConfig.minTRTPrecFrac)
 
-    if ((flags.Tracking.useBroadPixClusterErrors or
-         flags.Tracking.useBroadSCTClusterErrors)):
+    if (flags.Tracking.useBroadPixClusterErrors or
+            flags.Tracking.useBroadSCTClusterErrors):
         kwargs.setdefault('RecalibrateSilicon', False)
 
-    if flags.InDet.Tracking.doRobustReco:
+    if flags.Tracking.doRobustReco:
         kwargs.setdefault('OutlierCut', 10.0)
         kwargs.setdefault('TrackChi2PerNDFCut', 20)
 
-    if (flags.InDet.Tracking.doRobustReco or
+    if (flags.Tracking.doRobustReco or
             flags.Beam.Type is BeamType.Cosmics):
         kwargs.setdefault('MaxOutliers', 99)
 
     if (flags.Beam.Type is BeamType.Cosmics or
-            flags.InDet.Tracking.doBeamGas):
+            flags.Tracking.doBeamGas):
         kwargs.setdefault('Acceleration', False)
 
     if flags.Tracking.materialInteractions and not flags.BField.solenoidOn:
         kwargs.setdefault('Momentum', 1000.*Units.MeV)
 
-    InDetGlobalChi2Fitter = acc.popToolsAndMerge(
-        InDetGlobalChi2FitterBaseCfg(flags, name, **kwargs))
-    acc.setPrivateTools(InDetGlobalChi2Fitter)
+    acc.setPrivateTools(acc.popToolsAndMerge(
+        InDetGlobalChi2FitterBaseCfg(flags, name, **kwargs)))
     return acc
 
 
-def InDetGlobalChi2FitterTRTCfg(flags,
-                                name='InDetGlobalChi2FitterTRT',
-                                **kwargs):
+def InDetGlobalChi2FitterTRTCfg(
+        flags, name='InDetGlobalChi2FitterTRT', **kwargs):
     acc = ComponentAccumulator()
     '''
     Global Chi2 Fitter for TRT segments with different settings
@@ -137,9 +128,8 @@ def InDetGlobalChi2FitterTRTCfg(flags,
     if 'RotCreatorTool' not in kwargs:
         from TrkConfig.TrkRIO_OnTrackCreatorConfig import (
             InDetRefitRotCreatorCfg)
-        InDetRefitRotCreator = acc.popToolsAndMerge(
-            InDetRefitRotCreatorCfg(flags))
-        kwargs.setdefault("RotCreatorTool", InDetRefitRotCreator)
+        kwargs.setdefault("RotCreatorTool", acc.popToolsAndMerge(
+            InDetRefitRotCreatorCfg(flags)))
 
     kwargs.setdefault("MaterialUpdateTool", '')
     kwargs.setdefault("SignedDriftRadius", True)
@@ -156,47 +146,43 @@ def InDetGlobalChi2FitterTRTCfg(flags,
         kwargs.setdefault('Momentum', 1000.*Units.MeV)
 
     kwargs.setdefault("OutlierCut", 5)
-    kwargs.setdefault(
-        "MaxOutliers", 99 if flags.InDet.Tracking.doRobustReco or
-        flags.Beam.Type is BeamType.Cosmics else 10)
+    kwargs.setdefault("MaxOutliers",
+                      99 if (flags.Tracking.doRobustReco or
+                             flags.Beam.Type is BeamType.Cosmics)
+                      else 10)
     kwargs.setdefault("ReintegrateOutliers", False)
 
-    InDetGlobalChi2Fitter = acc.popToolsAndMerge(
-        InDetGlobalChi2FitterBaseCfg(flags, name, **kwargs))
-    acc.setPrivateTools(InDetGlobalChi2Fitter)
+    acc.setPrivateTools(acc.popToolsAndMerge(
+        InDetGlobalChi2FitterBaseCfg(flags, name, **kwargs)))
     return acc
 
 
-def InDetGlobalChi2FitterLowPtCfg(flags,
-                                  name='InDetGlobalChi2FitterLowPt',
-                                  **kwargs):
+def InDetGlobalChi2FitterLowPtCfg(
+        flags, name='InDetGlobalChi2FitterLowPt', **kwargs):
     acc = ComponentAccumulator()
 
     if 'RotCreatorTool' not in kwargs:
         from TrkConfig.TrkRIO_OnTrackCreatorConfig import InDetRotCreatorCfg
-        InDetRotCreator = acc.popToolsAndMerge(InDetRotCreatorCfg(flags))
-        kwargs.setdefault('RotCreatorTool', InDetRotCreator)
+        kwargs.setdefault('RotCreatorTool', acc.popToolsAndMerge(
+            InDetRotCreatorCfg(flags)))
     if 'BroadRotCreatorTool' not in kwargs:
         from TrkConfig.TrkRIO_OnTrackCreatorConfig import (
             InDetBroadRotCreatorCfg)
-        InDetBroadRotCreator = acc.popToolsAndMerge(
-            InDetBroadRotCreatorCfg(flags))
-        kwargs.setdefault('BroadRotCreatorTool', InDetBroadRotCreator)
+        kwargs.setdefault('BroadRotCreatorTool', acc.popToolsAndMerge(
+            InDetBroadRotCreatorCfg(flags)))
 
     kwargs.setdefault('OutlierCut', 5.0)
     kwargs.setdefault('Acceleration', False)
     kwargs.setdefault('RecalculateDerivatives', True)
     kwargs.setdefault('TrackChi2PerNDFCut', 10)
 
-    InDetGlobalChi2Fitter = acc.popToolsAndMerge(
-        InDetGlobalChi2FitterBaseCfg(flags, name, **kwargs))
-    acc.setPrivateTools(InDetGlobalChi2Fitter)
+    acc.setPrivateTools(acc.popToolsAndMerge(
+        InDetGlobalChi2FitterBaseCfg(flags, name, **kwargs)))
     return acc
 
 
-def InDetGlobalChi2FitterBTCfg(flags,
-                               name='InDetGlobalChi2FitterBT',
-                               **kwargs):
+def InDetGlobalChi2FitterBTCfg(
+        flags, name='InDetGlobalChi2FitterBT', **kwargs):
     '''
     Global Chi2 Fitter for backtracking
     '''
@@ -207,28 +193,27 @@ def InDetGlobalChi2FitterBTCfg(flags,
 ##############################
 #   Muon configs
 ##############################
-def MuonChi2TrackFitterCfg(flags,
-                           name='MuonChi2TrackFitter',
-                           **kwargs):
+def MuonChi2TrackFitterCfg(flags, name='MuonChi2TrackFitter', **kwargs):
     result = ComponentAccumulator()
 
     from TrkConfig.TrkRIO_OnTrackCreatorConfig import MuonRotCreatorCfg
-    rotcreator = result.popToolsAndMerge(MuonRotCreatorCfg(flags))
+    kwargs.setdefault("RotCreatorTool", result.popToolsAndMerge(
+        MuonRotCreatorCfg(flags)))
+
     from TrkConfig.TrkMeasurementUpdatorConfig import KalmanUpdatorCfg
-    measurement_updater = result.popToolsAndMerge(
-        KalmanUpdatorCfg(flags, name='MuonMeasUpdator'))
+    kwargs.setdefault("MeasurementUpdateTool", result.popToolsAndMerge(
+        KalmanUpdatorCfg(flags, name='MuonMeasUpdator')))
 
     if 'ExtrapolationTool' not in kwargs:
         from TrkConfig.AtlasExtrapolatorConfig import MuonExtrapolatorCfg
-        kwargs.setdefault("ExtrapolationTool", result.popToolsAndMerge(MuonExtrapolatorCfg(flags)))
+        kwargs.setdefault("ExtrapolationTool", result.popToolsAndMerge(
+            MuonExtrapolatorCfg(flags)))
 
     from TrkConfig.AtlasExtrapolatorToolsConfig import (
         AtlasMultipleScatteringUpdatorCfg)
     kwargs.setdefault("MultipleScatteringTool", result.popToolsAndMerge(
         AtlasMultipleScatteringUpdatorCfg(flags, UseTrkUtils=True)))
 
-    kwargs.setdefault("RotCreatorTool", rotcreator)
-    kwargs.setdefault("MeasurementUpdateTool", measurement_updater)
     kwargs.setdefault("StraightLine", False)
     kwargs.setdefault("OutlierCut", 3.0)
     kwargs.setdefault("GetMaterialFromTrack", False)
@@ -242,52 +227,52 @@ def MuonChi2TrackFitterCfg(flags,
                       else "")
     kwargs.setdefault("NavigatorTool",  extrapolator.Navigator)
     kwargs.setdefault("EnergyLossTool", extrapolator.EnergyLossUpdater)
+
     # We need to include the tracking geometry conditions
     from TrackingGeometryCondAlg.AtlasTrackingGeometryCondAlgConfig import (
         TrackingGeometryCondAlgCfg)
     geom_cond_key = result.getPrimaryAndMerge(
         TrackingGeometryCondAlgCfg(flags)).TrackingGeometryWriteKey
     kwargs.setdefault("TrackingGeometryReadKey", geom_cond_key)
-    fitter = CompFactory.Trk.GlobalChi2Fitter(name=name, **kwargs)
-    result.setPrivateTools(fitter)
+
+    result.setPrivateTools(CompFactory.Trk.GlobalChi2Fitter(name, **kwargs))
     return result
 
 
-def MCTBFitterCfg(flags,
-                  name='MCTBFitter',
-                  **kwargs):
+def MCTBFitterCfg(flags, name='MCTBFitter', **kwargs):
     from TrkConfig.AtlasExtrapolatorConfig import MCTBExtrapolatorCfg
     result = MCTBExtrapolatorCfg(flags)
     kwargs.setdefault("GetMaterialFromTrack", True)
     kwargs.setdefault("ExtrapolationTool", result.popPrivateTools())
     result.setPrivateTools(result.popToolsAndMerge(
-        MuonChi2TrackFitterCfg(flags, name=name, **kwargs)))
+        MuonChi2TrackFitterCfg(flags, name, **kwargs)))
     return result
 
-def MCTBFitterMaterialFromTrackCfg(flags, name='MCTBFitterMaterialFromTrack', **kwargs):
+
+def MCTBFitterMaterialFromTrackCfg(
+        flags, name='MCTBFitterMaterialFromTrack', **kwargs):
     return MCTBFitterCfg(flags, name, GetMaterialFromTrack=True, **kwargs)
 
-def MCTBSLFitterCfg(flags, name = 'MCTBSLFitter', **kwargs):
-    kwargs["StraightLine"] = True       # always set
-    kwargs.setdefault("Momentum", flags.Muon.straightLineFitMomentum)    
-    return MCTBFitterCfg(flags, name=name, **kwargs)
 
-def MCTBSLFitterMaterialFromTrackCfg(flags,
-                                     name='MCTBSLFitterMaterialFromTrack',
-                                     **kwargs):
+def MCTBSLFitterCfg(flags, name='MCTBSLFitter', **kwargs):
+    kwargs["StraightLine"] = True       # always set
+    kwargs.setdefault("Momentum", flags.Muon.straightLineFitMomentum)
+    return MCTBFitterCfg(flags, name, **kwargs)
+
+
+def MCTBSLFitterMaterialFromTrackCfg(
+        flags, name='MCTBSLFitterMaterialFromTrack', **kwargs):
     result = ComponentAccumulator()
     kwargs["GetMaterialFromTrack"] = True  # always set
     from TrkConfig.AtlasExtrapolatorConfig import (
         MuonStraightLineExtrapolatorCfg)
-    extrapolator = result.popToolsAndMerge(
-        MuonStraightLineExtrapolatorCfg(flags))
-    kwargs.setdefault("ExtrapolationTool", extrapolator)
+    kwargs.setdefault("ExtrapolationTool", result.popToolsAndMerge(
+        MuonStraightLineExtrapolatorCfg(flags)))
 
     from TrkConfig.TrkExRungeKuttaPropagatorConfig import (
         RungeKuttaPropagatorCfg)
-    propagator = result.popToolsAndMerge(
+    kwargs["PropagatorTool"] = result.popToolsAndMerge(
         RungeKuttaPropagatorCfg(flags, name="MuonRK_Propagator"))
-    kwargs["PropagatorTool"] = propagator
 
     result.setPrivateTools(result.popToolsAndMerge(
         MCTBSLFitterCfg(flags, name, **kwargs)))
@@ -295,9 +280,8 @@ def MCTBSLFitterMaterialFromTrackCfg(flags,
 
 
 # Unused
-def MuonCombinedTrackFitterCfg(flags,
-                               name="MuonCombinedTrackFitter",
-                               **kwargs):
+def MuonCombinedTrackFitterCfg(
+        flags, name="MuonCombinedTrackFitter", **kwargs):
     from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
     from TrkConfig.AtlasExtrapolatorToolsConfig import (
         AtlasNavigatorCfg, AtlasEnergyLossUpdatorCfg)
@@ -331,11 +315,13 @@ def MuonCombinedTrackFitterCfg(flags,
     kwargs.setdefault("MuidTool", result.popToolsAndMerge(
         MuidMaterialEffectsOnTrackProviderCfg(flags)))
     kwargs.setdefault("MuidToolParam", None)
+
     if flags.Beam.Type is BeamType.Cosmics:
         from MuonCombinedConfig.MuonCombinedRecToolsConfig import (
             MuidMaterialEffectsOnTrackProviderParamCfg)
         kwargs.setdefault("MuidToolParam", result.popToolsAndMerge(
             MuidMaterialEffectsOnTrackProviderParamCfg(flags)))
+
     kwargs.setdefault("MuidMat", True)
     kwargs.setdefault("StraightLine", flags.Beam.Type is BeamType.Cosmics)
     # ^ Was: not jobproperties.BField.solenoidOn() and not jobproperties.BField.allToroidOn()
@@ -345,8 +331,8 @@ def MuonCombinedTrackFitterCfg(flags,
     # ^ Was: jobproperties.BField.solenoidOn() and jobproperties.BField.allToroidOn()
     kwargs.setdefault("RecalculateDerivatives", False)
     kwargs.setdefault("UseCaloTG", True)
-    tool = CompFactory.Trk.GlobalChi2Fitter(name, **kwargs)
-    result.setPrivateTools(tool)
+
+    result.setPrivateTools(CompFactory.Trk.GlobalChi2Fitter(name, **kwargs))
     return result
 
 
@@ -360,48 +346,41 @@ def InDetTrigGlobalChi2FitterCfg(flags, name='InDetTrigTrackFitter', **kwargs):
         from TrackingGeometryCondAlg.AtlasTrackingGeometryCondAlgConfig import (
             TrackingGeometryCondAlgCfg)
         cond_alg = TrackingGeometryCondAlgCfg(flags)
-        geom_cond_key = cond_alg.getPrimary().TrackingGeometryWriteKey
         acc.merge(cond_alg)
-        kwargs.setdefault("TrackingGeometryReadKey", geom_cond_key)
+        kwargs.setdefault("TrackingGeometryReadKey",
+                          cond_alg.getPrimary().TrackingGeometryWriteKey)
 
     from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
+    kwargs.setdefault("ExtrapolationTool", acc.popToolsAndMerge(
+        InDetExtrapolatorCfg(flags, name="InDetTrigExtrapolator")))
     from TrkConfig.AtlasExtrapolatorToolsConfig import (
         AtlasNavigatorCfg, AtlasEnergyLossUpdatorCfg,
         AtlasMaterialEffectsUpdatorCfg)
-
-    InDetExtrapolator = acc.getPrimaryAndMerge(
-        InDetExtrapolatorCfg(flags, name="InDetTrigExtrapolator"))
-    InDetNavigator = acc.popToolsAndMerge(
-        AtlasNavigatorCfg(flags, name="InDetTrigNavigator"))
-    ELossUpdator = acc.popToolsAndMerge(AtlasEnergyLossUpdatorCfg(flags,
-                                                                  UseBetheBlochForElectrons=True,    #revisit after mc23a
-                                                                  )
-                                        )
-    MaterialEffectsUpdator = acc.popToolsAndMerge(
+    kwargs.setdefault("NavigatorTool", acc.popToolsAndMerge(
+        AtlasNavigatorCfg(flags, name="InDetTrigNavigator")))
+    kwargs.setdefault("EnergyLossTool", acc.popToolsAndMerge(
+        AtlasEnergyLossUpdatorCfg(flags,
+                                  # revisit after mc23a
+                                  UseBetheBlochForElectrons=True)))
+    kwargs.setdefault("MaterialUpdateTool", acc.popToolsAndMerge(
         AtlasMaterialEffectsUpdatorCfg(flags,
-                                       name="InDetTrigMaterialEffectsUpdator"))
+                                       name="InDetTrigMaterialEffectsUpdator")))
 
     from TrkConfig.TrkExRungeKuttaPropagatorConfig import (
         RungeKuttaPropagatorCfg)
-    InDetTrigRKPropagator = acc.popToolsAndMerge(
+    kwargs.setdefault("PropagatorTool", acc.popToolsAndMerge(
         RungeKuttaPropagatorCfg(flags, name="InDetTrigRKPropagator",
-                                AccuracyParameter = 0.0001,           #revisit after mc23a
-                                MaxStraightLineStep = 0.004,          #revisit after mc23a
-                                ),
-    )
-    from TrkConfig.TrkMeasurementUpdatorConfig import KalmanUpdatorCfg
-    InDetTrigUpdator = acc.popToolsAndMerge(
-        KalmanUpdatorCfg(flags, name="InDetTrigUpdator"))
-    from TrkConfig.TrkRIO_OnTrackCreatorConfig import TrigRotCreatorCfg
-    TrigRotCreator = acc.popToolsAndMerge(TrigRotCreatorCfg(flags))
+                                # revisit after mc23a
+                                AccuracyParameter=0.0001,
+                                MaxStraightLineStep=0.004)))
 
-    kwargs.setdefault("ExtrapolationTool", InDetExtrapolator)
-    kwargs.setdefault("NavigatorTool", InDetNavigator)
-    kwargs.setdefault("PropagatorTool", InDetTrigRKPropagator)
-    kwargs.setdefault("EnergyLossTool", ELossUpdator)
-    kwargs.setdefault("MeasurementUpdateTool", InDetTrigUpdator)
-    kwargs.setdefault("MaterialUpdateTool", MaterialEffectsUpdator)
-    kwargs.setdefault("RotCreatorTool", TrigRotCreator)
+    from TrkConfig.TrkMeasurementUpdatorConfig import KalmanUpdatorCfg
+    kwargs.setdefault("MeasurementUpdateTool", acc.popToolsAndMerge(
+        KalmanUpdatorCfg(flags, name="InDetTrigUpdator")))
+
+    from TrkConfig.TrkRIO_OnTrackCreatorConfig import TrigRotCreatorCfg
+    kwargs.setdefault("RotCreatorTool", acc.popToolsAndMerge(
+        TrigRotCreatorCfg(flags)))
     # InDetTrigBroadInDetRotCreator, #TODO, we have function to configure it
     kwargs.setdefault("BroadRotCreatorTool", None)
 
@@ -430,11 +409,12 @@ def InDetTrigGlobalChi2FitterCfg(flags, name='InDetTrigTrackFitter', **kwargs):
     #   InDetTrigTrackFitter.MaxOutliers        = 99
     #   #only switch off for cosmics InDetTrigTrackFitter.Acceleration = False
 
-    GlobalChi2Fitter = CompFactory.Trk.GlobalChi2Fitter(name, **kwargs)
-    acc.setPrivateTools(GlobalChi2Fitter)
+    acc.setPrivateTools(CompFactory.Trk.GlobalChi2Fitter(name, **kwargs))
     return acc
 
-def InDetTrigGlobalChi2FitterCosmicsCfg(flags, name='InDetTrigTrackFitterCosmics', **kwargs):
+
+def InDetTrigGlobalChi2FitterCosmicsCfg(
+        flags, name='InDetTrigTrackFitterCosmics', **kwargs):
 
     kwargs.setdefault("Acceleration", False)
     kwargs.setdefault("OutlierCut", 10)
@@ -448,44 +428,40 @@ def InDetTrigGlobalChi2FitterCosmicsCfg(flags, name='InDetTrigTrackFitterCosmics
 #########################
 # ITk configs
 #########################
-def ITkGlobalChi2FitterBaseCfg(flags,
-                               name='ITkGlobalChi2FitterBase',
-                               **kwargs):
+def ITkGlobalChi2FitterBaseCfg(flags, name='ITkGlobalChi2FitterBase', **kwargs):
     acc = ComponentAccumulator()
 
     if 'TrackingGeometryReadKey' not in kwargs:
         from TrackingGeometryCondAlg.AtlasTrackingGeometryCondAlgConfig import (
             TrackingGeometryCondAlgCfg)
         geom_cond = TrackingGeometryCondAlgCfg(flags)
-        geom_cond_key = geom_cond.getPrimary().TrackingGeometryWriteKey
         acc.merge(geom_cond)
-        kwargs.setdefault("TrackingGeometryReadKey", geom_cond_key)
+        kwargs.setdefault("TrackingGeometryReadKey",
+                          geom_cond.getPrimary().TrackingGeometryWriteKey)
 
     from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
+    kwargs.setdefault("ExtrapolationTool", acc.popToolsAndMerge(
+        AtlasExtrapolatorCfg(flags)))
+
     from TrkConfig.AtlasExtrapolatorToolsConfig import (
         AtlasNavigatorCfg, AtlasEnergyLossUpdatorCfg,
         ITkMaterialEffectsUpdatorCfg, ITkMultipleScatteringUpdatorCfg)
-
-    Extrapolator = acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags))
-    Navigator = acc.popToolsAndMerge(AtlasNavigatorCfg(flags))
-    ELossUpdator = acc.popToolsAndMerge(AtlasEnergyLossUpdatorCfg(flags))
-    ITkMaterialEffectsUpdator = acc.popToolsAndMerge(
-        ITkMaterialEffectsUpdatorCfg(flags))
-    MultipleScatteringUpdator = acc.popToolsAndMerge(
-        ITkMultipleScatteringUpdatorCfg(flags))
+    kwargs.setdefault("NavigatorTool", acc.popToolsAndMerge(
+        AtlasNavigatorCfg(flags)))
+    kwargs.setdefault("EnergyLossTool", acc.popToolsAndMerge(
+        AtlasEnergyLossUpdatorCfg(flags)))
+    kwargs.setdefault("MaterialUpdateTool", acc.popToolsAndMerge(
+        ITkMaterialEffectsUpdatorCfg(flags)))
+    kwargs.setdefault("MultipleScatteringTool", acc.popToolsAndMerge(
+        ITkMultipleScatteringUpdatorCfg(flags)))
 
     from TrkConfig.TrkExRungeKuttaPropagatorConfig import ITkPropagatorCfg
-    ITkPropagator = acc.popToolsAndMerge(ITkPropagatorCfg(flags))
+    kwargs.setdefault("PropagatorTool", acc.popToolsAndMerge(
+        ITkPropagatorCfg(flags)))
     from TrkConfig.TrkMeasurementUpdatorConfig import ITkUpdatorCfg
-    ITkUpdator = acc.popToolsAndMerge(ITkUpdatorCfg(flags))
+    kwargs.setdefault("MeasurementUpdateTool", acc.popToolsAndMerge(
+        ITkUpdatorCfg(flags)))
 
-    kwargs.setdefault("ExtrapolationTool", Extrapolator)
-    kwargs.setdefault("NavigatorTool", Navigator)
-    kwargs.setdefault("PropagatorTool", ITkPropagator)
-    kwargs.setdefault("MultipleScatteringTool", MultipleScatteringUpdator)
-    kwargs.setdefault("EnergyLossTool", ELossUpdator)
-    kwargs.setdefault("MeasurementUpdateTool", ITkUpdator)
-    kwargs.setdefault("MaterialUpdateTool", ITkMaterialEffectsUpdator)
     kwargs.setdefault("StraightLine", not flags.BField.solenoidOn)
     kwargs.setdefault("OutlierCut", 4)
     kwargs.setdefault("SignedDriftRadius", True)
@@ -497,25 +473,22 @@ def ITkGlobalChi2FitterBaseCfg(flags,
                       flags.Beam.Type is BeamType.Cosmics)
     kwargs.setdefault("TrackChi2PerNDFCut", 7)
 
-    GlobalChi2Fitter = CompFactory.Trk.GlobalChi2Fitter(name, **kwargs)
-    acc.setPrivateTools(GlobalChi2Fitter)
+    acc.setPrivateTools(CompFactory.Trk.GlobalChi2Fitter(name, **kwargs))
     return acc
 
 
-def ITkGlobalChi2FitterCfg(flags,
-                           name='ITkGlobalChi2Fitter',
-                           **kwargs):
+def ITkGlobalChi2FitterCfg(flags, name='ITkGlobalChi2Fitter', **kwargs):
     acc = ComponentAccumulator()
 
     if 'RotCreatorTool' not in kwargs:
         from TrkConfig.TrkRIO_OnTrackCreatorConfig import ITkRotCreatorCfg
-        ITkRotCreator = acc.popToolsAndMerge(ITkRotCreatorCfg(flags))
-        kwargs.setdefault('RotCreatorTool', ITkRotCreator)
+        kwargs.setdefault('RotCreatorTool', acc.popToolsAndMerge(
+            ITkRotCreatorCfg(flags)))
 
     if 'BroadRotCreatorTool' not in kwargs:
         from TrkConfig.TrkRIO_OnTrackCreatorConfig import ITkBroadRotCreatorCfg
-        ITkBroadRotCreator = acc.popToolsAndMerge(ITkBroadRotCreatorCfg(flags))
-        kwargs.setdefault('BroadRotCreatorTool', ITkBroadRotCreator)
+        kwargs.setdefault('BroadRotCreatorTool', acc.popToolsAndMerge(
+            ITkBroadRotCreatorCfg(flags)))
 
     if flags.Beam.Type is BeamType.Cosmics:
         kwargs.setdefault('MaxOutliers', 99)
@@ -524,7 +497,6 @@ def ITkGlobalChi2FitterCfg(flags,
     if flags.Tracking.materialInteractions and not flags.BField.solenoidOn:
         kwargs.setdefault('Momentum', 1000.*Units.MeV)
 
-    ITkGlobalChi2Fitter = acc.popToolsAndMerge(
-        ITkGlobalChi2FitterBaseCfg(flags, name=name, **kwargs))
-    acc.setPrivateTools(ITkGlobalChi2Fitter)
+    acc.setPrivateTools(acc.popToolsAndMerge(
+        ITkGlobalChi2FitterBaseCfg(flags, name, **kwargs)))
     return acc

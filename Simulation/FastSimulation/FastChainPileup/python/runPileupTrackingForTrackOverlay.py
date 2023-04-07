@@ -40,7 +40,7 @@ flags.Detector.EnableCalo = True
 flags.Tracking.doCaloSeededAmbi = False
 flags.Tracking.doTIDE_Ambi = True
 flags.Tracking.doCaloSeededBrem = True
-flags.InDet.Tracking.doBackTracking = True
+flags.Tracking.doBackTracking = True
 flags.Tracking.doTruth = True #Turn running of truth matching on and off (by default on for MC off for data)
 flags.Tracking.doVertexFinding = False # from VertexFindingFlags.py
 

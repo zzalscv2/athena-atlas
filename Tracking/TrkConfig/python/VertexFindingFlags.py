@@ -188,12 +188,12 @@ def createPriVertexingFlags():
     def vertexSetup(pcf):
         if pcf.Reco.EnableHI:
             return VertexSetup.FastIVF
-        elif pcf.Tracking.doHighPileup or \
-             pcf.Tracking.doMinBias or \
-             pcf.Tracking.doLowMu or \
-             pcf.InDet.Tracking.doRobustReco or \
-             pcf.Tracking.doVtxLumi or \
-             pcf.Tracking.doVtxBeamSpot:
+        elif (pcf.Tracking.doHighPileup or
+              pcf.Tracking.doMinBias or
+              pcf.Tracking.doLowMu or
+              pcf.Tracking.doRobustReco or
+              pcf.Tracking.doVtxLumi or
+              pcf.Tracking.doVtxBeamSpot):
             return VertexSetup.IVF
         else: # Default
             return VertexSetup.ActsGaussAMVF
@@ -203,9 +203,9 @@ def createPriVertexingFlags():
     # string to store the type of sorting algorithm to separate signal and pile-up vertices.
     flags.addFlag("sortingSetup", VertexSortingSetup.SumPt2Sorting, enum=VertexSortingSetup)
     flags.addFlag("useBeamConstraint", lambda pcf:
-                  not(pcf.Tracking.doVtxLumi \
-                      or pcf.Tracking.doVtxBeamSpot \
-                      or pcf.InDet.Tracking.doRobustReco))
+                  not(pcf.Tracking.doVtxLumi
+                      or pcf.Tracking.doVtxBeamSpot
+                      or pcf.Tracking.doRobustReco))
 
     def maxD0(pcf):
         if pcf.Detector.GeometryITk:
@@ -222,7 +222,7 @@ def createPriVertexingFlags():
         if pcf.Detector.GeometryITk:
             return 3
         else:
-            if pcf.InDet.Tracking.doRobustReco:
+            if pcf.Tracking.doRobustReco:
                 return 0
             else: # Default ID
                 return 1
@@ -233,7 +233,7 @@ def createPriVertexingFlags():
         if pcf.Detector.GeometryITk:
             return 900.0 * Units.MeV
         else:
-            if pcf.Tracking.doMinBias or pcf.InDet.Tracking.doLowPt:
+            if pcf.Tracking.doMinBias or pcf.Tracking.doLowPt:
                 return 100.0 * Units.MeV
             elif pcf.Reco.EnableHI or pcf.Tracking.doLowMu:
                 return 400.0 * Units.MeV
@@ -246,7 +246,7 @@ def createPriVertexingFlags():
         if pcf.Detector.GeometryITk:
             return 0.35 * Units.mm
         else:
-            if pcf.InDet.Tracking.doLowPt:
+            if pcf.Tracking.doLowPt:
                 return 0.9 * Units.mm
             else: # Default ID
                 return 5.0 * Units.mm

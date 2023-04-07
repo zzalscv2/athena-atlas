@@ -76,6 +76,8 @@ def createTrackingConfigFlags():
     icf.addFlag("Tracking.perigeeExpression", lambda prevFlags:
                 "Vertex" if prevFlags.Reco.EnableHI else "BeamLine")
 
+    # Tracking passes/configurations scheduled
+
     def doLargeD0(flags):
         if flags.GeoModel.Run <= LHCPeriod.Run3:
             return not ((flags.Beam.Type in
@@ -92,6 +94,9 @@ def createTrackingConfigFlags():
 
     # Special configuration for low-mu runs
     icf.addFlag("Tracking.doLowMu", False)
+    # Turn running of doLowPt second pass on and off
+    icf.addFlag("Tracking.doLowPt",
+                lambda prevFlags: prevFlags.Tracking.doLowMu)
 
     # Turn on to save the Track Seeds in a xAOD track collecting for development studies
     icf.addFlag("Tracking.doStoreTrackSeeds", False)
@@ -123,16 +128,6 @@ def createTrackingConfigFlags():
     # Control cuts and settings for different lumi to limit CPU and disk space
     icf.addFlag("Tracking.cutLevel", cutLevel)
 
-    # Turn running of doLargeD0 second pass down to 100 MeV on and off
-    icf.addFlag("Tracking.doLowPtLargeD0", False)
-    # Turn running of high pile-up reconstruction on and off
-    icf.addFlag("Tracking.doHighPileup", False)
-    # Special reconstruction for vertex lumi measurement
-    icf.addFlag("Tracking.doVtxLumi", False)
-    # Special reconstruction for vertex beamspot measurement
-    icf.addFlag("Tracking.doVtxBeamSpot", False)
-    # Switch for running MinBias settings
-    icf.addFlag("Tracking.doMinBias", False)
     # Turn on InDetRecStatistics
     icf.addFlag("Tracking.doStats", False)
     # Switch for track observer tool
@@ -145,6 +140,88 @@ def createTrackingConfigFlags():
     icf.addFlag("Tracking.useBroadPixClusterErrors", False)
     # Use broad cluster errors for SCT
     icf.addFlag("Tracking.useBroadSCTClusterErrors", False)
+
+    # Tracking passes/configurations scheduled
+
+    # Turn running of track segment creation in pixel on and off
+    icf.addFlag("Tracking.doTrackSegmentsPixel",
+                lambda prevFlags: (
+                    prevFlags.Detector.EnablePixel and (
+                        prevFlags.Tracking.doMinBias or
+                        prevFlags.Tracking.doLowMu or
+                        prevFlags.Beam.Type is BeamType.Cosmics)))
+    # Turn running of track segment creation in SCT on and off
+    icf.addFlag("Tracking.doTrackSegmentsSCT",
+                lambda prevFlags: (
+                    prevFlags.Detector.EnableSCT and (
+                        prevFlags.Tracking.doLowMu or
+                        prevFlags.Beam.Type is BeamType.Cosmics)))
+    # Turn running of track segment creation in TRT on and off
+    icf.addFlag("Tracking.doTrackSegmentsTRT",
+                lambda prevFlags: (
+                    prevFlags.Detector.EnableTRT and
+                    (prevFlags.Tracking.doLowMu or
+                     prevFlags.Beam.Type is BeamType.Cosmics)))
+    # turn on / off TRT extensions
+    icf.addFlag("Tracking.doTRTExtension",
+                lambda prevFlags: prevFlags.Detector.EnableTRT)
+    # control to run TRT Segment finding (do it always after new tracking!)
+    icf.addFlag("Tracking.doTRTSegments",
+                lambda prevFlags: (prevFlags.Detector.EnableTRT and
+                                   (prevFlags.Tracking.doBackTracking or
+                                    prevFlags.Tracking.doTRTStandalone)))
+    # Turn running of backtracking on and off
+    icf.addFlag("Tracking.doBackTracking", lambda prevFlags: (
+        prevFlags.Detector.EnableTRT and
+        not(prevFlags.Beam.Type in [BeamType.SingleBeam, BeamType.Cosmics] or
+            prevFlags.Reco.EnableHI or
+            prevFlags.Tracking.doHighPileup or
+            prevFlags.Tracking.doVtxLumi or
+            prevFlags.Tracking.doVtxBeamSpot)))
+    # control TRT Standalone
+    icf.addFlag("Tracking.doTRTStandalone", lambda prevFlags: (
+        prevFlags.Detector.EnableTRT and
+        not(prevFlags.Reco.EnableHI or
+            prevFlags.Tracking.doHighPileup or
+            prevFlags.Tracking.doVtxLumi or
+            prevFlags.Tracking.doVtxBeamSpot)))
+
+    # Turn running of doForwardTracks pass on and off
+    icf.addFlag("Tracking.doForwardTracks", lambda prevFlags: (
+        prevFlags.Detector.EnablePixel and
+        not(prevFlags.Beam.Type in [BeamType.SingleBeam, BeamType.Cosmics] or
+            prevFlags.Reco.EnableHI or
+            prevFlags.Tracking.doHighPileup or
+            prevFlags.Tracking.doVtxLumi or
+            prevFlags.Tracking.doVtxBeamSpot or
+            prevFlags.Tracking.doMinBias or
+            prevFlags.Tracking.doLowMu)))
+    icf.addFlag("Tracking.doTrackSegmentsDisappearing",
+                lambda prevFlags: (
+                    not(prevFlags.Reco.EnableHI or
+                        prevFlags.Beam.Type is BeamType.Cosmics)))
+
+    # Turn running of doVeryLowPt third pass on and off
+    icf.addFlag("Tracking.doVeryLowPt", False)
+    # Turn running of doLargeD0 second pass down to 100 MeV on and off
+    icf.addFlag("Tracking.doLowPtLargeD0", False)
+    # Turn running of high pile-up reconstruction on and off
+    icf.addFlag("Tracking.doHighPileup", False)
+    # Special reconstruction for vertex lumi measurement
+    icf.addFlag("Tracking.doVtxLumi", False)
+    # Special reconstruction for vertex beamspot measurement
+    icf.addFlag("Tracking.doVtxBeamSpot", False)
+    # Switch for running MinBias settings
+    icf.addFlag("Tracking.doMinBias", False)
+    # Turn running of BeamGas second pass on and off
+    icf.addFlag("Tracking.doBeamGas",
+                lambda prevFlags: prevFlags.Beam.Type is BeamType.SingleBeam)
+    # Switch for running MinBias settings with a 300 MeV pT cut (for Heavy Ion Proton)
+    icf.addFlag("Tracking.doHIP300", False)
+    # Switch for running Robust settings
+    icf.addFlag("Tracking.doRobustReco", False)
+    # Special reconstruction for BLS physics
+    icf.addFlag("Tracking.doBLS", False)
 
     ####################################################################
 
