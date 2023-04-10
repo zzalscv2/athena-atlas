@@ -25,7 +25,7 @@ StatusCode ZtoLeptonFilter::filterEvent() {
           break;
         }
         // Z children
-        for (auto thisChild: pitr->end_vertex()->particles_out()) {
+        for (const auto& thisChild: pitr->end_vertex()->particles_out()) {
           if (std::abs(thisChild->pdg_id()) == 11 || std::abs(thisChild->pdg_id()) == 13 || std::abs(thisChild->pdg_id()) == 15) {
             return StatusCode::SUCCESS;
           }

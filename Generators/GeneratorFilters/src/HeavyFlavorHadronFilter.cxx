@@ -88,7 +88,7 @@ StatusCode HeavyFlavorHadronFilter::filterEvent() {
     const HepMC::GenEvent* genEvt = *itr;
 
     // Loop over all truth particles in the event
-    for (auto part: *genEvt) {
+    for (const auto& part: *genEvt) {
       /// @todo This could be so much more efficient! And with so much less code duplication...
 
       // b-quarks

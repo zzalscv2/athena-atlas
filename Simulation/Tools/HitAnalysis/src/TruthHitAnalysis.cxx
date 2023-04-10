@@ -246,7 +246,7 @@ StatusCode TruthHitAnalysis::execute() {
       int nvtx = 0;
       int nvtx_sec=0;
 #ifdef HEPMC3
-    for (auto vtx: (*currentGenEventIter)->vertices()) {
+    for (const auto& vtx: (*currentGenEventIter)->vertices()) {
 #else
     for (HepMC::GenEvent::vertex_const_iterator vtxit=(*currentGenEventIter)->vertices_begin(); vtxit!=(*currentGenEventIter)->vertices_end(); ++vtxit) {
     auto vtx=*vtxit;
@@ -321,7 +321,7 @@ StatusCode TruthHitAnalysis::execute() {
 	  else {
 	    m_h_n_generations->Fill(1);
 	  }
-	} //End barcode <200000
+	} //End simulation particle
 	else {
 	  m_h_part_pdgid_sec->Fill(pdg);
 	  ++npart_sec;

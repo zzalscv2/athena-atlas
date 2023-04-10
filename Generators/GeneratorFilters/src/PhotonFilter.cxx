@@ -22,7 +22,7 @@ StatusCode PhotonFilter::filterEvent() {
   int NPhotons = 0;
   for (McEventCollection::const_iterator itr = events()->begin(); itr != events()->end(); ++itr) {
     const HepMC::GenEvent* genEvt = (*itr);
-    for (auto pitr: *genEvt) {
+    for (const auto& pitr: *genEvt) {
       if (pitr->pdg_id() == 22 && pitr->status()==1 &&
           pitr->momentum().perp() >= m_Ptmin &&
           pitr->momentum().perp() <  m_Ptmax &&

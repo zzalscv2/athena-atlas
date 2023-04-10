@@ -41,7 +41,7 @@ StatusCode ParentTwoChildrenFilter::filterEvent() {
   }
   for (McEventCollection::const_iterator itr = events()->begin(); itr != events()->end(); ++itr) {
     const HepMC::GenEvent* genEvt = (*itr);
-    for (auto  pitr:  *genEvt) {
+    for (const auto&  pitr:  *genEvt) {
       int id = pitr->pdg_id();
       if (std::abs(id) != m_PDGParent[0]) continue;
       if (pitr->momentum().perp() < m_PtMinParent) continue;
