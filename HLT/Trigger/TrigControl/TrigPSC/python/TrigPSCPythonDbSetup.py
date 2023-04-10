@@ -28,9 +28,10 @@ if PscConfig.forcePSK:
 ## Set OutputLevel in JobOptionsSvc if "-l" option was used in athenaHLT
 logLevel = PscConfig.optmap['LOGLEVEL'].split(',')[0]
 if logLevel!="INFO":
-   outputLevel = int(locals()[logLevel])
+   import AthenaCommon.Constants
+   outputLevel = getattr(AthenaCommon.Constants, logLevel)
    trigApp.service("MessageSvc", gbl.IMessageSvc).setOutputLevel(outputLevel)
-   trigApp.changeJobProperties('.*', 'OutputLevel', str(locals()[logLevel]))
+   trigApp.changeJobProperties('.*', 'OutputLevel', outputLevel)
 
 ## For running with offline THistSvc from online DB
 if not flags.Trigger.Online.useOnlineTHistSvc:

@@ -154,7 +154,6 @@ float PFEnergyPredictorTool::nnEnergyPrediction(const eflowRecTrack *ptr) const{
     std::array<double, 19> phitotal = getPhiTrackCalo(ptr->getTrackCaloPoints());
 
      const std::array<double, 2> track{ptr->getTrack()->eta(), ptr->getTrack()->phi()};
-     double totalE = 0.0;
 
      for(auto clink : links){
         auto cell = clink->getCluster()->getCluster();
@@ -175,7 +174,6 @@ float PFEnergyPredictorTool::nnEnergyPrediction(const eflowRecTrack *ptr) const{
             double R = std::sqrt(part1 * part1 + part2*part2);
             if(R >= 1.2) continue;
         }
-        totalE += clusterE;
 
         matchedClusters.push_back(clink->getCluster());
      }

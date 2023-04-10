@@ -48,3 +48,7 @@ atlas_add_test( NSWPassivTest
                 SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/testNSWPassivAlg.sh 
                 PROPERTIES TIMEOUT 600
                 POST_EXEC_SCRIPT nopost.sh)
+atlas_add_test( NSWDcsTest
+                SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/testNSWDcsAlg.sh 
+                PROPERTIES TIMEOUT 600
+                POST_EXEC_SCRIPT nopost.sh)

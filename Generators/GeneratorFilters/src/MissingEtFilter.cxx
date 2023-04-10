@@ -22,7 +22,7 @@ StatusCode MissingEtFilter::filterEvent() {
   McEventCollection::const_iterator itr;
   for (itr = events()->begin(); itr != events()->end(); ++itr) {
     const HepMC::GenEvent* genEvt = (*itr);
-    for (auto pitr: *genEvt) {
+    for (const auto& pitr: *genEvt) {
       if (!MC::isGenStable(pitr)) continue;
       // Consider all non-interacting particles
       // We want Missing Transverse Momentum, not "Missing Transverse Energy"

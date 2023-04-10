@@ -358,18 +358,18 @@ egammaSuperClusterBuilderBase::initialize()
   // the + is to account for different L0/L1 phi granularity
   m_extraL0L1PhiSize = m_extraL0L1PhiSizeCells * s_cellPhiSize;
   ATH_MSG_INFO(
-    '\n'
-    << "e/gamma super clusters" << '\n'
-    << "--> Eta Window size for L0/L1/L2 cells : " << '\n'
-    << "Barrel +- " << m_addCellsWindowEtaBarrel << '\n'
-    << "EndCap +- " << m_addCellsWindowEtaEndcap << '\n'
-    << "--> Eta Window size for L3 cells : " << '\n'
-    << "Barrel +- " << (m_addCellsWindowEtaBarrel + m_extraL3EtaSize) << '\n'
-    << "EndCap +- " << (m_addCellsWindowEtaEndcap + m_extraL3EtaSize) << '\n'
-    << " -> Phi window is fully dynamic for L2/L3" << '\n'
-    << " -> L0/L1 cells in phi will be collected in a window" << '\n'
-    << "(L2 neg extend - " << m_extraL0L1PhiSize << " , "
-    << "L2 pos extend + " << m_extraL0L1PhiSize << ")");
+      "e/gamma super clusters"
+      << '\n'
+      << "--> Eta Window size for L0/L1/L2 cells : "
+      << " Barrel +- " << m_addCellsWindowEtaBarrel << " EndCap +- "
+      << m_addCellsWindowEtaEndcap << '\n'
+      << "--> Eta Window size for L3 cells : " << '\n'
+      << " Barrel +- " << (m_addCellsWindowEtaBarrel + m_extraL3EtaSize)
+      << " EndCap +- " << (m_addCellsWindowEtaEndcap + m_extraL3EtaSize)
+      << " -> Phi window is fully dynamic for L2/L3" << '\n'
+      << " -> L0/L1 cells in phi will be collected in a Window : "
+      << "(L2 neg extend - " << m_extraL0L1PhiSize << " , "
+      << "L2 pos extend + " << m_extraL0L1PhiSize << ")");
 
   return StatusCode::SUCCESS;
 }

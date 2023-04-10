@@ -425,7 +425,7 @@ bool MdtDigitizationTool::handleMDTSimhit(const TimedHitPtr<MDTSimHit>& phit, CL
         ATH_MSG_ERROR("MuonGeoManager does not return valid element for given id!");
         return false;
     } else {
-        distRO = element->tubeFrame_localROPos(multilayer, layer, tube).z();
+        distRO = element->tubeFrame_localROPos(DigitId).z();
     }
 
     if (m_useDeformations) {

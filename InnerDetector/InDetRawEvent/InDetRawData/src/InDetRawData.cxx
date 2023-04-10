@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -13,10 +13,6 @@
 
 #include "InDetRawData/InDetRawData.h"
 #include "GaudiKernel/MsgStream.h"
-
-InDetRawData::InDetRawData(): 
-  m_word(0)
-{}
 
 // Constructor with parameters:
 InDetRawData::InDetRawData(const Identifier rdoId, const unsigned int word) :

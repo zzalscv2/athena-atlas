@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 
 Functions to solve dependencies of Jet reco components.
@@ -6,7 +6,7 @@ Functions to solve dependencies of Jet reco components.
 Jet reco components are objects described by classes in JetDefinition.py (including JetDefinition, JetModifier,...)
 and the dependencies of each instance are set as (list of) string aliases refering to other components.
 
-The functions here are scaning reccursively all the aliases, building the corresponging component objects and
+The functions here are scanning recursively all the aliases, building the corresponding component objects and
 collecting them in a JetDefinition.
 
 """
@@ -19,7 +19,7 @@ class _dummyJetDef:
 
 
 def solveDependencies( jetdef0, flags=None ):
-    """ Retrieve reccursively all  dependencies described by str aliases (from modifiers, ghosts, etc..) within jetdef0.
+    """ Retrieve recursively all  dependencies described by str aliases (from modifiers, ghosts, etc..) within jetdef0.
     The aliases are converted in to proper config objects (like JetModifier, JetInputConstit,...) and are collected into
     a cloned version of jetdef0.
     The cloned version is returned and contains all the necessary information to build the actual C++ tools and algs.
@@ -112,7 +112,7 @@ def aliasToInputDef(alias, parentjetdef=None, canBeConstit=True):
     raise Exception(f"Could not match a known jet input definition for '{alias}' ")
     
 def solveConstitDependencies(constitseq, parentjetdef, inplace=False):
-    """Reccursively translate all aliases appearing in the prereqs of constitseq into proper config objects.
+    """Recursively translate all aliases appearing in the prereqs of constitseq into proper config objects.
     All are collected into the parentjetdef for which this JetInputConstitSeq is being configured.
     Then instantiates all aliases for JetConstitModifier
     """
@@ -141,7 +141,7 @@ def solveConstitDependencies(constitseq, parentjetdef, inplace=False):
     return constitseq
 
 def solveInputExternalDependencies(jetinputext, parentjetdef,  inplace=False):
-    """Reccursively translate all aliases appearing in the prereqs of jetinputext into proper config objects.
+    """Recursively translate all aliases appearing in the prereqs of jetinputext into proper config objects.
     All are collected into the parentjetdef for which this JetInputConstitSeq is being configured.
     """
     if not inplace:

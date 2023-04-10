@@ -327,8 +327,10 @@ def DESDMCPOutputCfg(flags, **kwargs):
     # Define contents of the format
     # =============================
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
     kwargs.setdefault("ItemList", container_items)
     result.merge(OutputStreamCfg(flags, **kwargs))
+    result.merge(InfileMetaDataCfg(flags, kwargs.get("streamName"), kwargs.get("AcceptAlgs")))
     return result
 
 

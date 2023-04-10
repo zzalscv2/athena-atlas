@@ -142,6 +142,13 @@ class ATLAS_NOT_THREAD_SAFE EgammaPhysValMonitoringTool
       "AsgElectronLikelihoodTool/ElectronLHSelectorTightNoPix", // Default instance of the tool, of the form ToolClass/ToolName
       "Electron Likelihood Selector Tight" // Description
   };
+
+  // Aux accessor
+  SG::AuxElement::ConstAccessor<char> m_acc_electronLLH_VeryLooseNoPix; // access LLH decision decorators
+  SG::AuxElement::ConstAccessor<char> m_acc_electronLLH_LooseNoPix; // access LLH decision decorators
+  SG::AuxElement::ConstAccessor<char> m_acc_electronLLH_MediumNoPix; // access LLH decision decorators
+  SG::AuxElement::ConstAccessor<char> m_acc_electronLLH_TightNoPix; // access LLH decision decorators
+
 }; 
 
 }

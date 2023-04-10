@@ -53,28 +53,22 @@ namespace Muon {
         ATH_CHECK(m_extrapolator.retrieve());
         ATH_CHECK(m_mdtRotCreator.retrieve());
 
-        if (!m_cscRotCreator.empty()) {
-            if (!m_idHelperSvc->recoCSC())
-                ATH_MSG_WARNING("The current layout does not have any CSC chamber but you gave a CscRotCreator, ignoring it,"
-                                << "  but double-check configuration");
-            else
-                ATH_CHECK(m_cscRotCreator.retrieve());
-        } else {
-            ATH_MSG_INFO("CSC rot creation disabled");
-        }
+        ATH_CHECK(m_key_csc.initialize(!m_key_csc.empty()));
+        ATH_CHECK(m_key_stgc.initialize(!m_key_stgc.empty()));
+        ATH_CHECK(m_key_mm.initialize(!m_key_mm.empty()));
+        ATH_CHECK(m_cscRotCreator.retrieve(DisableTool{m_key_csc.empty()}));       
 
         ATH_CHECK(m_clusRotCreator.retrieve());
         ATH_CHECK(m_pullCalculator.retrieve());
       
         ATH_CHECK(m_key_mdt.initialize());
         /// Check that the layout has CSCs and that the key is actually set
-        ATH_CHECK(m_key_csc.initialize(!m_key_csc.empty() && m_idHelperSvc->recoCSC()));
+        
         ATH_CHECK(m_key_tgc.initialize());
         ATH_CHECK(m_key_rpc.initialize());
         /// Check that the layout has stgcs and that the key is set
-        ATH_CHECK(m_key_stgc.initialize(!m_key_stgc.empty() && m_idHelperSvc->recosTgc()));
         /// Check that the layout has micromegas and that the key is set
-        ATH_CHECK(m_key_mm.initialize(!m_key_mm.empty() && m_idHelperSvc->recoMM()));
+        
         ATH_CHECK(m_chamberGeoKey.initialize());
         return StatusCode::SUCCESS;
     }

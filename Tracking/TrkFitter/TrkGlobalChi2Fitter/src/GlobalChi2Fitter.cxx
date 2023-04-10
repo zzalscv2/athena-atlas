@@ -67,7 +67,6 @@
 #include <Eigen/Dense>
 #include <Eigen/StdVector>
 
-#include <cmath>
 #include <exception>
 #include <memory>
 
@@ -167,7 +166,32 @@ namespace {
     }
   }
 
-}
+#if defined(__GNUC__)
+// We compile this package with optimization, even in debug builds; otherwise,
+// the heavy use of Eigen makes it too slow.  However, from here we may call
+// to out-of-line Eigen code that is linked from other DSOs; in that case,
+// it would not be optimized.  Avoid this by forcing all Eigen code
+// to be inlined here if possible.
+[[gnu::flatten]]
+#endif
+  void
+  calculateJac(Eigen::Matrix<double, 5, 5> &jac,
+               Eigen::Matrix<double, 5, 5> &out,
+               int jmin, int jmax) {
+    out = (jac * out);
+
+    if (jmin > 0) {
+      out.block(0, 0, 4, jmin).setZero();
+    }
+
+    if (jmax < 4) {
+      out.block(0, jmax + 1, 4, 5 - (jmax + 1)).setZero();
+    }
+
+    out(4, 4) = jac(4, 4);
+  }
+
+} //end of anonymous namespace 
 
 namespace Trk {
   GlobalChi2Fitter::GlobalChi2Fitter(
@@ -359,7 +383,6 @@ namespace Trk {
         );
       }
     } else {
-      ATH_MSG_VERBOSE("Updating Calorimeter TSOS in Muon Combined Fit ...");
       m_caloMaterialProvider->getCaloMEOT(*indettrack, *muontrack, calomeots);
     }
 
@@ -2298,7 +2321,6 @@ namespace Trk {
     MeasurementSet hitColl;
 
     // collect MBs from Track (speed: assume this method is used for extending track at end)
-    ATH_MSG_VERBOSE("add MeasurementBase objects from Track to new set");
     DataVector<const TrackStateOnSurface>::const_iterator itStates = inputTrack.trackStateOnSurfaces()->begin();
     DataVector<const TrackStateOnSurface>::const_iterator endState = inputTrack.trackStateOnSurfaces()->end();
 
@@ -2335,7 +2357,6 @@ namespace Trk {
     }
 
     // fit set of MeasurementBase using main method, start with first TrkParameter in inputTrack
-    ATH_MSG_VERBOSE("call myfit(GXFTrajectory,TP,,)");
     std::unique_ptr<Track> track(myfit(ctx, cache, trajectory, *minpar, runOutlier, matEffects));
     cache.m_asymeloss = tmpasymeloss;
     
@@ -3691,7 +3712,6 @@ namespace Trk {
     if (refpar2 == nullptr) {
       return;
     }
-    ATH_MSG_VERBOSE("GlobalChi2Fitter::addMaterial, refpar=" << *refpar2);
     const MeasurementBase *firstmuonhit = nullptr;
     const MeasurementBase *lastmuonhit = nullptr;
     const MeasurementBase *firstidhit =
@@ -5397,10 +5417,6 @@ namespace Trk {
       
       chi2 += res[measno] * (1. / (error[measno] * error[measno])) * res[measno];
 
-      ATH_MSG_VERBOSE(
-        "res[" << measno << "]: " << res[measno] << " error[" << measno << "]: " << 
-        error[measno] << " res/err: " << res[measno] / error[measno]
-      );
     }
     if (!doderiv && (scatwasupdated)) {
       lu_m = a;
@@ -5885,17 +5901,6 @@ namespace Trk {
 
     if (doderiv || weightchanged) {
       lu = a;
-    }
-
-    if (m_printderivs) {
-      for (measno = 0; measno < nmeas; measno++) {
-        for (int k = 0; k < nfitpars; k++) {
-          ATH_MSG_VERBOSE(
-            "deriv[" << measno << "][" << k << "]=" << weight_deriv(measno, k) * error[measno] << 
-            " error: " << error[measno]
-          );
-        }
-      }
     }
 
     if (trajectory.converged()) {
@@ -7372,7 +7377,6 @@ namespace Trk {
 
     auto qual = std::make_unique<FitQuality>(tmptrajectory.chi2(), tmptrajectory.nDOF());
 
-    ATH_MSG_VERBOSE("making Trk::Track...");
     
     TrackInfo info;
     
@@ -7620,7 +7624,6 @@ namespace Trk {
       ) {
         ATH_MSG_DEBUG("Propagation in wrong direction");
         
-        ATH_MSG_VERBOSE("upstream prevtrackpar: " << *prevtrackpar << " current par: " << *rv.m_parameters);
       }
       
       if (rv.m_parameters == nullptr) {
@@ -7700,10 +7703,6 @@ namespace Trk {
         (prevtrackpar->position() - rv.m_parameters->position()).mag() > 5 * mm
       ) {
         ATH_MSG_DEBUG("Propagation in wrong direction");
-        
-        ATH_MSG_VERBOSE("downstream prevtrackpar: " << *prevtrackpar <<
-          " surf: " << prevtrackpar->associatedSurface() << " current par: " << 
-          *rv.m_parameters << " surf: " << rv.m_parameters->associatedSurface());
       }
       
       if (rv.m_parameters == nullptr) {
@@ -7799,32 +7798,6 @@ namespace Trk {
     return surf.createUniqueTrackParameters(
         old[0], old[1], newphi, newtheta, newqoverp, std::nullopt
     );
-  }
-
-#if defined(FLATTEN) && defined(__GNUC__)
-// We compile this package with optimization, even in debug builds; otherwise,
-// the heavy use of Eigen makes it too slow.  However, from here we may call
-// to out-of-line Eigen code that is linked from other DSOs; in that case,
-// it would not be optimized.  Avoid this by forcing all Eigen code
-// to be inlined here if possible.
-__attribute__ ((flatten))
-#endif
-  void GlobalChi2Fitter::calculateJac(
-    Eigen::Matrix<double, 5, 5> & jac,
-    Eigen::Matrix<double, 5, 5> & out,
-    int jmin, int jmax
-  ) {
-    out = (jac * out);
-    
-    if (jmin > 0) {
-      out.block(0, 0, 4, jmin).setZero();
-    }
-
-    if (jmax < 4) {
-      out.block(0, jmax + 1, 4, 5 - (jmax + 1)).setZero();
-    }
-
-    out(4, 4) = jac(4, 4);
   }
 
   void GlobalChi2Fitter::calculateDerivatives(GXFTrajectory & trajectory) { 

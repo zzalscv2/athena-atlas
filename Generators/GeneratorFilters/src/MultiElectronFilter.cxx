@@ -19,7 +19,7 @@ StatusCode MultiElectronFilter::filterEvent() {
   int numElectrons = 0;
   for (itr = events()->begin(); itr != events()->end(); ++itr) {
     const HepMC::GenEvent* genEvt = (*itr);
-    for (auto part: *genEvt) {
+    for (const auto& part: *genEvt) {
       if ( part->status() != 1) continue;
       if ( std::abs(part->pdg_id()) != 11) continue;
 	  if ( (part->momentum().perp() >= m_Ptmin) && std::abs(part->momentum().pseudoRapidity()) <= m_EtaRange) {

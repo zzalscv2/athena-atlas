@@ -296,6 +296,42 @@ Identifier MmIdHelper::multilayerID(const Identifier& moduleID, int multilayer, 
     return Identifier{0};
 }
 /*******************************************************************************/
+int MmIdHelper::getFirstPcbChnl(int stationEta, int pcb) const {
+	int pcbNb = abs(stationEta)==1 ? pcb : pcb-5;
+	return (pcbNb-1)*1024+1;
+}
+Identifier MmIdHelper::pcbID(int stationName, int stationEta, int stationPhi, int multilayer, int gasGap, int pcb) const {
+	int chnl = getFirstPcbChnl(stationEta,  pcb); 
+	return channelID(stationName, stationEta, stationPhi, multilayer, gasGap, chnl);
+}
+Identifier MmIdHelper::pcbID(int stationName, int stationEta, int stationPhi, int multilayer, int gasGap, int pcb, bool& isValid) const {
+	int chnl = getFirstPcbChnl(stationEta,  pcb); 
+	return channelID(stationName, stationEta, stationPhi, multilayer, gasGap, chnl, isValid);
+}
+Identifier MmIdHelper::pcbID(std::string& stationName, int stationEta, int stationPhi, int multilayer, int gasGap, int pcb) const {
+	int chnl = getFirstPcbChnl(stationEta,  pcb); 
+	return channelID(stationName, stationEta, stationPhi, multilayer, gasGap, chnl);
+}
+Identifier MmIdHelper::pcbID(std::string& stationName, int stationEta, int stationPhi, int multilayer, int gasGap, int pcb, bool& isValid) const {
+	int chnl = getFirstPcbChnl(stationEta,  pcb); 
+	return channelID(stationName, stationEta, stationPhi, multilayer, gasGap, chnl, isValid);
+}
+Identifier MmIdHelper::pcbID(const Identifier& channelId, int pcb) const {
+	int chnl = getFirstPcbChnl(stationEta(channelId),  pcb); 
+	return channelID(channelId, multilayer(channelId), gasGap(channelId), chnl);
+}
+Identifier MmIdHelper::pcbID(const Identifier& channelId, int pcb, bool& isValid) const {
+	int chnl = getFirstPcbChnl(stationEta(channelId),  pcb); 
+	return channelID(channelId, multilayer(channelId), gasGap(channelId), chnl, isValid);
+}
+Identifier MmIdHelper::pcbID(const Identifier& channelId) const {
+	int chnl = channel(channelId);
+        // PCB counts from 1-8. PCBs 1-5 are in abs(stationEta)==1 and PCBs 6-8 in abs(stationEta)==2
+        // each PCB consists of 1024 readout strips (strip number in athena is counting from 1 therefore chnl -1)
+	int pcb  = (chnl-1)/1024+1 + (std::abs(stationEta(channelId))==2 ? 5:0); // int division should round downwards
+	return pcbID(channelId, pcb);
+}
+/*******************************************************************************/
 void MmIdHelper::idChannels(const Identifier& id, std::vector<Identifier>& vect) const {
     vect.clear();
     Identifier parent = parentID(id);

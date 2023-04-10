@@ -52,7 +52,11 @@ EgammaPhysValMonitoringTool::EgammaPhysValMonitoringTool( const std::string& typ
   ManagedMonitorToolBase( type, name, parent ),
   m_oElectronValidationPlots(nullptr, "Electron/"),
   m_oPhotonValidationPlots(nullptr, "Photon/"),
-  m_oLRTElectronValidationPlots(nullptr, "LRTElectron/")
+  m_oLRTElectronValidationPlots(nullptr, "LRTElectron/"),
+  m_acc_electronLLH_VeryLooseNoPix("DFCommonElectronsLHVeryLooseNoPix"),
+  m_acc_electronLLH_LooseNoPix("DFCommonElectronsLHLooseNoPix"),
+  m_acc_electronLLH_MediumNoPix("DFCommonElectronsLHMediumNoPix"),
+  m_acc_electronLLH_TightNoPix("DFCommonElectronsLHTightNoPix")
 {    
 }
 
@@ -481,10 +485,23 @@ StatusCode EgammaPhysValMonitoringTool::fillLRTElecHistograms(const xAOD::TruthP
     bool isElecPrompt=false;
 
     if(!(electron->isGoodOQ (xAOD::EgammaParameters::BADCLUSELECTRON))) continue;
-    bool pass_LHVeryLooseNoPix = static_cast<bool>(m_Electron_VeryLooseNoPix_LLHTool->accept(electron));
-    bool pass_LHLooseNoPix = static_cast<bool>(m_Electron_LooseNoPix_LLHTool->accept(electron));
-    bool pass_LHMediumNoPix = static_cast<bool>(m_Electron_MediumNoPix_LLHTool->accept(electron));
-    bool pass_LHTightNoPix = static_cast<bool>(m_Electron_TightNoPix_LLHTool->accept(electron));
+
+    // Retrieve electron ID, compute on-the-fly if decoration is missing (for AODs)
+    bool pass_LHVeryLooseNoPix = false;
+    if (m_acc_electronLLH_VeryLooseNoPix.isAvailable(*electron)) electron->passSelection(pass_LHVeryLooseNoPix, "DFCommonElectronsLHVeryLooseNoPix");
+    else pass_LHVeryLooseNoPix = static_cast<bool>(m_Electron_VeryLooseNoPix_LLHTool->accept(electron));
+
+    bool pass_LHLooseNoPix = false;
+    if (m_acc_electronLLH_LooseNoPix.isAvailable(*electron)) electron->passSelection(pass_LHLooseNoPix, "DFCommonElectronsLHLooseNoPix");
+    else pass_LHLooseNoPix = static_cast<bool>(m_Electron_LooseNoPix_LLHTool->accept(electron));
+
+    bool pass_LHMediumNoPix = false;
+    if (m_acc_electronLLH_MediumNoPix.isAvailable(*electron)) electron->passSelection(pass_LHMediumNoPix, "DFCommonElectronsLHMediumNoPix");
+    else pass_LHMediumNoPix = static_cast<bool>(m_Electron_MediumNoPix_LLHTool->accept(electron));
+
+    bool pass_LHTightNoPix = false;
+    if (m_acc_electronLLH_TightNoPix.isAvailable(*electron)) electron->passSelection(pass_LHTightNoPix, "DFCommonElectronsLHTightNoPix");
+    else pass_LHTightNoPix = static_cast<bool>(m_Electron_TightNoPix_LLHTool->accept(electron));
 
     if(electron->isAvailable <int>("truthType")) {
       MCTruthPartClassifier::ParticleType type = (MCTruthPartClassifier::ParticleType) electron->auxdata<int>("truthType");

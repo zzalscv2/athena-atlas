@@ -332,7 +332,7 @@ namespace MuonCombined {
                     float locR = pars->parameters()[Trk::locR];
                     float errR = pars->covariance() ? Amg::error(*pars->covariance(), Trk::locR) : 0.3;
                     const auto* detEl = mdt->detectorElement();
-                    auto data = m_calibrationDbTool->getCalibration(detEl->collectionHash(), detEl->detectorElementHash());
+                    auto data = m_calibrationDbTool->getCalibration(detEl->identifyHash(), detEl->detectorElementHash());
                     const auto* rtRelation = data.rtRelation;
                     bool out_of_bound_flag = false;
                     float drdt = rtRelation->rt()->driftvelocity(driftTime);
@@ -625,7 +625,7 @@ namespace MuonCombined {
                 float locR = rline;
                 float errR = dc.errorTrack();
                 const auto* detEl = mdt->detectorElement();
-                auto data = m_calibrationDbTool->getCalibration(detEl->collectionHash(), detEl->detectorElementHash());
+                auto data = m_calibrationDbTool->getCalibration(detEl->identifyHash(), detEl->detectorElementHash());
                 const auto* rtRelation = data.rtRelation;
                 bool out_of_bound_flag = false;
                 float drdt = rtRelation->rt()->driftvelocity(driftTime);

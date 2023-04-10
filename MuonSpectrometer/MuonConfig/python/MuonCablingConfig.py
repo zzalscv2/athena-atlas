@@ -106,6 +106,8 @@ def TGCCablingConfigCfg(flags):
 # athena/MuonSpectrometer/MuonCnv/MuonCnvExample/python/MuonCablingConfig.py
 def MDTCablingConfigCfg(flags, name = "MuonMDT_CablingAlg", **kwargs):
     acc = ComponentAccumulator()
+    from AthenaConfiguration.Enums import LHCPeriod
+    kwargs.setdefault("isRun3", flags.GeoModel.Run >= LHCPeriod.Run3 )
     MDTCablingAlg = CompFactory.MuonMDT_CablingAlg(name, **kwargs)
    
     from IOVDbSvc.IOVDbSvcConfig import addFolders

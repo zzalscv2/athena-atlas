@@ -11,11 +11,28 @@
 
 // ISF includes
 #include "ISF_Event/ISFParticle.h"
-#include "ISF_Event/ParticleHelper.h"
 
 // HepMC includes
 #include "AtlasHepMC/SimpleVector.h"
 #include "AtlasHepMC/GenParticle.h"
+#include "AtlasHepMC/GenEvent.h"
+
+static HepMC::GenParticlePtr ParticleHelper_convert( const ISF::ISFParticle &particle) {
+
+  const Amg::Vector3D &mom = particle.momentum();
+  double mass = particle.mass();
+  double energy = sqrt( mom.mag2() + mass*mass);
+  HepMC::FourVector fourMomentum( mom.x(), mom.y(), mom.z(), energy);
+  int status = 1; // stable particle not decayed by EventGenerator
+
+  auto hepParticle = HepMC::newGenParticlePtr( fourMomentum, particle.pdgCode(), status );
+  HepMC::suggest_barcode(hepParticle, particle.barcode() );
+
+  // return a newly created GenParticle
+  return hepParticle;
+}
+
+
 
 ISF::ISFTruthIncident::ISFTruthIncident( ISF::ISFParticle &parent,
                                          const ISFParticleVector& children,
@@ -175,7 +192,7 @@ HepMC::GenParticlePtr ISF::ISFTruthIncident::getHepMCTruthParticle( ISF::ISFPart
 HepMC::GenParticlePtr ISF::ISFTruthIncident::updateHepMCTruthParticle( ISF::ISFParticle& particle,
                                                                        ISF::ISFParticle* parent ) const {
   auto* truthBinding     = particle.getTruthBinding();
-  HepMC::GenParticlePtr hepTruthParticle = ParticleHelper::convert( particle );
+  HepMC::GenParticlePtr hepTruthParticle = ParticleHelper_convert( particle );
 
   if (truthBinding) {
     truthBinding->setTruthParticle(hepTruthParticle);

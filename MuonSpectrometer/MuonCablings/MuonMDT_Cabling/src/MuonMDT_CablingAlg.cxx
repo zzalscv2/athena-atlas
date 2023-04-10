@@ -30,9 +30,7 @@ StatusCode MuonMDT_CablingAlg::initialize() {
     ATH_CHECK(m_readKeyMap.initialize());
     ATH_CHECK(m_writeKey.initialize());
     ATH_CHECK(m_idHelperSvc.retrieve());
-
-    ATH_CHECK(m_muonManagerKey.initialize(!m_mezzJSON.value().empty() || !m_chambJSON.value().empty()));
-    m_isRun3 = m_idHelperSvc->hasMM() || m_idHelperSvc->hasSTgc();
+    ATH_CHECK(m_muonManagerKey.initialize(!m_mezzJSON.value().empty() || !m_chambJSON.value().empty()));    
     return StatusCode::SUCCESS;
 }
 

@@ -47,7 +47,6 @@ namespace Muon {
          */
         MotherDaughter truthTrajectoryCuts(const HepMC::ConstGenVertexPtr& vtx) const;
 
-        // mutable bool m_isDecayIntoTwoMuons; // Really don't think this does anything? EJWM.
     };
 
 }  // namespace Muon

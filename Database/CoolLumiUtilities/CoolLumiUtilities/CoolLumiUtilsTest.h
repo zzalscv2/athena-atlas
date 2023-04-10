@@ -18,8 +18,6 @@ class MyTestClass {
 
 };
 
-//#include "Python.h"
-//#include <boost/python.hpp>
 #include <vector>
 
 class CoolLumiUtilsTestObj {
@@ -31,12 +29,10 @@ class CoolLumiUtilsTestObj {
   float getValue() const;
 
   void append(float);
-  //boost::python::list getList();
   const std::vector<float>& getList();
 
  private:
   float m_value;
-  //boost::python::list m_list;
   std::vector<float> m_list;
 };
 

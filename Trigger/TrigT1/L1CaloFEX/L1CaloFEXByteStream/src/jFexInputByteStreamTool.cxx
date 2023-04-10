@@ -56,6 +56,15 @@ StatusCode jFexInputByteStreamTool::initialize() {
     //Since the mapping is constant in everyentry, better to be read in the initialize function
     //Reading from CVMFS Fiber mapping
     ATH_CHECK(ReadfromFile(PathResolver::find_calib_file(m_FiberMapping)));
+    
+    
+    // Initialize monitoring tool if not empty
+    if (!m_monTool.empty()) {
+        ATH_CHECK(m_monTool.retrieve());
+        ATH_MSG_INFO("Logging errors to " << m_monTool.name() << " monitoring tool");
+        m_UseMonitoring = true;
+    }
+
 
     return StatusCode::SUCCESS;
 }
@@ -96,7 +105,15 @@ StatusCode jFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
         while(READ_WORDS){
             
             if( trailers_pos < jBits::jFEX2ROD_WORDS ){
-                ATH_MSG_WARNING("There are not enough words ("<< trailers_pos <<") for the jFEX to ROD trailer decoder. Expected at least " << jBits::jFEX2ROD_WORDS<<". Skipping this FPGA(?)");
+                std::stringstream sdetail;
+                sdetail  << "There are not enough words ("<< trailers_pos <<") for the jFEX to ROD trailer decoder. Expected at least " << jBits::jFEX2ROD_WORDS<<". Skipping this FPGA(?)" ;
+                std::stringstream slocation;
+                slocation  << "0x"<< std::hex << rob->rob_source_id();
+                std::stringstream stitle;
+                stitle  << "Invalid trailer words" ;
+                printError(slocation.str(),stitle.str(),m_WARNING,sdetail.str());                
+
+
                 READ_WORDS = false;
                 continue;
             }
@@ -106,8 +123,15 @@ StatusCode jFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
                 ATH_MSG_DEBUG("  Not full readout activated (" << payload << "). Data blocks/channels expected (" << jBits::DATA_BLOCKS <<")"<<C.END);
             }
             
-            if(payload % jBits::DATA_WORDS_PER_BLOCK != 0){
-                ATH_MSG_ERROR(C.B_RED<<"  Payload number (" << payload << ") not a multiple of data words per channel. Expected: " << jBits::DATA_WORDS_PER_BLOCK <<C.END);
+            if(payload % jBits::DATA_WORDS_PER_BLOCK != 0) {
+                std::stringstream sdetail;
+                sdetail  << "  Payload number (" << payload << ") not a multiple of data words per channel. Expected: " << jBits::DATA_WORDS_PER_BLOCK ;
+                std::stringstream slocation;
+                slocation  << "jFEX "<< jfex << " FPGA "<< fpga << " in 0x"<< std::hex << rob->rob_source_id();
+                std::stringstream stitle;
+                stitle  << "Invalid Data Blocks" ;
+                printError(slocation.str(),stitle.str(),m_DEBUG,sdetail.str());
+
                 READ_WORDS = false;
                 continue;
             }
@@ -118,9 +142,21 @@ StatusCode jFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
             // Number of iterations that must be done. It is divisible otherwise it throws out an error (Line 108)
             unsigned int Max_iter = payload/jBits::DATA_WORDS_PER_BLOCK;
             
-            if(Max_iter>trailers_pos){
-               ATH_MSG_ERROR(C.B_RED<<"Block size error in fragment 0x"<< std::hex << rob->rob_source_id() << std::dec<<". Words available: " << trailers_pos << ". Number of words wanted to decode: " << Max_iter <<C.END);
-               return StatusCode::FAILURE;
+            if(Max_iter>trailers_pos) {
+                std::stringstream sdetail;
+                sdetail  << "Block size error in fragment 0x"<< std::hex << rob->rob_source_id() << std::dec<<". Words available: " << trailers_pos << ". Number of words wanted to decode: " << Max_iter ;
+                std::stringstream slocation;
+                slocation  << "jFEX "<< jfex << " FPGA "<< fpga << " in 0x"<< std::hex << rob->rob_source_id();
+                std::stringstream stitle;
+                stitle  << "Block Size Error" ;
+                
+                //Currently under investigation... 
+                printError(slocation.str(),stitle.str(),m_DEBUG,sdetail.str());
+                return StatusCode::SUCCESS;
+                
+                //DO NOT REMOVE, once fixed it should return and error and FAILURE
+                //printError(slocation.str(),stitle.str(),m_ERROR,sdetail.str());
+                //return StatusCode::FAILURE;
             }
             
             for (unsigned int iblock = 0; iblock < Max_iter; iblock++){
@@ -347,3 +383,32 @@ constexpr unsigned int jFexInputByteStreamTool::mapIndex(unsigned int jfex, unsi
   return (jfex << 16) | (fpga << 12) | (channel << 4) | tower;
 }
 
+void  jFexInputByteStreamTool::printError(const std::string& location, const std::string& title, const uint8_t type, const std::string& detail) const{
+    
+    if(m_UseMonitoring){
+        Monitored::Group(m_monTool,
+                     Monitored::Scalar("jfexDecoderErrorLocation",location.empty() ? std::string("UNKNOWN") : location),
+                     Monitored::Scalar("jfexDecoderErrorTitle"   ,title.empty()    ? std::string("UNKNOWN") : title)
+                     );
+    }
+    else {
+
+        switch(type) {
+        case m_DEBUG:
+            ATH_MSG_DEBUG(detail);
+            break;
+        case m_WARNING:
+            ATH_MSG_WARNING(detail);
+            break;
+        case m_ERROR:
+            ATH_MSG_ERROR(detail);
+            break;
+        case m_FATAL:
+            ATH_MSG_FATAL(detail);
+            break;
+        default:
+            ATH_MSG_DEBUG("No type defined CHECK!. -> " << detail);
+        }
+
+    }
+}

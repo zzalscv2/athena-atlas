@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ALIGNCONDATHTEST
@@ -30,12 +30,12 @@ private:
 
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
-    bool m_alinePrint;
-    bool m_blinePrint;
-    bool m_mdtPrint;
-    bool m_rpcPrint;
-    bool m_tgcPrint;
-    bool m_cscPrint;
+    Gaudi::Property<bool> m_alinePrint{this, "ALinePrint", true};
+    Gaudi::Property<bool> m_blinePrint{this, "BLinePrint", true};
+    Gaudi::Property<bool> m_mdtPrint{this, "MdtPrint", true};
+    Gaudi::Property<bool> m_rpcPrint{this, "RpcPrint", true};
+    Gaudi::Property<bool> m_tgcPrint{this, "TgcPrint", true};
+    Gaudi::Property<bool> m_cscPrint{this, "CscPrint", true};
 
     StatusCode checkALines(const MuonGM::MuonDetectorManager* manager, std::ofstream& fout);
     StatusCode checkBLines(const MuonGM::MuonDetectorManager* manager, std::ofstream& fout);

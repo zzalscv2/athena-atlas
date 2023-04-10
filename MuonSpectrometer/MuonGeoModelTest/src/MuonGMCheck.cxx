@@ -1230,7 +1230,6 @@ void MuonGMCheck::checkreadoutmdtgeo() {
                     Identifier chid;
                     for (int tl = 1; tl <= mdt->getNLayers(); tl++) {
                         fout << " A new tube layer " << tl << std::endl;
-                        int gotTube(0);
                         int tubeStep = 1;
                         if (m_check_first_last == 1) tubeStep = mdt->getNtubesperlayer() - 1;
                         if (m_check_first_last == 2) tubeStep = int(mdt->getNtubesperlayer() / 2.);
@@ -1256,8 +1255,6 @@ void MuonGMCheck::checkreadoutmdtgeo() {
                                     continue;
                                 }
                             }
-
-                            gotTube = tube;
                             chid = m_idHelperSvc->mdtIdHelper().channelID(idp, mdt->getMultilayer(), tl, tube);
                             fout << m_idHelperSvc->mdtIdHelper().show_to_string(chid) << " wire global pos " << mdt->tubePos(chid);
                             fout << " Tube length is " << mdt->tubeLength(chid);
@@ -1271,7 +1268,7 @@ void MuonGMCheck::checkreadoutmdtgeo() {
                             if (m_check_surfaces) {}
                             // check B-lines
                             if (m_check_blines) {
-                                double zRO = mdt->signedRODistanceFromTubeCentre(mdt->getMultilayer(), tl, tube);
+                                double zRO = mdt->signedRODistanceFromTubeCentre(chid);
                                 double halfTubeL = mdt->getTubeLength(tl, tube) / 2.;
 
                                 double z1000RO = 1000.;
@@ -1405,7 +1402,7 @@ void MuonGMCheck::checkreadoutmdtgeo() {
                             // temporary
                             Amg::Vector3D myPloc = Amg::Vector3D(0., 0., 10.);  //
                             Amg::Vector3D myP = mdt->localToGlobalCoords(myPloc, chid);
-                            double distRO = mdt->tubeFrame_localROPos(mdt->getMultilayer(), tl, gotTube).z();
+                            double distRO = mdt->tubeFrame_localROPos(chid).z();
                             double distToRO = mdt->distanceFromRO(myP, chid);
                             double propagationDistance = distToRO - mdt->RODistanceFromTubeCentre(chid);
                             double position_along_wire = myPloc.z();

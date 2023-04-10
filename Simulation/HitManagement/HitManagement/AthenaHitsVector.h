@@ -27,6 +27,13 @@
 #include "GaudiKernel/MsgStream.h"
 #endif
 
+namespace AthHitVec{
+  enum OwnershipPolicy {
+    OWN_ELEMENTS = 0,  ///< this data object owns its elements
+    VIEW_ELEMENTS = 1  ///< this data object is a view, does not own its elmts
+  };
+}
+
 //
 template <typename T>
 class AthenaHitsVector {
@@ -49,18 +56,13 @@ class AthenaHitsVector {
   };
   using const_iterator =
       boost::transform_iterator<make_const, typename CONT::const_iterator>;
-
-  enum OwnershipPolicy {
-    OWN_ELEMENTS = 0,  ///< this data object owns its elements
-    VIEW_ELEMENTS = 1  ///< this data object is a view, does not own its elmts
-  };
 #ifdef __CINT__
   // default constructor for rootcint
   AthenaHitsVector() {}
 #else
   // methods not provided to rootcint
   AthenaHitsVector(const std::string& collectionName = "DefaultCollectionName",
-                   OwnershipPolicy ownPolicy = OWN_ELEMENTS) {
+                   AthHitVec::OwnershipPolicy ownPolicy = AthHitVec::OWN_ELEMENTS) {
 
     m_name = collectionName;
     m_ownPolicy = ownPolicy;
@@ -73,16 +75,16 @@ class AthenaHitsVector {
 
   void Clear() {
     // delete pointers if we own the elements
-    if (m_ownPolicy == OWN_ELEMENTS) {
+    if (m_ownPolicy == AthHitVec::OWN_ELEMENTS) {
       for (unsigned int i = 0; i < m_hitvector.size(); i++)
         delete m_hitvector[i];
     }
     m_hitvector.clear();
   }
 
-  void Clear(OwnershipPolicy ownPolicy) {
+  void Clear(AthHitVec::OwnershipPolicy ownPolicy) {
     // delete pointers if we own the elements
-    if (m_ownPolicy == OWN_ELEMENTS) {
+    if (m_ownPolicy == AthHitVec::OWN_ELEMENTS) {
       for (unsigned int i = 0; i < m_hitvector.size(); i++)
         delete m_hitvector[i];
     }
@@ -95,7 +97,7 @@ class AthenaHitsVector {
 #endif  // __CINT__
 
   /// copy constructor makes deep copy of elements,
-  /// as by default the container is OWN_ELEMENTS
+  /// as by default the container is AthHitVec::OWN_ELEMENTS
   explicit AthenaHitsVector(const AthenaHitsVector<T>& rhs) {
     m_hitvector.reserve(rhs.m_hitvector.size());
     const_iterator i(rhs.begin()), e(rhs.end());
@@ -106,11 +108,11 @@ class AthenaHitsVector {
   }
 
   /// assignment deletes old elements and copies the new ones
-  /// deep copy if OWN_ELEMENTS shallow copy if VIEW_ELEMENTS
+  /// deep copy if AthHitVec::OWN_ELEMENTS shallow copy if VIEW_ELEMENTS
   AthenaHitsVector<T>& operator=(const AthenaHitsVector<T>& rhs) {
     if (this != &rhs) {
       this->Clear();
-      if (this->m_ownPolicy == OWN_ELEMENTS) {
+      if (this->m_ownPolicy == AthHitVec::OWN_ELEMENTS) {
         m_hitvector.reserve(rhs.m_hitvector.size());
         const_iterator i(rhs.begin()), e(rhs.end());
         while (i != e) {
@@ -156,7 +158,7 @@ class AthenaHitsVector {
 
   void resize(size_type sz) {
     if (sz < size()) {
-      if (m_ownPolicy == OWN_ELEMENTS) {
+      if (m_ownPolicy == AthHitVec::OWN_ELEMENTS) {
         iterator i(m_hitvector.begin() + sz), e(m_hitvector.end());
         while (i != e) {
           delete *i++;
@@ -169,7 +171,7 @@ class AthenaHitsVector {
   }
 
   void clear() {
-    if (m_ownPolicy == OWN_ELEMENTS) {
+    if (m_ownPolicy == AthHitVec::OWN_ELEMENTS) {
       for (unsigned int i = 0; i < m_hitvector.size(); i++)
         delete m_hitvector[i];
     }
@@ -181,7 +183,7 @@ class AthenaHitsVector {
  protected:
   std::string m_name;
   std::vector<T*> m_hitvector;
-  OwnershipPolicy m_ownPolicy = OWN_ELEMENTS;
+  AthHitVec::OwnershipPolicy m_ownPolicy = AthHitVec::OWN_ELEMENTS;
 
  public:
   // Used to ensure that the DVLInfo gets registered

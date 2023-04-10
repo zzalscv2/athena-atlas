@@ -9,8 +9,6 @@
 
 LArfSampl2Ntuple::LArfSampl2Ntuple(const std::string& name, ISvcLocator* pSvcLocator): 
   LArCond2NtupleBase(name, pSvcLocator) { 
-  declareProperty("ContainerKey",m_contKey);
-
   m_ntTitle="fSampl";
   m_ntpath="/NTUPLES/FILE1/FSAMPL";
 
@@ -19,15 +17,22 @@ LArfSampl2Ntuple::LArfSampl2Ntuple(const std::string& name, ISvcLocator* pSvcLoc
 LArfSampl2Ntuple::~LArfSampl2Ntuple() 
 {}
 
+StatusCode LArfSampl2Ntuple::initialize(){
+  ATH_CHECK(m_contKey.initialize());
+  return LArCond2NtupleBase::initialize();
+}
+
 StatusCode LArfSampl2Ntuple::stop() {
-  const ILArfSampl* larfSampl = NULL;
-  StatusCode sc;
-  sc=m_detStore->retrieve(larfSampl,m_contKey);
-  if (sc!=StatusCode::SUCCESS) {
-     ATH_MSG_ERROR( "Unable to retrieve ILArNoise with key " 
-               << m_contKey << " from DetectorStore" );
-     return StatusCode::FAILURE;
+
+  // For compatibility with existing configurations, look in the detector
+  // store first, then in conditions store
+  const ILArfSampl* larfSampl = detStore()->tryConstRetrieve<ILArfSampl>(m_contKey.key());
+  if (!larfSampl){
+    SG::ReadCondHandle<ILArfSampl> fsamplHdl(m_contKey);
+    larfSampl=*fsamplHdl;
   }
+
+  StatusCode sc;
 
  NTuple::Item<long> cellIndex;
  NTuple::Item<float> fsampl;

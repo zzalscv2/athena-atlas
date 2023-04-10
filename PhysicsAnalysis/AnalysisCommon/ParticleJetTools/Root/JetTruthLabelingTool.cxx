@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ParticleJetTools/JetTruthLabelingTool.h"
@@ -288,16 +288,21 @@ StatusCode JetTruthLabelingTool::labelRecoJets(const xAOD::JetContainer& jets ) 
     /// Find matched truth jet
     float dRmin = 9999;
     const xAOD::Jet* matchTruthJet = nullptr;
-    for ( const xAOD::Jet* truthJet : *truthJets ) {
-      float dR = jet->p4().DeltaR( truthJet->p4() );
-      /// If parent jet has been retrieved, calculate dR w.r.t. it instead
-      if ( parent ) dR = parent->p4().DeltaR( truthJet->p4() );
-      /// If m_dRTruthJet < 0, the closest truth jet is used as matched jet. Otherwise, only match if dR < m_dRTruthJet
-      if ( m_dRTruthJet < 0 || dR < m_dRTruthJet ) { 
-        if ( dR < dRmin ) {
-          dRmin = dR;
-          matchTruthJet = truthJet;
-        }
+
+    // Ensure that the reco jet has at least one constituent
+    // (and thus a well-defined four-vector)
+    if(jet->numConstituents() > 0){
+      for ( const xAOD::Jet* truthJet : *truthJets ) {
+	float dR = jet->p4().DeltaR( truthJet->p4() );
+	/// If parent jet has been retrieved, calculate dR w.r.t. it instead
+	if ( parent ) dR = parent->p4().DeltaR( truthJet->p4() );
+	/// If m_dRTruthJet < 0, the closest truth jet is used as matched jet. Otherwise, only match if dR < m_dRTruthJet
+	if ( m_dRTruthJet < 0 || dR < m_dRTruthJet ) {
+	  if ( dR < dRmin ) {
+	    dRmin = dR;
+	    matchTruthJet = truthJet;
+	  }
+	}
       }
     }
 

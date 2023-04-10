@@ -5,9 +5,9 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from libpyeformat_helper import SourceIdentifier, SubDetector
 
-
 def eFexByteStreamToolCfg(flags, name, *, writeBS=False, TOBs=True, xTOBs=False, multiSlice=False, decodeInputs=False):
   acc = ComponentAccumulator()  
+
   tool = CompFactory.eFexByteStreamTool(name)
 
   if writeBS:
@@ -101,6 +101,24 @@ def jFexRoiByteStreamToolCfg(flags, name, *, writeBS=False, xTOBs=False):
     tool.jEMRoIContainerWriteKey = "L1_jFexFwdElxRoI" if xTOBs else "L1_jFexFwdElRoI"
     tool.jTERoIContainerWriteKey = "L1_jFexSumETxRoI" if xTOBs else "L1_jFexSumETRoI"
     tool.jXERoIContainerWriteKey = "L1_jFexMETxRoI"   if xTOBs else "L1_jFexMETRoI"
+    
+  if flags.Output.HISTFileName != '' or flags.Trigger.doHLT:
+    if flags.Trigger.doHLT:
+      from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
+      monTool = GenericMonitoringTool(flags,'MonTool',HistPath = f'HLTFramework/L1BSConverters/{name}')
+      topDir = "EXPERT"
+    else:
+      # if used in offline reconstruction respect DQ convention (ATR-26371)
+      from AthenaMonitoring import AthMonitorCfgHelper
+      helper = AthMonitorCfgHelper(flags, 'HLTFramework')
+      monTool = helper.addGroup(None, f'{name}MonTool', f'/HLT/HLTFramework/L1BSConverters/{name}')
+      topDir = None
+    monTool.defineHistogram('jfexDecoderErrorTitle,jfexDecoderErrorLocation;errors', path=topDir, type='TH2I',
+                            title='Decoder Errors;Type;Location',
+                            xbins=1, xmin=0, xmax=1, xlabels=["UNKNOWN"],
+                            ybins=1, ymin=0, ymax=1, ylabels=["UNKNOWN"],
+                            opt=['kCanRebin'])
+    tool.MonTool = monTool
 
   acc.setPrivateTools(tool)
   return acc
@@ -185,6 +203,25 @@ def jFexInputByteStreamToolCfg(flags, name, *, writeBS=False):
     tool.jTowersReadKey   =""
 
     tool.jTowersWriteKey  = "L1_jFexDataTowers"
+
+  if flags.Output.HISTFileName != '' or flags.Trigger.doHLT:
+    if flags.Trigger.doHLT:
+      from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
+      monTool = GenericMonitoringTool(flags,'MonTool',HistPath = f'HLTFramework/L1BSConverters/{name}')
+      topDir = "EXPERT"
+    else:
+      # if used in offline reconstruction respect DQ convention (ATR-26371)
+      from AthenaMonitoring import AthMonitorCfgHelper
+      helper = AthMonitorCfgHelper(flags, 'HLTFramework')
+      monTool = helper.addGroup(None, f'{name}MonTool', f'/HLT/HLTFramework/L1BSConverters/{name}')
+      topDir = None
+    monTool.defineHistogram('jfexDecoderErrorTitle,jfexDecoderErrorLocation;errors', path=topDir, type='TH2I',
+                            title='Decoder Errors;Type;Location',
+                            xbins=1, xmin=0, xmax=1, xlabels=["UNKNOWN"],
+                            ybins=1, ymin=0, ymax=1, ylabels=["UNKNOWN"],
+                            opt=['kCanRebin'])
+    tool.MonTool = monTool    
+
 
   acc.setPrivateTools(tool)
   return acc

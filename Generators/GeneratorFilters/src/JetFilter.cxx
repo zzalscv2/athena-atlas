@@ -78,7 +78,7 @@ StatusCode JetFilter::filterEvent() {
 
   // Loop over all particles in the event and build up the grid
   const HepMC::GenEvent* genEvt = event();
-  for (auto part: *genEvt) {
+  for (const auto& part: *genEvt) {
     /// @todo Use MCPID to identify leptons
     // if ( part->status() == 1 ) {// stables only
       if(MC::isGenStable(part)) { //stables only

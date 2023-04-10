@@ -28,7 +28,7 @@ StatusCode ParticleFilter::filterEvent() {
   int nParts = 0;
   for (McEventCollection::const_iterator itr = events()->begin(); itr != events()->end(); ++itr) {
     const HepMC::GenEvent* genEvt = (*itr);
-    for (auto pitr: *genEvt) {
+    for (const auto& pitr: *genEvt) {
       if (std::abs(pitr->pdg_id()) != m_PDGID || !(m_StatusReq == -1 || pitr->status() == m_StatusReq)) continue;
       if (pitr->momentum().perp() >= m_Ptmin && std::abs(pitr->momentum().pseudoRapidity()) <= m_EtaRange && pitr->momentum().e() <= m_EnergyRange) {
       if ((!m_Exclusive)&&(m_MinParts == 1))  return StatusCode::SUCCESS; // Found at least one particle and we have an inclusive requirement

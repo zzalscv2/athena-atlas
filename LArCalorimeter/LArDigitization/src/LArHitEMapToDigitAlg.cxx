@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 #include "LArHitEMapToDigitAlg.h"
 #include "AthenaKernel/ITriggerTime.h"
@@ -137,17 +137,17 @@ StatusCode LArHitEMapToDigitAlg::execute(const EventContext& context) const {
       if (!m_Windows || hitlist.inWindows()) {
         TimeE = &(hitlist.getData());
         if(m_doDigiTruth) {
-          auto& hitlist_DigiHSTruth=hitmapPtr_DigiHSTruth->GetCell(it);
+          const auto& hitlist_DigiHSTruth=hitmapPtr_DigiHSTruth->GetCell(it);
           TimeE_DigiHSTruth = &(hitlist_DigiHSTruth.getData());
         }
 
-        if (TimeE->size() > 0 || m_NoiseOnOff || m_RndmEvtOverlay) {
+        if (!TimeE->empty() || m_NoiseOnOff || m_RndmEvtOverlay) {
            const Identifier cellID=m_calocell_id->cell_id(IdentifierHash(it));
            HWIdentifier ch_id = cabling->createSignalChannelIDFromHash(IdentifierHash(it));
            HWIdentifier febId = m_laronline_id->feb_Id(ch_id);
            bool missing=!(badFebs->status(febId).good());
            if (!missing) {
-             const LArDigit * digit = 0 ;
+             const LArDigit * digit = nullptr ;
              if(m_RndmEvtOverlay) digit = hitmapPtr->GetDigit(it);
              // MakeDigit called if in no overlay mode or
              // if in overlay mode and random digit exists
@@ -576,7 +576,7 @@ StatusCode LArHitEMapToDigitAlg::MakeDigit(const EventContext& ctx, const Identi
 //
 // ...... create the LArDigit and push it into the Digit container ..................
 //
-  Digit = new LArDigit(ch_id,igain,AdcSample);
+  Digit = new LArDigit(ch_id,igain,std::move(AdcSample));
 
 
   if(m_doDigiTruth && createDigit_DigiHSTruth){
@@ -587,7 +587,7 @@ StatusCode LArHitEMapToDigitAlg::MakeDigit(const EventContext& ctx, const Identi
       if(Samples_DigiHSTruth[i] != 0) createDigit_DigiHSTruth = true;
     }
 
-    Digit_DigiHSTruth = new LArDigit(ch_id,igain,AdcSample_DigiHSTruth);
+    Digit_DigiHSTruth = new LArDigit(ch_id,igain,std::move(AdcSample_DigiHSTruth));
   }
 
 

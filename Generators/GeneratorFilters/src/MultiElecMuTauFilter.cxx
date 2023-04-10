@@ -31,7 +31,7 @@ StatusCode MultiElecMuTauFilter::filterEvent() {
   McEventCollection::const_iterator itr;
   for (itr = events()->begin(); itr != events()->end(); ++itr) {
     const HepMC::GenEvent* genEvt = *itr;
-    for (auto pitr: *genEvt) {
+    for (const auto& pitr: *genEvt) {
       // Electrons and muons
       if (pitr->status() == 1 && (std::abs(pitr->pdg_id()) == 11 || std::abs(pitr->pdg_id()) == 13)) {
         if (pitr->momentum().perp() >= m_minPt && std::abs(pitr->momentum().pseudoRapidity()) <= m_maxEta) {

@@ -28,9 +28,6 @@
 #include "boost/tokenizer.hpp"
 
 #include "boost/algorithm/string.hpp"
-//#include "boost/algorithm/string/predicate.hpp"
-//#include "boost/algorithm/string/replace.hpp"
-
 #include <boost/regex.hpp>
 
 // ROOT includes

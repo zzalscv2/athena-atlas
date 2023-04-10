@@ -304,16 +304,22 @@ bool TruthParticleFilterTool::isFromTau(const HepMC::ConstGenParticlePtr& part) 
   // Simple loop catch
   if (prod==part->end_vertex()) return false;
 
+#ifdef HEPMC3
+  // More complex loop catch
+  if ( find(m_barcode_trace.begin(),m_barcode_trace.end(),prod->id()) != m_barcode_trace.end()){
+    ATH_MSG_DEBUG( "Found a loop (a la Sherpa sample).  Backing out." );
+    return false;
+  }
+  m_barcode_trace.push_back(prod->id());
+   auto itrParent=prod->particles_in().begin();
+   auto endParent=prod->particles_in().end();
+#else
   // More complex loop catch
   if ( find(m_barcode_trace.begin(),m_barcode_trace.end(),HepMC::barcode(prod)) != m_barcode_trace.end()){
     ATH_MSG_DEBUG( "Found a loop (a la Sherpa sample).  Backing out." );
     return false;
   }
   m_barcode_trace.push_back(HepMC::barcode(prod));
-#ifdef HEPMC3
-   auto itrParent=prod->particles_in().begin();
-   auto endParent=prod->particles_in().end();
-#else
   auto itrParent = prod->particles_in_const_begin();
   auto endParent = prod->particles_in_const_end();
 #endif

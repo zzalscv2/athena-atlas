@@ -14,6 +14,7 @@ from JetRecConfig import StandardJetContext
 from . import TriggerJetMods
 from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
 
+import copy
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
@@ -40,6 +41,17 @@ def jetChainParts(chainParts):
 ##########################################################################################
 ### --- General reco dict handling --- 
 
+# Translate the reco dict to a string for suffixing etc
+def jetRecoDictToString(jetRecoDict):
+    if jetRecoDict['ionopt']=='ion':
+        # Unique settings for heavy ions
+        # other values will be default
+        return "a4_ion"
+    strtemp = "{recoAlg}_{constitMod}{constitType}_{clusterCalib}_{jetCalib}"
+    if doTracking(jetRecoDict):
+        strtemp += "_{trkopt}"
+    return strtemp.format(**jetRecoDict)
+
 # Extract the jet reco dict from the chainDict
 def extractRecoDict(chainParts):
     # interpret the reco configuration only
@@ -60,14 +72,9 @@ def extractRecoDict(chainParts):
     if recoDict['jetCalib'] == "default":
         recoDict['jetCalib'] = getJetCalibDefaultString(recoDict)
 
-    return recoDict
+    recoDict['jetDefStr'] = jetRecoDictToString(recoDict)
 
-# Translate the reco dict to a string for suffixing etc
-def jetRecoDictToString(jetRecoDict):
-    strtemp = "{recoAlg}_{constitMod}{constitType}_{clusterCalib}_{jetCalib}"
-    if doTracking(jetRecoDict):
-        strtemp += "_{trkopt}"
-    return strtemp.format(**jetRecoDict)
+    return recoDict
 
 # Inverse of the above, essentially only for CF tests
 def jetRecoDictFromString(jet_def_string):
@@ -90,8 +97,17 @@ def jetRecoDictFromString(jet_def_string):
     if jetRecoDict['jetCalib'] == "default":
         jetRecoDict['jetCalib'] = getJetCalibDefaultString(jetRecoDict)
 
+    jetRecoDict['jetDefStr'] = jetRecoDictToString(jetRecoDict)
+
     return jetRecoDict
 
+# Assist with grooming and reclustering workflows, we need to
+# ensure that the name is updated consistently
+def cloneAndUpdateJetRecoDict(jetRecoDict,**kwargs):
+    newJetRecoDict = copy.copy(jetRecoDict)
+    newJetRecoDict.update(dict(**kwargs))
+    newJetRecoDict["jetDefStr"] = jetRecoDictToString(newJetRecoDict)
+    return newJetRecoDict
 
 ##########################################################################################
 ### --- General helpers ---

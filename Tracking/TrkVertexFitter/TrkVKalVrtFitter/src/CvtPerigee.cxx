@@ -11,10 +11,6 @@
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "TrkVKalVrtFitter/VKalVrtAtlas.h"
 #include "TrkVKalVrtCore/TrkVKalVrtCore.h"
-//-------------------------------------------------
-// Other stuff
-//----
-#include "TrkTrack/Track.h"
 
 #include <iostream>
 
@@ -23,17 +19,15 @@ namespace Trk{
   extern const vkalPropagator  myPropagator;
 
   //--------------------------------------------------------------------
-  //  Extract TrkTracks
   //
   // Use perigee ONLY!!!
   // Then in normal conditions reference frame is always (0,0,0)
   //
 
-
   StatusCode
-  TrkVKalVrtFitter::CvtTrkTrack(const std::vector<const Trk::Track*>& InpTrk,
-				int& ntrk,
-				State& state) const
+  TrkVKalVrtFitter::CvtPerigee(const std::vector<const Perigee*>& InpPerigee,
+			       int& ntrk,
+			       State& state) const
   {
 
     double tmp_refFrameX = 0, tmp_refFrameY = 0, tmp_refFrameZ = 0;
@@ -50,8 +44,7 @@ namespace Trk{
     //
     int counter =0;
     state.m_trkControl.clear();
-    for (const auto& i_ntrk : InpTrk) {
-      const  Perigee* mPer = (*i_ntrk).perigeeParameters();
+    for (const auto& mPer : InpPerigee) {
       if( mPer == nullptr ){ continue; }
 
       // Global position of perigee point
@@ -93,11 +86,8 @@ namespace Trk{
     //
     //  Common reference frame is ready. Start extraction of parameters for fit.
     //
-
     double fx = 0., fy = 0., BMAG_FIXED = 0.;
-
-    for (const auto& i_ntrk : InpTrk) {
-      const  Perigee* mPer = (*i_ntrk).perigeeParameters();
+    for (const auto& mPer : InpPerigee) {
       if(mPer == nullptr){ continue; }
       AmgVector(5) VectPerig = mPer->parameters();
       // Global position of perigee point
@@ -168,38 +158,20 @@ namespace Trk{
     return StatusCode::SUCCESS;
   }
 
-
-
-  //  Create Trk::Track with perigee defined at vertex
-  //
-  Track* TrkVKalVrtFitter::CreateTrkTrack(const std::vector<double>& VKPerigee,
-					  const std::vector<double>& VKCov,
-					  IVKalState& istate) const
+  std::unique_ptr<Perigee>
+  TrkVKalVrtFitter::CreatePerigee(const std::vector<double>& VKPerigee,
+				  const std::vector<double>& VKCov,
+				  IVKalState& istate) const
   {
     assert(dynamic_cast<const State*> (&istate)!=nullptr);
     State& state = static_cast<State&> (istate);
-    auto perigee{CreatePerigee(0., 0., 0., VKPerigee, VKCov, state)};
-				      
-    auto fitQuality = std::make_unique<Trk::FitQuality>(10.,1);
-    auto trackStateOnSurfaces = DataVector<const Trk::TrackStateOnSurface>();
-    std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern(0);
-    typePattern.set(Trk::TrackStateOnSurface::Perigee);
-    const Trk::TrackStateOnSurface* trackSOS =
-      new Trk::TrackStateOnSurface(nullptr, std::move(perigee),
-				   nullptr, typePattern);
-    trackStateOnSurfaces.push_back(trackSOS);
-    Trk::TrackInfo info;
-    return new Trk::Track(info, std::move(trackStateOnSurfaces),
-			  std::move(fitQuality)) ;
+    return CreatePerigee(0., 0., 0., VKPerigee, VKCov, state);
   }
-
-
-
 
   // Function creates a Trk::Perigee on the heap
   //  Don't forget to remove it after use
   //  vX,vY,vZ are in LOCAL SYSTEM with respect to refGVertex
-  std::unique_ptr<Perigee >
+  std::unique_ptr<Perigee>
   TrkVKalVrtFitter::CreatePerigee(double vX, double vY, double vZ,
 				  const std::vector<double>& VKPerigee,
 				  const std::vector<double>& VKCov,

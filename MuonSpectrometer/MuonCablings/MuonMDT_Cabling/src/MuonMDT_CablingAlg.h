@@ -36,7 +36,7 @@ private:
     SG::ReadCondHandleKey<CondAttrListCollection> m_readKeyMap{this, "MapFolders", "/MDT/CABLING/MAP_SCHEMA"};
     SG::WriteCondHandleKey<MuonMDT_CablingMap> m_writeKey{this, "WriteKey", "MuonMDT_CablingMap", "Key of output MDT cabling map"};
 
-    bool m_isRun3{false};
+    Gaudi::Property<bool> m_isRun3{this, "isRun3", false, "Auxillary property to load the BIS78 cabling by hand"};
 
     /// Retrieves the general MDT station info from the coral attribute
     bool extractStationInfo(const coral::AttributeList& atr, CablingData& map_data) const;

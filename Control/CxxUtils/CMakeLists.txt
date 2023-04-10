@@ -156,7 +156,7 @@ foreach( test sincos_test ArrayScanner_test Arrayrep_test
       ConcurrentHashmapImpl_test SimpleUpdater_test hexdump_test
       FPControl_test LockedPointer_test nodiscard_test span_test
       reverse_wrapper_test atomic_bounded_decrement_test
-      releasing_iterator_test SizedUInt_test UIntConv_test )
+      releasing_iterator_test SizedUInt_test UIntConv_test starts_with_test )
    atlas_add_test( ${test}
       SOURCES test/${test}.cxx
       LINK_LIBRARIES CxxUtils TestTools )

@@ -140,11 +140,16 @@ def TrigMETMonConfig(inputFlags):
         HLTChainsT0 = metChainsT0
     print("L1Chains = ",L1Chains)
     print("HLTChains = ",HLTChains)
-    ## pass chians to TrigMETMonAlg
+    ## Setting primary electron and muon chains for signalEl/signalMu/Expert plot selection
+    HLTChainEl = ["HLT_e26_lhtight_ivarloose_L1.*","HLT_e28_lhtight_ivarloose_L1.*"]
+    HLTChainMu = ["HLT_mu24_ivarmedium_L1.*"]
+    ## pass chains to TrigMETMonAlg
     TrigMETMonAlg.L1Chains = L1Chains
     TrigMETMonAlg.HLTChains = HLTChains
     TrigMETMonAlg.HLTChainsVal = HLTChainsVal
     TrigMETMonAlg.HLTChainsT0 = HLTChainsT0
+    TrigMETMonAlg.HLTChainEl = HLTChainEl
+    TrigMETMonAlg.HLTChainMu = HLTChainMu
 
     ### algorithm selection
     algsL1 = ["roi"] 

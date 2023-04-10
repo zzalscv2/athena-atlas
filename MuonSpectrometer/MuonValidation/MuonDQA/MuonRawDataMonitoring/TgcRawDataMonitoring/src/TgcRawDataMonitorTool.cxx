@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include "TgcRawDataMonitorTool.h"
 #include <boost/format.hpp>
 #include "TVector2.h"
-#include "MuonReadoutGeometry/TgcDetectorElement.h"
 #include "MuonReadoutGeometry/TgcReadoutElement.h"
 #include "TrkSurfaces/TrapezoidBounds.h"
 
@@ -57,10 +56,11 @@ std::set<std::string> TgcRawDataMonitorTool::getPassedChambers(const Amg::Vector
 	  iStationPhi <= muonMgr->tgcIdHelper()->stationPhiMax(endcap) ; iStationPhi++){
 	if(iStationName==48 && iStationPhi>21)continue;
 	TGC::TgcChamber tgcChamber; tgcChamber.initChamber(iStationEta, iStationPhi, iStationName);
-	auto id = muonMgr->tgcIdHelper()->elementID(iStationName, iStationEta, iStationPhi);
-	IdentifierHash hash_id;
-	muonMgr->tgcIdHelper()->get_detectorElement_hash(id,hash_id);
-	auto detEle = muonMgr->getTgcDetectorElement(hash_id);
+     bool isValid{false};
+     const Identifier id = muonMgr->tgcIdHelper()->elementID(iStationName, iStationEta, iStationPhi, isValid);
+     if (!isValid) continue;
+	
+	const MuonGM::TgcReadoutElement* detEle = muonMgr->getTgcReadoutElement(id);
 	const Trk::TrapezoidBounds* tb = (const Trk::TrapezoidBounds*)&detEle->bounds();
 	Amg::Vector3D trkLocVec3D = detEle->transform().inverse() * Amg::Vector3D(ext_x,ext_y,ext_z);
 	if(std::abs(trkLocVec3D.x())>1000.)continue;

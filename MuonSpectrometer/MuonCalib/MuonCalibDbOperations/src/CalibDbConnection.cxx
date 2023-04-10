@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // this
@@ -57,8 +57,8 @@ namespace MuonCalib {
     CalibDbConnection::~CalibDbConnection() {
         for (std::set<coral::IQuery*>::iterator it = m_queries.begin(); it != m_queries.end(); ++it) {
             if (*it) { delete (*it); }
-            m_queries.clear();
         }
+        m_queries.clear();
     }
 
     ////////////////////

@@ -143,16 +143,16 @@ StatusCode JetHistoAttributeFiller::initialize() {
   ATH_CHECK(m_varX.retrieve() );
   m_nVar = 1;
   if( ! m_varY.isEnabled() ){
-    ATH_MSG_INFO( "Filling 1 var X=("<< m_varX->describe() << ")");
+    ATH_MSG_DEBUG( "Filling 1 var X=("<< m_varX->describe() << ")");
   }else { // has Y variable
     ATH_CHECK(m_varY.retrieve() );
     m_nVar = 2;
     if ( ! m_varZ.isEnabled()) {
-      ATH_MSG_INFO( "Filling 2 vars X=("<< m_varX->describe() << ") Y=("<<m_varY->describe() << ")");
+      ATH_MSG_DEBUG( "Filling 2 vars X=("<< m_varX->describe() << ") Y=("<<m_varY->describe() << ")");
     }else{
       ATH_CHECK(m_varZ.retrieve() );
       m_nVar = 3;
-      ATH_MSG_INFO( "Filling 3 vars X=("<< m_varX->describe() << ") Y=("<<m_varY->describe() << ") Z=("<<m_varZ->describe() << ")");
+      ATH_MSG_DEBUG( "Filling 3 vars X=("<< m_varX->describe() << ") Y=("<<m_varY->describe() << ") Z=("<<m_varZ->describe() << ")");
     }
     
   }  

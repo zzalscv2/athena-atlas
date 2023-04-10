@@ -56,7 +56,7 @@ StatusCode XtoVVDecayFilterExtended::filterEvent() {
   for (itr = events()->begin(); itr != events()->end(); ++itr) {
     // Loop over all particles in the event
     const HepMC::GenEvent* genEvt = (*itr);
-    for (auto  pitr: *genEvt) {
+    for (const auto&  pitr: *genEvt) {
       if ( std::abs(pitr->pdg_id()) == m_PDGParent && pitr->status() == m_StatusParent) {
         bool isGrandParentOK = RunHistory(pitr);
 	ATH_MSG_DEBUG(" Grand Parent is OK? " << isGrandParentOK);

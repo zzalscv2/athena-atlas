@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file StoreGate/WriteDecorHandle.icc
@@ -27,7 +27,7 @@ WriteDecorHandle<T, D>::WriteDecorHandle (const WriteDecorHandleKey<T>& key)
   : Base (key.contHandleKey(), nullptr),
     m_decorKey (key.key()),
     m_acc (SG::decorKeyFromKey (key.key())),
-    m_madeAlias (false)
+    m_state (key.renounced() ? RENOUNCED : NO_ALIAS)
 {
 }
 
@@ -49,7 +49,7 @@ WriteDecorHandle<T, D>::WriteDecorHandle (const WriteDecorHandleKey<T>& key,
   : Base (key.contHandleKey(), &ctx),
     m_decorKey (key.key()),
     m_acc (SG::decorKeyFromKey (key.key())),
-    m_madeAlias (false)
+    m_state (key.renounced() ? RENOUNCED : NO_ALIAS)
 {
 }
 
@@ -62,7 +62,7 @@ WriteDecorHandle<T, D>::WriteDecorHandle (const WriteDecorHandle& rhs)
   : Base (rhs),
     m_decorKey (rhs.m_decorKey),
     m_acc (rhs.m_acc),
-    m_madeAlias (rhs.m_madeAlias)
+    m_state (rhs.m_state)
 {
 }
 
@@ -75,9 +75,9 @@ WriteDecorHandle<T, D>::WriteDecorHandle (WriteDecorHandle&& rhs)
   : Base (std::move (rhs)),
     m_decorKey (std::move (rhs.m_decorKey)),
     m_acc (std::move (rhs.m_acc)),
-    m_madeAlias (rhs.m_madeAlias)
+    m_state (rhs.m_state)
 {
-  rhs.m_madeAlias = false;
+  rhs.m_state = NO_ALIAS;
 }
 
 
@@ -88,7 +88,7 @@ template <class T, class D>
 WriteDecorHandle<T, D>::~WriteDecorHandle()
 {
   // Lock the decoration.  But don't do anything if we haven't touched it.
-  if (m_madeAlias) {
+  if (m_state == MADE_ALIAS) {
     const IConstAuxStore* store = this->vectorData()->getConstStore();
     if (store) {
       IConstAuxStore* store_nc ATLAS_THREAD_SAFE = const_cast<IConstAuxStore*> (store);
@@ -108,7 +108,7 @@ WriteDecorHandle<T, D>& WriteDecorHandle<T, D>::operator= (const WriteDecorHandl
     *static_cast<Base*>(this) = rhs;
     m_acc = rhs.m_acc;
     m_decorKey = rhs.m_decorKey;
-    m_madeAlias = rhs.m_madeAlias;
+    m_state = rhs.m_state;
   }
   return *this;
 }
@@ -124,8 +124,8 @@ WriteDecorHandle<T, D>& WriteDecorHandle<T, D>::operator= (WriteDecorHandle&& rh
     *static_cast<Base*>(this) = std::move (rhs);
     m_acc = std::move (rhs.m_acc);
     m_decorKey = std::move (rhs.m_decorKey);
-    m_madeAlias = rhs.m_madeAlias;
-    rhs.m_madeAlias = false;
+    m_state = rhs.m_state;
+    rhs.m_state = NO_ALIAS;
   }
   return *this;
 }
@@ -158,7 +158,9 @@ bool WriteDecorHandle<T, D>::isPresent() const
 template <class T, class D>
 StatusCode WriteDecorHandle<T, D>::setProxyDict (IProxyDict* store)
 {
-  m_madeAlias = false;
+  if (m_state == MADE_ALIAS) {
+    m_state = NO_ALIAS;
+  }
   return Base::setProxyDict (store);
 }
 
@@ -171,7 +173,9 @@ template <class T, class D>
 typename WriteDecorHandle<T, D>::reference_type
 WriteDecorHandle<T, D>::operator() (const AuxElement& e)
 {
-  this->cptr();
+  if (m_state != RENOUNCED) {
+    this->cptr();
+  }
   return m_acc (e);
 }
 
@@ -187,7 +191,9 @@ template <class T, class D>
 typename WriteDecorHandle<T, D>::reference_type
 WriteDecorHandle<T, D>::operator() (size_t i)
 {
-  this->cptr();
+  if (m_state != RENOUNCED) {
+    this->cptr();
+  }
   return m_acc (*this->vectorData(), i);
 }
 
@@ -305,7 +311,7 @@ std::string WriteDecorHandle<T, D>::decorKey() const
 template <class T, class D>
 void* WriteDecorHandle<T, D>::typeless_dataPointer_impl (bool quiet)
 {
-  if (this->m_ptr && this->m_madeAlias)
+  if (this->m_ptr && this->m_state != NO_ALIAS)
     return this->m_ptr;
   if (!this->m_ptr) {
     ReadHandle<T>::typeless_dataPointer_impl (quiet);
@@ -313,15 +319,17 @@ void* WriteDecorHandle<T, D>::typeless_dataPointer_impl (bool quiet)
   if (!this->m_ptr) {
     return nullptr;
   }
-  if (this->alias (WriteHandleKey<T> (this->m_decorKey)).isFailure())
-    return nullptr;
+  if (m_state == NO_ALIAS) {
+    if (this->alias (WriteHandleKey<T> (this->m_decorKey)).isFailure())
+      return nullptr;
+    m_state = MADE_ALIAS;
+  }
   // Important to call the base class method above before calling vectorData;
   // otherwise, we'll get an infinite recursion.
   // Also don't call getDecorationArray if the container is empty.
   if (this->m_ptr && this->vectorData()->size_v() > 0) {
     m_acc.getDecorationArray (*this->vectorData());
   }
-  this->m_madeAlias = true;
   return this->m_ptr;
 }
 

@@ -4,6 +4,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaCommon.Logging import logging
+from collections.abc import Iterable
 _msg = logging.getLogger('AccumulatorCache')
 
 import functools
@@ -202,10 +203,17 @@ class AccumulatorDecorator:
 
     def __del__(self):
         # Cleanup dangling private tools of cached CAs
-        for k, v in self._cache.items():
-            if isinstance(v, ComponentAccumulator):
-                v.popPrivateTools(quiet=True)
+        def _cleanupIfCA(something):
+            if isinstance(something, ComponentAccumulator):
+                something.popPrivateTools(quiet=True)
+                something.wasMerged()
 
+        for k, v in self._cache.items():            
+            if isinstance(v, Iterable):
+                for el in v:
+                    _cleanupIfCA(el)
+            else:
+                _cleanupIfCA(v)
 
 def AccumulatorCache(func = None, maxSize = 128,
                      verifyResult = AccumulatorDecorator.VERIFY_NOTHING, deepCopy = True):

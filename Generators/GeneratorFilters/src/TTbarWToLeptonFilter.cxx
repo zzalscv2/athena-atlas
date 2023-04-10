@@ -31,7 +31,7 @@ StatusCode TTbarWToLeptonFilter::filterEvent() {
   for (McEventCollection::const_iterator itr = events()->begin(); itr!=events()->end(); ++itr) {
     const HepMC::GenEvent* genEvt = (*itr);
 #ifdef HEPMC3
-    for (auto  pitr: *genEvt) {
+    for (const auto&  pitr: *genEvt) {
         if (std::abs(pitr->pdg_id()) != 6) continue;
         if ( pitr->pdg_id() ==  6 ) N_quark_t_all++;
         if ( pitr->pdg_id() == -6 ) N_quark_tbar_all++;
@@ -254,7 +254,7 @@ StatusCode TTbarWToLeptonFilter::filterEvent() {
       event++;
       const HepMC::GenEvent* genEvt = (*itr);
       int part=0 ;
-      for (auto  mcpart: *genEvt) {
+      for (const auto&  mcpart: *genEvt) {
         part++;
         int pid = mcpart->pdg_id();
         ATH_MSG_ERROR("In event (from MC collection) " << event << " particle number " << part << " has pdg_id = " << pid);

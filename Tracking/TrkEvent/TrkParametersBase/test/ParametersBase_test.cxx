@@ -61,12 +61,12 @@ public:
     //nop           
   }
   
-  ChargedParametersStub(std::optional<AmgSymMatrix(DIM)> covariance):
+  explicit ChargedParametersStub(std::optional<AmgSymMatrix(DIM)> covariance):
     ParametersBase(std::move(covariance)){
    //nop
   }
   
-  ChargedParametersStub(const AmgVector(DIM) & parameters,
+  explicit ChargedParametersStub(const AmgVector(DIM) & parameters,
     std::optional<AmgSymMatrix(DIM)> covariance = std::nullopt):
     ParametersBase(parameters,std::move(covariance)){
     //nop  

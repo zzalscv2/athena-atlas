@@ -12,7 +12,6 @@ import AthenaCommon.SystemOfUnits as Units
 from TrigMinBias.TrigMinBiasMonitoring import MbtsHypoToolMonitoring
 
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from ..Config.MenuComponents import InViewRecoCA, InEventRecoCA, SelectionCA, MenuSequenceCA
 
 
@@ -140,7 +139,6 @@ def MinBiasSPSequence(flags):
                         Hypo        = spCountHypo,
                         HypoToolGen = SPCountHypoToolGen )
 
-@AccumulatorCache
 def MinBiasZVertexFinderSequenceCfg(flags):
     recoAcc = InViewRecoCA(name="ZVertFinderReco", InViewRoIs="InputRoI", RequireParentView=True)
     vdv = CompFactory.AthViews.ViewDataVerifier( "VDVZFinderInputs",
@@ -190,7 +188,6 @@ def MinBiasTrkSequence(flags):
                             Hypo        = trackCountHypo,
                             HypoToolGen = TrackCountHypoToolGen)
 
-@AccumulatorCache
 def MinBiasMbtsSequenceCfg(flags):
     recoAcc = InEventRecoCA(name="Mbts")
     from TrigMinBias.MbtsConfig import MbtsFexCfg, MbtsSGInputCfg

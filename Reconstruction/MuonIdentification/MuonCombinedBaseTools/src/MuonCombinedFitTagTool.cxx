@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -116,7 +116,7 @@ namespace MuonCombined {
             }
 
             // calculate track score
-            Trk::TrackScore score = m_trackScoringTool->score(*combinedTrack, true);
+            Trk::TrackScore score = m_trackScoringTool->score(*combinedTrack);
 
             // add fit info into tag object
             currentTag = std::make_unique<CombinedFitTag>(xAOD::Muon::MuidCo, muonCandidate, score);
@@ -144,7 +144,7 @@ namespace MuonCombined {
                     combinedTrack->info().setParticleHypothesis(Trk::muon);
                     combinedTrack->info().setPatternRecognitionInfo(Trk::TrackInfo::MuidCombined);
                     // calculate track score
-                    Trk::TrackScore score = m_trackScoringTool->score(*combinedTrack, true);
+                    Trk::TrackScore score = m_trackScoringTool->score(*combinedTrack);
 
                     // add fit info into tag object
                     currentTag = std::make_unique<CombinedFitTag>(xAOD::Muon::MuidCo, muonCandidate, score);

@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file StoreGate/WriteDecorHandle.h
@@ -300,7 +300,14 @@ private:
   /// Accessor for the aux data item.
   accessor_t m_acc;
 
-  bool m_madeAlias;
+  /// Set no NO_ALIAS when the handle is created, changed to MADE_ALIAS
+  /// after the alias has been made.  But if renounce() has been called
+  /// on the parent key, then we set this to RENOUNCED to indicate that
+  /// we shouldn't make an alias.
+  enum { NO_ALIAS,
+         MADE_ALIAS,
+         RENOUNCED }
+    m_state;
 };
 
 

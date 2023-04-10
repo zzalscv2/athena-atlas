@@ -160,7 +160,7 @@ bool GenObjectsFilterTool::isLeptonicWZ(const HepMC::ConstGenParticlePtr& part) 
   
   /// take into account W/Z->W/Z->lnu/ll
 
-  HepMC::ConstGenVertexPtr end = part->end_vertex();
+  const HepMC::ConstGenVertexPtr& end = part->end_vertex();
   if(end){
     for(const auto& Child: *end){
       int cpdg = Child->pdg_id();
