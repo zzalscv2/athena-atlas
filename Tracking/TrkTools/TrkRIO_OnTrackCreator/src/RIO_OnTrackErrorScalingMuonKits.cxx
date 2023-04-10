@@ -9,7 +9,7 @@ class MuonEtaPhiRIO_OnTrackErrorScalingKit
   : public RIO_OnTrackErrorScalingSpecialisedKit<MuonEtaPhiRIO_OnTrackErrorScaling>
 {
 public:
-  MuonEtaPhiRIO_OnTrackErrorScalingKit(const std::string &prefix) {
+  explicit MuonEtaPhiRIO_OnTrackErrorScalingKit(const std::string &prefix) {
     // use C-style array of strings to satisfy the interface
     m_names=new CharPtr_t[MuonEtaPhiRIO_OnTrackErrorScaling::kNParamTypes];
     for (unsigned int idx=0; idx< MuonEtaPhiRIO_OnTrackErrorScaling::kNParamTypes; ++idx ) {

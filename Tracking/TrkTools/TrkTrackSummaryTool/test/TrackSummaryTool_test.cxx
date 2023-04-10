@@ -60,7 +60,7 @@ class GaudiFixture {
     return m_detStore;
    }
 
-   GaudiFixture(const std::string & joPath = "TrkTrackSummaryUpdater/TrackSummaryUpdater_test.txt") {
+   explicit GaudiFixture(const std::string & joPath = "TrkTrackSummaryUpdater/TrackSummaryUpdater_test.txt") {
      setUpGaudi(joPath);
    }
  
