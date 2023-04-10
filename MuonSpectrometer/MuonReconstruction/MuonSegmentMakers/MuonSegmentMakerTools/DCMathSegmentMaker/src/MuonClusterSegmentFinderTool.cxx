@@ -262,9 +262,7 @@ namespace Muon {
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(m_trackCleaner.retrieve());
         ATH_CHECK(m_trackSummary.retrieve());
-        if (m_idHelperSvc->recoMM() || m_idHelperSvc->recosTgc()) {
-            ATH_CHECK(m_muonClusterCreator.retrieve());
-        }
+        ATH_CHECK(m_muonClusterCreator.retrieve());        
         ATH_MSG_DEBUG(" Max cut " << m_maxClustDist);
         return StatusCode::SUCCESS;
     }
