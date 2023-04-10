@@ -198,6 +198,23 @@ public:
   const ReadHandleKey<T>& contHandleKey() const;
 
 
+  /**
+   * @brief Declare that this item does not participate in scheduling.
+   *
+   * If a WriteDataHandleKey is renounced, then we skip creating the
+   * output alias.  Further, we skip the check that the element provided
+   * is a member of the declared container.  A WriteDataHandle initialized
+   * from a renounced key will effectively behave like a simple Decorator.
+   */
+  void renounce();
+
+
+  /**
+   * @brief Return the renounced flag.
+   */
+  bool renounced() const;
+
+
 private:
   friend class ::AthAlgorithm;
   friend class ::AthReentrantAlgorithm;
@@ -219,7 +236,11 @@ private:
   ReadHandleKey<T> m_contHandleKey;
 
   /// Optional container on which decorations are applied
-  const VarHandleKey* m_contKey{nullptr};
+  const VarHandleKey* m_contKey = nullptr;
+
+  /// True if this key has been the target of a renounce().
+  /// (In that case, we don't make the output alias.)
+  bool m_renounced = false;
 };
 
 

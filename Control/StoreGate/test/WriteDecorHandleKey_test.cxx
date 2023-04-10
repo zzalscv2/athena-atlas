@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file StoreGate/test/WriteDecorHandleKey_test.cxx
@@ -98,6 +98,10 @@ void test1()
   assert (k1.assign ("ccc.fee").isSuccess());
   assert (k1.key() == "ccc.fee");
   assert (k1.contHandleKey().key() == "ccc");
+
+  assert (!k1.renounced());
+  k1.renounce();
+  assert (k1.renounced());
 
   // Test auto-declaring constructors
   auto check = [](TestOwner& owner, SG::WriteDecorHandleKey<MyObj>& k) {

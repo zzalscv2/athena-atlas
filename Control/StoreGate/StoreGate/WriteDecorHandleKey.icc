@@ -1,4 +1,3 @@
-// $Id$
 /*
  * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  */
@@ -218,6 +217,33 @@ template <class T>
 ReadHandleKey<T>& WriteDecorHandleKey<T>::contHandleKey_nc()
 {
   return m_contHandleKey;
+}
+
+
+/**
+ * @brief Declare that this item does not participate in scheduling.
+ *
+ * If a WriteDataHandleKey is renounced, then we skip creating the
+ * output alias.  Further, we skip the check that the element provided
+ * is a member of the declared container.  A WriteDataHandle initialized
+ * from a renounced key will effectively behave like a simple Decorator.
+ */
+template <class T>
+inline
+void WriteDecorHandleKey<T>::renounce()
+{
+  m_renounced = true;
+}
+
+
+/**
+ * @brief Return the renounced flag.
+ */
+template <class T>
+inline
+bool WriteDecorHandleKey<T>::renounced() const
+{
+  return m_renounced;
 }
 
 
