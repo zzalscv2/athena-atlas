@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -12,7 +12,7 @@
 //#include <cmath>
 
 /** This is a plugin that makes Eigen look like CLHEP 
-    & defines some convenience methods */
+  & defines some convenience methods */
     
     // ------- Methods for 3D vector type objects ---------------------- //
     
@@ -70,24 +70,37 @@
     
     /** pseudorapidity  method */
     inline Scalar eta() const {
-        return -std::log(std::tan(this->theta()*.5)); //TODO: slow
-    } //old method with safeguards, new method is in SymmetricMatrixHelpers.h 
+        EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(MatrixBase, 3)
+        const Scalar rho2 = (*this).x() * (*this).x() + (*this).y() * (*this).y();
+        const Scalar z = (*this).z();
+        if ( rho2 > 0. ) { // rho^2 >0.
+          const double m = std::sqrt(rho2 + z * z);
+          return 0.5 * std::log(( m + z) / (m - z));
+        }
+        if ( z ==  0   ) { return  0.0; }
+        // Following math/genvector/inc/Math/GenVector/etaMax.h in ROOT 6.26
+        constexpr Scalar s_etaMax = static_cast<Scalar>(22756.0);
+        // Following math/genvector/inc/Math/GenVector/eta.h in ROOT 6.26
+        return (z > 0) ? z + s_etaMax :  z - s_etaMax;
+    }
 
     inline Scalar deltaR(const MatrixBase<Derived>& vec) const {
-    if (this->rows() < 2) return 0.;
-    double a = this->eta() - vec.eta();
-    double b = this->deltaPhi(vec);
-    return std::sqrt ( a*a + b*b );
+        if (this->rows() < 2)
+          return 0.;
+        double a = this->eta() - vec.eta();
+        double b = this->deltaPhi(vec);
+        return std::sqrt(a * a + b * b);
     }
 
     inline Scalar deltaPhi(const MatrixBase<Derived>& vec) const {
-    if (this->rows() < 2) return 0.;
-    double dphi = vec.phi() - this->phi();
-    if ( dphi > M_PI ) {
-            dphi -= M_PI*2;
-    } else if ( dphi <= -M_PI ) {
-            dphi += M_PI*2;
-    }
+        if (this->rows() < 2)
+          return 0.;
+        double dphi = vec.phi() - this->phi();
+        if (dphi > M_PI) {
+          dphi -= M_PI * 2;
+        } else if (dphi <= -M_PI) {
+          dphi += M_PI * 2;
+        }
         return dphi;
     }
 
