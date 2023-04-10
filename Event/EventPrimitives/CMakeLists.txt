@@ -25,3 +25,9 @@ atlas_add_library( EventPrimitives
    INCLUDE_DIRS ${clhep_includes} ${EIGEN_INCLUDE_DIRS}
    ${clhep_defs}
    LINK_LIBRARIES ${clhep_libs} ${EIGEN_LIBRARIES} )
+
+
+atlas_add_test( test_eta
+   SOURCES test/test_eta.cxx
+   LINK_LIBRARIES EventPrimitives )
+
