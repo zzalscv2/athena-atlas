@@ -67,7 +67,6 @@
 #include <Eigen/Dense>
 #include <Eigen/StdVector>
 
-#include <cmath>
 #include <exception>
 #include <memory>
 
