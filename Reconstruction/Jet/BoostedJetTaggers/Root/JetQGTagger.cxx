@@ -60,7 +60,6 @@ namespace CP {
     declareProperty( "FakeFile", m_fakefile = "track_systs.root");//REPLACE when file available
     declareProperty( "MinPt", m_jetPtMin = 50e3);
     declareProperty( "MaxEta", m_jetEtaMax = 2.1);
-    declareProperty( "WeightDecorationName", m_weight_decoration_name = "qgTaggerWeight");
     declareProperty( "TaggerDecorationName", m_tagger_decoration_name = "qgTagger");
 
 
