@@ -8,7 +8,8 @@ atlas_add_tpcnv_library( LArSimEventTPCnv
                          src/*.cxx
                          PUBLIC_HEADERS LArSimEventTPCnv
                          LINK_LIBRARIES AthenaPoolCnvSvcLib LArSimEvent
-                         PRIVATE_LINK_LIBRARIES AthenaKernel CaloIdentifier GaudiKernel Identifier StoreGateLib )
+                         PRIVATE_LINK_LIBRARIES AthenaKernel CaloIdentifier GaudiKernel 
+                         Identifier StoreGateLib AthAllocators)
 
 atlas_add_dictionary( LArSimEventTPCnvDict
                       LArSimEventTPCnv/LArSimEventTPCnvDict.h
@@ -33,7 +34,7 @@ atlas_add_test( LArHitContainerCnv_p1_test
 atlas_add_test( LArHitContainerCnv_p2_test
                 SOURCES
                 test/LArHitContainerCnv_p2_test.cxx
-                LINK_LIBRARIES CaloIdentifier IdDictParser LArSimEventTPCnv StoreGateLib TestTools CxxUtils
+                LINK_LIBRARIES CaloIdentifier IdDictParser LArSimEventTPCnv StoreGateLib TestTools CxxUtils AthAllocators
                 ENVIRONMENT "JOBOPTSEARCHPATH=${CMAKE_CURRENT_SOURCE_DIR}/share" )
 
 atlas_add_test( LArHitFloatCnv_p1_test
