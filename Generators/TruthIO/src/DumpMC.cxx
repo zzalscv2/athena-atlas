@@ -183,7 +183,7 @@ StatusCode DumpMC::execute() {
         }
       }
       if(m_PrintQuasiStableParticles) {
-        for (auto pitr: *evt) {
+        for (const auto& pitr: *evt) {
           int p_stat=pitr->status();
           if(p_stat==2 && pitr->production_vertex() && pitr->end_vertex()) {
             const auto& prodVtx = pitr->production_vertex()->position();
