@@ -64,6 +64,7 @@
 #include "AsgMessaging/MessageCheck.h"
 #include "PATInterfaces/CorrectionCode.h"
 #include "PathResolver/PathResolver.h"
+#include "AsgTools/ToolStore.h"
 #include "AsgTools/ToolHandle.h"
 #include "AsgTools/StandaloneToolHandle.h"
 #include "AsgTools/IAsgTool.h"
@@ -99,11 +100,11 @@ enum sel {
   passOR
 };
 
+namespace asg{ANA_MSG_HEADER(msgSTT) ANA_MSG_SOURCE(msgSTT,"SUSYToolsTester")}
+
 //====================================================================================================
 std::vector<std::string> getTokens(TString line, const TString& delim);
 std::map<std::string, std::string> getFileContainers(std::unique_ptr<TFile> &);
-
-namespace asg{ANA_MSG_HEADER(msgSTT) ANA_MSG_SOURCE(msgSTT,"SUSYToolsTester")}
 
 //====================================================================================================
 int main( int argc, char* argv[] ) {
@@ -112,8 +113,6 @@ int main( int argc, char* argv[] ) {
   ANA_CHECK_SET_TYPE (int);
   setMsgLevel(MSG::INFO);
 
-  //StatusCode::enableFailure();
-  StatusCode::enableFailure();
   CP::CorrectionCode::enableFailure();
 
   // The application's name:
@@ -121,9 +120,9 @@ int main( int argc, char* argv[] ) {
 
   // Check if we received a file name:
   if ( argc < 2 ) {
-    ATH_MSG_ERROR( "No file name received!" );
-    ATH_MSG_ERROR( "  Usage: " << APP_NAME << " [xAOD file name] [maxEvents] [isData=0/1 isAtlfast=0/1] [NoSyst=0/1] [Debug=0/1/2] [ConfigFile=<cfile.conf>] [PRWFile=<prwfile.root>] [autoconfigPRW=0/1]" );
-    return StatusCode::FAILURE;
+    ANA_MSG_ERROR( "No file name received!" );
+    ANA_MSG_ERROR( "  Usage: " << APP_NAME << " [xAOD file name] [maxEvents] [isData=0/1 isAtlfast=0/1] [NoSyst=0/1] [Debug=0/1/2] [ConfigFile=<cfile.conf>] [PRWFile=<prwfile.root>] [autoconfigPRW=0/1]" );
+    return 1;
   }
 
 
@@ -325,7 +324,7 @@ int main( int argc, char* argv[] ) {
 
   if ( objTool.initialize() != StatusCode::SUCCESS) {
     ANA_MSG_ERROR( "Cannot initialize SUSYObjDef_xAOD, exiting." );
-    return StatusCode::FAILURE;
+    return 1;
   } else {
     ANA_MSG_INFO( "SUSYObjDef_xAOD initialized..." );
   }
@@ -337,7 +336,7 @@ int main( int argc, char* argv[] ) {
   TEnv rEnv;
   if ( rEnv.ReadFile(config_file.c_str(), kEnvAll) != 0 ) {
     ANA_MSG_ERROR( "Cannot open config file, exiting.");
-    return StatusCode::FAILURE;
+    return 1;
   }
   ANA_MSG_INFO( "Config file opened" );
 
@@ -460,7 +459,7 @@ int main( int argc, char* argv[] ) {
       const xAOD::CutBookkeeperContainer* completeCBC = nullptr;
       if (!event.retrieveMetaInput(completeCBC, "CutBookkeepers").isSuccess()) {
         ANA_MSG_ERROR("Failed to retrieve CutBookkeepers from MetaData, exiting.");
-        return StatusCode::FAILURE;
+        return 1;
       }
 
       // Let's find the right CBK (latest with StreamAOD input before derivations)
@@ -491,8 +490,8 @@ int main( int argc, char* argv[] ) {
         ANA_MSG_INFO( "CutBookkeepers Accepted " << nEventsProcessed << " SumWei " << sumOfWeights << " sumWei2 " << sumOfWeightsSquared);
       } else { ANA_MSG_INFO( "No relevent CutBookKeepers found" ); }
 
-      ATH_MSG_INFO("Found kernel: " << kernel);
-      ATH_MSG_INFO("Found stream: " << stream);
+      ANA_MSG_INFO("Found kernel: " << kernel);
+      ANA_MSG_INFO("Found stream: " << stream);
 
       // No special jets when running on PHYSLITE
       if (isPHYSLite) {
@@ -541,18 +540,18 @@ int main( int argc, char* argv[] ) {
         int pdgid2 = 0;
    
         if( objTool.FindSusyHP(pdgid1, pdgid2) != StatusCode::SUCCESS ){
-          ATH_MSG_WARNING( "SUSY Proc finding failed. Normal for non-SUSY samples." );
+          ANA_MSG_WARNING( "SUSY Proc finding failed. Normal for non-SUSY samples." );
         }
    
         if( pdgid1!=0 && pdgid2!=0){ //(just to avoid warnings)
           // --- Deprecated usage of procID
-          ATH_MSG_INFO( "--- SIGNAL ID1     : " << pdgid1 );
-          ATH_MSG_INFO( "    SIGNAL ID2     : " << pdgid2 );
-          ATH_MSG_INFO( "--- XSECTION DETAILS" );
+          ANA_MSG_INFO( "--- SIGNAL ID1     : " << pdgid1 );
+          ANA_MSG_INFO( "    SIGNAL ID2     : " << pdgid2 );
+          ANA_MSG_INFO( "--- XSECTION DETAILS" );
         }
-        ATH_MSG_INFO( "    Xsec (high order)    " << my_XsecDB->xsectTimesEff(ei->mcChannelNumber(),0) );
-        ATH_MSG_INFO( "    kfactor (high order) " << my_XsecDB->kfactor(ei->mcChannelNumber(),0) );
-        ATH_MSG_INFO( "    filter efficiency    " << my_XsecDB->efficiency(ei->mcChannelNumber(),0) );
+        ANA_MSG_INFO( "    Xsec (high order)    " << my_XsecDB->xsectTimesEff(ei->mcChannelNumber(),0) );
+        ANA_MSG_INFO( "    kfactor (high order) " << my_XsecDB->kfactor(ei->mcChannelNumber(),0) );
+        ANA_MSG_INFO( "    filter efficiency    " << my_XsecDB->efficiency(ei->mcChannelNumber(),0) );
       }
     }
 
@@ -642,11 +641,11 @@ int main( int argc, char* argv[] ) {
     if (slices["tjet"] && hasTrkJets) {
       ANA_MSG_DEBUG( "Nominal track jet step" );
       if( event.retrieve(TJC, TrkJetCollection).isSuccess() ){
-        ATH_CHECK(objTool.GetTrackJets(trkjets_nominal, trkjets_nominal_aux));
+        ANA_CHECK(objTool.GetTrackJets(trkjets_nominal, trkjets_nominal_aux));
         ANA_MSG_DEBUG( trkjets_nominal->size() << " track jets");
       } else {
         ANA_MSG_ERROR("TrackJet collection " << TrkJetCollection.c_str() << " not available in input file. Please check!");
-        return StatusCode::FAILURE;
+        return 1;
       }
     }
 
@@ -664,7 +663,7 @@ int main( int argc, char* argv[] ) {
         }
       } else {
         ANA_MSG_ERROR("LargeR jet collection " << FatJetCollection.c_str() << " not available in input file. Please check!");
-        return StatusCode::FAILURE;
+        return 1;
       }
     }
 
@@ -921,17 +920,17 @@ int main( int argc, char* argv[] ) {
           if (!isData){
             const xAOD::TruthParticle* truthTau = T2MT->getTruth(*tau) ;
             if (tau->auxdata<char>("IsTruthMatched") || !truthTau){
-              ATH_MSG_DEBUG("Tau was matched to a truth tau, which has "
+              ANA_MSG_DEBUG("Tau was matched to a truth tau, which has "
                             << int(tau->auxdata<size_t>("TruthProng"))
                             << " prongs and a charge of "
                             << tau->auxdata<int>("TruthCharge"));
-            } else { ATH_MSG_DEBUG( "Tau was not matched to truth" ); }
+            } else { ANA_MSG_DEBUG( "Tau was not matched to truth" ); }
           }
         }
       }
 
       // Overlap Removal
-      ATH_MSG_DEBUG( "Overlap removal" );
+      ANA_MSG_DEBUG( "Overlap removal" );
       if (isNominal || (sysInfo.affectsKinematics && (syst_affectsElectrons || syst_affectsMuons || syst_affectsJets))) {
         if(stream.find("SUSY3")!=std::string::npos) {       ANA_CHECK( objTool.OverlapRemoval(electrons, muons, jets, 0, taus) ); }
         else if(stream.find("SUSY10")!=std::string::npos) { ANA_CHECK( objTool.OverlapRemoval(electrons, muons, jets, 0, 0, fatjets_nominal) ); }
@@ -941,7 +940,7 @@ int main( int argc, char* argv[] ) {
       // Jets - get goodjets
       if (slices["jet"]) {
         xAOD::JetInput::Type jetInputType = xAOD::JetInput::Uncategorized;
-        ATH_MSG_DEBUG("GoodJets?");
+        ANA_MSG_DEBUG("GoodJets?");
         for (const auto& jet : *jets) {
           if (jet->auxdata<char>("baseline") == 1  &&
               jet->auxdata<char>("passOR") == 1  &&

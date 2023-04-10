@@ -44,8 +44,6 @@ int main( int argc, char* argv[] ) {
   using namespace asg::msgUserCode;
   ANA_CHECK_SET_TYPE (int);
 
-  //StatusCode::enableFailure();
-  StatusCode::enableFailure();
   CP::CorrectionCode::enableFailure();
 
   // The application's name:
@@ -141,7 +139,7 @@ int main( int argc, char* argv[] ) {
     
     if( objTool.FindSusyHP(pdgid1, pdgid2) != StatusCode::SUCCESS ){
       Error(APP_NAME, "--- SOMETHING IS WRONG WITH THE SUSY PROC FINDING... ---");
-      return StatusCode::FAILURE;
+      return 1;
     }
     
     if( pdgid1!=0 && pdgid2!=0){ //(just to avoid warnings)

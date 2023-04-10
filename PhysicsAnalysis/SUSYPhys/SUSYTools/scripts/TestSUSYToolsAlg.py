@@ -21,7 +21,7 @@ parser.add_option('--log-level', dest = 'log_level', default = 'INFO', choices =
 parser.add_option('--dosyst', dest = 'dosyst', default = False, action = 'store_true')
 parser.add_option( '-s', '--submission-dir', dest = 'submission_dir', default = 'submitDir', help = 'Submission directory for EventLoop' )
 parser.add_option('-t', '--type', dest = 'type', default = 'mc20e', help = 'Job type. (mc20a, mc20d, mc20e, mc21a, data18, data22)', choices = ['mc20a', 'mc20d', 'mc20e', 'mc21a', 'data18', 'data22'])
-parser.add_option('--AFII', dest = 'AFII', default = False, action = 'store_true' )
+parser.add_option('--AF', dest = 'AF', default = False, action = 'store_true' )
 parser.add_option('-d', '--daod', dest = 'daod', type = 'int', default = 0, help = 'input DAOD type. Do not specify for xAOD input' )
 parser.add_option('-f', '--flav', dest = 'flav', default = 'PHYSVAL', help = 'input DAOD flavour' )
 parser.add_option('-m', '--maxEvts', dest = 'maxEvts', type = 'int', default = 500, help = 'Max events (-1 is all)' )
@@ -41,7 +41,7 @@ if 'data' in options.type and options.ptag in ptageqdata:
    print("Overriding ptag to equivalent data ptag: -> %s"%(options.ptag))
 print("Configured input data type: %s"%(options.type))
 print("Configured input data DAOD flavour: %s"%('SUSY%d'%options.daod if options.daod>0 else options.flav))
-print("Configured input data sim type: %s"%('FullSim' if not options.AFII else 'AFII'))
+print("Configured input data sim type: %s"%('FullSim' if not options.AF else 'AF'))
 
 # Set up (Py)ROOT.
 import ROOT
@@ -71,7 +71,7 @@ inputFiles['mc20e']      = 'DAOD_PHYS.mc20_13TeV.410470.FS_mc20e_%s.PHYS.pool.ro
 inputFiles['mc21a']      = 'DAOD_PHYS.mc21_13p6TeV.601229.FS_mc21a_%s.PHYS.pool.root'%(options.ptag)
 inputFiles['data18']     = 'DAOD_PHYS.data18_13TeV.358031.data18_%s.PHYS.pool.root'%(options.ptag)
 inputFiles['data22']     = 'DAOD_PHYS.data22_13p6TeV.430542.data22_%s.PHYS.pool.root'%(options.ptag)
-if options.daod == 0 and not '%s%s'%(options.type,'_AFII' if options.AFII else '') in inputFiles: sys.exit('No input file configured for type %s%s. Exiting.'%(options.type,'_AFII' if options.AFII else ''))
+if options.daod == 0 and not '%s%s'%(options.type,'_AF' if options.AF else '') in inputFiles: sys.exit('No input file configured for type %s%s. Exiting.'%(options.type,'_AF' if options.AF else ''))
 
 inputDir = ''
 inputFile = ''
@@ -89,11 +89,11 @@ elif options.inputGrid:
 else:
    if options.daod == 0 and not options.flav=='PHYS':
        inputDir = cvmfsInputArea[0]
-       ifile = options.type + ('_AFII' if options.AFII else '')
+       ifile = options.type + ('_AF' if options.AF else '')
        inputFile = inputFiles[ifile] if ifile in inputFiles else ''
    else:
        inputDir = cvmfsInputArea[1]
-       inputFile = 'DAOD_%s%s%s.%s.art.merge.root'%(options.type,'%s%d'%(options.flav,options.daod) if options.flav=='SUSY' else options.flav,'AFII' if options.AFII else '',options.ptag)
+       inputFile = 'DAOD_%s%s%s.%s.art.merge.root'%(options.type,'%s%d'%(options.flav,options.daod) if options.flav=='SUSY' else options.flav,'AF' if options.AF else '',options.ptag)
 
    if options.inputDir: inputDir = options.inputDir
    if options.inputFile: inputFile = options.inputFile
@@ -112,36 +112,39 @@ job.options().setDouble( ROOT.EL.Job.optMaxEvents, options.maxEvts )
 # algorithm property settings here later on.
 from AnaAlgorithm.AnaAlgorithmConfig import AnaAlgorithmConfig
 config = AnaAlgorithmConfig( 'SUSYToolsAlg' )
+config.addPrivateTool("SUSYTools","ST::SUSYObjDef_xAOD")
 
-config.STConfigFile = "SUSYTools/SUSYTools_Default.conf"
-if (options.type == "data22" or "mc21" in options.type): config.STConfigFile = "SUSYTools/SUSYTools_Default_Run3.conf"
-
+config.SUSYTools.ConfigFile = "SUSYTools/SUSYTools_Default.conf"
+if (options.type == "data22" or "mc21" in options.type): config.SUYSTools.ConfigFile = "SUSYTools/SUSYTools_Default_Run3.conf"
 config.DoSyst = options.dosyst
-config.DataSource = 1
+config.SUSYTools.DataSource = 1
 config.OutputLevel = outputlvl[options.log_level]
-config.PRWLumiCalc = []
-config.UsePRWAutoconfig = True
+config.SUSYTools.PRWLumiCalcFiles = []
+config.SUSYTools.AutoconfigurePRWTool = True
 if options.flav == "PHYSLITE": 
    print("Running on PHYSLITE : ", inputFile)
-   config.isPHYSLITE = True
-   STconfig_lite = str(config.STConfigFile).replace(".conf","_LITE.conf")
-   config.STConfigFile = STconfig_lite
+   config.SUSYTools.isPHYSLITE = True
+   STconfig_lite = str(config.SUSYTools.ConfigFile).replace(".conf","_LITE.conf")
+   config.SUSYTools.ConfigFile = STconfig_lite
 if options.type != 'data18' :
-    config.mcChannel = 410470
+    mcChannel = 410470
 
-# set datasource if AtlasFastII
-if options.AFII: 
-   config.DataSource = 2
+# set datasource if AtlasFastII or 3
+if options.AF:
+   config.SUSYTools.DataSource = 2
 
 # set mcCampaign
 if 'mc' in options.type:
-   config.mcCampaign = options.type
+   mcCampaign = options.type
+   config.SUSYTools.mcCampaign = options.type
 elif options.type == 'data18':
-   config.mcCampaign = 'mc20e'
-   config.DataSource = 0
+   mcCampaign = 'mc20e'
+   config.SUSYTools.mcCampaign = options.type
+   config.SUSYTools.DataSource = 0
 elif options.type == 'data22':
-   config.mcCampaign = 'mc21a'
-   config.DataSource = 0
+   mcCampaign = 'mc21a'
+   config.SUSYTools.mcCampaign = options.type
+   config.SUSYTools.DataSource = 0
 
 # set lumicalc info
 PRWLumiCalc = {}
@@ -151,7 +154,7 @@ PRWLumiCalc['mc20d'] = ['/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/GoodRun
 PRWLumiCalc['mc20e'] = ['/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/GoodRunsLists/data18_13TeV/20190318/ilumicalc_histograms_None_348885-364292_OflLumi-13TeV-010.root']
 PRWLumiCalc['mc21a'] = ['/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/GoodRunsLists/data22_13p6TeV/20220820/ilumicalc_histograms_None_427882-428855_OflLumi-Run3-001.root']
 
-config.PRWLumiCalc = PRWLumiCalc[config.mcCampaign]
+config.SUSYTools.PRWLumiCalcFiles = PRWLumiCalc[mcCampaign]
 
 if options.grl: config.GRLFiles = options.grl.split(',')
 if options.maxEvtsManual: config.maxEvts = options.maxEvtsManual

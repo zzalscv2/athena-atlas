@@ -66,17 +66,17 @@ bool SUSYObjDef_xAOD::IsMETTrigPassed(const std::string& triggerName, bool j400_
   bool L1_XE55 = m_trigDecTool->isPassed("L1_XE55");
   bool HLT_noalg_L1J400 = m_trigDecTool->isPassed("HLT_noalg_L1J400");
   if (!L1_XE50 && j400_OR && HLT_noalg_L1J400) {
-    return m_emulateHLT(triggerName);
+    return emulateHLT(triggerName);
   }
   else if (L1_XE50 || L1_XE55) {
     // See if the TDT knows about this
-    if (m_isTrigInTDT(triggerName) ) return m_trigDecTool->isPassed(triggerName);
-    else return m_emulateHLT(triggerName);
+    if (isTrigInTDT(triggerName) ) return m_trigDecTool->isPassed(triggerName);
+    else return emulateHLT(triggerName);
   }
   return false;
 }
 
-bool SUSYObjDef_xAOD::m_isTrigInTDT(const std::string& triggerName) const {
+bool SUSYObjDef_xAOD::isTrigInTDT(const std::string& triggerName) const {
   auto mapItr = m_checkedTriggers.find(triggerName);
   if ( mapItr == m_checkedTriggers.end() ) {
     const auto *cg = m_trigDecTool->getChainGroup(triggerName);
@@ -88,7 +88,7 @@ bool SUSYObjDef_xAOD::m_isTrigInTDT(const std::string& triggerName) const {
 }
 
 
-bool SUSYObjDef_xAOD::m_emulateHLT(const std::string& triggerName) const {
+bool SUSYObjDef_xAOD::emulateHLT(const std::string& triggerName) const {
   // First, check if we've already tried using this trigger
   auto funcItr = m_metTriggerFuncs.find(triggerName);
   if (funcItr != m_metTriggerFuncs.end() )
@@ -188,7 +188,7 @@ bool SUSYObjDef_xAOD::m_emulateHLT(const std::string& triggerName) const {
   // We can't get the exact trigger decision :( . Look for an alternative
   std::vector<std::string> replacementTriggers({"HLT_xe110_mht_L1XE50", "HLT_xe100_mht_L1XE50", "HLT_xe90_mht_L1XE50", "HLT_xe70_mht"});
   for (const std::string& trigName : replacementTriggers) {
-    if (m_isTrigInTDT(trigName) ) {
+    if (isTrigInTDT(trigName) ) {
       ATH_MSG_WARNING( "Trigger " << triggerName << " not available and direct emulation impossible! Will use " << trigName << " instead!");
       m_metTriggerFuncs[triggerName] = [this, trigName] () { 
         return m_trigDecTool->isPassed(trigName);

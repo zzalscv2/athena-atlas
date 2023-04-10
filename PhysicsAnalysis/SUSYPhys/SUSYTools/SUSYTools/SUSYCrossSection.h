@@ -67,16 +67,16 @@ public:
   };
 
   class Key {
-    int sample_id;
-    int proc_id;
+    int m_sample_id;
+    int m_proc_id;
   public:
-    Key(): sample_id(0), proc_id(0) {}
-    Key(int _sample_id, int _proc_id): sample_id(_sample_id), proc_id(_proc_id) {}
-    Key(int _sample_id, std::string name): sample_id(_sample_id) {
-      proc_id = atoi(name.c_str());
+    Key(): m_sample_id(0), m_proc_id(0) {}
+    Key(int _sample_id, int _proc_id): m_sample_id(_sample_id), m_proc_id(_proc_id) {}
+    Key(int _sample_id, std::string name): m_sample_id(_sample_id) {
+      m_proc_id = atoi(name.c_str());
     }
     bool operator<(const Key & k) const {
-      return this->sample_id < k.sample_id || (this->sample_id == k.sample_id && this->proc_id < k.proc_id);
+      return this->m_sample_id < k.m_sample_id || (this->m_sample_id == k.m_sample_id && this->m_proc_id < k.m_proc_id);
     }
   };
 

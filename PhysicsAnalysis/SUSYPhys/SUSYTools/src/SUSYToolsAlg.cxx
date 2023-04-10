@@ -46,7 +46,7 @@
 #include "TH2F.h"
 #include "TFile.h"
 #include "TEfficiency.h"
-#include <AnaAlgorithm/IHistogramWorker.h>
+//#include <AnaAlgorithm/IHistogramWorker.h>
 
 // For configuration
 #include "TString.h"
@@ -73,27 +73,17 @@ int getSize(std::map<std::string,std::vector<std::string>> &collection, const st
 SUSYToolsAlg::SUSYToolsAlg(const std::string& name,
                            ISvcLocator* pSvcLocator )
   : EL::AnaAlgorithm (name, pSvcLocator)
-  , m_SUSYTools("")
+  , m_SUSYTools("ST::SUSYObjDef_xAOD/SUSYTools",this)
   , m_tauTruthMatchingTool("")
   , m_Nevts(0)
   , m_kernel("")
   , m_configFile("SUSYTools/SUSYTools_Default.conf")
 {
 
-  declareProperty( "DataSource",  m_dataSource = 1 ); //default is fullsim = 1
   declareProperty( "DoSyst",      m_doSyst = false );
-
-  declareProperty( "STConfigFile", m_configFile );
-  //
-  declareProperty( "PRWConfigs", m_PRWConfigs );
-  declareProperty( "PRWLumiCalc", m_PRWLumiCalcFiles );
-  declareProperty( "UsePRWAutoconfig", m_usePRWAutoconfig = false );
-  declareProperty( "mcCampaign", m_mcCampaign = "" );
-  declareProperty( "mcChannel", m_mcChannel = -99 );
   declareProperty( "GRLFiles", m_GRLFiles );
   declareProperty( "maxEvts", m_maxEvts = -999 );
   declareProperty( "LumiBlockFilter", m_lbfilter = 90 );
-  declareProperty( "isPHYSLITE", isPHYSLITE = false);
 
 
   // asg Tool Handles must be dealt with differently
@@ -110,26 +100,13 @@ SUSYToolsAlg::~SUSYToolsAlg() { }
 StatusCode SUSYToolsAlg::initialize() {
   ATH_MSG_INFO("Initializing " << name() << "...");
 
-  //--- ST config and retrieval
-  ATH_CHECK( m_SUSYTools.setProperty("DataSource",m_dataSource) );
-  ATH_CHECK(m_SUSYTools.setProperty("PRWLumiCalcFiles", m_PRWLumiCalcFiles) );
-  ATH_CHECK(m_SUSYTools.setProperty("OutputLevel", this->msg().level()) );
-  ATH_CHECK(m_SUSYTools.setProperty("DebugMode", (static_cast<int>(this->msg().level())<3?true:false )));
-  if (m_usePRWAutoconfig){
-    ATH_CHECK(m_SUSYTools.setProperty("AutoconfigurePRWTool", true) );
-    ATH_CHECK(m_SUSYTools.setProperty("mcCampaign", m_mcCampaign) );
-    ATH_CHECK(m_SUSYTools.setProperty("mcChannel", m_mcChannel) );
-  } else {
-    ATH_CHECK(m_SUSYTools.setProperty("PRWConfigFiles", m_PRWConfigs) );
-  }
-  //
-  ATH_CHECK(m_SUSYTools.setProperty("ConfigFile", m_configFile) );
-  m_SUSYTools.setTypeAndName("ST::SUSYObjDef_xAOD/SUSYTools");
-  if (isPHYSLITE) {
-    ATH_CHECK(m_SUSYTools.setProperty("IsPHYSLITE", true) );
-  }
   ATH_CHECK(m_SUSYTools.retrieve());
   ATH_MSG_INFO("Retrieved tool: " << m_SUSYTools->name() );
+
+  // read some of the property values (may have been autoconfigured at this point)
+  m_mcCampaign = *(m_SUSYTools->getProperty<std::string>("mcCampaign"));
+  m_isPHYSLITE = *(m_SUSYTools->getProperty<bool>("isPHYSLITE"));
+
 
   // Need truth matching for tau CP tools
   if( !m_SUSYTools->isData() ){
@@ -346,7 +323,7 @@ StatusCode SUSYToolsAlg::execute() {
   // get EventInfo
   const xAOD::EventInfo* evtInfo(0);
   ATH_CHECK( evtStore()->retrieve(evtInfo, "EventInfo") );
-  bool isData = ( m_dataSource == 0 );
+    bool isData = m_SUSYTools->isData();
 
   // manual max events within lumiblock selection (on top of Nevts)
   if (m_maxEvts>=-1 && (evtInfo->lumiBlock() != (unsigned int)m_lbfilter)) return StatusCode::SUCCESS;
@@ -405,28 +382,28 @@ StatusCode SUSYToolsAlg::execute() {
   xAOD::ElectronContainer* electrons_nominal(0);
   xAOD::ShallowAuxContainer* electrons_nominal_aux(0);
   if (m_slices["ele"]) {
-    ATH_CHECK( m_SUSYTools->GetElectrons(electrons_nominal, electrons_nominal_aux,true, isPHYSLITE?"AnalysisElectrons":"Electrons") );
+    ATH_CHECK( m_SUSYTools->GetElectrons(electrons_nominal, electrons_nominal_aux,true, m_isPHYSLITE?"AnalysisElectrons":"Electrons") );
     ATH_MSG_DEBUG( "Number of electrons: " << electrons_nominal->size() );
   }
 
   xAOD::PhotonContainer* photons_nominal(0);
   xAOD::ShallowAuxContainer* photons_nominal_aux(0);
   if (m_slices["pho"]) {
-    ATH_CHECK( m_SUSYTools->GetPhotons(photons_nominal, photons_nominal_aux, true, isPHYSLITE?"AnalysisPhotons":"Photons") );
+    ATH_CHECK( m_SUSYTools->GetPhotons(photons_nominal, photons_nominal_aux, true, m_isPHYSLITE?"AnalysisPhotons":"Photons") );
     ATH_MSG_DEBUG( "Number of photons: " << photons_nominal->size() );
   }
 
   xAOD::MuonContainer* muons_nominal(0);
   xAOD::ShallowAuxContainer* muons_nominal_aux(0);
   if (m_slices["mu"]) {
-    ATH_CHECK( m_SUSYTools->GetMuons(muons_nominal, muons_nominal_aux, true, isPHYSLITE?"AnalysisMuons":"Muons") );
+    ATH_CHECK( m_SUSYTools->GetMuons(muons_nominal, muons_nominal_aux, true, m_isPHYSLITE?"AnalysisMuons":"Muons") );
     ATH_MSG_DEBUG( "Number of muons: " << muons_nominal->size() );
   }
 
   xAOD::JetContainer* jets_nominal(0);
   xAOD::ShallowAuxContainer* jets_nominal_aux(0);
   if (m_slices["jet"]) {
-    ATH_CHECK( m_SUSYTools->GetJets(jets_nominal, jets_nominal_aux, true, isPHYSLITE?"AnalysisJets":"") );
+    ATH_CHECK( m_SUSYTools->GetJets(jets_nominal, jets_nominal_aux, true, m_isPHYSLITE?"AnalysisJets":"") );
     ATH_MSG_DEBUG( "Number of jets: " << jets_nominal->size() );
   }
 
@@ -499,13 +476,13 @@ StatusCode SUSYToolsAlg::execute() {
   xAOD::TauJetContainer* taus_nominal(0);
   xAOD::ShallowAuxContainer* taus_nominal_aux(0);
   if (m_slices["tau"]) {
-     if (!isData && !isPHYSLITE) {
+     if (!isData && !m_isPHYSLITE) {
        ATH_CHECK( evtStore()->retrieve(taus_gettruth,"TauJets") );
        for(const auto& tau : *taus_gettruth) {
          m_tauTruthMatchingTool->getTruth(*tau);
        }
      }
-     ATH_CHECK( m_SUSYTools->GetTaus(taus_nominal, taus_nominal_aux, true, isPHYSLITE?"AnalysisTauJets":"TauJets") );
+     ATH_CHECK( m_SUSYTools->GetTaus(taus_nominal, taus_nominal_aux, true, m_isPHYSLITE?"AnalysisTauJets":"TauJets") );
      ATH_MSG_DEBUG( "Number of taus: " << taus_nominal->size() );
   }
 
@@ -590,9 +567,9 @@ StatusCode SUSYToolsAlg::execute() {
               bool passit = ((isRun3Trig||t.find("_L1")==std::string::npos) ? m_SUSYTools->IsTrigMatched(el, t) : false);
               passTM |= passit;
               if(passit) el_trigmatch_eff_nominal->SetBinContent(idx, el_trigmatch_eff_nominal->GetBinContent(idx)+1);
-              m_heffs["Trigger/el_pt_"+t]->Fill(passit,el->pt()/1000.);
-              m_heffs["Trigger/el_eta_"+t]->Fill(passit,el->eta());
-              m_heffs["Trigger/el_phi_"+t]->Fill(passit,el->phi());
+              //m_heffs["Trigger/el_pt_"+t]->Fill(passit,el->pt()/1000.);
+              //m_heffs["Trigger/el_eta_"+t]->Fill(passit,el->eta());
+              //m_heffs["Trigger/el_phi_"+t]->Fill(passit,el->phi());
               idx++;
             }
             if(passTM) el_n_flow_nominal->Fill(Cut::trigmatch);
@@ -633,9 +610,9 @@ StatusCode SUSYToolsAlg::execute() {
               bool passit = ((isRun3Trig||t.find("_L1")==std::string::npos) ? m_SUSYTools->IsTrigMatched(ph, t) : false);
               passTM |= passit;
               if(passit) ph_trigmatch_eff_nominal->SetBinContent(idx, ph_trigmatch_eff_nominal->GetBinContent(idx)+1);
-              m_heffs["Trigger/ph_pt_"+t]->Fill(passit,ph->pt()/1000.);
-              m_heffs["Trigger/ph_eta_"+t]->Fill(passit,ph->eta());
-              m_heffs["Trigger/ph_phi_"+t]->Fill(passit,ph->phi());
+              //m_heffs["Trigger/ph_pt_"+t]->Fill(passit,ph->pt()/1000.);
+              //m_heffs["Trigger/ph_eta_"+t]->Fill(passit,ph->eta());
+              //m_heffs["Trigger/ph_phi_"+t]->Fill(passit,ph->phi());
               idx++;
             }
             if (passTM) ph_n_flow_nominal->Fill(Cut::trigmatch);
@@ -676,9 +653,9 @@ StatusCode SUSYToolsAlg::execute() {
               bool passit = ((isRun3Trig||t.find("_L1")==std::string::npos) ? m_SUSYTools->IsTrigMatched(mu, t) : false);
               passTM |= passit;
               if(passit) mu_trigmatch_eff_nominal->SetBinContent(idx, mu_trigmatch_eff_nominal->GetBinContent(idx)+1);
-              m_heffs["Trigger/mu_pt_"+t]->Fill(passit,mu->pt()/1000.);
-              m_heffs["Trigger/mu_eta_"+t]->Fill(passit,mu->eta());
-              m_heffs["Trigger/mu_phi_"+t]->Fill(passit,mu->phi());
+              //m_heffs["Trigger/mu_pt_"+t]->Fill(passit,mu->pt()/1000.);
+              //m_heffs["Trigger/mu_eta_"+t]->Fill(passit,mu->eta());
+              //m_heffs["Trigger/mu_phi_"+t]->Fill(passit,mu->phi());
               idx++;
             }
             if(passTM) mu_n_flow_nominal->Fill(Cut::trigmatch);
@@ -962,7 +939,7 @@ StatusCode SUSYToolsAlg::execute() {
         ATH_MSG_DEBUG("Get systematics-varied electrons");
         xAOD::ElectronContainer* electrons_syst(0);
         xAOD::ShallowAuxContainer* electrons_syst_aux(0);
-        ATH_CHECK( m_SUSYTools->GetElectrons(electrons_syst, electrons_syst_aux, true , isPHYSLITE?"AnalysisElectrons":"Electrons") );
+        ATH_CHECK( m_SUSYTools->GetElectrons(electrons_syst, electrons_syst_aux, true , m_isPHYSLITE?"AnalysisElectrons":"Electrons") );
         electrons = electrons_syst;
       }
 
@@ -970,7 +947,7 @@ StatusCode SUSYToolsAlg::execute() {
         ATH_MSG_DEBUG("Get systematics-varied photons");
         xAOD::PhotonContainer* photons_syst(0);
         xAOD::ShallowAuxContainer* photons_syst_aux(0);
-        ATH_CHECK( m_SUSYTools->GetPhotons(photons_syst, photons_syst_aux, true, isPHYSLITE?"AnalysisPhotons":"Photons") );
+        ATH_CHECK( m_SUSYTools->GetPhotons(photons_syst, photons_syst_aux, true, m_isPHYSLITE?"AnalysisPhotons":"Photons") );
         photons = photons_syst;
       }
 
@@ -978,7 +955,7 @@ StatusCode SUSYToolsAlg::execute() {
         ATH_MSG_DEBUG("Get systematics-varied muons");
         xAOD::MuonContainer* muons_syst(0);
         xAOD::ShallowAuxContainer* muons_syst_aux(0);
-        ATH_CHECK( m_SUSYTools->GetMuons(muons_syst, muons_syst_aux, true, isPHYSLITE?"AnalysisMuons":"Muons") );
+        ATH_CHECK( m_SUSYTools->GetMuons(muons_syst, muons_syst_aux, true, m_isPHYSLITE?"AnalysisMuons":"Muons") );
         muons = muons_syst;
       }
 
@@ -987,7 +964,7 @@ StatusCode SUSYToolsAlg::execute() {
           ATH_MSG_DEBUG("Get systematics-varied jets");
           xAOD::JetContainer* jets_syst(0);
           xAOD::ShallowAuxContainer* jets_syst_aux(0);
-          ATH_CHECK( m_SUSYTools->GetJetsSyst(*jets_nominal, jets_syst, jets_syst_aux, true, isPHYSLITE?"AnalysisJets":"") );
+          ATH_CHECK( m_SUSYTools->GetJetsSyst(*jets_nominal, jets_syst, jets_syst_aux, true, m_isPHYSLITE?"AnalysisJets":"") );
           jets = jets_syst;
         }
         if (m_slices["fatjet"]) {
@@ -1010,7 +987,7 @@ StatusCode SUSYToolsAlg::execute() {
         ATH_MSG_DEBUG("Get systematics-varied taus");
         xAOD::TauJetContainer* taus_syst(0);
         xAOD::ShallowAuxContainer* taus_syst_aux(0);
-        ATH_CHECK( m_SUSYTools->GetTaus(taus_syst, taus_syst_aux,true, isPHYSLITE?"AnalysisTauJets":"TauJets") );
+        ATH_CHECK( m_SUSYTools->GetTaus(taus_syst, taus_syst_aux,true, m_isPHYSLITE?"AnalysisTauJets":"TauJets") );
         taus = taus_syst;
       }
 
@@ -1169,7 +1146,7 @@ StatusCode SUSYToolsAlg::execute() {
         else{
           btag_weight = m_SUSYTools->BtagSF(jets);
           size_t iwbin = find(syst_weights["BTag"].begin(), syst_weights["BTag"].end(), sys.name()) - syst_weights["BTag"].begin();
-          if(iwbin < syst_weights["BTag"].size()) {  weight_btags->SetBinContent(iwbin+1, weight_jets->GetBinContent(iwbin+1)+btag_weight); }
+          if(iwbin < syst_weights["BTag"].size()) {  weight_btags->SetBinContent(iwbin+1, weight_btags->GetBinContent(iwbin+1)+btag_weight); }
         }
 
         if(isNominal){ //JVT
@@ -1372,18 +1349,21 @@ StatusCode SUSYToolsAlg::bookHistograms(void) {
      }
   }
 
-  // Trigger histograms
-  for (std::string obj : {"el","mu","ph"}) {
-     for (const auto& trg : m_triggers[obj]) {
-        for (std::string var : {"pt","eta","phi"} ) {
-           std::string key = "Trigger/"+obj+"_"+var+"_"+trg;
-           std::string labels = ";"+labels_objects[obj]+" "+cfg_hist_labels[var][0]+";Efficiency "+trg;
-           m_heffs[key] = new TEfficiency(key.c_str(), labels.c_str(), cfg_hist_nbins[var], cfg_hist_minmax[var][0], cfg_hist_minmax[var][1]);
-           histogramWorker()->addOutput(m_heffs[key]);
-           ATH_MSG_INFO("Defined histogram: " << key.c_str() << ", " << m_heffs[key]);
-        }
-     }
-  }
+  //// Trigger histograms
+  //for (std::string obj : {"el","mu","ph"}) {
+  //   for (auto trg : m_triggers[obj]) {
+  //      for (std::string var : {"pt","eta","phi"} ) {
+  //         std::string key = "Trigger/"+obj+"_"+var+"_"+trg;
+  //         std::string labels = ";"+labels_objects[obj]+" "+cfg_hist_labels[var][0]+";Efficiency "+trg;
+  //         m_heffs[key] = new TEfficiency(key.c_str(), labels.c_str(), cfg_hist_nbins[var], cfg_hist_minmax[var][0], cfg_hist_minmax[var][1]);
+  //         //histogramWorker()->addOutput(m_heffs[key]);
+  //         //ATH_CHECK( book(TEfficiency(key.c_str(), labels.c_str(), cfg_hist_nbins[var], cfg_hist_minmax[var][0], cfg_hist_minmax[var][1])) );
+  //         //m_heffs[key] = hist(key);
+  //         ATH_CHECK( book(reinterpret_cast<TH1&>(m_heffs[key])) );
+  //         ATH_MSG_INFO("Defined histogram: " << key.c_str() << ", " << m_heffs[key]);
+  //      }
+  //   }
+  //}
   ATH_CHECK( book(TH1D("Trigger/el_trigmatch_eff_nominal", "Electron Trigger Matching Efficiency (Nominal);Electron Trigger Matching Efficiency (Nominal);N", getSize(m_triggers,"el"), 0, getSize(m_triggers,"el")) ) );
   ATH_CHECK( book(TH1D("Trigger/ph_trigmatch_eff_nominal", "Photon Trigger Matching Efficiency (Nominal);Photon Trigger Matching Efficiency (Nominal);N", getSize(m_triggers,"ph"), 0, getSize(m_triggers,"ph")) ) );
   ATH_CHECK( book(TH1D("Trigger/mu_trigmatch_eff_nominal", "Muon Trigger Matching Efficiency (Nominal);Muon Trigger Matching Efficiency (Nominal);N", getSize(m_triggers,"mu"), 0, getSize(m_triggers,"mu")) ) );
@@ -1490,7 +1470,7 @@ void SUSYToolsAlg::stdHistsForObj(xAOD::IParticle *obj, const std::string& objty
         hist(dir+objtype+"_"+objlevel+"_truthType")->Fill( obj->auxdata<int>("truthType") );
         hist(dir+objtype+"_"+objlevel+"_truthOrigin")->Fill( obj->auxdata<int>("truthOrigin") );
       } else {
-        if(!isPHYSLITE){
+        if(!m_isPHYSLITE){
           bool istruthmatched = (bool)obj->auxdata<char>("IsTruthMatched");
           int pid(0),ppid(0);
           if (istruthmatched && obj->isAvailable<ElementLink<xAOD::TruthParticleContainer>>("truthParticleLink")) {

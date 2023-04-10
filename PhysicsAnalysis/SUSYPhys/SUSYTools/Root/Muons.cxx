@@ -204,7 +204,6 @@ StatusCode SUSYObjDef_xAOD::FillMuon(xAOD::Muon& input, float ptcut, float etacu
 
   const xAOD::EventInfo* evtInfo = nullptr;
   ATH_CHECK( evtStore()->retrieve( evtInfo, "EventInfo" ) );
-
   const xAOD::Vertex* pv = this->GetPrimVtx();
   double primvertex_z = pv ? pv->z() : 0;
   //const xAOD::TrackParticle* track = input.primaryTrackParticle();
