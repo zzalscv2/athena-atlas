@@ -51,14 +51,7 @@ StatusCode Trk::RIO_OnTrackCreator::initialize()
     return StatusCode::FAILURE;
   }
 
-  ATH_MSG_INFO("RIO_OnTrackCreator job configuration:" << std::endl
-     << std::endl << " (i) The following RIO correction "
-     << "tools configured (depends on mode = "<< m_mode <<"):" << std::endl
-     << "     Pixel      : " << m_pixClusCor << std::endl
-     << "     SCT        : " << m_sctClusCor << std::endl
-     << "     TRT        : " << m_trt_Cor       << std::endl
-     << "     MDT        : " << m_muonDriftCircleCor << std::endl
-     << "     CSC/RPC/TGC/MM/sTGC: " << m_muonClusterCor);
+  ATH_MSG_INFO("Mode is set to :" <<m_mode);
 
   // Get the correction tool to create Pixel/SCT/TRT RIO_onTrack
   if (m_enumMode == Mode::all || m_enumMode == Mode::indet) {
@@ -99,12 +92,6 @@ StatusCode Trk::RIO_OnTrackCreator::initialize()
   return StatusCode::SUCCESS;
 }
 
-// finalise
-StatusCode Trk::RIO_OnTrackCreator::finalize()
-{
-  return StatusCode::SUCCESS;
-}
-
 // The sub-detector brancher algorithm
 const Trk::RIO_OnTrack* 
 Trk::RIO_OnTrackCreator::correct(const Trk::PrepRawData& rio,
@@ -121,41 +108,36 @@ Trk::RIO_OnTrackCreator::correct(const Trk::PrepRawData& rio,
   if (m_doPixel && m_idHelper->is_pixel(id)) {
     if (m_enumMode == Mode::muon) {
       ATH_MSG_WARNING(
-          "I have no tool to correct the current Pixel hit! - Giving back "
-          "nil.");
+          "No tool to correct the current Pixel hit! return nullptr");
       return nullptr;
     }
-    ATH_MSG_DEBUG("RIO identified as PixelCluster.");
     return m_pixClusCor->correct(rio, trk);
   }
 
   if (m_doSCT && m_idHelper->is_sct(id)) {
     if (m_enumMode == Mode::muon) {
       ATH_MSG_WARNING(
-          "I have no tool to correct the current SCT hit! - Giving back nil.");
+          "No tool to correct the current SCT hit! - Giving back nullptr.");
       return nullptr;
     }
-    ATH_MSG_DEBUG("RIO identified as SCT_Cluster.");
     return m_sctClusCor->correct(rio, trk);
   }
 
   if (m_doTRT && m_idHelper->is_trt(id)) {
     if (m_enumMode == Mode::muon) {
       ATH_MSG_WARNING(
-          "I have no tool to correct a TRT DriftCircle! - Giving back nil.");
+          "No tool to correct a TRT DriftCircle! - Giving back nullptr.");
       return nullptr;
     }
-    ATH_MSG_DEBUG("RIO identified as TRT_DriftCircle.");
     return m_trt_Cor->correct(rio, trk);
   }
 
   if (m_idHelper->is_mdt(id)) {
     if (m_enumMode == Mode::indet) {
       ATH_MSG_WARNING(
-          "I have no tool to correct a MDT DriftCircle! - Giving back nil.");
+          "No tool to correct a MDT DriftCircle! - Giving back nullptr.");
       return nullptr;
     }
-    ATH_MSG_DEBUG("RIO identified as MuonDriftCircle.");
     return m_muonDriftCircleCor->correct(rio, trk);
   }
 
@@ -163,10 +145,9 @@ Trk::RIO_OnTrackCreator::correct(const Trk::PrepRawData& rio,
       (m_idHelper->is_tgc(id)) || (m_idHelper->is_mm(id)) ||
       (m_idHelper->is_stgc(id))) {
     if (m_enumMode == Mode::indet) {
-      ATH_MSG_WARNING("I have no tool to correct a CSC/RPC/TGC/MM/sTGC hit! - Giving back nil.");
+      ATH_MSG_WARNING("No tool to correct a CSC/RPC/TGC/MM/sTGC hit! - Giving back nullptr.");
       return nullptr;
     }
-    ATH_MSG_DEBUG("RIO identified as MuonCluster.");
     return m_muonClusterCor->correct(rio, trk);
   }
 
