@@ -21,6 +21,8 @@
 #include <cassert>
 #include <iostream>
 
+#include "AthAllocators/DataPool.h"
+
 
 void compare (const LArHit& p1,
               const LArHit& p2)
@@ -57,6 +59,13 @@ void testit (const LArHitContainer& trans1)
 void test1 ATLAS_NOT_THREAD_SAFE (const CaloCell_ID& idhelper)
 {
   std::cout << "test1\n";
+  {
+    // Need to instantiate an instance of this before Leakcheck,
+    // to get the allocator created.  But the instance will also
+    // hold a lock on the allocator, so can't leave this live
+    // or we'll deadlock.
+    DataPool<LArHit> pooldum;
+  }
   Athena_test::Leakcheck check;
 
   LArHitContainer trans1 ("coll");
