@@ -565,7 +565,7 @@ InDet::TRT_ElectronPidToolRun2::electronProbability(
 bool InDet::TRT_ElectronPidToolRun2::CheckGeometry(int BEC, int Layer, int StrawLayer) const {
 
   //first check that the BEC is valid:
-  if(not ( BEC==-2 || BEC ==-1 || BEC==1 || BEC==2)){
+  if( BEC!=-2 && BEC !=-1 && BEC!=1 && BEC!=2){
     ATH_MSG_ERROR("Found a wrong TRT part: "<<BEC<<" expected one of (-2,-1,1,2)");
     return false;
   }

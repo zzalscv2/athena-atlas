@@ -239,7 +239,7 @@ std::map<int, double> TRT_LocalOccupancy::getDetectorOccupancy(const EventContex
             mask>>=1;
             if(tdcvalue==7 || tdcvalue==15) mask>>=1;
           }
-          if(!(tdcvalue==0 || tdcvalue==24)) {
+          if(tdcvalue!=0 && tdcvalue!=24) {
             t0 =  m_CalDbTool->getT0(rdo_id);
           }
         }
