@@ -23,7 +23,6 @@ namespace CP {
 
     /// Tagger configuration
     m_calibArea = "BoostedJetTaggers/JetQGTaggerBDT/Oct18/"; /// Overwrite base class default
-    declareProperty( "TMVAConfigFile", m_tmvaConfigFileName="TMVAClassification_BDTQGTagger_Oct18_BDT.weights.xml");
     declareProperty( "UseJetVars",  m_mode = 1); /// 0 uses the tracks. 1 uses variables from the jets (default)
 
   }
