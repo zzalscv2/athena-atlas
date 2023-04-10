@@ -89,10 +89,10 @@ namespace ISF {
     void deleteChildVertex(HepMC::GenVertexPtr  vertex) const;
 
     /** Helper function to determine the largest particle barcode set by the generator */
-    int maxGeneratedParticleBarcode(HepMC::GenEvent *genEvent) const;
+    int maxGeneratedParticleBarcode(const HepMC::GenEvent *genEvent) const;
 
     /** Helper function to determine the largest vertex barcode set by the generator */
-    int maxGeneratedVertexBarcode(HepMC::GenEvent *genEvent) const;
+    int maxGeneratedVertexBarcode(const HepMC::GenEvent *genEvent) const;
 
     /** Helper function to classify existing GenVertex objects */
     ISF::InteractionClass_t interactionClassification(HepMC::GenVertexPtr& vtx) const;
