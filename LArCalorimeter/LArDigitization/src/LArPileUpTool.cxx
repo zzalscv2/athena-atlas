@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // +==========================================================================+
@@ -37,14 +37,10 @@ using CLHEP::RandGaussZiggurat;
 
 LArPileUpTool::LArPileUpTool(const std::string& type, const std::string& name, const IInterface* parent) :
   PileUpToolBase(type, name, parent) {
-
 }
 
 
-LArPileUpTool::~LArPileUpTool()
-{
-  return;
-}
+LArPileUpTool::~LArPileUpTool() = default;
 
 
 StatusCode LArPileUpTool::initialize()
@@ -391,7 +387,7 @@ StatusCode LArPileUpTool::processAllSubEvents(const EventContext& ctx)
         // retrieve list of pairs (time,container) from PileUp service
 
         if (!(m_mergeSvc->retrieveSubEvtsData(containerName
-            ,hitContList).isSuccess()) && hitContList.size()==0) {
+            ,hitContList).isSuccess()) && hitContList.empty()) {
          ATH_MSG_ERROR("Could not fill TimedHitContList");
          return StatusCode::FAILURE;
         }
@@ -447,7 +443,7 @@ StatusCode LArPileUpTool::processAllSubEvents(const EventContext& ctx)
         // retrieve list of pairs (time,container) from PileUp service
 
         if (!(m_mergeSvc->retrieveSubEvtsData(containerName
-              ,hitContList).isSuccess()) && hitContList.size()==0) {
+              ,hitContList).isSuccess()) && hitContList.empty()) {
          ATH_MSG_ERROR("Could not fill TimedHitContList");
          return StatusCode::FAILURE;
         }
@@ -534,7 +530,7 @@ StatusCode LArPileUpTool::processAllSubEvents(const EventContext& ctx)
 
         TimedDigitContList digitContList;
         if (!(m_mergeSvc->retrieveSubEvtsData(m_inputDigitContainerKey.key(),
-            digitContList).isSuccess()) || digitContList.size()==0)
+            digitContList).isSuccess()) || digitContList.empty())
         {
           ATH_MSG_ERROR("Cannot retrieve LArDigitContainer for random event overlay or empty Container");
           ATH_MSG_ERROR("Random Digit Key= " << m_inputDigitContainerKey.key() << ",size=" << digitContList.size());

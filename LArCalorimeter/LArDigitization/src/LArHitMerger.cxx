@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -23,13 +23,13 @@
 
 LArHitMerger::LArHitMerger(const std::string& name, ISvcLocator* pSvcLocator)
   : AthAlgorithm(name, pSvcLocator),
-    p_mergeSvc(NULL),
+    p_mergeSvc(nullptr),
     m_SubDetectors ("LAr_All"),
     m_EmBarrelHitContainerName ("LArHitEMB"),
     m_EmEndCapHitContainerName ("LArHitEMEC"),
     m_HecHitContainerName ("LArHitHEC"),
     m_ForWardHitContainerName ("LArHitFCAL"),
-    m_larem_id(NULL),m_larhec_id(NULL),m_larfcal_id(NULL)
+    m_larem_id(nullptr),m_larhec_id(nullptr),m_larfcal_id(nullptr)
 {
   //
   // ........ declare the private data as properties
@@ -39,16 +39,10 @@ LArHitMerger::LArHitMerger(const std::string& name, ISvcLocator* pSvcLocator)
   declareProperty("EmEndCapHitContainerName",m_EmEndCapHitContainerName,"Hit container name for EMEC");
   declareProperty("HecHitContainerName",m_HecHitContainerName,"Hit container name for HEC");
   declareProperty("ForWardHitContainerName",m_ForWardHitContainerName,"Hit container name for FCAL");
-
-//
-return;
 }
 
 
-LArHitMerger::~LArHitMerger()
-{  
-return;
-}
+LArHitMerger::~LArHitMerger() = default;
 
 
 StatusCode LArHitMerger::initialize()
@@ -143,7 +137,7 @@ StatusCode LArHitMerger::initialize()
 // locate the PileUpMergeSvc and initialize our local ptr
 //
   if (!(service("PileUpMergeSvc", p_mergeSvc)).isSuccess() ||
-       0 == p_mergeSvc) {
+       nullptr == p_mergeSvc) {
      ATH_MSG_ERROR("Could not find PileUpMergeSvc");
      return StatusCode::FAILURE;
   }
@@ -191,10 +185,10 @@ StatusCode LArHitMerger::execute()
 //
 // ....... create the new LAr Hit containers
 //
-  LArHitContainer* larhit_emb=0;
-  LArHitContainer* larhit_emec=0;
-  LArHitContainer* larhit_hec=0;
-  LArHitContainer* larhit_fcal=0;
+  LArHitContainer* larhit_emb=nullptr;
+  LArHitContainer* larhit_emec=nullptr;
+  LArHitContainer* larhit_hec=nullptr;
+  LArHitContainer* larhit_fcal=nullptr;
 
   StatusCode sc;
 
@@ -268,7 +262,7 @@ StatusCode LArHitMerger::execute()
 // retrieve list of pairs (time,container) from PileUp service
 
     if (!(p_mergeSvc->retrieveSubEvtsData(m_HitContainer[iHitContainer]
-          ,hitContList).isSuccess()) && hitContList.size()==0) {
+          ,hitContList).isSuccess()) && hitContList.empty()) {
        ATH_MSG_ERROR(" Could not fill TimedHitContList" );
        return StatusCode::FAILURE;
     }
