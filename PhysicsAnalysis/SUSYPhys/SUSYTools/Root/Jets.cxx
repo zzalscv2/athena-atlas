@@ -392,9 +392,9 @@ namespace ST {
         dec_ztagged(input) = -1;
         dec_toptagged(input) = -1;
         if (doLargeRdecorations) {
-          if (!m_WtagConfig.empty()) dec_wtagged(input) = m_WTaggerTool->tag(input);
-          if (!m_ZtagConfig.empty()) dec_ztagged(input) = m_ZTaggerTool->tag(input);
-          if (!m_ToptagConfig.empty()) dec_toptagged(input) = m_TopTaggerTool->tag(input);
+          if (!m_WtagConfig.empty()) dec_wtagged(input) = m_WTaggerTool->tag(input).isSuccess();
+          if (!m_ZtagConfig.empty()) dec_ztagged(input) = m_ZTaggerTool->tag(input).isSuccess();
+          if (!m_ToptagConfig.empty()) dec_toptagged(input) = m_TopTaggerTool->tag(input).isSuccess();
         }
 
         // If a user hasn't specified an uncertainty config, then this tool will be empty
@@ -695,7 +695,8 @@ namespace ST {
     bool isbjet = bool(m_btagSelTool->accept(input));
     dec_bjet(input) = isbjet;
 
-    ATH_CHECK( SetBtagWeightDecorations(input, m_btagSelTool, m_BtagTagger) );
+    if (SetBtagWeightDecorations(input, m_btagSelTool, m_BtagTagger).isFailure())
+       ANA_MSG_ERROR("Couldn't set b-tag decorations for jet, is-b = " << (isbjet?"true":"false") << ", pT = " << input.pt()/1000.);
 
     return isbjet;
   }
@@ -705,7 +706,8 @@ namespace ST {
     bool isbjet = bool(m_btagSelTool_trkJet->accept(input));
     dec_bjet(input) = isbjet;
 
-    ATH_CHECK( SetBtagWeightDecorations(input, m_btagSelTool_trkJet, m_BtagTagger_trkJet) );
+    if(SetBtagWeightDecorations(input, m_btagSelTool_trkJet, m_BtagTagger_trkJet).isFailure())
+       ANA_MSG_ERROR("Couldn't set b-tag decorations for trackjet, is-b = " << (isbjet?"true":"false") << ", pT = " << input.pt()/1000.);
 
     return isbjet;
   }
@@ -725,7 +727,8 @@ namespace ST {
     int isbjet = m_btagSelTool->getQuantile(input);
     dec_bjet(input) = isbjet;
 
-    ATH_CHECK( SetBtagWeightDecorations(input, m_btagSelTool, m_BtagTagger) );
+    if(SetBtagWeightDecorations(input, m_btagSelTool, m_BtagTagger).isFailure())
+       ANA_MSG_ERROR("Couldn't set continuous b-tag decorations for jet, is-b = " << isbjet << ", pT = " << input.pt()/1000.);
 
     return isbjet;
   }
@@ -735,7 +738,8 @@ namespace ST {
     int isbjet = m_btagSelTool_trkJet->getQuantile(input);
     dec_bjet(input) = isbjet;
 
-    ATH_CHECK( SetBtagWeightDecorations(input, m_btagSelTool_trkJet, m_BtagTagger_trkJet) );
+    if(SetBtagWeightDecorations(input, m_btagSelTool_trkJet, m_BtagTagger_trkJet).isFailure())
+       ANA_MSG_ERROR("Couldn't set continuous b-tag decorations for trackjet, is-b = " << isbjet << ", pT = " << input.pt()/1000.);
 
     return isbjet;
   }
@@ -907,7 +911,8 @@ namespace ST {
     float totalSF = 1.;
     if (!m_applyJVTCut) return totalSF;
 
-    ANA_CHECK(m_jetJvtEfficiencyTool->recalculateScores(*jets));
+    if(m_jetJvtEfficiencyTool->recalculateScores(*jets).isFailure())
+       ATH_MSG_ERROR("Couldn't recalculate JvtEfficiencyScores.");
 
     ConstDataVector<xAOD::JetContainer> jvtjets(SG::VIEW_ELEMENTS);
     for (const xAOD::Jet* jet : *jets) {
@@ -1039,28 +1044,11 @@ namespace ST {
     return totalSF;
   }
 
-  StatusCode SUSYObjDef_xAOD::BendBTaggingLinks(xAOD::JetContainer* to_container , const std::string& bTagKey) const {
-    const xAOD::JetContainer* b_tag_jets = nullptr;
-    ATH_CHECK(evtStore()->retrieve(b_tag_jets,bTagKey));
-    if (b_tag_jets->size() != to_container->size()) {
-      ATH_MSG_FATAL("Size of the original jet container and of the btagg container do not match");
-      return StatusCode::FAILURE;
-    }
-    xAOD::JetContainer::const_iterator btag_begin = b_tag_jets->begin();
-    xAOD::JetContainer::const_iterator btag_end   = b_tag_jets->end();
-
-    xAOD::JetContainer::iterator to_begin = to_container->begin();
-    xAOD::JetContainer::iterator to_end   = to_container->end();
-    for (  ; to_begin != to_end && btag_begin != btag_end ; ++to_begin, ++btag_begin) {
-      xAOD::BTaggingUtilities::setBTaggingLink(*(*to_begin), xAOD::BTaggingUtilities::getBTaggingLink(*(*btag_begin)));
-    }
-    return StatusCode::SUCCESS;
-  }
-
   StatusCode SUSYObjDef_xAOD::SetBtagWeightDecorations(const xAOD::Jet& input, const asg::AnaToolHandle<IBTaggingSelectionTool>& btagSelTool, const std::string& btagTagger) const {
     double weight = 0.;
     if ( btagSelTool->getTaggerWeight(input, weight, false/*useVetoWP=false*/) != CP::CorrectionCode::Ok ) {
       ATH_MSG_ERROR( btagSelTool->name() << ": could not retrieve b-tag weight (" << btagTagger << ")." );
+      return StatusCode::FAILURE;
     }
     dec_btag_weight(input) = weight;
     ATH_MSG_DEBUG( btagSelTool->name() << " b-tag weight: " << weight );
@@ -1079,5 +1067,4 @@ namespace ST {
     }
     return StatusCode::SUCCESS;
   }
-
 }

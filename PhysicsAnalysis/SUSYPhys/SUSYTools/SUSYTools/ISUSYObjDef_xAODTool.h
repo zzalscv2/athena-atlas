@@ -12,6 +12,7 @@
 
 // EDM include(s):
 // Note that these are type defs, so we must include headers here
+#include "xAODEventInfo/EventInfo.h"
 #include "xAODEgamma/Electron.h"
 #include "xAODEgamma/ElectronContainer.h"
 #include "xAODMuon/Muon.h"
@@ -217,6 +218,11 @@ namespace ST {
     virtual bool isData() const = 0;
     virtual bool isAtlfast() const = 0;
 
+    // method to access properties of the tool
+    template<typename T> const T* getProperty(const std::string& name) {
+        return dynamic_cast<asg::AsgTool&>(*this).getProperty<T>(name);
+    }
+
     // override the AsgTool setProperty function for booleans
     virtual StatusCode setBoolProperty(const std::string& name, const bool& property) = 0;
 
@@ -230,8 +236,6 @@ namespace ST {
 
     virtual const xAOD::Vertex* GetPrimVtx() const = 0;
     
-    virtual StatusCode BendBTaggingLinks(xAOD::JetContainer* , const std::string& bTagKey) const = 0;
-    virtual StatusCode SetBtagWeightDecorations(const xAOD::Jet& input, const asg::AnaToolHandle<IBTaggingSelectionTool>& btagSelTool, const std::string& btagTagger) const = 0;
     virtual StatusCode GetJets(xAOD::JetContainer*& copy,xAOD::ShallowAuxContainer*& copyaux,const bool recordSG=true, const std::string& jetkey="", const xAOD::JetContainer* containerToBeCopied = nullptr) = 0;
     virtual StatusCode GetTrackJets(xAOD::JetContainer*& copy,xAOD::ShallowAuxContainer*& copyaux,const bool recordSG=true, const std::string& jetkey="", const xAOD::JetContainer* containerToBeCopied = nullptr) = 0;
     virtual StatusCode GetJetsSyst(const xAOD::JetContainer& calibjets,xAOD::JetContainer*& copy,xAOD::ShallowAuxContainer*& copyaux, const bool recordSG=true, const std::string& jetkey="") = 0;
@@ -264,6 +268,7 @@ namespace ST {
 
     virtual StatusCode MergeElectrons(const  xAOD::ElectronContainer & electrons, xAOD::ElectronContainer* outputCol, const std::set<const xAOD::Electron *> &ElectronsToRemove) const = 0;
 
+    virtual StatusCode SetBtagWeightDecorations(const xAOD::Jet& input, const asg::AnaToolHandle<IBTaggingSelectionTool>& btagSelTool, const std::string& btagTagger) const = 0;
     virtual bool IsPFlowCrackVetoCleaning(const xAOD::ElectronContainer* elec = nullptr, const xAOD::PhotonContainer* gamma = nullptr) const = 0;
 
     virtual bool IsSignalJet(const xAOD::Jet& input,  const float ptcut, const float etacut) const = 0;
@@ -392,6 +397,8 @@ namespace ST {
     virtual float GetTrigPrescale(const std::string&) const = 0;
 
     virtual const Trig::ChainGroup* GetTrigChainGroup(const std::string&) const = 0;
+
+    virtual const xAOD::EventInfo* GetEventInfo() const = 0;
 
     virtual float GetPileupWeight() = 0;
 

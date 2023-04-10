@@ -7,5 +7,11 @@
 
 #include "SUSYTools/SUSYObjDef_xAOD.h"
 #include "SUSYTools/SUSYCrossSection.h"
+
+// AthAnalysis doesn't need dictionaries building for components (such as algorithms)
+// So only do this overhead for AnalysisBase
+#ifdef XAOD_STANDALONE
 #include "src/SUSYToolsAlg.h"
+#endif
+
 #endif // not SUSYTOOLS_SUSYTOOLSDICT_H

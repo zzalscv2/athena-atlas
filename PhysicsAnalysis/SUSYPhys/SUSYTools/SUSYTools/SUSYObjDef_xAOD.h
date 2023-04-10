@@ -158,8 +158,6 @@ namespace ST {
 
     const xAOD::Vertex* GetPrimVtx() const override final;
 
-    StatusCode BendBTaggingLinks(xAOD::JetContainer* to_container , const std::string& bTagKey) const override final;
-    StatusCode SetBtagWeightDecorations(const xAOD::Jet& input, const asg::AnaToolHandle<IBTaggingSelectionTool>& btagSelTool, const std::string& btagTagger) const override final;
     StatusCode GetJets(xAOD::JetContainer*& copy, xAOD::ShallowAuxContainer*& copyaux, const bool recordSG = true, const std::string& jetkey = "", const xAOD::JetContainer* containerToBeCopied = nullptr) override final;
     StatusCode GetTrackJets(xAOD::JetContainer*& copy, xAOD::ShallowAuxContainer*& copyaux, const bool recordSG = true, const std::string& jetkey = "", const xAOD::JetContainer* containerToBeCopied = nullptr) override final;
     StatusCode GetJetsSyst(const xAOD::JetContainer& calibjets, xAOD::JetContainer*& copy, xAOD::ShallowAuxContainer*& copyaux, const bool recordSG = true, const std::string& jetkey = "") override final;
@@ -199,6 +197,7 @@ namespace ST {
     const xAOD::ElectronContainer* lrt_electrons = nullptr;
     mutable xAOD::Electron* newElectron = nullptr;
 
+    StatusCode SetBtagWeightDecorations(const xAOD::Jet& input, const asg::AnaToolHandle<IBTaggingSelectionTool>& btagSelTool, const std::string& btagTagger) const override final;
     bool IsPFlowCrackVetoCleaning(const xAOD::ElectronContainer* elec = nullptr, const xAOD::PhotonContainer* gamma = nullptr) const override final;
 
     bool IsSignalJet(const xAOD::Jet& input, const float ptcut, const float etacut) const override final;
@@ -339,6 +338,8 @@ namespace ST {
     void GetTriggerTokens(std::string, std::vector<std::string>& , std::vector<std::string>& , std::vector<std::string>& , std::vector<std::string>& ) const;
     Trig::FeatureContainer GetTriggerFeatures(const std::string& chainName = "EF_.*", unsigned int condition = TrigDefs::Physics) const;
 
+    const xAOD::EventInfo* GetEventInfo() const override final;
+
     float GetPileupWeight() override final;
 
     float GetPileupWeightPrescaledTrigger(const std::string & trigger_expr) override final;
@@ -421,26 +422,26 @@ namespace ST {
     mutable std::map<std::string, std::function<bool()>> m_metTriggerFuncs;
     // Store whether the trigger was in the TDT
     mutable std::map<std::string, bool> m_checkedTriggers;
-    bool m_emulateHLT(const std::string& triggerName) const;
-    bool m_isTrigInTDT(const std::string& triggerName) const;
+    bool emulateHLT(const std::string& triggerName) const;
+    bool isTrigInTDT(const std::string& triggerName) const;
 
     //book trigger chains for matching
-    std::vector<std::string> v_trigs15_cache_singleEle;
-    std::vector<std::string> v_trigs16_cache_singleEle;
-    std::vector<std::string> v_trigs17_cache_singleEle;
-    std::vector<std::string> v_trigs18_cache_singleEle;
-    std::vector<std::string> v_trigs15_cache_singleLep;
-    std::vector<std::string> v_trigs16_cache_singleLep;
-    std::vector<std::string> v_trigs17_cache_singleLep;
-    std::vector<std::string> v_trigs18_cache_singleLep;
-    std::vector<std::string> v_trigs15_cache_diLep;
-    std::vector<std::string> v_trigs16_cache_diLep;
-    std::vector<std::string> v_trigs17_cache_diLep;
-    std::vector<std::string> v_trigs18_cache_diLep;
-    std::vector<std::string> v_trigs15_cache_multiLep;
-    std::vector<std::string> v_trigs16_cache_multiLep;
-    std::vector<std::string> v_trigs17_cache_multiLep;
-    std::vector<std::string> v_trigs18_cache_multiLep;
+    std::vector<std::string> m_v_trigs15_cache_singleEle;
+    std::vector<std::string> m_v_trigs16_cache_singleEle;
+    std::vector<std::string> m_v_trigs17_cache_singleEle;
+    std::vector<std::string> m_v_trigs18_cache_singleEle;
+    std::vector<std::string> m_v_trigs15_cache_singleLep;
+    std::vector<std::string> m_v_trigs16_cache_singleLep;
+    std::vector<std::string> m_v_trigs17_cache_singleLep;
+    std::vector<std::string> m_v_trigs18_cache_singleLep;
+    std::vector<std::string> m_v_trigs15_cache_diLep;
+    std::vector<std::string> m_v_trigs16_cache_diLep;
+    std::vector<std::string> m_v_trigs17_cache_diLep;
+    std::vector<std::string> m_v_trigs18_cache_diLep;
+    std::vector<std::string> m_v_trigs15_cache_multiLep;
+    std::vector<std::string> m_v_trigs16_cache_multiLep;
+    std::vector<std::string> m_v_trigs17_cache_multiLep;
+    std::vector<std::string> m_v_trigs18_cache_multiLep;
 
   protected:
 

@@ -16,7 +16,7 @@ find_package( GTest )
 
 # Libraries in the package:
 atlas_add_library( SUSYToolsLib
-   SUSYTools/*.h Root/*.cxx src/SUSYToolsAlg.cxx src/SUSYToolsAlg.h
+   Root/*.cxx
    PUBLIC_HEADERS SUSYTools src
    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${BOOST_INCLUDE_DIRS}
    LINK_LIBRARIES AsgTools xAODCore xAODEgamma xAODEventInfo
@@ -40,48 +40,56 @@ atlas_add_library( SUSYToolsLib
 
 if( NOT XAOD_STANDALONE )
    atlas_add_component( SUSYTools
-      src/*.h src/*.cxx src/components/*.cxx
+      src/*.cxx src/components/*.cxx
       NOCLID
-      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-      LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps GaudiKernel
-      AthenaKernel AthAnalysisBaseCompsLib xAODEventInfo xAODMuon xAODPrimitives
-      xAODJet xAODBTagging xAODEgamma xAODMissingET xAODTracking xAODTau
-      TauAnalysisToolsLib xAODCore AthContainers AsgTools xAODBase xAODCutFlow
-      PATInterfaces PathResolver SUSYToolsLib MuonAnalysisInterfacesLib JetAnalysisInterfacesLib EgammaAnalysisInterfacesLib )
+      PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+      PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AthAnalysisBaseCompsLib SUSYToolsLib TauAnalysisToolsLib )
+   atlas_add_dictionary( SUSYToolsDict
+           SUSYTools/SUSYToolsDict.h
+           SUSYTools/selection.xml
+           LINK_LIBRARIES SUSYToolsLib )
+else()
+   atlas_add_library( SUSYTools src/SUSYToolsAlg.cxx src/SUSYToolsAlg.h
+           NO_PUBLIC_HEADERS
+           PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${BOOST_INCLUDE_DIRS}
+           PRIVATE_LINK_LIBRARIES SUSYToolsLib TauAnalysisToolsLib
+           )
+   atlas_add_dictionary( SUSYToolsDict
+           SUSYTools/SUSYToolsDict.h
+           SUSYTools/selection.xml
+           LINK_LIBRARIES SUSYToolsLib SUSYTools )
 endif()
 
-atlas_add_dictionary( SUSYToolsDict
-   SUSYTools/SUSYToolsDict.h
-   SUSYTools/selection.xml
-   LINK_LIBRARIES SUSYToolsLib )
+
 
 # Executable(s) in the package:
 set( extra_libs )
 if( NOT XAOD_STANDALONE )
    set( extra_libs POOLRootAccessLib )
 endif()
-atlas_add_executable( SUSYToolsTester
-   util/SUSYToolsTester.cxx
-   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} xAODRootAccess xAODEventInfo xAODMuon
-   xAODEgamma xAODTau xAODTruth xAODJet xAODCaloEvent xAODCore xAODMissingET
-   FTagAnalysisInterfacesLib xAODBase TauAnalysisToolsLib GoodRunsListsLib
-   PileupReweightingLib PATInterfaces PathResolver METUtilitiesLib xAODCutFlow
-   SUSYToolsLib ${extra_libs} )
-
-atlas_add_executable( SUSYTruthTester
-   util/SUSYTruthTester.cxx
-   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} xAODRootAccess xAODEventInfo
-   xAODTruth xAODCore xAODBase PATInterfaces PathResolver xAODCutFlow
-   SUSYToolsLib ${extra_libs} )
-
-atlas_add_executable( SUSYTools_check_xsections
-   util/check_xsections.cxx
-   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} SUSYToolsLib )
 
 if( XAOD_STANDALONE )
+   atlas_add_executable( SUSYToolsTester
+      util/SUSYToolsTester.cxx
+      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+      LINK_LIBRARIES ${ROOT_LIBRARIES} xAODRootAccess xAODEventInfo xAODMuon
+      xAODEgamma xAODTau xAODTruth xAODJet xAODCaloEvent xAODCore xAODMissingET
+      FTagAnalysisInterfacesLib xAODBase TauAnalysisToolsLib GoodRunsListsLib
+      PileupReweightingLib PATInterfaces PathResolver METUtilitiesLib xAODCutFlow
+      SUSYToolsLib ${extra_libs} )
+
+   atlas_add_executable( SUSYTruthTester
+      util/SUSYTruthTester.cxx
+      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+      LINK_LIBRARIES ${ROOT_LIBRARIES} xAODRootAccess xAODEventInfo
+      xAODTruth xAODCore xAODBase PATInterfaces PathResolver xAODCutFlow
+      SUSYToolsLib ${extra_libs} )
+
+   atlas_add_executable( SUSYTools_check_xsections
+      util/check_xsections.cxx
+      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+      LINK_LIBRARIES ${ROOT_LIBRARIES} SUSYToolsLib )
+
    atlas_add_executable( SUSYTools_check_syst
       util/check_syst.cxx
       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
@@ -98,13 +106,11 @@ if( XAOD_STANDALONE )
       SCRIPT SUSYToolsTester /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools/DAOD_PHYS.data18_13TeV.00356250_p5511.pool.root
              maxEvents=500 isData=1 isAtlfast=0 Debug=0
       LOG_IGNORE_PATTERN ${extra_patterns}
-      PROPERTIES TIMEOUT 300
    )
    atlas_add_test( ut_SUSYToolsTester_data_Run3
       SCRIPT SUSYToolsTester /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools/DAOD_PHYS.data22_13p6TeV.00440543_p5514.pool.root
             maxEvents=1000 isData=1 isAtlfast=0 Debug=0
       LOG_IGNORE_PATTERN ${extra_patterns}
-      PROPERTIES TIMEOUT 300
    )
    atlas_add_test( ut_SUSYToolsTester_mc
       SCRIPT SUSYToolsTester /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools/DAOD_PHYS.mc20_13TeV.410470.FS_mc20e_p5511.PHYS.pool.root
@@ -112,7 +118,6 @@ if( XAOD_STANDALONE )
              PRWFile=dev/PileupReweighting/mc16_13TeV/pileup_mc16e_dsid410470_FS.root
              ilumicalcFile=GoodRunsLists/data18_13TeV/20190318/ilumicalc_histograms_None_348885-364292_OflLumi-13TeV-010.root
       LOG_IGNORE_PATTERN ${extra_patterns}
-      PROPERTIES TIMEOUT 300
    )
    atlas_add_test( ut_SUSYToolsTester_mc_Run3
       SCRIPT SUSYToolsTester /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools/DAOD_PHYS.mc21_13p6TeV.601229.FS_mc21a_p5511.PHYS.pool.root
@@ -120,7 +125,23 @@ if( XAOD_STANDALONE )
              PRWFile=dev/PileupReweighting/mc16_13TeV/pileup_mc21a_dsid601229_FS.root
              ilumicalcFile=GoodRunsLists/data22_13p6TeV/20230116/ilumicalc_histograms_None_431810-440613_OflLumi-Run3-002.root 
       LOG_IGNORE_PATTERN ${extra_patterns}
-      PROPERTIES TIMEOUT 300
+   )
+else()
+   atlas_add_test( ut_SUSYToolsAlg_data
+      SCRIPT "athena SUSYTools/jobOptions.py --filesInput /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools/DAOD_PHYS.data18_13TeV.00356250_p5511.pool.root --evtMax 500"
+      LOG_IGNORE_PATTERN ${extra_patterns}
+   )
+   atlas_add_test( ut_SUSYToolsAlg_data_Run3
+      SCRIPT "athena SUSYTools/jobOptions.py --filesInput /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools/DAOD_PHYS.data22_13p6TeV.00440543_p5514.pool.root --evtMax 500 - --configFile SUSYTools/SUSYTools_Default_Run3.conf"
+      LOG_IGNORE_PATTERN ${extra_patterns}
+   )
+   atlas_add_test( ut_SUSYToolsAlg_mc
+      SCRIPT "athena SUSYTools/jobOptions.py --filesInput /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools/DAOD_PHYS.mc20_13TeV.410470.FS_mc20e_p5511.PHYS.pool.root --evtMax 100 - --prwFiles dev/PileupReweighting/share/DSID410xxx/pileup_mc16e_dsid410470_FS.root --lumicalcFiles GoodRunsLists/data18_13TeV/20190318/ilumicalc_histograms_None_348885-364292_OflLumi-13TeV-010.root"
+      LOG_IGNORE_PATTERN ${extra_patterns}
+   )
+   atlas_add_test( ut_SUSYToolsAlg_mc_Run3
+      SCRIPT "athena SUSYTools/jobOptions.py --filesInput /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools/DAOD_PHYS.mc21_13p6TeV.601229.FS_mc21a_p5511.PHYS.pool.root --evtMax 100 - --prwFiles dev/PileupReweighting/share/DSID601xxx/pileup_mc21a_dsid601229_FS.root --lumicalcFiles GoodRunsLists/data22_13p6TeV/20230116/ilumicalc_histograms_None_431810-440613_OflLumi-Run3-002.root --configFile SUSYTools/SUSYTools_Default_Run3.conf --noSyst"
+      LOG_IGNORE_PATTERN ${extra_patterns}
    )
 endif()
 

@@ -60,13 +60,8 @@ class SUSYToolsAlg : public EL::AnaAlgorithm {
     void stdHistsForObj(xAOD::IParticle *obj, const std::string& objtype, const std::string& objlevel, std::map<std::string,std::string> config = std::map<std::string,std::string>());
 
     // configuration and main tools
-    int  m_dataSource;
-    bool m_usePRWAutoconfig;
-    std::vector<std::string> m_PRWConfigs;
-    std::vector<std::string> m_PRWLumiCalcFiles;
     std::vector<std::string> m_GRLFiles;
     std::string m_mcCampaign;
-    int m_mcChannel;
     std::map<std::string,bool> m_slices;
     std::map<std::string,TH1*> m_hists;
     std::map<std::string,TEfficiency*> m_heffs;
@@ -79,7 +74,7 @@ class SUSYToolsAlg : public EL::AnaAlgorithm {
     unsigned int m_Nevts; 
     int m_maxEvts;
     int m_lbfilter;
-    bool isPHYSLITE;
+    bool m_isPHYSLITE;
     std::string m_kernel;
     std::string m_configFile;
     std::string m_FatJetCollection;

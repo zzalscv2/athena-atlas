@@ -819,29 +819,22 @@ StatusCode SUSYObjDef_xAOD::initialize() {
   bool autoconf(false);
 #ifndef XAOD_STANDALONE // For now metadata is Athena-only
   if ( m_dataSource < 0 ) {
-    bool local_isData(false), local_isAtlfast(false);
     autoconf = true;
-    ATH_MSG_INFO("Autoconfigure isData and isAtlfast");
+    ATH_MSG_INFO("Autoconfiguring: dataSource, mcCampaign, isPHYSLITE");
     std::string projectName = "";
     ATH_CHECK( AthAnalysisHelper::retrieveMetadata("/TagInfo", "project_name", projectName, inputMetaStore() ) );
-    if ( projectName == "IS_SIMULATION" ) local_isData = false;
-    else if (projectName.compare(0, 4, "data") == 0 ) local_isData = true;
-    else {
+    if ( projectName == "IS_SIMULATION" ) {
+        std::string simFlavour = "";
+        ATH_CHECK( AthAnalysisHelper::retrieveMetadata("/Simulation/Parameters", "SimulationFlavour", simFlavour, inputMetaStore() ) );
+        TString s(simFlavour); s.ToUpper();
+        m_dataSource = s.Contains("ATLFAST") ? AtlfastII : FullSim;
+    } else if (projectName.compare(0, 4, "data") == 0 ) {
+        m_dataSource = Data;
+    } else {
       ATH_MSG_ERROR("Failed to autoconfigure -- project_name matches neither IS_SIMULATION nor data!");
       return StatusCode::FAILURE;
     }
 
-    if (!local_isData) {
-      std::string simFlavour = "";
-      ATH_CHECK( AthAnalysisHelper::retrieveMetadata("/Simulation/Parameters", "SimulationFlavour", simFlavour, inputMetaStore() ) );
-      boost::to_upper(simFlavour);
-      local_isAtlfast = (simFlavour.find("ATLFAST") != std::string::npos);
-    }
-    if (local_isData) {m_dataSource = Data;}
-    else {
-      if (local_isAtlfast) {m_dataSource = AtlfastII;}
-      else {m_dataSource = FullSim;}
-    }
   }
 #endif
 
@@ -918,6 +911,9 @@ StatusCode SUSYObjDef_xAOD::initialize() {
   else
     // need to set a full path if you don't use the one in CVMFS
     ATH_CHECK( autoconfigurePileupRWTool(m_autoconfigPRWPath, m_autoconfigPRWFile, false, m_autoconfigPRWRPVmode, m_autoconfigPRWCombinedmode, m_autoconfigPRWHFFilter) );
+
+  ATH_CHECK( m_outElectronLocation.initialize() );
+  ATH_CHECK( m_outMuonLocation.initialize() );
 
   ATH_CHECK( this->SUSYToolsInit() );
 
@@ -1017,8 +1013,7 @@ StatusCode SUSYObjDef_xAOD::autoconfigurePileupRWTool(const std::string& PRWfile
 	} else {
 	  // OK, this is a fall-back option without using MetaData but one has to manually set 'mcCampaign' property
 	  ATH_MSG_WARNING( "autoconfigurePileupRWTool(): access to FileMetaData failed -> getting the mc channel number (DSID) from the event store." );
-	  const xAOD::EventInfo* evtInfo = nullptr;
-	  ATH_CHECK( evtStore()->retrieve( evtInfo, "EventInfo" ) );
+	  const xAOD::EventInfo* evtInfo = GetEventInfo();
 	  dsid = evtInfo->mcChannelNumber();
 
 	  std::string NoMetadataButPropertyOK("");
@@ -1632,23 +1627,23 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   ATH_CHECK( validConfig(m_strictConfigCheck) );
 
   //** cache trigger chains for electron matching
-  GetTriggerTokens(m_electronTriggerSFStringSingle, v_trigs15_cache_singleEle, v_trigs16_cache_singleEle, v_trigs17_cache_singleEle, v_trigs18_cache_singleEle);
+  GetTriggerTokens(m_electronTriggerSFStringSingle, m_v_trigs15_cache_singleEle, m_v_trigs16_cache_singleEle, m_v_trigs17_cache_singleEle, m_v_trigs18_cache_singleEle);
 
   //** cache trigger chains for matching (both electrons and muons)
-  GetTriggerTokens(m_electronTriggerSFStringSingle, v_trigs15_cache_singleEle, v_trigs16_cache_singleEle, v_trigs17_cache_singleEle, v_trigs18_cache_singleEle);
+  GetTriggerTokens(m_electronTriggerSFStringSingle, m_v_trigs15_cache_singleEle, m_v_trigs16_cache_singleEle, m_v_trigs17_cache_singleEle, m_v_trigs18_cache_singleEle);
 
-  v_trigs15_cache_singleLep = GetTriggerOR(m_trig2015combination_singleLep);
-  v_trigs16_cache_singleLep = GetTriggerOR(m_trig2016combination_singleLep);
-  v_trigs17_cache_singleLep = GetTriggerOR(m_trig2017combination_singleLep);
-  v_trigs18_cache_singleLep = GetTriggerOR(m_trig2018combination_singleLep);
-  v_trigs15_cache_diLep = GetTriggerOR(m_trig2015combination_diLep);
-  v_trigs16_cache_diLep = GetTriggerOR(m_trig2016combination_diLep);
-  v_trigs17_cache_diLep = GetTriggerOR(m_trig2017combination_diLep);
-  v_trigs18_cache_diLep = GetTriggerOR(m_trig2018combination_diLep);
-  v_trigs15_cache_multiLep = GetTriggerOR(m_trig2015combination_multiLep);
-  v_trigs16_cache_multiLep = GetTriggerOR(m_trig2016combination_multiLep);
-  v_trigs17_cache_multiLep = GetTriggerOR(m_trig2017combination_multiLep);
-  v_trigs18_cache_multiLep = GetTriggerOR(m_trig2018combination_multiLep);
+  m_v_trigs15_cache_singleLep = GetTriggerOR(m_trig2015combination_singleLep);
+  m_v_trigs16_cache_singleLep = GetTriggerOR(m_trig2016combination_singleLep);
+  m_v_trigs17_cache_singleLep = GetTriggerOR(m_trig2017combination_singleLep);
+  m_v_trigs18_cache_singleLep = GetTriggerOR(m_trig2018combination_singleLep);
+  m_v_trigs15_cache_diLep = GetTriggerOR(m_trig2015combination_diLep);
+  m_v_trigs16_cache_diLep = GetTriggerOR(m_trig2016combination_diLep);
+  m_v_trigs17_cache_diLep = GetTriggerOR(m_trig2017combination_diLep);
+  m_v_trigs18_cache_diLep = GetTriggerOR(m_trig2018combination_diLep);
+  m_v_trigs15_cache_multiLep = GetTriggerOR(m_trig2015combination_multiLep);
+  m_v_trigs16_cache_multiLep = GetTriggerOR(m_trig2016combination_multiLep);
+  m_v_trigs17_cache_multiLep = GetTriggerOR(m_trig2017combination_multiLep);
+  m_v_trigs18_cache_multiLep = GetTriggerOR(m_trig2018combination_multiLep);
 
   return StatusCode::SUCCESS;
 }
@@ -1704,8 +1699,8 @@ void SUSYObjDef_xAOD::getTauConfig(const std::string& tauConfigPath, std::vector
   static const std::string trueBool = "TRUE";
 
   // Now find the pT and eta window
-  std::vector<std::string> _pT_window;
-  std::vector<std::string> _eta_window;
+  std::vector<std::string> v_pT_window;
+  std::vector<std::string> v_eta_window;
   pT_window.clear();
   eta_window.clear();
   float pT_min = -99.0;
@@ -1714,9 +1709,9 @@ void SUSYObjDef_xAOD::getTauConfig(const std::string& tauConfigPath, std::vector
   float eta_max = -99.0;
   for (const auto& cut : cuts) {
     if(cut == "PtRegion") {
-      _pT_window = split(rEnv.GetValue("PtRegion", ""), ";");
-      std::transform(std::begin(_pT_window),
-		     std::end(_pT_window),
+      v_pT_window = split(rEnv.GetValue("PtRegion", ""), ";");
+      std::transform(std::begin(v_pT_window),
+		     std::end(v_pT_window),
 		     std::back_inserter(pT_window),
 		     [](const std::string& s) { return std::stof(s); }
 		     );
@@ -1725,9 +1720,9 @@ void SUSYObjDef_xAOD::getTauConfig(const std::string& tauConfigPath, std::vector
     } else if (cut == "PtMax") {
       pT_max = rEnv.GetValue("PtMax", NAN);
     } else if (cut == "AbsEtaRegion") {
-      _eta_window = split(rEnv.GetValue("AbsEtaRegion", ""), ";");
-      std::transform(std::begin(_eta_window),
-		     std::end(_eta_window),
+      v_eta_window = split(rEnv.GetValue("AbsEtaRegion", ""), ";");
+      std::transform(std::begin(v_eta_window),
+		     std::end(v_eta_window),
 		     std::back_inserter(eta_window),
 		     [](const std::string& s) { return std::stof(s); }
 		     );
@@ -2752,13 +2747,17 @@ StatusCode SUSYObjDef_xAOD::NearbyLeptonCorrections(xAOD::ElectronContainer *ele
   return StatusCode::SUCCESS;
 }
 
-
+const xAOD::EventInfo* SUSYObjDef_xAOD::GetEventInfo() const {
+  const xAOD::EventInfo* evtInfo = nullptr;
+  if ( evtStore()->retrieve( evtInfo, "EventInfo" ).isFailure() ) {
+    throw std::runtime_error("Unable to fetch EventInfo.");
+  }
+  return evtInfo;
+}
 
 float SUSYObjDef_xAOD::GetPileupWeight() {
 
-  const xAOD::EventInfo* evtInfo = nullptr;
-  ATH_CHECK( evtStore()->retrieve( evtInfo, "EventInfo" ) );
-
+  const xAOD::EventInfo* evtInfo = GetEventInfo();
   float pu_weight = m_prwTool->getCombinedWeight(*evtInfo);
 
   if(!isfinite(pu_weight)) pu_weight = 1.;
@@ -2773,9 +2772,7 @@ float SUSYObjDef_xAOD::GetPileupWeightPrescaledTrigger(const std::string & trigg
      https://twiki.cern.ch/twiki/bin/view/AtlasProtected/ExtendedPileupReweighting#Prescaling%20MC
   */
 
-  const xAOD::EventInfo* evtInfo = nullptr;
-  ATH_CHECK( evtStore()->retrieve( evtInfo, "EventInfo" ) );
-
+  const xAOD::EventInfo* evtInfo = GetEventInfo();
   float pu_weight = m_prwTool->getCombinedWeight(*evtInfo,trigger_expr);
 
   if(!isfinite(pu_weight)) pu_weight = 1.;
@@ -2784,26 +2781,22 @@ float SUSYObjDef_xAOD::GetPileupWeightPrescaledTrigger(const std::string & trigg
 }
 
 ULong64_t SUSYObjDef_xAOD::GetPileupWeightHash() {
-  const xAOD::EventInfo* evtInfo = nullptr;
-  ATH_CHECK( evtStore()->retrieve( evtInfo, "EventInfo" ) );
+  const xAOD::EventInfo* evtInfo = GetEventInfo();
   return m_prwTool->getPRWHash( *evtInfo );
 }
 
 float SUSYObjDef_xAOD::GetDataWeight(const std::string& trig) {
-  const xAOD::EventInfo* evtInfo = nullptr;
-  ATH_CHECK( evtStore()->retrieve( evtInfo, "EventInfo" ) );
+  const xAOD::EventInfo* evtInfo = GetEventInfo();
   return m_prwTool->getDataWeight( *evtInfo, trig );
 }
 
 float SUSYObjDef_xAOD::GetCorrectedAverageInteractionsPerCrossing(bool includeDataSF) {
-  const xAOD::EventInfo* evtInfo = nullptr;
-  ATH_CHECK( evtStore()->retrieve( evtInfo, "EventInfo" ) );
+  const xAOD::EventInfo* evtInfo = GetEventInfo();
   return m_prwTool->getCorrectedAverageInteractionsPerCrossing( *evtInfo, includeDataSF );
 }
 
 float SUSYObjDef_xAOD::GetCorrectedActualInteractionsPerCrossing(bool includeDataSF) {
-  const xAOD::EventInfo* evtInfo = nullptr;
-  ATH_CHECK( evtStore()->retrieve( evtInfo, "EventInfo" ) );
+  const xAOD::EventInfo* evtInfo = GetEventInfo();
   return m_prwTool->getCorrectedActualInteractionsPerCrossing( *evtInfo, includeDataSF );
 }
 
@@ -2813,8 +2806,7 @@ double SUSYObjDef_xAOD::GetSumOfWeights(int channel) {
 
 unsigned int SUSYObjDef_xAOD::GetRandomRunNumber(bool muDependentRRN) {
 
-  const xAOD::EventInfo* evtInfo = nullptr;
-  ATH_CHECK( evtStore()->retrieve( evtInfo, "EventInfo" ) );
+  const xAOD::EventInfo* evtInfo = GetEventInfo();
   if (randomrunnumber.isAvailable(*(evtInfo)) && muDependentRRN) {
     return randomrunnumber(*(evtInfo));
   }
@@ -2828,8 +2820,7 @@ unsigned int SUSYObjDef_xAOD::GetRandomRunNumber(bool muDependentRRN) {
 
 StatusCode SUSYObjDef_xAOD::ApplyPRWTool(bool muDependentRRN) {
 
-  const xAOD::EventInfo* evtInfo = nullptr;
-  ATH_CHECK( evtStore()->retrieve( evtInfo, "EventInfo" ) );
+  const xAOD::EventInfo* evtInfo = GetEventInfo();
   if(!evtInfo->isAvailable<unsigned int>("RandomRunNumber"))
     ATH_CHECK( m_prwTool->apply( *evtInfo, muDependentRRN ) );
   return StatusCode::SUCCESS;
@@ -2837,8 +2828,7 @@ StatusCode SUSYObjDef_xAOD::ApplyPRWTool(bool muDependentRRN) {
 
 unsigned int SUSYObjDef_xAOD::GetRunNumber() const {
 
-  const xAOD::EventInfo* evtInfo = nullptr;
-  ATH_CHECK( evtStore()->retrieve( evtInfo, "EventInfo" ) );
+  const xAOD::EventInfo* evtInfo = GetEventInfo();
 
   // For data, we can just directly use the run number
   if (isData()) { return evtInfo->runNumber(); }
