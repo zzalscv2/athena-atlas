@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file StoreGate/test/WriteDecorHandle_test.cxx
@@ -326,6 +326,50 @@ void test5()
 }
 
 
+// renounce
+void test6()
+{
+  std::cout << "test6\n";
+
+  SGTest::TestStore testStore;
+
+  SG::AuxStoreInternal auxstore1;
+  auto cont1 = std::make_unique<MyObjCont>();
+  cont1->setStore (&auxstore1);
+  cont1->push_back (new MyObj(1));
+  const MyObjCont* pcont1 = cont1.get();
+  testStore.record (std::move (cont1), "foo1");
+  SG::DataProxy* foo1_proxy = testStore.proxy (ClassID_traits<MyObjCont>::ID(), "foo1");
+
+  SG::AuxStoreInternal auxstore2;
+  auto cont2 = std::make_unique<MyObjCont>();
+  cont2->setStore (&auxstore2);
+  cont2->push_back (new MyObj(2));
+  const MyObjCont* pcont2 = cont2.get();
+  testStore.record (std::move (cont2), "foo2");
+  SG::DataProxy* foo2_proxy = testStore.proxy (ClassID_traits<MyObjCont>::ID(), "foo2");
+
+  SG::WriteDecorHandleKey<MyObjCont> k1 ("foo1.aaa");
+  assert (k1.initialize().isSuccess());
+  SG::WriteDecorHandle<MyObjCont, int> h1 (k1);
+  assert (h1.setProxyDict (&testStore).isSuccess());
+
+  assert (foo1_proxy->refCount() == 1);
+  h1 (*(*pcont1)[0]) = 11;
+  assert (foo1_proxy->refCount() == 2);
+
+  SG::WriteDecorHandleKey<MyObjCont> k2 ("foo2.aaa");
+  assert (k2.initialize().isSuccess());
+  k2.renounce();
+  SG::WriteDecorHandle<MyObjCont, int> h2 (k2);
+  assert (h2.setProxyDict (&testStore).isSuccess());
+
+  assert (foo2_proxy->refCount() == 1);
+  h2 (*(*pcont2)[0]) = 11;
+  assert (foo2_proxy->refCount() == 1);
+}
+
+
 int main()
 {
   errorcheck::ReportMessage::hideErrorLocus();
@@ -340,5 +384,6 @@ int main()
   test3();
   test4();
   test5();
+  test6();
   return 0;
 }
