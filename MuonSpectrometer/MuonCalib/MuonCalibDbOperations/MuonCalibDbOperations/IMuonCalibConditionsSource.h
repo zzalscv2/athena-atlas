@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MuonCalib_IMuonCalibConditionsSource
@@ -28,7 +28,7 @@ namespace MuonCalib {
         inline virtual void SetIOV(int& /*start*/, int& /*end*/) const {}
 
     protected:
-        CoolInserter* m_inserter;
+        CoolInserter* m_inserter = nullptr;
         virtual bool insert_calibration(bool store_t0, bool store_rt) = 0;
     };
 
