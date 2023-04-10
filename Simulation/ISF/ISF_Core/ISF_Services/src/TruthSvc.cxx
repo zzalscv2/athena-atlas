@@ -584,7 +584,7 @@ void ISF::TruthSvc::setSharedChildParticleBarcode( ISF::ITruthIncident& ti) cons
   }
 }
 
-int ISF::TruthSvc::maxGeneratedParticleBarcode(HepMC::GenEvent *genEvent) const {
+int ISF::TruthSvc::maxGeneratedParticleBarcode(const HepMC::GenEvent *genEvent) const {
   int maxBarcode=0;
   const int firstSecondaryParticleBarcode(m_barcodeSvc->secondaryParticleBcOffset());
 #ifdef HEPMC3
@@ -601,7 +601,7 @@ int ISF::TruthSvc::maxGeneratedParticleBarcode(HepMC::GenEvent *genEvent) const 
   return maxBarcode;
 }
 
-int ISF::TruthSvc::maxGeneratedVertexBarcode(HepMC::GenEvent *genEvent) const {
+int ISF::TruthSvc::maxGeneratedVertexBarcode(const HepMC::GenEvent *genEvent) const {
   int maxBarcode=0;
   const int firstSecondaryVertexBarcode(m_barcodeSvc->secondaryVertexBcOffset());
 #ifdef HEPMC3
