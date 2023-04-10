@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_TOT_DEDX_H
@@ -46,14 +46,9 @@ namespace InDet {
    class ITRT_LocalOccupancy;
 }
 
-//namespace InDet {
-// class TRT_DriftCircleOnTrack ;
-// } 
-//namespace Trk { class TrackParameters ; } 
-class TRT_ToT_dEdx : virtual public ITRT_ToT_dEdx, public AthAlgTool 
+class TRT_ToT_dEdx final : virtual public ITRT_ToT_dEdx, public AthAlgTool 
 {
 public:
-  IChronoStatSvc  *m_timingProfile;                                     // Timing measurements
   ToolHandle<ITRT_StrawStatusSummaryTool> m_TRTStrawSummaryTool; 
 
 public:
@@ -112,8 +107,6 @@ public:
   virtual ~TRT_ToT_dEdx();
   /** AlgTool initailize method.*/
   virtual StatusCode initialize() override;
-  /** AlgTool finalize method */
-  virtual StatusCode finalize() override;
 
   /**
    * @brief function to calculate sum ToT normalised to number of used hits
@@ -379,8 +372,6 @@ public:
 
   void  setAlgorithm(EstCalc alg)             { m_toolScenario=alg;    }
   int   getAlgorithm() const                  { return m_toolScenario; }
-
-  void  showDEDXSetup() const;
 
 // static methods
 static double calculateTrackLengthInStraw(const Trk::TrackStateOnSurface* trackState, const TRT_ID* identifier);
