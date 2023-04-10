@@ -262,13 +262,15 @@ StatusCode InDet::InDetTrackSelectionTool::initialize() {
   // Need messaging helper for cut functions
   m_msgHelper = std::make_unique<asg::AsgMessaging>(this) ;
 
-  // setup cut functions for xAOD::TrackParticles
-  ATH_CHECK( setupCuts<1>(m_trackParticleCuts) );
+
 #ifndef XAOD_ANALYSIS
   // setup cut functions for Trk::Tracks
   ATH_CHECK( setupCuts<0>(m_trkTrackCuts) );
+  ATH_CHECK( setupCuts<0>(m_trackParticleCuts) );
+#else
+  ATH_CHECK( setupCuts<1>(m_trackParticleCuts) );
 #endif
-
+  // setup cut functions for xAOD::TrackParticles
   for (const auto& cutFamily : m_trackParticleCuts) {
     const std::string& cutFamilyName = cutFamily.first;
     // lock(m_mutex) is not needed because this is inside of non-const initialize method.
