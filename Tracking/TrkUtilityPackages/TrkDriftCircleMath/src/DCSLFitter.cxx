@@ -59,7 +59,7 @@ bool DCSLFitter::fit(Segment& result, const Line& line, const DCOnTrackVec& dcs,
   //
   Sy = 0;
   Sz = 0;
-  double Szz{0}, Syy{0}, Szy{0}, Syyzz{0};
+  double Syy{0}, Szy{0}, Syyzz{0};
 
   for (unsigned int i = 0; i < N; ++i) {
     FitData& datum = data[i];
@@ -74,7 +74,6 @@ bool DCSLFitter::fit(Segment& result, const Line& line, const DCOnTrackVec& dcs,
     datum.ryw = datum.rw * datum.y;
     datum.rzw = datum.rw * datum.z;
 
-    Szz += datum.z * datum.z * datum.w;
     Syy += datum.y * datum.y * datum.w;
     Szy += datum.y * datum.z * datum.w;
     Syyzz += (datum.y - datum.z) * (datum.y + datum.z) * datum.w;
