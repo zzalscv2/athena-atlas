@@ -47,7 +47,7 @@ StatusCode BoostedHadTopAndTopPair::filterEvent() {
     const HepMC::GenEvent* genEvt = *itr;
 
     
-  for (auto part: *genEvt){
+  for (const auto& part: *genEvt){
       int pdgId = part->pdg_id();
   
       // pdgId t quark = 6
@@ -104,7 +104,7 @@ bool BoostedHadTopAndTopPair::isFromTop(HepMC::ConstGenParticlePtr part) const{
   if(!prod) return false;
 
 #ifdef HEPMC3
-   for (auto p: prod->particles_in()) if (std::abs(p->pdg_id()) == 6) return true;
+   for (const auto& p: prod->particles_in()) if (std::abs(p->pdg_id()) == 6) return true;
 #else
   HepMC::GenVertex::particle_iterator firstParent = prod->particles_begin(HepMC::parents);
   HepMC::GenVertex::particle_iterator endParent = prod->particles_end(HepMC::parents);

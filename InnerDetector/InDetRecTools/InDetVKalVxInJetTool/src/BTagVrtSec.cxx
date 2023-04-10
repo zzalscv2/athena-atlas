@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header include
@@ -820,17 +820,16 @@ namespace InDet{
 					    VKPerigee, CovPerigee, *state);
 
 	      if(sc.isSuccess()) {
-		const Trk::Track* TT = m_fitSvc->CreateTrkTrack(VKPerigee, CovPerigee, *state);
+	        std::unique_ptr<Trk::Perigee> perigee = m_fitSvc->CreatePerigee(VKPerigee, CovPerigee, *state);
 		std::vector<double> Impact, ImpactError;
-		double ImpactSignifV0 = m_fitSvc->VKalGetImpact(TT, primVrt.position(), 0, Impact, ImpactError, *state);
+		double ImpactSignifV0 = m_fitSvc->VKalGetImpact(perigee.get(), primVrt.position(), 0, Impact, ImpactError, *state);
+
 		if(m_fillHist){
 		  Hists& h = getHists();
 		  h.m_hb_impV0->Fill( ImpactSignifV0, evtWgt);
 		}
 		
 		if(ImpactSignifV0>3.0) badTracks = 0;
-
-		delete TT;
 	      } else {
 		badTracks = 0;
 	      }

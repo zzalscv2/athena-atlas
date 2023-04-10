@@ -110,6 +110,7 @@ def createBTaggingConfigFlags():
 
     # more aggressive trackless approach
     btagcf.addFlag("BTagging.savePixelHits", False)
+    btagcf.addFlag("BTagging.saveSCTHits", False)
 
     # experimental flags
     btagcf.addFlag("BTagging.Pseudotrack", False)

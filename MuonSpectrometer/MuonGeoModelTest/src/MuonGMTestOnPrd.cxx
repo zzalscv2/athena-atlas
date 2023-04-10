@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -11,7 +11,6 @@
 
 #include "GaudiKernel/MsgStream.h"
 #include "MuonReadoutGeometry/CscReadoutElement.h"
-#include "MuonReadoutGeometry/MdtDetectorElement.h"
 #include "MuonReadoutGeometry/MdtReadoutElement.h"
 #include "MuonReadoutGeometry/RpcReadoutElement.h"
 #include "StoreGate/StoreGateSvc.h"
@@ -211,46 +210,14 @@ StatusCode MuonGMTestOnPrd::execute() {
     return StatusCode::SUCCESS;
 }
 
-void MuonGMTestOnPrd::processMdtCollection(const Muon::MdtPrepDataCollection* mdtColl, Identifier& collid, IdentifierHash& collidh) const {
-    const MuonGM::MdtDetectorElement* mdtDE = m_MuonMgr->getMdtDetectorElement(collidh);
-    if (!mdtDE) {
-        ATH_MSG_ERROR("Impossible to retrieve MdtDetectorElement for collection with hashId = " << (int)collidh);
-        return;
-    }
+void MuonGMTestOnPrd::processMdtCollection(const Muon::MdtPrepDataCollection* mdtColl, Identifier& collid, IdentifierHash& /*collidh*/) const {
     for (const Muon::MdtPrepData* mdtPrepDatum : *mdtColl) {
         Identifier idchannel = mdtPrepDatum->identify();
-
-        Amg::Vector3D xc = mdtDE->center(idchannel);
+        Amg::Vector3D xc = mdtPrepDatum->detectorElement()->center(idchannel);
         ATH_MSG_INFO("Tube = " << m_MdtIdHelper->show_to_string(collid) << "    tdc = " << mdtPrepDatum->tdc()
                                << "   adc = " << mdtPrepDatum->adc());
         if (m_check_misal) {
             ATH_MSG_INFO("     position of the center of the tube is (" << xc.x() << ", " << xc.y() << ", " << xc.z() << ")");
-        }
-    }
-    return;
-}
-void MuonGMTestOnPrd::processMdtCollectionOld(const Muon::MdtPrepDataCollection* mdtColl, Identifier& collid,
-                                              IdentifierHash& /*collidh*/) const {
-    for (const Muon::MdtPrepData* mdtPrepDatum : *mdtColl) {
-        Identifier idchannel = mdtPrepDatum->identify();
-
-        const MuonGM::MdtReadoutElement* mdtRE = m_MuonMgr->getMdtReadoutElement(collid);
-        if (!mdtRE) {
-            ATH_MSG_ERROR("Impossible to retrive MdtReadoutElement for prd with Id = " << m_MdtIdHelper->show_to_string(idchannel));
-            return;
-        }
-
-        Amg::Vector3D xc = mdtRE->center(idchannel);
-        // Amg::Vector3D xct = (mdtRE->transform(idchannel))*Amg::Vector3D(0.,0.,0.);
-        // Amg::Vector3D xvt = (mdtRE->transform(idchannel))*Amg::Vector3D(10.,10.,10.);
-        Trk::SaggedLineSurface surf = mdtRE->surface(idchannel);
-
-        // log<<MSG::INFO<<"Tube center is ("<<xc.x()<<", "<<xc.y()<<", "<<xc.z()<<")"<<endmsg;
-
-        if (msgLvl(MSG::DEBUG)) {
-            ATH_MSG_DEBUG("center " << xc);
-            surf.dump(msg());
-            ATH_MSG_DEBUG("\n surface transform center " << (surf.transform()) * Amg::Vector3D(0., 0., 0));
         }
     }
     return;

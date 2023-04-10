@@ -53,7 +53,7 @@ def jetCRMenuSequence(flags, jetsIn, name):
 
     from .JetMenuSequencesConfig import getTrackingInputMaker
     from .JetTrackingConfig import JetFSTrackingCfg
-    trk_acc, trkcolls = JetFSTrackingCfg(flags, trkopt='ftf', RoIs=trkFSRoI)
+    trk_acc = JetFSTrackingCfg(flags, trkopt='ftf', RoIs=trkFSRoI)
 
     reco = InEventRecoCA(f"EmergingJets_HypoOnlyStep_{jetsIn}Reco", inputMaker=getTrackingInputMaker('ftf'))
     reco.mergeReco(trk_acc)

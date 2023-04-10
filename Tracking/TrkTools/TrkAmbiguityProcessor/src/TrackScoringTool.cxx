@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -48,20 +48,8 @@ Trk::TrackScoringTool::TrackScoringTool(const std::string& t,
 	m_summaryTypeScore[Trk::numberOfRpcEtaHits]	= 10;
 }
 
-Trk::TrackScoringTool::~TrackScoringTool()= default;
-
-StatusCode
-Trk::TrackScoringTool::initialize(){
-	ATH_CHECK( AlgTool::initialize());
-	return StatusCode::SUCCESS;
-}
-
-StatusCode Trk::TrackScoringTool::finalize(){
-	return AlgTool::finalize();
-}
-
 Trk::TrackScore
-Trk::TrackScoringTool::score( const Track& track, [[maybe_unused]] const bool suppressHoleSearch ) const{
+Trk::TrackScoringTool::score( const Track& track ) const{
         if (!track.trackSummary()) {
            ATH_MSG_FATAL("Attempt to score a track without a summary.");
         }

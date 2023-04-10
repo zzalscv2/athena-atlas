@@ -105,6 +105,11 @@ namespace xAOD {
 
    /// Methods to decode data from the TOB/RoI and return to the user
 
+   /// Algorithm version
+   unsigned int eFexTauRoI_v1::tobVersion() const {
+     return (word0() >> s_versionBit) & s_versionMask;
+   }
+
    /// eFEX number
    unsigned int eFexTauRoI_v1::eFexNumber() const {
      return (word1() >> s_eFexBit) & s_eFexMask;
@@ -166,19 +171,47 @@ namespace xAOD {
      return (word1() >> s_etBit) & s_etFullMask;
    }
     
-   /// Results of the 3 jet discriminant algorithms
+   
+   /// Tau BDT score, only available in xTOBs 
+   unsigned int eFexTauRoI_v1::bdtScore() const {
+     /// Was the BDT algorithm run?
+     if (tobVersion() != 1) return 0;
+     /// If the object is not an xTOB this will return 0
+     return (word1() >> s_bdtScoreBit) & s_bdtScoreMask;
+   }
+    
+
+   /// Results of the rCore discriminant algorithm
    unsigned int eFexTauRoI_v1::rCoreThresholds() const {
+     // Return rCore results if used, otherwise return 0
+    return (tobVersion() == 0 ? tauOneThresholds() : 0);
+   }
+   
+   /// Results of BDT discriminant algorithm
+   unsigned int eFexTauRoI_v1::bdtThresholds() const {
+     // Return BDT results if used, otherwise return 0
+    return (tobVersion() == 1 ? tauOneThresholds() : 0);
+   }
+    
+   /// Results of the rHad discriminant algorithm
+   unsigned int eFexTauRoI_v1::rHadThresholds() const {
+     return tauTwoThresholds();
+   }
+    
+   /// Generic getters for those who don't care what a discriminant was called
+   unsigned int eFexTauRoI_v1::tauOneThresholds() const {
      return (word0() >> s_veto1Bit) & s_veto1Mask;
    }
     
-   unsigned int eFexTauRoI_v1::rHadThresholds() const {
+   unsigned int eFexTauRoI_v1::tauTwoThresholds() const {
      return (word0() >> s_veto2Bit) & s_veto2Mask;
    }
-    
+
    unsigned int eFexTauRoI_v1::tauThreeThresholds() const {
      return (word0() >> s_veto3Bit) & s_veto3Mask;
    }
     
+   /// Last 4 bits of BCN (xTOB only)
    unsigned int eFexTauRoI_v1::bcn4() const {
      return (word1() >> s_bcn4Bit) & s_bcn4Mask;
    }

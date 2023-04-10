@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <iostream>
-#include <stdlib.h>
 #include "LArDigitization/LArHitEMap.h"
+#include <cstdlib>
+#include <iostream>
 
 #include "CaloDetDescr/CaloDetDescrElement.h"
 #include "Identifier/Identifier.h"
@@ -17,7 +17,7 @@
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/MagicNumbers.h"
 
-LArHitEMap::~LArHitEMap() {}
+LArHitEMap::~LArHitEMap() = default;
 
 //bool LArHitEMap::Initialize(std::vector<bool>& flags, bool windows, bool digit)
 LArHitEMap::LArHitEMap(const LArOnOffIdMapping* cabling, const CaloCell_ID* cellid, const CaloDetDescrManager* cddMgr, bool digit) :
@@ -31,7 +31,7 @@ LArHitEMap::LArHitEMap(const LArOnOffIdMapping* cabling, const CaloCell_ID* cell
 
   //fill energy map up to fcal-hashmax(= lar-hashmax) 
   m_emap.resize(fcalCellMax);
-  if (digit) m_digmap.resize(fcalCellMax,0);
+  if (digit) m_digmap.resize(fcalCellMax,nullptr);
 }
 
 
@@ -99,7 +99,7 @@ bool LArHitEMap::BuildWindows(const McEventCollection* mcCollptr,
     }
 
 
-    if ( etaPart.size() == 0) return true;
+    if ( etaPart.empty()) return true;
 
     for (unsigned int i=0; i < m_emap.size(); i++) 
     {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRT_SegmentToTrackTool/TRT_SegmentToTrackTool.h"
@@ -853,7 +853,7 @@ namespace InDet {
     }
 
     //Score the track under investigation
-    Trk::TrackScore score = m_scoringTool->score(*trk,m_suppressHoleSearch);
+    Trk::TrackScore score = m_scoringTool->score(*trk);
     ATH_MSG_DEBUG ("TRT-only: score is " << score);
 
     if (score==0) {

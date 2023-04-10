@@ -1417,7 +1417,6 @@ def getInDetAmbiScoringToolBase(name='InDetAmbiScoringTool', **kwargs) :
     return InDet__InDetAmbiScoringTool(the_name,
                                        **setDefaults(kwargs,
                                                      Extrapolator            = getInDetExtrapolator(),
-                                                     SummaryTool             = getInDetTrackSummaryTool(),
                                                      useAmbigFcn             = True,  # this is NewTracking
                                                      useTRT_AmbigFcn         = False,
                                                      maxZImp                 = NewTrackingCuts.maxZImpact(),
@@ -1471,7 +1470,6 @@ def getInDetNNScoringToolBase(name='InDetNNScoringTool', **kwargs) :
                                                      nnCutConfig             = "dev/TrackingCP/LRTAmbiNetwork/20200727_225401/nn-config.json",
                                                      nnCutThreshold          = InDetFlags.nnCutLargeD0Threshold(),
                                                      Extrapolator            = getInDetExtrapolator(),
-                                                     SummaryTool             = getInDetTrackSummaryTool(),
                                                      useAmbigFcn             = True,  # this is NewTracking
                                                      useTRT_AmbigFcn         = False,
                                                      maxZImp                 = NewTrackingCuts.maxZImpact(),
@@ -1538,8 +1536,7 @@ def getInDetCosmicsScoringToolBase(name='InDetCosmicsScoringTool', **kwargs) :
     return InDet__InDetCosmicScoringTool(the_name,
                                          **setDefaults(kwargs,
                                                        nWeightedClustersMin = NewTrackingCuts.nWeightedClustersMin(),
-                                                       minTRTHits           = 0,
-                                                       SummaryTool          = getInDetTrackSummaryTool()))
+                                                       minTRTHits           = 0))
 
 def getInDetCosmicsScoringTool(NewTrackingCuts,name='InDetCosmicsScoringTool', **kwargs) :
     return getInDetCosmicsScoringToolBase(name+NewTrackingCuts.extension(),
@@ -1556,8 +1553,7 @@ def getInDetCosmicScoringTool_TRT(NewTrackingCuts, name='InDetCosmicExtenScoring
     return getInDetCosmicExtenScoringTool(NewTrackingCuts,
                                           'InDetCosmicScoringTool_TRT',
                                           **setDefaults(kwargs,
-                                                        minTRTHits  = NewTrackingCuts.minSecondaryTRTonTrk(),
-                                                        SummaryTool = getInDetTrackSummaryToolNoHoleSearch()))
+                                                        minTRTHits  = NewTrackingCuts.minSecondaryTRTonTrk()))
 
 def getSolenoidParametrizationCondAlg(name='SolenoidParametrizationCondAlg',**kwargs) :
     the_name=makeName(name,kwargs)

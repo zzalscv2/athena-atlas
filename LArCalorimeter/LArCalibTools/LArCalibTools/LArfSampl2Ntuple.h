@@ -6,8 +6,8 @@
 #define LARFSAMPL2NTUPLE_H
 
 #include "LArCalibTools/LArCond2NtupleBase.h"
-
-
+#include "LArElecCalib/ILArfSampl.h"
+#include "StoreGate/ReadCondHandleKey.h"
 class LArfSampl2Ntuple : public LArCond2NtupleBase
 {
  public:
@@ -15,11 +15,12 @@ class LArfSampl2Ntuple : public LArCond2NtupleBase
   ~LArfSampl2Ntuple();
 
   //standard algorithm methods
+  StatusCode initialize();
   virtual StatusCode stop();
   StatusCode finalize(){return StatusCode::SUCCESS;}
  private:
-
-  std::string m_contKey;
+  SG::ReadCondHandleKey<ILArfSampl> m_contKey{this,"ContainerKey","LArfSamplSym"};
+  
 };
 
 #endif

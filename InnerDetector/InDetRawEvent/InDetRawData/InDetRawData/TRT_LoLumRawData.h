@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -21,7 +21,7 @@
 
 // Data members classes
 
-class TRT_LoLumRawData : public TRT_RDORawData{
+class TRT_LoLumRawData final : public TRT_RDORawData{
 
   ///////////////////////////////////////////////////////////////////
   // Public methods:
@@ -31,18 +31,20 @@ public:
   // Constructor with parameters:
   // offline hashId of the readout element,
   // the word
-  TRT_LoLumRawData(const Identifier rdoId, const unsigned int word);
+ TRT_LoLumRawData(const Identifier rdoId, const unsigned int word);
+ TRT_LoLumRawData(const TRT_LoLumRawData&) = default;
+ TRT_LoLumRawData(TRT_LoLumRawData&&) noexcept = default;
+ TRT_LoLumRawData& operator=(const TRT_LoLumRawData&) = default;
+ TRT_LoLumRawData& operator=(TRT_LoLumRawData&&) noexcept = default;
+ virtual ~TRT_LoLumRawData() = default;
 
-  // Destructor:
-  virtual ~TRT_LoLumRawData() = default;
+ // High level threshold:
+ virtual bool highLevel() const override final;
+ bool highLevel(int /* BX */) const;
 
-  // High level threshold:
-  virtual bool highLevel() const  override final;
-  virtual bool highLevel(int /* BX */) const;
-
-  // Time over threshold in ns for valid digits; zero otherwise:
-  virtual double timeOverThreshold() const  override final{
-    return timeOverThreshold(m_word);
+ // Time over threshold in ns for valid digits; zero otherwise:
+ virtual double timeOverThreshold() const override final {
+   return timeOverThreshold(m_word);
   };
 
   // drift time in bin

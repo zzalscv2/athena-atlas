@@ -9,7 +9,6 @@
 #include "AtlasHepMC/GenVertex.h"
 
 // CLHEP includes
-#include "CLHEP/Vector/LorentzVector.h"
 #include "CLHEP/Units/SystemOfUnits.h"
 
 #include "GeneratorObjectsTPCnv/HepMcParticleLinkCnv_p1.h"

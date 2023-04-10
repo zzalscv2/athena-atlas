@@ -144,7 +144,7 @@ StatusCode TauFilter::filterEvent() {
     auto wgtsC = genEvt->weights();
     weight = wgtsC.size() > 0 ? wgtsC[0] : 1;
 
-    for (auto pitr: *genEvt) {
+    for (const auto& pitr: *genEvt) {
       // Look for the first tau with genstat != 3
       if (std::abs((pitr)->pdg_id()) == 15 && (pitr)->status() != 3) {
         tau = pitr;
@@ -159,7 +159,7 @@ StatusCode TauFilter::filterEvent() {
         //TauType initialized as 0. tauType = 1 is an Tau_el, tauType = 2 is an Tau_mu, tauType = 0 is an Tau_had, tauType = 11 is a tau with tau parent, e.g a photon radiation event.
         // Sherpa has some status code 20 particles without decays
         if(!tau->end_vertex()) continue;
-        for ( auto beg: *(tau->end_vertex()) ) {
+        for ( const auto& beg: *(tau->end_vertex()) ) {
           if ( (beg)->production_vertex() != tau->end_vertex() ) continue; 
          
           else if ( std::abs( (beg)->pdg_id() ) == 12 ) tauType = 1;   //Tau decays into an electron

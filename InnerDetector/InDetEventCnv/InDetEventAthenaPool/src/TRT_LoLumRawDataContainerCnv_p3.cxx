@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include "InDetEventAthenaPool/InDetRawDataCollection_p1.h"
 #include "InDetRawData/TRT_RDO_Container.h"
@@ -7,6 +7,8 @@
 #include "TRT_LoLumRawDataContainerCnv_p3.h"
 #include "TRT_RDO_Elements.h"
 #include "MsgUtil.h"
+
+#include "AthAllocators/DataPool.h"
 
 void TRT_LoLumRawDataContainerCnv_p3::transToPers(const TRT_RDO_Container* transCont, InDetRawDataContainer_p3* persCont, MsgStream &log)
 {
@@ -166,16 +168,21 @@ void  TRT_LoLumRawDataContainerCnv_p3::persToTrans(const InDetRawDataContainer_p
   unsigned int trt_channel_index=0;
   unsigned int trt_channel_index_old;
 
-  TRT_RDO_Collection* tcoll=nullptr;         // transient collection to be constructed
 
   MSG_DEBUG(log," Reading " << persCont->m_collections.size() << "Collections");
-  if (persCont->m_collections.size() != trt_number_of_collections)
-    log << MSG::ERROR << "TRT_LoLumRawDataContainerCnv_p3::persToTrans expected 14912 collections but got " << persCont->m_collections.size() << ". We should be reading the whole detector!" << endmsg;
+  if (persCont->m_collections.size() != trt_number_of_collections){
+      log << MSG::ERROR
+          << "TRT_LoLumRawDataContainerCnv_p3::persToTrans expected 14912 "
+             "collections but got "
+          << persCont->m_collections.size()
+          << ". We should be reading the whole detector!" << endmsg;
+  }
+  //create Data Pool and reserve known max size
+  DataPool<TRT_LoLumRawData> dataItems;
+  dataItems.reserve(350848);
 
+  TRT_RDO_Collection* tcoll=nullptr;         // transient collection to be constructed
   for (unsigned int trt_collection_index=0; trt_collection_index<trt_number_of_collections; ++trt_collection_index) {
-
-    // Create trans collection - in NOT owner of TRT_RDO_RawData (SG::VIEW_ELEMENTS); IDet collection don't have the Ownership policy c'tor
-
     // count the number of non-dummy digits and skip to the next persistent collection if there are none.
     unsigned int nchans = trt_collection_size[trt_collection_index];
     trt_channel_index_old = trt_channel_index; // the beginning of this collection
@@ -185,10 +192,16 @@ void  TRT_LoLumRawDataContainerCnv_p3::persToTrans(const InDetRawDataContainer_p
       if ( pword != dummy_digit ) mchans++;
       trt_channel_index++;
     }
-    if (!mchans) continue;
+    if (!mchans) {
+      continue;
+    }
 
-    // Create the transient collection and fill with channels
+    // Create the transient collection we need it to be VIEW 
+    // as the ptr we will pass to it are managed by
+    // a DataPool
     tcoll = new TRT_RDO_Collection(IdentifierHash(trt_collection_index));
+    tcoll->clear (SG::VIEW_ELEMENTS);
+    //set identifier resize 
     tcoll->setIdentifier(Identifier(trt_collection_id[trt_collection_index]));
     tcoll->resize(mchans);
 
@@ -205,7 +218,10 @@ void  TRT_LoLumRawDataContainerCnv_p3::persToTrans(const InDetRawDataContainer_p
         continue; // don't write a dummy digit
       }
 
-      TRT_LoLumRawData* tchan = new TRT_LoLumRawData(Identifier(trt_channel_id),pword);
+      //ask the pool for the next pointer
+      TRT_LoLumRawData* tchan = dataItems.nextElementPtr();
+      //set the payload 
+      *tchan = TRT_LoLumRawData(Identifier(trt_channel_id),pword);
 
       (*tcoll)[jchan] = tchan;
       jchan++;
@@ -217,8 +233,15 @@ void  TRT_LoLumRawDataContainerCnv_p3::persToTrans(const InDetRawDataContainer_p
 
     // register the rdo collection in IDC with hash - faster addCollection
     StatusCode sc = transCont->addCollection(tcoll, IdentifierHash(trt_collection_index));
-    if (sc.isFailure()) throw std::runtime_error("Failed to add collection to ID Container");
-    MSG_VERBOSE(log,"AthenaPoolTPCnvIDCont::persToTrans, collection, hash_id / coll_id = " << trt_collection_index << " / " << trt_collection_id[trt_collection_index] << ", added to Identifiable container.");
+    if (sc.isFailure()) {
+      throw std::runtime_error("Failed to add collection to ID Container");
+    }
+    MSG_VERBOSE(
+        log,
+        "AthenaPoolTPCnvIDCont::persToTrans, collection, hash_id / coll_id = "
+            << trt_collection_index << " / "
+            << trt_collection_id[trt_collection_index]
+            << ", added to Identifiable container.");
   }
 
   trt_collection_id.clear();

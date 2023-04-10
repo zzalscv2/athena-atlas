@@ -17,7 +17,6 @@
 #include "AtlasHepMC/MagicNumbers.h"
 
 // CLHEP includes
-#include "CLHEP/Vector/LorentzVector.h"
 #include "CLHEP/Units/SystemOfUnits.h"
 
 #include "GeneratorObjectsTPCnv/HepMcParticleLinkCnv_p2.h"

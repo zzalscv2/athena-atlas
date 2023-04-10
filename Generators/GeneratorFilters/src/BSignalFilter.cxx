@@ -119,7 +119,7 @@ StatusCode BSignalFilter::filterEvent()
       if ( m_localLVL1MuonCutOn )
         {
 	  //
-	  for(auto part: *genEvt){
+	  for(const auto& part: *genEvt){
 	      bool LVL1Result = LVL1_Mu_Trigger( part );
 	      if ( LVL1Result )
                 {
@@ -175,7 +175,7 @@ StatusCode BSignalFilter::filterEvent()
 
       // ** Reject event if an undecayed quark is found **
       //
-      for(auto part: *genEvt)
+      for(const auto& part: *genEvt)
         {
 	  if ( std::abs(part->pdg_id()) <= 6 && part->status() == 1 )
             {
@@ -192,7 +192,7 @@ StatusCode BSignalFilter::filterEvent()
       if ( LVL1Passed && LVL2Passed )
         {
 	  // ** Loop on all particles **
-	  for(auto part: *genEvt)
+	  for(const auto& part: *genEvt)
             {
 	      const int particleID = part->pdg_id();
 	      //

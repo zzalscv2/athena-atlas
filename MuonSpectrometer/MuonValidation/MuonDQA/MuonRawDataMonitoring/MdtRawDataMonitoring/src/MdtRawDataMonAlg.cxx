@@ -1044,11 +1044,11 @@ StatusCode MdtRawDataMonAlg::handleEvent_effCalc_fillVects(const Trk::SegmentCol
                     CorrectTubeMax(hardware_name, tubeMax);
                     CorrectLayerMax(hardware_name, tubeLayerMax);
                     for (int i_tube = id_helper.tubeMin(newId); i_tube <= tubeMax; ++i_tube) {
-                        for (int i_layer = id_helper.tubeLayerMin(newId); i_layer <= tubeLayerMax; ++i_layer) {                            
+                        for (int i_layer = id_helper.tubeLayerMin(newId); i_layer <= tubeLayerMax; ++i_layer) {  
+                            Identifier tubeId = id_helper.channelID(newId, ML, i_layer, i_tube);                          
                             if (m_BMGpresent && m_idHelperSvc->mdtIdHelper().stationName(newId) == m_BMGid) {
                                 std::map<Identifier, std::set<Identifier>>::const_iterator myIt = m_DeadChannels.find(MdtRoEl->identify());
-                                if (myIt != m_DeadChannels.end()) {
-                                    Identifier tubeId = id_helper.channelID(newId, ML, i_layer, i_tube);
+                                if (myIt != m_DeadChannels.end()) {                                    
                                     if (myIt->second.count(tubeId)) {
                                         ATH_MSG_DEBUG("Skipping tube with identifier "
                                                       << m_idHelperSvc->toString(tubeId));
@@ -1056,7 +1056,7 @@ StatusCode MdtRawDataMonAlg::handleEvent_effCalc_fillVects(const Trk::SegmentCol
                                     }
                                 }
                             }
-                            Amg::Vector3D TubePos = MdtRoEl->GlobalToAmdbLRSCoords(MdtRoEl->tubePos(ML, i_layer, i_tube));
+                            Amg::Vector3D TubePos = MdtRoEl->GlobalToAmdbLRSCoords(MdtRoEl->tubePos(tubeId));
                             static const Amg::Vector3D tube_direction{1, 0, 0};
                             std::optional<double> distance = MuonGM::intersect<3>(segPosL, segDirL, TubePos, tube_direction);
                             if (distance && (*distance) < (MdtRoEl->innerTubeRadius())) {

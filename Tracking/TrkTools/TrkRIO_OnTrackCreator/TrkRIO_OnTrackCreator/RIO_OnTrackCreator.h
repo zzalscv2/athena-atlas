@@ -64,8 +64,6 @@ namespace Trk {
 
     //!get specific ROT tools and the AtlasIdHelper
     virtual StatusCode initialize() override;
-    //! standard AlgTool termination
-    virtual StatusCode finalize() override; 
 
     //! the master method for going from RIO to ROT.
     virtual const RIO_OnTrack* correct(const PrepRawData&,
@@ -79,15 +77,30 @@ namespace Trk {
     //! Helper to detect type of sub-detector from PRD->identify().
     const AtlasDetectorID*           m_idHelper{nullptr};
     //! Detector-specific helper tool, performing the actual calibration corrections for every InDet::PixelCluster
-    ToolHandle<IRIO_OnTrackCreator>  m_pixClusCor{this,"ToolPixelCluster", "InDet::PixelClusterOnTrackTool/PixelClusterOnTrackTool"};
-    //! Detector-specific helper tool, performing the actual calibration corrections for every InDet::SCT_Cluster
-    ToolHandle<IRIO_OnTrackCreator>  m_sctClusCor{this, "ToolSCT_Cluster", "InDet::SCT_ClusterOnTrackTool/SCT_ClusterOnTrackTool"};
-    //! Detector-specific helper tool, performing the actual calibration corrections for every InDet::TRT::DriftCircle
-    ToolHandle<IRIO_OnTrackCreator>  m_trt_Cor{this, "ToolTRT_DriftCircle","InDet::TRT_DriftCircleOnTrackTool/TRT_DriftCircleOnTrackTool" };
-    //! Detector-specific helper tool, performing the actual calibration corrections for every Muon::MdtPrepData 
-    ToolHandle<IRIO_OnTrackCreator>  m_muonDriftCircleCor{this, "ToolMuonDriftCircle", "Muon::MdtDriftCircleOnTrackCreator/MdtDriftCircleOnTrackTool" };
-    //! Detector-specific helper tool, performing the actual calibration corrections for the remaining muon detector technologies: RPC, TGC, CSC, MM, sTGC.
-    ToolHandle<IRIO_OnTrackCreator>  m_muonClusterCor{this,"ToolMuonCluster", "Muon::MuonClusterOnTrackCreator/MuonClusterOnTrackTool" } ;
+    ToolHandle<IRIO_OnTrackCreator> m_pixClusCor{
+        this, "ToolPixelCluster",
+        "InDet::PixelClusterOnTrackTool/PixelClusterOnTrackTool"};
+    //! Detector-specific helper tool, performing the actual calibration
+    //! corrections for every InDet::SCT_Cluster
+    ToolHandle<IRIO_OnTrackCreator> m_sctClusCor{
+        this, "ToolSCT_Cluster",
+        "InDet::SCT_ClusterOnTrackTool/SCT_ClusterOnTrackTool"};
+    //! Detector-specific helper tool, performing the actual calibration
+    //! corrections for every InDet::TRT::DriftCircle
+    ToolHandle<IRIO_OnTrackCreator> m_trt_Cor{
+        this, "ToolTRT_DriftCircle",
+        "InDet::TRT_DriftCircleOnTrackTool/TRT_DriftCircleOnTrackTool"};
+    //! Detector-specific helper tool, performing the actual calibration
+    //! corrections for every Muon::MdtPrepData
+    ToolHandle<IRIO_OnTrackCreator> m_muonDriftCircleCor{
+        this, "ToolMuonDriftCircle",
+        "Muon::MdtDriftCircleOnTrackCreator/MdtDriftCircleOnTrackTool"};
+    //! Detector-specific helper tool, performing the actual calibration
+    //! corrections for the remaining muon detector technologies: RPC, TGC, CSC,
+    //! MM, sTGC.
+    ToolHandle<IRIO_OnTrackCreator> m_muonClusterCor{
+        this, "ToolMuonCluster",
+        "Muon::MuonClusterOnTrackCreator/MuonClusterOnTrackTool"};
 
     Gaudi::Property<std::string>m_mode{this, "Mode" ,"all" };   //!< flag: can be 'all', 'indet' or 'muon'
     bool                             m_doPixel{true}; //!< Load Pixel IRIO_OnTrackCreator

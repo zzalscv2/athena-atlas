@@ -78,24 +78,11 @@ namespace Muon {
         ATH_CHECK(m_regsel_mdt.retrieve());
         ATH_CHECK(m_regsel_rpc.retrieve());
         ATH_CHECK(m_regsel_tgc.retrieve());
-
-        if (m_idHelperSvc->recoCSC()) {
-            ATH_CHECK(m_regsel_csc.retrieve());
-        } else
-            m_regsel_csc.disable();
-
-        if (m_idHelperSvc->recosTgc() && m_recoverSTGC) {
-            ATH_CHECK(m_regsel_stgc.retrieve());
-        } else {
-            m_regsel_stgc.disable();
-            m_recoverSTGC = false;
-        }
-        if (m_idHelperSvc->recoMM() && m_recoverMM) {
-            ATH_CHECK(m_regsel_mm.retrieve());
-        } else {
-            m_regsel_mm.disable();
-            m_recoverMM = false;
-        }      
+        m_recoverSTGC =  m_recoverSTGC && !m_regsel_stgc.empty();
+        m_recoverMM =  m_recoverMM && !m_regsel_mm.empty(); 
+        ATH_CHECK(m_regsel_csc.retrieve(DisableTool{m_regsel_csc.empty()}));
+        ATH_CHECK(m_regsel_stgc.retrieve(DisableTool{!m_recoverSTGC}));
+        ATH_CHECK(m_regsel_mm.retrieve(DisableTool{!m_recoverMM}));
         return StatusCode::SUCCESS;
     }
 
@@ -298,10 +285,10 @@ namespace Muon {
 
         RoiDescriptor roi(etamin, etamax, phimin, phimax);
 
-        if (m_idHelperSvc->hasMDT() && (m_idHelperSvc->mdtIdHelper().isInitialized())) addHashes(MDT, roi, data.mdt, data.mdtTrack);
-        if (m_idHelperSvc->hasRPC() && (m_idHelperSvc->rpcIdHelper().isInitialized())) addHashes(RPC, roi, data.rpc, data.rpcTrack);
-        if (m_idHelperSvc->hasTGC() && (m_idHelperSvc->tgcIdHelper().isInitialized())) addHashes(TGC, roi, data.tgc, data.tgcTrack);
-        if (m_idHelperSvc->recoCSC()) addHashes(CSC, roi, data.csc, data.cscTrack);
+        if (m_idHelperSvc->hasMDT()) addHashes(MDT, roi, data.mdt, data.mdtTrack);
+        if (m_idHelperSvc->hasRPC()) addHashes(RPC, roi, data.rpc, data.rpcTrack);
+        if (m_idHelperSvc->hasTGC()) addHashes(TGC, roi, data.tgc, data.tgcTrack);
+        if (m_regsel_csc.isEnabled()) addHashes(CSC, roi, data.csc, data.cscTrack);
         if (m_recoverSTGC) addHashes(STGC, roi, data.stgc, data.stgcTrack);
         if (m_recoverMM) addHashes(MM, roi, data.mm, data.mmTrack);
 
@@ -849,24 +836,23 @@ namespace Muon {
                 }
                 data.tgcCols = std::move(newtcols);
             }
-            if (m_idHelperSvc->recoCSC()) {
-                m_seededSegmentFinder->extractCscPrdCols(data.csc, data.cscCols);
-                std::vector<const CscPrepDataCollection*> newccols;
-                for (const CscPrepDataCollection* cit : data.cscCols) {
-                    std::unique_ptr<const Trk::TrackParameters> exPars{reachableDetEl(ctx, track, *(cit)->front()->detectorElement())};
-                    if (exPars) {
-                        newccols.push_back(cit);
-                        Identifier detElId = m_idHelperSvc->detElId(cit->identify());
-                        std::set<Identifier> layIds;
-                        createHoleTSOSsForClusterChamber(detElId, ctx, *exPars, layIds, states);
-                        if (states.size() != nstates) {
-                            nstates = states.size();
-                            newCscHashes.insert(cit->identifyHash());
-                        }
+            
+            m_seededSegmentFinder->extractCscPrdCols(data.csc, data.cscCols);
+            std::vector<const CscPrepDataCollection*> newccols;
+            for (const CscPrepDataCollection* cit : data.cscCols) {
+                std::unique_ptr<const Trk::TrackParameters> exPars{reachableDetEl(ctx, track, *(cit)->front()->detectorElement())};
+                if (exPars) {
+                    newccols.push_back(cit);
+                    Identifier detElId = m_idHelperSvc->detElId(cit->identify());
+                    std::set<Identifier> layIds;
+                    createHoleTSOSsForClusterChamber(detElId, ctx, *exPars, layIds, states);
+                    if (states.size() != nstates) {
+                        nstates = states.size();
+                        newCscHashes.insert(cit->identifyHash());
                     }
                 }
-                data.cscCols = std::move(newccols);
             }
+            data.cscCols = std::move(newccols);  
 
             nstates = states.size();
             if (m_recoverSTGC) {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -32,16 +32,14 @@ public:
   // offline compact id of the readout channel, 
   // the word
   TRT_RDORawData(const Identifier rdoId, const unsigned int word);
-
-  // Destructor:
+ // Destructor:
   virtual ~TRT_RDORawData() = default;
 
   ///////////////////////////////////////////////////////////////////
   // Virtual methods 
   ///////////////////////////////////////////////////////////////////
 
-
-    // High level threshold:
+  // High level threshold:
   virtual bool highLevel() const=0;
 
     // Time over threshold in ns for valid digits; zero otherwise:
@@ -50,27 +48,12 @@ public:
     // drift time in bin
   virtual int driftTimeBin() const=0;  
 
-  ///////////////////////////////////////////////////////////////////
-  // Static methods:
-  ///////////////////////////////////////////////////////////////////
-
-
-
-  // Create a new TRT_RDORawData and return a pointer to it:
-  //  static TRT_RDORawData *newObject(const Identifier rdoId, const unsigned int word);
-
-  ///////////////////////////////////////////////////////////////////
-  // Private methods:
-  ///////////////////////////////////////////////////////////////////
-private:
-  
-  TRT_RDORawData();
-
-  ///////////////////////////////////////////////////////////////////
-  // Private data:
-  ///////////////////////////////////////////////////////////////////
-private:
-
+protected:
+ TRT_RDORawData() = default;
+ TRT_RDORawData(const TRT_RDORawData&) = default;
+ TRT_RDORawData(TRT_RDORawData&&) = default;
+ TRT_RDORawData& operator=(const TRT_RDORawData&) = default;
+ TRT_RDORawData& operator=(TRT_RDORawData&&) = default;
 };
 
 ///////////////////////////////////////////////////////////////////

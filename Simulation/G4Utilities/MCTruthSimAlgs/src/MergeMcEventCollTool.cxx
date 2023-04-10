@@ -17,6 +17,7 @@ using namespace Gaudi::Units;
 #include <string>
 #include <cmath>
 #include <stdexcept>
+#include <array>
 
 typedef std::pair<int, int> IndexKey;
 namespace {
@@ -24,7 +25,7 @@ namespace {
     // anonymous namespace -> local to that .so
     /** 3*charge for basic pdgId codes -- used to parse unknown id's
         Fix from Frank for the charge of the MC Truth Particle */
-    const int qcharge[100] =
+    static const std::array<int,100> qcharge =
       {+0, -1, +2, -1, +2, -1, +2, -1, +2, +0,  // 0-9
        +0, -3, +0, -3, +0, -3, +0, -3, +0, +0,  // 10-19
        +0, +0, +0, +3, +0, +0, +0, +0, +0, +0,  // 20-29
@@ -51,10 +52,10 @@ namespace {
     else if ( sid == 2212 || sid==24 ) q=1; //proton/anti-proton and W
     else if ( sid == 2112 || sid==23 ) q=0; //neutron/anti-neutron and Z
     else { // quarks, gluons, measons and other baryons
-      int idmod = std::abs(id) % 10000;
-      int q1 = (idmod/10) % 10;
-      int q2 = (idmod/100) % 10;
-      int q3 = (idmod/1000) % 10;
+      const int idmod = std::abs(id) % 10000;
+      const int q1 = (idmod/10) % 10;
+      const int q2 = (idmod/100) % 10;
+      const int q3 = (idmod/1000) % 10;
       if( idmod < 100 ) {
         q = qcharge[idmod]/3.;
       }

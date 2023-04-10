@@ -61,7 +61,7 @@ StatusCode DiPhotonFilter::filterEvent() {
   for (itr = events()->begin(); itr!=events()->end(); ++itr) {
     // Loop over all particles in the event
     const HepMC::GenEvent* genEvt = (*itr);
-    for (auto part: *genEvt) {
+    for (const auto& part: *genEvt) {
       if ( (part->pdg_id() == 22) ) {
         if ( part->status() == 1 && (part->momentum().perp() >= ptcut) ) {
           MCTruthPhotonList.push_back(part);

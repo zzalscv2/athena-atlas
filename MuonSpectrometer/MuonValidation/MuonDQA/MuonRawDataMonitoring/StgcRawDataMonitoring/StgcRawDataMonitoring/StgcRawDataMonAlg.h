@@ -64,7 +64,6 @@ class sTgcRawDataMonAlg: public AthMonitorAlgorithm {
   SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_detectorManagerKey{this, "DetectorManagerKey", "MuonDetectorManager","Key of input MuonDetectorManager condition data"}; 
   SG::ReadHandleKey<xAOD::TrackParticleContainer> m_meTrkKey{this, "METrkContainer", "ExtrapolatedMuonTrackParticles"};
 
-  Gaudi::Property<bool> m_dosTgcESD{this,"dosTgcESD", true};
-  Gaudi::Property<bool> m_dosTgcOverview{this,"dosTgcOverview", true};
+  Gaudi::Property<unsigned int> m_clusterSizeCut{this, "clusterSizeCut", 3};
 };    
 #endif

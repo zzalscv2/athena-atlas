@@ -28,7 +28,7 @@ StatusCode SameParticleHardScatteringFilter::filterEvent() {
   N_Parent[1] = 0;
 
   for (const HepMC::GenEvent* genEvt : *events_const()) {
-      for (auto pitr: *genEvt) 
+      for (const auto& pitr: *genEvt) 
 	{
 	  int id = pitr->pdg_id();
 	  if (std::abs(id) != m_PDGChild[0]) continue; // searching for only b-quarks
@@ -41,7 +41,7 @@ StatusCode SameParticleHardScatteringFilter::filterEvent() {
 	  // Incoming particle range check
 #ifdef HEPMC3
 	  if (productionVtx->particles_in().size() < 2) continue; //  we are looking for excited tau-leptons produced in b-quark b-antiquark scattering
-	  for (auto thisParent:  productionVtx->particles_in()) {
+	  for (const auto& thisParent:  productionVtx->particles_in()) {
 #else
 	  if (productionVtx->particles_in_size() < 2) continue; //  we are looking for excited tau-leptons produced in b-quark b-antiquark scattering
 	  HepMC::GenVertex::particles_in_const_iterator firstParentIt = productionVtx->particles_in_const_begin();

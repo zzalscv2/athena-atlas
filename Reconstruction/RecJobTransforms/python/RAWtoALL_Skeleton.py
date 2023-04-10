@@ -89,6 +89,7 @@ def fromRunArgs(runArgs):
         flagString = 'Output.DESDM_MCPFileName'
         flags.addFlag(flagString, runArgs.outputDESDM_MCPFile)
         flags.Output.doWriteDAOD = True
+        flags.addFlag('Output.doWriteDESDM_MCP', True)
         log.info("---------- Configured DESDM_MCP output")
     
     if hasattr(runArgs, 'outputDRAW_ZMUMUFile'):
@@ -121,6 +122,7 @@ def fromRunArgs(runArgs):
         flagString = 'Output.DESDM_PHOJETFileName'
         flags.addFlag(flagString, runArgs.outputDESDM_PHOJETFile)
         flags.Output.doWriteDAOD = True
+        flags.addFlag('Output.doWriteDESDM_PHOJET', True)
         log.info("---------- Configured DESDM_PHOJET output")
 
     from AthenaConfiguration.Enums import ProductionStep

@@ -45,7 +45,7 @@ def CombinedTrackingPassFlagSets(flags):
         flags_set += [flagsConv]
 
     # LowPt
-    if flags.ITk.Tracking.doLowPt:
+    if flags.Tracking.doLowPt:
         flagsLowPt = flags.cloneAndReplace("ITk.Tracking.ActiveConfig",
                                            "ITk.Tracking.LowPt")
         flags_set += [flagsLowPt]

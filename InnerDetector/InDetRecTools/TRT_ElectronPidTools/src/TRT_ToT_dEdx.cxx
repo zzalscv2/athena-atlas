@@ -1,10 +1,7 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-//
-//  !!!!!! Problem with calibration constants for mean ToT on the tracks (norm_ ...) !!!!!!!
-//
 #include "TRT_ToT_dEdx.h"
 #include "TRT_ElectronPidTools/TRT_ToT_Corrections.h"
 
@@ -50,8 +47,7 @@ TRT_ToT_dEdx::TRT_ToT_dEdx(const std::string& t, const std::string& n, const IIn
 
   setDefaultConfiguration();
 
-  m_timingProfile         = nullptr;
-  m_trtId                                         = nullptr;
+  m_trtId = nullptr;
 }
 
 
@@ -68,29 +64,6 @@ void TRT_ToT_dEdx::setDefaultConfiguration()
   declareProperty("TRT_dEdx_useZeroRHitCut",m_useZeroRHitCut=true);
   declareProperty("TRT_dEdx_isData",m_isData=true);
 }
-
-
-
-void TRT_ToT_dEdx::showDEDXSetup() const
-{
-  ATH_MSG_INFO("//////////////////////////////////////////////////////////////////");
-  ATH_MSG_INFO("///              TRT_ToT_Tool setup configuration              ///");
-  ATH_MSG_INFO(" ");
-  ATH_MSG_INFO("m_divideByL                     ="<<m_divideByL<<"");
-  ATH_MSG_INFO("m_corrected                     ="<<m_corrected<<"");
-  ATH_MSG_INFO("m_correctionType                ="<<m_correctionType<<"");
-  ATH_MSG_INFO("m_useTrackPartWithGasType       ="<<m_useTrackPartWithGasType<<"");
-  ATH_MSG_INFO("m_toolScenario                  ="<<m_toolScenario<<"");
-  ATH_MSG_INFO(" ");
-  ATH_MSG_INFO("m_trackConfig_minRtrack         ="<<m_trackConfig_minRtrack<<"");
-  ATH_MSG_INFO("m_trackConfig_maxRtrack         ="<<m_trackConfig_maxRtrack<<"");
-  ATH_MSG_INFO("m_useZeroRHitCut                ="<<m_useZeroRHitCut<<"");
-  ATH_MSG_INFO("m_isData                        ="<<m_isData<<"");
-  ATH_MSG_INFO(" ");
-  ATH_MSG_INFO("//////////////////////////////////////////////////////////////////");
-}
-
-
 
 // destructor
 TRT_ToT_dEdx::~TRT_ToT_dEdx() = default;
@@ -111,29 +84,12 @@ StatusCode TRT_ToT_dEdx::initialize()
     return StatusCode::FAILURE;
   }
 
-  m_timingProfile=nullptr;
-  sc = service("ChronoStatSvc", m_timingProfile);
-  if ( sc.isFailure() || nullptr == m_timingProfile) {
-    ATH_MSG_DEBUG ("Can not find ChronoStatSvc name="<<m_timingProfile );
-  }
-
   // Initialize ReadHandleKey and ReadCondHandleKey
   ATH_CHECK(m_rdhkEvtInfo.initialize());
   ATH_CHECK(m_ReadKey.initialize());
-  //Get AssoTool
   ATH_CHECK(m_assoTool.retrieve());
-  //Get LocalOccupancyTool
   ATH_CHECK( m_localOccTool.retrieve() );
-
-  sc = m_TRTStrawSummaryTool.retrieve();
-  if (StatusCode::SUCCESS!= sc ){
-    ATH_MSG_ERROR ("Failed to retrieve StrawStatus Summary " << m_TRTStrawSummaryTool);
-    ATH_MSG_ERROR ("configure as 'None' to avoid its loading.");
-    return sc;
-  }
-    if ( !m_TRTStrawSummaryTool.empty() )
-      ATH_MSG_INFO ( "Retrieved tool " << m_TRTStrawSummaryTool );
-
+  ATH_CHECK(m_TRTStrawSummaryTool.retrieve());
 
   if (m_useTrackPartWithGasType > EGasType::kUnset ||
       m_useTrackPartWithGasType < EGasType::kXenon) {
@@ -142,19 +98,7 @@ StatusCode TRT_ToT_dEdx::initialize()
     return StatusCode::FAILURE;
   }
 
-  showDEDXSetup();
-
   ATH_MSG_INFO ( name() << " initialize() successful" );
-  return StatusCode::SUCCESS;
-}
-
-
-
-StatusCode TRT_ToT_dEdx::finalize()
-{
-  MsgStream log(msgSvc(), name());
-  ATH_MSG_DEBUG ( "... in finalize() ..." );
-  if(m_timingProfile)m_timingProfile->chronoPrint("TRT_ToT_dEdx"); //MJ
   return StatusCode::SUCCESS;
 }
 

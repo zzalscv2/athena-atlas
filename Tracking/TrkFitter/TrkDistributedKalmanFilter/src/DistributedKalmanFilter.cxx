@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 //////////////////////////////////////////////////////////////////
@@ -42,9 +42,8 @@
 #include "TrkDistributedKalmanFilter/DistributedKalmanFilter.h"
 #include "TrkDistributedKalmanFilter/TrkBaseNode.h"
 #include "TrkDistributedKalmanFilter/TrkFilteringNodes.h"
-#include "TrkDistributedKalmanFilter/TrkTrackState.h"
-#include "TrkDistributedKalmanFilter/TrkTrackState.h"
 #include "TrkDistributedKalmanFilter/TrkPlanarSurface.h"
+#include "TrkDistributedKalmanFilter/TrkTrackState.h"
 
 #include "TrkTrack/TrackInfo.h"
 

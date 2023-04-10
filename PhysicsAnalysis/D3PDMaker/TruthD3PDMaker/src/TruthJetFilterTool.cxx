@@ -17,7 +17,6 @@
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/MagicNumbers.h"
 #include "CLHEP/Vector/LorentzVector.h"
-#include "boost/range/iterator_range_core.hpp"
 #include <utility>
 
 
@@ -360,7 +359,7 @@ TruthJetFilterTool::addVertex (HepMC::ConstGenVertexPtr v,HepMC::GenEvent* ev)
 /**
  * @brief Test to find leptons from tau decays.
  */
-bool TruthJetFilterTool::isLeptonFromTau(HepMC::ConstGenParticlePtr part) const{
+bool TruthJetFilterTool::isLeptonFromTau(const HepMC::ConstGenParticlePtr& part) const{
 
   int pdg = part->pdg_id();
 
@@ -371,7 +370,7 @@ bool TruthJetFilterTool::isLeptonFromTau(HepMC::ConstGenParticlePtr part) const{
      std::abs(pdg) != 15 &&
      std::abs(pdg) != 16) return false; // all leptons including tau.
 
-  HepMC::ConstGenVertexPtr prod = part->production_vertex();
+  const HepMC::ConstGenVertexPtr& prod = part->production_vertex();
   if(!prod) return false; // no parent.
 #ifdef HEPMC3
   // Loop over the parents of this particle.
@@ -420,7 +419,7 @@ bool TruthJetFilterTool::isLeptonFromTau(HepMC::ConstGenParticlePtr part) const{
  * @brief Test to see if we want to keep a particle.
  */
 bool
-TruthJetFilterTool::acceptParticle (HepMC::ConstGenParticlePtr p)
+TruthJetFilterTool::acceptParticle (const HepMC::ConstGenParticlePtr& p)
 {
   bool ok = false;
   int pdg_id = std::abs (p->pdg_id());

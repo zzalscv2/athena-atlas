@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- ////////////////////////////
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetTrackSumMomentsTool.cxx
@@ -113,7 +113,7 @@ const xAOD::Vertex* JetTrackSumMomentsTool::findHSVertex(const xAOD::VertexConta
       return vertices->at(iVertex);
     }
   }
-  ATH_MSG_WARNING("There is no vertex of type PriVx. Taking default vertex.");
+  ATH_MSG_VERBOSE("There is no vertex of type PriVx. Taking default vertex.");
   return vertices->at(0);
 }
 

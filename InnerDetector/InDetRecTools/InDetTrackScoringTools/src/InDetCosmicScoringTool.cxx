@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTrackScoringTools/InDetCosmicScoringTool.h"
@@ -19,46 +19,12 @@ InDet::InDetCosmicScoringTool::InDetCosmicScoringTool(const std::string& t,
   AthAlgTool(t,n,p)
 {
   declareInterface<Trk::ITrackScoringTool>(this);
-  declareProperty("SummaryTool",          m_trkSummaryTool);  
   declareProperty("nWeightedClustersMin", m_nWeightedClustersMin = 0); 
   declareProperty("minTRTHits",           m_minTRTHits = 0);
 }
 
-//---------------------------------------------------------------------------------------------------------------------
-
-InDet::InDetCosmicScoringTool::~InDetCosmicScoringTool()
-= default;
-
-//---------------------------------------------------------------------------------------------------------------------
-
-StatusCode InDet::InDetCosmicScoringTool::initialize()
+Trk::TrackScore InDet::InDetCosmicScoringTool::score( const Trk::Track& track ) const
 {
-  StatusCode sc = AlgTool::initialize();
-  if (sc.isFailure()) return sc;
-  
-  sc = m_trkSummaryTool.retrieve();
-  if (sc.isFailure()) {
-    msg(MSG::FATAL) << "Failed to retrieve tool " << m_trkSummaryTool << endmsg;
-    return StatusCode::FAILURE;
-  } else 
-    msg(MSG::INFO) << "Retrieved tool " << m_trkSummaryTool << endmsg;
-  
-  return StatusCode::SUCCESS;
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-
-StatusCode InDet::InDetCosmicScoringTool::finalize()
-{
-  StatusCode sc = AlgTool::finalize();
-  return sc;
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-
-Trk::TrackScore InDet::InDetCosmicScoringTool::score( const Trk::Track& track, const bool suppressHoleSearch ) const
-{
-  (void) suppressHoleSearch;
   if (!track.trackSummary()) {
      ATH_MSG_FATAL("Track without a summary");
   }

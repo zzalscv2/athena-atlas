@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTrackScoringTools/InDetTrtTrackScoringTool.h"
@@ -61,10 +61,6 @@ InDet::InDetTrtTrackScoringTool::InDetTrtTrackScoringTool(const std::string& t,
 
 //---------------------------------------------------------------------------------------------------------------------
 
-InDet::InDetTrtTrackScoringTool::~InDetTrtTrackScoringTool() = default;
-
-//---------------------------------------------------------------------------------------------------------------------
-
 StatusCode
 InDet::InDetTrtTrackScoringTool::initialize()
 {
@@ -87,18 +83,9 @@ InDet::InDetTrtTrackScoringTool::initialize()
 
 //---------------------------------------------------------------------------------------------------------------------
 
-StatusCode
-InDet::InDetTrtTrackScoringTool::finalize()
-{
-  return StatusCode::SUCCESS;
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-
 Trk::TrackScore
-InDet::InDetTrtTrackScoringTool::score(const Trk::Track& track, const bool suppressHoleSearch) const
+InDet::InDetTrtTrackScoringTool::score(const Trk::Track& track) const
 {
-  (void)suppressHoleSearch;
   if (!track.trackSummary()) {
     ATH_MSG_FATAL("Track without a summary");
   }

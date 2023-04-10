@@ -64,7 +64,7 @@ StatusCode DecaysFinalStateFilter::filterEvent() {
     const HepMC::GenEvent* genEvt = *itr;
 
 
-  for (auto part: *genEvt){
+  for (const auto& part: *genEvt){
       // look only at the allowed parents (e.g. W, Z)
       bool allowedParent = false;
       for (size_t i=0; i<m_PDGAllowedParents.size(); ++i) {
@@ -74,7 +74,7 @@ StatusCode DecaysFinalStateFilter::filterEvent() {
 
       if (!part->end_vertex()) continue;
 
-      for (auto opitr: *(part->end_vertex())) {
+      for (const auto& opitr: *(part->end_vertex())) {
         int apid = std::abs(opitr->pdg_id());
         if (apid == 1 || apid == 2 || apid == 3 || apid == 4 || apid ==5) nQuarks++;
         if (apid == 5) nbQuarks++;

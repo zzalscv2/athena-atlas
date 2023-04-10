@@ -103,6 +103,11 @@ if '__main__' in __name__:
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     cfg.merge(OutputStreamCfg(flags, 'AOD'))
 
+    # Configure metadata
+    log.info('== Configuring metadata for the output stream')
+    from OutputStreamAthenaPool.OutputStreamConfig import InfileMetaDataCfg
+    cfg.merge(InfileMetaDataCfg(flags, 'AOD'))
+
     # Setup the output stream algorithm
     StreamAOD = cfg.getEventAlgo('OutputStreamAOD')
     StreamAOD.ForceRead = True

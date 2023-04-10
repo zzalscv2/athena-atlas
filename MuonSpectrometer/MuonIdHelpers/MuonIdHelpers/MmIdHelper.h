@@ -93,6 +93,14 @@ public:
     Identifier multilayerID(const Identifier& moduleID, int multilayer) const;
     Identifier multilayerID(const Identifier& moduleID, int multilayer, bool& isValid) const;
 
+    Identifier pcbID(int stationName, int stationEta, int stationPhi, int multilayer, int gasGap, int pcb) const;
+    Identifier pcbID(int stationName, int stationEta, int stationPhi, int multilayer, int gasGap, int pcb, bool& isValid) const;
+    Identifier pcbID(std::string& stationName, int stationEta, int stationPhi, int multilayer, int gasGap, int pcb) const;
+    Identifier pcbID(std::string& stationName, int stationEta, int stationPhi, int multilayer, int gasGap, int pcb, bool& isValid) const;
+    Identifier pcbID(const Identifier& channelID, int pcb) const;
+    Identifier pcbID(const Identifier& channelID, int pcb, bool& isValid) const;
+    Identifier pcbID(const Identifier& channelID) const;
+
     // for an Identifier id, get the list of the daughter readout channel ids
     void idChannels(const Identifier& id, std::vector<Identifier>& vect) const;
 
@@ -139,6 +147,7 @@ public:
     bool validElement(const Identifier& id) const;
 
 private:
+    int getFirstPcbChnl(int stationEta, int pcb) const;
     bool isStNameInTech(const std::string& stationName) const override;
 
     int init_id_to_hashes();

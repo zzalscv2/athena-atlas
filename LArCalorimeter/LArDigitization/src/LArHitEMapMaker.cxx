@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // +==========================================================================+
@@ -18,7 +18,6 @@ LArHitEMapMaker::LArHitEMapMaker(const std::string& name, ISvcLocator* pSvcLocat
     m_LArPileUpTool("LArPileUpTool",this)
 {
   declareProperty("LArPileUpTool",m_LArPileUpTool,"Tool to perform the real work");
-  return;
 }
 
 // ----------------------------------------------------------------------------------

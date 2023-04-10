@@ -16,3 +16,4 @@ atlas_add_component( LArCalibTools
 
 # Install files from the package:
 atlas_install_joboptions( share/*.py )
+atlas_install_scripts( share/LArConditions2Ntuple.py )

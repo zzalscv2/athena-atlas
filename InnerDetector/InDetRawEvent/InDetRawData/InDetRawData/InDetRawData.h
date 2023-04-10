@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -32,8 +32,6 @@ public:
   // Constructor with parameters:
   // offline compact identifier of the readout channel
   InDetRawData(const Identifier rdoId, const unsigned int word);
-
-  // Destructor:
   virtual ~InDetRawData() = default;
 
   ///////////////////////////////////////////////////////////////////
@@ -55,7 +53,7 @@ public:
   // Clients should not use default constructor, rather use the one
   // above. It must be public for pool I/O.
   ///////////////////////////////////////////////////////////////////
-  InDetRawData();
+  InDetRawData() = default;
 
   // OR the data word from OTHER into our data word.
   // Used by InDetOverlay.
@@ -64,7 +62,6 @@ public:
      m_word |= other.m_word;
   }
 
-
   ///////////////////////////////////////////////////////////////////
   // Private data:
   ///////////////////////////////////////////////////////////////////
@@ -72,7 +69,7 @@ private:
   Identifier m_rdoId; //Offline ID for readout channel
   
 protected:
-  unsigned int m_word; // raw data word 
+  unsigned int m_word = 0; // raw data word 
 };
 
 /**Overload of << operator for MsgStream for debug output*/
@@ -80,10 +77,6 @@ MsgStream& operator << ( MsgStream& sl, const InDetRawData& rdo);
 
 /**Overload of << operator for std::ostream for debug output*/ 
 std::ostream& operator << ( std::ostream& sl, const InDetRawData& rdo);
-
-///////////////////////////////////////////////////////////////////
-// Inline methods:
-///////////////////////////////////////////////////////////////////
 
 #endif // INDETRAWDATA_INDETRAWDATA_H
 

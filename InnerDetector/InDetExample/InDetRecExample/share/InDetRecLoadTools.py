@@ -383,8 +383,7 @@ InDetTRTExtensionTool = TrackingCommon.getInDetTRT_ExtensionTool(TrackingCuts = 
 if InDetFlags.doPattern() and InDetFlags.doCosmics():
 
     from InDetTrackScoringTools.InDetTrackScoringToolsConf import InDet__InDetCosmicScoringTool
-    InDetScoringToolCosmics = InDet__InDetCosmicScoringTool(name         = 'InDetCosmicScoringTool',
-                                                            SummaryTool  = InDetTrackSummaryTool)
+    InDetScoringToolCosmics = InDet__InDetCosmicScoringTool(name         = 'InDetCosmicScoringTool')
     ToolSvc += InDetScoringToolCosmics
     if (InDetFlags.doPrintConfigurables()):
         printfunc (     InDetScoringToolCosmics)
@@ -474,7 +473,7 @@ if InDetFlags.doVertexFinding() or InDetFlags.doVertexFindingForMonitoring() or 
                                                             minNSctHits = InDetPrimaryVertexingCuts.nHitSct(),
                                                             minNTrtHits = InDetPrimaryVertexingCuts.nHitTrt(),
                                                             minNSiHits = InDetPrimaryVertexingCuts.nHitSi(),
-                                                            TrackSummaryTool = InDetTrackSummaryTool,
+                                                            TrackSummaryTool = TrackingCommon.getInDetTrackSummaryTool(),
                                                             Extrapolator = InDetExtrapolator)
 
     ToolSvc += InDetTrackSelectorTool

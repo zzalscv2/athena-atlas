@@ -49,8 +49,6 @@ StatusCode InDet::InDetBoundaryCheckTool::initialize() {
             ATH_MSG_WARNING("Since ITk Strip is used, m_check_bad_sct is turned off.");
         }
     }
-
-    ATH_MSG_INFO("InDeTBoundaryCheckTool::initialize() successful in " << name());
     return StatusCode::SUCCESS;
 }
 
@@ -136,21 +134,13 @@ Trk::BoundaryCheckResult InDet::InDetBoundaryCheckTool::boundaryCheckSiElement(
          * while still being recorded on the trajectory for later 
          * refinement. 
          */
-        ATH_MSG_VERBOSE(
-            "Track parameter on the module edge"
-        );
         return Trk::BoundaryCheckResult::OnEdge; 
-
     }
 
     if (intersection.out()) {
         /*
          * In this case, we are _not_ inside the active region of the element.
          */
-        ATH_MSG_VERBOSE(
-            "Track parameter not inside (active?) detector within " <<
-            phitol << " " << etatol 
-        );
         return Trk::BoundaryCheckResult::Outside;
     }
 
@@ -194,10 +184,6 @@ Trk::BoundaryCheckResult InDet::InDetBoundaryCheckTool::boundaryCheckSiElement(
         * shared property and a shared check.
         */
         if (siElement.nearBondGap(parameters.localPosition(), etatol )) {
-            ATH_MSG_VERBOSE(
-                "Track parameter on bond gap within " << etatol << ", so hit " <<
-                "is on an insensitive part of the element."
-            );
             return Trk::BoundaryCheckResult::Insensitive;
         }
         /*
@@ -205,7 +191,6 @@ Trk::BoundaryCheckResult InDet::InDetBoundaryCheckTool::boundaryCheckSiElement(
          * we have a good hit. Note that this is the only way we can return a
          * Candidate result! It's the only success state.
          */
-        ATH_MSG_VERBOSE("Module is good, and we're hitting a sensitive part!");
         return Trk::BoundaryCheckResult::Candidate;
 
     } 
@@ -214,7 +199,6 @@ Trk::BoundaryCheckResult InDet::InDetBoundaryCheckTool::boundaryCheckSiElement(
          * Finally, if the module is not alive, we simply return a DeadElement
          * result.
          */
-        ATH_MSG_VERBOSE("Track is hiting a bad module!");
         return Trk::BoundaryCheckResult::DeadElement;
     }
 }

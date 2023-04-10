@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 __doc__ = """
           Instantiate the InDetForwardTrackParticles Thinning
@@ -14,7 +14,9 @@ def ThinInDetForwardTrackParticlesCfg(flags, name="ThinInDetForwardTrackParticle
     mlog.info("Starting InDetForwardTrackParticles Thinning configuration")
     acc = ComponentAccumulator()
 
-    if "xAOD::TrackParticleContainer#InDetForwardTrackParticles" not in flags.Input.TypedCollections and not (flags.Detector.GeometryPixel and flags.InDet.Tracking.doForwardTracks):
+    if (("xAOD::TrackParticleContainer#InDetForwardTrackParticles"
+         not in flags.Input.TypedCollections) and
+        not flags.Tracking.doForwardTracks):
         mlog.info("Not attempting to thin InDetForwardTrackParticles, because the container InDetForwardTrackParticles does not seem to be available")
         return acc
 

@@ -28,8 +28,6 @@ public:
   StatusCode filterFinalize();
   StatusCode filterEvent();
 
-//  CLHEP::HepLorentzVector sumDaughterNeutrinos( const xAOD::TruthParticle* tau );
-
 private:
 
   CLHEP::HepRandomEngine* getRandomEngine(const std::string& streamName,

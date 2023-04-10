@@ -16,7 +16,6 @@ def TrigBphysMonConfig(inputFlags):
     # build monitor and book histograms
     monAlgCfg.configure()
     
-    helper.result().printConfig(withDetails=True, summariseProps=True)
     return helper.result()
     
 

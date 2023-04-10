@@ -97,10 +97,10 @@ private:
                         HepMC::GenEvent* ev);
 
   /// Test to see if we want to keep a particle.
-  bool acceptParticle (HepMC::ConstGenParticlePtr p);
+  bool acceptParticle (const HepMC::ConstGenParticlePtr& p);
 
   /// Test to see if a particle is a lepton from a tau decay
-  bool isLeptonFromTau(HepMC::ConstGenParticlePtr part) const;
+  bool isLeptonFromTau(const HepMC::ConstGenParticlePtr& part) const;
 
   /// Parameter: SG key for input @c McEventCollection.
   std::string m_mcEventsName;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -64,7 +64,7 @@ mergeFullDistArray(Trk::MultiComponentStateAssembler::Cache& cache,
       continue;
     }
     cache.multiComponentState.emplace_back(
-      Trk::ComponentParameters(std::move(state.first), state.second));
+      std::move(state.first), state.second);
     cache.validWeightSum += state.second;
   }
   Trk::MultiComponentState mergedState =

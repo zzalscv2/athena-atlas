@@ -109,7 +109,7 @@ StatusCode HTFilter::filterEvent() {
     std::vector<HepMC::GenParticlePtr> WZleptons;
     WZleptons.reserve(10);
 
-    for (auto  iter: *((*mecc)[0])){
+    for (const auto& iter: *((*mecc)[0])){
       if ( !iter ) continue;
       int pdgid = iter->pdg_id();
       if (m_UseNu && MC::PID::isNeutrino(pdgid) && MC::isGenStable(iter)) {

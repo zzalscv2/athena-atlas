@@ -1,0 +1,47 @@
+/*
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ */
+/**
+ * @file starts_with.icc
+ * @author scott snyder <snyder@bnl.gov>
+ * @date Mar, 2023
+ * @brief C++20-like starts_with/ends_with for strings.
+ */
+
+
+#include <cstring>
+
+
+namespace CxxUtils {
+
+
+/**
+ * @brief Test whether one string starts with another.
+ * @param s String in which to search.
+ * @param prefix Prefix for which to search.
+ *
+ * Returns true if string @c s starts with @c prefix.
+ */
+inline
+bool starts_with (const std::string& s, const std::string& prefix)
+{
+  return strncmp (s.c_str(), prefix.c_str(), prefix.size()) == 0;
+}
+
+
+/**
+ * @brief Test whether one string ends with another.
+ * @param s String in which to search.
+ * @param suffix Suffix for which to search.
+ *
+ * Returns true if string @c s ends with @c suffix.
+ */
+inline
+bool ends_with (const std::string& s, const std::string& suffix)
+{
+  return s.size() >= suffix.size() &&
+    strcmp (s.c_str() + s.size() - suffix.size(), suffix.c_str()) == 0;
+}
+
+
+} // namespace CxxUtils
