@@ -159,7 +159,7 @@ Trk::DenseEnvironmentsAmbiguityProcessorTool::process(const TracksScores *trackS
     // Sanity check
     ATH_MSG_DEBUG("Saving observed tracks to store");
     unsigned int nFinalTracks;
-    if (trackScoreTrackMap->size() > 0){
+    if (!trackScoreTrackMap->empty()){
       nFinalTracks = m_observerToolWriter->saveTracksToStore(ctx, AmbiguityProcessorBase::m_observerTool->getTrackMap(ctx));
     }
     else{
