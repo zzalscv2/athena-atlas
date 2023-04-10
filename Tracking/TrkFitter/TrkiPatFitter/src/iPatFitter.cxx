@@ -128,30 +128,11 @@ StatusCode iPatFitter::initialize() {
   m_messageHelper->setMessage(24, "excessive spectrometer energy loss : ");
   m_messageHelper->setMessage(25, "flipped track measurement order");
 
-  // retrieve the MaterialProvider and various Intersectors
-  auto retrieveTool = [&](auto handle) {
-    if (handle.retrieve().isFailure()) {
-      ATH_MSG_FATAL("Failed to retrieve tool " << handle);
-      return false;
-    }
-    ATH_MSG_INFO("Retrieved tool " << handle);
-    return true;
-  };
-  if (!retrieveTool(m_materialAllocator)) {
-    return StatusCode::FAILURE;
-  }
-  if (!retrieveTool(m_rungeKuttaIntersector)) {
-    return StatusCode::FAILURE;
-  }
-  if (!retrieveTool(m_solenoidalIntersector)) {
-    return StatusCode::FAILURE;
-  }
-  if (!retrieveTool(m_stepPropagator)) {
-    return StatusCode::FAILURE;
-  };
-  if (!retrieveTool(m_straightLineIntersector)) {
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK(m_materialAllocator.retrieve());
+  ATH_CHECK(m_rungeKuttaIntersector.retrieve());
+  ATH_CHECK(m_solenoidalIntersector.retrieve());
+  ATH_CHECK(m_stepPropagator.retrieve());
+  ATH_CHECK(m_straightLineIntersector.retrieve());
 
   // need to create the IndetExit and MuonEntrance TrackingVolumes
   if (m_trackingVolumesSvc.retrieve().isFailure()) {
