@@ -24,7 +24,6 @@ TrigEgammaMonitorBaseAlgorithm::~TrigEgammaMonitorBaseAlgorithm() {}
 StatusCode TrigEgammaMonitorBaseAlgorithm::initialize() 
 {
 
-  ATH_MSG_INFO("TrigEgammaMonitorBaseAlgorithm::initialize()...");
   ATH_CHECK(AthMonitorAlgorithm::initialize());
   ATH_CHECK(m_trigdec.retrieve());
   ATH_CHECK(m_photonIsEMTool.retrieve());
@@ -657,17 +656,17 @@ void TrigEgammaMonitorBaseAlgorithm::setTrigInfo(const std::string& trigger){
         ATH_MSG_ERROR("Cannot set trigger type from name");
     }
 
-    ATH_MSG_INFO(parts.at(1));
+    ATH_MSG_DEBUG(parts.at(1));
     if(parts.at(1) == "idperf"){
-        ATH_MSG_INFO("This is idperf");
+        ATH_MSG_DEBUG("This is idperf");
         idperf=true;
     }
     else if( parts.at(1)== "etcut"){
-        ATH_MSG_INFO("This is etcut");
+        ATH_MSG_DEBUG("This is etcut");
         etcut=true;
     }
     else { // remap online pidname to offline pidname
-        ATH_MSG_INFO("This is nominal");
+        ATH_MSG_DEBUG("This is nominal");
         pidname = pidMap.at(parts.at(1));
     }
 
@@ -692,19 +691,19 @@ void TrigEgammaMonitorBaseAlgorithm::setTrigInfo(const std::string& trigger){
     l1legacy = !boost::contains(l1seed, "eEM");
 
 
-    ATH_MSG_INFO("=================== Chain Parser =======================");
-    ATH_MSG_INFO( "trigger     : " << trigger );
-    ATH_MSG_INFO( "threshold   : " << threshold);
-    ATH_MSG_INFO( "Pidname     : " << pidname );
-    ATH_MSG_INFO( "signature   : " << signature);
-    ATH_MSG_INFO( "etcut       : " << (etcut?"Yes":"No"));
-    ATH_MSG_INFO( "idperf      : " << (idperf?"Yes":"No"));
-    ATH_MSG_INFO( "nogsf       : " << (nogsf?"Yes":"No"));
-    ATH_MSG_INFO( "lrt         : " << (lrt?"Yes":"No"));
-    ATH_MSG_INFO( "Isolation   : " << isolation);
-    ATH_MSG_INFO( "Isolated    : " << (isolated?"Yes":"No"));
-    ATH_MSG_INFO( "L1Seed      : " << l1seed << " (Is Legacy? " << (l1legacy?"Yes":"No") << ")");
-    ATH_MSG_INFO("========================================================");
+    ATH_MSG_DEBUG("=================== Chain Parser =======================");
+    ATH_MSG_DEBUG( "trigger     : " << trigger );
+    ATH_MSG_DEBUG( "threshold   : " << threshold);
+    ATH_MSG_DEBUG( "Pidname     : " << pidname );
+    ATH_MSG_DEBUG( "signature   : " << signature);
+    ATH_MSG_DEBUG( "etcut       : " << (etcut?"Yes":"No"));
+    ATH_MSG_DEBUG( "idperf      : " << (idperf?"Yes":"No"));
+    ATH_MSG_DEBUG( "nogsf       : " << (nogsf?"Yes":"No"));
+    ATH_MSG_DEBUG( "lrt         : " << (lrt?"Yes":"No"));
+    ATH_MSG_DEBUG( "Isolation   : " << isolation);
+    ATH_MSG_DEBUG( "Isolated    : " << (isolated?"Yes":"No"));
+    ATH_MSG_DEBUG( "L1Seed      : " << l1seed << " (Is Legacy? " << (l1legacy?"Yes":"No") << ")");
+    ATH_MSG_DEBUG("========================================================");
 
     TrigInfo info{l1legacy,l1seed,trigger,signature,threshold,pidname,idperf,etcut,nogsf,lrt,isolation, isolated};
     m_trigInfo[trigger] = info;
