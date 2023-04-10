@@ -34,9 +34,8 @@ namespace Muon {
         ATH_CHECK(m_csc4dSegmentFinder.retrieve(DisableTool{!m_idHelperSvc->hasCSC() || m_csc4dSegmentFinder.empty()}));
         ATH_CHECK(m_patternSegs.initialize(!m_patternSegs.empty()));
         ATH_CHECK(m_segmentMatchingTool.retrieve(DisableTool{m_patternSegs.empty()}));       
-        ATH_CHECK(m_houghDataPerSectorVecKey.initialize(!m_houghDataPerSectorVecKey.empty()));
-        ATH_CHECK(m_clusterSegMakerNSW.retrieve(DisableTool{!(m_idHelperSvc->recoMM() || m_idHelperSvc->recosTgc()) 
-                                                            || m_clusterSegMakerNSW.empty()|| !m_patternSegs.empty()}));
+        ATH_CHECK(m_houghDataPerSectorVecKey.initialize(!m_houghDataPerSectorVecKey.empty()));        
+        ATH_CHECK(m_clusterSegMakerNSW.retrieve(DisableTool{m_clusterSegMakerNSW.empty()|| !m_patternSegs.empty()}));
       
         return StatusCode::SUCCESS;
     }
