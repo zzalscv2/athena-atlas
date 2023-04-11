@@ -3,8 +3,6 @@
 #Categories currently used by offline Egamma TO monitoringMT tool
 
 monitoring_photon = [
-    'HLT_g20_tight_L1EM15VHI',
-    'HLT_g20_tight_icaloloose_L1EM15VHI',
     'HLT_g22_tight_L1EM15VHI',
     'HLT_g35_medium_L1EM20VH',
     'HLT_g50_loose_L1EM20VH',
@@ -17,7 +15,6 @@ monitoring_bootstrap = {
         'HLT_g25_medium_L1EM20VH' : 'HLT_g25_loose_L1EM20VH',
         'HLT_g35_medium_L1EM20VH' : 'HLT_g25_loose_L1EM20VH',
         'HLT_g22_tight_L1EM15VHI' : 'HLT_g20_tight_L1EM15VHI',
-        'HLT_g20_tight_icaloloose_L1EM15VHI': 'HLT_g20_tight_L1EM15VHI',
         'HLT_g50_loose_L1EM20VH'  : 'HLT_g25_loose_L1EM20VH',
         }
 
@@ -91,9 +88,6 @@ validationTP_electron = [
 
 
 validationTP_electron_DNN = [ # will be added when new DNN is ready 
-        'HLT_e26_dnnloose_L1EM22VHI',
-        'HLT_e26_dnnmedium_L1EM22VHI',
-        'HLT_e26_dnntight_L1EM22VHI',
         'HLT_e26_dnntight_ivarloose_L1EM22VHI'
         ]
 
