@@ -7,7 +7,6 @@
 #include "TObjArray.h"
 #include "FourMomUtils/xAODP4Helpers.h"
 #include "StoreGate/ReadDecorHandle.h"
-#include "MuonReadoutGeometry/TgcDetectorElement.h"
 #include "GoodRunsLists/TGRLCollection.h"
 
 namespace {
@@ -1513,10 +1512,9 @@ return (m.muon->charge()>0);
 	    for(auto& cham : extpositions[tgcHit.cham_name()]){
 	      double newX = cham.extPos.x() + cham.extVec.x() / cham.extVec.z() * ( tgcHit.Z() - cham.extPos.z() );
 	      double newY = cham.extPos.y() + cham.extVec.y() / cham.extVec.z() * ( tgcHit.Z() - cham.extPos.z() );
-	      auto id2 = muonMgr->tgcIdHelper()->elementID(tgcHit.StationName(), tgcHit.StationEta(), tgcHit.StationPhi());
-	      IdentifierHash hash_id;
-	      muonMgr->tgcIdHelper()->get_detectorElement_hash(id2,hash_id);
-	      auto detEle = muonMgr->getTgcDetectorElement(hash_id);
+	      Identifier id2 = muonMgr->tgcIdHelper()->elementID(tgcHit.StationName(), tgcHit.StationEta(), tgcHit.StationPhi());
+	      
+	      auto detEle = muonMgr->getTgcReadoutElement(id2);
 	      double chamPhi = detEle->center().phi();
 	      TVector2 extPos(newX,newY);
 	      TVector2 hitPos(tgcHit.X(),tgcHit.Y());
@@ -1786,10 +1784,8 @@ return (m.muon->charge()>0);
 	const std::string& cham_name = exts.first;
 	TGC::TgcChamber cham; cham.initChamber(cham_name);
 	// local-coordinate x'-y'
-	auto id2 = muonMgr->tgcIdHelper()->elementID(cham.StationName(), cham.StationEta(), cham.StationPhi());
-	IdentifierHash hash_id;
-	muonMgr->tgcIdHelper()->get_detectorElement_hash(id2,hash_id);
-	auto detEle = muonMgr->getTgcDetectorElement(hash_id);
+	Identifier id2 = muonMgr->tgcIdHelper()->elementID(cham.StationName(), cham.StationEta(), cham.StationPhi());
+	auto detEle = muonMgr->getTgcReadoutElement(id2);
 	for(const auto& ext : exts.second){ // how often tracks are extrapolated to this chamber surface,e.i. denominator
 	  Amg::Vector3D extPosLocal = detEle->transform().inverse() * ext.extPos;
 	  Amg::Vector3D extVecLocal = detEle->transform().inverse() * ext.extVec;
@@ -1798,7 +1794,7 @@ return (m.muon->charge()>0);
 	    int etamap_index = 0;
 	    int phimap_global_index = 0;
 	    if(!m_tgcMonTool->getMapIndex(cham,iLay,etamap_index,phimap_index,phimap_global_index ))continue;
-	    double gapZ = detEle->readoutElement()->localGasGapPos(iLay).z();
+	    double gapZ = detEle->localGasGapPos(iLay).z();
 	    double newX = extPosLocal.x() + extVecLocal.x() / extVecLocal.z() * ( gapZ - extPosLocal.z() );
 	    double newY = extPosLocal.y() + extVecLocal.y() / extVecLocal.z() * ( gapZ - extPosLocal.z() );
 	    for(int iSorW = 0 ; iSorW < 2 ; iSorW++){
