@@ -168,12 +168,11 @@ HepMcParticleLink::HepMcParticleLink (const HepMC::ConstGenParticlePtr& part,
 HepMC::ConstGenParticlePtr HepMcParticleLink::cptr() const
 {
   // dummy link
-  if (!m_ptr.isValid() && !m_store) {
+  const bool is_valid = m_ptr.isValid();
+  if (!is_valid && !m_store) {
     return nullptr;
   }
-
-  HepMC::ConstGenParticlePtr p = m_ptr.get();
-  if (!p) {
+  if (is_valid) return m_ptr.get();
     if (0 == barcode()) {
 #if 0
       MsgStream log (Athena::getMessageSvc(), "HepMcParticleLink");
@@ -217,9 +216,10 @@ HepMC::ConstGenParticlePtr HepMcParticleLink::cptr() const
           m_extBarcode.makeIndex (pEvt->event_number(), position);
         }
         if (barcode() != 0) {
-          p = HepMC::barcode_to_particle(pEvt,barcode());
+         const HepMC::ConstGenParticlePtr p = HepMC::barcode_to_particle(pEvt,barcode());
           if (p) {
             m_ptr.set (p);
+            return p;
           }
         }
       } else {
@@ -238,8 +238,7 @@ HepMC::ConstGenParticlePtr HepMcParticleLink::cptr() const
       MsgStream log (Athena::getMessageSvc(), "HepMcParticleLink");
       log << MSG::WARNING << "cptr: McEventCollection not found" << endmsg;
     }
-  }
-  return p;
+  return nullptr;
 }
 
 
