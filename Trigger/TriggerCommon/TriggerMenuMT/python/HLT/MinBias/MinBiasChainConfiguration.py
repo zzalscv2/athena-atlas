@@ -8,12 +8,12 @@ from TriggerMenuMT.HLT.Config.MenuComponents import EmptyMenuSequence
 from TriggerMenuMT.HLT.Config.ChainConfigurationBase import ChainConfigurationBase
 from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 
-from TriggerMenuMT.HLT.MinBias.MinBiasMenuSequences import (MinBiasSPSequence, 
+from TriggerMenuMT.HLT.MinBias.MinBiasMenuSequences import (MinBiasSPSequence,
                                                             MinBiasTrkSequence,
-                                                            MinBiasMbtsSequenceCfg, 
+                                                            MinBiasMbtsSequenceCfg,
                                                             MinBiasZVertexFinderSequenceCfg)
 from TriggerMenuMT.HLT.MinBias.ALFAMenuSequences import ALFAPerfSequence
-from TriggerMenuMT.HLT.MinBias.AFPMenuSequence import AFPTrkSequenceCfg, AFPGlobalSequenceCfg
+from TriggerMenuMT.HLT.MinBias.AFPMenuSequence import AFPTrkSequence, AFPGlobalSequence
 
 #----------------------------------------------------------------
 # fragments generating configuration will be functions in New JO,
@@ -31,9 +31,17 @@ def MinBiasMbtsEmptySequenceCfg(flags):
 def MinBiasZFindEmptySequenceCfg(flags):
     return EmptyMenuSequence("EmptyZFind")
 
+def AFPGlobalSequenceCfg(flags):
+    from ..Config.MenuComponents import menuSequenceCAToGlobalWrapper
+    return menuSequenceCAToGlobalWrapper(AFPGlobalSequence, flags)
+
+def AFPTrkSequenceCfg(flags):
+    from ..Config.MenuComponents import menuSequenceCAToGlobalWrapper
+    return menuSequenceCAToGlobalWrapper(AFPTrkSequence, flags)
 
 def ALFAPerfSequenceCfg(flags):
-    return ALFAPerfSequence(flags)
+    from ..Config.MenuComponents import menuSequenceCAToGlobalWrapper
+    return menuSequenceCAToGlobalWrapper(ALFAPerfSequence, flags)
 
 def MinBiasZVertexFinderCfg(flags):
     #TODO we can do that inside of the getStep ... next interation
