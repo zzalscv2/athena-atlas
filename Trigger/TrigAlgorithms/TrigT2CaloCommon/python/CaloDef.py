@@ -25,17 +25,13 @@ def _algoHLTCaloCell(flags, name="HLTCaloCellMaker", inputEDM='', outputEDM='Cel
    algo.ExtraInputs+=[  ( 'LArBadChannelCont', 'ConditionStore+LArBadChannel'), ( 'LArMCSym', 'ConditionStore+LArMCSym'), ('LArOnOffIdMapping' , 'ConditionStore+LArOnOffIdMap' ), ('LArFebRodMapping'  , 'ConditionStore+LArFebRodMap' ), ('CaloDetDescrManager', 'ConditionStore+CaloDetDescrManager') ]
    return algo
 
-def _algoHLTHIEventShape(name='HLTEventShapeMaker', inputEDM='CellsClusters', outputEDM='HIEventShape'):
-    from HIGlobal.HIGlobalConf import HIEventShapeMaker
-    from HIGlobal.HIGlobalConf import HIEventShapeFillerTool
-
-    algo = HIEventShapeMaker(name)
-    algo.InputCellKey = inputEDM
-    algo.InputTowerKey=""
-    algo.NaviTowerKey=""
-    algo.OutputContainerKey = outputEDM
-    algo.HIEventShapeFillerTool = HIEventShapeFillerTool()
-
+def _algoHLTHIEventShape(flags,name='HLTEventShapeMaker', inputEDM='CellsClusters', outputEDM='HIEventShape'):
+    algo = CompFactory.HIEventShapeMaker(name = name,
+                                         InputCellKey = inputEDM,
+                                         InputTowerKey="",
+                                         NaviTowerKey="",
+                                         OutputContainerKey = outputEDM,
+                                         HIEventShapeFillerTool = CompFactory.HIEventShapeFillerTool())
     return algo
 
 def _algoHLTCaloCellCorrector(name='HLTCaloCellCorrector', inputEDM='CellsClusters', outputEDM='CorrectedCellsClusters', eventShape='HIEventShape'):
