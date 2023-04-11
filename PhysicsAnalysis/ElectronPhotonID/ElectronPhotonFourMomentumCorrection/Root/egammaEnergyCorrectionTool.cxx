@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -1474,7 +1474,7 @@ namespace AtlasRoot {
 
     if ( var==egEnergyCorr::Scale::L2GainUp || var==egEnergyCorr::Scale::L2GainDown ) {
       if (m_gain_tool) { // recipe for run1
-        if (!(std::abs(cl_eta) < 1.52 and std::abs(cl_eta) > 1.37) and fabs(cl_eta) < 2.4) {
+        if ((std::abs(cl_eta) >= 1.52 || std::abs(cl_eta) <= 1.37) and std::abs(cl_eta) < 2.4) {
   	      double evar = m_gain_tool->CorrectionGainTool(cl_eta, energy/GeV, energyS2/GeV, ptype);
   	      double meanES2 = m_zeeES2Profile->GetBinContent(m_zeeES2Profile->FindFixBin(cl_eta)); // in GeV already
   	      double eref = m_gain_tool->CorrectionGainTool(cl_eta, meanE/GeV, meanES2, PATCore::ParticleType::Electron );

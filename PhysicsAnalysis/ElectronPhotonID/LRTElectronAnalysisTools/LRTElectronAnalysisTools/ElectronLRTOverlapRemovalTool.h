@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -60,7 +60,7 @@ namespace CP
         ToolHandle<IAsgElectronLikelihoodTool> m_electronLLHToolMediumNoPix{this, "ElectronLLHToolMediumNoPix", "", "Electron LLH tool to use for the overlap removal"}; 
         ToolHandle<IAsgElectronLikelihoodTool> m_electronLLHToolTightNoPix{this, "ElectronLLHToolTightNoPix", "", "Electron LLH tool to use for the overlap removal"}; 
 
-        bool electronPassesID(const xAOD::Electron *electron, std::string IDWorkingPoint) const;
+        bool electronPassesID(const xAOD::Electron *electron, const std::string& IDWorkingPoint) const;
 
     }; // end namespace CP
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -50,7 +50,7 @@ ElectronDNNCalculator::ElectronDNNCalculator(AsgElectronSelectorTool* owner,
                                              "nPixHitsPlusDeadSensors", "nSCTHitsPlusDeadSensors",
                                              "EoverP", "eta", "et", "Rhad1", "Rhad", "f3", "f1",
                                              "weta2", "Rphi", "Reta", "Eratio", "wtots1"};
-  order.scalar.push_back( std::make_pair("node_0", inputVariables) );
+  order.scalar.emplace_back("node_0", inputVariables );
 
   // create the model
   inputFile.open(modelFileName);

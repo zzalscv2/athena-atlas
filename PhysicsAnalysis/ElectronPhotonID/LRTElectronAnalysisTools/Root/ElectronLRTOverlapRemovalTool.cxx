@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LRTElectronAnalysisTools/ElectronLRTOverlapRemovalTool.h"
@@ -72,7 +72,7 @@ namespace CP
     //////////////////////////////////////////////////////////////////
     // Check if electron passes ID
     //////////////////////////////////////////////////////////////////
-    bool ElectronLRTOverlapRemovalTool::electronPassesID(const xAOD::Electron *electron, std::string IDWorkingPoint) const
+    bool ElectronLRTOverlapRemovalTool::electronPassesID(const xAOD::Electron *electron, const std::string& IDWorkingPoint) const
     {
 
         if (m_isDAOD)
