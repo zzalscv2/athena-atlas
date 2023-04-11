@@ -113,6 +113,8 @@ def jFexRoiByteStreamToolCfg(flags, name, *, writeBS=False, xTOBs=False):
       helper = AthMonitorCfgHelper(flags, 'HLTFramework')
       monTool = helper.addGroup(None, f'{name}MonTool', f'/HLT/HLTFramework/L1BSConverters/{name}')
       topDir = None
+      acc.merge(helper.result())
+
     monTool.defineHistogram('jfexDecoderErrorTitle,jfexDecoderErrorLocation;errors', path=topDir, type='TH2I',
                             title='Decoder Errors;Type;Location',
                             xbins=1, xmin=0, xmax=1, xlabels=["UNKNOWN"],
@@ -215,6 +217,8 @@ def jFexInputByteStreamToolCfg(flags, name, *, writeBS=False):
       helper = AthMonitorCfgHelper(flags, 'HLTFramework')
       monTool = helper.addGroup(None, f'{name}MonTool', f'/HLT/HLTFramework/L1BSConverters/{name}')
       topDir = None
+      acc.merge(helper.result())
+
     monTool.defineHistogram('jfexDecoderErrorTitle,jfexDecoderErrorLocation;errors', path=topDir, type='TH2I',
                             title='Decoder Errors;Type;Location',
                             xbins=1, xmin=0, xmax=1, xlabels=["UNKNOWN"],
