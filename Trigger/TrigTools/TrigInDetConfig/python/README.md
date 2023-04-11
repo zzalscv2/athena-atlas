@@ -102,7 +102,7 @@ An example on how to call this
 
 The actual interface is 
 <pre>
-  def makeInDetTrigFastTracking( flags, config = None, rois = 'EMViewRoIs', doFTF = True, viewVerifier='IDViewDataVerifier', secondStageConfig = None):
+  def makeInDetTrigFastTracking( flags, config = None, rois = 'EMViewRoIs', doFTF = True, viewVerifier='IDViewDataVerifier'):
 </pre>
 where the arguments are    
   
@@ -110,8 +110,6 @@ where the arguments are
       rois              - the view RoI name
       doFTF             - whether to run the actual FTF, or just the data preparation
       viewVerifier      - the view data verifier
-      secondStageConfig - the ID Trigger config for a second stage. This is not really used now, 
-		              since the second stage generally has its own instance now
 					     
 
 # Precision  Tracking
