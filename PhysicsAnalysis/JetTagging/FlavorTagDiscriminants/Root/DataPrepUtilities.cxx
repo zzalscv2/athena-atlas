@@ -928,6 +928,70 @@ namespace FlavorTagDiscriminants {
       return std::make_tuple(decorators, deps, used_remap);
     }
 
+    std::tuple<
+      internal::OutNode, internal::OutNodeVecChar,
+      internal::OutNodeVecFloat, internal::OutNodeTrackLinks,
+      FTagDataDependencyNames, std::set<std::string>>
+    createGNDecorators(
+      const GNNConfig::Config& config,
+      const FTagOptions& options)
+    {
+      FTagDataDependencyNames deps;
+      internal::OutNode decorators_f;
+      internal::OutNodeVecChar decorators_vc;
+      internal::OutNodeVecFloat decorators_vf;
+      internal::OutNodeTrackLinks decorators_tl;
+
+      std::map<std::string, std::string> remap = options.remap_scalar;
+      std::set<std::string> used_remap;
+
+      for (const auto& out_node: config.outputs) {
+
+        // let user rename the output
+        std::string name = out_node.label;
+        if (auto h = remap.extract(name)){
+          name = h.mapped();
+          used_remap.insert(h.key());
+        }
+        deps.bTagOutputs.insert(name);
+
+        switch (out_node.type) {
+          case GNNConfig::OutputNodeType::FLOAT: {
+            SG::AuxElement::Decorator<float> f(name);
+            decorators_f.emplace_back(out_node.label, f);
+            break;
+          }
+          case GNNConfig::OutputNodeType::VECCHAR: {
+            SG::AuxElement::Decorator<std::vector<char>> vc(name);
+            decorators_vc.emplace_back(out_node.label, vc);
+            break;
+          }
+          case GNNConfig::OutputNodeType::VECFLOAT: {
+            SG::AuxElement::Decorator<std::vector<float>> vf(name);
+            decorators_vf.emplace_back(out_node.label, vf);
+            break;
+          }
+          default:
+            throw std::logic_error("uknown outputnode type");
+        }
+      }
+
+      // TrackLinks decorator
+      if (decorators_vc.size() > 0 || decorators_vf.size() > 0){
+        std::string name = "TrackLinks";
+        if (auto h = remap.extract(name)){
+          name = h.mapped();
+          used_remap.insert(h.key());
+        }
+        deps.bTagOutputs.insert(name);
+
+        SG::AuxElement::Decorator<internal::TrackLinks> tl(name);
+        decorators_tl.emplace_back("TrackLinks", tl);
+      }
+
+      return std::make_tuple(decorators_f, decorators_vc, decorators_vf, decorators_tl, deps, used_remap);
+    }
+
     // return a function to check IP validity
     std::tuple<
       std::function<char(const internal::Tracks&)>,
@@ -986,8 +1050,6 @@ namespace FlavorTagDiscriminants {
         throw std::logic_error("found unused output remapping(s): " + outputs);
       }
     }
-
-
   } // end of datapre namespace
 
 } // end of FlavorTagDiscriminants namespace

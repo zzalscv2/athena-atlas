@@ -33,9 +33,20 @@ namespace FlavorTagDiscriminants {
     m_onnxUtil = std::make_shared<OnnxUtil>(fullPathToOnnxFile);
 
     std::string gnn_config_str = m_onnxUtil->getMetaData("gnn_config");
-    std::stringstream gnn_config_stream;
-    gnn_config_stream << gnn_config_str;
+    m_config_gnn = m_onnxUtil->get_config();
 
+    std::stringstream gnn_config_stream;
+
+    // adding "outputs" to the config if it is not present or lwtnn will fail
+    if (m_onnxUtil->getOnnxModelVersion() != OnnxModelVersion::V0){
+      nlohmann::json j = nlohmann::json::parse(gnn_config_str);
+      j["outputs"] = nlohmann::json::object();
+
+      // dump the json to a stringstream
+      gnn_config_stream << j.dump();
+    } else {
+      gnn_config_stream << gnn_config_str;
+    }
     auto config = lwt::parse_json_graph(gnn_config_stream);
 
     auto [inputs, track_sequences, options] = dataprep::createGetterConfig(
@@ -51,15 +62,18 @@ namespace FlavorTagDiscriminants {
     m_trackSequenceBuilders = tsb;
     m_dataDependencyNames += td;
 
-    auto [decorators, dd, rd] = dataprep::createDecorators(
-      config, options);
-    m_decorators = decorators;
+    auto [dec_f, dec_vc, dec_vf, dec_tl, dd, rd] = dataprep::createGNDecorators(
+      m_config_gnn, options);
+    m_decorators_float = dec_f;
+    m_decorators_vecchar = dec_vc;
+    m_decorators_vecfloat = dec_vf;
+    m_decorators_tracklinks = dec_tl;
     m_dataDependencyNames += dd;
 
     rd.merge(rt);
     dataprep::checkForUnusedRemaps(options.remap_scalar, rd);
-
   }
+
   GNN::GNN(GNN&&) = default;
   GNN::GNN(const GNN&) = default;
   GNN::~GNN() = default;
@@ -76,10 +90,8 @@ namespace FlavorTagDiscriminants {
     decorate(jet, jet);
   }
   void GNN::decorateWithDefaults(const xAOD::Jet& jet) const {
-    for (const auto& dec: m_decorators) {
-      for (const auto& node: dec.second) {
-        node.second(jet) = m_defaultValue;
-      }
+    for (const auto& dec: m_decorators_float) {
+      dec.second(jet) = m_defaultValue;
     }
   }
 
@@ -101,13 +113,21 @@ namespace FlavorTagDiscriminants {
     input_pair jet_info (jet_feat, jet_feat_dim);
     gnn_input.insert({"jet_features", jet_info});
 
+    // Only one track sequence is allowed because the tracks are declared
+    // outside the loop over sequences. 
+    // Having more than one sequence would overwrite them. 
+    // These are only used outside the loop to write the track links. 
+    if (m_trackSequenceBuilders.size() > 1) {
+      throw std::runtime_error("Only one track sequence is supported");
+    }
+    Tracks flipped_tracks;
     for (const auto& builder: m_trackSequenceBuilders) {
       std::vector<float> track_feat; // (#tracks, #feats).flatten
       int num_track_vars = static_cast<int>(builder.sequencesFromTracks.size());
       int num_tracks = 0;
 
       Tracks sorted_tracks = builder.tracksFromJet(jet, btag);
-      Tracks flipped_tracks = builder.flipFilter(sorted_tracks, jet);
+      flipped_tracks = builder.flipFilter(sorted_tracks, jet);
 
       int track_var_idx=0;
       for (const auto& seq_builder: builder.sequencesFromTracks) {
@@ -131,12 +151,44 @@ namespace FlavorTagDiscriminants {
       gnn_input.insert({"track_features", track_info});
     }
 
-    std::map<std::string, float> outputs;
-    m_onnxUtil->runInference(gnn_input, outputs);
+    auto [out_f, out_vc, out_vf]
+      = m_onnxUtil->runInference(gnn_input);
 
-    for (const auto& dec: m_decorators) {
-      for (const auto& node: dec.second) {
-        node.second(btag) = outputs.at(node.first);
+    // with old metadata
+    if (m_onnxUtil->getOnnxModelVersion() == OnnxModelVersion::V0){
+      for (const auto& dec: m_decorators_float) {
+        if (out_vf.at(dec.first).size() != 1){
+          throw std::logic_error(
+            "expected vectors of length 1 for float decorators");
+        }
+        dec.second(btag) = out_vf.at(dec.first).at(0);
+      }
+    }
+
+    else {
+      for (const auto& dec: m_decorators_float) {
+        dec.second(btag) = out_f.at(dec.first);
+      }
+
+      for (const auto& dec: m_decorators_vecchar) {
+        dec.second(btag) = out_vc.at(dec.first);
+      }
+
+      for (const auto& dec: m_decorators_vecfloat) {
+        dec.second(btag) = out_vf.at(dec.first);
+      }
+
+      for (const auto& dec: m_decorators_tracklinks) {
+        internal::TrackLinks links;
+        for (const xAOD::TrackParticle* it: flipped_tracks) {
+          TrackLinks::value_type link;
+
+          const auto* itc = dynamic_cast<const xAOD::TrackParticleContainer*>(
+            it->container());
+          link.toIndexedElement(*itc, it->index());
+          links.push_back(link);
+        }
+        dec.second(btag) = links;
       }
     }
   } // end of decorate()
