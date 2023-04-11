@@ -16,12 +16,12 @@ else()
 endif()
 
 # External dependencies:
-find_package( Boost )
+find_package( Boost COMPONENTS program_options)
 find_package( ROOT COMPONENTS Core Tree Hist )
 
 # Executable(s) in the package:
 atlas_add_executable( TruthDerivationTester
    util/TruthDerivationTester.cxx
-   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} ${xaod_access_lib} AsgTools PATInterfaces
-   PMGAnalysisInterfacesLib xAODEventInfo xAODTruth xAODJet xAODMissingET )
+   PMGAnalysisInterfacesLib xAODEventInfo xAODTruth xAODJet xAODMissingET ${Boost_LIBRARIES})
