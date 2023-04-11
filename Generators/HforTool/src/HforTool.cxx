@@ -672,7 +672,11 @@ void HforTool::findHFQuarksPythia
 
 	      // first check that showered ME/PDF parton has prod. vtx -3 or -4
 	      auto pvtx34=prodvtx ;
-	      bool bc34=(HepMC::barcode(pvtx34)==-3 || HepMC::barcode(pvtx34)==-4) ;
+#ifdef HEPMC3
+          bool bc34 = (pvtx34->id() == -3 || pvtx34->id() == -4);
+#else
+          bool bc34 = (HepMC::barcode(pvtx34)==-3 || HepMC::barcode(pvtx34)==-4);
+#endif
 	      if ( !bc34 ) {
 #ifdef HEPMC3
                 for (const auto& pin: HepMC::ancestor_particles(prodvtx) ) {
@@ -683,13 +687,17 @@ void HforTool::findHFQuarksPythia
                   if (bc34) break;
 		  int bcpv(-1) ;
 		  if ( pin->production_vertex() )
-		    bcpv = HepMC::barcode(pin->production_vertex()) ;
+#ifdef HEPMC3
+		    bcpv = pin->production_vertex()->id();
+#else
+		    bcpv = HepMC::barcode(pin->production_vertex());
+#endif
 		  if ( pin->pdg_id() == pdg && (bcpv==-3 || bcpv==-4) ) {
 		    pvtx34 = pin->production_vertex() ;
 		    bc34 = true ;
 		  }
 		} // loop over ancestors
-	      } // prod-vertex has not barcode -3 or -4
+	      } // prod-vertex has not barcode/id -3 or -4
 	      if ( bc34 ) {
 		// number of times this parton gets identified as ME or PDF
 		int nid(0) ;
