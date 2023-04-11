@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // EDM include(s):
@@ -48,8 +48,7 @@ Egamma_v1::Egamma_v1()
   : IParticle() {
 }
 
-Egamma_v1::Egamma_v1(const Egamma_v1& eg) : IParticle(eg) {
-}
+Egamma_v1::Egamma_v1(const Egamma_v1& eg)  = default;
 
 Egamma_v1& Egamma_v1::operator=(const Egamma_v1& eg ){
 
@@ -364,7 +363,7 @@ bool Egamma_v1::isolationCorrectionBitset( std::bitset<32>& value, const Iso::Is
 std::bitset<32> Egamma_v1::isolationCorrectionBitset(const Iso::IsolationFlavour flavour ) const{
   const SG::AuxElement::Accessor< uint32_t > acc = getIsolationCorrectionBitsetAccessor( flavour );
   if( !acc.isAvailable(*this) ) {throw std::runtime_error( "Unknown/Unavailable Isolation BitSet requested" );}
-  return  std::bitset<32>(acc(*this));
+  return  {acc(*this)};
 }
 
 bool Egamma_v1::setIsolationCorrectionBitset(uint32_t value, const Iso::IsolationFlavour flavour ) {
