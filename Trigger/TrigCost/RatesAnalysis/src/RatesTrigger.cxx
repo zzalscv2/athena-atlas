@@ -23,9 +23,9 @@ RatesTrigger::RatesTrigger(const std::string& name, IMessageSvc* msgSvc, const d
   m_seed(seedName),
   m_nameHash(std::hash<std::string>{}(name)),
   m_seedHash(std::hash<std::string>{}(seedName)),
-  m_prescale(prescale < 1. ? 0 : prescale),
-  m_expressPrescale(expressPrescale < 1. ? 0 : expressPrescale),
-  m_seedPrescale(seedPrescale < 1. ? 0 : seedPrescale),
+  m_prescale(prescale < 1. ? -1 : prescale),
+  m_expressPrescale(expressPrescale < 1. ? -1 : expressPrescale),
+  m_seedPrescale(seedPrescale < 1. ? -1 : seedPrescale),
   m_totalPrescaleWeight(1. / (m_prescale * m_seedPrescale)),
   m_totalPrescaleWeightExpress(1. / (m_prescale * m_seedPrescale * m_expressPrescale)),
   m_extrapolationStrategy(extrapolation)
