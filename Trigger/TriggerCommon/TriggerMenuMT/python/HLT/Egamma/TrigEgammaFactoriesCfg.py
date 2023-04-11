@@ -35,3 +35,19 @@ def TrigEgammaSuperClusterBuilderCfg(flags, name, calibrationType, superClusterC
         acc.addEventAlgo(TrigEgammaSuperClusterBuilder)
         return acc
 
+def egammaFSCaloRecoSequenceCfg(flags,name="egammaFSRecoSequence"):
+    acc = ComponentAccumulator()
+    from HLTSeeding.HLTSeedingConfig import mapThresholdToL1RoICollection
+    from TrigCaloRec.TrigCaloRecConfig import hltCaloCellMakerCfg
+    from TrigT2CaloCommon.CaloDef import _algoHLTHIEventShape
+    acc.merge(
+        hltCaloCellMakerCfg(flags, 'HLTCaloCellMakerEGFS', roisKey=mapThresholdToL1RoICollection('FSNOSEED'), CellsName='CaloCellsEGFS',monitorCells=False)
+    )
+
+    acc.addEventAlgo(
+        _algoHLTHIEventShape(
+            flags, name='HLTEventShapeMakerEG', inputEDM='CaloCellsEGFS',outputEDM=TrigEgammaKeys.egEventShape
+        )
+    )
+    return acc
+
