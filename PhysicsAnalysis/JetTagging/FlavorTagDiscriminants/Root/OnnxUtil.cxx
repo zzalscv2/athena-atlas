@@ -20,6 +20,9 @@ namespace FlavorTagDiscriminants {
     // initialize session options if needed
     Ort::SessionOptions session_options;
     session_options.SetIntraOpNumThreads(1);
+    // Ignore all non-fatal errors. This isn't a good idea, but it's
+    // what we get for uploading semi-working graphs.
+    session_options.SetLogSeverityLevel(4);
     session_options.SetGraphOptimizationLevel(
       GraphOptimizationLevel::ORT_ENABLE_EXTENDED);
 
