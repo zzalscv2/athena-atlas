@@ -4,7 +4,7 @@
 atlas_subdir( CxxUtils )
 
 # External dependencies:
-find_package( Boost COMPONENTS program_options regex filesystem thread system timer unit_test_framework )
+find_package( Boost COMPONENTS regex thread system timer unit_test_framework )
 find_package( TBB )
 
 # The main library of the package:

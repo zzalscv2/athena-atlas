@@ -2,6 +2,7 @@
 
 # Declare the package name:
 atlas_subdir( AFP_Calibration )
+find_package( Boost COMPONENTS program_options)
 
 find_package( ROOT COMPONENTS MathCore Core Tree Hist RIO pthread )
 
@@ -20,4 +21,5 @@ atlas_install_joboptions( scripts/*.py )
 
 atlas_add_executable( run_AFP_PixelIdentifier
    scripts/run_AFP_PixelIdentifier.cxx
-   LINK_LIBRARIES AFP_CalibrationLib )
+    PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+   LINK_LIBRARIES AFP_CalibrationLib ${Boost_LIBRARIES})

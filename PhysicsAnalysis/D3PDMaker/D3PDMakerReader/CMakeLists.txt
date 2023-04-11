@@ -4,7 +4,7 @@
 atlas_subdir( D3PDMakerReader )
 
 # External dependencies:
-find_package( Boost )
+find_package( Boost COMPONENTS program_options)
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
 
 # Component(s) in the package:
