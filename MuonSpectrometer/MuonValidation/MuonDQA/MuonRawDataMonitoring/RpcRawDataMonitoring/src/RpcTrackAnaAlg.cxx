@@ -80,7 +80,7 @@ StatusCode RpcTrackAnaAlg::initRpcPanel()
   */
   ATH_MSG_INFO( name() << " - RpcTrackAnaAlg::initRpcPanel - start" );
 
-  int  nValidPanel = 0;
+  unsigned int  nValidPanel = 0, nTriedPanel{0};
   ATH_MSG_INFO( "MuonGM::MuonDetectorManager::RpcDetElMaxHash= "<<MuonGM::MuonDetectorManager::RpcDetElMaxHash );
   const RpcIdHelper& rpcIdHelper = m_idHelperSvc->rpcIdHelper();
 
@@ -96,7 +96,7 @@ StatusCode RpcTrackAnaAlg::initRpcPanel()
     const MuonGM::RpcReadoutElement *readoutEl = m_muonMgr->getRpcReadoutElement(hash);
     if (!readoutEl) continue;
 
-    const unsigned int ngasgap = readoutEl->NgasGaps(true);
+    const unsigned int ngasgap = 2;
     const unsigned int doubletZ =  readoutEl->getDoubletZ();
     const unsigned int doubletPhi = readoutEl->getDoubletPhi();
   
@@ -104,6 +104,11 @@ StatusCode RpcTrackAnaAlg::initRpcPanel()
    
     int stName = rpcIdHelper.stationName(readEl_id);
       
+      
+    if (!std::count(BMBO_StationNames.begin(), BMBO_StationNames.end(), stName)) {
+       continue; // Will be changed to include BIS
+    }
+  
     if (!std::count(BMBO_StationNames.begin(), BMBO_StationNames.end(), stName)) {
        continue; // Will be changed to include BIS
     }
@@ -137,12 +142,12 @@ StatusCode RpcTrackAnaAlg::initRpcPanel()
       }
       
       gap->RpcPanel_eta_phi = std::make_pair(rpcPanel_eta, rpcPanel_phi);
+      ++nTriedPanel;
     
     }
   }
 
-  ATH_MSG_INFO( "Number of valid panels = " << nValidPanel );
-
+  ATH_MSG_INFO( "Number of valid panels = " << nValidPanel<<" tried panels "<<nTriedPanel ); 
   return StatusCode::SUCCESS;
 }
 
@@ -587,11 +592,11 @@ StatusCode RpcTrackAnaAlg::fillHistPRD(const EventContext& ctx) const
       Identifier       id = rpcData->identify();
       const int   measphi = rpcIdHelper.measuresPhi(id);
 
-      auto  temp_panel = std::make_unique<RpcPanel>(id,  rpcIdHelper);
-
+      auto  temp_panel = std::make_unique<RpcPanel>(rpcData->detectorElement()->identify(),  rpcIdHelper);
       std::map<Identifier, std::shared_ptr<RpcPanel>>::const_iterator i_panel=m_rpcPanelMap.find(temp_panel->panelId);
       if (i_panel == m_rpcPanelMap.end()){
-        ATH_MSG_WARNING( "The panelID corresponding prd hit does NOT link to a known Panel !!!" );
+        ATH_MSG_WARNING( "The panelID corresponding prd hit does NOT link to a known Panel "<<m_idHelperSvc->toString(id)
+        <<" <"<<m_idHelperSvc->toString(rpcData->detectorElement()->identify())<<"> !!!" );
         continue;
       }
       else{
