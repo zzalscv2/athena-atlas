@@ -140,7 +140,7 @@ HION13FourTrackReco = DerivationFramework__Reco_dimuTrkTrk(
     PVContainerName        = "PrimaryVertices",
     RefPVContainerName     = "HION13RefittedPrimaryVertices",
     RefitPV                = True,
-    MaxPVrefit             = 1000,
+    MaxPVrefit             = 10,
     DoVertexType           = 7)
 ToolSvc += HION13FourTrackReco
 
@@ -410,9 +410,6 @@ HION13SlimmingHelper.AllVariables += HIGlobalVars
 
 if isSimulation:
     HION13SlimmingHelper.AllVariables += ["TruthEvents", "TruthParticles", "TruthVertices", "MuonTruthParticles"]
-
-HION13SlimmingHelper.StaticContent  = ["xAOD::VertexContainer#HION13RefittedPrimaryVertices"]
-HION13SlimmingHelper.StaticContent += ["xAOD::VertexAuxContainer#HION13RefittedPrimaryVerticesAux."]
 
 HION13SlimmingHelper.StaticContent += ["xAOD::VertexContainer#%s" % HION13FourTrackReco.OutputVtxContainerName]
 # we have to disable vxTrackAtVertex branch since it is not xAOD compatible
