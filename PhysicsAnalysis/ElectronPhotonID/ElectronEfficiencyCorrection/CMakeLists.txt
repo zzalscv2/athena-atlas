@@ -4,7 +4,7 @@
 atlas_subdir( ElectronEfficiencyCorrection )
 
 # External dependencies:
-find_package( Boost )
+find_package( Boost COMPONENTS program_options)
 find_package( ROOT COMPONENTS Core Hist MathCore)
 
 if (XAOD_STANDALONE)
