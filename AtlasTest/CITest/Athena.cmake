@@ -91,7 +91,7 @@ atlas_add_citest( DerivationRun2MC_PHYSLITE
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( RecoRun3Data
-   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q449 --threads 8 -e '--CA True --maxEvents 100 --preExec pass' --run-only
+   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q449 --threads 8 -e '--CA True --maxEvents 100 --preExec="flags.Exec.FPE=500;"' --run-only
    PROPERTIES PROCESSORS 8 )
 
 atlas_add_citest( RecoRun3Data_Checks
@@ -99,7 +99,7 @@ atlas_add_citest( RecoRun3Data_Checks
    DEPENDS_SUCCESS RecoRun3Data )
 
 atlas_add_citest( RecoRun3Data_Legacy
-   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -e '--CA False --maxEvents 100' --threads 8 --no-output-checks )
+   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -e '--CA False --maxEvents 100 --postExec="FPEAuditor.NStacktracesOnFPE=500;"' --threads 8 --no-output-checks )
 
 atlas_add_citest( RecoRun3Data_LegacyVsCA
    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/RecoLegacyVsCA.sh RecoRun3Data q449
