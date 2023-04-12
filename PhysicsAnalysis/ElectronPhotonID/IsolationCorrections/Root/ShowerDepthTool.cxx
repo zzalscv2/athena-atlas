@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "IsolationCorrections/ShowerDepthTool.h"
@@ -10,7 +10,6 @@
 
 #include <cmath>
 
-#include <cmath>
 #include <cstdlib>
 #include <string>
 
@@ -47,7 +46,7 @@ namespace CP{
     m_hData = getHistoFromFile( Tfilename , m_dataHistoName );
     m_hMC = getHistoFromFile( Tfilename , m_mcHistoName );   
     
-    return !(m_hData == nullptr || m_hMC == nullptr);
+    return m_hData != nullptr && m_hMC != nullptr;
   }      
    
   /** Shower depth (in mm) on EM1 vs. eta, considering misalignments **/

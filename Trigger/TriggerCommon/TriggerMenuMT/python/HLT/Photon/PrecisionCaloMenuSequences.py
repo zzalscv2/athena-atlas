@@ -63,8 +63,8 @@ def precisionCaloSequence(flags, ion=False):
         # using the full event (FS info), and has to be done outside of the
         # event views in this sequence. the egammaFSRecoSequence is thus placed
         # before the precisionCaloInViewSequence.
-        from TriggerMenuMT.HLT.Egamma.TrigEgammaFactories import egammaFSCaloRecoSequence
-        egammaFSRecoSequence = egammaFSCaloRecoSequence(flags)
+        from TriggerMenuMT.HLT.Egamma.TrigEgammaFactoriesCfg import egammaFSCaloRecoSequenceCfg
+        egammaFSRecoSequence = algorithmCAToGlobalWrapper(egammaFSCaloRecoSequenceCfg,flags)
         theSequence += egammaFSRecoSequence
 
     # connect EVC and reco

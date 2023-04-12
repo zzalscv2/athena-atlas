@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Dear emacs, this is -*-c++-*-
@@ -100,7 +100,7 @@ private:
   bool m_skipAmbiguityCut;
 
   // To retrieve mu
-  bool m_isMuDep;
+  bool m_isMuDep = false;
   float getMu(const EventContext& ctx) const;
   SG::ReadHandleKey<xAOD::EventInfo> m_EvtInfoKey{ this,
       "EventInfo", "EventInfo", "The event info object key" };

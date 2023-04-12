@@ -5,8 +5,6 @@
 #ifndef TRIGT1RESULTBYTESTREAM_MUONROIBYTESTREAMTOOL_H
 #define TRIGT1RESULTBYTESTREAM_MUONROIBYTESTREAMTOOL_H
 
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
 
 // Trigger includes
 #include "TrigT1ResultByteStream/IL1TriggerByteStreamTool.h"

@@ -162,8 +162,8 @@ private:
     bool isLowPt = false;
   };
 
-  void fillHistEdges(const std::vector<HistArray>& sfPerPeriodHist,
-                     std::vector<std::vector<HistEdge>>& sfPerPeriodEdges) const;
+  static void fillHistEdges(const std::vector<HistArray>& sfPerPeriodHist,
+                     std::vector<std::vector<HistEdge>>& sfPerPeriodEdges) ;
 
     /// Flag to control Toys
     bool m_doToyMC;

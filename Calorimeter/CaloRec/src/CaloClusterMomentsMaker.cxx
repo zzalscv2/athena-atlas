@@ -183,90 +183,103 @@ CaloClusterMomentsMaker::CaloClusterMomentsMaker(const std::string& type,
 StatusCode CaloClusterMomentsMaker::initialize()
 {
   // loop list of requested moments
-  std::string::size_type nstr(0); int nmom(0); 
-  for ( const auto& mom : m_momentsNames ) {
-    ATH_MSG_INFO( "Moment " << mom << " requested" );
+  std::string::size_type nstr(0); int nmom(0);
+  for (const auto& mom : m_momentsNames) {
+    ATH_MSG_DEBUG("Moment " << mom << " requested");
     // check if moment is known (enumerator available)
-    auto fmap(momentNameToEnumMap.find(mom)); 
-    if ( fmap != momentNameToEnumMap.end() ) {
-      // valid moment found 
-      nstr = std::max(nstr,mom.length()); ++nmom;
-      if ( fmap->second == xAOD::CaloCluster::SECOND_TIME ) {
-	// special flag for second moment of cell times - this moment is not 
-	// calculated in this tool! Do not add to internal (!) valid moments list. 
-	// Its value is available from xAOD::CaloCluster::secondTime()!
-	m_secondTime = true;
-      } else if ( fmap->second == xAOD::CaloCluster::NCELL_SAMPLING ) {
-	// flag indicates if number of cells in a sampling should be counted. 
-	// This is a vector of integers counts that is filled in this tool but does 
-	// not need any post-processing (e.g. normalization). It is not 
-	// added to the valid moments list for this reason.
-	ATH_MSG_INFO( "moment " << fmap->first << " found");  
-	m_nCellsPerSampling = true; 
-      } else if ( fmap->second == xAOD::CaloCluster::EM_PROBABILITY ) {
-	ATH_MSG_WARNING( mom << " not calculated in this tool - misconfiguration?" );
-      } else {  
-	// all other valid moments
-	m_validMoments.push_back(fmap->second);
-	// flag some special requests 
-	switch (fmap->second) { 
-	case xAOD::CaloCluster::SIGNIFICANCE:
-	case xAOD::CaloCluster::CELL_SIGNIFICANCE:
-	  m_calculateSignificance = true; 
-	  break;
-	case xAOD::CaloCluster::ISOLATION:
-	  m_calculateIsolation = true;
-	  break;
-	case xAOD::CaloCluster::ENG_BAD_HV_CELLS:
-	  m_calculateLArHVFraction = true;
-	  break;
-	default:
-	  break;
-	} // set special processing flags
-      } // moment calculated with this tool
-    } else { 
-      ATH_MSG_ERROR( "Moment name " << mom << " not known; known moments are:" );
-      char buffer[128]; std::string::size_type lstr(nstr); 
+    auto fmap(momentNameToEnumMap.find(mom));
+    if (fmap != momentNameToEnumMap.end()) {
+      // valid moment found
+      nstr = std::max(nstr, mom.length());
+      ++nmom;
+      if (fmap->second == xAOD::CaloCluster::SECOND_TIME) {
+        // special flag for second moment of cell times - this moment is not
+        // calculated in this tool! Do not add to internal (!) valid moments
+        // list. Its value is available from xAOD::CaloCluster::secondTime()!
+        m_secondTime = true;
+      } else if (fmap->second == xAOD::CaloCluster::NCELL_SAMPLING) {
+        // flag indicates if number of cells in a sampling should be counted.
+        // This is a vector of integers counts that is filled in this tool but
+        // does not need any post-processing (e.g. normalization). It is not
+        // added to the valid moments list for this reason.
+        ATH_MSG_DEBUG("moment " << fmap->first << " found");
+        m_nCellsPerSampling = true;
+      } else if (fmap->second == xAOD::CaloCluster::EM_PROBABILITY) {
+        ATH_MSG_WARNING(mom
+                        << " not calculated in this tool - misconfiguration?");
+      } else {
+        // all other valid moments
+        m_validMoments.push_back(fmap->second);
+        // flag some special requests
+        switch (fmap->second) {
+          case xAOD::CaloCluster::SIGNIFICANCE:
+          case xAOD::CaloCluster::CELL_SIGNIFICANCE:
+            m_calculateSignificance = true;
+            break;
+          case xAOD::CaloCluster::ISOLATION:
+            m_calculateIsolation = true;
+            break;
+          case xAOD::CaloCluster::ENG_BAD_HV_CELLS:
+            m_calculateLArHVFraction = true;
+            break;
+          default:
+            break;
+        }  // set special processing flags
+      }    // moment calculated with this tool
+    } else {
+      ATH_MSG_ERROR("Moment name " << mom << " not known; known moments are:");
+      char buffer[128];
+      std::string::size_type lstr(nstr);
       // determine field size
-      for ( const auto& fmom : momentNameToEnumMap ) { lstr = std::max(lstr,fmom.first.length()); } 
+      for (const auto& fmom : momentNameToEnumMap) {
+        lstr = std::max(lstr, fmom.first.length());
+      }
       // print available moments
-      for ( const auto& fmom : momentNameToEnumMap ) { 
-	sprintf(buffer,"moment name: %-*.*s - enumerator: %i",(int)lstr,(int)lstr,fmom.first.c_str(),(int)fmom.second); 
-	ATH_MSG_INFO(buffer);
+      for (const auto& fmom : momentNameToEnumMap) {
+        sprintf(buffer, "moment name: %-*.*s - enumerator: %i", (int)lstr,
+                (int)lstr, fmom.first.c_str(), (int)fmom.second);
+        ATH_MSG_ERROR(buffer);
       }
       auto fmom(momentNameToEnumMap.find("SECOND_TIME"));
-      sprintf(buffer,"moment name: %-*.*s - enumerator: %i",(int)nstr,(int)nstr,fmom->first.c_str(),(int)fmom->second);
-      ATH_MSG_INFO( buffer );
+      sprintf(buffer, "moment name: %-*.*s - enumerator: %i", (int)nstr,
+              (int)nstr, fmom->first.c_str(), (int)fmom->second);
+      ATH_MSG_ERROR(buffer);
       fmom = momentNameToEnumMap.find("NCELL_SAMPLING");
-      sprintf(buffer,"moment name: %-*.*s - enumerator: %i",(int)nstr,(int)nstr,fmom->first.c_str(),(int)fmom->second);
-      ATH_MSG_INFO( buffer );
+      sprintf(buffer, "moment name: %-*.*s - enumerator: %i", (int)nstr,
+              (int)nstr, fmom->first.c_str(), (int)fmom->second);
+      ATH_MSG_ERROR(buffer);
       return StatusCode::FAILURE;
-    } // found unknown moment name
-  } // loop configured moment names
-  
+    }  // found unknown moment name
+  }    // loop configured moment names
+
   // sort and remove duplicates
   std::sort(m_validMoments.begin(), m_validMoments.end());
-  m_validMoments.erase(std::unique(m_validMoments.begin(),m_validMoments.end()),m_validMoments.end());
-   
+  m_validMoments.erase(
+      std::unique(m_validMoments.begin(), m_validMoments.end()),
+      m_validMoments.end());
+
   // print configured moments
-  ATH_MSG_INFO( "Construct and save " << nmom << " cluster moments: " );
+  ATH_MSG_INFO("Construct and save " << nmom << " cluster moments: ");
   char buffer[128];
-  for ( auto menum : m_validMoments ) { 
-    sprintf(buffer,"moment name: %-*.*s - enumerator: %i",(int)nstr,(int)nstr,momentEnumToNameMap.at(menum).c_str(),(int)menum); 
-    ATH_MSG_INFO( buffer );
+  for (auto menum : m_validMoments) {
+    sprintf(buffer, "moment name: %-*.*s - enumerator: %i", (int)nstr,
+            (int)nstr, momentEnumToNameMap.at(menum).c_str(), (int)menum);
+    ATH_MSG_INFO(buffer);
   }
-  if ( m_secondTime ) { 
+  if (m_secondTime) {
     auto fmom(momentNameToEnumMap.find("SECOND_TIME"));
-    sprintf(buffer,"moment name: %-*.*s - enumerator: %i (save only)",(int)nstr,(int)nstr,fmom->first.c_str(),(int)fmom->second);
-    ATH_MSG_INFO( buffer );
+    sprintf(buffer, "moment name: %-*.*s - enumerator: %i (save only)",
+            (int)nstr, (int)nstr, fmom->first.c_str(), (int)fmom->second);
+    ATH_MSG_INFO(buffer);
   }
-  if ( m_nCellsPerSampling ) { 
+  if (m_nCellsPerSampling) {
     auto fmom(momentNameToEnumMap.find("NCELL_SAMPLING"));
-    sprintf(buffer,"moment name: %-*.*s - enumerator: %i",(int)nstr,(int)nstr,fmom->first.c_str(),(int)fmom->second);
-    ATH_MSG_INFO( buffer );
+    sprintf(buffer, "moment name: %-*.*s - enumerator: %i", (int)nstr,
+            (int)nstr, fmom->first.c_str(), (int)fmom->second);
+    ATH_MSG_INFO(buffer);
   }
 
-  // retrieve CaloCell ID server  
+  // retrieve CaloCell ID server
   CHECK(detStore()->retrieve(m_calo_id,"CaloCell_ID"));
   
   // retrieve the calo depth tool

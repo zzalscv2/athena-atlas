@@ -921,7 +921,7 @@ Root::TElectronEfficiencyCorrectionTool::setup(
 
 void Root::TElectronEfficiencyCorrectionTool::fillHistEdges(
     const std::vector<HistArray>& sfPerPeriodHist,
-    std::vector<std::vector<HistEdge>>& sfPerPeriodEdges) const{
+    std::vector<std::vector<HistEdge>>& sfPerPeriodEdges) {
 
   for (const auto& vec : sfPerPeriodHist) {
     const size_t vecSize = vec.size();

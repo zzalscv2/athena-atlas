@@ -14,7 +14,6 @@
 #include "xAODCaloEvent/CaloCluster.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODCore/ShallowCopy.h"
-#include "xAODEventInfo/EventInfo.h"
 
 #include <xAODTruth/TruthParticle.h>  // TODO: this introduces an additional dependecy which is not needed by the tool...
 #include <xAODTruth/xAODTruthHelpers.h>

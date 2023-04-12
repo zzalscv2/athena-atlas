@@ -226,6 +226,7 @@ def hltTopoClusterMakerCfg(flags, name, clustersKey="HLT_TopoCaloClustersFS",
         name,
         Cells=cellsKey,
         CaloClusters=recordable(clustersKey),
+        CellLinks = clustersKey+"_links",
         ClusterMakerTools = [ topoMaker, topoSplitter, topoMoments], # moments are missing yet
         ClusterCorrectionTools = listClusterCorrectionTools,
         MonCells = doMonCells,

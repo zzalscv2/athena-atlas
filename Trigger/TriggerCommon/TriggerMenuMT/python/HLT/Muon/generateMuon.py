@@ -14,7 +14,7 @@ from TriggerMenuMT.HLT.Muon.MuonRecoSequences import muonDecodeCfg
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-from MuonConfig.MuonSegmentFindingConfig import MooSegmentFinderAlgCfg
+from MuonConfig.MuonSegmentFindingConfig import MuonSegmentFinderAlgCfg
 from MuonConfig.MuonTrackBuildingConfig import MuPatTrackBuilderCfg
 from MuonCombinedConfig.MuonCombinedReconstructionConfig import MuonCombinedMuonCandidateAlgCfg, MuonInsideOutRecoAlgCfg, MuonInDetToMuonSystemExtensionAlgCfg
 from MuonSegmentTrackMaker.MuonTrackMakerAlgsMonitoring import MuPatTrackBuilderMonitoring
@@ -265,7 +265,7 @@ def _muEFSAStepSeq(flags, name='RoI', is_probe_leg=False):
     recoMS.mergeReco(muonDecodeCfg(flags, viewName+"RoIs"))
 
     #Reco
-    recoMS.mergeReco( MooSegmentFinderAlgCfg(flags,name="TrigMooSegmentFinder_"+name,UseTGCNextBC=False, UseTGCPriorBC=False))
+    recoMS.mergeReco(MuonSegmentFinderAlgCfg(flags,name="TrigMooSegmentFinder_"+name,UseTGCNextBC=False, UseTGCPriorBC=False))
 
     recoMS.mergeReco(MuPatTrackBuilderCfg(flags, name="TrigMuPatTrackBuilder_"+name, MonTool = MuPatTrackBuilderMonitoring(flags, "MuPatTrackBuilderMonitoringSA_"+name)))
     from xAODTrackingCnv.xAODTrackingCnvConfig import MuonTrackParticleCnvCfg
