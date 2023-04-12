@@ -56,7 +56,7 @@ class SpacePoint : public MeasurementBase {
   /** return the error matrix by reference
    The Matrix is calculated from the local Covariance Matrix when demanded and
    the cached */
-  const Amg::MatrixX& globCovariance() const;
+  const AmgSymMatrix(3)& globCovariance() const;
 
   /** calculate eta (not cached), needs z0 info */
   double eta(double z0 = 0) const;
@@ -97,7 +97,7 @@ class SpacePoint : public MeasurementBase {
   std::pair<const PrepRawData*, const PrepRawData*> m_clusList;
   std::pair<IdentifierHash, IdentifierHash> m_elemIdList;
   Amg::Vector3D m_position;
-  Amg::MatrixX m_globalCovariance;
+  AmgSymMatrix(3) m_globalCovariance;
 
   //For use by the final derived ones
   SpacePoint(const SpacePoint&) = default;
@@ -146,7 +146,7 @@ inline double SpacePoint::phi() const {
 inline const Amg::Vector3D& SpacePoint::globalPosition() const {
   return m_position;
 }
-inline const Amg::MatrixX& SpacePoint::globCovariance() const {
+inline const AmgSymMatrix(3)& SpacePoint::globCovariance() const {
   return m_globalCovariance;
 }
 
