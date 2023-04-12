@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Dear emacs, this is -*-c++-*-
@@ -198,10 +198,10 @@ AsgPhotonIsEMSelector::initialize()
 
   // if we use mu-dependent menu
   m_isMuDep =
-    m_rootTool->m_cutBinMu_photonsNonConverted.size() ||
-    m_rootTool->m_cutBinMu_photonsConverted.size() ||
-    m_rootTool->m_cutBinMuStrips_photonsNonConverted.size() ||
-    m_rootTool->m_cutBinMuStrips_photonsConverted.size();
+    !m_rootTool->m_cutBinMu_photonsNonConverted.empty() ||
+    !m_rootTool->m_cutBinMu_photonsConverted.empty() ||
+    !m_rootTool->m_cutBinMuStrips_photonsNonConverted.empty() ||
+    !m_rootTool->m_cutBinMuStrips_photonsConverted.empty();
   ATH_CHECK(m_EvtInfoKey.initialize(m_isMuDep));
   if (m_isMuDep)
     ATH_MSG_INFO("Running a mu-dependent photon ID menu");

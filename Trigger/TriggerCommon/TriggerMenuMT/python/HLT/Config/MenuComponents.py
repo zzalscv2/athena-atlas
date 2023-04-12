@@ -586,6 +586,11 @@ class MenuSequenceCA(MenuSequence):
     def globalRecoCA(self):
         return self._globalCA
 
+    def __del__(self):
+        self.ca.wasMerged()
+        if self._globalCA:
+            self._globalCA.wasMerged()
+
 class EmptyMenuSequenceCA(EmptyMenuSequence):
     def __init__(self, the_name):
         self.ca=ComponentAccumulator()
@@ -601,6 +606,9 @@ class EmptyMenuSequenceCA(EmptyMenuSequence):
     @property
     def globalRecoCA(self):
         return None
+
+    def __del__(self):
+        self.ca.wasMerged()
 
 class Chain(object):
     """Basic class to define the trigger menu """

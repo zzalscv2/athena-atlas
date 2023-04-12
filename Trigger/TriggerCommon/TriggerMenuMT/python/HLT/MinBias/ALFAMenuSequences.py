@@ -2,28 +2,49 @@
 #  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence
-from AthenaCommon.CFElements import parOR
-from AthenaCommon.CFElements import seqAND
-from TrigStreamerHypo.TrigStreamerHypoConf import TrigStreamerHypoAlg, TrigStreamerHypoTool
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory import CompFactory
+from TrigStreamerHypo.TrigStreamerHypoConf import TrigStreamerHypoTool
+from TriggerMenuMT.HLT.Config.MenuComponents import InEventRecoCA, SelectionCA, MenuSequenceCA
 
 
-def ALFAPerfSequence(flags):
+@AccumulatorCache
+def ALFAROBMonitorCfg(flags):
+    acc = ComponentAccumulator()
+
     from TrigOnlineMonitor.TrigOnlineMonitorConfig import TrigALFAROBMonitor
-    from DecisionHandling.DecisionHandlingConf import InputMakerForRoI, ViewCreatorInitialROITool
-    inputMakerAlg = InputMakerForRoI("IM_ALFAPerf", RoITool = ViewCreatorInitialROITool() )
-#        inputMaker.RoIs="TimeBurnerInputRoIs"
+    mon = TrigALFAROBMonitor(flags)
+    acc.addEventAlgo(mon)
 
-    reco = parOR("ALFAPerfReco", [TrigALFAROBMonitor(flags)])
-    hypoAlg = TrigStreamerHypoAlg("ALFAPerfHypo")
-    hypoAlg.RuntimeValidation = False 
+    return acc
+
+
+@AccumulatorCache
+def ALFAPerfSequence(flags):
     def alwaysRejectHypoToolGen(chainDict):
-        return TrigStreamerHypoTool(chainDict["chainName"], Pass = False)
+        return TrigStreamerHypoTool(chainDict['chainName'], Pass = False)
 
-    viewSeq = seqAND("ALFAPerfRecoView", [inputMakerAlg, reco])
+    recoAcc = InEventRecoCA(name='ALFAPerfReco')
 
-    return MenuSequence(flags,
-                        Sequence    = viewSeq,
-                        Maker       = inputMakerAlg,
-                        Hypo        = hypoAlg,
-                        HypoToolGen = alwaysRejectHypoToolGen)
+    mon = ALFAROBMonitorCfg(flags)
+    recoAcc.mergeReco(mon)
+
+    hypo = CompFactory.TrigStreamerHypoAlg('ALFAPerfHypo', RuntimeValidation=False)
+
+    selAcc = SelectionCA('ALFAPerfRecoView')
+    selAcc.mergeReco(recoAcc)
+    selAcc.addHypoAlgo(hypo)
+
+    return MenuSequenceCA(flags, selAcc, HypoToolGen=alwaysRejectHypoToolGen)
+
+
+if __name__ == '__main__':
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    flags.lock()
+
+    alfa = ALFAPerfSequence(flags)
+    alfa.ca.printConfig(withDetails=True)
+    from TriggerMenuMT.HLT.Config.MenuComponents import menuSequenceCAToGlobalWrapper
+    alfa_gw = menuSequenceCAToGlobalWrapper(ALFAPerfSequence, flags)

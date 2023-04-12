@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/TruthJetFilter.h"
@@ -33,23 +33,23 @@ StatusCode TruthJetFilter::filterInitialize() {
 
 
 StatusCode TruthJetFilter::filterEvent() {
-  const xAOD::JetContainer* truthjetTES;
+  const xAOD::JetContainer* truthjetTES = nullptr;
   CHECK(evtStore()->retrieve(truthjetTES, m_TruthJetContainerName));
-  ATH_MSG_INFO("xAOD::JetContainer size = " << (*truthjetTES).size());
+  ATH_MSG_DEBUG("xAOD::JetContainer size = " << (*truthjetTES).size());
 
   int Njet=0;
   int Njet_pt1=0;
   std::vector<const xAOD::Jet*> listOfSelectedJets;
-  const xAOD::Jet* leadingJet = 0;
+  const xAOD::Jet* leadingJet = nullptr;
   for (xAOD::JetContainer::const_iterator it_truth = (*truthjetTES).begin(); it_truth != (*truthjetTES).end() ; ++it_truth) {
     if ( (*it_truth)->pt() > m_NjetMinPt && std::abs( (*it_truth)->eta() ) < m_NjetMaxEta ) {
       Njet++;
-      ATH_MSG_INFO("Jet pt " << (*it_truth)->pt()/Gaudi::Units::GeV);
+      ATH_MSG_DEBUG("Jet pt " << (*it_truth)->pt()/Gaudi::Units::GeV);
       if (m_applyDeltaPhiCut) listOfSelectedJets.push_back(*it_truth);
     }
     if ( (*it_truth)->pt() > m_jet_pt1 && std::abs( (*it_truth)->eta() ) < m_NjetMaxEta ) {
       Njet_pt1++;
-      ATH_MSG_INFO("High jet pt " << (*it_truth)->pt()/Gaudi::Units::GeV);
+      ATH_MSG_DEBUG("High jet pt " << (*it_truth)->pt()/Gaudi::Units::GeV);
       if (m_applyDeltaPhiCut && (!leadingJet || (*it_truth)->pt() > leadingJet->pt())) {
         leadingJet = (*it_truth);
       }

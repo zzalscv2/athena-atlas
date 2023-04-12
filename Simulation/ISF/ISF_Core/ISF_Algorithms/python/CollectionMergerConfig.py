@@ -33,14 +33,12 @@ def ISFCollectionMergerCfg(flags,name="ISF_CollectionMerger", **kwargs):
     kwargs.setdefault( "InputMMHits",               [ ] )
 
     hardscatterSG=""
-    try:
+    if flags.hasFlag("Digitization.Pileup"):
         if flags.Sim.DoFullChain and (flags.Digitization.PileUp is True):
             hardscatterSG = "OriginalEvent_SG+"
-    except RuntimeError as err:
+    else:
         msg = logging.getLogger(name)
-        msg.info("Caught {!r}. "
-                 "Digitization flags are unavailable in AthSimulation."
-                 .format(err))
+        msg.info("Digitization flags are unavailable in AthSimulation.")
         # FIXME: Digitization is not the AthSimulation project;
         # support for FastChain may need to be added in the future.
     if flags.Detector.EnableBCM and not flags.Sim.ISF.Simulator.usesFatras():

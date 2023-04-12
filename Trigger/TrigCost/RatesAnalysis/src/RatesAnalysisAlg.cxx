@@ -203,8 +203,8 @@ StatusCode RatesAnalysisAlg::addExisting(const std::string pattern) {
   const TrigConf::HLTPrescalesSet& hltPrescalesSet = m_configSvc->hltPrescalesSet(Gaudi::Hive::currentContext());
   for( auto & p : hltPrescalesSet.data().get_child("prescales") ) {
     if ((!m_prescalesJSON.value().count(p.first) && !runWithPrescaleJSON) || hltPrescalesSet.prescale(p.first).prescale < 0){
-      m_prescalesJSON[p.first]["prescale"] = hltPrescalesSet.prescale(p.first).prescale;
-      m_prescalesJSON[p.first]["prescale_express"] = hltPrescalesSet.prescale_express(p.first).prescale;
+      m_prescalesJSON[p.first]["prescale"] = (hltPrescalesSet.prescale(p.first).enabled ? hltPrescalesSet.prescale(p.first).prescale : -1);
+      m_prescalesJSON[p.first]["prescale_express"] = (hltPrescalesSet.prescale_express(p.first).enabled ? hltPrescalesSet.prescale_express(p.first).prescale : -1);
       if (hltPrescalesSet.prescale(p.first).prescale < 0){
         ATH_MSG_WARNING("Trigger " << p.first << " disabled in supplied AOD file. DISABLING");
       }
@@ -595,10 +595,6 @@ StatusCode RatesAnalysisAlg::execute() {
   const xAOD::EventInfo* eventInfo(nullptr);
   uint32_t distance = 0;
   ATH_CHECK( evtStore()->retrieve(eventInfo, "EventInfo") );
-  if (eventInfo->actualInteractionsPerCrossing()==0) { // check if the event is empty
-    ATH_MSG_DEBUG("Event " << m_eventCounter << " is empty");
-    return StatusCode::SUCCESS;
-  }
   ATH_CHECK( m_enhancedBiasRatesTool->getDistanceIntoTrain(eventInfo, distance) );
 
   // Get the weighting & scaling characteristics
@@ -612,7 +608,7 @@ StatusCode RatesAnalysisAlg::execute() {
   if (m_useBunchCrossingData && m_vetoStartOfTrain > 0 && m_weightingValues.m_distanceInTrain < m_vetoStartOfTrain) return StatusCode::SUCCESS;
 
   // Bunch factor doesn't change as a fn. of the run. Reminder: m_bunchFactor = m_targetBunches / (double)ebPairedBunches;
-  m_weightingValues.m_muFactor = m_targetMu / m_weightingValues.m_eventMu;
+  m_weightingValues.m_muFactor = (m_weightingValues.m_eventMu ? m_targetMu / m_weightingValues.m_eventMu : 0.0);
   m_weightingValues.m_linearLumiFactor = m_targetLumi / m_weightingValues.m_eventLumi;
   m_weightingValues.m_expoMuFactor = m_weightingValues.m_bunchFactor * exp( m_expoScalingFactor * (m_targetMu - m_weightingValues.m_eventMu) );
 

@@ -272,9 +272,7 @@ def HTTTrackFitterTool_2ndCfg(flags):
 
 
 def checkIfAlgoTagExist(flags, tag):
-    try:
-        getattr(flags, tag)
-    except RuntimeError:
+    if not flags.hasFlag(tag) and not flags.hasFlagCategory(tag):
         raise Exception(f'{tag} does not appear to be flag category')
 
 def HTTReadInputCfg(flags):

@@ -98,7 +98,7 @@ class TrigEgammaMonAlgBuilder:
         self.activate_jpsiee=True 
         self.activate_electron=True
         self.activate_photon=True
-        self.activate_topo= True
+        self.activate_topo= False
     elif self.HI_mode or self.pPb_mode or self.cosmic_mode:
       self.activate_electron=True
       self.activate_photon=True
@@ -444,7 +444,6 @@ class TrigEgammaMonAlgBuilder:
         self.phMonAlg.EmulationTool = self.emulator.core()
 
 
-
     if self.activate_topo:
 
       self.__logger.info( "Creating the combo monitor algorithm...")
@@ -459,9 +458,6 @@ class TrigEgammaMonAlgBuilder:
       self.topoMonAlg.ElectronLikelihoodTool =[TightLHSelector,MediumLHSelector,LooseLHSelector]
       self.topoMonAlg.DetailedHistograms=self.detailedHistograms
       self.topoMonAlg.TriggerListConfig  = self.topoList # this is a list of dicts
-
-      
-
 
   
   def configureHistograms(self):
@@ -687,11 +683,12 @@ class TrigEgammaMonAlgBuilder:
     self.addHistogram(monGroup, TH1F("highet", "Cluster Energy; E [GeV] ; Count", 100, 0., 500.))
     self.addHistogram(monGroup, TH1F("eta_calo", "eta_calo; eta_calo ; Count", 50, -2.47, 2.47))
     self.addHistogram(monGroup, TH1F("phi_calo", "phi_calo; phi_calo ; Count", 50, -3.14, 3.14))
-    self.addHistogram(monGroup, TH1F("energyBE0", "Cluster Energy BE0; E [GeV] ; Count", 50, 0., 100.))
-    self.addHistogram(monGroup, TH1F("energyBE1", "Cluster Energy BE1; E [GeV] ; Count", 50, 0., 100.))
-    self.addHistogram(monGroup, TH1F("energyBE2", "Cluster Energy BE2; E [GeV] ; Count", 50, 0., 100.))
-    self.addHistogram(monGroup, TH1F("energyBE3", "Cluster Energy BE3; E [GeV] ; Count", 50, 0., 100.))
 
+    if self.detailedHistograms:
+      self.addHistogram(monGroup, TH1F("energyBE0", "Cluster Energy BE0; E [GeV] ; Count", 50, 0., 100.))
+      self.addHistogram(monGroup, TH1F("energyBE1", "Cluster Energy BE1; E [GeV] ; Count", 50, 0., 100.))
+      self.addHistogram(monGroup, TH1F("energyBE2", "Cluster Energy BE2; E [GeV] ; Count", 50, 0., 100.))
+      self.addHistogram(monGroup, TH1F("energyBE3", "Cluster Energy BE3; E [GeV] ; Count", 50, 0., 100.))
 
 
   #
@@ -738,13 +735,8 @@ class TrigEgammaMonAlgBuilder:
     monGroup = self.addGroup( monAlg, trigger+'_Distributions_' + ("HLT" if online else "Offline"), 
                               self.basePath+'/Shifter/'+trigger+'/Distributions/' + ("HLT" if online else "Offline") )
 
-
     # Tracking quantities
     self.addHistogram(monGroup, TH1F("deta1", "deta1; deta1 ; Count", 40, -0.01, 0.01))
-    self.addHistogram(monGroup, TH1F("deta1_EMECA", "deta1 EMEC-A; deta1 ; Count", 40, -0.01, 0.01))
-    self.addHistogram(monGroup, TH1F("deta1_EMECC", "deta1 EMEC-C; deta1 ; Count", 40, -0.01, 0.01))
-    self.addHistogram(monGroup, TH1F("deta1_EMEBA", "deta1 EMEB-A; deta1 ; Count", 40, -0.01, 0.01))
-    self.addHistogram(monGroup, TH1F("deta1_EMEBC", "deta1 EMEB-A; deta1 ; Count", 40, -0.01, 0.01))
     self.addHistogram(monGroup, TH1F("deta2", "deta2; deta2 ; Count", 40, -0.01, 0.01))
     self.addHistogram(monGroup, TH1F("dphi2", "dphi2; dphi2 ; Count", 40, -0.1, 0.1))
     self.addHistogram(monGroup, TH1F("dphiresc", "dphiresc; dphiresc ; Count", 40, -0.1, 0.1))
@@ -761,8 +753,12 @@ class TrigEgammaMonAlgBuilder:
     self.addHistogram(monGroup, TH1F("d0", "d0; d0 ; Count", 40, -1, 1))
     self.addHistogram(monGroup, TH1F("d0sig", "d0sig; d0sig ; Count", 40, -10, 10))
     
-    
-    
+    if self.detailedHistograms:
+      self.addHistogram(monGroup, TH1F("deta1_EMECA", "deta1 EMEC-A; deta1 ; Count", 40, -0.01, 0.01))
+      self.addHistogram(monGroup, TH1F("deta1_EMECC", "deta1 EMEC-C; deta1 ; Count", 40, -0.01, 0.01))
+      self.addHistogram(monGroup, TH1F("deta1_EMEBA", "deta1 EMEB-A; deta1 ; Count", 40, -0.01, 0.01))
+      self.addHistogram(monGroup, TH1F("deta1_EMEBC", "deta1 EMEB-A; deta1 ; Count", 40, -0.01, 0.01))
+       
   #
   # Book efficiencies
   #
@@ -818,7 +814,7 @@ class TrigEgammaMonAlgBuilder:
     
     monGroup = self.addGroup( monAlg, trigger+'_Inefficiency', self.basePath+'/Expert/'+trigger+'/Inefficiency' )
     levelLabels = ["L1Calo","L2Calo","L2","EFCalo","HLT"]
-    monGroup.defineHistogram("InneficiencyCounts", type='TH1F', path='', title="Inefficiency; Steps ; Count",xbins=len(levelLabels), xmin=0, xmax=len(levelLabels), xlabels=levelLabels)
+    monGroup.defineHistogram("InefficiencyCounts", type='TH1F', path='', title="Inefficiency; Steps ; Count",xbins=len(levelLabels), xmin=0, xmax=len(levelLabels), xlabels=levelLabels)
     
 
   def bookL1CaloResolutions(self, monAlg, trigger):
@@ -826,22 +822,20 @@ class TrigEgammaMonAlgBuilder:
     from TrigEgammaMonitoring.TrigEgammaMonitorHelper import TH1F, TH2F
     monGroup = self.addGroup( monAlg, trigger+'_Resolutions_L1Calo', self.basePath+'/Shifter/'+trigger+'/Resolutions/L1Calo' )
     self.addHistogram(monGroup, TH1F("res_et", "E_{T} resolution; (E_{T}(on)-E_{T}(off))/E_{T}(off) ; Count", 100, -0.1, 0.1))
-    self.addHistogram(monGroup, TH1F("eta", "eta; eta ; Count", 50, -2.47, 2.47))
 
     if self.detailedHistograms:
       self.addHistogram(monGroup, TH2F("eta,res_et", "E_{T} resolution as function of #eta; #eta; (E_{T}(on)-E_{T}(off))/E_{T}(off); Count",50, -2.47, 2.47,50, -0.1, 0.1))
+      self.addHistogram(monGroup, TH1F("eta", "eta; eta ; Count", 50, -2.47, 2.47))
     
-
 
   def bookL1CaloAbsResolutions(self, monAlg, trigger):
 
     from TrigEgammaMonitoring.TrigEgammaMonitorHelper import TH1F, TH2F
     monGroup = self.addGroup( monAlg, trigger+'_AbsResolutions_L1Calo', self.basePath+'/Shifter/'+trigger+'/AbsResolutions/L1Calo' )
-    self.addHistogram(monGroup, TH1F("eta", "#eta; #eta ; Count", 50, -2.47, 2.47))
     self.addHistogram(monGroup, TH1F("res_et", "E_{T} resolution; (E_{T}(on)-E_{T}(off))/E_{T}(off) ; Count", 100, -0.1, 0.1))
     if self.detailedHistograms:
+      self.addHistogram(monGroup, TH1F("eta", "#eta; #eta ; Count", 50, -2.47, 2.47))
       self.addHistogram(monGroup, TH2F("eta,res_et", "E_{T} resolution as function of #eta; #eta; (E_{T}(on)-E_{T}(off))/E_{T}(off); Count",50, -2.47, 2.47,50, -0.1, 0.1))
-
 
 
   def bookL2CaloResolutions(self, monAlg, trigger):
@@ -853,7 +847,6 @@ class TrigEgammaMonAlgBuilder:
     self.addHistogram(monGroup, TH1F("et", "E_{T}; E_{T}[GeV] ; Count", 50, 0.0, 100.))
     self.addHistogram(monGroup, TH1F("eta", "#eta; #eta ; Count", 50, -2.47, 2.47))
      
-   
     self.addHistogram(monGroup, TH1F("res_et", "E_{T} resolution; (E_{T}(on)-E_{T}(off))/E_{T}(off) ; Count", 100, -0.1, 0.1))
     self.addHistogram(monGroup, TH1F("res_eta", "#eta resolution; (#eta(on)-#eta(off))/#eta(off) ; Count", 40, -0.001, 0.001))
     self.addHistogram(monGroup, TH1F("res_phi", "#phi resolution; (#phi(on)-#phi(off))/#phi(off) ; Count", 40, -0.001, 0.001))
@@ -935,10 +928,8 @@ class TrigEgammaMonAlgBuilder:
 
 
   def bookHLTResolutions(self, monAlg, trigger,level):
-
     
     from TrigEgammaMonitoring.TrigEgammaMonitorHelper import TH1F, TH2F
-    # monGroup = self.addGroup( monAlg, trigger+'_Resolutions_HLT', self.basePath+'/'+trigger+'/Resolutions/HLT' )
     monGroup = self.addGroup( monAlg, trigger+'_Resolutions_HLT', self.basePath+'/Shifter/'+trigger+'/Resolutions/'+level )
      
     # online values used to fill all 2d histograms
@@ -976,9 +967,7 @@ class TrigEgammaMonAlgBuilder:
 
   def bookHLTElectronResolutions(self, monAlg, trigger, isolated=False):
 
-
     from TrigEgammaMonitoring.TrigEgammaMonitorHelper import TH1F, TH2F
-    # monGroup = self.addGroup( monAlg, trigger+'_Resolutions_HLT', self.basePath+'/'+trigger+'/Resolutions/HLT' )
     monGroup = self.addGroup( monAlg, trigger+'_Resolutions_HLT', self.basePath+'/Shifter/'+trigger+'/Resolutions/HLT')
 
     self.addHistogram(monGroup, TH1F("res_pt", "p_{T} resolution; (p_{T}(on)-p_{T}(off))/p_{T}(off) ; Count", 120, -1.5, 1.5))
@@ -990,17 +979,12 @@ class TrigEgammaMonAlgBuilder:
     self.addHistogram(monGroup, TH1F("res_d0", "resolution d0; (d0(on)-d0(off)) ; Count", 100, -0.5, 0.5))
     self.addHistogram(monGroup, TH1F("res_d0sig", "resolution d0sig; (d0sig(on)-d0sig(off)) ; Count", 50, -10, 10))
     self.addHistogram(monGroup, TH1F("res_eprobht","resolution eProbHT; (eProbHT(on)-eProbHT(off)); Count",50, -1, 1))
-    self.addHistogram(monGroup, TH1F("res_nscthits","resolution nSCTHit; (nSCTHits(on)-nSCTHits(off); Count",20, -10, 10))
-    self.addHistogram(monGroup, TH1F("res_npixhits","resolution nPixHit; (nPixHits(on)-nPixHits(off)); Count",10, -5, 5))
 
-    self.addHistogram(monGroup, TH1F("pt", "online p_{T}; p_{T}; Count", 50, 0., 100.))
- 
     if self.detailedHistograms:
-      self.addHistogram(monGroup, TH2F("pt,res_eprobht", "eProbHT resolution as function of p_{T}; p_{T} [GeV]; (eprobHT(on)-eprobHT(off)); Count",
-                        50, 0., 100.,
-                        50, -1., 1.))
-
-
+      self.addHistogram(monGroup, TH1F("pt", "online p_{T}; p_{T}; Count", 50, 0., 100.))
+      self.addHistogram(monGroup, TH1F("res_nscthits","resolution nSCTHit; (nSCTHits(on)-nSCTHits(off); Count",20, -10, 10))
+      self.addHistogram(monGroup, TH1F("res_npixhits","resolution nPixHit; (nPixHits(on)-nPixHits(off)); Count",10, -5, 5))
+      self.addHistogram(monGroup, TH2F("pt,res_eprobht", "eProbHT resolution as function of p_{T}; p_{T} [GeV]; (eprobHT(on)-eprobHT(off)); Count",50, 0., 100.,50, -1., 1.))
   
     if isolated:
         self.addHistogram(monGroup, TH1F("res_ptcone20", "resolution ptcone20; ptcone20 (on-off)/off; Count", 200, -0.1, 0.1))
@@ -1213,4 +1197,3 @@ class TrigEgammaMonAlgBuilder:
 
 
     return TrigEgammaInfo(trigger)
-

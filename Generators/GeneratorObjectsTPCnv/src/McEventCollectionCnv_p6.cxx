@@ -97,6 +97,25 @@ void McEventCollectionCnv_p6::persToTrans( const McEventCollection_p6* persObj,
 #ifdef HEPMC3
     genEvt->add_attribute ("barcodes", std::make_shared<HepMC::GenEventBarcodes>());
     for (unsigned int i = 0; i < persEvt.m_e_attribute_id.size(); ++i) {
+
+      if (persEvt.m_e_attribute_name[i] == "barcodes") continue;
+      if (persEvt.m_e_attribute_name[i] == "barcode") continue;
+      if (persEvt.m_e_attribute_name[i] == "flows") continue;
+      if (persEvt.m_e_attribute_name[i] == "flow1") continue;
+      if (persEvt.m_e_attribute_name[i] == "flow2") continue;
+      if (persEvt.m_e_attribute_name[i] == "flow3") continue;
+      if (persEvt.m_e_attribute_name[i] == "theta") continue;
+      if (persEvt.m_e_attribute_name[i] == "phi") continue;
+      if (persEvt.m_e_attribute_name[i] == "mpi") continue;
+      if (persEvt.m_e_attribute_name[i] == "signal_process_id") continue;
+      if (persEvt.m_e_attribute_name[i] == "event_scale") continue;
+      if (persEvt.m_e_attribute_name[i] == "alphaQCD") continue;
+      if (persEvt.m_e_attribute_name[i] == "alphaQED") continue;
+      if (persEvt.m_e_attribute_name[i] == "random_states") continue;
+      if (persEvt.m_e_attribute_name[i] == "weights") continue;
+      if (persEvt.m_e_attribute_name[i] == "GenCrossSection") continue;
+      if (persEvt.m_e_attribute_name[i] == "GenPdfInfo") continue;
+      if (persEvt.m_e_attribute_name[i] == "GenHeavyIon") continue;
       genEvt->add_attribute(persEvt.m_e_attribute_name[i], std::make_shared<HepMC3::StringAttribute>(persEvt.m_e_attribute_string[i]), persEvt.m_e_attribute_id[i]);
     }
     ///Note: the code above takes care about all the attributes: CS, HI, etc. ANd the code below is needed only for the compatibility
@@ -415,6 +434,23 @@ void McEventCollectionCnv_p6::transToPers( const McEventCollection* transObj,
      std::map< std::string, std::map<int, std::shared_ptr<HepMC3::Attribute> > > e_atts = genEvt->attributes();
      for (auto& attmap: e_atts) {
        if (attmap.first == "barcodes") continue;
+       if (attmap.first == "barcode") continue;
+       if (attmap.first == "flows") continue;
+       if (attmap.first == "flow1") continue;
+       if (attmap.first == "flow2") continue;
+       if (attmap.first == "flow3") continue;
+       if (attmap.first == "theta") continue;
+       if (attmap.first == "phi") continue;
+       if (attmap.first == "mpi") continue;
+       if (attmap.first == "signal_process_id") continue;
+       if (attmap.first == "event_scale") continue;
+       if (attmap.first == "alphaQCD") continue;
+       if (attmap.first == "alphaQED") continue;
+       if (attmap.first == "random_states") continue;
+       if (attmap.first == "weights") continue;
+       if (attmap.first == "GenCrossSection") continue;
+       if (attmap.first == "GenPdfInfo") continue;
+       if (attmap.first == "GenHeavyIon") continue;
        for (auto& att: attmap.second) {
          persEvt.m_e_attribute_name.push_back(attmap.first);
          persEvt.m_e_attribute_id.push_back(att.first);

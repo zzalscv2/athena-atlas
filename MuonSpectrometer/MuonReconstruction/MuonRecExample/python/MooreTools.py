@@ -113,44 +113,6 @@ class MuonCurvedSegmentCombiner(CfgMgr.Muon__MuonCurvedSegmentCombiner,Configure
 
 # end of class MuonCurvedSegmentCombiner
 
-    
-
-# the segment making supertool
-class MooSegmentCombinationFinder(CfgMgr.Muon__MooSegmentCombinationFinder,ConfiguredBase):
-    __slots__ = ()
-    
-    def __init__(self,name="MooSegmentFinder",**kwargs):
-        reco_cscs = MuonGeometryFlags.hasCSC() and muonRecFlags.doCSCs()
-        kwargs.setdefault( "SegmentCombiner", "MuonCurvedSegmentCombiner" )
-        kwargs.setdefault( "SegmentCombinationCleaner", "MuonSegmentCombinationCleanerTool" )
-        if( muonStandaloneFlags.reconstructionMode() == 'collisions'): 
-            kwargs.setdefault( "HoughPatternFinder", "MuonLayerHoughTool" )
-        else:
-            kwargs.setdefault( "HoughPatternFinder", "MuonHoughPatternFinderTool" )
-
-        kwargs.setdefault( "MdtSegmentMaker", "MuonPatternSegmentMaker" )
-        kwargs.setdefault( "DoSegmentCombinations", False )
-        kwargs.setdefault( "DoSegmentCombinationCleaning", False )
-        kwargs.setdefault( "DoCscSegments", reco_cscs )
-        kwargs.setdefault( "DoMdtSegments", muonRecFlags.doMDTs() )
-        if reco_cscs:
-            kwargs.setdefault( "Csc2dSegmentMaker","Csc2dSegmentMaker" )
-            kwargs.setdefault( "Csc4dSegmentMaker", "Csc4dSegmentMaker" )
-        else:
-            kwargs.setdefault( "Csc2dSegmentMaker", "" )
-            kwargs.setdefault( "Csc4dSegmentMaker", "" )
-        if muonStandaloneFlags.printSummary():
-            kwargs.setdefault( "DoSummary", True )
-
-        self.applyUserDefaults(kwargs,name)
-        # set some defaults
-
-        # call the base class ctor
-        super(MooSegmentCombinationFinder,self).__init__(name,**kwargs)
-
-# end of class MooSegmentCombinationFinder
-
-
 #
 # Start of new Moore track finding tools
 #

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <memory>
@@ -869,7 +869,7 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(xAOD::Egamm
   {
     const auto cl_eta = input.caloCluster()->eta();
     const auto es2 = input.caloCluster()->isAvailable<double>("correctedcl_Es2") ? input.caloCluster()->auxdataConst<double>("correctedcl_Es2") : input.caloCluster()->energyBE(2);
-    if (!(std::abs(cl_eta) < 1.52 and std::abs(cl_eta) > 1.37) and std::abs(cl_eta) < 2.4)
+    if ((std::abs(cl_eta) >= 1.52 || std::abs(cl_eta) <= 1.37) and std::abs(cl_eta) < 2.4)
     energy = m_gain_tool->CorrectionGainTool(cl_eta, energy / GeV, es2 / GeV, xAOD2ptype(input)); // cl_eta ok, TODO: check corrected E2
     ATH_MSG_DEBUG("energy after gain correction = " << boost::format("%.2f") % energy);
   }
