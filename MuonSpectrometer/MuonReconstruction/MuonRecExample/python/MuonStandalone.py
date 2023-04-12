@@ -19,7 +19,6 @@ from AthenaCommon.CfgGetter import getPublicTool,getPrivateTool,getPublicToolClo
 from RecExConfig.ObjKeyStore                  import cfgKeyStore
 
 from AtlasGeoModel.MuonGMJobProperties import MuonGeometryFlags
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
 #==============================================================
 
 # call  setDefaults to update default flags
@@ -59,60 +58,10 @@ def MuonTrackSteering(name="MuonTrackSteering", extraFlags=None, **kwargs):
     kwargs.setdefault("SegSeedQCut", 2)
     kwargs.setdefault("Seg2ndQCut", 1)
     return CfgMgr.Muon__MuonTrackSteering(name,**kwargs)
-
-# Segment finding algorithms
-def MooSegmentFinderAlg( name="MuonSegmentMaker",**kwargs ):
-    kwargs.setdefault("SegmentFinder", getPublicToolClone("MuonSegmentFinder","MooSegmentFinder",
-                                                          DoSummary=muonStandaloneFlags.printSummary()))
-    kwargs.setdefault("MuonClusterSegmentFinderTool",getPublicTool("MuonClusterSegmentFinder"))
-    kwargs.setdefault("MuonSegmentOutputLocation", "TrackMuonSegments")
-    kwargs.setdefault("UseCSC", muonRecFlags.doCSCs())
-    kwargs.setdefault("UseMDT", muonRecFlags.doMDTs())
-    kwargs.setdefault("UseRPC", muonRecFlags.doRPCs())
-    kwargs.setdefault("UseTGC", muonRecFlags.doTGCs())
-    if ConfigFlags.Muon.MuonTrigger:
-        kwargs.setdefault("UseTGCPriorBC", False)
-        kwargs.setdefault("UseTGCNextBC", False)
-    else:
-        kwargs.setdefault("UseTGCPriorBC", muonRecFlags.doTGCs() and muonRecFlags.useTGCPriorNextBC())
-        kwargs.setdefault("UseTGCNextBC", muonRecFlags.doTGCs() and muonRecFlags.useTGCPriorNextBC())
-    kwargs.setdefault("doTGCClust", muonRecFlags.doTGCClusterSegmentFinding())
-    kwargs.setdefault("doRPCClust", muonRecFlags.doRPCClusterSegmentFinding())
-    if muonStandaloneFlags.reconstructionMode() != 'collisions':
-        kwargs.setdefault("Key_MuonLayerHoughToolHoughDataPerSectorVec","")
-    return CfgMgr.MooSegmentFinderAlg(name,**kwargs)
-
 #
 def MuonSegmentFilterAlg(name="MuonSegmentFilterAlg", **kwargs):
     kwargs.setdefault("SegmentCollectionName", "TrackMuonSegments")
     return CfgMgr.MuonSegmentFilterAlg(name, **kwargs)
-
-def MooSegmentFinderNCBAlg( name="MuonSegmentMaker_NCB",**kwargs ):
-    reco_cscs = muonRecFlags.doCSCs() and MuonGeometryFlags.hasCSC()
-    kwargs.setdefault("SegmentFinder",getPublicToolClone("MooSegmentFinder_NCB","MooSegmentFinder",
-                                                         DoSummary=False,
-                                                         Csc2dSegmentMaker = (getPublicToolClone("Csc2dSegmentMaker_NCB","Csc2dSegmentMaker",
-                                                                                                 segmentTool = getPublicToolClone("CscSegmentUtilTool_NCB",
-                                                                                                                                  "CscSegmentUtilTool",
-                                                                                                                                  TightenChi2 = False, 
-                                                                                                                                  IPconstraint=False)) if reco_cscs else ""),
-                                                         Csc4dSegmentMaker = (getPublicToolClone("Csc4dSegmentMaker_NCB","Csc4dSegmentMaker",
-                                                                                                 segmentTool = getPublicTool("CscSegmentUtilTool_NCB")) if reco_cscs else ""),
-                                                         DoMdtSegments=False,DoSegmentCombinations=False,DoSegmentCombinationCleaning=False))
-    kwargs.setdefault("MuonPatternCombinationLocation", "NCB_MuonHoughPatternCombinations")
-    kwargs.setdefault("MuonSegmentOutputLocation", "NCB_TrackMuonSegments")
-    kwargs.setdefault("UseCSC", reco_cscs)
-    kwargs.setdefault("UseMDT", False)
-    kwargs.setdefault("UseRPC", False)
-    kwargs.setdefault("UseTGC", False)
-    kwargs.setdefault("UseTGCPriorBC", False)
-    kwargs.setdefault("UseTGCNextBC", False)
-    kwargs.setdefault("doTGCClust", False)
-    kwargs.setdefault("doRPCClust", False)
-    kwargs.setdefault("Key_MuonLayerHoughToolHoughDataPerSectorVec","")
-
-    return CfgMgr.MooSegmentFinderAlg(name,**kwargs)
-
 
 def MuonSegmentFinderNCBAlg(name="MuonSegmentMaker_NCB", **kwargs):
     ### Only use the TGC measurements from the  current bunch crossing
