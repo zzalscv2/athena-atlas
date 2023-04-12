@@ -5,8 +5,6 @@
 #include "TrigCombinedEvent/TrigComposite.h"
 #include "TrigCombinedEventTPCnv/TrigComposite_p1.h"
 #include "TrigCombinedEventTPCnv/TrigCompositeCnv_p1.h"
-//#include "AthenaKernel/errorcheck.h"
-#include "boost/any.hpp"
 
 void TrigCompositeCnv_p1::transToPers(const TrigComposite* trans, 
 				      TrigComposite_p1* pers, MsgStream &log )

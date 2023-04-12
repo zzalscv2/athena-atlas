@@ -24,8 +24,6 @@
 #include <iomanip>
 #include <functional>
 
-#include <boost/filesystem.hpp>
-
 #include "CxxUtils/checker_macros.h"
 
 #ifdef ATLAS_CHECK_THREAD_SAFETY
