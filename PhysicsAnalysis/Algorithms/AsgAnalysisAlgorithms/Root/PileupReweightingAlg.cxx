@@ -12,6 +12,7 @@
 
 /// Anonymous namespace for helpers
 namespace {
+  const static SG::ConstAuxElement::ConstAccessor<unsigned int> accRRN("RandomRunNumber");
   const static SG::ConstAuxElement::Decorator<unsigned int> decRRN("RandomRunNumber");
   const static SG::ConstAuxElement::Decorator<unsigned int> decRLBN("RandomLumiBlockNumber");
   const static SG::ConstAuxElement::Decorator<unsigned long long> decHash("PRWHash");
@@ -104,7 +105,7 @@ namespace CP
     // Get random run and lumi block numbers
     unsigned int rrn = 0;
     if(decRRN.isAvailable(*evtInfo))
-      rrn = decRRN(*evtInfo);
+      rrn = accRRN(*evtInfo);
     else{
       rrn = m_pileupReweightingTool->getRandomRunNumber(*evtInfo, true);
       // If it returns 0, try again without the mu dependence

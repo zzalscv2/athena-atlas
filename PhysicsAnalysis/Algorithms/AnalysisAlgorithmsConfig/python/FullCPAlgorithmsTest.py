@@ -509,6 +509,8 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
                         'jet_': 'OutJets',
                         'met_': 'AnaMET'}
 
+    # FIXME: this should probably be run on PHYSLITE, but the test fails with:
+    #   overran integrated luminosity for RunNumber=363262 (0.000000 vs 0.000000)
     if not isPhyslite :
         campaign, files, prwfiles, lumicalcfiles = None, None, None, None
         useDefaultConfig = False
