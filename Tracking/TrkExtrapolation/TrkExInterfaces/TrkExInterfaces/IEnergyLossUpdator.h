@@ -63,7 +63,6 @@ public:
     double pathcorrection,
     PropDirection dir = alongMomentum,
     ParticleHypothesis particle = pion,
-    bool mpv = false,
     bool usePDGformula = false) const = 0;
 
   /** Method to recalculate Eloss values for the fit setting an elossFlag using

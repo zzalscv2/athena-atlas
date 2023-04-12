@@ -119,26 +119,11 @@ Trk::EnergyLossUpdator::EnergyLossUpdator(const std::string& t,
                                           const std::string& n,
                                           const IInterface* p)
   : AthAlgTool(t, n, p)
-  , m_stragglingErrorScale(1.)
-  , m_mpvScale(0.98)
-  , m_useTrkUtils(true)
-  , m_gaussianVavilovTheory(false)
-  , m_useBetheBlochForElectrons(true)
-  , m_mpvSigmaParametric(false)
   , m_detailedEloss(true)
   , m_optimalRadiation(true)
 {
   declareInterface<Trk::IEnergyLossUpdator>(this);
-  // scale from outside
-  declareProperty("UseTrkUtils", m_useTrkUtils);
-  // some additional setup
-  declareProperty("UseGaussVavilovTheory", m_gaussianVavilovTheory);
-  declareProperty("UseBetheBlochForElectrons", m_useBetheBlochForElectrons);
-  // scalor for the straggling
-  declareProperty("ScaleStragglingError", m_stragglingErrorScale);
-  // scalor for the most probable value
-  declareProperty("UseParametricMpvError", m_mpvSigmaParametric);
-  declareProperty("ScaleMostProbableValue", m_mpvScale);
+  // scale for the most probable value
   declareProperty("DetailedEloss", m_detailedEloss);
   declareProperty("OptimalRadiation", m_optimalRadiation);
 }
@@ -177,7 +162,6 @@ Trk::EnergyLossUpdator::dEdX(const MaterialProperties& mat,
       dEdX += -2.986 / mat.x0() + 9.253e-5 * E / mat.x0(); // E above 1 TeV
     }
   }
-
   return dEdX;
 }
 
@@ -188,7 +172,6 @@ Trk::EnergyLossUpdator::energyLoss(const MaterialProperties& mat,
                                    double pathcorrection,
                                    PropDirection dir,
                                    ParticleHypothesis particle,
-                                   bool mpvSwitch,
                                    bool usePDGformula) const
 {
   if (particle == Trk::undefined) {
@@ -228,161 +211,15 @@ Trk::EnergyLossUpdator::energyLoss(const MaterialProperties& mat,
 
   deltaE = meanIoni + meanRad;
 
-  if (m_useTrkUtils) {
-    double sigmaDeltaE = std::sqrt(sigIoni * sigIoni + sigRad * sigRad);
-    ATH_MSG_DEBUG(" Energy loss updator deltaE "
-                  << deltaE << " meanIoni " << meanIoni << " meanRad "
-                  << meanRad << " sigIoni " << sigIoni << " sigRad " << sigRad
-                  << " sign " << sign << " pathLength " << pathLength);
-    return (!m_detailedEloss
-              ? Trk::EnergyLoss(deltaE, sigmaDeltaE)
-              : Trk::EnergyLoss(deltaE,
-                                sigmaDeltaE,
-                                sigmaDeltaE,
-                                sigmaDeltaE,
-                                meanIoni,
-                                sigIoni,
-                                meanRad,
-                                sigRad,
-                                pathLength));
-  }
-
-  // Code below will not be used if the parameterization of TrkUtils is used
-
-  double m = Trk::ParticleMasses::mass[particle];
-  double mfrac = Trk::ParticleMasses::mass[Trk::electron] / m;
-  double mfrac2 = mfrac * mfrac;
-  double E = std::sqrt(p * p + m * m);
-  // relativistic properties
-  double beta = p / E;
-  double gamma = E / m;
-
-  // mean radiation loss + sigma
-  // Follow CompPhys Comm 79 (1994) P157-164
-  // Brem parameterization in terms of path-length in number of radiation
-  // lengths
-  double dInX0 = pathcorrection * mat.thicknessInX0();
-  double meanZ = std::exp(-mfrac2 * dInX0);
-
-  double deltaE_rad = (dir == Trk::alongMomentum)
-                        ? sign * E * (1. - meanZ)
-                        : sign * E * (1. / meanZ - 1.);
-
-  // add e+e- pair production and photonuclear effect for muons at energies
-  // above 8 GeV
-  if ((particle == Trk::muon) && (E > 8000.)) {
-    double deltaEpair = 0.;
-    if (E < 1.e6) {
-      deltaEpair =
-        (-0.5345 + 6.803e-5 * E + 2.278e-11 * E * E - 9.899e-18 * E * E * E) *
-        dInX0; // E below 1 TeV
-    } else {
-      deltaEpair = (-2.986 + 9.253e-5 * E) * dInX0; // E above 1 TeV
-    }
-    deltaE_rad += sign * deltaEpair;
-  }
-
-  //  The sigma radiation loss of CompPhys Comm 79 (1994) P157-164 has PROBLEMS
-  //  at low Eloss values
-
-  //  double varZ  = exp( -1. * dInX0 * log(3.) / log(2.) ) - exp(-2. * dInX0);
-  //  double varianceQoverP =  ( dir == Trk::alongMomentum )? 1. / (meanZ *
-  //  meanZ * p * p) * varZ : varZ / (p * p); double sigmaDeltaE_rad =
-  //  beta*beta*p*p*sqrt( varianceQoverP );
-
-  // Use a simple scale factor applied to the Eloss from Radiation obtained from
-  // G4 simulation in stead
-
-  double Radiation_FWHM =
-    m_stragglingErrorScale * 4 * 0.85 * std::abs(deltaE_rad) / 3.59524;
-  double sigmaDeltaE_rad = s_fwhmToSigma * Radiation_FWHM;
-
-  // ionization
-  double deltaE_ioni = 0.;
-  double sigmaDeltaE_ioni = 0.;
-  if (particle != Trk::electron || m_useBetheBlochForElectrons) {
-    if (!mpvSwitch) {
-
-      // K A/Z and T max will be returned by the dEdXBetheBloch
-      double transKaz{ 0 };
-      double transTmax{ 0 };
-      // use the dEdX function
-      deltaE_ioni =
-        sign * pathLength *
-        dEdXBetheBloch(mat, transKaz, transTmax, beta, gamma, particle);
-      // the different straggling functions
-      if (m_gaussianVavilovTheory) {
-        // use the Gaussian approximation for the Vavilov Theory
-        double sigmaE2 =
-          transKaz * pathLength * transTmax * (1. - beta * beta / 2.);
-        sigmaDeltaE_ioni = std::sqrt(sigmaE2);
-      } else {
-        //      Take FWHM maximum of Landau and convert to Gaussian
-        //      For the FWHM of the Landau Bichsel/PDG is used: FWHM = 4 xi = 4
-        //      m_transKaz * pathLength
-        sigmaDeltaE_ioni = 4. * s_fwhmToSigma * transKaz * pathLength;
-      }
-    } else {
-      double eta2 = beta * gamma;
-      eta2 *= eta2;
-      // most probable
-      double kaz = 0.5 * s_ka_BetheBloch * mat.zOverAtimesRho();
-      double xi = kaz * pathLength;
-      // get the ionisation potential
-      double iPot = 16.e-6 * std::pow(mat.averageZ(), 0.9);
-      // density effect, only valid for high energies (gamma > 10 -> p > 1GeV
-      // for muons)
-      double delta = 0.;
-      /* ST replace with STEP-like coding
-         if (eta2 > 2.) {
-         // high energy density effect
-         double eplasma = 28.816e-6 * std::sqrt(1000.*0.5);
-         delta = 2.*log(eplasma/iPot) + log(eta2) - 0.5;
-         }
-       */
-      if (gamma > 10.) {
-        double eplasma = 28.816e-6 * std::sqrt(1000. * mat.zOverAtimesRho());
-        delta = 2. * std::log(eplasma / iPot) + std::log(eta2) - 1.;
-      }
-      // calculate the most probable value of the Landau distribution
-      double mpv = m_mpvScale * xi / (beta * beta) *
-                   (std::log(m * eta2 * kaz / (iPot * iPot)) + 0.2 -
-                    beta * beta - delta); //
-                                          // 12.325);
-
-      // sigma
-      // (1) - obtained from fitted function  [  return par0 +
-      // par1*std::pow(x,par2); ] (2) - following Bichsel: fwhm (full with at
-      // half maximum) = 4 *xi, w = 2.35 fwhm (for gaussian) use the crude
-      // approximation for the width 4*chi
-      sigmaDeltaE_ioni =
-        !m_mpvSigmaParametric
-          ? s_fwhmToSigma * 4. * xi
-          : mpv * (s_mpv_p0 + s_mpv_p1 * std::pow(mpv, s_mpv_p2));
-
-      // get the fitted sigma
-      deltaE_ioni = sign * mpv;
-    }
-    // scale the error
-    sigmaDeltaE_ioni *= m_stragglingErrorScale;
-  }
-
-  deltaE = deltaE_ioni + deltaE_rad;
-
-  double sigmaDeltaE = std::sqrt(sigmaDeltaE_rad * sigmaDeltaE_rad +
-                                 sigmaDeltaE_ioni * sigmaDeltaE_ioni);
-
-  return (m_detailedEloss ? EnergyLoss(
-                              deltaE,
-                              sigmaDeltaE,
-                              sigmaDeltaE,
-                              sigmaDeltaE,
-                              (mpvSwitch ? deltaE_ioni : 0.9 * deltaE_ioni),
-                              sigmaDeltaE_ioni,
-                              deltaE_rad,
-                              sigmaDeltaE_rad,
-                              pathLength)
-                          : EnergyLoss(deltaE, sigmaDeltaE));
+  double sigmaDeltaE = std::sqrt(sigIoni * sigIoni + sigRad * sigRad);
+  ATH_MSG_DEBUG(" Energy loss updator deltaE "
+                << deltaE << " meanIoni " << meanIoni << " meanRad " << meanRad
+                << " sigIoni " << sigIoni << " sigRad " << sigRad << " sign "
+                << sign << " pathLength " << pathLength);
+  return (!m_detailedEloss ? Trk::EnergyLoss(deltaE, sigmaDeltaE)
+                           : Trk::EnergyLoss(deltaE, sigmaDeltaE, sigmaDeltaE,
+                                             sigmaDeltaE, meanIoni, sigIoni,
+                                             meanRad, sigRad, pathLength));
 }
 
 // public interface method
