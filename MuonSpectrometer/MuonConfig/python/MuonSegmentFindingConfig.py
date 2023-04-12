@@ -430,61 +430,6 @@ def Csc4dSegmentMakerCfg(flags, name= "Csc4dSegmentMaker", **kwargs):
     result.setPrivateTools(CompFactory.Csc4dSegmentMaker(name=name, **kwargs))
     return result
 
-
-def MooSegmentFinderCfg(flags, name='MooSegmentFinder', **kwargs):
-    # This is based on https://gitlab.cern.ch/atlas/athena/blob/master/MuonSpectrometer/MuonReconstruction/MuonRecExample/python/MooreTools.py#L99 
-    
-    Muon__MuonSegmentCombinationCleanerTool=CompFactory.Muon.MuonSegmentCombinationCleanerTool
-    Muon__MooSegmentCombinationFinder=CompFactory.Muon.MooSegmentCombinationFinder
-
-    result=ComponentAccumulator()
-
-    muon_curved_segment_combiner_tool = result.popToolsAndMerge(MuonCurvedSegmentCombinerCfg(flags))
-    result.addPublicTool(muon_curved_segment_combiner_tool)
-    
-    muon_segment_combination_cleaner_tool = Muon__MuonSegmentCombinationCleanerTool()
-    result.addPublicTool(muon_segment_combination_cleaner_tool)
-    
-    # Use the MuonLayerHoughTool for collisions, MuonHoughPatternFinderTool for everything else.
-    # This is based on https://gitlab.cern.ch/atlas/athena/blob/master/MuonSpectrometer/MuonReconstruction/MuonRecExample/python/MuonRecTools.py#L428
-    muon_pattern_finder_tool = result.getPrimaryAndMerge(MuonLayerHoughToolCfg(flags, DoTruth=False if flags.Muon.MuonTrigger else flags.Input.isMC)) \
-                              if flags.Beam.Type is BeamType.Collisions else result.popToolsAndMerge(MuonHoughPatternFinderToolCfg(flags))
-    result.addPublicTool(muon_pattern_finder_tool)
-    
-    acc  = MuonPatternSegmentMakerCfg(flags)
-    muon_pattern_segment_maker = acc.getPrimary()
-    result.merge(acc)
-    result.addPublicTool(muon_pattern_segment_maker)
-    
-    if flags.Detector.EnableCSC:
-        acc = Csc2dSegmentMakerCfg(flags)
-        csc_2d_segment_maker = acc.getPrimary()        
-        result.merge(acc)
-    
-        acc = Csc4dSegmentMakerCfg(flags)
-        csc_4d_segment_maker = acc.getPrimary()
-        result.merge(acc)
-    else:
-        csc_2d_segment_maker=None
-        csc_4d_segment_maker=None
-    
-    kwargs.setdefault('SegmentCombiner', muon_curved_segment_combiner_tool)
-    kwargs.setdefault('SegmentCombinationCleaner', muon_segment_combination_cleaner_tool)
-    kwargs.setdefault('HoughPatternFinder', muon_pattern_finder_tool)
-    kwargs.setdefault('MdtSegmentMaker', muon_pattern_segment_maker)
-    kwargs.setdefault('DoSegmentCombinations', False)
-    kwargs.setdefault('DoSegmentCombinationCleaning', False)
-    kwargs.setdefault('DoCscSegments', flags.Detector.EnableCSC)
-    kwargs.setdefault('DoMdtSegments', flags.Detector.EnableMDT)
-    kwargs.setdefault('Csc2dSegmentMaker', csc_2d_segment_maker)
-    kwargs.setdefault('Csc4dSegmentMaker', csc_4d_segment_maker)
-    kwargs.setdefault('DoSummary', flags.Muon.printSummary)
-
-    segment_finder_tool = Muon__MooSegmentCombinationFinder(name=name, **kwargs)
-    
-    result.setPrivateTools(segment_finder_tool)
-    return result
-
 def MuonClusterSegmentFinderToolCfg(flags, name='MuonClusterSegmentFinderTool', **kwargs):
     from MuonConfig.MuonRecToolsConfig import MuonTrackToSegmentToolCfg
     from TrkConfig.TrkTrackSummaryToolConfig import MuonCombinedTrackSummaryToolCfg, MuonTrackSummaryToolCfg
@@ -544,90 +489,6 @@ def MuonClusterSegmentFinderCfg(flags, name = " MuonClusterSegmentFinder", **kwa
     from MuonConfig.MuonRecToolsConfig import MuonTrackToSegmentToolCfg
     kwargs.setdefault( "TrackToSegmentTool", result.popToolsAndMerge(MuonTrackToSegmentToolCfg(flags)))
     result.setPrivateTools(CompFactory.Muon.MuonClusterSegmentFinder(name, **kwargs))
-    return result
-
-def MooSegmentFinderAlgCfg(flags, name = "MuonSegmentMaker",  **kwargs):
-    # This is based on https://gitlab.cern.ch/atlas/athena/blob/master/MuonSpectrometer/MuonReconstruction/MuonRecExample/python/MuonStandalone.py#L113
-    result=ComponentAccumulator()
-    
-    if 'SegmentFinder' not in kwargs:
-        # Let's not call all of this twice if we don't have too...
-        segment_finder_tool=result.popToolsAndMerge(MooSegmentFinderCfg(flags))
-        result.addPublicTool(segment_finder_tool)
-        kwargs.setdefault('SegmentFinder', segment_finder_tool)
-
-    if 'MuonClusterSegmentFinderTool' not in kwargs:
-        # Let's not call all of this twice if we don't have too...
-        muon_cluster_segment_finder=result.popToolsAndMerge(MuonClusterSegmentFinderCfg(flags))
-        kwargs.setdefault('MuonClusterSegmentFinderTool', muon_cluster_segment_finder)
-        
-    kwargs.setdefault('UseCSC', flags.Detector.EnableCSC)
-    kwargs.setdefault('UseMDT', flags.Detector.EnableMDT)
-    kwargs.setdefault('UseRPC', flags.Detector.EnableRPC)
-    kwargs.setdefault('UseTGC', flags.Detector.EnableTGC)
-    kwargs.setdefault('UseTGCPriorBC', flags.Detector.EnableTGC and flags.Muon.useTGCPriorNextBC)
-    kwargs.setdefault('UseTGCNextBC', flags.Detector.EnableTGC and flags.Muon.useTGCPriorNextBC)
-    kwargs.setdefault('doTGCClust', flags.Muon.doTGCClusterSegmentFinding)
-    kwargs.setdefault('doRPCClust', flags.Muon.doRPCClusterSegmentFinding)
-    # When reading ESDs, where prior/next BC TGCs are merged, just retrieve that.
-    # FIXME - this really shouldn't be set here! 
-    kwargs.setdefault('TgcPrepDataContainer', 'TGC_MeasurementsAllBCs' if not flags.Muon.useTGCPriorNextBC else 'TGC_Measurements')
-        
-    kwargs.setdefault('MuonSegmentOutputLocation', "ThirdChainSegments" if flags.Muon.segmentOrigin=="TruthTracking" else "TrackMuonSegments")
-    if flags.Beam.Type is not BeamType.Collisions:
-        kwargs.setdefault("Key_MuonLayerHoughToolHoughDataPerSectorVec", "")
-
-    moo_segment_finder_alg = CompFactory.MooSegmentFinderAlg( name=name, **kwargs )
-    result.addEventAlgo( moo_segment_finder_alg )
-        
-    return result
-
-def MooSegmentFinderAlg_NCBCfg(flags, name = "MuonSegmentMaker_NCB", **kwargs):
-    result = ComponentAccumulator()
-
-    # Configure NCB MooSegmentFinder
-    if flags.Detector.GeometryCSC:
-        csc_segment_util_tool = result.popToolsAndMerge(CscSegmentUtilToolCfg(flags, 
-                                                                              name='CscSegmentUtilTool_NCB', 
-                                                                              TightenChi2 = False, 
-                                                                              IPconstraint=False))
-      
-        csc_2d_segment_maker = result.popToolsAndMerge(Csc2dSegmentMakerCfg(flags, 
-                                                                            name='Csc2dSegmentMaker_NCB', 
-                                                                            segmentTool=csc_segment_util_tool)) 
-        
-        csc_4d_segment_maker = result.popToolsAndMerge(Csc4dSegmentMakerCfg(flags, 
-                                                                            name='Csc4dSegmentMaker_NCB', 
-                                                                            segmentTool=csc_segment_util_tool))
-       
-    else:
-        csc_2d_segment_maker = ""
-        csc_4d_segment_maker = ""
-
-    acc  = MooSegmentFinderCfg(flags, name='MooSegmentFinder_NCB', Csc2dSegmentMaker=csc_2d_segment_maker, 
-                               Csc4dSegmentMaker=csc_4d_segment_maker, 
-                               DoMdtSegments=False,DoSegmentCombinations=False,DoSegmentCombinationCleaning=False)
-    segment_finder_tool=(acc.popPrivateTools())
-    result.addPublicTool(segment_finder_tool)
-    result.merge(acc)
-
-    kwargs.setdefault('SegmentFinder', segment_finder_tool)
-
-    # Now set other NCB properties
-    kwargs.setdefault('MuonPatternCombinationLocation', "NCB_MuonHoughPatternCombinations" )
-    kwargs.setdefault('MuonSegmentOutputLocation', "NCB_TrackMuonSegments" )
-    kwargs.setdefault('Key_MuonLayerHoughToolHoughDataPerSectorVec', '')
-    kwargs.setdefault('UseCSC', flags.Detector.EnableCSC)
-    kwargs.setdefault('UseMDT', False)
-    kwargs.setdefault('UseRPC', False)
-    kwargs.setdefault('UseTGC', False)
-    kwargs.setdefault('UseTGCPriorBC', False)
-    kwargs.setdefault('UseTGCNextBC', False)
-    kwargs.setdefault('doTGCClust', False)
-    kwargs.setdefault('doRPCClust', False)
-
-    acc = MooSegmentFinderAlgCfg(flags, name=name, **kwargs)
-    result.merge(acc)
     return result
 
 def MuonLayerHoughToolCfg(flags, name = "MuonLayerHoughTool" , **kwargs):
@@ -816,7 +677,6 @@ def MuonSegmentFindingCfg(flags, cardinality=1):
         result.merge( MuonRDOtoPRDConvertorsCfg(flags) )
   
     # We need to add two algorithms - one for normal collisions, one for NCB
-    # result.merge( MooSegmentFinderAlgCfg(flags, Cardinality=cardinality) )
     ### For the moment to not use the run 3 segment maker algorithm as we need
     ### to migrate the TgcPrepData first. In any case, let's keep the next two lines
     ### commented for the moment!!!
