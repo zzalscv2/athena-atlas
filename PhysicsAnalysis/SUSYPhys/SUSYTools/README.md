@@ -21,14 +21,14 @@ Set up the latest recommended AnalysisBase release:
 ```bash
 setupATLAS
 lsetup git
-asetup "AnalysisBase,24.2.0"
+asetup "AnalysisBase,24.2.2"
 ```
 
 Or the latest AthAnalysis release::
 
 ```bash
 setupATLAS
-asetup "AthAnalysis,24.2.0"
+asetup "AthAnalysis,24.2.2"
 ```
   
 For working with code, a sparse checkout is pretty straightforward.  
@@ -126,6 +126,24 @@ cp ut_SUSYToolsTester_data.log-todiff $WorkDir_DIR/../../src/athena/PhysicsAnaly
 cp ut_SUSYToolsTester_data_Run3.log-todiff $WorkDir_DIR/../../src/athena/PhysicsAnalysis/SUSYPhys/SUSYTools/share/ut_SUSYToolsTester_data_Run3.ref
 cp ut_SUSYToolsTester_mc.log-todiff $WorkDir_DIR/../../src/athena/PhysicsAnalysis/SUSYPhys/SUSYTools/share/ut_SUSYToolsTester_mc.ref
 cp ut_SUSYToolsTester_mc_Run3.log-todiff $WorkDir_DIR/../../src/athena/PhysicsAnalysis/SUSYPhys/SUSYTools/share/ut_SUSYToolsTester_mc_Run3.ref
+```
+Or if you are using AthAnalysis these are the current test:
+```bash
+ctest -R SUSYTools_ut_SUSYToolsAlg_data_ctest
+ctest -R SUSYTools_ut_SUSYToolsAlg_data_Run3_ctest
+ctest -R SUSYTools_ut_SUSYToolsAlg_mc_ctest
+ctest -R SUSYTools_ut_SUSYToolsAlg_mc_Run3_ctest
+```
+3) Before copying the files, check that all the changes are expected.
+```bash
+cd $WorkDir_DIR/../PhysicsAnalysis/SUSYPhys/SUSYTools/CMakeFiles/unitTestRun/
+cp ut_SUSYToolsAlg_data.log-todiff $WorkDir_DIR/../../src/athena/PhysicsAnalysis/SUSYPhys/SUSYTools/share/ut_SUSYToolsAlg_data.ref
+cp ut_SUSYToolsAlg_data_Run3.log-todiff $WorkDir_DIR/../../src/athena/PhysicsAnalysis/SUSYPhys/SUSYTools/share/ut_SUSYToolsAlg_data_Run3.ref
+cp ut_SUSYToolsAlg_mc.log-todiff $WorkDir_DIR/../../src/athena/PhysicsAnalysis/SUSYPhys/SUSYTools/share/ut_SUSYToolsAlg_mc.ref
+cp ut_SUSYToolsAlg_mc_Run3.log-todiff $WorkDir_DIR/../../src/athena/PhysicsAnalysis/SUSYPhys/SUSYTools/share/ut_SUSYToolsAlg_mc_Run3.ref
+```
+4) Add the new reference file on git:
+```bash
 cd $WorkDir_DIR/../../src/athena/PhysicsAnalysis/SUSYPhys/SUSYTools/share/
 git add ut_SUSYToolsTester*
 ```
