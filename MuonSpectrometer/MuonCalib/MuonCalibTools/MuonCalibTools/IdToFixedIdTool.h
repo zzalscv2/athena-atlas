@@ -43,7 +43,7 @@ namespace MuonCalib {
                         const IInterface* parent);  //!< AlgTool constructor
         virtual ~IdToFixedIdTool() = default;
 
-        StatusCode initialize();  //!< IdToFixedIdTool initialization: retrieve all the IdHelpers needed to do strap the ATHENA Identifier
+        virtual StatusCode initialize() override;  //!< IdToFixedIdTool initialization: retrieve all the IdHelpers needed to do strap the ATHENA Identifier
 
         void print(const Identifier& id) const override;  //!< print method to output an ATHENA Identifier, warning the user when the conversion and
                                                           //!< reconversion yields different results.
