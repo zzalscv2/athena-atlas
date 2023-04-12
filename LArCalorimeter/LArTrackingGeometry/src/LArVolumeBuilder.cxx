@@ -1372,11 +1372,10 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM) const
    if(m_useCaloSurfBuilder){
 
      double z, rmin, rmax, hphi, depth;
-     auto  pos = Amg::Transform3D();
+     Amg::Transform3D pos;
      m_calosurf->get_disk_surface(CaloCell_ID::HEC0, 1, pos, z, rmin, rmax, hphi, depth, &caloDDM);
      caloSurfZOffset = lArHecZmin - z;
      lArHecZmax = z + depth + caloSurfZOffset;
-     pos = Amg::Transform3D();
      m_calosurf->get_disk_surface(CaloCell_ID::HEC3, 1, pos, z, rmin, rmax, hphi, depth, &caloDDM);
      hecEnd = z + depth + caloSurfZOffset;
    }
