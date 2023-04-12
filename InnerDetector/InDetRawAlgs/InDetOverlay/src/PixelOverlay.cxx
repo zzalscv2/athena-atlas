@@ -29,8 +29,9 @@ namespace Overlay
     auto outputCollection = std::make_unique<PixelRDO_Collection>(hashId);
     outputCollection->setIdentifier(collection->identify());
 
+    //Deep copy
+    outputCollection->reserve(collection->size());
     for (const PixelRDORawData *existingDatum : *collection) {
-      // Owned by the collection
       auto *datumCopy = new Pixel1RawData(existingDatum->identify(), existingDatum->getWord());
       outputCollection->push_back(datumCopy);
     }
