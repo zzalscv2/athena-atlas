@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "egammaSuperClusterBuilderBase.h"
@@ -357,19 +357,20 @@ egammaSuperClusterBuilderBase::initialize()
 
   // the + is to account for different L0/L1 phi granularity
   m_extraL0L1PhiSize = m_extraL0L1PhiSizeCells * s_cellPhiSize;
-  ATH_MSG_INFO(
-      "e/gamma super clusters"
-      << '\n'
-      << "--> Eta Window size for L0/L1/L2 cells : "
-      << " Barrel +- " << m_addCellsWindowEtaBarrel << " EndCap +- "
-      << m_addCellsWindowEtaEndcap << '\n'
-      << "--> Eta Window size for L3 cells : " << '\n'
-      << " Barrel +- " << (m_addCellsWindowEtaBarrel + m_extraL3EtaSize)
-      << " EndCap +- " << (m_addCellsWindowEtaEndcap + m_extraL3EtaSize)
-      << " -> Phi window is fully dynamic for L2/L3" << '\n'
-      << " -> L0/L1 cells in phi will be collected in a Window : "
-      << "(L2 neg extend - " << m_extraL0L1PhiSize << " , "
-      << "L2 pos extend + " << m_extraL0L1PhiSize << ")");
+  ATH_MSG_INFO("e/gamma super clusters"
+               << '\n'
+               << "--> Eta Window size for L0/L1/L2 cells : "
+               << " Barrel +- " << m_addCellsWindowEtaBarrel << " ,EndCap +- "
+               << m_addCellsWindowEtaEndcap << '\n'
+               << "--> Eta Window size for L3 cells : "
+               << " Barrel +- "
+               << (m_addCellsWindowEtaBarrel + m_extraL3EtaSize)
+               << " ,EndCap +- "
+               << (m_addCellsWindowEtaEndcap + m_extraL3EtaSize) << '\n'
+               << " -> Phi window is fully dynamic for L2/L3" << '\n'
+               << " -> L0/L1 cells in phi will be collected in a Window : "
+               << "(L2 neg extend - " << m_extraL0L1PhiSize << " , "
+               << "L2 pos extend + " << m_extraL0L1PhiSize << ")");
 
   return StatusCode::SUCCESS;
 }

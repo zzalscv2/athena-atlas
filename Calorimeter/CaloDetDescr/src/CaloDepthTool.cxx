@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // ***************************************************************************
@@ -74,10 +74,8 @@ CaloDepthTool::initialize()
     }
 
   }
-  ATH_MSG_INFO(" CaloDepthTool " << this->name()
-                                 << " successfully initialised, will provide "
-                                 << m_depth_choice << " enum "
-                                 << static_cast<int>(m_depthChoice));
+  ATH_MSG_INFO("Choice " << m_depth_choice << " enum "
+                         << static_cast<int>(m_depthChoice));
 
   return StatusCode::SUCCESS;
 }
