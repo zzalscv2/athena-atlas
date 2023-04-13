@@ -5,6 +5,7 @@
 from TriggerMenuMT.HLT.Config.MenuComponents import RecoFragmentsPool, MenuSequence, algorithmCAToGlobalWrapper
 from AthenaCommon.CFElements import seqAND, parOR
 from .FullScanDefs import caloFSRoI
+import AthenaCommon.CfgMgr as CfgMgr
 
 class CaloMenuDefs(object):
       """Static Class to collect all string manipulations in Calo sequences """
@@ -15,43 +16,39 @@ class CaloMenuDefs(object):
 #
 # central or forward fast calo sequence 
 #
-def fastCaloSequence(flags, name="fastCaloSequence"):
-    """ Creates Fast Calo reco sequence"""
-    
-    from TrigT2CaloCommon.CaloDef import fastCaloEVCreator
-    from TrigT2CaloCommon.CaloDef import fastCaloRecoSequence
-    (fastCaloViewsMaker, InViewRoIs) = fastCaloEVCreator()
-    # reco sequence always build the rings
-    (fastCaloInViewSequence, sequenceOut) = fastCaloRecoSequence(flags, InViewRoIs)
-
-    from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Calo
-    robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Calo, flags, nameSuffix=fastCaloViewsMaker.name())[0]
-
-     # connect EVC and reco
-    fastCaloSequence = seqAND(name, [fastCaloViewsMaker, robPrefetchAlg, fastCaloInViewSequence ])
-    return (fastCaloSequence, fastCaloViewsMaker, sequenceOut)
-
-
 
 def fastCaloMenuSequence(flags, name, doRinger=True, is_probe_leg=False):
     """ Creates Egamma Fast Calo  MENU sequence
     The Hypo name changes depending on name, so for different implementations (Electron, Gamma,....)
     """
-    (sequence, fastCaloViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(fastCaloSequence, flags=flags)
-    # check if use Ringer and are electron because there aren't ringer for photons yet:
+    
+    from TrigT2CaloCommon.CaloDef import fastCaloEVCreator
+    (fastCaloViewsMaker, InViewRoIs) = fastCaloEVCreator()
 
+    fastCaloVDV = CfgMgr.AthViews__ViewDataVerifier("fastCaloVDV")
+    fastCaloVDV.DataObjects = [( 'CaloBCIDAverage' , 'StoreGateSvc+CaloBCIDAverage' ),
+                               ( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s'%InViewRoIs  )]
+    
+    from TrigT2CaloCommon.CaloDef import fastCaloRecoSequenceCfg
+    # reco sequence always build the rings
+    fastCaloAlg = algorithmCAToGlobalWrapper(fastCaloRecoSequenceCfg,flags,inputEDM=InViewRoIs)
+
+    from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Calo
+    robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Calo, flags, nameSuffix=fastCaloViewsMaker.name())[0]
+
+    fastCaloInViewSequence = seqAND( 'fastCaloInViewSequence', [fastCaloVDV, fastCaloAlg] )    
+    fastCaloSequence = seqAND("fastCaloSequence", [fastCaloViewsMaker, robPrefetchAlg, fastCaloInViewSequence ])
     # hypo
     if doRinger:
       from TrigEgammaHypo.TrigEgammaFastCaloHypoTool import createTrigEgammaFastCaloHypoAlg
     else:
       from TrigEgammaHypo.TrigEgammaFastCaloHypoTool import createTrigEgammaFastCaloHypoAlg_noringer as createTrigEgammaFastCaloHypoAlg
 
-    theFastCaloHypo = createTrigEgammaFastCaloHypoAlg(flags, name+"EgammaFastCaloHypo", sequenceOut)
-    CaloMenuDefs.L2CaloClusters = sequenceOut
+    theFastCaloHypo = createTrigEgammaFastCaloHypoAlg(flags, name+"EgammaFastCaloHypo", sequenceOut="HLT_FastCaloEMClusters")
 
     from TrigEgammaHypo.TrigEgammaFastCaloHypoTool import TrigEgammaFastCaloHypoToolFromDict
     return MenuSequence( flags,
-                         Sequence    = sequence,
+                         Sequence    = fastCaloSequence,
                          Maker       = fastCaloViewsMaker,
                          Hypo        = theFastCaloHypo,
                          HypoToolGen = TrigEgammaFastCaloHypoToolFromDict,

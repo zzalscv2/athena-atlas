@@ -34,7 +34,11 @@ StatusCode CTPUnpackingTool::start() {
   ATH_MSG_INFO( "Updating CTP bits decoding configuration");
 
   // iterate over all items and obtain the CPT ID for each item. Then, package that in the map: name -> CTP ID
-  ATH_MSG_INFO( "start(): use new L1 trigger menu" );
+  ATH_MSG_INFO( "start(): use new L1 trigger menu" );  
+  // Cleanup in case there was a stop/start transition
+  m_itemNametoCTPIDMap.clear();
+  m_ctpToChain.clear();
+
   auto l1menu = SG::makeHandle( m_L1MenuKey );
   if( l1menu.isValid() ) {
     for ( const TrigConf::L1Item & item:   *l1menu ) {
@@ -43,7 +47,7 @@ StatusCode CTPUnpackingTool::start() {
   } else {
     ATH_MSG_ERROR( "TrigConf::L1Menu does not exist" );
   }
-  m_ctpToChain.clear();
+  
   auto addIfItemExists = [&]( const std::string& itemName, HLT::Identifier id, bool warningOnly = false ) -> StatusCode {
     if ( m_itemNametoCTPIDMap.find( itemName ) != m_itemNametoCTPIDMap.end() ) {
       m_ctpToChain[ m_itemNametoCTPIDMap[itemName] ].push_back( id );

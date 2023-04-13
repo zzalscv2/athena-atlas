@@ -15,7 +15,7 @@
 #define CXXUTILS_POINTER_LIST_H
 
 
-#include "boost/static_assert.hpp"
+#include <type_traits>
 #include <iterator>
 
 
@@ -256,7 +256,7 @@ public:
   {
   public:
     /// Verify that @c NELT is one less than a power of two.
-    BOOST_STATIC_ASSERT (((NELT+1) & NELT) == 0);
+    static_assert (((NELT+1) & NELT) == 0);
 
     /// Constants to use to test if we're at the end of a block.
     static const unsigned long END_OFFS = NELT * sizeof(value_type);

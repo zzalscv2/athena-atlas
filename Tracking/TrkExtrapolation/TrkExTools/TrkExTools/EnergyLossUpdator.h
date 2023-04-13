@@ -146,7 +146,6 @@ public:
     double pathcorrection,
     PropDirection dir = alongMomentum,
     ParticleHypothesis particle = pion,
-    bool mpv = false,
     bool usePDGformula = false) const override final;
 
   /** Method to recalculate Eloss values for the fit setting an elossFlag using
@@ -185,17 +184,10 @@ private:
     PropDirection dir = alongMomentum,
     ParticleHypothesis particle = pion) const;
 
-  Trk::MaterialInteraction m_matInt;
-  double m_stragglingErrorScale; //!< stragglingErrorScale
-  double m_mpvScale;            //!< a scalor that can be introduced for the MPV
-  bool m_useTrkUtils;           //!< use eloss parametrisation from TrkUtils
-                                //!< MaterialInterAction.h
-  bool m_gaussianVavilovTheory; //!< include energy loss straggling or not
-  bool m_useBetheBlochForElectrons; //!< use adopted bethe bloch for electrons
-  bool m_mpvSigmaParametric;        //!< take the (crude) parametric mpv sigma
-  bool m_detailedEloss;             //!< provide extended EnergyLoss info
-  bool m_optimalRadiation; //!< use calorimeter more optimal for radiation
-                           //!< detection
+  Trk::MaterialInteraction m_matInt;  //!< MaterialInterAction.h
+  bool m_detailedEloss;               //!< provide extended EnergyLoss info
+  bool m_optimalRadiation;  //!< use calorimeter more optimal for radiation
+                            //!< detection
 };
 
 } // end of namespace

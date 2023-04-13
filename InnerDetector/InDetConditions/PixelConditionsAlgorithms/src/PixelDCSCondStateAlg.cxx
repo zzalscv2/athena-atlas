@@ -27,6 +27,7 @@ StatusCode PixelDCSCondStateAlg::initialize() {
   m_stateMap.insert(std::make_pair(std::string("UNDEFINED"),  PixelDCSStateData::DCSModuleState::UNDEFINED));
   m_stateMap.insert(std::make_pair(std::string("DISABLED"),   PixelDCSStateData::DCSModuleState::DISABLED));
   m_stateMap.insert(std::make_pair(std::string("LOCKED_OUT"), PixelDCSStateData::DCSModuleState::LOCKED_OUT));
+  m_stateMap.insert(std::make_pair(std::string("STANDBY"),    PixelDCSStateData::DCSModuleState::STANDBY));
   m_stateMap.insert(std::make_pair(std::string("OFF"),        PixelDCSStateData::DCSModuleState::OFF));
 
   return StatusCode::SUCCESS;

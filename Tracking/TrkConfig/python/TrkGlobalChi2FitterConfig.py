@@ -359,9 +359,7 @@ def InDetTrigGlobalChi2FitterCfg(flags, name='InDetTrigTrackFitter', **kwargs):
     kwargs.setdefault("NavigatorTool", acc.popToolsAndMerge(
         AtlasNavigatorCfg(flags, name="InDetTrigNavigator")))
     kwargs.setdefault("EnergyLossTool", acc.popToolsAndMerge(
-        AtlasEnergyLossUpdatorCfg(flags,
-                                  # revisit after mc23a
-                                  UseBetheBlochForElectrons=True)))
+        AtlasEnergyLossUpdatorCfg(flags)))
     kwargs.setdefault("MaterialUpdateTool", acc.popToolsAndMerge(
         AtlasMaterialEffectsUpdatorCfg(flags,
                                        name="InDetTrigMaterialEffectsUpdator")))

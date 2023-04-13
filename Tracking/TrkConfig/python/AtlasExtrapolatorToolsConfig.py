@@ -7,12 +7,12 @@ from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
 # Configured Energy Loss  uses the TrkUtils parametrization for
 # energy loss due to ionization and radiation
+# Ionization (PDG 2011 formula 27.11)
+# H. Bichsel, Rev. Mod. Phys. 60, 663 (1988)
 def AtlasEnergyLossUpdatorCfg(flags,
                               name='AtlasEnergyLossUpdator',
                               **kwargs):
     result = ComponentAccumulator()
-    kwargs.setdefault("UseTrkUtils", True)
-    kwargs.setdefault("UseBetheBlochForElectrons", False)
     result.setPrivateTools(CompFactory.Trk.EnergyLossUpdator(name, **kwargs))
     return result
 
@@ -107,7 +107,11 @@ def FastSimNavigatorCfg(flags,
 # Uses Highland formula for sigma
 # from Trk::MaterialInteraction::sigmaMS
 # (PDG 2018 formula 33.15)
+# G.R. Lynch and O.I Dahl, Nucl. Instrum. Methods B58, 6 (1991).
+# Eq. (33.15) is Eq. 12 from this paper
 # = default config
+
+
 def AtlasMultipleScatteringUpdatorCfg(flags,
                                       name="AtlasMultipleScatteringUpdator",
                                       **kwargs):
@@ -120,7 +124,11 @@ def AtlasMultipleScatteringUpdatorCfg(flags,
 # Uses Highland formula for sigma
 # from Trk::MultipleScatteringUpdator::sigmaSquare
 # (PDG 2010 formula 27.14)
+# V.L. Highland, Nucl. Instrum. Methods 129, 497 (1975),
+# and Nucl. Instrum. Methods 161, 171 (1979)
 # = non default config, used for GlobalChi2Fitter
+
+
 def InDetMultipleScatteringUpdatorCfg(flags,
                                       name="InDetMultipleScatteringUpdator",
                                       **kwargs):
@@ -130,10 +138,12 @@ def InDetMultipleScatteringUpdatorCfg(flags,
         CompFactory.Trk.MultipleScatteringUpdator(name, **kwargs))
     return acc
 
+
 def ITkMultipleScatteringUpdatorCfg(flags,
                                     name="ITkMultipleScatteringUpdator",
                                     **kwargs):
     return InDetMultipleScatteringUpdatorCfg(flags, name, **kwargs)
+
 
 def fatrasMultipleScatteringUpdatorCfg(flags,
                                        name="ISF_FatrasMultipleScatteringUpdator",

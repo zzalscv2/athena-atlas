@@ -27,6 +27,8 @@ StatusCode TrigCompositeUtils::AlgToChainTool::initialize() {
 StatusCode TrigCompositeUtils::AlgToChainTool::start() {
     SG::ReadHandle<TrigConf::HLTMenu>  hltMenuHandle = SG::makeHandle( m_HLTMenuKey );
     ATH_CHECK( hltMenuHandle.isValid() );
+    m_sequencerToChainMap.clear();
+    m_algToSequencersMap.clear();
 
     // Fill the maps
     for ( const TrigConf::Chain& chain : *hltMenuHandle ) {

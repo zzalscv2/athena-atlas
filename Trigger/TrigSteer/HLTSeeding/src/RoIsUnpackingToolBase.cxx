@@ -52,7 +52,9 @@ std::string RoIsUnpackingToolBase::getProbeThresholdName(const std::string& thre
 StatusCode RoIsUnpackingToolBase::decodeMapping( std::function<bool(const std::string&)>&& filter ) {
   SG::ReadHandle<TrigConf::HLTMenu>  hltMenuHandle = SG::makeHandle( m_HLTMenuKey );
   ATH_CHECK( hltMenuHandle.isValid() );
-
+  // Cleanup in case there was a stop/start transition
+  m_thresholdToChainMapping.clear();
+  
   for ( const TrigConf::Chain& chain: *hltMenuHandle ) {
     const HLT::Identifier chainIdentifier(chain.name());
     const std::vector<std::string> thresholds{ chain.l1thresholds() };

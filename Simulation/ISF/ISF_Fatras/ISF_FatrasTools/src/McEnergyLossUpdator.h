@@ -66,7 +66,7 @@ namespace iFatras{
                                  double pathCorrection,
                                  Trk::PropDirection direction = Trk::alongMomentum,
                                  Trk::ParticleHypothesis particleHypothesis = Trk::pion,
-                                 bool mpv=true, bool usePDGformula = false) const override;
+                                 bool usePDGformula = false) const override;
 
     /** Dummy methodes imposed by public interface - cleanup */
     /** Method to recalculate Eloss values for the fit setting an elossFlag using as an input

@@ -23,7 +23,7 @@ class PixelDCSStateData {
     int getModuleStatus(const int chanNum) const;
 
     enum DCSModuleState{READY,ON,UNKNOWN,TRANSITION,UNDEFINED,
-                        DISABLED,LOCKED_OUT,OFF,
+                        DISABLED,LOCKED_OUT,STANDBY,OFF,
                         NOSTATE};
     const IntConditions &moduleStatusMap() const { return m_moduleStatus; }
 

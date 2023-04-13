@@ -234,8 +234,7 @@ if InDetFlags.loadFitter():
     if InDetFlags.doBremRecovery() and InDetFlags.trackFitterType() == 'GlobalChi2Fitter' :
         # @TODO  create where it is needed
         from TrkExTools.TrkExToolsConf import Trk__EnergyLossUpdator
-        InDetEnergyLossUpdator = Trk__EnergyLossUpdator(name="AtlasEnergyLossUpdator",
-                                                        UseBetheBlochForElectrons = False)
+        InDetEnergyLossUpdator = Trk__EnergyLossUpdator(name="AtlasEnergyLossUpdator")
         ToolSvc               += InDetEnergyLossUpdator
 
     from AthenaCommon import CfgGetter

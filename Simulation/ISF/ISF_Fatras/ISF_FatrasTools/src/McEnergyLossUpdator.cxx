@@ -93,11 +93,9 @@ iFatras::McEnergyLossUpdator::energyLoss(
   double pathCorrection,
   Trk::PropDirection direction,
   Trk::ParticleHypothesis particleHypothesis,
-  bool,
   bool) const
 {
 
-  bool mpvSwitch = m_energyLossDistribution >= 2;
  
   // get the number of the material effects distribution
   Trk::EnergyLoss sampledEloss =
@@ -106,7 +104,6 @@ iFatras::McEnergyLossUpdator::energyLoss(
                                     pathCorrection,
                                     direction,
                                     particleHypothesis,
-                                    mpvSwitch,
                                     m_usePDGformula);
 
 
