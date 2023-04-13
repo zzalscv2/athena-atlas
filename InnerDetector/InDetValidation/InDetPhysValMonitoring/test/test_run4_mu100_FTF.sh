@@ -90,6 +90,6 @@ ls -la "$lastref_dir"
 run "dcube-last" \
     $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
     -p -x dcube_last \
-    -c ${dcubeXml} \
+    -c ${dcubeXmlAbsPath} \
     -r ${lastref_dir}/idpvm.root \
     idpvm.root
