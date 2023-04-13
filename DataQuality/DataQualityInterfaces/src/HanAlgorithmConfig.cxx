@@ -17,6 +17,7 @@
 #include "DataQualityInterfaces/HanConfigAlgPar.h"
 #include "DataQualityInterfaces/HanConfigAssessor.h"
 #include "DataQualityInterfaces/HanConfigParMap.h"
+#include "DataQualityInterfaces/HanRuntimeConfigSingleton.h"
 #include "DataQualityInterfaces/HanUtils.h"
 
 
@@ -32,6 +33,7 @@ HanAlgorithmConfig( const HanConfigAssessor& hca, TFile* config )
   , m_ref(0)
 {
   CopyAlgConfig( hca );
+  CopyRuntimeConfig();
 }
 
 HanAlgorithmConfig::
@@ -49,6 +51,7 @@ HanAlgorithmConfig( TObject* reference,
   m_generic_parameters = stringParameters;
   m_green_thresholds = greenThresholds;
   m_red_thresholds = redThresholds;
+  CopyRuntimeConfig();
 }
 
 HanAlgorithmConfig::
@@ -137,6 +140,17 @@ CopyAlgConfig( const HanConfigAssessor& hca )
       }
     }
   }
+}
+
+void
+HanAlgorithmConfig::
+CopyRuntimeConfig()
+{
+  auto& runtime = HanRuntimeConfigSingleton::getInstance();
+
+  m_generic_parameters.emplace( "runtime_path", runtime.getPath() );
+  if ( runtime.pathIsRunDirectory() )
+    m_parameters.emplace( "run_number", runtime.getPathRunNumber() );
 }
 
 
