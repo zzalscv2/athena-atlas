@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // TrackCaloClusterInfoAlgs includes
 #include "TrackCaloClusterRecAlgs/TrackCaloClusterInfoAlg.h"
 
 #include "StoreGate/ReadDecorHandle.h"
+#include "StoreGate/DecorKeyHelpers.h"
 
 #include "TrackCaloClusterRecTools/TCCHelpers.h"
 
@@ -182,7 +183,7 @@ StatusCode TrackCaloClusterInfoUFOAlg::fillInfo(SG::WriteHandle<TrackCaloCluster
   wcoll.m_orig_pfoK = m_orig_pfo;
   ATH_MSG_VERBOSE("GOT ORIG PFO");
  
-  wcoll.m_clustersLinkK="AssoClustersUFO"; //removing the container name from the assoClustersKey is required for the accessor to work. hardcode until a better solution is available
+  wcoll.m_clustersLinkK = SG::decorKeyFromKey (m_assoClustersKey.key());
   ATH_MSG_VERBOSE("ReadDecorHandle's default container: "<<clusterLinks.key());
   ATH_MSG_VERBOSE("is ReadDecorHandle available? " <<clusterLinks.isAvailable());
   ATH_MSG_VERBOSE("ReadDecorHandleKey: "<<clusterLinks.decorKey());
