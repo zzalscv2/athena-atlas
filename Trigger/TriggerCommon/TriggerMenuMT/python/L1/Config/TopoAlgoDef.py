@@ -981,6 +981,7 @@ class TopoAlgoDef:
             inputList = d.otype + d.olist
             alg = AlgConf.SimpleCone( name = toponame, inputs = inputList, outputs = [toponame] )
             alg.addgeneric('InputWidth', d.inputwidth)
+            alg.addgeneric('NumResultBits', 1)
             alg.addvariable('MinET',     get_threshold_cut(d.otype, d.ocut)*_et_conversion)
             alg.addvariable('MinSumET', d.minHT*_et_conversion)
             alg.addvariable('MaxRSqr',    10*10*_dr_conversion*_dr_conversion)                        
