@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @class  AthCommonDataStore
@@ -365,6 +365,25 @@ protected:
     handlesArray.renounce();
   }
 
+
+  // renounce() from the Gaudi base class.
+  // But if the handle class also declares a renounce(), then call that first.
+  // For safety, allow this only if the argument derives from Gaudi::DataHandle
+  // and (to prevent confusion with the above method) it is not
+  // a VarHandleKeyArray.
+  using PBASE::renounce;
+  template <class T>
+  std::enable_if_t<std::is_void_v<std::result_of_t<decltype(&T::renounce)(T)> > &&
+                   !std::is_base_of_v<SG::VarHandleKeyArray, T> &&
+                   std::is_base_of_v<Gaudi::DataHandle, T>,
+                   void>
+  renounce (T& h)
+  {
+    h.renounce();
+    PBASE::renounce (h);
+  }
+
+  
 private:
   typedef ServiceHandle<StoreGateSvc> StoreGateSvc_t;
   /// Pointer to StoreGate (event store by default)
