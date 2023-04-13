@@ -90,7 +90,7 @@ namespace ActsTrk {
     Gaudi::Property< float > m_impactMax {this, "impactMax", 2. * Acts::UnitConstants::mm,
       "maximum impact parameter"}; // Used in SeedfinderConfig as well
     Gaudi::Property< std::vector< float > > m_zBinEdges {this, "zBinEdges",
-      {-3000., -2500., -1400., -925., -450., -250.,  250., 450., 925.,   1400.,  2500.,  3000.},
+      {-3000., -2500., -1400., -925., -500., -250.,  250., 500., 925.,   1400.,  2500.,  3000.},
       "enable non equidistant binning in z"}; // Used in SeedfinderConfig as well
     Gaudi::Property< float > m_gridRMax {this, "gridRMax", 320. * Acts::UnitConstants::mm,
       "radial extension of subdetector to be used in grid building"};
@@ -114,7 +114,7 @@ namespace ActsTrk {
       "maximum distance in r between middle and top SP"};
     Gaudi::Property< float > m_deltaRMinBottomSP {this, "deltaRMinBottomSP", 6. * Acts::UnitConstants::mm,
       "minimum distance in r between middle and top SP"};
-    Gaudi::Property< float > m_deltaRMaxBottomSP {this, "deltaRMaxBottomSP", 120. * Acts::UnitConstants::mm,
+    Gaudi::Property< float > m_deltaRMaxBottomSP {this, "deltaRMaxBottomSP", 150. * Acts::UnitConstants::mm,
       "maximum distance in r between middle and top SP"};
     Gaudi::Property< float > m_deltaZMax {this, "deltaZMax",  600,
       "maximum distance in z between two measurements within one seed"};

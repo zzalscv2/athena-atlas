@@ -141,6 +141,7 @@ namespace ActsTrk {
 
     data.l_ITkSpacePointForSeed.emplace_back(sp, r);
     data.ns++;
+    data.nsaz++;
   }
 
   void
@@ -149,6 +150,7 @@ namespace ActsTrk {
   {
     data.v_ActsSpacePointForSeed.emplace_back(sp);
     data.ns++;
+    data.nsaz++;
   }
 
   void SiSpacePointsSeedMaker::pixInform(const Trk::SpacePoint* const& sp,
@@ -439,6 +441,8 @@ namespace ActsTrk {
 
     // initialising the number of space points as well
     data.ns = 0;
+    data.nsaz = 0;
+    data.nsazv = 0;
 
     // Retrieve the Trk::PRDtoTrackMap
     const Trk::PRDtoTrackMap *prd_to_track_map_cptr = nullptr;
@@ -600,6 +604,7 @@ namespace ActsTrk {
     }
 
     ATH_MSG_DEBUG("    \\__ Created " << seedPtrs->size() << " seeds");
+    data.nsazv = seedPtrs->size();
 
     // Store seeds to data
     // We need now to convert the output to Athena object once again (i.e. ITk::SiSpacePointForSeed)
@@ -623,7 +628,7 @@ namespace ActsTrk {
                                      top_sp, seed->z());
         data.i_ITkSeeds.back().setQuality(-seed->seedQuality());
       }
-    } else {
+    } else if (m_doSeedConversion) {
 
       if (isPixel) {
         SG::ReadHandle<xAOD::PixelClusterContainer> inputClusterContainer( m_pixelClusterContainerKey, ctx );
@@ -696,7 +701,7 @@ namespace ActsTrk {
       } else {
         SG::ReadHandle<xAOD::StripClusterContainer> inputClusterContainer( m_stripClusterContainerKey, ctx );
         if (!inputClusterContainer.isValid()){
-          ATH_MSG_FATAL("xAOD::PixelClusterContainer with key " << m_stripClusterContainerKey.key() << " is not available...");
+          ATH_MSG_FATAL("xAOD::StripClusterContainer with key " << m_stripClusterContainerKey.key() << " is not available...");
           return;
         }
         const xAOD::StripClusterContainer inputContainer = *inputClusterContainer.cptr();
@@ -945,8 +950,11 @@ namespace ActsTrk {
     out<<"| ns                       | "
        <<std::setw(12)<<data.ns
        <<"                              |"<<endmsg;
-    out<<"| seeds                   | "
-       <<std::setw(12)<<data.i_ITkSeeds.size()
+    out<<"| nsaz                     | "
+       <<std::setw(12)<<data.nsaz
+       <<"                              |"<<endmsg;
+    out<<"| seeds                    | "
+       <<std::setw(12)<< data.nsazv
        <<"                              |"<<endmsg;
     out<<"|---------------------------------------------------------------------|"
        <<endmsg;
