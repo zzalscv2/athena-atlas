@@ -29,7 +29,7 @@
 # art-output: cost-perEvent-chain
 # art-output: *.dat 
 
-Slices  = ['muon']
+Slices  = ['muon','muon-tnp']
 Events  = 10000
 Threads = 8
 Slots   = 8
@@ -39,13 +39,13 @@ GridFiles = True
 Jobs = [ ( "Truth",       " TIDAdata-run3.dat                    -o data-hists.root -p 13" ),
          ( "Offline",     " TIDAdata-run3-offline.dat -r Offline -o data-hists-offline.root" ) ]
 
-Comp = [ ( "L2muon",              "L2muon",      "data-hists.root",         " -c TIDAhisto-panel.dat  -d HLTL2-plots " ),
+Comp = [ ( "L2muon",              "L2muonTnP",      "data-hists.root",         " -c TIDAhisto-panel-TnP.dat  -d HLTL2-plots " ),
          ( "L2muon-lowpt",        "L2muonLowpt", "data-hists.root",         " -c TIDAhisto-panel.dat  -d HLTL2-plots-lowpt " ),
-         ( "L2muonoffline",       "L2muon",      "data-hists-offline.root", " -c TIDAhisto-panel.dat  -d HLTL2-plots-offline " ),
+         ( "L2muonoffline",       "L2muonTnP",      "data-hists-offline.root", " -c TIDAhisto-panel-TnP.dat  -d HLTL2-plots-offline " ),
          ( "L2muonoffline-lowpt", "L2muonLowpt", "data-hists-offline.root", " -c TIDAhisto-panel.dat  -d HLTL2-plots-lowpt-offline " ),
-         ( "EFmuon",              "EFmuon",      "data-hists.root",         " -c TIDAhisto-panel.dat  -d HLTEF-plots " ),
+         ( "EFmuon",              "EFmuonTnP",      "data-hists.root",         " -c TIDAhisto-panel-TnP.dat  -d HLTEF-plots " ),
          ( "EFmuon-lowpt",        "EFmuonLowpt", "data-hists.root",         " -c TIDAhisto-panel.dat  -d HLTEF-plots-lowpt " ),
-         ( "EFmuonoffline",       "EFmuon",      "data-hists-offline.root", " -c TIDAhisto-panel.dat  -d HLTEF-plots-offline " ),
+         ( "EFmuonoffline",       "EFmuonTnP",      "data-hists-offline.root", " -c TIDAhisto-panel-TnP.dat  -d HLTEF-plots-offline " ),
          ( "EFmuonoffline-lowpt", "EFmuonLowpt", "data-hists-offline.root", " -c TIDAhisto-panel.dat  -d HLTEF-plots-lowpt-offline " ) ]
 
 
