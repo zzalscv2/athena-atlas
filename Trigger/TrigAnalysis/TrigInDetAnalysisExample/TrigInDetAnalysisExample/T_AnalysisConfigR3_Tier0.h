@@ -328,7 +328,7 @@ protected:
 
     /// (obviously) get the event info
 
-    const xAOD::EventInfo* pEventInfo;
+    const xAOD::EventInfo* pEventInfo = 0;
 
     unsigned           run_number        = 0;
     unsigned long long event_number      = 0;
@@ -340,7 +340,7 @@ protected:
     /// for debugging ...
     //    std::cout << "\tloop() get EventInfo" << std::endl;
 
-    if ( m_provider->evtStore()->retrieve(pEventInfo).isFailure() ) {
+    if ( this->template retrieve( pEventInfo, "EventInfo" ).isFailure() ) {
       m_provider->msg(MSG::WARNING) << "Failed to get EventInfo " << endmsg;
     } else {
 
@@ -547,7 +547,7 @@ protected:
 	if ( m_provider->msg().level() <= MSG::VERBOSE )
 	  m_provider->msg(MSG::VERBOSE) << "evtStore()->retrieve( mcevent, " << keys[ik] << " )" << endmsg;
 
-	if ( m_provider->evtStore()->template retrieve( mcevent, keys[ik] ).isFailure() ) {
+	if ( this->template retrieve( mcevent, keys[ik] ).isFailure() ) {
 	  if ( m_provider->msg().level() <= MSG::VERBOSE )
 	    m_provider->msg(MSG::VERBOSE) << "Failed to get McEventCollection: " << keys[ik] << endmsg;
 	}

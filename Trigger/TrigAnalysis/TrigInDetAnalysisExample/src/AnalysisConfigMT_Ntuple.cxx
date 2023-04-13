@@ -164,7 +164,7 @@ void AnalysisConfigMT_Ntuple::loop() {
 	unsigned           time_stamp         = 0;
 	double             mu_val             = 0;
 
-	if ( m_provider->evtStore()->retrieve(pEventInfo).isFailure() ) {
+	if ( retrieve(pEventInfo, "EventInfo").isFailure() ) {
 		m_provider->msg(MSG::DEBUG) << "Failed to get EventInfo " << endmsg;
 	} 
 	else {
@@ -277,11 +277,11 @@ void AnalysisConfigMT_Ntuple::loop() {
 
 	if ( m_mcTruth) { 
 		m_provider->msg(MSG::DEBUG) << "getting Truth" << endmsg; 
-		if ( m_provider->evtStore()->retrieve(truthMap, "TrigInDetTrackTruthMap").isFailure()) {
-			m_hasTruthMap = false;
+		if ( retrieve(truthMap, "TrigInDetTrackTruthMap").isFailure()) {
+		        m_hasTruthMap = false;
 		}
 		else {
-			m_hasTruthMap = true;
+		        m_hasTruthMap = true;
 		}
 		if (m_provider->evtStore()->contains<TruthParticleContainer>("INav4MomTruthEvent")) {
 			//ESD
@@ -347,7 +347,7 @@ void AnalysisConfigMT_Ntuple::loop() {
 
 		const xAOD::VertexContainer* xaodVtxCollection = 0;
 
-		if ( m_provider->evtStore()->retrieve( xaodVtxCollection, vertexType ).isFailure()) {
+		if ( retrieve( xaodVtxCollection, vertexType ).isFailure()) {
 		  if (m_provider->msg().level() <= MSG::WARNING) m_provider->msg(MSG::WARNING) << "xAOD vertex container not found with key " << vertexType <<  endmsg;
 		}
 		
@@ -484,7 +484,7 @@ void AnalysisConfigMT_Ntuple::loop() {
 	        
 	    const xAOD::VertexContainer* xaodVtxCollection = 0;
 	    
-	    if ( m_provider->evtStore()->retrieve( xaodVtxCollection, vtx_name ).isFailure() ) {
+	    if ( retrieve( xaodVtxCollection, vtx_name ).isFailure() ) {
 	      if (m_provider->msg().level() <= MSG::WARNING) m_provider->msg(MSG::WARNING) << "xAOD vertex container not found with key " << vtx_name <<  endmsg;
 	    }
 	    

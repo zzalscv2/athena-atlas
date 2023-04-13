@@ -323,7 +323,7 @@ protected:
     unsigned           time_stamp        = 0;
     double             mu_val            = 0;
 
-    if ( m_provider->evtStore()->retrieve(pEventInfo).isFailure() ) {
+    if ( this->template retrieve(pEventInfo, "EventInfo").isFailure() ) {
       m_provider->msg(MSG::WARNING) << "Failed to get EventInfo " << endmsg;
     } else {
 
@@ -429,7 +429,7 @@ protected:
     if ( m_mcTruth ) {
       if(m_provider->msg().level() <= MSG::VERBOSE ) m_provider->msg(MSG::VERBOSE) << "getting Truth" << endmsg;
 
-      if ( m_provider->evtStore()->retrieve(truthMap, "TrigInDetTrackTruthMap").isFailure()) {
+      if ( this->template retrieve(truthMap, "TrigInDetTrackTruthMap").isFailure()) {
         if(m_provider->msg().level() <= MSG::VERBOSE)
           m_provider->msg(MSG::VERBOSE) << "TrigInDetTrackTruthMap not found" << endmsg;
         m_hasTruthMap = false;
@@ -458,7 +458,7 @@ protected:
 
     if ( m_doOffline ) {
       if ( m_provider->evtStore()->template contains<VxContainer>("VxPrimaryCandidate") ) {
-        if ( m_provider->evtStore()->retrieve(primaryVtxCollection, "VxPrimaryCandidate").isFailure()) {
+        if ( this->template retrieve(primaryVtxCollection, "VxPrimaryCandidate").isFailure()) {
           if (m_provider->msg().level() <= MSG::WARNING) m_provider->msg(MSG::WARNING) << "Primary vertex container not found" << endmsg;
         }
         else {
@@ -486,7 +486,7 @@ protected:
 
     const xAOD::VertexContainer* xaodVtxCollection = 0;
 
-    if ( m_provider->evtStore()->retrieve( xaodVtxCollection, "PrimaryVertices" ).isFailure()) {
+    if ( this->template retrieve( xaodVtxCollection, "PrimaryVertices" ).isFailure()) {
       if (m_provider->msg().level() <= MSG::WARNING) m_provider->msg(MSG::WARNING) << "xAOD Primary vertex container not found with key " << "PrimaryVertices" <<  endmsg;
     }
     
@@ -968,7 +968,7 @@ protected:
             if ( m_provider->msg().level() <= MSG::VERBOSE )
               m_provider->msg(MSG::VERBOSE) << "evtStore()->retrieve( mcevent, " << keys[ik] << " )" << endmsg;
 
-            if ( m_provider->evtStore()->template retrieve( mcevent, keys[ik] ).isFailure() ) {
+            if ( this->template retrieve( mcevent, keys[ik] ).isFailure() ) {
               if ( m_provider->msg().level() <= MSG::VERBOSE )
                 m_provider->msg(MSG::VERBOSE) << "Failed to get McEventCollection: " << keys[ik] << endmsg;
             }
