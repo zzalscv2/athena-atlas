@@ -395,7 +395,7 @@ protected:
     
     const xAOD::VertexContainer* xaodVtxCollection = 0;
 
-    if ( m_provider->evtStore()->retrieve( xaodVtxCollection, key ).isFailure()) {
+    if ( retrieve( xaodVtxCollection, key ).isFailure()) {
       m_provider->msg(MSG::WARNING) << "xAOD vertex container not found with key " << key <<  endmsg;
       return false;
     }
@@ -546,17 +546,15 @@ protected:
 
 	/// now got the collectionVector, can navigate through this
 
-	for ( unsigned iv=0 ; iv<collectionVector.size() ; iv++ ) {
-	  /// NB: this is safer than using index as an indev, ie collectionVector[index]
-	  ///     since it will do nothing if index is out of range
+	for ( unsigned iv=collectionVector.size() ; iv-- ; ) {
+	  /// NB: this is safer than using index as an index, ie collectionVector[index]
+	  ///     since it will do nothing if index is out of range, although it will be 
+	  ///     a little slower
 	  if ( index!=iv ) continue;
-	  //	if ( !trackfeature.empty() ) {
-	  // m_provider->msg(MSG::DEBUG) << "TDT TrackFeature->size() " << trackfeature.cptr()->size() << " (" << key << ")" << endmsg;
-	  // actually select the tracks from this roi at last!!
-	  //	  const Collection* trigtracks = trackfeature.cptr();
-	  //	  selector->selectTracks( trigtracks, truthmap );
+	  /// useful for debug
 	  // m_provider->msg(MSG::DEBUG) << "TDT TrackFeature->size() " << collectionVector[iv]->size() << " (" << key << ")" << endmsg;
 	  selector->selectTracks( collectionVector[iv], truthmap );
+	  break;
 	}
       }
       return true;
@@ -567,6 +565,23 @@ protected:
     }
   }
 
+
+
+  template<class Collection>
+  StatusCode retrieve( Collection const*& collection, const std::string& key="" ) {
+    /// old implementation - leave in place until after the full validation ...
+    ///    return m_provider->evtStore()->retrieve( container, containerName);
+    if ( m_provider->evtStore()->template contains<Collection>( key ) ) {
+      SG::ReadHandle<Collection> handle(key);
+      if ( handle.isValid() ) {
+	/// commented code intentionally left for development purposes ...
+	/// std::cout << "\t\t\t T_AnalysisConfig::selectTracks() - > TrackSelector" << std::endl;
+	collection = handle.cptr();
+	return StatusCode::SUCCESS;
+      }
+    }
+    return StatusCode::FAILURE;
+  }
 
 
 
@@ -593,7 +608,8 @@ protected:
     if ( key.empty() ) return false;
     if ( !m_provider->evtStore()->template contains<Collection>( key ) ) return false;
 
-    StatusCode sc = m_provider->evtStore()->retrieve( collection, key );
+    StatusCode sc = retrieve( collection, key );
+
     m_provider->msg(MSG::DEBUG) << "SG Collection->size() " << collection->size() << " (" << key << ")" << endmsg;
 
     if ( !( sc.isSuccess() && collection ) ) return false;
@@ -619,7 +635,7 @@ protected:
 
     if ( key!="" ) {
       if ( m_provider->evtStore()->template contains<Collection>( key ) ) {
-	StatusCode sc = m_provider->evtStore()->retrieve( collection, key );
+	StatusCode sc = retrieve( collection, key );
 	m_provider->msg(MSG::DEBUG) << "SG Collection->size() " << collection->size() << " (" << key << ")" << endmsg;
 	if( sc.isSuccess() && collection ) {
 
@@ -712,7 +728,7 @@ protected:
       return 0;
     }
 
-    StatusCode sc=m_provider->evtStore()->retrieve( container, containerName);
+    StatusCode sc = retrieve( container, containerName);
     if( sc.isFailure() || !container ) {
       m_provider->msg(MSG::WARNING) << "Error retrieving container: " << containerName << " !" << endmsg;
       return 0;
@@ -794,7 +810,7 @@ protected:
       return 0;
     }
 
-    StatusCode sc=m_provider->evtStore()->retrieve( container, containerName );
+    StatusCode sc = retrieve( container, containerName );
     if( sc.isFailure() || !container ) {
       m_provider->msg(MSG::WARNING) << "Error retrieving " << containerName << " !" << endmsg;
       return 0;
@@ -856,8 +872,7 @@ unsigned processTaus( TrigTrackSelector& selectorRef,
     return 0;
   }
 
-
-  StatusCode sc = m_provider->evtStore()->retrieve( container, containerName);
+  StatusCode sc = retrieve( container, containerName);
   if (sc != StatusCode::SUCCESS) {
     m_provider->msg(MSG::WARNING) << " Offline tau retrieval not successful" << endmsg;
     return 0;

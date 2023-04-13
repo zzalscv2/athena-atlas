@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -53,30 +53,25 @@ namespace Trk
   }
 
   /** set up the global covariance matrix by rotating the local one */
-  
-   void SpacePoint::setupGlobalFromLocalCovariance()
-  {
+
+  void SpacePoint::setupGlobalFromLocalCovariance() {
     const Amg::MatrixX& lc = this->localCovariance();
 
     Eigen::Matrix3d cov;
 
-    cov<<
-      lc(0,0),lc(0,1),0.,
-      lc(1,0),lc(1,1),0.,
-      // cppcheck-suppress constStatement
-      0.     ,0.     ,0.;
+    cov << lc(0, 0), lc(0, 1), 0., 
+           lc(1, 0), lc(1, 1), 0.,
+           // cppcheck-suppress constStatement
+           0., 0., 0.;
 
     const Amg::RotationMatrix3D& R = associatedSurface().transform().rotation();
-    m_globalCovariance = R*cov*R.transpose();
-    
+    m_globalCovariance = R * cov * R.transpose();
   }
 
-  const Surface& SpacePoint::associatedSurface() const
-    { 
-      assert(m_clusList.first->detectorElement());
-      return m_clusList.first->detectorElement()->surface();
-    }
+  const Surface& SpacePoint::associatedSurface() const {
+    assert(m_clusList.first->detectorElement());
+    return m_clusList.first->detectorElement()->surface();
+  }
 
-} // end of namespace
-
+}  // namespace Trk
 

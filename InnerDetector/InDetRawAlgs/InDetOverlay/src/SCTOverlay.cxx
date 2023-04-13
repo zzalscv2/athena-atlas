@@ -20,12 +20,14 @@ namespace Overlay
     auto outputCollection = std::make_unique<SCT_RDO_Collection>(hashId);
     outputCollection->setIdentifier(collection->identify());
 
+
+    //deep copy
+    outputCollection->reserve(collection->size());
     for (const SCT_RDORawData *existingDatum : *collection) {
       auto *oldDatum = dynamic_cast<const SCT3_RawData *>(existingDatum);
       if (not oldDatum) {
         throw std::runtime_error("Dynamic cast to SCT3_RawData failed in SCTOverlay.cxx, Overlay::copyCollection");
       }
-      // Owned by the collection
       auto *datumCopy = new SCT3_RawData(oldDatum->identify(),
                                          oldDatum->getWord(),
                                          &oldDatum->getErrorCondensedHit());

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -60,8 +60,8 @@ namespace Trk
       static Amg::Transform3D createTransform(double x, double y, double z, double phi=0., double theta=0., double alphaZ=0.);      
      
       /** Langrange-parabolic interpolation */
-      static double parabolicInterpolation(double x0, double x1, double x2,
-                                    double y0, double y1, double y2);
+      static double parabolicInterpolation(double y0, double y1, double y2,
+                                           double x0, double x1, double x2);
 
       /** member variables for algorithm properties: */
       ToolHandle<IPropagator>           m_propagator;       

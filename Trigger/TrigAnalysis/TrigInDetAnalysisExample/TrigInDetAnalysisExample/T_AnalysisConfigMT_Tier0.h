@@ -334,7 +334,7 @@ protected:
 
     //    std::cout << "\tloop() get EventInfo" << std::endl;
 
-    if ( m_provider->evtStore()->retrieve(pEventInfo).isFailure() ) {
+    if ( this->template retrieve(pEventInfo, "EventInfo").isFailure() ) {
       m_provider->msg(MSG::WARNING) << "Failed to get EventInfo " << endmsg;
     } else {
 
@@ -435,7 +435,7 @@ protected:
     if ( m_mcTruth ) {
       if(m_provider->msg().level() <= MSG::VERBOSE ) m_provider->msg(MSG::VERBOSE) << "getting Truth" << endmsg;
 
-      if ( m_provider->evtStore()->retrieve(truthMap, "TrigInDetTrackTruthMap").isFailure()) {
+      if ( this->template retrieve(truthMap, "TrigInDetTrackTruthMap").isFailure()) {
         if(m_provider->msg().level() <= MSG::VERBOSE)
           m_provider->msg(MSG::VERBOSE) << "TrigInDetTrackTruthMap not found" << endmsg;
         m_hasTruthMap = false;
@@ -573,7 +573,7 @@ protected:
 	if ( m_provider->msg().level() <= MSG::VERBOSE )
 	  m_provider->msg(MSG::VERBOSE) << "evtStore()->retrieve( mcevent, " << keys[ik] << " )" << endmsg;
 
-	if ( m_provider->evtStore()->template retrieve( mcevent, keys[ik] ).isFailure() ) {
+	if ( this->template retrieve( mcevent, keys[ik] ).isFailure() ) {
 	  if ( m_provider->msg().level() <= MSG::VERBOSE )
 	    m_provider->msg(MSG::VERBOSE) << "Failed to get McEventCollection: " << keys[ik] << endmsg;
 	}

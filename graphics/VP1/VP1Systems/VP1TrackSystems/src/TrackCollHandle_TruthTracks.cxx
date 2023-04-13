@@ -60,7 +60,7 @@ public:
   TrackCollHandle_TruthTracks * theclass = nullptr;
   bool loadHitLists(std::map<SimBarCode,SimHitList> & hitLists);
   void loadGenParticles( std::map<SimBarCode,HepMC::ConstGenParticlePtr> & genParticles,
-			 HepMC::ConstGenVertexPtr vtx );
+			 const HepMC::ConstGenVertexPtr& vtx );
   bool loadGenParticles( std::map<SimBarCode,HepMC::ConstGenParticlePtr> & genParticles,
 			 const QString& hepMcCollKey );
 
@@ -318,7 +318,7 @@ void TrackCollHandle_TruthTracks::fixPDGCode(SimHitHandleBase* handle) const
 
 //____________________________________________________________________
 void TrackCollHandle_TruthTracks::Imp::loadGenParticles( std::map<SimBarCode,HepMC::ConstGenParticlePtr> & genParticles,
-							 HepMC::ConstGenVertexPtr vtx )
+							 const HepMC::ConstGenVertexPtr& vtx )
 {
   if (!vtx)
     return;

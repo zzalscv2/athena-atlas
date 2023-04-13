@@ -80,7 +80,7 @@ def defaultConfigFiles(campaign):
         )
     elif campaign in [Campaign.MC23a]:
         list.append(
-            'PileupReweighting/mc23_common/mc23a.410000.physlite.prw.v1.root'
+            'PileupReweighting/mc23_common/mc23a.410000.physlite.prw.v2.root'
         )
     else:
         raise ValueError(f'Unsupported campaign {campaign}')

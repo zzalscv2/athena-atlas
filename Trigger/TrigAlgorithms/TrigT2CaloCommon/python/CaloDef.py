@@ -4,6 +4,7 @@ from AthenaCommon.CFElements import seqAND, parOR
 from AthenaConfiguration.ComponentFactory import CompFactory
 from TriggerMenuMT.HLT.Config.MenuComponents import algorithmCAToGlobalWrapper
 from TriggerMenuMT.HLT.CommonSequences.FullScanDefs import caloFSRoI
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 ########################
 ## ALGORITHMS
@@ -66,8 +67,9 @@ def _algoHLTTopoClusterLC(flags, inputEDM="CellsClusters", algSuffix="") :
 #
 # fast calo algorithm (central or forward regions)
 #
-def _algoL2Egamma(flags, inputEDM="", ClustersName="HLT_FastCaloEMClusters", RingerKey="HLT_FastCaloRinger", doForward=False, doAllEm=False, doAll=False):
+def fastCaloRecoSequenceCfg(flags, inputEDM="", ClustersName="HLT_FastCaloEMClusters", RingerKey="HLT_FastCaloRinger", doForward=False, doAllEm=False, doAll=False):
 
+    acc = ComponentAccumulator()
     if not inputEDM:
         from HLTSeeding.HLTSeedingConfig import mapThresholdToL1RoICollection
         # using jet seeds for testing. we should use EM as soon as we have EM seeds into the L1
@@ -76,58 +78,35 @@ def _algoL2Egamma(flags, inputEDM="", ClustersName="HLT_FastCaloEMClusters", Rin
     extraInputs=[ ( 'LArMCSym', 'ConditionStore+LArMCSym'), ('LArOnOffIdMapping' , 'ConditionStore+LArOnOffIdMap' ), ('LArFebRodMapping'  , 'ConditionStore+LArFebRodMap' ), ('CaloDetDescrManager', 'ConditionStore+CaloDetDescrManager') ]
     from TrigT2CaloEgamma.TrigT2CaloEgammaConfig import t2CaloEgamma_ReFastAlgoCfg
     if (not doForward) and (not doAll) and (not doAllEm ) :
-       algo=algorithmCAToGlobalWrapper(t2CaloEgamma_ReFastAlgoCfg,flags, "FastCaloL2EgammaAlg", doRinger=True, RingerKey=RingerKey,RoIs=inputEDM,ExtraInputs=extraInputs, ClustersName = ClustersName)
+       acc.merge(t2CaloEgamma_ReFastAlgoCfg(flags, "FastCaloL2EgammaAlg", doRinger=True, RingerKey=RingerKey,RoIs=inputEDM,ExtraInputs=extraInputs, ClustersName = ClustersName))
     if doForward:
         from TrigT2CaloEgamma.TrigT2CaloEgammaConfig import t2CaloEgamma_ReFastFWDAlgoCfg
-        algo=algorithmCAToGlobalWrapper(t2CaloEgamma_ReFastFWDAlgoCfg,flags, "FastCaloL2EgammaAlg_FWD", doRinger=True, RingerKey=RingerKey,RoIs=inputEDM,ExtraInputs=extraInputs, ClustersName = ClustersName)
+        acc.merge(t2CaloEgamma_ReFastFWDAlgoCfg(flags, "FastCaloL2EgammaAlg_FWD", doRinger=True, RingerKey=RingerKey,RoIs=inputEDM,ExtraInputs=extraInputs, ClustersName = ClustersName))
     else:
         if ( doAllEm or doAll ) :
-          if ( doAllEm ):
-            from TrigT2CaloEgamma.TrigT2CaloEgammaConfig import t2CaloEgamma_AllEmCfg
-            algo=algorithmCAToGlobalWrapper(t2CaloEgamma_AllEmCfg,flags, "L2CaloLayersEmFex",RoIs=inputEDM,ExtraInputs=extraInputs, ClustersName = ClustersName)
-          else : # can only be doAll
-            from TrigT2CaloEgamma.TrigT2CaloEgammaConfig import t2CaloEgamma_AllCfg
-            algo=algorithmCAToGlobalWrapper(t2CaloEgamma_AllCfg,flags, "L2CaloLayersFex",RoIs=inputEDM,ExtraInputs=extraInputs, ClustersName = ClustersName)
-    return algo
+            if ( doAllEm ):
+                from TrigT2CaloEgamma.TrigT2CaloEgammaConfig import t2CaloEgamma_AllEmCfg
+                acc.merge(t2CaloEgamma_AllEmCfg(flags, "L2CaloLayersEmFex",RoIs=inputEDM,ExtraInputs=extraInputs, ClustersName = ClustersName))
+            else : # can only be doAll
+                from TrigT2CaloEgamma.TrigT2CaloEgammaConfig import t2CaloEgamma_AllCfg
+                acc.merge(t2CaloEgamma_AllCfg(flags, "L2CaloLayersFex",RoIs=inputEDM,ExtraInputs=extraInputs, ClustersName = ClustersName))
+    return acc
 
 ####################################
 ##### SEQUENCES
 ####################################
 
 
-def fastCaloRecoSequence(flags, InViewRoIs, ClustersName="HLT_FastCaloEMClusters", RingerKey="HLT_FastCaloRinger",doAllEm=False,doAll=False):
-    
-    fastCaloAlg = _algoL2Egamma(flags, inputEDM=InViewRoIs, ClustersName=ClustersName, RingerKey=RingerKey, doAllEm=doAllEm, doAll=doAll)
-
-    name = 'fastCaloInViewSequence'
-    import AthenaCommon.CfgMgr as CfgMgr
-
-    fastCaloVDV = CfgMgr.AthViews__ViewDataVerifier("fastCaloVDV")
-    fastCaloVDV.DataObjects = [( 'CaloBCIDAverage' , 'StoreGateSvc+CaloBCIDAverage' ),
-                               ( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s'%InViewRoIs  )]
-
-    if doAllEm:
-        name = 'fastCaloInViewSequenceAllEM'
-          
-    elif doAll:
-        name = 'fastCaloInViewSequenceAll'    
-
-    fastCaloInViewSequence = seqAND( name, [fastCaloVDV, fastCaloAlg] )
-    sequenceOut = fastCaloAlg[0].ClustersName
-    return (fastCaloInViewSequence, sequenceOut)
-
-
-
 def fastCaloRecoFWDSequence(flags, InViewRoIs, ClustersName="HLT_FastCaloEMClusters_FWD", RingerKey="HLT_FastCaloRinger_FWD"):
     # create alg
-    fastCaloAlg = _algoL2Egamma(flags, inputEDM=InViewRoIs, ClustersName=ClustersName, RingerKey=RingerKey,
+    fastCaloAlg = algorithmCAToGlobalWrapper(fastCaloRecoSequenceCfg, flags, inputEDM=InViewRoIs, ClustersName=ClustersName, RingerKey=RingerKey,
                                 doForward=True)
     import AthenaCommon.CfgMgr as CfgMgr
     fastCaloVDV = CfgMgr.AthViews__ViewDataVerifier("fastCaloVDV_FWD")
     fastCaloVDV.DataObjects = [( 'CaloBCIDAverage' , 'StoreGateSvc+CaloBCIDAverage' ),
                                ( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+FSJETMETCaloRoI' )]
     fastCaloInViewSequence = seqAND('fastCaloInViewSequence_FWD' , [fastCaloVDV, fastCaloAlg] )
-    sequenceOut = fastCaloAlg[0].ClustersName
+    sequenceOut = "HLT_FastCaloEMClusters_FWD"
     return (fastCaloInViewSequence, sequenceOut)
 
 

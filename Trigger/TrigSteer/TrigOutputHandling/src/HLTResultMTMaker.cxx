@@ -89,6 +89,7 @@ StatusCode HLTResultMTMaker::start() {
     ATH_MSG_ERROR("Could not parse DataFlowConfig.DF_Enabled_ROB_IDs from JobOptionsSvc");
   }
 
+  m_enabledSubDets.clear();
   Gaudi::Property<std::vector<uint32_t>> enabledSubDetsProp("EnabledSubDets",{});
   if (enabledSubDetsProp.fromString(m_jobOptionsSvc->get("DataFlowConfig.DF_Enabled_SubDet_IDs","[]")).isSuccess()) {
     // Need to convert from uint32_t to eformat::SubDetector representable by uint8_t

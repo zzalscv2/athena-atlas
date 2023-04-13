@@ -382,8 +382,6 @@ def addLowMuP1Signatures(chains):
         #IDcalib for lower lumi
         ChainProp(name='HLT_idcalib_trk4_IDCalibPEB_L1J30', stream=['IDCalib'], groups=['PS:Online']+SupportLegGroup+['RATE:Calibration','BW:Detector'], l1SeedThresholds=['FSNOSEED']), 
         ChainProp(name='HLT_idcalib_trk4_IDCalibPEB_L1XE35', stream=['IDCalib'], groups=['PS:Online']+SupportLegGroup+['RATE:Calibration','BW:Detector'], l1SeedThresholds=['FSNOSEED']), 
-        #ATR-27253, Phase-I
-        ChainProp(name='HLT_idcalib_trk4_IDCalibPEB_L1jXE70', stream=['IDCalib'], groups=['PS:Online']+SupportPhIGroup+['RATE:Calibration','BW:Detector'], l1SeedThresholds=['FSNOSEED']),
     ]
 
     # Intentionally commented -- may be used specifically for low-mu MBTS validation

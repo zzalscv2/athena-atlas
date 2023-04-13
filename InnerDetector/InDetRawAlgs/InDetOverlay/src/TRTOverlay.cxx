@@ -38,9 +38,10 @@ namespace Overlay
   {
     auto outputCollection = std::make_unique<TRT_RDO_Collection>(hashId);
     outputCollection->setIdentifier(collection->identify());
-
+    
+    //deep copy
+    outputCollection->reserve(collection->size());
     for (const TRT_RDORawData *existingDatum : *collection) {
-      // Owned by the collection
       auto *datumCopy = new TRT_LoLumRawData(existingDatum->identify(), existingDatum->getWord());
       outputCollection->push_back(datumCopy);
     }
