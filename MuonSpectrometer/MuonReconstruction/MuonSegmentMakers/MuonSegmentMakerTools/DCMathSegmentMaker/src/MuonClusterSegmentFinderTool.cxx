@@ -359,8 +359,37 @@ namespace Muon {
         /// Order any parsed hit into the layer structure
         LayerMeasVec orderedClust =
             classifyByLayer(cleanClusters(allClusts, HitType::Eta | HitType::Phi, singleWedge), HitType::Wire | HitType::Pad);
-
+        
         if (orderedClust.empty()) return {};
+      
+        // The following lines protect the NSW segment seeding from events with an extremly high occupancy in the MM detectors which lead to very long processing times.
+        // For now the NSW segment building is canceled if the MMs have more than 75 hits per layer in average.
+        // This kill switch is meant as last safety net while the upstream part of the code will be improved to catch such high occupancy events earlier in the reco chain
+        // pscholer 04/2023
+  
+
+        ATH_MSG_DEBUG("in findStereSegments checking occupancy. Found n layers with hits: " << orderedClust.size());
+        std::vector<uint> MMHitMap(8); // hit map for the 8 MM layers of a sector
+        for(uint i_meas=0; i_meas<orderedClust.size(); i_meas++){
+          Identifier id = orderedClust.at(i_meas).front()->identify();
+          ATH_MSG_DEBUG("layer "<< i_meas << " has number of clusters: " << orderedClust.at(i_meas).size() << " " << m_idHelperSvc->toString(id));
+          if(!m_idHelperSvc->isMM(id)) continue;
+          uint layer = 4*(m_idHelperSvc->mmIdHelper().multilayer(id)-1) + m_idHelperSvc->mmIdHelper().gasGap(id) - 1;
+          MMHitMap.at(layer) += orderedClust.at(i_meas).size();
+        }
+        uint nMMLayers{0}, nMMHits{0};
+        for(uint val:MMHitMap){
+          if(val==0) continue;
+          nMMLayers+=1;
+          nMMHits += val;
+        }
+        float meanNumberOfMMHitsPerLayer = 1.f * nMMHits / std::max(nMMLayers,1u);
+        ATH_MSG_DEBUG("Found "<< nMMHits  << " hits on " << nMMLayers << " MM layers. This is an average of " << meanNumberOfMMHitsPerLayer << "hits per MM layer");
+        if(meanNumberOfMMHitsPerLayer > m_maxNumberOfMMHitsPerLayer){
+                ATH_MSG_DEBUG("A mean number of "<< meanNumberOfMMHitsPerLayer<< " mm hits per MM layer is too much. MM segment reconstruction will be suspended for this pattern.");
+                return{};
+        }
+
         std::vector<NSWSeed> seeds = segmentSeedFromMM(orderedClust);
         if (seeds.empty()) return {};
         TrackCollection trackSegs{SG::OWN_ELEMENTS};

@@ -184,6 +184,8 @@ namespace Muon {
         Gaudi::Property<bool> m_ipConstraint{this, "IPConstraint", true};  // use a ip perigee(0,0) constraint in the segment fit
         Gaudi::Property<double> m_maxClustDist{this, "ClusterDistance", 5.};
         Gaudi::Property<int> m_nOfSeedLayers{this, "NOfSeedLayers", 1};
+        Gaudi::Property<float> m_maxNumberOfMMHitsPerLayer{this, "maxNumberOfMMHitsPerLayer", 75, "If the average number of MM hits per layer exceeds this number MM segment reco is suspended for this pattern"};
+
 
         Gaudi::Property<bool> m_useStereoSeeding{this, "SeedMMStereos", true};
     public:
