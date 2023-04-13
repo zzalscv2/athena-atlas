@@ -37,6 +37,7 @@ atlas_add_library( DataQualityInterfaces
    src/HanConfigMetadata.cxx src/HanOutput.cxx src/MiniConfig.cxx
    src/DatabaseConfig.cxx src/MiniConfigTreeNode.cxx src/CompositeAlgorithm.cxx
    src/HanInputRootFile.cxx src/HanUtils.cxx src/ConditionsSingleton.cxx
+   src/HanRuntimeConfigSingleton.cxx
    ${DataQualityInterfacesDictSource}
    PUBLIC_HEADERS DataQualityInterfaces
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}

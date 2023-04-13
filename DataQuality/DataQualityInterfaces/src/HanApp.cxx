@@ -16,11 +16,15 @@
 #include "DataQualityInterfaces/HanConfig.h"
 #include "DataQualityInterfaces/HanOutput.h"
 #include "DataQualityInterfaces/HanInputRootFile.h"
+#include "DataQualityInterfaces/HanRuntimeConfigSingleton.h"
 #include "DataQualityInterfaces/HanUtils.h"
 
 #include <TCanvas.h>
 
 #include <utility>
+
+#include "CxxUtils/checker_macros.h"
+ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // standalone application
 
 //Get rid of Root macros that confuse Doxygen
 ///\cond CLASSIMP
@@ -83,6 +87,9 @@ Analyze( std::string configName_, std::string inputName_, std::string outputName
 {
   DisableMustClean disabled;
   
+  auto& runtimeConfig = HanRuntimeConfigSingleton::getInstance();
+  runtimeConfig.setPath( path_ );
+  
   HanOutput::DQOutputMap_t * outputMap = new HanOutput::DQOutputMap_t();
   TSeqCollection *outputList = new TList();
 
@@ -90,6 +97,7 @@ Analyze( std::string configName_, std::string inputName_, std::string outputName
   
   //dqm_core::InputRootFile	input( inputName_ );
   HanInputRootFile input( inputName_, path_ );				// HanInputRootFile inherits from dqm_core::InputRootFile
+
   HanOutput output( outputName_, outputMap, outputList );
   output.setInput(const_cast<TDirectory*>(input.getBasedir()));
   
