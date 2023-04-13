@@ -20,7 +20,7 @@ def HIJetRecCfg(flags):
     clustersKey = "HICluster"
     eventshapeKey_egamma = "HIEventShape"
     #get HIClusters
-    acc.merge(HIClusterMakerCfg(flags))
+    acc.merge(HIClusterMakerCfg(flags,cluster_key=clustersKey))
     #set eventshape map
     theMapTool = CompFactory.HIEventShapeMapTool()
     #get weighted event shape
@@ -106,10 +106,10 @@ def HIJetRecCfg(flags):
         calib_seq = "EtaJES"+"_Insitu"
     
     # Copy unsubtracted jets: seed1
-    jetDef_seed1 = jetDef_seed0.clone()
-    jetDef_seed1.suffix = jetDef_seed0.suffix.replace("_seed0","_seed1")
+    jetDef_seed1 = jetdef2.clone()
+    jetDef_seed1.suffix = jetdef2.suffix.replace("Unsubtracted", "seed1")
     jetname_seed1 = jetDef_seed1.fullname()
-    jetDef_seed1.modifiers=["HIJetAssoc", "subtr0", "EMScaleMom", "Filter:{}".format(flags.HeavyIon.Jet.SeedPtMin),"HIJetCalib:{}___{}".format(calib_seq, JES_is_data)]
+    jetDef_seed1.modifiers=["HIJetAssoc", "subtr0", "HIJetCalib:{}___{}".format(calib_seq, JES_is_data),"Filter:{}".format(flags.HeavyIon.Jet.SeedPtMin)]
     jetDef_seed1 = solveDependencies(jetDef_seed1)
     #adding seed1 to CA
     acc.merge(JetCopyAlgCfg(flags,jetname2, jetDef_seed1))
@@ -119,8 +119,7 @@ def HIJetRecCfg(flags):
         jetdef_trk = defineHITrackJets(jetradius=4)
         jetdef_trk.modifiers=["HIJetAssoc", "Filter:{}".format(flags.HeavyIon.Jet.TrackJetPtMin)]
         jetdef_trk = solveDependencies(jetdef_trk)
-        import JetRecTools.JetRecToolsConfig as jrtcfg
-        inputtracks = jrtcfg.getTrackSelAlg(trackSelOpt=False )# here we need HI tracking selection
+        inputtracks = getTrackSelAlg()
         acc.addEventAlgo(inputtracks)
  
         pjcs_trk = CompFactory.PseudoJetAlgorithm(
@@ -250,7 +249,7 @@ def HIJetRecCfg(flags):
     for i in range(len(jetRlist)):
         jetDefList_final.append(jetDef[i].clone())
         jetDefList_final[i].suffix = jetDef[i].suffix.replace("_Unsubtracted","")
-        jetDefList_final[i].modifiers=["subtr0","subtr1","consmod","Filter:{}".format(flags.HeavyIon.Jet.RecoOutputPtMin),"HIJetCalib:{}___{}".format(calib_seq, JES_is_data)]
+        jetDefList_final[i].modifiers=["subtr1","consmod","HIJetCalib:{}___{}".format(calib_seq, JES_is_data),"Filter:{}".format(flags.HeavyIon.Jet.RecoOutputPtMin)]
         jetNameList_final.append(jetDefList_final[i].fullname())
         jetDefList_final[i] = solveDependencies(jetDefList_final[i])
 
@@ -316,7 +315,7 @@ def HIEventShapeCfg(flags, clustersKey= "HICluster", suffix="_Weighted", **kwarg
 
     #Add weight tool to filler tool
     if flags.GeoModel.Run in [LHCPeriod.Run1, LHCPeriod.Run2]:
-        HITowerWeightTool_inputFile='cluster.geo.HIJING_2018.root'
+        HITowerWeightTool_inputFile='cluster.geo.DATA_PbPb_2018v2.root'
     else:
         HITowerWeightTool_inputFile='cluster.geo.DATA_PbPb_2022.root'
 
@@ -328,13 +327,14 @@ def HIEventShapeCfg(flags, clustersKey= "HICluster", suffix="_Weighted", **kwarg
     #Event Shape filler
     eventShapeTool = CompFactory.HIEventShapeFillerTool( 
             EventShapeMapTool = map_tool,
-            TowerWeightTool = TWTool
+            TowerWeightTool = TWTool,
+            UseClusters=True
     )
     
     #event shape maker
     shapeKey = "HIEventShape"+suffix
     eventShapeMakerAlg = CompFactory.HIEventShapeMaker("HIEventShapeMaker"+suffix,
-                    InputTowerKey = input_tower,
+                    InputTowerKey = clustersKey,
                     NaviTowerKey = input_tower,
                     OutputContainerKey = shapeKey,
                     HIEventShapeFillerTool = eventShapeTool)
@@ -462,14 +462,15 @@ def AddIterationCfg(flags,seed_container,shape_name,clustersKey, **kwargs) :
 
     if useClusters :
         if flags.GeoModel.Run in [LHCPeriod.Run1, LHCPeriod.Run2]:
-            HIJetClusterSubtractorTool_inputFile='cluster.geo.HIJING_2018.root'
+            HIJetClusterSubtractorTool_inputFile='cluster.geo.DATA_PbPb_2018v2.root'
         else:
             HIJetClusterSubtractorTool_inputFile='cluster.geo.DATA_PbPb_2022.root'
         
         HIJetClusterSubtractorTool = CompFactory.HIJetClusterSubtractorTool
         sub_tool = HIJetClusterSubtractorTool("HIJetClusterSubtractor", 
                                               ConfigDir='HIJetCorrection/',
-                                              InputFile=HIJetClusterSubtractorTool_inputFile)
+                                              InputFile=HIJetClusterSubtractorTool_inputFile,
+                                              UseSamplings = False)
     else :
         HIJetCellSubtractorTool=CompFactory.HIJetCellSubtractorTool
         sub_tool = HIJetCellSubtractorTool("HIJetCellSubtractor")
@@ -588,8 +589,16 @@ def ApplySubtractionToClustersCfg(flags, **kwargs) :
         map_tool=HIEventShapeMapTool()
 
     if useClusters :
+        if flags.GeoModel.Run in [LHCPeriod.Run1, LHCPeriod.Run2]:
+            HIJetClusterSubtractorTool_inputFile='cluster.geo.DATA_PbPb_2018v2.root'
+        else:
+            HIJetClusterSubtractorTool_inputFile='cluster.geo.DATA_PbPb_2022.root'
+
         HIJetClusterSubtractorTool = CompFactory.HIJetClusterSubtractorTool
-        sub_tool = HIJetClusterSubtractorTool("HIJetClusterSubtractor")
+        sub_tool = HIJetClusterSubtractorTool("HIJetClusterSubtractor",
+                                              ConfigDir='HIJetCorrection/',
+                                              InputFile=HIJetClusterSubtractorTool_inputFile,
+                                              UseSamplings = False)
     else :
         HIJetCellSubtractorTool=CompFactory.HIJetCellSubtractorTool
         sub_tool = HIJetCellSubtractorTool("HIJetCellSubtractor")
@@ -640,6 +649,25 @@ def ApplySubtractionToClustersCfg(flags, **kwargs) :
     
     return acc
 
+
+def getTrackSelAlg(trkOpt="HI"):
+    # tracking selection tool
+    idtracksel = CompFactory.getComp("InDet::InDetTrackSelectionTool")(f"tracksel{trkOpt}",
+                                                                       minNSiHits=7,
+                                                                       maxAbsEta=2.5,
+                                                                       maxNSiHoles=2,
+                                                                       maxNPixelHoles=1,
+                                                                       minPt=4000)
+
+    # build the selection alg 
+    trkSelAlg = CompFactory.JetTrackSelectionAlg( f"trackselalg_{trkOpt}",
+                                                  TrackSelector = idtracksel,
+                                                  InputContainer = "InDetTrackParticles",
+                                                  OutputContainer = "HIJetTracks",
+                                                  DecorDeps = []
+                                                 )
+
+    return trkSelAlg
 
 
 if __name__ == "__main__":
