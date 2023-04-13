@@ -55,11 +55,9 @@ InDet::InDetTrackSummaryHelperTool::initialize()
     }
   }
 
-  ATH_CHECK(m_holeSearchTool.retrieve(DisableTool{ m_holeSearchTool.empty() }));
+  ATH_CHECK(m_holeSearchTool.retrieve(DisableTool{m_holeSearchTool.empty()}));
   ATH_CHECK(m_TRTStrawSummaryTool.retrieve(
-    DisableTool{ not m_useTRT or m_TRTStrawSummaryTool.empty() }));
-
-  ATH_MSG_INFO("initialize() successful in " << name());
+      DisableTool{not m_useTRT or m_TRTStrawSummaryTool.empty()}));
 
   return StatusCode::SUCCESS;
 }
