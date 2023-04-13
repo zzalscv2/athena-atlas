@@ -307,6 +307,54 @@ def ActsTrkBaseEstimatedTrackParamsAnalysisAlgCfg(flags,
 
     return helper.result()
 
+def ActsTrkSeedingAlgorithmAnalysisAlgCfg(flags, name="ActsTrkSeedingAlgorithmAnalysis", **kwargs):
+    result = ComponentAccumulator()
+
+    MonitoringGroupNames = []
+
+    if "SeedingTools" not in kwargs:
+        from InDetConfig.SiSpacePointsSeedToolConfig import ITkSiSpacePointsSeedMakerCfg
+        ITkSiSpacePointsSeedMaker = result.popToolsAndMerge(ITkSiSpacePointsSeedMakerCfg(flags))
+        ITkSiSpacePointsSeedMaker.maxSize = 1e8
+        MonitoringGroupNames.append("ITkSiSpacePointSeedMaker")
+
+        from ActsTrkSeedingTool.ActsTrkSeedingToolConfig import ActsTrkSiSpacePointsSeedMakerCfg
+        ActsITkSiSpacePointsSeedMaker = result.popToolsAndMerge(ActsTrkSiSpacePointsSeedMakerCfg(flags))
+        ActsITkSiSpacePointsSeedMaker.doSpacePointConversion = False
+        ActsITkSiSpacePointsSeedMaker.doSeedConversion = False
+        MonitoringGroupNames.append("ActsITkSiSpacePointSeedMaker")
+
+        from ActsTrkSeedingTool.ActsTrkSeedingToolConfig import ActsTrkITkPixelOrthogonalSeedingToolCfg
+        orthogonal_seeding_tool = result.popToolsAndMerge(ActsTrkITkPixelOrthogonalSeedingToolCfg(flags))
+        ActsITkSiSpacePointsSeedMakerOrthogonal = \
+          result.popToolsAndMerge(ActsTrkSiSpacePointsSeedMakerCfg(flags,
+                                                                   name="ActsTrkSiSpacePointsSeedMakerOrthogonal",
+                                                                   SeedToolPixel=orthogonal_seeding_tool))
+        ActsITkSiSpacePointsSeedMakerOrthogonal.doSpacePointConversion = False
+        ActsITkSiSpacePointsSeedMakerOrthogonal.doSeedConversion = False
+        MonitoringGroupNames.append("ActsOrthogonalITkSiSpacePointSeedMaker")
+
+        from GaudiKernel.GaudiHandles import PrivateToolHandleArray
+        kwargs.setdefault("SeedingTools",
+                          PrivateToolHandleArray([ITkSiSpacePointsSeedMaker,
+                                                  ActsITkSiSpacePointsSeedMaker,
+                                                  ActsITkSiSpacePointsSeedMakerOrthogonal]))
+
+    kwargs.setdefault("MonitorNames", MonitoringGroupNames)
+
+    from AthenaMonitoring import AthMonitorCfgHelper
+    helper = AthMonitorCfgHelper(flags, 'SeedingAlgorithmAnalysisAlgCfg')
+    monitoringAlgorithm = helper.addAlgorithm(CompFactory.ActsTrk.SeedingAlgorithmAnalysisAlg, name, **kwargs)
+
+    for groupName in MonitoringGroupNames:
+      monitoringGroup = helper.addGroup(monitoringAlgorithm, groupName, '/'+groupName+'/')
+      monitoringGroup.defineTree('eventNumber,stripSeedInitialisationTime,stripSeedProductionTime,pixelSeedInitialisationTime,pixelSeedProductionTime,numberPixelSpacePoints,numberStripSpacePoints,numberPixelSeeds,numberStripSeeds;seedInformation',
+                                 path='ntuples',
+                                 treedef='eventNumber/I:stripSeedInitialisationTime/F:stripSeedProductionTime/F:pixelSeedInitialisationTime/F:pixelSeedProductionTime/F:numberPixelSpacePoints/I:numberStripSpacePoints/I:numberPixelSeeds/I:numberStripSeeds/I')
+
+    result.merge(helper.result())
+    return result
+
 
 def ActsTrkPixelEstimatedTrackParamsAnalysisAlgCfg(flags, name = 'ActsTrkPixelEstimatedTrackParamsAnalysisAlg', **kwargs):
     kwargs.setdefault('InputTrackParamsCollection', 'ITkPixelEstimatedTrackParams')

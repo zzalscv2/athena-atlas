@@ -198,6 +198,8 @@ namespace ActsTrk {
     Gaudi::Property< bool > m_useOverlap {this, "useOverlapSpCollection", true};
     Gaudi::Property< bool > m_fastTracking {this, "useFastTracking", false};
     Gaudi::Property< bool > m_doSpacePointConversion {this, "doSpacePointConversion", true, "Convert Trk::SpacePoint container into xAOD::SpacePoint container"};
+    Gaudi::Property< bool > m_doSeedConversion {this, "doSeedConversion", true, "Convert ActsTrk::Seed into ITk::SiSpacePointsProSeed"};
+
 
   private:
     // Validation
