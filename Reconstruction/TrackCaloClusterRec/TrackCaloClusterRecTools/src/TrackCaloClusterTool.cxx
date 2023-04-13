@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include "StoreGate/ReadDecorHandle.h"
 
@@ -12,6 +12,7 @@
 #include "CxxUtils/sincos.h"
 
 #include "TrackCaloClusterRecTools/TCCHelpers.h"
+#include "StoreGate/DecorKeyHelpers.h"
 
 
 namespace {
@@ -365,7 +366,7 @@ StatusCode UFOTool::fillTCC(xAOD::FlowElementContainer* tccContainer, const Trac
   // We use a dedicated helper to build the combined UFO. Initialize it :  
   TCCHelpers::UFOBuilder ufoB;
   ufoB.m_orig_pfoK = m_orig_pfo;
-  ufoB.m_clustersLinkK = m_assoClustersKey.key();
+  ufoB.m_clustersLinkK = SG::decorKeyFromKey (m_assoClustersKey.key());
   ufoB.m_trackVertexAssoTool = m_trackVertexAssoTool.get();
   ufoB.m_clusterEcut = m_clusterEcut;
   ufoB.m_useEnergy = m_useEnergy;
