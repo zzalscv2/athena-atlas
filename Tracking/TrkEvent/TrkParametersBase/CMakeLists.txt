@@ -3,7 +3,7 @@
 # Declare the package name:
 atlas_subdir( TrkParametersBase )
 
-find_package( Boost )
+find_package( Boost  COMPONENTS unit_test_framework)
 
 # Declare an interface library for the headers of the package:
 atlas_add_library( TrkParametersBase

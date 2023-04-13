@@ -18,6 +18,6 @@ atlas_add_library( ForwardTracker
 
 atlas_add_executable( forwardTrackerMain
                       test/forwardTrackerMain.cxx
-                      INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
-                      LINK_LIBRARIES ${Boost_LIBRARIES} ${Boost_LIBRARIES} ForwardTracker )
+                      INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+                      LINK_LIBRARIES ${Boost_LIBRARIES} ForwardTracker )
 

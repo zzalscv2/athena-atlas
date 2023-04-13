@@ -5,7 +5,7 @@ atlas_subdir( TrkExTools )
 
 # External dependencies:
 find_package( CLHEP )
-find_package( Boost )
+find_package( Boost COMPONENTS unit_test_framework)
 
 # Component(s) in the package:
 atlas_add_component( TrkExTools
@@ -24,7 +24,8 @@ atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 # Tests in the package:
 atlas_add_test( ObjContainer_boost_test
   SOURCES test/ObjContainer_boost_test.cxx
-  LINK_LIBRARIES CxxUtils
+  INCLUDE_DIRS ${Boost_INCLUDE_DIRS} 
+  LINK_LIBRARIES ${Boost_LIBRARIES}  CxxUtils
   POST_EXEC_SCRIPT nopost.sh
 )
 	

@@ -5,7 +5,7 @@ atlas_subdir( PixelDigitization )
 
 # External dependencies:
 find_package( CLHEP )
-find_package( Boost )
+find_package( Boost COMPONENTS unit_test_framework)
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread Matrix TreePlayer )
 
 # Component(s) in the package:
