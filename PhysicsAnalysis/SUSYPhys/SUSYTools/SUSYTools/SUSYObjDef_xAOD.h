@@ -275,13 +275,13 @@ namespace ST {
     double GetSignalTauSFsys(const xAOD::TauJet& tau, const CP::SystematicSet& systConfig, const bool idSF = true, const bool triggerSF = true, const std::string& trigExpr = "tau25_medium1_tracktwo") override final;
 
     void RetrieveTruthTauContainer() override final;
-    
+
     bool GetTauTriggerMatch(const xAOD::TauJet& tau, const std::string& trigExpr = "tau25_medium1_tracktwo") override final;
 
     double GetTauTriggerEfficiencySF(const xAOD::TauJet& tau, const std::string& trigExpr = "tau25_medium1_tracktwo") override final;
 
     double GetTauTriggerEfficiencySF(const xAOD::TauJet& tau, bool& matched, const std::string& trigExpr = "tau25_medium1_tracktwo") override final;
-    
+
     double GetTotalTauSF(const xAOD::TauJetContainer& taus, const bool idSF = true, const bool triggerSF = true,  const std::string& trigExpr = "tau25_medium1_tracktwo") override final;
 
     double GetTotalTauSFsys(const xAOD::TauJetContainer& taus, const CP::SystematicSet& systConfig, const bool idSF = true, const bool triggerSF = true, const std::string& trigExpr = "tau25_medium1_tracktwo") override final;
@@ -758,7 +758,7 @@ namespace ST {
     asg::AnaToolHandle<ICPJetUncertaintiesTool> m_WTagjetUncertaintiesTool;
     asg::AnaToolHandle<ICPJetUncertaintiesTool> m_ZTagjetUncertaintiesTool;
     asg::AnaToolHandle<ICPJetUncertaintiesTool> m_TopTagjetUncertaintiesTool;
-    
+
     //
     std::string m_jesConfig;
     std::string m_jesConfigJMS;
@@ -840,16 +840,19 @@ namespace ST {
     std::string m_trig2016combination_singleLep;
     std::string m_trig2017combination_singleLep;
     std::string m_trig2018combination_singleLep;
+    int m_trigNToys_diLep;
     std::string m_trig2015combination_diLep;
     std::string m_trig2016combination_diLep;
     std::string m_trig2017combination_diLep;
     std::string m_trig2018combination_diLep;
     asg::AnaToolHandle<ITrigGlobalEfficiencyCorrectionTool> m_trigGlobalEffCorrTool_diLep;
+    int m_trigNToys_multiLep;
     std::string m_trig2015combination_multiLep;
     std::string m_trig2016combination_multiLep;
     std::string m_trig2017combination_multiLep;
     std::string m_trig2018combination_multiLep;
     asg::AnaToolHandle<ITrigGlobalEfficiencyCorrectionTool> m_trigGlobalEffCorrTool_multiLep;
+    int m_trigNToys_diPhoton;
     std::string m_trig2015combination_diPhoton;
     std::string m_trig2016combination_diPhoton;
     std::string m_trig2017combination_diPhoton;
