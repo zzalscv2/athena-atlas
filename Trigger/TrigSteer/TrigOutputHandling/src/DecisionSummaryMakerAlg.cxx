@@ -43,7 +43,7 @@ StatusCode DecisionSummaryMakerAlg::initialize() {
 StatusCode DecisionSummaryMakerAlg::start() {
   SG::ReadHandle<TrigConf::HLTMenu> hltMenu{m_hltMenuKey};
   ATH_CHECK(hltMenu.isValid());
-
+  m_chainToStreamsMap.clear();
   // Fill the map of Chain ID -> stream names, omitting express which is treated separately due to express prescaling
   for (const TrigConf::Chain& chain : *hltMenu) {
     std::vector<std::string> streams = chain.streams();
