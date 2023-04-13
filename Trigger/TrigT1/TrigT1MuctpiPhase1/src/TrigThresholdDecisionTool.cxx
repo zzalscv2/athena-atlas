@@ -35,6 +35,8 @@ namespace LVL1
     ATH_MSG_DEBUG( "Start for Phase1 TrigThresholdDecisionTool"  );
     ATH_MSG_DEBUG( "==========================================" );
 
+    m_parsed_flags.clear();
+    m_tgcFlag_decisions.clear();
 
     //front-load the TGC flag parsing and all possible 3-bit decisions for the menu
     SG::ReadHandle<TrigConf::L1Menu> l1Menu = SG::makeHandle(m_l1MenuKey);
