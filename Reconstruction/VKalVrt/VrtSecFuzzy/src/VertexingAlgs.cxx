@@ -591,42 +591,9 @@ namespace VKalVrtAthena {
 
     unsigned int nclus_beforeGroupMerge = clusters.size(); 
     ATH_MSG_DEBUG("# seed groups before seed group merging = " << nclus_beforeGroupMerge);
-
-    // merge the clusters close to each other
-    for(unsigned int iclus = 0; iclus < nclus_beforeGroupMerge; ++iclus){     
-      
-      if(clusters.at(iclus).empty()) continue; // have cleared
-      ATH_MSG_DEBUG("# seeds in clus " << iclus << " = " << clusters.at(iclus).size());
-      for(unsigned int jclus = iclus + 1; jclus < nclus_beforeGroupMerge; ++jclus){
-      
-        if(clusters.at(jclus).empty()) continue; // have cleared
-        bool has_overlapping = false;
-
-        for(auto seed_trackIDs : clusters_trackIDs.at(jclus)){
-          if(std::find(clusters_trackIDs.at(iclus).begin(), clusters_trackIDs.at(iclus).end(), seed_trackIDs) != clusters_trackIDs.at(iclus).end()){
-            has_overlapping = true; // there is the same seed which is shared by multiple clusters -> merge
-            break;
-          }
-        }
-       
-        // merge the clusters
-        if(has_overlapping == true){
-          ATH_MSG_DEBUG("merge clus " << iclus << " and " << jclus);
-          
-          for(auto seed_trackIDs : clusters_trackIDs.at(jclus)){
-            if(std::find(clusters_trackIDs.at(iclus).begin(), clusters_trackIDs.at(iclus).end(), seed_trackIDs) == clusters_trackIDs.at(iclus).end()){ 
-              auto itr = std::find(clusters_trackIDs.at(jclus).begin(), clusters_trackIDs.at(jclus).end(), seed_trackIDs);
-              int seedID = itr - clusters_trackIDs.at(jclus).begin();
-              clusters.at(iclus).emplace_back(clusters.at(jclus).at(seedID)); //add clus_j's seed into clus_i
-              clusters_trackIDs.at(iclus).emplace_back(seed_trackIDs);
-            }
-          }
-
-          ATH_MSG_DEBUG("after merging, # seeds = " << clusters.at(iclus).size()); //cotaining multiple same seeds
-          clusters.at(jclus).clear(); //clear clus_j
-        }
-      }
-    }
+   
+    // merge seed groups with common seeds
+    mergeSeedClusters(clusters, clusters_trackIDs); 
 
     unsigned int nclus_afterGroupMerge = 0;
     for(auto icluster : clusters){
@@ -952,6 +919,57 @@ namespace VKalVrtAthena {
     }
     ATH_MSG_DEBUG(" > " << __FUNCTION__ << ": passed fake rejection." );
     return 6;
+  }
+
+
+
+  void VrtSecFuzzy::mergeSeedClusters(std::vector<std::vector<WrkVrt>>& clusters, std::vector<std::vector<std::deque<long int> >>& clusters_trackIDs){
+    bool merged = false;
+
+    // merge the clusters close to each other
+    for(unsigned int iclus = 0; iclus < clusters.size(); ++iclus){     
+
+      if(clusters.at(iclus).empty()) continue; // have cleared
+ 
+      ATH_MSG_DEBUG("# seeds in clus " << iclus << " = " << clusters.at(iclus).size());
+      for(unsigned int jclus = iclus + 1; jclus < clusters.size(); ++jclus){
+ 
+        if(clusters.at(jclus).empty()) continue; // have cleared
+ 
+        bool has_overlapping = false;
+
+        for(auto seed_trackIDs : clusters_trackIDs.at(jclus)){
+
+          if(std::find(clusters_trackIDs.at(iclus).begin(), clusters_trackIDs.at(iclus).end(), seed_trackIDs) != clusters_trackIDs.at(iclus).end()){
+            has_overlapping = true; // there is the same seed which is shared by multiple clusters -> merge
+            break;
+          }
+        }
+       
+        // merge the clusters
+        if(has_overlapping == true){
+          ATH_MSG_DEBUG("merge clus " << iclus << " and " << jclus);
+          
+          for(auto seed_trackIDs : clusters_trackIDs.at(jclus)){
+            if(std::find(clusters_trackIDs.at(iclus).begin(), clusters_trackIDs.at(iclus).end(), seed_trackIDs) == clusters_trackIDs.at(iclus).end()){ 
+              auto itr = std::find(clusters_trackIDs.at(jclus).begin(), clusters_trackIDs.at(jclus).end(), seed_trackIDs);
+              int seedID = itr - clusters_trackIDs.at(jclus).begin();
+              clusters.at(iclus).emplace_back(clusters.at(jclus).at(seedID)); //add clus_j's seed into clus_i
+              clusters_trackIDs.at(iclus).emplace_back(seed_trackIDs);
+              merged = true;
+            }
+          }
+
+          ATH_MSG_DEBUG("after merging, # seeds = " << clusters.at(iclus).size()); //cotaining multiple same seeds
+          clusters.at(jclus).clear(); //clear clus_j
+          clusters_trackIDs.at(jclus).clear(); //clear clus_j's track IDs
+        }
+      }
+    }
+    while(merged){ // repeat seed group merging until all seed groups become independent
+      merged = false;
+      mergeSeedClusters(clusters, clusters_trackIDs);
+    } 
   }
  
 } // end of namespace VKalVrtAthena
