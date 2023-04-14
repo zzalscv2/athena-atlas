@@ -33,10 +33,10 @@ class TTbarWithJpsimumuFilter: public GenFilter {
   double m_JpsiEtaMaxCut;
 
   // method to check if Jpsi decays into pair of leptons
-  bool isLeptonDecay(HepMC::ConstGenParticlePtr part, int type) const;  
+  bool isLeptonDecay(const HepMC::ConstGenParticlePtr& part, int type) const;  
 
   // method to check if Jpsi pass some selection criteria
-  bool passJpsiSelection(HepMC::ConstGenParticlePtr part) const;
+  bool passJpsiSelection(const HepMC::ConstGenParticlePtr& part) const;
 
 };
 

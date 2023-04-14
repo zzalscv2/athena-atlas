@@ -56,7 +56,7 @@ private:
   Gaudi::Property<double> m_m4muhigh{this,"HighM4mu",25000," "};
   Gaudi::Property<bool> m_ApplyReWeighting{this,"ApplyReWeighting",true," "};
 public:
-  double getEventWeight(double m);
+  double getEventWeight(double m) const;
 
 };
 

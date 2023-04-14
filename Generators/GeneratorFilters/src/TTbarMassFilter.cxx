@@ -26,7 +26,7 @@ StatusCode TTbarMassFilter::filterEvent() {
   for (McEventCollection::const_iterator itr = events()->begin(); itr!=events()->end(); ++itr) {
     const HepMC::GenEvent* genEvt = (*itr);
 #ifdef HEPMC3
-    for ( auto mcpart: *genEvt) {
+    for (const auto& mcpart: *genEvt) {
       // Reset the flag. it become true if the top with a final ('last') status is found
       isLastTop = false;
       // Reset the flag. becomes true if the top with the initial ('first') status is found
@@ -46,7 +46,7 @@ StatusCode TTbarMassFilter::filterEvent() {
 
         // Find out whether this is the top particle with final statuscode, so, just before its decay.
         /// @todo How generator-portable is this status code assumption?
-        for (auto child_mcpart: decayVtx->particles_out() ) {
+        for (const auto& child_mcpart: decayVtx->particles_out() ) {
           if (std::abs(child_mcpart->pdg_id()) == 6) {
             // This is not a 'last' top: break the loop over the children, and do nothing with this top particle
             isLastTop = false;
@@ -75,7 +75,7 @@ StatusCode TTbarMassFilter::filterEvent() {
             // Loop until the 'first' top particle  production vertex is not reached
             while (!isFirstTop && prodVtx) {
               // Loop over the top mother particles
-              for (auto  mother_mcpart: prodVtx->particles_in()) {
+              for (const auto&  mother_mcpart: prodVtx->particles_in()) {
                 // One of the mother particles is still top quark. needed to go up in the hierarchy
                 if (mother_mcpart->pdg_id() == 6) {
                   isFirstTop = false;

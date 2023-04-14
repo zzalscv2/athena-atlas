@@ -46,7 +46,7 @@ StatusCode TTbarWithJpsimumuFilter::filterEvent() {
 
         // Loop over all truth particles in the event
         // ===========================================
-        for(auto part: *genEvt) {
+        for(const auto& part: *genEvt) {
             if(HepMC::is_simulation_particle(part)) break;
             
             int pdgid = std::abs(part->pdg_id());
@@ -71,11 +71,11 @@ StatusCode TTbarWithJpsimumuFilter::filterEvent() {
 }
 
 // ========================================================
-bool TTbarWithJpsimumuFilter::isLeptonDecay(HepMC::ConstGenParticlePtr part, int type) const {
+bool TTbarWithJpsimumuFilter::isLeptonDecay(const HepMC::ConstGenParticlePtr& part, int type) const {
     auto end = part->end_vertex();
     if(!end) return true;
 #ifdef HEPMC3
-    for (auto p: end->particles_out()) {
+    for (const auto& p: end->particles_out()) {
         if (std::abs(p->pdg_id()) !=  type ) return false;
     }
 #else
@@ -92,7 +92,7 @@ bool TTbarWithJpsimumuFilter::isLeptonDecay(HepMC::ConstGenParticlePtr part, int
 }
 
 // ========================================================
-bool TTbarWithJpsimumuFilter::passJpsiSelection(HepMC::ConstGenParticlePtr part) const {
+bool TTbarWithJpsimumuFilter::passJpsiSelection(const HepMC::ConstGenParticlePtr& part) const {
 
     const HepMC::FourVector& p4 = part->momentum();
     double pt = p4.perp();

@@ -103,7 +103,7 @@ StatusCode ParentChildwStatusFilter::filterEvent() {
   for (itr = events()->begin(); itr != events()->end(); ++itr) {
     // Loop over all particles in the event
     const HepMC::GenEvent* genEvt = (*itr);
-    for(auto pitr: *genEvt){
+    for(const auto& pitr: *genEvt){
       // Parent
       int okPDGParent=0;
       int okStatusParent=0;
@@ -120,7 +120,7 @@ StatusCode ParentChildwStatusFilter::filterEvent() {
 	//Check if has end_vertex (skips initial protons)
 	if(!(pitr->end_vertex())) continue; 
 	// Child
-	for(auto thisChild: *(pitr->end_vertex())){
+	for(const auto& thisChild: *(pitr->end_vertex())){
 	  int okPDGChild=0;
 	  for(int i=0;i<int(m_PDGChild.size());i++) 
 	    if(std::abs(thisChild->pdg_id()) == m_PDGChild[i]) okPDGChild=1;

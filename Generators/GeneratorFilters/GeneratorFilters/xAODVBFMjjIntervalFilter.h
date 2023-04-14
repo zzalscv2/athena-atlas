@@ -72,7 +72,7 @@ private:
 public:
 
   bool ApplyMassDphi(ConstDataVector<xAOD::JetContainer> *jets);
-  double getEventWeight(ConstDataVector<xAOD::JetContainer> *jets);
+  double getEventWeight(ConstDataVector<xAOD::JetContainer> *jets) const;
 };
 
 #endif

@@ -96,7 +96,7 @@ StatusCode BoostedHadTopAndTopPair::filterEvent() {
 }
 
 
-bool BoostedHadTopAndTopPair::isFromTop(HepMC::ConstGenParticlePtr part) const{
+bool BoostedHadTopAndTopPair::isFromTop(const HepMC::ConstGenParticlePtr& part) const{
 
   auto initpart = findInitial(part);
   auto prod = initpart->production_vertex();
@@ -117,14 +117,14 @@ bool BoostedHadTopAndTopPair::isFromTop(HepMC::ConstGenParticlePtr part) const{
 }
 
 
-HepMC::ConstGenParticlePtr  BoostedHadTopAndTopPair::findInitial(HepMC::ConstGenParticlePtr part) const{
+HepMC::ConstGenParticlePtr   BoostedHadTopAndTopPair::findInitial(const HepMC::ConstGenParticlePtr& part) const{
 
   auto prod = part->production_vertex();
 
   if(!prod) return part;
 
 #ifdef HEPMC3
-   for (auto p: prod->particles_in()) if (part->pdg_id() == p->pdg_id()) return findInitial(part);
+   for (const auto& p: prod->particles_in()) if (part->pdg_id() == p->pdg_id()) return findInitial(part);
 #else
   HepMC::GenVertex::particle_iterator firstParent = prod->particles_begin(HepMC::parents);
   HepMC::GenVertex::particle_iterator endParent = prod->particles_end(HepMC::parents);
@@ -137,11 +137,11 @@ HepMC::ConstGenParticlePtr  BoostedHadTopAndTopPair::findInitial(HepMC::ConstGen
 }
 
 
-bool BoostedHadTopAndTopPair::isHadronic(HepMC::ConstGenParticlePtr part) const{
+bool BoostedHadTopAndTopPair::isHadronic(const HepMC::ConstGenParticlePtr& part) const{
 
   auto end = part->end_vertex();
   if (end) {
-  for(auto firstChild: *end){
+  for(const auto& firstChild: *end){
     if( std::abs(firstChild->pdg_id()) <= 5 ) return true;
   }
   }
@@ -149,12 +149,12 @@ bool BoostedHadTopAndTopPair::isHadronic(HepMC::ConstGenParticlePtr part) const{
 }
 
 
-bool BoostedHadTopAndTopPair::isFinalParticle(HepMC::ConstGenParticlePtr part) const{
+bool BoostedHadTopAndTopPair::isFinalParticle(const HepMC::ConstGenParticlePtr& part) const{
 
   auto end = part->end_vertex();
   if(end){
     int type = part->pdg_id();
-    for(auto  firstChild: *end){
+    for(const auto&  firstChild: *end){
       if( firstChild->pdg_id() == type ) return false;
     }
   }
@@ -162,14 +162,14 @@ bool BoostedHadTopAndTopPair::isFinalParticle(HepMC::ConstGenParticlePtr part) c
 }
 
 
-HepMC::FourVector BoostedHadTopAndTopPair::momentumBofW(HepMC::ConstGenParticlePtr part){
+HepMC::FourVector BoostedHadTopAndTopPair::momentumBofW(const HepMC::ConstGenParticlePtr& part) const{
 
   auto initpart = findInitial(part);
   auto prod = initpart->production_vertex();
 
   HepMC::FourVector b(0,0,0,0);
 if (prod) { 
- for( auto firstChild: *prod){
+ for(const auto& firstChild: *prod){
     if( std::abs( firstChild->pdg_id() ) == 5 ){
     b.set(firstChild->momentum().x(), firstChild->momentum().y(), firstChild->momentum().z(), firstChild->momentum().t());
     }

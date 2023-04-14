@@ -117,13 +117,13 @@ StatusCode SoftLeptonInJetFilter::filterEvent() {
   return StatusCode::SUCCESS;
 }
 
-bool SoftLeptonInJetFilter::isElectron(HepMC::ConstGenParticlePtr p) const {
+bool SoftLeptonInJetFilter::isElectron(const HepMC::ConstGenParticlePtr& p) const {
   return (std::abs(p->pdg_id())==11 && p->status()==1 &&
           p->momentum().perp() >= m_Ptmin &&
           std::abs(p->momentum().pseudoRapidity()) <= m_EtaRange );
 }
 
-bool SoftLeptonInJetFilter::isParton(HepMC::ConstGenParticlePtr p) const {
+bool SoftLeptonInJetFilter::isParton(const HepMC::ConstGenParticlePtr& p) const {
   return (std::abs(p->pdg_id()) == m_part_ID && p->status()==3 &&
           p->momentum().perp() >= m_part_Ptmin  &&
           std::abs(p->momentum().pseudoRapidity()) <= m_part_EtaRange);

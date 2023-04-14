@@ -45,7 +45,7 @@ StatusCode ParentTwoChildrenFilter::filterEvent() {
       int id = pitr->pdg_id();
       if (std::abs(id) != m_PDGParent[0]) continue;
       if (pitr->momentum().perp() < m_PtMinParent) continue;
-      HepMC::ConstGenVertexPtr decayVtx = pitr->end_vertex();
+      const HepMC::ConstGenVertexPtr&  decayVtx = pitr->end_vertex();
       // Verify if we got a valid pointer and retrieve the number of daughters
       if (!decayVtx) continue; 
 #ifdef HEPMC3
@@ -57,7 +57,7 @@ StatusCode ParentTwoChildrenFilter::filterEvent() {
       if (n_daughters < 2) continue; 
 
       int neutralPar = 0;
-      for(auto thisChild: *decayVtx) {
+      for(const auto& thisChild: *decayVtx) {
 	ATH_MSG_DEBUG(" ParentTwoChildrenFilter: parent ==> " <<pitr->pdg_id() << " child ===> "  <<thisChild->pdg_id());
 	for (int i = 0; i < 2; i++) {
 	  if ( std::abs(thisChild->pdg_id()) == m_PDGChild[i]) {

@@ -68,7 +68,7 @@ StatusCode M4MuIntervalFilter::filterEvent() {
   
   for (McEventCollection::const_iterator itr = events()->begin(); itr != events()->end(); ++itr) {
     const HepMC::GenEvent* genEvt = (*itr);
-    for ( auto pitr: *genEvt){
+    for (const auto& pitr: *genEvt){
 
 	   // muon
 	   if (std::abs((pitr)->pdg_id()) == 13 && (pitr)->status() == 1 &&
@@ -130,7 +130,7 @@ StatusCode M4MuIntervalFilter::filterEvent() {
 }
 
 
-double M4MuIntervalFilter::getEventWeight(double mass) {
+double M4MuIntervalFilter::getEventWeight(double mass) const {
   double weight = 1.0;
   if (mass < m_m4mulow) {
        	weight /= m_prob2low;

@@ -148,7 +148,7 @@ StatusCode HTFilter::filterEvent() {
   return StatusCode::SUCCESS;
 }
 
-bool HTFilter::fromWZ(HepMC::ConstGenParticlePtr part ) const
+bool HTFilter::fromWZ(const HepMC::ConstGenParticlePtr& part ) const
 {
   // !!! IMPORTANT !!! This is a TEMPORARY function
   //  it's used in place of code in MCTruthClassifier as long as this package is not dual-use
@@ -163,7 +163,7 @@ bool HTFilter::fromWZ(HepMC::ConstGenParticlePtr part ) const
   //   This code, like the code before it, really assumes one incoming particle per vertex...
   if (!part->production_vertex()) return false;
 #ifdef HEPMC3
-  for (auto  iter: part->production_vertex()->particles_in()){
+  for (const auto&  iter: part->production_vertex()->particles_in()){
     int parent_pdgid = iter->pdg_id();
     if (MC::PID::isW(parent_pdgid) || MC::PID::isZ(parent_pdgid)) return true;
     if (MC::PID::isHadron( parent_pdgid ) ) return false;
@@ -183,7 +183,7 @@ bool HTFilter::fromWZ(HepMC::ConstGenParticlePtr part ) const
   return false;
 }
 
-bool HTFilter::fromTau(HepMC::ConstGenParticlePtr part ) const
+bool HTFilter::fromTau(const HepMC::ConstGenParticlePtr& part ) const
 {
   // !!! IMPORTANT !!! This is a TEMPORARY function
   //  it's used in place of code in MCTruthClassifier as long as this package is not dual-use
@@ -196,7 +196,7 @@ bool HTFilter::fromTau(HepMC::ConstGenParticlePtr part ) const
   //   This code, like the code before it, really assumes one incoming particle per vertex...
   if (!part->production_vertex()) return false;
 #ifdef HEPMC3
-  for (auto iter: part->production_vertex()->particles_in()){
+  for (const auto& iter: part->production_vertex()->particles_in()){
     int parent_pdgid = iter->pdg_id();
     if ( std::abs( parent_pdgid ) == 15 ) return true;
     if (MC::PID::isHadron( parent_pdgid ) || std::abs( parent_pdgid ) < 9 ) return false;

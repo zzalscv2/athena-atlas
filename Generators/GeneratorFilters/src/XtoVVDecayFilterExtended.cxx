@@ -83,7 +83,8 @@ StatusCode XtoVVDecayFilterExtended::filterEvent() {
 
 // Runs the history of ancestors and returns TRUE if it finds the
 // m_PDGGrandParent in the list of ansestors
-bool XtoVVDecayFilterExtended::RunHistory(HepMC::ConstGenParticlePtr pitr) {
+bool XtoVVDecayFilterExtended::RunHistory(const HepMC::ConstGenParticlePtr& input) const {
+  auto pitr=input;
   if (! pitr->production_vertex()) {
     ATH_MSG_DEBUG("No History for this case");
     return false;
@@ -125,7 +126,7 @@ bool XtoVVDecayFilterExtended::RunHistory(HepMC::ConstGenParticlePtr pitr) {
   if(std::abs(pitr->pdg_id()) != m_PDGGrandParent && std::abs(pitr->pdg_id()) != m_PDGParent) return false;
   if (result == m_PDGGrandParent) return true;
 
-  HepMC::ConstGenParticlePtr pitr_current = (*firstMother);
+  const HepMC::ConstGenParticlePtr& pitr_current = (*firstMother);
   while ( result >= 0 ) {
     pitr_current = CheckGrandparent(pitr_current, result);
     ATH_MSG_DEBUG("Pointer PDG ID: " << pitr->pdg_id());
@@ -140,7 +141,7 @@ bool XtoVVDecayFilterExtended::RunHistory(HepMC::ConstGenParticlePtr pitr) {
 
 // checks whether the grandparent of a given particle is m_PDGGrandParent
 // it returns the first mother
-HepMC::ConstGenParticlePtr  XtoVVDecayFilterExtended::CheckGrandparent(HepMC::ConstGenParticlePtr pitr, int &result) {
+HepMC::ConstGenParticlePtr   XtoVVDecayFilterExtended::CheckGrandparent(const HepMC::ConstGenParticlePtr& pitr, int &result) const{
 
   if (! pitr->production_vertex()) {
     ATH_MSG_DEBUG("No ancestor for this case");
@@ -157,7 +158,7 @@ HepMC::ConstGenParticlePtr  XtoVVDecayFilterExtended::CheckGrandparent(HepMC::Co
 
   int n_mothers = 1;
 
-  for (auto thisMother: pitr->production_vertex()->particles_in()) {
+  for (const auto& thisMother: pitr->production_vertex()->particles_in()) {
     ATH_MSG_DEBUG("Now on this mother: " << (thisMother)->pdg_id() << " " << n_mothers);
     if ( (thisMother)->pdg_id() != m_PDGGrandParent && std::abs((thisMother)->pdg_id()) != m_PDGParent)
        break;
@@ -205,10 +206,10 @@ HepMC::ConstGenParticlePtr  XtoVVDecayFilterExtended::CheckGrandparent(HepMC::Co
 }
 
 
-void XtoVVDecayFilterExtended::FindAncestor(HepMC::ConstGenVertexPtr searchvertex,
-                                    int targetPDGID, bool& okPDGChild1, bool& okPDGChild2) {
+void XtoVVDecayFilterExtended::FindAncestor(const HepMC::ConstGenVertexPtr&  searchvertex,
+                                    int targetPDGID, bool& okPDGChild1, bool& okPDGChild2) const{
   if (!searchvertex) return;
-  for (auto thisAncestor:  *searchvertex){
+  for (const auto& thisAncestor:  *searchvertex){
     //ATH_MSG_DEBUG(" child " << thisAncestor->pdg_id());
     if (std::abs(thisAncestor->pdg_id()) == targetPDGID) { //same particle as parent
       FindAncestor(thisAncestor->end_vertex(), targetPDGID, okPDGChild1, okPDGChild2);

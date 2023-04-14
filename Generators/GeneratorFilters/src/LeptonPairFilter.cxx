@@ -113,7 +113,7 @@ StatusCode LeptonPairFilter::filterEvent() {
     // Loop over all particles in the event
     const HepMC::GenEvent* genEvt = (*itr);
 #ifdef HEPMC3
-    for(auto pitr: genEvt->particles()) {
+    for(const auto& pitr: genEvt->particles()) {
       if( pitr->status()!=1 ) continue;
 	// check stable particles only
 	// We do not place requirements on their origins (updated: optionally rejecting hadron decays)
@@ -146,7 +146,7 @@ StatusCode LeptonPairFilter::filterEvent() {
 			vLeptonEta.push_back(pitr->momentum().pseudoRapidity());
 			
 			std::vector<int> parentPDG_tmp;
-			for(auto thisParent: pitr->production_vertex()->particles_in()) parentPDG_tmp.push_back(thisParent->pdg_id());
+			for (auto thisParent: pitr->production_vertex()->particles_in()) parentPDG_tmp.push_back(thisParent->pdg_id());
 			vLeptonParentPDGIDs.push_back(parentPDG_tmp);
        }
 #else

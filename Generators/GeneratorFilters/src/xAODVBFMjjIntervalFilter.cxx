@@ -342,7 +342,7 @@ bool xAODVBFMjjIntervalFilter::ApplyMassDphi(ConstDataVector<xAOD::JetContainer>
     return pass;
 }
 
-double xAODVBFMjjIntervalFilter::getEventWeight(ConstDataVector<xAOD::JetContainer> *jets)
+double xAODVBFMjjIntervalFilter::getEventWeight(ConstDataVector<xAOD::JetContainer> *jets) const
 {
     double weight = 1.0;
     if (jets->size() == 0)

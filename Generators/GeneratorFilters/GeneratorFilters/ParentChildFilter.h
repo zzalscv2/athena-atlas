@@ -31,7 +31,7 @@ private:
   double m_EtaRangeChild;
 
   /** calculate the rapidity of a particle */
-  inline double getRapidity(HepMC::GenParticle*& p) {
+  inline double getRapidity(HepMC::GenParticle*& p) const {
     double e = (p)->momentum().e();
     double pz = (p)->momentum().pz();
     if (e == pz) return 9999.;
