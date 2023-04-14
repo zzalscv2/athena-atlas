@@ -126,7 +126,7 @@ namespace ActsTrk {
       "how many sigmas of scattering angle should be considered"};
     Gaudi::Property< float > m_maxPtScattering {this, "maxPtScattering", 10e6,
       "Upper pt limit for scattering calculation"};
-    Gaudi::Property< float > m_radLengthPerSeed {this, "radLengthPerSeed", 0.0975,
+    Gaudi::Property< float > m_radLengthPerSeed {this, "radLengthPerSeed", 0.098045,
       "average radiation lengths of material on the length of a seed. used for scattering"};
     Gaudi::Property< int > m_maxSeedsPerSpM {this, "maxSeedsPerSpM", 4,
       "In dense environments many seeds may be found per middle space point. Only seeds with the highest weight will be kept if this limit is reached."}; // Used in SeedFilterConfig as well
