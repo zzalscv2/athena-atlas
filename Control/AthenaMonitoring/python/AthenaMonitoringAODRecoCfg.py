@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
@@ -12,8 +12,10 @@ def AthenaMonitoringAODRecoCfg(flags):
         info('Running on AOD: Scheduling rebuild of standard jet collections if necessary')
         from JetRecConfig.StandardSmallRJets import AntiKt4EMTopo, AntiKt4EMPFlow, AntiKt4LCTopo
         from JetRecConfig.StandardLargeRJets import AntiKt10LCTopo_noVR, AntiKt10LCTopoTrimmed_trigger
-        # first, check small R jets
-        jets_to_schedule = [_ for _ in (AntiKt4EMTopo, AntiKt4EMPFlow, AntiKt4LCTopo)
+        from AthenaConfiguration.Enums import BeamType
+
+        # first, check small R jets, skip PFlow when running over cosmics
+        jets_to_schedule = [_ for _ in ((AntiKt4EMTopo, AntiKt4EMPFlow, AntiKt4LCTopo) if flags.Beam.Type is not BeamType.Cosmics else (AntiKt4EMTopo, AntiKt4LCTopo))
                             if _.fullname() not in flags.Input.Collections]
         # if we reschedule small R jets, check if we need to reschedule large R as well
         if jets_to_schedule:
@@ -43,7 +45,8 @@ def AthenaMonitoringAODRecoCfg(flags):
             for container in jet_collections & btag_jet_collections:
                 result.merge(BTagRecoSplitCfg(flags, [container]))
 
-        if jet_collections & met_jet_collections:
+        # MET can't be rebuilt when running over cosmics AOD as taus are missing
+        if jet_collections & met_jet_collections and flags.Beam.Type is not BeamType.Cosmics:
             info('Scheduling rebuild of standard MET')
             from METReconstruction.METAssociatorCfg import METAssociatorCfg
             from METUtilities.METMakerConfig import getMETMakerAlg
