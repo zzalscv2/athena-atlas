@@ -529,6 +529,14 @@ void ConfAnalysis::initialiseInternal() {
   m_rptres.push_back(  new Resplot("rpt_vs_pt",  ptnbins, ptbinlims, 8*pTResBins,   -wfactor*tmp_absResPt,  wfactor*tmp_absResPt  ) );
   m_rd0res.push_back(  new Resplot("rd0_vs_pt",  ptnbins, ptbinlims, factor*24*a0resBins,   -wfactor*a0resMax,  wfactor*a0resMax  ) );
 
+  m_retares.push_back( new Resplot("reta_vs_ET", ptnbins, ptbinlims, 8*etaResBins,  -wfactor*tmp_absResEta, wfactor*tmp_absResEta ) );
+  m_rphires.push_back( new Resplot("rphi_vs_ET", ptnbins, ptbinlims, 8*phiResBins,  -wfactor*tmp_absResPhi, wfactor*tmp_absResPhi ) );
+  m_rzedres.push_back( new Resplot("rzed_vs_ET", ptnbins, ptbinlims, 24*zfactor*zresBins,   -2*zfactor*zresMax,      2*zfactor*zresMax       ) );
+  m_rzedthetares.push_back( new Resplot("rzedtheta_vs_ET", ptnbins, ptbinlims, 24*zfactor*zresBins,   -2*zfactor*zresMax,      2*zfactor*zresMax       ) );
+  m_riptres.push_back( new Resplot("ript_vs_ET", ptnbins, ptbinlims, 16*pTResBins,  -wfactor*tmp_absResPt,  wfactor*tmp_absResPt  ) );
+  m_rptres.push_back(  new Resplot("rpt_vs_ET",  ptnbins, ptbinlims, 8*pTResBins,   -wfactor*tmp_absResPt,  wfactor*tmp_absResPt  ) );
+  m_rd0res.push_back(  new Resplot("rd0_vs_ET",  ptnbins, ptbinlims, factor*24*a0resBins,   -wfactor*a0resMax,  wfactor*a0resMax  ) );
+
 
   //  m_retares.push_back( new Resplot("reta_vs_eta", etaBins, -tmp_maxEta, tmp_maxEta,  4*etaResBins,  -tmp_absResEta, tmp_absResEta ) );
   m_retares.push_back( new Resplot("reta_vs_eta", etaBins, -tmp_maxEta, tmp_maxEta,  4*etaResBins,  -wfactor*tmp_absResEta, wfactor*tmp_absResEta ) );
@@ -1116,8 +1124,7 @@ void ConfAnalysis::finalise() {
   m_rzedlb->Finalise(Resplot::FitNull95);
   m_rzedlb_rec->Finalise(Resplot::FitNull95);
 
-
-  for ( unsigned i=m_rphires.size()-2 ; i-- ; ) {
+  for ( unsigned i=m_retaresPull.size() ; i-- ; ) {
 
     m_retaresPull[i]->Finalise(Resplot::FitNull);
     m_rphiresPull[i]->Finalise(Resplot::FitNull);
@@ -1151,19 +1158,14 @@ void ConfAnalysis::finalise() {
 
   //  td->cd();
 
-
   //ADDED BY JK
   //-----Only one more element in d0 and z0 vectors than eta now
-  //m_rzedres[5]->Finalise(Resplot::FitNull95);
-  //m_rzedres[5]->Write();
-  m_rzedres[m_rphires.size()]->Finalise(Resplot::FitNull95);
-  m_rzedres[m_rphires.size()]->Write();
-  m_rzedthetares[m_rphires.size()]->Finalise(Resplot::FitNull95);
-  m_rzedthetares[m_rphires.size()]->Write();
-  //m_rd0res[5]->Finalise(Resplot::FitNull95);
-  //m_rd0res[5]->Write();
-  m_rd0res[m_rphires.size()]->Finalise(Resplot::FitNull95);
-  m_rd0res[m_rphires.size()]->Write();
+  m_rzedres[m_rzedres.size()-1]->Finalise(Resplot::FitNull95);
+  m_rzedres[m_rzedres.size()-1]->Write();
+  m_rzedthetares.back()->Finalise(Resplot::FitNull95);
+  m_rzedthetares.back()->Write();
+  m_rd0res.back()->Finalise(Resplot::FitNull95);
+  m_rd0res.back()->Write();
   //-----
 
   m_eff_vs_lb->finalise();
@@ -1446,6 +1448,8 @@ void ConfAnalysis::execute( const std::vector<TIDA::Track*>& reftracks,
     double                 etovpt_val = 0;
     const TrackTrigObject* tobj       = 0;
     
+    double ET=0;
+
     if ( objects ) { 
       tobj = objects->object( reftracks[i]->id() );
       if ( tobj ) { 
@@ -1455,6 +1459,7 @@ void ConfAnalysis::execute( const std::vector<TIDA::Track*>& reftracks,
 	m_etovpt->Fill( etovpt_val );
 	m_etovpt_raw->Fill( etovpt_val );
 	m_et->Fill( tobj->pt()*0.001 );
+	ET = std::fabs(tobj->pt()*0.001);
       }
     }
 
@@ -1587,7 +1592,7 @@ void ConfAnalysis::execute( const std::vector<TIDA::Track*>& reftracks,
 
 
       /// fill them all the resplots from a loop ...
-      double resfiller[8] = { std::fabs(ipTt), std::fabs(pTt), etat, z0t, double(NvtxCount), double(Nvtxtracks), phit, mu_val };
+      double resfiller[9] = { std::fabs(ipTt), std::fabs(pTt), ET, etat, z0t, double(NvtxCount), double(Nvtxtracks), phit, mu_val };
       
       double Delta_ipt =  1.0/pTr - 1.0/pTt;
       double Delta_pt  =  pTr - pTt;
@@ -1597,7 +1602,7 @@ void ConfAnalysis::execute( const std::vector<TIDA::Track*>& reftracks,
 	Delta_pt  *= -1;
       }
 
-      for ( int irfill=0 ; irfill<8 ; irfill++ ) { 
+      for ( int irfill=0 ; irfill<9 ; irfill++ ) { 
         m_retares[irfill]->Fill( resfiller[irfill],  etar-etat );
         m_rphires[irfill]->Fill( resfiller[irfill],  phir-phit );
         m_rzedres[irfill]->Fill( resfiller[irfill],  z0r-z0t );
@@ -1669,19 +1674,21 @@ void ConfAnalysis::execute( const std::vector<TIDA::Track*>& reftracks,
 
       //ADDED BY JK
       //-----
-      m_rzedres[m_rphires.size()]->Fill( resfiller[1], z0r-z0t );
+      /// FIXME: this stuff is all insane with all the indexing with respect to the 
+      ///        size of other vectors, so this will need to be tidied up 
+      m_rzedres[m_rphires.size()-1]->Fill( resfiller[1], z0r-z0t );
       m_rzedres[m_rphires.size()+1]->Fill( resfiller[1], z0r-z0t );
 
-      m_rzedthetares[m_rphires.size()]->Fill( resfiller[1],   z0r*std::sin(thetar)-z0t*std::sin(thetat) );
-      m_rzedthetares[m_rphires.size()+1]->Fill( resfiller[1], z0r*std::sin(thetar)-z0t*std::sin(thetat) );
+      m_rzedthetares[m_rphires.size()-1]->Fill( resfiller[1],   z0r*std::sin(thetar)-z0t*std::sin(thetat) );
+      m_rzedthetares[m_rphires.size()]->Fill( resfiller[1], z0r*std::sin(thetar)-z0t*std::sin(thetat) );
 
       m_rd0res[m_rphires.size()]->Fill( resfiller[1], a0r-a0t );
       m_rd0res[m_rphires.size()+1]->Fill( fabs(resfiller[1]), a0r-a0t ); //
 
-      m_rzedresPull[m_rphires.size()-2]->Fill(   resfiller[1],       (z0r - z0t) / std::sqrt( (dz0t*dz0t) + (dz0r*dz0r) ) );
-      m_rzedresPull[m_rphires.size()-1]->Fill( fabs(resfiller[1]), (z0r - z0t) / std::sqrt( (dz0t*dz0t) + (dz0r*dz0r) ) );
-      m_rd0resPull[m_rphires.size()-2]->Fill(    resfiller[1],       (a0r - a0t) / std::sqrt( (da0t*da0t) + (da0r*da0r) ) );
-      m_rd0resPull[m_rphires.size()-1]->Fill(  fabs(resfiller[1]), (a0r - a0t) / std::sqrt( (da0t*da0t) + (da0r*da0r) ) );
+      m_rzedresPull[m_rphires.size()-3]->Fill(   resfiller[1],       (z0r - z0t) / std::sqrt( (dz0t*dz0t) + (dz0r*dz0r) ) );
+      m_rzedresPull[m_rphires.size()-2]->Fill( fabs(resfiller[1]), (z0r - z0t) / std::sqrt( (dz0t*dz0t) + (dz0r*dz0r) ) );
+      m_rd0resPull[m_rphires.size()-3]->Fill(    resfiller[1],       (a0r - a0t) / std::sqrt( (da0t*da0t) + (da0r*da0r) ) );
+      m_rd0resPull[m_rphires.size()-2]->Fill(  fabs(resfiller[1]), (a0r - a0t) / std::sqrt( (da0t*da0t) + (da0r*da0r) ) );
       
       //-----
 	
