@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.CfgGetter import addTool, addToolClone, addService, addAlgorithm, addNamesToSkipIfNotAvailable, addTypesOnlyToSkip
 from AtlasGeoModel.CommonGMJobProperties import CommonGeometryFlags  # noqa: F401
@@ -66,13 +66,6 @@ addTool("MuonRecExample.MuonRecTools.MuonExtrapolator", "MuonExtrapolator")
 addTool("MuonRecExample.MuonRecTools.MuonStraightLineExtrapolator", "MuonStraightLineExtrapolator")
 
 addTool("Trk::KalmanUpdator", "MuonMeasUpdator")
-
-addService("Muon::MuonIdHelperSvc", "MuonIdHelperSvc", HasCSC=MuonGeometryFlags.hasCSC(),
-                                                       HasSTgc=MuonGeometryFlags.hasSTGC(),
-                                                       HasMM=MuonGeometryFlags.hasMM(),
-                                                       RunCSC=setup_cscs,
-                                                       RunsTgc=setup_stgcs,
-                                                       RunMM = setup_mm)
 
 addTool("Muon::MuonTrackTruthTool", "MuonTrackTruthTool")
 

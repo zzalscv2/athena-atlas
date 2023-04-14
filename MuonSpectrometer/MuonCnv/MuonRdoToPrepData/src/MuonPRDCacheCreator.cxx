@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonPRDCacheCreator.h"
@@ -79,7 +79,7 @@ StatusCode MuonPRDCacheCreator::initialize() {
     if (!m_idHelperSvc->hasTGC() && (doTgcPrdCache || doTgcCoinCache)) {
         ATH_MSG_WARNING("TGC ID Helper is not available and TGC cache was requested - This will not be created");
     }
-    if (!m_idHelperSvc->hasSTgc() && !m_sTgcCacheKey.key().empty()) {
+    if (!m_idHelperSvc->hasSTGC() && !m_sTgcCacheKey.key().empty()) {
         ATH_MSG_WARNING("STGC ID Helper is not available and STGC PRD cache was requested - This will not be created");
     }
     if (!m_idHelperSvc->hasMM() && !m_MmCacheKey.key().empty()) {
@@ -124,7 +124,7 @@ StatusCode MuonPRDCacheCreator::execute(const EventContext& ctx) const {
     }
 
     // NSW STGC
-    if (m_idHelperSvc->hasSTgc()) { ATH_CHECK(createContainer(m_sTgcCacheKey, m_idHelperSvc->stgcIdHelper().module_hash_max(), ctx)); }
+    if (m_idHelperSvc->hasSTGC()) { ATH_CHECK(createContainer(m_sTgcCacheKey, m_idHelperSvc->stgcIdHelper().module_hash_max(), ctx)); }
 
     // NSW MM
     if (m_idHelperSvc->hasMM()) { ATH_CHECK(createContainer(m_MmCacheKey, m_idHelperSvc->mmIdHelper().module_hash_max(), ctx)); }

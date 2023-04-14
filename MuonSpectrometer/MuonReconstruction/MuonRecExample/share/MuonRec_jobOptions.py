@@ -37,7 +37,7 @@ topSequence = AlgSequence()
 # Since it is not automatically created by the job configuration (as for RDOtoESD),
 # do it here manually (hope this will be fixed with the movement to the new configuration for release 22)
 if rec.readESD() or rec.readAOD():
-    from MuonRecExample.MuonRecTools import MuonIdHelperSvc
+    from MuonIdHelpers.MuonIdHelpersConfigLegacy import MuonIdHelperSvc
     MuonIdHelperSvc()
 
 if muonRecFlags.doCSCs() and not MuonGeometryFlags.hasCSC(): muonRecFlags.doCSCs = False

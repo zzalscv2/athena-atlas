@@ -143,7 +143,7 @@ MuonSegmentConverterTool::convert(const MuonSegment& seg, xAOD::MuonSegmentConta
         acc_mmStereoHits(*xaodSeg) = hitCounts.nmmStereoHits;
         acc_mmEtaHits(*xaodSeg) = hitCounts.nmmEtaHits;
     }
-    if (m_idHelperSvc->hasSTgc()) {
+    if (m_idHelperSvc->hasSTGC()) {
         acc_stgcEtaHits(*xaodSeg) = hitCounts.nstgcHits.netaHits;
         acc_stgcPhiHits(*xaodSeg) = hitCounts.nstgcHits.nphiHits;        
     }

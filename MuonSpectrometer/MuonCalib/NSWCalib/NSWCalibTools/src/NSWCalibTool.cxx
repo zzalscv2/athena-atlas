@@ -54,10 +54,10 @@ StatusCode Muon::NSWCalibTool::initialize()
   ATH_MSG_DEBUG("In initialize()");
   ATH_CHECK(m_idHelperSvc.retrieve());
   ATH_CHECK(m_condTdoPdoKey.initialize());
-  ATH_CHECK(m_fieldCondObjInputKey.initialize( m_idHelperSvc->hasMM() && m_idHelperSvc->hasSTgc() ));
-  ATH_CHECK(m_muDetMgrKey.initialize( m_idHelperSvc->hasMM() && m_idHelperSvc->hasSTgc() ));
+  ATH_CHECK(m_fieldCondObjInputKey.initialize( m_idHelperSvc->hasMM() && m_idHelperSvc->hasSTGC() ));
+  ATH_CHECK(m_muDetMgrKey.initialize( m_idHelperSvc->hasMM() && m_idHelperSvc->hasSTGC() ));
 
-  if ( m_idHelperSvc->hasMM() && m_idHelperSvc->hasSTgc() ) {
+  if ( m_idHelperSvc->hasMM() && m_idHelperSvc->hasSTGC() ) {
     ATH_CHECK(initializeGasProperties());
   } else {
     ATH_MSG_INFO("MM or STGC not part of initialized detector layout, skipping initialization");
