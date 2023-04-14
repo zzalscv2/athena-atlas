@@ -3,7 +3,7 @@
 # Declare the package name:
 atlas_subdir( TrkTrackSummaryTool )
 
-find_package( Boost )
+find_package( Boost COMPONENTS unit_test_framework)
 find_package( ROOT )
 
 # Component(s) in the package:

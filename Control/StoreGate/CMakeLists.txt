@@ -4,7 +4,7 @@
 atlas_subdir( StoreGate )
 
 # External dependencies:
-find_package( Boost )
+find_package( Boost COMPONENTS timer)
 
 # Component(s) in the package:
 atlas_add_library( StoreGateLib src/*.cxx
@@ -34,7 +34,7 @@ function( _add_test name )
    atlas_add_test( ${name}
       SOURCES test/${name}.cxx
       INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-      LINK_LIBRARIES StoreGateLib TestTools
+      LINK_LIBRARIES ${Boost_LIBRARIES} StoreGateLib TestTools
       ${extra_arg} )
 endfunction( _add_test )
 

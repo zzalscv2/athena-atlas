@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkVertexFitterUtils/TrackToVertexIPEstimator.h"
@@ -27,35 +27,27 @@ namespace Trk
  StatusCode TrackToVertexIPEstimator::initialize()
  {
 
-//uploading the corresponding tools
-//extrapolator
-  if ( m_extrapolator.retrieve().isFailure() )
-  {
-   ATH_MSG_FATAL( "Failed to retrieve tool " << m_extrapolator );
-   return StatusCode::FAILURE;
-  }
-  ATH_MSG_INFO( "Retrieved tool " << m_extrapolator );
-
-
-//updator
-  if ( m_Updator.retrieve().isFailure() )
-  {
-    ATH_MSG_FATAL( "Failed to retrieve tool " << m_Updator );
+  // uploading the corresponding tools
+  // extrapolator
+  if (m_extrapolator.retrieve().isFailure()) {
+    ATH_MSG_FATAL("Failed to retrieve tool " << m_extrapolator);
     return StatusCode::FAILURE;
   }
-  ATH_MSG_INFO( "Retrieved tool " << m_Updator );
 
+  // updator
+  if (m_Updator.retrieve().isFailure()) {
+    ATH_MSG_FATAL("Failed to retrieve tool " << m_Updator);
+    return StatusCode::FAILURE;
+  }
 
-//linearized track factory
+  // linearized track factory
   if ( m_linFactory.retrieve().isFailure() )
   {
     ATH_MSG_FATAL("Failed to retrieve tool " << m_linFactory );
     return StatusCode::FAILURE;
   }
-  ATH_MSG_INFO( "Retrieved tool " << m_linFactory );
 
-
-   return StatusCode::SUCCESS;
+  return StatusCode::SUCCESS;
  }//end of initialize method
 
 

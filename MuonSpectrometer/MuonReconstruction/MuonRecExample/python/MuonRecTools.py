@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 logging.getLogger().info("Importing %s", __name__)
@@ -216,14 +216,6 @@ def MuonExtrapolator(name='MuonExtrapolator',**kwargs):
 
     return CfgMgr.Trk__Extrapolator(name,**kwargs)
 # end of factory function MuonExtrapolator
-
-def MuonIdHelperSvc(name="MuonIdHelperSvc",**kwargs):
-    from MuonIdHelpers.MuonIdHelpersConf import Muon__MuonIdHelperSvc
-    kwargs.setdefault("HasCSC", MuonGeometryFlags.hasCSC())
-    kwargs.setdefault("HasSTgc", MuonGeometryFlags.hasSTGC())
-    kwargs.setdefault("HasMM", MuonGeometryFlags.hasMM())
-    return Muon__MuonIdHelperSvc(name,**kwargs)
-
 def MuonStraightLineExtrapolator(name="MuonStraightLineExtrapolator",**kwargs):
     kwargs.setdefault("Propagators",["Trk::STEP_Propagator/MuonStraightLinePropagator"])
     kwargs.setdefault("STEP_Propagator","Trk::STEP_Propagator/MuonStraightLinePropagator")
@@ -376,7 +368,7 @@ def MuonClusterSegmentFinder(name="MuonClusterSegmentFinder", extraFlags=None,**
     kwargs.setdefault("MuonPRDSelectionTool", getPublicTool("MuonPRDSelectionTool") )
     return CfgMgr.Muon__MuonClusterSegmentFinder(name,**kwargs)
 
-def MuonClusterSegmentFinderTool(name="MuonClusterSegmentFinderTool", extraFlags=None,**kwargs):
+def MuonNSWSegmentFinderTool(name="MuonNSWSegmentFinderTool", extraFlags=None,**kwargs):
     kwargs.setdefault("SLFitter","Trk::GlobalChi2Fitter/MCTBSLFitterMaterialFromTrack")
     import MuonCombinedRecExample.CombinedMuonTrackSummary  # noqa: F401
     from AthenaCommon.AppMgr import ToolSvc
@@ -387,7 +379,7 @@ def MuonClusterSegmentFinderTool(name="MuonClusterSegmentFinderTool", extraFlags
         kwargs.setdefault("TrackSummaryTool", ToolSvc.CombinedMuonTrackSummary)
 
     kwargs.setdefault("MuonClusterCreator", getPublicTool("MuonClusterOnTrackCreator")) 
-    return CfgMgr.Muon__MuonClusterSegmentFinderTool(name,**kwargs)
+    return CfgMgr.Muon__MuonNSWSegmentFinderTool(name,**kwargs)
 
 def DCMathSegmentMaker(name='DCMathSegmentMaker',extraFlags=None,**kwargs):
     beamType       = getattr(extraFlags,"beamType", beamFlags.beamType())
@@ -511,4 +503,3 @@ def MuonLayerSegmentFinderTool(name='MuonLayerSegmentFinderTool',extraFlags=None
 def ExtraTreeTrackFillerTool(name="ExtraTreeTrackFillerTool",extraFlags=None,**kwargs):
     kwargs.setdefault("PullCalculator", getPublicTool("ResidualPullCalculator"))
     return CfgMgr.MuonCalib__ExtraTreeTrackFillerTool(name,**kwargs)
-

@@ -16,8 +16,7 @@ timeout 64800 Reco_tf.py \
   --outputDRAW_ZMUMUFile=myDRAW_ZMUMU.data \
   --outputDAOD_IDTIDEFile=myIDTIDE.pool.root \
   --multiprocess='True' \
-  --preExec 'all:from AthenaMonitoring.DQMonFlags import DQMonFlags; DQMonFlags.doHLTMon=False' \
-  --postExec 'FPEAuditor.NStacktracesOnFPE=10' \
+  --CA='True' \
   --autoConfiguration='everything' \
   --conditionsTag 'all:CONDBR2-BLKPA-RUN2-09' --geometryVersion='default:ATLAS-R2-2016-01-00-01' \
   --runNumber='357750' --maxEvents='-1'

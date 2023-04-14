@@ -137,7 +137,7 @@ def  ActsTrkSiSpacePointsSeedMakerCfg(flags,
     kwargs.setdefault('SeedToolStrip', seedTool_strip)
 
     # Validation
-    if flags.ITk.Tracking.writeSeedValNtuple:
+    if flags.Tracking.writeSeedValNtuple:
         kwargs.setdefault('WriteNtuple', True)
         HistService = CompFactory.THistSvc(Output = ["valNtuples DATAFILE='SeedMakerValidation.root' OPT='RECREATE'"])
         acc.addService(HistService)

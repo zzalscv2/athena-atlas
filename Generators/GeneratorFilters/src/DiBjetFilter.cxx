@@ -123,7 +123,7 @@ StatusCode DiBjetFilter::filterEvent() {
   double weight = 1;
   for (const HepMC::GenEvent* genEvt : *events()) {
     weight = genEvt->weights().front();
-    std::vector< HepMC::ConstGenParticlePtr > bHadrons;
+    std::vector<HepMC::ConstGenParticlePtr> bHadrons;
     for(const auto& pitr: *genEvt) {  
       if( !isBwithWeakDK( pitr->pdg_id()) ) continue;
       if( pitr->momentum().perp() < m_bottomPtMin ) continue;

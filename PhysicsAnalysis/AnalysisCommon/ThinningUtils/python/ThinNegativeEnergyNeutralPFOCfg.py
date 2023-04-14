@@ -10,8 +10,7 @@ def ThinNegativeEnergyNeutralPFOCfg(flags, StreamName="StreamAOD"):
     thinAlg = CompFactory.ThinNegativeEnergyNeutralPFOsAlg(
         "ThinNegativeEnergyNeutralPFOsAlg",
         ThinNegativeEnergyNeutralPFOs = True,
-        StreamName = StreamName,
-        LCNeutralPFOsKey = "JetETMissLCNeutralParticleFlowObjects",
+        StreamName = StreamName,        
     )
 
     acc.addEventAlgo( thinAlg )

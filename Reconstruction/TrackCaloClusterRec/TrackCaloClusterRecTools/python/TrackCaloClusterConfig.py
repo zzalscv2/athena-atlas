@@ -1,4 +1,4 @@
-#   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaCommon import Logging
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -239,7 +239,7 @@ def runUFOReconstruction_r22( flags,constits, caloClusterName="CaloCalTopoCluste
                                                         InputClusters = caloClusterName,
                                                         VertexContainer = "PrimaryVertices",
                                                         InputPFO=inputFEcontainerkey, 
-                                                        OriginPFO=inputFEcontainerkey+'.originalObjectLink',
+                                                        OriginPFO='originalObjectLink',
                                                         ClusterECut = 0.,
                                                         **commonArgs
     )
@@ -250,7 +250,7 @@ def runUFOReconstruction_r22( flags,constits, caloClusterName="CaloCalTopoCluste
     tccUFO = CompFactory.UFOTool(f"UFOtool{pfoVariant}",
                                  ClusterECut = UFOInfoAlg.ClusterECut,                     
                                  InputPFO=inputFEcontainerkey, 
-                                 OriginPFO=inputFEcontainerkey+'.originalObjectLink',
+                                 OriginPFO='originalObjectLink',
                                  **commonArgs
                                  )    
 

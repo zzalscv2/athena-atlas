@@ -19,7 +19,7 @@ StatusCode MultiMuonFilter::filterEvent() {
   int numMuons = 0;
   for (itr = events()->begin(); itr != events()->end(); ++itr) {
     const HepMC::GenEvent* genEvt = *itr;
-    for( auto pitr: *genEvt) {
+    for (const auto& pitr: *genEvt) {
      if (pitr->status() != 1 || std::abs(pitr->pdg_id()) != 13)  continue;
      if ( (pitr->momentum().perp() < m_Ptmin) || std::abs(pitr->momentum().pseudoRapidity()) > m_EtaRange) continue;
      numMuons++;

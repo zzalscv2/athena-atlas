@@ -47,24 +47,24 @@ private:
   bool m_excludeCFromTop;
 
 
-  bool passBSelection(HepMC::ConstGenParticlePtr part) const;
-  bool passCSelection(HepMC::ConstGenParticlePtr part) const;
+  bool passBSelection(const HepMC::ConstGenParticlePtr& part) const;
+  bool passCSelection(const HepMC::ConstGenParticlePtr& part) const;
 
   int hadronType(int pdgid) const;
-  bool isBHadron(HepMC::ConstGenParticlePtr part) const;
-  bool isCHadron(HepMC::ConstGenParticlePtr part) const;
+  bool isBHadron(const HepMC::ConstGenParticlePtr& part) const;
+  bool isCHadron(const HepMC::ConstGenParticlePtr& part) const;
 
-  bool isInitialHadron(HepMC::ConstGenParticlePtr part) const;
-  bool isFinalHadron(HepMC::ConstGenParticlePtr part) const;
+  bool isInitialHadron(const HepMC::ConstGenParticlePtr& part) const;
+  bool isFinalHadron(const HepMC::ConstGenParticlePtr& part) const;
 
-  bool isQuarkFromHadron(HepMC::ConstGenParticlePtr part) const;
-  bool isCHadronFromB(HepMC::ConstGenParticlePtr part) const;
+  bool isQuarkFromHadron(const HepMC::ConstGenParticlePtr& part) const;
+  bool isCHadronFromB(const HepMC::ConstGenParticlePtr& part) const;
 
-  HepMC::ConstGenParticlePtr  findInitial(HepMC::ConstGenParticlePtr part) const;
+  HepMC::ConstGenParticlePtr   findInitial(const HepMC::ConstGenParticlePtr& part) const;
 
-  bool isFromTop(HepMC::ConstGenParticlePtr part) const;
-  bool isDirectlyFromTop(HepMC::ConstGenParticlePtr part) const;
-  bool isDirectlyFromWTop(HepMC::ConstGenParticlePtr part) const;
+  bool isFromTop(const HepMC::ConstGenParticlePtr& part) const;
+  bool isDirectlyFromTop(const HepMC::ConstGenParticlePtr& part) const;
+  bool isDirectlyFromWTop(const HepMC::ConstGenParticlePtr& part) const;
 
 
 

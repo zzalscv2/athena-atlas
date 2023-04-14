@@ -131,7 +131,7 @@ for (itr = xTruthEventContainer->begin(); itr!=xTruthEventContainer->end(); ++it
   return StatusCode::SUCCESS;
 }
 
-double xAODM4MuIntervalFilter::getEventWeight(double mass) {
+double xAODM4MuIntervalFilter::getEventWeight(double mass) const{
   double weight = 1.0;
   if (mass < m_m4mulow) {
        	weight /= m_prob2low;

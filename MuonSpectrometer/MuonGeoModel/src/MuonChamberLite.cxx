@@ -665,7 +665,7 @@ namespace MuonGM {
                 det->setIdentifier(id);
                 det->setLastInitField(5);
 
-                manager->addMdtReadoutElement(det, id);
+                manager->addMdtReadoutElement(det);
 
                 // Select right MdtAsBuilt parameters from map in MuonDetectorManager and assign them to MuonStation
                 if (manager->applyMdtAsBuiltParams()) {
@@ -706,7 +706,7 @@ namespace MuonGM {
 
                 // set alignment parameters for the wire layers
                 det->setCscInternalAlignmentParams();
-                manager->addCscReadoutElement(det, id);
+                manager->addCscReadoutElement(det);
             }
 
             if (lvt && manager->tgcIdHelper()) {
@@ -748,7 +748,7 @@ namespace MuonGM {
                 det->setIdentifier(id);
                 det->setLastInitField(4);
  
-               manager->addTgcReadoutElement(det, id);
+               manager->addTgcReadoutElement(det);
             }
             if (lvr && RPCON && manager->rpcIdHelper()) {
                 RpcComponent *rp = (RpcComponent *)c;
@@ -889,7 +889,7 @@ namespace MuonGM {
                 det->fillCache();  // fill temporary cache (global position on known yet)
                 det->initDesign(); ///  init design : design uses  global (converting back to local) positions
                 det->clearCache(); // clear temporary cache
-                manager->addRpcReadoutElement(det, id);
+                manager->addRpcReadoutElement(det);
 
             } // if (lvr && RPCON && manager->rpcIdHelper()) {
 

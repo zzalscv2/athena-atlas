@@ -88,7 +88,7 @@ StatusCode VBFMjjIntervalFilter::filterEvent() {
   std::vector<TLorentzVector> MCTruthTauList;
   for (McEventCollection::const_iterator itr = events()->begin(); itr != events()->end(); ++itr) {
     const HepMC::GenEvent* genEvt = (*itr);
-    for (auto pitr: *genEvt) {
+    for (const auto& pitr: *genEvt) {
       if (m_photonjetoverlap==true) {
 	// photon - copied from VBFForwardJetsFilter.cxx
 	if ( pitr->pdg_id() == 22 && pitr->status() == 1 &&
@@ -110,7 +110,7 @@ StatusCode VBFMjjIntervalFilter::filterEvent() {
 	if ( std::abs(pitr->pdg_id()) == 15 && pitr->status() != 3 ) {
 	   auto tau = pitr;
 	  int leptonic = 0;
-	  for ( auto beg:  *(tau->end_vertex()) ) {
+	  for (const auto& beg:  *(tau->end_vertex()) ) {
 	    if (  beg->production_vertex() != tau->end_vertex() ) continue;
 	    if ( std::abs( beg->pdg_id() ) == 12 ) leptonic = 1;
 	    if ( std::abs( beg->pdg_id() ) == 14 ) leptonic = 2;
@@ -215,9 +215,9 @@ StatusCode VBFMjjIntervalFilter::filterEvent() {
 }
 
 
-bool VBFMjjIntervalFilter::checkOverlap(double eta, double phi, const std::vector<HepMC::ConstGenParticlePtr> &list ) {
+bool VBFMjjIntervalFilter::checkOverlap(double eta, double phi, const std::vector<HepMC::ConstGenParticlePtr> &list ) const {
   for (size_t i = 0; i < list.size(); ++i) {
-    double pt = list[i]->momentum().perp();
+    double pt = list.at(i)->momentum().perp();
     if (pt > m_olapPt) {
       /// @todo Provide a helper function for this (and similar)
       double dphi = phi-list[i]->momentum().phi();
@@ -233,7 +233,7 @@ bool VBFMjjIntervalFilter::checkOverlap(double eta, double phi, const std::vecto
 
 
 
-bool VBFMjjIntervalFilter::checkOverlap(double eta, double phi, const std::vector<TLorentzVector> &list ) {
+bool VBFMjjIntervalFilter::checkOverlap(double eta, double phi, const std::vector<TLorentzVector> &list ) const{
   for (size_t i = 0; i < list.size(); ++i) {
     double pt = list[i].Vect().Perp();
     if (pt > m_olapPt) {
@@ -249,7 +249,7 @@ bool VBFMjjIntervalFilter::checkOverlap(double eta, double phi, const std::vecto
   return false;
 }
 
-bool VBFMjjIntervalFilter::ApplyMassDphi(const xAOD::JetContainer *jets){
+bool VBFMjjIntervalFilter::ApplyMassDphi(const xAOD::JetContainer *jets) const {
   if(jets->size()<2) return false; 
   double mjj = (jets->at(0)->p4() + jets->at(1)->p4()).M();
   double dphi = std::abs(jets->at(0)->p4().DeltaPhi(jets->at(1)->p4()));
@@ -262,7 +262,7 @@ bool VBFMjjIntervalFilter::ApplyMassDphi(const xAOD::JetContainer *jets){
   return pass; 
 }
 
-double VBFMjjIntervalFilter::getEventWeight(const xAOD::JetContainer *jets) {
+double VBFMjjIntervalFilter::getEventWeight(const xAOD::JetContainer *jets) const {
   double weight = 1.0;
   if (jets->size() == 0) {
     weight /= m_prob0;
@@ -295,7 +295,7 @@ double VBFMjjIntervalFilter::getEventWeight(const xAOD::JetContainer *jets) {
 }
 
 
- TLorentzVector VBFMjjIntervalFilter::sumDaughterNeutrinos( HepMC::ConstGenParticlePtr part ) {
+ TLorentzVector VBFMjjIntervalFilter::sumDaughterNeutrinos(const HepMC::ConstGenParticlePtr& part ) const{
   TLorentzVector nu( 0, 0, 0, 0);
 
   if ( ( std::abs( part->pdg_id() ) == 12 ) || ( std::abs( part->pdg_id() ) == 14 ) || ( std::abs( part->pdg_id() ) == 16 ) ) {
@@ -308,7 +308,7 @@ double VBFMjjIntervalFilter::getEventWeight(const xAOD::JetContainer *jets) {
 
   if ( !part->end_vertex() ) return nu;
 
-  for (auto beg: *(part->end_vertex()) ) nu += sumDaughterNeutrinos( beg );
+  for (const auto& beg: *(part->end_vertex()) ) nu += sumDaughterNeutrinos( beg );
   return nu;
 }
 

@@ -6,7 +6,8 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType, LHCPeriod
 
 
-def InDetAmbiTrackSelectionToolCfg(flags, name="InDetAmbiTrackSelectionTool", **kwargs):
+def InDetAmbiTrackSelectionToolCfg(
+        flags, name="InDetAmbiTrackSelectionTool", **kwargs):
     acc = ComponentAccumulator()
 
     if ('UseParameterization' in kwargs and
@@ -81,8 +82,7 @@ def InDetAmbiTrackSelectionToolCfg(flags, name="InDetAmbiTrackSelectionTool", **
         kwargs.setdefault("phiWidthEM", 0.05)
         kwargs.setdefault("etaWidthEM", 0.05)
         # Skip ambi solver in hadronic ROI
-        kwargs.setdefault("doSkipAmbiInROI",
-                          flags.InDet.Tracking.doSkipAmbiROI)
+        kwargs.setdefault("doSkipAmbiInROI", flags.Tracking.doSkipAmbiROI)
 
         if (flags.Tracking.doTIDE_AmbiTrackMonitoring and
                 flags.InDet.Tracking.ActiveConfig.extension == ""):
@@ -100,13 +100,13 @@ def InDetAmbiTrackSelectionToolCfg(flags, name="InDetAmbiTrackSelectionTool", **
     else:
         AmbiTrackSelectionTool = CompFactory.InDet.InDetAmbiTrackSelectionTool
 
-    InDetAmbiTrackSelectionTool = AmbiTrackSelectionTool(
-        name=name+flags.InDet.Tracking.ActiveConfig.extension, **kwargs)
-    acc.setPrivateTools(InDetAmbiTrackSelectionTool)
+    acc.setPrivateTools(AmbiTrackSelectionTool(
+        name=name+flags.InDet.Tracking.ActiveConfig.extension, **kwargs))
     return acc
 
 
-def InDetTRTAmbiTrackSelectionToolCfg(flags, name='InDetTRT_SeededAmbiTrackSelectionTool', **kwargs):
+def InDetTRTAmbiTrackSelectionToolCfg(
+        flags, name='InDetTRT_SeededAmbiTrackSelectionTool', **kwargs):
     acc = ComponentAccumulator()
 
     if "DriftCircleCutTool" not in kwargs:
@@ -141,7 +141,8 @@ def InDetTRTAmbiTrackSelectionToolCfg(flags, name='InDetTRT_SeededAmbiTrackSelec
     return acc
 
 
-def InDetTrigAmbiTrackSelectionToolCfg(flags, name='InDetTrigAmbiTrackSelectionTool', **kwargs):
+def InDetTrigAmbiTrackSelectionToolCfg(
+        flags, name='InDetTrigAmbiTrackSelectionTool', **kwargs):
     acc = ComponentAccumulator()
     # TODO add AmbiTrackSelectionTool for cosmics
 
@@ -170,7 +171,8 @@ def InDetTrigAmbiTrackSelectionToolCfg(flags, name='InDetTrigAmbiTrackSelectionT
     return acc
 
 
-def ITkAmbiTrackSelectionToolCfg(flags, name="ITkAmbiTrackSelectionTool", **kwargs):
+def ITkAmbiTrackSelectionToolCfg(
+        flags, name="ITkAmbiTrackSelectionTool", **kwargs):
     acc = ComponentAccumulator()
 
     kwargs.setdefault("DriftCircleCutTool", None)
@@ -229,6 +231,8 @@ def ITkAmbiTrackSelectionToolCfg(flags, name="ITkAmbiTrackSelectionTool", **kwar
     # Split cluster ROI size
     kwargs.setdefault("phiWidthEM", 0.05)
     kwargs.setdefault("etaWidthEM", 0.05)
+    # Skip ambi solver in hadronic ROI
+    kwargs.setdefault("doSkipAmbiInROI", flags.Tracking.doSkipAmbiROI)
 
     if 'InDetEtaDependentCutsSvc' not in kwargs:
         from InDetConfig.InDetEtaDependentCutsConfig import (

@@ -1,5 +1,6 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from eflowRec import eflowRecConf
+from eflowRec import PFOnlineMon
 from InDetTrackSelectionTool import InDetTrackSelectionToolConf
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -17,23 +18,31 @@ trackvtxcontainers = {
 
 
 # Configure the extrapolator
-def getExtrapolator():
+def getExtrapolator(flags):
     # Set up with trigger extrapolator instance
-    # FIXME: reconfigure for lower tolerance to speed up
-    # from TrkExTools.AtlasExtrapolator import AtlasExtrapolator
     from TrackToCalo.TrackToCaloConf import Trk__ParticleCaloExtensionTool
-    from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigExtrapolator
+    from TrkConfig.AtlasExtrapolatorConfig import TrigPFlowExtrapolatorCfg
+    from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper, conf2toConfigurable
 
+    ca = CAtoGlobalWrapper(TrigPFlowExtrapolatorCfg,flags)
+    privateTool = ca.popPrivateTools()
+    tool = conf2toConfigurable(privateTool) 
+    
     return Trk__ParticleCaloExtensionTool(
-        "HLTPF_ParticleCaloExtension", Extrapolator=InDetTrigExtrapolator
+        "HLTPF_ParticleCaloExtension", Extrapolator=tool
     )
 
-def PFTrackExtension(tracktype):
+def PFTrackExtension(flags, tracktype):
     """ Get the track extension after a preselection
 
     Returns the preselected track selection, the extension cache and the list of algorithms
     """
     
+    TrackCaloExtrapolation_general = getExtrapolator(flags)
+    monTool_trackExtrap = PFOnlineMon.getMonTool_ParticleCaloExtensionTool(flags)
+    monTool_trackExtrap.HistPath = 'TrackCaloExtrapolation_general'
+    TrackCaloExtrapolation_general.MonTool = monTool_trackExtrap
+
     tracksin, _ = trackvtxcontainers[tracktype]
     from eflowRec.eflowRecConf import PFTrackPreselAlg
     from TrackToCalo.TrackToCaloConf import Trk__PreselCaloExtensionBuilderAlg
@@ -49,7 +58,7 @@ def PFTrackExtension(tracktype):
 
     extension_alg = Trk__PreselCaloExtensionBuilderAlg(
         f"HLTPFTrackExtension_{tracktype}",
-        ParticleCaloExtensionTool=getExtrapolator(),
+        ParticleCaloExtensionTool=TrackCaloExtrapolation_general,
         InputTracks=presel_alg.OutputTracks,
         OutputCache=f"HLTPFTrackExtensionCache_{tracktype}",
     )
@@ -79,7 +88,7 @@ def muonCaloTagSeq(flags, tracktype, tracksin, extcache, cellsin):
         MuonScoreTool=CaloMuonScoreTool(
             CaloMuonEtaCut=3,
             ParticleCaloCellAssociationTool=Rec__ParticleCaloCellAssociationTool(
-                ParticleCaloExtensionTool=getExtrapolator(),
+                ParticleCaloExtensionTool=getExtrapolator(flags),
                 CaloCellContainer=""
             ),
         ),
@@ -88,10 +97,10 @@ def muonCaloTagSeq(flags, tracktype, tracksin, extcache, cellsin):
         DepositInCaloTool=TrackDepositInCaloTool(
             ExtrapolatorHandle=InDetTrigExtrapolator,
             ParticleCaloCellAssociationTool=Rec__ParticleCaloCellAssociationTool(
-                ParticleCaloExtensionTool=getExtrapolator(),
+                ParticleCaloExtensionTool=getExtrapolator(flags),
                 CaloCellContainer=""
             ),
-            ParticleCaloExtensionTool=getExtrapolator(),
+            ParticleCaloExtensionTool=getExtrapolator(flags),
         ),
     )
     return tag_alg.OutputTracks, tag_alg
@@ -109,7 +118,7 @@ def muonIsoTagSeq(flags, tracktype, tracksin, extcache, clustersin):
         MinPt = flags.Trigger.FSHad.PFOMuonRemovalMinPt,
         TrackIsoTool = xAOD__TrackIsolationTool(TrackParticleLocation=tracksin, VertexLocation=""),
         CaloIsoTool = xAOD__CaloIsolationTool(
-            ParticleCaloExtensionTool=getExtrapolator(),
+            ParticleCaloExtensionTool=getExtrapolator(flags),
             InputCaloExtension=extcache,
             ParticleCaloCellAssociationTool="",
             saveOnlyRequestedCorrections=True,
@@ -128,7 +137,7 @@ def getPFTrackSel(flags, tracktype, extensionCache="", trackname=None):
         tracksin = trackname
 
     TrackCaloExtensionTool = eflowRecConf.eflowTrackCaloExtensionTool(
-        "HLTPF_eflowTrkCaloExt", TrackCaloExtensionTool=getExtrapolator()
+        "HLTPF_eflowTrkCaloExt", TrackCaloExtensionTool=getExtrapolator(flags)
     )
     # Set the extension cache - if this is "" then the tool will run the extension
     TrackCaloExtensionTool.PFParticleCache = extensionCache
@@ -285,7 +294,7 @@ def PFHLTSequence(flags, clustersin, tracktype, cellsin=None):
         algs = []
         extension = ""
     else:
-        pretracks, extension, algs = PFTrackExtension(tracktype)
+        pretracks, extension, algs = PFTrackExtension(flags, tracktype)
         if muon_mode == "Calo":
             if cellsin is None:
                 raise ValueError("Cells must be provided for the 'Calo' muon mode!")

@@ -58,7 +58,7 @@ def MuonTrackSteering(name="MuonTrackSteering", extraFlags=None, **kwargs):
     kwargs.setdefault("SegSeedQCut", 2)
     kwargs.setdefault("Seg2ndQCut", 1)
     return CfgMgr.Muon__MuonTrackSteering(name,**kwargs)
-#
+
 def MuonSegmentFilterAlg(name="MuonSegmentFilterAlg", **kwargs):
     kwargs.setdefault("SegmentCollectionName", "TrackMuonSegments")
     return CfgMgr.MuonSegmentFilterAlg(name, **kwargs)
@@ -101,11 +101,11 @@ def MuonSegmentFinderNCBAlg(name="MuonSegmentMaker_NCB", **kwargs):
         Cleaner.PullCut = 3
         Cleaner.PullCutPhi = 3
         Cleaner.UseSLFit = True
-        kwargs.setdefault("MuonClusterSegmentFinderTool", getPublicToolClone("MuonClusterSegmentFinderTool_NCB",
-                                                                            "MuonClusterSegmentFinderTool",
-                                                                            TrackCleaner = Cleaner,
-                                                                            SeedMMStereos = False,
-                                                                            IPConstraint = False) )
+        kwargs.setdefault("NSWSegmentMaker", getPublicToolClone("MuonNSWSegmentFinderTool_NCB",
+                                                                "MuonNSWSegmentFinderTool",
+                                                                TrackCleaner = Cleaner,
+                                                                SeedMMStereos = False,
+                                                                IPConstraint = False) )
 
     
     return CfgMgr.MuonSegmentFinderAlg(name, **kwargs)
@@ -115,7 +115,7 @@ def MuonSegmentFinderAlg( name="MuonSegmentMaker", **kwargs):
     from AthenaCommon.BeamFlags import jobproperties
     beamFlags = jobproperties.Beam
     
-    SegmentFinder = getPublicTool("MuonClusterSegmentFinderTool")
+    SegmentFinder = getPublicTool("MuonNSWSegmentFinderTool")
     Cleaner = getPublicToolClone("MuonTrackCleaner_seg","MuonTrackCleaner")
     Cleaner.Extrapolator = getPublicTool("MuonStraightLineExtrapolator")
     Cleaner.Fitter = getPublicTool("MCTBSLFitterMaterialFromTrack")
@@ -136,7 +136,7 @@ def MuonSegmentFinderAlg( name="MuonSegmentMaker", **kwargs):
     kwargs.setdefault("Csc2dSegmentMaker",  getPublicTool("Csc2dSegmentMaker") if reco_cscs else "")
     kwargs.setdefault("Csc4dSegmentMaker",  getPublicTool("Csc4dSegmentMaker") if reco_cscs else "")
     kwargs.setdefault("MuonClusterCreator", getPublicTool("MuonClusterOnTrackCreator") if reco_mircomegas or reco_stgc else "" )
-    kwargs.setdefault("MuonClusterSegmentFinderTool", getPublicTool("MuonClusterSegmentFinderTool") if reco_mircomegas or reco_stgc else "" )
+    kwargs.setdefault("NSWSegmentMaker", getPublicTool("MuonNSWSegmentFinderTool") if reco_mircomegas or reco_stgc else "" )
     kwargs.setdefault("SegmentCollectionName", SegmentLocation)
     kwargs.setdefault("MuonPatternCalibration", getPublicTool("MuonPatternCalibration"))
     kwargs.setdefault("PrintSummary",  muonStandaloneFlags.printSummary())

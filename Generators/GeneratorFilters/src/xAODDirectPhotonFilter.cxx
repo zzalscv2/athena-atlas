@@ -103,7 +103,7 @@ StatusCode xAODDirectPhotonFilter::filterEvent() {
     setFilterPassed(false);
   }
   else {
-    for (auto photon: promptPhotonsInEta) {
+    for (const auto& photon: promptPhotonsInEta) {
 
       ATH_MSG_DEBUG("Found prompt photon with pt="<<photon->pt());
     }

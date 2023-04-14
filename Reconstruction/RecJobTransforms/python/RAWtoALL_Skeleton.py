@@ -125,6 +125,12 @@ def fromRunArgs(runArgs):
         flags.addFlag('Output.doWriteDESDM_PHOJET', True)
         log.info("---------- Configured DESDM_PHOJET output")
 
+    if hasattr(runArgs, 'outputDESDM_ALLCELLSFile'):
+        streamName = 'DESDM_ALLCELLS'
+        flags.addFlag(f'Output.{streamName}FileName', runArgs.outputDESDM_ALLCELLSFile)
+        flags.addFlag(f'Output.doWrite{streamName}', True)
+        log.info("---------- Configured "+streamName+" output")
+
     from AthenaConfiguration.Enums import ProductionStep
     flags.Common.ProductionStep=ProductionStep.Reconstruction
 
@@ -205,6 +211,12 @@ def fromRunArgs(runArgs):
         from PrimaryDPDMaker.DESDM_PHOJET import DESDM_PHOJETCfg
         cfg.merge(DESDM_PHOJETCfg(flags))
         log.info("---------- Configured PHOJET perfDPD")
+
+    # DESDM ALLCELLS
+    for flag in [key for key in flags._flagdict.keys() if ("Output.DESDM_ALLCELLSFileName" in key)]:
+        from PrimaryDPDMaker.DESDM_ALLCELLS import DESDM_ALLCELLSCfg
+        cfg.merge(DESDM_ALLCELLSCfg(flags))
+        log.info("---------- Configured ALLCELLS perfDPD")
 
     # Special message service configuration
     from Digitization.DigitizationSteering import DigitizationMessageSvcCfg

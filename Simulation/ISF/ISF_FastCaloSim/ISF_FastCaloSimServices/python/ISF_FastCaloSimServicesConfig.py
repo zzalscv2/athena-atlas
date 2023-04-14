@@ -17,9 +17,9 @@ from FastCaloSim.FastCaloSimFactoryNew import (NITimedExtrapolatorCfg,
 
 def PunchThroughClassifierCfg(flags, name="ISF_PunchThroughClassifier", **kwargs):
     acc = ComponentAccumulator()
-    kwargs.setdefault("ScalerConfigFileName"     , "FastCaloSim/MC23/TFCSparam_mpt_classScaler_v03.xml" )
-    kwargs.setdefault("NetworkConfigFileName"     , "FastCaloSim/MC23/TFCSparam_mpt_classNet_v03.json" )
-    kwargs.setdefault("CalibratorConfigFileName"    , "FastCaloSim/MC23/TFCSparam_mpt_classCalib_v03.xml")
+    kwargs.setdefault("ScalerConfigFileName"     , "FastCaloSim/MC23/TFCSparam_mpt_classScaler_v04.xml" )
+    kwargs.setdefault("NetworkConfigFileName"     , "FastCaloSim/MC23/TFCSparam_mpt_classNet_v04.json" )
+    kwargs.setdefault("CalibratorConfigFileName"    , "FastCaloSim/MC23/TFCSparam_mpt_classCalib_v04.xml")
     acc.setPrivateTools(CompFactory.ISF.PunchThroughClassifier(name, **kwargs))
     return acc
 
@@ -34,9 +34,11 @@ def PunchThroughToolCfg(flags, name="ISF_PunchThroughTool", **kwargs):
         acc.addPublicTool(PT_classifier)
         kwargs.setdefault("PunchThroughClassifier", acc.getPublicTool(PT_classifier.name))
 
-    kwargs.setdefault("FilenameLookupTable"     , "FastCaloSim/MC23/TFCSparam_mpt_v06.root")
-    kwargs.setdefault("FilenameInverseCdf"      , "FastCaloSim/MC23/TFCSparam_mpt_inverseCdf_v03.xml")
-    kwargs.setdefault("FilenameInversePca"      , "FastCaloSim/MC23/TFCSparam_mpt_inversePca_v03.xml")
+    kwargs.setdefault("FilenameLookupTable"     , "FastCaloSim/MC23/TFCSparam_mpt_v07.root")
+    kwargs.setdefault("FilenameInverseCdf"      , "FastCaloSim/MC23/TFCSparam_mpt_inverseCdf_v07.xml")
+    kwargs.setdefault("FilenameInversePca"      , "FastCaloSim/MC23/TFCSparam_mpt_inversePca_v07.xml")
+    kwargs.setdefault("EnergyFactor"            , [ 0.98,  0.831, 0.896, 0.652, 0.717, 1., 0.877, 0.858, 0.919 ]    )
+    kwargs.setdefault("DoAntiParticles"         , [ 0,   1,    0,     1,     1,     0,   0,    0,    0 ]    )    
     kwargs.setdefault("PunchThroughInitiators"  , [ 211, 321, 311, 310, 130, 2212, 2112]        )
     kwargs.setdefault("InitiatorsMinEnergy"     , [ 65536, 65536, 65536, 65536, 65536, 65536, 65536]                                         )
     kwargs.setdefault("InitiatorsEtaRange"      , [ -3.2,   3.2 ]                               )
@@ -46,7 +48,6 @@ def PunchThroughToolCfg(flags, name="ISF_PunchThroughTool", **kwargs):
     kwargs.setdefault("FullCorrelationEnergy"   , [ 100000., 100000., 100000., 100000.,      0., 100000., 100000., 100000., 100000.]    )
     kwargs.setdefault("MinEnergy"               , [   938.3,   135.6,     50.,     50.,   105.7,   939.6, 493.7,   497.6,   497.6 ]    )
     kwargs.setdefault("MaxNumParticles"         , [      -1,      -1,      -1,      -1,      -1,    -1,     -1,     -1,     -1 ]    )
-    kwargs.setdefault("EnergyFactor"            , [      1.,      1.,      1.,      1.,      1.,    1.,      1.,      1.,     1. ]    )
     kwargs.setdefault("BarcodeSvc", acc.getPrimaryAndMerge(BarcodeSvcCfg(flags)).name)
     kwargs.setdefault("EnvelopeDefSvc", acc.getPrimaryAndMerge(EnvelopeDefSvcCfg(flags)).name)
     kwargs.setdefault("BeamPipeRadius", 500.)

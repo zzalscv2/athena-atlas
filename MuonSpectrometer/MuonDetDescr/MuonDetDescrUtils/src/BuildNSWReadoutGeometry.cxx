@@ -55,7 +55,7 @@ bool BuildNSWReadoutGeometry::BuildReadoutGeometry(MuonGM::MuonDetectorManager* 
                 std::string myVolName = (chTag.substr(0, 8)).c_str();
                 re->initDesign(-999., -999., -999., -999., -999.);
                 re->fillCache();
-                mgr->addMMReadoutElement(re, re->identify());
+                mgr->addMMReadoutElement(re);
                 re->setDelta(mgr);
                 re->setBLinePar(mgr);
             } else if (chTag.substr(0, 3) == "sTG") {
@@ -63,7 +63,7 @@ bool BuildNSWReadoutGeometry::BuildReadoutGeometry(MuonGM::MuonDetectorManager* 
                 std::string myVolName = (chTag.substr(0, 8)).c_str();
                 re->initDesign(-999., -999., -999., 3.2, -999., 2.7, -999., 2.6);
                 re->fillCache();
-                mgr->addsTgcReadoutElement(re, re->identify());
+                mgr->addsTgcReadoutElement(re);
                 re->setDelta(mgr);
                 re->setBLinePar(mgr);
             }

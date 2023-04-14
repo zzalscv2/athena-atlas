@@ -206,7 +206,7 @@ StatusCode jFexRoiByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
             slocation  << "0x"<< std::hex << rob->rob_source_id();
             std::stringstream stitle;
             stitle  << "Invalid amount of ROB words" ;
-            printError(slocation.str(),stitle.str(),m_WARNING,sdetail.str());             
+            printError(slocation.str(),stitle.str(),MSG::WARNING,sdetail.str());             
             
             continue;
         }
@@ -236,7 +236,7 @@ StatusCode jFexRoiByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
             slocation  << "0x"<< std::hex << rob->rob_source_id();
             std::stringstream stitle;
             stitle  << "Less than 4 trailers" ;
-            printError(slocation.str(),stitle.str(),m_WARNING,sdetail.str());              
+            printError(slocation.str(),stitle.str(),MSG::WARNING,sdetail.str());              
             
             continue;
         }
@@ -270,7 +270,7 @@ StatusCode jFexRoiByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
                 slocation  << "jFEX "<< jfex << " FPGA "<< fpga << " in 0x"<< std::hex << rob->rob_source_id();
                 std::stringstream stitle;
                 stitle  << "Wrong payload" ;
-                printError(slocation.str(),stitle.str(),m_WARNING,sdetail.str());                        
+                printError(slocation.str(),stitle.str(),MSG::WARNING,sdetail.str());                        
                 
                 //Checking if we can continue decoding data for the rest of FPGAs. No negative positions
                 int neg_positions = trailers_pos - (payload + jBits::TOB_TRAILERS);
@@ -283,7 +283,7 @@ StatusCode jFexRoiByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
                     std::stringstream stitle;
                     stitle  << "Event discarded" ;
                     
-                    printError(slocation.str(),stitle.str(),m_DEBUG,sdetail.str());                     
+                    printError(slocation.str(),stitle.str(),MSG::DEBUG,sdetail.str());                     
                     break;
                 }
                 
@@ -306,7 +306,7 @@ StatusCode jFexRoiByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
                 std::stringstream stitle;
                 stitle  << "Event discarded" ;
                 
-                printError(slocation.str(),stitle.str(),m_WARNING,sdetail.str());                  
+                printError(slocation.str(),stitle.str(),MSG::WARNING,sdetail.str());                  
                 break;
             }
                         
@@ -435,7 +435,7 @@ StatusCode jFexRoiByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
                 std::stringstream stitle;
                 stitle  << "Wrong amount of words" ;
                 
-                printError(slocation.str(),stitle.str(),m_ERROR,sdetail.str());                    
+                printError(slocation.str(),stitle.str(),MSG::ERROR,sdetail.str());                    
                 
                 return StatusCode::FAILURE;
             }
@@ -648,7 +648,7 @@ StatusCode jFexRoiByteStreamTool::convertToBS(std::vector<WROBF*>& /*vrobf*/, co
 }
 
 
-void  jFexRoiByteStreamTool::printError(const std::string& location, const std::string& title, const uint8_t type, const std::string& detail) const{
+void  jFexRoiByteStreamTool::printError(const std::string& location, const std::string& title, MSG::Level type, const std::string& detail) const{
     
     if(m_UseMonitoring){
         Monitored::Group(m_monTool,
@@ -657,23 +657,6 @@ void  jFexRoiByteStreamTool::printError(const std::string& location, const std::
                      );
     }
     else {
-
-        switch(type) {
-        case m_DEBUG:
-            ATH_MSG_DEBUG(detail);
-            break;
-        case m_WARNING:
-            ATH_MSG_WARNING(detail);
-            break;
-        case m_ERROR:
-            ATH_MSG_ERROR(detail);
-            break;
-        case m_FATAL:
-            ATH_MSG_FATAL(detail);
-            break;
-        default:
-            ATH_MSG_DEBUG("No type defined CHECK!. -> " << detail);
-        }
-
+        msg() << type << detail << endmsg;
     }
 }

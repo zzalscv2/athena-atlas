@@ -11,11 +11,11 @@ atlas_add_library( TrackToCaloLib
                    ParticleCaloExtension RecoToolInterfaces TrkCaloExtension TrkExInterfaces TrkParametersIdentificationHelpers 
                    TrkToolInterfaces TRT_ReadoutGeometry CaloTrackingGeometryLib xAODCaloEvent xAODTruth
                    PRIVATE_LINK_LIBRARIES AthenaBaseComps AtlasDetDescr CaloConditions CaloDetDescrLib CaloIdentifier StoreGateLib 
-                   TrkDetDescrUtils TrkEventPrimitives TrkParameters TrkSurfaces TrkTrack VxVertex xAODEgamma xAODMuon xAODTracking )
+                   TrkDetDescrUtils TrkEventPrimitives TrkParameters TrkSurfaces TrkTrack VxVertex xAODEgamma xAODMuon xAODTracking AthenaMonitoringKernelLib)
 
 atlas_add_component( TrackToCalo
                      src/components/*.cxx
-                     LINK_LIBRARIES TrackToCaloLib )
+                     LINK_LIBRARIES TrackToCaloLib AthenaMonitoringKernelLib)
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

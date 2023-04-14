@@ -64,7 +64,7 @@ StatusCode TTbarPlusHeavyFlavorFilter::filterEvent() {
 
     // Loop over all truth particles in the event
     // ===========================================
-    for(auto  part: *genEvt) {
+    for(const auto&  part: *genEvt) {
 
       if(HepMC::is_simulation_particle(part)) break;
 
@@ -155,7 +155,7 @@ StatusCode TTbarPlusHeavyFlavorFilter::filterEvent() {
 }
 
 
-bool TTbarPlusHeavyFlavorFilter::passBSelection(HepMC::ConstGenParticlePtr part) const{
+bool TTbarPlusHeavyFlavorFilter::passBSelection(const HepMC::ConstGenParticlePtr& part) const{
 
   const HepMC::FourVector& p4 = part->momentum();
   double pt = p4.perp();
@@ -168,7 +168,7 @@ bool TTbarPlusHeavyFlavorFilter::passBSelection(HepMC::ConstGenParticlePtr part)
   
 }
 
-bool TTbarPlusHeavyFlavorFilter::passCSelection(HepMC::ConstGenParticlePtr part) const{
+bool TTbarPlusHeavyFlavorFilter::passCSelection(const HepMC::ConstGenParticlePtr& part) const{
 
   const HepMC::FourVector& p4 = part->momentum();
   double pt = p4.perp();
@@ -197,7 +197,7 @@ int TTbarPlusHeavyFlavorFilter::hadronType(int pdgid) const{
 }
 
 
-bool TTbarPlusHeavyFlavorFilter::isBHadron(HepMC::ConstGenParticlePtr part) const{
+bool TTbarPlusHeavyFlavorFilter::isBHadron(const HepMC::ConstGenParticlePtr& part) const{
 
   if(HepMC::is_simulation_particle(part)) return false;
   int type = hadronType(part->pdg_id());
@@ -208,7 +208,7 @@ bool TTbarPlusHeavyFlavorFilter::isBHadron(HepMC::ConstGenParticlePtr part) cons
 }
 
 
-bool TTbarPlusHeavyFlavorFilter::isCHadron(HepMC::ConstGenParticlePtr part) const{
+bool TTbarPlusHeavyFlavorFilter::isCHadron(const HepMC::ConstGenParticlePtr& part) const{
 
   if(HepMC::is_simulation_particle(part)) return false;
   int type = hadronType(part->pdg_id());
@@ -220,13 +220,13 @@ bool TTbarPlusHeavyFlavorFilter::isCHadron(HepMC::ConstGenParticlePtr part) cons
 
 
 
-bool TTbarPlusHeavyFlavorFilter::isInitialHadron(HepMC::ConstGenParticlePtr part) const{
+bool TTbarPlusHeavyFlavorFilter::isInitialHadron(const HepMC::ConstGenParticlePtr& part) const{
 
     auto prod = part->production_vertex();
     if(!prod) return true;
     int type = hadronType(part->pdg_id());
 #ifdef HEPMC3
-    for(auto firstParent: prod->particles_in()){
+    for(const auto& firstParent: prod->particles_in()){
       int mothertype = hadronType( firstParent->pdg_id() );
       if( mothertype == type ){
 	return false;
@@ -247,13 +247,13 @@ bool TTbarPlusHeavyFlavorFilter::isInitialHadron(HepMC::ConstGenParticlePtr part
 }
 
 
-bool TTbarPlusHeavyFlavorFilter::isFinalHadron(HepMC::ConstGenParticlePtr part) const{
+bool TTbarPlusHeavyFlavorFilter::isFinalHadron(const HepMC::ConstGenParticlePtr& part) const{
 
     auto end = part->end_vertex();
     if(!end) return true;
     int type = hadronType(part->pdg_id());
 #ifdef HEPMC3
-    for(auto firstChild: end->particles_in()){
+    for(const auto& firstChild: end->particles_in()){
       int childtype = hadronType( firstChild->pdg_id() );
       if( childtype == type ){
 	return false;
@@ -275,12 +275,12 @@ bool TTbarPlusHeavyFlavorFilter::isFinalHadron(HepMC::ConstGenParticlePtr part) 
 
 
 
-bool TTbarPlusHeavyFlavorFilter::isQuarkFromHadron(HepMC::ConstGenParticlePtr part) const{
+bool TTbarPlusHeavyFlavorFilter::isQuarkFromHadron(const HepMC::ConstGenParticlePtr& part) const{
 
   auto prod = part->production_vertex();
   if(!prod) return false;
 #ifdef HEPMC3
-    for(auto firstParent: HepMC::ancestor_particles(prod)){
+    for(const auto& firstParent: HepMC::ancestor_particles(prod)){
       int mothertype = hadronType( firstParent->pdg_id() );
       if( 4 == mothertype || 5 == mothertype ){
 	return true;
@@ -300,14 +300,14 @@ bool TTbarPlusHeavyFlavorFilter::isQuarkFromHadron(HepMC::ConstGenParticlePtr pa
 
 }
 
-bool TTbarPlusHeavyFlavorFilter::isCHadronFromB(HepMC::ConstGenParticlePtr part) const{
+bool TTbarPlusHeavyFlavorFilter::isCHadronFromB(const HepMC::ConstGenParticlePtr& part) const{
 
   if(!isCHadron(part)) return false;
 
   auto prod = part->production_vertex();
   if(!prod) return false;
 #ifdef HEPMC3
-    for(auto firstParent:HepMC::ancestor_particles(prod)){
+    for(const auto& firstParent:HepMC::ancestor_particles(prod)){
       if( isBHadron(firstParent) ){
 	return true;
       }
@@ -328,13 +328,13 @@ bool TTbarPlusHeavyFlavorFilter::isCHadronFromB(HepMC::ConstGenParticlePtr part)
 
 
 
-HepMC::ConstGenParticlePtr  TTbarPlusHeavyFlavorFilter::findInitial(HepMC::ConstGenParticlePtr part) const{
+HepMC::ConstGenParticlePtr  TTbarPlusHeavyFlavorFilter::findInitial(const HepMC::ConstGenParticlePtr& part) const{
 
   auto prod = part->production_vertex();
 
   if(!prod) return part;
 #ifdef HEPMC3
-  for(auto firstParent: prod->particles_in()){
+  for(const auto& firstParent: prod->particles_in()){
     if( part->pdg_id() == firstParent->pdg_id() ){
       return findInitial(firstParent);
     }
@@ -353,20 +353,20 @@ HepMC::ConstGenParticlePtr  TTbarPlusHeavyFlavorFilter::findInitial(HepMC::Const
 
 }
 
-bool TTbarPlusHeavyFlavorFilter::isFromTop(HepMC::ConstGenParticlePtr part) const{
+bool TTbarPlusHeavyFlavorFilter::isFromTop(const HepMC::ConstGenParticlePtr& part) const{
 
   auto initpart = findInitial(part);
   return isDirectlyFromTop(initpart);
  
 }
 
-bool TTbarPlusHeavyFlavorFilter::isDirectlyFromTop(HepMC::ConstGenParticlePtr part) const{
+bool TTbarPlusHeavyFlavorFilter::isDirectlyFromTop(const HepMC::ConstGenParticlePtr& part) const{
 
  auto prod = part->production_vertex();
 
   if(!prod) return false;
 #ifdef HEPMC3
-  for( auto firstParent: prod->particles_in()){
+  for (auto firstParent: prod->particles_in()){
     if( std::abs( firstParent->pdg_id() ) == 6 ) return true;
   }
 #else
@@ -382,13 +382,13 @@ bool TTbarPlusHeavyFlavorFilter::isDirectlyFromTop(HepMC::ConstGenParticlePtr pa
 
 
 
-bool TTbarPlusHeavyFlavorFilter::isDirectlyFromWTop(HepMC::ConstGenParticlePtr part) const{
+bool TTbarPlusHeavyFlavorFilter::isDirectlyFromWTop(const HepMC::ConstGenParticlePtr& part) const{
 
   auto prod = part->production_vertex();
 
   if(!prod) return false;
 #ifdef HEPMC3
-  for(auto firstParent: prod->particles_in()){
+  for(const auto& firstParent: prod->particles_in()){
     if( std::abs( firstParent->pdg_id() ) == 24 ){
       if( isFromTop(firstParent) ) return true;
     }

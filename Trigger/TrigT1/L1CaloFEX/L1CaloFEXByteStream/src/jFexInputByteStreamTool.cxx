@@ -111,7 +111,7 @@ StatusCode jFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
                 slocation  << "0x"<< std::hex << rob->rob_source_id();
                 std::stringstream stitle;
                 stitle  << "Invalid trailer words" ;
-                printError(slocation.str(),stitle.str(),m_WARNING,sdetail.str());                
+                printError(slocation.str(),stitle.str(),MSG::WARNING,sdetail.str());                
 
 
                 READ_WORDS = false;
@@ -130,7 +130,7 @@ StatusCode jFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
                 slocation  << "jFEX "<< jfex << " FPGA "<< fpga << " in 0x"<< std::hex << rob->rob_source_id();
                 std::stringstream stitle;
                 stitle  << "Invalid Data Blocks" ;
-                printError(slocation.str(),stitle.str(),m_DEBUG,sdetail.str());
+                printError(slocation.str(),stitle.str(),MSG::DEBUG,sdetail.str());
 
                 READ_WORDS = false;
                 continue;
@@ -151,7 +151,7 @@ StatusCode jFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
                 stitle  << "Block Size Error" ;
                 
                 //Currently under investigation... 
-                printError(slocation.str(),stitle.str(),m_DEBUG,sdetail.str());
+                printError(slocation.str(),stitle.str(),MSG::DEBUG,sdetail.str());
                 return StatusCode::SUCCESS;
                 
                 //DO NOT REMOVE, once fixed it should return and error and FAILURE
@@ -383,7 +383,7 @@ constexpr unsigned int jFexInputByteStreamTool::mapIndex(unsigned int jfex, unsi
   return (jfex << 16) | (fpga << 12) | (channel << 4) | tower;
 }
 
-void  jFexInputByteStreamTool::printError(const std::string& location, const std::string& title, const uint8_t type, const std::string& detail) const{
+void  jFexInputByteStreamTool::printError(const std::string& location, const std::string& title, MSG::Level type, const std::string& detail) const{
     
     if(m_UseMonitoring){
         Monitored::Group(m_monTool,
@@ -392,23 +392,6 @@ void  jFexInputByteStreamTool::printError(const std::string& location, const std
                      );
     }
     else {
-
-        switch(type) {
-        case m_DEBUG:
-            ATH_MSG_DEBUG(detail);
-            break;
-        case m_WARNING:
-            ATH_MSG_WARNING(detail);
-            break;
-        case m_ERROR:
-            ATH_MSG_ERROR(detail);
-            break;
-        case m_FATAL:
-            ATH_MSG_FATAL(detail);
-            break;
-        default:
-            ATH_MSG_DEBUG("No type defined CHECK!. -> " << detail);
-        }
-
+        msg() << type << detail << endmsg;
     }
 }

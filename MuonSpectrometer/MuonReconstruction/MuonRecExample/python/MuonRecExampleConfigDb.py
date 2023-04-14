@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.CfgGetter import addTool, addToolClone, addService, addAlgorithm, addNamesToSkipIfNotAvailable, addTypesOnlyToSkip
 from AtlasGeoModel.CommonGMJobProperties import CommonGeometryFlags  # noqa: F401
@@ -67,13 +67,6 @@ addTool("MuonRecExample.MuonRecTools.MuonStraightLineExtrapolator", "MuonStraigh
 
 addTool("Trk::KalmanUpdator", "MuonMeasUpdator")
 
-addService("Muon::MuonIdHelperSvc", "MuonIdHelperSvc", HasCSC=MuonGeometryFlags.hasCSC(),
-                                                       HasSTgc=MuonGeometryFlags.hasSTGC(),
-                                                       HasMM=MuonGeometryFlags.hasMM(),
-                                                       RunCSC=setup_cscs,
-                                                       RunsTgc=setup_stgcs,
-                                                       RunMM = setup_mm)
-
 addTool("Muon::MuonTrackTruthTool", "MuonTrackTruthTool")
 
 addTool("MuonRecExample.MooreTools.MuonTrackToSegmentTool", "MuonTrackToSegmentTool")
@@ -107,7 +100,7 @@ addTool( "MuonRecExample.MuonRecTools.DCMathSegmentMaker", "DCMathSegmentMaker" 
 addTool( "MuonRecExample.MuonRecTools.DCMathT0FitSegmentMaker", "DCMathT0FitSegmentMaker" )
 
 addTool( "MuonRecExample.MuonRecTools.MuonClusterSegmentFinder", "MuonClusterSegmentFinder")
-addTool( "MuonRecExample.MuonRecTools.MuonClusterSegmentFinderTool", "MuonClusterSegmentFinderTool" )
+addTool( "MuonRecExample.MuonRecTools.MuonNSWSegmentFinderTool", "MuonNSWSegmentFinderTool" )
 #N.B. Both of these are tools. They do slightly different things, but the naming is unfortunate.
 
 addTool( "MuonRecExample.MuonRecTools.MuonLayerHoughTool","MuonLayerHoughTool" )

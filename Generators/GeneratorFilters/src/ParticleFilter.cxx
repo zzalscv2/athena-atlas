@@ -36,7 +36,7 @@ StatusCode ParticleFilter::filterEvent() {
             // Count only particles not decaying to themselves
             bool notSelfDecay = true;
             if (pitr->end_vertex()) {
-              for (auto  child: *(pitr->end_vertex())) {
+              for (const auto&  child: *(pitr->end_vertex())) {
                 if ( child->pdg_id() != pitr->pdg_id()) continue;
                 if ( child == pitr) continue;
                 if ( HepMC::is_simulation_particle(child)) continue;

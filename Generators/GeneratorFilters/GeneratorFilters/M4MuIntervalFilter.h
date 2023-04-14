@@ -39,7 +39,7 @@ private:
   bool m_ApplyReWeighting; 
 
 public:
-  double getEventWeight(double m);
+  double getEventWeight(double m) const;
 };
 
 #endif

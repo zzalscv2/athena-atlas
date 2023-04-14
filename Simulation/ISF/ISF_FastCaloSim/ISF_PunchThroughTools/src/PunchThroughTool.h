@@ -132,13 +132,13 @@ namespace ISF {
     double interpolateEta(const double &eta, CLHEP::HepRandomEngine* rndmEngine) const;
 
     //helper function to convert comma separated string into vector
-    static std::vector<std::string> str_to_list(std::string str);
+    std::vector<std::string> str_to_list(const std::string str) const;
 
     //get the infoMap from xml file based on the xmlpathname and also name of mainNode
     std::vector<std::map<std::string,std::string>> getInfoMap(std::string mainNode, const std::string &xmlFilePath);
 
     //decide the pca / cdf part to read based on pdgId and eta
-    static int passedParamIterator(int pid, double eta, std::vector<std::map<std::string,std::string>> mapvect);
+    int passedParamIterator(int pid, double eta, const std::vector<std::map<std::string,std::string>> &mapvect) const;
 
     //load inverse quantile transformer from XML
     StatusCode initializeInverseCDF(const std::string & quantileTransformerConfigFile);

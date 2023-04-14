@@ -10,7 +10,7 @@
 /// @todo Move to a sorting utils module
 class High2LowByGenParticleClassPt {
 public:
-  bool operator() (HepMC::ConstGenParticlePtr t1, HepMC::ConstGenParticlePtr t2) const {
+  bool operator() (const HepMC::ConstGenParticlePtr& t1, const HepMC::ConstGenParticlePtr& t2) const {
     return t1->momentum().perp2() > t2->momentum().perp2();
   }
 };

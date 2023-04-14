@@ -85,20 +85,20 @@ StatusCode ISF::PunchThroughTool::initialize()
   // resolving lookuptable file
   std::string resolvedFileName = PathResolverFindCalibFile (m_filenameLookupTable);
   if (resolvedFileName.empty()) {
-    ATH_MSG_ERROR( "[ punchthrough ] Parameterisation file not found" );
+    ATH_MSG_ERROR( "[ punchthrough ] Parametrisation file '" << m_filenameLookupTable << "' not found" );
     return StatusCode::FAILURE;
   }
-  ATH_MSG_INFO( "[ punchthrough ] Parameterisation file found: " << resolvedFileName );
+  ATH_MSG_INFO( "[ punchthrough ] Parametrisation file found: " << resolvedFileName );
 
   // open the LookupTable file
   m_fileLookupTable = new TFile( resolvedFileName.c_str(), "READ");
   if (!m_fileLookupTable) {
-    ATH_MSG_WARNING("[ punchthrough ] unable to open the lookup-tabel for the punch-through simulation (file does not exist)");
+    ATH_MSG_WARNING("[ punchthrough ] unable to open the lookup-table for the punch-through simulation (file does not exist)");
     return StatusCode::FAILURE;
   }
 
   if (!m_fileLookupTable->IsOpen()) {
-    ATH_MSG_WARNING("[ punchthrough ] unable to open the lookup-tabel for the punch-through simulation (wrong or empty file?)");
+    ATH_MSG_WARNING("[ punchthrough ] unable to open the lookup-table for the punch-through simulation (wrong or empty file?)");
     return StatusCode::FAILURE;
   }
 
@@ -116,7 +116,7 @@ StatusCode ISF::PunchThroughTool::initialize()
     return StatusCode::FAILURE;
   }
 
-  //check size of infoMap for both PCA and CDF, they should be equal
+  //check first the size of infoMap for both PCA and CDF, they should be equal
   if (!(m_xml_info_pca.size() == m_xml_info_cdf.size()))
   {
     ATH_MSG_WARNING("[ punchthrough ] size of infoMap for PCA and CDF differs! Something is wrong with input xml files.");
@@ -603,7 +603,7 @@ ISF::ISFParticle *ISF::PunchThroughTool::getOneParticle(const ISF::ISFParticle &
   // (0.) get the pca / cdf group based on pdgId and eta, eta times 100, e.g eta -4 to 4 is from eta -400 to 400
   int pcaCdfIterator = passedParamIterator(pdg, interpEta*100, m_xml_info_pca); //pca and cdf info should be of same size
 
-  ATH_MSG_DEBUG("[punchthrough] passedPCAIterator ==> passedParamIterator = "<< pcaCdfIterator <<" , pdg = "<< pdg <<" , interpEnergy = "<< interpEnergy <<" MeV, interpEta(*100) = "<< interpEta*100);
+  ATH_MSG_DEBUG("[ punchthrough ] passedPCAIterator ==> pcaCdfIterator = "<< pcaCdfIterator <<" , pdg = "<< pdg <<" , interpEnergy = "<< interpEnergy <<" MeV, interpEta(*100) = "<< interpEta*100);
 
   // (1.) decide if we create a particle or an anti-particle
   int anti = 1;
@@ -635,42 +635,38 @@ ISF::ISFParticle *ISF::PunchThroughTool::getOneParticle(const ISF::ISFParticle &
   double principal_component_4 = 0.;
   std::vector<double> transformed_variables;
 
-  int loopCount = 0;
-  while (energy < p->getMinEnergy()){
 
-      principal_component_0 = p->getPCA0PDF()->getRand(rndmEngine, parInitEnergyEta);
-      principal_component_1 = p->getPCA1PDF()->getRand(rndmEngine, parInitEnergyEta);
-      principal_component_2 = p->getPCA2PDF()->getRand(rndmEngine, parInitEnergyEta);
-      principal_component_3 = p->getPCA3PDF()->getRand(rndmEngine, parInitEnergyEta);
-      principal_component_4 = p->getPCA4PDF()->getRand(rndmEngine, parInitEnergyEta);
+  principal_component_0 = p->getPCA0PDF()->getRand(rndmEngine, parInitEnergyEta);
+  principal_component_1 = p->getPCA1PDF()->getRand(rndmEngine, parInitEnergyEta);
+  principal_component_2 = p->getPCA2PDF()->getRand(rndmEngine, parInitEnergyEta);
+  principal_component_3 = p->getPCA3PDF()->getRand(rndmEngine, parInitEnergyEta);
+  principal_component_4 = p->getPCA4PDF()->getRand(rndmEngine, parInitEnergyEta);
 
-      ATH_MSG_DEBUG("Drawn punch through kinematics PCA components: PCA0 = "<< principal_component_0 <<" PCA1 = "<< principal_component_1 <<" PCA2 = "<< principal_component_2 <<" PCA3 = "<< principal_component_3 <<" PCA4 = "<< principal_component_4 );
+  ATH_MSG_DEBUG("Drawn punch through kinematics PCA components: PCA0 = "<< principal_component_0 <<" PCA1 = "<< principal_component_1 <<" PCA2 = "<< principal_component_2 <<" PCA3 = "<< principal_component_3 <<" PCA4 = "<< principal_component_4 );
 
-      std::vector<double> principal_components;
-      principal_components.push_back(principal_component_0);
-      principal_components.push_back(principal_component_1);
-      principal_components.push_back(principal_component_2);
-      principal_components.push_back(principal_component_3);
-      principal_components.push_back(principal_component_4);
+  std::vector<double> principal_components {
+          principal_component_0, 
+          principal_component_1, 
+          principal_component_2, 
+          principal_component_3, 
+          principal_component_4
+   };
 
-      transformed_variables = inversePCA(pcaCdfIterator,principal_components);
+  transformed_variables = inversePCA(pcaCdfIterator,principal_components);
 
-      energy = inverseCdfTransform(transformed_variables.at(0), m_variable0_inverse_cdf[pcaCdfIterator]);
-      deltaTheta = inverseCdfTransform(transformed_variables.at(1), m_variable1_inverse_cdf[pcaCdfIterator]);
-      deltaPhi = inverseCdfTransform(transformed_variables.at(2), m_variable2_inverse_cdf[pcaCdfIterator]);
-      momDeltaTheta = inverseCdfTransform(transformed_variables.at(3), m_variable3_inverse_cdf[pcaCdfIterator]);
-      momDeltaPhi = inverseCdfTransform(transformed_variables.at(4), m_variable4_inverse_cdf[pcaCdfIterator]);
+  energy = inverseCdfTransform(transformed_variables.at(0), m_variable0_inverse_cdf[pcaCdfIterator]);
+  deltaTheta = inverseCdfTransform(transformed_variables.at(1), m_variable1_inverse_cdf[pcaCdfIterator]);
+  deltaPhi = inverseCdfTransform(transformed_variables.at(2), m_variable2_inverse_cdf[pcaCdfIterator]);
+  momDeltaTheta = inverseCdfTransform(transformed_variables.at(3), m_variable3_inverse_cdf[pcaCdfIterator]);
+  momDeltaPhi = inverseCdfTransform(transformed_variables.at(4), m_variable4_inverse_cdf[pcaCdfIterator]);
 
-      ATH_MSG_DEBUG("Transformed punch through kinematics: energy = "<< energy <<" MeV deltaTheta = "<< deltaTheta <<" deltaPhi = "<< deltaPhi <<" momDeltaTheta = "<< momDeltaTheta <<" momDeltaPhi = "<< momDeltaPhi );
-
-      loopCount++;
-      if (loopCount > 10000) {
-        energy = p->getMinEnergy() + 10;
-        ATH_MSG_WARNING("Loop exceeds max number attempts. Setting energy to " << energy << " MeV.");
-      }
-  }
+  ATH_MSG_DEBUG("Transformed punch through kinematics: energy = "<< energy <<" MeV deltaTheta = "<< deltaTheta <<" deltaPhi = "<< deltaPhi <<" momDeltaTheta = "<< momDeltaTheta <<" momDeltaPhi = "<< momDeltaPhi );
 
   energy *= p->getEnergyFactor(); // scale the energy if requested
+  if (energy < p->getMinEnergy()) {
+    energy = p->getMinEnergy() + 10;
+  }
+
 
   // (2.2) get the particles delta theta relative to the incoming particle
   double theta = 0;
@@ -747,7 +743,7 @@ std::vector<double> ISF::PunchThroughTool::dotProduct(const std::vector<std::vec
     return result;
 }
 
-std::vector<std::string> ISF::PunchThroughTool::str_to_list(std::string str)
+std::vector<std::string> ISF::PunchThroughTool::str_to_list(const std::string str) const
 {
     std::vector<std::string> v;
     std::stringstream ss(str); 
@@ -759,7 +755,7 @@ std::vector<std::string> ISF::PunchThroughTool::str_to_list(std::string str)
     return v;
 }
 
-int ISF::PunchThroughTool::passedParamIterator(int pid, double eta, std::vector<std::map<std::string, std::string>> mapvect)
+int ISF::PunchThroughTool::passedParamIterator(int pid, double eta, const std::vector<std::map<std::string, std::string>> &mapvect) const
 {
     //convert the pid to absolute value and string for query
     std::string pidStrSingle = std::to_string(std::abs(pid));

@@ -29,6 +29,14 @@ class BasicTests(FlagsSetup):
             print(".... test printout {}".format( self.flags.A is True ))
             print(".... test printout {}".format( self.flags.A.B == 6 ))
 
+    def test_noFlagOrCategory(self):
+        """Trying to access something which isn't a flag/attribute should raise an error"""
+        with self.assertRaises(AttributeError):
+            self.flags.X
+
+        with self.assertRaises(AttributeError):
+            self.flags.A.B.X
+
     def test_dependentFlag(self):
         """The dependent flags will use another flag value to establish its own value"""
         self.flags.A.B.C = True
