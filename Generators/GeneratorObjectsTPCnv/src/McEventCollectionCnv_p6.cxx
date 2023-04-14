@@ -108,6 +108,8 @@ void McEventCollectionCnv_p6::persToTrans( const McEventCollection_p6* persObj,
       if (persEvt.m_e_attribute_name[i] == "phi") continue;
       if (persEvt.m_e_attribute_name[i] == "mpi") continue;
       if (persEvt.m_e_attribute_name[i] == "signal_process_id") continue;
+      if (persEvt.m_e_attribute_name[i] == "signal_vertex_id") continue;
+      if (persEvt.m_e_attribute_name[i] == "filterWeight") continue;
       if (persEvt.m_e_attribute_name[i] == "event_scale") continue;
       if (persEvt.m_e_attribute_name[i] == "alphaQCD") continue;
       if (persEvt.m_e_attribute_name[i] == "alphaQED") continue;
@@ -192,7 +194,7 @@ void McEventCollectionCnv_p6::persToTrans( const McEventCollection_p6* persObj,
       genEvt->set_pdf_info(pi);
     }
     transObj->push_back( genEvt );
-    
+
     // create a temporary map associating the barcode of an end-vtx to its
     // particle.
     // As not all particles are stable (d'oh!) we take 50% of the number of
@@ -443,6 +445,8 @@ void McEventCollectionCnv_p6::transToPers( const McEventCollection* transObj,
        if (attmap.first == "phi") continue;
        if (attmap.first == "mpi") continue;
        if (attmap.first == "signal_process_id") continue;
+       if (attmap.first == "signal_vertex_id") continue;
+       if (attmap.first == "filterWeight") continue;
        if (attmap.first == "event_scale") continue;
        if (attmap.first == "alphaQCD") continue;
        if (attmap.first == "alphaQED") continue;
@@ -451,6 +455,9 @@ void McEventCollectionCnv_p6::transToPers( const McEventCollection* transObj,
        if (attmap.first == "GenCrossSection") continue;
        if (attmap.first == "GenPdfInfo") continue;
        if (attmap.first == "GenHeavyIon") continue;
+       persEvt.m_e_attribute_name.clear();
+       persEvt.m_e_attribute_id.clear();
+       persEvt.m_e_attribute_string.clear();
        for (auto& att: attmap.second) {
          persEvt.m_e_attribute_name.push_back(attmap.first);
          persEvt.m_e_attribute_id.push_back(att.first);
@@ -461,9 +468,11 @@ void McEventCollectionCnv_p6::transToPers( const McEventCollection* transObj,
          persEvt.m_e_attribute_string.push_back(st);
        }
      }
+     persEvt.m_r_attribute_name.clear();
+     persEvt.m_r_attribute_string.clear();
      auto ri = genEvt->run_info();
      if (ri) {
-		 std::map< std::string, std::shared_ptr<HepMC3::Attribute> > r_atts = ri->attributes();
+         std::map< std::string, std::shared_ptr<HepMC3::Attribute> > r_atts = ri->attributes();
          for (auto& att: r_atts) {
            persEvt.m_r_attribute_name.push_back(att.first);
            std::string st;
@@ -472,7 +481,7 @@ void McEventCollectionCnv_p6::transToPers( const McEventCollection* transObj,
            /// One can add here checks for the status
            persEvt.m_r_attribute_string.push_back(st);
          }
-    } 		 
+    }
     //Actually, with this piece there is no need to treat the CS and HI separately.
     }
     //HepMC::GenCrossSection encoding
@@ -812,7 +821,7 @@ McEventCollectionCnv_p6::createGenParticle( const GenParticle_p6& persPart,
 
 #ifdef HEPMC3
 void McEventCollectionCnv_p6::writeGenVertex( const HepMC::ConstGenVertexPtr& vtx,
-                                              McEventCollection_p6& persEvt ) 
+                                              McEventCollection_p6& persEvt )
 {
   const HepMC::FourVector& position = vtx->position();
   auto A_weights=vtx->attribute<HepMC3::VectorDoubleAttribute>("weights");
@@ -820,7 +829,7 @@ void McEventCollectionCnv_p6::writeGenVertex( const HepMC::ConstGenVertexPtr& vt
   std::vector<float> weights;
   if (A_weights) {
     auto weights_d = A_weights->value();
-    for (auto& w: weights_d) weights.push_back(w); 
+    for (auto& w: weights_d) weights.push_back(w);
   }
   persEvt.m_genVertices.emplace_back( position.x(),
                                                 position.y(),
@@ -887,7 +896,7 @@ void McEventCollectionCnv_p6::writeGenVertex( const HepMC::GenVertex& vtx,
 
 #ifdef HEPMC3
 int McEventCollectionCnv_p6::writeGenParticle( const HepMC::ConstGenParticlePtr& p,
-                                               McEventCollection_p6& persEvt ) 
+                                               McEventCollection_p6& persEvt )
 {
   const HepMC::FourVector mom = p->momentum();
   const double ene = mom.e();
@@ -945,7 +954,6 @@ int McEventCollectionCnv_p6::writeGenParticle( const HepMC::GenParticle& p,
                              : ( ene >= 0. //*GeV
                                  ? 1
                                  : 2 ) );
-
 
   persEvt.m_genParticles.
     push_back( GenParticle_p6( mom.px(),
