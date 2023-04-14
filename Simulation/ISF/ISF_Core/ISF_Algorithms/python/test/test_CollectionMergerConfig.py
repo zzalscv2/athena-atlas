@@ -60,7 +60,7 @@ class Test_generate_mergeable_collection_name(unittest.TestCase):
         result.printConfig(withDetails=True, summariseProps=True, prefix='CATest')
         actual_collection_merger_input = None
         try:
-            actual_collection_merger_input = result.getEventAlgo("ISF_CollectionMerger").InputPixelHits
+            actual_collection_merger_input = list(result.getEventAlgo("ISF_CollectionMerger").InputPixelHits)
         except ConfigurationError:
             pass
         expected_collection_merger_input = ['aTestCollection_TESTSUFFIX']
