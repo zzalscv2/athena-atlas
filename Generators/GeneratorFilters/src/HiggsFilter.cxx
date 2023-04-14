@@ -57,7 +57,7 @@ StatusCode HiggsFilter::filterEvent() {
     // Loop over all particles in the event
     const HepMC::GenEvent* genEvt = (*itr);
 
-    for(auto pitr: *genEvt){
+    for(const auto& pitr: *genEvt){
         if( std::abs(pitr->pdg_id()) != 25 ) continue;
 	N_Higgs_all++;	
 	auto decayVtx = pitr->end_vertex();
@@ -69,7 +69,7 @@ StatusCode HiggsFilter::filterEvent() {
         int n_daughters =  decayVtx->particles_out_size();
 #endif
 	if( n_daughters < 2 ) continue;
-	for ( auto child_mcpart: *decayVtx) {
+	for (const auto& child_mcpart: *decayVtx) {
 	      if ( std::abs(child_mcpart->pdg_id()) != 5 ) continue;
 	      if ( pitr->pdg_id() ==  25 ) {
 		N_Higgs++;

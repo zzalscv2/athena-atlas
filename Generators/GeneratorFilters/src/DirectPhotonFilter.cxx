@@ -49,7 +49,7 @@ StatusCode DirectPhotonFilter::filterInitialize() {
   return StatusCode::SUCCESS;
 }
 
-bool DirectPhotonFilterCmpByPt(HepMC::ConstGenParticlePtr p1, HepMC::ConstGenParticlePtr p2) {
+bool DirectPhotonFilterCmpByPt(const HepMC::ConstGenParticlePtr& p1, const HepMC::ConstGenParticlePtr& p2) {
   return (p1->momentum().perp()>p2->momentum().perp());
 }
 
@@ -94,7 +94,7 @@ StatusCode DirectPhotonFilter::filterEvent() {
     setFilterPassed(false);
   }
   else {
-    for (auto photon: promptPhotonsInEta) {
+    for (const auto& photon: promptPhotonsInEta) {
 
       ATH_MSG_DEBUG("Found prompt photon with pt="<<photon->momentum().perp());
     }

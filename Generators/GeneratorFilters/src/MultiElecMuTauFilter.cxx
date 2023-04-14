@@ -50,8 +50,8 @@ StatusCode MultiElecMuTauFilter::filterEvent() {
 
       // Look for Hadronic taus (leptonic ones will be saved by above) that have status!=3 and don't decay to another tau (FSR)
       if (!m_incHadTau) continue;
-      HepMC::ConstGenParticlePtr  tau= nullptr;
-      HepMC::ConstGenParticlePtr  taunu= nullptr;
+      HepMC::ConstGenParticlePtr   tau= nullptr;
+      HepMC::ConstGenParticlePtr   taunu= nullptr;
       if (std::abs(pitr->pdg_id()) != 15 || pitr->status() == 3) continue;
         tau = pitr;
         if(!tau->end_vertex()) continue;
@@ -60,7 +60,7 @@ StatusCode MultiElecMuTauFilter::filterEvent() {
         // 2. Veto tau -> tau (FSR)
         // 3. Store the tau neutino to calculate the visible momentum
         // cppcheck-suppress nullPointerRedundantCheck
-        for (auto citr: *(tau->end_vertex())) {
+        for (const auto& citr: *(tau->end_vertex())) {
           // Ignore tau -> tau (FSR)
           if (pitr->pdg_id() == citr->pdg_id()) {
             ATH_MSG_DEBUG("FSR tau decay.  Ignoring!");

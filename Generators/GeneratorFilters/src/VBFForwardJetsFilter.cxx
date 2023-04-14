@@ -90,14 +90,14 @@ StatusCode VBFForwardJetsFilter::filterEvent() {
   ATH_MSG_DEBUG("xAOD::JetContainer size = " << truthjetTES->size());
 
   // Get MCTruth Photon/Electon/Tau(HadronicDecay)
-  std::vector<HepMC::GenParticlePtr> MCTruthPhotonList;
-  std::vector<HepMC::GenParticlePtr> MCTruthElectronList;
+  std::vector<HepMC::ConstGenParticlePtr> MCTruthPhotonList;
+  std::vector<HepMC::ConstGenParticlePtr> MCTruthElectronList;
   std::vector<CLHEP::HepLorentzVector>   MCTruthTauList;
   McEventCollection::const_iterator itr;
   for (itr = events()->begin(); itr!=events()->end(); ++itr) {
     const HepMC::GenEvent* genEvt = (*itr);
 #ifdef HEPMC3
-    for (auto pitr: ((HepMC::GenEvent*)genEvt)->particles()) {
+    for (const auto& pitr: *genEvt) {
       // photon
       if ( pitr->pdg_id() == 22 && pitr->status() == 1 &&
            pitr->momentum().perp() >= m_LGMinPt && std::abs(pitr->momentum().pseudoRapidity()) <= m_LGMaxEta) {
@@ -112,9 +112,9 @@ StatusCode VBFForwardJetsFilter::filterEvent() {
       }
       // tau
       if ( std::abs(pitr->pdg_id()) == 15 && pitr->status() != 3 ) {
-        auto tau = pitr;
+        auto& tau = pitr;
         int leptonic = 0;
-        for (auto beg: tau->end_vertex()->particles_out() ) {
+        for (const auto& beg: tau->end_vertex()->particles_out() ) {
           if ( beg->production_vertex() != tau->end_vertex() ) continue;
           if ( std::abs( beg->pdg_id() ) == 12 ) leptonic = 1;
           if ( std::abs( beg->pdg_id() ) == 14 ) leptonic = 2;
@@ -268,7 +268,7 @@ StatusCode VBFForwardJetsFilter::filterEvent() {
 }
 
 
-CLHEP::HepLorentzVector VBFForwardJetsFilter::sumDaughterNeutrinos( HepMC::ConstGenParticlePtr part ) {
+CLHEP::HepLorentzVector VBFForwardJetsFilter::sumDaughterNeutrinos(const HepMC::ConstGenParticlePtr& part ) const{
   CLHEP::HepLorentzVector nu( 0, 0, 0, 0);
 
   if ( ( std::abs( part->pdg_id() ) == 12 ) || ( std::abs( part->pdg_id() ) == 14 ) || ( std::abs( part->pdg_id() ) == 16 ) ) {
@@ -281,12 +281,12 @@ CLHEP::HepLorentzVector VBFForwardJetsFilter::sumDaughterNeutrinos( HepMC::Const
 
   if ( !part->end_vertex() ) return nu;
 
-  for (auto daughterparticle: *(part->end_vertex())) nu += sumDaughterNeutrinos( daughterparticle );
+  for (const auto& daughterparticle: *(part->end_vertex())) nu += sumDaughterNeutrinos( daughterparticle );
   return nu;
 }
 
 
-double VBFForwardJetsFilter::getMinDeltaR(const xAOD::Jet *jet, std::vector<HepMC::GenParticlePtr> &list) {
+double VBFForwardJetsFilter::getMinDeltaR(const xAOD::Jet *jet, std::vector<HepMC::ConstGenParticlePtr> &list) const{
   double minDR = 999.;
   for (unsigned i=0;i<list.size();++i) {
     if (list[i]->momentum().perp() != 0.) {
@@ -303,7 +303,7 @@ double VBFForwardJetsFilter::getMinDeltaR(const xAOD::Jet *jet, std::vector<HepM
 }
 
 
-double VBFForwardJetsFilter::getMinDeltaR(const xAOD::Jet *jet, std::vector<CLHEP::HepLorentzVector> &list) {
+double VBFForwardJetsFilter::getMinDeltaR(const xAOD::Jet *jet, std::vector<CLHEP::HepLorentzVector> &list) const {
   double minDR = 999.;
   for (unsigned i=0;i<list.size();++i) {
     if (list[i].vect().perp() != 0.) {
@@ -321,8 +321,8 @@ double VBFForwardJetsFilter::getMinDeltaR(const xAOD::Jet *jet, std::vector<CLHE
 
 
 void VBFForwardJetsFilter::removePseudoJets( std::vector<const xAOD::Jet*> &jetList,
-                                             std::vector<HepMC::GenParticlePtr> &MCTruthPhotonList,
-                                             std::vector<HepMC::GenParticlePtr> &MCTruthElectronList,
+                                             std::vector<HepMC::ConstGenParticlePtr> &MCTruthPhotonList,
+                                             std::vector<HepMC::ConstGenParticlePtr> &MCTruthElectronList,
                                              std::vector<CLHEP::HepLorentzVector>   &MCTruthTauList) {
   std::vector<const xAOD::Jet*> orgJetList = jetList;
   jetList.clear();

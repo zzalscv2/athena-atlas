@@ -34,7 +34,7 @@ StatusCode SameParticleHardScatteringFilter::filterEvent() {
 	  if (std::abs(id) != m_PDGChild[0]) continue; // searching for only b-quarks
 	  
 	  // a pointer to the production vertex
-	  HepMC::ConstGenVertexPtr productionVtx = pitr->production_vertex();
+	  const HepMC::ConstGenVertexPtr&  productionVtx = pitr->production_vertex();
 	  
 	  // Verify if we got a valid pointer and retrieve the number of parents
 	  if (!productionVtx) continue;
