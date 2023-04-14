@@ -18,6 +18,7 @@ atlas_add_component( ActsTrkFittingTools
                      ActsGeometryInterfacesLib
                      ActsGeometryLib
                      ActsInteropLib
+                     ActsTrkEvent
                      EventPrimitives
                      GeoPrimitives
                      AthenaBaseComps

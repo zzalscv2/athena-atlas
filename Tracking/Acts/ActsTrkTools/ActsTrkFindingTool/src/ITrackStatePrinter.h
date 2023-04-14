@@ -13,13 +13,12 @@
 #include "GaudiKernel/EventContext.h"
 
 // ACTS CORE
-#include "Acts/EventData/VectorMultiTrajectory.hpp"
 #include "Acts/Geometry/TrackingGeometry.hpp"
-#include "Acts/EventData/VectorTrackContainer.hpp"
 #include "Acts/EventData/TrackParameters.hpp"
 
 // PACKAGE
 #include "ActsGeometry/ATLASSourceLink.h"
+#include "ActsTrkEvent/TrackContainer.h"
 
 // Other
 #include <vector>
@@ -40,8 +39,8 @@ namespace ActsTrk
 
     virtual void
     printTracks(const Acts::GeometryContext &tgContext,
-                const Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail::ValueHolder> &tracks,
-                const std::vector<typename Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail::ValueHolder>::TrackProxy> &fitResult,
+                const ActsTrk::TrackContainer &tracks,
+                const std::vector<ActsTrk::TrackContainer::TrackProxy> &fitResult,
                 const Acts::BoundTrackParameters &seed,
                 size_t iseed,
                 size_t ntracks) const = 0;

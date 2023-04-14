@@ -16,14 +16,13 @@
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
 
 // ACTS CORE
-#include "Acts/EventData/VectorMultiTrajectory.hpp"
 #include "Acts/Geometry/TrackingGeometry.hpp"
 #include "Acts/TrackFinding/CombinatorialKalmanFilter.hpp"
 #include "Acts/TrackFinding/MeasurementSelector.hpp"
-#include "Acts/EventData/VectorTrackContainer.hpp"
 
 // PACKAGE
 #include "src/ITrackStatePrinter.h"
+#include "ActsTrkEvent/TrackContainer.h"
 #include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 #include "ActsTrkEventCnv/IActsToTrkConverterTool.h"
@@ -74,8 +73,8 @@ namespace ActsTrk
     size_t
     makeTracks(const EventContext &ctx,
                const Acts::GeometryContext &tgContext,
-               const Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail::ValueHolder> &tracks,
-               const std::vector<typename Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail::ValueHolder>::TrackProxy> &fitOutput,
+               const ActsTrk::TrackContainer &tracks,
+               const std::vector<ActsTrk::TrackContainer::TrackProxy> &fitOutput,
                ::TrackCollection &tracksContainer) const;
 
     std::unique_ptr<const Trk::MeasurementBase>
