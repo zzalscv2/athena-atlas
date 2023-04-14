@@ -114,6 +114,12 @@ StatusCode gFexByteStreamTool::initialize() {
     
     ATH_CHECK(m_l1MenuKey.initialize());
     
+    if (!m_monTool.empty()) {
+        ATH_CHECK(m_monTool.retrieve());
+        ATH_MSG_INFO("Logging errors to " << m_monTool.name() << " monitoring tool");
+        m_UseMonitoring = true;
+    }
+    
     
     return StatusCode::SUCCESS;
 }
@@ -253,11 +259,15 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
             
             const uint32_t blockSize  = headerSize + dataSize;
             if ( (index + blockSize) > n_words ) {
-                ATH_MSG_DEBUG( "Remaining block size "
-                << (n_words - index)
-                << " is too small for subblock of type " << blockType
-                << " with headerSize " << headerSize
-                << " and dataSize " << dataSize );
+                
+                std::stringstream sdetail;
+                sdetail  << "Remaining block size " << (n_words - index) << " is too small for subblock of type " << blockType << " with headerSize " << headerSize << " and dataSize " << dataSize ;
+                std::stringstream slocation;
+                slocation  << "0x"<< std::hex << rob->rob_source_id() << std::dec << " type:"<<blockType;
+                std::stringstream stitle;
+                stitle  << "Small subblock size " ;
+                printError(slocation.str(),stitle.str(),MSG::DEBUG,sdetail.str());  
+                
             }
 
             index += headerSize;
@@ -266,9 +276,19 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
             ATH_MSG_DEBUG( "numSlices   "  <<  numSlices );
 
             if ( numSlices * gPos::WORDS_PER_SLICE != dataSize ) {
-                ATH_MSG_DEBUG( "L1CaloBsDecoderRun3::decodeGfexTobs: subblock type " << blockType
-                   << " with dataSize " << dataSize
-                   << " is not a multiple of " << gPos::WORDS_PER_SLICE << " words" );
+
+                std::stringstream sdetail;
+                sdetail  << "L1CaloBsDecoderRun3::decodeGfexTobs: subblock type " << blockType << " with dataSize " << dataSize << " is not a multiple of " << gPos::WORDS_PER_SLICE << " words" ;
+                std::stringstream slocation;
+                slocation  << "0x"<< std::hex << rob->rob_source_id()<< std::dec << " type:"<<blockType;
+                std::stringstream stitle;
+                stitle  << "Wrong dataSize" ;
+                printError(slocation.str(),stitle.str(),MSG::DEBUG,sdetail.str());   
+                     
+                //skip decode of this fragment
+                index+=dataSize;
+                continue;
+                
             }
 
             // The subblock type is 0xA,B,C for jet TOBs from FPGA A,B,C
@@ -279,7 +299,15 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
             for (uint32_t sliceNumber = 0; sliceNumber < numSlices; sliceNumber++) {
                 if (sliceNumber == 0){
                     if ( !isJet && !isMet ) {
-                        ATH_MSG_DEBUG( "gFexByteStreamTool::decodeGfexTobSlice: invalid block type " << blockType );
+                        
+                        std::stringstream sdetail;
+                        sdetail  << "gFexByteStreamTool::decodeGfexTobSlice: Invalid block type " << blockType ;
+                        std::stringstream slocation;
+                        slocation  << "0x"<< std::hex << rob->rob_source_id();
+                        std::stringstream stitle;
+                        stitle  << "Invalid block type" ;
+                        printError(slocation.str(),stitle.str(),MSG::DEBUG,sdetail.str());                         
+                        
                     }
 
                     for(unsigned int iWord=0; iWord<gPos::WORDS_PER_SLICE; iWord++) {
@@ -392,3 +420,16 @@ StatusCode gFexByteStreamTool::convertToBS(std::vector<WROBF*>& /*vrobf*/, const
     
 }
 
+
+void  gFexByteStreamTool::printError(const std::string& location, const std::string& title, MSG::Level type, const std::string& detail) const{
+    
+    if(m_UseMonitoring){
+        Monitored::Group(m_monTool,
+                     Monitored::Scalar("gfexDecoderErrorLocation",location.empty() ? std::string("UNKNOWN") : location),
+                     Monitored::Scalar("gfexDecoderErrorTitle"   ,title.empty()    ? std::string("UNKNOWN") : title)
+                     );
+    }
+    else {
+        msg() << type << detail << endmsg;
+    }
+}

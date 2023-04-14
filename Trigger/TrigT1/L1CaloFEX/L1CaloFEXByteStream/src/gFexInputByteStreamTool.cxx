@@ -36,6 +36,14 @@ StatusCode gFexInputByteStreamTool::initialize() {
     ATH_CHECK(m_gTowersWriteKey.initialize(gTowersmode==ConversionMode::Decoding));
     ATH_CHECK(m_gTowersReadKey.initialize(gTowersmode==ConversionMode::Encoding));
     ATH_MSG_DEBUG((gTowersmode==ConversionMode::Encoding ? "Encoding" : "Decoding") << " gTowers ");
+    
+    // Initialize monitoring tool if not empty
+    if (!m_monTool.empty()) {
+        ATH_CHECK(m_monTool.retrieve());
+        ATH_MSG_INFO("Logging errors to " << m_monTool.name() << " monitoring tool");
+        m_UseMonitoring = true;
+    }    
+    
 
     return StatusCode::SUCCESS;
 }
@@ -412,7 +420,15 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
         CRC = crc9d23(withoutComma, CRC,  1 );
         int StoredCRC = ( (Xfiber[iFiber][6]>>23) & 0x000001FF);
         if( (CRC != StoredCRC) && (StoredCRC != 0 ) )   {
-            ATH_MSG_DEBUG("Error [gFexInputByteStreamTool::gtReconstructABC]: Fiber " << iFiber << "of Xin " << Xin << ":  BAD New CRC: " << CRC << "Stored CRC "<< StoredCRC );
+            
+            std::stringstream sdetail;
+            sdetail  << "[gFexInputByteStreamTool::gtReconstructABC]: Fiber " << iFiber << "of Xin " << Xin << ":  BAD New CRC: " << CRC << "Stored CRC "<< StoredCRC ;
+            std::stringstream slocation;
+            slocation  << "Fiber " << iFiber << "of Xin " << Xin;
+            std::stringstream stitle;
+            stitle  << "Bad CRC" ;
+            printError(slocation.str(),stitle.str(),MSG::DEBUG,sdetail.str());                 
+            
         }
         
         // now check if CRC lower bits are correct in the trailer
@@ -427,7 +443,15 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
                 ATH_MSG_DEBUG("[gFexInputByteStreamTool::gtReconstructABC: unused location  iFiber "<< iFiber << ", calo type "<< XCALO_TYPE[iFiber]<<", data type "<< dataType <<", iDatum " << iDatum << "tower " << ntower);
             } 
             else if( (ntower < 0) || (ntower >383) ){
-                ATH_MSG_DEBUG("ERROR [gFexInputByteStreamTool::gtReconstructABC: bad value of ntower: iFiber "<< iFiber<< ", calo type"<< XCALO_TYPE[iFiber]<< ", data type "<< dataType<< ", iDatum "<< iDatum<< "tower "<< ntower);
+                
+                std::stringstream sdetail;
+                sdetail  << "[gFexInputByteStreamTool::gtReconstructABC: bad value of ntower: iFiber "<< iFiber<< ", calo type"<< XCALO_TYPE[iFiber]<< ", data type "<< dataType<< ", iDatum "<< iDatum<< "tower "<< ntower ;
+                std::stringstream slocation;
+                slocation  << "iFiber "<< iFiber<< ", calo type"<< XCALO_TYPE[iFiber];
+                std::stringstream stitle;
+                stitle  << "Bad value of ntower" ;
+                printError(slocation.str(),stitle.str(),MSG::DEBUG,sdetail.str());                     
+                
             }
 
             // bit number in the 32*7 = 234 bits transmitted in one BC
@@ -475,7 +499,15 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
                         }     
                     } 
                     else {
-                        ATH_MSG_DEBUG("ERROR [gFexInputByteStreamTool::gtReconstructABC]: wrongly packed data "<< fiber_type<< ", "<<dataType<< ", "<<ilword<< ", " <<ihword); 
+                        
+                        std::stringstream sdetail;
+                        sdetail  << "[gFexInputByteStreamTool::gtReconstructABC]: wrongly packed data "<< fiber_type<< ", "<<dataType<< ", "<<ilword<< ", " <<ihword ;
+                        std::stringstream slocation;
+                        slocation  << "Fiber type "<< fiber_type<< " and data type"<< dataType;
+                        std::stringstream stitle;
+                        stitle  << "Wrongly packed data" ;
+                        printError(slocation.str(),stitle.str(),MSG::DEBUG,sdetail.str());                             
+                        
                     }
                     break;
 
@@ -510,7 +542,15 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
                         htowerData[ntower] = htowerData[ntower] | ( ( (lTREXval & lmask) >> 24) &mask) ;
                     } 
                     else {
-                        ATH_MSG_DEBUG("ERROR [gFexInputByteStreamTool::gtReconstructABC]: wrongly packed data");
+                        
+                        std::stringstream sdetail;
+                        sdetail  << "[gFexInputByteStreamTool::gtReconstructABC]: wrongly packed data "<< fiber_type<< ", "<<dataType<< ", "<<ilword<< ", " <<ihword ;
+                        std::stringstream slocation;
+                        slocation  << "Fiber type "<< fiber_type<< " and data type"<< dataType;
+                        std::stringstream stitle;
+                        stitle  << "Wrongly packed data" ;
+                        printError(slocation.str(),stitle.str(),MSG::DEBUG,sdetail.str());                          
+                        
                     }
 
                     // mulitply by 20 to make 50 MeV LSB
@@ -534,7 +574,15 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
                     ilword  = ilow/32;
                     ilbit   = ilow%32;
                     if( ntower > 32 ){
-                        ATH_MSG_DEBUG("ERROR [gFexInputByteStreamTool::gtReconstructABC]: bad value of nTower for extended region (2.4 - 2.5 in eta"); 
+                        
+                        std::stringstream sdetail;
+                        sdetail  << "[gFexInputByteStreamTool::gtReconstructABC]: bad value of nTower for extended region 2.4 - 2.5 in eta" ;
+                        std::stringstream slocation;
+                        slocation  << "Fiber type "<< fiber_type<< " and data type"<< dataType;
+                        std::stringstream stitle;
+                        stitle  << "Bad value of nTower in extended eta" ;
+                        printError(slocation.str(),stitle.str(),MSG::DEBUG,sdetail.str());                          
+                        
                     }
                     if(ilword == ihword){
                         int mask = 0x00000FFF;
@@ -556,7 +604,15 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
                         xetowerData[ntower] = xetowerData[ntower] | ( (  (Xfiber[iFiber][ilword]&lmask) >> 24)&mask)  ;
                     } 
                     else {
-                        ATH_MSG_DEBUG("ERROR [gFexInputByteStreamTool::gtReconstructABC]: wrongly packed data");
+                        
+                        std::stringstream sdetail;
+                        sdetail  << "[gFexInputByteStreamTool::gtReconstructABC]: wrongly packed data "<< fiber_type<< ", "<<dataType<< ", "<<ilword<< ", " <<ihword ;
+                        std::stringstream slocation;
+                        slocation  << "Fiber type "<< fiber_type<< " and data type"<< dataType;
+                        std::stringstream stitle;
+                        stitle  << "Wrongly packed data" ;
+                        printError(slocation.str(),stitle.str(),MSG::DEBUG,sdetail.str());   
+                        
                     }
                     // undo multilinear decoding
                     if( do_lconv){
@@ -593,10 +649,26 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
                         xhtowerData[ntower] = xhtowerData[ntower] | ( (  (Xfiber[iFiber][ilword]&lmask) >> 24)&mask)  ;
                     } 
                     else {
-                        ATH_MSG_DEBUG("ERROR [gFexInputByteStreamTool::gtReconstructABC]: wrongly packed data");
+                        
+                        std::stringstream sdetail;
+                        sdetail  << "[gFexInputByteStreamTool::gtReconstructABC]: wrongly packed data "<< fiber_type<< ", "<<dataType<< ", "<<ilword<< ", " <<ihword ;
+                        std::stringstream slocation;
+                        slocation  << "Fiber type "<< fiber_type<< " and data type"<< dataType;
+                        std::stringstream stitle;
+                        stitle  << "Wrongly packed data" ;
+                        printError(slocation.str(),stitle.str(),MSG::DEBUG,sdetail.str());                           
+                        
                     }
                     if( ntower > 32 ){
-                        ATH_MSG_DEBUG("ERROR [gFexInputByteStreamTool::gtReconstructABC]: bad value of nTower for extended region (2.4 - 2.5 in eta");
+                        
+                        std::stringstream sdetail;
+                        sdetail  << "[gFexInputByteStreamTool::gtReconstructABC]: bad value of nTower for extended region 2.4 - 2.5 in eta" ;
+                        std::stringstream slocation;
+                        slocation  << "Fiber type "<< fiber_type<< " and data type"<< dataType;
+                        std::stringstream stitle;
+                        stitle  << "Bad value of nTower in extended eta" ;
+                        printError(slocation.str(),stitle.str(),MSG::DEBUG,sdetail.str());                        
+                        
                     }
                     // undo multilinear decoding
                     if( do_lconv){
@@ -633,10 +705,26 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
                         ohtowerData[ntower] = ohtowerData[ntower] | ( (  (Xfiber[iFiber][ilword]&lmask) >> 24)&mask)  ;
                     } 
                     else {
-                        ATH_MSG_DEBUG("ERROR [gFexInputByteStreamTool::gtReconstructABC]: wrongly packed data \n");
+                        
+                        std::stringstream sdetail;
+                        sdetail  << "[gFexInputByteStreamTool::gtReconstructABC]: wrongly packed data "<< fiber_type<< ", "<<dataType<< ", "<<ilword<< ", " <<ihword ;
+                        std::stringstream slocation;
+                        slocation  << "Fiber type "<< fiber_type<< " and data type"<< dataType;
+                        std::stringstream stitle;
+                        stitle  << "Wrongly packed data" ;
+                        printError(slocation.str(),stitle.str(),MSG::DEBUG,sdetail.str());                            
+                        
                     }
                     if( ntower > 32 ){
-                        ATH_MSG_DEBUG("ERROR [gFexInputByteStreamTool::gtReconstructABC]: bad value of nTower for extended region (2.4 - 2.5 in eta");
+                        
+                        std::stringstream sdetail;
+                        sdetail  << "[gFexInputByteStreamTool::gtReconstructABC]: bad value of nTower for extended region 2.4 - 2.5 in eta" ;
+                        std::stringstream slocation;
+                        slocation  << "Fiber type "<< fiber_type<< " and data type"<< dataType;
+                        std::stringstream stitle;
+                        stitle  << "Bad value of nTower in extended eta" ;
+                        printError(slocation.str(),stitle.str(),MSG::DEBUG,sdetail.str());                            
+                        
                     }
                     if( do_lconv){
                         undoMLE( ohtowerData[ntower] );
@@ -675,7 +763,15 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
                         htowerData[ntower] = htowerData[ntower] | ( ( (lHECval & lmask) >> 24) &mask) ;
                     } 
                     else {
-                    ATH_MSG_DEBUG("ERROR [gFexInputByteStreamTool::gtReconstructABC]: wrongly packed data\n");
+                        
+                        std::stringstream sdetail;
+                        sdetail  << "[gFexInputByteStreamTool::gtReconstructABC]: wrongly packed data "<< fiber_type<< ", "<<dataType<< ", "<<ilword<< ", " <<ihword ;
+                        std::stringstream slocation;
+                        slocation  << "Fiber type "<< fiber_type<< " and data type"<< dataType;
+                        std::stringstream stitle;
+                        stitle  << "Wrongly packed data" ;
+                        printError(slocation.str(),stitle.str(),MSG::DEBUG,sdetail.str());                         
+                        
                     }
                     if( do_lconv){
                         undoMLE( htowerData[ntower] );
@@ -719,7 +815,15 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
                     etowerData[ntower] = etowerData[ntower] | ( (  (Xfiber[iFiber][ilword]&lmask) >> 24)&mask)  ;
                 } 
                 else {
-                    ATH_MSG_DEBUG("ERROR [gFexInputByteStreamTool::gtReconstructABC]: wrongly packed data");
+
+                    std::stringstream sdetail;
+                    sdetail  << "[gFexInputByteStreamTool::gtReconstructABC]: wrongly packed data "<< fiber_type<< ", "<<dataType<< ", "<<ilword<< ", " <<ihword ;
+                    std::stringstream slocation;
+                    slocation  << "Fiber type "<< fiber_type<< " and data type"<< dataType;
+                    std::stringstream stitle;
+                    stitle  << "Wrongly packed data" ;
+                    printError(slocation.str(),stitle.str(),MSG::DEBUG,sdetail.str());                     
+                    
                 }
                 // undo multilinear decoding
                 if( do_lconv){
@@ -757,7 +861,15 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
                     htowerData[ntower] = htowerData[ntower] | ( (  (Xfiber[iFiber][ilword]&lmask) >> 24)&mask)  ;
                 } 
                 else {
-                    ATH_MSG_DEBUG("ERROR [gFexInputByteStreamTool::gtReconstructABC]: wrongly packed data");
+
+                    std::stringstream sdetail;
+                    sdetail  << "[gFexInputByteStreamTool::gtReconstructABC]: wrongly packed data "<< fiber_type<< ", "<<dataType<< ", "<<ilword<< ", " <<ihword ;
+                    std::stringstream slocation;
+                    slocation  << "Fiber type "<< fiber_type<< " and data type"<< dataType;
+                    std::stringstream stitle;
+                    stitle  << "Wrongly packed data" ;
+                    printError(slocation.str(),stitle.str(),MSG::DEBUG,sdetail.str());             
+                            
                 }
                 // undo multilinear decoding
                 if( do_lconv){
@@ -777,7 +889,15 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
                 break; 
     
                 default:
-                ATH_MSG_DEBUG("ERROR [gFexInputByteStreamTool::gtReconstructABC]: wrong detector type "<< dataType );
+                
+                    std::stringstream sdetail;
+                    sdetail  << "[gFexInputByteStreamTool::gtReconstructABC]: wrong detector type "<< dataType ;
+                    std::stringstream slocation;
+                    slocation  << "Fiber type "<< fiber_type<< " and data type"<< dataType;
+                    std::stringstream stitle;
+                    stitle  << "Wrong detector type" ;
+                    printError(slocation.str(),stitle.str(),MSG::DEBUG,sdetail.str()); 
+                    
                 } // end of case statement for FPGAC 
             } // end of | eta | > 2,5 
         } // end of loop over words
@@ -1173,3 +1293,15 @@ StatusCode gFexInputByteStreamTool::convertToBS(std::vector<WROBF*>& /*vrobf*/, 
     return StatusCode::SUCCESS;
 }
 
+void  gFexInputByteStreamTool::printError(const std::string& location, const std::string& title, MSG::Level type, const std::string& detail) const{
+    
+    if(m_UseMonitoring){
+        Monitored::Group(m_monTool,
+                     Monitored::Scalar("gfexDecoderErrorLocation",location.empty() ? std::string("UNKNOWN") : location),
+                     Monitored::Scalar("gfexDecoderErrorTitle"   ,title.empty()    ? std::string("UNKNOWN") : title)
+                     );
+    }
+    else {
+        msg() << type << detail << endmsg;
+    }
+}
