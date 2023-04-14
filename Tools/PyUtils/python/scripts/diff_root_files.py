@@ -170,7 +170,8 @@ def main(args):
         dict_in = {}
         nevts = tree.GetEntriesFast()
 
-        eiDict = {'eventNumber':['EventInfoAux.',
+        eiDict = {'':['EventInfoAuxDyn.eventNumber'],
+                  'eventNumber':['EventInfoAux.',
                                  'Bkg_EventInfoAux.',
                                  'xAOD::EventAuxInfo_v3_EventInfoAux.',
                                  'xAOD::EventAuxInfo_v2_EventInfoAux.',
@@ -178,7 +179,7 @@ def main(args):
                                  'xAOD::EventAuxInfo_v3_Bkg_EventInfoAux.',
                                  'xAOD::EventAuxInfo_v2_Bkg_EventInfoAux.',
                                  'xAOD::EventAuxInfo_v1_Bkg_EventInfoAux.'],
-                  'm_event_ID.m_event_number':['McEventInfo',
+                  'm_event_ID m_event_number':['McEventInfo',
                                                'ByteStreamEventInfo',
                                                'EventInfo_p4_McEventInfo',
                                                'EventInfo_p4_ByteStreamEventInfo']}
@@ -202,7 +203,7 @@ def main(args):
                 msg.error('Cannot read event info, will bail out.')
                 msg.error(f"Tried attributes {attr1} and {attr2}")
                 break
-            event_number = reduce(getattr, [attr1] + attr2.split('.'), tree)
+            event_number = reduce(getattr, [attr1] + attr2.split(), tree)
             msg.debug('Idx : EvtNum {:10d} : {}'.format(idx,event_number))
             dict_in[idx] = event_number
 
