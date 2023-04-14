@@ -82,12 +82,7 @@ class jFexInputByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamT
         constexpr static unsigned int mapIndex(unsigned int jfex, unsigned int fpga, unsigned int channel, unsigned int tower);
         std::unordered_map<unsigned int, std::array<float,6> > m_Firm2Tower_map; /// {map index, {IDsimulation,eta,phi,source,iEta,iPhi}}
 
-        void printError(const std::string& location, const std::string& title, const uint8_t type, const std::string& detail) const;
-        
-        static constexpr uint8_t m_DEBUG=0;
-        static constexpr uint8_t m_WARNING=1;
-        static constexpr uint8_t m_ERROR=2;
-        static constexpr uint8_t m_FATAL=3;
+        void printError(const std::string& location, const std::string& title, MSG::Level type, const std::string& detail) const;
         
 };
 

@@ -19,6 +19,7 @@
 
 // Athena includes
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "AthenaMonitoringKernel/Monitored.h"
 
 // Gaudi includes
 #include "Gaudi/Property.h"
@@ -65,6 +66,11 @@ class gFexInputByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamT
 
     private:
         // ------------------------- Properties --------------------------------------
+        ToolHandle<GenericMonitoringTool> m_monTool{this,"MonTool","","Monitoring tool"};
+        bool m_UseMonitoring = false;        
+                
+        
+        
         // ROBIDs property required by the interface
         Gaudi::Property<std::vector<uint32_t>> m_robIds {this, "ROBIDs", {}, "List of ROB IDs required for conversion to/from xAOD RoI"};
 
@@ -100,6 +106,8 @@ class gFexInputByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamT
         virtual void gtRescale(gtFPGA twr, gtFPGA &twrScaled, int scale) const;
         
         virtual void getEtaPhi(float &Eta, float &Phi, int iEta, int iPhi, int gFEXtowerID) const;
+        
+        void printError(const std::string& location, const std::string& title, MSG::Level type, const std::string& detail) const;
         
 };
 
