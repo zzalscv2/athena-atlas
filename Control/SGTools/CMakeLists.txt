@@ -4,7 +4,7 @@
 atlas_subdir( SGTools )
 
 # External dependencies:
-find_package( Boost )
+find_package( Boost COMPONENTS timer)
 
 # Component(s) in the package:
 atlas_add_library( SGTools

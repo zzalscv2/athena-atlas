@@ -55,6 +55,10 @@ StatusCode MuonSegmentFinderAlg::initialize() {
 }
 
 StatusCode MuonSegmentFinderAlg::execute(const EventContext& ctx) const {
+    
+    NSWSegmentCache nswCache{};
+    nswCache.buildQuads = !m_segmentNSWCollectionKey.empty();
+
     std::unique_ptr<Trk::SegmentCollection> segmentContainer = std::make_unique<Trk::SegmentCollection>();
     std::unique_ptr<Trk::SegmentCollection> nswSegmentContainer = !m_segmentNSWCollectionKey.empty() ? std::make_unique<Trk::SegmentCollection>()
                                                                                                      : nullptr;   
@@ -98,7 +102,18 @@ StatusCode MuonSegmentFinderAlg::execute(const EventContext& ctx) const {
             ATH_CHECK(createSegmentsWithMDTs(ctx, patt, segmentContainer.get()));
         }
        
-        createSegmentsFromClusters(ctx, patt, segmentContainer.get(), nswSegmentContainer.get());
+        createNSWSegments(ctx, patt, nswCache);
+        
+        /// Move the segments into the output
+        segmentContainer->insert(segmentContainer->end(), std::make_move_iterator(nswCache.constructedSegs.begin()),
+                                                          std::make_move_iterator(nswCache.constructedSegs.end()));
+        
+        nswCache.constructedSegs.clear();
+
+        if (!nswSegmentContainer) continue;
+        nswSegmentContainer->insert(nswSegmentContainer->end(), std::make_move_iterator(nswCache.quadSegs.begin()),
+                                                                std::make_move_iterator(nswCache.quadSegs.end()));
+        nswCache.quadSegs.clear();
                
     }  // end loop on pattern combinations
 
@@ -209,16 +224,17 @@ void MuonSegmentFinderAlg::appendSegmentsFromCombi(const std::unique_ptr<MuonSeg
         }
     }
 }
-void MuonSegmentFinderAlg::createSegmentsFromClusters(const EventContext& ctx, const Muon::MuonPatternCombination* patt, Trk::SegmentCollection* segments, Trk::SegmentCollection* segmentsNSW) const {
+void MuonSegmentFinderAlg::createNSWSegments(const EventContext& ctx, 
+                           const Muon::MuonPatternCombination* patt, 
+                           NSWSegmentCache& cache) const {
     // turn the PRD into MuonCluster
     if (!m_doSTgcSegments && !m_doMMSegments) return;
-    std::map<int, std::vector<const Muon::MuonClusterOnTrack*> > clustersPerSector;
-    std::vector<std::unique_ptr<const Muon::MuonClusterOnTrack>> garbage{};
+    std::map<int, std::vector<std::unique_ptr<const Muon::MuonClusterOnTrack>> > clustersPerSector;
+
+    
     for (const Muon::MuonPatternChamberIntersect&  it :patt->chamberData()) {
         if (it.prepRawDataVec().empty()) continue;
-        if (garbage.capacity() < it.prepRawDataVec().size() + garbage.size()){
-            garbage.reserve(it.prepRawDataVec().size() + garbage.size());
-        }
+        
         const Identifier id = it.prepRawDataVec().front()->identify();
         const int sector = m_idHelperSvc->sector(id);
         /// Constrain to NSW hits
@@ -228,15 +244,14 @@ void MuonSegmentFinderAlg::createSegmentsFromClusters(const EventContext& ctx, c
             if (!cl) continue;           
             else if (!m_doMMSegments && m_idHelperSvc->isMM(cl->identify())) continue;
             else if (!m_doSTgcSegments && m_idHelperSvc->issTgc(cl->identify())) continue;
-            std::vector<const Muon::MuonClusterOnTrack*>& clusters = clustersPerSector[sector];
-            clusters.push_back(m_clusterCreator->createRIO_OnTrack(*cl, cl->globalPosition()));
-            garbage.emplace_back(clusters.back());
+            std::vector<std::unique_ptr<const Muon::MuonClusterOnTrack>>& clusters = clustersPerSector[sector];
+            clusters.emplace_back(m_clusterCreator->createRIO_OnTrack(*cl, cl->globalPosition()));          
         }
     }    
     for (auto&[sector, clusters] :clustersPerSector) {
         ATH_MSG_VERBOSE("Run segment making on sector "<<sector);
-        std::vector<std::unique_ptr<Muon::MuonSegment>> segVec;
-        m_clusterSegMakerNSW->find(ctx, clusters, segVec, segments, segmentsNSW);
+        cache.inputClust = std::move(clusters);
+        m_clusterSegMakerNSW->find(ctx, cache);
     }
 }
 

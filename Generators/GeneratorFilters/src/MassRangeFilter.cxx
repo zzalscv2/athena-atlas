@@ -40,7 +40,7 @@ StatusCode MassRangeFilter::filterEvent() {
     const HepMC::GenEvent* genEvt = *itr;
     auto genEvt_particles_begin=HepMC::begin(*genEvt);
     auto genEvt_particles_end=HepMC::end(*genEvt);
-    for ( auto pitr1 = genEvt_particles_begin; pitr1 != genEvt_particles_end; ++pitr1) {
+    for (auto pitr1 = genEvt_particles_begin; pitr1 != genEvt_particles_end; ++pitr1) {
       if ((*pitr1)->status() != m_PartStatus ) continue; //status of the particle
       if (std::abs((*pitr1)->pdg_id()) != std::abs(m_PartId) ) continue; //PDG ID selection
       if ((*pitr1)->momentum().perp() < m_Ptmin ) continue; // pT cut

@@ -6,7 +6,7 @@
 # art-include: 23.0/Athena
 # art-athena-mt: 8
 
-Reco_tf.py  \
+Reco_tf.py --CA \
 --AMI f1328  \
 --inputBSFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00437548.physics_Main.daq.RAW._lb1044._SFO-15._0002.data" \
 --maxEvents=700 \
@@ -18,6 +18,7 @@ Reco_tf.py  \
 --outputDESDM_MCPFile="myDESDM_MCP.pool.root" \
 --outputDRAW_EGZFile="myDRAW_EGZ.data" \
 --outputDAOD_L1CALO1File="myDAOD_L1CALO1.pool.root" \
+--outputDESDM_PHOJETFile="myDAOD_PHOJET.pool.root" \
 --imf False
 
 rc1=$?

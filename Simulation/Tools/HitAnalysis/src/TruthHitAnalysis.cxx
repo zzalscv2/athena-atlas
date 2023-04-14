@@ -246,10 +246,15 @@ StatusCode TruthHitAnalysis::execute() {
       int nvtx = 0;
       int nvtx_sec=0;
 #ifdef HEPMC3
+    const auto &barcodes = (*currentGenEventIter)->attribute<HepMC::GenEventBarcodes> ("barcodes");
+    std::map<int,int> id_to_barcode_map;
+    if (barcodes) id_to_barcode_map = barcodes->id_to_barcode_map();
     for (const auto& vtx: (*currentGenEventIter)->vertices()) {
+    int bcode = id_to_barcode_map[vtx->id()];
 #else
     for (HepMC::GenEvent::vertex_const_iterator vtxit=(*currentGenEventIter)->vertices_begin(); vtxit!=(*currentGenEventIter)->vertices_end(); ++vtxit) {
     auto vtx=*vtxit;
+        int bcode = HepMC::barcode(*vtx);
 #endif
 	double x = vtx->position().x();
 	double y = vtx->position().y();
@@ -260,7 +265,6 @@ StatusCode TruthHitAnalysis::execute() {
 	m_h_vtx_r->Fill(r);
 	m_h_vtx_z->Fill(z);
 
-	int bcode = HepMC::barcode(*vtx);
 	m_vtx_x->push_back(x);
 	m_vtx_y->push_back(y);
 	m_vtx_r->push_back(r);
@@ -288,7 +292,11 @@ StatusCode TruthHitAnalysis::execute() {
 
       for (auto currentGenParticle: *(*currentGenEventIter)) {
 	const HepMC::FourVector mom = currentGenParticle->momentum();
+#ifdef HEPMC3
+    int currentGenParticlebarcode = id_to_barcode_map[currentGenParticle->id()];
+#else
         int currentGenParticlebarcode=HepMC::barcode(currentGenParticle);
+#endif
 	m_h_truth_px->Fill(mom.x());
 	m_h_truth_py->Fill(mom.y());
 	m_h_truth_pz->Fill(mom.z());
@@ -315,7 +323,7 @@ StatusCode TruthHitAnalysis::execute() {
 	  m_h_part_eta->Fill(mom.eta());
 	  m_h_part_phi->Fill(mom.phi());
 	  ++npart_prim; 
-	  if (currentGenParticlebarcode < 10000) {
+	  if (currentGenParticlebarcode < HepMC::PHOTOSMIN) {
 	    m_h_n_generations->Fill(0);
 	  }
 	  else {

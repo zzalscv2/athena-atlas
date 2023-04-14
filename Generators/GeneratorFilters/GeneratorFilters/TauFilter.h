@@ -25,7 +25,7 @@ public:
   StatusCode filterFinalize();
   StatusCode filterEvent();
 
-  CLHEP::HepLorentzVector sumDaughterNeutrinos( HepMC::ConstGenParticlePtr tau );
+  CLHEP::HepLorentzVector sumDaughterNeutrinos(const HepMC::ConstGenParticlePtr& tau );
 
 private:
 

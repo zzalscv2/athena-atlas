@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonHoughPatternTools/MuonLayerHoughTool.h"
@@ -54,7 +54,7 @@ namespace Muon {
                 using TechIdx = MuonStationIndex::TechnologyIndex;
                 if (tech == TechIdx::CSCI && !m_idHelperSvc->hasCSC())
                     continue;
-                else if (tech == TechIdx::STGC && !m_idHelperSvc->hasSTgc())
+                else if (tech == TechIdx::STGC && !m_idHelperSvc->hasSTGC())
                     continue;
                 else if (tech == TechIdx::MM && !m_idHelperSvc->hasMM())
                     continue;
@@ -2104,7 +2104,7 @@ namespace Muon {
         }
 
         // loop over all available STGC collection identifiers and order them per sector
-        if (m_idHelperSvc->hasSTgc()) {
+        if (m_idHelperSvc->hasSTGC()) {
             it = m_idHelperSvc->stgcIdHelper().detectorElement_begin();
             it_end = m_idHelperSvc->stgcIdHelper().detectorElement_end();
             for (; it != it_end; ++it) {

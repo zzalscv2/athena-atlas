@@ -153,6 +153,9 @@ if flags.Common.isOnline:
   from TrigOnlineMonitor.TrigOnlineMonitorConfig import trigOpMonitorCfg
   acc.merge( trigOpMonitorCfg(flags) )
 
+from AthenaConfiguration.AccumulatorCache import AccumulatorDecorator
+AccumulatorDecorator.printStats()
+
 log.info("Running ...")
 status = acc.run()
 if status.isFailure():

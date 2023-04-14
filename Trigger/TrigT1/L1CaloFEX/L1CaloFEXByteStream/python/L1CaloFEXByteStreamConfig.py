@@ -116,7 +116,7 @@ def jFexRoiByteStreamToolCfg(flags, name, *, writeBS=False, xTOBs=False):
       acc.merge(helper.result())
 
     monTool.defineHistogram('jfexDecoderErrorTitle,jfexDecoderErrorLocation;errors', path=topDir, type='TH2I',
-                            title='Decoder Errors;Type;Location',
+                            title='jFEX TOB Decoder Errors;Type;Location',
                             xbins=1, xmin=0, xmax=1, xlabels=["UNKNOWN"],
                             ybins=1, ymin=0, ymax=1, ylabels=["UNKNOWN"],
                             opt=['kCanRebin'])
@@ -184,6 +184,28 @@ def gFexByteStreamToolCfg(flags, name, *, writeBS=False):
     tool.gScalarENoiseCutOutputContainerWriteKey        ="L1_gScalarENoiseCut"
     tool.gScalarERmsOutputContainerWriteKey             ="L1_gScalarERms"
 
+
+  if flags.Output.HISTFileName != '' or flags.Trigger.doHLT:
+    if flags.Trigger.doHLT:
+      from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
+      monTool = GenericMonitoringTool(flags,'MonTool',HistPath = f'HLTFramework/L1BSConverters/{name}')
+      topDir = "EXPERT"
+    else:
+      # if used in offline reconstruction respect DQ convention (ATR-26371)
+      from AthenaMonitoring import AthMonitorCfgHelper
+      helper = AthMonitorCfgHelper(flags, 'HLTFramework')
+      monTool = helper.addGroup(None, f'{name}MonTool', f'/HLT/HLTFramework/L1BSConverters/{name}')
+      topDir = None
+      acc.merge(helper.result())
+
+    monTool.defineHistogram('gfexDecoderErrorTitle,gfexDecoderErrorLocation;errors', path=topDir, type='TH2I',
+                            title='gFEX TOB Decoder Errors;Type;Location',
+                            xbins=1, xmin=0, xmax=1, xlabels=["UNKNOWN"],
+                            ybins=1, ymin=0, ymax=1, ylabels=["UNKNOWN"],
+                            opt=['kCanRebin'])
+    tool.MonTool = monTool    
+
+
   acc.setPrivateTools(tool)
   return acc
 
@@ -220,7 +242,7 @@ def jFexInputByteStreamToolCfg(flags, name, *, writeBS=False):
       acc.merge(helper.result())
 
     monTool.defineHistogram('jfexDecoderErrorTitle,jfexDecoderErrorLocation;errors', path=topDir, type='TH2I',
-                            title='Decoder Errors;Type;Location',
+                            title='jFEX InputData Decoder Errors;Type;Location',
                             xbins=1, xmin=0, xmax=1, xlabels=["UNKNOWN"],
                             ybins=1, ymin=0, ymax=1, ylabels=["UNKNOWN"],
                             opt=['kCanRebin'])
@@ -248,6 +270,26 @@ def gFexInputByteStreamToolCfg(flags, name, *, writeBS=False):
     tool.gTowersReadKey   =""
   
     tool.gTowersWriteKey  = "L1_gFexDataTowers"
+    
+  if flags.Output.HISTFileName != '' or flags.Trigger.doHLT:
+    if flags.Trigger.doHLT:
+      from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
+      monTool = GenericMonitoringTool(flags,'MonTool',HistPath = f'HLTFramework/L1BSConverters/{name}')
+      topDir = "EXPERT"
+    else:
+      # if used in offline reconstruction respect DQ convention (ATR-26371)
+      from AthenaMonitoring import AthMonitorCfgHelper
+      helper = AthMonitorCfgHelper(flags, 'HLTFramework')
+      monTool = helper.addGroup(None, f'{name}MonTool', f'/HLT/HLTFramework/L1BSConverters/{name}')
+      topDir = None
+      acc.merge(helper.result())
+
+    monTool.defineHistogram('gfexDecoderErrorTitle,gfexDecoderErrorLocation;errors', path=topDir, type='TH2I',
+                            title='gFEX InputData Decoder Errors;Type;Location',
+                            xbins=1, xmin=0, xmax=1, xlabels=["UNKNOWN"],
+                            ybins=1, ymin=0, ymax=1, ylabels=["UNKNOWN"],
+                            opt=['kCanRebin'])
+    tool.MonTool = monTool   
 
   acc.setPrivateTools(tool)
   return acc

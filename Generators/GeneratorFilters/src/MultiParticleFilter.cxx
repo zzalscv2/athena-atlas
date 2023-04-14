@@ -96,7 +96,7 @@ StatusCode MultiParticleFilter::filterEvent() {
                 
         // Loop over all particles in the event
         const HepMC::GenEvent* genEvt = (*itr);
-        for(auto pitr: *genEvt){              
+        for(const auto& pitr: *genEvt){              
             bool passedPDG = false;
             bool passedStatus = false;            
             if (find(m_particlePDG.begin(),m_particlePDG.end(),std::abs(pitr->pdg_id()))!=m_particlePDG.end()) passedPDG = true;

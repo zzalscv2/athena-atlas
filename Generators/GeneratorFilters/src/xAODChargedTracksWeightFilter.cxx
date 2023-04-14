@@ -191,7 +191,7 @@ void xAODChargedTracksWeightFilter::weight_event(double weight) {
         if (event->weights().empty()) {
             event->weights().push_back( 1/weight );
         } else {
-            for(auto & w: event-> weights()) {
+            for (auto & w: event-> weights()) {
                 w /= weight;
             }
 

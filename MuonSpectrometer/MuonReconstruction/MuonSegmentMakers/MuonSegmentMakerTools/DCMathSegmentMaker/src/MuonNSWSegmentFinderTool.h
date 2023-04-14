@@ -21,14 +21,14 @@
 #include "MuonRecToolInterfaces/IMuonTrackCleaner.h"
 #include "MuonRecToolInterfaces/IMuonTrackToSegmentTool.h"
 #include "MuonSegment/MuonSegment.h"
-#include "MuonSegmentMakerToolInterfaces/IMuonClusterSegmentFinderTool.h"
+#include "MuonSegmentMakerToolInterfaces/IMuonNSWSegmentFinderTool.h"
 #include "TrkFitterInterfaces/ITrackFitter.h"
 #include "TrkPseudoMeasurementOnTrack/PseudoMeasurementOnTrack.h"
 #include "TrkToolInterfaces/ITrackAmbiguityProcessorTool.h"
 #include "TrkToolInterfaces/ITrackSummaryTool.h"
 namespace Muon {
 
-    class MuonClusterSegmentFinderTool;
+    class MuonNSWSegmentFinderTool;
     struct NSWSeed {
 
         /// Struct caching the MuonClusterOnTrack and providing the
@@ -63,15 +63,15 @@ namespace Muon {
         NSWSeed() = default;
 
         //// Constructor used for the three micro mega stereo seeds
-        NSWSeed(const MuonClusterSegmentFinderTool* parent, const std::array<SeedMeasurement, 4>& seed,
+        NSWSeed(const MuonNSWSegmentFinderTool* parent, const std::array<SeedMeasurement, 4>& seed,
                 const std::array<double, 2>& lengths);
 
         //// Constructor to build seeds from 2 eta/phi strips
-        NSWSeed(const MuonClusterSegmentFinderTool* parent,  const SeedMeasurement& first, const SeedMeasurement& second);
+        NSWSeed(const MuonNSWSegmentFinderTool* parent,  const SeedMeasurement& first, const SeedMeasurement& second);
         /// Constructor to build a seed from an existing segment
-        NSWSeed(const MuonClusterSegmentFinderTool* parent, const Muon::MuonSegment& seg);
+        NSWSeed(const MuonNSWSegmentFinderTool* parent, const Muon::MuonSegment& seg);
         //// Constructor to build a seed to create 3D segments
-        NSWSeed(const MuonClusterSegmentFinderTool* parent, const Amg::Vector3D& pos, const Amg::Vector3D& dir);
+        NSWSeed(const MuonNSWSegmentFinderTool* parent, const Amg::Vector3D& pos, const Amg::Vector3D& dir);
 
         double chi2() const {return m_chi2;}
         /// Returns the number of measurements
@@ -103,7 +103,7 @@ namespace Muon {
 
         bool insert(SeedMeasurement meas);
 
-        const MuonClusterSegmentFinderTool* m_parent{nullptr};
+        const MuonNSWSegmentFinderTool* m_parent{nullptr};
         /// Helper pair to cache the measurements with the respective distances
         using SeedMeasCache = std::array<SeedMeasurement, 16>;
         /// Cache the eta measurements
@@ -126,12 +126,12 @@ namespace Muon {
         std::set<std::shared_ptr<const Muon::MuonClusterOnTrack>> m_calibClust{};
     };
 
-    class MuonClusterSegmentFinderTool : virtual public IMuonClusterSegmentFinderTool, public AthAlgTool {
+    class MuonNSWSegmentFinderTool : virtual public IMuonNSWSegmentFinderTool, public AthAlgTool {
     public:
         /** default constructor */
-        MuonClusterSegmentFinderTool(const std::string& type, const std::string& name, const IInterface* parent);
+        MuonNSWSegmentFinderTool(const std::string& type, const std::string& name, const IInterface* parent);
         /** destructor */
-        virtual ~MuonClusterSegmentFinderTool() = default;
+        virtual ~MuonNSWSegmentFinderTool() = default;
 
         virtual StatusCode initialize() override;
 
@@ -184,6 +184,8 @@ namespace Muon {
         Gaudi::Property<bool> m_ipConstraint{this, "IPConstraint", true};  // use a ip perigee(0,0) constraint in the segment fit
         Gaudi::Property<double> m_maxClustDist{this, "ClusterDistance", 5.};
         Gaudi::Property<int> m_nOfSeedLayers{this, "NOfSeedLayers", 1};
+        Gaudi::Property<float> m_maxNumberOfMMHitsPerLayer{this, "maxNumberOfMMHitsPerLayer", 75, "If the average number of MM hits per layer exceeds this number MM segment reco is suspended for this pattern"};
+
 
         Gaudi::Property<bool> m_useStereoSeeding{this, "SeedMMStereos", true};
     public:
@@ -195,9 +197,7 @@ namespace Muon {
         // find segments given a list of MuonCluster
         // segments can be added directly to a SegmentCollection, if they are to be written to SG, or returned in a list for
         // further processing
-        void find(const EventContext& ctx, std::vector<const Muon::MuonClusterOnTrack*>& clusters,
-                  std::vector<std::unique_ptr<Muon::MuonSegment>>& segments, Trk::SegmentCollection* segColl,
-                  Trk::SegmentCollection* segPerQuadColl) const override;
+        void find(const EventContext& ctx, SegmentMakingCache& cache) const override;
 
         int wedgeNumber(const Muon::MuonClusterOnTrack* cluster) const;
         int layerNumber(const Muon::MuonClusterOnTrack* cluster) const;

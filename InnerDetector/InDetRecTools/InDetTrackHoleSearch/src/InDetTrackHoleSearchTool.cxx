@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -55,13 +55,10 @@ StatusCode InDet::InDetTrackHoleSearchTool::initialize() {
 
   ATH_CHECK(detStore()->retrieve(m_atlasId, "AtlasID"));
 
-  // Get TrkExtrapolator from ToolService
-  ATH_MSG_INFO("Retrieving tool " << m_extrapolator);
   ATH_CHECK(m_extrapolator.retrieve());
 
   if (m_extendedListOfHoles) ATH_MSG_INFO("Search for extended list of holes ");
 
-  ATH_MSG_INFO("initialize() successful in " << name());
   return StatusCode::SUCCESS;
 }
 

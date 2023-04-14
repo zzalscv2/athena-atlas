@@ -59,9 +59,9 @@ def HLTPF_ParticleCaloExtensionToolCfg(flags,
     acc = ComponentAccumulator()
 
     if "Extrapolator" not in kwargs:
-        from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
+        from TrkConfig.AtlasExtrapolatorConfig import TrigPFlowExtrapolatorCfg
         kwargs["Extrapolator"] = acc.popToolsAndMerge(
-            InDetExtrapolatorCfg(flags))
+            TrigPFlowExtrapolatorCfg(flags))
 
     acc.setPrivateTools(
         CompFactory.Trk.ParticleCaloExtensionTool(name, **kwargs))

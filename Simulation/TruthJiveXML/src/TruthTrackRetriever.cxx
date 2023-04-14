@@ -92,6 +92,11 @@ namespace JiveXML {
     for ( McEvtCollItr = McEvtColl->begin(); McEvtCollItr != McEvtColl->end(); ++McEvtCollItr){
 
       //Loop over particles in the event
+#ifdef HEPMC3
+      const auto &barcodes = (*McEvtCollItr)->attribute<HepMC::GenEventBarcodes> ("barcodes");
+      std::map<int,int> id_to_barcode_map;
+      if (barcodes) id_to_barcode_map = barcodes->id_to_barcode_map();
+#endif      
       for (const auto& particle:  *(*McEvtCollItr) ) {
         
         //Additional cuts for decaying particles
@@ -108,12 +113,16 @@ namespace JiveXML {
         phi.push_back(DataType( (thePhi<0) ? thePhi+=2*M_PI : thePhi ));
         eta.push_back(DataType( particle->momentum().pseudoRapidity() ));
         code.push_back(DataType( particle->pdg_id() ));
+#ifdef HEPMC3
+        id.push_back(DataType( id_to_barcode_map.at(particle->id() )));
+#else
         id.push_back(DataType( HepMC::barcode(*particle) ));
+#endif
 
         // Get the vertex information
-        auto vertex =  particle->production_vertex();
-        if (vertex) {
-          auto pos=vertex->position();
+        const auto& vertexprod =  particle->production_vertex();
+        if (vertexprod) {
+          const auto& pos=vertexprod->position();
           rhoVertex.push_back(DataType( std::sqrt(pos.x()*pos.x()+pos.y()*pos.y()+pos.z()*pos.z())*Gaudi::Units::mm/Gaudi::Units::cm ));
           float vtxPhi = pos.phi();
           phiVertex.push_back(DataType( (vtxPhi<0)? vtxPhi+=2*M_PI : vtxPhi ));
@@ -124,9 +133,9 @@ namespace JiveXML {
           zVertex.push_back(DataType( 0. )); 
         }
         //Do the same for the end vertex
-        vertex =  particle->end_vertex();
-        if ( vertex ) {
-         auto pos=vertex->position();
+        const auto& vertexend =  particle->end_vertex();
+        if ( vertexend ) {
+         const auto& pos=vertexend->position();
          rhoEndVertex.push_back(DataType(std::sqrt(pos.x()*pos.x()+pos.y()*pos.y()+pos.z()*pos.z())*Gaudi::Units::mm/Gaudi::Units::cm));
          float vtxPhi = pos.phi();
          phiEndVertex.push_back(DataType( (vtxPhi<0)? vtxPhi+=2*M_PI : vtxPhi ));

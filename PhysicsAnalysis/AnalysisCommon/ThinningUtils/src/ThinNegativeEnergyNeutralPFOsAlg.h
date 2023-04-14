@@ -61,13 +61,13 @@ private:
   SG::ThinningHandleKey<xAOD::FlowElementContainer> m_neutralPFOsKey{
     this,
     "NeutralPFOsKey",
-    "",
+    "JetETMissNeutralParticleFlowObjects",
     "StoreGate key for the FlowElementContainer to be thinned"
   };
   SG::ThinningHandleKey<xAOD::FlowElementContainer> m_LCNeutralPFOsKey{
     this,
     "LCNeutralPFOsKey",
-    "",
+    "JetETMissLCNeutralParticleFlowObjects",
     "StoreGate key for the LC FlowElementContainer to be thinned (if any)"
   };
 

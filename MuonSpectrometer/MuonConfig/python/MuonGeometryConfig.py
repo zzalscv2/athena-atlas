@@ -11,9 +11,11 @@ def MuonIdHelperSvcCfg(flags):
     acc = ComponentAccumulator()
     acc.addService( CompFactory.Muon.MuonIdHelperSvc("MuonIdHelperSvc",
         HasCSC=flags.Detector.GeometryCSC,
-        HasSTgc=flags.Detector.GeometrysTGC,
-        HasMM=flags.Detector.GeometryMM
-        ), primary=True )
+        HasSTGC=flags.Detector.GeometrysTGC,
+        HasMM=flags.Detector.GeometryMM,
+        HasMDT=flags.Detector.GeometryMDT,
+        HasRPC=flags.Detector.GeometryRPC,
+        HasTGC=flags.Detector.GeometryTGC), primary=True )
     return acc
 
 
@@ -94,14 +96,13 @@ def MuonDetectorToolCfg(flags):
 
     # turn on/off caching of MdtReadoutElement surfaces
     detTool.CachingFlag = 1
-
+    acc.merge(MuonIdHelperSvcCfg(flags))
     acc.setPrivateTools(detTool)
     return acc
 
 @AccumulatorCache
 def MuonAlignmentCondAlgCfg(flags):
     acc = MuonGeoModelToolCfg(flags)
-    acc.merge(MuonIdHelperSvcCfg(flags))
 
     # This is all migrated from MuonSpectrometer/MuonReconstruction/MuonRecExample/python/MuonAlignConfig.py
 

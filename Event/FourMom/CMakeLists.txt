@@ -4,7 +4,7 @@
 atlas_subdir( FourMom )
 
 # External dependencies:
-find_package( Boost )
+find_package( Boost  COMPONENTS timer)
 find_package( CLHEP )
 
 # Component(s) in the package:

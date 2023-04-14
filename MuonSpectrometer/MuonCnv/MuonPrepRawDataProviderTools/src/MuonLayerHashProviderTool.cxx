@@ -127,7 +127,7 @@ namespace Muon {
     if (m_idHelperSvc->hasRPC()) insertTechnology(m_idHelperSvc->rpcIdHelper());
     if (m_idHelperSvc->hasCSC()) insertTechnology(m_idHelperSvc->cscIdHelper());
     if (m_idHelperSvc->hasMM()) insertTechnology(m_idHelperSvc->mmIdHelper());
-    if (m_idHelperSvc->hasSTgc()) insertTechnology(m_idHelperSvc->stgcIdHelper());
+    if (m_idHelperSvc->hasSTGC()) insertTechnology(m_idHelperSvc->stgcIdHelper());
 
     if( !insertTgcs() ) return false;
 

@@ -38,6 +38,8 @@ protected:
 
   void CopyAlgConfig( const HanConfigAssessor& hca );
 
+  void CopyRuntimeConfig();
+
   TFile* m_file;
   
   TObject*  m_ref;

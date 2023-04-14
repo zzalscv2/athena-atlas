@@ -430,7 +430,8 @@ def Csc4dSegmentMakerCfg(flags, name= "Csc4dSegmentMaker", **kwargs):
     result.setPrivateTools(CompFactory.Csc4dSegmentMaker(name=name, **kwargs))
     return result
 
-def MuonClusterSegmentFinderToolCfg(flags, name='MuonClusterSegmentFinderTool', **kwargs):
+def MuonNSWSegmentFinderToolCfg(flags, name='MuonNSWSegmentFinderTool', **kwargs):
+
     from MuonConfig.MuonRecToolsConfig import MuonTrackToSegmentToolCfg
     from TrkConfig.TrkTrackSummaryToolConfig import MuonCombinedTrackSummaryToolCfg, MuonTrackSummaryToolCfg
     result=ComponentAccumulator()
@@ -450,7 +451,7 @@ def MuonClusterSegmentFinderToolCfg(flags, name='MuonClusterSegmentFinderTool', 
     from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MuonClusterOnTrackCreatorCfg
     kwargs.setdefault("MuonClusterCreator", result.popToolsAndMerge(MuonClusterOnTrackCreatorCfg(flags)) )
 
-    result.setPrivateTools(CompFactory.Muon.MuonClusterSegmentFinderTool(name,**kwargs))
+    result.setPrivateTools(CompFactory.Muon.MuonNSWSegmentFinderTool(name,**kwargs))
     return result
 
 def MuonPRDSelectionToolCfg( flags, name="MuonPRDSelectionTool", **kwargs):
@@ -592,16 +593,16 @@ def MuonSegmentFinderNCBAlgCfg(flags, name="MuonSegmentMaker_NCB", **kwargs):
     ### Setup the NSW segment maker
     if flags.Detector.EnablesTGC or flags.Detector.EnableMM:
         kwargs.setdefault("MuonClusterCreator", result.popToolsAndMerge(MuonClusterOnTrackCreatorCfg(flags)))
-        # Configure subtools needed by MuonClusterSegmentFinderTool
+        # Configure subtools needed by MuonNSWSegmentFinderTool
         extrapolator = result.getPrimaryAndMerge(MuonStraightLineExtrapolatorCfg(flags))
         result.addPublicTool(extrapolator)
         cleaner = result.popToolsAndMerge( MuonTrackCleanerCfg(flags, name='MuonTrackCleaner_seg',seg=True) )
-        segment_finder = result.popToolsAndMerge(MuonClusterSegmentFinderToolCfg(flags, 
-                                                                                   name ="MuonClusterSegmentFinderTool", 
+        segment_finder = result.popToolsAndMerge(MuonNSWSegmentFinderToolCfg(flags, 
+                                                                                   name ="MuonNSWSegmentFinderTool", 
                                                                                    TrackCleaner = cleaner,
                                                                                    SeedMMStereos = False,
                                                                                    IPConstraint = False))
-        kwargs.setdefault("MuonClusterSegmentFinderTool", segment_finder)
+        kwargs.setdefault("NSWSegmentMaker", segment_finder)
     the_alg = CompFactory.MuonSegmentFinderAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True) 
     return result
@@ -622,12 +623,12 @@ def MuonSegmentFinderAlgCfg(flags, name="MuonSegmentMaker", **kwargs):
     if flags.Detector.EnableMM or flags.Detector.EnablesTGC:
         kwargs.setdefault("MuonClusterCreator", result.popToolsAndMerge(MuonClusterOnTrackCreatorCfg(flags)))
 
-        # Configure subtools needed by MuonClusterSegmentFinderTool
+        # Configure subtools needed by MuonNSWSegmentFinderTool
         extrapolator = result.getPrimaryAndMerge(MuonStraightLineExtrapolatorCfg(flags))
         result.addPublicTool(extrapolator)
         cleaner = result.popToolsAndMerge( MuonTrackCleanerCfg(flags, name='MuonTrackCleaner_seg',seg=True) )
-        segment_finder = result.getPrimaryAndMerge(MuonClusterSegmentFinderToolCfg(flags, name ="MuonClusterSegmentFinderTool", TrackCleaner = cleaner))
-        kwargs.setdefault("MuonClusterSegmentFinderTool", segment_finder)
+        segment_finder = result.getPrimaryAndMerge(MuonNSWSegmentFinderToolCfg(flags, name ="MuonNSWSegmentFinderTool", TrackCleaner = cleaner))
+        kwargs.setdefault("NSWSegmentMaker", segment_finder)
 
     ### we check whether the layout contains any CSC chamber and if yes, we check that the user also wants to use the CSCs in reconstruction    
     if flags.Detector.EnableCSC:

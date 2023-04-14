@@ -40,7 +40,7 @@ StatusCode TTbarWToLeptonFilter::filterEvent() {
         if (!decayVtx) continue; 
         // For this analysis we are not interested in t->t MC structures, only in decays
         if (decayVtx->particles_out().size() < 2) continue;
-        for (auto child_mcpart:  decayVtx->particles_out()) {
+        for (const auto& child_mcpart:  decayVtx->particles_out()) {
             //  Implicitly assume that tops always decay to W X
             if (std::abs(child_mcpart->pdg_id()) != 24) continue;
               if ( pitr->pdg_id() ==  6 ) N_quark_t++;
@@ -50,7 +50,7 @@ StatusCode TTbarWToLeptonFilter::filterEvent() {
               auto w_decayVtx = child_mcpart->end_vertex();
               while (w_decayVtx) {
                 useNextVertex = false;
-                for (auto grandchild_mcpart: *w_decayVtx) {
+                for (const auto& grandchild_mcpart: *w_decayVtx) {
 			      int grandchild_pid = grandchild_mcpart->pdg_id();
 			      ATH_MSG_DEBUG("W (t/tbar) has " <<  w_decayVtx->particles_out().size() << " children and the pdg_id of the next is " << grandchild_pid);
 			      // Check if the W's child is W again. If yes, then move to its next decay vertex in a decay tree
@@ -263,7 +263,7 @@ StatusCode TTbarWToLeptonFilter::filterEvent() {
         // verify if we got a valid pointer
         if ( !decayVtx ) continue;
           int part_child=0;
-          for ( auto  child_mcpart: *decayVtx) {
+          for (const auto&  child_mcpart: *decayVtx) {
             part_child++;
             int child_pid = child_mcpart->pdg_id();
             ATH_MSG_ERROR("          child " << part_child << " with pdg_id = " << child_pid);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_IMUONIDHELPERSVC_H
@@ -28,7 +28,7 @@ namespace Muon {
         DeclareInterfaceID(IMuonIdHelperSvc, 1, 0);
 
         /** @brief destructor */
-        virtual ~IMuonIdHelperSvc() {}
+        virtual ~IMuonIdHelperSvc() = default;
 
         /** @brief print all fields to string */
         virtual std::string toString(const Identifier& id) const = 0;
@@ -167,15 +167,9 @@ namespace Muon {
         /** @brief returns whether the CSC identifiers are loaded */
         virtual bool hasCSC() const = 0;
         /** @brief returns whether the sTGC identifiers are loaded */
-        virtual bool hasSTgc() const = 0;
+        virtual bool hasSTGC() const = 0;
         /** @brief returns whether the Mircomegas identifiers are loaded */
         virtual bool hasMM() const = 0;
-        /** @brief returns whether the CSC shall take part in the reconstruction */
-        virtual bool recoCSC() const = 0;
-        /** @brief returns whether the sTGC shall take part in the reconstruction */
-        virtual bool recosTgc() const = 0;
-        /** @brief returns whether the Micromegas shall take part in the reconstruction */
-        virtual bool recoMM() const = 0;
     };
 
 }  // namespace Muon

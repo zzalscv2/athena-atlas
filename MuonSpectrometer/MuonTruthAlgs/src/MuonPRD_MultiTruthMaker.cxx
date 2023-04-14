@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Algorithm producing truth info for PrepRawData, keeping all MC particles contributed to a PRD.
@@ -44,19 +44,19 @@ StatusCode MuonPRD_MultiTruthMaker::initialize() {
     ATH_CHECK(m_CSC_ContainerName.initialize(m_idHelperSvc->hasCSC()));
     ATH_CHECK(m_RPC_ContainerName.initialize());
     ATH_CHECK(m_TGC_ContainerName.initialize());
-    ATH_CHECK(m_STGC_ContainerName.initialize(m_idHelperSvc->hasSTgc()));
+    ATH_CHECK(m_STGC_ContainerName.initialize(m_idHelperSvc->hasSTGC()));
     ATH_CHECK(m_MM_ContainerName.initialize(m_idHelperSvc->hasMM()));
     ATH_CHECK(m_MDT_SimDataMapName.initialize());
     ATH_CHECK(m_CSC_SimDataMapName.initialize(m_idHelperSvc->hasCSC()));
     ATH_CHECK(m_RPC_SimDataMapName.initialize());
     ATH_CHECK(m_TGC_SimDataMapName.initialize());
-    ATH_CHECK(m_STGC_SimDataMapName.initialize(m_idHelperSvc->hasSTgc()));
+    ATH_CHECK(m_STGC_SimDataMapName.initialize(m_idHelperSvc->hasSTGC()));
     ATH_CHECK(m_MM_SimDataMapName.initialize(m_idHelperSvc->hasMM()));
     ATH_CHECK(m_MDT_PRD_TruthName.initialize());
     ATH_CHECK(m_CSC_PRD_TruthName.initialize(m_idHelperSvc->hasCSC()));
     ATH_CHECK(m_RPC_PRD_TruthName.initialize());
     ATH_CHECK(m_TGC_PRD_TruthName.initialize());
-    ATH_CHECK(m_STGC_PRD_TruthName.initialize(m_idHelperSvc->hasSTgc()));
+    ATH_CHECK(m_STGC_PRD_TruthName.initialize(m_idHelperSvc->hasSTGC()));
     ATH_CHECK(m_MM_PRD_TruthName.initialize(m_idHelperSvc->hasMM()));
     return StatusCode::SUCCESS;
 }
@@ -75,7 +75,7 @@ StatusCode MuonPRD_MultiTruthMaker::execute() {
         buildPRD_Truth<Muon::RpcPrepDataContainer, MuonSimDataCollection>(m_RPC_ContainerName, m_RPC_SimDataMapName, m_RPC_PRD_TruthName));
     retvals.push_back(
         buildPRD_Truth<Muon::TgcPrepDataContainer, MuonSimDataCollection>(m_TGC_ContainerName, m_TGC_SimDataMapName, m_TGC_PRD_TruthName));
-    if (m_idHelperSvc->hasSTgc())
+    if (m_idHelperSvc->hasSTGC())
         retvals.push_back(buildPRD_Truth<Muon::sTgcPrepDataContainer, MuonSimDataCollection>(m_STGC_ContainerName, m_STGC_SimDataMapName,
                                                                                              m_STGC_PRD_TruthName));
     if (m_idHelperSvc->hasMM())

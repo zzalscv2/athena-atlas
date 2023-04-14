@@ -37,6 +37,7 @@
 #include <sstream>
 #include <dirent.h>
 #include <cstdlib>
+#include <set>
 #include "TFile.h"
 #include "TChain.h"
 #include "TCanvas.h"
@@ -63,10 +64,10 @@
 #include <TPaveText.h>
 #include "TLatex.h"
 #include "TGaxis.h"
+#include "TROOT.h"
 #include <algorithm>
 
 using namespace std;
-TString inputMC="ttbar";
 TString jetType="VR";
 
 //Legend names
@@ -79,7 +80,7 @@ const float EffMax=1.;
 //Some global variables for plotting:
 // taggers with 'old_taggers' in their name are assumed to be in the folder called 'old_taggers' in the merged root file
 //
-const vector<TString> taggers = {"IP2D","IP3D","RNNIP","DIPS","SV1","DL1dv00","DL1dv01","DL1r","GN1"};
+vector<TString> taggers = {"IP2D","IP3D","RNNIP","DIPS","SV1","DL1dv00","DL1dv01","DL1r","GN1"};
 
 //older ptags have fewer taggers
 //const vector<TString> taggers = {"IP2D","IP3D","RNNIP","SV1"};
@@ -95,7 +96,7 @@ const float CWidth=800;
 const float CHeight=600;
 
 //where to save histos
-const TString HistoDir = "ROC_"+jetType+"/";
+TString HistoDir = "ROC_"+jetType+"/";
 
 
 // detail level (more WPs for high detail level)
@@ -162,26 +163,34 @@ void fill_WP_values(){
 
 TString getRefHistoName(TString var, TString truth_label){
 
-  TString name;
-if (jetType=="PFlow"){
-      if(var == "pt_ttbar") name = "BTag/AntiKt4EMPFlowJets/jet/jet/BTag_AntiKt4EMPFlowJets_jet_jet_pt_" + truth_label + "_ttbar";
-      else if(var == "pt_Zprime") name = "BTag/AntiKt4EMPFlowJets/jet/jet/BTag_AntiKt4EMPFlowJets_jet_jet_pt_" + truth_label + "_Zprime";
-      else if(var == "Lxy"){
-        if(truth_label == "l") name = "BTag/AntiKt4EMPFlowJets/SV/_" + truth_label + "/BTag_AntiKt4EMPFlowJets_SV_SV1_Lxy_" + truth_label;
-        else name = "BTag/AntiKt4EMPFlowJets/other_histograms/histos/BTag_AntiKt4EMPFlowJets_truth_Truth_Lxy_" + truth_label;
-      }
-      else throw std::invalid_argument("getRefHistoName called with unknown var name: " + var + ". Only pt_ttbar, pt_Zprime and Lxy allowed. Aborting." );
-}
+  TString jetCollection;
+  if(jetType=="EMTopo") jetCollection = "AntiKt4EMTopoJets";
+  else if(jetType=="PFlow") jetCollection = "AntiKt4EMPFlowJets";
+  else if(jetType=="VR") jetCollection = "AntiKtVR30Rmax4Rmin02PV0TrackJets";
 
-else if (jetType=="VR"){
-      if(var == "pt_ttbar") name = "BTag/AntiKtVR30Rmax4Rmin02PV0TrackJets/jet/jet/BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_jet_jet_pt_" + truth_label + "_ttbar";
-      else if(var == "pt_Zprime") name = "BTag/AntiKtVR30Rmax4Rmin02PV0TrackJets/jet/jet/BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_jet_jet_pt_" + truth_label + "_Zprime";
-      else if(var == "Lxy"){
-        if(truth_label == "l") name = "BTag/AntiKtVR30Rmax4Rmin02PV0TrackJets/SV/_" + truth_label + "/BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_Lxy_" + truth_label;
-        else name = "BTag/AntiKtVR30Rmax4Rmin02PV0TrackJets/other_histograms/histos/BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_truth_Truth_Lxy_" + truth_label;
-      }
-      else throw std::invalid_argument("getRefHistoName called with unknown var name: " + var + ". Only pt_ttbar, pt_Zprime and Lxy allowed. Aborting." );
-}
+  TString name;
+
+  if(var == "pt_ttbar"){
+    name = "BTag/" + jetCollection + "/jet/jet/BTag_" + jetCollection
+      + "_jet_jet_pt_" + truth_label + "_ttbar";
+  }
+  else if(var == "pt_Zprime"){
+    name = "BTag/" + jetCollection + "/jet/jet/BTag_" + jetCollection
+      + "_jet_jet_pt_" + truth_label + "_Zprime";
+  }
+  else if(var == "Lxy"){
+    if(truth_label == "l"){
+      name = "BTag/" + jetCollection + "/SV/_" + truth_label + "/BTag_"
+	+ jetCollection + "_SV_SV1_Lxy_" + truth_label;
+    }
+    else{
+      name = "BTag/" + jetCollection + "/other_histograms/histos/BTag_"
+	+ jetCollection + "_truth_Truth_Lxy_" + truth_label;
+    }
+  }
+  else{
+    throw std::invalid_argument("getRefHistoName called with unknown var name: " + var + ". Only pt_ttbar, pt_Zprime and Lxy allowed. Aborting." );
+  }
 
   return name;
 }
@@ -327,6 +336,8 @@ TGraphErrors* h_EffvsVar(TH1* histo, TH1* histo_WPcuts) {
     effVsVar->SetPoint(i, x.at(i), y.at(i));
     effVsVar->SetPointError(i, ex.at(i), ey.at(i));
   }
+  std::string histoName = std::string("effVsVar_")+histo_WPcuts->GetName();
+  effVsVar->SetName(histoName.c_str());
   return effVsVar;
 
 }
@@ -378,7 +389,7 @@ TGraphErrors * Magic(const TGraphErrors* pReference, const TGraphErrors* pVariat
   const auto nPoints=pReference->GetN();
   //cout << "nPoints= " << nPoints << endl;
 
-  for (unsigned int i=0;i<nPoints;++i) {
+  for (int i=0;i<nPoints;++i) {
     double x,y;
     pReference->GetPoint(i, x, y);
     //cout << " ----- # (reference) = " << i << " x = " << x << " y = " << y << endl;
@@ -389,7 +400,7 @@ TGraphErrors * Magic(const TGraphErrors* pReference, const TGraphErrors* pVariat
     //cout << "   ---->> GetFirstPoint: pXValue=" << pXValue << endl;
     const auto nThisPoints=pVariation->GetN();
     unsigned int firstX=0;
-    for (unsigned int i=0;i<nThisPoints;++i) {
+    for (int i=0;i<nThisPoints;++i) {
       double x,y;
       pVariation->GetPoint(i, x, y);
       //cout << "       GetFirstPoint: i = " << i << " x = " << x << " y = " << y << endl;
@@ -418,7 +429,7 @@ TGraphErrors * Magic(const TGraphErrors* pReference, const TGraphErrors* pVariat
    return NewY;
   };
 
-  for (unsigned int iPoint=0;iPoint<nPoints;++iPoint) {
+  for (int iPoint=0;iPoint<nPoints;++iPoint) {
     double x,y;
     pReference->GetPoint(iPoint, x,y);
     const auto refX=x;
@@ -433,7 +444,9 @@ TGraphErrors * Magic(const TGraphErrors* pReference, const TGraphErrors* pVariat
   return result;
 }
 
-void PlotLikelihoodTaggers(vector<TString> InputFileNames, vector<vector<TH1F*>> h_b, vector<vector<TH1F*>> h_u){
+void PlotLikelihoodTaggers(const vector<TString>& InputFileNames,
+			   const vector<vector<TH1F*>>& h_b,
+			   const vector<vector<TH1F*>>& h_u){
 
   TCanvas* c1 = new TCanvas("c1","c1",0,0,CWidth,CHeight);
   c1->Divide(2*taggers.size(),InputFileNames.size());
@@ -441,7 +454,7 @@ void PlotLikelihoodTaggers(vector<TString> InputFileNames, vector<vector<TH1F*>>
   int l = 1;
   for(unsigned int it=0;it<InputFileNames.size();++it) {
     std::cout<<"--Reading input histo from file: "<<InputFileNames[it]<<std::endl;
-    for (int i=0;i<taggers.size();i++) {
+    for (unsigned int i=0;i<taggers.size();i++) {
       cout << "-taggers["<<i<<"]="<< taggers[i] << endl;
       c1->cd(l);
       h_b[it][i]->Draw();
@@ -557,39 +570,38 @@ void MyGraphCleaner(TGraphErrors* gr, bool debug=false, bool ApplyTruncatexAt = 
 
 pair<double,double> GetMaxRatioTGraphROC(TGraphErrors* Gratio, double mineff, double maxeff) {
 
-double ratiomax=1.05, ratiomin=0.95;
+  double ratiomax=1.05, ratiomin=0.95;
 
-
-for (int i=0; i< Gratio->GetN(); i++){
-
-
-    if ((Gratio->GetPointX(i) < mineff) || (Gratio->GetPointX(i) > maxeff)){
-        cout;
-    }    
-    else {
-        if (Gratio->GetPointY(i)> ratiomax){
-            ratiomax=Gratio->GetPointY(i) *1.2;
-            cout<<"ratiomax set to "<< Gratio->GetPointY(i)<<endl;
-        }
-        if (Gratio->GetPointY(i)< ratiomin){
-            ratiomin=Gratio->GetPointY(i) *0.9;
-            cout<<"ratiomin set to "<< Gratio->GetPointY(i)<<endl;
-        }
+  for (int i=0; i< Gratio->GetN(); i++){
+    if (!((Gratio->GetPointX(i) < mineff) || (Gratio->GetPointX(i) > maxeff))){
+      if (Gratio->GetPointY(i)> ratiomax){
+	ratiomax=Gratio->GetPointY(i) *1.2;
+	cout<<"ratiomax set to "<< Gratio->GetPointY(i)<<endl;
+      }
+      if (Gratio->GetPointY(i)< ratiomin){
+	ratiomin=Gratio->GetPointY(i) *0.9;
+	cout<<"ratiomin set to "<< Gratio->GetPointY(i)<<endl;
+      }
     }
+  }
+
+  pair<double,double> ratio_ymax_ymin;
+  ratio_ymax_ymin.first=ratiomax;
+  ratio_ymax_ymin.second=ratiomin;
+  cout<<"final set ratio max: "<<ratiomax<<endl;
+  cout<<"final set ratio min: "<<ratiomin<<endl;
+
+  return ratio_ymax_ymin;
 }
 
-pair<double,double> ratio_ymax_ymin;
-ratio_ymax_ymin.first=ratiomax;
-ratio_ymax_ymin.second=ratiomin;
-cout<<"final set ratio max: "<<ratiomax<<endl;
-cout<<"final set ratio min: "<<ratiomin<<endl;
-
-return ratio_ymax_ymin; 
-}
 
 
-
-void plotGraphs(vector<TString> InputFileNames, TString MC, TString sample, vector<TString> leg_entry,bool drawRatio = false, bool drawErrRatio=false, bool drawCtag=false) {
+void plotGraphs(const vector<TString>& InputFileNames,
+		TString MC, TString sample,
+		const vector<TString>& leg_entry,
+		bool drawRatio=false, bool drawErrRatio=false,
+		bool drawCtag=false,
+		bool writeHistos=false, TString outputName="myHistos.root") {
 
   gROOT->SetStyle("ATLAS");
   gROOT->ForceStyle();
@@ -609,41 +621,51 @@ void plotGraphs(vector<TString> InputFileNames, TString MC, TString sample, vect
     cout<<"--Reading input histo from file: "<<InputFileName<<endl;
     vector<TH1F*> hb,hu;
     vector<TGraphErrors*> Graph_bu;
-    for (int i=0;i<taggers.size();i++) {
 
-    TString folder1,folder2;
-    if (taggers[i].View().find("IP2D") < 1) {folder1 = "old_taggers/_"+taggers[i]; folder2="old_taggers_"+taggers[i];}
-    else {folder1 = "tagger_"+taggers[i]+"/other"; folder2="tagger_"+taggers[i];}
-    //cout <<"-folder1 ="<<folder1<<" -folder2 ="<<folder2<<endl;
+    for (unsigned int i=0;i<taggers.size();i++) {
 
-    TString hname_b, hname_u;
-    if (jetType=="PFlow"){
-        hname_b= "BTag/AntiKt4EMPFlowJets/"+folder1+"/BTag_AntiKt4EMPFlowJets_"+folder2+"_b_matched_weight";
-        hname_u= "BTag/AntiKt4EMPFlowJets/"+folder1+"/BTag_AntiKt4EMPFlowJets_"+folder2+"_u_matched_weight";
-        if(drawCtag) hname_u= "BTag/AntiKt4EMPFlowJets/"+folder1+"/BTag_AntiKt4EMPFlowJets_"+folder2+"_c_matched_weight";
-    }
-    else if (jetType=="VR"){
-        hname_b= "BTag/AntiKtVR30Rmax4Rmin02PV0TrackJets/"+folder1+"/BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_"+folder2+"_b_matched_weight";
-        hname_u= "BTag/AntiKtVR30Rmax4Rmin02PV0TrackJets/"+folder1+"/BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_"+folder2+"_u_matched_weight";
-        if(drawCtag) hname_u= "BTag/AntiKtVR30Rmax4Rmin02PV0TrackJets/"+folder1+"/BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_"+folder2+"_c_matched_weight";
+      TString folder1,folder2;
+      if (taggers[i].View().find("IP2D") < 1) {
+	folder1 = "old_taggers/_"+taggers[i];
+	folder2="old_taggers_"+taggers[i];
+      }
+      else {
+	folder1 = "tagger_"+taggers[i]+"/other";
+	folder2="tagger_"+taggers[i];
+      }
+      //cout <<"-folder1 ="<<folder1<<" -folder2 ="<<folder2<<endl;
 
-    }
-    //cout << "  hname_b = " << hname_b << " hname_u = " << hname_u << endl;
-    TH1F *MVX_b = (TH1F*)f->Get(hname_b);
-    TH1F *MVX_u = (TH1F*)f->Get(hname_u);
+      TString jetCollection;
+      if(jetType=="EMTopo") jetCollection = "AntiKt4EMTopoJets";
+      else if(jetType=="PFlow") jetCollection = "AntiKt4EMPFlowJets";
+      else if(jetType=="VR") jetCollection = "AntiKtVR30Rmax4Rmin02PV0TrackJets";
 
-    hb.push_back(MVX_b);
-    hu.push_back(MVX_u);
-    bool isSV1 = false;
-    if (taggers[i]=="SV1") isSV1 = true;
-    TGraphErrors* Graphbu = h_RejvEff(MVX_b,MVX_u,isSV1, drawCtag);
-    Graphbu->SetLineStyle(1);
-    if(InputFileNames.size()>=2 && it>=1) Graphbu->SetLineStyle(lstyle);
-    Graphbu->SetLineWidth(2);
-    if(InputFileNames.size()>2) Graphbu->SetLineColor(lcol[it]);
-    Graph_bu.push_back(Graphbu);
+      TString hname_b = "BTag/" + jetCollection + "/" + folder1 + "/BTag_"
+	+ jetCollection + "_" + folder2 + "_b_matched_weight";
+      TString hname_u = "BTag/" + jetCollection + "/" + folder1 + "/BTag_"
+	+ jetCollection + "_" + folder2 + "_u_matched_weight";
+      if(drawCtag){
+	hname_u = "BTag/" + jetCollection + "/" + folder1 + "/BTag_"
+	  + jetCollection + "_"+folder2+"_c_matched_weight";
+      }
+
+      //cout << "  hname_b = " << hname_b << " hname_u = " << hname_u << endl;
+      TH1F *MVX_b = (TH1F*)f->Get(hname_b);
+      TH1F *MVX_u = (TH1F*)f->Get(hname_u);
+
+      hb.push_back(MVX_b);
+      hu.push_back(MVX_u);
+      bool isSV1 = false;
+      if (taggers[i]=="SV1") isSV1 = true;
+      TGraphErrors* Graphbu = h_RejvEff(MVX_b,MVX_u,isSV1, drawCtag);
+      Graphbu->SetLineStyle(1);
+      if(InputFileNames.size()>=2 && it>=1) Graphbu->SetLineStyle(lstyle);
+      Graphbu->SetLineWidth(2);
+      if(InputFileNames.size()>2) Graphbu->SetLineColor(lcol[it]);
+      Graph_bu.push_back(Graphbu);
 
     } // taggers i
+
     h_b.push_back(hb);
     h_u.push_back(hu);
     vGraph_bu.push_back(Graph_bu);
@@ -657,57 +679,59 @@ void plotGraphs(vector<TString> InputFileNames, TString MC, TString sample, vect
   vector<vector<TGraphErrors*>> gratio;
   vector <pair<double,double>> v_ratio_ymax_ymin;
   if(drawRatio){
-    for (int i=0;i<taggers.size();i++) {
+    for (unsigned int i=0;i<taggers.size();i++) {
       double ymaxratio = 1.05; // to set range on Y of ratio pad
       double yminratio = 0.95; // to set range on Y of ratio pad
       //cout << "i tagger="<<i << endl;
       vector<TGraphErrors*> vratio;
       TGraphErrors* gref=vGraph_bu[ifirst][i];
+
       for(unsigned int it=0;it<InputFileNames.size();++it) {
-    //cout << "-it = " << it << endl;
-    if(ifirst==int(it)) continue;
-    TGraphErrors* Corrected = Magic(vGraph_bu[ifirst][i],vGraph_bu[it][i]); // perform extrapolation of Test curve
-    TGraphErrors* Gratio = Corrected;
-    //cout << " # of point = " << Gratio->GetN() << endl;
-    double x_ratio,y_ratio;
-    double eR,eT,eRatio;
-    for (int i=0;i<Gratio->GetN();i++) {
-      //central value
-      double x1,x2,y1,y2;
-      Gratio->GetPoint(i,x1,y1); // Test extrapolated
-      gref->GetPoint(i,x2,y2);
-      //if (it==1) cout << " point # = " << i << " Ref: x2= " << x2 << " y2= " << y2 << " Test: x1= " << x1 << " y1= " << y1 << " y1/y2= " << y1/y2 << endl;
+	//cout << "-it = " << it << endl;
+	if(ifirst==static_cast<int>(it)) continue;
+	TGraphErrors* Corrected = Magic(vGraph_bu[ifirst][i],vGraph_bu[it][i]); // perform extrapolation of Test curve
+	TGraphErrors* Gratio = Corrected;
+	//cout << " # of point = " << Gratio->GetN() << endl;
+	double x_ratio=0., y_ratio=0.;
+	double eR=0., eT=0., eRatio=0.;
+	for (int i=0;i<Gratio->GetN();i++) {
+	  //central value
+	  double x1,x2,y1,y2;
+	  Gratio->GetPoint(i,x1,y1); // Test extrapolated
+	  gref->GetPoint(i,x2,y2);
+	  //if (it==1) cout << " point # = " << i << " Ref: x2= " << x2 << " y2= " << y2 << " Test: x1= " << x1 << " y1= " << y1 << " y1/y2= " << y1/y2 << endl;
 
-      bool skiplooping= false;
-      if (y1==0 || y2==0 || isnan(y1) || isnan(y2)) skiplooping= true; 
-      if (isinf(y1) || isinf(y2)) skiplooping= true; 
-      //if (it==1) cout << " skiplooping = " << skiplooping << endl;
+	  bool skiplooping= false;
+	  if (y1==0 || y2==0 || isnan(y1) || isnan(y2)) skiplooping= true;
+	  if (isinf(y1) || isinf(y2)) skiplooping= true;
+	  //if (it==1) cout << " skiplooping = " << skiplooping << endl;
 
-      if (!skiplooping) {
-        x_ratio = x1;
-        y_ratio = y1/y2;
-        //uncertainty
-        eT = Gratio->GetErrorY(i);
-        eR = gref->GetErrorY(i);
-        eRatio = (y_ratio)*sqrt(pow((eR/y2),2) + pow(eT/y1,2));
-        //if (isnan(eRatio)) eRatio = 0;
+	  if (!skiplooping) {
+	    x_ratio = x1;
+	    y_ratio = y1/y2;
+	    //uncertainty
+	    eT = Gratio->GetErrorY(i);
+	    eR = gref->GetErrorY(i);
+	    eRatio = (y_ratio)*sqrt(pow((eR/y2),2) + pow(eT/y1,2));
+	    //if (isnan(eRatio)) eRatio = 0;
 
-      } // if (!skiplooping)
+	  } // if (!skiplooping)
 
-      //if (it==1) cout << " point # = " << i << " x_ratio = " << x_ratio << " y_ratio = " << y_ratio << " nan? = " << isnan(y_ratio) << endl;
-      //if (it==1) cout << "eRatio = " << eRatio << " nan? = " << isnan(eRatio) << endl;
-      Gratio->SetPoint(i,x_ratio,y_ratio);
-      Gratio->SetPointError(i,Gratio->GetErrorX(i),eRatio);
+	  //if (it==1) cout << " point # = " << i << " x_ratio = " << x_ratio << " y_ratio = " << y_ratio << " nan? = " << isnan(y_ratio) << endl;
+	  //if (it==1) cout << "eRatio = " << eRatio << " nan? = " << isnan(eRatio) << endl;
+	  Gratio->SetPoint(i,x_ratio,y_ratio);
+	  Gratio->SetPointError(i,Gratio->GetErrorX(i),eRatio);
         
-     } // for (int i=0;i<Gratio->GetN();i++)
+	} // for (int i=0;i<Gratio->GetN();i++)
 
-    vratio.push_back(Gratio);
-    float forceAroundMean=0.;
-    MyGraphCleaner(vratio.back(),kDebugOFF,kApplyTruncateXON,kTruncateXatOne,kApplyTruncateYOFF,kTruncateYatOne,kMonotonicOFF,kBinToBinMonotonicOFF,kRejectNullErrorsOFF,kForceNullErrorsOFF,forceAroundMean);
-    vratio.back()->SetLineWidth(2);
-    vratio.back()->SetLineStyle(vGraph_bu[it][i]->GetLineStyle());
-    vratio.back()->SetLineColor(vGraph_bu[it][i]->GetLineColor());
+	vratio.push_back(Gratio);
+	float forceAroundMean=0.;
+	MyGraphCleaner(vratio.back(),kDebugOFF,kApplyTruncateXON,kTruncateXatOne,kApplyTruncateYOFF,kTruncateYatOne,kMonotonicOFF,kBinToBinMonotonicOFF,kRejectNullErrorsOFF,kForceNullErrorsOFF,forceAroundMean);
+	vratio.back()->SetLineWidth(2);
+	vratio.back()->SetLineStyle(vGraph_bu[it][i]->GetLineStyle());
+	vratio.back()->SetLineColor(vGraph_bu[it][i]->GetLineColor());
       } // it
+
       pair<double,double> ratio_ymax_ymin = GetMaxRatioTGraphROC(vratio.back(),EffMin,EffMax);
       gratio.push_back(vratio);
       v_ratio_ymax_ymin.push_back(ratio_ymax_ymin);
@@ -718,7 +742,7 @@ void plotGraphs(vector<TString> InputFileNames, TString MC, TString sample, vect
   } // compute ratio
 
   //////////////////////////////////////////////////
-  for (int i=0;i<taggers.size();i++) {
+  for (unsigned int i=0;i<taggers.size();i++) {
 
     //set Xaxis range
     double mineff = EffMin;
@@ -732,10 +756,7 @@ void plotGraphs(vector<TString> InputFileNames, TString MC, TString sample, vect
     double ymax = max(vGraph_bu[ifirst][i]->Eval(mineff), vGraph_bu[ifirst][i]->Eval(mineff+0.2)); // get Y value at X=mineff
 
     for (int j=0; j< vGraph_bu[ifirst][i]->GetN(); j++){
-        if ((vGraph_bu[ifirst][i]->GetPointX(j) < mineff) || (vGraph_bu[ifirst][i]->GetPointX(j) > maxeff)){
-            cout;
-        }    
-        else {
+      if (!((vGraph_bu[ifirst][i]->GetPointX(j) < mineff) || (vGraph_bu[ifirst][i]->GetPointX(j) > maxeff))){
             if (vGraph_bu[ifirst][i]->GetPointY(j)> ymax){
                 ymax=vGraph_bu[ifirst][i]->GetPointY(j) *1.2;
                 cout<<"ymax set to "<< vGraph_bu[ifirst][i]->GetPointY(j)<<endl;
@@ -790,7 +811,7 @@ void plotGraphs(vector<TString> InputFileNames, TString MC, TString sample, vect
     }
 
     for(unsigned int it=0;it<InputFileNames.size();++it) {
-      if(ifirst==int(it)) continue;
+      if(ifirst==static_cast<int>(it)) continue;
       vGraph_bu[it][i]->Draw("LE");
       //vGraph_bu[it][i]->Draw("CLE");
     }//file name
@@ -802,6 +823,25 @@ void plotGraphs(vector<TString> InputFileNames, TString MC, TString sample, vect
     for(unsigned int it=0;it<InputFileNames.size();it++) {
       //lg->AddEntry(vGraph_bu[it][i], leg_entry[it],"LF");
       lg->AddEntry(vGraph_bu[it][i], leg_entry[it],"L");
+
+      // Guess this is always the test file.......?????????????
+      if(writeHistos && it == 1){
+        if(gSystem->AccessPathName(outputName)) {
+          //File doesn't exist already, make it
+          TFile filerio(outputName,"RECREATE");
+          TDirectory* d = filerio.mkdir("BTag/"+HistoDir);
+          filerio.cd("BTag/"+HistoDir);
+          vGraph_bu[it][i]->Write(vGraph_bu[it][i]->GetName());
+          filerio.Close();
+        } else {
+          //File already exist, just open it
+          TFile filerio(outputName,"UPDATE");
+          filerio.cd("BTag/"+HistoDir);
+          vGraph_bu[it][i]->Write(vGraph_bu[it][i]->GetName());
+          filerio.Close();
+        }
+      }
+
     }
     lg->SetTextSize(0.03);
     if(drawRatio) lg->SetTextSize(0.04);
@@ -893,12 +933,11 @@ void plotGraphs(vector<TString> InputFileNames, TString MC, TString sample, vect
 
  
     //check if the directory where to save histo exits
-    if(gSystem->AccessPathName("ROC/")){
-      std::cout << "ROC/ directory does not exist. Will create one." << std::endl;
-      gSystem->Exec("mkdir ROC");
+    if(gSystem->AccessPathName(HistoDir)){
+      std::cout << HistoDir << " directory does not exist. Will create one." << std::endl;
+      gSystem->Exec("mkdir "+HistoDir);
     } 
 
-    //TString Histo = HistoDir+MC+taggers[i]+".png";
     TString Histo = HistoDir+taggers[i]+".png";
     if(drawCtag) {Histo = HistoDir+taggers[i]+"-cVSb.png";}
     c1->SaveAs(Histo.Data(),"RECREATE");
@@ -915,7 +954,11 @@ void plotGraphs(vector<TString> InputFileNames, TString MC, TString sample, vect
 // a method for ploting the efficiency vs a variable
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void plotGraphsEffVsVar(TString var_name, vector<TString> InputFileNames, TString MC, TString sample, vector<TString> leg_entry,bool drawRatio = false, bool drawErrRatio=false) {
+void plotGraphsEffVsVar(TString var_name, const vector<TString>& InputFileNames,
+			TString MC, TString sample,
+			const vector<TString>& leg_entry,
+			bool drawRatio = false, bool drawErrRatio=false,
+			bool writeHistos=false, TString outputName="myHistos.root") {
 
   gROOT->SetStyle("ATLAS");
   gROOT->ForceStyle();
@@ -940,7 +983,7 @@ void plotGraphsEffVsVar(TString var_name, vector<TString> InputFileNames, TStrin
     vector<vector<vector<TGraphErrors*> > > graphs_forTaggers;
 
     // loop over the taggers
-    for (int i=0; i < taggers.size(); i++) {
+    for (unsigned int i=0; i < taggers.size(); i++) {
       // get the right histos
 
       TString folder1,folder2;
@@ -960,7 +1003,7 @@ void plotGraphsEffVsVar(TString var_name, vector<TString> InputFileNames, TStrin
       vector<vector<TGraphErrors*> > graphs_forLabels;
 
       // loop over the truth labels
-      for(int i_truthlabel = 0; i_truthlabel < truth_labels.size(); i_truthlabel++){
+      for(unsigned int i_truthlabel = 0; i_truthlabel < truth_labels.size(); i_truthlabel++){
         TString histo_truth_label = truth_labels[i_truthlabel];
         if(histo_truth_label == "u") histo_truth_label = "l";
         TString hname = getRefHistoName(var_name, histo_truth_label);
@@ -973,16 +1016,17 @@ void plotGraphsEffVsVar(TString var_name, vector<TString> InputFileNames, TStrin
 
         // loop over the WP cuts
         vector<TString> tagger_WPs = WP_values.at(taggers[i]);
-        for(int i_WP = 0; i_WP < tagger_WPs.size(); i_WP++){
+        for(unsigned int i_WP = 0; i_WP < tagger_WPs.size(); i_WP++){
 
-         TString hname_WPcuts ;
-        if (jetType=="PFlow"){
-         hname_WPcuts = "BTag/AntiKt4EMPFlowJets/"+folder1+"/BTag_AntiKt4EMPFlowJets_"+folder2+"_" + truth_labels[i_truthlabel] + "_" + tagger_WPs[i_WP] + "_matched_" + var_name;
-        }
-        else if (jetType=="VR"){
+	  TString jetCollection;
+	  if(jetType=="EMTopo") jetCollection = "AntiKt4EMTopoJets";
+	  else if(jetType=="PFlow") jetCollection = "AntiKt4EMPFlowJets";
+	  else if(jetType=="VR") jetCollection = "AntiKtVR30Rmax4Rmin02PV0TrackJets";
 
-          hname_WPcuts = "BTag/AntiKtVR30Rmax4Rmin02PV0TrackJets/"+folder1+"/BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_"+folder2+"_" + truth_labels[i_truthlabel] + "_" + tagger_WPs[i_WP] + "_matched_" + var_name;
-        }
+	  TString hname_WPcuts = "BTag/" + jetCollection + "/" + folder1
+	    + "/BTag_" + jetCollection + "_" + folder2 + "_"
+	    + truth_labels[i_truthlabel] + "_" + tagger_WPs[i_WP] + "_matched_"
+	    + var_name;
 
           TH1F *histo_WPcuts = (TH1F*)f->Get(hname_WPcuts);
           cout<<"histo_WPcuts: "<<histo_WPcuts<<endl;
@@ -990,17 +1034,17 @@ void plotGraphsEffVsVar(TString var_name, vector<TString> InputFileNames, TStrin
           // define the graph
           TGraphErrors* graph = h_EffvsVar(histo, histo_WPcuts);
 
-      //Truncate y efficiency above 0.99 first...
-      float TruncateAtY = 0.99;
-      float forceAroundMean=0.;
-       MyGraphCleaner(graph,kDebugON,kApplyTruncateXOFF,kTruncateXatOne,kApplyTruncateYON,kTruncateYatOne,kMonotonicOFF,kBinToBinMonotonicOFF,kRejectNullErrorsOFF,kForceNullErrorsOFF,forceAroundMean);
+          //Truncate y efficiency above 0.99 first...
+          float TruncateAtY = 0.99;
+          float forceAroundMean=0.;
+          MyGraphCleaner(graph,kDebugON,kApplyTruncateXOFF,kTruncateXatOne,kApplyTruncateYON,kTruncateYatOne,kMonotonicOFF,kBinToBinMonotonicOFF,kRejectNullErrorsOFF,kForceNullErrorsOFF,forceAroundMean);
 
-      //cout <<"Cleaning around mean, first pass..." <<  endl;
-      forceAroundMean=3.;
-       MyGraphCleaner(graph,kDebugON,kApplyTruncateXOFF,kTruncateXatOne,kApplyTruncateYON,kTruncateYatOne,kMonotonicOFF,kBinToBinMonotonicOFF,kRejectNullErrorsOFF,kForceNullErrorsOFF,forceAroundMean);
+          //cout <<"Cleaning around mean, first pass..." <<  endl;
+          forceAroundMean=3.;
+          MyGraphCleaner(graph,kDebugON,kApplyTruncateXOFF,kTruncateXatOne,kApplyTruncateYON,kTruncateYatOne,kMonotonicOFF,kBinToBinMonotonicOFF,kRejectNullErrorsOFF,kForceNullErrorsOFF,forceAroundMean);
 
-      //cout <<"Cleaning around mean, second pass (to get a more accurante mean in Y)..." <<  endl;
-       MyGraphCleaner(graph,kDebugON,kApplyTruncateXOFF,kTruncateXatOne,kApplyTruncateYON,kTruncateYatOne,kMonotonicOFF,kBinToBinMonotonicOFF,kRejectNullErrorsOFF,kForceNullErrorsOFF,forceAroundMean);
+          //cout <<"Cleaning around mean, second pass (to get a more accurante mean in Y)..." <<  endl;
+          MyGraphCleaner(graph,kDebugON,kApplyTruncateXOFF,kTruncateXatOne,kApplyTruncateYON,kTruncateYatOne,kMonotonicOFF,kBinToBinMonotonicOFF,kRejectNullErrorsOFF,kForceNullErrorsOFF,forceAroundMean);
 
           // set line styles
           graph->SetLineStyle(1);
@@ -1036,87 +1080,90 @@ void plotGraphsEffVsVar(TString var_name, vector<TString> InputFileNames, TStrin
   vector<vector<vector<pair<double,double> > > >    v_ratio_ymax_ymin;
   if(drawRatio){
 
-    for (int i=0;i<taggers.size();i++) {
+    for (unsigned int i=0;i<taggers.size();i++) {
       vector<vector<vector<TGraphErrors*> > > graph_ratios_forLabels;
       vector<vector<pair<double,double> > >  v_ratio_ymax_ymin_forLabels;
 
-      for(int i_truthlabel = 0; i_truthlabel < truth_labels.size(); i_truthlabel++){
+      for(unsigned int i_truthlabel = 0; i_truthlabel < truth_labels.size(); i_truthlabel++){
         vector<vector<TGraphErrors*> > graph_ratios_forWPs;
-    vector<pair<double,double> > v_ratio_ymax_ymin_forWPs;
+        vector<pair<double,double> > v_ratio_ymax_ymin_forWPs;
         vector<TString> tagger_WPs = WP_values.at(taggers[i]);
 
-        for(int i_WP = 0; i_WP < tagger_WPs.size(); i_WP++){
+        for(unsigned int i_WP = 0; i_WP < tagger_WPs.size(); i_WP++){
           //cout << "i tagger="<<i << endl;
           vector<TGraphErrors*> graph_ratios_forFiles;
           TGraphErrors* Gref = graphs[ifirst][i][i_truthlabel][i_WP];
 
-      double Xmin,Xmax,Ymin,Ymax;  // ??
-      Gref->GetPoint(0,Xmin,Ymin);  // 
-      Gref->GetPoint(Gref->GetN()-1,Xmax,Ymax); //
-      //cout << "Xmin_pt0 = " << Xmin << " Xmax_ptend = " << Xmax << " Gref->GetN() = " << Gref->GetN() << endl;
-      //cout << "Ymin_pt0 = " << Ymin << " Ymax_ptend = " << Ymax << " Gref->GetN() = " << Gref->GetN() << endl;
-      double ymaxratio = 0.; // to set range on Y of ratio pad
-      double yminratio = 1.; // to set range on Y of ratio pad
+	  double Xmin,Xmax,Ymin,Ymax;  // ??
+	  Gref->GetPoint(0,Xmin,Ymin);  //
+	  Gref->GetPoint(Gref->GetN()-1,Xmax,Ymax); //
+	  //cout << "Xmin_pt0 = " << Xmin << " Xmax_ptend = " << Xmax << " Gref->GetN() = " << Gref->GetN() << endl;
+	  //cout << "Ymin_pt0 = " << Ymin << " Ymax_ptend = " << Ymax << " Gref->GetN() = " << Gref->GetN() << endl;
+	  double ymaxratio = 0.; // to set range on Y of ratio pad
+	  double yminratio = 1.; // to set range on Y of ratio pad
       
           for(unsigned int it=0;it<InputFileNames.size();++it) {
-        //cout << "-it = " << it << endl;
-        if(ifirst==int(it)) continue;
-        TGraphErrors* Gratio=(TGraphErrors*)graphs[it][i][i_truthlabel][i_WP]->Clone();
+	    //cout << "-it = " << it << endl;
+	    if(ifirst==static_cast<int>(it)) continue;
+	    TGraphErrors* Gratio=(TGraphErrors*)graphs[it][i][i_truthlabel][i_WP]->Clone();
         
-        //cout << " # of point = " << Gratio->GetN() << endl;
-        double x_ratio,y_ratio;
-        double eR,eT,eRatio;
+	    //cout << " # of point = " << Gratio->GetN() << endl;
+	    double x_ratio=0., y_ratio=0.;
+	    double eR=0., eT=0., eRatio=0.;
             // loop over bins
-        for (int i=0; i < Gratio->GetN(); i++) {
-          //central value
-          double x1,x2,y1,y2;
-          Gratio->GetPoint(i,x1,y1); // Test extrapolated
-          Gref->GetPoint(i,x2,y2);
-          //if (it==1) cout << " point # = " << i << " Ref: x2= " << x2 << " y2= " << y2 << " Test: x1= " << x1 << " y1= " << y1 << " y2/y1= " << y2/y1 << endl;
+
+	    for (int i=0; i < Gratio->GetN(); i++) {
+	      //central value
+	      double x1,x2,y1,y2;
+	      Gratio->GetPoint(i,x1,y1); // Test extrapolated
+	      Gref->GetPoint(i,x2,y2);
+	      //if (it==1) cout << " point # = " << i << " Ref: x2= " << x2 << " y2= " << y2 << " Test: x1= " << x1 << " y1= " << y1 << " y2/y1= " << y2/y1 << endl;
           
-          bool skiplooping = false;
-          if (y1==0 || y2==0 || isnan(y1) || isnan(y2)) skiplooping = true; 
-          if (isinf(y1) || isinf(y2)) skiplooping = true; 
-          //if (it==1) cout << " skiplooping = " << skiplooping << endl;
+	      bool skiplooping = false;
+	      if (y1==0 || y2==0 || isnan(y1) || isnan(y2)) skiplooping = true;
+	      if (isinf(y1) || isinf(y2)) skiplooping = true;
+	      //if (it==1) cout << " skiplooping = " << skiplooping << endl;
           
-          if (!skiplooping) {
-        x_ratio = x1;
-        y_ratio = y1/y2; // Test/Ref
-        //y_ratio = y2/y1;
-        //uncertainty
-        eT = Gratio->GetErrorY(i);
-        eR = Gref->GetErrorY(i);
-        eRatio = (y_ratio)*sqrt(pow((eR/y2),2) + pow(eT/y1,2));
-        //if (isnan(eRatio)) eRatio = 0;
+	      if (!skiplooping) {
+		x_ratio = x1;
+		y_ratio = y1/y2; // Test/Ref
+		//y_ratio = y2/y1;
+		//uncertainty
+		eT = Gratio->GetErrorY(i);
+		eR = Gref->GetErrorY(i);
+		eRatio = (y_ratio)*sqrt(pow((eR/y2),2) + pow(eT/y1,2));
+		//if (isnan(eRatio)) eRatio = 0;
               }
           
-          //if (it==1) cout << " point # = " << i << " x_ratio = " << x_ratio << " y_ratio = " << y_ratio << " nan? = " << isnan(y_ratio) << endl;
-          //if (it==1) cout << "eRatio = " << eRatio << " nan? = " << isnan(eRatio) << endl;
-          Gratio->SetPoint(i,x_ratio,y_ratio);
-          Gratio->SetPointError(i,Gratio->GetErrorX(i),eRatio);
+	      //if (it==1) cout << " point # = " << i << " x_ratio = " << x_ratio << " y_ratio = " << y_ratio << " nan? = " << isnan(y_ratio) << endl;
+	      //if (it==1) cout << "eRatio = " << eRatio << " nan? = " << isnan(eRatio) << endl;
+	      Gratio->SetPoint(i,x_ratio,y_ratio);
+	      Gratio->SetPointError(i,Gratio->GetErrorX(i),eRatio);
             } // end loop over bins
         
-        Gratio->SetLineWidth(2);
-        Gratio->SetLineStyle(graphs[it][i][i_truthlabel][i_WP]->GetLineStyle());
-        Gratio->SetLineColor(graphs[it][i][i_truthlabel][i_WP]->GetLineColor());
-        graph_ratios_forFiles.push_back(Gratio);
+	    Gratio->SetLineWidth(2);
+	    Gratio->SetLineStyle(graphs[it][i][i_truthlabel][i_WP]->GetLineStyle());
+	    Gratio->SetLineColor(graphs[it][i][i_truthlabel][i_WP]->GetLineColor());
+	    graph_ratios_forFiles.push_back(Gratio);
         
-        //cout << "it=" << it << " Eval= " << yratio << " bin_min=" << bin_min << "  bin_max = " << bin_max << "  ymin = " << ymin << " ymax = " << ymax << endl;
+	    //cout << "it=" << it << " Eval= " << yratio << " bin_min=" << bin_min << "  bin_max = " << bin_max << "  ymin = " << ymin << " ymax = " << ymax << endl;
         
-        pair<double,double> ratio_ymax_ymin_tmp = GetMaxRatioTGraphROC(graph_ratios_forFiles.back(),Xmin,Xmax); 
-        //cout <<"ymin_tmp="<< ratio_ymax_ymin_tmp.second << " ymax_tmp=" << ratio_ymax_ymin_tmp.first << endl;
-        double ymax_tmp = ratio_ymax_ymin_tmp.first;
-        double ymin_tmp = ratio_ymax_ymin_tmp.second;
-        if (ymax_tmp>ymaxratio) ymaxratio=ymax_tmp;
-        if (ymin_tmp<yminratio) yminratio=ymin_tmp;
+	    pair<double,double> ratio_ymax_ymin_tmp = GetMaxRatioTGraphROC(graph_ratios_forFiles.back(),Xmin,Xmax);
+	    //cout <<"ymin_tmp="<< ratio_ymax_ymin_tmp.second << " ymax_tmp=" << ratio_ymax_ymin_tmp.first << endl;
+	    double ymax_tmp = ratio_ymax_ymin_tmp.first;
+	    double ymin_tmp = ratio_ymax_ymin_tmp.second;
+	    if (ymax_tmp>ymaxratio) ymaxratio=ymax_tmp;
+	    if (ymin_tmp<yminratio) yminratio=ymin_tmp;
           } // loop over files
+
           graph_ratios_forWPs.push_back(graph_ratios_forFiles);
-      pair<double,double> ratio_ymax_ymin;
-      cout << "yminratio = " << yminratio << " ymaxratio=" << ymaxratio << endl;
-      ratio_ymax_ymin.first=ymaxratio;
-      ratio_ymax_ymin.second=yminratio;
-      v_ratio_ymax_ymin_forWPs.push_back(ratio_ymax_ymin);
+	  pair<double,double> ratio_ymax_ymin;
+	  cout << "yminratio = " << yminratio << " ymaxratio=" << ymaxratio << endl;
+	  ratio_ymax_ymin.first=ymaxratio;
+	  ratio_ymax_ymin.second=yminratio;
+	  v_ratio_ymax_ymin_forWPs.push_back(ratio_ymax_ymin);
         } // loop over WPs
+
         graph_ratios_forLabels.push_back(graph_ratios_forWPs);
         v_ratio_ymax_ymin_forLabels.push_back(v_ratio_ymax_ymin_forWPs);
       } // loop over truth labels
@@ -1129,15 +1176,15 @@ void plotGraphsEffVsVar(TString var_name, vector<TString> InputFileNames, TStrin
   /////////////////////////////////////////////
   // make the plots
 
-  for (int i=0;i<taggers.size();i++) {
+  for (unsigned int i=0;i<taggers.size();i++) {
 
     vector<TString> tagger_WPs = WP_values.at(taggers[i]);
-    for(int i_truthlabel = 0; i_truthlabel < truth_labels.size(); i_truthlabel++){
-      for(int i_WP = 0; i_WP < tagger_WPs.size(); i_WP++){
+    for(unsigned int i_truthlabel = 0; i_truthlabel < truth_labels.size(); i_truthlabel++){
+      for(unsigned int i_WP = 0; i_WP < tagger_WPs.size(); i_WP++){
 
-    double scale = 0.3; // scale up and down by 30% to set the ratio bondaries
-    double YmaxPlotEff = graphs[ifirst][i][i_truthlabel][i_WP]->GetHistogram()->GetMaximum();
-    YmaxPlotEff = (1.+scale)*YmaxPlotEff;
+        double scale = 0.3; // scale up and down by 30% to set the ratio bondaries
+        double YmaxPlotEff = graphs[ifirst][i][i_truthlabel][i_WP]->GetHistogram()->GetMaximum();
+        YmaxPlotEff = (1.+scale)*YmaxPlotEff;
 
         graphs[ifirst][i][i_truthlabel][i_WP]->SetMinimum(0.);
         graphs[ifirst][i][i_truthlabel][i_WP]->SetMaximum(YmaxPlotEff);
@@ -1190,9 +1237,9 @@ void plotGraphsEffVsVar(TString var_name, vector<TString> InputFileNames, TStrin
         }
 
         for(unsigned int it=0;it<InputFileNames.size();++it) {
-          if(ifirst==int(it)) continue;
+          if(ifirst==static_cast<int>(it)) continue;
           graphs[it][i][i_truthlabel][i_WP]->Draw("L0");
-      //c2->Update();
+          //c2->Update();
           //graphs[it][i][i_truthlabel][i_WPs]->Draw("LE");
           //graphs[it][i][i_truthlabel][i_WPs]->Draw("CLE");
         }//file name
@@ -1206,6 +1253,25 @@ void plotGraphsEffVsVar(TString var_name, vector<TString> InputFileNames, TStrin
         for(unsigned int it=0;it<InputFileNames.size();it++) {
           //lg2->AddEntry(graphs[it][i][i_truthlabel][i_WP], leg_entry[it],"L");
           lg2->AddEntry(graphs[it][i][i_truthlabel][i_WP], leg_entry[it],"LF");
+
+          if(writeHistos && it == 1){
+            if(gSystem->AccessPathName(outputName)) {
+	      //File doesn't exist already, make it
+              TFile filerio(outputName,"RECREATE");
+              filerio.cd();
+              TDirectory* d = filerio.mkdir("BTag/"+HistoDir);
+              filerio.cd("BTag/"+HistoDir);
+              graphs[it][i][i_truthlabel][i_WP]->Write(graphs[it][i][i_truthlabel][i_WP]->GetName());
+              filerio.Close();
+            } else {
+              //File already exist, just open it
+              TFile filerio(outputName,"UPDATE");
+              filerio.cd("BTag/"+HistoDir);
+              graphs[it][i][i_truthlabel][i_WP]->Write(graphs[it][i][i_truthlabel][i_WP]->GetName());
+              filerio.Close();
+            }
+          }
+
         }
         lg2->SetTextSize(0.03);
         if(drawRatio) lg2->SetTextSize(0.04);
@@ -1295,16 +1361,16 @@ void plotGraphsEffVsVar(TString var_name, vector<TString> InputFileNames, TStrin
           //cout << "gratio[i].size() = " << gratio[i].size() << endl;
 
           for(unsigned int it=1;it<graph_ratios[i][i_truthlabel][i_WP].size();it++){
-        graph_ratios[i][i_truthlabel][i_WP][it]->Draw("Lxsame");
+	    graph_ratios[i][i_truthlabel][i_WP][it]->Draw("Lxsame");
           }
 
         } // drawRatio
     
         //check if the directory where to save histo exits
-        if(gSystem->AccessPathName("ROC/eff_vs_"+var_name)){
-          std::cout << "ROC/eff_vs_"+var_name+" directory does not exist. Will create one." << std::endl;
-          gSystem->Exec("mkdir -p ROC/");
-          gSystem->Exec("mkdir ROC/eff_vs_"+var_name);
+        if(gSystem->AccessPathName(HistoDir+"eff_vs_"+var_name)){
+          std::cout << HistoDir<< "eff_vs_"+var_name+" directory does not exist. Will create one." << std::endl;
+          gSystem->Exec("mkdir -p "+HistoDir);
+          gSystem->Exec("mkdir "+HistoDir+"eff_vs_"+var_name);
         } 
     
         //TString Histo = HistoDir+MC+taggers[i]+".png";
@@ -1323,7 +1389,16 @@ void plotGraphsEffVsVar(TString var_name, vector<TString> InputFileNames, TStrin
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void Draw_PhysVal_btagROC(){
+void Draw_PhysVal_btagROC(TString inputMC="ttbar",
+			  TString jet_type="VR",
+			  TString reffile="files_merged/merged_NTUP_PHYSVAL_ref.root",
+			  TString testfile="files_merged/merged_NTUP_PHYSVAL_test.root",
+			  TString outputName="MyHistos.root",
+			  const vector<TString>& def_taggers=vector<TString>{"IP2D","IP3D","RNNIP","DIPS","SV1","DL1dv00","DL1dv01","DL1r","GN1"},
+			  bool writeHistos=true){
+
+    jetType=jet_type;
+    HistoDir = "ROC_"+jetType+"/";
 
     if (inputMC=="Zprime"){
         EffMin=0.1;
@@ -1336,22 +1411,15 @@ void Draw_PhysVal_btagROC(){
   TH1::SetDefaultSumw2(true);
   fill_WP_values();
 
-  //Save histos 
-  string outputName_Histos = "MyHistos.root"; 
-  TFile *hfile = new TFile(outputName_Histos.c_str(),"RECREATE");
-
   ////////////////////////////////// 
   //      validation              //
   ////////////////////////////////// 
   //ttbar
-  //TString MC = inputMC; TString sample = "#sqrt{s}=13 TeV";
   TString sample = inputMC == "ttbar" ? "#sqrt{s}=13 TeV, t#bar{t}" : "#sqrt{s}=13 TeV, Z^{'}";
   TString MC=inputMC;
   cout<<"inputMC"<<inputMC<<endl;
   cout<<"sample: "<<sample<<endl;
 
-  TString reffile = "files_merged/merged_NTUP_PHYSVAL_ref.root";
-  TString testfile = "files_merged/merged_NTUP_PHYSVAL_test.root";
   vector<TString> InputFilesNames = {reffile, testfile};
   if (gSystem->AccessPathName(reffile,kFileExists)) {
     cout << "--File not found, check that the inputs are there: " << reffile << endl;
@@ -1362,28 +1430,28 @@ void Draw_PhysVal_btagROC(){
     gSystem->Exit(1);
   }
 
+  if (def_taggers.size() != 0){
+    taggers = def_taggers;
+  }
 
   ///////////////////
   //Plot ROC curves 
   bool drawRatio=true;
   bool drawErrRatio=false;
   bool drawCtag=true;
-  plotGraphs(InputFilesNames,MC,sample,leg_entry,drawRatio,drawErrRatio);
-  plotGraphs(InputFilesNames,MC,sample,leg_entry,drawRatio,drawErrRatio,drawCtag);
-  plotGraphsEffVsVar("Lxy", InputFilesNames,MC,sample,leg_entry,drawRatio,drawErrRatio);
+  plotGraphs(InputFilesNames,MC,sample,leg_entry,drawRatio,drawErrRatio, false, writeHistos, outputName);
+  plotGraphs(InputFilesNames,MC,sample,leg_entry,drawRatio,drawErrRatio,drawCtag, writeHistos, outputName);
+  plotGraphsEffVsVar("Lxy", InputFilesNames,MC,sample,leg_entry,drawRatio,drawErrRatio, writeHistos, outputName);
 
   drawRatio=true;
   if(MC == "ttbar"){
     //cout << "ttbar"<<endl;
-    plotGraphsEffVsVar("pt_ttbar", InputFilesNames,MC,sample,leg_entry,drawRatio,drawErrRatio);
+    plotGraphsEffVsVar("pt_ttbar", InputFilesNames,MC,sample,leg_entry,drawRatio,drawErrRatio, writeHistos, outputName);
   }
   else if (MC == "Zprime"){
-    plotGraphsEffVsVar("pt_Zprime", InputFilesNames,MC,sample,leg_entry,drawRatio,drawErrRatio);
+    plotGraphsEffVsVar("pt_Zprime", InputFilesNames,MC,sample,leg_entry,drawRatio,drawErrRatio, writeHistos, outputName);
   }
   ///////////////////
-
-  //Save histos
-  hfile->Write();
 
 } // end of Draw_PhysVal_btagROC()
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -82,7 +82,7 @@ StatusCode TauFilter::filterFinalize() {
 }
 
 
-CLHEP::HepLorentzVector TauFilter::sumDaughterNeutrinos( HepMC::ConstGenParticlePtr part ) {
+CLHEP::HepLorentzVector TauFilter::sumDaughterNeutrinos(const HepMC::ConstGenParticlePtr& part ) {
   CLHEP::HepLorentzVector nu( 0, 0, 0, 0);
   if ( ( (std::abs( part->pdg_id() ) == 12 ) || ( std::abs( part->pdg_id() ) == 14 ) || ( std::abs( part->pdg_id() ) == 16 )) 
        && part->status() != 3) {
@@ -95,7 +95,7 @@ CLHEP::HepLorentzVector TauFilter::sumDaughterNeutrinos( HepMC::ConstGenParticle
   if (part->end_vertex() == 0) return nu;
 
 
-  for ( auto beg: *(part->end_vertex())) nu += sumDaughterNeutrinos( beg ); 
+  for (const auto& beg: *(part->end_vertex())) nu += sumDaughterNeutrinos( beg ); 
 
   return nu;
 }
@@ -114,11 +114,11 @@ StatusCode TauFilter::filterEvent() {
     }
   }
   
-  HepMC::ConstGenParticlePtr tau;
+  HepMC::ConstGenParticlePtr  tau = nullptr;
   CLHEP::HepLorentzVector mom_tauprod;   // will contain the momentum of the products of the tau decay
   CLHEP::HepLorentzVector tauvis;
   CLHEP::HepLorentzVector nutau;
-  tau = 0;
+  tau = nullptr;
   int ntau = 0;
 
   double ptlep_max = 0;

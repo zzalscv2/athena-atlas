@@ -27,6 +27,7 @@
 
 // Athena includes
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "AthenaMonitoringKernel/Monitored.h"
 
 // Gaudi includes
 #include "Gaudi/Property.h"
@@ -58,6 +59,10 @@ class gFexByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamTool> 
 
     private:
         // ------------------------- Properties --------------------------------------
+        ToolHandle<GenericMonitoringTool> m_monTool{this,"MonTool","","Monitoring tool"};
+        bool m_UseMonitoring = false;          
+        
+        
         // ROBIDs property required by the interface
         Gaudi::Property<std::vector<uint32_t>> m_robIds {this, "ROBIDs", {}, "List of ROB IDs required for conversion to/from xAOD RoI"};
         Gaudi::Property<bool> m_saveExtendedTOBs {this, "SaveExtendedTOBs", false, "Decode and write xTOBs instead of TOBs"};
@@ -98,6 +103,13 @@ class gFexByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamTool> 
         SG::ReadHandleKey<TrigConf::L1Menu> m_l1MenuKey   {this, "L1TriggerMenu", "DetectorStore+L1TriggerMenu","Name of the L1Menu object to read configuration from"}; 
 
         void decodeGfexTobSlice( const uint32_t dataArray[], uint32_t blockType) const;
+        
+        void printError(const std::string& location, const std::string& title, MSG::Level type, const std::string& detail) const;
+        
+        static constexpr uint8_t m_DEBUG=0;
+        static constexpr uint8_t m_WARNING=1;
+        static constexpr uint8_t m_ERROR=2;
+        static constexpr uint8_t m_FATAL=3;        
         
 };
 

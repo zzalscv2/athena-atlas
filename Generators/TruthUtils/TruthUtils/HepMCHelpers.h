@@ -18,9 +18,9 @@ namespace MC
 {
 using namespace MCUtils::PID;
 #ifdef HEPMC3
-inline bool hasNoChildren(HepMC::ConstGenVertexPtr v) {return v->particles_out().size() == 0; }
-inline bool hasNoParents(HepMC::ConstGenVertexPtr v) {return v->particles_in().size() == 0; }
-inline bool isDisconnected(HepMC::ConstGenVertexPtr v) {return (v->particles_in().size() == 0) && (v->particles_out().size() == 0); }
+inline bool hasNoChildren(const HepMC::ConstGenVertexPtr& v) {return v->particles_out().size() == 0; }
+inline bool hasNoParents(const HepMC::ConstGenVertexPtr& v) {return v->particles_in().size() == 0; }
+inline bool isDisconnected(const HepMC::ConstGenVertexPtr& v) {return (v->particles_in().size() == 0) && (v->particles_out().size() == 0); }
 #else
 inline bool hasNoChildren(HepMC::ConstGenVertexPtr v) {return v->particles_out_size() == 0; }
 inline bool hasNoParents(HepMC::ConstGenVertexPtr v) {return v->particles_in_size() == 0; }
@@ -89,11 +89,11 @@ inline bool isDisconnected(HepMC::ConstGenVertexPtr v) {return (v->particles_in_
 //<----//This is copied from MCUtils
 #endif
 
-template <class T> inline bool isDecayed(T p)  { return p->status() == 2;}
-template <class T> inline bool isStable(T p)   { return p->status() == 1;}
-template <class T> inline bool isPhysical(T p) { return isStable<T>(p) || isDecayed<T>(p); }
-template <class T> inline bool isPhysicalHadron(T p) { return PID::isHadron(p->pdg_id()) && isPhysical<T>(p);}
-template <class T> inline bool fromDecay(T p)  {
+template <class T> inline bool isDecayed(const T& p)  { return p->status() == 2;}
+template <class T> inline bool isStable(const T& p)   { return p->status() == 1;}
+template <class T> inline bool isPhysical(const T& p) { return isStable<T>(p) || isDecayed<T>(p); }
+template <class T> inline bool isPhysicalHadron(const T& p) { return PID::isHadron(p->pdg_id()) && isPhysical<T>(p);}
+template <class T> inline bool fromDecay(const T& p)  {
       if (!p) return false;
       auto v=p->production_vertex();
       if (!v) return false;
@@ -138,7 +138,7 @@ namespace MC {
   //@{
 
   /// @brief Determine if the particle is stable at the generator (not det-sim) level,
-  inline bool isGenStable(HepMC::ConstGenParticlePtr p) {
+  inline bool isGenStable(const HepMC::ConstGenParticlePtr& p) {
     // Retrieving the barcode is relatively expensive with HepMC3,
     // so test status first.
     if (p->status() != 1) return false;
@@ -150,7 +150,7 @@ namespace MC {
 
 
   /// @brief Identify if the particle is considered stable at the post-detector-sim stage
-  inline bool isSimStable(HepMC::ConstGenParticlePtr p) {
+  inline bool isSimStable(const HepMC::ConstGenParticlePtr& p) {
     if (p->status() != 1) return false;
     if (isGenStable(p)) return p->end_vertex() == NULL;
     return true;
@@ -159,24 +159,24 @@ namespace MC {
   /// @brief Identify if the particle is considered stable at the post-detector-sim stage
   /// @todo I'm sure this shouldn't be exactly the same as isGenStable, but it is...
   /// @deprecated Use isSimulStable: this function _will_ be removed!
-  inline bool isGenSimulStable(HepMC::ConstGenParticlePtr p) {
+  inline bool isGenSimulStable(const HepMC::ConstGenParticlePtr& p) {
     return isSimStable(p);
   }
 
   /// @brief Identify if the particle would not interact with the detector, i.e. not a neutrino or WIMP
-  inline bool isNonInteracting(HepMC::ConstGenParticlePtr p) {
+  inline bool isNonInteracting(const HepMC::ConstGenParticlePtr& p) {
     return MC::isNonInteracting(p->pdg_id()); //< From TruthUtils/PIDHelpers.h
   }
 
   /// @brief Identify if the particle could interact with the detector during the simulation, e.g. not a neutrino or WIMP
-  inline bool isSimInteracting(HepMC::ConstGenParticlePtr p) {
+  inline bool isSimInteracting(const HepMC::ConstGenParticlePtr& p) {
     if (! MC::isGenStable(p)) return false; //skip particles which the simulation would not see
     return !MC::isNonInteracting(p);
   }
 
   /// @brief Oddly-named alias for isSimInteracting
   /// @deprecated Use isSimInteracting: this function _will_ be removed!
-  inline bool isGenInteracting(HepMC::ConstGenParticlePtr p) {
+  inline bool isGenInteracting(const HepMC::ConstGenParticlePtr& p) {
     return isSimInteracting(p);
   }
 

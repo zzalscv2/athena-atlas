@@ -78,37 +78,37 @@ class PunchThroughParamsInputFilename(JobProperty):
     """ Filename of the muon punch through input parametrizations file. """
     statusOn     = True
     allowedTypes = ['str']
-    StoredValue  = 'FastCaloSim/MC23/TFCSparam_mpt_v06.root'
+    StoredValue  = 'FastCaloSim/MC23/TFCSparam_mpt_v07.root'
 
 class PunchThroughParamsInverseCdfFilename(JobProperty):
     """ Filename of the muon punch through param inverse cdf config. """
     statusOn     = True
     allowedTypes = ['str']
-    StoredValue  = 'FastCaloSim/MC23/TFCSparam_mpt_inverseCdf_v03.xml'
+    StoredValue  = 'FastCaloSim/MC23/TFCSparam_mpt_inverseCdf_v07.xml'
 
 class PunchThroughParamsInversePcaFilename(JobProperty):
     """ Filename of the muon punch through param inverse pca config. """
     statusOn     = True
     allowedTypes = ['str']
-    StoredValue  = 'FastCaloSim/MC23/TFCSparam_mpt_inversePca_v03.xml'
+    StoredValue  = 'FastCaloSim/MC23/TFCSparam_mpt_inversePca_v07.xml'
 
 class PunchThroughClassifierScalerFilename(JobProperty):
     """ Filename of the muon punch through classifier input variable MinMaxScaler. """
     statusOn     = True
     allowedTypes = ['str']
-    StoredValue  = 'FastCaloSim/MC23/TFCSparam_mpt_classScaler_v03.xml'
+    StoredValue  = 'FastCaloSim/MC23/TFCSparam_mpt_classScaler_v04.xml'
 
 class PunchThroughClassifierNetworkFilename(JobProperty):
     """ Filename of the muon punch through classifier neural network. """
     statusOn     = True
     allowedTypes = ['str']
-    StoredValue  = 'FastCaloSim/MC23/TFCSparam_mpt_classNet_v03.json'
+    StoredValue  = 'FastCaloSim/MC23/TFCSparam_mpt_classNet_v04.json'
 
 class PunchThroughClassifierCalibratorFilename(JobProperty):
     """ Filename of the muon punch through classifier calibrator. """
     statusOn     = True
     allowedTypes = ['str']
-    StoredValue  = 'FastCaloSim/MC23/TFCSparam_mpt_classCalib_v03.xml'
+    StoredValue  = 'FastCaloSim/MC23/TFCSparam_mpt_classCalib_v04.xml'
 ##-----------------------------------------------------------------------------
 ## 2nd step
 ## Definition of the InDet flag container

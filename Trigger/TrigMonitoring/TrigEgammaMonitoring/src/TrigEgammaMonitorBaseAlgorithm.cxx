@@ -111,13 +111,17 @@ bool TrigEgammaMonitorBaseAlgorithm::ApplyPhotonPid( const xAOD::Photon *eg, con
 
 bool TrigEgammaMonitorBaseAlgorithm::isIsolated(const xAOD::Electron *eg, const std::string& isolation) const {
   ATH_MSG_DEBUG("Apply Isolation " << isolation);
-  float ptcone20;
-  eg->isolationValue(ptcone20, xAOD::Iso::ptcone20);
-  ATH_MSG_DEBUG("ptcone20 " << ptcone20);
+  float ptcone20=0;
+  bool isoStat=eg->isolationValue(ptcone20, xAOD::Iso::ptcone20);
+  if (!isoStat) {
+    ATH_MSG_DEBUG("Electron doesn't provide isolation for ptcone20");
+    return false;
+  }
   if (!(fabs(eg->pt()) > 0)) {
     ATH_MSG_DEBUG("Electron pt is zero, can't calculate relative isolation");
     return false;
   }
+  ATH_MSG_DEBUG("ptcone20 " << ptcone20);
   float ptcone20_rel = ptcone20/eg->pt();
   ATH_MSG_DEBUG("Relative isolation value " << ptcone20_rel);
   if (isolation == "loose"){

@@ -62,14 +62,14 @@ private:
   double m_dphijj; 
 
 
-  bool checkOverlap(double, double, const std::vector<HepMC::ConstGenParticlePtr>&);
-  bool checkOverlap(double, double, const std::vector<TLorentzVector>&);
-  TLorentzVector sumDaughterNeutrinos( HepMC::ConstGenParticlePtr );
+  bool checkOverlap(double, double, const std::vector<HepMC::ConstGenParticlePtr>&)  const;
+  bool checkOverlap(double, double, const std::vector<TLorentzVector>&)  const;
+  TLorentzVector sumDaughterNeutrinos(const HepMC::ConstGenParticlePtr& )  const;
 
 public:
 
-  bool ApplyMassDphi(const xAOD::JetContainer *jets);
-  double getEventWeight(const xAOD::JetContainer *jets);
+  bool ApplyMassDphi(const xAOD::JetContainer *jets)  const;
+  double getEventWeight(const xAOD::JetContainer *jets) const;
 };
 
 #endif

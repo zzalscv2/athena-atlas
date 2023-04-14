@@ -114,8 +114,8 @@ StatusCode MultiCjetFilter::filterEvent() {
     weight = genEvt->weights().front();
 
     // Make a vector containing all the event's b-hadrons
-    std::vector< HepMC::ConstGenParticlePtr > bHadrons;
-    for(auto pitr: *genEvt) {
+    std::vector<HepMC::ConstGenParticlePtr> bHadrons;
+    for(const auto& pitr: *genEvt) {
       if( !isBwithWeakDK( pitr->pdg_id()) ) continue;
       if( pitr->momentum().perp() < m_bottomPtMin ) continue;
       if( std::abs( pitr->momentum().pseudoRapidity() ) > m_bottomEtaMax) continue;
@@ -124,8 +124,8 @@ StatusCode MultiCjetFilter::filterEvent() {
 
 
     // Make a vector containing all the event's c-hadrons
-    std::vector< HepMC::ConstGenParticlePtr > cHadrons;
-    for(auto pitr: *genEvt) {
+    std::vector<HepMC::ConstGenParticlePtr> cHadrons;
+    for(const auto& pitr: *genEvt) {
       if( !isCwithWeakDK( pitr->pdg_id()) ) continue;
       if( pitr->momentum().perp() < m_charmPtMin ) continue;
       if( std::abs( pitr->momentum().pseudoRapidity() ) > m_charmEtaMax) continue;
