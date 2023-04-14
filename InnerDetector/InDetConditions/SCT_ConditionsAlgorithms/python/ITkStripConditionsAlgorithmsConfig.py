@@ -6,13 +6,13 @@ from IOVDbSvc.IOVDbSvcConfig import addFoldersSplitOnline
 from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripGeoModelCfg
 
 
-def ITkStripAlignCondAlgCfg(flags, name="ITkStripAlignCondAlg", **kwargs):
+def ITkStripAlignCondAlgCfg(flags, name="ITkStripAlignCondAlg",setGeometryAlignable=False,setAlignmentFolderName="/Indet/Align", **kwargs):
     """Return a configured SCT_AlignCondAlg for ITk"""
-    acc = ITkStripGeoModelCfg(flags)
+    acc = ITkStripGeoModelCfg(flags,setGeometryAlignable=setGeometryAlignable,setAlignmentFolderName=setAlignmentFolderName)
     if flags.GeoModel.Align.Dynamic:
         raise RuntimeError("Dynamic alignment not supported for ITk yet")
     else:
-        acc.merge(addFoldersSplitOnline(flags, "INDET", "/Indet/Onl/Align", "/Indet/Align", className="AlignableTransformContainer"))
+        acc.merge(addFoldersSplitOnline(flags, "INDET", "/Indet/Onl/Align", setAlignmentFolderName, className="AlignableTransformContainer"))
 
     kwargs.setdefault("DetManagerName", "ITkStrip")
     kwargs.setdefault("WriteKey", "ITkStripAlignmentStore")
@@ -64,11 +64,11 @@ def ITkStripConfigurationCondAlgCfg(flags, name="ITkStripConfigurationCondAlg", 
     return acc
 
 
-def ITkStripDetectorElementCondAlgCfg(flags, name="ITkStripDetectorElementCondAlg", **kwargs):
+def ITkStripDetectorElementCondAlgCfg(flags, name="ITkStripDetectorElementCondAlg",setGeometryAlignable=False,setAlignmentFolderName="/Indet/Align", **kwargs):
     kwargs.setdefault("DetManagerName", "ITkStrip")
     kwargs.setdefault("ReadKey", "ITkStripAlignmentStore")
     kwargs.setdefault("WriteKey", "ITkStripDetectorElementCollection")
 
-    acc = ITkStripAlignCondAlgCfg(flags)
+    acc = ITkStripAlignCondAlgCfg(flags,setGeometryAlignable=setGeometryAlignable,setAlignmentFolderName=setAlignmentFolderName)
     acc.addCondAlgo(CompFactory.SCT_DetectorElementCondAlg(name, **kwargs))
     return acc

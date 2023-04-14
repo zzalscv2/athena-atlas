@@ -33,11 +33,11 @@ def getFlags(**kwargs):
     flags.GeoModel.Align.Dynamic = False
 
     #Define the output database file name and add it to the flags
-    if not 'misalignmentMode' in kwargs.keys():
-        misalignmentMode = 11 # Radial
+    if not 'MisalignMode' in kwargs.keys():
+        MisalignMode = 11 # Radial
     else:
-        misalignmentMode=int(kwargs.get('misalignmentMode',11))
-    databaseFilename     = 'MisalignmentSet%s.db' % (misalignmentMode)
+        MisalignMode=int(kwargs.get('MisalignMode',11))
+    databaseFilename     = 'MisalignmentSet%s.db' % (MisalignMode)
     flags.IOVDb.DBConnection="sqlite://;schema=%s;dbname=OFLCOND" % (databaseFilename) 
     flags.IOVDb.GlobalTag = "OFLCOND-MC21-SDR-RUN4-01"
 
@@ -58,13 +58,13 @@ def CreateMis(flags,name="CreateITkMisalignAlg",**kwargs):
 
     createFreshDB = not(readDBPoolFile or misalignmentOnTopOfExistingSet)
 
-    misalignmentMode = kwargs.pop('misalignmentMode',11)
+    MisalignMode = kwargs.pop('MisalignMode',11)
 
     shiftInMicrons = 100
 
-    if misalignmentMode in [11, 12, 31]:
+    if MisalignMode in [11, 12, 31]:
         shiftInMicrons = 500
-    outFiles = 'MisalignmentSet%s' % (misalignmentMode)
+    outFiles = 'MisalignmentSet%s' % (MisalignMode)
     misalignModeMap = {0:'no Misalignment',
                     1: 'misalignment by 6 parameters',
                     2: 'random misalignment',
@@ -75,30 +75,34 @@ def CreateMis(flags,name="CreateITkMisalignAlg",**kwargs):
     ####################################################################################################################
 
     acc=MainServicesCfg(flags)
-    print ("\n CreateMisalignAlg: Creation of misalignment mode %s: %s \n" % (misalignmentMode,misalignModeMap.get(misalignmentMode,'unknown')))
+    print ("\n CreateMisalignAlg: Creation of misalignment mode %s: %s \n" % (MisalignMode,misalignModeMap.get(MisalignMode,'unknown')))
     kwargs.setdefault("ASCIIFilenameBase",outFiles)
-    kwargs.setdefault("SQLiteTag",'Misalignmen+sttMode_'+str(misalignModeMap.get(misalignmentMode,'unknown')))
-    kwargs.setdefault("MisalignMode",int(misalignmentMode))
+    kwargs.setdefault("SQLiteTag",'MisalignMode_'+str(misalignModeMap.get(MisalignMode,'unknown')))
+    kwargs.setdefault("MisalignMode",int(MisalignMode))
     kwargs.setdefault("MaxShift",shiftInMicrons)
     kwargs.setdefault("CreateFreshDB",createFreshDB)
     #Create and configure the AlignDB tool
     itkAlignFolder="/Indet/AlignITk"
+    AlignFolder="/Indet/Align"
     writeDBPoolFile=True   #Activate or deactivate writing to outFiles + '.pool.root'
     kargsTool={}
     kargsTool.setdefault("SCTTwoSide",True)
     kargsTool.setdefault("DBRoot",itkAlignFolder)
     kargsTool.setdefault("DBKey",itkAlignFolder)
     kargsTool.setdefault("forceUserDBConfig",True)
-    kargsTool.setdefault("AlignmentRootFolder","/Indet/AlignITk")
     if writeDBPoolFile:
-        kargsTool.setdefault("CondStream", acc.setPrivateTools(CompFactory.AthenaOutputStreamTool(OutputFile = outFiles+'.pool.root')))
-        kargsTool.setdefault("DBRoot","/Indet/Align")
-        kargsTool.setdefault("DBKey","/Indet/Align")
+        InDetCondStream=CompFactory.AthenaOutputStreamTool(OutputFile = outFiles+'.pool.root')
+        InDetCondStream.PoolContainerPrefix="<type>"
+        InDetCondStream.TopLevelContainerName=""
+        InDetCondStream.SubLevelBranchName="<key>"
+        kargsTool.setdefault("CondStream",InDetCondStream)
+        kargsTool.setdefault("DBRoot",AlignFolder)
+        kargsTool.setdefault("DBKey",AlignFolder)
     dbTool = acc.popToolsAndMerge(ITkAlignDBTool(flags,**kargsTool))
 
     kwargs.setdefault("IDAlignDBTool",dbTool)
 
-    cfg=CreateITkMisalignAlgCfg(flags,name=name,SetITkPixelAlignable=True,SetITkStripAlignable=True,**kwargs)
+    cfg=CreateITkMisalignAlgCfg(flags,name=name,SetITkPixelAlignable=True,SetITkStripAlignable=True,setAlignmentFolderName=AlignFolder,**kwargs)
     acc.merge(cfg)
     if writeDBPoolFile:
         print("To be writen DB pool File")

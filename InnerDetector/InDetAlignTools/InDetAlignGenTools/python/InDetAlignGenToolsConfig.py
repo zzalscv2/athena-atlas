@@ -3,10 +3,11 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def ITkAlignDBTool(flags, name="ITkAlignDBTool", **kwargs):
+def ITkAlignDBTool(flags, name="ITkAlignDBTool",setAlignmentFolderName="/Indet/AlignITk", **kwargs):
     acc = ComponentAccumulator()
     kwargs.setdefault("PixelManager","ITkPixel")
     kwargs.setdefault("SCT_Manager","ITkStrip")
+    kwargs.setdefault("DBRoot",setAlignmentFolderName)
     acc.setPrivateTools(CompFactory.InDetAlignDBTool(name,**kwargs))
     return acc
 
