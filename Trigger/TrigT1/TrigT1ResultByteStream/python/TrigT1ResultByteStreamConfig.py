@@ -404,11 +404,20 @@ if __name__ == '__main__':
   from AthenaCommon import Constants
   algLogLevel = getattr(Constants,args.outputLevel)
 
-  if any(["data22" in f for f in args.filesInput]):
+
+  if any(["data23" in f for f in args.filesInput]):
+    flags.IOVDb.GlobalTag = "CONDBR2-HLTP-2022-02"
+    flags.Trigger.triggerConfig='DB'
+    from AthenaConfiguration.Enums import LHCPeriod
+    flags.GeoModel.Run = LHCPeriod.Run3 # needed for LArGMConfig
+
+  elif any(["data22" in f for f in args.filesInput]):
     flags.Trigger.triggerConfig='DB'
     from AthenaConfiguration.Enums import LHCPeriod
     flags.GeoModel.Run = LHCPeriod.Run3 # needed for LArGMConfig
     flags.IOVDb.GlobalTag = "CONDBR2-ES1PA-2022-07"
+  
+  
 
   flags.Exec.OutputLevel = algLogLevel
   flags.Exec.MaxEvents = args.evtMax
@@ -440,7 +449,7 @@ if __name__ == '__main__':
   from TrigConfigSvc.TrigConfigSvcCfg import L1ConfigSvcCfg,generateL1Menu
   acc.merge(L1ConfigSvcCfg(flags))
 
-  if not any(["data22" in f for f in args.filesInput]):
+  if not any(["data22" in f for f in args.filesInput]) and not any(["data23" in f for f in args.filesInput]):
     generateL1Menu(flags)
 
 
