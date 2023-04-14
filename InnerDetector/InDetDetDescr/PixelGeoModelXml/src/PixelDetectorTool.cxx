@@ -64,21 +64,23 @@ StatusCode PixelDetectorTool::create()
   // The & takes the address of the GeoVPhysVol
   GeoPhysVol *world = &*theExpt->getPhysVol();
   auto *manager = new InDetDD::PixelDetectorManager(&*detStore(), m_detectorName, "PixelID");
-  manager->addFolder(m_alignmentFolderName);
-
+  const std::string topFolder(m_alignmentFolderName);
+  manager->addFolder(topFolder);
   if (m_alignable) {
-    manager->addChannel("/Indet/Align/ID",     2, InDetDD::global);
-    manager->addChannel("/Indet/Align/PIX",    1, InDetDD::global);
-    manager->addChannel("/Indet/Align/PIXB1",  0, InDetDD::local);
-    manager->addChannel("/Indet/Align/PIXB2",  0, InDetDD::local);
-    manager->addChannel("/Indet/Align/PIXB3",  0, InDetDD::local);
-    manager->addChannel("/Indet/Align/PIXB4",  0, InDetDD::local);
-    manager->addChannel("/Indet/Align/PIXEA1", 0, InDetDD::local);
-    manager->addChannel("/Indet/Align/PIXEA2", 0, InDetDD::local);
-    manager->addChannel("/Indet/Align/PIXEA3", 0, InDetDD::local);
-    manager->addChannel("/Indet/Align/PIXEC1", 0, InDetDD::local);
-    manager->addChannel("/Indet/Align/PIXEC2", 0, InDetDD::local);
-    manager->addChannel("/Indet/Align/PIXEC3", 0, InDetDD::local);
+    InDetDD::AlignFolderType alignFolderType = InDetDD::static_run1 ;
+    manager->addAlignFolderType(alignFolderType);
+    manager->addChannel(topFolder +"/ID",     2, InDetDD::global);
+    manager->addChannel(topFolder +"/PIX",    1, InDetDD::global);
+    manager->addChannel(topFolder +"/PIXB1",  0, InDetDD::local);
+    manager->addChannel(topFolder +"/PIXB2",  0, InDetDD::local);
+    manager->addChannel(topFolder +"/PIXB3",  0, InDetDD::local);
+    manager->addChannel(topFolder +"/PIXB4",  0, InDetDD::local);
+    manager->addChannel(topFolder +"/PIXEA1", 0, InDetDD::local);
+    manager->addChannel(topFolder +"/PIXEA2", 0, InDetDD::local);
+    manager->addChannel(topFolder +"/PIXEA3", 0, InDetDD::local);
+    manager->addChannel(topFolder +"/PIXEC1", 0, InDetDD::local);
+    manager->addChannel(topFolder +"/PIXEC2", 0, InDetDD::local);
+    manager->addChannel(topFolder +"/PIXEC3", 0, InDetDD::local);
   }
   InDetDD::ITk::PixelGmxInterface gmxInterface(manager, m_commonItems.get(), &m_moduleTree);
 

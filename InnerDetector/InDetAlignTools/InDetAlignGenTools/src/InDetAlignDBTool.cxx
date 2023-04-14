@@ -1280,8 +1280,6 @@ StatusCode InDetAlignDBTool::outputObjs() {
   }
   // write objects to stream
   if (StatusCode::SUCCESS!=m_par_condstream->streamObjects(typekeys)) {
-    ATH_MSG_ERROR("Could not stream output objects" );
-    return StatusCode::FAILURE;
   }else{
     ATH_MSG_DEBUG("Streamed output objects" );
   }

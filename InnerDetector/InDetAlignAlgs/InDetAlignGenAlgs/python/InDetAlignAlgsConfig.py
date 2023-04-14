@@ -3,7 +3,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def CreateITkMisalignAlgCfg(flags, name="CreateITkMisalignAlg",SetITkPixelAlignable=False,SetITkStripAlignable=False, **kwargs):
+def CreateITkMisalignAlgCfg(flags, name="CreateITkMisalignAlg",SetITkPixelAlignable=False,SetITkStripAlignable=False,setAlignmentFolderName="/Indet/AlignITk", **kwargs):
     kwargs.setdefault("MisalignmentX",0.0)
     kwargs.setdefault("MisalignmentY",0.0)
     kwargs.setdefault("MisalignmentZ",0.0)
@@ -21,20 +21,20 @@ def CreateITkMisalignAlgCfg(flags, name="CreateITkMisalignAlg",SetITkPixelAligna
     
     if flags.Detector.EnableITkPixel:
         from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
-        result.merge(ITkPixelReadoutGeometryCfg(flags,setGeometryAlignable=SetITkPixelAlignable))
+        result.merge(ITkPixelReadoutGeometryCfg(flags,setGeometryAlignable=SetITkPixelAlignable,setAlignmentFolderName=setAlignmentFolderName))
         kwargs.setdefault("PixelDetEleCollKey","ITkPixelDetectorElementCollection")
     else:
         kwargs.setdefault("PixelDetEleCollKey","")
 
     if flags.Detector.EnableITkStrip:    
         from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
-        result.merge(ITkStripReadoutGeometryCfg(flags,setGeometryAlignable=SetITkStripAlignable))
+        result.merge(ITkStripReadoutGeometryCfg(flags,setGeometryAlignable=SetITkStripAlignable,setAlignmentFolderName=setAlignmentFolderName))
         kwargs.setdefault("SCTDetEleCollKey","ITkStripDetectorElementCollection")
     else:
         kwargs.setdefault("SCTDetEleCollKey","")
 
     from InDetAlignGenTools.InDetAlignGenToolsConfig import ITkAlignDBTool
-    dbTool = result.popToolsAndMerge(ITkAlignDBTool(flags))
+    dbTool = result.popToolsAndMerge(ITkAlignDBTool(flags,setAlignmentFolderName=setAlignmentFolderName))
 
     kwargs.setdefault("IDAlignDBTool",dbTool)
     kwargs.setdefault("TRTDetEleCollKey","")
@@ -51,7 +51,7 @@ def CreateITkMisalignAlgCfg(flags, name="CreateITkMisalignAlg",SetITkPixelAligna
     result.addEventAlgo(CompFactory.InDetAlignment.CreateMisalignAlg(name,**kwargs))
     return result
 
-def CreateInDetMisalignAlgCfg(flags, name="CreateInDetMisalignAlg", **kwargs):
+def CreateInDetMisalignAlgCfg(flags, name="CreateInDetMisalignAlg",setAlignmentFolderName="/Indet/Align", **kwargs):
     result = ComponentAccumulator()
     
     if flags.Detector.EnablePixel:
@@ -73,7 +73,7 @@ def CreateInDetMisalignAlgCfg(flags, name="CreateInDetMisalignAlg", **kwargs):
         kwargs.setdefault("TRTDetEleCollKey","")
 
     from InDetAlignGenTools.InDetAlignGenToolsConfig import InDetAlignDBTool
-    dbTool = result.popToolsAndMerge(InDetAlignDBTool(flags))
+    dbTool = result.popToolsAndMerge(InDetAlignDBTool(flags,setAlignmentFolderName=setAlignmentFolderName))
 
     histoSvc = CompFactory.THistSvc(Output = ["IDENTIFIERTREE DATAFILE='InDetIdentifierTree.root' TYPE='ROOT' OPT='RECREATE'"])
     result.addService( histoSvc )
