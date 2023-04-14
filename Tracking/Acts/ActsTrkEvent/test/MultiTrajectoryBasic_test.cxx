@@ -175,9 +175,12 @@ struct EmptyMTJ {  // setup empty MTJ
         trackStateBackend.get(), parametersBackend.get(), jacobianBackend.get(),
         measurementsBackend.get());
     // backends can be shared
-    ro_mtj = std::make_unique<ActsTrk::ConstMultiTrajectory>(
-        trackStateBackend.get(), parametersBackend.get(), jacobianBackend.get(),
-        measurementsBackend.get());
+    ro_mtj = std::make_unique<ActsTrk::ConstMultiTrajectory>(*mtj.get());
+    // construction below should not work
+    // ActsTrk::MutableMultiTrajectory mtest(*ro_mtj.get());
+    ActsTrk::MutableMultiTrajectory mtest1(*mtj.get());
+    ActsTrk::ConstMultiTrajectory mtest2(*ro_mtj.get());
+
   }
   std::unique_ptr<xAOD::TrackStateContainer> trackStateBackend;
   std::unique_ptr<xAOD::TrackStateAuxContainer> trackStateBackendAux;

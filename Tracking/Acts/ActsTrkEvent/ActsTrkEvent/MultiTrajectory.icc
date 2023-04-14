@@ -15,6 +15,19 @@ ActsTrk::MultiTrajectory<RWState>::MultiTrajectory(
 }
 
 template <bool RWState>
+template <bool OtherRWState>
+ActsTrk::MultiTrajectory<RWState>::MultiTrajectory(
+    const MultiTrajectory<OtherRWState>& other) 
+    : m_trackStates(other.m_trackStates),
+      m_trackParameters(other.m_trackParameters),
+      m_trackJacobians(other.m_trackJacobians),
+      m_trackMeasurements(other.m_trackMeasurements) {
+  for ( auto& decoration: other.m_decorations) {
+    m_decorations.push_back(decoration);
+  }
+}
+
+template <bool RWState>
 bool ActsTrk::MultiTrajectory<RWState>::has_backends() const {
   return m_trackStates != nullptr and m_trackParameters != nullptr and
          m_trackJacobians != nullptr and m_trackMeasurements != nullptr;
@@ -422,3 +435,4 @@ void ActsTrk::MultiTrajectory<RWState>::shareFrom_impl(ActsTrk::MultiTrajectory<
       throw std::domain_error{"Unable to share this component"};
   }
 }
+

@@ -30,6 +30,15 @@ constexpr static bool IsReadWrite = false;
 }  // namespace ActsTrk
 
 namespace Acts {
+template<typename T>
+struct IsReadOnlyMultiTrajectory {};
+
+template<typename T>
+struct IsReadOnlyMultiTrajectory<T&> : IsReadOnlyMultiTrajectory<T> {};
+
+template<typename T>
+struct IsReadOnlyMultiTrajectory<T&&> : IsReadOnlyMultiTrajectory<T> {};
+
 template <>
 struct IsReadOnlyMultiTrajectory<ActsTrk::MultiTrajectory<ActsTrk::IsReadOnly>>
     : std::true_type {};
@@ -42,8 +51,8 @@ namespace ActsTrk {
 /**
  * @brief Athena implementation of ACTS::MultiTrajectory
  *
- * @tparam MOD - generates variant of the class that allows ro (if == CANMODIFY)
- * or rw (when not CANMODIFY)
+ * @tparam RWState - generates variant of the class that allows r/o (if == IsReadOnly)
+ * or r/w (when not IsReadWrite)
  */
 template <bool RWState>
 class MultiTrajectory final
@@ -78,6 +87,14 @@ class MultiTrajectory final
                   TrackParametersContainerBackendPtr parameters,
                   TrackJacobianContainerBackendPtr jacobians,
                   TrackMeasurementContainerBackendPtr measurements);
+
+  /**
+   * @brief Construct a new Multi Trajectory object given r/w input MTJ
+   * @note constructed MTJ does not copy backends, they remain shared
+   * @param other - source MTJ
+   */
+  template<bool OtherRWState>
+  MultiTrajectory(const MultiTrajectory<OtherRWState>& other);
 
   /**
    * @brief Add state with stograge for data that depends on the mask
@@ -263,7 +280,7 @@ class MultiTrajectory final
 
   /**
    * @brief clears backends
-   *
+   * decoration columns are still declared
    */
   inline void clear_impl() {
     m_trackStates->clear();
