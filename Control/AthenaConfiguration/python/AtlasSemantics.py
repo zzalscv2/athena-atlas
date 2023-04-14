@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import GaudiConfig2.semantics
 from GaudiKernel.GaudiHandles import PrivateToolHandleArray, PublicToolHandle, ServiceHandle
@@ -72,22 +72,36 @@ class VarHandleKeySemantics(GaudiConfig2.semantics.PropertySemantics):
         return DataHandle(v, self._mode, self._type, self._isCond)
 
 
-class VarHandleArraySematics(GaudiConfig2.semantics.PropertySemantics):
+class VarHandleArraySematics(GaudiConfig2.semantics.SequenceSemantics):
     '''
     Treat VarHandleKeyArrays like arrays of strings
     '''
     __handled_types__ = ("SG::VarHandleKeyArray",)
-    def __init__(self,cpp_type,name=None):
-        super(VarHandleArraySematics,self).__init__(cpp_type, name)
-        pass
+
+    class _ItemSemantics(GaudiConfig2.semantics.StringSemantics):
+        """Semantics for an item (DataHandle) in a VarHandleKeyArray converting to string"""
+
+        def __init__(self, name=None):
+            super().__init__("std::string", name)
+
+        def store(self, value):
+            if isinstance(value, DataHandle):
+                return value.Path
+            elif isinstance(value, str):
+                return value
+            else:
+                raise TypeError(f"cannot assign {value!r} ({type(value)}) to {self.name}"
+                                ", expected string or DataHandle")
+
+    def __init__(self, cpp_type, name=None):
+        super().__init__(cpp_type, name, valueSem = self._ItemSemantics())
 
     def merge(self,bb,aa):
         for b in bb:
             if b not in aa:
                 aa.append(b)
         return aa
-        #union=set(a) | set(b) 
-        #return list(union)
+
 
 class ToolHandleSemantics(GaudiConfig2.semantics.PropertySemantics):
     '''
