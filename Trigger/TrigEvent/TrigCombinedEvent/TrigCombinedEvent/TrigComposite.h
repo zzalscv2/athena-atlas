@@ -15,7 +15,7 @@
 #include "GaudiKernel/MsgStream.h"
 
 
-#include "boost/any.hpp"
+
 
 /**
  * @class TrigComposite
