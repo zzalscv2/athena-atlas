@@ -3,7 +3,7 @@
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
 def TrigFastTrackFinderMonitoring(flags):
-    name =    "trigfasttrackfinder_" + flags.InDet.Tracking.ActiveConfig.name
+    name =    flags.InDet.Tracking.ActiveConfig.name
     doResMon= flags.InDet.Tracking.ActiveConfig.doResMon
     return TrigFastTrackFinderMonitoringArg(flags, name, doResMon)
 
