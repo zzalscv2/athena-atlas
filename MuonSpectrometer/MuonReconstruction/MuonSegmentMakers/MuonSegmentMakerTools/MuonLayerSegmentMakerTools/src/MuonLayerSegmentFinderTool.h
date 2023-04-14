@@ -20,7 +20,7 @@
 #include "MuonRecToolInterfaces/IMuonPRDSelectionTool.h"
 #include "MuonRecToolInterfaces/IMuonSegmentMaker.h"
 #include "MuonSegmentMakerToolInterfaces/IMuonClusterSegmentFinder.h"
-#include "MuonSegmentMakerToolInterfaces/IMuonClusterSegmentFinderTool.h"
+#include "MuonSegmentMakerToolInterfaces/IMuonNSWSegmentFinderTool.h"
 #include "MuonSegmentMakerToolInterfaces/IMuonLayerSegmentFinderTool.h"
 #include "MuonRecToolInterfaces/HoughDataPerSec.h"
 #include "MuonCombinedToolInterfaces/IMuonLayerSegmentMatchingTool.h"
@@ -98,10 +98,10 @@ namespace Muon {
             "Csc4DSegmentMaker",
             "Csc4dSegmentMaker/Csc4dSegmentMaker",
         };
-        ToolHandle<IMuonClusterSegmentFinderTool> m_clusterSegMakerNSW{
+        ToolHandle<IMuonNSWSegmentFinderTool> m_clusterSegMakerNSW{
             this,
             "NSWMuonClusterSegmentFinderTool",
-            "Muon::MuonClusterSegmentFinderTool/MuonClusterSegmentFinderTool",
+            "",
         };
 
         ToolHandle<Muon::IMuonLayerSegmentMatchingTool> m_segmentMatchingTool{

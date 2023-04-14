@@ -18,7 +18,7 @@ DCMathSegmentMaker            = CfgGetter.getPublicTool("DCMathSegmentMaker")
 MuonClusterizationTool        = CfgGetter.getPublicTool("MuonClusterizationTool")
 MSVertexTrackletTool          = CfgGetter.getPublicTool("MSVertexTrackletTool")
 MSVertexRecoTool              = CfgGetter.getPublicTool("MSVertexRecoTool")
-MuonClusterSegmentFinderTool  = CfgGetter.getPublicTool("MuonClusterSegmentFinderTool")
+MuonNSWSegmentFinderTool      = CfgGetter.getPublicTool("MuonNSWSegmentFinderTool")
 MuonSegmentFittingTool        = CfgGetter.getPublicTool("MuonSegmentFittingTool")
 DCMathT0FitSegmentMaker       = CfgGetter.getPublicTool("DCMathT0FitSegmentMaker")
 
