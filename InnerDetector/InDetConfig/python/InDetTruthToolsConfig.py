@@ -4,9 +4,10 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def InDetPRDTruthTrajectorySorterCfg(flags, name='InDetTruthTrajectorySorter', **kwargs):
-    result = ComponentAccumulator()
 
+def InDetPRDTruthTrajectorySorterCfg(
+        flags, name='InDetTruthTrajectorySorter', **kwargs):
+    result = ComponentAccumulator()
     result.setPrivateTools(
         CompFactory.InDet.PRD_TruthTrajectorySorterID(name, **kwargs))
     return result
@@ -14,19 +15,20 @@ def InDetPRDTruthTrajectorySorterCfg(flags, name='InDetTruthTrajectorySorter', *
 
 def InDetPRD_ProviderCfg(flags, name='InDetPRD_Provider', **kwargs):
     result = ComponentAccumulator()
-
     kwargs.setdefault('PixelClusterContainer', 'PixelClusters')
     kwargs.setdefault('SCT_ClusterContainer', 'SCT_Clusters')
     kwargs.setdefault('TRT_DriftCircleContainer', 'TRT_DriftCircles')
-
     result.setPrivateTools(CompFactory.InDet.InDetPRD_Provider(name, **kwargs))
     return result
 
-def InDetPRD_TruthTrajectoryManipulatorIDCfg(flags, name='InDetTruthTrajectoryManipulator', **kwargs):
+
+def InDetPRD_TruthTrajectoryManipulatorIDCfg(
+        flags, name='InDetTruthTrajectoryManipulator', **kwargs):
     result = ComponentAccumulator()
     result.setPrivateTools(
         CompFactory.InDet.PRD_TruthTrajectoryManipulatorID(name, **kwargs))
     return result
+
 
 def InDetTruthTrackBuilderCfg(flags, name='InDetTruthTrackBuilder', **kwargs):
     result = ComponentAccumulator()
@@ -47,7 +49,8 @@ def InDetTruthTrackBuilderCfg(flags, name='InDetTruthTrackBuilder', **kwargs):
             InDetRotCreatorCfg(flags)))
 
     if "BroadRotCreatorTool" not in kwargs:
-        from TrkConfig.TrkRIO_OnTrackCreatorConfig import InDetBroadRotCreatorCfg
+        from TrkConfig.TrkRIO_OnTrackCreatorConfig import (
+            InDetBroadRotCreatorCfg)
         kwargs.setdefault('BroadRotCreatorTool', result.popToolsAndMerge(
             InDetBroadRotCreatorCfg(flags)))
 
@@ -59,33 +62,36 @@ def InDetTruthTrackBuilderCfg(flags, name='InDetTruthTrackBuilder', **kwargs):
     result.setPrivateTools(CompFactory.Trk.TruthTrackBuilder(name, **kwargs))
     return result
 
-def InDetPRD_TruthTrajectoryBuilderCfg(flags, name='InDetPRD_TruthTrajectoryBuilder', **kwargs):
+
+def InDetPRD_TruthTrajectoryBuilderCfg(
+        flags, name='InDetPRD_TruthTrajectoryBuilder', **kwargs):
     result = ComponentAccumulator()
 
-    truthClusters = ['PRD_MultiTruthPixel', 'PRD_MultiTruthSCT', \
-                     'PRD_MultiTruthTRT']
-    kwargs.setdefault('PRD_MultiTruthCollections', truthClusters)
+    kwargs.setdefault('PRD_MultiTruthCollections', [
+        'PRD_MultiTruthPixel', 'PRD_MultiTruthSCT', 'PRD_MultiTruthTRT'])
 
     kwargs.setdefault('InDetPRD_Provider', result.popToolsAndMerge(
         InDetPRD_ProviderCfg(flags)))
 
     kwargs.setdefault('MinimumPt', flags.InDet.Tracking.ActiveConfig.minPT)
 
-    manipulators = [ result.popToolsAndMerge(
-        InDetPRDTruthTrajectorySorterCfg(flags)) ]
+    manipulators = [result.popToolsAndMerge(
+        InDetPRDTruthTrajectorySorterCfg(flags))]
 
-    if not flags.InDet.Tracking.doIdealPseudoTracking:
+    if not flags.Tracking.doIdealPseudoTracking:
         manipulators.append(result.popToolsAndMerge(
             InDetPRD_TruthTrajectoryManipulatorIDCfg(flags)))
-    
+
     kwargs.setdefault('PRD_TruthTrajectoryManipulators', manipulators)
 
     result.setPrivateTools(
         CompFactory.Trk.PRD_TruthTrajectoryBuilder(name, **kwargs))
     return result
 
-def InDetPRD_TruthTrajectorySelectorCfg(name='InDetTruthTrajectorySelector', **kwargs):
+
+def InDetPRD_TruthTrajectorySelectorCfg(
+        flags, name='InDetTruthTrajectorySelector', **kwargs):
     result = ComponentAccumulator()
     result.setPrivateTools(
         CompFactory.InDet.PRD_TruthTrajectorySelectorID(name, **kwargs))
-    return result  
+    return result

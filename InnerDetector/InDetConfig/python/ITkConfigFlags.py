@@ -53,8 +53,6 @@ def createITkConfigFlags():
   itkcf.addFlag("ITk.Tracking.doDigitalClustering", False)
   itkcf.addFlag("ITk.Tracking.doFastTracking", False) # Turn running of ITk FastTracking on and off
   itkcf.addFlag("ITk.Tracking.doConversionFinding",True) # Turn running of ConversionFinding second pass on and off
-  itkcf.addFlag("ITk.Tracking.writeSeedValNtuple", False) # Turn writing of seed validation ntuple on and off
-  itkcf.addFlag("ITk.Tracking.writeExtendedPRDInfo", False)
 
   
   # config flags for tracking geometry configuration
