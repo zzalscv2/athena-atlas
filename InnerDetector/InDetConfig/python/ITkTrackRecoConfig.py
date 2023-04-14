@@ -187,7 +187,7 @@ def ITkTrackRecoCfg(flags):
                 flags_set[0],  # Use cuts from primary pass
                 TracksLocation=StatTrackCollections))
 
-    if flags.ITk.Tracking.writeExtendedPRDInfo:
+    if flags.Tracking.writeExtendedPRDInfo:
         from InDetConfig.InDetPrepRawDataToxAODConfig import (
             ITkPixelPrepDataToxAODCfg, ITkStripPrepDataToxAODCfg)
         result.merge(ITkPixelPrepDataToxAODCfg(
@@ -249,7 +249,7 @@ def ITkTrackRecoOutputCfg(flags):
 
     # exclude IDTIDE/IDTRKVALID decorations
     excludedAuxData += '.-TrkBLX.-TrkBLY.-TrkBLZ.-TrkIBLX.-TrkIBLY.-TrkIBLZ.-TrkL1X.-TrkL1Y.-TrkL1Z.-TrkL2X.-TrkL2Y.-TrkL2Z'
-    if not flags.ITk.Tracking.writeExtendedPRDInfo:
+    if not flags.Tracking.writeExtendedPRDInfo:
         excludedAuxData += '.-msosLink'
 
     # Save PRD
@@ -279,7 +279,7 @@ def ITkTrackRecoOutputCfg(flags):
     toAOD += [
         f"xAOD::TrackParticleAuxContainer#InDetTrackParticlesAux.{excludedAuxData}"]
 
-    if flags.ITk.Tracking.writeExtendedPRDInfo:
+    if flags.Tracking.writeExtendedPRDInfo:
         toAOD += [
             "xAOD::TrackMeasurementValidationContainer#ITkPixelClusters",
             "xAOD::TrackMeasurementValidationAuxContainer#ITkPixelClustersAux.",

@@ -1,8 +1,9 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 # Configuration of TrkTruthTrackAlgs package
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+
 
 def TruthTrackingCfg(flags, name='InDetTruthTrackCreation', **kwargs):
     acc = ComponentAccumulator()
@@ -28,28 +29,29 @@ def TruthTrackingCfg(flags, name='InDetTruthTrackCreation', **kwargs):
     if "AssociationTool" not in kwargs:
         from InDetConfig.InDetAssociationToolsConfig import (
             InDetPRDtoTrackMapToolGangedPixelsCfg)
-        InDetPRDtoTrackMapToolGangedPixels = acc.popToolsAndMerge(
-            InDetPRDtoTrackMapToolGangedPixelsCfg(flags))
-        kwargs.setdefault('AssociationTool', InDetPRDtoTrackMapToolGangedPixels)
+        kwargs.setdefault('AssociationTool', acc.popToolsAndMerge(
+            InDetPRDtoTrackMapToolGangedPixelsCfg(flags)))
 
     if "TrackSummaryTool" not in kwargs:
-        from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
-        TrackSummaryTool = acc.popToolsAndMerge(InDetTrackSummaryToolCfg(flags))
+        from TrkConfig.TrkTrackSummaryToolConfig import (
+            InDetTrackSummaryToolCfg)
+        TrackSummaryTool = acc.popToolsAndMerge(
+            InDetTrackSummaryToolCfg(flags))
         acc.addPublicTool(TrackSummaryTool)
         kwargs.setdefault('TrackSummaryTool', TrackSummaryTool)
 
     if "PRD_TruthTrajectorySelectors" not in kwargs:
         trajectoryselectors = []
-        if not flags.InDet.Tracking.doIdealPseudoTracking:
+        if not flags.Tracking.doIdealPseudoTracking:
             from InDetConfig.InDetTruthToolsConfig import (
                 InDetPRD_TruthTrajectorySelectorCfg)
-            TruthTrajectorySelector = acc.popToolsAndMerge(
-                InDetPRD_TruthTrajectorySelectorCfg())
-            trajectoryselectors.append(TruthTrajectorySelector)
+            trajectoryselectors.append(acc.popToolsAndMerge(
+                InDetPRD_TruthTrajectorySelectorCfg(flags)))
         kwargs.setdefault('PRD_TruthTrajectorySelectors', trajectoryselectors)
 
     acc.addEventAlgo(CompFactory.Trk.TruthTrackCreation(name, **kwargs))
     return acc
+
 
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -69,20 +71,21 @@ if __name__ == "__main__":
     top_acc.merge(PoolReadCfg(flags))
 
     ################################ Aditional configurations ################################
-    ##
     top_acc.merge(TruthTrackingCfg(flags))
-    if flags.InDet.Tracking.doIdealPseudoTracking:
+    if flags.Tracking.doIdealPseudoTracking:
         from InDetConfig.TrackTruthConfig import InDetTrackTruthCfg
-        top_acc.merge(InDetTrackTruthCfg(flags, 'InDetPseudoTrackParticles', 'InDetPseudoTrackTruthCollection', 'InDetPseudoTrackTruthCollection'))
+        top_acc.merge(InDetTrackTruthCfg(
+            flags,
+            Tracks='InDetPseudoTrackParticles',
+            DetailedTruth='InDetPseudoTrackDetailedTruth',
+            TracksTruth='InDetPseudoTrackTruthCollection'))
 
-    #flags.lock()
     flags.dump()
-    
-    ComponentAccumulator.debugMode="trackCA trackEventAlgo ..."
 
+    ComponentAccumulator.debugMode = "trackCA trackEventAlgo ..."
 
     from AthenaCommon.Constants import DEBUG
-    top_acc.foreach_component("AthEventSeq/*").OutputLevel=DEBUG
+    top_acc.foreach_component("AthEventSeq/*").OutputLevel = DEBUG
     top_acc.printConfig(withDetails=True, summariseProps=True)
     top_acc.store(open("TruthTrackingConfig.pkl", "wb"))
 

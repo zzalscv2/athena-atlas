@@ -523,8 +523,8 @@ def InDetTrackRecoCfg(flags):
             # ---------------------------------------
 
             if (flags.Tracking.doTruth and
-                (flags.InDet.Tracking.doPseudoTracking or
-                 flags.InDet.Tracking.doIdealPseudoTracking)):
+                (flags.Tracking.doPseudoTracking or
+                 flags.Tracking.doIdealPseudoTracking)):
 
                 from TrkConfig.TrkTruthTrackAlgsConfig import TruthTrackingCfg
                 result.merge(TruthTrackingCfg(current_flags))
@@ -564,8 +564,8 @@ def InDetTrackRecoCfg(flags):
     if flags.Tracking.doTruth:
         result.merge(InDetTrackTruthCfg(flags))
 
-        if (flags.InDet.Tracking.doPseudoTracking or
-            flags.InDet.Tracking.doIdealPseudoTracking):
+        if (flags.Tracking.doPseudoTracking or
+            flags.Tracking.doIdealPseudoTracking):
             result.merge(InDetTrackTruthCfg(
                 flags,
                 Tracks="InDetPseudoTracks",
@@ -590,8 +590,8 @@ def InDetTrackRecoCfg(flags):
             flags),
         AssociationMapName="PRDtoTrackMapCombinedInDetTracks"))
 
-    if (flags.InDet.Tracking.doPseudoTracking or
-        flags.InDet.Tracking.doIdealPseudoTracking):
+    if (flags.Tracking.doPseudoTracking or
+        flags.Tracking.doIdealPseudoTracking):
         result.merge(TrackParticleCnvAlgCfg(
             flags,
             name="PseudoTrackParticleCnvAlg",
@@ -600,6 +600,7 @@ def InDetTrackRecoCfg(flags):
                 "InDetPseudoTrackParticles"),
             AssociationMapName=(
                 "PRDtoTrackMapCombinedInDetTracks")))
+
     if flags.Tracking.doTIDE_AmbiTrackMonitoring:
         from xAODTrackingCnv.xAODTrackingCnvConfig import (
             ObserverTrackParticleCnvAlgCfg)
@@ -627,15 +628,13 @@ def InDetTrackRecoCfg(flags):
             xAODTrackParticlesFromTracksContainerName=(
                 "SiSPSeedSegmentsTrackParticles")))
 
-    if flags.InDet.Tracking.doStoreSiSPSeededTracks:
+    if flags.Tracking.doStoreSiSPSeededTracks:
         from xAODTrackingCnv.xAODTrackingCnvConfig import (
             TrackParticleCnvAlgNoPIDCfg)
-        TrackContainer = "SiSPSeededTracks"
-
         result.merge(TrackParticleCnvAlgNoPIDCfg(
             flags,
             name = "SiSPSeededTracksCnvAlg",
-            TrackContainerName = TrackContainer,
+            TrackContainerName = "SiSPSeededTracks",
             xAODTrackParticlesFromTracksContainerName=(
                 "SiSPSeededTracksTrackParticles"),
             AssociationMapName=(
@@ -669,10 +668,10 @@ def InDetTrackRecoCfg(flags):
     # --- Extra optional decorations
     # ---------------------------------------
 
-    if flags.InDet.Tracking.writeExtendedPRDInfo:
+    if flags.Tracking.writeExtendedPRDInfo:
 
         if (flags.Tracking.doTIDE_AmbiTrackMonitoring or
-                flags.InDet.Tracking.doPseudoTracking):
+                flags.Tracking.doPseudoTracking):
 
             from InDetConfig.InDetPrepRawDataToxAODConfig import (
                 InDetPixelPrepDataToxAOD_ExtraTruthCfg,
@@ -719,7 +718,7 @@ def InDetTrackRecoCfg(flags):
                     "ObserverInDetCommonKernel",
                     AugmentationTools=[ObserverTrackStateOnSurfaceDecorator]))
 
-        if flags.InDet.Tracking.doPseudoTracking:
+        if flags.Tracking.doPseudoTracking:
             from DerivationFrameworkInDet.InDetToolsConfig import (
                 PseudoTrackStateOnSurfaceDecoratorCfg)
             PseudoTrackStateOnSurfaceDecorator = result.getPrimaryAndMerge(
@@ -729,7 +728,7 @@ def InDetTrackRecoCfg(flags):
                     "PseudoInDetCommonKernel",
                     AugmentationTools=[PseudoTrackStateOnSurfaceDecorator]))
 
-        if flags.InDet.Tracking.doStoreSiSPSeededTracks:
+        if flags.Tracking.doStoreSiSPSeededTracks:
             from DerivationFrameworkInDet.InDetToolsConfig import (
                 SiSPTrackStateOnSurfaceDecoratorCfg)
             SiSPTrackStateOnSurfaceDecorator = result.getPrimaryAndMerge(
@@ -789,7 +788,7 @@ def InDetTrackRecoOutputCfg(flags):
 
     # exclude IDTIDE/IDTRKVALID decorations
     excludedAuxData += '.-TrkBLX.-TrkBLY.-TrkBLZ.-TrkIBLX.-TrkIBLY.-TrkIBLZ.-TrkL1X.-TrkL1Y.-TrkL1Z.-TrkL2X.-TrkL2Y.-TrkL2Z'
-    if not flags.InDet.Tracking.writeExtendedPRDInfo:
+    if not flags.Tracking.writeExtendedPRDInfo:
         excludedAuxData += '.-msosLink'
 
     # exclude IDTIDE decorations
@@ -853,7 +852,7 @@ def InDetTrackRecoOutputCfg(flags):
             toESD += ["TrackTruthCollection#StandaloneTRTTracksTruthCollection"]
             toESD += ["DetailedTrackTruthCollection#StandaloneTRTTracksDetailedTruth"]
 
-    if flags.InDet.Tracking.doPseudoTracking:
+    if flags.Tracking.doPseudoTracking:
         toESD += ["TrackCollection#InDetPseudoTracks"]
         if flags.Tracking.doTruth:
             toESD += ["TrackTruthCollection#InDetPseudoTracksTruthCollection"]
@@ -928,7 +927,7 @@ def InDetTrackRecoOutputCfg(flags):
         toAOD += ["xAOD::TrackParticleContainer#InDetTRTTrackParticles"]
         toAOD += [
             f"xAOD::TrackParticleAuxContainer#InDetTRTTrackParticlesAux.{excludedAuxData}"]
-    if flags.InDet.Tracking.doPseudoTracking:
+    if flags.Tracking.doPseudoTracking:
         toAOD += ["xAOD::TrackParticleContainer#InDetPseudoTrackParticles"]
         toAOD += [
             f"xAOD::TrackParticleAuxContainer#InDetPseudoTrackParticlesAux.{excludedAuxData}"]
@@ -942,7 +941,7 @@ def InDetTrackRecoOutputCfg(flags):
         if flags.Tracking.doTruth:
             toAOD += ["TrackTruthCollection#InDetObservedTrackTruthCollection"]
             toAOD += ["DetailedTrackTruthCollection#ObservedDetailedTracksTruth"]
-    if flags.InDet.Tracking.doStoreSiSPSeededTracks:
+    if flags.Tracking.doStoreSiSPSeededTracks:
         toAOD += ["xAOD::TrackParticleContainer#SiSPSeededTracksTrackParticles"]
         toAOD += [
             f"xAOD::TrackParticleAuxContainer#SiSPSeededTracksTrackParticlesAux.{excludedAuxData}"]
@@ -952,7 +951,7 @@ def InDetTrackRecoOutputCfg(flags):
             "xAOD::TrackParticleContainer#SiSPSeedSegmentsTrackParticles",
             "xAOD::TrackParticleAuxContainer#SiSPSeedSegmentsTrackParticlesAux."
         ]
-    if flags.InDet.Tracking.writeExtendedPRDInfo:
+    if flags.Tracking.writeExtendedPRDInfo:
         toAOD += [
             "xAOD::TrackMeasurementValidationContainer#PixelClusters",
             "xAOD::TrackMeasurementValidationAuxContainer#PixelClustersAux.",
@@ -976,7 +975,7 @@ def InDetTrackRecoOutputCfg(flags):
                 "xAOD::TrackStateValidationContainer#ObservedTrack_TRT_MSOSs",
                 "xAOD::TrackStateValidationAuxContainer#ObservedTrack_TRT_MSOSsAux."
             ]
-        if flags.InDet.Tracking.doPseudoTracking:
+        if flags.Tracking.doPseudoTracking:
             toAOD += [
                 "xAOD::TrackStateValidationContainer#Pseudo_Pixel_MSOSs",
                 "xAOD::TrackStateValidationAuxContainer#Pseudo_Pixel_MSOSsAux.",

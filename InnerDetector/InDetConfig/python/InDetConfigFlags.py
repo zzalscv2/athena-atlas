@@ -39,17 +39,6 @@ def createInDetConfigFlags():
                 prevFlags.Beam.Type is BeamType.Cosmics and
                 prevFlags.Detector.EnableTRT)
 
-    icf.addFlag("InDet.Tracking.writeSeedValNtuple", False) # Turn writing of seed validation ntuple on and off
-    icf.addFlag("InDet.Tracking.writeExtendedPRDInfo", False)
-    # Special pass using truth information for pattern recognition, runs in parallel to/instead of the first pass
-    icf.addFlag("InDet.Tracking.doPseudoTracking", False)
-    # Special pass using truth information for pattern recognition, removes assumed in-efficencies applied to PseudoTracking
-    icf.addFlag("InDet.Tracking.doIdealPseudoTracking", False)
-    # Save SiSP tracks (input to the ambiguity solver)
-    icf.addFlag("InDet.Tracking.doStoreSiSPSeededTracks", False)
-    # Skip ambiguity solver in hadronic ROI
-    icf.addFlag("InDet.Tracking.doSkipAmbiROI", False)
-
 
     from InDetConfig.TrackingPassFlags import (
         createTrackingPassFlags, createHighPileupTrackingPassFlags,

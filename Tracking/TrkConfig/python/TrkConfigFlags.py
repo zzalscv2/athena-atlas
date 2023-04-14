@@ -71,6 +71,9 @@ def createTrackingConfigFlags():
     # Cut value for splitting clusters into three parts
     icf.addFlag("Tracking.pixelClusterSplitProb2",
                 lambda prevFlags: (0.5 if prevFlags.GeoModel.Run is LHCPeriod.Run1 else 0.45))
+    # Skip ambiguity solver in hadronic ROI
+    icf.addFlag("Tracking.doSkipAmbiROI", False)
+
 
     # Express track parameters wrt. to : 'BeamLine','BeamSpot','Vertex' (first primary vertex)
     icf.addFlag("Tracking.perigeeExpression", lambda prevFlags:
@@ -100,6 +103,12 @@ def createTrackingConfigFlags():
 
     # Turn on to save the Track Seeds in a xAOD track collecting for development studies
     icf.addFlag("Tracking.doStoreTrackSeeds", False)
+    # Save SiSP tracks (input to the ambiguity solver)
+    icf.addFlag("Tracking.doStoreSiSPSeededTracks", False)
+    # Turn writing of seed validation ntuple on and off
+    icf.addFlag("Tracking.writeSeedValNtuple", False)
+    # Save xAOD TrackMeasurementValidation + TrackStateValidation containers
+    icf.addFlag("Tracking.writeExtendedPRDInfo", False)
 
     # Toggle track slimming
     icf.addFlag("Tracking.doSlimming", lambda prevFlags:
@@ -222,6 +231,11 @@ def createTrackingConfigFlags():
     icf.addFlag("Tracking.doRobustReco", False)
     # Special reconstruction for BLS physics
     icf.addFlag("Tracking.doBLS", False)
+
+    # Special pass using truth information for pattern recognition, runs in parallel to/instead of the first pass
+    icf.addFlag("Tracking.doPseudoTracking", False)
+    # Special pass using truth information for pattern recognition, removes assumed in-efficencies applied to PseudoTracking
+    icf.addFlag("Tracking.doIdealPseudoTracking", False)
 
     ####################################################################
 
