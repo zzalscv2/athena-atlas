@@ -598,7 +598,7 @@ namespace ST {
     std::string m_eleIsoHighPt_WP;
     double      m_eleIsoHighPtThresh;
     std::string m_eleChID_WP;
-    bool m_eleLRT; 
+    bool m_eleLRT;
     int m_eleLRT_strat;
     bool        m_eleChIso; // use Charge ID SF with/without Iso applied
     bool        m_eleChID_signal; // allows to run ECID but remove it from signal definition
@@ -647,7 +647,7 @@ namespace ST {
     double m_muCosmicd0;
     double m_badmuQoverP;
     int    m_muCalibrationMode;
-    bool m_muLRT; 
+    bool m_muLRT;
 
     double m_photonBaselinePt;
     double m_photonBaselineEta;
@@ -861,16 +861,19 @@ namespace ST {
     std::string m_trig2016combination_singleLep;
     std::string m_trig2017combination_singleLep;
     std::string m_trig2018combination_singleLep;
+    int m_trigNToys_diLep;
     std::string m_trig2015combination_diLep;
     std::string m_trig2016combination_diLep;
     std::string m_trig2017combination_diLep;
     std::string m_trig2018combination_diLep;
     asg::AnaToolHandle<ITrigGlobalEfficiencyCorrectionTool> m_trigGlobalEffCorrTool_diLep;
+    int m_trigNToys_multiLep;
     std::string m_trig2015combination_multiLep;
     std::string m_trig2016combination_multiLep;
     std::string m_trig2017combination_multiLep;
     std::string m_trig2018combination_multiLep;
     asg::AnaToolHandle<ITrigGlobalEfficiencyCorrectionTool> m_trigGlobalEffCorrTool_multiLep;
+    int m_trigNToys_diPhoton;
     std::string m_trig2015combination_diPhoton;
     std::string m_trig2016combination_diPhoton;
     std::string m_trig2017combination_diPhoton;
