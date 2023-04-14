@@ -23,11 +23,17 @@ dcube_pixel_fixref="dcube_pixel"
 dcube_pixel_lastref="dcube_pixel_last"
 dcube_sct_fixref="dcube_sct"
 dcube_sct_lastref="dcube_sct_last"
-dcube_rec_fixref="dcube"
-dcube_rec_lastref="dcube_last"
+dcube_rec_fixref="dcube_shifter"
+dcube_rec_expert_fixref="dcube_expert"
+dcube_rec_lastref="dcube_shifter_last"
+dcube_rec_expert_lastref="dcube_expert_last"
 
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
 name="run2"
+relname="r24"
+if [[ "$ATLAS_RELEASE_BASE" == *"23.0"* ]]; then
+  relname="r23"
+fi
 script="`basename \"$0\"`"
 hits=physval.HITS.root
 dcubemon_sim=SiHitValid.root
@@ -35,13 +41,15 @@ dcubemon_rec=physval.ntuple.root
 dcubemon_pixel=PixelRDOAnalysis.root
 dcubemon_sct=SCT_RDOAnalysis.root
 dcubecfg_sim=$artdata/InDetPhysValMonitoring/dcube/config/run2_SiHitValid.xml
-dcuberef_sim=$artdata/InDetPhysValMonitoring/ReferenceHistograms/SiHitValid_mu_1GeV_simreco.root
+dcuberef_sim=$artdata/InDetPhysValMonitoring/ReferenceHistograms/SiHitValid_mu_1GeV_simreco_${relname}.root
 dcubecfg_pixel=$artdata/InDetPhysValMonitoring/dcube/config/run2_PixelRDOAnalysis.xml
-dcuberef_pixel=$artdata/InDetPhysValMonitoring/ReferenceHistograms/PixelRDOAnalysis_mu_1GeV_simreco.root
+dcuberef_pixel=$artdata/InDetPhysValMonitoring/ReferenceHistograms/PixelRDOAnalysis_mu_1GeV_simreco_${relname}.root
 dcubecfg_sct=$artdata/InDetPhysValMonitoring/dcube/config/run2_SCTRDOAnalysis.xml
-dcuberef_sct=$artdata/InDetPhysValMonitoring/ReferenceHistograms/SCT_RDOAnalysis_mu_1GeV_simreco.root
+dcuberef_sct=$artdata/InDetPhysValMonitoring/ReferenceHistograms/SCT_RDOAnalysis_mu_1GeV_simreco_${relname}.root
 dcubecfg_rec=$artdata/InDetPhysValMonitoring/dcube/config/IDPVMPlots_R22.xml
-dcuberef_rec=$artdata/InDetPhysValMonitoring/ReferenceHistograms/physval_mu_1GeV_simreco.root
+dcubeshiftercfg_rec=$artdata/InDetPhysValMonitoring/dcube/config/IDPVMPlots_mc_baseline.xml
+dcubeexpertcfg_rec=$artdata/InDetPhysValMonitoring/dcube/config/IDPVMPlots_mc_expert.xml
+dcuberef_rec=$artdata/InDetPhysValMonitoring/ReferenceHistograms/physval_mu_1GeV_simreco_${relname}.root
 art_dcube=$ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py
 
 lastref_dir=last_results
@@ -80,7 +88,6 @@ if [ $sim_tf_exit_code -eq 0 ]  ;then
    -c ${dcubecfg_sim} \
    -r ${dcuberef_sim} \
    ${dcubemon_sim}
- echo "art-result: $? dcube_sim"
  
  $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
    -p -x ${dcube_sim_lastref} \
@@ -134,18 +141,30 @@ if [ $sim_tf_exit_code -eq 0 ]  ;then
    echo "compare with a fixed R22"
    $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
      -p -x ${dcube_rec_fixref} \
-     -c ${dcubecfg_rec} \
+     -c ${dcubeshiftercfg_rec} \
      -r ${dcuberef_rec} \
      ${dcubemon_rec}
-   echo "art-result: $? dcube_rec"
    
    echo "compare with last build"
    $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
      -p -x ${dcube_rec_lastref} \
-     -c ${dcubecfg_rec} \
+     -c ${dcubeshiftercfg_rec} \
      -r ${lastref_dir}/${dcubemon_rec} \
      ${dcubemon_rec}
    echo "art-result: $? dcube_rec_last"
+
+   $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
+     -p -x ${dcube_rec_expert_fixref} \
+     -c ${dcubeexpertcfg_rec} \
+     -r ${dcuberef_rec} \
+     ${dcubemon_rec}
+   
+   echo "compare with last build"
+   $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
+     -p -x ${dcube_rec_expert_lastref} \
+     -c ${dcubeexpertcfg_rec} \
+     -r ${lastref_dir}/${dcubemon_rec} \
+     ${dcubemon_rec}
 
    echo "compare with a fixed R22 for PixelRDOAnalysis"
    $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
@@ -153,7 +172,6 @@ if [ $sim_tf_exit_code -eq 0 ]  ;then
      -c ${dcubecfg_pixel} \
      -r ${dcuberef_pixel} \
      ${dcubemon_pixel}
-   echo "art-result: $? dcube_pixel_rdo"
    
    echo "compare with last build"
    $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
@@ -169,7 +187,6 @@ if [ $sim_tf_exit_code -eq 0 ]  ;then
      -c ${dcubecfg_sct} \
      -r ${dcuberef_sct} \
      ${dcubemon_sct}
-   echo "art-result: $? dcube_SCT_rdo"
    
    echo "compare with last build"
    $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
