@@ -117,21 +117,27 @@ namespace Muon {
         const std::vector<const MuonClusterOnTrack*>& clustersSTGC = layerROTs.getClusters(MuonStationIndex::STGC);
         const std::vector<const MuonClusterOnTrack*>& clustersMM = layerROTs.getClusters(MuonStationIndex::MM);
 
-        std::vector<const MuonClusterOnTrack*> clusters;
+        using NSWSegmentCache = Muon::IMuonNSWSegmentFinderTool::SegmentMakingCache;
+        NSWSegmentCache cache{};
+
+       
         if (!clustersSTGC.empty()) {
             ATH_MSG_DEBUG(" STGC clusters " << clustersSTGC.size());
-            clusters.insert(clusters.end(), clustersSTGC.begin(), clustersSTGC.end());
+            std::transform(clustersSTGC.begin(), clustersSTGC.end(), std::back_inserter(cache.inputClust), 
+                            [](const Muon::MuonClusterOnTrack* cl){ return std::unique_ptr<Muon::MuonClusterOnTrack>{cl->clone()};});
+           
         }
         if (!clustersMM.empty()) {
             ATH_MSG_DEBUG(" MM clusters " << clustersMM.size());
-            clusters.insert(clusters.end(), clustersMM.begin(), clustersMM.end());
+            std::transform(clustersMM.begin(), clustersMM.end(), std::back_inserter(cache.inputClust), 
+                            [](const Muon::MuonClusterOnTrack* cl){ return  std::unique_ptr<Muon::MuonClusterOnTrack>{cl->clone()};});            
         }
-        if (clusters.empty()) return;
+        if (cache.inputClust.empty()) return;
         
         
         if (!m_patternSegs.empty()) {
             std::set<Identifier> needed_rios{};        
-            for (const MuonClusterOnTrack* clus : clusters) {
+            for (std::unique_ptr<const MuonClusterOnTrack>& clus : cache.inputClust) {
                 needed_rios.insert(clus->identify());
             }
             SG::ReadHandle<Trk::SegmentCollection>  input_segs{m_patternSegs, ctx};
@@ -156,10 +162,9 @@ namespace Muon {
             return;
         }
 
-        std::vector<std::unique_ptr<MuonSegment>> foundSegments;
-        m_clusterSegMakerNSW->find(ctx, clusters, foundSegments, nullptr);
+        m_clusterSegMakerNSW->find(ctx, cache);
         
-        for (std::unique_ptr<MuonSegment>& seg : foundSegments) {
+        for (std::unique_ptr<MuonSegment>& seg : cache.constructedSegs) {
             ATH_MSG_DEBUG(" NSW segment " << m_printer->print(*seg));
             segments.emplace_back(std::move(seg));
         }        

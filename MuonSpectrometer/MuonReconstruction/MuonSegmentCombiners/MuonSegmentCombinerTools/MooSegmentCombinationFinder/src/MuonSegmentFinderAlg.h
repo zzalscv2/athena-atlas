@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MOOSEGMENTFINDERS_MUOSEGMENTFINDERALGS_H
@@ -22,7 +22,7 @@
 #include "MuonSegmentCombinerToolInterfaces/IMuonCurvedSegmentCombiner.h"
 #include "MuonSegmentMakerToolInterfaces/IMuonClusterSegmentFinder.h"
 #include "MuonSegmentMakerToolInterfaces/IMuonSegmentSelectionTool.h"
-#include "MuonSegmentMakerToolInterfaces/IMuonClusterSegmentFinderTool.h"
+#include "MuonSegmentMakerToolInterfaces/IMuonNSWSegmentFinderTool.h"
 #include "MuonSegmentMakerToolInterfaces/IMuonPatternCalibration.h"
 #include "MuonSegmentMakerToolInterfaces/IMuonSegmentOverlapRemovalTool.h"
 #include "TrkSegment/SegmentCollection.h"
@@ -74,9 +74,9 @@ private:
         "MuonClusterCreator",
         "Muon::MuonClusterOnTrackCreator/MuonClusterOnTrackCreator",
     };  //<! pointer to muon cluster rio ontrack creator
-    ToolHandle<Muon::IMuonClusterSegmentFinderTool> m_clusterSegMakerNSW{
+    ToolHandle<Muon::IMuonNSWSegmentFinderTool> m_clusterSegMakerNSW{
         this,
-        "MuonClusterSegmentFinderTool",
+        "NSWSegmentMaker",
         "",
     };
     ToolHandle<ICscSegmentFinder> m_csc2dSegmentFinder{
@@ -154,7 +154,11 @@ private:
 
     StatusCode createSegmentsWithMDTs(const EventContext& ctx, const Muon::MuonPatternCombination* patt, Trk::SegmentCollection* segs) const;
     
-    void createSegmentsFromClusters(const EventContext& ctx, const Muon::MuonPatternCombination* patt, Trk::SegmentCollection* segments, Trk::SegmentCollection* segmentsNSW) const;
+    
+    using NSWSegmentCache = Muon::IMuonNSWSegmentFinderTool::SegmentMakingCache;
+    void createNSWSegments(const EventContext& ctx, 
+                           const Muon::MuonPatternCombination* patt, 
+                           NSWSegmentCache& cache) const;
    
     /// Retrieve the raw outputs from the Csc segment makers for the curved combination
     StatusCode createCscSegments(const EventContext& ctx, 

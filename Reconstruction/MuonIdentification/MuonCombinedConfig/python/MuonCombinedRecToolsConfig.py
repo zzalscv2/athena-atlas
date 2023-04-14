@@ -950,7 +950,7 @@ def MuonCaloTagToolCfg(flags, name='MuonCaloTagTool', **kwargs):
 
 
 def MuonLayerSegmentFinderToolCfg(flags, name="MuonLayerSegmentFinderTool", **kwargs):
-    from MuonConfig.MuonSegmentFindingConfig import DCMathSegmentMakerCfg, MuonClusterSegmentFinderToolCfg, MuonPRDSelectionToolCfg
+    from MuonConfig.MuonSegmentFindingConfig import DCMathSegmentMakerCfg, MuonNSWSegmentFinderToolCfg, MuonPRDSelectionToolCfg
     result = ComponentAccumulator()
 
     from MuonConfig.MuonSegmentFindingConfig import Csc2dSegmentMakerCfg, Csc4dSegmentMakerCfg
@@ -964,7 +964,7 @@ def MuonLayerSegmentFinderToolCfg(flags, name="MuonLayerSegmentFinderTool", **kw
     kwargs.setdefault("SegmentMaker",  result.popToolsAndMerge(
         DCMathSegmentMakerCfg(flags, name="DCMathSegmentMaker")))
     kwargs.setdefault("NSWMuonClusterSegmentFinderTool",
-                      result.popToolsAndMerge(MuonClusterSegmentFinderToolCfg(flags, name="MuonClusterSegmentFinderTool")))
+                      result.popToolsAndMerge(MuonNSWSegmentFinderToolCfg(flags, name="MuonNSWSegmentFinderTool")))
 
     ###
     from AthenaConfiguration.Enums import LHCPeriod

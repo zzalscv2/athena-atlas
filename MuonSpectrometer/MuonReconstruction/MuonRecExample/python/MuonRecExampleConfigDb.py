@@ -107,7 +107,7 @@ addTool( "MuonRecExample.MuonRecTools.DCMathSegmentMaker", "DCMathSegmentMaker" 
 addTool( "MuonRecExample.MuonRecTools.DCMathT0FitSegmentMaker", "DCMathT0FitSegmentMaker" )
 
 addTool( "MuonRecExample.MuonRecTools.MuonClusterSegmentFinder", "MuonClusterSegmentFinder")
-addTool( "MuonRecExample.MuonRecTools.MuonClusterSegmentFinderTool", "MuonClusterSegmentFinderTool" )
+addTool( "MuonRecExample.MuonRecTools.MuonNSWSegmentFinderTool", "MuonNSWSegmentFinderTool" )
 #N.B. Both of these are tools. They do slightly different things, but the naming is unfortunate.
 
 addTool( "MuonRecExample.MuonRecTools.MuonLayerHoughTool","MuonLayerHoughTool" )

@@ -376,7 +376,7 @@ def MuonClusterSegmentFinder(name="MuonClusterSegmentFinder", extraFlags=None,**
     kwargs.setdefault("MuonPRDSelectionTool", getPublicTool("MuonPRDSelectionTool") )
     return CfgMgr.Muon__MuonClusterSegmentFinder(name,**kwargs)
 
-def MuonClusterSegmentFinderTool(name="MuonClusterSegmentFinderTool", extraFlags=None,**kwargs):
+def MuonNSWSegmentFinderTool(name="MuonNSWSegmentFinderTool", extraFlags=None,**kwargs):
     kwargs.setdefault("SLFitter","Trk::GlobalChi2Fitter/MCTBSLFitterMaterialFromTrack")
     import MuonCombinedRecExample.CombinedMuonTrackSummary  # noqa: F401
     from AthenaCommon.AppMgr import ToolSvc
@@ -387,7 +387,7 @@ def MuonClusterSegmentFinderTool(name="MuonClusterSegmentFinderTool", extraFlags
         kwargs.setdefault("TrackSummaryTool", ToolSvc.CombinedMuonTrackSummary)
 
     kwargs.setdefault("MuonClusterCreator", getPublicTool("MuonClusterOnTrackCreator")) 
-    return CfgMgr.Muon__MuonClusterSegmentFinderTool(name,**kwargs)
+    return CfgMgr.Muon__MuonNSWSegmentFinderTool(name,**kwargs)
 
 def DCMathSegmentMaker(name='DCMathSegmentMaker',extraFlags=None,**kwargs):
     beamType       = getattr(extraFlags,"beamType", beamFlags.beamType())
