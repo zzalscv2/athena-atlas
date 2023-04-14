@@ -84,6 +84,7 @@ run "NTUP_PHYSVAL" Derivation_tf.py \
   --outputNTUP_PHYSVALFile "NTUP_PHYSVAL.root" \
   --validationFlags doInDet, doMET, doEgamma, doTau, doJet, doTopoCluster, doPFlow, doMuon \
   --format NTUP_PHYSVAL \
+  --preExec "flags.PhysVal.IDPVM.setTruthStrategy='All'" \
   --maxEvents ${number_of_events}
 
 mv runargs.PhysicsValidation.py runargs.PhysicsValidation.Main.py
@@ -111,12 +112,11 @@ then
   hadd NTUP_PHYS.root art_core_*/NTUP_PHYSVAL.root
   $idpvm_merge_script NTUP_PHYSVAL.root
   python $ftag_merge_DQA/$ftag_merge_script --input art_core_*/* --pattern "*BTAG_PHYSVAL*" --output NTUP_BTAG_MERGE_PHYSVAL.root -d BTag
-  root -l -b -q $ftag_merge_DQA/$ftag_roc_script\(\"ttbar\",\"NTUP_BTAG_MERGE_PHYSVAL.root\",\"NTUP_BTAG_MERGE_PHYSVAL.root\",\"ROC\",\{\"IP2D\",\"IP3D\"\}\)
-  hadd NTUP_MERGE_PHYSVAL.root NTUP_PHYSVAL.root NTUP_BTAG_MERGE_PHYSVAL.root ROC_NTUP_BTAG_MERGE_PHYSVAL.root
 else
   python $ftag_merge_DQA/$ftag_merge_script --pattern "*BTAG_PHYSVAL*"  --output NTUP_BTAG_MERGE_PHYSVAL.root -d BTag
-  root -l -b -q $ftag_merge_DQA/$ftag_roc_script\(\"ttbar\",\"NTUP_BTAG_MERGE_PHYSVAL.root\",\"NTUP_BTAG_MERGE_PHYSVAL.root\",\"ROC\",\{\"IP2D\",\"IP3D\"\}\)
-  hadd NTUP_MERGE_PHYSVAL.root NTUP_PHYSVAL.root NTUP_BTAG_MERGE_PHYSVAL.root ROC_NTUP_BTAG_MERGE_PHYSVAL.root
 fi
+
+root -l -b -q $ftag_merge_DQA/$ftag_roc_script\(\"ttbar\",\"EMTopo\",\"NTUP_BTAG_MERGE_PHYSVAL.root\",\"NTUP_BTAG_MERGE_PHYSVAL.root\",\"ROC_NTUP_BTAG_MERGE_PHYSVAL.root\",\{\"IP2D\",\"IP3D\",\"SV1\",\"DL1dv00\",\"GN1\"\}\)
+hadd NTUP_MERGE_PHYSVAL.root NTUP_PHYSVAL.root NTUP_BTAG_MERGE_PHYSVAL.root ROC_NTUP_BTAG_MERGE_PHYSVAL.root
 
 checkstep "Merging and post processing"
