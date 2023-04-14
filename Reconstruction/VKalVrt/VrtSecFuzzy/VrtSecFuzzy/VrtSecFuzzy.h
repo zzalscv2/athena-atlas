@@ -298,6 +298,8 @@ namespace VKalVrtAthena {
  
      // selection of track pairs based on the BDT score
     void BDTSelection(const xAOD::TrackParticle* itrk, const xAOD::TrackParticle* jtrk, std::vector<float>& wgtSelect);
+    // recursive seed cluster merging
+    void mergeSeedClusters(std::vector<std::vector<WrkVrt> >& clusters, std::vector<std::vector<std::deque<long int> > >& clusters_trackIDs);
     
     // get secondary vertex impact parameters 
     bool getSVImpactParameters(const xAOD::TrackParticle* trk, Amg::Vector3D vertex, std::vector<double>& impactParameters, std::vector<double>& impactParErrors); 
