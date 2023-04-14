@@ -49,6 +49,19 @@ def get_args():
                         help=_h_stream)
     parser.add_argument('-d', '--dump-dicts', action='store_true',
                         help=_h_dump_dicts)
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument(
+        '--primary',
+        dest='group',
+        action='store_const',
+        const='Primary:',
+    )
+    group.add_argument(
+        '--support',
+        dest='group',
+        action='store_const',
+        const='Support:',
+    )
     return parser.parse_args()
 
 def run():
@@ -78,6 +91,16 @@ def run():
     else:
         def filt(x):
             return True
+
+    if args.group:
+        groupstr = args.group
+        def filt(x, old=filt):
+            if not old(x):
+                return False
+            for group in x.groups:
+                if group.startswith(groupstr):
+                    return True
+            return False
 
     chains = chain_iter(menu, filt)
     if args.names:
