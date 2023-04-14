@@ -149,6 +149,46 @@ def AtlasExtrapolatorCfg(flags, name='AtlasExtrapolator'):
     return result
 
 
+def TrigPFlowExtrapolatorCfg(flags, name='HLT_PFlowExtrapolator'):
+    # This is the extrapolator which is used in PFlow 
+    # reconstruction at the level of HLT. It allows to
+    # setup the tolerance which influences speed (but also 
+    # precision) of the extrapolation. 
+    result = ComponentAccumulator()
+
+    from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
+    PFlowExtrapolator = result.popToolsAndMerge(
+        AtlasExtrapolatorCfg(flags, name))
+
+    from TrkConfig.TrkExRungeKuttaPropagatorConfig import (
+        RungeKuttaPropagatorCfg)
+    RungeKuttaPropagator = result.popToolsAndMerge(
+        RungeKuttaPropagatorCfg(flags))
+    from TrkConfig.TrkExSTEP_PropagatorConfig import (
+        AtlasSTEP_PropagatorCfg)
+    pflowSTEP_Propagator = result.popToolsAndMerge(
+        AtlasSTEP_PropagatorCfg(flags,Tolerance=flags.Trigger.Jet.PFlowTolerance))
+
+    pflowPropagators = []
+    pflowPropagators += [RungeKuttaPropagator]
+    pflowPropagators += [pflowSTEP_Propagator]
+
+    pflowSubPropagators = []
+    pflowSubPropagators += [RungeKuttaPropagator.name]  # for Global
+    pflowSubPropagators += [RungeKuttaPropagator.name]  # for ID
+    pflowSubPropagators += [pflowSTEP_Propagator.name]  # for BeamPipe
+    pflowSubPropagators += [pflowSTEP_Propagator.name]  # for Calo
+    pflowSubPropagators += [pflowSTEP_Propagator.name]  # for MS
+    pflowSubPropagators += [RungeKuttaPropagator.name]  # for cavern
+
+    PFlowExtrapolator.Propagators = pflowPropagators
+    PFlowExtrapolator.SubPropagators = pflowSubPropagators
+    PFlowExtrapolator.STEP_Propagator = pflowSTEP_Propagator
+
+    result.setPrivateTools(PFlowExtrapolator)
+    return result
+
+
 def egammaCaloExtrapolatorCfg(flags, name='egammaCaloExtrapolator'):
     # e/gamma mainly uses Extrapolate Directly to a particular
     # surface to the calo. We do not do "tracking"

@@ -5,9 +5,9 @@ def getMonTool_eflowTrackCaloExtensionTool(flags):
   monTool = GenericMonitoringTool(flags, 'MonTool_TrackCaloExtension')
 
   monTool.defineHistogram( 'TIME_execute', path='EXPERT', type='TH1F', title='Extension tool - execution time; Execution time [us]; Counts',
-                             xbins=100, xmin=0., xmax=50. )
+                             xbins=100, xmin=0., xmax=800. )
   monTool.defineHistogram( 'TIME_extrapolation', path='EXPERT', type='TH1F', title='Extension tool - extrapolation time; Extrapolation time [us]; Counts',
-                             xbins=100, xmin=0., xmax=25. )
+                             xbins=100, xmin=0., xmax=1000. )
   monTool.defineHistogram( 'track_pt, TIME_extrapolation', path='EXPERT', type='TH2F', title='Extension tool - extrapolation time vt. track p_{T}; Track p_{T} [GeV]; Extrapolation time [us]  ; Counts',
                              xbins=100, xmin=0., xmax=15., ybins=100, ymin=0., ymax=25.)
   return monTool
@@ -20,7 +20,7 @@ def getMonTool_PFTrackSelector(flags):
   monTool.defineHistogram( 'TIME_execute', path='EXPERT', type='TH1F', title='Track selector - execution time; Execution time [ms]; Counts',
                            xbins=60, xmin=0., xmax=20. )
   monTool.defineHistogram( 'TIME_track', path='EXPERT', type='TH1F', title='Track selector - extrapolation time per track; Time per track [us]; Counts',
-                           xbins=100, xmin=0., xmax=50. )
+                           xbins=100, xmin=0., xmax=800. )
   monTool.defineHistogram( 'N_tracks', path='EXPERT', type='TH1F', title='Track selector - number of selected tracks per event; Selected tracks/event; Counts',
                            xbins=25, xmin=0., xmax=1000. )
   monTool.defineHistogram( 'eta_track', path='EXPERT', type='TH1F', title='Track selector - track #eta; #eta; Counts',
@@ -46,6 +46,15 @@ def getMonTool_PFTrackClusterMatching(flags):
                           xbins=40, xmin=-4., xmax=4. )
   monTool.defineHistogram( 'matched_clusters_phi', path='EXPERT', type='TH1F', title='Number of matched clusters with given phi; #phi; Counts',
                           xbins=40, xmin=-3.14159265, xmax=3.14159265 )
+
+  return monTool
+
+def getMonTool_ParticleCaloExtensionTool(flags):
+  from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
+  monTool = GenericMonitoringTool(flags, 'MonTool_ParticleCaloExtensionTool')  
+
+  monTool.defineHistogram( 'TIME_extrapolation', path='EXPERT', type='TH1F', title='Extrapolation time per track; time [us]; Counts',
+                          xbins=100, xmin=0., xmax=800. )
 
   return monTool
 
