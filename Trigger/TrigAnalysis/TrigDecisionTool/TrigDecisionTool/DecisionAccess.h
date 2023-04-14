@@ -22,7 +22,6 @@
 #include <string>
 #include <sstream>
 #include <vector>
-#include <boost/algorithm/string/predicate.hpp>
 
 #include "TrigNavStructure/TriggerElement.h"
 #include "TrigDecisionTool/Logger.h"

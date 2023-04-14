@@ -3,6 +3,7 @@
 */
 
 #include "TrigEgammaMatchingTool/TrigEgammaMatchingTool.h"
+#include <boost/algorithm/string.hpp>
 
 
 #ifdef ROOTCORE

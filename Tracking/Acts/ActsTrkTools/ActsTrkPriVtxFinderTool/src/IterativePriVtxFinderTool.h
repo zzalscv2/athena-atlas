@@ -43,10 +43,6 @@
 #include "Acts/Vertexing/ImpactPointEstimator.hpp"
 #include "Acts/Utilities/Logger.hpp"
 
-// BOOST
-#include <boost/variant/variant.hpp>
-#include <boost/variant/apply_visitor.hpp>
-#include <boost/variant/static_visitor.hpp>
 
 #include <cmath>
 

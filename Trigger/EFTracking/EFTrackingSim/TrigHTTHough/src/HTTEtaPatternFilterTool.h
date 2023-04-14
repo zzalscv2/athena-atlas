@@ -31,7 +31,6 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <boost/dynamic_bitset_fwd.hpp>
 
 class HTTEtaPatternFilterTool : public extends<AthAlgTool, IHTTRoadFilterTool>
 {
