@@ -10,7 +10,7 @@ def ActsTrkITkPixelSeedingToolCfg(flags,
     acc = ComponentAccumulator()
     ## For ITkPixel
     kwargs.setdefault("numSeedIncrement" , float("inf"))
-    kwargs.setdefault("deltaZMax" , 900. * UnitConstants.mm)
+    kwargs.setdefault("deltaZMax" , float("inf"))
     kwargs.setdefault("maxPtScattering", float("inf"))
     acc.setPrivateTools(CompFactory.ActsTrk.SeedingTool(name = "ActsSeedingTool_ITkPixel", **kwargs))
     return acc
