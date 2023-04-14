@@ -57,6 +57,7 @@ ParticleCaloExtensionTool::initialize()
   }
   ATH_MSG_INFO(" Using strategy based on particle type "
                << m_particleTypeName << " enum value " << m_particleStrategy);
+  if (!m_monTool.empty()) ATH_CHECK(m_monTool.retrieve());
   return StatusCode::SUCCESS;
 }
 
@@ -299,6 +300,11 @@ ParticleCaloExtensionTool::caloExtension(const EventContext& ctx,
   // pointers to hold results and go
   std::vector<const TrackStateOnSurface*>* material = nullptr;
 
+  auto extrapolation_timer = Monitored::Timer<std::chrono::microseconds>( "TIME_extrapolation" );
+  auto group = Monitored::Group(m_monTool, extrapolation_timer);
+  // Start monitoring timer
+  extrapolation_timer.start();
+
   /* The last argument to the extrapolate  overload
    * corresponds  to a GeometrySignature value from
    * TrkDetDescrUtils/GeometrySignature.h
@@ -307,6 +313,9 @@ ParticleCaloExtensionTool::caloExtension(const EventContext& ctx,
   std::unique_ptr<std::vector<std::pair<std::unique_ptr<Trk::TrackParameters>, int>>>
     caloParameters = m_extrapolator->collectIntersections(
       ctx, startPars, propDir, particleType, material, m_extrapolDetectorID);
+
+  // Stop monitoring timer
+  extrapolation_timer.stop();
 
   if (material) {
     ATH_MSG_DEBUG("Got material " << material->size());

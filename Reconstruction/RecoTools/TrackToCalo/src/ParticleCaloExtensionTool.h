@@ -32,6 +32,9 @@
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTruth/TruthParticle.h"
 
+/* monitoring */
+#include "AthenaMonitoringKernel/Monitored.h"
+
 class AtlasDetectorID;
 class CaloDetDescrManager;
 namespace Trk {
@@ -149,6 +152,9 @@ private:
     "The detector this tool should extrapolate through. Expects a "
     "Trk::GeometrySignature enum value."
   };
+
+  /** Monitoring tool for recording histograms of the alg in action */
+  ToolHandle<GenericMonitoringTool> m_monTool{this,"MonTool","","Monitoring tool"};
 };
 } // namespace Trk
 

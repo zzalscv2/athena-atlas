@@ -417,6 +417,9 @@ def createTriggerRecoFlags():
     flags.addFlag("Trigger.Jet.pflowCalibKey", "TrigLS2")
     flags.addFlag("Trigger.Jet.emtopoCalibKey", "TrigLS2")
 
+    # Change tollerance in STEP Propagator
+    flags.addFlag("Trigger.Jet.PFlowTolerance", 1e-4)
+
     def __httFlags():
         """Additional function delays import"""
         from TrigHTTConfTools.HTTConfigFlags import createHTTConfigFlags
