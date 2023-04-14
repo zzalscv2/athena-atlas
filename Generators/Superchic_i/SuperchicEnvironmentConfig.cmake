@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 # This module is used to set up the environment for Superchic
 # 
@@ -9,8 +9,12 @@ find_package( Superchic )
 
 if( SUPERCHIC_FOUND )
   set( SUPERCHICENVIRONMENT_ENVIRONMENT 
-        FORCESET SUPERCHICVER ${SUPERCHIC_LCGVERSION} 
-        FORCESET SUPERCHICPATH ${SUPERCHIC_LCGROOT}  )
+        FORCESET SUPERCHICVER ${SUPERCHIC_LCGVERSION}
+        FORCESET SUPERCHICPATH ${SUPERCHIC_LCGROOT} 
+        APPEND LHAPATH
+              /cvmfs/atlas.cern.ch/repo/sw/Generators/lhapdfsets/current
+        APPEND LHAPDF_DATA_PATH
+              /cvmfs/atlas.cern.ch/repo/sw/Generators/lhapdfsets/current )
 endif()
 
 
