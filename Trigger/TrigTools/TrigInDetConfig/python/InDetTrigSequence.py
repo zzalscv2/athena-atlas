@@ -21,7 +21,7 @@ class InDetTrigSequence:
     #self.__cas = list()
     
     
-  def sequence(self, recoType : str = "FastTrackFinder", inView : str = None) -> ComponentAccumulator:
+  def sequence(self, recoType : str = "FastTrackFinder") -> ComponentAccumulator:
     ca = ComponentAccumulator()
     
     if self.__inView:
