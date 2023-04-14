@@ -11,8 +11,9 @@
 #include "Acts/Definitions/Units.hpp"
 #include "Acts/Definitions/Common.hpp"
 #include "Acts/Definitions/Algebra.hpp"
-#include "Acts/Surfaces/Surface.hpp"
 #include "Acts/EventData/MultiTrajectory.hpp"
+#include "Acts/EventData/VectorMultiTrajectory.hpp"
+#include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Surfaces/AnnulusBounds.hpp"
 #include "Acts/Surfaces/SurfaceBounds.hpp"
 #include "Acts/Surfaces/DiscSurface.hpp"
@@ -455,8 +456,8 @@ namespace ActsTrk
 
   void
   TrackStatePrinter::printTracks(const Acts::GeometryContext &tgContext,
-                                 const Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail::ValueHolder> &tracks,
-                                 const std::vector<typename Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail::ValueHolder>::TrackProxy> &fitResult,
+                                 const ActsTrk::TrackContainer &tracks,
+                                 const std::vector<ActsTrk::TrackContainer::TrackProxy> &fitResult,
                                  const Acts::BoundTrackParameters &seed,
                                  size_t iseed,
                                  size_t ntracks) const

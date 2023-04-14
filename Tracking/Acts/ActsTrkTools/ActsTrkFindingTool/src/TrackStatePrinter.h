@@ -14,9 +14,7 @@
 #include "xAODInDetMeasurement/SpacePoint.h"
 
 // ACTS CORE
-#include "Acts/EventData/VectorMultiTrajectory.hpp"
 #include "Acts/Geometry/TrackingGeometry.hpp"
-#include "Acts/EventData/VectorTrackContainer.hpp"
 
 // PACKAGE
 #include "ActsGeometry/ActsGeometryContext.h"
@@ -47,8 +45,8 @@ namespace ActsTrk
 
     void
     printTracks(const Acts::GeometryContext &tgContext,
-                const Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail::ValueHolder> &tracks,
-                const std::vector<typename Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail::ValueHolder>::TrackProxy> &fitResult,
+                const ActsTrk::TrackContainer &tracks,
+                const std::vector<ActsTrk::TrackContainer::TrackProxy> &fitResult,
                 const Acts::BoundTrackParameters &seed,
                 size_t iseed,
                 size_t ntracks) const override;

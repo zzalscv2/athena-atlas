@@ -19,8 +19,8 @@ template<typename track_container_t, typename traj_t,
 std::unique_ptr<Trk::Track> 
 ActsKalmanFitter::makeTrack(const EventContext& ctx,
 			    Acts::GeometryContext& tgContext,
-			    Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail::ValueHolder>& tracks,
-			    Acts::Result<typename  Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail::ValueHolder>::TrackProxy, std::error_code>& fitResult) const {
+			    ActsTrk::TrackContainer& tracks,
+			    Acts::Result<ActsTrk::TrackContainer::TrackProxy, std::error_code>& fitResult) const {
 			  
 			
   if (not fitResult.ok()) 

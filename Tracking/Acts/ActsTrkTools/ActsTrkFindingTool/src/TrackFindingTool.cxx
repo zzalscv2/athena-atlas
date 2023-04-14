@@ -30,6 +30,8 @@
 #include "Acts/TrackFitting/GainMatrixSmoother.hpp"
 #include "Acts/TrackFitting/GainMatrixUpdater.hpp"
 #include "Acts/EventData/MultiTrajectory.hpp"
+#include "Acts/EventData/VectorMultiTrajectory.hpp"
+#include "Acts/EventData/VectorTrackContainer.hpp"
 
 // PACKAGE
 #include "ActsGeometry/ATLASSourceLink.h"
@@ -420,8 +422,8 @@ namespace ActsTrk
   size_t
   TrackFindingTool::makeTracks(const EventContext &ctx,
                                const Acts::GeometryContext &tgContext,
-                               const Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail::ValueHolder> &tracks,
-                               const std::vector<typename Acts::TrackContainer<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail::ValueHolder>::TrackProxy> &fitResult,
+                               const ActsTrk::TrackContainer &tracks,
+                               const std::vector<ActsTrk::TrackContainer::TrackProxy> &fitResult,
                                ::TrackCollection &tracksContainer) const
   {
     size_t ntracks = 0;
