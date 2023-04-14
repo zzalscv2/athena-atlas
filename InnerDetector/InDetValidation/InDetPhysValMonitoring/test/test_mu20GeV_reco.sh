@@ -40,23 +40,40 @@ case $ArtProcess in
       echo "postprocess"
       postProcessIDPVMHistos physval.root
 
-      dcubeXml="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/dcube/config/IDPVMPlots_R22.xml"
-      dcubeRef="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_mu20GeV_reco_r22.root"
-      echo "compare with Rel 22.0.73"
+      dcubeShifterXml="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/dcube/config/IDPVMPlots_mc_baseline.xml"
+      dcubeExpertXml="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/dcube/config/IDPVMPlots_mc_expert.xml"
+      dcubeRef="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_mu20GeV_reco_r24.root"
+      if [[ "$ATLAS_RELEASE_BASE" == *"23.0"* ]]; then
+        dcubeRef="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_mu20GeV_reco_r23.root"
+      fi
+      echo "compare with R23.0.23 or 24.0.1"
       $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-	   -p -x dcube \
-	   -c ${dcubeXml} \
+	   -p -x dcube_shifter \
+	   -c ${dcubeShifterXml} \
 	   -r ${dcubeRef} \
 	   physval.root
-      echo "art-result: $? dcube"
+      echo "art-result: $? shifter_plots"
 
       echo "compare with last build"
       $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-	   -p -x dcube_last \
-	   -c ${dcubeXml} \
+	   -p -x dcube_shifter_last \
+	   -c ${dcubeShifterXml} \
 	   -r last_results/physval.root \
 	   physval.root
-      echo "art-result: $? dcube_last"
+      echo "art-result: $? shifter_plots_last"
+
+      $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
+	   -p -x dcube_expert \
+	   -c ${dcubeShifterXml} \
+	   -r ${dcubeRef} \
+	   physval.root
+
+      echo "compare with last build"
+      $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
+	   -p -x dcube_expert_last \
+	   -c ${dcubeShifterXml} \
+	   -r last_results/physval.root \
+	   physval.root
     else
       echo "reco failed"
     fi
