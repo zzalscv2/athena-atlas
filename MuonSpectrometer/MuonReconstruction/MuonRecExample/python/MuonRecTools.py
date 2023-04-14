@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 logging.getLogger().info("Importing %s", __name__)
@@ -216,14 +216,6 @@ def MuonExtrapolator(name='MuonExtrapolator',**kwargs):
 
     return CfgMgr.Trk__Extrapolator(name,**kwargs)
 # end of factory function MuonExtrapolator
-
-def MuonIdHelperSvc(name="MuonIdHelperSvc",**kwargs):
-    from MuonIdHelpers.MuonIdHelpersConf import Muon__MuonIdHelperSvc
-    kwargs.setdefault("HasCSC", MuonGeometryFlags.hasCSC())
-    kwargs.setdefault("HasSTgc", MuonGeometryFlags.hasSTGC())
-    kwargs.setdefault("HasMM", MuonGeometryFlags.hasMM())
-    return Muon__MuonIdHelperSvc(name,**kwargs)
-
 def MuonStraightLineExtrapolator(name="MuonStraightLineExtrapolator",**kwargs):
     kwargs.setdefault("Propagators",["Trk::STEP_Propagator/MuonStraightLinePropagator"])
     kwargs.setdefault("STEP_Propagator","Trk::STEP_Propagator/MuonStraightLinePropagator")
@@ -511,4 +503,3 @@ def MuonLayerSegmentFinderTool(name='MuonLayerSegmentFinderTool',extraFlags=None
 def ExtraTreeTrackFillerTool(name="ExtraTreeTrackFillerTool",extraFlags=None,**kwargs):
     kwargs.setdefault("PullCalculator", getPublicTool("ResidualPullCalculator"))
     return CfgMgr.MuonCalib__ExtraTreeTrackFillerTool(name,**kwargs)
-

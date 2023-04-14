@@ -1,20 +1,14 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_MUONIDHELPERSVC_H
 #define MUON_MUONIDHELPERSVC_H
 
-#include <string>
-
 #include "AthenaBaseComps/AthService.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
-#include "StoreGate/StoreGateSvc.h"
-
-static const InterfaceID IID_MuonIdHelperSvc("Muon::MuonIdHelperSvc", 1, 0);
 
 namespace Muon {
-
     /**
        @brief Helper service that creates muon Identifiers and can be used to print Identifiers
 
@@ -163,30 +157,28 @@ namespace Muon {
         bool hasMDT() const override;
 
         bool hasCSC() const override;
-        bool hasSTgc() const override;
+        bool hasSTGC() const override;
         bool hasMM() const override;
-
-        bool recoCSC() const override;
-        bool recosTgc() const override;
-        bool recoMM() const override;
-
+        
     private:
-        const RpcIdHelper* m_rpcIdHelper = nullptr;
-        const TgcIdHelper* m_tgcIdHelper = nullptr;
-        const CscIdHelper* m_cscIdHelper = nullptr;
-        const MdtIdHelper* m_mdtIdHelper = nullptr;
-        const MmIdHelper* m_mmIdHelper = nullptr;
-        const sTgcIdHelper* m_stgcIdHelper = nullptr;
+        /// Sub detector specific IdHelpers
+        const RpcIdHelper* m_rpcIdHelper{nullptr};
+        const TgcIdHelper* m_tgcIdHelper{nullptr};
+        const CscIdHelper* m_cscIdHelper{nullptr};
+        const MdtIdHelper* m_mdtIdHelper{nullptr};
+        const MmIdHelper* m_mmIdHelper{nullptr};
+        const sTgcIdHelper* m_stgcIdHelper{nullptr};
+
+        const MuonIdHelper* m_primaryHelper{nullptr};
+
+        Gaudi::Property<bool> m_hasMDT{this, "HasMDT", true, "Specify whether the current detector layour contains MDT chambers"};
+        Gaudi::Property<bool> m_hasRPC{this, "HasRPC", true, "Specify whether the current detector layour contains RPC chambers"};
+        Gaudi::Property<bool> m_hasTGC{this, "HasTGC", true, "Specify whether the current detector layour contains TGC chambers"};        
         Gaudi::Property<bool> m_hasCSC{this, "HasCSC", true, "Specify whether current detector layout contains CSC chambers"};
-        Gaudi::Property<bool> m_hasSTgc{this, "HasSTgc", true, "Specify whether current detector layout contains STGC chambers"};
+        Gaudi::Property<bool> m_hasSTGC{this, "HasSTGC", true, "Specify whether current detector layout contains STGC chambers"};
         Gaudi::Property<bool> m_hasMM{this, "HasMM", true, "Specify whether current detector layout contains MicroMegas chambers"};
 
-        /// Properties to explicitly switch off the CSC / Micromega/ sTGC reconstruction
-        Gaudi::Property<bool> m_runCSC{this, "RunCSC", true, "Specify whether the CSC reconstruction shall be run"};
-        Gaudi::Property<bool> m_runSTgc{this, "RunsTgc", true, "Specify whether the sTGC reconstruction shall be run"};
-        Gaudi::Property<bool> m_runMM{this, "RunMM", true, "Specify whether the Micromega reconstruction shall be tun"};
-
-        const ServiceHandle<StoreGateSvc> m_detStore;
+        ServiceHandle<StoreGateSvc> m_detStore{this, "DetectorStore", "DetectorStore"};
 
         struct StationNameData {
             std::string stationName{};

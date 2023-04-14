@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTrackPerformanceAlg.h"
@@ -108,7 +108,7 @@ StatusCode MuonTrackPerformanceAlg::initialize() {
     ATH_CHECK(m_eventInfoKey.initialize());
 
     ATH_CHECK(m_mcEventColl.initialize(m_doTruth));
-    if (!(m_idHelperSvc->hasSTgc() && m_idHelperSvc->hasMM())) m_muonSimData = {"MDT_SDO", "RPC_SDO", "TGC_SDO"};
+    if (!(m_idHelperSvc->hasSTGC() && m_idHelperSvc->hasMM())) m_muonSimData = {"MDT_SDO", "RPC_SDO", "TGC_SDO"};
     if (m_doTruth) ATH_CHECK(m_muonSimData.initialize());
     ATH_CHECK(m_cscSimData.initialize(m_doTruth && m_idHelperSvc->hasCSC()));
     ATH_CHECK(m_trackRecord.initialize(m_doTruth));
@@ -675,7 +675,7 @@ std::string MuonTrackPerformanceAlg::print(const Muon::IMuonTrackTruthTool::Trut
         CscSimDataCollection::const_iterator cit_end = trackTruth.cscHits.end();
         for (; cit != cit_end; ++cit) allIds.insert(m_idHelperSvc->layerId(cit->first));
     }
-    if (m_idHelperSvc->hasSTgc()) {
+    if (m_idHelperSvc->hasSTGC()) {
         mit = trackTruth.stgcHits.begin();
         mit_end = trackTruth.stgcHits.end();
         for (; mit != mit_end; ++mit) allIds.insert(m_idHelperSvc->layerId(mit->first));
@@ -1094,7 +1094,7 @@ MuonTrackPerformanceAlg::TrackData* MuonTrackPerformanceAlg::evaluateTrackTruthO
     if (m_idHelperSvc->hasCSC())
         insertTechnology(truthTrack.cscs.missedChambers, truthTrack.cscs.missedHits, m_minCscEtaHits, m_minCscPhiHits,
                          trackData->missingChambers);
-    if (m_idHelperSvc->hasSTgc())
+    if (m_idHelperSvc->hasSTGC())
         insertTechnology(truthTrack.stgcs.missedChambers, truthTrack.stgcs.missedHits, m_minsTgcEtaHits, m_minsTgcPhiHits,
                          trackData->missingChambers);
     if (m_idHelperSvc->hasMM())
@@ -1109,7 +1109,7 @@ MuonTrackPerformanceAlg::TrackData* MuonTrackPerformanceAlg::evaluateTrackTruthO
     if (m_idHelperSvc->hasCSC())
         insertTechnology(truthTrack.cscs.wrongChambers, truthTrack.cscs.wrongHits, m_minCscEtaHits, m_minCscPhiHits,
                          trackData->wrongChambers);
-    if (m_idHelperSvc->hasSTgc())
+    if (m_idHelperSvc->hasSTGC())
         insertTechnology(truthTrack.stgcs.wrongChambers, truthTrack.stgcs.wrongHits, m_minsTgcEtaHits, m_minsTgcPhiHits,
                          trackData->wrongChambers);
     if (m_idHelperSvc->hasMM())
@@ -1129,7 +1129,7 @@ MuonTrackPerformanceAlg::TrackData* MuonTrackPerformanceAlg::evaluateTrackTruthO
     // handle layer information for precision chambers
     insertStationLayers(truthTrack.rpcs.matchedChambers, dummyList, trackData->layersTrigger);
     insertStationLayers(truthTrack.tgcs.matchedChambers, dummyList, trackData->layersTrigger);
-    if (m_idHelperSvc->hasSTgc()) insertStationLayers(truthTrack.stgcs.matchedChambers, dummyList, trackData->layersTrigger);
+    if (m_idHelperSvc->hasSTGC()) insertStationLayers(truthTrack.stgcs.matchedChambers, dummyList, trackData->layersTrigger);
 
     insertStationLayers(trackData->missingChambers, trackData->layersTrigger, trackData->missingLayersTrigger, false);
     insertStationLayers(trackData->wrongChambers, trackData->layersTrigger, trackData->wrongLayersTrigger, false);
@@ -1284,7 +1284,7 @@ MuonTrackPerformanceAlg::TrackData* MuonTrackPerformanceAlg::createTrackData(
             chambers[chId].insert(m_idHelperSvc->layerId(cit->first));
         }
     }
-    if (m_idHelperSvc->hasSTgc()) {
+    if (m_idHelperSvc->hasSTGC()) {
         mit = trackTruth.stgcHits.begin();
         mit_end = trackTruth.stgcHits.end();
         for (; mit != mit_end; ++mit) {

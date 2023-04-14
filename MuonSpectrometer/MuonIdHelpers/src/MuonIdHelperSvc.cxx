@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonIdHelpers/MuonIdHelperSvc.h"
@@ -11,89 +11,54 @@
 namespace Muon {
 
     MuonIdHelperSvc::MuonIdHelperSvc(const std::string& name, ISvcLocator* svc) :
-        base_class(name, svc), m_detStore("DetectorStore", name) {}
+        base_class(name, svc) {}
 
     StatusCode MuonIdHelperSvc::initialize() {
         ATH_CHECK(m_detStore.retrieve());
+        if (m_hasMDT) ATH_CHECK(m_detStore->retrieve(m_mdtIdHelper));
+        if (m_hasRPC) ATH_CHECK(m_detStore->retrieve(m_rpcIdHelper));
+        if (m_hasTGC) ATH_CHECK(m_detStore->retrieve(m_tgcIdHelper));
+        if (m_hasCSC) ATH_CHECK(m_detStore->retrieve(m_cscIdHelper));       
+        if (m_hasSTGC) ATH_CHECK(m_detStore->retrieve(m_stgcIdHelper));
+        if (m_hasMM) ATH_CHECK(m_detStore->retrieve(m_mmIdHelper));
+       
+        /// Find an id helper that is not a nullptr
+        const std::array<const MuonIdHelper*, 6> all_helpers{m_mdtIdHelper, m_rpcIdHelper, m_tgcIdHelper,
+                                                       m_cscIdHelper, m_stgcIdHelper, m_mmIdHelper};
+        std::array<const MuonIdHelper*, 6>::const_iterator itr = std::find_if(all_helpers.begin(),
+                                                                              all_helpers.end(),
+                                                                              [](const MuonIdHelper* h){return h != nullptr;});
+        if (itr == all_helpers.end()){
+            ATH_MSG_WARNING("No MuonIdHelper has been created before. Please do not setup the service if no muon layout is loaded");
+            return StatusCode::SUCCESS;
+        }                
+        m_primaryHelper = (*itr);
 
-        if (m_detStore->retrieve(m_mdtIdHelper).isFailure()) {
-            ATH_MSG_ERROR(" Cannot retrieve MdtIdHelper ");
-            return StatusCode::FAILURE;
-        }
-
-        if (m_hasCSC) {
-            if (m_detStore->retrieve(m_cscIdHelper).isFailure()) {
-                ATH_MSG_WARNING(
-                    " Cannot retrieve CscIdHelper, please consider setting HasCSC property to false in the future when running a layout "
-                    "without CSC chambers");
-                m_hasCSC = false;
-                m_runCSC = false;
-                m_cscIdHelper = nullptr;
-            }
-        } else {
-            m_runCSC = false;
-            m_cscIdHelper = nullptr;
-        }
-        if (m_detStore->retrieve(m_rpcIdHelper).isFailure()) {
-            ATH_MSG_ERROR(" Cannot retrieve RpcIdHelper ");
-            return StatusCode::FAILURE;
-        }
-        if (m_detStore->retrieve(m_tgcIdHelper).isFailure()) {
-            ATH_MSG_ERROR(" Cannot retrieve TgcIdHelper ");
-            return StatusCode::FAILURE;
-        }
-        if (m_hasSTgc) {
-            if (m_detStore->retrieve(m_stgcIdHelper).isFailure()) {
-                ATH_MSG_WARNING(" Cannot retrieve sTgcIdHelper, please consider setting HasSTgc property to false "
-                                << " in the future when running a layout without sTGC chambers");
-                m_hasSTgc = false;
-                m_stgcIdHelper = nullptr;
-                m_runSTgc = false;
-            }
-        } else {
-            m_stgcIdHelper = nullptr;
-            m_runSTgc = false;
-        }
-
-        if (m_hasMM) {
-            if (m_detStore->retrieve(m_mmIdHelper).isFailure()) {
-                ATH_MSG_WARNING(
-                    " Cannot retrieve MmIdHelper, please consider setting HasMM property to false in the future when running a layout "
-                    "without MicroMegas chambers");
-                m_hasMM = false;
-                m_runMM = false;
-                m_mmIdHelper = nullptr;
-            }
-        } else {
-            m_mmIdHelper = nullptr;
-            m_runMM = false;
-        }
-
-        if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << " Technologies: size " << m_mdtIdHelper->technologyNameIndexMax();
-        for (int tech = 0; tech <= m_mdtIdHelper->technologyNameIndexMax(); ++tech) {
-            std::string name = m_mdtIdHelper->technologyString(tech);
+        std::stringstream techStr{};
+        
+        for (int tech = 0; tech <= m_primaryHelper->technologyNameIndexMax(); ++tech) {
+            std::string name = m_primaryHelper->technologyString(tech);
             if (name == "MDT") m_technologies.push_back(MuonStationIndex::MDT);
             if (name == "CSC") m_technologies.push_back(MuonStationIndex::CSCI);
             if (name == "RPC") m_technologies.push_back(MuonStationIndex::RPC);
             if (name == "TGC") m_technologies.push_back(MuonStationIndex::TGC);
             if (name == "STGC") m_technologies.push_back(MuonStationIndex::STGC);
             if (name == "MM") m_technologies.push_back(MuonStationIndex::MM);
-            if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << ", " << tech << " " << name;
+            techStr<< ", " << tech << " " << name;
         }
-        if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << endmsg;
-        unsigned int nstationsNames = m_mdtIdHelper->stationNameIndexMax() + 1;
+         ATH_MSG_DEBUG(" Technologies: size " << m_primaryHelper->technologyNameIndexMax()<<" "<<techStr.str());
+       
+        unsigned int nstationsNames = m_primaryHelper->stationNameIndexMax() + 1;
         m_stationNameData.resize(nstationsNames);
-        for (int i = 0; i <= m_mdtIdHelper->stationNameIndexMax(); ++i) {
-            std::string name = m_mdtIdHelper->stationNameString(i);
-
+        for (int i = 0; i <= m_primaryHelper->stationNameIndexMax(); ++i) {
+            std::string name = m_primaryHelper->stationNameString(i);
             if (name.compare(MuonIdHelper::BAD_NAME) == 0) continue;
 
             StationNameData& data = m_stationNameData[i];
 
             data.stationName = name;
-
-            data.isEndcap = m_mdtIdHelper->isEndcap(i);
-            data.isSmall = m_mdtIdHelper->isSmall(i);
+            data.isEndcap = m_primaryHelper->isEndcap(i);
+            data.isSmall = m_primaryHelper->isSmall(i);
 
             data.chIndex = MuonStationIndex::ChUnknown;
             if (data.isEndcap) {
@@ -184,31 +149,30 @@ namespace Muon {
         /// Cache the sMDT stations
         // now, let's check if we are in the inner barrel layer, and if there are RPCs installed
         // if yes, the MDT chambers must be sMDTs
-        m_BIS_stat = mdtIdHelper().stationNameIndex("BIS");
-        for (int eta = mdtIdHelper().stationEtaMin(true); eta <= mdtIdHelper().stationEtaMax(true); ++eta) {
-            for (int phi = 1; phi <= 8; ++phi) {
-                // now, let's check if we are in the inner barrel layer, and if there are RPCs installed
-                // if yes, the MDT chambers must be sMDTs
-                // now try to retrieve RPC identifier with the same station name/eta/phi and check if it is valid
-                bool isValid = false;
-                m_rpcIdHelper->elementID(m_BIS_stat, eta, phi, 1, isValid);
-                // last 4 arguments are: doubletR, check, isValid
-                // there is a BI RPC in the same station, thus, this station was already upgraded and sMDTs are present
-                if (!isValid) continue;
-                m_smdt_stat.emplace(mdtIdHelper().elementID(m_BIS_stat, eta, phi));
+        if (m_mdtIdHelper && m_rpcIdHelper) {
+            m_BIS_stat = mdtIdHelper().stationNameIndex("BIS");
+            for (int eta = mdtIdHelper().stationEtaMin(true); eta <= mdtIdHelper().stationEtaMax(true); ++eta) {
+                for (int phi = 1; phi <= 8; ++phi) {
+                    // now, let's check if we are in the inner barrel layer, and if there are RPCs installed
+                    // if yes, the MDT chambers must be sMDTs
+                    // now try to retrieve RPC identifier with the same station name/eta/phi and check if it is valid
+                    bool isValid = false;
+                    m_rpcIdHelper->elementID(m_BIS_stat, eta, phi, 1, isValid);
+                    // last 4 arguments are: doubletR, check, isValid
+                    // there is a BI RPC in the same station, thus, this station was already upgraded and sMDTs are present
+                    if (!isValid) continue;
+                    m_smdt_stat.emplace(mdtIdHelper().elementID(m_BIS_stat, eta, phi));
+                }
             }
         }
-
-        ATH_MSG_DEBUG("Configured the service with the following flags --- hasCSC: "
-                      << hasCSC() << " recoCSC: " << recoCSC() << " hasSTGC: " << hasSTgc() << " recoSTGC: " << recosTgc()
-                      << " hasMicroMegas: " << hasMM() << " recoMM: " << recoMM());
+        ATH_MSG_DEBUG("Configured the service with the following flags --- hasMDT: "<< hasMDT()<<" hasRPC: "<<hasRPC()
+                      <<" hasTGC"<< hasTGC() << " hasCSC: "<< hasCSC() << " hasSTGC: " << hasSTGC() << " hasMM: " << hasMM() );
         return StatusCode::SUCCESS;
     }
 
     int MuonIdHelperSvc::gasGap(const Identifier& id) const {
         if (isRpc(id)) {
             return m_rpcIdHelper->gasGap(id);
-
         } else if (isTgc(id)) {
             return m_tgcIdHelper->gasGap(id);
 
@@ -226,70 +190,45 @@ namespace Muon {
         return 1;
     }
 
-    bool MuonIdHelperSvc::isMuon(const Identifier& id) const { return m_mdtIdHelper->is_muon(id); }
-
+    bool MuonIdHelperSvc::isMuon(const Identifier& id) const { 
+        return m_primaryHelper && m_primaryHelper->is_muon(id); 
+    }
     bool MuonIdHelperSvc::isMdt(const Identifier& id) const {
-        if (!m_mdtIdHelper) return false;
-        return m_mdtIdHelper->is_mdt(id);
+        return m_mdtIdHelper && m_mdtIdHelper->is_mdt(id);
     }
-
     bool MuonIdHelperSvc::isMM(const Identifier& id) const {
-        if (!m_mmIdHelper) return false;
-        return m_mmIdHelper->is_mm(id);
+        return m_mmIdHelper && m_mmIdHelper->is_mm(id);
     }
-
     bool MuonIdHelperSvc::isCsc(const Identifier& id) const {
-        if (!m_cscIdHelper) return false;
-        return m_cscIdHelper->is_csc(id);
+        return m_cscIdHelper && m_cscIdHelper->is_csc(id);
     }
-
     bool MuonIdHelperSvc::isRpc(const Identifier& id) const {
-        if (!m_rpcIdHelper) return false;
-        return m_rpcIdHelper->is_rpc(id);
+        return m_rpcIdHelper && m_rpcIdHelper->is_rpc(id);
     }
 
     bool MuonIdHelperSvc::isTgc(const Identifier& id) const {
-        if (!m_tgcIdHelper) return false;
-        return m_tgcIdHelper->is_tgc(id);
+        return m_tgcIdHelper && m_tgcIdHelper->is_tgc(id);
     }
 
     bool MuonIdHelperSvc::issTgc(const Identifier& id) const {
-        if (!m_stgcIdHelper) return false;
-        return m_stgcIdHelper->is_stgc(id);
+        return m_stgcIdHelper && m_stgcIdHelper->is_stgc(id);
     }
 
     bool MuonIdHelperSvc::issMdt(const Identifier& id) const {
         if (!isMdt(id))
             return false;
-        else if (m_mdtIdHelper->isEndcap(id))
-            return false;  // there are no sMDTs in the endcaps
-        else if (m_mdtIdHelper->isBME(id))
-            return true;  // all BME chambers are sMDTs
-        else if (m_mdtIdHelper->isBMG(id))
-            return true;  // all BMG chambers are sMDTs
-        else if (!m_rpcIdHelper)
-            return false;  // there must be RPCs in any layout
-        else if (stationName(id) == m_BIS_stat) {
+        if (stationName(id) == m_BIS_stat) {
             return m_smdt_stat.find(mdtIdHelper().elementID(id)) != m_smdt_stat.end();
         }
-        return false;
+        return m_mdtIdHelper->isBME(id) || m_mdtIdHelper->isBMG(id);
     }
 
     bool MuonIdHelperSvc::hasHPTDC(const Identifier& id) const {
         /** NOTE that in Run4, no HPTDCs at all are planned to be present any more,
             so this function should be obsolete from Run4 onwards */
-        if (!isMdt(id))
-            return false;
-        else if (m_mdtIdHelper->isEndcap(id))
-            return false;  // there are no HPTDCs in the endcaps
-        else if (m_mdtIdHelper->isBME(id))
-            return false;  // all BME sMDTs have no HPTDC
-        else if (m_mdtIdHelper->isBMG(id))
-            return true;  // all BMG sMDTs have an HPTDC
         // the remaining sMDTs (installed in BI in LS1) all have an HPTDC in Run3
-        else if (issMdt(id))
-            return true;
-        return false;
+        // all BME sMDTs have no HPTDC
+        return issMdt(id) && !m_mdtIdHelper->isBME(id);
     }
 
     bool MuonIdHelperSvc::measuresPhi(const Identifier& id) const {
@@ -307,36 +246,32 @@ namespace Muon {
     }
 
     bool MuonIdHelperSvc::isTrigger(const Identifier& id) const {
-        if (isRpc(id))
-            return true;
-        else if (isTgc(id))
-            return true;
-        return false;
+        return isRpc(id) || isTgc(id);
     }
 
-    bool MuonIdHelperSvc::isEndcap(const Identifier& id) const { return m_mdtIdHelper->isEndcap(id); }
+    bool MuonIdHelperSvc::isEndcap(const Identifier& id) const { return m_primaryHelper->isEndcap(id); }
 
-    bool MuonIdHelperSvc::isSmallChamber(const Identifier& id) const { return m_mdtIdHelper->isSmall(id); }
+    bool MuonIdHelperSvc::isSmallChamber(const Identifier& id) const { return m_primaryHelper->isSmall(id); }
 
     MuonStationIndex::ChIndex MuonIdHelperSvc::chamberIndex(const Identifier& id) const {
         if (!id.is_valid() || !isMuon(id)) {
-            if (id.is_valid()) ATH_MSG_WARNING("chamberIndex: invalid ID " << m_mdtIdHelper->print_to_string(id));
+            if (id.is_valid()) ATH_MSG_WARNING("chamberIndex: invalid ID " << m_primaryHelper->print_to_string(id));
             return MuonStationIndex::ChUnknown;
         }
-        return m_stationNameData[m_mdtIdHelper->stationName(id)].chIndex;
+        return m_stationNameData[stationName(id)].chIndex;
     }
 
     MuonStationIndex::StIndex MuonIdHelperSvc::stationIndex(const Identifier& id) const {
         if (!id.is_valid() || !isMuon(id)) {
-            if (id.is_valid()) ATH_MSG_WARNING("stationIndex: invalid ID " << m_mdtIdHelper->print_to_string(id));
+            if (id.is_valid()) ATH_MSG_WARNING("stationIndex: invalid ID " << m_primaryHelper->print_to_string(id));
             return MuonStationIndex::StUnknown;
         }
-        return m_stationNameData[m_mdtIdHelper->stationName(id)].stIndex;
+        return m_stationNameData[stationName(id)].stIndex;
     }
 
     MuonStationIndex::PhiIndex MuonIdHelperSvc::phiIndex(const Identifier& id) const {
         if (!id.is_valid() || !isMuon(id)) {
-            if (id.is_valid()) ATH_MSG_WARNING("phiIndex: invalid ID " << m_mdtIdHelper->print_to_string(id));
+            if (id.is_valid()) ATH_MSG_WARNING("phiIndex: invalid ID " << m_primaryHelper->print_to_string(id));
             return MuonStationIndex::PhiUnknown;
         }
         if (isMdt(id) || isMM(id)) {
@@ -397,7 +332,7 @@ namespace Muon {
         if (isRpc(id)) return MuonStationIndex::RPC;
         if (issTgc(id)) return MuonStationIndex::STGC;
         if (isMM(id)) return MuonStationIndex::MM;
-        return MuonStationIndex::TechnologyUnknown;  // m_technologies[m_mdtIdHelper->technology(id)];
+        return MuonStationIndex::TechnologyUnknown;
     }
 
     std::string MuonIdHelperSvc::toString(const Identifier& id) const {
@@ -445,7 +380,7 @@ namespace Muon {
     }
 
     std::string MuonIdHelperSvc::chamberNameString(const Identifier& id) const {
-        return m_mdtIdHelper->stationNameString(m_mdtIdHelper->stationName(id));
+        return m_primaryHelper->stationNameString(stationName(id));
     }
 
     std::string MuonIdHelperSvc::toStringStation(const Identifier& id) const {
@@ -568,7 +503,7 @@ namespace Muon {
             Identifier elId = m_cscIdHelper->elementID(id);
             chId = m_cscIdHelper->channelID(elId, 2, 1, 1, 1);
 
-        } else {
+        } else if (isMdt(id)) {
             chId = m_mdtIdHelper->elementID(id);
         }
         return chId;
@@ -804,11 +739,6 @@ namespace Muon {
     bool MuonIdHelperSvc::hasTGC() const { return m_tgcIdHelper != nullptr; }
     bool MuonIdHelperSvc::hasMDT() const { return m_mdtIdHelper != nullptr; }
     bool MuonIdHelperSvc::hasCSC() const { return m_hasCSC; }
-    bool MuonIdHelperSvc::hasSTgc() const { return m_hasSTgc; }
+    bool MuonIdHelperSvc::hasSTGC() const { return m_hasSTGC; }
     bool MuonIdHelperSvc::hasMM() const { return m_hasMM; }
-
-    bool MuonIdHelperSvc::recoCSC() const { return m_runCSC; }
-    bool MuonIdHelperSvc::recosTgc() const { return m_runSTgc; }
-    bool MuonIdHelperSvc::recoMM() const { return m_runMM; }
-
 }  // namespace Muon

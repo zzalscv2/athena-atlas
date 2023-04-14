@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTruthSummaryTool.h"
@@ -63,7 +63,7 @@ namespace Muon {
         }
 
         if (m_idHelperSvc->hasMM()) m_TruthNames.emplace_back("MM_TruthMap");
-        if (m_idHelperSvc->hasSTgc()) m_TruthNames.emplace_back("STGC_TruthMap");
+        if (m_idHelperSvc->hasSTGC()) m_TruthNames.emplace_back("STGC_TruthMap");
         if (m_idHelperSvc->hasCSC()) m_TruthNames.emplace_back("CSC_TruthMap");
         ATH_CHECK(m_TruthNames.initialize());
         return StatusCode::SUCCESS;

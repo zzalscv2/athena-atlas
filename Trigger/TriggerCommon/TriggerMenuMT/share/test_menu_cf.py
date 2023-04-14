@@ -43,7 +43,8 @@ forceEnableAllChains=True
 # load all configuration as the real HLT
 include("TriggerJobOpts/runHLT_standalone.py")
 
-
+from MuonIdHelpers.MuonIdHelpersConfigLegacy import MuonIdHelperSvc
+svcMgr+=MuonIdHelperSvc()
 # make menu manually here:
 from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFConfig import makeHLTTree
 from TriggerMenuMT.HLT.Config.Utility.HLTMenuConfig import HLTMenuConfig

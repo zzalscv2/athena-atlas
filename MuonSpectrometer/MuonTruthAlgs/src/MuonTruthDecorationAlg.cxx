@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTruthDecorationAlg.h"
@@ -698,7 +698,7 @@ namespace Muon {
         if (m_idHelperSvc->hasCSC()) {
             truthParticle.auxdata<std::vector<unsigned long long> >("truthCscHits") = cscTruthHits;
         }
-        if (m_idHelperSvc->hasSTgc()) {
+        if (m_idHelperSvc->hasSTGC()) {
             truthParticle.auxdata<std::vector<unsigned long long> >("truthStgcHits") = stgcTruthHits;
         }
         if (m_idHelperSvc->hasMM()) {
