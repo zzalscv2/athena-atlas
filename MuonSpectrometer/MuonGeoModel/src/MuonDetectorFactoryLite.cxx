@@ -54,12 +54,6 @@ namespace MuonGM {
     std::map<std::string, GeoAlignableTransform*> mapAXF = m_sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("MuonSys");                     
     std::map<std::string, GeoFullPhysVol*>        mapFPV = m_sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("MuonSys");                                            
 
-    bool hasCsc=std::find_if(mapFPV.begin(),mapFPV.end(),[](std::pair<std::string, GeoFullPhysVol*> s)->bool {return s.first.find("CS")!=std::string::npos;})!=mapFPV.end();
-    bool hasMm=std::find_if(mapFPV.begin(),mapFPV.end(),[](std::pair<std::string, GeoFullPhysVol*> s)->bool {return s.first.find("MM")!=std::string::npos;})!=mapFPV.end();
-    bool hasSTgc=std::find_if(mapFPV.begin(),mapFPV.end(),[](std::pair<std::string, GeoFullPhysVol*> s)->bool {return s.first.find("STGC")!=std::string::npos;})!=mapFPV.end();
-
-
-
     MsgStream log(Athena::getMessageSvc(), "MuGM:MuonFactory");
 
     if (!m_manager)
@@ -74,22 +68,6 @@ namespace MuonGM {
     // here create the MYSQL singleton
     MYSQL::LockedMYSQL mysql = MYSQL::GetPointer();
     mysql->set_amdb_from_RDB(true);
-
-    // Set up the ID helpers:
-    const MdtIdHelper  * mdtidh =getIdHelper<MdtIdHelper>  (m_pDetStore,"MDTIDHELPER");
-    const RpcIdHelper  * rpcidh =getIdHelper<RpcIdHelper>  (m_pDetStore,"RPCIDHELPER");
-    const TgcIdHelper  * tgcidh =getIdHelper<TgcIdHelper>  (m_pDetStore,"TGCIDHELPER");
-    const CscIdHelper  * cscidh =hasCsc  ? getIdHelper<CscIdHelper>  (m_pDetStore,"CSCIDHELPER") :nullptr;
-    const MmIdHelper   * mmidh  =hasMm   ? getIdHelper<MmIdHelper>   (m_pDetStore,"MMIDHELPER")  :nullptr;
-    const sTgcIdHelper * stgcidh=hasSTgc ? getIdHelper<sTgcIdHelper> (m_pDetStore,"STGCIDHELPER"):nullptr;
-    if (mdtidh)  m_manager->set_mdtIdHelper(mdtidh);
-    if (rpcidh)  m_manager->set_rpcIdHelper(rpcidh);
-    if (tgcidh)  m_manager->set_tgcIdHelper(tgcidh);
-    if (cscidh)  m_manager->set_cscIdHelper(cscidh);
-    if (mmidh)   m_manager->set_mmIdHelper(mmidh);
-    if (stgcidh) m_manager->set_stgcIdHelper(stgcidh);
-
-
 
     std::unique_ptr<RDBReaderAtlas> dbr;
     {        

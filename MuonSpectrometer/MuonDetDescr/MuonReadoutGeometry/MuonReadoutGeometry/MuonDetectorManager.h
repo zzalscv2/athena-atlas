@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MuonDetectorManager_H
@@ -11,18 +11,13 @@
 #include <map>
 #include <sstream>
 #include <vector>
-
+#include "AthenaBaseComps/AthMessaging.h"
 #include "GaudiKernel/StatusCode.h"
 #include "GeoModelKernel/GeoAlignableTransform.h"
 #include "GeoModelKernel/GeoVDetectorManager.h"
 #include "MuonAlignmentData/CorrContainer.h"
 #include "MuonAlignmentData/NswAsBuiltDbData.h"
-#include "MuonIdHelpers/CscIdHelper.h"
-#include "MuonIdHelpers/MdtIdHelper.h"
-#include "MuonIdHelpers/MmIdHelper.h"
-#include "MuonIdHelpers/RpcIdHelper.h"
-#include "MuonIdHelpers/TgcIdHelper.h"
-#include "MuonIdHelpers/sTgcIdHelper.h"
+#include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonReadoutGeometry/GenericCSCCache.h"
 #include "MuonReadoutGeometry/GenericMDTCache.h"
 #include "MuonReadoutGeometry/GenericRPCCache.h"
@@ -50,10 +45,6 @@ namespace MuonGM {
     class MMReadoutElement;
     class MuonClusterReadoutElement;
     class MuonStation;
-    class CscDetectorElement;
-    class TgcDetectorElement;
-    class RpcDetectorElement;
-    class MdtDetectorElement;
     class TgcReadoutParams;
 
     /**
@@ -64,7 +55,7 @@ namespace MuonGM {
        More details below.
     */
 
-    class MuonDetectorManager : public GeoVDetectorManager {
+    class MuonDetectorManager : public GeoVDetectorManager, public AthMessaging {
     public:
         // Constructor:
         MuonDetectorManager();
@@ -82,12 +73,12 @@ namespace MuonGM {
         void addTreeTop(PVLink);
 
         // Add a XxxReadoutElement to the Collection
-        void addMdtReadoutElement(MdtReadoutElement*, const Identifier&);    //!< store the MdtReadoutElement using as "key" the identifier
-        void addRpcReadoutElement(RpcReadoutElement*, const Identifier&);    //!< store the RpcReadoutElement using as "key" the identifier
-        void addTgcReadoutElement(TgcReadoutElement*, const Identifier&);    //!< store the TgcReadoutElement using as "key" the identifier
-        void addCscReadoutElement(CscReadoutElement*, const Identifier&);    //!< store the CscReadoutElement using as "key" the identifier
-        void addsTgcReadoutElement(sTgcReadoutElement*, const Identifier&);  //!< store the sTGCReadoutElement using as "key" the identifier
-        void addMMReadoutElement(MMReadoutElement*, const Identifier&);      //!< store the MMReadoutElement using as "key" the identifier
+        void addMdtReadoutElement(MdtReadoutElement*);    //!< store the MdtReadoutElement using as "key" the identifier
+        void addRpcReadoutElement(RpcReadoutElement*);    //!< store the RpcReadoutElement using as "key" the identifier
+        void addTgcReadoutElement(TgcReadoutElement*);    //!< store the TgcReadoutElement using as "key" the identifier
+        void addCscReadoutElement(CscReadoutElement*);    //!< store the CscReadoutElement using as "key" the identifier
+        void addsTgcReadoutElement(sTgcReadoutElement*);  //!< store the sTGCReadoutElement using as "key" the identifier
+        void addMMReadoutElement(MMReadoutElement*);      //!< store the MMReadoutElement using as "key" the identifier
        
         // storeTgcReadoutParams
         void storeTgcReadoutParams(std::unique_ptr<const TgcReadoutParams> x);
@@ -105,9 +96,6 @@ namespace MuonGM {
         const MMReadoutElement* getMMReadoutElement(const Identifier&) const;      //!< access via extended identifier (requires unpacking)
         const sTgcReadoutElement* getsTgcReadoutElement(const Identifier&) const;  //!< access via extended identifier (requires unpacking)
 
-        //!< access via extended identifier (requires unpacking)
-        const MuonClusterReadoutElement* getMuonClusterReadoutElement(const Identifier&) const;
-
         //// Non const version
         MdtReadoutElement* getMdtReadoutElement(const Identifier& id);
         CscReadoutElement* getCscReadoutElement(const Identifier& id);
@@ -118,13 +106,6 @@ namespace MuonGM {
         const RpcReadoutElement* getRpcReadoutElement(const IdentifierHash& id) const;  //!< access via detector-element hash id
         const TgcReadoutElement* getTgcReadoutElement(const IdentifierHash& id) const;  //!< access via detector-element hash id
         const CscReadoutElement* getCscReadoutElement(const IdentifierHash& id) const;  //!< access via detector-element hash id
-
-        const MdtDetectorElement* getMdtDetectorElement(const IdentifierHash& id) const;  //!< access via data-collection hash id
-
-        // access to Detector Elements (via hash id ) - NOTICE Detector Elements have the granularity of the EDM digit collections
-        const RpcDetectorElement* getRpcDetectorElement(const IdentifierHash& id) const;
-        const TgcDetectorElement* getTgcDetectorElement(const IdentifierHash& id) const;
-        const CscDetectorElement* getCscDetectorElement(const IdentifierHash& id) const;
 
         inline unsigned int nMuonStation() const;  //!< Number of MuonStations
 
@@ -153,14 +134,6 @@ namespace MuonGM {
         inline const TgcIdHelper* tgcIdHelper() const;
         inline const sTgcIdHelper* stgcIdHelper() const;
         inline const MmIdHelper* mmIdHelper() const;
-
-        // Setting the identifier helpers
-        void set_mdtIdHelper(const MdtIdHelper* idh);
-        void set_cscIdHelper(const CscIdHelper* idh);
-        void set_rpcIdHelper(const RpcIdHelper* idh);
-        void set_tgcIdHelper(const TgcIdHelper* idh);
-        void set_stgcIdHelper(const sTgcIdHelper* idh);
-        void set_mmIdHelper(const MmIdHelper* idh);
 
         // Generic Technology descriptors
         void setGenericMdtDescriptor(const GenericMDTCache& mc);
@@ -327,6 +300,8 @@ namespace MuonGM {
 
 
     private:
+        ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{"Muon::MuonIdHelperSvc/MuonIdHelperSvc", "MuonDetectorManager"};
+        void loadStationIndices();
         unsigned int rpcStationTypeIdx(const int stationName) const;  // map the RPC stationNames from the RpcIdHelper to 0-NRpcStatType
         enum RpcStatType { BML = 0, BMS, BOL, BOS, BMF, BOF, BOG, BME, BIR, BIM, BIL, BIS, UNKNOWN };
         /// Helper method to convert the Identifier into the corresponding index accessing the array
@@ -373,15 +348,7 @@ namespace MuonGM {
         std::string m_NSWABLineAsciiPath{};
         bool m_NSWAsBuiltAsciiOverrideMM{false};
         bool m_NSWAsBuiltAsciiOverrideSTgc{false};
-
-        // pointers to IdHelpers
-        const MdtIdHelper* m_mdtIdHelper{nullptr};
-        const CscIdHelper* m_cscIdHelper{nullptr};
-        const RpcIdHelper* m_rpcIdHelper{nullptr};
-        const TgcIdHelper* m_tgcIdHelper{nullptr};
-        const sTgcIdHelper* m_stgcIdHelper{nullptr};
-        const MmIdHelper* m_mmIdHelper{nullptr};
-
+       
         // 115.6 kBytes.
         static constexpr int s_NumMaxMdtElements = NMdtStatType * NMdtStatEta * NMdtStatPhi * NMdtMultilayer;
         static constexpr int s_NumMaxCscElements = NCscStatType * NCscStatEta * NCscStatPhi * NCscChamberLayer;
@@ -418,11 +385,6 @@ namespace MuonGM {
         // pointers to the XxxDetectorElements (with granularity a la EDM)
         std::vector<std::unique_ptr<const TgcReadoutParams> > m_TgcReadoutParamsVec;
 
-        std::array<std::unique_ptr<MdtDetectorElement>, MdtDetElMaxHash> m_mdtDEArray;
-        std::array<std::unique_ptr<RpcDetectorElement>, RpcDetElMaxHash> m_rpcDEArray;
-        std::array<std::unique_ptr<TgcDetectorElement>, TgcDetElMaxHash> m_tgcDEArray;
-        std::array<std::unique_ptr<CscDetectorElement>, CscDetElMaxHash> m_cscDEArray;
-
         ALineMapContainer m_aLineContainer;
         BLineMapContainer m_bLineContainer;
         CscInternalAlignmentMapContainer m_cscALineContainer;
@@ -447,12 +409,12 @@ namespace MuonGM {
         template <typename read_out, size_t N> void refreshCache(std::array<std::unique_ptr<read_out>, N>& array);
     };
 
-    const MdtIdHelper* MuonDetectorManager::mdtIdHelper() const { return m_mdtIdHelper; }
-    const CscIdHelper* MuonDetectorManager::cscIdHelper() const { return m_cscIdHelper; }
-    const RpcIdHelper* MuonDetectorManager::rpcIdHelper() const { return m_rpcIdHelper; }
-    const TgcIdHelper* MuonDetectorManager::tgcIdHelper() const { return m_tgcIdHelper; }
-    const sTgcIdHelper* MuonDetectorManager::stgcIdHelper() const { return m_stgcIdHelper; }
-    const MmIdHelper* MuonDetectorManager::mmIdHelper() const { return m_mmIdHelper; }
+    const MdtIdHelper* MuonDetectorManager::mdtIdHelper() const { return &(m_idHelperSvc->mdtIdHelper()); }
+    const CscIdHelper* MuonDetectorManager::cscIdHelper() const { return &(m_idHelperSvc->cscIdHelper()); }
+    const RpcIdHelper* MuonDetectorManager::rpcIdHelper() const { return &(m_idHelperSvc->rpcIdHelper()); }
+    const TgcIdHelper* MuonDetectorManager::tgcIdHelper() const { return &(m_idHelperSvc->tgcIdHelper()); }
+    const sTgcIdHelper* MuonDetectorManager::stgcIdHelper() const { return &(m_idHelperSvc->stgcIdHelper()); }
+    const MmIdHelper* MuonDetectorManager::mmIdHelper() const { return &(m_idHelperSvc->mmIdHelper()); }
 
     const GenericRPCCache* MuonDetectorManager::getGenericRpcDescriptor() const { return &m_genericRPC; }
     const GenericMDTCache* MuonDetectorManager::getGenericMdtDescriptor() const { return &m_genericMDT; }

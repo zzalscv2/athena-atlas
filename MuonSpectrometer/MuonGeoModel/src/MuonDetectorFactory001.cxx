@@ -161,56 +161,19 @@ namespace MuonGM {
  
         StatusCode sc = StatusCode::SUCCESS;
 
-        const MdtIdHelper *mdtidh = nullptr;
-        sc = m_pDetStore->retrieve(mdtidh, "MDTIDHELPER");
-        if (sc.isFailure())
-            log << MSG::ERROR << " not found MDT " << endmsg;
-        else
-            log << MSG::INFO << "MDTIDHELPER retrieved from DetStore" << endmsg;
-        m_manager->set_mdtIdHelper(mdtidh);
-
-        const RpcIdHelper *rpcidh = nullptr;
-        sc = m_pDetStore->retrieve(rpcidh, "RPCIDHELPER");
-        if (sc.isFailure())
-            log << MSG::ERROR << " not found RPC " << endmsg;
-        else
-            log << MSG::INFO << "RPCIDHELPER retrieved from DetStore" << endmsg;
-        m_manager->set_rpcIdHelper(rpcidh);
-
-        const TgcIdHelper *tgcidh = nullptr;
-        sc = m_pDetStore->retrieve(tgcidh, "TGCIDHELPER");
-        if (sc.isFailure())
-            log << MSG::ERROR << " not found TGC " << endmsg;
-        else
-            log << MSG::INFO << "TGCIDHELPER retrieved from DetStore" << endmsg;
-        m_manager->set_tgcIdHelper(tgcidh);
-
+        
+        log << MSG::INFO << "MDTIDHELPER retrieved from DetStore" << endmsg;
+        log << MSG::INFO << "RPCIDHELPER retrieved from DetStore" << endmsg;
+        log << MSG::INFO << "TGCIDHELPER retrieved from DetStore" << endmsg;
+        
         if (m_hasCSC) {
-            const CscIdHelper *cscidh = nullptr;
-            sc = m_pDetStore->retrieve(cscidh, "CSCIDHELPER");
-            if (sc.isFailure())
-                log << MSG::ERROR << " not found CSC " << endmsg;
-            else
-                log << MSG::INFO << "CSCIDHELPER retrieved from DetStore" << endmsg;
-            m_manager->set_cscIdHelper(cscidh);
+            log << MSG::INFO << "CSCIDHELPER retrieved from DetStore" << endmsg;
         }
         if (m_hasSTgc) {
-            const sTgcIdHelper *stgcidh = nullptr;
-            sc = m_pDetStore->retrieve(stgcidh, "STGCIDHELPER");
-            if (sc.isFailure())
-                log << MSG::ERROR << " not found sTGC " << endmsg;
-            else
-                log << MSG::INFO << "STGCIDHELPER retrieved from DetStore" << endmsg;
-            m_manager->set_stgcIdHelper(stgcidh);
+            log << MSG::INFO << "STGCIDHELPER retrieved from DetStore" << endmsg;
         }
         if (m_hasMM) {
-            const MmIdHelper *mmidh = nullptr;
-            sc = m_pDetStore->retrieve(mmidh, "MMIDHELPER");
-            if (sc.isFailure())
-                log << MSG::ERROR << " not found MicroMegas " << endmsg;
-            else
-                log << MSG::INFO << "MMIDHELPER retrieved from DetStore" << endmsg;
-            m_manager->set_mmIdHelper(mmidh);
+            log << MSG::INFO << "MMIDHELPER retrieved from DetStore" << endmsg;
         }
 
         if (m_dumpMemoryBreakDown) {

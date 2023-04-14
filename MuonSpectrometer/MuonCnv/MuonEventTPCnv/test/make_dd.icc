@@ -88,7 +88,7 @@ void MuonChamber::makeCsc (const Identifier& id)
   elt->setIdentifier (id);
   elt->m_ngasgaps = 2;
   elt->fillCache();
-  m_muo_dd.addCscReadoutElement (elt.release(), id);
+  m_muo_dd.addCscReadoutElement (elt.release());
 }
 
 
@@ -100,7 +100,7 @@ void MuonChamber::makeRpc (const Identifier& id)
   elt->m_nphistrippanels = 1;
   elt->m_netastrippanels = 1;
   elt->fillCache();
-  m_muo_dd.addRpcReadoutElement (elt.release(), id);
+  m_muo_dd.addRpcReadoutElement (elt.release());
 }
 
 
@@ -111,7 +111,7 @@ void MuonChamber::makeTgc (const Identifier& id)
   elt->setIdentifier (id);
   elt->m_ngasgaps = 2;
   elt->fillCache();
-  m_muo_dd.addTgcReadoutElement (elt.release(), id);
+  m_muo_dd.addTgcReadoutElement (elt.release());
 }
 
 
@@ -122,7 +122,7 @@ void MuonChamber::makeMdt (const Identifier& id)
   elt->setIdentifier (id);
   //elt->m_ngasgaps = 2;
   elt->fillCache();
-  m_muo_dd.addMdtReadoutElement (elt.release(), id);
+  m_muo_dd.addMdtReadoutElement (elt.release());
 }
 
 
@@ -134,7 +134,7 @@ void MuonChamber::makesTgc (const Identifier& id)
   elt->initDesign (0, 0, 0, 0, 0, 0, 0, 1);
   //elt->m_ngasgaps = 2;
   elt->fillCache();
-  m_muo_dd.addsTgcReadoutElement(elt.release(), id);
+  m_muo_dd.addsTgcReadoutElement(elt.release());
 }
 
 
@@ -146,7 +146,7 @@ void MuonChamber::makeMm (const Identifier& id)
   elt->initDesign (0, 0, 0, 0, 0);
   //elt->m_ngasgaps = 2;
   elt->fillCache();
-  m_muo_dd.addMMReadoutElement(elt.release(), id);
+  m_muo_dd.addMMReadoutElement(elt.release());
 }
 
 
@@ -192,42 +192,36 @@ void init_dd (MuonGM::MuonDetectorManager& muo_dd,
 
   const CscIdHelper* csc_id = nullptr;
   assert ( sg->retrieve (csc_id, "CscIdHelper").isSuccess() );
-  muo_dd.set_cscIdHelper (csc_id);
   for (int hash=2; hash <= 3; hash++) {
     chamber.makeCsc (csc_id->channelID (50, 1, hash, 1, 1, 0, 1));
   }
 
   const RpcIdHelper* rpc_id = nullptr;
   assert ( sg->retrieve (rpc_id, "RpcIdHelper").isSuccess() );
-  muo_dd.set_rpcIdHelper (rpc_id);
   for (int hash=2; hash <= 3; hash++) {
     chamber.makeRpc (rpc_id->channelID (4, 1, hash, 1, 1, 2, 1, 0, 1));
   }
 
   const TgcIdHelper* tgc_id = nullptr;
   assert ( sg->retrieve (tgc_id, "TgcIdHelper").isSuccess() );
-  muo_dd.set_tgcIdHelper (tgc_id);
   for (int hash=2; hash <= 3; hash++) {
     chamber.makeTgc (tgc_id->channelID (43, 1, hash, 1, 1, 2));
   }
 
   const MdtIdHelper* mdt_id = nullptr;
   assert ( sg->retrieve (mdt_id, "MdtIdHelper").isSuccess() );
-  muo_dd.set_mdtIdHelper (mdt_id);
   for (int hash=2; hash <= 3; hash++) {
     chamber.makeMdt (mdt_id->channelID (0, 1, hash, 1, 1, 1));
   }
 
   const sTgcIdHelper* stgc_id = nullptr;
   assert ( sg->retrieve (stgc_id, "sTgcIdHelper").isSuccess() );
-  muo_dd.set_stgcIdHelper (stgc_id);
   for (int hash=2; hash <= 3; hash++) {
     chamber.makesTgc (stgc_id->channelID (57, 2, hash, 1, 1, 0, 1)); // STS
   }
 
   const MmIdHelper* mm_id = nullptr;
   assert ( sg->retrieve (mm_id, "MmIdHelper").isSuccess() );
-  muo_dd.set_mmIdHelper (mm_id);
   for (int hash=2; hash <= 3; hash++) {
     chamber.makeMm (mm_id->channelID (55, 1, hash, 1, 1, 1)); // MMS
   }
