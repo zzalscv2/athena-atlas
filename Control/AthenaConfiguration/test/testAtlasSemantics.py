@@ -1,12 +1,14 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import unittest
 
 from GaudiConfig2 import Configurables
 from GaudiKernel.DataHandle import DataHandle
 
-from AthenaConfiguration import AtlasSemantics # noqa: F401
+# always need to import this to initialize our semantics:
+from AthenaConfiguration import AtlasSemantics
+
 
 class TestVarHandleKey(unittest.TestCase):
    """Test VarHandleKey properties"""
@@ -41,6 +43,44 @@ class TestVarHandleKey(unittest.TestCase):
       self.assertTrue(alg.Key_RCH1.isCondition())
       self.assertEqual(alg.Key_RCH1.mode(), "R")
       self.assertEqual(alg.Key_WCH.mode(), "W")
+
+
+class TestVarHandleKeyArray(unittest.TestCase):
+   """Test VarHandleKeyArray properties"""
+
+   def test_semantics(self):
+      alg = Configurables.HiveAlgV()
+      self.assertIsInstance(alg._descriptors['Key_WV'].semantics,
+                            AtlasSemantics.VarHandleArraySematics)
+
+   def test_assign(self):
+      alg1 = Configurables.HiveAlgV()
+      alg2 = Configurables.HiveAlgV()
+      alg1.Key_WV = ['foo']
+      # The .data is needed due to https://gitlab.cern.ch/gaudi/Gaudi/-/issues/264
+      self.assertEqual(alg1.Key_WV.data, ['foo'])
+      self.assertEqual(alg2.Key_WV.data, [])  # check ATEAM-902
+
+   def test_append(self):
+      alg1 = Configurables.HiveAlgV()
+      alg2 = Configurables.HiveAlgV()
+      alg1.Key_WV += ['foo']
+      self.assertEqual(alg1.Key_WV.data, ['foo'])
+      self.assertEqual(alg2.Key_WV.data, [])
+      alg1.Key_WV += ['bar']
+      self.assertEqual(alg1.Key_WV.data, ['foo','bar'])
+
+   def test_assignDataHandle(self):
+      alg = Configurables.HiveAlgV()
+      alg.Key_WV = [ DataHandle('foo', 'W', 'HiveDataObj'),
+                     DataHandle('bar', 'W', 'HiveDataObj') ]
+      self.assertEqual(alg.Key_WV.data, ['foo','bar'])
+
+   def test_appendDataHandle(self):
+      alg = Configurables.HiveAlgV()
+      alg.Key_WV += [ DataHandle('foo', 'W', 'HiveDataObj') ]
+      alg.Key_WV += [ DataHandle('bar', 'W', 'HiveDataObj') ]
+      self.assertEqual(alg.Key_WV.data, ['foo','bar'])
 
 
 if __name__ == "__main__":
