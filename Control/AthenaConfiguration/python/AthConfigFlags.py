@@ -107,29 +107,7 @@ class FlagAddress(object):
             self._name  = f._name+"."+name
 
     def __getattr__(self, name):
-        # the logic it implements is as follows:
-        # full flag name is formed from the path + name passed as an argument
-        # first try if the flags is available (most frequent case)
-        # if not see if the path+name is used in one of the flags of longer name (having more pieces)
-        # if not try dynamic flags loading
-        # after basically above stops are repeated
-
-        merged = self._name + "." + name
-        if self._flags.hasFlag( merged ):
-            return self._flags._get( merged )
-
-        if self._flags.hasCategory( merged ): # the flag name is not complete yet
-            return FlagAddress( self, name )
-
-        self._flags._loadDynaFlags( merged )
-
-        if self._flags.hasCategory( merged ): # the flag name is not complete yet
-            return FlagAddress( self, name )
-
-        if self._flags.hasFlag( merged ):
-            return self._flags._get( merged )
-
-        raise RuntimeError( "No such flag: {}  The name is likely incomplete.".format(merged) )
+        return getattr(self._flags, self._name + "." + name)
 
     def __setattr__( self, name, value ):
         if name.startswith("_"):
@@ -181,9 +159,25 @@ class AthConfigFlags(object):
         return hash(str(self._flagdict.items()))
 
     def __getattr__(self, name):
-        if name in self._flagdict:
+        # First try to get an already loaded flag or category
+        if self.hasFlag(name):
             return self._get(name)
-        return FlagAddress(self, name)
+
+        if self.hasCategory(name):
+            return FlagAddress(self, name)
+
+        # Reaching here means that we may need to load a dynamic flag
+        self._loadDynaFlags(name)
+
+        # Try again
+        if self.hasFlag(name):
+            return self._get(name)
+
+        if self.hasCategory(name):
+            return FlagAddress(self, name)
+
+        # Reaching here means that it truly isn't something we know about
+        raise AttributeError(f"No such flag: {name}")
 
     def __setattr__(self, name, value):
         if name.startswith("_"):
