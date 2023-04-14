@@ -61,7 +61,8 @@ tzmon.executable = 'Run3DQTestingDriver.py'
 tzmon.input = ''
 tzmon.args = '--threads=1'
 tzmon.args += ' --dqOffByDefault'
-tzmon.args += ' Input.Files="[\'AOD.pool.root\']" DQ.Steering.doHLTMon=True Trigger.triggerMenuSetup=\'Cosmic_run3_v1\''
+# HLT jet monitoring disabled as it requires offline PFlow jets which can't be reconstructed for cosmics
+tzmon.args += ' Input.Files="[\'AOD.pool.root\']" DQ.Steering.doHLTMon=True DQ.Steering.HLT.doJet=False Trigger.triggerMenuSetup=\'Cosmic_run3_v1\''
 
 # The full test
 test = Test.Test()
