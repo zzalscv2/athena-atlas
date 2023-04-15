@@ -16,6 +16,10 @@ from .MuonAlignFlags import muonAlignFlags
 # defaults have to be re-set maybe 
 muonAlignFlags.setDefaults()
 
+from AthenaCommon.AppMgr import ServiceMgr as svcMgr
+if not hasattr(svcMgr, "MuonIdHelperSvc"):
+    from MuonIdHelpers.MuonIdHelpersConfigLegacy import MuonIdHelperSvc
+    svcMgr += MuonIdHelperSvc("MuonIdHelperSvc")
 ###############################################################
 # There are 3 types of problems in some old global tags (already locked)
 # Pb 1: no TGC alignment folders exist
