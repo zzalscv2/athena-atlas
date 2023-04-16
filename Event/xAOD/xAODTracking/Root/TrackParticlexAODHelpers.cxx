@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODTracking/TrackParticlexAODHelpers.h"
@@ -20,6 +20,16 @@ namespace xAOD {
       throw std::runtime_error("TrackParticle without covariance matrix for the defining parameters.");
     }
   }
+
+  void checkTPAndDefiningParamCovDiag(const xAOD::TrackParticle *tp) {
+    if (!tp) {
+      throw std::runtime_error("Invalid TrackParticle pointer.");
+    }
+    SG::AuxElement::ConstAccessor< std::vector<float> > accDiag( "definingParametersCovMatrixDiag" );
+    if( !(accDiag.isAvailable( *tp )) ) {
+      throw std::runtime_error("TrackParticle without diagonal covariance matrix elements for the defining parameters.");
+    }
+  }
   }
 
   bool TrackingHelpers::hasValidCov(const xAOD::TrackParticle *tp) {
@@ -30,7 +40,7 @@ namespace xAOD {
 
   namespace TrackingHelpers {
     inline double d0significance(const xAOD::TrackParticle *tp, double d0_uncert_beam_spot_2) {
-      checkTPAndDefiningParamCov(tp);
+      checkTPAndDefiningParamCovDiag(tp);
       double d0 = tp->d0();
       // elements in definingParametersCovMatrixDiagVec should be : sigma_d0^2, sigma_z0^2
       double sigma_d0 = tp->definingParametersCovMatrixDiagVec().at(0);
@@ -53,7 +63,7 @@ namespace xAOD {
   }
 
   double TrackingHelpers::z0significance(const xAOD::TrackParticle *tp, const xAOD::Vertex *vx) {
-    checkTPAndDefiningParamCov(tp);
+    checkTPAndDefiningParamCovDiag(tp);
     double z0 = tp->z0() + tp->vz();
     if (vx) {
         if (!checkPVReference(tp,vx)) {
