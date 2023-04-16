@@ -56,6 +56,8 @@ class TrigEgammaMonitorElectronAlgorithm: public TrigEgammaMonitorAnalysisAlgori
     /*! Event Wise offline ElectronContainer Access and end iterator */
     SG::ReadHandleKey<xAOD::ElectronContainer> m_offElectronKey{ this, "ElectronKey", "Electrons", ""};
     SG::ReadDecorHandleKey<xAOD::EventInfo> m_eventInfoDecorKey{this, "LArStatusFlag", "EventInfo.larFlags", "Key for EventInfo object"}; //To get data-dependencies right
+    /*! Ensure offline electron isolation decoration is retrieved after being created */
+    SG::ReadDecorHandleKey<xAOD::ElectronContainer> m_electronIsolationKeyPtCone20 { this, "PtCone20Decoration", m_offElectronKey, "ptcone20", "Decoration key for the ptcone20 isolation decoration" };
     
 };
 
