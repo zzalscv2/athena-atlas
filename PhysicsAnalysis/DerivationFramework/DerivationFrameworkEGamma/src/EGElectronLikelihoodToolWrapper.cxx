@@ -89,11 +89,11 @@ EGElectronLikelihoodToolWrapper::addBranches() const
     m_decoratorIsEM, ctx
   };
 
-  std::unique_ptr<SG::WriteDecorHandle<xAOD::EgammaContainer, double>>
+  std::unique_ptr<SG::WriteDecorHandle<xAOD::EgammaContainer, float>>
     decoratorResult = nullptr;
   if (m_storeTResult) {
     decoratorResult =
-      std::make_unique<SG::WriteDecorHandle<xAOD::EgammaContainer, double>>(
+      std::make_unique<SG::WriteDecorHandle<xAOD::EgammaContainer, float>>(
         m_decoratorResult, ctx);
   }
 
@@ -155,7 +155,7 @@ EGElectronLikelihoodToolWrapper::addBranches() const
       decoratorIsEM(*par) = isEM;
       if (decoratorResult) {
         (*decoratorResult)(*par) =
-          static_cast<double>(m_tool->calculate(ctx, pCopy));
+          static_cast<float>(m_tool->calculate(ctx, pCopy));
       }
       if (m_storeMultipleOutputs) {
         // calculateMultipleOutputs only supports xAOD::Electron as input
@@ -173,10 +173,10 @@ EGElectronLikelihoodToolWrapper::addBranches() const
       }
       decoratorIsEM(*par) = isEM;
       if (decoratorResult) {
-        static const SG::AuxElement::Decorator<double> decResult(m_sgName +
-                                                                 "Result");
+        static const SG::AuxElement::Decorator<float> decResult(m_sgName +
+                                                                "Result");
         (*decoratorResult)(*par) =
-          static_cast<double>(m_tool->calculate(ctx, pCopy));
+          static_cast<float>(m_tool->calculate(ctx, pCopy));
       }
       if (m_storeMultipleOutputs) {
         // calculateMultipleOutputs only supports xAOD::Electron as input
