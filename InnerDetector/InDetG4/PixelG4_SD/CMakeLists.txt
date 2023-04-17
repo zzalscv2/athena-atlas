@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( PixelG4_SD )
@@ -7,6 +7,7 @@ atlas_subdir( PixelG4_SD )
 find_package( CLHEP )
 find_package( Geant4 )
 find_package( GTest )
+find_package( GeoModel COMPONENTS GeoModelKernel GeoModelRead GeoModelDBManager )
 
 # Component(s) in the package:
 atlas_add_library( PixelG4_SDLib
