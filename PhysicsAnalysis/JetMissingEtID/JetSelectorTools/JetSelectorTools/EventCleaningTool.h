@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETSELECTORTOOLS_EVENTCLEANINGTOOL_H
@@ -64,6 +64,7 @@ class EventCleaningTool : public virtual IEventCleaningTool,
     Gaudi::Property<bool>        m_useDecorations   {this, "UseDecorations",          false,      "Use decorations in cleaning tool?"};
     Gaudi::Property<std::string> m_cleaningLevel    {this, "CleaningLevel",           "LooseBad", "Jet cleaning level"};
     Gaudi::Property<bool>        m_suppressInputDeps{this, "SuppressInputDependence", false,      "Will passOR be created in the same algorithm that uses this tool?"};
+    Gaudi::Property<bool>        m_suppressOutputDeps{this, "SuppressOutputDependence", false,    "Create output dependencies?"};
     asg::AnaToolHandle<IJetSelector> m_jetCleaningTool; //!
 
     Gaudi::Property<std::string> m_jetContainerName          {this, "JetContainer", "",        "Input jet container key"};
