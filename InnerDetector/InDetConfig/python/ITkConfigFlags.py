@@ -53,10 +53,6 @@ def createITkConfigFlags():
   itkcf.addFlag("ITk.Tracking.doDigitalClustering", False)
   itkcf.addFlag("ITk.Tracking.doFastTracking", False) # Turn running of ITk FastTracking on and off
   itkcf.addFlag("ITk.Tracking.doConversionFinding",True) # Turn running of ConversionFinding second pass on and off
-  itkcf.addFlag("ITk.Tracking.writeSeedValNtuple", False) # Turn writing of seed validation ntuple on and off
-  itkcf.addFlag("ITk.Tracking.writeExtendedPRDInfo", False)
-  # Turn running of doLowPt second pass on and off
-  itkcf.addFlag("ITk.Tracking.doLowPt", False)
   itkcf.addFlag("ITk.Tracking.useFTF", False) # Allows TrigFastTrackFinder to be run as an offline algorithm by replacing SiSPSeededTrackFinder
 
   
