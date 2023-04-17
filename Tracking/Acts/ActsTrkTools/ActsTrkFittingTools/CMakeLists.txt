@@ -5,15 +5,14 @@ atlas_subdir( ActsTrkFittingTools )
 
 # External dependencies:
 find_package( Acts COMPONENTS Core )
-find_package( Boost )
 find_package( ROOT COMPONENTS Core Tree RIO )
 
 # Component(s) in the package:
 atlas_add_component( ActsTrkFittingTools
                      src/*.cxx
                      src/components/*.cxx
-                     INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES}
+                     INCLUDE_DIRS  ${ROOT_INCLUDE_DIRS}
+                     LINK_LIBRARIES  ${ROOT_LIBRARIES}
                      ActsCore
                      ActsGeometryInterfacesLib
                      ActsGeometryLib
