@@ -250,7 +250,7 @@ class MonitorDef:
                     #
                     "L1_eTAU20L", "L1_eTAU35", "L1_eTAU40HM",
                 ]
-        else:
+        else: # HI menu
             monItems[TBP|TAP|TAV] = [
                 "L1_EM12", # keep for LUMI group
                 # Random
@@ -314,6 +314,8 @@ class MonitorDef:
                 "L1_ALFA_ELAST15", "L1_ALFA_ELAST18",
                 "L1_ALFA_SYST9", "L1_ALFA_SYST10", "L1_ALFA_SYST11",
                 "L1_ALFA_SYST12", "L1_ALFA_SYST17", "L1_ALFA_SYST18",
+                # LUCID
+                "L1_LUCID_A", "L1_LUCID_C",
                 # ZDC
                 # Basic inputs
                 #"L1_ZDC_BIT0", "L1_ZDC_BIT1", "L1_ZDC_BIT2",
