@@ -185,6 +185,7 @@ void TFCSParametrizationBinnedChain::Print(Option_t *option) const {
 void TFCSParametrizationBinnedChain::unit_test(
     TFCSSimulationState *simulstate, const TFCSTruthState *truth,
     const TFCSExtrapolationState *extrapol) {
+  ISF_FCS::MLogging logger;
   if (!simulstate)
     simulstate = new TFCSSimulationState();
   if (!truth)
@@ -195,11 +196,11 @@ void TFCSParametrizationBinnedChain::unit_test(
   TFCSParametrizationBinnedChain chain("chain", "chain");
   chain.setLevel(MSG::DEBUG);
 
-  std::cout << "====         Chain setup       ====" << std::endl;
+  ATH_MSG_NOCLASS(logger, "====         Chain setup       ====");
   chain.Print();
-  std::cout << "==== Simulate with empty chain ====" << std::endl;
+  ATH_MSG_NOCLASS(logger, "==== Simulate with empty chain ====");
   chain.simulate(*simulstate, truth, extrapol);
-  std::cout << "===================================" << std::endl << std::endl;
+  ATH_MSG_NOCLASS(logger, "===================================" << std::endl);
 
   TFCSParametrizationBase *param;
   param = new TFCSInvisibleParametrization("A begin all", "A begin all");
@@ -209,16 +210,16 @@ void TFCSParametrizationBinnedChain::unit_test(
   param->setLevel(MSG::DEBUG);
   chain.push_back(param);
 
-  std::cout << "====         Chain setup       ====" << std::endl;
+  ATH_MSG_NOCLASS(logger, "====         Chain setup       ====");
   chain.Print();
-  std::cout << "==== Simulate only begin/end all ====" << std::endl;
+  ATH_MSG_NOCLASS(logger, "==== Simulate only begin/end all ====");
   chain.simulate(*simulstate, truth, extrapol);
-  std::cout << "==== Simulate only begin/end all with chain retry===="
-            << std::endl;
+  ATH_MSG_NOCLASS(logger,
+                  "==== Simulate only begin/end all with chain retry====");
   chain.set_RetryChainFromStart();
   chain.simulate(*simulstate, truth, extrapol);
   chain.reset_RetryChainFromStart();
-  std::cout << "===================================" << std::endl << std::endl;
+  ATH_MSG_NOCLASS(logger, "===================================" << std::endl);
 
   for (int i = 0; i < 3; ++i) {
     TFCSParametrizationBase *param =
@@ -240,14 +241,14 @@ void TFCSParametrizationBinnedChain::unit_test(
   param->setLevel(MSG::VERBOSE);
   chain.push_before_first_bin(param);
 
-  std::cout << "====         Chain setup       ====" << std::endl;
+  ATH_MSG_NOCLASS(logger, "====         Chain setup       ====");
   chain.Print();
-  std::cout << "==== Simulate with full chain  ====" << std::endl;
+  ATH_MSG_NOCLASS(logger, "==== Simulate with full chain  ====");
   chain.simulate(*simulstate, truth, extrapol);
-  std::cout << "==== Simulate with full chain with chain retry ===="
-            << std::endl;
+  ATH_MSG_NOCLASS(logger,
+                  "==== Simulate with full chain with chain retry ====");
   chain.set_RetryChainFromStart();
   chain.simulate(*simulstate, truth, extrapol);
   chain.reset_RetryChainFromStart();
-  std::cout << "===================================" << std::endl << std::endl;
+  ATH_MSG_NOCLASS(logger, "===================================" << std::endl);
 }

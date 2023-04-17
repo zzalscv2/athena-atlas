@@ -7,7 +7,11 @@
 
 #include <TLorentzVector.h>
 
-class TFCSTruthState : public TLorentzVector {
+#include "ISF_FastCaloSimEvent/MLogging.h"
+
+using namespace ISF_FCS;
+
+class TFCSTruthState : public TLorentzVector, public MLogging {
 public:
   TFCSTruthState();
   TFCSTruthState(Double_t x, Double_t y, Double_t z, Double_t t, int pdgid);
@@ -31,7 +35,7 @@ private:
   TLorentzVector m_vertex;
   double m_ekin_off = 0;
 
-  ClassDef(TFCSTruthState, 2) // TFCSTruthState
+  ClassDef(TFCSTruthState, 3) // TFCSTruthState
 };
 
 #endif

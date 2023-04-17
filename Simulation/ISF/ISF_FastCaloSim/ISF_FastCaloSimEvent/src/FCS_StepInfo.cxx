@@ -36,8 +36,8 @@ ISF_FCS_Parametrization::FCS_StepInfo &
 ISF_FCS_Parametrization::FCS_StepInfo::operator+=(
     const ISF_FCS_Parametrization::FCS_StepInfo &other) {
   if (identify() != other.identify()) {
-    std::cout << "Warning: Not merging hits from different cells!!! "
-              << identify() << " / " << other.identify() << std::endl;
+    ATH_MSG_WARNING("Not merging hits from different cells!!! "
+                    << identify() << " / " << other.identify());
     return *this;
   }
 
@@ -62,10 +62,10 @@ ISF_FCS_Parametrization::FCS_StepInfo::operator+=(
     // other is 0, use original
     // don't need to do anything...
   } else {
-    std::cout << "Warning: merging hits something weird: " << std::endl;
-    std::cout << "Original hit: " << energy() << " " << position() << std::endl;
-    std::cout << "Second hit: " << other.energy() << " " << other.position()
-              << std::endl;
+    ATH_MSG_WARNING("merging hits something weird: "
+                    << "\nOriginal hit: " << energy() << " " << position()
+                    << "\nSecond hit: " << other.energy() << " "
+                    << other.position());
   }
 
   /*
@@ -111,7 +111,7 @@ ISF_FCS_Parametrization::FCS_StepInfo::operator+=(
   }
   else
     {
-      std::cout <<"Wow, you're still here??"<<std::endl;
+      ATH_MSG_INFO("Wow, you're still here??");
     }
   */
   return *this;

@@ -73,13 +73,13 @@ public:
             ibinx, hist->GetXaxis()->GetBinLowEdge(ibinx + 1));
         //          if(ihist>0)
         //          if(m_HistoBorders.GetBinLowEdge(ihist-1)==m_HistoBorders.GetBinLowEdge(ihist))
-        //          { std::cout<<"Skip bin="<<ibin+1<<"
+        //          { ATH_MSG_INFO( bin="<<ibin+1<<"
         //          x="<<hist->GetXaxis()->GetBinLowEdge(ibin+1)<<"
-        //          fx="<<m_HistoBorders.GetBinLowEdge(ihist)<<std::endl;
+        //          fx="<<m_HistoBorders.GetBinLowEdge(ihist);
         //          --ihist;
-        //          std::cout<<"     bin="<<ibin  <<"
+        //          ATH_MSG_INFO("     bin="<<ibin  <<"
         //          x="<<hist->GetXaxis()->GetBinLowEdge(ibin  )<<"
-        //          fx="<<m_HistoBorders.GetBinLowEdge(ihist)<<std::endl;
+        //          fx="<<m_HistoBorders.GetBinLowEdge(ihist));
         //          }
       } // for
       for (Int_t ibiny = 1; ibiny <= hist->GetNbinsY(); ++ibiny) {
@@ -87,13 +87,13 @@ public:
             ibiny, hist->GetYaxis()->GetBinLowEdge(ibiny + 1));
         //          if(ihist>0)
         //          if(m_HistoBorders.GetBinLowEdge(ihist-1)==m_HistoBorders.GetBinLowEdge(ihist))
-        //          { std::cout<<"Skip bin="<<ibin+1<<"
+        //          { ATH_MSG_INFO("Skip bin="<<ibin+1<<"
         //          x="<<hist->GetXaxis()->GetBinLowEdge(ibin+1)<<"
-        //          fx="<<m_HistoBorders.GetBinLowEdge(ihist)<<std::endl;
+        //          fx="<<m_HistoBorders.GetBinLowEdge(ihist));
         //          --ihist;
-        //          std::cout<<"     bin="<<ibin  <<"
+        //          ATH_MSG_INFO("     bin="<<ibin  <<"
         //          x="<<hist->GetXaxis()->GetBinLowEdge(ibin  )<<"
-        //          fx="<<m_HistoBorders.GetBinLowEdge(ihist)<<std::endl;
+        //          fx="<<m_HistoBorders.GetBinLowEdge(ihist));
         //          }
       } // for
 
@@ -105,21 +105,21 @@ public:
           //          if(ihist>0)
           //          if(m_HistoContents.get_fraction(ihist-1)==m_HistoContents.get_fraction(ihist))
           //          {
-          //            std::cout<<"Skip fbin="<<ihist<<"
+          //            ATH_MSG_INFO("Skip fbin="<<ihist<<"
           //            fx="<<m_HistoBorders.GetBinLowEdge(ihist)<<"
-          //            frac="<<m_HistoContents.get_fraction(ihist)<<std::endl;
+          //            frac="<<m_HistoContents.get_fraction(ihist));
           //            --ihist;
-          //            std::cout<<"     fbin="<<ihist<<"
+          //            ATH_MSG_INFO("     fbin="<<ihist<<"
           //            fx="<<m_HistoBorders.GetBinLowEdge(ihist)<<"
-          //            frac="<<m_HistoContents.get_fraction(ihist)<<std::endl;
+          //            frac="<<m_HistoContents.get_fraction(ihist));
           //          }
 
-          //          std::cout<<"bin="<<ibin+1<<"
+          //          ATH_MSG_INFO("bin="<<ibin+1<<"
           //          fbin="<<ihist<<"/"<<m_HistoBorders.get_nbins()<<"
           //          x=["<<hist->GetXaxis()->GetBinLowEdge(ibin+1)<<","<<hist->GetXaxis()->GetBinUpEdge(ibin+1)<<"]
           //          fx="<<m_HistoBorders.GetBinLowEdge(ihist)<<"
           //          int="<<temp_HistoContents[ibin]/integral<<"
-          //          frac="<<m_HistoContents.get_fraction(ihist)<<std::endl;
+          //          frac="<<m_HistoContents.get_fraction(ihist));
 
           //          ++ihist;
         }
@@ -140,21 +140,21 @@ public:
   //          if(ihist>0)
   if(m_HistoContents.get_fraction(ihist-1)==m_HistoContents.get_fraction(ihist))
   {
-  //            std::cout<<"Skip fbin="<<ihist<<"
+  //            ATH_MSG_INFO("Skip fbin="<<ihist<<"
   fx="<<m_HistoBorders.GetBinLowEdge(ihist)<<"
-  frac="<<m_HistoContents.get_fraction(ihist)<<std::endl;
+  frac="<<m_HistoContents.get_fraction(ihist));
   //            --ihist;
-  //            std::cout<<"     fbin="<<ihist<<"
+  //            ATH_MSG_INFO("     fbin="<<ihist<<"
   fx="<<m_HistoBorders.GetBinLowEdge(ihist)<<"
-  frac="<<m_HistoContents.get_fraction(ihist)<<std::endl;
+  frac="<<m_HistoContents.get_fraction(ihist));
   //          }
 
-  //          std::cout<<"bin="<<ibin+1<<"
+  //          ATH_MSG_INFO("bin="<<ibin+1<<"
   fbin="<<ihist<<"/"<<m_HistoBorders.get_nbins()<<"
   x=["<<hist->GetXaxis()->GetBinLowEdge(ibin+1)<<","<<hist->GetXaxis()->GetBinUpEdge(ibin+1)<<"]
   fx="<<m_HistoBorders.GetBinLowEdge(ihist)<<"
   int="<<temp_HistoContents[ibin]/integral<<"
-  frac="<<m_HistoContents.get_fraction(ihist)<<std::endl;
+  frac="<<m_HistoContents.get_fraction(ihist));
 
   //          ++ihist;
                      }

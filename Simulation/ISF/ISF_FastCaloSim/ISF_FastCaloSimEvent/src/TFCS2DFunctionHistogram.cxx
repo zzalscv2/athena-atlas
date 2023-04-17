@@ -32,11 +32,11 @@ void TFCS2DFunctionHistogram::Initialize(TH2 *hist) {
         // Can't work if a bin is negative, forcing bins to 0 in this case
         double fraction = binval / hist->Integral();
         if (TMath::Abs(fraction) > 1e-5) {
-          std::cout << "WARNING: bin content is negative in histogram "
-                    << hist->GetName() << " : " << hist->GetTitle()
-                    << " binval=" << binval << " " << fraction * 100
-                    << "% of integral=" << hist->Integral()
-                    << ". Forcing bin to 0." << std::endl;
+          ATH_MSG_WARNING("bin content is negative in histogram "
+                          << hist->GetName() << " : " << hist->GetTitle()
+                          << " binval=" << binval << " " << fraction * 100
+                          << "% of integral=" << hist->Integral()
+                          << ". Forcing bin to 0.");
         }
         binval = 0;
       }
@@ -46,9 +46,8 @@ void TFCS2DFunctionHistogram::Initialize(TH2 *hist) {
     }
   }
   if (integral <= 0) {
-    std::cout << "ERROR: histogram " << hist->GetName() << " : "
-              << hist->GetTitle() << " integral=" << integral << " is <=0"
-              << std::endl;
+    ATH_MSG_ERROR("histogram " << hist->GetName() << " : " << hist->GetTitle()
+                               << " integral=" << integral << " is <=0");
     m_HistoBorders.resize(0);
     m_HistoBordersy.resize(0);
     m_HistoContents.resize(0);
@@ -101,6 +100,7 @@ void TFCS2DFunctionHistogram::rnd_to_fct(float &valuex, float &valuey,
 }
 
 void TFCS2DFunctionHistogram::unit_test ATLAS_NOT_THREAD_SAFE(TH2 *hist) {
+  ISF_FCS::MLogging logger;
   int nbinsx;
   int nbinsy;
   if (hist == nullptr) {
@@ -129,8 +129,9 @@ void TFCS2DFunctionHistogram::unit_test ATLAS_NOT_THREAD_SAFE(TH2 *hist) {
   for (rnd[0] = 0; rnd[0] < 0.9999; rnd[0] += 0.25) {
     for (rnd[1] = 0; rnd[1] < 0.9999; rnd[1] += 0.25) {
       rtof.rnd_to_fct(value, rnd);
-      std::cout << "rnd0=" << rnd[0] << " rnd1=" << rnd[1]
-                << " -> x=" << value[0] << " y=" << value[1] << std::endl;
+      ATH_MSG_NOCLASS(logger, "rnd0=" << rnd[0] << " rnd1=" << rnd[1]
+                                      << " -> x=" << value[0]
+                                      << " y=" << value[1]);
     }
   }
 
@@ -157,7 +158,7 @@ void TFCS2DFunctionHistogram::unit_test ATLAS_NOT_THREAD_SAFE(TH2 *hist) {
       float err = hist_val->GetBinError(ix, iy);
       if (err > 0)
         hist_pull->Fill(val / err);
-      std::cout << "val=" << val << " err=" << err << std::endl;
+      ATH_MSG_NOCLASS(logger, "val=" << val << " err=" << err);
     }
   }
 

@@ -109,17 +109,18 @@ int TFCSParametrizationFloatSelectChain::val_to_bin(float val) const {
 
 void TFCSParametrizationFloatSelectChain::unit_test(
     TFCSSimulationState *, TFCSTruthState *, const TFCSExtrapolationState *) {
-  std::cout
-      << "=================================================================="
-      << std::endl;
-  std::cout
-      << "= Please call TFCSParametrizationEkinSelectChain::unit_test(...) ="
-      << std::endl;
-  std::cout
-      << "= or          TFCSParametrizationEtaSelectChain ::unit_test(...) ="
-      << std::endl;
-  std::cout
-      << "=================================================================="
-      << std::endl
-      << std::endl;
+  ISF_FCS::MLogging logger;
+  ATH_MSG_NOCLASS(
+      logger,
+      "==================================================================");
+  ATH_MSG_NOCLASS(
+      logger,
+      "= Please call TFCSParametrizationEkinSelectChain::unit_test(...) =");
+  ATH_MSG_NOCLASS(
+      logger,
+      "= or          TFCSParametrizationEtaSelectChain ::unit_test(...) =");
+  ATH_MSG_NOCLASS(
+      logger,
+      "=================================================================="
+          << std::endl);
 }

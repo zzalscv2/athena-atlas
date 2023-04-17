@@ -19,7 +19,7 @@ TFCSTruthState::TFCSTruthState(Double_t x, Double_t y, Double_t z, Double_t t,
 }
 
 void TFCSTruthState::Print(Option_t *) const {
-  std::cout << "PDGID=" << m_pdgid << " pT=" << Pt() << " eta=" << Eta()
-            << " phi=" << Phi() << " E=" << E() << " Ekin_off=" << Ekin_off()
-            << std::endl;
+  ATH_MSG_INFO("PDGID=" << m_pdgid << " pT=" << Pt() << " eta=" << Eta()
+                        << " phi=" << Phi() << " E=" << E()
+                        << " Ekin_off=" << Ekin_off());
 }

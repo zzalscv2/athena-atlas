@@ -6,8 +6,11 @@
 #define ISF_FASTCALOSIMEVENT_TFCSFunction_h
 
 #include "TObject.h"
+#include "ISF_FastCaloSimEvent/MLogging.h"
 
-class TFCSFunction : public TObject {
+using namespace ISF_FCS;
+
+class TFCSFunction : public TObject, public MLogging {
 public:
   TFCSFunction(){};
   virtual ~TFCSFunction(){};
@@ -25,7 +28,7 @@ public:
   virtual void rnd_to_fct(float value[], const float rnd[]) const = 0;
 
 private:
-  ClassDef(TFCSFunction, 2) // TFCSFunction
+  ClassDef(TFCSFunction, 3) // TFCSFunction
 };
 
 #endif
