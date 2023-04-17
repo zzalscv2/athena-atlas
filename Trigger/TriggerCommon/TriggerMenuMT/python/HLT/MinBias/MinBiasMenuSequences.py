@@ -31,6 +31,8 @@ def SPCountHypoToolGen(chainDict):
         hypo.sctSPMax = 150 # as above
     if "sp_pix" in chainDict["chainName"]:
         hypo.pixCL = int(chainDict["chainParts"][0]["hypoSPInfo"].strip("pix"))
+    if "sp_vpix" in chainDict["chainName"]:
+        hypo.pixCLMax = int(chainDict["chainParts"][0]["hypoSPInfo"].strip("vpix"))
     return hypo
 
 
