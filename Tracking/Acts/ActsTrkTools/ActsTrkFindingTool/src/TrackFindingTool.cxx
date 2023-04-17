@@ -327,12 +327,15 @@ namespace ActsTrk
       auto *detElems = detElemsBind; // structured bindings can't be captured in C++17
       std::visit([&](auto &&clusterContainer)
                  {
-                    for (auto *measurement : *clusterContainer)
+
+                    for (const auto& measurement : *clusterContainer)
                     {
-                      auto sl = m_ATLASConverterTool->uncalibratedTrkMeasurementToSourceLink(*detElems, *measurement, elementsCollection);
+		      auto sl = m_ATLASConverterTool->uncalibratedTrkMeasurementToSourceLink(*detElems, measurement, elementsCollection);
+
                       sourceLinks.insert(sourceLinks.end(), sl);
                       if (!m_trackStatePrinter.empty()) sourceLinksVec.push_back(sl);
                     } },
+
                  clusterContainerVar);
     }
 

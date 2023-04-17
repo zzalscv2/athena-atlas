@@ -53,7 +53,7 @@ class IActsToTrkConverterTool : virtual public IAlgTool {
   virtual
   const ATLASUncalibSourceLink
   uncalibratedTrkMeasurementToSourceLink(const InDetDD::SiDetectorElementCollection &detectorElements, 
-				      const xAOD::UncalibratedMeasurement &measurement,
+				      const xAOD::UncalibratedMeasurement *measurement,
 				      std::vector<ATLASUncalibSourceLink::ElementsType>& Collection) const = 0;
 
   virtual

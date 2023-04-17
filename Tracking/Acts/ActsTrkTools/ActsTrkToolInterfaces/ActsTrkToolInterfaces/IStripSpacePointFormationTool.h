@@ -35,15 +35,18 @@ namespace ActsTrk {
 
     class IStripSpacePointFormationTool : virtual public IAlgTool {
     public:
-        DeclareInterfaceID(IStripSpacePointFormationTool, 1, 0);
+      DeclareInterfaceID(IStripSpacePointFormationTool, 1, 0);
 
-        virtual StatusCode produceStripSpacePoints(const xAOD::StripClusterContainer& clusterContainer,
-						   const InDet::SiElementPropertiesTable& properties,
-						   const InDetDD::SiDetectorElementCollection& elements,
-						   const Amg::Vector3D& beamSpotVertex,
-						   std::vector<StripSP>& spacePoints,
-						   std::vector<StripSP>& overlapSpacePoints,
-						   bool processOverlaps) const = 0;
+
+      virtual StatusCode produceSpacePoints(const EventContext& ctx,
+					    const xAOD::StripClusterContainer& clusterContainer,
+					    const InDet::SiElementPropertiesTable& properties,
+					    const InDetDD::SiDetectorElementCollection& elements,
+					    const Amg::Vector3D& beamSpotVertex,
+					    std::vector<StripSP>& spacePoints,
+					    std::vector<StripSP>& overlapSpacePoints,
+					    bool processOverlaps) const = 0;
+
     };
 
 } // ACTSTRKTOOLINTERFACES_ISTRIPSPACEPOINTFORMATIONTOOL_H
