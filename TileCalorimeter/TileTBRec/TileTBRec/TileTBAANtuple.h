@@ -608,6 +608,7 @@ class TileTBAANtuple: public AthAlgorithm {
     std::string m_streamName;
 
     std::map<int, int> m_nSamplesInDrawerMap;
+    bool m_saveFelixData{false};
 
     static const int MAX_MINIDRAWERS = 4;
     static const int NOT_SETUP = -9999;
