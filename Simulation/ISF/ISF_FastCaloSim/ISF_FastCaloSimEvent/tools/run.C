@@ -4,7 +4,7 @@
 
 {
   TFCS1DFunction f;
-  f.dummytest=1234.5;
-  TFile::Open("test.root","recreate");
+  f.dummytest = 1234.5;
+  TFile::Open("test.root", "recreate");
   f.Write("test");
 }

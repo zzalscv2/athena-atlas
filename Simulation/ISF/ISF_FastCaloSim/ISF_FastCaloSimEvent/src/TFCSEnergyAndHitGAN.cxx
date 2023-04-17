@@ -251,8 +251,8 @@ bool TFCSEnergyAndHitGAN::fillFastCaloGanNetworkInputs(
         std::pair<std::string, double>(std::to_string(i), randUniformZ));
   }
 
-  // std::cout << "Check label: " <<trueEnergy <<" "<<std::pow(2,22)<<"
-  // "<<trueEnergy/std::pow(2,22)<<std::endl;
+  // ATH_MSG_INFO( "Check label: " <<trueEnergy <<" "<<std::pow(2,22)<<"
+  // "<<trueEnergy/std::pow(2,22));
   inputs["node_1"].insert(
       std::pair<std::string, double>("0", trueEnergy / (std::pow(2, 22))));
 

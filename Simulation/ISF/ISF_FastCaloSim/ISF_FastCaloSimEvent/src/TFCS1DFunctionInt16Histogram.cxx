@@ -33,11 +33,11 @@ void TFCS1DFunctionInt16Histogram::Initialize(const TH1 *hist) {
       // Can't work if a bin is negative, forcing bins to 0 in this case
       double fraction = binval / hist->Integral();
       if (TMath::Abs(fraction) > 1e-5) {
-        std::cout << "WARNING: bin content is negative in histogram "
-                  << hist->GetName() << " : " << hist->GetTitle()
-                  << " binval=" << binval << " " << fraction * 100
-                  << "% of integral=" << hist->Integral()
-                  << ". Forcing bin to 0." << std::endl;
+        ATH_MSG_WARNING("bin content is negative in histogram "
+                        << hist->GetName() << " : " << hist->GetTitle()
+                        << " binval=" << binval << " " << fraction * 100
+                        << "% of integral=" << hist->Integral()
+                        << ". Forcing bin to 0.");
       }
       binval = 0;
     }
@@ -46,9 +46,8 @@ void TFCS1DFunctionInt16Histogram::Initialize(const TH1 *hist) {
     ++ibin;
   }
   if (integral <= 0) {
-    std::cout << "ERROR: histogram " << hist->GetName() << " : "
-              << hist->GetTitle() << " integral=" << integral << " is <=0"
-              << std::endl;
+    ATH_MSG_ERROR("histogram " << hist->GetName() << " : " << hist->GetTitle()
+                               << " integral=" << integral << " is <=0");
     m_HistoBorders.resize(0);
     m_HistoContents.resize(0);
     return;
@@ -60,7 +59,7 @@ void TFCS1DFunctionInt16Histogram::Initialize(const TH1 *hist) {
 
   for (ibin = 0; ibin < nbins; ++ibin) {
     m_HistoContents[ibin] = s_MaxValue * (temp_HistoContents[ibin] / integral);
-    // std::cout<<"bin="<<ibin<<" val="<<m_HistoContents[ibin]<<std::endl;
+    // ATH_MSG_INFO("bin="<<ibin<<" val="<<m_HistoContents[ibin]);
   }
 }
 
@@ -93,6 +92,7 @@ double TFCS1DFunctionInt16Histogram::rnd_to_fct(double rnd) const {
 }
 
 void TFCS1DFunctionInt16Histogram::unit_test ATLAS_NOT_THREAD_SAFE(TH1 *hist) {
+  ISF_FCS::MLogging logger;
   int nbinsx;
   if (hist == nullptr) {
     nbinsx = 50;
@@ -113,7 +113,7 @@ void TFCS1DFunctionInt16Histogram::unit_test ATLAS_NOT_THREAD_SAFE(TH1 *hist) {
   float rnd[2];
   for (rnd[0] = 0; rnd[0] < 0.9999; rnd[0] += 0.25) {
     rtof.rnd_to_fct(value, rnd);
-    std::cout << "rnd0=" << rnd[0] << " -> x=" << value[0] << std::endl;
+    ATH_MSG_NOCLASS(logger, "rnd0=" << rnd[0] << " -> x=" << value[0]);
   }
 
   TH1 *hist_val = (TH1 *)hist->Clone("hist_val");
@@ -135,7 +135,7 @@ void TFCS1DFunctionInt16Histogram::unit_test ATLAS_NOT_THREAD_SAFE(TH1 *hist) {
     float err = hist_val->GetBinError(ix);
     if (err > 0)
       hist_pull->Fill(val / err);
-    std::cout << "val=" << val << " err=" << err << std::endl;
+    ATH_MSG_NOCLASS(logger, "val=" << val << " err=" << err);
   }
 
 // Screen output in athena won't make sense and would require linking of

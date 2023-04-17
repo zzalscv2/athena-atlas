@@ -105,15 +105,15 @@ bool TFCSGANXMLParameters::ReadBooleanAttribute(const std::string &name,
 }
 
 void TFCSGANXMLParameters::Print() const {
-  std::cout << "Parameters taken from XML" << std::endl;
-  std::cout << "  symmetrisedAlpha: " << m_symmetrisedAlpha << std::endl;
-  std::cout << "  ganVersion:" << m_ganVersion << std::endl;
-  std::cout << "  latentDim: " << m_latentDim << std::endl;
-  std::cout << "  relevantlayers: ";
+  ATH_MSG_INFO("Parameters taken from XML");
+  ATH_MSG_INFO("  symmetrisedAlpha: " << m_symmetrisedAlpha);
+  ATH_MSG_INFO("  ganVersion:" << m_ganVersion);
+  ATH_MSG_INFO("  latentDim: " << m_latentDim);
+  ATH_MSG(INFO) << "  relevantlayers: ";
   for (auto l : m_relevantlayers) {
-    std::cout << l << " ";
+    ATH_MSG(INFO) << l << " ";
   }
-  std::cout << std::endl;
+  ATH_MSG(INFO) << END_MSG(INFO);
 
   for (auto element : m_binning) {
     int layer = element.first;
@@ -124,15 +124,15 @@ void TFCSGANXMLParameters::Print() const {
 
     // If only one bin in r means layer is empty, no value should be added
     if (xBinNum == 1) {
-      std::cout << "layer " << layer << " not used" << std::endl;
+      ATH_MSG_INFO("layer " << layer << " not used");
       continue;
     }
-    std::cout << "Binning along r for layer " << layer << std::endl;
-    std::cout << "0,";
+    ATH_MSG_INFO("Binning along r for layer " << layer);
+    ATH_MSG(INFO) << "0,";
     // First fill energies
     for (int ix = 1; ix <= xBinNum; ++ix) {
-      std::cout << x->GetBinUpEdge(ix) << ",";
+      ATH_MSG(INFO) << x->GetBinUpEdge(ix) << ",";
     }
-    std::cout << std::endl;
+    ATH_MSG(INFO) << END_MSG(INFO);
   }
 }

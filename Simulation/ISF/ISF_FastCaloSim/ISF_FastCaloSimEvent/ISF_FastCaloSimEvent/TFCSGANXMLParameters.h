@@ -21,7 +21,11 @@
 #include <libxml/xpathInternals.h>
 #include "TH2D.h"
 
-class TFCSGANXMLParameters {
+#include "ISF_FastCaloSimEvent/MLogging.h"
+
+using namespace ISF_FCS;
+
+class TFCSGANXMLParameters : public MLogging {
 public:
   typedef std::map<int, TH2D> Binning;
 
@@ -49,7 +53,7 @@ private:
   int m_latentDim;
   std::string m_fastCaloGANInputFolderName;
 
-  ClassDef(TFCSGANXMLParameters, 1) // TFCSGANXMLParameters
+  ClassDef(TFCSGANXMLParameters, 2) // TFCSGANXMLParameters
 };
 
 #endif //> !ISF_TFCSGANXMLPARAMETERS_H
