@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Author: J. Poveda (Ximo.Poveda@cern.ch)
 # TileRawChannel creation from TileDigits 
@@ -94,9 +94,6 @@ class TileRawChannelGetter ( Configured)  :
                 jobproperties.TileRecFlags.TimeMaxForAmpCorrection = halfBS
 
         TileFrameLength = ServiceMgr.TileInfoLoader.NSamples
-        if TileFrameLength!=7:
-            mlog.info("disabling reading of OFC from COOL because Nsamples!=7")
-            jobproperties.TileRecFlags.OfcFromCOOL = False
 
         jobproperties.TileRecFlags.print_JobProperties('tree&value')
         
