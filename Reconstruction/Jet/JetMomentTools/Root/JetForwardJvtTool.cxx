@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetForwardJvtTool.cxx
@@ -45,8 +45,13 @@
     ATH_CHECK(m_trkMETName.initialize());
 
     if(m_jetContainerName.empty()) {
-      ATH_MSG_ERROR("JetForwardJvtTool needs to have its input jet container configured!");
-      return StatusCode::FAILURE;
+      if (m_renounceOutputs) {
+        m_jetContainerName = "_dummy";
+      }
+      else {
+        ATH_MSG_ERROR("JetForwardJvtTool needs to have its input jet container configured!");
+        return StatusCode::FAILURE;
+      }
     }
     if(!m_orKey.key().empty()) m_orKey = m_jetContainerName + "." + m_orKey.key();
     m_outKey = m_jetContainerName + "." + m_outKey.key();
@@ -65,6 +70,17 @@
     ATH_CHECK(m_widthKey.initialize());
     ATH_CHECK(m_jvtMomentKey.initialize());
     ATH_CHECK(m_sumPtsKey.initialize());
+
+    if (m_renounceOutputs) {
+      renounce (m_orKey);
+      renounce (m_outKey);
+      renounce (m_isHSKey);
+      renounce (m_isPUKey);
+      renounce (m_fjvtDecKey);
+      renounce (m_widthKey);
+      renounce (m_jvtMomentKey);
+      renounce (m_sumPtsKey);
+    }
 
     return StatusCode::SUCCESS;
   }

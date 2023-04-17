@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetForwardJvtTool.h
@@ -87,6 +87,7 @@
     /// Default constructor:
     JetForwardJvtTool();
 
+    BooleanProperty m_renounceOutputs{this, "RenounceOutputs", false, "If true, then we're not interested in output dependencies.  In that case, JetContainer is irrelevant."};
     Gaudi::Property<std::string> m_jetContainerName{this, "JetContainer", "", "SG key for the input jet container"};
     SG::ReadDecorHandleKey<xAOD::JetContainer> m_orKey{this, "OverlapDec", "", "Overlap decoration key"};
     SG::WriteDecorHandleKey<xAOD::JetContainer> m_outKey{this, "OutputDec", "passFJVT", "Output decoration key"};
