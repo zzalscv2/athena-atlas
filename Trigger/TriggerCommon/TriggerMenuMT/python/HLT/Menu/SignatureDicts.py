@@ -260,6 +260,7 @@ JetChainParts = {
                       # 'ht' category applies a cut on HT (HT>value) computed by aggregation over single jets (default filtering: 30et and 0eta320)
                       'HT0',
                       'HT1000',
+                      'HT290',
                       'HT300',
                       'HT500',
                       'HT50',
