@@ -77,7 +77,7 @@ private:
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
     int m_mem;       //<! counter for memory allocated VmSize values read from /proc/<pid>/status
-    int m_cpu[2]{};  //<! counter for cpu time read from /proc/<pid>/cpu
+    std::array<int,2> m_cpu{};  //<! counter for cpu time read from /proc/<pid>/cpu
     void showVmemCpu(const std::string& message);
     void getVmemCpu(int& dVmem, int& duCpu, int& dsCpu);
 
@@ -85,10 +85,6 @@ private:
     void testRpcCache();
     void testTgcCache();
     void testCscCache();
-    void testMdtCache_here();
-    void testRpcCache_here();
-    void testTgcCache_here();
-    void testCscCache_here();
 
     void test_MM_IdHelpers();
     void test_sTGC_IdHelpers();
@@ -125,11 +121,7 @@ private:
     void testCscDetectorElementHash();
 
     void coercePositivePhi(double& phi);
-
-    Identifier getMdtIdentifier(const int sname_index, const int seta_index, const int sphi_index, const int dbr_index, bool& valid) const;
-
-    Identifier getCscIdentifier(const int sname_index, const int seta_index, const int sphi_index, const int ml, bool& valid) const;
-    Identifier getTgcIdentifier(const int sname_index, const int seta_index, const int sphi_index, bool& valid) const;
+   
 };
 inline void MuonGMCheck::coercePositivePhi(double& phi) {
     if (phi < 0) phi += 2 * M_PI;

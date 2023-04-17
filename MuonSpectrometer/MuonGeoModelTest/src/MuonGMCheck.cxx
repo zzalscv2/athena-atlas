@@ -44,7 +44,6 @@ namespace {
     // the tube number of a tube in a tubeLayer is encoded in the GeoSerialIdentifier (modulo maxNTubesPerLayer)
     constexpr unsigned int maxNTubesPerLayer = MdtIdHelper::maxNTubesPerLayer;
 
-    static const Amg::Vector3D Zero{0., 0., 0.};
 }  // namespace
 
 using namespace MuonGM;
@@ -229,24 +228,14 @@ void MuonGMCheck::checkreadoutrpcgeo() {
     fpad << setiosflags(std::ios::fixed) << std::setprecision(4) << std::endl;
     fpanelidh << setiosflags(std::ios::fixed) << std::setprecision(4) << std::endl;
 
-    double phistr_pitch = 0.;
-    double etastr_pitch = 0.;
-    int nphistr = 0;
-    int netastr = 0;
+    double phistr_pitch{0.}, etastr_pitch{0.};
+    int nphistr{0}, netastr{0};
 
     for (int sname_index = 0; sname_index < MuonDetectorManager::NRpcStatType; ++sname_index) {
         for (int seta_index = 0; seta_index < MuonDetectorManager::NRpcStatEta; ++seta_index) {
             for (int sphi_index = 0; sphi_index < MuonDetectorManager::NRpcStatPhi; ++sphi_index) {
                 for (int dbr_index = 0; dbr_index < MuonDetectorManager::NDoubletR; ++dbr_index) {
-                    double keepxC = 0.;
-                    double keepyC = 0.;
-                    double keepzC = 0.;
-                    double keepxFS = 0.;
-                    double keepyFS = 0.;
-                    double keepzFS = 0.;
-                    double keepxLS = 0.;
-                    double keepyLS = 0.;
-                    double keepzLS = 0.;
+                    double keepxC{0.}, keepyC{0.}, keepzC{0.}, keepxFS{0.}, keepyFS{0.}, keepzFS{0.}, keepxLS{0.}, keepyLS{0.}, keepzLS{0.};
 
                     for (int dbz_index = 0; dbz_index < MuonDetectorManager::NDoubletZ; ++dbz_index) {
                         fout << " ///////////////////// Looking for a RpcReadoutElement for indices = " << sname_index << " " << seta_index
@@ -559,23 +548,23 @@ void MuonGMCheck::checkreadoutrpcgeo() {
                                     if (m_check_surfaces) {
                                         if (strip == 1) {
                                             fout << "tracking local x(phi) axis (surface->transform) = "
-                                                 << (rpc->surface(chid)).transform().linear() * Amg::Vector3D(1, 0, 0) << std::endl;
+                                                 << (rpc->surface(chid)).transform().linear() * Amg::Vector3D::UnitX() << std::endl;
                                             fout << "tracking local y(phi) axis (surface->transform) = "
-                                                 << (rpc->surface(chid)).transform().linear() * Amg::Vector3D(0, 1, 0) << std::endl;
+                                                 << (rpc->surface(chid)).transform().linear() * Amg::Vector3D::UnitY()<< std::endl;
                                             fout << "tracking local z(phi) axis (surface->transform) = "
-                                                 << (rpc->surface(chid)).transform().linear() * Amg::Vector3D(0, 0, 1) << std::endl;
+                                                 << (rpc->surface(chid)).transform().linear() * Amg::Vector3D::UnitZ() << std::endl;
                                             Amg::Vector2D lpos(0., 0.);
                                             fout << "Check surface.localToGlobal for loc point " << lpos << std::endl;
                                             fout << "                                global    "
-                                                 << (rpc->surface(chid)).Trk::Surface::localToGlobal(lpos) << std::endl;
+                                                 << static_cast<const Trk::Surface&>(rpc->surface(chid)).localToGlobal(lpos) << std::endl;
                                             lpos = Amg::Vector2D(100., 0.);
                                             fout << "Check surface.localToGlobal for loc point " << lpos << std::endl;
                                             fout << "                                global    "
-                                                 << (rpc->surface(chid)).Trk::Surface::localToGlobal(lpos) << std::endl;
+                                                 << static_cast<const Trk::Surface&>(rpc->surface(chid)).localToGlobal(lpos) << std::endl;
                                             lpos = Amg::Vector2D(0., 100.);
                                             fout << "Check surface.localToGlobal for loc point " << lpos << std::endl;
                                             fout << "                                global    "
-                                                 << (rpc->surface(chid)).Trk::Surface::localToGlobal(lpos) << std::endl;
+                                                 << static_cast<const Trk::Surface&>(rpc->surface(chid)).localToGlobal(lpos) << std::endl;
                                         }
                                     }
                                     strip += stripStep;
@@ -615,23 +604,23 @@ void MuonGMCheck::checkreadoutrpcgeo() {
                                     if (m_check_surfaces) {
                                         if (strip == 1) {
                                             fout << "tracking local x(eta) axis (surface->transform) = "
-                                                 << (rpc->surface(chid)).transform().linear() * Amg::Vector3D(1, 0, 0) << std::endl;
+                                                 << (rpc->surface(chid)).transform().linear() * Amg::Vector3D::UnitX() << std::endl;
                                             fout << "tracking local y(eta) axis (surface->transform) = "
-                                                 << (rpc->surface(chid)).transform().linear() * Amg::Vector3D(0, 1, 0) << std::endl;
+                                                 << (rpc->surface(chid)).transform().linear() * Amg::Vector3D::UnitY()<< std::endl;
                                             fout << "tracking local z(eta) axis (surface->transform) = "
-                                                 << (rpc->surface(chid)).transform().linear() * Amg::Vector3D(0, 0, 1) << std::endl;
+                                                 << (rpc->surface(chid)).transform().linear() * Amg::Vector3D::UnitZ() << std::endl;
                                             Amg::Vector2D lpos(0., 0.);
                                             fout << "Check surface.localToGlobal for loc point " << lpos << std::endl;
                                             fout << "                                global    "
-                                                 << (rpc->surface(chid)).Trk::Surface::localToGlobal(lpos) << std::endl;
+                                                 << static_cast<const Trk::Surface&>(rpc->surface(chid)).localToGlobal(lpos) << std::endl;
                                             lpos = Amg::Vector2D(100., 0.);
                                             fout << "Check surface.localToGlobal for loc point " << lpos << std::endl;
                                             fout << "                                global    "
-                                                 << (rpc->surface(chid)).Trk::Surface::localToGlobal(lpos) << std::endl;
+                                                 << static_cast<const Trk::Surface&>(rpc->surface(chid)).localToGlobal(lpos) << std::endl;
                                             lpos = Amg::Vector2D(0., 100.);
                                             fout << "Check surface.localToGlobal for loc point " << lpos << std::endl;
                                             fout << "                                global    "
-                                                 << (rpc->surface(chid)).Trk::Surface::localToGlobal(lpos) << std::endl;
+                                                 << static_cast<const Trk::Surface&>(rpc->surface(chid)).localToGlobal(lpos) << std::endl;
                                         }
                                     }
                                     strip += stripStep;
@@ -649,7 +638,7 @@ void MuonGMCheck::checkreadoutrpcgeo() {
                                         std::optional<Amg::Vector2D> locPosition =
                                             rpc->surface(chid).Trk::Surface::globalToLocal(tempGlobalPosition);
                                         fout << "loc.pos. " << locPosition->x() << " " << locPosition->y();
-                                        const Amg::Vector3D gPtrk = rpc->surface(chid).Trk::Surface::localToGlobal(*locPosition);
+                                        const Amg::Vector3D gPtrk = static_cast<const Trk::Surface&>(rpc->surface(chid)).localToGlobal(*locPosition);
                                         fout << " Trk::glob.pos. " << gPtrk.x() << " " << gPtrk.y() << " " << gPtrk.z() << std::endl;
                                     }
                                     for (int strip = 1; strip <= rpc->NetaStrips(); strip++) {
@@ -664,7 +653,7 @@ void MuonGMCheck::checkreadoutrpcgeo() {
                                         std::optional<Amg::Vector2D> locPosition =
                                             rpc->surface(chid).Trk::Surface::globalToLocal(tempGlobalPosition);
                                         fout << "loc.pos. " << locPosition->x() << " " << locPosition->y();
-                                        const Amg::Vector3D gPtrk = rpc->surface(chid).Trk::Surface::localToGlobal(*locPosition);
+                                        const Amg::Vector3D gPtrk = static_cast<const Trk::Surface&>(rpc->surface(chid)).localToGlobal(*locPosition);
                                         fout << " Trk::glob.pos. " << gPtrk.x() << " " << gPtrk.y() << " " << gPtrk.z() << std::endl;
                                     }
                                 }
@@ -689,8 +678,7 @@ void MuonGMCheck::checkreadoutrpcgeo() {
 
 void MuonGMCheck::getEtaPhiPanelBoundaries(const MuonGM::RpcReadoutElement* rpc, Identifier& chid, double& etamin, double& etamax,
                                            double& phimin, double& phimax) {
-    double zmin;
-    double zmax;
+    double zmin{0.}, zmax{0.};
     return getPanelBoundaries(rpc, chid, etamin, etamax, phimin, phimax, zmin, zmax);
 }
 void MuonGMCheck::getZPhiPanelBoundaries(const MuonGM::RpcReadoutElement* rpc, Identifier& chid, double& zmin, double& zmax, double& phimin,
@@ -733,17 +721,7 @@ void MuonGMCheck::getPanelEdgeCenter(const MuonGM::RpcReadoutElement* rpc, Ident
                                                                  m_idHelperSvc->rpcIdHelper().doubletPhi(chid),
                                                                  m_idHelperSvc->rpcIdHelper().gasGap(chid), view, n_strips);
 
-    xFirstPhiS = 0.;
-    yFirstPhiS = 0.;
-    zFirstPhiS = 0.;
-
-    xLastPhiS = 0.;
-    yLastPhiS = 0.;
-    zLastPhiS = 0.;
-
-    xC = 0.;
-    yC = 0.;
-    zC = 0.;
+    xFirstPhiS = yFirstPhiS = zFirstPhiS = xLastPhiS = yLastPhiS = zLastPhiS = xC = yC = zC = 0.;
     if (view == 1) {
         xFirstPhiS = rpc->stripPos(chidFirst).x();
         yFirstPhiS = rpc->stripPos(chidFirst).y();
@@ -794,12 +772,7 @@ void MuonGMCheck::getPanelBoundaries(const MuonGM::RpcReadoutElement* rpc, Ident
         idp, m_idHelperSvc->rpcIdHelper().doubletZ(chid), m_idHelperSvc->rpcIdHelper().doubletPhi(chid),
         m_idHelperSvc->rpcIdHelper().gasGap(chid), otherview, n_stripsOtherView);
 
-    double phiFirstStrip;
-    double phiLastStrip;
-    double etaFirstStrip;
-    double etaLastStrip;
-    double zFirstStrip;
-    double zLastStrip;
+    double phiFirstStrip{0.}, phiLastStrip{0.}, etaFirstStrip{0.}, etaLastStrip{0.}, zFirstStrip{0.}, zLastStrip{0.};
     if (view == 1) {
         phiFirstStrip = rpc->stripPos(chidFirst).phi();
         phiLastStrip = rpc->stripPos(chidLast).phi();
@@ -883,12 +856,7 @@ void MuonGMCheck::getActivePanelBoundaries(const MuonGM::RpcReadoutElement* rpc,
     Amg::Vector3D firstStripEdgeOtherView = firstStripPosOtherView - halfStripShiftOtherView;
     Amg::Vector3D lastStripEdgeOtherView = lastStripPosOtherView + halfStripShiftOtherView;
 
-    double phiFirstStrip;
-    double phiLastStrip;
-    double etaFirstStrip;
-    double etaLastStrip;
-    double zFirstStrip;
-    double zLastStrip;
+    double phiFirstStrip{0.}, phiLastStrip{0.}, etaFirstStrip{0.}, etaLastStrip{0.}, zFirstStrip{0.}, zLastStrip{0.};
     if (view == 1) {
         phiFirstStrip = firstStripEdge.phi();
         phiLastStrip = lastStripEdge.phi();
@@ -930,41 +898,24 @@ void MuonGMCheck::getActivePanelBoundaries(const MuonGM::RpcReadoutElement* rpc,
 
 void MuonGMCheck::checkParentStation() {
     ATH_MSG_INFO(" *************************** Global Check for Mdt");
-
-    for (int sname_index = 0; sname_index < MuonDetectorManager::NMdtStatType; ++sname_index) {
-        for (int seta_index = 0; seta_index < MuonDetectorManager::NMdtStatEta; ++seta_index) {
-            for (int sphi_index = 0; sphi_index < MuonDetectorManager::NMdtStatPhi; ++sphi_index) {
-                for (int dbr_index = 0; dbr_index < MuonDetectorManager::NMdtMultilayer; ++dbr_index) {
-                    bool isValid = false;
-                    const Identifier readout_ident = getMdtIdentifier(sname_index, seta_index, sphi_index, dbr_index, isValid);
-                    if (!isValid) {
-                        ATH_MSG_DEBUG(__FILE__<<":"<<__LINE__<<" Failed to create a valid Mdt identifier from " << sname_index << "," << seta_index << ","
-                                                                                        << sphi_index << "," << dbr_index);
-                        continue;
-                    }
-                    const MdtReadoutElement* mdt = p_MuonMgr->getMdtReadoutElement(readout_ident);
-                    if (!mdt) continue;
-                    ATH_MSG_INFO(" ///////////////////// Found a MdtReadoutElement for indices = "
-                                 << sname_index << " " << seta_index << " " << sphi_index << " " << dbr_index);
-                    Identifier idr = mdt->identify();
-                    ATH_MSG_INFO(" its offline Id = " << m_idHelperSvc->mdtIdHelper().show_to_string(idr)
-                                                      << " ////////////////// belongs to module " << mdt->getTechnologyName() << "/"
-                                                      << mdt->getStationName());
-                    Identifier idp = m_idHelperSvc->mdtIdHelper().parentID(idr);
-                    ATH_MSG_INFO("      parent Id = " << m_idHelperSvc->mdtIdHelper().show_to_string(idp));
-                    ATH_MSG_ERROR(" now the positions ");
-                    Amg::Vector3D stc = mdt->parentMuonStationPos();
-                    ATH_MSG_INFO("     Station centre is at " << stc << " cyl. coords R,phi,Z " << stc.perp() << " " << stc.phi() << " "
-                                                              << stc.z());
-                    ATH_MSG_INFO(" New Station centre is at "  //<<stcm
-                                 << " s_amdb  " << mdt->parentStation_s_amdb() << " S,Z,R sizes " << mdt->parentStationSsize() << " "
-                                 << mdt->parentStationZsize() << " " << mdt->parentStationRsize() << " ");
-                    Amg::Vector3D elc = mdt->globalPosition();
-                    ATH_MSG_INFO(" Element centre is at " << elc << " cyl. coords R,phi,Z " << elc.perp() << " " << elc.phi() << " "
-                                                          << elc.z());
-                }
-            }
-        }
+    for (unsigned int hashInt =0 ; hashInt < MuonDetectorManager::MdtRElMaxHash; ++hashInt) {
+        const IdentifierHash hash{hashInt};
+        const MdtReadoutElement* mdt = p_MuonMgr->getMdtReadoutElement(hash);
+        if (!mdt) continue;
+        ATH_MSG_INFO(" ///////////////////// Found a MdtReadoutElement ");
+        Identifier idr = mdt->identify();
+        ATH_MSG_INFO(" its offline Id = " << m_idHelperSvc->toString(idr)
+                                            << " ////////////////// belongs to module " << mdt->getTechnologyName() << "/"
+                                            << mdt->getStationName());
+        Identifier idp = m_idHelperSvc->mdtIdHelper().parentID(idr);
+        ATH_MSG_INFO("      parent Id = " << m_idHelperSvc->toString(idp));
+        ATH_MSG_ERROR(" now the positions ");
+        Amg::Vector3D stc = mdt->parentMuonStationPos();
+        ATH_MSG_INFO("     Station centre is at " << stc << " cyl. coords R,phi,Z " << stc.perp() << " " << stc.phi() << " "
+                                                    << stc.z());                   
+        Amg::Vector3D elc = mdt->globalPosition();
+        ATH_MSG_INFO(" Element centre is at " << elc << " cyl. coords R,phi,Z " << elc.perp() << " " << elc.phi() << " "
+                                                << elc.z());
     }
 }
 
@@ -984,37 +935,17 @@ void MuonGMCheck::checkreadoutmmgeo() {
     ATH_MSG_INFO(" ***** Writing file " << fileName);
     fout << setiosflags(std::ios::fixed) << std::setw(11) << std::setprecision(4) << std::endl;
 
-    for (int ieta = 0; ieta < MuonDetectorManager::NMMcStatEta / 2; ++ieta) {
-        int etaC = ieta - MuonDetectorManager::NMMcStEtaOffset;
-        int etaA = -etaC;
-        int iSL = 0;  // large sectors
-        for (int iphi = 0; iphi < MuonDetectorManager::NMMcStatPhi; ++iphi) {
-            int iphi8 = iphi / 2 + 1;
-            for (int iml = 0; iml < 2; ++iml) {
+    for (int ieta = helper.stationEtaMin(); ieta <= helper.stationEtaMax(); ++ieta) {
+        if (ieta ==0) continue;
+        for (int iphi = helper.stationPhiMin(); iphi <= helper.stationPhiMax(); ++iphi) {
+            for (int iml = 1; iml <= 2; ++iml) {
                 // first large
-                fout << "\n ieta, iphi, iml, " << ieta << " " << iphi << " " << iml << " --- iphi8  =" << iphi8;
-                if (iphi % 2 != 0) {
-                    iSL = 1;
-                    fout << " iSL = " << iSL << " i.e. Small sector " << std::endl;
-                } else {
-                    iSL = 0;
-                    fout << " iSL = " << iSL << " i.e. Large sector " << std::endl;
-                }
-                fout << "------------------------------------- ISL, etaC, iphi8, ml " << iSL << " " << etaC << " " << iphi8 << " "
-                     << iml + 1 << std::endl;
-                const Identifier id_c = helper.channelID(iSL, etaC, iphi8, iml + 1, 1 ,1);
+                fout << "\n ieta, iphi, iml, " << ieta << " " << iphi << " " << iml;
+                
+                const Identifier id_c = helper.channelID("MML", ieta, iphi, iml, 1 ,1);
                 const MMReadoutElement* mmC = p_MuonMgr->getMMReadoutElement(id_c);
-                fout << "------------------------------------- ISL, etaA, iphi8, ml " << iSL << " " << etaA << " " << iphi8 << " "
-                     << iml + 1 << std::endl;
-                const Identifier id_a = helper.channelID(iSL, etaA, iphi8, iml + 1, 1 ,1);                
+                const Identifier id_a = helper.channelID("MMS", ieta, iphi, iml, 1 ,1);              
                 const MMReadoutElement* mmA = p_MuonMgr->getMMReadoutElement(id_a);
-
-                if (!mmC)
-                    ATH_MSG_INFO(" Something not found on the C side - ISL, etaC, iphi8, ml " << iSL << " " << etaC << " " << iphi8 << " "
-                                                                                              << iml + 1);
-                if (!mmA)
-                    ATH_MSG_INFO(" Something not found in the A side - ISL, etaA, iphi8, ml " << iSL << " " << etaA << " " << iphi8 << " "
-                                                                                              << iml + 1);
                 if (mmC && mmA) {
                     Identifier idA = mmA->identify();
                     Identifier idC = mmC->identify();
@@ -1035,8 +966,8 @@ void MuonGMCheck::checkreadoutmmgeo() {
                     fout << helper.show_to_string(idC) << " # of gas gaps = " << helper.gasGapMax(idC) - helper.gasGapMin(idC) + 1
                          << " ggMax = " << helper.gasGapMax(idC) << " number of layers(from geo)= " << mmC->numberOfLayers(true)
                          << " nStrips = " << mmC->numberOfStrips(idC) << std::endl;
-                    Amg::Vector3D chCenterC = (mmC->absTransform()) * Zero;
-                    Amg::Vector3D chCenterA = (mmA->absTransform()) * Zero;
+                    Amg::Vector3D chCenterC = (mmC->absTransform()).translation();
+                    Amg::Vector3D chCenterA = (mmA->absTransform()).translation();
                     fout << "center of the chamber on the A-side = " << chCenterA << " cyl coord (r,phi)-> " << chCenterA.perp() << " "
                          << chCenterA.phi() * invRad << std::endl;
                     fout << "center of the chamber on the C-side = " << chCenterC << " cyl coord (r,phi)-> " << chCenterC.perp() << " "
@@ -1047,10 +978,10 @@ void MuonGMCheck::checkreadoutmmgeo() {
                         Identifier idgg_lA = helper.channelID(helper.parentID(idA), iml + 1, igg, mmA->numberOfStrips(idA));
                         Identifier idgg_fC = helper.channelID(helper.parentID(idC), iml + 1, igg, 1);
                         Identifier idgg_lC = helper.channelID(helper.parentID(idC), iml + 1, igg, mmC->numberOfStrips(idC));
-                        const Amg::Vector3D chCenter_fA = mmA->surface(idgg_fA).Trk::Surface::localToGlobal(lpos);
-                        const Amg::Vector3D chCenter_lA = mmA->surface(idgg_lA).Trk::Surface::localToGlobal(lpos);
-                        const Amg::Vector3D chCenter_fC = mmC->surface(idgg_fC).Trk::Surface::localToGlobal(lpos);
-                        const Amg::Vector3D chCenter_lC = mmC->surface(idgg_lC).Trk::Surface::localToGlobal(lpos);
+                        const Amg::Vector3D chCenter_fA = static_cast<const Trk::Surface&>(mmA->surface(idgg_fA)).localToGlobal(lpos);
+                        const Amg::Vector3D chCenter_lA = static_cast<const Trk::Surface&>(mmA->surface(idgg_lA)).localToGlobal(lpos);
+                        const Amg::Vector3D chCenter_fC = static_cast<const Trk::Surface&>(mmC->surface(idgg_fC)).localToGlobal(lpos);
+                        const Amg::Vector3D chCenter_lC = static_cast<const Trk::Surface&>(mmC->surface(idgg_lC)).localToGlobal(lpos);
                         fout << "A-side: center of surface for gg " << igg << " 1st ch, " << mmA->numberOfStrips(idA) << "-th ch: r "
                              << chCenter_fA.perp() << " " << chCenter_lA.perp() << " phi " << chCenter_fA.phi() * invRad << " "
                              << chCenter_lA.phi() * invRad << " z " << chCenter_fA.z() << " " << chCenter_lA.z() << " "
@@ -1081,37 +1012,17 @@ void MuonGMCheck::checkreadoutstgcgeo() {
     ATH_MSG_INFO(" ***** Writing file " << fileName);
     const sTgcIdHelper& helper = m_idHelperSvc->stgcIdHelper();
 
-    for (int ieta = 0; ieta < MuonDetectorManager::NsTgStatEta / 2; ++ieta) {
-        int etaC = ieta - MuonDetectorManager::NsTgStEtaOffset;
-        int etaA = -etaC;
-        int iSL = 0;  // large sectors
-        for (int iphi = 0; iphi < MuonDetectorManager::NsTgStatPhi; ++iphi) {
-            int iphi8 = iphi / 2 + 1;
-            for (int iml = 0; iml < 2; ++iml) {
+    for (int ieta = helper.stationEtaMin(); ieta <= helper.stationEtaMax(); ++ieta) {
+        if (ieta ==0) continue;
+        for (int iphi = helper.stationPhiMin(); iphi <= helper.stationPhiMax(); ++iphi) {
+            for (int iml = 1; iml <= 2; ++iml) {
                 // first large
-                fout << " ieta, iphi, iml, " << ieta << " " << iphi << " " << iml << " --- iphi8  =" << iphi8;
-                if (iphi % 2 != 0) {
-                    iSL = 1;
-                    fout << " iSL = " << iSL << " i.e. Small sector " << std::endl;
-                } else {
-                    iSL = 0;
-                    fout << " iSL = " << iSL << " i.e. Large sector " << std::endl;
-                }
-                fout << "------------------------------------- ISL, etaC, iphi8, ml " << iSL << " " << etaC << " " << iphi8 << " "
-                     << iml + 1 << std::endl;
-                const Identifier idc = helper.channelID(iSL, etaC, iphi8, iml + 1, 1, 0 ,1);
+                fout << " ieta, iphi, iml, " << ieta << " " << iphi << " " << iml << std::endl;
+                const Identifier idc = helper.channelID("STL", ieta, iphi , iml, 1, 0 ,1);
                 const sTgcReadoutElement* mmC = p_MuonMgr->getsTgcReadoutElement(idc);
-                fout << "------------------------------------- ISL, etaA, iphi8, ml " << iSL << " " << etaA << " " << iphi8 << " "
-                     << iml + 1 << std::endl;
-                const Identifier ida = helper.channelID(iSL, etaA, iphi8, iml + 1, 1, 0 ,1);
+                const Identifier ida = helper.channelID("STS", ieta, iphi , iml, 1, 0 ,1);
                 const sTgcReadoutElement* mmA = p_MuonMgr->getsTgcReadoutElement(ida);
 
-                if (!mmC)
-                    ATH_MSG_INFO(" Something not found on the C side - ISL, etaC, iphi8, ml " << iSL << " " << etaC << " " << iphi8 << " "
-                                                                                              << iml + 1);
-                if (!mmA)
-                    ATH_MSG_INFO(" Something not found in the A side - ISL, etaA, iphi8, ml " << iSL << " " << etaA << " " << iphi8 << " "
-                                                                                              << iml + 1);
                 if (mmC && mmA) {
                     Identifier idA = mmA->identify();
                     Identifier idC = mmC->identify();
@@ -1129,8 +1040,8 @@ void MuonGMCheck::checkreadoutstgcgeo() {
                          << std::endl;
                     fout << "# of gas gaps = " << helper.gasGapMax(idA) - helper.gasGapMin(idA) + 1 << std::endl;
 
-                    Amg::Vector3D chCenterC = (mmC->absTransform()) * Zero;
-                    Amg::Vector3D chCenterA = (mmA->absTransform()) * Zero;
+                    Amg::Vector3D chCenterC = (mmC->absTransform()).translation();
+                    Amg::Vector3D chCenterA = (mmA->absTransform()).translation();
                     fout << "center of the chamber on the A-side = " << chCenterA << " cyl coord (r,phi)-> " << chCenterA.perp() << " "
                          << chCenterA.phi() * invRad << std::endl;
                     fout << "center of the chamber on the C-side = " << chCenterC << " cyl coord (r,phi)-> " << chCenterC.perp() << " "
@@ -1166,259 +1077,240 @@ void MuonGMCheck::checkreadoutmdtgeo() {
 
     bool doHeader = true;
 
-    for (int sname_index = 0; sname_index < MuonDetectorManager::NMdtStatType; ++sname_index) {
-        for (int seta_index = 0; seta_index < MuonDetectorManager::NMdtStatEta; ++seta_index) {
-            for (int sphi_index = 0; sphi_index < MuonDetectorManager::NMdtStatPhi; ++sphi_index) {
-                bool doChHeader = true;
-                for (int dbr_index = 0; dbr_index < MuonDetectorManager::NMdtMultilayer; ++dbr_index) {
-                    bool isValid = false;
-                    const Identifier readout_ident = getMdtIdentifier(sname_index, seta_index, sphi_index, dbr_index, isValid);
-                    if (!isValid) {
-                        ATH_MSG_DEBUG(__FILE__<<":"<<__LINE__<<" Failed to create a valid Mdt identifier from " << sname_index << "," << seta_index << ","
-                                                                                        << sphi_index << "," << dbr_index);
+    for (unsigned int hashInt = 0; hashInt < MuonDetectorManager::MdtRElMaxHash; ++ hashInt) {
+        bool doChHeader = true;
+        const IdentifierHash hash{hashInt};
+        const MdtReadoutElement* mdt = p_MuonMgr->getMdtReadoutElement(hashInt);
+        if (!mdt) continue;
+
+        fout << " ///////////////////// Found a MdtReadoutElement " << std::endl;
+        Identifier idr = mdt->identify();
+        fout << " its offline hash Id = " << mdt->identifyHash() << std::endl;
+        fout << " its offline Id = " << m_idHelperSvc->toString(idr)
+                << " ////////////////// belongs to module " << mdt->getTechnologyName() << "/" << mdt->getStationName();
+        if (mdt->hasCutouts())
+            fout << " ---- it HAS CUTOUTS" << std::endl;
+        else
+            fout << std::endl;
+
+        // here get B-line
+        const BLinePar* bLine = nullptr;
+        bLine = mdt->getBLinePar();  //
+
+        Identifier idp = m_idHelperSvc->mdtIdHelper().parentID(idr);
+        fout << "      parent Id = " << m_idHelperSvc->toString(idp) << std::endl;
+
+        const MuonStation* pms = mdt->parentMuonStation();
+
+        if (mdt->getStationName() == "BIL2" && mdt->getStationPhi() == 3 && mdt->getStationEta() == 1) {
+            fout << " ^^^^^^^^^^^^^^^^^ start checking transform to amdb lrs MULTILAYER = " << mdt->getMultilayer()
+                    << std::endl;
+            fout << " center in the parent station RF " << mdt->toParentStation().translation() << std::endl;
+            Amg::Transform3D gToStation = mdt->GlobalToAmdbLRSTransform();
+            for (int tl = 1; tl <= mdt->getNLayers(); tl++) {
+                fout << " tube layer = " << tl << std::endl;
+                for (int tube = 1; tube < mdt->getNtubesperlayer(); tube++) {
+                    Identifier chid = m_idHelperSvc->mdtIdHelper().channelID(idp, mdt->getMultilayer(), tl, tube);
+                    Amg::Vector3D locPos = gToStation * mdt->tubePos(chid);
+                    fout << " locPos = " << locPos << std::endl;
+                }
+            }
+            fout << " ^^^^^^^^^^^^^^^^^ end   checking transform to amdb lrs " << std::endl;
+        }
+
+        fout << " Multilayer    = " << mdt->getMultilayer();
+        fout << " N tube layers = " << mdt->getNLayers();
+        fout << "   tubes/layer = " << mdt->getNtubesperlayer() << std::endl;
+
+        Amg::Vector3D elc = mdt->globalPosition();
+        fout << " Element centre is at " << elc << " cyl. coords R,phi,Z " << elc.perp() << " " << elc.phi() << " " << elc.z()
+                << std::endl;
+
+        Identifier chid;
+        for (int tl = 1; tl <= mdt->getNLayers(); tl++) {
+            fout << " A new tube layer " << tl << std::endl;
+            int tubeStep = 1;
+            if (m_check_first_last == 1) tubeStep = mdt->getNtubesperlayer() - 1;
+            if (m_check_first_last == 2) tubeStep = int(mdt->getNtubesperlayer() / 2.);
+            if (m_check_first_last > 2) tubeStep = m_check_first_last;
+            if (mdt->hasCutouts()) tubeStep = 1;
+            for (int tube = 1; tube < mdt->getNtubesperlayer() + 1;) {
+                if (mdt->hasCutouts()) {  // check that the tube exists if there are cutouts
+                    PVConstLink cv = mdt->getMaterialGeom();
+                    int nGrandchildren = cv->getNChildVols();
+                    if (nGrandchildren <= 0) continue;
+                    bool tubefound = false;
+                    for (unsigned int kk = 0; kk < cv->getNChildVols(); kk++) {
+                        int tubegeo = cv->getIdOfChildVol(kk) % maxNTubesPerLayer;
+                        int layergeo = (cv->getIdOfChildVol(kk) - tubegeo) / maxNTubesPerLayer;
+                        if (tubegeo == tube && layergeo == tl) {
+                            tubefound = true;
+                            break;
+                        }
+                        if (layergeo > tl) break;
+                    }
+                    if (!tubefound) {
+                        tube += tubeStep;
                         continue;
                     }
+                }
+                chid = m_idHelperSvc->mdtIdHelper().channelID(idp, mdt->getMultilayer(), tl, tube);
+                fout << m_idHelperSvc->toString(chid) << " wire global pos " << mdt->tubePos(chid);
+                fout << " Tube length is " << mdt->tubeLength(chid);
+                if (mdt->hasCutouts())
+                    fout << " HAS CUTOUTS" << std::endl;
+                else
+                    fout << std::endl;
+                
+                // check B-lines
+                if (m_check_blines) {
+                    double zRO = mdt->signedRODistanceFromTubeCentre(chid);
+                    double halfTubeL = mdt->getTubeLength(tl, tube) / 2.;
 
-                    const MdtReadoutElement* mdt = p_MuonMgr->getMdtReadoutElement(readout_ident);
-                    if (!mdt) continue;
+                    double z1000RO = 1000.;
+                    if (zRO < 0) z1000RO = -1000.;
+                    Amg::Vector3D pzRO = mdt->transform(chid) * Amg::Vector3D(0., 0., zRO);
+                    Amg::Vector3D pzHV = mdt->transform(chid) * Amg::Vector3D(0., 0., -zRO);
+                    Amg::Vector3D pzEPsplus = mdt->transform(chid) * Amg::Vector3D(0., 0., halfTubeL);
+                    Amg::Vector3D pzEPsminus = mdt->transform(chid) * Amg::Vector3D(0., 0., -halfTubeL);
+                    Amg::Vector3D pzEPstmp;
+                    double pzROamdbS = (mdt->GlobalToAmdbLRSCoords(pzRO)).x();
+                    if (pzROamdbS < 0) {
+                        pzEPstmp = pzEPsminus;
+                        pzEPsminus = pzEPsplus;
+                        pzEPsplus = pzEPstmp;
+                    }
+                    Amg::Vector3D pz0 = mdt->center(chid);
+                    fout << " point on the wire at 1m from the center @ RO side "
+                            << mdt->transform(chid) * Amg::Vector3D(0., 0., z1000RO) << std::endl;
+                    fout << " point on the wire at 1m from the center @ HV side "
+                            << mdt->transform(chid) * Amg::Vector3D(0., 0., -z1000RO) << std::endl;
+                    fout << " RO side tube end-point                            " << pzRO << std::endl;
+                    fout << " HV side tube end-point                            " << pzHV << std::endl;
+                    fout << " s+ half-tube end-point                            " << pzEPsplus << std::endl;
+                    fout << " s- half-tube end-point                            " << pzEPsminus << std::endl;
+                    if (doHeader) {
+                        doHeader = false;
+                        fendpoints << "=================================================" << std::endl;
 
-                    fout << " ///////////////////// Found a MdtReadoutElement for indices = " << sname_index << " " << seta_index << " "
-                         << sphi_index << " " << dbr_index << std::endl;
-                    Identifier idr = mdt->identify();
-                    fout << " its offline hash Id = " << mdt->identifyHash() << std::endl;
-                    fout << " its offline Id = " << m_idHelperSvc->mdtIdHelper().show_to_string(idr)
-                         << " ////////////////// belongs to module " << mdt->getTechnologyName() << "/" << mdt->getStationName();
-                    if (mdt->hasCutouts())
-                        fout << " ---- it HAS CUTOUTS" << std::endl;
-                    else
-                        fout << std::endl;
+                        fendpoints << "   Atlas id                                 s+ end-point x,y,z               center "
+                                        "x,y,z                                s-  end-point x,y,z    halfTubeLength"
+                                    << std::endl;
+                        fendpoints << "=================================================" << std::endl;
+                    }
+                    if (doChHeader) {
+                        doChHeader = false;
 
-                    // here get B-line
-                    const BLinePar* bLine = nullptr;
-                    bLine = mdt->getBLinePar();  //
-
-                    Identifier idp = m_idHelperSvc->mdtIdHelper().parentID(idr);
-                    fout << "      parent Id = " << m_idHelperSvc->mdtIdHelper().show_to_string(idp) << std::endl;
-
-                    const MuonStation* pms = mdt->parentMuonStation();
-
-                    if (mdt->getStationName() == "BIL2" && mdt->getStationPhi() == 3 && mdt->getStationEta() == 1) {
-                        fout << " ^^^^^^^^^^^^^^^^^ start checking transform to amdb lrs MULTILAYER = " << mdt->getMultilayer()
-                             << std::endl;
-                        fout << " center in the parent station RF " << mdt->toParentStation() * Zero << std::endl;
-                        Amg::Transform3D gToStation = mdt->GlobalToAmdbLRSTransform();
-                        for (int tl = 1; tl <= mdt->getNLayers(); tl++) {
-                            fout << " tube layer = " << tl << std::endl;
-                            for (int tube = 1; tube < mdt->getNtubesperlayer(); tube++) {
-                                Identifier chid = m_idHelperSvc->mdtIdHelper().channelID(idp, mdt->getMultilayer(), tl, tube);
-                                Amg::Vector3D locPos = gToStation * mdt->tubePos(chid);
-                                const Amg::Vector3D locTubePos = mdt->AmdbLRStubePos(chid);
-                                fout << " locPos = " << locPos << " locTubePos " << locTubePos << std::endl;
-                            }
+                        fendpoints << " ----------- New MDT Station --------- id = "
+                                    << m_idHelperSvc->mdtIdHelper().print_to_string(chid)
+                                    << "----------------------------------------------------------------------- " << std::endl;
+                        fendpoints << " A-line in use is s,z,t rots,z,t " << std::setw(10) << setiosflags(std::ios::fixed)
+                                    << std::setprecision(7) << pms->getALine_tras() << " " << pms->getALine_traz() << " "
+                                    << pms->getALine_trat() << " " << pms->getALine_rots() << " " << pms->getALine_rotz() << " "
+                                    << pms->getALine_rott() << std::setw(10) << setiosflags(std::ios::fixed)
+                                    << std::setprecision(4) << std::endl;
+                        if (!bLine)
+                            fendpoints << m_idHelperSvc->toString(chid) << " B-line is NOT defined "
+                                        << std::endl;
+                        else {
+                            fendpoints << m_idHelperSvc->toString(chid)
+                                        << " B-line in use is: bz,bp,bn,sp,sn,tw,pg,tr,eg,ep,en  " << std::setw(10)
+                                        << setiosflags(std::ios::fixed) << std::setprecision(7) << bLine->bz() << " "
+                                        << bLine->bp() << " " << bLine->bn() << " " << bLine->sp() << " " << bLine->sn() << " "
+                                        << bLine->tw() << " " << bLine->pg() << " " << bLine->tr() << " " << bLine->eg() << " "
+                                        << bLine->ep() << " " << bLine->en() << std::setw(10) << setiosflags(std::ios::fixed)
+                                        << std::setprecision(4) << std::endl;
                         }
-                        fout << " ^^^^^^^^^^^^^^^^^ end   checking transform to amdb lrs " << std::endl;
+                        if (mdt->barrel())
+                            fendpoints << m_idHelperSvc->toString(chid)
+                                        << " MDT envelop Ssize, LongSsize, Rsize=Height, Zsize=Length " << pms->Ssize() << " "
+                                        << pms->LongSsize() << " " << pms->RsizeMdtStation() << " " << pms->ZsizeMdtStation()
+                                        << std::endl;
+                        else
+                            fendpoints << m_idHelperSvc->toString(chid)
+                                        << " MDT envelop Ssize, LongSsize, Zsize=Height, Rsize=Length " << pms->Ssize() << " "
+                                        << pms->LongSsize() << " " << pms->ZsizeMdtStation() << " " << pms->RsizeMdtStation()
+                                        << std::endl;
+                        HepGeom::Point3D<double> temp = pms->getUpdatedBlineFixedPointInAmdbLRS();
+                        Amg::Vector3D bLineFixedPointAMDBl(temp[0], temp[1], temp[2]);
+                        Amg::Vector3D aLineFixedPoint = mdt->AmdbLRSToGlobalCoords(Amg::Vector3D::Zero());
+                        Amg::Vector3D bLineFixedPoint = mdt->AmdbLRSToGlobalCoords(bLineFixedPointAMDBl);
+                        fendpoints << m_idHelperSvc->toString(chid)
+                                    << " A-line szt frame origine:               " << std::setw(15)
+                                    << setiosflags(std::ios::fixed) << std::setprecision(4) << " " << aLineFixedPoint.x() << " "
+                                    << aLineFixedPoint.y() << " " << aLineFixedPoint.z() << std::endl;
+                        fendpoints << m_idHelperSvc->toString(chid)
+                                    << " B-line fixed point in A-line szt frame: " << std::setw(15)
+                                    << setiosflags(std::ios::fixed) << std::setprecision(4) << " " << bLineFixedPointAMDBl.x()
+                                    << " " << bLineFixedPointAMDBl.y() << " " << bLineFixedPointAMDBl.z() << std::endl;
+                        fendpoints << m_idHelperSvc->toString(chid)
+                                    << " B-line fixed point:                     " << std::setw(15)
+                                    << setiosflags(std::ios::fixed) << std::setprecision(4) << " " << bLineFixedPoint.x() << " "
+                                    << bLineFixedPoint.y() << " " << bLineFixedPoint.z() << std::endl;
                     }
 
-                    fout << " Multilayer    = " << mdt->getMultilayer();
-                    fout << " N tube layers = " << mdt->getNLayers();
-                    fout << "   tubes/layer = " << mdt->getNtubesperlayer() << std::endl;
+                    fendpoints << std::setw(20) << setiosflags(std::ios::fixed)
+                                << m_idHelperSvc->toString(chid) << "     s+ " << std::setw(12)
+                                << setiosflags(std::ios::fixed) << std::setprecision(4) << " " << pzEPsplus.x() << " "
+                                << pzEPsplus.y() << " " << pzEPsplus.z() << "   "
+                                << "     s=0 " << std::setw(12) << setiosflags(std::ios::fixed) << std::setprecision(4) << " "
+                                << pz0.x() << " " << pz0.y() << " " << pz0.z() << "     s- " << std::setw(12)
+                                << setiosflags(std::ios::fixed) << std::setprecision(4) << " " << pzEPsminus.x() << " "
+                                << pzEPsminus.y() << " " << pzEPsminus.z() << "    halfTubeLength "
+                                << halfTubeL  //<<" "<<pzROamdbS
+                                << std::endl;
 
-                    Amg::Vector3D elc = mdt->globalPosition();
-                    fout << " Element centre is at " << elc << " cyl. coords R,phi,Z " << elc.perp() << " " << elc.phi() << " " << elc.z()
-                         << std::endl;
+                    fendpoints2 << boost::format(
+                                        "%10d %25s   %12.4f %12.4f %12.4f   %12.4f %12.4f %12.4f   %12.4f %12.4f %12.4f\n") %
+                                        m_fixedIdTool->idToFixedId(chid).getIdInt() %
+                                        m_idHelperSvc->toString(chid) % pzEPsplus.x() % pzEPsplus.y() %
+                                        pzEPsplus.z() % pz0.x() % pz0.y() % pz0.z() % pzEPsminus.x() % pzEPsminus.y() %
+                                        pzEPsminus.z();
 
-                    Identifier chid;
-                    for (int tl = 1; tl <= mdt->getNLayers(); tl++) {
-                        fout << " A new tube layer " << tl << std::endl;
-                        int tubeStep = 1;
-                        if (m_check_first_last == 1) tubeStep = mdt->getNtubesperlayer() - 1;
-                        if (m_check_first_last == 2) tubeStep = int(mdt->getNtubesperlayer() / 2.);
-                        if (m_check_first_last > 2) tubeStep = m_check_first_last;
-                        if (mdt->hasCutouts()) tubeStep = 1;
-                        for (int tube = 1; tube < mdt->getNtubesperlayer() + 1;) {
-                            if (mdt->hasCutouts()) {  // check that the tube exists if there are cutouts
-                                PVConstLink cv = mdt->getMaterialGeom();
-                                int nGrandchildren = cv->getNChildVols();
-                                if (nGrandchildren <= 0) continue;
-                                bool tubefound = false;
-                                for (unsigned int kk = 0; kk < cv->getNChildVols(); kk++) {
-                                    int tubegeo = cv->getIdOfChildVol(kk) % maxNTubesPerLayer;
-                                    int layergeo = (cv->getIdOfChildVol(kk) - tubegeo) / maxNTubesPerLayer;
-                                    if (tubegeo == tube && layergeo == tl) {
-                                        tubefound = true;
-                                        break;
-                                    }
-                                    if (layergeo > tl) break;
-                                }
-                                if (!tubefound) {
-                                    tube += tubeStep;
-                                    continue;
-                                }
-                            }
-                            chid = m_idHelperSvc->mdtIdHelper().channelID(idp, mdt->getMultilayer(), tl, tube);
-                            fout << m_idHelperSvc->mdtIdHelper().show_to_string(chid) << " wire global pos " << mdt->tubePos(chid);
-                            fout << " Tube length is " << mdt->tubeLength(chid);
-                            if (mdt->hasCutouts())
-                                fout << " HAS CUTOUTS" << std::endl;
-                            else
-                                fout << std::endl;
-                            if (!m_minimal_checks)
-                                fout << " Amdb LRS tubePos " << mdt->AmdbLRStubePos(chid) << " transformed to global "
-                                     << Amg::CLHEPTransformToEigen(pms->getAmdbLRSToGlobal()) * mdt->AmdbLRStubePos(chid) << std::endl;
-                            if (m_check_surfaces) {}
-                            // check B-lines
-                            if (m_check_blines) {
-                                double zRO = mdt->signedRODistanceFromTubeCentre(chid);
-                                double halfTubeL = mdt->getTubeLength(tl, tube) / 2.;
-
-                                double z1000RO = 1000.;
-                                if (zRO < 0) z1000RO = -1000.;
-                                Amg::Vector3D pzRO = mdt->transform(chid) * Amg::Vector3D(0., 0., zRO);
-                                Amg::Vector3D pzHV = mdt->transform(chid) * Amg::Vector3D(0., 0., -zRO);
-                                Amg::Vector3D pzEPsplus = mdt->transform(chid) * Amg::Vector3D(0., 0., halfTubeL);
-                                Amg::Vector3D pzEPsminus = mdt->transform(chid) * Amg::Vector3D(0., 0., -halfTubeL);
-                                Amg::Vector3D pzEPstmp;
-                                double pzROamdbS = (mdt->GlobalToAmdbLRSCoords(pzRO)).x();
-                                if (pzROamdbS < 0) {
-                                    pzEPstmp = pzEPsminus;
-                                    pzEPsminus = pzEPsplus;
-                                    pzEPsplus = pzEPstmp;
-                                }
-                                Amg::Vector3D pz0 = mdt->center(chid);
-                                fout << " point on the wire at 1m from the center @ RO side "
-                                     << mdt->transform(chid) * Amg::Vector3D(0., 0., z1000RO) << std::endl;
-                                fout << " point on the wire at 1m from the center @ HV side "
-                                     << mdt->transform(chid) * Amg::Vector3D(0., 0., -z1000RO) << std::endl;
-                                fout << " RO side tube end-point                            " << pzRO << std::endl;
-                                fout << " HV side tube end-point                            " << pzHV << std::endl;
-                                fout << " s+ half-tube end-point                            " << pzEPsplus << std::endl;
-                                fout << " s- half-tube end-point                            " << pzEPsminus << std::endl;
-                                if (doHeader) {
-                                    doHeader = false;
-                                    fendpoints << "=================================================" << std::endl;
-
-                                    fendpoints << "   Atlas id                                 s+ end-point x,y,z               center "
-                                                  "x,y,z                                s-  end-point x,y,z    halfTubeLength"
-                                               << std::endl;
-                                    fendpoints << "=================================================" << std::endl;
-                                }
-                                if (doChHeader) {
-                                    doChHeader = false;
-
-                                    fendpoints << " ----------- New MDT Station --------- id = "
-                                               << m_idHelperSvc->mdtIdHelper().print_to_string(chid)
-                                               << "----------------------------------------------------------------------- " << std::endl;
-                                    fendpoints << " A-line in use is s,z,t rots,z,t " << std::setw(10) << setiosflags(std::ios::fixed)
-                                               << std::setprecision(7) << pms->getALine_tras() << " " << pms->getALine_traz() << " "
-                                               << pms->getALine_trat() << " " << pms->getALine_rots() << " " << pms->getALine_rotz() << " "
-                                               << pms->getALine_rott() << std::setw(10) << setiosflags(std::ios::fixed)
-                                               << std::setprecision(4) << std::endl;
-                                    if (!bLine)
-                                        fendpoints << m_idHelperSvc->mdtIdHelper().show_to_string(chid) << " B-line is NOT defined "
-                                                   << std::endl;
-                                    else {
-                                        fendpoints << m_idHelperSvc->mdtIdHelper().show_to_string(chid)
-                                                   << " B-line in use is: bz,bp,bn,sp,sn,tw,pg,tr,eg,ep,en  " << std::setw(10)
-                                                   << setiosflags(std::ios::fixed) << std::setprecision(7) << bLine->bz() << " "
-                                                   << bLine->bp() << " " << bLine->bn() << " " << bLine->sp() << " " << bLine->sn() << " "
-                                                   << bLine->tw() << " " << bLine->pg() << " " << bLine->tr() << " " << bLine->eg() << " "
-                                                   << bLine->ep() << " " << bLine->en() << std::setw(10) << setiosflags(std::ios::fixed)
-                                                   << std::setprecision(4) << std::endl;
-                                    }
-                                    if (mdt->barrel())
-                                        fendpoints << m_idHelperSvc->mdtIdHelper().show_to_string(chid)
-                                                   << " MDT envelop Ssize, LongSsize, Rsize=Height, Zsize=Length " << pms->Ssize() << " "
-                                                   << pms->LongSsize() << " " << pms->RsizeMdtStation() << " " << pms->ZsizeMdtStation()
-                                                   << std::endl;
-                                    else
-                                        fendpoints << m_idHelperSvc->mdtIdHelper().show_to_string(chid)
-                                                   << " MDT envelop Ssize, LongSsize, Zsize=Height, Rsize=Length " << pms->Ssize() << " "
-                                                   << pms->LongSsize() << " " << pms->ZsizeMdtStation() << " " << pms->RsizeMdtStation()
-                                                   << std::endl;
-                                    HepGeom::Point3D<double> temp = pms->getUpdatedBlineFixedPointInAmdbLRS();
-                                    Amg::Vector3D bLineFixedPointAMDBl(temp[0], temp[1], temp[2]);
-                                    Amg::Vector3D aLineFixedPoint = mdt->AmdbLRSToGlobalCoords(Zero);
-                                    Amg::Vector3D bLineFixedPoint = mdt->AmdbLRSToGlobalCoords(bLineFixedPointAMDBl);
-                                    fendpoints << m_idHelperSvc->mdtIdHelper().show_to_string(chid)
-                                               << " A-line szt frame origine:               " << std::setw(15)
-                                               << setiosflags(std::ios::fixed) << std::setprecision(4) << " " << aLineFixedPoint.x() << " "
-                                               << aLineFixedPoint.y() << " " << aLineFixedPoint.z() << std::endl;
-                                    fendpoints << m_idHelperSvc->mdtIdHelper().show_to_string(chid)
-                                               << " B-line fixed point in A-line szt frame: " << std::setw(15)
-                                               << setiosflags(std::ios::fixed) << std::setprecision(4) << " " << bLineFixedPointAMDBl.x()
-                                               << " " << bLineFixedPointAMDBl.y() << " " << bLineFixedPointAMDBl.z() << std::endl;
-                                    fendpoints << m_idHelperSvc->mdtIdHelper().show_to_string(chid)
-                                               << " B-line fixed point:                     " << std::setw(15)
-                                               << setiosflags(std::ios::fixed) << std::setprecision(4) << " " << bLineFixedPoint.x() << " "
-                                               << bLineFixedPoint.y() << " " << bLineFixedPoint.z() << std::endl;
-                                }
-
-                                Amg::Vector3D amdbpos = mdt->AmdbLRStubePos(chid);
-                                fendpoints << "Amdb LRS rubePos " << amdbpos.x() << " " << amdbpos.y() << " " << amdbpos.z() << std::endl;
-                                fendpoints << std::setw(20) << setiosflags(std::ios::fixed)
-                                           << m_idHelperSvc->mdtIdHelper().show_to_string(chid) << "     s+ " << std::setw(12)
-                                           << setiosflags(std::ios::fixed) << std::setprecision(4) << " " << pzEPsplus.x() << " "
-                                           << pzEPsplus.y() << " " << pzEPsplus.z() << "   "
-                                           << "     s=0 " << std::setw(12) << setiosflags(std::ios::fixed) << std::setprecision(4) << " "
-                                           << pz0.x() << " " << pz0.y() << " " << pz0.z() << "     s- " << std::setw(12)
-                                           << setiosflags(std::ios::fixed) << std::setprecision(4) << " " << pzEPsminus.x() << " "
-                                           << pzEPsminus.y() << " " << pzEPsminus.z() << "    halfTubeLength "
-                                           << halfTubeL  //<<" "<<pzROamdbS
-                                           << std::endl;
-
-                                fendpoints2 << boost::format(
-                                                   "%10d %25s   %12.4f %12.4f %12.4f   %12.4f %12.4f %12.4f   %12.4f %12.4f %12.4f\n") %
-                                                   m_fixedIdTool->idToFixedId(chid).getIdInt() %
-                                                   m_idHelperSvc->mdtIdHelper().show_to_string(chid) % pzEPsplus.x() % pzEPsplus.y() %
-                                                   pzEPsplus.z() % pz0.x() % pz0.y() % pz0.z() % pzEPsminus.x() % pzEPsminus.y() %
-                                                   pzEPsminus.z();
-
-                                fout << " A-line in use is s,z,t rots,z,t " << std::setw(10) << setiosflags(std::ios::fixed)
-                                     << std::setprecision(7) << pms->getALine_tras() << " " << pms->getALine_traz() << " "
-                                     << pms->getALine_trat() << " " << pms->getALine_rots() << " " << pms->getALine_rotz() << " "
-                                     << pms->getALine_rott() << std::setw(10) << setiosflags(std::ios::fixed) << std::setprecision(4)
-                                     << std::endl;
-                                if (!bLine)
-                                    fout << " B-line is NOT defined " << std::endl;
-                                else {
-                                    fout << " B-line in use is: bz,bp,bn,sp,sn,tw,pg,tr,eg,ep,en  " << std::setw(10)
-                                         << setiosflags(std::ios::fixed) << std::setprecision(7) << bLine->bz() << " " << bLine->bp() << " "
-                                         << bLine->bn() << " " << bLine->sp() << " " << bLine->sn() << " " << bLine->tw() << " "
-                                         << bLine->pg() << " " << bLine->tr() << " " << bLine->eg() << " " << bLine->ep() << " "
-                                         << bLine->en() << std::setw(10) << setiosflags(std::ios::fixed) << std::setprecision(4)
-                                         << std::endl;
-                                }
-                            }
-                            if (m_check_first_last == 2 && tube == tubeStep)
-                                tube = mdt->getNtubesperlayer();
-                            else if (m_check_first_last == 2 && tube == 1)
-                                tube = tubeStep;
-                            else {
-                                tube += tubeStep;
-                            }
-                        }
-
-                        if (!m_minimal_checks) {
-                            // temporary
-                            Amg::Vector3D myPloc = Amg::Vector3D(0., 0., 10.);  //
-                            Amg::Vector3D myP = mdt->localToGlobalCoords(myPloc, chid);
-                            double distRO = mdt->tubeFrame_localROPos(chid).z();
-                            double distToRO = mdt->distanceFromRO(myP, chid);
-                            double propagationDistance = distToRO - mdt->RODistanceFromTubeCentre(chid);
-                            double position_along_wire = myPloc.z();
-                            double sign(-1.);
-                            if (distRO < 0.) sign = 1.;
-                            double propagation_delay = sign * position_along_wire;
-                            fout << " ***** distRO, distToRO, propagationDistance " << distRO << " " << distToRO << " "
-                                 << propagationDistance << " propagationDist (sim) " << propagation_delay
-                                 << " inner CLHEP::rad = " << mdt->innerTubeRadius() << std::endl;
-                            // end temporary
-                        }
+                    fout << " A-line in use is s,z,t rots,z,t " << std::setw(10) << setiosflags(std::ios::fixed)
+                            << std::setprecision(7) << pms->getALine_tras() << " " << pms->getALine_traz() << " "
+                            << pms->getALine_trat() << " " << pms->getALine_rots() << " " << pms->getALine_rotz() << " "
+                            << pms->getALine_rott() << std::setw(10) << setiosflags(std::ios::fixed) << std::setprecision(4)
+                            << std::endl;
+                    if (!bLine)
+                        fout << " B-line is NOT defined " << std::endl;
+                    else {
+                        fout << " B-line in use is: bz,bp,bn,sp,sn,tw,pg,tr,eg,ep,en  " << std::setw(10)
+                                << setiosflags(std::ios::fixed) << std::setprecision(7) << bLine->bz() << " " << bLine->bp() << " "
+                                << bLine->bn() << " " << bLine->sp() << " " << bLine->sn() << " " << bLine->tw() << " "
+                                << bLine->pg() << " " << bLine->tr() << " " << bLine->eg() << " " << bLine->ep() << " "
+                                << bLine->en() << std::setw(10) << setiosflags(std::ios::fixed) << std::setprecision(4)
+                                << std::endl;
                     }
                 }
+                if (m_check_first_last == 2 && tube == tubeStep)
+                    tube = mdt->getNtubesperlayer();
+                else if (m_check_first_last == 2 && tube == 1)
+                    tube = tubeStep;
+                else {
+                    tube += tubeStep;
+                }
+            }
+
+            if (!m_minimal_checks) {
+                // temporary
+                Amg::Vector3D myPloc = Amg::Vector3D(0., 0., 10.);  //
+                Amg::Vector3D myP = mdt->localToGlobalCoords(myPloc, chid);
+                double distRO = mdt->tubeFrame_localROPos(chid).z();
+                double distToRO = mdt->distanceFromRO(myP, chid);
+                double propagationDistance = distToRO - mdt->RODistanceFromTubeCentre(chid);
+                double position_along_wire = myPloc.z();
+                double sign(-1.);
+                if (distRO < 0.) sign = 1.;
+                double propagation_delay = sign * position_along_wire;
+                fout << " ***** distRO, distToRO, propagationDistance " << distRO << " " << distToRO << " "
+                        << propagationDistance << " propagationDist (sim) " << propagation_delay
+                        << " inner CLHEP::rad = " << mdt->innerTubeRadius() << std::endl;
+                // end temporary
             }
         }
     }
+    
     fout.close();
     if (m_check_blines) {
         fendpoints2 << std::flush;
@@ -1442,258 +1334,248 @@ void MuonGMCheck::checkreadouttgcgeo() {
     ATH_MSG_INFO(" ***** Writing file " << fileName);
     fout << setiosflags(std::ios::fixed) << std::setprecision(4) << std::endl;
 
-    for (int sname_index = 0; sname_index < MuonDetectorManager::NTgcStatType; ++sname_index) {
-        for (int seta_index = 5; seta_index < MuonDetectorManager::NTgcStatEta; ++seta_index) {
-            for (int sphi_index = 0; sphi_index < MuonDetectorManager::NTgcStatPhi; ++sphi_index) {
-                fout << " indices are " << sname_index << " " << seta_index << " " << sphi_index << std::endl;
+    for (unsigned int hashId = 0; hashId < MuonDetectorManager::TgcRElMaxHash; ++ hashId) {
+        const IdentifierHash hash{hashId};
+        const TgcReadoutElement* tgc = p_MuonMgr->getTgcReadoutElement(hashId);
+        if (!tgc) continue;
+        fout << " ///////////////////// Found a TgcReadoutElement " << std::endl;
+        Identifier idr = tgc->identify();
+        fout << " its offline hash Id = " << tgc->identifyHash() << std::endl;
+        fout << " its offline Id = " << m_idHelperSvc->toString(idr) << " ////////////////// belongs to module "
+                << tgc->getTechnologyName() << "/" << tgc->getStationName() << " stEta/stPhi " << tgc->getStationEta() << " "
+                << tgc->getStationPhi() << std::endl;
+        Identifier idp = m_idHelperSvc->tgcIdHelper().parentID(idr);
+        Identifier idp1 = m_idHelperSvc->tgcIdHelper().elementID(m_idHelperSvc->tgcIdHelper().stationName(idp),
+                                                                    -m_idHelperSvc->tgcIdHelper().stationEta(idp),
+                                                                    m_idHelperSvc->tgcIdHelper().stationPhi(idp));
+        fout << "      parent Id = " << m_idHelperSvc->toString(idp);
+        fout << " opposite stEta = " << m_idHelperSvc->toString(idp1);
+        const TgcReadoutElement* tgc1 = p_MuonMgr->getTgcReadoutElement(idp1);
+        if (!tgc1) {
+            ATH_MSG_FATAL(" TGC readout Element at z<0, with id = " << m_idHelperSvc->toString(idp1)
+                                                                    << " not found ");
+            ATH_MSG_FATAL(" is the geometry COMPLETE ? Any StationSelection active ? Exiting");
+            return;
+        }
+        fout << " its offline hash Id = " << tgc1->identifyHash() << std::endl;
 
-                bool isValid{false};
-                const Identifier readout_id = getTgcIdentifier(sname_index, seta_index, sphi_index, isValid);
-                if (!isValid) {
-                    ATH_MSG_DEBUG(__FILE__<<":"<<__LINE__<<" Failed to build a valid Tgc Identifier from " << sname_index << "," << seta_index << "," << sphi_index);
-                    continue;
+        const MuonStation* ms = tgc->parentMuonStation();
+        if (ms)
+            fout << "Parent MuonStation found for element at z>0" << std::endl;
+        else
+            fout << "Parent MuonStation NOT found for element " << m_idHelperSvc->toString(idp) << std::endl;
+
+        const MuonStation* ms1 = tgc1->parentMuonStation();
+        if (ms1)
+            fout << "Parent MuonStation found for element at z<0" << std::endl;
+        else
+            fout << "Parent MuonStation NOT found for element " << m_idHelperSvc->toString(idp1) << std::endl;
+
+        fout << " N gasgaps layers = " << tgc->NwirePlanes();
+        fout << " N strip planes   = " << tgc->NstripPlanes() << std::endl;
+
+        const TgcReadoutParams* rpar = tgc->getReadoutParams();
+        fout << "****** read type " << tgc->getReadoutType() << " getNGaps() " << tgc->getNGaps() << " d.a. " << rpar->nGaps()
+                << std::endl;
+        for (int ngg = 0; ngg < tgc->NwirePlanes(); ++ngg) {
+            fout << "****** getnGangs(gg) " << tgc->getNGangs(ngg + 1) << "  getnStrips(gg) " << tgc->getNStrips(ngg + 1)
+                    << std::endl;
+            fout << "****** getnWire(gg,1/2/3) " << tgc->getNWires(ngg + 1, 1) << "/" << tgc->getNWires(ngg + 1, 2) << "/"
+                    << tgc->getNWires(ngg + 1, 3) << " d.a. " << rpar->nWires(ngg + 1, 1) << "/" << rpar->nWires(ngg + 1, 2) << "/"
+                    << rpar->nWires(ngg + 1, 3) << std::endl;
+
+            Identifier idch = m_idHelperSvc->tgcIdHelper().channelID(idp, ngg + 1, 0, 1);
+            Amg::Vector3D ggcentre = tgc->localToGlobalCoords(Amg::Vector3D::Zero(), idch);
+            fout << " For Chamber id " << m_idHelperSvc->toString(idch) << " gasgap centre is " << ggcentre
+                    << std::endl;
+            idch = m_idHelperSvc->tgcIdHelper().channelID(idp1, ngg + 1, 0, 1);
+            ggcentre = tgc1->localToGlobalCoords(Amg::Vector3D::Zero(), idch);
+            fout << " For Chamber id " << m_idHelperSvc->toString(idch) << " gasgap centre is " << ggcentre
+                    << std::endl;
+            idch = m_idHelperSvc->tgcIdHelper().channelID(idp, ngg + 1, 1, 1);
+            ggcentre = tgc->localToGlobalCoords(Amg::Vector3D::Zero(), idch);
+            fout << " For Chamber id " << m_idHelperSvc->toString(idch) << " gasgap centre is " << ggcentre
+                    << std::endl;
+            idch = m_idHelperSvc->tgcIdHelper().channelID(idp1, ngg + 1, 1, 1);
+            ggcentre = tgc1->localToGlobalCoords(Amg::Vector3D::Zero(), idch);
+            fout << " For Chamber id " << m_idHelperSvc->toString(idch) << " gasgap centre is " << ggcentre
+                    << std::endl;
+
+            Identifier fg = m_idHelperSvc->tgcIdHelper().channelID(idp, ngg + 1, 0, 1);
+            Identifier lg = m_idHelperSvc->tgcIdHelper().channelID(idp, ngg + 1, 0, tgc->getNGangs(ngg + 1));
+            Identifier fgn = m_idHelperSvc->tgcIdHelper().channelID(idp1, ngg + 1, 0, 1);
+            Identifier lgn = m_idHelperSvc->tgcIdHelper().channelID(idp1, ngg + 1, 0, tgc1->getNGangs(ngg + 1));
+
+            Amg::Vector3D xfg = tgc->channelPos(fg);
+            Amg::Vector3D xlg = tgc->channelPos(lg);
+            Amg::Vector3D xfgn = tgc1->channelPos(fgn);
+            Amg::Vector3D xlgn = tgc1->channelPos(lgn);
+            fout << "\n gg " << ngg + 1 << " " << m_idHelperSvc->toString(fg)
+                    << "GM:: first eta gang z>0 r,p,z " << xfg.perp() << " " << xfg.phi() * invRad << " " << xfg.z() << " last "
+                    << xlg.perp() << " " << xlg.phi() * invRad << " " << xlg.z() << std::endl;
+            fout << "gg " << ngg + 1 << " " << m_idHelperSvc->toString(fgn) << "GM:: first eta gang z<0 r,p,z "
+                    << xfgn.perp() << " " << xfgn.phi() * invRad << " " << xfgn.z() << " last " << xlgn.perp() << " "
+                    << xlgn.phi() * invRad << " " << xlgn.z() << std::endl;
+
+            Identifier fs = m_idHelperSvc->tgcIdHelper().channelID(idp, ngg + 1, 1, 1);
+            Identifier ls = m_idHelperSvc->tgcIdHelper().channelID(idp, ngg + 1, 1, tgc->getNStrips(ngg + 1));
+            Identifier fsn = m_idHelperSvc->tgcIdHelper().channelID(idp1, ngg + 1, 1, 1);
+            Identifier lsn = m_idHelperSvc->tgcIdHelper().channelID(idp1, ngg + 1, 1, tgc1->getNStrips(ngg + 1));
+            xfg = tgc->channelPos(fs);
+            xlg = tgc->channelPos(ls);
+            xfgn = tgc1->channelPos(fsn);
+            xlgn = tgc1->channelPos(lsn);
+            fout << "\n gg " << ngg + 1 << " " << m_idHelperSvc->toString(fs)
+                    << "GM:: first phi strip z>0 r,p,z " << xfg.perp() << " " << xfg.phi() * invRad << " " << xfg.z() << " last "
+                    << xlg.perp() << " " << xlg.phi() * invRad << " " << xlg.z() << std::endl;
+            fout << "gg " << ngg + 1 << " " << m_idHelperSvc->toString(fsn) << "GM:: first phi strip z<0 r,p,z "
+                    << xfgn.perp() << " " << xfgn.phi() * invRad << " " << xfgn.z() << " last " << xlgn.perp() << " "
+                    << xlgn.phi() * invRad << " " << xlgn.z() << std::endl;
+            xfg = tgc->localChannelPos(fs);
+            xlg = tgc->localChannelPos(ls);
+            xfgn = tgc1->localChannelPos(fsn);
+            xlgn = tgc1->localChannelPos(lsn);
+            fout << "\n gg " << ngg + 1 << " " << m_idHelperSvc->toString(fs)
+                    << "GM:: first p_S local z>0 r,p,z " << xfg.perp() << " " << xfg.phi() * invRad << " " << xfg.z() << " last "
+                    << xlg.perp() << " " << xlg.phi() * invRad << " " << xlg.z() << std::endl;
+            fout << "gg " << ngg + 1 << " " << m_idHelperSvc->toString(fsn) << "GM:: first p_S local z<0 r,p,z "
+                    << xfgn.perp() << " " << xfgn.phi() * invRad << " " << xfgn.z() << " last " << xlgn.perp() << " "
+                    << xlgn.phi() * invRad << " " << xlgn.z() << std::endl;
+
+            if (m_check_surfaces) {
+                fout << "A-side: Phi surface centre = " << (tgc->surface(fs)).center() << std::endl;
+                fout << "A-side: Eta surface centre = " << (tgc->surface(fg)).center() << std::endl;
+                fout << "C-side: Phi surface centre = " << (tgc1->surface(fsn)).center() << std::endl;
+                fout << "C-side: Eta surface centre = " << (tgc1->surface(fgn)).center() << std::endl;
+                // A side: fs(phi view), fg(eta view)
+                fout << "A-side: tracking local x(phi) axis (surface->transform) = "
+                        << (tgc->surface(fs)).transform().linear() * Amg::Vector3D::UnitX() << std::endl;
+                fout << "A-side: tracking local y(phi) axis (surface->transform) = "
+                        << (tgc->surface(fs)).transform().linear() * Amg::Vector3D::UnitY()<< std::endl;
+                fout << "A-side: tracking local z(phi) axis (surface->transform) = "
+                        << (tgc->surface(fs)).transform().linear() * Amg::Vector3D::UnitZ() << std::endl;
+                Amg::Vector2D lpos(0., 0.);
+                fout << "A-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
+                fout << "A-side:                                 global    " << static_cast<const Trk::Surface&>(tgc->surface(fs)).localToGlobal(lpos)
+                        << std::endl;
+                lpos = Amg::Vector2D(100., 0.);
+                fout << "A-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
+                fout << "A-side:                                 global    " << static_cast<const Trk::Surface&>(tgc->surface(fs)).localToGlobal(lpos)
+                        << std::endl;
+                lpos = Amg::Vector2D(0., 100.);
+                fout << "A-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
+                fout << "A-side:                                 global    " << static_cast<const Trk::Surface&>(tgc->surface(fs)).localToGlobal(lpos)
+                        << std::endl;
+                // C side: fsn(phi view), fgn(eta view)
+                fout << "C-side: tracking local x(phi) axis (surface->transform) = "
+                        << (tgc1->surface(fsn)).transform().linear() * Amg::Vector3D::UnitX() << std::endl;
+                fout << "C-side: tracking local y(phi) axis (surface->transform) = "
+                        << (tgc1->surface(fsn)).transform().linear() * Amg::Vector3D::UnitY()<< std::endl;
+                fout << "C-side: tracking local z(phi) axis (surface->transform) = "
+                        << (tgc1->surface(fsn)).transform().linear() * Amg::Vector3D::UnitZ() << std::endl;
+                lpos = Amg::Vector2D(0., 0.);
+                fout << "C-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
+                fout << "C-side:                                 global    "
+                        << static_cast<const Trk::Surface&>(tgc1->surface(fsn)).localToGlobal(lpos) << std::endl;
+                lpos = Amg::Vector2D(100., 0.);
+                fout << "C-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
+                fout << "C-side:                                 global    "
+                        << static_cast<const Trk::Surface&>(tgc1->surface(fsn)).localToGlobal(lpos) << std::endl;
+                lpos = Amg::Vector2D(0., 100.);
+                fout << "C-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
+                fout << "C-side:                                 global    "
+                        << static_cast<const Trk::Surface&>(tgc1->surface(fsn)).localToGlobal(lpos) << std::endl;
+                // A side: fs(phi view), fg(eta view)
+                fout << "A-side: tracking local x(eta) axis (surface->transform) = "
+                        << (tgc->surface(fg)).transform().linear() * Amg::Vector3D::UnitX() << std::endl;
+                fout << "A-side: tracking local y(eta) axis (surface->transform) = "
+                        << (tgc->surface(fg)).transform().linear() * Amg::Vector3D::UnitY()<< std::endl;
+                fout << "A-side: tracking local z(eta) axis (surface->transform) = "
+                        << (tgc->surface(fg)).transform().linear() * Amg::Vector3D::UnitZ() << std::endl;
+                lpos = Amg::Vector2D(0., 0.);
+                fout << "A-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
+                fout << "A-side:                                 global    " << static_cast<const Trk::Surface&>(tgc->surface(fg)).localToGlobal(lpos)
+                        << std::endl;
+                lpos = Amg::Vector2D(100., 0.);
+                fout << "A-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
+                fout << "A-side:                                 global    " << static_cast<const Trk::Surface&>(tgc->surface(fg)).localToGlobal(lpos)
+                        << std::endl;
+                lpos = Amg::Vector2D(0., 100.);
+                fout << "A-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
+                fout << "A-side:                                 global    " << static_cast<const Trk::Surface&>(tgc->surface(fg)).localToGlobal(lpos)
+                        << std::endl;
+                // C side: fsn(phi view), fgn(eta view)
+                fout << "C-side: tracking local x(eta) axis (surface->transform) = "
+                        << (tgc1->surface(fgn)).transform().linear() * Amg::Vector3D::UnitX() << std::endl;
+                fout << "C-side: tracking local y(eta) axis (surface->transform) = "
+                        << (tgc1->surface(fgn)).transform().linear() * Amg::Vector3D::UnitY()<< std::endl;
+                fout << "C-side: tracking local z(eta) axis (surface->transform) = "
+                        << (tgc1->surface(fgn)).transform().linear() * Amg::Vector3D::UnitZ() << std::endl;
+                lpos = Amg::Vector2D(0., 0.);
+                fout << "C-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
+                fout << "C-side:                                 global    "
+                        << static_cast<const Trk::Surface&>(tgc1->surface(fgn)).localToGlobal(lpos) << std::endl;
+                lpos = Amg::Vector2D(100., 0.);
+                fout << "C-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
+                fout << "C-side:                                 global    "
+                        << static_cast<const Trk::Surface&>(tgc1->surface(fgn)).localToGlobal(lpos) << std::endl;
+                lpos = Amg::Vector2D(0., 100.);
+                fout << "C-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
+                fout << "C-side:                                 global    "
+                        << static_cast<const Trk::Surface&>(tgc1->surface(fgn)).localToGlobal(lpos) << std::endl;
+            }
+
+            if (m_check_surfaces_details) {
+                for (int strip = 1; strip <= tgc->getNStrips(ngg + 1); strip++) {
+                    Identifier chid = m_idHelperSvc->tgcIdHelper().channelID(idp, ngg + 1, 1, strip);
+                    Identifier chid1 = m_idHelperSvc->tgcIdHelper().channelID(idp1, ngg + 1, 1, strip);
+                    // Global position
+                    Amg::Vector3D tempGlobalPosition = tgc->channelPos(chid);
+                    Amg::Vector3D tempGlobalPosition1 = tgc1->channelPos(chid1);
+                    fout << "Z>0 - GG: " << ngg << " Phi strip: " << strip << " glob.pos. " << tempGlobalPosition.x() << ", "
+                            << tempGlobalPosition.y() << ", " << tempGlobalPosition.z() << " ";
+                    // Local position
+                    std::optional<Amg::Vector2D> locPosition = tgc->surface(chid).Trk::Surface::globalToLocal(tempGlobalPosition);
+                    fout << " Z>0 - loc.pos. " << locPosition->x() << " " << locPosition->y();
+                    const Amg::Vector3D gPtrk = static_cast<const Trk::Surface&>(tgc->surface(chid)).localToGlobal(*locPosition);
+                    fout << " Z>0 - Trk::glob.pos. " << gPtrk.x() << " " << gPtrk.y() << " " << gPtrk.z() << std::endl;
+                    // global
+                    fout << "Z<0 - GG: " << ngg << " Phi strip: " << strip << " glob.pos. " << tempGlobalPosition1.x() << ", "
+                            << tempGlobalPosition1.y() << ", " << tempGlobalPosition1.z() << " ";
+                    std::optional<Amg::Vector2D> locPosition1 =
+                        tgc1->surface(chid1).Trk::Surface::globalToLocal(tempGlobalPosition1);
+                    fout << " Z<0 - loc.pos. " << locPosition1->x() << " " << locPosition1->y();
+                    const Amg::Vector3D gPtrk1 = static_cast<const Trk::Surface&>(tgc1->surface(chid1)).localToGlobal(*locPosition1);
+                    fout << " Z<0 - Trk::glob.pos. " << gPtrk1.x() << " " << gPtrk1.y() << " " << gPtrk1.z() << std::endl;
                 }
-                const TgcReadoutElement* tgc = p_MuonMgr->getTgcReadoutElement(readout_id);
-                if (!tgc) continue;
-                fout << " ///////////////////// Found a TgcReadoutElement for indices = " << sname_index << " " << seta_index << " "
-                     << sphi_index << " " << std::endl;
-                Identifier idr = tgc->identify();
-                fout << " its offline hash Id = " << tgc->identifyHash() << std::endl;
-                fout << " its offline Id = " << m_idHelperSvc->tgcIdHelper().show_to_string(idr) << " ////////////////// belongs to module "
-                     << tgc->getTechnologyName() << "/" << tgc->getStationName() << " stEta/stPhi " << tgc->getStationEta() << " "
-                     << tgc->getStationPhi() << std::endl;
-                Identifier idp = m_idHelperSvc->tgcIdHelper().parentID(idr);
-                Identifier idp1 = m_idHelperSvc->tgcIdHelper().elementID(m_idHelperSvc->tgcIdHelper().stationName(idp),
-                                                                         -m_idHelperSvc->tgcIdHelper().stationEta(idp),
-                                                                         m_idHelperSvc->tgcIdHelper().stationPhi(idp));
-                fout << "      parent Id = " << m_idHelperSvc->tgcIdHelper().show_to_string(idp);
-                fout << " opposite stEta = " << m_idHelperSvc->tgcIdHelper().show_to_string(idp1);
-                const TgcReadoutElement* tgc1 = p_MuonMgr->getTgcReadoutElement(idp1);
-                if (!tgc1) {
-                    ATH_MSG_FATAL(" TGC readout Element at z<0, with id = " << m_idHelperSvc->tgcIdHelper().show_to_string(idp1)
-                                                                            << " not found ");
-                    ATH_MSG_FATAL(" is the geometry COMPLETE ? Any StationSelection active ? Exiting");
-                    return;
-                }
-                fout << " its offline hash Id = " << tgc1->identifyHash() << std::endl;
-
-                const MuonStation* ms = tgc->parentMuonStation();
-                if (ms)
-                    fout << "Parent MuonStation found for element at z>0" << std::endl;
-                else
-                    fout << "Parent MuonStation NOT found for element " << m_idHelperSvc->tgcIdHelper().show_to_string(idp) << std::endl;
-
-                const MuonStation* ms1 = tgc1->parentMuonStation();
-                if (ms1)
-                    fout << "Parent MuonStation found for element at z<0" << std::endl;
-                else
-                    fout << "Parent MuonStation NOT found for element " << m_idHelperSvc->tgcIdHelper().show_to_string(idp1) << std::endl;
-
-                fout << " N gasgaps layers = " << tgc->NwirePlanes();
-                fout << " N strip planes   = " << tgc->NstripPlanes() << std::endl;
-
-                const TgcReadoutParams* rpar = tgc->getReadoutParams();
-                fout << "****** read type " << tgc->getReadoutType() << " getNGaps() " << tgc->getNGaps() << " d.a. " << rpar->nGaps()
-                     << std::endl;
-                for (int ngg = 0; ngg < tgc->NwirePlanes(); ++ngg) {
-                    fout << "****** getnGangs(gg) " << tgc->getNGangs(ngg + 1) << "  getnStrips(gg) " << tgc->getNStrips(ngg + 1)
-                         << std::endl;
-                    fout << "****** getnWire(gg,1/2/3) " << tgc->getNWires(ngg + 1, 1) << "/" << tgc->getNWires(ngg + 1, 2) << "/"
-                         << tgc->getNWires(ngg + 1, 3) << " d.a. " << rpar->nWires(ngg + 1, 1) << "/" << rpar->nWires(ngg + 1, 2) << "/"
-                         << rpar->nWires(ngg + 1, 3) << std::endl;
-
-                    Identifier idch = m_idHelperSvc->tgcIdHelper().channelID(idp, ngg + 1, 0, 1);
-                    Amg::Vector3D ggcentre = tgc->localToGlobalCoords(Zero, idch);
-                    fout << " For Chamber id " << m_idHelperSvc->tgcIdHelper().show_to_string(idch) << " gasgap centre is " << ggcentre
-                         << std::endl;
-                    idch = m_idHelperSvc->tgcIdHelper().channelID(idp1, ngg + 1, 0, 1);
-                    ggcentre = tgc1->localToGlobalCoords(Zero, idch);
-                    fout << " For Chamber id " << m_idHelperSvc->tgcIdHelper().show_to_string(idch) << " gasgap centre is " << ggcentre
-                         << std::endl;
-                    idch = m_idHelperSvc->tgcIdHelper().channelID(idp, ngg + 1, 1, 1);
-                    ggcentre = tgc->localToGlobalCoords(Zero, idch);
-                    fout << " For Chamber id " << m_idHelperSvc->tgcIdHelper().show_to_string(idch) << " gasgap centre is " << ggcentre
-                         << std::endl;
-                    idch = m_idHelperSvc->tgcIdHelper().channelID(idp1, ngg + 1, 1, 1);
-                    ggcentre = tgc1->localToGlobalCoords(Zero, idch);
-                    fout << " For Chamber id " << m_idHelperSvc->tgcIdHelper().show_to_string(idch) << " gasgap centre is " << ggcentre
-                         << std::endl;
-
-                    Identifier fg = m_idHelperSvc->tgcIdHelper().channelID(idp, ngg + 1, 0, 1);
-                    Identifier lg = m_idHelperSvc->tgcIdHelper().channelID(idp, ngg + 1, 0, tgc->getNGangs(ngg + 1));
-                    Identifier fgn = m_idHelperSvc->tgcIdHelper().channelID(idp1, ngg + 1, 0, 1);
-                    Identifier lgn = m_idHelperSvc->tgcIdHelper().channelID(idp1, ngg + 1, 0, tgc1->getNGangs(ngg + 1));
-
-                    Amg::Vector3D xfg = tgc->channelPos(fg);
-                    Amg::Vector3D xlg = tgc->channelPos(lg);
-                    Amg::Vector3D xfgn = tgc1->channelPos(fgn);
-                    Amg::Vector3D xlgn = tgc1->channelPos(lgn);
-                    fout << "\n gg " << ngg + 1 << " " << m_idHelperSvc->tgcIdHelper().show_to_string(fg)
-                         << "GM:: first eta gang z>0 r,p,z " << xfg.perp() << " " << xfg.phi() * invRad << " " << xfg.z() << " last "
-                         << xlg.perp() << " " << xlg.phi() * invRad << " " << xlg.z() << std::endl;
-                    fout << "gg " << ngg + 1 << " " << m_idHelperSvc->tgcIdHelper().show_to_string(fgn) << "GM:: first eta gang z<0 r,p,z "
-                         << xfgn.perp() << " " << xfgn.phi() * invRad << " " << xfgn.z() << " last " << xlgn.perp() << " "
-                         << xlgn.phi() * invRad << " " << xlgn.z() << std::endl;
-
-                    Identifier fs = m_idHelperSvc->tgcIdHelper().channelID(idp, ngg + 1, 1, 1);
-                    Identifier ls = m_idHelperSvc->tgcIdHelper().channelID(idp, ngg + 1, 1, tgc->getNStrips(ngg + 1));
-                    Identifier fsn = m_idHelperSvc->tgcIdHelper().channelID(idp1, ngg + 1, 1, 1);
-                    Identifier lsn = m_idHelperSvc->tgcIdHelper().channelID(idp1, ngg + 1, 1, tgc1->getNStrips(ngg + 1));
-                    xfg = tgc->channelPos(fs);
-                    xlg = tgc->channelPos(ls);
-                    xfgn = tgc1->channelPos(fsn);
-                    xlgn = tgc1->channelPos(lsn);
-                    fout << "\n gg " << ngg + 1 << " " << m_idHelperSvc->tgcIdHelper().show_to_string(fs)
-                         << "GM:: first phi strip z>0 r,p,z " << xfg.perp() << " " << xfg.phi() * invRad << " " << xfg.z() << " last "
-                         << xlg.perp() << " " << xlg.phi() * invRad << " " << xlg.z() << std::endl;
-                    fout << "gg " << ngg + 1 << " " << m_idHelperSvc->tgcIdHelper().show_to_string(fsn) << "GM:: first phi strip z<0 r,p,z "
-                         << xfgn.perp() << " " << xfgn.phi() * invRad << " " << xfgn.z() << " last " << xlgn.perp() << " "
-                         << xlgn.phi() * invRad << " " << xlgn.z() << std::endl;
-                    xfg = tgc->localChannelPos(fs);
-                    xlg = tgc->localChannelPos(ls);
-                    xfgn = tgc1->localChannelPos(fsn);
-                    xlgn = tgc1->localChannelPos(lsn);
-                    fout << "\n gg " << ngg + 1 << " " << m_idHelperSvc->tgcIdHelper().show_to_string(fs)
-                         << "GM:: first p_S local z>0 r,p,z " << xfg.perp() << " " << xfg.phi() * invRad << " " << xfg.z() << " last "
-                         << xlg.perp() << " " << xlg.phi() * invRad << " " << xlg.z() << std::endl;
-                    fout << "gg " << ngg + 1 << " " << m_idHelperSvc->tgcIdHelper().show_to_string(fsn) << "GM:: first p_S local z<0 r,p,z "
-                         << xfgn.perp() << " " << xfgn.phi() * invRad << " " << xfgn.z() << " last " << xlgn.perp() << " "
-                         << xlgn.phi() * invRad << " " << xlgn.z() << std::endl;
-
-                    if (m_check_surfaces) {
-                        fout << "A-side: Phi surface centre = " << (tgc->surface(fs)).center() << std::endl;
-                        fout << "A-side: Eta surface centre = " << (tgc->surface(fg)).center() << std::endl;
-                        fout << "C-side: Phi surface centre = " << (tgc1->surface(fsn)).center() << std::endl;
-                        fout << "C-side: Eta surface centre = " << (tgc1->surface(fgn)).center() << std::endl;
-                        // A side: fs(phi view), fg(eta view)
-                        fout << "A-side: tracking local x(phi) axis (surface->transform) = "
-                             << (tgc->surface(fs)).transform().linear() * Amg::Vector3D(1, 0, 0) << std::endl;
-                        fout << "A-side: tracking local y(phi) axis (surface->transform) = "
-                             << (tgc->surface(fs)).transform().linear() * Amg::Vector3D(0, 1, 0) << std::endl;
-                        fout << "A-side: tracking local z(phi) axis (surface->transform) = "
-                             << (tgc->surface(fs)).transform().linear() * Amg::Vector3D(0, 0, 1) << std::endl;
-                        Amg::Vector2D lpos(0., 0.);
-                        fout << "A-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
-                        fout << "A-side:                                 global    " << (tgc->surface(fs)).Trk::Surface::localToGlobal(lpos)
-                             << std::endl;
-                        lpos = Amg::Vector2D(100., 0.);
-                        fout << "A-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
-                        fout << "A-side:                                 global    " << (tgc->surface(fs)).Trk::Surface::localToGlobal(lpos)
-                             << std::endl;
-                        lpos = Amg::Vector2D(0., 100.);
-                        fout << "A-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
-                        fout << "A-side:                                 global    " << (tgc->surface(fs)).Trk::Surface::localToGlobal(lpos)
-                             << std::endl;
-                        // C side: fsn(phi view), fgn(eta view)
-                        fout << "C-side: tracking local x(phi) axis (surface->transform) = "
-                             << (tgc1->surface(fsn)).transform().linear() * Amg::Vector3D(1, 0, 0) << std::endl;
-                        fout << "C-side: tracking local y(phi) axis (surface->transform) = "
-                             << (tgc1->surface(fsn)).transform().linear() * Amg::Vector3D(0, 1, 0) << std::endl;
-                        fout << "C-side: tracking local z(phi) axis (surface->transform) = "
-                             << (tgc1->surface(fsn)).transform().linear() * Amg::Vector3D(0, 0, 1) << std::endl;
-                        lpos = Amg::Vector2D(0., 0.);
-                        fout << "C-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
-                        fout << "C-side:                                 global    "
-                             << (tgc1->surface(fsn)).Trk::Surface::localToGlobal(lpos) << std::endl;
-                        lpos = Amg::Vector2D(100., 0.);
-                        fout << "C-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
-                        fout << "C-side:                                 global    "
-                             << (tgc1->surface(fsn)).Trk::Surface::localToGlobal(lpos) << std::endl;
-                        lpos = Amg::Vector2D(0., 100.);
-                        fout << "C-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
-                        fout << "C-side:                                 global    "
-                             << (tgc1->surface(fsn)).Trk::Surface::localToGlobal(lpos) << std::endl;
-                        // A side: fs(phi view), fg(eta view)
-                        fout << "A-side: tracking local x(eta) axis (surface->transform) = "
-                             << (tgc->surface(fg)).transform().linear() * Amg::Vector3D(1, 0, 0) << std::endl;
-                        fout << "A-side: tracking local y(eta) axis (surface->transform) = "
-                             << (tgc->surface(fg)).transform().linear() * Amg::Vector3D(0, 1, 0) << std::endl;
-                        fout << "A-side: tracking local z(eta) axis (surface->transform) = "
-                             << (tgc->surface(fg)).transform().linear() * Amg::Vector3D(0, 0, 1) << std::endl;
-                        lpos = Amg::Vector2D(0., 0.);
-                        fout << "A-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
-                        fout << "A-side:                                 global    " << (tgc->surface(fg)).Trk::Surface::localToGlobal(lpos)
-                             << std::endl;
-                        lpos = Amg::Vector2D(100., 0.);
-                        fout << "A-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
-                        fout << "A-side:                                 global    " << (tgc->surface(fg)).Trk::Surface::localToGlobal(lpos)
-                             << std::endl;
-                        lpos = Amg::Vector2D(0., 100.);
-                        fout << "A-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
-                        fout << "A-side:                                 global    " << (tgc->surface(fg)).Trk::Surface::localToGlobal(lpos)
-                             << std::endl;
-                        // C side: fsn(phi view), fgn(eta view)
-                        fout << "C-side: tracking local x(eta) axis (surface->transform) = "
-                             << (tgc1->surface(fgn)).transform().linear() * Amg::Vector3D(1, 0, 0) << std::endl;
-                        fout << "C-side: tracking local y(eta) axis (surface->transform) = "
-                             << (tgc1->surface(fgn)).transform().linear() * Amg::Vector3D(0, 1, 0) << std::endl;
-                        fout << "C-side: tracking local z(eta) axis (surface->transform) = "
-                             << (tgc1->surface(fgn)).transform().linear() * Amg::Vector3D(0, 0, 1) << std::endl;
-                        lpos = Amg::Vector2D(0., 0.);
-                        fout << "C-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
-                        fout << "C-side:                                 global    "
-                             << (tgc1->surface(fgn)).Trk::Surface::localToGlobal(lpos) << std::endl;
-                        lpos = Amg::Vector2D(100., 0.);
-                        fout << "C-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
-                        fout << "C-side:                                 global    "
-                             << (tgc1->surface(fgn)).Trk::Surface::localToGlobal(lpos) << std::endl;
-                        lpos = Amg::Vector2D(0., 100.);
-                        fout << "C-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
-                        fout << "C-side:                                 global    "
-                             << (tgc1->surface(fgn)).Trk::Surface::localToGlobal(lpos) << std::endl;
-                    }
-
-                    if (m_check_surfaces_details) {
-                        for (int strip = 1; strip <= tgc->getNStrips(ngg + 1); strip++) {
-                            Identifier chid = m_idHelperSvc->tgcIdHelper().channelID(idp, ngg + 1, 1, strip);
-                            Identifier chid1 = m_idHelperSvc->tgcIdHelper().channelID(idp1, ngg + 1, 1, strip);
-                            // Global position
-                            Amg::Vector3D tempGlobalPosition = tgc->channelPos(chid);
-                            Amg::Vector3D tempGlobalPosition1 = tgc1->channelPos(chid1);
-                            fout << "Z>0 - GG: " << ngg << " Phi strip: " << strip << " glob.pos. " << tempGlobalPosition.x() << ", "
-                                 << tempGlobalPosition.y() << ", " << tempGlobalPosition.z() << " ";
-                            // Local position
-                            std::optional<Amg::Vector2D> locPosition = tgc->surface(chid).Trk::Surface::globalToLocal(tempGlobalPosition);
-                            fout << " Z>0 - loc.pos. " << locPosition->x() << " " << locPosition->y();
-                            const Amg::Vector3D gPtrk = tgc->surface(chid).Trk::Surface::localToGlobal(*locPosition);
-                            fout << " Z>0 - Trk::glob.pos. " << gPtrk.x() << " " << gPtrk.y() << " " << gPtrk.z() << std::endl;
-                            // global
-                            fout << "Z<0 - GG: " << ngg << " Phi strip: " << strip << " glob.pos. " << tempGlobalPosition1.x() << ", "
-                                 << tempGlobalPosition1.y() << ", " << tempGlobalPosition1.z() << " ";
-                            std::optional<Amg::Vector2D> locPosition1 =
-                                tgc1->surface(chid1).Trk::Surface::globalToLocal(tempGlobalPosition1);
-                            fout << " Z<0 - loc.pos. " << locPosition1->x() << " " << locPosition1->y();
-                            const Amg::Vector3D gPtrk1 = tgc1->surface(chid1).Trk::Surface::localToGlobal(*locPosition1);
-                            fout << " Z<0 - Trk::glob.pos. " << gPtrk1.x() << " " << gPtrk1.y() << " " << gPtrk1.z() << std::endl;
-                        }
-                        for (int gang = 1; gang <= tgc->getNGangs(ngg + 1); gang++) {
-                            Identifier chid = m_idHelperSvc->tgcIdHelper().channelID(idp, ngg + 1, 0, gang);
-                            Identifier chid1 = m_idHelperSvc->tgcIdHelper().channelID(idp1, ngg + 1, 0, gang);
-                            // Global position
-                            Amg::Vector3D tempGlobalPosition = tgc->channelPos(chid);
-                            Amg::Vector3D tempGlobalPosition1 = tgc1->channelPos(chid1);
-                            fout << "Z>0 - GG: " << ngg << " Eta gang: " << gang << " glob.pos. " << tempGlobalPosition.x() << ", "
-                                 << tempGlobalPosition.y() << ", " << tempGlobalPosition.z() << " ";
-                            // Local position
-                            std::optional<Amg::Vector2D> locPosition = tgc->surface(chid).Trk::Surface::globalToLocal(tempGlobalPosition);
-                            fout << " Z>0 - loc.pos. " << locPosition->x() << " " << locPosition->y();
-                            const Amg::Vector3D gPtrk = tgc->surface(chid).Trk::Surface::localToGlobal(*locPosition);
-                            fout << " Z>0 - Trk::glob.pos. " << gPtrk.x() << " " << gPtrk.y() << " " << gPtrk.z() << std::endl;
-                            // Global position
-                            fout << "Z<0 - GG: " << ngg << " Eta gang: " << gang << " glob.pos. " << tempGlobalPosition1.x() << ", "
-                                 << tempGlobalPosition1.y() << ", " << tempGlobalPosition1.z() << " ";
-                            // Local position
-                            std::optional<Amg::Vector2D> locPosition1 =
-                                tgc1->surface(chid1).Trk::Surface::globalToLocal(tempGlobalPosition1);
-                            fout << " Z<0 - loc.pos. " << locPosition1->x() << " " << locPosition1->y();
-                            const Amg::Vector3D gPtrk1 = tgc1->surface(chid1).Trk::Surface::localToGlobal(*locPosition1);
-                            fout << " Z<0 - Trk::glob.pos. " << gPtrk1.x() << " " << gPtrk1.y() << " " << gPtrk1.z() << std::endl;
-                        }
-                    }
+                for (int gang = 1; gang <= tgc->getNGangs(ngg + 1); gang++) {
+                    Identifier chid = m_idHelperSvc->tgcIdHelper().channelID(idp, ngg + 1, 0, gang);
+                    Identifier chid1 = m_idHelperSvc->tgcIdHelper().channelID(idp1, ngg + 1, 0, gang);
+                    // Global position
+                    Amg::Vector3D tempGlobalPosition = tgc->channelPos(chid);
+                    Amg::Vector3D tempGlobalPosition1 = tgc1->channelPos(chid1);
+                    fout << "Z>0 - GG: " << ngg << " Eta gang: " << gang << " glob.pos. " << tempGlobalPosition.x() << ", "
+                            << tempGlobalPosition.y() << ", " << tempGlobalPosition.z() << " ";
+                    // Local position
+                    std::optional<Amg::Vector2D> locPosition = tgc->surface(chid).Trk::Surface::globalToLocal(tempGlobalPosition);
+                    fout << " Z>0 - loc.pos. " << locPosition->x() << " " << locPosition->y();
+                    const Amg::Vector3D gPtrk = static_cast<const Trk::Surface&>(tgc->surface(chid)).localToGlobal(*locPosition);
+                    fout << " Z>0 - Trk::glob.pos. " << gPtrk.x() << " " << gPtrk.y() << " " << gPtrk.z() << std::endl;
+                    // Global position
+                    fout << "Z<0 - GG: " << ngg << " Eta gang: " << gang << " glob.pos. " << tempGlobalPosition1.x() << ", "
+                            << tempGlobalPosition1.y() << ", " << tempGlobalPosition1.z() << " ";
+                    // Local position
+                    std::optional<Amg::Vector2D> locPosition1 =
+                        tgc1->surface(chid1).Trk::Surface::globalToLocal(tempGlobalPosition1);
+                    fout << " Z<0 - loc.pos. " << locPosition1->x() << " " << locPosition1->y();
+                    const Amg::Vector3D gPtrk1 = static_cast<const Trk::Surface&>(tgc1->surface(chid1)).localToGlobal(*locPosition1);
+                    fout << " Z<0 - Trk::glob.pos. " << gPtrk1.x() << " " << gPtrk1.y() << " " << gPtrk1.z() << std::endl;
                 }
             }
         }
     }
+        
+    
     fout.close();
     ATH_MSG_INFO(" CheckReadoutTgc done !");
 }
@@ -1712,298 +1594,287 @@ void MuonGMCheck::checkreadoutcscgeo() {
     ATH_MSG_INFO(" ***** Writing file " << fileName);
     fout << setiosflags(std::ios::fixed) << std::setprecision(4) << std::endl;
 
-    for (int sname_index = 0; sname_index < MuonDetectorManager::NCscStatType; ++sname_index) {
-        for (int seta_index = 1; seta_index < MuonDetectorManager::NCscStatEta; ++seta_index) {
-            for (int sphi_index = 0; sphi_index < MuonDetectorManager::NCscStatPhi; ++sphi_index) {
-                for (int ml = 0; ml < MuonDetectorManager::NCscChamberLayer; ++ml) {
-                    fout << " indices are " << sname_index << " " << seta_index << " " << sphi_index << " ml " << ml << std::endl;
-                    bool isValid{false};
-                    const Identifier readout_id = getCscIdentifier(sname_index, seta_index, sphi_index, ml, isValid);
-                    if (!isValid) {
-                        ATH_MSG_DEBUG(__FILE__<<":"<<__LINE__<<" Failed to build a valid CSC identifier from " << sname_index << "," << seta_index << ","
-                                                                                       << sphi_index << "," << ml);
-                        continue;
-                    }
+    for (unsigned int hashInt = 0; hashInt < MuonDetectorManager::CscRElMaxHash; ++hashInt) {
+        const IdentifierHash hash{hashInt};
+        const CscReadoutElement* csc = p_MuonMgr->getCscReadoutElement(hash);
+        if (!csc) continue;
+        const Identifier readout_id = csc->identify();
+        
+        fout << " ///////////////////// Found a CscReadoutElement "<< std::endl;
+        Identifier idr = csc->identify();
+        fout << " its offline hash Id = " << csc->identifyHash() << std::endl;
+        fout << " its offline Id = " << m_idHelperSvc->toString(idr)
+                << " ////////////////// belongs to module " << csc->getTechnologyName() << "/" << csc->getStationName()
+                << " centre at " << (csc->transform()).translation() << std::endl;
+        Identifier idp = m_idHelperSvc->cscIdHelper().parentID(idr);
+        fout << "      parent Id = " << m_idHelperSvc->toString(idp) << std::endl;
 
-                    const CscReadoutElement* csc = p_MuonMgr->getCscReadoutElement(readout_id);
-                    if (!csc) continue;
-                    fout << " ///////////////////// Found a CscReadoutElement for indices = " << sname_index << " " << seta_index << " "
-                         << sphi_index << " " << ml << std::endl;
-                    Identifier idr = csc->identify();
-                    fout << " its offline hash Id = " << csc->identifyHash() << std::endl;
-                    fout << " its offline Id = " << m_idHelperSvc->cscIdHelper().show_to_string(idr)
-                         << " ////////////////// belongs to module " << csc->getTechnologyName() << "/" << csc->getStationName()
-                         << " centre at " << (csc->transform()) * Zero << std::endl;
-                    Identifier idp = m_idHelperSvc->cscIdHelper().parentID(idr);
-                    fout << "      parent Id = " << m_idHelperSvc->cscIdHelper().show_to_string(idp) << std::endl;
+        Identifier idp1 = m_idHelperSvc->cscIdHelper().elementID(m_idHelperSvc->cscIdHelper().stationName(idp),
+                                                                    -m_idHelperSvc->cscIdHelper().stationEta(idp),
+                                                                    m_idHelperSvc->cscIdHelper().stationPhi(idp));
 
-                    Identifier idp1 = m_idHelperSvc->cscIdHelper().elementID(m_idHelperSvc->cscIdHelper().stationName(idp),
-                                                                             -m_idHelperSvc->cscIdHelper().stationEta(idp),
-                                                                             m_idHelperSvc->cscIdHelper().stationPhi(idp));
+        Identifier idp1ch = m_idHelperSvc->cscIdHelper().channelID(idp1, csc->ChamberLayer(), 1, 0, 1);
+        const CscReadoutElement* csc1 = p_MuonMgr->getCscReadoutElement(idp1ch);
+        if (!csc1) {
+            ATH_MSG_FATAL(" CSC readout Element at z<0, with id = " << m_idHelperSvc->toString(idp1ch)
+                                                                    << " not found ");
+            ATH_MSG_FATAL(" is the geometry COMPLETE ? Any StationSelection active ? Exiting");
+            return;
+        }
+        unsigned int ml = csc->ChamberLayer();
+        fout << " at opposite z  = " << m_idHelperSvc->toString(csc1->identify())
+                << " ////////////////// belongs to module " << csc1->getTechnologyName() << "/" << csc1->getStationName()
+                << " centre at " << (csc1->transform()).translation() << std::endl;
+        fout << " at opposite z the offline hash Id = " << csc1->identifyHash() << std::endl;
 
-                    Identifier idp1ch = m_idHelperSvc->cscIdHelper().channelID(idp1, csc->ChamberLayer(), 1, 0, 1);
-                    const CscReadoutElement* csc1 = p_MuonMgr->getCscReadoutElement(idp1ch);
-                    if (!csc1) {
-                        ATH_MSG_FATAL(" CSC readout Element at z<0, with id = " << m_idHelperSvc->cscIdHelper().show_to_string(idp1ch)
-                                                                                << " not found ");
-                        ATH_MSG_FATAL(" is the geometry COMPLETE ? Any StationSelection active ? Exiting");
-                        return;
-                    }
-                    fout << " at opposite z  = " << m_idHelperSvc->cscIdHelper().show_to_string(csc1->identify())
-                         << " ////////////////// belongs to module " << csc1->getTechnologyName() << "/" << csc1->getStationName()
-                         << " centre at " << (csc1->transform()) * Zero << std::endl;
-                    fout << " at opposite z the offline hash Id = " << csc1->identifyHash() << std::endl;
+        const MuonStation* ms = csc->parentMuonStation();
+        if (ms)
+            fout << "Parent MuonStation found for element at z>0" << std::endl;
+        else
+            fout << "Parent MuonStation NOT found for element " << m_idHelperSvc->toString(idp)
+                    << std::endl;
 
-                    const MuonStation* ms = csc->parentMuonStation();
-                    if (ms)
-                        fout << "Parent MuonStation found for element at z>0" << std::endl;
-                    else
-                        fout << "Parent MuonStation NOT found for element " << m_idHelperSvc->cscIdHelper().show_to_string(idp)
-                             << std::endl;
+        const MuonStation* ms1 = csc1->parentMuonStation();
+        if (ms1)
+            fout << "Parent MuonStation found for element at z<0" << std::endl;
+        else
+            fout << "Parent MuonStation NOT found for element " << m_idHelperSvc->toString(idp1)
+                    << std::endl;
+        int netastrips = csc->NetaStrips(1);
+        int nphistrips = csc->NphiStrips(1);
+        fout << "N or eta / phi strips in this chamber = " << netastrips << " " << nphistrips << " --- pitch in eta/phi "
+                << csc->StripPitch(0) << " " << csc->StripPitch(1) << std::endl;
 
-                    const MuonStation* ms1 = csc1->parentMuonStation();
-                    if (ms1)
-                        fout << "Parent MuonStation found for element at z<0" << std::endl;
-                    else
-                        fout << "Parent MuonStation NOT found for element " << m_idHelperSvc->cscIdHelper().show_to_string(idp1)
-                             << std::endl;
-                    int netastrips = csc->NetaStrips(1);
-                    int nphistrips = csc->NphiStrips(1);
-                    fout << "N or eta / phi strips in this chamber = " << netastrips << " " << nphistrips << " --- pitch in eta/phi "
-                         << csc->StripPitch(0) << " " << csc->StripPitch(1) << std::endl;
+        for (int gg = 1; gg <= csc->Ngasgaps(); ++gg) {
+            Amg::Vector3D ggNomCenter = csc->nominalCenter(gg);
+            Amg::Vector3D ggCenter = csc->center(gg - 1);
+            Amg::Vector3D localWireLayerPos = csc->localWireLayerPos(gg);
+            Amg::Vector3D localEtaStripLayerPos = csc->localStripLayerPos(csc->ChamberLayer(), gg, 0, 0);
+            Amg::Vector3D localPhiStripLayerPos = csc->localStripLayerPos(csc->ChamberLayer(), gg, 1, 0);
 
-                    for (int gg = 1; gg <= csc->Ngasgaps(); ++gg) {
-                        Amg::Vector3D ggNomCenter = csc->nominalCenter(gg);
-                        Amg::Vector3D ggCenter = csc->center(gg - 1);
-                        Amg::Vector3D localWireLayerPos = csc->localWireLayerPos(gg);
-                        Amg::Vector3D localEtaStripLayerPos = csc->localStripLayerPos(csc->ChamberLayer(), gg, 0, 0);
-                        Amg::Vector3D localPhiStripLayerPos = csc->localStripLayerPos(csc->ChamberLayer(), gg, 1, 0);
+            Amg::Vector3D ggNomCenter1 = csc1->nominalCenter(gg);
+            Amg::Vector3D ggCenter1 = csc1->center(gg - 1);
+            Amg::Vector3D localWireLayerPos1 = csc1->localWireLayerPos(gg);
+            Amg::Vector3D localEtaStripLayerPos1 = csc1->localStripLayerPos(csc1->ChamberLayer(), gg, 0, 0);
+            Amg::Vector3D localPhiStripLayerPos1 = csc1->localStripLayerPos(csc1->ChamberLayer(), gg, 1, 0);
 
-                        Amg::Vector3D ggNomCenter1 = csc1->nominalCenter(gg);
-                        Amg::Vector3D ggCenter1 = csc1->center(gg - 1);
-                        Amg::Vector3D localWireLayerPos1 = csc1->localWireLayerPos(gg);
-                        Amg::Vector3D localEtaStripLayerPos1 = csc1->localStripLayerPos(csc1->ChamberLayer(), gg, 0, 0);
-                        Amg::Vector3D localPhiStripLayerPos1 = csc1->localStripLayerPos(csc1->ChamberLayer(), gg, 1, 0);
+            fout << "-------------------- new gasGap       =  " << gg << std::endl;
+            fout << "------- Side-A: Internal alignment Params are =  s,z,t " << csc->getGasGapIntAlign_s(gg) << " "
+                    << csc->getGasGapIntAlign_z(gg) << " " << csc->getGasGapIntAlign_t(gg) << "   rots,z,t "
+                    << csc->getGasGapIntAlign_rots(gg) << " " << csc->getGasGapIntAlign_rotz(gg) << " "
+                    << csc->getGasGapIntAlign_rott(gg) << " " << std::endl;
 
-                        fout << "-------------------- new gasGap       =  " << gg << std::endl;
-                        fout << "------- Side-A: Internal alignment Params are =  s,z,t " << csc->getGasGapIntAlign_s(gg) << " "
-                             << csc->getGasGapIntAlign_z(gg) << " " << csc->getGasGapIntAlign_t(gg) << "   rots,z,t "
-                             << csc->getGasGapIntAlign_rots(gg) << " " << csc->getGasGapIntAlign_rotz(gg) << " "
-                             << csc->getGasGapIntAlign_rott(gg) << " " << std::endl;
+            fout << "Side-A: Gas Gap nominal center (origin for internal alignment) = " << ggNomCenter << std::endl;
+            fout << "Side-A: Gas Gap center         (after      internal alignment) = " << ggCenter << std::endl;
+            fout << "Side-A: localWireLayerPosition                                 = " << localWireLayerPos << std::endl;
+            fout << "Side-A: localEtaStripLayerPosition                             = " << localEtaStripLayerPos << std::endl;
+            fout << "Side-A: localPhiStripLayerPosition                             = " << localPhiStripLayerPos << std::endl;
+            fout << "Side-A: Now converting all the previous quantities in the AmdbLRS frame "
+                    "----------------------------------------"
+                    << std::endl;
+            fout << "Side-A: in AmdbLRS Gas Gap nominal center (origin for internal alignment) = "
+                    << csc->GlobalToAmdbLRSCoords(ggNomCenter) << std::endl;
+            fout << "Side-A: in AmdbLRS Gas Gap center         (after      internal alignment) = "
+                    << csc->GlobalToAmdbLRSCoords(ggCenter) << std::endl;
 
-                        fout << "Side-A: Gas Gap nominal center (origin for internal alignment) = " << ggNomCenter << std::endl;
-                        fout << "Side-A: Gas Gap center         (after      internal alignment) = " << ggCenter << std::endl;
-                        fout << "Side-A: localWireLayerPosition                                 = " << localWireLayerPos << std::endl;
-                        fout << "Side-A: localEtaStripLayerPosition                             = " << localEtaStripLayerPos << std::endl;
-                        fout << "Side-A: localPhiStripLayerPosition                             = " << localPhiStripLayerPos << std::endl;
-                        fout << "Side-A: Now converting all the previous quantities in the AmdbLRS frame "
-                                "----------------------------------------"
-                             << std::endl;
-                        fout << "Side-A: in AmdbLRS Gas Gap nominal center (origin for internal alignment) = "
-                             << csc->GlobalToAmdbLRSCoords(ggNomCenter) << std::endl;
-                        fout << "Side-A: in AmdbLRS Gas Gap center         (after      internal alignment) = "
-                             << csc->GlobalToAmdbLRSCoords(ggCenter) << std::endl;
+            fout << "------- Side-C: Internal alignment Params are =  s,z,t " << csc1->getGasGapIntAlign_s(gg) << " "
+                    << csc1->getGasGapIntAlign_z(gg) << " " << csc1->getGasGapIntAlign_t(gg) << "   rots,z,t "
+                    << csc1->getGasGapIntAlign_rots(gg) << " " << csc1->getGasGapIntAlign_rotz(gg) << " "
+                    << csc1->getGasGapIntAlign_rott(gg) << " " << std::endl;
+            fout << "Side-C: Gas Gap nominal center (origin for internal alignment) = " << ggNomCenter1 << std::endl;
+            fout << "Side-C: Gas Gap center         (after      internal alignment) = " << ggCenter1 << std::endl;
+            fout << "Side-C: localWireLayerPosition                                 = " << localWireLayerPos1 << std::endl;
+            fout << "Side-C: localEtaStripLayerPosition                             = " << localEtaStripLayerPos1 << std::endl;
+            fout << "Side-C: localPhiStripLayerPosition                             = " << localPhiStripLayerPos1 << std::endl;
+            fout << "Side-C: Now converting all the previous quantities in the AmdbLRS frame "
+                    "----------------------------------------"
+                    << std::endl;
+            fout << "Side-C: in AmdbLRS Gas Gap nominal center (origin for internal alignment) = "
+                    << csc1->GlobalToAmdbLRSCoords(ggNomCenter1) << std::endl;
+            fout << "Side-C: in AmdbLRS Gas Gap center         (after      internal alignment) = "
+                    << csc1->GlobalToAmdbLRSCoords(ggCenter1) << std::endl;
+            
+            Identifier fwzp = m_idHelperSvc->cscIdHelper().channelID(idp, ml, gg, 0, 1);
+            Identifier fszp = m_idHelperSvc->cscIdHelper().channelID(idp, ml, gg, 1, 1);
+            Identifier lwzp = m_idHelperSvc->cscIdHelper().channelID(idp, ml, gg, 0, csc->NetaStrips(gg));
+            Identifier lszp = m_idHelperSvc->cscIdHelper().channelID(idp, ml, gg, 1, csc->NphiStrips(gg));
+            Identifier fwzp1 = m_idHelperSvc->cscIdHelper().channelID(idp1, ml, gg, 0, 1);
+            Identifier fszp1 = m_idHelperSvc->cscIdHelper().channelID(idp1, ml, gg, 1, 1);
+            Identifier lwzp1 = m_idHelperSvc->cscIdHelper().channelID(idp1, ml, gg, 0, csc1->NetaStrips(gg));
+            Identifier lszp1 = m_idHelperSvc->cscIdHelper().channelID(idp1, ml, gg, 1, csc1->NphiStrips(gg));
+            Amg::Vector3D AoriginGlobalF = csc->AmdbLRSToGlobalCoords(Amg::Vector3D::Zero());
+            Amg::Vector3D AoriginTrkF = csc->transform(fszp).inverse() * AoriginGlobalF;
+            fout << " Side-A: A-line origin Global Frame       " << AoriginGlobalF.x() << " " << AoriginGlobalF.y() << " "
+                    << AoriginGlobalF.z() << std::endl;
+            fout << " Side-A: A-line origin Tracking Phi Frame " << AoriginTrkF << std::endl;
+            Amg::Vector3D AoriginGlobalF1 = csc1->AmdbLRSToGlobalCoords(Amg::Vector3D::Zero());
+            Amg::Vector3D AoriginTrkF1 = csc1->transform(fszp1).inverse() * AoriginGlobalF1;
+            fout << " Side-C: A-line origin Global Frame       " << AoriginGlobalF1.x() << " " << AoriginGlobalF1.y() << " "
+                    << AoriginGlobalF1.z() << std::endl;
+            fout << " Side-C: A-line origin Tracking Phi Frame " << AoriginTrkF1 << std::endl;
 
-                        fout << "------- Side-C: Internal alignment Params are =  s,z,t " << csc1->getGasGapIntAlign_s(gg) << " "
-                             << csc1->getGasGapIntAlign_z(gg) << " " << csc1->getGasGapIntAlign_t(gg) << "   rots,z,t "
-                             << csc1->getGasGapIntAlign_rots(gg) << " " << csc1->getGasGapIntAlign_rotz(gg) << " "
-                             << csc1->getGasGapIntAlign_rott(gg) << " " << std::endl;
-                        fout << "Side-C: Gas Gap nominal center (origin for internal alignment) = " << ggNomCenter1 << std::endl;
-                        fout << "Side-C: Gas Gap center         (after      internal alignment) = " << ggCenter1 << std::endl;
-                        fout << "Side-C: localWireLayerPosition                                 = " << localWireLayerPos1 << std::endl;
-                        fout << "Side-C: localEtaStripLayerPosition                             = " << localEtaStripLayerPos1 << std::endl;
-                        fout << "Side-C: localPhiStripLayerPosition                             = " << localPhiStripLayerPos1 << std::endl;
-                        fout << "Side-C: Now converting all the previous quantities in the AmdbLRS frame "
-                                "----------------------------------------"
-                             << std::endl;
-                        fout << "Side-C: in AmdbLRS Gas Gap nominal center (origin for internal alignment) = "
-                             << csc1->GlobalToAmdbLRSCoords(ggNomCenter1) << std::endl;
-                        fout << "Side-C: in AmdbLRS Gas Gap center         (after      internal alignment) = "
-                             << csc1->GlobalToAmdbLRSCoords(ggCenter1) << std::endl;
+            Amg::Vector3D xfwzp = csc->stripPos(fwzp);
+            Amg::Vector3D xfszp = csc->stripPos(fszp);
+            Amg::Vector3D xlwzp = csc->stripPos(lwzp);
+            Amg::Vector3D xlszp = csc->stripPos(lszp);
+            Amg::Vector3D xfwzpNom = csc->nominalStripPos(fwzp);
+            Amg::Vector3D xfszpNom = csc->nominalStripPos(fszp);
+            Amg::Vector3D xlwzpNom = csc->nominalStripPos(lwzp);
+            Amg::Vector3D xlszpNom = csc->nominalStripPos(lszp);
+            Amg::Vector3D xfwzp1 = csc1->stripPos(fwzp1);
+            Amg::Vector3D xfszp1 = csc1->stripPos(fszp1);
+            Amg::Vector3D xlwzp1 = csc1->stripPos(lwzp1);
+            Amg::Vector3D xlszp1 = csc1->stripPos(lszp1);
+            fout << "gg " << gg << " " << m_idHelperSvc->toString(fwzp)
+                    << "GM::  first eta wire is at z>0 local coord " << csc->localStripPos(fwzp) << " last "
+                    << csc->localStripPos(lwzp) << std::endl;
+            fout << "gg " << gg << " " << m_idHelperSvc->toString(fwzp)
+                    << "GM::  first eta wire is at z>0 AMDB lcoord " << csc->GlobalToAmdbLRSCoords(csc->stripPos(fwzp)) << " last "
+                    << csc->GlobalToAmdbLRSCoords(csc->stripPos(lwzp)) << std::endl;
+            fout << "gg " << gg << " " << m_idHelperSvc->toString(fwzp1)
+                    << "GM::  first eta wire is at z<0 AMDB lcoord " << csc1->GlobalToAmdbLRSCoords(csc1->stripPos(fwzp1))
+                    << " last " << csc1->GlobalToAmdbLRSCoords(csc1->stripPos(lwzp1)) << std::endl;
+            fout << "gg " << gg << " " << m_idHelperSvc->toString(fwzp)
+                    << "Nom:: first eta wire is at z>0 local coord " << csc->nominalLocalStripPos(fwzp) << " last "
+                    << csc->nominalLocalStripPos(lwzp) << std::endl;
+            fout << "gg " << gg << " " << m_idHelperSvc->toString(fwzp)
+                    << "TRK:: first eta wire on    TrackingSurface " << csc->stripPosOnTrackingSurface(fwzp) << " last "
+                    << csc->stripPosOnTrackingSurface(lwzp) << std::endl;
+            fout << "gg " << gg << " " << m_idHelperSvc->toString(fwzp) << "GM::  first eta wire is at z>0 "
+                    << xfwzp << " last " << xlwzp << std::endl;
+            fout << "gg " << gg << " " << m_idHelperSvc->toString(fwzp) << "Nom:: first eta wire is at z>0 "
+                    << xfwzpNom << " last " << xlwzpNom << std::endl;
+            fout << "gg " << gg << " " << m_idHelperSvc->toString(fwzp1) << "GM:: first eta wire is at z<0 "
+                    << xfwzp1 << " last " << xlwzp1 << std::endl;
 
-                        Identifier fwzp = m_idHelperSvc->cscIdHelper().channelID(idp, ml + 1, gg, 0, 1);
-                        Identifier fszp = m_idHelperSvc->cscIdHelper().channelID(idp, ml + 1, gg, 1, 1);
-                        Identifier lwzp = m_idHelperSvc->cscIdHelper().channelID(idp, ml + 1, gg, 0, csc->NetaStrips(gg));
-                        Identifier lszp = m_idHelperSvc->cscIdHelper().channelID(idp, ml + 1, gg, 1, csc->NphiStrips(gg));
-                        Identifier fwzp1 = m_idHelperSvc->cscIdHelper().channelID(idp1, ml + 1, gg, 0, 1);
-                        Identifier fszp1 = m_idHelperSvc->cscIdHelper().channelID(idp1, ml + 1, gg, 1, 1);
-                        Identifier lwzp1 = m_idHelperSvc->cscIdHelper().channelID(idp1, ml + 1, gg, 0, csc1->NetaStrips(gg));
-                        Identifier lszp1 = m_idHelperSvc->cscIdHelper().channelID(idp1, ml + 1, gg, 1, csc1->NphiStrips(gg));
-                        Amg::Vector3D AoriginGlobalF = csc->AmdbLRSToGlobalCoords(Zero);
-                        Amg::Vector3D AoriginTrkF = csc->transform(fszp).inverse() * AoriginGlobalF;
-                        fout << " Side-A: A-line origin Global Frame       " << AoriginGlobalF.x() << " " << AoriginGlobalF.y() << " "
-                             << AoriginGlobalF.z() << std::endl;
-                        fout << " Side-A: A-line origin Tracking Phi Frame " << AoriginTrkF << std::endl;
-                        Amg::Vector3D AoriginGlobalF1 = csc1->AmdbLRSToGlobalCoords(Zero);
-                        Amg::Vector3D AoriginTrkF1 = csc1->transform(fszp1).inverse() * AoriginGlobalF1;
-                        fout << " Side-C: A-line origin Global Frame       " << AoriginGlobalF1.x() << " " << AoriginGlobalF1.y() << " "
-                             << AoriginGlobalF1.z() << std::endl;
-                        fout << " Side-C: A-line origin Tracking Phi Frame " << AoriginTrkF1 << std::endl;
+            fout << "gg " << gg << " " << m_idHelperSvc->toString(fszp)
+                    << "GM::  first phi strip is at z>0 local coord " << csc->localStripPos(fszp) << " last "
+                    << csc->localStripPos(lszp) << std::endl;
+            fout << "gg " << gg << " " << m_idHelperSvc->toString(fszp)
+                    << "GM::  first phi wire is at z>0 AMDB lcoord " << csc->GlobalToAmdbLRSCoords(csc->stripPos(fszp)) << " last "
+                    << csc->GlobalToAmdbLRSCoords(csc->stripPos(lszp)) << std::endl;
+            fout << "gg " << gg << " " << m_idHelperSvc->toString(fszp1)
+                    << "GM::  first phi wire is at z<0 AMDB lcoord " << csc1->GlobalToAmdbLRSCoords(csc->stripPos(fszp1))
+                    << " last " << csc1->GlobalToAmdbLRSCoords(csc1->stripPos(lszp1)) << std::endl;
+            fout << "gg " << gg << " " << m_idHelperSvc->toString(fszp)
+                    << "Nom:: first phi strip is at z>0 local coord " << csc->nominalLocalStripPos(fszp) << " last "
+                    << csc->nominalLocalStripPos(lszp) << std::endl;
+            fout << "gg " << gg << " " << m_idHelperSvc->toString(fwzp)
+                    << "TRK:: first phi strip    on TrackingSurface " << csc->stripPosOnTrackingSurface(fszp) << " last "
+                    << csc->stripPosOnTrackingSurface(lszp) << std::endl;
+            fout << "gg " << gg << " " << m_idHelperSvc->toString(fszp)
+                    << "GM::  first phi strip is at z>0 " << xfszp << " last " << xlszp << std::endl;
+            fout << "gg " << gg << " " << m_idHelperSvc->toString(fszp)
+                    << "Nom:: first phi strip is at z>0 " << xfszpNom << " last " << xlszpNom << std::endl;
+            fout << "gg " << gg << " " << m_idHelperSvc->toString(fszp1)
+                    << "GM:: first phi strip is at z<0 " << xfszp1 << " last " << xlszp1 << std::endl;
+            fout << "gg " << gg << " " << m_idHelperSvc->toString(fwzp) << "GM::  first eta gang z>0 r,p,z "
+                    << xfwzp.perp() << " " << xfwzp.phi() * invRad << " " << xfwzp.z() << " last " << xlwzp.perp() << " "
+                    << xlwzp.phi() * invRad << " " << xlwzp.z() << std::endl;
+            fout << "gg " << gg << " " << m_idHelperSvc->toString(fwzp1) << "GM:: first eta wire z<0 r,p,z "
+                    << xfwzp1.perp() << " " << xfwzp1.phi() * invRad << " " << xfwzp1.z() << " last " << xlwzp1.perp() << " "
+                    << xlwzp1.phi() * invRad << " " << xlwzp1.z() << std::endl;
 
-                        Amg::Vector3D xfwzp = csc->stripPos(fwzp);
-                        Amg::Vector3D xfszp = csc->stripPos(fszp);
-                        Amg::Vector3D xlwzp = csc->stripPos(lwzp);
-                        Amg::Vector3D xlszp = csc->stripPos(lszp);
-                        Amg::Vector3D xfwzpNom = csc->nominalStripPos(fwzp);
-                        Amg::Vector3D xfszpNom = csc->nominalStripPos(fszp);
-                        Amg::Vector3D xlwzpNom = csc->nominalStripPos(lwzp);
-                        Amg::Vector3D xlszpNom = csc->nominalStripPos(lszp);
-                        Amg::Vector3D xfwzp1 = csc1->stripPos(fwzp1);
-                        Amg::Vector3D xfszp1 = csc1->stripPos(fszp1);
-                        Amg::Vector3D xlwzp1 = csc1->stripPos(lwzp1);
-                        Amg::Vector3D xlszp1 = csc1->stripPos(lszp1);
-                        fout << "gg " << gg << " " << m_idHelperSvc->cscIdHelper().show_to_string(fwzp)
-                             << "GM::  first eta wire is at z>0 local coord " << csc->localStripPos(fwzp) << " last "
-                             << csc->localStripPos(lwzp) << std::endl;
-                        fout << "gg " << gg << " " << m_idHelperSvc->cscIdHelper().show_to_string(fwzp)
-                             << "GM::  first eta wire is at z>0 AMDB lcoord " << csc->GlobalToAmdbLRSCoords(csc->stripPos(fwzp)) << " last "
-                             << csc->GlobalToAmdbLRSCoords(csc->stripPos(lwzp)) << std::endl;
-                        fout << "gg " << gg << " " << m_idHelperSvc->cscIdHelper().show_to_string(fwzp1)
-                             << "GM::  first eta wire is at z<0 AMDB lcoord " << csc1->GlobalToAmdbLRSCoords(csc1->stripPos(fwzp1))
-                             << " last " << csc1->GlobalToAmdbLRSCoords(csc1->stripPos(lwzp1)) << std::endl;
-                        fout << "gg " << gg << " " << m_idHelperSvc->cscIdHelper().show_to_string(fwzp)
-                             << "Nom:: first eta wire is at z>0 local coord " << csc->nominalLocalStripPos(fwzp) << " last "
-                             << csc->nominalLocalStripPos(lwzp) << std::endl;
-                        fout << "gg " << gg << " " << m_idHelperSvc->cscIdHelper().show_to_string(fwzp)
-                             << "TRK:: first eta wire on    TrackingSurface " << csc->stripPosOnTrackingSurface(fwzp) << " last "
-                             << csc->stripPosOnTrackingSurface(lwzp) << std::endl;
-                        fout << "gg " << gg << " " << m_idHelperSvc->cscIdHelper().show_to_string(fwzp) << "GM::  first eta wire is at z>0 "
-                             << xfwzp << " last " << xlwzp << std::endl;
-                        fout << "gg " << gg << " " << m_idHelperSvc->cscIdHelper().show_to_string(fwzp) << "Nom:: first eta wire is at z>0 "
-                             << xfwzpNom << " last " << xlwzpNom << std::endl;
-                        fout << "gg " << gg << " " << m_idHelperSvc->cscIdHelper().show_to_string(fwzp1) << "GM:: first eta wire is at z<0 "
-                             << xfwzp1 << " last " << xlwzp1 << std::endl;
+            fout << "gg " << gg << " " << m_idHelperSvc->toString(fszp)
+                    << "GM::  first phi strip z>0 r,p,z " << xfszp.perp() << " " << xfszp.phi() * invRad << " " << xfszp.z()
+                    << " last " << xlszp.perp() << " " << xlszp.phi() * invRad << " " << xlszp.z() << std::endl;
+            fout << "gg " << gg << " " << m_idHelperSvc->toString(fszp1)
+                    << "GM:: first phi strip z<0 r,p,z " << xfszp1.perp() << " " << xfszp1.phi() * invRad << " " << xfszp1.z()
+                    << " last " << xlszp1.perp() << " " << xlszp1.phi() * invRad << " " << xlszp1.z() << std::endl;
 
-                        fout << "gg " << gg << " " << m_idHelperSvc->cscIdHelper().show_to_string(fszp)
-                             << "GM::  first phi strip is at z>0 local coord " << csc->localStripPos(fszp) << " last "
-                             << csc->localStripPos(lszp) << std::endl;
-                        fout << "gg " << gg << " " << m_idHelperSvc->cscIdHelper().show_to_string(fszp)
-                             << "GM::  first phi wire is at z>0 AMDB lcoord " << csc->GlobalToAmdbLRSCoords(csc->stripPos(fszp)) << " last "
-                             << csc->GlobalToAmdbLRSCoords(csc->stripPos(lszp)) << std::endl;
-                        fout << "gg " << gg << " " << m_idHelperSvc->cscIdHelper().show_to_string(fszp1)
-                             << "GM::  first phi wire is at z<0 AMDB lcoord " << csc1->GlobalToAmdbLRSCoords(csc->stripPos(fszp1))
-                             << " last " << csc1->GlobalToAmdbLRSCoords(csc1->stripPos(lszp1)) << std::endl;
-                        fout << "gg " << gg << " " << m_idHelperSvc->cscIdHelper().show_to_string(fszp)
-                             << "Nom:: first phi strip is at z>0 local coord " << csc->nominalLocalStripPos(fszp) << " last "
-                             << csc->nominalLocalStripPos(lszp) << std::endl;
-                        fout << "gg " << gg << " " << m_idHelperSvc->cscIdHelper().show_to_string(fwzp)
-                             << "TRK:: first phi strip    on TrackingSurface " << csc->stripPosOnTrackingSurface(fszp) << " last "
-                             << csc->stripPosOnTrackingSurface(lszp) << std::endl;
-                        fout << "gg " << gg << " " << m_idHelperSvc->cscIdHelper().show_to_string(fszp)
-                             << "GM::  first phi strip is at z>0 " << xfszp << " last " << xlszp << std::endl;
-                        fout << "gg " << gg << " " << m_idHelperSvc->cscIdHelper().show_to_string(fszp)
-                             << "Nom:: first phi strip is at z>0 " << xfszpNom << " last " << xlszpNom << std::endl;
-                        fout << "gg " << gg << " " << m_idHelperSvc->cscIdHelper().show_to_string(fszp1)
-                             << "GM:: first phi strip is at z<0 " << xfszp1 << " last " << xlszp1 << std::endl;
-                        fout << "gg " << gg << " " << m_idHelperSvc->cscIdHelper().show_to_string(fwzp) << "GM::  first eta gang z>0 r,p,z "
-                             << xfwzp.perp() << " " << xfwzp.phi() * invRad << " " << xfwzp.z() << " last " << xlwzp.perp() << " "
-                             << xlwzp.phi() * invRad << " " << xlwzp.z() << std::endl;
-                        fout << "gg " << gg << " " << m_idHelperSvc->cscIdHelper().show_to_string(fwzp1) << "GM:: first eta wire z<0 r,p,z "
-                             << xfwzp1.perp() << " " << xfwzp1.phi() * invRad << " " << xfwzp1.z() << " last " << xlwzp1.perp() << " "
-                             << xlwzp1.phi() * invRad << " " << xlwzp1.z() << std::endl;
+            Amg::Vector3D lxfszp = csc->localStripPos(fszp);
+            Amg::Vector3D lxlszp = csc->localStripPos(lszp);
+            Amg::Vector3D lxfszp1 = csc1->localStripPos(fszp1);
+            Amg::Vector3D lxlszp1 = csc1->localStripPos(lszp1);
 
-                        fout << "gg " << gg << " " << m_idHelperSvc->cscIdHelper().show_to_string(fszp)
-                             << "GM::  first phi strip z>0 r,p,z " << xfszp.perp() << " " << xfszp.phi() * invRad << " " << xfszp.z()
-                             << " last " << xlszp.perp() << " " << xlszp.phi() * invRad << " " << xlszp.z() << std::endl;
-                        fout << "gg " << gg << " " << m_idHelperSvc->cscIdHelper().show_to_string(fszp1)
-                             << "GM:: first phi strip z<0 r,p,z " << xfszp1.perp() << " " << xfszp1.phi() * invRad << " " << xfszp1.z()
-                             << " last " << xlszp1.perp() << " " << xlszp1.phi() * invRad << " " << xlszp1.z() << std::endl;
+            fout << "gg " << gg << " " << m_idHelperSvc->toString(fszp)
+                    << "GM:: first phi_S local z>0 r,p,z " << lxfszp.perp() << " " << lxfszp.phi() * invRad << " " << lxfszp.z()
+                    << " last " << lxlszp.perp() << " " << lxlszp.phi() * invRad << " " << lxlszp.z() << std::endl;
+            fout << "gg " << gg << " " << m_idHelperSvc->toString(fszp1)
+                    << "GM:: first phi_S local z<0 r,p,z " << lxfszp1.perp() << " " << lxfszp1.phi() * invRad << " " << lxfszp1.z()
+                    << " last " << lxlszp1.perp() << " " << lxlszp1.phi() * invRad << " " << lxlszp1.z() << std::endl;
 
-                        Amg::Vector3D lxfszp = csc->localStripPos(fszp);
-                        Amg::Vector3D lxlszp = csc->localStripPos(lszp);
-                        Amg::Vector3D lxfszp1 = csc1->localStripPos(fszp1);
-                        Amg::Vector3D lxlszp1 = csc1->localStripPos(lszp1);
-
-                        fout << "gg " << gg << " " << m_idHelperSvc->cscIdHelper().show_to_string(fszp)
-                             << "GM:: first phi_S local z>0 r,p,z " << lxfszp.perp() << " " << lxfszp.phi() * invRad << " " << lxfszp.z()
-                             << " last " << lxlszp.perp() << " " << lxlszp.phi() * invRad << " " << lxlszp.z() << std::endl;
-                        fout << "gg " << gg << " " << m_idHelperSvc->cscIdHelper().show_to_string(fszp1)
-                             << "GM:: first phi_S local z<0 r,p,z " << lxfszp1.perp() << " " << lxfszp1.phi() * invRad << " " << lxfszp1.z()
-                             << " last " << lxlszp1.perp() << " " << lxlszp1.phi() * invRad << " " << lxlszp1.z() << std::endl;
-
-                        if (m_check_surfaces) {
-                            // A side: fs(phi view), fg(eta view)
-                            fout << "A-side: tracking local x(phi) axis (surface->transform) = "
-                                 << (csc->surface(fszp)).transform().linear() * Amg::Vector3D(1, 0, 0) << std::endl;
-                            fout << "A-side: tracking local y(phi) axis (surface->transform) = "
-                                 << (csc->surface(fszp)).transform().linear() * Amg::Vector3D(0, 1, 0) << std::endl;
-                            fout << "A-side: tracking local z(phi) axis (surface->transform) = "
-                                 << (csc->surface(fszp)).transform().linear() * Amg::Vector3D(0, 0, 1) << std::endl;
-                            Amg::Vector2D lpos(0., 0.);
-                            fout << "A-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
-                            fout << "A-side:                                 global    "
-                                 << (csc->surface(fszp)).Trk::Surface::localToGlobal(lpos) << std::endl;
-                            lpos = Amg::Vector2D(100., 0.);
-                            fout << "A-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
-                            fout << "A-side:                                 global    "
-                                 << (csc->surface(fszp)).Trk::Surface::localToGlobal(lpos) << std::endl;
-                            lpos = Amg::Vector2D(0., 100.);
-                            fout << "A-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
-                            fout << "A-side:                                 global    "
-                                 << (csc->surface(fszp)).Trk::Surface::localToGlobal(lpos) << std::endl;
-                            // C side: fsn(phi view), fgn(eta view)
-                            fout << "C-side: tracking local x(phi) axis (surface->transform) = "
-                                 << (csc1->surface(fszp1)).transform().linear() * Amg::Vector3D(1, 0, 0) << std::endl;
-                            fout << "C-side: tracking local y(phi) axis (surface->transform) = "
-                                 << (csc1->surface(fszp1)).transform().linear() * Amg::Vector3D(0, 1, 0) << std::endl;
-                            fout << "C-side: tracking local z(phi) axis (surface->transform) = "
-                                 << (csc1->surface(fszp1)).transform().linear() * Amg::Vector3D(0, 0, 1) << std::endl;
-                            lpos = Amg::Vector2D(0., 0.);
-                            fout << "C-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
-                            fout << "C-side:                                 global    "
-                                 << (csc1->surface(fszp1)).Trk::Surface::localToGlobal(lpos) << std::endl;
-                            lpos = Amg::Vector2D(100., 0.);
-                            fout << "C-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
-                            fout << "C-side:                                 global    "
-                                 << (csc1->surface(fszp1)).Trk::Surface::localToGlobal(lpos) << std::endl;
-                            lpos = Amg::Vector2D(0., 100.);
-                            fout << "C-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
-                            fout << "C-side:                                 global    "
-                                 << (csc1->surface(fszp1)).Trk::Surface::localToGlobal(lpos) << std::endl;
-                            // A side: fs(phi view), fg(eta view)
-                            fout << "A-side: tracking local x(eta) axis (surface->transform) = "
-                                 << (csc->surface(fwzp)).transform().linear() * Amg::Vector3D(1, 0, 0) << std::endl;
-                            fout << "A-side: tracking local y(eta) axis (surface->transform) = "
-                                 << (csc->surface(fwzp)).transform().linear() * Amg::Vector3D(0, 1, 0) << std::endl;
-                            fout << "A-side: tracking local z(eta) axis (surface->transform) = "
-                                 << (csc->surface(fwzp)).transform().linear() * Amg::Vector3D(0, 0, 1) << std::endl;
-                            lpos = Amg::Vector2D(0., 0.);
-                            fout << "A-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
-                            fout << "A-side:                                 global    "
-                                 << (csc->surface(fwzp)).Trk::Surface::localToGlobal(lpos) << std::endl;
-                            lpos = Amg::Vector2D(100., 0.);
-                            fout << "A-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
-                            fout << "A-side:                                 global    "
-                                 << (csc->surface(fwzp)).Trk::Surface::localToGlobal(lpos) << std::endl;
-                            lpos = Amg::Vector2D(0., 100.);
-                            fout << "A-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
-                            fout << "A-side:                                 global    "
-                                 << (csc->surface(fwzp)).Trk::Surface::localToGlobal(lpos) << std::endl;
-                            // C side: fsn(phi view), fgn(eta view)
-                            fout << "C-side: tracking local x(eta) axis (surface->transform) = "
-                                 << (csc1->surface(fwzp1)).transform().linear() * Amg::Vector3D(1, 0, 0) << std::endl;
-                            fout << "C-side: tracking local y(eta) axis (surface->transform) = "
-                                 << (csc1->surface(fwzp1)).transform().linear() * Amg::Vector3D(0, 1, 0) << std::endl;
-                            fout << "C-side: tracking local z(eta) axis (surface->transform) = "
-                                 << (csc1->surface(fwzp1)).transform().linear() * Amg::Vector3D(0, 0, 1) << std::endl;
-                            lpos = Amg::Vector2D(0., 0.);
-                            fout << "C-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
-                            fout << "C-side:                                 global    "
-                                 << (csc1->surface(fwzp1)).Trk::Surface::localToGlobal(lpos) << std::endl;
-                            lpos = Amg::Vector2D(100., 0.);
-                            fout << "C-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
-                            fout << "C-side:                                 global    "
-                                 << (csc1->surface(fwzp1)).Trk::Surface::localToGlobal(lpos) << std::endl;
-                            lpos = Amg::Vector2D(0., 100.);
-                            fout << "C-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
-                            fout << "C-side:                                 global    "
-                                 << (csc1->surface(fwzp1)).Trk::Surface::localToGlobal(lpos) << std::endl;
-                        }
-                    }
-                }
+            if (m_check_surfaces) {
+                // A side: fs(phi view), fg(eta view)
+                fout << "A-side: tracking local x(phi) axis (surface->transform) = "
+                        << (csc->surface(fszp)).transform().linear() * Amg::Vector3D::UnitX() << std::endl;
+                fout << "A-side: tracking local y(phi) axis (surface->transform) = "
+                        << (csc->surface(fszp)).transform().linear() * Amg::Vector3D::UnitY()<< std::endl;
+                fout << "A-side: tracking local z(phi) axis (surface->transform) = "
+                        << (csc->surface(fszp)).transform().linear() * Amg::Vector3D::UnitZ() << std::endl;
+                Amg::Vector2D lpos(0., 0.);
+                fout << "A-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
+                fout << "A-side:                                 global    "
+                        << static_cast<const Trk::Surface&>(csc->surface(fszp)).localToGlobal(lpos) << std::endl;
+                lpos = Amg::Vector2D(100., 0.);
+                fout << "A-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
+                fout << "A-side:                                 global    "
+                        << static_cast<const Trk::Surface&>(csc->surface(fszp)).localToGlobal(lpos) << std::endl;
+                lpos = Amg::Vector2D(0., 100.);
+                fout << "A-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
+                fout << "A-side:                                 global    "
+                        <<static_cast<const Trk::Surface&> (csc->surface(fszp)).localToGlobal(lpos) << std::endl;
+                // C side: fsn(phi view), fgn(eta view)
+                fout << "C-side: tracking local x(phi) axis (surface->transform) = "
+                        << (csc1->surface(fszp1)).transform().linear() * Amg::Vector3D::UnitX() << std::endl;
+                fout << "C-side: tracking local y(phi) axis (surface->transform) = "
+                        << (csc1->surface(fszp1)).transform().linear() * Amg::Vector3D::UnitY()<< std::endl;
+                fout << "C-side: tracking local z(phi) axis (surface->transform) = "
+                        << (csc1->surface(fszp1)).transform().linear() * Amg::Vector3D::UnitZ() << std::endl;
+                lpos = Amg::Vector2D(0., 0.);
+                fout << "C-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
+                fout << "C-side:                                 global    "
+                        << static_cast<const Trk::Surface&>(csc1->surface(fszp1)).localToGlobal(lpos) << std::endl;
+                lpos = Amg::Vector2D(100., 0.);
+                fout << "C-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
+                fout << "C-side:                                 global    "
+                        << static_cast<const Trk::Surface&>(csc1->surface(fszp1)).localToGlobal(lpos) << std::endl;
+                lpos = Amg::Vector2D(0., 100.);
+                fout << "C-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
+                fout << "C-side:                                 global    "
+                        << static_cast<const Trk::Surface&>(csc1->surface(fszp1)).localToGlobal(lpos) << std::endl;
+                // A side: fs(phi view), fg(eta view)
+                fout << "A-side: tracking local x(eta) axis (surface->transform) = "
+                        << (csc->surface(fwzp)).transform().linear() * Amg::Vector3D::UnitX() << std::endl;
+                fout << "A-side: tracking local y(eta) axis (surface->transform) = "
+                        << (csc->surface(fwzp)).transform().linear() * Amg::Vector3D::UnitY()<< std::endl;
+                fout << "A-side: tracking local z(eta) axis (surface->transform) = "
+                        << (csc->surface(fwzp)).transform().linear() * Amg::Vector3D::UnitZ() << std::endl;
+                lpos = Amg::Vector2D(0., 0.);
+                fout << "A-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
+                fout << "A-side:                                 global    "
+                        << static_cast<const Trk::Surface&>(csc->surface(fwzp)).localToGlobal(lpos) << std::endl;
+                lpos = Amg::Vector2D(100., 0.);
+                fout << "A-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
+                fout << "A-side:                                 global    "
+                        << static_cast<const Trk::Surface&>(csc->surface(fwzp)).localToGlobal(lpos) << std::endl;
+                lpos = Amg::Vector2D(0., 100.);
+                fout << "A-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
+                fout << "A-side:                                 global    "
+                        << static_cast<const Trk::Surface&>(csc->surface(fwzp)).localToGlobal(lpos) << std::endl;
+                // C side: fsn(phi view), fgn(eta view)
+                fout << "C-side: tracking local x(eta) axis (surface->transform) = "
+                        << (csc1->surface(fwzp1)).transform().linear() * Amg::Vector3D::UnitX() << std::endl;
+                fout << "C-side: tracking local y(eta) axis (surface->transform) = "
+                        << (csc1->surface(fwzp1)).transform().linear() * Amg::Vector3D::UnitY()<< std::endl;
+                fout << "C-side: tracking local z(eta) axis (surface->transform) = "
+                        << (csc1->surface(fwzp1)).transform().linear() * Amg::Vector3D::UnitZ() << std::endl;
+                lpos = Amg::Vector2D(0., 0.);
+                fout << "C-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
+                fout << "C-side:                                 global    "
+                        << static_cast<const Trk::Surface&>(csc1->surface(fwzp1)).localToGlobal(lpos) << std::endl;
+                lpos = Amg::Vector2D(100., 0.);
+                fout << "C-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
+                fout << "C-side:                                 global    "
+                        << static_cast<const Trk::Surface&>(csc1->surface(fwzp1)).localToGlobal(lpos) << std::endl;
+                lpos = Amg::Vector2D(0., 100.);
+                fout << "C-side: Check surface.localToGlobal for loc point " << lpos << std::endl;
+                fout << "C-side:                                 global    "
+                        << static_cast<const Trk::Surface&>(csc1->surface(fwzp1)).localToGlobal(lpos) << std::endl;
             }
         }
     }
+   
     fout.close();
     ATH_MSG_INFO(" CheckReadoutCsc done !");
 }
@@ -2055,10 +1926,7 @@ void MuonGMCheck::buildRpcRegionSelectorMap() {
         ATH_MSG_INFO(" Number of modules in Phi/DoubletZ: ");
         for (int i = 1; i <= ndbz; i++) ATH_MSG_INFO(Set.NPhimodules(i) << " ");
 
-        double zmin = 99999999;
-        double zmax = -99999999;
-        double phimin = 999999;
-        double phimax = -999999;
+        double zmin{ 99999999}, zmax{ -99999999}, phimin { 999999}, phimax { -999999};
         Amg::Vector3D Pzmin(0, 0, zmin);
         Amg::Vector3D Pzmax(0, 0, zmax);
         unsigned int nmodules = 0;
@@ -2125,7 +1993,7 @@ void MuonGMCheck::buildMdtRegionSelectorMap() {
         Identifier Id = *i;
         IdentifierHash Idhash;
         int gethash_code = m_idHelperSvc->mdtIdHelper().get_hash(Id, Idhash, &mdtModuleContext);
-        std::string extid = m_idHelperSvc->mdtIdHelper().show_to_string(Id);
+        std::string extid = m_idHelperSvc->toString(Id);
         ATH_MSG_INFO("\n Identifier = " << extid);
         if (gethash_code == 0)
             ATH_MSG_INFO(" its hash Id is " << Idhash);
@@ -2153,7 +2021,7 @@ void MuonGMCheck::buildMdtRegionSelectorMap() {
         // get the element corresponding to multilayer = 1
         const MdtReadoutElement* mdt1 = p_MuonMgr->getMdtReadoutElement(Id);
         if (!mdt1) {
-            ATH_MSG_INFO(" Mdt Readout Element not found for Id = " << m_idHelperSvc->mdtIdHelper().show_to_string(Id) << " go to next ");
+            ATH_MSG_INFO(" Mdt Readout Element not found for Id = " << m_idHelperSvc->toString(Id) << " go to next ");
             continue;
         }
         ATH_MSG_INFO(" Station name / technology " << mdt1->getStationName() << " / " << mdt1->getTechnologyName());
@@ -2165,11 +2033,11 @@ void MuonGMCheck::buildMdtRegionSelectorMap() {
         int ntubesl1 = mdt1->getNtubesperlayer();
         int ntubesl2 = 0;
         if (!mdt2) {
-            ATH_MSG_INFO(" Mdt Readout Element not found for Id = " << m_idHelperSvc->mdtIdHelper().show_to_string(Id2));
+            ATH_MSG_INFO(" Mdt Readout Element not found for Id = " << m_idHelperSvc->toString(Id2));
         } else
             ntubesl2 = mdt2->getNtubesperlayer();
 
-        Identifier Idv[4];
+        std::array<Identifier,4> Idv{};
         Idv[0] = m_idHelperSvc->mdtIdHelper().channelID(Id, 1, 1, 1);
         Idv[1] = m_idHelperSvc->mdtIdHelper().channelID(Id, 1, 1, ntubesl1);
         Idv[2] = m_idHelperSvc->mdtIdHelper().channelID(Id, 2, ntlay, 1);
@@ -2178,16 +2046,9 @@ void MuonGMCheck::buildMdtRegionSelectorMap() {
         ATH_MSG_INFO(" Number of tube layers " << ntlay);
         ATH_MSG_INFO(" Number of tubes / layer (1 ,2) " << ntubesl1 << ", " << ntubesl2);
 
-        double rmin = 99999999.;
-        double rmax = -99999999.;
-        double zmin = 99999999.;
-        double zmax = -99999999.;
-        double emin = 99999999.;
-        double emax = -99999999.;
-        double phimin = 999999.;
-        double phimax = -999999.;
+        double rmin{ 99999999.}, rmax{ -99999999.}, zmin{ 99999999.}, zmax{ -99999999.}, zpos21{0.},
+                emin{ 99999999.}, emax{ -99999999.}, phimin {999999.}, phimax {-999999.};
 
-        double zpos21 = 0.;
         Identifier Idsl = m_idHelperSvc->mdtIdHelper().channelID(Id, 1, 2, 1);
         if (mdt1->barrel()) {
             zpos21 = (mdt1->tubePos(Idsl)).z() - (mdt1->tubePos(Idv[0])).z();
@@ -2226,7 +2087,7 @@ void MuonGMCheck::buildMdtRegionSelectorMap() {
                 continue;
             }
             Amg::Vector3D mdtPos = mdt->tubePos(Idv[i]);
-            ATH_MSG_INFO(m_idHelperSvc->mdtIdHelper().show_to_string(Idv[i])
+            ATH_MSG_INFO(m_idHelperSvc->toString(Idv[i])
                          << " index " << i << " posx,y,z " << mdtPos << " R = " << mdtPos.perp());
             //
             Amg::Vector3D mdtPos1 = mdtPos;
@@ -2290,13 +2151,7 @@ void MuonGMCheck::buildMdtRegionSelectorMap() {
                 }
             }
 
-            double eminMod = 0.;
-            double emaxMod = 0.;
-            double zminMod = 0.;
-            double zmaxMod = 0.;
-            double rminMod = 0.;
-            double rmaxMod = 0.;
-            double dphi = 0.;
+            double eminMod{0.}, emaxMod{0.}, zminMod{0.}, zmaxMod{0.}, rminMod{0.}, rmaxMod{0.}, dphi{0.};
             if (mdt->barrel()) {
                 eminMod = mdtPos1.eta();
                 emaxMod = mdtPos2.eta();
@@ -2377,7 +2232,7 @@ void MuonGMCheck::buildTgcRegionSelectorMap() {
 
         int gethash_code = m_idHelperSvc->tgcIdHelper().get_hash(elemId, hashId, &tgcModuleContext);
 
-        std::string extid = m_idHelperSvc->tgcIdHelper().show_to_string(elemId);
+        std::string extid = m_idHelperSvc->toString(elemId);
         ATH_MSG_INFO("\n Identifier = " << extid);
         if (gethash_code == 0)
             ATH_MSG_INFO(" its hash Id is " << hashId);
@@ -2403,7 +2258,7 @@ void MuonGMCheck::buildTgcRegionSelectorMap() {
 
         const TgcReadoutElement* tgc = p_MuonMgr->getTgcReadoutElement(elemId);
         if (!tgc) {
-            ATH_MSG_INFO(" Tgc Readout Element not found for Id = " << m_idHelperSvc->tgcIdHelper().show_to_string(elemId)
+            ATH_MSG_INFO(" Tgc Readout Element not found for Id = " << m_idHelperSvc->toString(elemId)
                                                                     << " go to next ");
             continue;
         }
@@ -2464,7 +2319,7 @@ void MuonGMCheck::buildCscRegionSelectorMap() {
         Identifier Id = *i;
         IdentifierHash Idhash;
         int gethash_code = m_idHelperSvc->cscIdHelper().get_hash(Id, Idhash, &cscModuleContext);
-        std::string extid = m_idHelperSvc->cscIdHelper().show_to_string(Id);
+        std::string extid = m_idHelperSvc->toString(Id);
         ATH_MSG_INFO("\n Identifier = " << extid);
         if (gethash_code == 0)
             ATH_MSG_INFO(" its hash Id is " << Idhash);
@@ -2523,15 +2378,8 @@ void MuonGMCheck::buildCscRegionSelectorMap() {
                                                 << m_idHelperSvc->cscIdHelper().wireLayerMax(Id));
         ATH_MSG_INFO("strip number : " << m_idHelperSvc->cscIdHelper().stripMin(Id) << "," << m_idHelperSvc->cscIdHelper().stripMax(Id));
 
-        double eta_min = 99999999.;
-        double eta_max = -99999999.;
-        double phi_min = 999999.;
-        double phi_max = -999999.;
-        double phi_test = 0.;
-        Identifier Id_phi_max;
-        Identifier Id_phi_min;
-        Identifier Id_eta_max;
-        Identifier Id_eta_min;
+        double eta_min { 99999999.}, eta_max { -99999999.}, phi_min { 999999.}, phi_max { -999999.}, phi_test{0.};
+        Identifier Id_phi_max{0}, Id_phi_min{0}, Id_eta_max{0}, Id_eta_min{0};
 
         for (int chlayer = 1; chlayer <= m_idHelperSvc->cscIdHelper().chamberLayerMax(Id); chlayer++) {
             for (int wlayer = 1; wlayer <= m_idHelperSvc->cscIdHelper().wireLayerMax(Id); wlayer++) {
@@ -2721,157 +2569,17 @@ void MuonGMCheck::testRpcCache() {
     p_MuonMgr->fillRpcCache();
 }
 
-void MuonGMCheck::testRpcCache_here() {
-    ATH_MSG_INFO(" *************************** Building Rpc cache");
-
-    if (p_MuonMgr->nRpcRE() == 0) {
-        ATH_MSG_INFO(" No RpcReadoutElements found ");
-        return;
-    }
-    std::string gVersion = p_MuonMgr->geometryVersion();
-    std::string fileName = "testRpcCache_" + gVersion;
-
-    int nre = 0;
-    for (int sname_index = 0; sname_index < MuonDetectorManager::NRpcStatType; ++sname_index) {
-        for (int seta_index = 0; seta_index < MuonDetectorManager::NRpcStatEta; ++seta_index) {
-            for (int sphi_index = 0; sphi_index < MuonDetectorManager::NRpcStatPhi; ++sphi_index) {
-                for (int dbr_index = 0; dbr_index < MuonDetectorManager::NDoubletR; ++dbr_index) {
-                    for (int dbz_index = 0; dbz_index < MuonDetectorManager::NDoubletZ; ++dbz_index) {
-                        int stationName = p_MuonMgr->rpcStationName(sname_index);
-                        bool isValid = false;
-                        Identifier id =
-                            p_MuonMgr->rpcIdHelper()->channelID(stationName, seta_index, sphi_index, dbr_index, dbz_index, 1, 1, 1, 1, isValid);  
-                                                                             // last 4 arguments are: int doubletPhi, int gasGap, int
-                                                                            // measuresPhi, int strip, bool& isValid
-                        if (!isValid) continue;
-                        const RpcReadoutElement* rpc = p_MuonMgr->getRpcReadoutElement(id);
-                        if (!rpc) { continue; }
-                        nre++;
-                        Identifier idr = rpc->identify();
-                        ATH_MSG_DEBUG("Filling cache for rpcRE n " << nre << " " << m_idHelperSvc->rpcIdHelper().show_to_string(idr));
-                    }
-                }
-            }
-        }
-    }
-    ATH_MSG_INFO(" Rpc cache built !");
-}
-
 void MuonGMCheck::testTgcCache() {
     ATH_MSG_INFO(" *************************** Building Tgc cache");
     p_MuonMgr->fillTgcCache();
 }
-
-void MuonGMCheck::testTgcCache_here() {
-    ATH_MSG_INFO(" *************************** Building Tgc cache");
-
-    if (p_MuonMgr->nTgcRE() == 0) {
-        ATH_MSG_INFO(" No TgcReadoutElements found ");
-        return;
-    }
-    std::string gVersion = p_MuonMgr->geometryVersion();
-    std::string fileName = "testTgcCache_" + gVersion;
-
-    int nre = 0;
-    for (int sname_index = 0; sname_index < MuonDetectorManager::NTgcStatType; ++sname_index) {
-        for (int seta_index = 0; seta_index < MuonDetectorManager::NTgcStatEta; ++seta_index) {
-            for (int sphi_index = 0; sphi_index < MuonDetectorManager::NTgcStatPhi; ++sphi_index) {
-                bool isValid{false};
-                const Identifier readout_id = getTgcIdentifier(sname_index, seta_index, sphi_index, isValid);
-                if (!isValid) {
-                    ATH_MSG_DEBUG(__FILE__<<":"<<__LINE__<<" Failed to build a valid Identifier from " << sname_index << "," << seta_index << "," << sphi_index);
-                    continue;
-                }
-                TgcReadoutElement* tgc = p_MuonMgr->getTgcReadoutElement(readout_id);
-                if (!tgc) continue;
-                nre++;
-                Identifier idr = tgc->identify();
-                ATH_MSG_DEBUG(" Filling cache for tgcRE n. " << nre << " " << m_idHelperSvc->tgcIdHelper().show_to_string(idr));
-                tgc->fillCache();
-            }
-        }
-    }
-    ATH_MSG_INFO(" Tgc cache built !");
-}
-
 void MuonGMCheck::testCscCache() {
     ATH_MSG_INFO(" *************************** Building Csc cache");
     p_MuonMgr->fillCscCache();
 }
-void MuonGMCheck::testCscCache_here() {
-    ATH_MSG_INFO(" *************************** Building Csc cache");
-
-    if (p_MuonMgr->nCscRE() == 0) {
-        ATH_MSG_INFO(" No CscReadoutElements found ");
-        return;
-    }
-    std::string gVersion = p_MuonMgr->geometryVersion();
-    std::string fileName = "testCscCache_" + gVersion;
-
-    int nre = 0;
-    for (int sname_index = 0; sname_index < MuonDetectorManager::NCscStatType; ++sname_index) {
-        for (int seta_index = 0; seta_index < MuonDetectorManager::NCscStatEta; ++seta_index) {
-            for (int sphi_index = 0; sphi_index < MuonDetectorManager::NCscStatPhi; ++sphi_index) {
-                for (int ml = 0; ml < MuonDetectorManager::NCscChamberLayer; ++ml) {
-                    bool isValid{false};
-                    const Identifier readout_id = getCscIdentifier(sname_index, seta_index, sphi_index, ml, isValid);
-                    if (!isValid) {
-                        ATH_MSG_DEBUG(__FILE__<<":"<<__LINE__<<" Failed to build a valid CSC identifier from " << sname_index << "," << seta_index << ","
-                                                                                       << sphi_index << "," << ml);
-                        continue;
-                    }
-                    CscReadoutElement* csc = p_MuonMgr->getCscReadoutElement(readout_id);
-                    if (!csc) continue;
-                    nre++;
-                    Identifier idr = csc->identify();
-
-                    ATH_MSG_DEBUG(" Filling cache for cscRE n. " << nre << " " << m_idHelperSvc->cscIdHelper().show_to_string(idr));
-                    csc->fillCache();
-                }
-            }
-        }
-    }
-    ATH_MSG_INFO(" Csc cache built !");
-}
 void MuonGMCheck::testMdtCache() {
     ATH_MSG_INFO(" *************************** Building Mdt cache");
     p_MuonMgr->fillMdtCache();
-}
-void MuonGMCheck::testMdtCache_here() {
-    ATH_MSG_INFO(" *************************** Building Mdt cache");
-
-    if (p_MuonMgr->nMdtRE() == 0) {
-        ATH_MSG_INFO(" No MdtReadoutElements found ");
-        return;
-    }
-    std::string gVersion = p_MuonMgr->geometryVersion();
-    std::string fileName = "testMdtCache_" + gVersion;
-
-    int nre = 0;
-    for (int sname_index = 0; sname_index < MuonDetectorManager::NMdtStatType; ++sname_index) {
-        for (int seta_index = 0; seta_index < MuonDetectorManager::NMdtStatEta; ++seta_index) {
-            for (int sphi_index = 0; sphi_index < MuonDetectorManager::NMdtStatPhi; ++sphi_index) {
-                for (int dbr_index = 0; dbr_index < MuonDetectorManager::NMdtMultilayer; ++dbr_index) {
-                    bool isValid = false;
-                    const Identifier readout_ident = getMdtIdentifier(sname_index, seta_index, sphi_index, dbr_index, isValid);
-                    if (!isValid) {
-                        ATH_MSG_DEBUG(__FILE__<<":"<<__LINE__<<" Failed to create a valid Mdt identifier from " << sname_index << "," << seta_index << ","
-                                                                                        << sphi_index << "," << dbr_index);
-                        continue;
-                    }
-                    MdtReadoutElement* mdt = p_MuonMgr->getMdtReadoutElement(readout_ident);
-                    if (!mdt) continue;
-                    nre++;
-                    Identifier idr = mdt->identify();
-
-                    ATH_MSG_DEBUG(" Filling cache for mdtRE n. " << nre << " " << m_idHelperSvc->mdtIdHelper().show_to_string(idr));
-                    mdt->fillCache();
-                }  // end of multilayer
-            }      // end of stPhi
-        }          // end of stEta
-    }              // end of stName
-    // fout.close();
-    ATH_MSG_INFO(" Mdt cache built !");
 }
 
 void MuonGMCheck::testMdtDetectorElementHash() {
@@ -2888,7 +2596,7 @@ void MuonGMCheck::testMdtDetectorElementHash() {
         Identifier Id = *i;
         IdentifierHash Idhash;
         int gethash_code = m_idHelperSvc->mdtIdHelper().get_hash(Id, Idhash, &mdtDetElemContext);
-        std::string extid = m_idHelperSvc->mdtIdHelper().show_to_string(Id);
+        std::string extid = m_idHelperSvc->toString(Id);
         ATH_MSG_DEBUG("MDT Identifier = " << extid);
         if (gethash_code == 0)
             ATH_MSG_DEBUG(" its hash Id is " << Idhash);
@@ -3041,7 +2749,7 @@ void MuonGMCheck::testTgcDetectorElementHash() {
         Identifier Id = *i;
         IdentifierHash Idhash;
         int gethash_code = m_idHelperSvc->tgcIdHelper().get_hash(Id, Idhash, &tgcDetElemContext);
-        std::string extid = m_idHelperSvc->tgcIdHelper().show_to_string(Id);
+        std::string extid = m_idHelperSvc->toString(Id);
         ATH_MSG_DEBUG("TGC Identifier = " << extid);
         if (gethash_code == 0)
             ATH_MSG_DEBUG(" its hash Id is " << Idhash);
@@ -3113,7 +2821,7 @@ void MuonGMCheck::testCscDetectorElementHash() {
         Identifier Id = *i;
         IdentifierHash Idhash;
         int gethash_code = m_idHelperSvc->cscIdHelper().get_hash(Id, Idhash, &cscDetElemContext);
-        std::string extid = m_idHelperSvc->cscIdHelper().show_to_string(Id);
+        std::string extid = m_idHelperSvc->toString(Id);
         ATH_MSG_DEBUG("CSC Identifier = " << extid);
         if (gethash_code == 0)
             ATH_MSG_DEBUG(" its hash Id is " << Idhash);
@@ -3183,7 +2891,7 @@ void MuonGMCheck::showVmemCpu(const std::string& message) {
                          << m_cpu[0] << " ms");
 }
 void MuonGMCheck::getVmemCpu(int& dVmem, int& dUCpu, int& dSCpu) {
-    int cpu_now[2];
+    std::array<int, 2> cpu_now;
     int uTime = 0;
     int sTime = 0;
     int mem_now = PerfUtils::getMem();  // kB
@@ -3199,32 +2907,4 @@ void MuonGMCheck::getVmemCpu(int& dVmem, int& dUCpu, int& dSCpu) {
     m_cpu[1] = cpu_now[1];
 
     return;
-}
-Identifier MuonGMCheck::getMdtIdentifier(const int sname_index, const int seta_index, const int sphi_index, const int dbr_index,
-                                         bool& isValid) const {
-    const int stName = p_MuonMgr->mdtStationName(sname_index);
-    if (stName <0) {
-        ATH_MSG_DEBUG("Station name index "<<sname_index<<" is not occupied ");
-        isValid = false;
-        return Identifier();
-    }
-    const int stEta = seta_index - MuonGM::MuonDetectorManager::NMdtStEtaOffset;
-    const int stPhi = sphi_index + 1;
-    const int ml = dbr_index + 1;
-    return m_idHelperSvc->mdtIdHelper().channelID(stName, stEta, stPhi, ml, 1, 1, isValid);
-}
-Identifier MuonGMCheck::getCscIdentifier(const int sname_index, const int seta_index, const int sphi_index, const int ml,
-                                         bool& isValid) const {
-    const int stName = sname_index - MuonGM::MuonDetectorManager::NCscStatTypeOff;
-    const int stEta = seta_index - MuonGM::MuonDetectorManager::NCscStEtaOffset;
-    const int stPhi = sphi_index + 1;
-    const int stMl = ml + 1;
-    return m_idHelperSvc->cscIdHelper().channelID(stName, stEta, stPhi, stMl, 0, 0, 1, isValid);
-}
-Identifier MuonGMCheck::getTgcIdentifier(const int sname_index, const int seta_index, const int sphi_index, bool& valid) const {
-    const int stationName = sname_index - MuonGM::MuonDetectorManager::NTgcStatTypeOff;
-    const int stationPhi = sphi_index + 1;
-    const int zi = seta_index - MuonGM::MuonDetectorManager::NTgcStEtaOffset;
-    const int stationEta = zi + (seta_index >= MuonGM::MuonDetectorManager::NTgcStEtaOffset);
-    return m_idHelperSvc->tgcIdHelper().elementID(stationName, stationEta, stationPhi, valid);
 }
