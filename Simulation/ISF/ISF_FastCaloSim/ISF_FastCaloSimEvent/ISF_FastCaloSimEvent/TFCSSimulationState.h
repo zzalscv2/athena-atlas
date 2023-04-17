@@ -7,6 +7,7 @@
 
 #include <TObject.h>
 #include "ISF_FastCaloSimEvent/FastCaloSim_CaloCell_ID.h"
+#include "ISF_FastCaloSimEvent/MLogging.h"
 #include <map>
 #include <set>
 #include <unordered_map>
@@ -27,7 +28,9 @@ class HepRandomEngine;
 
 constexpr std::uint32_t operator"" _FCShash(char const *s, std::size_t count);
 
-class TFCSSimulationState : public TObject {
+using ISF_FCS::MLogging;
+
+class TFCSSimulationState : public TObject, public MLogging {
 public:
   TFCSSimulationState(CLHEP::HepRandomEngine *randomEngine = nullptr);
 

@@ -50,7 +50,6 @@ FCSReturnCode TFCSParametrizationPDGIDSelectChain::simulate(
                                << ((SimulateOnlyOnePDGID() == true)
                                        ? ", abort PDGID loop afterwards"
                                        : ", continue PDGID loop afterwards"));
-
         status = simulate_and_retry(param, simulstate, truth, extrapol);
         if (status >= FCSRetry) {
           retry = status - FCSRetry;
@@ -84,6 +83,7 @@ FCSReturnCode TFCSParametrizationPDGIDSelectChain::simulate(
 void TFCSParametrizationPDGIDSelectChain::unit_test(
     TFCSSimulationState *simulstate, TFCSTruthState *truth,
     TFCSExtrapolationState *extrapol) {
+  ISF_FCS::MLogging logger;
   if (!simulstate)
     simulstate = new TFCSSimulationState();
   if (!truth)
@@ -126,33 +126,32 @@ void TFCSParametrizationPDGIDSelectChain::unit_test(
   param->set_pdgid(1);
   chain.push_back(param);
 
-  std::cout << "====         Chain setup       ====" << std::endl;
+  ATH_MSG_NOCLASS(logger, "====         Chain setup       ====");
   chain.Print();
-  std::cout << "==== Simulate with pdgid=0      ====" << std::endl;
+  ATH_MSG_NOCLASS(logger, "==== Simulate with pdgid=0      ====");
   truth->set_pdgid(0);
   chain.simulate(*simulstate, truth, extrapol);
-  std::cout << "==== Simulate with pdgid=1      ====" << std::endl;
+  ATH_MSG_NOCLASS(logger, "==== Simulate with pdgid=1      ====");
   truth->set_pdgid(1);
   chain.simulate(*simulstate, truth, extrapol);
-  std::cout << "==== Simulate with pdgid=2      ====" << std::endl;
+  ATH_MSG_NOCLASS(logger, "==== Simulate with pdgid=2      ====");
   truth->set_pdgid(2);
   chain.set_RetryChainFromStart();
   chain.simulate(*simulstate, truth, extrapol);
   chain.reset_RetryChainFromStart();
-  std::cout << "=====================================" << std::endl
-            << std::endl;
+  ATH_MSG_NOCLASS(logger, "=====================================" << std::endl);
 
-  std::cout << "=====================================" << std::endl;
-  std::cout << "= Now only one simul for each PDGID =" << std::endl;
-  std::cout << "=====================================" << std::endl;
+  ATH_MSG_NOCLASS(logger, "=====================================");
+  ATH_MSG_NOCLASS(logger, "= Now only one simul for each PDGID =");
+  ATH_MSG_NOCLASS(logger, "=====================================");
   chain.set_SimulateOnlyOnePDGID();
-  std::cout << "==== Simulate with pdgid=0      ====" << std::endl;
+  ATH_MSG_NOCLASS(logger, "==== Simulate with pdgid=0      ====");
   truth->set_pdgid(0);
   chain.simulate(*simulstate, truth, extrapol);
-  std::cout << "==== Simulate with pdgid=1      ====" << std::endl;
+  ATH_MSG_NOCLASS(logger, "==== Simulate with pdgid=1      ====");
   truth->set_pdgid(1);
   chain.simulate(*simulstate, truth, extrapol);
-  std::cout << "==== Simulate with pdgid=2      ====" << std::endl;
+  ATH_MSG_NOCLASS(logger, "==== Simulate with pdgid=2      ====");
   truth->set_pdgid(2);
   chain.set_RetryChainFromStart();
   chain.simulate(*simulstate, truth, extrapol);

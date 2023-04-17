@@ -162,8 +162,9 @@ void TFCSHitCellMappingWiggle::Print(Option_t *option) const {
     ATH_MSG(INFO) << optprint << "  " << get_number_of_bins()
                   << " functions : ";
     for (unsigned int i = 0; i < get_number_of_bins(); ++i)
-      msg() << get_bin_low_edge(i) << " < (" << get_function(i) << ") < ";
-    msg() << get_bin_up_edge(get_number_of_bins() - 1) << endmsg;
+      ATH_MSG(INFO) << get_bin_low_edge(i) << " < (" << get_function(i)
+                    << ") < ";
+    ATH_MSG(INFO) << get_bin_up_edge(get_number_of_bins() - 1) << END_MSG(INFO);
   }
 }
 

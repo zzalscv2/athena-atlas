@@ -104,8 +104,9 @@ void TFCS1DFunctionHistogram::smart_rebin_loop(TH1 *hist, double cut_maxdev) {
     maxdev *= 100.0;
 
     if (i % 100 == 0)
-      cout << "Iteration nr. " << i << " -----> change " << change << " bins "
-           << h_out->GetNbinsX() << " -> maxdev=" << maxdev << endl;
+      ATH_MSG_INFO("Iteration nr. " << i << " -----> change " << change
+                                    << " bins " << h_out->GetNbinsX()
+                                    << " -> maxdev=" << maxdev);
 
     if (maxdev < cut_maxdev && h_out->GetNbinsX() > 5 && i < 1000) {
       delete h_input;
@@ -120,8 +121,8 @@ void TFCS1DFunctionHistogram::smart_rebin_loop(TH1 *hist, double cut_maxdev) {
     }
   }
 
-  cout << "Info: Rebinned histogram has " << h_output->GetNbinsX() << " bins."
-       << endl;
+  ATH_MSG_INFO("Info: Rebinned histogram has " << h_output->GetNbinsX()
+                                               << " bins.");
 
   // store:
 

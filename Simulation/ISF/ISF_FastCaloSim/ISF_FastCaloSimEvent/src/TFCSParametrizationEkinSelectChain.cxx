@@ -143,6 +143,7 @@ TFCSParametrizationEkinSelectChain::get_bin_text(int bin) const {
 void TFCSParametrizationEkinSelectChain::unit_test(
     TFCSSimulationState *simulstate, TFCSTruthState *truth,
     const TFCSExtrapolationState *extrapol) {
+  ISF_FCS::MLogging logger;
   if (!simulstate)
     simulstate = new TFCSSimulationState();
   if (!truth)
@@ -185,7 +186,7 @@ void TFCSParametrizationEkinSelectChain::unit_test(
     chain.push_back_in_bin(param);
   }
 
-  std::cout << "====         Chain setup       ====" << std::endl;
+  ATH_MSG_NOCLASS(logger, "====         Chain setup       ====");
   chain.Print();
 
   param = new TFCSInvisibleParametrization("B end all", "B end all");
@@ -195,27 +196,27 @@ void TFCSParametrizationEkinSelectChain::unit_test(
   param->setLevel(MSG::DEBUG);
   chain.push_before_first_bin(param);
 
-  std::cout << "====         Chain setup       ====" << std::endl;
+  ATH_MSG_NOCLASS(logger, "====         Chain setup       ====");
   chain.Print();
-  std::cout << "==== Simulate with E=0.3      ====" << std::endl;
+  ATH_MSG_NOCLASS(logger, "==== Simulate with E=0.3      ====");
   truth->SetPtEtaPhiM(0.3, 0, 0, 0);
   chain.simulate(*simulstate, truth, extrapol);
   for (double E = 1; E < 10.1; E += 1) {
-    std::cout << "==== Simulate with E=" << E << "      ====" << std::endl;
+    ATH_MSG_NOCLASS(logger, "==== Simulate with E=" << E << "      ====");
     truth->SetPtEtaPhiM(E, 0, 0, 0);
     chain.simulate(*simulstate, truth, extrapol);
   }
-  std::cout << "==== Simulate with E=100      ====" << std::endl;
+  ATH_MSG_NOCLASS(logger, "==== Simulate with E=100      ====");
   truth->SetPtEtaPhiM(100, 0, 0, 0);
   chain.simulate(*simulstate, truth, extrapol);
-  std::cout << "===================================" << std::endl << std::endl;
-  std::cout << "====== now with random bin ========" << std::endl << std::endl;
+  ATH_MSG_NOCLASS(logger, "===================================" << std::endl);
+  ATH_MSG_NOCLASS(logger, "====== now with random bin ========" << std::endl);
   chain.set_DoRandomInterpolation();
   for (double E = 15; E < 35.1; E += 4) {
-    std::cout << "==== Simulate with E=" << E << "      ====" << std::endl;
+    ATH_MSG_NOCLASS(logger, "==== Simulate with E=" << E << "      ====");
     truth->SetPtEtaPhiM(E, 0, 0, 0);
     for (int i = 0; i < 10; ++i)
       chain.simulate(*simulstate, truth, extrapol);
   }
-  std::cout << "===================================" << std::endl << std::endl;
+  ATH_MSG_NOCLASS(logger, "===================================" << std::endl);
 }

@@ -63,16 +63,16 @@ public:
           if (m_HistoBorders.GetBinLowEdge(ihist - 1) ==
               m_HistoBorders.GetBinLowEdge(ihist)) {
             if (doprint)
-              std::cout << "Skip bin=" << ibin + 1
-                        << " x=" << hist->GetXaxis()->GetBinLowEdge(ibin + 1)
-                        << " fx=" << m_HistoBorders.GetBinLowEdge(ihist)
-                        << std::endl;
+              ATH_MSG_INFO("Skip bin="
+                           << ibin + 1
+                           << " x=" << hist->GetXaxis()->GetBinLowEdge(ibin + 1)
+                           << " fx=" << m_HistoBorders.GetBinLowEdge(ihist));
             --ihist;
             if (doprint)
-              std::cout << "     bin=" << ibin
-                        << " x=" << hist->GetXaxis()->GetBinLowEdge(ibin)
-                        << " fx=" << m_HistoBorders.GetBinLowEdge(ihist)
-                        << std::endl;
+              ATH_MSG_INFO("     bin="
+                           << ibin
+                           << " x=" << hist->GetXaxis()->GetBinLowEdge(ibin)
+                           << " fx=" << m_HistoBorders.GetBinLowEdge(ihist));
           }
         m_HistoContents.set_fraction(ihist,
                                      temp_HistoContents[ibin] / integral);
@@ -80,27 +80,27 @@ public:
           if (m_HistoContents.get_fraction(ihist - 1) ==
               m_HistoContents.get_fraction(ihist)) {
             if (doprint)
-              std::cout << "Skip fbin=" << ihist
-                        << " fx=" << m_HistoBorders.GetBinLowEdge(ihist)
-                        << " frac=" << m_HistoContents.get_fraction(ihist)
-                        << std::endl;
+              ATH_MSG_INFO("Skip fbin="
+                           << ihist
+                           << " fx=" << m_HistoBorders.GetBinLowEdge(ihist)
+                           << " frac=" << m_HistoContents.get_fraction(ihist));
             --ihist;
             if (doprint)
-              std::cout << "     fbin=" << ihist
-                        << " fx=" << m_HistoBorders.GetBinLowEdge(ihist)
-                        << " frac=" << m_HistoContents.get_fraction(ihist)
-                        << std::endl;
+              ATH_MSG_INFO("     fbin="
+                           << ihist
+                           << " fx=" << m_HistoBorders.GetBinLowEdge(ihist)
+                           << " frac=" << m_HistoContents.get_fraction(ihist));
           }
 
         if (doprint)
-          std::cout << "bin=" << ibin + 1 << " fbin=" << ihist << "/"
-                    << m_HistoBorders.get_nbins() << " x=["
-                    << hist->GetXaxis()->GetBinLowEdge(ibin + 1) << ","
-                    << hist->GetXaxis()->GetBinUpEdge(ibin + 1)
-                    << "] fx=" << m_HistoBorders.GetBinLowEdge(ihist)
-                    << " int=" << temp_HistoContents[ibin] / integral
-                    << " frac=" << m_HistoContents.get_fraction(ihist)
-                    << std::endl;
+          ATH_MSG_INFO("bin=" << ibin + 1 << " fbin=" << ihist << "/"
+                              << m_HistoBorders.get_nbins() << " x=["
+                              << hist->GetXaxis()->GetBinLowEdge(ibin + 1)
+                              << "," << hist->GetXaxis()->GetBinUpEdge(ibin + 1)
+                              << "] fx=" << m_HistoBorders.GetBinLowEdge(ihist)
+                              << " int=" << temp_HistoContents[ibin] / integral
+                              << " frac="
+                              << m_HistoContents.get_fraction(ihist));
 
         ++ihist;
       }
@@ -121,9 +121,9 @@ public:
       return 0;
     Trandom residual_rnd;
     size_t ibin = m_HistoContents.get_bin(rnd, residual_rnd);
-    // std::cout<<"fbin="<<ibin<<" fx="<<m_HistoBorders.GetBinLowEdge(ibin)<<"
+    // ATH_MSG_INFO( fx="<<m_HistoBorders.GetBinLowEdge(ibin)<<"
     // frac="<<m_HistoContents.get_fraction(ibin)<<"
-    // residual_rnd="<<residual_rnd<<std::endl;
+    // residual_rnd="<<residual_rnd);
     return m_HistoBorders.position(ibin, residual_rnd);
   }
 

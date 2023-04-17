@@ -5,76 +5,17 @@
 #ifndef ISF_FASTCALOSIMEVENT_TFCSParametrizationBase_h
 #define ISF_FASTCALOSIMEVENT_TFCSParametrizationBase_h
 
-#include <TNamed.h>
 #include <set>
 #include <map>
 #include <mutex>
 
 #include "CxxUtils/checker_macros.h"
+#include "ISF_FastCaloSimEvent/MLogging.h"
 
 class ICaloGeometry;
 class TFCSSimulationState;
 class TFCSTruthState;
 class TFCSExtrapolationState;
-
-// Define Athena like message macro's such that they work stand alone and inside
-// athena
-#if defined(__FastCaloSimStandAlone__)
-#include <iostream>
-#include <iomanip>
-typedef std::ostream MsgStream;
-#define endmsg std::endl
-
-namespace MSG {
-enum Level {
-  NIL = 0,
-  VERBOSE,
-  DEBUG,
-  INFO,
-  WARNING,
-  ERROR,
-  FATAL,
-  ALWAYS,
-  NUM_LEVELS
-}; // enum Level
-__attribute__((unused)) static const char *LevelNames[NUM_LEVELS] = {
-    "NIL", "VERBOSE", "DEBUG", "INFO", "WARNING", "ERROR", "FATAL", "ALWAYS"};
-} // end namespace MSG
-// Needs a check despite the name, as stand alone mode is not using MsgStream,
-// but just cout internally
-#define ATH_MSG_LVL_NOCHK(lvl, x)                                              \
-  do {                                                                         \
-    if (this->msgLvl(lvl))                                                     \
-      this->msg(lvl) << std::setw(45) << std::left << this->GetName() << " "   \
-                     << MSG::LevelNames[lvl] << " " << x << endmsg;            \
-  } while (0)
-
-#define ATH_MSG_LVL(lvl, x)                                                    \
-  do {                                                                         \
-    if (this->msgLvl(lvl))                                                     \
-      ATH_MSG_LVL_NOCHK(lvl, x);                                               \
-  } while (0)
-
-#define ATH_MSG_VERBOSE(x) ATH_MSG_LVL(MSG::VERBOSE, x)
-#define ATH_MSG_DEBUG(x) ATH_MSG_LVL(MSG::DEBUG, x)
-// note that we are using the _NOCHK variant here
-#define ATH_MSG_INFO(x) ATH_MSG_LVL_NOCHK(MSG::INFO, x)
-#define ATH_MSG_WARNING(x) ATH_MSG_LVL_NOCHK(MSG::WARNING, x)
-#define ATH_MSG_ERROR(x) ATH_MSG_LVL_NOCHK(MSG::ERROR, x)
-#define ATH_MSG_FATAL(x) ATH_MSG_LVL_NOCHK(MSG::FATAL, x)
-
-// can be used like so: ATH_MSG(INFO) << "hello" << endmsg;
-#define ATH_MSG(lvl)                                                           \
-  if (this->msgLvl(MSG::lvl))                                                  \
-  this->msg(MSG::lvl) << std::setw(45) << std::left << this->GetName() << " "  \
-                      << MSG::LevelNames[MSG::lvl] << " "
-
-#else
-#include "GaudiKernel/MsgStream.h"
-#include "AthenaBaseComps/AthMsgStreamMacros.h"
-#include "AthenaKernel/getMessageSvc.h"
-#include <boost/thread/tss.hpp>
-#endif
 
 /** Base class for all FastCaloSim parametrizations
 Functionality in derivde classes is  provided through the simulate method. The
@@ -101,7 +42,9 @@ enum FCSReturnCode { FCSFatal = 0, FCSSuccess = 1, FCSRetry = 2 };
 
 #define FCS_RETRY_COUNT 3
 
-class TFCSParametrizationBase : public TNamed {
+using ISF_FCS::MLogging;
+
+class TFCSParametrizationBase : public TNamed, public MLogging {
 public:
   TFCSParametrizationBase(const char *name = nullptr,
                           const char *title = nullptr);
@@ -228,60 +171,14 @@ protected:
 #if defined(__FastCaloSimStandAlone__)
 public:
   /// Update outputlevel
-  virtual void setLevel(int level, bool recursive = false) {
-    level = (level >= MSG::NUM_LEVELS) ? MSG::ALWAYS
-            : (level < MSG::NIL)       ? MSG::NIL
-                                       : level;
-    m_level = MSG::Level(level);
+  /// for multiple levels
+  using MLogging::setLevel;
+  virtual void setLevel(int level, bool recursive) {
+    this->setLevel(level);
     if (recursive)
       for (unsigned int i = 0; i < size(); ++i)
-        (*this)[i]->setLevel(m_level, recursive);
+        (*this)[i]->setLevel(level, recursive);
   }
-  /// Retrieve output level
-  MSG::Level level() const { return m_level; }
-
-  /// Log a message using cout; a check of MSG::Level lvl is not possible!
-  MsgStream &msg() const { return *m_msg; }
-  MsgStream &msg(const MSG::Level) const { return *m_msg; }
-  /// Check whether the logging system is active at the provided verbosity level
-  bool msgLvl(const MSG::Level lvl) const { return m_level <= lvl; }
-
-private:
-  MSG::Level m_level; //! Do not persistify!
-
-  MsgStream *m_msg; //! Do not persistify!
-#else
-public:
-  /// Update outputlevel
-  void setLevel(int level) { msg().setLevel(level); }
-
-  /// Retrieve output level
-  MSG::Level level() const { return msg().level(); }
-
-  /// Log a message using the Athena controlled logging system
-  MsgStream &msg() const {
-    MsgStream *ms = s_msg_tls.get();
-    if (!ms) {
-      ms = new MsgStream(Athena::getMessageSvc(), "FastCaloSimParametrization");
-      s_msg_tls.reset(ms);
-    }
-    return *ms;
-  }
-
-  /// Log a message using the Athena controlled logging system
-  MsgStream &msg(MSG::Level lvl) const { return msg() << lvl; }
-
-  /// Check whether the logging system is active at the provided verbosity level
-  bool msgLvl(MSG::Level lvl) const { return msg().level() <= lvl; }
-
-private:
-  /** Static private message stream member.
-      We don't want this to take memory for every instance of this object
-     created. Note that we also cannot use AthMessaging as a base class as this
-     creates problems when storing these objects in ROOT files (ATLASSIM-5854).
-  */
-  inline static boost::thread_specific_ptr<MsgStream> s_msg_tls
-      ATLAS_THREAD_SAFE; //! Do not persistify!
 #endif
 
 private:
@@ -289,7 +186,7 @@ private:
   static std::vector<TFCSParametrizationBase *> s_cleanup_list
       ATLAS_THREAD_SAFE;
 
-  ClassDef(TFCSParametrizationBase, 2) // TFCSParametrizationBase
+  ClassDef(TFCSParametrizationBase, 3) // TFCSParametrizationBase
 };
 
-#endif
+#endif // End header guards

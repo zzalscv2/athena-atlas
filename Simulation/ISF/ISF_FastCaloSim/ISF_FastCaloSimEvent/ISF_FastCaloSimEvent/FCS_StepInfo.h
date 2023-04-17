@@ -17,6 +17,8 @@
 // #include "LArSimEvent/LArHit.h"
 #include "TileSimEvent/TileHit.h"
 
+#include "ISF_FastCaloSimEvent/MLogging.h"
+
 class MsgStream;
 
 // Namespace for the G4 step related classes
@@ -38,7 +40,9 @@ namespace ISF_FCS_Parametrization {
  *
  */
 
-class FCS_StepInfo : public TileHit {
+using namespace ISF_FCS;
+
+class FCS_StepInfo : public TileHit, public MLogging {
 
 public:
   //! empty default constructor
