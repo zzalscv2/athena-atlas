@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: FPEControlSvc.cxx,v 1.5 2008-09-23 22:00:47 binet Exp $
 /**
  * @file  AthenaServices/src/FPEControlSvc.cxx
  * @author scott snyder
@@ -217,6 +215,7 @@ void FPEControlSvc::prophand (Gaudi::Details::PropertyBase& /*prop*/)
  */
 void FPEControlSvc::setFPU()
 {
+  feclearexcept (m_enabled);
 #ifdef __GLIBC__
   feenableexcept (m_enabled);
   fedisableexcept (m_disabled);
