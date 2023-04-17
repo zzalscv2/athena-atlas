@@ -129,6 +129,7 @@ def defineMenu():
         
         
         #LUCID
+        'L1_LUCID_A', 'L1_LUCID_C',
 
         # ZDC
         'L1_ZDC_A','L1_ZDC_C','L1_ZDC_A_C',
