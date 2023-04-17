@@ -241,6 +241,23 @@ def getDevHISignatures():
         #----------- UPC HMT Fgap #FIXME: currently ChainMerging fails due to EmptyMbts step in mb part (?)
         #ChainProp(name='HLT_mb_sp300_trk20_hmt_hi_FgapA5_L1TE3_VTE50', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=MinBiasGroup+SupportGroup),
         #ChainProp(name='HLT_mb_sp300_trk20_hmt_hi_FgapC5_L1TE3_VTE50', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=MinBiasGroup+SupportGroup),
+        ChainProp(name='HLT_mb_sptrk_hi_FgapC5_L1VTE200', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=MinBiasGroup+SupportGroup),
+        ChainProp(name='HLT_mb_sptrk_hi_FgapA5_L1VTE200', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=MinBiasGroup+SupportGroup),
+        ChainProp(name='HLT_mb_sp50_trk15_hmt_hi_FgapA5_L1MBTS_1_VTE200', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=MinBiasGroup+SupportGroup),
+        ChainProp(name='HLT_mb_sp50_trk15_hmt_hi_FgapC5_L1MBTS_1_VTE200', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=MinBiasGroup+SupportGroup),
+        ChainProp(name='HLT_mb_sp400_trk25_hmt_hi_FgapA5_L1TE3_VTE200', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=MinBiasGroup+SupportGroup),
+        ChainProp(name='HLT_mb_sp400_trk25_hmt_hi_FgapC5_L1TE3_VTE200', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=MinBiasGroup+SupportGroup),
+        ChainProp(name='HLT_mb_sp700_trk35_hmt_hi_FgapA5_L1TE5_VTE200', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=MinBiasGroup+SupportGroup),
+        ChainProp(name='HLT_mb_sp700_trk35_hmt_hi_FgapC5_L1TE5_VTE200', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=MinBiasGroup+SupportGroup),
+        
+        #----------- UPC diphotons/dielectrons
+        ChainProp(name='HLT_mb_sp_vpix15_hi_FgapAC3_L12TAU1_VTE200', l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream],groups=MinBiasGroup+PrimaryLegGroup),
+        ChainProp(name='HLT_mb_sp_vpix30_hi_FgapAC3_L12TAU1_VTE200', l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream],groups=MinBiasGroup+PrimaryLegGroup),
+        ChainProp(name='HLT_mb_excl_1trk4_pt1_hi_FgapAC3_L12TAU1_VTE200', l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream],groups=MinBiasGroup+PrimaryLegGroup),
+        ChainProp(name='HLT_mb_sptrk_hi_FgapAC3_L12TAU1_VTE200', l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream],groups=MinBiasGroup+SupportLegGroup),
+
+        #----------- UPC ditaus 
+        ChainProp(name='HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1TRT_VTE50', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=MinBiasGroup+PrimaryLegGroup),
 
     ]
 
@@ -268,6 +285,12 @@ def getDevHISignatures():
         ChainProp(name='HLT_mb_sp15_trk15_hmt_L1MBTS_1_VTE50', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportGroup),
         ChainProp(name='HLT_mb_sp300_trk20_hmt_L1TE3_VTE50',   l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportGroup),
 
+        #----------- UPC exclusive dileptons
+        ChainProp(name='HLT_mb_excl_1trk4_pt1_L12TAU1_VTE200', l1SeedThresholds=['FSNOSEED'],stream=[UPCStream],groups=MinBiasGroup+SupportLegGroup),
+        ChainProp(name='HLT_mb_excl_1trk5_pt1_L1TAU1_VTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportLegGroup),
+        ChainProp(name='HLT_mb_excl_1trk5_pt2_L1TAU1_VTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportLegGroup),
+        ChainProp(name='HLT_mb_excl_1trk5_pt1_L1TRT_VTE50', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportLegGroup),
+        
         #----Physics streamer for 2022 Nov HI test run, ATR-26405
         ChainProp(name='HLT_mb_sptrk_L1MBTS_1_VTE5', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportGroup),
     ]
