@@ -45,8 +45,12 @@ def JetTagMonitorConfig(inputFlags):
     from AthenaConfiguration.ComponentFactory import CompFactory
     from AthenaMonitoring.FilledBunchFilterToolConfig import FilledBunchFilterToolCfg
     from AthenaMonitoring.BadLBFilterToolConfig import LArBadLBFilterToolCfg
+    from AthenaMonitoring.AtlasReadyFilterConfig import AtlasReadyFilterCfg
    
-    jetTagMonAlg = helper.addAlgorithm(CompFactory.JetTagMonitorAlgorithm,'JetTagMonAlg', addFilterTools = [FilledBunchFilterToolCfg(inputFlags), LArBadLBFilterToolCfg(inputFlags)])
+    jetTagMonAlg = helper.addAlgorithm(CompFactory.JetTagMonitorAlgorithm,'JetTagMonAlg',
+                                       addFilterTools = [FilledBunchFilterToolCfg(inputFlags),
+                                                         LArBadLBFilterToolCfg(inputFlags),
+                                                         AtlasReadyFilterCfg(inputFlags)])
        
    #anotherJetTagMonAlg = helper.addAlgorithm(JetTagMonitorAlgorithm,'AnotherJetTagMonAlg')
 
