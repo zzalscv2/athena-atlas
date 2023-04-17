@@ -467,109 +467,6 @@
      <hist1D name="Photon_Phot_n" plotopts="" tests="KS" type="TH1F"/>
      <hist1D name="Photon_Phot_n_weighted" plotopts="" tests="KS" type="TH1F"/>
     </TDirectory>
-    <TDirectory name="PhotTopo">
-     <TDirectory name="All">
-      <TDirectory name="KinPlots">
-       <hist1D name="Photon_PhotTopo_All_KinPlots_et" plotopts="" tests="KS" type="TH1F"/>
-       <hist1D name="Photon_PhotTopo_All_KinPlots_eta" plotopts="" tests="KS" type="TH1F"/>
-       <hist1D name="Photon_PhotTopo_All_KinPlots_phi" plotopts="" tests="KS" type="TH1F"/>
-       <hist2D name="Photon_PhotTopo_All_KinPlots_etvseta" plotopts="" tests="KS" type="TH2F"/>
-      </TDirectory>
-     </TDirectory>
-     <TDirectory name="Iso">
-      <TDirectory name="KinPlots">
-       <hist1D name="Photon_PhotTopo_Iso_KinPlots_et" plotopts="" tests="KS" type="TH1F"/>
-       <hist1D name="Photon_PhotTopo_Iso_KinPlots_eta" plotopts="" tests="KS" type="TH1F"/>
-       <hist1D name="Photon_PhotTopo_Iso_KinPlots_phi" plotopts="" tests="KS" type="TH1F"/>
-       <hist2D name="Photon_PhotTopo_Iso_KinPlots_etvseta" plotopts="" tests="KS" type="TH2F"/>
-      </TDirectory>
-     </TDirectory>
-     <TDirectory name="IsoLoose">
-      <TDirectory name="KinPlots">
-       <hist1D name="Photon_PhotTopo_IsoLoose_KinPlots_et" plotopts="" tests="KS" type="TH1F"/>
-       <hist1D name="Photon_PhotTopo_IsoLoose_KinPlots_eta" plotopts="" tests="KS" type="TH1F"/>
-       <hist1D name="Photon_PhotTopo_IsoLoose_KinPlots_phi" plotopts="" tests="KS" type="TH1F"/>
-       <hist2D name="Photon_PhotTopo_IsoLoose_KinPlots_etvseta" plotopts="" tests="KS" type="TH2F"/>
-      </TDirectory>
-     </TDirectory>
-     <TDirectory name="IsoTight">
-      <TDirectory name="KinPlots">
-       <hist1D name="Photon_PhotTopo_IsoTight_KinPlots_et" plotopts="" tests="KS" type="TH1F"/>
-       <hist1D name="Photon_PhotTopo_IsoTight_KinPlots_eta" plotopts="" tests="KS" type="TH1F"/>
-       <hist1D name="Photon_PhotTopo_IsoTight_KinPlots_phi" plotopts="" tests="KS" type="TH1F"/>
-       <hist2D name="Photon_PhotTopo_IsoTight_KinPlots_etvseta" plotopts="" tests="KS" type="TH2F"/>
-      </TDirectory>
-     </TDirectory>
-     <hist1D name="Photon_PhotTopo_n" plotopts="" tests="KS" type="TH1F"/>
-     <hist1D name="Photon_PhotTopo_n_weighted" plotopts="" tests="KS" type="TH1F"/>
-    </TDirectory>
-    <TDirectory name="PhotAmb">
-     <TDirectory name="All">
-      <TDirectory name="KinPlots">
-       <hist1D name="Photon_PhotAmb_All_KinPlots_et" plotopts="" tests="KS" type="TH1F"/>
-       <hist1D name="Photon_PhotAmb_All_KinPlots_eta" plotopts="" tests="KS" type="TH1F"/>
-       <hist1D name="Photon_PhotAmb_All_KinPlots_phi" plotopts="" tests="KS" type="TH1F"/>
-       <hist2D name="Photon_PhotAmb_All_KinPlots_etvseta" plotopts="" tests="KS" type="TH2F"/>
-      </TDirectory>
-     </TDirectory>
-     <hist1D name="Photon_PhotAmb_n" plotopts="" tests="KS" type="TH1F"/>
-     <hist1D name="Photon_PhotAmb_n_weighted" plotopts="" tests="KS" type="TH1F"/>
-    </TDirectory>
-    <TDirectory name="Conv">
-     <TDirectory name="All">
-      <TDirectory name="KinPlots">
-       <hist1D name="Photon_Conv_All_KinPlots_et" plotopts="" tests="KS" type="TH1F"/>
-       <hist1D name="Photon_Conv_All_KinPlots_eta" plotopts="" tests="KS" type="TH1F"/>
-       <hist1D name="Photon_Conv_All_KinPlots_phi" plotopts="" tests="KS" type="TH1F"/>
-       <hist2D name="Photon_Conv_All_KinPlots_etvseta" plotopts="" tests="KS" type="TH2F"/>
-      </TDirectory>
-     </TDirectory>
-     <TDirectory name="Iso">
-      <TDirectory name="KinPlots">
-       <hist1D name="Photon_Conv_Iso_KinPlots_et" plotopts="" tests="KS" type="TH1F"/>
-       <hist1D name="Photon_Conv_Iso_KinPlots_eta" plotopts="" tests="KS" type="TH1F"/>
-       <hist1D name="Photon_Conv_Iso_KinPlots_phi" plotopts="" tests="KS" type="TH1F"/>
-       <hist2D name="Photon_Conv_Iso_KinPlots_etvseta" plotopts="" tests="KS" type="TH2F"/>
-      </TDirectory>
-     </TDirectory>
-     <hist1D name="Photon_Conv_n" plotopts="" tests="KS" type="TH1F"/>
-     <hist1D name="Photon_Conv_n_weighted" plotopts="" tests="KS" type="TH1F"/>
-     <hist1D name="Photon_Conv_nVtx" plotopts="" tests="KS" type="TH1F"/>
-     <hist1D name="Photon_Conv_convR" plotopts="" tests="KS" type="TH1F"/>
-     <hist2D name="Photon_Conv_convRvsEta" plotopts="" tests="KS" type="TH2F"/>
-     <hist2D name="Photon_Conv_convRvsType" plotopts="" tests="KS" type="TH2F"/>
-     <hist1D name="Photon_Conv_convType" plotopts="" tests="KS" type="TH1F"/>
-     <hist1D name="Photon_Conv_convDeltaEta" plotopts="" tests="KS" type="TH1F"/>
-     <hist1D name="Photon_Conv_ConvDeltaPhi" plotopts="" tests="KS" type="TH1F"/>
-    </TDirectory>
-    <TDirectory name="TruthAll">
-     <TDirectory name="All">
-      <hist1D name="Photon_TruthAll_All_et" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Photon_TruthAll_All_eta" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Photon_TruthAll_All_phi" plotopts="" tests="KS" type="TH1F"/>
-      <hist2D name="Photon_TruthAll_All_etvseta" plotopts="" tests="KS" type="TH2F"/>
-     </TDirectory>
-     <TDirectory name="Iso">
-      <TDirectory name="all">
-       <hist1D name="Photon_TruthAll_Iso_all_et" plotopts="" tests="KS" type="TH1F"/>
-       <hist1D name="Photon_TruthAll_Iso_all_eta" plotopts="" tests="KS" type="TH1F"/>
-       <hist1D name="Photon_TruthAll_Iso_all_phi" plotopts="" tests="KS" type="TH1F"/>
-       <hist2D name="Photon_TruthAll_Iso_all_etvseta" plotopts="" tests="KS" type="TH2F"/>
-      </TDirectory>
-      <TDirectory name="Conv">
-       <hist1D name="Photon_TruthAll_Iso_Conv_et" plotopts="" tests="KS" type="TH1F"/>
-       <hist1D name="Photon_TruthAll_Iso_Conv_eta" plotopts="" tests="KS" type="TH1F"/>
-       <hist1D name="Photon_TruthAll_Iso_Conv_phi" plotopts="" tests="KS" type="TH1F"/>
-       <hist2D name="Photon_TruthAll_Iso_Conv_etvseta" plotopts="" tests="KS" type="TH2F"/>
-      </TDirectory>
-      <TDirectory name="Unc">
-       <hist1D name="Photon_TruthAll_Iso_Unc_et" plotopts="" tests="KS" type="TH1F"/>
-       <hist1D name="Photon_TruthAll_Iso_Unc_eta" plotopts="" tests="KS" type="TH1F"/>
-       <hist1D name="Photon_TruthAll_Iso_Unc_phi" plotopts="" tests="KS" type="TH1F"/>
-       <hist2D name="Photon_TruthAll_Iso_Unc_etvseta" plotopts="" tests="KS" type="TH2F"/>
-      </TDirectory>
-     </TDirectory>
-    </TDirectory>
     <TDirectory name="Truth">
      <TDirectory name="Reco">
       <TDirectory name="all">
@@ -577,18 +474,6 @@
        <hist1D name="Photon_Truth_Reco_all_eta" plotopts="" tests="KS" type="TH1F"/>
        <hist1D name="Photon_Truth_Reco_all_phi" plotopts="" tests="KS" type="TH1F"/>
        <hist2D name="Photon_Truth_Reco_all_etvseta" plotopts="" tests="KS" type="TH2F"/>
-      </TDirectory>
-      <TDirectory name="Conv">
-       <hist1D name="Photon_Truth_Reco_Conv_et" plotopts="" tests="KS" type="TH1F"/>
-       <hist1D name="Photon_Truth_Reco_Conv_eta" plotopts="" tests="KS" type="TH1F"/>
-       <hist1D name="Photon_Truth_Reco_Conv_phi" plotopts="" tests="KS" type="TH1F"/>
-       <hist2D name="Photon_Truth_Reco_Conv_etvseta" plotopts="" tests="KS" type="TH2F"/>
-      </TDirectory>
-      <TDirectory name="Unc">
-       <hist1D name="Photon_Truth_Reco_Unc_et" plotopts="" tests="KS" type="TH1F"/>
-       <hist1D name="Photon_Truth_Reco_Unc_eta" plotopts="" tests="KS" type="TH1F"/>
-       <hist1D name="Photon_Truth_Reco_Unc_phi" plotopts="" tests="KS" type="TH1F"/>
-       <hist2D name="Photon_Truth_Reco_Unc_etvseta" plotopts="" tests="KS" type="TH2F"/>
       </TDirectory>
      </TDirectory>
      <TDirectory name="RecoLoose">
@@ -598,18 +483,6 @@
        <hist1D name="Photon_Truth_RecoLoose_all_phi" plotopts="" tests="KS" type="TH1F"/>
        <hist2D name="Photon_Truth_RecoLoose_all_etvseta" plotopts="" tests="KS" type="TH2F"/>
       </TDirectory>
-      <TDirectory name="Conv">
-       <hist1D name="Photon_Truth_RecoLoose_Conv_et" plotopts="" tests="KS" type="TH1F"/>
-       <hist1D name="Photon_Truth_RecoLoose_Conv_eta" plotopts="" tests="KS" type="TH1F"/>
-       <hist1D name="Photon_Truth_RecoLoose_Conv_phi" plotopts="" tests="KS" type="TH1F"/>
-       <hist2D name="Photon_Truth_RecoLoose_Conv_etvseta" plotopts="" tests="KS" type="TH2F"/>
-      </TDirectory>
-      <TDirectory name="Unc">
-       <hist1D name="Photon_Truth_RecoLoose_Unc_et" plotopts="" tests="KS" type="TH1F"/>
-       <hist1D name="Photon_Truth_RecoLoose_Unc_eta" plotopts="" tests="KS" type="TH1F"/>
-       <hist1D name="Photon_Truth_RecoLoose_Unc_phi" plotopts="" tests="KS" type="TH1F"/>
-       <hist2D name="Photon_Truth_RecoLoose_Unc_etvseta" plotopts="" tests="KS" type="TH2F"/>
-      </TDirectory>
      </TDirectory>
      <TDirectory name="RecoTight">
       <TDirectory name="all">
@@ -618,18 +491,6 @@
        <hist1D name="Photon_Truth_RecoTight_all_phi" plotopts="" tests="KS" type="TH1F"/>
        <hist2D name="Photon_Truth_RecoTight_all_etvseta" plotopts="" tests="KS" type="TH2F"/>
       </TDirectory>
-      <TDirectory name="Conv">
-       <hist1D name="Photon_Truth_RecoTight_Conv_et" plotopts="" tests="KS" type="TH1F"/>
-       <hist1D name="Photon_Truth_RecoTight_Conv_eta" plotopts="" tests="KS" type="TH1F"/>
-       <hist1D name="Photon_Truth_RecoTight_Conv_phi" plotopts="" tests="KS" type="TH1F"/>
-       <hist2D name="Photon_Truth_RecoTight_Conv_etvseta" plotopts="" tests="KS" type="TH2F"/>
-      </TDirectory>
-      <TDirectory name="Unc">
-       <hist1D name="Photon_Truth_RecoTight_Unc_et" plotopts="" tests="KS" type="TH1F"/>
-       <hist1D name="Photon_Truth_RecoTight_Unc_eta" plotopts="" tests="KS" type="TH1F"/>
-       <hist1D name="Photon_Truth_RecoTight_Unc_phi" plotopts="" tests="KS" type="TH1F"/>
-       <hist2D name="Photon_Truth_RecoTight_Unc_etvseta" plotopts="" tests="KS" type="TH2F"/>
-      </TDirectory>
      </TDirectory>
      <TDirectory name="Iso">
       <TDirectory name="all">
@@ -637,18 +498,6 @@
        <hist1D name="Photon_Truth_Iso_all_eta" plotopts="" tests="KS" type="TH1F"/>
        <hist1D name="Photon_Truth_Iso_all_phi" plotopts="" tests="KS" type="TH1F"/>
        <hist2D name="Photon_Truth_Iso_all_etvseta" plotopts="" tests="KS" type="TH2F"/>
-      </TDirectory>
-      <TDirectory name="Conv">
-       <hist1D name="Photon_Truth_Iso_Conv_et" plotopts="" tests="KS" type="TH1F"/>
-       <hist1D name="Photon_Truth_Iso_Conv_eta" plotopts="" tests="KS" type="TH1F"/>
-       <hist1D name="Photon_Truth_Iso_Conv_phi" plotopts="" tests="KS" type="TH1F"/>
-       <hist2D name="Photon_Truth_Iso_Conv_etvseta" plotopts="" tests="KS" type="TH2F"/>
-      </TDirectory>
-      <TDirectory name="Unc">
-       <hist1D name="Photon_Truth_Iso_Unc_et" plotopts="" tests="KS" type="TH1F"/>
-       <hist1D name="Photon_Truth_Iso_Unc_eta" plotopts="" tests="KS" type="TH1F"/>
-       <hist1D name="Photon_Truth_Iso_Unc_phi" plotopts="" tests="KS" type="TH1F"/>
-       <hist2D name="Photon_Truth_Iso_Unc_etvseta" plotopts="" tests="KS" type="TH2F"/>
       </TDirectory>
      </TDirectory>
     </TDirectory>
