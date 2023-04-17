@@ -272,9 +272,11 @@ def HLTConfigSvcCfg( flags ):
 def TrigConfigSvcCfg( flags ):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     acc = ComponentAccumulator()
-    acc.merge( L1ConfigSvcCfg( flags ) )
     acc.merge( BunchGroupCondAlgCfg( flags ) )
+    acc.merge( L1ConfigSvcCfg( flags ) )
     acc.merge( HLTConfigSvcCfg( flags ) )
+    acc.merge( L1PrescaleCondAlgCfg( flags ) )
+    acc.merge( HLTPrescaleCondAlgCfg( flags ) )
     return acc
 
 def L1PrescaleCondAlgCfg( flags ):
@@ -383,9 +385,6 @@ if __name__ == "__main__":
             flags.Input.Files = defaultTestFiles.RAW_RUN2
             flags.lock()
             TrigConfigSvcCfg( flags )
-            L1PrescaleCondAlgCfg( flags )
-            BunchGroupCondAlgCfg( flags )
-            HLTPrescaleCondAlgCfg( flags )
 
         def test_legacyMenu(self):
             from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -394,9 +393,6 @@ if __name__ == "__main__":
             flags.Input.Files = defaultTestFiles.RAW_RUN2
             flags.lock()
             TrigConfigSvcCfg( flags )
-            L1PrescaleCondAlgCfg( flags )
-            BunchGroupCondAlgCfg( flags )
-            HLTPrescaleCondAlgCfg( flags )
 
         def test_jsonConverter(self):
             keys = createJsonMenuFiles(run=360026, lb=151)

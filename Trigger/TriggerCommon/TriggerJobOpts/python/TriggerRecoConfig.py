@@ -4,7 +4,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import Format
 from TrigT1ResultByteStream.TrigT1ResultByteStreamConfig import L1TriggerByteStreamDecoderCfg
-from TrigConfigSvc.TrigConfigSvcCfg import TrigConfigSvcCfg, L1PrescaleCondAlgCfg, HLTPrescaleCondAlgCfg
+from TrigConfigSvc.TrigConfigSvcCfg import TrigConfigSvcCfg
 from TriggerJobOpts.TriggerByteStreamConfig import ByteStreamReadCfg
 from TrigEDMConfig.TriggerEDM import getTriggerEDMList
 from TrigEDMConfig.Utils import edmDictToList
@@ -113,8 +113,6 @@ def TriggerMetadataWriterCfg(flags):
     keyWriterOutput = ""
     if flags.Trigger.triggerConfig != 'INFILE':
         acc.merge( TrigConfigSvcCfg(flags) )
-        acc.merge( L1PrescaleCondAlgCfg(flags) )
-        acc.merge( HLTPrescaleCondAlgCfg(flags) )
         keyWriterTool = CompFactory.TrigConf.KeyWriterTool("KeyWriterToolOffline")
         keyWriterOutput = str(keyWriterTool.ConfKeys)
         acc.addEventAlgo( CompFactory.TrigConf.xAODMenuWriterMT("xAODMenuWriterMT", KeyWriterTool = keyWriterTool) )
