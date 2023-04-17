@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRKSPACEPOINTFORMATIONTOOL_STRIPINFORMATIONHELPER_H
@@ -8,6 +8,9 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 
 namespace ActsTrk {
+
+  /// @brief Total number of neightbours and indices
+  enum NeighbourIndices {ThisOne, Opposite, PhiMinus, PhiPlus, EtaMinus, EtaPlus, nNeighbours};
 
   class StripInformationHelper {
 

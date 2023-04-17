@@ -1,6 +1,7 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from ActsInterop.ActsConfigFlags import SpacePointStrategy
 
 def ActsTrkPixelSpacePointToolCfg(flags, name = "ActsTrkPixelSpacePointTool", **kwargs):
     acc = ComponentAccumulator()
@@ -14,7 +15,19 @@ def ActsTrkStripSpacePointToolCfg(flags, name = "ActsTrkStripSpacePointTool", **
     kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(ITkStripLorentzAngleToolCfg(flags)) )
     kwargs.setdefault("AllClusters", False)
 
-    acc.setPrivateTools(CompFactory.ActsTrk.StripSpacePointFormationTool(name, **kwargs))
+    acc.setPrivateTools(CompFactory.ActsTrk.ActsTrkStripSpacePointFormationTool(name, **kwargs))
+    return acc
+
+def ActsCoreStripSpacePointToolCfg(flags, name = "ActsCoreStripSpacePointTool", **kwargs):
+    acc = ComponentAccumulator()
+
+    from SiLorentzAngleTool.ITkStripLorentzAngleConfig import ITkStripLorentzAngleToolCfg
+    kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(ITkStripLorentzAngleToolCfg(flags)) )
+    kwargs.setdefault("AllClusters", False)
+    from ActsTrkEventCnv.ActsTrkEventCnvConfig import ActsToTrkConverterToolCfg
+    kwargs.setdefault("ConverterTool", acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)))
+
+    acc.setPrivateTools(CompFactory.ActsTrk.ActsCoreStripSpacePointFormationTool(name, **kwargs))
     return acc
 
 def ActsTrkPixelSpacePointFormationCfg(flags,
@@ -46,7 +59,11 @@ def ActsTrkStripSpacePointFormationCfg(flags,
     from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
     acc = ITkStripReadoutGeometryCfg(flags)
 
-    ActsTrkStripSpacePointTool = acc.popToolsAndMerge(ActsTrkStripSpacePointToolCfg(flags))
+    if flags.Acts.SpacePointStrategy is SpacePointStrategy.ActsCore:
+        ActsTrkStripSpacePointTool = acc.popToolsAndMerge(ActsCoreStripSpacePointToolCfg(flags))
+    else:
+        ActsTrkStripSpacePointTool = acc.popToolsAndMerge(ActsTrkStripSpacePointToolCfg(flags))
+
     kwargs.setdefault("SpacePointFormationTool", ActsTrkStripSpacePointTool)
 
     kwargs.setdefault("StripClusters", "ITkStripClusters")

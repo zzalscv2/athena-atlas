@@ -6,7 +6,12 @@ from AthenaConfiguration.Enums import FlagEnum
 class SeedingStrategy(FlagEnum):
     Default = "Default"
     Orthogonal = "Orthogonal"
-    
+
+# This is temporary during the integration of ACTS.
+class SpacePointStrategy(FlagEnum):
+    ActsCore = "ActsCore" # ACTS-based SP formation
+    ActsTrk = "ActsTrk" #SP formation without ACTS
+
 def createActsConfigFlags():
     actscf = AthConfigFlags()
 
@@ -24,6 +29,9 @@ def createActsConfigFlags():
     # Monitoring
     actscf.addFlag('Acts.doMonitoring', False)
     actscf.addFlag('Acts.doAnalysis', False)
+
+    # SpacePoint
+    actscf.addFlag("Acts.SpacePointStrategy", SpacePointStrategy.ActsTrk, enum=SpacePointStrategy)  # Define SpacePoint Strategy
 
     # Seeding
     actscf.addFlag("Acts.SeedingStrategy", SeedingStrategy.Default, enum=SeedingStrategy)  # Define Seeding Strategy

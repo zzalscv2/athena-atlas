@@ -2,8 +2,8 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ACTSTRKSPACEPOINTFORMATIONTOOL_STRIPSPACEPOINTFORMATIONTOOL_H
-#define ACTSTRKSPACEPOINTFORMATIONTOOL_STRIPSPACEPOINTFORMATIONTOOL_H
+#ifndef ACTSTRKSPACEPOINTFORMATIONTOOL_ACTSTRKSTRIPSPACEPOINTFORMATIONTOOL_H
+#define ACTSTRKSPACEPOINTFORMATIONTOOL_ACTSTRKSTRIPSPACEPOINTFORMATIONTOOL_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "ActsTrkToolInterfaces/IStripSpacePointFormationTool.h"
@@ -20,7 +20,7 @@ class SCT_ID;
 
 namespace ActsTrk {
   
-    /// @class StripSpacePointFormationTool
+    /// @class ActsTrkStripSpacePointFormationTool
     /// Tool to produce strip space points.
     /// Strip space points are made by combining clusters from pairs of
     /// overlapping detectors. The access to overlapping detector elements is
@@ -29,32 +29,29 @@ namespace ActsTrk {
     /// its opposite on the stereo layer, or also to consider overlaps with the
     /// four nearest neighbours of the opposite elements.
     ///
-    /// Space points are then recorded to storegate as ActsTrk::SpacePoint
-    /// into an ActsTrk::SpacePointContainer.
+    /// Space points are then recorded to storegate as StripSP
 
-    /// @brief Total number of neightbours and indices
-    enum NeighbourIndices{ThisOne, Opposite, PhiMinus, PhiPlus, EtaMinus, EtaPlus, nNeighbours};
-
-    class StripSpacePointFormationTool: public extends<AthAlgTool, ActsTrk::IStripSpacePointFormationTool> {
+    class ActsTrkStripSpacePointFormationTool: public extends<AthAlgTool, ActsTrk::IStripSpacePointFormationTool> {
     public:
         /// @name AthAlgTool methods
         //@{
-        StripSpacePointFormationTool(const std::string& type,
+        ActsTrkStripSpacePointFormationTool(const std::string& type,
                                      const std::string& name,
                                      const IInterface* parent);
-        virtual ~StripSpacePointFormationTool() = default;
+        virtual ~ActsTrkStripSpacePointFormationTool() = default;
         virtual StatusCode initialize() override;
         //@}
 
         /// @name Production of space points
         //@{
-        virtual StatusCode produceStripSpacePoints(const xAOD::StripClusterContainer& clusterContainer,
-						   const InDet::SiElementPropertiesTable& properties,
-						   const InDetDD::SiDetectorElementCollection& elements,
-						   const Amg::Vector3D& beamSpotVertex,
-						   std::vector<StripSP>& spacePoints,
-						   std::vector<StripSP>& overlapSpacePoints,
-						   bool processOverlaps) const override;
+      virtual StatusCode produceSpacePoints(const EventContext& ctx,
+					    const xAOD::StripClusterContainer& clusterContainer,
+					    const InDet::SiElementPropertiesTable& properties,
+					    const InDetDD::SiDetectorElementCollection& elements,
+					    const Amg::Vector3D& beamSpotVertex,
+					    std::vector<StripSP>& spacePoints,
+					    std::vector<StripSP>& overlapSpacePoints,
+					    bool processOverlaps) const override;
         //@}
 
     private:
@@ -62,8 +59,8 @@ namespace ActsTrk {
         /// @name Production of space points
         //@{
         StatusCode
-	  fillStripSpacePoints(const std::array<const InDetDD::SiDetectorElement*, nNeighbours>& neighbourElements,
-			       const std::array<std::vector<std::pair<const xAOD::StripCluster*, size_t>>, nNeighbours>& neighbourClusters,
+	  fillStripSpacePoints(const std::array<const InDetDD::SiDetectorElement*,nNeighbours>& neighbourElements,
+			       const std::array<std::vector<std::pair<const xAOD::StripCluster*, size_t>>,nNeighbours>& neighbourClusters,
 			       const std::array<double, 14>& overlapExtents,
 			       const Amg::Vector3D& beamSpotVertex,
 			       std::vector<StripSP>& spacePoints,
@@ -128,4 +125,4 @@ namespace ActsTrk {
 
 }
 
-#endif // ACTSTRKSPACEPOINTFORMATIONTOOL_STRIPSPACEPOINTFORMATIONTOOL_H
+#endif // ACTSTRKSPACEPOINTFORMATIONTOOL_ACTSTRKSTRIPSPACEPOINTFORMATIONTOOL_H

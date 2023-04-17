@@ -18,10 +18,16 @@ def actsValidateClustersFlags(flags):
     flags.Reco.EnableHGTDExtension = False
     flags.ITk.Tracking.recoChain = [TrackingComponent.ValidateActsClusters]
 
-def actsValidateSpacePointsFlags(flags):
-    """flags for Reco_tf with CA used in CI tests: use for validating space point formation with Acts"""
+def actsTrkValidateSpacePointsFlags(flags):
+    """flags for Reco_tf with CA used in CI tests: use for validating Athena-based space point formation"""
     flags.Reco.EnableHGTDExtension = False
     flags.ITk.Tracking.recoChain = [TrackingComponent.ValidateActsSpacePoints]
+
+def actsCoreValidateSpacePointsFlags(flags):
+    """flags for Reco_tf with CA used in CI tests: use for validating ACTS-based space point formation"""
+    from ActsInterop.ActsConfigFlags import SpacePointStrategy
+    flags.Acts.SpacePointStrategy = SpacePointStrategy.ActsCore
+    actsTrkValidateSpacePointsFlags(flags)
     
 def actsValidateSeedsFlags(flags):
     """flags for Reco_tf with CA used in CI tests: use SiSpacePointSeedMaker tool during reconstruction"""

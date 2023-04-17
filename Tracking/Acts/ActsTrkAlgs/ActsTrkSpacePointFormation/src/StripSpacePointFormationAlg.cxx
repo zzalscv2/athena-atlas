@@ -79,13 +79,14 @@ namespace ActsTrk {
     sps.reserve(inputStripClusterContainer->size() * 0.5);
     osps.reserve(inputStripClusterContainer->size() * 0.5);
 
-    ATH_CHECK( m_spacePointMakerTool->produceStripSpacePoints(*inputStripClusterContainer.cptr(),
-							      *properties,
-							      *stripElements,
-							      vertex,
-							      sps,
-							      osps,
-							      m_processOverlapForStrip) );
+    ATH_CHECK( m_spacePointMakerTool->produceSpacePoints(ctx,
+							 *inputStripClusterContainer.cptr(),
+							 *properties,
+							 *stripElements,
+							 vertex,
+							 sps,
+							 osps,
+							 m_processOverlapForStrip) );
 
     // using trick for fast insertion
     std::unique_ptr<xAOD::SpacePointContainer> spacePoints =
