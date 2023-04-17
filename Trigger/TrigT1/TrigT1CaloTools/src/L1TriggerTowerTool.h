@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 ///////////////////////////////////////////////////////////////////
 // L1TriggerTowerTool.h, 
@@ -24,6 +24,7 @@
 #include "xAODEventInfo/EventInfo.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "TrigConfData/L1Menu.h"
+#include "CxxUtils/checker_macros.h"
 
 class CaloIdManager;
 class CaloLVL1_ID;
@@ -54,7 +55,7 @@ namespace LVL1
       @author  Alan Watson <Alan.Watson@cern.ch>
   */  
 
-  class L1TriggerTowerTool : virtual public IL1TriggerTowerTool, public IIncidentListener, public AthAlgTool
+  class ATLAS_NOT_THREAD_SAFE L1TriggerTowerTool : virtual public IL1TriggerTowerTool, public IIncidentListener, public AthAlgTool
   {
     public:
       
