@@ -1018,7 +1018,6 @@
         <hist1D name="Muons_All_matched_AllMuons_truthHits_precMatchedHitsBOS" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="Muons_All_matched_AllMuons_truthHits_precMatchedHitsBOL" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="Muons_All_matched_AllMuons_truthHits_precMatchedHitsBEE" plotopts="" tests="KS" type="TH1F"/>
-        <hist1D name="Muons_All_matched_AllMuons_truthHits_precMatchedHitsEIS" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="Muons_All_matched_AllMuons_truthHits_precMatchedHitsEIL" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="Muons_All_matched_AllMuons_truthHits_precMatchedHitsEMS" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="Muons_All_matched_AllMuons_truthHits_precMatchedHitsEML" plotopts="" tests="KS" type="TH1F"/>
@@ -1026,8 +1025,6 @@
         <hist1D name="Muons_All_matched_AllMuons_truthHits_precMatchedHitsEOL" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="Muons_All_matched_AllMuons_truthHits_precMatchedHitsEES" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="Muons_All_matched_AllMuons_truthHits_precMatchedHitsEEL" plotopts="" tests="KS" type="TH1F"/>
-        <hist1D name="Muons_All_matched_AllMuons_truthHits_precMatchedHitsCSS" plotopts="" tests="KS" type="TH1F"/>
-        <hist1D name="Muons_All_matched_AllMuons_truthHits_precMatchedHitsCSL" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="Muons_All_matched_AllMuons_truthHits_phiMatchedHitsSummed" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="Muons_All_matched_AllMuons_truthHits_phiMatchedHitsBM1" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="Muons_All_matched_AllMuons_truthHits_phiMatchedHitsBM2" plotopts="" tests="KS" type="TH1F"/>
@@ -1050,7 +1047,6 @@
        </TDirectory>
        <TDirectory name="Eloss">
         <hist1D name="Muons_All_matched_AllMuons_Eloss_msInnerMatchChi2" plotopts="" tests="KS" type="TH1F"/>
-        <hist1D name="Muons_All_matched_AllMuons_Eloss_msOuterMatchChi2" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="Muons_All_matched_AllMuons_Eloss_ELoss" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="Muons_All_matched_AllMuons_Eloss_ELossDiffTruth" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="Muons_All_matched_AllMuons_Eloss_ELossDiffTruthEta0_1p35" plotopts="" tests="KS" type="TH1F"/>
