@@ -10,7 +10,6 @@ if( NOT SIMULATIONBASE )
 endif()
 
 # External dependencies:
-find_package( Boost )
 find_package( ROOT COMPONENTS Core Tree RIO)
 if( NOT SIMULATIONBASE )
   find_package( tdaq-common COMPONENTS DataReader EventStorage )
@@ -28,8 +27,8 @@ if( NOT SIMULATIONBASE )
   atlas_add_executable( BSFilePeeker
                         src/BSFilePeeker.cxx
                         src/FileMetaData.cxx
-                        INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
-                        LINK_LIBRARIES CxxUtils ${TDAQ-COMMON_LIBRARIES} ${Boost_LIBRARIES})
+                        INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS}
+                        LINK_LIBRARIES CxxUtils ${TDAQ-COMMON_LIBRARIES})
 endif()
 
 # Install files from the package:
