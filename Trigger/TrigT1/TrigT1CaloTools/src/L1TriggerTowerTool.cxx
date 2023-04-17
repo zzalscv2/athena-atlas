@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 //////////////////////////////////////////////////////////////////////
 //  L1TriggerTowerTool.cxx 
@@ -155,7 +155,7 @@ void L1TriggerTowerTool::handle(const Incident& inc)
 
 namespace { // helper function
   template<class T>
-  StatusCode retrieveGeneric(ServiceHandle<L1CaloCondSvc>& svc, boost::any& target) {
+  StatusCode retrieveGeneric ATLAS_NOT_THREAD_SAFE (ServiceHandle<L1CaloCondSvc>& svc, boost::any& target) {
     T* C = nullptr;
     CHECK_WITH_CONTEXT(svc->retrieve(C), "L1TriggerTowerTool");
     target = C;
@@ -163,7 +163,7 @@ namespace { // helper function
   }
 
   template<class T, class FolderMap>
-  StatusCode retrieveGenericWithFolders(ServiceHandle<L1CaloCondSvc>& svc, const FolderMap& fmap, boost::any& target) {
+  StatusCode retrieveGenericWithFolders ATLAS_NOT_THREAD_SAFE (ServiceHandle<L1CaloCondSvc>& svc, const FolderMap& fmap, boost::any& target) {
     T* C = nullptr;
     CHECK_WITH_CONTEXT(svc->retrieve(C, fmap), "L1TriggerTowerTool");
     target = C;
