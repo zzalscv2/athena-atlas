@@ -71,19 +71,20 @@ namespace Muon
         SIZE_ORBIT1,
       };
       // NB: std::accumulate is constexpr since C++20
-      const uint32_t FIRSTBIT_SWROD      = std::accumulate(HEADER_SIZES.cbegin(), HEADER_SIZES.cbegin() +  0, 0);
-      const uint32_t FIRSTBIT_FLAGS      = std::accumulate(HEADER_SIZES.cbegin(), HEADER_SIZES.cbegin() +  1, 0);
-      const uint32_t FIRSTBIT_EC         = std::accumulate(HEADER_SIZES.cbegin(), HEADER_SIZES.cbegin() +  2, 0);
-      const uint32_t FIRSTBIT_SECID      = std::accumulate(HEADER_SIZES.cbegin(), HEADER_SIZES.cbegin() +  3, 0);
-      const uint32_t FIRSTBIT_FRAGID     = std::accumulate(HEADER_SIZES.cbegin(), HEADER_SIZES.cbegin() +  4, 0);
-      const uint32_t FIRSTBIT_SPARE      = std::accumulate(HEADER_SIZES.cbegin(), HEADER_SIZES.cbegin() +  5, 0);
-      const uint32_t FIRSTBIT_ORBIT      = std::accumulate(HEADER_SIZES.cbegin(), HEADER_SIZES.cbegin() +  6, 0);
-      const uint32_t FIRSTBIT_BCID       = std::accumulate(HEADER_SIZES.cbegin(), HEADER_SIZES.cbegin() +  7, 0);
-      const uint32_t FIRSTBIT_L1ID_31_16 = std::accumulate(HEADER_SIZES.cbegin(), HEADER_SIZES.cbegin() +  8, 0);
-      const uint32_t FIRSTBIT_L1ID_15_00 = std::accumulate(HEADER_SIZES.cbegin(), HEADER_SIZES.cbegin() +  9, 0);
-      const uint32_t FIRSTBIT_ORBITID    = std::accumulate(HEADER_SIZES.cbegin(), HEADER_SIZES.cbegin() + 10, 0);
-      const uint32_t FIRSTBIT_ORBIT1     = std::accumulate(HEADER_SIZES.cbegin(), HEADER_SIZES.cbegin() + 11, 0);
-      const uint32_t SIZE_HEADER         = std::accumulate(HEADER_SIZES.cbegin(), HEADER_SIZES.cend(),        0);
+      constexpr uint32_t ZERO{0};
+      const uint32_t FIRSTBIT_SWROD      = std::accumulate(HEADER_SIZES.cbegin(), HEADER_SIZES.cbegin() +  0, ZERO);
+      const uint32_t FIRSTBIT_FLAGS      = std::accumulate(HEADER_SIZES.cbegin(), HEADER_SIZES.cbegin() +  1, ZERO);
+      const uint32_t FIRSTBIT_EC         = std::accumulate(HEADER_SIZES.cbegin(), HEADER_SIZES.cbegin() +  2, ZERO);
+      const uint32_t FIRSTBIT_SECID      = std::accumulate(HEADER_SIZES.cbegin(), HEADER_SIZES.cbegin() +  3, ZERO);
+      const uint32_t FIRSTBIT_FRAGID     = std::accumulate(HEADER_SIZES.cbegin(), HEADER_SIZES.cbegin() +  4, ZERO);
+      const uint32_t FIRSTBIT_SPARE      = std::accumulate(HEADER_SIZES.cbegin(), HEADER_SIZES.cbegin() +  5, ZERO);
+      const uint32_t FIRSTBIT_ORBIT      = std::accumulate(HEADER_SIZES.cbegin(), HEADER_SIZES.cbegin() +  6, ZERO);
+      const uint32_t FIRSTBIT_BCID       = std::accumulate(HEADER_SIZES.cbegin(), HEADER_SIZES.cbegin() +  7, ZERO);
+      const uint32_t FIRSTBIT_L1ID_31_16 = std::accumulate(HEADER_SIZES.cbegin(), HEADER_SIZES.cbegin() +  8, ZERO);
+      const uint32_t FIRSTBIT_L1ID_15_00 = std::accumulate(HEADER_SIZES.cbegin(), HEADER_SIZES.cbegin() +  9, ZERO);
+      const uint32_t FIRSTBIT_ORBITID    = std::accumulate(HEADER_SIZES.cbegin(), HEADER_SIZES.cbegin() + 10, ZERO);
+      const uint32_t FIRSTBIT_ORBIT1     = std::accumulate(HEADER_SIZES.cbegin(), HEADER_SIZES.cbegin() + 11, ZERO);
+      const uint32_t SIZE_HEADER         = std::accumulate(HEADER_SIZES.cbegin(), HEADER_SIZES.cend(),        ZERO);
       const uint32_t SIZE_HEADER_BYTES   = SIZE_HEADER / N_BITS_IN_BYTE;
 
       // decompression (units: bits)
@@ -115,18 +116,18 @@ namespace Muon
         SIZE_L2_31_16,
         SIZE_L2_15_00,
       };
-      const uint32_t FIRSTBIT_MULT         = std::accumulate(DECOMP_SIZES.cbegin(), DECOMP_SIZES.cbegin() +  0, 0);
-      const uint32_t FIRSTBIT_MULT0        = std::accumulate(DECOMP_SIZES.cbegin(), DECOMP_SIZES.cbegin() +  1, 0);
-      const uint32_t FIRSTBIT_PHIID_23_16  = std::accumulate(DECOMP_SIZES.cbegin(), DECOMP_SIZES.cbegin() +  2, 0);
-      const uint32_t FIRSTBIT_PHIID0       = std::accumulate(DECOMP_SIZES.cbegin(), DECOMP_SIZES.cbegin() +  3, 0);
-      const uint32_t FIRSTBIT_PHIID_15_00  = std::accumulate(DECOMP_SIZES.cbegin(), DECOMP_SIZES.cbegin() +  4, 0);
-      const uint32_t FIRSTBIT_BANDID_31_16 = std::accumulate(DECOMP_SIZES.cbegin(), DECOMP_SIZES.cbegin() +  5, 0);
-      const uint32_t FIRSTBIT_BANDID_15_00 = std::accumulate(DECOMP_SIZES.cbegin(), DECOMP_SIZES.cbegin() +  6, 0);
-      const uint32_t FIRSTBIT_L0SIZE       = std::accumulate(DECOMP_SIZES.cbegin(), DECOMP_SIZES.cbegin() +  7, 0);
-      const uint32_t FIRSTBIT_L1SIZE       = std::accumulate(DECOMP_SIZES.cbegin(), DECOMP_SIZES.cbegin() +  8, 0);
-      const uint32_t FIRSTBIT_L2_31_16     = std::accumulate(DECOMP_SIZES.cbegin(), DECOMP_SIZES.cbegin() +  9, 0);
-      const uint32_t FIRSTBIT_L2_15_00     = std::accumulate(DECOMP_SIZES.cbegin(), DECOMP_SIZES.cbegin() + 10, 0);
-      const uint32_t FIRSTBIT_L1           = std::accumulate(DECOMP_SIZES.cbegin(), DECOMP_SIZES.cend(),        0);
+      const uint32_t FIRSTBIT_MULT         = std::accumulate(DECOMP_SIZES.cbegin(), DECOMP_SIZES.cbegin() +  0, ZERO);
+      const uint32_t FIRSTBIT_MULT0        = std::accumulate(DECOMP_SIZES.cbegin(), DECOMP_SIZES.cbegin() +  1, ZERO);
+      const uint32_t FIRSTBIT_PHIID_23_16  = std::accumulate(DECOMP_SIZES.cbegin(), DECOMP_SIZES.cbegin() +  2, ZERO);
+      const uint32_t FIRSTBIT_PHIID0       = std::accumulate(DECOMP_SIZES.cbegin(), DECOMP_SIZES.cbegin() +  3, ZERO);
+      const uint32_t FIRSTBIT_PHIID_15_00  = std::accumulate(DECOMP_SIZES.cbegin(), DECOMP_SIZES.cbegin() +  4, ZERO);
+      const uint32_t FIRSTBIT_BANDID_31_16 = std::accumulate(DECOMP_SIZES.cbegin(), DECOMP_SIZES.cbegin() +  5, ZERO);
+      const uint32_t FIRSTBIT_BANDID_15_00 = std::accumulate(DECOMP_SIZES.cbegin(), DECOMP_SIZES.cbegin() +  6, ZERO);
+      const uint32_t FIRSTBIT_L0SIZE       = std::accumulate(DECOMP_SIZES.cbegin(), DECOMP_SIZES.cbegin() +  7, ZERO);
+      const uint32_t FIRSTBIT_L1SIZE       = std::accumulate(DECOMP_SIZES.cbegin(), DECOMP_SIZES.cbegin() +  8, ZERO);
+      const uint32_t FIRSTBIT_L2_31_16     = std::accumulate(DECOMP_SIZES.cbegin(), DECOMP_SIZES.cbegin() +  9, ZERO);
+      const uint32_t FIRSTBIT_L2_15_00     = std::accumulate(DECOMP_SIZES.cbegin(), DECOMP_SIZES.cbegin() + 10, ZERO);
+      const uint32_t FIRSTBIT_L1           = std::accumulate(DECOMP_SIZES.cbegin(), DECOMP_SIZES.cend(),        ZERO);
 
       // starting with L1, the data has variable length, and therefore cannot be constant'd D:
       constexpr uint32_t SIZE_TRAILER          = 0 * N_BITS_IN_BYTE;
