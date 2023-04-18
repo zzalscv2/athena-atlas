@@ -4,7 +4,7 @@
 atlas_subdir( AthExHive )
 
 # External dependencies:
-find_package( Boost )
+find_package( Boost COMPONENTS regex )
 find_package( CLHEP )
 
 # Component(s) in the package:

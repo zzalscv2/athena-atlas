@@ -4,7 +4,7 @@
 atlas_subdir( CaloLocalHadCalib )
 
 # External dependencies:
-find_package( Boost COMPONENTS filesystem thread system )
+find_package( Boost )
 find_package( CLHEP )
 find_package( ROOT COMPONENTS Gpad Graf Core Tree MathCore Hist RIO pthread MathMore Minuit Minuit2 Matrix Physics HistPainter Rint Graf3d Html Postscript Gui GX11TTF GX11 )
 
