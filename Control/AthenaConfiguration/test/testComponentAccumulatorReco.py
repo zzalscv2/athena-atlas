@@ -16,6 +16,7 @@ class TestDataDependenciesCollection( unittest.TestCase ):
 
         ca.addEventAlgo(alg)
         ca.addPublicTool(CompFactory.CaloCellTimeCorrTool("SomeOtherTool", Folder="TestFolderB"))
+        ca.wasMerged()
         self.io = ca.getIO()
         import pprint
         pprint.pprint(self.io)
