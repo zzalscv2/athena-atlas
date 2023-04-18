@@ -284,7 +284,7 @@ def defineMenu():
         'L1_BPH-0DR3-eEM9jJ40', 'L1_BPH-0DR3-eEM9jJ40_MU5VF', 'L1_BPH-0DR3-eEM9jJ40_2MU3V',
         'L1_LLP-RO-eEM', 'L1_LLP-NOMATCH-eEM',
         #'L1_DPHI-2eEM5', 
-        'L1_jHT150-jJ50s5pETA31_jMJJ-400-CF',
+        'L1_HT150-jJ50s5pETA31_jMJJ-400-CF',
         'L1_HT190-jJ40s5pETA21',
         'L1_SC111-CjJ40',  
         'L1_jJ90_DETA20-jJ90J', 
