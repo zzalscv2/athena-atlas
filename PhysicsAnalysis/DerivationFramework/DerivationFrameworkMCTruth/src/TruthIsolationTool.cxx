@@ -84,11 +84,19 @@ StatusCode DerivationFramework::TruthIsolationTool::addBranches() const
     //make a list of all candidate particles that could fall inside the cone of the particle of interest from listOfParticlesForIso
     decayHelper.constructListOfFinalParticles(allTruthParticles.ptr(), candidateParticlesList, emptyList, true, m_chargedOnly);
 
+    //All isolation must filled for all Particles. 
+    ///Even if this is with some dummy value 
+    for ( unsigned int icone = 0; icone < m_coneSizesSort.size(); ++icone ) {
+      SG::WriteDecorHandle< xAOD::TruthParticleContainer, float > decorator_iso(m_isoDecorKeys.at(icone), ctx);
+      for (const auto& part : *isoTruthParticles) {
+          decorator_iso(*part) = -1;
+      }
+    }
+
     // Standard particle loop over final state particles of interest
     for (const auto& part : listOfParticlesForIso) {
       std::vector<float> isolationsCalcs(m_coneSizesSort.size(), 0.0);
       calcIsos(part, candidateParticlesList, isolationsCalcs);
-
       for ( unsigned int icone = 0; icone < m_coneSizesSort.size(); ++icone ) {
         SG::WriteDecorHandle< xAOD::TruthParticleContainer, float > decorator_iso(m_isoDecorKeys.at(icone), ctx);
         decorator_iso(*part) = isolationsCalcs.at(icone);
