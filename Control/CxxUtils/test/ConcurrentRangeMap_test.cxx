@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  CxxUtils/test/ConcurrentRangeMap_test.cxx
@@ -807,6 +807,16 @@ void test1b()
     map.quiescent (i);
   }
   assert (phist.size() == 1);
+
+  assert (map.trim (keys) == 0);
+  assert (map.size() == 1);
+  assert (phist.size() == 1);
+  assert (map.trim (keys, true) == 1);
+  assert (map.size() == 0);
+  for (int i=0; i < nslots; i++) {
+    map.quiescent (i);
+  }
+  assert (phist.size() == 0);
 }
 
 
