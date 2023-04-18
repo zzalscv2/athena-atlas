@@ -108,8 +108,12 @@ def PFCfg(inputFlags,**kwargs):
     result.merge(addToESD(inputFlags, toESDAndAOD))
     result.merge(addToAOD(inputFlags, toESDAndAOD))
 
-    from ThinningUtils.ThinNegativeEnergyNeutralPFOCfg import ThinNegativeEnergyNeutralPFOCfg
-    result.merge(ThinNegativeEnergyNeutralPFOCfg(inputFlags))
+    #If we read an ESD then we cannot run the thinning because e.g electrons in the ESD
+    #have links to the neutral particle flow objects. If we run the thinning, then those
+    #links become invalid. 
+    if "StreamESD" not in inputFlags.Input.ProcessingTags:
+      from ThinningUtils.ThinNegativeEnergyNeutralPFOCfg import ThinNegativeEnergyNeutralPFOCfg
+      result.merge(ThinNegativeEnergyNeutralPFOCfg(inputFlags))
 
     return result
 
@@ -125,7 +129,7 @@ def PFTauFELinkCfg(inputFlags,**kwargs):
 if __name__=="__main__":
 
     from AthenaConfiguration.AllConfigFlags import ConfigFlags as cfgFlags
-
+    cfgFlags.Concurrency.NumThreads=8
     cfgFlags.Input.isMC=True
     cfgFlags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecExRecoTest/mc21_13p6TeV/ESDFiles/mc21_13p6TeV.421450.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep_fct.recon.ESD.e8445_e8447_s3822_r13565/ESD.28877240._000046.pool.root.1"]
     # Use latest MC21 tag to pick up latest muon folders apparently needed

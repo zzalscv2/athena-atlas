@@ -3,15 +3,7 @@
 def ListRemaps():
     #function to get all of the remapped names needed in PFRun3Config.py
     from SGComps.AddressRemappingConfig import InputRenameCfg
-    list_remaps=[
-        InputRenameCfg ('xAOD::FlowElementContainer','JetETMissChargedFlowElements.FE_ElectronLinks','JetETMissChargedFlowElements.FE_ElectronLinks_renamed'),
-        InputRenameCfg ('xAOD::FlowElementContainer','JetETMissChargedFlowElements.FE_PhotonLinks','JetETMissChargedFlowElements.FE_PhotonLinks_renamed'),
-        InputRenameCfg ('xAOD::FlowElementContainer','JetETMissNeutralFlowElements.FE_ElectronLinks','JetETMissNeutralFlowElements.FE_ElectronLinks_renamed'),
-        InputRenameCfg ('xAOD::FlowElementContainer','JetETMissNeutralFlowElements.FE_PhotonLinks','JetETMissNeutralFlowElements.FE_PhotonLinks_renamed'),
-        InputRenameCfg ('xAOD::PFOContainer','JetETMissChargedParticleFlowObjects.pfo_ElectronLinks','JetETMissChargedParticleFlowObjects.pfo_ElectronLinks_renamed'),
-        InputRenameCfg ('xAOD::PFOContainer','JetETMissChargedParticleFlowObjects.pfo_PhotonLinks','JetETMissChargedParticleFlowObjects.pfo_PhotonLinks_renamed'),
-        InputRenameCfg ('xAOD::PFOContainer','JetETMissNeutralParticleFlowObjects.pfo_ElectronLinks','JetETMissNeutralParticleFlowObjects.pfo_ElectronLinks_renamed'),
-        InputRenameCfg ('xAOD::PFOContainer','JetETMissNeutralParticleFlowObjects.pfo_PhotonLinks','JetETMissNeutralParticleFlowObjects.pfo_PhotonLinks_renamed'),
+    list_remaps=[        
         InputRenameCfg ('xAOD::ElectronContainer','Electrons.chargedFELinks','Electrons.chargedFELinks_renamed'),
         InputRenameCfg ('xAOD::ElectronContainer','Electrons.neutralFELinks','Electrons.neutralFELinks_renamed'),
         InputRenameCfg ('xAOD::PhotonContainer','Photons.chargedFELinks','Photons.chargedFELinks_renamed'),
@@ -24,16 +16,10 @@ def ListRemaps():
         InputRenameCfg ('xAOD::MuonContainer','Muons.chargedFELinks','Muons.chargedFELinks_renamed'),
         InputRenameCfg ('xAOD::MuonContainer','Muons.neutralFELinks','Muons.neutralFELinks_renamed'),
         InputRenameCfg ('xAOD::MuonContainer','Muons.muon_efrac_matched_FE','Muons.muon_efrac_matched_FE_renamed'),
-        InputRenameCfg ('xAOD::MuonContainer','Muons.ClusterInfo_deltaR','Muons.ClusterInfo_deltaR_renamed'),
-        InputRenameCfg ('xAOD::FlowElementContainer','JetETMissChargedFlowElements.FE_MuonLinks','JetETMissChargedFlowElements.FE_MuonLinks_renamed'),
-        InputRenameCfg ('xAOD::FlowElementContainer','JetETMissNeutralFlowElements.FE_MuonLinks','JetETMissNeutralFlowElements.FE_MuonLinks_renamed'),
-        InputRenameCfg ('xAOD::FlowElementContainer','JetETMissNeutralFlowElements.FE_efrac_matched_muon_MuonLinks','JetETMissNeutralFlowElements.FE_efrac_matched_muon_renamed'),
-        InputRenameCfg ('xAOD::FlowElementContainer','JetETMissNeutralFlowElements.FE_nMatchedMuons','JetETMissNeutralFlowElements.FE_nMatchedMuons_renamed'),
+        InputRenameCfg ('xAOD::MuonContainer','Muons.ClusterInfo_deltaR','Muons.ClusterInfo_deltaR_renamed'),        
         #Remap the Tau decorations for FE
         InputRenameCfg ('xAOD::TauJetContainer','TauJets.neutralFELinks','TauJets.neutralFELinks_renamed'),
-        InputRenameCfg ('xAOD::TauJetContainer','TauJets.chargedFELinks','TauJets.chargedFELinks_renamed'),
-        InputRenameCfg ('xAOD::FlowElementContainer','JetETMissChargedFlowElements.FE_TauLinks','JetETMissChargedFlowElements.FE_TauLinks_renamed'),
-        InputRenameCfg ('xAOD::FlowElementContainer','JetETMissNeutralFlowElements.FE_TauLinks','JetETMissNeutralFlowElements.FE_TauLinks_renamed'),
+        InputRenameCfg ('xAOD::TauJetContainer','TauJets.chargedFELinks','TauJets.chargedFELinks_renamed'),        
         #Remap the calibrated and origin corrected topoclusters
         InputRenameCfg ('xAOD::CaloClusterContainer','CaloCalTopoClusters','CaloCalTopoClusters_renamed'),
         InputRenameCfg ('xAOD::CaloClusterContainer','LCOriginTopoClusters','LCOriginTopoClusters_renamed'),
