@@ -177,9 +177,12 @@ void  TRT_LoLumRawDataContainerCnv_p3::persToTrans(const InDetRawDataContainer_p
           << persCont->m_collections.size()
           << ". We should be reading the whole detector!" << endmsg;
   }
-  //create Data Pool and reserve known max size
+  //create Data Pool
   DataPool<TRT_LoLumRawData> dataItems;
-  dataItems.reserve(350848);
+  // It resizes as needed .
+  // The max number of straws is 350847 but assume
+  // that we do not have 100% occupancy ~ 80%
+  dataItems.reserve(280000);
 
   TRT_RDO_Collection* tcoll=nullptr;         // transient collection to be constructed
   for (unsigned int trt_collection_index=0; trt_collection_index<trt_number_of_collections; ++trt_collection_index) {
