@@ -182,12 +182,17 @@ three_output_taggers = [
     'DL1dv00',                  # first 'official' offline r22
     'dips20211116',             # DIPS input to the current online DL1d
     'DL1d20211216',             # current online r22
-    'DL1bb20220331',            # anti-bb tagger, ATLINFR-4511
     'GN120220813'
 ]
+
+b_vs_bb_taggers = [
+    'dl1dbb20230314'            # anti-bb-jet tagger r22
+]
+
 BTagOutput_highLevelTaggers = [
     'MV2c10_discriminant',
     *[f'{t}_p{x}' for x in 'cub' for t in three_output_taggers],
+    *[f'{t}_p{x}' for x in ['b','bb'] for t in b_vs_bb_taggers],
 ]
 
 BTagOutput += BTagOutput_IP2D + BTagOutput_IP3D + BTagOutput_SV1 + BTagOutput_JetFitter + BTagOutput_rnnip + BTagOutput_highLevelTaggers
