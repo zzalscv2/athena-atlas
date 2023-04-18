@@ -11,8 +11,8 @@ from TriggerMenuMT.HLT.Config.ChainConfigurationBase import ChainConfigurationBa
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence
 from DecisionHandling.DecisionHandlingConf import ViewCreatorInitialROITool
 
+from AthenaConfiguration.ComponentFactory import CompFactory
 from TrigStreamerHypo.TrigStreamerHypoConfig import StreamerHypoToolGenerator
-from TrigStreamerHypo.TrigStreamerHypoConf import TrigStreamerHypoAlg
 
 #----------------------------------------------------------------
 # fragments generating configuration will be functions in New JO,
@@ -63,9 +63,11 @@ def allTE_trkfast( flags, signature="FS" ):
 
 
         #hypo
-        beamspotHypoAlg = TrigStreamerHypoAlg("BeamspotHypoAlg_"+signature)
+        beamspotHypoAlg = CompFactory.TrigStreamerHypoAlg("BeamspotHypoAlg_"+signature)
         beamspotHypoAlg.RuntimeValidation = False #Needed to avoid the ERROR ! Decision has no 'feature' ElementLink
-        beamspotHypoToolGen= StreamerHypoToolGenerator
+
+        # Accept every event
+        beamspotHypoToolGen = StreamerHypoToolGenerator
 
 
         return  MenuSequence( flags,
@@ -98,14 +100,16 @@ def getBeamspotVtx(flags):
         beamspotViewsSequence = seqAND( "beamspotJetViewsSequence"+signature, [ inputMakerAlg, beamspotSequence ])
 
         #-- HypoAlg and Tool
-        beamspotHypoAlg = TrigStreamerHypoAlg("BeamspotHypoAlg_"+signature)
-        beamspotHypoToolGen= StreamerHypoToolGenerator
+        beamspotHypoAlg = CompFactory.TrigStreamerHypoAlg("BeamspotHypoAlg_"+signature)
+        # Reject every event
+        def getRejectingHypoTool(chainDict): 
+                return CompFactory.TrigStreamerHypoTool(chainDict['chainName'],Pass=False)
 
         return  MenuSequence( flags,
                               Sequence    = beamspotViewsSequence,
                               Maker       = inputMakerAlg,
                               Hypo        = beamspotHypoAlg,
-                              HypoToolGen = beamspotHypoToolGen )
+                              HypoToolGen = getRejectingHypoTool )
 
 
 def getBeamspotVtxCfg( flags ):
