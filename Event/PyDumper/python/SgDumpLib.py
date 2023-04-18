@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # @file    PyDumper.SgDumpLib
 # @purpose API for the sg-dump script
@@ -117,6 +117,10 @@ def _gen_jobo(dct):
         DetFlags.readRIOPool.all_setOff()
         # FIXME -- end
         include ('RecExCommon/RecExCommon_topOptions.py')
+
+        # Needed to get MuonIdHlpers properly initialized.
+        from MuonIdHelpers.MuonIdHelpersConfigLegacy import MuonIdHelperSvc
+        svcMgr += MuonIdHelperSvc()
 
         svcMgr.GeoModelSvc.IgnoreTagDifference = True
         %(conditions_tag_frag)s
