@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -27,7 +27,6 @@
 #include "TrkEventUtils/PRDtoTrackMap.h"
 #include "TrkEventUtils/EventDataBase.h"
 
-#include "CxxUtils/checker_macros.h"
 #include <iosfwd>
 #include <list>
 
@@ -63,7 +62,7 @@ namespace InDet{
 
       @author Christian.Schmitt@cern.ch
    */
-  class ATLAS_NOT_THREAD_SAFE TRT_TrackSegmentsMaker_ECcosmics : // This class read and write gErrorIgnoreLevel without a global lock for ROOT.
+  class TRT_TrackSegmentsMaker_ECcosmics : // This class read and write gErrorIgnoreLevel without a global lock for ROOT.
     virtual public ITRT_TrackSegmentsMaker, public AthAlgTool
     {
       ///////////////////////////////////////////////////////////////////
