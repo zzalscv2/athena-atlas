@@ -675,6 +675,21 @@ class ComponentAccumulator:
                 self._msg.warning("Algorithm %s not found in self._sequence ???",name)
         return
 
+    def popEventAlgo(self,name,sequence="AthAlgSeq"):
+        s=self.getSequence(sequence)
+        lenBefore=len(s.Members)
+        s.Members = [a for a in s.Members if not a.getName()==name]
+        lenAfter=len(s.Members)
+        if lenAfter == lenBefore:
+            self._msg.warning("Algorithm %s not found in sequence %s",name,sequence)
+        else:
+            self._msg.info("Removed algorithm %s from sequence %s",name,sequence)
+            try:
+                return self._algorithms.pop(name)
+            except KeyError:
+                self._msg.warning("Algorithm %s not found in self._sequence ??? Returning 'None'",name)
+        return None
+
     def dropCondAlgo(self,name):
         lenBefore=len(self._conditionsAlgs)
         self._conditionsAlgs = [a for a in self._conditionsAlgs if a.getName()!=name]

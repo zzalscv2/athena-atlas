@@ -44,7 +44,9 @@ def CreateJets(prefiltSeq, jetR, mods=""):
 
     # Get the algs needed by the JetDefinition and schedule them with runII style
     algs, jetdef_i = getJetAlgs(ConfigFlags, jetdef, True)
-    algs = reOrderAlgs( [a for a in algs if a is not None])
+    algs, ca = reOrderAlgs( [a for a in algs if a is not None])
+    # ignore dangling CA instance in legacy config
+    ca.wasMerged()
     for a in algs:
         prefiltSeq += a
 
