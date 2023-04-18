@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -56,8 +56,8 @@ StatusCode DerivationFramework::TruthDressingTool::initialize()
     ATH_CHECK(m_decorator_m_visKey.initialize());
     m_decorator_nphotonKey = m_dressParticlesKey.key() + ".nPhotons_dressed";
     ATH_CHECK(m_decorator_nphotonKey.initialize());
-    if (!m_decorationName.empty()) {m_decorationKey = m_dressParticlesKey.key()+"."+m_decorationName;}
-    else {m_decorationKey = m_dressParticlesKey.key()+".unusedPhotonDecoration";} 
+    if (!m_decorationName.empty()) {m_decorationKey = m_particlesKey.key()+"."+m_decorationName;}
+    else {m_decorationKey = m_particlesKey.key()+".unusedPhotonDecoration";} 
     ATH_CHECK(m_decorationKey.initialize());
 
     return StatusCode::SUCCESS;
@@ -105,8 +105,8 @@ StatusCode DerivationFramework::TruthDressingTool::addBranches() const
     SG::WriteDecorHandle< xAOD::TruthParticleContainer, char > dressDec (m_decorationKey, ctx);
     // If we want to decorate, then we need to decorate everything with false to begin with
     if (!m_decorationKey.key().empty()){
-      for (const auto * particle : *truthParticles){
-        if (!particle->isAvailable<char>(m_decorationKey.key())) {
+      if (!dressDec.isAvailable()) {
+        for (const auto * particle : *truthParticles){
           dressDec(*particle);
         }
       } // Loop over particles
