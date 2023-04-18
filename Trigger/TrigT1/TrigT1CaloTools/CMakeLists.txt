@@ -4,7 +4,7 @@
 atlas_subdir( TrigT1CaloTools )
 
 # External dependencies:
-find_package( Boost COMPONENTS filesystem thread system )
+find_package( Boost )
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
 
 # Component(s) in the package:
