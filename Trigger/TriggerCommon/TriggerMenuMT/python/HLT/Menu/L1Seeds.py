@@ -62,15 +62,9 @@ def getL1BackgroundSeed():
 ##############################
 def getL1_ALFA_Diff_Phys_Seeds():
     return [
-        'L1_ALFA_SDIFF5','L1_ALFA_SDIFF6','L1_ALFA_SDIFF7','L1_ALFA_SDIFF8',
         'L1_MBTS_1_A_ALFA_C','L1_MBTS_1_C_ALFA_A',
-        'L1_MBTS_1_A_ALFA_C_UNPAIRED_ISO','L1_MBTS_1_C_ALFA_A_UNPAIRED_ISO',
-        'L1_MBTS_2_A_ALFA_C','L1_MBTS_2_C_ALFA_A',
-        'L1_MBTS_2_A_ALFA_C_UNPAIRED_ISO','L1_MBTS_2_C_ALFA_A_UNPAIRED_ISO',
-        'L1_LUCID_A_ALFA_C','L1_LUCID_C_ALFA_A',
-        'L1_LUCID_A_ALFA_C_UNPAIRED_ISO','L1_LUCID_C_ALFA_A_UNPAIRED_ISO',
-        'L1_EM3_ALFA_ANY','L1_EM3_ALFA_ANY_UNPAIRED_ISO',
-        'L1_TE5_ALFA_ANY','L1_TE5_ALFA_ANY_UNPAIRED_ISO'
+        'L1_EM3_ALFA_ANY',
+        'L1_TE5_ALFA_ANY',
     ]
 
 ##############################

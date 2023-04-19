@@ -21,7 +21,7 @@ double TFCS1DFunctionSpline::Initialize(TH1 *hist, double maxdevgoal,
   double max_penalty_best = -1;
   TSpline3 sp_best;
   for (int np = 3; np <= maxnp; ++np) {
-    std::cout << "========== Spline #=" << np << " ==============" << std::endl;
+    ATH_MSG_INFO("========== Spline #=" << np << " ==============");
     double max_penalty;
     if (max_penalty_best > 0) {
       max_penalty =
@@ -45,16 +45,16 @@ double TFCS1DFunctionSpline::Initialize(TH1 *hist, double maxdevgoal,
       sp_best = m_spline;
     }
 
-    std::cout << "========== Spline #=" << np
-              << " max_penalty_best=" << max_penalty_best
-              << " ==============" << std::endl;
-    std::cout << "==== Best spline init | ";
+    ATH_MSG_INFO("========== Spline #=" << np << " max_penalty_best="
+                                        << max_penalty_best
+                                        << " ==============");
+    ATH_MSG(INFO) << "==== Best spline init | ";
     for (int i = 0; i < sp_best.GetNp(); ++i) {
       double p, x;
       sp_best.GetKnot(i, p, x);
-      std::cout << i << " : p=" << p << " x=" << x << " ; ";
+      ATH_MSG(INFO) << i << " : p=" << p << " x=" << x << " ; ";
     }
-    std::cout << " =====" << std::endl;
+    ATH_MSG(INFO) << " =====" << END_MSG(INFO);
 
     if (max_penalty_best < 2)
       break;
@@ -82,23 +82,23 @@ double TFCS1DFunctionSpline::InitializeFromSpline(TH1 *hist, const TSpline3 &sp,
   int nsplinepoints = sp.GetNp();
   std::vector<double> nprop(nsplinepoints + 1);
   int ind = 0;
-  std::cout << "Spline init p_improve=" << p_improve << " | ";
+  ATH_MSG(INFO) << "Spline init p_improve=" << p_improve << " | ";
   for (int i = 0; i < nsplinepoints; ++i) {
     double p, x;
     sp.GetKnot(i, p, x);
     if (i == 0 && p_improve < p) {
       nprop[ind] = (0 + p) / 2;
-      std::cout << ind << " : pi=" << nprop[ind] << " ; ";
+      ATH_MSG(INFO) << ind << " : pi=" << nprop[ind] << " ; ";
       ++ind;
     }
 
     nprop[ind] = p;
-    std::cout << ind << " : p=" << nprop[ind] << " ; ";
+    ATH_MSG(INFO) << ind << " : p=" << nprop[ind] << " ; ";
     ++ind;
 
     if (i == nsplinepoints - 1 && p_improve > p) {
       nprop[ind] = (1 + p) / 2;
-      std::cout << ind << " : pi=" << nprop[ind] << " ; ";
+      ATH_MSG(INFO) << ind << " : pi=" << nprop[ind] << " ; ";
       ++ind;
     }
     if (i < nsplinepoints - 1) {
@@ -106,29 +106,30 @@ double TFCS1DFunctionSpline::InitializeFromSpline(TH1 *hist, const TSpline3 &sp,
       sp.GetKnot(i + 1, pn, xn);
       if (p_improve > p && p_improve < pn) {
         nprop[ind] = (p + pn) / 2;
-        std::cout << ind << " : pi=" << nprop[ind] << " ; ";
+        ATH_MSG(INFO) << ind << " : pi=" << nprop[ind] << " ; ";
         ++ind;
       }
     }
   }
-  std::cout << std::endl;
+  ATH_MSG(INFO) << END_MSG(INFO);
   nsplinepoints = ind;
   nprop.resize(nsplinepoints);
 
   double max_penalty =
       optimize(m_spline, nprop, hist, hist_fct, maxdevgoal, maxeffsiggoal);
   maxdev = get_maxdev(hist, m_spline, maxeffsig, p_maxdev, p_maxeffsig);
-  std::cout << "Spline init spline #=" << nsplinepoints
-            << " : maxdev=" << maxdev << " p_maxdev=" << p_maxdev
-            << " maxeffsig=" << maxeffsig << " p_maxeffsig=" << p_maxeffsig
-            << " max_penalty=" << max_penalty << std::endl;
-  std::cout << "  ";
+  ATH_MSG_INFO("Spline init spline #=" << nsplinepoints << " : maxdev="
+                                       << maxdev << " p_maxdev=" << p_maxdev
+                                       << " maxeffsig=" << maxeffsig
+                                       << " p_maxeffsig=" << p_maxeffsig
+                                       << " max_penalty=" << max_penalty);
+  ATH_MSG(INFO) << "  ";
   for (int i = 0; i < m_spline.GetNp(); ++i) {
     double p, x;
     m_spline.GetKnot(i, p, x);
-    std::cout << i << " : p=" << p << " x=" << x << " ; ";
+    ATH_MSG(INFO) << i << " : p=" << p << " x=" << x << " ; ";
   }
-  std::cout << std::endl;
+  ATH_MSG(INFO) << END_MSG(INFO);
   return max_penalty;
 }
 
@@ -150,7 +151,7 @@ double TFCS1DFunctionSpline::InitializeEqualDistance(TH1 *hist,
     if (hist->GetBinContent(i) > 0)
       break;
   }
-  // std::cout<<"xmin="<<xmin<<" xmax="<<xmax<<std::endl;
+  // ATH_MSG_INFO("xmin="<<xmin<<" xmax="<<xmax);
 
   double dx = (xmax - xmin) / (nsplinepoints - 1);
 
@@ -158,7 +159,7 @@ double TFCS1DFunctionSpline::InitializeEqualDistance(TH1 *hist,
   std::vector<double> nx(nsplinepoints);
   nprop[0] = 0;
   nx[0] = hist_fct.rnd_to_fct(nprop[0]);
-  // std::cout<<0<<" p="<<nprop[0]<<" x="<<nx[0]<<std::endl;
+  // ATH_MSG_INFO(0<<" p="<<nprop[0]<<" x="<<nx[0]);
   for (int i = 1; i < nsplinepoints; ++i) {
     nx[i] = xmin + i * dx;
     double p_min = 0;
@@ -175,7 +176,7 @@ double TFCS1DFunctionSpline::InitializeEqualDistance(TH1 *hist,
       if ((p_max - p_min) < 0.0000001)
         break;
     } while (TMath::Abs(tx - nx[i]) > dx / 10);
-    // std::cout<<i<<" p="<<p_test<<" x="<<tx<<std::endl;
+    // ATH_MSG_INFO(i<<" p="<<p_test<<" x="<<tx);
     nprop[i] = p_test;
   }
 
@@ -185,17 +186,18 @@ double TFCS1DFunctionSpline::InitializeEqualDistance(TH1 *hist,
   double p_maxdev;
   double p_maxeffsig;
   double maxdev = get_maxdev(hist, m_spline, maxeffsig, p_maxdev, p_maxeffsig);
-  std::cout << "Spline init equ. dist. #=" << nsplinepoints
-            << " : maxdev=" << maxdev << " p_maxdev=" << p_maxdev
-            << " maxeffsig=" << maxeffsig << " p_maxeffsig=" << p_maxeffsig
-            << " max_penalty=" << max_penalty << std::endl;
-  std::cout << "  ";
+  ATH_MSG_INFO("Spline init equ. dist. #=" << nsplinepoints << " : maxdev="
+                                           << maxdev << " p_maxdev=" << p_maxdev
+                                           << " maxeffsig=" << maxeffsig
+                                           << " p_maxeffsig=" << p_maxeffsig
+                                           << " max_penalty=" << max_penalty);
+  ATH_MSG(INFO) << "  ";
   for (int i = 0; i < m_spline.GetNp(); ++i) {
     double p, x;
     m_spline.GetKnot(i, p, x);
-    std::cout << i << " : p=" << p << " x=" << x << " ; ";
+    ATH_MSG(INFO) << i << " : p=" << p << " x=" << x << " ; ";
   }
-  std::cout << std::endl;
+  ATH_MSG(INFO) << END_MSG(INFO);
   return max_penalty;
 }
 
@@ -217,17 +219,18 @@ double TFCS1DFunctionSpline::InitializeEqualProbability(TH1 *hist,
   double p_maxdev;
   double p_maxeffsig;
   double maxdev = get_maxdev(hist, m_spline, maxeffsig, p_maxdev, p_maxeffsig);
-  std::cout << "Spline init equ. prob. #=" << nsplinepoints
-            << " : maxdev=" << maxdev << " p_maxdev=" << p_maxdev
-            << " maxeffsig=" << maxeffsig << " p_maxeffsig=" << p_maxeffsig
-            << " max_penalty=" << max_penalty << std::endl;
-  std::cout << "  ";
+  ATH_MSG_INFO("Spline init equ. prob. #=" << nsplinepoints << " : maxdev="
+                                           << maxdev << " p_maxdev=" << p_maxdev
+                                           << " maxeffsig=" << maxeffsig
+                                           << " p_maxeffsig=" << p_maxeffsig
+                                           << " max_penalty=" << max_penalty);
+  ATH_MSG(INFO) << "  ";
   for (int i = 0; i < m_spline.GetNp(); ++i) {
     double p, x;
     m_spline.GetKnot(i, p, x);
-    std::cout << i << " : p=" << p << " x=" << x << " ; ";
+    ATH_MSG(INFO) << i << " : p=" << p << " x=" << x << " ; ";
   }
-  std::cout << std::endl;
+  ATH_MSG(INFO) << END_MSG(INFO);
   return max_penalty;
 }
 
@@ -266,12 +269,12 @@ double TFCS1DFunctionSpline::optimize(TSpline3 &sp_best,
         nprop = nprop_try;
         sp_best = sp;
         /*
-        std::cout<<"#="<<nsplinepoints<<" try="<<itrytot-1<<" | ";
+        ATH_MSG(INFO) <<"#="<<nsplinepoints<<" try="<<itrytot-1<<" | ";
         for(int i=0;i<nsplinepoints;++i) {
-          std::cout<<i<<":p="<<nprop_try[i]<<" x="<<nx[i]<<" ; ";
+          ATH_MSG(INFO) <<i<<":p="<<nprop_try[i]<<" x="<<nx[i]<<" ; ";
         }
-        std::cout<<"new maxdev="<<maxdev<<" maxeffsig="<<maxeffsig<<"
-        max_penalty="<<max_penalty<<std::endl;
+        ATH_MSG(INFO) <<"new maxdev="<<maxdev<<" maxeffsig="<<maxeffsig<<"
+        max_penalty="<<max_penalty<<END_MSG(INFO);
         */
         n_nogain = 0;
       } else {
@@ -327,9 +330,9 @@ double TFCS1DFunctionSpline::get_maxdev(const TH1 *hist, const TSpline3 &sp,
   double integral = hist->IntegralAndError(1, hist->GetNbinsX(), interr);
   double effN = integral / interr;
   effN *= effN;
-  // std::cout<<"integral="<<integral<<" +- "<<interr<<"
-  // relerr="<<interr/integral<<std::endl; std::cout<<"effN="<<effN<<" +-
-  // "<<TMath::Sqrt(effN)<<" relerr="<<1/TMath::Sqrt(effN)<<std::endl;
+  // ATH_MSG_INFO("integral="<<integral<<" +- "<<interr<<"
+  // relerr="<<interr/integral); ATH_MSG_INFO("effN="<<effN<<" +-
+  // "<<TMath::Sqrt(effN)<<" relerr="<<1/TMath::Sqrt(effN));
   double toyweight = 1.0 / ntoy;
   for (int itoy = 0; itoy < ntoy; ++itoy) {
     double prop = itoy * toyweight;
@@ -358,9 +361,9 @@ double TFCS1DFunctionSpline::get_maxdev(const TH1 *hist, const TSpline3 &sp,
       p_maxeffsig = int1;
     }
 
-    // std::cout<<i<<": diff="<<int1-int2<<" sig(diff)="<<valsig<<"
+    // ATH_MSG_INFO(i<<": diff="<<int1-int2<<" sig(diff)="<<valsig<<"
     // int1="<<int1<<" +- "<<int1err<<" int2="<<int2<<" maxdev="<<maxdev<<"
-    // maxeffsig="<<maxeffsig<<std::endl;
+    // maxeffsig="<<maxeffsig);
   }
 
   delete hist_clone;
@@ -373,6 +376,7 @@ double TFCS1DFunctionSpline::rnd_to_fct(double rnd) const {
 }
 
 void TFCS1DFunctionSpline::unit_test ATLAS_NOT_THREAD_SAFE(TH1 *hist) {
+  ISF_FCS::MLogging logger;
   int nbinsx;
   TH1 *histfine = nullptr;
   if (hist == nullptr) {
@@ -403,7 +407,7 @@ void TFCS1DFunctionSpline::unit_test ATLAS_NOT_THREAD_SAFE(TH1 *hist) {
   float rnd[2];
   for (rnd[0] = 0; rnd[0] < 0.9999; rnd[0] += 0.25) {
     rtof.rnd_to_fct(value, rnd);
-    std::cout << "rnd0=" << rnd[0] << " -> x=" << value[0] << std::endl;
+    ATH_MSG_NOCLASS(logger, "rnd0=" << rnd[0] << " -> x=" << value[0]);
   }
 
   TH1 *hist_val = (TH1 *)histfine->Clone("hist_val");
@@ -432,7 +436,7 @@ void TFCS1DFunctionSpline::unit_test ATLAS_NOT_THREAD_SAFE(TH1 *hist) {
     float err = hist_diff->GetBinError(ix);
     if (err > 0)
       hist_pull->Fill(val / err);
-    // std::cout<<"val="<<val<<" err="<<err<<std::endl;
+    // ATH_MSG_NOCLASS(logger,"val="<<val<<" err="<<err);
   }
 
 // Screen output in athena won't make sense and would require linking of

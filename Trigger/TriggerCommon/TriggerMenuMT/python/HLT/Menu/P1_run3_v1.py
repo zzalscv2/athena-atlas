@@ -23,6 +23,7 @@ from .Physics_pp_run3_v1 import (
     SupportLegGroup,
     SupportPhIGroup,
     Topo2Group,
+    Topo3Group,
     LegacyTopoGroup,
 )
 
@@ -357,15 +358,34 @@ def addHighMuP1Signatures(chains):
     chainsP1['Beamspot'] = [
         ChainProp(name='HLT_beamspot_trkFS_trkfast_BeamSpotPEB_L14J20',  l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['PS:Online','RATE:BeamSpot',  'BW:BeamSpot']+SupportLegGroup),
 
-        ChainProp(name='HLT_j0_pf_ftf_preselj20_beamspotVtx_BeamSpotPEB_L1J15' , l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['PS:Online', 'RATE:BeamSpot',  'BW:BeamSpot', 'RATE:CPS_J15']+SupportLegGroup),
-        ChainProp(name='HLT_j0_pf_ftf_preselcHT450_beamspotVtx_BeamSpotPEB_L1HT190-J15s5pETA21', l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['PS:Online','RATE:BeamSpot',  'BW:BeamSpot']+SupportLegGroup+LegacyTopoGroup),
-        ChainProp(name='HLT_j0_pf_ftf_presel6c25_beamspotVtx_BeamSpotPEB_L14J15', l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['PS:Online','RATE:BeamSpot',  'BW:BeamSpot', 'RATE:CPS_4J15']+SupportLegGroup),
-        ChainProp(name='HLT_j0_pf_ftf_presel2c20b85_beamspotVtx_BeamSpotPEB_L1J45p0ETA21_3J15p0ETA25', l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['PS:Online','PS:Online', 'RATE:BeamSpot',  'BW:BeamSpot']+SupportLegGroup),
         #ATR-27253
         ChainProp(name='HLT_beamspot_trkFS_trkfast_BeamSpotPEB_L14jJ50',  l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['PS:Online','RATE:BeamSpot',  'BW:BeamSpot']+SupportPhIGroup),
-        ChainProp(name='HLT_j0_pf_ftf_presel6c25_beamspotVtx_BeamSpotPEB_L14jJ40', l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['PS:Online','RATE:BeamSpot',  'BW:BeamSpot']+SupportPhIGroup),
 
+        # ATR-23061, ATR-26394
+        # Beamspot chains using FS tracking -- no PEB, fill BeamSpot histograms then reject all events
+        ChainProp(name='HLT_j0_pf_ftf_preselj20_beamspotVtx_L1J15' , l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD', 'RATE:CPS_J15']+SupportLegGroup),
+        ChainProp(name='HLT_j0_pf_ftf_preselcHT450_beamspotVtx_L1HT190-J15s5pETA21', l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD']+SupportLegGroup+LegacyTopoGroup),
+        ChainProp(name='HLT_j0_pf_ftf_presel6c25_beamspotVtx_L14J15', l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD', 'RATE:CPS_4J15']+SupportLegGroup),
+        ChainProp(name='HLT_j0_pf_ftf_presel2c20b85_beamspotVtx_L1J45p0ETA21_3J15p0ETA25', l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:BeamSpot', 'RATE:CPS_J45p0ETA21_3J15p0ETA25']+SupportLegGroup),
+        #
+        ChainProp(name='HLT_j0_pf_ftf_preselj20_beamspotVtx_L1jJ40' , l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD', 'RATE:CPS_jJ40']+SupportPhIGroup),
+        ChainProp(name='HLT_j0_pf_ftf_preselcHT450_beamspotVtx_L1HT190-jJ40s5pETA21', l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD', 'RATE:CPS_HT190-jJ40s5pETA21']+SupportPhIGroup+Topo3Group),
+        ChainProp(name='HLT_j0_pf_ftf_presel6c25_beamspotVtx_L14jJ40', l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD', 'RATE:CPS_4jJ40']+SupportPhIGroup),
+        ChainProp(name='HLT_j0_pf_ftf_presel2c20b85_beamspotVtx_L1jJ85p0ETA21_3jJ40p0ETA25', l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD', 'BW:DISCARD', 'RATE:CPS_jJ85p0ETA21_3jJ40p0ETA25']+SupportPhIGroup),
+    ]
 
+    chainsP1['Jet'] = [
+        # ATR-23061, ATR-26394
+        # BeamspotPEB chains -- only run preselection without tracking, write PEB data
+        ChainProp(name='HLT_j0_pf_ftf_preselj20_BeamSpotPEB_L1J15' , l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot', 'BW:BeamSpot', 'RATE:CPS_J15']+SupportLegGroup),
+        ChainProp(name='HLT_j0_pf_ftf_preselcHT450_BeamSpotPEB_L1HT190-J15s5pETA21', l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot',  'BW:BeamSpot']+SupportLegGroup+LegacyTopoGroup),
+        ChainProp(name='HLT_j0_pf_ftf_presel6c25_BeamSpotPEB_L14J15', l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot',  'BW:BeamSpot', 'RATE:CPS_4J15']+SupportLegGroup),
+        ChainProp(name='HLT_j0_pf_ftf_presel2c20b85_BeamSpotPEB_L1J45p0ETA21_3J15p0ETA25', l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot',  'BW:BeamSpot', 'RATE:CPS_J45p0ETA21_3J15p0ETA25']+SupportLegGroup),
+        #
+        ChainProp(name='HLT_j0_pf_ftf_preselj20_BeamSpotPEB_L1jJ40' , l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot',  'BW:BeamSpot', 'RATE:CPS_jJ40']+SupportPhIGroup),
+        ChainProp(name='HLT_j0_pf_ftf_preselcHT450_BeamSpotPEB_L1HT190-jJ40s5pETA21', l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot',  'BW:BeamSpot', 'RATE:CPS_HT190-jJ40s5pETA21']+SupportPhIGroup+Topo3Group),
+        ChainProp(name='HLT_j0_pf_ftf_presel6c25_BeamSpotPEB_L14jJ40', l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot',  'BW:BeamSpot', 'RATE:CPS_4jJ40']+SupportPhIGroup),
+        ChainProp(name='HLT_j0_pf_ftf_presel2c20b85_BeamSpotPEB_L1jJ85p0ETA21_3jJ40p0ETA25', l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot',  'BW:BeamSpot', 'RATE:CPS_jJ85p0ETA21_3jJ40p0ETA25']+SupportPhIGroup),
     ]
 
     addP1Signatures(chains,chainsP1)

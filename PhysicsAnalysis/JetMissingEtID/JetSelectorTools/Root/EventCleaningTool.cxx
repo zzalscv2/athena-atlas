@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /******************************************************************************
@@ -81,6 +81,10 @@ StatusCode EventCleaningTool::initialize()
   m_passORKey = m_jetContainerName + "." + m_prefix + m_passORKey.key();
   m_jetCleanKey = m_jetContainerName + "." + m_prefix + "jetClean_" + m_cleaningLevel;
 
+  ATH_CHECK(m_passJvtKey.initialize());
+  ATH_CHECK(m_passORKey.initialize());
+  ATH_CHECK(m_jetCleanKey.initialize(m_decorate));
+
 #ifndef XAOD_STANDALONE
   if(m_suppressInputDeps){
     // The user has promised that this will be produced by the same alg.
@@ -88,11 +92,10 @@ StatusCode EventCleaningTool::initialize()
     renounce(m_passJvtKey);
     renounce(m_passORKey);
   }
+  if(m_suppressOutputDeps) {
+    renounce(m_jetCleanKey);
+  }
 #endif
-
-  ATH_CHECK(m_passJvtKey.initialize());
-  ATH_CHECK(m_passORKey.initialize());
-  ATH_CHECK(m_jetCleanKey.initialize(m_decorate));
 
   return StatusCode::SUCCESS;
 }

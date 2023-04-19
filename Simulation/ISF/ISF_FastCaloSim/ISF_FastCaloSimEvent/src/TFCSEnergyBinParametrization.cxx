@@ -142,13 +142,14 @@ void TFCSEnergyBinParametrization::Print(Option_t *option) const {
       float p = 0;
       for (int iEbin = 0; iEbin <= n_bins(); ++iEbin) {
         if (iEbin > 0)
-          std::cout << ", ";
+          ATH_MSG(INFO) << ", ";
         auto mapit = m_pdgid_Ebin_probability.find(*it);
-        msg() << "b" << iEbin << "="
-              << (mapit->second[iEbin] - p) / mapit->second.back() * 100 << "%";
+        ATH_MSG(INFO) << "b" << iEbin << "="
+                      << (mapit->second[iEbin] - p) / mapit->second.back() * 100
+                      << "%";
         p = mapit->second[iEbin];
       }
-      msg() << endmsg;
+      ATH_MSG(INFO) << END_MSG(INFO);
     }
   }
 }

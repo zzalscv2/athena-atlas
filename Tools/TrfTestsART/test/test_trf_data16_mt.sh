@@ -7,7 +7,7 @@
 # art-include: 23.0/Athena
 # art-athena-mt: 8
 
-timeout 64800 Reco_tf.py \
+timeout 64800 Reco_tf.py --CA\
   --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/data16_13TeV.00304008.physics_Main.daq.RAW._lb0838._SFO-6._0001.data \
   --outputAODFile=myAOD.pool.root \
   --outputHISTFile=myHIST.root \
@@ -15,8 +15,7 @@ timeout 64800 Reco_tf.py \
   --outputDRAW_ZMUMUFile=myDRAW_ZMUMU.data \
   --outputDAOD_IDTIDEFile=myIDTIDE.pool.root \
   --multithreaded='True' \
-  --preExec 'all:from AthenaMonitoring.DQMonFlags import DQMonFlags; DQMonFlags.doHLTMon=False' \
-  --postExec 'FPEAuditor.NStacktracesOnFPE=10' \
+  --preExec 'all:flags.DQ.Steering.doHLTMon=False; flags.Exec.FPE=10;' \
   --autoConfiguration='everything' \
   --conditionsTag 'all:CONDBR2-BLKPA-RUN2-09' --geometryVersion='default:ATLAS-R2-2016-01-00-01' \
   --runNumber='357750' --maxEvents='-1'

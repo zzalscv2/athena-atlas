@@ -18,13 +18,15 @@
 #include "ISF_FastCaloSimEvent/TFCSExtrapolationState.h"
 #include "ISF_FastCaloSimEvent/TFCSGANXMLParameters.h"
 #include "ISF_FastCaloSimEvent/TFCSGANLWTNNHandler.h"
+#include "ISF_FastCaloSimEvent/MLogging.h"
 
 #include "lwtnn/LightweightGraph.hh"
 #include "lwtnn/parse_json.hh"
 
 #include <fstream>
 
-class TFCSGANEtaSlice {
+using namespace ISF_FCS;
+class TFCSGANEtaSlice : public MLogging {
 public:
   TFCSGANEtaSlice();
   TFCSGANEtaSlice(int pid, int etaMin, int etaMax,
@@ -69,7 +71,7 @@ private:
 
   TFCSGANXMLParameters m_param;
 
-  ClassDef(TFCSGANEtaSlice, 3) // TFCSGANEtaSlice
+  ClassDef(TFCSGANEtaSlice, 4) // TFCSGANEtaSlice
 };
 
 #endif //> !ISF_TFCSGANETASLICE_H

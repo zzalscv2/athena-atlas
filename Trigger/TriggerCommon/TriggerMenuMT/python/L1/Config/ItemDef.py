@@ -1861,7 +1861,7 @@ class ItemDef:
             MenuItem('L1_MU5VF_jMJJ-300-NFF').setLogic( d.MU5VF & d.TOPO_300INVM_jJ60s6_AjJ50s6 & physcond)
             MenuItem('L1_eEM22M_jMJJ-300').setLogic( d.eEM22M & d.TOPO_300INVM_AjJ60s6_AjJ50s6 & physcond)
             MenuItem('L1_eEM22M_jMJJ-300-NFF').setLogic( d.eEM22M & d.TOPO_300INVM_jJ60s6_AjJ50s6 & physcond)
-            MenuItem('L1_jHT150-jJ50s5pETA31_jMJJ-400-CF').setLogic( d.TOPO_HT150_jJ50s5pETA31   & d.TOPO_400INVM_AjJ60s6pETA31_AjJ50s6p31ETA49 & physcond)
+            MenuItem('L1_HT150-jJ50s5pETA31_jMJJ-400-CF').setLogic( d.TOPO_HT150_jJ50s5pETA31   & d.TOPO_400INVM_AjJ60s6pETA31_AjJ50s6p31ETA49 & physcond)
             MenuItem('L1_jMJJ-400-CF').setLogic( d.TOPO_400INVM_AjJ60s6pETA31_AjJ50s6p31ETA49 & physcond)
             MenuItem('L1_jJ90_DETA20-jJ90J').setLogic( d.jJ50 & d.TOPO_0DETA20_jJ90s1_jJs2 & physcond)
             MenuItem('L1_HT190-jJ40s5pETA21').setLogic( d.TOPO_HT190_jJ40s5pETA21   & physcond)

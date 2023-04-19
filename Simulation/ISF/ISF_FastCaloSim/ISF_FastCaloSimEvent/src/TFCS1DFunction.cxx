@@ -51,6 +51,7 @@ double TFCS1DFunction::get_maxdev(TH1 *h_input1, TH1 *h_approx1) {
 
 double TFCS1DFunction::CheckAndIntegrate1DHistogram(
     const TH1 *hist, std::vector<double> &integral_vec, int &first, int &last) {
+  ISF_FCS::MLogging logger;
   Int_t nbins = hist->GetNbinsX();
 
   float integral = 0;
@@ -61,11 +62,12 @@ double TFCS1DFunction::CheckAndIntegrate1DHistogram(
       // Can't work if a bin is negative, forcing bins to 0 in this case
       double fraction = binval / hist->Integral();
       if (TMath::Abs(fraction) > 1e-5) {
-        std::cout << "WARNING: bin content is negative in histogram "
-                  << hist->GetName() << " : " << hist->GetTitle()
-                  << " binval=" << binval << " " << fraction * 100
-                  << "% of integral=" << hist->Integral()
-                  << ". Forcing bin to 0." << std::endl;
+        ATH_MSG_NOCLASS(logger, "Warning: bin content is negative in histogram "
+                                    << hist->GetName() << " : "
+                                    << hist->GetTitle() << " binval=" << binval
+                                    << " " << fraction * 100
+                                    << "% of integral=" << hist->Integral()
+                                    << ". Forcing bin to 0.");
       }
       binval = 0;
     }
@@ -82,9 +84,9 @@ double TFCS1DFunction::CheckAndIntegrate1DHistogram(
   last++;
 
   if (integral <= 0) {
-    std::cout << "ERROR: histogram " << hist->GetName() << " : "
-              << hist->GetTitle() << " integral=" << integral << " is <=0"
-              << std::endl;
+    ATH_MSG_NOCLASS(logger, "Error: histogram "
+                                << hist->GetName() << " : " << hist->GetTitle()
+                                << " integral=" << integral << " is <=0");
   }
   return integral;
 }
@@ -120,8 +122,9 @@ ATLAS_NOT_THREAD_SAFE(int nbinsx, int ntoy, double xmin, double xmax,
 void TFCS1DFunction::unit_test ATLAS_NOT_THREAD_SAFE(TH1 *hist,
                                                      TFCS1DFunction *rtof,
                                                      int nrnd, TH1 *histfine) {
-  std::cout << "========= " << hist->GetName()
-            << " funcsize=" << rtof->MemorySize() << " ========" << std::endl;
+  ISF_FCS::MLogging logger;
+  ATH_MSG_NOCLASS(logger, "========= " << hist->GetName() << " funcsize="
+                                       << rtof->MemorySize() << " ========");
   int nbinsx = hist->GetNbinsX();
   double integral = hist->Integral();
 
@@ -129,7 +132,7 @@ void TFCS1DFunction::unit_test ATLAS_NOT_THREAD_SAFE(TH1 *hist,
   float rnd[2];
   for (rnd[0] = 0; rnd[0] < 0.9999; rnd[0] += 0.25) {
     rtof->rnd_to_fct(value, rnd);
-    std::cout << "rnd0=" << rnd[0] << " -> x=" << value[0] << std::endl;
+    ATH_MSG_NOCLASS(logger, "rnd0=" << rnd[0] << " -> x=" << value[0]);
   }
 
   TH1 *hist_val = nullptr;

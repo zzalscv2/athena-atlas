@@ -553,6 +553,7 @@ void TFCSEnergyAndHitGANV2::Print(Option_t *option) const {
 void TFCSEnergyAndHitGANV2::unit_test(TFCSSimulationState *simulstate,
                                       const TFCSTruthState *truth,
                                       const TFCSExtrapolationState *extrapol) {
+  ISF_FCS::MLogging logger;
   if (!simulstate) {
     simulstate = new TFCSSimulationState();
 #if defined(__FastCaloSimStandAlone__)
@@ -562,7 +563,7 @@ void TFCSEnergyAndHitGANV2::unit_test(TFCSSimulationState *simulstate,
 #endif
   }
   if (!truth) {
-    std::cout << "New particle" << std::endl;
+    ATH_MSG_NOCLASS(logger, "New particle");
     TFCSTruthState *t = new TFCSTruthState();
     t->SetPtEtaPhiM(65536, 0, 0, 139.6);
     t->set_pdgid(211);
@@ -594,7 +595,7 @@ void TFCSEnergyAndHitGANV2::unit_test(TFCSSimulationState *simulstate,
   int pid = 211;
   int etaMin = 20;
   int etaMax = etaMin + 5;
-  std::cout << "Initialize Networks" << std::endl;
+  ATH_MSG_NOCLASS(logger, "Initialize Networks");
   GAN.initializeNetwork(pid, etaMin,
                         "/eos/atlas/atlascerngroupdisk/proj-simul/AF3_Run3/"
                         "InputsToBigParamFiles/FastCaloGANWeightsVer02");
@@ -620,13 +621,13 @@ void TFCSEnergyAndHitGANV2::unit_test(TFCSSimulationState *simulstate,
 
   GAN.Print();
 
-  std::cout << "Writing GAN to FCSGANtest.root" << std::endl;
+  ATH_MSG_NOCLASS(logger, "Writing GAN to FCSGANtest.root");
   TFile *fGAN = TFile::Open("FCSGANtest.root", "recreate");
   GAN.Write();
   fGAN->ls();
   fGAN->Close();
 
-  std::cout << "Open FCSGANtest.root" << std::endl;
+  ATH_MSG_NOCLASS(logger, "Open FCSGANtest.root");
   fGAN = TFile::Open("FCSGANtest.root");
   TFCSEnergyAndHitGANV2 *GAN2 = (TFCSEnergyAndHitGANV2 *)(fGAN->Get("GAN"));
   if (GAN2) {
@@ -634,7 +635,7 @@ void TFCSEnergyAndHitGANV2::unit_test(TFCSSimulationState *simulstate,
   }
 
   GAN2->setLevel(MSG::DEBUG);
-  std::cout << "Before running GAN2->simulate()" << std::endl;
+  ATH_MSG_NOCLASS(logger, "Before running GAN2->simulate()");
   GAN2->simulate(*simulstate, truth, extrapol);
   simulstate->Print();
 }

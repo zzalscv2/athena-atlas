@@ -5,6 +5,13 @@
 #ifndef IdentifierStandAlone
 #define IdentifierStandAlone
 
+// Not really sure why this is needed.
+// If it isn't there, then we get 
+// error: 'Long64_t' does not name a type
+// in Identifier.h, only I haven't changed that.
+// Some dependancy isn't defined quite right.
+#include <RtypesCore.h>
+
 class Identifier
 {
   public:

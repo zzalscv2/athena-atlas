@@ -3,7 +3,7 @@ Py:UnitTest          INFO Event Algorithm Sequences
 Py:UnitTest          INFO Top sequence 0
 Py:UnitTest          INFO \__ AthAlgSeq (seq: PAR AND)
 Py:UnitTest          INFO Services
-Py:UnitTest          INFO ['xAODConfigSvc']
+Py:UnitTest          INFO ['xAODConfigSvc', 'LVL1ConfigSvc', 'HLTConfigSvc']
 Py:UnitTest          INFO Public Tools
 Py:UnitTest          INFO [
 Py:UnitTest          INFO   HLT::Navigation/Navigation,

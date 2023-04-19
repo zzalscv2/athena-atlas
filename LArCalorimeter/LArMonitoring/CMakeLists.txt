@@ -4,13 +4,12 @@
 atlas_subdir( LArMonitoring )
 
 # External dependencies:
-find_package( Boost COMPONENTS filesystem thread system )
 find_package( CLHEP )
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread Graf Graf3d Gpad Html Postscript Gui GX11TTF GX11 )
 
 atlas_add_library( LArStrHelper
                    src/StrHelper/LArStrHelper.cxx LArMonitoring/LArStrHelper.h
-		   PUBLIC_HEADERS LArMonitoring
+                   PUBLIC_HEADERS LArMonitoring
                    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
                    LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES})
 

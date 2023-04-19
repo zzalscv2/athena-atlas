@@ -374,6 +374,7 @@ void TFCSPredictExtrapWeights::Streamer(TBuffer &R__b) {
 void TFCSPredictExtrapWeights::unit_test(
     TFCSSimulationState *simulstate, const TFCSTruthState *truth,
     const TFCSExtrapolationState *extrapol) {
+  ISF_FCS::MLogging logger;
   if (!simulstate) {
     simulstate = new TFCSSimulationState();
 #if defined(__FastCaloSimStandAlone__)
@@ -427,8 +428,8 @@ void TFCSPredictExtrapWeights::unit_test(
   const float Ekin = truth->Ekin();
   const float eta = truth->Eta();
 
-  std::cout << "True energy " << Ekin << " pdgId " << pdgId << " eta " << eta
-            << std::endl;
+  ATH_MSG_NOCLASS(logger, "True energy " << Ekin << " pdgId " << pdgId
+                                         << " eta " << eta);
 
   // Find eta bin
   int Eta = eta * 10;
@@ -440,7 +441,7 @@ void TFCSPredictExtrapWeights::unit_test(
     }
   }
 
-  std::cout << "etaBin = " << etaBin << std::endl;
+  ATH_MSG_NOCLASS(logger, "etaBin = " << etaBin);
 
   TFCSPredictExtrapWeights NN("NN", "NN");
   NN.setLevel(MSG::VERBOSE);

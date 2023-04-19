@@ -38,21 +38,20 @@ void TFCSSimulationState::deposit(const CaloDetDescrElement *cellele, float E) {
 }
 
 void TFCSSimulationState::Print(Option_t *) const {
-  std::cout << "Ebin=" << m_Ebin << " E=" << E() << " #cells=" << m_cells.size()
-            << std::endl;
+  ATH_MSG_INFO("Ebin=" << m_Ebin << " E=" << E()
+                       << " #cells=" << m_cells.size());
   for (int i = 0; i < CaloCell_ID_FCS::MaxSample; ++i)
     if (E(i) != 0) {
-      std::cout << "  E" << i << "(" << CaloSampling::getSamplingName(i)
-                << ")=" << E(i) << " E" << i << "/E=" << Efrac(i) << std::endl;
+      ATH_MSG_INFO("  E" << i << "(" << CaloSampling::getSamplingName(i)
+                         << ")=" << E(i) << " E" << i << "/E=" << Efrac(i));
     }
   if (!m_AuxInfo.empty()) {
-    std::cout << "  AuxInfo has " << m_AuxInfo.size() << " elements"
-              << std::endl;
+    ATH_MSG_INFO("  AuxInfo has " << m_AuxInfo.size() << " elements");
     for (const auto &a : m_AuxInfo) {
-      std::cout << "    " << a.first << " : bool=" << a.second.b
-                << " char=" << a.second.c << " int=" << a.second.i
-                << " float=" << a.second.f << " double=" << a.second.d
-                << " void*=" << a.second.p << std::endl;
+      ATH_MSG_INFO("    " << a.first << " : bool=" << a.second.b
+                          << " char=" << a.second.c << " int=" << a.second.i
+                          << " float=" << a.second.f << " double=" << a.second.d
+                          << " void*=" << a.second.p);
     }
   }
 }

@@ -32,6 +32,7 @@ TFCSParametrizationAbsEtaSelectChain::get_bin_text(int bin) const {
 void TFCSParametrizationAbsEtaSelectChain::unit_test(
     TFCSSimulationState *simulstate, TFCSTruthState *truth,
     TFCSExtrapolationState *extrapol) {
+  ISF_FCS::MLogging logger;
   if (!simulstate)
     simulstate = new TFCSSimulationState();
   if (!truth)
@@ -74,7 +75,7 @@ void TFCSParametrizationAbsEtaSelectChain::unit_test(
     chain.push_back_in_bin(param);
   }
 
-  std::cout << "====         Chain setup       ====" << std::endl;
+  ATH_MSG_NOCLASS(logger, "====         Chain setup       ====");
   chain.Print();
 
   param = new TFCSParametrization("B end all", "B end all");
@@ -84,25 +85,25 @@ void TFCSParametrizationAbsEtaSelectChain::unit_test(
   param->setLevel(MSG::DEBUG);
   chain.push_before_first_bin(param);
 
-  std::cout << "====         Chain setup       ====" << std::endl;
+  ATH_MSG_NOCLASS(logger, "====         Chain setup       ====");
   chain.Print();
-  std::cout << "==== Simulate with eta=0.1      ====" << std::endl;
+  ATH_MSG_NOCLASS(logger, "==== Simulate with eta=0.1      ====");
   extrapol->set_IDCaloBoundary_eta(0.1);
   chain.simulate(*simulstate, truth, extrapol);
-  std::cout << "==== Simulate with eta=-1.1      ====" << std::endl;
+  ATH_MSG_NOCLASS(logger, "==== Simulate with eta=-1.1      ====");
   extrapol->set_IDCaloBoundary_eta(-1.1);
   chain.simulate(*simulstate, truth, extrapol);
-  std::cout << "==== Simulate with eta=2.1      ====" << std::endl;
+  ATH_MSG_NOCLASS(logger, "==== Simulate with eta=2.1      ====");
   extrapol->set_IDCaloBoundary_eta(2.1);
   chain.simulate(*simulstate, truth, extrapol);
-  std::cout << "==== Simulate with eta=4.1      ====" << std::endl;
+  ATH_MSG_NOCLASS(logger, "==== Simulate with eta=4.1      ====");
   extrapol->set_IDCaloBoundary_eta(4.1);
   chain.simulate(*simulstate, truth, extrapol);
-  std::cout << "==== Simulate with eta=-4.1      ====" << std::endl;
+  ATH_MSG_NOCLASS(logger, "==== Simulate with eta=-4.1      ====");
   extrapol->set_IDCaloBoundary_eta(-4.1);
   chain.simulate(*simulstate, truth, extrapol);
-  std::cout << "==== Simulate with eta=100      ====" << std::endl;
+  ATH_MSG_NOCLASS(logger, "==== Simulate with eta=100      ====");
   extrapol->set_IDCaloBoundary_eta(100);
   chain.simulate(*simulstate, truth, extrapol);
-  std::cout << "===================================" << std::endl << std::endl;
+  ATH_MSG_NOCLASS(logger, "===================================" << std::endl);
 }

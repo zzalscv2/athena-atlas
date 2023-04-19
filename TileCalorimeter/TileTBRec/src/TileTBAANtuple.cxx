@@ -233,7 +233,7 @@ TileTBAANtuple::TileTBAANtuple(const std::string& name, ISvcLocator* pSvcLocator
   declareProperty("TileInfoName", m_infoName = "TileInfo");
   declareProperty("TileCondToolEmscale", m_tileToolEmscale);
   declareProperty("TileDigitsContainer", m_digitsContainer = "TileDigitsCnt");
-  declareProperty("TileDigitsContainerFlx", m_digitsContainerFlx = "TileDigitsFlxCnt");
+  declareProperty("TileDigitsContainerFlx", m_digitsContainerFlx = "");
   declareProperty("TileBeamElemContainer", m_beamElemContainer = "TileBeamElemCnt");
   // declareProperty("TileRawChannelContainerFlat", m_flatRawChannelContainer = "TileRawChannelFlat");
   declareProperty("TileRawChannelContainerFlat", m_flatRawChannelContainer = ""); // don't create by default
@@ -358,6 +358,7 @@ TileTBAANtuple::TileTBAANtuple(const std::string& name, ISvcLocator* pSvcLocator
 
 StatusCode TileTBAANtuple::initialize() {
   ATH_CHECK( m_samplingFractionKey.initialize() );
+  m_saveFelixData = !(m_digitsContainerFlx.empty() && m_flxOptRawChannelContainer.empty() && m_flxFitRawChannelContainer.empty());
   return StatusCode::SUCCESS;
 }
 
@@ -387,7 +388,7 @@ StatusCode TileTBAANtuple::ntuple_initialize() {
     m_nSamples = 7;
   }
   if (m_nSamplesFlx < 0) {
-    m_nSamples = 32;
+    m_nSamplesFlx = m_saveFelixData ? 32 : 0;
   }
 
   if (m_TBperiod >= 2015)  {
@@ -606,7 +607,7 @@ StatusCode TileTBAANtuple::ntuple_initialize() {
     ATH_MSG_ERROR( " Error during drawer list initialization"  );
   }
 
-  if (initListFlx().isFailure()) {
+  if (m_saveFelixData && initListFlx().isFailure()) {
     ATH_MSG_ERROR( " Error during drawer list initialization"  );
   }
 
@@ -1867,22 +1868,6 @@ StatusCode TileTBAANtuple::storeDigits() {
         (m_slinkCRCVec.at(type))[1] = (*itColl)->getFragCRC() & 0xffff;
         (m_dmuMaskVec.at(type))[1] = (*itColl)->getFragDMUMask() & 0xffff;
 
-        if (m_mdL1idVec.at(type)) {
-          std::vector<uint32_t> extraWords = (*itColl)->getFragExtraWords();
-          if (extraWords.size() >= 8 * MAX_MINIDRAWERS) {
-
-            int* md[] = {m_mdL1idVec.at(type), m_mdBcidVec.at(type),
-                         m_mdModuleVec.at(type), m_mdRunTypeVec.at(type), m_mdRunVec.at(type),
-                         m_mdChargeVec.at(type), m_mdChargeTimeVec.at(type), m_mdCapacitorVec.at(type)};
-
-            auto it = extraWords.begin();
-            for (int i = 0; i < 8; ++i) {
-              std::copy(it + i * MAX_MINIDRAWERS, it + (i + 1) * MAX_MINIDRAWERS, md[i]);
-            }
-          }
-        }
-
-
         // go through all TileDigits in collection
         it = (*itColl)->begin();
         itEnd = (*itColl)->end();
@@ -2362,7 +2347,9 @@ StatusCode TileTBAANtuple::ntuple_clear() {
   COINCBOARD_clearBranch();
 
   DIGI_clearBranch(); // working now
-  FELIX_clearBranch();
+  if (m_saveFelixData) {
+    FELIX_clearBranch();
+  }
 
   HIT_clearBranch();
   ATH_MSG_DEBUG( "clear() successfully" );
@@ -2472,7 +2459,9 @@ StatusCode TileTBAANtuple::initNTuple(void) {
   CISPAR_addBranch();
   BEAM_addBranch();
   DIGI_addBranch(); //working now
-  FELIX_addBranch();
+  if (m_saveFelixData) {
+    FELIX_addBranch();
+  }
 
   HIT_addBranch();
 
@@ -3289,6 +3278,10 @@ void TileTBAANtuple::BEAM_addBranch(void) {
 
     m_ntuplePtr->Branch("Cher1", &m_cher1, "Cher1/S");
     m_ntuplePtr->Branch("Cher2", &m_cher2, "Cher2/S");
+    if (m_TBperiod >= 2022) {
+      m_ntuplePtr->Branch("Cher3", &m_cher3, "Cher3/S");
+    }
+
     if (m_TBperiod < 2015) {
       m_ntuplePtr->Branch("MuTag", &m_muTag, "MuTag/S");
       m_ntuplePtr->Branch("MuHalo", &m_muHalo, "MuHalo/S");
@@ -3299,8 +3292,6 @@ void TileTBAANtuple::BEAM_addBranch(void) {
       m_ntuplePtr->Branch("SCalo1", &m_muTag, "SCalo1/S");
       m_ntuplePtr->Branch("SCalo2", &m_muHalo, "SCalo2/S");
       //m_ntuplePtr->Branch("SCalo3", &m_muVeto, "SCalo3/S");
-    } else if (m_TBperiod >= 2022) {
-      m_ntuplePtr->Branch("Cher3", &m_cher3, "Cher3/S");
     }
   }
 
@@ -3787,30 +3778,6 @@ void TileTBAANtuple::DIGI_addBranch(void)
       float *chi2Dsp = new float[N_CHANS];
 
 
-      int* mdL1id(nullptr);
-      int* mdBcid(nullptr);
-      int* mdModule(nullptr);
-      int* mdRunType(nullptr);
-      int* mdRun(nullptr);
-      int* mdCharge(nullptr);
-      int* mdChargeTime(nullptr);
-      int* mdCapacitor(nullptr);
-
-      if ((m_TBperiod == 2017 || m_TBperiod == 2019) && nSamplesInDrawer == 16) {
-	// It is supposed that the drawer is read via FELIX
-
-	mdL1id = new int[MAX_MINIDRAWERS];
-	mdBcid = new int[MAX_MINIDRAWERS];
-	mdModule = new int[MAX_MINIDRAWERS];
-	mdRunType = new int[MAX_MINIDRAWERS];
-	mdRun = new int[MAX_MINIDRAWERS];
-	mdCharge = new int[MAX_MINIDRAWERS];
-	mdChargeTime = new int[MAX_MINIDRAWERS];
-	mdCapacitor = new int[MAX_MINIDRAWERS];
-
-      } 
-
-
      m_evtVec.push_back( evt ); // I
      m_bcidVec.push_back( bcid ); // U
      m_DMUheaderVec.push_back( DMUheader ); // U32
@@ -3864,15 +3831,6 @@ void TileTBAANtuple::DIGI_addBranch(void)
      m_ROD_DMUDataparityErrVec.push_back( ROD_DMUDataparityErr );
      m_ROD_DMUMaskVec.push_back( ROD_DMUMask );
 
-     m_mdL1idVec.push_back(mdL1id);
-     m_mdBcidVec.push_back(mdBcid);
-     m_mdModuleVec.push_back(mdModule);
-     m_mdRunTypeVec.push_back(mdRunType);
-     m_mdRunVec.push_back(mdRun);
-     m_mdChargeVec.push_back(mdCharge);
-     m_mdChargeTimeVec.push_back(mdChargeTime);
-     m_mdCapacitorVec.push_back(mdCapacitor);
-
      if (i%m_nDrawers < listSize) {
        // create ntuple layout
        ATH_MSG_DEBUG( "Adding Leaf to Event '" << ("Evt" + suffixArr[i]) << "' @" << evt );
@@ -3890,17 +3848,6 @@ void TileTBAANtuple::DIGI_addBranch(void)
          m_ntuplePtr->Branch(("DMUDstrobeErr"+suffixArr[i]).c_str(),m_DMUDstrobeErrVec.back(),("DMUDstrobeErr"+suffixArr[i]+"[16]/S").c_str()); // short
          m_ntuplePtr->Branch(("DMUMask"+suffixArr[i]).c_str(),m_dmuMaskVec.back(),("dmumask"+suffixArr[i]+"[2]/I").c_str()); // int
          m_ntuplePtr->Branch(("SlinkCRC"+suffixArr[i]).c_str(),m_slinkCRCVec.back(),("crc"+suffixArr[i]+"[2]/I").c_str()); // int
-      }
-
-      if (mdL1id) {
-	m_ntuplePtr->Branch(("mdL1ID"+suffixArr[i]).c_str(),m_mdL1idVec.back(),("mdL1id"+suffixArr[i]+"[4]/I").c_str()); // int
-	m_ntuplePtr->Branch(("mdBCID"+suffixArr[i]).c_str(),m_mdBcidVec.back(),("mdBcid"+suffixArr[i]+"[4]/I").c_str()); // int
-	m_ntuplePtr->Branch(("mdModule"+suffixArr[i]).c_str(),m_mdModuleVec.back(),("mdModule"+suffixArr[i]+"[4]/I").c_str()); // int
-	m_ntuplePtr->Branch(("mdRunType"+suffixArr[i]).c_str(),m_mdRunTypeVec.back(),("mdRunType"+suffixArr[i]+"[4]/I").c_str()); // int
-        m_ntuplePtr->Branch(("mdRun"+suffixArr[i]).c_str(),m_mdRunVec.back(),("mdRun"+suffixArr[i]+"[4]/I").c_str()); // int
-	m_ntuplePtr->Branch(("mdCharge"+suffixArr[i]).c_str(),m_mdChargeVec.back(),("mdCharge"+suffixArr[i]+"[4]/I").c_str()); // int
-	m_ntuplePtr->Branch(("mdChargeTime"+suffixArr[i]).c_str(),m_mdChargeTimeVec.back(),("mdChargeTime"+suffixArr[i]+"[4]/I").c_str()); // int
-	m_ntuplePtr->Branch(("mdCapacitor"+suffixArr[i]).c_str(),m_mdCapacitorVec.back(),("mdCapacitor"+suffixArr[i]+"[4]/I").c_str()); // int
       }
 
       m_ntuplePtr->Branch(("Gain"+suffixArr[i]).c_str(),m_gainVec.back(),("gain"+suffixArr[i]+"[48]/I").c_str()); // int
@@ -4037,17 +3984,6 @@ void TileTBAANtuple::DIGI_clearBranch(void)
   clear_float(m_eDspVec);
   clear_float(m_tDspVec);
   clear_float(m_chi2DspVec);
-
-  if (m_TBperiod == 2017 || m_TBperiod == 2019) {
-    clear_int(m_mdL1idVec, MAX_MINIDRAWERS);
-    clear_int(m_mdBcidVec, MAX_MINIDRAWERS);
-    clear_int(m_mdModuleVec, MAX_MINIDRAWERS);
-    clear_int(m_mdRunTypeVec, MAX_MINIDRAWERS);
-    clear_int(m_mdRunVec, MAX_MINIDRAWERS);
-    clear_int(m_mdChargeVec, MAX_MINIDRAWERS);
-    clear_int(m_mdChargeTimeVec, MAX_MINIDRAWERS);
-    clear_int(m_mdCapacitorVec, MAX_MINIDRAWERS);
-  }
 
 }
 

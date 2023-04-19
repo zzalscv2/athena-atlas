@@ -94,6 +94,9 @@ class TrigEgammaMonitorTagAndProbeAlgorithm: public TrigEgammaMonitorAnalysisAlg
     /*! Jet container for probe selection */
     SG::ReadHandleKey<xAOD::JetContainer> m_jetKey{ this, "JetKey" , "AntiKt4LCTopoJets", ""};
     SG::ReadDecorHandleKey<xAOD::EventInfo> m_eventInfoDecorKey{this, "LArStatusFlag", "EventInfo.larFlags", "Key for EventInfo object"};
+    /*! Ensure offline electron isolation decoration is retrieved after being created */
+    SG::ReadDecorHandleKey<xAOD::ElectronContainer> m_electronIsolationKeyPtCone20 { this, "PtCone20Decoration", m_offElectronKey, "ptcone20", "Decoration key for the ptcone20 isolation decoration" };
+    
 };
 
 #endif

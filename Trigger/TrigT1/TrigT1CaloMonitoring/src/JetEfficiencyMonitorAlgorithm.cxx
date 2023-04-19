@@ -168,30 +168,37 @@ StatusCode JetEfficiencyMonitorAlgorithm::fillHistograms( const EventContext& ct
     jet_phi["leadingOffline_LargeRadiusJet"] = (*leading_offline_LR_jet)->phi();
   } //(close IF) LRjets size > 0 loop
   
-  //gFex SR and LR TOB containers
-  // gfex tobs are not pt sorted, so if we want to emulate the triggers we need to find the largest first
+  // gFex SR and LR TOB containers
+  // when we emulate the gfex trigger decision, we just want to find the gfex tob that 
+  // is the closest in physical space to the leading offline pt jet
+  float maximum_value_for_delta_r = 0.4;
   for (auto & g : gFex_types){ //iterate through SR and LR gfex jets.
     if (!gFEX_Container[g]->empty()) { //check that there are jets before accessing the container
-      // gfex tobs are not sorted according to pt, so we need to look for the leading tobs manually
-      float max_pt = 0.0; //inital value of zero
-      const xAOD::gFexJetRoI* leading_gfex_tob = nullptr; //inital pointer of null
-      //iterate through all the gfex tobs
-      for (const auto* iterating_gfex_jet : *gFEX_Container[g]) {
-        //extract gfex tob values
-        const float check_gfex_tob_pt = iterating_gfex_jet->et(), check_gfex_tob_eta = iterating_gfex_jet->eta();
-        //check if this gfex tob is more PT than the current max
-        if (check_gfex_tob_pt > max_pt && std::abs(check_gfex_tob_eta) < maxEta){
-          max_pt = check_gfex_tob_pt; //update maximums!
-          leading_gfex_tob = iterating_gfex_jet;
+      const xAOD::gFexJetRoI* matching_gfex_jet = nullptr; //inital pointer of null
+      float min_delta_r = 10000;
+      //iterate through all the gfex tobs 
+      for (const auto* gfex_jet : *gFEX_Container[g]) {
+        std::string comparison_offline_jet = "";
+        if (g == "gfex_SmallRadiusTOB") {comparison_offline_jet = "offline_SmallRadiusJet"; }
+        else if (g == "gfex_LargeRadiusTOB") {comparison_offline_jet = "offline_LargeRadiusJet"; }
+        float gfex_eta = gfex_jet->eta();
+        float gfex_phi = gfex_jet->phi();
+        float delta_eta = std::abs(gfex_eta-jet_eta[comparison_offline_jet]),
+        delta_phi = P4Helpers::deltaPhi(gfex_phi,jet_phi[comparison_offline_jet]),
+        delta_r = std::sqrt(std::pow(delta_eta,2)+ std::pow(delta_phi,2));
+        if (maximum_value_for_delta_r > delta_r && delta_r < min_delta_r && std::abs(gfex_eta) < maxEta){
+          min_delta_r = delta_r;
+          matching_gfex_jet = gfex_jet;
         } //(close IF) loop if gfex jet satisfies pt and eta conditions
-      } //(close FOR) loop that iterates through gfex tobs
+      } //(close FOR) loop that iterates through gfex tobs for the given event
 
-      //if we successfully found a leading gfex tob, then we can save its physical properties, for accessing later
-      if (leading_gfex_tob != nullptr) {
-        jet_eta[g] = leading_gfex_tob->eta(), jet_phi[g] = leading_gfex_tob->phi(), jet_pt[g] = leading_gfex_tob->et();
+      //if we successfully found a leading gfex tob, then we can save its physics properties 
+      if (matching_gfex_jet != nullptr) {
+        jet_eta[g] = matching_gfex_jet->eta(), jet_phi[g] = matching_gfex_jet->phi(), jet_pt[g] = matching_gfex_jet->et();
       } // (close IF) loop that checks if there is a leading gfex jet
     } // (close IF) loop that checks that there are gfex tobs
   }// (close FOR) that loops through sr and lr gfex tobs
+
   
   
   
@@ -204,11 +211,11 @@ StatusCode JetEfficiencyMonitorAlgorithm::fillHistograms( const EventContext& ct
 
   //offline SR Jet requriment 
   bool  offlineSRJet_maxEta_minPt_requirement = false;
-  if(std::abs(jet_eta["leadingOffline_SmallRadiusJet"])<maxEta && (jet_pt["leadingOffline_SmallRadiusJet"] > minPt)) {  offlineSRJet_maxEta_minPt_requirement = true; }
+  if(std::abs(jet_eta["leadingOffline_SmallRadiusJet"])<=maxEta && (jet_pt["leadingOffline_SmallRadiusJet"] >= minPt)) {  offlineSRJet_maxEta_minPt_requirement = true; }
   
   // offline LR Jet requriment 
   bool  offlineLRJet_maxEta_minPt_requirement = false;
-  if(std::abs(jet_eta["leadingOffline_LargeRadiusJet"])<maxEta && (jet_pt["leadingOffline_LargeRadiusJet"] > minPt)) {  offlineLRJet_maxEta_minPt_requirement = true; }
+  if(std::abs(jet_eta["leadingOffline_LargeRadiusJet"])<=maxEta && (jet_pt["leadingOffline_LargeRadiusJet"] >= minPt)) {  offlineLRJet_maxEta_minPt_requirement = true; }
   
   
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -247,7 +254,7 @@ StatusCode JetEfficiencyMonitorAlgorithm::fillHistograms( const EventContext& ct
   //define emulatedString variable so that we can have emulated in the title
   //(or not) according to the status of the gfex triggers
   std::string emulatedString = " ";
-  if (use_emulated_gfex_trig) {emulatedString = " Emulated "; }
+  if (use_emulated_gfex_trig) {emulatedString = " Emulated Decision "; }
   
   
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////

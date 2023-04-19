@@ -1,69 +1,79 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-#==============================================================================
+# ==============================================================================
 # Provides configs for the tools used for building/thinning tracking related
 # object containers and decorations in the DAODs
-#==============================================================================
+# ==============================================================================
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 # Track collection merger
-def TrackParticleMergerCfg(ConfigFlags, name, **kwargs):
+
+
+def TrackParticleMergerCfg(flags, name, **kwargs):
     """Configure the track particle merger tool"""
     acc = ComponentAccumulator()
-    TrackParticleMerger = CompFactory.DerivationFramework.TrackParticleMerger
-    acc.addPublicTool(TrackParticleMerger(name, **kwargs),
-                      primary = True)
+    acc.addPublicTool(CompFactory.DerivationFramework.TrackParticleMerger(
+        name, **kwargs), primary=True)
     return acc
 
 # Used in vertex fit track decorator
-def UsedInVertexFitTrackDecoratorCfg(ConfigFlags, name, **kwargs):
+
+
+def UsedInVertexFitTrackDecoratorCfg(flags, name, **kwargs):
     """Configure the UsedInVertexFitTrackDecorator"""
     acc = ComponentAccumulator()
-    UsedInVertexFitTrackDecorator = CompFactory.DerivationFramework.UsedInVertexFitTrackDecorator
-    acc.addPublicTool(UsedInVertexFitTrackDecorator(name, **kwargs),
-                      primary = True)
+    acc.addPublicTool(
+        CompFactory.DerivationFramework.UsedInVertexFitTrackDecorator(
+            name, **kwargs), primary=True)
     return acc
 
 # Hard scatter vertex decorator
-def HardScatterVertexDecoratorCfg(ConfigFlags, name, **kwargs):
+
+
+def HardScatterVertexDecoratorCfg(flags, name, **kwargs):
     """Configure the hard process vertex decorator"""
     acc = ComponentAccumulator()
-    HardScatterVertexDecorator = CompFactory.DerivationFramework.HardScatterVertexDecorator
-    acc.addPublicTool(HardScatterVertexDecorator(name, **kwargs),
-                       primary = True)
+    acc.addPublicTool(
+        CompFactory.DerivationFramework.HardScatterVertexDecorator(
+            name, **kwargs), primary=True)
     return acc
 
 # TrackStateOnSurface decorator
-def TrackStateOnSurfaceDecoratorCfg(ConfigFlags, name, **kwargs):
+
+
+def TrackStateOnSurfaceDecoratorCfg(flags, name, **kwargs):
     """Configure the TSOS decorator"""
+    # To produce SCT_DetectorElementCollection
     from SCT_GeoModel.SCT_GeoModelConfig import SCT_ReadoutGeometryCfg
-    acc = SCT_ReadoutGeometryCfg(ConfigFlags) # To produce SCT_DetectorElementCollection
+    acc = SCT_ReadoutGeometryCfg(flags)
 
     kwargs.setdefault("DecorationPrefix", "notSet")
 
     from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
-    AtlasExtrapolator = acc.popToolsAndMerge(AtlasExtrapolatorCfg(ConfigFlags))
+    AtlasExtrapolator = acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags))
     acc.addPublicTool(AtlasExtrapolator)
     kwargs.setdefault("TrackExtrapolator", AtlasExtrapolator)
 
-    from InDetConfig.InDetTrackHoleSearchConfig import InDetTrackHoleSearchToolCfg
-    InDetHoleSearchTool = acc.popToolsAndMerge(InDetTrackHoleSearchToolCfg(ConfigFlags))
+    from InDetConfig.InDetTrackHoleSearchConfig import (
+        InDetTrackHoleSearchToolCfg)
+    InDetHoleSearchTool = acc.popToolsAndMerge(
+        InDetTrackHoleSearchToolCfg(flags))
     acc.addPublicTool(InDetHoleSearchTool)
     kwargs.setdefault("HoleSearch", InDetHoleSearchTool)
 
     kwargs.setdefault("DecorationPrefix", "")
     kwargs.setdefault("PRDtoTrackMap", "PRDtoTrackMapCombinedInDetTracks")
 
-    TrackStateOnSurfaceDecorator = CompFactory.DerivationFramework.TrackStateOnSurfaceDecorator
-    acc.addPublicTool(TrackStateOnSurfaceDecorator(name, **kwargs),
-                      primary = True)
+    acc.addPublicTool(
+        CompFactory.DerivationFramework.TrackStateOnSurfaceDecorator(
+            name, **kwargs), primary=True)
     return acc
 
-def ObserverTrackStateOnSurfaceDecoratorCfg(ConfigFlags,
-                                            name="ObserverTrackStateOnSurfaceDecorator",
-                                            **kwargs):
+
+def ObserverTrackStateOnSurfaceDecoratorCfg(
+        flags, name="ObserverTrackStateOnSurfaceDecorator", **kwargs):
     kwargs.setdefault("ContainerName", "InDetObservedTrackParticles")
     kwargs.setdefault("DecorationPrefix", "ObservedTrack_")
     kwargs.setdefault("PixelMsosName", "ObservedTrack_Pixel_MSOSs")
@@ -71,11 +81,11 @@ def ObserverTrackStateOnSurfaceDecoratorCfg(ConfigFlags,
     kwargs.setdefault("TrtMsosName", "ObservedTrack_TRT_MSOSs")
     kwargs.setdefault("AddPRD", True)
     kwargs.setdefault("StoreHoles", False)
-    return TrackStateOnSurfaceDecoratorCfg(ConfigFlags, name, **kwargs)
+    return TrackStateOnSurfaceDecoratorCfg(flags, name, **kwargs)
 
-def PseudoTrackStateOnSurfaceDecoratorCfg(ConfigFlags,
-                                          name="PseudoTrackStateOnSurfaceDecorator",
-                                          **kwargs):
+
+def PseudoTrackStateOnSurfaceDecoratorCfg(
+        flags, name="PseudoTrackStateOnSurfaceDecorator", **kwargs):
     kwargs.setdefault("ContainerName", "InDetPseudoTrackParticles")
     kwargs.setdefault("DecorationPrefix", "Pseudo_")
     kwargs.setdefault("PixelMsosName", "Pseudo_Pixel_MSOSs")
@@ -83,11 +93,11 @@ def PseudoTrackStateOnSurfaceDecoratorCfg(ConfigFlags,
     kwargs.setdefault("TrtMsosName", "Pseudo_TRT_MSOSs")
     kwargs.setdefault("AddPRD", True)
     kwargs.setdefault("StoreHoles", False)
-    return TrackStateOnSurfaceDecoratorCfg(ConfigFlags, name, **kwargs)
+    return TrackStateOnSurfaceDecoratorCfg(flags, name, **kwargs)
 
-def SiSPTrackStateOnSurfaceDecoratorCfg(ConfigFlags,
-                                        name="SiSPTrackStateOnSurfaceDecorator",
-                                        **kwargs):
+
+def SiSPTrackStateOnSurfaceDecoratorCfg(
+        flags, name="SiSPTrackStateOnSurfaceDecorator", **kwargs):
     kwargs.setdefault("ContainerName", "SiSPSeededTracksTrackParticles")
     kwargs.setdefault("DecorationPrefix", "SiSP_")
     kwargs.setdefault("PixelMsosName", "SiSP_Pixel_MSOSs")
@@ -95,20 +105,24 @@ def SiSPTrackStateOnSurfaceDecoratorCfg(ConfigFlags,
     kwargs.setdefault("TrtMsosName", "SiSP_TRT_MSOSs")
     kwargs.setdefault("AddPRD", True)
     kwargs.setdefault("StoreHoles", False)
-    return TrackStateOnSurfaceDecoratorCfg(ConfigFlags, name, **kwargs)
+    return TrackStateOnSurfaceDecoratorCfg(flags, name, **kwargs)
 
-def ITkTrackStateOnSurfaceDecoratorCfg(ConfigFlags, name, **kwargs):
+
+def ITkTrackStateOnSurfaceDecoratorCfg(flags, name, **kwargs):
     """Configure the TSOS decorator"""
-    from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
-    acc = ITkStripReadoutGeometryCfg(ConfigFlags) # To produce ITkStripDetectorElementCollection
+    # To produce ITkStripDetectorElementCollection
+    from StripGeoModelXml.ITkStripGeoModelConfig import (
+        ITkStripReadoutGeometryCfg)
+    acc = ITkStripReadoutGeometryCfg(flags)
 
     from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
-    AtlasExtrapolator = acc.popToolsAndMerge(AtlasExtrapolatorCfg(ConfigFlags))
+    AtlasExtrapolator = acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags))
     acc.addPublicTool(AtlasExtrapolator)
     kwargs.setdefault("TrackExtrapolator", AtlasExtrapolator)
 
-    from InDetConfig.InDetTrackHoleSearchConfig import ITkTrackHoleSearchToolCfg
-    ITkHoleSearchTool = acc.popToolsAndMerge(ITkTrackHoleSearchToolCfg(ConfigFlags))
+    from InDetConfig.InDetTrackHoleSearchConfig import (
+        ITkTrackHoleSearchToolCfg)
+    ITkHoleSearchTool = acc.popToolsAndMerge(ITkTrackHoleSearchToolCfg(flags))
     acc.addPublicTool(ITkHoleSearchTool)
     kwargs.setdefault("HoleSearch", ITkHoleSearchTool)
 
@@ -122,112 +136,132 @@ def ITkTrackStateOnSurfaceDecoratorCfg(ConfigFlags, name, **kwargs):
     kwargs.setdefault("SctMsosName", "ITkStripMSOSs")
     kwargs.setdefault("SCTDetEleCollKey", "ITkStripDetectorElementCollection")
 
-    TrackStateOnSurfaceDecorator = CompFactory.DerivationFramework.TrackStateOnSurfaceDecorator
-    acc.addPublicTool(TrackStateOnSurfaceDecorator(name, **kwargs),
-                      primary = True)
+    acc.addPublicTool(
+        CompFactory.DerivationFramework.TrackStateOnSurfaceDecorator(
+            name, **kwargs), primary=True)
     return acc
 
 # Expression of Z0 at the primary vertex
-def TrackParametersAtPVCfg(ConfigFlags, name, **kwargs):
+
+
+def TrackParametersAtPVCfg(flags, name, **kwargs):
     """Configure the TrackParametersAtPV tool"""
     acc = ComponentAccumulator()
-    TrackParametersAtPV = CompFactory.DerivationFramework.TrackParametersAtPV
-    acc.addPublicTool(TrackParametersAtPV(name, **kwargs),
-                      primary = True)
+    acc.addPublicTool(CompFactory.DerivationFramework.TrackParametersAtPV(
+        name, **kwargs), primary=True)
     return acc
 
 # Pseudotrack selector
-def PseudoTrackSelectorCfg(ConfigFlags, name, **kwargs):
+
+
+def PseudoTrackSelectorCfg(flags, name, **kwargs):
     """Configure the pseudotrack selector"""
     acc = ComponentAccumulator()
 
     if "trackTruthOriginTool" not in kwargs:
         from InDetTrackSystematicsTools.InDetTrackSystematicsToolsConfig import InDetTrackTruthOriginToolCfg
         kwargs.setdefault("trackTruthOriginTool", acc.popToolsAndMerge(
-            InDetTrackTruthOriginToolCfg(ConfigFlags)))
+            InDetTrackTruthOriginToolCfg(flags)))
 
-    acc.addPublicTool(CompFactory.DerivationFramework.PseudoTrackSelector(name, **kwargs),
-                      primary = True)
+    acc.addPublicTool(
+        CompFactory.DerivationFramework.PseudoTrackSelector(
+            name, **kwargs), primary=True)
     return acc
 
 # Tool for decorating tracks with the outcome of the track selector tool
-def InDetTrackSelectionToolWrapperCfg(ConfigFlags, name, **kwargs):
+
+
+def InDetTrackSelectionToolWrapperCfg(flags, name, **kwargs):
     """Configure the InDetTrackSelectionToolWrapper"""
     acc = ComponentAccumulator()
-    InDetTrackSelectionTool = CompFactory.InDet.InDetTrackSelectionTool(name=f"{name}Tool",CutLevel = "TightPrimary")
-    acc.addPublicTool(InDetTrackSelectionTool, primary=False) 
-    InDetTrackSelectionToolWrapper = CompFactory.DerivationFramework.InDetTrackSelectionToolWrapper
+    InDetTrackSelectionTool = CompFactory.InDet.InDetTrackSelectionTool(
+        name=f"{name}Tool", CutLevel="TightPrimary")
+    acc.addPublicTool(InDetTrackSelectionTool, primary=False)
+    InDetTrackSelectionToolWrapper = (
+        CompFactory.DerivationFramework.InDetTrackSelectionToolWrapper)
     kwargs["TrackSelectionTool"] = InDetTrackSelectionTool
-    acc.addPublicTool(InDetTrackSelectionToolWrapper(name, **kwargs),
-                      primary = True)
+    acc.addPublicTool(InDetTrackSelectionToolWrapper(
+        name, **kwargs), primary=True)
     return acc
 
 # Tool for thinning TrackParticle containers via string selection
-def TrackParticleThinningCfg(ConfigFlags, name, **kwargs):
+
+
+def TrackParticleThinningCfg(flags, name, **kwargs):
     """Configure the TrackParticleThining tool"""
     acc = ComponentAccumulator()
-    TrackParticleThinning = CompFactory.DerivationFramework.TrackParticleThinning
-    acc.addPublicTool(TrackParticleThinning(name,**kwargs),
-                      primary = True)
+    acc.addPublicTool(CompFactory.DerivationFramework.TrackParticleThinning(
+        name, **kwargs), primary=True)
     return acc
 
 # Tool for thinning TrackParticles that aren't associated with muons
-def MuonTrackParticleThinningCfg(ConfigFlags, name, **kwargs):
+
+
+def MuonTrackParticleThinningCfg(flags, name, **kwargs):
     """Configure the MuonTrackParticleThinning tool"""
     acc = ComponentAccumulator()
-    MuonTrackParticleThinning = CompFactory.DerivationFramework.MuonTrackParticleThinning
-    acc.addPublicTool(MuonTrackParticleThinning(name,**kwargs),
-                      primary = True)
+    acc.addPublicTool(
+        CompFactory.DerivationFramework.MuonTrackParticleThinning(
+            name, **kwargs), primary=True)
     return acc
 
 # Tool for thinning TrackParticles that aren't associated with taus
-def TauTrackParticleThinningCfg(ConfigFlags, name, **kwargs):
+
+
+def TauTrackParticleThinningCfg(flags, name, **kwargs):
     """Configure the TauTrackParticleThinning tool"""
     acc = ComponentAccumulator()
-    TauTrackParticleThinning = CompFactory.DerivationFramework.TauTrackParticleThinning
-    acc.addPublicTool(TauTrackParticleThinning(name, **kwargs),
-                      primary = True)
+    acc.addPublicTool(CompFactory.DerivationFramework.TauTrackParticleThinning(
+        name, **kwargs), primary=True)
     return acc
 
 # Tool for thinning TrackParticles that aren't associated high-pt di-taus
-def DiTauTrackParticleThinningCfg(ConfigFlags, name, **kwargs):
+
+
+def DiTauTrackParticleThinningCfg(flags, name, **kwargs):
     """Configure the DiTauTrackParticleThinning tool"""
     acc = ComponentAccumulator()
-    DiTauTrackParticleThinning = CompFactory.DerivationFramework.DiTauTrackParticleThinning
-    acc.addPublicTool(DiTauTrackParticleThinning(name, **kwargs),
-                      primary = True)
+    acc.addPublicTool(
+        CompFactory.DerivationFramework.DiTauTrackParticleThinning(
+            name, **kwargs), primary=True)
     return acc
 
 # Tool for thinning TrackParticles that are associated with jets
-def JetTrackParticleThinningCfg(ConfigFlags, name, **kwargs):
+
+
+def JetTrackParticleThinningCfg(flags, name, **kwargs):
     """Configure the JetTrackParticleThinning tool"""
     acc = ComponentAccumulator()
-    JetTrackParticleThinning = CompFactory.DerivationFramework.JetTrackParticleThinning
-    acc.addPublicTool(JetTrackParticleThinning(name,**kwargs),
-            primary = True)
+    acc.addPublicTool(CompFactory.DerivationFramework.JetTrackParticleThinning(
+        name, **kwargs), primary=True)
     return acc
 
-def TauJetLepRMParticleThinningCfg(ConfigFlags, name, **kwargs):
+
+def TauJetLepRMParticleThinningCfg(flags, name, **kwargs):
     """Configure the DiTauTrackParticleThinning tool"""
     acc = ComponentAccumulator()
-    TauJetLepRMParticleThinningTool = CompFactory.DerivationFramework.TauJets_LepRMParticleThinning
-    acc.addPublicTool(TauJetLepRMParticleThinningTool(name, **kwargs), primary = True)
+    acc.addPublicTool(
+        CompFactory.DerivationFramework.TauJets_LepRMParticleThinning(
+            name, **kwargs), primary=True)
     return acc
 
 # Tool for thinning TrackParticles that aren't associated with egamma objects
-def EgammaTrackParticleThinningCfg(ConfigFlags, name, **kwargs):
+
+
+def EgammaTrackParticleThinningCfg(flags, name, **kwargs):
     """Configure the EgammaTrackParticleThinning tool"""
     acc = ComponentAccumulator()
-    EgammaTrackParticleThinning = CompFactory.DerivationFramework.EgammaTrackParticleThinning
-    acc.addPublicTool(EgammaTrackParticleThinning(name, **kwargs),
-                      primary = True)
+    acc.addPublicTool(
+        CompFactory.DerivationFramework.EgammaTrackParticleThinning(
+            name, **kwargs), primary=True)
     return acc
 
 # Track to vertex wrapper
-def TrackToVertexWrapperCfg(ConfigFlags, name, **kwargs):
+
+
+def TrackToVertexWrapperCfg(flags, name, **kwargs):
     """Configure the TrackToVertexWrapper tool"""
     acc = ComponentAccumulator()
-    TrackToVertexWrapper = CompFactory.DerivationFramework.TrackToVertexWrapper
-    acc.addPublicTool(TrackToVertexWrapper(name, **kwargs),
-                      primary = True)
+    acc.addPublicTool(CompFactory.DerivationFramework.TrackToVertexWrapper(
+        name, **kwargs), primary=True)
     return acc

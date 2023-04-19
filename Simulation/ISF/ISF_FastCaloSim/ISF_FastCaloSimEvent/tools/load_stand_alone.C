@@ -5,6 +5,7 @@
 {
   gInterpreter->AddIncludePath("..");
   TLorentzVector tdummy;
-  TMatrixF fdummy(1,1);
-  gROOT->ProcessLine(".L ../src/TFCS1DFunction.cxx+");//TFCS1DFunction.cxx++dvc
+  TMatrixF fdummy(1, 1);
+  gROOT->ProcessLine(
+      ".L ../src/TFCS1DFunction.cxx+"); // TFCS1DFunction.cxx++dvc
 }

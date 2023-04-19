@@ -22,6 +22,7 @@ const std::string TFCSParametrizationEbinChain::get_variable_text(
 void TFCSParametrizationEbinChain::unit_test(
     TFCSSimulationState *simulstate, const TFCSTruthState *truth,
     const TFCSExtrapolationState *extrapol) {
+  ISF_FCS::MLogging logger;
   if (!simulstate)
     simulstate = new TFCSSimulationState();
   if (!truth)
@@ -62,16 +63,16 @@ void TFCSParametrizationEbinChain::unit_test(
   param->setLevel(MSG::DEBUG);
   chain.push_before_first_bin(param);
 
-  std::cout << "====         Chain setup       ====" << std::endl;
+  ATH_MSG_NOCLASS(logger, "====         Chain setup       ====");
   chain.Print();
-  std::cout << "==== Simulate with Ebin=0      ====" << std::endl;
+  ATH_MSG_NOCLASS(logger, "==== Simulate with Ebin=0      ====");
   simulstate->set_Ebin(0);
   chain.simulate(*simulstate, truth, extrapol);
-  std::cout << "==== Simulate with Ebin=1      ====" << std::endl;
+  ATH_MSG_NOCLASS(logger, "==== Simulate with Ebin=1      ====");
   simulstate->set_Ebin(1);
   chain.simulate(*simulstate, truth, extrapol);
-  std::cout << "==== Simulate with Ebin=2      ====" << std::endl;
+  ATH_MSG_NOCLASS(logger, "==== Simulate with Ebin=2      ====");
   simulstate->set_Ebin(2);
   chain.simulate(*simulstate, truth, extrapol);
-  std::cout << "===================================" << std::endl << std::endl;
+  ATH_MSG_NOCLASS(logger, "===================================" << std::endl);
 }

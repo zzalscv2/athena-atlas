@@ -65,6 +65,7 @@ def LVL1CaloMonitoringConfig(flags):
 
         # Phase 1 monitoring
         if flags.Trigger.enableL1CaloPhase1:
+            #efex monitoring
             from TrigT1CaloMonitoring.EfexMonitorAlgorithm import EfexMonitoringConfig
             EfexMonitorCfg = EfexMonitoringConfig(flags)
             result.merge(EfexMonitorCfg)
@@ -74,6 +75,24 @@ def LVL1CaloMonitoringConfig(flags):
             from TrigT1CaloMonitoring.EfexMonitorAlgorithm import EfexMonitoringHistConfig
             EfexMonitorHistCfg = EfexMonitoringHistConfig(flags,EfexMonAlg)
             result.merge(EfexMonitorHistCfg)
+
+            #gfex monitoring 
+            from TrigT1CaloMonitoring.GfexMonitorAlgorithm import GfexMonitoringConfig
+            result.merge(GfexMonitoringConfig(flags))
+
+            #efex input monitoring 
+            from TrigT1CaloMonitoring.EfexInputMonitorAlgorithm import EfexInputMonitoringConfig
+            result.merge(EfexInputMonitoringConfig(flags))
+
+            #gfex input monitoring 
+            from TrigT1CaloMonitoring.GfexInputMonitorAlgorithm import GfexInputMonitoringConfig
+            result.merge(GfexInputMonitoringConfig(flags))
+
+            #jfex input monitoring 
+            from TrigT1CaloMonitoring.JfexInputMonitorAlgorithm import JfexInputMonitoringConfig
+            result.merge(JfexInputMonitoringConfig(flags))
+
+
 
 
     # algorithms for validation checks

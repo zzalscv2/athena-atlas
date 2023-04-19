@@ -29,6 +29,10 @@ jetTagMonTool.FilterTools += [ GetFilledBunchFilterTool() ]
 from AthenaMonitoring.BadLBFilterTool import GetLArBadLBFilterTool
 jetTagMonTool.FilterTools += [ GetLArBadLBFilterTool() ] 
 
+# remove events with atlas not ready for physics
+from AthenaMonitoring.AtlasReadyFilterTool import AtlasReadyFilterTool
+jetTagMonTool.FilterTools += [ GetAtlasReadyFilterTool() ]
+
 jetTagMonTool.OutputLevel = INFO
 jetTagMonTool.JetContainer = "AntiKt4EMTopoJets"
 jetTagMonTool.TrackParticleContainer = "InDetTrackParticles"

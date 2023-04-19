@@ -23,6 +23,7 @@ StatusCode TrigEgammaMonitorElectronAlgorithm::initialize()
   ATH_CHECK(TrigEgammaMonitorAnalysisAlgorithm::initialize());
 
   ATH_CHECK(m_offElectronKey.initialize());
+  ATH_CHECK(m_electronIsolationKeyPtCone20.initialize());
   ATH_CHECK( m_eventInfoDecorKey.initialize() );
   
   for(auto& trigName : m_trigInputList)

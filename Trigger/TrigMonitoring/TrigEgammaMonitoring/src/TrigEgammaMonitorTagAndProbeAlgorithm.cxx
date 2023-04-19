@@ -50,7 +50,8 @@ StatusCode TrigEgammaMonitorTagAndProbeAlgorithm::initialize() {
 
     ATH_CHECK(m_offElectronKey.initialize());
     ATH_CHECK(m_jetKey.initialize());
-    ATH_CHECK( m_eventInfoDecorKey.initialize() );
+    ATH_CHECK(m_eventInfoDecorKey.initialize() );
+    ATH_CHECK(m_electronIsolationKeyPtCone20.initialize());
     
     ATH_MSG_INFO("Now configuring chains for analysis: " << name() );
     for(auto& trigName : m_trigInputList)

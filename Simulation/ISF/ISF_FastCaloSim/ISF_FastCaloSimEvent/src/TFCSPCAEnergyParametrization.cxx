@@ -58,10 +58,10 @@ void TFCSPCAEnergyParametrization::Print(Option_t *option) const {
                   << ", Enorm=" << m_total_energy_normalization << ", layers=";
     for (unsigned int i = 0; i < m_RelevantLayers.size(); i++) {
       if (i > 0)
-        msg() << ", ";
-      msg() << m_RelevantLayers[i];
+        ATH_MSG(INFO) << ", ";
+      ATH_MSG(INFO) << m_RelevantLayers[i];
     }
-    msg() << endmsg;
+    ATH_MSG(INFO) << END_MSG(INFO);
   }
 }
 
