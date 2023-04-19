@@ -64,8 +64,6 @@ public:
 
   /** AlgTool initialize method */
   virtual StatusCode initialize() override final;
-  /** AlgTool finalize method */
-  virtual StatusCode finalize() override final;
 
   /** TrackingVolumeBuilder interface method - returns vector of Volumes */
   virtual std::vector<Trk::TrackingVolume*>* trackingVolumes(

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -30,7 +30,6 @@ class MuonInertMaterialBuilderCond final : public MuonInertMaterialBuilderImpl {
   virtual ~MuonInertMaterialBuilderCond() = default;
   /** AlgTool initialize method.*/
   virtual StatusCode initialize() override;
-  virtual StatusCode finalize() override;
 
   /** Method returning cloned and positioned material objects */
   std::pair<
