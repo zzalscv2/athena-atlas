@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 // Muon
 #include "MuonTrackingGeometry/MuonInertMaterialBuilderImpl.h"
@@ -357,13 +357,6 @@ Muon::MuonInertMaterialBuilderImpl::buildDetachedTrackingVolumeTypes(const MuonG
 
   return std::make_pair(mObjects, std::move(constituentsVector));
 }
-
-// finalize
-StatusCode Muon::MuonInertMaterialBuilderImpl::finalize() {
-  ATH_MSG_INFO(name() << " finalize() successful");
-  return StatusCode::SUCCESS;
-}
-//
 
 void Muon::MuonInertMaterialBuilderImpl::printInfo(const GeoVPhysVol* pv) const {
   const GeoLogVol* lv = pv->getLogVol();

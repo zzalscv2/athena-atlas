@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALORIMETER_CALOTRACKINGGEOMETRYBUILDERIMPL_H
@@ -56,9 +56,6 @@ class CaloTrackingGeometryBuilderImpl : public AthAlgTool {
 
   /** AlgTool initailize method.*/
   virtual StatusCode initialize() override;
-
-  /** AlgTool finalize method */
-  virtual StatusCode finalize() override;
 
   /** TrackingGeometry Interface method */
   std::unique_ptr<Trk::TrackingGeometry> createTrackingGeometry(
