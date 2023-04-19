@@ -88,6 +88,13 @@ from AthenaCommon.DetFlags import DetFlags
 DetFlags.Print()
 
 #--------------------------------------------------------------
+# Ensure the MuonIdHelperSvc is correctly set up
+#--------------------------------------------------------------
+if not hasattr(ServiceMgr, "MuonIdHelperSvc"):
+    from AthenaCommon.CfgGetter import getService
+    ServiceMgr += getService("MuonIdHelperSvc")
+
+#--------------------------------------------------------------
 # Setup Input
 #--------------------------------------------------------------
 In = runArgs.inputHITSFile
