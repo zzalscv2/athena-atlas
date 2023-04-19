@@ -211,6 +211,16 @@ def ITkTrackRecoCfg(flags):
                 "ITkCommonKernel",
                 AugmentationTools=[TrackStateOnSurfaceDecorator]))
 
+        if flags.Tracking.doStoreSiSPSeededTracks:
+            from DerivationFrameworkInDet.InDetToolsConfig import (
+                ITkSiSPTrackStateOnSurfaceDecoratorCfg)
+            SiSPTrackStateOnSurfaceDecorator = result.getPrimaryAndMerge(
+                ITkSiSPTrackStateOnSurfaceDecoratorCfg(flags))
+            result.addEventAlgo(
+                CompFactory.DerivationFramework.CommonAugmentation(
+                    "SiSPITkCommonKernel",
+                    AugmentationTools=[SiSPTrackStateOnSurfaceDecorator]))
+
         if flags.Input.isMC:
             from InDetPhysValMonitoring.InDetPhysValDecorationConfig import (
                 InDetPhysHitDecoratorAlgCfg)
@@ -230,6 +240,18 @@ def ITkTrackRecoCfg(flags):
             TrackContainerName=TrackContainer,
             xAODTrackParticlesFromTracksContainerName=(
                 f"{TrackContainer}TrackParticles")))
+
+    if flags.Tracking.doStoreSiSPSeededTracks:
+        result.merge(ITkTrackParticleCnvAlgCfg(
+            flags,
+            name = "ITkSiSPSeededTracksCnvAlg",
+            TrackContainerName = "SiSPSeededTracks",
+            xAODTrackParticlesFromTracksContainerName=(
+                "SiSPSeededTracksTrackParticles"),
+            AssociationMapName=(
+                "PRDtoTrackMapCombinedITkTracks")))
+
+
 
     # output
     result.merge(ITkTrackRecoOutputCfg(flags))
@@ -297,12 +319,14 @@ def ITkTrackRecoOutputCfg(flags):
     if (flags.Tracking.doLargeD0 and
             flags.Tracking.storeSeparateLargeD0Container):
         toAOD += [
-            'xAOD::TrackParticleContainer#InDet{}TrackParticles'.format(
-                flags.ITk.Tracking.LargeD0Pass.extension
-            ),
-            'xAOD::TrackParticleAuxContainer#InDet{}TrackParticlesAux.'.format(
-                flags.ITk.Tracking.LargeD0Pass.extension
-            )
+            "xAOD::TrackParticleContainer#InDetLargeD0TrackParticles",
+            f"xAOD::TrackParticleAuxContainer#InDetLargeD0TrackParticlesAux.{excludedAuxData}"
+        ]
+
+    if flags.Tracking.doStoreSiSPSeededTracks:
+        toAOD += [
+            "xAOD::TrackParticleContainer#SiSPSeededTracksTrackParticles",
+            f"xAOD::TrackParticleAuxContainer#SiSPSeededTracksTrackParticlesAux.{excludedAuxData}"
         ]
 
     if flags.Tracking.doStoreTrackSeeds:
