@@ -30,7 +30,7 @@ from AthenaMonitoring.BadLBFilterTool import GetLArBadLBFilterTool
 jetTagMonTool.FilterTools += [ GetLArBadLBFilterTool() ] 
 
 # remove events with atlas not ready for physics
-from AthenaMonitoring.AtlasReadyFilterTool import AtlasReadyFilterTool
+from AthenaMonitoring.AtlasReadyFilterTool import GetAtlasReadyFilterTool
 jetTagMonTool.FilterTools += [ GetAtlasReadyFilterTool() ]
 
 jetTagMonTool.OutputLevel = INFO
