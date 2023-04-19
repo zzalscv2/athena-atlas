@@ -345,6 +345,9 @@
 + Simulation/SimulationConfig
 + Simulation/SimulationJobOptions
 + Simulation/Tests/ISF_Validation
++ Simulation/Tests/ISF_ValidationMT
++ Simulation/Tests/SimCoreTests
++ Simulation/Tests/SimCoreTestsMT
 + Simulation/Tests/SimExoticsTests
 + Simulation/Tools/AtlasCLHEP_RandomGenerators
 + Simulation/Tools/McEventCollectionFilter
