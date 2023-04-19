@@ -340,6 +340,7 @@ class ForbidRecursiveSequences( unittest.TestCase ):
         self.assertRaises(RuntimeError, selfMergedGrandParentSequence )
         print("selfMergedGrandParentSequence done")
 
+
 class FailedMerging( unittest.TestCase ):
     def runTest( self ):
         topCA = ComponentAccumulator()
@@ -362,6 +363,13 @@ class FailedMerging( unittest.TestCase ):
         self.assertRaises(ValueError, badMerge2)
 
 
+class ErrorForUnmerged( unittest.TestCase ):
+    def runTest( self ):
+        topCA = ComponentAccumulator()
+        with self.assertLogs(topCA._msg, level='ERROR') as cm:
+            topCA.addEventAlgo(CompFactory.HelloAlg())
+            del topCA
+        self.assertIn('This ComponentAccumulator was never merged', cm.output[0])
 
 
 class MergeMovingAlgorithms( unittest.TestCase ):
