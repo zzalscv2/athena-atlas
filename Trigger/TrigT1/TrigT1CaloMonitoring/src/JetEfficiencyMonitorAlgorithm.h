@@ -26,8 +26,8 @@ public:JetEfficiencyMonitorAlgorithm( const std::string& name, ISvcLocator* pSvc
   virtual StatusCode fillHistograms( const EventContext& ctx ) const override;
 private:
   StringProperty m_packageName{this,"PackageName","JetEfficiencyMonitor","group name for histograming"};
-  StringProperty m_bootstrap_trigger{this,"BootstrapTrigger","L1_J15","the bootstrapping trigger"};
-  StringProperty m_orthogonal_trigger{this,"OrthogonalTrigger","L1_RD0_FILLED","the orthogonal trigger"};
+  StringProperty m_bootstrap_reference_trigger{this,"BootstrapReferenceTrigger","L1_J15","the bootstrapping trigger"};
+  StringProperty m_random_reference_trigger{this,"RandomReferenceTrigger","L1_RD0_FILLED","the random refernce trigger"};
   Gaudi::Property<bool> m_emulated{this,"Emulated",0,"boolean of if we want to emulate the gfex triggers"};
   Gaudi::Property<bool> m_passedb4Prescale{this,"PassedBeforePrescale",0,"boolean of if we want to measure the efficiency based on passed before prescale"};
 

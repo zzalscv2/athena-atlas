@@ -64,21 +64,21 @@ def JetEfficiencyMonitoringConfig(inputFlags):
     #################################################################
     #################################################################
 
-    JetEfficiencyMonAlg.OrthogonalTrigger= "L1_RD0_FILLED" #trigger that does not depend on depend on the jets
-    orthogonal_trigger =  JetEfficiencyMonAlg.OrthogonalTrigger
+    JetEfficiencyMonAlg.RandomReferenceTrigger= "L1_RD0_FILLED" #trigger that does not depend on depend on the jets
+    random_reference_trigger =  JetEfficiencyMonAlg.RandomReferenceTrigger
     
 
-    JetEfficiencyMonAlg.BootstrapTrigger='L1_J15' 
-    bootstrap_trigger = JetEfficiencyMonAlg.BootstrapTrigger
+    JetEfficiencyMonAlg.BootstrapReferenceTrigger='L1_J15' 
+    bootstrap_trigger = JetEfficiencyMonAlg.BootstrapReferenceTrigger
 
 
     mainDir = 'L1Calo'
     trigPath = 'JetEfficiency/'
     distributionPath = 'Distributions/'
-    noRefPath = 'noneRef/'
-    unbiasedRefPath = 'unbiasedRef/'
-    orthogonalRefPath = 'orthoRef/'
-    bsRefPath = 'bsRef/'
+    noRefPath = 'NoReferenceTrigger/'
+    muonRefPath = 'MuonReferenceTrigger/'
+    randomRefPath = 'RandomReferenceTrigger/'
+    bsRefPath = 'BootstrapReferenceTrigger/'
     GeV = 1000
 
     # add monitoring algorithm to group, with group name and main directory
@@ -110,12 +110,12 @@ def JetEfficiencyMonitoringConfig(inputFlags):
     else: 
         prescale_title_add = " "
 
-    reference_titles = {"unbiased" : ' wrt unbiased triggers',
-                        "ortho": ' wrt orthogonal trigger ' + orthogonal_trigger, 
-                        "none": '', 
-                        "bs": ' wrt bootstrap trigger ' + bootstrap_trigger }
-    reference_paths = {"unbiased" : unbiasedRefPath, "ortho": orthogonalRefPath, 
-                       "none": noRefPath,  "bs":  bsRefPath }
+    reference_titles = {"Muon" : ' wrt muon triggers',
+                        "Random": ' wrt random trigger ' + random_reference_trigger, 
+                        "No": '', 
+                        "Bootstrap": ' wrt bootstrap trigger ' + bootstrap_trigger }
+    reference_paths = {"Muon" : muonRefPath, "Random": randomRefPath, 
+                       "No": noRefPath,  "Bootstrap":  bsRefPath }
     references = list(reference_titles.keys())
 
 
@@ -152,7 +152,7 @@ def JetEfficiencyMonitoringConfig(inputFlags):
     myGroup.defineHistogram('raw_pt',title='pT for all leading offline jets (with no trigger requirments);PT [MeV];Events',
                             path=trigPath + distributionPath,xbins=nbins["pt"],xmin=binmin["pt"], xmax=binmax["pt"])
 
-    myGroup.defineHistogram('eta',  title='Eta Distribution of offline jets for orthogonal trigger ' + orthogonal_trigger +';#eta; Count',
+    myGroup.defineHistogram('eta',  title='Eta Distribution of offline jets for random reference trigger ' + random_reference_trigger +';#eta; Count',
                                 path=trigPath + distributionPath,xbins=nbins["eta"],xmin=binmin["eta"], xmax=binmax["eta"])
     
 
