@@ -116,5 +116,8 @@ def LVL1CaloMonitoringConfig(flags):
         from TrigT1CaloMonitoring.JfexMonitorAlgorithm import JfexMonitoringConfig
         result.merge(JfexMonitoringConfig(flags))
 
+        from TrigT1CaloMonitoring.JetEfficiencyMonitorAlgorithm import JetEfficiencyMonitoringConfig
+        result.merge(JetEfficiencyMonitoringConfig(flags))
+
 
     return result
