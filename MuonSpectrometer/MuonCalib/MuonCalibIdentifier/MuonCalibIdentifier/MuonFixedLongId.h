@@ -26,6 +26,7 @@
 
 #include <cstdlib>
 #include <limits>
+#include <cstdint>
 
 /** @namespace MuonCalib
 * namespace to identify classes related only to muon calibration 
