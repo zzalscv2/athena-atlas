@@ -34,7 +34,7 @@ Muon::MM_RawDataProviderToolCore::initialize()
 
 //==============================================================================
 StatusCode 
-Muon::MM_RawDataProviderToolCore::convertIntoContainer(const std::vector<const ROBFragment*>& vecRobs, const std::vector<IdentifierHash>& rdoIdhVect, MM_RawDataContainer& mmRdoContainer) const
+Muon::MM_RawDataProviderToolCore::convertIntoContainer(const EventContext& ctx, const std::vector<const ROBFragment*>& vecRobs, const std::vector<IdentifierHash>& rdoIdhVect, MM_RawDataContainer& mmRdoContainer) const
 {
   // Since there can be multiple ROBFragments contributing to the same RDO collection a temporary cache is setup and passed to fillCollection by reference. Once all ROBFragments are processed the collections are added into the rdo container
 
@@ -44,7 +44,7 @@ Muon::MM_RawDataProviderToolCore::convertIntoContainer(const std::vector<const R
 
   // Loop on the passed ROB fragments, and call the decoder for each one to fill the RDO container.
   for (const ROBFragment* fragment : vecRobs)
-    ATH_CHECK( m_decoder->fillCollection(*fragment, rdoIdhVect, rdo_map) ); // always returns StatusCode::SUCCESS
+    ATH_CHECK( m_decoder->fillCollection(ctx, *fragment, rdoIdhVect, rdo_map) ); // always returns StatusCode::SUCCESS
 
   // error counters
   int nerr_duplicate{0}, nerr_rdo{0};
