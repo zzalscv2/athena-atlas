@@ -49,7 +49,7 @@ public:
   InDetDD::SiLocalPosition position() const;
 
   // charge located at this position:
-  SiCharge charge() const;
+  const SiCharge& charge() const;
 
   ///////////////////////////////////////////////////////////////////
   // Private methods:
@@ -77,7 +77,7 @@ inline InDetDD::SiLocalPosition SiSurfaceCharge::position() const
   return m_position;
 }
 
-inline SiCharge SiSurfaceCharge::charge() const
+inline const SiCharge& SiSurfaceCharge::charge() const
 {
   return m_charge;
 }
