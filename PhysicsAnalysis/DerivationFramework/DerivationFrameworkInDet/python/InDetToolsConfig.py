@@ -141,6 +141,18 @@ def ITkTrackStateOnSurfaceDecoratorCfg(flags, name, **kwargs):
             name, **kwargs), primary=True)
     return acc
 
+
+def ITkSiSPTrackStateOnSurfaceDecoratorCfg(
+        flags, name="SiSPTrackStateOnSurfaceDecorator", **kwargs):
+    kwargs.setdefault("ContainerName", "SiSPSeededTracksTrackParticles")
+    kwargs.setdefault("DecorationPrefix", "SiSP_")
+    kwargs.setdefault("PixelMsosName", "SiSP_ITkPixel_MSOSs")
+    kwargs.setdefault("SctMsosName", "SiSP_ITkStrip_MSOSs")
+    kwargs.setdefault("AddPRD", True)
+    kwargs.setdefault("StoreHoles", False)
+    return ITkTrackStateOnSurfaceDecoratorCfg(flags, name, **kwargs)
+
+
 # Expression of Z0 at the primary vertex
 
 
