@@ -409,12 +409,24 @@ namespace MuonGM {
         template <typename read_out, size_t N> void refreshCache(std::array<std::unique_ptr<read_out>, N>& array);
     };
 
-    const MdtIdHelper* MuonDetectorManager::mdtIdHelper() const { return &(m_idHelperSvc->mdtIdHelper()); }
-    const CscIdHelper* MuonDetectorManager::cscIdHelper() const { return &(m_idHelperSvc->cscIdHelper()); }
-    const RpcIdHelper* MuonDetectorManager::rpcIdHelper() const { return &(m_idHelperSvc->rpcIdHelper()); }
-    const TgcIdHelper* MuonDetectorManager::tgcIdHelper() const { return &(m_idHelperSvc->tgcIdHelper()); }
-    const sTgcIdHelper* MuonDetectorManager::stgcIdHelper() const { return &(m_idHelperSvc->stgcIdHelper()); }
-    const MmIdHelper* MuonDetectorManager::mmIdHelper() const { return &(m_idHelperSvc->mmIdHelper()); }
+    const MdtIdHelper* MuonDetectorManager::mdtIdHelper() const { 
+        return m_idHelperSvc->hasMDT() ? &(m_idHelperSvc->mdtIdHelper()) : nullptr;
+    }
+    const CscIdHelper* MuonDetectorManager::cscIdHelper() const { 
+        return m_idHelperSvc->hasCSC() ?  &(m_idHelperSvc->cscIdHelper()) : nullptr; 
+    }
+    const RpcIdHelper* MuonDetectorManager::rpcIdHelper() const { 
+        return m_idHelperSvc->hasRPC() ? &(m_idHelperSvc->rpcIdHelper()): nullptr; 
+    }
+    const TgcIdHelper* MuonDetectorManager::tgcIdHelper() const { 
+        return m_idHelperSvc->hasTGC() ? &(m_idHelperSvc->tgcIdHelper()) : nullptr; 
+    }
+    const sTgcIdHelper* MuonDetectorManager::stgcIdHelper() const { 
+        return  m_idHelperSvc->hasSTGC() ? &(m_idHelperSvc->stgcIdHelper()) : nullptr; 
+    }
+    const MmIdHelper* MuonDetectorManager::mmIdHelper() const { 
+        return  m_idHelperSvc->hasMM() ? &(m_idHelperSvc->mmIdHelper()) : nullptr; 
+    }
 
     const GenericRPCCache* MuonDetectorManager::getGenericRpcDescriptor() const { return &m_genericRPC; }
     const GenericMDTCache* MuonDetectorManager::getGenericMdtDescriptor() const { return &m_genericMDT; }
