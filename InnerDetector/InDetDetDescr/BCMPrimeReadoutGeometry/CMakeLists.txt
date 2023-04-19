@@ -9,6 +9,6 @@ find_package( GeoModel COMPONENTS GeoModelKernel )
 atlas_add_library( BCMPrimeReadoutGeometry
   src/*.cxx
   PUBLIC_HEADERS BCMPrimeReadoutGeometry
-  LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaKernel CxxUtils GeoPrimitives
+  LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaKernel GeoPrimitives
   PRIVATE_LINK_LIBRARIES AthenaBaseComps AthenaPoolUtilities )
 
