@@ -86,6 +86,8 @@ namespace top {
     m_reco_tagpt_DOWN("MUON_EFF_RECO_TAGPT__1down"),
     m_reco_extrapolation_UP("MUON_EFF_RECO_EXTRAPOLATION__1up"),
     m_reco_extrapolation_DOWN("MUON_EFF_RECO_EXTRAPOLATION__1down"),
+    m_reco_extrapolation_lowpt_UP("MUON_EFF_RECO_EXTRAPOLATION_LOWPT__1up"),
+    m_reco_extrapolation_lowpt_DOWN("MUON_EFF_RECO_EXTRAPOLATION_LOWPT__1down"),
     
     m_reco_stat_lowpt_UP("MUON_EFF_RECO_STAT_LOWPT__1up"),
     m_reco_stat_lowpt_DOWN("MUON_EFF_RECO_STAT_LOWPT__1down"),
@@ -187,6 +189,7 @@ namespace top {
         "MUON_EFF_TTVA_EXTRAPOLATION",
         "MUON_EFF_TrigStatUncertainty",
         "MUON_EFF_TrigSystUncertainty",
+        "MUON_EFF_RECO_EXTRAPOLATION_LOWPT",
       };
       if (m_config->muonQuality() == "HighPt" || m_config->muonQualityLoose() == "HighPt") {
         implemented_systematics.insert("MUON_EFF_BADMUON_PTDEPENDENCY");
@@ -1298,11 +1301,23 @@ namespace top {
                                    m_reco_extrapolation_UP, muon,
                                    id_sf_loose_decor_extrapolation_up);
       this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsTool,
+                                   m_reco_extrapolation_lowpt_UP, muon,
+                                   id_sf_decor_extrapolation_up);
+      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsToolLoose,
+                                   m_reco_extrapolation_lowpt_UP, muon,
+                                   id_sf_loose_decor_extrapolation_up);
+      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsTool,
                                    m_reco_extrapolation_DOWN, muon,
                                    id_sf_decor_extrapolation_down);
       this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsToolLoose,
                                    m_reco_extrapolation_DOWN, muon,
                                    id_sf_loose_decor_extrapolation_down);
+      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsTool,
+                                   m_reco_extrapolation_lowpt_DOWN, muon,
+                                   id_sf_decor_extrapolation_up);
+      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsToolLoose,
+                                   m_reco_extrapolation_lowpt_DOWN, muon,
+                                   id_sf_loose_decor_extrapolation_up);
     } else {
       ///-- Syst UP --///
       this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsTool,
