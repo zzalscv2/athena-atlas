@@ -90,11 +90,11 @@ namespace top {
         const auto& child = z->child(i);
         if (!child) continue;
         if (child->pdgId() > 0) {
-          *ZDecay1 = PartonHistoryUtils::findAfterFSR(child)->p4();
+          *ZDecay1 = child->p4();
           *ZDecay1_pdgId = child->pdgId();
           hasZDecay1 = true;
         } else {
-          *ZDecay2 = PartonHistoryUtils::findAfterFSR(child)->p4();
+          *ZDecay2 = child->p4();
           *ZDecay2_pdgId = child->pdgId();
           hasZDecay2 = true;
         }
