@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -8,14 +8,10 @@
 // Author: James Catmore (James.Catmore@cern.ch)
 
 #include "DerivationFrameworkInDet/EgammaTrackParticleThinning.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "StoreGate/ThinningHandle.h"
 #include "xAODEgamma/ElectronContainer.h"
 #include "xAODEgamma/PhotonContainer.h"
-#include "xAODTracking/TrackParticleContainer.h"
-#include "xAODTracking/VertexContainer.h"
-#include <string>
-#include <vector>
+#include "AthContainers/ConstDataVector.h"
 
 namespace {
 const SG::AuxElement::Accessor<ElementLink<xAOD::TrackParticleContainer>> orig(
@@ -70,6 +66,14 @@ DerivationFramework::EgammaTrackParticleThinning::initialize()
     }
   }
 
+  ATH_CHECK(m_gsfVtxSGKey.initialize(m_streamName, !m_gsfVtxSGKey.empty()));
+  if (!m_gsfVtxSGKey.empty()) {
+    ATH_MSG_INFO("Using " << m_gsfVtxSGKey.key()
+		 << " as the source collection for GSF conversion vertices");
+    ATH_MSG_INFO((m_bestVtxMatchOnly ? "Best match " : "ALL ")
+		 << " GSF conversion vertices will be kept");
+  }
+
   // Set up the text-parsing machinery for selectiong the objects directly
   // according to user cuts
   if (!m_selectionString.empty()) {
@@ -86,7 +90,10 @@ DerivationFramework::EgammaTrackParticleThinning::finalize()
                            << " objects from " << m_egammaKey.key());
   ATH_MSG_INFO("Kept " << m_nGSFPass << " out of " << m_ntotGSF
                        << " objects from " << m_gsfSGKey.key());
-
+  if (!m_gsfVtxSGKey.empty()) {
+    ATH_MSG_INFO("Kept " << m_nGSFVtxPass << " out of " << m_ntotGSFVtx
+		 << " vertices from " << m_gsfVtxSGKey.key());
+  }
   if (!m_inDetSGKey.empty()) {
     ATH_MSG_INFO("Kept " << m_npass << "out of " << m_ntot << " objects from "
                          << m_inDetSGKey.key());
@@ -145,10 +152,11 @@ DerivationFramework::EgammaTrackParticleThinning::doThinning() const
   size_t nEgammas(importedEgamma->size());
   ATH_MSG_DEBUG("nEgammas : " << nEgammas);
   m_nEgammas += nEgammas;
+  bool doSelect = !m_selectionString.empty();
   if (nEgammas != 0) {
-    std::vector<const xAOD::Egamma*> egToCheck{};
+    ConstDataVector<xAOD::EgammaContainer> tofill(SG::VIEW_ELEMENTS);
     // Execute the text parsers if requested
-    if (!m_selectionString.empty()) {
+    if (doSelect) {
       std::vector<int> entries = m_parser->evaluateAsVector();
       unsigned int nEntries = entries.size();
       // check the sizes are compatible
@@ -160,43 +168,25 @@ DerivationFramework::EgammaTrackParticleThinning::doThinning() const
         // identify which e-gammas to keep for the thinning check
         for (unsigned int i = 0; i < nEgammas; ++i)
           if (entries[i] == 1)
-            egToCheck.push_back((*importedEgamma)[i]);
+            tofill.push_back(importedEgamma->at(i));
       }
     } // end of selection
-    // Are we dealing with electrons or photons?
-    bool isElectrons(false), isPhotons(false);
-    const xAOD::ElectronContainer* testElectrons =
-      dynamic_cast<const xAOD::ElectronContainer*>(importedEgamma.cptr());
-    const xAOD::PhotonContainer* testPhotons =
-      dynamic_cast<const xAOD::PhotonContainer*>(importedEgamma.cptr());
-
-    if (testElectrons) {
-      isElectrons = true;
-    }
-    if (testPhotons) {
-      isPhotons = true;
-    }
-    // Set elements in the mask to true if there is a corresponding ElementLink
-    // from a reconstructed object
-    //
+    const xAOD::EgammaContainer* egToCheck = doSelect
+      ? tofill.asDataVector() : importedEgamma.cptr();
     ATH_MSG_DEBUG("Setting the masks");
-    if (m_selectionString.empty()) { // check all objects as user didn't provide
-                                     // a selection string
-      m_nSelEgammas += importedEgamma.cptr()->size();
-      if (isElectrons)
-        setElectronMasks(
-          mask, gsfMask, importedEgamma.cptr(), tps, gsfs, m_bestMatchOnly);
-      if (isPhotons)
-        setPhotonMasks(
-          mask, gsfMask, importedEgamma.cptr(), tps, gsfs, m_bestMatchOnly);
-    } else { // check only photons passing user selection string
-      m_nSelEgammas += egToCheck.size();
-      if (isElectrons)
-        setElectronMasks(mask, gsfMask, egToCheck, tps, gsfs, m_bestMatchOnly);
-      if (isPhotons)
-        setPhotonMasks(mask, gsfMask, egToCheck, tps, gsfs, m_bestMatchOnly);
-    }
-  }//end of if egammas
+    m_nSelEgammas += egToCheck->size();
+    // Are we dealing with electrons or photons?
+    if (dynamic_cast<const xAOD::ElectronContainer*>(importedEgamma.cptr()) != nullptr)
+      setElectronMasks(mask, gsfMask, egToCheck, tps, gsfs);
+    else if (dynamic_cast<const xAOD::PhotonContainer*>(importedEgamma.cptr()) != nullptr)
+      setPhotonMasks(mask, gsfMask, egToCheck, tps, gsfs);
+    else
+      ATH_MSG_WARNING("Input container is neither for Electrons, "
+		      "nor for Photons ??");
+  }//end of if nEgammas != 0
+  else if (!m_gsfVtxSGKey.empty()) {
+    clearGSFVtx(ctx);
+  }
 
   // Count up the mask contents
   unsigned int n_pass = 0;
@@ -223,79 +213,41 @@ DerivationFramework::EgammaTrackParticleThinning::doThinning() const
   return StatusCode::SUCCESS;
 }
 
+void DerivationFramework::EgammaTrackParticleThinning::clearGSFVtx(
+    const EventContext& ctx) const
+{
+  SG::ThinningHandle<xAOD::VertexContainer> importedGSFConversionVtx(
+      m_gsfVtxSGKey, ctx);
+  const xAOD::VertexContainer* gsfVtxs = importedGSFConversionVtx.cptr();
+  unsigned int nGSFVtx = gsfVtxs->size();
+  if (nGSFVtx == 0) {
+    ATH_MSG_DEBUG("No conversion vertex to thin");
+    return;
+  }
+  std::vector<bool> gsfVtxMask(nGSFVtx,false);
+  m_ntotGSFVtx += nGSFVtx;
+  ATH_MSG_DEBUG("nGSFVtx : " << nGSFVtx);
+  importedGSFConversionVtx.keep(gsfVtxMask);
+}
+
 void
 DerivationFramework::EgammaTrackParticleThinning::setPhotonMasks(
   std::vector<bool>& mask,
   std::vector<bool>& gsfMask,
   const xAOD::EgammaContainer* egammas,
   const xAOD::TrackParticleContainer* tps,
-  const xAOD::TrackParticleContainer* gsfs,
-  const bool bestMatchOnly) const
+  const xAOD::TrackParticleContainer* gsfs) const
 {
-  DerivationFramework::TracksInCone trIC;
-  for (const auto *egamma : *egammas) {
-    const xAOD::Photon* photon = egamma->type() == xAOD::Type::Photon
-                                   ? static_cast<const xAOD::Photon*>(egamma)
-                                   : nullptr;
-    if (!photon) {
-      ATH_MSG_ERROR("Did not get a photon object in "
-                    "EgammaTrackParticleThinning::setPhotonMasks");
-      return;
-    }
-    if (tps && m_coneSize > 0.0) {
-      trIC.select(photon,
-                  m_coneSize,
-                  tps,
-                  mask); // check InDet tracks in a cone around the e-gammas
-    }
-    std::vector<ElementLink<xAOD::VertexContainer>> vertexLinks =
-      photon->vertexLinks();
-    unsigned int nLinks = vertexLinks.size();
-    if (nLinks == 0) {
-      continue;
-    }
-    if (bestMatchOnly) {
-      nLinks = 1;
-    }
-    for (unsigned int i = 0; i < nLinks; ++i) {
-      if (!(vertexLinks[i])) {
-        continue;
-      }
-      if (!(vertexLinks[i]).isValid()) {
-        continue;
-      }
-      const xAOD::Vertex* vx = *(vertexLinks[i]);
-      if (!vx) {
-        continue;
-      }
-      auto trackParticleLinks = vx->trackParticleLinks();
-      for (const auto& link : trackParticleLinks) {
-        if (!link.isValid()) {
-          continue;
-        }
-        gsfMask[link.index()] = true;
-        if (tps) {
-          const ElementLink<xAOD::TrackParticleContainer>& origTrackLink =
-            orig(*((*gsfs)[link.index()]));
-          int inDetIndex = origTrackLink.index();
-          mask[inDetIndex] = true;
-        }
-      }
-    }
-  }
-  }
+  SG::ThinningHandle<xAOD::VertexContainer> importedGSFConversionVtx(
+     m_gsfVtxSGKey, Gaudi::Hive::currentContext());
+  const xAOD::VertexContainer* gsfVtxs = importedGSFConversionVtx.cptr();
+  unsigned int nGSFVtx = gsfVtxs->size(), n_gsfVtx_pass = 0;
+  std::vector<bool> gsfVtxMask(nGSFVtx,false);
+  m_ntotGSFVtx += nGSFVtx;
+  ATH_MSG_DEBUG("nGSFVtx : " << nGSFVtx);
 
-void
-DerivationFramework::EgammaTrackParticleThinning::setPhotonMasks(
-  std::vector<bool>& mask,
-  std::vector<bool>& gsfMask,
-  std::vector<const xAOD::Egamma*>& egammas,
-  const xAOD::TrackParticleContainer* tps,
-  const xAOD::TrackParticleContainer* gsfs,
-  const bool bestMatchOnly) const
-{
   DerivationFramework::TracksInCone trIC;
-  for (auto & egamma : egammas) {
+  for (const auto* egamma : *egammas) {
     const xAOD::Photon* photon = egamma->type() == xAOD::Type::Photon
                                    ? static_cast<const xAOD::Photon*>(egamma)
                                    : nullptr;
@@ -314,13 +266,25 @@ DerivationFramework::EgammaTrackParticleThinning::setPhotonMasks(
     if (nLinks == 0) {
       continue;
     }
-    if (bestMatchOnly) {
+    if (!m_bestVtxMatchOnly) {
+      for (unsigned int i = 0; i < nLinks; ++i) {
+	if (!(vertexLinks[i])) {
+	  continue;
+	}
+	if (!(vertexLinks[i]).isValid()) {
+	  continue;
+	}
+	gsfVtxMask[vertexLinks[i].index()] = true;
+      }
+    }
+    if (m_bestMatchOnly) {
       nLinks = 1;
     }
     for (unsigned int i = 0; i < nLinks; ++i) {
       if (!(vertexLinks[i]).isValid()) {
         continue;
       }
+      gsfVtxMask[vertexLinks[i].index()] = true;
       const xAOD::Vertex* vx = *(vertexLinks[i]);
       if (!vx) {
         continue;
@@ -342,7 +306,13 @@ DerivationFramework::EgammaTrackParticleThinning::setPhotonMasks(
       }
     }
   }
+  importedGSFConversionVtx.keep(gsfVtxMask);
+  for (bool b : gsfVtxMask) {
+    if (b)
+      ++n_gsfVtx_pass;
   }
+  m_nGSFVtxPass += n_gsfVtx_pass;
+}
 
 void
 DerivationFramework::EgammaTrackParticleThinning::setElectronMasks(
@@ -350,58 +320,10 @@ DerivationFramework::EgammaTrackParticleThinning::setElectronMasks(
   std::vector<bool>& gsfMask,
   const xAOD::EgammaContainer* egammas,
   const xAOD::TrackParticleContainer* tps,
-  const xAOD::TrackParticleContainer* gsfs,
-  const bool bestMatchOnly) const
+  const xAOD::TrackParticleContainer* gsfs) const
 {
   DerivationFramework::TracksInCone trIC;
   for (const auto *egamma : *egammas) {
-    const xAOD::Electron* electron =
-      egamma->type() == xAOD::Type::Electron
-        ? static_cast<const xAOD::Electron*>(egamma)
-        : nullptr;
-
-    if (!electron) {
-      ATH_MSG_ERROR("Did not get an electron object in "
-                    "EgammaTrackParticleThinning::setElectronMasks");
-      return;
-    }
-    if (tps && m_coneSize > 0.0){
-      trIC.select(electron,
-                  m_coneSize,
-                  tps,
-                  mask); // check InDet tracks in a cone around the e-gammas
-    }
-
-    unsigned int nGSFLinks = bestMatchOnly ? 1 : electron->nTrackParticles();
-    for (unsigned int i = 0; i < nGSFLinks; ++i) {
-      if (!(electron->trackParticleLink(i).isValid())) {
-        continue;
-      }
-      int gsfIndex = electron->trackParticleLink(i).index();
-      gsfMask[gsfIndex] = true;
-      if (tps) {
-        const ElementLink<xAOD::TrackParticleContainer>& origTrackLink =
-          orig(*((*gsfs)[gsfIndex]));
-        if (origTrackLink.isValid()) {
-          int inDetIndex = origTrackLink.index();
-          mask[inDetIndex] = true;
-        }
-      }
-    }
-  }
-  }
-
-void
-DerivationFramework::EgammaTrackParticleThinning::setElectronMasks(
-  std::vector<bool>& mask,
-  std::vector<bool>& gsfMask,
-  std::vector<const xAOD::Egamma*>& egammas,
-  const xAOD::TrackParticleContainer* tps,
-  const xAOD::TrackParticleContainer* gsfs,
-  const bool bestMatchOnly) const
-{
-  DerivationFramework::TracksInCone trIC;
-  for (auto & egamma : egammas) {
     const xAOD::Electron* electron =
       egamma->type() == xAOD::Type::Electron
         ? static_cast<const xAOD::Electron*>(egamma)
@@ -418,7 +340,7 @@ DerivationFramework::EgammaTrackParticleThinning::setElectronMasks(
                   tps,
                   mask); // check InDet tracks in a cone around the e-gammas
 
-    unsigned int nGSFLinks = bestMatchOnly ? 1 : electron->nTrackParticles();
+    unsigned int nGSFLinks = m_bestMatchOnly ? 1 : electron->nTrackParticles();
     for (unsigned int i = 0; i < nGSFLinks; ++i) {
       if (!(electron->trackParticleLink(i).isValid())) {
         continue;
@@ -435,5 +357,5 @@ DerivationFramework::EgammaTrackParticleThinning::setElectronMasks(
       }
     }
   }
-  }
+}
 
