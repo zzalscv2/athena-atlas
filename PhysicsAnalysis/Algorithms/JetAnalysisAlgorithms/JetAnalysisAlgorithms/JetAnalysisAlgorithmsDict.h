@@ -10,6 +10,7 @@
 
 #include <JetAnalysisAlgorithms/JetCalibrationAlg.h>
 #include <JetAnalysisAlgorithms/JetGhostMuonAssociationAlg.h>
+#include <JetAnalysisAlgorithms/JetGhostMergingAlg.h>
 #include <JetAnalysisAlgorithms/JetModifierAlg.h>
 #include <JetAnalysisAlgorithms/JetSelectionAlg.h>
 #include <JetAnalysisAlgorithms/JetUncertaintiesAlg.h>

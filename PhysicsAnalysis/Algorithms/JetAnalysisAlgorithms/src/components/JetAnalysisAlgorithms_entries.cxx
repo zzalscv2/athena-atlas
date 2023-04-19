@@ -2,6 +2,7 @@
 
 #include <JetAnalysisAlgorithms/JetCalibrationAlg.h>
 #include <JetAnalysisAlgorithms/JetGhostMuonAssociationAlg.h>
+#include <JetAnalysisAlgorithms/JetGhostMergingAlg.h>
 #include <JetAnalysisAlgorithms/JetModifierAlg.h>
 #include <JetAnalysisAlgorithms/JetSelectionAlg.h>
 #include <JetAnalysisAlgorithms/JetUncertaintiesAlg.h>
@@ -11,6 +12,7 @@
 
 DECLARE_COMPONENT (CP::JetCalibrationAlg)
 DECLARE_COMPONENT (CP::JetGhostMuonAssociationAlg)
+DECLARE_COMPONENT (CP::JetGhostMergingAlg)
 DECLARE_COMPONENT (CP::JetModifierAlg)
 DECLARE_COMPONENT (CP::JetSelectionAlg)
 DECLARE_COMPONENT (CP::JetUncertaintiesAlg)
