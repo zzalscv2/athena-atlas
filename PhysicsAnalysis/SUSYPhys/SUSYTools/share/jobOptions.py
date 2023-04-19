@@ -22,10 +22,11 @@ susyArgs = susyArgsParser.parse_args()
 if susyArgs.testCampaign:
     pTag = 'p5511' if susyArgs.testCampaign!='data22' else 'p5514'
     inputDir = '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools/'
-    inputFiles = {'data18' : f'DAOD_PHYS.data18_13TeV.00356250_{pTag}.pool.root',
-                  'data22' : f'DAOD_PHYS.data22_13p6TeV.430542.data22_{pTag}.PHYS.pool.root',
-                  'mc20e' : f'DAOD_PHYS.mc20_13TeV.410470.FS_mc20e_{pTag}.PHYS.pool.root',
-                  'mc21a': f'DAOD_PHYS.mc21_13p6TeV.601229.FS_mc21a_{pTag}.PHYS.pool.root'}
+    inputFiles = {}
+    inputFiles['data18'] = f'DAOD_PHYS.data18_13TeV.00356250_{pTag}.pool.root'
+    inputFiles['data22'] = f'DAOD_PHYS.data22_13p6TeV.00440543_{pTag}.pool.root'
+    inputFiles['mc20e']  = f'DAOD_PHYS.mc20_13TeV.410470.FS_mc20e_{pTag}.PHYS.pool.root'
+    inputFiles['mc21a']  = f'DAOD_PHYS.mc21_13p6TeV.601229.FS_mc21a_{pTag}.PHYS.pool.root'
     jps.AthenaCommonFlags.FilesInput = [f'{inputDir}/{inputFiles[susyArgs.testCampaign]}']
     if susyArgs.fileOutput is None: susyArgs.fileOutput = f"monitoring.{susyArgs.testCampaign}.root"
 
