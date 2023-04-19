@@ -74,7 +74,7 @@ class SUSYToolsAlg : public EL::AnaAlgorithm {
     unsigned int m_Nevts; 
     int m_maxEvts;
     int m_lbfilter;
-    bool m_isPHYSLITE;
+    bool m_IsPHYSLITE;
     std::string m_kernel;
     std::string m_configFile;
     std::string m_FatJetCollection;

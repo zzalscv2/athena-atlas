@@ -105,7 +105,7 @@ StatusCode SUSYToolsAlg::initialize() {
 
   // read some of the property values (may have been autoconfigured at this point)
   m_mcCampaign = *(m_SUSYTools->getProperty<std::string>("mcCampaign"));
-  m_isPHYSLITE = *(m_SUSYTools->getProperty<bool>("isPHYSLITE"));
+  m_IsPHYSLITE = *(m_SUSYTools->getProperty<bool>("IsPHYSLITE"));
 
 
   // Need truth matching for tau CP tools
@@ -382,28 +382,28 @@ StatusCode SUSYToolsAlg::execute() {
   xAOD::ElectronContainer* electrons_nominal(0);
   xAOD::ShallowAuxContainer* electrons_nominal_aux(0);
   if (m_slices["ele"]) {
-    ATH_CHECK( m_SUSYTools->GetElectrons(electrons_nominal, electrons_nominal_aux,true, m_isPHYSLITE?"AnalysisElectrons":"Electrons") );
+    ATH_CHECK( m_SUSYTools->GetElectrons(electrons_nominal, electrons_nominal_aux,true, m_IsPHYSLITE?"AnalysisElectrons":"Electrons") );
     ATH_MSG_DEBUG( "Number of electrons: " << electrons_nominal->size() );
   }
 
   xAOD::PhotonContainer* photons_nominal(0);
   xAOD::ShallowAuxContainer* photons_nominal_aux(0);
   if (m_slices["pho"]) {
-    ATH_CHECK( m_SUSYTools->GetPhotons(photons_nominal, photons_nominal_aux, true, m_isPHYSLITE?"AnalysisPhotons":"Photons") );
+    ATH_CHECK( m_SUSYTools->GetPhotons(photons_nominal, photons_nominal_aux, true, m_IsPHYSLITE?"AnalysisPhotons":"Photons") );
     ATH_MSG_DEBUG( "Number of photons: " << photons_nominal->size() );
   }
 
   xAOD::MuonContainer* muons_nominal(0);
   xAOD::ShallowAuxContainer* muons_nominal_aux(0);
   if (m_slices["mu"]) {
-    ATH_CHECK( m_SUSYTools->GetMuons(muons_nominal, muons_nominal_aux, true, m_isPHYSLITE?"AnalysisMuons":"Muons") );
+    ATH_CHECK( m_SUSYTools->GetMuons(muons_nominal, muons_nominal_aux, true, m_IsPHYSLITE?"AnalysisMuons":"Muons") );
     ATH_MSG_DEBUG( "Number of muons: " << muons_nominal->size() );
   }
 
   xAOD::JetContainer* jets_nominal(0);
   xAOD::ShallowAuxContainer* jets_nominal_aux(0);
   if (m_slices["jet"]) {
-    ATH_CHECK( m_SUSYTools->GetJets(jets_nominal, jets_nominal_aux, true, m_isPHYSLITE?"AnalysisJets":"") );
+    ATH_CHECK( m_SUSYTools->GetJets(jets_nominal, jets_nominal_aux, true, m_IsPHYSLITE?"AnalysisJets":"") );
     ATH_MSG_DEBUG( "Number of jets: " << jets_nominal->size() );
   }
 
@@ -476,13 +476,13 @@ StatusCode SUSYToolsAlg::execute() {
   xAOD::TauJetContainer* taus_nominal(0);
   xAOD::ShallowAuxContainer* taus_nominal_aux(0);
   if (m_slices["tau"]) {
-     if (!isData && !m_isPHYSLITE) {
+     if (!isData && !m_IsPHYSLITE) {
        ATH_CHECK( evtStore()->retrieve(taus_gettruth,"TauJets") );
        for(const auto& tau : *taus_gettruth) {
          m_tauTruthMatchingTool->getTruth(*tau);
        }
      }
-     ATH_CHECK( m_SUSYTools->GetTaus(taus_nominal, taus_nominal_aux, true, m_isPHYSLITE?"AnalysisTauJets":"TauJets") );
+     ATH_CHECK( m_SUSYTools->GetTaus(taus_nominal, taus_nominal_aux, true, m_IsPHYSLITE?"AnalysisTauJets":"TauJets") );
      ATH_MSG_DEBUG( "Number of taus: " << taus_nominal->size() );
   }
 
@@ -939,7 +939,7 @@ StatusCode SUSYToolsAlg::execute() {
         ATH_MSG_DEBUG("Get systematics-varied electrons");
         xAOD::ElectronContainer* electrons_syst(0);
         xAOD::ShallowAuxContainer* electrons_syst_aux(0);
-        ATH_CHECK( m_SUSYTools->GetElectrons(electrons_syst, electrons_syst_aux, true , m_isPHYSLITE?"AnalysisElectrons":"Electrons") );
+        ATH_CHECK( m_SUSYTools->GetElectrons(electrons_syst, electrons_syst_aux, true , m_IsPHYSLITE?"AnalysisElectrons":"Electrons") );
         electrons = electrons_syst;
       }
 
@@ -947,7 +947,7 @@ StatusCode SUSYToolsAlg::execute() {
         ATH_MSG_DEBUG("Get systematics-varied photons");
         xAOD::PhotonContainer* photons_syst(0);
         xAOD::ShallowAuxContainer* photons_syst_aux(0);
-        ATH_CHECK( m_SUSYTools->GetPhotons(photons_syst, photons_syst_aux, true, m_isPHYSLITE?"AnalysisPhotons":"Photons") );
+        ATH_CHECK( m_SUSYTools->GetPhotons(photons_syst, photons_syst_aux, true, m_IsPHYSLITE?"AnalysisPhotons":"Photons") );
         photons = photons_syst;
       }
 
@@ -955,7 +955,7 @@ StatusCode SUSYToolsAlg::execute() {
         ATH_MSG_DEBUG("Get systematics-varied muons");
         xAOD::MuonContainer* muons_syst(0);
         xAOD::ShallowAuxContainer* muons_syst_aux(0);
-        ATH_CHECK( m_SUSYTools->GetMuons(muons_syst, muons_syst_aux, true, m_isPHYSLITE?"AnalysisMuons":"Muons") );
+        ATH_CHECK( m_SUSYTools->GetMuons(muons_syst, muons_syst_aux, true, m_IsPHYSLITE?"AnalysisMuons":"Muons") );
         muons = muons_syst;
       }
 
@@ -964,7 +964,7 @@ StatusCode SUSYToolsAlg::execute() {
           ATH_MSG_DEBUG("Get systematics-varied jets");
           xAOD::JetContainer* jets_syst(0);
           xAOD::ShallowAuxContainer* jets_syst_aux(0);
-          ATH_CHECK( m_SUSYTools->GetJetsSyst(*jets_nominal, jets_syst, jets_syst_aux, true, m_isPHYSLITE?"AnalysisJets":"") );
+          ATH_CHECK( m_SUSYTools->GetJetsSyst(*jets_nominal, jets_syst, jets_syst_aux, true, m_IsPHYSLITE?"AnalysisJets":"") );
           jets = jets_syst;
         }
         if (m_slices["fatjet"]) {
@@ -987,7 +987,7 @@ StatusCode SUSYToolsAlg::execute() {
         ATH_MSG_DEBUG("Get systematics-varied taus");
         xAOD::TauJetContainer* taus_syst(0);
         xAOD::ShallowAuxContainer* taus_syst_aux(0);
-        ATH_CHECK( m_SUSYTools->GetTaus(taus_syst, taus_syst_aux,true, m_isPHYSLITE?"AnalysisTauJets":"TauJets") );
+        ATH_CHECK( m_SUSYTools->GetTaus(taus_syst, taus_syst_aux,true, m_IsPHYSLITE?"AnalysisTauJets":"TauJets") );
         taus = taus_syst;
       }
 
@@ -1470,7 +1470,7 @@ void SUSYToolsAlg::stdHistsForObj(xAOD::IParticle *obj, const std::string& objty
         hist(dir+objtype+"_"+objlevel+"_truthType")->Fill( obj->auxdata<int>("truthType") );
         hist(dir+objtype+"_"+objlevel+"_truthOrigin")->Fill( obj->auxdata<int>("truthOrigin") );
       } else {
-        if(!m_isPHYSLITE){
+        if(!m_IsPHYSLITE){
           bool istruthmatched = (bool)obj->auxdata<char>("IsTruthMatched");
           int pid(0),ppid(0);
           if (istruthmatched && obj->isAvailable<ElementLink<xAOD::TruthParticleContainer>>("truthParticleLink")) {

@@ -115,7 +115,7 @@ config = AnaAlgorithmConfig( 'SUSYToolsAlg' )
 config.addPrivateTool("SUSYTools","ST::SUSYObjDef_xAOD")
 
 config.SUSYTools.ConfigFile = "SUSYTools/SUSYTools_Default.conf"
-if (options.type == "data22" or "mc21" in options.type): config.SUYSTools.ConfigFile = "SUSYTools/SUSYTools_Default_Run3.conf"
+if (options.type == "data22" or "mc21" in options.type): config.SUSYTools.ConfigFile = "SUSYTools/SUSYTools_Default_Run3.conf"
 config.DoSyst = options.dosyst
 config.SUSYTools.DataSource = 1
 config.OutputLevel = outputlvl[options.log_level]
@@ -123,9 +123,9 @@ config.SUSYTools.PRWLumiCalcFiles = []
 config.SUSYTools.AutoconfigurePRWTool = True
 if options.flav == "PHYSLITE": 
    print("Running on PHYSLITE : ", inputFile)
-   config.SUSYTools.isPHYSLITE = True
    STconfig_lite = str(config.SUSYTools.ConfigFile).replace(".conf","_LITE.conf")
    config.SUSYTools.ConfigFile = STconfig_lite
+   config.SUSYTools.IsPHYSLITE = True
 if options.type != 'data18' :
     mcChannel = 410470
 
