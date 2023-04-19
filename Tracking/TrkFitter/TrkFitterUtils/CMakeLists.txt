@@ -12,5 +12,5 @@ atlas_add_library( TrkFitterUtils
                    PUBLIC_HEADERS TrkFitterUtils
                    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
                    DEFINITIONS ${CLHEP_DEFINITIONS}
-		           LINK_LIBRARIES ${CLHEP_LIBRARIES} AthContainers GeoPrimitives Identifier GaudiKernel TrkSurfaces TrkEventPrimitives TrkEventUtils TrkMeasurementBase TrkParameters TrkExUtils CxxUtils
+		           LINK_LIBRARIES ${CLHEP_LIBRARIES} AthContainers GeoPrimitives Identifier GaudiKernel TrkSurfaces TrkEventPrimitives TrkEventUtils TrkMeasurementBase TrkParameters TrkExUtils 
 		           PRIVATE_LINK_LIBRARIES AtlasDetDescr TrkMaterialOnTrack TrkPseudoMeasurementOnTrack TrkRIO_OnTrack TrkSegment TrkTrack TrkVertexOnTrack TrkExInterfaces TrkToolInterfaces )

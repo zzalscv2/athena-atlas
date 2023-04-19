@@ -7,5 +7,5 @@ atlas_subdir( LArRawUtils )
 atlas_add_library( LArRawUtilsLib
                    src/*.cxx
                    PUBLIC_HEADERS LArRawUtils
-                   LINK_LIBRARIES CaloIdentifier CaloTTDetDescr AthenaBaseComps AthenaKernel Identifier GaudiKernel LArCablingLib LArIdentifier LArRawEvent StoreGateLib CaloTriggerToolLib CxxUtils
+                   LINK_LIBRARIES CaloIdentifier CaloTTDetDescr AthenaBaseComps AthenaKernel Identifier GaudiKernel LArCablingLib LArIdentifier LArRawEvent StoreGateLib CaloTriggerToolLib 
                    PRIVATE_LINK_LIBRARIES AtlasDetDescr LArRecConditions )
