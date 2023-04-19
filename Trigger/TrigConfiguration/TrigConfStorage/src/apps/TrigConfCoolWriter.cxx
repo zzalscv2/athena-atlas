@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigConfStorage/TrigConfCoolFolderSpec.h"
@@ -21,7 +21,6 @@
 #include "TrigConfHLTData/HLTPrescaleSet.h"
 #include "TrigConfHLTData/HLTUtils.h"
 
-#include "CoolApplication/Application.h"
 #include "CoolKernel/ValidityKey.h"
 #include "CoolKernel/IFolder.h"
 #include "CoolKernel/Exception.h"
@@ -48,9 +47,6 @@
 #include <iterator>
 
 #include "TrigConfCoolWriter.h"
-
-#include "CxxUtils/checker_macros.h"
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // only used in standalone app
 
 using boost::lexical_cast;
 using namespace std;
@@ -87,8 +83,7 @@ AutoDBOpen::~AutoDBOpen() {
 cool::IDatabaseSvc&  
 TrigConfCoolWriter::databaseService()
 {
-   static cool::Application app;
-   return app.databaseService();
+   return m_coolApp.databaseService();
 }
 
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigConfStorage )
@@ -22,7 +22,7 @@ if( NOT XAOD_STANDALONE )
    atlas_add_executable( TrigConfReadWrite
                          src/apps/ReadWrite.cxx src/apps/Run2toRun3ConvertersL1.cxx src/apps/Run2toRun3ConvertersHLT.cxx src/apps/TrigConfCoolWriter.cxx
                          INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
-                         LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${CORAL_LIBRARIES} CxxUtils L1TopoConfig TrigCompositeUtilsLib TrigConfBase TrigConfData TrigConfHLTData TrigConfIO TrigConfJobOptData TrigConfL1Data TrigConfStorage nlohmann_json::nlohmann_json )
+                         LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${CORAL_LIBRARIES} L1TopoConfig TrigCompositeUtilsLib TrigConfBase TrigConfData TrigConfHLTData TrigConfIO TrigConfJobOptData TrigConfL1Data TrigConfStorage nlohmann_json::nlohmann_json )
 
    atlas_add_test( test_Run2Run3Conversion
                    SCRIPT TrigConfReadWrite -i TRIGGERDB 2218,4229,2967,1373 -o r3json
@@ -33,7 +33,7 @@ endif()
 atlas_add_executable( TrigConfCoolFix
                       src/apps/CoolFix.cxx src/apps/TrigConfCoolWriter.cxx
                       INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
-                      LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${CORAL_LIBRARIES} CxxUtils TrigConfBase TrigConfHLTData TrigConfL1Data TrigConfStorage )
+                      LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${CORAL_LIBRARIES} TrigConfBase TrigConfHLTData TrigConfL1Data TrigConfStorage )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
