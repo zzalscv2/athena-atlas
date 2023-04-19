@@ -103,7 +103,8 @@ class FTagConfig (ConfigBlock):
         alg.preselection = config.getPreselection (self.containerName, selectionName)
         alg.selectionDecoration = 'ftag_select_' + selectionName + ',as_char'
         alg.particles = config.readName (self.containerName)
-        config.addOutputVar (self.containerName, 'ftag_select_' + selectionName, selectionName + '_select', noSys=True)
+        if self.btagWP != 'Continuous':
+            config.addOutputVar (self.containerName, 'ftag_select_' + selectionName, selectionName + '_select', noSys=True)
 
         if self.btagWP == 'Continuous':
             alg = config.createAlgorithm( 'CP::BTaggingInformationDecoratorAlg', 'FTagInfoAlg' + postfix )
@@ -116,6 +117,7 @@ class FTagConfig (ConfigBlock):
             alg.preselection = config.getPreselection (self.containerName, selectionName)
             alg.quantileDecoration = 'ftag_quantile_' + selectionName
             alg.jets = config.readName (self.containerName)
+            config.addOutputVar (self.containerName, 'ftag_quantile_' + selectionName, selectionName + '_quantile', noSys=True)
 
         if not self.noEfficiency and config.dataType() != 'data':
             # Set up the efficiency calculation algorithm:
