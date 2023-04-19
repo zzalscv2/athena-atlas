@@ -631,6 +631,12 @@ def getDevSignatures():
         ChainProp(name='HLT_2mu4_noL2Comb_bBmumux_BsmumuPhi_L12MU3V', stream=["BphysDelayed"], groups=BphysicsGroup+DevGroup),
         ChainProp(name='HLT_2mu4_noL2Comb_bBmumux_LbPqKm_L12MU3V', stream=["BphysDelayed"], groups=BphysicsGroup+DevGroup),
 
+        #ATR-27341; R(D*) measurement
+        ChainProp(name='HLT_2mu4_bBmux_BdmuDstarX_L12MU3V', l1SeedThresholds=['MU3V'], stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+DevGroup),
+        ChainProp(name='HLT_2mu4_bBmux_BdmuDstarX_L1BPH-7M11-25DR99-2MU3VF', l1SeedThresholds=['MU3VF'], stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+DevGroup),
+        ChainProp(name='HLT_2mu4_bBmux_BdmuDstarX_L1BPH-7M14-0DR25-MU5VFMU3VF', l1SeedThresholds=['MU3VF'], stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+DevGroup),
+        ChainProp(name='HLT_mu6_mu4_bBmux_BdmuDstarX_L1BPH-7M14-0DR25-MU5VFMU3VF', l1SeedThresholds=['MU5VF','MU3VF'], stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+DevGroup),
+        ChainProp(name='HLT_mu11_mu6_bBmux_BdmuDstarX_L1MU8VF_2MU5VF', l1SeedThresholds=['MU8VF','MU5VF'], stream=['BphysDelayed'], groups=BphysicsGroup+PrimaryL1MuGroup+DevGroup),
     ]
 
     chains['Combined'] = [

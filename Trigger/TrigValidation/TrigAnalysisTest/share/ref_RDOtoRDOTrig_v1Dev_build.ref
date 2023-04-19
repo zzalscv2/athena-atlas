@@ -1842,6 +1842,23 @@ HLT_2mu4_bBmumux_LbPqKm_L1BPH-2M9-0DR15-2MU3V:
   eventCount: 0
 HLT_2mu4_bBmumux_LbPqKm_L1BPH-2M9-0DR15-2MU3VF:
   eventCount: 0
+HLT_2mu4_bBmux_BdmuDstarX_L12MU3V:
+  eventCount: 0
+  stepCounts:
+    0: 3
+    1: 3
+    2: 3
+    3: 3
+  stepFeatures:
+    0: 7
+    1: 6
+    2: 6
+    3: 6
+    4: 6
+HLT_2mu4_bBmux_BdmuDstarX_L1BPH-7M11-25DR99-2MU3VF:
+  eventCount: 0
+HLT_2mu4_bBmux_BdmuDstarX_L1BPH-7M14-0DR25-MU5VFMU3VF:
+  eventCount: 0
 HLT_2mu4_bDimu_L12MU3V:
   eventCount: 0
   stepCounts:
@@ -17638,6 +17655,19 @@ HLT_mu11_mu6_bBmumux_LbPqKm_L1MU8VF_2MU5VF:
   stepFeatures:
     0: 13
     1: 11
+HLT_mu11_mu6_bBmux_BdmuDstarX_L1MU8VF_2MU5VF:
+  eventCount: 0
+  stepCounts:
+    0: 3
+    1: 3
+    2: 3
+    3: 3
+  stepFeatures:
+    0: 13
+    1: 11
+    2: 11
+    3: 10
+    4: 10
 HLT_mu11_mu6_bDimu2700_L1LFV-MU8VF:
   eventCount: 0
   stepCounts:
@@ -23056,6 +23086,8 @@ HLT_mu6_mu4_bBmumux_LbPqKm_L1MU5VF_2MU3VF:
   stepFeatures:
     0: 14
     1: 14
+HLT_mu6_mu4_bBmux_BdmuDstarX_L1BPH-7M14-0DR25-MU5VFMU3VF:
+  eventCount: 0
 HLT_mu6_mu4_bDimu_L1BPH-2M9-0DR15-C-MU5VFMU3V:
   eventCount: 0
 HLT_mu6_mu4_bDimu_L1BPH-2M9-0DR15-MU5VFMU3V:
