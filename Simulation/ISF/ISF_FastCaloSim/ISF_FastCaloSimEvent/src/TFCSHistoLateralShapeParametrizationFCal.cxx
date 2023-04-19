@@ -77,9 +77,10 @@ FCSReturnCode TFCSHistoLateralShapeParametrizationFCal::simulate_hit(
 
   const float hit_r = r * cos(alpha) + center_r;
   float delta_phi = r * sin(alpha) / center_r;
-  // Particle with negative charge are expected to have the same shape as
-  // positively charged particles after transformation: delta_phi --> -delta_phi
-  if (charge < 0.)
+  // We derive the shower shapes for electrons and positively charged hadrons.
+  // Particle with the opposite charge are expected to have the same shower shape
+  // after the transformation: delta_phi --> -delta_phi
+  if ((charge < 0. && pdgId!=11) || pdgId==-11)
     delta_phi = -delta_phi;
   const float hit_phi = delta_phi + center_phi;
 
