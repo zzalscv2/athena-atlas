@@ -352,8 +352,9 @@ if __name__ == '__main__':
   outputEDM += addEDM('xAOD::JetEtRoI'         , 'LVL1JetEtRoI')
   outputEDM += addEDM('xAOD::JetRoIContainer'  , 'LVL1JetRoIs')
   outputEDM += addEDM('xAOD::EmTauRoIContainer', 'LVL1EmTauRoIs')
-  outputEDM += addEDM('xAOD::EnergySumRoI'     , 'LVL1EnergySumRoI')
-
+  #different naming scheme of Aux branches and types for legacy EnergySumRoI (MET,sumET)
+  outputEDM += ["xAOD::EnergySumRoI#LVL1EnergySumRoI", "xAOD::EnergySumRoIAuxInfo#LVL1EnergySumRoIAux."]
+  
   if 'Muons' in subsystem:
       from MuonConfig.MuonBytestreamDecodeConfig import RpcBytestreamDecodeCfg,TgcBytestreamDecodeCfg
       rpcdecodingAcc = RpcBytestreamDecodeCfg(flags)
