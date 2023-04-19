@@ -12,11 +12,14 @@ theApp.EvtMax = 500 #set to -1 to run on all events
 if not 'MCCampaign' in dir():
     MCCampaign = 'mc20e'
     print(f'set default MCCampaign={MCCampaign}')
-sample_format = "DAOD_PHYS"
 if not 'IsPHYSLITE' in dir():
     IsPHYSLITE = False
-    print(f'set default IsPHYSLITE={IsPHYSLITE}')
+    sample_format = "DAOD_PHYS"
+print(f'set default IsPHYSLITE = {IsPHYSLITE}')
+if IsPHYSLITE:
     sample_format = "DAOD_PHYSLITE"
+print(f'set default sample_format = {sample_format}')
+
 if not 'pTag' in dir():
     pTag = 'p5511' if not 'data22' in MCCampaign else 'p5514'
     print(f'set default pTag={pTag}')
@@ -27,15 +30,12 @@ if not 'doSyst' in dir():
 # some inputs
 inputDir = '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools'
 inputFiles = {}
-inputFiles['data18'] = f'DAOD_PHYS.data18_13TeV.00356250_{pTag}.pool.root'
-inputFiles['data22'] = f'DAOD_PHYS.data22_13p6TeV.00440543_{pTag}.pool.root'
-inputFiles['mc20e'] = f'DAOD_PHYS.mc20_13TeV.410470.FS_mc20e_{pTag}.PHYS.pool.root'
-inputFiles['mc21a'] = f'DAOD_PHYS.mc21_13p6TeV.601229.FS_mc21a_{pTag}.PHYS.pool.root'
+inputFiles['data18'] = f'{sample_format}.data18_13TeV.00356250_{pTag}.pool.root'
+inputFiles['data22'] = f'{sample_format}.data22_13p6TeV.00440543_{pTag}.pool.root'
+inputFiles['mc20e'] = f'{sample_format}.mc20_13TeV.410470.FS_mc20e_{pTag}.{sample_format.replace("DAOD_","")}.pool.root'
+inputFiles['mc21a'] = f'{sample_format}.mc21_13p6TeV.601229.FS_mc21a_{pTag}.{sample_format.replace("DAOD_","")}.pool.root'
 
 inputPath = f'{inputDir}/{inputFiles[MCCampaign]}'
-if IsPHYSLITE: 
-    inputPathLITE = str(inputPath).replace("PHYS.","PHYSLITE.")
-    inputPath = inputPathLITE
 print(f'inputPath = {inputPath}')
 AFII = True if 'AFII' in inputPath else False
 print(f'set default AFII = {AFII}')
