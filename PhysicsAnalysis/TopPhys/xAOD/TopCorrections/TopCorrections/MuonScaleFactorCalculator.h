@@ -228,6 +228,8 @@ namespace top {
     CP::SystematicSet m_reco_tagpt_DOWN;
     CP::SystematicSet m_reco_extrapolation_UP;
     CP::SystematicSet m_reco_extrapolation_DOWN;
+    CP::SystematicSet m_reco_extrapolation_lowpt_UP;
+    CP::SystematicSet m_reco_extrapolation_lowpt_DOWN;
 
     CP::SystematicSet m_reco_stat_lowpt_UP;
     CP::SystematicSet m_reco_stat_lowpt_DOWN;
