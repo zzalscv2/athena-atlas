@@ -21,6 +21,12 @@ Trk::PRDtoTrackMap::onTracks(const PrepRawData& prd) const
 }
 
 inline void
+Trk::PRDtoTrackMap::reserve(size_t nTracks, size_t nRawData) {
+  m_prepRawDataTrackMap.reserve(nRawData);
+  m_trackPrepRawDataMap.reserve(nTracks);
+}
+
+inline void
 Trk::PRDtoTrackMap::clear()
 {
   m_prepRawDataTrackMap.clear();
@@ -34,9 +40,8 @@ Trk::PRDtoTrackMap::getPrdsOnTrack(const Track& track) const
     m_trackPrepRawDataMap.find(&track);
   if (itvec != m_trackPrepRawDataMap.end()) {
     return itvec->second;
-  } else {
-    return std::vector<const PrepRawData*>();
   }
+  return std::vector<const PrepRawData*>();
 }
 
 inline bool
