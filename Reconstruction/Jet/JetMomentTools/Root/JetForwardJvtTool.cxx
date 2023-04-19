@@ -71,6 +71,7 @@
     ATH_CHECK(m_jvtMomentKey.initialize());
     ATH_CHECK(m_sumPtsKey.initialize());
 
+#ifndef XAOD_STANDALONE
     if (m_renounceOutputs) {
       renounce (m_orKey);
       renounce (m_outKey);
@@ -81,6 +82,7 @@
       renounce (m_jvtMomentKey);
       renounce (m_sumPtsKey);
     }
+#endif
 
     return StatusCode::SUCCESS;
   }
