@@ -60,22 +60,22 @@ namespace top
         for (size_t k = 0; k < particle->nChildren(); k++) {	
             const xAOD::TruthParticle* ZChildren = particle->child(k);
             if (ZChildren->pdgId() > 0) {
-                tZ.Zdecay1_p4 = findAfterGamma(ZChildren)->p4();
+                tZ.Zdecay1_p4 = ZChildren->p4();
                 tZ.Zdecay1_pdgId = ZChildren->pdgId();
                 tZ.Zdecay1_status = ZChildren->status();
 
                 // Tautau channel -> Check whether the Tau is hadronic or leptonic
                 if (tZ.Zdecay1_pdgId == 15) { 
-                    tZ.Zdecay1_tau_isHadronic = PartonHistoryUtils::TauIsHadronic(findAfterGamma(ZChildren),tZ.Zdecay1_tauvis_p4);
+                    tZ.Zdecay1_tau_isHadronic = PartonHistoryUtils::TauIsHadronic(ZChildren,tZ.Zdecay1_tauvis_p4);
                 } 
             } else {
-                tZ.Zdecay2_p4 = findAfterGamma(ZChildren)->p4();
+                tZ.Zdecay2_p4 = ZChildren->p4();
                 tZ.Zdecay2_pdgId = ZChildren->pdgId();
                 tZ.Zdecay2_status = ZChildren->status();
                 
                 // Tautau channel -> Check whether the Tau is hadronic or leptonic
                 if (tZ.Zdecay2_pdgId == -15) { 
-                    tZ.Zdecay2_tau_isHadronic = PartonHistoryUtils::TauIsHadronic(findAfterGamma(ZChildren),tZ.Zdecay2_tauvis_p4);
+                    tZ.Zdecay2_tau_isHadronic = PartonHistoryUtils::TauIsHadronic(ZChildren,tZ.Zdecay2_tauvis_p4);
                 } 
             }
         }
@@ -276,18 +276,18 @@ namespace top
                     const auto* sibling = getFlavourSibling(child); // look for fermion with a sibling
                     if( !sibling ) continue;
                     foundZ = true;
-                    tZ.Zdecay1_p4 = particle->p4();
-                    tZ.Zdecay1_pdgId = particle->pdgId();
-                    tZ.Zdecay1_status = particle->status();
+                    tZ.Zdecay1_p4 = child->p4();
+                    tZ.Zdecay1_pdgId = child->pdgId();
+                    tZ.Zdecay1_status = child->status();
                     if (std::abs(tZ.Zdecay1_pdgId) == 15) { 
-                        tZ.Zdecay1_tau_isHadronic = PartonHistoryUtils::TauIsHadronic(findAfterGamma(particle),tZ.Zdecay1_tauvis_p4);
+                        tZ.Zdecay1_tau_isHadronic = PartonHistoryUtils::TauIsHadronic(child,tZ.Zdecay1_tauvis_p4);
                     }
                     
                     tZ.Zdecay2_p4 = sibling->p4();
                     tZ.Zdecay2_pdgId = sibling->pdgId();
                     tZ.Zdecay2_status = sibling->status();
                     if (std::abs(tZ.Zdecay1_pdgId) == 15) { 
-                        tZ.Zdecay2_tau_isHadronic = PartonHistoryUtils::TauIsHadronic(findAfterGamma(sibling),tZ.Zdecay2_tauvis_p4);
+                        tZ.Zdecay2_tau_isHadronic = PartonHistoryUtils::TauIsHadronic(sibling,tZ.Zdecay2_tauvis_p4);
                     } 
 
                     tZ.Z_p4 = (tZ.Zdecay1_p4+tZ.Zdecay2_p4);
