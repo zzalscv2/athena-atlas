@@ -8,6 +8,7 @@
 #include <iostream>
 #include <cmath>
 #include <vector>
+#include <cstdint>
 
 #define MODULE_BADMODULE -1
 #define SECTOR_NOTFOUND -1
