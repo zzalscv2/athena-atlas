@@ -6,7 +6,7 @@
 atlas_subdir( LArG4H6SD )
 
 # External dependencies:
-find_package( Boost COMPONENTS filesystem thread system )
+find_package( Boost )
 find_package( CLHEP )
 find_package( CORAL COMPONENTS CoralBase CoralKernel RelationalAccess )
 find_package( Geant4 )

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonTrackingGeometry/MuonInertMaterialBuilder.h"
 // constructor
@@ -12,7 +12,6 @@ StatusCode Muon::MuonInertMaterialBuilder::initialize() {
   sc = Muon::MuonInertMaterialBuilderImpl::initialize();
   return sc;
 }
-StatusCode Muon::MuonInertMaterialBuilder::finalize() { return Muon::MuonInertMaterialBuilderImpl::finalize(); }
 
 std::pair<std::unique_ptr<std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>,
           std::unique_ptr<std::vector<std::vector<std::pair<std::unique_ptr<const Trk::Volume>, float>>>>>

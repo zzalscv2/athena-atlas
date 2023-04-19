@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIG_TrigBmumuxComboHypo_H
@@ -65,6 +65,7 @@ class TrigBmumuxState: public ::ITrigBphysState {
   xAOD::VertexContainer dimuons;
   xAOD::VertexAuxContainer dimuonsStore;
   std::vector<std::array<size_t, 2>> trigBphysMuonIndices;
+  bool isCompositeRoI = false;
   StatusCode addTriggerObject(xAOD::TrigBphys* triggerObject) {
     if (!triggerObject) {
       return StatusCode::FAILURE;
@@ -121,6 +122,7 @@ class TrigBmumuxComboHypo: public ::ComboHypo {
 
   bool isIdenticalTracks(const xAOD::TrackParticle* lhs, const xAOD::TrackParticle* rhs) const;
   bool isIdenticalTracks(const xAOD::Muon* lhs, const xAOD::Muon* rhs) const;
+  bool isInSameRoI(const xAOD::Muon*, const xAOD::TrackParticle*) const;
   bool passDimuonTrigger(const std::vector<const TrigCompositeUtils::DecisionIDContainer*>& previousDecisionIDs) const;
   bool isInMassRange(double mass, const std::pair<double, double>& range) const { return (mass > range.first && mass < range.second); }
   double Lxy(const Amg::Vector3D& productionVertex, const xAOD::Vertex& decayVertex) const;
@@ -140,6 +142,10 @@ class TrigBmumuxComboHypo: public ::ComboHypo {
     "DeltaR", 0.01, "minimum deltaR between same-sign tracks (overlap removal)"};
   Gaudi::Property<double> m_trkZ0 {this,
     "TrkZ0", 50., "maximum z0 impact parameter of the track wrt the fitted dimuon vertex; no preselection if negative"};
+  Gaudi::Property<double> m_roiEtaWidth {this,
+    "RoiEtaWidth", 0.75, "extent of the RoI in eta from initial muon, to be check for SuperRoI"};
+  Gaudi::Property<double> m_roiPhiWidth {this,
+    "RoiPhiWidth", 0.75, "extent of the RoI in phi from initial muon, to be check for SuperRoI"};
   Gaudi::Property<size_t> m_fitAttemptsWarningThreshold {this,
     "FitAttemptsWarningThreshold", 200, "Events processing this many calls of the vertex fitter will generate a WARNING message (time-out protect)"};
   Gaudi::Property<size_t> m_fitAttemptsBreakThreshold {this,

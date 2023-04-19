@@ -42,16 +42,14 @@ def RpcBytestreamDecodeCfg(flags, name="RpcRawDataProvider"):
     # Make sure muon geometry is configured
     from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
     acc.merge(MuonGeoModelCfg(flags)) 
-
+    
     # Setup the RPC ROD decoder
-    Muon__RpcROD_Decoder=CompFactory.Muon.RpcROD_Decoder
-    RPCRodDecoder = Muon__RpcROD_Decoder(name	     = "RpcROD_Decoder" )
+    RPCRodDecoder = CompFactory.Muon.RpcROD_Decoder(name	     = "RpcROD_Decoder" )
 
 
     # Setup the RAW data provider tool
     keyName = flags.Overlay.BkgPrefix + "RPCPAD" if flags.Common.isOverlay else "RPCPAD"
-    Muon__RPC_RawDataProviderToolMT=CompFactory.Muon.RPC_RawDataProviderToolMT
-    MuonRpcRawDataProviderTool = Muon__RPC_RawDataProviderToolMT(name    = "RPC_RawDataProviderToolMT",
+    MuonRpcRawDataProviderTool = CompFactory.Muon.RPC_RawDataProviderToolMT(name    = "RPC_RawDataProviderToolMT",
                                                                  Decoder = RPCRodDecoder,
                                                                  RdoLocation = keyName )
     if flags.Muon.MuonTrigger:
@@ -296,6 +294,8 @@ def MmBytestreamDecodeCfg(flags, name="MmRawDataProvider"):
     # Make sure muon geometry is configured
     from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
     acc.merge(MuonGeoModelCfg(flags)) 
+    from MuonConfig.MuonCablingConfig import MicroMegaCablingCfg
+    acc.merge(MicroMegaCablingCfg(flags))
 
     # Setup the MM ROD decoder
     Muon__MmROD_Decoder=CompFactory.Muon.MM_ROD_Decoder
@@ -305,8 +305,7 @@ def MmBytestreamDecodeCfg(flags, name="MmRawDataProvider"):
     # Setup the RAW data provider tool
     #keyName = flags.Overlay.BkgPrefix + "MMRDO" if flags.Detector.OverlayMM else "MMRDO"
     keyName = flags.Overlay.BkgPrefix + "MMRDO" if flags.Common.isOverlay else "MMRDO"
-    Muon_MM_RawDataProviderToolMT = CompFactory.Muon.MM_RawDataProviderToolMT
-    MuonMmRawDataProviderTool = Muon_MM_RawDataProviderToolMT(name  = "MM_RawDataProviderToolMT",
+    MuonMmRawDataProviderTool = CompFactory.Muon.MM_RawDataProviderToolMT(name  = "MM_RawDataProviderToolMT",
                                                               Decoder = MMRodDecoder,
                                                               RdoLocation = keyName,
                                                               SkipDecoding=flags.Muon.MuonTrigger and flags.Muon.runCommissioningChain)

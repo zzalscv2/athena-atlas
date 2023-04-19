@@ -11,6 +11,7 @@
 
 #include <atomic>
 #include <string>
+#include <vector>
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "DerivationFrameworkInDet/TracksInCone.h"
@@ -19,8 +20,11 @@
 #include "StoreGate/ThinningHandleKey.h"
 #include "xAODEgamma/EgammaContainer.h"
 #include "xAODTracking/TrackParticleContainer.h"
+#include "xAODTracking/VertexContainer.h"
 
 #include "ExpressionEvaluation/ExpressionParserUser.h"
+
+#include "GaudiKernel/ThreadLocalContext.h"
 
 namespace DerivationFramework {
 
@@ -39,57 +43,44 @@ public:
 private:
   mutable std::atomic<unsigned long int> m_ntot = 0;
   mutable std::atomic<unsigned long int> m_ntotGSF = 0;
+  mutable std::atomic<unsigned long int> m_ntotGSFVtx = 0;
   mutable std::atomic<unsigned long int> m_npass = 0;
   mutable std::atomic<unsigned long int> m_nGSFPass = 0;
+  mutable std::atomic<unsigned long int> m_nGSFVtxPass = 0;
   mutable std::atomic<unsigned long int> m_nEgammas = 0;
   mutable std::atomic<unsigned long int> m_nSelEgammas = 0;
 
-  StringProperty m_streamName{ this,
-                               "StreamName",
-                               "",
-                               "Name of the stream being thinned" };
+  StringProperty
+    m_streamName{ this, "StreamName", "", "Name of the stream being thinned" };
 
-  SG::ReadHandleKey<xAOD::EgammaContainer> m_egammaKey{ this,
-                                                        "SGKey",
-                                                        ""
-                                                        "" };
+  SG::ReadHandleKey<xAOD::EgammaContainer> m_egammaKey{ this, "SGKey", "", "" };
+
   SG::ThinningHandleKey<xAOD::TrackParticleContainer>
     m_inDetSGKey{ this, "InDetTrackParticlesKey", "InDetTrackParticles", "" };
 
   SG::ThinningHandleKey<xAOD::TrackParticleContainer>
     m_gsfSGKey{ this, "GSFTrackParticlesKey", "GSFTrackParticles", "" };
 
-  Gaudi::Property<std::string> m_selectionString{ this,
-                                                  "SelectionString",
-                                                  "",
-                                                  "" };
-  Gaudi::Property<bool> m_bestMatchOnly{ this, "BestMatchOnly", true, "" };
-  Gaudi::Property<float> m_coneSize{ this, "ConeSize", -1.0, "" };
+  SG::ThinningHandleKey<xAOD::VertexContainer>
+    m_gsfVtxSGKey{ this, "GSFConversionVerticesKey", "", "" };
+
+  StringProperty m_selectionString{ this, "SelectionString", "", "" };
+
+  BooleanProperty m_bestMatchOnly{ this, "BestMatchOnly", true, "" };
+  BooleanProperty m_bestVtxMatchOnly{ this, "BestVtxMatchOnly", false, "" };
+  FloatProperty m_coneSize{ this, "ConeSize", -1.0, "" };
 
   void setPhotonMasks(std::vector<bool>&,
                       std::vector<bool>&,
                       const xAOD::EgammaContainer*,
                       const xAOD::TrackParticleContainer*,
-                      const xAOD::TrackParticleContainer*,
-                      const bool) const;
-  void setPhotonMasks(std::vector<bool>&,
-                      std::vector<bool>&,
-                      std::vector<const xAOD::Egamma*>&,
-                      const xAOD::TrackParticleContainer*,
-                      const xAOD::TrackParticleContainer*,
-                      const bool) const;
+                      const xAOD::TrackParticleContainer*) const;
   void setElectronMasks(std::vector<bool>&,
                         std::vector<bool>&,
                         const xAOD::EgammaContainer*,
                         const xAOD::TrackParticleContainer*,
-                        const xAOD::TrackParticleContainer*,
-                        const bool) const;
-  void setElectronMasks(std::vector<bool>&,
-                        std::vector<bool>&,
-                        std::vector<const xAOD::Egamma*>&,
-                        const xAOD::TrackParticleContainer*,
-                        const xAOD::TrackParticleContainer*,
-                        const bool) const;
+                        const xAOD::TrackParticleContainer*) const;
+  void clearGSFVtx(const EventContext& ctx) const;
 };
 }
 

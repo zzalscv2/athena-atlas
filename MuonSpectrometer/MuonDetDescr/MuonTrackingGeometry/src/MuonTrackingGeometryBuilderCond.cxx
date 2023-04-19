@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -41,10 +41,6 @@ StatusCode Muon::MuonTrackingGeometryBuilderCond::initialize() {
   return MuonTrackingGeometryBuilderImpl::initialize();
 }
 
-StatusCode Muon::MuonTrackingGeometryBuilderCond::finalize() {
-  ATH_MSG_INFO(name() << " finalize() successful");
-  return StatusCode::SUCCESS;
-}
 
 std::unique_ptr<Trk::TrackingGeometry> Muon::MuonTrackingGeometryBuilderCond::trackingGeometry(
     const EventContext& ctx, Trk::TrackingVolume* tvol, SG::WriteCondHandle<Trk::TrackingGeometry>& whandle) const {

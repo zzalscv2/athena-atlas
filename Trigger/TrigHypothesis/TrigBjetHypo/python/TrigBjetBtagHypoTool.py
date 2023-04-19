@@ -47,14 +47,9 @@ bTaggingWP = \
   }
 
 bbTaggingWP = \
-  { "dl1d85bb82" : 0.040
-  , "dl1d85bb80" : 0.411
-  , "dl1d85bb77" : 0.806
-  , "dl1d85bb75" : 1.011
-  , "dl1d85bb72" : 1.251
-  , "dl1d85bb70" : 1.380
-  , "dl1d85bb65" : 1.634
-  , "dl1d85bb60" : 1.862
+  { "gn182bb96": -1.201
+  , "gn177bb96": -1.201
+  , "gn175bb90": -0.590
   }
 
 
@@ -89,7 +84,7 @@ def decodeThreshold( threshold_btag ):
 
     tagger = "offperf" if threshold_btag == "offperf" else re.findall("(.*)[0-9]{2}",threshold_btag)[0]
 
-    allowedTaggers = ["offperf", "dl1d", "dl1d85bb", "gn1"]
+    allowedTaggers = ["offperf", "dl1d", "gn182bb", "gn177bb", "gn175bb", "gn1"]
     if tagger not in allowedTaggers:
         log.debug("tagger = %s not amidst allowed taggers ",threshold_btag)
         assert False, "Can't recognize tagger during TrigBjetHypoTool configuration. Tagger = "+threshold_btag
@@ -97,7 +92,7 @@ def decodeThreshold( threshold_btag ):
 
 
     btagger = "DL1d20211216"
-    bbtagger = "DL1bb20220331"
+    bbtagger = "dl1dbb20230314"
 
     bbcut = bbTaggingWP.get(threshold_btag)
 

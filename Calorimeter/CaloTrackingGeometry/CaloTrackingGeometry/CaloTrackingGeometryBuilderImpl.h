@@ -56,9 +56,6 @@ class CaloTrackingGeometryBuilderImpl : public AthAlgTool {
   /** AlgTool initailize method.*/
   virtual StatusCode initialize() override;
 
-  /** AlgTool finalize method */
-  virtual StatusCode finalize() override;
-
   /** TrackingGeometry Interface method */
   std::unique_ptr<Trk::TrackingGeometry> createTrackingGeometry(
       Trk::TrackingVolume* innerVol, const CaloDetDescrManager* caloDDM) const;

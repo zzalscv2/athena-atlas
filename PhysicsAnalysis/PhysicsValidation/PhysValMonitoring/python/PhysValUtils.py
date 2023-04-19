@@ -66,7 +66,9 @@ def sortJetAlgs(algseq, algs):
     from JetRecConfig.JetRecConfig import reOrderAlgs
     from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable
 
-    algs = reOrderAlgs( [a for a in algs if a is not None])
+    algs, ca = reOrderAlgs( [a for a in algs if a is not None])
+    # ignore dangling CA instance in legacy config
+    ca.wasMerged()
     for a in algs:
         if hasattr(algseq,a.getName()):
             continue

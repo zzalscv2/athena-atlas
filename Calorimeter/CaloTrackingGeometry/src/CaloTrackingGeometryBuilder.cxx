@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -22,11 +22,6 @@ Calo::CaloTrackingGeometryBuilder::CaloTrackingGeometryBuilder(
 // initialize
 StatusCode Calo::CaloTrackingGeometryBuilder::initialize() {
   return Calo::CaloTrackingGeometryBuilderImpl::initialize();
-}
-
-// finalize
-StatusCode Calo::CaloTrackingGeometryBuilder::finalize() {
-  return Calo::CaloTrackingGeometryBuilderImpl::finalize();
 }
 
 std::unique_ptr<Trk::TrackingGeometry> Calo::CaloTrackingGeometryBuilder::trackingGeometry(

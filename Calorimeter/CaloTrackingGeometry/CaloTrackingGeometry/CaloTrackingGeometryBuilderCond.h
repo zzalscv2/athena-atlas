@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -40,9 +40,6 @@ class CaloTrackingGeometryBuilderCond final
 
   /** AlgTool initailize method.*/
   virtual StatusCode initialize() override final;
-
-  /** AlgTool finalize method */
-  virtual StatusCode finalize() override final;
 
   /** TrackingGeometry Interface method */
   virtual std::unique_ptr<Trk::TrackingGeometry> trackingGeometry(

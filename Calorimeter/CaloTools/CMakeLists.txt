@@ -4,15 +4,14 @@
 atlas_subdir( CaloTools )
 
 # External dependencies:
-find_package( CLHEP )
 find_package( CORAL COMPONENTS CoralBase )
 find_package( ROOT COMPONENTS Core MathCore )
 
 # Component(s) in the package:
 atlas_add_component( CaloTools
    CaloTools/*.h CaloTools/*.icc src/*.cxx src/components/*.cxx
-   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
-   LINK_LIBRARIES ${CLHEP_LIBRARIES} ${CORAL_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel AthenaPoolUtilities AtlasDetDescr CaloCondBlobObjs CaloConditions CaloDetDescrLib CaloEvent CaloGeoHelpers CaloIdentifier CaloInterfaceLib CxxUtils GaudiKernel Identifier LArCablingLib LArElecCalib LArRawConditions LArRecEvent StoreGateLib TileConditionsLib TileEvent TileIdentifier xAODBase )
+   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS} 
+   LINK_LIBRARIES  ${CORAL_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel AthenaPoolUtilities AtlasDetDescr CaloCondBlobObjs CaloConditions CaloDetDescrLib CaloEvent CaloGeoHelpers CaloIdentifier CaloInterfaceLib CxxUtils GaudiKernel Identifier LArCablingLib LArElecCalib LArRawConditions LArRecEvent StoreGateLib TileConditionsLib TileEvent TileIdentifier xAODBase )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

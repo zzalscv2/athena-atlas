@@ -3,14 +3,10 @@
 # Declare the package name:
 atlas_subdir( TrigCombinedEvent )
 
-# External dependencies:
-find_package( Boost )
-
 # Component(s) in the package:
 atlas_add_library( TrigCombinedEvent
                    src/*.cxx
                    PUBLIC_HEADERS TrigCombinedEvent
-                   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
                    LINK_LIBRARIES AthContainers AthenaKernel GaudiKernel TrigNavigationLib TrigSerializeCnvSvcLib )
 
 atlas_add_sercnv_library( TrigCombinedEventSerCnv

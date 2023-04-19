@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -69,7 +69,6 @@ class MuonInertMaterialBuilderImpl : public AthAlgTool, public Trk::TrackingVolu
   virtual ~MuonInertMaterialBuilderImpl() = default;
   /** AlgTool initialize method.*/
   virtual StatusCode initialize() override;
-  virtual StatusCode finalize() override;
 
   std::pair<std::unique_ptr< std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>,
             std::unique_ptr<std::vector<std::vector<std::pair<std::unique_ptr<const Trk::Volume>, float>>>>>

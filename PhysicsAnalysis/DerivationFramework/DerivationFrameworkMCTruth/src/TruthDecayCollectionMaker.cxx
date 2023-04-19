@@ -61,17 +61,17 @@ StatusCode DerivationFramework::TruthDecayCollectionMaker::initialize()
     }
 
     // Decorators
-    m_originDecoratorKey = m_particlesKey.key()+".classifierParticleOrigin";
+    m_originDecoratorKey = m_outputParticlesKey.key()+".classifierParticleOrigin";
     ATH_CHECK(m_originDecoratorKey.initialize());
-    m_typeDecoratorKey = m_typeDecoratorKey.key()+".classifierParticleType";
+    m_typeDecoratorKey = m_outputParticlesKey.key()+".classifierParticleType";
     ATH_CHECK(m_typeDecoratorKey.initialize());
-    m_outcomeDecoratorKey = m_outcomeDecoratorKey.key()+".classifierParticleOutCome";
+    m_outcomeDecoratorKey = m_outputParticlesKey.key()+".classifierParticleOutCome";
     ATH_CHECK(m_outcomeDecoratorKey.initialize());
-    m_classificationDecoratorKey = m_classificationDecoratorKey.key()+".Classification";
+    m_classificationDecoratorKey = m_outputParticlesKey.key()+".Classification";
     ATH_CHECK(m_classificationDecoratorKey.initialize());
-    m_motherIDDecoratorKey = m_motherIDDecoratorKey.key()+".motherID";
+    m_motherIDDecoratorKey = m_outputParticlesKey.key()+".motherID";
     ATH_CHECK(m_motherIDDecoratorKey.initialize());
-    m_daughterIDDecoratorKey = m_daughterIDDecoratorKey.key()+".daughterID";
+    m_daughterIDDecoratorKey = m_outputParticlesKey.key()+".daughterID";
     ATH_CHECK(m_daughterIDDecoratorKey.initialize());
 
     return StatusCode::SUCCESS;

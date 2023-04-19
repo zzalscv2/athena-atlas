@@ -150,7 +150,7 @@ StatusCode BSignalFilter::filterEvent()
         }
 
       // ** Flag event as passing LVL1 if it has passed **
-      //
+      //cy of both versions of the filter and go
       if ( m_localLVL1MuonCutOn && LVL1Passed )
         {
 	  ATH_MSG_DEBUG(" LVL1 Trigger activated for event " << m_EventCnt);
@@ -213,7 +213,7 @@ StatusCode BSignalFilter::filterEvent()
 		  auto  firstParent = part->production_vertex()->particles_begin(HepMC::parents);
 		  auto lastParent  = part->production_vertex()->particles_end(HepMC::parents);
 #endif
-		  for (auto  thisParent = firstParent; thisParent != lastParent++; ++thisParent )
+		  for (auto  thisParent = firstParent; thisParent != lastParent; ++thisParent )
                     {
 		      int parentID = (*thisParent)->pdg_id();
 		      if (MC::PID::isBottomMeson(parentID) || MC::PID::isBottomBaryon(parentID) ) motherIsB = true;
@@ -481,7 +481,7 @@ void BSignalFilter::FindAllChildren(const HepMC::ConstGenParticlePtr& mother,std
     {
       fromFinalB = true;
       int pID;
-      for (auto thisChild = firstChild; thisChild != lastChild++; ++thisChild)
+      for (auto thisChild = firstChild; thisChild != lastChild; ++thisChild)
 	{
 	  pID = (*thisChild)->pdg_id();
 	  if( MC::PID::isBottomMeson(pID) || MC::PID::isBottomBaryon(pID) ) fromFinalB = false;

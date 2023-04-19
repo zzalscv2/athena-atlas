@@ -92,8 +92,9 @@ MuonGMCheck.check_mdt = 1
 MuonGMCheck.check_rpc = 1
 MuonGMCheck.check_tgc = 1
 MuonGMCheck.check_csc = 1
-from MuonIdHelpers.MuonIdHelpersConf import Muon__MuonIdHelperSvc
-ServiceMgr += Muon__MuonIdHelperSvc("MuonIdHelperSvc",HasCSC=MuonGeometryFlags.hasCSC(), HasSTgc=MuonGeometryFlags.hasSTGC(), HasMM=MuonGeometryFlags.hasMM())
+if not hasattr(ServiceMgr, "MuonIdHelperSvc"):
+    from AthenaCommon.CfgGetter import getService
+    ServiceMgr += getService("MuonIdHelperSvc")
 MuonGMCheck.MuonIdHelperSvc=ServiceMgr.MuonIdHelperSvc
 
 printfunc (MuonGMCheck)

@@ -174,8 +174,13 @@ class AccumulatorDecorator:
                             cacheHit = True
                     else:
                         cacheHit = True
-
-                    return (deepcopy(res) if self._deepcopy else res, cacheHit)
+                
+                    if self._deepcopy:
+                        return deepcopy(res), cacheHit
+                    else:
+                        # shallow copied CA still needs to undergo merging
+                        res._wasMerged=False
+                        return res, cacheHit
 
                 else:
                     _msg.debug('Hash not found in AccumulatorCache for function %s' , self._func)

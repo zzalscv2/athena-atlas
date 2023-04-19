@@ -17,6 +17,9 @@ if DQMonFlags.doMonitoring() and not DQMonFlags.doNewMonitoring():
       from AthenaConfiguration.AllConfigFlags import ConfigFlags
       from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
       from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
+
+      # If the flags are not locked yet, we have to do it now
+      ConfigFlags.lock()
       CAtoGlobalWrapper(TrigDecisionToolCfg, ConfigFlags)
 
    # set up first monitoring manager to set static variables

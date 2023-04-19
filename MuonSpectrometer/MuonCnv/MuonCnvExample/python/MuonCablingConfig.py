@@ -18,6 +18,10 @@ if DetFlags.MDT_on():
     from AtlasGeoModel.CommonGMJobProperties import CommonGeometryFlags
     condSequence.MuonMDT_CablingAlg.isRun3 = CommonGeometryFlags.Run not in ["RUN1","RUN2"]
 
+if DetFlags.MM_on():
+    from MuonMM_Cabling.MuonMM_CablingConf import MuonMM_CablingAlg
+    condSequence += MuonMM_CablingAlg("MuonMM_CablingAlg")
+
 # defaults have to be re-set now since the jobproperties and trigger flags are now available # SS
 muonCnvFlags.setDefaults()
 
@@ -135,3 +139,12 @@ if DetFlags.readRDOBS.MDT_on() or DetFlags.readRDOPool.MDT_on()  or DetFlags.rea
           condSequence.MuonMDT_CablingAlg.MapFolders = "/MDT/Ofl/CABLING/MAP_SCHEMA" 
           condSequence.MuonMDT_CablingAlg.MezzanineFolders    = "/MDT/Ofl/CABLING/MEZZANINE_SCHEMA"
        
+if DetFlags.readRDOBS.MM_on() or DetFlags.readRDOPool.MM_on()  or DetFlags.readRIOPool.MM_on() or DetFlags.digitize.MM_on():
+      log.info("Adding Micromegas cabling folders to conddb")
+      from IOVDbSvc.CondDB import conddb 
+      IOVDbSvc = ServiceMgr.IOVDbSvc
+      if globalflags.DataSource()=='data':
+          # here we should add the cool folders containing the cabling map of the NSW
+          pass
+
+    

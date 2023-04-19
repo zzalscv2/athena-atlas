@@ -44,8 +44,9 @@ from AtlasGeoModel import MuonGM
 from AtlasGeoModel import Agdd2Geo
 
 from AtlasGeoModel.MuonGMJobProperties import MuonGeometryFlags
-from MuonIdHelpers.MuonIdHelpersConf import Muon__MuonIdHelperSvc
-svcMgr += Muon__MuonIdHelperSvc("MuonIdHelperSvc",HasCSC=MuonGeometryFlags.hasCSC(), HasSTgc=MuonGeometryFlags.hasSTGC(), HasMM=MuonGeometryFlags.hasMM())
+if not hasattr(svcMgr, "MuonIdHelperSvc"):
+    from AthenaCommon.CfgGetter import getService
+    svcMgr += getService("MuonIdHelperSvc")
 
 ###################################################
 # Initialize the trigger related things

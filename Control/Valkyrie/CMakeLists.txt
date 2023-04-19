@@ -4,7 +4,7 @@
 atlas_subdir( Valkyrie )
 
 # External dependencies:
-find_package( Boost COMPONENTS filesystem thread system )
+find_package( Boost COMPONENTS regex )
 find_package( valgrind )
 
 # Component(s) in the package:

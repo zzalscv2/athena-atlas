@@ -126,13 +126,6 @@ StatusCode Tile::TileVolumeBuilder::initialize()
   return StatusCode::SUCCESS;
 }
 
-// finalize
-StatusCode Tile::TileVolumeBuilder::finalize()
-{
-  ATH_MSG_INFO( "finalize() successful" );
-  return StatusCode::SUCCESS;
-}
-
 std::vector<Trk::TrackingVolume*>*
 Tile::TileVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM) const
 {
