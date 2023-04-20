@@ -287,8 +287,8 @@ bool InDetGlobalErrorMonTool::SyncPixel()
   
   m_errorGeoPixel.clear();
   m_disabledGeoPixel.clear();
-  
-  SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> pixelDetEle(m_pixelDetEleCollKey);
+  const EventContext& ctx{Gaudi::Hive::currentContext()}; 
+  SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> pixelDetEle(m_pixelDetEleCollKey, ctx);
   const InDetDD::SiDetectorElementCollection* elements(pixelDetEle.retrieve());
   if (elements==nullptr) {
     ATH_MSG_ERROR(m_pixelDetEleCollKey.fullKey() << " could not be retrieved in SyncDisabledPixel()");
@@ -304,7 +304,7 @@ bool InDetGlobalErrorMonTool::SyncPixel()
       IdentifierHash waferHash = m_pixID->wafer_hash((*fit));
       
       // Inactive module, flagging time!
-      if ( !m_pixelCondSummaryTool->isActive( waferHash ) )
+      if ( !m_pixelCondSummaryTool->isActive( waferHash, ctx ) )
 	{
 	  moduleGeo_t moduleGeo;
 	  
@@ -318,7 +318,7 @@ bool InDetGlobalErrorMonTool::SyncPixel()
 	  
 	}
       // Bad module, flagging time!
-      if ( m_pixelCondSummaryTool->isActive( waferHash ) && !m_pixelCondSummaryTool->isGood( waferHash ) )
+      if ( m_pixelCondSummaryTool->isActive( waferHash, ctx ) && !m_pixelCondSummaryTool->isGood( waferHash, ctx ) )
 	{
 	  moduleGeo_t moduleGeo;
 	  

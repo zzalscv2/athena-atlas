@@ -28,31 +28,19 @@ public:
   /// Creates the InterfaceID and interfaceID() method
   DeclareInterfaceID(IInDetConditionsTool, 1, 0);
  
-  virtual bool isActive(const Identifier& elementId, const InDetConditions::Hierarchy h=InDetConditions::DEFAULT) const =0;
-  virtual bool isActive(const IdentifierHash& elementHash) const =0;
-  virtual bool isActive(const IdentifierHash& elementHash, const Identifier& elementId) const =0;
-  virtual double activeFraction(const IdentifierHash& elementHash, const Identifier& idStart, const Identifier& idEnd) const =0;  
 
   virtual bool isActive(const Identifier& elementId, const InDetConditions::Hierarchy h, const EventContext& ctx) const =0;
   virtual bool isActive(const IdentifierHash& elementHash, const EventContext& ctx) const =0;
   virtual bool isActive(const IdentifierHash& elementHash, const Identifier& elementId, const EventContext& ctx) const =0;
   virtual double activeFraction(const IdentifierHash& elementHash, const Identifier& idStart, const Identifier& idEnd, const EventContext& ctx) const =0;  
 
-  virtual bool isGood(const Identifier& elementId, const InDetConditions::Hierarchy h=InDetConditions::DEFAULT) const =0;
-  virtual bool isGood(const IdentifierHash& elementHash) const =0;
-  virtual bool isGood(const IdentifierHash& elementHash, const Identifier& elementId) const =0;
-  virtual double goodFraction(const IdentifierHash& elementHash, const Identifier& idStart, const Identifier& idEnd) const =0;
-
   virtual bool isGood(const Identifier& elementId, const InDetConditions::Hierarchy h, const EventContext& ctx) const =0;
   virtual bool isGood(const IdentifierHash& elementHash, const EventContext& ctx) const =0;
   virtual bool isGood(const IdentifierHash& elementHash, const Identifier& elementId, const EventContext& ctx) const =0;
   virtual double goodFraction(const IdentifierHash& elementHash, const Identifier& idStart, const Identifier& idEnd, const EventContext& ctx) const =0;
 
-  virtual bool hasBSError(const IdentifierHash& elementHash) const =0;
-  virtual bool hasBSError(const IdentifierHash& elementHash, Identifier elementId) const =0;
   virtual bool hasBSError(const IdentifierHash& elementHash, const EventContext& ctx) const =0;
   virtual bool hasBSError(const IdentifierHash& elementHash, Identifier elementId, const EventContext& ctx) const =0;
-  virtual bool hasBSError(const IdentifierHash& elementHash, const EventContext& ctx, Identifier elementId) const =0;
   virtual uint64_t getBSErrorWord(const IdentifierHash& elementHash, const EventContext& ctx) const =0;
   virtual uint64_t getBSErrorWord(const IdentifierHash& elementHash, const int index, const EventContext& ctx) const =0;
 

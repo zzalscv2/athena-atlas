@@ -181,11 +181,11 @@ InDet::InDetTestPixelLayerTool::expectHitInPixelLayer(
 
     VALIDATE_STATUS_ARRAY(!m_pixelDetElStatus.empty(),
                           pixelDetElStatus->isGood(p->associatedSurface().associatedDetectorElement()->identifyHash()),
-                          m_pixelCondSummaryTool->isGood(id, InDetConditions::PIXEL_MODULE));
+                          m_pixelCondSummaryTool->isGood(id, InDetConditions::PIXEL_MODULE, ctx));
 
     if ((!m_pixelDetElStatus.empty() &&
          pixelDetElStatus->isGood(p->associatedSurface().associatedDetectorElement()->identifyHash())) ||
-        (m_pixelDetElStatus.empty() && m_pixelCondSummaryTool->isGood(id, InDetConditions::PIXEL_MODULE))) {
+        (m_pixelDetElStatus.empty() && m_pixelCondSummaryTool->isGood(id, InDetConditions::PIXEL_MODULE, ctx))) {
 
       if (m_checkActiveAreas) {
 
@@ -242,15 +242,17 @@ InDet::InDetTestPixelLayerTool::expectHit(
   Identifier id =
     trackpar->associatedSurface().associatedDetectorElement()->identify();
 
-  SG::ReadHandle<InDet::SiDetectorElementStatus> pixelDetElStatus(getPixelDetElStatus(Gaudi::Hive::currentContext()));
+  
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  SG::ReadHandle<InDet::SiDetectorElementStatus> pixelDetElStatus(getPixelDetElStatus(ctx));
 
   VALIDATE_STATUS_ARRAY(
     !m_pixelDetElStatus.empty(),
     pixelDetElStatus->isGood(trackpar->associatedSurface().associatedDetectorElement()->identifyHash()),
-    m_pixelCondSummaryTool->isGood(id, InDetConditions::PIXEL_MODULE));
+    m_pixelCondSummaryTool->isGood(id, InDetConditions::PIXEL_MODULE, ctx));
   if ((!m_pixelDetElStatus.empty() &&
        pixelDetElStatus->isGood(trackpar->associatedSurface().associatedDetectorElement()->identifyHash())) ||
-      (m_pixelDetElStatus.empty() && m_pixelCondSummaryTool->isGood(id, InDetConditions::PIXEL_MODULE))) {
+      (m_pixelDetElStatus.empty() && m_pixelCondSummaryTool->isGood(id, InDetConditions::PIXEL_MODULE, ctx))) {
 
     if (m_checkDeadRegions) {
 
@@ -326,7 +328,8 @@ InDet::InDetTestPixelLayerTool::getFracGood(
   if (!found_layer)
     return -7.;
 
-  SG::ReadHandle<InDet::SiDetectorElementStatus> pixelDetElStatus(getPixelDetElStatus(Gaudi::Hive::currentContext()));
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  SG::ReadHandle<InDet::SiDetectorElementStatus> pixelDetElStatus(getPixelDetElStatus(ctx));
 
   for (std::unique_ptr<const Trk::TrackParameters>& p : pixelLayerParam) {
 
@@ -341,10 +344,10 @@ InDet::InDetTestPixelLayerTool::getFracGood(
     VALIDATE_STATUS_ARRAY(
       !m_pixelDetElStatus.empty(),
       pixelDetElStatus->isGood(trackpar->associatedSurface().associatedDetectorElement()->identifyHash()),
-      m_pixelCondSummaryTool->isGood(id, InDetConditions::PIXEL_MODULE));
+      m_pixelCondSummaryTool->isGood(id, InDetConditions::PIXEL_MODULE, ctx));
     if ((!m_pixelDetElStatus.empty() &&
          pixelDetElStatus->isGood(p->associatedSurface().associatedDetectorElement()->identifyHash())) ||
-        (m_pixelDetElStatus.empty() && m_pixelCondSummaryTool->isGood(id, InDetConditions::PIXEL_MODULE))) {
+        (m_pixelDetElStatus.empty() && m_pixelCondSummaryTool->isGood(id, InDetConditions::PIXEL_MODULE, ctx))) {
 
       if (isActive(p.get())) {
 
@@ -471,7 +474,8 @@ InDet::InDetTestPixelLayerTool::getTrackStateOnPixelLayerInfo(
   if (!getPixelLayerParameters(trackpar, pixelLayerParam))
     return false;
 
-  SG::ReadHandle<InDet::SiDetectorElementStatus> pixelDetElStatus(getPixelDetElStatus(Gaudi::Hive::currentContext()));
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  SG::ReadHandle<InDet::SiDetectorElementStatus> pixelDetElStatus(getPixelDetElStatus(ctx));
 
   for (std::unique_ptr<const Trk::TrackParameters>& trkParam :
        pixelLayerParam) {
@@ -547,11 +551,11 @@ InDet::InDetTestPixelLayerTool::getTrackStateOnPixelLayerInfo(
     VALIDATE_STATUS_ARRAY(
       !m_pixelDetElStatus.empty(),
       pixelDetElStatus->isGood(trkParam->associatedSurface().associatedDetectorElement()->identifyHash()),
-      m_pixelCondSummaryTool->isGood(id, InDetConditions::PIXEL_MODULE));
+      m_pixelCondSummaryTool->isGood(id, InDetConditions::PIXEL_MODULE, ctx));
     bool isgood =
       ((!m_pixelDetElStatus.empty() &&
         pixelDetElStatus->isGood(trkParam->associatedSurface().associatedDetectorElement()->identifyHash())) ||
-       (m_pixelDetElStatus.empty() && m_pixelCondSummaryTool->isGood(id, InDetConditions::PIXEL_MODULE)));
+       (m_pixelDetElStatus.empty() && m_pixelCondSummaryTool->isGood(id, InDetConditions::PIXEL_MODULE, ctx)));
 
     double phitol = 2.5;
     double etatol = 5.;
@@ -645,9 +649,10 @@ InDet::InDetTestPixelLayerTool::getFracGood(
     trkParam->associatedSurface().associatedDetectorElement()->identify();
   IdentifierHash id_hash = m_pixelId->wafer_hash(moduleid);
 
-  VALIDATE_STATUS_ARRAY(pixelDetElStatus,pixelDetElStatus->isGood(id_hash), m_pixelCondSummaryTool->isGood(id_hash));
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  VALIDATE_STATUS_ARRAY(pixelDetElStatus,pixelDetElStatus->isGood(id_hash), m_pixelCondSummaryTool->isGood(id_hash, ctx));
   bool is_good (  ( pixelDetElStatus && pixelDetElStatus->isGood(id_hash))
-                || (!pixelDetElStatus && m_pixelCondSummaryTool->isGood(id_hash)));
+                || (!pixelDetElStatus && m_pixelCondSummaryTool->isGood(id_hash, ctx)));
   if (!is_good)
     return 0.;
 
@@ -740,7 +745,7 @@ InDet::InDetTestPixelLayerTool::getFracGood(
                             m_pixelCondSummaryTool->isGood(centreId, context));
       bool is_chip_good((!m_pixelDetElStatus.empty() &&
                          pixelDetElStatus->isChipGood(id_hash, m_pixelReadout->getFE(centreId, moduleID))) ||
-                        (m_pixelDetElStatus.empty() && m_pixelCondSummaryTool->isGood(centreId, context)));
+                        (m_pixelDetElStatus.empty() && m_pixelCondSummaryTool->isGood(centreId, context, ctx)));
       if (!is_chip_good){
         return 0.;
       }
@@ -764,10 +769,10 @@ InDet::InDetTestPixelLayerTool::getFracGood(
   if (pixelDetElStatus) {
     frac = Pixel::getGoodFraction(*pixelDetElStatus, *m_pixelReadout, *m_pixelId, moduleid, id_hash, startId, endId);
     VALIDATE_STATUS_ARRAY(
-      !m_pixelDetElStatus.empty(), frac, m_pixelCondSummaryTool->goodFraction(id_hash, startId, endId));
+      !m_pixelDetElStatus.empty(), frac, m_pixelCondSummaryTool->goodFraction(id_hash, startId, endId, ctx));
 
   } else {
-    frac = m_pixelCondSummaryTool->goodFraction(id_hash, startId, endId);
+    frac = m_pixelCondSummaryTool->goodFraction(id_hash, startId, endId, ctx);
   }
 
   return frac;

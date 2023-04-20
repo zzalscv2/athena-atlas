@@ -205,7 +205,8 @@ bool StripClusteringTool::isBadStrip(const InDet::SiDetectorElementStatus *strip
 	    m_conditionsTool->isGood(stripId, InDetConditions::SCT_STRIP));
 	return not stripDetElStatus->isCellGood(waferHash.value(), strip_i) ;
     }
-    return not m_conditionsTool->isGood(stripId, InDetConditions::SCT_STRIP);
+    const EventContext& ctx{Gaudi::Hive::currentContext()};
+    return not m_conditionsTool->isGood(stripId, InDetConditions::SCT_STRIP, ctx);
 }
 
 

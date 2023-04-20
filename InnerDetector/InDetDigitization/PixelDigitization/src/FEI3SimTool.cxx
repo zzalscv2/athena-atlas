@@ -188,7 +188,7 @@ void FEI3SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
       continue;
     }
 
-    if (!m_pixelConditionsTool->isActive(moduleHash, diodeID)) {
+    if (!m_pixelConditionsTool->isActive(moduleHash, diodeID, ctx)) {
       SiHelper::disabled(diode, true, true);
       continue;
     }
