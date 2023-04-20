@@ -39,7 +39,7 @@ namespace Muon {
       virtual StatusCode initialize() override;
       
       /** Method that converts the ROBFragments into the passed container */
-      virtual StatusCode convertIntoContainer(const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>&, 
+      virtual StatusCode convertIntoContainer(const EventContext& ctx, const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>&, 
                                               const std::vector<IdentifierHash>&, MM_RawDataContainer&) const;
 
     protected:

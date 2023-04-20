@@ -92,11 +92,6 @@ StatusCode Calo::CaloTrackingGeometryBuilderImpl::initialize() {
   return StatusCode::SUCCESS;
 }
 
-// finalize
-StatusCode Calo::CaloTrackingGeometryBuilderImpl::finalize() {
-  ATH_MSG_INFO("finalize() successful");
-  return StatusCode::SUCCESS;
-}
 std::unique_ptr<Trk::TrackingGeometry>
 Calo::CaloTrackingGeometryBuilderImpl::createTrackingGeometry(
     Trk::TrackingVolume* innerVol, const CaloDetDescrManager* caloDDM) const {

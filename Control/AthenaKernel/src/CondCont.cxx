@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaKernel/src/CondCont.cpp
@@ -335,11 +335,13 @@ size_t CondContBase::trim (const std::vector<key_type>& runLbnKeys, const std::v
       const CondContSet* tsmap = reinterpret_cast<const CondContSet*> (ent.second);
       //size_t before=tsmap->size();
       CondContSet* tsmap_nc ATLAS_THREAD_SAFE = const_cast<CondContSet*>(tsmap);
-      size_t ntrim=tsmap_nc->trim(TSKeys);
+      // Trim inner containers, allowing the removal of all elements.
+      // See ATLASRECTS-7421.
+      size_t ntrim=tsmap_nc->trim (TSKeys, true);
       nTrimmed+=ntrim;
       //std::cout << "WL: Trimming inner container for clid " << m_clid << " (" << ntrim << " out of " << before << ", nKeys= " << TSKeys.size() << ")" << std::endl;
     }
-    //Then trim outer container based on run-LB 
+    // Then trim outer container based on run-LB.
     size_t outerTrimmed=m_condSet.trim(runLbnKeys);
     //std::cout << "WL: Removing outer sets " << outerTrimmed << ", remaining " << m_condSet.size()  << std::endl; 
     //FIXME: The number returned may be inaccurate, only correct if the outer container
@@ -742,7 +744,7 @@ CondContBase::delete_function* CondContBase::delfcn() const
 
 
 /**
- * @brief Description of this container to use for Msgstream.
+ * @brief Description of this container to use for MsgStream.
  */
 std::string CondContBase::title() const
 {

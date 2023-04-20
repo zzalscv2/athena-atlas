@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef _Trk_PRDtoTrackMap_H_
 #define _Trk_PRDtoTrackMap_H_
-
+#include "AthAllocators/ArenaPoolSTLAllocator.h"
 #include <unordered_map>
+#include <functional>
 
 namespace Trk {
 
@@ -15,57 +16,66 @@ class Track;
 class PRDtoTrackMap
 {
 public:
-  using TrackPrepRawDataMap =
-    std::unordered_map<const Track*, std::vector<const PrepRawData*>>;
+ using TrackPrepRawDataMap =
+     std::unordered_map<const Track*,                     // Key
+                        std::vector<const PrepRawData*>,  // T
+                        std::hash<const Track*>,          // Hash
+                        std::equal_to<const Track*>,      // KeyEqual
+                        SG::ArenaPoolSTLAllocator<std::pair<
+                            const Track* const,
+                            std::vector<const PrepRawData*>>>  // Allocator
+                        >;
 
-  using PrepRawDataTrackMap =
-    std::unordered_multimap<const PrepRawData*, const Track*>;
+ using PrepRawDataTrackMap = std::unordered_multimap<
+     const PrepRawData*,                 // Key
+     const Track*,                       // T
+     std::hash<const PrepRawData*>,      // Hash
+     std::equal_to<const PrepRawData*>,  // KeyEqual
+     SG::ArenaPoolSTLAllocator<
+         std::pair<const PrepRawData* const, const Track*>>  // Allocator
 
-  using PrepRawDataTrackMapRange =
-    std::pair<PrepRawDataTrackMap::iterator, PrepRawDataTrackMap::iterator>;
+     >;
 
-  using ConstPrepRawDataTrackMapRange =
-    std::pair<PrepRawDataTrackMap::const_iterator,
-              PrepRawDataTrackMap::const_iterator>;
+ using PrepRawDataTrackMapRange =
+     std::pair<PrepRawDataTrackMap::iterator, PrepRawDataTrackMap::iterator>;
 
-  PRDtoTrackMap() = default;
-  virtual ~PRDtoTrackMap() = default;
-  PRDtoTrackMap(const PRDtoTrackMap& a) = default;
-  PRDtoTrackMap(PRDtoTrackMap&& a) noexcept = default;
-  PRDtoTrackMap& operator=(const PRDtoTrackMap& a) = default;
-  PRDtoTrackMap& operator=(PRDtoTrackMap&& a) noexcept = default;
+ using ConstPrepRawDataTrackMapRange =
+     std::pair<PrepRawDataTrackMap::const_iterator,
+               PrepRawDataTrackMap::const_iterator>;
 
-  virtual const std::type_info& getType() const;
+ PRDtoTrackMap() = default;
+ virtual ~PRDtoTrackMap() = default;
+ PRDtoTrackMap(const PRDtoTrackMap& a) = default;
+ PRDtoTrackMap(PRDtoTrackMap&& a) noexcept = default;
+ PRDtoTrackMap& operator=(const PRDtoTrackMap& a) = default;
+ PRDtoTrackMap& operator=(PRDtoTrackMap&& a) noexcept = default;
 
-  /** does this PRD belong to at least one track?
-      @param prd the PrepRawData in question
-      @return true if 'prd' exists in at least one track (of course
-     PRD_AssociationTool can only give information about tracks it knows about
-     i.e. that were added with addPRDs()*/
-  bool isUsed(const PrepRawData& prd) const;
+ virtual const std::type_info& getType() const;
 
-  /** does this PRD belong to more than one track?
-      @param prd the PrepRawData in question
-      @return true if 'prd' exists on more than one track (of course
-     PRD_AssociationTool can only give information about tracks it knows about
-     i.e. that were added with addPRDs()*/
-  bool isShared(const PrepRawData& prd) const;
+ /** does this PRD belong to at least one track?
+     @param prd the PrepRawData in question
+     @return true if 'prd' exists in at least one track
+ */
+ bool isUsed(const PrepRawData& prd) const;
 
-  /** get the Tracks associated with this PrepRawData.
-      IMPORTANT: Please use the typedef PrepRawDataTrackMapRange to
-      access the tracks, as the internal representation may change.*/
-  PrepRawDataTrackMapRange onTracks(const PrepRawData& prd);
-
-  /** get the Tracks associated with this PrepRawData.
-      IMPORTANT: Please use the typedef ConstPrepRawDataTrackMapRange to
-      access the tracks, as the internal representation may change.*/
-  ConstPrepRawDataTrackMapRange onTracks(const PrepRawData& prd) const;
-
-  /** returns a vector of PRDs belonging to the passed track.
+ /** does this PRD belong to more than one track?
+     @param prd the PrepRawData in question
+     @return true if 'prd' exists on more than one track
    */
-  std::vector<const Trk::PrepRawData*> getPrdsOnTrack(const Track& track) const;
+ bool isShared(const PrepRawData& prd) const;
 
-  void clear();
+ /** get the Tracks associated with this PrepRawData.*/
+ PrepRawDataTrackMapRange onTracks(const PrepRawData& prd);
+
+ /** get the Tracks associated with this PrepRawData.*/
+ ConstPrepRawDataTrackMapRange onTracks(const PrepRawData& prd) const;
+
+ /** returns a vector of PRDs belonging to the passed track.*/
+ std::vector<const Trk::PrepRawData*> getPrdsOnTrack(const Track& track) const;
+
+ void clear();
+
+ void reserve(size_t nTracks, size_t nRawData);
 
 protected:
   /**holds the tracks associated with each PRD (i.e. the PRD* is the key)*/

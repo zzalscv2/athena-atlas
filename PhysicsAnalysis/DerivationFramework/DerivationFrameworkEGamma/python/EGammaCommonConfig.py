@@ -575,8 +575,9 @@ def EGammaCommonCfg(ConfigFlags):
 
         # Schedule PseudoJetTruth
         constit_algs = getInputAlgs(cst.Truth, flags=ConfigFlags)
-        constit_algs = reOrderAlgs( [a for a in constit_algs if a is not None])
+        constit_algs, ca = reOrderAlgs( [a for a in constit_algs if a is not None])
 
+        acc.merge(ca)
         for a in constit_algs:
             acc.addEventAlgo(a)
         constitPJAlg = getConstitPJGAlg(cst.Truth, suffix=None)

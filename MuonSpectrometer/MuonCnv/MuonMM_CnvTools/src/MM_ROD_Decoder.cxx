@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <memory>
@@ -7,6 +7,7 @@
 
 #include "MuonRDO/MM_RawDataContainer.h"
 #include "MuonIdHelpers/MmIdHelper.h"
+#include "StoreGate/ReadCondHandle.h"
 
 #include "MuonNSWCommonDecode/NSWCommonDecoder.h"
 #include "MuonNSWCommonDecode/NSWElink.h"
@@ -29,6 +30,7 @@ Muon::MM_ROD_Decoder::MM_ROD_Decoder( const std::string& type, const std::string
 StatusCode Muon::MM_ROD_Decoder::initialize() 
 {
   ATH_CHECK(detStore()->retrieve(m_MmIdHelper, "MMIDHELPER"));
+  ATH_CHECK(m_mmCablingMap.initialize());
   return StatusCode::SUCCESS;
 }
 
@@ -39,7 +41,7 @@ StatusCode Muon::MM_ROD_Decoder::initialize()
 // (only requested modules are decoded). This must be made here, because the 
 // trigger granularity is a module, whereas ROB granularity is a whole sector. 
 // Therefore, refined selection is needed with decoded information.
-StatusCode Muon::MM_ROD_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment& robFrag, const std::vector<IdentifierHash>& rdoIdhVect, std::unordered_map<IdentifierHash, std::unique_ptr<MM_RawDataCollection>> &rdo_map) const
+StatusCode Muon::MM_ROD_Decoder::fillCollection(const EventContext& ctx, const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment& robFrag, const std::vector<IdentifierHash>& rdoIdhVect, std::unordered_map<IdentifierHash, std::unique_ptr<MM_RawDataCollection>> &rdo_map) const
 {
   // check fragment for errors
   try {
@@ -47,6 +49,12 @@ StatusCode Muon::MM_ROD_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPAC
   } catch (eformat::Issue &ex) {
     ATH_MSG_WARNING(ex.what());
     return StatusCode::SUCCESS;
+  }
+
+  SG::ReadCondHandle<MicroMega_CablingMap>  mmCablingMap{m_mmCablingMap, ctx};
+  if(! mmCablingMap.isValid()){
+    ATH_MSG_ERROR("Cannot find Micromegas cabling map!");
+    return StatusCode::FAILURE;
   }
 
   // if the vector of hashes is not empty, then we are in seeded mode
@@ -89,10 +97,17 @@ StatusCode Muon::MM_ROD_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPAC
        unsigned int channel_number = channel->channel_number();
        if (channel_number == 0) continue; // skip disconnected vmm channels
        Identifier channel_ID = m_MmIdHelper->channelID(module_ID, multi_layer, gas_gap, channel_number);  // not validating the IDs (too slow)
-
-       // for data the time and charge are in counts
-       bool timeAndChargeInCounts = true;
-       rdo->push_back(new MM_RawData(channel_ID, channel_number, channel->tdo(), channel->pdo(), channel->rel_bcid(),timeAndChargeInCounts)); // isDead = false (ok?)
+       
+       // now we have to check if for this channel there is a correction of the cabling needed
+       std::optional<Identifier> correctedChannelId = mmCablingMap.cptr()->correctChannel(channel_ID, msgStream());
+       if(correctedChannelId){
+          // for data the time and charge are in counts
+          bool timeAndChargeInCounts = true;
+          uint correctedChannelNumber = m_MmIdHelper->channel(*correctedChannelId);
+          rdo->push_back(new MM_RawData(*correctedChannelId, correctedChannelNumber, channel->tdo(), channel->pdo(), channel->rel_bcid(),timeAndChargeInCounts)); // isDead = false (ok?)
+       } else {
+          ATH_MSG_DEBUG("Channel was shifted outside its connector and is therefore not decoded into and RDO");
+       }
     }
   }
 

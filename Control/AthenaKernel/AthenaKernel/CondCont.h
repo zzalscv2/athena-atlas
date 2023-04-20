@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaKernel/CondCont.h
@@ -340,7 +340,7 @@ public:
    * an object with a range matching a key in @c keys or when there
    * is only one object left. Mixed containers are trimmed recursivly. 
    *
-   * The list @c runLBnKeys should contain keys as computed by keyFromRunLBN,
+   * The list @c runLbnKeys should contain keys as computed by keyFromRunLBN,
    * the @c list TSKey should contain keys from keyFromTimestamp. Depending 
    * on the type (RUNLUMI, TIMESTAMP, MIXED) only one of the lists or both 
    * are used. The list must be sorted.
@@ -653,7 +653,7 @@ protected:
 
 
   /**
-   * @brief Description of this container to use for Msgstream.
+   * @brief Description of this container to use for MsgStream.
    */
   std::string title() const;
 

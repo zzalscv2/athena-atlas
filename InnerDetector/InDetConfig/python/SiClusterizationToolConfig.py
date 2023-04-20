@@ -7,9 +7,8 @@ from AthenaConfiguration.Enums import BeamType, LHCPeriod
 from IOVDbSvc.IOVDbSvcConfig import addFoldersSplitOnline
 
 
-def ClusterMakerToolCfg(flags, name="InDetClusterMakerTool"):
+def ClusterMakerToolCfg(flags, name="InDetClusterMakerTool", **kwargs):
     acc = ComponentAccumulator()
-    kwargs = {}
 
     # This directly needs the following Conditions data:
     # PixelChargeCalibCondData & PixelOfflineCalibData
@@ -26,23 +25,24 @@ def ClusterMakerToolCfg(flags, name="InDetClusterMakerTool"):
         PixelReadoutManagerCfg)
     acc.merge(PixelReadoutManagerCfg(flags))
 
-    from SiLorentzAngleTool.PixelLorentzAngleConfig import (
-        PixelLorentzAngleToolCfg)
-    kwargs["PixelLorentzAngleTool"] = acc.popToolsAndMerge(
-        PixelLorentzAngleToolCfg(flags))
+    if "PixelLorentzAngleTool" not in kwargs:
+        from SiLorentzAngleTool.PixelLorentzAngleConfig import (
+            PixelLorentzAngleToolCfg)
+        kwargs.setdefault("PixelLorentzAngleTool", acc.popToolsAndMerge(
+            PixelLorentzAngleToolCfg(flags)))
 
-    from SiLorentzAngleTool.SCT_LorentzAngleConfig import (
-        SCT_LorentzAngleToolCfg)
-    kwargs["SCTLorentzAngleTool"] = acc.popToolsAndMerge(
-        SCT_LorentzAngleToolCfg(flags))
+    if "SCTLorentzAngleTool" not in kwargs:
+        from SiLorentzAngleTool.SCT_LorentzAngleConfig import (
+            SCT_LorentzAngleToolCfg)
+        kwargs.setdefault("SCTLorentzAngleTool", acc.popToolsAndMerge(
+            SCT_LorentzAngleToolCfg(flags)))
 
     acc.setPrivateTools(CompFactory.InDet.ClusterMakerTool(name, **kwargs))
     return acc
 
 
-def ITkClusterMakerToolCfg(flags, name="ITkClusterMakerTool"):
+def ITkClusterMakerToolCfg(flags, name="ITkClusterMakerTool", **kwargs):
     acc = ComponentAccumulator()
-    kwargs = {}
 
     from PixelConditionsAlgorithms.ITkPixelConditionsConfig import (
         ITkPixelChargeCalibCondAlgCfg)
@@ -53,66 +53,70 @@ def ITkClusterMakerToolCfg(flags, name="ITkClusterMakerTool"):
     # PixelModuleData & PixelChargeCalibCondData
     acc.merge(ITkPixelChargeCalibCondAlgCfg(flags))
     acc.merge(ITkPixelReadoutManagerCfg(flags))
-    kwargs["PixelReadoutManager"] = acc.getService("ITkPixelReadoutManager")
+    kwargs.setdefault("PixelReadoutManager", acc.getService(
+        "ITkPixelReadoutManager"))
 
-    from SiLorentzAngleTool.ITkPixelLorentzAngleConfig import (
-        ITkPixelLorentzAngleToolCfg)
-    kwargs["PixelLorentzAngleTool"] = acc.popToolsAndMerge(
-        ITkPixelLorentzAngleToolCfg(flags))
+    if "PixelLorentzAngleTool" not in kwargs:
+        from SiLorentzAngleTool.ITkPixelLorentzAngleConfig import (
+            ITkPixelLorentzAngleToolCfg)
+        kwargs.setdefault("PixelLorentzAngleTool", acc.popToolsAndMerge(
+            ITkPixelLorentzAngleToolCfg(flags)))
 
-    from SiLorentzAngleTool.ITkStripLorentzAngleConfig import (
-        ITkStripLorentzAngleToolCfg)
-    kwargs["SCTLorentzAngleTool"] = acc.popToolsAndMerge(
-        ITkStripLorentzAngleToolCfg(flags))
+    if "SCTLorentzAngleTool" not in kwargs:
+        from SiLorentzAngleTool.ITkStripLorentzAngleConfig import (
+            ITkStripLorentzAngleToolCfg)
+        kwargs.setdefault("SCTLorentzAngleTool", acc.popToolsAndMerge(
+            ITkStripLorentzAngleToolCfg(flags)))
 
-    kwargs["PixelChargeCalibCondData"] = "ITkPixelChargeCalibCondData"
-    kwargs["PixelOfflineCalibData"] = ""
+    kwargs.setdefault("PixelChargeCalibCondData", "ITkPixelChargeCalibCondData")
+    kwargs.setdefault("PixelOfflineCalibData", "")
 
     acc.setPrivateTools(CompFactory.InDet.ClusterMakerTool(name, **kwargs))
     return acc
 
 
-def InDetPixelRDOToolCfg(flags, name="InDetPixelRDOTool",
-                         PixelDetElStatus="PixelDetectorElementStatus"):
+def InDetPixelRDOToolCfg(flags, name="InDetPixelRDOTool", **kwargs):
     # To produce PixelDetectorElementCollection condition data
     from PixelGeoModel.PixelGeoModelConfig import PixelReadoutGeometryCfg
     acc = PixelReadoutGeometryCfg(flags)
-    kwargs = {}
-    kwargs["PixelDetElStatus"] = PixelDetElStatus
 
-    if PixelDetElStatus != "":
+    kwargs.setdefault("PixelDetElStatus", "PixelDetectorElementStatus")
+
+    if kwargs["PixelDetElStatus"] != "":
         from PixelConditionsAlgorithms.PixelConditionsConfig import (
             PixelDetectorElementStatusAlgCfg)
         acc.merge(PixelDetectorElementStatusAlgCfg(flags))
 
-    from PixelConditionsTools.PixelConditionsSummaryConfig import (
-        PixelConditionsSummaryCfg)
-    kwargs["PixelConditionsSummaryTool"] = acc.popToolsAndMerge(
-        PixelConditionsSummaryCfg(flags))
+    if "PixelConditionsSummaryTool" not in kwargs:
+        from PixelConditionsTools.PixelConditionsSummaryConfig import (
+            PixelConditionsSummaryCfg)
+        kwargs.setdefault("PixelConditionsSummaryTool", acc.popToolsAndMerge(
+            PixelConditionsSummaryCfg(flags)))
 
     # Enable duplicated RDO check for data15 because duplication mechanism
     # was used.
-    kwargs["CheckDuplicatedRDO"] = (len(flags.Input.ProjectName) >= 6 and
-                                    flags.Input.ProjectName[:6] == "data15")
+    kwargs.setdefault("CheckDuplicatedRDO",
+                      (len(flags.Input.ProjectName) >= 6 and
+                       flags.Input.ProjectName[:6] == "data15"))
 
     acc.setPrivateTools(CompFactory.InDet.PixelRDOTool(name, **kwargs))
     return acc
 
 
-def ITkPixelRDOToolCfg(flags, name="ITkPixelRDOTool"):
+def ITkPixelRDOToolCfg(flags, name="ITkPixelRDOTool", **kwargs):
     # To produce ITkPixelDetectorElementCollection condition data
     from PixelGeoModelXml.ITkPixelGeoModelConfig import (
         ITkPixelReadoutGeometryCfg)
     acc = ITkPixelReadoutGeometryCfg(flags)
-    kwargs = {}
 
-    from PixelConditionsTools.ITkPixelConditionsSummaryConfig import (
-        ITkPixelConditionsSummaryCfg)
-    kwargs["PixelConditionsSummaryTool"] = acc.popToolsAndMerge(
-        ITkPixelConditionsSummaryCfg(flags))
+    if "PixelConditionsSummaryTool" not in kwargs:
+        from PixelConditionsTools.ITkPixelConditionsSummaryConfig import (
+            ITkPixelConditionsSummaryCfg)
+        kwargs.setdefault("PixelConditionsSummaryTool", acc.popToolsAndMerge(
+            ITkPixelConditionsSummaryCfg(flags)))
 
-    kwargs["PixelDetEleCollKey"] = "ITkPixelDetectorElementCollection"
-    kwargs["CheckGanged"] = False
+    kwargs.setdefault("PixelDetEleCollKey", "ITkPixelDetectorElementCollection")
+    kwargs.setdefault("CheckGanged", False)
 
     acc.setPrivateTools(CompFactory.InDet.PixelRDOTool(name, **kwargs))
     return acc
@@ -122,12 +126,13 @@ def TrigPixelRDOToolCfg(flags, name="InDetTrigPixelRDOTool"):
     return InDetPixelRDOToolCfg(flags, name, PixelDetElStatus="")
 
 
-def MergedPixelsToolCfg(flags, name="InDetMergedPixelsTool"):
+def MergedPixelsToolCfg(flags, name="InDetMergedPixelsTool", **kwargs):
     acc = ComponentAccumulator()
-    kwargs = {}
 
-    kwargs["globalPosAlg"] = acc.popToolsAndMerge(ClusterMakerToolCfg(flags))
-    kwargs["PixelRDOTool"] = acc.popToolsAndMerge(InDetPixelRDOToolCfg(flags))
+    kwargs.setdefault("globalPosAlg", acc.popToolsAndMerge(
+        ClusterMakerToolCfg(flags)))
+    kwargs.setdefault("PixelRDOTool", acc.popToolsAndMerge(
+        InDetPixelRDOToolCfg(flags)))
 
     acc.setPrivateTools(CompFactory.InDet.MergedPixelsTool(name, **kwargs))
     return acc
@@ -144,22 +149,21 @@ def TrigMergedPixelsToolCfg(flags, name="InDetTrigMergedPixelsTool"):
     return acc
 
 
-def ITkMergedPixelsToolCfg(flags, name="ITkMergedPixelsTool"):
+def ITkMergedPixelsToolCfg(flags, name="ITkMergedPixelsTool", **kwargs):
     acc = ComponentAccumulator()
-    kwargs = {}
 
-    kwargs["globalPosAlg"] = acc.popToolsAndMerge(
-        ITkClusterMakerToolCfg(flags))
-    kwargs["PixelRDOTool"] = acc.popToolsAndMerge(ITkPixelRDOToolCfg(flags))
+    kwargs.setdefault("globalPosAlg", acc.popToolsAndMerge(
+        ITkClusterMakerToolCfg(flags)))
+    kwargs.setdefault("PixelRDOTool", acc.popToolsAndMerge(
+        ITkPixelRDOToolCfg(flags)))
 
     acc.setPrivateTools(CompFactory.InDet.MergedPixelsTool(name, **kwargs))
     return acc
 
 
-def PixelClusterNnCondAlgCfg(flags, name="PixelClusterNnCondAlg",
-                             trackNetwork=False):
+def PixelClusterNnCondAlgCfg(
+        flags, name="PixelClusterNnCondAlg", trackNetwork=False, **kwargs):
     acc = ComponentAccumulator()
-    kwargs = {}
 
     nn_names = [
         "NumberParticles_NoTrack/",
@@ -176,10 +180,10 @@ def PixelClusterNnCondAlgCfg(flags, name="PixelClusterNnCondAlg",
     if trackNetwork:
         nn_names = [elm.replace('_NoTrack', '') for elm in nn_names]
 
-    kwargs["NetworkNames"] = nn_names
-    kwargs["GetInputsInfo"] = True
-    kwargs["WriteKey"] = ("PixelClusterNN" if not trackNetwork
-                          else "PixelClusterNNWithTrack")
+    kwargs.setdefault("NetworkNames", nn_names)
+    kwargs.setdefault("GetInputsInfo", True)
+    kwargs.setdefault("WriteKey", ("PixelClusterNN" if not trackNetwork
+                                   else "PixelClusterNNWithTrack"))
 
     acc.merge(addFoldersSplitOnline(
         flags, "PIXEL",
@@ -187,10 +191,11 @@ def PixelClusterNnCondAlgCfg(flags, name="PixelClusterNnCondAlg",
         "/PIXEL/PixelClustering/PixelClusNNCalib",
         className='CondAttrListCollection'))
 
-    from TrkConfig.TrkNeuralNetworkUtilsConfig import (
-        NeuralNetworkToHistoToolCfg)
-    kwargs["NetworkToHistoTool"] = acc.popToolsAndMerge(
-        NeuralNetworkToHistoToolCfg(flags))
+    if "NetworkToHistoTool" not in kwargs:
+        from TrkConfig.TrkNeuralNetworkUtilsConfig import (
+            NeuralNetworkToHistoToolCfg)
+        kwargs.setdefault("NetworkToHistoTool", acc.popToolsAndMerge(
+            NeuralNetworkToHistoToolCfg(flags)))
 
     acc.addCondAlgo(CompFactory.InDet.TTrainedNetworkCondAlg(name, **kwargs))
     return acc
@@ -201,9 +206,8 @@ def PixelClusterNnWithTrackCondAlgCfg(
     return PixelClusterNnCondAlgCfg(flags, name, trackNetwork=True)
 
 
-def LWTNNCondAlgCfg(flags, name="LWTNNCondAlg"):
+def LWTNNCondAlgCfg(flags, name="LWTNNCondAlg", **kwargs):
     acc = ComponentAccumulator()
-    kwargs = {}
 
     acc.merge(addFoldersSplitOnline(
         flags, "PIXEL",
@@ -211,15 +215,14 @@ def LWTNNCondAlgCfg(flags, name="LWTNNCondAlg"):
         "/PIXEL/PixelClustering/PixelNNCalibJSON",
         className="CondAttrListCollection"))
 
-    kwargs["WriteKey"] = "PixelClusterNNJSON"
+    kwargs.setdefault("WriteKey", "PixelClusterNNJSON")
 
     acc.addCondAlgo(CompFactory.InDet.LWTNNCondAlg(name, **kwargs))
     return acc
 
 
-def NnClusterizationFactoryCfg(flags, name="NnClusterizationFactory"):
+def NnClusterizationFactoryCfg(flags, name="NnClusterizationFactory", **kwargs):
     acc = ComponentAccumulator()
-    kwargs = {}
 
     from PixelConditionsAlgorithms.PixelConditionsConfig import (
         PixelChargeLUTCalibCondAlgCfg, PixelChargeCalibCondAlgCfg)
@@ -234,28 +237,30 @@ def NnClusterizationFactoryCfg(flags, name="NnClusterizationFactory"):
     else:
         acc.merge(LWTNNCondAlgCfg(flags))
 
-    from SiLorentzAngleTool.PixelLorentzAngleConfig import (
-        PixelLorentzAngleToolCfg)
-    kwargs["PixelLorentzAngleTool"] = acc.popToolsAndMerge(
-        PixelLorentzAngleToolCfg(flags))
+    if "PixelLorentzAngleTool" not in kwargs:
+        from SiLorentzAngleTool.PixelLorentzAngleConfig import (
+            PixelLorentzAngleToolCfg)
+        kwargs.setdefault("PixelLorentzAngleTool", acc.popToolsAndMerge(
+            PixelLorentzAngleToolCfg(flags)))
 
-    kwargs["doRunI"] = flags.GeoModel.Run is LHCPeriod.Run1
-    kwargs["useToT"] = False
-    kwargs["useRecenteringNNWithoutTracks"] = (
-        flags.GeoModel.Run is LHCPeriod.Run1)
-    kwargs["useRecenteringNNWithTracks"] = False
-    kwargs["correctLorShiftBarrelWithoutTracks"] = 0
-    kwargs["correctLorShiftBarrelWithTracks"] = (
-        0.03 if flags.GeoModel.Run is LHCPeriod.Run1 else 0.)
-    kwargs["useTTrainedNetworks"] = flags.GeoModel.Run is LHCPeriod.Run1
-    kwargs["NnCollectionReadKey"] = (
-        "PixelClusterNN" if flags.GeoModel.Run is LHCPeriod.Run1 else "")
-    kwargs["NnCollectionWithTrackReadKey"] = (
+    kwargs.setdefault("doRunI", flags.GeoModel.Run is LHCPeriod.Run1)
+    kwargs.setdefault("useToT", False)
+    kwargs.setdefault("useRecenteringNNWithoutTracks", (
+        flags.GeoModel.Run is LHCPeriod.Run1))
+    kwargs.setdefault("useRecenteringNNWithTracks", False)
+    kwargs.setdefault("correctLorShiftBarrelWithoutTracks", 0)
+    kwargs.setdefault("correctLorShiftBarrelWithTracks", (
+        0.03 if flags.GeoModel.Run is LHCPeriod.Run1 else 0.))
+    kwargs.setdefault("useTTrainedNetworks",
+                      flags.GeoModel.Run is LHCPeriod.Run1)
+    kwargs.setdefault("NnCollectionReadKey", (
+        "PixelClusterNN" if flags.GeoModel.Run is LHCPeriod.Run1 else ""))
+    kwargs.setdefault("NnCollectionWithTrackReadKey", (
         "PixelClusterNNWithTrack" if flags.GeoModel.Run is LHCPeriod.Run1
-        else "")
-    kwargs["NnCollectionJSONReadKey"] = (
+        else ""))
+    kwargs.setdefault("NnCollectionJSONReadKey", (
         "" if flags.GeoModel.Run is LHCPeriod.Run1
-        else "PixelClusterNNJSON")
+        else "PixelClusterNNJSON"))
 
     acc.setPrivateTools(
         CompFactory.InDet.NnClusterizationFactory(name, **kwargs))
@@ -290,14 +295,14 @@ def TrigNnClusterizationFactoryCfg(flags, name="TrigNnClusterizationFactory"):
     return acc
 
 
-def NnPixelClusterSplitProbToolCfg(flags, name="NnPixelClusterSplitProbTool"):
+def NnPixelClusterSplitProbToolCfg(
+        flags, name="NnPixelClusterSplitProbTool", **kwargs):
     acc = ComponentAccumulator()
-    kwargs = {}
 
-    kwargs["NnClusterizationFactory"] = acc.popToolsAndMerge(
-        NnClusterizationFactoryCfg(flags))
-    kwargs["PriorMultiplicityContent"] = [1, 1, 1]
-    kwargs["useBeamSpotInfo"] = flags.Tracking.useBeamSpotInfoNN
+    kwargs.setdefault("NnClusterizationFactory", acc.popToolsAndMerge(
+            NnClusterizationFactoryCfg(flags)))
+    kwargs.setdefault("PriorMultiplicityContent", [1, 1, 1])
+    kwargs.setdefault("useBeamSpotInfo", flags.Tracking.useBeamSpotInfoNN)
 
     acc.setPrivateTools(
         CompFactory.InDet.NnPixelClusterSplitProbTool(name, **kwargs))
@@ -305,56 +310,55 @@ def NnPixelClusterSplitProbToolCfg(flags, name="NnPixelClusterSplitProbTool"):
 
 
 def PixelGangedAmbiguitiesFinderCfg(
-        flags, name="InDetPixelGangedAmbiguitiesFinder"):
+        flags, name="InDetPixelGangedAmbiguitiesFinder", **kwargs):
     # To produce PixelDetectorElementCollection condition data
     from PixelGeoModel.PixelGeoModelConfig import PixelReadoutGeometryCfg
     acc = PixelReadoutGeometryCfg(flags)
-    acc.setPrivateTools(CompFactory.InDet.PixelGangedAmbiguitiesFinder(name))
+    acc.setPrivateTools(
+        CompFactory.InDet.PixelGangedAmbiguitiesFinder(name, **kwargs))
     return acc
 
 
 def ITkPixelGangedAmbiguitiesFinderCfg(
-        flags, name="ITkPixelGangedAmbiguitiesFinder"):
+        flags, name="ITkPixelGangedAmbiguitiesFinder", **kwargs):
     # To produce ITkPixelDetectorElementCollection condition data
     from PixelGeoModelXml.ITkPixelGeoModelConfig import (
         ITkPixelReadoutGeometryCfg)
     acc = ITkPixelReadoutGeometryCfg(flags)
-    kwargs = {}
-    kwargs["PixelDetEleCollKey"] = "ITkPixelDetectorElementCollection"
-
+    kwargs.setdefault("PixelDetEleCollKey", "ITkPixelDetectorElementCollection")
     acc.setPrivateTools(
         CompFactory.InDet.PixelGangedAmbiguitiesFinder(name, **kwargs))
     return acc
 
 
 def SCT_ClusteringToolCfg(
-        flags, name="InDetSCT_ClusteringTool",
-        conditionsTool=None,
-        SCTDetElStatus="SCTDetectorElementStatusWithoutFlagged"):
+        flags, name="InDetSCT_ClusteringTool", **kwargs):
     # To produce SCT_DetectorElementCollection
     from SCT_GeoModel.SCT_GeoModelConfig import SCT_ReadoutGeometryCfg
     acc = SCT_ReadoutGeometryCfg(flags)
-    kwargs = {}
-    kwargs["SCTDetElStatus"] = SCTDetElStatus
 
-    if conditionsTool is None:
+    kwargs.setdefault("SCTDetElStatus",
+                      "SCTDetectorElementStatusWithoutFlagged")
+
+    if "conditionsTool" not in kwargs:
         from SCT_ConditionsTools.SCT_ConditionsToolsConfig import (
             SCT_ConditionsSummaryToolCfg)
-        conditionsTool = acc.popToolsAndMerge(
-            SCT_ConditionsSummaryToolCfg(flags, withFlaggedCondTool=False))
-    kwargs["conditionsTool"] = conditionsTool
+        kwargs.setdefault("conditionsTool", acc.popToolsAndMerge(
+            SCT_ConditionsSummaryToolCfg(flags, withFlaggedCondTool=False)))
 
-    from SiLorentzAngleTool.SCT_LorentzAngleConfig import (
-        SCT_LorentzAngleToolCfg)
-    kwargs["LorentzAngleTool"] = acc.popToolsAndMerge(
-        SCT_LorentzAngleToolCfg(flags))
+    if "LorentzAngleTool" not in kwargs:
+        from SiLorentzAngleTool.SCT_LorentzAngleConfig import (
+            SCT_LorentzAngleToolCfg)
+        kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(
+            SCT_LorentzAngleToolCfg(flags)))
 
-    kwargs["globalPosAlg"] = acc.popToolsAndMerge(ClusterMakerToolCfg(flags))
+    kwargs.setdefault("globalPosAlg", acc.popToolsAndMerge(
+        ClusterMakerToolCfg(flags)))
 
     if flags.InDet.selectSCTIntimeHits:
         coll_25ns = (flags.Beam.BunchSpacing <= 25 and
                      flags.Beam.Type is BeamType.Collisions)
-        kwargs["timeBins"] = "01X" if coll_25ns else "X1X"
+        kwargs.setdefault("timeBins", "01X" if coll_25ns else "X1X")
 
     acc.setPrivateTools(CompFactory.InDet.SCT_ClusteringTool(name, **kwargs))
     return acc
@@ -376,44 +380,47 @@ def Trig_SCT_ClusteringToolCfg(flags, name="Trig_SCT_ClusteringTool"):
     return acc
 
 
-def ITKStrip_SCT_ClusteringToolCfg(flags, name="ITkStripClusteringTool"):
+def ITKStrip_SCT_ClusteringToolCfg(
+        flags, name="ITkStripClusteringTool", **kwargs):
     # To produce ITkStripDetectorElementCollection
     from StripGeoModelXml.ITkStripGeoModelConfig import (
         ITkStripReadoutGeometryCfg)
     acc = ITkStripReadoutGeometryCfg(flags)
-    kwargs = {}
-    kwargs["SCTDetEleCollKey"] = "ITkStripDetectorElementCollection"
-    kwargs["useRowInformation"] = True  # ITk-specific clustering
 
-    from SCT_ConditionsTools.ITkStripConditionsToolsConfig import (
-        ITkStripConditionsSummaryToolCfg)
-    kwargs["conditionsTool"] = acc.popToolsAndMerge(
-        ITkStripConditionsSummaryToolCfg(flags))
+    kwargs.setdefault("SCTDetEleCollKey", "ITkStripDetectorElementCollection")
+    kwargs.setdefault("useRowInformation", True)  # ITk-specific clustering
 
-    from SiLorentzAngleTool.ITkStripLorentzAngleConfig import (
-        ITkStripLorentzAngleToolCfg)
-    kwargs["LorentzAngleTool"] = acc.popToolsAndMerge(
-        ITkStripLorentzAngleToolCfg(flags))
+    if "conditionsTool" not in kwargs:
+        from SCT_ConditionsTools.ITkStripConditionsToolsConfig import (
+            ITkStripConditionsSummaryToolCfg)
+        kwargs.setdefault("conditionsTool", acc.popToolsAndMerge(
+            ITkStripConditionsSummaryToolCfg(flags)))
 
-    kwargs["globalPosAlg"] = acc.popToolsAndMerge(
-        ITkClusterMakerToolCfg(flags))
+    if "LorentzAngleTool" not in kwargs:
+        from SiLorentzAngleTool.ITkStripLorentzAngleConfig import (
+            ITkStripLorentzAngleToolCfg)
+        kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(
+            ITkStripLorentzAngleToolCfg(flags)))
+
+    kwargs.setdefault("globalPosAlg", acc.popToolsAndMerge(
+        ITkClusterMakerToolCfg(flags)))
 
     if flags.ITk.selectStripIntimeHits:
         coll_25ns = (flags.Beam.BunchSpacing <= 25 and
                      flags.Beam.Type is BeamType.Collisions)
-        kwargs["timeBins"] = "01X" if coll_25ns else "X1X"
+        kwargs.setdefault("timeBins", "01X" if coll_25ns else "X1X")
 
     acc.setPrivateTools(CompFactory.InDet.SCT_ClusteringTool(name, **kwargs))
     return acc
 
 
 def ITkTruthClusterizationFactoryCfg(
-        flags, name='ITkTruthClusterizationFactory'):
+        flags, name='ITkTruthClusterizationFactory', **kwargs):
     acc = ComponentAccumulator()
-    kwargs = {}
-    kwargs["InputSDOMap"] = "ITkPixelSDO_Map"
+
+    kwargs.setdefault("InputSDOMap", "ITkPixelSDO_Map")
     # Until truth content is debugged, uses following configuration (see ATLITKSW-216)
-    kwargs["usePUHits"] = True
+    kwargs.setdefault("usePUHits", True)
 
     acc.setPrivateTools(
         CompFactory.InDet.TruthClusterizationFactory(name, **kwargs))
@@ -421,14 +428,11 @@ def ITkTruthClusterizationFactoryCfg(
 
 
 def ITkTruthPixelClusterSplitProbToolCfg(
-        flags, name="ITkTruthPixelClusterSplitProbTool"):
+        flags, name="ITkTruthPixelClusterSplitProbTool", **kwargs):
     acc = ComponentAccumulator()
-    kwargs = {}
-    kwargs["PriorMultiplicityContent"] = [1, 1, 1]
-    kwargs["NnClusterizationFactory"] = acc.popToolsAndMerge(
-        ITkTruthClusterizationFactoryCfg(flags))
-
-    # Truth-based for ITk for now
+    kwargs.setdefault("PriorMultiplicityContent", [1, 1, 1])
+    kwargs.setdefault("NnClusterizationFactory", acc.popToolsAndMerge(
+        ITkTruthClusterizationFactoryCfg(flags)))
     acc.setPrivateTools(
         CompFactory.InDet.TruthPixelClusterSplitProbTool(name, **kwargs))
     return acc

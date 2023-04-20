@@ -21,14 +21,6 @@ namespace {
 // statics doubles
 constexpr double s_ka_BetheBloch = 30.7075 * Gaudi::Units::MeV;
 
-// from full with at half maximum to sigma for a gaussian
-constexpr double s_fwhmToSigma = 0.424; //   1./(2.*sqrt(2.*log(2.)));
-
-// mpv to sigma fit values
-constexpr double s_mpv_p0 = 4.57270e-02;
-constexpr double s_mpv_p1 = 8.11761e-03;
-constexpr double s_mpv_p2 = -4.85133e-01;
-
 double
 dEdXBetheBloch(const Trk::MaterialProperties& mat,
                double& transKaz,

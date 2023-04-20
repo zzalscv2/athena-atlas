@@ -558,12 +558,14 @@ CONCURRENTRANGEMAP::extendImpl (lock_t& /*lock*/,
  * @brief Remove unused entries from the front of the list.
  * @param keys List of keys that may still be in use.
  *             (Must be sorted.)
+ * @param trimall If true, then allow removing all elements in the container.
+ *                Otherwise, stop when there's one left.
  *
  * We examine the objects in the container, starting with the earliest one.
  * If none of the keys in @c keys match the range for this object, then
  * it is removed from the container.  We stop when we either find
- * an object with a range matching a key in @c keys or when there
- * is only one object left.
+ * an object with a range matching a key in @c keys or (if trimall is false)
+ * when there is only one object left.
  *
  * Removed objects are queued for deletion once all slots have been
  * marked as quiescent.
@@ -574,7 +576,8 @@ CONCURRENTRANGEMAP::extendImpl (lock_t& /*lock*/,
  */
 T_CONCURRENTRANGEMAP
 size_t
-CONCURRENTRANGEMAP::trim (const std::vector<key_query_type>& keys)
+CONCURRENTRANGEMAP::trim (const std::vector<key_query_type>& keys,
+                          bool trimall /*= false*/)
 {
   size_t ndel = 0;
 
@@ -586,8 +589,10 @@ CONCURRENTRANGEMAP::trim (const std::vector<key_query_type>& keys)
   
   value_type* pos = m_begin;
 
-  // Compare with last rather than end=last+1; we don't want to consider
-  // the last elt.
+  // If trimall is set, then we want to compare trimall against end=last+1.
+  // Otherwise, we compare against last in order to skip considering
+  // the last element.
+  if (trimall) ++last;
   while (pos < last) {
     // FIXME: Can use the position where we found the last one as a hint?
     if (anyInRange (pos->first, keys)) {
@@ -606,6 +611,15 @@ CONCURRENTRANGEMAP::trim (const std::vector<key_query_type>& keys)
   }
 
   return ndel;
+}
+
+
+// temporary --- remove this
+T_CONCURRENTRANGEMAP
+size_t
+CONCURRENTRANGEMAP::trim (const std::vector<key_query_type>& keys)
+{
+  return trim (keys, false);
 }
 
 

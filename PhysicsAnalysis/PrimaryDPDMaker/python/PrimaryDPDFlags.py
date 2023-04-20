@@ -23,18 +23,6 @@ from AthenaCommon.JobProperties import jobproperties
 desdEventSkimmingFilterNamesList = []
 daodEventSkimmingFilterNamesList = []
 
-
-# ---- Load the egammaPID and egammaParameters information
-# This is needed to always be up-to-date with the egamma
-# IsEM selections and also the author selections
-#import PyUtils.RootUtils as ru
-#ROOT = ru.import_root()
-#import cppyy
-#cppyy.load_library('libegammaEnumsDict')
-#from ROOT import egammaPID
-#from ROOT import egammaParameters
-
-
 #=====================================================================
 # First define container for the PrimaryDPDMaker flags
 #=====================================================================
@@ -146,19 +134,6 @@ class WriteAllcellsStream(JobProperty):
 jobproperties.PrimaryDPDFlags.add_JobProperty(WriteAllcellsStream)
 listESDtoDPD.append(WriteAllcellsStream.StreamName)
 
-class WriteEOverPStream(JobProperty):
-    """ Produce the primary DPD EOverP DPD."""
-    statusOn     = True
-    allowedTypes = ['bool']
-    StoredValue  = False
-    StreamName   = "StreamDESDM_EOVERP"
-    FileName     = ""
-    isVirtual    = False
-    DPDMakerScript = "PrimaryDPDMaker/PerfDPD_EOverP.py"
-    pass
-jobproperties.PrimaryDPDFlags.add_JobProperty(WriteEOverPStream)
-listESDtoDPD.append(WriteEOverPStream.StreamName)
-
 class WriteIDALIGNStream(JobProperty):
     """ Produce the primary DPD ID alignment DPD."""
     statusOn     = True
@@ -171,19 +146,6 @@ class WriteIDALIGNStream(JobProperty):
     pass
 jobproperties.PrimaryDPDFlags.add_JobProperty(WriteIDALIGNStream)
 listESDtoDPD.append(WriteIDALIGNStream.StreamName)
-
-class WriteDESDM_EGAMMAStream(JobProperty):
-    """ Produce the primary DPD EGamma DPD."""
-    statusOn     = True
-    allowedTypes = ['bool']
-    StoredValue  = False
-    StreamName   = "StreamDESDM_EGAMMA"
-    FileName     = ""
-    isVirtual    = False
-    DPDMakerScript = "PrimaryDPDMaker/PerfDPD_EGamma.py"
-    pass
-jobproperties.PrimaryDPDFlags.add_JobProperty(WriteDESDM_EGAMMAStream)
-listESDtoDPD.append(WriteDESDM_EGAMMAStream.StreamName)
 
 class WriteDAOD_PIXELVALIDStream(JobProperty):
     """ Produce the DPD for DAOD_PIXELVALID - AOD with PrepRawData """
@@ -335,7 +297,6 @@ class WriteRAWPerfDPD_DIMU(JobProperty):
 jobproperties.PrimaryDPDFlags.add_JobProperty(WriteRAWPerfDPD_DIMU)
 listRAWtoDPD.append(WriteRAWPerfDPD_DIMU.StreamName)
 
-
 class WriteDRAW_EGZ(JobProperty):
     """ Produce the DRAW for EGamma calibration in Z events."""
     statusOn       = True
@@ -348,32 +309,6 @@ class WriteDRAW_EGZ(JobProperty):
     pass
 jobproperties.PrimaryDPDFlags.add_JobProperty(WriteDRAW_EGZ)
 listRAWtoDPD.append(WriteDRAW_EGZ.StreamName)
-
-class WriteDRAW_EGJPSI(JobProperty):
-    """ Produce the DRAW for EGamma calibration in JPSI events."""
-    statusOn       = True
-    allowedTypes   = ['bool']
-    StoredValue    = False
-    StreamName     = "StreamDRAW_EGJPSI"
-    FileName       = ""
-    isVirtual      = False
-    DPDMakerScript = "PrimaryDPDMaker/DRAW_EGJPSI.py"
-    pass
-jobproperties.PrimaryDPDFlags.add_JobProperty(WriteDRAW_EGJPSI)
-listRAWtoDPD.append(WriteDRAW_EGJPSI.StreamName)
-
-class WriteDRAW_TAUMUH(JobProperty):
-    """ Produce the DRAW for TAUWG Z->tau(mu)tau(had) T&P."""
-    statusOn       = True
-    allowedTypes   = ['bool']
-    StoredValue    = False
-    StreamName     = "StreamDRAW_TAUMUH"
-    FileName       = ""
-    isVirtual      = False
-    DPDMakerScript = "PrimaryDPDMaker/DRAW_TAUMUH.py"
-    pass
-jobproperties.PrimaryDPDFlags.add_JobProperty(WriteDRAW_TAUMUH)
-listRAWtoDPD.append(WriteDRAW_TAUMUH.StreamName)
 
 class WriteDRAW_EMU(JobProperty):
     """ Produce the primary DPD e-mu in Byte Stream format."""
@@ -453,20 +388,6 @@ class WriteDRAW_BCID4(JobProperty):
     pass
 jobproperties.PrimaryDPDFlags.add_JobProperty(WriteDRAW_BCID4)
 listRAWtoDPD.append(WriteDRAW_BCID4.StreamName)
-
-class WriteDRAW_TOPSLMU(JobProperty):
-    """ Produce DRAW_TOPSLMU, a top-like single-muon selection for tau embedding used by H+ searches."""
-    statusOn       = True    
-    allowedTypes   = ['bool']
-    StoredValue    = False
-    StreamName     = "StreamDRAW_TOPSLMU"
-    FileName       = ""
-    Prescale       = 1
-    isVirtual      = False
-    DPDMakerScript = "PrimaryDPDMaker/DRAW_TOPSLMU.py"
-    pass
-jobproperties.PrimaryDPDFlags.add_JobProperty(WriteDRAW_TOPSLMU)
-listRAWtoDPD.append(WriteDRAW_TOPSLMU.StreamName)
 
 ##--------------------------------------------
 ## Skimmed ESD

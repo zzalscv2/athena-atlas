@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <algorithm>
@@ -164,6 +164,10 @@ StatusCode TrigBmuxComboHypo::findBmuxCandidates(TrigBmuxState& state) const {
     ATH_CHECK( viewLinkInfo.isValid() );
     auto view = *viewLinkInfo.link;
 
+    auto roiLinkInfo = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>(decision, TrigCompositeUtils::roiString(), true);
+    ATH_CHECK( roiLinkInfo.isValid() );
+    const auto roi = *roiLinkInfo.link;
+
     auto tracksHandle = ViewHelper::makeHandle(view, m_trackParticleContainerKey, state.context());
     ATH_CHECK( tracksHandle.isValid() );
     ATH_MSG_DEBUG( "Tracks container " << m_trackParticleContainerKey << " size: " << tracksHandle->size() );
@@ -172,9 +176,13 @@ StatusCode TrigBmuxComboHypo::findBmuxCandidates(TrigBmuxState& state) const {
     tracks.reserve(tracksHandle->size());
     for (size_t idx = 0; idx < tracksHandle->size(); ++idx) {
       const auto track = tracksHandle->get(idx);
-      if (track->definingParametersCovMatrixVec().empty() || isIdenticalTracks(track, muonInDetTrack) || (m_trkZ0 > 0. && std::abs(getTrkImpactParameterZ0(state.context(), *track, state.beamSpotPosition()) - z0_mu) > m_trkZ0)) continue;
+      if (track->definingParametersCovMatrixVec().empty() || (m_trkZ0 > 0. && std::abs(getTrkImpactParameterZ0(state.context(), *track, state.beamSpotPosition()) - z0_mu) > m_trkZ0)) continue;
+      if (roi->composite() && !isInSameRoI(muon, track)) continue;
       tracks.emplace_back(ViewHelper::makeLink<xAOD::TrackParticleContainer>(view, tracksHandle, idx));
     }
+    // find the best match to the original muon and remove it
+    std::sort(tracks.begin(), tracks.end(), [p_mu](const auto& lhs, const auto& rhs){ return ROOT::Math::VectorUtil::DeltaR(p_mu, (*lhs)->genvecP4()) > ROOT::Math::VectorUtil::DeltaR(p_mu, (*rhs)->genvecP4()); });
+    tracks.pop_back();
     nTrk.push_back(tracks.size());
 
     std::sort(tracks.begin(), tracks.end(), [](const auto& lhs, const auto& rhs){ return ((*lhs)->pt() > (*rhs)->pt()); });
@@ -681,10 +689,11 @@ StatusCode TrigBmuxComboHypo::fillTriggerObjects(
 }
 
 
-bool TrigBmuxComboHypo::isIdenticalTracks(const xAOD::TrackParticle* lhs, const xAOD::TrackParticle* rhs) const {
+bool TrigBmuxComboHypo::isInSameRoI(const xAOD::Muon* muon, const xAOD::TrackParticle* track) const {
 
-  if (lhs->charge() * rhs->charge() < 0.) return false;
-  return (ROOT::Math::VectorUtil::DeltaR(lhs->genvecP4(), rhs->genvecP4()) < m_deltaR);
+  auto p_mu = muon->genvecP4();
+  auto p_trk = track->genvecP4();
+  return (ROOT::Math::VectorUtil::DeltaPhi(p_mu, p_trk) < m_roiPhiWidth && std::abs(p_mu.eta() - p_trk.eta()) < m_roiEtaWidth);
 }
 
 

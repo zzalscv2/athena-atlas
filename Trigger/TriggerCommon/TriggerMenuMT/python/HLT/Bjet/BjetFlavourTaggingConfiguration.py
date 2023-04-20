@@ -39,7 +39,10 @@ def getFlavourTagging( flags, inputJets, inputVertex, inputTracks, BTagName,
         'BTagging/20211216trig/dl1d/AntiKt4EMPFlow/network.json',
         # Trigger GN1 training
         'BTagging/20220813trig/gn1/antikt4empflow/network.onnx',
+        # Trigger DL1dbb training
+        'BTagging/20230314trig/dl1dbb/antikt4empflow/network.json',
     ]
+
 
     acc.merge(BTagAlgsCfg(
         inputFlags=flags,

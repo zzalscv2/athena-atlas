@@ -6,6 +6,7 @@
 #define dqiHanRuntimeConfigSingleton_h
 
 #include <string>
+#include <cstdint>
 
 #include "CxxUtils/checker_macros.h"
 

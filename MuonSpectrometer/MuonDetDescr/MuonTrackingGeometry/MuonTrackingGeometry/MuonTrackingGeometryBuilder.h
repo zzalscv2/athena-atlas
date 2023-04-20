@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -37,8 +37,6 @@ class MuonTrackingGeometryBuilder final : public MuonTrackingGeometryBuilderImpl
   virtual ~MuonTrackingGeometryBuilder() = default;
   /** AlgTool initailize method.*/
   virtual StatusCode initialize() override;
-  /** AlgTool finalize method */
-  virtual StatusCode finalize() override;
   /** TrackingGeometry Interface method */
   virtual std::unique_ptr<Trk::TrackingGeometry> trackingGeometry(Trk::TrackingVolume* tvol = 0) const override;
 

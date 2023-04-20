@@ -404,9 +404,6 @@ from InDetRecExample.InDetJobProperties import InDetFlags
 if jobproperties.Beam.beamType() == 'cosmics':
     ConfigFlags.Tracking.doTIDE_Ambi = False
 
-if rec.doMonitoring():
-    include ("AthenaMonitoring/DataQualityInit_jobOptions.py")
-
 if recAlgs.doEFlow():
     #Some settings for pflow have to toggle to a different setup for RecExCommon workflows.
     ConfigFlags.PF.useRecExCommon=True
@@ -435,6 +432,9 @@ if rec.doHeavyIon():
     HIDict['InputTopoCollection'] = 'CaloTopoClusters'
     HIDict['OutputTopoCollection'] = 'egammaTopoClusters'
     HIDict['OutputTopoCollectionShallow'] = 'tmp_egammaTopoClusters'
+
+if rec.doMonitoring():
+    include ("AthenaMonitoring/DataQualityInit_jobOptions.py")
 
 # Lock the flags
 logRecExCommon_topOptions.info("Locking ConfigFlags")

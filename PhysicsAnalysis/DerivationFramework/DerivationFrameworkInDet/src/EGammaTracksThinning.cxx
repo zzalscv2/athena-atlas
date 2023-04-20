@@ -6,7 +6,6 @@
 #include "TrkParameters/TrackParameters.h"
 #include "FourMomUtils/P4Helpers.h"
 #include "StoreGate/ThinningHandle.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 DerivationFramework::EGammaTracksThinning::EGammaTracksThinning(const std::string& type, 
                                                     const std::string& name, 

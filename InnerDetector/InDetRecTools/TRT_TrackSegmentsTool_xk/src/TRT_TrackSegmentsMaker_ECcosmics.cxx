@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -18,6 +18,7 @@
 #include "TrkToolInterfaces/IRIO_OnTrackCreator.h"
 #include "TRT_ReadoutGeometry/TRT_DetectorManager.h"
 #include "InDetPrepRawData/TRT_DriftCircleContainer.h"
+#include "RootUtils/WithRootErrorHandler.h"
 #include "TGraphErrors.h"
 #include "TF1.h"
 #include "TVirtualFitter.h"
@@ -1818,9 +1819,7 @@ TF1 *InDet::TRT_TrackSegmentsMaker_ECcosmics::perform_fit(int count,
   std::lock_guard<std::mutex> lock(s_fitMutex);
   TVirtualFitter::SetMaxIterations(100000);
 
-  //save ROOT error message level
-  int originalErrorLevel=gErrorIgnoreLevel;
-  gErrorIgnoreLevel=10000;
+  RootUtils::WithRootErrorHandler hand ([] (int, bool, const char*, const char*) { return false; });
 
 
   event_data.m_fitf_ztanphi->SetParameter(0,0.);
@@ -1884,8 +1883,6 @@ TF1 *InDet::TRT_TrackSegmentsMaker_ECcosmics::perform_fit(int count,
   }else if(match_tan<match_phi){
     return event_data.m_fitf_zphi_approx;
   }
-
-  gErrorIgnoreLevel=originalErrorLevel;
 
   if(p1>p2){
     return event_data.m_fitf_zphi;

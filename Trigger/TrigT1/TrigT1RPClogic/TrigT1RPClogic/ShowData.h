@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -13,18 +13,18 @@ template <class Type> class ShowData
     const bool m_detail;
 
     public:
-    ShowData(const Type*,std::string,bool);
-    ShowData(const Type&,std::string,bool);
+    ShowData(const Type*,const std::string&,bool);
+    ShowData(const Type&,const std::string&,bool);
     ~ShowData() {}
 };
 
 template <class Type>
-ShowData<Type>::ShowData(const Type& obj,std::string element,bool detail) :
+ShowData<Type>::ShowData(const Type& obj,const std::string& element,bool detail) :
     m_object(&obj),m_element(element),m_detail(detail) {}
 
 
 template <class Type>
-ShowData<Type>::ShowData(const Type* obj,std::string element,bool detail) :
+ShowData<Type>::ShowData(const Type* obj,const std::string& element,bool detail) :
     m_object(obj),m_element(element),m_detail(detail) {}
 
 

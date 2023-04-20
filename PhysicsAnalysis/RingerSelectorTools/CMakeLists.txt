@@ -7,7 +7,7 @@ set( RingerSelectorTools_version "\"RingerSelectorTools-00-00-18\"" )
 atlas_subdir( RingerSelectorTools )
 
 # External dependencies:
-find_package( Boost COMPONENTS filesystem thread system )
+find_package( Boost )
 find_package( ROOT COMPONENTS Core Gpad Tree MathCore Hist RIO pthread )
 find_package( onnxruntime )
 

@@ -29,19 +29,18 @@ hlt.args += ' --runNumber 360026'  # RunNumber is set by Panda, but ignored by T
 hlt.input = 'data_run2_EB'
 
 #====================================================================================================
-# Tier-0 reco step BS->ESD->AOD
+# Tier-0 reco step BS->AOD
 tzrecoPreExec = ' '.join([
- "from AthenaConfiguration.AllConfigFlags import ConfigFlags;",
- f"ConfigFlags.Trigger.triggerMenuSetup=\'{triggermenu}\';",
- "ConfigFlags.Trigger.AODEDMSet=\'AODFULL\';",
- "from AthenaMonitoring.DQMonFlags import DQMonFlags;",
- "DQMonFlags.set_All_Off();",
- "DQMonFlags.doDataFlowMon=True;",
- "DQMonFlags.doHLTMon=True;",
- "DQMonFlags.doLVL1CaloMon=True;",
- "DQMonFlags.doGlobalMon=True;", 
- "DQMonFlags.doLVL1InterfacesMon=True;",
- "DQMonFlags.doCTPMon=True;"
+  f"flags.Trigger.triggerMenuSetup=\'{triggermenu}\';",
+  "flags.Trigger.AODEDMSet=\'AODFULL\';",
+  "from AthenaMonitoring.DQConfigFlags import allSteeringFlagsOff;",
+  "allSteeringFlagsOff(flags);",
+  "flags.DQ.Steering.doDataFlowMon=True;",
+  "flags.DQ.Steering.doHLTMon=True;",
+  "flags.DQ.Steering.doLVL1CaloMon=True;",
+  "flags.DQ.Steering.doGlobalMon=True;",
+  "flags.DQ.Steering.doLVL1InterfacesMon=True;",
+  "flags.DQ.Steering.doCTPMon=True;",
 ])
 
 tzreco = ExecStep.ExecStep('Tier0Reco')
@@ -52,13 +51,12 @@ tzreco.explicit_input = True
 tzreco.input = ''
 tzreco.max_events = 50
 tzreco.args = '--inputBSFile=RAW.pool.root'  # output of the previous step
-# TODO: add RAWtoALL steering (ATR-26605)
 tzreco.args += ' --outputAODFile=AOD.pool.root'
 tzreco.args += ' --outputNTUP_TRIGRATEFile=rate.ntup.root'
 tzreco.args += ' --outputHISTFile=hist.root'
 tzreco.args += ' --conditionsTag=\'CONDBR2-BLKPA-RUN2-09\' --geometryVersion=\'ATLAS-R2-2016-01-00-01\''
 tzreco.args += ' --preExec="{:s}"'.format(tzrecoPreExec)
-tzreco.args += ' --postInclude="TriggerTest/disableChronoStatSvcPrintout.py"'
+tzreco.args += ' --CA'
 
 #====================================================================================================
 # Merging NTUP_TRIGRATE/COST

@@ -4,7 +4,7 @@
 atlas_subdir( TBRec )
 
 # External dependencies:
-find_package( Boost COMPONENTS filesystem thread system )
+find_package( Boost )
 find_package( CLHEP )
 find_package( Eigen )
 find_package( ROOT COMPONENTS Cint Core Tree MathCore Hist RIO pthread )
