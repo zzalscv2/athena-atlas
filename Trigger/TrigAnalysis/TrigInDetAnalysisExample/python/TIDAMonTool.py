@@ -179,7 +179,7 @@ def createMonTool( flags, slicetag, chain ) :
     defineHisto( monTool,  "Eff_Phi",    path=mypath, type="TProfile", title="phi  efficiency",     xbins=25,   xmin=-pi, xmax=pi )
     defineHisto( monTool,  "Eff_d0",     path=mypath, type="TProfile", title="d0 efficiency",       xbins=d0bins     ) 
     defineHisto( monTool,  "Eff_z0",     path=mypath, type="TProfile", title="z0 efficiency",       xbins=50,   xmin=-225., xmax=225. )
-    defineHisto( monTool,  "Eff_nVtx",   path=mypath, type="TProfile", title="nVtx efficiency",     xbins=71,   xmin=-0.5,  xmax=70.5 )
+    defineHisto( monTool,  "Eff_nVtx",   path=mypath, type="TProfile", title="nVtx efficiency",     xbins=101,   xmin=-0.5,  xmax=100.5 )
     defineHisto( monTool,  "Eff_lb",     path=mypath, type="TProfile", title="efficinecy vs lumiblock",      xbins=3010, xmin=-0.5, xmax=3009.5 )
     
     defineHisto( monTool,  "trkvtx_x_vs_lb", path=mypath, type="TProfile", title="track vertex x vs lumiblock", xbins=301, xmin=-0.5, xmax=3009.5 )
@@ -278,7 +278,7 @@ def createMonTool( flags, slicetag, chain ) :
             defineHisto( monTool, "vx_zed_eff",    path=mypath, type="TProfile", title="zed_eff;efficiency;offline vtx z [mm]",   xbins=50,  xmin=-250,  xmax=250    )
             defineHisto( monTool, "vx_ntrax_eff",  path=mypath, type="TProfile", title="ntrax_eff;number of tracks;efficiency",   xbins=vnbins )
             defineHisto( monTool, "vx_nvtx_eff",   path=mypath, type="TProfile", title="nvtx_eff;number of vertices;efficiency",  xbins=101, xmin=-0.5,  xmax=100.5  )
-            defineHisto( monTool, "vx_mu_eff",     path=mypath, type="TProfile", title="mu_eff;<#mu>;efficiency",                 xbins=61,  xmin=-0.5,  xmax=60.5   )
+            defineHisto( monTool, "vx_mu_eff",     path=mypath, type="TProfile", title="mu_eff;<#mu>;efficiency",                 xbins=101,  xmin=-0.5,  xmax=100.5   )
             defineHisto( monTool, "vx_lb_eff",     path=mypath, type="TProfile", title="lb_eff;lumi block;efficiency",            xbins=151, xmin=-0.5,  xmax=3019.5 )
  
 
