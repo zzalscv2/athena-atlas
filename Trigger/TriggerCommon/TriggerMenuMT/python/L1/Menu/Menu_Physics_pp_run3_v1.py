@@ -178,6 +178,9 @@ def defineMenu():
         # combined jet
         'L1_2J15_XE55', 'L1_J40_XE50',
         'L1_2J50_XE40', 'L1_J40_XE60',
+        # ATR-27250 Duplicate multijet-seeded triggers to jFEX
+        #'L1_2jJ90_jXE80', 'L1_2jJ40_jXE110',
+        #'L1_3jJ40p0ETA25_jXE80',
         
         # XE
         'L1_XE35', 'L1_XE40', 'L1_XE45', 'L1_XE50', 
