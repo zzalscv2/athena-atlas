@@ -10,13 +10,14 @@
  *  @brief Atlas MDT Tdc Mapping class
  *
  *  This class implements the channel mapping of a single MDT TDC.
- *  The mapping is between the TDC channel and the tube multilayer, layer, number in
- *  the offline convention
+ *  The mapping is between the TDC channel and the tube multilayer, layer,
+ *number in the offline convention
  *
  *
  **/
 
 #include <stdint.h>
+
 #include <array>
 
 #include "GaudiKernel/MsgStream.h"
@@ -25,15 +26,14 @@
 
 class MdtIdHelper;
 class MdtTdcMap {
-public:
-    
+   public:
     static constexpr uint8_t NOTSET = MdtMezzanineCard::NOTSET;
     using MezzCardPtr = MdtMezzanineCard::MezzCardPtr;
     /** constructor */
-    /** arguments are the mezzanine type, one channel (usually chan 0) and the */
+    /** arguments are the mezzanine type, one channel (usually chan 0) and the
+     */
     /** corresponding offline informations */
-    MdtTdcMap(const MezzCardPtr mezType, 
-              const MdtCablingData& cabling_data);
+    MdtTdcMap(const MezzCardPtr mezType, const MdtCablingData& cabling_data);
 
     /** destructor */
     ~MdtTdcMap() = default;
@@ -56,7 +56,7 @@ public:
     /** get the offline identifier */
     const MdtCablingOffData& offId() const { return m_statId; }
     /** get the online identiifer */
-    const MdtCablingOnData& onlineId() const {return m_statId; }
+    const MdtCablingOnData& onlineId() const { return m_statId; }
     /** get the multilayer (independent of the channel) */
     int multiLayer() const { return m_statId.multilayer; }
     /* get the station Name */
@@ -70,11 +70,11 @@ public:
     uint8_t tdcZero() const { return m_statId.channelId; }
     /* tube zero */
     uint8_t tubeZero() const { return m_statId.tube; }
-   
-    uint8_t maxTube() const {return m_maxTube; }
-    uint8_t minTube() const {return m_minTube; }
-   
-private:    
+
+    uint8_t maxTube() const { return m_maxTube; }
+    uint8_t minTube() const { return m_minTube; }
+
+   private:
     /** tube corresponding to each tdc channel */
     MdtCablingData m_statId{};
     MezzCardPtr m_mezzCard{nullptr};
@@ -92,7 +92,7 @@ struct MdtTdcOffSorter {
     bool operator!() const { return !m_ptr; }
     operator bool() const { return m_ptr; }
 
-private:
+   private:
     const MdtTdcMap* m_ptr{nullptr};
 };
 /// Helper struct to search through the std::set if a conversion from
@@ -104,7 +104,7 @@ struct MdtTdcOnlSorter {
     bool operator!() const { return !m_ptr; }
     operator bool() const { return m_ptr; }
 
-private:
+   private:
     const MdtTdcMap* m_ptr{nullptr};
 };
 /// Operators used for navigation later
@@ -112,13 +112,25 @@ private:
 /// The minimum and maximum tube of a tdc define its range of covered channels
 /// The MdtHit belongs exactly to the corresponding readout channel if its
 /// tube number is within that range
-inline bool operator<(const MdtTdcOffSorter& a, const MdtCablingData& b) { return a->maxTube() < b.tube; }
-inline bool operator<(const MdtCablingData& a, const MdtTdcOffSorter& b) { return a.tube < b->minTube(); }
+inline bool operator<(const MdtTdcOffSorter& a, const MdtCablingData& b) {
+    return a->maxTube() < b.tube;
+}
+inline bool operator<(const MdtCablingData& a, const MdtTdcOffSorter& b) {
+    return a.tube < b->minTube();
+}
 /// Order the tdc identifiers according to their minimum tube
-inline bool operator<(const MdtTdcOffSorter& a, const MdtTdcOffSorter& b) { return a->minTube() < b->minTube(); }
+inline bool operator<(const MdtTdcOffSorter& a, const MdtTdcOffSorter& b) {
+    return a->minTube() < b->minTube();
+}
 
-inline bool operator<(const MdtTdcOnlSorter& a, const MdtTdcOnlSorter& b) { return a->moduleId() < b->moduleId(); }
-inline bool operator<(const MdtTdcOnlSorter& a, const MdtCablingData& b) { return a->moduleId() < b.tdcId; }
-inline bool operator<(const MdtCablingData& a, const MdtTdcOnlSorter& b) { return a.tdcId < b->moduleId(); }
+inline bool operator<(const MdtTdcOnlSorter& a, const MdtTdcOnlSorter& b) {
+    return a->moduleId() < b->moduleId();
+}
+inline bool operator<(const MdtTdcOnlSorter& a, const MdtCablingData& b) {
+    return a->moduleId() < b.tdcId;
+}
+inline bool operator<(const MdtCablingData& a, const MdtTdcOnlSorter& b) {
+    return a.tdcId < b->moduleId();
+}
 
 #endif  // MUONMDT_CABLING_MDTAMTMAP_H
