@@ -1,12 +1,14 @@
 /* -*- C++ -*- */
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <algorithm>  /* make_pair */
 #include <cassert>
 #include <string>
+
+#include <fmt/format.h>
 
 /* #include "boost/concept_check.hpp" */
 #include "GaudiKernel/System.h"
@@ -18,9 +20,18 @@
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 
 namespace {
-  template <class DATALINK, typename KEY> 
-  void fillLink(DATALINK& l, const KEY& k, IProxyDict* sg = 0)
-  { l.toIdentifiedObject(k, sg); }
+  template <typename KEY>
+  std::string mkHSKey(const KEY& k) {
+    return fmt::format("HS{}", k);
+  }
+
+  template <class DATALINK, typename KEY>
+  void fillLink(DATALINK& l, const KEY& k, IProxyDict* sg = 0) {
+    l.toIdentifiedObject(k, sg);
+    if (!l.isValid()) {
+      l.toIdentifiedObject(mkHSKey(k), sg);
+    }
+  }
 
   struct NoKey {};
   //MsgStream& operator <<(MsgStream& os, const NoKey&) { os << "Default"; return os; }  
@@ -69,6 +80,9 @@ PileUpMergeSvc::retrieveOriginal(const KEY& dataKey, const DATA*& data) {
      if( pEvent->subEvents().size() ) {
         //here we assume that the original event is the first in pEvent list
         sc =  pEvent->subEvents()[0].ptr()->evtStore()->retrieve(data, dataKey);
+        if (!sc) {
+          sc =  pEvent->subEvents()[0].ptr()->evtStore()->retrieve(data, mkHSKey(dataKey));
+        }
      }
   }
   return sc;
@@ -240,6 +254,9 @@ PileUpMergeSvc::retrieveSingleSubEvtData(const KEY& dataKey, const DATA*& data, 
 		  iEvt->ptr()->runNumber());
 
   StatusCode sc = seStore.retrieve(data, dataKey);
+  if (!sc) {
+    sc = seStore.retrieve(data, mkHSKey(dataKey));
+  }
   return sc;
 
 }
