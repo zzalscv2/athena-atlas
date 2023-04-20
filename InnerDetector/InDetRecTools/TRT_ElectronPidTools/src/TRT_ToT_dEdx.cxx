@@ -98,7 +98,6 @@ StatusCode TRT_ToT_dEdx::initialize()
     return StatusCode::FAILURE;
   }
 
-  ATH_MSG_INFO ( name() << " initialize() successful" );
   return StatusCode::SUCCESS;
 }
 
