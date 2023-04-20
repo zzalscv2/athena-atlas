@@ -138,12 +138,12 @@ else()
       LOG_IGNORE_PATTERN ${extra_patterns}
    )
    atlas_add_test( ut_SUSYToolsAlg_mc
-      SCRIPT "athena SUSYTools/jobOptions.py --evtMax 100 - --testCampaign mc20e"
+      SCRIPT "athena SUSYTools/jobOptions.py --evtMax 100 - --prwFiles dev/PileupReweighting/share/DSID410xxx/pileup_mc16e_dsid410470_FS.root --testCampaign mc20e"
       PROPERTIES TIMEOUT 300
       LOG_IGNORE_PATTERN ${extra_patterns}
    )
    atlas_add_test( ut_SUSYToolsAlg_mc_Run3
-      SCRIPT "athena SUSYTools/jobOptions.py --evtMax 100 - --testCampaign mc21a"
+      SCRIPT "athena SUSYTools/jobOptions.py --evtMax 100 - --prwFiles dev/PileupReweighting/share/DSID601xxx/pileup_mc21a_dsid601229_FS.root --testCampaign mc21a"
       PROPERTIES TIMEOUT 300
       LOG_IGNORE_PATTERN ${extra_patterns}
    )
