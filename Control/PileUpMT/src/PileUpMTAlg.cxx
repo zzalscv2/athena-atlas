@@ -58,17 +58,18 @@ PileUpMTAlg::PileUpMTAlg(const std::string& name, ISvcLocator* pSvcLocator)
 PileUpMTAlg::~PileUpMTAlg() {}
 
 StatusCode PileUpMTAlg::get_ei(StoreGateSvc& sg, std::unique_ptr<const xAOD::EventInfo>& ei_,
-                               bool /* pileup */) const {
+                               bool pileup) const {
+    std::string key = pileup ? "EventInfo" : "HSEventInfo";
     xAOD::EventInfo* newEi = new xAOD::EventInfo();
     xAOD::EventAuxInfo* eiAux = new xAOD::EventAuxInfo();
     newEi->setStore(eiAux);
-    SG::ReadHandle<xAOD::EventInfo> ei_h("EventInfo", sg.name());
+    SG::ReadHandle<xAOD::EventInfo> ei_h(key, sg.name());
     const xAOD::EventInfo* ei = ei_h.get();
     if (ei != nullptr) {
         *newEi = *ei;
     }
     else {
-        SG::ReadHandle<::EventInfo> ei2_h("EventInfo", sg.name());
+        SG::ReadHandle<::EventInfo> ei2_h(key, sg.name());
         const ::EventInfo* ei2 = ei2_h.get();
         if (ei2 == nullptr) {
             // Just in case
@@ -172,7 +173,7 @@ StatusCode PileUpMTAlg::initialize() {
             }
         }
     }
-    m_evtInfoContKey = fmt::format("{}Container", m_evtInfoKey.key());
+    m_evtInfoContKey = "PileUpEventInfo";
     ATH_CHECK(m_evtInfoKey.initialize());
     ATH_CHECK(m_evtInfoContKey.initialize());
     return StatusCode::SUCCESS;
