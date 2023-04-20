@@ -18,7 +18,7 @@ atlas_add_library( TRT_TR_Process
                    OBJECT
                    NO_PUBLIC_HEADERS
                    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${XERCESC_INCLUDE_DIRS} ${GEANT4_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${Boost_LIBRARIES} ${XERCESC_LIBRARIES} ${GEANT4_LIBRARIES} ${CLHEP_LIBRARIES} GaudiKernel AthenaBaseComps AthenaKernel CxxUtils StoreGateLib IdDictDetDescr G4AtlasInterfaces GeoMaterial2G4 GeoModelInterfaces PathResolver RDBAccessSvcLib )
+                   LINK_LIBRARIES ${Boost_LIBRARIES} ${XERCESC_LIBRARIES} ${GEANT4_LIBRARIES} ${CLHEP_LIBRARIES} GaudiKernel AthenaBaseComps AthenaKernel StoreGateLib IdDictDetDescr G4AtlasInterfaces GeoMaterial2G4 GeoModelInterfaces PathResolver RDBAccessSvcLib )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py )

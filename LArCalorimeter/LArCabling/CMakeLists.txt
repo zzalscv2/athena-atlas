@@ -11,7 +11,7 @@ atlas_add_library( LArCablingLib
                    src/*.cxx
                    PUBLIC_HEADERS LArCabling
                    PRIVATE_INCLUDE_DIRS ${CORAL_INCLUDE_DIRS}
-                   LINK_LIBRARIES CaloIdentifier AthenaBaseComps AthenaKernel AthenaPoolUtilities CxxUtils Identifier LArIdentifier StoreGateLib
+                   LINK_LIBRARIES CaloIdentifier AthenaBaseComps AthenaKernel AthenaPoolUtilities Identifier LArIdentifier StoreGateLib
                    PRIVATE_LINK_LIBRARIES ${CORAL_LIBRARIES} PathResolver )
 
 atlas_add_component( LArCabling

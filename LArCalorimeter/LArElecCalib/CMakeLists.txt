@@ -12,7 +12,7 @@ atlas_add_library ( LArElecCalib
                     INTERFACE
                     PUBLIC_HEADERS LArElecCalib
                     INCLUDE_DIRS ${EIGEN_INCLUDE_DIRS}
-                    LINK_LIBRARIES ${EIGEN_LIBRARIES} AthenaKernel CxxUtils GaudiKernel Identifier LArIdentifier )
+                    LINK_LIBRARIES ${EIGEN_LIBRARIES} AthenaKernel GaudiKernel Identifier LArIdentifier )
 
 atlas_add_dictionary( LArElecCalibDict
                       LArElecCalib/LArElecCalibDict.h
