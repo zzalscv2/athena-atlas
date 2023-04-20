@@ -403,12 +403,11 @@ void MdtRawDataMonAlg::mdtchamberId() {
             ATH_MSG_VERBOSE("  hash Id NOT computed " << Idhash);
         }
     }
-
-    }
+    m_hist_hash_list.resize(m_chambersIdHash.size());
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-int MdtRawDataMonAlg::mezzmdt(
-    const Identifier& digcoll_id) const {
+int MdtRawDataMonAlg::mezzmdt(const Identifier& digcoll_id) const {
     int TotmezzTubes = 8;
     if (cachedTubeLayerMax(digcoll_id) == 4) TotmezzTubes = 6;
     int Imezz = (int)((m_idHelperSvc->mdtIdHelper().tube(digcoll_id) - 1) / TotmezzTubes) +
