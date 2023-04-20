@@ -78,8 +78,8 @@ namespace MuonGM {
         }
 
         unsigned int nmdt{0}, nrpc{0}, ntgc{0}, ncsc{0};
-        for (unsigned int mdt_hash = 0; mdt_hash < MuonDetectorManager::MdtDetElMaxHash; ++mdt_hash) {
-            IdentifierHash id_hash{mdt_hash};
+        for (unsigned int mdt_hash = 0; mdt_hash < MuonDetectorManager::MdtRElMaxHash; ++mdt_hash) {
+            const IdentifierHash id_hash{mdt_hash};
             const MdtReadoutElement* detEl = MuonDetMgr->getMdtReadoutElement(id_hash);
             if (!detEl) continue;
             ++nmdt;
