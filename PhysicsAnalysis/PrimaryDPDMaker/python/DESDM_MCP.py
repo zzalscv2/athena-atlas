@@ -210,9 +210,8 @@ def setupAlignmentEventSkimmingToolCfg(flags,name = "AlignmentEventStringSkimmin
 
 def setupDESDMCPSkimmingAlgCfg(flags, name= "DESDMCPEventKernel", **kwargs):
     result = ComponentAccumulator()
-    doAlignment = False
     
-    EventFilterTool = result.getPrimaryAndMerge(setupAlignmentEventSkimmingToolCfg(flags)) if doAlignment else \
+    EventFilterTool = result.getPrimaryAndMerge(setupAlignmentEventSkimmingToolCfg(flags)) if flags.Muon.DESDM_MCP.doAlignmentFormat else \
                       result.getPrimaryAndMerge(setupDESDMSkimmingToolsCfg(flags))    
     kwargs.setdefault("SkimmingTools", EventFilterTool)
     the_alg = CompFactory.DerivationFramework.DerivationKernel(name, **kwargs)
@@ -272,9 +271,8 @@ def DESDMCPOutputCfg(flags, **kwargs):
     
     trackParticleAuxExclusions="-clusterAssociation.-trackParameterCovarianceMatrices.-parameterX.-parameterY.-parameterZ.-parameterPX.-parameterPY.-parameterPZ.-parameterPosition"
 
-    ### Need to find the proper flag for this
-    #if primDPDAlignTrigMu.doAlignmentFormat():
-    #   trackParticleAuxExclusions=""
+    if flags.Muon.DESDM_MCP.doAlignmentFormat:
+       trackParticleAuxExclusions=""
     track_parts = ["MuonSpectrometerTrackParticles", 
                    "CombinedMuonTrackParticles", 
                    "ExtrapolatedMuonTrackParticles",
@@ -335,6 +333,10 @@ def DESDMCPOutputCfg(flags, **kwargs):
 
 
 def DESDM_MCPCfg(flags):
+    if(flags.Muon.DESDM_MCP.doAlignmentFormat):
+        from AthenaCommon.Logging import logging
+        msg = logging.getLogger("Athena")
+        msg.info("DESDM_MCP format will run with doAlignmentFormat True")
     result = ComponentAccumulator()
     StreamName = "DESDM_MCP"
     SeqName = "DESDMCPSequence"
