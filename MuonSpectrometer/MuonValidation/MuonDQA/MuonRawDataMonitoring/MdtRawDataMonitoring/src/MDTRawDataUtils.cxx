@@ -1073,8 +1073,8 @@ void MdtRawDataValAlg::mdtchamberId() {
             ATH_MSG_DEBUG("  hash Id NOT computed " << Idhash);
         }
     }
-
-    }
+    m_hist_hash_list.resize(m_chambersIdHash.size());    
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 int MdtRawDataValAlg::mezzmdt(Identifier digcoll_id) {  // int mezz_chamber, int mezz_eta, int mezz_ml, int mezz_tube, int max_tube) {
