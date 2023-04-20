@@ -140,16 +140,6 @@ uint64_t PixelConditionsSummaryTool::getBSErrorWord(const IdentifierHash& module
   return word<m_missingErrorInfo ? word : 0;
 }
 
-bool PixelConditionsSummaryTool::hasBSError(const IdentifierHash& moduleHash) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return hasBSError(moduleHash, ctx);
-}
-
-bool PixelConditionsSummaryTool::hasBSError(const IdentifierHash& moduleHash, Identifier pixid) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return hasBSError(moduleHash, pixid, ctx);
-}
-
 bool PixelConditionsSummaryTool::hasBSError(const IdentifierHash& moduleHash, const EventContext& ctx) const {
   uint64_t word = getBSErrorWord(moduleHash,ctx);
   if (PixelByteStreamErrors::hasError(word,PixelByteStreamErrors::TruncatedROB))      { return true; }
@@ -188,43 +178,6 @@ bool PixelConditionsSummaryTool::hasBSError(const IdentifierHash& moduleHash, Id
   if (PixelByteStreamErrors::hasError(word,PixelByteStreamErrors::MCCEoEOverflow))    { return true; }
   if (PixelByteStreamErrors::hasError(word,PixelByteStreamErrors::MCCHitOverflow))    { return true; }
   return false;
-}
-
-bool PixelConditionsSummaryTool::hasBSError(const IdentifierHash& moduleHash, const EventContext& ctx, Identifier pixid) const {
-
-  int maxHash = m_pixelID->wafer_hash_max();
-  Identifier moduleID = m_pixelID->wafer_id(pixid);
-  int chFE = m_pixelReadout->getFE(pixid, moduleID);
-  if (m_pixelReadout->getModuleType(moduleID)==InDetDD::PixelModuleType::IBL_3D) { chFE=0; }
-
-  int indexFE = (1+chFE)*maxHash+static_cast<int>(moduleHash);    // (FE_channel+1)*2048 + moduleHash
-  uint64_t word = getBSErrorWord(moduleHash,indexFE,ctx);
-  if (PixelByteStreamErrors::hasError(word,PixelByteStreamErrors::Preamble))          { return true; }
-  if (PixelByteStreamErrors::hasError(word,PixelByteStreamErrors::TimeOut))           { return true; }
-  if (PixelByteStreamErrors::hasError(word,PixelByteStreamErrors::LVL1ID))            { return true; }
-  if (PixelByteStreamErrors::hasError(word,PixelByteStreamErrors::BCID))              { return true; }
-  if (PixelByteStreamErrors::hasError(word,PixelByteStreamErrors::Trailer))           { return true; }
-  if (PixelByteStreamErrors::hasError(word,PixelByteStreamErrors::MCCLVL1IDEoECheck)) { return true; }
-  if (PixelByteStreamErrors::hasError(word,PixelByteStreamErrors::MCCBCIDEoECheck))   { return true; }
-  if (PixelByteStreamErrors::hasError(word,PixelByteStreamErrors::MCCLVL1IDCheck))    { return true; }
-  if (PixelByteStreamErrors::hasError(word,PixelByteStreamErrors::MCCEoEOverflow))    { return true; }
-  if (PixelByteStreamErrors::hasError(word,PixelByteStreamErrors::MCCHitOverflow))    { return true; }
-  return false;
-}
-
-bool PixelConditionsSummaryTool::isActive(const Identifier& elementId, const InDetConditions::Hierarchy h) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return isActive(elementId, h, ctx);
-}
-
-bool PixelConditionsSummaryTool::isActive(const IdentifierHash& moduleHash) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return isActive(moduleHash, ctx);
-}
-
-bool PixelConditionsSummaryTool::isActive(const IdentifierHash& moduleHash, const Identifier& elementId) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return isActive(moduleHash, elementId, ctx);
 }
 
 bool PixelConditionsSummaryTool::isActive(const Identifier& /*elementId*/, const InDetConditions::Hierarchy /*h*/, const EventContext& /*ctx*/) const {
@@ -270,30 +223,11 @@ bool PixelConditionsSummaryTool::isActive(const IdentifierHash& moduleHash, cons
 
   if (SG::ReadCondHandle<PixelDeadMapCondData>(m_condDeadMapKey,ctx)->getModuleStatus(moduleHash)) { return false; }
 
-  return checkChipStatus(moduleHash, elementId);
-}
-
-double PixelConditionsSummaryTool::activeFraction(const IdentifierHash & /*moduleHash*/, const Identifier & /*idStart*/, const Identifier & /*idEnd*/) const {
-  return 1.0;
+  return checkChipStatus(moduleHash, elementId, ctx);
 }
 
 double PixelConditionsSummaryTool::activeFraction(const IdentifierHash & /*moduleHash*/, const Identifier & /*idStart*/, const Identifier & /*idEnd*/, const EventContext& /*ctx*/) const {
   return 1.0;
-}
-
-bool PixelConditionsSummaryTool::isGood(const IdentifierHash & moduleHash) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return isGood(moduleHash, ctx);
-}
-
-bool PixelConditionsSummaryTool::isGood(const Identifier& elementId, const InDetConditions::Hierarchy h) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return isGood(elementId, h, ctx);
-}
-
-bool PixelConditionsSummaryTool::isGood(const IdentifierHash & moduleHash, const Identifier &elementId) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return isGood(moduleHash, elementId, ctx);
 }
 
 bool PixelConditionsSummaryTool::isGood(const Identifier& elementId, const InDetConditions::Hierarchy h, const EventContext& ctx) const {
@@ -321,7 +255,7 @@ bool PixelConditionsSummaryTool::isGood(const Identifier& elementId, const InDet
   if (SG::ReadCondHandle<PixelDeadMapCondData>(m_condDeadMapKey, ctx)->getModuleStatus(moduleHash)) { return false; }
 
   if (h==InDetConditions::PIXEL_CHIP) {
-    if (!checkChipStatus(moduleHash, elementId)) { return false; }
+    if (!checkChipStatus(moduleHash, elementId,ctx)) { return false; }
     if (hasBSError(moduleHash, elementId, ctx)) { return false; }
   }
 
@@ -578,19 +512,9 @@ bool PixelConditionsSummaryTool::isGood(const IdentifierHash & moduleHash, const
 
   if (!checkChipStatus(moduleHash, elementId, ctx)) { return false; }
 
-  if (hasBSError(moduleHash, ctx, elementId)) { return false; }
+  if (hasBSError(moduleHash, elementId, ctx)) { return false; }
 
   return true;
-}
-
-bool PixelConditionsSummaryTool::checkChipStatus(IdentifierHash moduleHash, Identifier pixid) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return checkChipStatus(moduleHash, pixid, ctx);
-}
-
-double PixelConditionsSummaryTool::goodFraction(const IdentifierHash & moduleHash, const Identifier & idStart, const Identifier & idEnd) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return goodFraction(moduleHash, idStart, idEnd, ctx);
 }
 
 double PixelConditionsSummaryTool::goodFraction(const IdentifierHash & moduleHash, const Identifier & idStart, const Identifier & idEnd, const EventContext& ctx) const {

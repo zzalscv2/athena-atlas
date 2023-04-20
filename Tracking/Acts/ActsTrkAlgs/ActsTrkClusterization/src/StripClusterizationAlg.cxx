@@ -80,7 +80,7 @@ StatusCode StripClusterizationAlg::execute(const EventContext& ctx) const
 	    if (!m_stripDetElStatus.empty()) {
 		goodModule = status->isGood(idHash);
 	    } else {
-		goodModule = m_summaryTool->isGood(idHash);
+		goodModule = m_summaryTool->isGood(idHash, ctx);
 	    }
 	}
 	VALIDATE_STATUS_ARRAY(
