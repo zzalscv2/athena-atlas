@@ -57,3 +57,10 @@ def MergeEFMuonsAlgCfg(flags, name="MergeEFMuonsAlg", **kwargs):
 
     acc.addEventAlgo(mergeMuons(name, **kwargs))
     return acc
+
+def MuonChainFilterAlgCfg(flags, name="MuonChainFilter", **kwargs):
+
+    filterAlg = CompFactory.MuonChainFilterAlg
+    acc = ComponentAccumulator()
+    acc.addEventAlgo(filterAlg(name, **kwargs))
+    return acc
