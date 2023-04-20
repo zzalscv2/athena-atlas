@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigConf_TrigConfCoolWriter
 #define TrigConf_TrigConfCoolWriter
 
+#include "CoolApplication/Application.h"
 #include "CoolKernel/DatabaseId.h"
 #include "CoolKernel/Exception.h"
 #include "CoolKernel/IDatabaseSvc.h"
@@ -14,9 +15,6 @@
 #include <iostream>
 #include <vector>
 #include <map>
-
-#include "CxxUtils/checker_macros.h"
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // only used in standalone app
 
 namespace TrigConf {
 
@@ -440,6 +438,7 @@ namespace TrigConf {
       // DB connection string: oracle://<server>;schema=<acc_name>;dbname=<db_name>;user=<acc_name>;password=<pwd>
       cool::DatabaseId         m_dbId;  ///< db connection string
       cool::IDatabasePtr       m_dbPtr; ///< COOL database pointer
+      cool::Application        m_coolApp; ///< COOL application
 
       std::vector<std::string> m_writeFolderList; ///< list of folders to which writing is restricted
       std::ostream & m_ostream; ///< output stream for all messages

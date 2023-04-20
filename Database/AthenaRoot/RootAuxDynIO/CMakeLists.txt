@@ -14,5 +14,5 @@ atlas_add_library( RootAuxDynIO
                       ${VDT_INCLUDE_DIRS} #VDT needed by RNTuple 
                    LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps
                    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES}
-                     AthContainers AthContainersInterfaces AthContainersRoot CxxUtils RootUtils
+                     AthContainers AthContainersInterfaces AthContainersRoot  RootUtils
                    )

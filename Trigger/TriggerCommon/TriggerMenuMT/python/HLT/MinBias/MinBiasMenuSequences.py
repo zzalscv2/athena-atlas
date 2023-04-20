@@ -12,6 +12,8 @@ import AthenaCommon.SystemOfUnits as Units
 from TrigMinBias.TrigMinBiasMonitoring import MbtsHypoToolMonitoring
 
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
+
 from ..Config.MenuComponents import InViewRecoCA, InEventRecoCA, SelectionCA, MenuSequenceCA
 
 
@@ -19,8 +21,7 @@ from ..Config.MenuComponents import InViewRecoCA, InEventRecoCA, SelectionCA, Me
 # to move into TrigMinBiasHypoConfigMT?
 
 def SPCountHypoToolGen(chainDict):
-    from TrigMinBias.TrigMinBiasConf import SPCountHypoTool
-    hypo = SPCountHypoTool(chainDict["chainName"])
+    hypo = CompFactory.SPCountHypoTool(chainDict["chainName"])
     if "hmt" in chainDict["chainName"]:
         hypo.sctSP = int(chainDict["chainParts"][0]["hypoSPInfo"].strip("sp"))
     if "mb_sptrk" in chainDict["chainName"]:
@@ -87,59 +88,40 @@ def TrigZVertexHypoToolGen(chainDict):
         hypo.minWeight = -1 # pass always
 
     return hypo
-    
 
+@AccumulatorCache    
+def MinBiasSPSel(flags):
 
-### Now the sequences
+    reco = InViewRecoCA("SPCountingReco")
+    minBiasFlags = flags.cloneAndReplace("InDet.Tracking.ActiveConfig","Trigger.InDetTracking.minBias")
 
-def MinBiasSPSequence(flags):
-    spAlgsList = []
-    from TrigMinBias.TrigMinBiasConf import SPCountHypoAlg
+    from TrigInDetConfig.InDetTrigSequence import InDetTrigSequence
+    seq = InDetTrigSequence(minBiasFlags, 
+                            minBiasFlags.InDet.Tracking.ActiveConfig.input_name, # this is already in the flags, maybe we would nto need to pass it in the future?
+                            rois   = str(reco.inputMaker().InViewRoIs),
+                            inView = str(reco.inputMaker().Views))
+    spMakingCA = seq.sequence("spacePointFormation")
 
-    spInputMakerAlg = EventViewCreatorAlgorithm("IM_SPEventViewCreator")
-    spInputMakerAlg.ViewFallThrough = True
-    spInputMakerAlg.RoITool = ViewCreatorInitialROITool()
-    spInputMakerAlg.InViewRoIs = "InputRoI"
-    spInputMakerAlg.Views = "SPView"
-    idTrigConfig = getInDetTrigConfig('minBias')
+    reco.mergeReco(spMakingCA)
+    # TODO, this should come from ID config, another method of InDetTrigSequence possibly
+    vdv = CompFactory.AthViews.ViewDataVerifier( "VDVSPCountingInputs",
+                                                  DataObjects = [( 'PixelID' , 'DetectorStore+PixelID' ),
+                                                                 ( 'SCT_ID'  , 'DetectorStore+SCT_ID' )] )
+    reco.addRecoAlgo(vdv)
 
-    from TrigInDetConfig.InDetTrigFastTracking import makeInDetTrigFastTracking
-    idAlgs, verifier = makeInDetTrigFastTracking(flags, config=idTrigConfig,
-                                     rois=spInputMakerAlg.InViewRoIs, 
-                                     viewVerifier='IDDataPrepCosmicsDataVerifier', 
-                                     doFTF=False)
-    verifier.DataObjects += [('TrigRoiDescriptorCollection', 'StoreGateSvc+InputRoI'),
-                             ('SCT_ID', 'DetectorStore+SCT_ID'),
-                             ('PixelID', 'DetectorStore+PixelID'),
-                             ('TagInfo', 'DetectorStore+ProcessingTags')]
-
-    # Make sure required objects are still available at whole-event level
-    from AthenaCommon.AlgSequence import AlgSequence
-    topSequence = AlgSequence()
-    topSequence.SGInputLoader.Load += [('SCT_ID', 'DetectorStore+SCT_ID'),
-                                       ('PixelID', 'DetectorStore+PixelID'),
-                                       ('TagInfo', 'DetectorStore+ProcessingTags')]
-
-#    spAlgsList = idAlgs[:-2]
-    spAlgsList = idAlgs
-
-    from ..Config.MenuComponents import algorithmCAToGlobalWrapper # this will disappear once whole sequence would be configured at once
     from TrigMinBias.MinBiasCountersConfig import SPCounterRecoAlgCfg
-    spCount = algorithmCAToGlobalWrapper(SPCounterRecoAlgCfg, flags)[0]
+    reco.mergeReco(SPCounterRecoAlgCfg(flags))
 
-    spRecoSeq = parOR("spRecoSeq", spAlgsList + [spCount])
-    spSequence = seqAND("spSequence", [spInputMakerAlg, spRecoSeq])
-    spInputMakerAlg.ViewNodeName = spRecoSeq.name()
+    selAcc = SelectionCA("MinBiasSPCounting")
+    selAcc.mergeReco(reco)
+    spCountHypo = CompFactory.SPCountHypoAlg(SpacePointsKey=recordable("HLT_SpacePointCounts"))
+    selAcc.addHypoAlgo(spCountHypo)
+    return selAcc
 
-
-    spCountHypo =SPCountHypoAlg()
-    spCountHypo.SpacePointsKey=recordable("HLT_SpacePointCounts")
-
-    return MenuSequence(flags,
-                        Sequence    = spSequence,
-                        Maker       = spInputMakerAlg,
-                        Hypo        = spCountHypo,
-                        HypoToolGen = SPCountHypoToolGen )
+def MinBiasSPSequenceCfg(flags):
+    selAcc = MinBiasSPSel(flags)
+    from TrigInDetConfig.TrigInDetConfig import InDetIDCCacheCreatorCfg
+    return MenuSequenceCA(flags, selAcc, HypoToolGen = SPCountHypoToolGen, globalRecoCA=InDetIDCCacheCreatorCfg(flags))
 
 def MinBiasZVertexFinderSequenceCfg(flags):
     recoAcc = InViewRecoCA(name="ZVertFinderReco", InViewRoIs="InputRoI", RequireParentView=True)

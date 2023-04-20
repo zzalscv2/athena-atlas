@@ -14,7 +14,7 @@ atlas_add_library( FakeBkgToolsLib
   DEFINITIONS FAKEBKGTOOLS_ATLAS_ENVIRONMENT
   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
   LINK_LIBRARIES AsgAnalysisInterfaces AsgTools xAODBase PATInterfaces
-  PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} CxxUtils xAODEgamma xAODMuon xAODTau PathResolver SelectionHelpersLib
+  PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} xAODEgamma xAODMuon xAODTau PathResolver SelectionHelpersLib
   xAODCore xAODEventInfo )
 
 if( NOT XAOD_STANDALONE )

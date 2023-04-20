@@ -7,7 +7,6 @@
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-from TriggerJobOpts.TriggerRecoConfig import TriggerRecoCfg
 from TrigValAlgs.TrigValAlgsConfig import TrigEDMAuxCheckerCfg, TrigEDMCheckerCfg
 import sys
 
@@ -19,7 +18,6 @@ flags.lock()
 # Central services
 cfg = MainServicesCfg(flags)
 cfg.merge(PoolReadCfg(flags))
-cfg.merge(TriggerRecoCfg(flags))
 
 # EDMCheckers
 cfg.merge(TrigEDMCheckerCfg(flags, doDumpAll=False))

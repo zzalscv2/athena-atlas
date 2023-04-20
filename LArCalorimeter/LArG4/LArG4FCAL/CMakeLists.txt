@@ -13,6 +13,6 @@ atlas_add_library( LArG4FCAL
                    OBJECT
                    NO_PUBLIC_HEADERS
                    PRIVATE_INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS}
-                   PRIVATE_LINK_LIBRARIES ${GEANT4_LIBRARIES} AthenaKernel CaloG4SimLib CxxUtils GaudiKernel GeoModelInterfaces LArG4Code LArHV LArReadoutGeometry PathResolver RDBAccessSvcLib StoreGateLib )
+                   PRIVATE_LINK_LIBRARIES ${GEANT4_LIBRARIES} AthenaKernel CaloG4SimLib GaudiKernel GeoModelInterfaces LArG4Code LArHV LArReadoutGeometry PathResolver RDBAccessSvcLib StoreGateLib )
 
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

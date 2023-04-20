@@ -65,9 +65,9 @@ StatusCode JetEfficiencyMonitorAlgorithm::fillHistograms( const EventContext& ct
   //DEFINITIONS and extracting variables from the python config file!
   bool use_emulated_gfex_trig =  m_emulated;
   bool use_passed_before_prescale =  m_passedb4Prescale;
-  std::string  bootstrap_trigger = m_bootstrap_trigger;
-  std::string orthogonal_trigger = m_orthogonal_trigger; 
-  std::vector<std::string> unbiased_triggers = {"L1_MU14FCH", "L1_MU18VFCH",
+  std::string  bootstrap_trigger = m_bootstrap_reference_trigger;
+  std::string random_reference_trigger = m_random_reference_trigger; 
+  std::vector<std::string> muon_triggers = {"L1_MU14FCH", "L1_MU18VFCH",
     "L1_MU8F_TAU20IM", "L1_2MU8F", "L1_MU8VF_2MU5VF", "L1_3MU3VF",
     "L1_MU5VF_3MU3VF", "L1_4MU3V", "L1_2MU5VF_3MU3V",
     "L1_RD0_FILLED"};
@@ -75,41 +75,41 @@ StatusCode JetEfficiencyMonitorAlgorithm::fillHistograms( const EventContext& ct
   
   
   //Define the various reference vector things!
-  std::vector<std::string> reference_trigger_options {"bs", "ortho", "none", "unbiased"};
+  std::vector<std::string> reference_trigger_options {"Bootstrap", "Random", "No", "Muon"};
   
-  bool bs_decision = false; //bootstrap trigger decision (L1_J15 -- defined in py file)
-  bool ortho_decision = false; //orthogal trigger decision, (L1_RD0_FILLED -- defined in py file)
-  bool unbiased_trig_decision = false; //unbiased trigger decision, a combinaton of if any of the triggers in line 70 - 73 passed 
+  bool bootstrap_ref_decision = false; //bootstrap trigger decision (L1_J15 -- defined in py file)
+  bool random_ref_decision = false; //random reference trigger decision, (L1_RD0_FILLED -- defined in py file)
+  bool muon_ref_decision = false; //muon trigger decision, a combinaton of if any of the muon triggers in line 70 - 73 passed 
   
   // if use pass before prescale, then we have to use this more complicated format
   // is passed bits, l1 passed before prescale feature for extracting if the trigger passed
   if (use_passed_before_prescale) {
     const unsigned int bs_bits = AthMonitorAlgorithm::getTrigDecisionTool()->isPassedBits(bootstrap_trigger);
-    bs_decision = bs_bits & TrigDefs::L1_isPassedBeforePrescale;
+    bootstrap_ref_decision = bs_bits & TrigDefs::L1_isPassedBeforePrescale;
     
-    const unsigned int ortho_bits = AthMonitorAlgorithm::getTrigDecisionTool()->isPassedBits(orthogonal_trigger);
-    ortho_decision = ortho_bits & TrigDefs::L1_isPassedBeforePrescale;
+    const unsigned int random_trigger_bits = AthMonitorAlgorithm::getTrigDecisionTool()->isPassedBits(random_reference_trigger);
+    random_ref_decision = random_trigger_bits & TrigDefs::L1_isPassedBeforePrescale;
     
-    for (auto & u : unbiased_triggers) {
+    for (auto & u : muon_triggers) {
       const unsigned int bits = AthMonitorAlgorithm::getTrigDecisionTool()->isPassedBits(u);
       bool pass = bits & TrigDefs::L1_isPassedBeforePrescale;
-      if (pass) {unbiased_trig_decision = true;}
+      if (pass) {muon_ref_decision = true;}
     } // iterating through the list of unbaised triggers
   } //close if used pass before prescale
   // if not using pass before prescale, then is a more direct process to see if trigger passed
   else {
-    bs_decision = AthMonitorAlgorithm::getTrigDecisionTool()->isPassed(bootstrap_trigger);
-    ortho_decision = AthMonitorAlgorithm::getTrigDecisionTool()->isPassed(orthogonal_trigger);
-    for (auto & u : unbiased_triggers) {
-      if (AthMonitorAlgorithm::getTrigDecisionTool()->isPassed(u)) {unbiased_trig_decision = true;}
-    } //close iterating through the unbiased triggers
+    bootstrap_ref_decision = AthMonitorAlgorithm::getTrigDecisionTool()->isPassed(bootstrap_trigger);
+    random_ref_decision = AthMonitorAlgorithm::getTrigDecisionTool()->isPassed(random_reference_trigger);
+    for (auto & u : muon_triggers) {
+      if (AthMonitorAlgorithm::getTrigDecisionTool()->isPassed(u)) {muon_ref_decision = true;}
+    } //close iterating through the muon triggers
   } //close else
   
   std::map<std::string, bool> reference_trigger_decision {
-    {"bs", bs_decision },
-    {"ortho", ortho_decision},
-    {"none", true},
-    {"unbiased", unbiased_trig_decision}
+    {"Bootstrap", bootstrap_ref_decision },
+    {"Random", random_ref_decision},
+    {"No", true},
+    {"Muon", muon_ref_decision}
   };
   
   

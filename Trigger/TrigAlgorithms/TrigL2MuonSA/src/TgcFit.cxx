@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TgcFit.h"
@@ -12,6 +12,7 @@
 
 
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
+#include "CxxUtils/checker_macros.h"
 
 // --------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
@@ -41,7 +42,9 @@ void TrigL2MuonSA::TgcFit::setFitParameters(double CHI2_TEST,
 double TrigL2MuonSA::TgcFit::LinStats::eval(double fX) const
 {
   double fY, fYerr;
-  gsl_fit_linear_est(fX, fIntercept, fSlope, fCov00, fCov01, fCov11, &fY, &fYerr);
+  // suppress thread-checker warning about unchecked code (gsl is thread-safe)
+  int status [[maybe_unused]] ATLAS_THREAD_SAFE =
+    gsl_fit_linear_est(fX, fIntercept, fSlope, fCov00, fCov01, fCov11, &fY, &fYerr);
   return fY;
 }
 
@@ -67,11 +70,15 @@ void TrigL2MuonSA::TgcFit::SimpleStatistics(TrigL2MuonSA::TgcFit::PointArray& po
     }
     if (stats.n == 0)
       break;
+
     // Calculate mean and standard deviation.
-    stats.fMean = gsl_stats_wmean(w, 1, y, 1, stats.n);
+    // suppress thread-checker warning about unchecked code (gsl is thread-safe)
+    const double mean ATLAS_THREAD_SAFE = gsl_stats_wmean(w, 1, y, 1, stats.n);
+    stats.fMean = mean;
     if (stats.n == 1)
       break;
-    stats.fStd  = gsl_stats_wsd  (w, 1, y, 1, stats.n);
+    const double stddev ATLAS_THREAD_SAFE = gsl_stats_wsd  (w, 1, y, 1, stats.n);
+    stats.fStd = stddev;
     double fMaxChi2 = 0.0;
     int iPtMax = -1;
     for (unsigned iPt = 0; iPt < points.size(); iPt++)
@@ -125,7 +132,8 @@ void TrigL2MuonSA::TgcFit::linReg(TrigL2MuonSA::TgcFit::PointArray& points, Trig
     if (stats.n < 2)
       break;
 
-    gsl_fit_wlinear(x, 1,
+    // suppress thread-checker warning about unchecked code (gsl is thread-safe)
+    int status [[maybe_unused]] ATLAS_THREAD_SAFE = gsl_fit_wlinear(x, 1,
         w, 1,
         y, 1,
         stats.n,
