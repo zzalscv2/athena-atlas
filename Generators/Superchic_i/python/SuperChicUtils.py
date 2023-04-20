@@ -97,7 +97,8 @@ class SuperChicConfig:
         self.mneut = 80
         self.wlp = 'el'
         self.wlm = 'el'
-
+        self.tau = 0.04
+        self.mxs = 100
 
     def toFortran(self):
 
@@ -263,6 +264,12 @@ class SuperChicConfig:
         conf+="***********************************************************************************\n"
         conf+=fortStr(self.wlp) + "                                  ! [wlp] : leptonic decay (either 'mu' or 'el') for Wplus \n"
         conf+=fortStr(self.wlm) + "                                  ! [wlm] : leptonic decay (either 'mu' or 'el') for Wminus \n"
+
+        conf+="****************************************************************************************\n"
+        conf+="****** V+X simplified model \n"   
+        conf+="****************************************************************************************\n" 
+        conf+=fortDouble(self.tau) + "                                   ! [tau] : mass distribution decay constant (GeV^-1) \n"
+        conf+=fortDouble(self.mxs) + "                                 ! [mxs] : mass of MX \n"
 
 
         return conf 
