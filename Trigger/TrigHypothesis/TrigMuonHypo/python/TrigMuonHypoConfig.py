@@ -290,6 +290,9 @@ def getThresholdsFromDict( chainDict ):
     return sum( [ [part['threshold']]*int(part['multiplicity']) for part in cparts ], [])
 
 
+def TrigMufastHypoAlgCfg(flags, name="UNSPECIFIED", **kwargs):
+    return CompFactory.TrigMufastHypoAlg(name, **kwargs)
+
 def TrigMufastHypoToolFromDict(flags, chainDict):
 
     chainPart = chainDict['chainParts'][0]

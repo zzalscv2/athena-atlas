@@ -245,11 +245,9 @@ def muFastVDVCfg(flags, RoIs, postFix, InsideOutMode, extraLoads):
   result.addEventAlgo(ViewVerify)
   return result
 
-def muFastRecoSequence( flags, RoIs, doFullScanID = False, InsideOutMode=False, extraLoads=None, l2mtmode=False, calib=False ):
+def muFastRecoSequenceCfg( flags, RoIs, doFullScanID = False, InsideOutMode=False, extraLoads=None, l2mtmode=False, calib=False ):
 
-  from AthenaCommon.CFElements import parOR
-
-  muFastRecoSequence = parOR("l2MuViewNode")
+  acc = ComponentAccumulator()
   postFix = ""
   if InsideOutMode:
     postFix = "IOmode"
@@ -257,27 +255,24 @@ def muFastRecoSequence( flags, RoIs, doFullScanID = False, InsideOutMode=False, 
     postFix = "l2mtmode"
   elif calib:
     postFix = "Calib"
-  muFastRecoSequence = parOR("l2Mu"+postFix+"ViewNode")
 
-  muFastRecoSequence+= algorithmCAToGlobalWrapper( muFastVDVCfg, flags, RoIs, postFix, InsideOutMode, extraLoads)
+  acc.merge(muFastVDVCfg(flags, RoIs, postFix, InsideOutMode, extraLoads))
 
 
   ### set up MuFastSteering ###
   from TrigL2MuonSA.TrigL2MuonSAConfig import l2MuFastAlgCfg
-  muFastAlg = algorithmCAToGlobalWrapper(l2MuFastAlgCfg, flags,
-                                         roisKey = RoIs,
-                                         setup = postFix,
-                                         FILL_FSIDRoI = doFullScanID,
-                                         MuonL2SAInfo = muNames.L2SAName+postFix,
-                                         L2IOCB = muNames.L2CBName+postFix,
-                                         forID = muNames.L2forIDName+postFix,
-                                         forMS = "forMS"+postFix,
-                                         TrackParticlesContainerName = getIDTracks(flags))[0]
+  acc.merge(l2MuFastAlgCfg(flags,
+                           roisKey = RoIs,
+                           setup = postFix,
+                           FILL_FSIDRoI = doFullScanID,
+                           MuonL2SAInfo = muNames.L2SAName+postFix,
+                           L2IOCB = muNames.L2CBName+postFix,
+                           forID = muNames.L2forIDName+postFix,
+                           forMS = "forMS"+postFix,
+                           TrackParticlesContainerName = getIDTracks(flags)))
 
-  muFastRecoSequence += muFastAlg
-  sequenceOut = muNames.L2SAName+postFix
 
-  return muFastRecoSequence, sequenceOut
+  return acc
 
 
 def muonIDFastTrackingSequence( flags, RoIs, name, extraLoads=None, extraLoadsForl2mtmode=None, doLRT=False ):
