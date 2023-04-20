@@ -203,6 +203,22 @@ void lowerLB(TObject* a, const TObject* b) {
      dqutils::MonitoringFile::merge_lowerLB(*a1,*b1);
    return;
 }
+
+void identical(TObject* a, const TObject* b) {
+   TH1* a1=(dynamic_cast<TH1*>(a));
+   const TH1* b1=dynamic_cast<const TH1*>(b);
+   TH2* c1=(dynamic_cast<TH2*>(a));
+   const TH2* d1=dynamic_cast<const TH2*>(b);
+   if ((!b1 || !a1) && (!c1 || !d1) ){
+     std::cout << "ERROR in identical: Object not of type THist" << std::endl;
+     std::cout << a1 << " " << b1 << " " << c1 << " " <<d1 <<std::endl;
+   }else if (a1){
+     dqutils::MonitoringFile::merge_identical(*a1,*b1);
+   }else {
+     dqutils::MonitoringFile::merge_identical(*c1,*d1);
+   }
+   return;
+}
     
 
 histCollection::histPerDir_t::histPerDir_t(const std::string& nameIn, TObject* objIn, TTree* md, bool dbg) : 
@@ -249,6 +265,8 @@ histCollection::histPerDir_t::histPerDir_t(const std::string& nameIn, TObject* o
       mergeMethod=&perBinEffPerCent;
     else if (!strcmp(howToMerge,"lowerLB")) 
       mergeMethod=&lowerLB;
+    else if (!strcmp(howToMerge,"identical")) 
+      mergeMethod=&identical;
 
     else {
       std::cout << "ERROR: Unknown merging method (" << howToMerge << ") for object of type TH1 named " << nameIn << std::endl;
@@ -593,7 +611,7 @@ int main(int argc, char** argv) {
       TDirectory* dir=dynamic_cast<TDirectory*>(in1->Get(dirName.c_str()));
       if (!dir) {
 	std::cout << "Did not find directory " << dirName <<"!" << std::endl;
-	return -1;
+	continue;
       }
       listOfHists.addDirectory(dir,dirName);
     }
