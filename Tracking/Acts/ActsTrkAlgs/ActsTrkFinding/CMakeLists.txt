@@ -13,7 +13,7 @@ atlas_add_component( ActsTrkFinding
                      GaudiKernel
                      BeamSpotConditionsData
                      ActsCore
-                     ActsTrkEvent
+                     ActsTrkEventLib
                      ActsTrkToolInterfacesLib
                      MagFieldConditions
                      ActsGeometryInterfacesLib

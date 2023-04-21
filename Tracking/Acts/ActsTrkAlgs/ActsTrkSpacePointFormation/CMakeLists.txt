@@ -12,7 +12,7 @@ atlas_add_component( ActsTrkSpacePointFormation
                      AthenaBaseComps
                      AthenaMonitoringKernelLib
                      GaudiKernel
-                     ActsTrkEvent
+                     ActsTrkEventLib
                      ActsTrkToolInterfacesLib
                      BeamSpotConditionsData
                      MagFieldConditions

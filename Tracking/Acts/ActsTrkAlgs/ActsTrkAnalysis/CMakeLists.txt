@@ -7,7 +7,7 @@ atlas_subdir( ActsTrkAnalysis )
 atlas_add_component( ActsTrkAnalysis
                      src/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES AthenaBaseComps AthenaKernel GaudiKernel Identifier InDetIdentifier InDetReadoutGeometry StoreGateLib ActsTrkEvent xAODInDetMeasurement
+                     LINK_LIBRARIES AthenaBaseComps AthenaKernel GaudiKernel Identifier InDetIdentifier InDetReadoutGeometry StoreGateLib ActsTrkEventLib xAODInDetMeasurement
 		     AthenaMonitoringKernelLib AthenaMonitoringLib TrkTruthData ActsTrkToolInterfacesLib InDetRecToolInterfaces
 		     PixelReadoutGeometryLib ReadoutGeometryBase InDetReadoutGeometry SCT_ReadoutGeometry ActsTrkEventCnvLib )
 

@@ -8,7 +8,7 @@ find_package( Acts COMPONENTS Core )
 find_package( Boost )
 find_package( Eigen )
 
-atlas_add_library( ActsTrkEvent
+atlas_add_library( ActsTrkEventLib
                    Root/*.cxx
                    PUBLIC_HEADERS ActsTrkEvent
                    INCLUDE_DIRS ${Acts_INCLUDE_DIR}
@@ -21,7 +21,7 @@ atlas_add_library( ActsTrkEvent
 atlas_add_dictionary( ActsTrkEventDict
 		      ActsTrkEvent/ActsTrkEventDict.h
 		      ActsTrkEvent/selection.xml
-		      LINK_LIBRARIES xAODCore ActsTrkEvent
+		      LINK_LIBRARIES xAODCore ActsTrkEventLib
 		      DATA_LINKS 
 		      ActsTrk::SeedContainer 
 		      ActsTrk::BoundTrackParametersContainer
@@ -29,5 +29,5 @@ atlas_add_dictionary( ActsTrkEventDict
 
 atlas_add_test( MultiTrajectoryBasic_test 
 				SOURCES test/MultiTrajectoryBasic_test.cxx
-				LINK_LIBRARIES TestTools ActsTrkEvent xAODTracking ActsTrkEvent
+				LINK_LIBRARIES TestTools ActsTrkEventLib
 				POST_EXEC_SCRIPT nopost.sh)
