@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 # Compatibility layer allowing to convert between new (as of 2020) Gaudi Configurable2
 # and old Configurable classes
@@ -46,7 +46,7 @@ def _setProperties( dest, src, indent="" ):
         if "PrivateToolHandleArray" in propType:
             setattr( dest, pname,
                      [conf2toConfigurable( tool, indent=_indent( indent ),
-                                           parent = src.getName() ) for tool in pvalue] )
+                                           parent = f"{src.getName()}.{pname}" ) for tool in pvalue] )
             _log.debug( "%sSetting private tool array property %s of %s",
                         indent, pname, dest.name() )
 
@@ -63,7 +63,7 @@ def _setProperties( dest, src, indent="" ):
             if pvalue is not None:
                 setattr( dest, pname,
                          conf2toConfigurable( pvalue, indent=_indent( indent ),
-                                              parent = src.getName() ) )
+                                              parent = f"{src.getName()}.{pname}" ) )
             else:
                 setattr( dest, pname, pvalue )
 
@@ -91,8 +91,8 @@ def conf2toConfigurable( comp, indent="", parent="", servicesOfThisCA=[], suppre
 
     if isinstance(comp, str):
         if comp:  # warning for non-empty string
-            _log.warning( "%sComponent: '%s' is of type string, no conversion, "
-                          "some properties possibly not set?", indent, comp )
+            _log.warning( "%sComponent '%s' in '%s' is of type string, no conversion, "
+                          "some properties possibly not set?", indent, comp, parent)
         return comp
 
     _log.debug( "%sConverting from GaudiConfig2 object %s type %s, parent %s",
@@ -251,9 +251,10 @@ def conf2toConfigurable( comp, indent="", parent="", servicesOfThisCA=[], suppre
                     if "ServiceHandle" in propType and pvalue in servicesOfThisCA:
                         _log.debug("%sThe service %s is part of the CA. Consistency checks will be performed when the service is merged") 
                     else:
-                        _log.warning("%sThe handle %s of new-config component %s.%s is just a string %s, "
-                                     "skipping deeper checks, configuration may be incorrect",
-                                     indent, propType, conf2.name, pname, pvalue)
+                        # debug only, because we already get a warning from conf2toConfigurable for this
+                        _log.debug("%sThe %s '%s' of GaudiConfig2 component %s.%s is a string, "
+                                   "skipping deeper checks",
+                                   indent, propType, pvalue, conf2.name, pname)
                 elif pvalue is None:
                     _log.debug("%sThe property value for %s of %s is None. Skipping.", indent, pname, conf2.name )
                     continue
