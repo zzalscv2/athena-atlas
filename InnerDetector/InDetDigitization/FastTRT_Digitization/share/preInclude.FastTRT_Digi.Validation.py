@@ -30,7 +30,7 @@ from TRT_ElectronPidTools.TRT_ElectronPidToolsConf import InDet__TRT_ElectronPid
 InDetTRT_ElectronPidTool = InDet__TRT_ElectronPidToolRun2( name = "InDetTRT_ElectronPidTool",
                                                            TRT_LocalOccupancyTool = InDetTRT_LocalOccupancy,
                                                            TRTStrawSummaryTool       = InDetTRTStrawStatusSummaryTool,
-                                                           TRT_ToT_dEdx_Tool = InDetTrigTRT_ToT_dEdx,
+                                                           TRT_ToT_dEdx_Tool = InDetTRT_ToT_dEdx,
                                                            isData = (globalflags.DataSource == 'data') )
 ToolSvc += InDetTRT_ElectronPidTool
 
