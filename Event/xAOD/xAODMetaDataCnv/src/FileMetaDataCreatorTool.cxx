@@ -278,7 +278,7 @@ StatusCode
 
           for (const std::string& key : m_metaDataSvc->getPerStreamKeysFor(m_key)) {
               const xAOD::FileMetaData* input = nullptr;
-              input = m_inputMetaDataStore->tryRetrieve< xAOD::FileMetaData >(key);
+              input = m_inputMetaDataStore->tryConstRetrieve< xAOD::FileMetaData >(key);
               if (input) {
                   std::string orig_simFlavour = "none";
                   bool orig_isDataOverlay = false;
