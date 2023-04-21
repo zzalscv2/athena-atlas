@@ -10,24 +10,20 @@
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps, Input
 
-# Generate configuration run file
-run = ExecStep.ExecStep('athena_run')
-run.type = 'other'
-run.input = 'data'
-run.executable = 'runHLT_standalone_newJO.py'
-run.args = ' --filesInput='+Input.get_input('data').paths[0]
-run.args += ' Trigger.triggerMenuSetup="Dev_pp_run3_v1"'
-run.args += ' Trigger.doRuntimeNaviVal=True'
-run.args += ' Output.doWriteRDO=False  Output.doWriteBS=True Trigger.writeBS=True'
-run.prmon = False
+ex = ExecStep.ExecStep('athena')
+ex.type = 'other'
+ex.input = 'data'
+ex.executable = 'runHLT_standalone_newJO.py'
+ex.args = ' --filesInput='+Input.get_input('data').paths[0]
+ex.args += ' Trigger.triggerMenuSetup="Dev_pp_run3_v1"'
+ex.args += ' Trigger.doRuntimeNaviVal=True'
+ex.args += ' Output.doWriteRDO=False Output.doWriteBS=True Trigger.writeBS=True'
+ex.prmon = False
 
-
-# The full test configuration
 test = Test.Test()
 test.art_type = 'build'
-test.exec_steps = [run]
+test.exec_steps = [ex]
 test.check_steps = CheckSteps.default_check_steps(test)
-test.get_step('MessageCount').log_regex = 'athena_run.log'
 
 
 import sys
