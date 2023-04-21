@@ -5,6 +5,13 @@
 #ifndef ACTSTRKSEEDINGTOOL_SEEDINGTOOL_H
 #define ACTSTRKSEEDINGTOOL_SEEDINGTOOL_H
 
+
+// gcc12 gives false positive warnings from copying boost::small_vector.
+#if __GNUC__ >= 12
+# pragma GCC diagnostic ignored "-Wstringop-overread"
+#endif
+
+
 // ATHENA
 #include "ActsTrkToolInterfaces/ISeedingTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
