@@ -5,7 +5,6 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import Format
-from InDetRecExample.InDetKeys import InDetKeys
 
 class InDetCacheNames(object):
   Pixel_ClusterKey   = "PixelTrigClustersCache"
@@ -49,73 +48,6 @@ def trtCondCfg(flags):
   acc.merge(addFoldersSplitOnline (flags, "TRT","/TRT/Onl/Calib/errors","/TRT/Calib/errors",className="TRTCond::RtRelationMultChanContainer"))
 
   return acc
-
-
-def pixelDataPrepCfg(flags, roisKey, signature):
-  from PixelReadoutGeometry.PixelReadoutGeometryConfig import PixelReadoutManagerCfg
-  acc = PixelReadoutManagerCfg(flags)
-
-  from RegionSelector.RegSelToolConfig import regSelTool_Pixel_Cfg
-  RegSelTool_Pixel = acc.popToolsAndMerge(regSelTool_Pixel_Cfg(flags))
-
-  from PixelConditionsAlgorithms.PixelConditionsConfig import PixelCablingCondAlgCfg
-  acc.merge(PixelCablingCondAlgCfg(flags)) # To produce PixelCablingCondData for PixelRodDecoder + PixelRawDataProvider
-
-  if flags.Input.Format is Format.BS:
-    from PixelConditionsAlgorithms.PixelConditionsConfig import PixelHitDiscCnfgAlgCfg
-    acc.merge(PixelHitDiscCnfgAlgCfg(flags)) # To produce PixelHitDiscCnfgData for PixelRodDecoder
-    PixelRodDecoder=CompFactory.PixelRodDecoder
-    InDetPixelRodDecoder = PixelRodDecoder(name = "InDetPixelRodDecoder"+ signature)
-    # Disable duplcated pixel check for data15 because duplication mechanism was used.
-    if len(flags.Input.ProjectName)>=6 and flags.Input.ProjectName[:6]=="data15":
-      InDetPixelRodDecoder.CheckDuplicatedPixel=False
-    acc.addPublicTool(InDetPixelRodDecoder)
-
-    PixelRawDataProviderTool=CompFactory.PixelRawDataProviderTool
-    InDetPixelRawDataProviderTool = PixelRawDataProviderTool(name    = "InDetPixelRawDataProviderTool"+ signature,
-                                                             Decoder = InDetPixelRodDecoder)
-    acc.addPublicTool(InDetPixelRawDataProviderTool)
-
-    # load the PixelRawDataProvider
-    PixelRawDataProvider=CompFactory.PixelRawDataProvider
-    InDetPixelRawDataProvider = PixelRawDataProvider(name         = "InDetPixelRawDataProvider"+ signature,
-                                                     RDOKey       = InDetKeys.PixelRDOs(),
-                                                     ProviderTool = InDetPixelRawDataProviderTool,
-                                                     isRoI_Seeded = True,
-                                                     RoIs         = roisKey,
-                                                     RDOCacheKey  = InDetCacheNames.PixRDOCacheKey,
-                                                     BSErrorsCacheKey = InDetCacheNames.PixBSErrCacheKey,
-                                                     RegSelTool   = RegSelTool_Pixel)
-
-    acc.addEventAlgo(InDetPixelRawDataProvider)
-
-  return acc
-
-def sctDataPrepCfg(flags, roisKey, signature):
-  acc = ComponentAccumulator()
-
-  from RegionSelector.RegSelToolConfig import regSelTool_SCT_Cfg
-  RegSelTool_SCT   = acc.popToolsAndMerge(regSelTool_SCT_Cfg(flags))
-
-  # load the SCTRawDataProvider
-
-  if flags.Input.Format is Format.BS:
-    from SCT_RawDataByteStreamCnv.SCT_RawDataByteStreamCnvConfig import SCTRawDataProviderCfg
-    sctProviderArgs = {}
-    sctProviderArgs["RDOKey"] = InDetKeys.SCT_RDOs()
-    sctProviderArgs["isRoI_Seeded"] = True
-    sctProviderArgs["RoIs"] = roisKey
-    sctProviderArgs["RDOCacheKey"] = InDetCacheNames.SCTRDOCacheKey
-    sctProviderArgs["BSErrCacheKey"] = InDetCacheNames.SCTBSErrCacheKey
-    sctProviderArgs["RegSelTool"] = RegSelTool_SCT
-    acc.merge(SCTRawDataProviderCfg(flags, suffix=signature, **sctProviderArgs))
-    # load the SCTEventFlagWriter
-    from SCT_RawDataByteStreamCnv.SCT_RawDataByteStreamCnvConfig import SCTEventFlagWriterCfg
-    acc.merge(SCTEventFlagWriterCfg(flags, suffix=signature))
-
-  return acc
-
-
 
 
 def trtDataPrep(flags, roisKey, signature):
@@ -182,52 +114,13 @@ def trigInDetFastTrackingCfg( inflags, roisKey="EMRoIs", signatureName='', in_vi
   # redirect InDet.Tracking.ActiveConfig flags to point to a specific trigger setting
 
   flags = inflags.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking."+signatureName)
+  from TrigInDetConfig.InDetTrigSequence import InDetTrigSequence
+  seq = InDetTrigSequence(flags, 
+                          flags.InDet.Tracking.ActiveConfig.input_name, 
+                          rois   = roisKey,
+                          inView = "VDVInDetFTF")
+  acc = seq.sequence("FastTrackFinder")
 
-  #If signature specified add suffix to the name of each algorithms
-  signature =  ("_" + signatureName if signatureName else '').lower()
-
-  acc = ComponentAccumulator()
-
-  if in_view:
-    verifier = CompFactory.AthViews.ViewDataVerifier( name = 'VDVInDetFTF'+signature,
-                                                      DataObjects= [('xAOD::EventInfo', 'StoreGateSvc+EventInfo'),
-                                                                    ('InDet::PixelClusterContainerCache', InDetCacheNames.Pixel_ClusterKey),
-                                                                    ('PixelRDO_Cache', InDetCacheNames.PixRDOCacheKey),
-                                                                    ('InDet::SCT_ClusterContainerCache', InDetCacheNames.SCT_ClusterKey),
-                                                                    ('SCT_RDO_Cache', InDetCacheNames.SCTRDOCacheKey),
-                                                                    ('SpacePointCache', InDetCacheNames.SpacePointCachePix),
-                                                                    ('SpacePointCache', InDetCacheNames.SpacePointCacheSCT),
-                                                                    ( 'IDCInDetBSErrContainer_Cache' , InDetCacheNames.PixBSErrCacheKey ),
-                                                                    ( 'IDCInDetBSErrContainer_Cache' , InDetCacheNames.SCTBSErrCacheKey ),
-                                                                    ( 'IDCInDetBSErrContainer_Cache' , InDetCacheNames.SCTFlaggedCondCacheKey ),
-                                                                    ('xAOD::EventInfo', 'EventInfo'),
-                                                                    ('TrigRoiDescriptorCollection', str(roisKey)),
-                                                                    ( 'TagInfo' , 'DetectorStore+ProcessingTags' )] )
-    if flags.Input.isMC:
-        verifier.DataObjects += [( 'PixelRDO_Container' , 'StoreGateSvc+PixelRDOs' ),
-                                  ( 'SCT_RDO_Container' , 'StoreGateSvc+SCT_RDOs' ) ]
-        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-        sgil_load = [( 'PixelRDO_Container' , 'StoreGateSvc+PixelRDOs' ),
-                    ( 'SCT_RDO_Container' , 'StoreGateSvc+SCT_RDOs' ) ]
-        acc.merge(SGInputLoaderCfg(flags, Load=sgil_load))
-
-    acc.addEventAlgo(verifier)
-  #Only add raw data decoders if we're running over raw data
-  acc.merge(pixelDataPrepCfg(flags, roisKey, signature))
-  acc.merge(sctDataPrepCfg(flags, roisKey, signature))
-  acc.merge(trtDataPrep(flags, roisKey, signature))
-
-  from InDetConfig.InDetPrepRawDataFormationConfig import TrigPixelClusterizationCfg, TrigSCTClusterizationCfg
-  acc.merge(TrigPixelClusterizationCfg(flags, name="InDetPixelClusterization"+signature, RoIs=roisKey))
-  acc.merge(TrigSCTClusterizationCfg(flags, name="InDetSCT_Clusterization"+signature, RoIs=roisKey))
-
-  from InDetConfig.SiSpacePointFormationConfig import TrigSiTrackerSpacePointFinderCfg
-  acc.merge(TrigSiTrackerSpacePointFinderCfg(flags, name="InDetSiTrackerSpacePointFinder_"+signature))
-  
-  from TrigFastTrackFinder.TrigFastTrackFinderConfig import TrigFastTrackFinderCfg
-  acc.merge(TrigFastTrackFinderCfg(flags, "TrigFastTrackFinder_"+signatureName, signatureName, roisKey))
-  
-  acc.merge(trackFTFConverterCfg(flags, signature))
   return acc
 
 ############################################################################################################################
