@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "sTgcFastDigitizer.h"
@@ -178,7 +178,7 @@ StatusCode sTgcFastDigitizer::execute() {
   SG::WriteHandle<MuonSimDataCollection> h_sdoContainer(m_sdoName);
   ATH_CHECK( h_sdoContainer.record ( std::make_unique<MuonSimDataCollection>() ) );
 
-  CLHEP::HepRandomEngine* rndmEngine = getRandomEngine(m_rndmEngineName, Gaudi::Hive::currentContextEvt());
+  CLHEP::HepRandomEngine* rndmEngine = getRandomEngine(m_rndmEngineName, Gaudi::Hive::currentContext());
 
   sTgcPrepDataContainer* prdContainer = new sTgcPrepDataContainer(m_idHelperSvc->stgcIdHelper().module_hash_max());
   

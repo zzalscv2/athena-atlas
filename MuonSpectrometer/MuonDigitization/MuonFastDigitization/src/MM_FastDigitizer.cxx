@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MM_FastDigitizer.h"
@@ -118,7 +118,7 @@ StatusCode MM_FastDigitizer::execute() {
   // Create and record the SDO container in StoreGate
   std::unique_ptr<MuonSimDataCollection> h_sdoContainer =  std::make_unique<MuonSimDataCollection>();
   
-  CLHEP::HepRandomEngine* rndmEngine = getRandomEngine(m_rndmEngineName, Gaudi::Hive::currentContextEvt());
+  CLHEP::HepRandomEngine* rndmEngine = getRandomEngine(m_rndmEngineName, ctx);
 
  
   std::unique_ptr<MMPrepDataContainer> prdContainer = std::make_unique<MMPrepDataContainer>(m_idHelperSvc->mmIdHelper().module_hash_max());
