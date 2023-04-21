@@ -27,4 +27,6 @@ test.art_type = 'build'
 test.exec_steps = [ex]
 test.check_steps = CheckSteps.default_check_steps(test)
 
+chaindump = test.get_step("ChainDump")
+chaindump.args = '--json --yaml ref_mc_newJO_v1lowMu_build.new'
 sys.exit(test.run())

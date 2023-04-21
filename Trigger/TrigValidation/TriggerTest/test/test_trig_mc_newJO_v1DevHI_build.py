@@ -25,5 +25,8 @@ test.art_type = 'build'
 test.exec_steps = [run]
 test.check_steps = CheckSteps.default_check_steps(test)
 
+chaindump = test.get_step("ChainDump")
+chaindump.args = '--json --yaml ref_mc_newJO_v1DevHI_build.new'
+
 import sys
 sys.exit(test.run())
