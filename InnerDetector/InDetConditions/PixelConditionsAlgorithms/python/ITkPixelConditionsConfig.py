@@ -173,10 +173,7 @@ def ITkPixelOfflineCalibCondAlgCfg(flags, name="ITkPixelOfflineCalibCondAlg", **
     folderName = ""
     if flags.ITk.Conditions.PixelOfflineCalibTag:
         folderName = '/PIXEL/ITkClusterError'
-        DetDescrVersion = flags.GeoModel.AtlasVersion
-        splitGeo        = DetDescrVersion.split('-')
-        CalibTag = flags.ITk.Conditions.PixelOfflineCalibTag + '_' + splitGeo[0] + '-' + splitGeo[1] + '-' + splitGeo[2] + '-' + splitGeo[3] # PixelITkError_v5_ATLAS-RUN4-P2-XX
-
+        CalibTag = flags.ITk.Conditions.PixelOfflineCalibTag     
         if flags.ITk.Conditions.PixelOfflineCalibFile:
             acc.merge(addFolders(flags, folderName, flags.ITk.Conditions.PixelOfflineCalibFile, tag=CalibTag, db="OFLP200", className="CondAttrListCollection"))
         else:
