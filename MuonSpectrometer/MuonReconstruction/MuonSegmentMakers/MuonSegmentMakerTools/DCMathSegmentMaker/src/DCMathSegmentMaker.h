@@ -173,7 +173,7 @@ namespace Muon {
         };
 
         struct segmentCreationInfo {  // miscellaneous objects needed for segment creation
-            segmentCreationInfo(ClusterVecPair& spVecs, TrkDriftCircleMath::MdtMultiChamberGeometry* multiGeo, Amg::Transform3D gToStation,
+            segmentCreationInfo(ClusterVecPair& spVecs, const TrkDriftCircleMath::ChamberGeometry* multiGeo, Amg::Transform3D gToStation,
                                 Amg::Transform3D amdbToGlobal, double pmin, double pmax) :
                 clusters(spVecs.first, spVecs.second),
                 geom(multiGeo),
@@ -182,11 +182,11 @@ namespace Muon {
                 phimin(pmin),
                 phimax(pmax) {}
             ClusterVecPair clusters;
-            TrkDriftCircleMath::MdtMultiChamberGeometry* geom;
-            Amg::Transform3D globalTrans;
-            Amg::Transform3D amdbTrans;
-            double phimin;
-            double phimax;
+            const TrkDriftCircleMath::ChamberGeometry* geom{nullptr};
+            Amg::Transform3D globalTrans{Amg::Transform3D::Identity()};
+            Amg::Transform3D amdbTrans{Amg::Transform3D::Identity()};
+            double phimin{0.};
+            double phimax{0.};
         };
 
     public:
@@ -294,7 +294,7 @@ namespace Muon {
 
        void associateMDTsToSegment(
             const Amg::Vector3D& gdir, TrkDriftCircleMath::Segment& segment, const std::vector<const MdtDriftCircleOnTrack*>& mdts,
-            TrkDriftCircleMath::MdtMultiChamberGeometry* multiGeo, const Amg::Transform3D& gToStation, const Amg::Transform3D& amdbToGlobal,
+            const TrkDriftCircleMath::ChamberGeometry* multiGeo, const Amg::Transform3D& gToStation, const Amg::Transform3D& amdbToGlobal,
             std::set<Identifier>& deltaVec, std::set<Identifier>& outoftimeVec,
             std::vector<std::pair<double,  std::unique_ptr<const Trk::MeasurementBase>> >& rioDistVec) const;
         std::pair<std::pair<int, int>, bool> associateClustersToSegment(

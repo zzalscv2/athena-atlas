@@ -4,7 +4,7 @@
 
 #include "MuonStationIntersectCond/MdtIntersectGeometry.h"
 
-#include <TString.h>  // for Form
+#include <iostream>
 
 #include "AthenaKernel/getMessageSvc.h"
 #include "GaudiKernel/MsgStream.h"
@@ -67,18 +67,23 @@ namespace Muon {
     }
 
     double MdtIntersectGeometry::tubeLength(const int ml, const int layer, const int tube) const {
-        if (ml < 0 || ml > 1)
-            throw std::runtime_error(
-                Form("File: %s, Line: %d\nMdtIntersectGeometry::tubeLength() - got called with ml=%d which is definitely out of range",
-                     __FILE__, __LINE__, ml));
-        if (layer < 0 || layer > 3)
-            throw std::runtime_error(
-                Form("File: %s, Line: %d\nMdtIntersectGeometry::tubeLength() - got called with layer=%d which is definitely out of range",
-                     __FILE__, __LINE__, layer));
-        if (tube < 0 || tube >= int(MdtIdHelper::maxNTubesPerLayer))
-            throw std::runtime_error(
-                Form("File: %s, Line: %d\nMdtIntersectGeometry::tubeLength() - got called with tube=%d which is definitely out of range",
-                     __FILE__, __LINE__, tube));
+#ifndef NDEBUG
+        if (ml < 0 || ml > 1){
+            std::stringstream sstr{};
+            sstr<<__FILE__<<":"<<__LINE__<<" "<<__func__<<"() got called with ml="<<ml<<" which is definetly out of range";
+            throw std::runtime_error(sstr.str());
+        }
+        if (layer < 0 || layer > 3) {
+            std::stringstream sstr{};
+            sstr<<__FILE__<<":"<<__LINE__<<" "<<__func__<<"() got called with layer="<<layer<<" which is definetly out of range";
+            throw std::runtime_error(sstr.str());
+        }  
+        if (tube < 0 || tube >= int(MdtIdHelper::maxNTubesPerLayer)){
+            std::stringstream sstr{};
+            sstr<<__FILE__<<":"<<__LINE__<<" "<<__func__<<"() got called with tube="<<tube<<" which is definetly out of range";
+            throw std::runtime_error(sstr.str());
+        }
+#endif
         // shift by one to account for MuonGeoModel scheme
         int theTube = tube + 1;
         int theLayer = layer + 1;
@@ -190,7 +195,7 @@ namespace Muon {
         // finally if the first ml is dead, configure the MdtChamberGeometry accordingly
         if (!goodMl0 && goodMl1) m_mdtGeometry->isSecondMultiLayer(true);
     }
-    const TrkDriftCircleMath::MdtChamberGeometry* MdtIntersectGeometry::mdtChamberGeometry() const { return m_mdtGeometry.get(); }
+    std::shared_ptr<const TrkDriftCircleMath::MdtChamberGeometry> MdtIntersectGeometry::mdtChamberGeometry() const { return m_mdtGeometry; }
     void MdtIntersectGeometry::fillDeadTubes(const MuonGM::MdtReadoutElement* mydetEl, MsgStream& msg) {
         if ((mydetEl->getStationName()).find("BMG") != std::string::npos) {
             PVConstLink cv = mydetEl->getMaterialGeom();  // it is "Multilayer"
