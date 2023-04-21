@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -7,91 +7,63 @@
  -----------------------------------------
  ***************************************************************************/
 
-//<doc><file>   $Id: IdDictDetDescrCnv.cxx,v 1.21 2009-02-15 13:08:19 schaffer Exp $
-//<version>     $Name: not supported by cvs2svn $
+//<doc><file>   $Id: IdDictDetDescrCnv.cxx,v 1.21 2009-02-15 13:08:19 schaffer
+//Exp $ <version>     $Name: not supported by cvs2svn $
 
 #include "IdDictDetDescrCnv.h"
 
-#include "IdDictParser/IdDictParser.h"
-#include "IdDictDetDescr/IdDictManager.h"
-
-#include "DetDescrCnvSvc/DetDescrConverter.h"
+#include "AthenaBaseComps/AthCheckMacros.h"
+#include "AthenaKernel/StorableConversions.h"
 #include "DetDescrCnvSvc/DetDescrAddress.h"
-
+#include "DetDescrCnvSvc/DetDescrConverter.h"
 #include "GeoModelInterfaces/IGeoDbTagSvc.h"
 #include "GeoModelUtilities/DecodeVersionKey.h"
+#include "IdDictDetDescr/IdDictManager.h"
 #include "RDBAccessSvc/IRDBAccessSvc.h"
 #include "RDBAccessSvc/IRDBRecord.h"
 #include "RDBAccessSvc/IRDBRecordset.h"
- 
-#include "GaudiKernel/MsgStream.h"
-
-#include "AthenaKernel/StorableConversions.h"
-
 
 // To write text file
-#include <iostream>
 #include <fstream>
-
+#include <iostream>
 
 //--------------------------------------------------------------------
 
-long int   
-IdDictDetDescrCnv::repSvcType() const
-{
-  return (storageType());
+long int IdDictDetDescrCnv::repSvcType() const {
+    return (storageType());
 }
 
 //--------------------------------------------------------------------
 
-StatusCode 
-IdDictDetDescrCnv::initialize()
-{
+StatusCode IdDictDetDescrCnv::initialize() {
     // First call parent init
-    StatusCode sc = DetDescrConverter::initialize();
-    MsgStream log(msgSvc(), "IdDictDetDescrCnv");
-    log << MSG::INFO << "in initialize" << endmsg;
-
-    if (sc.isFailure()) {
-        log << MSG::ERROR << "DetDescrConverter::initialize failed" << endmsg;
-        return sc;
-    }
-    
+    ATH_CHECK(DetDescrConverter::initialize());
+    ATH_MSG_INFO("in initialize");
     // Must set indet tag to EMPTY
     m_inDetIDTag = "EMPTY";
-    
-    return StatusCode::SUCCESS; 
+    return StatusCode::SUCCESS;
 }
 
 //--------------------------------------------------------------------
 
-StatusCode 
-IdDictDetDescrCnv::finalize()
-{
-    MsgStream log(msgSvc(), "IdDictDetDescrCnv");
-    log << MSG::INFO << "in finalize" << endmsg;
-
-    // Remove parser
-    if(m_parser) delete m_parser;
-    m_parser = 0;
-
-    return StatusCode::SUCCESS; 
+StatusCode IdDictDetDescrCnv::finalize() {
+    ATH_MSG_INFO("in finalize");
+    return StatusCode::SUCCESS;
 }
 
 //--------------------------------------------------------------------
 
-StatusCode
-IdDictDetDescrCnv::createObj(IOpaqueAddress* pAddr, DataObject*& pObj) 
-{
+StatusCode IdDictDetDescrCnv::createObj(IOpaqueAddress *pAddr,
+                                        DataObject *&pObj) {
     //
     // Here we create an IdDictManager and provide it with an
     // IdDictMgr which has been filled by an IdDictParser. This mgr
-    // is used by each IdHelper to initialize itself. 
+    // is used by each IdHelper to initialize itself.
     //
     //   Lifetime management:
     //
     //     IdDictDetDescrCnv holds onto ONE IdDictParser, which in
-    //     turn holds the same IdDictMgr. 
+    //     turn holds the same IdDictMgr.
     //
     //     Multiple initializations are possible. parseXMLDescription
     //     will look for a new set of xml files, clear any
@@ -101,40 +73,29 @@ IdDictDetDescrCnv::createObj(IOpaqueAddress* pAddr, DataObject*& pObj)
     //     Since the parser "refills" the same IdDictMgr, one has the
     //     option to delete and recreate the IdDictManager, or just
     //     keep the same one which will be refreshed with the new
-    //     description. 
+    //     description.
     //
-    MsgStream log(msgSvc(), "IdDictDetDescrCnv");
-    log << MSG::INFO << "in createObj: creating a IdDictManager object in the detector store" << endmsg;
-
-    DetDescrAddress* ddAddr;
-    ddAddr = dynamic_cast<DetDescrAddress*> (pAddr);
-    if(!ddAddr) {
-        log << MSG::ERROR << "Could not cast to DetDescrAddress." << endmsg;
+    ATH_MSG_INFO(
+        "in createObj: creating a IdDictManager object in the detector store");
+    DetDescrAddress *ddAddr = dynamic_cast<DetDescrAddress *>(pAddr);
+    if (!ddAddr) {
+        ATH_MSG_ERROR("Could not cast to DetDescrAddress.");
         return StatusCode::FAILURE;
     }
 
     // Get the StoreGate key of this container.
-    std::string mgrKey  = *( ddAddr->par() );
-    if ("" == mgrKey) {
-        log << MSG::DEBUG << "No Manager key " << endmsg;
-    }
-    else {
-        log << MSG::DEBUG << "Manager key is " << mgrKey << endmsg;
-    }
-    
-    StatusCode sc = parseXMLDescription();
-    if (sc != StatusCode::SUCCESS ) {
-        log << MSG::ERROR << " Cannot parse the XML description " << endmsg; 
-        return sc ;
-    }
+    std::string mgrKey = *(ddAddr->par());
+    if (mgrKey.empty())
+        ATH_MSG_DEBUG("No Manager key ");
+    else
+        ATH_MSG_DEBUG("Manager key is " << mgrKey);
 
+    ATH_CHECK(parseXMLDescription());
 
     // Create the manager - only once
-    IdDictManager* dictMgr = new IdDictManager(m_parser->m_idd); 
+    IdDictManager *dictMgr = new IdDictManager(m_parser->m_idd);
 
-    log << MSG::DEBUG << "Created IdDictManager " 
-        << endmsg;
-    
+    ATH_MSG_DEBUG("Created IdDictManager ");
 
     // Print out the dictionary names
     printDicts(dictMgr);
@@ -143,18 +104,13 @@ IdDictDetDescrCnv::createObj(IOpaqueAddress* pAddr, DataObject*& pObj)
     // by reference.
     pObj = SG::asStorable(dictMgr);
 
-    return StatusCode::SUCCESS; 
-
+    return StatusCode::SUCCESS;
 }
 
 //--------------------------------------------------------------------
 
-StatusCode
-IdDictDetDescrCnv::parseXMLDescription() 
-{
-    MsgStream log(msgSvc(), "IdDictDetDescrCnv");
-
-    log << MSG::DEBUG << "in getManager" << endmsg;
+StatusCode IdDictDetDescrCnv::parseXMLDescription() {
+    ATH_MSG_DEBUG("in parseXMLDescription()");
 
     // Parse the xml files to obtain the iddict dictionaries
     //
@@ -166,136 +122,52 @@ IdDictDetDescrCnv::parseXMLDescription()
     //     - a change in one of the "options" such as doIdChecks,
     //       doInitNeighbors, etc.
     //
-    
-    m_doParsing = false; // Preset to no parsing
+
+    m_doParsing = false;  // Preset to no parsing
 
     if (!m_parser) {
-
         // Create parser
-        m_parser    = new IdDictParser;
-        m_doParsing = true; 
-        
+        m_parser = std::make_unique<IdDictParser>();
+        m_doParsing = true;
     }
-    
+
     // We access the properties on each pass
 
-    // Get the access to DetDescrCnvSvc for access to properties
-    IProperty* propertyServer(0); 
-    StatusCode sc = serviceLocator()->service("DetDescrCnvSvc", propertyServer); 
-    if (sc != StatusCode::SUCCESS ) {
-        log << MSG::ERROR 
-            << " Cannot get DetDescrCnvSvc " 
-            << endmsg; 
-        return sc ;
-    }
-
     // Set flag for doing checks of ids
-    BooleanProperty     boolProperty("DoIdChecks", false);
-    sc = propertyServer->getProperty(&boolProperty);
-    if (!sc.isSuccess()) {
-        log << MSG::ERROR << "unable to get DoIdChecks flag: found " 
-            << boolProperty.value()
-            << endmsg;
-        return sc;
-    }
-    else {
-        bool doChecks = boolProperty.value();
-        if (doChecks != m_doChecks)m_doParsing = true; // Changed flag
-        m_doChecks = doChecks;
-        log << MSG::DEBUG << "Flag DoIdChecks is:  " 
-            << m_doChecks
-            << endmsg;
-    }
+    ATH_CHECK(loadPropertyWithParse("DoIdChecks", m_doChecks));
 
     // Set flag for initializing neighbours
-    BooleanProperty     boolProperty1("DoInitNeighbours", true);
-    sc = propertyServer->getProperty(&boolProperty1);
-    if (!sc.isSuccess()) {
-        log << MSG::ERROR << "unable to get DoInitNeighbours flag: found " 
-            << boolProperty1.value()
-            << endmsg;
-        return sc;
-    }
-    else {
-        bool doNeighbours = boolProperty1.value();
-        if (doNeighbours != m_doNeighbours)m_doParsing = true; // Changed flag
-        m_doNeighbours = doNeighbours;
-        log << MSG::DEBUG << "Flag DoInitNeighbours is:  " 
-            << m_doNeighbours
-            << endmsg;
-    }
+    ATH_CHECK(loadPropertyWithParse("DoInitNeighbours", m_doNeighbours));
 
     // Name of IdDict file
-    StringProperty property("IdDictName", "");
-    sc = propertyServer->getProperty(&property);
-    if (!sc.isSuccess()) {
-        log << MSG::ERROR << "unable to get IdDictName: found " 
-            << property.value()
-            << endmsg;
-        return sc;
-    }
-    else {
-        std::string idDictName = property.value();
-        if (idDictName != m_idDictName)m_doParsing = true; // Changed flag
-        m_idDictName = idDictName;
-        log << MSG::INFO << "IdDictName:  " 
-            << m_idDictName
-            << endmsg;
-    }
-
+    ATH_CHECK(loadPropertyWithParse("IdDictName", m_idDictName));
+    ATH_MSG_INFO("IdDictName:  " << m_idDictName);
 
     // Get the file names: two options - either from jobOpt
     // properties of the DetDescrCnvSvc or from RDB tags
-        
+
     // Determine if Dict filename comes from DD database or
     // if properties from JobOptions should be used.
-    BooleanProperty  boolProperty2("IdDictFromRDB", false);
-    sc = propertyServer->getProperty(&boolProperty2);
-    if (!sc.isSuccess()) {
-        log << MSG::ERROR << "unable to get IdDictFromRDB: found " 
-            << boolProperty2.value()
-            << endmsg;
-        return sc;
-    } else {
-        m_idDictFromRDB =  boolProperty2.value();           
-        log << MSG::DEBUG << "IdDictFromRDB:  " 
-            << (boolProperty2.value() ? "True" : "False")
-            << endmsg;
-    }
-    
-    
+    ATH_CHECK(loadProperty("IdDictFromRDB", m_idDictFromRDB));
+
     // Determine if the dictionary content comes from DD database or
     // if properties from JobOptions should be used.
-    BooleanProperty  boolProperty3("useGeomDB_InDet", false);
-    sc = propertyServer->getProperty(&boolProperty3);
-    if (!sc.isSuccess()) {
-        log << MSG::ERROR << "unable to get useGeomDB_InDet: found " 
-            << boolProperty3.value()
-            << endmsg;
-        return sc;
-    } else {
-        m_useGeomDB_InDet =  boolProperty3.value();           
-        log << MSG::DEBUG << "useGeomDB_InDet:  " 
-            << (boolProperty3.value() ? "True" : "False")
-            << endmsg;
-    }    
-
+    ATH_CHECK(loadProperty("useGeomDB_InDet", m_useGeomDB_InDet));
 
     if (m_idDictFromRDB && !serviceLocator()->existsService("GeoDbTagSvc")) {
-      log << MSG::WARNING << "GeoDbTagSvc not part of this job. Falling back to files name from job options" << endmsg;
-      m_idDictFromRDB=false;
-      m_doNeighbours=false;
+        ATH_MSG_WARNING(
+            "GeoDbTagSvc not part of this job. Falling back to files name from "
+            "job options");
+        m_idDictFromRDB = false;
+        m_doNeighbours = false;
     }
 
+    if (m_idDictFromRDB)
+        ATH_MSG_DEBUG("Dictonary file name from DD database");
+    else
+        ATH_MSG_DEBUG(
+            "Dictonary file name from job options or using defaults.");
 
-    if (m_idDictFromRDB) {
-        log << MSG::DEBUG << "Dictonary file name from DD database" 
-            << endmsg;
-    } else {
-        log << MSG::DEBUG << "Dictonary file name from job options or using defaults." 
-            << endmsg;
-    }
-        
     // Get the file name to parse:
     //
     //   1) From Relational DB
@@ -306,526 +178,211 @@ IdDictDetDescrCnv::parseXMLDescription()
     //  no file name is found.
     //
     if (m_idDictFromRDB) {
-
         // Get file names from RDB
-        StatusCode sc = getFileNamesFromTags();
-        if (!sc.isSuccess()) {
-            log << MSG::ERROR << "unable to get Id file names from RDB " 
-                << endmsg;
-            return sc;
-        }
-        else {
-            log << MSG::DEBUG << "Looked for ID file name from RDB " 
-                << endmsg;
-        }
-
-    }
-    else {
+        ATH_CHECK(getFileNamesFromTags());
+        ATH_MSG_DEBUG("Looked for ID file name from RDB ");
+    } else {
         // Get file names from properties
-        sc = getFileNamesFromProperties(propertyServer);
-        if (!sc.isSuccess()) {
-            log << MSG::ERROR << "unable to get Id file names from properties " 
-                << endmsg;
-            return sc;
-        }
-        else {
-            log << MSG::DEBUG << "Looked for ID file name from properties " 
-                << endmsg;
-        }
+        ATH_CHECK(getFileNamesFromProperties());
+        ATH_MSG_DEBUG("Looked for ID file name from properties ");
     }
-        
-            
-//          if (!idDictFromRDB || inDetCustom) {
-//              // We get it from properties
-//              if (inDetCustom) {
-//                  log << MSG::WARNING << "InnerDetector dictionary from custom settings." << endmsg; 
-//              }
-//          } 
-
 
     // Only parse if necessary
     if (m_doParsing) {
-        
-
         // Register the requested files with the xml parser
-        sc = registerFilesWithParser();
-        if (!sc.isSuccess()) {
-            log << MSG::ERROR << "unable to register file names " 
-                << endmsg;
-            return sc;
-        }
-        else {
-            log << MSG::DEBUG << "Registered file names " 
-                << endmsg;
-        }
-        
+        ATH_CHECK(registerFilesWithParser());
+        ATH_MSG_DEBUG("Registered file names ");
+
         // Check whether a tag is needed for dictionary initialization
 
         // NOTE: the internal tag for IdDict is global, but is only
         // used for InDet and thus is defined by InDet
-        std::string tag;
-        if (m_inDetIDTag == "EMPTY") {
-            sc = getTag(tag);
-            if (!sc.isSuccess()) {
-                log << MSG::DEBUG << " no tag found " 
-                    << endmsg;
-                tag = "";  // force empty tag
-            } 
-        } else {
+        std::string tag{};
+        if (m_inDetIDTag == "EMPTY")
+            ATH_CHECK(loadProperty("IdDictGlobalTag", tag));
+        else
             tag = m_inDetIDTag;
-        }
 
         // Parse the dictionaries
         m_parser->parse(m_idDictName, tag);
-        
-        if (tag == "") tag = "default";
-        log << MSG::DEBUG << "Read dict:  " 
-            << m_idDictName << " with tag " << tag
-            << endmsg;
+        if (tag.empty())
+            tag = "default";
+        ATH_MSG_DEBUG("Read dict:  " << m_idDictName << " with tag " << tag);
 
         // Set flag to check ids
-        IdDictMgr& mgr = m_parser->m_idd;
-        if(m_doChecks) {
-            mgr.set_do_checks(true);
-            log << MSG::DEBUG << "Set IdDictManager doChecks flag to true " 
-                << endmsg;
-        }
-        else {
-            mgr.set_do_checks(false);
-            log << MSG::DEBUG << "Set IdDictManager doChecks flag to false  " 
-                << endmsg;
-        }
+        IdDictMgr &mgr = m_parser->m_idd;
+
+        mgr.set_do_checks(m_doChecks);
+        ATH_MSG_DEBUG("Set IdDictManager doChecks flag to"
+                      << (m_doChecks ? "true" : "false"));
 
         // Set flag to initialize neighbours
-        if(m_doNeighbours) {
-            mgr.set_do_neighbours(true);
-            log << MSG::DEBUG << "Set IdDictManager doNeighbours flag to true " 
-                << endmsg;
-        }
-        else {
-            mgr.set_do_neighbours(false);
-            log << MSG::DEBUG << "Set IdDictManager doNeighbours flag to false  " 
-                << endmsg;
-        }
+        mgr.set_do_neighbours(m_doNeighbours);
+        ATH_MSG_DEBUG("Set IdDictManager doNeighbours flag to "
+                      << (m_doNeighbours ? "true" : "false"));
 
         // Do some checks
-        const IdDictMgr::dictionary_map& dm = mgr.get_dictionary_map (); 
-        if (dm.begin () == dm.end ()) {
-            // No dicts found
-            log << MSG::ERROR << "No dictionaries found!" << endmsg;
+        const IdDictMgr::dictionary_map &dm = mgr.get_dictionary_map();
+        if (dm.empty()) {
+            ATH_MSG_ERROR("No dictionaries found!");
             return StatusCode::FAILURE;
         }
-        else {
-            log << MSG::DEBUG << "Found " << dm.size() << " dictionaries." << endmsg;
-        }
+        ATH_MSG_DEBUG("Found " << dm.size() << " dictionaries.");
 
         // Register the requested files and tags with the id dicts
-        sc = registerInfoWithDicts();
-        if (!sc.isSuccess()) {
-            log << MSG::ERROR << "unable to register info with dicts " 
-                << endmsg;
-            return sc;
-        }
-        else {
-            log << MSG::DEBUG << "Registered info with id dicts " 
-                << endmsg;
-        }
+        ATH_CHECK(registerInfoWithDicts());
+        ATH_MSG_DEBUG("Registered info with id dicts ");
+    } else {
+        ATH_MSG_WARNING(
+            "NOTE:  ** parseXMLDescription called, but parsing was deemed "
+            "unnecessary ** ");
     }
-    else {
-        log << MSG::WARNING << "NOTE:  ** parseXMLDescription called, but parsing was deemed unnecessary ** " 
-            << endmsg;
-    }
-    
-
-    log << MSG::DEBUG << "parseXMLDescription: Finished parsing and setting options " 
-        << endmsg;
-
-    return StatusCode::SUCCESS; 
-
+    ATH_MSG_DEBUG("parseXMLDescription: Finished parsing and setting options ");
+    return StatusCode::SUCCESS;
 }
 
 //--------------------------------------------------------------------
 
-StatusCode 
-IdDictDetDescrCnv::initTheManager()
-{
-    return StatusCode::SUCCESS; 
-}
-
-//--------------------------------------------------------------------
-
-long int
-IdDictDetDescrCnv::storageType()
-{
+long int IdDictDetDescrCnv::storageType() {
     return DetDescr_StorageType;
 }
 
 //--------------------------------------------------------------------
-const CLID& 
-IdDictDetDescrCnv::classID() { 
-    return ClassID_traits<IdDictManager>::ID(); 
+const CLID &IdDictDetDescrCnv::classID() {
+    return ClassID_traits<IdDictManager>::ID();
 }
 
 //--------------------------------------------------------------------
-IdDictDetDescrCnv::IdDictDetDescrCnv(ISvcLocator* svcloc) 
-    :
-    DetDescrConverter(ClassID_traits<IdDictManager>::ID(), svcloc),
-    m_parser(0),
-    m_doChecks(false),
-    m_doNeighbours(true),
-    m_idDictFromRDB(false),
-    m_doParsing(false)
-    {}
-
-
+IdDictDetDescrCnv::IdDictDetDescrCnv(ISvcLocator *svcloc)
+    : DetDescrConverter(ClassID_traits<IdDictManager>::ID(), svcloc),
+      AthMessaging{"IdDictDetDescrCnv"} {}
 //--------------------------------------------------------------------
-StatusCode
-IdDictDetDescrCnv::getTag(std::string& tag)
-{
+void IdDictDetDescrCnv::printDicts(const IdDictManager *dictMgr) {
+   
+    ATH_MSG_INFO("Found id dicts:");
+    if (!dictMgr)
+        return;
 
-    MsgStream log(msgSvc(), "IdDictDetDescrCnv");
+    std::string tag = tag.empty() ? "<no tag>" : dictMgr->manager()->tag();
+    ATH_MSG_INFO("Using dictionary tag: " << tag);
 
+    const IdDictMgr::dictionary_map &dm =
+        dictMgr->manager()->get_dictionary_map();
+    IdDictMgr::dictionary_map::const_iterator it;
 
-    // Allow the internal tag for dictionaries to be set by
-    // jobOptions. Note that this is not used as far as I know. RDS
-    // 10/2007. 
-    log << MSG::DEBUG << "in getTag: chenk if tag is set in jobOpts" << endmsg;
+    int n = 0;
 
-    // Check whether we initialize from Zebra or ROOT
-    IProperty* propertyServer(0); 
-    StatusCode sc = serviceLocator()->service("DetDescrCnvSvc", propertyServer); 
-    if (sc != StatusCode::SUCCESS ) {
-        log << MSG::ERROR 
-            << " Cannot get DetDescrCnvSvc " 
-            << endmsg; 
-        return sc ;
-    }
-
-    // Finally get tag from DetDescrCnvSvc property
-
-    StringProperty tagProperty("IdDictGlobalTag", "");
-    sc = propertyServer->getProperty(&tagProperty);
-    if (!sc.isSuccess()) {
-        log << MSG::ERROR << "unable to get IdDictGlobalTag: found " 
-            << tagProperty.value()
-            << endmsg;
-    }
-    else {
-        tag = tagProperty.value();
-        log << MSG::DEBUG << "Found IdDictGlobalTag:  " 
-            << tag
-            << endmsg;
-    }
-
-    return sc;
-}
-    
-//--------------------------------------------------------------------
-void    
-IdDictDetDescrCnv::printDicts(const IdDictManager* dictMgr)
-{
-    MsgStream  log(msgSvc(),"IdDictDetDescrCnv");
-
-    log << MSG::INFO 
-        << "Found id dicts:" 
-        << endmsg;
-
-    if(!dictMgr) return;
-    
-    std::string tag = dictMgr->manager()->tag();
-    if (!tag.size()) tag = "<no tag>";
-    log << MSG::INFO << "Using dictionary tag: " << tag << endmsg;
-    
-    const IdDictMgr::dictionary_map& dm = dictMgr->manager()->get_dictionary_map (); 
-    IdDictMgr::dictionary_map::const_iterator it;  
- 
-    int n = 0; 
- 
-    for (it = dm.begin (); it != dm.end (); ++it, ++n) { 
-        const IdDictDictionary& dictionary = *((*it).second); 
-        std::string version = ("" != dictionary.m_version) ? dictionary.m_version : "default";
-        log << MSG::INFO 
-            << "Dictionary " << dictionary.m_name;
+    for (it = dm.begin(); it != dm.end(); ++it, ++n) {
+        const IdDictDictionary &dictionary = *((*it).second);
+        std::string version =
+            ("" != dictionary.m_version) ? dictionary.m_version : "default";
+        msg(MSG::INFO) << "Dictionary " << dictionary.m_name;
         if (dictionary.m_name.size() < 20) {
-            std::string space(20-dictionary.m_name.size(),' ');
-            log << MSG::INFO << space;
+            std::string space(20 - dictionary.m_name.size(), ' ');
+            msg(MSG::INFO) << space;
         }
-        log << MSG::INFO 
-            << " version " << version;
+        msg(MSG::INFO) << " version " << version;
         if (version.size() < 20) {
-            std::string space(20-version.size(),' ');
-            log << MSG::INFO << space;
+            std::string space(20 - version.size(), ' ');
+            msg(MSG::INFO) << space;
         }
         if (dictionary.dict_tag().size()) {
-            log << MSG::INFO 
-                << " DetDescr tag " << dictionary.dict_tag();
+            msg(MSG::INFO) << " DetDescr tag " << dictionary.dict_tag();
             if (dictionary.dict_tag().size() < 20) {
-                std::string space(25-dictionary.dict_tag().size(),' ');
-                log << MSG::INFO << space;
+                std::string space(25 - dictionary.dict_tag().size(), ' ');
+                msg(MSG::INFO) << space;
             }
+        } else {
+            msg(MSG::INFO) << " DetDescr tag (using default)";
         }
-        else {
-            log << MSG::INFO 
-                << " DetDescr tag (using default)";
-        }
-        log << MSG::INFO 
-            << " file " << dictionary.file_name();
-        log << MSG::INFO << endmsg;
+        ATH_MSG_INFO(" file " << dictionary.file_name());
     }
 }
 
 //--------------------------------------------------------------------
-StatusCode 
-IdDictDetDescrCnv::getFileNamesFromProperties(IProperty* propertyServer)
-{
-
+StatusCode IdDictDetDescrCnv::getFileNamesFromProperties() {
     // Check whether non-default names have been specified for the
     // IdDict files of the subsystems
 
-    MsgStream log(msgSvc(), "IdDictDetDescrCnv");
-
     // Atlas IDs
-    StringProperty property = StringProperty("AtlasIDFileName", "");
-    StatusCode sc = propertyServer->getProperty(&property);
-    if (!sc.isSuccess()) {
-        log << MSG::ERROR << "unable to get AtlasIDFileName: found " 
-            << property.value()
-            << endmsg;
-        return sc;
-    }
-    else {
-        m_atlasIDFileName = property.value();
-        std::string fileName = m_atlasIDFileName;
-        if (fileName == "") fileName = "<not given>";
-        log << MSG::DEBUG << "AtlasIDFileName:  " 
-            << fileName
-            << endmsg;
-    }
-
+    ATH_CHECK(loadProperty("AtlasIDFileName", m_atlasIDFileName));
     // InDet Ids
-    property = StringProperty("InDetIDFileName", "");
-    sc = propertyServer->getProperty(&property);
-    if (!sc.isSuccess()) {
-        log << MSG::ERROR << "unable to get InDetIDFileName: found " 
-            << property.value()
-            << endmsg;
-        return sc;
-    }
-    else {
-        m_inDetIDFileName = property.value();
-        std::string fileName = m_inDetIDFileName;
-        if (fileName == "") fileName = "<not given>";
-        log << MSG::DEBUG << "InDetIDFileName:  " 
-            << fileName
-            << endmsg;
-    }
-
-
+    ATH_CHECK(loadProperty("InDetIDFileName", m_inDetIDFileName));
     // LAr ids
-    property = StringProperty("LArIDFileName", "");
-    sc = propertyServer->getProperty(&property);
-    if (!sc.isSuccess()) {
-        log << MSG::ERROR << "unable to get LArIDFileName: found " 
-            << property.value()
-            << endmsg;
-        return sc;
-    }
-    else {
-        m_larIDFileName = property.value();
-        std::string fileName = m_larIDFileName;
-        if (fileName == "") fileName = "<not given>";
-        log << MSG::DEBUG << "LArIDFileName:  " 
-            << fileName
-            << endmsg;
-    }
-
-    // Tile ids 
-    property = StringProperty("TileIDFileName", "");
-    sc = propertyServer->getProperty(&property);
-    if (!sc.isSuccess()) {
-        log << MSG::ERROR << "unable to get TileIDFileName: found " 
-            << property.value()
-            << endmsg;
-        return sc;
-    }
-    else {
-        m_tileIDFileName = property.value();
-        std::string fileName = m_tileIDFileName;
-        if (fileName == "") fileName = "<not given>";
-        log << MSG::DEBUG << "TileIDFileName:  " 
-            << fileName
-            << endmsg;
-    }
-
+    ATH_CHECK(loadProperty("LArIDFileName", m_larIDFileName));
+    // Tile ids
+    ATH_CHECK(loadProperty("TileIDFileName", m_tileIDFileName));
     // Calo ids
-    property = StringProperty("CaloIDFileName", "");
-    sc = propertyServer->getProperty(&property);
-    if (!sc.isSuccess()) {
-        log << MSG::ERROR << "unable to get CaloIDFileName: found " 
-            << property.value()
-            << endmsg;
-        return sc;
-    }
-    else {
-        m_caloIDFileName = property.value();
-        std::string fileName = m_caloIDFileName;
-        if (fileName == "") fileName = "<not given>";
-        log << MSG::DEBUG << "CaloIDFileName:  " 
-            << fileName
-            << endmsg;
-    }
-
+    ATH_CHECK(loadProperty("CaloIDFileName", m_caloIDFileName));
     // Calo neighbor files
-    property = StringProperty("FullAtlasNeighborsFileName", "");
-    sc = propertyServer->getProperty(&property);
-    if (!sc.isSuccess()) {
-        log << MSG::ERROR << "unable to get FullAtlasNeighborsFileName: found " 
-            << property.value() << endmsg;
-        return sc;
-    }
-    else {
-        m_fullAtlasNeighborsName = property.value();
-        std::string fileName = m_fullAtlasNeighborsName;
-        if (fileName == "") fileName = "<not given>";
-        log << MSG::DEBUG << "FullAtlasNeighborsFileName:  " << fileName << endmsg;
-    }
-    property = StringProperty("FCAL2DNeighborsFileName", "");
-    sc = propertyServer->getProperty(&property);
-    if (!sc.isSuccess()) {
-        log << MSG::ERROR << "unable to get FCAL2DNeighborsFileName: found " 
-            << property.value() << endmsg;
-        return sc;
-    }
-    else {
-        m_fcal2dNeighborsName = property.value();
-        std::string fileName = m_fcal2dNeighborsName;
-        if (fileName == "") fileName = "<not given>";
-        log << MSG::DEBUG << "FCAL2DNeighborsFileName:  " << fileName << endmsg;
-    }
-    property = StringProperty("FCAL3DNeighborsNextFileName", "");
-    sc = propertyServer->getProperty(&property);
-    if (!sc.isSuccess()) {
-        log << MSG::ERROR << "unable to get FCAL3DNeighborsNextFileName: found " 
-            << property.value() << endmsg;
-        return sc;
-    }
-    else {
-        m_fcal3dNeighborsNextName = property.value();
-        std::string fileName = m_fcal3dNeighborsNextName;
-        if (fileName == "") fileName = "<not given>";
-        log << MSG::DEBUG << "FCAL3DNeighborsNextFileName:  " << fileName << endmsg;
-    }
-    property = StringProperty("FCAL3DNeighborsPrevFileName", "");
-    sc = propertyServer->getProperty(&property);
-    if (!sc.isSuccess()) {
-        log << MSG::ERROR << "unable to get FCAL3DNeighborsPrevFileName: found " 
-            << property.value() << endmsg;
-        return sc;
-    }
-    else {
-        m_fcal3dNeighborsPrevName = property.value();
-        std::string fileName = m_fcal3dNeighborsPrevName;
-        if (fileName == "") fileName = "<not given>";
-        log << MSG::DEBUG << "FCAL3DNeighborsPrevFileName:  " << fileName << endmsg;
-    }
-    property = StringProperty("TileNeighborsFileName", "");
-    sc = propertyServer->getProperty(&property);
-    if (!sc.isSuccess()) {
-        log << MSG::ERROR << "unable to get TileNeighborsFileName: found " 
-            << property.value() << endmsg;
-        return sc;
-    }
-    else {
-        m_tileNeighborsName = property.value();
-        std::string fileName = m_tileNeighborsName;
-        if (fileName == "") fileName = "<not given>";
-        log << MSG::DEBUG << "TileNeighborsFileName:  " << fileName << endmsg;
-    }
+    ATH_CHECK(
+        loadProperty("FullAtlasNeighborsFileName", m_fullAtlasNeighborsName));
+    ATH_CHECK(loadProperty("FCAL2DNeighborsFileName", m_fcal2dNeighborsName));
+    ATH_CHECK(
+        loadProperty("FCAL3DNeighborsNextFileName", m_fcal3dNeighborsNextName));
+    ATH_CHECK(
+        loadProperty("FCAL3DNeighborsPrevFileName", m_fcal3dNeighborsPrevName));
 
+    ATH_CHECK(loadProperty("TileNeighborsFileName", m_tileNeighborsName));
     // Muon ids
-    property = StringProperty("MuonIDFileName", "");
-    sc = propertyServer->getProperty(&property);
-    if (!sc.isSuccess()) {
-        log << MSG::ERROR << "unable to get MuonIDFileName: found " 
-            << property.value()
-            << endmsg;
-        return sc;
-    }
-    else {
-        m_muonIDFileName = property.value();
-        std::string fileName = m_muonIDFileName;
-        if (fileName == "") fileName = "<not given>";
-        log << MSG::DEBUG << "MuonIDFileName:  " 
-            << fileName
-            << endmsg;
-    }
-
+    ATH_CHECK(loadProperty("MuonIDFileName", m_muonIDFileName));
     // ForwardDetectors ids
-    property = StringProperty("ForwardIDFileName", "");
-    sc = propertyServer->getProperty(&property);
-    if (!sc.isSuccess()) {
-        log << MSG::ERROR << "unable to get ForwardIDFileName: found " 
-            << property.value()
-            << endmsg;
-        return sc;
-    }
-    else {
-        m_forwardIDFileName = property.value();
-        std::string fileName = m_forwardIDFileName;
-        if (fileName == "") fileName = "<not given>";
-        log << MSG::DEBUG << "ForwardIDFileName:  " 
-            << fileName
-            << endmsg;
-    }
-
-    return StatusCode::SUCCESS ;
+    ATH_CHECK(loadProperty("ForwardIDFileName", m_forwardIDFileName));
+    return StatusCode::SUCCESS;
 }
 
-    
-
 //--------------------------------------------------------------------
-StatusCode 
-IdDictDetDescrCnv::getFileNamesFromTags()
-{
-    // Fetch file names and tags from the RDB 
+StatusCode IdDictDetDescrCnv::getFileNamesFromTags() {
+    // Fetch file names and tags from the RDB
 
-    MsgStream log(msgSvc(), "IdDictDetDescrCnv");
+    IGeoDbTagSvc *geoDbTagSvc{nullptr};
+    ATH_CHECK(service("GeoDbTagSvc", geoDbTagSvc));
+    ATH_MSG_DEBUG("Accessed GeoDbTagSvc.");
+    IRDBAccessSvc *rdbAccessSvc{nullptr};
+    ATH_CHECK(service(geoDbTagSvc->getParamSvcName(), rdbAccessSvc));
+    ATH_MSG_DEBUG("Accessed " << geoDbTagSvc->getParamSvcName());
 
-    IGeoDbTagSvc*       geoDbTagSvc{nullptr};
-    IRDBAccessSvc*      rdbAccessSvc{nullptr};
-
-    StatusCode sc = service ("GeoDbTagSvc",geoDbTagSvc);
-    if (!sc.isSuccess()) {
-      log << MSG::ERROR << "Unable to get GeoDbTagSvc." << endmsg;
-      return sc;
-    }
-    else {
-      log << MSG::DEBUG << "Accessed GeoDbTagSvc." << endmsg;
-    }
-     
-    sc = service(geoDbTagSvc->getParamSvcName(),rdbAccessSvc);
-    if (!sc.isSuccess()) {
-      log << MSG::ERROR << "Unable to get " << geoDbTagSvc->getParamSvcName() << endmsg;
-      return sc;
-    }
-    else {
-      log << MSG::DEBUG << "Accessed " << geoDbTagSvc->getParamSvcName() <<endmsg;
+    if (geoDbTagSvc->getSqliteReader()) {
+        return StatusCode::SUCCESS;
     }
 
-    bool useGeomDB = (geoDbTagSvc->getSqliteReader()==nullptr);
-    std::string detTag{""}, detNode{""};
+    auto assignTagAndName = [this](const IRDBRecordset_ptr &idDictSet,
+                                   std::string &fileName,
+                                   std::string &dictTag) {
+        if (idDictSet->size()) {
+            const IRDBRecord *idDictTable = (*idDictSet)[0];
+            const std::string dictName = idDictTable->getString("DICT_NAME");
+            fileName = idDictTable->getString("DICT_FILENAME");
+            dictTag = idDictSet->tagName();
+            // NOTE: the internal tag for IdDict is global, but is
+            // only used for InDet and thus is defined by InDet
+            if (!idDictTable->isFieldNull("DICT_TAG")) {
+                m_inDetIDTag = idDictTable->getString("DICT_TAG");
+            }
+            ATH_MSG_DEBUG(" using dictionary:  "
+                          << dictName << ", file: " << fileName
+                          << ", with internal tag: " << m_inDetIDTag
+                          << ", dictionary tag: " << dictTag);
+
+        } else
+            ATH_MSG_WARNING(
+                " no record set found for dictionary - using default "
+                "dictionary ");
+    };
+
+    bool useGeomDB = (geoDbTagSvc->getSqliteReader() == nullptr);
+
+    std::string detTag{""}, detNode{""}, dictName{""};
     DecodeVersionKey detectorKey("ATLAS");
-
     IRDBRecordset_ptr idDictSet{};
-    std::string       dictName;
-    const IRDBRecord* idDictTable{};
 
     // Get InDet
     if (m_useGeomDB_InDet) {
-        // Get Innner Detector xml and write to the temporary file InDetIdDict.xml
+        // Get Innner Detector xml and write to the temporary file
+        // InDetIdDict.xml
         detectorKey = DecodeVersionKey(geoDbTagSvc, "InnerDetector");
-        log << MSG::DEBUG << "From Version Tag: " << detectorKey.tag()
-            << " at Node: " << detectorKey.node() << endmsg;
+        ATH_MSG_DEBUG("From Version Tag: " << detectorKey.tag() << " at Node: "
+                                           << detectorKey.node());
         detTag = detectorKey.tag();
         detNode = detectorKey.node();
         idDictSet = rdbAccessSvc->getRecordsetPtr("DICTXDD", detTag, detNode);
@@ -840,431 +397,273 @@ IdDictDetDescrCnv::getFileNamesFromTags()
             blobFile.open("InDetIdDict.xml");
             blobFile << InDetString << std::endl;
             blobFile.close();
-        } else {
-            log << MSG::WARNING << " no record set found for InDetIdentifier - using default dictionary " << endmsg;
-        }
+        } else
+            ATH_MSG_WARNING(
+                " no record set found for InDetIdentifier - using default "
+                "dictionary ");
+
     } else {
-        if(useGeomDB) {
+        if (useGeomDB) {
             detectorKey = DecodeVersionKey(geoDbTagSvc, "InnerDetector");
-            log << MSG::DEBUG << "From Version Tag: " 
-                << detectorKey.tag()  << " at Node: " << detectorKey.node() << endmsg;
+            ATH_MSG_DEBUG("From Version Tag: " << detectorKey.tag()
+                                               << " at Node: "
+                                               << detectorKey.node());
             detTag = detectorKey.tag();
             detNode = detectorKey.node();
         }
-        idDictSet = rdbAccessSvc->getRecordsetPtr("InDetIdentifier",detTag,detNode);
-
-        // Size == 0 if not found
-        if (idDictSet->size()) {
-            idDictTable       = (*idDictSet)[0];
-            dictName          = idDictTable->getString("DICT_NAME");
-            m_inDetIDFileName = idDictTable->getString("DICT_FILENAME");
-            // NOTE: the internal tag for IdDict is global, but is
-            // only used for InDet and thus is defined by InDet
-            if(!idDictTable->isFieldNull("DICT_TAG")) {
-                m_inDetIDTag  = idDictTable->getString("DICT_TAG");
-            }
-            m_inDetIdDictTag  = idDictSet->tagName();
-            log << MSG::DEBUG << " using dictionary:  " << dictName 
-                << ", file: " <<  m_inDetIDFileName  
-                << ", with internal tag: " << m_inDetIDTag
-                << ", dictionary tag: " << m_inDetIdDictTag
-                << endmsg;
-        } else {
-            log << MSG::WARNING << " no record set found for InDetIdentifier - using default dictionary " << endmsg;
-        }
+        idDictSet =
+            rdbAccessSvc->getRecordsetPtr("InDetIdentifier", detTag, detNode);
+        assignTagAndName(idDictSet, m_inDetIDFileName, m_inDetIdDictTag);
     }
 
     // Get LAr
-    if(useGeomDB) {
-      detectorKey = DecodeVersionKey(geoDbTagSvc, "LAr");
-      log << MSG::DEBUG << "From Version Tag: " 
-	  << detectorKey.tag()  << " at Node: " << detectorKey.node() << endmsg;
-      detTag = detectorKey.tag();
-      detNode = detectorKey.node();
+    if (useGeomDB) {
+        detectorKey = DecodeVersionKey(geoDbTagSvc, "LAr");
+        ATH_MSG_DEBUG( "From Version Tag: " << detectorKey.tag()
+            << " at Node: " << detectorKey.node() );
+        detTag = detectorKey.tag();
+        detNode = detectorKey.node();
     }
-    idDictSet = rdbAccessSvc->getRecordsetPtr("LArIdentifier", detTag,detNode);
+    idDictSet = rdbAccessSvc->getRecordsetPtr("LArIdentifier", detTag, detNode);
+    assignTagAndName(idDictSet, m_larIDFileName, m_larIdDictTag);
 
-    // Size == 0 if not found
-    if (idDictSet->size()) {
-      idDictTable      = (*idDictSet)[0];
-      dictName         = idDictTable->getString("DICT_NAME");
-      m_larIDFileName  = idDictTable->getString("DICT_FILENAME");
-      m_larIdDictTag   = idDictSet->tagName();
-      log << MSG::DEBUG << " using Dictionary:  " << dictName 
-	  << ", file: " <<  m_larIDFileName
-	  << ", dictionary tag: " << m_larIdDictTag
-	  << endmsg;
-    }
-    else {
-      log << MSG::WARNING << " no record set found for LArIdentifier - using default dictionary " << endmsg;
-    }
-    
-    
     // Get Tile
-    if(useGeomDB) {
-      detectorKey = DecodeVersionKey(geoDbTagSvc, "TileCal");
-      log << MSG::DEBUG << "From Version Tag: " 
-	  << detectorKey.tag()  << " at Node: " << detectorKey.node() << endmsg;
-      detTag = detectorKey.tag();
-      detNode = detectorKey.node();
+    if (useGeomDB) {
+        detectorKey = DecodeVersionKey(geoDbTagSvc, "TileCal");
+        ATH_MSG_DEBUG( "From Version Tag: " << detectorKey.tag()
+            << " at Node: " << detectorKey.node() );
+        detTag = detectorKey.tag();
+        detNode = detectorKey.node();
     }
-    idDictSet = rdbAccessSvc->getRecordsetPtr("TileIdentifier",detTag,detNode);
+    idDictSet =
+        rdbAccessSvc->getRecordsetPtr("TileIdentifier", detTag, detNode);
+    assignTagAndName(idDictSet, m_tileIDFileName, m_tileIdDictTag);
 
-    // Size == 0 if not found
-    if (idDictSet->size()) {
-      idDictTable       = (*idDictSet)[0];
-      dictName          = idDictTable->getString("DICT_NAME");
-      m_tileIDFileName  = idDictTable->getString("DICT_FILENAME");
-      m_tileIdDictTag   = idDictSet->tagName();
-      log << MSG::DEBUG << " using Dictionary:  " << dictName  
-	  << ", file: " <<  m_tileIDFileName 
-	  << ", dictionary tag: " << m_tileIdDictTag
-	  << endmsg;
-    }
-    else {
-      log << MSG::WARNING << " no record set found for TileIdentifier - using default dictionary " << endmsg;
-    }
-    
     // Get Calo
-    if(useGeomDB) {
-      detectorKey = DecodeVersionKey(geoDbTagSvc, "Calorimeter");
-      log << MSG::DEBUG << "From Version Tag: " << detectorKey.tag()  
-	  << " at Node: " << detectorKey.node() << endmsg;
-      detTag = detectorKey.tag();
-      detNode = detectorKey.node();
+    if (useGeomDB) {
+        detectorKey = DecodeVersionKey(geoDbTagSvc, "Calorimeter");
+        ATH_MSG_DEBUG( "From Version Tag: " << detectorKey.tag()
+            << " at Node: " << detectorKey.node() );
+        detTag = detectorKey.tag();
+        detNode = detectorKey.node();
     }
-    idDictSet = rdbAccessSvc->getRecordsetPtr("CaloIdentifier",detTag,detNode);
+    idDictSet =
+        rdbAccessSvc->getRecordsetPtr("CaloIdentifier", detTag, detNode);
 
-    // Size == 0 if not found
-    if (idDictSet->size()) {
-      idDictTable       = (*idDictSet)[0];
-      dictName          = idDictTable->getString("DICT_NAME");
-      m_caloIDFileName  = idDictTable->getString("DICT_FILENAME");
-      m_caloIdDictTag   = idDictSet->tagName();
-      log << MSG::DEBUG << " using Dictionary:  " << dictName  
-	  << ", file: " <<  m_caloIDFileName 
-	  << ", dictionary tag: " << m_caloIdDictTag
-	  << endmsg;
-    }
-    else {
-      log << MSG::WARNING << " no record set found for CaloIdentifier - using default dictionary " << endmsg;
-    }
-    
+    assignTagAndName(idDictSet, m_caloIDFileName, m_caloIdDictTag);
+
     // Calo neighbor files:
-    IRDBRecordset_ptr caloNeighborTable = rdbAccessSvc->getRecordsetPtr("CaloNeighborTable",detTag,detNode);
+    IRDBRecordset_ptr caloNeighborTable =
+        rdbAccessSvc->getRecordsetPtr("CaloNeighborTable", detTag, detNode);
 
-    if (caloNeighborTable->size()==0 && useGeomDB) {
-      caloNeighborTable = rdbAccessSvc->getRecordsetPtr("CaloNeighborTable","CaloNeighborTable-00");
+    if (caloNeighborTable->size() == 0 && useGeomDB) {
+        caloNeighborTable = rdbAccessSvc->getRecordsetPtr(
+            "CaloNeighborTable", "CaloNeighborTable-00");
     }
     // Size == 0 if not found
     if (caloNeighborTable->size()) {
-      const IRDBRecord* neighborTable =  (*caloNeighborTable)[0];
-      m_fullAtlasNeighborsName        = neighborTable->getString("FULLATLASNEIGHBORS");
-      m_fcal2dNeighborsName           = neighborTable->getString("FCAL2DNEIGHBORS");
-      m_fcal3dNeighborsNextName       = neighborTable->getString("FCAL3DNEIGHBORSNEXT");
-      m_fcal3dNeighborsPrevName       = neighborTable->getString("FCAL3DNEIGHBORSPREV");
-      m_tileNeighborsName             = neighborTable->getString("TILENEIGHBORS");
-      log << MSG::DEBUG << " using neighbor files:  " << endmsg;
-      log << MSG::DEBUG << "   FullAtlasNeighborsFileName:  " << m_fullAtlasNeighborsName
-	  << endmsg;
-      log << MSG::DEBUG << "   FCAL2DNeighborsFileName:     " << m_fcal2dNeighborsName      
-	  << endmsg;
-      log << MSG::DEBUG << "   FCAL3DNeighborsNextFileName: " << m_fcal3dNeighborsNextName
-	  << endmsg;
-      log << MSG::DEBUG << "   FCAL3DNeighborsPrevFileName: " << m_fcal3dNeighborsPrevName  
-	  << endmsg;
-      log << MSG::DEBUG << "   TileNeighborsFileName:       " << m_tileNeighborsName        
-	  << endmsg;
+        const IRDBRecord *neighborTable = (*caloNeighborTable)[0];
+        m_fullAtlasNeighborsName =
+            neighborTable->getString("FULLATLASNEIGHBORS");
+        m_fcal2dNeighborsName = neighborTable->getString("FCAL2DNEIGHBORS");
+        m_fcal3dNeighborsNextName =
+            neighborTable->getString("FCAL3DNEIGHBORSNEXT");
+        m_fcal3dNeighborsPrevName =
+            neighborTable->getString("FCAL3DNEIGHBORSPREV");
+        m_tileNeighborsName = neighborTable->getString("TILENEIGHBORS");
+        ATH_MSG_DEBUG(" using neighbor files:  ");
+        ATH_MSG_DEBUG(
+            "   FullAtlasNeighborsFileName:  " << m_fullAtlasNeighborsName);
+        ATH_MSG_DEBUG(
+            "   FCAL2DNeighborsFileName:     " << m_fcal2dNeighborsName);
+        ATH_MSG_DEBUG(
+            "   FCAL3DNeighborsNextFileName: " << m_fcal3dNeighborsNextName);
+        ATH_MSG_DEBUG(
+            "   FCAL3DNeighborsPrevFileName: " << m_fcal3dNeighborsPrevName);
+        ATH_MSG_DEBUG(
+            "   TileNeighborsFileName:       " << m_tileNeighborsName);
+    } else {
+        ATH_MSG_ERROR(" no record set found neighbour file ");
+        return StatusCode::FAILURE;
     }
-    else {
-      log << MSG::ERROR << " no record set found neighbor file " << endmsg;
-    }
-    
-    // Get Muon
-    if(useGeomDB) {
-      detectorKey = DecodeVersionKey(geoDbTagSvc, "MuonSpectrometer");
-      log << MSG::DEBUG << "From Version Tag: " 
-	  << detectorKey.tag()  << " at Node: " << detectorKey.node() << endmsg;
-      detTag = detectorKey.tag();
-      detNode = detectorKey.node();
-    }
-    idDictSet = rdbAccessSvc->getRecordsetPtr("MuonIdentifier",detTag,detNode);
 
-    // Size == 0 if not found
-    if (idDictSet->size()) {
-      idDictTable       = (*idDictSet)[0];
-      dictName          = idDictTable->getString("DICT_NAME");
-      m_muonIDFileName  = idDictTable->getString("DICT_FILENAME");
-      m_muonIdDictTag   = idDictSet->tagName();
-      log << MSG::DEBUG << " using Dictionary:  " << dictName  
-	  << ", file: " <<  m_muonIDFileName 
-	  << ", dictionary tag: " << m_muonIdDictTag
-	  << endmsg;
-      if (m_muonIDFileName == "") {
-	log << MSG::ERROR << "MuonIDFileName CANNOT be empty " << endmsg;
-	return StatusCode::FAILURE;
-      }
-      else if (m_muonIDFileName == "IdDictMuonSpectrometer.xml") {
-	log << MSG::ERROR << "MuonIDFileName must NOT be IdDictMuonSpectrometer.xml " 
-	    << endmsg;
-	return StatusCode::FAILURE;
-      }
-      
+    // Get Muon
+    if (useGeomDB) {
+        detectorKey = DecodeVersionKey(geoDbTagSvc, "MuonSpectrometer");
+        ATH_MSG_DEBUG( "From Version Tag: " << detectorKey.tag()
+            << " at Node: " << detectorKey.node() );
+        detTag = detectorKey.tag();
+        detNode = detectorKey.node();
     }
-    else {
-      log << MSG::WARNING << " no record set found for MuonIdentifier - using default dictionary " << endmsg;
-    }
-    
+    idDictSet =
+        rdbAccessSvc->getRecordsetPtr("MuonIdentifier", detTag, detNode);
+    assignTagAndName(idDictSet, m_muonIDFileName, m_muonIdDictTag);
+
     // Get Forward
-    if(useGeomDB) {
-      detectorKey = DecodeVersionKey(geoDbTagSvc, "ForwardDetectors");
-      log << MSG::DEBUG << "From Version Tag: " << detectorKey.tag()
-	  << " at Node: " << detectorKey.node() << endmsg;
-      detTag = detectorKey.tag();
-      detNode = detectorKey.node();
+    if (useGeomDB) {
+        detectorKey = DecodeVersionKey(geoDbTagSvc, "ForwardDetectors");
+        ATH_MSG_DEBUG( "From Version Tag: " << detectorKey.tag()
+            << " at Node: " << detectorKey.node() );
+        detTag = detectorKey.tag();
+        detNode = detectorKey.node();
     }
-    idDictSet = rdbAccessSvc->getRecordsetPtr("ForDetIdentifier",detTag,detNode);
+    idDictSet =
+        rdbAccessSvc->getRecordsetPtr("ForDetIdentifier", detTag, detNode);
 
     // For older datasets use ForDetIdentifier-00 as fallback
-    if (idDictSet->size()==0 && useGeomDB) {
-      idDictSet = rdbAccessSvc->getRecordsetPtr("ForDetIdentifier",
-						"ForDetIdentifier-00");
-      log << MSG::DEBUG << " explicitly requesting ForDetIdentifier-00 tag for pre-forward detector data  " 
-	  << endmsg;
+    if (idDictSet->size() == 0 && useGeomDB) {
+        idDictSet = rdbAccessSvc->getRecordsetPtr("ForDetIdentifier",
+                                                  "ForDetIdentifier-00");
+        ATH_MSG_DEBUG(
+            " explicitly requesting ForDetIdentifier-00 tag for pre-forward "
+            "detector data  ");
     }
     // Size == 0 if not found
-    if (idDictSet->size()) {
-      idDictTable          = (*idDictSet)[0];
-      dictName             = idDictTable->getString("DICT_NAME");
-      m_forwardIDFileName  = idDictTable->getString("DICT_FILENAME");
-      m_forwardIdDictTag   = idDictSet->tagName();
-      log << MSG::DEBUG << " using Dictionary:  " << dictName  
-	  << ", file: " <<  m_forwardIDFileName 
-	  << ", dictionary tag: " << m_forwardIdDictTag
-	  << endmsg;
-    }
-    else {
-      log << MSG::WARNING << " no record set found for ForDetIdentifier - using default dictionary " << endmsg;
-    }
-
-    log << MSG::DEBUG << "End access to RDB for id dictionary info " << endmsg;
-
-    return StatusCode::SUCCESS ;
+    assignTagAndName(idDictSet, m_forwardIDFileName, m_forwardIdDictTag);
+    ATH_MSG_DEBUG("End access to RDB for id dictionary info ");
+    return StatusCode::SUCCESS;
 }
 
-
-
 //--------------------------------------------------------------------
-StatusCode 
-IdDictDetDescrCnv::registerFilesWithParser()
-{
-    // If files names were found, register them with the parser to be read 
-
-    MsgStream log(msgSvc(), "IdDictDetDescrCnv");
-
-    
-    //If InDetIdDict.xml exists set InDetFileName set to it's name
-    if (m_useGeomDB_InDet){
-    	std::ifstream ifile;
-    	ifile.open("InDetIdDict.xml");
-    	if(ifile) {
-    	  m_inDetIDFileName = "InDetIdDict.xml";
-    	} else {
-    	  log << MSG::WARNING << " no temp. file InDetIdDict.xml found - using file "<<m_inDetIDFileName << endmsg;
-    	}
+StatusCode IdDictDetDescrCnv::registerFilesWithParser() {
+    // If InDetIdDict.xml exists set InDetFileName set to it's name
+    if (m_useGeomDB_InDet) {
+        std::ifstream ifile;
+        ifile.open("InDetIdDict.xml");
+        if (ifile)
+            m_inDetIDFileName = "InDetIdDict.xml";
+        else
+            ATH_MSG_WARNING(" no temp. file InDetIdDict.xml found - using file "
+                            << m_inDetIDFileName);
     }
 
-    if ("" != m_atlasIDFileName) {
+    if (!m_atlasIDFileName.empty()) {
         m_parser->register_external_entity("ATLAS", m_atlasIDFileName);
-        log << MSG::INFO << "Reading ATLAS            IdDict file "
-            << m_atlasIDFileName
-            << endmsg;
+        ATH_MSG_INFO("Reading ATLAS            IdDict file "
+                     << m_atlasIDFileName);
     }
-    if ("" != m_inDetIDFileName) {
+    if (!m_inDetIDFileName.empty()) {
         m_parser->register_external_entity("InnerDetector", m_inDetIDFileName);
-        log << MSG::INFO << "Reading InnerDetector    IdDict file "
-            << m_inDetIDFileName
-            << endmsg;
+        ATH_MSG_INFO("Reading InnerDetector    IdDict file "
+                     << m_inDetIDFileName);
     }
-    if ("" != m_larIDFileName) {
+    if (!m_larIDFileName.empty()) {
         m_parser->register_external_entity("LArCalorimeter", m_larIDFileName);
-        log << MSG::INFO << "Reading LArCalorimeter   IdDict file "
-            << m_larIDFileName
-            << endmsg;
+        ATH_MSG_INFO("Reading LArCalorimeter   IdDict file "
+                     << m_larIDFileName);
     }
-    if ("" != m_tileIDFileName) {
+    if (!m_tileIDFileName.empty()) {
         m_parser->register_external_entity("TileCalorimeter", m_tileIDFileName);
-        log << MSG::INFO << "Reading TileCalorimeter  IdDict file "
-            << m_tileIDFileName
-            << endmsg;
+        ATH_MSG_INFO("Reading TileCalorimeter  IdDict file "
+                     << m_tileIDFileName);
     }
-    if ("" != m_caloIDFileName) {
+    if (!m_caloIDFileName.empty()) {
         m_parser->register_external_entity("Calorimeter", m_caloIDFileName);
-        log << MSG::INFO << "Reading Calorimeter      IdDict file "
-            << m_caloIDFileName
-            << endmsg;
+        ATH_MSG_INFO("Reading Calorimeter      IdDict file "
+                     << m_caloIDFileName);
     }
-    if ("" != m_muonIDFileName) {
-        m_parser->register_external_entity("MuonSpectrometer", m_muonIDFileName);
-        log << MSG::INFO << "Reading MuonSpectrometer IdDict file "
-            << m_muonIDFileName
-            << endmsg;
+    if (!m_muonIDFileName.empty()) {
+        m_parser->register_external_entity("MuonSpectrometer",
+                                           m_muonIDFileName);
+        ATH_MSG_INFO("Reading MuonSpectrometer IdDict file "
+                     << m_muonIDFileName);
     }
-    if ("" != m_forwardIDFileName) {
-        m_parser->register_external_entity("ForwardDetectors", m_forwardIDFileName);
-        log << MSG::INFO << "Reading ForwardDetectors IdDict file "
-            << m_forwardIDFileName
-            << endmsg;
+    if (!m_forwardIDFileName.empty()) {
+        m_parser->register_external_entity("ForwardDetectors",
+                                           m_forwardIDFileName);
+        ATH_MSG_INFO("Reading ForwardDetectors IdDict file "
+                     << m_forwardIDFileName);
     }
-
-    return StatusCode::SUCCESS ;
+    return StatusCode::SUCCESS;
 }
 
 //--------------------------------------------------------------------
-StatusCode
-IdDictDetDescrCnv::registerInfoWithDicts()
-{
+StatusCode IdDictDetDescrCnv::registerInfoWithDicts() {
     // Save the file name and tag in each of the dictionaries
-    
-    MsgStream log(msgSvc(), "IdDictDetDescrCnv");
+    IdDictMgr &mgr = m_parser->m_idd;
 
-    IdDictMgr& mgr = m_parser->m_idd;
+    auto setDictPaths = [this, &mgr](const std::string &dict_name,
+                                     const std::string &file_name,
+                                     const std::string &dict_tag) {
+        if (file_name.empty()) {
+            ATH_MSG_DEBUG("No idDict will be loaded for " << dict_name);
+            return StatusCode::SUCCESS;
+        }
+        IdDictDictionary *dict = mgr.find_dictionary(dict_name);
+        if (!dict) {
+            ATH_MSG_ERROR("unable to find idDict for " << dict_name);
+            return StatusCode::FAILURE;
+        }
+        dict->set_file_name(file_name);
+        dict->set_dict_tag(dict_tag);
+        ATH_MSG_DEBUG("For " << dict_name << " idDict, setting file/tag: "
+                             << file_name << " " << dict_tag);
+        return StatusCode::SUCCESS;
+    };
+    ATH_CHECK(setDictPaths("ATLAS", m_atlasIDFileName, m_atlasIdDictTag));
+    ATH_CHECK(
+        setDictPaths("InnerDetector", m_inDetIDFileName, m_inDetIdDictTag));
+    ATH_CHECK(setDictPaths("LArCalorimeter", m_larIDFileName, m_larIdDictTag));
+    ATH_CHECK(
+        setDictPaths("TileCalorimeter", m_tileIDFileName, m_tileIdDictTag));
+    ATH_CHECK(setDictPaths("Calorimeter", m_caloIDFileName, m_caloIdDictTag));
+    ATH_CHECK(
+        setDictPaths("MuonSpectrometer", m_muonIDFileName, m_muonIdDictTag));
+    ATH_CHECK(setDictPaths("ForwardDetectors", m_forwardIDFileName,
+                           m_forwardIdDictTag));
 
-    if ("" != m_atlasIDFileName) {
-        // Find Atlas:
-        IdDictDictionary* dict = mgr.find_dictionary("ATLAS");  
-        if (!dict) {
-            log << MSG::ERROR 
-                << "unable to find idDict for ATLAS" 
-                << endmsg;
-            return StatusCode::FAILURE;
+    auto addMetaData = [&mgr, this](const std::string &key,
+                                    const std::string &value) {
+        if (value.empty()) {
+            ATH_MSG_DEBUG("No value given for key " << key);
+        } else {
+            mgr.add_metadata(key, value);
+            ATH_MSG_DEBUG("Added to dict mgr meta data: <" << key << ","
+                                                           << value << ">");
         }
-        dict->set_file_name(m_atlasIDFileName);
-        dict->set_dict_tag (m_atlasIdDictTag);
-        log << MSG::DEBUG << "For ATLAS idDict, setting file/tag: "
-            << m_atlasIDFileName << " " << m_atlasIdDictTag
-            << endmsg;
-    }
-    if ("" != m_inDetIDFileName) {
-        // Find Indet:
-        IdDictDictionary* dict = mgr.find_dictionary("InnerDetector");  
-        if (!dict) {
-            log << MSG::ERROR 
-                << "unable to find idDict for InnerDetector" 
-                << endmsg;
-            return StatusCode::FAILURE;
-        }
-        dict->set_file_name(m_inDetIDFileName);
-        dict->set_dict_tag (m_inDetIdDictTag);
-        log << MSG::DEBUG << "For InnerDetector idDict, setting file/tag: "
-            << m_inDetIDFileName << " " << m_inDetIdDictTag
-            << endmsg;
-    }
-    if ("" != m_larIDFileName) {
-        // Find LAr:
-        IdDictDictionary* dict = mgr.find_dictionary("LArCalorimeter");  
-        if (!dict) {
-            log << MSG::ERROR 
-                << "unable to find idDict for LArCalorimeter" 
-                << endmsg;
-            return StatusCode::FAILURE;
-        }
-        dict->set_file_name(m_larIDFileName);
-        dict->set_dict_tag (m_larIdDictTag);
-        log << MSG::DEBUG << "For LArCalorimeter idDict, setting file/tag: "
-            << m_larIDFileName << " " << m_larIdDictTag
-            << endmsg;
-    }
-    if ("" != m_tileIDFileName) {
-        // Find Tile:
-        IdDictDictionary* dict = mgr.find_dictionary("TileCalorimeter");  
-        if (!dict) {
-            log << MSG::ERROR 
-                << "unable to find idDict for TileCalorimeter" 
-                << endmsg;
-            return StatusCode::FAILURE;
-        }
-        dict->set_file_name(m_tileIDFileName);
-        dict->set_dict_tag (m_tileIdDictTag);
-        log << MSG::DEBUG << "For TileCalorimeter idDict, setting file/tag: "
-            << m_tileIDFileName << " " << m_tileIdDictTag
-            << endmsg;
-    }
-    if ("" != m_caloIDFileName) {
-        // Find Calo:
-        IdDictDictionary* dict = mgr.find_dictionary("Calorimeter");  
-        if (!dict) {
-            log << MSG::ERROR 
-                << "unable to find idDict for Calorimeter" 
-                << endmsg;
-            return StatusCode::FAILURE;
-        }
-        dict->set_file_name(m_caloIDFileName);
-        dict->set_dict_tag (m_caloIdDictTag);
-        log << MSG::DEBUG << "For Calorimeter idDict, setting file/tag: "
-            << m_caloIDFileName << " " << m_caloIdDictTag
-            << endmsg;
-    }
-    if ("" != m_fullAtlasNeighborsName) {
-        // Set neighbor file name:
-        mgr.add_metadata("FULLATLASNEIGHBORS", m_fullAtlasNeighborsName);  
-        log << MSG::DEBUG << "Added to dict mgr meta data: <FULLATLASNEIGHBORS, " 
-            << m_fullAtlasNeighborsName << endmsg;
-    }
-    if ("" != m_fcal2dNeighborsName) {
-        // Set neighbor file name:
-        mgr.add_metadata("FCAL2DNEIGHBORS", m_fcal2dNeighborsName);  
-        log << MSG::DEBUG << "Added to dict mgr meta data: <FCAL2DNEIGHBORS, " 
-            << m_fcal2dNeighborsName << endmsg;
-    }
-    if ("" != m_fcal3dNeighborsNextName) {
-        // Set neighbor file name:
-        mgr.add_metadata("FCAL3DNEIGHBORSNEXT", m_fcal3dNeighborsNextName);  
-        log << MSG::DEBUG << "Added to dict mgr meta data: <FCAL3DNEIGHBORSNEXT, " 
-            << m_fcal3dNeighborsNextName << endmsg;
-    }
-    if ("" != m_fcal3dNeighborsPrevName) {
-        // Set neighbor file name:
-        mgr.add_metadata("FCAL3DNEIGHBORSPREV", m_fcal3dNeighborsPrevName);  
-        log << MSG::DEBUG << "Added to dict mgr meta data: <FCAL3DNEIGHBORSPREV, " 
-            << m_fcal3dNeighborsPrevName << endmsg;
-    }
-    if ("" != m_tileNeighborsName) {
-        // Set neighbor file name:
-        mgr.add_metadata("TILENEIGHBORS", m_tileNeighborsName);  
-        log << MSG::DEBUG << "Added to dict mgr meta data: <TILENEIGHBORS, " 
-            << m_tileNeighborsName << endmsg;
-    }
-    if ("" != m_muonIDFileName) {
-        // Find Muon:
-        IdDictDictionary* dict = mgr.find_dictionary("MuonSpectrometer");  
-        if (!dict) {
-            log << MSG::ERROR 
-                << "unable to find idDict for MuonSpectrometer" 
-                << endmsg;
-            return StatusCode::FAILURE;
-        }
-        dict->set_file_name(m_muonIDFileName);
-        dict->set_dict_tag (m_muonIdDictTag);
-        log << MSG::DEBUG << "For MuonSpectrometer idDict, setting file/tag: "
-            << m_muonIDFileName << " " << m_muonIdDictTag
-            << endmsg;
-    }
-    if ("" != m_forwardIDFileName) {
-        // Find Forward:
-        IdDictDictionary* dict = mgr.find_dictionary("ForwardDetectors");  
-        if (!dict) {
-            log << MSG::ERROR 
-                << "unable to find idDict for ForwardDetectors" 
-                << endmsg;
-            return StatusCode::FAILURE;
-        }
-        dict->set_file_name(m_forwardIDFileName);
-        dict->set_dict_tag (m_forwardIdDictTag);
-        log << MSG::DEBUG << "For ForwardDetectors idDict, setting file/tag: "
-            << m_forwardIDFileName << " " << m_forwardIdDictTag
-            << endmsg;
-    }
+    };
+    addMetaData("FULLATLASNEIGHBORS", m_fullAtlasNeighborsName);
+    addMetaData("FCAL2DNEIGHBORS", m_fcal2dNeighborsName);
+    addMetaData("FCAL3DNEIGHBORSNEXT", m_fcal3dNeighborsNextName);
+    addMetaData("FCAL3DNEIGHBORSPREV", m_fcal3dNeighborsPrevName);
+    addMetaData("TILENEIGHBORS", m_tileNeighborsName);
 
-    return StatusCode::SUCCESS ;
+    return StatusCode::SUCCESS;
+}
+
+template <class dType>
+StatusCode IdDictDetDescrCnv::loadProperty(const std::string &propertyName,
+                                           dType &pipeTo) {
+    if (!m_detDescrProxy)
+        ATH_CHECK(serviceLocator()->service("DetDescrCnvSvc", m_detDescrProxy));
+    if (!m_detDescrProxy->hasProperty(propertyName)) {
+        ATH_MSG_FATAL("DetDescrSvc does not have the property "
+                      << propertyName);
+        return StatusCode::FAILURE;
+    }
+    const Gaudi::Details::PropertyBase &prop =
+        m_detDescrProxy->getProperty(propertyName);
+    const Gaudi::Property<dType> *propPtr{
+        dynamic_cast<const Gaudi::Property<dType> *>(&prop)};
+    if (!propPtr) {
+        ATH_MSG_ERROR("Property " << propertyName << " is not of type"
+                                  << typeid(dType).name() << " but of "
+                                  << typeid(prop).name());
+        return StatusCode::FAILURE;
+    }
+    pipeTo = propPtr->value();
+    ATH_MSG_DEBUG("Flag " << propertyName << " is: " << pipeTo);
+    return StatusCode::SUCCESS;
+}
+
+/// Same as loadProperty but additionally m_doParsing is set to true if the
+/// input value does not match the set property value
+template <class dType>
+StatusCode IdDictDetDescrCnv::loadPropertyWithParse(
+    const std::string &propertyName, dType &pipeTo) {
+    dType cache{};
+    ATH_CHECK(loadProperty(propertyName, cache));
+    m_doParsing |= cache != pipeTo;
+    pipeTo = std::move(cache);
+    return StatusCode::SUCCESS;
 }
