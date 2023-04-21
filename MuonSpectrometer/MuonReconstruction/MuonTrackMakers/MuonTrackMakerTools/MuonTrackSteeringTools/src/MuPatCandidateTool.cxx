@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuPatCandidateTool.h"
@@ -241,20 +241,25 @@ namespace Muon {
                 // if selected create competing ROTs for trigger hits
                 if (createComp && (isRpc || isTgc)) {
                     if (measuresPhi && m_createCompetingROTsPhi) {
+                        // cppcheck-suppress invalidLifetime; false positive
                         addCluster(*meas, triggerHitsPhi);
                         continue;
                     } else if (!measuresPhi && m_createCompetingROTsEta) {
+                        // cppcheck-suppress invalidLifetime; false positive
                         addCluster(*meas, triggerHitsEta);
                         continue;
                     }
                 }
             }
 
+            // cppcheck-suppress invalidLifetime; false positive
             allHits.push_back(meas);
 
             if (measuresPhi) {
+                // cppcheck-suppress invalidLifetime; false positive
                 phiHits.push_back(meas);
             } else {
+                // cppcheck-suppress invalidLifetime; false positive
                 etaHits.push_back(meas);
             }
         }
