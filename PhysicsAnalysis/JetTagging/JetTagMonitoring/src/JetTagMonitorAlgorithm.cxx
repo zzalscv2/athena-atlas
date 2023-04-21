@@ -167,7 +167,9 @@ StatusCode JetTagMonitorAlgorithm::fillHistograms( const EventContext& ctx ) con
       
       if (vertItr->nTrackParticles()>0) {
 	PV_tracks_n = vertItr->nTrackParticles();
-	PV_tracks_n_on_mu = PV_tracks_n/Run_mu;
+      if (Run_mu > 0){
+	  PV_tracks_n_on_mu = PV_tracks_n/Run_mu;
+      }
 	ATH_MSG_DEBUG("PV has "<< PV_tracks_n <<" tracks");
       }
 
@@ -337,7 +339,9 @@ StatusCode JetTagMonitorAlgorithm::fillHistograms( const EventContext& ctx ) con
   }
   
   Tracks_n = tracks->size();
-  Tracks_n_on_mu = Tracks_n/Run_mu;
+  if (Run_mu > 0) {
+    Tracks_n_on_mu = Tracks_n/Run_mu;
+  }
   fill(tool,Tracks_n,Tracks_n_on_mu);
 
   for (const auto trackItr : *tracks) {
