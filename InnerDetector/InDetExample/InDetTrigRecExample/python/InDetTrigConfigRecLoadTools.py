@@ -157,61 +157,7 @@ if InDetTrigFlags.loadRotCreator():
   from InDetRecExample.TrackingCommon import createAndAddCondAlg, getRIO_OnTrackErrorScalingCondAlg
   createAndAddCondAlg(getRIO_OnTrackErrorScalingCondAlg,'RIO_OnTrackErrorScalingCondAlg')
 
-  #
-  # smart ROT creator in case we do the TRT LR in the refit
-  #
-  if InDetTrigFlags.redoTRT_LR():
 
-    from InDetRecExample.TrackingCommon import getInDetTRT_DriftCircleOnTrackTool
-    from TRT_DriftCircleOnTrackTool.TRT_DriftCircleOnTrackToolConf import \
-        InDet__TRT_DriftCircleOnTrackUniversalTool
-    InDetTrigTRT_RefitRotCreator = \
-        InDet__TRT_DriftCircleOnTrackUniversalTool(name  = 'InDetTrigTRT_RefitRotCreator',
-                                                   RIOonTrackToolDrift = getInDetTRT_DriftCircleOnTrackTool(), # special settings for trigger needed ?
-                                                   ScaleHitUncertainty = 2.5) # fix from Thijs
-#    if InDetTrigFlags.doCommissioning():    #introduced for cosmics do not use for collisions
-#      InDetTrigTRT_RefitRotCreator.ScaleHitUncertainty = 5.
-    ToolSvc += InDetTrigTRT_RefitRotCreator
-      
-    if (InDetTrigFlags.doPrintConfigurables()):
-      print (     InDetTrigTRT_RefitRotCreator)
-  
-    from TrkRIO_OnTrackCreator.TrkRIO_OnTrackCreatorConf import Trk__RIO_OnTrackCreator
-    InDetTrigRefitRotCreator = Trk__RIO_OnTrackCreator(name              = 'InDetTrigRefitRotCreator',
-                                                       ToolPixelCluster= InDetTrigPixelClusterOnTrackTool,
-                                                       ToolSCT_Cluster     = SCT_ClusterOnTrackTool,
-                                                       ToolTRT_DriftCircle = InDetTrigTRT_RefitRotCreator,
-                                                       Mode                = 'indet')
-    if InDetTrigFlags.useBroadClusterErrors():
-      InDetTrigRefitRotCreator.ToolPixelCluster = InDetTrigBroadPixelClusterOnTrackTool
-      InDetTrigRefitRotCreator.ToolSCT_Cluster  = InDetTrigBroadSCT_ClusterOnTrackTool
-
-    ToolSvc += InDetTrigRefitRotCreator
-    if (InDetTrigFlags.doPrintConfigurables()):
-      print (     InDetTrigRefitRotCreator)
-         
-  else:
-    InDetTrigRefitRotCreator = InDetTrigRotCreator
-
-#
-# ----------- control loading of the kalman updator
-#
-if InDetTrigFlags.loadUpdator():
-   
-  if InDetTrigFlags.kalmanUpdator() == "fast" :
-    # fast Kalman updator tool
-    from TrkMeasurementUpdator_xk.TrkMeasurementUpdator_xkConf import Trk__KalmanUpdator_xk
-    InDetTrigUpdator = Trk__KalmanUpdator_xk(name = 'InDetTrigUpdator')
-  elif InDetTrigFlags.kalmanUpdator() == "weight" :
-    from TrkMeasurementUpdator.TrkMeasurementUpdatorConf import Trk__KalmanWeightUpdator as ConfiguredWeightUpdator
-    InDetTrigUpdator = ConfiguredWeightUpdator(name='InDetTrigUpdator')
-  else :
-    from TrkMeasurementUpdator.TrkMeasurementUpdatorConf import Trk__KalmanUpdator as ConfiguredKalmanUpdator
-    InDetTrigUpdator = ConfiguredKalmanUpdator('InDetTrigUpdator')
-
-  ToolSvc += InDetTrigUpdator
-  if (InDetTrigFlags.doPrintConfigurables()):
-    print (     InDetTrigUpdator)
 
 #
 # ----------- control loading extrapolation
@@ -241,8 +187,6 @@ if InDetTrigFlags.loadExtrapolator():
 #
 # ----------- control loading of fitters
 #
-
-from InDetRecExample import TrackingCommon
 
 from TrkConfig.TrkGlobalChi2FitterConfig import InDetTrigGlobalChi2FitterCfg,InDetTrigGlobalChi2FitterCosmicsCfg
 InDetTrigTrackFitter = CAtoLegacyPublicToolWrapper(InDetTrigGlobalChi2FitterCfg)
@@ -304,12 +248,6 @@ if InDetTrigFlags.loadSummaryTool():
   from InDetConfig.InDetTrackHoleSearchConfig import TrigHoleSearchToolCfg
   InDetTrigHoleSearchTool = CAtoLegacyPublicToolWrapper(TrigHoleSearchToolCfg)
   
-  #Load inner Pixel layer tool
-  InDetTrigTestPixelLayerToolInner = TrackingCommon.getInDetTrigTestPixelLayerToolInner()
-  ToolSvc += InDetTrigTestPixelLayerToolInner
-  if (InDetTrigFlags.doPrintConfigurables()):
-    print ( InDetTrigTestPixelLayerToolInner)
-
   #
   # Configrable version of loading the InDetTrackSummaryHelperTool
   #
@@ -354,19 +292,6 @@ if InDetTrigFlags.loadSummaryTool():
   InDetTRTCalDbTool = TRT_CalDbTool(name = "TRT_CalDbTool")
 
  
-  #
-  # Configurable version of TrkTrackSummaryTool
-  #
-  from TrkTrackSummaryTool.TrkTrackSummaryToolConf import Trk__TrackSummaryTool
-  InDetTrigTrackSummaryTool = Trk__TrackSummaryTool(name = "InDetTrigTrackSummaryTool",
-                                                    InDetSummaryHelperTool = InDetTrigTrackSummaryHelperTool,
-                                                    doHolesInDet           = True,
-                                                    #this may be temporary #61512 (and used within egamma later)
-                                                    )
-  ToolSvc += InDetTrigTrackSummaryTool
-  if (InDetTrigFlags.doPrintConfigurables()):
-     print (     InDetTrigTrackSummaryTool)
-
 #
 # ----------- control loading of tools which are needed by new tracking and backtracking
 #
@@ -398,43 +323,6 @@ InDetTrigTRTDriftCircleCut = CAtoLegacyPublicToolWrapper(InDetTrigTRTDriftCircle
 
 from InDetConfig.InDetAmbiTrackSelectionToolConfig import InDetTrigAmbiTrackSelectionToolCfg
 InDetTrigAmbiTrackSelectionTool = CAtoLegacyPublicToolWrapper(InDetTrigAmbiTrackSelectionToolCfg)
-
-
-if InDetTrigFlags.doNewTracking():
-
-  #
-  # ------ load new track selector (common for all vertexing algorithms, except for the moment VKalVrt
-  #
-  from InDetTrigRecExample.ConfiguredVertexingTrigCuts import EFIDVertexingCuts
-  from InDetTrackSelectionTool.InDetTrackSelectionToolConf import InDet__InDetTrackSelectionTool
-
-  InDetTrigTrackSelectorTool = \
-      InDet__InDetTrackSelectionTool(name = "InDetTrigDetailedTrackSelectorTool",
-                                     CutLevel                   =  EFIDVertexingCuts.TrackCutLevel(),
-                                     minPt                      =  EFIDVertexingCuts.minPT(),
-                                     maxD0			=  EFIDVertexingCuts.IPd0Max(),
-                                     maxZ0			=  EFIDVertexingCuts.z0Max(),
-                                     maxZ0SinTheta              =  EFIDVertexingCuts.IPz0Max(),
-                                     maxSigmaD0 = EFIDVertexingCuts.sigIPd0Max(),
-                                     maxSigmaZ0SinTheta = EFIDVertexingCuts.sigIPz0Max(),
-                                     # maxChiSqperNdf = EFIDVertexingCuts.fitChi2OnNdfMax(), # Seems not to be implemented?
-                                     maxAbsEta = EFIDVertexingCuts.etaMax(),
-                                     minNInnermostLayerHits = EFIDVertexingCuts.nHitInnermostLayer(),
-                                     minNPixelHits = EFIDVertexingCuts.nHitPix(),
-                                     maxNPixelHoles = EFIDVertexingCuts.nHolesPix(),
-                                     minNSctHits = EFIDVertexingCuts.nHitSct(),
-                                     minNTrtHits = EFIDVertexingCuts.nHitTrt(),
-                                     minNSiHits = EFIDVertexingCuts.nHitSi(),
-                                     TrackSummaryTool =  InDetTrigTrackSummaryTool,
-                                     Extrapolator     = InDetTrigExtrapolator,
-                                     #TrtDCCutTool     = InDetTrigTRTDriftCircleCut,
-                                     )
-
-
-
-  ToolSvc += InDetTrigTrackSelectorTool
-  if (InDetTrigFlags.doPrintConfigurables()):
-    print (     InDetTrigTrackSelectorTool)
 
 
 # --- set Data/MC flag
