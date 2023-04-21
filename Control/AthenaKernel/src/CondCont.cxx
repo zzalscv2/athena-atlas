@@ -337,7 +337,7 @@ size_t CondContBase::trim (const std::vector<key_type>& runLbnKeys, const std::v
       CondContSet* tsmap_nc ATLAS_THREAD_SAFE = const_cast<CondContSet*>(tsmap);
       // Trim inner containers, allowing the removal of all elements.
       // See ATLASRECTS-7421.
-      size_t ntrim=tsmap_nc->trim (TSKeys, true);
+      size_t ntrim=tsmap_nc->trim (TSKeys/*, true*/);
       nTrimmed+=ntrim;
       //std::cout << "WL: Trimming inner container for clid " << m_clid << " (" << ntrim << " out of " << before << ", nKeys= " << TSKeys.size() << ")" << std::endl;
     }
