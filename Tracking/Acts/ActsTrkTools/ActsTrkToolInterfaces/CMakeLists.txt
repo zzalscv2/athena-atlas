@@ -16,10 +16,10 @@ atlas_add_library( ActsTrkToolInterfacesLib
                    GaudiKernel
                    BeamSpotConditionsData
                    ActsCore
-                   ActsTrkEvent
+                   ActsTrkEventLib
                    SiSpacePointFormationLib
                    InDetReadoutGeometry
-		           InDetIdentifier
+		   InDetIdentifier
                    xAODInDetMeasurement
                    TrkFitterUtils
                    )

@@ -13,7 +13,7 @@ atlas_add_component( ActsTrkSpacePointFormationTool
                      ActsCore
                      AthenaBaseComps
                      GaudiKernel
-                     ActsTrkEvent
+                     ActsTrkEventLib
                      ActsTrkEventCnvLib
                      ActsTrkToolInterfacesLib
                      InDetCondTools

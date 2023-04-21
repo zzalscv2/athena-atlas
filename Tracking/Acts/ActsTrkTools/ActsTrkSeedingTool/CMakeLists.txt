@@ -13,7 +13,7 @@ atlas_add_component( ActsTrkSeedingTool
                      LINK_LIBRARIES
                      GaudiKernel
                      ActsCore
-                     ActsTrkEvent
+                     ActsTrkEventLib
                      ActsTrkToolInterfacesLib
                      ActsInteropLib
                      CxxUtils

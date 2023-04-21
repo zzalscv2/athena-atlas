@@ -13,12 +13,12 @@ atlas_add_component( ActsTrkSeeding
                      GaudiKernel
                      BeamSpotConditionsData
                      ActsCore
-                     ActsTrkEvent
+                     ActsTrkEventLib
                      ActsTrkToolInterfacesLib
                      MagFieldConditions
                      ActsGeometryInterfacesLib
                      SiSPSeededTrackFinderData
-		             AthenaMonitoringKernelLib
+		     AthenaMonitoringKernelLib
                      ActsTrkEventCnvLib
                      )
 
