@@ -3,7 +3,7 @@
 if [[ $# < 3 ]];
 then
   echo "Syntax: $0 [-append] [-offline] [-onerun] <Run> <LBb> [<LBe>] File1 [Folder] ..."
-  exit
+  exit 1
 fi
 
 inputTextFile="mf_input.txt"
@@ -47,7 +47,7 @@ then
     shift
 else
     echo "ERROR: Expected a run-number, got $1"
-    exit
+    exit 1
 fi
 
 
@@ -57,58 +57,62 @@ then
     shift
 else
     echo "ERROR: Expected a lumi-block-number, got $1"
-    exit
+    exit 1
 fi
 
-#if [ $onerun == 1 ]
-#then
-  if echo $1 | grep -q "^[0-9]*$";
-  then
-    lbnumbere=$1
-    shift
-  else  
-    lbnumbere=-1
-  fi  
-#  else
-#    echo "ERROR: Expected a lumi-block-number, got $1"
-#    exit
-#  fi
-#fi
+if echo $1 | grep -q "^[0-9]*$";
+then
+  lbnumbere=$1
+  shift
+else  
+  lbnumbere=-1
+fi  
 
 if ! which AtlCoolCopy 1>/dev/null 2>&1
 then
     echo "No offline setup found!"
-    exit
+    exit 2
+fi
+
+if [[ $online == 1 ]] && [[ $lbnumbere -ge 0 ]]
+then
+   echo "Make no sense closed IOV for online.... "
+   exit 3
+fi
+
+if [[ $onerun == 1 ]] && [[ $lbnumbere -ge 0 ]]
+then
+   echo "WARNING: both -onerun and LB2 given.... LB2 taking precedence !!!!"
 fi
 
 if [ -f $inputTextFile ];
 then
   echo "Temporary file $inputTextFile exists already. Please remove!"
-  exit
+  exit 4
 fi
 
 if [ -f $outputTextFile ];
 then
   echo "Temporary file $outputTextFile exists already. Please remove!"
-  exit
+  exit 4
 fi
 
 if [ -f $outputSqlite ];
 then
   echo "Output file $outputSqlite exists already. Please remove!"
-  exit
+  exit 4
 fi
 
 if [ -f $outputSqliteOnl ];
 then
   echo "Output file $outputSqliteOnl exists already. Please remove!"
-  exit
+  exit 4
 fi
 
 if [ -f $oldTextFile ];
 then
   echo "Output file $oldTextFile exists already. Please remove!"
-  exit
+  exit 4
 fi
 
 
@@ -122,7 +126,7 @@ echo "Left parameters: " $# $1
 if [ ! -f $1 ];
     then
     echo "ERROR File $1 not found!"
-    exit
+    exit 4
 fi
 echo "Adding $1"
 catfiles="${catfiles} ${1%%:}"
@@ -140,9 +144,9 @@ fi
 echo "Resolving current folder-level tag suffix for ${Folder} ...."
 fulltag=`getCurrentFolderTag.py "COOLOFL_LAR/CONDBR2" $Folder` 
 upd4TagName=`echo $fulltag | grep -o "RUN2-UPD4-[0-9][0-9]"` 
-echo "Found $upd4TagName"
+gtag=`echo $fulltag | grep BLKPA | awk '{print $2}'`
+echo "Found $gtag $upd4TagName"
 fulltages=`getCurrentFolderTag.py "COOLOFL_LAR/CONDBR2" $Folder True` 
-gtages=`echo $fulltages | grep ES1PA | awk '{print $2}'`
 upd1TagName=`echo $fulltages | grep -o "RUN2-UPD1-[0-9][0-9]"` 
 echo "Found $upd1TagName"
 
@@ -159,60 +163,52 @@ IFS=' '
 
 
 echo "Running athena to read current database content..."
-athena.py -c "OutputFile=\"${oldTextFile}\";RunNumber=${runnumber};LBNumber=${lbnumber};Folder=\"${Folder}\";GlobalTag=\"${gtages}\"" LArBadChannelTool/LArMissingFebs2Ascii.py > oracle2ascii.log 2>&1
+athena.py -c "OutputFile=\"${oldTextFile}\";RunNumber=${runnumber};LBNumber=${lbnumber};Folder=\"${Folder}\";GlobalTag=\"${gtag}\";tag=\"${fldtag}-${upd4TagName}\";" LArBadChannelTool/LArMissingFebs2Ascii.py > oracle2ascii.log 2>&1
 if [ $? -ne 0 ];  then
     echo "Athena reported an error reading back sqlite file ! Please check oracle2ascii.log!"
-    exit
+    exit 5
 fi
 
 echo "cat the files:"$catfiles":to " $inputTextFile
-if [ ! -f "mf_previous.txt" ];
+if [ ! -f ${oldTextFile} ];
     then
     echo "ERROR File mf_previous.txt not found!"
-    exit
+    exit 6
 fi
-if [ ! -f "new.txt" ];
-    then
-    echo "ERROR File new.txt not found!"
-    exit
-fi
-#cat $catfiles > $inputTextFile
+cat $catfiles > $inputTextFile
 #cat mf_previous.txt new.txt > $inputTextFile
-cp mf_previous.txt $inputTextFile
-cat new.txt >> $inputTextFile
+#cp mf_previous.txt $inputTextFile
+#cat new.txt >> $inputTextFile
 if [ $? -ne 0 ];  then
     echo "Failed to concatinate input files!"
-    exit
+    exit 7
 fi
 
-if [ $onerun -eq 1 ]; then
- if [ $lbnumbere -ge 0 ]; then
+prefix=""
+if [ $lbnumbere -ge 0 ]; then
    endlb=$[ $lbnumbere + 1]
    prefix="IOVEndRun=${runnumber};IOVEndLB=$endlb;"
- else
+elif [ $onerun -eq 1 ]; then
    prefix=$[ $runnumber + 1]
    prefix="IOVEndRun=${prefix};IOVEndLB=0;"
- fi  
-else 
- prefix=""
-fi
+fi  
 
 echo "TagSuffix: " $upd4TagName
 echo "Running athena to build sqlite database file ..."
-prefix="${prefix}IOVBeginRun=${runnumber};IOVBeginLB=${lbnumber};sqlite=\"${outputSqlite}.tmp\";Folder=\"${Folder}\";GlobalTag=\"${gtages}\";"
+prefix="${prefix}IOVBeginRun=${runnumber};IOVBeginLB=${lbnumber};sqlite=\"${outputSqlite}.tmp\";Folder=\"${Folder}\";GlobalTag=\"${gtag}\";TagPostfix=\"-${upd4TagName}\";"
 echo "prefix: ${prefix}"
 athena.py -c $prefix LArBadChannelTool/LArMissingFebDbAlg.py > ascii2sqlite.log 2>&1
 
 if [ $? -ne 0 ];  then
     echo "Athena reported an error! Please check ascii2sqlite.log!"
-    exit
+    exit 8
 fi
 
  
 if grep -q ERROR ascii2sqlite.log
 then
     echo "An error occured during ascii2sqlite job! Please check ascii2sqlite.log!"
-    exit
+    exit 8
 fi
 
 if grep -q "REJECTED" ascii2sqlite.log
@@ -228,38 +224,38 @@ if [ $onerun -eq 1 ] || [ $lbnumbere -ge 0 ]; then
 else   
    pref=""
 fi
-pref="${pref}sqlite=\"${outputSqlite}\";OutputFile=\"${outputTextFile}\";Folder=\"${Folder}\";GlobalTag=\"${gtages}\";tag=\"${fldtag}-RUN2-UPD3-01\""
+pref="${pref}sqlite=\"${outputSqlite}\";OutputFile=\"${outputTextFile}\";Folder=\"${Folder}\";GlobalTag=\"${gtag}\";tag=\"${fldtag}-${upd4TagName}\";"
 echo "Running athena to test readback of sqlite database file"
 athena.py  -c ${pref} LArBadChannelTool/LArMissingFebs2Ascii.py > sqlite2ascii.log 2>&1
 
 if [ $? -ne 0 ];  then
     echo "Athena reported an error reading back sqlite file ! Please check sqlite2ascii.log!"
-    exit
+    exit 9
 fi
 
 
 if grep -q ERROR sqlite2ascii.log
 then
     echo "An error occured during reading back sqlite file ! Please check sqlite2ascii.log!"
-    exit
+    exit 9
 fi
 
 if [ $online -eq 1 ]; then
-   echo "Copying UPD3 to UPD1 tag..."
-   AtlCoolCopy "sqlite://;schema=${outputSqlite}.tmp;dbname=CONDBR2" "sqlite://;schema=${outputSqlite};dbname=CONDBR2" -f ${Folder} -t ${fldtag}-RUN2-UPD3-01 -ot ${fldtag}-${upd1TagName} -r 2147483647 -a  > AtlCoolCopy.upd3.log 2>&1
+   echo "Copying UPD4 to UPD1 tag..."
+   AtlCoolCopy "sqlite://;schema=${outputSqlite}.tmp;dbname=CONDBR2" "sqlite://;schema=${outputSqlite};dbname=CONDBR2" -f ${Folder} -t ${fldtag}-${upd4TagName} -ot ${fldtag}-${upd1TagName}  > AtlCoolCopy.upd1.log 2>&1
 
    if [ $? -ne 0 ];  then
        echo "AtlCoolCopy reported an error! Please check AtlCoolCopy.upd3.log!"
-       exit
+       exit 10
    fi
 fi
 
-echo "Copying UPD3 to UPD4 tag..."
-AtlCoolCopy "sqlite://;schema=${outputSqlite}.tmp;dbname=CONDBR2" "sqlite://;schema=${outputSqlite};dbname=CONDBR2" -f ${Folder} -t ${fldtag}-RUN2-UPD3-01 -ot ${fldtag}-$upd4TagName  > AtlCoolCopy.upd4.log 2>&1
+echo "Copying UPD4 to UPD3 tag..."
+AtlCoolCopy "sqlite://;schema=${outputSqlite}.tmp;dbname=CONDBR2" "sqlite://;schema=${outputSqlite};dbname=CONDBR2" -f ${Folder} -t ${fldtag}-${upd4TagName} -ot ${BaseTagName}  > AtlCoolCopy.upd3.log 2>&1
 
 if [ $? -ne 0 ];  then
-    echo "AtlCoolCopy reported an error! Please check AtlCoolCopy.upd4.log!"
-    exit
+    echo "AtlCoolCopy reported an error! Please check AtlCoolCopy.upd3.log!"
+    exit 10
 fi
 
 if ! grep -q ${runnumber} /afs/cern.ch/user/a/atlcond/scratch0/nemo/prod/web/calibruns.txt
@@ -294,12 +290,16 @@ if [ $online -eq 1 ]; then
    IFS=' ' 
 
    echo "Copying to the: "${onlfld} " with tag " ${onlfldtag}-${upd1TagName}
-   AtlCoolCopy "sqlite://;schema=${outputSqlite}.tmp;dbname=CONDBR2" "sqlite://;schema=${outputSqliteOnl};dbname=CONDBR2" -f ${Folder} -t ${fldtag}-RUN2-UPD3-01 -of ${onlfld} -ot ${onlfldtag}-${upd1TagName} -r 2147483647 -a -c > AtlCoolCopy.onl.log 2>&1
+   if [ $onerun -eq 1 ]; then
+      AtlCoolCopy "sqlite://;schema=${outputSqlite}.tmp;dbname=CONDBR2" "sqlite://;schema=${outputSqliteOnl};dbname=CONDBR2" -f ${Folder} -t ${fldtag}-${upd4TagName} -of ${onlfld} -ot ${onlfldtag}-${upd1TagName} -c > AtlCoolCopy.onl.log 2>&1
+   else   
+      AtlCoolCopy "sqlite://;schema=${outputSqlite}.tmp;dbname=CONDBR2" "sqlite://;schema=${outputSqliteOnl};dbname=CONDBR2" -f ${Folder} -t ${fldtag}-${upd4TagName} -of ${onlfld} -ot ${onlfldtag}-${upd1TagName} -r 2147483647 -a -c > AtlCoolCopy.onl.log 2>&1
+   fi   
 
 
    if [ $? -ne 0 ];  then
       echo "AtlCoolCopy reported an error! Please check AtlCoolCopy.onl.log!"
-      exit
+      exit 10
    fi
 fi
 
@@ -316,6 +316,11 @@ nTotal=`wc -l $outputTextFile | cut -f 1 -d " "`
 
 echo "Added $nNew missing FEBs and removed $nGone"
 echo "Total number of FEBs in the new list: $nTotal" 
+
+if [ -f ${outputSqlite}.tmp ];
+then
+    rm -f ${outputSqlite}.tmp
+fi
 
 
 echo "Output files:"

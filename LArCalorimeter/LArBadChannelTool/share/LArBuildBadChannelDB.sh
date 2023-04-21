@@ -51,7 +51,7 @@ then
    fulltag=`getCurrentFolderTag.py "COOLOFL_LAR/CONDBR2" /LAR/BadChannelsOfl/BadChannels` 
    if [ $? -ne 0 ]
    then
-       exit
+       exit 1
    fi
    upd4TagName=`echo $fulltag | grep -o "RUN2-UPD4-[0-9][0-9]"` 
    echo "Found UPD4 $upd4TagName"
@@ -63,7 +63,7 @@ else
    fulltag=`getCurrentFolderTag.py "COOLOFL_LAR/CONDBR2" /LAR/BadChannelsOfl/BadChannelsSC` 
    if [ $? -ne 0 ]
    then
-       exit
+       exit 1
    fi
    upd4TagName=`echo $fulltag | grep -o "RUN3-UPD4-[0-9][0-9]"` 
    echo "Found UPD4 $upd4TagName"
@@ -101,7 +101,7 @@ elif [ $tag == "All" ]
     tags="${upd1TagName} ${upd3TagName} ${BulkTagName} ${upd4TagName}"
 else
     echo "ERROR, expected 'UPD1', 'UPD4' or 'BOTH' or 'All' or 'Bulk' or 'UPD3' as type, got: $tag"
-    exit
+    exit 2
 fi
 
 echo "tags" ${tags}
@@ -113,7 +113,7 @@ then
     shift
 else
     echo "ERROR: Expected a run-number, got $1"
-    exit
+    exit 3
 fi
 
 if echo $1 | grep -q "^[0-9]*$";
@@ -122,19 +122,19 @@ then
     shift
 else
     echo "ERROR: Expected a lumi-block-number, got $1"
-    exit
+    exit 4
 fi
 
 if [[  $# == 0 ]]
     then
     echo "ERROR: No input files found!"
-    exit
+    exit 5
 fi
 
 if [ ! -f $1 ];
       then
       echo "ERROR File $1 not found!"
-      exit
+      exit 6
 fi
 echo "Adding $1"
 catfiles=" $1"
@@ -176,6 +176,12 @@ else
   lbnumber2=-1
 fi
 
+if [[ $openiov == 1 ]] && [[ $runnumber2 > 0 ]]
+then
+   echo "Could not handle -openiov and RunEnd at the same time"
+   exit 7
+fi
+
 
 if [ -f $outputSqlite ];
     then
@@ -203,7 +209,7 @@ touch $summaryFile
 if ! which AtlCoolCopy 1>/dev/null 2>&1
 then
     echo "No offline setup found!"
-    exit
+    exit 8
 fi
 
 for t in $tags
@@ -219,20 +225,20 @@ do
   if [ -f $inputTextFile ];
       then
       echo "Temporary file $inputTextFile exists already. Please remove!"
-      exit
+      exit 9
   fi
 
   if [ -f $outputTextFile ];
       then
       echo "Temporary file $outputTextFile exists already. Please remove!"
-      exit
+      exit 9
   fi
 
 
   if [ -f $oldTextFile ];
       then
       echo "Output file $oldTextFile exists already. Please remove!"
-      exit
+      exit 9
   fi
 
   if [ $issc == 1 ];
@@ -260,7 +266,7 @@ do
 
   if [ $? -ne 0 ];  then
       echo "Athena reported an error reading back sqlite file ! Please check oracle2ascii_$t.log!"
-      exit
+      exit 10
   fi
 
   if [ $append == 1 ]
@@ -273,7 +279,7 @@ do
   cat $catfiles1 > $inputTextFile
   if [ $? -ne 0 ];  then
       echo "Failed to concatenate input files!"
-      exit
+      exit 11
   fi
 
   iovEnd=""
@@ -291,17 +297,18 @@ do
   fi
 
   echo "Running athena to build sqlite database file ..."
+  echo "Parameters..."
   echo "Parameters: -o ${outputSqlite} -t $t -r $runnumber -l $lbnumber ${inputTextFile} $iovEnd"
   python -m LArBadChannelTool.LArBadChannelDBAlg -o ${outputSqlite} -t $t -r $runnumber -l $lbnumber -f ${folder} $SCParam ${inputTextFile} $iovEnd > ascii2sqlite_$t.log 2>&1
   if [ $? -ne 0 ];  then
     echo "Athena reported an error! Please check ascii2sqlite_$t.log!"
-    exit
+    exit 12
   fi
 
   if grep -q ERROR ascii2sqlite_$t.log
       then
       echo "An error occured during ascii2sqlite job! Please check ascii2sqlite_$t.log!"
-      exit
+      exit 13
   fi
 
   if grep -q "REJECTED" ascii2sqlite_$t.log
@@ -313,14 +320,14 @@ do
   python -m LArBadChannelTool.LArBadChannel2Ascii -o $outputTextFile -d $outputSqlite -t $t -f ${folder} -r $runnumber -l $lbnumber  $SCParam > sqlite2ascii_$t.log 2>&1
   if [ $? -ne 0 ];  then
       echo "Athena reported an error reading back sqlite file ! Please check sqlite2ascii_$t.log!"
-      exit
+      exit 14
   fi
 
 
   if grep  ERROR sqlite2ascii_$t.log
   then
       echo "An error occured during reading back sqlite file ! Please check sqlite2ascii_$t.log!"
-      exit
+      exit 15
   fi
 
   
@@ -337,7 +344,7 @@ do
       
       if [ $? -ne 0 ];  then
 	  echo "AtlCoolCopy reported an error! Please check AtlCoolCopy.onl.log!"
-	  exit
+	  exit 16
       fi
   fi
 

@@ -10,6 +10,9 @@ if 'sqlite' in dir():
 else:
     dbStr="<db>COOLOFL_LAR/"+DBInstance+"</db>"
 
+if 'GlobalTag' not in dir():
+    GlobalTag="CONDBR2-ES1PA-2023-01" 
+
 if 'tag' in dir():
     tagStr="<tag>"+tag+"</tag>"
 else:
@@ -23,7 +26,6 @@ if 'RunNumber' not in dir():
 
 if 'LBNumber' not in dir():
    LBNumber = 0
-
 
 import AthenaCommon.AtlasUnixGeneratorJob
 
@@ -80,7 +82,7 @@ if not hasattr(svcMgr,"ConditionStore"):
    import StoreGate.StoreGateConf as StoreGateConf
    svcMgr += StoreGateConf.StoreGateSvc("ConditionStore")
 
-svcMgr.IOVDbSvc.GlobalTag="CONDBR2-ES1PA-2018-06" 
+svcMgr.IOVDbSvc.GlobalTag=GlobalTag 
 
 from LArBadChannelTool.LArBadFebAccess import LArBadFebAccess
 LArBadFebAccess(dbString="/LAR/BadChannelsOfl/MissingFEBs"+dbStr+tagStr)
