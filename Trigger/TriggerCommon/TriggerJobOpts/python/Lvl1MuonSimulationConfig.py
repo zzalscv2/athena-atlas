@@ -88,7 +88,8 @@ def MuonBytestream2RdoConfig(flags):
     # for MM
     if flags.Detector.GeometryMM:
         Muon__MmROD_Decoder=CompFactory.Muon.MM_ROD_Decoder
-        MMRodDecoder = Muon__MmROD_Decoder(name="MmROD_Decoder"+postFix)
+        MMRodDecoder = Muon__MmROD_Decoder(name="MmROD_Decoder"+postFix,
+                                           CablingMap="")
         Muon_MM_RawDataProviderToolMT = CompFactory.Muon.MM_RawDataProviderToolMT
         MuonMmRawDataProviderTool = Muon_MM_RawDataProviderToolMT(name  = "MM_RawDataProviderToolMT"+postFix,
                                                                   Decoder = MMRodDecoder,
