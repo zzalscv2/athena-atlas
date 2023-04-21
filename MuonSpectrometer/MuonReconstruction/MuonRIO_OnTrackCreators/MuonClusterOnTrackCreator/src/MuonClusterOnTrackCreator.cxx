@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -253,12 +253,22 @@ namespace Muon {
             MClT = new CscClusterOnTrack(MClus, locpar, loce, positionAlongStrip, MClus->status(), MClus->timeStatus());
 
         } else if (m_idHelperSvc->issTgc(RIO.identify())) {
-        
+
             //***************************
             // sTGC: cast to sTgcPrepData
             //***************************
-            
+
             const sTgcPrepData* MClus = static_cast<const sTgcPrepData*>(&RIO);
+            Amg::Vector2D localPos(lp[Trk::locX], lp[Trk::locY]);
+
+            // Dont make RIO On tracks for sTGC wires in inner Q1
+            if (m_idHelperSvc->stgcIdHelper().channelType(MClus->identify()) == sTgcIdHelper::Wire && MClus->detectorElement()->isEtaZero(MClus->identify(), lp[Trk::locY]))
+              return nullptr;
+
+            // Wires are already considered in the above check. Dont remove them here
+            if (!rio_surface.insideBounds(localPos) && m_idHelperSvc->stgcIdHelper().channelType(MClus->identify()) != sTgcIdHelper::Wire)
+              return nullptr;
+
             MClT = new sTgcClusterOnTrack(MClus, locpar, loce, positionAlongStrip);
 
         } else if (m_idHelperSvc->isMM(RIO.identify())) {

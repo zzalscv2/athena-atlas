@@ -161,20 +161,28 @@ namespace Muon {
     bool NSWSeed::add(SeedMeasurement meas, double max_uncert) {
         if (!size() || !meas) return false;
         if (find(meas)) return true;
+        Trk::Intersection intersect = meas->associatedSurface().straightLineIntersection(pos(), dir(), false, false);
+        Amg::Vector2D lpos_seed{Amg::Vector2D::Zero()};
+        if (!meas->associatedSurface().globalToLocal(intersect.position, dir(), lpos_seed)) return false;
+        // Dont allow out seeds outside of active areas to create seeds
+        // Happens rarely but is good protection to reduce wrong channel to track association
+        if (!meas->associatedSurface().insideBounds(lpos_seed)) return false;
+
+        // Dont save sTGC wires in inner Q1
+        if (m_parent->isWire(meas)){
+            const sTgcPrepData* prd = dynamic_cast<const sTgcPrepData*>(meas->prepRawData());
+            if (!prd) return false;
+            if (prd->detectorElement()->isEtaZero(prd->identify(), lpos_seed.y())) return false;
+        }
+
         if (m_parent->isPad(meas)) {
             const sTgcPrepData* prd = dynamic_cast<const sTgcPrepData*>(meas->prepRawData());
             if (!prd) return false;
-            Trk::Intersection intersect = meas->associatedSurface().straightLineIntersection(pos(), dir(), false, false);
-            Amg::Vector2D lpos_seed{Amg::Vector2D::Zero()};
-            if (!meas->associatedSurface().globalToLocal(intersect.position, dir(), lpos_seed)) return false;
 
             const MuonGM::MuonPadDesign* design = prd->detectorElement()->getPadDesign(prd->identify());
             if (!design) return false;
 
-            double halfPadWidthX = 0.5 * design->channelWidth(prd->localPosition(), true);   // X = phi direction for pads
-            double halfPadWidthY = 0.5 * design->channelWidth(prd->localPosition(), false);  // Y = eta direction for pads
-            const Amg::Vector2D diff = prd->localPosition() - lpos_seed;
-            return (std::abs(diff.x()) < halfPadWidthX && std::abs(diff.y()) < halfPadWidthY) && insert(meas);
+            return prd->detectorElement()->stripNumber(prd->localPosition(), prd->identify()) == prd->detectorElement()->stripNumber(lpos_seed, prd->identify()) && insert(meas);
         }
         meas.setDistance(distance(meas));
         const double uncertD = std::max(1.,std::hypot(m_width, Amg::error(meas->localCovariance(), Trk::locX)));
@@ -661,6 +669,14 @@ namespace Muon {
     bool MuonNSWSegmentFinderTool::isPad(const Muon::MuonClusterOnTrack* clust) const {
         const Identifier id = clust->identify();
         return m_idHelperSvc->issTgc(id) && m_idHelperSvc->stgcIdHelper().channelType(id) == sTgcIdHelper::Pad;
+    }
+    bool MuonNSWSegmentFinderTool::isStrip(const Muon::MuonClusterOnTrack* clust) const {
+        const Identifier id = clust->identify();
+        return m_idHelperSvc->issTgc(id) && m_idHelperSvc->stgcIdHelper().channelType(id) == sTgcIdHelper::Strip;
+    }
+    bool MuonNSWSegmentFinderTool::isWire(const Muon::MuonClusterOnTrack* clust) const {
+        const Identifier id = clust->identify();
+        return m_idHelperSvc->issTgc(id) && m_idHelperSvc->stgcIdHelper().channelType(id) == sTgcIdHelper::Wire;
     }
     //============================================================================
     bool MuonNSWSegmentFinderTool::hitsToTrack(const EventContext& ctx, const MeasVec& etaHitVec,

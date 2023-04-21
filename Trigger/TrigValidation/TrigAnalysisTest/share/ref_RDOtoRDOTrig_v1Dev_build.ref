@@ -18497,12 +18497,12 @@ HLT_mu20_msonly_iloosems_mu6noL1_msonly_nscan_L1MU14FCH:
   stepCounts:
     0: 6
     1: 5
-    2: 5
+    2: 4
     3: 3
   stepFeatures:
     0: 7
     1: 5
-    2: 5
+    2: 4
     3: 6
 HLT_mu20_msonly_iloosems_mu6noL1_msonly_nscan_L1MU14FCH_J40:
   eventCount: 2
@@ -18559,13 +18559,13 @@ HLT_mu20_mu2noL1_invmJPsiOS_L1MU14FCH:
     1: 5
     2: 5
     3: 5
-    4: 3
+    4: 4
   stepFeatures:
     0: 7
     1: 5
     2: 5
     3: 5
-    4: 7
+    4: 9
     5: 7
 HLT_mu22_2mu4noL1_L1MU14FCH:
   eventCount: 0
@@ -18825,13 +18825,13 @@ HLT_mu23_mu2noL1_invmJPsiOS_L1MU18VFCH:
     1: 5
     2: 5
     3: 5
-    4: 3
+    4: 4
   stepFeatures:
     0: 7
     1: 5
     2: 5
     3: 5
-    4: 7
+    4: 9
     5: 7
 HLT_mu23_mu8noL1_L1MU18VFCH:
   eventCount: 3

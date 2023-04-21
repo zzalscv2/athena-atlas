@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "GeoPrimitives/GeoPrimitives.h"
+#include "CLHEP/Units/SystemOfUnits.h"
 
 namespace MuonGM {
 
@@ -98,7 +99,7 @@ namespace MuonGM {
         bool channelCorners(std::pair<int, int> pad, std::vector<Amg::Vector2D>& corners) const;
 
         /** calculate local channel width */
-        double channelWidth(const Amg::Vector2D& pos, bool measPhi) const;
+        double channelWidth(const Amg::Vector2D& pos, bool measPhi, bool preciseMeas = false) const;
 
         /** calculate local stereo angle */
         double stereoAngle(/*int channel*/) const;
@@ -152,10 +153,31 @@ namespace MuonGM {
 
     inline double MuonPadDesign::channelLength(/*int st*/) const { return 0.; }
 
-    inline double MuonPadDesign::channelWidth(const Amg::Vector2D& pos, bool measPhi) const {
-        // calculate the phi width
+    inline double MuonPadDesign::channelWidth(const Amg::Vector2D& pos, bool measPhi, bool preciseMeas) const {
+        // get Eta and Phi indices, and corner positions of given pad
+        std::pair<int, int> pad = channelNumber(pos);
+        std::vector<Amg::Vector2D> corners;
+        channelCorners(pad, corners);
 
-        return (measPhi ? 2. * std::tan(0.5 * inputPhiPitch * M_PI / 180.) * (radialDistance + pos.y()) : inputRowPitch);
+        // For eta pad measurement, return height of given pad
+        if (!measPhi) return corners.at(2)[1] - corners.at(0)[1];
+
+        // Return the width at the top of the pads
+        /* This is used by default and allows for track/segment association to pads to work correctly
+           In these cases, the given position of the pad is always its centre so we can not know the
+           precise position where we want to compute the width so its best to give a larger value
+        */
+        if (!preciseMeas) return corners.at(3)[0] - corners.at(2)[0];
+
+        // Return precise Phi width for a given precise position on the pad
+        /* This is only used when the precise position of a hit, track or segment is known on the pad
+           Only to be used in specific cases, like in the digitization when we need to know the exact
+           width along a certain point in the pad, e.g. for charge sharing. 
+        */
+        
+        double WidthTop = corners.at(3)[0] - corners.at(2)[0];
+        double WidthBot = corners.at(1)[0] - corners.at(0)[0];
+        return WidthBot + (WidthTop - WidthBot) * (pos.y() - corners.at(0)[1]) / (corners.at(2)[1]-corners.at(0)[1]);
     }
 
     inline double MuonPadDesign::gasGapThickness() const { return thickness; }
