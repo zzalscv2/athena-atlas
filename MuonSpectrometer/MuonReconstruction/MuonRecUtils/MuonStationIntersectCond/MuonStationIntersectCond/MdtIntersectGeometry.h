@@ -34,7 +34,7 @@ namespace Muon {
 
         const Amg::Transform3D& transform() const { return m_transform; }
 
-        const TrkDriftCircleMath::MdtChamberGeometry* mdtChamberGeometry() const;
+        std::shared_ptr<const TrkDriftCircleMath::MdtChamberGeometry> mdtChamberGeometry() const;
         const Identifier& chamberId() const { return m_chid; }
 
     private:
@@ -44,7 +44,7 @@ namespace Muon {
 
         Identifier m_chid{};
         Amg::Transform3D m_transform;
-        std::unique_ptr<TrkDriftCircleMath::MdtChamberGeometry> m_mdtGeometry{};
+        std::shared_ptr<TrkDriftCircleMath::MdtChamberGeometry> m_mdtGeometry{};
         const MuonGM::MdtReadoutElement* m_detElMl0{nullptr};
         const MuonGM::MdtReadoutElement* m_detElMl1{nullptr};
         const MuonGM::MuonDetectorManager* m_detMgr{nullptr};  // cannot use ReadCondHandleKey since no athena component
