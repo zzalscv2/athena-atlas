@@ -67,7 +67,8 @@ def JetRecCfg( flags, jetdef,  returnConfiguredDef=False):
     # FIXME temporarily reorder for serial running
     if flags.Concurrency.NumThreads <= 0:
         jetlog.info("Reordering algorithms in sequence {0}".format(sequenceName))
-        algs = reOrderAlgs(algs)
+        algs, ca = reOrderAlgs(algs)
+        components.merge(ca)
 
     for a in algs:
 
@@ -760,13 +761,41 @@ def isAnalysisRelease():
 def reOrderAlgs(algs):
     """In runIII the scheduler automatically orders algs, so the JetRecConfig helpers do not try to enforce the correct ordering.
     This is not the case in runII config for which this jobO is intended --> This function makes sure some jet-related algs are well ordered.
-    """    
+    """
+    def _flatten_CA(cfg, sequence_name="AthAlgSeq"):
+        from AthenaConfiguration.ComponentAccumulator import ConfigurationError
+        if not isinstance(cfg, ComponentAccumulator):
+            raise ConfigurationError('It is not allowed to flatten with multiple top sequences')
+
+        if len(cfg._allSequences) != 1:
+            raise ConfigurationError('It is not allowed to flatten with multiple top sequences')
+
+        sequence = cfg.getSequence(sequence_name)
+        if sequence.Sequential:
+            raise ConfigurationError('It is not allowed to flatten sequential sequences')
+
+        members = []
+        for member in sequence.Members:
+            if isinstance(member, CompFactory.AthSequencer):
+                members.extend(_flatten_CA(cfg, member.getName()))
+            else:
+                members.append(member)
+
+        sequence.Members = members
+        return members
+
     algs_tmp = []
+    ca = ComponentAccumulator()
     for a in algs:
         if not isinstance(a, ComponentAccumulator) :
             algs_tmp.append(a)
         else:
-            algs_tmp += a._algorithms.values() # can not ask getEventAlgos() because this returns sub-AthSequence which confuses the rest of the chain
+            _flatten_CA(a)
+            ca_algs = list(a._algorithms.keys())
+            for algo in ca_algs:
+                algs_tmp.append(a.popEventAlgo(algo))
+            ca.merge(a)
+
     algs = algs_tmp
     evtDensityAlgs = [(i, alg) for (i, alg) in enumerate(algs) if alg and alg.getType() == 'EventDensityAthAlg' ]
     pjAlgs = [(i, alg) for (i, alg) in enumerate(algs) if alg and alg.getType() == 'PseudoJetAlgorithm' ]
@@ -781,7 +810,7 @@ def reOrderAlgs(algs):
     for i, j in pairsToswap:
         algs[i], algs[j] = algs[j], algs[i]
         
-    return algs
+    return algs, ca
 
 
 
@@ -802,9 +831,11 @@ def registerAsInputConstit( jetdef ):
             # Compatibility with runII style : we can't use ComponentAccumulator and must return the list of algs.
             #  When this is not needed anymore we can remove here and simplify inside getInputAlgs()
             algs, jetdef_i = getJetAlgs(largejetdef._cflags, jetdef, True)
-            algs = reOrderAlgs( [a for a in algs if a is not None])
+            algs, ca = reOrderAlgs( [a for a in algs if a is not None])
+            # ignore dangling CA instance in legacy config
+            ca.wasMerged()
             return algs
-            
+
     stdInputExtDic[jetname]  = JetInputExternal( jetname, jetname, algoBuilder=jetBuilder)
     stdConstitDic[jetname] = JetInputConstit(jetname, xAODType.Jet, jetname )
     

@@ -3,13 +3,15 @@
 #
 
 from ..Config.MenuComponents import MenuSequence, MenuSequenceCA, RecoFragmentsPool, algorithmCAToGlobalWrapper, SelectionCA, InViewRecoCA, InEventRecoCA
+
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaCommon.CFElements import parOR, seqAND, seqOR
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentFactory import CompFactory
 log = logging.getLogger(__name__)
 
 from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
-from DecisionHandling.DecisionHandlingConf import ViewCreatorInitialROITool, ViewCreatorNamedROITool, \
+from DecisionHandling.DecisionHandlingConf import ViewCreatorNamedROITool, \
   ViewCreatorCentredOnIParticleROITool, ViewCreatorFetchFromViewROITool
 
 #muon container names (for RoI based sequences)
@@ -21,143 +23,138 @@ from TrigEDMConfig.TriggerEDMRun3 import recordable
 #-----------------------------------------------------#
 ### ************* Step1  ************* ###
 #-----------------------------------------------------#
-def muFastAlgSequence(flags):
+def muFastAlgSequenceCfg(flags, is_probe_leg=False):
 
-    ### set the EVCreator ###
-    l2MuViewsMaker = EventViewCreatorAlgorithm("IMl2Mu")
-    #
-    l2MuViewsMaker.RoIsLink = "initialRoI" # ROI is from L1
-    l2MuViewsMaker.RoITool = ViewCreatorInitialROITool() # ROI is from L1
-    #
-    l2MuViewsMaker.Views = "L2MuFastRecoViews"
-    l2MuViewsMaker.InViewRoIs = "MURoIs"
-    #
-    l2MuViewsMaker.ViewFallThrough = True
+    selAccSA = SelectionCA('L2MuFastSel', isProbe=is_probe_leg)
+    
+    viewName="L2MuFastReco"
+
+    recoSA = InViewRecoCA(name=viewName, isProbe=is_probe_leg)
 
     ### get muFast reco sequence ###   
     #Clone and replace offline flags so we can set muon trigger specific values
     muonflags = flags.cloneAndReplace('Muon', 'Trigger.Offline.SA.Muon')
-    from .MuonRecoSequences import muFastRecoSequence, muonDecodeCfg
-    viewAlgs_MuonPRD = algorithmCAToGlobalWrapper(muonDecodeCfg,muonflags,RoIs=l2MuViewsMaker.InViewRoIs.path())
-    
-    ##### L2 mutli-track mode #####
-    from TrigMuonEF.TrigMuonEFConf import MuonChainFilterAlg
-    from TriggerMenuMT.HLT.Config.ControlFlow.MenuComponentsNaming import CFNaming
-    MultiTrackChainFilter = MuonChainFilterAlg("SAFilterMultiTrackChains")
-    MultiTrackChains = getMultiTrackChainNames()
-    MultiTrackChainFilter.ChainsToFilter = MultiTrackChains
-    MultiTrackChainFilter.InputDecisions = [ CFNaming.inputMakerOutName(l2MuViewsMaker.name()) ]
-    MultiTrackChainFilter.L2MuFastContainer = muNames.L2SAName+"l2mtmode"
-    MultiTrackChainFilter.L2MuCombContainer = muNames.L2CBName+"l2mtmode"
-    MultiTrackChainFilter.WriteMuFast = True
-    MultiTrackChainFilter.NotGate = True
+    from .MuonRecoSequences import muFastRecoSequenceCfg, muonDecodeCfg
+    recoSA.mergeReco(muonDecodeCfg(muonflags,RoIs=viewName+'RoIs'))
 
     extraLoads = []
-
-    for decision in MultiTrackChainFilter.InputDecisions:
+    from TriggerMenuMT.HLT.Config.ControlFlow.MenuComponentsNaming import CFNaming
+    filterInput = [ CFNaming.inputMakerOutName('IM_'+viewName) ]
+    for decision in filterInput:
       extraLoads += [( 'xAOD::TrigCompositeContainer', 'StoreGateSvc+%s' % decision )]
 
     from .MuonRecoSequences  import  isCosmic
-    muFastRecoSeq, sequenceOut = muFastRecoSequence( flags, l2MuViewsMaker.InViewRoIs, doFullScanID= isCosmic(flags), extraLoads=extraLoads )
+    acc = ComponentAccumulator()
+    seql2sa = seqAND("L2MuonSASeq")
+    acc.addSequence(seql2sa)
+    muFastRecoSeq = muFastRecoSequenceCfg( flags, viewName+'RoIs', doFullScanID= isCosmic(flags), extraLoads=extraLoads )
+    sequenceOut = muNames.L2SAName
+    acc.merge(muFastRecoSeq, sequenceName=seql2sa.name)
 
-    muFastl2mtRecoSeq, sequenceOutL2mtSA = muFastRecoSequence( flags, l2MuViewsMaker.InViewRoIs, doFullScanID= isCosmic(flags), l2mtmode=True )
-    muFastl2mtFilterSequence = seqAND("muFastl2mtFilterSequence", [MultiTrackChainFilter, muFastl2mtRecoSeq])
+    ##### L2 mutli-track mode #####
+    seqFilter = seqAND("L2MuonMTSeq")
+    acc.addSequence(seqFilter)
+    from TrigMuonEF.TrigMuonEFConfig import MuonChainFilterAlgCfg
+    MultiTrackChains = getMultiTrackChainNames()
+    MultiTrackChainFilter = MuonChainFilterAlgCfg(flags, "SAFilterMultiTrackChains", ChainsToFilter = MultiTrackChains, 
+                                                  InputDecisions = filterInput,
+                                                  L2MuFastContainer = muNames.L2SAName+"l2mtmode", 
+                                                  L2MuCombContainer = muNames.L2CBName+"l2mtmode",
+                                                  WriteMuFast = True, NotGate = True)
 
-    #muFastSequence = parOR("muFastRecoSequence", [viewAlgs_MuonPRD, muFastRecoSequence])
-    muFastSequence = parOR("muFastRecoSequence", [viewAlgs_MuonPRD, muFastRecoSeq, muFastl2mtFilterSequence])
-    l2MuViewsMaker.ViewNodeName = muFastSequence.name()
+    acc.merge(MultiTrackChainFilter, sequenceName=seqFilter.name)
+    muFastl2mtRecoSeq = muFastRecoSequenceCfg( flags, viewName+'RoIs', doFullScanID= isCosmic(flags), l2mtmode=True )
+    acc.merge(muFastl2mtRecoSeq, sequenceName=seqFilter.name)
+    recoSA.mergeReco(acc)
 
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Muon
-    robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Muon, flags, nameSuffix=l2MuViewsMaker.name())[0]
+    robPrefetch = ROBPrefetchingAlgCfg_Muon(flags, nameSuffix=viewName+'_probe' if is_probe_leg else viewName)
 
-    l2muFastSequence = seqAND("l2muFastSequence", [ l2MuViewsMaker, robPrefetchAlg, muFastSequence ])
-    return (l2muFastSequence, l2MuViewsMaker, sequenceOut)
+    selAccSA.mergeReco(recoSA, robPrefetchCA=robPrefetch)
 
-def muFastCalibAlgSequence(flags):
 
-    ### set the EVCreator ###
-    l2MuViewsMaker = EventViewCreatorAlgorithm("IMl2MuCalib")
-    #
-    l2MuViewsMaker.RoIsLink = "initialRoI" # ROI is from L1
-    l2MuViewsMaker.RoITool = ViewCreatorInitialROITool() # ROI is from L1
-    #
-    l2MuViewsMaker.Views = "MUCalibViewRoIs"
-    l2MuViewsMaker.InViewRoIs = "MURoIs"
-    #
-    l2MuViewsMaker.ViewFallThrough = True
+    return (selAccSA, sequenceOut)
+
+def muFastCalibAlgSequenceCfg(flags, is_probe_leg=False):
+
+    selAccSA = SelectionCA('L2MuFastCalibSel', isProbe=is_probe_leg)
+    
+    viewName="L2MuFastCalibReco"
+
+    recoSA = InViewRecoCA(name=viewName, isProbe=is_probe_leg)
 
     ### get muFast reco sequence ###
     #Clone and replace offline flags so we can set muon trigger specific values
     muonflags = flags.cloneAndReplace('Muon', 'Trigger.Offline.SA.Muon')
-    from .MuonRecoSequences import muFastRecoSequence, muonDecodeCfg
-    viewAlgs_MuonPRD = algorithmCAToGlobalWrapper(muonDecodeCfg,muonflags,RoIs=l2MuViewsMaker.InViewRoIs.path())
+    from .MuonRecoSequences import muFastRecoSequenceCfg, muonDecodeCfg
+    recoSA.mergeReco(muonDecodeCfg(muonflags,RoIs=viewName+'RoIs'))
 
     from .MuonRecoSequences  import  isCosmic
-    muFastRecoSeq, sequenceOut = muFastRecoSequence( flags, l2MuViewsMaker.InViewRoIs, doFullScanID= isCosmic(flags), calib=True )
+    muFastRecoSeq = muFastRecoSequenceCfg( flags, viewName+'RoIs', doFullScanID= isCosmic(flags), calib=True )
+    sequenceOut = muNames.L2SAName+"Calib"
+    recoSA.mergeReco(muFastRecoSeq)
 
-    muFastSequence = parOR("muFastCalibRecoSequence", [viewAlgs_MuonPRD, muFastRecoSeq])
-    l2MuViewsMaker.ViewNodeName = muFastSequence.name()
 
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Muon
-    robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Muon, flags, nameSuffix=l2MuViewsMaker.name())[0]
+    robPrefetchAlg = ROBPrefetchingAlgCfg_Muon(flags, nameSuffix=viewName+'_probe' if is_probe_leg else viewName)
+    selAccSA.mergeReco(recoSA, robPrefetchCA=robPrefetchAlg)
 
-    l2muFastSequence = seqAND("l2muFastCalibSequence", [ l2MuViewsMaker, robPrefetchAlg, muFastSequence ])
-    return (l2muFastSequence, l2MuViewsMaker, sequenceOut)
+    return (selAccSA, sequenceOut)
 
 def muFastSequence(flags, is_probe_leg=False):
 
-    (l2muFastSequence, l2MuViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(muFastAlgSequence, flags)
+    (selAcc, sequenceOut) = muFastAlgSequenceCfg(flags, is_probe_leg)
 
-    ### set up MuFastHypo ###
-    from TrigMuonHypo.TrigMuonHypoConfig import TrigMufastHypoAlg
-    trigMufastHypo = TrigMufastHypoAlg("TrigL2MufastHypoAlg")
-    trigMufastHypo.MuonL2SAInfoFromMuFastAlg = sequenceOut
+    from TrigMuonHypo.TrigMuonHypoConfig import TrigMufastHypoAlgCfg, TrigMufastHypoToolFromDict
+    l2saHypo = TrigMufastHypoAlgCfg( flags,
+                                     name = 'TrigL2MufastHypoAlg',
+                                     MuonL2SAInfoFromMuFastAlg = sequenceOut)
 
-    from TrigMuonHypo.TrigMuonHypoConfig import TrigMufastHypoToolFromDict
+    selAcc.addHypoAlgo(l2saHypo)
+    
+    l2saSequence = MenuSequenceCA(flags, selAcc,
+                                  HypoToolGen = TrigMufastHypoToolFromDict, isProbe=is_probe_leg)
 
-    return MenuSequence( flags,
-                         Sequence    = l2muFastSequence,
-                         Maker       = l2MuViewsMaker,
-                         Hypo        = trigMufastHypo,
-                         HypoToolGen = TrigMufastHypoToolFromDict,
-                         IsProbe     = is_probe_leg)
+
+    return l2saSequence
+
 
 def muFastCalibSequence(flags, is_probe_leg=False):
 
-    (l2muFastSequence, l2MuViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(muFastCalibAlgSequence, flags)
+    (selAcc, sequenceOut) = muFastCalibAlgSequenceCfg(flags, is_probe_leg)
 
-    ### set up MuFastHypo ###
-    from TrigMuonHypo.TrigMuonHypoConfig import TrigMufastHypoAlg
-    trigMufastHypo = TrigMufastHypoAlg("TrigL2MufastCalibHypoAlg")
-    trigMufastHypo.MuonL2SAInfoFromMuFastAlg = sequenceOut
+    from TrigMuonHypo.TrigMuonHypoConfig import TrigMufastHypoAlgCfg, TrigMufastHypoToolFromDict
+    l2saHypo = TrigMufastHypoAlgCfg( flags,
+                                     name = 'TrigL2MufastCalibHypoAlg',
+                                     MuonL2SAInfoFromMuFastAlg = sequenceOut)
 
-    from TrigMuonHypo.TrigMuonHypoConfig import TrigMufastHypoToolFromDict
+    selAcc.addHypoAlgo(l2saHypo)
+    
+    l2saSequence = MenuSequenceCA(flags, selAcc,
+                                  HypoToolGen = TrigMufastHypoToolFromDict, isProbe=is_probe_leg)
 
-    return MenuSequence( flags,
-                         Sequence    = l2muFastSequence,
-                         Maker       = l2MuViewsMaker,
-                         Hypo        = trigMufastHypo,
-                         HypoToolGen = TrigMufastHypoToolFromDict,
-                         IsProbe     = is_probe_leg)
+
+    return l2saSequence
+
 
 
 def mul2mtSAOvlpRmSequence(flags, is_probe_leg=False):
 
-    (l2muFastSequence, l2MuViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(muFastAlgSequence, flags)
+    (selAcc, sequenceOut) = muFastAlgSequenceCfg(flags, is_probe_leg)
 
-    ### set up muCombHypo algorithm ###
-    from TrigMuonHypo.TrigMuonHypoConfig import TrigMufastHypoAlg
-    trigMufastHypo = TrigMufastHypoAlg("TrigL2mtMufastHypoAlg")
-    trigMufastHypo.MuonL2SAInfoFromMuFastAlg = muNames.L2SAName+"l2mtmode"
+    from TrigMuonHypo.TrigMuonHypoConfig import TrigMufastHypoAlgCfg, TrigMufastHypoToolFromDict
+    l2saHypo = TrigMufastHypoAlgCfg( flags,
+                                     name = 'TrigL2mtMufastHypoAlg',
+                                     MuonL2SAInfoFromMuFastAlg = muNames.L2SAName+"l2mtmode")
 
-    from TrigMuonHypo.TrigMuonHypoConfig import TrigMufastHypoToolFromDict
+    selAcc.addHypoAlgo(l2saHypo)
+    
+    l2saSequence = MenuSequenceCA(flags, selAcc,
+                                  HypoToolGen = TrigMufastHypoToolFromDict, isProbe=is_probe_leg)
 
-    return MenuSequence( flags,
-                         Sequence    = l2muFastSequence,
-                         Maker       = l2MuViewsMaker,
-                         Hypo        = trigMufastHypo,
-                         HypoToolGen = TrigMufastHypoToolFromDict,
-                         IsProbe     = is_probe_leg )
+
+    return l2saSequence
+
 
 
 #-----------------------------------------------------#
@@ -171,7 +168,7 @@ def muCombAlgSequence(flags):
     newRoITool.InViewRoIs = muNames.L2forIDName #input RoIs from L2 SA views
 
     ### get ID tracking and muComb reco sequences ###
-    from .MuonRecoSequences  import muFastRecoSequence, muCombRecoSequence, muonIDFastTrackingSequence, muonIDCosmicTrackingSequence, isCosmic
+    from .MuonRecoSequences  import muFastRecoSequenceCfg, muCombRecoSequence, muonIDFastTrackingSequence, muonIDCosmicTrackingSequence, isCosmic
     #
     l2muCombViewsMaker.RoIsLink = "initialRoI" # ROI for merging is still from L1, we get exactly one L2 SA muon per L1 ROI
     l2muCombViewsMaker.RoITool = newRoITool # Create a new ROI centred on the L2 SA muon from Step 1
@@ -228,7 +225,8 @@ def muCombAlgSequence(flags):
 
     # for Inside-out L2SA
     from .MuonRecoSequences  import isCosmic
-    muFastIORecoSequence, sequenceOutL2SAIO = muFastRecoSequence( flags, l2muCombViewsMaker.InViewRoIs, doFullScanID= isCosmic(flags) , InsideOutMode=True )
+    muFastIORecoSequence = algorithmCAToGlobalWrapper(muFastRecoSequenceCfg,flags, l2muCombViewsMaker.InViewRoIs, doFullScanID=isCosmic(flags) , InsideOutMode=True)
+    sequenceOutL2SAIO = muNames.L2SAName+"IOmode"
     insideoutMuonChainFilter = MuonChainFilterAlg("FilterInsideOutMuonChains")
     insideoutMuonChains = getInsideOutMuonChainNames()
     insideoutMuonChainFilter.ChainsToFilter = insideoutMuonChains
@@ -412,9 +410,7 @@ def muEFSAAlgSequenceCfg(flags, is_probe_leg=False):
     viewName="EFMuMSReco_RoI"
     ViewCreatorFetchFromViewROITool=CompFactory.ViewCreatorFetchFromViewROITool
     #temporarily using different view names until L2 SA sequence is migrated to CA
-    from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import isCAMenu 
-    viewname = "L2MuFastRecoNewJOViews" if isCAMenu() else "L2MuFastRecoViews"
-    roiTool         = ViewCreatorFetchFromViewROITool(RoisWriteHandleKey="HLT_Roi_L2SAMuonForEF", InViewRoIs = "forMS", ViewToFetchFrom = viewname)
+    roiTool         = ViewCreatorFetchFromViewROITool(RoisWriteHandleKey="HLT_Roi_L2SAMuonForEF", InViewRoIs = "forMS", ViewToFetchFrom = "L2MuFastRecoViews")
     requireParentView = True
 
     recoMS = InViewRecoCA(name=viewName, RoITool = roiTool, RequireParentView = requireParentView, isProbe=is_probe_leg)
@@ -755,8 +751,8 @@ def efLateMuRoIAlgSequenceCfg(flags):
     selAcc = SelectionCA('EFLateMuSel')
     
     viewName="EFLateMuRoIReco"
-    ViewCreatorInitialROITool=CompFactory.ViewCreatorInitialROITool
-    roiTool         = ViewCreatorInitialROITool()
+    viewcreator         = CompFactory.ViewCreatorInitialROITool
+    roiTool = viewcreator()
     requireParentView = True
                                                          
     recoLateMu = InViewRecoCA(name=viewName, RoITool = roiTool, RequireParentView = requireParentView)
@@ -941,8 +937,8 @@ def muRoiClusterSequence(flags):
     selAcc = SelectionCA('muRoIClusterSel')
     
     viewName="MuRoIClusReco"
-    ViewCreatorInitialROITool=CompFactory.ViewCreatorInitialROITool
-    roiTool         = ViewCreatorInitialROITool()
+    viewcreator         = CompFactory.ViewCreatorInitialROITool
+    roiTool = viewcreator()
                                                          
     recoRoICluster = InEventRecoCA(name=viewName, RoITool = roiTool, mergeUsingFeature = False, RoIs = 'HLT_muVtxCluster_RoIs')
     recoRoICluster.mergeReco(MuonClusterConfig(flags, 'muvtxMuonCluster'))
@@ -960,13 +956,6 @@ def muRoiClusterSequence(flags):
     return muRoIClusterSequence
 
 
-######################
-### TrkMaterialProvider ###
-######################
-def TMEF_TrkMaterialProviderTool(name='TMEF_TrkMaterialProviderTool',**kwargs):
-    from TrkMaterialProvider.TrkMaterialProviderConf import Trk__TrkMaterialProviderTool
-    kwargs.setdefault("UseCaloEnergyMeasurement", False)
-    return Trk__TrkMaterialProviderTool(name,**kwargs)
 
 ##############################
 ### Get Bphysics triggers to #

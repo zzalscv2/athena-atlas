@@ -7,6 +7,7 @@ atlas_subdir( TrkEventUtils )
 atlas_add_library( TrkEventUtils
                    src/*.cxx
                    PUBLIC_HEADERS TrkEventUtils
-                   LINK_LIBRARIES AthenaKernel GeoPrimitives EventPrimitives Identifier TrkSurfaces TrkEventPrimitives TrkMeasurementBase TrkParameters TrkPrepRawData TrkRIO_OnTrack TrkTrack
+                   LINK_LIBRARIES AthenaKernel GeoPrimitives EventPrimitives Identifier TrkSurfaces TrkEventPrimitives 
+                   TrkMeasurementBase TrkParameters TrkPrepRawData TrkRIO_OnTrack TrkTrack AthAllocators
                    PRIVATE_LINK_LIBRARIES AtlasDetDescr TrkCompetingRIOsOnTrack TrkPseudoMeasurementOnTrack TrkSegment TrkSpacePoint TrkVertexOnTrack )
 

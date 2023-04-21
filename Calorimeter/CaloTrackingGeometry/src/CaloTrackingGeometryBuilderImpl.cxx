@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Calo
@@ -141,11 +141,6 @@ StatusCode Calo::CaloTrackingGeometryBuilderImpl::initialize() {
   return StatusCode::SUCCESS;
 }
 
-// finalize
-StatusCode Calo::CaloTrackingGeometryBuilderImpl::finalize() {
-  ATH_MSG_INFO("finalize() successful");
-  return StatusCode::SUCCESS;
-}
 std::unique_ptr<Trk::TrackingGeometry>
 Calo::CaloTrackingGeometryBuilderImpl::createTrackingGeometry(
     Trk::TrackingVolume* innerVol, const CaloDetDescrManager* caloDDM) const {

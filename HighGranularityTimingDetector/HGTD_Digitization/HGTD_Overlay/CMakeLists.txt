@@ -4,7 +4,6 @@
 atlas_subdir( HGTD_Overlay )
 
 # External dependencies:
-find_package( CLHEP )
 find_package( GTest )
 find_package( GMock )
 
@@ -19,8 +18,8 @@ atlas_add_test( HGTD_Overlay_test
 atlas_add_component( HGTD_Overlay
                      src/*.cxx
                      src/components/*.cxx
-                     INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${CLHEP_LIBRARIES} AthenaBaseComps AthenaKernel AtlasHepMCLib GaudiKernel IDC_OverlayBase HGTD_RawData )
+                     INCLUDE_DIRS 
+                     LINK_LIBRARIES  AthenaBaseComps AthenaKernel AtlasHepMCLib GaudiKernel IDC_OverlayBase HGTD_RawData )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

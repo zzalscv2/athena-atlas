@@ -120,8 +120,9 @@ DetFlags.Print()
 
 # muon ID
 from AtlasGeoModel.MuonGMJobProperties import MuonGeometryFlags
-from MuonIdHelpers.MuonIdHelpersConf import Muon__MuonIdHelperSvc
-ServiceMgr += Muon__MuonIdHelperSvc("MuonIdHelperSvc", HasCSC=MuonGeometryFlags.hasCSC(), HasSTgc=MuonGeometryFlags.hasSTGC(), HasMM=MuonGeometryFlags.hasMM())
+if not hasattr(ServiceMgr, "MuonIdHelperSvc"):
+    from AthenaCommon.CfgGetter import getService
+    ServiceMgr += getService("MuonIdHelperSvc")
 
 # PixelLorentzAngleSvc and SCTLorentzAngleSvc
 from InDetRecExample.InDetJobProperties import InDetFlags

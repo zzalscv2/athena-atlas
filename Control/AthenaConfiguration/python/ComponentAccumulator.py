@@ -1,5 +1,5 @@
 
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import GaudiConfig2
 import GaudiKernel.GaudiHandles as GaudiHandles
@@ -8,12 +8,13 @@ import AthenaPython.Configurables
 from AthenaCommon.Logging import logging
 from AthenaCommon.Debugging import DbgStage
 from AthenaCommon.CFElements import (isSequence, findSubSequence, findAlgorithm, flatSequencers,
-                                     checkSequenceConsistency, findAllAlgorithmsByName)
+                                     checkSequenceConsistency, findAllAlgorithmsByName, compName)
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Deduplication import deduplicate, deduplicateOne, DeduplicationFailed
 from AthenaConfiguration.DebuggingContext import (Context, raiseWithCurrentContext, shortCallStack,
                                                   createContextForDeduplication)
+
 from collections import OrderedDict
 from collections.abc import Sequence
 import sys
@@ -125,7 +126,7 @@ class ComponentAccumulator:
         self._isMergable = False
 
     def _inspect(self): #Create a string some basic info about this CA, useful for debugging
-        summary = "This CA contains {0} service, {1} conditions algorithms, {2} event algorithms and {3} public tools\n"\
+        summary = "This CA contains {0} service(s), {1} conditions algorithm(s), {2} event algorithm(s) and {3} public tool(s)\n"\
             .format(len(self._services),len(self._conditionsAlgs),len(self._algorithms),len(self._publicTools))
 
         if self._privateTools:
@@ -135,15 +136,15 @@ class ComponentAccumulator:
                 summary += "  Private AlgTool: " + self._privateTools.getFullJobOptName() + "\n"
 
         if self._primaryComp:
-            summary += "  Primary Component: " + self._primaryComp.getFullJobOptName() + "\n"
+            summary += "  Primary Component: " + self._primaryComp.getFullJobOptName() + "\n"      
 
-        summary += "  Sequence(s): " + ", ".join([s.name+(" (main)" if s == self._sequence else "") for s in self._allSequences]) + "\n"
+        summary += "  Sequence(s): " + ", ".join([compName(s)+(" (main)" if s == self._sequence else "") for s in self._allSequences]) + "\n"
         summary += "  Last component added: " + self._lastAddedComponent+"\n"
         summary += "  Created by: " + self._creationCallStack
         return summary
 
     def _cleanup(self): 
-        #Delete internal data structures, to be called after all properties are tranferred to the C++ application
+        #Delete internal data structures, to be called after all properties are transferred to the C++ application
         #Purpose: Free memory
         del self._sequence
         del self._algorithms
@@ -159,11 +160,12 @@ class ComponentAccumulator:
                 len(self._publicTools)+len(self._theAppProps) == 0)
 
     def __del__(self):
-         if not getattr(self,'_wasMerged',True) and not self.empty() and not sys.exc_info():
-             #can't raise an exception in __del__ method (Python rules) so this is a warning
+         if not getattr(self,'_wasMerged',True) and not self.empty() and sys.exc_info()[0] is None:
              log = logging.getLogger("ComponentAccumulator")
              log.error("This ComponentAccumulator was never merged!")
-             log.error(self._inspect())
+             if "trackCA" not in ComponentAccumulator.debugMode:
+                 log.error("Setting ComponentAccumulator.debugMode = 'trackCA' may help finding place of creation")
+             log.error(self._inspect().replace("\n", " "))
              import traceback
              traceback.print_stack()
          if getattr(self,'_privateTools',None) is not None:
@@ -674,6 +676,21 @@ class ComponentAccumulator:
             except KeyError:
                 self._msg.warning("Algorithm %s not found in self._sequence ???",name)
         return
+
+    def popEventAlgo(self,name,sequence="AthAlgSeq"):
+        s=self.getSequence(sequence)
+        lenBefore=len(s.Members)
+        s.Members = [a for a in s.Members if not a.getName()==name]
+        lenAfter=len(s.Members)
+        if lenAfter == lenBefore:
+            self._msg.warning("Algorithm %s not found in sequence %s",name,sequence)
+        else:
+            self._msg.info("Removed algorithm %s from sequence %s",name,sequence)
+            try:
+                return self._algorithms.pop(name)
+            except KeyError:
+                self._msg.warning("Algorithm %s not found in self._sequence ??? Returning 'None'",name)
+        return None
 
     def dropCondAlgo(self,name):
         lenBefore=len(self._conditionsAlgs)

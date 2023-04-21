@@ -124,12 +124,14 @@ def PhysCommonThinningCfg(ConfigFlags, StreamName = "StreamDAOD_PHYS", **kwargs)
     # GSF tracks associated to photons
     if "PhotonGSFTPThinningToolName" in kwargs:
         PhotonGSFTPThinningTool = CompFactory.DerivationFramework.EgammaTrackParticleThinning(
-            name                   = kwargs['PhotonGSFTPThinningToolName'],
-            StreamName             = StreamName,
-            SGKey                  = "AnalysisPhotons",
-            GSFTrackParticlesKey   = "GSFTrackParticles",
-            InDetTrackParticlesKey = "",
-            BestMatchOnly          = True)
+            name                     = kwargs['PhotonGSFTPThinningToolName'],
+            StreamName               = StreamName,
+            SGKey                    = "AnalysisPhotons",
+            GSFTrackParticlesKey     = "GSFTrackParticles",
+            GSFConversionVerticesKey = "GSFConversionVertices",
+            InDetTrackParticlesKey   = "",
+            BestMatchOnly            = True,
+            BestVtxMatchOnly         = True)
         acc.addPublicTool(PhotonGSFTPThinningTool)
 
     return acc

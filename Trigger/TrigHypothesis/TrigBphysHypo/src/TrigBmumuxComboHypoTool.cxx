@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigBmumuxComboHypoTool.h"
@@ -69,13 +69,28 @@ StatusCode TrigBmumuxComboHypoTool::decideOnSingleObject(Decision* decision, con
   ATH_CHECK( trigBphysEL.isValid() );
 
   const std::vector<HLT::Identifier>& legDecisionIDs = legDecisionIds();
-  if (legDecisionIDs.size() == 1) {  // bBmumux chain with symmetric legs or bBmux chain with single leg
+  if (m_isBmux) {  // bBmux chain: only one previousDecision is available, in case of assymmetric chain it should match to one arbitrary leg
+    ATH_CHECK( previousDecisionIDs.size() == 1 );
+    bool passed = false;
+    for (size_t i = 0; i < legDecisionIDs.size(); ++i) {
+      const DecisionID id = legDecisionIDs[i].numeric();
+      if (TrigCompositeUtils::passed(id, *previousDecisionIDs[0])) {
+        passed = true;
+        break;
+      }
+    }
+    if (!passed) {
+      ATH_MSG_DEBUG( "bBmux chain did not match to the previous decisions" );
+      return StatusCode::SUCCESS;
+    }
+  }
+  else if (legDecisionIDs.size() == 1) {  // bBmumux chain with symmetric legs
     auto n = static_cast<size_t>(legMultiplicity().at(0));
     ATH_CHECK( previousDecisionIDs.size() == n );
     const DecisionID id = legDecisionIDs[0].numeric();
     for (size_t i = 0; i < n; ++i) {
       if (!TrigCompositeUtils::passed(id, *previousDecisionIDs[i])) {
-        ATH_MSG_DEBUG( "Trigger with symmetric legs did not match to the previous decisions" );
+        ATH_MSG_DEBUG( "bBmumux chain with symmetric legs did not match to the previous decisions" );
         return StatusCode::SUCCESS;
       }
     }
@@ -89,7 +104,7 @@ StatusCode TrigBmumuxComboHypoTool::decideOnSingleObject(Decision* decision, con
       if (inverse && !TrigCompositeUtils::passed(legDecisionIDs.at(i).numeric(), *previousDecisionIDs.at(1-i))) inverse = false;
     }
     if (!direct && !inverse) {
-      ATH_MSG_DEBUG( "Trigger with asymmetric legs matched to the previous decisions neither direct nor inverse way" );
+      ATH_MSG_DEBUG( "bBmumux chain with asymmetric legs matched to the previous decisions neither direct nor inverse way" );
       return StatusCode::SUCCESS;
     }
   }

@@ -16,7 +16,7 @@ atlas_add_component( ActsTrkFindingTool
                      ActsTrkEvent
                      ActsTrkToolInterfacesLib
                      ActsInteropLib
-                     CxxUtils
+                     
                      InDetRecToolInterfaces
                      SiSpacePoint
                      xAODInDetMeasurement

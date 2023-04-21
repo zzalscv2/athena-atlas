@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // AthAnalysisHelper.h 
@@ -265,7 +265,7 @@ public:
   }
 
 
-   ///retrieve metadata from the input metadata storegate. Use checkMetaSG.py to see the 'folder' and 'key' values available
+   ///retrieve metadata from the input metadata storegate. Use 'meta-reader' to see the 'folder' and 'key' values available
    ///always takes the first CondAttrListCollection (aka IOV) and the first channel number present in that IOV
    template<typename T> static StatusCode retrieveMetadata(const std::string& folder, const std::string& key, T& out) {
       ServiceHandle<StoreGateSvc> inputMetaStore("StoreGateSvc/InputMetaDataStore", "AthAnalysisHelper");

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIG_TrigBmumuxComboHypoTool_H
@@ -22,7 +22,7 @@
 
 /**
  * @class TrigBmumuxComboHypoTool
- * @brief ComboHypoTool for B -> mu+, mu- X decays
+ * @brief ComboHypoTool for B -> mu+ mu- X (bBmumux) and B+ -> mu+ nu_mu X (bBmux) decays
  */
 class TrigBmumuxComboHypoTool: public ComboHypoToolBase {
  public:
@@ -35,6 +35,7 @@ class TrigBmumuxComboHypoTool: public ComboHypoToolBase {
   virtual bool executeAlg(const std::vector<Combo::LegDecision>&) const override;
 
   Gaudi::Property<int> m_decay {this, "Decay", 9999, "decay as enumerated in xAOD::TrigBphys::pType"};
+  Gaudi::Property<bool> m_isBmux {this, "isBmux", false, "B+ -> mu+ nu_mu X decay (bBmux)"};
 
   ToolHandle<GenericMonitoringTool> m_monTool {this, "MonTool", "", "Monitoring tool"};
 };

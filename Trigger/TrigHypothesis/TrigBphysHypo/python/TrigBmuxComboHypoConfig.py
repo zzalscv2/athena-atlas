@@ -29,6 +29,8 @@ def BmuxComboHypoInternalCfg(flags):
         CascadeChi2 = 50.,
         DeltaR = 0.01,
         TrkZ0 = 10.,
+        RoiEtaWidth = 0.75,
+        RoiPhiWidth = 0.75,
         FitAttemptsWarningThreshold = 200,
         FitAttemptsBreakThreshold = 1000,
         # B+ -> mu+ nu_mu anti-D0(-> K+ pi-) and B0 -> mu+ nu_mu D*-(-> anti-D0(-> K+ pi-) pi-)

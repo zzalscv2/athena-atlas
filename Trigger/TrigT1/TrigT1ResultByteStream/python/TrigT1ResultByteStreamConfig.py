@@ -131,7 +131,6 @@ def doRoIBResult(flags):
   return False
 
 def L1TriggerByteStreamDecoderCfg(flags, returnEDM=False):
-
   acc = ComponentAccumulator()
   decoderTools = []
   maybeMissingRobs = []
@@ -503,6 +502,17 @@ if __name__ == '__main__':
     roibResultTool = acc.popToolsAndMerge(RoIBResultByteStreamToolCfg(
       flags, name="RoIBResultBSDecoderTool", writeBS=False))
     decoderTools += [roibResultTool]
+
+    # Always treat L1Topo as "maybe missing" as it was under commissioning in Run 2 and had readout issues in Run 3
+    for module_id in roibResultTool.L1TopoModuleIds:
+      maybeMissingRobs.append(int(SourceIdentifier(SubDetector.TDAQ_CALO_TOPO_PROC, module_id)))
+    if flags.Trigger.EDMVersion == 2 and not flags.Trigger.doHLT:
+      # L1Calo occasional readout errors weren't caught by HLT in 2015 - ignore these in offline reco, see ATR-24493
+      for module_id in roibResultTool.JetModuleIds:
+        maybeMissingRobs.append(int(SourceIdentifier(SubDetector.TDAQ_CALO_JET_PROC_ROI, module_id)))
+      for module_id in roibResultTool.EMModuleIds:
+        maybeMissingRobs.append(int(SourceIdentifier(SubDetector.TDAQ_CALO_CLUSTER_PROC_ROI, module_id)))
+
 
     outputEDM += addEDM('xAOD::JetEtRoI'         , 'LVL1JetEtRoI')
     outputEDM += addEDM('xAOD::JetRoIContainer'  , 'LVL1JetRoIs')

@@ -41,25 +41,21 @@ def MuonInertMaterialBuilderCfg(flags, name='MuonInertMaterialBuilder',
 def MuonTrackingGeometryBuilderCfg(flags, name='MuonTrackingGeometryBuilder',
                                    useCond = True,
                                    **kwargs):
+    from SubDetectorEnvelopes.SubDetectorEnvelopesConfig import EnvelopeDefSvcCfg
     result = ComponentAccumulator()
 
-    if "EnvelopeDefinitionSvc" not in kwargs:
-        from SubDetectorEnvelopes.SubDetectorEnvelopesConfig import (
-            EnvelopeDefSvcCfg)
-        kwargs.setdefault("EnvelopeDefinitionSvc", result.getPrimaryAndMerge(
-            EnvelopeDefSvcCfg(flags)))
+    kwargs.setdefault("EnvelopeDefinitionSvc", result.getPrimaryAndMerge(
+        EnvelopeDefSvcCfg(flags)))
 
-    if "MuonStationBuilder" not in kwargs:
-        kwargs.setdefault("MuonStationBuilder", result.popToolsAndMerge(
-            MuonStationBuilderCfg(flags,
-                                  name = 'MuonStationBuilder',
-                                  useCond = useCond)))
+    kwargs.setdefault("MuonStationBuilder", result.popToolsAndMerge(
+        MuonStationBuilderCfg(flags,
+                              name = 'MuonStationBuilder',
+                              useCond = useCond)))
 
-    if "InertMaterialBuilder" not in kwargs:
-        kwargs.setdefault("InertMaterialBuilder", result.popToolsAndMerge(
-            MuonInertMaterialBuilderCfg(flags,
-                                        name = 'MuonInertMaterialBuilder',
-                                        useCond = useCond)))
+    kwargs.setdefault("InertMaterialBuilder", result.popToolsAndMerge(
+        MuonInertMaterialBuilderCfg(flags,
+                                    name = 'MuonInertMaterialBuilder',
+                                    useCond = useCond)))
 
     kwargs.setdefault("EntryVolumeName", 'MuonSpectrometerEntrance')
     kwargs.setdefault("ExitVolumeName", 'Muon::Containers::MuonSystem')

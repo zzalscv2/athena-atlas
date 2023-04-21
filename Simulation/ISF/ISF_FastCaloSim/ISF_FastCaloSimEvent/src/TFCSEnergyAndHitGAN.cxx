@@ -480,10 +480,10 @@ bool TFCSEnergyAndHitGAN::fillEnergy(TFCSSimulationState &simulstate,
               // -delta_eta
               if (center_eta < 0.)
                 delta_eta_mm = -delta_eta_mm;
-              // Particle with negative charge are expected to have the same
-              // shape as positively charged particles after transformation:
-              // delta_phi --> -delta_phi
-              if (charge < 0.)
+              // We derive the shower shapes for electrons and positively charged hadrons.
+              // Particle with the opposite charge are expected to have the same shower shape
+              // after the transformation: delta_phi --> -delta_phi
+              if ((charge < 0. && pdgId!=11) || pdgId==-11)
                 delta_phi_mm = -delta_phi_mm;
 
               const float delta_eta = delta_eta_mm / eta_jakobi / dist000;
@@ -498,10 +498,10 @@ bool TFCSEnergyAndHitGAN::fillEnergy(TFCSSimulationState &simulstate,
               const float hit_r = r * cos(alpha) + center_r;
               float delta_phi = r * sin(alpha) / center_r;
 
-              // Particle with negative charge are expected to have the same
-              // shape as positively charged particles after transformation:
-              // delta_phi --> -delta_phi
-              if (charge < 0.)
+              // We derive the shower shapes for electrons and positively charged hadrons.
+              // Particle with the opposite charge are expected to have the same shower shape
+              // after the transformation: delta_phi --> -delta_phi
+              if ((charge < 0. && pdgId!=11) || pdgId==-11)
                 delta_phi = -delta_phi;
               const float hit_phi = delta_phi + center_phi;
               hit.x() = hit_r * cos(hit_phi);

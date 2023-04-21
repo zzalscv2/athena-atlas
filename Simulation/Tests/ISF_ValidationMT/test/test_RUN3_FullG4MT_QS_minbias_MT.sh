@@ -2,9 +2,7 @@
 #
 # art-description: MC23-style RUN3 simulation using FullG4MT_QS in AthenaMT
 # art-include: 23.0/Athena
-# art-include: 23.0/AthSimulation
 # art-include: master/Athena
-# art-include: master/AthSimulation
 # art-type: grid
 # art-athena-mt: 8
 # art-architecture:  '#x86_64-intel'

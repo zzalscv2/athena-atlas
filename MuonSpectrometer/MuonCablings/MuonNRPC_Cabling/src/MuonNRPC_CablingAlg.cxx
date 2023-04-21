@@ -20,8 +20,9 @@
 #include "SGTools/TransientAddress.h"
 #include "nlohmann/json.hpp"
 
-
-MuonNRPC_CablingAlg::MuonNRPC_CablingAlg(const std::string& name, ISvcLocator* pSvcLocator) : AthAlgorithm(name, pSvcLocator) {}
+MuonNRPC_CablingAlg::MuonNRPC_CablingAlg(const std::string& name,
+                                         ISvcLocator* pSvcLocator)
+    : AthAlgorithm(name, pSvcLocator) {}
 
 StatusCode MuonNRPC_CablingAlg::initialize() {
     ATH_MSG_DEBUG("initialize " << name());
@@ -31,7 +32,7 @@ StatusCode MuonNRPC_CablingAlg::initialize() {
     /// Only load the readout geometry if an external JSON file is defined
     ATH_CHECK(m_muonManagerKey.initialize(ext_json));
     ATH_CHECK(m_readKeyMap.initialize(!ext_json));
-   
+
     return StatusCode::SUCCESS;
 }
 
@@ -39,60 +40,73 @@ StatusCode MuonNRPC_CablingAlg::execute() {
     ATH_MSG_VERBOSE("MuonNRPC_CablingAlg::execute()");
     const EventContext& ctx = Gaudi::Hive::currentContext();
 
-
     // Write Cond Handle
-    SG::WriteCondHandle<MuonNRPC_CablingMap> writeCablingHandle{m_writeKey, ctx};
- 
+    SG::WriteCondHandle<MuonNRPC_CablingMap> writeCablingHandle{m_writeKey,
+                                                                ctx};
+
     if (writeCablingHandle.isValid()) {
-        ATH_MSG_DEBUG("CondHandle " << writeCablingHandle.fullKey() << " is already valid."
-                                    << ". In theory this should not be called, but may happen"
-                                    << " if multiple concurrent events are being processed out of order.");
+        ATH_MSG_DEBUG("CondHandle "
+                      << writeCablingHandle.fullKey() << " is already valid."
+                      << ". In theory this should not be called, but may happen"
+                      << " if multiple concurrent events are being processed "
+                         "out of order.");
         return StatusCode::SUCCESS;
     }
-    
+
     ATH_MSG_INFO("Load the Nrpc cabling");
-    std::unique_ptr<MuonNRPC_CablingMap> writeCdo{std::make_unique<MuonNRPC_CablingMap>()};
+    std::unique_ptr<MuonNRPC_CablingMap> writeCdo{
+        std::make_unique<MuonNRPC_CablingMap>()};
 
     /// If the JSON file is defined use the readout geometry as IOV definition
     if (!m_extJSONFile.value().empty()) {
-        SG::ReadCondHandle<MuonGM::MuonDetectorManager> muonDependency{m_muonManagerKey, ctx};
+        SG::ReadCondHandle<MuonGM::MuonDetectorManager> muonDependency{
+            m_muonManagerKey, ctx};
         if (!muonDependency.isValid()) {
-            ATH_MSG_FATAL("Failed to retrieve the detector manager "<<m_muonManagerKey.fullKey());
+            ATH_MSG_FATAL("Failed to retrieve the detector manager "
+                          << m_muonManagerKey.fullKey());
             return StatusCode::FAILURE;
         }
         writeCablingHandle.addDependency(muonDependency);
         std::ifstream in_json{m_extJSONFile};
         if (!in_json.good()) {
-            ATH_MSG_FATAL("Failed to open external JSON file "<<m_extJSONFile);
+            ATH_MSG_FATAL("Failed to open external JSON file "
+                          << m_extJSONFile);
             return StatusCode::FAILURE;
         }
         std::string json_content{};
-        while(std::getline(in_json, json_content)){
-            ATH_CHECK(payLoadJSON(*writeCdo, json_content));  
+        while (std::getline(in_json, json_content)) {
+            ATH_CHECK(payLoadJSON(*writeCdo, json_content));
         }
     } else {
-        SG::ReadCondHandle<CondAttrListCollection> coolHandle{m_readKeyMap, ctx}; 
+        SG::ReadCondHandle<CondAttrListCollection> coolHandle{m_readKeyMap,
+                                                              ctx};
         if (!coolHandle.isValid()) {
-            ATH_MSG_FATAL("Failed to load cabling map from COOL "<<m_readKeyMap.fullKey());
+            ATH_MSG_FATAL("Failed to load cabling map from COOL "
+                          << m_readKeyMap.fullKey());
             return StatusCode::FAILURE;
         }
         writeCablingHandle.addDependency(coolHandle);
         for (const auto& itr : **coolHandle) {
-            const coral::AttributeList &atr = itr.second;
-            ATH_CHECK(payLoadJSON(*writeCdo, *(static_cast<const std::string *>((atr["data"]).addressOfData()))));
+            const coral::AttributeList& atr = itr.second;
+            ATH_CHECK(
+                payLoadJSON(*writeCdo, *(static_cast<const std::string*>(
+                                           (atr["data"]).addressOfData()))));
         }
-    }    
-    if(!writeCdo->finalize(msgStream())) return StatusCode::FAILURE;
-    
+    }
+    if (!writeCdo->finalize(msgStream()))
+        return StatusCode::FAILURE;
+
     ATH_CHECK(writeCablingHandle.record(std::move(writeCdo)));
 
     return StatusCode::SUCCESS;
 }
-StatusCode MuonNRPC_CablingAlg::payLoadJSON(MuonNRPC_CablingMap& cabling_map, const std::string& theJSON) const {
-    if (theJSON.empty()) return StatusCode::SUCCESS;
+StatusCode MuonNRPC_CablingAlg::payLoadJSON(MuonNRPC_CablingMap& cabling_map,
+                                            const std::string& theJSON) const {
+    if (theJSON.empty())
+        return StatusCode::SUCCESS;
     nlohmann::json payload = nlohmann::json::parse(theJSON);
 
-    for (const auto &cabl_chan : payload.items()) {
+    for (const auto& cabl_chan : payload.items()) {
         nlohmann::json cabl_payload = cabl_chan.value();
         CablingData cabl_data{};
         cabl_data.stationIndex = cabl_payload["station"];
@@ -109,7 +123,7 @@ StatusCode MuonNRPC_CablingAlg::payLoadJSON(MuonNRPC_CablingMap& cabling_map, co
         cabl_data.tdc = cabl_payload["tdc"];
         cabl_data.firstStrip = cabl_payload["firstStrip"];
         cabl_data.lastStrip = cabl_payload["lastStrip"];
-        if (!cabling_map.insertChannels(cabl_data,msgStream())) {
+        if (!cabling_map.insertChannels(cabl_data, msgStream())) {
             return StatusCode::FAILURE;
         }
     }

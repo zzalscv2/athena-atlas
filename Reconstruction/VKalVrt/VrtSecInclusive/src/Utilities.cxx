@@ -1132,14 +1132,14 @@ namespace VKalVrtAthena {
         if( m_atlasId->is_pixel(id) ) {
           
           auto idHash = m_pixelId->wafer_hash( id );
-          good = m_pixelCondSummaryTool->isGood( idHash );
+          good = m_pixelCondSummaryTool->isGood( idHash, ctx );
           
           pattern->emplace_back( std::make_tuple( position, Pixel, m_pixelId->barrel_ec(id), m_pixelId->layer_disk(id), good ) );
           
         } else if( m_atlasId->is_sct(id) ) {
           
           auto idHash = m_sctId->wafer_hash( id );
-          good = m_sctCondSummaryTool->isGood( idHash );
+          good = m_sctCondSummaryTool->isGood( idHash, ctx );
           
           pattern->emplace_back( std::make_tuple( position, SCT, m_sctId->barrel_ec(id), m_sctId->layer_disk(id), good ) );
           

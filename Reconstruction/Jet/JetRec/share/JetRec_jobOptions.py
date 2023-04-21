@@ -34,7 +34,9 @@ evtDensities = []
 
 for jd in jetdefs:
     algs, jetdef_i = getJetAlgs(ConfigFlags, jd, True)
-    algs = reOrderAlgs( [a for a in algs if a is not None])
+    algs, ca = reOrderAlgs( [a for a in algs if a is not None])
+    # ignore dangling CA instance in legacy config
+    ca.wasMerged()
     for a in algs:
         topSequence += conf2toConfigurable(a)
         if "EventDensityAthAlg" in a.getType():

@@ -1,6 +1,6 @@
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -85,7 +85,7 @@ namespace monAlg {
     struct TubeTraversedBySegment_cmp {
         bool operator()(const TubeTraversedBySegment& A, const TubeTraversedBySegment& B) const {
             if (A.idHash != B.idHash) return A.idHash < B.idHash;
-            
+
             if (A.tubeBin != B.tubeBin) return A.tubeBin < B.tubeBin;
             return A.isHit < B.isHit;
         }
@@ -124,15 +124,15 @@ private:
     virtual StatusCode fillMDTSegmentHistograms(const MDTSegmentHistogramStruct (&vects)[4][4][16]) const;
 
     // MDTRawDataUtils_cxx
-    static bool AinB(int A, std::vector<int>& B) ;
+    static bool AinB(int A, std::vector<int>& B);
     virtual StatusCode binMdtGlobal(TH2*, char ecap);
     virtual StatusCode binMdtRegional(TH2*, std::string_view xAxis);
     virtual StatusCode binMdtGlobal_byLayer(TH2*, TH2*, TH2*);
     virtual StatusCode binMdtOccVsLB(TH2*& h, int region, int layer);
     virtual StatusCode binMdtOccVsLB_Crate(TH2*& h, int region, int crate);
-    static void ChamberTubeNumberCorrection(int& tubeNum, std::string_view hardware_name, int tubePos, int numLayers) ;
-    static void CorrectTubeMax(const std::string& hardware_name, int& numTubes) ;
-    static void CorrectLayerMax(const std::string& hardware_name, int& numLayers) ;
+    static void ChamberTubeNumberCorrection(int& tubeNum, std::string_view hardware_name, int tubePos, int numLayers);
+    static void CorrectTubeMax(const std::string& hardware_name, int& numTubes);
+    static void CorrectLayerMax(const std::string& hardware_name, int& numLayers);
     virtual StatusCode fillMDTMaskedTubes(IdentifierHash, const std::string&, TH1F_LW*& h);  // DEV not used at moment, should be revised
     int get_bin_for_LB_hist(int region, int layer, int phi, int eta, bool isBIM) const;
     int get_bin_for_LB_crate_hist(int region, int layer, int phi, int eta, std::string_view chamber) const;
@@ -145,7 +145,8 @@ private:
     StatusCode GetTimingInfo();  // here
     void initDeadChannels(const MuonGM::MdtReadoutElement* mydetEl);
 
-    SG::ReadHandleKeyArray<Trk::SegmentCollection> m_segm_type{this, "SegmentKey", {"TrkMuonSegments", "UnAssocMuonTrkSegments"}, "muon segments"};
+    SG::ReadHandleKeyArray<Trk::SegmentCollection> m_segm_type{
+        this, "SegmentKey", {"TrkMuonSegments", "UnAssocMuonTrkSegments"}, "muon segments"};
     SG::ReadHandleKey<xAOD::TrackParticleContainer> m_muon_type{this, "Muon_type", "ExtrapolatedMuonTrackParticles", "extrapolated muons"};
 
     std::vector<Identifier> m_chambersId;
@@ -160,7 +161,7 @@ private:
     SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo{this, "EventInfo", "EventInfo", "event info"};
 
     // Chamber by Chamber Plots
-    std::array<std::unique_ptr<MDTChamber>, 1200> m_hist_hash_list{};
+    std::vector<std::unique_ptr<MDTChamber>> m_hist_hash_list{};
 
     std::string getChamberName(const Muon::MdtPrepData*) const;
     std::string getChamberName(const Identifier&) const;

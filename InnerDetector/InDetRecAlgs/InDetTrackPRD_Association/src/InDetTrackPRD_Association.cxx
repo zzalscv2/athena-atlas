@@ -39,11 +39,12 @@ StatusCode InDet::InDetTrackPRD_Association::execute(const EventContext& ctx) co
     unsigned tracksPRDn=0;
 
     for  (const Trk::Track* t : *tracks) {
-      if((m_assoTool->addPRDs(*prd_to_track_map,*t)).isFailure())
+      if((m_assoTool->addPRDs(*prd_to_track_map,*t)).isFailure()){
         ++tracksPRDn;
-      else
+      }
+      else{
         ++tracksPRD;
-
+      }
     }
     ATH_MSG_DEBUG("Collection " << collKey.key() << ": tracks with PRD "<< tracksPRD
                   << ",  without PRD " << tracksPRDn);

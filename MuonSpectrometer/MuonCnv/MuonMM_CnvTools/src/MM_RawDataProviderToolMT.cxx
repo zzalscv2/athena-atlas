@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -93,7 +93,7 @@ StatusCode Muon::MM_RawDataProviderToolMT::convert(const std::vector<uint32_t>& 
 
   // pass empty list of ID hashes, every ROB ID in list will be decoded
   const std::vector<IdentifierHash> hashIDList;
-  return convertIntoContainer(vecRobf, hashIDList, *rdoContainer);
+  return convertIntoContainer(ctx, vecRobf, hashIDList, *rdoContainer);
 }
 
 //==============================================================================
@@ -110,7 +110,7 @@ StatusCode Muon::MM_RawDataProviderToolMT::convert(const std::vector<IdentifierH
   std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> vecRobf;
   m_robDataProvider->getROBData(m_allRobIds, vecRobf);
 
-  return convertIntoContainer(vecRobf, rdoIdhVect, *rdoContainer);
+  return convertIntoContainer(ctx, vecRobf, rdoIdhVect, *rdoContainer);
 }
 
 
@@ -129,7 +129,7 @@ StatusCode Muon::MM_RawDataProviderToolMT::convert(const EventContext& ctx) cons
   // dummy hashID vector for the decoder (empty = unseeded mode)
   const std::vector<IdentifierHash> rdoIdhVect;
 
-  return convertIntoContainer(vecRobf, rdoIdhVect, *rdoContainer);
+  return convertIntoContainer(ctx, vecRobf, rdoIdhVect, *rdoContainer);
 }
 
 

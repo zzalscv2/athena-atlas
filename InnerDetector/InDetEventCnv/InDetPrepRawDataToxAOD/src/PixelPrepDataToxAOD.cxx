@@ -310,7 +310,7 @@ StatusCode PixelPrepDataToxAOD::execute()
       // Add information for each contributing hit
       if(m_writeRDOinformation) {
         IdentifierHash moduleHash = clusterCollection->identifyHash();
-        AUXDATA(xprd,int,hasBSError) = (int)m_pixelSummary->hasBSError(moduleHash);
+        AUXDATA(xprd,int,hasBSError) = (int)m_pixelSummary->hasBSError(moduleHash, ctx);
         AUXDATA(xprd,int,DCSState) = dcsState->getModuleStatus(moduleHash);
 
         float deplVoltage = 0.0;

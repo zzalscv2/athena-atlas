@@ -484,12 +484,14 @@ public:
    * @brief Remove unused entries from the front of the list.
    * @param keys List of keys that may still be in use.
    *             (Must be sorted.)
+   * @param trimall If true, then allow removing all elements in the container.
+   *                Otherwise, stop when there's one left.
    *
    * We examine the objects in the container, starting with the earliest one.
    * If none of the keys in @c keys match the range for this object, then
    * it is removed from the container.  We stop when we either find
-   * an object with a range matching a key in @c keys or when there
-   * is only one object left.
+   * an object with a range matching a key in @c keys or (if trimall is false)
+   * when there is only one object left.
    *
    * The list @c keys MUST be sorted.
    *
@@ -498,6 +500,8 @@ public:
    *
    * Returns the number of objects that were removed.
    */
+  size_t trim (const std::vector<key_query_type>& keys, bool trimall);
+  // temporary --- remove this
   size_t trim (const std::vector<key_query_type>& keys);
 
 

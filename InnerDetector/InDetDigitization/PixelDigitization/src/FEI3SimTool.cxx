@@ -5,6 +5,19 @@
 #include "FEI3SimTool.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 
+namespace{
+  template <size_t n>
+  double 
+  getProbability(const std::array<double,n> &bounds, const std::array<double,n> &probs, const double &val, const double defval=0.){
+    auto pCategory = std::upper_bound(bounds.begin(), bounds.end(),val);
+    if (pCategory == bounds.end()) return defval;
+    auto idx = std::distance(bounds.begin(), pCategory);
+    return probs[idx];
+  }
+
+
+}
+
 FEI3SimTool::FEI3SimTool(const std::string& type, const std::string& name, const IInterface* parent) :
   FrontEndSimTool(type, name, parent) {
 }
@@ -39,7 +52,7 @@ void FEI3SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
   int layerIndex = pixelId->layer_disk(chargedDiodes.element()->identify());
   int moduleIndex = pixelId->eta_module(chargedDiodes.element()->identify());
 
-  if (abs(barrel_ec) != m_BarrelEC) {
+  if (std::abs(barrel_ec) != m_BarrelEC) {
     return;
   }
 
@@ -175,7 +188,7 @@ void FEI3SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
       continue;
     }
 
-    if (!m_pixelConditionsTool->isActive(moduleHash, diodeID)) {
+    if (!m_pixelConditionsTool->isActive(moduleHash, diodeID, ctx)) {
       SiHelper::disabled(diode, true, true);
       continue;
     }
@@ -264,332 +277,166 @@ int FEI3SimTool::relativeBunch2015(const SiTotalCharge& totalCharge, int barrel_
    *
    * 60% working point tune-2
    */
+   
+  static constexpr std::array<double, 6> totCharges = {
+    4100., 4150., 4600., 
+    5250., 5850.,6500.
+  };
+  
 
   double prob = 0.0;
   if (barrel_ec == 0 && layer_disk == 1) {
-    if (abs(moduleID) == 0) {
-      if (totalCharge.charge() < 4100.0) {
-        prob = 0.9349;
-      }   // corresponds to ToT=4
-      else if (totalCharge.charge() < 4150.0) {
-        prob = 0.2520;
-      }   //                ToT=5
-      else if (totalCharge.charge() < 4600.0) {
-        prob = 0.0308;
-      }   //                ToT=6
-      else if (totalCharge.charge() < 5250.0) {
-        prob = 0.0160;
-      }   //                ToT=7
-      else if (totalCharge.charge() < 5850.0) {
-        prob = 0.0104;
-      }   //                ToT=8
-      else if (totalCharge.charge() < 6500.0) {
-        prob = 0.0127;
-      }   //                ToT=9
+    if (std::abs(moduleID) == 0) {
+      static constexpr std::array<double, 6> prob0 = {
+        0.9349, 0.2520, 0.0308, 
+        0.0160, 0.0104, 0.0127
+      };
+      prob = getProbability(totCharges, prob0, totalCharge.charge() );
     }
-    if (abs(moduleID) == 1) {
-      if (totalCharge.charge() < 4100.0) {
-        prob = 0.9087;
-      } else if (totalCharge.charge() < 4150.0) {
-        prob = 0.2845;
-      } else if (totalCharge.charge() < 4600.0) {
-        prob = 0.0504;
-      } else if (totalCharge.charge() < 5250.0) {
-        prob = 0.0198;
-      } else if (totalCharge.charge() < 5850.0) {
-        prob = 0.0141;
-      } else if (totalCharge.charge() < 6500.0) {
-        prob = 0.0122;
-      }
+    if (std::abs(moduleID) == 1) {
+      static constexpr std::array<double, 6> prob1 = {
+        0.9087, 0.2845, 0.0504, 
+        0.0198, 0.0141, 0.0122
+      };
+      prob = getProbability(totCharges, prob1, totalCharge.charge() );
     }
     if (abs(moduleID) == 2) {
-      if (totalCharge.charge() < 4100.0) {
-        prob = 0.9060;
-      } else if (totalCharge.charge() < 4150.0) {
-        prob = 0.2885;
-      } else if (totalCharge.charge() < 4600.0) {
-        prob = 0.0387;
-      } else if (totalCharge.charge() < 5250.0) {
-        prob = 0.0126;
-      } else if (totalCharge.charge() < 5850.0) {
-        prob = 0.0116;
-      } else if (totalCharge.charge() < 6500.0) {
-        prob = 0.0052;
-      }
+      static constexpr std::array<double, 6> prob2 = {
+        0.9060, 0.2885, 0.0387, 
+        0.0126, 0.0116, 0.0052
+      };
+      prob = getProbability(totCharges, prob2, totalCharge.charge() );
     }
     if (abs(moduleID) == 3) {
-      if (totalCharge.charge() < 4100.0) {
-        prob = 0.8774;
-      } else if (totalCharge.charge() < 4150.0) {
-        prob = 0.3066;
-      } else if (totalCharge.charge() < 4600.0) {
-        prob = 0.0449;
-      } else if (totalCharge.charge() < 5250.0) {
-        prob = 0.0188;
-      } else if (totalCharge.charge() < 5850.0) {
-        prob = 0.0169;
-      } else if (totalCharge.charge() < 6500.0) {
-        prob = 0.0096;
-      }
+     static constexpr std::array<double, 6> prob3 = {
+       0.8774, 0.3066, 0.0449, 
+       0.0188, 0.0169, 0.0096
+     };
+     prob = getProbability(totCharges, prob3, totalCharge.charge() );
     }
     if (abs(moduleID) == 4) {
-      if (totalCharge.charge() < 4100.0) {
-        prob = 0.8725;
-      } else if (totalCharge.charge() < 4150.0) {
-        prob = 0.2962;
-      } else if (totalCharge.charge() < 4600.0) {
-        prob = 0.0472;
-      } else if (totalCharge.charge() < 5250.0) {
-        prob = 0.0188;
-      } else if (totalCharge.charge() < 5850.0) {
-        prob = 0.0141;
-      } else if (totalCharge.charge() < 6500.0) {
-        prob = 0.0130;
-      }
+      static constexpr std::array<double, 6> prob4 = {
+        0.8725, 0.2962, 0.0472, 
+        0.0188, 0.0141, 0.0130
+      };
+      prob = getProbability(totCharges, prob4, totalCharge.charge() );
     }
     if (abs(moduleID) == 5) {
-      if (totalCharge.charge() < 4100.0) {
-        prob = 0.8731;
-      } else if (totalCharge.charge() < 4150.0) {
-        prob = 0.3443;
-      } else if (totalCharge.charge() < 4600.0) {
-        prob = 0.0686;
-      } else if (totalCharge.charge() < 5250.0) {
-        prob = 0.0243;
-      } else if (totalCharge.charge() < 5850.0) {
-        prob = 0.0139;
-      } else if (totalCharge.charge() < 6500.0) {
-        prob = 0.0089;
-      }
+      static constexpr std::array<double, 6> prob5 = {
+        0.8731, 0.3443, 0.0686, 
+        0.0243, 0.0139, 0.0089
+      };
+      prob = getProbability(totCharges, prob5, totalCharge.charge() );
     }
     if (abs(moduleID) == 6) {
-      if (totalCharge.charge() < 4100.0) {
-        prob = 0.8545;
-      } else if (totalCharge.charge() < 4150.0) {
-        prob = 0.2946;
-      } else if (totalCharge.charge() < 4600.0) {
-        prob = 0.0524;
-      } else if (totalCharge.charge() < 5250.0) {
-        prob = 0.0218;
-      } else if (totalCharge.charge() < 5850.0) {
-        prob = 0.0218;
-      } else if (totalCharge.charge() < 6500.0) {
-        prob = 0.0191;
-      }
+      static constexpr std::array<double, 6> prob6 = {
+        0.8545, 0.2946, 0.0524, 
+        0.0218, 0.0218, 0.0191
+      };
+      prob = getProbability(totCharges, prob6, totalCharge.charge() );
     }
   }
+  
   if (barrel_ec == 0 && layer_disk == 2) {
     if (abs(moduleID) == 0) {
-      if (totalCharge.charge() < 4100.0) {
-        prob = 0.9479;
-      } else if (totalCharge.charge() < 4150.0) {
-        prob = 0.6051;
-      } else if (totalCharge.charge() < 4600.0) {
-        prob = 0.2031;
-      } else if (totalCharge.charge() < 5250.0) {
-        prob = 0.0735;
-      } else if (totalCharge.charge() < 5850.0) {
-        prob = 0.0462;
-      } else if (totalCharge.charge() < 6500.0) {
-        prob = 0.0272;
-      }
+      static constexpr std::array<double, 6> prob0{
+        0.9479, 0.6051, 0.2031,
+        0.0735, 0.0462, 0.0272
+      };
+      prob = getProbability(totCharges, prob0, totalCharge.charge() );
     }
     if (abs(moduleID) == 1) {
-      if (totalCharge.charge() < 4100.0) {
-        prob = 0.9736;
-      } else if (totalCharge.charge() < 4150.0) {
-        prob = 0.6344;
-      } else if (totalCharge.charge() < 4600.0) {
-        prob = 0.2439;
-      } else if (totalCharge.charge() < 5250.0) {
-        prob = 0.1000;
-      } else if (totalCharge.charge() < 5850.0) {
-        prob = 0.0435;
-      } else if (totalCharge.charge() < 6500.0) {
-        prob = 0.0335;
-      }
+      static constexpr std::array<double, 6> prob1{
+        0.9736, 0.6344, 0.2439,
+        0.1000, 0.0435, 0.0335
+      };
+      prob = getProbability(totCharges, prob1, totalCharge.charge() );
     }
     if (abs(moduleID) == 2) {
-      if (totalCharge.charge() < 4100.0) {
-        prob = 0.9461;
-      } else if (totalCharge.charge() < 4150.0) {
-        prob = 0.6180;
-      } else if (totalCharge.charge() < 4600.0) {
-        prob = 0.1755;
-      } else if (totalCharge.charge() < 5250.0) {
-        prob = 0.0647;
-      } else if (totalCharge.charge() < 5850.0) {
-        prob = 0.0476;
-      } else if (totalCharge.charge() < 6500.0) {
-        prob = 0.0470;
-      }
+      static constexpr std::array<double, 6> prob2{
+        0.9461, 0.6180, 0.1755, 
+        0.0647, 0.0476, 0.0470
+      };
+      prob = getProbability(totCharges, prob2, totalCharge.charge() );
     }
     if (abs(moduleID) == 3) {
-      if (totalCharge.charge() < 4100.0) {
-        prob = 0.9542;
-      } else if (totalCharge.charge() < 4150.0) {
-        prob = 0.5839;
-      } else if (totalCharge.charge() < 4600.0) {
-        prob = 0.1899;
-      } else if (totalCharge.charge() < 5250.0) {
-        prob = 0.0604;
-      } else if (totalCharge.charge() < 5850.0) {
-        prob = 0.0576;
-      } else if (totalCharge.charge() < 6500.0) {
-        prob = 0.0285;
-      }
+      static constexpr std::array<double, 6> prob3{
+        0.9542, 0.5839, 0.1899,
+        0.0604, 0.0576, 0.0285
+      };
+      prob = getProbability(totCharges, prob3, totalCharge.charge() );
     }
     if (abs(moduleID) == 4) {
-      if (totalCharge.charge() < 4100.0) {
-        prob = 0.9233;
-      } else if (totalCharge.charge() < 4150.0) {
-        prob = 0.5712;
-      } else if (totalCharge.charge() < 4600.0) {
-        prob = 0.1633;
-      } else if (totalCharge.charge() < 5250.0) {
-        prob = 0.0796;
-      } else if (totalCharge.charge() < 5850.0) {
-        prob = 0.0612;
-      } else if (totalCharge.charge() < 6500.0) {
-        prob = 0.0384;
-      }
+       static constexpr std::array<double, 6> prob4{
+         0.9233, 0.5712, 0.1633,
+         0.0796, 0.0612, 0.0384
+      };
+      prob = getProbability(totCharges, prob4, totalCharge.charge() );
     }
     if (abs(moduleID) == 5) {
-      if (totalCharge.charge() < 4100.0) {
-        prob = 0.8994;
-      } else if (totalCharge.charge() < 4150.0) {
-        prob = 0.5176;
-      } else if (totalCharge.charge() < 4600.0) {
-        prob = 0.1626;
-      } else if (totalCharge.charge() < 5250.0) {
-        prob = 0.0698;
-      } else if (totalCharge.charge() < 5850.0) {
-        prob = 0.0416;
-      } else if (totalCharge.charge() < 6500.0) {
-        prob = 0.0382;
-      }
+      static constexpr std::array<double, 6> prob5{
+        0.8994, 0.5176, 0.1626,
+        0.0698, 0.0416, 0.0382
+      };
+      prob = getProbability(totCharges, prob5, totalCharge.charge() );
     }
     if (abs(moduleID) == 6) {
-      if (totalCharge.charge() < 4100.0) {
-        prob = 0.8919;
-      } else if (totalCharge.charge() < 4150.0) {
-        prob = 0.5313;
-      } else if (totalCharge.charge() < 4600.0) {
-        prob = 0.1585;
-      } else if (totalCharge.charge() < 5250.0) {
-        prob = 0.0520;
-      } else if (totalCharge.charge() < 5850.0) {
-        prob = 0.0318;
-      } else if (totalCharge.charge() < 6500.0) {
-        prob = 0.0254;
-      }
+      static constexpr std::array<double, 6> prob6{
+        0.8919, 0.5313, 0.1585,
+        0.0520, 0.0318, 0.0254
+      };
+      prob = getProbability(totCharges, prob6, totalCharge.charge() );
     }
   }
   if (barrel_ec == 0 && layer_disk == 3) {
     if (abs(moduleID) == 0) {
-      if (totalCharge.charge() < 4100.0) {
-        prob = 0.9182;
-      } else if (totalCharge.charge() < 4150.0) {
-        prob = 0.6744;
-      } else if (totalCharge.charge() < 4600.0) {
-        prob = 0.3174;
-      } else if (totalCharge.charge() < 5250.0) {
-        prob = 0.1460;
-      } else if (totalCharge.charge() < 5850.0) {
-        prob = 0.1001;
-      } else if (totalCharge.charge() < 6500.0) {
-        prob = 0.0587;
-      }
+      static constexpr std::array<double, 6> prob0{
+        0.9182, 0.6744, 0.3174,
+        0.1460, 0.1001, 0.0587
+      };
+      prob = getProbability(totCharges, prob0, totalCharge.charge() );
     }
     if (abs(moduleID) == 1) {
-      if (totalCharge.charge() < 4100.0) {
-        prob = 0.9255;
-      } else if (totalCharge.charge() < 4150.0) {
-        prob = 0.6995;
-      } else if (totalCharge.charge() < 4600.0) {
-        prob = 0.3046;
-      } else if (totalCharge.charge() < 5250.0) {
-        prob = 0.1449;
-      } else if (totalCharge.charge() < 5850.0) {
-        prob = 0.0954;
-      } else if (totalCharge.charge() < 6500.0) {
-        prob = 0.0608;
-      }
+      static constexpr std::array<double, 6> prob1{
+        0.9255, 0.6995, 0.3046,
+        0.1449, 0.0954, 0.0608
+      };
+      prob = getProbability(totCharges, prob1, totalCharge.charge() );
     }
     if (abs(moduleID) == 2) {
-      if (totalCharge.charge() < 4100.0) {
-        prob = 0.9419;
-      } else if (totalCharge.charge() < 4150.0) {
-        prob = 0.7380;
-      } else if (totalCharge.charge() < 4600.0) {
-        prob = 0.3346;
-      } else if (totalCharge.charge() < 5250.0) {
-        prob = 0.1615;
-      } else if (totalCharge.charge() < 5850.0) {
-        prob = 0.0726;
-      } else if (totalCharge.charge() < 6500.0) {
-        prob = 0.0564;
-      }
+      static constexpr std::array<double, 6> prob2{
+        0.9419, 0.7380, 0.3346,
+        0.1615, 0.0726, 0.0564
+      };
+      prob = getProbability(totCharges, prob2, totalCharge.charge() );
     }
     if (abs(moduleID) == 3) {
-      if (totalCharge.charge() < 4100.0) {
-        prob = 0.9319;
-      } else if (totalCharge.charge() < 4150.0) {
-        prob = 0.6747;
-      } else if (totalCharge.charge() < 4600.0) {
-        prob = 0.2640;
-      } else if (totalCharge.charge() < 5250.0) {
-        prob = 0.1018;
-      } else if (totalCharge.charge() < 5850.0) {
-        prob = 0.0588;
-      } else if (totalCharge.charge() < 6500.0) {
-        prob = 0.0502;
-      }
+      static constexpr std::array<double, 6> prob3{
+        0.9319, 0.6747, 0.2640,
+        0.1018, 0.0588, 0.0502
+      };
+      prob = getProbability(totCharges, prob3, totalCharge.charge() );
     }
     if (abs(moduleID) == 4) {
-      if (totalCharge.charge() < 4100.0) {
-        prob = 0.9276;
-      } else if (totalCharge.charge() < 4150.0) {
-        prob = 0.6959;
-      } else if (totalCharge.charge() < 4600.0) {
-        prob = 0.2859;
-      } else if (totalCharge.charge() < 5250.0) {
-        prob = 0.1214;
-      } else if (totalCharge.charge() < 5850.0) {
-        prob = 0.0776;
-      } else if (totalCharge.charge() < 6500.0) {
-        prob = 0.0387;
-      }
+      static constexpr std::array<double, 6> prob4{
+        0.9276, 0.6959, 0.2859,
+        0.1214, 0.0776, 0.0387
+      };
+      prob = getProbability(totCharges, prob4, totalCharge.charge() );
     }
     if (abs(moduleID) == 5) {
-      if (totalCharge.charge() < 4100.0) {
-        prob = 0.8845;
-      } else if (totalCharge.charge() < 4150.0) {
-        prob = 0.6270;
-      } else if (totalCharge.charge() < 4600.0) {
-        prob = 0.2798;
-      } else if (totalCharge.charge() < 5250.0) {
-        prob = 0.1209;
-      } else if (totalCharge.charge() < 5850.0) {
-        prob = 0.0706;
-      } else if (totalCharge.charge() < 6500.0) {
-        prob = 0.0703;
-      }
+      static constexpr std::array<double, 6> prob5{
+        0.8845, 0.6270, 0.2798,
+        0.1209, 0.0706, 0.0703
+      };
+      prob = getProbability(totCharges, prob5, totalCharge.charge() );
     }
     if (abs(moduleID) == 6) {
-      if (totalCharge.charge() < 4100.0) {
-        prob = 0.8726;
-      } else if (totalCharge.charge() < 4150.0) {
-        prob = 0.6358;
-      } else if (totalCharge.charge() < 4600.0) {
-        prob = 0.2907;
-      } else if (totalCharge.charge() < 5250.0) {
-        prob = 0.1051;
-      } else if (totalCharge.charge() < 5850.0) {
-        prob = 0.0646;
-      } else if (totalCharge.charge() < 6500.0) {
-        prob = 0.0685;
-      }
+      static constexpr std::array<double, 6> prob6{
+        0.8726, 0.6358, 0.2907,
+        0.1051, 0.0646, 0.0685
+      };
+      prob = getProbability(totCharges, prob6, totalCharge.charge() );
     }
   }
 
@@ -618,656 +465,236 @@ int FEI3SimTool::relativeBunch2018(const SiTotalCharge& totalCharge, int barrel_
    * The time walk effect is directly tuned with timing scan data (collision) in 2017/18.
    * https://indico.cern.ch/event/880804/
    */
+   
+  static constexpr std::array<double, 9> totCharges{
+    6480., 6800., 7000., 
+    9000., 10000., 11000., 
+    12000., 13000., 14000.
+  };
 
   double prob = 0.0;
   if (barrel_ec == 0 && layer_disk == 1) {
     if (abs(moduleID) == 0) {
-      if (totalCharge.charge() < 6480.0) {
-        prob = 0.035;
-      } //ToT=4
-      else if (totalCharge.charge() < 6800.0) {
-        prob = 0.010;
-      } //ToT=5
-      else if (totalCharge.charge() < 7000.0) {
-        prob = 0.010;
-      } //ToT=6
-      else if (totalCharge.charge() < 9000.0) {
-        prob = 0.005;
-      } //ToT=7
-      else if (totalCharge.charge() < 10000.0) {
-        prob = 0.001;
-      } //ToT=8
-      else if (totalCharge.charge() < 11000.0) {
-        prob = 0.001;
-      } //ToT=9
-      else if (totalCharge.charge() < 12000.0) {
-        prob = 0.001;
-      } //ToT=10
-      else if (totalCharge.charge() < 13000.0) {
-        prob = 0.001;
-      } //ToT=11
-      else if (totalCharge.charge() < 14000.0) {
-        prob = 0.001;
-      } //ToT=12
+      static constexpr std::array<double, 9> prob0{
+        0.035, 0.010, 0.010,  
+        0.005, 0.001, 0.001, 
+        0.001, 0.001, 0.001
+      };
+      prob = getProbability(totCharges, prob0, totalCharge.charge());
     }
     if (abs(moduleID) == 1) {
-      if (totalCharge.charge() < 6480.0) {
-        prob = 0.035;
-      } //ToT=4
-      else if (totalCharge.charge() < 6800.0) {
-        prob = 0.010;
-      } //ToT=5
-      else if (totalCharge.charge() < 7000.0) {
-        prob = 0.010;
-      } //ToT=6
-      else if (totalCharge.charge() < 9000.0) {
-        prob = 0.005;
-      } //ToT=7
-      else if (totalCharge.charge() < 10000.0) {
-        prob = 0.001;
-      } //ToT=8
-      else if (totalCharge.charge() < 11000.0) {
-        prob = 0.001;
-      } //ToT=9
-      else if (totalCharge.charge() < 12000.0) {
-        prob = 0.001;
-      } //ToT=10
-      else if (totalCharge.charge() < 13000.0) {
-        prob = 0.001;
-      } //ToT=11
-      else if (totalCharge.charge() < 14000.0) {
-        prob = 0.001;
-      } //ToT=12
+      static constexpr std::array<double, 9> prob1{
+        0.035, 0.010, 0.010,
+        0.005, 0.001, 0.001,
+        0.001, 0.001, 0.001
+      };
+      prob = getProbability(totCharges, prob1, totalCharge.charge());
     }
     if (abs(moduleID) == 2) {
-      if (totalCharge.charge() < 6480.0) {
-        prob = 0.075;
-      } //ToT=4
-      else if (totalCharge.charge() < 6800.0) {
-        prob = 0.010;
-      } //ToT=5
-      else if (totalCharge.charge() < 7000.0) {
-        prob = 0.010;
-      } //ToT=6
-      else if (totalCharge.charge() < 9000.0) {
-        prob = 0.005;
-      } //ToT=7
-      else if (totalCharge.charge() < 10000.0) {
-        prob = 0.001;
-      } //ToT=8
-      else if (totalCharge.charge() < 11000.0) {
-        prob = 0.001;
-      } //ToT=9
-      else if (totalCharge.charge() < 12000.0) {
-        prob = 0.001;
-      } //ToT=10
-      else if (totalCharge.charge() < 13000.0) {
-        prob = 0.001;
-      } //ToT=11
-      else if (totalCharge.charge() < 14000.0) {
-        prob = 0.001;
-      } //ToT=12
+      static constexpr std::array<double, 9> prob2{
+        0.075, 0.010, 0.010,
+        0.005, 0.001, 0.001,
+        0.001, 0.001, 0.001
+      };
+      prob = getProbability(totCharges, prob2, totalCharge.charge());
     }
     if (abs(moduleID) == 3) {
-      if (totalCharge.charge() < 6480.0) {
-        prob = 0.075;
-      } //ToT=4
-      else if (totalCharge.charge() < 6800.0) {
-        prob = 0.010;
-      } //ToT=5
-      else if (totalCharge.charge() < 7000.0) {
-        prob = 0.010;
-      } //ToT=6
-      else if (totalCharge.charge() < 9000.0) {
-        prob = 0.005;
-      } //ToT=7
-      else if (totalCharge.charge() < 10000.0) {
-        prob = 0.001;
-      } //ToT=8
-      else if (totalCharge.charge() < 11000.0) {
-        prob = 0.001;
-      } //ToT=9
-      else if (totalCharge.charge() < 12000.0) {
-        prob = 0.001;
-      } //ToT=10
-      else if (totalCharge.charge() < 13000.0) {
-        prob = 0.001;
-      } //ToT=11
-      else if (totalCharge.charge() < 14000.0) {
-        prob = 0.001;
-      } //ToT=12
+      static constexpr std::array<double, 9> prob3{
+        0.075, 0.010, 0.010,
+        0.005, 0.001, 0.001,
+        0.001, 0.001, 0.001
+      };
+      prob = getProbability(totCharges, prob3, totalCharge.charge());
     }
     if (abs(moduleID) == 4) {
-      if (totalCharge.charge() < 6480.0) {
-        prob = 0.060;
-      } //ToT=4
-      else if (totalCharge.charge() < 6800.0) {
-        prob = 0.010;
-      } //ToT=5
-      else if (totalCharge.charge() < 7000.0) {
-        prob = 0.010;
-      } //ToT=6
-      else if (totalCharge.charge() < 9000.0) {
-        prob = 0.005;
-      } //ToT=7
-      else if (totalCharge.charge() < 10000.0) {
-        prob = 0.001;
-      } //ToT=8
-      else if (totalCharge.charge() < 11000.0) {
-        prob = 0.001;
-      } //ToT=9
-      else if (totalCharge.charge() < 12000.0) {
-        prob = 0.001;
-      } //ToT=10
-      else if (totalCharge.charge() < 13000.0) {
-        prob = 0.001;
-      } //ToT=11
-      else if (totalCharge.charge() < 14000.0) {
-        prob = 0.001;
-      } //ToT=12
+      static constexpr std::array<double, 9> prob4{
+        0.060, 0.010, 0.010,
+        0.005, 0.001, 0.001,
+        0.001, 0.001, 0.001
+      };
+      prob = getProbability(totCharges, prob4, totalCharge.charge());
     }
     if (abs(moduleID) == 5) {
-      if (totalCharge.charge() < 6480.0) {
-        prob = 0.060;
-      } //ToT=4
-      else if (totalCharge.charge() < 6800.0) {
-        prob = 0.010;
-      } //ToT=5
-      else if (totalCharge.charge() < 7000.0) {
-        prob = 0.010;
-      } //ToT=6
-      else if (totalCharge.charge() < 9000.0) {
-        prob = 0.005;
-      } //ToT=7
-      else if (totalCharge.charge() < 10000.0) {
-        prob = 0.001;
-      } //ToT=8
-      else if (totalCharge.charge() < 11000.0) {
-        prob = 0.001;
-      } //ToT=9
-      else if (totalCharge.charge() < 12000.0) {
-        prob = 0.001;
-      } //ToT=10
-      else if (totalCharge.charge() < 13000.0) {
-        prob = 0.001;
-      } //ToT=11
-      else if (totalCharge.charge() < 14000.0) {
-        prob = 0.001;
-      } //ToT=12
+      static constexpr std::array<double, 9> prob5{
+        0.060, 0.010, 0.010,
+        0.005, 0.001, 0.001,
+        0.001, 0.001, 0.001
+      };
+      prob = getProbability(totCharges, prob5, totalCharge.charge());
     }
     if (abs(moduleID) == 6) {
-      if (totalCharge.charge() < 6480.0) {
-        prob = 0.050;
-      } //ToT=4
-      else if (totalCharge.charge() < 6800.0) {
-        prob = 0.008;
-      } //ToT=5
-      else if (totalCharge.charge() < 7000.0) {
-        prob = 0.010;
-      } //ToT=6
-      else if (totalCharge.charge() < 9000.0) {
-        prob = 0.005;
-      } //ToT=7
-      else if (totalCharge.charge() < 10000.0) {
-        prob = 0.001;
-      } //ToT=8
-      else if (totalCharge.charge() < 11000.0) {
-        prob = 0.001;
-      } //ToT=9
-      else if (totalCharge.charge() < 12000.0) {
-        prob = 0.001;
-      } //ToT=10
-      else if (totalCharge.charge() < 13000.0) {
-        prob = 0.001;
-      } //ToT=11
-      else if (totalCharge.charge() < 14000.0) {
-        prob = 0.001;
-      } //ToT=12
+      static constexpr std::array<double, 9> prob6{
+        0.050, 0.008, 0.010,
+        0.005, 0.001, 0.001,
+        0.001, 0.001, 0.001
+      };
+      prob = getProbability(totCharges, prob6, totalCharge.charge());
     }
   }
   if (barrel_ec == 0 && layer_disk == 2) {
+    static constexpr std::array<double, 8> totChargeLayer2{
+      5094.9, 5100.0, 5800.0,
+      6500.0, 7000.0, 7500.0,
+      8200.0, 9500.0
+    };
     if (abs(moduleID) == 0) {
-      if (totalCharge.charge() < 5094.9) {
-        prob = 0.1012;
-      } //ToT = 6
-      else if (totalCharge.charge() < 5100.0) {
-        prob = 0.0500;
-      } //ToT = 7
-      else if (totalCharge.charge() < 5800.0) {
-        prob = 0.0350;
-      } //ToT = 8
-      else if (totalCharge.charge() < 6500.0) {
-        prob = 0.0250;
-      } //ToT = 9
-      else if (totalCharge.charge() < 7000.0) {
-        prob = 0.0200;
-      } //ToT = 10
-      else if (totalCharge.charge() < 7500.0) {
-        prob = 0.0150;
-      } //ToT = 11
-      else if (totalCharge.charge() < 8200.0) {
-        prob = 0.0100;
-      } //ToT = 12
-      else if (totalCharge.charge() < 9500.0) {
-        prob = 0.0100;
-      } //ToT = 13
+      static constexpr std::array<double, 8> prob0{
+        0.1012, 0.0500, 0.0350,
+        0.0250, 0.0200, 0.0150,
+        0.0100, 0.0100
+      };
+      prob = getProbability(totChargeLayer2, prob0, totalCharge.charge());
     }
     if (abs(moduleID) == 1) {
-      if (totalCharge.charge() < 5094.9) {
-        prob = 0.0978;
-      } //ToT = 6
-      else if (totalCharge.charge() < 5100.0) {
-        prob = 0.0500;
-      } //ToT = 7
-      else if (totalCharge.charge() < 5800.0) {
-        prob = 0.0405;
-      } //ToT = 8
-      else if (totalCharge.charge() < 6500.0) {
-        prob = 0.0250;
-      } //ToT = 9
-      else if (totalCharge.charge() < 7000.0) {
-        prob = 0.0200;
-      } //ToT = 10
-      else if (totalCharge.charge() < 7500.0) {
-        prob = 0.0150;
-      } //ToT = 11
-      else if (totalCharge.charge() < 8200.0) {
-        prob = 0.0100;
-      } //ToT = 12
-      else if (totalCharge.charge() < 9500.0) {
-        prob = 0.0100;
-      } //ToT = 13
+      static constexpr std::array<double, 8> prob1{
+        0.0978, 0.0500, 0.0405,
+        0.0250, 0.0200, 0.0150,
+        0.0100, 0.0100
+      };
+      prob = getProbability(totChargeLayer2, prob1, totalCharge.charge());
     }
     if (abs(moduleID) == 2) {
-      if (totalCharge.charge() < 5094.9) {
-        prob = 0.1012;
-      } //ToT = 6
-      else if (totalCharge.charge() < 5100.0) {
-        prob = 0.0500;
-      } //ToT = 7
-      else if (totalCharge.charge() < 5800.0) {
-        prob = 0.0392;
-      } //ToT = 8
-      else if (totalCharge.charge() < 6500.0) {
-        prob = 0.0250;
-      } //ToT = 9
-      else if (totalCharge.charge() < 7000.0) {
-        prob = 0.0200;
-      } //ToT = 10
-      else if (totalCharge.charge() < 7500.0) {
-        prob = 0.0150;
-      } //ToT = 11
-      else if (totalCharge.charge() < 8200.0) {
-        prob = 0.0100;
-      } //ToT = 12
-      else if (totalCharge.charge() < 9500.0) {
-        prob = 0.0100;
-      } //ToT = 13
+      static constexpr std::array<double, 8> prob2{
+        0.1012, 0.0500, 0.0392,
+        0.0250, 0.0200, 0.0150,
+        0.0100, 0.0100
+      };
+      prob = getProbability(totChargeLayer2, prob2, totalCharge.charge());
     }
     if (abs(moduleID) == 3) {
-      if (totalCharge.charge() < 5094.9) {
-        prob = 0.1015;
-      } //ToT = 6
-      else if (totalCharge.charge() < 5100.0) {
-        prob = 0.0500;
-      } //ToT = 7
-      else if (totalCharge.charge() < 5800.0) {
-        prob = 0.0390;
-      } //ToT = 8
-      else if (totalCharge.charge() < 6500.0) {
-        prob = 0.0250;
-      } //ToT = 9
-      else if (totalCharge.charge() < 7000.0) {
-        prob = 0.0200;
-      } //ToT = 10
-      else if (totalCharge.charge() < 7500.0) {
-        prob = 0.0150;
-      } //ToT = 11
-      else if (totalCharge.charge() < 8200.0) {
-        prob = 0.0100;
-      } //ToT = 12
-      else if (totalCharge.charge() < 9500.0) {
-        prob = 0.0100;
-      } //ToT = 13
+      static constexpr std::array<double, 8> prob3{
+        0.1015, 0.0500, 0.0390,
+        0.0250, 0.0200, 0.0150,
+        0.0100, 0.0100
+      };
+      prob = getProbability(totChargeLayer2, prob3, totalCharge.charge());
     }
     if (abs(moduleID) == 4) {
-      if (totalCharge.charge() < 5094.9) {
-        prob = 0.0977;
-      } else if (totalCharge.charge() < 5100.0) {
-        prob = 0.0500;
-      } else if (totalCharge.charge() < 5800.0) {
-        prob = 0.0150;
-      } //0.0284
-      else if (totalCharge.charge() < 6500.0) {
-        prob = 0.0150;
-      } //0.0307
-      else if (totalCharge.charge() < 7000.0) {
-        prob = 0.0200;
-      } //ToT = 10
-      else if (totalCharge.charge() < 7500.0) {
-        prob = 0.0150;
-      } //ToT = 11
-      else if (totalCharge.charge() < 8200.0) {
-        prob = 0.0100;
-      } //ToT = 12
-      else if (totalCharge.charge() < 9500.0) {
-        prob = 0.0100;
-      } //ToT = 13
+      static constexpr std::array<double, 8> prob4{
+        0.0977, 0.0500, 0.0150,
+        0.0150, 0.0200, 0.0150,
+        0.0100, 0.0100
+      };
+      prob = getProbability(totChargeLayer2, prob4, totalCharge.charge());
     }
     if (abs(moduleID) == 5) {
-      if (totalCharge.charge() < 5094.9) {
-        prob = 0.0966;
-      } //ToT = 6
-      else if (totalCharge.charge() < 5100.0) {
-        prob = 0.0500;
-      } //ToT = 7
-      else if (totalCharge.charge() < 5800.0) {
-        prob = 0.0369;
-      } //ToT = 8
-      else if (totalCharge.charge() < 6500.0) {
-        prob = 0.0256;
-      } //ToT = 9
-      else if (totalCharge.charge() < 7000.0) {
-        prob = 0.0200;
-      } //ToT = 10
-      else if (totalCharge.charge() < 7500.0) {
-        prob = 0.0150;
-      } //ToT = 11
-      else if (totalCharge.charge() < 8200.0) {
-        prob = 0.0100;
-      } //ToT = 12
-      else if (totalCharge.charge() < 9500.0) {
-        prob = 0.0100;
-      } //ToT = 13
+      static constexpr std::array<double, 8> prob5{
+        0.0966, 0.0500, 0.0369,
+        0.0256, 0.0200, 0.0150,
+        0.0100, 0.0100
+      };
+      prob = getProbability(totChargeLayer2, prob5, totalCharge.charge());
     }
     if (abs(moduleID) == 6) {
-      if (totalCharge.charge() < 5094.9) {
-        prob = 0.1053;
-      } //ToT = 6
-      else if (totalCharge.charge() < 5100.0) {
-        prob = 0.0500;
-      } //ToT = 7
-      else if (totalCharge.charge() < 5800.0) {
-        prob = 0.0379;
-      } //ToT = 8
-      else if (totalCharge.charge() < 6500.0) {
-        prob = 0.0252;
-      } //ToT = 9
-      else if (totalCharge.charge() < 7000.0) {
-        prob = 0.0200;
-      } //ToT = 10
-      else if (totalCharge.charge() < 7500.0) {
-        prob = 0.0150;
-      } //ToT = 11
-      else if (totalCharge.charge() < 8200.0) {
-        prob = 0.0100;
-      } //ToT = 12
-      else if (totalCharge.charge() < 9500.0) {
-        prob = 0.0100;
-      } //ToT = 13
+      static constexpr std::array<double, 8> prob6{
+        0.1053, 0.0500, 0.0379,
+        0.0252, 0.0200, 0.0150,
+        0.0100, 0.0100
+      };
+      prob = getProbability(totChargeLayer2, prob6, totalCharge.charge());
     }
   }
   if (barrel_ec == 0 && layer_disk == 3) {
+    static constexpr std::array<double, 8> totChargeLayer3{
+      5055.0, 5070.0, 5700.0, 
+      6550.0, 7000.0, 7500.0,
+      8200.0, 9500.0
+    };
     if (abs(moduleID) == 0) {
-      if (totalCharge.charge() < 5055.0) {
-        prob = 0.1451;
-      } //ToT = 6
-      else if (totalCharge.charge() < 5070.0) {
-        prob = 0.0915;
-      } //ToT = 7
-      else if (totalCharge.charge() < 5700.0) {
-        prob = 0.0681;
-      } //ToT = 8
-      else if (totalCharge.charge() < 6550.0) {
-        prob = 0.0518;
-      } //ToT = 9
-      else if (totalCharge.charge() < 7000.0) {
-        prob = 0.0300;
-      } //ToT = 10
-      else if (totalCharge.charge() < 7500.0) {
-        prob = 0.0200;
-      } //ToT = 11
-      else if (totalCharge.charge() < 8200.0) {
-        prob = 0.0200;
-      } //ToT = 12
-      else if (totalCharge.charge() < 9500.0) {
-        prob = 0.0100;
-      } //ToT = 13
+      static constexpr std::array<double, 8> prob0{
+        0.1451, 0.0915, 0.0681,
+        0.0518, 0.0300, 0.0200,
+        0.0200, 0.0100
+      };
+      prob = getProbability(totChargeLayer3, prob0, totalCharge.charge());
     }
     if (abs(moduleID) == 1) {
-      if (totalCharge.charge() < 5055.0) {
-        prob = 0.1418;
-      } //ToT = 6
-      else if (totalCharge.charge() < 5070.0) {
-        prob = 0.0800;
-      } //ToT = 7
-      else if (totalCharge.charge() < 5700.0) {
-        prob = 0.0600;
-      } //ToT = 8
-      else if (totalCharge.charge() < 6550.0) {
-        prob = 0.0497;
-      } //ToT = 9
-      else if (totalCharge.charge() < 7000.0) {
-        prob = 0.0300;
-      } //ToT = 10
-      else if (totalCharge.charge() < 7500.0) {
-        prob = 0.0200;
-      } //ToT = 11
-      else if (totalCharge.charge() < 8200.0) {
-        prob = 0.0200;
-      } //ToT = 12
-      else if (totalCharge.charge() < 9500.0) {
-        prob = 0.0100;
-      } //ToT = 13
+      static constexpr std::array<double, 8> prob1{
+        0.1418, 0.0800, 0.0600,
+        0.0497, 0.0300, 0.0200,
+        0.0200, 0.0100
+      };
+      prob = getProbability(totChargeLayer3, prob1, totalCharge.charge());
     }
     if (abs(moduleID) == 2) {
-      if (totalCharge.charge() < 5055.0) {
-        prob = 0.1481;
-      } //ToT = 6
-      else if (totalCharge.charge() < 5070.0) {
-        prob = 0.0891;
-      } //ToT = 7
-      else if (totalCharge.charge() < 5700.0) {
-        prob = 0.0627;
-      } //ToT = 8
-      else if (totalCharge.charge() < 6550.0) {
-        prob = 0.0488;
-      } //ToT = 9
-      else if (totalCharge.charge() < 7000.0) {
-        prob = 0.0300;
-      } //ToT = 10
-      else if (totalCharge.charge() < 7500.0) {
-        prob = 0.0200;
-      } //ToT = 11
-      else if (totalCharge.charge() < 8200.0) {
-        prob = 0.0200;
-      } //ToT = 12
-      else if (totalCharge.charge() < 9500.0) {
-        prob = 0.0100;
-      } //ToT = 13
+      static constexpr std::array<double, 8> prob2{
+        0.1481, 0.0891, 0.0627,
+        0.0488, 0.0300, 0.0200,
+        0.0200, 0.0100
+      };
+      prob = getProbability(totChargeLayer3, prob2, totalCharge.charge());
     }
     if (abs(moduleID) == 3) {
-      if (totalCharge.charge() < 5055.0) {
-        prob = 0.1590;
-      } //ToT = 6
-      else if (totalCharge.charge() < 5070.0) {
-        prob = 0.0930;
-      } //ToT = 7
-      else if (totalCharge.charge() < 5700.0) {
-        prob = 0.0635;
-      } //ToT = 8
-      else if (totalCharge.charge() < 6550.0) {
-        prob = 0.0485;
-      } //ToT = 9
-      else if (totalCharge.charge() < 7000.0) {
-        prob = 0.0300;
-      } //ToT = 10
-      else if (totalCharge.charge() < 7500.0) {
-        prob = 0.0200;
-      } //ToT = 11
-      else if (totalCharge.charge() < 8200.0) {
-        prob = 0.0200;
-      } //ToT = 12
-      else if (totalCharge.charge() < 9500.0) {
-        prob = 0.0100;
-      } //ToT = 13
+      static constexpr std::array<double, 8> prob3{
+        0.1590, 0.0930, 0.0635,
+        0.0485, 0.0300, 0.0200,
+        0.0200, 0.0100
+      };
+      prob = getProbability(totChargeLayer3, prob3, totalCharge.charge());
     }
     if (abs(moduleID) == 4) {
-      if (totalCharge.charge() < 5055.0) {
-        prob = 0.1590;
-      } //ToT = 6
-      else if (totalCharge.charge() < 5070.0) {
-        prob = 0.1214;
-      } //ToT = 7
-      else if (totalCharge.charge() < 5700.0) {
-        prob = 0.0776;
-      } //ToT = 8
-      else if (totalCharge.charge() < 6550.0) {
-        prob = 0.0387;
-      } //ToT = 9
-      else if (totalCharge.charge() < 7000.0) {
-        prob = 0.0300;
-      } //ToT = 10
-      else if (totalCharge.charge() < 7500.0) {
-        prob = 0.0200;
-      } //ToT = 11
-      else if (totalCharge.charge() < 8200.0) {
-        prob = 0.0200;
-      } //ToT = 12
-      else if (totalCharge.charge() < 9500.0) {
-        prob = 0.0100;
-      } //ToT = 13
+      static constexpr std::array<double, 8> prob4{
+        0.1590, 0.1214, 0.0776,
+        0.0387, 0.0300, 0.0200,
+        0.0200, 0.0100
+      };
+      prob = getProbability(totChargeLayer3, prob4, totalCharge.charge());
     }
     if (abs(moduleID) == 5) {
-      if (totalCharge.charge() < 5055.0) {
-        prob = 0.1518;
-      } //ToT = 6
-      else if (totalCharge.charge() < 5070.0) {
-        prob = 0.0874;
-      } //ToT = 7
-      else if (totalCharge.charge() < 5700.0) {
-        prob = 0.0603;
-      } //ToT = 8
-      else if (totalCharge.charge() < 6550.0) {
-        prob = 0.0460;
-      } //ToT = 9
-      else if (totalCharge.charge() < 7000.0) {
-        prob = 0.0300;
-      } //ToT = 10
-      else if (totalCharge.charge() < 7500.0) {
-        prob = 0.0200;
-      } //ToT = 11
-      else if (totalCharge.charge() < 8200.0) {
-        prob = 0.0200;
-      } //ToT = 12
-      else if (totalCharge.charge() < 9500.0) {
-        prob = 0.0100;
-      } //ToT = 13
+      static constexpr std::array<double, 8> prob5{
+        0.1518, 0.0874, 0.0603,
+        0.0460, 0.0300, 0.0200,
+        0.0200, 0.0100
+      };
+      prob = getProbability(totChargeLayer3, prob5, totalCharge.charge());
     }
     if (abs(moduleID) == 6) {
-      if (totalCharge.charge() < 5055.0) {
-        prob = 0.1461;
-      } //ToT = 6
-      else if (totalCharge.charge() < 5070.0) {
-        prob = 0.0825;
-      } //ToT = 7
-      else if (totalCharge.charge() < 5700.0) {
-        prob = 0.0571;
-      } //ToT = 8
-      else if (totalCharge.charge() < 6550.0) {
-        prob = 0.0441;
-      } //ToT = 9
-      else if (totalCharge.charge() < 7000.0) {
-        prob = 0.0300;
-      } //ToT = 10
-      else if (totalCharge.charge() < 7500.0) {
-        prob = 0.0200;
-      } //ToT = 11
-      else if (totalCharge.charge() < 8200.0) {
-        prob = 0.0200;
-      } //ToT = 12
-      else if (totalCharge.charge() < 9500.0) {
-        prob = 0.0100;
-      } //ToT = 13
+      static constexpr std::array<double, 8> prob6{
+        0.1461, 0.0825, 0.0571,
+        0.0441, 0.0300, 0.0200,
+        0.0200, 0.0100
+      };
+      prob = getProbability(totChargeLayer3, prob6, totalCharge.charge());
     }
   }
   if (abs(barrel_ec) == 2 && layer_disk == 0) {
-    if (totalCharge.charge() < 5550.0) {
-      prob = 0.124;
-    } //ToT = 6
-    else if (totalCharge.charge() < 6000.0) {
-      prob = 0.067;
-    } //ToT = 7
-    else if (totalCharge.charge() < 6400.0) {
-      prob = 0.0005;
-    } //ToT = 8
-    else if (totalCharge.charge() < 6500.0) {
-      prob = 0.002;
-    } //ToT = 9
-    else if (totalCharge.charge() < 6800.0) {
-      prob = 0.040;
-    } //ToT = 10
-    else if (totalCharge.charge() < 7300.0) {
-      prob = 0.031;
-    } //ToT = 11
-    else if (totalCharge.charge() < 7400.0) {
-      prob = 0.040;
-    }  //ToT = 12
-    else if (totalCharge.charge() < 7500.0) {
-      prob = 0.001;
-    } //ToT = 13
+    static constexpr std::array<double, 8> totChargeLayerEc0{
+      5550.0, 6000.0, 6400.0,
+      6500.0, 6800.0, 7300.0,
+      7400.0, 7500.0
+    };
+    static constexpr std::array<double, 8> prob0{
+      0.124, 0.067, 0.0005,
+      0.002, 0.040, 0.031,
+      0.040, 0.001
+    };
+    prob = getProbability(totChargeLayerEc0, prob0, totalCharge.charge());
   }
   if (abs(barrel_ec) == 2 && layer_disk == 1) {
-    if (totalCharge.charge() < 5550.0) {
-      prob = 0.124;
-    } //ToT = 6
-    else if (totalCharge.charge() < 6000.0) {
-      prob = 0.067;
-    } //ToT = 7
-    else if (totalCharge.charge() < 6400.0) {
-      prob = 0.0005;
-    } //ToT = 8
-    else if (totalCharge.charge() < 6500.0) {
-      prob = 0.002;
-    } //ToT = 9
-    else if (totalCharge.charge() < 6800.0) {
-      prob = 0.040;
-    } //ToT = 10
-    else if (totalCharge.charge() < 7300.0) {
-      prob = 0.031;
-    } //ToT = 11
-    else if (totalCharge.charge() < 7400.0) {
-      prob = 0.040;
-    }  //ToT = 12
-    else if (totalCharge.charge() < 7500.0) {
-      prob = 0.001;
-    } //ToT = 13
+    static constexpr std::array<double, 8> totChargeLayerEc1{
+      5550.0, 6000.0, 6400.0,
+      6500.0, 6800.0, 7300.0,
+      7400.0, 7500.0
+    };
+    static constexpr std::array<double, 8> prob0{
+      0.124, 0.067, 0.0005,
+      0.002, 0.040, 0.031,
+      0.040, 0.001
+    };
+    prob = getProbability(totChargeLayerEc1, prob0, totalCharge.charge());
   }
   if (abs(barrel_ec) == 2 && layer_disk == 2) {
-    if (totalCharge.charge() < 5400.0) {
-      prob = 0.180;
-    } //ToT=6
-    else if (totalCharge.charge() < 5700.0) {
-      prob = 0.067;
-    } //ToT=7
-    else if (totalCharge.charge() < 5701.0) {
-      prob = 0.0005;
-    } //ToT=8
-    else if (totalCharge.charge() < 5702.0) {
-      prob = 0.0005;
-    } //ToT=9
-    else if (totalCharge.charge() < 5800.0) {
-      prob = 0.036;
-    } //ToT=10
-    else if (totalCharge.charge() < 6000.0) {
-      prob = 0.031;
-    } //ToT=11
-    else if (totalCharge.charge() < 6500.0) {
-      prob = 0.034;
-    } //ToT=12
-    else if (totalCharge.charge() < 7000.0) {
-      prob = 0.001;
-    } //ToT = 13
+    static constexpr std::array<double, 8> totChargeLayerEc2{
+      5400.0, 5700.0, 5701.0,
+      5702.0, 5800.0, 6000.0,
+      6500.0, 7000.0
+    };
+    static constexpr std::array<double, 8> prob0{
+      0.180, 0.067, 0.0005,
+      0.0005, 0.036, 0.031,
+      0.034, 0.001
+    };
+    prob = getProbability(totChargeLayerEc2, prob0, totalCharge.charge());
   }
 
   double G4Time = getG4Time(totalCharge);
@@ -1281,7 +708,7 @@ int FEI3SimTool::relativeBunch2018(const SiTotalCharge& totalCharge, int barrel_
   int BCID =
     static_cast<int>(floor((G4Time +
                             moduleData->getTimeOffset(barrel_ec,
-                                                      layer_disk) + timeWalk) / moduleData->getBunchSpace()));
+                              layer_disk) + timeWalk) / moduleData->getBunchSpace()));
 
   return BCID;
 }
@@ -1292,435 +719,282 @@ int FEI3SimTool::relativeBunch2022(const SiTotalCharge& totalCharge, const doubl
   /**
    * 2023.03.07  Taken from timing scan data in 2022.
    */
-
+  static constexpr std::array<double, 9> totCharges{
+    4.5, 5.5, 6.5, 
+    7.5, 8.5, 9.5, 
+    10.5, 11.5, 12.5
+  };
+  
   double prob = 0.0;
   if (barrel_ec==0 && layer_disk==1) {    // b-layer
     if (std::abs(moduleID)==0) {
-      if      (tot<4.5)  { prob=0.0670; } // ToT=4
-      else if (tot<5.5)  { prob=0.0311; } // ToT=5
-      else if (tot<6.5)  { prob=0.0110; } // ToT=6
-      else if (tot<7.5)  { prob=0.0098; } // ToT=7
-      else if (tot<8.5)  { prob=0.0106; } // ToT=8
-      else if (tot<9.5)  { prob=0.0072; } // ToT=9
-      else if (tot<10.5) { prob=0.0061; } // ToT=10
-      else if (tot<11.5) { prob=0.0072; } // ToT=11
-      else if (tot<12.5) { prob=0.0089; } // ToT=12
+      static constexpr std::array<double, 9> prob0{
+        0.0670, 0.0311, 0.0110, 
+        0.0098, 0.0106, 0.0072, 
+        0.0061, 0.0072, 0.0089
+      };
+      prob=getProbability(totCharges, prob0, tot);
     }
     else  if (std::abs(moduleID)==1) {
-      if      (tot<4.5)  { prob=0.0275; } // ToT=4
-      else if (tot<5.5)  { prob=0.0123; } // ToT=5
-      else if (tot<6.5)  { prob=0.0099; } // ToT=6
-      else if (tot<7.5)  { prob=0.0098; } // ToT=7
-      else if (tot<8.5)  { prob=0.0084; } // ToT=8
-      else if (tot<9.5)  { prob=0.0079; } // ToT=9
-      else if (tot<10.5) { prob=0.0042; } // ToT=10
-      else if (tot<11.5) { prob=0.0033; } // ToT=11
-      else if (tot<12.5) { prob=0.0037; } // ToT=12
+      static constexpr std::array<double, 9> prob1{
+        0.0275, 0.0123, 0.0099, 
+        0.0098, 0.0084, 0.0079, 
+        0.0042, 0.0033, 0.0037
+      };
+      prob=getProbability(totCharges, prob1, tot);
     }
     else  if (std::abs(moduleID)==2) {
-      if      (tot<4.5)  { prob=0.0684; } // ToT=4
-      else if (tot<5.5)  { prob=0.0275; } // ToT=5
-      else if (tot<6.5)  { prob=0.0218; } // ToT=6
-      else if (tot<7.5)  { prob=0.0142; } // ToT=7
-      else if (tot<8.5)  { prob=0.0111; } // ToT=8
-      else if (tot<9.5)  { prob=0.0077; } // ToT=9
-      else if (tot<10.5) { prob=0.0068; } // ToT=10
-      else if (tot<11.5) { prob=0.0062; } // ToT=11
-      else if (tot<12.5) { prob=0.0051; } // ToT=12
+      static constexpr std::array<double, 9> prob2{
+        0.0684, 0.0275, 0.0218, 
+        0.0142, 0.0111, 0.0077, 
+        0.0068, 0.0062, 0.0051
+      };
+      prob=getProbability(totCharges, prob2, tot);
     }
     else  if (std::abs(moduleID)==3) {
-      if      (tot<4.5)  { prob=0.0536; } // ToT=4
-      else if (tot<5.5)  { prob=0.0134; } // ToT=5
-      else if (tot<6.5)  { prob=0.0101; } // ToT=6
-      else if (tot<7.5)  { prob=0.0081; } // ToT=7
-      else if (tot<8.5)  { prob=0.0074; } // ToT=8
-      else if (tot<9.5)  { prob=0.0051; } // ToT=9
-      else if (tot<10.5) { prob=0.0049; } // ToT=10
-      else if (tot<11.5) { prob=0.0049; } // ToT=11
-      else if (tot<12.5) { prob=0.0027; } // ToT=12
+      static constexpr std::array<double, 9> prob3{
+        0.0536, 0.0134, 0.0101, 
+        0.0081, 0.0074, 0.0051, 
+        0.0049, 0.0049, 0.0027
+      };
+      prob=getProbability(totCharges, prob3, tot);
     }
     else  if (std::abs(moduleID)==4) {
-      if      (tot<4.5)  { prob=0.0806; } // ToT=4
-      else if (tot<5.5)  { prob=0.0340; } // ToT=5
-      else if (tot<6.5)  { prob=0.0203; } // ToT=6
-      else if (tot<7.5)  { prob=0.0225; } // ToT=7
-      else if (tot<8.5)  { prob=0.0198; } // ToT=8
-      else if (tot<9.5)  { prob=0.0121; } // ToT=9
-      else if (tot<10.5) { prob=0.0095; } // ToT=10
-      else if (tot<11.5) { prob=0.0069; } // ToT=11
-      else if (tot<12.5) { prob=0.0049; } // ToT=12
+      static constexpr std::array<double, 9> prob4{
+        0.0806, 0.0340, 0.0203, 
+        0.0225, 0.0198, 0.0121, 
+        0.0095, 0.0069, 0.0049
+      };
+      prob=getProbability(totCharges, prob4, tot);
     }
     else  if (std::abs(moduleID)==5) {
-      if      (tot<4.5)  { prob=0.0736; } // ToT=4
-      else if (tot<5.5)  { prob=0.0164; } // ToT=5
-      else if (tot<6.5)  { prob=0.0143; } // ToT=6
-      else if (tot<7.5)  { prob=0.0113; } // ToT=7
-      else if (tot<8.5)  { prob=0.0091; } // ToT=8
-      else if (tot<9.5)  { prob=0.0079; } // ToT=9
-      else if (tot<10.5) { prob=0.0068; } // ToT=10
-      else if (tot<11.5) { prob=0.0060; } // ToT=11
-      else if (tot<12.5) { prob=0.0056; } // ToT=12
+      static constexpr std::array<double, 9> prob5{
+        0.0736, 0.0164, 0.0143, 
+        0.0113, 0.0091, 0.0079, 
+        0.0068, 0.0060, 0.0056
+      };
+      prob=getProbability(totCharges, prob5, tot);
     }
     else  if (std::abs(moduleID)==6) {
-      if      (tot<4.5)  { prob=0.1190; } // ToT=4
-      else if (tot<5.5)  { prob=0.0275; } // ToT=5
-      else if (tot<6.5)  { prob=0.0126; } // ToT=6
-      else if (tot<7.5)  { prob=0.0125; } // ToT=7
-      else if (tot<8.5)  { prob=0.0083; } // ToT=8
-      else if (tot<9.5)  { prob=0.0076; } // ToT=9
-      else if (tot<10.5) { prob=0.0064; } // ToT=10
-      else if (tot<11.5) { prob=0.0055; } // ToT=11
-      else if (tot<12.5) { prob=0.0060; } // ToT=12
+      static constexpr std::array<double, 9> prob6{
+        0.1190, 0.0275, 0.0126, 
+        0.0125, 0.0083, 0.0076, 
+        0.0064, 0.0055, 0.0060
+      };
+      prob=getProbability(totCharges, prob6, tot);
     }
   }
   else if (barrel_ec==0 && layer_disk==2) {  // layer-1
+    //use constexpr immediately-executed-lambda to initialise boundaries
+    //to 21 incremental values from 5.5 to 25.5
+    //in C++20, can probably use std::iota
+    static constexpr auto boundaries = [] {
+      std::array<double, 21> a{};
+      for (int i = 0; i < 21; ++i) {
+          a[i] =5.5 + i;
+      }
+      return a;
+    }();
+    //
     if (std::abs(moduleID)==0) {
-      if      (tot<5.5)  { prob=0.3755; } // ToT=5
-      else if (tot<6.5)  { prob=0.0841; } // ToT=6
-      else if (tot<7.5)  { prob=0.0516; } // ToT=7
-      else if (tot<8.5)  { prob=0.0390; } // ToT=8
-      else if (tot<9.5)  { prob=0.0265; } // ToT=9
-      else if (tot<10.5) { prob=0.0206; } // ToT=10
-      else if (tot<11.5) { prob=0.0234; } // ToT=11
-      else if (tot<12.5) { prob=0.0184; } // ToT=12
-      else if (tot<13.5) { prob=0.0153; } // ToT=13
-      else if (tot<14.5) { prob=0.0122; } // ToT=14
-      else if (tot<15.5) { prob=0.0100; } // ToT=15
-      else if (tot<16.5) { prob=0.0129; } // ToT=16
-      else if (tot<17.5) { prob=0.0109; } // ToT=17
-      else if (tot<18.5) { prob=0.0088; } // ToT=18
-      else if (tot<19.5) { prob=0.0134; } // ToT=19
-      else if (tot<20.5) { prob=0.0145; } // ToT=20
-      else if (tot<21.5) { prob=0.0107; } // ToT=21
-      else if (tot<22.5) { prob=0.0104; } // ToT=22
-      else if (tot<23.5) { prob=0.0123; } // ToT=23
-      else if (tot<24.5) { prob=0.0070; } // ToT=24
-      else if (tot<25.5) { prob=0.0065; } // ToT=25
+      static constexpr std::array<double, 21> prob0{
+        0.3755, 0.0841, 0.0516, 
+        0.0390, 0.0265, 0.0206, 
+        0.0234, 0.0184, 0.0153, 
+        0.0122, 0.0100, 0.0129,
+        0.0109, 0.0088, 0.0134,
+        0.0145, 0.0107, 0.0104,
+        0.0123, 0.0070, 0.0065
+      };
+      prob = getProbability(boundaries, prob0, tot);
     }
     else if (std::abs(moduleID)==1) {
-      if      (tot<5.5)  { prob=0.4535; } // ToT=5
-      else if (tot<6.5)  { prob=0.1277; } // ToT=6
-      else if (tot<7.5)  { prob=0.0626; } // ToT=7
-      else if (tot<8.5)  { prob=0.0443; } // ToT=8
-      else if (tot<9.5)  { prob=0.0341; } // ToT=9
-      else if (tot<10.5) { prob=0.0288; } // ToT=10
-      else if (tot<11.5) { prob=0.0270; } // ToT=11
-      else if (tot<12.5) { prob=0.0224; } // ToT=12
-      else if (tot<13.5) { prob=0.0227; } // ToT=13
-      else if (tot<14.5) { prob=0.0196; } // ToT=14
-      else if (tot<15.5) { prob=0.0145; } // ToT=15
-      else if (tot<16.5) { prob=0.0163; } // ToT=16
-      else if (tot<17.5) { prob=0.0128; } // ToT=17
-      else if (tot<18.5) { prob=0.0129; } // ToT=18
-      else if (tot<19.5) { prob=0.0126; } // ToT=19
-      else if (tot<20.5) { prob=0.0144; } // ToT=20
-      else if (tot<21.5) { prob=0.0118; } // ToT=21
-      else if (tot<22.5) { prob=0.0091; } // ToT=22
-      else if (tot<23.5) { prob=0.0131; } // ToT=23
-      else if (tot<24.5) { prob=0.0120; } // ToT=24
-      else if (tot<25.5) { prob=0.0119; } // ToT=25
+      static constexpr std::array<double, 21> prob1{
+        0.4535, 0.1277, 0.0626, 
+        0.0443, 0.0341, 0.0288, 
+        0.0270, 0.0224, 0.0227, 
+        0.0196, 0.0145, 0.0163,
+        0.0128, 0.0129, 0.0126,
+        0.0144, 0.0118, 0.0091,
+        0.0131, 0.0120, 0.0119
+      };
+      prob = getProbability(boundaries, prob1, tot);
     }
     else if (std::abs(moduleID)==2) {
-      if      (tot<5.5)  { prob=0.5102; } // ToT=5
-      else if (tot<6.5)  { prob=0.1059; } // ToT=6
-      else if (tot<7.5)  { prob=0.0575; } // ToT=7
-      else if (tot<8.5)  { prob=0.0411; } // ToT=8
-      else if (tot<9.5)  { prob=0.0309; } // ToT=9
-      else if (tot<10.5) { prob=0.0333; } // ToT=10
-      else if (tot<11.5) { prob=0.0274; } // ToT=11
-      else if (tot<12.5) { prob=0.0258; } // ToT=12
-      else if (tot<13.5) { prob=0.0209; } // ToT=13
-      else if (tot<14.5) { prob=0.0209; } // ToT=14
-      else if (tot<15.5) { prob=0.0170; } // ToT=15
-      else if (tot<16.5) { prob=0.0143; } // ToT=16
-      else if (tot<17.5) { prob=0.0141; } // ToT=17
-      else if (tot<18.5) { prob=0.0164; } // ToT=18
-      else if (tot<19.5) { prob=0.0145; } // ToT=19
-      else if (tot<20.5) { prob=0.0131; } // ToT=20
-      else if (tot<21.5) { prob=0.0112; } // ToT=21
-      else if (tot<22.5) { prob=0.0159; } // ToT=22
-      else if (tot<23.5) { prob=0.0128; } // ToT=23
-      else if (tot<24.5) { prob=0.0097; } // ToT=24
-      else if (tot<25.5) { prob=0.0088; } // ToT=25
+       static constexpr std::array<double, 21> prob2{
+        0.5102, 0.1059, 0.0575,
+        0.0411, 0.0309, 0.0333, 
+        0.0274, 0.0258, 0.0209,
+        0.0209, 0.0170, 0.0143,
+        0.0141, 0.0164, 0.0145,
+        0.0131, 0.0112, 0.0159,
+        0.0128, 0.0097, 0.0088
+      };
+      prob = getProbability(boundaries, prob2, tot);
     }
     else if (std::abs(moduleID)==3) {
-      if      (tot<5.5)  { prob=0.4122; } // ToT=5
-      else if (tot<6.5)  { prob=0.1038; } // ToT=6
-      else if (tot<7.5)  { prob=0.0567; } // ToT=7
-      else if (tot<8.5)  { prob=0.0371; } // ToT=8
-      else if (tot<9.5)  { prob=0.0288; } // ToT=9
-      else if (tot<10.5) { prob=0.0268; } // ToT=10
-      else if (tot<11.5) { prob=0.0211; } // ToT=11
-      else if (tot<12.5) { prob=0.0238; } // ToT=12
-      else if (tot<13.5) { prob=0.0223; } // ToT=13
-      else if (tot<14.5) { prob=0.0166; } // ToT=14
-      else if (tot<15.5) { prob=0.0161; } // ToT=15
-      else if (tot<16.5) { prob=0.0175; } // ToT=16
-      else if (tot<17.5) { prob=0.0129; } // ToT=17
-      else if (tot<18.5) { prob=0.0091; } // ToT=18
-      else if (tot<19.5) { prob=0.0136; } // ToT=19
-      else if (tot<20.5) { prob=0.0126; } // ToT=20
-      else if (tot<21.5) { prob=0.0133; } // ToT=21
-      else if (tot<22.5) { prob=0.0087; } // ToT=22
-      else if (tot<23.5) { prob=0.0082; } // ToT=23
-      else if (tot<24.5) { prob=0.0077; } // ToT=24
-      else if (tot<25.5) { prob=0.0078; } // ToT=25
+      static constexpr std::array<double, 21> prob3{
+        0.4122, 0.1038, 0.0567,
+        0.0371, 0.0288, 0.0268,
+        0.0211, 0.0238, 0.0223, 
+        0.0166, 0.0161, 0.0175,
+        0.0129, 0.0091, 0.0136,
+        0.0126, 0.0133, 0.0087,
+        0.0082, 0.0077, 0.0078
+      };
+      prob = getProbability(boundaries, prob3, tot);
     }
     else if (std::abs(moduleID)==4) {
-      if      (tot<5.5)  { prob=0.4174; } // ToT=5
-      else if (tot<6.5)  { prob=0.0976; } // ToT=6
-      else if (tot<7.5)  { prob=0.0527; } // ToT=7
-      else if (tot<8.5)  { prob=0.0403; } // ToT=8
-      else if (tot<9.5)  { prob=0.0329; } // ToT=9
-      else if (tot<10.5) { prob=0.0245; } // ToT=10
-      else if (tot<11.5) { prob=0.0254; } // ToT=11
-      else if (tot<12.5) { prob=0.0240; } // ToT=12
-      else if (tot<13.5) { prob=0.0228; } // ToT=13
-      else if (tot<14.5) { prob=0.0203; } // ToT=14
-      else if (tot<15.5) { prob=0.0151; } // ToT=15
-      else if (tot<16.5) { prob=0.0143; } // ToT=16
-      else if (tot<17.5) { prob=0.0171; } // ToT=17
-      else if (tot<18.5) { prob=0.0124; } // ToT=18
-      else if (tot<19.5) { prob=0.0140; } // ToT=19
-      else if (tot<20.5) { prob=0.0119; } // ToT=20
-      else if (tot<21.5) { prob=0.0134; } // ToT=21
-      else if (tot<22.5) { prob=0.0090; } // ToT=22
-      else if (tot<23.5) { prob=0.0093; } // ToT=23
-      else if (tot<24.5) { prob=0.0109; } // ToT=24
-      else if (tot<25.5) { prob=0.0110; } // ToT=25
+      static constexpr std::array<double, 21> prob4{
+        0.4174, 0.0976, 0.0527,
+        0.0403, 0.0329, 0.0245, 
+        0.0254, 0.0240, 0.0228, 
+        0.0203, 0.0151, 0.0143, 
+        0.0171, 0.0124, 0.0140,
+        0.0119, 0.0134, 0.0090, 
+        0.0093, 0.0109, 0.0110
+      };
+      prob = getProbability(boundaries, prob4, tot);
     }
     else if (std::abs(moduleID)==5) {
-      if      (tot<5.5)  { prob=0.4079; } // ToT=5
-      else if (tot<6.5)  { prob=0.0869; } // ToT=6
-      else if (tot<7.5)  { prob=0.0441; } // ToT=7
-      else if (tot<8.5)  { prob=0.0348; } // ToT=8
-      else if (tot<9.5)  { prob=0.0308; } // ToT=9
-      else if (tot<10.5) { prob=0.0249; } // ToT=10
-      else if (tot<11.5) { prob=0.0221; } // ToT=11
-      else if (tot<12.5) { prob=0.0216; } // ToT=12
-      else if (tot<13.5) { prob=0.0211; } // ToT=13
-      else if (tot<14.5) { prob=0.0213; } // ToT=14
-      else if (tot<15.5) { prob=0.0184; } // ToT=15
-      else if (tot<16.5) { prob=0.0163; } // ToT=16
-      else if (tot<17.5) { prob=0.0167; } // ToT=17
-      else if (tot<18.5) { prob=0.0143; } // ToT=18
-      else if (tot<19.5) { prob=0.0125; } // ToT=19
-      else if (tot<20.5) { prob=0.0111; } // ToT=20
-      else if (tot<21.5) { prob=0.0124; } // ToT=21
-      else if (tot<22.5) { prob=0.0139; } // ToT=22
-      else if (tot<23.5) { prob=0.0148; } // ToT=23
-      else if (tot<24.5) { prob=0.0104; } // ToT=24
-      else if (tot<25.5) { prob=0.0074; } // ToT=25
+      static constexpr std::array<double, 21> prob5{
+        0.4079, 0.0869, 0.0441,
+        0.0348, 0.0308, 0.0249,
+        0.0221, 0.0216, 0.0211,
+        0.0213, 0.0184, 0.0163,
+        0.0167, 0.0143, 0.0125,
+        0.0111, 0.0124, 0.0139,
+        0.0148, 0.0104, 0.0074
+      };
+      prob = getProbability(boundaries, prob5, tot);
     }
     else if (std::abs(moduleID)==6) {
-      if      (tot<5.5)  { prob=0.4023; } // ToT=5
-      else if (tot<6.5)  { prob=0.1047; } // ToT=6
-      else if (tot<7.5)  { prob=0.0589; } // ToT=7
-      else if (tot<8.5)  { prob=0.0439; } // ToT=8
-      else if (tot<9.5)  { prob=0.0332; } // ToT=9
-      else if (tot<10.5) { prob=0.0292; } // ToT=10
-      else if (tot<11.5) { prob=0.0270; } // ToT=11
-      else if (tot<12.5) { prob=0.0209; } // ToT=12
-      else if (tot<13.5) { prob=0.0166; } // ToT=13
-      else if (tot<14.5) { prob=0.0192; } // ToT=14
-      else if (tot<15.5) { prob=0.0194; } // ToT=15
-      else if (tot<16.5) { prob=0.0191; } // ToT=16
-      else if (tot<17.5) { prob=0.0155; } // ToT=17
-      else if (tot<18.5) { prob=0.0149; } // ToT=18
-      else if (tot<19.5) { prob=0.0123; } // ToT=19
-      else if (tot<20.5) { prob=0.0117; } // ToT=20
-      else if (tot<21.5) { prob=0.0113; } // ToT=21
-      else if (tot<22.5) { prob=0.0103; } // ToT=22
-      else if (tot<23.5) { prob=0.0153; } // ToT=23
-      else if (tot<24.5) { prob=0.0088; } // ToT=24
-      else if (tot<25.5) { prob=0.0100; } // ToT=25
+      static constexpr std::array<double, 21> prob6{
+        0.4023, 0.1047, 0.0589,
+        0.0439, 0.0332, 0.0292,
+        0.0270, 0.0209, 0.0166,
+        0.0192, 0.0194, 0.0191,
+        0.0155, 0.0149, 0.0123,
+        0.0117, 0.0113, 0.0103,
+        0.0153, 0.0088, 0.0100
+      };
+      prob = getProbability(boundaries, prob6, tot);
     }
   }
   else if (barrel_ec==0 && layer_disk==3) {  // layer-2
+    //21 incremental values from 5.5 to 25.5
+    static constexpr auto boundaries = [] {
+      std::array<double, 21> a{};
+      for (int i = 0; i < 21; ++i) {
+          a[i] =5.5 + i;
+      }
+      return a;
+    }();
+    //
     if (std::abs(moduleID)==0) {
-      if      (tot<5.5)  { prob=0.4812; } // ToT=5
-      else if (tot<6.5)  { prob=0.1637; } // ToT=6
-      else if (tot<7.5)  { prob=0.0945; } // ToT=7
-      else if (tot<8.5)  { prob=0.0670; } // ToT=8
-      else if (tot<9.5)  { prob=0.0579; } // ToT=9
-      else if (tot<10.5) { prob=0.0451; } // ToT=10
-      else if (tot<11.5) { prob=0.0317; } // ToT=11
-      else if (tot<12.5) { prob=0.0249; } // ToT=12
-      else if (tot<13.5) { prob=0.0191; } // ToT=13
-      else if (tot<14.5) { prob=0.0270; } // ToT=14
-      else if (tot<15.5) { prob=0.0227; } // ToT=15
-      else if (tot<16.5) { prob=0.0190; } // ToT=16
-      else if (tot<17.5) { prob=0.0168; } // ToT=17
-      else if (tot<18.5) { prob=0.0205; } // ToT=18
-      else if (tot<19.5) { prob=0.0162; } // ToT=19
-      else if (tot<20.5) { prob=0.0179; } // ToT=20
-      else if (tot<21.5) { prob=0.0228; } // ToT=21
-      else if (tot<22.5) { prob=0.0169; } // ToT=22
-      else if (tot<23.5) { prob=0.0136; } // ToT=23
-      else if (tot<24.5) { prob=0.0089; } // ToT=24
-      else if (tot<25.5) { prob=0.0198; } // ToT=25
+      static constexpr std::array<double, 21> prob0{
+        0.4812, 0.1637, 0.0945,
+        0.0670, 0.0579, 0.0451, 
+        0.0317, 0.0249, 0.0191,
+        0.0270, 0.0227, 0.0190,
+        0.0168, 0.0205, 0.0162,
+        0.0179, 0.0228, 0.0169,
+        0.0136, 0.0089, 0.0198
+      };
+      prob = getProbability(boundaries, prob0, tot);
     }
     else if (std::abs(moduleID)==1) {
-      if      (tot<5.5)  { prob=0.5605; } // ToT=5
-      else if (tot<6.5)  { prob=0.1837; } // ToT=6
-      else if (tot<7.5)  { prob=0.1040; } // ToT=7
-      else if (tot<8.5)  { prob=0.0654; } // ToT=8
-      else if (tot<9.5)  { prob=0.0465; } // ToT=9
-      else if (tot<10.5) { prob=0.0391; } // ToT=10
-      else if (tot<11.5) { prob=0.0337; } // ToT=11
-      else if (tot<12.5) { prob=0.0325; } // ToT=12
-      else if (tot<13.5) { prob=0.0242; } // ToT=13
-      else if (tot<14.5) { prob=0.0270; } // ToT=14
-      else if (tot<15.5) { prob=0.0218; } // ToT=15
-      else if (tot<16.5) { prob=0.0191; } // ToT=16
-      else if (tot<17.5) { prob=0.0172; } // ToT=17
-      else if (tot<18.5) { prob=0.0149; } // ToT=18
-      else if (tot<19.5) { prob=0.0158; } // ToT=19
-      else if (tot<20.5) { prob=0.0153; } // ToT=20
-      else if (tot<21.5) { prob=0.0134; } // ToT=21
-      else if (tot<22.5) { prob=0.0204; } // ToT=22
-      else if (tot<23.5) { prob=0.0142; } // ToT=23
-      else if (tot<24.5) { prob=0.0131; } // ToT=24
-      else if (tot<25.5) { prob=0.0158; } // ToT=25
+      static constexpr std::array<double, 21> prob1{
+        0.5605, 0.1837, 0.1040,
+        0.0654, 0.0465, 0.0391,
+        0.0337, 0.0325, 0.0242, 
+        0.0270, 0.0218, 0.0191,
+        0.0172, 0.0149, 0.0158,
+        0.0153, 0.0134, 0.0204,
+        0.0142, 0.0131, 0.0158
+      };
+      prob = getProbability(boundaries, prob1, tot);
     }
     else if (std::abs(moduleID)==2) {
-      if      (tot<5.5)  { prob=0.5681; } // ToT=5
-      else if (tot<6.5)  { prob=0.1665; } // ToT=6
-      else if (tot<7.5)  { prob=0.1006; } // ToT=7
-      else if (tot<8.5)  { prob=0.0659; } // ToT=8
-      else if (tot<9.5)  { prob=0.0478; } // ToT=9
-      else if (tot<10.5) { prob=0.0417; } // ToT=10
-      else if (tot<11.5) { prob=0.0330; } // ToT=11
-      else if (tot<12.5) { prob=0.0343; } // ToT=12
-      else if (tot<13.5) { prob=0.0310; } // ToT=13
-      else if (tot<14.5) { prob=0.0271; } // ToT=14
-      else if (tot<15.5) { prob=0.0244; } // ToT=15
-      else if (tot<16.5) { prob=0.0169; } // ToT=16
-      else if (tot<17.5) { prob=0.0191; } // ToT=17
-      else if (tot<18.5) { prob=0.0223; } // ToT=18
-      else if (tot<19.5) { prob=0.0211; } // ToT=19
-      else if (tot<20.5) { prob=0.0170; } // ToT=20
-      else if (tot<21.5) { prob=0.0153; } // ToT=21
-      else if (tot<22.5) { prob=0.0193; } // ToT=22
-      else if (tot<23.5) { prob=0.0194; } // ToT=23
-      else if (tot<24.5) { prob=0.0146; } // ToT=24
-      else if (tot<25.5) { prob=0.0141; } // ToT=25
+      static constexpr std::array<double, 21> prob2{
+        0.5681, 0.1665, 0.1006,
+        0.0659, 0.0478, 0.0417, 
+        0.0330, 0.0343, 0.0310, 
+        0.0271, 0.0244, 0.0169,
+        0.0191, 0.0223, 0.0211,
+        0.0170, 0.0153, 0.0193,
+        0.0194, 0.0146, 0.0141
+      };
+      prob = getProbability(boundaries, prob2, tot);
     }
     else if (std::abs(moduleID)==3) {
-      if      (tot<5.5)  { prob=0.5725; } // ToT=5
-      else if (tot<6.5)  { prob=0.1725; } // ToT=6
-      else if (tot<7.5)  { prob=0.0918; } // ToT=7
-      else if (tot<8.5)  { prob=0.0529; } // ToT=8
-      else if (tot<9.5)  { prob=0.0416; } // ToT=9
-      else if (tot<10.5) { prob=0.0336; } // ToT=10
-      else if (tot<11.5) { prob=0.0261; } // ToT=11
-      else if (tot<12.5) { prob=0.0273; } // ToT=12
-      else if (tot<13.5) { prob=0.0241; } // ToT=13
-      else if (tot<14.5) { prob=0.0195; } // ToT=14
-      else if (tot<15.5) { prob=0.0264; } // ToT=15
-      else if (tot<16.5) { prob=0.0178; } // ToT=16
-      else if (tot<17.5) { prob=0.0201; } // ToT=17
-      else if (tot<18.5) { prob=0.0191; } // ToT=18
-      else if (tot<19.5) { prob=0.0200; } // ToT=19
-      else if (tot<20.5) { prob=0.0150; } // ToT=20
-      else if (tot<21.5) { prob=0.0139; } // ToT=21
-      else if (tot<22.5) { prob=0.0151; } // ToT=22
-      else if (tot<23.5) { prob=0.0104; } // ToT=23
-      else if (tot<24.5) { prob=0.0121; } // ToT=24
-      else if (tot<25.5) { prob=0.0111; } // ToT=25
+      static constexpr std::array<double, 21> prob3{
+        0.5725, 0.1725, 0.0918,
+        0.0529, 0.0416, 0.0336,
+        0.0261, 0.0273, 0.0241,
+        0.0195, 0.0264, 0.0178,
+        0.0201, 0.0191, 0.0200,
+        0.0150, 0.0139, 0.0151,
+        0.0104, 0.0121, 0.0111
+      };
+      prob = getProbability(boundaries, prob3, tot);
     }
     else if (std::abs(moduleID)==4) {
-      if      (tot<5.5)  { prob=0.5377; } // ToT=5
-      else if (tot<6.5)  { prob=0.1785; } // ToT=6
-      else if (tot<7.5)  { prob=0.1089; } // ToT=7
-      else if (tot<8.5)  { prob=0.0702; } // ToT=8
-      else if (tot<9.5)  { prob=0.0474; } // ToT=9
-      else if (tot<10.5) { prob=0.0476; } // ToT=10
-      else if (tot<11.5) { prob=0.0392; } // ToT=11
-      else if (tot<12.5) { prob=0.0308; } // ToT=12
-      else if (tot<13.5) { prob=0.0318; } // ToT=13
-      else if (tot<14.5) { prob=0.0290; } // ToT=14
-      else if (tot<15.5) { prob=0.0244; } // ToT=15
-      else if (tot<16.5) { prob=0.0262; } // ToT=16
-      else if (tot<17.5) { prob=0.0228; } // ToT=17
-      else if (tot<18.5) { prob=0.0163; } // ToT=18
-      else if (tot<19.5) { prob=0.0158; } // ToT=19
-      else if (tot<20.5) { prob=0.0153; } // ToT=20
-      else if (tot<21.5) { prob=0.0185; } // ToT=21
-      else if (tot<22.5) { prob=0.0157; } // ToT=22
-      else if (tot<23.5) { prob=0.0165; } // ToT=23
-      else if (tot<24.5) { prob=0.0112; } // ToT=24
-      else if (tot<25.5) { prob=0.0095; } // ToT=25
+      static constexpr std::array<double, 21> prob4{
+        0.5377, 0.1785, 0.1089,
+        0.0702, 0.0474, 0.0476,
+        0.0392, 0.0308, 0.0318,
+        0.0290, 0.0244, 0.0262,
+        0.0228, 0.0163, 0.0158,
+        0.0153, 0.0185, 0.0157,
+        0.0165, 0.0112, 0.0095
+      };
+      prob = getProbability(boundaries, prob4, tot);
     }
     else if (std::abs(moduleID)==5) {
-      if      (tot<5.5)  { prob=0.5317; } // ToT=5
-      else if (tot<6.5)  { prob=0.1626; } // ToT=6
-      else if (tot<7.5)  { prob=0.0897; } // ToT=7
-      else if (tot<8.5)  { prob=0.0606; } // ToT=8
-      else if (tot<9.5)  { prob=0.0434; } // ToT=9
-      else if (tot<10.5) { prob=0.0346; } // ToT=10
-      else if (tot<11.5) { prob=0.0290; } // ToT=11
-      else if (tot<12.5) { prob=0.0289; } // ToT=12
-      else if (tot<13.5) { prob=0.0268; } // ToT=13
-      else if (tot<14.5) { prob=0.0268; } // ToT=14
-      else if (tot<15.5) { prob=0.0275; } // ToT=15
-      else if (tot<16.5) { prob=0.0262; } // ToT=16
-      else if (tot<17.5) { prob=0.0239; } // ToT=17
-      else if (tot<18.5) { prob=0.0222; } // ToT=18
-      else if (tot<19.5) { prob=0.0216; } // ToT=19
-      else if (tot<20.5) { prob=0.0213; } // ToT=20
-      else if (tot<21.5) { prob=0.0195; } // ToT=21
-      else if (tot<22.5) { prob=0.0209; } // ToT=22
-      else if (tot<23.5) { prob=0.0150; } // ToT=23
-      else if (tot<24.5) { prob=0.0186; } // ToT=24
-      else if (tot<25.5) { prob=0.0125; } // ToT=25
+      static constexpr std::array<double, 21> prob5{
+        0.5317, 0.1626, 0.0897,
+        0.0606, 0.0434, 0.0346,
+        0.0290, 0.0289, 0.0268,
+        0.0268, 0.0275, 0.0262,
+        0.0239, 0.0222, 0.0216,
+        0.0213, 0.0195, 0.0209,
+        0.0150, 0.0186, 0.0125
+      };
+      prob = getProbability(boundaries, prob5, tot);
     }
     else if (std::abs(moduleID)==6) {
-      if      (tot<5.5)  { prob=0.5822; } // ToT=5
-      else if (tot<6.5)  { prob=0.1635; } // ToT=6
-      else if (tot<7.5)  { prob=0.0925; } // ToT=7
-      else if (tot<8.5)  { prob=0.0583; } // ToT=8
-      else if (tot<9.5)  { prob=0.0498; } // ToT=9
-      else if (tot<10.5) { prob=0.0434; } // ToT=10
-      else if (tot<11.5) { prob=0.0303; } // ToT=11
-      else if (tot<12.5) { prob=0.0267; } // ToT=12
-      else if (tot<13.5) { prob=0.0253; } // ToT=13
-      else if (tot<14.5) { prob=0.0247; } // ToT=14
-      else if (tot<15.5) { prob=0.0219; } // ToT=15
-      else if (tot<16.5) { prob=0.0223; } // ToT=16
-      else if (tot<17.5) { prob=0.0195; } // ToT=17
-      else if (tot<18.5) { prob=0.0141; } // ToT=18
-      else if (tot<19.5) { prob=0.0118; } // ToT=19
-      else if (tot<20.5) { prob=0.0207; } // ToT=20
-      else if (tot<21.5) { prob=0.0169; } // ToT=21
-      else if (tot<22.5) { prob=0.0121; } // ToT=22
-      else if (tot<23.5) { prob=0.0117; } // ToT=23
-      else if (tot<24.5) { prob=0.0118; } // ToT=24
-      else if (tot<25.5) { prob=0.0102; } // ToT=25
+      static constexpr std::array<double, 21> prob6{
+        0.5822, 0.1635, 0.0925,
+        0.0583, 0.0498, 0.0434,
+        0.0303, 0.0267, 0.0253,
+        0.0247, 0.0219, 0.0223,
+        0.0195, 0.0141, 0.0118,
+        0.0207, 0.0169, 0.0121,
+        0.0117, 0.0118, 0.0102
+      };
+      prob = getProbability(boundaries, prob6, tot);
     }
   }
   else if (std::abs(barrel_ec)==2) {  // Endcap
-    if      (tot<5.5)  { prob=0.4896; } // ToT=5
-    else if (tot<6.5)  { prob=0.1294; } // ToT=6
-    else if (tot<7.5)  { prob=0.0684; } // ToT=7
-    else if (tot<8.5)  { prob=0.0491; } // ToT=8
-    else if (tot<9.5)  { prob=0.0379; } // ToT=9
-    else if (tot<10.5) { prob=0.0350; } // ToT=10
-    else if (tot<11.5) { prob=0.0315; } // ToT=11
-    else if (tot<12.5) { prob=0.0275; } // ToT=12
-    else if (tot<13.5) { prob=0.0251; } // ToT=13
-    else if (tot<14.5) { prob=0.0246; } // ToT=14
-    else if (tot<15.5) { prob=0.0221; } // ToT=15
-    else if (tot<16.5) { prob=0.0186; } // ToT=16
-    else if (tot<17.5) { prob=0.0182; } // ToT=17
-    else if (tot<18.5) { prob=0.0190; } // ToT=18
-    else if (tot<19.5) { prob=0.0176; } // ToT=19
-    else if (tot<20.5) { prob=0.0133; } // ToT=20
-    else if (tot<21.5) { prob=0.0127; } // ToT=21
-    else if (tot<22.5) { prob=0.0107; } // ToT=22
-    else if (tot<23.5) { prob=0.0113; } // ToT=23
-    else if (tot<24.5) { prob=0.0096; } // ToT=24
-    else if (tot<25.5) { prob=0.0086; } // ToT=25
+    //21 incremental values from 5.5 to 25.5
+    static constexpr auto boundaries = [] {
+      std::array<double, 21> a{};
+      for (int i = 0; i < 21; ++i) {
+          a[i] =5.5 + i;
+      }
+      return a;
+    }();
+    static constexpr std::array<double, 21> probEc{
+      0.4896, 0.1294, 0.0684,
+      0.0491, 0.0379, 0.0350,
+      0.0315, 0.0275, 0.0251,
+      0.0246, 0.0221, 0.0186,
+      0.0182, 0.0190, 0.0176,
+      0.0133, 0.0127, 0.0107,
+      0.0113, 0.0096, 0.0086
+    };
+    prob = getProbability(boundaries, probEc, tot);
   }
 
   double G4Time = getG4Time(totalCharge);

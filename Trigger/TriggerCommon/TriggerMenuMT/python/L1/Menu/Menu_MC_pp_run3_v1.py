@@ -36,6 +36,8 @@ def defineMenu():
         'L1_4jJ30p0ETA24_0DETA24_4DPHI99-eTAU30MeTAU20M',
         'L1_4jJ30p0ETA24_0DETA24_10DPHI99-eTAU30MeTAU12M',
         'L1_jJ85p0ETA21_3jJ40p0ETA25_cTAU20M_2cTAU12M',
+        #ATR-27252
+        'L1_eTAU60_2cTAU20M_jXE80',
     ]
 
     # To replace thresholds in the physics menu

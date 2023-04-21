@@ -159,7 +159,9 @@ def addDAODJets(jetlist,sequence):
 
     for jd in jetlist:
         algs, jetdef_i = getJetAlgs(ConfigFlags, jd, True)
-        algs = reOrderAlgs( [a for a in algs if a is not None])
+        algs, ca = reOrderAlgs( [a for a in algs if a is not None])
+        # ignore dangling CA instance in legacy config
+        ca.wasMerged()
         for a in algs:
             if hasattr(sequence,a.getName()):
                 continue
@@ -216,7 +218,7 @@ def addSidebandEventShape(sequence=DerivationFrameworkJob):
     from AthenaConfiguration.AllConfigFlags import ConfigFlags
 
     constit_algs = getInputAlgs(cst.GPFlow, flags=ConfigFlags)
-    constit_algs = reOrderAlgs( [a for a in constit_algs if a is not None])
+    constit_algs, ca_list = reOrderAlgs( [a for a in constit_algs if a is not None])
 
     for a in constit_algs:
         if not hasattr(sequence,a.getName()):

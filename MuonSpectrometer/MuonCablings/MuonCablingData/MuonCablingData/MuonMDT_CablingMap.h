@@ -6,6 +6,7 @@
 #define MUONMDT_CABLING_MUONMDT_CABLINGMAP_H
 
 #include <set>
+
 #include "AthenaKernel/CLASS_DEF.h"
 #include "Identifier/Identifier.h"
 #include "MuonCablingData/MdtTdcMap.h"
@@ -21,7 +22,7 @@ class MdtIdHelper;
 class IdentifierHash;
 
 class MuonMDT_CablingMap {
-public:
+   public:
     /** typedef to implement the list of mezzanine types */
     using MezzanineTypes = std::map<uint8_t, std::unique_ptr<MdtMezzanineType>>;
     using TdcOffSet = std::set<MdtTdcOffSorter, std::less<>>;
@@ -29,10 +30,11 @@ public:
 
     /// Helper struct to group the Mezzanine cards mounted on each multilayer
     /// The object provides the following information
-    ///   1) List of all mezzanine cards associated with the particular multilayer
-    ///   2) The BME / BIS78 chambers are split into 2 CSM modules due to their
-    //       larger number of tubes. The csm caches the up to 2 CSM associated with
-    //       this object
+    ///   1) List of all mezzanine cards associated with the particular
+    ///   multilayer 2) The BME / BIS78 chambers are split into 2 CSM modules
+    ///   due to their
+    //       larger number of tubes. The csm caches the up to 2 CSM associated
+    //       with this object
     struct MdtOffChModule {
         TdcOffSet::const_iterator begin() const { return cards.begin(); }
         TdcOffSet::const_iterator end() const { return cards.end(); }
@@ -48,9 +50,11 @@ public:
     using OffToOnlMap = std::map<MdtCablingOffData, MdtOffChModule>;
     /// The online -> offline conversion needs to treat two cases
     ///   tdcId && channelId == 0xFF:
-    ///     ** Decode the station name using the first module in the set with tdcZero() == 0
+    ///     ** Decode the station name using the first module in the set with
+    ///     tdcZero() == 0
     ///     ** Ordinary channel decoding
-    /// Helper struct below is collection of all the modules & the first module used to decode the stationName
+    /// Helper struct below is collection of all the modules & the first module
+    /// used to decode the stationName
     struct MdtTdcModule {
         TdcOnlSet::const_iterator begin() const { return all_modules.begin(); }
         TdcOnlSet::const_iterator end() const { return all_modules.end(); }
@@ -73,44 +77,52 @@ public:
     ~MuonMDT_CablingMap();
 
     /** Add a new line describing a mezzanine type */
-    bool addMezzanineLine(const int type, const int layer, const int sequence, MsgStream& log);
+    bool addMezzanineLine(const int type, const int layer, const int sequence,
+                          MsgStream& log);
 
     /** Adds a new mezzanine card mapping*/
-    bool addMezanineLayout(std::unique_ptr<MdtMezzanineCard> card, MsgStream& log);
+    bool addMezanineLayout(std::unique_ptr<MdtMezzanineCard> card,
+                           MsgStream& log);
 
-    enum class DataSource{
-        JSON,
-        LegacyCOOL
-    };
+    enum class DataSource { JSON, LegacyCOOL };
     /** Add a new fully configured mezzanine card */
-    /** the indexes multilayer, layer, tube refer to the tube connected to the channelZero */
-    bool addMezzanine(CablingData cabling_data, DataSource source, MsgStream& log);
+    /** the indexes multilayer, layer, tube refer to the tube connected to the
+     * channelZero */
+    bool addMezzanine(CablingData cabling_data, DataSource source,
+                      MsgStream& log);
 
     /** return the offline id given the online id */
     bool getOfflineId(CablingData& cabling_data, MsgStream& log) const;
 
     /** return the online id given the offline id */
     bool getOnlineId(CablingData& cabling_data, MsgStream& log) const;
-    /** converts the cabling data into an identifier. The check valid argument optionally enables the check that the returned identifier is
-     * actually well defined within the ranges but is also slow */
-    bool convert(const CablingData& cabling_data, Identifier& id, bool check_valid = true) const;
-    /** converts the identifier into a cabling data object. Returns false if the Identifier is not Mdt */
+    /** converts the cabling data into an identifier. The check valid argument
+     * optionally enables the check that the returned identifier is actually
+     * well defined within the ranges but is also slow */
+    bool convert(const CablingData& cabling_data, Identifier& id,
+                 bool check_valid = true) const;
+    /** converts the identifier into a cabling data object. Returns false if the
+     * Identifier is not Mdt */
     bool convert(const Identifier& id, CablingData& cabling_data) const;
 
     /** return the ROD id of a given chamber, given the hash id */
     uint32_t getROBId(const IdentifierHash& stationCode, MsgStream& log) const;
-    /** get the robs corresponding to a vector of hashIds, copied from Svc before the readCdo migration */
-    ListOfROB getROBId(const std::vector<IdentifierHash>& mdtHashVector, MsgStream& log) const;
+    /** get the robs corresponding to a vector of hashIds, copied from Svc
+     * before the readCdo migration */
+    ListOfROB getROBId(const std::vector<IdentifierHash>& mdtHashVector,
+                       MsgStream& log) const;
 
     /** return a vector of HashId lists for a  given list of ROD's */
-    std::vector<IdentifierHash> getMultiLayerHashVec(const std::vector<uint32_t>& ROBId_list, MsgStream& log) const;
+    std::vector<IdentifierHash> getMultiLayerHashVec(
+        const std::vector<uint32_t>& ROBId_list, MsgStream& log) const;
 
     /** return a HashId list for a  given ROD */
-    const std::vector<IdentifierHash>& getMultiLayerHashVec(const uint32_t ROBI, MsgStream& log) const;
+    const std::vector<IdentifierHash>& getMultiLayerHashVec(
+        const uint32_t ROBI, MsgStream& log) const;
 
     /** return the ROD id of a given chamber */
     const ListOfROB& getAllROBId() const;
-   
+
     /// Returns the map to convert the online -> offline identifiers
     const OnlToOffMap& getOnlineConvMap() const;
     /// Returns hte map to convert the offline -> online identifiers
@@ -118,21 +130,27 @@ public:
 
     bool finalize_init(MsgStream& log);
 
-    /// Transforms the identifier to an IdentifierHash corresponding to the module
-    bool getStationCode(const CablingData& map_data, IdentifierHash& mdtHashId, MsgStream& log) const;
-    /// Transforms the identifier to an IdentifierHash corresponding to the multilayer
-    /// In this case, the multi layer represents the CSM chip
-    bool getMultiLayerCode(const CablingData& map_data, Identifier& multiLayer, IdentifierHash& mdtHashId, MsgStream& log) const;
+    /// Transforms the identifier to an IdentifierHash corresponding to the
+    /// module
+    bool getStationCode(const CablingData& map_data, IdentifierHash& mdtHashId,
+                        MsgStream& log) const;
+    /// Transforms the identifier to an IdentifierHash corresponding to the
+    /// multilayer In this case, the multi layer represents the CSM chip
+    bool getMultiLayerCode(const CablingData& map_data, Identifier& multiLayer,
+                           IdentifierHash& mdtHashId, MsgStream& log) const;
 
-    /// Returns whether the channel belongs to the first or second mounted CSM card
-    unsigned int csmNumOnChamber(const CablingData& map_data, MsgStream& log) const;
-    /// Returns if the cabling map has found multilayers connected to 2 CSM cards
+    /// Returns whether the channel belongs to the first or second mounted CSM
+    /// card
+    unsigned int csmNumOnChamber(const CablingData& map_data,
+                                 MsgStream& log) const;
+    /// Returns if the cabling map has found multilayers connected to 2 CSM
+    /// cards
     bool has2CsmML() const;
     ///
     using MezzCardPtr = MdtMezzanineCard::MezzCardPtr;
-    MezzCardPtr getHedgeHogMapping(uint8_t mezzCardId ) const;
+    MezzCardPtr getHedgeHogMapping(uint8_t mezzCardId) const;
 
-private:
+   private:
     /** private function to add a chamber to the ROD map */
     bool addChamberToROBMap(const CablingData& cabling_data, MsgStream& log);
 
@@ -159,15 +177,13 @@ private:
     ChamberToROBMap m_multilayerToROB{};
     /** Switch to check whether the layout has chambers with 2 CSM chips*/
     bool m_2CSM_cham{false};
-    
-    /// @brief  List of mezzanine cards    
+
+    /// @brief  List of mezzanine cards
     using MezzCardList = std::vector<MezzCardPtr>;
     MezzCardList m_mezzCards{};
-    /// In the legacy data format several transformations on the hedgehog layout were applied
-    /// during the final TdcMap build
+    /// In the legacy data format several transformations on the hedgehog layout
+    /// were applied during the final TdcMap build
     MezzCardPtr legacyHedgehogCard(CablingData& cabling, MsgStream& msg) const;
-
-
 };
 
 CLASS_DEF(MuonMDT_CablingMap, 51038731, 1)

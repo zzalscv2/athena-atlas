@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <algorithm>
@@ -189,16 +189,20 @@ StatusCode TrigBmumuxComboHypo::mergeTracksFromViews(TrigBmumuxState& state) con
   for (const Decision* decision : state.previousDecisions()) {
     auto viewLinkInfo = TrigCompositeUtils::findLink<ViewContainer>(decision, TrigCompositeUtils::viewString(), true);
     ATH_CHECK( viewLinkInfo.isValid() );
-    auto viewEL = viewLinkInfo.link;
+    auto view = *viewLinkInfo.link;
 
-    auto tracksHandle = ViewHelper::makeHandle(*viewEL, m_trackParticleContainerKey, state.context());
+    auto roiLinkInfo = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>(decision, TrigCompositeUtils::roiString(), true);
+    ATH_CHECK( roiLinkInfo.isValid() );
+    const auto roi = *roiLinkInfo.link;
+
+    auto tracksHandle = ViewHelper::makeHandle(view, m_trackParticleContainerKey, state.context());
     ATH_CHECK( tracksHandle.isValid() );
     ATH_MSG_DEBUG( "tracks handle " << m_trackParticleContainerKey << " size: " << tracksHandle->size() );
 
     std::vector<ElementLink<xAOD::TrackParticleContainer>> tracksFromView;
     tracksFromView.reserve(tracksHandle->size());
     for (size_t idx = 0; idx < tracksHandle->size(); ++idx) {
-      tracksFromView.emplace_back(ViewHelper::makeLink<xAOD::TrackParticleContainer>(*viewEL, tracksHandle, idx));
+      tracksFromView.emplace_back(ViewHelper::makeLink<xAOD::TrackParticleContainer>(view, tracksHandle, idx));
     }
 
     for (const auto& trackEL : tracksFromView) {
@@ -212,6 +216,10 @@ StatusCode TrigBmumuxComboHypo::mergeTracksFromViews(TrigBmumuxState& state) con
       }
     }
     viewCounter++;
+    if (roi->composite()) {
+      state.isCompositeRoI = true;
+      break;
+    }
   }
   std::sort(tracks.begin(), tracks.end(), [](const auto& lhs, const auto& rhs){ return ((*lhs)->pt() > (*rhs)->pt()); });
 
@@ -313,6 +321,13 @@ StatusCode TrigBmumuxComboHypo::findBmumuxCandidates(TrigBmumuxState& state) con
   for (size_t idx = 0; idx < state.dimuons.size(); ++idx) {
     const xAOD::Vertex* dimuon = state.dimuons.get(idx);
 
+    std::vector<const xAOD::Muon*> muons(2, nullptr);
+    const auto& muonIndices = state.trigBphysMuonIndices.at(idx);
+    for (size_t i = 0; i < 2; ++i) {
+      const auto& muon = state.muons.at(muonIndices[i]);
+      muons[i] = *muon.link;
+    }
+
     auto dimuonTriggerObjectEL = ElementLink<xAOD::TrigBphysContainer>(state.trigBphysCollection(), idx);
     ATH_CHECK( dimuonTriggerObjectEL.isValid() );
 
@@ -335,21 +350,30 @@ StatusCode TrigBmumuxComboHypo::findBmumuxCandidates(TrigBmumuxState& state) con
     // we can safely omit tracks with large z0
     std::vector<ElementLink<xAOD::TrackParticleContainer>> selectedTracks;
     selectedTracks.reserve(tracks.size());
-    std::vector<double> selectedTrackZ0;
-    selectedTrackZ0.reserve(tracks.size());
-    if (m_trkZ0 > 0.) {
-      for (const auto& trackEL : tracks) {
+    std::map<const xAOD::TrackParticle*, double> selectedTrackZ0;
+    for (const auto& trackEL : tracks) {
+      if (state.isCompositeRoI && !isInSameRoI(muons[0], *trackEL) && !isInSameRoI(muons[1], *trackEL)) continue;
+      if (m_trkZ0 > 0.) {
         std::unique_ptr<const Trk::Perigee> perigee(m_trackToVertexTool->perigeeAtVertex(state.context(), **trackEL, dimuon->position()));
         if (std::abs(perigee->parameters()[Trk::z0]) < m_trkZ0) {
           selectedTracks.push_back(trackEL);
-          selectedTrackZ0.push_back(perigee->parameters()[Trk::z0]);
+          selectedTrackZ0[*trackEL] = perigee->parameters()[Trk::z0];
         }
       }
-      ATH_MSG_DEBUG( "Found " << selectedTracks.size() << " tracks consistent with dimuon vertex " << idx );
+      else {
+        selectedTracks.push_back(trackEL);
+        selectedTrackZ0[*trackEL] = -1000.;
+      }
     }
-    else {
-      std::copy(tracks.begin(), tracks.end(), std::back_inserter(selectedTracks));
-    }
+    // remove muon duplicates
+    if (selectedTracks.size() < 2) continue;
+    std::sort(selectedTracks.begin(), selectedTracks.end(), [p_mu=mu1->genvecP4()](const auto& lhs, const auto& rhs){ return ROOT::Math::VectorUtil::DeltaR(p_mu, (*lhs)->genvecP4()) > ROOT::Math::VectorUtil::DeltaR(p_mu, (*rhs)->genvecP4()); });
+    if (isIdenticalTracks(mu1, *selectedTracks.back())) selectedTracks.pop_back();
+    std::sort(selectedTracks.begin(), selectedTracks.end(), [p_mu=mu2->genvecP4()](const auto& lhs, const auto& rhs){ return ROOT::Math::VectorUtil::DeltaR(p_mu, (*lhs)->genvecP4()) > ROOT::Math::VectorUtil::DeltaR(p_mu, (*rhs)->genvecP4()); });
+    if (isIdenticalTracks(mu2, *selectedTracks.back())) selectedTracks.pop_back();
+    std::sort(selectedTracks.begin(), selectedTracks.end(), [](const auto& lhs, const auto& rhs){ return ((*lhs)->pt() > (*rhs)->pt()); });
+
+    ATH_MSG_DEBUG( "Found " << selectedTracks.size() << " tracks consistent with dimuon vertex " << idx );
     nSelectedTrk.push_back(selectedTracks.size());
 
     size_t iterations = 0;
@@ -357,7 +381,6 @@ StatusCode TrigBmumuxComboHypo::findBmumuxCandidates(TrigBmumuxState& state) con
     // dimuon + 1 track
     for (size_t itrk1 = 0; itrk1 < selectedTracks.size(); ++itrk1) {
       const xAOD::TrackParticle* trk1 = *selectedTracks[itrk1];
-      if (isIdenticalTracks(mu1, trk1) || isIdenticalTracks(mu2, trk1)) continue;
 
       trackParticleLinks_vtx1[2] = selectedTracks[itrk1];
       auto p_trk1 = trk1->genvecP4();
@@ -399,7 +422,6 @@ StatusCode TrigBmumuxComboHypo::findBmumuxCandidates(TrigBmumuxState& state) con
       // dimuon + 2 tracks
       for (size_t itrk2 = itrk1 + 1; itrk2 < selectedTracks.size(); ++itrk2) {
         const xAOD::TrackParticle* trk2 = *selectedTracks[itrk2];
-        if (isIdenticalTracks(mu1, trk2) || isIdenticalTracks(mu2, trk2)) continue;
 
         trackParticleLinks_vtx2[2] = selectedTracks[itrk1];
         trackParticleLinks_vtx2[3] = selectedTracks[itrk2];
@@ -500,7 +522,7 @@ StatusCode TrigBmumuxComboHypo::findBmumuxCandidates(TrigBmumuxState& state) con
 
         for (size_t itrk3 = 0; itrk3 < selectedTracks.size(); ++itrk3) {
           const xAOD::TrackParticle* trk3 = *selectedTracks[itrk3];
-          if (itrk3 == itrk1 || itrk3 == itrk2 || isIdenticalTracks(mu1, trk3) || isIdenticalTracks(mu2, trk3)) continue;
+          if (itrk3 == itrk1 || itrk3 == itrk2) continue;
 
           trackParticleLinks_vtx3[0] = selectedTracks[itrk1];
           trackParticleLinks_vtx3[1] = selectedTracks[itrk2];
@@ -580,7 +602,6 @@ StatusCode TrigBmumuxComboHypo::findBmumuxCandidates(TrigBmumuxState& state) con
 
       for (size_t itrk1 = 0; itrk1 < selectedTracks.size(); ++itrk1) {
         const xAOD::TrackParticle* trk1 = *selectedTracks[itrk1];
-        if (isIdenticalTracks(mu1, trk1) || isIdenticalTracks(mu2, trk1)) continue;
 
         trackParticleLinks_D0[0] = selectedTracks[itrk1];
         auto p_trk1 = trk1->genvecP4();
@@ -590,7 +611,6 @@ StatusCode TrigBmumuxComboHypo::findBmumuxCandidates(TrigBmumuxState& state) con
         for (size_t itrk2 = 0; itrk2 < selectedTracks.size(); ++itrk2) {
           if (itrk2 == itrk1) continue;
           const xAOD::TrackParticle* trk2 = *selectedTracks[itrk2];
-          if (isIdenticalTracks(mu1, trk2) || isIdenticalTracks(mu2, trk2)) continue;
 
           trackParticleLinks_D0[1] = selectedTracks[itrk2];
           auto p_trk2 = trk2->genvecP4();
@@ -619,7 +639,7 @@ StatusCode TrigBmumuxComboHypo::findBmumuxCandidates(TrigBmumuxState& state) con
 
             for (size_t itrk3 = 0; itrk3 < selectedTracks.size(); ++itrk3) {
               const xAOD::TrackParticle* trk3 = *selectedTracks[itrk3];
-              if (itrk3 == itrk1 || itrk3 == itrk2 || isIdenticalTracks(mu1, trk3) || isIdenticalTracks(mu2, trk3)) continue;
+              if (itrk3 == itrk1 || itrk3 == itrk2) continue;
 
               // J/psi + pion from D*+
               trackParticleLinks_vtx1[2] = selectedTracks[itrk3];
@@ -627,7 +647,7 @@ StatusCode TrigBmumuxComboHypo::findBmumuxCandidates(TrigBmumuxState& state) con
               p_trk3.SetM(PDG::mPion);
 
               if (p_trk3.Pt() > m_BcToDstarMuMu_minDstarPionPt &&
-                  (m_BcToDstarMuMu_maxDstarPionZ0 < 0. || std::abs(selectedTrackZ0[itrk3]) < m_BcToDstarMuMu_maxDstarPionZ0) &&
+                  (m_BcToDstarMuMu_maxDstarPionZ0 < 0. || std::abs(selectedTrackZ0[trk3]) < m_BcToDstarMuMu_maxDstarPionZ0) &&
                   isInMassRange((p_D0 + p_trk3).M() - p_D0.M() + PDG::mD0, m_BcToDstarMuMu_DstarMassRange)) {
                 auto Bc_vtx1 = fit(state.context(), trackParticleLinks_vtx1, kB_PsiPi);
                 ++iterations;
@@ -871,6 +891,14 @@ bool TrigBmumuxComboHypo::isIdenticalTracks(const xAOD::TrackParticle* lhs, cons
 bool TrigBmumuxComboHypo::isIdenticalTracks(const xAOD::Muon* lhs, const xAOD::Muon* rhs) const {
 
   return isIdenticalTracks(*lhs->inDetTrackParticleLink(), *rhs->inDetTrackParticleLink());
+}
+
+
+bool TrigBmumuxComboHypo::isInSameRoI(const xAOD::Muon* muon, const xAOD::TrackParticle* track) const {
+
+  auto p_mu = muon->genvecP4();
+  auto p_trk = track->genvecP4();
+  return (ROOT::Math::VectorUtil::DeltaPhi(p_mu, p_trk) < m_roiPhiWidth && std::abs(p_mu.eta() - p_trk.eta()) < m_roiEtaWidth);
 }
 
 

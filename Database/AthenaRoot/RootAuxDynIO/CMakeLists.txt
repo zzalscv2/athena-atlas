@@ -13,5 +13,5 @@ atlas_add_library( RootAuxDynIO
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}  ${VDT_INCLUDE_DIRS}
                    LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps
                    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES}
-                     AthContainers AthContainersInterfaces AthContainersRoot CxxUtils RootUtils
+                     AthContainers AthContainersInterfaces AthContainersRoot  RootUtils
                    )

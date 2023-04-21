@@ -13,7 +13,7 @@ atlas_add_library( ITrackToVertex
                    PUBLIC_HEADERS ITrackToVertex
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
 		   LINK_LIBRARIES ${ROOT_LIBRARIES} xAODTracking GaudiKernel TrkDetDescrUtils 
-		   TrkNeutralParameters TrkParameters CxxUtils)
+		   TrkNeutralParameters TrkParameters)
 
 atlas_add_dictionary( ITrackToVertexDict
                       ITrackToVertex/ITrackToVertex.h

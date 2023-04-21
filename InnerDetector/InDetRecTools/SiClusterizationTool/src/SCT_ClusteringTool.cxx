@@ -196,7 +196,8 @@ namespace InDet {
                                                         std::vector<Identifier>& clusterVector,
                                                         std::vector<std::vector<Identifier> >& idGroups,
                                                         const SCT_ID& idHelper,
-                                                        const InDet::SiDetectorElementStatus *det_el_status) const{
+                                                        const InDet::SiDetectorElementStatus *det_el_status,
+                                                        const EventContext& ctx) const{
 
     const unsigned int firstStripNumber(idHelper.strip(firstStripId));
     const unsigned int endStripNumber(firstStripNumber + nStrips); // one-past-the-end
@@ -209,7 +210,7 @@ namespace InDet {
     unsigned int nBadStrips(0);
     for (unsigned int stripNumber(firstStripNumber); stripNumber not_eq endStripNumber; ++stripNumber) {
       Identifier stripId(idHelper.strip_id(waferId, stripNumber));
-      if (isBad(det_el_status, idHelper, waferHash, stripId)) {
+      if (isBad(det_el_status, idHelper, waferHash, stripId, ctx)) {
         ++nBadStrips;
         stripId = badId;
       }
@@ -236,7 +237,8 @@ namespace InDet {
                                                       std::vector<Identifier>& clusterVector,
                                                       std::vector<std::vector<Identifier> >& idGroups,
                                                       const SCT_ID& idHelper,
-                                                      const InDet::SiDetectorElementStatus *det_el_status) const {
+                                                      const InDet::SiDetectorElementStatus *det_el_status,
+                                                      const EventContext& ctx) const{
 
     const unsigned int firstStripNumber(idHelper.strip(firstStripId));
     const unsigned int firstRowNumber(idHelper.row(firstStripId));
@@ -249,7 +251,7 @@ namespace InDet {
     unsigned int nBadStrips(0);
     for (unsigned int stripNumber(firstStripNumber); stripNumber not_eq endStripNumber; ++stripNumber) {
       Identifier stripId(idHelper.strip_id(waferId, firstRowNumber, stripNumber));
-      if (isBad(det_el_status, idHelper, waferHash, stripId)) {
+      if (isBad(det_el_status, idHelper, waferHash, stripId, ctx)) {
         ++nBadStrips;
         stripId = badId;
       }
@@ -305,11 +307,11 @@ namespace InDet {
   SCT_ClusterCollection * 
   SCT_ClusteringTool::clusterize(const InDetRawDataCollection<SCT_RDORawData>& collection,
                                  const SCT_ID& idHelper,
-                                 const InDet::SiDetectorElementStatus *sctDetElStatus) const
+                                 const InDet::SiDetectorElementStatus *sctDetElStatus, const EventContext& ctx) const
   {
     ATH_MSG_VERBOSE ("SCT_ClusteringTool::clusterize()");
 
-    if (m_doFastClustering) return fastClusterize(collection, idHelper, sctDetElStatus);
+    if (m_doFastClustering) return fastClusterize(collection, idHelper, sctDetElStatus, ctx);
 
     SCT_ClusterCollection* nullResult(nullptr);
     if (collection.empty()) {
@@ -389,11 +391,11 @@ namespace InDet {
       //                or (b) pushing a new set of ids onto an empty vector
       if (passTiming or m_majority01X) {
         if (m_useRowInformation) {
-           addStripsToClusterInclRows(firstStripId, nStrips, currentVector, idGroups, idHelper,sctDetElStatus); // Note this takes the current vector only
+           addStripsToClusterInclRows(firstStripId, nStrips, currentVector, idGroups, idHelper,sctDetElStatus, ctx); // Note this takes the current vector only
         } else if (not m_checkBadChannels) {
           addStripsToCluster(firstStripId, nStrips, currentVector, idHelper); // Note this takes the current vector only
         } else {
-          addStripsToClusterWithChecks(firstStripId, nStrips, currentVector, idGroups, idHelper,sctDetElStatus); // This one includes the groups of vectors as well
+          addStripsToClusterWithChecks(firstStripId, nStrips, currentVector, idGroups, idHelper,sctDetElStatus, ctx); // This one includes the groups of vectors as well
         }
         for (unsigned int iStrip=0; iStrip<nStrips; iStrip++) {
           if (stripCount < 16) hitsInThirdTimeBin |= (timePattern.test(0) << stripCount);
@@ -419,7 +421,7 @@ namespace InDet {
     const Identifier elementID(collection.identify());
     const Identifier waferId{idHelper.wafer_id(elementID)};
     const IdentifierHash waferHash{idHelper.wafer_hash(waferId)};
-    SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> sctDetEleHandle(m_SCTDetEleCollKey);
+    SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> sctDetEleHandle(m_SCTDetEleCollKey, ctx);
     const InDetDD::SiDetectorElementCollection* sctDetEle(*sctDetEleHandle);
     if (not sctDetEleHandle.isValid() or sctDetEle==nullptr) {
       ATH_MSG_FATAL(m_SCTDetEleCollKey.fullKey() << " is not available.");
@@ -489,7 +491,7 @@ namespace InDet {
 
   SCT_ClusterCollection* SCT_ClusteringTool::fastClusterize(const InDetRawDataCollection<SCT_RDORawData>& collection,
                                                             const SCT_ID& idHelper,
-                                                            const InDet::SiDetectorElementStatus *sctDetElStatus) const
+                                                            const InDet::SiDetectorElementStatus *sctDetElStatus, const EventContext& ctx) const
   {
     if (collection.empty()) return nullptr;
 
@@ -568,7 +570,7 @@ namespace InDet {
         }
         for (unsigned int sn=thisStrip; sn < max_strip; ++sn) {
           Identifier stripId = m_useRowInformation ? idHelper.strip_id(waferId,thisRow,sn) : idHelper.strip_id(waferId,sn);
-          if (!isBad(sctDetElStatus, idHelper, waferHash, stripId)) {
+          if (!isBad(sctDetElStatus, idHelper, waferHash, stripId, ctx)) {
             currentVector.push_back(stripId);
           } else {
             currentVector.push_back(badId);
@@ -606,7 +608,7 @@ namespace InDet {
     // Find detector element for these digits
     //
     IdentifierHash idHash = collection.identifyHash();
-    SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> sctDetEleHandle(m_SCTDetEleCollKey);
+    SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> sctDetEleHandle(m_SCTDetEleCollKey, ctx);
     const InDetDD::SiDetectorElementCollection* sctDetEle(*sctDetEleHandle);
     if (not sctDetEleHandle.isValid() or sctDetEle==nullptr) {
       ATH_MSG_FATAL(m_SCTDetEleCollKey.fullKey() << " is not available.");

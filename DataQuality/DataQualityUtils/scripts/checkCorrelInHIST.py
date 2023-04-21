@@ -22,7 +22,8 @@ dqmpassfile="/afs/cern.ch/user/l/larmon/public/atlasdqmpass.txt"
 
 # Some definitions for wildcards which can be used for input plot lists
 wildcards = {}
-wildcardplots = ["CellOccupancyVsEtaPhi", "fractionOverQthVsEtaPhi"]
+wildcardplots = ["CellOccupancyVsEtaPhi", "fractionOverQthVsEtaPhi","DatabaseNoiseVsEtaPhi"]
+
 for plot in wildcardplots:
   wildcards[plot] = {}
   wildcards[plot]["EMB"] = { "P":"Presampler","1":"Sampling1","2":"Sampling2","3":"Sampling3"}
@@ -30,8 +31,8 @@ for plot in wildcardplots:
   wildcards[plot]["HEC"] = { "0":"Sampling0","1":"Sampling1","2":"Sampling2","3":"Sampling3"}
   wildcards[plot]["FCAL"] = { "1":"Sampling1","2":"Sampling2","3":"Sampling3"}
 
-# Tile/Cell/AnyPhysTrig/TileCellEneEtaPhi_SampB_AnyPhysTrig
-# Tile/Cell/AnyPhysTrig/TileCellEtaPhiOvThr_SampB_AnyPhysTrig
+# e.g. Tile/Cell/AnyPhysTrig/TileCellEneEtaPhi_SampB_AnyPhysTrig
+# e.g. Tile/Cell/AnyPhysTrig/TileCellEtaPhiOvThr_SampB_AnyPhysTrig
 wildcards["TileCellEneEtaPhi"] = [ "A", "B", "D", "E" ]
 wildcards["TileCellEtaPhiOvThr"] = [ "A", "B", "D", "E" ]
 
@@ -55,15 +56,17 @@ def expandWildCard(histlist):
               tmp_path = hist
               if part+"*" in tmp_path:
                 for samp in wildcards[wc][part].keys():
+
                   new_path = tmp_path.replace(part+"*", part+samp)
+
                   if "*" in new_path:
                     new_path = new_path.replace("*", wildcards[wc][part][samp])
-                    newpaths.append(new_path)
+                  newpaths.append(new_path)
 
           if len(newpaths) == 0: 
             print("Failed to get the full paths from the wildcard...")
             sys.exit()
-          #histlist.remove(hist)
+
           print("Expanded",wc,"wildcard to give",len(newpaths),"histograms")
           newhistlist.extend(newpaths)      
       if foundwc is False:
@@ -392,7 +395,8 @@ if __name__ == "__main__":
                                                   args.tag )
   runFilePath = "root://eosatlas.cern.ch/%s"%(mergedFilePath).rstrip()
   if ("FILE NOT FOUND" in runFilePath):
-    print("No merged file found...")
+    print("No merged file found for this run")
+    print("HINT: check if there is a folder like","/eos/atlas/atlastier0/rucio/"+args.tag+"/physics_CosmicCalo/00"+str(args.runNumber)+"/"+args.tag+".00"+str(args.runNumber)+".physics_CosmicCalo.*."+args.amiTag)
     sys.exit()
   print("I have found the merged HIST file %s"%(runFilePath))
 
@@ -403,6 +407,7 @@ if __name__ == "__main__":
   print("File is",runFilePath)
   for hist in histos.keys():
     hpath = "run_%d/%s"%(args.runNumber,hist)
+    print("Reading histogram",hpath)
     histos[hist]["merged"] = f.Get(hpath)
     histos[hist]["type"] = hType(histos[hist]["merged"])
     histos[hist]["min"] = histos[hist]["merged"].GetMinimum()*0.8
@@ -413,7 +418,7 @@ if __name__ == "__main__":
     histos[hist]["nbHitInHot"] = [0.] * nLB
     histos[hist]["regionBins"] = []
 
-    # oioi here, find another way to define x y delta
+    # here, find another way to define x y delta?
     tmp_x = args.globalX
     tmp_delta = args.globalDelta
     # steps for iterating over bins in the scan
@@ -468,7 +473,7 @@ if __name__ == "__main__":
       # find the >Qth plot equivalent if this is the occupancy vs eta phi plot
       QthHist = None
       if "CellOccupancyVsEtaPhi" in hist:
-        QthHistPath= hist.replace("2d_Occupancy/CellOccupancyVsEtaPhi", "2d_PoorQualityFraction/fractionOverQthVsEtaPhi").replace("_5Sigma_CSCveto", "_hiEth_noVeto")
+        QthHistPath= hist.replace("2d_Occupancy/CellOccupancyVsEtaPhi", "2d_PoorQualityFraction/fractionOverQthVsEtaPhi").replace("_5Sigma_CSCveto", "_hiEth_noVeto").replace("_hiEth_CSCveto", "_hiEth_noVeto")
         QthHist = f.Get("run_%d/%s"%(args.runNumber,QthHistPath))
 
       # Extract the list of bins where to count.
@@ -505,6 +510,11 @@ if __name__ == "__main__":
   lbFilePathList = pathExtract.returnEosHistPathLB( args.runNumber,
                                                     args.lowerlb, args.upperlb,
                                                     args.stream, args.amiTag, args.tag )
+
+  if isinstance(lbFilePathList,str) and "NOT FOUND" in lbFilePathList:
+    print("Could not find per-LB files for this run")
+    print("HINT: check if there is a folder like","/eos/atlas/atlastier0/tzero/prod/"+args.tag+"/physics_CosmicCalo/00"+str(args.runNumber)+"/"+args.tag+".00"+str(args.runNumber)+".physics_CosmicCalo.*."+args.amiTag)
+    sys.exit()
 
   print("I have found %d unmerged HIST files"%(len(lbFilePathList)))
   print("The first one is root://eosatlas.cern.ch/%s"%(lbFilePathList[0]))

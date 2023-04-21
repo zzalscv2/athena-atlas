@@ -1198,7 +1198,7 @@ namespace Crest {
     retv = performRequest(current_path, POST, body, method_name);
   }
 
-  nlohmann::json CrestClient::findRunLumiInfo(urlParameters params) {
+  nlohmann::json CrestClient::findRunLumiInfo(const urlParameters& params) {
     const char* method_name = "CrestClient::findRunLumiInfo";
 
     checkFsException(method_name);

@@ -612,11 +612,13 @@ bool SCTErrMonAlg::summarySCT(std::set<IdentifierHash>& sctHashAll, std::set<Ide
   sctHashAll.clear();//All
   sctHashSummary.clear();
 
+  const EventContext& ctx{Gaudi::Hive::currentContext()};
+
   const unsigned int maxHash{static_cast<unsigned int>(m_pSCTHelper->wafer_hash_max())}; // 8176
   for (unsigned int i{0}; i<maxHash; i++) {
     IdentifierHash hash{i};
     sctHashAll.insert(hash);//All
-    if (not m_pSummaryTool->isGood(hash)) {
+    if (not m_pSummaryTool->isGood(hash, ctx)) {
       sctHashSummary.insert(hash);
     }
   }
