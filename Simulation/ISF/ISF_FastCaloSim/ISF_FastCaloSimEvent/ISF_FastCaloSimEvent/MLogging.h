@@ -1,13 +1,12 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOSIMEVENT_MLogging_h
 #define ISF_FASTCALOSIMEVENT_MLogging_h
 
-#include <TNamed.h>
+#include <TNamed.h> //for ClassDef
 #include "CxxUtils/checker_macros.h"
-#include "ISF_FastCaloSimEvent/MLogging.h"
 
 // One macro for use outside classes.
 // Use this in standalone functions or static methods.
