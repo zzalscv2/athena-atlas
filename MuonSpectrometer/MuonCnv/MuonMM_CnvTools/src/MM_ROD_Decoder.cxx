@@ -30,7 +30,7 @@ Muon::MM_ROD_Decoder::MM_ROD_Decoder( const std::string& type, const std::string
 StatusCode Muon::MM_ROD_Decoder::initialize() 
 {
   ATH_CHECK(detStore()->retrieve(m_MmIdHelper, "MMIDHELPER"));
-  ATH_CHECK(m_mmCablingMap.initialize());
+  ATH_CHECK(m_cablingKey.initialize(!m_cablingKey.empty()));
   return StatusCode::SUCCESS;
 }
 
@@ -46,16 +46,20 @@ StatusCode Muon::MM_ROD_Decoder::fillCollection(const EventContext& ctx, const O
   // check fragment for errors
   try {
     robFrag.check();
-  } catch (eformat::Issue &ex) {
+  } catch (const eformat::Issue &ex) {
     ATH_MSG_WARNING(ex.what());
     return StatusCode::SUCCESS;
   }
-
-  SG::ReadCondHandle<MicroMega_CablingMap>  mmCablingMap{m_mmCablingMap, ctx};
-  if(! mmCablingMap.isValid()){
-    ATH_MSG_ERROR("Cannot find Micromegas cabling map!");
-    return StatusCode::FAILURE;
+  const MicroMega_CablingMap* mmCablingMap{nullptr};
+  if (!m_cablingKey.empty()) {
+      SG::ReadCondHandle<MicroMega_CablingMap>  readCondHandle{m_cablingKey, ctx};
+      if(!readCondHandle.isValid()){
+        ATH_MSG_ERROR("Cannot find Micromegas cabling map!");
+        return StatusCode::FAILURE;
+      }
+      mmCablingMap = readCondHandle.cptr();
   }
+ 
 
   // if the vector of hashes is not empty, then we are in seeded mode
   bool seeded_mode(!rdoIdhVect.empty());
@@ -82,15 +86,15 @@ StatusCode Muon::MM_ROD_Decoder::fillCollection(const EventContext& ctx, const O
     unsigned int gas_gap      = (unsigned int)elink->elinkId()->gas_gap();
     Identifier   module_ID    = m_MmIdHelper->elementID(station_name, station_eta, station_phi);
 
-    IdentifierHash module_hashID;
+    IdentifierHash module_hashID{0};
     m_MmIdHelper->get_module_hash(module_ID, module_hashID);
 
     // if we are in ROI-seeded mode, check if this hashID is requested
     if (seeded_mode && std::find(rdoIdhVect.begin(), rdoIdhVect.end(), module_hashID) == rdoIdhVect.end()) continue;
 
-    if (!rdo_map[module_hashID]) rdo_map[module_hashID] = std::make_unique<MM_RawDataCollection>(module_hashID);
-    MM_RawDataCollection* rdo = rdo_map[module_hashID].get();
-
+    std::unique_ptr<MM_RawDataCollection>& rdo = rdo_map[module_hashID];
+    if (!rdo) rdo = std::make_unique<MM_RawDataCollection>(module_hashID);
+    
     // loop on all channels of this elink to fill the collection
     const std::vector<Muon::nsw::VMMChannel *>& channels = elink->get_channels();
     for (auto channel : channels) {
@@ -99,15 +103,17 @@ StatusCode Muon::MM_ROD_Decoder::fillCollection(const EventContext& ctx, const O
        Identifier channel_ID = m_MmIdHelper->channelID(module_ID, multi_layer, gas_gap, channel_number);  // not validating the IDs (too slow)
        
        // now we have to check if for this channel there is a correction of the cabling needed
-       std::optional<Identifier> correctedChannelId = mmCablingMap.cptr()->correctChannel(channel_ID, msgStream());
-       if(correctedChannelId){
-          // for data the time and charge are in counts
-          bool timeAndChargeInCounts = true;
-          uint correctedChannelNumber = m_MmIdHelper->channel(*correctedChannelId);
-          rdo->push_back(new MM_RawData(*correctedChannelId, correctedChannelNumber, channel->tdo(), channel->pdo(), channel->rel_bcid(),timeAndChargeInCounts)); // isDead = false (ok?)
-       } else {
-          ATH_MSG_DEBUG("Channel was shifted outside its connector and is therefore not decoded into and RDO");
+       if (mmCablingMap) {
+          std::optional<Identifier> correctedChannelId = mmCablingMap->correctChannel(channel_ID, msgStream());
+          if (!correctedChannelId) {
+              ATH_MSG_DEBUG("Channel was shifted outside its connector and is therefore not decoded into and RDO");
+              continue;
+          }
+          channel_ID = (*correctedChannelId);
+          channel_number = m_MmIdHelper->channel(channel_ID);
        }
+       rdo->push_back(new MM_RawData(channel_ID, channel_number, channel->tdo(), 
+                                     channel->pdo(), channel->rel_bcid(), true));      
     }
   }
 

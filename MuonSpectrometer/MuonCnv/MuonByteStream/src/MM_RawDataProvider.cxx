@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonByteStream/MM_RawDataProvider.h"
@@ -15,15 +15,7 @@ StatusCode Muon::MM_RawDataProvider::initialize() {
 
     ATH_CHECK(m_rawDataTool.retrieve());
     ATH_CHECK(m_roiCollectionKey.initialize(m_seededDecoding));  // mark the RoI-collection flag as used or not used
-
-    if (m_seededDecoding) {
-        if (m_regsel_mm.retrieve().isFailure()) {  // in RoI - seeded mode, retrieve the region selector
-            ATH_MSG_FATAL("Unable to retrieve RegionSelector Tool");
-            return StatusCode::FAILURE;
-        }
-    } else {
-        m_regsel_mm.disable();
-    }
+    ATH_CHECK(m_regsel_mm.retrieve(DisableTool{!m_seededDecoding}));
 
     return StatusCode::SUCCESS;
 }

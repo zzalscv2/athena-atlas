@@ -30,7 +30,7 @@ class MM_ROD_Decoder : virtual public IMM_ROD_Decoder, public AthAlgTool
 
   protected:
     const MmIdHelper* m_MmIdHelper = nullptr;
-    SG::ReadCondHandleKey<MicroMega_CablingMap> m_mmCablingMap{this, "MmCablingMap","MicroMegaCabling","Key of MicroMega_CablingMap"};
+    SG::ReadCondHandleKey<MicroMega_CablingMap> m_cablingKey{this, "CablingMap", "MicroMegaCabling","Key of MicroMega_CablingMap"};
 
   private:
 
