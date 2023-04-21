@@ -18,9 +18,10 @@
 #include <Math/Vector3D.h>
 #include <Math/Vector4D.h>
 #include "TMath.h"
+#include "TString.h"
 
 //flags
-const double crep_pt=200.;
+constexpr double crep_pt=200.;
 /*
   Potential indexing problems that might slip through the cracks:
   --athena_event/event (hitData_entry)
@@ -29,7 +30,7 @@ const double crep_pt=200.;
 */
 
 //constants and conversions
-const int yzdex=2,bkdex=13,zbardex=2;
+constexpr int yzdex=2,bkdex=13,zbardex=2;
 
 template<unsigned char T> class float32fixed
 {
