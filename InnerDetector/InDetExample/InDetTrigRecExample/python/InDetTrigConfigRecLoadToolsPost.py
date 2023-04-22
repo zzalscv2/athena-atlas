@@ -17,7 +17,6 @@ from InDetTrigRecExample.InDetTrigFlags import InDetTrigFlags
 
 from InDetTrigRecExample.InDetTrigCommonTools import CAtoLegacyPublicToolWrapper
 
-from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigTestPixelLayerToolInner
 from TrkConfig.TrkTrackSummaryToolConfig import InDetTrigTrackSummaryToolCfg
 InDetTrigTrackSummaryTool = CAtoLegacyPublicToolWrapper(InDetTrigTrackSummaryToolCfg)
 
@@ -26,8 +25,6 @@ InDetTrigTrackSummaryTool = CAtoLegacyPublicToolWrapper(InDetTrigTrackSummaryToo
 # This can be enabled with
 # DoSharedSiHits = InDetTrigFlags.doSharedHits(),
 # AssociationMapName = "TrigInDetPRDtoTrackMap"
-
-from TrkParticleCreator.TrkParticleCreatorConf import Trk__TrackParticleCreatorTool
 
 from TrkConfig.TrkParticleCreatorConfig import InDetTrigParticleCreatorToolCfg,InDetTrigParticleCreatorToolTRTPidCfg
 InDetTrigParticleCreatorTool = CAtoLegacyPublicToolWrapper(InDetTrigParticleCreatorToolCfg)
@@ -65,20 +62,6 @@ if DetFlags.haveRIO.TRT_on() :
     if (InDetTrigFlags.doPrintConfigurables()):
         print (     InDetTrigTRT_ElectronPidTool)
 
-InDetTrigParticleCreatorToolWithSummaryTRTPid = \
-    Trk__TrackParticleCreatorTool( name = "InDetTrigParticleCreatorToolWithSummaryTRTPid",
-                                   TrackSummaryTool = InDetTrigTrackSummaryTool,
-                                   TestPixelLayerTool = InDetTrigTestPixelLayerToolInner,
-                                   KeepParameters = True,
-                                   ComputeAdditionalInfo = True,
-                                   TRT_ElectronPidTool   = InDetTrigTRT_ElectronPidTool,
-                                   DoSharedSiHits = False
-                                   #ForceTrackSummaryUpdate = True,
-                                   )
-
-ToolSvc += InDetTrigParticleCreatorToolWithSummaryTRTPid
-if (InDetTrigFlags.doPrintConfigurables()):
-    print (InDetTrigParticleCreatorToolWithSummaryTRTPid)
 
 from InDetRecExample.TrackingCommon import makePublicTool,makeName
 @makePublicTool

@@ -6,27 +6,25 @@
  global functions and stuff ...
  -----------------------------------------
  ***************************************************************************/
- 
+
 #ifndef RPCRAWDATAMONITORING_RPCGLOBALUTILITIES_H
 #define RPCRAWDATAMONITORING_RPCGLOBALUTILITIES_H
 
- 
 #include <string>
 
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "MuonReadoutGeometry/RpcReadoutElement.h"
- 
 
 class RpcIdHelper;
-namespace RpcGM 
-{
-  
-  
-   
-  std::vector<int>	     	 RpcStripShift    (const MuonGM::MuonDetectorManager* m_muonMgr, const RpcIdHelper& rpcIdHelper, Identifier prdcoll_id, int  irpctriggerInfo);
-  std::vector<std::string>   	 RpcLayerSectorSideName(const RpcIdHelper& rpcIdHelper, Identifier prdcoll_id, int  irpctriggerInfo);
-    
-    
-}
+namespace RpcGM {
 
-#endif // RPCRAWDATAMONITORING_RPCGLOBALUTILITIES_H
+std::vector<int> RpcStripShift(const MuonGM::MuonDetectorManager* m_muonMgr,
+                               const RpcIdHelper& rpcIdHelper,
+                               Identifier prdcoll_id, int irpctriggerInfo);
+std::vector<std::string> RpcLayerSectorSideName(const RpcIdHelper& rpcIdHelper,
+                                                Identifier prdcoll_id,
+                                                int irpctriggerInfo);
+
+}  // namespace RpcGM
+
+#endif  // RPCRAWDATAMONITORING_RPCGLOBALUTILITIES_H

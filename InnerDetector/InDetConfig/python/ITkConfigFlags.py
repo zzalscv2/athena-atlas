@@ -40,7 +40,7 @@ def createITkConfigFlags():
 
   itkcf.addFlag("ITk.Conditions.PixelChargeCalibTag", "ChargeCalib-MC21-01")
   itkcf.addFlag("ITk.Conditions.PixelChargeCalibFile", "")
-  itkcf.addFlag("ITk.Conditions.PixelOfflineCalibTag", "PixelITkError_v5")
+  itkcf.addFlag("ITk.Conditions.PixelOfflineCalibTag", "PixelITkError_v5_ATLAS-P2-RUN4-01")
   itkcf.addFlag("ITk.Conditions.PixelOfflineCalibFile", "")
 
   # Turn on running of PRD MultiTruthMaker

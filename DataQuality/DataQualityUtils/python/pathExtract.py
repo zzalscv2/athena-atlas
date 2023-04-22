@@ -5,7 +5,7 @@ from __future__ import print_function
 # arguments : list of run
 
 import subprocess as sp
-
+import os 
 # Return the path of the output of tier0 monitoring
 
 
@@ -14,21 +14,16 @@ def returnEosHistPath(run, stream, amiTag, tag="data16_13TeV"):
               'JetTauEtmiss': 'physics_', 'Main': 'physics_', 'ZeroBias': 'physics_', 'MinBias': 'physics_'}
     path = '/eos/atlas/atlastier0/rucio/'+tag + \
         '/'+prefix[stream]+stream+'/00'+str(run)+'/'
-    P = sp.Popen(['/usr/bin/eos', 'ls', path], stdout=sp.PIPE, stderr=sp.PIPE)
-    p = P.communicate()[0].decode("utf-8")
-    
-    listOfFiles = p.split('\n') #hi
-    for iFile in listOfFiles:
-        if ("HIST.%s" % (amiTag) in iFile):
-            path = '/eos/atlas/atlastier0/rucio/'+str(tag)+'/' + \
-                   str(prefix[stream])+str(stream)+'/00'+str(run)+'/'+str(iFile)
-            P = sp.Popen(['/usr/bin/eos', 'ls', path],
-                         stdout=sp.PIPE, stderr=sp.PIPE)
-            p = P.communicate()[0].decode("utf-8")
-            path = '/eos/atlas/atlastier0/rucio/'+str(tag)+'/' + \
-                   str(prefix[stream])+str(stream)+'/00'+str(run)+'/'+str(iFile)+'/'+p
-            return path
-
+    listOfDirs = [ path+p for p in os.listdir(path) ]
+    for iDir in listOfDirs:
+        if ("HIST.%s" % (amiTag) in iDir):
+            files = [ iDir+"/"+f for f in os.listdir(iDir) ]
+            if len(files) == 0:
+                return "FILE NOT FOUND"
+            elif len(files) > 1:
+                print("WARNING: pathExtract returning",len(files),"hist files, where one is expected in path",iDir)
+            return files[0]
+                
     return "FILE NOT FOUND"
 
 # Return the path of the output of tier0 monitoring for a range of single LB (available only a couple of days after processing)

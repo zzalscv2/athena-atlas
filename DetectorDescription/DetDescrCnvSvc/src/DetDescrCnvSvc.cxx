@@ -1,100 +1,46 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Include files
 #include "DetDescrCnvSvc/DetDescrCnvSvc.h"
-#include "DetDescrCnvSvc/IDetDescrCnvSvc.h"
-//#include "AthenaServices/AthenaConversionSvc.h"
+
+#include "AthenaBaseComps/AthCheckMacros.h"
+#include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "DetDescrCnvSvc/DetDescrAddress.h"
-
-
-#include "GaudiKernel/MsgStream.h"
-#include "GaudiKernel/ISvcLocator.h"
+#include "DetDescrCnvSvc/IDetDescrCnvSvc.h"
 #include "GaudiKernel/IConversionSvc.h"
 #include "GaudiKernel/IConverter.h"
 #include "GaudiKernel/IDataSelector.h"
 #include "GaudiKernel/IOpaqueAddress.h"
-
+#include "GaudiKernel/ISvcLocator.h"
 #include "StoreGate/StoreGateSvc.h"
-//  #include "SGTools/TransientAddress.h"
 
-//External definitions
-const long DetDescr_StorageType=0x44;
+// External definitions
+constexpr long DetDescr_StorageType = 0x44;
 
 //-------------------------------------------------------------------------
 
 /// Standard constructor
-DetDescrCnvSvc::DetDescrCnvSvc(const std::string& name, ISvcLocator* svc)
-        :
-        ConversionSvc( name, svc, DetDescr_StorageType),
-        m_detStore(0),
-        m_decodeIdDict(true),
-        m_idDictFromRDB(false),
-        m_fromRoot(false),
-        m_fromNova(false),
-        m_detElemsfromDetNodes(false),
-        m_compact_ids_only(false),
-        m_do_checks(false),
-        m_do_neighbours(true),
-        m_hasCSC(true),
-        m_hasSTgc(true),
-        m_hasMM(true),
-        m_useGeomDB_InDet(false)
-{
-    declareProperty("DetectorManagers",            m_detMgrs);
-    declareProperty("DetectorNodes",   	           m_detNodes );
-    declareProperty("DecodeIdDict",	           m_decodeIdDict );
-    declareProperty("IdDictName",   	           m_idDictName );
-    declareProperty("IdDictFromRDB",   	           m_idDictFromRDB );
-    declareProperty("IdDictGlobalTag",             m_idDictGlobalTag );
-    declareProperty("ReadFromROOT",   	           m_fromRoot );
-    declareProperty("ReadFromNova",   	           m_fromNova );
-    declareProperty("InitDetElemsFromGeoModel",    m_detElemsfromDetNodes);
-    declareProperty("CompactIDsOnly",              m_compact_ids_only);
-    declareProperty("DoIdChecks",                  m_do_checks);
-    declareProperty("DoInitNeighbours",            m_do_neighbours);
-    declareProperty("HasCSC",                      m_hasCSC);
-    declareProperty("HasSTgc",                     m_hasSTgc);
-    declareProperty("HasMM",                       m_hasMM);
-
-    declareProperty("AtlasIDFileName",             m_idDictATLASName);
-    declareProperty("InDetIDFileName",             m_idDictInDetName);
-    declareProperty("LArIDFileName",               m_idDictLArName);
-    declareProperty("TileIDFileName",              m_idDictTileName);
-    declareProperty("CaloIDFileName",              m_idDictLVL1Name);
-    declareProperty("MuonIDFileName",              m_idDictMuonName);
-    declareProperty("HighVoltageIDFileName",       m_idDictLArHighVoltageName);
-    declareProperty("LArElectrodeIDFileName",      m_idDictLArElectrodeName);
-    declareProperty("ForwardIDFileName",           m_idDictForwardName);
-    declareProperty("FullAtlasNeighborsFileName",  m_fullAtlasNeighborsName);
-    declareProperty("FCAL2DNeighborsFileName",     m_fcal2dNeighborsName);
-    declareProperty("FCAL3DNeighborsNextFileName", m_fcal3dNeighborsNextName);
-    declareProperty("FCAL3DNeighborsPrevFileName", m_fcal3dNeighborsPrevName);
-    declareProperty("TileNeighborsFileName",       m_tileNeighborsName);
-
-    declareProperty("useGeomDB_InDet",       m_useGeomDB_InDet);
-}
+DetDescrCnvSvc::DetDescrCnvSvc(const std::string &name, ISvcLocator *svc)
+    : ConversionSvc(name, svc, DetDescr_StorageType) {}
 
 //-------------------------------------------------------------------------
 
 /// Standard Destructor
-DetDescrCnvSvc::~DetDescrCnvSvc()   {
-}
+DetDescrCnvSvc::~DetDescrCnvSvc() = default;
 
 //-------------------------------------------------------------------------
 
 /// Identify interfaces to which this service is responsive
-StatusCode
-DetDescrCnvSvc::queryInterface(const InterfaceID& riid, void** ppvInterface) {
-    if ( riid == IConversionSvc::interfaceID() )  {
-        *ppvInterface = (IConversionSvc*)this;
-    }
-    else if ( riid == IDetDescrCnvSvc::interfaceID() )  {
-        *ppvInterface = (IDetDescrCnvSvc*)this;
-    }
-    else   {
-        return ConversionSvc::queryInterface( riid, ppvInterface );
+StatusCode DetDescrCnvSvc::queryInterface(const InterfaceID &riid,
+                                          void **ppvInterface) {
+    if (riid == IConversionSvc::interfaceID()) {
+        *ppvInterface = dynamic_cast<IConversionSvc *>(this);
+    } else if (riid == IDetDescrCnvSvc::interfaceID()) {
+        *ppvInterface = dynamic_cast<IDetDescrCnvSvc *>(this);
+    } else {
+        return ConversionSvc::queryInterface(riid, ppvInterface);
     }
     addRef();
     return StatusCode::SUCCESS;
@@ -103,228 +49,141 @@ DetDescrCnvSvc::queryInterface(const InterfaceID& riid, void** ppvInterface) {
 //-------------------------------------------------------------------------
 
 /// Initialize the service.
-StatusCode
-DetDescrCnvSvc::initialize()     {
-
-    MsgStream log(msgSvc(),name());
-    StatusCode status = ConversionSvc::initialize();
-    if (status.isFailure()) {
-	log << MSG::FATAL << "Unable to initialize ConversionSvc !" << endmsg;
-	return StatusCode::FAILURE;
-    }
-
-    log << MSG::INFO << " initializing " <<endmsg ;
+StatusCode DetDescrCnvSvc::initialize() {
+    ATH_CHECK(ConversionSvc::initialize());
+    ATH_MSG_INFO(" initializing ");
 
     // get DetectorStore service
-    status = service("DetectorStore", m_detStore);
-    if (status.isFailure()) {
-	log << MSG::FATAL << "DetectorStore service not found !" << endmsg;
-	return StatusCode::FAILURE;
-    } else {
-	log << MSG::INFO << "Found DetectorStore service" << endmsg;
-    }
+    ATH_CHECK(service("DetectorStore", m_detStore));
+    ATH_MSG_INFO("Found DetectorStore service");
 
     // fill in the Addresses for Transient Detector Store objects
+    ATH_MSG_INFO(" filling proxies for detector managers ");
 
-    log << MSG::INFO << " filling proxies for detector managers " <<endmsg ;
-
-    // Obsolete --- this CLID no longer exists
-    //status = addToDetStore(2512, "InDetMgr");
-    //if (status != StatusCode::SUCCESS) return status;
-    // now LArGeoModel does it itself
-    //    status =  addToDetStore(2741, "LArMgr");
-    // if (status != StatusCode::SUCCESS) return status;
-    // now TileGeoModel is does it itself
-    //    status =  addToDetStore(2941, "TileMgr");
-    // if (status != StatusCode::SUCCESS) return status;
-    // Obsolete --- this CLID no longer exists
-    //status =  addToDetStore(4060, "MuonMgr");
-    //if (status != StatusCode::SUCCESS) return status;
-    status =  addToDetStore(117659265, "CaloTTMgr");
-    if (status != StatusCode::SUCCESS) return status;
-
-
-    status =  addToDetStore(4548337, "CaloMgr");
-    if (status != StatusCode::SUCCESS) return status;
-    status =  addToDetStore(241807251, "CaloSuperCellMgr");
-    if (status != StatusCode::SUCCESS) return status;
-    status =  addToDetStore(125856940, "CaloIdManager");
-    if (status != StatusCode::SUCCESS) return status;
-
-
+    ATH_CHECK(addToDetStore(117659265, "CaloTTMgr"));
+    ATH_CHECK(addToDetStore(4548337, "CaloMgr"));
+    ATH_CHECK(addToDetStore(241807251, "CaloSuperCellMgr"));
+    ATH_CHECK(addToDetStore(125856940, "CaloIdManager"));
     // IdDict:
-    status =  addToDetStore(2411, "IdDict");
-    if (status != StatusCode::SUCCESS) return status;
+    ATH_CHECK(addToDetStore(2411, "IdDict"));
 
     // IdHelpers
-    status =  addToDetStore(164875623, "AtlasID");
-    if (status != StatusCode::SUCCESS) return status;
-    status =  addToDetStore(2516, "PixelID");
-    if (status != StatusCode::SUCCESS) return status;
-    status =  addToDetStore(2517, "SCT_ID");
-    if (status != StatusCode::SUCCESS) return status;
-    status =  addToDetStore(2518, "TRT_ID");
-    if (status != StatusCode::SUCCESS) return status;
-    status =  addToDetStore(131939624, "PLR_ID");
-    if (status != StatusCode::SUCCESS) return status;
-    status =  addToDetStore(79264207, "HGTD_ID");
-    if (status != StatusCode::SUCCESS) return status;
-    status =  addToDetStore(129452393, "SiliconID");
-    if (status != StatusCode::SUCCESS) return status;
-    status =  addToDetStore(163583365, "LArEM_ID");
-    if (status != StatusCode::SUCCESS) return status;
-    status =  addToDetStore(99488227, "LArEM_SuperCell_ID");
-    if (status != StatusCode::SUCCESS) return status;
-    status =  addToDetStore(3870484, "LArHEC_ID");
-    if (status != StatusCode::SUCCESS) return status;
-    status =  addToDetStore(254277678, "LArHEC_SuperCell_ID");
-    if (status != StatusCode::SUCCESS) return status;
-    status =  addToDetStore(45738051, "LArFCAL_ID");
-    if (status != StatusCode::SUCCESS) return status;
-    status =  addToDetStore(12829437, "LArFCAL_SuperCell_ID");
-    if (status != StatusCode::SUCCESS) return status;
-    status =  addToDetStore(79264204, "LArMiniFCAL_ID");
-    if (status != StatusCode::SUCCESS) return status;
-    status =  addToDetStore(158698068, "LArOnlineID");
-    if (status != StatusCode::SUCCESS) return status;
-    status =  addToDetStore(38321944, "TTOnlineID");
-    if (status != StatusCode::SUCCESS) return status;
-    status =  addToDetStore(115600394, "LArOnline_SuperCellID");
-    if (status != StatusCode::SUCCESS) return status;
-    status =  addToDetStore(27863673, "LArHVLineID");
-    if (status != StatusCode::SUCCESS) return status;
-    status =  addToDetStore(80757351, "LArElectrodeID");
-    if (status != StatusCode::SUCCESS) return status;
-    status =  addToDetStore(2901, "TileID");
-    if (status != StatusCode::SUCCESS) return status;
-    status =  addToDetStore(49557789, "Tile_SuperCell_ID");
-    if (status != StatusCode::SUCCESS) return status;
-    status =  addToDetStore(2902, "TileHWID");
-    if (status != StatusCode::SUCCESS) return status;
-    status =  addToDetStore(2903, "TileTBID");
-    if (status != StatusCode::SUCCESS) return status;
-    status =  addToDetStore(4170, "MDTIDHELPER");
-    if (status != StatusCode::SUCCESS) return status;
-    if (m_hasCSC) {
-        status =  addToDetStore(4171, "CSCIDHELPER");
-        if (status != StatusCode::SUCCESS) return status;
-    }
-    status =  addToDetStore(4172, "RPCIDHELPER");
-    if (status != StatusCode::SUCCESS) return status;
-    status =  addToDetStore(4173, "TGCIDHELPER");
-    if (status != StatusCode::SUCCESS) return status;
-    if (m_hasSTgc) {
-        status =  addToDetStore(4174, "STGCIDHELPER");
-        if (status != StatusCode::SUCCESS) return status;
-    }
-    if (m_hasMM) {
-        status =  addToDetStore(4175, "MMIDHELPER");
-        if (status != StatusCode::SUCCESS) return status;
-    }
-    status =  addToDetStore(108133391, "CaloLVL1_ID");
-    if (status != StatusCode::SUCCESS) return status;
-    status =  addToDetStore(123500438, "CaloCell_ID");
-    if (status != StatusCode::SUCCESS) return status;
-    status =  addToDetStore(128365736, "CaloCell_SuperCell_ID");
-    if (status != StatusCode::SUCCESS) return status;
-    status =  addToDetStore(167756483, "CaloDM_ID");
-    if (status != StatusCode::SUCCESS) return status;
-    status =  addToDetStore(190591643, "ZdcID");
-    if (status != StatusCode::SUCCESS) return status;
+    ATH_CHECK(addToDetStore(164875623, "AtlasID"));
+    ATH_CHECK(addToDetStore(2516, "PixelID"));
+    ATH_CHECK(addToDetStore(2517, "SCT_ID"));
+    ATH_CHECK(addToDetStore(2518, "TRT_ID"));
+    ATH_CHECK(addToDetStore(131939624, "PLR_ID"));
+    ATH_CHECK(addToDetStore(79264207, "HGTD_ID"));
+    ATH_CHECK(addToDetStore(129452393, "SiliconID"));
+    ATH_CHECK(addToDetStore(163583365, "LArEM_ID"));
+    ATH_CHECK(addToDetStore(99488227, "LArEM_SuperCell_ID"));
+    ATH_CHECK(addToDetStore(3870484, "LArHEC_ID"));
+    ATH_CHECK(addToDetStore(254277678, "LArHEC_SuperCell_ID"));
+    ATH_CHECK(addToDetStore(45738051, "LArFCAL_ID"));
+    ATH_CHECK(addToDetStore(12829437, "LArFCAL_SuperCell_ID"));
+    ATH_CHECK(addToDetStore(79264204, "LArMiniFCAL_ID"));
+    ATH_CHECK(addToDetStore(158698068, "LArOnlineID"));
+    ATH_CHECK(addToDetStore(38321944, "TTOnlineID"));
+    ATH_CHECK(addToDetStore(115600394, "LArOnline_SuperCellID"));
+    ATH_CHECK(addToDetStore(27863673, "LArHVLineID"));
+    ATH_CHECK(addToDetStore(80757351, "LArElectrodeID"));
+    ATH_CHECK(addToDetStore(2901, "TileID"));
+    ATH_CHECK(addToDetStore(49557789, "Tile_SuperCell_ID"));
+    ATH_CHECK(addToDetStore(2902, "TileHWID"));
+    ATH_CHECK(addToDetStore(2903, "TileTBID"));
 
-    //for J/GTower
-    status =  addToDetStore(218674799, "JTower_ID");
-    if (status != StatusCode::SUCCESS) return status;
-    status =  addToDetStore(49678914, "GTower_ID");
-    if (status != StatusCode::SUCCESS) return status;
+    if (m_hasMDT)
+        ATH_CHECK(addToDetStore(4170, "MDTIDHELPER"));
+    if (m_hasCSC)
+        ATH_CHECK(addToDetStore(4171, "CSCIDHELPER"));
 
-    return status;
+    if (m_hasRPC)
+        ATH_CHECK(addToDetStore(4172, "RPCIDHELPER"));
+    if (m_hasTGC)
+        ATH_CHECK(addToDetStore(4173, "TGCIDHELPER"));
+    if (m_hasSTGC)
+        ATH_CHECK(addToDetStore(4174, "STGCIDHELPER"));
+    if (m_hasMM)
+        ATH_CHECK(addToDetStore(4175, "MMIDHELPER"));
+
+    ATH_CHECK(addToDetStore(108133391, "CaloLVL1_ID"));
+    ATH_CHECK(addToDetStore(123500438, "CaloCell_ID"));
+    ATH_CHECK(addToDetStore(128365736, "CaloCell_SuperCell_ID"));
+    ATH_CHECK(addToDetStore(167756483, "CaloDM_ID"));
+    ATH_CHECK(addToDetStore(190591643, "ZdcID"));
+
+    // for J/GTower
+    ATH_CHECK(addToDetStore(218674799, "JTower_ID"));
+    ATH_CHECK(addToDetStore(49678914, "GTower_ID"));
+
+    return StatusCode::SUCCESS;
 }
 
 //-------------------------------------------------------------------------
 
-/// Create a Generic address using explicit arguments to identify a single object.
-StatusCode DetDescrCnvSvc::createAddress(long            /* svc_type */,
-					 const CLID&          /* clid     */,
-					 const std::string*   /* par      */,
-					 const unsigned long* /* ip       */,
-					 IOpaqueAddress*& refpAddress)    {
-    refpAddress = 0;
+/// Create a Generic address using explicit arguments to identify a single
+/// object.
+StatusCode DetDescrCnvSvc::createAddress(long /* svc_type */,
+                                         const CLID & /* clid     */,
+                                         const std::string * /* par      */,
+                                         const unsigned long * /* ip       */,
+                                         IOpaqueAddress *&refpAddress) {
+    refpAddress = nullptr;
     return StatusCode::FAILURE;
 }
 
 //-------------------------------------------------------------------------
 
-StatusCode DetDescrCnvSvc::createAddress( long /* svc_type */,
-					  const CLID& clid,
-					  const std::string& refAddress,
-					  IOpaqueAddress*& refpAddress)
-{
+StatusCode DetDescrCnvSvc::createAddress(long /* svc_type */, const CLID &clid,
+                                         const std::string &refAddress,
+                                         IOpaqueAddress *&refpAddress) {
     try {
-	refpAddress = new DetDescrAddress(clid);
-	DetDescrAddress* ddAddr;
-	ddAddr = dynamic_cast<DetDescrAddress*> (refpAddress);
-	if(!ddAddr) {
-	    MsgStream log(msgSvc(),name());
-	    log << MSG::FATAL << "Could not cast to DetDescrAddress." << endmsg;
-	    return StatusCode::FAILURE;
-	}
-	if (ddAddr->fromString(refAddress).isFailure()) {
-	  MsgStream log(msgSvc(),name());
-	  log << MSG::FATAL << "Could not assign address " << refAddress << endmsg;
-	  return StatusCode::FAILURE;
-	}
-    }
-    catch(...) {
-	refpAddress = 0;
+        refpAddress = new DetDescrAddress(clid);
+        DetDescrAddress *ddAddr;
+        ddAddr = dynamic_cast<DetDescrAddress *>(refpAddress);
+        if (!ddAddr) {
+            MsgStream log(msgSvc(), name());
+            log << MSG::FATAL << "Could not cast to DetDescrAddress." << endmsg;
+            return StatusCode::FAILURE;
+        }
+        if (ddAddr->fromString(refAddress).isFailure()) {
+            MsgStream log(msgSvc(), name());
+            log << MSG::FATAL << "Could not assign address " << refAddress
+                << endmsg;
+            return StatusCode::FAILURE;
+        }
+    } catch (...) {
+        refpAddress = 0;
     }
     return (refpAddress != 0) ? StatusCode::SUCCESS : StatusCode::FAILURE;
 }
 
 //-------------------------------------------------------------------------
 
-StatusCode DetDescrCnvSvc::convertAddress( const IOpaqueAddress* pAddress,
-                                           std::string& refAddress)
-{
-  const DetDescrAddress* addr = dynamic_cast<const DetDescrAddress*>(pAddress);
-  if (!addr) return StatusCode::FAILURE;
-  return addr->toString(refAddress);
+StatusCode DetDescrCnvSvc::convertAddress(const IOpaqueAddress *pAddress,
+                                          std::string &refAddress) {
+    const DetDescrAddress *addr =
+        dynamic_cast<const DetDescrAddress *>(pAddress);
+    if (!addr)
+        return StatusCode::FAILURE;
+    return addr->toString(refAddress);
 }
-
 
 //-------------------------------------------------------------------------
 
-StatusCode
-DetDescrCnvSvc::addToDetStore(const CLID& clid, const std::string& name) const
-{
-
-    MsgStream log(msgSvc(), "DetDescrCnvSvc");
-
+StatusCode DetDescrCnvSvc::addToDetStore(const CLID &clid,
+                                         const std::string &name) const {
     // Based on input parameters, create StoreGate proxies with
     // DetDescrAddresses in the detector store for the different
     // detectors.
 
     // fill in the Addresses for Transient Detector Store objects
 
-    DetDescrAddress * addr;
-    addr  = new DetDescrAddress(clid, name, name);
-    StatusCode status = m_detStore->recordAddress(addr);
-    if (status != StatusCode::SUCCESS) {
-	log << MSG::INFO
-	    << " unable to fill address for " << (*addr->par())
-	    << " with CLID " << addr->clID()
-	    << " and storage type " << addr->svcType()
-	    << " to detector store " <<endmsg ;
-	return StatusCode::FAILURE;
-    }
-    else {
-	unsigned int st = addr->svcType();
-	log << MSG::INFO
-	    << " filling address for " << (*addr->par())
-	    << " with CLID " << addr->clID()
-	    << " and storage type " << st
-	    << " to detector store " <<endmsg ;
-    }
-    return status;
+    DetDescrAddress *addr = new DetDescrAddress(clid, name, name);
+    ATH_CHECK(m_detStore->recordAddress(addr));
+    ATH_MSG_INFO(" filling address for " << (*addr->par()) << " with CLID "
+                                         << addr->clID() << " and storage type "
+                                         << addr->svcType()
+                                         << " to detector store ");
+    return StatusCode::SUCCESS;
 }
-

@@ -1598,7 +1598,6 @@ void MuonGMCheck::checkreadoutcscgeo() {
         const IdentifierHash hash{hashInt};
         const CscReadoutElement* csc = p_MuonMgr->getCscReadoutElement(hash);
         if (!csc) continue;
-        const Identifier readout_id = csc->identify();
         
         fout << " ///////////////////// Found a CscReadoutElement "<< std::endl;
         Identifier idr = csc->identify();

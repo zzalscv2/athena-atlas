@@ -65,7 +65,10 @@ def generateCFChains(flags, opt):
 
         MuonChains  = []
         # step1
-        mufastS= muFastSequence(flags)
+        if isComponentAccumulatorCfg():
+            mufastS= muFastSequence(flags)
+        else:
+            mufastS= menuSequenceCAToGlobalWrapper(muFastSequence,flags)
         step1mufast=makeChainStep("Step1_muFast", [ mufastS ])
         # step2
         mucombS = muCombSequence(flags)
@@ -249,7 +252,11 @@ def generateCFChains(flags, opt):
         from TriggerMenuMT.HLT.Muon.MuonMenuSequences import muFastSequence, muCombSequence, muEFSASequence, muEFCBSequence
         from TrigBphysHypo.TrigMultiTrkComboHypoConfig import StreamerDimuL2ComboHypoCfg, DimuEFComboHypoCfg
         
-        step1_dimufast=makeChainStep("Step1_dimuFast", [muFastSequence(flags)], multiplicity=[2])
+        if isComponentAccumulatorCfg():
+            muFast = muFastSequence(flags)
+        else:
+            muFast = menuSequenceCAToGlobalWrapper(muFastSequence,flags)
+        step1_dimufast=makeChainStep("Step1_dimuFast", [muFast], multiplicity=[2])
         step2_dimuComb=makeChainStep("Step2_dimuComb", [muCombSequence(flags)], multiplicity=[2], comboHypoCfg=functools.partial(StreamerDimuL2ComboHypoCfg,flags))
         if isComponentAccumulatorCfg():
             muEFSAS = muEFSASequence(flags)
@@ -275,8 +282,12 @@ def generateCFChains(flags, opt):
         fastCaloSeq = RecoFragmentsPool.retrieve( electronFastCaloCfg, flags )
         
         from TriggerMenuMT.HLT.Muon.MuonMenuSequences import muFastSequence
-        
-        comboStep_et_mufast           = makeChainStep("Step1_et_mufast", [fastCaloSeq, muFastSequence(flags)], multiplicity=[1,1])
+        if isComponentAccumulatorCfg():
+            muFast = muFastSequence(flags)
+        else:
+            muFast = menuSequenceCAToGlobalWrapper(muFastSequence,flags)
+
+        comboStep_et_mufast           = makeChainStep("Step1_et_mufast", [fastCaloSeq, muFast], multiplicity=[1,1])
 
         menu.chainsInMenu['Combined'] = [
             makeChain(flags, name='HLT_e3_etcut_mu6_L1EM7_MU8F', L1Thresholds=["EM7", "MU8F"],  ChainSteps=[comboStep_et_mufast ])]

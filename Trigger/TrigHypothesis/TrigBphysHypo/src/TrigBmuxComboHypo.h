@@ -128,6 +128,7 @@ class TrigBmuxComboHypo: public ::ComboHypo {
       const Trk::VxCascadeInfo& vxCascadeInfo,
       const Amg::Vector3D& beamSpotPosition) const;
 
+  bool isIdenticalTracks(const xAOD::TrackParticle* lhs, const xAOD::TrackParticle* rhs) const;
   bool isInSameRoI(const xAOD::Muon*, const xAOD::TrackParticle*) const;
   bool isInMassRange(double mass, const std::pair<double, double>& range) const { return (mass > range.first && mass < range.second); }
   double getTrkImpactParameterZ0(const EventContext& ctx, const xAOD::TrackParticle& track, const Amg::Vector3D& vertex) const;
@@ -147,6 +148,8 @@ class TrigBmuxComboHypo: public ::ComboHypo {
     "MakeCascadeFit", true, "perform cascade fit of the partially reconstructed decays"};
   Gaudi::Property<float> m_cascadeChi2 {this,
     "CascadeChi2", 50., "maximum chi2 of the cascade fit"};
+  Gaudi::Property<double> m_deltaR {this,
+    "DeltaR", 0.01, "minimum deltaR between same-sign tracks (overlap removal)"};
   Gaudi::Property<double> m_trkZ0 {this,
     "TrkZ0", 10., "maximum of |z0_trk - z0_muon|, where z0_trk(z0_muon) is impact parameter of the track(muon) wrt BeamSpot; no preselection if negative"};
   Gaudi::Property<double> m_roiEtaWidth {this,

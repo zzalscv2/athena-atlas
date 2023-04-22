@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file MuonPhysValConfig.py
@@ -16,6 +16,33 @@ def PhysValMuonCfg(flags, container='', **kwargs):
 
     kwargs.setdefault("IsData", not flags.Input.isMC)
     kwargs.setdefault("SlowMuonContainerName", "")
+
+    kwargs.setdefault("SelectMuonWorkingPoints", [0, 1, 2])
+    kwargs.setdefault("SelectMuonAuthors", [1, 2 , 4, 5, 6, 8, 10])
+    selectMuonCat = [0, 1]
+    if not flags.Input.isMC:
+        selectMuonCat = [0, 1, 4]
+    kwargs.setdefault("SelectMuonCategories", selectMuonCat)
+    from IsolationSelection.IsolationSelectionConfig import MuonPhysValIsolationSelCfg
+    kwargs.setdefault("IsoTool", acc.popToolsAndMerge(MuonPhysValIsolationSelCfg(flags)))
+    from InDetConfig.InDetTrackSelectorToolConfig import MuonCombinedInDetDetailedTrackSelectorToolCfg
+    kwargs.setdefault("TrackSelector",acc.popToolsAndMerge(MuonCombinedInDetDetailedTrackSelectorToolCfg(flags)))
+    from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
+    kwargs.setdefault("MuonSelector", acc.popToolsAndMerge(MuonSelectionToolCfg(flags)))
+    from MuonConfig.MuonRecToolsConfig import MuonEDMPrinterToolCfg
+    edmprinter = acc.popToolsAndMerge(MuonEDMPrinterToolCfg(flags))
+    kwargs.setdefault("MuonPrinter", CompFactory.Rec.MuonPrintingTool(MuonStationPrinter=edmprinter))
+    kwargs.setdefault("EnableLumi", False)
+    from AthenaCommon.Constants import WARNING
+    kwargs.setdefault("OutputLevel", WARNING)
+    kwargs.setdefault("DetailLevel", 10)
+
+    acc.setPrivateTools(CompFactory.MuonPhysValMonitoring.MuonPhysValMonitoringTool("muphysval", **kwargs))
+    return acc
+
+
+def PhysValMuonTriggerCfg(flags, container='', **kwargs):
+    acc = ComponentAccumulator()
 
     selectHLTMuonItems = [
         ["HLT_mu20","L1_MU20"],
@@ -39,27 +66,9 @@ def PhysValMuonCfg(flags, container='', **kwargs):
 
     kwargs.setdefault("SelectHLTMuonItems", selectHLTMuonItems)
     kwargs.setdefault("SelectL1MuonItems", selectL1MuonItems)
-    kwargs.setdefault("SelectMuonWorkingPoints", [0, 1, 2])
-    kwargs.setdefault("SelectMuonAuthors", [1, 2 , 4, 5, 6, 8, 10])
-    selectMuonCat = [0, 1]
-    if not flags.Input.isMC:
-        selectMuonCat = [0, 1, 4]
-    kwargs.setdefault("SelectMuonCategories", selectMuonCat)
-    from IsolationSelection.IsolationSelectionConfig import MuonPhysValIsolationSelCfg
-    kwargs.setdefault("IsoTool", acc.popToolsAndMerge(MuonPhysValIsolationSelCfg(flags)))
-    from InDetConfig.InDetTrackSelectorToolConfig import MuonCombinedInDetDetailedTrackSelectorToolCfg
-    kwargs.setdefault("TrackSelector",acc.popToolsAndMerge(MuonCombinedInDetDetailedTrackSelectorToolCfg(flags)))
-    from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
-    kwargs.setdefault("MuonSelector", acc.popToolsAndMerge(MuonSelectionToolCfg(flags)))
-    from MuonConfig.MuonRecToolsConfig import MuonEDMPrinterToolCfg
-    edmprinter = acc.popToolsAndMerge(MuonEDMPrinterToolCfg(flags))
-    kwargs.setdefault("MuonPrinter", CompFactory.Rec.MuonPrintingTool(MuonStationPrinter=edmprinter))
     from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
     kwargs.setdefault("TrigDecTool", acc.getPrimaryAndMerge(TrigDecisionToolCfg(flags)))
-    kwargs.setdefault("EnableLumi", False)
-    from AthenaCommon.Constants import WARNING
-    kwargs.setdefault("OutputLevel", WARNING)
-    kwargs.setdefault("DetailLevel", 10)
 
-    acc.setPrivateTools(CompFactory.MuonPhysValMonitoring.MuonPhysValMonitoringTool("muphysval", **kwargs))
+    acc.setPrivateTools(acc.popToolsAndMerge(
+        PhysValMuonCfg(flags, container, **kwargs)))
     return acc

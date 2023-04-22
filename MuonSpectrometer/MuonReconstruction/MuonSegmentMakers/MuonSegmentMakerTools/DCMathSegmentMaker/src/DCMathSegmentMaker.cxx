@@ -54,7 +54,7 @@ namespace {
     }
     template <typename T> constexpr T absmax(const T& a, const T& b) {
         return std::abs(a) > std::abs(b) ? a : b;}
-
+    
 }  // namespace
 namespace Muon {
 
@@ -171,19 +171,22 @@ namespace Muon {
         TrkDriftCircleMath::DCVec dcs = createDCVec(mdts, errorScale, chamberSet, phimin, phimax, dcStatistics, gToStation, amdbToGlobal);
 
         // create geometry
-        std::unique_ptr<TrkDriftCircleMath::MdtMultiChamberGeometry> multiGeo;
-        if (m_doGeometry) {
-            ATH_MSG_VERBOSE(" using chamber geometry with #chambers " << chamberSet.size());
-
+        std::shared_ptr<const TrkDriftCircleMath::ChamberGeometry> multiGeo;
+        if (m_doGeometry) { 
+            ATH_MSG_VERBOSE(" using chamber geometry with #chambers " << chamberSet.size());            
             // vector to store chamber geometries
-            std::vector<TrkDriftCircleMath::MdtChamberGeometry> geos;
+            std::vector<TrkDriftCircleMath::MdtChamberGeometry> geos{};
 
             // loop over chambers
             geos.reserve(chamberSet.size());
-            for (const Identifier& id : chamberSet) { geos.push_back(createChamberGeometry(id, gToStation)); }
-
+            for (const Identifier& id : chamberSet) { 
+                ATH_MSG_VERBOSE("Chamber: "<<m_idHelperSvc->toStringChamber(id));
+                geos.push_back(createChamberGeometry(id, gToStation)); 
+            }            
             // create new geometry
             multiGeo = std::make_unique<TrkDriftCircleMath::MdtMultiChamberGeometry>(geos);
+            
+            
         }
 
         double angle = m_sinAngleCut;
@@ -1188,7 +1191,7 @@ namespace Muon {
 
    void DCMathSegmentMaker::associateMDTsToSegment(
         const Amg::Vector3D& gdir, TrkDriftCircleMath::Segment& segment, const std::vector<const MdtDriftCircleOnTrack*>& mdts,
-        TrkDriftCircleMath::MdtMultiChamberGeometry* multiGeo, const Amg::Transform3D& gToStation, const Amg::Transform3D& amdbToGlobal,
+        const TrkDriftCircleMath::ChamberGeometry* multiGeo, const Amg::Transform3D& gToStation, const Amg::Transform3D& amdbToGlobal,
         std::set<Identifier>& deltaVec, std::set<Identifier>& outoftimeVec,
         std::vector<std::pair<double,  std::unique_ptr<const Trk::MeasurementBase>> >& rioDistVec) const {
         // clear result vectors

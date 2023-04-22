@@ -25,11 +25,11 @@ run.prmon = False
 # The full test configuration
 test = Test.Test()
 test.art_type = 'build'
-#test.check_steps = CheckSteps.default_check_steps(test)
 test.exec_steps = [run]
-check_log = CheckSteps.CheckLogStep('CheckLog')
-check_log.log_file = run.get_log_file_name()
-test.check_steps = [check_log]
+test.check_steps = CheckSteps.default_check_steps(test)
+
+chaindump = test.get_step("ChainDump")
+chaindump.args = '--json --yaml ref_mc_newJO_build.new'
 
 # Change RegTest pattern
 #regtest = test.get_step('RegTest')

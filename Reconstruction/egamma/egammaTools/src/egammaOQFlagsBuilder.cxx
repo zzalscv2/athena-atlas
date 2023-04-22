@@ -76,7 +76,74 @@ findNeighbours(const Identifier cellCentrId,
   return neighbourList;
 }
 
-}//end anonymous namespace
+void coreCellHelper(const bool isMissing, const bool isMasked,
+                    const bool isSporadicNoise, const bool isAffected,
+                    const bool isHighQ, unsigned int& iflag) {
+  if (isMissing) {
+    iflag |= (0x1 << xAOD::EgammaParameters::MissingFEBCellCore);
+  }
+  if (isMasked) {
+    iflag |= (0x1 << xAOD::EgammaParameters::MaskedCellCore);
+  }
+  if (isSporadicNoise) {
+    iflag |= (0x1 << xAOD::EgammaParameters::SporadicNoiseLowQCore);
+  }
+  if (isAffected) {
+    iflag |= (0x1 << xAOD::EgammaParameters::AffectedCellCore);
+  }
+  if (isHighQ) {
+    iflag |= (0x1 << xAOD::EgammaParameters::HighQCore);
+  }
+}
+
+void missingHelper(const bool isPresampler, const bool isL1,
+                   const bool isStripCoreCell, const bool isL2, const bool isL3,
+                   unsigned int& iflag) {
+  if (isPresampler) {
+    iflag |= (0x1 << xAOD::EgammaParameters::MissingFEBCellEdgePS);
+  } else if (isL1) {
+    iflag |= (0x1 << xAOD::EgammaParameters::MissingFEBCellEdgeS1);
+    if (isStripCoreCell) {
+      iflag |= (0x1 << xAOD::EgammaParameters::BadS1Core);
+    }
+  } else if (isL2) {
+    iflag |= (0x1 << xAOD::EgammaParameters::MissingFEBCellEdgeS2);
+  } else if (isL3) {
+    iflag |= (0x1 << xAOD::EgammaParameters::MissingFEBCellEdgeS3);
+  }
+}
+
+void maskedHelper(const bool isPresampler, const bool isL1,
+                  const bool isStripCoreCell, const bool isL2, const bool isL3,
+                  unsigned int& iflag) {
+  if (isPresampler) {
+    iflag |= (0x1 << xAOD::EgammaParameters::MaskedCellEdgePS);
+  } else if (isL1) {
+    iflag |= (0x1 << xAOD::EgammaParameters::MaskedCellEdgeS1);
+    if (isStripCoreCell) {
+      iflag |= (0x1 << xAOD::EgammaParameters::BadS1Core);
+    }
+  } else if (isL2) {
+    iflag |= (0x1 << xAOD::EgammaParameters::MaskedCellEdgeS2);
+  } else if (isL3) {
+    iflag |= (0x1 << xAOD::EgammaParameters::MaskedCellEdgeS3);
+  }
+}
+
+void affectedHelper(const bool isPresampler, const bool isL1, const bool isL2,
+                    const bool isL3, unsigned int& iflag) {
+  if (isPresampler) {
+    iflag |= (0x1 << xAOD::EgammaParameters::AffectedCellEdgePS);
+  } else if (isL1) {
+    iflag |= (0x1 << xAOD::EgammaParameters::AffectedCellEdgeS1);
+  } else if (isL2) {
+    iflag |= (0x1 << xAOD::EgammaParameters::AffectedCellEdgeS2);
+  } else if (isL3) {
+    iflag |= (0x1 << xAOD::EgammaParameters::AffectedCellEdgeS3);
+  }
+}
+
+}  // end anonymous namespace
 
 egammaOQFlagsBuilder::egammaOQFlagsBuilder(const std::string& type,
                                            const std::string& name,
@@ -245,72 +312,31 @@ egammaOQFlagsBuilder::execute(const EventContext& ctx,
          bc.unstableNoiseHG() || bc.unstableNoiseMG() || bc.unstableNoiseLG() ||
          bc.peculiarCalibrationLine() || bc.almostDead() || bc.shortProblem());
 
+      const bool isSporadicNoise =
+          (bc.sporadicBurstNoise() && qual < m_QCellSporCut);
+
       if (isACoreCell) {
-        if (isMissing) {
-          iflag |= (0x1 << xAOD::EgammaParameters::MissingFEBCellCore);
-        }
-        if (isMasked) {
-          iflag |= (0x1 << xAOD::EgammaParameters::MaskedCellCore);
-        }
-        if (bc.sporadicBurstNoise() && qual < m_QCellSporCut) {
-          iflag |= (0x1 << xAOD::EgammaParameters::SporadicNoiseLowQCore);
-        }
-        if (isAffected) {
-          iflag |= (0x1 << xAOD::EgammaParameters::AffectedCellCore);
-        }
-        if (isHighQ) {
-          iflag |= (0x1 << xAOD::EgammaParameters::HighQCore);
-        }
-      } // end if isACoreCell
+        coreCellHelper(isMissing, isMasked, isSporadicNoise, isAffected,
+                       isHighQ, iflag);
+      }  // end if isACoreCell
       else {
         if (isMissing) {
-          if (isPresampler) {
-            iflag |= (0x1 << xAOD::EgammaParameters::MissingFEBCellEdgePS);
-          } else if (isL1) {
-            iflag |= (0x1 << xAOD::EgammaParameters::MissingFEBCellEdgeS1);
-            if (isStripCoreCell){
-              iflag |= (0x1 << xAOD::EgammaParameters::BadS1Core);
-            }
-          } else if (isL2) {
-            iflag |= (0x1 << xAOD::EgammaParameters::MissingFEBCellEdgeS2);
-          } else if (isL3) {
-            iflag |= (0x1 << xAOD::EgammaParameters::MissingFEBCellEdgeS3);
-          }
-        } // isMissing
+          missingHelper(isPresampler, isL1, isStripCoreCell, isL2, isL3, iflag);
+        }  // isMissing
         if (isMasked) {
-          if (isPresampler) {
-            iflag |= (0x1 << xAOD::EgammaParameters::MaskedCellEdgePS);
-          } else if (isL1) {
-            iflag |= (0x1 << xAOD::EgammaParameters::MaskedCellEdgeS1);
-            if (isStripCoreCell) {
-              iflag |= (0x1 << xAOD::EgammaParameters::BadS1Core);
-            }
-          } else if (isL2) {
-            iflag |= (0x1 << xAOD::EgammaParameters::MaskedCellEdgeS2);
-          } else if (isL3) {
-            iflag |= (0x1 << xAOD::EgammaParameters::MaskedCellEdgeS3);
-          }
-        } // isMasked
-        if (bc.sporadicBurstNoise() && qual < m_QCellSporCut) {
+          maskedHelper(isPresampler, isL1, isStripCoreCell, isL2, isL3, iflag);
+        }  // isMasked
+        if (isSporadicNoise) {
           iflag |= (0x1 << xAOD::EgammaParameters::SporadicNoiseLowQEdge);
         }
-
         if (isAffected) {
-          if (isPresampler) {
-            iflag |= (0x1 << xAOD::EgammaParameters::AffectedCellEdgePS);
-          } else if (isL1) {
-            iflag |= (0x1 << xAOD::EgammaParameters::AffectedCellEdgeS1);
-          } else if (isL2) {
-            iflag |= (0x1 << xAOD::EgammaParameters::AffectedCellEdgeS2);
-          } else if (isL3) {
-            iflag |= (0x1 << xAOD::EgammaParameters::AffectedCellEdgeS3);
-          }
-        } // is affected
+          affectedHelper(isPresampler, isL1, isL2, isL3, iflag);
+        }  // is affected
         if (isHighQ) {
           iflag |= (0x1 << xAOD::EgammaParameters::HighQEdge);
         }
       }
-    } // end loop over LAr cells
+    }  // end loop over LAr cells
 
     // Set LArQCleaning bit
     double egammaLArQCleaning = 0;

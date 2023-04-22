@@ -534,7 +534,6 @@ StatusCode MergeMcEventCollTool::processUnfilteredEvent(const McEventCollection 
       int n_particles_out=pCopyOfVertexForClassification[type]->particles_out_size();
 #endif
       if (m_saveType[type] && (n_particles_out > 0) ) {
-        m_pOvrlMcEvColl->at(m_startingIndexForBackground+m_nBkgEventsReadSoFar)->add_vertex( pCopyOfVertexForClassification[type]);
         updateClassificationMap(spi, currentBkgEventIndex, 0, type, false);
       }
     }

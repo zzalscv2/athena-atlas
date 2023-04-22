@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // MuonPhysValMonitoringTool.cxx
@@ -89,7 +89,7 @@ namespace MuonPhysValMonitoring {
             m_doTrigMuonL2Validation = false;
             m_doTrigMuonEFValidation = false;
         }
-        if(m_doTrigMuonValidation) ATH_CHECK(m_trigDec.retrieve());
+        ATH_CHECK(m_trigDec.retrieve(DisableTool{!m_doTrigMuonValidation}));
 
         ATH_CHECK(m_eventInfo.initialize());
         ATH_CHECK(m_muonSelectionTool.retrieve());

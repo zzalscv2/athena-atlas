@@ -8,6 +8,10 @@ def DetDescrCnvSvcCfg(flags, **kwargs):
     kwargs.setdefault("HasCSC", flags.Detector.GeometryCSC)
     kwargs.setdefault("HasSTgc", flags.Detector.GeometrysTGC)
     kwargs.setdefault("HasMM", flags.Detector.GeometryMM)
+    kwargs.setdefault("HasTGC", flags.Detector.GeometryTGC)
+    kwargs.setdefault("HasMDT", flags.Detector.GeometryMDT)
+    kwargs.setdefault("HasRPC", flags.Detector.GeometryRPC)
+    
 
     # Use GEOM DB to read InDet dictionary information 
     if flags.Detector.GeometryITk or flags.Detector.GeometryHGTD:

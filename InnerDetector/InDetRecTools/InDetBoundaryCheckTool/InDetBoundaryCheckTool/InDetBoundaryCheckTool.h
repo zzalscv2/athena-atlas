@@ -56,7 +56,7 @@ namespace InDet {
                 const Trk::TrackParameters &
             ) const;
 
-            SG::ReadHandle<InDet::SiDetectorElementStatus> getSCTDetElStatus() const;
+            SG::ReadHandle<InDet::SiDetectorElementStatus> getSCTDetElStatus(const EventContext& ctx) const;
 
             ServiceHandle<IGeoModelSvc> m_geoModelSvc;
 
@@ -97,10 +97,10 @@ namespace InDet {
 
     };
 
-    inline SG::ReadHandle<InDet::SiDetectorElementStatus> InDetBoundaryCheckTool::getSCTDetElStatus() const {
+    inline SG::ReadHandle<InDet::SiDetectorElementStatus> InDetBoundaryCheckTool::getSCTDetElStatus(const EventContext& ctx) const {
        SG::ReadHandle<InDet::SiDetectorElementStatus> sctDetElStatus;
        if (!m_sctDetElStatus.empty()) {
-          sctDetElStatus = SG::ReadHandle<InDet::SiDetectorElementStatus>(m_sctDetElStatus);
+          sctDetElStatus = SG::ReadHandle<InDet::SiDetectorElementStatus>(m_sctDetElStatus, ctx);
           if (!sctDetElStatus.isValid()) {
              std::stringstream msg;
              msg << "Failed to get " << m_sctDetElStatus.key() << " from StoreGate in " << name();

@@ -1,8 +1,10 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "FEI4SimTool.h"
+#include <algorithm>
+
 
 FEI4SimTool::FEI4SimTool(const std::string& type, const std::string& name, const IInterface* parent) :
   FrontEndSimTool(type, name, parent) {
@@ -140,17 +142,14 @@ void FEI4SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
       }
     } 
 
-    if (nToT < 1) {
-      nToT = 1;
-    }
+   
 
     // FEI4 HitDiscConfig
     if (nToT == 2 && maxFEI4SmallHit == 2) {
       nToT = 1;
     }
-    if (nToT >= overflowToT) {
-      nToT = overflowToT;
-    }
+    
+    nToT=std::clamp(nToT, 1, overflowToT);
 
     if (nToT <= moduleData->getToTThreshold(barrel_ec, layerIndex)) {
       SiHelper::belowThreshold(diode, true, true);
@@ -164,7 +163,7 @@ void FEI4SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
       continue;
     }
 
-    if (!m_pixelConditionsTool->isActive(moduleHash, diodeID)) {
+    if (!m_pixelConditionsTool->isActive(moduleHash, diodeID, ctx)) {
       SiHelper::disabled(diode, true, true);
       continue;
     }

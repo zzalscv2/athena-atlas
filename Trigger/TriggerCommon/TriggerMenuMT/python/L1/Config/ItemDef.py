@@ -802,6 +802,10 @@ class ItemDef:
         MenuItem('L1_J40_XE60' ).setLogic( d.J40 & d.XE60 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_J30p0ETA49_XE50').setLogic( d.J300ETA49 & d.XE50 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_3J15p0ETA25_XE40').setLogic( d.J150ETA25.x(3) & d.XE40 & physcond).setTriggerType(TT.calo)
+        # ATR-27250 Duplicate multijet-seeded triggers to jFEX
+        #MenuItem('L1_3jJ40p0ETA25_jXE80').setLogic( d.jJ400ETA25.x(3) & d.jXE80 & physcond).setTriggerType(TT.calo)
+        #MenuItem('L1_2jJ90_jXE80').setLogic( d.jJ90.x(2) & d.jXE80 & physcond).setTriggerType(TT.calo)
+        #MenuItem('L1_2jJ40_jXE110').setLogic( d.jJ40.x(2) & d.jXE110 & physcond).setTriggerType(TT.calo)
 
         # combined em - jet
         MenuItem('L1_EM18VHI_3J20' ).setLogic( d.EM18VHI  & d.J20.x(3)  & physcond).setTriggerType(TT.calo)

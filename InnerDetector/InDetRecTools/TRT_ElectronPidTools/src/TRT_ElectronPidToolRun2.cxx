@@ -113,9 +113,7 @@ StatusCode InDet::TRT_ElectronPidToolRun2::initialize()
   ATH_CHECK( m_TRTPIDNNReadKey.initialize(m_calculateNN) );
 
   CHECK( m_TRTStrawSummaryTool.retrieve() );
-  if ( !m_TRTStrawSummaryTool.empty()) ATH_MSG_INFO( "Retrieved tool " << m_TRTStrawSummaryTool);
 
-  ATH_MSG_INFO ("initialize() successful in " << name());
   return StatusCode::SUCCESS;
 }
 
@@ -480,7 +478,7 @@ InDet::TRT_ElectronPidToolRun2::electronProbability(
   double dEdx_noHTHits = m_TRTdEdxTool->dEdx(
     ctx,
     &track,
-    false,//be expicit as optional below can be converted to bool 
+    false,//be expicit as optional below can be converted to bool
     PIDvalues[Trk::TRTTrackOccupancy]); // Divide by L, exclude HT hits
 
   double dEdx_usedHits_noHTHits = m_TRTdEdxTool->usedHits(ctx, &track, false);

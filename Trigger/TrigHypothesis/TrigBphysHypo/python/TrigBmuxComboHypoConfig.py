@@ -27,6 +27,7 @@ def BmuxComboHypoInternalCfg(flags):
         TrackCollectionKey = 'HLT_IDTrack_Bmumux_IDTrig',
         MakeCascadeFit = True,
         CascadeChi2 = 50.,
+        DeltaR = 0.01,
         TrkZ0 = 10.,
         RoiEtaWidth = 0.75,
         RoiPhiWidth = 0.75,

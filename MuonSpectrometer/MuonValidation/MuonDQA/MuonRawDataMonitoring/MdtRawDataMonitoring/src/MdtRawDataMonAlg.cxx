@@ -345,7 +345,7 @@ StatusCode MdtRawDataMonAlg::fillHistograms(const EventContext& ctx) const
 
             // ATH_CHECK(muons.isValid());
 
-            for (const auto *const mu : *muons) {
+            for (const auto* const mu : *muons) {
                 // add quality selection here
                 if (mu) {
                     const Trk::Track* trk = mu->track();
@@ -385,7 +385,7 @@ StatusCode MdtRawDataMonAlg::fillHistograms(const EventContext& ctx) const
 
                 bool isHit_above_ADCCut = false;
                 // loop over hits
-                for (const auto *mdtCollection : **containerIt) {
+                for (const auto* mdtCollection : **containerIt) {
                     nPrd++;
 
                     float adc = mdtCollection->adc();
@@ -462,7 +462,7 @@ StatusCode MdtRawDataMonAlg::fillHistograms(const EventContext& ctx) const
         }  // m_environment == AthenaMonManager::tier0 || m_environment == AthenaMonManager::tier0ESD
     }      // m_doMdtESD==true
 
-    for (const auto& key : m_segm_type){
+    for (const auto& key : m_segm_type) {
         SG::ReadHandle<Trk::SegmentCollection> segms(key, ctx);
         if (!segms.isValid()) {
             ATH_MSG_ERROR("evtStore() does not contain mdt segms Collection with name " << key);
@@ -948,10 +948,10 @@ StatusCode MdtRawDataMonAlg::handleEvent_effCalc_fillVects(const Trk::SegmentCol
             ATH_MSG_DEBUG("no pointer to segment!!!");
             break;
         }
-        if (segment->numberOfContainedROTs() < std::max(0lu,m_nb_hits.value()) ||
+        if (segment->numberOfContainedROTs() < std::max(0lu, m_nb_hits.value()) ||
             segment->fitQuality()->chiSquared() / segment->fitQuality()->doubleNumberDoF() > m_chi2_cut) {
             continue;
-        }         
+        }
         for (unsigned int irot = 0; irot < segment->numberOfContainedROTs(); irot++) {
             const Trk::RIO_OnTrack* rot = segment->rioOnTrack(irot);
             const Muon::MdtDriftCircleOnTrack* mrot = dynamic_cast<const Muon::MdtDriftCircleOnTrack*>(rot);
@@ -959,7 +959,7 @@ StatusCode MdtRawDataMonAlg::handleEvent_effCalc_fillVects(const Trk::SegmentCol
             Identifier tmpid = rot->identify();
             // This information needs to be stored fully for each segment (for calculations below), so deal with these duplicates later
             // (otherwise we may not check a traversed ML for a differently pointing overlapping segment, for example)
-           
+
             IdentifierHash idHash{0};
             MDTChamber* chamber = nullptr;
             id_helper.get_module_hash(tmpid, idHash);
@@ -968,8 +968,8 @@ StatusCode MdtRawDataMonAlg::handleEvent_effCalc_fillVects(const Trk::SegmentCol
             float adc = mrot->prepRawData()->adc();
 
             if (m_idHelperSvc->hasHPTDC(tmpid)) adc /= m_adcScale;
-            
-            if (store_ROTs.count(tmpid)) {continue;}  
+
+            if (store_ROTs.count(tmpid)) { continue; }
             store_ROTs.insert(tmpid);
 
             double tdc = mrot->prepRawData()->tdc() * 25.0 / 32.0;
@@ -978,12 +978,12 @@ StatusCode MdtRawDataMonAlg::handleEvent_effCalc_fillVects(const Trk::SegmentCol
             int iregion = chamber->GetRegionEnum();
             int ilayer = chamber->GetLayerEnum();
             int statphi = chamber->GetStationPhi();
-           
+
             auto& thisVects = vects[iregion][ilayer][statphi];
             thisVects.adc_segs_mon.push_back(adc);
 
             if (adc > m_ADCCut) {  // This is somewhat redundant because this is usual cut for segment-reconstruction, but that's OK
-                
+
                 thisVects.tdc_segs_mon.push_back(tdc);
 
                 int binx = chamber->GetMDTHitsPerChamber_IMO_BinX();
@@ -991,7 +991,7 @@ StatusCode MdtRawDataMonAlg::handleEvent_effCalc_fillVects(const Trk::SegmentCol
                     binx = binx - 9;
                 else
                     binx = binx - 7;
-                int biny = chamber->GetMDTHitsPerChamber_IMO_BinY();                
+                int biny = chamber->GetMDTHitsPerChamber_IMO_BinY();
                 thisVects.x_segs_mon.push_back(binx);
                 thisVects.y_segs_mon.push_back(biny - 1);
 
@@ -1003,13 +1003,16 @@ StatusCode MdtRawDataMonAlg::handleEvent_effCalc_fillVects(const Trk::SegmentCol
             auto adc_ml2 = Monitored::Scalar<int>("adc_ml2", (int)(mdtMultLayer == 2));
 
             std::string monPerCh = "MdtMonPerChamber";
-            if (iregion == 0) monPerCh += "BA";
-            else if (iregion == 1) monPerCh += "BC";
-            else if (iregion == 2) monPerCh += "EA";
-            else if (iregion == 3) monPerCh += "EC";
+            if (iregion == 0)
+                monPerCh += "BA";
+            else if (iregion == 1)
+                monPerCh += "BC";
+            else if (iregion == 2)
+                monPerCh += "EA";
+            else if (iregion == 3)
+                monPerCh += "EC";
 
             fill(monPerCh, adc_perch, adc_ml1, adc_ml2);
-            
         }
         // Finished gathering hits used in segment
 
@@ -1017,16 +1020,14 @@ StatusCode MdtRawDataMonAlg::handleEvent_effCalc_fillVects(const Trk::SegmentCol
             // Find unique chambers (since above we stored one chamber for every tube)
             // Also store the MLs affected by the ROTs, since we don't necessarily want to look for traversed tubes in entire chamber
             std::set<Identifier> unique_chambers;
-            
-            for (const Identifier& id : store_ROTs) {
-                unique_chambers.insert(id_helper.multilayerID(id));
-            }
+
+            for (const Identifier& id : store_ROTs) { unique_chambers.insert(id_helper.multilayerID(id)); }
             // Done finding unique chambers
 
             // Loop over the unique chambers
             // Here we store the tubes in each chamber that were traversed by the segment
-            std::vector<Identifier> traversed_station_id;           
-            for (const Identifier& station_id: unique_chambers) {
+            std::vector<Identifier> traversed_station_id;
+            for (const Identifier& station_id : unique_chambers) {
                 const std::string hardware_name = getChamberName(station_id);
 
                 // SEGMENT track
@@ -1034,9 +1035,9 @@ StatusCode MdtRawDataMonAlg::handleEvent_effCalc_fillVects(const Trk::SegmentCol
                 const Amg::Transform3D& gToStation = detEl->GlobalToAmdbLRSTransform();
                 const Amg::Vector3D segPosL = gToStation * segment->globalPosition();
                 const Amg::Vector3D segDirL = gToStation.linear() * segment->globalDirection();
-               
+
                 // Loop over tubes in chamber, find those along segment
-                for (int ML : {1,2}) {
+                for (int ML : {1, 2}) {
                     Identifier newId = id_helper.channelID(station_id, ML, 1, 1);
                     const MuonGM::MdtReadoutElement* MdtRoEl = MuonDetMgr->getMdtReadoutElement(newId);
                     int tubeMax = cachedTubeMax(newId);
@@ -1044,14 +1045,13 @@ StatusCode MdtRawDataMonAlg::handleEvent_effCalc_fillVects(const Trk::SegmentCol
                     CorrectTubeMax(hardware_name, tubeMax);
                     CorrectLayerMax(hardware_name, tubeLayerMax);
                     for (int i_tube = id_helper.tubeMin(newId); i_tube <= tubeMax; ++i_tube) {
-                        for (int i_layer = id_helper.tubeLayerMin(newId); i_layer <= tubeLayerMax; ++i_layer) {  
-                            Identifier tubeId = id_helper.channelID(newId, ML, i_layer, i_tube);                          
+                        for (int i_layer = id_helper.tubeLayerMin(newId); i_layer <= tubeLayerMax; ++i_layer) {
+                            Identifier tubeId = id_helper.channelID(newId, ML, i_layer, i_tube);
                             if (m_BMGpresent && m_idHelperSvc->mdtIdHelper().stationName(newId) == m_BMGid) {
                                 std::map<Identifier, std::set<Identifier>>::const_iterator myIt = m_DeadChannels.find(MdtRoEl->identify());
-                                if (myIt != m_DeadChannels.end()) {                                    
+                                if (myIt != m_DeadChannels.end()) {
                                     if (myIt->second.count(tubeId)) {
-                                        ATH_MSG_DEBUG("Skipping tube with identifier "
-                                                      << m_idHelperSvc->toString(tubeId));
+                                        ATH_MSG_DEBUG("Skipping tube with identifier " << m_idHelperSvc->toString(tubeId));
                                         continue;
                                     }
                                 }
@@ -1059,10 +1059,7 @@ StatusCode MdtRawDataMonAlg::handleEvent_effCalc_fillVects(const Trk::SegmentCol
                             Amg::Vector3D TubePos = MdtRoEl->GlobalToAmdbLRSCoords(MdtRoEl->tubePos(tubeId));
                             static const Amg::Vector3D tube_direction{1, 0, 0};
                             std::optional<double> distance = MuonGM::intersect<3>(segPosL, segDirL, TubePos, tube_direction);
-                            if (distance && (*distance) < (MdtRoEl->innerTubeRadius())) {
-                                traversed_station_id.push_back(station_id);                               
-                               
-                            }
+                            if (distance && (*distance) < (MdtRoEl->innerTubeRadius())) { traversed_station_id.push_back(station_id); }
                         }
                     }
                 }
@@ -1071,8 +1068,9 @@ StatusCode MdtRawDataMonAlg::handleEvent_effCalc_fillVects(const Trk::SegmentCol
 
             // Loop over traversed tubes that were stored above
             // Here we fill the DRvsDT/DRvsSegD histos, as well is unique hits and traversed tubes to calculate efficiencies
-            if (traversed_station_id.size() < 20) {  // quality cut here -- 20 traversed tubes is ridiculous and generates low efficiencies (these
-                                               // are due to non-pointing segments)
+            if (traversed_station_id.size() <
+                20) {  // quality cut here -- 20 traversed tubes is ridiculous and generates low efficiencies (these
+                       // are due to non-pointing segments)
                 for (const Identifier& trav_id : traversed_station_id) {
                     std::string hardware_name = getChamberName(trav_id);
                     // GET HISTS
@@ -1082,7 +1080,7 @@ StatusCode MdtRawDataMonAlg::handleEvent_effCalc_fillVects(const Trk::SegmentCol
                     ATH_CHECK(getChamber(idHash, chamber));
 
                     const bool hit_flag = store_ROTs.count(trav_id);
-                   
+
                     Identifier newId = id_helper.multilayerID(trav_id);
                     int tubeLayerMax = cachedTubeLayerMax(newId);
                     id_helper.get_module_hash(newId, idHash);
@@ -1095,7 +1093,7 @@ StatusCode MdtRawDataMonAlg::handleEvent_effCalc_fillVects(const Trk::SegmentCol
                     // Store info for eff calc
                     // (Here we make sure we are removing duplicates from overlapping segments by using sets)
                     std::set<monAlg::TubeTraversedBySegment, monAlg::TubeTraversedBySegment_cmp>::iterator it;
-                    monAlg::TubeTraversedBySegment tmp_effTube {hardware_name, ibin, hit_flag, idHash};
+                    monAlg::TubeTraversedBySegment tmp_effTube{hardware_name, ibin, hit_flag, idHash};
                     monAlg::TubeTraversedBySegment tmp_effTube_noHit{hardware_name, ibin, false, idHash};
                     store_effTubes.insert(tmp_effTube);  // Insert if w/hit, but if w/o hit then only insert if no already stored w/ hit
                     it = store_effTubes.find(tmp_effTube_noHit);
@@ -1110,7 +1108,7 @@ StatusCode MdtRawDataMonAlg::handleEvent_effCalc_fillVects(const Trk::SegmentCol
 
     // Fill effentries/effcounts hists for efficiency calculation
     if (m_doChamberHists) {  // Don't perform this block if not doing chamber by chamber hists
-        for (const monAlg::TubeTraversedBySegment & it : store_effTubes) {
+        for (const monAlg::TubeTraversedBySegment& it : store_effTubes) {
             // GET HISTS
             MDTChamber* chamber{nullptr};
             ATH_CHECK(getChamber(it.idHash, chamber));
@@ -1173,7 +1171,6 @@ void MdtRawDataMonAlg::initDeadChannels(const MuonGM::MdtReadoutElement* mydetEl
 
     Identifier detElId = mydetEl->identify();
 
-  
     std::set<Identifier>& deadTubes = m_DeadChannels[detElId];
 
     for (int layer = 1; layer <= mydetEl->getNLayers(); ++layer) {
@@ -1191,8 +1188,8 @@ void MdtRawDataMonAlg::initDeadChannels(const MuonGM::MdtReadoutElement* mydetEl
             if (!tubefound) {
                 Identifier deadTubeId = m_idHelperSvc->mdtIdHelper().channelID(detElId, mydetEl->getMultilayer(), layer, tube);
                 deadTubes.insert(deadTubeId);
-                ATH_MSG_VERBOSE("adding dead tube "<<m_idHelperSvc->toString(deadTubeId));
+                ATH_MSG_VERBOSE("adding dead tube " << m_idHelperSvc->toString(deadTubeId));
             }
         }
-    } 
+    }
 }

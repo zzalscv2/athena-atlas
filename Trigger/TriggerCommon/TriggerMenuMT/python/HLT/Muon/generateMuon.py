@@ -132,7 +132,7 @@ def MuFastViewDataVerifier(flags):
 def MuCombViewDataVerifier():
     result = ComponentAccumulator()
     alg = CompFactory.AthViews.ViewDataVerifier( name = "VDVMuComb",
-                                                 DataObjects = [( 'xAOD::L2StandAloneMuonContainer' , 'StoreGateSvc+MuonL2SAInfo' )])
+                                                 DataObjects = [( 'xAOD::L2StandAloneMuonContainer' , 'StoreGateSvc+HLT_MuonL2SAInfo' )])
     result.addEventAlgo(alg)
     return result
 
@@ -181,7 +181,7 @@ def _muFastStepSeq(flags, is_probe_leg=False):
     
     l2muFastHypo = l2MuFastHypoCfg( flags,
                                     name = 'TrigL2MuFastHypo',
-                                    muFastInfo = 'MuonL2SAInfo' )
+                                    muFastInfo = 'HLT_MuonL2SAInfo' )
 
     selAcc.addHypoAlgo(l2muFastHypo)    
     return selAcc
@@ -254,7 +254,7 @@ def _muEFSAStepSeq(flags, name='RoI', is_probe_leg=False):
         requireParentView = False
     else:
         ViewCreatorFetchFromViewROITool=CompFactory.ViewCreatorFetchFromViewROITool
-        roiTool         = ViewCreatorFetchFromViewROITool(RoisWriteHandleKey="Roi_L2SAMuonForEF", InViewRoIs = "forMS", ViewToFetchFrom = "L2MuFastRecoNewJOViews")
+        roiTool         = ViewCreatorFetchFromViewROITool(RoisWriteHandleKey="Roi_L2SAMuonForEF", InViewRoIs = "forMS", ViewToFetchFrom = "L2MuFastRecoViews")
         requireParentView = True
                                                          
     recoMS = InViewRecoCA(name=viewName, RoITool = roiTool, RequireParentView = requireParentView, isProbe=is_probe_leg)

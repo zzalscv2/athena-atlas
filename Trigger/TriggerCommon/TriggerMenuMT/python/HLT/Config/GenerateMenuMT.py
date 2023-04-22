@@ -500,8 +500,8 @@ class GenerateMenuMT(object, metaclass=Singleton):
                 else: 
                     emptySteps.append(the_step)
                             
-        log.info("Are there any fully empty steps? %s", steps_are_empty)
-        log.info("The empty step(s) and associated chain(s) are: %s", emptySteps)
+        log.debug("Are there any fully empty steps? %s", steps_are_empty)
+        log.debug("The empty step(s) and associated chain(s) are: %s", emptySteps)
         empty_step_indices = [i for i,is_empty in enumerate(steps_are_empty) if is_empty]
         
         if len(empty_step_indices) == 0:

@@ -18,44 +18,17 @@ namespace Muon {
     MuonIntersectGeoData::MuonIntersectGeoData(MsgStream& log, const MuonGM::MuonDetectorManager* detMgr,
                                                const IMuonIdHelperSvc* idHelperSvc, const MdtCondDbData* dbData) :
         m_idHelperSvc{idHelperSvc}, m_detMgr{detMgr}, m_dbData{dbData} {
-        m_mdt_EIS_stName = m_idHelperSvc->mdtIdHelper().stationNameIndex("EIS");
-        m_mdt_BIM_stName = m_idHelperSvc->mdtIdHelper().stationNameIndex("BIM");
-        m_mdt_BME_stName = m_idHelperSvc->mdtIdHelper().stationNameIndex("BME");
-        m_mdt_BMG_stName = m_idHelperSvc->mdtIdHelper().stationNameIndex("BMG");
-
+       
         for (unsigned int n = 0; n < m_geometry.size(); ++n) {
             IdentifierHash id_hash{n};
             const MuonGM::MdtReadoutElement* mdt_ele = detMgr->getMdtReadoutElement(id_hash);
             // The Mdt intersectionGeometry relies on the first multi layer. We can skip the other layers
             if (!mdt_ele || mdt_ele->getMultilayer() != 1) continue;
             const Identifier id = mdt_ele->identify();
-            m_geometry[toArrayIdx(id)] = std::make_unique<Muon::MdtIntersectGeometry>(log, id, idHelperSvc, detMgr, dbData);
+            m_geometry[id_hash] = std::make_unique<Muon::MdtIntersectGeometry>(log, mdt_ele->identify(), idHelperSvc, detMgr, dbData);
         }    
     } 
-    size_t MuonIntersectGeoData::toArrayIdx(const Identifier& id) const {        
-        
-        if (!id.is_valid() || !m_idHelperSvc->isMdt(id)) return m_geometry.size();
-        const int stName =  m_idHelperSvc->mdtIdHelper().stationName(id);
-        int stname_index = stName;
-       
-        if (stName == m_mdt_EIS_stName) {
-            stname_index = MuonGM::MuonDetectorManager::NMdtStatType - 4;
-        } else if (stName == m_mdt_BIM_stName) {
-            stname_index = MuonGM::MuonDetectorManager::NMdtStatType - 3;
-        } else if (stName == m_mdt_BME_stName) {
-            stname_index = MuonGM::MuonDetectorManager::NMdtStatType - 2;
-        } else if (stName == m_mdt_BMG_stName) {
-            stname_index = MuonGM::MuonDetectorManager::NMdtStatType - 1;
-        }
-        const int steta_index =  m_idHelperSvc->mdtIdHelper().stationEta(id) + MuonGM::MuonDetectorManager::NMdtStEtaOffset;
-        const int stphi_index =  m_idHelperSvc->mdtIdHelper().stationPhi(id) - 1;
-
-        constexpr int C = MuonGM::MuonDetectorManager::NMdtStatPhi;
-        constexpr int BxC = MuonGM::MuonDetectorManager::NMdtStatEta * C;
-        const size_t arrayIdx = stname_index * BxC + steta_index * C + stphi_index;
-        return arrayIdx;
-    }
-
+    
     std::vector<std::shared_ptr<const Muon::MdtIntersectGeometry>> MuonIntersectGeoData::getStationGeometry(const Identifier& id) const {
         // get ids of geometry associated with identifier
         std::vector<Identifier> chambers = binPlusneighbours(id);
@@ -66,14 +39,16 @@ namespace Muon {
         // loop over bins, retrieve geometry
         for (const Identifier& chId : chambers) {
             if (m_dbData && !m_dbData->isGoodStation(chId)) { continue; }
-            const size_t id = toArrayIdx(chId);            
-            if (id < m_geometry.size () && m_geometry[id]) stations.push_back(m_geometry[id]);
+            std::shared_ptr<const MdtIntersectGeometry> chamb = getChamber(chId);
+            if (chamb) stations.push_back(std::move(chamb));
         }
         return stations;
     }
     std::shared_ptr<const MdtIntersectGeometry> MuonIntersectGeoData::getChamber(const Identifier& chId) const {
-         const size_t id = toArrayIdx(chId);
-         return id < m_geometry.size() ? m_geometry[id] : nullptr;
+         IdentifierHash hash{0};
+         const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
+         if (idHelper.get_detectorElement_hash(idHelper.multilayerID(chId), hash)) return nullptr;
+         return hash < m_geometry.size() ? m_geometry[hash] : nullptr;
     }
 
     Muon::MuonStationIntersect MuonIntersectGeoData::tubesCrossedByTrack(const Identifier& id, const Amg::Vector3D& pos,

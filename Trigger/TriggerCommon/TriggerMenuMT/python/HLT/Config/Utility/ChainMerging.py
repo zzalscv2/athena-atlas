@@ -26,7 +26,7 @@ def mergeChainDefs(listOfChainDefs, chainDict, perSig_lengthOfChainConfigs = Non
                 if any ([ "_MissingCA" in step.name for step in chainPartConfig.steps]):
                     # flag as merged all CAs created , but not used   
                     [seq.ca.wasMerged() for chainPartConfig in listOfChainDefs for step in chainPartConfig.steps for seq in step.sequences  ]                                     
-                    raise NoCAmigration ('[mergeChainDefs] not possible for chain {0} due to missing configurations'.format(chainDict['chainName']))
+                    raise NoCAmigration (f'[mergeChainDefs] not possible for chain {chainDict["chainName"]} due to missing configurations')
         except NoCAmigration as e:
             log.warning(str(e))
             if perSig_lengthOfChainConfigs is None:
@@ -179,7 +179,6 @@ def mergeParallel(chainDefList, offset, leg_numbering = [], perSig_lengthOfChain
                 n_new_steps = max_length - current_leg_ag_length
                 
                 previous_step_dicts = cConfig.steps[current_leg_ag_length-1].stepDicts
-                doBonusDebug = False
                 for i in range(1,n_new_steps+1):
                     step_mult = []
                     sigNames = []
@@ -192,7 +191,7 @@ def mergeParallel(chainDefList, offset, leg_numbering = [], perSig_lengthOfChain
                     seqStepName = 'Empty' + align_grp_to_lengthen + 'Align' + str(current_leg_ag_length+i) + '_' + seqMultName
                     seqNames = [getEmptySeqName(previous_step_dicts[iSeq]['signature'], current_leg_ag_length+i, align_grp_to_lengthen) for iSeq in range(len(sigNames))]
 
-                    emptySequences = build_empty_sequences(doBonusDebug, previous_step_dicts, step_mult, 'mergeParallel', cConfig.L1decisions, seqNames, chainName)
+                    emptySequences = build_empty_sequences(previous_step_dicts, step_mult, 'mergeParallel', cConfig.L1decisions, seqNames, chainName)
 
                     cConfig.steps.insert(current_leg_ag_length + i - 1, #-1 to go to indexed from zero
                                         ChainStep( seqStepName, Sequences=emptySequences,
@@ -343,8 +342,6 @@ def serial_zip(allSteps, chainName, chainDefList, legOrdering):
     log.debug('[serial_zip]     and leg ordering %s', legOrdering)
     newsteps = []
 
-    doBonusDebug = False
-    
     #per-part (horizontal) iteration by alignment ordering
     #i.e. if we run muon then electron, allSteps[0] = muon steps, allSteps[1] = electron steps
     #leg ordering tells us where it was ordered in the chain name, so e_mu in this case would
@@ -409,12 +406,11 @@ def serial_zip(allSteps, chainName, chainDefList, legOrdering):
 
                     seqNames = [getEmptySeqName(emptyChainDicts[iSeq]['signature'], ag_step_index, currentAG) for iSeq in range(nLegs)]
 
-                    if doBonusDebug:                        
-                        log.debug("[serial_zip] step name for this leg: %s", seqStepName)
-                        log.debug("[serial_zip] created empty sequence(s): %s", seqNames)
-                        log.debug("[serial_zip] L1decisions %s ", chainDefList[stepPlacement2].L1decisions)
+                    log.verbose("[serial_zip] step name for this leg: %s", seqStepName)
+                    log.verbose("[serial_zip] created empty sequence(s): %s", seqNames)
+                    log.verbose("[serial_zip] L1decisions %s ", chainDefList[stepPlacement2].L1decisions)
                         
-                    emptySequences = build_empty_sequences(doBonusDebug, emptyChainDicts, step_mult, 'serial_zip', chainDefList[stepPlacement2].L1decisions, seqNames, chainName)
+                    emptySequences = build_empty_sequences(emptyChainDicts, step_mult, 'serial_zip', chainDefList[stepPlacement2].L1decisions, seqNames, chainName)
 
                     stepList[stepPlacement2] = ChainStep( seqStepName, Sequences=emptySequences,
                                                           multiplicity = step_mult, chainDicts=emptyChainDicts,
@@ -684,50 +680,41 @@ def zip_longest_parallel(AllSteps, multiplicity, fillvalue=None):
         yield tuple(values)
 
 
-def build_empty_sequences(doBonusDebug, emptyChainDicts, step_mult, caller, L1decisions, seqNames, chainName):
+def build_empty_sequences(emptyChainDicts, step_mult, caller, L1decisions, seqNames, chainName):
     emptySequences = []
     for ileg in range(len(L1decisions)):                        
         if isFullScanRoI(L1decisions[ileg]):
-            log.debug("[{}] adding FS empty sequence".format(caller))
+            log.debug("[%s] adding FS empty sequence", caller)
             emptySequences += [getEmptyMenuSequence(seqNames[ileg]+"FS")]
         else:
-            log.debug("[{}] adding non-FS empty sequence".format(caller))
+            log.debug("[%s] adding non-FS empty sequence", caller)
             emptySequences += [getEmptyMenuSequence(seqNames[ileg])]
             
-    if doBonusDebug:
-        log.debug("[{}] emptyChainDicts {}".format(caller,
-                                                   emptyChainDicts))
-    log.info("[{}] {} has number of empty sequences {} and empty legs in stepDicts {}".format(caller,
-                                                                                                   chainName,
-                                                                                                   len(emptySequences),
-                                                                                                   len(emptyChainDicts)))
+    log.verbose("[%s] emptyChainDicts %s", caller, emptyChainDicts)
+    log.debug("[%s] %s has number of empty sequences %d and empty legs in stepDicts %d",
+              caller, chainName, len(emptySequences), len(emptyChainDicts))
     if len(emptySequences) != len(emptyChainDicts):
-        log.error("[{}] {} has a different number of empty sequences/legs {} than stepDicts {}".format(caller,
-                                                                                                       chainName,
-                                                                                                       len(emptySequences),
-                                                                                                       len(emptyChainDicts)))
-        raise Exception("[{}] Cannot create this chain step, exiting.".format(caller))
+        log.error("[%s] %s has a different number of empty sequences/legs %d than stepDicts %d",
+                  caller, chainName, len(emptySequences), len(emptyChainDicts))
+
+        raise Exception(f"[{caller}] Cannot create this chain step, exiting.")
 
     for sd in emptyChainDicts:
         if sd['signature'] == 'Jet' or sd['signature'] == 'Bjet':
             step_mult += [1]
         elif len(sd['chainParts']) != 1:
-            log.error("[{}] {} has chainParts has length != 1 within a leg! chain dictionary for this step: \n {}".format(caller,
-                                                                                                                          chainName,
-                                                                                                                          sd))
-            raise Exception("[{}] Cannot create this chain step, exiting.".format(caller))
+            log.error("[%s] %s has chainParts has length != 1 within a leg! chain dictionary for this step: \n %s",
+                      caller, chainName, sd)
+            raise Exception(f"[{caller}] Cannot create this chain step, exiting.")
         else:
             step_mult += [int(sd['chainParts'][0]['multiplicity'])]
 
     if len(emptySequences) != len(step_mult):
-        log.error("[{}] {} has a different number of empty sequences/legs {} than multiplicities {}".format(caller,
-                                                                                                            chainName,
-                                                                                                            len(emptySequences),
-                                                                                                            len(step_mult)))
-        raise Exception("[{}] Cannot create this chain step, exiting.".format(caller))
+        log.error("[%s] %s has a different number of empty sequences/legs %d than multiplicities %d",
+                  caller, chainName, len(emptySequences), len(step_mult))
+        raise Exception(f"[{caller}] Cannot create this chain step, exiting.")
 
-    if doBonusDebug:
-        log.debug('[{}] step multiplicity %s',step_mult.format(caller))
+    log.verbose('[%s] step multiplicity %s',caller, step_mult)
 
 
     return emptySequences

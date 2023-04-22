@@ -71,7 +71,7 @@ endfunction()
 function( atlas_test_hlt_trigger_menu menu )
    atlas_add_test( "HLT_${menu}"
                    SCRIPT ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_HLTmenu.sh ${menu}
-                   PROPERTIES TIMEOUT 600
+                   PROPERTIES TIMEOUT 800
                    PRIVATE_WORKING_DIRECTORY
                    POST_EXEC_SCRIPT "check_log.py --errors --config checklogTriggerTest.conf ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/unitTestRun_HLT_${menu}/HLT_${menu}.log" )
 endfunction()
@@ -107,7 +107,7 @@ function( atlas_test_ca_trigger_menu menu )
    atlas_add_test( "menu_CA_${menu}"
    SCRIPT ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_menu_CA.py Trigger.triggerMenuSetup=${menu}
    PRIVATE_WORKING_DIRECTORY
-   PROPERTIES TIMEOUT 600
+   PROPERTIES TIMEOUT 800
    POST_EXEC_SCRIPT "check_log.py --errors --config checklogTriggerTest.conf ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/unitTestRun_menu_CA_${menu}/menu_CA_${menu}.log" )
 endfunction()
 

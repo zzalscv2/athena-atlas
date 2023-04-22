@@ -150,7 +150,7 @@ void RD53SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
       continue;
     }
 
-    if (!m_pixelConditionsTool->isActive(moduleHash, diodeID)) {
+    if (!m_pixelConditionsTool->isActive(moduleHash, diodeID, ctx)) {
       SiHelper::disabled((*i_chargedDiode).second, true, true);
       continue;
     }

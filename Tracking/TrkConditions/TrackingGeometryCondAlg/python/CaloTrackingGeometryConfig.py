@@ -69,7 +69,7 @@ def CaloTrackingGeometryBuilderCfg(flags, name='CaloTrackingGeometryBuilder',
     kwargs.setdefault("LArVolumeBuilder", lArVolumeBuilder)
     kwargs.setdefault("TileVolumeBuilder", tileVolumeBuilder)
     kwargs.setdefault("TrackingVolumeHelper", trackingVolumeHelper)
-    kwargs.setdefault("EnvelopeDefinitionSvc", envelopeDefinitionSvc.name)
+    kwargs.setdefault("EnvelopeDefinitionSvc", envelopeDefinitionSvc)
     kwargs.setdefault("EntryVolumeName", "InDet::Containers::EntryVolume")
     kwargs.setdefault("ExitVolumeName", "Calo::Container")
     kwargs.setdefault("GapLayerEnvelope", 5.0)
