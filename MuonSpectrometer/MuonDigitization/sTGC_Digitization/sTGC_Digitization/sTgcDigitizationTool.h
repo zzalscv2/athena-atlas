@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONDIGITIZATION_STGC_DIGITIZATIONTOOL_H
@@ -138,6 +138,7 @@ private:
   SG::ReadCondHandleKey<NswCalibDbThresholdData> m_condThrshldsKey {this, "CondThrshldsKey", "NswCalibDbThresholdData", "Key of NswCalibDbThresholdData object containing calibration data (VMM thresholds)"};
 
   Gaudi::Property<int> m_doChannelTypes{this,"doChannelTypes",3};
+  Gaudi::Property<bool> m_doPadSharing{this,"padChargeSharing", false};
 
   // sTgc VMM configurables accessible by python steering
   Gaudi::Property<float> m_deadtimeStrip{this,"deadtimeStrip", 250};

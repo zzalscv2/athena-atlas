@@ -3,7 +3,6 @@
 */
 
 #include "MuonReadoutGeometry/MuonPadDesign.h"
-#include "CLHEP/Units/SystemOfUnits.h"
 
 #include <TString.h>  // for Form
 
