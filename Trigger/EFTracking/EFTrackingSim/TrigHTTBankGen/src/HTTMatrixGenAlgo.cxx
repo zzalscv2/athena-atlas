@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 /**
  * @file HTTMatrixGenAlgo.cxx
@@ -193,10 +193,8 @@ StatusCode HTTMatrixGenAlgo::execute()
   m_eventHeader->reset();
 
   // Get hits and training tracks from this event
-  bool last=false;
-  ATH_CHECK(m_hitInputTool->readData(m_eventHeader, last));
-  if (last) return StatusCode::SUCCESS;
-    
+  ATH_CHECK(m_hitInputTool->readData(m_eventHeader, Gaudi::Hive::currentContext()));
+
   std::vector<HTTHit> hits = getLogicalHits();
 
   std::vector<HTTTruthTrack> truth_tracks = m_eventHeader->optional().getTruthTracks();

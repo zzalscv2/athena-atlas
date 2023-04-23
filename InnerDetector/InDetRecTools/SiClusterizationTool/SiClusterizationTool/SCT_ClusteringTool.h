@@ -58,13 +58,13 @@ namespace InDet {
     SCT_ClusterCollection*
     clusterize(const InDetRawDataCollection<SCT_RDORawData>& RDOs,
                const SCT_ID& idHelper,
-               const InDet::SiDetectorElementStatus *sctDetElementStatus) const override;
+               const InDet::SiDetectorElementStatus *sctDetElementStatus, const EventContext& ctx) const override;
 
     /// A new fast method originally implemented for ITk. Can be internally used in clusterize with m_doFastClustering=true.
     SCT_ClusterCollection*
       fastClusterize(const InDetRawDataCollection<SCT_RDORawData>& RDOs,
                      const SCT_ID& idHelper,
-                     const InDet::SiDetectorElementStatus *sctDetElementStatus) const;
+                     const InDet::SiDetectorElementStatus *sctDetElementStatus, const EventContext& ctx) const;
     
   private:
     typedef std::vector<Identifier> IdVec_t;
@@ -113,12 +113,12 @@ namespace InDet {
     /// Add strips to a cluster vector checking for bad strips
     void addStripsToClusterWithChecks(const Identifier& firstStripId, unsigned int nStrips, IdVec_t& clusterVector,
 				      std::vector<IdVec_t>& idGroups, const SCT_ID& idHelper,
-                                      const InDet::SiDetectorElementStatus *det_el_status) const;
+                                      const InDet::SiDetectorElementStatus *det_el_status, const EventContext& ctx) const;
 
     /// Add strips to a cluster vector including row variable for ITk
     void addStripsToClusterInclRows(const Identifier& firstStripId, unsigned int nStrips, IdVec_t& clusterVector,
                                     std::vector<IdVec_t>& idGroups, const SCT_ID& idHelper,
-                                    const InDet::SiDetectorElementStatus *det_el_status) const;
+                                    const InDet::SiDetectorElementStatus *det_el_status, const EventContext& ctx) const;
 
     /**
      * Recluster the current vector, splitting on bad strips, and insert those new groups to the idGroups vector.
@@ -142,7 +142,7 @@ namespace InDet {
                                                   const InDetDD::SiDetectorElement* element, const InDetDD::SCT_ModuleSideDesign* design) ;
   
     /// In-class facade on the 'isGood' method for a strip identifier
-    bool isBad(const InDet::SiDetectorElementStatus *sctDetElStatus, const SCT_ID& sctID, const IdentifierHash &waferHash, const Identifier& stripId) const;
+    bool isBad(const InDet::SiDetectorElementStatus *sctDetElStatus, const SCT_ID& sctID, const IdentifierHash &waferHash, const Identifier& stripId, const EventContext& ctx) const;
 
     /// Convert time bin string to array of 3 bits
     StatusCode decodeTimeBins();
@@ -161,14 +161,14 @@ namespace InDet {
   // Inline methods
   ///////////////////////////////////////////////////////////////////
 
-  inline bool SCT_ClusteringTool::isBad(const InDet::SiDetectorElementStatus *sctDetElStatus, const SCT_ID& sctID, const IdentifierHash &waferHash, const Identifier& stripId) const {
+  inline bool SCT_ClusteringTool::isBad(const InDet::SiDetectorElementStatus *sctDetElStatus, const SCT_ID& sctID, const IdentifierHash &waferHash, const Identifier& stripId, const EventContext& ctx) const {
      if (sctDetElStatus) {
         const int strip_i{sctID.strip(stripId)};
-        VALIDATE_STATUS_ARRAY(sctDetElStatus,sctDetElStatus->isCellGood(waferHash.value(), strip_i), m_conditionsTool->isGood(stripId, InDetConditions::SCT_STRIP));
+        VALIDATE_STATUS_ARRAY(sctDetElStatus,sctDetElStatus->isCellGood(waferHash.value(), strip_i), m_conditionsTool->isGood(stripId, InDetConditions::SCT_STRIP, ctx));
         return !sctDetElStatus->isCellGood(waferHash.value(), strip_i) ;
      }
      else {
-        return (not m_conditionsTool->isGood(stripId, InDetConditions::SCT_STRIP));
+        return (not m_conditionsTool->isGood(stripId, InDetConditions::SCT_STRIP, ctx));
      }
   }
   

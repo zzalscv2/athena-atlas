@@ -206,6 +206,10 @@ def addMainSequences(flags, cfg):
 
 def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
 
+    # Set the Python OutputLevel on the root logger
+    from AthenaCommon.Logging import log
+    log.setLevel(flags.Exec.OutputLevel)
+
     if flags.Exec.Interactive == "run":
         print ("Interactive mode, switch to PyAthenaEventLoopMgr")
         LoopMgr="PyAthenaEventLoopMgr"

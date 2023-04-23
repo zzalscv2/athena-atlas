@@ -38,7 +38,7 @@ def HGTD_TrackingGeometryBuilderCfg(flags,
     envelopeDefinitionSvc = result.getPrimaryAndMerge(EnvelopeDefSvcCfg(flags))
     
     kwargs.setdefault("LayerBuilder", HGTD_LayerBuilder)
-    kwargs.setdefault("EnvelopeDefinitionSvc", envelopeDefinitionSvc.name)
+    kwargs.setdefault("EnvelopeDefinitionSvc", envelopeDefinitionSvc)
     kwargs.setdefault("TrackingVolumeCreator", cylinderVolumeCreator)
     
     result.setPrivateTools(

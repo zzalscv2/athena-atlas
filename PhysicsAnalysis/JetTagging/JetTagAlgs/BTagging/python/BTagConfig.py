@@ -14,8 +14,6 @@ from FlavorTagDiscriminants.BTagMuonAugmenterAlgConfig import (
     BTagMuonAugmenterAlgCfg)
 from FlavorTagDiscriminants.FlavorTagNNConfig import FlavorTagNNCfg
 from JetTagCalibration.JetTagCalibConfig import JetTagCalibCfg
-from BTagging.BTaggingFlags import BTaggingFlags
-from BTagging.BTaggingConfiguration import getConfiguration
 from OutputStreamAthenaPool.OutputStreamConfig import addToESD, addToAOD
 from JetHitAssociation.JetHitAssociationConfig import JetHitAssociationCfg
 
@@ -161,7 +159,6 @@ def BTagRecoSplitCfg(inputFlags, JetCollection=['AntiKt4EMTopo','AntiKt4EMPFlow'
 
     # Invoking the alhorithm saving hits in the vicinity of jets, with proper flags
     if inputFlags.BTagging.Trackless:
-        BTaggingFlags.DoJetHitAssociation=True
         result.merge(JetHitAssociationCfg(inputFlags))
         BTaggingAODList = _track_measurement_list('JetAssociatedPixelClusters')
         BTaggingAODList += _track_measurement_list('JetAssociatedSCTClusters')
@@ -379,22 +376,44 @@ def _get_flip_config(nn_path):
 
 def addBTagToOutput(inputFlags, JetCollectionList, toAOD=True, toESD=True):
     """Write out the BTagging containers as defined by JetCollectionList
-    In Run3 we don't write out BTagging in AOD or ESD : this function is for convenience and testing purpose.
     """
     result = ComponentAccumulator()
 
-    BTaggingAODList =  BTaggingFlags.btaggingAODList
+    outlist = []
 
-    BTagConf = getConfiguration()
     for coll in JetCollectionList:
-      BTagConf.RegisterOutputContainersForJetCollection(coll)
-
-    BTaggingAODList = BTaggingFlags.btaggingAODList if toAOD else []
-    BTaggingESDList = BTaggingFlags.btaggingESDList if toESD else []
+        registerContainer(coll, outlist)
 
     if toESD:
-        result.merge(addToESD(inputFlags, BTaggingESDList))
+        result.merge(addToESD(inputFlags, outlist))
     if toAOD:
-        result.merge(addToAOD(inputFlags, BTaggingAODList))
+        result.merge(addToAOD(inputFlags, outlist))
 
     return result
+
+
+# ---------------------------------------------------------------------------
+# copied from the old BTaggingConfiguration.py
+# ---------------------------------------------------------------------------
+
+def registerContainer(JetCollection, bfg):
+    Prefix = "BTagging_"
+    SV = "SecVtx"
+    JFVx = "JFVtx"
+    Base = "xAOD::BTaggingContainer#"
+    BaseAux = "xAOD::BTaggingAuxContainer#"
+    BaseSecVtx = "xAOD::VertexContainer#"
+    BaseAuxSecVtx = "xAOD::VertexAuxContainer#"
+    BaseJFSecVtx = "xAOD::BTagVertexContainer#"
+    BaseAuxJFSecVtx = "xAOD::BTagVertexAuxContainer#"
+
+    author = Prefix + JetCollection # Get correct name with prefix
+    bfg.append(Base + author)
+    bfg.append(BaseAux + author + 'Aux.')
+    # SeCVert
+    bfg.append(BaseSecVtx + author + SV)
+    bfg.append(BaseAuxSecVtx + author + SV + 'Aux.-vxTrackAtVertex')
+    # JFSeCVert
+    bfg.append(BaseJFSecVtx + author + JFVx)
+    bfg.append(BaseAuxJFSecVtx + author + JFVx + 'Aux.')
+

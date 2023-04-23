@@ -54,20 +54,10 @@ class PixelConditionsSummaryTool: public AthAlgTool, virtual public IDetectorEle
     virtual ~PixelConditionsSummaryTool();
     virtual StatusCode initialize() override;
 
-    virtual bool isActive(const Identifier& elementId, const InDetConditions::Hierarchy h=InDetConditions::DEFAULT) const override final;
-    virtual bool isActive(const IdentifierHash& moduleHash) const override final;
-    virtual bool isActive(const IdentifierHash& moduleHash, const Identifier& elementId)  const override final;
-    virtual double activeFraction(const IdentifierHash& moduleHash, const Identifier & idStart, const Identifier & idEnd)  const override final;
-
     virtual bool isActive(const Identifier& elementId, const InDetConditions::Hierarchy h, const EventContext& ctx) const override final;
     virtual bool isActive(const IdentifierHash& moduleHash, const EventContext& ctx) const override final;
     virtual bool isActive(const IdentifierHash& moduleHash, const Identifier& elementId, const EventContext& ctx)  const override final;
     virtual double activeFraction(const IdentifierHash& moduleHash, const Identifier & idStart, const Identifier & idEnd, const EventContext& ctx)  const override final;
-
-    virtual bool isGood(const Identifier & elementId, const InDetConditions::Hierarchy h=InDetConditions::DEFAULT) const override final;
-    virtual bool isGood(const IdentifierHash & moduleHash) const override final;
-    virtual bool isGood(const IdentifierHash & moduleHash, const Identifier & elementId) const override final;
-    virtual double goodFraction(const IdentifierHash & moduleHash, const Identifier & idStart, const Identifier & idEnd) const override final;
 
     virtual bool isGood(const Identifier& elementId, const InDetConditions::Hierarchy h, const EventContext& ctx) const override final;
     virtual bool isGood(const IdentifierHash& moduleHash, const EventContext& ctx) const override final;
@@ -78,15 +68,11 @@ class PixelConditionsSummaryTool: public AthAlgTool, virtual public IDetectorEle
     getDetectorElementStatus(const EventContext& ctx,
                              SG::WriteCondHandle<InDet::SiDetectorElementStatus>* whandle) const override;
 
-    virtual bool hasBSError(const IdentifierHash& moduleHash) const override final;
-    virtual bool hasBSError(const IdentifierHash& moduleHash, Identifier pixid) const override final;
     virtual bool hasBSError(const IdentifierHash& moduleHash, const EventContext& ctx) const override final;
     virtual bool hasBSError(const IdentifierHash& moduleHash, Identifier pixid, const EventContext& ctx) const override final;
-    virtual bool hasBSError(const IdentifierHash& moduleHash, const EventContext& ctx, Identifier pixid) const override final;
     virtual uint64_t getBSErrorWord(const IdentifierHash& moduleHash, const EventContext& ctx) const override final;
     virtual uint64_t getBSErrorWord(const IdentifierHash& moduleHash, const int index, const EventContext& ctx) const override final;
 
-    bool checkChipStatus(IdentifierHash moduleHash, Identifier pixid) const;
     bool checkChipStatus(IdentifierHash moduleHash, Identifier pixid, const EventContext& ctx) const;
 
   private:

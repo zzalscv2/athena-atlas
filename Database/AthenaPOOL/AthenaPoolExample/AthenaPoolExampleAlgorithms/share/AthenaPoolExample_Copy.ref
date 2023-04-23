@@ -353,6 +353,17 @@ SimplePoolRepli...  DEBUG ---->[0]:float Typ:float [10] Size:0 Offset:0 #Element
 SimplePoolRepli...  DEBUG DB Action Commit
 Stream1.FileMet...  DEBUG beam energy "" tag could not be converted to float
 Stream1.FileMet...  DEBUG Failed to retrieve  'SimInfoKey':'/Simulation/Parameters' => cannot set: xAOD::FileMetaData::simFlavour, and xAOD::FileMetaData::isDataOverlay. Trying to get them from input metadata store.
+SimplePoolFile1...  DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] MetaData(xAOD::FileMetaData_v1/FileMetaData)
+MetaData(xAOD::...  DEBUG Opening
+MetaData(xAOD::...  DEBUG    attributes# = 1
+MetaData(xAOD::...  DEBUG Branch container 'xAOD::FileMetaData_v1_FileMetaData'
+MetaData(xAOD::...  DEBUG Opened container MetaData(xAOD::FileMetaData_v1/FileMetaData) of type ROOT_Tree
+SimplePoolFile1...  DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.)
+MetaData(xAOD::...  DEBUG Opening
+MetaData(xAOD::...  DEBUG    attributes# = 1
+MetaData(xAOD::...  DEBUG Branch container 'xAOD::FileMetaDataAuxInfo_v1_FileMetaDataAux.'
+MetaData(xAOD::...  DEBUG Opened container MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.) of type ROOT_Tree
+Stream1.FileMet...  DEBUG Could not get simulation parameters from input metadata store
 Stream1.FileMet...  DEBUG set xAOD::FileMetaData::dataType to Stream1
 Stream1.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream1.FileMet...  DEBUG added 1 to list of runNumbers

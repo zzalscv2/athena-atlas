@@ -49,7 +49,7 @@ namespace InDet {
      */
     virtual SCT_ClusterCollection *clusterize(const InDetRawDataCollection<SCT_RDORawData>& rdoCollection,
                                               const SCT_ID& idHelper,
-                                              const InDet::SiDetectorElementStatus *sctDetElementStatus) const = 0;
+                                              const InDet::SiDetectorElementStatus *sctDetElementStatus, const EventContext& ctx) const = 0;
   };
 }
 

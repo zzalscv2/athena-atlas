@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DETDESCRCNVSVC_DETDESCRCNVSVC_H
@@ -8,123 +8,99 @@
 #include "GaudiKernel/ConversionSvc.h"
 
 // Forward declarations
-template <class TYPE> class SvcFactory;
+template <class TYPE>
+class SvcFactory;
 
 class IOpaqueAddress;
-class StatusCode;
 class StoreGateSvc;
-//  namespace SG {
-//    class TransientAddress;
-//  }
 
-//  class DetDescrCnvSvc : 
-//      public ConversionSvc,
-//      public virtual IAddressProvider {
-
-class DetDescrCnvSvc : public ConversionSvc	{
+class DetDescrCnvSvc : public ConversionSvc {
     /// Allow the factory class access to the constructor
     friend class SvcFactory<DetDescrCnvSvc>;
-public:
 
+   public:
     /// Initialize the service.
     virtual StatusCode initialize();
-    virtual StatusCode queryInterface(const InterfaceID& riid, void** ppvInterface);
+    virtual StatusCode queryInterface(const InterfaceID &riid,
+                                      void **ppvInterface);
 
     /// Add new address to the Detector Store
-    virtual StatusCode addToDetStore(const CLID& clid, const std::string& name) const;
+    virtual StatusCode addToDetStore(const CLID &clid,
+                                     const std::string &name) const;
 
     /// Basic create address
-    virtual StatusCode createAddress( long svc_type,
-				      const CLID& clid,
-				      const std::string* par, 
-				      const unsigned long* ip,
-				      IOpaqueAddress*& refpAddress);
+    virtual StatusCode createAddress(long svc_type, const CLID &clid,
+                                     const std::string *par,
+                                     const unsigned long *ip,
+                                     IOpaqueAddress *&refpAddress);
 
     /// Create address from string form
-    virtual StatusCode createAddress( long svc_type, 
-				      const CLID& clid, 
-				      const std::string& refAddress,
-				      IOpaqueAddress*& refpAddress);
+    virtual StatusCode createAddress(long svc_type, const CLID &clid,
+                                     const std::string &refAddress,
+                                     IOpaqueAddress *&refpAddress);
 
     /// Convert address to string form
-    virtual StatusCode convertAddress( const IOpaqueAddress* pAddress,
-				       std::string& refAddress);
-  
-//      /// AddressProvider interface
-//      typedef IAddressProvider::tadList tadList;
-//      typedef IAddressProvider::tadListIterator tadListIterator;
-  
-//      /// get all addresses that the provider wants to preload in SG
-//      /// maps before the event loop
-//      virtual StatusCode preLoadAddresses( StoreID::type storeID,
-//  					 tadList& list );
-    
-//      /// get all new addresses from Provider for this Event.
-//      virtual StatusCode loadAddresses( StoreID::type storeID,
-//  				      tadList& list );
-      
-//      /// update a transient Address
-//      virtual StatusCode updateAddress( SG::TransientAddress* tad );
-
+    virtual StatusCode convertAddress(const IOpaqueAddress *pAddress,
+                                      std::string &refAddress);
 
     /**@name: Object implementation     */
     //@{
     /// Standard Constructor
-    DetDescrCnvSvc(const std::string& name, ISvcLocator* svc);
+    DetDescrCnvSvc(const std::string &name, ISvcLocator *svc);
 
     /// Standard Destructor
     virtual ~DetDescrCnvSvc();
 
+   private:
+    StatusCode fillTDSRefs();
 
-private:
+    void initTDSItems();
 
-    StatusCode fillTDSRefs(); 
+    StoreGateSvc *m_detStore{nullptr};
+    StringArrayProperty m_detMgrs{this, "DetectorManagers", {}};
+    StringArrayProperty m_detNodes{this, "DetectorNodes", {}};
+    BooleanProperty m_decodeIdDict{this, "DecodeIdDict", true};
+    BooleanProperty m_idDictFromRDB{this, "IdDictFromRDB", false};
+    StringProperty m_idDictName{this, "IdDictName", ""};
+    StringProperty m_idDictGlobalTag{this, "IdDictGlobalTag", ""};
+    StringProperty m_idDictATLASName{this, "AtlasIDFileName", ""};
+    StringProperty m_idDictInDetName{this, "InDetIDFileName", ""};
+    StringProperty m_idDictLArName{this, "LArIDFileName", ""};
+    StringProperty m_idDictTileName{this, "TileIDFileName", ""};
+    StringProperty m_idDictLVL1Name{this, "CaloIDFileName", ""};
+    StringProperty m_idDictMuonName{this, "MuonIDFileName", ""};
+    StringProperty m_idDictLArHighVoltageName{this, "HighVoltageIDFileName",
+                                              ""};
+    StringProperty m_idDictLArElectrodeName{this, "LArElectrodeIDFileName", ""};
+    StringProperty m_idDictForwardName{this, "ForwardIDFileName", ""};
+    StringProperty m_fcal2dNeighborsName{this, "FCAL2DNeighborsFileName", ""};
+    StringProperty m_fcal3dNeighborsNextName{this,
+                                             "FCAL3DNeighborsNextFileName", ""};
+    StringProperty m_fcal3dNeighborsPrevName{this,
+                                             "FCAL3DNeighborsPrevFileName", ""};
+    StringProperty m_tileNeighborsName{this, "TileNeighborsFileName", ""};
+    StringProperty m_fullAtlasNeighborsName{this, "FullAtlasNeighborsFileName",
+                                            ""};
 
-//      SG::TransientAddress* loadAddress(const CLID& clid, 
-//  				      const std::string& key);
+    BooleanProperty m_fromRoot{this, "ReadFromROOT", false};
+    BooleanProperty m_fromNova{this, "ReadFromNova", false};
+    BooleanProperty m_detElemsfromDetNodes{this, "InitDetElemsFromGeoModel",
+                                           false};
+    BooleanProperty m_compact_ids_only{this, "CompactIDsOnly", false};
+    BooleanProperty m_do_checks{this, "DoIdChecks", false};
+    BooleanProperty m_do_neighbours{this, "DoInitNeighbours", true};
 
-    void initTDSItems(); 
+    /// Switch on/off the muon detectors
 
-    StoreGateSvc *			m_detStore;
-    StringArrayProperty			m_detMgrs;
-    StringArrayProperty			m_detNodes;
-    BooleanProperty 			m_decodeIdDict;
-    BooleanProperty 			m_idDictFromRDB;
-    StringProperty			m_idDictName;
-    StringProperty			m_idDictGlobalTag;
-    StringProperty			m_idDictATLASName;
-    StringProperty			m_idDictInDetName;
-    StringProperty			m_idDictLArName;
-    StringProperty			m_idDictTileName;
-    StringProperty			m_idDictLVL1Name;
-    StringProperty			m_idDictMuonName;
-    StringProperty			m_idDictLArHighVoltageName;
-    StringProperty			m_idDictLArElectrodeName;
-    StringProperty			m_idDictForwardName;
-    StringProperty			m_fcal2dNeighborsName;
-    StringProperty			m_fcal3dNeighborsNextName;
-    StringProperty			m_fcal3dNeighborsPrevName;
-    StringProperty			m_tileNeighborsName;
-    StringProperty			m_fullAtlasNeighborsName;
-    BooleanProperty 			m_fromRoot;
-    BooleanProperty 			m_fromNova;
-    BooleanProperty 			m_detElemsfromDetNodes;
-    BooleanProperty 			m_compact_ids_only;
-    BooleanProperty 			m_do_checks;
-    BooleanProperty 			m_do_neighbours;
-    BooleanProperty             m_hasCSC;
-    BooleanProperty             m_hasSTgc;
-    BooleanProperty             m_hasMM;
-    
-    BooleanProperty             m_useGeomDB_InDet;
+    BooleanProperty m_hasCSC{this, "HasCSC", false};
+    BooleanProperty m_hasSTGC{this, "HasSTgc", false};
+    BooleanProperty m_hasMM{this, "HasMM", false};
+    BooleanProperty m_hasMDT{this, "HasMDT", true};
+    BooleanProperty m_hasRPC{this, "HasRPC", true};
+    BooleanProperty m_hasTGC{this, "HasTGC", true};
+
+    BooleanProperty m_useGeomDB_InDet{this, "useGeomDB_InDet", false};
+
+    inline MsgStream &msg(MSG::Level lvl) const { return msgStream(lvl); }
 };
 #endif
-
-
-
-
-
-
-
-
-

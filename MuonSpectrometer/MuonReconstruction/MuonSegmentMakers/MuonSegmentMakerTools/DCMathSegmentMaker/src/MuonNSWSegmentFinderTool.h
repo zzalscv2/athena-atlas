@@ -206,6 +206,8 @@ namespace Muon {
         
         const IMuonIdHelperSvc* idHelper() const;
         bool isPad(const Muon::MuonClusterOnTrack* clust) const;
+        bool isStrip(const Muon::MuonClusterOnTrack* clust) const;
+        bool isWire(const Muon::MuonClusterOnTrack* clust) const;
         template <size_t N>
         std::string printSeed(const std::array<SeedMeasurement, N>& seed) const;
         std::string print(const SeedMeasurement& meas) const;

@@ -84,7 +84,9 @@ def HGTD_DigitizationToolCfg(flags, name="HGTD_DigitizationTool", **kwargs):
     else:
         kwargs.setdefault("OutputObjectName", "HGTD_RDOs")
         kwargs.setdefault("OutputSDOName", "HGTD_SDO_Map")
-    return HGTD_DigitizationBasicToolCfg(flags, name, **kwargs)
+    pileupTool = acc.popToolsAndMerge(HGTD_DigitizationBasicToolCfg(flags, name, **kwargs))
+    acc.setPrivateTools(pileupTool)
+    return acc
 
 
 def HGTD_OverlayDigitizationToolCfg(flags, name="HGTD_OverlayDigitizationTool", **kwargs):

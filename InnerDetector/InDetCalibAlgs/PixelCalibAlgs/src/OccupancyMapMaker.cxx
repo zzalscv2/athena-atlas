@@ -328,13 +328,13 @@ StatusCode OccupancyMapMaker::execute(){
       ATH_MSG_VERBOSE("moduleID, modHash = " << moduleID << " , " << modHash);
       
       // exclude module if reported as not good by PixelConditionsSummaryTool
-      if( !(m_pixelConditionsTool->isGood(modHash)) ) {
+      if( !(m_pixelConditionsTool->isGood(modHash, ctx)) ) {
 	ATH_MSG_VERBOSE("Module excluded as reported not good by PixelConditionsSummaryTool");
         continue;
       }
 
       // exclude module if containg FE synch errors
-      if (m_pixelConditionsTool->hasBSError(modHash)) {
+      if (m_pixelConditionsTool->hasBSError(modHash, ctx)) {
 	ATH_MSG_VERBOSE("Module excluded as containing FE synch errors");
 	continue;
       }
@@ -359,7 +359,7 @@ StatusCode OccupancyMapMaker::execute(){
 
   // [sgs] why is this done in every event ???
   for(unsigned int moduleHash = 0; moduleHash < m_pixelID->wafer_hash_max(); moduleHash++) {
-    if( !m_pixelConditionsTool->isActive( moduleHash ) ){
+    if( !m_pixelConditionsTool->isActive( moduleHash, ctx ) ){
       m_disabledModules->Fill( moduleHash );
     }
   }
@@ -515,6 +515,7 @@ StatusCode OccupancyMapMaker::finalize() {
   int modulesWithHits=0;
   int modulesWithDisabledPixels=0;
 
+  const EventContext& ctx{Gaudi::Hive::currentContext()};
   for (PixelID::const_id_iterator wafer_it=m_pixelID->wafer_begin(); wafer_it!=m_pixelID->wafer_end(); ++wafer_it) {
     Identifier ident = *wafer_it;
     if(!m_pixelID->is_pixel(ident)) continue;  
@@ -552,7 +553,7 @@ StatusCode OccupancyMapMaker::finalize() {
         else if(layer == 3) { cut=m_layer2Cut; nhitsNoNoisePlot=nhitsNoNoisePlotB2; comp="Layer2";  }
     } 
 
-    if (!m_pixelConditionsTool->hasBSError(modHash) && m_hitMaps[modHash]->GetEntries()==0) {
+    if (!m_pixelConditionsTool->hasBSError(modHash, ctx) && m_hitMaps[modHash]->GetEntries()==0) {
       if(bec == 0) {
 	if(layer == 0)      { disablePlotBI->Fill(modEta, modPhi, -1); }
 	else if(layer == 1) { disablePlotB0->Fill(modEta, modPhi, -1); }

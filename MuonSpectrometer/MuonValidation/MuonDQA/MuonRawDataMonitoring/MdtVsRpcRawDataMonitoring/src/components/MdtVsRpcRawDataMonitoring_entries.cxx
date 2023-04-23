@@ -1,4 +1,3 @@
-#include "../MdtVsRpcRawDataValAlg.h" 
-  
-DECLARE_COMPONENT( MdtVsRpcRawDataValAlg )
-    
+#include "../MdtVsRpcRawDataValAlg.h"
+
+DECLARE_COMPONENT(MdtVsRpcRawDataValAlg)

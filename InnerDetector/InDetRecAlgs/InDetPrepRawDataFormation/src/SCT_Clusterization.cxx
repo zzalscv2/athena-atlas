@@ -152,8 +152,8 @@ namespace InDet {
             ATH_MSG_DEBUG("Item already in cache , Hash=" << rd->identifyHash());
             continue;
           }
-          bool goodModule{m_checkBadModules.value() ? ( !m_sctDetElStatus.empty() ?  sctDetElStatus->isGood( rd->identifyHash() ) : m_pSummaryTool->isGood(rd->identifyHash())) : true};
-          VALIDATE_STATUS_ARRAY(m_checkBadModules.value()  && !m_sctDetElStatus.empty(), sctDetElStatus->isGood( rd->identifyHash() ), m_pSummaryTool->isGood(rd->identifyHash()));
+          bool goodModule{m_checkBadModules.value() ? ( !m_sctDetElStatus.empty() ?  sctDetElStatus->isGood( rd->identifyHash() ) : m_pSummaryTool->isGood(rd->identifyHash(),ctx)) : true};
+          VALIDATE_STATUS_ARRAY(m_checkBadModules.value()  && !m_sctDetElStatus.empty(), sctDetElStatus->isGood( rd->identifyHash() ), m_pSummaryTool->isGood(rd->identifyHash(),ctx));
 
 	  if (!goodModule) ATH_MSG_DEBUG(" module status is bad");
           // Check the RDO is not empty and that the wafer is good according to the conditions
@@ -173,7 +173,7 @@ namespace InDet {
             std::unique_ptr<SCT_ClusterCollection> clusterCollection{m_clusteringTool->clusterize(*rd, *m_idHelper,
                                                                                                   !m_sctDetElStatus.empty()
                                                                                                   ? sctDetElStatus.cptr()
-                                                                                                  : nullptr) };
+                                                                                                  : nullptr, ctx) };
             if (clusterCollection) {
               if (not clusterCollection->empty()) {
                 const IdentifierHash hash{clusterCollection->identifyHash()};
@@ -206,7 +206,7 @@ namespace InDet {
             bool goodModule;
             {
               Monitored::ScopedTimer time_SummaryTool(mnt_timer_SummaryTool);
-	      goodModule = {m_checkBadModules.value() ? ( !m_sctDetElStatus.empty() ?  sctDetElStatus->isGood( id ) :  m_pSummaryTool->isGood(id)) : true};
+	      goodModule = {m_checkBadModules.value() ? ( !m_sctDetElStatus.empty() ?  sctDetElStatus->isGood( id ) :  m_pSummaryTool->isGood(id, ctx)) : true};
               VALIDATE_STATUS_ARRAY(m_checkBadModules.value() && !m_sctDetElStatus.empty(), sctDetElStatus->isGood( id ), m_pSummaryTool->isGood(id));
 	      if (!goodModule) ATH_MSG_VERBOSE("module status flagged as BAD");
             }
@@ -239,7 +239,7 @@ namespace InDet {
               std::unique_ptr<SCT_ClusterCollection> clusterCollection{m_clusteringTool->clusterize(*RDO_Collection, *m_idHelper,
                                                                                                     !m_sctDetElStatus.empty()
                                                                                                     ? sctDetElStatus.cptr()
-                                                                                                    : nullptr)};
+                                                                                                    : nullptr, ctx)};
               if (clusterCollection and (not clusterCollection->empty())) {
                 ATH_MSG_VERBOSE("REGTEST: SCT : clusterCollection contains " << clusterCollection->size() << " clusters");
                 ATH_CHECK(lock.addOrDelete(std::move(clusterCollection)));

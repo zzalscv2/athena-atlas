@@ -322,8 +322,9 @@ StatusCode TrigBmumuxComboHypo::findBmumuxCandidates(TrigBmumuxState& state) con
     const xAOD::Vertex* dimuon = state.dimuons.get(idx);
 
     std::vector<const xAOD::Muon*> muons(2, nullptr);
-    for (const size_t& i : state.trigBphysMuonIndices.at(idx)) {
-      const auto& muon = state.muons.at(i);
+    const auto& muonIndices = state.trigBphysMuonIndices.at(idx);
+    for (size_t i = 0; i < 2; ++i) {
+      const auto& muon = state.muons.at(muonIndices[i]);
       muons[i] = *muon.link;
     }
 
@@ -365,10 +366,11 @@ StatusCode TrigBmumuxComboHypo::findBmumuxCandidates(TrigBmumuxState& state) con
       }
     }
     // remove muon duplicates
+    if (selectedTracks.size() < 2) continue;
     std::sort(selectedTracks.begin(), selectedTracks.end(), [p_mu=mu1->genvecP4()](const auto& lhs, const auto& rhs){ return ROOT::Math::VectorUtil::DeltaR(p_mu, (*lhs)->genvecP4()) > ROOT::Math::VectorUtil::DeltaR(p_mu, (*rhs)->genvecP4()); });
-    selectedTracks.pop_back();
+    if (isIdenticalTracks(mu1, *selectedTracks.back())) selectedTracks.pop_back();
     std::sort(selectedTracks.begin(), selectedTracks.end(), [p_mu=mu2->genvecP4()](const auto& lhs, const auto& rhs){ return ROOT::Math::VectorUtil::DeltaR(p_mu, (*lhs)->genvecP4()) > ROOT::Math::VectorUtil::DeltaR(p_mu, (*rhs)->genvecP4()); });
-    selectedTracks.pop_back();
+    if (isIdenticalTracks(mu2, *selectedTracks.back())) selectedTracks.pop_back();
     std::sort(selectedTracks.begin(), selectedTracks.end(), [](const auto& lhs, const auto& rhs){ return ((*lhs)->pt() > (*rhs)->pt()); });
 
     ATH_MSG_DEBUG( "Found " << selectedTracks.size() << " tracks consistent with dimuon vertex " << idx );

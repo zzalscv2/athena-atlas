@@ -285,8 +285,8 @@ RobustTrackingGeometryBuilderImpl::trackingGeometryImpl(
 
   // --------------------------------------------------------------------------------------------------
   double lastCentralOuterR = beamPipeBounds->outerRadius();
-  double lastNegEndcapOuterR = beamPipeBounds->outerRadius();
-  double lastPosEndcapOuterR = beamPipeBounds->outerRadius();
+  double lastNegEndcapOuterR = lastCentralOuterR;
+  double lastPosEndcapOuterR = lastCentralOuterR;
 
   // loop over double-vectors, access the dimensions from the parsing
   auto pclIter = providedCylinderLayers.begin();

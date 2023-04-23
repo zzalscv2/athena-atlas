@@ -8,7 +8,7 @@ atlas_add_library( DetDescrCnvSvcLib
                    src/*.cxx
                    PUBLIC_HEADERS DetDescrCnvSvc
                    LINK_LIBRARIES GaudiKernel
-                   PRIVATE_LINK_LIBRARIES StoreGateLib )
+                   PRIVATE_LINK_LIBRARIES StoreGateLib AthenaBaseComps)
 
 atlas_add_component( DetDescrCnvSvc
                      src/components/*.cxx

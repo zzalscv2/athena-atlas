@@ -5,7 +5,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-muFastInfo="MuonL2SAInfo"
+muFastInfo="HLT_MuonL2SAInfo"
 muCombInfo="HLT_MuonL2CBInfo"
 
 def muCombCfg(flags, postFix="", useBackExtrp=True):
@@ -56,7 +56,7 @@ def l2MuCombRecoCfg(flags, name="L2MuCombReco", is_probe_leg=False):
     ViewCreatorFetchFromViewROITool=CompFactory.ViewCreatorFetchFromViewROITool
     reco = InViewRecoCA(name, 
                         RequireParentView = True, 
-                        RoITool = ViewCreatorFetchFromViewROITool(RoisWriteHandleKey="Roi_L2SAMuon", InViewRoIs = "forID", ViewToFetchFrom = "L2MuFastRecoNewJOViews"),
+                        RoITool = ViewCreatorFetchFromViewROITool(RoisWriteHandleKey="Roi_L2SAMuon", InViewRoIs = "RoIs_fromL2SAViews"),
                         isProbe=is_probe_leg)
 
     acc, alg = muCombCfg(flags)

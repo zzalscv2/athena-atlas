@@ -3,7 +3,7 @@
 #include "AsgMessaging/MsgStream.h"
 #include <AsgTools/StandaloneToolHandle.h>
 #include "FTagAnalysisInterfaces/IBTaggingTruthTaggingTool.h"
-
+#include "xAODBTaggingEfficiency/TruthTagResults.h"
 
 #include <string>
 #include <iomanip>

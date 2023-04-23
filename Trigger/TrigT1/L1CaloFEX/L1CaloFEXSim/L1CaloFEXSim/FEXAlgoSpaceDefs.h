@@ -150,7 +150,7 @@ namespace LVL1 {
   
     // jFEX SRJet Et Calibration (Depending on eta region...)
                                             //          jFex 0,     jFex 1,     jFex 2,     jFex 3,     jFex 4,     jFex 5 
-    constexpr static float SRJ_Calib_params[6] = {    1.65343915, 1.97160883, 1.66666667, 1.66666667, 1.97160883, 1.65343915 };
+    constexpr static float SRJ_Calib_params[6] = {   1.5390625,  1.734375,    1.421875,   1.421875,   1.734375,  1.5390625 };
         
 
   

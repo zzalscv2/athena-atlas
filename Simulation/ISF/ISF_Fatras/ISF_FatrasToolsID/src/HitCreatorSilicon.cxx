@@ -403,8 +403,9 @@ void iFatras::HitCreatorSilicon::createSimHit(const ISF::ISFParticle& isp, const
   IdentifierHash hitIdHash = hitSiDetElement.identifyHash();
   // check conditions of the intersection
   if ( m_useConditionsTool ) {
-    bool isActive = m_condSummaryTool->isActive(hitIdHash, hitId);                   // active = "element returns data"
-    bool isGood   = isActive ? m_condSummaryTool->isGood(hitIdHash, hitId) : false;  // good   = "data are reliable"
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+    bool isActive = m_condSummaryTool->isActive(hitIdHash, hitId, ctx);                   // active = "element returns data"
+    bool isGood   = isActive ? m_condSummaryTool->isGood(hitIdHash, hitId, ctx) : false;  // good   = "data are reliable"
     if (!isActive) 
       ATH_MSG_VERBOSE("[ sihit ]  ID " << hitId << ", hash " << hitIdHash << " is not active. ");
     else if (!isGood)               

@@ -181,8 +181,9 @@ StatusCode TrigBmuxComboHypo::findBmuxCandidates(TrigBmuxState& state) const {
       tracks.emplace_back(ViewHelper::makeLink<xAOD::TrackParticleContainer>(view, tracksHandle, idx));
     }
     // find the best match to the original muon and remove it
+    if (tracks.size() < 2) continue;
     std::sort(tracks.begin(), tracks.end(), [p_mu](const auto& lhs, const auto& rhs){ return ROOT::Math::VectorUtil::DeltaR(p_mu, (*lhs)->genvecP4()) > ROOT::Math::VectorUtil::DeltaR(p_mu, (*rhs)->genvecP4()); });
-    tracks.pop_back();
+    if (isIdenticalTracks(muonInDetTrack, *tracks.back())) tracks.pop_back();
     nTrk.push_back(tracks.size());
 
     std::sort(tracks.begin(), tracks.end(), [](const auto& lhs, const auto& rhs){ return ((*lhs)->pt() > (*rhs)->pt()); });
@@ -686,6 +687,13 @@ StatusCode TrigBmuxComboHypo::fillTriggerObjects(
   }
 
   return StatusCode::SUCCESS;
+}
+
+
+bool TrigBmuxComboHypo::isIdenticalTracks(const xAOD::TrackParticle* lhs, const xAOD::TrackParticle* rhs) const {
+
+  if (lhs->charge() * rhs->charge() < 0.) return false;
+  return (ROOT::Math::VectorUtil::DeltaR(lhs->genvecP4(), rhs->genvecP4()) < m_deltaR);
 }
 
 

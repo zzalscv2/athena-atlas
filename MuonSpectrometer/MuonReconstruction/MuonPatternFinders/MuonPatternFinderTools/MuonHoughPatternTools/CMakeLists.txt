@@ -22,3 +22,4 @@ atlas_add_component( MuonHoughPatternTools
                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                      LINK_LIBRARIES ${ROOT_LIBRARIES} AtlasHepMCLib AthenaBaseComps GeoPrimitives GaudiKernel MuonDetDescrUtils MuonIdHelpersLib MuonClusterizationLib MuonHoughPatternEvent MuonPattern MuonPrepRawData MuonSegment MuonRecHelperToolsLib MuonRecToolInterfaces MuonLayerHough TrkDriftCircleMath CxxUtils StoreGateLib EventPrimitives xAODMuon xAODTruth MuonReadoutGeometry MuonRIO_OnTrack TrkSurfaces TrkTruthData MuonHoughPatternToolsLib )
 
+                     atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

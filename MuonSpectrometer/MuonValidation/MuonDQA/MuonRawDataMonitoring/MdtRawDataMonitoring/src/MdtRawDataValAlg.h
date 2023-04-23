@@ -279,7 +279,7 @@ private:
     TH1* m_mdttdccut_sector[4][4][16]{};  ////  [endcap/barrel A/C][layer][sector]
 
     // Chamber by Chamber Plots
-    std::array<std::unique_ptr<MDTChamber>, MuonGM::MuonDetectorManager::MdtDetElMaxHash> m_hist_hash_list{};
+    std::vector<std::unique_ptr<MDTChamber>> m_hist_hash_list{};
 
     std::string getChamberName(const Muon::MdtPrepData*);
     std::string getChamberName(const Identifier& id);

@@ -263,7 +263,7 @@ StatusCode MM_DigitizationTool::initialize() {
     /// Large wedges first eta station
     NoiseCalibConstants& noise_largeEta2 = m_noiseParams[m_idHelperSvc->stationName(tmpId)*2];
     noise_largeEta2.slope = (maxNoiseLarge_eta2 - minNoiseLarge_eta2) / (longestStripLength - shortestStripLength);
-    noise_largeEta2.intercept =  minNoiseLarge_eta1 - noise_largeEta2.slope * shortestStripLength;    
+    noise_largeEta2.intercept =  minNoiseLarge_eta2 - noise_largeEta2.slope * shortestStripLength;    
     //============================
 
     ATH_MSG_DEBUG("Configuration  MM_DigitizationTool ");

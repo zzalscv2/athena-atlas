@@ -16,7 +16,6 @@
 #include <vector>
 
 #include "CalibrationDataInterface/CalibrationDataVariables.h"
-#include "xAODBTaggingEfficiency/TruthTagResults.h"
 
 // xAOD jet
 #include "xAODJet/JetContainer.h"
@@ -25,6 +24,10 @@
 #include "PATInterfaces/CorrectionCode.h"
 #include "AsgMessaging/StatusCode.h"
 #include "PATInterfaces/SystematicSet.h"
+
+namespace Analysis {
+  class TruthTagResults;
+}
 
 class IBTaggingTruthTaggingTool : virtual public CP::ISystematicsTool {
 

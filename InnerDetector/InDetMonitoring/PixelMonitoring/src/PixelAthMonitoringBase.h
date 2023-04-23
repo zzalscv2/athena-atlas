@@ -169,14 +169,16 @@ protected:
   }
   bool isActive(const  InDet::SiDetectorElementStatus *element_status,
                 const IdentifierHash &module_hash) const {
-     bool ret  { element_status ? element_status->isGood(module_hash) : m_pixelCondSummaryTool->isActive(module_hash)  };
-     VALIDATE_STATUS_ARRAY(element_status, element_status->isGood(module_hash), m_pixelCondSummaryTool->isActive(module_hash)  );
+     const EventContext& ctx{Gaudi::Hive::currentContext()};
+     bool ret  { element_status ? element_status->isGood(module_hash) : m_pixelCondSummaryTool->isActive(module_hash, ctx)  };
+     VALIDATE_STATUS_ARRAY(element_status, element_status->isGood(module_hash), m_pixelCondSummaryTool->isActive(module_hash, ctx)  );
      return ret;
   }
   bool isGood(const InDet::SiDetectorElementStatus *element_status,
               const IdentifierHash &module_hash) const {
-     bool ret  ( element_status ? element_status->isGood(module_hash) : m_pixelCondSummaryTool->isGood(module_hash));
-     VALIDATE_STATUS_ARRAY(element_status, element_status->isGood(module_hash), m_pixelCondSummaryTool->isGood(module_hash)  );
+     const EventContext& ctx{Gaudi::Hive::currentContext()};
+     bool ret  ( element_status ? element_status->isGood(module_hash) : m_pixelCondSummaryTool->isGood(module_hash, ctx));
+     VALIDATE_STATUS_ARRAY(element_status, element_status->isGood(module_hash), m_pixelCondSummaryTool->isGood(module_hash, ctx)  );
      return ret;
   }
   std::tuple<bool,bool> isChipGood(const IdentifierHash &module_hash,
@@ -185,9 +187,10 @@ protected:
      bool is_good=false;
      Identifier pixelID = m_pixelReadout->getPixelIdfromHash(module_hash, chip_i, 1, 1);
      if (pixelID.is_valid()) {
-        is_active = m_pixelCondSummaryTool->isActive(module_hash,pixelID);
+        const EventContext& ctx{Gaudi::Hive::currentContext()};
+        is_active = m_pixelCondSummaryTool->isActive(module_hash,pixelID, ctx);
         if (is_active) {
-           is_good = m_pixelCondSummaryTool->isGood(module_hash, pixelID);
+           is_good = m_pixelCondSummaryTool->isGood(module_hash, pixelID, ctx);
         }
      }
      return std::make_tuple(is_active,is_good);
@@ -197,7 +200,8 @@ protected:
      bool is_active=false;
      Identifier pixelID = m_pixelReadout->getPixelIdfromHash(module_hash, chip_i, 1, 1);
      if (pixelID.is_valid()) {
-        is_active = m_pixelCondSummaryTool->isActive(module_hash,pixelID);
+        const EventContext& ctx{Gaudi::Hive::currentContext()};
+        is_active = m_pixelCondSummaryTool->isActive(module_hash,pixelID, ctx);
      }
      return is_active;
   }
@@ -216,8 +220,9 @@ protected:
                                 : isChipGood( module_hash, chip_i) );
 #ifdef DO_VALIDATE_STATUS_ARRAY
      Identifier pixelID = m_pixelReadout->getPixelIdfromHash(module_hash, chip_i, 1, 1);
-     VALIDATE_STATUS_ARRAY(element_active, element_active->isChipGood(module_hash, chip_i), m_pixelCondSummaryTool->isActive(module_hash,pixelID)  );
-     VALIDATE_STATUS_ARRAY(element_status, element_status->isChipGood(module_hash, chip_i), m_pixelCondSummaryTool->isGood(module_hash,pixelID)  );
+     const EventContext& ctx{Gaudi::Hive::currentContext()};
+     VALIDATE_STATUS_ARRAY(element_active, element_active->isChipGood(module_hash, chip_i), m_pixelCondSummaryTool->isActive(module_hash,pixelID, ctx)  );
+     VALIDATE_STATUS_ARRAY(element_status, element_status->isChipGood(module_hash, chip_i), m_pixelCondSummaryTool->isGood(module_hash,pixelID, ctx)  );
 #endif
      return ret;
   }
@@ -228,8 +233,9 @@ protected:
                ? element_active->isChipGood(module_hash, chip_i)
                : isChipActive( module_hash, chip_i) );
 #ifdef DO_VALIDATE_STATUS_ARRAY
+     const EventContext& ctx{Gaudi::Hive::currentContext()};
      Identifier pixelID = m_pixelReadout->getPixelIdfromHash(module_hash, chip_i, 1, 1);
-     VALIDATE_STATUS_ARRAY(element_active, element_active->isChipGood(module_hash, chip_i), m_pixelCondSummaryTool->isActive(module_hash,pixelID)  );
+     VALIDATE_STATUS_ARRAY(element_active, element_active->isChipGood(module_hash, chip_i), m_pixelCondSummaryTool->isActive(module_hash,pixelID, ctx)  );
 #endif
      return ret;
   }
