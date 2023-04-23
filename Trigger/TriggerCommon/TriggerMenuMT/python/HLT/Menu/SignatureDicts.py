@@ -206,6 +206,8 @@ JetChainParts = {
        'preselcHT850',
        #b-jet preselections
        'presel2c20XX2c20b85',
+       'presel2c20XX2c20b82',
+       'presel2c20XX2c20b80',
        'presel2c20XX2c20bg85',
        'presel2c20XX2c20b90',
        'presel3c20XX1c20b85',
