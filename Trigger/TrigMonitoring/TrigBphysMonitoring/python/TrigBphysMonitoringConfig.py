@@ -69,7 +69,7 @@ class TrigBphysMonAlgBuilder:
         return True if self.chain().startswith('L1') else False
       
       def getTopo(self):
-        if "_bBmumu_" in self.chain() or "_bDimu_" in self.chain() or "_bJpsimumu_" in self.chain() :
+        if "_bBmumu_" in self.chain() or "_bDimu_" in self.chain() or "_bJpsimumu_" in self.chain() or "_bUpsimumu_" in self.chain() :
           return "MuMu"
         elif "_bBmumux_" in self.chain() :
           return "MuMuX"

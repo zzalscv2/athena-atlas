@@ -2042,10 +2042,10 @@ def setupMenu(menu_name):
         ChainProp(name='HLT_2mu6_bBmumu_Lxy0_L12MU5VF', l1SeedThresholds=['MU5VF'], stream=['BphysDelayed'], groups=BphysicsGroup+SupportGroup+['RATE:CPS_2MU5VF']),
         ChainProp(name='HLT_2mu6_bUpsimumu_L12MU5VF', l1SeedThresholds=['MU5VF'], stream=['BphysDelayed'], groups=BphysicsGroup+SupportGroup+['RATE:CPS_2MU5VF']),
         #-- 2mu6 chains with L1Topo
-        ChainProp(name='HLT_2mu6_bJpsimumu_L1BPH-2M9-2DR15-2MU5VF', l1SeedThresholds=['MU5VF'], stream=['BphysDelayed'], groups=BphysicsGroup+PrimaryL1MuGroup+Topo2Group),
+        ChainProp(name='HLT_2mu6_bJpsimumu_L1BPH-2M9-2DR15-2MU5VF', l1SeedThresholds=['MU5VF'], stream=['BphysDelayed','express'], groups=BphysicsGroup+PrimaryL1MuGroup+Topo2Group, monGroups=['bphysMon:online','bphysMon:shifter']),
         ChainProp(name='HLT_2mu6_bJpsimumu_Lxy0_L1BPH-2M9-2DR15-2MU5VF', l1SeedThresholds=['MU5VF'], stream=['BphysDelayed'], groups=BphysicsGroup+PrimaryL1MuGroup+Topo2Group),
         ChainProp(name='HLT_2mu6_bBmumu_Lxy0_L1BPH-2M9-2DR15-2MU5VF', l1SeedThresholds=['MU5VF'], stream=['BphysDelayed'], groups=BphysicsGroup+PrimaryL1MuGroup+Topo2Group),
-        ChainProp(name='HLT_2mu6_bUpsimumu_L1BPH-8M15-0DR22-2MU5VF', l1SeedThresholds=['MU5VF'], stream=['BphysDelayed'], groups=BphysicsGroup+PrimaryL1MuGroup+Topo2Group),
+        ChainProp(name='HLT_2mu6_bUpsimumu_L1BPH-8M15-0DR22-2MU5VF', l1SeedThresholds=['MU5VF'], stream=['BphysDelayed','express'], groups=BphysicsGroup+PrimaryL1MuGroup+Topo2Group, monGroups=['bphysMon:online','bphysMon:t0']),
 
         #-- dimuon EOF triggers
         #-- 2mu6 chains
