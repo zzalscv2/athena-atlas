@@ -138,9 +138,9 @@ def JetEfficiencyMonitoringConfig(inputFlags):
 
     title_for_prop = { "pt" :'pT',  "eta" : '#eta'}
     xlabel_for_prop = { "pt" :'pT [MeV]',  "eta" : '#eta'}
-    nbins = {"pt": 50, "eta" :32}
+    nbins = {"pt": 200, "eta" :32}
     binmin = {"pt": -50, "eta" :-3.3}
-    binmax = {"pt": 700*GeV, "eta" :3.3}
+    binmax = {"pt": 1400*GeV, "eta" :3.3}
     properties = list(title_for_prop.keys())
 
 
