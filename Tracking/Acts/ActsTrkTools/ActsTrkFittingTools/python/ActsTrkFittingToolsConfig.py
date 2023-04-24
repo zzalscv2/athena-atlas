@@ -27,8 +27,6 @@ def ActsKalmanFitterCfg(flags, name: str = "ActsKalmanFitter", **kwargs):
             ActsExtrapolationToolCfg(flags, MaxSteps=10000)
         ) # PrivateToolHandle
 
-    result.addPublicTool(result.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000))) # FIXME redundant?
-
     kwargs.setdefault("ReverseFilteringPt", 1.0 * UnitConstants.GeV)
     kwargs.setdefault("OverstepLimit", 300 * UnitConstants.um)
 
