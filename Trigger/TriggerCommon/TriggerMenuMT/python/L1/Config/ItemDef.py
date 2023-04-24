@@ -282,6 +282,7 @@ class ItemDef:
         MenuItem('L1_EM7_UNPAIRED_ISO'   ).setLogic(d.EM7 & unpaired_isocond).setTriggerType( TT.calo )
         MenuItem('L1_EM7_UNPAIRED_NONISO').setLogic(d.EM7 & unpaired_nonisocond).setTriggerType( TT.calo )
         MenuItem('L1_EM7_FIRSTEMPTY'     ).setLogic(d.EM7 & firstempty).setTriggerType( TT.calo )
+        #MenuItem('L1_eEM9_FIRSTEMPTY'     ).setLogic(d.eEM9 & firstempty).setTriggerType( TT.calo )
 
         MenuItem('L1_EM20VH_FIRSTEMPTY'  ).setLogic( d.EM20VH  & firstempty).setTriggerType( TT.calo )
         MenuItem('L1_EM22VHI_FIRSTEMPTY' ).setLogic( d.EM22VHI & firstempty).setTriggerType( TT.calo )
