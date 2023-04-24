@@ -3093,6 +3093,19 @@ def setupMenu(menu_name):
         ChainProp(name='HLT_g90_loose_xe90_cell_L1EM22VHI',l1SeedThresholds=['EM22VHI','FSNOSEED'],stream=[PhysicsStream], groups=PrimaryLegGroup+EgammaMETGroup),
         ChainProp(name='HLT_g90_loose_xe90_cell_L1eEM26M',l1SeedThresholds=['eEM26M','FSNOSEED'],stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaMETGroup),
 
+        #Photon+MET ATR-21565,ATR-26410
+        ChainProp(name='HLT_g50_tight_xe40_cell_xe50_pfopufit_80mTAC_L1EM22VHI',l1SeedThresholds=['EM22VHI','FSNOSEED','FSNOSEED'],stream=[PhysicsStream], groups=PrimaryLegGroup+EgammaMETGroup),
+        ChainProp(name='HLT_g50_tight_xe40_cell_xe60_pfopufit_80mTAC_L1EM22VHI',l1SeedThresholds=['EM22VHI','FSNOSEED','FSNOSEED'],stream=[PhysicsStream], groups=PrimaryLegGroup+EgammaMETGroup),
+        ChainProp(name='HLT_g50_tight_xe40_cell_xe70_pfopufit_80mTAC_L1EM22VHI',l1SeedThresholds=['EM22VHI','FSNOSEED','FSNOSEED'],stream=[PhysicsStream], groups=PrimaryLegGroup+EgammaMETGroup),
+        #
+        ChainProp(name='HLT_g50_tight_xe40_cell_xe50_pfopufit_80mTAC_L1eEM26M',l1SeedThresholds=['eEM26M','FSNOSEED','FSNOSEED'],stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaMETGroup),
+        ChainProp(name='HLT_g50_tight_xe40_cell_xe60_pfopufit_80mTAC_L1eEM26M',l1SeedThresholds=['eEM26M','FSNOSEED','FSNOSEED'],stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaMETGroup),
+        ChainProp(name='HLT_g50_tight_xe40_cell_xe70_pfopufit_80mTAC_L1eEM26M',l1SeedThresholds=['eEM26M','FSNOSEED','FSNOSEED'],stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaMETGroup),
+        #
+        ChainProp(name='HLT_g50_tight_xe40_cell_xe50_pfopufit_80mTAC_L1eEM28M',l1SeedThresholds=['eEM28M','FSNOSEED','FSNOSEED'],stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaMETGroup),
+        ChainProp(name='HLT_g50_tight_xe40_cell_xe60_pfopufit_80mTAC_L1eEM28M',l1SeedThresholds=['eEM28M','FSNOSEED','FSNOSEED'],stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaMETGroup),
+        ChainProp(name='HLT_g50_tight_xe40_cell_xe70_pfopufit_80mTAC_L1eEM28M',l1SeedThresholds=['eEM28M','FSNOSEED','FSNOSEED'],stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaMETGroup),
+
         #ATR-27373
         ChainProp(name='HLT_g90_loose_xe90_cell_L1eEM28M',l1SeedThresholds=['eEM28M','FSNOSEED'],stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaMETGroup),
 
