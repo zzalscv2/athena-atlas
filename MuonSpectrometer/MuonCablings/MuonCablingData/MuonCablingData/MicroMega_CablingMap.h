@@ -43,7 +43,8 @@ class MicroMega_CablingMap {
     using LookUpMap = std::map<Identifier, MicroMegaZebraSet>;
     LookUpMap m_cablingMap{};
 };
-
+std::ostream& operator<<(std::ostream& ostr,
+                         const MicroMegaZebraData& connector);
 CLASS_DEF(MicroMega_CablingMap, 85614785, 1);
 #include "AthenaKernel/CondCont.h"
 CONDCONT_DEF(MicroMega_CablingMap, 164588835);

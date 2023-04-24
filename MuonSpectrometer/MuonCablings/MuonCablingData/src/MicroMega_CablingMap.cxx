@@ -4,7 +4,6 @@
 
 #include <MuonCablingData/MicroMega_CablingMap.h>
 
-namespace {
 std::ostream& operator<<(std::ostream& ostr,
                          const MicroMegaZebraData& connector) {
     ostr << "First channel: " << connector.firstChannel
@@ -12,7 +11,7 @@ std::ostream& operator<<(std::ostream& ostr,
          << " shift: " << connector.shiftChannel;
     return ostr;
 }
-}  // namespace
+
 
 MicroMega_CablingMap::MicroMega_CablingMap(const Muon::IMuonIdHelperSvc* svc)
     : m_idHelperSvc{svc} {}
