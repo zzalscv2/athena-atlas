@@ -12,6 +12,10 @@ class SpacePointStrategy(FlagEnum):
     ActsCore = "ActsCore" # ACTS-based SP formation
     ActsTrk = "ActsTrk" #SP formation without ACTS
 
+class TrackFitterType(FlagEnum):
+    KalmanFitter = 'KalmanFitter' # default ACTS fitter to choose
+    GaussianSumFitter = 'GaussianSumFitter' # new experimental implementation
+
 def createActsConfigFlags():
     actscf = AthConfigFlags()
 
@@ -42,5 +46,6 @@ def createActsConfigFlags():
 
     # Track fitting
     actscf.addFlag('Acts.writeTrackCollection', False) # save to file (ESD, AOD) the Resolved and Refitted track collections
+    actscf.addFlag('Acts.trackFitterType', TrackFitterType.KalmanFitter, enum=TrackFitterType) # Define Tracking algorithm for refitting
 
     return actscf

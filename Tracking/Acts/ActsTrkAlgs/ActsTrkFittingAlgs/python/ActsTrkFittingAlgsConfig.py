@@ -4,14 +4,14 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 
-from ActsTrkFittingTools.ActsTrkFittingToolsConfig import ActsKalmanFitterCfg
+from ActsTrkFittingTools.ActsTrkFittingToolsConfig import ActsFitterCfg
 
 def ActsReFitterAlgCfg(flags, name="ActsReFitterAlg", **kwargs):
     result = ComponentAccumulator()
 
-    actsKF = result.popToolsAndMerge(ActsKalmanFitterCfg(flags))
+    actsFitter = result.popToolsAndMerge(ActsFitterCfg(flags))
 
-    kwargs.setdefault("ActsKalmanFitter", actsKF)
+    kwargs.setdefault("ActsFitter", actsFitter)
     kwargs.setdefault("TrackName", "ResolvedTracks")
 
     result.addEventAlgo(
@@ -25,6 +25,7 @@ def ActsReFitterAlgCfg(flags, name="ActsReFitterAlg", **kwargs):
         result.merge(writeAdditionalTracks(flags))
 
     return result
+
 
 
 def writeAdditionalTracks(flags, trackName='ResolvedTracks', newTrackName='ReFitted_Tracks'):

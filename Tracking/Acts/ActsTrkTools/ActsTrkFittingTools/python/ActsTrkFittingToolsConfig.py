@@ -12,8 +12,10 @@ from ActsGeometry.ActsGeometryConfig import (
 from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
 from ActsTrkEventCnv.ActsTrkEventCnvConfig import ActsToTrkConverterToolCfg
 
+from ActsInterop.ActsConfigFlags import TrackFitterType
 
-def ActsKalmanFitterCfg(flags, name: str = "ActsKalmanFitter", **kwargs):
+
+def ActsFitterCfg(flags, name: str = "ActsKalmanFitter", **kwargs):
     result = ComponentAccumulator()
 
     # Make sure this is set correctly!
@@ -27,8 +29,9 @@ def ActsKalmanFitterCfg(flags, name: str = "ActsKalmanFitter", **kwargs):
             ActsExtrapolationToolCfg(flags, MaxSteps=10000)
         ) # PrivateToolHandle
 
-    kwargs.setdefault("ReverseFilteringPt", 1.0 * UnitConstants.GeV)
-    kwargs.setdefault("OverstepLimit", 300 * UnitConstants.um)
+    if flags.Acts.trackFitterType is TrackFitterType.KalmanFitter:
+        kwargs.setdefault("ReverseFilteringPt", 1.0 * UnitConstants.GeV)
+        kwargs.setdefault("OverstepLimit", 300 * UnitConstants.um)
 
     actsConverter = result.popToolsAndMerge(ActsToTrkConverterToolCfg(flags))
     kwargs["ATLASConverterTool"] = actsConverter
@@ -55,7 +58,11 @@ def ActsKalmanFitterCfg(flags, name: str = "ActsKalmanFitter", **kwargs):
             result.popToolsAndMerge(InDetBoundaryCheckToolCfg(flags)),
         )
 
-    result.setPrivateTools(CompFactory.ActsKalmanFitter(name, **kwargs))
+    if flags.Acts.trackFitterType is TrackFitterType.KalmanFitter:    # This flag is by default set to KalmanFitter
+        result.setPrivateTools(CompFactory.ActsKalmanFitter(name, **kwargs))
+    elif flags.Acts.trackFitterType is TrackFitterType.GaussianSumFitter:
+        name = name.replace("KalmanFitter", "GaussianSumFitter")
+        result.setPrivateTools(CompFactory.ActsGaussianSumFitter(name, **kwargs))
 
     return result
 
