@@ -30,7 +30,7 @@ struct TRTRDOSorter {
 } TRTRDOSorterObject;
 
 std::unique_ptr<TRT_RDO_Collection> copyCollection(
-    const IdentifierHash &hashId, 
+    const IdentifierHash &hashId,
     const TRT_RDO_Collection *collection,
     DataPool<TRT_LoLumRawData>& dataItemsPool) {
 
@@ -50,7 +50,7 @@ std::unique_ptr<TRT_RDO_Collection> copyCollection(
 }
 
 std::unique_ptr<TRT_RDO_Collection> copyCollectionAndSort(
-    const IdentifierHash &hashId, 
+    const IdentifierHash &hashId,
     const TRT_RDO_Collection *collection,
     DataPool<TRT_LoLumRawData>& dataItemsPool) {
 
@@ -134,7 +134,7 @@ StatusCode TRTOverlay::execute(const EventContext& ctx) const
   // The DataPool, this is what will actually own the elements
   // we create during this algorithm. The containers are
   // views.
-  DataPool<TRT_LoLumRawData> dataItemsPool;
+  DataPool<TRT_LoLumRawData> dataItemsPool(ctx);
   //It resizes but lets reserve already quite a few
   //Max number of straws is 350847
   // but lets not assume 100% occupancy ~ 80%
@@ -247,7 +247,7 @@ StatusCode TRTOverlay::overlayContainer(const EventContext &ctx,
       outputCollection->setIdentifier(signalCollection->identify());
       // This will receive merged elements from the other containers.
       // There elements are owned actually by the DataPool
-      outputCollection->clear(SG::VIEW_ELEMENTS); 
+      outputCollection->clear(SG::VIEW_ELEMENTS);
 
       // Copy the background collection the pool owns the individual elements
       std::unique_ptr<TRT_RDO_Collection> bkgCollection{};
@@ -261,10 +261,10 @@ StatusCode TRTOverlay::overlayContainer(const EventContext &ctx,
       int det = m_trtId->barrel_ec(signalCollection->identify());
       mergeCollections(bkgCollection.get(),
                        signalCollection.get(),
-                       outputCollection.get(), 
-                       occupancyMap[det], 
-                       signalSDOCollection, 
-                       strawStatusHT, 
+                       outputCollection.get(),
+                       occupancyMap[det],
+                       signalSDOCollection,
+                       strawStatusHT,
                        rndmEngine);
 
       if (outputContainer->addCollection(outputCollection.get(), hashId).isFailure()) {
@@ -302,9 +302,9 @@ void TRTOverlay::mergeCollections(TRT_RDO_Collection *bkgCollection,
 
   // Merge by copying ptrs from background and signal to output collection
   TRT_RDO_Collection::size_type ibkg = 0, isig = 0;
-  
+
   // Below we have swapElements.
-  // Remember the elements of the signalCollection and bkgCollection 
+  // Remember the elements of the signalCollection and bkgCollection
   // containers are owned by the DataPool.
   // tmpBkg and tmp are whaterver elements we take out of the containers.
   //
@@ -332,7 +332,7 @@ void TRTOverlay::mergeCollections(TRT_RDO_Collection *bkgCollection,
         bkgCollection->swapElement(ibkg++, nullptr, tmp);
       } else {
         // The hits are on the same channel.
-        TRT_RDORawData *tmpBkg{}; 
+        TRT_RDORawData *tmpBkg{};
 
         bkgCollection->swapElement(ibkg++, nullptr, tmpBkg);
         signalCollection->swapElement(isig++, nullptr, tmp);
@@ -392,7 +392,7 @@ void TRTOverlay::mergeCollections(TRT_RDO_Collection *bkgCollection,
             if (HTOccupancyCorrection != 0. && occupancy * HTOccupancyCorrection > CLHEP::RandFlat::shoot(rndmEngine, 0, 1)) {
               newWord += 1 << (26-9);
             }
-  
+
             TRT_LoLumRawData newRdo(rdoId, newWord);
             sigRdo->merge(newRdo);
           }
