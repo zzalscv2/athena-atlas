@@ -766,6 +766,7 @@ bool InDetV0FinderTool::d0Pass(const xAOD::TrackParticle* track1, const xAOD::Tr
     if (fabs(d0_1/sig_d0_1) > m_d0_cut && fabs(d0_2/sig_d0_2) > m_d0_cut) pass = true; 
     delete per1;
     delete per2;
+    if(pass) break;
   }
   return pass;
 }
