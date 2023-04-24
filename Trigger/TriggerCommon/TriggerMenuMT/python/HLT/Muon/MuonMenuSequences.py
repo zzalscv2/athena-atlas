@@ -168,7 +168,7 @@ def muCombAlgSequence(flags):
     newRoITool.InViewRoIs = muNames.L2forIDName #input RoIs from L2 SA views
 
     ### get ID tracking and muComb reco sequences ###
-    from .MuonRecoSequences  import muFastRecoSequenceCfg, muCombRecoSequence, muonIDFastTrackingSequence, muonIDCosmicTrackingSequence, isCosmic
+    from .MuonRecoSequences  import muFastRecoSequenceCfg, muCombRecoSequence, muonIDFastTrackingSequenceCfg, muonIDCosmicTrackingSequence, isCosmic
     #
     l2muCombViewsMaker.RoIsLink = "initialRoI" # ROI for merging is still from L1, we get exactly one L2 SA muon per L1 ROI
     l2muCombViewsMaker.RoITool = newRoITool # Create a new ROI centred on the L2 SA muon from Step 1
@@ -218,9 +218,9 @@ def muCombAlgSequence(flags):
       extraLoads += [( 'xAOD::TrigCompositeContainer' , 'StoreGateSvc+%s' % decision )]
 
     if isCosmic(flags):
-        muTrigIDRecoSequence = muonIDCosmicTrackingSequence( flags, l2muCombViewsMaker.InViewRoIs , "", extraLoads )
+        muTrigIDRecoSequence = muonIDCosmicTrackingSequence( flags, l2muCombViewsMaker.InViewRoIs , "cosmics", extraLoads, extraLoadsForl2mtmode )
     else:
-        muTrigIDRecoSequence = muonIDFastTrackingSequence( flags, l2muCombViewsMaker.InViewRoIs , "", extraLoads, extraLoadsForl2mtmode )
+        muTrigIDRecoSequence = algorithmCAToGlobalWrapper(muonIDFastTrackingSequenceCfg, flags, l2muCombViewsMaker.InViewRoIs , "muon", extraLoads, extraLoadsForl2mtmode )
 
 
     # for Inside-out L2SA
@@ -299,13 +299,13 @@ def muCombLRTAlgSequence(flags):
     l2muCombLRTViewsMaker.ViewFallThrough = True #if this needs to access anything from the previous step, from within the view
 
     ### get ID tracking and muComb reco sequences ###
-    from .MuonRecoSequences  import muCombRecoSequence, muonIDFastTrackingSequence
+    from .MuonRecoSequences  import muCombRecoSequence, muonIDFastTrackingSequenceCfg
 
     muCombLRTRecoSequence, sequenceOut = muCombRecoSequence( flags, l2muCombLRTViewsMaker.InViewRoIs, "FTF_LRT" )
 
     extraLoads = []
 
-    muFastIDRecoSequence = muonIDFastTrackingSequence( flags, l2muCombLRTViewsMaker.InViewRoIs , "LRT", extraLoads, doLRT=True )
+    muFastIDRecoSequence = algorithmCAToGlobalWrapper(muonIDFastTrackingSequenceCfg, flags, l2muCombLRTViewsMaker.InViewRoIs , "muonLRT", extraLoads, doLRT=True )
 
     muCombLRTIDSequence = parOR("l2muCombLRTIDSequence", [muFastIDRecoSequence, muCombLRTRecoSequence])
 
@@ -786,7 +786,7 @@ def efLateMuRoISequence(flags):
 
 def efLateMuAlgSequence(flags):
 
-    from .MuonRecoSequences import muEFInsideOutRecoSequence, muonDecodeCfg, muonIDFastTrackingSequence
+    from .MuonRecoSequences import muEFInsideOutRecoSequence, muonDecodeCfg, muonIDFastTrackingSequenceCfg
     eflateViewsMaker = EventViewCreatorAlgorithm("IMeflatemu")
     roiTool = ViewCreatorNamedROITool() # Use an existing ROI which is linked to the navigation with a custom name.
     roiTool.ROILinkName = "feature" # The ROI is actually linked as Step 1's feature. So the custom name is "feature".
@@ -805,7 +805,7 @@ def efLateMuAlgSequence(flags):
     #decode data in these RoIs
     viewAlgs_MuonPRD = algorithmCAToGlobalWrapper(muonDecodeCfg,muonflags,RoIs=eflateViewsMaker.InViewRoIs.path())
     #ID fast tracking
-    muFastIDRecoSequence = muonIDFastTrackingSequence( flags, eflateViewsMaker.InViewRoIs,"Late" )
+    muFastIDRecoSequence = algorithmCAToGlobalWrapper(muonIDFastTrackingSequenceCfg, flags, eflateViewsMaker.InViewRoIs,"muonLate" )
     #inside-out reco sequence
     #Clone and replace offline flags so we can set muon trigger specific values
     #muonflags = flags.cloneAndReplace('Muon', 'Trigger.Offline.SA.Muon')
