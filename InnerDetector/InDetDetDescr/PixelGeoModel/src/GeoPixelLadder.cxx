@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeoPixelLadder.h"
@@ -25,12 +25,14 @@
 
 using std::max;
 
-GeoPixelLadder::GeoPixelLadder(InDetDD::PixelDetectorManager* m_DDmgr
-                               , PixelGeometryManager* mgr
-			       , GeoModelIO::ReadGeoModel* sqliteReader
-                               , GeoPixelSiCrystal& theSensor
-			       , GeoPixelStaveSupport* staveSupport)
-  : GeoVPixelFactory (m_DDmgr, mgr, sqliteReader)
+GeoPixelLadder::GeoPixelLadder(InDetDD::PixelDetectorManager* m_DDmgr,
+                               PixelGeometryManager* mgr,
+			       GeoModelIO::ReadGeoModel* sqliteReader,
+                               std::shared_ptr<std::map<std::string, GeoFullPhysVol*>> mapFPV,
+                               std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX,
+                               GeoPixelSiCrystal& theSensor,
+			       GeoPixelStaveSupport* staveSupport)
+  : GeoVPixelFactory (m_DDmgr, mgr, sqliteReader, mapFPV, mapAX)
   , m_theLadder(nullptr)
   , m_theSensor(theSensor)
   , m_staveSupport(staveSupport)
@@ -161,25 +163,19 @@ GeoPixelLadder::~GeoPixelLadder() {
 
 GeoVPhysVol* GeoPixelLadder::Build( ) {
 
-  std::map<std::string, GeoFullPhysVol*>        mapFPV;
-  std::map<std::string, GeoAlignableTransform*> mapAX;
-  if(m_sqliteReader) {
-    mapFPV = m_sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("Pixel");
-    mapAX  = m_sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("Pixel");
-  }
 
  // Create the ladder physVolume
   GeoPhysVol* ladderPhys = m_sqliteReader==nullptr ? new GeoPhysVol(m_theLadder) : nullptr;
   //
   // Place the Modules
   //
-  GeoPixelModule pm(m_DDmgr, m_gmt_mgr, m_sqliteReader, m_theSensor);
+  GeoPixelModule pm(m_DDmgr, m_gmt_mgr, m_sqliteReader, m_mapFPV, m_mapAX, m_theSensor);
   
   bool isBLayer=(m_gmt_mgr->GetLD() == 0);
   bool isModule3D=true;
   if (m_gmt_mgr->PixelStaveLayout()<5) isModule3D=false;
-  GeoPixelSiCrystal theSensor3D(m_DDmgr, m_gmt_mgr, m_sqliteReader, isBLayer,isModule3D);
-  GeoPixelModule pm3D(m_DDmgr, m_gmt_mgr, m_sqliteReader, theSensor3D);
+  GeoPixelSiCrystal theSensor3D(m_DDmgr, m_gmt_mgr, m_sqliteReader, m_mapFPV, m_mapAX, isBLayer,isModule3D);
+  GeoPixelModule pm3D(m_DDmgr, m_gmt_mgr, m_sqliteReader, m_mapFPV, m_mapAX, theSensor3D);
   //  double pm3DLength=pm3D.Length();
 
   // Pixel module parameters
@@ -351,7 +347,7 @@ GeoVPhysVol* GeoPixelLadder::Build( ) {
       Identifier id;
       if(!b3DModule)  id = m_theSensor.getID();
       else id = theSensor3D.getID();
-      m_DDmgr->addAlignableTransform(0,id,mapAX[key],mapFPV[key]);
+      m_DDmgr->addAlignableTransform(0,id,(*m_mapAX)[key],(*m_mapFPV)[key]);
     }
     else {
       std::ostringstream nameTag; 

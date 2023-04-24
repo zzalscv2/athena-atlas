@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GEOPIXELSERVICES_H
@@ -17,7 +17,11 @@ namespace InDetDD {
 class GeoPixelServices : public GeoVPixelFactory {
 public:
   GeoPixelServices(InDetDD::PixelDetectorManager* ddmgr,
-                   PixelGeometryManager* mgr, GeoModelIO::ReadGeoModel* sqliteReader, InDetDD::Zone * envelopeZone = 0);
+                   PixelGeometryManager* mgr, 
+                   GeoModelIO::ReadGeoModel* sqliteReader, 
+                   std::shared_ptr<std::map<std::string, GeoFullPhysVol*>> mapFPV,
+                   std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX,
+                   InDetDD::Zone * envelopeZone = 0);
   GeoPixelServices (const GeoPixelServices&) = delete;
   GeoPixelServices& operator= (const GeoPixelServices&) = delete;
   ~GeoPixelServices();

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-203 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelDetectorFactoryLite.h"
@@ -97,7 +97,14 @@ PixelDetectorFactoryLite::PixelDetectorFactoryLite(GeoModelIO::ReadGeoModel *sql
   m_detectorManager->setVersion(version);
 
   m_useDynamicAlignFolders = switches.dynamicAlignFolders();
-}
+
+  if (sqliteReader) {
+    m_mapFPV = std::shared_ptr<std::map<std::string, GeoFullPhysVol*>> (new std::map<std::string, GeoFullPhysVol*> (m_sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("Pixel")));
+    m_mapAX  = std::shared_ptr< std::map<std::string, GeoAlignableTransform*>> (new std::map<std::string, GeoAlignableTransform *> (m_sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("Pixel")));
+  }
+
+} 
+
 
 
 //## Other Operations (implementation)
@@ -112,17 +119,15 @@ void PixelDetectorFactoryLite::create(GeoPhysVol*)
   msg(MSG::DEBUG) << " B-Layer basic eta pitch: " << m_geometryManager->DesignPitchZ()/Gaudi::Units::micrometer << "um"  << endmsg;  
   msg(MSG::DEBUG) << " B-Layer sensor thickness: " << m_geometryManager->PixelBoardThickness()/Gaudi::Units::micrometer << "um"  << endmsg;   
     
-  std::map<std::string, GeoFullPhysVol*>        mapFPV = m_sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("Pixel");
-  std::map<std::string, GeoAlignableTransform*> mapAX  = m_sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("Pixel");
   
   // The top level volume
-  GeoFullPhysVol *pPixelEnvelopeVol = mapFPV["Pixel_Envelope"];
+  GeoFullPhysVol *pPixelEnvelopeVol = (*m_mapFPV)["Pixel_Envelope"];
     
   // Create the Lite Pixel Envelope...
-  GeoPixelEnvelope pe(m_detectorManager, m_geometryManager.get(), m_sqliteReader);
+  GeoPixelEnvelope pe(m_detectorManager, m_geometryManager.get(), m_sqliteReader, m_mapFPV, m_mapAX);
   pe.Build() ;
 
-  GeoAlignableTransform * transform = mapAX["Pixel_Envelope"];
+  GeoAlignableTransform * transform = (*m_mapAX)["Pixel_Envelope"];
 
   // Store alignable transform
   Identifier id = m_geometryManager->getIdHelper()->wafer_id(0,0,0,0);

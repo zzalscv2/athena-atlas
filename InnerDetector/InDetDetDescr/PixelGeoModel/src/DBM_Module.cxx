@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -22,8 +22,10 @@ using namespace InDetDD;
 
 DBM_Module::DBM_Module(InDetDD::PixelDetectorManager* ddmgr,
                        PixelGeometryManager* mgr,
-		       GeoModelIO::ReadGeoModel* sqliteReader)
-  : GeoVPixelFactory (ddmgr, mgr, sqliteReader)
+		       GeoModelIO::ReadGeoModel* sqliteReader,
+                       std::shared_ptr<std::map<std::string, GeoFullPhysVol*>> mapFPV,
+                       std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX)
+  : GeoVPixelFactory (ddmgr, mgr, sqliteReader, mapFPV, mapAX)
 {
 
   double thickness = 0.5;
@@ -69,13 +71,11 @@ GeoVPhysVol* DBM_Module::Build()
   idwafer = idHelper->wafer_id(dbmdet,m_gmt_mgr->GetLD(),m_gmt_mgr->Phi(),m_gmt_mgr->Eta());
   
   if(m_sqliteReader) {
-    std::map<std::string, GeoFullPhysVol*> mapFPV = m_sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("Pixel");
-    std::map<std::string, GeoAlignableTransform*> mapAX = m_sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("Pixel");
     std::string key ="DBMDiamond_" + std::to_string(dbmdet) +"_"+ std::to_string(m_gmt_mgr->GetLD()) +"_"+ std::to_string(m_gmt_mgr->Phi()) +"_"+ std::to_string(m_gmt_mgr->Eta());
-    SiDetectorElement* element = new SiDetectorElement(idwafer, m_design, mapFPV[key], m_gmt_mgr->commonItems());
+    SiDetectorElement* element = new SiDetectorElement(idwafer, m_design, (*m_mapFPV)[key], m_gmt_mgr->commonItems());
     // add the element to the manager
     m_DDmgr->addDetectorElement(element);
-    m_DDmgr->addAlignableTransform(0, idwafer, mapAX[key], mapFPV[key]);
+    m_DDmgr->addAlignableTransform(0, idwafer, (*m_mapAX)[key], (*m_mapFPV)[key]);
     return nullptr;
   }
   else {

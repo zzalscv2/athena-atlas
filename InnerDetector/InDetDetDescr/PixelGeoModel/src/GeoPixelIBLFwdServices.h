@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GEOPIXELIBLFWDSERVICES_H
@@ -19,7 +19,11 @@ class GeoPixelIBLFwdServices :  public GeoVPixelFactory {
 public:  
 
   GeoPixelIBLFwdServices(InDetDD::PixelDetectorManager* ddmgr,
-                         PixelGeometryManager* mgr, GeoModelIO::ReadGeoModel* sqliteReader, int);
+                         PixelGeometryManager* mgr,
+                         GeoModelIO::ReadGeoModel* sqliteReader, 
+                         std::shared_ptr<std::map<std::string, GeoFullPhysVol*>> mapFPV,
+                         std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX,
+                         int);
   virtual GeoVPhysVol* Build() override;
 
   bool isComplexShapeDefined();
