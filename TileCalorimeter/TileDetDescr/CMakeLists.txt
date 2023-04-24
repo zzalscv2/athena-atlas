@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TileDetDescr )
@@ -14,3 +14,8 @@ atlas_add_library( TileDetDescr
                    LINK_LIBRARIES ${GEOMODEL_LIBRARIES} CaloIdentifier AthenaKernel Identifier CaloDetDescrLib RDBAccessSvcLib AthenaBaseComps
                    PRIVATE_LINK_LIBRARIES AtlasDetDescr GaudiKernel TileIdentifier )
 
+
+atlas_add_dictionary( TileDetDescrDict
+                      TileDetDescr/TileDetDescrDict.h
+                      TileDetDescr/selection.xml
+                      LINK_LIBRARIES TileDetDescr)
