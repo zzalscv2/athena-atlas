@@ -612,7 +612,7 @@ void StripDigitizationTool::SetupRdoOutputType(Gaudi::Details::PropertyBase &) {
 class DigitizeNonHitElementsDebugPrinter
 {
 public:
-  DigitizeNonHitElementsDebugPrinter(const SCT_ID* detID) :
+  explicit DigitizeNonHitElementsDebugPrinter(const SCT_ID* detID) :
     m_detID{detID}, m_msgNo{-1} {
     }
 
