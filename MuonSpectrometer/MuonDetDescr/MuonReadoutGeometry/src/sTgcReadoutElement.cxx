@@ -42,21 +42,17 @@
 namespace MuonGM {
 
     //============================================================================
-    sTgcReadoutElement::sTgcReadoutElement(GeoVFullPhysVol* pv, const std::string& stName, int zi, int fi, int mL, bool is_mirrored, MuonDetectorManager* mgr) 
-    : MuonClusterReadoutElement(pv, stName, zi, fi, is_mirrored, mgr)
+    sTgcReadoutElement::sTgcReadoutElement(GeoVFullPhysVol* pv, const std::string& stName, int zi, int fi, int mL, MuonDetectorManager* mgr) 
+    : MuonClusterReadoutElement(pv, mgr, Trk::DetectorElemType::sTgc)
     , m_ml(mL) {
 
         // get the setting of the caching flag from the manager
         setCachingFlag(mgr->cachingFlag());
 
-        std::string vName = pv->getLogVol()->getName();
-        std::string sName = vName.substr(vName.find('-') + 1);
-        std::string fixName = (sName[1] == 'L') ? "STL" : "STS";
+        std::string fixName = (stName[1] == 'L') ? "STL" : "STS";
         Identifier id = mgr->stgcIdHelper()->channelID(fixName, zi, fi, mL, 1, 2, 1);
 
-        setStationName(fixName);
-        setStationEta(zi);
-        setStationPhi(fi);
+        setStationName(fixName);       
         setChamberLayer(mL);
         setIdentifier(id); // representative identifier, with stName, stEta, stPhi, mL 
 
@@ -116,27 +112,6 @@ namespace MuonGM {
 
     //============================================================================
     sTgcReadoutElement::~sTgcReadoutElement() { clearCache(); }
-
-
-    //============================================================================
-    void sTgcReadoutElement::setIdentifier(const Identifier& id) {
-        m_id = id;
-        const sTgcIdHelper* idh = manager()->stgcIdHelper();
-        IdentifierHash collIdhash = 0;
-        IdentifierHash detIdhash = 0;
-        // set parent data collection hash id
-        if (idh->get_module_hash(id, collIdhash) != 0) {
-            MsgStream log(Athena::getMessageSvc(), "sTgcReadoutElement");
-            log << MSG::WARNING << "setIdentifier -- collection hash Id NOT computed for id = " << idh->show_to_string(id) << endmsg;
-        }
-        m_idhash = collIdhash;
-        // set RE hash id
-        if (idh->get_detectorElement_hash(id, detIdhash) != 0) {
-            MsgStream log(Athena::getMessageSvc(), "sTgcReadoutElement");
-            log << MSG::WARNING << "setIdentifier -- detectorElement hash Id NOT computed for id = " << idh->show_to_string(id) << endmsg;
-        }
-        m_detectorElIdhash = detIdhash;
-    }
 
     //============================================================================
     void sTgcReadoutElement::initDesign(double /*largeX*/, double /*smallX*/, double /*lengthY*/, double /*stripPitch*/,
