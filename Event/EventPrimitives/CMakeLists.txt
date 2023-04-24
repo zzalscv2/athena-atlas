@@ -31,3 +31,7 @@ atlas_add_test( test_eta
    SOURCES test/test_eta.cxx
    LINK_LIBRARIES EventPrimitives )
 
+ atlas_add_test( test_AmgDefs
+   SOURCES test/test_AmgDefs.cxx
+   LINK_LIBRARIES EventPrimitives )
+
