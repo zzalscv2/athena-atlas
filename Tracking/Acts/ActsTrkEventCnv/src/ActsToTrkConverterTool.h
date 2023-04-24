@@ -59,7 +59,7 @@ public:
   virtual
   const ATLASUncalibSourceLink
   uncalibratedTrkMeasurementToSourceLink(const InDetDD::SiDetectorElementCollection &detectorElements, 
-				      const xAOD::UncalibratedMeasurement *measurement,
+				      const xAOD::UncalibratedMeasurement &measurement,
 				      std::vector<ATLASUncalibSourceLink::ElementsType>& Collection) const override;
 
   /// Transform an ATLAS track into a vector of SourceLink to be use in the avts tracking

@@ -188,7 +188,7 @@ namespace ActsTrk
 	  for (auto start = this_range.first; start != this_range.second; ++start){
 	    size_t position = std::distance(groupStart, start);
 	    neighbourClusters[0].push_back(std::make_pair(*start, position));
-	    auto slink = m_ATLASConverterTool->uncalibratedTrkMeasurementToSourceLink(elements, *start, elementsCollection);
+	    auto slink = m_ATLASConverterTool->uncalibratedTrkMeasurementToSourceLink(elements, **start, elementsCollection);
 	    neighbourSourceLinks[0].emplace_back(std::make_pair(slink, position));
 	  }
 	}
@@ -231,7 +231,7 @@ namespace ActsTrk
 	    for (auto start = this_range.first; start != this_range.second; ++start){
 	      size_t position = std::distance(groupStart, start);
 	      neighbourClusters[neigbourIndices[n]].push_back(std::make_pair(*start, position));
-	      auto slink = m_ATLASConverterTool->uncalibratedTrkMeasurementToSourceLink(elements, *start, elementsCollection);
+	      auto slink = m_ATLASConverterTool->uncalibratedTrkMeasurementToSourceLink(elements, **start, elementsCollection);
 	      neighbourSourceLinks[neigbourIndices[n]].emplace_back(std::make_pair(slink, position));
 	    }
 	  }

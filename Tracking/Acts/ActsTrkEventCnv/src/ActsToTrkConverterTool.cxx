@@ -148,33 +148,33 @@ ActsTrk::ActsToTrkConverterTool::trkMeasurementToSourceLink(
 const ATLASUncalibSourceLink
 ActsTrk::ActsToTrkConverterTool::uncalibratedTrkMeasurementToSourceLink(
     const InDetDD::SiDetectorElementCollection &detectorElements,
-    const xAOD::UncalibratedMeasurement *measurement,
+    const xAOD::UncalibratedMeasurement &measurement,
     std::vector<ATLASUncalibSourceLink::ElementsType> &externalCollection)
     const {
   const InDetDD::SiDetectorElement *elem =
-      detectorElements.getDetectorElement(measurement->identifierHash());
+      detectorElements.getDetectorElement(measurement.identifierHash());
   if (!elem) {
     throw std::domain_error("No detector element for measurement");
   }
   const Acts::Surface &surface = trkSurfaceToActsSurface(elem->surface());
   Acts::BoundVector loc = Acts::BoundVector::Zero();
   Acts::BoundMatrix cov = Acts::BoundMatrix::Zero();
-  xAOD::UncalibMeasType typ = measurement->type();
+  xAOD::UncalibMeasType typ = measurement.type();
 
   std::size_t dim = 0;
   switch (typ) {
     case (xAOD::UncalibMeasType::StripClusterType):
       dim = 1;
-      loc[Acts::eBoundLoc0] = measurement->localPosition<1>()[Trk::locX];
+      loc[Acts::eBoundLoc0] = measurement.localPosition<1>()[Trk::locX];
       cov.topLeftCorner<1, 1>() =
-          measurement->localCovariance<1>().cast<Acts::ActsScalar>();
+          measurement.localCovariance<1>().cast<Acts::ActsScalar>();
       break;
     case (xAOD::UncalibMeasType::PixelClusterType):
       dim = 2;
-      loc[Acts::eBoundLoc0] = measurement->localPosition<2>()[Trk::locX];
-      loc[Acts::eBoundLoc1] = measurement->localPosition<2>()[Trk::locY];
+      loc[Acts::eBoundLoc0] = measurement.localPosition<2>()[Trk::locX];
+      loc[Acts::eBoundLoc1] = measurement.localPosition<2>()[Trk::locY];
       cov.topLeftCorner<2, 2>() =
-          measurement->localCovariance<2>().cast<Acts::ActsScalar>();
+          measurement.localCovariance<2>().cast<Acts::ActsScalar>();
       break;
     default:
       throw std::domain_error(
@@ -182,7 +182,7 @@ ActsTrk::ActsToTrkConverterTool::uncalibratedTrkMeasurementToSourceLink(
   };
 
   externalCollection.push_back(
-      std::make_tuple(measurement, loc, cov, dim, surface.bounds().type()));
+      std::make_tuple(&measurement, loc, cov, dim, surface.bounds().type()));
   return ATLASUncalibSourceLink(surface, externalCollection.back());
 }
 
