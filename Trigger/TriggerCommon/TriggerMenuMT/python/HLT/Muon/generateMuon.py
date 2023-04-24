@@ -189,7 +189,7 @@ def _muFastStepSeq(flags, is_probe_leg=False):
 
 def muFastSequence(flags, is_probe_leg=False): 
     muonflags = flags.cloneAndReplace('Muon', 'Trigger.Offline.SA.Muon')
-    muonidflags = muonflags.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking.muon")
+    muonidflags = muonflags.cloneAndReplace("Tracking.ActiveConfig", "Trigger.InDetTracking.muon")
     selAcc=  _muFastStepSeq(muonidflags, is_probe_leg)
     return MenuSequenceCA(flags, selAcc,HypoToolGen = TrigMufastHypoToolFromDict, isProbe=is_probe_leg )
 
@@ -227,7 +227,7 @@ def _muCombStepSeq(flags, is_probe_leg=False):
 
 def muCombSequence(flags, is_probe_leg=False):
     muonflagsCB = flags.cloneAndReplace('Muon', 'Trigger.Offline.Muon').cloneAndReplace('MuonCombined', 'Trigger.Offline.Combined.MuonCombined')    
-    muonflagsCBid = muonflagsCB.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking.muon")
+    muonflagsCBid = muonflagsCB.cloneAndReplace("Tracking.ActiveConfig", "Trigger.InDetTracking.muon")
     selAcc = _muCombStepSeq(muonflagsCBid, is_probe_leg=is_probe_leg)
     return MenuSequenceCA(flags, selAcc, HypoToolGen = TrigmuCombHypoToolFromDict)
     
@@ -300,7 +300,7 @@ def _muEFCBStepSeq(flags, name='RoI', is_probe_leg=False):
     selAccEFCB = SelectionCA("EFCBMuon_"+name, is_probe_leg)
 
     viewName = 'EFMuCBReco_'+name                                                       
-    trackName = flags.InDet.Tracking.ActiveConfig.tracks_FTF
+    trackName = flags.Tracking.ActiveConfig.tracks_FTF
     muonCandName = "MuonCandidates"
     if 'FS' in name:
         muonCandName = "MuonCandidates_FS"
@@ -380,7 +380,7 @@ def _muEFCBStepSeq(flags, name='RoI', is_probe_leg=False):
 
 def muEFCBSequence(flags, is_probe_leg=False):
     muonflagsCB = flags.cloneAndReplace('Muon', 'Trigger.Offline.Muon').cloneAndReplace('MuonCombined', 'Trigger.Offline.Combined.MuonCombined')
-    muonflagsCBid = muonflagsCB.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking.muon")        
+    muonflagsCBid = muonflagsCB.cloneAndReplace("Tracking.ActiveConfig", "Trigger.InDetTracking.muon")        
     selAccEFCB = _muEFCBStepSeq(muonflagsCBid, name='RoI', is_probe_leg=is_probe_leg)
     return MenuSequenceCA(flags, selAccEFCB, HypoToolGen = TrigMuonEFCombinerHypoToolFromDict)    
 

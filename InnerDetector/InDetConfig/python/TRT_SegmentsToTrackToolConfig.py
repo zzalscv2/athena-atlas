@@ -9,7 +9,7 @@ def TRT_Standalone_SegmentToTrackToolCfg(flags, name ='InDetTRT_Standalone_Segme
     acc = AtlasFieldCacheCondAlgCfg(flags)
 
     if "AssociationTool" not in kwargs:
-        if flags.InDet.Tracking.ActiveConfig.usePrdAssociationTool:
+        if flags.Tracking.ActiveConfig.usePrdAssociationTool:
             from InDetConfig.InDetAssociationToolsConfig import (
                 InDetPRDtoTrackMapToolGangedPixelsCfg)
             asso_tool = acc.popToolsAndMerge(
@@ -44,7 +44,7 @@ def TRT_Standalone_SegmentToTrackToolCfg(flags, name ='InDetTRT_Standalone_Segme
 
     kwargs.setdefault("FinalRefit", True)
     kwargs.setdefault("MaxSharedHitsFraction",
-                      flags.InDet.Tracking.ActiveConfig.maxTRTonlyShared)
+                      flags.Tracking.ActiveConfig.maxTRTonlyShared)
     kwargs.setdefault("SuppressHoleSearch", True)
 
     acc.setPrivateTools(CompFactory.InDet.TRT_SegmentToTrackTool(name, **kwargs))

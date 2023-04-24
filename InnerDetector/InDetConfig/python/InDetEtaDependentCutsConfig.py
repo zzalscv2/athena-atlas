@@ -4,10 +4,11 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 import AthenaCommon.SystemOfUnits as Units
 
-def ITkEtaDependentCutsSvcCfg(flags, name = 'ITkEtaDependentCutsSvc', **kwargs):
+def ITkEtaDependentCutsSvcCfg(
+        flags, name = 'ITkEtaDependentCutsSvc', **kwargs):
     acc = ComponentAccumulator()
 
-    cuts = flags.ITk.Tracking.ActiveConfig
+    cuts = flags.Tracking.ActiveConfig
 
     kwargs.setdefault("etaBins",              cuts.etaBins)
     kwargs.setdefault("etaWidthBrem",         cuts.etaWidthBrem)
@@ -31,8 +32,8 @@ def ITkEtaDependentCutsSvcCfg(flags, name = 'ITkEtaDependentCutsSvc', **kwargs):
     kwargs.setdefault("Xi2max",               cuts.Xi2max)
     kwargs.setdefault("Xi2maxNoAdd",          cuts.Xi2maxNoAdd)
 
-    ITkEtaDependentCutsSvc = CompFactory.InDet.InDetEtaDependentCutsSvc( name = name + flags.ITk.Tracking.ActiveConfig.extension, **kwargs )
-    acc.addService(ITkEtaDependentCutsSvc)
+    acc.addService(CompFactory.InDet.InDetEtaDependentCutsSvc(
+        name=name + flags.Tracking.ActiveConfig.extension, **kwargs))
     return acc
 
 def IDEtaDependentCuts_IPXD_SvcCfg(flags, name="IDEtaDepCutsSvc_IPXD", **kwargs):

@@ -136,18 +136,18 @@ class FlagsCopiedTest(unittest.TestCase):
         flags.Trigger.doID
         flags.Trigger.InDetTracking.Muon
         flags.Trigger.InDetTracking.Electron.minPT = 2.0 * Units.GeV
-        self.newflags = flags.cloneAndReplace('InDet.Tracking.ActiveConfig', 'Trigger.InDetTracking.Electron')
+        self.newflags = flags.cloneAndReplace('Tracking.ActiveConfig', 'Trigger.InDetTracking.Electron')
 
         self.newflags.dump(".*InDet")
 
     def runTest(self):
-        self.assertEqual(self.newflags.InDet.Tracking.ActiveConfig.minPT, 2.0 * Units.GeV, msg="Flags are not copied")
+        self.assertEqual(self.newflags.Tracking.ActiveConfig.minPT, 2.0 * Units.GeV, msg="Flags are not copied")
 
 
 
 class UnsetFlagsTest(FlagsCopiedTest):
     def runTest(self):
-        self.assertEqual(self.newflags.InDet.Tracking.ActiveConfig.vertex_jet, None)
+        self.assertEqual(self.newflags.Tracking.ActiveConfig.vertex_jet, None)
 
 
 if __name__ == "__main__":

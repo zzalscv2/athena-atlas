@@ -91,8 +91,7 @@ def InDetGlobalChi2FitterCfg(flags, name='InDetGlobalChi2Fitter', **kwargs):
             InDetBroadRotCreatorCfg(flags)))
 
     # PHF cut during fit iterations to save CPU time
-    kwargs.setdefault('MinPHFCut',
-                      flags.InDet.Tracking.ActiveConfig.minTRTPrecFrac)
+    kwargs.setdefault('MinPHFCut', flags.Tracking.ActiveConfig.minTRTPrecFrac)
 
     if (flags.Tracking.useBroadPixClusterErrors or
             flags.Tracking.useBroadSCTClusterErrors):

@@ -38,8 +38,8 @@ def InDetTrackFitterAmbiCfg(flags, name='InDetTrackFitterAmbi', **kwargs) :
 
     InDetTrackFitter = acc.popToolsAndMerge(
         InDetTrackFitterHoleSearchCfg(flags, name, **kwargs))
-    ClusterSplitProbabilityName = "InDetAmbiguityProcessorSplitProb" + \
-                                  flags.InDet.Tracking.ActiveConfig.extension
+    ClusterSplitProbabilityName = ("InDetAmbiguityProcessorSplitProb" +
+                                   flags.Tracking.ActiveConfig.extension)
 
     if flags.Tracking.trackFitterType==TrackFitterType.DistributedKalmanFilter:
         InDetTrackFitter.RecalibratorHandle.BroadPixelClusterOnTrackTool.ClusterSplitProbabilityName = ClusterSplitProbabilityName
@@ -97,8 +97,8 @@ def InDetTrackFitterLowPtAmbiCfg(flags, name='InDetTrackFitterAmbi', **kwargs) :
         InDetGlobalChi2FitterLowPt = acc.popToolsAndMerge(
             InDetGlobalChi2FitterLowPtCfg(flags, name, **kwargs))
 
-        ClusterSplitProbabilityName = "InDetAmbiguityProcessorSplitProb" + \
-                                      flags.InDet.Tracking.ActiveConfig.extension
+        ClusterSplitProbabilityName = ("InDetAmbiguityProcessorSplitProb" +
+                                       flags.Tracking.ActiveConfig.extension)
         InDetGlobalChi2FitterLowPt.RotCreatorTool.ToolPixelCluster.ClusterSplitProbabilityName = ClusterSplitProbabilityName
         InDetGlobalChi2FitterLowPt.BroadRotCreatorTool.ToolPixelCluster.ClusterSplitProbabilityName = ClusterSplitProbabilityName
         acc.setPrivateTools(InDetGlobalChi2FitterLowPt)
@@ -147,8 +147,8 @@ def ITkTrackFitterAmbiCfg(flags, name='ITkTrackFitterAmbi', **kwargs) :
 
     ITkTrackFitter = acc.popToolsAndMerge(
         ITkTrackFitterCfg(flags, name, **kwargs))
-    ClusterSplitProbabilityName = "ITkAmbiguityProcessorSplitProb" + \
-                                  flags.ITk.Tracking.ActiveConfig.extension
+    ClusterSplitProbabilityName = ("ITkAmbiguityProcessorSplitProb" +
+                                   flags.Tracking.ActiveConfig.extension)
 
     if flags.Tracking.trackFitterType==TrackFitterType.DistributedKalmanFilter:
         ITkTrackFitter.RecalibratorHandle.BroadPixelClusterOnTrackTool.ClusterSplitProbabilityName = ClusterSplitProbabilityName

@@ -93,11 +93,11 @@ def TrigZVertexHypoToolGen(chainDict):
 def MinBiasSPSel(flags):
 
     reco = InViewRecoCA("SPCountingReco")
-    minBiasFlags = flags.cloneAndReplace("InDet.Tracking.ActiveConfig","Trigger.InDetTracking.minBias")
+    minBiasFlags = flags.cloneAndReplace("Tracking.ActiveConfig","Trigger.InDetTracking.minBias")
 
     from TrigInDetConfig.InDetTrigSequence import InDetTrigSequence
     seq = InDetTrigSequence(minBiasFlags, 
-                            minBiasFlags.InDet.Tracking.ActiveConfig.input_name, # this is already in the flags, maybe we would nto need to pass it in the future?
+                            minBiasFlags.Tracking.ActiveConfig.input_name, # this is already in the flags, maybe we would nto need to pass it in the future?
                             rois   = str(reco.inputMaker().InViewRoIs),
                             inView = str(reco.inputMaker().Views))
     spMakingCA = seq.sequence("spacePointFormation")

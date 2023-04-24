@@ -3,7 +3,8 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def SeedToTrackConversionToolCfg(flags, name="SeedToTrackConversionTool", **kwargs):
+def SeedToTrackConversionToolCfg(
+        flags, name="SeedToTrackConversionTool", **kwargs):
     acc = ComponentAccumulator()
 
     if "Extrapolator" not in kwargs:
@@ -13,18 +14,22 @@ def SeedToTrackConversionToolCfg(flags, name="SeedToTrackConversionTool", **kwar
         kwargs.setdefault("Extrapolator", InDetExtrapolator)
 
     if "RIO_OnTrackCreator" not in kwargs:
-        from TrkConfig.TrkRIO_OnTrackCreatorConfig import InDetRotCreatorDigitalCfg
+        from TrkConfig.TrkRIO_OnTrackCreatorConfig import (
+            InDetRotCreatorDigitalCfg)
         RotCreator = acc.popToolsAndMerge(InDetRotCreatorDigitalCfg(flags))
         acc.addPublicTool(RotCreator)
         kwargs.setdefault("RIO_OnTrackCreator", RotCreator)
 
-    kwargs.setdefault("OutputName", f"SiSPSeedSegments{flags.InDet.Tracking.ActiveConfig.extension}")
+    kwargs.setdefault("OutputName",
+                      f"SiSPSeedSegments{flags.Tracking.ActiveConfig.extension}")
 
-    acc.setPrivateTools(CompFactory.InDet.SeedToTrackConversionTool(name, **kwargs))
+    acc.setPrivateTools(
+        CompFactory.InDet.SeedToTrackConversionTool(name, **kwargs))
     return acc
 
 
-def ITkSeedToTrackConversionToolCfg(flags, name="ITkSeedToTrackConversionTool", **kwargs):
+def ITkSeedToTrackConversionToolCfg(
+        flags, name="ITkSeedToTrackConversionTool", **kwargs):
     acc = ComponentAccumulator()
 
     if "Extrapolator" not in kwargs:
@@ -39,7 +44,9 @@ def ITkSeedToTrackConversionToolCfg(flags, name="ITkSeedToTrackConversionTool", 
         acc.addPublicTool(RotCreator)
         kwargs.setdefault("RIO_OnTrackCreator", RotCreator)
 
-    kwargs.setdefault("OutputName", f"SiSPSeedSegments{flags.ITk.Tracking.ActiveConfig.extension}")
+    kwargs.setdefault("OutputName",
+                      f"SiSPSeedSegments{flags.Tracking.ActiveConfig.extension}")
 
-    acc.setPrivateTools(CompFactory.InDet.SeedToTrackConversionTool(name, **kwargs))
+    acc.setPrivateTools(
+        CompFactory.InDet.SeedToTrackConversionTool(name, **kwargs))
     return acc
