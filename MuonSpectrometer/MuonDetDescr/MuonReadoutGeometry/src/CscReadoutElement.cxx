@@ -38,9 +38,8 @@ namespace Trk {
 
 namespace MuonGM {
 
-    CscReadoutElement::CscReadoutElement(GeoVFullPhysVol* pv, const std::string& stName, int zi, int fi, bool is_mirrored,
-                                         MuonDetectorManager* mgr) :
-        MuonClusterReadoutElement(pv, stName, zi, fi, is_mirrored, mgr) {
+    CscReadoutElement::CscReadoutElement(GeoVFullPhysVol* pv, const std::string& stName, MuonDetectorManager* mgr) :
+        MuonClusterReadoutElement(pv, mgr, Trk::DetectorElemType::Csc) {
         // Set a few parameters here.  The rest are set in MuonChamber::setCscReadoutGeometry
         // get the setting of the caching flag from the manager
         setCachingFlag(mgr->cachingFlag());
@@ -369,9 +368,9 @@ namespace MuonGM {
         // const Amg::Transform3D cscTrans = absTransform();
         Amg::Transform3D transfPtr_internalgeo(
             Amg::Translation3D(m_cscIntTransl[wireLayer - 1][2], m_cscIntTransl[wireLayer - 1][0], m_cscIntTransl[wireLayer - 1][1]) *
-            Amg::AngleAxis3D(m_cscIntRot[wireLayer - 1][0], Amg::Vector3D(0., 1., 0.)) *
-            Amg::AngleAxis3D(m_cscIntRot[wireLayer - 1][1], Amg::Vector3D(0., 0., 1.)) *
-            Amg::AngleAxis3D(m_cscIntRot[wireLayer - 1][2], Amg::Vector3D(1., 0., 0.)));
+            Amg::AngleAxis3D(m_cscIntRot[wireLayer - 1][0], Amg::Vector3D::UnitY()) *
+            Amg::AngleAxis3D(m_cscIntRot[wireLayer - 1][1], Amg::Vector3D::UnitZ()) *
+            Amg::AngleAxis3D(m_cscIntRot[wireLayer - 1][2], Amg::Vector3D::UnitX()));
         return transfPtr_internalgeo * nominalLP;
     }
     //****************************************************************************
@@ -438,9 +437,9 @@ namespace MuonGM {
         Amg::Transform3D transfPtr_internalgeo = Amg::Transform3D::Identity();
         transfPtr_internalgeo *=
             Amg::Translation3D(m_cscIntTransl[wireLayer - 1][2], m_cscIntTransl[wireLayer - 1][0], m_cscIntTransl[wireLayer - 1][1]);
-        transfPtr_internalgeo *= Amg::AngleAxis3D(m_cscIntRot[wireLayer - 1][0], Amg::Vector3D(0., 1., 0.));
-        transfPtr_internalgeo *= Amg::AngleAxis3D(m_cscIntRot[wireLayer - 1][1], Amg::Vector3D(0., 0., 1.));
-        transfPtr_internalgeo *= Amg::AngleAxis3D(m_cscIntRot[wireLayer - 1][2], Amg::Vector3D(1., 0., 0.));
+        transfPtr_internalgeo *= Amg::AngleAxis3D(m_cscIntRot[wireLayer - 1][0], Amg::Vector3D::UnitY());
+        transfPtr_internalgeo *= Amg::AngleAxis3D(m_cscIntRot[wireLayer - 1][1], Amg::Vector3D::UnitZ());
+        transfPtr_internalgeo *= Amg::AngleAxis3D(m_cscIntRot[wireLayer - 1][2], Amg::Vector3D::UnitX());
 
         return transfPtr_internalgeo * nominalLCP;
     }
@@ -546,28 +545,7 @@ namespace MuonGM {
         }
 #endif
     }
-
-    void CscReadoutElement::setIdentifier(const Identifier& id) {
-        m_id = id;
-        const CscIdHelper* idh = manager()->cscIdHelper();
-        IdentifierHash collIdhash = 0;
-        IdentifierHash detIdhash = 0;
-        // set parent data collection hash id
-        if (idh->get_module_hash(id, collIdhash) != 0) {
-            MsgStream log(Athena::getMessageSvc(), "CscReadoutElement");
-            if (log.level() <= MSG::WARNING)
-                log << MSG::WARNING << "collection hash Id NOT computed for id = " << idh->show_to_string(id) << endmsg;
-        }
-        m_idhash = collIdhash;
-        // set readout element hash id
-        if (idh->get_detectorElement_hash(id, detIdhash) != 0) {
-            MsgStream log(Athena::getMessageSvc(), "CscReadoutElement");
-            if (log.level() <= MSG::WARNING)
-                log << MSG::WARNING << "detectorElement hash Id NOT computed for id = " << idh->show_to_string(id) << endmsg;
-        }
-        m_detectorElIdhash = detIdhash;
-    }
-
+    
     Amg::Vector3D CscReadoutElement::stripLayerPos(const Identifier& id) const {
         const CscIdHelper* idh = manager()->cscIdHelper();
         int chamberLayer = idh->chamberLayer(id);
@@ -693,7 +671,7 @@ namespace MuonGM {
         surfaceTRotation.col(0) = muonTRotation.col(1);
         surfaceTRotation.col(1) = muonTRotation.col(2);
         surfaceTRotation.col(2) = muonTRotation.col(0);
-        if (measPhi == 0) surfaceTRotation = surfaceTRotation * Amg::AngleAxis3D(M_PI / 2., Amg::Vector3D(0., 0., 1.));
+        if (measPhi == 0) surfaceTRotation = surfaceTRotation * Amg::AngleAxis3D(M_PI / 2., Amg::Vector3D::UnitZ());
 
         Amg::Transform3D transfPtr_orig(surfaceTRotation);
         transfPtr_orig *= Amg::Translation3D(localToGlobalTransf(gasGap).translation());
@@ -753,31 +731,30 @@ namespace MuonGM {
                 surfaceTRotation.col(0) = muonTRotation.col(1);
                 surfaceTRotation.col(1) = muonTRotation.col(2);
                 surfaceTRotation.col(2) = muonTRotation.col(0);
-                if (mp == 0) surfaceTRotation = surfaceTRotation * Amg::AngleAxis3D(M_PI / 2., Amg::Vector3D(0., 0., 1.));
+                if (mp == 0) surfaceTRotation = surfaceTRotation * Amg::AngleAxis3D(M_PI / 2., Amg::Vector3D::UnitZ());
 
                 Amg::Transform3D transfPtr_orig(surfaceTRotation);
                 transfPtr_orig.pretranslate(trans3D.translation());
-                Amg::Transform3D transfPtr_internalgeo;
-                transfPtr_internalgeo.setIdentity();
+                Amg::Transform3D transfPtr_internalgeo{Amg::Transform3D::Identity()};
                 if (mp == 1) {
                     transfPtr_internalgeo *=
                         Amg::Translation3D(m_cscIntTransl[gp - 1][0], m_cscIntTransl[gp - 1][1], m_cscIntTransl[gp - 1][2]);
-                    transfPtr_internalgeo *= Amg::AngleAxis3D(m_cscIntRot[gp - 1][0], Amg::Vector3D(1., 0., 0.));
-                    transfPtr_internalgeo *= Amg::AngleAxis3D(m_cscIntRot[gp - 1][1], Amg::Vector3D(0., 1., 0.));
-                    transfPtr_internalgeo *= Amg::AngleAxis3D(m_cscIntRot[gp - 1][2], Amg::Vector3D(0., 0., 1.));
+                    transfPtr_internalgeo *= Amg::AngleAxis3D(m_cscIntRot[gp - 1][0], Amg::Vector3D::UnitX());
+                    transfPtr_internalgeo *= Amg::AngleAxis3D(m_cscIntRot[gp - 1][1], Amg::Vector3D::UnitY());
+                    transfPtr_internalgeo *= Amg::AngleAxis3D(m_cscIntRot[gp - 1][2], Amg::Vector3D::UnitZ());
                 } else {
                     transfPtr_internalgeo *=
                         Amg::Translation3D(m_cscIntTransl[gp - 1][1], -m_cscIntTransl[gp - 1][0], m_cscIntTransl[gp - 1][2]);
-                    transfPtr_internalgeo *= Amg::AngleAxis3D(-m_cscIntRot[gp - 1][0], Amg::Vector3D(0., 1., 0.));
-                    transfPtr_internalgeo *= Amg::AngleAxis3D(m_cscIntRot[gp - 1][1], Amg::Vector3D(1., 0., 0.));
-                    transfPtr_internalgeo *= Amg::AngleAxis3D(m_cscIntRot[gp - 1][2], Amg::Vector3D(0., 0., 1.));
+                    transfPtr_internalgeo *= Amg::AngleAxis3D(-m_cscIntRot[gp - 1][0], Amg::Vector3D::UnitY());
+                    transfPtr_internalgeo *= Amg::AngleAxis3D(m_cscIntRot[gp - 1][1], Amg::Vector3D::UnitX());
+                    transfPtr_internalgeo *= Amg::AngleAxis3D(m_cscIntRot[gp - 1][2], Amg::Vector3D::UnitZ());
                 }
 
                 m_surfaceData->m_layerTransforms.push_back(Amg::Transform3D(transfPtr_orig * transfPtr_internalgeo));
                 m_surfaceData->m_layerSurfaces.emplace_back(std::make_unique<Trk::PlaneSurface>(*this, id));
                 if (mp == 1) {
                     m_surfaceData->m_layerCenters.push_back(m_surfaceData->m_layerTransforms.back() * Amg::Vector3D(0., 0., 0.));
-                    m_surfaceData->m_layerNormals.push_back(m_surfaceData->m_layerTransforms.back().linear() * Amg::Vector3D(0., 0., 1.));
+                    m_surfaceData->m_layerNormals.push_back(m_surfaceData->m_layerTransforms.back().linear() * Amg::Vector3D::UnitZ());
                 }
             }
         }

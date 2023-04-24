@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONREADOUTGEOMETRY_TGCREADOUTELEMENT_H
@@ -59,7 +59,7 @@ namespace MuonGM {
 	friend class MuonChamberLite;
 
     public:
-        TgcReadoutElement(GeoVFullPhysVol* pv, const std::string& stName, int zi, int fi, bool is_mirrored, MuonDetectorManager* mgr);
+        TgcReadoutElement(GeoVFullPhysVol* pv, const std::string& stName, MuonDetectorManager* mgr);
 
         virtual ~TgcReadoutElement();
 
@@ -94,9 +94,6 @@ namespace MuonGM {
         virtual inline int numberOfStrips(const Identifier& layerId) const override;
         virtual inline int numberOfStrips(int layer, bool) const override;
 
-        /** TrkDetElementInterface */
-        virtual Trk::DetectorElemType detectorType() const override final { return Trk::DetectorElemType::Tgc; }
-
         /** space point position for a given pair of phi and eta identifiers
             The LocalPosition is expressed in the reference frame of the phi projection.
             If one of the identifiers is outside the valid range, the function will return false */
@@ -106,7 +103,6 @@ namespace MuonGM {
             If one of the identifiers is outside the valid range, the function will return false */
         virtual inline bool spacePointPosition(const Identifier& phiId, const Identifier& etaId, Amg::Vector3D& pos) const override;
 
-        void setIdentifier(const Identifier& id);
         virtual bool containsId(const Identifier& id) const override;
         inline int Ngasgaps() const;
         inline int NstripPlanes() const;

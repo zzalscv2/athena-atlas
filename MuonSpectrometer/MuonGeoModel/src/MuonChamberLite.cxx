@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaKernel/getMessageSvc.h"
@@ -637,13 +637,13 @@ namespace MuonGM {
 
 
                 const MdtIdHelper *mdt_id = manager->mdtIdHelper();
-                MdtReadoutElement *det = new MdtReadoutElement(lvm, stName, zi, fi + 1, is_mirrored, manager);
+                MdtReadoutElement *det = new MdtReadoutElement(lvm, stName, manager);
                 Position ip = mysql.GetStationPosition(stName.substr(0, 3), fi, zi);
                 setMdtReadoutGeom(mysql, det, (MdtComponent *)c, ip);
                 det->setHasCutouts(ncutouts > 0);
-                det->setNofREinStation(nMdt, nRpc, nTgc, nCsc);
-                det->setStationEta(stationEta);
-                det->setStationPhi(stationPhi);
+                det->setNMdtInStation(nMdt);
+                Identifier id = mdt_id->channelID(stationType, stationEta, stationPhi, ml, tubel, tube);
+                det->setIdentifier(id);
                 det->setMultilayer(ml);
                 det->setParentStationPV(PVConstLink(ptrd));
                 det->setParentMuonStation(mstat);
@@ -661,9 +661,6 @@ namespace MuonGM {
                 int jobIndex = c->index;
 
                 mstat->addMuonReadoutElementWithAlTransf(det, xfaligncomponent, jobIndex);
-                Identifier id = mdt_id->channelID(stationType, stationEta, stationPhi, ml, tubel, tube);
-                det->setIdentifier(id);
-                det->setLastInitField(5);
 
                 manager->addMdtReadoutElement(det);
 
@@ -683,15 +680,15 @@ namespace MuonGM {
                 if (ypos > 0.)
                     chamberLayer = 2;
 
-                CscReadoutElement *det = new CscReadoutElement(lvc, stName, zi, fi + 1, is_mirrored, manager);
+                CscReadoutElement *det = new CscReadoutElement(lvc, stName, manager);
                 Position ip = mysql.GetStationPosition(stName.substr(0, 3), fi, zi);
                 setCscReadoutGeom(mysql, det, cs, ip);
 
                 const CscIdHelper *csc_id = manager->cscIdHelper();
                 det->setHasCutouts(ncutouts > 0);
-                det->setNofREinStation(nMdt, nRpc, nTgc, nCsc);
-                det->setStationEta(stationEta);
-                det->setStationPhi(stationPhi);
+                Identifier id = csc_id->channelID(stationType, stationEta, stationPhi, chamberLayer, 1, 0, 1);
+                det->setIdentifier(id);
+
                 det->setChamberLayer(chamberLayer);
                 det->setParentStationPV(PVConstLink(ptrd));
                 det->setParentMuonStation(mstat);
@@ -700,9 +697,7 @@ namespace MuonGM {
                 //
                 mstat->addMuonReadoutElementWithAlTransf(det, xfaligncomponent, jobIndex);
 
-                Identifier id = csc_id->channelID(stationType, stationEta, stationPhi, chamberLayer, 1, 0, 1);
-                det->setIdentifier(id);
-                det->setLastInitField(5);
+                
 
                 // set alignment parameters for the wire layers
                 det->setCscInternalAlignmentParams();
@@ -727,13 +722,12 @@ namespace MuonGM {
                 int stationPhi = 0;
                 stationPhi = stationPhiTGC(stName, fi,zi);
                                 
-                TgcReadoutElement *det = new TgcReadoutElement(lvt, stName, zi, fi + 1, is_mirrored, manager);
+                TgcReadoutElement *det = new TgcReadoutElement(lvt, stName, manager);
                 Position ip = mysql.GetStationPosition(stName.substr(0, 3), fi, zi);
                 setTgcReadoutGeom(mysql, det, tg, ip, stName);
                 det->setHasCutouts(ncutouts > 0);
-                det->setNofREinStation(nMdt, nRpc, nTgc, nCsc);
-                det->setStationEta(stationEta);
-                det->setStationPhi(stationPhi);
+                Identifier id = tgc_id->channelID(stationType, stationEta, stationPhi, 1, false, 1);
+                det->setIdentifier(id);
                 det->setParentStationPV(PVConstLink(ptrd));
                 det->setParentMuonStation(mstat);
 
@@ -741,14 +735,7 @@ namespace MuonGM {
 
                 mstat->addMuonReadoutElementWithAlTransf(det, xfaligncomponent, jobIndex);
 
-                int gg = 1;
-                int isStrip = 0;
-                int ch = 1;
-                Identifier id = tgc_id->channelID(stationType, stationEta, stationPhi, gg, isStrip, ch);
-                det->setIdentifier(id);
-                det->setLastInitField(4);
- 
-               manager->addTgcReadoutElement(det);
+                manager->addTgcReadoutElement(det);
             }
             if (lvr && RPCON && manager->rpcIdHelper()) {
                 RpcComponent *rp = (RpcComponent *)c;
@@ -859,9 +846,8 @@ namespace MuonGM {
                 Position ip = mysql.GetStationPosition(stName.substr(0, 3), fi, zi);
                 setRpcReadoutGeom(mysql, det, rp, ip, "R.ANYTHING", manager);
                 det->setHasCutouts(ncutouts > 0);
-                det->setNofREinStation(nMdt, nRpc, nTgc, nCsc);
-                det->setStationEta(stationEta);
-                det->setStationPhi(stationPhi);
+                Identifier id = rpc_id->channelID(stationType, stationEta, stationPhi, doubletR, doubletZ, doubletPhi, gasGap, measuresPhi, strip);
+		        det->setIdentifier(id);
                 det->setDoubletR(doubletR);
                 det->setDoubletZ(doubletZ);
                 det->setDoubletPhi(doubletPhi);
@@ -873,9 +859,8 @@ namespace MuonGM {
                 int jobIndex = c->index;
 
                 mstat->addMuonReadoutElementWithAlTransf(det, xfaligncomponent, jobIndex);
-                Identifier id = rpc_id->channelID(stationType, stationEta, stationPhi, doubletR, doubletZ, doubletPhi, gasGap, measuresPhi, strip);
-		det->setIdentifier(id);
-                det->setLastInitField(nfields);
+                
+
 
                 if (stName.find("BI") != std::string::npos) {
                     std::map<std::string, float>::const_iterator yItr = rpcYTrans.find(techname);
