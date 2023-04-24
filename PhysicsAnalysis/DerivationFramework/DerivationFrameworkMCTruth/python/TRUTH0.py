@@ -10,7 +10,7 @@ def TRUTH0Cfg(ConfigFlags):
     acc = ComponentAccumulator()
     
     # Ensure EventInfoCnvAlg is scheduled
-    if "EventInfo#EventInfo" in ConfigFlags.Input.TypedCollections and "xAOD::EventInfo#EventInfo" not in ConfigFlags.Input.TypedCollections:
+    if "EventInfo#McEventInfo" in ConfigFlags.Input.TypedCollections and "xAOD::EventInfo#EventInfo" not in ConfigFlags.Input.TypedCollections:
         from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
         acc.merge(EventInfoCnvAlgCfg(ConfigFlags, inputKey="McEventInfo", outputKey="EventInfo", disableBeamSpot=True))
  

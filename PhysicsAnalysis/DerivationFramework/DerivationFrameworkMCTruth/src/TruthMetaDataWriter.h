@@ -12,6 +12,9 @@
 // Handles to services
 #include "GaudiKernel/ServiceHandle.h"
 
+// Service for the metadata (tag info)
+#include "EventInfoMgt/ITagInfoMgr.h"
+
 // EDM classes - typedefs, so have to #include them
 #include "xAODTruth/TruthMetaDataContainer.h"
 
@@ -43,6 +46,9 @@ namespace DerivationFramework {
       std::string m_metaName;
       /// Set for tracking the mc channels for which we already added meta data
       mutable std::unordered_set<uint32_t> m_existingMetaDataChan; 
+      /// TagInfoMgr to get information out of /TagInfo
+      ServiceHandle< ITagInfoMgr > m_tagInfoMgr{
+        "TagInfoMgr", name()};
 
   }; 
 }

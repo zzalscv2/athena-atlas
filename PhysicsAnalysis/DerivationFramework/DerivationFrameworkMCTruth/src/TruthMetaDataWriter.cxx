@@ -20,6 +20,9 @@
 // Service for the weights
 #include "GenInterfaces/IHepMCWeightSvc.h"
 
+// Service for the metadata (tag info)
+#include "EventInfoMgt/ITagInfoMgr.h"
+
 // Constructor
 DerivationFramework::TruthMetaDataWriter::TruthMetaDataWriter(const std::string& t,
                                                               const std::string& n,
@@ -44,6 +47,7 @@ StatusCode DerivationFramework::TruthMetaDataWriter::initialize()
     // Initialize the service handles
     CHECK( m_metaStore.retrieve() );
     CHECK( m_weightSvc.retrieve() );
+    CHECK( m_tagInfoMgr.retrieve() );
 
     // Create an empty truth meta data container:
     xAOD::TruthMetaDataAuxContainer* aux = new xAOD::TruthMetaDataAuxContainer();
@@ -93,36 +97,13 @@ StatusCode DerivationFramework::TruthMetaDataWriter::addBranches() const
         md->setMcChannelNumber(mcChannelNumber);
         md->setWeightNames( orderedWeightNameVec );
 
-        // Shamelessly stolen from the file meta data tool
-        const CondAttrListCollection* tagInfo(nullptr);
-        ATH_CHECK( detStore()->retrieve( tagInfo, "/TagInfo" ) );
-
-        // Access the first, and only channel of the object:
-        const CondAttrListCollection::AttributeList& al = tagInfo->attributeList( 0 );
-
-        if (al.exists("lhefGenerator")){
-            md->setLhefGenerator( al["lhefGenerator"].data< std::string >() );
-        }
-
-        if (al.exists("generators")){
-            md->setGenerators( al["generators"].data< std::string >() );
-        }
-
-        if (al.exists("evgenProcess")){
-            md->setEvgenProcess( al["evgenProcess"].data< std::string >() );
-        }
-
-        if (al.exists("evgenTune")){
-            md->setEvgenTune( al["evgenTune"].data< std::string >() );
-        }
-
-        if (al.exists("hardPDF")){
-            md->setHardPDF( al["hardPDF"].data< std::string >() );
-        }
-
-        if (al.exists("softPDF")){
-            md->setSoftPDF( al["softPDF"].data< std::string >() );
-        }
+        //// Shamelessly stolen from the file meta data tool; returns empty string if unavailable
+        md->setLhefGenerator( m_tagInfoMgr->findTag("lhefGenerator") );
+        md->setGenerators( m_tagInfoMgr->findTag("generators") );
+        md->setEvgenProcess( m_tagInfoMgr->findTag("evgenProcess") );
+        md->setEvgenTune( m_tagInfoMgr->findTag("evgenTune") );
+        md->setHardPDF( m_tagInfoMgr->findTag("hardPDF") );
+        md->setSoftPDF( m_tagInfoMgr->findTag("softPDF") );
         // Done getting things from the TagInfo
 
     } // Done making the new truth metadata object
