@@ -72,7 +72,7 @@ class InDetTrigSequence:
 
   def dataPreparation(self) -> ComponentAccumulator:
     
-    signature = self.__flags.InDet.Tracking.ActiveConfig.input_name
+    signature = self.__flags.Tracking.ActiveConfig.input_name
     
     with ConfigurableCABehavior():
       acc = ComponentAccumulator()
@@ -100,7 +100,7 @@ class InDetTrigSequence:
   
   def spacePointFormation(self) -> ComponentAccumulator:
     
-    signature = self.__flags.InDet.Tracking.ActiveConfig.input_name
+    signature = self.__flags.Tracking.ActiveConfig.input_name
     with ConfigurableCABehavior():
       acc = ComponentAccumulator()
 
@@ -121,13 +121,13 @@ class InDetTrigSequence:
       ftfargs = {}
       flags = self.__flags
       
-      signature = flags.InDet.Tracking.ActiveConfig.input_name
+      signature = flags.Tracking.ActiveConfig.input_name
 
       if extraFlags:
         flags = extraFlags
-        ftfargs["inputTracksName"] = self.__flags.InDet.Tracking.ActiveConfig.trkTracks_FTF
+        ftfargs["inputTracksName"] = self.__flags.Tracking.ActiveConfig.trkTracks_FTF
         #TODO move from .name to .input_name for consistency after migration to private tools
-        signature = flags.InDet.Tracking.ActiveConfig.name
+        signature = flags.Tracking.ActiveConfig.name
       elif inputTracksName:
         ftfargs["inputTracksName"] = inputTracksName
     
@@ -135,7 +135,7 @@ class InDetTrigSequence:
       acc.merge(TrigFastTrackFinderCfg(flags, "TrigFastTrackFinder_" + signature, 
                                        signature, self.__rois, **ftfargs))
       
-      if not flags.InDet.Tracking.ActiveConfig.doZFinderOnly:
+      if not flags.Tracking.ActiveConfig.doZFinderOnly:
         from TrigInDetConfig.TrigInDetConfig import trackFTFConverterCfg
         acc.merge(trackFTFConverterCfg(flags, signature))
 

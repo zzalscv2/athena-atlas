@@ -27,7 +27,7 @@ def TRT_Cosmics_SegmentsToTrackCfg(flags, name ='InDetTRT_Cosmics_SegmentsToTrac
         from InDetConfig.InDetAssociationToolsConfig import InDetPRDtoTrackMapToolGangedPixelsCfg
         kwargs.setdefault("AssociationTool", acc.popToolsAndMerge( InDetPRDtoTrackMapToolGangedPixelsCfg(flags) ))
 
-    kwargs.setdefault("MinNHit", flags.InDet.Tracking.ActiveConfig.minTRTonly)
+    kwargs.setdefault("MinNHit", flags.Tracking.ActiveConfig.minTRTonly)
     kwargs.setdefault("OutlierRemoval", True)
     kwargs.setdefault("MaterialEffects", False)
 

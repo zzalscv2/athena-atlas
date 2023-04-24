@@ -239,6 +239,88 @@ def createTrackingConfigFlags():
 
     ####################################################################
 
+    # Tracking pass flags
+
+    # InDet
+
+    from InDetConfig.TrackingPassFlags import (
+        createTrackingPassFlags, createHighPileupTrackingPassFlags,
+        createMinBiasTrackingPassFlags, createLargeD0TrackingPassFlags,
+        createR3LargeD0TrackingPassFlags, createLowPtLargeD0TrackingPassFlags,
+        createLowPtTrackingPassFlags, createVeryLowPtTrackingPassFlags,
+        createForwardTracksTrackingPassFlags, createBeamGasTrackingPassFlags,
+        createVtxLumiTrackingPassFlags, createVtxBeamSpotTrackingPassFlags, createCosmicsTrackingPassFlags,
+        createHeavyIonTrackingPassFlags, createPixelTrackingPassFlags, createDisappearingTrackingPassFlags,
+        createSCTTrackingPassFlags, createTRTTrackingPassFlags, createTRTStandaloneTrackingPassFlags,
+        createRobustRecoTrackingPassFlags)
+
+    # Set up for first tracking pass, updated for second passes
+    icf.addFlagsCategory("Tracking.MainPass",
+                         createTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory("Tracking.HighPileupPass",
+                         createHighPileupTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory("Tracking.MinBiasPass",
+                         createMinBiasTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory("Tracking.LargeD0Pass",
+                         createLargeD0TrackingPassFlags, prefix=True)
+    icf.addFlagsCategory("Tracking.R3LargeD0Pass",
+                         createR3LargeD0TrackingPassFlags, prefix=True)
+    icf.addFlagsCategory("Tracking.LowPtLargeD0Pass",
+                         createLowPtLargeD0TrackingPassFlags, prefix=True)
+    icf.addFlagsCategory("Tracking.LowPtPass",
+                         createLowPtTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory("Tracking.VeryLowPtPass",
+                         createVeryLowPtTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory("Tracking.ForwardPass",
+                         createForwardTracksTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory("Tracking.BeamGasPass",
+                         createBeamGasTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory("Tracking.VtxLumiPass",
+                         createVtxLumiTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory("Tracking.VtxBeamSpotPass",
+                         createVtxBeamSpotTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory("Tracking.CosmicsPass",
+                         createCosmicsTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory("Tracking.HeavyIonPass",
+                         createHeavyIonTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory("Tracking.PixelPass",
+                         createPixelTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory("Tracking.DisappearingPass",
+                         createDisappearingTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory("Tracking.SCTPass",
+                         createSCTTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory("Tracking.TRTPass",
+                         createTRTTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory("Tracking.TRTStandalonePass",
+                         createTRTStandaloneTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory("Tracking.RobustRecoPass",
+                         createRobustRecoTrackingPassFlags, prefix=True)
+
+    # ITk
+
+    from InDetConfig.TrackingPassFlags import (
+        createITkTrackingPassFlags, createITkLargeD0TrackingPassFlags,
+        createITkConversionFindingTrackingPassFlags,
+        createITkFastTrackingPassFlags, createITkLargeD0FastTrackingPassFlags,
+        createITkFTFPassFlags, createITkLowPtTrackingPassFlags)
+
+    icf.addFlagsCategory ("Tracking.ITkMainPass",
+                          createITkTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory ("Tracking.ITkLargeD0Pass",
+                          createITkLargeD0TrackingPassFlags, prefix=True)
+    icf.addFlagsCategory ("Tracking.ITkConversionFindingPass",
+                          createITkConversionFindingTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory ("Tracking.ITkLowPt",
+                          createITkLowPtTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory ("Tracking.ITkFastPass",
+                          createITkFastTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory ("Tracking.ITkLargeD0FastPass",
+                          createITkLargeD0FastTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory ("Tracking.ITkFTFPass",
+                          createITkFTFPassFlags, prefix=True)
+
+    ####################################################################
+
     # Vertexing flags
     from TrkConfig.VertexFindingFlags import (
         createSecVertexingFlags, createEGammaPileUpSecVertexingFlags,

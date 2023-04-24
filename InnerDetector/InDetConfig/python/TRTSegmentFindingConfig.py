@@ -113,7 +113,7 @@ if __name__ == "__main__":
     flags.Concurrency.NumThreads=numThreads
     flags.Concurrency.NumConcurrentEvents=numThreads # Might change this later, but good enough for the moment.
 
-    flags = flags.cloneAndReplace("InDet.Tracking.ActiveConfig","InDet.Tracking.MainPass")
+    flags = flags.cloneAndReplace("Tracking.ActiveConfig","Tracking.MainPass")
 
     flags.lock()
     flags.dump()

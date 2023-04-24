@@ -101,7 +101,9 @@ def _trackConverterCfg(flags, signature, inputTracksKey, outputTrackParticleKey)
   return acc
 
 def trackFTFConverterCfg(flags, signature):
-  return _trackConverterCfg(flags, signature, flags.InDet.Tracking.ActiveConfig.trkTracks_FTF, flags.InDet.Tracking.ActiveConfig.tracks_FTF)
+  return _trackConverterCfg(flags, signature,
+                            flags.Tracking.ActiveConfig.trkTracks_FTF,
+                            flags.Tracking.ActiveConfig.tracks_FTF)
 
 
 def trigInDetFastTrackingCfg( inflags, roisKey="EMRoIs", signatureName='', in_view=True ):
@@ -111,12 +113,12 @@ def trigInDetFastTrackingCfg( inflags, roisKey="EMRoIs", signatureName='', in_vi
  
   """ Generates precision fast tracking config, it is a primary config function """
 
-  # redirect InDet.Tracking.ActiveConfig flags to point to a specific trigger setting
+  # redirect Tracking.ActiveConfig flags to point to a specific trigger setting
 
-  flags = inflags.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking."+signatureName)
+  flags = inflags.cloneAndReplace("Tracking.ActiveConfig", "Trigger.InDetTracking."+signatureName)
   from TrigInDetConfig.InDetTrigSequence import InDetTrigSequence
   seq = InDetTrigSequence(flags, 
-                          flags.InDet.Tracking.ActiveConfig.input_name, 
+                          flags.Tracking.ActiveConfig.input_name, 
                           rois   = roisKey,
                           inView = "VDVInDetFTF")
   acc = seq.sequence("FastTrackFinder")
@@ -130,21 +132,24 @@ prefix="InDetTrigMT"
 
 def TRTDataProviderCfg(flags):
   acc = ComponentAccumulator()
-  rodDecoder = CompFactory.TRT_RodDecoder(f"{prefix}TRTRodDecoder{flags.InDet.Tracking.ActiveConfig.name}",
-                                          LoadCompressTableDB=True)
+  rodDecoder = CompFactory.TRT_RodDecoder(
+    f"{prefix}TRTRodDecoder{flags.Tracking.ActiveConfig.name}",
+    LoadCompressTableDB=True)
   acc.addPublicTool( rodDecoder )
-  dataProviderTool = CompFactory.TRTRawDataProviderTool(f"{prefix}TRTRawDataProviderTool{flags.InDet.Tracking.ActiveConfig.name}",
-                                                    Decoder=rodDecoder)
+  dataProviderTool = CompFactory.TRTRawDataProviderTool(
+    f"{prefix}TRTRawDataProviderTool{flags.Tracking.ActiveConfig.name}",
+    Decoder=rodDecoder)
 
   acc.addPublicTool( dataProviderTool )
   from .InDetTrigCollectionKeys import TrigTRTKeys
   from RegionSelector.RegSelToolConfig import regSelTool_TRT_Cfg
-  dataProviderAlg = CompFactory.TRTRawDataProvider(f"{prefix}TRTRawDataProvider{flags.InDet.Tracking.ActiveConfig.name}",
-                                                   RDOKey       = TrigTRTKeys.RDOs,
-                                                   ProviderTool = dataProviderTool,
-                                                   RegSelTool   = acc.popToolsAndMerge( regSelTool_TRT_Cfg(flags)),
-                                                   isRoI_Seeded = True,
-                                                   RoIs         = flags.InDet.Tracking.ActiveConfig.roi )
+  dataProviderAlg = CompFactory.TRTRawDataProvider(
+    f"{prefix}TRTRawDataProvider{flags.Tracking.ActiveConfig.name}",
+    RDOKey       = TrigTRTKeys.RDOs,
+    ProviderTool = dataProviderTool,
+    RegSelTool   = acc.popToolsAndMerge(regSelTool_TRT_Cfg(flags)),
+    isRoI_Seeded = True,
+    RoIs         = flags.Tracking.ActiveConfig.roi)
   acc.addEventAlgo(dataProviderAlg)
   return acc
 
@@ -173,13 +178,16 @@ def ambiguitySolverAlgCfg(flags):
   acc = ComponentAccumulator()
 
   from TrkConfig.TrkAmbiguitySolverConfig import TrkAmbiguityScore_Trig_Cfg, TrkAmbiguitySolver_Trig_Cfg
-  acc.merge(TrkAmbiguityScore_Trig_Cfg(flags, name = f"{prefix}TrkAmbiguityScore_{flags.InDet.Tracking.ActiveConfig.input_name}"))
-  acc.merge(TrkAmbiguitySolver_Trig_Cfg(flags, name  = f"{prefix}TrkAmbiguitySolver_{flags.InDet.Tracking.ActiveConfig.input_name}"))
+  acc.merge(TrkAmbiguityScore_Trig_Cfg(flags, name = f"{prefix}TrkAmbiguityScore_{flags.Tracking.ActiveConfig.input_name}"))
+  acc.merge(TrkAmbiguitySolver_Trig_Cfg(flags, name = f"{prefix}TrkAmbiguitySolver_{flags.Tracking.ActiveConfig.input_name}"))
 
   return acc
 
 def trackEFIDConverterCfg(flags):
-  return _trackConverterCfg(flags, "_Precision"+flags.InDet.Tracking.ActiveConfig.name, flags.InDet.Tracking.ActiveConfig.trkTracks_IDTrig, flags.InDet.Tracking.ActiveConfig.tracks_IDTrig)
+  return _trackConverterCfg(flags, 
+                            "_Precision"+flags.Tracking.ActiveConfig.name,
+                            flags.Tracking.ActiveConfig.trkTracks_IDTrig,
+                            flags.Tracking.ActiveConfig.tracks_IDTrig)
 
 
 def trigInDetPrecisionTrackingCfg( inflags, signatureName, in_view=True ):
@@ -190,7 +198,7 @@ def trigInDetPrecisionTrackingCfg( inflags, signatureName, in_view=True ):
   """ Generates precision tracking config, it is a primary config function """
 
   acc = ComponentAccumulator()
-  flags = inflags.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking."+signatureName)
+  flags = inflags.cloneAndReplace("Tracking.ActiveConfig", "Trigger.InDetTracking."+signatureName)
 
   from .InDetTrigCollectionKeys import TrigPixelKeys,TrigTRTKeys
   if in_view:
@@ -198,7 +206,7 @@ def trigInDetPrecisionTrackingCfg( inflags, signatureName, in_view=True ):
     TRT_RDO_Key = "TRT_RDOs"
     if flags.Input.Format is Format.BS:
           TRT_RDO_Key = TrigTRTKeys.RDOs
-    verifier = CompFactory.AthViews.ViewDataVerifier( name = 'VDVInDetPrecision'+flags.InDet.Tracking.ActiveConfig.suffix,
+    verifier = CompFactory.AthViews.ViewDataVerifier( name = 'VDVInDetPrecision'+flags.Tracking.ActiveConfig.suffix,
                                                       DataObjects= [('xAOD::EventInfo', 'StoreGateSvc+EventInfo'),
                                                                     ('InDet::PixelClusterContainerCache', 'PixelTrigClustersCache'),
                                                                     ('PixelRDO_Cache', 'PixRDOCache'),
@@ -206,10 +214,10 @@ def trigInDetPrecisionTrackingCfg( inflags, signatureName, in_view=True ):
                                                                     ( 'TRT_RDO_Container' , TRT_RDO_Key),
                                                                     ('SpacePointCache', 'PixelSpacePointCache'),
                                                                     ('SpacePointCache', 'SctSpacePointCache'),
-                                                                    ('TrigRoiDescriptorCollection', flags.InDet.Tracking.ActiveConfig.roi),
+                                                                    ('TrigRoiDescriptorCollection', flags.Tracking.ActiveConfig.roi),
                                                                     ( 'TagInfo', 'DetectorStore+ProcessingTags' ), 
                                                                     ( 'InDet::PixelGangedClusterAmbiguities' , TrigPixelKeys.PixelClusterAmbiguitiesMap),
-                                                                    ( 'TrackCollection', flags.InDet.Tracking.ActiveConfig.trkTracks_FTF )] )
+                                                                    ( 'TrackCollection', flags.Tracking.ActiveConfig.trkTracks_FTF )] )
 
     if flags.Input.Format is Format.BS:
         verifier.DataObjects += [ ('IDCInDetBSErrContainer' , 'PixelByteStreamErrs'),

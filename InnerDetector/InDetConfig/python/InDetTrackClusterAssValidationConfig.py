@@ -4,7 +4,8 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType
 
-def InDetTrackClusterAssValidationCfg(flags, name='InDetTrackClusterAssValidation', **kwargs):
+def InDetTrackClusterAssValidationCfg(
+        flags, name='InDetTrackClusterAssValidation', **kwargs):
     acc = ComponentAccumulator()
 
     kwargs.setdefault("SpacePointsPixelName", "PixelSpacePoints")
@@ -18,7 +19,7 @@ def InDetTrackClusterAssValidationCfg(flags, name='InDetTrackClusterAssValidatio
 
     if flags.Beam.Type in [BeamType.Cosmics, BeamType.SingleBeam]:
         kwargs.setdefault("MomentumCut",
-                          flags.InDet.Tracking.ActiveConfig.minPT \
+                          flags.Tracking.ActiveConfig.minPT
                           if flags.Beam.Type==BeamType.Cosmics else 0)
         kwargs.setdefault("RadiusMax",   9999999.)
         kwargs.setdefault("RapidityCut", 9999999.)
@@ -26,31 +27,29 @@ def InDetTrackClusterAssValidationCfg(flags, name='InDetTrackClusterAssValidatio
         kwargs.setdefault("MinNumberSpacePoints", 4)
 
     else:
-        kwargs.setdefault("MomentumCut",
-                          2 * flags.InDet.Tracking.ActiveConfig.minPT)
+        kwargs.setdefault("MomentumCut", 2*flags.Tracking.ActiveConfig.minPT)
         kwargs.setdefault("RadiusMax", 20.)
-        kwargs.setdefault("RapidityCut",
-                          flags.InDet.Tracking.ActiveConfig.maxEta)
+        kwargs.setdefault("RapidityCut", flags.Tracking.ActiveConfig.maxEta)
         kwargs.setdefault("MinNumberClusters",
-                          flags.InDet.Tracking.ActiveConfig.minClusters)
+                          flags.Tracking.ActiveConfig.minClusters)
         kwargs.setdefault("MinNumberSpacePoints", 3)
 
-    acc.addEventAlgo(CompFactory.InDet.TrackClusterAssValidation(name, **kwargs))
+    acc.addEventAlgo(
+        CompFactory.InDet.TrackClusterAssValidation(name, **kwargs))
     return acc
 
-def ITkTrackClusterAssValidationCfg(flags, name='ITkTrackClusterAssValidation', **kwargs):
+def ITkTrackClusterAssValidationCfg(
+        flags, name='ITkTrackClusterAssValidation', **kwargs):
     acc = ComponentAccumulator()
 
     kwargs.setdefault("usePixel", flags.Detector.EnableITkPixel)
     kwargs.setdefault("useStrip", flags.Detector.EnableITkStrip)
-    kwargs.setdefault("MomentumCut",
-                      max(flags.ITk.Tracking.ActiveConfig.minPT))
-    kwargs.setdefault("RapidityCut",
-                      flags.ITk.Tracking.ActiveConfig.maxEta)
-    kwargs.setdefault("EtaBins", flags.ITk.Tracking.ActiveConfig.etaBins)
-    kwargs.setdefault("PtCuts", flags.ITk.Tracking.ActiveConfig.minPT)
+    kwargs.setdefault("MomentumCut", max(flags.Tracking.ActiveConfig.minPT))
+    kwargs.setdefault("RapidityCut", flags.Tracking.ActiveConfig.maxEta)
+    kwargs.setdefault("EtaBins", flags.Tracking.ActiveConfig.etaBins)
+    kwargs.setdefault("PtCuts", flags.Tracking.ActiveConfig.minPT)
     kwargs.setdefault("MinNumberClustersCuts",
-                      flags.ITk.Tracking.ActiveConfig.minClusters)
+                      flags.Tracking.ActiveConfig.minClusters)
 
     acc.addEventAlgo(CompFactory.ITk.TrackClusterAssValidation(name, **kwargs))
     return acc

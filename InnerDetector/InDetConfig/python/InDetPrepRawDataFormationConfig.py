@@ -260,9 +260,10 @@ def TrigTRTRIOMakerCfg(flags, name="InDetTrigMTTRTDriftCircleMaker", **kwargs):
     kwargs.setdefault("TRTRIOLocation", "TRT_TrigDriftCircles")
     kwargs.setdefault("TRTRDOLocation", "TRT_RDOs_TRIG" if flags.Input.Format is Format.BS else "TRT_RDOs")
     kwargs.setdefault("isRoI_Seeded", True)
-    kwargs.setdefault("RoIs", flags.InDet.Tracking.ActiveConfig.roi)
+    kwargs.setdefault("RoIs", flags.Tracking.ActiveConfig.roi)
     
-    acc.addEventAlgo(CompFactory.InDet.TRT_RIO_Maker(name+"_"+flags.InDet.Tracking.ActiveConfig.name, **kwargs))
+    acc.addEventAlgo(CompFactory.InDet.TRT_RIO_Maker(
+        name+"_"+flags.Tracking.ActiveConfig.name, **kwargs))
     return acc
 
 def AthenaTrkClusterizationCfg(flags):

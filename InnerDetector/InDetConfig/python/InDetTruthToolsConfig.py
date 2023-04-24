@@ -56,8 +56,7 @@ def InDetTruthTrackBuilderCfg(flags, name='InDetTruthTrackBuilder', **kwargs):
 
     kwargs.setdefault('MinDegreesOfFreedom', 1)
     kwargs.setdefault('MatEffects', flags.Tracking.materialInteractionsType)
-    kwargs.setdefault('MinSiHits',
-                      flags.InDet.Tracking.ActiveConfig.minClusters)
+    kwargs.setdefault('MinSiHits', flags.Tracking.ActiveConfig.minClusters)
 
     result.setPrivateTools(CompFactory.Trk.TruthTrackBuilder(name, **kwargs))
     return result
@@ -73,7 +72,7 @@ def InDetPRD_TruthTrajectoryBuilderCfg(
     kwargs.setdefault('InDetPRD_Provider', result.popToolsAndMerge(
         InDetPRD_ProviderCfg(flags)))
 
-    kwargs.setdefault('MinimumPt', flags.InDet.Tracking.ActiveConfig.minPT)
+    kwargs.setdefault('MinimumPt', flags.Tracking.ActiveConfig.minPT)
 
     manipulators = [result.popToolsAndMerge(
         InDetPRDTruthTrajectorySorterCfg(flags))]

@@ -38,7 +38,7 @@ def actsValidateOrthogonalSeedsFlags(flags):
 def actsValidateTracksFlags(flags):
     """flags for Reco_tf with CA used in CI tests: use ActsTrkFinding during reconstruction"""
     flags.Reco.EnableHGTDExtension = False
-    flags.ITk.Tracking.MainPass.doAmbiguityProcessorTrackFit = False
+    flags.Tracking.MainPass.doAmbiguityProcessorTrackFit = False
     flags.ITk.Tracking.recoChain = [TrackingComponent.ValidateActsTracks]
 
 def actsArtFlags(flags):

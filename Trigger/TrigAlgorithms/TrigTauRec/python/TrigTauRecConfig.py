@@ -89,7 +89,7 @@ def trigTauRecMergedPrecisionMVACfg(flags, name='', inputRoIs='', tracks=''):
                                        Key_trigJetSeedOutputKey        = recordable("HLT_jet_seed"),
                                        RoIInputKey                     = inputRoIs,
                                        clustersKey                     = "",
-                                       Key_vertexInputContainer        = flags.InDet.Tracking.ActiveConfig.vertex,
+                                       Key_vertexInputContainer        = flags.Tracking.ActiveConfig.vertex,
                                        Key_trackPartInputContainer     = tracks,
                                        Key_trigTauJetOutputContainer   = trigTauJetOutputContainer,
                                        Key_trigTauTrackOutputContainer = trigTauTrackOutputContainer
