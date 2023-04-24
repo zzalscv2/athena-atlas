@@ -7,6 +7,7 @@
 
 #include "dqm_core/AlgorithmConfig.h"
 #include "dqm_core/exceptions.h"
+#include "CxxUtils/checker_macros.h"
 
 class TDirectory;
 class TFile;
@@ -18,7 +19,7 @@ namespace dqi {
 class HanConfigAssessor;
 
 
-class HanAlgorithmConfig : public dqm_core::AlgorithmConfig {
+class ATLAS_NOT_THREAD_SAFE HanAlgorithmConfig : public dqm_core::AlgorithmConfig {
 public:
 
   HanAlgorithmConfig( const HanConfigAssessor& hca, TFile* config );

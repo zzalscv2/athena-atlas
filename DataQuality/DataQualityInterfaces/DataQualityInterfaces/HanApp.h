@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef dqiHanApp_h
@@ -8,6 +8,7 @@
 #include <string>
 
 #include <TObject.h>
+#include "CxxUtils/checker_macros.h"
 
 #include "CxxUtils/checker_macros.h"
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // standalone application
@@ -17,7 +18,7 @@ class TFile;
 
 namespace dqi {
 
-class HanApp : public TObject {
+class ATLAS_NOT_THREAD_SAFE HanApp : public TObject {
 public:
 
   HanApp();
