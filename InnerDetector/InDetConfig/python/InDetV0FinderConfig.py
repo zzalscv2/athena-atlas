@@ -8,9 +8,9 @@ def InDetV0FinderToolCfg(flags, name, **kwargs):
     acc = ComponentAccumulator()
 
     if "V0Tools" not in kwargs:
-        from TrkConfig.TrkVertexAnalysisUtilsConfig import V0ToolsNoExtrapCfg
+        from TrkConfig.TrkVertexAnalysisUtilsConfig import V0ToolsCfg
         kwargs.setdefault("V0Tools",  acc.popToolsAndMerge(
-            V0ToolsNoExtrapCfg(flags, name+"_V0Tools")))
+            V0ToolsCfg(flags, name+"_V0Tools")))
     acc.addPublicTool(kwargs["V0Tools"])
 
     if "VertexPointEstimator" not in kwargs:
