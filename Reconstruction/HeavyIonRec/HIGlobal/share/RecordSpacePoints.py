@@ -8,5 +8,5 @@ if "StreamAOD" in dir():
 
 if "StreamESD" in dir() or  ("StreamAOD" in dir() and not rec.readESD):
     from HIGlobal.HIGlobalConf import SpacePointCopier
-    copier = SpacePointCopier(maxTotalSP=1000, maxTracks=20)
+    copier = SpacePointCopier(maxTracks=20)
     topSequence += copier
