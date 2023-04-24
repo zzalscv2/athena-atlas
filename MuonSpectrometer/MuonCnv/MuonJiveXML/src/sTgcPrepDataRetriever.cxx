@@ -9,9 +9,9 @@
 #include "MuonPrepRawData/MuonPrepDataContainer.h"
 #include "MuonReadoutGeometry/MuonChannelDesign.h"
 #include "MuonReadoutGeometry/MuonPadDesign.h"
+#include "MuonReadoutGeometry/ArrayHelper.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 
-#include <vector>
 
 namespace JiveXML {
 
@@ -71,8 +71,8 @@ namespace JiveXML {
           continue;
         }
 
-        Amg::Vector3D globalPos; 
-        Amg::Vector2D pos; 
+        Amg::Vector3D globalPos{Amg::Vector3D::Zero()}; 
+        Amg::Vector2D pos{Amg::Vector2D::Zero()}; 
         double shortWidth=0, longWidth=0, length=0;
         int channel = m_idHelperSvc->stgcIdHelper().channel(id);
         const Trk::PlaneSurface surface = element->surface(id);
@@ -81,7 +81,7 @@ namespace JiveXML {
 
         if (m_idHelperSvc->stgcIdHelper().channelType(id)==0) { // pad
            length = element->channelPitch(id); // Height of a pad
-           std::vector<Amg::Vector2D> corners;
+           std::array<Amg::Vector2D, 4> corners{make_array<Amg::Vector2D, 4>(Amg::Vector2D::Zero())};
            element->padCorners(id, corners); // BotLeft, BotRight, TopLeft, TopRight
            shortWidth = (corners.at(1)-corners.at(0)).norm();
            longWidth = (corners.at(3)-corners.at(2)).norm();

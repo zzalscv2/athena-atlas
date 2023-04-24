@@ -16,6 +16,7 @@
 
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "CLHEP/Units/SystemOfUnits.h"
+#include "MuonReadoutGeometry/ArrayHelper.h"
 
 namespace MuonGM {
 
@@ -93,10 +94,10 @@ namespace MuonGM {
         std::pair<int, int> channelNumber(const Amg::Vector2D& pos) const;
 
         /** calculate local channel position for a given channel number */
-        bool channelPosition(std::pair<int, int> pad, Amg::Vector2D& pos) const;
+        bool channelPosition(const std::pair<int, int>& pad, Amg::Vector2D& pos) const;
 
         /** calculate local channel corners for a given channel number */
-        bool channelCorners(std::pair<int, int> pad, std::vector<Amg::Vector2D>& corners) const;
+        bool channelCorners(const std::pair<int, int>& pad, std::array<Amg::Vector2D, 4>& corners) const;
 
         /** calculate local channel width */
         double channelWidth(const Amg::Vector2D& pos, bool measPhi, bool preciseMeas = false) const;
@@ -119,7 +120,7 @@ namespace MuonGM {
     inline double MuonPadDesign::distanceToChannel(const Amg::Vector2D& pos, bool measPhi, int channel) const {
         // if channel number not provided, get the nearest channel ( mostly for validation purposes )
 
-        std::pair<int, int> pad(0, 0);
+        std::pair<int, int> pad{0, 0};
 
         if (channel < 1) {  // retrieve nearest pad indices
             pad = channelNumber(pos);
@@ -129,7 +130,7 @@ namespace MuonGM {
             pad.second = ((channel - 1) / 13) + 1;
         }
 
-        Amg::Vector2D chPos;
+        Amg::Vector2D chPos{Amg::Vector2D::Zero()};
         if (!channelPosition(pad, chPos)) return -10000.;
 
         if (!measPhi) return (pos.y() - chPos.y());
@@ -155,8 +156,8 @@ namespace MuonGM {
 
     inline double MuonPadDesign::channelWidth(const Amg::Vector2D& pos, bool measPhi, bool preciseMeas) const {
         // get Eta and Phi indices, and corner positions of given pad
-        std::pair<int, int> pad = channelNumber(pos);
-        std::vector<Amg::Vector2D> corners;
+        const std::pair<int, int>& pad = channelNumber(pos);
+        std::array<Amg::Vector2D,4> corners{make_array<Amg::Vector2D, 4>(Amg::Vector2D::Zero())};
         channelCorners(pad, corners);
 
         // For eta pad measurement, return height of given pad

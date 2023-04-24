@@ -33,12 +33,12 @@ namespace MuonPRDTest {
 
                 const MuonGM::sTgcReadoutElement* rdoEl = MuonDetMgr->getsTgcReadoutElement(Id);
                 if (!rdoEl) {
-                    ATH_MSG_ERROR("sTGCDigitVariables::fillVariables() - Failed to retrieve sTGCReadoutElement for "<<idHelperSvc()->stgcIdHelper().print_to_string(Id).c_str());
+                    ATH_MSG_ERROR("sTGCDigitVariables::fillVariables() - Failed to retrieve sTGCReadoutElement for "<<idHelperSvc()->toString(Id));
                     return false;
                 }
                 m_NSWsTGC_dig_id.push_back(Id);
-                Amg::Vector3D gpos{0., 0., 0.};
-                Amg::Vector2D lpos(0., 0.);
+                Amg::Vector3D gpos{Amg::Vector3D::Zero()};
+                Amg::Vector2D lpos(Amg::Vector2D::Zero());
 
                 rdoEl->stripPosition(Id, lpos);
                 rdoEl->surface(Id).localToGlobal(lpos, gpos, gpos);
@@ -48,19 +48,15 @@ namespace MuonPRDTest {
                 m_NSWsTGC_dig_localPosY.push_back(lpos.y());
                 
                 m_NSWsTGC_dig_channelNumber.push_back(rdoEl->stripNumber(lpos, Id));
-
-                std::vector<Amg::Vector2D> local_pad_corners;
-                rdoEl->padCorners(Id,local_pad_corners);
-                std::vector<Amg::Vector3D> global_pad_corners;
-
-                for(auto& local_corner : local_pad_corners) {
-                    Amg::Vector3D global_corner;
-                    rdoEl->surface(Id).localToGlobal(local_corner, global_corner, global_corner);
-                    global_pad_corners.push_back(global_corner);
-                }
-                for(auto corner : global_pad_corners) {
-                    if(idHelperSvc()->stgcIdHelper().channelType(Id) ==0 ) {
-                        m_NSWsTGC_dig_PadglobalCornerPos.push_back(corner);
+                if(idHelperSvc()->stgcIdHelper().channelType(Id) == sTgcIdHelper::Pad ) {
+        
+                    std::array<Amg::Vector2D, 4> local_pad_corners{make_array<Amg::Vector2D, 4>(Amg::Vector2D::Zero())};
+                    rdoEl->padCorners(Id,local_pad_corners);
+                 
+                    for(const Amg::Vector2D& local_corner : local_pad_corners) {
+                        Amg::Vector3D global_corner{Amg::Vector3D::Zero()};
+                        rdoEl->surface(Id).localToGlobal(local_corner, global_corner, global_corner);
+                        m_NSWsTGC_dig_PadglobalCornerPos.push_back(global_corner);
                     }
                 }
 
