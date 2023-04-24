@@ -105,7 +105,7 @@ StatusCode SUSYToolsAlg::initialize() {
 
   // read some of the property values (may have been autoconfigured at this point)
   m_mcCampaign = *(m_SUSYTools->getProperty<std::string>("mcCampaign"));
-  m_isPHYSLITE = *(m_SUSYTools->getProperty<bool>("isPHYSLITE"));
+  m_isPHYSLITE = *(m_SUSYTools->getProperty<bool>("IsPHYSLITE"));
 
 
   // Need truth matching for tau CP tools

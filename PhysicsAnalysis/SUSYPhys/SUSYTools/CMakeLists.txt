@@ -128,19 +128,23 @@ if( XAOD_STANDALONE )
    )
 else()
    atlas_add_test( ut_SUSYToolsAlg_data
-      SCRIPT "athena SUSYTools/jobOptions.py --filesInput /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools/DAOD_PHYS.data18_13TeV.00356250_p5511.pool.root --evtMax 500"
+      SCRIPT "athena SUSYTools/jobOptions.py --evtMax 500 - --testCampaign data18"
+      PROPERTIES TIMEOUT 300
       LOG_IGNORE_PATTERN ${extra_patterns}
    )
    atlas_add_test( ut_SUSYToolsAlg_data_Run3
-      SCRIPT "athena SUSYTools/jobOptions.py --filesInput /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools/DAOD_PHYS.data22_13p6TeV.00440543_p5514.pool.root --evtMax 500 - --configFile SUSYTools/SUSYTools_Default_Run3.conf"
+      SCRIPT "athena SUSYTools/jobOptions.py --evtMax 500 - --testCampaign data22"
+      PROPERTIES TIMEOUT 300
       LOG_IGNORE_PATTERN ${extra_patterns}
    )
    atlas_add_test( ut_SUSYToolsAlg_mc
-      SCRIPT "athena SUSYTools/jobOptions.py --filesInput /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools/DAOD_PHYS.mc20_13TeV.410470.FS_mc20e_p5511.PHYS.pool.root --evtMax 100 - --prwFiles dev/PileupReweighting/share/DSID410xxx/pileup_mc16e_dsid410470_FS.root --lumicalcFiles GoodRunsLists/data18_13TeV/20190318/ilumicalc_histograms_None_348885-364292_OflLumi-13TeV-010.root"
+      SCRIPT "athena SUSYTools/jobOptions.py --evtMax 100 - --prwFiles dev/PileupReweighting/share/DSID410xxx/pileup_mc16e_dsid410470_FS.root --testCampaign mc20e"
+      PROPERTIES TIMEOUT 300
       LOG_IGNORE_PATTERN ${extra_patterns}
    )
    atlas_add_test( ut_SUSYToolsAlg_mc_Run3
-      SCRIPT "athena SUSYTools/jobOptions.py --filesInput /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools/DAOD_PHYS.mc21_13p6TeV.601229.FS_mc21a_p5511.PHYS.pool.root --evtMax 100 - --prwFiles dev/PileupReweighting/share/DSID601xxx/pileup_mc21a_dsid601229_FS.root --lumicalcFiles GoodRunsLists/data22_13p6TeV/20230116/ilumicalc_histograms_None_431810-440613_OflLumi-Run3-002.root --configFile SUSYTools/SUSYTools_Default_Run3.conf --noSyst"
+      SCRIPT "athena SUSYTools/jobOptions.py --evtMax 100 - --prwFiles dev/PileupReweighting/share/DSID601xxx/pileup_mc21a_dsid601229_FS.root --testCampaign mc21a"
+      PROPERTIES TIMEOUT 300
       LOG_IGNORE_PATTERN ${extra_patterns}
    )
 endif()

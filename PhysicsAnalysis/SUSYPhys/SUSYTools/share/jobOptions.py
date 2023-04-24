@@ -10,6 +10,7 @@
 from AthenaCommon.AthArgumentParser import AthArgumentParser
 susyArgsParser = AthArgumentParser()
 susyArgsParser.add_argument("--testCampaign",action="store",default=None,choices=["mc20e","mc21a","data22","data18"],help="Specify to select a test campaign")
+susyArgsParser.add_argument("--testFormat",action="store",default="PHYS",choices=["PHYS","PHYSLITE"],help="Specify to select a test format")
 susyArgsParser.add_argument("--accessMode",action="store",choices=["POOLAccess","ClassAccess"],default="POOLAccess",help="xAOD read mode - Class is faster, POOL is more robust")
 susyArgsParser.add_argument("--configFile",action="store",default=None,help="Name of the SUSYTools config file, leave blank for auto-config")
 susyArgsParser.add_argument("--prwFiles",action="store",nargs="+",default=None,help="Name of prw files")
@@ -22,12 +23,14 @@ susyArgs = susyArgsParser.parse_args()
 if susyArgs.testCampaign:
     pTag = 'p5511' if susyArgs.testCampaign!='data22' else 'p5514'
     inputDir = '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools/'
-    inputFiles = {'data18' : f'DAOD_PHYS.data18_13TeV.00356250_{pTag}.pool.root',
-                  'data22' : f'DAOD_PHYS.data22_13p6TeV.430542.data22_{pTag}.PHYS.pool.root',
-                  'mc20e' : f'DAOD_PHYS.mc20_13TeV.410470.FS_mc20e_{pTag}.PHYS.pool.root',
-                  'mc21a': f'DAOD_PHYS.mc21_13p6TeV.601229.FS_mc21a_{pTag}.PHYS.pool.root'}
+    inputFiles = {}
+    inputFiles['data18'] = f'DAOD_{susyArgs.testFormat}.data18_13TeV.00356250_{pTag}.pool.root'
+    inputFiles['data22'] = f'DAOD_{susyArgs.testFormat}.data22_13p6TeV.00440543_{pTag}.pool.root'
+    inputFiles['mc20e']  = f'DAOD_{susyArgs.testFormat}.mc20_13TeV.410470.FS_mc20e_{pTag}.{susyArgs.testFormat}.pool.root'
+    inputFiles['mc21a']  = f'DAOD_{susyArgs.testFormat}.mc21_13p6TeV.601229.FS_mc21a_{pTag}.{susyArgs.testFormat}.pool.root'
     jps.AthenaCommonFlags.FilesInput = [f'{inputDir}/{inputFiles[susyArgs.testCampaign]}']
-    if susyArgs.fileOutput is None: susyArgs.fileOutput = f"monitoring.{susyArgs.testCampaign}.root"
+    if susyArgs.fileOutput is None: 
+        susyArgs.fileOutput = f"hist-Ath_{susyArgs.testCampaign}_DAOD_{susyArgs.testFormat}.root"
 
 # setup xAOD file reading
 jps.AthenaCommonFlags.AccessMode = susyArgs.accessMode
@@ -41,7 +44,8 @@ print("INFO: Outputting:",jps.AthenaCommonFlags.HistOutputs())
 from PyUtils import AthFile
 af = AthFile.fopen(jps.AthenaCommonFlags.FilesInput()[0])
 isMC = 'IS_SIMULATION' in af.fileinfos['evt_type']
-#isFastSim = isMC and ('ATLFASTII' in af.fileinfos['metadata']['/Simulation/Parameters']['SimulationFlavour'].upper()) #full sim or atlfast
+isFastSim = isMC and ('ATLFASTII' in af.fileinfos['metadata']['/Simulation/Parameters']['SimulationFlavour'].upper()) #full sim or atlfast
+print("INFO: Format: "," isMC: ",isMC," isFastSim: ",isFastSim)
 
 if isMC:
     campaignMap = {284500:"mc20a",300000:"mc20d",310000:"mc20e",410000:"mc21a"}
@@ -58,10 +62,16 @@ else:
         susyAlg.SUSYTools.ConfigFile = "SUSYTools/SUSYTools_Default_Run3.conf"   # run3
     else:
         susyAlg.SUSYTools.ConfigFile = "SUSYTools/SUSYTools_Default.conf"        # run2
+    if susyArgs.testFormat == "PHYSLITE":
+        STconfig_lite = str(susyAlg.SUSYTools.ConfigFile).replace(".conf","_LITE.conf")
+        susyAlg.SUSYTools.ConfigFile = STconfig_lite
+        susyAlg.SUSYTools.IsPHYSLITE = True
 
 print("INFO: Configuration file:",susyAlg.SUSYTools.ConfigFile)
 
-#susyAlg.SUSYTools.DataSource = int(isMC) + int(isFastSim) # 0 = data, 1 = mc, 2 = fastSim
+susyAlg.SUSYTools.DataSource = 0 if not isMC else (1 if not isFastSim else 2) # data/FS/atlfast
+
+print("INFO: Configuration SUSYTools.DataSource: ",susyAlg.SUSYTools.DataSource)
 
 if isMC:
     if susyArgs.prwFiles:
@@ -83,7 +93,6 @@ if isMC:
 
 # schedule alg:
 athAlgSeq += susyAlg
-
 
 include("AthAnalysisBaseComps/SuppressLogging.py")              #Optional include to suppress as much athena output as possible. Keep at bottom of joboptions so that it doesn't suppress the logging of the things you have configured above
 svcMgr+=CfgMgr.AthenaEventLoopMgr(IntervalInSeconds = 10,OutputLevel=INFO)  # print progress in fixed period intervals
