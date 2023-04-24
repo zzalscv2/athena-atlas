@@ -759,7 +759,7 @@ bool InDetV0FinderTool::d0Pass(const xAOD::TrackParticle* track1, const xAOD::Tr
     double sig_d0_1 = sqrt((*per1->covariance())(0,0));
     double d0_2 = per2->parameters()[Trk::d0];
     double sig_d0_2 = sqrt((*per2->covariance())(0,0));
-    if (fabs(d0_1/sig_d0_1) > m_d0_cut && fabs(d0_2/sig_d0_2) > m_d0_cut) pass = true; 
+    if (fabs(d0_1/sig_d0_1) > m_d0_cut && fabs(d0_2/sig_d0_2) > m_d0_cut) return true;
   }
   return pass;
 }
