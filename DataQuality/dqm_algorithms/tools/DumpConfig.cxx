@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <vector>
@@ -7,16 +7,24 @@
 
 using namespace std;
 
-dqm_algorithms::tools::DumpConfig::DumpConfig(std::string ParameterName,dqm_core::test::DummyAlgorithmConfig & config, std::string algorithmname, std::string histogramname,  std::string reffilename,std::string refhistogramname, float weight, std::string regionname){
-m_ParameterName=ParameterName;
- m_config=config;
- m_algorithmname=algorithmname;
- m_histogramname=histogramname;
- m_weight=weight;
- m_refhistogramname=refhistogramname;
- m_reffilename=reffilename;
- m_regionname=regionname;
- 
+dqm_algorithms::tools::DumpConfig::DumpConfig
+  (const std::string& ParameterName,
+   dqm_core::test::DummyAlgorithmConfig & config,
+   const std::string& algorithmname,
+   const std::string& histogramname,
+   const std::string& reffilename,
+   const std::string& refhistogramname,
+   float weight,
+   const std::string& regionname) :
+  m_ParameterName(ParameterName),
+  m_config(config),
+  m_regionname(regionname),
+  m_algorithmname(algorithmname),
+  m_histogramname(histogramname),
+  m_refhistogramname(refhistogramname),
+  m_reffilename(reffilename),
+  m_weight(weight)
+{
 }
 
 dqm_algorithms::tools::DumpConfig::~DumpConfig(){
@@ -74,7 +82,7 @@ m_myfile<<"</obj>\n";
 
 
 void 
-dqm_algorithms::tools::DumpConfig::WriteThresholdFromMap(std::map<std::string,double> object,std::string ParameterName,std::string Name){
+dqm_algorithms::tools::DumpConfig::WriteThresholdFromMap(const std::map<std::string,double>& object,const std::string& ParameterName,const std::string& Name){
   int objsize=object.size();
   char line[500];
 sprintf(line, "<rel name=\"%sThresholds\" num=\"%d\">\n", Name.c_str(),objsize);
@@ -151,7 +159,7 @@ dqm_algorithms::tools::DumpConfig::DumpParams(){
 
 
 void
-dqm_algorithms::tools::DumpConfig::DumpOnlineConfig(std::string filename, bool dumpAgent) {
+dqm_algorithms::tools::DumpConfig::DumpOnlineConfig(const std::string& filename, bool dumpAgent) {
   
   m_myfile.open(filename.c_str());
   //open file
@@ -251,7 +259,7 @@ m_myfile <<paramsline;
 }
 
 void
-dqm_algorithms::tools::DumpConfig::DumpOfflineConfig(std::string filename) {
+dqm_algorithms::tools::DumpConfig::DumpOfflineConfig(const std::string& filename) {
 
   m_myfile.open(filename.c_str());
 

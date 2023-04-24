@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-TestDivideReference()
+void TestDivideReference()
 {
   TH1F* hin = new TH1F("hin","hin",100,-1,1);
   hin->FillRandom("gaus",10000);

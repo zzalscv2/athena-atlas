@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-TestJarqueBera()
+void TestJarqueBera()
 {
 
     dqm_algorithms::JarqueBeraTest_Prob * algorithm = new dqm_algorithms::JarqueBeraTest_Prob();  
