@@ -167,7 +167,7 @@ def MuonCombinedTrackSummaryToolCfg(flags,
         from InDetConfig.InDetTrackHoleSearchConfig import CombinedMuonIDHoleSearchCfg
         atlasHoleSearchTool = result.popToolsAndMerge(
             CombinedMuonIDHoleSearchCfg(flags))
-        result.addPublicTool(atlasHoleSearchTool)
+        #result.addPublicTool(atlasHoleSearchTool)
         kwargs.setdefault("InDetSummaryHelperTool", result.popToolsAndMerge(
             AtlasTrackSummaryHelperToolCfg(
                 flags, name="CombinedMuonIDSummaryHelper",

@@ -29,7 +29,7 @@ def PanTauInputConverterCfg(flags, infoHandler):
     python_Tool_InputConverter  = PanTau__Tool_InputConverter("PanTau_InputConverter",
                                                               Tool_InformationStore = result.getPrimaryAndMerge(PanTauInformationStoreCfg(flags, infoHandler) ) )
 
-    result.addPublicTool(python_Tool_InputConverter, True)
+    result.setPrivateTools(python_Tool_InputConverter)
     return result
 
 def PanTauConstGetterCfg(flags, infoHandler):
@@ -39,7 +39,7 @@ def PanTauConstGetterCfg(flags, infoHandler):
     # ===> Tau Constituent Getter
     python_Tool_TauConstituentGetter = PanTau__Tool_TauConstituentGetter("PanTau_TauConstituentGetter",
                                                                          Tool_InformationStore = result.getPrimaryAndMerge(PanTauInformationStoreCfg(flags, infoHandler) ),
-                                                                         Tool_InputConverter   = result.getPrimaryAndMerge(PanTauInputConverterCfg(flags, infoHandler) ) )
+                                                                         Tool_InputConverter   = result.popToolsAndMerge(PanTauInputConverterCfg(flags, infoHandler) ) )
 
     result.addPublicTool(python_Tool_TauConstituentGetter, True)
     return result
