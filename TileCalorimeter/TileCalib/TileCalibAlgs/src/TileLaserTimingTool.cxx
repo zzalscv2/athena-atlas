@@ -839,7 +839,7 @@ StatusCode TileLaserTimingTool::writeNtuple(int runNumber, int runType, TFile* r
   // store histos 
   for (unsigned int ros = 1; ros < TileCalibUtils::MAX_ROS; ++ros) {
     for (unsigned int drawer = 0; drawer < TileCalibUtils::MAX_DRAWER; ++drawer) {
-      ATH_MSG_DEBUG( "writeNtuple() ros:" << ros << " drawer:" << drawer );
+      ATH_MSG_VERBOSE( "writeNtuple() ros:" << ros << " drawer:" << drawer );
 
       DrawerData* dd = drawerData(ros, drawer);
       if (dd) {

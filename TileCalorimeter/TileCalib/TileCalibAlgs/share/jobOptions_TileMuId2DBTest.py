@@ -3,6 +3,11 @@
 # File: TileCalibAlgs/jobOptions_TileMuId2DBTest.py
 #=============================================================
 
+#=== get user options or set default
+if not 'RUN' in dir():
+    RUN = 999999
+RunNumber = RUN
+
 import AthenaCommon.AtlasUnixGeneratorJob
 from AthenaCommon import CfgMgr
 from AthenaCommon.AppMgr import theApp
@@ -12,11 +17,14 @@ from AthenaCommon.AppMgr import ToolSvc
 #=============================================================
 # Global Flags
 #=============================================================
-from AthenaCommon.GlobalFlags import GlobalFlags
-GlobalFlags.DetGeo.set_commis()
-GlobalFlags.Luminosity.set_zero()
-GlobalFlags.DataSource.set_data()
-GlobalFlags.InputFormat.set_bytestream()    
+from AthenaCommon.GlobalFlags import globalflags
+globalflags.DetGeo.set_Value_and_Lock('atlas')
+globalflags.Luminosity.set_Value_and_Lock('zero')
+globalflags.DataSource.set_Value_and_Lock('data')
+globalflags.InputFormat.set_Value_and_Lock('bytestream')
+globalflags.DatabaseInstance="CONDBR2"
+
+TileUseDCS = False
 
 #=============================================================
 # Geometry setup
@@ -27,22 +35,18 @@ DetFlags.detdescr.Muon_setOff()
 DetFlags.detdescr.LAr_setOn()
 DetFlags.detdescr.Tile_setOn()
 
+#--- see https://atlas-geometry-db.web.cern.ch/atlas-geometry-db/
+#--- for the geometry updates
 from AthenaCommon.JobProperties import jobproperties
-jobproperties.Global.DetDescrVersion = "ATLAS-Comm-00-00-00"
-
+jobproperties.Global.DetDescrVersion = "ATLAS-R3S-2021-02-00-00"
 from AtlasGeoModel import SetGeometryVersion
 from AtlasGeoModel import GeoModelInit
-
-from AthenaCommon.AppMgr import ToolSvc
-from AthenaCommon.AlgSequence import AlgSequence
-
-topSequence = AlgSequence()
 
 #=============================================================
 # set global tag
 #=============================================================
 from IOVDbSvc.CondDB import conddb
-conddb.setGlobalTag('COMCOND-ES1C-000-00')
+conddb.setGlobalTag("CONDBR2-BLKPA-2023-01")
 
 #=============================================================
 # Add includes
@@ -63,15 +67,11 @@ CaloNoiseCondAlg ('totalNoise')
 #============================================================
 # Add TileMuId2DBAlg
 #============================================================
+from AthenaCommon.AlgSequence import AlgSequence
+topSequence = AlgSequence()
 from TileCalibAlgs.TileCalibAlgsConf import TileMuId2DBAlg
 theTileMuId2DBAlg = TileMuId2DBAlg("TileMuId2DBAlg")
 topSequence += theTileMuId2DBAlg
-
-#============================================================
-# Add to the job
-#============================================================
-from AthenaCommon.AlgSequence import AlgSequence
-job = AlgSequence()
 
 #============================================================
 # MessageSvc setup
@@ -82,7 +82,7 @@ MessageSvc.OutputLevel = INFO
 #============================================================
 # Dummy event loop setup
 #============================================================
-svcMgr.EventSelector.RunNumber         = 99999
+svcMgr.EventSelector.RunNumber         = RUN
 svcMgr.EventSelector.EventsPerRun      = 5
 svcMgr.EventSelector.FirstEvent        = 1
 svcMgr.EventSelector.EventsPerLB       = 5
@@ -94,5 +94,5 @@ theApp.EvtMax                          = 1
 #============================================================
 # Print out job summary
 #============================================================
-print svcMgr
-print job
+print(svcMgr)
+print(topSequence)
