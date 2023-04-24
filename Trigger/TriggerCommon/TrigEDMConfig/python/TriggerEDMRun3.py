@@ -89,12 +89,13 @@ JetCopyVarsToKeep = ['pt', 'eta', 'phi', 'm',
 
 FastFtagPFlowVarsToKeep = [f'dips20211116_p{x}' for x in 'cub']
 FastFtagPFlowVarsToKeep += [f'fastDIPS20211215_p{x}' for x in 'cub']
+FastFtagPFlowVarsToKeep += [f'GN120230331_p{x}' for x in 'cub']
 JetCopyVarsToKeep += FastFtagPFlowVarsToKeep
 JetCopyVars = '.'.join(JetCopyVarsToKeep)
 
 JetFastFTagVarsToKeep = JetCopyVarsToKeep
 JetFastFTagVarsToKeep += [f'fastDips_p{x}' for x in 'cub']
-JetFastFTagVarsToKeep += [f'fastGN120230130_p{x}' for x in 'cub']
+JetFastFTagVarsToKeep += [f'fastGN120230327_p{x}' for x in 'cub']
 JetFastFTagVars = '.'.join(JetFastFTagVarsToKeep)
 
 

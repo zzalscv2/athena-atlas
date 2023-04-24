@@ -119,7 +119,14 @@ def getFastFlavourTagging( flags, inputJets, inputVertex, inputTracks, isPFlow=F
                 {
                     'BTagTrackToJetAssociator': tracksOnJetDecoratorName,
                 },
-            ]
+            ],
+
+            [
+                'BTagging/20230331trig/gn1/antikt4empflow/network.onnx',
+                {
+                    'BTagTrackToJetAssociator': tracksOnJetDecoratorName,
+                },
+            ],
         ]
     else:
         dl2_configs=[
@@ -132,10 +139,10 @@ def getFastFlavourTagging( flags, inputJets, inputVertex, inputTracks, isPFlow=F
                 }
             ],
             [
-                'BTagging/20230130/FastGN1/antikt4empflow/fastGN1_20230130.onnx',
+                'BTagging/20230327trig/gn1/antikt4emtopo/network.onnx',
                 {
                     'BTagTrackToJetAssociator': tracksOnJetDecoratorName,
-                    **{f'GN120230130_p{x}': f'fastGN120230130_p{x}' for x in 'cub'},
+                    **{f'GN120230327_p{x}': f'fastGN120230327_p{x}' for x in 'cub'},
                     'btagIp_': trackIpPrefix,
                 }
             ]
