@@ -371,7 +371,6 @@ def getDevSignatures():
         # with HT leg at the HLT
         # + ht preselection
         ChainProp(name='HLT_j0_HT500XX0eta240_pf_ftf_preselcHT450_L1HT190-J15s5pETA21', l1SeedThresholds=['FSNOSEED'], groups=DevGroup+MultiJetGroup+LegacyTopoGroup),
-        ChainProp(name='HLT_j0_HT650XX0eta240_pf_ftf_preselcHT450_L1HT190-J15s5pETA21', l1SeedThresholds=['FSNOSEED'], groups=DevGroup+MultiJetGroup+LegacyTopoGroup),
         ChainProp(name='HLT_j0_HT850XX0eta240_pf_ftf_preselcHT450_L1HT190-J15s5pETA21', l1SeedThresholds=['FSNOSEED'], groups=DevGroup+MultiJetGroup+LegacyTopoGroup),
         # + jet preselection
         ChainProp(name='HLT_j0_HT850XX0eta240_pf_ftf_preselj180_L1HT190-J15s5pETA21', l1SeedThresholds=['FSNOSEED'], groups=DevGroup+MultiJetGroup+LegacyTopoGroup),
