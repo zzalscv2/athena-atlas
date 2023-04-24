@@ -227,34 +227,37 @@ def fatrasSimHitCreatorMSCfg(flags, name="ISF_FatrasSimHitCreatorMS", **kwargs):
                                                                region)
     result.merge(tgc_result)
 
-    csc_bare_collection_name="CSC_Hits"
-    csc_merger_input_property="CSCHits"
-    csc_result, csc_hits_collection_name = CollectionMergerCfg(flags,
-                                                               csc_bare_collection_name,
-                                                               mergeable_collection_suffix,
-                                                               csc_merger_input_property,
-                                                               region)
+    csc_hits_collection_name = ""
     if flags.Detector.EnableCSC:
+        csc_bare_collection_name="CSC_Hits"
+        csc_merger_input_property="CSCHits"
+        csc_result, csc_hits_collection_name = CollectionMergerCfg(flags,
+                                                                   csc_bare_collection_name,
+                                                                   mergeable_collection_suffix,
+                                                                   csc_merger_input_property,
+                                                                   region)
         result.merge(csc_result)
 
-    stgc_bare_collection_name="sTGC_Hits"
-    stgc_merger_input_property="sTGCHits"
-    stgc_result, stgc_hits_collection_name = CollectionMergerCfg(flags,
-                                                                 stgc_bare_collection_name,
-                                                                 mergeable_collection_suffix,
-                                                                 stgc_merger_input_property,
-                                                                 region)
+    stgc_hits_collection_name = ""
     if flags.Detector.EnablesTGC:
+        stgc_bare_collection_name="sTGC_Hits"
+        stgc_merger_input_property="sTGCHits"
+        stgc_result, stgc_hits_collection_name = CollectionMergerCfg(flags,
+                                                                     stgc_bare_collection_name,
+                                                                     mergeable_collection_suffix,
+                                                                     stgc_merger_input_property,
+                                                                     region)
         result.merge(stgc_result)
 
-    mm_bare_collection_name="MM_Hits"
-    mm_merger_input_property="MMHits"
-    mm_result, mm_hits_collection_name = CollectionMergerCfg(flags,
-                                                             mm_bare_collection_name,
-                                                             mergeable_collection_suffix,
-                                                             mm_merger_input_property,
-                                                             region)
+    mm_hits_collection_name = ""
     if flags.Detector.EnableMM:
+        mm_bare_collection_name="MM_Hits"
+        mm_merger_input_property="MMHits"
+        mm_result, mm_hits_collection_name = CollectionMergerCfg(flags,
+                                                                 mm_bare_collection_name,
+                                                                 mergeable_collection_suffix,
+                                                                 mm_merger_input_property,
+                                                                 region)
         result.merge(mm_result)
 
     kwargs.setdefault("RandomNumberService", result.getPrimaryAndMerge(FatrasRndSvcCfg(flags)).name)
