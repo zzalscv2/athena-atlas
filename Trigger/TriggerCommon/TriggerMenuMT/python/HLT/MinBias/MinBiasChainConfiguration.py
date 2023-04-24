@@ -4,7 +4,7 @@ from AthenaCommon.Logging import logging
 logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger( __name__ )
 
-from TriggerMenuMT.HLT.Config.MenuComponents import EmptyMenuSequence
+from TriggerMenuMT.HLT.Config.MenuComponents import EmptyMenuSequence, EmptyMenuSequenceCA
 from TriggerMenuMT.HLT.Config.ChainConfigurationBase import ChainConfigurationBase
 from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 
@@ -69,6 +69,12 @@ class MinBiasChainConfig(ChainConfigurationBase):
         if isComponentAccumulatorCfg():
             if "mbts" == self.chainPart['recoAlg'][0] or "mbts" in self.chainName:
                 steps.append(self.getStep(flags,1,'Mbts',[MinBiasMbtsSequenceCfg]))
+            else:
+                steps.append(self.getStep(flags,1,'EmptyMbts',[lambda flags: EmptyMenuSequenceCA("EmptyMbts") ]))
+
+            if self.chainPart['recoAlg'][0] in ['sp', 'sptrk', 'hmt', 'excl']:
+                steps.append(self.getStep(flags,2,'SPCount',[MinBiasSPSequenceCfg]))
+
         else:
 
             if "mbts" == self.chainPart['recoAlg'][0] or "mbts" in self.chainName:
