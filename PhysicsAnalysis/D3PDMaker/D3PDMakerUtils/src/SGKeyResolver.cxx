@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file D3PDMakerUtils/src/SGKeyResolver.cxx
@@ -24,7 +24,7 @@ namespace D3PD {
  * @param sg The event store service.
  * @param sgkey The property of the requested key.
  */
-SGKeyResolver::SGKeyResolver (std::string name,
+SGKeyResolver::SGKeyResolver (const std::string& name,
                               ServiceHandle<StoreGateSvc>& sg,
                               std::string& sgkey)
   : m_name (name),
@@ -41,7 +41,7 @@ SGKeyResolver::SGKeyResolver (std::string name,
  * @param clid The CLID of the desired object.
  * @param typname The name of the desired type.
  */
-StatusCode SGKeyResolver::initialize (CLID clid, std::string typname)
+StatusCode SGKeyResolver::initialize (CLID clid, const std::string& typname)
 {
   m_clid = clid;
   m_typname = typname;

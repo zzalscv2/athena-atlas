@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -9,6 +9,7 @@
 // Gaudi/Athena include(s):
 #include "GaudiKernel/System.h"
 #include "AthenaKernel/errorcheck.h"
+#include "CxxUtils/starts_with.h"
 
 // Local include(s):
 #include "D3PDMakerUtils/ObjectMetadata.h"
@@ -113,8 +114,9 @@ namespace D3PD {
                                            const void* /*defval*/ ) {
 
       // Check that the variable has the correct prefix:
-      if( ( m_prefix != "" ) &&
-          ( name.find( m_prefix ) != 0 ) ) {
+      if( m_prefix != "" &&
+          !CxxUtils::starts_with (name, m_prefix) )
+      {
          REPORT_MESSAGE_WITH_CONTEXT( MSG::ERROR, "ObjectMetadata" )
             << "Specified variable name (" << name << ") doesn't have the "
             << "expected prefix (" << m_prefix << ")";

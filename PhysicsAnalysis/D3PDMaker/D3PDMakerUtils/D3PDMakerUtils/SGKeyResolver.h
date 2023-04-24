@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file D3PDMakerUtils/SGKeyResolver.h
  * @author scott snyder <snyder@bnl.gov>
@@ -48,7 +45,7 @@ public:
    * @param sg The event store service.
    * @param sgkey The property of the requested key.
    */
-  SGKeyResolver (std::string name,
+  SGKeyResolver (const std::string& name,
                  ServiceHandle<StoreGateSvc>& sg,
                  std::string& sgkey);
 
@@ -58,7 +55,7 @@ public:
    * @param clid The CLID of the desired type.
    * @param typename The name of the desired type.
    */
-  StatusCode initialize (CLID clid, std::string typname);
+  StatusCode initialize (CLID clid, const std::string& typname);
 
 
   /**
