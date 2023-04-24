@@ -11,31 +11,31 @@
 
 //#include <cmath>
 
-/** This is a plugin that makes Eigen look like CLHEP 
+/** This is a plugin that makes Eigen look like CLHEP
   & defines some convenience methods */
-    
+
     // ------- Methods for 3D vector type objects ---------------------- //
-    
+
     /** unit method - forward normalized() */
     inline const PlainObject unit() const {
         return (*this).normalized();
     }
-    
-    /** mag method - forward to norm() */
-    inline Scalar mag() const {
-        return (*this).norm();
-    } //slow method with safeguards, new methods are in SymmetricMatrixHelpers.h 
 
-    /** mag2 method - forward to norm() */
+    /** mag method  */
+    inline Scalar mag() const {
+      return (*this).norm();
+    }
+
+    /** mag2 method - forward to squaredNorm() */
     inline Scalar mag2() const {
         return (*this).squaredNorm();
     }
-    
-    /** perp method - perpenticular length */ 
+
+    /** perp method - perpenticular length */
     inline Scalar perp() const {
         if (this->rows() < 2) return 0.;
         return std::sqrt( (*this)[0]*(*this)[0]+(*this)[1]*(*this)[1] );
-    } 
+    }
 
     /** perp2 method - perpendicular length squared */
     inline Scalar perp2() const {
@@ -60,14 +60,14 @@
     inline Scalar phi() const {
         if (this->rows() < 2) return 0.;
         return std::atan2((*this)[1],(*this)[0]);
-    } 
-    
+    }
+
     /** theta method */
     inline Scalar theta() const {
         if (this->rows() < 3) return 0.;
         return std::atan2(std::sqrt((*this)[0]*(*this)[0]+(*this)[1]*(*this)[1]),(*this)[2]);
-    } 
-    
+    }
+
     /** pseudorapidity  method */
     inline Scalar eta() const {
         EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(MatrixBase, 3)
