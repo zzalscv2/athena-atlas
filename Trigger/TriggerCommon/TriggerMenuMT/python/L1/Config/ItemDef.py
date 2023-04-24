@@ -173,6 +173,8 @@ class ItemDef:
         MenuItem('L1_EM22'    ).setLogic( d.EM22     & physcond).setTriggerType( TT.calo )
 
         # Phase-I
+        MenuItem('L1_eEM1'      ).setLogic( d.eEM1       & physcond).setTriggerType( TT.calo )
+        MenuItem('L1_eEM2'      ).setLogic( d.eEM2       & physcond).setTriggerType( TT.calo )
         MenuItem('L1_eEM5'      ).setLogic( d.eEM5       & physcond).setTriggerType( TT.calo )
         MenuItem('L1_eEM7'      ).setLogic( d.eEM7       & physcond).setTriggerType( TT.calo )
         MenuItem('L1_eEM9'      ).setLogic( d.eEM9       & physcond).setTriggerType( TT.calo )
