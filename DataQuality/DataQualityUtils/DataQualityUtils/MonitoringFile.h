@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef dqutilsMonitoringFile_h
@@ -22,6 +22,8 @@
 // good enough for CINT
 namespace std { class regex; }
 #endif
+
+#include "CxxUtils/checker_macros.h"
 
 class TDirectory;
 class TFile;
@@ -49,7 +51,7 @@ namespace dqutils {
   typedef std::map<std::string, std::vector<int> > keycyclemap;
   void populateKeyMapping(TDirectory*, keycyclemap&);
 
-  class MonitoringFile : public TObject {
+  class ATLAS_NOT_THREAD_SAFE MonitoringFile : public TObject {
   public:
 
     struct MetaData {
@@ -198,7 +200,7 @@ namespace dqutils {
     static void MDTvsTGCEfficiency(const std::string & inFilename);
     static void MDTvsTGCResetContents(TH1* h);
 
-    class PostProcessorFileWrapper : public TFile { //class to keep keep track of histograms we collect
+    class ATLAS_NOT_THREAD_SAFE PostProcessorFileWrapper : public TFile { //class to keep keep track of histograms we collect
     public:
       PostProcessorFileWrapper(const std::string & inFilename, const std::string & name);
       ~PostProcessorFileWrapper(); //delete all objects accessed from the TFile whose SetDirectory(0)
