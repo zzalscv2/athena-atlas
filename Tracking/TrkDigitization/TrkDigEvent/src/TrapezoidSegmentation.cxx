@@ -63,7 +63,7 @@ void Trk::TrapezoidSegmentation::createSegmenationSurfaces(std::vector< std::sha
     Amg::Transform3D readoutPlaneTransform(Amg::Transform3D::Identity());
     Amg::Transform3D counterPlaneTransform(Amg::Transform3D::Identity());
     // readout and counter readout bounds, the bounds of the readout plane are like the active ones
-    Trk::SharedObject<const Trk::SurfaceBounds> readoutPlaneBounds = moduleBounds;
+    const Trk::SharedObject<const Trk::SurfaceBounds>& readoutPlaneBounds = moduleBounds;
     Trk::SharedObject<const Trk::SurfaceBounds> counterPlaneBounds(nullptr);
     // the transform of the readout plane is always centric
     readoutPlaneTransform.translation()     = Amg::Vector3D(0.,0.,readoutDirection*halfThickness);
