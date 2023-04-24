@@ -116,12 +116,12 @@ class ThresholdDef:
         NSWMonThreshold('NSWMon')
 
         # eEM
-        eEM_cuts = [5, 7, 9, 15, 18, 26]
+        eEM_cuts = [1, 2, 5, 7, 9, 15, 18, 26]
         for thrV in eEM_cuts:
             eEMThreshold('eEM%i' %thrV, 'eEM').addThrValue(get_threshold_cut('eEM',thrV))
 
         # eEM SPARES
-        for thrV in range(1,9):
+        for thrV in range(1,7):
             eEMThreshold('eEMSPARE%i' % thrV, 'eEM').addThrValue(thrVal_SPARE)
 
         # L section (used to be VH in Run2)

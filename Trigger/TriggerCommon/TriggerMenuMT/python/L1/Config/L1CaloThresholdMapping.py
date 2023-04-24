@@ -10,6 +10,9 @@
 
 threshold_mapping = {
     'eEM': { # TODO: Update when eFEX EM calibrations are applied
+        # TODO: 3 is assigined to eEM1 and eEM2 to avoid checkPtMinToTopo error, to be updated when ptMinToTopo can be changed for HI menu
+        1:3,
+        2:3,
         5:4,
         7:6,
         9:8,
