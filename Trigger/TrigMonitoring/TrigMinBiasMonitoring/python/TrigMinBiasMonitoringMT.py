@@ -9,18 +9,20 @@ from TrigMinBiasMonitoring.TrigMBTSMonitoringMT import TrigMBTS
 from TrigMinBiasMonitoring.TrigSPTRKMonitoringMT import TrigSPTRK
 from TrigMinBiasMonitoring.TrigMinBiasEffMonitoring import TrigMinBiasEff
 from TrigMinBiasMonitoring.TrigAFPSidHypoMonitoring import TrigAFPSidHypoMonitoring
+from TrigMinBiasMonitoring.TrigFwdAFPMonitoring import TrigFwdAFPAllMonitoringCfg
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import BeamType
 
 
-def TrigMinBias(configFlags):
+def TrigMinBias(flags):
     acc = ComponentAccumulator()
-    acc.merge(TrigMBTS(configFlags))
-    if configFlags.Beam.Type is not BeamType.Cosmics:
-        acc.merge(TrigSPTRK(configFlags))
-        acc.merge(TrigMinBiasEff(configFlags))
-        acc.merge(TrigAFPSidHypoMonitoring(configFlags))
+    acc.merge(TrigMBTS(flags))
+    if flags.Beam.Type is not BeamType.Cosmics:
+        acc.merge(TrigSPTRK(flags))
+        acc.merge(TrigMinBiasEff(flags))
+        acc.merge(TrigAFPSidHypoMonitoring(flags))
+        acc.merge(TrigFwdAFPAllMonitoringCfg(flags))
     return acc
 
 
