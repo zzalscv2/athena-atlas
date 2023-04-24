@@ -7,24 +7,13 @@
 
 #include <vector>
 #include <string>
-#include "TVector3.h"
+#include "TLorentzVector.h"
 
 #include "xAODTracking/VertexContainer.h"
-#include "xAODTracking/VertexAuxContainer.h"
 #include "xAODBPhys/BPhysHelper.h"
-#include "xAODBPhys/BPhysHypoHelper.h"
-#include "TrkVertexAnalysisUtils/V0Tools.h"
 
-//#include "IsolationTool/CaloIsolationTool.h"
-//#include "IsolationTool/TrackIsolationTool.h"
-#include "RecoToolInterfaces/ITrackIsolationTool.h"
 #include "xAODPrimitives/IsolationHelpers.h"  //For the definition of Iso::conesize
 
-//#include "IsolationTool/IsolationHelper.h"
-//#include "InDetTrackSelectionTool/InDetTrackSelectionTool.h"
-
-
-//#include "Identifier/Identifier32.h"
 using namespace std;
 namespace DerivationFramework {
 
@@ -37,11 +26,10 @@ namespace DerivationFramework {
     m_vertexContainerName("NONE"),
     m_cones(),
     m_vertexType(7),
-    
     m_doIsoPerTrk(false),
     m_removeDuplicate(2)
   {
-        ATH_MSG_DEBUG("in constructor");
+    ATH_MSG_DEBUG("in constructor");
     declareInterface<DerivationFramework::IAugmentationTool>(this);
     
     // Declare tools                      
@@ -64,7 +52,6 @@ namespace DerivationFramework {
   
     ATH_MSG_DEBUG("in initialize()");
  
-    // retrieve TrackIsolationTool
     CHECK( m_trackIsoTool.retrieve() );
     
     //Check that flags were given to tag the correct vertices
@@ -97,7 +84,8 @@ namespace DerivationFramework {
 
   // check if the two vertices are composed of the same set of tracks
   bool VertexTrackIsolation::isSame(const xAOD::Vertex* theVtx1, const xAOD::Vertex* theVtx2) const {
-    if(!theVtx1 || !theVtx2) return false;
+    assert(theVtx1);
+    assert(theVtx2);
     if(theVtx1==theVtx2) return true;
     if(theVtx1->nTrackParticles() != theVtx2->nTrackParticles()) return false;
 
@@ -149,14 +137,12 @@ namespace DerivationFramework {
 
     //Convert m_cones (done per-event to avoid needing extra public dependency)
 
-    std::vector<xAOD::Iso::IsolationType> cones; cones.resize(m_cones.size());
+    std::vector<xAOD::Iso::IsolationType> cones(m_cones.size());
 
     for (unsigned int i =0; i< m_cones.size(); i++)
     	cones[i] = xAOD::Iso::IsolationType(m_cones[i]);
-    //for(unsigned int cone : m_cones)
-    //	cones.push_back(xAOD::Iso::IsolationType(cone));
 
-    ATH_MSG_DEBUG("The provided IsolationTypes are re-ordered internally");
+    //The provided IsolationTypes are re-ordered internally
     std::sort(cones.begin(),cones.end(),[](xAOD::Iso::IsolationType i, xAOD::Iso::IsolationType j) { return xAOD::Iso::coneSize(i) > xAOD::Iso::coneSize(j); } );
 
     //	loop over vertices
@@ -172,7 +158,7 @@ namespace DerivationFramework {
       } // end of loop over flags
       if(passed){
 	        if(!m_doIsoPerTrk) { // for legacy
-		  if(vertex->trackParticleLinks().size() != 3)ATH_MSG_WARNING("Vertex without 3 tracks, it has "<< vertex->trackParticleLinks().size() <<" instead");
+		   //Retired warning message was here
 		}
 		else {
 		  if(m_removeDuplicate) {
@@ -185,7 +171,7 @@ namespace DerivationFramework {
 
 		std::set<const xAOD::TrackParticle*> exclusionset;
 
-		for(auto part : vertex->trackParticleLinks()){ //Loop over tracks linked to vertex
+		for(const auto &part : vertex->trackParticleLinks()){ //Loop over tracks linked to vertex
 			candidate += (*part)->p4();
 			exclusionset.insert( *part ); //If it crashes use the direct TP from the vertex
 		}
@@ -203,7 +189,7 @@ namespace DerivationFramework {
 		corrlist.trackbitset.set(static_cast<unsigned int>(xAOD::Iso::coreTrackPtr));
 
 
-		string vtxType_name[3] = {"SumPt", "A0", "Z0"};
+		const string vtxType_name[3] = {"SumPt", "A0", "Z0"};
 
 		xAOD::BPhysHelper vertex_h(vertex); //Use the BPhysHelper to access vertex quantities
 
@@ -213,19 +199,10 @@ namespace DerivationFramework {
 
 			if((m_vertexType & (1 << vertex_type ) ) == 0)continue; //Stop if the type of vertex is not required
 
-
-			//if(debug should go outside!!!)
-
 			ATH_MSG_DEBUG("List of cone types" );
-
-
-					for(unsigned int i =0; i < cones.size(); i++){
-
-						ATH_MSG_DEBUG("cone type = "<< 	xAOD::Iso::toString(xAOD::Iso::IsolationType(cones[i])) );
-					//	ATH_MSG_DEBUG("isolation value "<< vtxType_name[vertex_type] << " = "<< result.ptcones[i] );
-					//	ATH_MSG_DEBUG("isolation value "<<vtxType_name[vertex_type] <<" = "<< result.ptcones[i] );
-					}
-
+			for(unsigned int i =0; i < cones.size(); i++){
+				ATH_MSG_DEBUG("cone type = "<< 	xAOD::Iso::toString(xAOD::Iso::IsolationType(cones[i])) );
+			}
 
 
 			const xAOD::Vertex* refVtx = vertex_h.pv( static_cast<xAOD::BPhysHelper::pv_type>(vertex_type) ); //Fix the cast
@@ -239,9 +216,7 @@ namespace DerivationFramework {
 			  //Decorate the vertex with all the isolation values
 			  for(unsigned int i =0; i < cones.size(); i++){
 
-				string variableName;
-
-				variableName = xAOD::Iso::toString(xAOD::Iso::IsolationType(cones[i]));
+				string variableName= xAOD::Iso::toString(xAOD::Iso::IsolationType(cones[i]));
 				variableName += vtxType_name[vertex_type];
 
 				SG::AuxElement::Decorator<float> isolation(variableName);
@@ -254,9 +229,10 @@ namespace DerivationFramework {
 			    m_trackIsoTool->trackIsolation(result, *vertex->trackParticle(i), cones, corrlist, refVtx, &exclusionset, idTrackParticleContainer);
 
 			    for(unsigned int j =0; j < cones.size(); j++) {
-			      string variableName;
-			      variableName = xAOD::Iso::toString(xAOD::Iso::IsolationType(cones[j]));
-			      variableName += vtxType_name[vertex_type] + "_trk" + std::to_string(i+1);
+			      string variableName = xAOD::Iso::toString(xAOD::Iso::IsolationType(cones[j]));
+                  variableName += vtxType_name[vertex_type];
+                  variableName += "_trk";
+                  variableName += std::to_string(i+1);
 			      SG::AuxElement::Decorator<float> isolation(variableName);
 			      isolation(*vertex) = result.ptcones[j];
 			    }
