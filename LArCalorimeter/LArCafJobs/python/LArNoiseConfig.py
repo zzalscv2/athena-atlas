@@ -61,7 +61,6 @@ def LArNoiseCfg(flags):
 def LArNoiseFromRawCfg(flags):
 
     result=ComponentAccumulator()
-    result.debugMode = "trackCA trackEventAlgo"
 
     from LArByteStream.LArRawDataReadingConfig import LArRawDataReadingCfg
     result.merge(LArRawDataReadingCfg(flags))
