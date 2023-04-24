@@ -1,5 +1,5 @@
 /*
-        Copyright (C) 2019-2022 CERN for the benefit of the ATLAS collaboration
+        Copyright (C) 2019-2023 CERN for the benefit of the ATLAS collaboration
 */
 // Author: Neza Ribaric <neza.ribaric@cern.ch>
 
@@ -12,7 +12,7 @@
                 information : Tool for Secondary Vertex Finding using AdaptiveMultivertexFitter and InDetTrackSelection
  ***************************************************************************/
 
-#include "Root/InDetAdaptiveMultiSecVtxFinderTool.h"
+#include "InDetAdaptiveMultiSecVtxFinderTool.h"
 
 #include <map>
 #include <utility>
@@ -61,11 +61,8 @@ namespace InDet {
         /* Get the right vertex fitting tool from ToolSvc */
         ATH_CHECK(m_VertexFitter.retrieve());
         ATH_CHECK(m_SeedFinder.retrieve());
-        ATH_CHECK(m_LinearizedTrackFactory.retrieve());
         ATH_CHECK(m_ImpactPoint3dEstimator.retrieve());
         ATH_CHECK(m_trkFilter.retrieve());
-
-        m_seedperigees = new std::vector<Trk::TrackParameters*>();
 
         ATH_MSG_DEBUG("Initialization successful");
         return StatusCode::SUCCESS;
@@ -84,12 +81,9 @@ namespace InDet {
         const xAOD::TrackParticleContainer* trackParticles) {
         ATH_MSG_DEBUG(" Number of input tracks before track selection: " << trackParticles->size());
 
-        m_evtNum++;
-
         std::vector<Trk::ITrackLink*> selectedTracks;
         bool selectionPassed;
         xAOD::TrackParticle::Decorator<bool> trackPass("TrackPassedSelection");
-        m_trkdefiPars.clear();
 
         for (const xAOD::TrackParticle* itr : *trackParticles) {
             xAOD::Vertex null;
@@ -99,14 +93,13 @@ namespace InDet {
             vertexError.setZero();
             null.setCovariancePosition(vertexError);
             selectionPassed = static_cast<bool>(m_trkFilter->accept(*itr, &null));
-            if (selectionPassed) selectionPassed = static_cast<bool>(m_trkFilter->accept(*itr, &null));
+            if (selectionPassed) selectionPassed = static_cast<bool>(m_SVtrkFilter->accept(*itr, &null));
 
             if (selectionPassed) {
                 trackPass(*itr) = true;
 
                 Amg::VectorX par = (itr)->definingParameters();
                 par[0] = (itr)->hitPattern();
-                m_trkdefiPars.push_back(par);
 
                 ElementLink<xAOD::TrackParticleContainer> link;
                 link.setElement(itr);
@@ -272,9 +265,9 @@ namespace InDet {
             }
 
             ATH_MSG_DEBUG("Checking goodness of fit.");
-            m_goodVertex = checkFit(actualCandidate);
+            bool goodVertex = checkFit(actualCandidate);
 
-            if (!m_goodVertex) {
+            if (!goodVertex) {
                 ATH_MSG_DEBUG("Bad vertex, deleting the vertex and clearing all pointers");
 
                 seededxAODVertex->setVertexType(xAOD::VxType::KinkVtx);
@@ -485,22 +478,19 @@ namespace InDet {
     }
 
     bool InDetAdaptiveMultiSecVtxFinderTool::checkFit(xAOD::Vertex* actualCandidate) const {
-        m_ntracks = 0;
-        m_ndf = -3.;
-        m_ndf = actualCandidate->numberDoF();
+        int ntracks = 0;
+        float ndf = actualCandidate->numberDoF();
 
         static const xAOD::Vertex::Decorator<std::vector<Trk::VxTrackAtVertex*>> VTAV("VTAV");
 
         for (Trk::VxTrackAtVertex* trkAtVtxIter : VTAV(*actualCandidate)) {
-            if ((trkAtVtxIter)->weight() > m_minWghtAtVtx) { m_ntracks += 1; }
+            if ((trkAtVtxIter)->weight() > m_minWghtAtVtx) { ntracks += 1; }
         }
 
-        m_goodVertex = actualCandidate != 0 && m_ndf > 0 && m_ntracks >= 2;
+        ATH_MSG_DEBUG(" xAOD::Vertex : " << (actualCandidate != 0 ? 1 : 0) << ",  #dof = " << ndf
+                                         << ",  #tracks (weight>0.01) = " << ntracks);
 
-        ATH_MSG_DEBUG(" xAOD::Vertex : " << (actualCandidate != 0 ? 1 : 0) << ",  #dof = " << m_ndf
-                                         << ",  #tracks (weight>0.01) = " << m_ntracks);
-
-        return m_goodVertex;
+        return (actualCandidate != 0 && ndf > 0 && ntracks >= 2);
     }
 
     int InDetAdaptiveMultiSecVtxFinderTool::removeTracksFromSeeds(xAOD::Vertex* actualCandidate,
@@ -510,13 +500,15 @@ namespace InDet {
         std::vector<Trk::ITrackLink*>::iterator seedBegin = seedTracks.begin();
         std::vector<Trk::ITrackLink*>::iterator seedEnd = seedTracks.end();
 
-        m_goodVertex = checkFit(actualCandidate);
+        bool goodVertex = checkFit(actualCandidate);
 
         int nFound = 0;
 
         for (Trk::VxTrackAtVertex* trkAtVtxIter : VTAV(*actualCandidate)) {
             // delete the pointer to this vertex if the vertex was bad
-            if (!m_goodVertex) { (static_cast<Trk::MVFVxTrackAtVertex*>(trkAtVtxIter))->linkToVertices()->vertices()->pop_back(); }
+            if (!goodVertex) {
+	      (static_cast<Trk::MVFVxTrackAtVertex*>(trkAtVtxIter))->linkToVertices()->vertices()->pop_back();
+	    }
 
             std::vector<Trk::ITrackLink*>::iterator foundTrack = seedEnd;
             for (std::vector<Trk::ITrackLink*>::iterator seedtrkiter = seedBegin; seedtrkiter != seedEnd; ++seedtrkiter) {

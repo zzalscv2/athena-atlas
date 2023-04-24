@@ -95,22 +95,13 @@ namespace InDet {
         
         ToolHandle<Trk::IVertexSeedFinder> m_SeedFinder{this, "SeedFinder", "Trk::IndexedCrossDistancesSeedFinder", "Seed finder"};
         ToolHandle<Trk::IImpactPoint3dEstimator> m_ImpactPoint3dEstimator{this, "ImpactPoint3dEstimator", "Trk::ImpactPoint3dEstimator", "Impact point estimator"};
-        ToolHandle<Trk::IVertexLinearizedTrackFactory> m_LinearizedTrackFactory{this, "LinearizedTrackFactory", "InDet::LinearizedTrackFactory", "Linearized track factory"};
-
 
         // declareInterface<IAdaptiveMultiSecVertexFinder>(this);
         FloatProperty m_privtxRef{this, "MomentumProjectionOnDirection", -999999.9, "pri vtx ref"};
         DoubleProperty m_significanceCutSeeding{this, "significanceCutSeeding", 10, "significanceCutSeeding"};
         DoubleProperty m_minWghtAtVtx{this, "minTrackWeightAtVtx", 0., "minTrackWeightAtVtx"};
         DoubleProperty m_maxIterations{this, "maxVertices", 25, "max iterations"};
-        LongProperty m_evtNum{this, "eventNum", 0, "event number"};
-
-        std::vector<Trk::TrackParameters*>* m_seedperigees{};
         Amg::Vector3D m_privtx;
-        mutable std::vector<Amg::VectorX> m_trkdefiPars;
-        mutable int m_ntracks{};
-        mutable bool m_goodVertex{};
-        mutable float m_ndf{};
 
     };  // end of class definitions
 }  // namespace InDet

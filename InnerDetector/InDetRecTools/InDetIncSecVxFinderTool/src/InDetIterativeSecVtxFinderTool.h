@@ -171,8 +171,6 @@ public:
    Gaudi::Property<bool> m_doMaxTracksCut{this, "doMaxTracksCut", false, ""}; 
    Gaudi::Property<unsigned int> m_maxTracks{this, "MaxTracks", 5000,""};
 
-   std::vector<const Trk::TrackParameters*> * m_seedperigees{};
-
    void SGError(const std::string& errService);
 
    virtual void printParameterSettings();
@@ -198,7 +196,6 @@ public:
 
    mutable float m_v0mass{}, m_v0ee{}, m_dir{}, m_ndf{}, m_hif{} ;
    mutable int m_ntracks{} ;
-   mutable bool m_goodVertex{} ;
    mutable std::vector< Amg::VectorX > m_trkdefiPars ;
 
  };//end of class definitions
