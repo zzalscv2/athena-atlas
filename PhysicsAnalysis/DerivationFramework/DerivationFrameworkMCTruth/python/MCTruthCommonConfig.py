@@ -29,7 +29,7 @@ def HepMCtoXAODTruthCfg(flags):
     isEVNT = False
 
     # Ensure EventInfoCnvAlg is scheduled
-    if "EventInfo#EventInfo" in flags.Input.TypedCollections and "xAOD::EventInfo#EventInfo" not in flags.Input.TypedCollections:
+    if "EventInfo#McEventInfo" in flags.Input.TypedCollections and "xAOD::EventInfo#EventInfo" not in flags.Input.TypedCollections:
         from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
         acc.merge(EventInfoCnvAlgCfg(flags, inputKey="McEventInfo", outputKey="EventInfo", disableBeamSpot=True))
 
