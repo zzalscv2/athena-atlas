@@ -330,14 +330,13 @@ namespace ActsTrk
       std::visit([&](auto &&clusterContainer)
                  {
 
-                    for (const auto& measurement : *clusterContainer)
+                    for (auto *measurement : *clusterContainer)
                     {
-		      auto sl = m_ATLASConverterTool->uncalibratedTrkMeasurementToSourceLink(*detElems, measurement, elementsCollection);
+		      auto sl = m_ATLASConverterTool->uncalibratedTrkMeasurementToSourceLink(*detElems, *measurement, elementsCollection);
 
                       sourceLinks.insert(sourceLinks.end(), sl);
                       if (!m_trackStatePrinter.empty()) sourceLinksVec.push_back(sl);
                     } },
-
                  clusterContainerVar);
     }
 
