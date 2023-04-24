@@ -200,7 +200,5 @@ svcMgr.EventSelector.TimeStampInterval = 5
 #============================================================
 #=== print out job summary
 #============================================================
-from AthenaCommon.AlgSequence import AlgSequence
-job = AlgSequence()
 print(svcMgr)
-print(job)
+print(topSequence)
