@@ -65,19 +65,10 @@ StatusCode MuonMM_CablingAlg::execute() {
         }
         writeHandle.addDependency(muonDetMgr);
     }
-    if (!m_readCablingKey.empty()) {
-        SG::ReadCondHandle<CondAttrListCollection> condHandle{m_readCablingKey,
-                                                              ctx};
-        if (!condHandle.isValid()) {
-            ATH_MSG_FATAL(
-                "Failed to retrive the cabling data from the database "
-                << m_readCablingKey.fullKey());
-            return StatusCode::FAILURE;
-        }
-    }
 
     std::unique_ptr<MicroMega_CablingMap> writeCdo{
         std::make_unique<MicroMega_CablingMap>(m_idHelperSvc.get())};
+
     /// JSON file
     if (!m_JSONFile.value().empty()) {
         std::ifstream inf{m_JSONFile};
@@ -87,6 +78,31 @@ StatusCode MuonMM_CablingAlg::execute() {
         }
         std::string payload{};
         while (std::getline(inf, payload)) {
+            ATH_CHECK(loadCablingSchema(payload, *writeCdo));
+        }
+    }
+
+    /// Conditions DB
+    else if (!m_readCablingKey.empty()) {
+        SG::ReadCondHandle<CondAttrListCollection> readHandle{m_readCablingKey,
+                                                              ctx};
+        if (!readHandle.isValid()) {
+            ATH_MSG_FATAL(
+                "Failed to retrive the cabling data from the database "
+                << m_readCablingKey.fullKey());
+            return StatusCode::FAILURE;
+        }
+
+        const CondAttrListCollection* readCdo{*readHandle}; 
+        writeHandle.addDependency(readHandle);
+        ATH_MSG_DEBUG("Size of CondAttrListCollection " << readHandle.fullKey() << " readCdo->size()= " << readCdo->size());
+        ATH_MSG_DEBUG("Range of input is " << readHandle.getRange() << ", range of output is " << writeHandle.getRange());
+        
+        // iterate through data
+        CondAttrListCollection::const_iterator itr;
+        for(itr = readCdo->begin(); itr != readCdo->end(); ++itr) {
+        	const coral::AttributeList& atr = itr->second;
+        	std::string payload = *(static_cast<const std::string *>((atr["data"]).addressOfData()));
             ATH_CHECK(loadCablingSchema(payload, *writeCdo));
         }
     }
