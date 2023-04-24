@@ -1,4 +1,4 @@
-#include "Root/InDetAdaptiveMultiSecVtxFinderTool.h"
+#include "src/InDetAdaptiveMultiSecVtxFinderTool.h"
 
 using namespace InDet;
 
