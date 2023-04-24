@@ -2,11 +2,8 @@
 #
 # art-description: Tests ATLAS + Lucid simulation, reading in events from a file, using 2015 geometry and conditions
 # art-include: 21.0/Athena
-# art-include: 21.0/AthSimulation
 # art-include: 23.0/Athena
-# art-include: 23.0/AthSimulation
 # art-include: master/Athena
-# art-include: master/AthSimulation
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
 # art-output: test.HITS.pool.root

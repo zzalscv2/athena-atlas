@@ -1,6 +1,6 @@
-"""Define methods to construct configured TGC Digitization tools and algorithms
+"""Define methods to construct configured STGC Digitization tools and algorithms
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -41,6 +41,7 @@ def sTGC_DigitizationToolCfg(flags, name="sTgcDigitizationTool", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("CalibrationTool", result.popToolsAndMerge(NSWCalibToolCfg(flags)))
     kwargs.setdefault("SmearingTool", result.popToolsAndMerge(STgcCalibSmearingToolCfg(flags)))
+    kwargs.setdefault("padChargeSharing", False)
     # sTGC VMM configurables
     kwargs.setdefault("deadtimeStrip", 250)
     kwargs.setdefault("deadtimePad"  , 250)

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -111,7 +111,7 @@ StatusCode sTgcDigitizationTool::initialize() {
     return StatusCode::FAILURE;
   }
   double meanGasGain = 2.15 * 1E-4 * exp(6.88*m_runVoltage);
-  m_digitizer = std::make_unique<sTgcDigitMaker>(m_hitIdHelper, m_mdManager, m_doEfficiencyCorrection, meanGasGain);
+  m_digitizer = std::make_unique<sTgcDigitMaker>(m_hitIdHelper, m_mdManager, m_doEfficiencyCorrection, meanGasGain, m_doPadSharing);
   m_digitizer->setLevel(static_cast<MSG::Level>(msgLevel()));
   ATH_CHECK(m_digitizer->initialize(m_doChannelTypes));
 

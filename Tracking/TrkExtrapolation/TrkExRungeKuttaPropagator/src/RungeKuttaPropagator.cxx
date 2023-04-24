@@ -768,7 +768,7 @@ propagateWithJacobian(Cache& cache,
 bool propagateWithJacobianSwitch(Cache& cache,
                                  const Trk::Surface& Su,
                                  bool useJac,
-                                 double* ATH_RESTRICT P, 
+                                 double* ATH_RESTRICT P,
                                  double& ATH_RESTRICT Step) {
 
   const Amg::Transform3D& T = Su.transform();
@@ -821,12 +821,14 @@ bool propagateWithJacobianSwitch(Cache& cache,
                    T(0, 2),           T(1, 2),           T(2, 2),
                    cyl->bounds().r(), cache.m_direction, 0.};
 
-    return propagateWithJacobian(cache, useJac, 2, s, P, Step);
+    bool status = propagateWithJacobian(cache, useJac, 2, s, P, Step);
     // For cylinder we do test for next cross point
-    if (cyl->bounds().halfPhiSector() < 3.1 && newCrossPoint(*cyl, r0, P)) {
+    if (status && cyl->bounds().halfPhiSector() < 3.1 &&
+        newCrossPoint(*cyl, r0, P)) {
       s[8] = 0.;
       return propagateWithJacobian(cache, useJac, 2, s, P, Step);
     }
+    return status;
   } else if (ty == Trk::SurfaceType::Perigee) {
     // Perigee
     double s[6] = {T(0, 3), T(1, 3), T(2, 3), T(0, 2), T(1, 2), T(2, 2)};
@@ -869,7 +871,7 @@ propagateStraightLine(Cache& cache,
   if (!Trk::RungeKuttaUtils::transformLocalToGlobal(useJac, Tp, P)){
     return nullptr;
   }
-  
+
   if (!propagateWithJacobianSwitch(cache,Su,useJac,P,Step)){
     return nullptr;
   }
@@ -1194,7 +1196,7 @@ propagateRungeKutta(Cache& cache,
   if (!Trk::RungeKuttaUtils::transformLocalToGlobal(useJac, Tp, P)){
     return nullptr;
   }
-  
+
   if (!propagateWithJacobianSwitch(cache,Su,useJac,P,Step)){
     return nullptr;
   }
@@ -1687,7 +1689,7 @@ Trk::RungeKuttaPropagator::propagate(const ::EventContext& ctx,
       }
     } else if (std::abs(S) < DBL_EPSILON)
       return nullptr;
-  
+
     if (flips > max_back_forth_flips) return nullptr;
   }
   return nullptr;
@@ -1976,6 +1978,6 @@ Trk::RungeKuttaPropagator::getInitializedCache(Cache& cache, const EventContext&
   cache.m_helixStep = m_helixStep;
   cache.m_straightStep = m_straightStep;
   cache.m_usegradient = m_usegradient;
- 
+
 }
 

@@ -35,12 +35,14 @@
 sTgcDigitMaker::sTgcDigitMaker(const sTgcHitIdHelper* hitIdHelper,
                                const MuonGM::MuonDetectorManager* mdManager,
                                bool doEfficiencyCorrection,
-                               double meanGasGain)
+                               double meanGasGain,
+                               bool doPadChargeSharing)
   : AthMessaging ("sTgcDigitMaker"),
   m_hitIdHelper{hitIdHelper},
   m_mdManager{mdManager},
   m_doEfficiencyCorrection{doEfficiencyCorrection},
-  m_meanGasGain{meanGasGain} {}
+  m_meanGasGain{meanGasGain},
+  m_doPadSharing{doPadChargeSharing} {}
 //----- Destructor
 sTgcDigitMaker::~sTgcDigitMaker() = default;
 //------------------------------------------------------
@@ -553,7 +555,80 @@ std::unique_ptr<sTgcDigitCollection> sTgcDigitMaker::executeDigi(const sTGCSimHi
     }
     newId = m_idHelper->channelID(m_idHelper->parentID(layid), multiPlet, gasGap, channelType, padNumber, isValid);
     if(isValid) {
-      addDigit(digits.get(), newId, bctag, sDigitTimePad, 0.5*total_charge, channelType);
+      // Find centre position of pad
+      Amg::Vector2D padPos(Amg::Vector2D::Zero());
+      if (!detEl->stripPosition(newId, padPos)) {
+        ATH_MSG_ERROR("Failed to obtain local position for neighbor pad with identifier " << m_idHelper->print_to_string(newId) );
+        return digits;
+      }
+      // Pad sharing needs to look at position on hit vs pad boundaries
+      const Amg::Vector2D diff = posOnSurf_pad - padPos;
+      double halfPadWidthX = 0.5*detEl->getPadDesign(newId)->channelWidth(posOnSurf_pad, true, true);
+      double halfPadWidthY = 0.5*detEl->getPadDesign(newId)->channelWidth(posOnSurf_pad, false);
+
+      // Charge sharing happens within 4mm window for pads
+      // i.e. the charge is spread over a 2D gaussian of total radius about 4mm
+      // This value depends on actual width of the distribution, so lets consider 2.5*sigma
+      double deltaX = halfPadWidthX - std::abs(diff.x());
+      double deltaY= halfPadWidthY - std::abs(diff.y());
+      bool isNeighX = deltaX < 2.5*m_GausMean;
+      bool isNeighY = deltaY < 2.5*m_GausMean;
+      // Pad width can be calculated to be very slightly larger than it should due to rounding errors
+      // So if a hit falls on a given pad but is "outside" the width, just define it to be on the boundary of 2 pads.
+      if (deltaX < 0.) deltaX = 0.1;
+      if (deltaY < 0.) deltaY = 0.1;
+
+      if (m_doPadSharing && (isNeighX || isNeighY)){
+        std::pair<int, int> padEtaPhi(detEl->getPadDesign(newId)->channelNumber(padPos));
+        // Phi == 1 at the right in the local geometry
+        // In local coordinates, the pad to the right has phi' = phi - 1
+        int newPhi = diff.x() > 0 ? padEtaPhi.second-1 : padEtaPhi.second+1;
+        int newEta = diff.y() > 0 ? padEtaPhi.first+1 : padEtaPhi.first-1;
+        bool validEta = newEta > 0 && newEta < detEl->getPadDesign(newId)->nPadH+1;
+        bool validPhi = newPhi > 0 && newPhi < detEl->getPadDesign(newId)->nPadColumns+1;
+        const Amg::Vector2D new_pos(Amg::Vector2D::Zero());
+
+        if (isNeighX && isNeighY && validEta && validPhi){
+          // 4 pads total; makes life a bit harder. Corner of 4 valid pads
+          Identifier neigh_ID_X = m_idHelper->padID(m_idHelper->parentID(newId), multiPlet, gasGap, channelType, padEtaPhi.first, newPhi, isValid);
+          Identifier neigh_ID_Y = m_idHelper->padID(m_idHelper->parentID(newId), multiPlet, gasGap, channelType, newEta, padEtaPhi.second, isValid);
+          Identifier neigh_ID_XY = m_idHelper->padID(m_idHelper->parentID(newId), multiPlet, gasGap, channelType, newEta, newPhi, isValid);
+          double xQfraction = getPadChargeFraction(deltaX);
+          double yQfraction = getPadChargeFraction(deltaY);
+
+          // Main pad gets 1 - Qfraction of total
+          addDigit(digits.get(), neigh_ID_X, bctag, sDigitTimePad, xQfraction*(1.-yQfraction)*0.5*total_charge, channelType);
+          addDigit(digits.get(), neigh_ID_Y, bctag, sDigitTimePad, yQfraction*(1.-xQfraction)*0.5*total_charge, channelType);
+          addDigit(digits.get(), neigh_ID_XY, bctag, sDigitTimePad, xQfraction*yQfraction*0.5*total_charge, channelType);
+          addDigit(digits.get(), newId, bctag, sDigitTimePad, (1.-xQfraction-yQfraction+xQfraction*yQfraction)*0.5*total_charge, channelType);
+        }
+        else if (isNeighX && validPhi){
+          // There is only 1 neighbor, immediately to the left or right.
+          Identifier neigh_ID = m_idHelper->padID(m_idHelper->parentID(newId), multiPlet, gasGap, channelType, padEtaPhi.first, newPhi, isValid);
+
+          // NeighborPad gets Qfraction of the total pad charge: 0.5*total_charge
+          // Main pad gets 1 - Qfraction of total
+          double xQfraction = getPadChargeFraction(deltaX);
+          addDigit(digits.get(), newId, bctag, sDigitTimePad, (1.-xQfraction)*0.5*total_charge, channelType);
+          addDigit(digits.get(), neigh_ID, bctag, sDigitTimePad, xQfraction*0.5*total_charge, channelType);
+        }
+        else if (isNeighY && validEta){
+          // There is only 1 neighbor, immediately above or below
+          Identifier neigh_ID = m_idHelper->padID(m_idHelper->parentID(newId), multiPlet, gasGap, channelType, newEta, padEtaPhi.second, isValid);
+
+          // NeighborPad gets Qfraction of the total pad charge: 0.5*total_charge
+          // Main pad gets 1 - Qfraction of total
+          double yQfraction = getPadChargeFraction(deltaX);
+          addDigit(digits.get(), newId, bctag, sDigitTimePad, (1.-yQfraction)*0.5*total_charge, channelType);
+          addDigit(digits.get(), neigh_ID, bctag, sDigitTimePad, yQfraction*0.5*total_charge, channelType);
+        }
+
+      }
+      else{
+        // No charge sharing: hit is nicely isolated within pad
+        addDigit(digits.get(), newId, bctag, sDigitTimePad, 0.5*total_charge, channelType);
+      }
+
     }
     else if(padNumber != -1) {
       ATH_MSG_ERROR("Failed to obtain identifier " << m_idHelper->print_to_string(newId) );
@@ -1071,4 +1146,17 @@ double sTgcDigitMaker::getTimeOffsetStrip(int neighbor_index) const {
                   << ". Returning an offset of 0 ns.");
   }
   return 0.0;
+}
+
+//+++++++++++++++++++++++++++++++++++++++++++++++
+double sTgcDigitMaker::getPadChargeFraction(double distance) const {
+  // The charge fraction that is found past a distance x away from the
+  // centre of a 2D gaussian distribution of width m_GausMean is
+  // described by a modified error function.
+
+  // The modified error function perfectly describes
+  // the pad charge sharing distribution figure 16 of the sTGC
+  // testbeam paper https://arxiv.org/pdf/1509.06329.pdf
+
+  return 0.5 * (1.0 - std::erf( distance / (std::sqrt(2) * m_GausMean)));
 }

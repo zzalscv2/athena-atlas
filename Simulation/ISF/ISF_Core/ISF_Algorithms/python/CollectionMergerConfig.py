@@ -33,7 +33,7 @@ def ISFCollectionMergerCfg(flags,name="ISF_CollectionMerger", **kwargs):
     kwargs.setdefault( "InputMMHits",               [ ] )
 
     hardscatterSG=""
-    if flags.hasFlag("Digitization.Pileup"):
+    if flags.hasFlag("Digitization.PileUp"):
         if flags.Sim.DoFullChain and (flags.Digitization.PileUp is True):
             hardscatterSG = "OriginalEvent_SG+"
     else:

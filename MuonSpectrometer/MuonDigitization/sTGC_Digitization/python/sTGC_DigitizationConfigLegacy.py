@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 #
 # Import sTGC_Digitization job properties
@@ -38,6 +38,7 @@ def sTgcDigitizationTool(name="sTgcDigitizationTool",**kwargs):
     kwargs.setdefault("doToFCorrection", True)
     kwargs.setdefault("doEfficiencyCorrection", False)
     kwargs.setdefault("SmearingTool","STgcCalibSmearingTool")
+    kwargs.setdefault("padChargeSharing", False)
     # sTGC VMM configurables
     kwargs.setdefault("deadtimeStrip", 250)
     kwargs.setdefault("deadtimePad"  , 250)
