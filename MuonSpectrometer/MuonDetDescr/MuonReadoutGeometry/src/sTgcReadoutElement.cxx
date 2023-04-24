@@ -469,17 +469,26 @@ namespace MuonGM {
             return -1;
         }
         std::pair<int, int> pad(design->channelNumber(pos));
-
+        const sTgcIdHelper& id_helper{*manager()->stgcIdHelper()};
         if (pad.first > 0 && pad.second > 0) {
+#ifndef NDEBUG
             bool is_valid {true};
-            Identifier padID =
-                manager()->stgcIdHelper()->padID(manager()->stgcIdHelper()->stationName(id), manager()->stgcIdHelper()->stationEta(id),
-                                                 manager()->stgcIdHelper()->stationPhi(id), manager()->stgcIdHelper()->multilayer(id),
-                                                 manager()->stgcIdHelper()->gasGap(id), 0, pad.first, pad.second, is_valid);
-            int channel = manager()->stgcIdHelper()->channel(padID);
-            int padEta = manager()->stgcIdHelper()->padEta(padID);
-            int padPhi = manager()->stgcIdHelper()->padPhi(padID);
-            if (!is_valid || padEta != pad.first || padPhi != pad.second) {
+#endif
+            const Identifier padID = id_helper.padID(id, id_helper.multilayer(id),
+                                                        id_helper.gasGap(id), sTgcIdHelper::Pad, pad.first, pad.second
+#ifndef NDEBUG
+                                                        , is_valid
+#endif
+                                                        
+                                                        );
+            int channel = id_helper.channel(padID);
+            int padEta = id_helper.padEta(padID);
+            int padPhi = id_helper.padPhi(padID);
+            if (
+#ifndef NDEBUG                
+                !is_valid ||
+#endif                
+                 padEta != pad.first || padPhi != pad.second) {
                 MsgStream log(Athena::getMessageSvc(), "sTgcReadoutElement");
                 log << MSG::WARNING << " bad pad indices: input " << pad.first << " " << pad.second << " from ID " << padEta << " "
                     << padPhi << endmsg;
