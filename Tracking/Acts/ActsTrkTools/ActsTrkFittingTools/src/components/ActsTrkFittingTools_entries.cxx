@@ -4,5 +4,8 @@
 
 
 #include "../ActsKalmanFitter.h"
+#include "../ActsGaussianSumFitter.h"
 
 DECLARE_COMPONENT( ActsKalmanFitter )
+DECLARE_COMPONENT( ActsGaussianSumFitter )
+

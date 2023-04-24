@@ -35,7 +35,7 @@ public:
 
 private:
 
-  ToolHandle<Trk::ITrackFitter> m_actsKalmanFitter{this, "ActsKalmanFitter", "ActsKalmanFitter", "the Acts Kalman Fitter"};
+  ToolHandle<Trk::ITrackFitter> m_actsFitter{this, "ActsFitter", "ActsKalmanFitter", "Choice of Acts Fitter (Kalman by default)"};
   // --- job options
   SG::ReadHandleKey<TrackCollection>  m_trackName{this, "TrackName", "Tracks", "Collection name for tracks to be refitted"};
   SG::WriteHandleKey<TrackCollection> m_newTrackName{this, "NewTrackName", "ReFitted_Tracks", "Collection name for output tracks"};

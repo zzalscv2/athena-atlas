@@ -2,36 +2,35 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ACTSGEOMETRY_ACTSKALMANFITTER_H
-#define ACTSGEOMETRY_ACTSKALMANFITTER_H
+#ifndef ACTSGEOMETRY_ACTSGAUSSIANSUMFITTER_H
+#define ACTSGEOMETRY_ACTSGAUSSIANSUMFITTER_H
 
 #include "ActsFitterHelperFunctions.h"
 
-#include "GaudiKernel/ToolHandle.h"
-
-
+// ATHENA
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "GaudiKernel/ToolHandle.h"
 #include "TrkFitterInterfaces/ITrackFitter.h"
-
-#include "TrkToolInterfaces/IExtendedTrackSummaryTool.h"
 #include "TrkToolInterfaces/IBoundaryCheckTool.h"
+#include "TrkToolInterfaces/IExtendedTrackSummaryTool.h"
 
 // ACTS
-#include "Acts/EventData/TrackParameters.hpp"
-#include "Acts/TrackFitting/KalmanFitter.hpp"
-#include "Acts/MagneticField/MagneticFieldProvider.hpp"
-#include "Acts/Propagator/EigenStepper.hpp"
-#include "Acts/Propagator/Propagator.hpp"
 #include "Acts/EventData/Track.hpp"
+#include "Acts/EventData/TrackParameters.hpp"
 #include "Acts/EventData/VectorTrackContainer.hpp"
 #include "Acts/Geometry/GeometryIdentifier.hpp"
+#include "Acts/MagneticField/MagneticFieldProvider.hpp"
+#include "Acts/Propagator/MultiEigenStepperLoop.hpp"
+#include "Acts/Propagator/Propagator.hpp"
+#include "Acts/TrackFitting/BetheHeitlerApprox.hpp"
+#include "Acts/TrackFitting/GaussianSumFitter.hpp"
+#include "Acts/TrackFitting/GsfOptions.hpp"
 
 // PACKAGE
-
 #include "ActsTrkEvent/TrackContainer.h"
+#include "ActsTrkEventCnv/IActsToTrkConverterTool.h"
 #include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
-#include "ActsTrkEventCnv/IActsToTrkConverterTool.h"
 
 // STL
 #include <string>
@@ -45,12 +44,11 @@ namespace Trk{
   class Track;
 }
 
-class ActsKalmanFitter : public extends<AthAlgTool, Trk::ITrackFitter> { 
+class ActsGaussianSumFitter : public extends<AthAlgTool, Trk::ITrackFitter> {
 public:
-  using traj_Type = Acts::VectorMultiTrajectory;
-
-  ActsKalmanFitter(const std::string&,const std::string&,const IInterface*);
-  virtual ~ActsKalmanFitter() = default;
+  
+  ActsGaussianSumFitter(const std::string&,const std::string&,const IInterface*);
+  virtual ~ActsGaussianSumFitter() = default;
 
   // standard Athena methods
   virtual StatusCode initialize() override;
@@ -114,6 +112,8 @@ public:
   ///////////////////////////////////////////////////////////////////
 private:
 
+  using traj_Type = Acts::VectorMultiTrajectory;
+
   // Create a track from the fitter result
   template<typename track_container_t, typename traj_t,
            template <typename> class holder_t>
@@ -130,29 +130,23 @@ private:
                                                            "BoundaryCheckTool", 
                                                            "InDet::InDetBoundaryCheckTool", 
                                                            "Boundary checking tool for detector sensitivities"};
-
+  
     // the settable job options
   Gaudi::Property< double > m_option_outlierChi2Cut {this, "OutlierChi2Cut", 12.5, 
       "Chi2 cut used by the outlier finder" };
-  Gaudi::Property< double > m_option_ReverseFilteringPt {this, "ReverseFilteringPt", 1.0 * Acts::UnitConstants::GeV,
-      "Pt cut used for the ReverseFiltering logic"};
   Gaudi::Property< int > m_option_maxPropagationStep {this, "MaxPropagationStep", 5000, 
       "Maximum number of steps for one propagate call"};
-  Gaudi::Property< double > m_option_seedCovarianceScale {this, "SeedCovarianceScale", 100.,
-      "Scale factor for the input seed covariance when doing refitting"};
-
-  Gaudi::Property<double> m_overstepLimit{this, "OverstepLimit", 100 * Acts::UnitConstants::mm, 
-      "Overstep limit / tolerance for the Eigen stepper (use ACTS units!)"};
 
   /// Type erased track fitter function.
-    using Fitter = Acts::KalmanFitter<Acts::Propagator<Acts::EigenStepper<>, Acts::Navigator>, traj_Type>;
-    std::unique_ptr<Fitter> m_fitter;
+  using Fitter = Acts::Experimental::GaussianSumFitter< Acts::Propagator<Acts::MultiEigenStepperLoop<>, Acts::Navigator>,
+                                                        Acts::Experimental::AtlasBetheHeitlerApprox<6, 5>,
+                                                        traj_Type>;
+  std::unique_ptr<Fitter> m_fitter;
 
-    Acts::KalmanFitterExtensions<traj_Type> getExtensions();
-    Acts::KalmanFitterExtensions<traj_Type> m_kfExtensions;
+  Acts::Experimental::GsfExtensions<traj_Type> getExtensions();
+  Acts::Experimental::GsfExtensions<traj_Type> m_gsfExtensions;
 
-    ActsTrk::FitterHelperFunctions::ATLASOutlierFinder m_outlierFinder{0};
-    ActsTrk::FitterHelperFunctions::ReverseFilteringLogic m_reverseFilteringLogic{0};
+  ActsTrk::FitterHelperFunctions::ATLASOutlierFinder m_outlierFinder{0};
 
   /// Private access to the logger
   const Acts::Logger& logger() const {

@@ -2,7 +2,7 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "ActsKalmanFitter.h"
+#include "ActsGaussianSumFitter.h"
 
 // ATHENA
 #include "GaudiKernel/ListItem.h"
@@ -11,6 +11,7 @@
 #include "TrkSurfaces/PerigeeSurface.h"
 #include "TrkTrackSummary/TrackSummary.h"
 #include "GaudiKernel/EventContext.h"
+#include "TRT_ReadoutGeometry/TRT_BaseElement.h"
 
 // ACTS
 #include "Acts/Definitions/TrackParametrization.hpp"
@@ -20,7 +21,6 @@
 #include "Acts/Propagator/Propagator.hpp"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 #include "Acts/Surfaces/Surface.hpp"
-#include "Acts/TrackFitting/KalmanFitter.hpp"
 #include "Acts/Utilities/Helpers.hpp"
 #include "Acts/Utilities/Logger.hpp"
 #include "Acts/Utilities/CalibrationContext.hpp"
@@ -29,6 +29,8 @@
 
 // PACKAGE
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
+#include "ActsGeometry/ATLASSourceLink.h"
+#include "ActsGeometry/ActsDetectorElement.h"
 #include "ActsGeometry/ActsGeometryContext.h"
 #include "ActsInterop/Logger.h"
 
@@ -37,12 +39,12 @@
 
 
 
-ActsKalmanFitter::ActsKalmanFitter(const std::string& t,const std::string& n,
+ActsGaussianSumFitter::ActsGaussianSumFitter(const std::string& t,const std::string& n,
                                 const IInterface* p) :
   base_class(t,n,p)
 {}
 
-StatusCode ActsKalmanFitter::initialize() {
+StatusCode ActsGaussianSumFitter::initialize() {
 
   ATH_MSG_DEBUG(name() << "::" << __FUNCTION__);
   ATH_CHECK(m_trackingGeometryTool.retrieve());
@@ -50,34 +52,30 @@ StatusCode ActsKalmanFitter::initialize() {
   ATH_CHECK(m_ATLASConverterTool.retrieve());
   ATH_CHECK(m_trkSummaryTool.retrieve());
 
-  m_logger = makeActsAthenaLogger(this, "Acts Kalman Refit");
+  m_logger = makeActsAthenaLogger(this, "Acts Gaussian Sum Refit");
 
   auto field = std::make_shared<ATLASMagneticFieldWrapper>();
-  Acts::EigenStepper<> stepper(field, m_overstepLimit);
+  Acts::MultiEigenStepperLoop<> stepper(field);
   Acts::Navigator navigator( Acts::Navigator::Config{ m_trackingGeometryTool->trackingGeometry() } );     
-  Acts::Propagator<Acts::EigenStepper<>, Acts::Navigator> propagator(std::move(stepper), 
+  Acts::Propagator<Acts::MultiEigenStepperLoop<>, Acts::Navigator> propagator(std::move(stepper), 
                      std::move(navigator),
                      logger().cloneWithSuffix("Prop"));
+  Acts::Experimental::AtlasBetheHeitlerApprox<6, 5> bha = Acts::Experimental::makeDefaultBetheHeitlerApprox();
 
-  m_fitter = std::make_unique<Fitter>(std::move(propagator),
-              logger().cloneWithSuffix("KalmanFitter"));
+  m_fitter = std::make_unique<Fitter>(std::move(propagator), std::move(bha),
+              logger().cloneWithSuffix("GaussianSumFitter"));
 
-
-  m_kfExtensions.updater.connect<&ActsTrk::FitterHelperFunctions::gainMatrixUpdate<traj_Type>>();
-  m_kfExtensions.smoother.connect<&ActsTrk::FitterHelperFunctions::gainMatrixSmoother<traj_Type>>();
-  m_kfExtensions.calibrator.connect<&ATLASSourceLinkCalibrator::calibrate<traj_Type>>();
-
+  m_gsfExtensions.updater.connect<&ActsTrk::FitterHelperFunctions::gainMatrixUpdate<traj_Type>>();
+  m_gsfExtensions.calibrator.connect<&ATLASSourceLinkCalibrator::calibrate<traj_Type>>();
+  
   m_outlierFinder.StateChiSquaredPerNumberDoFCut = m_option_outlierChi2Cut;
-  m_kfExtensions.outlierFinder.connect<&ActsTrk::FitterHelperFunctions::ATLASOutlierFinder::operator()<traj_Type>>(&m_outlierFinder);
-
-  m_reverseFilteringLogic.momentumMax = m_option_ReverseFilteringPt;
-  m_kfExtensions.reverseFilteringLogic.connect<&ActsTrk::FitterHelperFunctions::ReverseFilteringLogic::operator()<traj_Type>>(&m_reverseFilteringLogic);
+  m_gsfExtensions.outlierFinder.connect<&ActsTrk::FitterHelperFunctions::ATLASOutlierFinder::operator()<traj_Type>>(&m_outlierFinder);
 
   return StatusCode::SUCCESS;
 }
 
 // finalize
-StatusCode ActsKalmanFitter::finalize()
+StatusCode ActsGaussianSumFitter::finalize()
 {
   ATH_MSG_INFO ("finalize() successful in " << name());
   return StatusCode::SUCCESS;
@@ -86,13 +84,13 @@ StatusCode ActsKalmanFitter::finalize()
 // refit a track
 // -------------------------------------------------------
 std::unique_ptr<Trk::Track>
-ActsKalmanFitter::fit(const EventContext& ctx,
+ActsGaussianSumFitter::fit(const EventContext& ctx,
                        const Trk::Track& inputTrack,
                        const Trk::RunOutlierRemoval /*runOutlier*/,
                        const Trk::ParticleHypothesis /*prtHypothesis*/) const
 {
   std::unique_ptr<Trk::Track> track = nullptr;
-  ATH_MSG_VERBOSE ("--> enter KalmanFitter::fit(Track,,)    with Track from author = "
+  ATH_MSG_VERBOSE ("--> enter GaussianSumFitter::fit(Track,,)    with Track from author = "
        << inputTrack.info().dumpInfo());
 
   // protection against not having measurements on the input track
@@ -103,7 +101,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
 
   // protection against not having track parameters on the input track
   if (!inputTrack.trackParameters() || inputTrack.trackParameters()->empty()) {
-    ATH_MSG_INFO ("input fails to provide track parameters for seeding the KF, reject fit");
+    ATH_MSG_INFO ("input fails to provide track parameters for seeding the GSF, reject fit");
     return nullptr;
   }
 
@@ -118,12 +116,15 @@ ActsKalmanFitter::fit(const EventContext& ctx,
 
   Acts::PropagatorPlainOptions propagationOption;
   propagationOption.maxSteps = m_option_maxPropagationStep;
-  // Set the KalmanFitter options
-  Acts::KalmanFitterOptions
-      kfOptions(tgContext, mfContext, calContext,
-                m_kfExtensions,
+  // Set the GaussianSumFitter options
+  Acts::Experimental::GsfOptions<Acts::VectorMultiTrajectory>
+      gsfOptions{tgContext, mfContext, calContext,
+                m_gsfExtensions,
                 propagationOption,
-                &(*pSurface));
+                &(*pSurface)};
+
+  // Set abortOnError to false, else the refitting crashes if no forward propagation is done. Here, we just skip the event and continue.
+  gsfOptions.abortOnError = false;
 
   std::vector<ATLASSourceLink::ElementsType> elementCollection;
 
@@ -136,18 +137,6 @@ ActsKalmanFitter::fit(const EventContext& ctx,
 
   const auto& initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters((*inputTrack.perigeeParameters()));
 
-  // The covariance from already fitted track are too small and would result an incorect smoothing.
-  // We scale up the input covaraiance to avoid this.
-  Acts::BoundSymMatrix scaledCov = Acts::BoundSymMatrix::Identity();
-  for (int i=0; i<6; ++i) {
-    double scale = m_option_seedCovarianceScale;
-    (scaledCov)(i,i) = scale * initialParams.covariance().value()(i,i);
-  }
-
-  const Acts::BoundTrackParameters scaledInitialParams(initialParams.referenceSurface().getSharedPtr(),
-                                                       initialParams.parameters(),
-                                                       scaledCov);
-
   Acts::TrackContainer tracks{
     Acts::VectorTrackContainer{},
     Acts::VectorMultiTrajectory{}};
@@ -157,8 +146,8 @@ ActsKalmanFitter::fit(const EventContext& ctx,
   Acts::SourceLinkAdapterIterator end{trackSourceLinks.end()};
 
   // Perform the fit
-  auto result = m_fitter->fit(begin, end,           
-    scaledInitialParams, kfOptions, tracks);
+  auto result = m_fitter->fit(begin, end,
+      initialParams, gsfOptions, tracks);
   if (result.ok()) {
     track = makeTrack<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail::ValueHolder>(ctx, tgContext, tracks, result);
   }
@@ -168,7 +157,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
 // fit a set of MeasurementBase objects
 // --------------------------------
 std::unique_ptr<Trk::Track>
-ActsKalmanFitter::fit(const EventContext& ctx,
+ActsGaussianSumFitter::fit(const EventContext& ctx,
                        const Trk::MeasurementSet& inputMeasSet,
                        const Trk::TrackParameters& estimatedStartParameters,
                        const Trk::RunOutlierRemoval /*runOutlier*/,
@@ -193,12 +182,15 @@ ActsKalmanFitter::fit(const EventContext& ctx,
 
   Acts::PropagatorPlainOptions propagationOption;
   propagationOption.maxSteps = m_option_maxPropagationStep;
-  // Set the KalmanFitter options
-  Acts::KalmanFitterOptions
-      kfOptions(tgContext, mfContext, calContext,
-                m_kfExtensions,
-                propagationOption,
-                &(*pSurface));
+  // Set the GaussianSumFitter options
+  Acts::Experimental::GsfOptions<Acts::VectorMultiTrajectory>
+      gsfOptions{tgContext, mfContext, calContext,
+                m_gsfExtensions,
+                propagationOption, // Acts::LoggerWrapper{logger()},
+                &(*pSurface)};
+
+  // Set abortOnError to false, else the refitting crashes if no forward propagation is done. Here, we just skip the event and continue.
+  gsfOptions.abortOnError = false;
 
   std::vector<ATLASSourceLink> trackSourceLinks;
   trackSourceLinks.reserve(inputMeasSet.size());
@@ -227,7 +219,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
 
   // Perform the fit
   auto result = m_fitter->fit(begin, end,
-    initialParams, kfOptions, tracks);
+    initialParams, gsfOptions, tracks);
   if (result.ok()) {
     track = makeTrack<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail::ValueHolder>(ctx, tgContext, tracks, result);
   }
@@ -237,7 +229,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
 // fit a set of PrepRawData objects
 // --------------------------------
 std::unique_ptr<Trk::Track>
-ActsKalmanFitter::fit(const EventContext& /*ctx*/,
+ActsGaussianSumFitter::fit(const EventContext& /*ctx*/,
                        const Trk::PrepRawDataSet& /*inputPRDColl*/,
                        const Trk::TrackParameters& /*estimatedStartParameters*/,
                        const Trk::RunOutlierRemoval /*runOutlier*/,
@@ -252,13 +244,13 @@ ActsKalmanFitter::fit(const EventContext& /*ctx*/,
 // mem efficient and stable way
 // --------------------------------
 std::unique_ptr<Trk::Track>
-ActsKalmanFitter::fit(const EventContext& ctx,
+ActsGaussianSumFitter::fit(const EventContext& ctx,
                        const Trk::Track& inputTrack,
                        const Trk::MeasurementSet& addMeasColl,
                        const Trk::RunOutlierRemoval /*runOutlier*/,
                        const Trk::ParticleHypothesis /*matEffects*/) const
 {
-  ATH_MSG_VERBOSE ("--> enter KalmanFitter::fit(Track,Meas'BaseSet,,)");
+  ATH_MSG_VERBOSE ("--> enter GaussianSumFitter::fit(Track,Meas'BaseSet,,)");
   ATH_MSG_VERBOSE ("    with Track from author = " << inputTrack.info().dumpInfo());
 
   // protection, if empty MeasurementSet
@@ -275,7 +267,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
 
   // protection against not having track parameters on the input track
   if (!inputTrack.trackParameters() || inputTrack.trackParameters()->empty()) {
-    ATH_MSG_INFO ("input fails to provide track parameters for seeding the KF, reject fit");
+    ATH_MSG_INFO ("input fails to provide track parameters for seeding the GSF, reject fit");
     return nullptr;
   }
 
@@ -292,12 +284,15 @@ ActsKalmanFitter::fit(const EventContext& ctx,
 
   Acts::PropagatorPlainOptions propagationOption;
   propagationOption.maxSteps = m_option_maxPropagationStep;
-  // Set the KalmanFitter options
-  Acts::KalmanFitterOptions
-      kfOptions(tgContext, mfContext, calContext,
-                m_kfExtensions,
-                propagationOption,
-                &(*pSurface));
+  // Set the GaussianSumFitter options
+  Acts::Experimental::GsfOptions<Acts::VectorMultiTrajectory>
+      gsfOptions{tgContext, mfContext, calContext,
+                m_gsfExtensions,
+                propagationOption, // Acts::LoggerWrapper{logger()},
+                &(*pSurface)};
+
+  // Set abortOnError to false, else the refitting crashes if no forward propagation is done. Here, we just skip the event and continue.
+  gsfOptions.abortOnError = false;
 
   std::vector<ATLASSourceLink::ElementsType> elementCollection;
 
@@ -328,7 +323,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
 
   // Perform the fit
   auto result = m_fitter->fit(begin, end,
-    initialParams, kfOptions, tracks);
+    initialParams, gsfOptions, tracks);
   if (result.ok()) {
     track = makeTrack<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail::ValueHolder>(ctx, tgContext, tracks, result);
   }
@@ -338,7 +333,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
 // extend a track fit to include an additional set of PrepRawData objects
 // --------------------------------
 std::unique_ptr<Trk::Track>
-ActsKalmanFitter::fit(const EventContext& /*ctx*/,
+ActsGaussianSumFitter::fit(const EventContext& /*ctx*/,
                        const Trk::Track& /*inputTrack*/,
                        const Trk::PrepRawDataSet& /*addPrdColl*/,
                        const Trk::RunOutlierRemoval /*runOutlier*/,
@@ -352,13 +347,13 @@ ActsKalmanFitter::fit(const EventContext& /*ctx*/,
 // combined fit of two tracks
 // --------------------------------
 std::unique_ptr<Trk::Track>
-ActsKalmanFitter::fit(const EventContext& ctx,
+ActsGaussianSumFitter::fit(const EventContext& ctx,
                        const Trk::Track& intrk1,
                        const Trk::Track& intrk2,
                        const Trk::RunOutlierRemoval /*runOutlier*/,
                        const Trk::ParticleHypothesis /*matEffects*/) const
 {
-  ATH_MSG_VERBOSE ("--> enter KalmanFitter::fit(Track,Track,)");
+  ATH_MSG_VERBOSE ("--> enter GaussianSumFitter::fit(Track,Track,)");
   ATH_MSG_VERBOSE ("    with Tracks from #1 = " << intrk1.info().dumpInfo()
                    << " and #2 = " << intrk2.info().dumpInfo());
 
@@ -376,7 +371,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
 
   // protection against not having track parameters on the input track
   if (!intrk1.trackParameters() || intrk1.trackParameters()->empty()) {
-    ATH_MSG_INFO ("input #1 fails to provide track parameters for seeding the KF, reject fit");
+    ATH_MSG_INFO ("input #1 fails to provide track parameters for seeding the GSF, reject fit");
     return nullptr;
   }
 
@@ -393,12 +388,15 @@ ActsKalmanFitter::fit(const EventContext& ctx,
 
   Acts::PropagatorPlainOptions propagationOption;
   propagationOption.maxSteps = m_option_maxPropagationStep;
-  // Set the KalmanFitter options
-  Acts::KalmanFitterOptions
-      kfOptions(tgContext, mfContext, calContext,
-                m_kfExtensions,
-                propagationOption,
-                &(*pSurface));
+  // Set the GaussianSumFitter options
+  Acts::Experimental::GsfOptions<Acts::VectorMultiTrajectory>
+      gsfOptions{tgContext, mfContext, calContext,
+                m_gsfExtensions,
+                propagationOption, // Acts::LoggerWrapper{logger()},
+                &(*pSurface)};
+
+  // Set abortOnError to false, else the refitting crashes if no forward propagation is done. Here, we just skip the event and continue.
+  gsfOptions.abortOnError = false;
 
   std::vector<ATLASSourceLink::ElementsType> elementCollection1;
   std::vector<ATLASSourceLink::ElementsType> elementCollection2;
@@ -414,19 +412,6 @@ ActsKalmanFitter::fit(const EventContext& ctx,
 
   const auto &initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(*(intrk1.perigeeParameters()));
 
-  // The covariance from already fitted track are too small and would result an incorect smoothing.
-  // We scale up the input covaraiance to avoid this.
-  Acts::BoundSymMatrix scaledCov = Acts::BoundSymMatrix::Identity();
-  for (int i=0; i<6; ++i) {
-    double scale = m_option_seedCovarianceScale;
-    (scaledCov)(i,i) = scale * initialParams.covariance().value()(i,i);
-  }
-
-  const Acts::BoundTrackParameters scaledInitialParams(initialParams.referenceSurface().getSharedPtr(),
-                                                       initialParams.parameters(),
-                                                       scaledCov);
-
-
   Acts::TrackContainer tracks{
     Acts::VectorTrackContainer{},
     Acts::VectorMultiTrajectory{}};
@@ -437,7 +422,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
 
   // Perform the fit
   auto result = m_fitter->fit(begin, end,
-    scaledInitialParams, kfOptions, tracks);
+    initialParams, gsfOptions, tracks);
   if (result.ok()) {
     track = makeTrack<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail::ValueHolder>(ctx, tgContext, tracks, result);
   }
@@ -447,7 +432,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
 template<typename track_container_t, typename traj_t,
          template <typename> class holder_t>
 std::unique_ptr<Trk::Track> 
-ActsKalmanFitter::makeTrack(const EventContext& ctx,
+ActsGaussianSumFitter::makeTrack(const EventContext& ctx,
           Acts::GeometryContext& tgContext,
           ActsTrk::TrackContainer& tracks,
           Acts::Result<ActsTrk::TrackContainer::TrackProxy, std::error_code>& fitResult) const {
@@ -515,23 +500,23 @@ ActsKalmanFitter::makeTrack(const EventContext& ctx,
       // Check if this is a hole, a dead sensors or a state outside the sensor boundary
       ATH_MSG_VERBOSE("Check if this is a hole, a dead sensors or a state outside the sensor boundary");
       if(boundaryCheck == Trk::BoundaryCheckResult::DeadElement){
-        if (detElem->isPixel()) {
-          ++numberOfDeadPixel;
-        }
-        else if (detElem->isSCT()) {
-          ++numberOfDeadSCT;
-        }
-        // Dead sensors states are not stored              
-        return;
-            } else if (boundaryCheck != Trk::BoundaryCheckResult::Candidate){
-        // States outside the sensor boundary are ignored
-        return;
+  if (detElem->isPixel()) {
+    ++numberOfDeadPixel;
+  }
+  else if (detElem->isSCT()) {
+    ++numberOfDeadSCT;
+  }
+  // Dead sensors states are not stored              
+  return;
+      } else if (boundaryCheck != Trk::BoundaryCheckResult::Candidate){
+  // States outside the sensor boundary are ignored
+  return;
       }
       typePattern.set(Trk::TrackStateOnSurface::Hole);
     }
     // The state was tagged as an outlier or was missed in the reverse filtering, use filtered parameters
     else if (flag[Acts::TrackStateFlag::OutlierFlag] or
-             state.template component<std::uint32_t, Acts::hashString("smoothed")>() == Acts::MultiTrajectoryTraits::kInvalid) {
+            not state.hasSmoothed()) {
       ATH_MSG_VERBOSE("The state was tagged as an outlier or was missed in the reverse filtering, use filtered parameters");
       const Acts::BoundTrackParameters actsParam(state.referenceSurface().getSharedPtr(),
              state.filtered(),
@@ -569,8 +554,8 @@ ActsKalmanFitter::makeTrack(const EventContext& ctx,
   
   // Convert the perigee state and add it to the trajectory
   const Acts::BoundTrackParameters actsPer(acts_track.referenceSurface().getSharedPtr(), 
-                                          acts_track.parameters(), 
-                                          acts_track.covariance());
+                 acts_track.parameters(), 
+             acts_track.covariance());
   std::unique_ptr<const Trk::TrackParameters> per = m_ATLASConverterTool->actsTrackParametersToTrkParameters(actsPer, tgContext);
   std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
   typePattern.set(Trk::TrackStateOnSurface::Perigee);
@@ -578,8 +563,8 @@ ActsKalmanFitter::makeTrack(const EventContext& ctx,
   if (perState) finalTrajectory.insert(finalTrajectory.begin(), perState);
 
   // Create the track using the states
-  Trk::TrackInfo newInfo(Trk::TrackInfo::TrackFitter::KalmanFitter, Trk::noHypothesis);
-  newInfo.setTrackFitter(Trk::TrackInfo::TrackFitter::KalmanFitter); //Mark the fitter as KalmanFitter
+  Trk::TrackInfo newInfo(Trk::TrackInfo::TrackFitter::GaussianSumFilter, Trk::noHypothesis);
+  newInfo.setTrackFitter(Trk::TrackInfo::TrackFitter::GaussianSumFilter); //Mark the fitter as GaussianSumFilter
   newtrack = std::make_unique<Trk::Track>(newInfo, std::move(finalTrajectory), nullptr);
   if (newtrack) {
     // Create the track summary and update the holes information
@@ -596,4 +581,3 @@ ActsKalmanFitter::makeTrack(const EventContext& ctx,
   
   return newtrack;
 }
-
