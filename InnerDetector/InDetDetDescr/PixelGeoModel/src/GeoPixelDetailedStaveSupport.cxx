@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -31,8 +31,10 @@ using std::max;
 
 GeoPixelDetailedStaveSupport::GeoPixelDetailedStaveSupport(InDetDD::PixelDetectorManager* ddmgr,
                                                            PixelGeometryManager* mgr,
-							   GeoModelIO::ReadGeoModel* sqliteReader)
-  : GeoPixelStaveSupport (ddmgr, mgr, sqliteReader),
+							   GeoModelIO::ReadGeoModel* sqliteReader,
+                                                           std::shared_ptr<std::map<std::string, GeoFullPhysVol*>> mapFPV,
+                                                           std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX)
+  : GeoPixelStaveSupport (ddmgr, mgr, sqliteReader, mapFPV, mapAX),
     m_transform(GeoTrf::Transform3D::Identity())
 {
   m_bVerbose = (m_gmt_mgr->msgLvl(MSG::DEBUG));
@@ -48,8 +50,8 @@ GeoVPhysVol* GeoPixelDetailedStaveSupport::Build ( ) {
   int staveLayout = m_gmt_mgr->PixelStaveLayout();
 
   // Module geometry
-  GeoPixelSiCrystal theSensor(m_DDmgr, m_gmt_mgr, m_sqliteReader, isBLayer);
-  GeoPixelModule pm(m_DDmgr, m_gmt_mgr, m_sqliteReader, theSensor);
+  GeoPixelSiCrystal theSensor(m_DDmgr, m_gmt_mgr, m_sqliteReader, m_mapFPV, m_mapAX, isBLayer);
+  GeoPixelModule pm(m_DDmgr, m_gmt_mgr, m_sqliteReader, m_mapFPV, m_mapAX, theSensor);
   double pmThicknessN=pm.ThicknessN_noSvc();
   double pmThicknessP=pm.ThicknessP();
   double pmWidth=pm.Width();
@@ -65,11 +67,10 @@ GeoVPhysVol* GeoPixelDetailedStaveSupport::Build ( ) {
   double pmShilftLateral3D=0.;
   double radialShift=0.;
   double radialShiftThickN=0.;
-
   if(staveLayout==5||staveLayout==6||staveLayout==7)     // 75/25 or 50/50
     {
-      GeoPixelSiCrystal theSensor3D(m_DDmgr, m_gmt_mgr, m_sqliteReader, isBLayer,true);
-      GeoPixelModule pm3D(m_DDmgr, m_gmt_mgr, m_sqliteReader, theSensor3D);
+      GeoPixelSiCrystal theSensor3D(m_DDmgr, m_gmt_mgr, m_sqliteReader, m_mapFPV, m_mapAX, isBLayer,true);
+      GeoPixelModule pm3D(m_DDmgr, m_gmt_mgr, m_sqliteReader, m_mapFPV, m_mapAX, theSensor3D);
 
       pmThicknessN3D=pm3D.ThicknessN();
       pmThicknessP3D=pm3D.ThicknessP();
@@ -106,12 +107,13 @@ GeoVPhysVol* GeoPixelDetailedStaveSupport::Build ( ) {
   // Module 3D geometry
   // ------------------------------------------------------------------------------------------------------------
   // ------------------------------------------------------------------------------------------------------------
+    
   if(staveLayout==5||staveLayout==6||staveLayout==7)     // 75/25 or 50/50 or 75/25 review
     {
       // Get the 3D module description
       bool isModule3D=true;
-      GeoPixelSiCrystal theSensor3D(m_DDmgr, m_gmt_mgr, m_sqliteReader, isBLayer,isModule3D);
-      GeoPixelModule pm3D(m_DDmgr, m_gmt_mgr, m_sqliteReader, theSensor3D);
+      GeoPixelSiCrystal theSensor3D(m_DDmgr, m_gmt_mgr, m_sqliteReader, m_mapFPV, m_mapAX, isBLayer,isModule3D);
+      GeoPixelModule pm3D(m_DDmgr, m_gmt_mgr, m_sqliteReader, m_mapFPV, m_mapAX, theSensor3D);
       Module3DLength=pm3D.Length();
 
       if(staveLayout==5||staveLayout==7)  // 75/25

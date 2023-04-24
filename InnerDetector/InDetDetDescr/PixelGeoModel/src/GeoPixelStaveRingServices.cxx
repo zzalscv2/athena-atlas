@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -24,12 +24,14 @@
 #include <algorithm>
 using std::max;
 
-GeoPixelStaveRingServices::GeoPixelStaveRingServices(InDetDD::PixelDetectorManager* ddmgr
-						     , PixelGeometryManager* mgr
-						     , GeoModelIO::ReadGeoModel* sqliteReader
-						     , GeoPixelLadder& ladder
-						     , GeoPixelStaveSupport& staveSupport)
-  : GeoVPixelFactory (ddmgr, mgr, sqliteReader)
+GeoPixelStaveRingServices::GeoPixelStaveRingServices(InDetDD::PixelDetectorManager* ddmgr,
+						     PixelGeometryManager* mgr,
+						     GeoModelIO::ReadGeoModel* sqliteReader,
+                                                     std::shared_ptr<std::map<std::string, GeoFullPhysVol*>> mapFPV,
+                                                     std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX,
+						     GeoPixelLadder& ladder,
+						     GeoPixelStaveSupport& staveSupport)
+  : GeoVPixelFactory (ddmgr, mgr, sqliteReader, mapFPV, mapAX)
   , m_ladder(ladder)
   , m_staveSupport(staveSupport)
   , m_supportPhysA(nullptr)
@@ -47,7 +49,7 @@ GeoVPhysVol* GeoPixelStaveRingServices::Build()
   m_gmt_mgr->msg(MSG::INFO) <<"Build IBL stave ring services"<<endmsg;
 
   if(m_sqliteReader) {
-    GeoPixelStaveRing staveRing (m_DDmgr, m_gmt_mgr, m_sqliteReader);
+    GeoPixelStaveRing staveRing (m_DDmgr, m_gmt_mgr, m_sqliteReader, m_mapFPV, m_mapAX);
     staveRing.SetParametersAndBuild("Brl0A_StaveRing","AC");
     staveRing.SetParametersAndBuild("Brl0C_StaveRing","AC");
     return nullptr;
@@ -84,7 +86,7 @@ GeoVPhysVol* GeoPixelStaveRingServices::Build()
   } 
   
   // Define staveRing for side A
-  GeoPixelStaveRing staveRing (m_DDmgr, m_gmt_mgr, m_sqliteReader);
+  GeoPixelStaveRing staveRing (m_DDmgr, m_gmt_mgr, m_sqliteReader, m_mapFPV, m_mapAX);
   std::ostringstream lnameA;
   lnameA << "Brl0A_StaveRing";
   GeoVPhysVol* ringphysA = staveRing.SetParametersAndBuild(lnameA.str(),"AC");

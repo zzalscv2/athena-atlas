@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeoPixelBarrel.h"
@@ -29,24 +29,22 @@
 #include <sstream>
 
 using namespace std;
-GeoPixelBarrel::GeoPixelBarrel(InDetDD::PixelDetectorManager* ddmgr
-                               , PixelGeometryManager* mgr
-			       , GeoModelIO::ReadGeoModel* sqliteReader
-                               , GeoPixelServices * pixServices)
-  : GeoVPixelFactory (ddmgr, mgr, sqliteReader),
+GeoPixelBarrel::GeoPixelBarrel(InDetDD::PixelDetectorManager* ddmgr,
+                               PixelGeometryManager* mgr,
+			       GeoModelIO::ReadGeoModel* sqliteReader,
+                               std::shared_ptr<std::map<std::string, GeoFullPhysVol*>> mapFPV,
+                               std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX,
+                               GeoPixelServices * pixServices   )
+  : GeoVPixelFactory (ddmgr, mgr, sqliteReader, mapFPV, mapAX),
     m_pixServices(pixServices)
 {}
 
 GeoVPhysVol* GeoPixelBarrel::Build( ) {
 
   GeoFullPhysVol* barrelPhys{nullptr};
-  std::map<std::string, GeoFullPhysVol*> mapFPV;
-  std::map<std::string, GeoAlignableTransform*> mapAX;
 
   if(m_sqliteReader) {
-    mapFPV = m_sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("Pixel");
-    mapAX  = m_sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("Pixel");
-    barrelPhys = mapFPV["Barrel"];
+    barrelPhys = (*m_mapFPV)["Barrel"];
   }
   else {
     //
@@ -71,7 +69,7 @@ GeoVPhysVol* GeoPixelBarrel::Build( ) {
   //
   // Build the layers inside
   //
-  GeoPixelLayer layer (m_DDmgr, m_gmt_mgr, m_sqliteReader);
+  GeoPixelLayer layer (m_DDmgr, m_gmt_mgr, m_sqliteReader, m_mapFPV, m_mapAX);
   for(int ii = 0; ii < m_gmt_mgr->PixelBarrelNLayer(); ii++){
     //cout << "Layer" << ii << endl;
     m_gmt_mgr->SetCurrentLD(ii);
@@ -82,9 +80,9 @@ GeoVPhysVol* GeoPixelBarrel::Build( ) {
       Identifier id = m_gmt_mgr->getIdHelper()->wafer_id(0,ii,0,0);
 
       if(m_sqliteReader) {
-	GeoAlignableTransform* xform = mapAX[lname.str()];
+	GeoAlignableTransform* xform = (*m_mapAX)[lname.str()];
 	layer.Build();
-	GeoFullPhysVol* layerFPV = mapFPV [lname.str()];
+	GeoFullPhysVol* layerFPV = (*m_mapFPV) [lname.str()];
 	// Store the transform (at level 1)
 	m_DDmgr->addAlignableTransform(1, id, xform, layerFPV);
 
@@ -143,7 +141,7 @@ GeoVPhysVol* GeoPixelBarrel::Build( ) {
 	    // ----------- end of stave PP0 services (insde barrel)
 	    
 	    if(m_gmt_mgr->IBLFlexAndWingDefined()){
-	      GeoPixelIFlexServices iFlexSrv(m_DDmgr, m_gmt_mgr, m_sqliteReader, 0);
+	      GeoPixelIFlexServices iFlexSrv(m_DDmgr, m_gmt_mgr, m_sqliteReader, m_mapFPV, m_mapAX, 0);
 	      iFlexSrv.Build();
 	      
 	      GeoNameTag * tagFlexA = new GeoNameTag("PP0Flex_A");
@@ -182,7 +180,7 @@ GeoVPhysVol* GeoPixelBarrel::Build( ) {
     // Add the pixel frame inside the barrel volume
     // In recent versions this taken care of in the general services.
     if (m_gmt_mgr->oldFrame()) {
-      GeoPixelOldFrame frame (m_DDmgr, m_gmt_mgr, m_sqliteReader);
+      GeoPixelOldFrame frame (m_DDmgr, m_gmt_mgr, m_sqliteReader, m_mapFPV, m_mapAX);
       frame.BuildInBarrel(barrelPhys);      
     }
   }

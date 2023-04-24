@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -113,8 +113,10 @@
 GeoPixelServices::GeoPixelServices(InDetDD::PixelDetectorManager* ddmgr,
                                    PixelGeometryManager* mgr,
 				   GeoModelIO::ReadGeoModel* sqliteReader,
+                                   std::shared_ptr<std::map<std::string, GeoFullPhysVol*>> mapFPV,
+                                   std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX,
                                    InDetDD::Zone * pixZone) 
-  : GeoVPixelFactory(ddmgr, mgr, sqliteReader),
+  : GeoVPixelFactory(ddmgr, mgr, sqliteReader, mapFPV, mapAX),
     m_pixServBuilder(nullptr),
     m_servMatBuilder(nullptr),
     m_layerShift(0)

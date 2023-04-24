@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DBM_Telescope.h"
@@ -24,7 +24,7 @@
 
 GeoVPhysVol* DBM_Telescope::Build() {
 
-  DBM_ModuleCage moduleCage(m_DDmgr, m_gmt_mgr, m_sqliteReader);
+  DBM_ModuleCage moduleCage(m_DDmgr, m_gmt_mgr, m_sqliteReader, m_mapFPV, m_mapAX);
 
   if(m_sqliteReader) {
     moduleCage.Build();

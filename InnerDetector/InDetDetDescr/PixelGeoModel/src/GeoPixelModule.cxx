@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeoPixelModule.h"
@@ -20,11 +20,13 @@
 
 using std::max;
 
-GeoPixelModule::GeoPixelModule(InDetDD::PixelDetectorManager* m_DDmgr
-                               , PixelGeometryManager* mgr
-			       , GeoModelIO::ReadGeoModel* sqliteReader
-                               , GeoPixelSiCrystal& theSensor) 
-  : GeoVPixelFactory (m_DDmgr, mgr, sqliteReader)
+GeoPixelModule::GeoPixelModule(InDetDD::PixelDetectorManager* m_DDmgr,
+                               PixelGeometryManager* mgr,
+			                   GeoModelIO::ReadGeoModel* sqliteReader,
+                               std::shared_ptr<std::map<std::string, GeoFullPhysVol*>> mapFPV,
+                               std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX,
+                               GeoPixelSiCrystal& theSensor) 
+  : GeoVPixelFactory (m_DDmgr, mgr, sqliteReader, mapFPV, mapAX)
   , m_theSensor(theSensor)
 {
   //
@@ -37,7 +39,7 @@ GeoPixelModule::GeoPixelModule(InDetDD::PixelDetectorManager* m_DDmgr
 
   m_isModule3D=m_theSensor.GetModule3DFlag();
   m_nbModuleSvc = m_gmt_mgr->PixelModuleServiceNumber();
-
+  
   if(!m_sqliteReader) {
     int svcType = (m_isModule3D) ? 1 : 0;
 
@@ -111,6 +113,7 @@ GeoPixelModule::GeoPixelModule(InDetDD::PixelDetectorManager* m_DDmgr
       }
     }
   }
+    
 }
 
 GeoPixelModule::~GeoPixelModule(){
@@ -150,7 +153,7 @@ GeoVPhysVol* GeoPixelModule::Build( ) {
   // Place the Hybrid
   //
   if (m_gmt_mgr->PixelHybridThickness(m_isModule3D)>0.00001*Gaudi::Units::mm){
-    GeoPixelHybrid ph(m_DDmgr, m_gmt_mgr, m_sqliteReader, m_isModule3D);
+    GeoPixelHybrid ph(m_DDmgr, m_gmt_mgr, m_sqliteReader, m_mapFPV, m_mapAX, m_isModule3D);
     double hybxpos = -0.5*(m_gmt_mgr->PixelBoardThickness(m_isModule3D)+m_gmt_mgr->PixelHybridThickness(m_isModule3D));
     GeoTransform* xform = new GeoTransform(GeoTrf::TranslateX3D(hybxpos));
     modulePhys->add(xform);
@@ -160,7 +163,7 @@ GeoVPhysVol* GeoPixelModule::Build( ) {
   //
   // Place the Chip
   //
-  GeoPixelChip pc(m_DDmgr, m_gmt_mgr ,m_sqliteReader, m_isModule3D);
+  GeoPixelChip pc(m_DDmgr, m_gmt_mgr, m_sqliteReader, m_mapFPV, m_mapAX, m_isModule3D);
   double chipxpos = 0.5*(m_gmt_mgr->PixelBoardThickness(m_isModule3D)+m_gmt_mgr->PixelChipThickness(m_isModule3D))+m_gmt_mgr->PixelChipGap(m_isModule3D);
   double chipypos =m_gmt_mgr->PixelChipOffset(m_isModule3D);
   GeoTransform* xform = new GeoTransform(GeoTrf::TranslateX3D(chipxpos)*GeoTrf::TranslateY3D(chipypos));

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GEOPIXELFRAME_H
@@ -11,7 +11,9 @@ class GeoPixelFrame : public GeoVPixelFactory {
 
 public:  
   GeoPixelFrame(InDetDD::PixelDetectorManager* ddmgr,
-                PixelGeometryManager* mgr, GeoModelIO::ReadGeoModel* sqliteReader);
+                PixelGeometryManager* mgr, GeoModelIO::ReadGeoModel* sqliteReader,
+                std::shared_ptr<std::map<std::string, GeoFullPhysVol*>> mapFPV,
+                std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX);
   void BuildAndPlace(GeoFullPhysVol * parent, int section);
 
 private:

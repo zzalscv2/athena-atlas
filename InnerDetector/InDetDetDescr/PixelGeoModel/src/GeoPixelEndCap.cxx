@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeoPixelEndCap.h"
@@ -23,24 +23,20 @@
 
 #include "InDetGeoModelUtils/VolumeBuilder.h"
 
-GeoPixelEndCap::GeoPixelEndCap(InDetDD::PixelDetectorManager* ddmgr
-                               , PixelGeometryManager* mgr
-			       , GeoModelIO::ReadGeoModel* sqliteReader
-                               , GeoPixelServices * pixServices)
-  : GeoVPixelFactory(ddmgr, mgr, sqliteReader),
+GeoPixelEndCap::GeoPixelEndCap(InDetDD::PixelDetectorManager* ddmgr,
+                               PixelGeometryManager* mgr,
+			       GeoModelIO::ReadGeoModel* sqliteReader,
+                               std::shared_ptr<std::map<std::string, GeoFullPhysVol*>> mapFPV,
+                               std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX,
+                               GeoPixelServices * pixServices)
+  : GeoVPixelFactory(ddmgr, mgr, sqliteReader, mapFPV, mapAX),
     m_pixServices(pixServices)
 {}
 
 GeoVPhysVol* GeoPixelEndCap::Build( ) {
 
   GeoFullPhysVol* ecPhys{nullptr};
-  std::map<std::string, GeoFullPhysVol*> mapFPV;
-  std::map<std::string, GeoAlignableTransform*> mapAX;
-  if(m_sqliteReader) {
-    mapFPV = m_sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("Pixel");
-    mapAX  = m_sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("Pixel");
-  }
-  else {
+  if(!m_sqliteReader) {
     //
     // create the Barrel Mother volume
     // 
@@ -65,8 +61,8 @@ GeoVPhysVol* GeoPixelEndCap::Build( ) {
   //
   // Place the disks and cables on both sides
   //
-  GeoPixelDisk * pd = new GeoPixelDisk (m_DDmgr, m_gmt_mgr, m_sqliteReader);
-  GeoPixelECCable * pecc = new GeoPixelECCable (m_DDmgr, m_gmt_mgr, m_sqliteReader);
+  GeoPixelDisk * pd = new GeoPixelDisk (m_DDmgr, m_gmt_mgr, m_sqliteReader, m_mapFPV, m_mapAX);
+  GeoPixelECCable * pecc = new GeoPixelECCable (m_DDmgr, m_gmt_mgr, m_sqliteReader, m_mapFPV, m_mapAX);
   for(int idisk = 0; idisk < ndisks; idisk++) {
     m_gmt_mgr->SetCurrentLD(idisk);
     // Some method is accessing the eta before the disk is built so we set it 
@@ -78,7 +74,7 @@ GeoVPhysVol* GeoPixelEndCap::Build( ) {
 	int brl_ec = 2*m_gmt_mgr->GetSide();
 	Identifier id = m_gmt_mgr->getIdHelper()->wafer_id(brl_ec,idisk,0,0);
 	std::string key="Disk_"+std::to_string(brl_ec)+"_"+std::to_string(idisk)+"_"+std::to_string(m_gmt_mgr->GetLD())+"_"+std::to_string(m_gmt_mgr->Phi())+"_"+std::to_string(m_gmt_mgr->Eta());
-	m_DDmgr->addAlignableTransform(1, id, mapAX[key], mapFPV[key]);
+	m_DDmgr->addAlignableTransform(1, id, (*m_mapAX)[key], (*m_mapFPV)[key]);
       }
       else {
       
@@ -127,7 +123,7 @@ GeoVPhysVol* GeoPixelEndCap::Build( ) {
   if(m_sqliteReader) {
     std::ostringstream ename;
     ename << "EndCap" << region;
-    ecPhys = mapFPV[ename.str()];
+    ecPhys = (*m_mapFPV)[ename.str()];
   }
   else if(m_pixServices) {
     //
