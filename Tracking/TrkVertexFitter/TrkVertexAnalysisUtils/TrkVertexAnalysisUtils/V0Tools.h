@@ -277,7 +277,6 @@ namespace Trk
  * mass-proper time covariance
  */
   Amg::MatrixX tauMassCovariance(const xAOD::Vertex * vxCandidate, const xAOD::Vertex* vertex, const std::vector<double> &masses) const;
-  double massTauCov(const xAOD::Vertex * vxCandidate, const xAOD::Vertex* vertex, double posTrackMass, double negTrackMass) const;
   double massTauCov(const xAOD::Vertex * vxCandidate, const xAOD::Vertex* vertex, const std::vector<double> &masses) const;
 
 /**
@@ -361,33 +360,15 @@ namespace Trk
  *  if a negative value for a track is provided, the invariantMass and invariantMassError
  *  are returned excluding that track
  */
-  double invariantMassBeforeFitIP(const xAOD::Vertex * vxCandidate, double posTrackMass, double negTrackMass) const;
   double invariantMassBeforeFitIP(const xAOD::Vertex * vxCandidate, const std::vector<double> &masses) const;
-  double invariantMassBeforeFit(const xAOD::Vertex * vxCandidate, double posTrackMass, double negTrackMass) const;
-  double invariantMassBeforeFit(const xAOD::Vertex * vxCandidate, const std::vector<double> &masses) const;
-  double invariantMassBeforeFit(const xAOD::Vertex * vxCandidate, double posTrackMass, double negTrackMass, const Amg::Vector3D& vertex) const;
-  double invariantMassBeforeFit(const xAOD::Vertex * vxCandidate, const std::vector<double> &masses, const Amg::Vector3D& vertex) const;
-  double invariantMassErrorBeforeFitIP(const xAOD::Vertex * vxCandidate, double posTrackMass, double negTrackMass) const;
+  double invariantMassBeforeFit(const xAOD::Vertex * vxCandidate, const std::vector<double> &masses, const EventContext&, const Trk::IExtrapolator*) const;
+  double invariantMassBeforeFit(const xAOD::Vertex * vxCandidate, const std::vector<double> &masses, const Amg::Vector3D& vertex, const EventContext&, const Trk::IExtrapolator*) const;
   double invariantMassErrorBeforeFitIP(const xAOD::Vertex * vxCandidate, const std::vector<double> &masses) const;
-  double invariantMassErrorBeforeFit(const xAOD::Vertex * vxCandidate, double posTrackMass, double negTrackMass) const;
-  double invariantMassErrorBeforeFit(const xAOD::Vertex * vxCandidate, const std::vector<double> &masses) const;
-  double invariantMassErrorBeforeFit(const xAOD::Vertex * vxCandidate, double posTrackMass, double negTrackMass, const Amg::Vector3D& vertex) const;
-  double invariantMassErrorBeforeFit(const xAOD::Vertex * vxCandidate, const std::vector<double> &masses, const Amg::Vector3D& vertex) const;
+  double invariantMassErrorBeforeFit(const xAOD::Vertex * vxCandidate, const std::vector<double> &masses, const EventContext& ctx, const Trk::IExtrapolator*) const;
+  double invariantMassErrorBeforeFit(const xAOD::Vertex * vxCandidate, const std::vector<double> &masses, const Amg::Vector3D& vertex, const EventContext& ctx, const Trk::IExtrapolator*) const;
 
   static Amg::MatrixX convertCovMatrix(const xAOD::Vertex * vxCandidate) ;
 
-/**
- * pointer from a mass constrained (Kshort, Lambda or Lambdabar) V0 to the unconstrained one
- */
-  static const xAOD::Vertex* v0Link(const xAOD::Vertex * vxCandidate) ;
-
-/**
- * pointers to Kshort, Lambda or Lambdabar mass constrained V0s, if they exist, from the unconstrained one
- */
-  static const xAOD::Vertex* kshortLink(const xAOD::Vertex * vxCandidate) ;
-  static const xAOD::Vertex* lambdaLink(const xAOD::Vertex * vxCandidate) ;
-  static const xAOD::Vertex* lambdabarLink(const xAOD::Vertex * vxCandidate) ;
- 
   static Amg::MatrixX makeV0Cov(const xAOD::Vertex * vxCandidate) ;
  
   private:
@@ -399,8 +380,6 @@ namespace Trk
   double massErrorVxCandidate(const xAOD::Vertex * vxCandidate, double posTrackMass, double negTrackMass) const;
   double massErrorVxCandidate(const xAOD::Vertex * vxCandidate, const std::vector<double> &masses) const;
 
-  ToolHandle < Trk::IExtrapolator > m_extrapolator;
-  Gaudi::Property<bool> m_disableExtrap{this, "DisableExtrapolator", false, "To prevent Extrapolator use when not needed"};
  };//end of class definitions
 
 

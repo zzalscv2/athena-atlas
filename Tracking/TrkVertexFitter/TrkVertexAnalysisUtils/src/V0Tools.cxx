@@ -24,10 +24,8 @@ namespace Trk
 {
 
   V0Tools::V0Tools(const std::string& t, const std::string& n, const IInterface*  p) :
-   AthAlgTool(t,n,p),
-   m_extrapolator("Trk::Extrapolator")
+   AthAlgTool(t,n,p)
   {
-    declareProperty("Extrapolator", m_extrapolator);
     declareInterface<V0Tools>(this);
   }
 
@@ -35,64 +33,8 @@ namespace Trk
 
   StatusCode V0Tools::initialize()
   {
-
-  //get the extrapolator
-   ATH_MSG_DEBUG("in V0tools");
-  if(m_disableExtrap) {
-    m_extrapolator.disable();
-    ATH_MSG_INFO( "Disabled extrapolator access");
-  }
-  else{
-    if (m_extrapolator.retrieve().isFailure() ) {
-      ATH_MSG_FATAL( "Failed to retrieve tool " << m_extrapolator );
-      return StatusCode::FAILURE;
-    } else {
-      ATH_MSG_DEBUG( "Retrieved tool " << m_extrapolator );
-    }
-  }
-
     ATH_MSG_DEBUG( "Initialize successful" );
     return StatusCode::SUCCESS;
-  }
-
-  const xAOD::Vertex * V0Tools::v0Link(const xAOD::Vertex * vxCandidate)
-  {
-    const xAOD::Vertex* v0(nullptr);
-    const static SG::AuxElement::Accessor< ElementLink< xAOD::VertexContainer > > acc( "V0Link" );
-    if ((acc(*vxCandidate)).isValid()) {
-      v0 = *(acc(*vxCandidate));
-    }
-    return v0;
-  }
-
-  const xAOD::Vertex * V0Tools::kshortLink(const xAOD::Vertex * vxCandidate)
-  {
-    const xAOD::Vertex* v0(nullptr);
-    const static SG::AuxElement::Accessor< ElementLink< xAOD::VertexContainer > > acc( "KshortLink" );
-    if ((acc(*vxCandidate)).isValid()) {
-      v0 = *(acc(*vxCandidate));
-    }
-    return v0;
-  }
-
-  const xAOD::Vertex * V0Tools::lambdaLink(const xAOD::Vertex * vxCandidate)
-  {
-    const xAOD::Vertex* v0(nullptr);
-    const static SG::AuxElement::Accessor< ElementLink< xAOD::VertexContainer > > acc( "LambdaLink" );
-    if ((acc(*vxCandidate)).isValid()) {
-      v0 = *(acc(*vxCandidate));
-    }
-    return v0;
-  }
-
-  const xAOD::Vertex * V0Tools::lambdabarLink(const xAOD::Vertex * vxCandidate)
-  {
-    const xAOD::Vertex* v0(nullptr);
-    const static SG::AuxElement::Accessor< ElementLink< xAOD::VertexContainer > > acc( "LambdabarLink" );
-    if ((acc(*vxCandidate)).isValid()) {
-      v0 = *(acc(*vxCandidate));
-    }
-    return v0;
   }
 
   double V0Tools::invariantMass(const xAOD::Vertex * vxCandidate, double posTrackMass, double negTrackMass) const
@@ -2206,12 +2148,6 @@ namespace Trk
   }
   */
 
-  double V0Tools::invariantMassBeforeFitIP(const xAOD::Vertex * vxCandidate, double posTrackMass, double negTrackMass) const
-  {
-    std::vector<double> masses = {posTrackMass, negTrackMass};
-    return invariantMassBeforeFitIP(vxCandidate,masses);
-  }
-
   double V0Tools::invariantMassBeforeFitIP(const xAOD::Vertex * vxCandidate, const std::vector<double> &masses) const
   {
     double px = 0., py = 0., pz = 0., e = 0.;
@@ -2236,13 +2172,7 @@ namespace Trk
     return (msq>0.) ? sqrt(msq) : 0.;
   }
 
-  double V0Tools::invariantMassBeforeFit(const xAOD::Vertex * vxCandidate, double posTrackMass, double negTrackMass) const
-  {
-    std::vector<double> masses = {posTrackMass, negTrackMass};
-    return invariantMassBeforeFit(vxCandidate,masses);
-  }
-
-  double V0Tools::invariantMassBeforeFit(const xAOD::Vertex * vxCandidate, const std::vector<double> &masses) const
+  double V0Tools::invariantMassBeforeFit(const xAOD::Vertex * vxCandidate, const std::vector<double> &masses, const EventContext& ctx, const Trk::IExtrapolator* extrapolator) const
   {
     Trk::PerigeeSurface perigeeSurface(vxCandidate->position());
     double px = 0., py = 0., pz = 0., e = 0.;
@@ -2256,8 +2186,7 @@ namespace Trk
         const xAOD::TrackParticle* TP = origTrack(vxCandidate,it);
         if (TP == nullptr) return -999999.;
         std::unique_ptr<const Trk::TrackParameters> extrPer =
-          m_extrapolator->extrapolate(
-            Gaudi::Hive::currentContext(), TP->perigeeParameters(), perigeeSurface);
+          extrapolator->extrapolate(ctx, TP->perigeeParameters(), perigeeSurface);
         if (extrPer == nullptr)
           return -999999.;
         px += extrPer->momentum().x();
@@ -2272,13 +2201,8 @@ namespace Trk
     return (msq>0.) ? sqrt(msq) : 0.;
   }
 
-  double V0Tools::invariantMassBeforeFit(const xAOD::Vertex * vxCandidate, double posTrackMass, double negTrackMass, const Amg::Vector3D& vertex) const
-  {
-    std::vector<double> masses = {posTrackMass, negTrackMass};
-    return invariantMassBeforeFit(vxCandidate,masses,vertex);
-  }
-
-  double V0Tools::invariantMassBeforeFit(const xAOD::Vertex * vxCandidate, const std::vector<double> &masses, const Amg::Vector3D& vertex) const
+  double V0Tools::invariantMassBeforeFit(const xAOD::Vertex * vxCandidate, 
+        const std::vector<double> &masses, const Amg::Vector3D& vertex, const EventContext& ctx, const Trk::IExtrapolator* extrap) const
   {
     Trk::PerigeeSurface perigeeSurface(vertex);
     double px = 0., py = 0., pz = 0., e = 0.;
@@ -2292,8 +2216,7 @@ namespace Trk
         const xAOD::TrackParticle* TP = origTrack(vxCandidate,it);
         if (TP == nullptr) return -999999.;
         std::unique_ptr<const Trk::TrackParameters> extrPer =
-          m_extrapolator->extrapolate(
-            Gaudi::Hive::currentContext(), TP->perigeeParameters(), perigeeSurface);
+          extrap->extrapolate(ctx, TP->perigeeParameters(), perigeeSurface);
         if (extrPer == nullptr)
           return -999999.;
         px += extrPer->momentum().x();
@@ -2306,13 +2229,6 @@ namespace Trk
     }
     double msq = e*e - px*px - py*py - pz*pz;
     return (msq>0.) ? sqrt(msq) : 0.;
-  }
-
-  double V0Tools::invariantMassErrorBeforeFitIP(const xAOD::Vertex * vxCandidate, double posTrackMass, double negTrackMass) const
-  {
-    std::vector<double> masses = {posTrackMass, negTrackMass};
-
-    return invariantMassErrorBeforeFitIP(vxCandidate,masses);
   }
 
   double V0Tools::invariantMassErrorBeforeFitIP(const xAOD::Vertex * vxCandidate, const std::vector<double> &masses) const
@@ -2380,14 +2296,8 @@ namespace Trk
     return massErr;
   }
 
-  double V0Tools::invariantMassErrorBeforeFit(const xAOD::Vertex * vxCandidate, double posTrackMass, double negTrackMass) const
-  {
-    std::vector<double> masses = {posTrackMass, negTrackMass};
 
-    return invariantMassErrorBeforeFit(vxCandidate,masses);
-  }
-
-  double V0Tools::invariantMassErrorBeforeFit(const xAOD::Vertex * vxCandidate, const std::vector<double> &masses) const
+  double V0Tools::invariantMassErrorBeforeFit(const xAOD::Vertex * vxCandidate, const std::vector<double> &masses, const EventContext& ctx, const Trk::IExtrapolator* extrap) const
   {
     unsigned int NTrk = vxCandidate->vxTrackAtVertex().size();
     if (masses.size() != NTrk) {
@@ -2395,17 +2305,12 @@ namespace Trk
       return -999999.;
     }
     Amg::Vector3D vertex = vxCandidate->position();
-    return invariantMassErrorBeforeFit(vxCandidate,masses,vertex);
+    return invariantMassErrorBeforeFit(vxCandidate,masses,vertex, ctx, extrap);
   }
 
-  double V0Tools::invariantMassErrorBeforeFit(const xAOD::Vertex * vxCandidate, double posTrackMass, double negTrackMass, const Amg::Vector3D& vertex) const
-  {
-    std::vector<double> masses = {posTrackMass, negTrackMass};
 
-    return invariantMassErrorBeforeFit(vxCandidate,masses,vertex);
-  }
-
-  double V0Tools::invariantMassErrorBeforeFit(const xAOD::Vertex * vxCandidate, const std::vector<double> &masses, const Amg::Vector3D& vertex) const
+  double V0Tools::invariantMassErrorBeforeFit(const xAOD::Vertex * vxCandidate, 
+           const std::vector<double> &masses, const Amg::Vector3D& vertex, const EventContext& ctx, const Trk::IExtrapolator* extrap) const
   {
     unsigned int NTrk = vxCandidate->vxTrackAtVertex().size();
     if (masses.size() != NTrk) {
@@ -2422,8 +2327,7 @@ namespace Trk
         const xAOD::TrackParticle* TP = origTrack(vxCandidate,it);
         if (TP == nullptr) return -999999.;
         std::unique_ptr<const Trk::TrackParameters> extrPer =
-          m_extrapolator->extrapolate(
-            Gaudi::Hive::currentContext(), TP->perigeeParameters(), perigeeSurface);
+          extrap->extrapolate(ctx, TP->perigeeParameters(), perigeeSurface);
         if (extrPer == nullptr)
           return -999999.;
         const AmgSymMatrix(5)* cov_tmp = extrPer->covariance();
@@ -2477,12 +2381,6 @@ namespace Trk
     return massErr;
   }
 
-  double V0Tools::massTauCov(const xAOD::Vertex * vxCandidate, const xAOD::Vertex* vertex, double posTrackMass, double negTrackMass) const
-  {
-    std::vector<double> masses = {posTrackMass, negTrackMass};
-
-    return massTauCov(vxCandidate,vertex,masses);
-  }
 
   double V0Tools::massTauCov(const xAOD::Vertex * vxCandidate, const xAOD::Vertex* vertex, const std::vector<double>  &masses) const
   {
