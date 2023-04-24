@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONREADOUTGEOMETRY_STGCREADOUTELEMENT_H
@@ -27,7 +27,7 @@ namespace MuonGM {
     public:
         /** constructor */
 
-        sTgcReadoutElement(GeoVFullPhysVol* pv, const std::string& stName, int zi, int fi, int mL, bool is_mirrored, MuonDetectorManager* mgr);
+        sTgcReadoutElement(GeoVFullPhysVol* pv, const std::string& stName, int zi, int fi, int mL, MuonDetectorManager* mgr);
 
         /** destructor */
         ~sTgcReadoutElement();
@@ -110,9 +110,6 @@ namespace MuonGM {
            return false */
         virtual bool spacePointPosition(const Identifier& phiId, const Identifier& etaId, Amg::Vector3D& pos) const override final;
 
-        /** TrkDetElementInterface */
-        virtual Trk::DetectorElemType detectorType() const override final { return Trk::DetectorElemType::sTgc; }
-
         /** space point position for a pair of phi and eta local positions and a layer identifier
             The LocalPosition is expressed in the reference frame of the phi projection.
         */
@@ -170,9 +167,6 @@ namespace MuonGM {
 
         /** returns the MuonChannelDesign */
         const MuonPadDesign* getPadDesign(int gasGap) const;
-
-        /** set methods only to be used by MuonGeoModel */
-        void setIdentifier(const Identifier& id);
 
         /** set methods only to be used by MuonGeoModel */
         void setChamberLayer(int ml) { m_ml = ml; }
