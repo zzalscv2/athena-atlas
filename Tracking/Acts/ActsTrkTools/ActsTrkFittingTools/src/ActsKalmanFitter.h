@@ -22,7 +22,7 @@
 #include "Acts/MagneticField/MagneticFieldProvider.hpp"
 #include "Acts/Propagator/EigenStepper.hpp"
 #include "Acts/Propagator/Propagator.hpp"
-#include "Acts/EventData/Track.hpp"
+#include "Acts/EventData/TrackProxy.hpp"
 #include "Acts/EventData/VectorTrackContainer.hpp"
 #include "Acts/Geometry/GeometryIdentifier.hpp"
 
