@@ -33,7 +33,7 @@ echo "Now in ${rundir}"
 export AtlasSetup=/afs/cern.ch/atlas/software/dist/AtlasSetup
 source $AtlasSetup/scripts/asetup.sh Athena,22.0.81
 
-systems='Pixel SCT TRT LAr Tile MDT TGC RPC Trig_L1 Trig_HLT Lumi Global ALFA LUCID ZDC IDGlobal BTag CaloCP MuonCP '
+systems='Pixel SCT TRT LAr Tile MDT TGC RPC Trig_L1 Trig_HLT Lumi Global ALFA AFP LUCID ZDC IDGlobal BTag CaloCP MuonCP '
 
 if [ $option == "resetYS" ];
 then
@@ -81,7 +81,7 @@ do
 done
 
 echo "Derive ATLAS data loss"
-cmd="python $ScriptPath/DeMoAtlasDataLoss.py -b -y ${year} -t ${tag}"
+cmd="python DeMoAtlasDataLoss.py -b -y ${year} -t ${tag}"
 eval ${cmd}
 
 echo "Generate webpage"

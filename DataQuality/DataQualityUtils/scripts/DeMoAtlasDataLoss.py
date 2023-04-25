@@ -174,7 +174,10 @@ for iSyst in systemList2:
   print("==== %s"%iSyst)
   if (len(affectedLBs[iSyst])):
     for i in range(len(periodName)):
-      percentLoss = dataLossPerPeriod[iSyst][periodName[i]]/periodLumi[periodName[i]]/10000
+      if (periodLumi[periodName[i]] != 0.):
+        percentLoss = dataLossPerPeriod[iSyst][periodName[i]]/periodLumi[periodName[i]]/10000
+      else:
+        percentLoss = 0.
       if percentLoss != 0.:
         print("Period %s -> %.4f percent"%(periodName[i],percentLoss))
         hprof_dataLossPerSystem[iSyst].Fill(i,percentLoss)
