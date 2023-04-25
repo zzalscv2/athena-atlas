@@ -15,7 +15,7 @@
 #include "TrkToolInterfaces/IExtendedTrackSummaryTool.h"
 
 // ACTS
-#include "Acts/EventData/Track.hpp"
+#include "Acts/EventData/TrackContainer.hpp"
 #include "Acts/EventData/TrackParameters.hpp"
 #include "Acts/EventData/VectorTrackContainer.hpp"
 #include "Acts/Geometry/GeometryIdentifier.hpp"

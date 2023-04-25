@@ -261,19 +261,26 @@ namespace ActsTrk {
       for (std::size_t idx(0); idx < spacePointsGrouping.grid().size(); ++idx) {
         const std::vector<std::unique_ptr<Acts::InternalSpacePoint<xAOD::SpacePoint>>>& collection = spacePointsGrouping.grid().at(idx);
         for (const std::unique_ptr<Acts::InternalSpacePoint<xAOD::SpacePoint>>& sp : collection) {
-	  std::size_t index = sp->index();
-          state.spacePointData.setTopHalfStripLength(index,
-                                                     m_finderCfg.getTopHalfStripLength(sp->sp()));
-          state.spacePointData.setBottomHalfStripLength(index,
-                                                        m_finderCfg.getBottomHalfStripLength(sp->sp()));
-          state.spacePointData.setTopStripDirection(index,
-                                                    m_finderCfg.getTopStripDirection(sp->sp()));
-          state.spacePointData.setBottomStripDirection(index,
-                                                       m_finderCfg.getBottomStripDirection(sp->sp()));
-          state.spacePointData.setStripCenterDistance(index,
-                                                      m_finderCfg.getStripCenterDistance(sp->sp()));
-          state.spacePointData.setTopStripCenterPosition(index,
-                                                         m_finderCfg.getTopStripCenterPosition(sp->sp()));
+          std::size_t index = sp->index();
+
+          const float topHalfStripLength =
+              m_finderCfg.getTopHalfStripLength(sp->sp());
+          const float bottomHalfStripLength =
+              m_finderCfg.getBottomHalfStripLength(sp->sp());
+          const Acts::Vector3 topStripDirection =
+              m_finderCfg.getTopStripDirection(sp->sp());
+          const Acts::Vector3 bottomStripDirection =
+              m_finderCfg.getBottomStripDirection(sp->sp());
+
+          state.spacePointData.setTopStripVector(
+              index, topHalfStripLength * topStripDirection);
+          state.spacePointData.setBottomStripVector(
+              index, bottomHalfStripLength * bottomStripDirection);
+          state.spacePointData.setStripCenterDistance(
+              index, m_finderCfg.getStripCenterDistance(sp->sp()));
+          state.spacePointData.setTopStripCenterPosition(
+              index, m_finderCfg.getTopStripCenterPosition(sp->sp()));
+
         }
       }
     }
