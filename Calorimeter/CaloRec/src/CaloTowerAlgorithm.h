@@ -28,6 +28,7 @@
 #include <vector>
 #include <map>
 
+class IChronoStatSvc;
 class CaloTowerContainer;
 class ICaloTowerBuilderToolBase;
 
@@ -54,6 +55,10 @@ class CaloTowerAlgorithm: public AthReentrantAlgorithm {
     // Properties //
     ////////////////
 
+    // ChronoStatSvc
+    ServiceHandle<IChronoStatSvc> m_chrono;
+    bool m_doChronoStat;
+
     // tower grid specs
     unsigned int m_nEtaTowers;
     unsigned int m_nPhiTowers;
@@ -74,5 +79,6 @@ class CaloTowerAlgorithm: public AthReentrantAlgorithm {
 
     // list of tools
     tool_store m_tools;
+
 };
 #endif

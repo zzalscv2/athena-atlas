@@ -3,6 +3,9 @@
 */
 
 
+// Gaudi includes
+#include "GaudiKernel/IChronoStatSvc.h"
+
 #include "AthenaKernel/errorcheck.h"
 
 #include "CaloEvent/CaloTowerSeg.h"
@@ -16,6 +19,8 @@
 CaloTowerAlgorithm::CaloTowerAlgorithm(const std::string& name, 
 				       ISvcLocator* pSvcLocator) 
   : AthReentrantAlgorithm(name,pSvcLocator)
+  , m_chrono("ChronoStatSvc", name)
+  , m_doChronoStat(true)
   , m_nEtaTowers(50)
   , m_nPhiTowers(64)
   , m_minEta(-2.5)
@@ -24,6 +29,8 @@ CaloTowerAlgorithm::CaloTowerAlgorithm(const std::string& name,
   , m_ptools( this )
   , m_towerContainerKey("")
 {
+  // chrono
+  declareProperty("EnableChronoStat", m_doChronoStat);
   // tool names
   //declareProperty("TowerBuilderTools",m_toolNames);
   declareProperty("TowerBuilderTools",m_ptools);
@@ -47,6 +54,11 @@ CaloTowerAlgorithm::~CaloTowerAlgorithm()
 
 StatusCode CaloTowerAlgorithm::initialize()
 {
+  // Retrieve ChronoStatSvc
+  if (m_doChronoStat) {
+    ATH_CHECK( m_chrono.retrieve() );
+  }
+
   ATH_CHECK(m_towerContainerKey.initialize());
   ////////////////////
   // Allocate Tools //
@@ -100,13 +112,6 @@ StatusCode CaloTowerAlgorithm::initialize()
 StatusCode CaloTowerAlgorithm::execute (const EventContext& ctx) const
 {
 
-  //////////////////////////
-  // Re-allocate Services //
-  //////////////////////////
-
-  //timing
-  IChronoStatSvc* theTicker = chronoSvc();
-
   /////////////////////
   // Tool Processing //
   /////////////////////
@@ -128,14 +133,14 @@ StatusCode CaloTowerAlgorithm::execute (const EventContext& ctx) const
   
   while (!processStatus.isFailure() && firstITool != lastITool) {
 
-    if (theTicker != nullptr) {
-      theTicker->chronoStart((*firstITool)->name());
+    if (m_doChronoStat) {
+      m_chrono->chronoStart((*firstITool)->name());
     }
 
     processStatus = (*firstITool)->execute(ctx, theTowers.ptr());
 
-    if (theTicker != nullptr) {
-      theTicker->chronoStop((*firstITool)->name());
+    if (m_doChronoStat) {
+      m_chrono->chronoStop((*firstITool)->name());
     }
     if (!processStatus.isFailure()) {
       ATH_MSG_DEBUG((*firstITool)->name()
