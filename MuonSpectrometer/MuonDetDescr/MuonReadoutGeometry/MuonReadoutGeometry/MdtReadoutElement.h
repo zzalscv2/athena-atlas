@@ -11,7 +11,7 @@
 #include "MuonReadoutGeometry/ArrayHelper.h"
 #include "MuonReadoutGeometry/MuonReadoutElement.h"
 #include "TrkDistortedSurfaces/SaggedLineSurface.h"
-#include "EventPrimitives/EventPrimitivesToStringConverter.h"
+
 class BLinePar;
 
 namespace Trk {
@@ -58,19 +58,9 @@ namespace MuonGM {
         friend class MuonChamberLite;
 
     public:
-        MdtReadoutElement(GeoVFullPhysVol* pv, const std::string& stName,MuonDetectorManager* mgr);
+        MdtReadoutElement(GeoVFullPhysVol* pv, const std::string& stName, int zi, int fi, bool is_mirrored, MuonDetectorManager* mgr);
 
         virtual ~MdtReadoutElement() = default;
-
-        /// How many MDT chambers are in the station
-        unsigned int nMDTinStation() const { 
-             return m_nMDTinStation;
-        }
-        void setNMdtInStation(unsigned int numMdt) { m_nMDTinStation = numMdt;}
-        
-        bool barrel() const;
-        bool endcap() const;
-      
 
         // Id set/get methods
         inline int getMultilayer() const;
@@ -80,6 +70,7 @@ namespace MuonGM {
         inline void setMultilayer(const int ml);
         inline void setNLayers(const int nl);
         inline bool isInBarrel() const;
+        void setIdentifier(const Identifier& id);
         bool getWireFirstLocalCoordAlongZ(int tubeLayer, double& coord) const;
         bool getWireFirstLocalCoordAlongR(int tubeLayer, double& coord) const;
 
@@ -188,6 +179,9 @@ namespace MuonGM {
         Amg::Vector3D tubeNormal(const int, const int) const;
         const Amg::Vector3D& normal() const override final;
 
+        /** TrkDetElementInterface */
+        virtual Trk::DetectorElemType detectorType() const override final { return Trk::DetectorElemType::Mdt; }
+
         /** returns all the surfaces contained in this detector element */
         std::vector<const Trk::Surface*> surfaces() const;
 
@@ -213,7 +207,6 @@ namespace MuonGM {
         void shiftTube(const Identifier& id);
         void restoreTubes();
 
-        unsigned int m_nMDTinStation{0};
         int m_multilayer{0};
         int m_nlayers{-1};
         double m_tubepitch{-9999.};

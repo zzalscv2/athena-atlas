@@ -49,18 +49,17 @@ bool BuildNSWReadoutGeometry::BuildReadoutGeometry(MuonGM::MuonDetectorManager* 
             etaIndex = iSide * atoi((chTag.substr(5, 1)).c_str());
             phiIndex = atoi((chTag.substr(12, 1)).c_str());
             mLayer = atoi((chTag.substr(7, 1)).c_str());
-            std::string vName = vol->getLogVol()->getName();
-            std::string sName = vName.substr(vName.find('-') + 1);
-                
+
             if (chTag.substr(0, 3) == "sMD") {
-                MMReadoutElement* re = new MMReadoutElement(vol, sName, etaIndex, phiIndex, mLayer, mgr, passivData);
-                re->initDesign();
+                MMReadoutElement* re = new MMReadoutElement((GeoVFullPhysVol*)vol, stName, etaIndex, phiIndex, mLayer, false, mgr, passivData);
+                std::string myVolName = (chTag.substr(0, 8)).c_str();
+                re->initDesign(-999., -999., -999., -999., -999.);
                 re->fillCache();
                 mgr->addMMReadoutElement(re);
                 re->setDelta(mgr);
                 re->setBLinePar(mgr);
             } else if (chTag.substr(0, 3) == "sTG") {
-                sTgcReadoutElement* re = new sTgcReadoutElement(vol, sName, etaIndex, phiIndex, mLayer, mgr);
+                sTgcReadoutElement* re = new sTgcReadoutElement((GeoVFullPhysVol*)vol, stName, etaIndex, phiIndex, mLayer, false, mgr);
                 std::string myVolName = (chTag.substr(0, 8)).c_str();
                 re->initDesign(-999., -999., -999., 3.2, -999., 2.7, -999., 2.6);
                 re->fillCache();

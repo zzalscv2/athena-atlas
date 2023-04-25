@@ -1,18 +1,24 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONREADOUTGEOMETRY_MUONCLUSTERREADOUTELEMENT_H
 #define MUONREADOUTGEOMETRY_MUONCLUSTERREADOUTELEMENT_H
 
+#include <GaudiKernel/IMessageSvc.h>
+#include <TString.h>
 
 #include <stdexcept>
 #include <string>
 #include <vector>
 
+#include "AthenaKernel/getMessageSvc.h"
+#include "GaudiKernel/MsgStream.h"
 #include "MuonReadoutGeometry/MuonReadoutElement.h"
 #include "TrkSurfaces/PlaneSurface.h"
 #include "TrkSurfaces/SurfaceBounds.h"
+
+class GeoVFullPhysVol;
 
 namespace MuonGM {
 
@@ -23,27 +29,29 @@ namespace MuonGM {
         /** struct to hold information needed for TrkDetElementBase, takes owership of all pointers */
         struct SurfaceData {
             /** all surfaces on the muon strip detectors have the same normal vector */
-            std::vector<Amg::Vector3D> m_layerNormals{};
+            std::vector<Amg::Vector3D> m_layerNormals;
 
             /** the eta and phi bounds of the individual layers are not all identical in the muon system (sTGC staircase) */
-            std::vector<std::unique_ptr<Trk::SurfaceBounds>> m_surfBounds{};
+            std::vector<std::unique_ptr<Trk::SurfaceBounds>> m_surfBounds;
 
             /** there are two transformation per layer as the eta/phi surfaces are rotated by 90 degrees wrt eachother: Total number =
              * 2*number of layers */
-            std::vector<Amg::Transform3D> m_layerTransforms{};
+            std::vector<Amg::Transform3D> m_layerTransforms;
 
             /** there are two surfaces per layer as the eta/phi surfaces are rotated by 90 degrees wrt eachother: Total number = 2*number of
              * layers */
-            std::vector<std::unique_ptr<Trk::PlaneSurface>> m_layerSurfaces{};
+            std::vector<std::unique_ptr<Trk::PlaneSurface>> m_layerSurfaces;
 
             /** the eta and phi surfaces for a given layer share the same center: Total number = number of layers */
-            std::vector<Amg::Vector3D> m_layerCenters{};
+            std::vector<Amg::Vector3D> m_layerCenters;
 
             SurfaceData() = default;
             ~SurfaceData() = default;
         };
 
-      
+        MuonClusterReadoutElement(GeoVFullPhysVol* pv, const std::string& stName, int zi, int fi, bool is_mirrored,
+                                  MuonDetectorManager* mgr);
+
         ~MuonClusterReadoutElement();
 
         /** distance to readout.
@@ -117,13 +125,10 @@ namespace MuonGM {
         virtual bool measuresPhi(const Identifier& id) const = 0;
 
     protected:
-        
-        MuonClusterReadoutElement(GeoVFullPhysVol* pv, MuonDetectorManager* mgr, Trk::DetectorElemType detType);
-
         void shiftSurface(const Identifier& id);
         void restoreSurfaces();
 
-        std::unique_ptr<SurfaceData> m_surfaceData{};
+        std::unique_ptr<SurfaceData> m_surfaceData;
     };
 
     inline const Trk::PlaneSurface& MuonClusterReadoutElement::surface() const { return surface(0); }
@@ -142,12 +147,14 @@ namespace MuonGM {
 
     inline const Trk::PlaneSurface& MuonClusterReadoutElement::surface(int hash) const {
         if (!m_surfaceData) {
-            ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" "<<__func__<<" Requesting surface but cache is empty");
-            throw std::runtime_error("Empty surface cache");
+            throw std::runtime_error(Form(
+                "File: %s, Line: %d\nMuonClusterReadoutElement::surface() - requesting surface but cache is empty", __FILE__, __LINE__));
         }
         if (hash == -1 || hash >= (int)m_surfaceData->m_layerSurfaces.size()) {
-            ATH_MSG_WARNING(" surface hash out of range: " << hash << " elements "
-                            << m_surfaceData->m_layerSurfaces.size());
+            MsgStream log(Athena::getMessageSvc(), "MuonClusterReadoutElement");
+            if (log.level() <= MSG::WARNING)
+                log << MSG::WARNING << this << " surface hash out of range: " << hash << " elements "
+                    << m_surfaceData->m_layerSurfaces.size() << endmsg;
             return *m_surfaceData->m_layerSurfaces.front();
         }
         return *m_surfaceData->m_layerSurfaces[hash];
@@ -155,12 +162,15 @@ namespace MuonGM {
 
     inline const Amg::Transform3D& MuonClusterReadoutElement::transform(int hash) const {
         if (!m_surfaceData) {
-            ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" "<<__func__<<" Requesting transform but cache is empty");
-            throw std::runtime_error("Empty transform cache");
+            throw std::runtime_error(
+                Form("File: %s, Line: %d\nMuonClusterReadoutElement::transform() - requesting transform but cache is empty", __FILE__,
+                     __LINE__));
         }
         if (hash == -1 || hash >= (int)m_surfaceData->m_layerTransforms.size()) {
-            ATH_MSG_WARNING("transform hash out of range: " << hash << " elements "
-                    << m_surfaceData->m_layerTransforms.size());
+            MsgStream log(Athena::getMessageSvc(), "MuonClusterReadoutElement");
+            if (log.level() <= MSG::WARNING)
+                log << MSG::WARNING << this << "transform hash out of range: " << hash << " elements "
+                    << m_surfaceData->m_layerTransforms.size() << endmsg;
             return m_surfaceData->m_layerTransforms.front();
         }
         return m_surfaceData->m_layerTransforms[hash];
@@ -168,11 +178,14 @@ namespace MuonGM {
 
     inline const Amg::Vector3D& MuonClusterReadoutElement::center(int hash) const {
         if (!m_surfaceData) {
-           ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" "<<__func__<<" Requesting center but cache is empty");
-           throw std::runtime_error("Empty center cache");
+            throw std::runtime_error(
+                Form("File: %s, Line: %d\nMuonClusterReadoutElement::center() - requesting center but cache is empty", __FILE__, __LINE__));
         }
         if (hash == -1 || hash >= (int)m_surfaceData->m_layerCenters.size()) {
-            ATH_MSG_WARNING("center hash out of range: " << hash << " elements " << m_surfaceData->m_layerCenters.size());
+            MsgStream log(Athena::getMessageSvc(), "MuonClusterReadoutElement");
+            if (log.level() <= MSG::WARNING)
+                log << MSG::WARNING << "center hash out of range: " << hash << " elements " << m_surfaceData->m_layerCenters.size()
+                    << endmsg;
             return m_surfaceData->m_layerCenters.front();
         }
         return m_surfaceData->m_layerCenters[hash];
@@ -180,11 +193,14 @@ namespace MuonGM {
 
     inline const Amg::Vector3D& MuonClusterReadoutElement::normal(int hash) const {
         if (!m_surfaceData) {
-           ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" "<<__func__<<" Requesting normal but cache is empty");
-           throw std::runtime_error("Empty normal cache");
+            throw std::runtime_error(
+                Form("File: %s, Line: %d\nMuonClusterReadoutElement::normal() - requesting normal but cache is empty", __FILE__, __LINE__));
         }
         if (hash == -1 || hash >= (int)m_surfaceData->m_layerNormals.size()) {
-            ATH_MSG_WARNING("normal hash out of range: " << hash << " elements " << m_surfaceData->m_layerNormals.size());
+            MsgStream log(Athena::getMessageSvc(), "MuonClusterReadoutElement");
+            if (log.level() <= MSG::WARNING)
+                log << MSG::WARNING << "normal hash out of range: " << hash << " elements " << m_surfaceData->m_layerNormals.size()
+                    << endmsg;
             return m_surfaceData->m_layerNormals.front();
         }
         return m_surfaceData->m_layerNormals[hash];
@@ -192,11 +208,13 @@ namespace MuonGM {
 
     inline const Trk::SurfaceBounds& MuonClusterReadoutElement::bounds(int hash) const {
         if (!m_surfaceData) {
-            ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" "<<__func__<<" Requesting bounds but cache is empty");
-            throw std::runtime_error("Empty bounds cache");
+            throw std::runtime_error(
+                Form("File: %s, Line: %d\nMuonClusterReadoutElement::bounds() - requesting bounds but cache is empty", __FILE__, __LINE__));
         }
         if (hash == -1 || hash >= (int)m_surfaceData->m_surfBounds.size()) {
-            ATH_MSG_WARNING("normal hash out of range: " << hash << " elements " << m_surfaceData->m_surfBounds.size());
+            MsgStream log(Athena::getMessageSvc(), "MuonClusterReadoutElement");
+            if (log.level() <= MSG::WARNING)
+                log << MSG::WARNING << "normal hash out of range: " << hash << " elements " << m_surfaceData->m_surfBounds.size() << endmsg;
             return *m_surfaceData->m_surfBounds.front();
         }
         return *m_surfaceData->m_surfBounds[hash];

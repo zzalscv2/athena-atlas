@@ -128,6 +128,9 @@ namespace MuonGM {
            return false */
         virtual bool spacePointPosition(const Identifier& phiId, const Identifier& etaId, Amg::Vector3D& pos) const override final;
 
+        /** TrkDetElementInterface */
+        virtual Trk::DetectorElemType detectorType() const override final { return Trk::DetectorElemType::Rpc; }
+
         /** space point position for a pair of phi and eta local positions and a layer identifier
             The LocalPosition is expressed in the reference frame of the phi projection.
         */
@@ -163,6 +166,8 @@ namespace MuonGM {
         /** @brief initialize the design classes for this readout element */
         void initDesign();
 
+        /** set methods only to be used by MuonGeoModel */
+        void setIdentifier(const Identifier& id);
         void setDoubletR(int);
         void setDoubletZ(int);
         void setDoubletPhi(int);
@@ -229,12 +234,7 @@ namespace MuonGM {
         void setYTranslation(const float y);
         void setZTranslation(const float z);
 
-        
-        inline bool isMirrored() const {return m_mirrored;}       
-        inline bool isDescrAtNegZ() const {return m_descratzneg;}
     private:
-        bool m_mirrored{false};
-        bool m_descratzneg{false};
         /** returns the MuonStripDesign class for the given identifier */
         const MuonStripDesign* getDesign(const Identifier& id) const;
 

@@ -24,8 +24,7 @@ namespace MuonGM {
     class MMReadoutElement final : public MuonClusterReadoutElement {
     public:
         /** constructor */
-        MMReadoutElement(GeoVFullPhysVol* pv, const std::string& stName, int zi, int fi, int mL, 
-                         MuonDetectorManager* mgr, const NswPassivationDbData*);
+        MMReadoutElement(GeoVFullPhysVol* pv, const std::string& stName, int zi, int fi, int mL, bool is_mirrored, MuonDetectorManager* mgr, const NswPassivationDbData*);
 
         /** destructor */
         ~MMReadoutElement();
@@ -83,6 +82,9 @@ namespace MuonGM {
          */
         Amg::Vector3D localToGlobalCoords(const Amg::Vector3D& locPos, const Identifier& id) const;
 
+        /** TrkDetElementInterface */
+        virtual Trk::DetectorElemType detectorType() const override final { return Trk::DetectorElemType::MM; }
+
         /** Method calculating the global position of the hit on surface taking the as-built corrections into account.
          *  The local position is expressed in the reference frame of each individual layer
         */
@@ -110,10 +112,13 @@ namespace MuonGM {
         virtual bool measuresPhi(const Identifier& id) const override final;
 
         /** @brief initialize the design classes for this readout element */
-        void initDesign();
+        void initDesign(double largeY, double smallY, double lengthX, double pitch, double thickness);
 
         /** returns the MuonChannelDesign class for the given identifier */
         const MuonChannelDesign* getDesign(const Identifier& id) const;
+
+        /** set methods only to be used by MuonGeoModel */
+        void setIdentifier(const Identifier& id);
 
         /** set methods only to be used by MuonGeoModel */
         void setChamberLayer(int ml) { m_ml = ml; }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -60,7 +60,7 @@ namespace MuonGM {
 	friend class MuonChamberLite;
 
     public:
-        CscReadoutElement(GeoVFullPhysVol* pv, const std::string& stName, MuonDetectorManager* mgr);
+        CscReadoutElement(GeoVFullPhysVol* pv, const std::string& stName, int zi, int fi, bool is_mirrored, MuonDetectorManager* mgr);
 
         virtual ~CscReadoutElement();
 
@@ -94,6 +94,9 @@ namespace MuonGM {
         /** number of strips per layer */
         virtual int numberOfStrips(const Identifier& layerId) const override final;
         virtual int numberOfStrips(int layer, bool) const override final;
+
+        /** TrkDetElementInterface */
+        virtual Trk::DetectorElemType detectorType() const override final { return Trk::DetectorElemType::Csc; }
 
         /** space point position for a given pair of phi and eta identifiers
             The LocalPosition is expressed in the reference frame of the phi projection.
@@ -230,7 +233,8 @@ namespace MuonGM {
         Amg::Transform3D globalToLocalTransf(const Identifier& id) const;
         //**< localToGlobalCoords and Transf relates gas-gap frame (SensitiveDetectors) to the Global Frame  */
 
-        
+        // modifiers
+        void setIdentifier(const Identifier& id);
         void set_ngasgaps(int);
         void set_nstriplayers(int);
         void set_nwirelayers(int);
