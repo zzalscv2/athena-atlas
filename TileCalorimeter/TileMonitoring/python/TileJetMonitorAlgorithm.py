@@ -87,6 +87,7 @@ def TileJetMonitoringConfig(flags, **kwargs):
         eventCleaningTool.CleaningLevel = jetCleaningTool.CutLevel
         eventCleaningTool.JetContainer = str(jetContainer)
         eventCleaningTool.SuppressInputDependence = True
+        eventCleaningTool.SuppressOutputDependence = True
 
         tileJetMonAlg.EventCleaningTool = eventCleaningTool
         tileJetMonAlg.JetTrackingEtaLimit = jetTrackingEtaLimit
