@@ -29,8 +29,8 @@ class ONNXWrapper {
 
 
     // dimensions of the input and output 
-    std::vector<std::vector<int64_t>> m_input_dims;
-    std::vector<std::vector<int64_t>> m_output_dims;
+    std::map<std::string, std::vector<int64_t>> m_input_dims;
+    std::map<std::string, std::vector<int64_t>> m_output_dims;
 
 
     // ONNX session objects
@@ -44,16 +44,15 @@ class ONNXWrapper {
     // allocate memory
     // Ort::MemoryInfo memory_info;
     // name of the input - access name map
-    std::vector<const char*> m_input_names;
 
     // name of the outputs
     std::vector<const char*> m_output_names;
-    std::vector<std::vector<float>> m_outputs;
-
+    std::vector<const char*> m_input_names;
     std::vector<int64_t> getShape(Ort::TypeInfo model_info);
-
+    // std::string GetMETAData_str;
   public:
-    
+
+
     // output vector - will be init with zero later
     // Constructor with parameters
     // ONNXWrapper(){};
@@ -61,15 +60,28 @@ class ONNXWrapper {
 
     ONNXWrapper(std::string model_path);
     // void LoadModel(std::string model_path);
-    std::vector<std::vector<float>> Run(std::map<std::string, std::vector<float>> inputs);
-    void ModelINFO();
-    void GetMETAData();
-    std::string GetMETADataByKey(std::string key);
+    
+    std::map<std::string, std::vector<float>> Run(
+      std::map<std::string,
+      std::vector<float>> inputs,
+      int n_batches=1);
+
+    // std::vector<std::vector<float>> Run(
+    //   std::map<std::string, std::vector<float>> inputs,
+    //   int n_batches );
+    // void GetMETAData();
+    // std::string ModelINFO();
+    // void Run(std::vector<std::vector<float>> inputs);
+    std::map<std::string, std::vector<int64_t>> GetModelInputs();
+    std::map<std::string, std::vector<int64_t>> GetModelOutputs();
+    
+    std::map<std::string, std::string> GetMETAData();
+    std::string GetMETADataByKey(const char * key);
     std::vector<int64_t> getInputShape(int input_nr);
     std::vector<int64_t> getOutputShape(int output_nr);
+    std::vector<const char*> getInputNames();
+    std::vector<const char*> getOutputNames();
     int getNumInputs();
     int getNumOutputs();
-
-    // void Run(std::vector<std::vector<float>> inputs);
 };
 #endif

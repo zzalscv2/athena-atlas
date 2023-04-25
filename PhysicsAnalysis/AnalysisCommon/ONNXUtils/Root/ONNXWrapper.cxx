@@ -22,7 +22,7 @@ ONNXWrapper::ONNXWrapper(std::string model_path) {
 
     // get the input nodes
     m_nr_inputs = m_onnxSession->GetInputCount();
-    
+
     // get the output nodes
     m_nr_output = m_onnxSession->GetOutputCount();
     
@@ -34,7 +34,7 @@ ONNXWrapper::ONNXWrapper(std::string model_path) {
 
       m_input_names.push_back(input_name);
 
-      m_input_dims.push_back(getShape(m_onnxSession->GetInputTypeInfo(i)));
+      m_input_dims[input_name] = getShape(m_onnxSession->GetInputTypeInfo(i));
     }
     // init input tensor
     // std::vector<Ort::Value> input_tensor(m_nr_inputs);
@@ -45,53 +45,66 @@ ONNXWrapper::ONNXWrapper(std::string model_path) {
 
       m_output_names.push_back(output_name);
 
-      m_output_dims.push_back(getShape(m_onnxSession->GetOutputTypeInfo(i)));
+      m_output_dims[output_name] = getShape(m_onnxSession->GetOutputTypeInfo(i));
 
-      std::vector<float> output(m_output_dims[i][1], 0.0);
-      m_outputs.push_back(output);
+      // std::vector<float> output(m_output_dims[i][1], 0.0);
+      // m_outputs.push_back(output);
     }
-    }
-
-void ONNXWrapper::ModelINFO() {
-  std::cout << "MODEL INFO"<< "\n\n";
-
-  std::cout << "MODEL INPUT"<< "\n";
-  for(std::size_t i = 0; i < m_nr_inputs; i++ ) {
-    std::cout << "Name: " << m_input_names.at(i) << "\n";
-    std::cout << "Size: {";
-    for(int j: m_input_dims.at(i) ) 
-      std::cout << j << ", ";
-    std::cout << "}";
-    std::cout << "\n\n";
-  }
-
-  std::cout << "MODEL OUTPUT"<< "\n";
-  for(std::size_t i = 0; i < m_nr_output; i++ ) {
-    std::cout << "Name:" << m_output_names.at(i) << "\n";
-    std::cout << "Size: {";
-    for(int j: m_output_dims.at(i) ) 
-      std::cout << j << ", ";
-    std::cout << "}";
-    std::cout << "\n\n";
-  }
 }
-void ONNXWrapper::GetMETAData() {
-  std::cout << "Get META data"<< "\n\n";
 
-  Ort::ModelMetadata metadata = m_onnxSession->GetModelMetadata();
+std::map<std::string, std::vector<int64_t>> ONNXWrapper::GetModelInputs() {
+  std::map<std::string, std::vector<int64_t>> ModelInputINFO_map;
 
-  std::cout << "keys: ";
+  for(std::size_t i = 0; i < m_nr_inputs; i++ ) {
+    ModelInputINFO_map[m_input_names.at(i)] = m_input_dims[m_input_names.at(i)];
+  }
+  return ModelInputINFO_map;
+}
+
+std::map<std::string, std::vector<int64_t>> ONNXWrapper::GetModelOutputs() {
+  std::map<std::string, std::vector<int64_t>> ModelOutputINFO_map;
+
+  for(std::size_t i = 0; i < m_nr_output; i++ ) {
+    ModelOutputINFO_map[m_output_names.at(i)] = m_output_dims[m_output_names.at(i)];
+  }
+  return ModelOutputINFO_map;
+}
+
+std::map<std::string, std::string> ONNXWrapper::GetMETAData() {
+  std::map<std::string, std::string> METAData_map;
+  // Ort::Session& session ATLAS_THREAD_SAFE = *m_onnxSession;
+  auto metadata = m_onnxSession->GetModelMetadata();
   int64_t nkeys = 0;
   char** keys = metadata.GetCustomMetadataMapKeys(m_allocator, nkeys);
+
   for (int64_t i = 0; i < nkeys; i++) {
-    std::cout << keys[i];
-    if (i+1 < nkeys) std::cout << ", ";
+    METAData_map[keys[i]]=this->GetMETADataByKey(keys[i]);
   }
-  std::cout << std::endl;
+
+  return METAData_map;
 }
+// std::vector<std::vector<float>> ONNXWrapper::Run(
+//   std::map<std::string, std::vector<float>> inputs,
+//   int n_batches) { 
+//   }
 
+std::map<std::string, std::vector<float>> ONNXWrapper::Run(
+  std::map<std::string, std::vector<float>> inputs, int n_batches) { // ADDD custom input size
+    for ( const auto &p : inputs ) // check for valid dimensions between batches and inputs
+    {
+      uint64_t n=1;
+      for (uint64_t i:m_input_dims[p.first])
+        {
+          n*=i;
+        }
+    if ( (p.second.size() % n) != 0){
+      throw std::invalid_argument("length of vector of inputs not compatible with model. Expect a multiple of n, got m");
+    }
+    else if (  p.second.size()!=(n_batches*n)){
+      throw std::invalid_argument("number of batches not compatible with length of vector");
+    }
 
-std::vector<std::vector<float>> ONNXWrapper::Run(std::map<std::string, std::vector<float>> inputs) { // ADDD custom input size
+    } 
     // Create a CPU tensor to be used as input
     // std::cout << "------- Creating ONNX tensors: \n";
     Ort::MemoryInfo memory_info("Cpu", OrtDeviceAllocator, 0, OrtMemTypeDefault);
@@ -100,29 +113,54 @@ std::vector<std::vector<float>> ONNXWrapper::Run(std::map<std::string, std::vect
     std::vector<Ort::Value> output_tensor;
     std::vector<Ort::Value> input_tensor;
 
-
     // add the inputs to vector
-    // std::cout << "init input"<< "\n";
-    for(std::size_t i = 0; i < m_nr_inputs; i++ ){          
+    // for(std::size_t i = 0; i < m_nr_inputs; i++ ){
+    for ( const auto &p : m_input_dims )   
+    {        
+      std::vector<int64_t> in_dims = p.second;
+      in_dims.at(0) = n_batches;
       input_tensor.push_back(Ort::Value::CreateTensor<float>(memory_info,
-                                                            inputs[m_input_names[i]].data(),
-                                                            inputs[m_input_names[i]].size(),
-                                                            m_input_dims[i].data(),
-                                                            m_input_dims[i].size()));
+                                                            inputs[p.first].data(),
+                                                            inputs[p.first].size(),
+                                                            in_dims.data(),
+                                                            in_dims.size()));
     }
 
     // init output tensor and fill with zeros
     // std::cout << "init output"<< "\n";
-    for(std::size_t i = 0; i < m_nr_output; i++ ){                           
+    std::map<std::string, std::vector<float>> outputs;
+    for ( const auto &p : m_output_dims ) {     
+      std::vector<int64_t> out_dims = p.second;
+      out_dims.at(0) = n_batches;
+      // init output
+      int length = 1;
+      for(auto i : out_dims){ length*=i; }
+      std::vector<float> output(length,0);
+      // std::vector<float> output(m_output_dims[i][1], 0.0);
+      outputs[p.first] = output;
       output_tensor.push_back(Ort::Value::CreateTensor<float>(memory_info,
-                                                      m_outputs[i].data(),
-                                                      m_outputs[i].size(),
-                                                      m_output_dims[i].data(),
-                                                      m_output_dims[i].size()));
+                                                            outputs[p.first].data(),
+                                                            outputs[p.first].size(),
+                                                            out_dims.data(),
+                                                            out_dims.size()));
     }
+    // std::vector<std::vector<float>> outputs;
+    // for(std::size_t i = 0; i < m_nr_output; i++ ){
+    //   // init output  
+    //   std::vector<float> output(m_output_dims[i][1], 0.0); 
+    // output_pt = (0.0), out_transport = (0,0,0) 
+    //   outputs.push_back(output);
 
-    Ort::Session& session ATLAS_THREAD_SAFE = *m_onnxSession;
-    // std::cout << "RUNNING MODEL"<< "\n";
+    //   // create output ort tensor 
+    //   output_tensor.push_back(Ort::Value::CreateTensor<float>(memory_info,
+    //                                                   outputs[i].data(),
+    //                                                   outputs[i].size(),
+    //                                                   m_output_dims[i].data(),
+    //                                                   m_output_dims[i].size()));
+    // }
+
+    Ort::Session& session = *m_onnxSession;
+
     // run the model
     session.Run(Ort::RunOptions{nullptr},
                 m_input_names.data(),
@@ -130,14 +168,14 @@ std::vector<std::vector<float>> ONNXWrapper::Run(std::map<std::string, std::vect
                 2,
                 m_output_names.data(),
                 output_tensor.data(),
-                2);
-    return m_outputs; 
-}
+                2); 
 
-// get functions
+    return outputs;
+    }
 
-std::string GetMETADataByKey(std::string key){
-  Ort::ModelMetadata metadata = m_onnxSession->GetModelMetadata();
+
+std::string ONNXWrapper::GetMETADataByKey(const char * key){
+  auto metadata = m_onnxSession->GetModelMetadata();
   return metadata.LookupCustomMetadataMap(key, m_allocator);
 }
 
@@ -153,16 +191,18 @@ std::vector<const char*> ONNXWrapper::getOutputNames(){
 
 std::vector<int64_t> ONNXWrapper::getInputShape(int input_nr=0){
   //put the model access for input here
-  return m_input_dims.at(input_nr);
+  std::vector<const char*> names = getInputNames();
+  return m_input_dims[names.at(input_nr)];
 }
 
 std::vector<int64_t> ONNXWrapper::getOutputShape(int output_nr=0){
   //put the model access for outputs here
-  return m_output_dims.at(output_nr);
+  std::vector<const char*> names = getOutputNames();
+  return m_output_dims[names.at(output_nr)];
 }
 
-int getNumInputs(){ return m_input_dims.size(); }
-int getNumOutputs(){ return m_output_dims.size(); }
+int ONNXWrapper::getNumInputs(){ return m_input_names.size(); }
+int ONNXWrapper::getNumOutputs(){ return m_output_names.size(); }
 
 std::vector<int64_t> ONNXWrapper::getShape(Ort::TypeInfo model_info) {
       auto tensor_info = model_info.GetTensorTypeAndShapeInfo();
