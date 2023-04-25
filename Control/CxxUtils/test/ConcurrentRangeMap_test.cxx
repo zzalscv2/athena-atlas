@@ -810,9 +810,11 @@ void test1b()
 
   assert (map.trim (keys) == 0);
   assert (map.size() == 1);
+  assert (map.find (55)->second->m_x == 400);
   assert (phist.size() == 1);
   assert (map.trim (keys, true) == 1);
   assert (map.size() == 0);
+  assert (map.find(55) == nullptr);
   for (int i=0; i < nslots; i++) {
     map.quiescent (i);
   }
