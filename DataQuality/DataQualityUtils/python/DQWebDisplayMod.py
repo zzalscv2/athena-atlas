@@ -195,6 +195,52 @@ def DQWebDisplay( inputFilePath, runAccumulating, c ):
         splitLine = allLines.rsplit()
         if len(splitLine) >= 1:
             xferFileList.append( splitLine[0] + "\n" )
+
+    # invoke hancool if appropriate
+    runNumber = runfile[1]
+    rN=runNumber.lstrip("run_")
+    if not runAccumulating:
+        print("Getting COOL authentications")
+#        if c.auth:
+#            os.environ['CORAL_AUTH_PATH'] = c.auth    
+#        else:
+#            home = os.environ.get('HOME')
+#            os.environ['CORAL_AUTH_PATH'] = home+"/private"        
+               
+        # write monitor comparison results to cool
+        # MB : 29.05.2008
+        if 'COOLUPLOADS' in os.environ:
+            uploadAllowed = (os.environ['COOLUPLOADS'] == '1')
+        else:
+            uploadAllowed = True
+
+        if not uploadAllowed:
+            print('hancool run and upload to DB switched off by request')
+            
+        if (uploadAllowed and c.dbConnection):
+            print("")
+            print("Now calling hancool ...")
+            #stream = os.path.basename(outputHanResultsDir)
+            if '_' in stream: stream = stream.split('_',1)[-1]
+            if amitag is not None and 'x' in amitag and stream.startswith('express'): # this is ESn processing
+                dbTagName = c.dbTagNameESn
+                isESn = True
+            else:
+                dbTagName = c.dbTagName
+                isESn = False
+            if '%' in dbTagName:
+                # this is a little fragile
+                uploadTag = dbTagName % { 'stream': stream,
+                                          'amitag': amitag,
+                                          'procpass': procpass }
+                doUpload = True
+            else:
+                uploadTag = dbTagName
+                doUpload = ('-%s-' % stream in uploadTag)
+
+            if (doUpload):
+                print('isESn?', isESn)
+                _local_apply(hancool, (int(rN),outputHanResultsDir,c.dbConnection,isESn))
     
     ## Archive han results - 090422 : PUEO
     if c.server != []:
@@ -257,8 +303,6 @@ def DQWebDisplay( inputFilePath, runAccumulating, c ):
                 print("")
                         
 
-    runNumber = runfile[1]
-    rN=runNumber.lstrip("run_")
     if c.doHandi:
         rundir=outputHtmlDir+runNumber+"/"
         makeOutputDirectory( rundir )
@@ -414,49 +458,6 @@ def DQWebDisplay( inputFilePath, runAccumulating, c ):
             for server in c.server:
                 generateDQIndexFiles( server, c.htmlDir, c.config, c.indexFile, c.runlist, c.htmlWeb )
     
-    if not runAccumulating:
-        print("Getting COOL authentications")
-#        if c.auth:
-#            os.environ['CORAL_AUTH_PATH'] = c.auth    
-#        else:
-#            home = os.environ.get('HOME')
-#            os.environ['CORAL_AUTH_PATH'] = home+"/private"        
-               
-        # write monitor comparison results to cool
-        # MB : 29.05.2008
-        if 'COOLUPLOADS' in os.environ:
-            uploadAllowed = (os.environ['COOLUPLOADS'] == '1')
-        else:
-            uploadAllowed = True
-
-        if not uploadAllowed:
-            print('hancool run and upload to DB switched off by request')
-            
-        if (uploadAllowed and c.dbConnection):
-            print("")
-            print("Now calling hancool ...")
-            #stream = os.path.basename(outputHanResultsDir)
-            if '_' in stream: stream = stream.split('_',1)[-1]
-            if amitag is not None and 'x' in amitag and stream.startswith('express'): # this is ESn processing
-                dbTagName = c.dbTagNameESn
-                isESn = True
-            else:
-                dbTagName = c.dbTagName
-                isESn = False
-            if '%' in dbTagName:
-                # this is a little fragile
-                uploadTag = dbTagName % { 'stream': stream,
-                                          'amitag': amitag,
-                                          'procpass': procpass }
-                doUpload = True
-            else:
-                uploadTag = dbTagName
-                doUpload = ('-%s-' % stream in uploadTag)
-
-            if (doUpload):
-                print('isESn?', isESn)
-                _local_apply(hancool, (int(rN),outputHanResultsDir,c.dbConnection,isESn))
-
     if runAccumulating:
         os.unlink(inputFilePath)
     
