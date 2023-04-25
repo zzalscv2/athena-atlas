@@ -80,6 +80,7 @@ endfunction()
 function( atlas_test_l1defined_menu menu )
    atlas_add_test( "L1Defined_${menu}"
                    SCRIPT test_menu_dump.py -l -m ${menu}
+                   PRIVATE_WORKING_DIRECTORY
                    POST_EXEC_SCRIPT noerror.sh )
 endfunction()
 
