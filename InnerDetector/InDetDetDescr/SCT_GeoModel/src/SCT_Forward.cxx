@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_GeoModel/SCT_Forward.h"
@@ -41,8 +41,10 @@ SCT_Forward::SCT_Forward(const std::string & name, int ec,
                          InDetDD::SCT_DetectorManager* detectorManager,
                          SCT_GeometryManager* geometryManager,
                          SCT_MaterialManager* materials,
-                         GeoModelIO::ReadGeoModel* sqliteReader)
-  : SCT_UniqueComponentFactory(name, detectorManager, geometryManager, materials, sqliteReader),
+                         GeoModelIO::ReadGeoModel* sqliteReader,
+                         std::shared_ptr<std::map<std::string, GeoFullPhysVol*>>        mapFPV,
+                         std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX)
+  : SCT_UniqueComponentFactory(name, detectorManager, geometryManager, materials, sqliteReader, mapFPV, mapAX),
     m_endcap(ec)
 {
   getParameters();
@@ -102,7 +104,7 @@ SCT_Forward::preBuild()
   for (int iModuleType = 0; iModuleType < m_numModuleTypes; iModuleType++){
     
     std::unique_ptr<SCT_FwdModule> module = std::make_unique<SCT_FwdModule>("FwdModule"+intToString(iModuleType), iModuleType,
-                                                                            m_detectorManager, m_geometryManager, m_materials, m_sqliteReader);
+                                                                            m_detectorManager, m_geometryManager, m_materials, m_sqliteReader, m_mapFPV, m_mapAX);
     modules.push_back(module.get());
     m_modules.push_back(std::move(module));
   }
@@ -111,7 +113,7 @@ SCT_Forward::preBuild()
     // Build Wheels
     std::ostringstream name; name << "Wheel" << iWheel << ((m_endcap > 0) ? "A" : "C");
     m_wheels.push_back(std::make_unique<SCT_FwdWheel>(name.str(), iWheel, modules, m_endcap,
-                                                      m_detectorManager, m_geometryManager, m_materials, m_sqliteReader));
+                                                      m_detectorManager, m_geometryManager, m_materials, m_sqliteReader, m_mapFPV, m_mapAX));
   }
 
   if(m_sqliteReader) return nullptr;
