@@ -108,7 +108,7 @@ void InDet::SiTrajectoryElement_xk::setParameters()
 ///////////////////////////////////////////////////////////////////
 
 bool InDet::SiTrajectoryElement_xk::firstTrajectorElement
-(const Trk::TrackParameters& startingParameters)
+(const Trk::TrackParameters& startingParameters, const EventContext& ctx)
 {
   /// if we don't have a cluster, something went wrong! 
   if(!m_cluster) return false;     
@@ -124,7 +124,7 @@ bool InDet::SiTrajectoryElement_xk::firstTrajectorElement
   /// if we are already on the correct surface, we can assign the params as they ar
   if(m_surface==pl) m_parametersPredForward = startingPatternPars;
   /// otherwise, we need to propagate to "our" surface
-  else  if(!propagate(startingPatternPars,m_parametersPredForward,m_step)) return false;
+  else  if(!propagate(startingPatternPars,m_parametersPredForward,m_step,ctx)) return false;
 
   // Initiate track parameters without initial covariance
   //
@@ -273,7 +273,7 @@ bool InDet::SiTrajectoryElement_xk::lastTrajectorElementPrecise()
 ///////////////////////////////////////////////////////////////////
 
 bool InDet::SiTrajectoryElement_xk::ForwardPropagationWithoutSearch
-(InDet::SiTrajectoryElement_xk& TE)
+(InDet::SiTrajectoryElement_xk& TE, const EventContext& ctx)
 {
   /// Track propagation
   /// If the starting trajectory element has a cluster: 
@@ -281,7 +281,7 @@ bool InDet::SiTrajectoryElement_xk::ForwardPropagationWithoutSearch
     /// add noise to the track parameters of the starting TE 
     TE.m_parametersUpdatedForward.addNoise   (TE.m_noise,Trk::alongMomentum);
     /// propagate to the current element, plug into m_parametersPredForward
-    if(!propagate(TE.m_parametersUpdatedForward,m_parametersPredForward,m_step)) return false;
+    if(!propagate(TE.m_parametersUpdatedForward,m_parametersPredForward,m_step, ctx)) return false;
     /// and restore the starting TE again 
     TE.m_parametersUpdatedForward.removeNoise(TE.m_noise,Trk::alongMomentum);
     /// reset the double hole count to zero - we had a cluster
@@ -291,7 +291,7 @@ bool InDet::SiTrajectoryElement_xk::ForwardPropagationWithoutSearch
     /// add noise to the starting pars 
     TE.m_parametersPredForward.addNoise   (TE.m_noise,Trk::alongMomentum);
     /// propagate, plug into m_parametersPredForward
-    if(!propagate(TE.m_parametersPredForward,m_parametersPredForward,m_step)) return false;
+    if(!propagate(TE.m_parametersPredForward,m_parametersPredForward,m_step, ctx)) return false;
     /// restore starting TE
     TE.m_parametersPredForward.removeNoise(TE.m_noise,Trk::alongMomentum);
     /// double hole count is copied from the previous one
@@ -363,7 +363,7 @@ bool InDet::SiTrajectoryElement_xk::ForwardPropagationWithoutSearch
 ///////////////////////////////////////////////////////////////////
 
 bool InDet::SiTrajectoryElement_xk::ForwardPropagationWithoutSearchPreciseWithCorrection
-(InDet::SiTrajectoryElement_xk& TE)
+(InDet::SiTrajectoryElement_xk& TE, const EventContext& ctx)
 {
   Trk::PatternTrackParameters P;
 
@@ -379,7 +379,7 @@ bool InDet::SiTrajectoryElement_xk::ForwardPropagationWithoutSearchPreciseWithCo
   // Track propagation
   //
   P.addNoise(TE.m_noise,Trk::alongMomentum);
-  if(!propagate(P,m_parametersPredForward,m_step)) return false;
+  if(!propagate(P,m_parametersPredForward,m_step,ctx)) return false;
 
   m_nclustersForward = TE.m_nclustersForward;
   m_nholesForward    = TE.m_nholesForward   ;
@@ -420,7 +420,7 @@ bool InDet::SiTrajectoryElement_xk::ForwardPropagationWithoutSearchPreciseWithCo
 ///////////////////////////////////////////////////////////////////
 
 bool InDet::SiTrajectoryElement_xk::ForwardPropagationWithSearch
-(InDet::SiTrajectoryElement_xk& TE)
+(InDet::SiTrajectoryElement_xk& TE, const EventContext& ctx)
 {
   /// Track propagation
   /// as usual, if the previous element has a cluster, propagate the updated parameters.
@@ -428,7 +428,7 @@ bool InDet::SiTrajectoryElement_xk::ForwardPropagationWithSearch
   if(TE.m_cluster) {
 
     TE.m_parametersUpdatedForward.addNoise   (TE.m_noise,Trk::alongMomentum);
-    if(!propagate(TE.m_parametersUpdatedForward,m_parametersPredForward,m_step)) return false; 
+    if(!propagate(TE.m_parametersUpdatedForward,m_parametersPredForward,m_step,ctx)) return false; 
     TE.m_parametersUpdatedForward.removeNoise(TE.m_noise,Trk::alongMomentum);
     /// double hole running counter is reset if the prev element has a cluster
     m_dholesForward = 0;
@@ -436,7 +436,7 @@ bool InDet::SiTrajectoryElement_xk::ForwardPropagationWithSearch
   else             {
 
     TE.m_parametersPredForward.addNoise   (TE.m_noise,Trk::alongMomentum);
-    if(!propagate(TE.m_parametersPredForward,m_parametersPredForward,m_step)) return false; 
+    if(!propagate(TE.m_parametersPredForward,m_parametersPredForward,m_step,ctx)) return false; 
     TE.m_parametersPredForward.removeNoise(TE.m_noise,Trk::alongMomentum);
     m_dholesForward = TE.m_dholesForward;
   }
@@ -524,7 +524,7 @@ bool InDet::SiTrajectoryElement_xk::ForwardPropagationWithSearch
 ///////////////////////////////////////////////////////////////////
 
 bool InDet::SiTrajectoryElement_xk::BackwardPropagationFilter
-(InDet::SiTrajectoryElement_xk& TE)
+(InDet::SiTrajectoryElement_xk& TE, const EventContext& ctx)
 {
   // Track propagation
   // 
@@ -533,14 +533,14 @@ bool InDet::SiTrajectoryElement_xk::BackwardPropagationFilter
     if(TE.m_cluster) {
 
       TE.m_parametersUpdatedBackward.addNoise   (TE.m_noise,Trk::oppositeMomentum);
-      if(!propagate(TE.m_parametersUpdatedBackward,m_parametersPredBackward,m_step)) return false; 
+      if(!propagate(TE.m_parametersUpdatedBackward,m_parametersPredBackward,m_step,ctx)) return false; 
       TE.m_parametersUpdatedBackward.removeNoise(TE.m_noise,Trk::oppositeMomentum);
       m_dholesBackward = 0;
     }
     else             {
 
       TE.m_parametersPredBackward.addNoise   (TE.m_noise,Trk::oppositeMomentum);
-      if(!propagate(TE.m_parametersPredBackward,m_parametersPredBackward,m_step)) return false; 
+      if(!propagate(TE.m_parametersPredBackward,m_parametersPredBackward,m_step,ctx)) return false; 
       TE.m_parametersPredBackward.removeNoise(TE.m_noise,Trk::oppositeMomentum);
       m_dholesBackward = TE.m_dholesBackward;
     }
@@ -549,12 +549,12 @@ bool InDet::SiTrajectoryElement_xk::BackwardPropagationFilter
 
     if(TE.m_cluster) {
 
-      if(!propagate(TE.m_parametersUpdatedBackward,m_parametersPredBackward,m_step)) return false; 
+      if(!propagate(TE.m_parametersUpdatedBackward,m_parametersPredBackward,m_step,ctx)) return false; 
       m_dholesBackward = 0;
     }
     else             {
 
-      if(!propagate(TE.m_parametersPredBackward,m_parametersPredBackward,m_step)) return false; 
+      if(!propagate(TE.m_parametersPredBackward,m_parametersPredBackward,m_step,ctx)) return false; 
       m_dholesBackward = TE.m_dholesBackward;
     }
   }
@@ -614,18 +614,18 @@ bool InDet::SiTrajectoryElement_xk::BackwardPropagationFilter
 ///////////////////////////////////////////////////////////////////
 
 bool InDet::SiTrajectoryElement_xk::BackwardPropagationSmoother
-(InDet::SiTrajectoryElement_xk& TE,bool isTwoSpacePointsSeed)
+(InDet::SiTrajectoryElement_xk& TE,bool isTwoSpacePointsSeed, const EventContext& ctx)
 {
 
   // Track propagation
   //
   double step;
   if(TE.m_cluster) {
-    if(!propagate(TE.m_parametersUpdatedBackward,m_parametersPredBackward,step)) return false;
+    if(!propagate(TE.m_parametersUpdatedBackward,m_parametersPredBackward,step,ctx)) return false;
     m_dholesBackward = 0;
   }
   else             {
-    if(!propagate(TE.m_parametersPredBackward,m_parametersPredBackward,step)) return false;
+    if(!propagate(TE.m_parametersPredBackward,m_parametersPredBackward,step,ctx)) return false;
     m_dholesBackward = TE.m_dholesBackward;
   }
 
@@ -712,7 +712,7 @@ bool InDet::SiTrajectoryElement_xk::BackwardPropagationSmoother
 ///////////////////////////////////////////////////////////////////
 
 bool InDet::SiTrajectoryElement_xk::BackwardPropagationPrecise
-(InDet::SiTrajectoryElement_xk& TE)
+(InDet::SiTrajectoryElement_xk& TE, const EventContext& ctx)
 {
 
   // Track propagation
@@ -720,11 +720,11 @@ bool InDet::SiTrajectoryElement_xk::BackwardPropagationPrecise
   double step;
   if(TE.m_cluster) {
 
-    if(!propagate(TE.m_parametersUpdatedBackward,m_parametersPredBackward,step)) return false;
+    if(!propagate(TE.m_parametersUpdatedBackward,m_parametersPredBackward,step,ctx)) return false;
   }
   else             {
 
-    if(!propagate(TE.m_parametersPredBackward,m_parametersPredBackward,step)) return false;
+    if(!propagate(TE.m_parametersPredBackward,m_parametersPredBackward,step,ctx)) return false;
   }
   
   m_parametersPredBackward.addNoise(m_noise,Trk::oppositeMomentum);
@@ -1035,7 +1035,7 @@ InDet::SiTrajectoryElement_xk::trackSimpleStateOnSurface
 ///////////////////////////////////////////////////////////////////
 
 Trk::TrackStateOnSurface*  
-InDet::SiTrajectoryElement_xk::trackPerigeeStateOnSurface ()
+InDet::SiTrajectoryElement_xk::trackPerigeeStateOnSurface (const EventContext& ctx)
 {
   if(&m_parametersUpdatedBackward.associatedSurface()!=m_surface) return nullptr;
   
@@ -1045,7 +1045,7 @@ InDet::SiTrajectoryElement_xk::trackPerigeeStateOnSurface ()
   Trk::PerigeeSurface per;
 
   bool Q = m_proptool->propagate
-	(Gaudi::Hive::currentContext(),
+	(ctx,
    m_parametersUpdatedBackward, per,Tp,Trk::anyDirection,m_tools->fieldTool(),step,Trk::pion);
 
   if(Q) {
@@ -1372,7 +1372,8 @@ double InDet::SiTrajectoryElement_xk::quality(int& holes) const
 bool 
 InDet::SiTrajectoryElement_xk::propagate(Trk::PatternTrackParameters  & startingParameters,
                                          Trk::PatternTrackParameters  & outputParameters,
-                                         double & StepLength ) {
+                                         double & StepLength,
+                                         const EventContext& ctx ) {
   if (Trk::SurfaceType::Plane == m_surface->type() and
     Trk::SurfaceType::Plane == startingParameters.associatedSurface().type()) {
     bool useJac = (startingParameters.iscovariance());
@@ -1400,7 +1401,7 @@ InDet::SiTrajectoryElement_xk::propagate(Trk::PatternTrackParameters  & starting
     /// and finally transform from global back to local, and write into the output parameters.
     return transformGlobalToPlane(useJac,globalParameters,startingParameters,outputParameters);
   } else {
-    if (!m_proptool->propagate (Gaudi::Hive::currentContext(),
+    if (!m_proptool->propagate (ctx,
                                 startingParameters, *m_surface, outputParameters,
                                 Trk::anyDirection, m_tools->fieldTool(), StepLength, Trk::pion))
       return false;

@@ -362,7 +362,7 @@ const std::list<Trk::Track*>&  InDet::SiCombinatorialTrackFinder_xk::getTracks
   data.trajectory().sortStep();
 
 
-  Trk::Track* t = convertToTrack(data);
+  Trk::Track* t = convertToTrack(data,ctx);
   if (t) {
      ++data.findtracks();
      if (m_writeHolesFromPattern) data.addPatternHoleSearchOutcome(t,data.trajectory().getHoleSearchResult());
@@ -421,7 +421,7 @@ const std::list<Trk::Track*>& InDet::SiCombinatorialTrackFinder_xk::getTracks
   data.trajectory().sortStep();
 
   if(data.useFastTracking()) {
-    if(!data.trajectory().filterWithPreciseClustersError()) {
+    if(!data.trajectory().filterWithPreciseClustersError(ctx)) {
       data.statistic()[CantFindTrk] = true;
       return data.tracks();
     }
@@ -429,7 +429,7 @@ const std::list<Trk::Track*>& InDet::SiCombinatorialTrackFinder_xk::getTracks
 
   // Trk::Track production
   //
-  Trk::Track* t = convertToTrack(data);
+  Trk::Track* t = convertToTrack(data,ctx);
   if (t==nullptr) return data.tracks(); // @TODO should one check if convertToNextTrack would yield anything ?
   if (m_writeHolesFromPattern) data.addPatternHoleSearchOutcome(t,data.trajectory().getHoleSearchResult());
 
@@ -501,7 +501,7 @@ const std::list<Trk::Track*>&  InDet::SiCombinatorialTrackFinder_xk::getTracksWi
     if (isCaloCompatible) data.trackinfo().setPatternRecognitionInfo(Trk::TrackInfo::TrackInCaloROI);
 
     data.tools().setMultiTracks(0, Xi2m);
-    Trk::Track* t = convertToTrack(data);
+    Trk::Track* t = convertToTrack(data,ctx);
     data.trackinfo() = oldinfo;
     data.tools().setMultiTracks(mult,Xi2m);
 
@@ -536,7 +536,7 @@ const std::list<Trk::Track*>&  InDet::SiCombinatorialTrackFinder_xk::getTracksWi
   data.trajectory().sortStep();
 
   if(data.useFastTracking()) {
-    if(!data.trajectory().filterWithPreciseClustersError()) {
+    if(!data.trajectory().filterWithPreciseClustersError(ctx)) {
       data.statistic()[CantFindTrk] = true;
       return data.tracks();
     }
@@ -550,7 +550,7 @@ const std::list<Trk::Track*>&  InDet::SiCombinatorialTrackFinder_xk::getTracksWi
   if (isCaloCompatible) data.trackinfo().setPatternRecognitionInfo(Trk::TrackInfo::TrackInCaloROI);
 
   data.tools().setMultiTracks(0, Xi2m);
-  Trk::Track* t = convertToTrack(data);
+  Trk::Track* t = convertToTrack(data, ctx);
   data.trackinfo() = oldinfo;
   data.tools().setMultiTracks(mult, Xi2m);
 
@@ -635,7 +635,7 @@ InDet::SiCombinatorialTrackFinder_xk::EStat_t InDet::SiCombinatorialTrackFinder_
     if (!data.trajectory().globalPositionsToClusters(p_pixcontainer, p_sctcontainer, Gp, DEL, PT, Cl)) return TwoCluster;
   } else {
     /// use case if we have neither space-points nor global posittions, but track parameters to start from
-    if (!data.trajectory().trackParametersToClusters(p_pixcontainer, p_sctcontainer, Tp, DEL, PT, Cl)) return TwoCluster;
+    if (!data.trajectory().trackParametersToClusters(p_pixcontainer, p_sctcontainer, Tp, DEL, PT, Cl, ctx)) return TwoCluster;
   }
   ++data.goodseeds();
 
@@ -650,7 +650,7 @@ InDet::SiCombinatorialTrackFinder_xk::EStat_t InDet::SiCombinatorialTrackFinder_
     /// reset our cluster list
     Cl.clear();
     /// try again using the clusters from the track parameters only
-    if (!data.trajectory().trackParametersToClusters(p_pixcontainer, p_sctcontainer, Tp, DEL, PT, Cl)) return TwoCluster;
+    if (!data.trajectory().trackParametersToClusters(p_pixcontainer, p_sctcontainer, Tp, DEL, PT, Cl,ctx)) return TwoCluster;
 
     if (!data.trajectory().initialize(m_usePIX, m_useSCT, p_pixcontainer, p_sctcontainer, Tp, Cl, DEL, Qr,ctx)) return TwoCluster;
     /// if it worked now, set the quality flag to true
@@ -680,16 +680,16 @@ InDet::SiCombinatorialTrackFinder_xk::EStat_t InDet::SiCombinatorialTrackFinder_
 
   /// Track finding
   if (pixseed) {      /// Strategy for pixel seeds
-    if (!data.trajectory().forwardExtension (false,itmax)) return CantFindTrk;
-    if (!data.trajectory().backwardSmoother (false)      ) return CantFindTrk;
-    if (!data.trajectory().backwardExtension(itmax)      ) return CantFindTrk;
+    if (!data.trajectory().forwardExtension (false,itmax,ctx)) return CantFindTrk;
+    if (!data.trajectory().backwardSmoother (false,ctx)      ) return CantFindTrk;
+    if (!data.trajectory().backwardExtension(itmax,ctx)      ) return CantFindTrk;
     if (data.isITkGeometry() &&
 	(data.trajectory().nclusters() < data.nclusmin() ||
 	 data.trajectory().ndf() < data.nwclusmin()) ) return CantFindTrk;
 
     /// refine if needed
     if(!data.useFastTracking() && data.trajectory().difference() > 0){
-      if (!data.trajectory().forwardFilter()) {
+      if (!data.trajectory().forwardFilter(ctx)) {
 	if( toReturnFailedTrack ) {
 	  data.setResultCode(SiCombinatorialTrackFinderData_xk::ResultCode::PixSeedDiffKFFwd);
 	}
@@ -698,7 +698,7 @@ InDet::SiCombinatorialTrackFinder_xk::EStat_t InDet::SiCombinatorialTrackFinder_
 	}
       }
 
-      if (!data.trajectory().backwardSmoother (false) ) {
+      if (!data.trajectory().backwardSmoother (false,ctx) ) {
 	if( toReturnFailedTrack ) {
 	  data.setResultCode(SiCombinatorialTrackFinderData_xk::ResultCode::PixSeedDiffKFBwd);
 	}
@@ -723,16 +723,16 @@ InDet::SiCombinatorialTrackFinder_xk::EStat_t InDet::SiCombinatorialTrackFinder_
 
   /// case of a strip seed or mixed PPS
   else {      // Strategy for mixed seeds
-    if (!data.trajectory().backwardSmoother(isTwoPointSeed)       ) return CantFindTrk;
-    if (!data.trajectory().backwardExtension(itmax)    ) return CantFindTrk;
-    if (!data.trajectory().forwardExtension(true,itmax)) return CantFindTrk;
+    if (!data.trajectory().backwardSmoother(isTwoPointSeed,ctx)       ) return CantFindTrk;
+    if (!data.trajectory().backwardExtension(itmax,ctx)    ) return CantFindTrk;
+    if (!data.trajectory().forwardExtension(true,itmax,ctx)) return CantFindTrk;
 
     /// first application of hit cut
     int na = data.trajectory().nclustersNoAdd();
     if (data.trajectory().nclusters()+na < data.nclusmin() ||
 	data.trajectory().ndf() < data.nwclusmin()) return CantFindTrk;
     /// backward smooting
-    if (!data.trajectory().backwardSmoother(false)    ) return CantFindTrk;
+    if (!data.trajectory().backwardSmoother(false,ctx)    ) return CantFindTrk;
 
     /// apply hit cut again following smoothing step
     na     = data.trajectory().nclustersNoAdd();
@@ -748,7 +748,7 @@ InDet::SiCombinatorialTrackFinder_xk::EStat_t InDet::SiCombinatorialTrackFinder_
 
     /// refine if needed
     if (data.trajectory().difference() > 0) {
-      if (!data.trajectory().forwardFilter()) {
+      if (!data.trajectory().forwardFilter(ctx)) {
 	 if( toReturnFailedTrack ) {
 	    data.setResultCode(SiCombinatorialTrackFinderData_xk::ResultCode::MixSeedDiffKFFwd);
 	 }
@@ -756,7 +756,7 @@ InDet::SiCombinatorialTrackFinder_xk::EStat_t InDet::SiCombinatorialTrackFinder_
 	    return CantFindTrk;
 	 }
       }
-      if (!data.trajectory().backwardSmoother (false)) {
+      if (!data.trajectory().backwardSmoother (false, ctx)) {
 	 if( toReturnFailedTrack ) {
 	    data.setResultCode(SiCombinatorialTrackFinderData_xk::ResultCode::MixSeedDiffKFBwd);
 	 }
@@ -826,7 +826,7 @@ InDet::SiCombinatorialTrackFinder_xk::EStat_t InDet::SiCombinatorialTrackFinder_
 // Trk::Track production
 ///////////////////////////////////////////////////////////////////
 
-Trk::Track* InDet::SiCombinatorialTrackFinder_xk::convertToTrack(SiCombinatorialTrackFinderData_xk& data) const
+Trk::Track* InDet::SiCombinatorialTrackFinder_xk::convertToTrack(SiCombinatorialTrackFinderData_xk& data, const EventContext& ctx) const
 {
   const Trk::PatternTrackParameters *param = data.trajectory().firstParameters();
   if (param) {
@@ -849,12 +849,12 @@ Trk::Track* InDet::SiCombinatorialTrackFinder_xk::convertToTrack(SiCombinatorial
   info.setParticleHypothesis(Trk::pion);
   if( !data.flagToReturnFailedTrack() ) {
      return new Trk::Track(info,
-			   data.trajectory().convertToSimpleTrackStateOnSurface(data.cosmicTrack()),
+			   data.trajectory().convertToSimpleTrackStateOnSurface(data.cosmicTrack(),ctx),
 			   data.trajectory().convertToFitQuality());
   }
   else {
      return new Trk::Track(info,
-			   data.trajectory().convertToSimpleTrackStateOnSurfaceForDisTrackTrigger(data.cosmicTrack()),
+			   data.trajectory().convertToSimpleTrackStateOnSurfaceForDisTrackTrigger(data.cosmicTrack(),ctx),
 			   data.trajectory().convertToFitQuality());
   }
 }

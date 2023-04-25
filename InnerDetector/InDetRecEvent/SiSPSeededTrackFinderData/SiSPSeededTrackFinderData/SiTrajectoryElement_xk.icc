@@ -682,7 +682,8 @@ bool InDet::SiTrajectoryElement_xk::ForwardPropagationForClusterSeach
  const Trk::TrackParameters& Tpa,
  const InDet::SiDetElementBoundaryLink_xk*& dl,
  const T& sb, 
- const T& se)
+ const T& se,
+ const EventContext& ctx)
 {
   // remove case if you have trajectory element without actual detector element
   // this happens if you have added a dead cylinder
@@ -725,7 +726,7 @@ bool InDet::SiTrajectoryElement_xk::ForwardPropagationForClusterSeach
     }
   }
   else {
-    if(!propagate(m_parametersPredForward,m_parametersPredForward,m_step)) return false;
+    if(!propagate(m_parametersPredForward,m_parametersPredForward,m_step,ctx)) return false;
   }
   m_nlinksForward=searchClusters(m_parametersPredForward,m_linkForward);
   return true;
