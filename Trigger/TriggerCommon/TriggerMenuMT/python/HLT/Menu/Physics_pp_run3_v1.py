@@ -862,8 +862,8 @@ def setupMenu(menu_name):
 
         # ATR-24268
         # B->K*ee chains
-        ChainProp(name='HLT_e5_lhvloose_bBeeM6000_L1BKeePrimary', l1SeedThresholds=['EM3'], stream=['BphysDelayed','express'], groups=PrimaryLegGroup+BphysElectronGroup, monGroups=['bphysMon:online','bphysMon:shifter']),
-        ChainProp(name='HLT_2e5_lhvloose_bBeeM6000_L1BKeePrimary', l1SeedThresholds=['EM3'], stream=['BphysDelayed','express'], groups=PrimaryLegGroup+BphysElectronGroup, monGroups=['bphysMon:online','bphysMon:shifter']),
+        ChainProp(name='HLT_e5_lhvloose_bBeeM6000_L1BKeePrimary', l1SeedThresholds=['EM3'], stream=['BphysDelayed','express'], groups=SupportLegGroup+BphysElectronGroup+['RATE:CPS_BKeePrimary'], monGroups=['bphysMon:online','bphysMon:shifter']),
+        ChainProp(name='HLT_2e5_lhvloose_bBeeM6000_L1BKeePrimary', l1SeedThresholds=['EM3'], stream=['BphysDelayed','express'], groups=SupportLegGroup+BphysElectronGroup+['RATE:CPS_BKeePrimary'], monGroups=['bphysMon:online','bphysMon:shifter']),
         ChainProp(name='HLT_e5_lhvloose_bBeeM6000_L1BKeePrescaled', l1SeedThresholds=['EM3'], stream=['BphysDelayed'], groups=EOFBeeLegGroup+BphysElectronGroup),
         ChainProp(name='HLT_2e5_lhvloose_bBeeM6000_L1BKeePrescaled', l1SeedThresholds=['EM3'], stream=['BphysDelayed'], groups=EOFBeeLegGroup+BphysElectronGroup),
 
