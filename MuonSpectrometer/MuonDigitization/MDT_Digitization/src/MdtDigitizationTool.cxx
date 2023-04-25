@@ -502,7 +502,7 @@ bool MdtDigitizationTool::handleMDTSimhit(const TimedHitPtr<MDTSimHit>& phit, CL
         ATH_MSG_VERBOSE("Tube efficient: driftTime  " << driftTime << " adc value " << adc);
 
         // compute RT effect
-        if (m_useWireSagRT && !element->isInBarrel() && stationName != "EOS" && stationName != "EOL") {
+        if (m_useWireSagRT && !element->barrel() && stationName != "EOS" && stationName != "EOL") {
             Amg::Vector3D gpos = element->localToGlobalCoords(lpos, DigitId);
 
             // fit parameters for drift time difference vs impact radius for a wire 500 microns off axis
