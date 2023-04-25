@@ -274,24 +274,20 @@ class AthConfigFlags(object):
 
     def _set(self,name,value):
         self._tryModify()
-        if name in self._flagdict:
+        try:
             self._flagdict[name].set(value)
-            return
-        errString="No flag with name \'{}\' found".format( name )
-        closestMatch=get_close_matches(name,self._flagdict.keys(),1)
-        if len(closestMatch)>0:
-            errString+=". Did you mean \'{}\'?".format(  closestMatch[0] )
-        raise KeyError(errString)
+        except KeyError:
+            closestMatch = get_close_matches(name,self._flagdict.keys(),1)
+            raise KeyError(f"No flag with name '{name}' found" +
+                           (f". Did you mean '{closestMatch[0]}'?" if closestMatch else ""))
 
     def _get(self,name):
-        if name in self._flagdict:
+        try:
             return self._flagdict[name].get(self)
-
-        errString="No flag with name \'{}\' found".format( name )
-        closestMatch=get_close_matches(name,self._flagdict.keys(),1)
-        if len(closestMatch)>0:
-            errString+=". Did you mean \'{}\'?".format( closestMatch[0] )
-        raise KeyError(errString)
+        except KeyError:
+            closestMatch = get_close_matches(name,self._flagdict.keys(),1)
+            raise KeyError(f"No flag with name '{name}' found" +
+                           (f". Did you mean '{closestMatch[0]}'?" if closestMatch else ""))
 
     def __call__(self,name):
         return self._get(name)
