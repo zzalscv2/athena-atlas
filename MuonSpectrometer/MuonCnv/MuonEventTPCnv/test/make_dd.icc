@@ -127,10 +127,10 @@ void MuonChamber::makeMdt (const Identifier& id)
 
 void MuonChamber::makesTgc (const Identifier& id)
 {
-  auto elt = std::make_unique<MuonGM::sTgcReadoutElement>
-    (&m_pvol, "STS", 1, 2, 1, &m_muo_dd);
-  elt->setIdentifier (id);
+  auto elt = std::make_unique<MuonGM::sTgcReadoutElement>(&m_pvol, "STS", 1, 2, 1, &m_muo_dd);
   elt->initDesign (0, 0, 0, 0, 0, 0, 0, 1);
+  elt->setIdentifier (id);
+  
   //elt->m_ngasgaps = 2;
   elt->fillCache();
   m_muo_dd.addsTgcReadoutElement(elt.release());
@@ -141,8 +141,9 @@ void MuonChamber::makeMm (const Identifier& id)
 {
   auto elt = std::make_unique<MuonGM::MMReadoutElement>
     (&m_pvol, "MMS", 1, 2, 1, &m_muo_dd, nullptr);
-  elt->setIdentifier (id);
   elt->initDesign ();
+  elt->setIdentifier (id);
+  
   //elt->m_ngasgaps = 2;
   elt->fillCache();
   m_muo_dd.addMMReadoutElement(elt.release());
