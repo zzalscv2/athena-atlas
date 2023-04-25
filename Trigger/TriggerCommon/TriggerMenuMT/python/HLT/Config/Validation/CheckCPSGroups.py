@@ -41,23 +41,22 @@ def checkCPSGroups(chainDicts):
       log.error("CPS group %s contains too few chains %s", CPS_group, [hlt['chainName'] for hlt in HLT_list])
       CPS_OK = False
 
-    # Checks for every chain
-    for hlt in HLT_list:
-      # Can't apply CPS to multi-seed L1
-      if ',' in hlt['L1item']:
-        log.error("CPS group %s contains HLT chain %s with multi-seed L1 item", CPS_group, hlt['chainName'])
-        CPS_OK = False
-
       for grp in hlt['groups']:
         if 'Primary' in grp:
           log.error("Primary trigger '%s' in CPS %s", hlt['chainName'], CPS_group)
           CPS_OK = False
 
       # Verify L1 item matches CPS group
-      if CPS_item != hlt['L1item'][3:]:
-        log.error("CPS group %s for HLT chain %s does not match L1 item %s", CPS_group, hlt['chainName'], hlt['L1item'])
-        CPS_OK = False
-      # Passing this check also implies that there is exactly 1 L1 for the CPS group
+      if ',' in hlt['L1item']:
+        if CPS_item != hlt['name'].rsplit('_L1')[1]:
+          log.error("CPS group %s for HLT chain %s does not match mult-seed L1 item %s", CPS_group, hlt['chainName'], hlt['name'].rsplit('_L1')[1])
+          CPS_OK = False
+          # Checks CPS for multi-seed items
+      else:
+        if CPS_item != hlt['L1item'][3:]:
+          log.error("CPS group %s for HLT chain %s does not match L1 item %s", CPS_group, hlt['chainName'], hlt['L1item'])
+          CPS_OK = False
+          # Passing this check also implies that there is exactly 1 L1 for the CPS group
 
   if not CPS_OK:
     raise Exception("Invalid CPS group assignments found")
