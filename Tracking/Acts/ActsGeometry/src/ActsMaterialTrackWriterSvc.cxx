@@ -278,10 +278,9 @@ ActsMaterialTrackWriterSvc::doWrite(const Acts::RecordedMaterialTrack& mTrack)
       const Acts::Surface* surface = mint.surface;
       Acts::GeometryIdentifier layerID;
       if (surface) {
-        auto gctx = std::make_unique<ActsGeometryContext>();
-        gctx->alignmentStore = m_trackingGeometrySvc->getNominalAlignmentStore();
+        const ActsGeometryContext& gctx{m_trackingGeometrySvc->getNominalContext()};
         auto sfIntersection = surface->intersect(
-            gctx->context(), mint.position, mint.direction, true);
+            gctx.context(), mint.position, mint.direction, true);
         layerID = surface->geometryId();
         m_sur_id.push_back(layerID.value());
         m_sur_type.push_back(surface->type());

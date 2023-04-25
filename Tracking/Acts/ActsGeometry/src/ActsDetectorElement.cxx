@@ -6,8 +6,6 @@
 
 // ATHENA
 #include "ActsInterop/IdentityHelper.h"
-#include "GeoPrimitives/CLHEPtoEigenConverter.h"
-#include "GeoPrimitives/GeoPrimitives.h"
 #include "SCT_ReadoutGeometry/StripBoxDesign.h"
 #include "SCT_ReadoutGeometry/StripStereoAnnulusDesign.h"
 #include "TRT_ReadoutGeometry/TRT_BarrelElement.h"
@@ -19,10 +17,7 @@
 #include "TrkSurfaces/TrapezoidBounds.h"
 
 // PACKAGE
-#include "ActsGeometry/ActsAlignmentStore.h"
-#include "ActsGeometry/ActsGeometryContext.h"
-#include "ActsGeometry/ActsTrackingGeometrySvc.h"
-
+#include "ActsGeometryInterfaces/ActsGeometryContext.h"
 // ACTS
 #include "Acts/Definitions/Units.hpp"
 #include "Acts/Geometry/GeometryContext.hpp"
@@ -36,8 +31,6 @@
 #include "Acts/Visualization/ObjVisualization3D.hpp"
 #include "Acts/Visualization/PlyVisualization3D.hpp"
 
-// STL
-#include <mutex>
 
 // BOOST
 #include <boost/variant.hpp>
@@ -47,12 +40,15 @@ using Acts::Surface;
 using Acts::Transform3;
 
 using namespace Acts::UnitLiterals;
+using namespace ActsTrk;
+using SubDetAlignments = ActsGeometryContext::SubDetAlignments;
+
+
 
 constexpr double length_unit = 1_mm;
 
-ActsDetectorElement::ActsDetectorElement(
-    const InDetDD::SiDetectorElement &detElem) {
-  m_detElement = &detElem;
+ActsDetectorElement::ActsDetectorElement(const InDetDD::SiDetectorElement &detElem) : m_detElement{&detElem} {
+  m_type = detElem.isPixel() ? DetectorType::Pixel : DetectorType::Sct;
 
   auto boundsType = detElem.bounds().type();
 
@@ -151,13 +147,9 @@ ActsDetectorElement::ActsDetectorElement(
   }
 }
 
-ActsDetectorElement::ActsDetectorElement(
-    const Acts::Transform3 &trf, const InDetDD::TRT_BaseElement &detElem,
-    const Identifier &id)
-  :  m_detElement (&detElem),
-     m_defTransform (trf),
-     m_explicitIdentifier (id)
-{
+ActsDetectorElement::ActsDetectorElement(const Acts::Transform3 &trf, const InDetDD::TRT_BaseElement &detElem, const Identifier &id) :
+    m_type{DetectorType::Trt}, m_detElement{&detElem}, m_defTransform{trf}, m_explicitIdentifier(id) {
+
   // we know this is a straw
   double length = detElem.strawLength() * 0.5 * length_unit;
 
@@ -184,12 +176,9 @@ ActsDetectorElement::ActsDetectorElement(
   m_surface = Acts::Surface::makeShared<Acts::StrawSurface>(lineBounds, *this);
 }
 
-ActsDetectorElement::ActsDetectorElement(
-    const InDetDD::HGTD_DetectorElement &detElem, const Identifier &id) 
-  :  m_detElement (&detElem),
-     m_thickness (detElem.thickness()),
-     m_explicitIdentifier (id)
-{
+ActsDetectorElement::ActsDetectorElement(const InDetDD::HGTD_DetectorElement &detElem, const Identifier &id) :
+    m_type{DetectorType::Hgtd}, m_detElement{&detElem}, m_thickness{detElem.thickness()}, m_explicitIdentifier{id} {
+
   auto boundsType = detElem.bounds().type();
 
   if (boundsType == Trk::SurfaceBounds::Rectangle) {
@@ -213,118 +202,82 @@ ActsDetectorElement::ActsDetectorElement(
 }
 
 IdentityHelper ActsDetectorElement::identityHelper() const {
-  if (const auto *detElem =
-          dynamic_cast<const InDetDD::SiDetectorElement *>(m_detElement);
-      detElem != nullptr) {
-    return IdentityHelper(detElem);
+  if (detectorType() == DetectorType::Pixel || detectorType() == DetectorType::Sct) {
+        return IdentityHelper(static_cast<const InDetDD::SiDetectorElement *>(m_detElement));
   } else {
     throw std::domain_error("Cannot get IdentityHelper for TRT element");
   }
 }
 
-const Acts::Transform3 &
-ActsDetectorElement::transform(const Acts::GeometryContext &anygctx) const {
-  // any cast to known context type
-  const ActsGeometryContext *gctx = anygctx.get<const ActsGeometryContext *>();
+const Acts::Transform3 &ActsDetectorElement::transform(const Acts::GeometryContext &anygctx) const {
+    // any cast to known context type
+    const ActsGeometryContext *gctx = anygctx.get<const ActsGeometryContext *>();
 
-  // This is needed for initial geometry construction. At that point, we don't
-  // have a consistent view of the geometry yet, and thus we can't populate an
-  // alignment store at that time.
-  if (gctx->construction) {
-    // this should only happen at initialize (1 thread, but mutex anyway)
-    return getDefaultTransformMutexed();
-  }
+    // This is needed for initial geometry construction. At that point, we don't
+    // have a consistent view of the geometry yet, and thus we can't populate an
+    // alignment store at that time.
 
-  // unpack the alignment store from the context
-  const ActsAlignmentStore *alignmentStore = gctx->alignmentStore;
-  // no GAS, is this initialization?
-  assert(alignmentStore != nullptr);
+    // unpack the alignment store from the context
+    SubDetAlignments::const_iterator itr = gctx->alignmentStores.find(detectorType());
 
-  // get the correct cached transform
-  // units should be fine here since we converted at construction
-  const Acts::Transform3 *cachedTrf = alignmentStore->getTransform(this);
+    /// Does this mean that the alignment is not cached for this detector element?
+    if (itr == gctx->alignmentStores.end()) return getDefaultTransform();
+    const GeoModel::TransientConstSharedPtr<AlignmentStore> &alignmentStore = itr->second;
 
-  assert(cachedTrf != nullptr);
+    // get the correct cached transform
+    // units should be fine here since we converted at construction
+    const Acts::Transform3 *cachedTrf = alignmentStore->getTransform(this);
 
-  return *cachedTrf;
+    assert(cachedTrf != nullptr);
+    return *cachedTrf;
+
 }
 
-void ActsDetectorElement::storeTransform(ActsAlignmentStore *gas) const {
-  Amg::Transform3D trf;
-  if (const auto *detElem =
-          dynamic_cast<const InDetDD::SiDetectorElement *>(m_detElement);
-      detElem != nullptr) {
-    Amg::Transform3D l2g =
-        detElem->getMaterialGeom()->getAbsoluteTransform(gas)
-        * m_extraTransform;
+bool ActsDetectorElement::storeAlignment(RawGeomAlignStore &store) const {
+  if (store.detType != detectorType()) return false;
 
-    // need to make sure translation has correct units
-    l2g.translation() *= 1.0 / CLHEP::mm * length_unit;
+    Amg::Transform3D trf{Amg::Transform3D::Identity()};
+    static constexpr std::array<DetectorType, 3> useGeoModel{DetectorType::Pixel, DetectorType::Sct, DetectorType::Hgtd};
+    if (std::find(useGeoModel.begin(), useGeoModel.end(), detectorType()) != useGeoModel.end()) {
+        Amg::Transform3D l2g = m_detElement->getMaterialGeom()->getAbsoluteTransform(store.geoModelAlignment.get()) * m_extraTransform;
+        // need to make sure translation has correct units
+        l2g.translation() *= 1.0 / CLHEP::mm * length_unit;
 
-    trf = l2g;
-  } else if (const auto *detElem =
-                dynamic_cast<const InDetDD::HGTD_DetectorElement *>(m_detElement); 
-                detElem!= nullptr) {
-    Amg::Transform3D l2g = 
-        detElem->getMaterialGeom()->getAbsoluteTransform(gas) 
-        * m_extraTransform;
-    // need to make sure translation has correct units
-    l2g.translation() *= 1.0 / CLHEP::mm * length_unit;
-
-    trf = l2g;
-  } else if (const auto *detElem =
-                 dynamic_cast<const InDetDD::TRT_BaseElement *>(m_detElement);
-             detElem != nullptr && m_defTransform.isValid())
-  {
-    // So far: NO ALIGNMENT for the ACTS TRT version. Default transform set in
-    // constructor, should be safe to access without mutex.
-    trf = *m_defTransform.ptr();
+        trf = l2g;
+    } else if (detectorType() == DetectorType::Trt && m_defTransform.isValid()) {
+        // So far: NO ALIGNMENT for the ACTS TRT version. Default transform set in
+        // constructor, should be safe to access without mutex.
+        trf = *m_defTransform.ptr();
   } else {
-    throw std::runtime_error{"Unknown detector element type"};
+    throw std::runtime_error{"Unknown detector element type "+to_string(detectorType())};
   }
 
-  gas->setTransform(this, trf);
-  if (gas->getTransform(this) == nullptr) {
-    throw std::runtime_error(
-        "Detector element was unable to store transform in GAS");
-  }
+  store.trackingAlignment->setTransform(this, trf);
+#ifndef NDEBUG
+    if (!store.trackingAlignment->getTransform(this)) { throw std::runtime_error("Detector element was unable to store transform in GAS"); }
+#endif
+    return true;
+
 }
 
 const Acts::Transform3 &
-ActsDetectorElement::getDefaultTransformMutexed() const {
+ActsDetectorElement::getDefaultTransform() const {
   if (!m_defTransform.isValid()) {
     // transform not yet set
-    if (const auto *detElem =
-        dynamic_cast<const InDetDD::SiDetectorElement *>(m_detElement);
-        detElem != nullptr) {
-      Amg::Transform3D l2g =
-        detElem->getMaterialGeom()->getDefAbsoluteTransform() 
-        * m_extraTransform;
+    static constexpr std::array<DetectorType, 3> useGeoModel{DetectorType::Pixel, DetectorType::Sct, DetectorType::Hgtd};
+    if (std::find(useGeoModel.begin(), useGeoModel.end(), detectorType()) != useGeoModel.end()) {
+        Amg::Transform3D l2g = m_detElement->getMaterialGeom()->getAbsoluteTransform() * m_extraTransform;
+            // need to make sure translation has correct units
+            l2g.translation() *= 1.0 / CLHEP::mm * length_unit;
 
-      l2g.translation() *= 1.0 / CLHEP::mm * length_unit;
-
-      m_defTransform.set (l2g);
-    }  else if (const auto *detElem =
-                dynamic_cast<const InDetDD::HGTD_DetectorElement *>(m_detElement); 
-                detElem!= nullptr) {
-    Amg::Transform3D l2g = 
-            detElem->getMaterialGeom()->getDefAbsoluteTransform() 
-            * m_extraTransform;
-    // need to make sure translation has correct units
-    l2g.translation() *= 1.0 / CLHEP::mm * length_unit;
-
-    m_defTransform.set(l2g);
-  } else if (const auto *detElem =
-               dynamic_cast<const InDetDD::TRT_BaseElement *>(m_detElement);
-               detElem != nullptr) {
-      throw std::logic_error{
-        "TRT transform should have been set in the constructor"};
-    } else {
-      throw std::runtime_error{"Unknown detector element type"};
+            m_defTransform.set(std::move(l2g));
+        } else if (const auto *detElem = dynamic_cast<const InDetDD::TRT_BaseElement *>(m_detElement); detElem != nullptr) {
+            throw std::logic_error{"TRT transform should have been set in the constructor"};
+        } else {
+            throw std::runtime_error{"Unknown detector element type"};
+        }
     }
-  }
-
-  return *m_defTransform.ptr();
+    return *m_defTransform.ptr();
 }
 
 const Acts::Surface &ActsDetectorElement::surface() const {
@@ -363,3 +316,4 @@ const GeoVDetectorElement *
 ActsDetectorElement::upstreamDetectorElement() const {
   return m_detElement;
 }
+DetectorType ActsDetectorElement::detectorType() const { return m_type; }

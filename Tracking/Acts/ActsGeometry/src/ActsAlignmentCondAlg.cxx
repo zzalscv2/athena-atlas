@@ -2,131 +2,81 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "ActsGeometry/ActsAlignmentCondAlg.h"
+#include "ActsAlignmentCondAlg.h"
 
 // PACKAGE
-#include "ActsGeometry/ActsDetectorElement.h"
 #include "ActsGeometry/ActsAlignmentStore.h"
+#include "ActsGeometry/ActsDetectorElement.h"
 #include "ActsGeometry/ActsGeometryContext.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometrySvc.h"
 
-
 // ATHENA
-#include "GaudiKernel/EventIDBase.h"
-#include "GaudiKernel/EventIDRange.h"
-#include "GaudiKernel/ICondSvc.h"
-#include "GeoModelKernel/GeoAlignableTransform.h"
-#include "StoreGate/StoreGateSvc.h"
+#include "AthenaKernel/IOVInfiniteRange.h"
 #include "StoreGate/WriteCondHandle.h"
 
 // ACTS
+#include "Acts/Definitions/Algebra.hpp"
 #include "Acts/Geometry/DetectorElementBase.hpp"
 #include "Acts/Geometry/TrackingGeometry.hpp"
 #include "Acts/Surfaces/Surface.hpp"
-#include "Acts/Definitions/Algebra.hpp"
 
 // STL
 #include <memory>
 
-ActsAlignmentCondAlg::ActsAlignmentCondAlg(const std::string &name,
-                                           ISvcLocator *pSvcLocator)
-    : ::AthAlgorithm(name, pSvcLocator),
-      m_trackingGeometrySvc("ActsTrackingGeometrySvc", name) {}
+using namespace ActsTrk;
+ActsAlignmentCondAlg::ActsAlignmentCondAlg(const std::string& name, ISvcLocator* pSvcLocator) : AthReentrantAlgorithm(name, pSvcLocator) {}
 
-ActsAlignmentCondAlg::~ActsAlignmentCondAlg() {}
+ActsAlignmentCondAlg::~ActsAlignmentCondAlg() = default;
 
 StatusCode ActsAlignmentCondAlg::initialize() {
-  ATH_MSG_DEBUG("initialize " << name());
-
-  ATH_CHECK(m_pixelAlignStoreReadKey.initialize());
-  ATH_CHECK(m_sctAlignStoreReadKey.initialize());
-
-  ATH_CHECK(m_wchk.initialize());
-
-  return StatusCode::SUCCESS;
+    ATH_MSG_DEBUG("initialize " << name());
+    ATH_CHECK(m_alignStoreKeys.initialize());
+    ATH_CHECK(m_wchk.initialize());
+    return StatusCode::SUCCESS;
 }
 
-StatusCode ActsAlignmentCondAlg::execute() {
-  ATH_MSG_DEBUG("execute " << name());
+StatusCode ActsAlignmentCondAlg::execute(const EventContext& ctx) const {
+    ATH_MSG_DEBUG("execute " << name());
 
-  auto trkGeom = m_trackingGeometrySvc->trackingGeometry();
+    EventIDBase now(ctx.eventID());
+    SG::WriteCondHandle<ActsGeometryContext> wch{m_wchk, ctx};
 
-  EventIDBase now(getContext().eventID());
-  SG::WriteCondHandle<ActsGeometryContext> wch(m_wchk);
+    if (wch.isValid(now)) {
+        ATH_MSG_DEBUG("CondHandle is already valid for " << now << ". In theory this should not be called, but may happen"
+                                                         << " if multiple concurrent events are being processed out of order.");
 
-  if (wch.isValid(now)) {
-    ATH_MSG_DEBUG(
-        "CondHandle is already valid for "
-        << now << ". In theory this should not be called, but may happen"
-        << " if multiple concurrent events are being processed out of order.");
-
-  } else {
-
-    ATH_MSG_DEBUG("  CondHandle " << wch.key() << " not valid now (" << now
-                                  << "). Getting new info for dbKey \""
-                                  << wch.dbKey() << "\" from CondDb");
-
-    // Pixel
-    SG::ReadCondHandle<GeoAlignmentStore> pixelAlignStore(m_pixelAlignStoreReadKey);
-    SG::ReadCondHandle<GeoAlignmentStore> sctAlignStore(m_sctAlignStoreReadKey);
-
-
-    EventIDRange pixelRange;
-    if(!pixelAlignStore.range(pixelRange)) {
-      ATH_MSG_FATAL("Failed to retrieve validity range for " << pixelAlignStore.key());
-      return StatusCode::FAILURE;
+        return StatusCode::SUCCESS;
     }
+    wch.addDependency(EventIDRange(IOVInfiniteRange::infiniteRunLB()));
 
-    EventIDRange sctRange;
-    if(!sctAlignStore.range(sctRange)) {
-      ATH_MSG_FATAL("Failed to retrieve validity range for " << sctAlignStore.key());
-      return StatusCode::FAILURE;
-    }
+    ATH_MSG_DEBUG("  CondHandle " << wch.key() << " not valid now (" << now << "). Getting new info for dbKey \"" << wch.dbKey()
+                                  << "\" from CondDb");
 
     // create an Acts aware geo alignment store from the one given
     // (this makes a copy for now, which is not ideal)
-    auto actsAlignStore =
-        std::make_unique<ActsAlignmentStore>(**pixelAlignStore);
+    std::unique_ptr<ActsGeometryContext> gctx = std::make_unique<ActsGeometryContext>();
 
-    actsAlignStore->append(**sctAlignStore);
-
-    //std::unique_ptr<ActsAlignmentStore> sctActsAlignStore =
-        //std::make_unique<ActsAlignmentStore>(**sctAlignStore);
-
-    // deltas are set, now populate sensitive element transforms
-    ATH_MSG_DEBUG("Populating ActsAlignmentStore for IOV");
-    size_t nElems = 0;
-    trkGeom->visitSurfaces([&actsAlignStore, &nElems](const Acts::Surface *srf) {
-      const Acts::DetectorElementBase *detElem =
-          srf->associatedDetectorElement();
-      const auto *gmde = static_cast<const ActsDetectorElement *>(detElem);
-      gmde->storeTransform(actsAlignStore.get());
-      nElems++;
-    });
-    ATH_MSG_DEBUG("ActsAlignmentStore populated for " << nElems
-                                                      << " detector elements");
-
-    EventIDRange r = EventIDRange::intersect(pixelRange, sctRange);
+    for (const SG::ReadCondHandleKey<RawGeomAlignStore>& key : m_alignStoreKeys) {
+        SG::ReadCondHandle<RawGeomAlignStore> alignStore{key, ctx};
+        if (!alignStore.isValid()) {
+            ATH_MSG_FATAL("Failed to retrieve alignment from " << key.fullKey());
+            return StatusCode::FAILURE;
+        }
+        wch.addDependency(alignStore);
+        GeoModel::TransientConstSharedPtr<AlignmentStore>& newStore = gctx->alignmentStores[alignStore->detType];
+        if (newStore) {
+            ATH_MSG_FATAL("The alignment constants of " << to_string(alignStore->detType) << " are already added to the context");
+            return StatusCode::FAILURE;
+        }
+        newStore = alignStore->trackingAlignment;
+    }
 
     // get a nominal alignment store from the tracking geometry service
     // and plug it into a geometry context
-    auto gctx = std::make_unique<ActsGeometryContext>();
-    gctx->ownedAlignmentStore =
-        std::move(actsAlignStore); // GCTX owns the alignment store
-    gctx->alignmentStore = gctx->ownedAlignmentStore.get();
-
-    if (wch.record(r, gctx.release()).isFailure()) {
-      ATH_MSG_ERROR("could not record alignment store "
-                    << wch.key() << " = " << gctx.get() << " with EventRange "
-                    << r);
-      return StatusCode::FAILURE;
-    }
-
+    ATH_CHECK(m_trackingGeometrySvc->checkAlignComplete(*gctx));
+    ATH_CHECK(wch.record(std::move(gctx)));
     ATH_MSG_INFO("Recorded new " << wch.key() << " "
-                                       << " with range " << r);
-  }
+                                 << " with range " << wch.getRange());
 
-
-
-  return StatusCode::SUCCESS;
+    return StatusCode::SUCCESS;
 }

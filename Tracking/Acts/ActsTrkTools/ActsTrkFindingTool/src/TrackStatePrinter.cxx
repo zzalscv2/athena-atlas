@@ -26,7 +26,7 @@
 // Other
 #include <sstream>
 
-namespace
+namespace ActsTrk
 {
   /// =========================================================================
   /// Debug printout routines

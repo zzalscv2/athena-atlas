@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRY_ACTSTRACKINGGEOMETRYSVC_H
@@ -7,8 +7,6 @@
 
 // ATHENA
 #include "AthenaBaseComps/AthService.h"
-#include "StoreGate/StoreGateSvc.h"
-#include "GaudiKernel/EventContext.h"
 
 // PACKAGE
 #include "ActsGeometryInterfaces/IActsTrackingGeometrySvc.h"
@@ -54,18 +52,17 @@ class ActsTrackingGeometrySvc : public extends<AthService, IActsTrackingGeometry
 public:
 
   StatusCode initialize() override;
-  //virtual StatusCode finalize() override;
 
   ActsTrackingGeometrySvc( const std::string& name, ISvcLocator* pSvcLocator );
 
   std::shared_ptr<const Acts::TrackingGeometry>
   trackingGeometry() override;
 
-  void
-  populateAlignmentStore(ActsAlignmentStore *store) const override;
+  unsigned int populateAlignmentStore(ActsTrk::RawGeomAlignStore& store) const override;
 
-  const ActsAlignmentStore*
-  getNominalAlignmentStore() const override;
+  const ActsGeometryContext& getNominalContext() const override;
+
+  StatusCode checkAlignComplete(const ActsGeometryContext& ctx) const override;
 
 private:
   ActsLayerBuilder::Config
@@ -88,22 +85,22 @@ private:
   bool runConsistencyChecks() const;
 
   ServiceHandle<StoreGateSvc> m_detStore;
-  const InDetDD::SiDetectorManager* p_pixelManager;
-  const InDetDD::SiDetectorManager* p_SCTManager;
-  const InDetDD::TRT_DetectorManager* p_TRTManager;
-  const InDetDD::SiDetectorManager* p_ITkPixelManager;
-  const InDetDD::SiDetectorManager* p_ITkStripManager;
-  const BeamPipeDetectorManager* p_beamPipeMgr;
-  const HGTD_DetectorManager* p_HGTDManager;
+  const InDetDD::SiDetectorManager* p_pixelManager{nullptr};
+  const InDetDD::SiDetectorManager* p_SCTManager{nullptr};
+  const InDetDD::TRT_DetectorManager* p_TRTManager{nullptr};
+  const InDetDD::SiDetectorManager* p_ITkPixelManager{nullptr};
+  const InDetDD::SiDetectorManager* p_ITkStripManager{nullptr};
+  const BeamPipeDetectorManager* p_beamPipeMgr{nullptr};
+  const HGTD_DetectorManager* p_HGTDManager{nullptr};
 
-  std::shared_ptr<ActsElementVector> m_elementStore;
-  std::shared_ptr<const Acts::TrackingGeometry> m_trackingGeometry;
+  std::shared_ptr<ActsElementVector> m_elementStore{nullptr};
+  std::shared_ptr<const Acts::TrackingGeometry> m_trackingGeometry{nullptr};
 
-  const TRT_ID *m_TRT_idHelper;
-  const HGTD_ID *m_HGTD_idHelper;
-
-  std::unique_ptr<const ActsAlignmentStore> m_nominalAlignmentStore{nullptr};
-
+  const TRT_ID *m_TRT_idHelper{nullptr};
+  const HGTD_ID *m_HGTD_idHelper{nullptr};
+  
+  ActsGeometryContext m_nominalContext{};
+  
   Gaudi::Property<bool> m_useMaterialMap{this, "UseMaterialMap", false, ""};
   Gaudi::Property<bool> m_objDebugOutput{this, "ObjDebugOutput", false, ""};
   Gaudi::Property<std::string> m_materialMapInputFileBase{this, "MaterialMapInputFile", "", ""};
@@ -125,6 +122,10 @@ private:
 
   ToolHandle<IActsTrackingVolumeBuilder> m_caloVolumeBuilder{this, 
       "CaloVolumeBuilder", "", "CaloVolumeBuilder"};
+    /// Define the subdetectors for which the tracking geometry does not expect a valid alignment store
+  Gaudi::Property<std::vector<unsigned int>> m_subDetNoAlignProp{this, "NotAlignDetectors", {}};
+  std::set<ActsTrk::DetectorType> m_subDetNoAlign{};
+
 
 };
 
