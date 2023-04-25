@@ -50,14 +50,14 @@ def SiCombinatorialTrackFinder_xkCfg(flags, name="InDetSiComTrackFinder", **kwar
     acc = ComponentAccumulator()
 
     # For SiDetElementBoundaryLinks_xk ReadCondHandle
-    if flags.InDet.Tracking.ActiveConfig.usePixel:
+    if flags.Tracking.ActiveConfig.usePixel:
         acc.merge(SiDetElementBoundaryLinksCondAlg_xk_Pixel_Cfg(flags))
 
-    if flags.InDet.Tracking.ActiveConfig.useSCT:
+    if flags.Tracking.ActiveConfig.useSCT:
         acc.merge(SiDetElementBoundaryLinksCondAlg_xk_SCT_Cfg(flags))
 
-    kwargs.setdefault("usePixel", flags.InDet.Tracking.ActiveConfig.usePixel)
-    kwargs.setdefault("useSCT", flags.InDet.Tracking.ActiveConfig.useSCT)
+    kwargs.setdefault("usePixel", flags.Tracking.ActiveConfig.usePixel)
+    kwargs.setdefault("useSCT", flags.Tracking.ActiveConfig.useSCT)
     kwargs.setdefault("PixelClusterContainer", "PixelClusters")
     kwargs.setdefault("SCT_ClusterContainer", "SCT_Clusters")
 
@@ -82,7 +82,7 @@ def SiCombinatorialTrackFinder_xkCfg(flags, name="InDetSiComTrackFinder", **kwar
     from InDetConfig.InDetBoundaryCheckToolConfig import InDetBoundaryCheckToolCfg
     kwargs.setdefault("BoundaryCheckTool", acc.popToolsAndMerge(InDetBoundaryCheckToolCfg(flags)))
 
-    if flags.InDet.Tracking.ActiveConfig.usePixel:
+    if flags.Tracking.ActiveConfig.usePixel:
         if "PixelSummaryTool" not in kwargs:
            from PixelConditionsTools.PixelConditionsSummaryConfig import PixelConditionsSummaryCfg
            kwargs.setdefault("PixelSummaryTool", acc.popToolsAndMerge(PixelConditionsSummaryCfg(flags)))
@@ -93,7 +93,7 @@ def SiCombinatorialTrackFinder_xkCfg(flags, name="InDetSiComTrackFinder", **kwar
     else:
         kwargs.setdefault("PixelSummaryTool", "")
 
-    if flags.InDet.Tracking.ActiveConfig.useSCT:
+    if flags.Tracking.ActiveConfig.useSCT:
         if "SctSummaryTool" not in kwargs:
            from SCT_ConditionsTools.SCT_ConditionsToolsConfig import SCT_ConditionsSummaryToolCfg
            kwargs.setdefault("SctSummaryTool", acc.popToolsAndMerge(SCT_ConditionsSummaryToolCfg(flags)))
@@ -104,8 +104,8 @@ def SiCombinatorialTrackFinder_xkCfg(flags, name="InDetSiComTrackFinder", **kwar
     else:
         kwargs.setdefault("SctSummaryTool", "")
 
-    track_finder = CompFactory.InDet.SiCombinatorialTrackFinder_xk(name = name+flags.InDet.Tracking.ActiveConfig.extension, **kwargs)
-    acc.setPrivateTools(track_finder)
+    acc.setPrivateTools(CompFactory.InDet.SiCombinatorialTrackFinder_xk(
+        name+flags.Tracking.ActiveConfig.extension, **kwargs))
     return acc
 
 def SiCombinatorialTrackFinder_xk_Trig_Cfg( flags, name="InDetTrigSiComTrackFinder", **kwargs ):
@@ -115,14 +115,14 @@ def SiCombinatorialTrackFinder_xk_Trig_Cfg( flags, name="InDetTrigSiComTrackFind
   acc = ComponentAccumulator()
 
   # For SiDetElementBoundaryLinks_xk ReadCondHandle
-  if flags.InDet.Tracking.ActiveConfig.usePixel:
+  if flags.Tracking.ActiveConfig.usePixel:
       acc.merge(SiDetElementBoundaryLinksCondAlg_xk_Pixel_Cfg(flags))
 
-  if flags.InDet.Tracking.ActiveConfig.useSCT:
+  if flags.Tracking.ActiveConfig.useSCT:
       acc.merge(SiDetElementBoundaryLinksCondAlg_xk_SCT_Cfg(flags))
 
-  kwargs.setdefault("usePixel", flags.InDet.Tracking.ActiveConfig.usePixel)
-  kwargs.setdefault("useSCT", flags.InDet.Tracking.ActiveConfig.useSCT)
+  kwargs.setdefault("usePixel", flags.Tracking.ActiveConfig.usePixel)
+  kwargs.setdefault("useSCT", flags.Tracking.ActiveConfig.useSCT)
   kwargs.setdefault("PixelClusterContainer", 'PixelTrigClusters')
   kwargs.setdefault("SCT_ClusterContainer", 'SCT_TrigClusters')
   kwargs.setdefault("PixelDetElStatus", "")
@@ -162,14 +162,14 @@ def ITkSiCombinatorialTrackFinder_xkCfg(flags, name="ITkSiComTrackFinder", **kwa
     acc = ComponentAccumulator()
 
     # For SiDetElementBoundaryLinks_xk ReadCondHandle
-    if flags.ITk.Tracking.ActiveConfig.useITkPixel:
+    if flags.Tracking.ActiveConfig.useITkPixel:
         acc.merge(SiDetElementBoundaryLinksCondAlg_xk_ITkPixel_Cfg(flags))
 
-    if flags.ITk.Tracking.ActiveConfig.useITkStrip:
+    if flags.Tracking.ActiveConfig.useITkStrip:
         acc.merge(SiDetElementBoundaryLinksCondAlg_xk_ITkStrip_Cfg(flags))
 
-    kwargs.setdefault("usePixel", flags.ITk.Tracking.ActiveConfig.useITkPixel)
-    kwargs.setdefault("useSCT",   flags.ITk.Tracking.ActiveConfig.useITkStrip)
+    kwargs.setdefault("usePixel", flags.Tracking.ActiveConfig.useITkPixel)
+    kwargs.setdefault("useSCT",   flags.Tracking.ActiveConfig.useITkStrip)
     kwargs.setdefault("PixelClusterContainer", 'ITkPixelClusters')
     kwargs.setdefault("SCT_ClusterContainer",   'ITkStripClusters')
     kwargs.setdefault("PixelDetElementBoundaryLinks_xk", "ITkPixelDetElementBoundaryLinks_xk")
@@ -181,7 +181,8 @@ def ITkSiCombinatorialTrackFinder_xkCfg(flags, name="ITkSiComTrackFinder", **kwa
     # --- Local track finding using sdCaloSeededSSSpace point seed
     #
     from TrkConfig.TrkRIO_OnTrackCreatorConfig import ITkRotCreatorCfg
-    ITkRotCreator = acc.popToolsAndMerge(ITkRotCreatorCfg(flags, name="ITkRotCreator"+flags.ITk.Tracking.ActiveConfig.extension))
+    ITkRotCreator = acc.popToolsAndMerge(ITkRotCreatorCfg(
+        flags, name="ITkRotCreator"+flags.Tracking.ActiveConfig.extension))
     acc.addPublicTool(ITkRotCreator)
     kwargs.setdefault("RIOonTrackTool", ITkRotCreator)
 
@@ -213,5 +214,6 @@ def ITkSiCombinatorialTrackFinder_xkCfg(flags, name="ITkSiComTrackFinder", **kwa
     else:
         kwargs.setdefault("SctSummaryTool", None)
 
-    acc.setPrivateTools(CompFactory.InDet.SiCombinatorialTrackFinder_xk(name = name+flags.ITk.Tracking.ActiveConfig.extension, **kwargs))
+    acc.setPrivateTools(CompFactory.InDet.SiCombinatorialTrackFinder_xk(
+        name+flags.Tracking.ActiveConfig.extension, **kwargs))
     return acc

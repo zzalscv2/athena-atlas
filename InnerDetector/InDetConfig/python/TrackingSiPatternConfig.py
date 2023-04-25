@@ -15,13 +15,13 @@ def TrackingSiPatternCfg(flags,
     #
     # --- get list of already associated hits (always do this, even if no other tracking ran before)
     #
-    if flags.InDet.Tracking.ActiveConfig.usePrdAssociationTool:
+    if flags.Tracking.ActiveConfig.usePrdAssociationTool:
         from InDetConfig.InDetTrackPRD_AssociationConfig import (
             InDetTrackPRD_AssociationCfg)
         acc.merge(InDetTrackPRD_AssociationCfg(
             flags,
-            name = 'InDetTrackPRD_Association' + \
-            flags.InDet.Tracking.ActiveConfig.extension,
+            name = ('InDetTrackPRD_Association' +
+                    flags.Tracking.ActiveConfig.extension),
             TracksName = list(InputCollections)))
 
     # ------------------------------------------------------------

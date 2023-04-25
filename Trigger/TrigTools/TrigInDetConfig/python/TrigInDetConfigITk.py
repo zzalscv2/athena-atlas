@@ -44,35 +44,36 @@ def ITkftfCfg(flags, roisKey, signature, signatureName):
     from TrigFastTrackFinder.TrigFastTrackFinderConfig import TrigFastTrackFinderMonitoringArg
     monTool = TrigFastTrackFinderMonitoringArg(flags, name = "trigfasttrackfinder_" + signature, doResMon=False)
 
-    ftf = CompFactory.TrigFastTrackFinder( name = "TrigFastTrackFinder_" + signature,
-                                            LayerNumberTool          = acc.getPublicTool( "TrigL2LayerNumberToolITk_FTF" ),
-                                            SpacePointProviderTool   = acc.getPublicTool( "TrigSpacePointConversionTool" + signature ),
-                                            TrackSummaryTool         = ITkTrackSummaryTool,
-                                            initialTrackMaker        = ITkSiTrackMakerTool,
-                                            trigInDetTrackFitter     = acc.getPublicTool( "TrigInDetTrackFitter" ),
-                                            RoIs                     = roisKey,
-                                            trigZFinder              = CompFactory.TrigZFinder(),
-                                            doZFinder                = False,
-                                            SeedRadBinWidth          = flags.ITk.Tracking.ActiveConfig.SeedRadBinWidth,
-                                            TrackInitialD0Max        = 1000. if flags.ITk.Tracking.ActiveConfig.extension == 'cosmics' else 20.0,
-                                            TracksName               = flags.ITk.Tracking.ActiveConfig.trkTracks_FTF,
-                                            TripletDoPSS             = False,
-                                            Triplet_D0Max            = flags.ITk.Tracking.ActiveConfig.Triplet_D0Max,
-                                            Triplet_D0_PPS_Max       = flags.ITk.Tracking.ActiveConfig.Triplet_D0_PPS_Max,
-                                            Triplet_MaxBufferLength  = 3,
-                                            Triplet_MinPtFrac        = 1,
-                                            Triplet_nMaxPhiSlice     = 53,
-                                            doCloneRemoval           = flags.ITk.Tracking.ActiveConfig.doCloneRemoval,
-                                            doResMon                 = flags.ITk.Tracking.ActiveConfig.doResMon,
-                                            doSeedRedundancyCheck    = flags.ITk.Tracking.ActiveConfig.doSeedRedundancyCheck,
-                                            pTmin                    = flags.ITk.Tracking.ActiveConfig.minPT[0],
-                                            useNewLayerNumberScheme  = True,
-                                            MinHits                  = 5,
-                                            useGPU                   = False,
-                                            DoubletDR_Max            = 270,
-                                            ITkMode                  = True, 
-                                            StandaloneMode           = False,
-                                            MonTool = monTool)
+    ftf = CompFactory.TrigFastTrackFinder(
+        name = "TrigFastTrackFinder_" + signature,
+        LayerNumberTool          = acc.getPublicTool( "TrigL2LayerNumberToolITk_FTF" ),
+        SpacePointProviderTool   = acc.getPublicTool( "TrigSpacePointConversionTool" + signature ),
+        TrackSummaryTool         = ITkTrackSummaryTool,
+        initialTrackMaker        = ITkSiTrackMakerTool,
+        trigInDetTrackFitter     = acc.getPublicTool( "TrigInDetTrackFitter" ),
+        RoIs                     = roisKey,
+        trigZFinder              = CompFactory.TrigZFinder(),
+        doZFinder                = False,
+        SeedRadBinWidth          = flags.Tracking.ActiveConfig.SeedRadBinWidth,
+        TrackInitialD0Max        = 1000. if flags.Tracking.ActiveConfig.extension == 'cosmics' else 20.0,
+        TracksName               = flags.Tracking.ActiveConfig.trkTracks_FTF,
+        TripletDoPSS             = False,
+        Triplet_D0Max            = flags.Tracking.ActiveConfig.Triplet_D0Max,
+        Triplet_D0_PPS_Max       = flags.Tracking.ActiveConfig.Triplet_D0_PPS_Max,
+        Triplet_MaxBufferLength  = 3,
+        Triplet_MinPtFrac        = 1,
+        Triplet_nMaxPhiSlice     = 53,
+        doCloneRemoval           = flags.Tracking.ActiveConfig.doCloneRemoval,
+        doResMon                 = flags.Tracking.ActiveConfig.doResMon,
+        doSeedRedundancyCheck    = flags.Tracking.ActiveConfig.doSeedRedundancyCheck,
+        pTmin                    = flags.Tracking.ActiveConfig.minPT[0],
+        useNewLayerNumberScheme  = True,
+        MinHits                  = 5,
+        useGPU                   = False,
+        DoubletDR_Max            = 270,
+        ITkMode                  = True, 
+        StandaloneMode           = False,
+        MonTool = monTool)
 
     acc.addEventAlgo( ftf, primary=True )
 
@@ -81,8 +82,8 @@ def ITkftfCfg(flags, roisKey, signature, signatureName):
 def ITktrigInDetFastTrackingCfg( inflags, roisKey, signatureName, in_view ):
     """ Generates precision fast tracking config, it is a primary config function """
 
-    flags = inflags.cloneAndReplace("ITk.Tracking.ActiveConfig", "ITk.Tracking.MainPass")
-    trigflags = flags.cloneAndReplace("ITk.Tracking.ActiveConfig", "Trigger.ITkTracking."+signatureName)
+    flags = inflags.cloneAndReplace("Tracking.ActiveConfig", "Tracking.ITkMainPass")
+    trigflags = flags.cloneAndReplace("Tracking.ActiveConfig", "Trigger.ITkTracking."+signatureName)
     
     #If signature specified add suffix to the name of each algorithms
     signature =  ("_" + signatureName if signatureName else '').lower()
@@ -126,10 +127,11 @@ def ITktrigInDetFastTrackingCfg( inflags, roisKey, signatureName, in_view ):
     acc.merge(ITkftfCfg(trigflags, roisKey, signature, signatureName))
 
     from xAODTrackingCnv.xAODTrackingCnvConfig import ITkTrackParticleCnvAlgCfg
-    acc.merge(ITkTrackParticleCnvAlgCfg(trigflags,
-                                        name = "ITkTrigTrackParticleCnvAlg"+signature,
-                                        TrackContainerName = trigflags.ITk.Tracking.ActiveConfig.trkTracks_FTF,
-                                        xAODTrackParticlesFromTracksContainerName = trigflags.ITk.Tracking.ActiveConfig.tracks_FTF))
+    acc.merge(ITkTrackParticleCnvAlgCfg(
+        trigflags,
+        name = "ITkTrigTrackParticleCnvAlg"+signature,
+        TrackContainerName = trigflags.Tracking.ActiveConfig.trkTracks_FTF,
+        xAODTrackParticlesFromTracksContainerName = trigflags.Tracking.ActiveConfig.tracks_FTF))
     
 
     if flags.Output.doWriteAOD:
@@ -144,8 +146,8 @@ def ITkambiguitySolverAlgCfg(flags):
     prefix="InDetTrigMT"
 
     from TrkConfig.TrkAmbiguitySolverConfig import ITkTrkAmbiguityScoreCfg, ITkTrkAmbiguitySolverCfg
-    acc.merge(ITkTrkAmbiguityScoreCfg(flags, name = f"{prefix}TrkAmbiguityScore_{flags.ITk.Tracking.ActiveConfig.input_name}"))
-    acc.merge(ITkTrkAmbiguitySolverCfg(flags, name  = f"{prefix}TrkAmbiguitySolver_{flags.ITk.Tracking.ActiveConfig.input_name}"))
+    acc.merge(ITkTrkAmbiguityScoreCfg(flags, name = f"{prefix}TrkAmbiguityScore_{flags.Tracking.ActiveConfig.input_name}"))
+    acc.merge(ITkTrkAmbiguitySolverCfg(flags, name  = f"{prefix}TrkAmbiguitySolver_{flags.Tracking.ActiveConfig.input_name}"))
 
     return acc
 
@@ -153,7 +155,7 @@ def ITktrigInDetPrecisionTrackingCfg( inflags, signatureName, in_view=True ):
     """ Generates precision tracking config, it is a primary config function """
 
     acc = ComponentAccumulator()
-    flags = inflags.cloneAndReplace("ITk.Tracking.ActiveConfig", "Trigger.ITkTracking."+signatureName)
+    flags = inflags.cloneAndReplace("Tracking.ActiveConfig", "Trigger.ITkTracking."+signatureName)
 
     acc.merge(ITkambiguitySolverAlgCfg(flags))
 

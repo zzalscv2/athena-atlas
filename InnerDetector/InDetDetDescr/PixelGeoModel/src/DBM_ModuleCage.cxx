@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DBM_ModuleCage.h"
@@ -30,7 +30,7 @@ GeoVPhysVol* DBM_ModuleCage::Build() {
       // add sensor module
       // set telescope layer number 
       m_gmt_mgr->SetCurrentLD(i);
-      DBM_Module module(m_DDmgr, m_gmt_mgr, m_sqliteReader);
+      DBM_Module module(m_DDmgr, m_gmt_mgr, m_sqliteReader, m_mapFPV, m_mapAX);
       module.Build();
     }
   }
@@ -143,7 +143,7 @@ GeoVPhysVol* DBM_ModuleCage::Build() {
       // set telescope layer number 
       m_gmt_mgr->SetCurrentLD(i);
       
-      DBM_Module module (m_DDmgr, m_gmt_mgr, m_sqliteReader);
+      DBM_Module module (m_DDmgr, m_gmt_mgr, m_sqliteReader, m_mapFPV, m_mapAX);
       GeoVPhysVol* modulePhys = module.Build();
       
       Rspacing = m_gmt_mgr->DBMSpacingRadial();

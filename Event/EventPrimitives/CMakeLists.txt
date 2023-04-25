@@ -26,8 +26,15 @@ atlas_add_library( EventPrimitives
    ${clhep_defs}
    LINK_LIBRARIES ${clhep_libs} ${EIGEN_LIBRARIES} )
 
+atlas_add_test( test_plugins
+   SOURCES test/test_plugins.cxx
+   LINK_LIBRARIES EventPrimitives )
 
 atlas_add_test( test_eta
    SOURCES test/test_eta.cxx
+   LINK_LIBRARIES EventPrimitives )
+
+ atlas_add_test( test_AmgDefs
+   SOURCES test/test_AmgDefs.cxx
    LINK_LIBRARIES EventPrimitives )
 

@@ -103,9 +103,15 @@ def  ActsTrkSiSpacePointsSeedMakerCfg(flags,
     kwargs.setdefault('SpacePointsPixelName', 'ITkPixelSpacePoints')
     kwargs.setdefault('SpacePointsStripName', 'ITkStripSpacePoints')
     kwargs.setdefault('SpacePointsOverlapName', 'ITkOverlapSpacePoints')
-    kwargs.setdefault('usePixel', flags.ITk.Tracking.ActiveConfig.useITkPixel and flags.ITk.Tracking.ActiveConfig.useITkPixelSeeding)
-    kwargs.setdefault('useStrip', flags.ITk.Tracking.ActiveConfig.useITkStrip and flags.ITk.Tracking.ActiveConfig.useITkStripSeeding)
-    kwargs.setdefault('useOverlapSpCollection', flags.ITk.Tracking.ActiveConfig.useITkStrip and flags.ITk.Tracking.ActiveConfig.useITkStripSeeding)
+    kwargs.setdefault('usePixel',
+                      flags.Tracking.ActiveConfig.useITkPixel and
+                      flags.Tracking.ActiveConfig.useITkPixelSeeding)
+    kwargs.setdefault('useStrip',
+                      flags.Tracking.ActiveConfig.useITkStrip and
+                      flags.Tracking.ActiveConfig.useITkStripSeeding)
+    kwargs.setdefault('useOverlapSpCollection',
+                      flags.Tracking.ActiveConfig.useITkStrip and
+                      flags.Tracking.ActiveConfig.useITkStripSeeding)
     kwargs.setdefault('doSpacePointConversion', not (configuration_settings.doActsSpacePoint and configuration_settings.doAthenaToActsCluster))
     kwargs.setdefault('ActsTrkSpacePointsPixelName'    , "ITkPixelSpacePoints")
     kwargs.setdefault('ActsTrkSpacePointsStripName'    , "ITkStripSpacePoints")
@@ -113,9 +119,10 @@ def  ActsTrkSiSpacePointsSeedMakerCfg(flags,
     kwargs.setdefault('PixelClusterContainerKey', "ITkPixelClusters")
     kwargs.setdefault('StripClusterContainerKey', "ITkStripClusters")
 
-    if flags.ITk.Tracking.ActiveConfig.usePrdAssociationTool:
+    if flags.Tracking.ActiveConfig.usePrdAssociationTool:
         # not all classes have that property !!!
-        kwargs.setdefault('PRDtoTrackMap', 'ITkPRDtoTrackMap'+ flags.ITk.Tracking.ActiveConfig.extension)
+        kwargs.setdefault('PRDtoTrackMap', (
+            'ITkPRDtoTrackMap' + flags.Tracking.ActiveConfig.extension))
 
     # Acts Seed Tools
     # Do not overwrite if already present in `kwargs`

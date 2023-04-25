@@ -29,16 +29,18 @@ def SiSPSeededTrackFinderCfg(flags, name="InDetSiSpTrackFinder", **kwargs) :
 
     kwargs.setdefault("useMBTSTimeDiff", flags.Reco.EnableHI) # Heavy-ion config
 
-    if flags.InDet.Tracking.ActiveConfig.usePrdAssociationTool:
+    if flags.Tracking.ActiveConfig.usePrdAssociationTool:
         # not all classes have that property !!!
-        kwargs.setdefault("PRDtoTrackMap", 'InDetPRDtoTrackMap'+ flags.InDet.Tracking.ActiveConfig.extension)
+        kwargs.setdefault("PRDtoTrackMap", (
+            'InDetPRDtoTrackMap' + flags.Tracking.ActiveConfig.extension))
 
-    if flags.InDet.Tracking.ActiveConfig.extension == "Forward":
-        kwargs.setdefault("useZvertexTool", flags.Reco.EnableHI) # For heavy-ion
+    if flags.Tracking.ActiveConfig.extension == "Forward":
+        kwargs.setdefault("useZvertexTool", flags.Reco.EnableHI)
         kwargs.setdefault("useZBoundFinding", False)
     else:
-        kwargs.setdefault("useZvertexTool", flags.Reco.EnableHI) # For heavy-ion
-        kwargs.setdefault("useZBoundFinding", flags.InDet.Tracking.ActiveConfig.doZBoundary)
+        kwargs.setdefault("useZvertexTool", flags.Reco.EnableHI)
+        kwargs.setdefault("useZBoundFinding",
+                          flags.Tracking.ActiveConfig.doZBoundary)
     
     #
     # --- Z-coordinates primary vertices finder (only for collisions)
@@ -51,7 +53,8 @@ def SiSPSeededTrackFinderCfg(flags, name="InDetSiSpTrackFinder", **kwargs) :
     if flags.Reco.EnableHI:
         kwargs.setdefault("FreeClustersCut",2) #Heavy Ion optimization from Igor
 
-    acc.addEventAlgo(CompFactory.InDet.SiSPSeededTrackFinder(name+flags.InDet.Tracking.ActiveConfig.extension, **kwargs))
+    acc.addEventAlgo(CompFactory.InDet.SiSPSeededTrackFinder(
+        name+flags.Tracking.ActiveConfig.extension, **kwargs))
     return acc
 
 def ITkSiSPSeededTrackFinderCfg(flags, name="ITkSiSpTrackFinder", **kwargs) :
@@ -79,7 +82,8 @@ def ITkSiSPSeededTrackFinderCfg(flags, name="ITkSiSpTrackFinder", **kwargs) :
         from ActsInterop.TrackingComponentConfigurer import TrackingComponentConfigurer
         configuration_settings = TrackingComponentConfigurer(flags)
 
-        if flags.ITk.Tracking.ActiveConfig.extension != "ConversionFinding" and configuration_settings.ActsToAthenaSeedConverter:
+        if (flags.Tracking.ActiveConfig.extension != "ConversionFinding" and
+            configuration_settings.ActsToAthenaSeedConverter):
             from ActsTrkSeedingTool.ActsTrkSeedingToolConfig import ActsTrkSiSpacePointsSeedMakerCfg
             ITkSiSpacePointsSeedMaker = acc.popToolsAndMerge(ActsTrkSiSpacePointsSeedMakerCfg(flags))
         else:
@@ -88,12 +92,14 @@ def ITkSiSPSeededTrackFinderCfg(flags, name="ITkSiSpTrackFinder", **kwargs) :
 
         kwargs.setdefault("SeedsTool", ITkSiSpacePointsSeedMaker)
 
-    if flags.ITk.Tracking.ActiveConfig.usePrdAssociationTool:
+    if flags.Tracking.ActiveConfig.usePrdAssociationTool:
         # not all classes have that property !!!
-        kwargs.setdefault("PRDtoTrackMap", 'ITkPRDtoTrackMap'+ flags.ITk.Tracking.ActiveConfig.extension)
+        kwargs.setdefault("PRDtoTrackMap", (
+            'ITkPRDtoTrackMap' + flags.Tracking.ActiveConfig.extension))
 
     kwargs.setdefault("useZvertexTool", False)
-    kwargs.setdefault("useZBoundFinding", flags.ITk.Tracking.ActiveConfig.doZBoundary)
+    kwargs.setdefault("useZBoundFinding",
+                      flags.Tracking.ActiveConfig.doZBoundary)
     kwargs.setdefault("ITKGeometry", True)
     kwargs.setdefault("SpacePointsSCTName", "ITkStripSpacePoints")
     kwargs.setdefault("SpacePointsPixelName", "ITkPixelSpacePoints")
@@ -104,9 +110,11 @@ def ITkSiSPSeededTrackFinderCfg(flags, name="ITkSiSpTrackFinder", **kwargs) :
         if 'InDetEtaDependentCutsSvc' not in kwargs :
             from InDetConfig.InDetEtaDependentCutsConfig import ITkEtaDependentCutsSvcCfg
             acc.merge(ITkEtaDependentCutsSvcCfg(flags))
-            kwargs.setdefault("InDetEtaDependentCutsSvc", acc.getService("ITkEtaDependentCutsSvc"+flags.ITk.Tracking.ActiveConfig.extension))
+            kwargs.setdefault("InDetEtaDependentCutsSvc", acc.getService(
+                "ITkEtaDependentCutsSvc"+flags.Tracking.ActiveConfig.extension))
 
-    acc.addEventAlgo(CompFactory.InDet.SiSPSeededTrackFinder(name+flags.ITk.Tracking.ActiveConfig.extension, **kwargs))
+    acc.addEventAlgo(CompFactory.InDet.SiSPSeededTrackFinder(
+        name+flags.Tracking.ActiveConfig.extension, **kwargs))
     return acc
 
 def ITkSiSPSeededTrackFinderROIConvCfg(flags, name="ITkSiSpTrackFinderROIConv", **kwargs) :

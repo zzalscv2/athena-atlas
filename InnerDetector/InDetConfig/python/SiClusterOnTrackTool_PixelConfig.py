@@ -38,8 +38,8 @@ def InDetPixelClusterOnTrackToolBaseCfg(flags, name="PixelClusterOnTrackTool", *
                       flags.Tracking.doPixelClusterSplitting and
                       flags.Tracking.pixelClusterSplittingType == "NeuralNet")
     split_cluster_map_extension = (
-        flags.InDet.Tracking.ActiveConfig.extension
-        if flags.InDet.Tracking.ActiveConfig.useTIDE_Ambi else "")
+        flags.Tracking.ActiveConfig.extension
+        if flags.Tracking.ActiveConfig.useTIDE_Ambi else "")
     kwargs.setdefault("SplitClusterAmbiguityMap",
                       f"SplitClusterAmbiguityMap{split_cluster_map_extension}")
     kwargs.setdefault("RunningTIDE_Ambi", flags.Tracking.doTIDE_Ambi)
@@ -139,7 +139,7 @@ def ITkPixelClusterOnTrackToolBaseCfg(flags, name="ITkPixelClusterOnTrackTool", 
     kwargs.setdefault("applyNNcorrection", False)
     kwargs.setdefault(
         "SplitClusterAmbiguityMap",
-        f"SplitClusterAmbiguityMap{flags.ITk.Tracking.ActiveConfig.extension}")
+        f"SplitClusterAmbiguityMap{flags.Tracking.ActiveConfig.extension}")
     kwargs.setdefault("RunningTIDE_Ambi", flags.Tracking.doTIDE_Ambi)
 
     kwargs.setdefault("PixelErrorScalingKey", "")

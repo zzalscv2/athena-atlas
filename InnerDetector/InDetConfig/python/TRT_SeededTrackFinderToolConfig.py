@@ -25,7 +25,8 @@ def TRT_SeededTrackFinder_ATLCfg(flags, name='InDetTRT_SeededTrackMaker', InputC
     InDetSiComTrackFinder = acc.popToolsAndMerge(SiCombinatorialTrackFinder_xkCfg(flags))
     kwargs.setdefault("CombinatorialTrackFinder", InDetSiComTrackFinder)
 
-    if flags.InDet.Tracking.ActiveConfig.usePixel and flags.InDet.Tracking.ActiveConfig.useSCT:
+    if (flags.Tracking.ActiveConfig.usePixel and
+        flags.Tracking.ActiveConfig.useSCT):
         from InDetConfig.SiDetElementsRoadToolConfig import SiDetElementsRoadMaker_xk_TRT_Cfg
         InDetTRT_SeededSiRoadMaker = acc.popToolsAndMerge(SiDetElementsRoadMaker_xk_TRT_Cfg(flags))
         acc.addPublicTool(InDetTRT_SeededSiRoadMaker)
@@ -39,11 +40,14 @@ def TRT_SeededTrackFinder_ATLCfg(flags, name='InDetTRT_SeededTrackMaker', InputC
     acc.addPublicTool(InDetTRT_SeededSpacePointFinder)
     kwargs.setdefault("SeedTool", InDetTRT_SeededSpacePointFinder)
 
-    kwargs.setdefault("pTmin", flags.InDet.Tracking.ActiveConfig.minSecondaryPt)
-    kwargs.setdefault("nHolesMax", flags.InDet.Tracking.ActiveConfig.SecondarynHolesMax)
-    kwargs.setdefault("nHolesGapMax", flags.InDet.Tracking.ActiveConfig.SecondarynHolesGapMax)
-    kwargs.setdefault("Xi2max", flags.InDet.Tracking.ActiveConfig.SecondaryXi2max)
-    kwargs.setdefault("Xi2maxNoAdd", flags.InDet.Tracking.ActiveConfig.SecondaryXi2maxNoAdd)
+    kwargs.setdefault("pTmin", flags.Tracking.ActiveConfig.minSecondaryPt)
+    kwargs.setdefault("nHolesMax",
+                      flags.Tracking.ActiveConfig.SecondarynHolesMax)
+    kwargs.setdefault("nHolesGapMax",
+                      flags.Tracking.ActiveConfig.SecondarynHolesGapMax)
+    kwargs.setdefault("Xi2max", flags.Tracking.ActiveConfig.SecondaryXi2max)
+    kwargs.setdefault("Xi2maxNoAdd",
+                      flags.Tracking.ActiveConfig.SecondaryXi2maxNoAdd)
     kwargs.setdefault("SearchInCaloROI", False)
     if kwargs["SearchInCaloROI"]:
         from InDetConfig.InDetCaloClusterROISelectorConfig import CaloClusterROIPhiRZContainerMakerCfg

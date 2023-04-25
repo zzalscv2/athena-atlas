@@ -18,6 +18,7 @@ def defineMenu():
         'L1_EM22VHI',
         'L1_EM20VH_FIRSTEMPTY',
         # new calo
+        'L1_eEM1', 'L1_eEM2',
         'L1_eEM5', 'L1_eEM9', 'L1_eEM18', 'L1_eEM15',
         'L1_eEM12L', 'L1_eEM18L', 'L1_eEM26', 'L1_eEM26M',
 

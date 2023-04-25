@@ -32,7 +32,7 @@ def TRT_SeededSpacePointFinder_ATLCfg(flags, name='InDetTRT_SeededSpFinder', Inp
     kwargs.setdefault("NeighborSearch", True)
     kwargs.setdefault("LoadFull", False)
     kwargs.setdefault("DoCosmics", flags.Beam.Type is BeamType.Cosmics)
-    kwargs.setdefault("pTmin", flags.InDet.Tracking.ActiveConfig.minSecondaryPt)
+    kwargs.setdefault("pTmin", flags.Tracking.ActiveConfig.minSecondaryPt)
 
     acc.setPrivateTools(
         CompFactory.InDet.TRT_SeededSpacePointFinder_ATL(name, **kwargs))

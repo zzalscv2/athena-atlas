@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -22,8 +22,10 @@
 
 GeoPixelOldFrame::GeoPixelOldFrame(InDetDD::PixelDetectorManager* ddmgr,
                                    PixelGeometryManager* mgr,
-				   GeoModelIO::ReadGeoModel* sqliteReader)
-  : GeoVPixelFactory (ddmgr, mgr, sqliteReader)
+				   GeoModelIO::ReadGeoModel* sqliteReader,
+                                   std::shared_ptr<std::map<std::string, GeoFullPhysVol*>> mapFPV,
+                                   std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX)
+  : GeoVPixelFactory (ddmgr, mgr, sqliteReader, mapFPV, mapAX)
 {
   m_legacyManager = m_gmt_mgr->legacyManager();
 }

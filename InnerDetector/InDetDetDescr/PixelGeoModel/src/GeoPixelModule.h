@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PIXELGEOMODEL_GEOPIXELMODULE_H
@@ -15,6 +15,8 @@ class GeoPixelModule : public GeoVPixelFactory {
   GeoPixelModule(InDetDD::PixelDetectorManager* ddmgr,
                  PixelGeometryManager* mgr,
 		 GeoModelIO::ReadGeoModel* sqliteReader,
+                 std::shared_ptr<std::map<std::string, GeoFullPhysVol*>> mapFPV,
+                 std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX,
                  GeoPixelSiCrystal &theSensor);
   GeoPixelModule (const GeoPixelModule&) = delete;
   GeoPixelModule& operator= (const GeoPixelModule&) = delete;

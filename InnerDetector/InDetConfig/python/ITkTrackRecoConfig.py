@@ -19,35 +19,35 @@ def CombinedTrackingPassFlagSets(flags):
 
     # Primary Pass
     if flags.ITk.Tracking.useFTF:
-        flags = flags.cloneAndReplace("ITk.Tracking.ActiveConfig", 
-                                      "ITk.Tracking.FTFPass")
+        flags = flags.cloneAndReplace("Tracking.ActiveConfig", 
+                                      "Tracking.ITkFTFPass")
     elif flags.ITk.Tracking.doFastTracking:
-        flags = flags.cloneAndReplace("ITk.Tracking.ActiveConfig",
-                                      "ITk.Tracking.FastPass")
+        flags = flags.cloneAndReplace("Tracking.ActiveConfig",
+                                      "Tracking.ITkFastPass")
     else:
-        flags = flags.cloneAndReplace("ITk.Tracking.ActiveConfig",
-                                      "ITk.Tracking.MainPass")
+        flags = flags.cloneAndReplace("Tracking.ActiveConfig",
+                                      "Tracking.ITkMainPass")
     flags_set += [flags]
 
     # LRT
     if flags.Tracking.doLargeD0:
-        flagsLRT = flags.cloneAndReplace("ITk.Tracking.ActiveConfig",
-                                         "ITk.Tracking.LargeD0Pass")
+        flagsLRT = flags.cloneAndReplace("Tracking.ActiveConfig",
+                                         "Tracking.ITkLargeD0Pass")
         if flags.ITk.Tracking.doFastTracking:
-            flagsLRT = flags.cloneAndReplace("ITk.Tracking.ActiveConfig",
-                                             "ITk.Tracking.LargeD0FastPass")
+            flagsLRT = flags.cloneAndReplace("Tracking.ActiveConfig",
+                                             "Tracking.ITkLargeD0FastPass")
         flags_set += [flagsLRT]
 
     # Photon conversion tracking reco
     if flags.Detector.EnableCalo and flags.ITk.Tracking.doConversionFinding:
-        flagsConv = flags.cloneAndReplace("ITk.Tracking.ActiveConfig",
-                                          "ITk.Tracking.ConversionFindingPass")
+        flagsConv = flags.cloneAndReplace("Tracking.ActiveConfig",
+                                          "Tracking.ITkConversionFindingPass")
         flags_set += [flagsConv]
 
     # LowPt
     if flags.Tracking.doLowPt:
-        flagsLowPt = flags.cloneAndReplace("ITk.Tracking.ActiveConfig",
-                                           "ITk.Tracking.LowPt")
+        flagsLowPt = flags.cloneAndReplace("Tracking.ActiveConfig",
+                                           "Tracking.ITkLowPt")
         flags_set += [flagsLowPt]
 
     _flags_set = flags_set  # Put into cache
@@ -57,7 +57,7 @@ def CombinedTrackingPassFlagSets(flags):
 
 def ITkClusterSplitProbabilityContainerName(flags):
     flags_set = CombinedTrackingPassFlagSets(flags)
-    extension = flags_set[-1].ITk.Tracking.ActiveConfig.extension
+    extension = flags_set[-1].Tracking.ActiveConfig.extension
     ClusterSplitProbContainer = "ITkAmbiguityProcessorSplitProb" + extension
     return ClusterSplitProbContainer
 
@@ -93,7 +93,7 @@ def ITkTrackRecoCfg(flags):
 
     for current_flags in flags_set:
 
-        extension = current_flags.ITk.Tracking.ActiveConfig.extension
+        extension = current_flags.Tracking.ActiveConfig.extension
         TrackContainer = "Resolved" + extension + "Tracks"
         SiSPSeededTracks = "SiSPSeeded" + extension + "Tracks"
 
@@ -107,7 +107,7 @@ def ITkTrackRecoCfg(flags):
         StatTrackTruthCollections += [SiSPSeededTracks+"TruthCollection",
                                       TrackContainer+"TruthCollection"]
 
-        if current_flags.ITk.Tracking.ActiveConfig.storeSeparateContainer:
+        if current_flags.Tracking.ActiveConfig.storeSeparateContainer:
             if flags.Tracking.doTruth:
                 result.merge(ITkTrackTruthCfg(
                     current_flags,
@@ -329,11 +329,6 @@ def ITkTrackRecoOutputCfg(flags):
             f"xAOD::TrackParticleAuxContainer#SiSPSeededTracksTrackParticlesAux.{excludedAuxData}"
         ]
 
-    if flags.Tracking.doStoreTrackSeeds:
-        toAOD += [
-            "xAOD::TrackParticleContainer#SiSPSeedSegmentsTrackParticles",
-            "xAOD::TrackParticleAuxContainer#SiSPSeedSegmentsTrackParticlesAux."
-        ]
 
     result = ComponentAccumulator()
     result.merge(addToESD(flags, toAOD+toESD))

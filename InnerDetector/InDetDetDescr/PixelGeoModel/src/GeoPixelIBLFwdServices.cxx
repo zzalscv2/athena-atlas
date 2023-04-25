@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -23,8 +23,10 @@ using std::max;
 GeoPixelIBLFwdServices::GeoPixelIBLFwdServices(InDetDD::PixelDetectorManager* ddmgr,
                                                PixelGeometryManager* mgr,
 					       GeoModelIO::ReadGeoModel* sqliteReader,
+                                               std::shared_ptr<std::map<std::string, GeoFullPhysVol*>> mapFPV,
+                                               std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX,
                                                int section)
-  : GeoVPixelFactory(ddmgr, mgr, sqliteReader),
+  : GeoVPixelFactory(ddmgr, mgr, sqliteReader, mapFPV, mapAX),
   m_bFwdComplexGeometry_CAD(false),
   m_bFwdComplexGeometry_Mod1(false),
   m_section(section),
@@ -71,7 +73,7 @@ GeoVPhysVol* GeoPixelIBLFwdServices::Build()
   if(m_bFwdComplexGeometry_CAD) {
 
     m_gmt_mgr->msg(MSG::INFO) <<"Build IBL fwd services - CAD tool design"<<endmsg;
-    GeoPixelIBLFwdSvcCADModel fwdSvc = GeoPixelIBLFwdSvcCADModel(m_DDmgr, m_gmt_mgr ,m_sqliteReader, m_section);
+    GeoPixelIBLFwdSvcCADModel fwdSvc = GeoPixelIBLFwdSvcCADModel(m_DDmgr, m_gmt_mgr ,m_sqliteReader, m_mapFPV, m_mapAX, m_section);
     
     fwdSvc.Build();
     m_supportPhysA = fwdSvc.getSupportA();
@@ -90,7 +92,7 @@ GeoVPhysVol* GeoPixelIBLFwdServices::Build()
   if(m_bFwdComplexGeometry_Mod1) {
 
     m_gmt_mgr->msg(MSG::INFO) <<"Build IBL fwd services - S. Menke  design"<<endmsg;
-    GeoPixelIBLFwdSvcModel1 fwdSvc = GeoPixelIBLFwdSvcModel1(m_DDmgr, m_gmt_mgr, m_sqliteReader, m_section);
+    GeoPixelIBLFwdSvcModel1 fwdSvc = GeoPixelIBLFwdSvcModel1(m_DDmgr, m_gmt_mgr, m_sqliteReader, m_mapFPV, m_mapAX,  m_section);
     
     fwdSvc.Build();
     m_supportPhysA = fwdSvc.getSupportA();

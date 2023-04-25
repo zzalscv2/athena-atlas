@@ -77,10 +77,10 @@ namespace MuonGM {
         bool padGlobalPosition(const Identifier& id, Amg::Vector3D& gpos) const;
 
         /** pad corners */
-        bool padCorners(const Identifier& id, std::vector<Amg::Vector2D>& corners) const;
+        bool padCorners(const Identifier& id, std::array<Amg::Vector2D,4>& corners) const;
 
         /** pad global corners */
-        bool padGlobalCorners(const Identifier& id, std::vector<Amg::Vector3D>& gcorners) const;
+        bool padGlobalCorners(const Identifier& id, std::array<Amg::Vector3D, 4>& gcorners) const;
 
         /** is eta=0 of QL1 or QS1? */
         bool isEtaZero(const Identifier& id, double posY) const;
@@ -305,9 +305,9 @@ namespace MuonGM {
     }
 
     inline bool sTgcReadoutElement::stripGlobalPosition(const Identifier& id, Amg::Vector3D& gpos) const {
-        Amg::Vector2D lpos(0., 0.);
+        Amg::Vector2D lpos{Amg::Vector2D::Zero()};
         if (!stripPosition(id, lpos)) return false;
-        surface(id).localToGlobal(lpos, Amg::Vector3D(0., 0., 0.), gpos);
+        surface(id).localToGlobal(lpos, Amg::Vector3D::Zero(), gpos);
         return true;
     }
 
@@ -318,7 +318,7 @@ namespace MuonGM {
         int padEta = manager()->stgcIdHelper()->padEta(id);
         int padPhi = manager()->stgcIdHelper()->padPhi(id);
 
-        return design->channelPosition(std::pair<int, int>(padEta, padPhi), pos);
+        return design->channelPosition(std::make_pair(padEta, padPhi), pos);
     }
 
     inline bool sTgcReadoutElement::padGlobalPosition(const Identifier& id, Amg::Vector3D& gpos) const {
@@ -328,28 +328,24 @@ namespace MuonGM {
         return true;
     }
 
-    inline bool sTgcReadoutElement::padCorners(const Identifier& id, std::vector<Amg::Vector2D>& corners) const {
+    inline bool sTgcReadoutElement::padCorners(const Identifier& id, std::array<Amg::Vector2D, 4>& corners) const {
         const MuonPadDesign* design = getPadDesign(id);
         if (!design) return false;
 
         int padEta = manager()->stgcIdHelper()->padEta(id);
         int padPhi = manager()->stgcIdHelper()->padPhi(id);
 
-        return design->channelCorners(std::pair<int, int>(padEta, padPhi), corners);
+        return design->channelCorners(std::make_pair(padEta, padPhi), corners);
     }
 
-    inline bool sTgcReadoutElement::padGlobalCorners(const Identifier& id, std::vector<Amg::Vector3D>& gcorners) const {
-        std::vector<Amg::Vector2D> lcorners;
+    inline bool sTgcReadoutElement::padGlobalCorners(const Identifier& id, std::array<Amg::Vector3D, 4>& gcorners) const {
+        std::array<Amg::Vector2D,4> lcorners{make_array<Amg::Vector2D, 4>(Amg::Vector2D::Zero())};
         if (!padCorners(id, lcorners)) {
             return false;
         }
-        std::transform(lcorners.cbegin(), lcorners.cend(),
-                       std::back_inserter(gcorners),
-                       [&](const auto& lpos) {
-                           Amg::Vector3D gpos;
-                           surface(id).localToGlobal(lpos, Amg::Vector3D::Zero(), gpos);
-                           return gpos;
-                       });
+        for (size_t c = 0; c < lcorners.size() ; ++c) {
+            surface(id).localToGlobal(lcorners[c], Amg::Vector3D::Zero(), gcorners[c]);
+        }
         return true;
     }
 

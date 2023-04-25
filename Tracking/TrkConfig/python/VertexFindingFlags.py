@@ -35,8 +35,7 @@ def createSecVertexingFlags():
     flags.addFlag("TrkSel.maxTrtD0", 10000.)
     flags.addFlag("TrkSel.maxSiZ0", 10000.)
     flags.addFlag("TrkSel.maxTrtZ0", 10000.)
-    flags.addFlag("TrkSel.minPt",
-                  lambda pcf: pcf.InDet.Tracking.MainPass.minPT)
+    flags.addFlag("TrkSel.minPt", lambda pcf: pcf.Tracking.MainPass.minPT)
     # e-prob for Si conversion tracks (affects 1Si, 2Si, SiTRT): Ntrt < 15
     flags.addFlag("TrkSel.RatioCut1", 0.0)
     # e-prob for Si conversion tracks (affects 1Si, 2Si, SiTRT): 15 < Ntrt < 25

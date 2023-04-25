@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -11,7 +11,6 @@
 #include "TrigT1NSWSimTools/tdr_compat_enum.h"
 #include "TVector3.h"
 
-#include <string>
 #include <math.h>
 
 namespace NSWL1 {
@@ -119,14 +118,14 @@ namespace NSWL1 {
         if (m_detMgr ==nullptr) return;
         const MuonGM::sTgcReadoutElement* rdoEl = m_detMgr->getsTgcReadoutElement(this->Identity());
         const Trk::PlaneSurface &surface = rdoEl->surface(this->Identity());
-        std::vector<Amg::Vector2D> local_pad_corners;
+        std::array<Amg::Vector2D, 4> local_pad_corners{make_array<Amg::Vector2D, 4>(Amg::Vector2D::Zero())};
         //From MuonPadDesign... read pad local corners
         bool check=rdoEl->padCorners(this->Identity(),local_pad_corners);
         if(! check ){
             std::cout<<"Unable to get pad corners!"<<std::endl;
             return;
         }
-        Amg::Vector3D pad_corner_global;
+        Amg::Vector3D pad_corner_global{Amg::Vector3D::Zero()};
         for(unsigned int i=0; i<4; i++) {
             surface.localToGlobal(local_pad_corners.at(i), pad_corner_global, pad_corner_global);
             this->m_cornerXyz[i][0] = pad_corner_global.x(); 

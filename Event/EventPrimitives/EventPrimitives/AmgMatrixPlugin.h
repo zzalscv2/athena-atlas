@@ -5,8 +5,6 @@
 #ifndef EVENTPRIMITIVES_AMGMATRIXPLUGIN_H
 #define EVENTPRIMITIVES_AMGMATRIXPLUGIN_H
 
-#include <cmath>
-
     //////////////////////////////////////////////////////////////////////
     // Inverse calculation for symmetric matrix (5x5) with Gauss-Jordan
     //
@@ -19,13 +17,6 @@
     //                               4  9  14 19 24
     //
     // Output parameters : Vn(0/24) symmetric ////////////////////////////
-
-
-    inline Scalar mag() const {
-        EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Matrix, 3)
-        const Scalar* data = this->data();
-        return std::sqrt(data[0] * data[0] + data[1] * data[1] + data[2]*data[2]);
-    }
 
     bool inverseSym5(Matrix<Scalar, 5,5>& out) const {
 

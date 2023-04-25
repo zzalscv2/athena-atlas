@@ -492,7 +492,7 @@ InDetIterativeSecVtxFinderTool::findVertex(const std::vector<Trk::ITrackLink*> &
 
     m_v0mass = -199.9 ;
 
-    m_goodVertex = myxAODVertex != 0 && m_ndf >0 && m_ntracks >=2 ;
+    bool goodVertex = myxAODVertex != 0 && m_ndf >0 && m_ntracks >=2 ;
 
     
     ATH_MSG_DEBUG( " xAOD::Vertex : " << ( myxAODVertex != 0 ? 1 : 0 ) 
@@ -500,7 +500,7 @@ InDetIterativeSecVtxFinderTool::findVertex(const std::vector<Trk::ITrackLink*> &
     
 
 //  below is while-okay
-    if (!m_goodVertex)
+    if (!goodVertex)
     {
       
       ATH_MSG_DEBUG( " Going to new iteration with: " << seedTracks.size() << " seed tracks after BAD VERTEX. " );
@@ -715,14 +715,14 @@ InDetIterativeSecVtxFinderTool::findVertex(const std::vector<Trk::ITrackLink*> &
           
         countTracksAndNdf( myxAODVertex, m_ndf, m_ntracks);
           
-        m_goodVertex = myxAODVertex != 0 && m_ndf >0 && m_ntracks >=2 ;
+        goodVertex = myxAODVertex != 0 && m_ndf >0 && m_ntracks >=2 ;
 
         
         ATH_MSG_DEBUG( " Refitted xAODVertex is pointer: " << myxAODVertex << 
        " #dof = " << m_ndf << " #tracks (with weight>0.01) " << m_ntracks );
         
 
-        if ( ! m_goodVertex )
+        if ( ! goodVertex )
         {
 // it was ever good vertex at least, it become nothing after eating new a track ...         
           if (myxAODVertex)
@@ -1522,8 +1522,6 @@ StatusCode InDetIterativeSecVtxFinderTool::initialize()
     // since some parameters special to an inherited class this method
     // will be overloaded by the inherited class
     printParameterSettings();
-
-    m_seedperigees = new std::vector<const Trk::TrackParameters*> () ;
 
 #ifdef MONITORTUNES
     ITHistSvc*     hist_root=0;

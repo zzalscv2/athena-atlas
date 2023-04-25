@@ -11,7 +11,6 @@
 #include "InDetSimEvent/SiHit.h"
 #include "InDetIdentifier/PixelID.h"
 #include "SiDigitization/SiChargedDiodeCollection.h"
-#include "PixelReadoutGeometry/PixelModuleDesign.h"
 
 #include "GeneratorObjects/HepMcParticleLink.h"
 #include "SiPropertiesTool/SiliconProperties.h"

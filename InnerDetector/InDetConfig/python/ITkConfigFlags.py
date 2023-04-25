@@ -54,22 +54,10 @@ def createITkConfigFlags():
   itkcf.addFlag("ITk.Tracking.doFastTracking", False) # Turn running of ITk FastTracking on and off
   itkcf.addFlag("ITk.Tracking.doConversionFinding",True) # Turn running of ConversionFinding second pass on and off
   itkcf.addFlag("ITk.Tracking.useFTF", False) # Allows TrigFastTrackFinder to be run as an offline algorithm by replacing SiSPSeededTrackFinder
-
   
   # config flags for tracking geometry configuration
   from InDetConfig.TrackingGeometryFlags import createITkTrackingGeometryFlags
   itkcf.addFlagsCategory ("ITk.trackingGeometry", createITkTrackingGeometryFlags, prefix=True)
-
-  # config flags for tracking cuts
-  from InDetConfig.TrackingPassFlags import createITkTrackingPassFlags, createITkLargeD0TrackingPassFlags, createITkConversionFindingTrackingPassFlags, createITkFastTrackingPassFlags, createITkLargeD0FastTrackingPassFlags, createITkFTFPassFlags, createITkLowPtTrackingPassFlags
-
-  itkcf.addFlagsCategory ("ITk.Tracking.MainPass", createITkTrackingPassFlags, prefix=True)
-  itkcf.addFlagsCategory ("ITk.Tracking.LargeD0Pass", createITkLargeD0TrackingPassFlags, prefix=True)
-  itkcf.addFlagsCategory ("ITk.Tracking.ConversionFindingPass", createITkConversionFindingTrackingPassFlags, prefix=True)
-  itkcf.addFlagsCategory ("ITk.Tracking.FastPass", createITkFastTrackingPassFlags, prefix=True)
-  itkcf.addFlagsCategory ("ITk.Tracking.LargeD0FastPass", createITkLargeD0FastTrackingPassFlags, prefix=True)
-  itkcf.addFlagsCategory ("ITk.Tracking.FTFPass", createITkFTFPassFlags, prefix=True)
-  itkcf.addFlagsCategory ("ITk.Tracking.LowPt", createITkLowPtTrackingPassFlags, prefix=True)
 
   # enable reco steps 
   itkcf.addFlag("ITk.Tracking.recoChain", [TrackingComponent.AthenaChain])

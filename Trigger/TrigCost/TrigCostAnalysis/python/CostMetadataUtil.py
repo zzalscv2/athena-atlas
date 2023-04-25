@@ -356,19 +356,25 @@ def readDetailsFromTRP(inputFile, runNumber, maxRanges, itemName="L1_TAU8--enabl
             lbEnd = lbRangeTsDict[lbRange]["end"]
 
             # Deadtime
-            physicsDeadtimeTRP = pbeast.get_data('ATLAS', 'L1_Rate', 'DT', 'ISS_TRP.' + itemName, False, lbStart, lbEnd, 0, True)[0].data['ISS_TRP.' + itemName]
-            physicsDeadtimeArray = []
-            for entry in physicsDeadtimeTRP:
-                # Read only values between timestamps - pbeast returns one timestamp earlier and one later
-                if entry.ts < lbStart or entry.ts > lbEnd:
-                    continue
-                if type(entry.value) != float: # None type
-                    continue
+            physicsDeadtimeTRP = pbeast.get_data('ATLAS', 'L1_Rate', 'DT', 'ISS_TRP.' + itemName, False, lbStart, lbEnd, 0, True)
+            
+            if len(physicsDeadtimeTRP) == 0:
+                log.error("Deadtime not found for item {0} for range {1}".format(itemName, lbRange))
+                physicsDeadtimeAvg = -1
+            else: 
+                physicsDeadtimeTRP = physicsDeadtimeTRP[0].data['ISS_TRP.' + itemName]
+                physicsDeadtimeArray = []
+                for entry in physicsDeadtimeTRP:
+                    # Read only values between timestamps - pbeast returns one timestamp earlier and one later
+                    if entry.ts < lbStart or entry.ts > lbEnd:
+                        continue
+                    if type(entry.value) != float: # None type
+                        continue
 
-                physicsDeadtimeArray.append(entry.value)
-                physicsDeadtimeGlobal.append(entry.value)
-                    
-            physicsDeadtimeAvg = sum(physicsDeadtimeArray)/len(physicsDeadtimeArray) if len(physicsDeadtimeArray) > 0 else 1.
+                    physicsDeadtimeArray.append(entry.value)
+                    physicsDeadtimeGlobal.append(entry.value)
+                        
+                physicsDeadtimeAvg = sum(physicsDeadtimeArray)/len(physicsDeadtimeArray) if len(physicsDeadtimeArray) > 0 else 1.
 
             # Pileup
             pileupPbeast = pbeast.get_data('OLC', 'OCLumi', 'Mu', 'OLC.OLCApp/ATLAS_PREFERRED_LBAv_PHYS', False, lbStart, lbEnd)[0].data['OLC.OLCApp/ATLAS_PREFERRED_LBAv_PHYS']

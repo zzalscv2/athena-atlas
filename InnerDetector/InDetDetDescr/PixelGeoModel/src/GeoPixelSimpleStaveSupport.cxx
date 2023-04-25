@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Build simple stave support as a box
@@ -15,8 +15,10 @@
 
 GeoPixelSimpleStaveSupport::GeoPixelSimpleStaveSupport(InDetDD::PixelDetectorManager* ddmgr,
                                                        PixelGeometryManager* mgr,
-						       GeoModelIO::ReadGeoModel* sqliteReader)
-  : GeoPixelStaveSupport(ddmgr, mgr, sqliteReader),
+						       GeoModelIO::ReadGeoModel* sqliteReader,
+                                                       std::shared_ptr<std::map<std::string, GeoFullPhysVol*>> mapFPV,
+                                                      std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX)
+  : GeoPixelStaveSupport(ddmgr, mgr, sqliteReader, mapFPV, mapAX),
     m_transform(GeoTrf::Transform3D::Identity())
 {
   m_physVol = GeoPixelSimpleStaveSupport::Build();

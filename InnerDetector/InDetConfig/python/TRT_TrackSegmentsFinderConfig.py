@@ -26,14 +26,14 @@ def TRT_TrackSegmentsFinderCfg(flags, name = 'InDetTRT_TrackSegmentsFinder',
         kwargs.setdefault("RoadTool", acc.popToolsAndMerge(
             TRT_DetElementsRoadMaker_xkCfg(flags)))
 
-    if flags.InDet.Tracking.ActiveConfig.RoISeededBackTracking:
+    if flags.Tracking.ActiveConfig.RoISeededBackTracking:
         from InDetConfig.InDetCaloClusterROISelectorConfig import (
             CaloClusterROIPhiRZContainerMakerCfg)
         acc.merge(CaloClusterROIPhiRZContainerMakerCfg(flags))
         kwargs.setdefault("useCaloSeeds", True)
-        kwargs.setdefault("EMROIPhiRZContainer",
-                          "InDetCaloClusterROIPhiRZ%.0fGeVUnordered" % \
-                          (flags.InDet.Tracking.ActiveConfig.minRoIClusterEt/Units.GeV))
+        kwargs.setdefault("EMROIPhiRZContainer", (
+            "InDetCaloClusterROIPhiRZ%.0fGeVUnordered" %
+            (flags.Tracking.ActiveConfig.minRoIClusterEt/Units.GeV)))
 
     kwargs.setdefault("SegmentsLocation", "TRTSegments")
 

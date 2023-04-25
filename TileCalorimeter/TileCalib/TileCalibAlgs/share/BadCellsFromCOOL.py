@@ -1,3 +1,8 @@
+#
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+#
+#**************************************************************
+#
 #=============================================================
 #===
 #=== Usage:
@@ -36,13 +41,13 @@ if not 'tileSqlite' in dir():
 #=== select Oracle or sqlite replica
 #============================================================
 if tileSqlite:
-    print 'Setting db connenction to tileSqlite.db'
+    print('Setting db connenction to tileSqlite.db')
     if Folder == 'ONL01':
         tileCoolMgr.setDbConn("onlStatAdc","tileSqlite.db")
     else:
         tileCoolMgr.setDbConn("oflStatAdc","tileSqlite.db")
 else:
-    print 'Setting db connenction to Oracle'
+    print('Setting db connenction to Oracle')
 
 #============================================================
 #=== select folder to dump
@@ -58,10 +63,10 @@ elif Folder == 'OFL02':
     tileCoolMgr.setFolder("oflStatAdc","/TILE/OFL02/STATUS/ADC")
 
 else:
-    print 'Folder %s not valid' % Folderll
-    print 'Use Folder = "ONL01", "OFL01" or "OFL02"'
-    print 'Use tile=tileSqlite=True for dumping tileSqlite.db content'
-    print 'Use Tag = "some_tag" to dump specific tag, otherwise UPD1 tag is used'
+    print('Folder %s not valid' % Folderll)
+    print('Use Folder = "ONL01", "OFL01" or "OFL02"')
+    print('Use tile=tileSqlite=True for dumping tileSqlite.db content')
+    print('Use Tag = "some_tag" to dump specific tag, otherwise UPD1 tag is used')
     exit(2)
 
 if Tag in dir() and len(Tag)>0:
@@ -81,4 +86,4 @@ tileInfoDump.Print1gNoise           = False
 tileInfoDump.PrintBadChannels       = True
 tileInfoDump.PrintBadCells          = True
 
-print tileInfoDump
+print(tileInfoDump)

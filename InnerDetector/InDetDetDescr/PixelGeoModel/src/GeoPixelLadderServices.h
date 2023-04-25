@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GEOPIXELLADDERSERVICES_H
@@ -15,7 +15,10 @@ class GeoPhysVol;
 class GeoPixelLadderServices : public GeoVPixelFactory {
  public:
   GeoPixelLadderServices(InDetDD::PixelDetectorManager* ddmgr,
-                         PixelGeometryManager* mgr , GeoModelIO::ReadGeoModel* sqliteReader, int ladderType);
+                         PixelGeometryManager* mgr , GeoModelIO::ReadGeoModel* sqliteReader, 
+                         std::shared_ptr<std::map<std::string, GeoFullPhysVol*>> mapFPV,
+                         std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX, 
+                         int ladderType);
   GeoPixelLadderServices (const GeoPixelLadderServices&) = delete;
   GeoPixelLadderServices& operator= (const GeoPixelLadderServices&) = delete;
   virtual ~GeoPixelLadderServices();

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Build detailed stave support : face plate + carbon foam + cable flex + cooling pipe + end blocks
@@ -25,8 +25,10 @@ using namespace std;
 
 GeoPixelStaveRing::GeoPixelStaveRing(InDetDD::PixelDetectorManager* ddmgr,
                                      PixelGeometryManager* mgr,
-				     GeoModelIO::ReadGeoModel* sqliteReader)
-  : GeoVPixelFactory (ddmgr, mgr, sqliteReader),
+				     GeoModelIO::ReadGeoModel* sqliteReader,
+                                     std::shared_ptr<std::map<std::string, GeoFullPhysVol*>> mapFPV,
+                                     std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX)
+  : GeoVPixelFactory (ddmgr, mgr, sqliteReader, mapFPV, mapAX),
     m_physVol (nullptr),
     m_zPosition (0),
     m_innerRadius (0),
@@ -53,8 +55,8 @@ GeoVPhysVol* GeoPixelStaveRing::Build(){
   double safety = 0.001*Gaudi::Units::mm; 
   bool isBLayer = false;
   if(m_gmt_mgr->GetLD() == 0) isBLayer = true;
-  GeoPixelSiCrystal theSensor(m_DDmgr, m_gmt_mgr, m_sqliteReader, isBLayer);
-  GeoPixelModule pm(m_DDmgr, m_gmt_mgr, m_sqliteReader, theSensor);
+  GeoPixelSiCrystal theSensor(m_DDmgr, m_gmt_mgr, m_sqliteReader, m_mapFPV, m_mapAX, isBLayer);
+  GeoPixelModule pm(m_DDmgr, m_gmt_mgr, m_sqliteReader,  m_mapFPV, m_mapAX, theSensor);
   if(m_sqliteReader) return nullptr;
   // Ladder geometry
 
