@@ -72,7 +72,6 @@ def addCommonP1Signatures(chains):
         ChainProp(name='HLT_j140f_LArPEBHLT_L1J75p31ETA49', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['PS:Online']+SingleJetGroup+SupportLegGroup),
         ChainProp(name='HLT_j140f_LArPEBHLT_L1jJ125p31ETA49', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['PS:Online']+SingleJetGroup+SupportPhIGroup),
         ChainProp(name='HLT_j165_LArPEBHLT_L1J100', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['PS:Online']+SingleJetGroup+SupportLegGroup),
-        ChainProp(name='HLT_j165_LArPEBHLT_L1jJ160', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['PS:Online']+SingleJetGroup+SupportPhIGroup),
     ]
 
     chainsP1['Calib'] = [
@@ -401,6 +400,9 @@ def addHighMuP1Signatures(chains):
         ChainProp(name='HLT_j0_pf_ftf_preselcHT450_BeamSpotPEB_L1HT190-jJ40s5pETA21', l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot',  'BW:BeamSpot', 'RATE:CPS_HT190-jJ40s5pETA21']+SupportPhIGroup+Topo3Group),
         ChainProp(name='HLT_j0_pf_ftf_presel6c25_BeamSpotPEB_L14jJ40', l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot',  'BW:BeamSpot', 'RATE:CPS_4jJ40']+SupportPhIGroup),
         ChainProp(name='HLT_j0_pf_ftf_presel2c20b85_BeamSpotPEB_L1jJ85p0ETA21_3jJ40p0ETA25', l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot',  'BW:BeamSpot', 'RATE:CPS_jJ85p0ETA21_3jJ40p0ETA25']+SupportPhIGroup),
+
+        # Placed here because not in HI menu
+        ChainProp(name='HLT_j165_LArPEBHLT_L1jJ160', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['PS:Online']+SingleJetGroup+SupportPhIGroup),
     ]
 
     addP1Signatures(chains,chainsP1)
@@ -497,7 +499,6 @@ def addHeavyIonP1Signatures(chains):
         ChainProp(name='HLT_noalg_L1ALFA_CDiff_Phys', l1SeedThresholds=['FSNOSEED'], stream=["MinBias"], groups=['PS:NoHLTReprocessing']+MinBiasGroup),
         ChainProp(name='HLT_noalg_L1J12_ALFA_EINE', l1SeedThresholds=['FSNOSEED'], stream=["MinBias"], groups=['PS:NoHLTReprocessing']+MinBiasGroup),
 
-        ChainProp(name='HLT_mb_sptrk_vetombts2in_L1ALFA_EINE', l1SeedThresholds=['FSNOSEED'], stream=["MinBias"], groups=['PS:NoHLTReprocessing']+MinBiasGroup),
         ChainProp(name='HLT_mb_sptrk_vetombts2in_L1ALFA_ANY', l1SeedThresholds=['FSNOSEED'], stream=["MinBias"], groups=['PS:NoHLTReprocessing']+MinBiasGroup),
 
         ChainProp(name='HLT_mb_sptrk_vetombts2in_L1TRT_ALFA_EINE', l1SeedThresholds=['FSNOSEED'], stream=["MinBias"], groups=['PS:NoHLTReprocessing']+MinBiasGroup),
