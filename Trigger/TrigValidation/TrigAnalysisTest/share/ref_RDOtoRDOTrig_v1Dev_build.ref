@@ -6950,6 +6950,42 @@ HLT_e28_lhmedium_mu8noL1_L1eEM28M:
     6: 5
     7: 2
     8: 1
+HLT_e28_lhtight_L1EM22VHI:
+  eventCount: 5
+  stepCounts:
+    0: 6
+    1: 6
+    2: 5
+    3: 5
+    4: 5
+    5: 5
+    6: 5
+  stepFeatures:
+    0: 6
+    1: 6
+    2: 9
+    3: 5
+    4: 5
+    5: 5
+    6: 5
+HLT_e28_lhtight_L1eEM28M:
+  eventCount: 5
+  stepCounts:
+    0: 6
+    1: 6
+    2: 5
+    3: 5
+    4: 5
+    5: 5
+    6: 5
+  stepFeatures:
+    0: 6
+    1: 6
+    2: 9
+    3: 5
+    4: 5
+    5: 5
+    6: 5
 HLT_e28_lhtight_e14_etcut_L1eEM28M:
   eventCount: 1
   stepCounts:
@@ -9217,6 +9253,24 @@ HLT_e5_nopid_L1EM3:
     4: 111
     5: 111
     6: 90
+HLT_e5_nopid_L1eEM5:
+  eventCount: 20
+  stepCounts:
+    0: 20
+    1: 20
+    2: 20
+    3: 20
+    4: 20
+    5: 20
+    6: 20
+  stepFeatures:
+    0: 108
+    1: 108
+    2: 453
+    3: 136
+    4: 136
+    5: 136
+    6: 118
 HLT_e60_dnnmedium_L1EM22VHI:
   eventCount: 3
   stepCounts:
@@ -14805,6 +14859,102 @@ HLT_g50_loose_L1eEM24L:
     1: 7
     2: 6
     3: 5
+HLT_g50_loose_xe40_cell_xe70_pfopufit_80mTAC_L1EM22VHI:
+  eventCount: 1
+  stepCounts:
+    0: 7
+    1: 6
+    2: 6
+    3: 5
+    4: 3
+    5: 1
+  stepFeatures:
+    0: 8
+    1: 6
+    2: 6
+    3: 5
+    4: 8
+    5: 1
+HLT_g50_loose_xe40_cell_xe70_pfopufit_80mTAC_L1eEM26M:
+  eventCount: 1
+  stepCounts:
+    0: 8
+    1: 7
+    2: 6
+    3: 5
+    4: 3
+    5: 1
+  stepFeatures:
+    0: 9
+    1: 7
+    2: 6
+    3: 5
+    4: 8
+    5: 1
+HLT_g50_loose_xe40_cell_xe70_pfopufit_80mTAC_L1eEM28M:
+  eventCount: 1
+  stepCounts:
+    0: 8
+    1: 7
+    2: 6
+    3: 5
+    4: 3
+    5: 1
+  stepFeatures:
+    0: 9
+    1: 7
+    2: 6
+    3: 5
+    4: 8
+    5: 1
+HLT_g50_loose_xe40_cell_xe70_pfopufit_L1EM22VHI:
+  eventCount: 1
+  stepCounts:
+    0: 7
+    1: 6
+    2: 6
+    3: 5
+    4: 3
+    5: 1
+  stepFeatures:
+    0: 8
+    1: 6
+    2: 6
+    3: 5
+    4: 8
+    5: 1
+HLT_g50_loose_xe40_cell_xe70_pfopufit_L1eEM26M:
+  eventCount: 1
+  stepCounts:
+    0: 8
+    1: 7
+    2: 6
+    3: 5
+    4: 3
+    5: 1
+  stepFeatures:
+    0: 9
+    1: 7
+    2: 6
+    3: 5
+    4: 8
+    5: 1
+HLT_g50_loose_xe40_cell_xe70_pfopufit_L1eEM28M:
+  eventCount: 1
+  stepCounts:
+    0: 8
+    1: 7
+    2: 6
+    3: 5
+    4: 3
+    5: 1
+  stepFeatures:
+    0: 9
+    1: 7
+    2: 6
+    3: 5
+    4: 8
+    5: 1
 HLT_g50_tight_3j25_pf_ftf_PhysicsTLA_L1EM22VHI:
   eventCount: 4
   stepCounts:
@@ -22291,6 +22441,18 @@ HLT_mu23_mu8noL1_L1MU18VFCH:
     4: 6
     5: 6
 HLT_mu24_L1MU14FCH:
+  eventCount: 5
+  stepCounts:
+    0: 5
+    1: 5
+    2: 5
+    3: 5
+  stepFeatures:
+    0: 6
+    1: 5
+    2: 5
+    3: 5
+HLT_mu24_L1MU18VFCH:
   eventCount: 5
   stepCounts:
     0: 5
