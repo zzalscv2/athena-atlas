@@ -144,7 +144,8 @@ class AthConfigFlags(object):
         self._flagdict=dict()
         self._locked=False
         self._dynaflags = dict()
-        self._loaded    = set() # dynamic dlags that were loaded
+        self._loaded    = set()      # dynamic dlags that were loaded
+        self._categoryCache = set()  # cache for already found categories
         self._hash = None
         self._parser = None
         self._args = None # user args from parser
@@ -251,13 +252,21 @@ class AthConfigFlags(object):
                 self._loadDynaFlags( prefix )
 
     def hasCategory(self, name):
-        path = name+'.'
+        # We cache successfully found categories
+        if name in self._categoryCache:
+            return True
+
+        # If not found do search through all keys.
+        # TODO: could be improved by using a trie for _flagdict
         for f in self._flagdict.keys():
-            if f.startswith(path):
+            if f.startswith(name+'.'):
+                self._categoryCache.add(name)
                 return True
         for c in self._dynaflags.keys():
             if c.startswith(name):
+                self._categoryCache.add(name)
                 return True
+
         return False
 
     def hasFlag(self, name):
