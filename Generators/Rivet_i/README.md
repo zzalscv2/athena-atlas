@@ -1,17 +1,17 @@
 **For support: [Mailing list](mailto:atlas-phys-pmg-rivet@cern.ch)**
 
 Rivet contact persons in ATLAS: [Deepak Kar](mailto:deepak.kar@cern.ch)
-and [Neil Warrack](mailto:neil.warrack@cern.ch).
+and [Christian Gütschow ](mailto:chris.g@cern.ch).
 
-For adding your awesome analysis in the official Rivet framework 
-[see here](https://twiki.cern.ch/twiki/bin/view/AtlasProtected/RivetMCValidation).
+For adding your awesome analysis in the official Rivet framework
+[see here](https://gitlab.cern.ch/atlas-physics/pmg/rivet-routines).
 
 Finally, if all else fails, you can contact the [Rivet developers](mailto:rivet-support@cern.ch),
 but remember that this is an external address and that you should not discuss anything ATLAS Internal!
 
 [[_TOC_]]
 
-# How to use Rivet 
+# How to use Rivet
 
 Rivet has a growing [wiki](https://gitlab.com/hepcedar/rivet/-/wikis/home) of its own with many useful examples
 for using standalone Rivet. This tutorial will focus on the Athena wrapper around Rivet.
@@ -21,11 +21,11 @@ for using standalone Rivet. This tutorial will focus on the Athena wrapper aroun
 In general, the latest 22.0/22.6 releases should have the latest Rivet release supported by ATLAS.
 
 ```bash
-asetup 22.6.1,AthGeneration # or later 
+asetup 22.6.1,AthGeneration # or later
 source setupRivet
 ```
 
-The last line is necessary to have the main Rivet executable 
+The last line is necessary to have the main Rivet executable
 as well as useful helper scripts (e.g. `yodamerge`, `rivet-mkhtml`, etc.)
 available on the command line.
 
@@ -37,12 +37,12 @@ asetup master,latest,AthGeneration
 source setupRivet
 ```
 
-That's all. 
+That's all.
 
 _Please note this also allow you to run all native Rivet/Yoda commands without the wrapper as well._
 
-The Rivet3 series comes with automatic handling of multiweights as well as couple of syntax changes. 
-For a quick tutorial on how to make a Rivet2-style routine compatible with Rivet3, 
+The Rivet3 series comes with automatic handling of multiweights as well as couple of syntax changes.
+For a quick tutorial on how to make a Rivet2-style routine compatible with Rivet3,
 [check this out](https://gitlab.com/hepcedar/rivet/blob/release-3-1-x/doc/tutorials/mig2to3.md).
 
 
@@ -55,6 +55,9 @@ If for some reason, you do need to revert back to an older Rivet version, feel f
 
 | Rivet version | Athena release | Comments |
 | :----:  | :-------:| :----- |
+| v3.1.7 | `22.6.26,AthGeneration` | |
+| v3.1.6 | `22.6.20,AthGeneration` | |
+| v3.1.5 | `22.6.14,AthGeneration` | |
 | v3.1.2 | `22.6.1,AthGeneration` | |
 | v3.1.2 | `22.6.0,AthGeneration` | `Rivet_i` disabled by accident |
 
@@ -63,7 +66,7 @@ If for some reason, you do need to revert back to an older Rivet version, feel f
 # Running Rivet over a local EVNT file
 
 Standalone Rivet cannot deal with EVNT files, but that's why we have a `Rivet_i` wrapper in Athena.
-As with everything in Athena, this requires some JOs. We've added an [example](share/example/local_jO.py) to this repo. 
+As with everything in Athena, this requires some JOs. We've added an [example](share/example/local_jO.py) to this repo.
 These JOs are very simple. Take a look:
 
 ```python
@@ -103,9 +106,9 @@ Rivet3 will produce one histogram per variation weight in the EVNT file. If you 
 you can suppress the extra histograms in the output file by setting the `SkipWeights` flag to `True`.
 
 
-Hint: In the example above, the output files will be zipped since the additional variation weights can 
-increase the file size significantly. You do not need to unzip the files, since all of the other 
-Rivet scripts (`yodamerge`, `rivet-mkhtml`, etc.) happily read in zipped yodas! 
+Hint: In the example above, the output files will be zipped since the additional variation weights can
+increase the file size significantly. You do not need to unzip the files, since all of the other
+Rivet scripts (`yodamerge`, `rivet-mkhtml`, etc.) happily read in zipped yodas!
 
 More `Rivet_i` options are defined [here](src/Rivet_i.cxx).
 
@@ -123,7 +126,7 @@ athena local_jO.py
 In the previous example, we assumed that you downloaded an EVNT file from the grid.
 
 If you generated the EVNT files locally, you typically have the generator cross-section stored in the `log.generate`
-file in each run. In that case you can extend the JobOption as follows to feed the correct cross-section 
+file in each run. In that case you can extend the JobOption as follows to feed the correct cross-section
 directly into Rivet:
 
 ```python
@@ -225,12 +228,12 @@ If you are autobooking histograms from data yoda file, that file need to be
 sent as well.
 
 
-If the container is large and you know the jobs are fast, 
+If the container is large and you know the jobs are fast,
 it might be more efficient to tweak the number of input files per jobs
 using the `--nFilesPerJob` flag.
 
 
-This can also be done by the 
+This can also be done by the
 [PMG systemtics tool](https://gitlab.cern.ch/atlas-physics/pmg/tools/systematics-tools/tree/master#installation-on-afs),
 which can also combine the outputs.
 
@@ -240,10 +243,10 @@ which can also combine the outputs.
 
 **Note that due to a bug in HepMC, this feature did not work with Rivet3 until release 21.6.46,AthGeneration or later.**
 
-Rivet jobs can be run in the same job as a `Gen_tf` run, 
-without needing to modify the standard production jO fragment. 
-The easiest and the recommended way is to use `--rivetAnas` 
-option followed by the list of rivet analysis separated by commas. One example is shown below. 
+Rivet jobs can be run in the same job as a `Gen_tf` run,
+without needing to modify the standard production jO fragment.
+The easiest and the recommended way is to use `--rivetAnas`
+option followed by the list of rivet analysis separated by commas. One example is shown below.
 
 ```bash
 Gen_tf.py --ecmEnergy=13000.0 --randomSeed=1234 --jobConfig=830011 --outputEVNTFile=tmp.EVNT.root --maxEvents=10 --rivetAnas=MC_GENERIC,ATLAS_2020_I1790256.cc
@@ -252,21 +255,21 @@ Gen_tf.py --ecmEnergy=13000.0 --randomSeed=1234 --jobConfig=830011 --outputEVNTF
 _More details about the new generation setup is [here](https://twiki.cern.ch/twiki/bin/view/AtlasProtected/PmgMcSoftware#Production_transforms_and_job_op)._
 
 
-The other possibility is to use a `--postInclude=local_jO.py`, where `local_jO.py` 
+The other possibility is to use a `--postInclude=local_jO.py`, where `local_jO.py`
 are some after-burner-like JOs to configure Rivet, similar to the standalone JOs mentioned above,
-but without the following lines (or equivalent): 
+but without the following lines (or equivalent):
 
 ```python
 import AthenaPoolCnvSvc.ReadAthenaPool
 svcMgr.EventSelector.InputCollections = [ 'EVNT.root' ]
 ```
 
-Also note that when Rivet is run using a `--postInclude` instead of with `--rivetAnas`, 
+Also note that when Rivet is run using a `--postInclude` instead of with `--rivetAnas`,
 the YODA output file should be specified on the command line using the `--outputYODAFile` arument of `Gen_tf`.
-In this way it is also possible to run custom routines on the fly (i.e. as part of running `Gen_tf`). 
+In this way it is also possible to run custom routines on the fly (i.e. as part of running `Gen_tf`).
 
 If the (possibly large) EVNT output is not needed to be saved, then the `--outputEVNTFile` argument can simply
-be omitted, but the `--outputYODAFile` would still need to be kept of course, so that the YODA file 
+be omitted, but the `--outputYODAFile` would still need to be kept of course, so that the YODA file
 will be kept as an output.
 
 
@@ -285,7 +288,7 @@ can disable the extra histograms by setting `rivet.SkipWeights=True` in the JOs.
 
 ## Where to start
 
-Rivet has a huge library of existing routines. Chances are that there is already a routine 
+Rivet has a huge library of existing routines. Chances are that there is already a routine
 which is similar enough to your phase space of interest that it's worth copying it and
 using it as a starting point.
 
@@ -296,7 +299,7 @@ rivet-mkanalysis MY_ANALYSIS
 ```
 
 The routine will have familiar `init()`, `analyze()` and `finalize()` methods.
-Check out the [Rivet wiki](https://gitlab.com/hepcedar/rivet/-/blob/master/doc/tutorials) 
+Check out the [Rivet wiki](https://gitlab.com/hepcedar/rivet/-/blob/master/doc/tutorials)
 for more information.
 
 Note: To enable the Rivet commands for merging and plotting to work with your new local routine,
@@ -305,7 +308,7 @@ you will have to set an enviroment variable as e.g.:
 export RIVET_ANALYSIS_PATH=$PWD
 ```
 
-It's worth reading the 
+It's worth reading the
 [physics tips and pitfalls](https://gitlab.com/hepcedar/rivet/-/blob/release-3-1-x/doc/tutorials/tips-pitfalls.md)
 as well.
 
@@ -331,25 +334,39 @@ over a grid container.
 
 # How to merge output files
 
-Rivet provides a handy script that can be used to merge yoda files:
+Rivet provides multiple handy scripts that can be used to merge yoda files:
+`rivet-merge` and `yodamerge` and `yodastack`. The `rivet-merge` script is
+more sophisticated in the sense that it is Rivet-based and so has access
+to the original routine (and actually re-runs the `finalize` method over
+the merged result, provided the routine is reentrant safe).
+The other two scripts are YODA-based and so know nothing about the routines
+and just blindly merge (or stack) YODA objects with the same path.
 
-```bash
-yodamerge -o my_merged_output.yoda MY_GRID_OUTPUT/*
+See this [page](https://gitlab.com/hepcedar/rivet/-/blob/release-3-1-x/doc/tutorials/merging.md)
+for a more extensive discussion of the differences between them, including
+short tutorials.
+
+As a rule of thumb, use `rivet-merge` if you can, otherwise fall back to the others.
+Equivalent merging (e.g. multiple grid outputs from a parallelised run over the same setup):
+
+```
+rivet-merge -e -o my_merged_output.yoda.gz MY_GRID_OUTPUT/*
+yodamerge -o my_merged_output.yoda.gz MY_GRID_OUTPUT/*
 ```
 
-If you have to run Rivet over several processes, you want
-to merge the grid output as shown above for each process.
-The you can stack the resulting files into a combined output
+When you have to run Rivet over several processes and you want
+to merge the grid output as shown above for each process,
+you can stack the resulting files to yield the combined output
 file like so:
 
-```bash
-yodamerge --add -o my_stacked_outpyt.yoda process1.yoda:12.34 process2.yoda:4.56
+```
+rivet-merge -o my_stacked_outpyt.yoda.gz process1.yoda.gz:12.34 process2.yoda.gz:4.56
+yodastack -o my_stacked_outpyt.yoda.gz process1.yoda.gz:12.34 process2.yoda.gz:4.56
 ```
 
-where the optional multipliers at the end of the input files could be the sample 
-cross-sections from the PMG Central Page, thereby scaling the yoda files on the fly
+where the optional multipliers at the end of the input files could be the sample
+cross-sections from the PMG Central Page, thereby scaling the YODA files on the fly
 to the relevant generator cross-section.
-
 
 # How to plot the output
 
@@ -361,9 +378,9 @@ rivet-mkhtml --errs -o my_plots prediction1.yoda:"Title=MC 1" prediction2.yoda:"
 
 This will create a nice little html booklet that you can stare at in your favourite browser.
 
-Several other options are available with `rivet-mkhtml --help`. 
+Several other options are available with `rivet-mkhtml --help`.
 For example, one can select the analyses' plot to run with the option `-a`.
-One can also customize the cosmetic of the plots with the 
+One can also customize the cosmetic of the plots with the
 help of a `.plot` file that.
 Check the rivet documentation for `make-plots` for more information.
 
@@ -383,7 +400,7 @@ This section will be populated from the mailing list questions/answers.
 ## Converting YODA files to ROOT format
 
 To first order YODA can do what ROOT can, minus all the ROOT bugs,
-but if you _really_ need the data in ROOT format, it is 
+but if you _really_ need the data in ROOT format, it is
 straightforward to convert them using Python, e.g.
 
 
@@ -425,9 +442,9 @@ We've added this as a script to the repo too.
 The cross-section can be set in the jOs or it can be
 set to unity and then the resulting yoda file(s) can be scaled after the run. The advantage
 of the latter approach is, the user does not have modify the joboption for (say) every jet slice.
-If the user does not set the cross-section in the JOs at all, 
+If the user does not set the cross-section in the JOs at all,
 then I believe in the old version of Rivet_i, then the default value is unity.
-Athena expects cross-sections in pb, so if the user is scaling the histograms 
+Athena expects cross-sections in pb, so if the user is scaling the histograms
 using the "/femtobarn" in the routine, it assumes that the value coming out of "crossSections()" is in pb.
 
 
@@ -439,7 +456,7 @@ The correct syntax for user-defined histograms is:
 book(_h_myhisto,"_h_myhisto",10,0,200);
 ```
 
-Omitting the `"_h_myhisto"` part will result in it being interpreted as an autobooked histogram 
+Omitting the `"_h_myhisto"` part will result in it being interpreted as an autobooked histogram
 from a reference yoda file, with the numbers corresponding to `d`, `x` and `y` from the usual
 `d01-x01-y01` names assigened by HepData.
 
@@ -448,35 +465,31 @@ from a reference yoda file, with the numbers corresponding to `d`, `x` and `y` f
 
 ### AntiKt4TruthJets
 
-```cpp
-FinalState fs(Cuts::abseta < 5.0); 
-FastJets(fs, 0.4, ANTIKT, JetAlg::Muons::NONE, JetAlg::Invisibles::NONE) 
+```
+FinalState fs(Cuts::abseta < 4.5);
+FastJets(fs, 0.4, ANTIKT, JetAlg::Muons::NONE, JetAlg::Invisibles::NONE)
 ```
 
-### AntiKt4TruthDressedWZJets
+### AntiKt4TruthWZJets
 
-```cpp
+```
 // Photons
-FinalState photons(Cuts::abspid == PID::PHOTON, true, true);
+FinalState photons(Cuts::abspid == PID::PHOTON);
 
 // Muons
 PromptFinalState bare_mu(Cuts::abspid == PID::MUON, true); // true = use muons from prompt tau decays
-DressedLeptons all_dressed_mu(photons, bare_mu, 0.1);
+DressedLeptons all_dressed_mu(photons, bare_mu, 0.1, Cuts::abseta < 2.5, true);
 
 // Electrons
 PromptFinalState bare_el(Cuts::abspid == PID::ELECTRON, true); // true = use electrons from prompt tau decays
-DressedLeptons all_dressed_el(photons, bare_el, 0.1);
-
-// Prompt invisibles
-InvisibleFinalState prompt_invis(true, true);
+DressedLeptons all_dressed_el(photons, bare_el, 0.1, Cuts::abseta < 2.5, true);
 
 //Jet forming
-VetoedFinalState vfs(FinalState(Cuts::abseta < 5.0));
+VetoedFinalState vfs(FinalState(Cuts::abseta < 4.5));
 vfs.addVetoOnThisFinalState(all_dressed_el);
 vfs.addVetoOnThisFinalState(all_dressed_mu);
-vfs.addVetoOnThisFinalState(prompt_invis);
-      
-FastJets jet(vfs, FastJets::ANTIKT, 0.4, JetAlg::Muons::ALL, JetAlg::Invisibles::ALL);
+
+FastJets jet(vfs, FastJets::ANTIKT, 0.4, JetAlg::Muons::ALL, JetAlg::Invisibles::DECAY);
 ```
 
 
@@ -493,27 +506,27 @@ Same as AntiKt4TruthWZJets, just change the radius from 0.4 to 1.0
 ### AntiKt10TruthTrimmedPtFrac5SmallR20Jets
 
 Declare in `init`:
-```cpp
+```
  _trimmer = fastjet::Filter(fastjet::JetDefinition(fastjet::kt_algorithm, 0.2), fastjet::SelectorPtFractionMin(0.05));
 ```
 Then in `execute`:
-```cpp
+```
 PseudoJets tr_ljets;
 for (const Jet& fjet : fjets) {
    tr_ljets += _trimmer(fjet);
 }
 ```
 where `fjets` are obtained from AntiKt10TruthJets.
-             
+
 
 ### AntiKt10TruthSoftDropBeta100Zcut10Jets
 
 Include the following header:
-```cpp
+```
 #include "fastjet/contrib/SoftDrop.hh"
 ```
 In `execute`:
-```cpp
+```
 fastjet::contrib::SoftDrop sd(1.0, 0.1);
 for (const Jet& fjet : fjets) {
    sd_ljets += sd(fjet);
@@ -525,22 +538,22 @@ where `fjets` are obtained from AntiKt10TruthJets.
 ### AntiKt10TruthBottomUpSoftDropBeta100Zcut5Jets
 
 Include the following header:
-```cpp
+```
 #include "fastjet/contrib/BottomUpSoftDrop.hh"
 ```
 As above, but:
-```cpp
+```
 fastjet::contrib::BottomUpSoftDrop busd(1.0, 0.05);
 ```
 
 ### AntiKt10TruthRecursiveSoftDropBeta100Zcut5NinfJets
 
 Include the following header:
-```cpp
+```
 #include "fastjet/contrib/RecursiveSoftDrop.hh"
 ```
 As above, but:
-```cpp
+```
 fastjet::contrib::RecursiveSoftDrop rsd(1.0, 0.05);
 ```
 
@@ -549,9 +562,9 @@ fastjet::contrib::RecursiveSoftDrop rsd(1.0, 0.05);
 
 ### Where is my histogram?
 
-histograms with a leading `_` 
-in their name are interpreted as auxiliary objects and 
-hence skipped by the plotting scripts, similar to the `_EVTCOUNT` and `_XSEC` 
+histograms with a leading `_`
+in their name are interpreted as auxiliary objects and
+hence skipped by the plotting scripts, similar to the `_EVTCOUNT` and `_XSEC`
 objects in the output file.
 
 ### How to plot with/without weights?
@@ -588,22 +601,17 @@ For left-aligned text in the top left corner, something like the following shoul
 
 ## How to scale a yoda file?
 
-````bash
+````
 yodascale -c '.* 10x' file.yoda
 ````
 
 will create a `file-scaled.yoda`, where every histogram will be scaled by a factor of 10.
 
+
 ### "Can I run over (D)AOD files?"
 
-Yes! AODs and TRUTH1 DAOD can be read in and passed onto Rivet (Unfortunately TRUTH3 DAOD cannot, because the full truth record is not 
-retained for TRUTH3).  For AOD files specifically, some of the events may be missing beam protons, causing Rivet to complain about a beam 
-mismatch. If you encounter this problem, you can ask Rivet_i to add some dummy protons to the reconstructed GenEvent by setting the 
-following flag in the JobOptions:
-```python
-rivet.AddMissingBeamParticles = True 
+Yes! AODs and TRUTH1 DAOD can be read in and passed onto Rivet (Unfortunately TRUTH3 DAOD cannot, because the full truth record is not retained for TRUTH3).  For AOD files specifically, some of the events may be missing beam protons, causing Rivet to complain about a beam mismatch. If you encounter this problem, you can ask Rivet_i to add some dummy protons to the reconstructed GenEvent by setting the following flag in the JobOptions:
 ```
-
+rivet.AddMissingBeamParticles = True
+```
 this will inject the necessary protons in the targeted events (those missing beam protons) with the appropriate centre of mass energy.
-
-
