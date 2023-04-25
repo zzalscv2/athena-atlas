@@ -18,6 +18,7 @@ def TileTowerBuilderAlgCfg(flags, **kwargs):
     kwargs.setdefault('NumberOfEtaTowers', 34)
     kwargs.setdefault('EtaMin', -1.7)
     kwargs.setdefault('EtaMax', 1.7)
+    kwargs.setdefault('EnableChronoStat', flags.Concurrency.NumThreads == 0)
 
     from TileGeoModel.TileGMConfig import TileGMCfg
     acc.merge(TileGMCfg(flags))

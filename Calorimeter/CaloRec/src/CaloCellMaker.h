@@ -21,7 +21,6 @@
 // Gaudi includes
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
-//#include "GaudiKernel/IChronoStatSvc.h"
 
 // Athena includes
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
@@ -47,8 +46,9 @@ class CaloCellMaker: public AthReentrantAlgorithm {
 
   private:
 
-//    IChronoStatSvc* m_chrono;
+    // ChronoStatSvc
     ServiceHandle<IChronoStatSvc> m_chrono;
+    bool m_doChronoStat;
 
     /** whether CellContainer to be created will own (default) its cells or not */
     int m_ownPolicy;
