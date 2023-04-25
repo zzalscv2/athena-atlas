@@ -4,9 +4,15 @@
 
 namespace Trk {
 
-inline bool PlaneSurface::operator==(const PlaneSurface& sf) const
+inline bool PlaneSurface::operator==(const PlaneSurface& psf) const
 {
-  return *this == static_cast<const Surface& >(sf);
+  if (this == &psf){
+    return true;
+  }
+  bool transfEqual(transform().isApprox(psf.transform(), 10e-8));
+  bool centerEqual = center() == psf.center();
+  bool boundsEqual = bounds() == psf.bounds();
+  return transfEqual && centerEqual && boundsEqual;
 }
 
 inline SurfaceType

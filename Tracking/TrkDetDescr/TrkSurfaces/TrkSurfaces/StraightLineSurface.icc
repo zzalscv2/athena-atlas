@@ -3,9 +3,15 @@
 */
 namespace Trk {
 
-inline bool StraightLineSurface::operator==(const StraightLineSurface& sf) const
+inline bool StraightLineSurface::operator==(const StraightLineSurface& slsf) const
 {
-  return *this == static_cast<const Surface& >(sf);
+  if(this == &slsf){
+    return true;
+  }
+  bool transfEqual(transform().isApprox(slsf.transform(), 10e-8));
+  bool centerEqual = (transfEqual) ? (center() == slsf.center()) : false;
+  bool boundsEqual = (centerEqual) ? (bounds() == slsf.bounds()) : false;
+  return boundsEqual;
 }
 
 /** Return the surface type */
