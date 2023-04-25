@@ -57,6 +57,7 @@ def ITkFastTrackFinderStandaloneCfg(flags, SiSPSeededTrackCollectionKey = None):
                                             useNewLayerNumberScheme  = True,
                                             MinHits                  = 3,
                                             ITkMode                  = True, # Allows ftf to use the new TrigTrackSeedGenerator for ITk
+                                            useGPU                   = False,
                                             StandaloneMode           = True, # Allows ftf to be run as an offline algorithm with reco_tf
                                             doTrackRefit             = False,
                                             FreeClustersCut          = 1,

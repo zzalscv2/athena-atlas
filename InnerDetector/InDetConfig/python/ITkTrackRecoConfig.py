@@ -319,15 +319,16 @@ def ITkTrackRecoOutputCfg(flags):
     if (flags.Tracking.doLargeD0 and
             flags.Tracking.storeSeparateLargeD0Container):
         toAOD += [
-            'xAOD::TrackParticleContainer#InDetLargeD0TrackParticles',
-            'xAOD::TrackParticleAuxContainer#InDetLargeD0TrackParticlesAux.'
+            "xAOD::TrackParticleContainer#InDetLargeD0TrackParticles",
+            f"xAOD::TrackParticleAuxContainer#InDetLargeD0TrackParticlesAux.{excludedAuxData}"
         ]
 
-    if flags.Tracking.doStoreTrackSeeds:
+    if flags.Tracking.doStoreSiSPSeededTracks:
         toAOD += [
-            "xAOD::TrackParticleContainer#SiSPSeedSegmentsTrackParticles",
-            "xAOD::TrackParticleAuxContainer#SiSPSeedSegmentsTrackParticlesAux."
+            "xAOD::TrackParticleContainer#SiSPSeededTracksTrackParticles",
+            f"xAOD::TrackParticleAuxContainer#SiSPSeededTracksTrackParticlesAux.{excludedAuxData}"
         ]
+
 
     result = ComponentAccumulator()
     result.merge(addToESD(flags, toAOD+toESD))

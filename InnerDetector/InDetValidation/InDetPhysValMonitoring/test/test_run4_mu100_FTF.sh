@@ -76,7 +76,6 @@ run "IDPVM" \
     --outputFile idpvm.root \
     --doTightPrimary \
     --doHitLevelPlots \
-    --doExpertPlots \
     --truthMinPt=1000
 
 reco_rc=$?
