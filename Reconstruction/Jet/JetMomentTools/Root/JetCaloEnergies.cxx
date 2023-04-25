@@ -23,7 +23,7 @@ JetCaloEnergies::JetCaloEnergies(const std::string& name)
 
 //**********************************************************************
 
-bool JetCaloEnergies::isInVector(const std::string key, const std::vector<std::string> calculations) {
+bool JetCaloEnergies::isInVector(const std::string& key, const std::vector<std::string>& calculations) {
   // Split key to get back the actual handle key 
   std::vector<std::string> split;
   std::string sub_string;
