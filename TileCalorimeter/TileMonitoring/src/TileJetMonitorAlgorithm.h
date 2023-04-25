@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILEMONITORING_TILEJETMONITORALGORITHM
@@ -11,8 +11,6 @@
 #include "TileConditions/ITileBadChanTool.h"
 
 #include "StoreGate/ReadHandleKey.h"
-#include "StoreGate/WriteDecorHandleKey.h"
-#include "StoreGate/WriteDecorHandle.h"
 #include "xAODJet/JetContainer.h"
 #include "CaloEvent/CaloCellContainer.h"
 
@@ -68,9 +66,6 @@ class TileJetMonitorAlgorithm : public AthMonitorAlgorithm {
         "CellEnergyUpperLimitsHG", {}, "Energy upper limits of the HG cell-time histograms"};
     Gaudi::Property<std::vector<float>> m_cellEnergyUpperLimitsLG{this,
         "CellEnergyUpperLimitsLG", {}, "Energy upper limits of the LG cell-time histograms"};
-
-    SG::WriteDecorHandleKey<xAOD::JetContainer> m_passORKey{this, "OrDecorator", "passOR", ""};
-    SG::WriteDecorHandleKey<xAOD::JetContainer> m_passJVTKey{this, "JvtDecorator", "passJvt", ""};
 
     ToolHandle<ITileBadChanTool> m_tileBadChanTool{this, 
         "TileBadChanTool", "TileBadChanTool", "Tile bad channel tool"};
