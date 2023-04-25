@@ -533,7 +533,7 @@ def triggerMergeViewsAndAddMissingEDMCfg( flags, edmSet, hypos, viewMakers, decO
             setattr(mergingTool, collType, attrName )
             producer = [ maker for maker in viewMakers if maker.Views == viewsColl ]
             if len(producer) == 0:
-                __log.warning("The producer of the %s not in the menu, it's outputs won't ever make it out of the HLT", coll)
+                __log.warning("The producer of %s for %s not in the menu, its outputs won't ever make it out of the HLT", viewsColl, coll)
                 continue
             if len(producer) > 1:
                 for pr in producer[1:]:
