@@ -106,15 +106,15 @@ def ITkSummaryHelperNoHoleSearchCfg(
     return ITkTrackSummaryHelperToolCfg(flags, name, **kwargs)
 
 
-def AtlasTrackSummaryHelperToolCfg(
-        flags, name='AtlasTrackSummaryHelperTool', **kwargs):
+def CombinedMuonIDSummaryHelperToolCfg(
+        flags, name='CombinedMuonIDSummaryHelper', **kwargs):
     result = ComponentAccumulator()
 
     if "HoleSearch" not in kwargs:
         from InDetConfig.InDetTrackHoleSearchConfig import (
-            AtlasTrackHoleSearchToolCfg)
+            CombinedMuonIDHoleSearchCfg)
         kwargs.setdefault("HoleSearch", result.popToolsAndMerge(
-            AtlasTrackHoleSearchToolCfg(flags)))
+            CombinedMuonIDHoleSearchCfg(flags)))
 
     result.setPrivateTools(result.popToolsAndMerge(
         InDetTrackSummaryHelperToolCfg(flags, name, **kwargs)))
