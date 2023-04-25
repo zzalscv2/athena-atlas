@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -40,7 +40,7 @@ class sTgcDigitMaker : public AthMessaging {
   //------ for public
  public:
 
-  sTgcDigitMaker(const sTgcHitIdHelper* hitIdHelper, const MuonGM::MuonDetectorManager * mdManager, bool doEfficiencyCorrection, double meanGasGain);
+  sTgcDigitMaker(const sTgcHitIdHelper* hitIdHelper, const MuonGM::MuonDetectorManager * mdManager, bool doEfficiencyCorrection, double meanGasGain, bool doPadChargeSharing);
 
   virtual ~sTgcDigitMaker();
 
@@ -119,6 +119,8 @@ class sTgcDigitMaker : public AthMessaging {
    */
   double getTimeOffsetStrip(int neighbor_index) const;
 
+  double getPadChargeFraction(double distance) const;
+
   /** Find the gamma pdf parameters of a given distance */
   GammaParameter getGammaParameter(double distance) const;
   /** Get the most probable time of arrival */
@@ -150,6 +152,7 @@ class sTgcDigitMaker : public AthMessaging {
   int m_channelTypes{3}; // 1 -> strips, 2 -> strips+wires, 3 -> strips/wires/pads
   double m_theta{0.8}; // theta=0.8 value best matches the PDF
   double m_meanGasGain{5.e4};  // mean gain estimated from ATLAS note "ATL-MUON-PUB-2014-001"
+  bool m_doPadSharing{false};
 
 
   // Flag to enable strip time offset
