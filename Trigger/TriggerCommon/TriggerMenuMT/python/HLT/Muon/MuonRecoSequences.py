@@ -274,35 +274,29 @@ def muFastRecoSequenceCfg( flags, RoIs, doFullScanID = False, InsideOutMode=Fals
 
   return acc
 
-
-def muonIDFastTrackingSequence( flags, RoIs, name, extraLoads=None, extraLoadsForl2mtmode=None, doLRT=False ):
-
-  from AthenaCommon.CFElements import parOR
-
-  viewNodeName=name+"FastIDViewNode"
-
-  muonIDFastTrackingSequence = parOR(viewNodeName)
-
-  ### Define input data of Inner Detector algorithms  ###
-  ### and Define EventViewNodes to run the algorithms ###
-  from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
-  IDTrigConfig = getInDetTrigConfig( "muon"+name ) 
-
-  from TrigInDetConfig.InDetTrigFastTracking import makeInDetTrigFastTracking
-  viewAlgs, viewVerify = makeInDetTrigFastTracking( flags, config = IDTrigConfig, rois = RoIs )
-  viewVerify.DataObjects += [( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s' % RoIs )]
+def muonIDtrackVDVCfg( flags, name, RoIs, extraLoads=None, extraLoadsForl2mtmode=None ):
+  result=ComponentAccumulator()
+  dataObjects=[( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s' % RoIs )]
   if extraLoads:
-    viewVerify.DataObjects += extraLoads
-
+    dataObjects += extraLoads
   if extraLoadsForl2mtmode:
-    viewVerify.DataObjects += extraLoadsForl2mtmode
+    dataObjects += extraLoadsForl2mtmode
+  ViewVerify = CompFactory.AthViews.ViewDataVerifier("muCombVDV"+name, DataObjects = dataObjects)
 
-  for viewAlg in viewAlgs:
-      muonIDFastTrackingSequence += viewAlg
+  result.addEventAlgo(ViewVerify)
+  return result
 
-  return muonIDFastTrackingSequence
+def muonIDFastTrackingSequenceCfg( flags, RoIs, name, extraLoads=None, extraLoadsForl2mtmode=None, doLRT=False ):
 
-def muonIDCosmicTrackingSequence( flags, RoIs, name, extraLoads=None ):
+  acc = ComponentAccumulator()
+  from TrigInDetConfig.TrigInDetConfig import trigInDetFastTrackingCfg
+  acc.merge(trigInDetFastTrackingCfg( flags, roisKey=RoIs, signatureName=name ))
+
+  acc.merge(muonIDtrackVDVCfg(flags, name, RoIs, extraLoads, extraLoadsForl2mtmode))
+
+  return acc
+
+def muonIDCosmicTrackingSequence( flags, RoIs, name, extraLoads=None, extraLoadsForl2mtmode=None ):
 
   from AthenaCommon.CFElements import parOR
   viewNodeName=name+"IDTrackingViewNode"
@@ -312,17 +306,16 @@ def muonIDCosmicTrackingSequence( flags, RoIs, name, extraLoads=None ):
   from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
   IDTrigConfig = getInDetTrigConfig( "cosmics" )
 
-  from TrigInDetConfig.InDetTrigFastTracking import makeInDetTrigFastTracking
-  dataPreparationAlgs, dataVerifier = makeInDetTrigFastTracking( flags, config = IDTrigConfig, rois = RoIs, doFTF = False)
-   
-  dataVerifier.DataObjects += [( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s'%RoIs )]
+  #from TrigInDetConfig.InDetTrigFastTracking import makeInDetTrigFastTracking
+  from TrigInDetConfig.TrigInDetConfig import trigInDetFastTrackingCfg
+  dataPreparationAlgs = algorithmCAToGlobalWrapper(trigInDetFastTrackingCfg, flags, roisKey=RoIs, signatureName=name )
+
+  dataVerifier = algorithmCAToGlobalWrapper(muonIDtrackVDVCfg,flags, 'cosmics', RoIs, extraLoads, extraLoadsForl2mtmode)
 
   from TrigInDetConfig.EFIDTracking import makeInDetPatternRecognition
   trackingAlgs, _ = makeInDetPatternRecognition( flags, config  = IDTrigConfig, verifier = 'VDVCosmicIDTracking' )
 
-  if extraLoads:
-    dataVerifier.DataObjects += extraLoads
-
+  trackingSequence += dataVerifier
   for alg in dataPreparationAlgs:
       trackingSequence += alg
 

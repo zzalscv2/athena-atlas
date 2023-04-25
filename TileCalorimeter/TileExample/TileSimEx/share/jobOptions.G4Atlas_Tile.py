@@ -138,7 +138,6 @@ if 'GDML' in dir():
 from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
 athenaCommonFlags.PoolEvgenInput.set_Off()
 athenaCommonFlags.SkipEvents.set_Off()
-svcMgr.EventSelector.FirstEvent=1
 
 ## Use single particle generator
 import AthenaCommon.AtlasUnixGeneratorJob

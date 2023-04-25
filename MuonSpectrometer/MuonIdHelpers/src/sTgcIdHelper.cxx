@@ -914,7 +914,7 @@ Identifier sTgcIdHelper::padID(const Identifier& id, int multilayer, int gasGap,
     resetAndSet(m_gap_impl, gasGap, result);
     resetAndSet(m_typ_impl, channelType, result);
     int channel = (padPhi - 1) * PadEtaMax + padEta;
-    m_cha_impl.pack(channel, result);
+    resetAndSet(m_cha_impl, channel, result);
 
     return result;
 }

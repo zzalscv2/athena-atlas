@@ -6,12 +6,13 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 def SiZvertexMaker_xkCfg(flags, name="InDetZvertexMaker", **kwargs) :
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("Zmax", flags.InDet.Tracking.ActiveConfig.maxZImpact)
-    kwargs.setdefault("Zmin", -flags.InDet.Tracking.ActiveConfig.maxZImpact)
+    kwargs.setdefault("Zmax", flags.Tracking.ActiveConfig.maxZImpact)
+    kwargs.setdefault("Zmin", -flags.Tracking.ActiveConfig.maxZImpact)
     kwargs.setdefault("minRatio", 0.17)
 
     if "SeedMakerTool" not in kwargs:
-        from InDetConfig.SiSpacePointsSeedToolConfig import SiSpacePointsSeedMakerCfg
+        from InDetConfig.SiSpacePointsSeedToolConfig import (
+            SiSpacePointsSeedMakerCfg)
         kwargs.setdefault("SeedMakerTool", acc.popToolsAndMerge(
             SiSpacePointsSeedMakerCfg(flags)))
 
@@ -19,5 +20,6 @@ def SiZvertexMaker_xkCfg(flags, name="InDetZvertexMaker", **kwargs) :
         kwargs.setdefault("HistSize", 2000)
         kwargs.setdefault("minContent", 30)
 
-    acc.setPrivateTools(CompFactory.InDet.SiZvertexMaker_xk(name = name+flags.InDet.Tracking.ActiveConfig.extension, **kwargs))
+    acc.setPrivateTools(CompFactory.InDet.SiZvertexMaker_xk(
+        name+flags.Tracking.ActiveConfig.extension, **kwargs))
     return acc

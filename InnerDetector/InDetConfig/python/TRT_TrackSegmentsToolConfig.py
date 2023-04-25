@@ -14,7 +14,7 @@ def TRT_TrackSegmentsMakerCondAlg_ATLxkCfg(flags, name = 'InDetTRT_SeedsMakerCon
             RungeKuttaPropagatorCfg(flags)))
 
     kwargs.setdefault("NumberMomentumChannel",
-                      flags.InDet.Tracking.ActiveConfig.TRTSegFinderPtBins)
+                      flags.Tracking.ActiveConfig.TRTSegFinderPtBins)
 
     acc.addCondAlgo(
         CompFactory.InDet.TRT_TrackSegmentsMakerCondAlg_ATLxk(name, **kwargs))
@@ -35,9 +35,10 @@ def TRT_TrackSegmentsMaker_ATLxkCfg(flags, name = 'InDetTRT_SeedsMaker',
                                     InputCollections = None,
                                     **kwargs):
 
-    acc = TRT_TrackSegmentsMakerCondAlg_ATLxkCfg(flags,
-                                                 name = 'InDetTRT_SeedsMakerCondAlg',
-                                                 pTmin = flags.InDet.Tracking.ActiveConfig.minSecondaryPt)
+    acc = TRT_TrackSegmentsMakerCondAlg_ATLxkCfg(
+        flags,
+        name = 'InDetTRT_SeedsMakerCondAlg',
+        pTmin = flags.Tracking.ActiveConfig.minSecondaryPt)
 
     if "PropagatorTool" not in kwargs:
         from TrkConfig.TrkExRungeKuttaPropagatorConfig import (
@@ -55,13 +56,13 @@ def TRT_TrackSegmentsMaker_ATLxkCfg(flags, name = 'InDetTRT_SeedsMaker',
     kwargs.setdefault("PRDtoTrackMap", 'InDetSegmentPRDtoTrackMap')
     kwargs.setdefault("RemoveNoiseDriftCircles", False)
     kwargs.setdefault("NumberMomentumChannel",
-                      flags.InDet.Tracking.ActiveConfig.TRTSegFinderPtBins)
+                      flags.Tracking.ActiveConfig.TRTSegFinderPtBins)
     kwargs.setdefault("PRDtoTrackMap", 'InDetSegmentPRDtoTrackMap')
     kwargs.setdefault("MinNumberDriftCircles",
-                      flags.InDet.Tracking.ActiveConfig.minSecondaryTRTonTrk)
-    kwargs.setdefault("pTmin", flags.InDet.Tracking.ActiveConfig.minSecondaryPt)
+                      flags.Tracking.ActiveConfig.minSecondaryTRTonTrk)
+    kwargs.setdefault("pTmin", flags.Tracking.ActiveConfig.minSecondaryPt)
     kwargs.setdefault("sharedFrac",
-                      flags.InDet.Tracking.ActiveConfig.maxSecondaryTRTShared)
+                      flags.Tracking.ActiveConfig.maxSecondaryTRTShared)
 
     acc.setPrivateTools(
         CompFactory.InDet.TRT_TrackSegmentsMaker_ATLxk(name, **kwargs))
@@ -72,11 +73,8 @@ def TRT_TrackSegmentsMaker_ATLxk_Phase_Cfg(flags, name = 'InDetTRT_SeedsMaker_Ph
     return TRT_TrackSegmentsMaker_ATLxkCfg(flags, name, *kwargs)
 
 def TRT_TrackSegmentsMaker_ATLxk_TrackSegmentsCfg(flags, name = 'InDetTRT_SeedsMaker_TrackSegments', **kwargs):
-
-   kwargs.setdefault("pTmin", flags.InDet.Tracking.ActiveConfig.minPT)
-   kwargs.setdefault("MinNumberDriftCircles",
-                     flags.InDet.Tracking.ActiveConfig.minPT)
-   kwargs.setdefault("sharedFrac",
-                     flags.InDet.Tracking.ActiveConfig.maxTRTonlyShared)
+   kwargs.setdefault("pTmin", flags.Tracking.ActiveConfig.minPT)
+   kwargs.setdefault("MinNumberDriftCircles", flags.Tracking.ActiveConfig.minPT)
+   kwargs.setdefault("sharedFrac", flags.Tracking.ActiveConfig.maxTRTonlyShared)
    kwargs.setdefault("PRDtoTrackMap", "")
    return TRT_TrackSegmentsMaker_ATLxkCfg(flags, name, *kwargs)

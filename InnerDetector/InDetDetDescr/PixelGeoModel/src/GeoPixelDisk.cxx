@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeoPixelDisk.h"
@@ -24,20 +24,16 @@
 
 GeoPixelDisk::GeoPixelDisk(InDetDD::PixelDetectorManager* ddmgr,
                            PixelGeometryManager* mgr,
-			   GeoModelIO::ReadGeoModel* sqliteReader)
-  : GeoVPixelFactory (ddmgr, mgr, sqliteReader)
+			   GeoModelIO::ReadGeoModel* sqliteReader,
+                           std::shared_ptr<std::map<std::string, GeoFullPhysVol*>> mapFPV,
+                           std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX)
+  : GeoVPixelFactory (ddmgr, mgr, sqliteReader, mapFPV, mapAX)
 {
 }
 
 GeoVPhysVol* GeoPixelDisk::Build( ) {
 
-  std::map<std::string, GeoFullPhysVol*>        mapFPV;
-  std::map<std::string, GeoAlignableTransform*> mapAX;
   int brl_ec=0;
-  if(m_sqliteReader) {
-    mapFPV = m_sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("Pixel");
-    mapAX  = m_sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("Pixel");
-  }
 
   // Need to specify some eta. Assume all module the same
   m_gmt_mgr->SetEta(0);
@@ -64,14 +60,14 @@ GeoVPhysVol* GeoPixelDisk::Build( ) {
   }
   //
   // Define the Sensor to be used here, so it will be the same for all the disk
-  GeoPixelSiCrystal theSensor(m_DDmgr, m_gmt_mgr, m_sqliteReader, false);
+  GeoPixelSiCrystal theSensor(m_DDmgr, m_gmt_mgr, m_sqliteReader, m_mapFPV, m_mapAX, false);
   if(m_sqliteReader && m_gmt_mgr->isEndcap() ) brl_ec = 2*m_gmt_mgr->GetSide();
   GeoFullPhysVol* diskPhys = m_sqliteReader==nullptr ? new GeoFullPhysVol(theDisk) : nullptr;
   //
   // Place the disk sectors (on both sides):
   //
   // Need to specify some eta. Assume all module the same
-  GeoPixelModule psd(m_DDmgr, m_gmt_mgr, m_sqliteReader, theSensor);
+    GeoPixelModule psd(m_DDmgr, m_gmt_mgr, m_sqliteReader, m_mapFPV, m_mapAX, theSensor);
   double zpos = m_gmt_mgr->PixelECSiDz1()*0.5;
   double deltaPhi = 360.*Gaudi::Units::deg/ (float) nbECSector;
   // This is the start angle of the even modules (3.75 deg):
@@ -154,7 +150,7 @@ GeoVPhysVol* GeoPixelDisk::Build( ) {
       psd.Build();
       std::string key="ModuleEC_"+ std::to_string(phiId)+"_"+std::to_string(m_gmt_mgr->GetLD())+"_"+std::to_string(m_gmt_mgr->Phi())+"_"+std::to_string(m_gmt_mgr->Eta());
       Identifier id = theSensor.getID();
-      m_DDmgr->addAlignableTransform(0,id,mapAX[key],mapFPV[key]);
+      m_DDmgr->addAlignableTransform(0,id,(*m_mapAX)[key],(*m_mapFPV)[key]);
       continue;
     }
 
@@ -189,13 +185,13 @@ GeoVPhysVol* GeoPixelDisk::Build( ) {
 
   if(m_sqliteReader) {
     std::string key="PixelDisk_"+std::to_string(brl_ec)+"_"+std::to_string(m_gmt_mgr->GetLD())+"_"+std::to_string(m_gmt_mgr->Phi())+"_"+std::to_string(m_gmt_mgr->Eta());
-    diskPhys=mapFPV[key];
+    diskPhys=(*m_mapFPV)[key];
   }
   else {
     //
     // Place the supports for the disks:
     //
-    GeoPixelDiskSupports pds (m_DDmgr, m_gmt_mgr, m_sqliteReader);
+    GeoPixelDiskSupports pds (m_DDmgr, m_gmt_mgr, m_sqliteReader, m_mapFPV, m_mapAX);
     for(int ii =0; ii< pds.NCylinders(); ii++) {
       pds.SetCylinder(ii);
       GeoTransform* xform = new GeoTransform( GeoTrf::Translate3D(0, 0, pds.ZPos()) );

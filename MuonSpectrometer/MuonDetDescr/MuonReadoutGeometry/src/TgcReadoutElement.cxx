@@ -12,7 +12,7 @@
 #include <memory>
 #include <ostream>
 #include <vector>
-
+#include <TString.h>
 #include "AthenaKernel/getMessageSvc.h"
 #include "EventPrimitives/AmgMatrixBasePlugin.h"
 #include "GaudiKernel/MsgStream.h"
@@ -23,7 +23,6 @@
 #include "TrkSurfaces/RotatedTrapezoidBounds.h"
 #include "TrkSurfaces/TrapezoidBounds.h"
 
-class GeoVFullPhysVol;
 
 namespace Trk {
     class SurfaceBounds;
@@ -31,9 +30,8 @@ namespace Trk {
 
 namespace MuonGM {
 
-    TgcReadoutElement::TgcReadoutElement(GeoVFullPhysVol* pv, const std::string& stName, int zi, int fi, bool is_mirrored,
-                                         MuonDetectorManager* mgr) :
-        MuonClusterReadoutElement(pv, stName, zi, fi, is_mirrored, mgr) {
+    TgcReadoutElement::TgcReadoutElement(GeoVFullPhysVol* pv, const std::string& stName, MuonDetectorManager* mgr) :
+        MuonClusterReadoutElement(pv, mgr, Trk::DetectorElemType::Tgc) {
         setStationName(stName);
         // get the setting of the caching flag from the manager
         setCachingFlag(mgr->cachingFlag());
@@ -676,25 +674,6 @@ namespace MuonGM {
 
         return sin(theta);
     }
-    void TgcReadoutElement::setIdentifier(const Identifier& id) {
-        m_id = id;
-        const TgcIdHelper* idh = manager()->tgcIdHelper();
-        IdentifierHash collIdhash = 0;
-        IdentifierHash detIdhash = 0;
-        // set parent data collection hash id
-        if (idh->get_module_hash(id, collIdhash) != 0) {
-            MsgStream log(Athena::getMessageSvc(), "TgcReadoutElement");
-            log << MSG::WARNING << "setIdentifier -- collection hash Id NOT computed for id = " << idh->show_to_string(id) << endmsg;
-        }
-        m_idhash = collIdhash;
-        // set RE hash id
-        if (idh->get_detectorElement_hash(id, detIdhash) != 0) {
-            MsgStream log(Athena::getMessageSvc(), "TgcReadoutElement");
-            log << MSG::WARNING << "setIdentifier -- detectorElement hash Id NOT computed for id = " << idh->show_to_string(id) << endmsg;
-        }
-        m_detectorElIdhash = detIdhash;
-    }
-
     void TgcReadoutElement::fillCache() {
         if (!m_surfaceData)
             m_surfaceData = std::make_unique<SurfaceData>();

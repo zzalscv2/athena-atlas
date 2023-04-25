@@ -544,7 +544,7 @@ def addFlavourTagVariables(conf, network_prefix):
       xvar = f"{network_prefix}_p{f}"
       varname = f"ftag_p{f}"
       fillerTools += [HistoSpec(varname, xvar=xvar, bins=(70, -0.2, 1.2), title=f"{varname};{varname};;Entries")]
-    fastDipsSelectSpec = SelectSpec(cutname, '20<pt:GeV&|eta|<3.2', path='NoTriggerSelection/'+cutname, FillerTools=fillerTools)
+    fastDipsSelectSpec = SelectSpec(f"{network_prefix}_{cutname}", '20<pt:GeV&|eta|<3.2', path='NoTriggerSelection/'+cutname, FillerTools=fillerTools)
     conf.appendHistos(fastDipsSelectSpec)
 
 #########################################################
@@ -820,8 +820,10 @@ def jetMonitoringConfig(inputFlags,jetcoll,athenaMT):
            conf.appendHistos("fCharged")
            if "subresjesgscIS" in jetcoll:
                addFlavourTagVariables(conf,"fastDIPS20211215")
+               addFlavourTagVariables(conf,"GN120230331")
        if 'fastftag' in jetcoll:
            addFlavourTagVariables(conf,"fastDips")
+           addFlavourTagVariables(conf, "fastGN120230327")
        if 'EMTopo' in jetcoll: #dedicated histograms for online EMTopo jets
            conf.appendHistos("Timing")
      else:

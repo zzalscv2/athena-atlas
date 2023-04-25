@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PIXELGEOMODEL_GEOPIXELDETAILEDSTAVESUPPORT_H
@@ -17,7 +17,9 @@ class GeoPixelDetailedStaveSupport : public GeoPixelStaveSupport {
 public:  
   GeoPixelDetailedStaveSupport(InDetDD::PixelDetectorManager* ddmgr,
                                PixelGeometryManager* mgr,
-			       GeoModelIO::ReadGeoModel* sqliteReader);
+			       GeoModelIO::ReadGeoModel* sqliteReader,
+                               std::shared_ptr<std::map<std::string, GeoFullPhysVol*>> mapFPV,
+                               std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX);
   virtual GeoVPhysVol* Build() override;
   virtual GeoVPhysVol* getPhysVol() override {return m_physVol;}
   virtual const GeoTrf::Transform3D & transform() const override {return m_transform;}

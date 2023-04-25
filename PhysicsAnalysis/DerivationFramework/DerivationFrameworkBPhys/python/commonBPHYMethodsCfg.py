@@ -6,8 +6,8 @@ def BPHY_TrkVKalVrtFitterCfg(flags, BPHYDerivationName, **kwargs):
     return TrkVKalVrtFitterCfg(flags, name=BPHYDerivationName+"_VKalVrtFitter", **kwargs)
 
 def BPHY_V0ToolCfg(flags, BPHYDerivationName):
-    from TrkConfig.TrkVertexAnalysisUtilsConfig import V0ToolsNoExtrapCfg
-    return V0ToolsNoExtrapCfg(flags, BPHYDerivationName+"_V0Tools")
+    from TrkConfig.TrkVertexAnalysisUtilsConfig import V0ToolsCfg
+    return V0ToolsCfg(flags, BPHYDerivationName+"_V0Tools")
 
 def BPHY_VertexPointEstimatorCfg(flags, BPHYDerivationName):
     from InDetConfig.InDetConversionFinderToolsConfig import \

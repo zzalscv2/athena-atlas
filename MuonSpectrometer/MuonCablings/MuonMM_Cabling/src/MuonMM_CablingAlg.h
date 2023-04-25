@@ -31,9 +31,9 @@ class MuonMM_CablingAlg : public AthAlgorithm {
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{
         this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
     SG::ReadCondHandleKey<CondAttrListCollection> m_readCablingKey{
-        this, "CablingFolder", ""};
+        this, "CablingFolder", /* "/MDT/MM/CABLING" */ "", "Key of input conditions folder for MM cabling map"};
     SG::WriteCondHandleKey<MicroMega_CablingMap> m_writeKey{
-        this, "WriteKey", "MicroMegaCabling", "Key of output MDT cabling map"};
+        this, "WriteKey", "MicroMegaCabling", "Key of output MM cabling map"};
 
     Gaudi::Property<std::string> m_JSONFile{
         this, "JSONFile", "", "External path to read the cabling from"};

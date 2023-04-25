@@ -12,12 +12,12 @@ def TRT_SeededTrackFinderCfg(flags, name='InDetTRT_SeededTrackFinder',
     from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
     acc = BeamSpotCondAlgCfg(flags)
 
-    if flags.InDet.Tracking.ActiveConfig.usePixel:
+    if flags.Tracking.ActiveConfig.usePixel:
         from InDetConfig.SiCombinatorialTrackFinderToolConfig import (
             SiDetElementBoundaryLinksCondAlg_xk_Pixel_Cfg)
         acc.merge(SiDetElementBoundaryLinksCondAlg_xk_Pixel_Cfg(flags))
 
-    if flags.InDet.Tracking.ActiveConfig.useSCT:
+    if flags.Tracking.ActiveConfig.useSCT:
         from InDetConfig.SiCombinatorialTrackFinderToolConfig import (
             SiDetElementBoundaryLinksCondAlg_xk_SCT_Cfg)
         acc.merge(SiDetElementBoundaryLinksCondAlg_xk_SCT_Cfg(flags))
@@ -56,33 +56,34 @@ def TRT_SeededTrackFinderCfg(flags, name='InDetTRT_SeededTrackFinder',
     kwargs.setdefault("PRDtoTrackMap",
                       'InDetSegmentPRDtoTrackMap' if InputCollections is not None else "")
     kwargs.setdefault("MinTRTonSegment",
-                      flags.InDet.Tracking.ActiveConfig.minSecondaryTRTonTrk)
-    kwargs.setdefault("MinTRTonly",
-                      flags.InDet.Tracking.ActiveConfig.minTRTonly)
+                      flags.Tracking.ActiveConfig.minSecondaryTRTonTrk)
+    kwargs.setdefault("MinTRTonly", flags.Tracking.ActiveConfig.minTRTonly)
     kwargs.setdefault("TrtExtension", True)
     kwargs.setdefault("SiExtensionCuts",
-                      flags.InDet.Tracking.ActiveConfig.SiExtensionCuts)
-    kwargs.setdefault("minPt", flags.InDet.Tracking.ActiveConfig.minSecondaryPt)
+                      flags.Tracking.ActiveConfig.SiExtensionCuts)
+    kwargs.setdefault("minPt", flags.Tracking.ActiveConfig.minSecondaryPt)
     kwargs.setdefault("maxRPhiImp",
-                      flags.InDet.Tracking.ActiveConfig.maxSecondaryImpact)
-    kwargs.setdefault("maxZImp", flags.InDet.Tracking.ActiveConfig.maxZImpact)
-    kwargs.setdefault("maxEta", flags.InDet.Tracking.ActiveConfig.maxEta)
+                      flags.Tracking.ActiveConfig.maxSecondaryImpact)
+    kwargs.setdefault("maxZImp", flags.Tracking.ActiveConfig.maxZImpact)
+    kwargs.setdefault("maxEta", flags.Tracking.ActiveConfig.maxEta)
     kwargs.setdefault("RejectShortExtension",
-                      flags.InDet.Tracking.ActiveConfig.rejectShortExtensions)
+                      flags.Tracking.ActiveConfig.rejectShortExtensions)
     kwargs.setdefault("FinalRefit", False)
     kwargs.setdefault("FinalStatistics", False)
     kwargs.setdefault("OutputSegments", False)
     kwargs.setdefault("InputSegmentsLocation", 'TRTSegments')
     kwargs.setdefault("OutputTracksLocation", 'TRTSeededTracks')
 
-    if flags.InDet.Tracking.ActiveConfig.RoISeededBackTracking:
+    if flags.Tracking.ActiveConfig.RoISeededBackTracking:
         from RegionSelector.RegSelToolConfig import regSelTool_SCT_Cfg
         RegSelTool_SCT   = acc.popToolsAndMerge(regSelTool_SCT_Cfg(flags))
         acc.addPublicTool(RegSelTool_SCT)
 
         kwargs.setdefault("RegSelTool", RegSelTool_SCT)
         kwargs.setdefault("CaloSeededRoI", True)
-        kwargs.setdefault("EMROIPhiRZContainer", "InDetCaloClusterROIPhiRZ%.0fGeVUnordered" % (flags.InDet.Tracking.ActiveConfig.minRoIClusterEt/Units.GeV))
+        kwargs.setdefault("EMROIPhiRZContainer", (
+            "InDetCaloClusterROIPhiRZ%.0fGeVUnordered" % 
+            (flags.Tracking.ActiveConfig.minRoIClusterEt/Units.GeV)))
 
     acc.addEventAlgo(CompFactory.InDet.TRT_SeededTrackFinder(name, **kwargs))
     return acc

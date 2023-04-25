@@ -15,13 +15,13 @@ def ITkTrackingSiPatternCfg(flags,
     #
     # --- get list of already associated hits (always do this, even if no other tracking ran before)
     #
-    if flags.ITk.Tracking.ActiveConfig.usePrdAssociationTool:
+    if flags.Tracking.ActiveConfig.usePrdAssociationTool:
         from InDetConfig.InDetTrackPRD_AssociationConfig import (
             ITkTrackPRD_AssociationCfg)
         acc.merge(ITkTrackPRD_AssociationCfg(
             flags,
-            name = 'ITkTrackPRD_Association' + \
-            flags.ITk.Tracking.ActiveConfig.extension,
+            name = ('ITkTrackPRD_Association' + 
+                    flags.Tracking.ActiveConfig.extension),
             TracksName = list(InputCollections)))
 
     if flags.ITk.Tracking.useFTF: # Can use FastTrackFinder instead of SiSPSeededTrackFinder
@@ -57,7 +57,7 @@ def ITkTrackingSiPatternCfg(flags,
             from InDetConfig.SiSPSeededTrackFinderConfig import (
                 ITkSiSPSeededTrackFinderCfg)
             SiSPSeededTrackFinderCfg = ITkSiSPSeededTrackFinderCfg
-            if flags.ITk.Tracking.ActiveConfig.extension == "ConversionFinding":
+            if flags.Tracking.ActiveConfig.extension == "ConversionFinding":
                 from InDetConfig.SiSPSeededTrackFinderConfig import ITkSiSPSeededTrackFinderROIConvCfg
                 SiSPSeededTrackFinderCfg = ITkSiSPSeededTrackFinderROIConvCfg
 
@@ -72,7 +72,7 @@ def ITkTrackingSiPatternCfg(flags,
                 ActsTrkSeedingCfg)
             acc.merge(ActsTrkSeedingCfg(flags))
             
-            if flags.ITk.Tracking.ActiveConfig.extension == "ConversionFinding":
+            if flags.Tracking.ActiveConfig.extension == "ConversionFinding":
                 from AthenaCommon.Logging import logging 
                 log = logging.getLogger( 'ITkTrackingSiPattern' )
                 log.warning('ROI-based track-finding is not available yet in ACTS, so the default one is used')
@@ -107,7 +107,7 @@ def ITkTrackingSiPatternCfg(flags,
         from TrkConfig.TrkCollectionAliasAlgConfig import CopyAlgForAmbiCfg
         acc.merge(CopyAlgForAmbiCfg(
             flags,
-            "ITkCopyAlgForAmbi"+flags.ITk.Tracking.ActiveConfig.extension,
+            "ITkCopyAlgForAmbi"+flags.Tracking.ActiveConfig.extension,
             CollectionName = SiSPSeededTrackCollectionKey, # Input
             AliasName = ResolvedTrackCollectionKey))       # Output
 

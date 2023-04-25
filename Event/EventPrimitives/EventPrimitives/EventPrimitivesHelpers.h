@@ -184,26 +184,6 @@ int compare(const AmgVector(N) & m1, const AmgVector(N) & m2,
   return -1;
 }
 
-template <int N>
-bool isSymMatrix(const AmgSymMatrix(N) & m) {
-  for (int i = 0; i < N; ++i) {
-    for (int j = 0; j <= i; ++j) {
-      // check that the diagonal is filled with positive values
-      if (i == j) {
-        if (m(i, j) < 0.) {
-          return false;
-        }
-      } else {
-        // check that the off-diagonal elements are symmetric
-        if (std::abs(m(i, j) - m(j, i)) > 1e-9) {
-          return false;
-        }
-      }
-    }
-    return true;
-  }
-}
-
 }  // namespace Amg
 
 #endif

@@ -3,8 +3,8 @@
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
 def TrigFastTrackFinderMonitoring(flags):
-    name =    flags.InDet.Tracking.ActiveConfig.name
-    doResMon= flags.InDet.Tracking.ActiveConfig.doResMon
+    name =    flags.Tracking.ActiveConfig.name
+    doResMon= flags.Tracking.ActiveConfig.doResMon
     return TrigFastTrackFinderMonitoringArg(flags, name, doResMon)
 
     
@@ -216,7 +216,7 @@ from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 def TrigZFinderCfg(flags : AthConfigFlags, numberingTool) -> ComponentAccumulator:
   acc = ComponentAccumulator()
   zfargs = {}
-  if flags.InDet.Tracking.ActiveConfig.name == "beamSpot" :
+  if flags.Tracking.ActiveConfig.name == "beamSpot" :
     zfargs = {
         'TripletMode'   : 1,
         'TripletDZ'     : 1,
@@ -293,7 +293,7 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, slice_name: str, Ro
   acc.addPublicTool(
       CompFactory.TrigInDetTrackFitter(
           name = "TrigInDetTrackFitter_"+remapped_type,
-          doBremmCorrection = '2023fix' in flags.InDet.Tracking.ActiveConfig.name,
+          doBremmCorrection = '2023fix' in flags.Tracking.ActiveConfig.name,
           correctClusterPos = True,  #improved err(z0) estimates in Run 2
           ROTcreator = TrigRotCreator,
       )
@@ -315,40 +315,41 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, slice_name: str, Ro
 
     from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
     
-    ftf = CompFactory.TrigFastTrackFinder(name = name,
-                                          useNewLayerNumberScheme = useNewLayerNumberScheme,
-                                          LayerNumberTool = numberingTool,
-                                          useGPU = useGPU,
-                                          SpacePointProviderTool=spTool,
-                                          MinHits = 5, #Only process RoI with more than 5 spacepoints
-                                          Triplet_MinPtFrac = 1,
-                                          Triplet_nMaxPhiSlice = 53 if "cosmics" not in flags.InDet.Tracking.ActiveConfig.name else 2,
-                                          LRT_Mode = flags.InDet.Tracking.ActiveConfig.isLRT,
-                                          dodEdxTrk = flags.InDet.Tracking.ActiveConfig.dodEdxTrk,
-                                          doHitDV = flags.InDet.Tracking.ActiveConfig.doHitDV,
-                                          doDisappearingTrk = flags.InDet.Tracking.ActiveConfig.doDisappearingTrk,
-                                          Triplet_MaxBufferLength = 3,
-                                          doSeedRedundancyCheck = flags.InDet.Tracking.ActiveConfig.doSeedRedundancyCheck,
-                                          Triplet_D0Max         = flags.InDet.Tracking.ActiveConfig.Triplet_D0Max,
-                                          Triplet_D0_PPS_Max    = flags.InDet.Tracking.ActiveConfig.Triplet_D0_PPS_Max,
-                                          TrackInitialD0Max     = flags.InDet.Tracking.ActiveConfig.TrackInitialD0Max,
-                                          TrackZ0Max            = flags.InDet.Tracking.ActiveConfig.TrackZ0Max,
-                                          TripletDoPPS    = flags.InDet.Tracking.ActiveConfig.TripletDoPPS,
-                                          TripletDoPSS    = False,
-                                          pTmin           = flags.InDet.Tracking.ActiveConfig.pTmin,
-                                          DoubletDR_Max   = flags.InDet.Tracking.ActiveConfig.DoubletDR_Max,
-                                          SeedRadBinWidth = flags.InDet.Tracking.ActiveConfig.SeedRadBinWidth,
-                                          initialTrackMaker = TrackMaker_FTF,
-                                          trigInDetTrackFitter = theTrigInDetTrackFitter,
-                                          doZFinder = flags.InDet.Tracking.ActiveConfig.doZFinder,
-                                          TrackSummaryTool = trackSummaryTool,
-                                          doCloneRemoval = flags.InDet.Tracking.ActiveConfig.doCloneRemoval,
-                                          TracksName     = flags.InDet.Tracking.ActiveConfig.trkTracks_FTF,
-                                          doResMon = flags.InDet.Tracking.ActiveConfig.doResMon,
-                                          MonTool = TrigFastTrackFinderMonitoring(flags),
-                                          Extrapolator = acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)),
-                                          RoIs = RoIs,
-                                          )
+    ftf = CompFactory.TrigFastTrackFinder(
+        name = name,
+        useNewLayerNumberScheme = useNewLayerNumberScheme,
+        LayerNumberTool = numberingTool,
+        useGPU = useGPU,
+        SpacePointProviderTool=spTool,
+        MinHits = 5, #Only process RoI with more than 5 spacepoints
+        Triplet_MinPtFrac = 1,
+        Triplet_nMaxPhiSlice = 53 if "cosmics" not in flags.Tracking.ActiveConfig.name else 2,
+        LRT_Mode = flags.Tracking.ActiveConfig.isLRT,
+        dodEdxTrk = flags.Tracking.ActiveConfig.dodEdxTrk,
+        doHitDV = flags.Tracking.ActiveConfig.doHitDV,
+        doDisappearingTrk = flags.Tracking.ActiveConfig.doDisappearingTrk,
+        Triplet_MaxBufferLength = 3,
+        doSeedRedundancyCheck = flags.Tracking.ActiveConfig.doSeedRedundancyCheck,
+        Triplet_D0Max         = flags.Tracking.ActiveConfig.Triplet_D0Max,
+        Triplet_D0_PPS_Max    = flags.Tracking.ActiveConfig.Triplet_D0_PPS_Max,
+        TrackInitialD0Max     = flags.Tracking.ActiveConfig.TrackInitialD0Max,
+        TrackZ0Max            = flags.Tracking.ActiveConfig.TrackZ0Max,
+        TripletDoPPS    = flags.Tracking.ActiveConfig.TripletDoPPS,
+        TripletDoPSS    = False,
+        pTmin           = flags.Tracking.ActiveConfig.pTmin,
+        DoubletDR_Max   = flags.Tracking.ActiveConfig.DoubletDR_Max,
+        SeedRadBinWidth = flags.Tracking.ActiveConfig.SeedRadBinWidth,
+        initialTrackMaker = TrackMaker_FTF,
+        trigInDetTrackFitter = theTrigInDetTrackFitter,
+        doZFinder = flags.Tracking.ActiveConfig.doZFinder,
+        TrackSummaryTool = trackSummaryTool,
+        doCloneRemoval = flags.Tracking.ActiveConfig.doCloneRemoval,
+        TracksName     = flags.Tracking.ActiveConfig.trkTracks_FTF,
+        doResMon = flags.Tracking.ActiveConfig.doResMon,
+        MonTool = TrigFastTrackFinderMonitoring(flags),
+        Extrapolator = acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)),
+        RoIs = RoIs,
+    )
     
   if config.LRT_D0Min is not None:
     ftf.LRT_D0Min = config.LRT_D0Min
@@ -380,7 +381,7 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, slice_name: str, Ro
     acc.addPublicTool(InDetTrigTrackFitter)
     ftf.DisTrackFitter = InDetTrigTrackFitter
 
-  if flags.InDet.Tracking.ActiveConfig.doZFinder:
+  if flags.Tracking.ActiveConfig.doZFinder:
     ftf.doZFinderOnly = config.doZFinderOnly
     ftf.trigZFinder = theTrigZFinder
     ftf.zVertexResolution = 1

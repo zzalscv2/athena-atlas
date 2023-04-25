@@ -13,11 +13,7 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
-#include "JpsiUpsilonTools/PrimaryVertexRefitter.h"
-//#include "MuonIdHelpers/MuonIdHelperTool.h"
-//#include "IsolationTool/TrackIsolationTool.h"
 #include "RecoToolInterfaces/ITrackIsolationTool.h"
-//#include "xAODPrimitives/IsolationType.h"
 #include <vector>
 /** THE reconstruction tool
  */

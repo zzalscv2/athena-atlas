@@ -91,6 +91,7 @@ TileTopCalibAlg::finalize()
 
   for ( ; itTool != itToolEnd; ++itTool ) {
     ATH_CHECK( (*itTool)->finalizeCalculations() );
+    m_rootFile->cd();
     ATH_CHECK((*itTool)->writeNtuple(m_runNumber,m_runType,m_rootFile) );
   }
 

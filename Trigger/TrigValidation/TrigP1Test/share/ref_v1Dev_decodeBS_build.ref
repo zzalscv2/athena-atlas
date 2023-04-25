@@ -6008,6 +6008,18 @@ HLT_g50_tight_xe40_cell_xe50_pfopufit_80mTAC_L1EM22VHI:
     0: 1
   stepFeatures:
     0: 1
+HLT_g50_tight_xe40_cell_xe50_pfopufit_80mTAC_L1eEM26M:
+  eventCount: 0
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 1
+HLT_g50_tight_xe40_cell_xe50_pfopufit_80mTAC_L1eEM28M:
+  eventCount: 0
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 1
 HLT_g50_tight_xe40_cell_xe50_pfopufit_xe60_nn_80mTAC_L1EM22VHI:
   eventCount: 0
   stepCounts:
@@ -6032,7 +6044,31 @@ HLT_g50_tight_xe40_cell_xe60_pfopufit_80mTAC_L1EM22VHI:
     0: 1
   stepFeatures:
     0: 1
+HLT_g50_tight_xe40_cell_xe60_pfopufit_80mTAC_L1eEM26M:
+  eventCount: 0
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 1
+HLT_g50_tight_xe40_cell_xe60_pfopufit_80mTAC_L1eEM28M:
+  eventCount: 0
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 1
 HLT_g50_tight_xe40_cell_xe70_pfopufit_80mTAC_L1EM22VHI:
+  eventCount: 0
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 1
+HLT_g50_tight_xe40_cell_xe70_pfopufit_80mTAC_L1eEM26M:
+  eventCount: 0
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 1
+HLT_g50_tight_xe40_cell_xe70_pfopufit_80mTAC_L1eEM28M:
   eventCount: 0
   stepCounts:
     0: 1
@@ -8538,6 +8574,8 @@ HLT_mu24_ivarmedium_tau80_mediumRNN_tracktwoMVA_probe_03dRAB_L1MU14FCH:
 HLT_mu24_ivarmedium_tau80_mediumRNN_tracktwoMVA_probe_03dRAB_L1MU18VFCH:
   eventCount: 0
 HLT_mu24_ivarmedium_tau80_mediumRNN_tracktwoMVA_probe_L1eTAU80_03dRAB_L1MU14FCH:
+  eventCount: 0
+HLT_mu24_ivarmedium_tau80_mediumRNN_tracktwoMVA_probe_L1eTAU80_03dRAB_L1MU18VFCH:
   eventCount: 0
 HLT_mu24_ivarmedium_xe0_cell_L1MU14FCH:
   eventCount: 0

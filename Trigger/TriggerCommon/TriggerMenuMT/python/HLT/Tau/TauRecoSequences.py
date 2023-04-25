@@ -59,46 +59,49 @@ def tauCaloRoiUpdaterCfg(flags, inputRoIs, clusters):
 @AccumulatorCache
 def tauTrackRoiUpdaterCfg(inflags, inputRoIs, tracks):
     acc = ComponentAccumulator()
-    flags = inflags.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking.tauIso")
-    alg                               = CompFactory.TrigTauTrackRoiUpdater("TrackRoiUpdater",
-                                        etaHalfWidth                  = flags.InDet.Tracking.ActiveConfig.etaHalfWidth,
-                                        phiHalfWidth                  = flags.InDet.Tracking.ActiveConfig.phiHalfWidth,
-                                        z0HalfWidth                   = flags.InDet.Tracking.ActiveConfig.zedHalfWidth,
-                                        RoIInputKey                   = inputRoIs,
-                                        RoIOutputKey                  = "UpdatedTrackRoI",
-                                        fastTracksKey                 = tracks,
-                                        Key_trigTauJetInputContainer  = "" )
+    flags = inflags.cloneAndReplace("Tracking.ActiveConfig", "Trigger.InDetTracking.tauIso")
+    alg                               = CompFactory.TrigTauTrackRoiUpdater(
+        "TrackRoiUpdater",
+        etaHalfWidth                  = flags.Tracking.ActiveConfig.etaHalfWidth,
+        phiHalfWidth                  = flags.Tracking.ActiveConfig.phiHalfWidth,
+        z0HalfWidth                   = flags.Tracking.ActiveConfig.zedHalfWidth,
+        RoIInputKey                   = inputRoIs,
+        RoIOutputKey                  = "UpdatedTrackRoI",
+        fastTracksKey                 = tracks,
+        Key_trigTauJetInputContainer  = "" )
     acc.addEventAlgo(alg)
     return acc
 
 @AccumulatorCache
 def tauTrackBDTRoiUpdaterCfg(inflags, inputRoIs, tracks):
     acc                               = ComponentAccumulator()
-    flags = inflags.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking.tauIso")
-    alg                               = CompFactory.TrigTauTrackRoiUpdater("TrackRoiUpdaterBDT",
-                                        etaHalfWidth                  = flags.InDet.Tracking.ActiveConfig.etaHalfWidth,
-                                        phiHalfWidth                  = flags.InDet.Tracking.ActiveConfig.phiHalfWidth,
-                                        z0HalfWidth                   = flags.InDet.Tracking.ActiveConfig.zedHalfWidth,
-                                        RoIInputKey                   = inputRoIs,
-                                        RoIOutputKey                  = "UpdatedTrackBDTRoI",
-                                        fastTracksKey                 = tracks,
-                                        BDTweights                    = f"{flags.Trigger.Offline.Tau.tauRecToolsCVMFSPath}/{flags.Trigger.Offline.Tau.FTFTauCoreBDTConfig}",
-                                        Key_trigTauJetInputContainer  = "HLT_TrigTauRecMerged_CaloMVAOnly" )
+    flags = inflags.cloneAndReplace("Tracking.ActiveConfig", "Trigger.InDetTracking.tauIso")
+    alg                               = CompFactory.TrigTauTrackRoiUpdater(
+        "TrackRoiUpdaterBDT",
+        etaHalfWidth                  = flags.Tracking.ActiveConfig.etaHalfWidth,
+        phiHalfWidth                  = flags.Tracking.ActiveConfig.phiHalfWidth,
+        z0HalfWidth                   = flags.Tracking.ActiveConfig.zedHalfWidth,
+        RoIInputKey                   = inputRoIs,
+        RoIOutputKey                  = "UpdatedTrackBDTRoI",
+        fastTracksKey                 = tracks,
+        BDTweights                    = f"{flags.Trigger.Offline.Tau.tauRecToolsCVMFSPath}/{flags.Trigger.Offline.Tau.FTFTauCoreBDTConfig}",
+        Key_trigTauJetInputContainer  = "HLT_TrigTauRecMerged_CaloMVAOnly" )
     acc.addEventAlgo(alg)
     return acc
 
 @AccumulatorCache
 def tauLRTRoiUpdaterCfg(inflags, inputRoIs, tracks):
     acc                               = ComponentAccumulator()
-    flags = inflags.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking.tauLRT")
-    alg                               = CompFactory.TrigTauTrackRoiUpdater("TrackRoiUpdaterLRT",
-                                        etaHalfWidth                  = flags.InDet.Tracking.ActiveConfig.etaHalfWidth,
-                                        phiHalfWidth                  = flags.InDet.Tracking.ActiveConfig.phiHalfWidth,
-                                        z0HalfWidth                   = flags.InDet.Tracking.ActiveConfig.zedHalfWidth,
-                                        RoIInputKey                   = inputRoIs,
-                                        RoIOutputKey                  = "UpdatedTrackLRTRoI",
-                                        fastTracksKey                 = tracks,
-                                        Key_trigTauJetInputContainer  = "" )
+    flags = inflags.cloneAndReplace("Tracking.ActiveConfig", "Trigger.InDetTracking.tauLRT")
+    alg                               = CompFactory.TrigTauTrackRoiUpdater(
+        "TrackRoiUpdaterLRT",
+        etaHalfWidth                  = flags.Tracking.ActiveConfig.etaHalfWidth,
+        phiHalfWidth                  = flags.Tracking.ActiveConfig.phiHalfWidth,
+        z0HalfWidth                   = flags.Tracking.ActiveConfig.zedHalfWidth,
+        RoIInputKey                   = inputRoIs,
+        RoIOutputKey                  = "UpdatedTrackLRTRoI",
+        fastTracksKey                 = tracks,
+        Key_trigTauJetInputContainer  = "" )
     acc.addEventAlgo(alg)
     return acc
 
@@ -158,7 +161,7 @@ def tauIdSequence(flags, RoIs, name):
 
     tauIdSequence+= ViewVerifyId
 
-    newflags = flags.cloneAndReplace("InDet.Tracking.ActiveConfig","Trigger.InDetTracking."+IDTrigConfig.name)
+    newflags = flags.cloneAndReplace("Tracking.ActiveConfig","Trigger.InDetTracking."+IDTrigConfig.name)
 
     from TrigTauRec.TrigTauRecConfig import trigTauRecMergedPrecisionMVACfg
     tauPrecisionAlg = algorithmCAToGlobalWrapper(trigTauRecMergedPrecisionMVACfg, newflags, name, inputRoIs = RoIs, tracks = IDTrigConfig.tracks_IDTrig())[0]

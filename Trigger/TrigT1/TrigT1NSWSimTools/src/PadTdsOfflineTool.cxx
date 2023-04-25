@@ -106,7 +106,7 @@ namespace NSWL1 {
     {
         double localPosX(d.second.firstEntry()), localPosY(d.second.secondEntry());
         Amg::Vector2D localPos(localPosX, localPosY);
-        Amg::Vector3D globalPos;
+        Amg::Vector3D globalPos{Amg::Vector3D::Zero()};
         s.localToGlobal(localPos, globalPos, globalPos);
         return globalPos;
     }
@@ -120,8 +120,8 @@ namespace NSWL1 {
                 const MuonGM::sTgcReadoutElement* rdoEl = m_detManager->getsTgcReadoutElement(Id);
                 const Trk::PlaneSurface &surface = rdoEl->surface(Id);
                 // gathers the readout element associated to this PAD + the PAD Local/Global psoition
-                Amg::Vector2D pad_lpos;
-                Amg::Vector3D pad_gpos;
+                Amg::Vector2D pad_lpos{Amg::Vector2D::Zero()};
+                Amg::Vector3D pad_gpos{Amg::Vector3D::Zero()};
                 rdoEl->stripPosition(Id,pad_lpos); // shouldn't this be padPosition? DG 2014-01-17
                 surface.localToGlobal(pad_lpos, pad_gpos, pad_gpos);
                 ATH_MSG_DEBUG("Pad at GposX " << pad_gpos.x() << " GposY " << pad_gpos.y() << " GposZ " << pad_gpos.z()
@@ -135,13 +135,13 @@ namespace NSWL1 {
                 }
 
                 // Fill Pad Corners
-                std::vector<Amg::Vector2D> local_pad_corners;
+                std::array<Amg::Vector2D, 4> local_pad_corners{make_array<Amg::Vector2D, 4>(Amg::Vector2D::Zero())};
                 rdoEl->padCorners(Id,local_pad_corners);
                 std::vector<Amg::Vector3D> global_pad_corners;
                 for(const auto& local_corner : local_pad_corners) {
-                Amg::Vector3D global_corner;
-                surface.localToGlobal(local_corner, global_corner, global_corner);
-                global_pad_corners.push_back(global_corner);
+                    Amg::Vector3D global_corner{Amg::Vector3D::Zero()};
+                    surface.localToGlobal(local_corner, global_corner, global_corner);
+                    global_pad_corners.push_back(global_corner);
                 }
                 m_validation_tree->fill_hit_global_corner_pos(global_pad_corners);
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DBM_Det.h"
@@ -18,8 +18,10 @@
 
 DBM_Det::DBM_Det(InDetDD::PixelDetectorManager* ddmgr
                  , PixelGeometryManager* mgr
-		 , GeoModelIO::ReadGeoModel* sqliteReader)
-  : GeoVPixelFactory(ddmgr,mgr,sqliteReader)
+		 , GeoModelIO::ReadGeoModel* sqliteReader
+                 , std::shared_ptr<std::map<std::string, GeoFullPhysVol*>> mapFPV
+                 , std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX)
+  : GeoVPixelFactory(ddmgr,mgr,sqliteReader, mapFPV, mapAX)
 {
   double Trans_Y = 0.;
   
@@ -51,7 +53,7 @@ GeoVPhysVol* DBM_Det::Build()
     Phys = new GeoFullPhysVol(Log);
     
     // add PP0 board
-    DBM_PP0 pp0Board (m_DDmgr, m_gmt_mgr, m_sqliteReader);
+    DBM_PP0 pp0Board (m_DDmgr, m_gmt_mgr, m_sqliteReader, m_mapFPV, m_mapAX);
     GeoVPhysVol* pp0BoardPhys = pp0Board.Build();
     GeoTrf::Translate3D pp0Pos(0., 0., -halflength + m_gmt_mgr->DBMPP0Thick()/2. + safety);
     GeoTransform* pp0xform = new GeoTransform(pp0Pos);
@@ -62,7 +64,7 @@ GeoVPhysVol* DBM_Det::Build()
   }
 
   //we are now adding four DBM telescopes
-  DBM_Telescope dbm (m_DDmgr, m_gmt_mgr, m_sqliteReader);
+  DBM_Telescope dbm (m_DDmgr, m_gmt_mgr, m_sqliteReader, m_mapFPV, m_mapAX);
   for(int i=0; i<4; i++)
     {
       m_gmt_mgr->SetEta(0);
@@ -109,9 +111,8 @@ GeoVPhysVol* DBM_Det::Build()
   }
 
   if(m_sqliteReader) {
-    std::map<std::string, GeoFullPhysVol*> mapFPV = m_sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("Pixel");
     std::string key="DBM_Det_"+std::to_string(m_gmt_mgr->GetLD())+"_"+std::to_string(m_gmt_mgr->Phi())+"_"+std::to_string(m_gmt_mgr->Eta());
-    return mapFPV[key];
+    return (*m_mapFPV)[key];
   }
   else {
     return Phys;

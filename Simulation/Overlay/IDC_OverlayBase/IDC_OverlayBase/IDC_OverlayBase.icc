@@ -1,33 +1,40 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
+/// @author Christos Anastopoulos DataPool strategy
 /// @author Andrei Gaponenko <agaponenko@lbl.gov>, 2006-2009
 
 #include <Identifier/Identifier.h>
 #include <Identifier/IdentifierHash.h>
 
+#include "AthContainers/OwnershipPolicy.h"
+
 #include "IDC_OverlayCommon.h"
 
-
-template <class IDC_Container>
-StatusCode IDC_OverlayBase::overlayContainer(const IDC_Container *bkgContainer,
-                                             const IDC_Container *signalContainer,
-                                             IDC_Container *outputContainer) const
+template <bool usePool, typename Type, typename IDC_Container>
+StatusCode IDC_OverlayBase::overlayContainerImpl(
+    const IDC_Container *bkgContainer,
+    const IDC_Container *signalContainer,
+    IDC_Container *outputContainer,
+    DataPool<Type> *dataItems) const
 {
+
   ATH_MSG_DEBUG("overlayContainer<>() begin");
-
   typedef typename IDC_Container::base_value_type Collection;
-
 
   // There are some use cases where background is empty
   if (!bkgContainer) {
     // Only loop through the signal collections and copy them over
     for (const auto &[hashId, ptr] : signalContainer->GetAllHashPtrPair()) {
       // Copy the signal collection
-      std::unique_ptr<Collection> signalCollection = Overlay::copyCollection(hashId, ptr);
-
+      std::unique_ptr<Collection> signalCollection = nullptr;
+      if constexpr (usePool){
+        signalCollection = Overlay::copyCollection(hashId, ptr, *dataItems);
+      } else {
+        signalCollection = Overlay::copyCollection(hashId, ptr);
+      }
       if (outputContainer->addCollection(signalCollection.get(), hashId).isFailure()) {
         ATH_MSG_ERROR("Adding signal Collection with hashId " << hashId << " failed");
         return StatusCode::FAILURE;
@@ -39,7 +46,7 @@ StatusCode IDC_OverlayBase::overlayContainer(const IDC_Container *bkgContainer,
     return StatusCode::SUCCESS;
   }
 
-  
+
   // The MC signal container should typically be smaller than bkgContainer,
   // because the latter contains all the noise, minimum bias and pile up.
   // Thus we firstly iterate over signal hashes and store them in a map.
@@ -55,8 +62,12 @@ StatusCode IDC_OverlayBase::overlayContainer(const IDC_Container *bkgContainer,
        [](const std::pair<IdentifierHash, bool> &lhs,  IdentifierHash rhs) -> bool { return lhs.first < rhs; } );
     if (search == overlapMap.end() || search->first != hashId) {
       // Copy the background collection
-      std::unique_ptr<Collection> bkgCollection = Overlay::copyCollection(hashId, ptr);
-
+      std::unique_ptr<Collection> bkgCollection = nullptr;
+      if constexpr (usePool) {
+        bkgCollection = Overlay::copyCollection(hashId, ptr, *dataItems);
+      } else {
+        bkgCollection = Overlay::copyCollection(hashId, ptr);
+      }
       if (outputContainer->addCollection(bkgCollection.get(), hashId).isFailure()) {
         ATH_MSG_ERROR("Adding background Collection with hashId " << hashId << " failed");
         return StatusCode::FAILURE;
@@ -73,18 +84,37 @@ StatusCode IDC_OverlayBase::overlayContainer(const IDC_Container *bkgContainer,
   // necessary
   for (const auto &[hashId, overlap] : overlapMap) {
     // Copy the signal collection
-    std::unique_ptr<Collection> signalCollection = Overlay::copyCollection(hashId, signalContainer->indexFindPtr(hashId));
+    std::unique_ptr<Collection> signalCollection = nullptr;
+    if constexpr (usePool) {
+      signalCollection = Overlay::copyCollection(
+          hashId, signalContainer->indexFindPtr(hashId), *dataItems);
+    } else {
+      signalCollection = Overlay::copyCollection(
+          hashId, signalContainer->indexFindPtr(hashId));
+    }
 
     if (overlap) { // Do overlay
       // Create the output collection, only works for Inner Detector
       auto outputCollection = std::make_unique<Collection>(hashId);
       outputCollection->setIdentifier(signalCollection->identify());
+      if constexpr (usePool) {
+        // if we use pool the output is also to go to the pool
+        outputCollection->clear(SG::VIEW_ELEMENTS);
+      }
       // Copy the background collection
-      std::unique_ptr<Collection> bkgCollection = Overlay::copyCollection(hashId, bkgContainer->indexFindPtr(hashId));
-
       // Merge collections
-      Overlay::mergeCollections(bkgCollection.get(), signalCollection.get(), outputCollection.get(), this);
-
+      std::unique_ptr<Collection> bkgCollection = nullptr;
+      if constexpr (usePool) {
+        bkgCollection = Overlay::copyCollection(
+            hashId, bkgContainer->indexFindPtr(hashId), *dataItems);
+        Overlay::mergeCollections(bkgCollection.get(), signalCollection.get(),
+                                  outputCollection.get(), this, *dataItems);
+      } else {
+        bkgCollection =
+            Overlay::copyCollection(hashId, bkgContainer->indexFindPtr(hashId));
+        Overlay::mergeCollections(bkgCollection.get(), signalCollection.get(),
+                                  outputCollection.get(), this);
+      }
       if (outputContainer->addCollection(outputCollection.get(), hashId).isFailure()) {
         ATH_MSG_ERROR("Adding overlaid Collection with hashId " << hashId << " failed");
         return StatusCode::FAILURE;
@@ -100,6 +130,23 @@ StatusCode IDC_OverlayBase::overlayContainer(const IDC_Container *bkgContainer,
       }
     }
   }
-
   return StatusCode::SUCCESS;
+}
+
+template <typename IDC_Container>
+StatusCode IDC_OverlayBase::overlayContainer(const IDC_Container *bkgContainer,
+                                             const IDC_Container *signalContainer,
+                                             IDC_Container *outputContainer) const
+{
+  return overlayContainerImpl<false, void>(
+      bkgContainer, signalContainer, outputContainer, nullptr);
+}
+
+template <typename IDC_Container, typename Type>
+StatusCode IDC_OverlayBase::overlayContainer(const IDC_Container *bkgContainer,
+                                             const IDC_Container *signalContainer,
+                                             IDC_Container *outputContainer,
+                                             DataPool<Type>& dataItems) const
+{
+ return overlayContainerImpl<true>(bkgContainer,signalContainer,outputContainer,&dataItems);
 }

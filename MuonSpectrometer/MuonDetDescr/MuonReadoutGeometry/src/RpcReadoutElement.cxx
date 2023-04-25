@@ -37,18 +37,17 @@ namespace {
 
 namespace MuonGM {
 
-    RpcReadoutElement::RpcReadoutElement(GeoVFullPhysVol* pv, const std::string& stName, int zi, int fi, bool is_mirrored,
+    RpcReadoutElement::RpcReadoutElement(GeoVFullPhysVol* pv, const std::string& stName, int zi, int /*fi*/, bool is_mirrored,
                                          MuonDetectorManager* mgr) :
-        MuonClusterReadoutElement(pv, stName, zi, fi, is_mirrored, mgr) {
+        MuonClusterReadoutElement(pv, mgr, Trk::DetectorElemType::Rpc),
+        m_mirrored{is_mirrored}  {
         std::string gVersion = manager()->geometryVersion();
 
         // get the setting of the caching flag from the manager
         setCachingFlag(mgr->cachingFlag());
 
-        m_dbR = m_dbZ = m_dbPhi = 0;
-
-        m_descratzneg = false;
-        if (zi < 0 && !is_mirrored) m_descratzneg = true;
+        m_descratzneg = (zi < 0 && !is_mirrored);
+       
 
         setStationName(stName);
 
@@ -632,7 +631,7 @@ namespace MuonGM {
         Amg::Translation3D xfp(gasgapP.x(), gasgapP.y(), gasgapP.z());
         Amg::Transform3D trans = absTransform();
         if (rotatedGasGap(id))
-            return trans * xfp * Amg::AngleAxis3D(180. * CLHEP::deg, Amg::Vector3D(0., 1., 0.));
+            return trans * xfp * Amg::AngleAxis3D(180. * CLHEP::deg, Amg::Vector3D::UnitY());
         else
             return trans * xfp;
     }
@@ -640,7 +639,7 @@ namespace MuonGM {
         const Amg::Vector3D locP = localStripPanelPos(dbZ, dbPhi, gasGap);
         const Amg::Translation3D xfp(locP.x(), locP.y(), locP.z());
         if (rotatedGasGap(gasGap))
-            return absTransform() * xfp * Amg::AngleAxis3D(180. * CLHEP::deg, Amg::Vector3D(0., 1., 0.));
+            return absTransform() * xfp * Amg::AngleAxis3D(180. * CLHEP::deg, Amg::Vector3D::UnitY());
         else
             return absTransform() * xfp;
     }
@@ -648,32 +647,13 @@ namespace MuonGM {
         const Amg::Vector3D gasgapP = localGasGapPos(dbZ, dbPhi, gasGap);
         const Amg::Translation3D xfp(gasgapP.x(), gasgapP.y(), gasgapP.z());
         if (rotatedGasGap(gasGap))
-            return absTransform() * xfp * Amg::AngleAxis3D(180. * CLHEP::deg, Amg::Vector3D(0., 1., 0.));
+            return absTransform() * xfp * Amg::AngleAxis3D(180. * CLHEP::deg, Amg::Vector3D::UnitY());
         else
             return absTransform() * xfp;
     }
     Amg::Transform3D RpcReadoutElement::globalToLocalTransf(const Identifier& id) const { return localToGlobalTransf(id).inverse(); }
     Amg::Vector3D RpcReadoutElement::globalToLocalCoords(const Amg::Vector3D& x, Identifier id) const {
         return globalToLocalTransf(id) * x;
-    }
-
-    void RpcReadoutElement::setIdentifier(const Identifier& id) {
-        m_id = id;
-        const RpcIdHelper* idh = manager()->rpcIdHelper();
-        IdentifierHash collIdhash;
-        IdentifierHash detIdhash;
-        // set parent data collection hash id
-        if (idh->get_module_hash(id, collIdhash) != 0) {
-            MsgStream log(Athena::getMessageSvc(), "RpcReadoutElement");
-            log << MSG::WARNING << "setIdentifier -- collection hash Id NOT computed for id = " << idh->show_to_string(id) << endmsg;
-        }
-        m_idhash = collIdhash;
-        // set RE hash id
-        if (idh->get_detectorElement_hash(id, detIdhash) != 0) {
-            MsgStream log(Athena::getMessageSvc(), "RpcReadoutElement");
-            log << MSG::WARNING << "setIdentifier -- detectorElement hash Id NOT computed for id = " << idh->show_to_string(id) << endmsg;
-        }
-        m_detectorElIdhash = detIdhash;
     }
 
     double RpcReadoutElement::distanceToPhiReadout(const Amg::Vector3D& P, const Identifier& id) const {
@@ -888,14 +868,14 @@ namespace MuonGM {
                 const Amg::Vector3D locP = localStripPanelPos(getDoubletZ(), dbPhi, gasGap);
                 const Amg::Translation3D xfp(locP.x(), locP.y(), locP.z());
                 Amg::Transform3D trans3D = rotatedGasGap(gasGap)
-                                               ? absTransform() * xfp * Amg::AngleAxis3D(180. * CLHEP::deg, Amg::Vector3D(0., 1., 0.))
+                                               ? absTransform() * xfp * Amg::AngleAxis3D(180. * CLHEP::deg, Amg::Vector3D::UnitY())
                                                : absTransform() * xfp;
 
                 // surface()
                 bool hasSpecialRot = (rotatedGasGap(gasGap) && (!rotatedRpcModule())) || (!rotatedGasGap(gasGap) && (rotatedRpcModule()));
                 Amg::RotationMatrix3D muonTRotation(trans3D.rotation());
-                if (isMirrored()) muonTRotation = muonTRotation * Amg::AngleAxis3D(180. * CLHEP::deg, Amg::Vector3D(1., 0., 0.));
-                if (hasSpecialRot) muonTRotation = muonTRotation * Amg::AngleAxis3D(180. * CLHEP::deg, Amg::Vector3D(0., 1., 0.));
+                if (isMirrored()) muonTRotation = muonTRotation * Amg::AngleAxis3D(180. * CLHEP::deg, Amg::Vector3D::UnitX());
+                if (hasSpecialRot) muonTRotation = muonTRotation * Amg::AngleAxis3D(180. * CLHEP::deg, Amg::Vector3D::UnitY());
 
                 Amg::RotationMatrix3D surfaceTRotation;
                 surfaceTRotation.col(0) = muonTRotation.col(1);
@@ -906,16 +886,16 @@ namespace MuonGM {
                     Identifier id = idh->channelID(parentID, getDoubletZ(), dbPhi, gasGap, measphi  , 1);
 
                     Amg::Transform3D trans(surfaceTRotation);
-                    if (measphi   == 0) trans *= Amg::AngleAxis3D(M_PI / 2., Amg::Vector3D(0., 0., 1.));
+                    if (measphi   == 0) trans *= Amg::AngleAxis3D(M_PI / 2., Amg::Vector3D::UnitZ());
                     trans.pretranslate(trans3D.translation());
 
                     m_surfaceData->m_layerTransforms.push_back(trans);
                     m_surfaceData->m_layerSurfaces.emplace_back(std::make_unique<Trk::PlaneSurface>(*this, id));
 
                     if (measphi) {
-                        m_surfaceData->m_layerCenters.push_back(m_surfaceData->m_layerTransforms.back() * Amg::Vector3D(0., 0., 0.));
+                        m_surfaceData->m_layerCenters.push_back(m_surfaceData->m_layerTransforms.back() * Amg::Vector3D::Zero());
                         m_surfaceData->m_layerNormals.push_back(m_surfaceData->m_layerTransforms.back().linear() *
-                                                                Amg::Vector3D(0., 0., 1.));
+                                                                Amg::Vector3D::UnitZ());
                     }
                 }
             }

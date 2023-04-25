@@ -25,14 +25,14 @@ def SiDetElementsRoadMaker_xkCfg(flags, name="InDetSiRoadMaker", **kwargs) :
     acc.addPublicTool(InDetPatternPropagator)
     kwargs.setdefault("PropagatorTool", InDetPatternPropagator)
 
-    kwargs.setdefault("usePixel", flags.InDet.Tracking.ActiveConfig.usePixel )
+    kwargs.setdefault("usePixel", flags.Tracking.ActiveConfig.usePixel )
     kwargs.setdefault("PixManagerLocation", 'Pixel')
-    kwargs.setdefault("useSCT", flags.InDet.Tracking.ActiveConfig.useSCT)
+    kwargs.setdefault("useSCT", flags.Tracking.ActiveConfig.useSCT)
     kwargs.setdefault("SCTManagerLocation", 'SCT')
-    kwargs.setdefault("RoadWidth", flags.InDet.Tracking.ActiveConfig.roadWidth)
+    kwargs.setdefault("RoadWidth", flags.Tracking.ActiveConfig.roadWidth)
 
-    InDetSiDetElementsRoadMaker = CompFactory.InDet.SiDetElementsRoadMaker_xk(name = name+flags.InDet.Tracking.ActiveConfig.extension, **kwargs)
-    acc.setPrivateTools(InDetSiDetElementsRoadMaker)
+    acc.setPrivateTools(CompFactory.InDet.SiDetElementsRoadMaker_xk(
+        name+flags.Tracking.ActiveConfig.extension, **kwargs))
     return acc
 
 def SiDetElementsRoadMaker_xk_TRT_Cfg(flags, name = 'InDetTRT_SeededSiRoad', **kwargs):
@@ -65,13 +65,13 @@ def ITkSiDetElementsRoadMaker_xkCfg(flags, name="ITkSiRoadMaker", **kwargs) :
     acc.addPublicTool(ITkPatternPropagator)
     kwargs.setdefault("PropagatorTool", ITkPatternPropagator)
 
-    kwargs.setdefault("usePixel", flags.ITk.Tracking.ActiveConfig.useITkPixel )
+    kwargs.setdefault("usePixel", flags.Tracking.ActiveConfig.useITkPixel )
     kwargs.setdefault("PixManagerLocation", 'ITkPixel')
-    kwargs.setdefault("useSCT", flags.ITk.Tracking.ActiveConfig.useITkStrip)
+    kwargs.setdefault("useSCT", flags.Tracking.ActiveConfig.useITkStrip)
     kwargs.setdefault("SCTManagerLocation", 'ITkStrip')
-    kwargs.setdefault("RoadWidth", flags.ITk.Tracking.ActiveConfig.roadWidth)
+    kwargs.setdefault("RoadWidth", flags.Tracking.ActiveConfig.roadWidth)
 
-    ITkSiDetElementsRoadMaker = CompFactory.InDet.SiDetElementsRoadMaker_xk(name = name+flags.ITk.Tracking.ActiveConfig.extension, **kwargs)
-    acc.setPrivateTools(ITkSiDetElementsRoadMaker)
+    acc.setPrivateTools(CompFactory.InDet.SiDetElementsRoadMaker_xk(
+        name+flags.Tracking.ActiveConfig.extension, **kwargs))
     return acc
 

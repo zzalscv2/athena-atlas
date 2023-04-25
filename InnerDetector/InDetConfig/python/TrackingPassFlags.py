@@ -681,7 +681,8 @@ def createLowPtTrackingPassFlags():
     icf.extension        = "LowPt"
     icf.usePrdAssociationTool = True
     icf.isLowPt          = True
-    icf.maxPT = lambda pcf: (1e6 if pcf.Tracking.doMinBias else pcf.InDet.Tracking.MainPass.minPT + 0.3) * Units.GeV
+    icf.maxPT = lambda pcf: (1e6 if pcf.Tracking.doMinBias else
+                             pcf.Tracking.MainPass.minPT + 0.3) * Units.GeV
     icf.minPT            = 0.050 * Units.GeV
     icf.minClusters      = 5
     icf.minSiNotShared   = 4
@@ -740,7 +741,8 @@ def createVeryLowPtTrackingPassFlags():
     icf.usePrdAssociationTool = True
     icf.isLowPt          = True
     icf.useTRTExtension  = False
-    icf.maxPT            = lambda pcf : (1e6 if pcf.Tracking.doMinBias  else  pcf.InDet.Tracking.MainPass.minPT + 0.3) * Units.GeV # some overlap
+    icf.maxPT            = lambda pcf : (1e6 if pcf.Tracking.doMinBias else 
+                                         pcf.Tracking.MainPass.minPT + 0.3) * Units.GeV # some overlap
     icf.minPT            = 0.050 * Units.GeV
     icf.minClusters      = 3
     icf.minSiNotShared   = 3
@@ -1095,19 +1097,19 @@ if __name__ == "__main__":
   from AthenaCommon.Constants import INFO
   l.setLevel(INFO)
 
-  flags = flags.cloneAndReplace("InDet.Tracking.ActiveConfig","InDet.Tracking.MainPass")
+  flags = flags.cloneAndReplace("Tracking.ActiveConfig","Tracking.MainPass")
 
   assert flags.Tracking.cutLevel == 19 , "default cut level is wrong"
-  assert flags.InDet.Tracking.ActiveConfig.minRoIClusterEt == 6000.0 * Units.MeV, "wrong cut value {} ".format(flags.InDet.Tracking.ActiveConfig.minRoIClusterEt)
+  assert flags.Tracking.ActiveConfig.minRoIClusterEt == 6000.0 * Units.MeV, "wrong cut value {} ".format(flags.Tracking.ActiveConfig.minRoIClusterEt)
   flags.Tracking.cutLevel = 2
-  assert flags.InDet.Tracking.ActiveConfig.minRoIClusterEt == 0.0, "wrong cut value {} ".format(flags.InDet.Tracking.ActiveConfig.minRoIClusterEt)
-  assert flags.InDet.Tracking.BeamGasPass.minRoIClusterEt == 0.0, "wrong cut value {}, not following cutLevel setting ".format(flags.InDet.Tracking.BeamGasPass.minRoIClusterEt)
+  assert flags.Tracking.ActiveConfig.minRoIClusterEt == 0.0, "wrong cut value {} ".format(flags.Tracking.ActiveConfig.minRoIClusterEt)
+  assert flags.Tracking.BeamGasPass.minRoIClusterEt == 0.0, "wrong cut value {}, not following cutLevel setting ".format(flags.Tracking.BeamGasPass.minRoIClusterEt)
 
-  assert flags.InDet.Tracking.HeavyIonPass.minSiNotShared == 7, "wrong cut value, overwrite"
-  assert flags.InDet.Tracking.HeavyIonPass.minRoIClusterEt == 0.0, "wrong cut value, overwrite"
+  assert flags.Tracking.HeavyIonPass.minSiNotShared == 7, "wrong cut value, overwrite"
+  assert flags.Tracking.HeavyIonPass.minRoIClusterEt == 0.0, "wrong cut value, overwrite"
 
-  l.info("flags.InDet.Tracking.ActiveConfig.minSecondaryPt %f", flags.InDet.Tracking.ActiveConfig.minSecondaryPt * 1.0)
-  l.info("type(flags.InDet.Tracking.ActiveConfig.minSecondaryPt) " + str(type(flags.InDet.Tracking.ActiveConfig.minSecondaryPt)))
+  l.info("flags.Tracking.ActiveConfig.minSecondaryPt %f", flags.Tracking.ActiveConfig.minSecondaryPt * 1.0)
+  l.info("type(flags.Tracking.ActiveConfig.minSecondaryPt) " + str(type(flags.Tracking.ActiveConfig.minSecondaryPt)))
 
 
 

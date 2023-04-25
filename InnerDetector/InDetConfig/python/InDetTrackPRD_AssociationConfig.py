@@ -10,13 +10,18 @@ def InDetTrackPRD_AssociationCfg(flags, name='InDetTrackPRD_Association', **kwar
         raise Exception('Not TracksName argument provided')
 
     if 'AssociationTool' not in kwargs:
-        from InDetConfig.InDetAssociationToolsConfig import InDetPRDtoTrackMapToolGangedPixelsCfg
-        kwargs.setdefault("AssociationTool", acc.popToolsAndMerge(InDetPRDtoTrackMapToolGangedPixelsCfg(flags)))
+        from InDetConfig.InDetAssociationToolsConfig import (
+            InDetPRDtoTrackMapToolGangedPixelsCfg)
+        kwargs.setdefault("AssociationTool", acc.popToolsAndMerge(
+            InDetPRDtoTrackMapToolGangedPixelsCfg(flags)))
 
     if "AssociationMapName" not in kwargs:
-        kwargs.setdefault("AssociationMapName", "InDetPRDtoTrackMap" + flags.InDet.Tracking.ActiveConfig.extension)
+        kwargs.setdefault("AssociationMapName",
+                          "InDetPRDtoTrackMap" +
+                          flags.Tracking.ActiveConfig.extension)
 
-    acc.addEventAlgo(CompFactory.InDet.InDetTrackPRD_Association(name, **kwargs))
+    acc.addEventAlgo(
+        CompFactory.InDet.InDetTrackPRD_Association(name, **kwargs))
     return acc
 
 def ITkTrackPRD_AssociationCfg(flags, name='ITkTrackPRD_Association', **kwargs):
@@ -26,9 +31,14 @@ def ITkTrackPRD_AssociationCfg(flags, name='ITkTrackPRD_Association', **kwargs):
         raise Exception('Not TracksName argument provided')
 
     if 'AssociationTool' not in kwargs:
-        from InDetConfig.InDetAssociationToolsConfig import ITkPRDtoTrackMapToolGangedPixelsCfg
-        kwargs.setdefault("AssociationTool", acc.popToolsAndMerge(ITkPRDtoTrackMapToolGangedPixelsCfg(flags)))
+        from InDetConfig.InDetAssociationToolsConfig import (
+            ITkPRDtoTrackMapToolGangedPixelsCfg)
+        kwargs.setdefault("AssociationTool", acc.popToolsAndMerge(
+            ITkPRDtoTrackMapToolGangedPixelsCfg(flags)))
 
-    kwargs.setdefault("AssociationMapName", 'ITkPRDtoTrackMap' + flags.ITk.Tracking.ActiveConfig.extension)
-    acc.addEventAlgo(CompFactory.InDet.InDetTrackPRD_Association(name, **kwargs))
+    kwargs.setdefault("AssociationMapName",
+                      'ITkPRDtoTrackMap' +
+                      flags.Tracking.ActiveConfig.extension)
+    acc.addEventAlgo(
+        CompFactory.InDet.InDetTrackPRD_Association(name, **kwargs))
     return acc

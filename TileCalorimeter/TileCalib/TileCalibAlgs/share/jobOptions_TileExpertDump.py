@@ -1,17 +1,20 @@
+#
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+#
+#**************************************************************
+#
 # File:     TileCalibAlgs/jobOptions_TileExpertDump.py
 # Author:   Nils Gollub <nils.gollub@cern.ch>
 # Modified: Lukas Pribyl <lukas.pribyl@cern.ch>
 # Usage:    athena.py -c 'RUN=999999' jobOptions_TileExpertDump.py 
 #
 # RUN : runnumber
+#==============================================================
 
 #=== get user options or set default
 if not 'RUN' in dir():
     RUN = 999999
 RunNumber = RUN
-
-if not 'RUN2' in dir(): 
-    RUN2 = (RUN>=222222)
 
 #__________________________________________________________________
 import AthenaCommon.AtlasUnixGeneratorJob
@@ -28,8 +31,7 @@ globalflags.DetGeo.set_Value_and_Lock('atlas')
 globalflags.Luminosity.set_Value_and_Lock('zero')
 globalflags.DataSource.set_Value_and_Lock('data')
 globalflags.InputFormat.set_Value_and_Lock('bytestream')
-if RUN2: globalflags.DatabaseInstance="CONDBR2"
-else:    globalflags.DatabaseInstance="COMP200"
+globalflags.DatabaseInstance="CONDBR2"
 
 TileUseDCS = False
 
@@ -37,14 +39,13 @@ TileUseDCS = False
 from AthenaCommon.DetFlags import DetFlags
 DetFlags.detdescr.ID_setOff()
 DetFlags.detdescr.Muon_setOff()
-DetFlags.detdescr.LAr_setOff()
+DetFlags.detdescr.LAr_setOn()
 DetFlags.detdescr.Tile_setOn()
-from AthenaCommon.JobProperties import jobproperties
 
 #--- see https://atlas-geometry-db.web.cern.ch/atlas-geometry-db/
 #--- for the geometry updates
-if RUN2: jobproperties.Global.DetDescrVersion = "ATLAS-R2-2015-04-00-00"
-else:    jobproperties.Global.DetDescrVersion = "ATLAS-GEO-20-00-02"
+from AthenaCommon.JobProperties import jobproperties
+jobproperties.Global.DetDescrVersion = "ATLAS-R3S-2021-02-00-00"
 from AtlasGeoModel import SetGeometryVersion
 from AtlasGeoModel import GeoModelInit
 
@@ -52,8 +53,7 @@ from AtlasGeoModel import GeoModelInit
 #=== set global tag
 #=============================================================
 from IOVDbSvc.CondDB import conddb
-if RUN2: conddb.setGlobalTag("CONDBR2-BLKPA-2017-15")
-else:    conddb.setGlobalTag("COMCOND-BLKPA-RUN1-06")
+conddb.setGlobalTag("CONDBR2-BLKPA-2023-01")
 
 #=============================================================
 #=== setup TileCablingSvc
@@ -135,9 +135,7 @@ tileExpertDump.useOnlCes        = True
 tileExpertDump.useOnlEms        = True
 
 #=== add to the job
-from AthenaCommon.AlgSequence import AlgSequence
-job = AlgSequence()
-job+= tileExpertDump 
+topSequence += tileExpertDump 
 
 #============================================================
 #=== MessageSvc setup
@@ -161,5 +159,5 @@ theApp.EvtMax                          = 1
 #============================================================
 #=== print out job summary
 #============================================================
-print svcMgr
-print job
+print(svcMgr)
+print(topSequence)

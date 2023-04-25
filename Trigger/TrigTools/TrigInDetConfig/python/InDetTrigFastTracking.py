@@ -38,13 +38,16 @@ def makeInDetTrigFastTracking( inflags, config = None, rois = 'EMViewRoIs', doFT
   InDetTrigCA.InDetTrigConfigFlags = flags
      
   
-  log.info( "Fast tracking using new configuration: %s %s and suffix %s", flags.InDet.Tracking.ActiveConfig.input_name, flags.InDet.Tracking.ActiveConfig.name, flags.InDet.Tracking.ActiveConfig.suffix )
+  log.info( "Fast tracking using new configuration: %s %s and suffix %s",
+            flags.Tracking.ActiveConfig.input_name,
+            flags.Tracking.ActiveConfig.name,
+            flags.Tracking.ActiveConfig.suffix )
 
   viewAlgs = []
 
   from TrigInDetConfig.InDetTrigSequence import InDetTrigSequence
 
-  seq = InDetTrigSequence(flags, flags.InDet.Tracking.ActiveConfig.input_name, rois = rois, inView = viewVerifier)
+  seq = InDetTrigSequence(flags, flags.Tracking.ActiveConfig.input_name, rois = rois, inView = viewVerifier)
   
   ViewDataVerifier = None
   if viewVerifier:
@@ -79,7 +82,7 @@ def makeInDetTrigFastTracking( inflags, config = None, rois = 'EMViewRoIs', doFT
       
     if secondStageConfig is not None:
       #TODO move from .name to .input_name for consistency after migration to private tools
-      myflags2 = flags.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking."+secondStageConfig.name)
+      myflags2 = flags.cloneAndReplace("Tracking.ActiveConfig", "Trigger.InDetTracking."+secondStageConfig.name)
 
       theFTFCA2 = seq.fastTrackFinder(extraFlags = myflags2)
       theFTF = extractAlgorithmsAndAppendCA(theFTFCA2)

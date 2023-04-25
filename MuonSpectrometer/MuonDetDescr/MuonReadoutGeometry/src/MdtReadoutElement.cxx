@@ -56,18 +56,21 @@ namespace {
 
 namespace MuonGM {
 
-    MdtReadoutElement::MdtReadoutElement(GeoVFullPhysVol* pv, const std::string& stName, int zi, int fi, bool is_mirrored,
-                                         MuonDetectorManager* mgr) :
-        MuonReadoutElement(pv, zi, fi, is_mirrored, mgr) {
+    MdtReadoutElement::MdtReadoutElement(GeoVFullPhysVol* pv, const std::string& stName, MuonDetectorManager* mgr) :
+        MuonReadoutElement(pv, mgr, Trk::DetectorElemType::Mdt) {
         // get the setting of the caching flag from the manager
         setCachingFlag(mgr->cachingFlag());
 
-        if (stName.substr(0, 1) == "B") m_inBarrel = true;
-        m_descratzneg = false;
-        if (zi < 0 && !is_mirrored) m_descratzneg = true;
-
+        m_inBarrel = stName[0]== 'B';
+       
         setStationName(stName);
     }
+      bool MdtReadoutElement::barrel() const {
+        return m_inBarrel;
+    }
+
+    bool MdtReadoutElement::endcap() const { return !barrel(); }
+
 
     bool MdtReadoutElement::getWireFirstLocalCoordAlongZ(int tubeLayer, double& coord) const {
         coord = -9999.;
@@ -786,7 +789,7 @@ namespace MuonGM {
         if (itube >= m_deformTransf.size()) {
             MsgStream log(Athena::getMessageSvc(), "MdtReadoutElement");
             log << MSG::WARNING << " geoInfo called with tubeLayer or tube out of range in chamber "
-                << manager()->mdtIdHelper()->print_to_string(m_id) << " : layer " << tubelayer << " max " << m_nlayers << " tube " << tube
+                << manager()->mdtIdHelper()->print_to_string(identify()) << " : layer " << tubelayer << " max " << m_nlayers << " tube " << tube
                 << " max " << m_ntubesperlayer << " will compute deformation for first tube in this chamber" << endmsg;
             log << MSG::WARNING << "Please run in DEBUG mode to get extra diagnostic" << endmsg;
             itube = 0;
@@ -1191,24 +1194,6 @@ namespace MuonGM {
                 locAMDBWireEndN = ret;
         }
     }
-
-    void MdtReadoutElement::setIdentifier(const Identifier& id) {
-        m_id = id;
-        const MdtIdHelper* idh = manager()->mdtIdHelper();
-        IdentifierHash collIdhash = 0;
-        IdentifierHash detIdhash = 0;
-        if (idh->get_module_hash(id, collIdhash) != 0) {
-            MsgStream log(Athena::getMessageSvc(), "MdtReadoutElement");
-            log << MSG::WARNING << "setIdentifier -- collection hash Id NOT computed for id = " << idh->show_to_string(id) << endmsg;
-        }
-        m_idhash = collIdhash;
-        if (idh->get_detectorElement_hash(id, detIdhash) != 0) {
-            MsgStream log(Athena::getMessageSvc(), "MdtReadoutElement");
-            log << MSG::WARNING << "setIdentifier -- detectorElement hash Id NOT computed for id = " << idh->show_to_string(id) << endmsg;
-        }
-        m_detectorElIdhash = detIdhash;
-    }
-
     // **************************** interfaces related to Tracking *****************************************************
     const Amg::Transform3D& MdtReadoutElement::transform(const Identifier& id) const {
         const MdtIdHelper* idh = manager()->mdtIdHelper();
@@ -1242,7 +1227,7 @@ namespace MuonGM {
         if (itube >= m_tubeGeo.size()) {
             MsgStream log(Athena::getMessageSvc(), "MdtReadoutElement");
             log << MSG::WARNING << " geoInfo called with tubeLayer or tube out of range in chamber "
-                << manager()->mdtIdHelper()->print_to_string(m_id) << " : layer " << tubeLayer << " max " << m_nlayers << " tube " << tube
+                << manager()->mdtIdHelper()->print_to_string(identify()) << " : layer " << tubeLayer << " max " << m_nlayers << " tube " << tube
                 << " max " << m_ntubesperlayer << " will compute transform for first tube in this chamber" << endmsg;
             log << MSG::WARNING << "Please run in DEBUG mode to get extra diagnostic" << endmsg;
             itube = 0;
@@ -1305,7 +1290,7 @@ namespace MuonGM {
         if (itube >= ntot_tubes) {
             MsgStream log(Athena::getMessageSvc(), "MdtReadoutElement");
             log << MSG::WARNING << "surface called with tubeLayer or tube out of range in chamber "
-                << manager()->mdtIdHelper()->print_to_string(m_id) << " : layer " << tubeLayer << " max " << m_nlayers << " tube " << tube
+                << manager()->mdtIdHelper()->print_to_string(identify()) << " : layer " << tubeLayer << " max " << m_nlayers << " tube " << tube
                 << " max " << m_ntubesperlayer << " will compute surface for first tube in this chamber" << endmsg;
             log << MSG::WARNING << "Please run in DEBUG mode to get extra diagnostic" << endmsg;
             itube = 0;
@@ -1430,7 +1415,7 @@ namespace MuonGM {
             Amg::Transform3D trans3D(surfaceTRotation);
             trans3D.pretranslate(transform().translation());
 
-            if (MuonReadoutElement::barrel()) {
+            if (barrel()) {
                 m_associatedSurface.set(std::make_unique<Trk::PlaneSurface>(Amg::Transform3D(trans3D), MuonReadoutElement::getSsize() * 0.5,
                                                                             MuonReadoutElement::getZsize() * 0.5));
             } else {
@@ -1446,7 +1431,7 @@ namespace MuonGM {
 
     const Trk::SurfaceBounds& MdtReadoutElement::bounds() const {
         if (!m_associatedBounds) {
-            if (MuonReadoutElement::barrel()) {
+            if (barrel()) {
                 m_associatedBounds.set(
                     std::make_unique<Trk::RectangleBounds>(MuonReadoutElement::getSsize() / 2., MuonReadoutElement::getZsize() / 2.));
             } else {

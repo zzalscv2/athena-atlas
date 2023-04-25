@@ -18,7 +18,6 @@
 #include <stdlib.h>
 
 #include <cmath>
-#include <map>
 #include <memory>
 #include <utility>
 
@@ -39,29 +38,20 @@
 namespace Trk {
     class SurfaceBounds;
 }
-namespace {
-    static const Amg::Vector3D x_axis{1., 0., 0.};
-    static const Amg::Vector3D y_axis{0., 1., 0.};
-    static const Amg::Vector3D z_axis{0., 0., 1.};
-}
 namespace MuonGM {
 
     //============================================================================
-    MMReadoutElement::MMReadoutElement(GeoVFullPhysVol* pv, const std::string& stName, int zi, int fi, int mL, bool is_mirrored, MuonDetectorManager* mgr, const NswPassivationDbData* passivData) 
-    : MuonClusterReadoutElement(pv, stName, zi, fi, is_mirrored, mgr),
+    MMReadoutElement::MMReadoutElement(GeoVFullPhysVol* pv, const std::string& stName, int zi, int fi, int mL, MuonDetectorManager* mgr, const NswPassivationDbData* passivData) 
+    : MuonClusterReadoutElement(pv,mgr, Trk::DetectorElemType::MM),
       m_passivData(passivData),
       m_ml(mL) {
 
         // get the setting of the caching flag from the manager
         setCachingFlag(mgr->cachingFlag());
 
-        std::string vName = pv->getLogVol()->getName();
-        std::string sName = vName.substr(vName.find('-') + 1);
-        std::string fixName = (sName[2] == 'L') ? "MML" : "MMS";
+        std::string fixName = (stName[2] == 'L') ? "MML" : "MMS";
 
-        setStationName(fixName);
-        setStationEta(zi);
-        setStationPhi(fi);
+        setStationName(fixName);       
         setChamberLayer(mL);
         Identifier id = mgr->mmIdHelper()->channelID(fixName, zi, fi, mL, 1, 1);
         setIdentifier(id);
@@ -135,33 +125,8 @@ namespace MuonGM {
     //============================================================================
     MMReadoutElement::~MMReadoutElement() { clearCache(); }
 
-
     //============================================================================
-    void MMReadoutElement::setIdentifier(const Identifier& id) {
-        m_id = id;
-        IdentifierHash collIdhash = 0;
-        IdentifierHash detIdhash = 0;
-        // set parent data collection hash id
-        if (manager()->mmIdHelper()->get_module_hash(id, collIdhash) != 0) {
-            MsgStream log(Athena::getMessageSvc(), "MMReadoutElement");
-            log << MSG::WARNING
-                << "MMReadoutElement --  collection hash Id NOT computed for id = " << manager()->mmIdHelper()->show_to_string(id)
-                << endmsg;
-        }
-        m_idhash = collIdhash;
-        // // set RE hash id
-        if (manager()->mmIdHelper()->get_detectorElement_hash(id, detIdhash) != 0) {
-            MsgStream log(Athena::getMessageSvc(), "MMReadoutElement");
-            log << MSG::WARNING
-                << "MMReadoutElement --  detectorElement hash Id NOT computed for id = " << manager()->mmIdHelper()->show_to_string(id)
-                << endmsg;
-        }
-        m_detectorElIdhash = detIdhash;
-    }
-
-
-    //============================================================================
-    void MMReadoutElement::initDesign(double /*maxY*/, double /*minY*/, double /*xS*/, double /*pitch*/, double /*thickness*/) {
+    void MMReadoutElement::initDesign() {
        m_etaDesign.clear();
        m_etaDesign.resize(m_nlayers);
 
@@ -258,18 +223,18 @@ namespace MuonGM {
                 * m_delta                              // rotations (a-lines) from the alignment group
                 * m_Xlg[layer]                         // x-shift of the gas-gap center w.r.t. quadruplet center
                 * Amg::Translation3D(0., 0., m_offset) // z-shift to volume center
-                * Amg::AngleAxis3D(-90. * CLHEP::deg, y_axis) // x<->z because of GeoTrd definition
-                * Amg::AngleAxis3D(sAngle, z_axis)); 
+                * Amg::AngleAxis3D(-90. * CLHEP::deg, Amg::Vector3D::UnitY()) // x<->z because of GeoTrd definition
+                * Amg::AngleAxis3D(sAngle, Amg::Vector3D::UnitZ())); 
 
             // surface info (center, normal)
             m_surfaceData->m_layerCenters.push_back(m_surfaceData->m_layerTransforms.back().translation());
-            m_surfaceData->m_layerNormals.push_back(m_surfaceData->m_layerTransforms.back().linear() * (-z_axis));
+            m_surfaceData->m_layerNormals.push_back(m_surfaceData->m_layerTransforms.back().linear() * (-Amg::Vector3D::UnitZ()));
 
 #ifndef NDEBUG
            
             if (log.level() <= MSG::DEBUG)
                 log << MSG::DEBUG << "MMReadoutElement layer " << layer << " sAngle " << sAngle << " phi direction MM eta strip "
-                    << (m_surfaceData->m_layerTransforms.back().linear() * y_axis).phi() << endmsg;
+                    << (m_surfaceData->m_layerTransforms.back().linear() * Amg::Vector3D::UnitY()).phi() << endmsg;
 #endif
         }
     }
@@ -298,8 +263,8 @@ namespace MuonGM {
         //const MuonChannelDesign* design = getDesign(id);
         Amg::Vector3D locPos_ML = (m_Xlg[gg - 1]) * Amg::Translation3D(0., 0., m_offset) * 
                                  //   (design->hasStereoAngle() ?  
-                                 //    Amg::AngleAxis3D(90. * CLHEP::deg, y_axis) * Amg::AngleAxis3D(design->stereoAngle(), z_axis)  *
-                                 //    Amg::AngleAxis3D(-90. * CLHEP::deg, y_axis)  : AmgSymMatrix(3)::Identity())*
+                                 //    Amg::AngleAxis3D(90. * CLHEP::deg, Amg::Vector3D::UnitY()) * Amg::AngleAxis3D(design->stereoAngle(), Amg::Vector3D::UnitZ())  *
+                                 //    Amg::AngleAxis3D(-90. * CLHEP::deg, Amg::Vector3D::UnitY())  : AmgSymMatrix(3)::Identity())*
         locPos;
        
 #ifndef NDEBUG
@@ -324,9 +289,9 @@ namespace MuonGM {
             m_delta = Amg::Translation3D(0., tras, 0.) // translations (applied after rotations)
                     * Amg::Translation3D(0., 0., traz)  
                     * Amg::Translation3D(trat, 0., 0.) 
-                    * Amg::AngleAxis3D(rots, y_axis)  // rotation about Y (applied 3rd)
-                    * Amg::AngleAxis3D(rotz, z_axis)  // rotation about Z (applied 2nd)
-                    * Amg::AngleAxis3D(rott, x_axis); // rotation about X (applied 1st)
+                    * Amg::AngleAxis3D(rots, Amg::Vector3D::UnitY())  // rotation about Y (applied 3rd)
+                    * Amg::AngleAxis3D(rotz, Amg::Vector3D::UnitZ())  // rotation about Z (applied 2nd)
+                    * Amg::AngleAxis3D(rott, Amg::Vector3D::UnitX()); // rotation about X (applied 1st)
 
             // The origin of the rotation axes is at the center of the active area 
             // in the z (radial) direction. Account for this shift in the definition 

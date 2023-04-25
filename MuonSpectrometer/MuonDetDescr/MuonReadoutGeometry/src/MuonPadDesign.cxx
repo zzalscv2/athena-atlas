@@ -4,11 +4,10 @@
 
 #include "MuonReadoutGeometry/MuonPadDesign.h"
 
-#include <TString.h>  // for Form
 
 #include <ext/alloc_traits.h>
 #include <stdexcept>
-
+#include <TString.h>
 using MuonGM::MuonPadDesign;
 
 bool MuonPadDesign::withinSensitiveArea(const Amg::Vector2D& pos) const {
@@ -105,8 +104,8 @@ std::pair<int, int> MuonPadDesign::channelNumber(const Amg::Vector2D& pos) const
 }
 
 //----------------------------------------------------------
-bool MuonPadDesign::channelPosition(std::pair<int, int> pad, Amg::Vector2D& pos) const {
-    std::vector<Amg::Vector2D> corners;
+bool MuonPadDesign::channelPosition(const std::pair<int, int>& pad, Amg::Vector2D& pos) const {
+    std::array<Amg::Vector2D, 4> corners{make_array<Amg::Vector2D, 4>(Amg::Vector2D::Zero())};
     channelCorners(pad, corners);
     // double yCenter = 0.5*(corners.at(0)[1]+corners.at(3)[1]);
     double yCenter = 0.5 * (0.5 * (corners.at(0)[1] + corners.at(1)[1]) + 0.5 * (corners.at(2)[1] + corners.at(3)[1]));
@@ -116,7 +115,7 @@ bool MuonPadDesign::channelPosition(std::pair<int, int> pad, Amg::Vector2D& pos)
     return true;
 }
 //----------------------------------------------------------
-bool MuonPadDesign::channelCorners(std::pair<int, int> pad, std::vector<Amg::Vector2D>& corners) const {
+bool MuonPadDesign::channelCorners(const std::pair<int, int>& pad, std::array<Amg::Vector2D, 4>& corners) const {
     // DG-2015-11-30: todo check whether the offset subtraction is still needed
     int iEta = pad.first;   // -1 + padEtaMin;
     int iPhi = pad.second;  //  -1 + padPhiMin;
@@ -131,8 +130,8 @@ bool MuonPadDesign::channelCorners(std::pair<int, int> pad, std::vector<Amg::Vec
         yBot = yCutout ? -(Size - yCutout) : -0.5 * Size;
         yTop = yBot + firstRowPos;
     } else if (iEta > 1) {
-        yBot =
-            yCutout ? -(Size - yCutout) + firstRowPos + (iEta - 2) * inputRowPitch : -0.5 * Size + firstRowPos + (iEta - 2) * inputRowPitch;
+        yBot = yCutout ? -(Size - yCutout) + firstRowPos + (iEta - 2) * inputRowPitch 
+                       : -0.5 * Size + firstRowPos + (iEta - 2) * inputRowPitch;
         yTop = yBot + inputRowPitch;
         if (iEta == nPadH) yTop = maxSensitiveY();
     } else {  // Unkwown ieta
@@ -151,17 +150,20 @@ bool MuonPadDesign::channelCorners(std::pair<int, int> pad, std::vector<Amg::Vec
     double phiRight = firstPhiPos + (iPhi - 2) * inputPhiPitch;
     double phiLeft = firstPhiPos + (iPhi - 1) * inputPhiPitch;
 
-    double xBotRight = -(yBot + radialDistance) * std::tan(phiRight *CLHEP::degree);
-    double xBotLeft = -(yBot + radialDistance) * std::tan(phiLeft *CLHEP::degree);
-    double xTopRight = -(yTop + radialDistance) * std::tan(phiRight *CLHEP::degree);
-    double xTopLeft = -(yTop + radialDistance) * std::tan(phiLeft * CLHEP::degree);
-
-    double localPhiLeft= std::atan(-xBotLeft / (radialDistance + yBot));
-    double localPhiRight= std::atan(-xBotRight / (radialDistance + yBot));
-    xBotRight += 1.*PadPhiShift*std::cos(localPhiRight);
-    xBotLeft += 1.*PadPhiShift*std::cos(localPhiLeft);
-    xTopRight += 1.*PadPhiShift*std::cos(localPhiRight);
-    xTopLeft += 1.*PadPhiShift*std::cos(localPhiLeft);
+    const double tanRight = std::tan(phiRight *CLHEP::degree);
+    const double tanLeft = std::tan(phiLeft *CLHEP::degree);
+    double xBotRight = -(yBot + radialDistance) * tanRight;
+    double xBotLeft = -(yBot + radialDistance) * tanLeft;
+    double xTopRight = -(yTop + radialDistance) * tanRight;
+    double xTopLeft = -(yTop + radialDistance) * tanLeft;
+  
+    const double cosRight = (radialDistance + yBot) / std::hypot(xBotRight, (radialDistance + yBot));
+    const double cosLeft = (radialDistance + yBot) / std::hypot(xBotLeft, (radialDistance + yBot));
+    
+    xBotRight += 1.*PadPhiShift*cosRight;
+    xBotLeft += 1.*PadPhiShift*cosLeft;
+    xTopRight += 1.*PadPhiShift*cosRight;
+    xTopLeft += 1.*PadPhiShift*cosLeft;
 
     // Adjust outer columns
     // No staggering from fuziness in the outer edges
@@ -188,10 +190,10 @@ bool MuonPadDesign::channelCorners(std::pair<int, int> pad, std::vector<Amg::Vec
         }
     }
 
-    corners.push_back(Amg::Vector2D(xBotLeft, yBot));
-    corners.push_back(Amg::Vector2D(xBotRight, yBot));
-    corners.push_back(Amg::Vector2D(xTopLeft, yTop));
-    corners.push_back(Amg::Vector2D(xTopRight, yTop));
+    corners[0] = Amg::Vector2D(xBotLeft, yBot);
+    corners[1] = Amg::Vector2D(xBotRight, yBot);
+    corners[2] = Amg::Vector2D(xTopLeft, yTop);
+    corners[3] = Amg::Vector2D(xTopRight, yTop);
     return true;
 }
 //----------------------------------------------------------

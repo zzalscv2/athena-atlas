@@ -78,16 +78,16 @@ def TrackParticleCreatorToolPIDCheckCfg(flags,
                                         **kwargs):
 
     # Used only through tracking passes, where ActiveConfig flags are defined
-    if not flags.InDet.Tracking.ActiveConfig.RunTRTPID:
+    if not flags.Tracking.ActiveConfig.RunTRTPID:
         kwargs.setdefault("TRT_ElectronPidTool", None)
-    if not flags.InDet.Tracking.ActiveConfig.RunPixelPID:
+    if not flags.Tracking.ActiveConfig.RunPixelPID:
         kwargs.setdefault("PixelToTPIDTool", None)
         kwargs.setdefault("TestPixelLayerTool", None)
 
     # have to create special public instance depending on PID tool configuration
     if name == "InDetxAODParticleCreatorTool":
-        pixel_pid = flags.InDet.Tracking.ActiveConfig.RunPixelPID
-        trt_pid = flags.InDet.Tracking.ActiveConfig.RunTRTPID
+        pixel_pid = flags.Tracking.ActiveConfig.RunPixelPID
+        trt_pid = flags.Tracking.ActiveConfig.RunTRTPID
         if not trt_pid and not pixel_pid:
             name += "NoPID"
         elif not trt_pid:

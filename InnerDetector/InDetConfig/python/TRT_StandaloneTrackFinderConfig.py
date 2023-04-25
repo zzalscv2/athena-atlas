@@ -7,11 +7,11 @@ def TRT_StandaloneTrackFinderCfg(flags, name ='InDetTRT_StandaloneTrackFinder', 
     acc = ComponentAccumulator()
 
     kwargs.setdefault("MinNumDriftCircles",
-                      flags.InDet.Tracking.ActiveConfig.minTRTonly)
-    kwargs.setdefault("MinPt", flags.InDet.Tracking.ActiveConfig.minTRTonlyPt)
+                      flags.Tracking.ActiveConfig.minTRTonly)
+    kwargs.setdefault("MinPt", flags.Tracking.ActiveConfig.minTRTonlyPt)
     kwargs.setdefault("MaterialEffects", 0)
     kwargs.setdefault("OldTransitionLogic",
-                      flags.InDet.Tracking.ActiveConfig.useTRTonlyOldLogic)
+                      flags.Tracking.ActiveConfig.useTRTonlyOldLogic)
     kwargs.setdefault("OutputTracksLocation", "TRTStandaloneTracks")
 
     if "TRT_SegToTrackTool" not in kwargs:

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PIXELGEOMODEL_GEOPIXELSICRYSTAL_H
@@ -22,6 +22,8 @@ class GeoPixelSiCrystal : public GeoVPixelFactory {
   GeoPixelSiCrystal(InDetDD::PixelDetectorManager* ddmgr,
                     PixelGeometryManager* mgr,
 		    GeoModelIO::ReadGeoModel* sqliteReader,
+                    std::shared_ptr<std::map<std::string, GeoFullPhysVol*>> mapFPV,
+                    std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX,
                     bool isBLayer, bool isModule3D=false);
   virtual GeoVPhysVol* Build() override;
   inline Identifier getID() {return m_id;}

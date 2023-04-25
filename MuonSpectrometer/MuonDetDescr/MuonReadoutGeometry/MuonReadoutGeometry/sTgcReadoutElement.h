@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONREADOUTGEOMETRY_STGCREADOUTELEMENT_H
@@ -27,7 +27,7 @@ namespace MuonGM {
     public:
         /** constructor */
 
-        sTgcReadoutElement(GeoVFullPhysVol* pv, const std::string& stName, int zi, int fi, int mL, bool is_mirrored, MuonDetectorManager* mgr);
+        sTgcReadoutElement(GeoVFullPhysVol* pv, const std::string& stName, int zi, int fi, int mL, MuonDetectorManager* mgr);
 
         /** destructor */
         ~sTgcReadoutElement();
@@ -77,10 +77,10 @@ namespace MuonGM {
         bool padGlobalPosition(const Identifier& id, Amg::Vector3D& gpos) const;
 
         /** pad corners */
-        bool padCorners(const Identifier& id, std::vector<Amg::Vector2D>& corners) const;
+        bool padCorners(const Identifier& id, std::array<Amg::Vector2D,4>& corners) const;
 
         /** pad global corners */
-        bool padGlobalCorners(const Identifier& id, std::vector<Amg::Vector3D>& gcorners) const;
+        bool padGlobalCorners(const Identifier& id, std::array<Amg::Vector3D, 4>& gcorners) const;
 
         /** is eta=0 of QL1 or QS1? */
         bool isEtaZero(const Identifier& id, double posY) const;
@@ -109,9 +109,6 @@ namespace MuonGM {
             If one of the identifiers is outside the valid range, the function will
            return false */
         virtual bool spacePointPosition(const Identifier& phiId, const Identifier& etaId, Amg::Vector3D& pos) const override final;
-
-        /** TrkDetElementInterface */
-        virtual Trk::DetectorElemType detectorType() const override final { return Trk::DetectorElemType::sTgc; }
 
         /** space point position for a pair of phi and eta local positions and a layer identifier
             The LocalPosition is expressed in the reference frame of the phi projection.
@@ -170,9 +167,6 @@ namespace MuonGM {
 
         /** returns the MuonChannelDesign */
         const MuonPadDesign* getPadDesign(int gasGap) const;
-
-        /** set methods only to be used by MuonGeoModel */
-        void setIdentifier(const Identifier& id);
 
         /** set methods only to be used by MuonGeoModel */
         void setChamberLayer(int ml) { m_ml = ml; }
@@ -305,9 +299,9 @@ namespace MuonGM {
     }
 
     inline bool sTgcReadoutElement::stripGlobalPosition(const Identifier& id, Amg::Vector3D& gpos) const {
-        Amg::Vector2D lpos(0., 0.);
+        Amg::Vector2D lpos{Amg::Vector2D::Zero()};
         if (!stripPosition(id, lpos)) return false;
-        surface(id).localToGlobal(lpos, Amg::Vector3D(0., 0., 0.), gpos);
+        surface(id).localToGlobal(lpos, Amg::Vector3D::Zero(), gpos);
         return true;
     }
 
@@ -318,7 +312,7 @@ namespace MuonGM {
         int padEta = manager()->stgcIdHelper()->padEta(id);
         int padPhi = manager()->stgcIdHelper()->padPhi(id);
 
-        return design->channelPosition(std::pair<int, int>(padEta, padPhi), pos);
+        return design->channelPosition(std::make_pair(padEta, padPhi), pos);
     }
 
     inline bool sTgcReadoutElement::padGlobalPosition(const Identifier& id, Amg::Vector3D& gpos) const {
@@ -328,28 +322,24 @@ namespace MuonGM {
         return true;
     }
 
-    inline bool sTgcReadoutElement::padCorners(const Identifier& id, std::vector<Amg::Vector2D>& corners) const {
+    inline bool sTgcReadoutElement::padCorners(const Identifier& id, std::array<Amg::Vector2D, 4>& corners) const {
         const MuonPadDesign* design = getPadDesign(id);
         if (!design) return false;
 
         int padEta = manager()->stgcIdHelper()->padEta(id);
         int padPhi = manager()->stgcIdHelper()->padPhi(id);
 
-        return design->channelCorners(std::pair<int, int>(padEta, padPhi), corners);
+        return design->channelCorners(std::make_pair(padEta, padPhi), corners);
     }
 
-    inline bool sTgcReadoutElement::padGlobalCorners(const Identifier& id, std::vector<Amg::Vector3D>& gcorners) const {
-        std::vector<Amg::Vector2D> lcorners;
+    inline bool sTgcReadoutElement::padGlobalCorners(const Identifier& id, std::array<Amg::Vector3D, 4>& gcorners) const {
+        std::array<Amg::Vector2D,4> lcorners{make_array<Amg::Vector2D, 4>(Amg::Vector2D::Zero())};
         if (!padCorners(id, lcorners)) {
             return false;
         }
-        std::transform(lcorners.cbegin(), lcorners.cend(),
-                       std::back_inserter(gcorners),
-                       [&](const auto& lpos) {
-                           Amg::Vector3D gpos;
-                           surface(id).localToGlobal(lpos, Amg::Vector3D::Zero(), gpos);
-                           return gpos;
-                       });
+        for (size_t c = 0; c < lcorners.size() ; ++c) {
+            surface(id).localToGlobal(lcorners[c], Amg::Vector3D::Zero(), gcorners[c]);
+        }
         return true;
     }
 

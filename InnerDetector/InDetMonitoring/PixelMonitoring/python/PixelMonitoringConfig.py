@@ -74,14 +74,18 @@ def PixelMonitoringConfig(flags):
 
             from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_TightPrimary_TrackTools_Cfg
             TrackSelectionTool = acc.popToolsAndMerge(
-                InDetTrackSelectionTool_TightPrimary_TrackTools_Cfg(flags,
-                                                                    maxNPixelHoles = 1)) # Default for TightPrimary is 0
+                InDetTrackSelectionTool_TightPrimary_TrackTools_Cfg(
+                    flags, maxNPixelHoles = 1)) # Default for TightPrimary is 0
             if flags.Beam.Type is not BeamType.Cosmics:
                 TrackSelectionTool.maxD0            = 2
                 TrackSelectionTool.maxZ0            = 150
 
             pixelAthClusterMonAlg.TrackSelectionTool = TrackSelectionTool
-            pixelAthClusterMonAlg.HoleSearchTool = acc.getPublicTool("InDetHoleSearchTool")
+
+            from InDetConfig.InDetTrackHoleSearchConfig import (
+                InDetTrackHoleSearchToolCfg)
+            pixelAthClusterMonAlg.HoleSearchTool = acc.popToolsAndMerge(
+                InDetTrackHoleSearchToolCfg(flags))
 
             PixelAthClusterMonAlgCfg(helper, pixelAthClusterMonAlg, **kwargsClusMonAlg)
 

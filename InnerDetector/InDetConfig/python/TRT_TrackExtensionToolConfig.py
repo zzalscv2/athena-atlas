@@ -87,11 +87,11 @@ def TRT_TrackExtensionTool_xk_BaseCfg(
 
     kwargs.setdefault("TRT_ClustersContainer", "TRT_DriftCircles")
     kwargs.setdefault("MinNumberDriftCircles",
-                      flags.InDet.Tracking.ActiveConfig.minTRTonTrk)
+                      flags.Tracking.ActiveConfig.minTRTonTrk)
     kwargs.setdefault("ScaleHitUncertainty", 2)
     kwargs.setdefault("RoadWidth", 20.)
     kwargs.setdefault("UseParameterization",
-                      flags.InDet.Tracking.ActiveConfig.useParameterizedTRTCuts)
+                      flags.Tracking.ActiveConfig.useParameterizedTRTCuts)
 
     acc.setPrivateTools(
         CompFactory.InDet.TRT_TrackExtensionTool_xk(name, **kwargs))
@@ -126,9 +126,9 @@ def TRT_TrackExtensionTool_xkCfg(
                       500 if flags.Tracking.doBeamGas
                       else 50)
 
-    if flags.InDet.Tracking.ActiveConfig.RoISeededBackTracking:
+    if flags.Tracking.ActiveConfig.RoISeededBackTracking:
         kwargs.setdefault("minTRTSegmentpT",
-                          flags.InDet.Tracking.ActiveConfig.minSecondaryPt)
+                          flags.Tracking.ActiveConfig.minSecondaryPt)
 
     acc.setPrivateTools(acc.popToolsAndMerge(
         TRT_TrackExtensionTool_xk_BaseCfg(flags, name, **kwargs)))

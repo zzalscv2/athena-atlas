@@ -11,7 +11,8 @@ def TRT_TrackExtensionAlgCfg(flags, name = 'InDetTRT_Extension', **kwargs):
         kwargs.setdefault("TrackExtensionTool", acc.popToolsAndMerge(
             TRT_TrackExtensionToolCfg(flags)))
 
-    acc.addEventAlgo(CompFactory.InDet.TRT_TrackExtensionAlg(name + flags.InDet.Tracking.ActiveConfig.extension, **kwargs))
+    acc.addEventAlgo(CompFactory.InDet.TRT_TrackExtensionAlg(
+        name + flags.Tracking.ActiveConfig.extension, **kwargs))
     return acc
 
 def TRT_Phase_TrackExtensionAlgCfg(flags, name = 'InDetTRT_Phase_Extension', **kwargs):
@@ -33,8 +34,10 @@ def Trig_TRT_TrackExtensionAlgCfg(flags, name = 'InDetTrigMTTrackExtensionAlg', 
         kwargs.setdefault("TrackExtensionTool", acc.popToolsAndMerge(
             Trig_TRT_TrackExtensionToolCfg(flags)))
 
-    kwargs.setdefault("InputTracksLocation", flags.InDet.Tracking.ActiveConfig.trkTracks_IDTrig+"_Amb")
+    kwargs.setdefault("InputTracksLocation",
+                      flags.Tracking.ActiveConfig.trkTracks_IDTrig+"_Amb")
     kwargs.setdefault("ExtendedTracksLocation", "ExtendedTrackMap")
 
-    acc.addEventAlgo(CompFactory.InDet.TRT_TrackExtensionAlg(f"{name}_{flags.InDet.Tracking.ActiveConfig.name}", **kwargs))
+    acc.addEventAlgo(CompFactory.InDet.TRT_TrackExtensionAlg(
+        f"{name}_{flags.Tracking.ActiveConfig.name}", **kwargs))
     return acc

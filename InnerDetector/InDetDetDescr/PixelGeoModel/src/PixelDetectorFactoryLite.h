@@ -1,15 +1,21 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PIXELGEOMODEL_PIXELDETECTORFACTORYLITE_H
 #define PIXELGEOMODEL_PIXELDETECTORFACTORYLITE_H 
+
+#include <map>
+#include <string>
 
 #include "InDetGeoModelUtils/InDetDetectorFactoryBase.h" 
 
 #include "PixelReadoutGeometry/PixelDetectorManager.h"
 #include "ReadoutGeometryBase/InDetDD_Defs.h"
 #include "CxxUtils/checker_macros.h"
+
+class GeoFullPhysVol;
+class GeoAlignableTransform;
 
 class PixelSwitches;
 class PixelGeometryManager;
@@ -42,6 +48,8 @@ class PixelDetectorFactoryLite : public InDetDD::DetectorFactoryBase {
   std::unique_ptr<PixelGeometryManager> m_geometryManager;
 
   bool m_useDynamicAlignFolders{false};
+  std::shared_ptr<std::map<std::string, GeoFullPhysVol*>>        m_mapFPV;
+  std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> m_mapAX;
 
   void doChecks();
 };

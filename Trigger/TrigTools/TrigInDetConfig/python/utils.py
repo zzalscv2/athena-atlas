@@ -25,25 +25,25 @@ def getFlagsForActiveConfig(
     Either the current flags instance if all the ActiveConfig is correct or a new
     version with cloned flags
     """
-    if flags.hasFlag("InDet.Tracking.ActiveConfig.input_name"):
-        if flags.InDet.Tracking.ActiveConfig.input_name == config_name:
+    if flags.hasFlag("Tracking.ActiveConfig.input_name"):
+        if flags.Tracking.ActiveConfig.input_name == config_name:
             log.debug(
-                "flags.InDet.Tracking.ActiveConfig is for %s",
-                flags.InDet.Tracking.ActiveConfig.input_name,
+                "flags.Tracking.ActiveConfig is for %s",
+                flags.Tracking.ActiveConfig.input_name,
             )
             return flags
         else:
             log.warning(
-                "flags.InDet.Tracking.ActiveConfig is not for %s but %s",
+                "flags.Tracking.ActiveConfig is not for %s but %s",
                 config_name,
-                flags.InDet.Tracking.ActiveConfig.input_name,
+                flags.Tracking.ActiveConfig.input_name,
             )
     else:
 
         log.warning(
-            "Menu code invoked ID config without flags.InDet.Tracking.ActiveConfig for %s",
+            "Menu code invoked ID config without flags.Tracking.ActiveConfig for %s",
             config_name,
         )
     return flags.cloneAndReplace(
-        "InDet.Tracking.ActiveConfig", "Trigger.InDetTracking." + config_name
+        "Tracking.ActiveConfig", "Trigger.InDetTracking." + config_name
     )
