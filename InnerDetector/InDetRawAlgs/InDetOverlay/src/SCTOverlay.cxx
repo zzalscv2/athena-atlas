@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetIdentifier/SCT_ID.h"
@@ -10,27 +10,31 @@
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
 
+#include "AthAllocators/DataPool.h"
+
 namespace Overlay
 {
   // Specialize copyCollection() for the SCT
   template<>
   std::unique_ptr<SCT_RDO_Collection> copyCollection(const IdentifierHash &hashId,
-                                                     const SCT_RDO_Collection *collection)
+                                                     const SCT_RDO_Collection *collection,
+                                                     DataPool<SCT3_RawData>& dataItems)
   {
     auto outputCollection = std::make_unique<SCT_RDO_Collection>(hashId);
     outputCollection->setIdentifier(collection->identify());
 
-
-    //deep copy
+    // Elements created here are owned by the DataPool
+    outputCollection->clear(SG::VIEW_ELEMENTS);
     outputCollection->reserve(collection->size());
+
     for (const SCT_RDORawData *existingDatum : *collection) {
       auto *oldDatum = dynamic_cast<const SCT3_RawData *>(existingDatum);
       if (not oldDatum) {
         throw std::runtime_error("Dynamic cast to SCT3_RawData failed in SCTOverlay.cxx, Overlay::copyCollection");
       }
-      auto *datumCopy = new SCT3_RawData(oldDatum->identify(),
-                                         oldDatum->getWord(),
-                                         &oldDatum->getErrorCondensedHit());
+      SCT3_RawData* datumCopy = dataItems.nextElementPtr();
+      (*datumCopy) = SCT3_RawData(oldDatum->identify(), oldDatum->getWord(),
+                                  &oldDatum->getErrorCondensedHit());
       outputCollection->push_back(datumCopy);
     }
 
@@ -38,11 +42,14 @@ namespace Overlay
   }
 
   // Specialize mergeCollections() for the SCT
+  // bkg,signal and output collections
+  // are all VIEW containers.
   template<>
   void mergeCollections(SCT_RDO_Collection *bkgCollection,
                         SCT_RDO_Collection *signalCollection,
                         SCT_RDO_Collection *outputCollection,
-                        const IDC_OverlayBase *algorithm)
+                        const IDC_OverlayBase *algorithm,
+                        DataPool<SCT3_RawData>& dataItems)
   {
     // We want to use the SCT_ID helper provided by SCTOverlay, thus the constraint
     const SCTOverlay *parent = dynamic_cast<const SCTOverlay *>(algorithm);
@@ -87,7 +94,7 @@ namespace Overlay
       } else { // signal
         rdo = signalCollection->begin();
         rdoEnd = signalCollection->end();
-      } 
+      }
       // Loop over all RDOs in the wafer
       for (; rdo!=rdoEnd; ++rdo) {
         const SCT3_RawData* rdo3 = dynamic_cast<const SCT3_RawData*>(*rdo);
@@ -134,7 +141,10 @@ namespace Overlay
           }
           unsigned int SCT_Word = (groupSize | (strip << 11) | (tbin <<22) | (ERRORS << 25));
           Identifier rdoId = parent->get_sct_id()->strip_id(idColl, strip) ;
-          outputCollection->push_back(new SCT3_RawData(rdoId, SCT_Word, &errvec));
+          // use the pool
+          SCT3_RawData* datum = dataItems.nextElementPtr();
+          (*datum) = SCT3_RawData(rdoId, SCT_Word, &errvec);
+          outputCollection->push_back(datum);
         }
       }
     } else {
@@ -149,7 +159,9 @@ namespace Overlay
             unsigned int firstStrip = strip - groupSize;
             unsigned int SCT_Word = (groupSize | (firstStrip << 11) | (tbin <<22) | (ERRORS << 25));
             Identifier rdoId = parent->get_sct_id()->strip_id(idColl, firstStrip) ;
-            outputCollection->push_back(new SCT3_RawData(rdoId, SCT_Word, &errvec));
+            SCT3_RawData* datum = dataItems.nextElementPtr();
+            (*datum) = SCT3_RawData(rdoId, SCT_Word, &errvec);
+            outputCollection->push_back(datum);
             groupSize = 0;
           }
         }
@@ -188,7 +200,7 @@ StatusCode SCTOverlay::initialize()
 StatusCode SCTOverlay::execute(const EventContext& ctx) const
 {
   ATH_MSG_DEBUG("execute() begin");
-  
+
   // Reading the input RDOs
   ATH_MSG_VERBOSE("Retrieving input RDO containers");
 
@@ -215,6 +227,8 @@ StatusCode SCTOverlay::execute(const EventContext& ctx) const
 
   // Creating output RDO container
   SG::WriteHandle<SCT_RDO_Container> outputContainer(m_outputKey, ctx);
+
+
   ATH_CHECK(outputContainer.record(std::make_unique<SCT_RDO_Container>(signalContainer->size())));
   if (!outputContainer.isValid()) {
     ATH_MSG_ERROR("Could not record output SCT RDO container " << outputContainer.name() << " to store " << outputContainer.store());
@@ -222,7 +236,13 @@ StatusCode SCTOverlay::execute(const EventContext& ctx) const
   }
   ATH_MSG_DEBUG("Recorded output SCT RDO container " << outputContainer.name() << " in store " << outputContainer.store());
 
-  ATH_CHECK(overlayContainer(bkgContainerPtr, signalContainer.cptr(), outputContainer.ptr()));
+  // The DataPool, this is what will actually own the elements
+  // we create during this algorithm. The containers are views.
+  DataPool<SCT3_RawData> dataItemsPool(ctx);
+  // It resizes but lets reserve already quite a few
+  dataItemsPool.reserve(250000);
+
+  ATH_CHECK(overlayContainer(bkgContainerPtr, signalContainer.cptr(), outputContainer.ptr(),dataItemsPool));
   ATH_MSG_DEBUG("SCT Result   = " << Overlay::debugPrint(outputContainer.ptr(), 50));
 
   ATH_MSG_DEBUG("execute() end");
