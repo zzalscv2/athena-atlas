@@ -229,7 +229,7 @@ namespace InDet {
       static void getTrackQualityCuts(SiCombinatorialTrackFinderData_xk& data,
                                       const TrackQualityCuts&);
 
-      Trk::Track* convertToTrack(SiCombinatorialTrackFinderData_xk& data) const;
+      Trk::Track* convertToTrack(SiCombinatorialTrackFinderData_xk& data, const EventContext& ctx) const;
       Trk::Track* convertToNextTrack(
           SiCombinatorialTrackFinderData_xk& data) const;
 

@@ -136,10 +136,10 @@ InDet::SiTrajectory_xk::convertToTrackStateOnSurfaceWithNewDirection()
 ///////////////////////////////////////////////////////////////////
 
 DataVector<const Trk::TrackStateOnSurface>
-InDet::SiTrajectory_xk::convertToSimpleTrackStateOnSurface(int cosmic)
+InDet::SiTrajectory_xk::convertToSimpleTrackStateOnSurface(int cosmic, const EventContext& ctx)
 {
   if (!cosmic ||  m_elements[m_elementsMap[m_firstElement]].parametersUB().parameters()[2] < 0.) {
-    return convertToSimpleTrackStateOnSurface();
+    return convertToSimpleTrackStateOnSurface(ctx);
   }
   return convertToSimpleTrackStateOnSurfaceWithNewDirection();
 }
@@ -149,14 +149,14 @@ InDet::SiTrajectory_xk::convertToSimpleTrackStateOnSurface(int cosmic)
 ///////////////////////////////////////////////////////////////////
 
 DataVector<const Trk::TrackStateOnSurface> 
-InDet::SiTrajectory_xk::convertToSimpleTrackStateOnSurface()
+InDet::SiTrajectory_xk::convertToSimpleTrackStateOnSurface(const EventContext& ctx)
 {
   auto dtsos = DataVector<const Trk::TrackStateOnSurface>();
 
   int i = m_firstElement;
   
   const Trk::TrackStateOnSurface* 
-    tsos = m_elements[m_elementsMap[i]].trackPerigeeStateOnSurface();
+    tsos = m_elements[m_elementsMap[i]].trackPerigeeStateOnSurface(ctx);
 
   if (tsos) dtsos.push_back(tsos);
   
@@ -228,10 +228,10 @@ InDet::SiTrajectory_xk::convertToSimpleTrackStateOnSurfaceWithNewDirection()
 ///////////////////////////////////////////////////////////////////
 
 DataVector<const Trk::TrackStateOnSurface>
-InDet::SiTrajectory_xk::convertToSimpleTrackStateOnSurfaceForDisTrackTrigger(int cosmic)
+InDet::SiTrajectory_xk::convertToSimpleTrackStateOnSurfaceForDisTrackTrigger(int cosmic, const EventContext& ctx)
 {
   if (!cosmic ||  m_elements[m_elementsMap[m_firstElement]].parametersUB().parameters()[2] < 0.) {
-    return convertToSimpleTrackStateOnSurfaceForDisTrackTrigger();
+    return convertToSimpleTrackStateOnSurfaceForDisTrackTrigger(ctx);
   }
   return convertToSimpleTrackStateOnSurfaceWithNewDirection();
 }
@@ -242,14 +242,14 @@ InDet::SiTrajectory_xk::convertToSimpleTrackStateOnSurfaceForDisTrackTrigger(int
 ///////////////////////////////////////////////////////////////////
 
 DataVector<const Trk::TrackStateOnSurface> 
-InDet::SiTrajectory_xk::convertToSimpleTrackStateOnSurfaceForDisTrackTrigger()
+InDet::SiTrajectory_xk::convertToSimpleTrackStateOnSurfaceForDisTrackTrigger(const EventContext& ctx)
 {
   auto dtsos = DataVector<const Trk::TrackStateOnSurface>();
 
   int i = m_firstElement;
   
   const Trk::TrackStateOnSurface* 
-    tsos = m_elements[m_elementsMap[i]].trackPerigeeStateOnSurface();
+    tsos = m_elements[m_elementsMap[i]].trackPerigeeStateOnSurface(ctx);
 
   if (tsos) dtsos.push_back(tsos);
   
@@ -559,12 +559,12 @@ double InDet::SiTrajectory_xk::pTseed
 
   int n = 0;
   if(!m_elements[n].set(1,(*r),sib,sie,(*s),ctx) ) return 0.;
-  if(!m_elements[n].firstTrajectorElement(Tp)) return 0.;
+  if(!m_elements[n].firstTrajectorElement(Tp,ctx)) return 0.;
 
   for(++r; r!=re; ++r) {
     ++n; ++s;
     if(!m_elements[n].set(1,(*r),sib,sie,(*s),ctx)                    ) return 0.;
-    if(!m_elements[n].ForwardPropagationWithoutSearch(m_elements[n-1])) return 0.;
+    if(!m_elements[n].ForwardPropagationWithoutSearch(m_elements[n-1], ctx)) return 0.;
     if( m_elements[n].xi2F()      >      Xi2cut                       ) return 0.;
   }
   return m_elements[n].parametersUF().pT();
@@ -646,7 +646,7 @@ bool InDet::SiTrajectory_xk::initialize
             if(!m_elements[m_nElements].setDead(m_surfacedead.get())) return false;
             m_elementsMap[m_nElements] = m_nElements;
             if(m_nclusters && !lSiCluster.empty()) {
-              if(!m_elements[m_nElements].ForwardPropagationWithoutSearch(m_elements[up])) return false;
+              if(!m_elements[m_nElements].ForwardPropagationWithoutSearch(m_elements[up], ctx)) return false;
               up = m_nElements;
             }
             if(++m_nElements==300) break;
@@ -779,7 +779,7 @@ bool InDet::SiTrajectory_xk::initialize
     /// if the element we are currently processing is the first one where we saw a cluster: 
     if (m_firstElement == m_nElements-1) {
       up = m_nElements-1;         /// set the upper populated point to the current index 
-      if (!m_elements[up].firstTrajectorElement(Tp)) return false;  /// and update the current trajectory     
+      if (!m_elements[up].firstTrajectorElement(Tp, ctx)) return false;  /// and update the current trajectory     
                                                                     /// element with the track parameters 
                                                                     /// we obtained upstream for 
                                                                     /// the starting surface
@@ -788,7 +788,7 @@ bool InDet::SiTrajectory_xk::initialize
     else if (theCluster) {
 
       /// run forward propagation from the last element with a cluster to this one 
-      if (!m_elements[m_nElements-1].ForwardPropagationWithoutSearch(m_elements[up])) {
+      if (!m_elements[m_nElements-1].ForwardPropagationWithoutSearch(m_elements[up],ctx)) {
         return false;
       }
       /// update index of last element that had a cluster to point to this one 
@@ -820,7 +820,7 @@ bool InDet::SiTrajectory_xk::initialize
     else if (m_nclusters && !lSiCluster.empty()) {
       /// propagate to the current DE from the last one where we had a cluster from the seed
       /// if the propagation fails
-      if (!m_elements[m_nElements-1].ForwardPropagationWithoutSearch(m_elements[up])) {
+      if (!m_elements[m_nElements-1].ForwardPropagationWithoutSearch(m_elements[up], ctx)) {
         /// if we have a cluster here, something went wrong in the upstream logic 
         if(not m_tools->isITkGeometry() and m_elements[m_nElements-1].cluster()) return false;
         /// otherwise, remove this guy from consideration. 
@@ -916,7 +916,8 @@ bool InDet::SiTrajectory_xk::trackParametersToClusters
  const Trk::TrackParameters                              & Tp        ,
  std::vector<const InDet::SiDetElementBoundaryLink_xk*>    & DE      ,
  std::multimap<const Trk::PrepRawData*,const Trk::Track*>& PT        ,
- std::vector<const InDet::SiCluster*>                      & lSiCluster) 
+ std::vector<const InDet::SiCluster*>                      & lSiCluster, 
+ const EventContext& ctx)
 {
   m_nElements = 0;
   m_ndf       = 0;
@@ -946,7 +947,7 @@ bool InDet::SiTrajectory_xk::trackParametersToClusters
       } else {
         continue;
       }
-      if (!m_elements[0].ForwardPropagationForClusterSeach(m_nElements,Tp,(*iter_boundaryLink),sib,sie)) return false;
+      if (!m_elements[0].ForwardPropagationForClusterSeach(m_nElements,Tp,(*iter_boundaryLink),sib,sie,ctx)) return false;
     } else {
       InDet::SCT_ClusterCollection::const_iterator sib, sie;
       const InDet::SCT_ClusterCollection *w = (*SCTc).indexFindPtr(id);
@@ -957,7 +958,7 @@ bool InDet::SiTrajectory_xk::trackParametersToClusters
       } else {
         continue;
       }
-      if (!m_elements[0].ForwardPropagationForClusterSeach(m_nElements,Tp,(*iter_boundaryLink),sib,sie)) return false;
+      if (!m_elements[0].ForwardPropagationForClusterSeach(m_nElements,Tp,(*iter_boundaryLink),sib,sie,ctx)) return false;
     }
 
     for (int i=0; i!=m_elements[0].nlinksF(); ++i) {
@@ -1089,7 +1090,7 @@ bool InDet::SiTrajectory_xk::globalPositionsToClusters
 // Backward test initial trajectory
 ///////////////////////////////////////////////////////////////////
 
-bool InDet::SiTrajectory_xk::backwardSmoother(bool TWO)
+bool InDet::SiTrajectory_xk::backwardSmoother(bool TWO, const EventContext& ctx)
 {
   if (m_firstElement >= m_lastElement) return false;
 
@@ -1117,7 +1118,7 @@ bool InDet::SiTrajectory_xk::backwardSmoother(bool TWO)
     InDet::SiTrajectoryElement_xk& En = m_elements[m_elementsMap[m+1]];
     InDet::SiTrajectoryElement_xk& Em = m_elements[m_elementsMap[m  ]];
 
-    if (!Em.BackwardPropagationSmoother(En,TWO)) {
+    if (!Em.BackwardPropagationSmoother(En,TWO,ctx)) {
       
       if (m == m_firstElement) break;
 
@@ -1181,7 +1182,7 @@ bool InDet::SiTrajectory_xk::backwardSmoother(bool TWO)
 // Backward trajectory extension
 ///////////////////////////////////////////////////////////////////
 
-bool InDet::SiTrajectory_xk::backwardExtension(int itmax)
+bool InDet::SiTrajectory_xk::backwardExtension(int itmax, const EventContext& ctx)
 {
   if (m_firstElement >= m_lastElement) return false;
   int L = m_firstElement;
@@ -1222,7 +1223,7 @@ bool InDet::SiTrajectory_xk::backwardExtension(int itmax)
       InDet::SiTrajectoryElement_xk& El = m_elements[m_elementsMap[F+1]];
       InDet::SiTrajectoryElement_xk& Ef = m_elements[m_elementsMap[F  ]];
 
-      if (!Ef.BackwardPropagationFilter(El))  break;
+      if (!Ef.BackwardPropagationFilter(El, ctx))  break;
       
       if (Ef.cluster()) {
         lastElementWithExpHit = F;
@@ -1396,7 +1397,7 @@ bool InDet::SiTrajectory_xk::backwardExtension(int itmax)
 // Forward trajectory extension
 ///////////////////////////////////////////////////////////////////
 
-bool InDet::SiTrajectory_xk::forwardExtension(bool smoother,int itmax)
+bool InDet::SiTrajectory_xk::forwardExtension(bool smoother,int itmax, const EventContext& ctx)
 {
   const double pi2 = 2.*M_PI;
   const double pi = M_PI;
@@ -1421,13 +1422,13 @@ bool InDet::SiTrajectory_xk::forwardExtension(bool smoother,int itmax)
       /// state forward without searching for new hits yet 
 
       /// prepare first element for forward propagation
-      if (!m_elements[m_elementsMap[extensionStartIndex]].firstTrajectorElement()) return false;
+      if (!m_elements[m_elementsMap[extensionStartIndex]].firstTrajectorElement(false)) return false;
       /// for all following elements with until the last with a known hit: 
       for (++extensionStartIndex; extensionStartIndex<=m_lastElement; ++extensionStartIndex) {
         InDet::SiTrajectoryElement_xk& previousElement = m_elements[m_elementsMap[extensionStartIndex-1]];
         InDet::SiTrajectoryElement_xk& thisElement = m_elements[m_elementsMap[extensionStartIndex  ]];
         /// propagate forward the state from the previous element
-        if (!thisElement.ForwardPropagationWithoutSearch(previousElement)) return false;
+        if (!thisElement.ForwardPropagationWithoutSearch(previousElement,ctx)) return false;
       }
     }
     /// this branch is entered if the first element is already in agreement between forward and back
@@ -1453,7 +1454,7 @@ bool InDet::SiTrajectory_xk::forwardExtension(bool smoother,int itmax)
         /// case if we have entered a piece of the tracks where there was no back smoothing yet
         else      {
           /// propagate forward
-          if (!thisElement.ForwardPropagationWithoutSearch(previousElement)) return false;
+          if (!thisElement.ForwardPropagationWithoutSearch(previousElement,ctx)) return false;
         }
       } /// end loop from second to last element with hit 
     } /// end case of existing smoothing
@@ -1538,7 +1539,7 @@ bool InDet::SiTrajectory_xk::forwardExtension(bool smoother,int itmax)
       InDet::SiTrajectoryElement_xk& currentElement = m_elements[m_elementsMap[index_currentElement ]];
 
       /// propagate forward to the current element, and search for matching clusters
-      if (!currentElement.ForwardPropagationWithSearch(prevElement)) {
+      if (!currentElement.ForwardPropagationWithSearch(prevElement, ctx)) {
         /// In case of a forward propagation error, try to recover cases due to barrel-endcap transitions 
 
         /// we are already in the endcaps, or if the incompatible elements the failure are not subsequent: abooooort!  
@@ -1844,7 +1845,7 @@ bool InDet::SiTrajectory_xk::forwardExtension(bool smoother,int itmax)
   for (++index_currentElement; index_currentElement<=m_lastElement; ++index_currentElement) {
     InDet::SiTrajectoryElement_xk& prevElement = m_elements[m_elementsMap[index_currentElement-1]];
     InDet::SiTrajectoryElement_xk& currentElement = m_elements[m_elementsMap[index_currentElement  ]];
-    if (!currentElement.ForwardPropagationWithoutSearch(prevElement)) return false;
+    if (!currentElement.ForwardPropagationWithoutSearch(prevElement, ctx)) return false;
   }
   /// now we can finally exit
   return true;
@@ -1867,17 +1868,17 @@ void InDet::SiTrajectory_xk::getClusters
 // Forward filter without search
 ///////////////////////////////////////////////////////////////////
 
-bool InDet::SiTrajectory_xk::forwardFilter()
+bool InDet::SiTrajectory_xk::forwardFilter(const EventContext& ctx)
 {
   int L = m_firstElement;
   
-  if (!m_elements[m_elementsMap[L]].firstTrajectorElement()) return false;
+  if (!m_elements[m_elementsMap[L]].firstTrajectorElement(false)) return false;
 
   for (++L; L<=m_lastElement; ++L) {
 
     InDet::SiTrajectoryElement_xk& El = m_elements[m_elementsMap[L-1]];
     InDet::SiTrajectoryElement_xk& Ef = m_elements[m_elementsMap[L  ]];
-    if (!Ef.ForwardPropagationWithoutSearch(El)) return false;
+    if (!Ef.ForwardPropagationWithoutSearch(El,ctx)) return false;
   }
   return true;
 }
@@ -1887,7 +1888,7 @@ bool InDet::SiTrajectory_xk::forwardFilter()
 // Filter with precise clusters error
 ///////////////////////////////////////////////////////////////////
 
-bool InDet::SiTrajectory_xk::filterWithPreciseClustersError()
+bool InDet::SiTrajectory_xk::filterWithPreciseClustersError(const EventContext& ctx)
 {
   int L       = m_firstElement;
   int I       = 0             ;
@@ -1918,7 +1919,7 @@ bool InDet::SiTrajectory_xk::filterWithPreciseClustersError()
     InDet::SiTrajectoryElement_xk& El = m_elements[m_elementsMap[L-1]];
     InDet::SiTrajectoryElement_xk& Ef = m_elements[m_elementsMap[L  ]];
 
-    if(!Ef.ForwardPropagationWithoutSearchPreciseWithCorrection(El)) return false;
+    if(!Ef.ForwardPropagationWithoutSearchPreciseWithCorrection(El, ctx)) return false;
   }
 
   // Backward smoother
@@ -1931,7 +1932,7 @@ bool InDet::SiTrajectory_xk::filterWithPreciseClustersError()
     InDet::SiTrajectoryElement_xk& En = m_elements[m_elementsMap[m+1]];
     InDet::SiTrajectoryElement_xk& Em = m_elements[m_elementsMap[m  ]];
 
-    if(!Em.BackwardPropagationPrecise(En)) return false;
+    if(!Em.BackwardPropagationPrecise(En, ctx)) return false;
   }
 
   return true;

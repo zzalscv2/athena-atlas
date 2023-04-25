@@ -176,17 +176,17 @@ namespace InDet{
       /// track parameters
       ///////////////////////////////////////////////////////////////////
       //@{
-      bool firstTrajectorElement(const Trk::TrackParameters&);
-      bool firstTrajectorElement(bool correction = false);
+      bool firstTrajectorElement(const Trk::TrackParameters&, const EventContext& ctx);
+      bool firstTrajectorElement(bool correction);
       //@}
 
       ///////////////////////////////////////////////////////////////////
       // @name Forward propagation  
       ///////////////////////////////////////////////////////////////////
       //@{
-      bool ForwardPropagationWithoutSearch(SiTrajectoryElement_xk&);
-      bool ForwardPropagationWithoutSearchPreciseWithCorrection(SiTrajectoryElement_xk&);
-      bool ForwardPropagationWithSearch(SiTrajectoryElement_xk&);
+      bool ForwardPropagationWithoutSearch(SiTrajectoryElement_xk&, const EventContext&);
+      bool ForwardPropagationWithoutSearchPreciseWithCorrection(SiTrajectoryElement_xk&, const EventContext&);
+      bool ForwardPropagationWithSearch(SiTrajectoryElement_xk&, const EventContext&);
       /**
        * T = InDet::SiClusterCollection::const_iterator or
        *     InDet::PixelClusterCollection::const_iterator or
@@ -194,11 +194,12 @@ namespace InDet{
        */
       template <typename T>
         bool ForwardPropagationForClusterSeach
-	(int n,
+        (int n,
          const Trk::TrackParameters& Tpa,
-	 const InDet::SiDetElementBoundaryLink_xk*& dl,
-	 const T& sb,
-	 const T& se);
+         const InDet::SiDetElementBoundaryLink_xk*& dl,
+         const T& sb,
+         const T& se,
+         const EventContext& ctx);
       //@}
 
       /**
@@ -227,9 +228,9 @@ namespace InDet{
       /// @name Backward propagation for smoother  
       ///////////////////////////////////////////////////////////////////
       //@{
-      bool BackwardPropagationSmoother(SiTrajectoryElement_xk&,bool);
-      bool BackwardPropagationPrecise (SiTrajectoryElement_xk&);
-      bool BackwardPropagationFilter  (SiTrajectoryElement_xk&);
+      bool BackwardPropagationSmoother(SiTrajectoryElement_xk&,bool, const EventContext& ctx);
+      bool BackwardPropagationPrecise (SiTrajectoryElement_xk&, const EventContext& ctx);
+      bool BackwardPropagationFilter  (SiTrajectoryElement_xk&, const EventContext& ctx);
       //@}
 
       ///////////////////////////////////////////////////////////////////
@@ -269,7 +270,7 @@ namespace InDet{
       //@{
       Trk::TrackStateOnSurface* trackStateOnSurface(bool,bool,bool,int);
       Trk::TrackStateOnSurface* trackSimpleStateOnSurface(bool,bool,int);
-      Trk::TrackStateOnSurface* trackPerigeeStateOnSurface();
+      Trk::TrackStateOnSurface* trackPerigeeStateOnSurface(const EventContext& ctx);
       //@}
 
       ///////////////////////////////////////////////////////////////////
@@ -333,7 +334,8 @@ namespace InDet{
       /// the second argument. The third argument records the step length traversed. 
       bool propagate(Trk::PatternTrackParameters  & startingParameters,
                      Trk::PatternTrackParameters  & outParameters,
-                     double                       & step);
+                     double                       & step,
+                     const EventContext& ctx);
       //@}
 
       ////////////////////////////////////////////////////////////////////
