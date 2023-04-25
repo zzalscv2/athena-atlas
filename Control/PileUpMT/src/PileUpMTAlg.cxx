@@ -193,6 +193,7 @@ StatusCode PileUpMTAlg::execute() {
     ATH_MSG_DEBUG("Executing " << name() << "...");
     // Gaudi::Hive::setCurrentContext(ctx);
     const EventContext& ctx = Gaudi::Hive::currentContext();
+    const auto& evtID = ctx.eventID();
     const long long hs_id = ctx.evt() + m_skippedHSEvents.value();
     ATH_CHECK(evtStore().retrieve());
     if (m_fracLowPt != 0) {
@@ -226,6 +227,13 @@ StatusCode PileUpMTAlg::execute() {
     overlaidEvt->setEvtStore(evtStore().get());
     overlaidEvt->clearSubEvents();
 
+    // This was the problem. Need to fix overlaidEvt using context run and lb number
+    overlaidEvt->setRunNumber(evtID.run_number());
+    overlaidEvt->setLumiBlock(evtID.lumi_block());
+    overlaidEvt->setEventNumber(evtID.event_number());
+    overlaidEvt->setBCID(evtID.bunch_crossing_id());
+    overlaidEvt->setTimeStamp(evtID.time_stamp());
+    overlaidEvt->setTimeStampNSOffset(evtID.time_stamp_ns_offset());
     // Pileup container
     SG::WriteHandle<xAOD::EventInfoContainer> puCont(m_evtInfoContKey, ctx);
     ATH_CHECK(puCont.record(std::make_unique<xAOD::EventInfoContainer>(),
@@ -240,7 +248,7 @@ StatusCode PileUpMTAlg::execute() {
 
     // Set properties
     bool sf_updated = false;
-    float lumi_sf = m_beamLumi->scaleFactor(hsEvt->runNumber(), hsEvt->lumiBlock(), sf_updated);
+    float lumi_sf = m_beamLumi->scaleFactor(evtID.run_number(), evtID.lumi_block(), sf_updated);
     float cur_avg_mu = lumi_sf * m_avgMu;
     overlaidEvt->setAverageInteractionsPerCrossing(cur_avg_mu);
     overlaidEvt->setActualInteractionsPerCrossing(m_beamInt->normFactor(0) * cur_avg_mu);
