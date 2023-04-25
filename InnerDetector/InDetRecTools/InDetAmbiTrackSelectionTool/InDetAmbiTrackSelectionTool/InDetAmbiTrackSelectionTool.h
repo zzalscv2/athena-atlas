@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -16,7 +16,6 @@
 #include "TrkToolInterfaces/IAmbiTrackSelectionTool.h"
 
 #include "InDetRecToolInterfaces/ITrtDriftCircleCutTool.h"
-#include "PixelGeoModel/IBLParameterSvc.h"
 #include "TrkToolInterfaces/IPRDtoTrackMapTool.h"
 #include "TrkTrack/TrackStateOnSurface.h"
 
@@ -69,8 +68,8 @@ namespace InDet
     Trk::Track* createSubTrack( const std::vector<const Trk::TrackStateOnSurface*>& tsos, const Trk::Track* track ) const ;
 
     /** TRT minimum number of drift circles tool- returns allowed minimum number of TRT drift circles */
-    PublicToolHandle<ITrtDriftCircleCutTool> m_selectortool{this, "DriftCircleCutTool", "InDet::InDetTrtDriftCircleCutTool"};
-    ServiceHandle<IBLParameterSvc> m_IBLParameterSvc{this, "IBLParameterSvc", "IBLParameterSvc"};
+    PublicToolHandle<ITrtDriftCircleCutTool> m_selectortool
+    {this, "DriftCircleCutTool", "InDet::InDetTrtDriftCircleCutTool"};
 
     ToolHandle<Trk::IPRDtoTrackMapTool>         m_assoTool
          {this, "AssociationTool", "Trk::PRDtoTrackMapTool" };

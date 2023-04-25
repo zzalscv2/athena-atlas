@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( InDetAmbiTrackSelectionTool )
@@ -14,4 +14,4 @@ atlas_add_component( InDetAmbiTrackSelectionTool
    TrkTrack TrkToolInterfaces AthContainers CxxUtils StoreGateLib
    InDetIdentifier InDetPrepRawData InDetRecToolInterfaces TrkDetElementBase TrkEventUtils
    TrkSurfaces TrkCaloClusterROI TrkMeasurementBase TrkPrepRawData
-   TrkPseudoMeasurementOnTrack TrkTrackSummary TrkParameters PixelGeoModelLib TrkFitterInterfaces TrkValInterfaces)
+   TrkPseudoMeasurementOnTrack TrkTrackSummary TrkParameters TrkFitterInterfaces TrkValInterfaces)
