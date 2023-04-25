@@ -419,8 +419,6 @@ def ITkTruthClusterizationFactoryCfg(
     acc = ComponentAccumulator()
 
     kwargs.setdefault("InputSDOMap", "ITkPixelSDO_Map")
-    # Until truth content is debugged, uses following configuration (see ATLITKSW-216)
-    kwargs.setdefault("usePUHits", True)
 
     acc.setPrivateTools(
         CompFactory.InDet.TruthClusterizationFactory(name, **kwargs))
