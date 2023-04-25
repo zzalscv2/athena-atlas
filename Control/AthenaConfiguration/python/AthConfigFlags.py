@@ -253,14 +253,12 @@ class AthConfigFlags(object):
             if f.startswith(path):
                 return True
         for c in self._dynaflags.keys():
-            if c.startswith(path):
+            if c.startswith(name):
                 return True
         return False
 
     def hasFlag(self, name):
-        if name in self._flagdict:
-            return True
-        return False
+        return name in self._flagdict
 
     def _set(self,name,value):
         self._tryModify()
