@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // TileCellsDecorator.cxx
@@ -297,13 +297,22 @@ namespace DerivationFramework {
         // Tile PMT information
         const TileCell* tile_cell = dynamic_cast<const TileCell*> (cell);
 
+        IdentifierHash hash1 = cell_dde->onl1();
+        IdentifierHash hash2 = cell_dde->onl2();
+
         // Tile cell positioning
-        int ros1 = m_tileHWID->ros(m_tileHWID->adc_id(cell_dde->onl1(), tile_cell->gain1()));
-        int ros2 = m_tileHWID->ros(m_tileHWID->adc_id(cell_dde->onl2(), tile_cell->gain2()));
-        int drawer1 = m_tileHWID->drawer(m_tileHWID->adc_id(cell_dde->onl1(), tile_cell->gain1()));
-        int drawer2 = m_tileHWID->drawer(m_tileHWID->adc_id(cell_dde->onl2(), tile_cell->gain2()));
-        int channel1 = m_tileHWID->channel(m_tileHWID->adc_id(cell_dde->onl1(), tile_cell->gain1()));
-        int channel2 = m_tileHWID->channel(m_tileHWID->adc_id(cell_dde->onl2(), tile_cell->gain2()));
+        int ros1 = m_tileHWID->ros(m_tileHWID->adc_id(hash1, tile_cell->gain1()));
+        int drawer1 = m_tileHWID->drawer(m_tileHWID->adc_id(hash1, tile_cell->gain1()));
+        int channel1 = m_tileHWID->channel(m_tileHWID->adc_id(hash1, tile_cell->gain1()));
+
+        int ros2 = -1;
+        int drawer2 = -1;
+        int channel2 = -1;
+        if (hash2 != TileHWID::NOT_VALID_HASH) {
+          ros2 = m_tileHWID->ros(m_tileHWID->adc_id(hash2, tile_cell->gain2()));
+          drawer2 = m_tileHWID->drawer(m_tileHWID->adc_id(hash2, tile_cell->gain2()));
+          channel2 = m_tileHWID->channel(m_tileHWID->adc_id(hash2, tile_cell->gain2()));
+        }
 
         cells_pmt1_ros.push_back( ros1 );
         cells_pmt2_ros.push_back( ros2 );
