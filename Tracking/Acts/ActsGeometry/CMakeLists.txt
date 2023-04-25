@@ -13,7 +13,7 @@ find_package( TBB )
 
 # Component(s) in the package:
 atlas_add_library( ActsGeometryLib
-                   src/ActsAlignmentStore.cxx
+                   src/AlignmentStore.cxx
                    src/ActsDetectorElement.cxx
                    src/ActsLayerBuilder.cxx
                    src/ActsStrawLayerBuilder.cxx
@@ -31,7 +31,7 @@ atlas_add_library( ActsGeometryLib
                    AthenaBaseComps
                    AthenaKernel
                    CaloDetDescrLib
-		   CaloDetDescrUtils
+                   CaloDetDescrUtils
                    GaudiKernel
                    GeoModelUtilities
                    GeoPrimitives
@@ -69,7 +69,7 @@ atlas_add_component( ActsGeometry
                      src/ActsMaterialJsonWriterTool.cxx
                      src/ActsMaterialTrackWriterSvc.cxx
                      src/ActsAlignmentCondAlg.cxx
-                     src/NominalAlignmentCondAlg.cxx
+                     src/ActsDetAlignCondAlg.cxx
                      src/ActsTrackingGeometryTool.cxx
                      src/ActsPropStepRootWriterSvc.cxx
                      src/ActsCaloTrackingVolumeBuilder.cxx
@@ -103,3 +103,8 @@ atlas_add_component( ActsGeometry
 atlas_install_joboptions( scripts/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_scripts( test/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
+
+atlas_add_dictionary( ActsGeometryDict
+                      ActsGeometry/ActsGeometryDict.h
+                      ActsGeometry/selection.xml 
+                      LINK_LIBRARIES ActsGeometryLib)

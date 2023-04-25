@@ -6,6 +6,10 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 def ActsTrackingGeometrySvcCfg(flags, name = "ActsTrackingGeometrySvc", **kwargs) :
   result = ComponentAccumulator()
 
+  from ROOT.ActsTrk import DetectorType 
+  kwargs.setdefault("NotAlignDetectors", [DetectorType.Trt, 
+                                          DetectorType.Hgtd])
+
   subDetectors = []
   if flags.Detector.GeometryBpipe:
     from BeamPipeGeoModel.BeamPipeGMConfig import BeamPipeGeometryCfg
@@ -78,7 +82,7 @@ def ActsTrackingGeometrySvcCfg(flags, name = "ActsTrackingGeometrySvc", **kwargs
       actsTrackingGeometrySvc.MaterialMapCalibFolder = flags.Acts.TrackingGeometry.MaterialCalibrationFolder
       actsTrackingGeometrySvc.MaterialMapInputFile = flags.Acts.TrackingGeometry.MaterialSource
 
-  result.addService(actsTrackingGeometrySvc)
+  result.addService(actsTrackingGeometrySvc, primary = True)
   return result
 
 
@@ -97,31 +101,45 @@ def ActsTrackingGeometryToolCfg(flags, name = "ActsTrackingGeometryTool" ) :
   result.setPrivateTools(CompFactory.ActsTrackingGeometryTool(name))
   return result
 
-
-def NominalAlignmentCondAlgCfg(flags, name = "NominalAlignmentCondAlg", **kwargs) :
+def ActsDetAlignCondAlgCfg(flags, name="ActsDetAlignmentCondAlg", **kwargs):
   result = ComponentAccumulator()
-  result.merge(ActsTrackingGeometrySvcCfg(flags))
-  result.addCondAlgo(CompFactory.NominalAlignmentCondAlg(name, **kwargs))
+  kwargs.setdefault("TrackingGeometrySvc", result.getPrimaryAndMerge(ActsTrackingGeometrySvcCfg(flags)))
+  the_alg = CompFactory.ActsDetAlignCondAlg(name, **kwargs)
+  result.addCondAlgo(the_alg, primary = True)
   return result
-
-
 def ActsAlignmentCondAlgCfg(flags, name = "ActsAlignmentCondAlg", **kwargs) :
   result = ComponentAccumulator()
-  
+  from ROOT.ActsTrk import DetectorType 
   if flags.Detector.GeometryITk:
     from PixelConditionsAlgorithms.ITkPixelConditionsConfig import ITkPixelAlignCondAlgCfg
     result.merge(ITkPixelAlignCondAlgCfg(flags))
+    result.merge(ActsDetAlignCondAlgCfg(flags, name="ActsDetAlignmentCondAlgITkPixel",
+                                               InputTransforms="ITkPixelAlignmentStore",
+                                               ActsTransforms="ActsITkPixelAlignmentStore",
+                                               DetectorType=DetectorType.Pixel))
     from SCT_ConditionsAlgorithms.ITkStripConditionsAlgorithmsConfig import ITkStripAlignCondAlgCfg
     result.merge(ITkStripAlignCondAlgCfg(flags))
-    kwargs.setdefault("PixelAlignStoreReadKey", "ITkPixelAlignmentStore")
-    kwargs.setdefault("SCTAlignStoreReadKey", "ITkStripAlignmentStore")
+    result.merge(ActsDetAlignCondAlgCfg(flags, name="ActsDetAlignmentCondAlgITkSct",
+                                               InputTransforms="ITkStripAlignmentStore",
+                                               ActsTransforms="ActsITkStripAlignmentStore",
+                                               DetectorType=DetectorType.Sct))
+    
+    kwargs.setdefault("AlignmentStores", ["ActsITkPixelAlignmentStore", "ActsITkStripAlignmentStore"])
   else:
     from PixelConditionsAlgorithms.PixelConditionsConfig import PixelAlignCondAlgCfg
     result.merge(PixelAlignCondAlgCfg(flags))
+    result.merge(ActsDetAlignCondAlgCfg(flags, name="ActsDetAlignmentCondAlgPixel",
+                                               InputTransforms="PixelAlignmentStore",
+                                               ActsTransforms="ActsPixelAlignmentStore",
+                                               DetectorType=DetectorType.Pixel))
+    
     from SCT_ConditionsAlgorithms.SCT_ConditionsAlgorithmsConfig import SCT_AlignCondAlgCfg
     result.merge(SCT_AlignCondAlgCfg(flags))
-    kwargs.setdefault("PixelAlignStoreReadKey", "PixelAlignmentStore")
-    kwargs.setdefault("SCTAlignStoreReadKey", "SCTAlignmentStore")
+    result.merge(ActsDetAlignCondAlgCfg(flags, name="ActsDetAlignmentCondAlgSct",
+                                               InputTransforms="SCTAlignmentStore",
+                                               ActsTransforms="ActsSCTAlignmentStore",
+                                               DetectorType=DetectorType.Sct))
+    kwargs.setdefault("AlignmentStores", ["ActsPixelAlignmentStore", "ActsSCTAlignmentStore"])
 
   result.addCondAlgo(CompFactory.ActsAlignmentCondAlg(name, **kwargs))
   return result

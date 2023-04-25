@@ -22,20 +22,21 @@ class ConfiguredActsTrackingGeometry( ActsTrackingGeometryTool ) :
     subDetectors = []
     if DetFlags.pixel_on():
       subDetectors += ["Pixel"]
-
+    from ActsGeometry.ActsGeometryConf import ActsAlignmentCondAlg
+    from AthenaCommon.AlgSequence import AthSequencer
+    condSeq = AthSequencer("AthCondSeq")
+    if not hasattr(condSeq, "NominalAlignmentCondAlg"):
+      condSeq += ActsAlignmentCondAlg(name = "NominalAlignmentCondAlg")
     from ActsGeometry.ActsGeometryConf import ActsTrackingGeometrySvc
+    from ROOT.ActsTrk import DetectorType
     actsTrackingGeometrySvc = ActsTrackingGeometrySvc(name = "ActsTrackingGeometrySvc",
-                                                      BuildSubDetectors = subDetectors)
+                                                      BuildSubDetectors = subDetectors,
+                                                      NotAlignDetectors = [DetectorType.Pixel])
     
     from AthenaCommon.AppMgr import ServiceMgr
     ServiceMgr += actsTrackingGeometrySvc
     
     
-    from ActsGeometry.ActsGeometryConf import NominalAlignmentCondAlg
-    from AthenaCommon.AlgSequence import AthSequencer
-    condSeq = AthSequencer("AthCondSeq")
-    if not hasattr(condSeq, "NominalAlignmentCondAlg"):
-      condSeq += NominalAlignmentCondAlg(name = "NominalAlignmentCondAlg")
     
     ActsTrackingGeometryTool.__init__(self,
                                       name,

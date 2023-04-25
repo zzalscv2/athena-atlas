@@ -1,18 +1,8 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ActsGeometry/ActsTrackingGeometryTool.h"
-
-// ATHENA
-#include "GaudiKernel/EventContext.h"
-
-// PACKAGE
-#include "ActsGeometry/ActsAlignmentStore.h"
-
-// STL
-#include <iostream>
-#include <memory>
 
 ActsTrackingGeometryTool::ActsTrackingGeometryTool(const std::string& type, const std::string& name,
     const IInterface* parent)
@@ -51,12 +41,12 @@ ActsTrackingGeometryTool::getGeometryContext(const EventContext& ctx) const
   return **rch;
 }
 
-ActsGeometryContext
-ActsTrackingGeometryTool::getNominalGeometryContext() const
-{
+const ActsGeometryContext&
+ActsTrackingGeometryTool::getNominalGeometryContext() const {
 
-  ActsGeometryContext gctx;
-  gctx.alignmentStore = m_trackingGeometrySvc->getNominalAlignmentStore();
-
-  return gctx;
+  return m_trackingGeometrySvc->getNominalContext();
 }
+const ActsGeometryContext& ActsTrackingGeometryTool::getGeometryContext() const {
+    return getGeometryContext(Gaudi::Hive::currentContext());
+}
+

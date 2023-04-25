@@ -42,11 +42,11 @@ public:
 
   virtual
   const ActsGeometryContext&
-  getGeometryContext(const EventContext& ctx = Gaudi::Hive::currentContext()) const override;
+  getGeometryContext(const EventContext& ctx) const override;
+ const ActsGeometryContext&
+  getGeometryContext() const override;
 
-  virtual
-  ActsGeometryContext
-  getNominalGeometryContext() const override;
+  virtual const ActsGeometryContext& getNominalGeometryContext() const override;
 
 private:
   ServiceHandle<IActsTrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};

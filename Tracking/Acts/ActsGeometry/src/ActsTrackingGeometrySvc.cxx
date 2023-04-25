@@ -40,9 +40,8 @@
 #include <Acts/Surfaces/RectangleBounds.hpp>
 
 // PACKAGE
-#include "ActsGeometry/ActsAlignmentStore.h"
-#include "ActsGeometry/ActsDetectorElement.h"
-#include "ActsGeometry/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/IDetectorElement.h"
+#include "ActsGeometryInterfaces/ActsGeometryContext.h"
 #include "ActsGeometry/ActsLayerBuilder.h"
 #include "ActsGeometry/ActsStrawLayerBuilder.h"
 #include "ActsGeometry/ActsHGTDLayerBuilder.h"
@@ -54,7 +53,7 @@
 #include <stdexcept>
 
 using namespace Acts::UnitLiterals;
-
+using namespace ActsTrk;
 ActsTrackingGeometrySvc::ActsTrackingGeometrySvc(const std::string &name,
                                                  ISvcLocator *svc)
     : base_class(name, svc),
@@ -65,6 +64,15 @@ ActsTrackingGeometrySvc::ActsTrackingGeometrySvc(const std::string &name,
 
 StatusCode ActsTrackingGeometrySvc::initialize() {
   ATH_MSG_INFO(name() << " is initializing");
+  for (unsigned int skipAlign : m_subDetNoAlignProp) {
+    try {
+        m_subDetNoAlign.insert(static_cast<DetectorType>(skipAlign));
+    } catch (...) {
+        ATH_MSG_FATAL("Failed to interpret " << m_subDetNoAlignProp << " as ActsDetectorElements");
+        return StatusCode::FAILURE;
+    }
+}
+
 
   // FIXME: ActsCaloTrackingVolumeBuilder holds ReadHandle to
   // CaloDetDescrManager. Hopefully this service is never called before that
@@ -153,10 +161,6 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
     }
     tgbConfig.materialDecorator = matDeco;
   }
-
-  // default geometry context, this is nominal
-  ActsGeometryContext constructionContext;
-  constructionContext.construction = true;
 
   std::array<double, 2> sctECEnvelopeZ{20_mm, 20_mm};
 
@@ -393,7 +397,7 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
 
   ATH_MSG_VERBOSE("Begin building process");
   m_trackingGeometry =
-      trackingGeometryBuilder->trackingGeometry(constructionContext.context());
+      trackingGeometryBuilder->trackingGeometry(getNominalContext().context());
   ATH_MSG_VERBOSE("Building process completed");
 
   if (!m_trackingGeometry) {
@@ -401,15 +405,7 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
     return StatusCode::FAILURE;
   }
 
-  ATH_MSG_VERBOSE("Building nominal alignment store");
-  ActsAlignmentStore *nominalAlignmentStore = new ActsAlignmentStore();
-
-  populateAlignmentStore(nominalAlignmentStore);
-
-  // manage ownership
-  m_nominalAlignmentStore =
-      std::unique_ptr<const ActsAlignmentStore>(nominalAlignmentStore);
-
+ 
   if(m_runConsistencyChecks) {
     ATH_MSG_INFO("Running extra consistency check! (this is SLOW)");
     if(!runConsistencyChecks()) {
@@ -446,9 +442,7 @@ bool ActsTrackingGeometrySvc::runConsistencyChecks() const {
     localPoints.emplace_back(dist(gen), dist(gen));
   }
 
-  ActsGeometryContext explicitContext;
-  explicitContext.construction = true;
-  Acts::GeometryContext gctx = explicitContext.context();
+  Acts::GeometryContext gctx = getNominalContext().context();
 
   size_t nTotalSensors = 0;
   std::array<size_t,3> nInconsistent{0,0,0};
@@ -1009,24 +1003,19 @@ ActsTrackingGeometrySvc::makeSCTTRTAssembly(
   return container;
 }
 
-void ActsTrackingGeometrySvc::populateAlignmentStore(
-    ActsAlignmentStore *store) const {
-  ATH_MSG_DEBUG("Populate the alignment store with all detector elements");
-  size_t nElements = 0;
-  m_trackingGeometry->visitSurfaces([store,
-                                     &nElements](const Acts::Surface *srf) {
-    const Acts::DetectorElementBase *detElem = srf->associatedDetectorElement();
-    const auto *gmde = dynamic_cast<const ActsDetectorElement *>(detElem);
-    gmde->storeTransform(store);
-    nElements++;
-  });
-  ATH_MSG_DEBUG("Populated with " << nElements << " elements");
+unsigned int ActsTrackingGeometrySvc::populateAlignmentStore(RawGeomAlignStore &store) const {
+    ATH_MSG_DEBUG("Populate the alignment store with all detector elements");
+    unsigned int nElements = 0;
+    m_trackingGeometry->visitSurfaces([&store, &nElements](const Acts::Surface *srf) {
+        const Acts::DetectorElementBase *detElem = srf->associatedDetectorElement();
+        const IDetectorElement *gmde = dynamic_cast<const IDetectorElement *>(detElem);
+        nElements += gmde->storeAlignment(store);
+    });
+    ATH_MSG_DEBUG("Populated with " << nElements << " elements");
+    return nElements;
 }
 
-const ActsAlignmentStore *
-ActsTrackingGeometrySvc::getNominalAlignmentStore() const {
-  return m_nominalAlignmentStore.get();
-}
+const ActsGeometryContext &ActsTrackingGeometrySvc::getNominalContext() const { return m_nominalContext; }
 
 Acts::CylinderVolumeBuilder::Config
 ActsTrackingGeometrySvc::makeBeamPipeConfig(
@@ -1113,4 +1102,26 @@ ActsTrackingGeometrySvc::makeBeamPipeConfig(
   cfg.volumeSignature = 0;
 
   return cfg;
+}
+StatusCode ActsTrackingGeometrySvc::checkAlignComplete(const ActsGeometryContext &ctx) const {
+    /// Look up what subdetectors are part of the tracking geometry
+    std::set<DetectorType> activeDets{};
+    m_trackingGeometry->visitSurfaces([&activeDets](const Acts::Surface *srf) {
+        const Acts::DetectorElementBase *detElem = srf->associatedDetectorElement();
+        const IDetectorElement *gmde = dynamic_cast<const IDetectorElement *>(detElem);
+        activeDets.insert(gmde->detectorType());
+    });
+
+    /// Loop over the detector types. Check whether for each of them a dedicated alignment store exists
+    for (const DetectorType &type : activeDets) {
+        if (m_subDetNoAlign.count(type)) {
+            ATH_MSG_DEBUG("Detector " << to_string(type) << " does not expect any alignment store. Do not check");
+            continue;
+        }
+        if (ctx.alignmentStores.find(type) == ctx.alignmentStores.end()) {
+            ATH_MSG_FATAL("No alignment constants have been defined for subdetector " << to_string(type) << ". Please check.");
+            return StatusCode::FAILURE;
+        }
+    }
+    return StatusCode::SUCCESS;
 }
