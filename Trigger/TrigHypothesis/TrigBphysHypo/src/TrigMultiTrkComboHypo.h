@@ -69,6 +69,7 @@ class TrigMultiTrkStateBase: public ::ITrigBphysState {
   virtual std::vector<ElementLink<TrigCompositeUtils::DecisionContainer>>& getDecisionLinks(size_t) = 0;
   virtual TrigCompositeUtils::DecisionIDContainer& getDecisionIDs(size_t) = 0;
   virtual void addTrigBphysObject(xAOD::TrigBphys*, const std::vector<size_t>& legIndices) = 0;
+  virtual bool checkMultiplicity(const std::vector<int>& legMultiplicity, const std::vector<HLT::Identifier>& legDecisionIDs) const = 0;
 
   void setEventAccepted(bool flag = true) { m_isEventAccepted = (flag ? 1 : 0); }
   inline int isEventAccepted() const { return m_isEventAccepted; }
@@ -111,6 +112,20 @@ class TrigMultiTrkState : public TrigMultiTrkStateBase {
   virtual void addTrigBphysObject(xAOD::TrigBphys* trigBphysObject, const std::vector<size_t>& legIndices) override final {
     trigBphysCollection().push_back(trigBphysObject);
     trigBphysLegIndices().push_back(legIndices);
+  }
+  virtual bool checkMultiplicity(const std::vector<int>& legMultiplicity, const std::vector<HLT::Identifier>& legDecisionIDs) const override final {
+    if (legMultiplicity.size() == 1) return true;
+    int N = std::accumulate(legMultiplicity.begin(), legMultiplicity.end(), 0);
+    int n = 0;
+    for (size_t i = 0; i < m_leptons.size(); ++i) {
+      for (size_t j = 0; j < legMultiplicity.size(); ++j) {
+        if (TrigCompositeUtils::passed(legDecisionIDs.at(j).numeric(), m_leptons.at(i).decisionIDs)) {
+          n++;
+          break;
+        }
+      }
+    }
+    return (n >= N);
   }
 
  private:
@@ -244,6 +259,8 @@ class TrigMultiTrkComboHypo: public ::ComboHypo {
     "combine objects attached to decisions from different input collections, needed for HLT_mu4_ivarloose_mu4_b10invmAB120vtx20_L12MU3V chains"};
   Gaudi::Property<bool> m_useLeptonMomentum {this, "useLeptonMomentum", false,
     "use 4-momentum of the xAOD::Muon to make fast calculation of the xAOD::TrigBphys mass, needed for consistency with TrigComboHypoTool::compute()"};
+  Gaudi::Property<bool> m_checkMultiplicity {this, "checkMultiplicity", false,
+    "check that we have enough leptons to fire the chain, needed for HLT_mu6_2mu4_bJpsi_L1MU5VF_3MU3VF"};
   Gaudi::Property<float> m_deltaR {this, "deltaR", 0.01,
     "minimum deltaR between same-sign tracks (overlap removal)"};
   Gaudi::Property<float> m_deltaRMax {this, "deltaRMax", std::numeric_limits<float>::max(),

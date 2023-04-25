@@ -69,6 +69,7 @@ def DimuEFComboHypoCfg(flags, name):
     kwargs = {"isStreamer" : False,
         "trigSequenceName" : 'Dimu',
         "trigLevel" : 'EF',
+        "checkMultiplicity" : True,
         "TrigBphysCollectionKey" : 'HLT_DimuEF'}
     if not isComponentAccumulatorCfg():
         return algorithmCAToGlobalWrapper(ConfigurationComboHypo, flags, **kwargs)[0]
