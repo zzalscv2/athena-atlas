@@ -864,7 +864,7 @@ StatusCode TrigMultiTrkComboHypo::createDecisionObjects(TrigMultiTrkStateBase& s
 
     for (const auto& tool : hypoTools()) {
       ATH_MSG_DEBUG( "Go to " << tool );
-      ATH_CHECK( tool->decideOnSingleObject(decision, previousDecisionIDs) );
+      if (!m_checkMultiplicity || state.checkMultiplicity(tool->legMultiplicity(), tool->legDecisionIds())) ATH_CHECK( tool->decideOnSingleObject(decision, previousDecisionIDs) );
     }
     ++idx;
   }
