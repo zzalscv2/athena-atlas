@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( JetCalibTools )
@@ -7,6 +7,7 @@ atlas_subdir( JetCalibTools )
 find_package( Boost )
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO Graf Gpad )
 find_package( lwtnn )
+find_package( onnxruntime )
 
 # Libraries in the package:
 atlas_add_library( JetCalibToolsLib
