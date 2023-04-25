@@ -177,16 +177,10 @@ bool
 Trk::CylinderSurface::operator==(const Trk::Surface& sf) const
 {
   // first check the type not to compare apples with oranges
-  const Trk::CylinderSurface* csf =
-    dynamic_cast<const Trk::CylinderSurface*>(&sf);
-  if (!csf)
-    return false;
-  if (this == csf)
-    return true;
-  bool transfEqual(transform().isApprox(csf->transform(), 10e-8));
-  bool centerEqual = (transfEqual) ? (center() == csf->center()) : false;
-  bool boundsEqual = (centerEqual) ? (bounds() == csf->bounds()) : false;
-  return boundsEqual;
+  if (sf.type()!=Trk::SurfaceType::Cylinder){
+      return false;
+  }
+  return (*this) == static_cast<const Trk::CylinderSurface&>(sf);
 }
 
 // return the measurement frame: it's the tangential plane

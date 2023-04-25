@@ -157,15 +157,10 @@ bool
 Trk::DiscSurface::operator==(const Trk::Surface& sf) const
 {
   // first check the type not to compare apples with oranges
-  const Trk::DiscSurface* dsf = dynamic_cast<const Trk::DiscSurface*>(&sf);
-  if (!dsf)
-    return false;
-  if (this == dsf)
-    return true;
-  bool transfEqual(transform().isApprox(dsf->transform(), 10e-8));
-  bool centerEqual = (transfEqual) ? (center() == dsf->center()) : false;
-  bool boundsEqual = (centerEqual) ? (bounds() == dsf->bounds()) : false;
-  return boundsEqual;
+  if (sf.type()!=Trk::SurfaceType::Disc){
+      return false;
+  }
+  return (*this) == static_cast<const Trk::DiscSurface&>(sf);
 }
 
 /* Use the Surface as a ParametersBase constructor, from local parameters -

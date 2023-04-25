@@ -86,14 +86,10 @@ bool
 Trk::PerigeeSurface::operator==(const Trk::Surface& sf) const
 {
   // first check the type not to compare apples with oranges
-  const Trk::PerigeeSurface* persf = dynamic_cast<const Trk::PerigeeSurface*>(&sf);
-  if (!persf){
-    return false;
+  if (sf.type()!=Trk::SurfaceType::Perigee){
+      return false;
   }
-  if (this == persf){
-    return true;
-  }
-  return (center() == persf->center());
+  return (*this) == static_cast<const Trk::PerigeeSurface&>(sf);
 }
 
 /** Use the Surface as a ParametersBase constructor, from local parameters -

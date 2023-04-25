@@ -102,13 +102,13 @@ public:
      - ownership of bounds is passed */
   DiscSurface(const Amg::Transform3D& htrans, DiscTrapezoidalBounds* dtbounds);
 
-  /**Constructor for Discs from HepGeom::Transform3D and AnnulusBoundsPC 
+  /**Constructor for Discs from HepGeom::Transform3D and AnnulusBoundsPC
 	   - ownership of bounds is passed */
   DiscSurface(const Amg::Transform3D& htrans, AnnulusBoundsPC* annpcbounds);
-  
+
   /// @brief Constructor for Discs from Transform3D and AnnulusBoundsPC
   /// This will use the converting factory in @c AnnulusBoundsPC to
-  /// build an equivalent PC version. 
+  /// build an equivalent PC version.
   /// The overall transform of this object will be @c htrans and an additional
   /// rotation to overlay the two bounds implementations exactly.
   /// @param htrans Base transform. This should be the transform of the @c PlaneSurface
@@ -132,13 +132,11 @@ public:
 
   /**Equality operator*/
   virtual bool operator==(const Surface& sf) const override;
-
-  // Needed to prevent ambiguities with c++20.
   bool operator==(const DiscSurface& cf) const;
 
   /** Virtual constructor*/
   virtual DiscSurface* clone() const override;
-  
+
   /** Use the Surface as a ParametersBase constructor, from local parameters -
    * charged */
   virtual Surface::ChargedTrackParametersUniquePtr createUniqueTrackParameters(
