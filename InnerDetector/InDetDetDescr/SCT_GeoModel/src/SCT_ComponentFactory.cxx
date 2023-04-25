@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_GeoModel/SCT_ComponentFactory.h"
@@ -44,13 +44,12 @@ SCT_UniqueComponentFactory::SCT_UniqueComponentFactory(const std::string & name,
 			    InDetDD::SCT_DetectorManager* detectorManager,
                             SCT_GeometryManager* geometryManager,
                             SCT_MaterialManager* materials, 
-                            GeoModelIO::ReadGeoModel* sqliteReader) :
+                            GeoModelIO::ReadGeoModel* sqliteReader,
+                            std::shared_ptr<std::map<std::string, GeoFullPhysVol*>>        mapFPV,
+                            std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX) :
   SCT_ComponentFactory(name, detectorManager, geometryManager, materials),
   m_logVolume(nullptr),
-  m_sqliteReader(sqliteReader)
-{
-  if (sqliteReader) {
-    m_mapFPV = std::make_unique<std::map<std::string, GeoFullPhysVol*>>         (m_sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("SCT"));
-    m_mapAX  = std::make_unique< std::map<std::string, GeoAlignableTransform*>> (m_sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("SCT"));
-  }
-};
+  m_sqliteReader(sqliteReader),
+  m_mapFPV(mapFPV),
+  m_mapAX(mapAX)
+{};

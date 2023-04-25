@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SCT_GEOMODEL_SCT_FORWARD_H
@@ -23,7 +23,9 @@ public:
               InDetDD::SCT_DetectorManager* detectorManager,
               SCT_GeometryManager* geometryManager,
               SCT_MaterialManager* materials,
-              GeoModelIO::ReadGeoModel* sqliteReader);
+              GeoModelIO::ReadGeoModel* sqliteReader,
+              std::shared_ptr<std::map<std::string, GeoFullPhysVol*>>        mapFPV,
+              std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX);
   ~SCT_Forward();
 
   //

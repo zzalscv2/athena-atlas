@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_GeoModel/SCT_FwdSensor.h"
@@ -43,8 +43,10 @@ SCT_FwdSensor::SCT_FwdSensor(const std::string & name,
                              InDetDD::SCT_DetectorManager* detectorManager,
                              SCT_GeometryManager* geometryManager,
                              SCT_MaterialManager* materials,
-                             GeoModelIO::ReadGeoModel* sqliteReader)
-  : SCT_UniqueComponentFactory(name, detectorManager, geometryManager, materials, sqliteReader),
+                             GeoModelIO::ReadGeoModel* sqliteReader,
+                             std::shared_ptr<std::map<std::string, GeoFullPhysVol*>>        mapFPV,
+                             std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX)
+  : SCT_UniqueComponentFactory(name, detectorManager, geometryManager, materials, sqliteReader, mapFPV, mapAX),
     m_ringType{ringType},
     m_noElementWarning{true}
 {

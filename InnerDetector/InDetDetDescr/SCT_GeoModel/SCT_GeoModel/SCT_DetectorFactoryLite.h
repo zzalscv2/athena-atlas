@@ -59,8 +59,8 @@ class SCT_DetectorFactoryLite : public InDetDD::DetectorFactoryBase
   std::unique_ptr<SCT_MaterialManager> m_materials;
   bool m_useDynamicAlignFolders;
 
-  std::unique_ptr<std::map<std::string, GeoFullPhysVol*>>        m_mapFPV;
-  std::unique_ptr<std::map<std::string, GeoAlignableTransform*>> m_mapAX;
+  std::shared_ptr<std::map<std::string, GeoFullPhysVol*>>        m_mapFPV;
+  std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> m_mapAX;
 
 
 }; 

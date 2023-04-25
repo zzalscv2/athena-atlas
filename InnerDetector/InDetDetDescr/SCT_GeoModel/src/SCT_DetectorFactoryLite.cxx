@@ -130,8 +130,11 @@ SCT_DetectorFactoryLite::SCT_DetectorFactoryLite(GeoModelIO::ReadGeoModel *sqlit
   m_detectorManager->setVersion(version);
 
   if (sqliteReader) {
-    m_mapFPV = std::make_unique<std::map<std::string, GeoFullPhysVol*>>         (m_sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("SCT"));
-    m_mapAX  = std::make_unique< std::map<std::string, GeoAlignableTransform*>> (m_sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("SCT"));
+      
+      m_mapFPV = std::shared_ptr<std::map<std::string, GeoFullPhysVol*>> (new std::map<std::string, GeoFullPhysVol*> (m_sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("SCT")));
+        
+      m_mapAX  = std::shared_ptr< std::map<std::string, GeoAlignableTransform*>> (new std::map<std::string, GeoAlignableTransform *> (m_sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("SCT")));
+      
   }
 
 } 
@@ -173,7 +176,7 @@ void SCT_DetectorFactoryLite::create(GeoPhysVol*)
     m_detectorManager->numerology().addBarrel(0);
 
     // Create the SCT Barrel
-    SCT_Barrel sctBarrel("SCT_Barrel", m_detectorManager, m_geometryManager.get(), nullptr, m_sqliteReader);
+    SCT_Barrel sctBarrel("SCT_Barrel", m_detectorManager, m_geometryManager.get(), nullptr, m_sqliteReader, m_mapFPV, m_mapAX);
       
     SCT_Identifier id{m_geometryManager->athenaComps()->getIdHelper()};
     id.setBarrelEC(0);
@@ -198,7 +201,7 @@ void SCT_DetectorFactoryLite::create(GeoPhysVol*)
     m_detectorManager->numerology().addEndcap(2);
 
     // Create the Forward
-    SCT_Forward sctForwardPlus("SCT_ForwardA", +2, m_detectorManager, m_geometryManager.get(), nullptr, m_sqliteReader);
+    SCT_Forward sctForwardPlus("SCT_ForwardA", +2, m_detectorManager, m_geometryManager.get(), nullptr, m_sqliteReader, m_mapFPV, m_mapAX);
     SCT_Identifier idFwdPlus{m_geometryManager->athenaComps()->getIdHelper()};
     idFwdPlus.setBarrelEC(2);
     //GeoVPhysVol * forwardPlusPV =
@@ -223,7 +226,7 @@ void SCT_DetectorFactoryLite::create(GeoPhysVol*)
 
     m_detectorManager->numerology().addEndcap(-2);
     
-    SCT_Forward sctForwardMinus("SCT_ForwardC", -2, m_detectorManager, m_geometryManager.get(), nullptr, m_sqliteReader);
+    SCT_Forward sctForwardMinus("SCT_ForwardC", -2, m_detectorManager, m_geometryManager.get(), nullptr, m_sqliteReader, m_mapFPV, m_mapAX);
 
     SCT_Identifier idFwdMinus{m_geometryManager->athenaComps()->getIdHelper()};
     idFwdMinus.setBarrelEC(-2);

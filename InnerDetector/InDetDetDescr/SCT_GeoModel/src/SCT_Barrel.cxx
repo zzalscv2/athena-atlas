@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_GeoModel/SCT_Barrel.h"
@@ -43,8 +43,10 @@ SCT_Barrel::SCT_Barrel(const std::string & name,
                        InDetDD::SCT_DetectorManager* detectorManager,
                        SCT_GeometryManager* geometryManager,
                        SCT_MaterialManager* materials,
-                       GeoModelIO::ReadGeoModel* sqliteReader)
-  : SCT_UniqueComponentFactory(name, detectorManager, geometryManager, materials, sqliteReader)
+                       GeoModelIO::ReadGeoModel* sqliteReader,
+                       std::shared_ptr<std::map<std::string, GeoFullPhysVol*>>        mapFPV,
+                       std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX)
+  : SCT_UniqueComponentFactory(name, detectorManager, geometryManager, materials, sqliteReader, mapFPV, mapAX)
 {
   getParameters();
   if(!m_sqliteReader) {
@@ -104,7 +106,7 @@ SCT_Barrel::build(SCT_Identifier id)
         }
         
         // There is only one type of module. So we create it just the once and pass it to the layers.
-        SCT_Module module("Module", m_detectorManager, m_geometryManager, m_materials, m_sqliteReader);
+        SCT_Module module("Module", m_detectorManager, m_geometryManager, m_materials, m_sqliteReader, m_mapFPV, m_mapAX);
         
         // Create the interlinks
         SCT_InterLink interLink("InterLink", m_detectorManager, m_geometryManager, m_materials);
@@ -123,7 +125,7 @@ SCT_Barrel::build(SCT_Identifier id)
             // Create the layers
             
             layerLength = 0.;
-            SCT_Layer layer("Layer"+intToString(iLayer), iLayer, &module, m_detectorManager, m_geometryManager, m_materials, m_sqliteReader);
+            SCT_Layer layer("Layer"+intToString(iLayer), iLayer, &module, m_detectorManager, m_geometryManager, m_materials, m_sqliteReader, m_mapFPV, m_mapAX);
             barrel->add(new GeoNameTag("Layer#"+intToString(iLayer)));
             barrel->add(new GeoIdentifierTag(iLayer)); // Identifier layer= iLayer
             id.setLayerDisk(iLayer);
@@ -174,11 +176,11 @@ SCT_Barrel::build(SCT_Identifier id)
     {
         
         // There is only one type of module. So we create it just the once and pass it to the layers.
-        SCT_Module module("Module", m_detectorManager, m_geometryManager, nullptr, m_sqliteReader);
+        SCT_Module module("Module", m_detectorManager, m_geometryManager, nullptr, m_sqliteReader, m_mapFPV, m_mapAX);
     
         for (int iLayer = 0; iLayer < m_numLayers; iLayer++) {
             // Create the layers
-            SCT_Layer layer("Layer"+intToString(iLayer), iLayer, &module, m_detectorManager, m_geometryManager, m_materials, m_sqliteReader);
+            SCT_Layer layer("Layer"+intToString(iLayer), iLayer, &module, m_detectorManager, m_geometryManager, m_materials, m_sqliteReader, m_mapFPV, m_mapAX);
             id.setLayerDisk(iLayer);
             layer.build(id); //MB to verify
             // Store alignable transform

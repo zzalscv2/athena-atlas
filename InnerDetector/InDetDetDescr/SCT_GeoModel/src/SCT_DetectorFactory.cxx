@@ -167,7 +167,7 @@ void SCT_DetectorFactory::create(GeoPhysVol *world)
     m_detectorManager->numerology().addBarrel(0);
 
     // Create the SCT Barrel
-      SCT_Barrel sctBarrel("SCT_Barrel", m_detectorManager, m_geometryManager.get(), m_materials.get(), nullptr);
+      SCT_Barrel sctBarrel("SCT_Barrel", m_detectorManager, m_geometryManager.get(), m_materials.get(), nullptr, nullptr, nullptr);
   
     SCT_Identifier id{m_geometryManager->athenaComps()->getIdHelper()};
     id.setBarrelEC(0);
@@ -198,7 +198,7 @@ void SCT_DetectorFactory::create(GeoPhysVol *world)
     m_detectorManager->numerology().addEndcap(2);
 
     // Create the Forward
-    SCT_Forward sctForwardPlus("SCT_ForwardA", +2, m_detectorManager, m_geometryManager.get(), m_materials.get(), nullptr);
+    SCT_Forward sctForwardPlus("SCT_ForwardA", +2, m_detectorManager, m_geometryManager.get(), m_materials.get(), nullptr, nullptr, nullptr);
     
     SCT_Identifier idFwdPlus{m_geometryManager->athenaComps()->getIdHelper()};
     idFwdPlus.setBarrelEC(2);
@@ -231,7 +231,7 @@ void SCT_DetectorFactory::create(GeoPhysVol *world)
 
     m_detectorManager->numerology().addEndcap(-2);
     
-    SCT_Forward sctForwardMinus("SCT_ForwardC", -2, m_detectorManager, m_geometryManager.get(), m_materials.get(), nullptr);
+    SCT_Forward sctForwardMinus("SCT_ForwardC", -2, m_detectorManager, m_geometryManager.get(), m_materials.get(), nullptr, nullptr, nullptr);
 
     SCT_Identifier idFwdMinus{m_geometryManager->athenaComps()->getIdHelper()};
     idFwdMinus.setBarrelEC(-2);
