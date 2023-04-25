@@ -103,6 +103,21 @@ void compare (const HepMC::GenEvent& e1,
     const std::vector<HepMC::ConstGenParticlePtr> & resetBPs = e2.beams();
     compareGenParticle(originalBPs.at(0), resetBPs.at(0));
     compareGenParticle(originalBPs.at(1), resetBPs.at(1));
+    auto bcTime1 = e1.attribute<HepMC3::IntAttribute>("BunchCrossingTime");
+    assert(bcTime1);
+    auto bcTime2 = e2.attribute<HepMC3::IntAttribute>("BunchCrossingTime");
+    assert(bcTime2);
+    assert(bcTime1->value() == bcTime2->value());
+    auto floatProp1 = e1.attribute<HepMC3::FloatAttribute>("MyFloatProp");
+    assert(floatProp1);
+    auto floatProp2 = e2.attribute<HepMC3::FloatAttribute>("MyFloatProp");
+    assert(floatProp2);
+    assert(floatProp1->value() == floatProp2->value());
+    auto stringProp1 = e1.attribute<HepMC3::StringAttribute>("MyStringProp");
+    assert(stringProp1);
+    auto stringProp2 = e2.attribute<HepMC3::StringAttribute>("MyStringProp");
+    assert(stringProp2);
+    assert(stringProp1->value() == stringProp2->value());
 #else
     std::pair<HepMC::GenParticle*,HepMC::GenParticle*> originalBP = e1.beam_particles();
     std::pair<HepMC::GenParticle*,HepMC::GenParticle*> resetBP = e2.beam_particles();
@@ -195,6 +210,11 @@ void populateGenEvent(HepMC::GenEvent & ge)
   ge.add_vertex( myVertex );
   HepMC::set_signal_process_vertex(&ge, myVertex );
   ge.set_beam_particles(inParticle1,inParticle2);
+#if HEPMC3
+  ge.add_attribute("BunchCrossingTime",std::make_shared<HepMC3::IntAttribute>(0));
+  ge.add_attribute("MyFloatProp",std::make_shared<HepMC3::FloatAttribute>(0.5));
+  ge.add_attribute("MyStringProp",std::make_shared<HepMC3::StringAttribute>("EventNumber1"));
+#endif
 }
 
 void populateGenEvent2(HepMC::GenEvent & ge)
@@ -216,6 +236,11 @@ void populateGenEvent2(HepMC::GenEvent & ge)
   ge.add_vertex( myVertex );
   HepMC::set_signal_process_vertex(&ge, myVertex );
   ge.set_beam_particles(inParticle1,inParticle2);
+#if HEPMC3
+  ge.add_attribute("BunchCrossingTime",std::make_shared<HepMC3::IntAttribute>(25));
+  ge.add_attribute("MyFloatProp",std::make_shared<HepMC3::FloatAttribute>(1.5));
+  ge.add_attribute("MyStringProp",std::make_shared<HepMC3::StringAttribute>("EventNumber2"));
+#endif
 }
 
 void testit (const McEventCollection& trans1)
