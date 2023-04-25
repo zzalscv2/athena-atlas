@@ -25,3 +25,4 @@ SG::ExcAtomicMismatch: Non-atomic access to atomic aux variable  `cl::bar' (1) o
 SG::ExcInvalidThinningTarget: ThinningHandle target does not exist: 1234/asd
 SG::ExcBadIterSwap: Attempt to swap between containers with inconsistent ownership.
 SG::ExcAllocOwnership: Bad allocation ownership.
+SG::ExcBadVarName: Bad name for auxiliary variable `foo asd'. Variable and class name must be identifiers, and variable name must not be empty.

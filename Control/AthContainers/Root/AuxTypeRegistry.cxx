@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/AuxTypeRegistry.cxx
@@ -523,6 +523,13 @@ AuxTypeRegistry::findAuxID (const std::string& name,
     // fall through, get a new auxid and real type info
     // new auxid needed so a new data vector is created in the AuxStore
   }
+
+  // Verify now that the variable names are ok.
+  if (!checkName (name) || (!clsname.empty() && !checkName (clsname)))
+  {
+    throw ExcBadVarName (key);
+  }
+
   const IAuxTypeVectorFactory* fac = getFactory (ti);
   if (!fac || fac->isDynamic()) {
     IAuxTypeVectorFactory* fac2 = (*this.*makeFactory)();
@@ -605,6 +612,24 @@ const std::string& AuxTypeRegistry::inputRename (const std::string& key,
   if (it != m_renameMap.end())
     return it->second;
   return name;
+}
+
+
+/**
+ * @brief Check for valid variable name.
+ * @param name Name to check.
+ *
+ * Require that NAME be not empty, contains only alphanumeric characters plus
+ * underscore, and first character is not a digit.
+ */
+bool AuxTypeRegistry::checkName (const std::string& s)
+{
+  static const std::string chars1 = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_";
+  static const std::string chars2 = chars1 + "0123456789";
+
+  if (s.empty()) return false;
+  if (chars1.find (s[0]) == std::string::npos) return false;
+  return s.find_first_not_of (chars2, 1) == std::string::npos;
 }
 
 
