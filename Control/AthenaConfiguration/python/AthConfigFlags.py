@@ -1,8 +1,11 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from copy import copy, deepcopy
+from difflib import get_close_matches
+import importlib
 from AthenaCommon.Logging import logging
 from PyUtils.moduleExists import moduleExists
+
 _msg = logging.getLogger('AthConfigFlags')
 
 def isGaudiEnv():
@@ -268,7 +271,6 @@ class AthConfigFlags(object):
             self._flagdict[name].set(value)
             return
         errString="No flag with name \'{}\' found".format( name )
-        from difflib import get_close_matches
         closestMatch=get_close_matches(name,self._flagdict.keys(),1)
         if len(closestMatch)>0:
             errString+=". Did you mean \'{}\'?".format(  closestMatch[0] )
@@ -279,7 +281,6 @@ class AthConfigFlags(object):
             return self._flagdict[name].get(self)
 
         errString="No flag with name \'{}\' found".format( name )
-        from difflib import get_close_matches
         closestMatch=get_close_matches(name,self._flagdict.keys(),1)
         if len(closestMatch)>0:
             errString+=". Did you mean \'{}\'?".format( closestMatch[0] )
@@ -465,12 +466,51 @@ class AthConfigFlags(object):
     def args(self):
         return self._args
 
+
+    def fillFromString(self, flag_string):
+        """Fill the flags from a string of type key=value"""
+
+        try:
+            key, value = flag_string.split("=")
+        except ValueError:
+            raise ValueError(f"Cannot interpret argument {flag_string}, expected a key=value format")
+
+        key = key.strip()
+        value = value.strip()
+
+        # also allow key+=value to append
+        oper = "="
+        if (key[-1]=="+"):
+            oper = "+="
+            key = key[:-1]
+
+        if not self.hasFlag(key):
+            self._loadDynaFlags( '.'.join(key.split('.')[:-1]) ) # for a flag A.B.C dymanic flags from category A.B
+        if not self.hasFlag(key):
+            raise KeyError(f"{key} is not a known configuration flag")
+
+        enum = self._flagdict[key]._enum
+        # Regular flag
+        if enum is None:
+            try:
+                exec(f"type({value})")
+            except (NameError, SyntaxError): #Can't determine type, assume we got an un-quoted string
+                value=f"\"{value}\""
+        # FlagEnum
+        else:
+            # import the module containing the FlagEnum class
+            ENUM = importlib.import_module(enum.__module__)  # noqa: F841 (used in exec)
+            value=f"ENUM.{value}"
+
+        # Set the value
+        exec(f"self.{key}{oper}{value}")
+
+
     # parser argument must be an ArgumentParser returned from getArgumentParser()
     def fillFromArgs(self, listOfArgs=None, parser=None):
         """
         Used to set flags from command-line parameters, like ConfigFlags.fillFromArgs(sys.argv[1:])
         """
-        import importlib
         import sys
 
         self._tryModify()
@@ -523,20 +563,12 @@ class AthConfigFlags(object):
         if args.filesInput is not None:
             self.Input.Files = [] # remove generic
             for f in args.filesInput:
-                # removing this as decided for now would be better to force users to use "--" terminator to get good behaviour
-                # if "=" in f and "--" not in leftover:
-                #     # assume this is actually a positional argument ... user forgot to use "--" terminator before starting
-                #     # can add this onto leftovers
-                #     print("Assuming",f,"is a flag instead of input file. Use list terminator '--' to follow inputFiles with flags")
-                #     leftover += [f]
-                #     continue
                 for ffile in f.split(","):
                     if '*' in ffile: # handle wildcard
                         import glob
                         self.Input.Files += glob.glob(ffile)
                     else:
                         self.Input.Files += [ffile]
-
 
         if args.loglevel is not None:
             from AthenaCommon import Constants
@@ -560,50 +592,17 @@ class AthConfigFlags(object):
             if arg=='--':
                 argList += ["---"]
                 continue # allows for multi-value arguments to be terminated by a " -- "
-            #Safety check on arg: Contains exactly one '=' and left side is a valid flag
-            argsplit=arg.split("=")
-            if len(argsplit)!=2:
-                if do_help:
-                    argList += arg.split(".") # put arg back into list
-                    continue # allow fallover when doing help
-                raise ValueError(f"Can't interpret argument {arg}, expected a key=value format")
+            if do_help and '=' not in arg:
+                argList += arg.split(".") # put arg back back for help (but split by sub-categories)
+                continue
 
-            key=argsplit[0].strip()
-            value=argsplit[1].strip()
-
-            # also allow key+=value to append
-            oper = "="
-            if (key[-1]=="+"):
-                oper = "+="
-                key = key[:-1]
-
-            if not self.hasFlag(key):
-                self._loadDynaFlags( '.'.join(key.split('.')[:-1]) ) # for a flag A.B.C dymanic flags from category A.B
-            if not self.hasFlag(key):
-                raise KeyError(f"{key} is not a known configuration flag")
-
-            enum = self._flagdict[key]._enum
-            # Regular flag
-            if enum is None:
-                try:
-                    exec(f"type({value})")
-                except (NameError, SyntaxError): #Can't determine type, assume we got an un-quoted string
-                    value=f"\"{value}\""
-            # FlagEnum
-            else:
-                # import the module containing the FlagEnum class
-                ENUM = importlib.import_module(enum.__module__)  # noqa: F841 (used in exec)
-                value=f"ENUM.{value}"
-
-            # Set the value
-            exec(f"self.{key}{oper}{value}")
+            self.fillFromString(arg)
 
         if do_help:
             if parser.epilog is None: parser.epilog=""
             parser.epilog += "  Note: Specify additional flags in form <flagName>=<value>."
             subparsers = {"":[parser,parser.add_subparsers(help=argparse.SUPPRESS)]} # first is category's parser, second is subparsers (effectively the category's subcategories)
             # silence logging while evaluating flags
-            from AthenaCommon.Logging import logging
             logging.root.setLevel(logging.ERROR)
             def getParser(category): # get parser for a given category
                 if category not in subparsers.keys():
