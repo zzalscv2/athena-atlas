@@ -43,12 +43,15 @@ namespace Crest {
 
   CrestClient::CrestClient(std::string_view url, bool check_version) : m_mode(SERVER_MODE) {
     size_t found = url.find_first_of(':');
+    size_t n = url.size();
 
     std::string_view url_new = url.substr(found + 3); //url_new is the url excluding the http part
     size_t found1 = url_new.find_first_of(':');
     size_t found2 = url_new.find_first_of('/');
+
     std::string_view host;
     std::string_view port;
+    std::string_view resources;
     if (found1 != std::string::npos && found2 != std::string::npos) {
       host = url_new.substr(0, found1);
       port = url_new.substr(found1 + 1, found2 - found1 - 1);
@@ -62,6 +65,12 @@ namespace Crest {
       port = "80";
       host = url_new;
     }
+
+    if (found2 < n - 1){
+      resources = url_new.substr(found2,n - 1);
+      m_PATH = resources;
+    }
+
     m_port = std::string(port);
     m_host = std::string(host);
 
@@ -92,7 +101,7 @@ namespace Crest {
 
     checkFsException(method_name);
 
-    std::string current_path = s_PATH;
+    std::string current_path = m_PATH;
     current_path += s_TAG_PATH;
 
     std::string retv;
@@ -137,7 +146,7 @@ namespace Crest {
       }
     }
 
-    std::string current_path = s_PATH;
+    std::string current_path = m_PATH;
     current_path += s_TAG_PATH;
     current_path += '?';
     current_path += params;
@@ -156,7 +165,7 @@ namespace Crest {
 
     checkFsException(method_name);
 
-    std::string current_path = s_PATH;
+    std::string current_path = m_PATH;
     current_path += s_TAG_PATH;
 
     if (!name.empty()) {
@@ -191,7 +200,7 @@ namespace Crest {
 
     checkFsException(method_name);
 
-    std::string current_path = s_PATH;
+    std::string current_path = m_PATH;
     current_path += s_ADMIN_PATH;
     current_path += s_TAG_PATH;
     current_path += '/';
@@ -210,7 +219,7 @@ namespace Crest {
       return findTagFs(tagName);
     }
 
-    std::string current_path = s_PATH + s_TAG_PATH + '/' + tagName;
+    std::string current_path = m_PATH + s_TAG_PATH + '/' + tagName;
 
     std::string retv;
 
@@ -247,7 +256,7 @@ namespace Crest {
       return;
     }
 
-    std::string current_path = s_PATH;
+    std::string current_path = m_PATH;
     current_path += s_TAG_PATH;
 
     std::string retv;
@@ -260,7 +269,7 @@ namespace Crest {
 
     checkFsException(method_name);
 
-    std::string current_path = s_PATH;
+    std::string current_path = m_PATH;
     current_path += s_TAG_PATH;
     current_path += '/';
     current_path += tagname;
@@ -275,7 +284,7 @@ namespace Crest {
 
     checkFsException(method_name);
 
-    std::string current_path = s_PATH;
+    std::string current_path = m_PATH;
     current_path += s_TAG_PATH;
     current_path += '/';
     current_path += tagname;
@@ -374,7 +383,7 @@ namespace Crest {
       return findAllIovsFs(tagname);
     }
 
-    std::string current_path = s_PATH;
+    std::string current_path = m_PATH;
     current_path += s_IOV_PATH;
     current_path += "?method=";
     current_path += s_METHOD_IOVS;
@@ -404,7 +413,7 @@ namespace Crest {
     // http://crest-01.cern.ch:9090/crestapi/iovs?method=IOVS&tagname=MuonAlignMDTBarrelAlign-RUN2-BA_ROLLING_12-BLKP-UPD4-00
     // http://crest-02.cern.ch:8090/crestapi/tags?size=10&page=2&sort=name:DESC
 
-    std::string current_path = s_PATH;
+    std::string current_path = m_PATH;
     current_path += s_IOV_PATH;
     current_path += "?method=";
     current_path += s_METHOD_IOVS;
@@ -438,7 +447,7 @@ namespace Crest {
       return getSizeFS(tagname);
     }
 
-    std::string current_path = s_PATH;
+    std::string current_path = m_PATH;
     current_path += s_IOV_PATH;
     current_path += s_IOV_SIZE_PATH;
     current_path += "?tagname=";
@@ -475,7 +484,7 @@ namespace Crest {
 
     checkFsException(method_name);
 
-    std::string current_path = s_PATH;
+    std::string current_path = m_PATH;
     current_path += s_IOV_PATH;
     current_path += "?method=";
     current_path += s_METHOD_IOVS;
@@ -499,7 +508,7 @@ namespace Crest {
 
     checkFsException(method_name);
 
-    std::string current_path = s_PATH;
+    std::string current_path = m_PATH;
     current_path += s_IOV_PATH;
 
     current_path += "?method=";
@@ -526,7 +535,7 @@ namespace Crest {
 
     checkFsException(method_name);
 
-    std::string current_path = s_PATH;
+    std::string current_path = m_PATH;
     current_path += s_IOV_PATH;
 
     current_path += "?method=";
@@ -561,7 +570,7 @@ namespace Crest {
 
     checkFsException(method_name);
 
-    std::string current_path = s_PATH;
+    std::string current_path = m_PATH;
     current_path += s_IOV_PATH;
 
     current_path += "?method=";
@@ -586,7 +595,7 @@ namespace Crest {
 
     checkFsException(method_name);
 
-    std::string current_path = s_PATH;
+    std::string current_path = m_PATH;
     current_path += s_IOV_PATH;
 
     current_path += "?method=";
@@ -639,7 +648,7 @@ namespace Crest {
     };
 
 
-    std::string current_path = s_PATH;
+    std::string current_path = m_PATH;
     current_path += s_IOV_PATH;
 
     std::string retv;
@@ -654,7 +663,7 @@ namespace Crest {
 
     checkFsException(method_name);
 
-    std::string current_path = s_PATH;
+    std::string current_path = m_PATH;
     current_path += s_ADMIN_PATH;
     current_path += s_GLOBALTAG_PATH;
     current_path += '/';
@@ -673,7 +682,7 @@ namespace Crest {
       return;
     }
 
-    std::string current_path = s_PATH;
+    std::string current_path = m_PATH;
     current_path += s_GLOBALTAG_PATH;
     std::string retv;
     retv = performRequest(current_path, POST, js, method_name);
@@ -710,7 +719,7 @@ namespace Crest {
       return s;
     }
 
-    std::string current_path = s_PATH;
+    std::string current_path = m_PATH;
     current_path += s_GLOBALTAG_PATH;
     current_path += '/';
     current_path += name;
@@ -740,7 +749,7 @@ namespace Crest {
 
     checkFsException(method_name);
 
-    std::string current_path = s_PATH;
+    std::string current_path = m_PATH;
     current_path += s_ADMIN_PATH;
     current_path += s_GLOBALTAG_PATH;
     current_path += '/';
@@ -755,7 +764,7 @@ namespace Crest {
 
     checkFsException(method_name);
 
-    std::string current_path = s_PATH;
+    std::string current_path = m_PATH;
     current_path += s_GLOBALTAG_PATH;
     std::string retv;
     nlohmann::json js = nullptr;
@@ -770,7 +779,7 @@ namespace Crest {
 
     checkFsException(method_name);
 
-    std::string current_path = s_PATH;
+    std::string current_path = m_PATH;
     current_path += s_GLOBALTAG_PATH;
 
     std::string retv;
@@ -787,7 +796,7 @@ namespace Crest {
 
     checkFsException(method_name);
 
-    std::string current_path = s_PATH;
+    std::string current_path = m_PATH;
     current_path += s_GLOBALTAG_PATH;
     if (!name.empty()) {
       std::string nameString = "?name=";
@@ -826,7 +835,7 @@ namespace Crest {
       return findGlobalTagMapFs(name);
     }
 
-    std::string current_path = s_PATH;
+    std::string current_path = m_PATH;
     current_path += s_GLOBALTAG_MAP_PATH;
     current_path += '/';
     current_path += name;
@@ -850,7 +859,7 @@ namespace Crest {
       return;
     }
 
-    std::string current_path = s_PATH;
+    std::string current_path = m_PATH;
     current_path += s_GLOBALTAG_MAP_PATH;
 
     std::string retv;
@@ -875,7 +884,7 @@ namespace Crest {
       return;
     }
 
-    std::string current_path = s_PATH + s_GLOBALTAG_MAP_PATH;
+    std::string current_path = m_PATH + s_GLOBALTAG_MAP_PATH;
 
     std::string retv;
 
@@ -892,7 +901,7 @@ namespace Crest {
       return getBlobFs(hash);
     }
 
-    std::string current_path = s_PATH;
+    std::string current_path = m_PATH;
     current_path += s_PAYLOAD_PATH;
     current_path += '/';
     current_path += hash;
@@ -911,7 +920,7 @@ namespace Crest {
       return getBlobInStreamFs(hash, out);
     }
 
-    std::string current_path = s_PATH;
+    std::string current_path = m_PATH;
     current_path += s_PAYLOAD_PATH;
     current_path += '/';
     current_path += hash;
@@ -933,7 +942,7 @@ namespace Crest {
       return getPayloadMetaInfoAsJsonFS(hash);
     }
 
-    std::string current_path = s_PATH;
+    std::string current_path = m_PATH;
     current_path += s_PAYLOAD_PATH;
     current_path += '/';
     current_path += hash;
@@ -957,7 +966,7 @@ namespace Crest {
       return getPayloadMetaInfoAsStringFS(hash);
     }
 
-    std::string current_path = s_PATH;
+    std::string current_path = m_PATH;
     current_path += s_PAYLOAD_PATH;
     current_path += '/';
     current_path += hash;
@@ -977,7 +986,7 @@ namespace Crest {
 
     checkFsException(method_name);
 
-    std::string current_path = s_PATH;
+    std::string current_path = m_PATH;
     current_path += s_MONITORING_PAYLOAD_PATH;
     current_path += "?tagname=";
     current_path += tagname;
@@ -998,7 +1007,7 @@ namespace Crest {
 
     checkFsException(method_name);
 
-    std::string current_path = s_PATH;
+    std::string current_path = m_PATH;
     current_path += s_MONITORING_PAYLOAD_PATH;
 
     std::string retv;
@@ -1019,7 +1028,7 @@ namespace Crest {
       return getPayloadAsJsonFS(hash);
     }
 
-    std::string current_path = s_PATH;
+    std::string current_path = m_PATH;
     current_path += s_PAYLOAD_PATH;
     current_path += '/';
     current_path += hash;
@@ -1043,7 +1052,7 @@ namespace Crest {
       return getPayloadAsStringFS(hash);
     }
 
-    std::string current_path = s_PATH;
+    std::string current_path = m_PATH;
     current_path += s_PAYLOAD_PATH;
     current_path += '/';
     current_path += hash;
@@ -1063,7 +1072,7 @@ namespace Crest {
 
     checkFsException(method_name);
 
-    std::string current_path = s_PATH + s_PAYLOAD_PATH;
+    std::string current_path = m_PATH + s_PAYLOAD_PATH;
 
     std::string retv;
 
@@ -1138,7 +1147,7 @@ namespace Crest {
 
     checkFsException(method_name);
 
-    std::string current_path = s_PATH + s_FOLDER_PATH;
+    std::string current_path = m_PATH + s_FOLDER_PATH;
 
     std::string retv;
 
@@ -1156,7 +1165,7 @@ namespace Crest {
 
     checkFsException(method_name);
 
-    std::string current_path = s_PATH + s_FOLDER_PATH;
+    std::string current_path = m_PATH + s_FOLDER_PATH;
 
     std::string retv;
 
@@ -1173,7 +1182,7 @@ namespace Crest {
 
     checkFsException(method_name);
 
-    std::string current_path = s_PATH + s_RUNINFO_PATH;
+    std::string current_path = m_PATH + s_RUNINFO_PATH;
 
     std::string retv;
 
@@ -1191,7 +1200,7 @@ namespace Crest {
 
     checkFsException(method_name);
 
-    std::string current_path = s_PATH + s_RUNINFO_PATH;
+    std::string current_path = m_PATH + s_RUNINFO_PATH;
 
     std::string retv;
 
@@ -1203,7 +1212,7 @@ namespace Crest {
 
     checkFsException(method_name);
 
-    std::string current_path = s_PATH;
+    std::string current_path = m_PATH;
     current_path += s_RUNINFO_PATH;
     current_path += s_RUNINFO_LIST_PATH;
     current_path += '?';
@@ -1466,7 +1475,7 @@ namespace Crest {
 // Request method to store payloads in batch mode
 
   std::string CrestClient::storeBatchPayloadRequest(const std::string& tag, uint64_t endtime, const std::string& js) {
-    std::string current_path = s_PATH;
+    std::string current_path = m_PATH;
     current_path += s_PAYLOAD_PATH;
 
     CURL* curl;
@@ -1939,7 +1948,7 @@ namespace Crest {
               "ERROR in CrestClient::createTagMetaInfo cannot get the tag name from tag meta info JSON.");
     }
 
-    std::string current_path = s_PATH;
+    std::string current_path = m_PATH;
     current_path += s_TAG_PATH;
     current_path += '/';
     current_path += tagname;
@@ -1968,7 +1977,7 @@ namespace Crest {
       return getTagMetaInfoFs(tagname);
     }
 
-    std::string current_path = s_PATH;
+    std::string current_path = m_PATH;
     current_path += s_TAG_PATH;
     current_path += '/';
     current_path += tagname;
@@ -2002,7 +2011,7 @@ namespace Crest {
       return;
     }
 
-    std::string current_path = s_PATH + s_TAG_PATH + '/' + tagname + s_META_PATH;
+    std::string current_path = m_PATH + s_TAG_PATH + '/' + tagname + s_META_PATH;
 
     std::string retv;
 
@@ -2030,7 +2039,7 @@ namespace Crest {
       return;
     }
 
-    std::string current_path = s_PATH;
+    std::string current_path = m_PATH;
     current_path += s_TAG_PATH;
     current_path += '/';
     current_path += tagname;
@@ -2100,6 +2109,11 @@ namespace Crest {
     }
     std::string workDir = m_root_folder;
     workDir += s_FS_TAG_PATH;
+
+    if (!std::filesystem::exists(std::filesystem::path(workDir))) {
+      std::filesystem::create_directory(std::filesystem::path(workDir));
+    }
+
     workDir += '/';
     workDir += name;
     std::string tagMetaFile = workDir;
