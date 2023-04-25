@@ -20,7 +20,7 @@ runListDir = "./YearStats-common"
 parser = argparse.ArgumentParser(description='')
 parser.add_argument('-y','--year',dest='parser_year',default = "2023",help='Year [Default: 2023].',action='store')
 parser.add_argument('-t','--tag',dest='parser_tag',help='DeMo tag',action='store')
-parser.add_argument('-s','--system',dest='parser_system',default="",help='System: LAr, CaloCP... [Default : all systems : LAr,Pixel,SCT,TRT,Tile,MDT,TGC,RPC,Trig_L1,Trig_HLT,Lumi,Global,ALFA,LUCID,ZDC,IDGlobal,BTag,CaloCP,MuonCP]',action='store')
+parser.add_argument('-s','--system',dest='parser_system',default="",help='System: LAr, CaloCP... [Default : all systems : LAr,Pixel,SCT,TRT,Tile,MDT,TGC,RPC,Trig_L1,Trig_HLT,Lumi,Global,ALFA,AFP,LUCID,ZDC,IDGlobal,BTag,CaloCP,MuonCP]',action='store')
 parser.add_argument('--description',dest='parser_description',default = "",help='Short description for DeMo plots',action='store')
 parser.add_argument('--defectTag',dest='parser_defectTag',default = "",help='Defect tag',action='store')
 parser.add_argument('--vetoTag',dest='parser_vetoTag',default = "",help='Veto tag (relevant only for LAr)',action='store')
@@ -33,13 +33,13 @@ parser.print_help()
 
 systems = []
 if args.parser_system == "":
-  systems = ["LAr","Pixel","SCT","TRT","Tile","MDT","TGC","RPC","Trig_L1","Trig_HLT","Lumi","Global","ALFA","LUCID","ZDC","IDGlobal","BTag","CaloCP","MuonCP"]
+  systems = ["LAr","Pixel","SCT","TRT","Tile","MDT","TGC","RPC","Trig_L1","Trig_HLT","Lumi","Global","ALFA","AFP","LUCID","ZDC","IDGlobal","BTag","CaloCP","MuonCP"]
 else:
   systems.append(args.parser_system)
 
 b_createDeMoConfig = True
 
-configFilename = "%s/DeMoConfig-%s-%s.dat"%(runListDir,args.parser_year,args.parser_tag)
+configFilename = "%s/%s/DeMoConfig-%s-%s.dat"%(runListDir,args.parser_year,args.parser_year,args.parser_tag)
 if os.path.exists(configFilename):
     print("Warning: this year/tag apparently already exists. As the database tags must be uniform among systems, I will keep the already defined tags:")
     os.system("cat %s"%configFilename)
@@ -128,7 +128,7 @@ for iSystem in systems:
 
 # When requested, generation of run list
 print("=========== Treatment of run list")
-newRunListName = "%s/runlist-%s-%s.dat"%(runListDir,args.parser_year,args.parser_tag)
+newRunListName = "%s/%s/runlist-%s-%s.dat"%(runListDir,args.parser_year,args.parser_year,args.parser_tag)
 
 if args.parser_xmlGRL != "":
   if "https" in args.parser_xmlGRL:

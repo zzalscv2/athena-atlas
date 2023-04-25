@@ -64,10 +64,10 @@ def returnPeriod(runNb,system,year,tag):
    
 ########################################################################
 # Return the year/tag properties (defect/veto/lumi tags...) stored in
-# YearStats-commonDeMoConfig-[year]-[tag].dat
+# YearStats-common/DeMoConfig-[year]-[tag].dat
 def retrieveYearTagProperties(year,tag):
    ytp = {"Description":"","Defect tag":"","Veto tag":"","OflLumi tag":"","OflLumiAcct tag":""}
-   DeMoConfigFile = open("YearStats-common/DeMoConfig-%s-%s.dat"%(year,tag),"r")
+   DeMoConfigFile = open("YearStats-common/%s/DeMoConfig-%s-%s.dat"%(year,year,tag),"r")
    for line in DeMoConfigFile:
       for i_ytp in ytp.keys():
          if ("%s: "%i_ytp in line):
@@ -76,7 +76,7 @@ def retrieveYearTagProperties(year,tag):
 
    for i_ytp in ytp.keys():
       if (ytp[i_ytp] == ""):
-         print("ERROR: Missing (%s) in YearStats-common/DeMoConfig-%s-%s.dat -> Please check or define it with DeMoSetup.py"%(i_ytp,year,tag))
+         print("ERROR: Missing (%s) in YearStats-common/%s/DeMoConfig-%s-%s.dat -> Please check or define it with DeMoSetup.py"%(i_ytp,year,year,tag))
 
    return ytp
 
@@ -937,6 +937,42 @@ def initializeMonitoredDefects(system,partitions,defects0,defectVeto,veto,signOf
     signOff["EXPR."] = []
     signOff["BULK"] = []
     signOff["FINAL"] = []
+
+#################################### AFP defects
+  if system == "AFP":
+    partitions["color"] = {'C':kYellow-9,'A':kYellow,'C_FAR':kOrange,'C_NEAR':kOrange-3,'A_FAR':kRed-3,'A_NEAR':kBlue-3}
+    partitions["list"] = partitions["color"].keys()
+
+    defects0["prefix"] = ["AFP"]
+    # Partition intolerable and tolerable defects - Order determines what defect is proeminent
+    # Warning : do not remove/edit the comment specifying the system. It is used to display the defects in the webpage
+    defects0["partIntol"] = ["TOF_NOT_OPERATIONAL_HV","TOF_NOT_OPERATIONAL_LV","TOF_WRONG_CABLING","TOF_WRONG_TIMING","TOF_TRIGGER_PROBLEM","SIT_NOT_OPERATIONAL_HV","SIT_NOT_OPERATIONAL_LV","SIT_NOT_OPERATIONAL","SIT_WRONG_TIMING","IN_GARAGE"] # AFP system
+    defects0["partTol"] = [] # AFP system
+    # Global intolerable and tolerable defects
+    # Warning : do not remove/edit the comment specifying the system. It is used to display the defects in the webpage
+    defects0["globIntol"] = ["WRONG_MAPPING","ERROR"]  # AFP system
+    defects0["globTol"] = []  # AFP system
+    
+    veto["all"] = [] # Veto name as defined in the COOL database
+    veto["COOL"] = {} # Veto name as defined in the COOL database
+
+    defectVeto["description"] = {"TOF_NOT_OPERATIONAL_HV":"[ToF] Non-nominal HV",
+                                 "TOF_NOT_OPERATIONAL_LV":"[ToF] Non-operational LV",
+                                 "TOF_WRONG_CABLING":"[ToF] Wrong cabling",
+                                 "TOF_WRONG_TIMING":"[ToF] Wrong timing",
+                                 "TOF_TRIGGER_PROBLEM":"[ToF] Trigger problem",
+                                 "SIT_NOT_OPERATIONAL_HV":"[SiT] < 3 planes at nominal HV",
+                                 "SIT_NOT_OPERATIONAL_LV":"[SiT] < 3 planes available (LV)",
+                                 "SIT_NOT_OPERATIONAL":"[SiT] < 3 SiT planes available",
+                                 "SIT_WRONG_TIMING":"[SiT] Wrong timing",
+                                 "IN_GARAGE":">= 1 RP in the garage or moving",
+                                 "WRONG_MAPPING":"[ToF] Wrong mapping",
+                                 "ERROR":"Unknown problem"}
+
+    signOff["EXPR."] = ["AFP_UNCHECKED"]
+    signOff["BULK"] = ["AFP_BULK_UNCHECKED"]
+    signOff["FINAL"] = []
+
 
 ################################# ZDC defects
   if system == "ZDC":

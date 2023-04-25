@@ -229,6 +229,21 @@ def extractNamePartition(foundDefect):
       defectSplitted = foundDefect.split("_",1)
       if len(defectSplitted) > 1:
         defectName=defectSplitted[1]
+    elif (foundDefect.startswith("AFP")): # AFP_[NAME] or AFP_[PART]_[NAME]
+      if ("_A_" in foundDefect or "_C_" in foundDefect): #AFP_[PART]_[NAME]
+        defectSplitted = foundDefect.split("_",2)
+        if len(defectSplitted) > 2:
+          defectName=defectSplitted[2] 
+          defectPart=defectSplitted[1]
+      if ("_A_NEAR_" in foundDefect or "_C_NEAR_" in foundDefect or "_A_FAR_" in foundDefect or "_C_FAR_" in foundDefect): #AFP_[PART]_[NEAR/FAR]_[NAME]
+        defectSplitted = foundDefect.split("_",3)
+        if len(defectSplitted) > 3:
+          defectName=defectSplitted[3] 
+          defectPart="%s_%s"%(defectSplitted[1],defectSplitted[2])
+      else:
+        defectSplitted = foundDefect.split("_",1)
+        if len(defectSplitted) > 1:
+          defectName=defectSplitted[1] 
     elif (foundDefect.startswith("LCD")): # LCD_[NAME]
       defectSplitted = foundDefect.split("_",1)
       if len(defectSplitted) > 1:
@@ -276,7 +291,7 @@ def updateRunList(year=time.localtime().tm_year):
                     fileRuns.append(r)
                     print("Adding the ATLAS ready run: %s"%r)
                     outfile.write("%s\n"%r)
-    allRunListDat = "%s/runlist-%s-AtlasReady.dat"%(runListDir,str(year))
+    allRunListDat = "%s/%s/runlist-%s-AtlasReady.dat"%(runListDir,str(year),str(year))
     if os.path.isfile(allRunListDat):
         fRunList = open(allRunListDat,'r+')
         fileRuns = [l.strip() for l in fRunList.readlines() ]
@@ -456,7 +471,7 @@ if len(options['runRange']) == 2: # Run range
 # runlist['primary'] contains all runs extracted from the runList convoluted with the run range (if any was defined - not mandatory - Deactivated for weeklyReport)
 # runlist['toprocess'] is derived from the primary list. Some runs may be removed depending on the options (skipAlreadyUpdated) and also for the weekly report (see below)
 # runlist['toprocess'] contains all run that will be processed and that will be displayed in the final table / plots
-runListFilename = "%s/%s"%(runListDir,runlist['filename'])
+runListFilename = "%s/%s/%s"%(runListDir,options['year'],runlist['filename'])
 if os.path.exists(runListFilename):
   fRunList = open(runListFilename,'r')
   for iRun in fRunList.readlines():
@@ -471,7 +486,7 @@ if (len(runlist['primary']) == 0):
   print("No run found -> Exiting")
   sys.exit()
 
-roughVetoFilename = runListDir+"/%s/roughVeto-%s.dat"%(options['system'],options['year'])
+roughVetoFilename = runListDir+"/%s/%s/roughVeto-%s.dat"%(options['system'],options['year'],options['year'])
 if os.path.exists(roughVetoFilename):
   fRoughVeto = open(roughVetoFilename,'r')
   for iRun in fRoughVeto.readlines():
@@ -567,8 +582,8 @@ if options['weekly']: # Weekly report - Look for the last 7-days runs + the sign
         elif (time.time()-runinfo[run]["Run start"] < oneWeek):
             print("Run",run,"was acquired during the last seven days")
             runlist['toprocess'].append(run)
-    if (os.path.exists("%s/runlist-weekly.dat")%runListDir):
-        weeklyFile = open("%s/runlist-weekly.dat"%runListDir,'r')
+    if (os.path.exists("%s/%s/runlist-weekly.dat"%(runListDir,options['year']))):
+        weeklyFile = open("%s/%s/runlist-weekly.dat"%(runListDir,options['year']),'r')
         print("I found a runlist-weekly.dat file and will add some runs...")
         for iRun in weeklyFile.readlines():
           if runlist['weekly-dqmeeting'] == "": # The first line of the weekly file contains the date of the DQ meeting
@@ -607,6 +622,13 @@ for p in allperiods:
                 periodListCurrent[p] = [run]
             else:
                 periodListCurrent[p].append(run)
+
+if (len(allperiods) == 0 and options['updateYearStats']):
+    print("No period available yet for the runs to process")
+    print("I am exiting...")
+    if options['updateYearStats']:
+        os.system("rm -f %s"%tokenName)
+    sys.exit()
 
 for irun in runinfo.keys():
     runinfo[irun]['newInYearStats'] = False
@@ -813,15 +835,19 @@ for irun,runNb in enumerate(runlist['toprocess']):
   defectDatabase = DQDefects.DefectsDB(tag=options['defectTag'])
   # Treatement of global filter
   globalFilterLB = []
+  runinfo[runNb]['globalFilter'] = False
+  runinfo["AllRuns"]['globalFilter'] = False
   if not options['noGlobalFilter']:
     retrievedDefects = defectDatabase.retrieve((runNb, 1), (runNb, runinfo[runNb]['nLB']), grlDef["globalFilterDefects"])
     for iRetrievedDefects in retrievedDefects:
       if (iRetrievedDefects.until.lumi > 4000000000):
         # The GLOBAL_NOTCONSIDERED defect is apparently set by default with a huge end of IOV.
+        # A priori, it should not survive the 48 hours calibration loop but anyway, In such a case, no filter is applied.
         # BT October 2022 : this protection should be obsolete with the change of run 2 lines above. To be confirmed
-        if (time.time()-v_lbTimeSt[len(v_lbTimeSt)][1]) > 48*3600: # During 48 hours after the end of run, the global filter is deactived to display all recent runs
-          for lb in range(iRetrievedDefects.since.lumi,runinfo[runNb]['nLB']+1):
-            globalFilterLB.append(lb)
+#        if (time.time()-v_lbTimeSt[len(v_lbTimeSt)][1]) > 48*3600: # During 48 hours after the end of run, the global filter is deactived to display all recent runs
+#          for lb in range(iRetrievedDefects.since.lumi,runinfo[runNb]['nLB']+1):
+#            globalFilterLB.append(lb)
+        continue
       else:
         for lb in range(iRetrievedDefects.since.lumi,iRetrievedDefects.until.lumi):
           globalFilterLB.append(lb)
@@ -833,6 +859,9 @@ for irun,runNb in enumerate(runlist['toprocess']):
   for lb in list(atlasready.keys()):
     if (atlasready[lb]>0): runinfo[runNb]['readyLB']+=[lb] 
     if (atlasready[lb]>0) and (lb not in globalFilterLB): runinfo[runNb]['readyLB_globalFilter']+=[lb] 
+    if (lb in globalFilterLB):
+      runinfo[runNb]['globalFilter'] = True
+      runinfo["AllRuns"]['globalFilter'] = True
   runinfo[runNb]['nLBready'] = float(len(runinfo[runNb]['readyLB_globalFilter']))    
 
   thisRunPerLB = dict() # Contains various per LB run characteristics retrieved from COOL
@@ -1093,7 +1122,7 @@ if (runinfo['AllRuns']['Lumi']!=0):
       c1[canvasIndex] = TCanvas("runSummary_%s"%canvasIndex,"Run collection - %s"%canvasIndex,10,10,1000,(len(runlist['toprocess'])+6)*22)
       column[canvasIndex] = []
       lineNb[canvasIndex] = 0
-      labels_col = ["Run","Run start / stop","LB ready","Peak lumi","Int. lumi","GRL ineff.","Veto ineff.","Period","Status"]
+      labels_col = ["Run","Run start / stop","LB ready","Peak lumi","Filt. lumi","GRL ineff.","Veto ineff.","Period","Status"]
       xlow_col = [0.01,0.075,0.405,0.485,0.57,0.65,0.735,0.83,0.89,0.99]
       ylowTable = 0.99 - 0.98/(len(runlist['toprocess'])+6)*(len(runlist['toprocess'])+2)
 
@@ -1107,6 +1136,8 @@ if (runinfo['AllRuns']['Lumi']!=0):
       notYetSignedOff_TPave = TPaveText(xlow_col[0],0.01,xlow_col[len(labels_col)],ylowTable)
       if runlist['weekly-dqmeeting'] != "":
         notYetSignedOff_TPave.AddText("#club: runs to be signed off at %s"%runlist['weekly-dqmeeting'])
+      if runinfo['AllRuns']['globalFilter'] != "":
+        notYetSignedOff_TPave.AddText("#diamond: runs for which a global filter has been applied (for more information, look at the Global system)")
       notYetSignedOff_TPave.AddText("Completed at %s"%(time.strftime("%H:%M (%d %b)", time.localtime())))
       notYetSignedOff_TPave.SetFillColor(kAzure+2)
       
@@ -1118,7 +1149,10 @@ if (runinfo['AllRuns']['Lumi']!=0):
     column[canvasIndex][1].AddText("%s / %s"%(runinfo[runNb]['Start'],runinfo[runNb]['Stop']))
     column[canvasIndex][2].AddText("%s"%(listify(runinfo[runNb]["readyLB"])))
     column[canvasIndex][3].AddText("%.1e"%(runinfo[runNb]['peakLumi']*1e30))
-    column[canvasIndex][4].AddText("%s"%(strLumi(runinfo[runNb]['Lumi'])))
+    if (runinfo[runNb]['globalFilter']):
+      column[canvasIndex][4].AddText("%s #diamond"%(strLumi(runinfo[runNb]['Lumi'])))
+    else:
+      column[canvasIndex][4].AddText("%s"%(strLumi(runinfo[runNb]['Lumi'])))
     column[canvasIndex][5].AddText("%.2f %%"%(runinfo[runNb]['ineffDefect_allIntol']))
     column[canvasIndex][6].AddText("%.2f %%"%(runinfo[runNb]['ineffVeto_allVeto']))
     column[canvasIndex][7].AddText("%s"%(runinfo[runNb]["period"]))
@@ -1173,9 +1207,9 @@ gStyle.SetOptStat(0)
 if options['plotResults']:
   gStyle.SetHistMinimumZero()
 
-  plotStack("defects--Run--%s"%(yearTagProperties["Description"]),hProfRun_IntolDefect,grlDef["intol"],defectVeto["description"],h1Run_IntLuminosity,False,stackResults,canvasResults,legendResults)
+  plotStack("defects--Run--%s"%(options['tag']),hProfRun_IntolDefect,grlDef["intol"],defectVeto["description"],h1Run_IntLuminosity,False,stackResults,canvasResults,legendResults)
   if (len(veto["all"])):
-    plotStack("veto--Run--%s"%(yearTagProperties["Description"]),hProfRun_Veto,veto["all"],defectVeto["description"],h1Run_IntLuminosity,False,stackResults,canvasResults,legendResults)
+    plotStack("veto--Run--%s"%(options['tag']),hProfRun_Veto,veto["all"],defectVeto["description"],h1Run_IntLuminosity,False,stackResults,canvasResults,legendResults)
 
   if options['vetoLumiEvolution']:
     for iVeto in veto["all"]:
