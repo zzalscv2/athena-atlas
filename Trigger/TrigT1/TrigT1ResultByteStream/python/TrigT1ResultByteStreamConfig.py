@@ -213,7 +213,10 @@ def L1TriggerByteStreamDecoderCfg(flags, returnEDM=False):
           decodeInputs=flags.Trigger.L1.doCaloInputs
         ))
       decoderTools += [eFexByteStreamTool]
-      maybeMissingRobs += eFexByteStreamTool.ROBIDs  # Allow the data to be missing during commissioning of the phase-1 L1Calo (2022)
+      # Allow the data to be missing at T0, due to the commissioning of the phase-1 L1Calo in RAW data from 2022
+      # Forbit the data to be missing at Point 1 (2023+)
+      if not flags.Trigger.doHLT:
+        maybeMissingRobs += eFexByteStreamTool.ROBIDs  
 
     #--------------------
     # jFex
