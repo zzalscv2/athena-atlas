@@ -83,7 +83,7 @@ namespace Crest {
     bool m_isRewrite {};
     std::string m_currentTag {};
 
-    inline static const std::string s_PATH = "/api-v4.0";
+    std::string m_PATH = "/api-v4.0";
     inline static const std::string s_TAG_PATH = "/tags";
     inline static const std::string s_ADMIN_PATH = "/admin";
     inline static const std::string s_IOV_PATH = "/iovs";
