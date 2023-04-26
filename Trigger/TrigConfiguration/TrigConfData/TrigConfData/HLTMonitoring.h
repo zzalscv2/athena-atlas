@@ -9,6 +9,7 @@
 #include "TrigConfData/DataStructure.h"
 
 #include <map>
+#include <set>
 
 namespace TrigConf {
 
@@ -44,9 +45,29 @@ namespace TrigConf {
          return "HLTMonitoring";
       }
 
+      /** Accessor to the number of HLT monitoring chains */
+      std::size_t size() const;
+
       /** setter and getter for the supermasterkey */
       unsigned int smk() const;
       void setSMK(unsigned int psk);
+
+      /** names of the monitored signatures */
+      std::vector<std::string> signatureNames() const;
+
+      /** names of targets */
+      const std::set<std::string> & targets() const;
+
+      const std::map<std::string, std::map<std::string, std::vector<std::string>>> & signatures() const;
+
+      /** monitored chains by signature for a given target
+       * @param signature signature like egammaMon, idMon, caloMon (complete list via signatureNames())
+       * @param target monitoring target like shifter, t0, online (complete set via targets())
+       */
+      std::vector<std::string> chainsBySignatureAndTarget(const std::string & signature, const std::string & target) const;
+
+      /** print overview of L1 Menu */
+      void printMonConfig(bool full = false) const;
 
       /** Clearing the configuration data */
       virtual void clear() override;
@@ -59,6 +80,12 @@ namespace TrigConf {
 
       /** the supermasterkey */
       unsigned int m_smk {0};
+
+      /** internal storage of the information */
+      std::map<std::string, std::map<std::string, std::vector<std::string>>> m_signatures{};
+
+      /** names of monitoring targets like shifter, t0, online */
+      std::set<std::string> m_targets{};
    };
 }
 

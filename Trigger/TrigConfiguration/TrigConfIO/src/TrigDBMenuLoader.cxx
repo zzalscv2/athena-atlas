@@ -104,7 +104,7 @@ TrigConf::TrigDBMenuLoader::loadL1Menu ( unsigned int smk,
       auto & cursor = q->execute();
       if ( ! cursor.next() ) {
          TRG_MSG_ERROR("Tried reading L1 menu, but SuperMasterKey " << smk << " is not available" );
-         throw TrigConf::NoSMKException("TriggerDBMenuLoader (L1Menu): SMK " + std::to_string(smk) + " not available");
+         throw TrigConf::NoSMKException("TrigDBMenuLoader (L1Menu): SMK " + std::to_string(smk) + " not available");
       }
       const coral::AttributeList& row = cursor.currentRow();
       const coral::Blob& dataBlob = row[qdef.dataName()].data<coral::Blob>();
@@ -113,7 +113,7 @@ TrigConf::TrigDBMenuLoader::loadL1Menu ( unsigned int smk,
    }
    catch(coral::QueryException & ex) {
       TRG_MSG_ERROR("When reading L1 menu for SMK " << smk << " a coral::QueryException was caught ( " << ex.what() <<" )" );
-      throw TrigConf::QueryException("TriggerDBMenuLoader (L1Menu): " + std::string(ex.what()));
+      throw TrigConf::QueryException("TrigDBMenuLoader (L1Menu): " + std::string(ex.what()));
    }
    return true;
 }
@@ -134,7 +134,7 @@ TrigConf::TrigDBMenuLoader::loadHLTMenu ( unsigned int smk,
       auto & cursor = q->execute();
       if ( ! cursor.next() ) {
          TRG_MSG_ERROR("Tried reading HLT menu, but SuperMasterKey " << smk << " is not available" );
-         throw TrigConf::NoSMKException("TriggerDBMenuLoader (HLTMenu): SMK " + std::to_string(smk) + " not available");
+         throw TrigConf::NoSMKException("TrigDBMenuLoader (HLTMenu): SMK " + std::to_string(smk) + " not available");
       }
       const coral::AttributeList& row = cursor.currentRow();
       const coral::Blob& dataBlob = row[qdef.dataName()].data<coral::Blob>();
@@ -143,7 +143,7 @@ TrigConf::TrigDBMenuLoader::loadHLTMenu ( unsigned int smk,
    }
    catch(coral::QueryException & ex) {
       TRG_MSG_ERROR("When reading HLT menu for SMK " << smk << " a coral::QueryException was caught ( " << ex.what() <<" )" );
-      throw TrigConf::QueryException("TriggerDBMenuLoader (HLTMenu): " + std::string(ex.what()));
+      throw TrigConf::QueryException("TrigDBMenuLoader (HLTMenu): " + std::string(ex.what()));
    }
    return true;
 }
