@@ -330,7 +330,7 @@ EnergyDepositionTool::BichselSim(double BetaGamma, int ParticleType,double Total
   }
 
   // load relevant data
-  BichselData iData = m_bichselData[ParticleType - 1];
+  const BichselData& iData = m_bichselData[ParticleType - 1];
   double BetaGammaLog10 = std::log10(BetaGamma);
   std::pair<int, int> indices_BetaGammaLog10 = iData.getBetaGammaIndices(BetaGammaLog10);
  
@@ -364,8 +364,9 @@ EnergyDepositionTool::BichselSim(double BetaGamma, int ParticleType,double Total
     // infinite loop protection
     if (count >= (1.0 * LoopLimit / m_nCols)) {
       ATH_MSG_WARNING(
-        "Potential infinite loop in BichselSim. Exit Loop. A special flag will be returned (-1,-1). The total length is " << TotalLength << ". The lambda is " << lambda <<
-          ".");
+          "Potential infinite loop in BichselSim. Exit Loop. A special flag "
+          "will be returned (-1,-1). The total length is "
+          << TotalLength << ". The lambda is " << lambda << ".");
       SetFailureFlag(rawHitRecord);
       break;
     }
