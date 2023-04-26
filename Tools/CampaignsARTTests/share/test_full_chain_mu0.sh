@@ -8,7 +8,7 @@ echo "Input Parameters"
 number_of_events=$1
 
 #Option for sim/digi/reco
-default_geometry="ATLAS-P2-RUN4-01-01-00"
+default_geometry="ATLAS-P2-RUN4-03-00-00"
 default_condition="OFLCOND-MC15c-SDR-14-05"
 
 #Post-processing for ID/ITk and FTag
@@ -63,6 +63,7 @@ run "RAWtoALL" Reco_tf.py \
   --multithreaded "True" \
   --postInclude "all:PyJobTransforms.UseFrontier" \
   --preInclude "all:Campaigns.PhaseIINoPileUp" \
+  --preExec "all:ConfigFlags.Acts.TrackingGeometry.MaterialSource='material-maps-ATLAS-P2-RUN4-01-01-00-ITk-HGTD.json'" \
   --inputHitsFile "HITS.pool.root" \
   --outputAODFile "AOD.pool.root" \
   --maxEvents ${number_of_events}
