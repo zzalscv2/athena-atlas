@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file TruthD3PDAnalysis/src/TruthParticleFilterBase.cxx
@@ -219,9 +219,9 @@ TruthParticleFilterBase::addParticle (const HepMC::ConstGenParticlePtr& p, HepMC
 #ifdef HEPMC3
   // Find if the particle was used.
   HepMC::GenParticlePtr pnew = nullptr;
-  if (p && m_used.count(p->id()) == 0) pnew = std::make_shared<HepMC::GenParticle>(*p);
+  if (m_used.count(p->id()) == 0) pnew = std::make_shared<HepMC::GenParticle>(*p);
   // Add ourself to our vertices.
-  if (p && p->production_vertex() && m_used.count(p->production_vertex()->id()) == 0) {
+  if (p->production_vertex() && m_used.count(p->production_vertex()->id()) == 0) {
     HepMC::GenVertexPtr v = std::make_shared<HepMC::GenVertex>(*p->production_vertex());
     ev -> add_vertex(v);
     m_used.insert(p->production_vertex()->id());
@@ -230,7 +230,7 @@ TruthParticleFilterBase::addParticle (const HepMC::ConstGenParticlePtr& p, HepMC
     HepMC::suggest_barcode (v,HepMC::barcode(p->production_vertex()));
     HepMC::suggest_barcode (pnew,HepMC::barcode(p));
   }
-  if (p && p->end_vertex() && m_used.count(p->end_vertex()->id()) == 0 ) {
+  if (p->end_vertex() && m_used.count(p->end_vertex()->id()) == 0 ) {
     HepMC::GenVertexPtr v =  std::make_shared<HepMC::GenVertex>(*p->end_vertex());
     ev -> add_vertex(v);
     m_used.insert(p->end_vertex()->id());
