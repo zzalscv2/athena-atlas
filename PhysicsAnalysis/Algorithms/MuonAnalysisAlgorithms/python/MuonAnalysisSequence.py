@@ -11,6 +11,7 @@ def makeMuonAnalysisSequence( dataType, workingPoint,
                               shallowViewOutput = True,
                               postfix = '',
                               ptSelectionOutput = False,
+                              trackSelection = True,
                               qualitySelectionOutput = True,
                               enableCutflow = False,
                               enableKinematicHistograms = False,
@@ -30,6 +31,7 @@ def makeMuonAnalysisSequence( dataType, workingPoint,
                  names are unique.
       ptSelectionOutput -- Whether or not to apply pt selection when creating
                            output containers.
+      trackSelection -- apply selection on tracks (d0, z0, siHits, etc.)
       qualitySelectionOutput -- Whether or not to apply muon quality selection
                                 when creating output containers.
       enableCutflow -- Whether or not to dump the cutflow
@@ -51,7 +53,8 @@ def makeMuonAnalysisSequence( dataType, workingPoint,
     seq.addMetaConfigDefault ("selectionDecorCount", [])
 
     makeMuonCalibrationSequence (seq, dataType, postfix=postfix,
-                                 ptSelectionOutput = ptSelectionOutput)
+                                 ptSelectionOutput = ptSelectionOutput, 
+                                 trackSelection = trackSelection)
     makeMuonWorkingPointSequence (seq, dataType, workingPoint, postfix=postfix,
                                   qualitySelectionOutput = qualitySelectionOutput, isRun3Geo = isRun3Geo)
     makeSharedObjectSequence (seq, deepCopyOutput = deepCopyOutput,
@@ -68,7 +71,7 @@ def makeMuonAnalysisSequence( dataType, workingPoint,
 
 
 def makeMuonCalibrationSequence( seq, dataType,
-                                 postfix = '', ptSelectionOutput = False):
+                                 postfix = '', ptSelectionOutput = False, trackSelection = False):
     """Create muon calibration analysis algorithms
 
     This makes all the algorithms that need to be run first befor
@@ -108,17 +111,18 @@ def makeMuonCalibrationSequence( seq, dataType,
                 dynConfig = {'preselection' : lambda meta : "&&".join (meta["selectionDecorNamesOutput"])})
 
     # Set up the track selection algorithm:
-    alg = createAlgorithm( 'CP::AsgLeptonTrackSelectionAlg',
-                           'MuonTrackSelectionAlg' + postfix )
-    alg.selectionDecoration = 'trackSelection' + postfix + ',as_bits'
-    alg.maxD0Significance = 3
-    alg.maxDeltaZ0SinTheta = 0.5
-    seq.append( alg, inputPropName = 'particles',
-                stageName = 'selection',
-                metaConfig = {'selectionDecorNames' : [alg.selectionDecoration],
-                              'selectionDecorNamesOutput' : [alg.selectionDecoration],
-                              'selectionDecorCount' : [3]},
-                dynConfig = {'preselection' : lambda meta : "&&".join (meta["selectionDecorNamesOutput"])})
+    if trackSelection:
+        alg = createAlgorithm( 'CP::AsgLeptonTrackSelectionAlg',
+                               'MuonTrackSelectionAlg' + postfix )
+        alg.selectionDecoration = 'trackSelection' + postfix + ',as_bits'
+        alg.maxD0Significance  = 3
+        alg.maxDeltaZ0SinTheta = 0.5
+        seq.append( alg, inputPropName = 'particles',
+                    stageName = 'selection',
+                    metaConfig = {'selectionDecorNames' : [alg.selectionDecoration],
+                                'selectionDecorNamesOutput' : [alg.selectionDecoration],
+                                'selectionDecorCount' : [3]},
+                    dynConfig = {'preselection' : lambda meta : "&&".join (meta["selectionDecorNamesOutput"])})
 
     # Set up the muon calibration and smearing algorithm:
     alg = createAlgorithm( 'CP::MuonCalibrationAndSmearingAlg',
