@@ -414,14 +414,13 @@ def CopyTrackRecordCollectionsCfg(flags, **kwargs):
     availableContainers = []
 
     # Detect the list of track record collections
-    for container in allowedContainers:
-        if flags.Common.ProductionStep == ProductionStep.FastChain:
-            availableContainers = allowedContainers
-        else:
-            hardScatterInputCollections = flags.Input.Collections if flags.Overlay.DataOverlay else flags.Input.SecondaryCollections
-            for container in allowedContainers:
-                if container in hardScatterInputCollections:
-                    availableContainers.append(container)
+    if flags.Common.ProductionStep == ProductionStep.FastChain:
+        availableContainers = allowedContainers
+    else:
+        hardScatterInputCollections = flags.Input.Collections if flags.Overlay.DataOverlay else flags.Input.SecondaryCollections
+        for container in allowedContainers:
+            if container in hardScatterInputCollections:
+                availableContainers.append(container)
 
     for container in availableContainers:
         acc.merge(CopyTrackRecordCollectionAlgCfg(flags, container, **kwargs))
@@ -443,14 +442,13 @@ def CopyTrackCollectionsCfg(flags, **kwargs):
 
     availableContainers = []
     # Detect the list of track collections
-    for container in allowedContainers:
-        if flags.Common.ProductionStep == ProductionStep.FastChain:
-            availableContainers = allowedContainers
-        else:
-            hardScatterInputCollections = flags.Input.Collections
-            for container in allowedContainers:
-                if container in hardScatterInputCollections:
-                    availableContainers.append(container)
+    if flags.Common.ProductionStep == ProductionStep.FastChain:
+        availableContainers = allowedContainers
+    else:
+        hardScatterInputCollections = flags.Input.Collections
+        for container in allowedContainers:
+            if container in hardScatterInputCollections:
+                availableContainers.append(container)
     for container in availableContainers:
         acc.merge(CopyTrackCollectionAlgCfg(flags, container, **kwargs))
 
@@ -472,14 +470,13 @@ def CopyDetailedTrackTruthCollectionsCfg(flags, **kwargs):
     availableContainers = []
 
     # Detect the list of detailed track truth collections
-    for container in allowedContainers:
-        if flags.Common.ProductionStep == ProductionStep.FastChain:
-            availableContainers = allowedContainers
-        else:
-            hardScatterInputCollections = flags.Input.Collections
-            for container in allowedContainers:
-                if container in hardScatterInputCollections:
-                    availableContainers.append(container)
+    if flags.Common.ProductionStep == ProductionStep.FastChain:
+        availableContainers = allowedContainers
+    else:
+        hardScatterInputCollections = flags.Input.Collections
+        for container in allowedContainers:
+            if container in hardScatterInputCollections:
+                availableContainers.append(container)
 
     for container in availableContainers:
         acc.merge(CopyDetailedTrackTruthCollectionAlgCfg(flags, container, **kwargs))
@@ -501,14 +498,13 @@ def CopyPRD_MultiTruthCollectionsCfg(flags, **kwargs):
     availableContainers = []
 
     # Detect the list of detailed track truth collections
-    for container in allowedContainers:
-        if flags.Common.ProductionStep == ProductionStep.FastChain:
-            availableContainers = allowedContainers
-        else:
-            hardScatterInputCollections = flags.Input.Collections
-            for container in allowedContainers:
-                if container in hardScatterInputCollections:
-                    availableContainers.append(container)
+    if flags.Common.ProductionStep == ProductionStep.FastChain:
+        availableContainers = allowedContainers
+    else:
+        hardScatterInputCollections = flags.Input.Collections
+        for container in allowedContainers:
+            if container in hardScatterInputCollections:
+                availableContainers.append(container)
 
     for container in availableContainers:
         acc.merge(CopyPRD_MultiTruthCollectionAlgCfg(flags, container, **kwargs))
