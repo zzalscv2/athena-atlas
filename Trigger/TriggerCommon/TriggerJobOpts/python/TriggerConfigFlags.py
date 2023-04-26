@@ -414,7 +414,7 @@ def createTriggerRecoFlags():
 
     # chooses calibration config file for HLT small-R jets (mapping in: Reconstruction/Jet/JetCalibTools/python/JetCalibToolsConfig.py)
     # All calib keys for HLT jets have to start with "Trig" otherwise the JetCalibTool config fails!
-    flags.addFlag("Trigger.Jet.pflowCalibKey", "TrigLS2")
+    flags.addFlag("Trigger.Jet.pflowCalibKey", "TrigR22Prerec")
     flags.addFlag("Trigger.Jet.emtopoCalibKey", "TrigLS2")
 
     # Change tollerance in STEP Propagator
