@@ -35,6 +35,9 @@ class SuperChicConfig:
         self.rn = 6.7
         self.dn = 0.55
         self.ionqcd = 'coh'
+        self.ionbreakup = True
+        self.fAA = '00'
+        self.fracsigX = 1
         self.ncall = 10000
         self.itmx = 10
         self.prec = 0.5
@@ -136,6 +139,10 @@ class SuperChicConfig:
         conf+=fortDouble(self.az) + "                                   ! [az] : Ion atomic number \n"
         conf+=fortDouble(self.rz) + "                                 ! [rz] : Ion proton density - radius \n"
         conf+=fortDouble(self.dz) + "                                ! [dz] : Ion proton density - skin thickness \n"
+        conf+=fortBool(self.ionbreakup) + "                            ! [ionbreakup] \n"
+        conf+=fortStr(self.fAA) + "                                    ! [fAA] \n"
+        conf+=fortDouble(self.fracsigX) + "                            ! [fracsigX] : multiply sig_(gamA) by this factor (1d0 - default) \n"
+
         conf+=fortDouble(self.rn) + "                                  ! [rn] : Ion neutron density - radius \n"
         conf+=fortDouble(self.dn) + "                                  ! [dn] : Ion neutron density - skin thickness \n"
         conf+=fortStr(self.ionqcd) + "                               ! [ionqcd] : Coherent ('coh') or incoherent ('incoh') for QCD-induced processes \n"
@@ -208,7 +215,7 @@ class SuperChicConfig:
         conf+=fortDouble(self.etabmax) + "                               ! [etabmax] \n"
         conf+=fortDouble(self.etacmin) + "                               ! [etacmin] \n"
         conf+=fortDouble(self.etacmax) + "                               ! [etacmax] \n"
-        conf+=fortDouble(self.etadmin) + "                               ! [etacmin] \n"
+        conf+=fortDouble(self.etadmin) + "                               ! [etadmin] \n"
         conf+=fortDouble(self.etadmax) + "                               ! [etadmax] \n"
         conf+="***********************************************************************************\n"
         conf+="****** 6 body final states : p(a) + p(b) + p(c) + p(d) + p(e) + p(f) **************\n"
