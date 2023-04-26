@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file TruthD3PDMaker/src/TruthJetFilterTool.cxx
@@ -352,7 +352,6 @@ TruthJetFilterTool::addVertex (HepMC::ConstGenVertexPtr v,HepMC::GenEvent* ev)
 #endif
 
   return StatusCode::SUCCESS;
-  return StatusCode::SUCCESS;
 }
 
 
@@ -363,12 +362,12 @@ bool TruthJetFilterTool::isLeptonFromTau(const HepMC::ConstGenParticlePtr& part)
 
   int pdg = part->pdg_id();
 
-  if(std::abs(pdg) != 11 &&
-     std::abs(pdg) != 12 &&
-     std::abs(pdg) != 13 &&
-     std::abs(pdg) != 14 &&
-     std::abs(pdg) != 15 &&
-     std::abs(pdg) != 16) return false; // all leptons including tau.
+  if( const auto a = std::abs(pdg); a != 11 &&
+     a != 12 &&
+     a != 13 &&
+     a != 14 &&
+     a != 15 &&
+     a != 16) return false; // all leptons including tau.
 
   const HepMC::ConstGenVertexPtr& prod = part->production_vertex();
   if(!prod) return false; // no parent.
