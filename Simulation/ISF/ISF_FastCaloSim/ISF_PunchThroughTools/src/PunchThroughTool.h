@@ -132,7 +132,7 @@ namespace ISF {
     double interpolateEta(const double &eta, CLHEP::HepRandomEngine* rndmEngine) const;
 
     //helper function to convert comma separated string into vector
-    std::vector<std::string> str_to_list(const std::string str) const;
+    std::vector<std::string> str_to_list(const std::string & str) const;
 
     //get the infoMap from xml file based on the xmlpathname and also name of mainNode
     std::vector<std::map<std::string,std::string>> getInfoMap(std::string mainNode, const std::string &xmlFilePath);
@@ -198,11 +198,7 @@ namespace ISF {
     DoubleArrayProperty   m_numParticlesFactor{this, "NumParticlesFactor", {}, "scale the number of punch-through particles"};
     DoubleArrayProperty   m_energyFactor{this, "EnergyFactor", {}, "scale the energy of the punch-through particles"};
 
-    /*---------------------------------------------------------------------
-     *  Constants
-     *---------------------------------------------------------------------*/
-     const static double m_SQRT_0p5;
-     const static double m_SQRT_2;
+    
 
     /*---------------------------------------------------------------------
      *  ServiceHandles
