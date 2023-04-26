@@ -19,7 +19,7 @@ from JetHitAssociation.JetHitAssociationConfig import JetHitAssociationCfg
 
 # this is where you add the new trainings!
 def GetTaggerTrainingMap(inputFlags, jet_collection_list):
-    if inputFlags.GeoModel.Run >= LHCPeriod.Run4:
+    if inputFlags.GeoModel.Run >= LHCPeriod.Run4 and "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets" not in jet_collection_list:
         derivationTrainingMap = {
             "AntiKt4EMTopo": [
                 "BTagging/20221008/dipsrun4/antikt4emtopo/network.json",
@@ -80,6 +80,10 @@ def GetTaggerTrainingMap(inputFlags, jet_collection_list):
             "BTagging/20230307/DL1dv01/antiktvr30rmax4rmin02track/network.json",  # new "recommended tagger" for VR track jets named DL1dv01 in EDM
             "BTagging/20230307/gn2v00/antiktvr30rmax4rmin02track/network.onnx",
         ],
+        "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets": [
+            "BTagging/20230413/gn2xv00/antikt10ufo/network.onnx",
+            "BTagging/20230413/gn2xwithmassv00/antikt10ufo/network.onnx",
+        ]
     }
 
     return derivationTrainingMap[jet_collection_list]
