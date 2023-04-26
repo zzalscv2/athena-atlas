@@ -13,6 +13,7 @@ class MuonCalibrationConfig (ConfigBlock):
         self.containerName = containerName
         self.addOption ('postfix', "", type=str)
         self.addOption ('ptSelectionOutput', False, type=bool)
+        self.addOption ('trackSelection', True, type=bool)
 
     def makeAlgs (self, config) :
 
@@ -39,15 +40,16 @@ class MuonCalibrationConfig (ConfigBlock):
                              bits=2)
 
         # Set up the track selection algorithm:
-        alg = config.createAlgorithm( 'CP::AsgLeptonTrackSelectionAlg',
-                               'MuonTrackSelectionAlg' + self.postfix )
-        alg.selectionDecoration = 'trackSelection' + self.postfix + ',as_bits'
-        alg.maxD0Significance = 3
-        alg.maxDeltaZ0SinTheta = 0.5
-        alg.particles = config.readName (self.containerName)
-        alg.preselection = config.getPreselection (self.containerName, '')
-        config.addSelection (self.containerName, '', alg.selectionDecoration,
-                             bits=3)
+        if self.trackSelection :
+            alg = config.createAlgorithm( 'CP::AsgLeptonTrackSelectionAlg',
+                                'MuonTrackSelectionAlg' + self.postfix )
+            alg.selectionDecoration = 'trackSelection' + self.postfix + ',as_bits'
+            alg.maxD0Significance = 3
+            alg.maxDeltaZ0SinTheta = 0.5
+            alg.particles = config.readName (self.containerName)
+            alg.preselection = config.getPreselection (self.containerName, '')
+            config.addSelection (self.containerName, '', alg.selectionDecoration,
+                                bits=3)
 
         # Set up the muon calibration and smearing algorithm:
         alg = config.createAlgorithm( 'CP::MuonCalibrationAndSmearingAlg',

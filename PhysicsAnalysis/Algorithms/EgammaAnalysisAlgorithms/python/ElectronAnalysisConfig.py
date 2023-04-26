@@ -19,6 +19,8 @@ class ElectronCalibrationConfig (ConfigBlock) :
         self.addOption ('crackVeto', False, type=bool)
         self.addOption ('ptSelectionOutput', False, type=bool)
         self.addOption ('isolationCorrection', False, type=bool)
+        self.addOption ('trackSelection', True, type=bool)
+
 
 
     def makeAlgs (self, config) :
@@ -50,14 +52,15 @@ class ElectronCalibrationConfig (ConfigBlock) :
                              bits=(5 if self.crackVeto else 4))
 
         # Set up the track selection algorithm:
-        alg = config.createAlgorithm( 'CP::AsgLeptonTrackSelectionAlg',
-                                      'ElectronTrackSelectionAlg' + self.postfix )
-        alg.selectionDecoration = 'trackSelection' + self.postfix + ',as_bits'
-        alg.maxD0Significance = 5
-        alg.maxDeltaZ0SinTheta = 0.5
-        alg.particles = config.readName (self.containerName)
-        alg.preselection = config.getPreselection (self.containerName, '')
-        config.addSelection (self.containerName, '', alg.selectionDecoration,
+        if self.trackSelection :
+            alg = config.createAlgorithm( 'CP::AsgLeptonTrackSelectionAlg',
+                                        'ElectronTrackSelectionAlg' + self.postfix )
+            alg.selectionDecoration = 'trackSelection' + self.postfix + ',as_bits'
+            alg.maxD0Significance = 5
+            alg.maxDeltaZ0SinTheta = 0.5
+            alg.particles = config.readName (self.containerName)
+            alg.preselection = config.getPreselection (self.containerName, '')
+            config.addSelection (self.containerName, '', alg.selectionDecoration,
                              bits=3)
 
         # Select electrons only with good object quality.

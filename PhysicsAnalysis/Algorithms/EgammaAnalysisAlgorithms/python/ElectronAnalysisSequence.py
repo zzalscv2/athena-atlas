@@ -19,6 +19,7 @@ def makeElectronAnalysisSequence( dataType, workingPoint,
                                   isolationCorrection = False,
                                   crackVeto = False,
                                   ptSelectionOutput = False,
+                                  trackSelection = True,
                                   enableCutflow = False,
                                   enableKinematicHistograms = False ):
     """Create an electron analysis algorithm sequence
@@ -40,6 +41,7 @@ def makeElectronAnalysisSequence( dataType, workingPoint,
       crackVeto -- Whether or not to perform eta crack veto
       ptSelectionOutput -- Whether or not to apply pt selection when creating
                            output containers.
+      trackSelection -- apply selection on tracks (d0, z0, siHits, etc.)
       enableCutflow -- Whether or not to dump the cutflow
       enableKinematicHistograms -- Whether or not to dump the kinematic histograms
     """
@@ -63,6 +65,7 @@ def makeElectronAnalysisSequence( dataType, workingPoint,
     makeElectronCalibrationSequence (seq, dataType, postfix=postfix,
                                      crackVeto = crackVeto,
                                      ptSelectionOutput = ptSelectionOutput,
+                                     trackSelection = trackSelection, 
                                      isolationCorrection = isolationCorrection)
     makeElectronWorkingPointSequence (seq, dataType, workingPoint, postfix=postfix,
                                       recomputeLikelihood = recomputeLikelihood,
@@ -83,6 +86,7 @@ def makeElectronAnalysisSequence( dataType, workingPoint,
 def makeElectronCalibrationSequence( seq, dataType, postfix = '',
                                      crackVeto = False,
                                      ptSelectionOutput = False,
+                                     trackSelection = False,
                                      isolationCorrection = False):
     """Create electron calibration analysis algorithms
 
@@ -129,17 +133,18 @@ def makeElectronCalibrationSequence( seq, dataType, postfix = '',
                 dynConfig = {'preselection' : lambda meta : "&&".join (meta["selectionDecorNamesOutput"])} )
 
     # Set up the track selection algorithm:
-    alg = createAlgorithm( 'CP::AsgLeptonTrackSelectionAlg',
-                           'ElectronTrackSelectionAlg' + postfix )
-    alg.selectionDecoration = 'trackSelection' + postfix + ',as_bits'
-    alg.maxD0Significance = 5
-    alg.maxDeltaZ0SinTheta = 0.5
-    seq.append( alg, inputPropName = 'particles',
-                stageName = 'selection',
-                metaConfig = {'selectionDecorNames' : [alg.selectionDecoration],
-                              'selectionDecorNamesOutput' : [alg.selectionDecoration],
-                              'selectionDecorCount' : [3]},
-                dynConfig = {'preselection' : lambda meta : "&&".join (meta["selectionDecorNamesOutput"])} )
+    if trackSelection:
+        alg = createAlgorithm( 'CP::AsgLeptonTrackSelectionAlg',
+                            'ElectronTrackSelectionAlg' + postfix )
+        alg.selectionDecoration = 'trackSelection' + postfix + ',as_bits'
+        alg.maxD0Significance = 5
+        alg.maxDeltaZ0SinTheta = 0.5
+        seq.append( alg, inputPropName = 'particles',
+                    stageName = 'selection',
+                    metaConfig = {'selectionDecorNames' : [alg.selectionDecoration],
+                                'selectionDecorNamesOutput' : [alg.selectionDecoration],
+                                'selectionDecorCount' : [3]},
+                    dynConfig = {'preselection' : lambda meta : "&&".join (meta["selectionDecorNamesOutput"])} )
 
     # Select electrons only with good object quality.
     alg = createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronObjectQualityAlg' + postfix )

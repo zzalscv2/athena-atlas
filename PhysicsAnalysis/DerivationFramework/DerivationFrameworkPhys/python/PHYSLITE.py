@@ -81,7 +81,7 @@ def PHYSLITEKernelCfg(ConfigFlags, name='PHYSLITEKernel', **kwargs):
 
     # Include, and then set up the electron analysis sequence:
     from EgammaAnalysisAlgorithms.ElectronAnalysisSequence import  makeElectronAnalysisSequence
-    electronSequence = makeElectronAnalysisSequence( dataType, 'LooseLHElectron.NonIso', shallowViewOutput = False, deepCopyOutput = True )
+    electronSequence = makeElectronAnalysisSequence( dataType, 'LooseLHElectron.NonIso', shallowViewOutput = False, deepCopyOutput = True, trackSelection = False )
     electronSequence.configure( inputName = 'Electrons',
                                 outputName = 'AnalysisElectrons' )
     for element in electronSequence.getGaudiConfig2Components():
@@ -100,7 +100,7 @@ def PHYSLITEKernelCfg(ConfigFlags, name='PHYSLITEKernel', **kwargs):
     isRun3Geo = False
     from AthenaConfiguration.Enums import LHCPeriod
     if ConfigFlags.GeoModel.Run >= LHCPeriod.Run3: isRun3Geo = True 
-    muonSequence = makeMuonAnalysisSequence( dataType, shallowViewOutput = False, deepCopyOutput = True, workingPoint = 'Loose.NonIso', isRun3Geo = isRun3Geo)
+    muonSequence = makeMuonAnalysisSequence( dataType, shallowViewOutput = False, deepCopyOutput = True, workingPoint = 'Loose.NonIso', isRun3Geo = isRun3Geo, trackSelection = False)
     muonSequence.configure( inputName = 'Muons',
                             outputName = 'AnalysisMuons' )
     for element in muonSequence.getGaudiConfig2Components():
