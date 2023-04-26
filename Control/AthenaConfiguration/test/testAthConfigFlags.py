@@ -243,5 +243,65 @@ class FlagsFromArgsTest(unittest.TestCase):
         self.assertEqual(self.flags.Format, Format.BS,"Failed to set FlagEnum")
 
 
+class FlagsHelpTest(unittest.TestCase):
+    def setUp(self):
+        self.flags = AthConfigFlags()
+        self.flags.addFlag("Flag0","",help="This is Flag0")
+        self.flags.addFlag("CatA.Flag1","",help="This is Flag1")
+        self.flags.addFlag("CatA.SubCatA.Flag2","",help="This is Flag2")
+        self.flags.addFlag("CatB.Flag3","",help="This is Flag3")
+
+    def do_test(self,args,expected):
+        import io
+        import contextlib
+        with self.assertRaises(SystemExit):
+            f = io.StringIO()
+            with contextlib.redirect_stdout(f):
+                self.flags.fillFromArgs(args.split(" "))
+        if expected not in f.getvalue(): print(f.getvalue())
+        self.assertTrue(expected in f.getvalue())
+
+    def test_basicHelp(self):
+        # tests printing top-level help message
+        self.do_test(args="--help",expected="""
+flags and positional arguments:
+  {CatA,CatB}           Flag subcategories:
+    CatA                CatA flags
+    CatB                CatB flags
+  Flag0                 : This is Flag0 (default: '')
+""")
+
+    def test_catHelp(self):
+        # tests getting help for a category of flags
+        self.do_test(args="--help CatA",expected="""flags:
+  {SubCatA}   Flag subcategories:
+    SubCatA   CatA.SubCatA flags
+  CatA.Flag1  : This is Flag1 (default: '')
+""")
+
+    def test_catHelp(self):
+        # tests getting help for a subcategory of flags (tests navigation down through categories)
+        self.do_test(args="--help CatA.SubCatA",expected="""flags:
+  CatA.SubCatA.Flag2  : This is Flag2 (default: '')
+""")
+
+    def test_setFlagBeforeParse(self):
+        # tests that we can change values of a flag before parsing and that will replace the "default"
+        # in the help text
+        self.flags.CatA.SubCatA.Flag2 = "test"
+        self.do_test(args="--help CatA.SubCatA",expected="""flags:
+  CatA.SubCatA.Flag2  : This is Flag2 (default: 'test')
+""")
+
+    def test_setFlagDuringParse(self):
+        # tests that we can change values of a flag during parsing and that will replace the "default"
+        # in the help text. This is useful to see the 'effect' of other arguments on the flags
+        # this test also shows the use of the list terminator e.g. for fileInput list
+        self.flags.addFlag("Input.Files",[],help="List of input files")
+        self.do_test(args="--filesInput file1 file2 -- --help Input",expected="""flags:
+  Input.Files  : List of input files (default: ['file1', 'file2'])
+""")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

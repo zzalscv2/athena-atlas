@@ -439,12 +439,12 @@ class AthConfigFlags(object):
         return
 
 
-    def getArgumentParser(self):
+    def getArgumentParser(self, **kwargs):
         """
         Scripts calling AthConfigFlags.fillFromArgs can extend this parser, and pass their version to fillFromArgs
         """
         import argparse
-        parser= argparse.ArgumentParser(formatter_class = argparse.ArgumentDefaultsHelpFormatter)
+        parser= argparse.ArgumentParser(formatter_class = argparse.ArgumentDefaultsHelpFormatter, **kwargs )
         parser.add_argument("-d","--debug", default=None, help="attach debugger (gdb) before run, <stage>: init, exec, fini")
         parser.add_argument("-i","--interactive", default=None, help="Drop into interactive mode before <stage>: init or run")
         parser.add_argument("--evtMax", type=int, default=None, help="Max number of events to process")
@@ -476,7 +476,7 @@ class AthConfigFlags(object):
         self._tryModify()
 
         if parser is None:
-            parser = self.getArgumentParser()
+            parser = self.parser()
         self._parser = parser # set our parser to given one
         argList = listOfArgs or sys.argv[1:]
         do_help = False
