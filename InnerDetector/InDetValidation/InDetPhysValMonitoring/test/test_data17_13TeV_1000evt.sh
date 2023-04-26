@@ -17,8 +17,12 @@ run() { (set -x; exec "$@") }
 lastref_dir=last_results
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
 inputBS=${artdata}/RecJobTransformTests/data17_13TeV.00324910.physics_Main.daq.RAW._lb0713._SFO-6._0001.data 
-dcubeXml="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/dcube/config/IDPVMPlots_master_data.xml"
-dcubeRef="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_data17_1000evt_reco_r22.root"
+dcubeShifterXml="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/dcube/config/IDPVMPlots_data_baseline.xml"
+dcubeExpertXml="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/dcube/config/IDPVMPlots_data_expert.xml"
+dcubeRef="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_data17_1000evt_reco_r24.root"
+if [[ "$ATLAS_RELEASE_BASE" == *"23.0"* ]]; then
+  dcubeRef="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_data17_1000evt_reco_r23.root"
+fi
 
 # Reco step based on test InDetPhysValMonitoring ART setup from Josh Moss.
 
@@ -59,20 +63,32 @@ if [ $rec_tf_exit_code -eq 0 ]  ;then
   run art.py download --user=artprod --dst="$lastref_dir" "$ArtPackage" "$ArtJobName"
   run ls -la "$lastref_dir"
 
-#  echo "compare with R22 with nightly build at 2020-12-05"
-#  $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-#    -p -x dcube \
-#    -c ${dcubeXml} \
-#    -r ${dcubeRef} \
-#    physval.ntuple.root
-#  echo "art-result: $? plots"
+#  echo "compare with R22 with nightly build at 23.0.23 or 24.0.1"
+  $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
+    -p -x dcube \
+    -c ${dcubeShifterXml} \
+    -r ${dcubeRef} \
+    physval.ntuple.root
+  echo "art-result: $? shifter_plots"
+
+  $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
+    -p -x dcube \
+    -c ${dcubeExpertXml} \
+    -r ${dcubeRef} \
+    physval.ntuple.root
   
   echo "compare with last build"
   $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-    -p -x dcube_last \
-    -c ${dcubeXml} \
+    -p -x dcube_shifter_last \
+    -c ${dcubeShifterXml} \
     -r ${lastref_dir}/physval.ntuple.root \
     physval.ntuple.root
-  echo "art-result: $? plots"
+  echo "art-result: $? shifter_plots_last"
+
+  $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
+    -p -x dcube_expert_last \
+    -c ${dcubeExpertXml} \
+    -r ${lastref_dir}/physval.ntuple.root \
+    physval.ntuple.root
 fi
 

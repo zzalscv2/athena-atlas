@@ -23,8 +23,12 @@ lastref_dir=last_results
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
 dcubeXml_idtide="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/dcube/config/IDPVMPlots_idtide.xml"
 dcubeXml_lrt="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/dcube/config/IDPVMPlots_lrt.xml"
-dcubeRef_idtide="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_ttbarPU40_idtide.root"
-dcubeRef_lrt="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_ttbarPU40_lrt.root"
+dcubeRef_idtide="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_ttbarPU40_idtide_r24.root"
+dcubeRef_lrt="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_ttbarPU40_lrt_r24.root"
+if [[ "$ATLAS_RELEASE_BASE" == *"23.0"* ]]; then
+  dcubeRef_idtide="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_ttbarPU40_idtide_r23.root"
+  dcubeRef_lrt="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_ttbarPU40_lrt_r23.root"
+fi
 
 # Reco step based on test InDetPhysValMonitoring ART setup from Josh Moss.
 run Reco_tf.py \
@@ -61,13 +65,13 @@ if [ $rec_tf_exit_code -eq 0 ]  ;then
   run art.py download --user=artprod --dst="$lastref_dir" "$ArtPackage" "$ArtJobName"
   run ls -la "$lastref_dir"
 
-  echo "compare with nightly 2023-02-15T2101 for IDTIDE derivation"
+  echo "compare with R23.0.23 or 24.0.1"
   $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
     -p -x dcube_idtide \
     -c ${dcubeXml_idtide} \
     -r ${dcubeRef_idtide} \
     physval_idtide.ntuple.root
-  echo "art-result: $? dcube_idtide"
+  echo "art-result: $? shifter_plots_idtide"
   
   echo "compare with last build"
   $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
@@ -75,15 +79,14 @@ if [ $rec_tf_exit_code -eq 0 ]  ;then
     -c ${dcubeXml_idtide} \
     -r ${lastref_dir}/physval_idtide.ntuple.root \
     physval_idtide.ntuple.root
-  echo "art-result: $? dcube_idtide_last"
+  echo "art-result: $? shifter_plots_idtide_last"
 
-  echo "compare with nightly 2023-02-15T2101 for LRT and normal tracks"
   $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
     -p -x dcube_lrt \
     -c ${dcubeXml_lrt} \
     -r ${dcubeRef_lrt} \
     physval_lrt.ntuple.root
-  echo "art-result: $? dcube_lrt"
+  echo "art-result: $? shifter_plots_lrt"
   
   echo "compare with last build"
   $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
@@ -91,6 +94,6 @@ if [ $rec_tf_exit_code -eq 0 ]  ;then
     -c ${dcubeXml_lrt} \
     -r ${lastref_dir}/physval_lrt.ntuple.root \
     physval_lrt.ntuple.root
-  echo "art-result: $? dcube_lrt_last"
+  echo "art-result: $? shifter_plots_lrt_last"
 fi
 
