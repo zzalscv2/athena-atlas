@@ -13,7 +13,6 @@ from AthenaConfiguration.Enums import LHCPeriod
 def InDetRotCreatorCfg(flags, name='InDetRotCreator', **kwargs):
     if flags.Detector.GeometryITk:
         name = name.replace("InDet", "ITk")
-        from InDetConfig.ITkTrackingCommonConfig import ITkRotCreatorCfg
         return ITkRotCreatorCfg(flags, name, **kwargs)
 
     acc = ComponentAccumulator()

@@ -547,7 +547,7 @@ class L1MenuConfig(object):
                         continue
                     threshold = self.getDefinedThreshold(thrName)
                     if threshold is None:
-                        log.error('Threshold %s is required in menu on board %s, connector %s, but it is not defined', (thrName, boardName, connDef['name']) )
+                        log.error('Threshold %s is required in menu on board %s, connector %s, but it is not defined', thrName, boardName, connDef['name'] )
                         list_of_undefined_thresholds += [ thrName ]
                     else:
                         self.l1menu.addThreshold( threshold )
@@ -576,7 +576,7 @@ class L1MenuConfig(object):
                             continue
                         threshold = self.getDefinedThreshold(thrName)
                         if threshold is None:
-                            log.error('Threshold %s is required in menu on board %s, connector %s, but it is not defined', (thrName, boardName, connDef['name']) )
+                            log.error('Threshold %s is required in menu on board %s, connector %s, but it is not defined', thrName, boardName, connDef['name'] )
                             list_of_undefined_thresholds += [ thrName ]
                         else:
                             self.l1menu.addThreshold( threshold )

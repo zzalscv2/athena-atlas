@@ -1007,7 +1007,7 @@ class TrigMuonEFTrackIsolationHypoConfig(object) :
                 log.debug('Setting passthrough')
                 tool.AcceptAll = True
             else:
-                log.error('isoCut = ', isoCut)
+                log.error('isoCut = %s', isoCut)
                 raise Exception('TrigMuonEFTrackIsolation Hypo Misconfigured')
         return tool
 
@@ -1051,7 +1051,7 @@ class TrigMuonEFInvMassHypoConfig(object) :
                 log.debug('Setting passthrough')
                 tool.AcceptAll = True
             else:
-                log.error('thresholds = ', thresholds)
+                log.error('thresholds = %s', thresholds)
                 raise Exception('TrigMuonEFInvMass Hypo Misconfigured')
         return tool
 
@@ -1160,7 +1160,7 @@ class TrigMuonEFIdtpInvMassHypoConfig(object) :
                 log.debug('Setting passthrough')
                 tool.AcceptAll = True
             else:
-                log.error('thresholds = ', thresholds)
+                log.error('thresholds = %s', thresholds)
                 raise Exception('TrigMuonEFIdtpInvMass Hypo Misconfigured')
         return tool
 

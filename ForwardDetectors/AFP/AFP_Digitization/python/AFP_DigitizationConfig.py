@@ -38,7 +38,7 @@ def AFP_TDPUXinfFolderCfg(flags, name="AFP_TDXinfFolder", **kwargs):
     return PileUpXingFolderCfg(flags, name, **kwargs)
 
 
-def AFP_DigitizationToolCfg(flags, **kwargs):
+def AFP_DigitizationToolCfg(flags, name="AFP_PileUpTool", **kwargs):
     """Return ComponentAccumulator with AFP digitization tool."""
     acc = ComponentAccumulator()
 
@@ -59,7 +59,7 @@ def AFP_DigitizationToolCfg(flags, **kwargs):
     from RngComps.RandomServices import AthRNGSvcCfg
     kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
 
-    acc.setPrivateTools(CompFactory.AFP_PileUpTool("AFP_PileUpTool", **kwargs))
+    acc.setPrivateTools(CompFactory.AFP_PileUpTool(name, **kwargs))
     return acc
 
 
