@@ -311,6 +311,10 @@ This allows the possibility of later adding a new IOV using IOVSvc::setRange."""
         "Set option to write data to file"
         self.iovdbsvc.OutputToFile=writeData
 
+    def setCrestToFile(self, crestData=False):
+        "Set option to write CREST data to file"
+        self.iovdbsvc.CrestToFile=crestData
+
 
     def extractFolder(self,folderstr):
         "Extract the folder name (non-XML text) from a IOVDbSvc.Folders entry"
