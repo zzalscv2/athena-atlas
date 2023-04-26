@@ -50,6 +50,20 @@ def InDetTestPixelLayerToolInnerCfg(
     return InDetTestPixelLayerToolCfg(flags, name, **kwargs)
 
 
+def CombinedMuonPixelLayerToolCfg(
+        flags, name="CombinedMuonPixelLayerToolDefault", **kwargs):
+    result = ComponentAccumulator()
+
+    if 'Extrapolator' not in kwargs:
+        from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
+        kwargs.setdefault("Extrapolator", result.popToolsAndMerge(
+            AtlasExtrapolatorCfg(flags)))
+
+    result.setPrivateTools(result.popToolsAndMerge(
+        InDetTestPixelLayerToolCfg(flags, name, **kwargs)))
+    return result
+
+
 def InDetTrigTestPixelLayerToolCfg(
         flags, name="InDetTrigTestPixelLayerTool", **kwargs):
     kwargs.setdefault("CheckActiveAreas", True)
@@ -63,6 +77,20 @@ def InDetTrigTestPixelLayerToolInnerCfg(
     kwargs.setdefault("CheckActiveAreas", True)
     kwargs.setdefault("PixelDetElStatus", "")
     return InDetTestPixelLayerToolInnerCfg(flags, name, **kwargs)
+
+
+def CombinedMuonTrigPixelLayerToolCfg(
+        flags, name="CombinedMuonPixelLayerToolDefault", **kwargs):
+    result = ComponentAccumulator()
+
+    if 'Extrapolator' not in kwargs:
+        from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
+        kwargs.setdefault("Extrapolator", result.popToolsAndMerge(
+            AtlasExtrapolatorCfg(flags)))
+
+    result.setPrivateTools(result.popToolsAndMerge(
+        InDetTrigTestPixelLayerToolCfg(flags, name, **kwargs)))
+    return result
 
 
 def ITkTestPixelLayerToolCfg(flags, name="ITkTestPixelLayerTool", **kwargs):

@@ -115,7 +115,7 @@ public:
       return deltaR >= R - std::sqrt(x * x + y * y);
 
   }
-  EllipseCollisionTest(int maxIterations)
+  explicit EllipseCollisionTest(int maxIterations)
     : m_maxIterations(maxIterations)
   {
   }

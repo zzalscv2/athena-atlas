@@ -74,19 +74,6 @@ def ITkTrackHoleSearchToolCfg(flags, name='ITkHoleSearchTool', **kwargs):
     return result
 
 
-def AtlasTrackHoleSearchToolCfg(flags, name='AtlasHoleSearchTool', **kwargs):
-    result = ComponentAccumulator()
-
-    if 'Extrapolator' not in kwargs:
-        from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
-        kwargs.setdefault("Extrapolator", result.popToolsAndMerge(
-            AtlasExtrapolatorCfg(flags)))
-
-    result.setPrivateTools(result.popToolsAndMerge(
-        InDetTrackHoleSearchToolCfg(flags, name, **kwargs)))
-    return result
-
-
 def CombinedMuonIDHoleSearchCfg(
         flags, name='CombinedMuonIDHoleSearch', **kwargs):
     if flags.Detector.GeometryITk:
@@ -100,39 +87,16 @@ def CombinedMuonIDHoleSearchCfg(
             AtlasExtrapolatorCfg(flags)))
 
     if 'BoundaryCheckTool' not in kwargs:
-        from InDetConfig.InDetBoundaryCheckToolConfig import (
-            InDetBoundaryCheckToolCfg)
-        from InDetConfig.InDetTestPixelLayerConfig import (
-            InDetTestPixelLayerToolCfg, InDetTrigTestPixelLayerToolCfg)
-        from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
-        atlasextrapolator = result.popToolsAndMerge(
-            AtlasExtrapolatorCfg(flags))
         if flags.Muon.MuonTrigger:
-            from SCT_ConditionsTools.SCT_ConditionsToolsConfig import (
-                SCT_ConditionsSummaryToolCfg)
-            sctCondTool = result.popToolsAndMerge(SCT_ConditionsSummaryToolCfg(
-                flags, withFlaggedCondTool=False,
-                withByteStreamErrorsTool=False))
-
+            from InDetConfig.InDetBoundaryCheckToolConfig import (
+                CombinedMuonTrigIDBoundaryCheckToolCfg)
             BoundaryCheckTool = result.popToolsAndMerge(
-                InDetBoundaryCheckToolCfg(
-                    flags, name='CombinedMuonIDBoundaryCheckTool',
-                    SCTDetElStatus="",
-                    SctSummaryTool=sctCondTool,
-                    PixelLayerTool=result.popToolsAndMerge(
-                        InDetTrigTestPixelLayerToolCfg(
-                            flags, name='CombinedMuonPixelLayerToolDefault',
-                            Extrapolator=atlasextrapolator)
-                    )
-                ))
+                CombinedMuonTrigIDBoundaryCheckToolCfg(flags))
         else:
+            from InDetConfig.InDetBoundaryCheckToolConfig import (
+                CombinedMuonIDBoundaryCheckToolCfg)
             BoundaryCheckTool = result.popToolsAndMerge(
-                InDetBoundaryCheckToolCfg(
-                    flags, name='CombinedMuonIDBoundaryCheckTool',
-                    PixelLayerTool=result.popToolsAndMerge(
-                        InDetTestPixelLayerToolCfg(
-                            flags, name='CombinedMuonPixelLayerToolDefault',
-                            Extrapolator=atlasextrapolator))))
+                CombinedMuonIDBoundaryCheckToolCfg(flags))
 
         kwargs.setdefault('BoundaryCheckTool', BoundaryCheckTool)
 

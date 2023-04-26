@@ -14,10 +14,10 @@
 class ContainsPtrSurface : public Trk::SurfacePtrHolder
 {
 public:
-  ContainsPtrSurface(const Trk::Surface& s)
+  explicit ContainsPtrSurface(const Trk::Surface& s)
     : Trk::SurfacePtrHolder(s)
   {}
-  ContainsPtrSurface(const Trk::Surface* s)
+  explicit ContainsPtrSurface(const Trk::Surface* s)
     : Trk::SurfacePtrHolder(s)
   {}
   ContainsPtrSurface() = default;
@@ -34,10 +34,10 @@ public:
 class ContainsUniqSurface : public Trk::SurfaceUniqHolder
 {
 public:
-  ContainsUniqSurface(const Trk::Surface& s)
+  explicit ContainsUniqSurface(const Trk::Surface& s)
     : Trk::SurfaceUniqHolder(s)
   {}
-  ContainsUniqSurface(const Trk::Surface* s)
+  explicit ContainsUniqSurface(const Trk::Surface* s)
     : Trk::SurfaceUniqHolder(s)
   {}
   ContainsUniqSurface() = default;
@@ -54,10 +54,10 @@ public:
 class ContainsPtrSurfaceDetEl : public Trk::SurfacePtrHolderDetEl
 {
 public:
-  ContainsPtrSurfaceDetEl(const Trk::Surface& s)
+  explicit ContainsPtrSurfaceDetEl(const Trk::Surface& s)
     : Trk::SurfacePtrHolderDetEl(s)
   {}
-  ContainsPtrSurfaceDetEl(const Trk::Surface* s)
+  explicit ContainsPtrSurfaceDetEl(const Trk::Surface* s)
     : Trk::SurfacePtrHolderDetEl(s)
   {}
   ContainsPtrSurfaceDetEl() = default;

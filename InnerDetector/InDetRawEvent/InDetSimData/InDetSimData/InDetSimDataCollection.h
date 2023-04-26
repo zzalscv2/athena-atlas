@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -13,28 +13,15 @@
 #ifndef INDETSIMDATA_INDETSIMDATACOLLECTION_H
 # define INDETSIMDATA_INDETSIMDATACOLLECTION_H
 
-//<<<<<< INCLUDES                                                       >>>>>>
 #include "AthenaKernel/CLASS_DEF.h"
 #include "InDetSimData/InDetSimData.h"
 #include "Identifier/Identifier.h"
 #include <map>
 
-//<<<<<< PUBLIC DEFINES                                                 >>>>>>
-//<<<<<< PUBLIC CONSTANTS                                               >>>>>>
-//<<<<<< PUBLIC TYPES                                                   >>>>>>
-//<<<<<< PUBLIC VARIABLES                                               >>>>>>
-//<<<<<< PUBLIC FUNCTIONS                                               >>>>>>
-//<<<<<< CLASS DECLARATIONS                                             >>>>>>
 
-class InDetSimDataCollection : public std::map<Identifier,InDetSimData> {
- public:
-  InDetSimDataCollection();
-  virtual ~InDetSimDataCollection();
+class InDetSimDataCollection : public std::map<Identifier,InDetSimData>{
+//empty
 };
 CLASS_DEF(InDetSimDataCollection, 2543, 1)
-
-
-//<<<<<< INLINE PUBLIC FUNCTIONS                                        >>>>>>
-//<<<<<< INLINE MEMBER FUNCTIONS                                        >>>>>>
 
 #endif // INDETSIMDATA_INDETSIMDATACLASS_DEF_H

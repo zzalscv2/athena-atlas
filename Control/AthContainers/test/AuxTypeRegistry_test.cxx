@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/AuxBaseRegistry_test.cxx
@@ -223,6 +223,10 @@ void test2()
   assert (r.numVariables() == 9);
   test_makeVector<int> ("anInt");
   assert (r.numVariables() == 9);
+
+  EXPECT_EXCEPTION( SG::ExcBadVarName, r.getAuxID<int> ("") );
+  EXPECT_EXCEPTION( SG::ExcBadVarName, r.getAuxID<int> ("ab.cd") );
+  EXPECT_EXCEPTION( SG::ExcBadVarName, r.getAuxID<int> ("abcd", "de.fg") );
 }
 
 

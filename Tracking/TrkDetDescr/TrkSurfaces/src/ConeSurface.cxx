@@ -152,15 +152,10 @@ bool
 Trk::ConeSurface::operator==(const Trk::Surface& sf) const
 {
   // first check the type not to compare apples with oranges
-  const Trk::ConeSurface* csf = dynamic_cast<const Trk::ConeSurface*>(&sf);
-  if (!csf)
-    return false;
-  if (this == csf)
-    return true;
-  bool transfEqual(transform().isApprox(csf->transform(), 10e-8));
-  bool centerEqual = (transfEqual) ? (center() == csf->center()) : false;
-  bool boundsEqual = (centerEqual) ? (bounds() == csf->bounds()) : false;
-  return boundsEqual;
+  if (sf.type()!=Trk::SurfaceType::Cone){
+      return false;
+  }
+  return (*this) == static_cast<const Trk::ConeSurface&>(sf);
 }
 
 const Amg::Vector3D&

@@ -45,12 +45,6 @@ def InDetAmbiTrackSelectionToolCfg(
         kwargs.setdefault("minTrackChi2ForSharedHits", 3)
         # Only allow split clusters on track withe pt greater than this MeV
         kwargs.setdefault("minPtSplit", 1000)
-        # Maximum number of shared modules for tracks in ROI
-        kwargs.setdefault("maxSharedModulesInROI", 3)
-        # Minimum number of unique modules for tracks in ROI
-        kwargs.setdefault("minNotSharedInROI", 2)
-        # Minimum number of Si hits to allow splittings for tracks in ROI
-        kwargs.setdefault("minSiHitsToAllowSplittingInROI", 8)
         # Split cluster ROI size
         kwargs.setdefault("phiWidth", 0.05)
         kwargs.setdefault("etaWidth", 0.05)
@@ -74,7 +68,6 @@ def InDetAmbiTrackSelectionToolCfg(
             acc.merge(HadCaloClusterROIPhiRZContainerMakerCfg(flags))
 
         # Do special cuts in region of interest
-        kwargs.setdefault("minPtConv", 10000)
         kwargs.setdefault("minPtBjetROI", 10000)
         # Split cluster ROI size
         kwargs.setdefault("phiWidthEM", 0.05)
@@ -186,7 +179,6 @@ def ITkAmbiTrackSelectionToolCfg(
     kwargs.setdefault("Cosmics", flags.Beam.Type is BeamType.Cosmics)
     kwargs.setdefault("doPixelSplitting",
                       flags.Tracking.doPixelClusterSplitting)
-    kwargs.setdefault("doITk", True)
 
     kwargs.setdefault("sharedProbCut",
                       flags.Tracking.pixelClusterSplitProb1)
@@ -197,12 +189,6 @@ def ITkAmbiTrackSelectionToolCfg(
     kwargs.setdefault("minTrackChi2ForSharedHits", 3)
     # Only allow split clusters on track withe pt greater than this MeV
     kwargs.setdefault("minPtSplit", 1000)
-    # Maximum number of shared modules for tracks in ROI
-    kwargs.setdefault("maxSharedModulesInROI", 3)
-    # Minimum number of unique modules for tracks in ROI
-    kwargs.setdefault("minNotSharedInROI", 2)
-    # Minimum number of Si hits to allow splittings for tracks in ROI
-    kwargs.setdefault("minSiHitsToAllowSplittingInROI", 8)
     # Split cluster ROI size
     kwargs.setdefault("phiWidth", 0.05)
     kwargs.setdefault("etaWidth", 0.05)
@@ -224,7 +210,6 @@ def ITkAmbiTrackSelectionToolCfg(
         acc.merge(ITkHadCaloClusterROIPhiRZContainerMakerCfg(flags))
 
     # Only allow split clusters on track withe pt greater than this MeV
-    kwargs.setdefault("minPtConv", 10000)
     kwargs.setdefault("minPtBjetROI", 10000)
     # Split cluster ROI size
     kwargs.setdefault("phiWidthEM", 0.05)

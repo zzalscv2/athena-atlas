@@ -41,12 +41,14 @@ using CLHEP::second;
 CaloCellMaker::CaloCellMaker(const std::string& name, ISvcLocator* pSvcLocator)
     : AthReentrantAlgorithm(name, pSvcLocator)
   , m_chrono("ChronoStatSvc", name)
+  , m_doChronoStat(true)
   , m_ownPolicy(static_cast<int>(SG::VIEW_ELEMENTS))
   , m_caloCellsOutputKey("")
       //, m_caloCellHack(false)
   , m_caloCellMakerTools(this)
       //, m_evCounter(0)
 {
+  declareProperty("EnableChronoStat", m_doChronoStat);
   declareProperty("OwnPolicy", m_ownPolicy);
   declareProperty("CaloCellMakerToolNames", m_caloCellMakerTools);
   declareProperty("CaloCellsOutputName", m_caloCellsOutputKey);
@@ -66,7 +68,10 @@ CaloCellMaker::~CaloCellMaker() = default;
 
 StatusCode CaloCellMaker::initialize() {
 
-  CHECK( m_chrono.retrieve() );
+  // Retrieve ChronoStatSvc
+  if (m_doChronoStat) {
+    ATH_CHECK( m_chrono.retrieve() );
+  }
 
   // // Add ":PUBLIC" to the tool names to force ToolSvc into creating
   // // public tools.
@@ -110,13 +115,15 @@ StatusCode CaloCellMaker::execute (const EventContext& ctx) const {
 
     std::string chronoName = this->name() + "_" + tool.name();
 
-    m_chrono->chronoStart(chronoName);
+    if(m_doChronoStat) {
+      m_chrono->chronoStart(chronoName);
+    }
     StatusCode sc = tool->process(caloCellsOutput.ptr(), ctx);
-    m_chrono->chronoStop(chronoName);
+    if(m_doChronoStat) {
+      m_chrono->chronoStop(chronoName);
 
-    ATH_MSG_DEBUG( "Chrono stop : delta "
-                   << m_chrono->chronoDelta(chronoName, IChronoStatSvc::USER) * (microsecond / second)
-        << " second " );
+      ATH_MSG_DEBUG( "Chrono stop : delta " << m_chrono->chronoDelta(chronoName, IChronoStatSvc::USER) * (microsecond / second) << " second " );
+    }
 
     if (sc.isFailure()) {
       ATH_MSG_ERROR( "Error executing tool " << tool.name() );

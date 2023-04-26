@@ -19,9 +19,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
-def InDetTrackSummaryToolCfg(flags,
-                             name='InDetTrackSummaryTool',
-                             **kwargs):
+def InDetTrackSummaryToolCfg(flags, name='InDetTrackSummaryTool', **kwargs):
     if flags.Detector.GeometryITk:
         name = name.replace("InDet", "ITk")
         return ITkTrackSummaryToolCfg(flags, name, **kwargs)
@@ -46,14 +44,14 @@ def InDetTrackSummaryToolCfg(flags,
     acc.setPrivateTools(CompFactory.Trk.TrackSummaryTool(name, **kwargs))
     return acc
 
-def InDetTrackSummaryToolNoHoleSearchCfg(flags,
-                                         name='InDetTrackSummaryToolNoHoleSearch',
-                                         **kwargs):
+def InDetTrackSummaryToolNoHoleSearchCfg(
+        flags, name='InDetTrackSummaryToolNoHoleSearch', **kwargs):
     kwargs.setdefault('doHolesInDet', False)
     return InDetTrackSummaryToolCfg(flags, name, **kwargs)
 
 
-def InDetTrigTrackSummaryToolCfg(flags,name="InDetTrigTrackSummaryTool",**kwargs):
+def InDetTrigTrackSummaryToolCfg(
+        flags,name="InDetTrigTrackSummaryTool",**kwargs):
     """
     instance with hole search
     """
@@ -64,11 +62,10 @@ def InDetTrigTrackSummaryToolCfg(flags,name="InDetTrigTrackSummaryTool",**kwargs
     if 'InDetSummaryHelperTool' not in kwargs:
         from InDetConfig.InDetTrackSummaryHelperToolConfig import (
             TrigTrackSummaryHelperToolCfg)
-        summaryHelperTool = acc.popToolsAndMerge(
-            TrigTrackSummaryHelperToolCfg(flags))
-        kwargs.setdefault("InDetSummaryHelperTool", summaryHelperTool)
+        kwargs.setdefault("InDetSummaryHelperTool", acc.popToolsAndMerge(
+            TrigTrackSummaryHelperToolCfg(flags)))
 
-    acc.setPrivateTools(CompFactory.Trk.TrackSummaryTool(name = name, **kwargs))
+    acc.setPrivateTools(CompFactory.Trk.TrackSummaryTool(name, **kwargs))
     return acc
 
 def InDetTrigFastTrackSummaryToolCfg(
@@ -115,16 +112,14 @@ def ITkTrackSummaryToolCfg(flags, name='ITkTrackSummaryTool', **kwargs):
     acc.setPrivateTools(CompFactory.Trk.TrackSummaryTool(name, **kwargs))
     return acc
 
-def ITkTrackSummaryToolNoHoleSearchCfg(flags,
-                                       name='ITkTrackSummaryToolNoHoleSearch',
-                                       **kwargs):
+def ITkTrackSummaryToolNoHoleSearchCfg(
+        flags, name='ITkTrackSummaryToolNoHoleSearch', **kwargs):
     kwargs.setdefault('doHolesInDet', False)
     return ITkTrackSummaryToolCfg(flags, name, **kwargs)
 
 
-def GSFTrackSummaryToolCfg(flags,
-                           name="GSFTrackSummaryTool",
-                           **kwargs):
+def GSFTrackSummaryToolCfg(
+        flags, name="GSFTrackSummaryTool", **kwargs):
     """ The Track Summary for the GSF refitted Tracks/TrackParticles"""
 
     acc = ComponentAccumulator()
@@ -148,30 +143,23 @@ def GSFTrackSummaryToolCfg(flags,
 def MuonTrackSummaryToolCfg(flags, name="MuonTrackSummaryTool", **kwargs):
     result = ComponentAccumulator()
     from MuonConfig.MuonRecToolsConfig import MuonTrackSummaryHelperToolCfg
-    track_summary_helper = result.popToolsAndMerge(
-        MuonTrackSummaryHelperToolCfg(flags))
-    kwargs.setdefault("MuonSummaryHelperTool", track_summary_helper)
+    kwargs.setdefault("MuonSummaryHelperTool", result.popToolsAndMerge(
+        MuonTrackSummaryHelperToolCfg(flags)))
     kwargs.setdefault("AddDetailedMuonSummary", True)
     result.setPrivateTools(CompFactory.Trk.TrackSummaryTool(name, **kwargs))
     return result
 
 @AccumulatorCache
-def MuonCombinedTrackSummaryToolCfg(flags,
-                                    name="CombinedMuonTrackSummary",
-                                    **kwargs):
+def MuonCombinedTrackSummaryToolCfg(
+        flags, name="CombinedMuonTrackSummary", **kwargs):
 
     result = ComponentAccumulator()
 
     if "InDetSummaryHelperTool" not in kwargs:
-        from InDetConfig.InDetTrackSummaryHelperToolConfig import AtlasTrackSummaryHelperToolCfg
-        from InDetConfig.InDetTrackHoleSearchConfig import CombinedMuonIDHoleSearchCfg
-        atlasHoleSearchTool = result.popToolsAndMerge(
-            CombinedMuonIDHoleSearchCfg(flags))
-        #result.addPublicTool(atlasHoleSearchTool)
+        from InDetConfig.InDetTrackSummaryHelperToolConfig import (
+            CombinedMuonIDSummaryHelperToolCfg)
         kwargs.setdefault("InDetSummaryHelperTool", result.popToolsAndMerge(
-            AtlasTrackSummaryHelperToolCfg(
-                flags, name="CombinedMuonIDSummaryHelper",
-                HoleSearch = atlasHoleSearchTool)))
+            CombinedMuonIDSummaryHelperToolCfg(flags)))
 
     if "MuonSummaryHelperTool" not in kwargs:
         from MuonConfig.MuonRecToolsConfig import MuonTrackSummaryHelperToolCfg

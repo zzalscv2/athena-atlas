@@ -267,9 +267,6 @@ StatusCode TrigT1RPC::fill_RPCdata(RPCsimuData &data, const RpcCablingCondData *
 
   ATH_MSG_DEBUG("in execute(): fill RPC data");
 
-  typedef RpcDigitContainer::const_iterator collection_iterator;
-  typedef RpcDigitCollection::const_iterator digit_iterator;
-
   SG::ReadHandle<RpcDigitContainer> rh_rpcDigits(m_rpcDigitKey);
   if (!rh_rpcDigits.isValid())
   {

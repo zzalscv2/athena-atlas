@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/exceptions.h
@@ -440,6 +440,24 @@ public:
  */
 [[noreturn]]
 void throwExcAllocOwnership();
+
+
+/**
+ * @brief Exception --- Bad name for auxiliary variable.
+ *
+ * Variable and class name must be identifiers, and variable name
+ * must not be empty.
+ */
+class ExcBadVarName
+  : public std::runtime_error
+{
+public:
+  /**
+   * @brief Constructor.
+   * @param name Name of the variable.
+   */
+  ExcBadVarName (const std::string& name);
+};
 
 
 } // namespace SG

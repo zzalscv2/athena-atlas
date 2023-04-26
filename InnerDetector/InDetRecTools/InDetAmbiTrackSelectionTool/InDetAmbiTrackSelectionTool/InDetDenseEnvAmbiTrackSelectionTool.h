@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -17,7 +17,6 @@
 #include "AthenaKernel/SlotSpecificObj.h"
 #include "InDetRecToolInterfaces/ITrtDriftCircleCutTool.h"
 #include "InDetRecToolInterfaces/IInDetEtaDependentCutsSvc.h"
-#include "PixelGeoModel/IBLParameterSvc.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "TrkCaloClusterROI/ROIPhiRZContainer.h"
 #include "TrkFitterInterfaces/ITrackFitter.h"
@@ -427,7 +426,6 @@ namespace InDet
 
     /** TRT minimum number of drift circles tool- returns allowed minimum number of TRT drift circles */
     PublicToolHandle<ITrtDriftCircleCutTool>  m_selectortool{this, "DriftCircleCutTool", "InDet::InDetTrtDriftCircleCutTool"};
-    ServiceHandle<IBLParameterSvc> m_IBLParameterSvc{this, "IBLParameterSvc", "IBLParameterSvc"};
 
     /** ITk eta-dependet cuts*/
     ServiceHandle<IInDetEtaDependentCutsSvc> m_etaDependentCutsSvc{this, "InDetEtaDependentCutsSvc", ""};
@@ -445,22 +443,18 @@ namespace InDet
     IntegerProperty m_minHits{this, "minHits", 5, "Min Number of hits on track"};
     IntegerProperty m_minTRT_Hits{this, "minTRTHits", 0, "Min Number of TRT hits on track"};
     IntegerProperty m_maxSharedModules{this, "maxShared", 1, "Max number of shared modules"};
-    IntegerProperty m_maxSharedModulesInROI{this, "maxSharedModulesInROI", 2, "Max number of shared modules in a hadronic ROI. Test value for recovering B jet efficiency at high pt"};
     IntegerProperty m_maxTracksPerPRD{this, "maxTracksPerSharedPRD", 2, "Max number of tracks per hit. When NN is used, other flags set the limits."};
     IntegerProperty m_minNotSharedHits{this, "minNotShared", 6, "Min number of non shared hits"};
-    IntegerProperty m_minNotSharedHitsInROI{this, "minNotSharedInROI", 4, "Min number of non shared hits in ROI. Test value for recovering B jet efficiency at high pt"};
     FloatProperty m_minScoreShareTracks{this, "minScoreShareTracks", 0.0, "Min track score to alow it to share hits"};
     BooleanProperty m_cosmics{this, "Cosmics", false, "Trying to reco cosmics?"};
     BooleanProperty m_parameterization{this, "UseParameterization", true, "Use table of min number DCs"};
     BooleanProperty m_doPixelClusterSplitting{this, "doPixelSplitting", false, "Split pixel clusters"};
     FloatProperty m_sharedProbCut{this, "sharedProbCut", 0.3, "Min split prob to break a cluster into two parts"};
     FloatProperty m_sharedProbCut2{this, "sharedProbCut2", 0.3, "Min split prob to break a clsuter into three parts"};
-    FloatProperty m_minsharedProbCut{this, "minSharedProbCut", 0.05, "Min split prob cut to all a cluster to be shared"};
       
     FloatProperty m_minTrackChi2ForSharedHits{this, "minTrackChi2ForSharedHits", 3, "Min track chi2 to split share hits"};
     IntegerProperty m_minUniqueSCTHits{this, "minUniqueSCTHits", 2, "Min number of hits in the SCT that we need before we allow hit sharing in the SCT"};
     IntegerProperty m_minSiHitsToAllowSplitting{this, "minSiHitsToAllowSplitting", 9, "Min number of hits before we allow split sharing of hits"};
-    IntegerProperty m_minSiHitsToAllowSplittingInROI{this, "minSiHitsToAllowSplittingInROI", 7, "Min number of hits before we allow split sharing of hits In ROI. Test value for recovering B jet efficiency"}; 
     IntegerProperty m_maxPixOnePartCluster{this, "maxPixOnePartCluster", 2, "Max number of tracks that can be associated to a 1 particle cluster"};
     IntegerProperty m_maxPixTwoPartCluster{this, "maxPixTwoPartCluster", 2, "Max number of tracks that can be associated to a 2 particle cluster"};
     IntegerProperty m_maxPixMultiCluster{this, "maxPixMultiCluster", 4, "Max number of tracks that can be associated to a >= 3 particle cluster"};
@@ -477,7 +471,6 @@ namespace InDet
     SG::ReadHandleKey<ROIPhiRZContainer> m_inputHadClusterContainerName{this, "HadROIPhiRZContainer", ""};
       
     BooleanProperty m_useEmClusSeed{this, "doEmCaloSeed", false};
-    FloatProperty m_minPtEm{this, "minPtConv", 10000., "in MeV"};
     FloatProperty m_phiWidthEm{this, "phiWidthEM", 0.05};
     FloatProperty m_etaWidthEm{this, "etaWidthEM", 0.05};
 
@@ -489,7 +482,6 @@ namespace InDet
 
     BooleanProperty m_monitorTracks{this, "MonitorAmbiguitySolving", false, "to track observeration/monitoring (default is false)"};
 
-    BooleanProperty m_doITk{this, "doITk", false};
   }; 
 } // end of namespace
 

@@ -47,7 +47,8 @@ def CaloCellMakerCfg(flags):
         cellMakerTools.append(result.popToolsAndMerge(theCaloTimeCorr))
 
     cellAlgo = CompFactory.CaloCellMaker(CaloCellMakerToolNames=cellMakerTools,
-                                         CaloCellsOutputName="AllCalo")
+                                         CaloCellsOutputName="AllCalo",
+                                         EnableChronoStat=(flags.Concurrency.NumThreads == 0))
 
     result.addEventAlgo(cellAlgo, primary=True)
 

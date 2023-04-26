@@ -1,23 +1,16 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, ChainStep, Chain, EmptyMenuSequence, SelectionCA, InViewRecoCA
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, ChainStep, SelectionCA, InViewRecoCA
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import BeamType, Format
 
-from TrigL2MuonSA.TrigL2MuonSAConfig import l2MuFastAlgCfg, l2MuFastHypoCfg
 from TrigmuComb.TrigmuCombConfig import l2MuCombRecoCfg, l2MuCombHypoCfg
-from TrigMuonHypo.TrigMuonHypoConfig import TrigMufastHypoToolFromDict, TrigmuCombHypoToolFromDict, TrigMuonEFMSonlyHypoToolFromDict, TrigMuonEFCombinerHypoToolFromDict, TrigMuonEFTrackIsolationHypoToolFromDict
+from TrigMuonHypo.TrigMuonHypoConfig import TrigmuCombHypoToolFromDict, TrigMuonEFCombinerHypoToolFromDict, TrigMuonEFTrackIsolationHypoToolFromDict
 from TrigInDetConfig.TrigInDetConfig import trigInDetFastTrackingCfg
-
-from TriggerMenuMT.HLT.Config.Utility.ChainDictTools import splitChainDict
-from TriggerMenuMT.HLT.Muon.MuonRecoSequences import muonDecodeCfg
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-from MuonConfig.MuonSegmentFindingConfig import MuonSegmentFinderAlgCfg
-from MuonConfig.MuonTrackBuildingConfig import MuPatTrackBuilderCfg
-from MuonCombinedConfig.MuonCombinedReconstructionConfig import MuonCombinedMuonCandidateAlgCfg, MuonInsideOutRecoAlgCfg, MuonInDetToMuonSystemExtensionAlgCfg
-from MuonSegmentTrackMaker.MuonTrackMakerAlgsMonitoring import MuPatTrackBuilderMonitoring
+from MuonCombinedConfig.MuonCombinedReconstructionConfig import MuonInsideOutRecoAlgCfg, MuonInDetToMuonSystemExtensionAlgCfg
 from MuonCombinedConfig.MuonCombinedReconstructionConfig import MuonCombinedInDetCandidateAlgCfg, MuonCombinedAlgCfg, MuonCreatorAlgCfg
 
 from TrigMuonEF.TrigMuonEFConfig import TrigMuonEFTrackIsolationAlgCfg, MuonFilterAlgCfg, MergeEFMuonsAlgCfg
@@ -25,7 +18,6 @@ from AthenaCommon.CFElements import seqAND, parOR, seqOR
 
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
-import pprint
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
 
@@ -76,21 +68,6 @@ def EFMuonCBViewDataVerifierCfg(flags, name):
     result.addEventAlgo(EFMuonCBViewDataVerifier)
     return result
 
-def EFMuonViewDataVerifierCfg(flags, name='RoI'):
-    EFMuonViewDataVerifier =  CompFactory.AthViews.ViewDataVerifier("VDVEFMuon_"+name)
-    EFMuonViewDataVerifier.DataObjects = [( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' ),
-                                          ( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+EFMuMSReco_'+name+'RoIs' ),
-                                          ( 'RpcPad_Cache' , 'StoreGateSvc+RpcRdoCache' ),
-                                          ( 'RpcCoinDataCollection_Cache' , 'StoreGateSvc+RpcCoinCache' ),
-                                          ( 'RpcPrepDataCollection_Cache' , 'StoreGateSvc+RpcPrdCache' ),
-                                          ( 'TgcRdo_Cache' , 'StoreGateSvc+TgcRdoCache' ),
-                                          ( 'MdtCsm_Cache' , 'StoreGateSvc+MdtCsmRdoCache' )]
-    if flags.Detector.GeometryCSC:
-        EFMuonViewDataVerifier.DataObjects += [( 'CscRawDataCollection_Cache' , 'StoreGateSvc+CscRdoCache' )]
-
-    result = ComponentAccumulator()
-    result.addEventAlgo(EFMuonViewDataVerifier)
-    return result
 
 def MuonInsideOutViewDataVerifierCfg(flags):
     MuonViewDataVerifier =  CompFactory.AthViews.ViewDataVerifier("VDVMuInsideOut")
@@ -109,25 +86,6 @@ def MuonInsideOutViewDataVerifierCfg(flags):
     result.addEventAlgo(MuonViewDataVerifier)
     return result
 
-def MuFastViewDataVerifier(flags):
-    result = ComponentAccumulator()
-    dataobjects = [( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' ),
-                   ( 'RpcPad_Cache' , 'StoreGateSvc+RpcRdoCache' ),
-                   ( 'RpcCoinDataCollection_Cache' , 'StoreGateSvc+RpcCoinCache' ),
-                   ( 'RpcPrepDataCollection_Cache' , 'StoreGateSvc+RpcPrdCache' ),
-                   ( 'TgcRdo_Cache' , 'StoreGateSvc+TgcRdoCache' ),
-                   ( 'MdtCsm_Cache' , 'StoreGateSvc+MdtCsmRdoCache' ),
-                   ( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+L2MuFastRecoNewJORoIs' )]
-    if flags.Detector.GeometryCSC:
-        dataobjects += [( 'CscRawDataCollection_Cache' , 'StoreGateSvc+CscRdoCache' )]
-    if flags.Trigger.enableL1MuonPhase1:
-        dataobjects += [( 'xAOD::MuonRoIContainer' , 'StoreGateSvc+LVL1MuonRoIs' )]
-    else:
-        dataobjects += [( 'DataVector< LVL1::RecMuonRoI >' , 'StoreGateSvc+HLT_RecMURoIs' )]
-    alg = CompFactory.AthViews.ViewDataVerifier( name = "VDVMuFast",
-                                                 DataObjects = dataobjects )
-    result.addEventAlgo(alg)
-    return result
 
 def MuCombViewDataVerifier():
     result = ComponentAccumulator()
@@ -157,48 +115,6 @@ def efMuIsoHypoConf(flags, name="UNSPECIFIED", inputMuons="UNSPECIFIED"):
     efHypo = TrigMuonEFHypoAlg(name)
     efHypo.EFMuonsName = inputMuons
     return efHypo
-
-@AccumulatorCache
-def _muFastStepSeq(flags, is_probe_leg=False):
-    # Step 1 (L2MuonSA)
-    selAcc = SelectionCA("L2MuFastSel",  is_probe_leg)
-    # Set EventViews for L2MuonSA step
-
-    recoName = "L2MuFastRecoNewJO"
-    reco = InViewRecoCA(recoName, isProbe=is_probe_leg)
-
-    #external data loading to view
-    reco.mergeReco( MuFastViewDataVerifier(flags) )
-    
-    # decoding
-    decodeAcc = muonDecodeCfg(flags, recoName+"RoIs")
-    reco.mergeReco(decodeAcc)
-
-    #L2 SA alg
-    reco.mergeReco(l2MuFastAlgCfg( flags, roisKey=recoName+"RoIs"))    
-    selAcc.mergeReco(reco)
-    
-    
-    l2muFastHypo = l2MuFastHypoCfg( flags,
-                                    name = 'TrigL2MuFastHypo',
-                                    muFastInfo = 'HLT_MuonL2SAInfo' )
-
-    selAcc.addHypoAlgo(l2muFastHypo)    
-    return selAcc
-    
-
-def muFastSequence(flags, is_probe_leg=False): 
-    muonflags = flags.cloneAndReplace('Muon', 'Trigger.Offline.SA.Muon')
-    muonidflags = muonflags.cloneAndReplace("Tracking.ActiveConfig", "Trigger.InDetTracking.muon")
-    selAcc=  _muFastStepSeq(muonidflags, is_probe_leg)
-    return MenuSequenceCA(flags, selAcc,HypoToolGen = TrigMufastHypoToolFromDict, isProbe=is_probe_leg )
-
-
-
-def muFastStep(flags, chainDict):
-    """ can be removed"""
-    l2muFastSequence = muFastSequence(flags)
-    return ChainStep( name=l2muFastSequence.name, Sequences=[l2muFastSequence], chainDicts=[chainDict] )
 
 
 @AccumulatorCache
@@ -242,57 +158,6 @@ def muCombOvlpRmSequence(flags, is_probe_leg=False):
     return muCombSequence(flags, is_probe_leg)
 
 
-@AccumulatorCache
-def _muEFSAStepSeq(flags, name='RoI', is_probe_leg=False):
-    #EF MS only
-    selAccMS = SelectionCA('EFMuMSSel_'+name, is_probe_leg)
-    
-    viewName="EFMuMSReco_"+name
-    if 'FS' in name:
-        ViewCreatorFSROITool=CompFactory.ViewCreatorFSROITool
-        roiTool         = ViewCreatorFSROITool(RoisWriteHandleKey="MuonFS_RoIs")
-        requireParentView = False
-    else:
-        ViewCreatorFetchFromViewROITool=CompFactory.ViewCreatorFetchFromViewROITool
-        roiTool         = ViewCreatorFetchFromViewROITool(RoisWriteHandleKey="Roi_L2SAMuonForEF", InViewRoIs = "forMS", ViewToFetchFrom = "L2MuFastRecoViews")
-        requireParentView = True
-                                                         
-    recoMS = InViewRecoCA(name=viewName, RoITool = roiTool, RequireParentView = requireParentView, isProbe=is_probe_leg)
-    
-    recoMS.mergeReco(EFMuonViewDataVerifierCfg(flags, name))
-
-    # decoding
-    recoMS.mergeReco(muonDecodeCfg(flags, viewName+"RoIs"))
-
-    #Reco
-    recoMS.mergeReco(MuonSegmentFinderAlgCfg(flags,name="TrigMooSegmentFinder_"+name,UseTGCNextBC=False, UseTGCPriorBC=False))
-
-    recoMS.mergeReco(MuPatTrackBuilderCfg(flags, name="TrigMuPatTrackBuilder_"+name, MonTool = MuPatTrackBuilderMonitoring(flags, "MuPatTrackBuilderMonitoringSA_"+name)))
-    from xAODTrackingCnv.xAODTrackingCnvConfig import MuonTrackParticleCnvCfg
-    recoMS.mergeReco(MuonTrackParticleCnvCfg(flags, name = "TrigMuonTrackParticleCnvAlg_"+name))
-    recoMS.mergeReco(MuonCombinedMuonCandidateAlgCfg(flags, name = "TrigMuonCandidateAlg_"+name))
-    recoMS.mergeReco(MuonCreatorAlgCfg(flags, name = "TrigMuonCreatorAlg_"+name, MuonContainerLocation="Muons_"+name))
-
-    selAccMS.mergeReco(recoMS)
-
-    efmuMSHypo = efMuHypoConf( flags,
-                              name = 'TrigMuonEFMSonlyHypo_'+name,
-                              inputMuons = "Muons_"+name,
-                              doSA=True)
-
-    selAccMS.addHypoAlgo(efmuMSHypo)    
-    return selAccMS
-
-def muEFSASequence(flags, name='RoI', is_probe_leg=False):
-    muonflags = flags.cloneAndReplace('Muon', 'Trigger.Offline.SA.Muon')
-    selAccMS = _muEFSAStepSeq(muonflags, name, is_probe_leg=is_probe_leg)
-    return MenuSequenceCA(flags, selAccMS, HypoToolGen = TrigMuonEFMSonlyHypoToolFromDict)
-    
-
-def muEFSAStep(flags, chainDict, name='RoI'):
-    """ can be removed """
-    efmuMSSequence = muEFSASequence(flags)
-    return ChainStep( name=efmuMSSequence.name, Sequences=[efmuMSSequence], chainDicts=[chainDict] )
 
 @AccumulatorCache
 def _muEFCBStepSeq(flags, name='RoI', is_probe_leg=False):
@@ -432,35 +297,4 @@ def muEFIsoStep(flags, chainDict):
     """ can be removed"""
     efmuIsoSequence=muEFIsoSequence(flags)
     return ChainStep( name=efmuIsoSequence.name, Sequences=[efmuIsoSequence], chainDicts=[chainDict] )
-
-def generateChains( flags, chainDict ):
-    """can be removed"""
-    chainDict = splitChainDict(chainDict)[0]
-
-    #Clone and replace offline flags so we can set muon trigger specific values
-    muonflags = flags.cloneAndReplace('Muon', 'Trigger.Offline.SA.Muon')
-
-
-    l1Thresholds=[]
-    for part in chainDict['chainParts']:
-        l1Thresholds.append(part['L1threshold'])
-
-    log.debug('dictionary is: %s\n', pprint.pformat(chainDict))
-    def _empty(name):
-        return ChainStep(name="EmptyNoL2MuComb", Sequences=[EmptyMenuSequence("EmptyNoL2MuComb")], chainDicts=[chainDict])
-    if 'noL1' in chainDict['chainName']:
-        muonflagsCB = flags.cloneAndReplace('Muon', 'Trigger.Offline.Muon')
-        chain = Chain(name=chainDict['chainName'], L1Thresholds=l1Thresholds, ChainSteps=[muEFSAStep(muonflags, chainDict, 'FS'), muEFCBStep(muonflagsCB, chainDict, 'FS')])
-    else:
-        if 'msonly' in chainDict['chainName']:
-            chain = Chain( name=chainDict['chainName'], L1Thresholds=l1Thresholds, ChainSteps=[ muFastStep(muonflags, chainDict), _empty("EmptyNoL2MuComb"), muEFSAStep(muonflags, chainDict)] )
-        else:
-            muonflagsCB = flags.cloneAndReplace('Muon', 'Trigger.Offline.Muon').cloneAndReplace('MuonCombined', 'Trigger.Offline.Combined.MuonCombined')
-            if 'ivar' in chainDict['chainName']:
-                chain = Chain( name=chainDict['chainName'], L1Thresholds=l1Thresholds, ChainSteps=[ muFastStep(muonflags, chainDict), muCombStep(muonflagsCB, chainDict), muEFSAStep(muonflags, chainDict), muEFCBStep(muonflagsCB, chainDict), muEFIsoStep(muonflagsCB, chainDict) ] )
-            else:
-                chain = Chain( name=chainDict['chainName'], L1Thresholds=l1Thresholds, ChainSteps=[ muFastStep(muonflags, chainDict), muCombStep(muonflagsCB, chainDict), muEFSAStep(muonflags, chainDict), muEFCBStep(muonflagsCB, chainDict) ] )
-    
-    log.info('Steps for %s are %s', chain.name, chain.steps)
-    return chain
 

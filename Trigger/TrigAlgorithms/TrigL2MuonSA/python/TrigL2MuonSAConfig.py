@@ -366,15 +366,6 @@ def l2MuFastAlgCfg( flags, roisKey, setup="", **kwargs ):
 
 
 
-def l2MuFastHypoCfg( flags, name="UNSPECIFIED", muFastInfo="UNSPECIFIED" ):
-
-    TrigMufastHypoAlg=CompFactory.TrigMufastHypoAlg
-    muFastHypo = TrigMufastHypoAlg( name )
-    muFastHypo.MuonL2SAInfoFromMuFastAlg = muFastInfo 
-
-    return muFastHypo
- 
-
 if __name__ == "__main__":
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaConfiguration.AllConfigFlags import initConfigFlags

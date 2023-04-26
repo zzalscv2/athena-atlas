@@ -96,7 +96,8 @@ namespace InDet{
          const Trk::TrackParameters                              &,
          std::vector<const InDet::SiDetElementBoundaryLink_xk*>  &,
          std::multimap<const Trk::PrepRawData*,const Trk::Track*>&,
-         std::vector<const InDet::SiCluster*>                      &);
+         std::vector<const InDet::SiCluster*>                    &,
+         const EventContext& ctx);
       
       bool globalPositionsToClusters
         (const PixelClusterContainer*                             ,
@@ -106,11 +107,11 @@ namespace InDet{
          std::multimap<const Trk::PrepRawData*,const Trk::Track*>&,
          std::vector<const InDet::SiCluster*>                      &);
 
-      bool backwardExtension(int);
-      bool forwardExtension (bool,int);
-      bool forwardFilter    ();
-      bool filterWithPreciseClustersError();
-      bool backwardSmoother (bool);
+      bool backwardExtension(int, const EventContext&);
+      bool forwardExtension (bool,int, const EventContext&);
+      bool forwardFilter    (const EventContext&);
+      bool filterWithPreciseClustersError(const EventContext&);
+      bool backwardSmoother (bool, const EventContext&);
       bool isLastPixel      () const;
 
       /** @brief Return the pattern track parameters of the first element of this trajectory matching its status
@@ -134,19 +135,19 @@ namespace InDet{
       convertToNextTrackStateOnSurface();
 
       DataVector<const Trk::TrackStateOnSurface>
-      convertToSimpleTrackStateOnSurface();
+      convertToSimpleTrackStateOnSurface(const EventContext& ctx);
 
       DataVector<const Trk::TrackStateOnSurface>
-      convertToSimpleTrackStateOnSurface(int);
+      convertToSimpleTrackStateOnSurface(int, const EventContext& ctx);
 
       DataVector<const Trk::TrackStateOnSurface>
       convertToSimpleTrackStateOnSurfaceWithNewDirection();
 
       DataVector<const Trk::TrackStateOnSurface>
-      convertToSimpleTrackStateOnSurfaceForDisTrackTrigger();
+      convertToSimpleTrackStateOnSurfaceForDisTrackTrigger(const EventContext& ctx);
 
       DataVector<const Trk::TrackStateOnSurface>
-      convertToSimpleTrackStateOnSurfaceForDisTrackTrigger(int);
+      convertToSimpleTrackStateOnSurfaceForDisTrackTrigger(int, const EventContext& ctx);
 
       std::unique_ptr<Trk::FitQuality> convertToFitQuality() const;
 

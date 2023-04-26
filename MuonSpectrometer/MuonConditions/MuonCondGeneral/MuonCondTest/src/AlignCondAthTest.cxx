@@ -161,7 +161,6 @@ StatusCode AlignCondAthTest::checkMdtGeometry(const MuonGM::MuonDetectorManager*
                      << " Local X, Y, Z: " << Amg::toString(detEl->localTubePos(chId)) << std::endl
                      << " Cent X, Y, Z: " << Amg::toString(detEl->center(chId))<< std::endl
                      << " Norm X, Y, Z: " << Amg::toString(detEl->normal()) << std::endl
-                     << " TNor X, Y, Z: " << Amg::toString(detEl->tubeNormal(chId)) << std::endl
                      << Amg::toString(surf.transform(), 6) << std::endl
                      << detEl->bounds(tl, t) << std::endl;
             }
