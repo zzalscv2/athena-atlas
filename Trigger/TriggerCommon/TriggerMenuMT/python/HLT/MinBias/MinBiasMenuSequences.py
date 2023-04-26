@@ -24,7 +24,7 @@ def SPCountHypoToolGen(chainDict):
     hypo = CompFactory.SPCountHypoTool(chainDict["chainName"])
     if "hmt" in chainDict["chainName"]:
         hypo.sctSP = int(chainDict["chainParts"][0]["hypoSPInfo"].strip("sp"))
-    if "mb_sptrk" in chainDict["chainName"]:
+    if "mb_sptrk_" in chainDict["chainName"] or "mb_sp_" in chainDict["chainName"]:
         hypo.pixCL = 2
         hypo.sctSP = 3
     if "mb_excl" in chainDict["chainName"]:
