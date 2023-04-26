@@ -1,24 +1,31 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+
+from functools import reduce
 
 from TrigConfIO.TriggerConfigAccessBase import TriggerConfigAccess, ConfigType
-
+from AthenaCommon.Logging import logging
+log = logging.getLogger('L1TriggerConfigAccess.py')
 
 class L1MenuAccess(TriggerConfigAccess):
     """
     this class provides access to the L1Menu
     the methods are self-explanatory for people with knowledge of the configuration
     """
-    def __init__(self, filename = None, jsonString=None, dbalias = None, smkey = None ):
+    def __init__(self, filename = None, jsonString = None, dbalias = None, smkey = None ):
         """
         accessor needs to be initialized with either a filename or the dbalias and smkey
         """
         super(L1MenuAccess,self).__init__( ConfigType.L1MENU, mainkey = "items",
-                                           jsonString=jsonString, filename = filename, dbalias = dbalias, dbkey = smkey)
+                                           jsonString = jsonString, filename = filename, dbalias = dbalias, dbkey = smkey)
         self.loader.setQuery({
             2: "SELECT L1MT.L1TM_DATA FROM {schema}.SUPER_MASTER_TABLE SMT, {schema}.L1_MENU L1MT WHERE L1MT.L1TM_ID=SMT.SMT_L1_MENU_ID AND SMT.SMT_ID={dbkey}", # for new db schema
             1: "SELECT L1MT.L1MT_MENU FROM {schema}.SUPER_MASTER_TABLE SMT, {schema}.L1_MASTER_TABLE L1MT WHERE L1MT.L1MT_ID=SMT.SMT_L1_MASTER_TABLE_ID AND SMT.SMT_ID={dbkey}"  # for current db schema
         })
         self.load()
+        if smkey is not None:
+            log.info(f"Loaded L1 menu {self.name()} with {len(self)} items from {dbalias} with smk {smkey}")
+        elif filename is not None:
+            log.info(f"Loaded L1 menu {self.name()} with {len(self)} chains from file {filename}")
 
     def itemNames(self):
         return self._config["items"].keys()
@@ -119,16 +126,16 @@ class L1MenuAccess(TriggerConfigAccess):
 
     def printSummary(self):
         print("L1 menu %s" % self.name())
-        print("Number of items: %i" % len(self) )
+        print("Number of items: %i" % len(self))
         print("Number of threshold types: %i" % len(self.thresholdTypes()) )
         print("Number of thresholds: %i" % len(self.thresholds()) )
         print("Number of topo algorithms: %i" % len(self.topoAlgorithms()))
         print("Number of boards: %i (%i are legacy boards)" % ( len(self.boards()), sum(["legacy" in b for b in self.boards().values()]) ))
         print("Number of connectors: %i (%i are legacy connetors)" % ( len(self.connectors()), sum(["legacy" in c for c in self.connectors().values()]) ))
         print("CTP has %i optical, %i electrical, and %i CTPIN inputs" % ( len(self.ctpInputs("optical")), len(self.ctpInputs("electrical")), 
-                                                                           len(set(self.ctpInputs("ctpin")["slot7"].values() + 
-                                                                                   self.ctpInputs("ctpin")["slot8"].values() + 
-                                                                                   self.ctpInputs("ctpin")["slot9"].values()) - set([""])) ))
+                                                                           len(reduce(
+                                                                               lambda s1,i: s1.union(self.ctpInputs("ctpin")[f"slot{i}"].values()),
+                                                                               [7,8,9], set()) - set([""]) )))
 
 
 
@@ -145,7 +152,7 @@ class L1PrescalesSetAccess(TriggerConfigAccess):
         """
         return 0xFFFFFF / ( 0x1000000 - cut )
 
-    def __init__(self, filename = None, jsonString=None, dbalias = None, l1pskey = None ):
+    def __init__(self, filename = None, jsonString = None, dbalias = None, l1pskey = None ):
         """
         accessor needs to be initialized with either a filename or the dbalias and l1pskey
         """
@@ -155,6 +162,10 @@ class L1PrescalesSetAccess(TriggerConfigAccess):
             1: "SELECT L1PS_DATA FROM {schema}.L1_PRESCALE_SET L1PS WHERE L1PS_ID={dbkey}" # for current and new db schema
         })
         self.load()
+        if l1pskey is not None:
+            log.info(f"Loaded L1 prescales {self.name()} with {len(self)} items from {dbalias} with psk {l1pskey}")
+        elif filename is not None:
+            log.info(f"Loaded L1 prescales {self.name()} with {len(self)} items from file {filename}")
 
 
     def itemNames(self):
@@ -180,11 +191,15 @@ class BunchGroupSetAccess(TriggerConfigAccess):
     this class provides access to the L1 bunchgroup set
     the methods are self-explanatory for people with knowledge of the configuration
     """
-    def __init__(self, filename = None, jsonString=None, dbalias = None, bgskey = None ):
+    def __init__(self, filename = None, jsonString = None, dbalias = None, bgskey = None ):
         super(BunchGroupSetAccess,self).__init__( ConfigType.BGS, mainkey = "bunchGroups",
                                                   jsonString = jsonString, filename = filename, dbalias = dbalias, dbkey = bgskey )
         self.loader.setQuery({
             1: "SELECT L1BGS_DATA FROM {schema}.L1_BUNCH_GROUP_SET BGS WHERE L1BGS_ID={dbkey}" # for current and new db schema
         })
         self.load()
+        if bgskey is not None:
+            log.info(f"Loaded L1 bunchgroup set {self.name()} with {len(self)} bunchgroups from {dbalias} with bgsk {bgskey}")
+        elif filename is not None:
+            log.info(f"Loaded L1 bunchgroup set {self.name()} with {len(self)} bunchgroups from file {filename}")
 

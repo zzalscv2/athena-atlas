@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from TrigConfIO.TriggerConfigAccessBase import getFileType, ConfigType
 from TrigConfIO.L1TriggerConfigAccess import L1MenuAccess, L1PrescalesSetAccess, BunchGroupSetAccess
-from TrigConfIO.HLTTriggerConfigAccess import HLTMenuAccess, HLTPrescalesSetAccess, HLTJobOptionsAccess
-
+from TrigConfIO.HLTTriggerConfigAccess import HLTMenuAccess, HLTPrescalesSetAccess, HLTJobOptionsAccess, HLTMonitoringAccess
+from AthenaCommon.Logging import logging
+log = logging.getLogger('TriggerMenuRW.py')
 
 def main():
     import argparse
@@ -17,11 +17,19 @@ def main():
     parser.add_argument("--l1psk",  type = int, help="L1 PrescalesSet key (when accessing L1 prescales")
     parser.add_argument("--hltpsk", type = int, help="HLT PrescalesSet key (when accessing L1 prescales")
     parser.add_argument("--bgsk",   type = int, help="BunchGroupSet key (when accessing bunch groups")
+    parser.add_argument("--monk",   type = int, help="Monitoring Groups key (when accessing  monitoring groups)")
     parser.add_argument("--print",  dest="doPrint", help="Prints the loaded information", action="store_true", default = False)
     parser.add_argument("-w", "--write",  dest="doWrite", help="Writes the loaded information to a file", action="store_true", default = False)
+    parser.add_argument("-l", "--loglevel",  dest="loglevel", help="Log level [DEBUG, INFO, WARNING] (default INFO)", default = "INFO")
     
     args = parser.parse_args()
-    
+
+    logging.getLogger('TriggerConfigAccessBase.py').setLevel(args.loglevel)
+    logging.getLogger('L1TriggerConfigAccess.py').setLevel(args.loglevel)
+    logging.getLogger('HLTTriggerConfigAccess.py').setLevel(args.loglevel)
+    log.setLevel(args.loglevel)
+
+
     if args.filename:
         filetype = getFileType(args.filename)
         if filetype == ConfigType.L1MENU.filetype:
@@ -36,8 +44,10 @@ def main():
             cfg = HLTPrescalesSetAccess( filename = args.filename )
         elif filetype == ConfigType.HLTJO.filetype:
             cfg = HLTJobOptionsAccess( filename = args.filename )
+        elif filetype == ConfigType.HLTMON.filetype:
+            cfg = HLTMonitoringAccess( filename = args.filename )
         else:
-            print("Can't read file %s of unknown filetype '%s'" % (args.filename, filetype))
+            log.error("Can't read file %s of unknown filetype '%s'", args.filename, filetype)
             return 1
     elif args.dbalias:
         cfg = []
@@ -45,17 +55,18 @@ def main():
             cfg += [ L1MenuAccess( dbalias = args.dbalias, smkey = args.smk ) ]
             cfg += [ HLTMenuAccess( dbalias = args.dbalias, smkey = args.smk ) ]
             cfg += [ HLTJobOptionsAccess( dbalias = args.dbalias, smkey = args.smk ) ]
+            cfg += [ HLTMonitoringAccess( dbalias = args.dbalias, smkey = args.smk ) ]
         if args.l1psk:
             cfg += [ L1PrescalesSetAccess( dbalias = args.dbalias, l1pskey = args.l1psk ) ]
         if args.hltpsk:
             cfg += [ HLTPrescalesSetAccess( dbalias = args.dbalias, hltpskey = args.hltpsk ) ]
         if args.bgsk:
             cfg += [ BunchGroupSetAccess( dbalias = args.dbalias, bgskey = args.bgsk ) ]
+        if args.monk:
+            cfg += [ HLTMonitoringAccess( dbalias = args.dbalias, monikey = args.monk ) ]
     else:
         print("Either a file or dbalias and key need to be specified")
         return 1
-
-
 
     if args.doPrint:
         if type(cfg) is list:
