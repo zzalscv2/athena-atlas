@@ -88,6 +88,10 @@ def StandaloneMuonOutputCfg(flags):
     esd_items += ["Muon::TgcCoinDataContainer#TrigT1CoinDataCollectionNextNextBC"]
     esd_items += ["Muon::RpcCoinDataContainer#RPC_triggerHits"]
     esd_items += ["RpcSectorLogicContainer#RPC_SECTORLOGIC"]
+    
+    # trigger info for RPC time calibration
+    if flags.Output.doWriteRDO or flags.Muon.doWriteRpcRDO:
+        esd_items += ["RpcPadContainer#RPCPAD"]
 
     # Segments
     esd_items += ["Trk::SegmentCollection#NCB_TrackMuonSegments"]
