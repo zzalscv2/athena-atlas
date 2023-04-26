@@ -137,7 +137,7 @@ def ITkSiTrackerSpacePointFinderCfg(
     # Strip hits are not used for default fast tracking but are used
     # for LRT fast tracking
     useStrip = (flags.Detector.EnableITkStrip and
-                (not flags.ITk.Tracking.doFastTracking or
+                (not flags.Tracking.doITkFastTracking or
                  flags.Tracking.doLargeD0))
     kwargs.setdefault("ProcessSCTs", useStrip)
     kwargs.setdefault("ProcessOverlaps", useStrip)

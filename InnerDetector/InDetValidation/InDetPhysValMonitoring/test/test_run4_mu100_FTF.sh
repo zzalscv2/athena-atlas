@@ -60,7 +60,7 @@ run "Reconstruction" \
     --outputAODFile AOD.root \
     --steering doRAWtoALL \
     --preInclude InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude \
-    --preExec "ConfigFlags.ITk.Tracking.useFTF=True"
+    --preExec "flags.Tracking.useITkFTF=True"
 
 run "IDPVM" \
     runIDPVM.py \

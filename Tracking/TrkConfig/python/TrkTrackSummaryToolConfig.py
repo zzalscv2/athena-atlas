@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Configuration of TrkTrackSummaryTool package
 # In the current workflow, we need to add information
@@ -97,7 +97,7 @@ def InDetTrigFastTrackSummaryToolCfg(
 def ITkTrackSummaryToolCfg(flags, name='ITkTrackSummaryTool', **kwargs):
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("doHolesInDet", True)
+    kwargs.setdefault("doHolesInDet", not flags.Tracking.doITkFastTracking)
 
     if 'InDetSummaryHelperTool' not in kwargs:
         if kwargs["doHolesInDet"]:
