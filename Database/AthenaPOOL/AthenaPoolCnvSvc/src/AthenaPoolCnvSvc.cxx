@@ -41,7 +41,9 @@ StatusCode AthenaPoolCnvSvc::initialize() {
    // Retrieve PoolSvc
    ATH_CHECK(m_poolSvc.retrieve());
    // Retrieve ChronoStatSvc
-   ATH_CHECK(m_chronoStatSvc.retrieve());
+   if (m_enableChronoStat) {
+      ATH_CHECK(m_chronoStatSvc.retrieve());
+   }
    // Retrieve ClassIDSvc
    ATH_CHECK(m_clidSvc.retrieve());
    // Retrieve InputStreamingTool (if configured)
@@ -107,6 +109,7 @@ StatusCode AthenaPoolCnvSvc::initialize() {
       ATH_MSG_DEBUG("setInputAttribute failed setting POOL domain attributes.");
    }
    m_doChronoStat = m_skipFirstChronoCommit.value() ? false : true;
+   m_doChronoStat &= m_enableChronoStat.value();
 
    // Load these dictionaries now, so we don't need to try to do so
    // while multiple threads are running.
@@ -687,7 +690,7 @@ StatusCode AthenaPoolCnvSvc::commitOutput(const std::string& outputConnectionSpe
       m_chronoStatSvc->chronoStop("commitOutput");
    }
    // Prepare chrono for next commit
-   m_doChronoStat = true;
+   m_doChronoStat = m_enableChronoStat.value();
    return(StatusCode::SUCCESS);
 }
 
