@@ -68,14 +68,14 @@ def EfexMonitoringHistConfig(inputFlags, eFexAlg):
     noCutGroup = helper.addGroup(EfexMonAlg, baseGroupName, mainDir)
     for containerKey in EfexMonAlg.eFexEMTobKeyList:
         tobTypeStr = "xTOB" if ('xRoI' in containerKey) else "TOB"
-        tobTypeStr += "Copy" if 'Copy' in containerKey else "" 
+        tobTypeStr += "copy" if 'Copy' in containerKey else ""
         simStr = "Sim" if ('Sim' in containerKey) else ""
         tobStr = tobTypeStr + simStr
         noCutGroup.defineHistogram(containerKey + '_nEMTOBs_nocut;h_nEmTOBs_nocut', title='Number of eFex EM '+tobStr+'s;EM '+tobStr+'s;Number of EM '+tobStr+'s',
                                 type='TH1I', path=trigPath+tobStr+'/', xbins=10,xmin=0,xmax=10)
     for containerKey in EfexMonAlg.eFexTauTobKeyList:
         tobTypeStr = "xTOB" if ('xRoI' in containerKey) else "TOB"
-        tobTypeStr += "Copy" if 'Copy' in containerKey else "" 
+        tobTypeStr += "copy" if 'Copy' in containerKey else ""
         simStr = "Sim" if ('Sim' in containerKey) else ""
         tobStr = tobTypeStr + simStr
         noCutGroup.defineHistogram(containerKey + '_nTauTOBs_nocut;h_nTauTOBs_nocut', title='Number of eFex Tau '+tobStr+'s;Tau '+tobStr+'s;Number of Tau '+tobStr+'s',
