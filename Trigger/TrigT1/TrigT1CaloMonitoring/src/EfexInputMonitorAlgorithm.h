@@ -26,5 +26,7 @@ private:
   SG::ReadHandleKey<xAOD::eFexTowerContainer> m_eFexTowerContainerKey{this, "eFexTowerContainer","L1_eFexDataTowers","SG key of the input eFex Tower container"};
   SG::ReadHandleKey<xAOD::eFexTowerContainer> m_eFexTowerContainerRefKey{this,"eFexTowerContainerRef","L1_eFexEmulatedTowers","SG key of the towers to use as a reference (defaults to emulated towers built from sCells and tTowers"};
 
+  std::map<std::pair<std::pair<int,int>,int>,std::pair<std::set<unsigned long long>,std::string>> m_scMap;
+
 };
 #endif

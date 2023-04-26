@@ -24,11 +24,12 @@
 
 namespace LVL1 {
 
-static const int s_corrections[3][25] = {
-    {0,0,0,0,0,0,0,0x8,0,0,0xb,0x4,0x8,0x9,0x34,0x7e,0x7b,0x6b,0,0,0,0,0,0,0},
+static thread_local int s_corrections[3][25] = {
+    {0,0,0,0,0,0,0,0x8,0,0,0xb,0x4,0x8,0x9,0x34,0x7e,0x7b,0x6b,0,0,0,0,0,0,0xc},
     {0xe,0x12,0x12,0x12,0x12,0x13,0x18,0x17,0x42,0x40,0x38,0x3d,0x3b,0x4e,0x2d,0xc,0x10,0x4,0x27,0x19,0x19,0x16,0x12,0x10,0xc},
     {0xb,0x8,0x8,0x8,0x8,0x8,0x7,0x9,0x8,0x8,0x8,0x7,0x8,0x8,0x21,0x2,0x2,0x4,0x6,0x8,0x8,0x8,0x9,0x10,0x12}
 };
+bool thread_local eFEXegAlgo::s_dmCorrectionsLoaded = false;
 
 
   // default constructor for persistency
@@ -46,6 +47,7 @@ eFEXegAlgo::~eFEXegAlgo()
 StatusCode eFEXegAlgo::initialize(){
 
   ATH_CHECK(m_eTowerContainerKey.initialize());
+  ATH_CHECK( m_dmCorrectionsKey.initialize(SG::AllowEmpty) );
 
   return StatusCode::SUCCESS;
 
@@ -272,12 +274,12 @@ unsigned int LVL1::eFEXegAlgo::getET() {
 
   /// Layer sums (including dead material corrections if requested)
   unsigned int PS_ET = dmCorrection(PS_ET_1, 0) + dmCorrection(PS_ET_2, 0);
-  unsigned int L1_ET = dmCorrection(L1_ET_1, 1) + dmCorrection(L1_ET_2, 1) 
-                     + dmCorrection(L1_ET_3, 1) + dmCorrection(L1_ET_4, 1) 
-                     + dmCorrection(L1_ET_5, 1) + dmCorrection(L1_ET_6, 1);
-  unsigned int L2_ET = dmCorrection(L2_ET_1, 2) + dmCorrection(L2_ET_2, 2) 
-                     + dmCorrection(L2_ET_3, 2) + dmCorrection(L2_ET_4, 2) 
-                     + dmCorrection(L2_ET_5, 2) + dmCorrection(L2_ET_6, 2);
+  unsigned int L1_ET = dmCorrection(L1_ET_1, 1) + dmCorrection(L1_ET_2, 1)
+                         + dmCorrection(L1_ET_3, 1) + dmCorrection(L1_ET_4, 1)
+                         + dmCorrection(L1_ET_5, 1) + dmCorrection(L1_ET_6, 1);
+  unsigned int L2_ET = dmCorrection(L2_ET_1, 2) + dmCorrection(L2_ET_2, 2)
+                         + dmCorrection(L2_ET_3, 2) + dmCorrection(L2_ET_4, 2)
+                         + dmCorrection(L2_ET_5, 2) + dmCorrection(L2_ET_6, 2);
   unsigned int L3_ET = L3_ET_1 + L3_ET_2;
 
   /// Final ET sum
@@ -290,9 +292,8 @@ unsigned int LVL1::eFEXegAlgo::getET() {
 
 }
 
-unsigned int LVL1::eFEXegAlgo::dmCorrection(unsigned int ET, unsigned int layer) {
-  /// Check corrections are required and layer in range
-
+unsigned int LVL1::eFEXegAlgo::dmCorrection (unsigned int ET, unsigned int layer) {
+  /// Check layer is valid, otherwise do nothing
   if ( !m_dmCorr || layer > 2 ) return ET;
 
   /// Get correction factor
@@ -314,6 +315,23 @@ unsigned int LVL1::eFEXegAlgo::dmCorrection(unsigned int ET, unsigned int layer)
   else {   // Leftmost eFEX
      // m_central_eta has range 0-4 or 1-4
      ieta = 8 + 4*(3-m_fpgaid) + (4-m_central_eta);
+  }
+
+  if (!s_dmCorrectionsLoaded) {
+      if (!m_dmCorrectionsKey.empty()) {
+          // replace s_corrections values with values from database ... only try this once
+          SG::ReadCondHandle <CondAttrListCollection> dmCorrections{m_dmCorrectionsKey/*, ctx*/ };
+          if (dmCorrections.isValid()) {
+              for (auto itr = dmCorrections->begin(); itr != dmCorrections->end(); ++itr) {
+                  if (itr->first < 25 || itr->first >= 50) continue;
+                  s_corrections[0][itr->first - 25] = itr->second["EmPS"].data<int>();
+                  s_corrections[1][itr->first - 25] = itr->second["EmFR"].data<int>();
+                  s_corrections[2][itr->first - 25] = itr->second["EmMD"].data<int>();
+              }
+          }
+          ATH_MSG_INFO("Loaded DM Corrections from database");
+      }
+      s_dmCorrectionsLoaded = true;
   }
 
   /// Retrieve the factor from table (eventually from DB)

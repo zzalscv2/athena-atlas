@@ -15,6 +15,7 @@ namespace LVL1 {
 const int eFEXCompression::s_steps[] = {25, 50, 100, 400};
 const int eFEXCompression::s_minET[] = {-750, 5600, 18400, 44000};
 const int eFEXCompression::s_minCode[] = {2, 256, 512, 768};
+std::atomic<bool> eFEXCompression::s_disableNoiseCuts = false;
 
 unsigned int eFEXCompression::compress(int Et) {
 
@@ -67,6 +68,8 @@ int eFEXCompression::expand(unsigned int code) {
 bool eFEXCompression::noiseCut(unsigned int code, int layer) {
     // Check if noise cut is passed - one cut per layer  
     bool pass=true;
+
+    if(s_disableNoiseCuts) return pass;
 
     switch(layer){
     case 0: 

@@ -93,17 +93,30 @@ StatusCode eFexTowerBuilder::fillTowers(const EventContext& ctx) const {
         if (itr == m_scMap.end()) { continue; } // not in map so not mapping to a tower
         int val =  std::round(digi->energy()/(12.5*std::cosh(digi->eta())));
         bool isMasked = ((digi)->provenance()&0x80);
-        if (isMasked) val = std::numeric_limits<int>::max();
         auto& tower = towers[itr->second.first];
         if (itr->second.second.second<11) {
             // doing an energy split between slots ... don't include a masked channel
             if (!isMasked) {
+                // if the other contribution was masked, revert to 0 before adding this contribution
+                if (tower.at(itr->second.second.first)==std::numeric_limits<int>::max()) {
+                    tower.at(itr->second.second.first)=0;
+                }
                 tower.at(itr->second.second.first) += val >> 1;
-                tower.at(itr->second.second.second) += (val - (val >> 1));
+                tower.at(itr->second.second.second) += (val - (val >> 1)); // HW seems fixed now!
             }
+            // hw is incorrectly ignoring masking on the second part
+            // so always add the 2nd bit
+            //tower.at(itr->second.second.second) += (val - (val >> 1)); // Removed b.c. of fix above - leaving this comment here until resolved!
         } else {
-            tower.at(itr->second.second.first) += val;
+            auto& v = tower.at(itr->second.second.first);
+            if (isMasked) {
+                // dont mark it masked if it already has a contribution
+                if(v==0) v = std::numeric_limits<int>::max();
+            } else {
+                v += val;
+            }
         }
+
     }
 
     // add tile energies from TriggerTowers
@@ -131,7 +144,7 @@ StatusCode eFexTowerBuilder::fillTowers(const EventContext& ctx) const {
     // now create the towers
     for(auto& [coord,counts] : towers) {
         size_t ni = (std::abs(coord.first)<=15) ? 10 : 11; // ensures we skip the tile towers for next line
-        for(size_t i=0;i<ni;++i) counts[i] = calToFex(counts[i]); // do latome energy scaling to non-tile towers
+        for(size_t i=0;i<ni;++i) counts[i] = (scells->empty() ? 1025 : calToFex(counts[i])); // do latome energy scaling to non-tile towers - if had no cells will use code "1025" to indicate
         eTowers->push_back( std::make_unique<xAOD::eFexTower>() );
         eTowers->back()->initialize( ( (coord.first<0 ? 0.5:-0.5) + coord.first)*0.1 ,
                                  ( (coord.second<0 ? 0.5:-0.5) + coord.second)*M_PI/32,
@@ -139,7 +152,6 @@ StatusCode eFexTowerBuilder::fillTowers(const EventContext& ctx) const {
                                  -1, /* module number */
                                  -1, /* fpga number */
                                  0,0 /* status flags ... could use to indicate which cells were actually present?? */);
-
     }
 
     return StatusCode::SUCCESS;
@@ -168,8 +180,8 @@ StatusCode eFexTowerBuilder::fillMap(const EventContext& ctx) const {
         std::vector<unsigned long long> had;
         std::vector<unsigned long long> other;
     };
-    static const auto etaIndex = [](float eta) { return int( eta*10 ) + ((eta<0) ? -1 : 1); };
-    static const auto phiIndex = [](float phi) { return int( phi*32./ROOT::Math::Pi() ) + (phi<0 ? -1 : 1); };
+    static const auto etaIndex = [](float eta) { return int( eta*10 ) + ((eta<0) ? -1 : 1); }; // runs from -25 to 25, skipping over 0 (so gives outer edge eta)
+    static const auto phiIndex = [](float phi) { return int( phi*32./ROOT::Math::Pi() ) + (phi<0 ? -1 : 1); }; // runs from -pi to pi, skipping over 0 (gives out edge phi)
     std::map<std::pair<int,int>,TowerSCells> towers;
     std::map<unsigned long long,int> eTowerSlots; // not used by this alg, but we produce the map for benefit of eFexTower->eTower alg
 
