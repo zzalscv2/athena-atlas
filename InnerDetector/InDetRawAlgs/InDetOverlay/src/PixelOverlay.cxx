@@ -9,35 +9,39 @@
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
 
+#include "AthAllocators/DataPool.h"
+
 namespace Overlay
 {
-  // Specialize mergeChannelData() for the Pixel
-  template <>
-  void mergeChannelData(PixelRDORawData &/* baseDatum */,
-                        const PixelRDORawData &/* additionalDatum */,
-                        const IDC_OverlayBase *algorithm)
-  {
-    algorithm->msg(MSG::DEBUG) << "Overlay::mergeChannelData<PixelRDORawData>(): "
-      << "Merging of data on the same channel is not explicitly implemented for PixelRDORawData" << endmsg;
+
+// Specialize mergeChannelData() for the Pixel
+template <>
+void mergeChannelData(PixelRDORawData & /* baseDatum */,
+                      const PixelRDORawData & /* additionalDatum */,
+                      const IDC_OverlayBase *algorithm) {
+  algorithm->msg(MSG::DEBUG) << "Overlay::mergeChannelData<PixelRDORawData>(): "
+                             << "Merging of data on the same channel is not "
+                                "explicitly implemented for PixelRDORawData"
+                             << endmsg;
+}
+
+// Specialize copyCollection() for the Pixel
+template <>
+std::unique_ptr<PixelRDO_Collection> copyCollection(
+    const IdentifierHash &hashId, const PixelRDO_Collection *collection,
+    DataPool<Pixel1RawData> &dataItems) {
+  auto outputCollection = std::make_unique<PixelRDO_Collection>(hashId);
+  outputCollection->setIdentifier(collection->identify());
+  outputCollection->clear(SG::VIEW_ELEMENTS);
+  outputCollection->reserve(collection->size());
+  for (const PixelRDORawData *existingDatum : *collection) {
+    Pixel1RawData *datumCopy = dataItems.nextElementPtr();
+    (*datumCopy) =
+        Pixel1RawData(existingDatum->identify(), existingDatum->getWord());
+    outputCollection->push_back(datumCopy);
   }
-
-  // Specialize copyCollection() for the Pixel
-  template<>
-  std::unique_ptr<PixelRDO_Collection> copyCollection(const IdentifierHash &hashId,
-                                                      const PixelRDO_Collection *collection)
-  {
-    auto outputCollection = std::make_unique<PixelRDO_Collection>(hashId);
-    outputCollection->setIdentifier(collection->identify());
-
-    //Deep copy
-    outputCollection->reserve(collection->size());
-    for (const PixelRDORawData *existingDatum : *collection) {
-      auto *datumCopy = new Pixel1RawData(existingDatum->identify(), existingDatum->getWord());
-      outputCollection->push_back(datumCopy);
-    }
-
-    return outputCollection;
-  }
+  return outputCollection;
+}
 } // namespace Overlay
 
 
@@ -97,8 +101,12 @@ StatusCode PixelOverlay::execute(const EventContext& ctx) const
     return StatusCode::FAILURE;
   }
   ATH_MSG_DEBUG("Recorded output Pixel RDO container " << outputContainer.name() << " in store " << outputContainer.store());
-
-  ATH_CHECK(overlayContainer(bkgContainerPtr, signalContainer.cptr(), outputContainer.ptr()));
+  // The DataPool, this is what will actually own the elements
+  // we create during this algorithm. The containers are views.
+  DataPool<Pixel1RawData> dataItemsPool(ctx);
+  // It resizes but lets reserve already quite a few
+  dataItemsPool.reserve(100000);
+  ATH_CHECK(overlayContainer(bkgContainerPtr, signalContainer.cptr(), outputContainer.ptr(), dataItemsPool));
   ATH_MSG_DEBUG("Pixel Result   = " << Overlay::debugPrint(outputContainer.ptr()));
 
   ATH_MSG_DEBUG("execute() end");
