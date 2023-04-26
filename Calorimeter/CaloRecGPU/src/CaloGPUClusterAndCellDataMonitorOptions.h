@@ -381,7 +381,7 @@ struct SimpleToolPair:
   impl::simple_tuple_conversion<SimpleToolPair, std::string, std::string, std::string, bool>
 {
   std::string tool_ref, tool_test, plot_id;
-  bool match_in_energy;
+  bool match_in_energy=false;
   
   CALORECGPU_OPTIONCLASS_CONSTRUCTORS(SimpleToolPair)
 };
