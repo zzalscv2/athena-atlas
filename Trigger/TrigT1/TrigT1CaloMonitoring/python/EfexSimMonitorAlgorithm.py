@@ -39,16 +39,36 @@ def EfexSimMonitoringConfig(flags):
 
     # add monitoring algorithm to group, with group name and main directory 
     myGroup = helper.addGroup(EfexSimMonAlg, groupName , mainDir)
+
     simEqDataGroup = helper.addGroup(EfexSimMonAlg, groupName+"_simEqData" , mainDir)
     simNeDataGroup = helper.addGroup(EfexSimMonAlg, groupName+"_simNeData" , mainDir)
     simNoDataGroup = helper.addGroup(EfexSimMonAlg, groupName+"_simNoData" , mainDir)
     dataNoSimGroup = helper.addGroup(EfexSimMonAlg, groupName+"_dataNoSim" , mainDir)
 
-    # meed at least one histogram in the main group
-    myGroup.defineHistogram('TOBTransverseEnergy;h_TOBTransverseEnergy', title='eFex TOB EM Transverse Energy [MeV]',
-                            type='TH1F', path=trigPath+'eEM/', xbins=100,xmin=0,xmax=50000)
+    # note: monitoring will require at least one histogram in every created group or will refuse to run
 
-
+    for key in [EfexSimMonAlg.eFexEMRoIContainer,EfexSimMonAlg.eFexTauRoIContainer,EfexSimMonAlg.eFexEMRoISimContainer,EfexSimMonAlg.eFexTauSimRoIContainer]:
+        sKey = str(key) if "+" not in str(key) else str(key)[str(key).index('+')+1:] # strip storegate name
+        for suffix,inputType in ["","caloReadout"],["2","fexReadout"]:
+            matchedFracGrp = helper.addGroup(EfexSimMonAlg, groupName+"_"+sKey+"_mismatchedFrac" + suffix, mainDir)
+            matchedGrp = helper.addGroup(EfexSimMonAlg, groupName+"_"+sKey+"_matched" + suffix, mainDir)
+            partmatchedGrp = helper.addGroup(EfexSimMonAlg, groupName+"_"+sKey+"_partmatched" + suffix, mainDir) # right location but wrong energy or other flags
+            unmatchedGrp = helper.addGroup(EfexSimMonAlg, groupName+"_"+sKey+"_unmatched" + suffix, mainDir)
+            matchedFracGrp.defineHistogram("tobEta,tobPhi,tobMismatched;mismatchedFrac", title=f"Mismatched Fraction {sKey} ({inputType} simput);#eta;#phi", type='TProfile2D', path=trigPath+inputType+"/" + sKey + "/",
+                                           xbins=50,xmin=-2.5,xmax=2.5,ybins=64,ymin=-math.pi,ymax=math.pi)
+            matchedGrp.defineHistogram("tobEta,tobPhi;matched", title=f"Matched {sKey} ({inputType} simput);#eta;#phi;matched "+sKey, type='TH2F', path=trigPath+inputType+"/" + sKey + "/",
+                                   xbins=50,xmin=-2.5,xmax=2.5,ybins=64,ymin=-math.pi,ymax=math.pi)
+            partmatchedGrp.defineHistogram("tobEta,tobPhi;locationOnly_matched", title=f"LocationOnly-matched {sKey} ({inputType} simput);#eta;#phi", type='TH2F', path=trigPath+inputType+"/" + sKey + "/",
+                                     xbins=50,xmin=-2.5,xmax=2.5,ybins=64,ymin=-math.pi,ymax=math.pi)
+            unmatchedGrp.defineHistogram("tobEta,tobPhi;unmatched", title=f"Unmatched {sKey} ({inputType} simput);#eta;#phi", type='TH2F', path=trigPath+inputType+"/" + sKey + "/",
+                                     xbins=50,xmin=-2.5,xmax=2.5,ybins=64,ymin=-math.pi,ymax=math.pi)
+    myGroup.defineTree('LBN,EventNumber,fexReadout,tobType,dataEtas,dataPhis,dataWord0s,simEtas,simPhis,simWord0s;mismatched',
+                                "lbn/l:eventNumber/l:fexReadout/i:tobType/i:dataEtas/vector<float>:dataPhis/vector<float>:dataWord0s/vector<unsigned int>:simEtas/vector<float>:simPhis/vector<float>:simWord0s/vector<unsigned int>",title="mismatched",path=trigPath)
+    myGroup.defineHistogram('LBNString,tobAndReadoutType;mismatchedTobTypes_vs_lbn', path=trigPath, type='TH2I', weight='nTOBs',
+                            title='TOBs;LB;Tob Type (simput Type);Events',
+                            xbins=1, xmin=0, xmax=1, xlabels=[""],
+                            ybins=4, ymin=-0.5, ymax=3.5, ylabels=["em (calo)","tau (calo)","em (fex)","tau (fex)"],
+                            opt=['kCanRebin'])
     #
     def bookSimCompHistos(simtype, leptype='eEM'):
         """
@@ -58,10 +78,10 @@ def EfexSimMonitoringConfig(flags):
         group_title = ''
         if simtype == "simEqData":
             group = simEqDataGroup
-            group_title = "(sim=data)"
+            group_title = "(events where sim=data)"
         elif simtype == "simNeData":
             group = simNeDataGroup 
-            group_title = "(sim!=data)"
+            group_title = "(Mismatched where sim!=data but nSim=nData)"
         elif simtype == "simNoData":
             group = simNoDataGroup 
             group_title = "(sim no data)"
@@ -81,7 +101,7 @@ def EfexSimMonitoringConfig(flags):
             title = title.replace('EM','Tau')
         path=trigPath+simtype+'/'+leptype+'/' 
         group.defineHistogram(varname, title=title, type='TH2F', path=path,
-                              xbins=50,xmin=-3.0,xmax=3.0,ybins=64,ymin=-math.pi,ymax=math.pi)
+                              xbins=50,xmin=-2.5,xmax=2.5,ybins=64,ymin=-math.pi,ymax=math.pi)
 
         # Shelf vs FPGA
         varname = lepPrefix+'TOBshelfNumber,'+lepPrefix+'TOBeFEXNumber;h_'+lepPrefix+'TOBShelfVsModule_'+simtype 
