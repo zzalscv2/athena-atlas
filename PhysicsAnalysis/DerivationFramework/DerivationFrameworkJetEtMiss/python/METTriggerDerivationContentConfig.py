@@ -64,10 +64,11 @@ def METTriggerDerivationKernelCfg(ConfigFlags, name, **kwargs):
 
    photonTPThinningTool = acc.getPrimaryAndMerge(EgammaTrackParticleThinningCfg(
       ConfigFlags,
-      name                    = kwargs['StreamName']+"PhotonTPThinningTool",
-      StreamName              = kwargs['StreamName'],
-      SGKey                   = "Photons",
-      InDetTrackParticlesKey  = "InDetTrackParticles"))
+      name                     = kwargs['StreamName']+"PhotonTPThinningTool",
+      StreamName               = kwargs['StreamName'],
+      SGKey                    = "Photons",
+      InDetTrackParticlesKey   = "InDetTrackParticles",
+      GSFConversionVerticesKey = "GSFConversionVertices"))
 
    tauTPThinningTool = acc.getPrimaryAndMerge(TauTrackParticleThinningCfg(
       ConfigFlags,

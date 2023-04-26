@@ -56,10 +56,11 @@ def JETM5KernelCfg(ConfigFlags, name='JETM5Kernel', **kwargs):
     # Include inner detector tracks associated with photons
     JETM5PhotonTPThinningTool = acc.getPrimaryAndMerge(EgammaTrackParticleThinningCfg(
         ConfigFlags,
-        name                    = "JETM5PhotonTPThinningTool",
-        StreamName              = kwargs['StreamName'],
-        SGKey                   = "Photons",
-        InDetTrackParticlesKey  = "InDetTrackParticles"))
+        name                     = "JETM5PhotonTPThinningTool",
+        StreamName               = kwargs['StreamName'],
+        SGKey                    = "Photons",
+        InDetTrackParticlesKey   = "InDetTrackParticles",
+        GSFConversionVerticesKey = "GSFConversionVertices"))
 
 
     thinningTools = [JETM5MuonTPThinningTool,
