@@ -461,6 +461,7 @@ class ConfigSettings_DJetLRT( _ConfigSettingsBase ):
       self._doFullScan      = False
       self._etaHalfWidth    = 0.4
       self._phiHalfWidth    = 0.4
+      self._zedHalfWidth    = 225.
       self._doTRT           = False
       self._doSeedRedundancyCheck = True
       self._UsePixelSpacePoints   = False
