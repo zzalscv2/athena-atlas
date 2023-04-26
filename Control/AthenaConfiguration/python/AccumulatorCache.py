@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -179,7 +179,8 @@ class AccumulatorDecorator:
                         return deepcopy(res), cacheHit
                     else:
                         # shallow copied CA still needs to undergo merging
-                        res._wasMerged=False
+                        if isinstance(res, ComponentAccumulator):
+                            res._wasMerged=False
                         return res, cacheHit
 
                 else:
