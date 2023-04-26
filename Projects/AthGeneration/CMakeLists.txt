@@ -35,6 +35,7 @@ find_package( AIDA )
 find_package( VDT )
 find_package( libffi )
 find_package( gl2ps )
+find_package( autopep8 )
 
 # Set the project into "GENERATIONBASE mode".
 set( GENERATIONBASE TRUE CACHE BOOL

@@ -35,6 +35,8 @@ execute_process(
 
 # flake8 wrapper
 configure_file( "${CMAKE_CURRENT_LIST_DIR}/flake8_wrapper.sh.in" "${ATLAS_IDE_PREFIX}flake8" @ONLY )
+# autopep8 wrapper
+configure_file( "${CMAKE_CURRENT_LIST_DIR}/autopep8_wrapper.sh.in" "${ATLAS_IDE_PREFIX}autopep8" @ONLY )
 
 # gdb wrappers
 configure_file( "${CMAKE_CURRENT_LIST_DIR}/gdb_wrapper.sh.in" "${ATLAS_IDE_PREFIX}gdb_wrapper" @ONLY )
