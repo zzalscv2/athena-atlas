@@ -32,6 +32,7 @@ find_package( VDT )
 find_package( TIFF )
 find_package( libffi )
 find_package( gl2ps )
+find_package( autopep8 )
 
 # Set the project into "SIMULATIONBASE mode".
 set( SIMULATIONBASE TRUE CACHE BOOL

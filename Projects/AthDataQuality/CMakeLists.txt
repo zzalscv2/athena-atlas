@@ -38,6 +38,7 @@ find_package( TBB )
 find_package( TIFF )
 find_package( libffi )
 find_package( gl2ps )
+find_package( autopep8 )
 
 # Disable flake8.
 set( ATLAS_FLAKE8 true   # <- this is the shell builtin `true`

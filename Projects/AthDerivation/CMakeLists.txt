@@ -42,6 +42,7 @@ find_package( Frontier_Client )
 find_package( VDT )
 find_package( libffi )
 find_package( gl2ps )
+find_package( autopep8 )
 
 # Set up where to find the AthenaPoolUtilitiesTest CMake code.
 set( AthenaPoolUtilitiesTest_DIR
