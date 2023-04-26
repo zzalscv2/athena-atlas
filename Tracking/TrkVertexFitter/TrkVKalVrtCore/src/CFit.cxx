@@ -270,6 +270,7 @@ int fitVertex(VKVertex * vk)
 	  for (tk = 0; tk < NTRK; ++tk) {
 //std::cout<<__func__<<" propagate trk="<<tk<<" X,Y,Z="<<targV[0]<<","<<targV[1]<<","<<targV[2]<<'\n';
             myPropagator.Propagate(vk->TrackList[tk].get(), vk->refV,  targV, tmpPer, tmpCov, (vk->vk_fitterControl).get());
+            if(std::abs(tmpCov[14])<1.e-20 || std::isnan(tmpCov[14])) {return -7;} // Zero Q/p covariance. Stop fit and return failure
             cfTrkCovarCorr(tmpCov);
             double eig5=cfSmallEigenvalue(tmpCov,5 );
             if(eig5>0 && eig5<1.e-15 ){
