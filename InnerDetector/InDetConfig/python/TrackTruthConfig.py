@@ -73,7 +73,7 @@ if __name__ == "__main__":
 
     SiSPSeededTrackCollectionKey = 'SiSPSeededPixelTracks'
     ResolvedTrackCollectionKey = 'ResolvedPixelTracks'
-    from InDetConfig.TrackingSiPatternConfig import SiSPSeededTrackFinderCfg
+    from InDetConfig.SiSPSeededTrackFinderConfig import SiSPSeededTrackFinderCfg
     top_acc.merge(SiSPSeededTrackFinderCfg(
         flags,
         InputCollections=InputCollections,
