@@ -130,7 +130,7 @@ void PixelRodDecoder::propagateROBErrorsToModules(const PixelCablingCondData *pi
 }
 
 //---------------------------------------------------------------------------------------------------- fillCixollection
-StatusCode PixelRodDecoder::fillCollection( const ROBFragment *robFrag, IPixelRDO_Container* rdoIdc, IDCInDetBSErrContainer& decodingErrors, std::vector<IdentifierHash>* vecHash) const {
+StatusCode PixelRodDecoder::fillCollection( const ROBFragment *robFrag, IPixelRDO_Container* rdoIdc, IDCInDetBSErrContainer& decodingErrors, std::vector<IdentifierHash>* vecHash, const EventContext& ctx) const {
 #ifdef PIXEL_DEBUG
   ATH_MSG_VERBOSE( "-------------------------------------------------------------------------------------------------------------");
   ATH_MSG_DEBUG("Entering PixelRodDecoder");
@@ -147,7 +147,7 @@ StatusCode PixelRodDecoder::fillCollection( const ROBFragment *robFrag, IPixelRD
   if ( isIBL( robId )  && robId != rodId ) { // isIBL(robId)
     generalwarning("Discrepancy in IBL SourceId: ROBID 0x" << std::hex << robId << " unequal to RODID 0x" << rodId);
   }
-  SG::ReadCondHandle<PixelCablingCondData> pixCabling(m_condCablingKey);
+  SG::ReadCondHandle<PixelCablingCondData> pixCabling(m_condCablingKey,ctx);
   std::unique_ptr<SG::ReadCondHandle<PixelHitDiscCnfgData> > pixHitDiscCnfg;
   unsigned int errorRecoverable = 0;
   uint32_t serviceCodeCounter = 0;  // frequency of the serviceCode (with the exceptions of serviceCode = 14,15 or 16)
@@ -650,7 +650,7 @@ StatusCode PixelRodDecoder::fillCollection( const ROBFragment *robFrag, IPixelRD
 #endif
 
                   if (!pixHitDiscCnfg) {
-                    pixHitDiscCnfg = std::make_unique<SG::ReadCondHandle<PixelHitDiscCnfgData> > (m_condHitDiscCnfgKey);
+                    pixHitDiscCnfg = std::make_unique<SG::ReadCondHandle<PixelHitDiscCnfgData> > (m_condHitDiscCnfgKey,ctx);
                   }
                   // Get the hit discrimination configuration setting for this FE
                   if (m_pixelReadout->getModuleType(pixelId) == InDetDD::PixelModuleType::IBL_PLANAR || m_pixelReadout->getModuleType(pixelId) == InDetDD::PixelModuleType::DBM) {

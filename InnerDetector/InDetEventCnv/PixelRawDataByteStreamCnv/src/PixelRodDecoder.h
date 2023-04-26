@@ -41,7 +41,7 @@ class PixelRodDecoder : virtual public IPixelRodDecoder, public AthAlgTool {
     StatusCode fillCollection  (const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment *robFrag,
 				IPixelRDO_Container* rdoIdc,
 				IDCInDetBSErrContainer& decodingErrors,
-				std::vector<IdentifierHash>* vecHash = NULL) const override;
+				std::vector<IdentifierHash>* vecHash, const EventContext& ctx) const override;
 
     uint32_t getDataType(unsigned int rawDataWord, bool link_start) const;   // determine module word type
 

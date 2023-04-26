@@ -22,7 +22,7 @@ class IPixelRodDecoder : virtual public IAlgTool{
     virtual StatusCode fillCollection  (const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment *robFrag,
 					IPixelRDO_Container* rdoIdc,
 					IDCInDetBSErrContainer& decodingErrors,
-					std::vector<IdentifierHash>* vecHash = NULL) const = 0;
+					std::vector<IdentifierHash>* vecHash, const EventContext& ctx) const = 0;
 
 };
 
