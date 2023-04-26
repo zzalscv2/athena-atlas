@@ -47,7 +47,7 @@ run "Reconstruction" \
     --steering doRAWtoALL \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
     --postInclude "SiSpacePointFormation.SiSpacePointFormationConfig.TrkToXAODSpacePointConversionCfg,ActsTrkSeeding.ActsTrkSeedingConfig.ActsTrkSeedingCfg" \
-    --preExec "flags.Tracking.doTruth=False;flags.Acts.doAnalysis=True;flags.Output.HISTFileName=\"ActsMonitoringOutput.root\"" \
+    --preExec "flags.Tracking.doTruth=False;flags.DQ.useTrigger=False;flags.Acts.doAnalysis=True;flags.Output.HISTFileName=\"ActsMonitoringOutput.root\"" \
     --maxEvents 5
 
 reco_rc=$?
