@@ -85,7 +85,7 @@ MUCTPISLTiming::execute( const std::string& name, const TObject& object, const d
   result->status_ = dqm_core::Result::Green;
   uint howmanybad=0;
 
-  for(int iBin=0;iBin<projection->GetNbinsX();iBin++)
+  for(int iBin=1;iBin<=projection->GetNbinsX();iBin++)//0=underflow bin
   {
       if( projection->GetBinContent(iBin)*thresh > hist->GetBinContent(iBin,centralBin)  ) //if central slice is less than half of SL sum => bad
       {
