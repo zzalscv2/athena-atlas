@@ -37,6 +37,14 @@ class BasicTests(FlagsSetup):
         with self.assertRaises(AttributeError):
             self.flags.A.B.X
 
+    def test_exists(self):
+        """Test `has` methods"""
+        self.assertTrue( self.flags.hasFlag("Atest") )
+        self.assertFalse( self.flags.hasFlag("A") )  # category, not flag
+        self.assertTrue( self.flags.hasFlag("A.One") )
+        self.assertTrue( self.flags.hasCategory("A.B") )
+        self.assertFalse( self.flags.hasCategory("Z") )
+
     def test_dependentFlag(self):
         """The dependent flags will use another flag value to establish its own value"""
         self.flags.A.B.C = True
@@ -195,6 +203,15 @@ class TestFlagsSetupDynamic(FlagsSetup):
         copyf = self.flags.cloneAndReplace( "X", "Z.Xclone2")
         self.assertEqual( copyf.X.a, 40, "dynamically loaded flags have wrong value")
         self.assertEqual( copyf.T.Abool, False, "The flags clone does not have dynamic flags")
+
+    def test_exists(self):
+        """Test `has` methods"""
+        self.assertTrue( self.flags.hasCategory("Z") )
+        self.assertFalse( self.flags.hasCategory("Z.C") )  # sub-category not auto-resolved
+        # now load category:
+        self.flags.needFlagsCategory("Z")
+        self.assertTrue( self.flags.hasFlag("Z.A") )
+        self.assertTrue( self.flags.hasCategory("Z.C") )
 
 
 class TestDynamicDependentFlags(unittest.TestCase):
