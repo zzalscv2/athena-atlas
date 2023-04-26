@@ -3,7 +3,8 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def SiSPSeededTrackFinderCfg(flags, name="InDetSiSpTrackFinder", **kwargs) :
+
+def SiSPSeededTrackFinderCfg(flags, name="InDetSiSpTrackFinder", **kwargs):
     acc = ComponentAccumulator()
 
     if "TrackTool" not in kwargs:
@@ -18,16 +19,19 @@ def SiSPSeededTrackFinderCfg(flags, name="InDetSiSpTrackFinder", **kwargs) :
         kwargs.setdefault("PropagatorTool", InDetPropagator)
 
     if "TrackSummaryTool" not in kwargs:
-        from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolNoHoleSearchCfg
+        from TrkConfig.TrkTrackSummaryToolConfig import (
+            InDetTrackSummaryToolNoHoleSearchCfg)
         kwargs.setdefault("TrackSummaryTool", acc.popToolsAndMerge(
             InDetTrackSummaryToolNoHoleSearchCfg(flags)))
 
     if "SeedsTool" not in kwargs:
-        from InDetConfig.SiSpacePointsSeedToolConfig import SiSpacePointsSeedMakerCfg
+        from InDetConfig.SiSpacePointsSeedToolConfig import (
+            SiSpacePointsSeedMakerCfg)
         kwargs.setdefault("SeedsTool", acc.popToolsAndMerge(
             SiSpacePointsSeedMakerCfg(flags)))
 
-    kwargs.setdefault("useMBTSTimeDiff", flags.Reco.EnableHI) # Heavy-ion config
+    # Heavy-ion config
+    kwargs.setdefault("useMBTSTimeDiff", flags.Reco.EnableHI)
 
     if flags.Tracking.ActiveConfig.usePrdAssociationTool:
         # not all classes have that property !!!
@@ -41,7 +45,7 @@ def SiSPSeededTrackFinderCfg(flags, name="InDetSiSpTrackFinder", **kwargs) :
         kwargs.setdefault("useZvertexTool", flags.Reco.EnableHI)
         kwargs.setdefault("useZBoundFinding",
                           flags.Tracking.ActiveConfig.doZBoundary)
-    
+
     #
     # --- Z-coordinates primary vertices finder (only for collisions)
     #
@@ -51,13 +55,15 @@ def SiSPSeededTrackFinderCfg(flags, name="InDetSiSpTrackFinder", **kwargs) :
             SiZvertexMaker_xkCfg(flags)))
 
     if flags.Reco.EnableHI:
-        kwargs.setdefault("FreeClustersCut",2) #Heavy Ion optimization from Igor
+        # Heavy Ion optimization from Igor
+        kwargs.setdefault("FreeClustersCut", 2)
 
     acc.addEventAlgo(CompFactory.InDet.SiSPSeededTrackFinder(
         name+flags.Tracking.ActiveConfig.extension, **kwargs))
     return acc
 
-def ITkSiSPSeededTrackFinderCfg(flags, name="ITkSiSpTrackFinder", **kwargs) :
+
+def ITkSiSPSeededTrackFinderCfg(flags, name="ITkSiSpTrackFinder", **kwargs):
     acc = ComponentAccumulator()
 
     if "TrackTool" not in kwargs:
@@ -72,23 +78,29 @@ def ITkSiSPSeededTrackFinderCfg(flags, name="ITkSiSpTrackFinder", **kwargs) :
         kwargs.setdefault("PropagatorTool", ITkPropagator)
 
     if "TrackSummaryTool" not in kwargs:
-        from TrkConfig.TrkTrackSummaryToolConfig import ITkTrackSummaryToolNoHoleSearchCfg
+        from TrkConfig.TrkTrackSummaryToolConfig import (
+            ITkTrackSummaryToolNoHoleSearchCfg)
         kwargs.setdefault("TrackSummaryTool", acc.popToolsAndMerge(
             ITkTrackSummaryToolNoHoleSearchCfg(flags)))
 
     if "SeedsTool" not in kwargs:
         ITkSiSpacePointsSeedMaker = None
 
-        from ActsInterop.TrackingComponentConfigurer import TrackingComponentConfigurer
+        from ActsInterop.TrackingComponentConfigurer import (
+            TrackingComponentConfigurer)
         configuration_settings = TrackingComponentConfigurer(flags)
 
         if (flags.Tracking.ActiveConfig.extension != "ConversionFinding" and
             configuration_settings.ActsToAthenaSeedConverter):
-            from ActsTrkSeedingTool.ActsTrkSeedingToolConfig import ActsTrkSiSpacePointsSeedMakerCfg
-            ITkSiSpacePointsSeedMaker = acc.popToolsAndMerge(ActsTrkSiSpacePointsSeedMakerCfg(flags))
+            from ActsTrkSeedingTool.ActsTrkSeedingToolConfig import (
+                ActsTrkSiSpacePointsSeedMakerCfg)
+            ITkSiSpacePointsSeedMaker = acc.popToolsAndMerge(
+                ActsTrkSiSpacePointsSeedMakerCfg(flags))
         else:
-            from InDetConfig.SiSpacePointsSeedToolConfig import ITkSiSpacePointsSeedMakerCfg
-            ITkSiSpacePointsSeedMaker = acc.popToolsAndMerge(ITkSiSpacePointsSeedMakerCfg(flags))
+            from InDetConfig.SiSpacePointsSeedToolConfig import (
+                ITkSiSpacePointsSeedMakerCfg)
+            ITkSiSpacePointsSeedMaker = acc.popToolsAndMerge(
+                ITkSiSpacePointsSeedMakerCfg(flags))
 
         kwargs.setdefault("SeedsTool", ITkSiSpacePointsSeedMaker)
 
@@ -104,11 +116,12 @@ def ITkSiSPSeededTrackFinderCfg(flags, name="ITkSiSpTrackFinder", **kwargs) :
     kwargs.setdefault("SpacePointsSCTName", "ITkStripSpacePoints")
     kwargs.setdefault("SpacePointsPixelName", "ITkPixelSpacePoints")
 
-    if flags.ITk.Tracking.doFastTracking :
+    if flags.Tracking.doITkFastTracking:
         kwargs.setdefault("doFastTracking", True)
 
-        if 'InDetEtaDependentCutsSvc' not in kwargs :
-            from InDetConfig.InDetEtaDependentCutsConfig import ITkEtaDependentCutsSvcCfg
+        if 'InDetEtaDependentCutsSvc' not in kwargs:
+            from InDetConfig.InDetEtaDependentCutsConfig import (
+                ITkEtaDependentCutsSvcCfg)
             acc.merge(ITkEtaDependentCutsSvcCfg(flags))
             kwargs.setdefault("InDetEtaDependentCutsSvc", acc.getService(
                 "ITkEtaDependentCutsSvc"+flags.Tracking.ActiveConfig.extension))
@@ -117,8 +130,11 @@ def ITkSiSPSeededTrackFinderCfg(flags, name="ITkSiSpTrackFinder", **kwargs) :
         name+flags.Tracking.ActiveConfig.extension, **kwargs))
     return acc
 
-def ITkSiSPSeededTrackFinderROIConvCfg(flags, name="ITkSiSpTrackFinderROIConv", **kwargs) :
-    from InDetConfig.InDetCaloClusterROISelectorConfig import ITkCaloClusterROIPhiRZContainerMakerCfg
+
+def ITkSiSPSeededTrackFinderROIConvCfg(
+        flags, name="ITkSiSpTrackFinderROIConv", **kwargs):
+    from InDetConfig.InDetCaloClusterROISelectorConfig import (
+        ITkCaloClusterROIPhiRZContainerMakerCfg)
     acc = ITkCaloClusterROIPhiRZContainerMakerCfg(flags)
 
     if "RegSelTool_Strip" not in kwargs:
@@ -127,7 +143,8 @@ def ITkSiSPSeededTrackFinderROIConvCfg(flags, name="ITkSiSpTrackFinderROIConv", 
             regSelTool_ITkStrip_Cfg(flags)))
 
     kwargs.setdefault("useITkConvSeeded", True)
-    kwargs.setdefault("EMROIPhiRZContainer", "ITkCaloClusterROIPhiRZ15GeVUnordered")
+    kwargs.setdefault("EMROIPhiRZContainer",
+                      "ITkCaloClusterROIPhiRZ15GeVUnordered")
 
     acc.merge(ITkSiSPSeededTrackFinderCfg(flags, name, **kwargs))
     return acc
