@@ -1,9 +1,22 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AFP_Calibration/AFP_PixelHistoFiller.h"
 
+//local object includes
+#include "xAODForward/AFPSiHit.h"
+#include "xAODForward/AFPTrack.h"
+#include "xAODForward/AFPSiHitsClusterContainer.h"
+#include "xAODForward/AFPSiHitsCluster.h"
+#include "AFP_Geometry/AFP_constants.h"
+
+//STL
+#include <memory> //for unique_ptr
+
+//ROOT
+#include "TFile.h"
+#include "TH1I.h"
 
 AFP_PixelHistoFiller::AFP_PixelHistoFiller(const std::string& name, ISvcLocator* pSvcLocator) :
   AthAlgorithm(name, pSvcLocator)
@@ -184,42 +197,44 @@ StatusCode AFP_PixelHistoFiller::execute()
           int st=(*cluster)->stationID();
           int la=(*cluster)->pixelLayerID();
         
-        if(nClusterHits[st]<3 || nClusterHits[st]>4) continue; // 3 or 4 cluster hits per track
-        if(nClusterHistPerPlane[st][la]>1) continue;  // 1 cluster hit per plane
+       
           
-        if(st<0 || m_nStations<=st)
-        {
-            ATH_MSG_INFO("stationID = " <<st<<", but expected values are from 0 to "<<m_nStations-1 );
-            continue;
-        }
+          if(st<0 || m_nStations<=st)
+          {
+              ATH_MSG_INFO("stationID = " <<st<<", but expected values are from 0 to "<<m_nStations-1 );
+              continue;
+          }
         
-        if(la<0 || m_nLayers<=la)
-        {
-            ATH_MSG_INFO("pixelLayerID = " <<la<<", but expected values are from 0 to "<<m_nLayers-1 );
-            continue;
-        }
+          if(la<0 || m_nLayers<=la)
+          {
+              ATH_MSG_INFO("pixelLayerID = " <<la<<", but expected values are from 0 to "<<m_nLayers-1 );
+              continue;
+          }
         
-        m_pixelCluster[st][la].at(lb_index).Fill((*cluster)->xLocal(),(*cluster)->yLocal());
+          if(nClusterHits[st]<3 || nClusterHits[st]>4) continue; // 3 or 4 cluster hits per track
+          if(nClusterHistPerPlane[st][la]>1) continue;  // 1 cluster hit per plane
         
-        double dx = 1e3*(track->xLocal() + (*cluster)->zLocal()*track->xSlope() - (*cluster)->xLocal());
-        double dy = 1e3*(track->yLocal() + (*cluster)->zLocal()*track->ySlope() - (*cluster)->yLocal());
+          m_pixelCluster[st][la].at(lb_index).Fill((*cluster)->xLocal(),(*cluster)->yLocal());
         
-        m_lb_yCluster_yDistSiTrackCluster[st][la].Fill(current_lb, (*cluster)->yLocal(), dy);
-        m_lb_xCluster_xDistSiTrackCluster[st][la].Fill(current_lb, (*cluster)->xLocal(), dx);
-        m_lb_sxTrack_xDistSiTrackCluster[st][la].Fill(current_lb, track->xSlope(), dx); 
-        m_lb_syTrack_yDistSiTrackCluster[st][la].Fill(current_lb, track->ySlope(), dy); 
-        m_lb_syTrack_xDistSiTrackCluster[st][la].Fill(current_lb, track->ySlope(), dx); 
-        m_lb_sxTrack_yDistSiTrackCluster[st][la].Fill(current_lb, track->xSlope(), dy);
+          double dx = 1e3*(track->xLocal() + (*cluster)->zLocal()*track->xSlope() - (*cluster)->xLocal());
+          double dy = 1e3*(track->yLocal() + (*cluster)->zLocal()*track->ySlope() - (*cluster)->yLocal());
         
-        m_lb_xDistSiTrackCluster[st][la].Fill(current_lb, dx);
-        m_lb_yDistSiTrackCluster[st][la].Fill(current_lb, dy);
+          m_lb_yCluster_yDistSiTrackCluster[st][la].Fill(current_lb, (*cluster)->yLocal(), dy);
+          m_lb_xCluster_xDistSiTrackCluster[st][la].Fill(current_lb, (*cluster)->xLocal(), dx);
+          m_lb_sxTrack_xDistSiTrackCluster[st][la].Fill(current_lb, track->xSlope(), dx); 
+          m_lb_syTrack_yDistSiTrackCluster[st][la].Fill(current_lb, track->ySlope(), dy); 
+          m_lb_syTrack_xDistSiTrackCluster[st][la].Fill(current_lb, track->ySlope(), dx); 
+          m_lb_sxTrack_yDistSiTrackCluster[st][la].Fill(current_lb, track->xSlope(), dy);
         
-        m_lb_xCluster_yDistSiTrackCluster[st][la].Fill(current_lb, (*cluster)->xLocal(), dy);
-        m_lb_yCluster_xDistSiTrackCluster[st][la].Fill(current_lb, (*cluster)->yLocal(), dx);
-        m_lb_zCluster_xDistSiTrackCluster[st][la].Fill(current_lb, (*cluster)->zLocal(), dx);
-        m_lb_zCluster_yDistSiTrackCluster[st][la].Fill(current_lb, (*cluster)->zLocal(), dy);
+          m_lb_xDistSiTrackCluster[st][la].Fill(current_lb, dx);
+          m_lb_yDistSiTrackCluster[st][la].Fill(current_lb, dy);
+        
+          m_lb_xCluster_yDistSiTrackCluster[st][la].Fill(current_lb, (*cluster)->xLocal(), dy);
+          m_lb_yCluster_xDistSiTrackCluster[st][la].Fill(current_lb, (*cluster)->yLocal(), dx);
+          m_lb_zCluster_xDistSiTrackCluster[st][la].Fill(current_lb, (*cluster)->zLocal(), dx);
+          m_lb_zCluster_yDistSiTrackCluster[st][la].Fill(current_lb, (*cluster)->zLocal(), dy);
           
-      }
+        }
     
     }
     
