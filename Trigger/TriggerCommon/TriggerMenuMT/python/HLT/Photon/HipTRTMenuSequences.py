@@ -44,7 +44,7 @@ def TRTHitGeneratorSequence(flags):
 
     # calling trtRIOMaker
     from TrigInDetConfig.InDetTrigPrecisionTracking import trtRIOMaker_builder
-    trtInviewAlgs = trtRIOMaker_builder(signature = "electrontrt", config = None, rois=InViewRoIs)
+    trtInviewAlgs = trtRIOMaker_builder(flags, signature = "electrontrt", config = None, rois=InViewRoIs)
     
     trtHTHFex = TrigTRTHTHCounterFex(flags, name="TrigTRTH_fex",
                                      RoIs = trtViewsMaker.InViewRoIs,

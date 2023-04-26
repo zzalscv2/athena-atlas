@@ -4,6 +4,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import Format
 
 class InDetCacheNames(object):
@@ -46,42 +47,6 @@ def trtCondCfg(flags):
   acc.merge(addFoldersSplitOnline(flags, "TRT","/TRT/Onl/Calib/RT","/TRT/Calib/RT",className="TRTCond::RtRelationMultChanContainer"))
   acc.merge(addFoldersSplitOnline(flags, "TRT","/TRT/Onl/Calib/T0","/TRT/Calib/T0",className="TRTCond::StrawT0MultChanContainer"))
   acc.merge(addFoldersSplitOnline (flags, "TRT","/TRT/Onl/Calib/errors","/TRT/Calib/errors",className="TRTCond::RtRelationMultChanContainer"))
-
-  return acc
-
-
-def trtDataPrep(flags, roisKey, signature):
-  acc = ComponentAccumulator()
-
-  acc.merge(trtCondCfg(flags))
-
-  from RegionSelector.RegSelToolConfig import regSelTool_TRT_Cfg
-  RegSelTool_TRT = acc.popToolsAndMerge(regSelTool_TRT_Cfg(flags))
-
-  if flags.Input.Format is Format.BS:
-    TRT_RodDecoder=CompFactory.TRT_RodDecoder
-    InDetTRTRodDecoder = TRT_RodDecoder(name = "InDetTRTRodDecoder")
-    if flags.Input.isMC:
-      InDetTRTRodDecoder.LoadCompressTableDB = False
-      InDetTRTRodDecoder.keyName=""
-    acc.addPublicTool(InDetTRTRodDecoder)
-
-    TRTRawDataProviderTool=CompFactory.TRTRawDataProviderTool
-    InDetTRTRawDataProviderTool = TRTRawDataProviderTool(name    = "InDetTRTRawDataProviderTool"+ signature,
-                                                         Decoder = InDetTRTRodDecoder)
-    acc.addPublicTool(InDetTRTRawDataProviderTool)
-
-     # load the TRTRawDataProvider
-    from .InDetTrigCollectionKeys import TrigTRTKeys
-    TRTRawDataProvider=CompFactory.TRTRawDataProvider
-    InDetTRTRawDataProvider = TRTRawDataProvider(name         = "InDetTRTRawDataProvider"+ signature,
-                                                 RDOKey       = TrigTRTKeys.RDOs,
-                                                 ProviderTool = InDetTRTRawDataProviderTool,
-                                                 RegSelTool   = RegSelTool_TRT,
-                                                 isRoI_Seeded = True,
-                                                 RoIs         = roisKey)
-
-    acc.addEventAlgo(InDetTRTRawDataProvider)
 
   return acc
 
@@ -130,40 +95,47 @@ def trigInDetFastTrackingCfg( inflags, roisKey="EMRoIs", signatureName='', in_vi
 ############################################################################################################################
 prefix="InDetTrigMT"
 
-def TRTDataProviderCfg(flags):
+def TRTDataProviderCfg(flags : AthConfigFlags, rois : str, signatureName : str = None):
+  if signatureName is None:
+    suffix = flags.Tracking.ActiveConfig.name
+  else:
+    suffix = signatureName
+    
+  rodDecoderName =  f"TrigTRTRodDecoder{suffix}"
+  providerToolName = f"TrigTRTRawDataProviderTool{suffix}"
+  providerName = f"TrigTRTRawDataProvider{suffix}"
+    
   acc = ComponentAccumulator()
-  rodDecoder = CompFactory.TRT_RodDecoder(
-    f"{prefix}TRTRodDecoder{flags.Tracking.ActiveConfig.name}",
-    LoadCompressTableDB=True)
+  rodDecoder = CompFactory.TRT_RodDecoder(name = rodDecoderName,
+                                          LoadCompressTableDB=True)
   acc.addPublicTool( rodDecoder )
-  dataProviderTool = CompFactory.TRTRawDataProviderTool(
-    f"{prefix}TRTRawDataProviderTool{flags.Tracking.ActiveConfig.name}",
-    Decoder=rodDecoder)
-
+  
+  dataProviderTool = CompFactory.TRTRawDataProviderTool(name = providerToolName,
+                                                        Decoder=rodDecoder)
   acc.addPublicTool( dataProviderTool )
+  
   from .InDetTrigCollectionKeys import TrigTRTKeys
   from RegionSelector.RegSelToolConfig import regSelTool_TRT_Cfg
-  dataProviderAlg = CompFactory.TRTRawDataProvider(
-    f"{prefix}TRTRawDataProvider{flags.Tracking.ActiveConfig.name}",
-    RDOKey       = TrigTRTKeys.RDOs,
-    ProviderTool = dataProviderTool,
-    RegSelTool   = acc.popToolsAndMerge(regSelTool_TRT_Cfg(flags)),
-    isRoI_Seeded = True,
-    RoIs         = flags.Tracking.ActiveConfig.roi)
+  dataProviderAlg = CompFactory.TRTRawDataProvider(name = providerName,
+                                                   RDOKey       = TrigTRTKeys.RDOs,
+                                                   ProviderTool = dataProviderTool,
+                                                   RegSelTool   = acc.popToolsAndMerge( regSelTool_TRT_Cfg(flags)),
+                                                   isRoI_Seeded = True,
+                                                   RoIs         = rois )
   acc.addEventAlgo(dataProviderAlg)
   return acc
 
 
-def TRTExtrensionBuilderCfg(flags):
+def TRTExtensionBuilderCfg(flags, rois):
   acc = ComponentAccumulator()
   if flags.Input.Format is Format.BS:
-    acc.merge( TRTDataProviderCfg(flags) )
+    acc.merge( TRTDataProviderCfg(flags, rois) )
 
   from InDetConfig.InDetPrepRawDataFormationConfig import TrigTRTRIOMakerCfg
   acc.merge( TrigTRTRIOMakerCfg(flags) )
 
   from InDetConfig.TRT_TrackExtensionAlgConfig import Trig_TRT_TrackExtensionAlgCfg
-  acc.merge( Trig_TRT_TrackExtensionAlgCfg(flags) )
+  acc.merge( Trig_TRT_TrackExtensionAlgCfg(flags, inputTracks = flags.Tracking.ActiveConfig.trkTracks_IDTrig+"_Amb") )
 
   from InDetConfig.InDetExtensionProcessorConfig import TrigInDetExtensionProcessorCfg
   acc.merge( TrigInDetExtensionProcessorCfg(flags) )
@@ -190,7 +162,7 @@ def trackEFIDConverterCfg(flags):
                             flags.Tracking.ActiveConfig.tracks_IDTrig)
 
 
-def trigInDetPrecisionTrackingCfg( inflags, signatureName, in_view=True ):
+def trigInDetPrecisionTrackingCfg( inflags, rois, signatureName, in_view=True ):
   if inflags.Detector.GeometryITk:
     from TrigInDetConfig.TrigInDetConfigITk import ITktrigInDetPrecisionTrackingCfg
     return  ITktrigInDetPrecisionTrackingCfg(inflags, signatureName, in_view=True)
@@ -226,7 +198,7 @@ def trigInDetPrecisionTrackingCfg( inflags, signatureName, in_view=True ):
     acc.addEventAlgo(verifier)
 
   acc.merge(ambiguitySolverAlgCfg(flags))
-  acc.merge(TRTExtrensionBuilderCfg(flags))
+  acc.merge(TRTExtensionBuilderCfg(flags, rois))
   acc.merge(trackEFIDConverterCfg(flags))
 
 #   Members = ['Trk::TrkAmbiguityScore/InDetTrigMTTrkAmbiguityScore_electronLRT', 
@@ -246,9 +218,9 @@ if __name__ == "__main__":
     # output can be used by experts to check actual configuration (e.g. here we configure to run on RAW and it should be reflected in settings)
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     acc = MainServicesCfg( flags )
-    acc.merge( trigInDetFastTrackingCfg( flags, roisKey="ElectronRoIs", signatureName="Electron" ) )
-
-    acc.merge( trigInDetPrecisionTrackingCfg( flags, signatureName="Electron" , in_view=True) )
+    roisKey = "ElectronRoIs"
+    acc.merge( trigInDetFastTrackingCfg( flags, roisKey=roisKey, signatureName="Electron" ) )
+    acc.merge( trigInDetPrecisionTrackingCfg( flags, rois=roisKey, signatureName="Electron", in_view=True) )
 
 
     acc.printConfig(withDetails=True, summariseProps=True)

@@ -145,7 +145,15 @@ def Trig_TRT_TrackExtensionToolCfg(
         kwargs.setdefault("DriftCircleCutTool", acc.popToolsAndMerge(
             InDetTrigTRTDriftCircleCutToolCfg(flags)))
 
+    if 'RoadTool' not in kwargs:
+        from InDetConfig.TRT_DetElementsRoadToolConfig import Trig_TRT_DetElementsRoadMaker_xk_TRTExtensionCfg
+        kwargs.setdefault("RoadTool", acc.popToolsAndMerge(
+            Trig_TRT_DetElementsRoadMaker_xk_TRTExtensionCfg(flags)))
+        
     kwargs.setdefault("TRT_ClustersContainer", "TRT_TrigDriftCircles")
+    kwargs.setdefault("RoadWidth", 20.)
+    kwargs.setdefault("ScaleHitUncertainty", 2.)
+    kwargs.setdefault("MinNumberDriftCircles", flags.Tracking.ActiveConfig.minTRTonTrk)
 
     acc.setPrivateTools(acc.popToolsAndMerge(
         TRT_TrackExtensionTool_xk_BaseCfg(flags, name, **kwargs)))

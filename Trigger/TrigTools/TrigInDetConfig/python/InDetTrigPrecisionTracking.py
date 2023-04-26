@@ -6,7 +6,7 @@ from AthenaCommon.Logging import logging
 log = logging.getLogger("InDetTrigPrecisionTracking")
 
 from InDetTrigRecExample.InDetTrigCommonTools import CAtoLegacyPublicToolWrapper
-
+from TriggerMenuMT.HLT.Config.MenuComponents import algorithmCAToGlobalWrapper
 
 def makeInDetTrigPrecisionTracking( inflags, config=None, verifier=False, rois='EMViewRoIs', prefix="InDetTrigMT" ) :
     
@@ -56,7 +56,7 @@ def makeInDetTrigPrecisionTracking( inflags, config=None, verifier=False, rois='
     if doTRT:
         # do the TRT extension if requested
         finalTrackCollection = outTrkTracks
-        trtAlgs = trtExtension_builder( signature, config, rois, summaryTool, inputTracks=ambiTrackCollection, outputTracks=outTrkTracks, prefix=prefix ) 
+        trtAlgs = trtExtension_builder(flags, signature, config, rois, summaryTool, inputTracks=ambiTrackCollection, outputTracks=outTrkTracks, prefix=prefix ) 
         ptAlgs.extend( trtAlgs )
 
         
@@ -253,7 +253,7 @@ def scoringTool_builder( signature, config, prefix=None, SiOnly=True ):
                        name = scoringToolName,
                        minPt        = config.pTmin, 
                        doEmCaloSeed = False,
-                       minTRTonTrk        = 0,
+                       minTRTonTrk        = 0,          #2023fix  (switch to flags)
                        DriftCircleCutTool = InDetTrigTRTDriftCircleCut)
   
   if(config.maxRPhiImpact is not None):
@@ -292,27 +292,22 @@ def scoringTool_builder( signature, config, prefix=None, SiOnly=True ):
   if(config.doEmCaloSeed is not None):
     kwargs = setDefaults(kwargs, doEmCaloSeed = config.doEmCaloSeed)
 
-  if(config.minTRTonTrk is not None):
-    kwargs = setDefaults(kwargs, minTRTonTrk = config.minTRTonTrk)
-
   from InDetConfig.InDetTrackScoringToolsConfig import InDetAmbiScoringToolCfg
   scoringTool = CAtoLegacyPublicToolWrapper(InDetAmbiScoringToolCfg, **kwargs)
   return scoringTool
 
 
-def trtExtension_builder( signature, config, rois, summaryTool, inputTracks, outputTracks, prefix="InDetTrigMT" ): 
+def trtExtension_builder(flags, signature, config, rois, summaryTool, inputTracks, outputTracks, prefix="InDetTrigMT" ): 
 
-    trtRIOMaker           = trtRIOMaker_builder( signature, config, rois, prefix  )
-    trtExtensionAlg       = trtExtensionAlg_builder( signature, config, inputTracks, prefix )
-    trtExtensionProcessor = trtExtensionProcessor_builder( signature, config, summaryTool, inputTracks, outputTracks, prefix )
+        
+    trtRIOMaker           = trtRIOMaker_builder(flags, signature, config, rois, prefix  )
+    trtExtensionAlg       = trtExtensionAlg_builder(flags, signature, config, inputTracks, prefix =prefix)
+    trtExtensionProcessor = trtExtensionProcessor_builder(flags, signature, config, summaryTool, inputTracks, outputTracks, prefix )
 
     return [ trtRIOMaker, trtExtensionAlg, trtExtensionProcessor]
     
 
-
-
-
-def trtRIOMaker_builder( signature, config, rois, prefix="InDetTrigMT" ): 
+def trtRIOMaker_builder(inflags, signature, config, rois, prefix="InDetTrigMT" ): 
     
     log.info( "trtRIOMaker_builder: {} {}".format( signature, prefix ) )
 
@@ -323,201 +318,54 @@ def trtRIOMaker_builder( signature, config, rois, prefix="InDetTrigMT" ):
     from .InDetTrigCollectionKeys import TrigTRTKeys
     from AthenaCommon.GlobalFlags import globalflags
 
+    #TODO invoke as photon from the menu
+    if signature=="electrontrt":
+      flags = inflags.cloneAndReplace("Tracking.ActiveConfig", "Trigger.InDetTracking."+"photon")
+    else:
+      flags = inflags
+
     # Only add raw data decoders if we're running over raw data
     if globalflags.InputFormat.is_bytestream():
         #Global keys/names for collections 
         TRT_RDO_Key = TrigTRTKeys.RDOs
-        trtDataProvider = trtDataProvider_builder( signature, config, TRT_RDO_Key, rois )
+        trtDataProvider = trtDataProvider_builder(flags, signature, config, TRT_RDO_Key, rois )
         algs.append( trtDataProvider )
         
-        
-    #-----------------------------------------------------------------------------
-    #                        TRT extension
-    # Keep track that this needs to have a switch between DAF and XK
-    # trkExtensionType = 'XK'
-    # if InDetTrigFlags.trtExtensionType() is 'DAF' :
-    
-    from InDetTrigRecExample.InDetTrigConfigRecLoadTools import  InDetTrigTRT_DriftCircleTool
-    
-    from InDetPrepRawDataFormation.InDetPrepRawDataFormationConf import InDet__TRT_RIO_Maker
-    trtRIOMaker = InDet__TRT_RIO_Maker( name = "%sTRTDriftCircleMaker%s"%(prefix, signature),
-                                        TRTRIOLocation = TrigTRTKeys.DriftCircles,
-                                        TRTRDOLocation = TRT_RDO_Key,
-                                        # FIXME:
-                                        # EtaHalfWidth = config.etaHalfWidth
-                                        # PhiHalfWidth = config.phiHalfWidth
-                                        # doFullScan   = config.doFullScan
-                                        TRT_DriftCircleTool = InDetTrigTRT_DriftCircleTool )
-    
-    trtRIOMaker.isRoI_Seeded = True
-    trtRIOMaker.RoIs = rois
 
-    from RegionSelector.RegSelToolConfig import makeRegSelTool_TRT
-    trtRIOMaker.RegSelTool = makeRegSelTool_TRT()
-
-    algs.append( trtRIOMaker )
-
+    from InDetConfig.InDetPrepRawDataFormationConfig import TrigTRTRIOMakerCfg
+    trtRIOMaker = algorithmCAToGlobalWrapper(TrigTRTRIOMakerCfg,
+                                             flags, RoIs = rois)
+    algs.extend( trtRIOMaker )
     return algs
-  
- 
-
-
-
-
-def trtDataProvider_builder( signature, config, TRT_RDO_Key, rois, prefix="InDetTrigMT" ) :
-  
-    from AthenaCommon.AppMgr import ToolSvc
-
-    from TRT_RawDataByteStreamCnv.TRT_RawDataByteStreamCnvConf import TRT_RodDecoder
-    trtRodDecoder = TRT_RodDecoder( name="%sTRTRodDecoder%s"%(prefix, signature),
-                                       LoadCompressTableDB=True )
-    ToolSvc += trtRodDecoder
-  
-    from TRT_RawDataByteStreamCnv.TRT_RawDataByteStreamCnvConf import TRTRawDataProviderTool
-    trtRawDataProviderTool = TRTRawDataProviderTool( name="%sTRTRawDataProviderTool%s"%(prefix, signature),
-                                                     Decoder=trtRodDecoder )
     
-    ToolSvc += trtRawDataProviderTool
+
+
+def trtDataProvider_builder(flags, signature, config, TRT_RDO_Key, rois, prefix="InDetTrigMT" ) :
+
     
-    # load the TRTRawDataProvider
-    from TRT_RawDataByteStreamCnv.TRT_RawDataByteStreamCnvConf import TRTRawDataProvider
-    trtRawDataProvider = TRTRawDataProvider(name         = "%sTRTRawDataProvider%s"%(prefix, signature),
-                                            RDOKey       = TRT_RDO_Key,
-                                            ProviderTool = trtRawDataProviderTool)
+    from TrigInDetConfig.TrigInDetConfig import TRTDataProviderCfg
+    trtRawDataProvider = algorithmCAToGlobalWrapper(TRTDataProviderCfg,
+                                                    flags, rois, signature)
+    return trtRawDataProvider[0]
+
     
-    from RegionSelector.RegSelToolConfig import makeRegSelTool_TRT
-    
-    trtRawDataProvider.RegSelTool = makeRegSelTool_TRT()
-    trtRawDataProvider.isRoI_Seeded = True
-    trtRawDataProvider.RoIs = rois
-    
-    return  trtRawDataProvider 
+def trtExtensionAlg_builder(flags, signature, config, inputTracks, prefix="InDetTrigMT" ): 
+
+    from InDetConfig.TRT_TrackExtensionAlgConfig import Trig_TRT_TrackExtensionAlgCfg
+    extensionAlg = algorithmCAToGlobalWrapper(Trig_TRT_TrackExtensionAlgCfg,
+                                              flags, inputTracks, name="%sTrackExtensionAlg%s"%(prefix, signature),
+                                              )
+    return extensionAlg[0]
 
 
+def trtExtensionProcessor_builder(flags, signature, config, summaryTool, inputTracks, outputTracks, prefix="InDetTrigMT" ):   
 
 
-
-
-
-
-def trtExtensionTool_builder( signature, config, prefix="InDetTrigMT" ): 
-
-    from AthenaCommon.AppMgr import ToolSvc
-
-    # Condition algorithm for InDet__TRT_DetElementsRoadMaker_xk
-    from AthenaCommon.AlgSequence import AthSequencer
-    condSeq = AthSequencer("AthCondSeq")
-    
-    trtRoadAlgName = "%sTRT_DetElementsRoadCondAlg_xk"%(prefix)
-    
-    if not hasattr( condSeq, trtRoadAlgName ):
-        from TRT_DetElementsRoadTool_xk.TRT_DetElementsRoadTool_xkConf import InDet__TRT_DetElementsRoadCondAlg_xk
-    
-        # condSeq += InDet__TRT_DetElementsRoadCondAlg_xk(name = "%sTRT_DetElementsRoadCondAlg_xk%s"%(prefix, signature) )
-        condSeq += InDet__TRT_DetElementsRoadCondAlg_xk( name = trtRoadAlgName )
-
-
-    from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigPatternPropagator
-    
-    from TRT_DetElementsRoadTool_xk.TRT_DetElementsRoadTool_xkConf import InDet__TRT_DetElementsRoadMaker_xk
-    
-    trtRoadMaker =  InDet__TRT_DetElementsRoadMaker_xk( name   = '%sTRTRoadMaker%s'%(prefix, signature),
-                                                        #DetectorStoreLocation = 'DetectorStore',
-                                                        #TRTManagerLocation    = 'TRT',
-                                                        MagneticFieldMode     = 'MapSolenoid',
-                                                        PropagatorTool        = InDetTrigPatternPropagator )
-
-    ToolSvc += trtRoadMaker
-
-
-
-    # TODO implement new configuration of circle cut
-
-    from InDetTrigRecExample.ConfiguredNewTrackingTrigCuts import EFIDTrackingCuts
-
-    cutValues = EFIDTrackingCuts
-
-    if(config.isLRT):
-        from InDetTrigRecExample.ConfiguredNewTrackingTrigCuts import EFIDTrackingCutLRT
-        cutValues = EFIDTrackingCutLRT
-        
-    from .InDetTrigCollectionKeys import TrigTRTKeys
-
-    from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigPatternUpdator 
-    from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigTRTDriftCircleCut
-    
-    from TRT_TrackExtensionTool_xk.TRT_TrackExtensionTool_xkConf import InDet__TRT_TrackExtensionTool_xk
-    
-    trtExtensionTool = InDet__TRT_TrackExtensionTool_xk ( name = "%sTrackExtensionTool%s"%(prefix,signature),
-                                                          MagneticFieldMode     = 'MapSolenoid',      # default
-                                                          TRT_ClustersContainer = TrigTRTKeys.DriftCircles, # default
-                                                          TrtManagerLocation    = 'TRT',              # default
-                                                          PropagatorTool = InDetTrigPatternPropagator,
-                                                          UpdatorTool    = InDetTrigPatternUpdator,
-                                                          # RIOonTrackToolYesDr = # default for now
-                                                          # RIOonTrackToolNoDr  = # default for now
-                                                          RoadTool            = trtRoadMaker,
-                                                          DriftCircleCutTool = InDetTrigTRTDriftCircleCut,
-                                                          MinNumberDriftCircles = cutValues.minTRTonTrk(),
-                                                          ScaleHitUncertainty   = 2.,
-                                                          RoadWidth             = 20.,
-                                                          UseParameterization   = cutValues.useParameterizedTRTCuts() )
-               
-    ToolSvc += trtExtensionTool
-
-    return trtExtensionTool
-
-
- 
-
-def trtExtensionAlg_builder( signature, config, inputTracks, prefix="InDetTrigMT" ): 
- 
-    extensionTool = trtExtensionTool_builder( signature, config ) 
- 
-    from TRT_TrackExtensionAlg.TRT_TrackExtensionAlgConf import InDet__TRT_TrackExtensionAlg
-    extensionAlg = InDet__TRT_TrackExtensionAlg( name = "%sTrackExtensionAlg%s"%(prefix, signature),
-                                                    InputTracksLocation    = inputTracks,
-                                                    TrackExtensionTool     = extensionTool,
-                                                    ExtendedTracksLocation = 'ExtendedTrackMap' )
-
-    return extensionAlg
-
-
-
-
-def trtExtensionProcessor_builder( signature, config, summaryTool, inputTracks, outputTracks, prefix="InDetTrigMT" ):   
-
-    from AthenaCommon.AppMgr import ToolSvc
-
-    #-----------------------------------------------------------------------------
-    #                        TRT processor
-    
-    # TODO: do I need a new fitter for this? Or can I use the same one?
-    # TODO In Run2 option for cosmic
-    # InDetTrigExtensionFitter = InDetTrigTrackFitter
-
-    scoringTool = scoringTool_builder( signature, config, prefix=prefix, SiOnly=False )
-    ToolSvc += scoringTool
-
-
-    from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigTrackFitter
-    from InDetTrigRecExample.InDetTrigFlags import InDetTrigFlags
-    from InDetExtensionProcessor.InDetExtensionProcessorConf import InDet__InDetExtensionProcessor   
-    trtExtensionProcessor = InDet__InDetExtensionProcessor (name               = "%sExtensionProcessor%s"%(prefix, signature),
-                                                            TrackName          = inputTracks,
-                                                            #Cosmics           = InDetFlags.doCosmics(),
-                                                            ExtensionMap       = 'ExtendedTrackMap',
-                                                            NewTrackName       = outputTracks,
-                                                            TrackFitter        = InDetTrigTrackFitter,
-                                                            TrackSummaryTool   = summaryTool,
-                                                            ScoringTool        = scoringTool, 
-                                                            suppressHoleSearch = False,
-                                                            RefitPrds = not (InDetTrigFlags.refitROT() or (InDetTrigFlags.trtExtensionType() == 'DAF')))
-                                                            # Check these option after DAF is implemented
-                                                            # tryBremFit         = InDetFlags.doBremRecovery(),
-                                                            # caloSeededBrem     = InDetFlags.doCaloSeededBrem(),
-                                                            # pTminBrem          = NewTrackingCuts.minPTBrem() )
-    return trtExtensionProcessor
+    from InDetConfig.InDetExtensionProcessorConfig import TrigInDetExtensionProcessorCfg
+    trtExtensionProcessor = algorithmCAToGlobalWrapper(TrigInDetExtensionProcessorCfg,
+                                                       flags, name="%sExtensionProcessor%s"%(prefix, signature),
+                                                       )
+    return trtExtensionProcessor[0]
 
 
 

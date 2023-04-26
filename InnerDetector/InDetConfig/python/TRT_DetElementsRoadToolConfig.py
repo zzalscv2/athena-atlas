@@ -29,3 +29,8 @@ def TRT_DetElementsRoadMaker_xkCfg(flags, name='TRT_DetElementsRoadMaker', **kwa
 def TRT_DetElementsRoadMaker_xk_TRTExtensionCfg(flags, name='TRT_DetElementsRoadMaker_TRTExtension', **kwargs):
     kwargs.setdefault("RoadWidth", 20.)
     return TRT_DetElementsRoadMaker_xkCfg(flags, name, **kwargs)
+
+def Trig_TRT_DetElementsRoadMaker_xk_TRTExtensionCfg(flags, name='TRT_DetElementsRoadMaker_TRTExtension', **kwargs):
+    #this should not be necessary aside from 2022 legacy config
+    kwargs.setdefault("RoadWidth", 10.)                 #2023fix 
+    return TRT_DetElementsRoadMaker_xkCfg(flags, name, **kwargs)

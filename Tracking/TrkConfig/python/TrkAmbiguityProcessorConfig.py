@@ -172,10 +172,10 @@ def SimpleAmbiguityProcessorTool_Trig_Cfg(
 
     kwargs.setdefault("SuppressTrackFit", (
         not flags.Tracking.ActiveConfig.doAmbiguityProcessorTrackFit))
-    # TODO False if flags.InDet.Tracking.ActiveConfig.name == 'cosmics' else True
+    # TODO False if flags.Tracking.ActiveConfig.name == 'cosmics' else True
     kwargs.setdefault("SuppressHoleSearch", False)
     # kwargs.setdefault("RefitPrds", False)
-    # #TODO clarify this setting False if flags.InDet.Tracking.ActiveConfig.name == 'cosmics' else True
+    # #TODO clarify this setting False if flags.Tracking.ActiveConfig.name == 'cosmics' else True
     kwargs.setdefault("tryBremFit",
                       flags.Tracking.ActiveConfig.name == 'electron' and
                       flags.Tracking.doBremRecovery)
