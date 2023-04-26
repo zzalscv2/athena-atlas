@@ -457,18 +457,13 @@ TrackParticleCnvAlg::createParticle(
 xAOD::TrackParticle*
 TrackParticleCnvAlg::createParticle(xAOD::TrackParticleContainer& xaod,
                                     const TrackCollection& container,
-                                    const Trk::Track& tp)
+                                    const Trk::Track& tp,
+                                    const EventContext& ctx)
 {
   // create the xAOD::TrackParticle, the pointer is added to the container in
   // the function
-  ElementLink<TrackCollection> trackLink(&tp, container);
+  ElementLink<TrackCollection> trackLink(&tp, container,ctx);
   return m_particleCreator->createParticle(trackLink, &xaod);
-}
-
-StatusCode
-TrackParticleCnvAlg::finalize()
-{
-  return StatusCode::SUCCESS;
 }
 
 } // namespace xAODMaker
