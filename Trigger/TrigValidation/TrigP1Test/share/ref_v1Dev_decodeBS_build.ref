@@ -10297,11 +10297,13 @@ HLT_mu6_mu6noL1_L1MU5VF:
     1: 6
     2: 3
     3: 2
+    4: 1
   stepFeatures:
     0: 7
     1: 6
     2: 3
     3: 2
+    4: 2
 HLT_mu6_noL2Comb_mu4_noL2Comb_bJpsimumu_L1MU5VF_2MU3V:
   eventCount: 0
   stepCounts:
