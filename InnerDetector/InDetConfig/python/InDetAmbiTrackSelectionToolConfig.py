@@ -12,11 +12,13 @@ def InDetAmbiTrackSelectionToolCfg(
 
     if ('UseParameterization' in kwargs and
         kwargs.get('UseParameterization', False) and
-            "DriftCircleCutTool" not in kwargs):
+        "DriftCircleCutTool" not in kwargs):
         from InDetConfig.InDetTrackSelectorToolConfig import (
             InDetTRTDriftCircleCutToolCfg)
-        kwargs.setdefault("DriftCircleCutTool", acc.popToolsAndMerge(
-            InDetTRTDriftCircleCutToolCfg(flags)))
+        DriftCircleCutTool = acc.popToolsAndMerge(
+            InDetTRTDriftCircleCutToolCfg(flags))
+        acc.addPublicTool(DriftCircleCutTool)
+        kwargs.setdefault("DriftCircleCutTool", DriftCircleCutTool)
 
     if "AssociationTool" not in kwargs:
         from InDetConfig.InDetAssociationToolsConfig import (
@@ -103,8 +105,10 @@ def InDetTRTAmbiTrackSelectionToolCfg(
     if "DriftCircleCutTool" not in kwargs:
         from InDetConfig.InDetTrackSelectorToolConfig import (
             InDetTRTDriftCircleCutToolCfg)
-        kwargs.setdefault("DriftCircleCutTool", acc.popToolsAndMerge(
-            InDetTRTDriftCircleCutToolCfg(flags)))
+        DriftCircleCutTool = acc.popToolsAndMerge(
+            InDetTRTDriftCircleCutToolCfg(flags))
+        acc.addPublicTool(DriftCircleCutTool)
+        kwargs.setdefault("DriftCircleCutTool", DriftCircleCutTool)
 
     if "AssociationTool" not in kwargs:
         from InDetConfig.InDetAssociationToolsConfig import (
@@ -140,8 +144,10 @@ def InDetTrigAmbiTrackSelectionToolCfg(
     if "DriftCircleCutTool" not in kwargs:
         from InDetConfig.InDetTrackSelectorToolConfig import (
             InDetTrigTRTDriftCircleCutToolCfg)
-        kwargs.setdefault("DriftCircleCutTool", acc.popToolsAndMerge(
-            InDetTrigTRTDriftCircleCutToolCfg(flags)))
+        DriftCircleCutTool = acc.popToolsAndMerge(
+            InDetTrigTRTDriftCircleCutToolCfg(flags))
+        acc.addPublicTool(DriftCircleCutTool)
+        kwargs.setdefault("DriftCircleCutTool", DriftCircleCutTool)
 
     if "AssociationTool" not in kwargs:
         from InDetConfig.InDetAssociationToolsConfig import (
