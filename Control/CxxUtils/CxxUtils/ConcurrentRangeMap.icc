@@ -605,6 +605,11 @@ CONCURRENTRANGEMAP::trim (const std::vector<key_query_type>& keys,
     // Discard it.  Be sure to adjust m_begin first.
     mapped_type todel = pos->second;
     ++pos;
+    if (pos > m_last) {
+      // Removing the last entry.  Be sure to clear m_begin first.
+      m_begin = nullptr;
+      m_last = nullptr;
+    }
     m_begin = pos;
     m_payloadDeleter->discard (todel);
     ++ndel;
@@ -645,7 +650,7 @@ void CONCURRENTRANGEMAP::clear()
     m_payloadDeleter->discard (todel);
   }
 
-  // Now have one element left.  Be sure to clean m_begin first.
+  // Now have one element left.  Be sure to clear m_begin first.
   mapped_type todel = begin->second;
   ++begin;
   m_begin = nullptr;

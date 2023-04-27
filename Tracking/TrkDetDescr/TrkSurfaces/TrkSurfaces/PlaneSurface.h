@@ -93,7 +93,7 @@ public:
   /** Constructor from TrkDetElementBase*/
   PlaneSurface(const TrkDetElementBase& detelement,
                const Amg::Transform3D& transf);
-               
+
   /** Constructor from TrkDetElementBase*/
   PlaneSurface(const TrkDetElementBase& detelement);
 
@@ -102,7 +102,7 @@ public:
   PlaneSurface(const TrkDetElementBase& detelement,
                const Identifier& id,
                const Amg::Transform3D & transf);
-               
+
   /** Constructor from TrkDetElementBase and Identifier in case one element
    * holds more surfaces*/
   PlaneSurface(const TrkDetElementBase& detelement,
@@ -111,7 +111,7 @@ public:
   /** Constructor for planar Surface without Bounds , reference */
   PlaneSurface(const Amg::Transform3D& htrans);
 
-  
+
   /** Constructor for Rectangular Planes*/
   PlaneSurface(const Amg::Transform3D & htrans, double halephi, double haleta);
 
@@ -131,13 +131,11 @@ public:
 
   /**Equality operator*/
   virtual bool operator==(const Surface& sf) const override;
-
-  // Needed to prevent ambiguities with c++20.
   bool operator==(const PlaneSurface& cf) const;
 
   /**Virtual constructor*/
   virtual PlaneSurface* clone() const override;
-  
+
   /** Return the surface type */
   virtual SurfaceType type() const override final;
 

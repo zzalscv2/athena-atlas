@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////
@@ -50,8 +50,10 @@ SCT_FwdModule::SCT_FwdModule(const std::string & name, int ringType,
                              InDetDD::SCT_DetectorManager* detectorManager,
                              SCT_GeometryManager* geometryManager,
                              SCT_MaterialManager* materials,
-                             GeoModelIO::ReadGeoModel* sqliteReader)
-  : SCT_UniqueComponentFactory(name, detectorManager, geometryManager, materials, sqliteReader),
+                             GeoModelIO::ReadGeoModel* sqliteReader,
+                             std::shared_ptr<std::map<std::string, GeoFullPhysVol*>>        mapFPV,
+                             std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX)
+  : SCT_UniqueComponentFactory(name, detectorManager, geometryManager, materials, sqliteReader, mapFPV, mapAX),
     m_ringType(ringType)
 {
     getParameters();
@@ -69,7 +71,7 @@ SCT_FwdModule::SCT_FwdModule(const std::string & name, int ringType,
         }
     }
     m_sensor = std::make_unique<SCT_FwdSensor>("ECSensor"+intToString(ringType), m_ringType,
-    m_detectorManager, m_geometryManager, materials, m_sqliteReader);
+    m_detectorManager, m_geometryManager, materials, m_sqliteReader, m_mapFPV, m_mapAX);
     m_logVolume = SCT_FwdModule::preBuild();
 
 }

@@ -85,13 +85,10 @@ bool
 Trk::StraightLineSurface::operator==(const Trk::Surface& sf) const
 {
   // first check the type not to compare apples with oranges
-  const Trk::StraightLineSurface* slsf = dynamic_cast<const Trk::StraightLineSurface*>(&sf);
-  if (!slsf)
-    return false;
-  bool transfEqual(transform().isApprox(slsf->transform(), 10e-8));
-  bool centerEqual = (transfEqual) ? (center() == slsf->center()) : false;
-  bool boundsEqual = (centerEqual) ? (bounds() == slsf->bounds()) : false;
-  return boundsEqual;
+  if (sf.type()!=Trk::SurfaceType::Line){
+      return false;
+  }
+  return (*this) == static_cast<const Trk::StraightLineSurface&>(sf);
 }
 
 /** Use the Surface as a ParametersBase constructor, from local parameters -
@@ -188,8 +185,8 @@ Trk::StraightLineSurface::globalToLocal(const Amg::Vector3D& glopos,
 #endif
 // isOnSurface check
 bool
-Trk::StraightLineSurface::isOnSurface(const Amg::Vector3D& glopo, 
-                                      const BoundaryCheck& bchk, 
+Trk::StraightLineSurface::isOnSurface(const Amg::Vector3D& glopo,
+                                      const BoundaryCheck& bchk,
                                       double tol1, double tol2) const
 {
   if (!bchk)

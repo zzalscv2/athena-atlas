@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SCT_GEOMODEL_SCT_COMPONENTFACTORY_H
@@ -79,7 +79,10 @@ public:
   SCT_UniqueComponentFactory(const std::string & name,
                              InDetDD::SCT_DetectorManager* detectorManager,
                              SCT_GeometryManager* geometryManager,
-                             SCT_MaterialManager* materials=nullptr, GeoModelIO::ReadGeoModel* sqliteReader=nullptr);
+                             SCT_MaterialManager* materials=nullptr,
+                             GeoModelIO::ReadGeoModel* sqliteReader=nullptr,
+                             std::shared_ptr<std::map<std::string, GeoFullPhysVol*>>        mapFPV=nullptr,
+                             std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX=nullptr);
 
   virtual GeoVPhysVol * build(SCT_Identifier id) = 0;
 
@@ -89,8 +92,8 @@ protected:
 
   virtual const GeoLogVol * preBuild() = 0;
 
-  std::unique_ptr<std::map<std::string, GeoFullPhysVol*>>        m_mapFPV;
-  std::unique_ptr<std::map<std::string, GeoAlignableTransform*>> m_mapAX;
+  std::shared_ptr<std::map<std::string, GeoFullPhysVol*>>        m_mapFPV;
+  std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> m_mapAX;
 
 };
 

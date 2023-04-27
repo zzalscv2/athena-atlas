@@ -137,15 +137,10 @@ bool
 Trk::PlaneSurface::operator==(const Trk::Surface& sf) const
 {
   // first check the type not to compare apples with oranges
-  const Trk::PlaneSurface* psf = dynamic_cast<const Trk::PlaneSurface*>(&sf);
-  if (!psf)
-    return false;
-  if (psf == this)
-    return true;
-  bool transfEqual(transform().isApprox(psf->transform(), 10e-8));
-  bool centerEqual = center() == psf->center();
-  bool boundsEqual = bounds() == psf->bounds();
-  return transfEqual && centerEqual && boundsEqual;
+  if (sf.type()!=Trk::SurfaceType::Plane){
+      return false;
+  }
+  return (*this) == static_cast<const Trk::PlaneSurface&>(sf);
 }
 
 /** Use the Surface as a ParametersBase constructor, from local parameters -
@@ -272,8 +267,8 @@ Trk::PlaneSurface::globalToLocalDirection(const Amg::Vector3D& glodir, Trk::Loca
 }
 
 bool
-Trk::PlaneSurface::isOnSurface(const Amg::Vector3D& glopo,  
-                               const Trk::BoundaryCheck& bchk, 
+Trk::PlaneSurface::isOnSurface(const Amg::Vector3D& glopo,
+                               const Trk::BoundaryCheck& bchk,
                                double tol1, double tol2) const
 {
   Amg::Vector3D loc3Dframe = inverseTransformMultHelper(glopo);

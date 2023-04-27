@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -54,8 +54,10 @@ SCT_Layer::SCT_Layer(const std::string & name,
                      InDetDD::SCT_DetectorManager* detectorManager,
                      SCT_GeometryManager* geometryManager,
                      SCT_MaterialManager* materials,
-                     GeoModelIO::ReadGeoModel* sqliteReader)
-: SCT_UniqueComponentFactory(name, detectorManager, geometryManager, materials, sqliteReader),
+                     GeoModelIO::ReadGeoModel* sqliteReader,
+                     std::shared_ptr<std::map<std::string, GeoFullPhysVol*>>        mapFPV,
+                     std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX)
+: SCT_UniqueComponentFactory(name, detectorManager, geometryManager, materials, sqliteReader, mapFPV, mapAX),
     m_iLayer(iLayer), 
     m_module(module)
 {
@@ -112,7 +114,7 @@ SCT_Layer::preBuild()
     // Make the ski
     // The ski length is now reduced to m_activeLength to make room for the cooling inlet/outlet volumes
     m_ski = std::make_unique<SCT_Ski>("Ski"+layerNumStr, m_module, m_stereoSign, m_tilt, m_activeLength,
-                                      m_detectorManager, m_geometryManager, m_materials, m_sqliteReader);
+                                      m_detectorManager, m_geometryManager, m_materials, m_sqliteReader, m_mapFPV, m_mapAX);
     
     
     //

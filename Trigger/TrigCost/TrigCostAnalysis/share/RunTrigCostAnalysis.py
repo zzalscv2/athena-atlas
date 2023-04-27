@@ -56,7 +56,7 @@ def trigCostAnalysisCfg(flags, args, isMC=False):
 
   return acc
 
-# Prepare dictionary with MC parameters read from arguments
+# Prepare dictionary with MC parameters read from arguments, or from AMI
 def readMCpayload(args):
   payload = {}
 
@@ -64,6 +64,16 @@ def readMCpayload(args):
   payload['MCFilterEfficiency'] = args.MCFilterEfficiency
   payload['MCKFactor'] = args.MCKFactor
   payload['MCIgnoreGeneratorWeights'] = args.MCIgnoreGeneratorWeights
+
+  dset = args.MCDatasetName
+  if payload['MCCrossSection'] == 0: # If the input file is MC then make sure we have the needed info
+    from RatesAnalysis.GetCrossSectionAMITool import GetCrossSectionAMI
+    amiTool = GetCrossSectionAMI()
+    if dset == '': # Can we get the dataset name from the input file path?
+      dset = amiTool.getDatasetNameFromPath(ConfigFlags.Input.Files[0])
+    amiTool.queryAmi(dset)
+    payload['MCCrossSection'] = amiTool.crossSection
+    payload['MCFilterEfficiency'] = amiTool.filterEfficiency
 
   return payload
 
@@ -200,6 +210,7 @@ if __name__=='__main__':
   parser.add_argument('--smk', type=int, help='SuperMasterKey to retrieve menu file')
   parser.add_argument('--dbAlias', type=str, help='Database alias to retrieve menu file')
 
+  parser.add_argument('--MCDatasetName', default='', type=str, help='For MC input: Name of the dataset, can be used instead of MCCrossSection, MCFilterEfficiency')
   parser.add_argument('--MCCrossSection', default=0.0, type=float, help='For MC input: Cross section of process in nb')
   parser.add_argument('--MCFilterEfficiency', default=1.0, type=float, help='For MC input: Filter efficiency of any MC filter (0.0 - 1.0)')
   parser.add_argument('--MCKFactor', default=1.0, type=float, help='For MC input: Additional multiplicitive fudge-factor to the supplied cross section.')

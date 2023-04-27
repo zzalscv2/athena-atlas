@@ -1,16 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonReadoutGeometry/MuonClusterReadoutElement.h"
-
-class GeoVFullPhysVol;
-
 namespace MuonGM {
 
-    MuonClusterReadoutElement::MuonClusterReadoutElement(GeoVFullPhysVol* pv, const std::string&, int zi, int fi, bool is_mirrored,
-                                                         MuonDetectorManager* mgr) :
-        MuonReadoutElement(pv, zi, fi, is_mirrored, mgr), m_surfaceData(nullptr) {}
+    MuonClusterReadoutElement::MuonClusterReadoutElement(GeoVFullPhysVol* pv, MuonDetectorManager* mgr, Trk::DetectorElemType detType) :
+        MuonReadoutElement(pv, mgr, detType) {}
 
     MuonClusterReadoutElement::~MuonClusterReadoutElement() = default;
 

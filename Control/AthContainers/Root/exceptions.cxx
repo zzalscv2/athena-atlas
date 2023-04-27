@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/src/exceptions.cxx
@@ -531,6 +531,30 @@ ExcAllocOwnership::ExcAllocOwnership()
 void throwExcAllocOwnership()
 {
   throw ExcAllocOwnership();
+}
+
+
+//*************************************************************************
+
+
+/// Helper: format exception error string.
+std::string excBadVarName_format (const std::string& name)
+{
+  std::ostringstream os;
+  os << "SG::ExcBadVarName: "
+     << "Bad name for auxiliary variable `" << name << "'. "
+     << "Variable and class name must be identifiers, and variable name must not be empty.";
+  return os.str();
+}
+
+
+/**
+ * @brief Constructor.
+ * @param name Name of the variable.
+ */
+ExcBadVarName::ExcBadVarName (const std::string& name)
+  : std::runtime_error (excBadVarName_format (name))
+{
 }
 
 

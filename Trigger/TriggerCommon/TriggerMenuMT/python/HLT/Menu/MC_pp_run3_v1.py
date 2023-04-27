@@ -47,7 +47,6 @@ def getMCSignatures():
         ChainProp(name="HLT_mu10_L1MU8F", groups=SingleMuonGroup),
         ChainProp(name="HLT_mu14_L1MU8F", groups=SingleMuonGroup),
         ChainProp(name="HLT_mu14_L1MU8VFC", groups=SingleMuonGroup),
-        ChainProp(name="HLT_mu24_L1MU14FCH", groups=SingleMuonGroup),
         ChainProp(name='HLT_2mu4_L12MU3V',  groups=MultiMuonGroup),
 
         #-- nscan ATR-19376, TODO: to be moved to physics once debugged to a resaonable rate
@@ -125,7 +124,6 @@ def getMCSignatures():
         ChainProp(name='HLT_e5_lhtight_noringer_L1EM3', groups=SingleElectronGroup),
         ChainProp(name='HLT_e26_lhtight_L1eEM26', groups=SingleElectronGroup),
         ChainProp(name='HLT_e26_lhtight_L1eEM26L', groups=SingleElectronGroup),
-        ChainProp(name='HLT_e26_lhtight_L1eEM26M', groups=SingleElectronGroup),
         ChainProp(name='HLT_e26_lhtight_L1eEM26T', groups=SingleElectronGroup),
         #------------ dnn chains
         ChainProp(name='HLT_e5_dnnloose_L1EM3', groups=SingleElectronGroup),
@@ -153,11 +151,11 @@ def getMCSignatures():
         #------------ nopid trigger and etcut from ATR-26311
         # ATR-23723
         ChainProp(name='HLT_e5_nopid_L1EM3', groups=SingleElectronGroup+['PS:NoBulkMCProd']),
+        ChainProp(name='HLT_e5_nopid_L1eEM5', groups=SingleElectronGroup+['PS:NoBulkMCProd']), #ATR-27264
 
         #  ATR-26311
         #  Validating/checking eFEX and primary electron trigger
         ChainProp(name='HLT_e26_etcut_L1EM22VHI', groups=SingleElectronGroup),
-        ChainProp(name='HLT_e26_lhtight_L1EM22VHI', groups=SingleElectronGroup,monGroups=['egammaMon:t0_tp']),
         ChainProp(name='HLT_e26_lhtight_ivarloose_L1EM22VH', groups=SingleElectronGroup),
 
         # Ringer development / validation also ATR-24384

@@ -1,71 +1,126 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 # Configuration of InDetBoundaryCheckTool package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
+
 def InDetBoundaryCheckToolCfg(flags, name='InDetBoundarySearchTool', **kwargs):
-  result = ComponentAccumulator()
+    result = ComponentAccumulator()
 
-  if 'SctSummaryTool' not in kwargs:
+    if 'SctSummaryTool' not in kwargs:
+        if flags.Detector.EnableSCT:
+            from SCT_ConditionsTools.SCT_ConditionsToolsConfig import (
+                SCT_ConditionsSummaryToolCfg)
+            kwargs.setdefault("SctSummaryTool", result.popToolsAndMerge(
+                SCT_ConditionsSummaryToolCfg(flags)))
+        else:
+            kwargs.setdefault("SctSummaryTool", None)
+
     if flags.Detector.EnableSCT:
-      from SCT_ConditionsTools.SCT_ConditionsToolsConfig import SCT_ConditionsSummaryToolCfg
-      kwargs.setdefault("SctSummaryTool", result.popToolsAndMerge(SCT_ConditionsSummaryToolCfg(flags)))
+        if "SCTDetElStatus" not in kwargs and not flags.Common.isOnline:
+            from SCT_ConditionsAlgorithms.SCT_ConditionsAlgorithmsConfig import  (
+                SCT_DetectorElementStatusAlgCfg)
+            result.merge(SCT_DetectorElementStatusAlgCfg(flags))
+            kwargs.setdefault("SCTDetElStatus", "SCTDetectorElementStatus")
+
+    if flags.Detector.EnablePixel:
+        if 'PixelLayerTool' not in kwargs:
+            from InDetConfig.InDetTestPixelLayerConfig import (
+                InDetTestPixelLayerToolCfg)
+            kwargs.setdefault("PixelLayerTool", result.popToolsAndMerge(
+                InDetTestPixelLayerToolCfg(flags)))
     else:
-      kwargs.setdefault("SctSummaryTool", None)
+        kwargs.setdefault("PixelLayerTool", "")
 
-  if flags.Detector.EnableSCT:
-    if "SCTDetElStatus" not in kwargs and not flags.Common.isOnline :
-      from SCT_ConditionsAlgorithms.SCT_ConditionsAlgorithmsConfig  import SCT_DetectorElementStatusAlgCfg
-      result.merge( SCT_DetectorElementStatusAlgCfg(flags) )
-      kwargs.setdefault("SCTDetElStatus", "SCTDetectorElementStatus" )
+    kwargs.setdefault("UsePixel", flags.Detector.EnablePixel)
+    kwargs.setdefault("UseSCT", flags.Detector.EnableSCT)
+    kwargs.setdefault("CheckBadSCT", flags.InDet.checkDeadElementsOnTrack)
 
-  if flags.Detector.EnablePixel :
-    if 'PixelLayerTool' not in kwargs :
-      from InDetConfig.InDetTestPixelLayerConfig import InDetTestPixelLayerToolCfg
-      kwargs.setdefault("PixelLayerTool", result.popToolsAndMerge(InDetTestPixelLayerToolCfg(flags)))
-  else :
-    kwargs.setdefault("PixelLayerTool", "")
+    result.setPrivateTools(
+        CompFactory.InDet.InDetBoundaryCheckTool(name, **kwargs))
+    return result
 
 
-  kwargs.setdefault("UsePixel", flags.Detector.EnablePixel)
-  kwargs.setdefault("UseSCT", flags.Detector.EnableSCT)
-  kwargs.setdefault("CheckBadSCT", flags.InDet.checkDeadElementsOnTrack)
+def CombinedMuonIDBoundaryCheckToolCfg(
+        flags, name="CombinedMuonIDBoundaryCheckTool", **kwargs):
+    result = ComponentAccumulator()
 
-  result.setPrivateTools(CompFactory.InDet.InDetBoundaryCheckTool(name, **kwargs))
-  return result
+    if flags.Detector.EnablePixel:
+        if 'PixelLayerTool' not in kwargs:
+            from InDetConfig.InDetTestPixelLayerConfig import (
+                CombinedMuonPixelLayerToolCfg)
+            kwargs.setdefault("PixelLayerTool", result.popToolsAndMerge(
+                CombinedMuonPixelLayerToolCfg(flags)))
+    else:
+        kwargs.setdefault("PixelLayerTool", "")
 
-def InDetTrigBoundaryCheckToolCfg(flags, name = "InDetTrigBoundaryCheckTool", **kwargs):
-  acc = ComponentAccumulator()
-  from SCT_ConditionsTools.SCT_ConditionsToolsConfig import SCT_ConditionsSummaryToolCfg
+    result.setPrivateTools(result.popToolsAndMerge(
+        InDetBoundaryCheckToolCfg(flags, name, **kwargs)))
+    return result
 
-  kwargs.setdefault("SCTDetElStatus", "")
-  kwargs.setdefault("SctSummaryTool", acc.popToolsAndMerge(SCT_ConditionsSummaryToolCfg(flags, withFlaggedCondTool=False,withTdaqTool=False)))
 
-  from InDetConfig.InDetTestPixelLayerConfig import InDetTrigTestPixelLayerToolCfg
-  kwargs.setdefault("PixelLayerTool", acc.popToolsAndMerge(InDetTrigTestPixelLayerToolCfg(flags)))
+def InDetTrigBoundaryCheckToolCfg(
+        flags, name="InDetTrigBoundaryCheckTool", **kwargs):
+    acc = ComponentAccumulator()
+    from SCT_ConditionsTools.SCT_ConditionsToolsConfig import (
+        SCT_ConditionsSummaryToolCfg)
 
-  acc.setPrivateTools(acc.popToolsAndMerge(
-    InDetBoundaryCheckToolCfg(flags, name=name, **kwargs)))
-  return acc
+    kwargs.setdefault("SCTDetElStatus", "")
+    kwargs.setdefault("SctSummaryTool", acc.popToolsAndMerge(
+        SCT_ConditionsSummaryToolCfg(flags,
+                                     withFlaggedCondTool=False,
+                                     withTdaqTool=False)))
+
+    from InDetConfig.InDetTestPixelLayerConfig import (
+        InDetTrigTestPixelLayerToolCfg)
+    kwargs.setdefault("PixelLayerTool", acc.popToolsAndMerge(
+        InDetTrigTestPixelLayerToolCfg(flags)))
+
+    acc.setPrivateTools(acc.popToolsAndMerge(
+        InDetBoundaryCheckToolCfg(flags, name, **kwargs)))
+    return acc
+
+
+def CombinedMuonTrigIDBoundaryCheckToolCfg(
+        flags, name="CombinedMuonIDBoundaryCheckTool", **kwargs):
+    result = ComponentAccumulator()
+
+    if flags.Detector.EnablePixel:
+        if 'PixelLayerTool' not in kwargs:
+            from InDetConfig.InDetTestPixelLayerConfig import (
+                CombinedMuonTrigPixelLayerToolCfg)
+            kwargs.setdefault("PixelLayerTool", result.popToolsAndMerge(
+                CombinedMuonTrigPixelLayerToolCfg(flags)))
+    else:
+        kwargs.setdefault("PixelLayerTool", "")
+
+    result.setPrivateTools(result.popToolsAndMerge(
+        InDetTrigBoundaryCheckToolCfg(flags, name, **kwargs)))
+    return result
+
 
 def ITkBoundaryCheckToolCfg(flags, name='ITkBoundaryCheckTool', **kwargs):
-  result = ComponentAccumulator()
+    result = ComponentAccumulator()
 
-  if 'SctSummaryTool' not in kwargs:
-    if flags.Detector.EnableITkStrip:
-      from SCT_ConditionsTools.ITkStripConditionsToolsConfig import ITkStripConditionsSummaryToolCfg
-      kwargs.setdefault("SctSummaryTool", result.popToolsAndMerge(ITkStripConditionsSummaryToolCfg(flags)))
-    else:
-      kwargs.setdefault("SctSummaryTool", None)
+    if 'SctSummaryTool' not in kwargs:
+        if flags.Detector.EnableITkStrip:
+            from SCT_ConditionsTools.ITkStripConditionsToolsConfig import (
+                ITkStripConditionsSummaryToolCfg)
+            kwargs.setdefault("SctSummaryTool", result.popToolsAndMerge(
+                ITkStripConditionsSummaryToolCfg(flags)))
+        else:
+            kwargs.setdefault("SctSummaryTool", None)
 
-  if 'PixelLayerTool' not in kwargs :
-    from InDetConfig.InDetTestPixelLayerConfig import ITkTestPixelLayerToolCfg
-    kwargs.setdefault("PixelLayerTool", result.popToolsAndMerge(ITkTestPixelLayerToolCfg(flags)))
+    if 'PixelLayerTool' not in kwargs:
+        from InDetConfig.InDetTestPixelLayerConfig import (
+            ITkTestPixelLayerToolCfg)
+        kwargs.setdefault("PixelLayerTool", result.popToolsAndMerge(
+            ITkTestPixelLayerToolCfg(flags)))
 
-  kwargs.setdefault("UsePixel", flags.Detector.EnableITkPixel)
-  kwargs.setdefault("UseSCT", flags.Detector.EnableITkStrip)
-  kwargs.setdefault("CheckBadSCT", False)
+    kwargs.setdefault("UsePixel", flags.Detector.EnableITkPixel)
+    kwargs.setdefault("UseSCT", flags.Detector.EnableITkStrip)
+    kwargs.setdefault("CheckBadSCT", False)
 
-  indet_boundary_check_tool = CompFactory.InDet.InDetBoundaryCheckTool(name, **kwargs)
-  result.setPrivateTools(indet_boundary_check_tool)
-  return result
+    result.setPrivateTools(
+        CompFactory.InDet.InDetBoundaryCheckTool(name, **kwargs))
+    return result

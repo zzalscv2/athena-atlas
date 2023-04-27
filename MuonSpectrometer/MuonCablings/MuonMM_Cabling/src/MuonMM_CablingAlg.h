@@ -16,7 +16,6 @@
 #include "GaudiKernel/IChronoStatSvc.h"
 #include "MuonCablingData/MicroMega_CablingMap.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
-#include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 
@@ -37,10 +36,6 @@ class MuonMM_CablingAlg : public AthAlgorithm {
 
     Gaudi::Property<std::string> m_JSONFile{
         this, "JSONFile", "", "External path to read the cabling from"};
-
-    SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_muonManagerKey{
-        this, "MuonManagerKey", "MuonDetectorManager",
-        "MuonManager ReadKey for IOV Range intersection"};
 
     StatusCode loadCablingSchema(const std::string& payload,
                                  MicroMega_CablingMap& cabling_map) const;

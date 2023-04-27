@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileJetMonitorAlgorithm.h"
@@ -73,15 +73,8 @@ StatusCode TileJetMonitorAlgorithm::initialize() {
     m_eventCleaningTool.disable();
   }
 
-  m_passORKey = m_jetContainerKey.key()+"."+m_passORKey.key();
-  m_passJVTKey = m_jetContainerKey.key()+"."+m_passJVTKey.key();
-
   ATH_CHECK( m_jetContainerKey.initialize() );
   ATH_CHECK( m_caloCellContainerKey.initialize() );
-
-  ATH_CHECK( m_passORKey.initialize() );
-  ATH_CHECK( m_passJVTKey.initialize() );
-
 
   return StatusCode::SUCCESS;
 }
@@ -420,15 +413,17 @@ bool TileJetMonitorAlgorithm::isGoodEvent(const EventContext& ctx) const {
   std::unique_ptr< xAOD::JetContainer > jetsCopy(jetsSC.first);
   std::unique_ptr< xAOD::ShallowAuxContainer > jetsCopyAux(jetsSC.second);
 
-  SG::WriteDecorHandle<xAOD::JetContainer, char> passORHandle(m_passORKey, ctx);
-  SG::WriteDecorHandle<xAOD::JetContainer, char> passJVTHandle(m_passJVTKey, ctx);
+  // We're attaching decorations here to a temporary object that
+  // is not recorded, so we shouldn't use a WriteDecorHandle.
+  static const SG::AuxElement::Decorator<char> passOR ("passOR");
+  static const SG::AuxElement::Decorator<char> passJvt ("passJvt");
 
   int iJet = 0;
   for (auto jet : *jetsCopy) {
     ATH_MSG_DEBUG("Jet " << iJet << ", pT " << jet->pt()/1000.0 << " GeV, eta " 
 		  << jet->eta());
-    passJVTHandle(*jet) = passesJvt(*jet);
-    passORHandle(*jet) = true;
+    passJvt(*jet) = passesJvt(*jet);
+    passOR(*jet) = true;
     ATH_MSG_DEBUG("... done with jet " << iJet);
     ++iJet;
   }

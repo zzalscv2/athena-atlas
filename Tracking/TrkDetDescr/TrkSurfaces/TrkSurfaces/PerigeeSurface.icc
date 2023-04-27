@@ -4,9 +4,12 @@
 
 namespace Trk {
 
-inline bool PerigeeSurface::operator==(const PerigeeSurface& sf) const
+inline bool PerigeeSurface::operator==(const PerigeeSurface& persf) const
 {
-  return *this == static_cast<const Surface& >(sf);
+  if (this == &persf){
+    return true;
+  }
+  return (center() == persf.center());
 }
 
 /** Return the surface type */

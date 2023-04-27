@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_GeoModel/SCT_FwdWheel.h"
@@ -55,8 +55,10 @@ SCT_FwdWheel::SCT_FwdWheel(const std::string & name,
                            InDetDD::SCT_DetectorManager* detectorManager,
                            SCT_GeometryManager* geometryManager,
                            SCT_MaterialManager* materials,
-                           GeoModelIO::ReadGeoModel* sqliteReader)
-  : SCT_UniqueComponentFactory(name, detectorManager, geometryManager, materials, sqliteReader),
+                           GeoModelIO::ReadGeoModel* sqliteReader,
+                           std::shared_ptr<std::map<std::string, GeoFullPhysVol*>>        mapFPV,
+                           std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX)
+  : SCT_UniqueComponentFactory(name, detectorManager, geometryManager, materials, sqliteReader, mapFPV, mapAX),
     m_iWheel(iWheel), 
     m_endcap(ec),
     m_modules(modules)
@@ -135,8 +137,7 @@ SCT_FwdWheel::preBuild()
     for (int iRing = 0; iRing < m_numRings; iRing++){
         std::string ringName = "Ring"+intToString(iRing)+"For"+getName();
         int ringType = m_ringType[iRing];
-        m_rings.push_back(std::make_unique<SCT_FwdRing>(ringName, m_modules[ringType], m_iWheel, iRing, m_endcap,
-                                                        m_detectorManager, m_geometryManager, m_materials, m_sqliteReader));
+        m_rings.push_back(std::make_unique<SCT_FwdRing>(ringName, m_modules[ringType], m_iWheel, iRing, m_endcap,m_detectorManager, m_geometryManager, m_materials, m_sqliteReader, m_mapFPV,m_mapAX));
     }
     
     if(m_sqliteReader) return nullptr;

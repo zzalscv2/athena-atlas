@@ -29,7 +29,7 @@ protected:
   void fillEperSamplingPFO(const xAOD::Jet &jet, std::vector<float> & ePerSampling ) const ;
   void fillEperSamplingFE(const xAOD::Jet &jet, std::vector<float> & ePerSampling ) const ;
   void fillEperSamplingFEClusterBased(const xAOD::Jet &jet, std::vector<float> & ePerSampling ) const ;
-  bool isInVector(const std::string key, const std::vector<std::string> calculations);
+  bool isInVector(const std::string& key, const std::vector<std::string>& calculations);
 
 private:
   Gaudi::Property<std::vector<std::string> > m_calculationNames{this, "Calculations", {}, "Name of calo quantities to compute and add as decorations"};

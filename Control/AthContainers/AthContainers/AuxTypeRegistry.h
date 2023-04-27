@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/AuxTypeRegistry.h
@@ -449,6 +449,16 @@ private:
    */
   static std::string makeKey (const std::string& name,
                               const std::string& clsname);
+
+
+  /**
+   * @brief Check for valid variable name.
+   * @param name Name to check.
+   *
+   * Require that NAME be not empty, contains only alphanumeric characters plus
+   * underscore, and first character is not a digit.
+   */
+  static bool checkName (const std::string& s);
 
 
   /// Hold information about one aux data item.

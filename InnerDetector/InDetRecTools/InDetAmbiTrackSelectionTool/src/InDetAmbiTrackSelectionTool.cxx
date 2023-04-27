@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -39,19 +39,9 @@ InDet::InDetAmbiTrackSelectionTool::InDetAmbiTrackSelectionTool(const std::strin
 
 StatusCode InDet::InDetAmbiTrackSelectionTool::initialize()
 {
-  if (m_IBLParameterSvc.retrieve().isFailure()) {
-    ATH_MSG_WARNING( "Could not retrieve IBLParameterSvc");
-  } else {
-    m_IBLParameterSvc->setBoolParameters(m_doPixelClusterSplitting.value(), "doPixelClusterSplitting");
-  }
-
   // Get segment selector tool
   //
-  if (m_parameterization){
-    ATH_CHECK(m_selectortool.retrieve());
-  } else {
-    m_selectortool.disable(); 
-  }
+  ATH_CHECK(m_selectortool.retrieve(DisableTool{!m_parameterization}));
   ATH_CHECK(detStore()->retrieve(m_detID, "SiliconID" ));
   ATH_MSG_DEBUG( "initialize() successful" );
 

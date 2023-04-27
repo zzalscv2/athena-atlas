@@ -174,7 +174,7 @@ StatusCode DQTGlobalWZFinderAlg::fillHistograms( const EventContext& ctx ) const
      ATH_MSG_DEBUG("Start muon selection");
      static const SG::AuxElement::Accessor<float> aptc20("ptcone20");
 
-     for (const auto &muon : *muons){
+     for (const xAOD::Muon* muon : *muons){
        auto muTrk = (muon)->primaryTrackParticle();
        float d0sig;
        if (!muTrk) {
@@ -619,7 +619,7 @@ void DQTGlobalWZFinderAlg::doEleContainerTP(std::vector<const xAOD::Electron*>& 
       }
     }
 
-    for (const auto& photon : *photons) {
+    for (const xAOD::Photon* photon : *photons) {
       auto photonp4(photon->p4());
       auto mass = Scalar("mass", (tagElp4+photonp4).M());
 
@@ -892,7 +892,7 @@ void DQTGlobalWZFinderAlg::doMuonTruthEff(std::vector<const xAOD::Muon*>& goodmu
      return;
    }
    auto match = Monitored::Scalar("match", 0);
-   for (const auto& truthmu : *vtruth) {
+   for (const xAOD::TruthParticle* truthmu : *vtruth) {
      if (truthmu->abseta() > m_muonMaxEta || truthmu->pt() < m_muonPtCut*GeV) {
        continue;
      }
@@ -1062,7 +1062,7 @@ void DQTGlobalWZFinderAlg::doMuonInDetTP(std::vector<const xAOD::Muon*>& goodmuo
     if (!matched) continue;
     auto tagmup4(tagmu->p4());
     // For Every MS track....
-    for (const auto& trk : *msTracks) {
+    for (const xAOD::TrackParticle* trk : *msTracks) {
       if (trk->pt() < m_muonPtCut*GeV || std::abs(trk->eta()) > m_muonMaxEta)
         continue;
       if (std::abs((trk->z0()+trk->vz()-pVtx->z())*std::sin(trk->theta())) > 2*mm)
@@ -1084,7 +1084,7 @@ void DQTGlobalWZFinderAlg::doMuonInDetTP(std::vector<const xAOD::Muon*>& goodmuo
       auto LB = Scalar("LB", thisEventInfo->lumiBlock());
 
       // for all ID tracks
-      for (const auto& mu2 : *idTracks) {
+      for (const xAOD::TrackParticle* mu2 : *idTracks) {
         auto idtrkp4(mu2->p4());
         auto mstrkp4(trk->p4());
 

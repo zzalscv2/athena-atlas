@@ -44,7 +44,7 @@ class ParametersT;
  @author Andreas.Salzburger@cern.ch
  @author Christos Anastopoulos (Thread safety and interface cleanup)
  @author Shaun Roe (interface cleanup)
- 
+
  */
 
 class StraightLineSurface : public Surface
@@ -88,13 +88,11 @@ public:
 
   /** Equality operator*/
   virtual bool operator==(const Surface& sf) const override;
-
-  // Needed to prevent ambiguities with c++20.
   bool operator==(const StraightLineSurface& cf) const;
 
   /** Implicit constructor*/
   virtual StraightLineSurface* clone() const override final;
-  
+
   /** Use the Surface as a ParametersBase constructor, from local parameters -
    * charged */
   virtual Surface::ChargedTrackParametersUniquePtr createUniqueTrackParameters(

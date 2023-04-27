@@ -67,13 +67,13 @@ if __name__=='__main__':
   fEff = args.MCFilterEfficiency
   dset = args.MCDatasetName
   if ConfigFlags.Input.isMC and xsec == 0: # If the input file is MC then make sure we have the needed info
-    from .RatesGetCrossSectionMC import GetCrossSectionAMI
+    from RatesAnalysis.GetCrossSectionAMITool import GetCrossSectionAMI
     amiTool = GetCrossSectionAMI()
     if dset == "": # Can we get the dataset name from the input file path?
       dset = amiTool.getDatasetNameFromPath(ConfigFlags.Input.Files[0])
     amiTool.queryAmi(dset)
-    xsec = amiTool.getCrossSection()
-    fEff = amiTool.getFilterEfficiency()
+    xsec = amiTool.crossSection
+    fEff = amiTool.filterEfficiency
 
   ebw = CompFactory.EnhancedBiasWeighter('EnhancedBiasRatesTool')
   ebw.RunNumber = ConfigFlags.Input.RunNumber[0]

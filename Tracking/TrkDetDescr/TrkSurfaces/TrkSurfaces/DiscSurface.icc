@@ -3,9 +3,15 @@
 */
 
 namespace Trk {
-inline bool DiscSurface::operator==(const DiscSurface& sf) const
+inline bool DiscSurface::operator==(const DiscSurface& dsf) const
 {
-  return *this == static_cast<const Surface& >(sf);
+  if (this == &dsf){
+    return true;
+  }
+  bool transfEqual(transform().isApprox(dsf.transform(), 10e-8));
+  bool centerEqual = (transfEqual) ? (center() == dsf.center()) : false;
+  bool boundsEqual = (centerEqual) ? (bounds() == dsf.bounds()) : false;
+  return boundsEqual;
 }
 
 /** Return the surface type */

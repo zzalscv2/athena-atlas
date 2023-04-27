@@ -11,10 +11,8 @@
 
 #include "EventPrimitives/EventPrimitives.h"
 //
-#include <iostream>
 #include <vector>
-
-#include "cmath"
+#include <cmath>
 
 /** Event primitives helper functions
  @author  Niels van Eldik

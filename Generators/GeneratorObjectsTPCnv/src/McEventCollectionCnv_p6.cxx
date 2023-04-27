@@ -434,6 +434,9 @@ void McEventCollectionCnv_p6::transToPers( const McEventCollection* transObj,
     {
      GenEvent_p6& persEvt = persObj->m_genEvents.back();
      std::map< std::string, std::map<int, std::shared_ptr<HepMC3::Attribute> > > e_atts = genEvt->attributes();
+     persEvt.m_e_attribute_name.clear();
+     persEvt.m_e_attribute_id.clear();
+     persEvt.m_e_attribute_string.clear();
      for (auto& attmap: e_atts) {
        if (attmap.first == "barcodes") continue;
        if (attmap.first == "barcode") continue;
@@ -455,9 +458,6 @@ void McEventCollectionCnv_p6::transToPers( const McEventCollection* transObj,
        if (attmap.first == "GenCrossSection") continue;
        if (attmap.first == "GenPdfInfo") continue;
        if (attmap.first == "GenHeavyIon") continue;
-       persEvt.m_e_attribute_name.clear();
-       persEvt.m_e_attribute_id.clear();
-       persEvt.m_e_attribute_string.clear();
        for (auto& att: attmap.second) {
          persEvt.m_e_attribute_name.push_back(attmap.first);
          persEvt.m_e_attribute_id.push_back(att.first);

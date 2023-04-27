@@ -4,9 +4,15 @@
 
 namespace Trk {
 
-inline bool CylinderSurface::operator==(const CylinderSurface& sf) const
+inline bool CylinderSurface::operator==(const CylinderSurface& csf) const
 {
-  return *this == static_cast<const Surface& >(sf);
+  if (this == &csf){
+    return true;
+  }
+  bool transfEqual(transform().isApprox(csf.transform(), 10e-8));
+  bool centerEqual = (transfEqual) ? (center() == csf.center()) : false;
+  bool boundsEqual = (centerEqual) ? (bounds() == csf.bounds()) : false;
+  return boundsEqual;
 }
 
 /** Return the surface type */

@@ -136,9 +136,7 @@ StatusCode TRTOverlay::execute(const EventContext& ctx) const
   // views.
   DataPool<TRT_LoLumRawData> dataItemsPool(ctx);
   //It resizes but lets reserve already quite a few
-  //Max number of straws is 350847
-  // but lets not assume 100% occupancy ~ 80%
-  dataItemsPool.reserve(280000);
+  dataItemsPool.reserve(300000);
 
   // Creating output RDO container
   SG::WriteHandle<TRT_RDO_Container> outputContainer(m_outputKey, ctx);

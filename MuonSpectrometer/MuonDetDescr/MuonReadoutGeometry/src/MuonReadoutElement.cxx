@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -8,8 +8,6 @@
 ***************************************************************************/
 
 #include "MuonReadoutGeometry/MuonReadoutElement.h"
-
-#include <TString.h>  // for Form
 
 #include "GeoModelKernel/GeoDefinitions.h"
 #include "GeoModelKernel/GeoPhysVol.h"
@@ -20,43 +18,46 @@
 #include "TrkSurfaces/CylinderBounds.h"
 #include "TrkSurfaces/StraightLineSurface.h"
 
+namespace {
+    std::string to_string(const Trk::DetectorElemType type ) {
+        if (type == Trk::DetectorElemType::Mdt) return "Mdt";
+        else if (type == Trk::DetectorElemType::Rpc) return "Rpc";
+        else if (type == Trk::DetectorElemType::Tgc) return "Tgc";
+        else if (type == Trk::DetectorElemType::sTgc) return "sTgc";
+        else if (type == Trk::DetectorElemType::MM) return "Mm";
+        else if (type == Trk::DetectorElemType::Csc) return "Csc";
+        return "Unknown";
+    }
+}
 namespace MuonGM {
 
-    MuonReadoutElement::MuonReadoutElement(GeoVFullPhysVol* pv, int zi, int fi, bool is_mirrored, MuonDetectorManager* mgr) :
-        TrkDetElementBase(pv), m_zi(zi), m_fi(fi), m_mirrored(is_mirrored), m_muon_mgr(mgr) {}
+    MuonReadoutElement::MuonReadoutElement(GeoVFullPhysVol* pv, MuonDetectorManager* mgr, Trk::DetectorElemType detType) :
+        TrkDetElementBase(pv), AthMessaging{to_string(detType)+"MuonReadoutElement"}, m_type{detType}, m_muon_mgr{mgr} {
+            if (!m_idHelperSvc.retrieve().isSuccess()) {
+                ATH_MSG_FATAL("Failed to retrieve the MuonIdHelperSvc");
+                throw std::runtime_error("Invalid MuonIdHelperSvc");
+            }
+        }
 
-    MuonReadoutElement::~MuonReadoutElement() {}
+    MuonReadoutElement::~MuonReadoutElement() = default;
 
-    const Amg::Vector3D MuonReadoutElement::globalPosition() const {
-        Amg::Transform3D xf = absTransform();
-        return xf * Amg::Vector3D(0., 0., 0.);
-    }
-
-    bool MuonReadoutElement::barrel() const {
-        if (m_statname[0] == 'B')
-            return true;
-        else
-            return false;
-    }
-
-    bool MuonReadoutElement::endcap() const { return !barrel(); }
+    const Amg::Vector3D MuonReadoutElement::globalPosition() const { return absTransform().translation(); }
 
     bool MuonReadoutElement::largeSector() const {
         // this doesn't apply to TGC
         if(m_statname.size() >= 3){
-        char c = m_statname[2];
-        if (c == 'L')
-            return true;
-        else if (c == 'S')
-            return false;
-        else {
-            if (c == 'E' || c == 'F' || c == 'G') return false;
-            if (c == 'M' || c == 'R') return true;
+            char c = m_statname[2];
+            if (c == 'L')
+                return true;
+            else if (c == 'S')
+                return false;
+            else {
+                if (c == 'E' || c == 'F' || c == 'G') return false;
+                if (c == 'M' || c == 'R') return true;
+            }
         }
-        }
-        throw std::runtime_error(
-            Form("File: %s, Line: %d\nMuonReadoutElement::largeSector() - is this Station in a largeSector ???? - DEFAULT answer is NO",
-                 __FILE__, __LINE__));
+        ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" largeSector() - is this station a larger sector answer is no for readout element "<<m_idHelperSvc->toStringDetEl(identify()));
+        throw std::runtime_error("Unknown sector");
         return false;
     }
 
@@ -80,7 +81,7 @@ namespace MuonGM {
         std::string name = (myphysvol->getLogVol())->getName();
         if ((npos = name.find("Station")) != std::string::npos) {
             pStat = myphysvol;
-        } else
+        } else {
             for (unsigned int k = 0; k < 10; k++) {
                 pStat = myphysvol->getParent();
                 if (pStat == PVConstLink(nullptr)) break;
@@ -88,7 +89,7 @@ namespace MuonGM {
                 if ((npos = name.find("Station")) != std::string::npos) { break; }
                 myphysvol = pStat;
             }
-
+        }
         m_parentStationPV = pStat;
         setIndexOfREinMuonStation();
     }
@@ -100,8 +101,8 @@ namespace MuonGM {
     void MuonReadoutElement::setIndexOfREinMuonStation() {
         PVConstLink par = parentStationPV();
         if (par == PVConstLink(nullptr)) {
-            throw std::runtime_error(
-                Form("File: %s, Line: %d\nMuonReadoutElement::setIndexOfREinMuonStation() - parent station not found", __FILE__, __LINE__));
+            ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" No parent station found for "<<m_idHelperSvc->toStringDetEl(identify()));
+            throw std::runtime_error("Parent station is a nullptr");
         }
         Query<unsigned int> c = par->indexOf(getMaterialGeom());
         if (c.isValid()) {
@@ -113,68 +114,79 @@ namespace MuonGM {
     Amg::Transform3D MuonReadoutElement::toParentStation() const {
         PVConstLink par = parentStationPV();
         if (par == PVConstLink(nullptr)) {
-            throw std::runtime_error(
-                Form("File: %s, Line: %d\nMuonReadoutElement::toParentStation() - parent not found", __FILE__, __LINE__));
+            ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" No parent station found for "<<m_idHelperSvc->toStringDetEl(identify()));
+            throw std::runtime_error("Parent station is a nullptr");
         }
 
-        GeoTrf::Transform3D par_to_child = GeoTrf::Transform3D::Identity();
-
-        if (m_indexOfREinMuonStation >= 0) par_to_child = par->getXToChildVol((unsigned int)m_indexOfREinMuonStation);
-        return par_to_child;
+        if (m_indexOfREinMuonStation >= 0) return par->getXToChildVol((unsigned int)m_indexOfREinMuonStation);
+        return GeoTrf::Transform3D::Identity();
     }
 
     void MuonReadoutElement::setParentMuonStation(const MuonStation* mstat) { m_parentMuonStation = mstat; }
 
     const MuonStation* MuonReadoutElement::parentMuonStation() const { return m_parentMuonStation; }
 
-    double MuonReadoutElement::parentStationRsize() const { return parentMuonStation()->Rsize(); }
-    double MuonReadoutElement::parentStationSsize() const { return parentMuonStation()->Ssize(); }
-    double MuonReadoutElement::parentStationZsize() const { return parentMuonStation()->Zsize(); }
-    double MuonReadoutElement::parentStationLongRsize() const { return parentMuonStation()->LongRsize(); }
-    double MuonReadoutElement::parentStationLongSsize() const { return parentMuonStation()->LongSsize(); }
-    double MuonReadoutElement::parentStationLongZsize() const { return parentMuonStation()->LongZsize(); }
-
-    double MuonReadoutElement::parentStation_s_amdb() const {
-        Amg::Vector3D scentre = parentMuonStationPos();
-        double phi = (getStationPhi() - 1) * M_PI / 4.;
-        if (smallSector()) phi = phi + M_PI / 8.;
-        Amg::Vector3D Saxis = Amg::Vector3D(-sin(phi), cos(phi), 0.);
-        Amg::Vector3D scVec = Amg::Vector3D(scentre.x(), scentre.y(), 0.);
-        double s = scVec.x() * Saxis.x() + scVec.y() * Saxis.y();
-        return s;
-    }
-
     Amg::Vector3D MuonReadoutElement::parentMuonStationPos() const {
-        Amg::Transform3D tr = Amg::CLHEPTransformToEigen(parentMuonStation()->getTransform());
-        Amg::Vector3D scentre = tr * Amg::Vector3D(0., 0., 0.);
-        return scentre;
+        return Amg::CLHEPTransformToEigen(parentMuonStation()->getTransform()).translation();       
     }
 
-    const Amg::Vector3D MuonReadoutElement::AmdbLRSToGlobalCoords(Amg::Vector3D x) const {
-        HepGeom::Point3D<double> p(x[0], x[1], x[2]);
-        HepGeom::Transform3D msToGlobal = parentMuonStation()->getTransform();             // native_MuonStation to global
-        const HepGeom::Transform3D* msToAmdb = parentMuonStation()->getNativeToAmdbLRS();  // native_MuonStation to Amdb local (szt)
-        HepGeom::Point3D<double> p2 = msToGlobal * (msToAmdb->inverse()) * p;
-        return Amg::Vector3D(p2.x(), p2.y(), p2.z());
+    Amg::Vector3D MuonReadoutElement::AmdbLRSToGlobalCoords(const Amg::Vector3D& x) const {       
+        return AmdbLRSToGlobalTransform() * x;
     }
 
-    const Amg::Transform3D MuonReadoutElement::AmdbLRSToGlobalTransform() const {
+    Amg::Transform3D MuonReadoutElement::AmdbLRSToGlobalTransform() const {
         HepGeom::Transform3D msToGlobal = parentMuonStation()->getTransform();             // native_MuonStation to global
         const HepGeom::Transform3D* msToAmdb = parentMuonStation()->getNativeToAmdbLRS();  // native_MuonStation to Amdb local (szt)
         return Amg::CLHEPTransformToEigen(msToGlobal * (msToAmdb->inverse()));
     }
 
-    const Amg::Vector3D MuonReadoutElement::GlobalToAmdbLRSCoords(Amg::Vector3D x) const {
-        HepGeom::Point3D<double> p(x[0], x[1], x[2]);
-        HepGeom::Transform3D msToGlobal = parentMuonStation()->getTransform();             // native_MuonStation to global
-        const HepGeom::Transform3D* msToAmdb = parentMuonStation()->getNativeToAmdbLRS();  // native_MuonStation to Amdb local (szt)
-        HepGeom::Point3D<double> p2 = (*msToAmdb) * (msToGlobal.inverse()) * p;
-        return Amg::Vector3D(p2.x(), p2.y(), p2.z());
+    Amg::Vector3D MuonReadoutElement::GlobalToAmdbLRSCoords(const Amg::Vector3D& x) const {       
+        return GlobalToAmdbLRSTransform() * x;
     }
 
-    const Amg::Transform3D MuonReadoutElement::GlobalToAmdbLRSTransform() const {
+    Amg::Transform3D MuonReadoutElement::GlobalToAmdbLRSTransform() const {
         HepGeom::Transform3D msToGlobal = parentMuonStation()->getTransform();             // native_MuonStation to global
         const HepGeom::Transform3D* msToAmdb = parentMuonStation()->getNativeToAmdbLRS();  // native_MuonStation to Amdb local (szt)
         return Amg::CLHEPTransformToEigen((*msToAmdb) * (msToGlobal.inverse()));
     }
+    void MuonReadoutElement::setIdentifier(const Identifier& id) {
+        m_id = id;
+        if (!m_idHelperSvc->isMuon(id)) {
+            ATH_MSG_FATAL("The Identifier "<<m_idHelperSvc->toString(id)<<" is not a muon one.");
+            throw std::runtime_error("Invalid Identifier set");
+        }
+        auto loadIdFields = [this](const MuonIdHelper& idHelper) {
+            if (idHelper.get_detectorElement_hash(m_id, m_detectorElIdhash) || 
+                static_cast<unsigned int>(m_detectorElIdhash) >= idHelper.detectorElement_hash_max()){
+                 ATH_MSG_FATAL("Failed to get a valid detector Element hash for "<<m_idHelperSvc->toStringDetEl(identify())
+                                <<". Extracted hash "<<m_detectorElIdhash<<". Maximum allowed "<<idHelper.detectorElement_hash_max());
+                 throw std::runtime_error("Invalid Detector Element Hash");
+            }
+            if (idHelper.get_module_hash(m_id, m_idhash) || 
+                static_cast<unsigned int>(m_idhash) >= idHelper.module_hash_max()){
+                 ATH_MSG_FATAL("Failed to get a valid module hash for "<<m_idHelperSvc->toStringDetEl(identify())
+                                <<". Extracted hash "<<m_idhash<<". Maximum allowed "<<idHelper.module_hash_max());
+                 throw std::runtime_error("Invalid Module Hash");
+            }
+            m_stIdx = idHelper.stationName(identify());
+            m_eta = idHelper.stationEta(identify());
+            m_phi = idHelper.stationPhi(identify());
+        };
+        if (m_idHelperSvc->isMdt(identify())) loadIdFields(m_idHelperSvc->mdtIdHelper());
+        else if (m_idHelperSvc->isRpc(identify())) loadIdFields(m_idHelperSvc->rpcIdHelper());
+        else if (m_idHelperSvc->isTgc(identify())) loadIdFields(m_idHelperSvc->tgcIdHelper());
+        else if (m_idHelperSvc->isCsc(identify())) loadIdFields(m_idHelperSvc->cscIdHelper());
+        else if (m_idHelperSvc->issTgc(identify())) loadIdFields(m_idHelperSvc->stgcIdHelper());
+        else if (m_idHelperSvc->isMM(identify())) loadIdFields(m_idHelperSvc->mmIdHelper());
+    }
+    void MuonReadoutElement::setTechnologyName(const std::string& str) { m_techname = str; }
+    void MuonReadoutElement::setStationName(const std::string& str) { m_statname = str; }
+    void MuonReadoutElement::setStationS(double v) { m_stationS = v; }
+    void MuonReadoutElement::setLongSsize(double v) { m_LongSsize = v; }
+    void MuonReadoutElement::setLongRsize(double v) { m_LongRsize = v; }
+    void MuonReadoutElement::setLongZsize(double v) { m_LongZsize = v; }
+    void MuonReadoutElement::setSsize(double v) { m_Ssize = v; }
+    void MuonReadoutElement::setRsize(double v) { m_Rsize = v; }
+    void MuonReadoutElement::setZsize(double v) { m_Zsize = v; }
+    void MuonReadoutElement::setCachingFlag(int value) { m_caching = value; }
 }  // namespace MuonGM

@@ -19,6 +19,7 @@
 #include "PathResolver/PathResolver.h"
 #include "SGTools/TransientAddress.h"
 #include "nlohmann/json.hpp"
+#include "AthenaKernel/IOVInfiniteRange.h"
 
 MuonMM_CablingAlg::MuonMM_CablingAlg(const std::string& name,
                                      ISvcLocator* pSvcLocator)
@@ -32,11 +33,6 @@ StatusCode MuonMM_CablingAlg::initialize() {
              .empty()));  // do not initialize if either an external json file
                           // is used to read the cabling map from or no folder
                           // to read the cabling from is specified
-    ATH_CHECK(m_muonManagerKey.initialize(
-        !m_JSONFile.value().empty() ||
-        m_readCablingKey.empty()));  // only intialize if either a database
-                                     // folder to read the cabling from or an
-                                     // external json file was defined
     ATH_CHECK(m_writeKey.initialize());
     ATH_CHECK(m_idHelperSvc.retrieve());
     return StatusCode::SUCCESS;
@@ -55,17 +51,8 @@ StatusCode MuonMM_CablingAlg::execute() {
                          "out of order.");
         return StatusCode::SUCCESS;
     }
-    if (!m_muonManagerKey.empty()) {
-        SG::ReadCondHandle<MuonGM::MuonDetectorManager> muonDetMgr{
-            m_muonManagerKey, ctx};
-        if (!muonDetMgr.isValid()) {
-            ATH_MSG_FATAL("Failed to retrieve the Muon detector manager "
-                          << m_muonManagerKey.fullKey());
-            return StatusCode::FAILURE;
-        }
-        writeHandle.addDependency(muonDetMgr);
-    }
-
+    writeHandle.addDependency(EventIDRange(IOVInfiniteRange::infiniteRunLB()));
+    
     std::unique_ptr<MicroMega_CablingMap> writeCdo{
         std::make_unique<MicroMega_CablingMap>(m_idHelperSvc.get())};
 

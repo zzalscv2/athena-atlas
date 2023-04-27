@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/exceptions_test.cxx
@@ -56,6 +56,7 @@ void test1()
   std::cout << SG::ExcInvalidThinningTarget(1234, "asd").what() << "\n";
   std::cout << SG::ExcBadIterSwap().what() << "\n";
   std::cout << SG::ExcAllocOwnership().what() << "\n";
+  std::cout << SG::ExcBadVarName("foo asd").what() << "\n";
 }
 
 
