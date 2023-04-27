@@ -7,6 +7,7 @@
 '''
 from TrigConfigSvc.TriggerConfigAccess import getHLTMenuAccess
 
+
 def TrigMBTS(configFlags):
     from AthenaMonitoring import AthMonitorCfgHelper
     monConfig = AthMonitorCfgHelper(configFlags, 'HLTMBTSMonitoringAlgMTflags')
@@ -36,7 +37,7 @@ def TrigMBTS(configFlags):
                                      xbins=MBTS_countsSideA+1, xmin=-0.5, xmax=MBTS_countsSideA+0.5)
         mbShiftGroup.defineHistogram('MBTS_C_hits', type='TH1I', title='MBTS hits side C; Entry rate; MBTS side C',
                                      xbins=MBTS_countsSideC+1, xmin=-0.5, xmax=MBTS_countsSideC+0.5)
-        mbShiftGroup.defineHistogram('MBTS_A_EWTime,MBTS_C_EWTime', type='TH2I', title='MBTS timing correlation',
+        mbShiftGroup.defineHistogram('MBTS_A_EWTime,MBTS_C_EWTime', type='TH2I', title='MBTS timing correlation; MBTS side A; MBTS side C',
                                      xbins=40, xmin=-80, xmax=80, ybins=40, ymin=-80, ymax=80)
         mbShiftGroup.defineHistogram('MBTS_A_hits,MBTS_C_hits', type='TH2I', title='MBTS hits correlation; MBTS side A; MBTS side C',
                                      xbins=MBTS_countsSideA+1, xmin=-0.5, xmax=MBTS_countsSideA+0.5, ybins=MBTS_countsSideC+1, ymin=-0.5, ymax=MBTS_countsSideC+0.5)
@@ -54,6 +55,11 @@ def TrigMBTS(configFlags):
         mbShiftGroup.defineHistogram('MBTS_channelID,MBTS_energy', type='TH2F', title='MBTS energy; Channel ID;MBTS energy [pC]; Entry rate',
                                      xbins=MBTS_countsSideA+MBTS_countsSideC, xmin=0, xmax=MBTS_countsSideA+MBTS_countsSideC, xlabels=list(channelLabels), ybins=100, ymin=-0.1, ymax=1.9)
 
+        mbShiftGroup.defineHistogram('MBTS_diff_timeMean', type='TH1F', title='Mean MBTS time difference between sides; MBTS time [ns]',
+                                     xbins=100, xmin=-100, xmax=100)
+        mbShiftGroup.defineHistogram('MBTS_diff_weightedTimeMean', type='TH1F', title='Energy weighted mean MBTS time difference between sides; MBTS time [ns]',
+                                     xbins=100, xmin=-100, xmax=100)
+
         mbExpGroup = monConfig.addGroup(alg, chain+'_expert',
                                         topPath='HLT/MBTSMon/'+chain+'/')
         mbExpGroup.defineHistogram(
@@ -70,6 +76,7 @@ def TrigMBTS(configFlags):
                                    title='Mean MBTS Time C side; MBTS time [ns]', xbins=100, xmin=-100, xmax=100)
 
     return monConfig.result()
+
 
 if __name__ == '__main__':
     # Setup logs
