@@ -176,7 +176,7 @@ StatusCode AFP_PixelHistoFiller::execute()
     
     int nTrks[m_nStations]={0};
     int nClusterHits[m_nStations]={0};
-    int nClusterHistPerPlane[m_nStations][m_nLayers]={0};
+    int nClusterHistPerPlane[m_nStations][m_nLayers]={{0}};
     
     for(const xAOD::AFPTrack* track: *afpTrackContainer){
         nTrks[track->stationID()]++;
