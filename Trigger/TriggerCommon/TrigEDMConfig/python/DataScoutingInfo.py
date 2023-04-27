@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger( __name__ )
@@ -15,7 +15,8 @@ CostMonDS, PhysicsTLA
 '''
 
 
-# Data scouting identifiers and the corresponding HLT result ROBFragment module IDs
+# Data scouting identifiers and the corresponding HLT result ROBFragment module IDs.
+# If you add new entries also add a corresponding entry to EventBuildingInfo.py.
 # WARNING: Never change the module IDs during data taking!
 # WARNING: ID=0 is reserved for full HLT result
 DataScoutingIdentifiers = {
