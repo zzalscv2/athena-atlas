@@ -93,10 +93,11 @@ def JETM3KernelCfg(ConfigFlags, name='JETM3Kernel', **kwargs):
     # Include inner detector tracks associated with photons
     JETM3PhotonTPThinningTool = acc.getPrimaryAndMerge(EgammaTrackParticleThinningCfg(
         ConfigFlags,
-        name                    = "JETM3PhotonTPThinningTool",
-        StreamName              = kwargs['StreamName'],
-        SGKey                   = "Photons",
-        InDetTrackParticlesKey  = "InDetTrackParticles"))
+        name                     = "JETM3PhotonTPThinningTool",
+        StreamName               = kwargs['StreamName'],
+        SGKey                    = "Photons",
+        InDetTrackParticlesKey   = "InDetTrackParticles",
+        GSFConversionVerticesKey = "GSFConversionVertices"))
 
     # Include inner detector tracks associated with taus
     JETM3TauTPThinningTool = acc.getPrimaryAndMerge(TauTrackParticleThinningCfg(

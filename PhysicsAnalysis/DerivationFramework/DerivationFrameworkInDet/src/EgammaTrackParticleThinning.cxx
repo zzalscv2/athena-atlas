@@ -238,6 +238,12 @@ DerivationFramework::EgammaTrackParticleThinning::setPhotonMasks(
   const xAOD::TrackParticleContainer* tps,
   const xAOD::TrackParticleContainer* gsfs) const
 {
+  if (m_gsfVtxSGKey.empty()) {
+    ATH_MSG_ERROR("Thinning track particles/vertices associated to photons"
+		  "but no conversion vertex key provided");
+    return;
+  }
+
   SG::ThinningHandle<xAOD::VertexContainer> importedGSFConversionVtx(
      m_gsfVtxSGKey, Gaudi::Hive::currentContext());
   const xAOD::VertexContainer* gsfVtxs = importedGSFConversionVtx.cptr();
