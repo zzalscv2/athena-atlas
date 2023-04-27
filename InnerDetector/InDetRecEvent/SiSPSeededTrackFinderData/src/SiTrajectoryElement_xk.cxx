@@ -2269,6 +2269,13 @@ void InDet::SiTrajectoryElement_xk::patternCovariances
 (const InDet::SiCluster* c,double& covX,double& covXY,double& covY) const
 {
   const Amg::MatrixX& v = c->localCovariance();
+  if (m_tools->useFastTracking() and m_stereo) {
+    // in fast tracking mode, endcap strip clusters use cluster covariance terms
+    covX=v(0,0);
+    covY=v(1,1);
+    covXY=v(1,0);
+    return;
+  }
   covX  = c->width().phiR(); 
   covX*=(covX*s_oneOverTwelve);  /// sigma ~pitch / sqrt(12)
   covXY = c->localCovariance()(1,0);
