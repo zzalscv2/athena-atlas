@@ -231,6 +231,7 @@ def EGAM5KernelCfg(ConfigFlags, name='EGAM5Kernel', **kwargs):
                     SGKey = 'Photons',
                     GSFTrackParticlesKey = 'GSFTrackParticles',
                     InDetTrackParticlesKey = 'InDetTrackParticles',
+                    GSFConversionVerticesKey = 'GSFConversionVertices',
                     SelectionString = 'Photons.pt > 0*GeV',
                     BestMatchOnly = True,
                     ConeSize = 0.3)
