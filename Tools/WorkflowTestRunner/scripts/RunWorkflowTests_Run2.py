@@ -33,7 +33,7 @@ def main():
         if not options.workflow or options.workflow is WorkflowType.MCOverlay:
             tests_to_run.append(OverlayTest("d1726", run, WorkflowType.MCOverlay, ["Overlay"], setup, options.extra_args))
         if not options.workflow or options.workflow is WorkflowType.DataOverlay:
-            tests_to_run.append(DataOverlayTest("d1590", run, WorkflowType.DataOverlay, ["Overlay"], setup, options.extra_args + " --conditionsTag CONDBR2-BLKPA-RUN2-10"))
+            tests_to_run.append(DataOverlayTest("d1590", run, WorkflowType.DataOverlay, ["Overlay"], setup, options.extra_args))
     elif options.pileup:
         if setup.parallel_execution:
             log.error("Parallel execution not supported for pile-up workflow")
