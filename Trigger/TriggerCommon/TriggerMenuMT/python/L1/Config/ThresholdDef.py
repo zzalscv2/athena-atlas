@@ -268,7 +268,8 @@ class ThresholdDef:
             XEThreshold('jXE%i' % thrV, 'jXE').setXE(get_threshold_cut('jXE', thrV))
 
         # ENERGY SPARES
-        for thrV in range(1,30):
+        # decrement jXE spares for addtional heavy ion jTE thresholds
+        for thrV in range(1,23):
             XEThreshold('jXESPARE%i' % thrV, 'jXE').setXE(thrVal_SPAREXE)
 
         jXE_cuts = [100]
@@ -281,7 +282,8 @@ class ThresholdDef:
             XEThreshold('jXEPerf%i' % thrV, 'jXE').setXE(get_threshold_cut('jXE', thrV))
 
         # jTE
-        for thrV in [200,]:
+        # additional heavy ion jTE threhsolds
+        for thrV in [200,600,1500,3000]:
             TEThreshold('jTE%i' % thrV, 'jTE').setTE(thrV)
 
         for thrV in [200,]:
@@ -290,10 +292,10 @@ class ThresholdDef:
         for thrV in [100,]:
             TEThreshold('jTEFWD%i' % thrV, 'jTE').setTE(thrV)
 
-        for thrV in [100,]:
+        for thrV in [100,5,1]:
             TEThreshold('jTEFWDA%i' % thrV, 'jTE').setTE(thrV)
 
-        for thrV in [100,]:
+        for thrV in [100,5,1]:
             TEThreshold('jTEFWDC%i' % thrV, 'jTE').setTE(thrV)
 
         # ATR-22344
