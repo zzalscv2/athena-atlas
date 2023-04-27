@@ -1,9 +1,9 @@
 #
-#  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
-@AccumulatorCache
+
 def TRT_GeoModelCfg(flags):
     from AtlasGeoModel.GeometryDBConfig import InDetGeometryDBSvcCfg
     db = InDetGeometryDBSvcCfg(flags)
@@ -43,6 +43,7 @@ def TRT_AlignmentCfg(flags):
     return acc
 
 
+@AccumulatorCache
 def TRT_SimulationGeometryCfg(flags):
     # main GeoModel config
     acc = TRT_GeoModelCfg(flags)
@@ -50,6 +51,7 @@ def TRT_SimulationGeometryCfg(flags):
     return acc
 
 
+@AccumulatorCache
 def TRT_ReadoutGeometryCfg(flags):
     # main GeoModel config
     acc = TRT_GeoModelCfg(flags)

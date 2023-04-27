@@ -1,7 +1,7 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
-@AccumulatorCache
+
 def PixelGeoModelCfg(flags):
     from AtlasGeoModel.GeometryDBConfig import InDetGeometryDBSvcCfg
     db = InDetGeometryDBSvcCfg(flags)
@@ -30,6 +30,7 @@ def PixelAlignmentCfg(flags):
         return PixelAlignCondAlgCfg(flags)
 
 
+@AccumulatorCache
 def PixelSimulationGeometryCfg(flags):
     # main GeoModel config
     acc = PixelGeoModelCfg(flags)
@@ -37,6 +38,7 @@ def PixelSimulationGeometryCfg(flags):
     return acc
 
 
+@AccumulatorCache
 def PixelReadoutGeometryCfg(flags):
     # main GeoModel config
     acc = PixelGeoModelCfg(flags)
