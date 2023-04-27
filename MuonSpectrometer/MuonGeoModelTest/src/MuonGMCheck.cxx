@@ -53,62 +53,7 @@ MuonGMCheck::MuonGMCheck(const std::string& name, ISvcLocator* pSvcLocator) : At
     m_cpu[0] = 0;
     m_cpu[1] = 0;
 
-    m_event_loop = 0;
-    declareProperty("EventLoopMode", m_event_loop);
-    m_minimal_checks = 1;
-    declareProperty("minimalChecks", m_minimal_checks);
-    m_check_first_last = 1;
-    declareProperty("check_first_last", m_check_first_last);
-    m_check_surfaces = 0;
-    m_check_surfaces_details = 0;
-    declareProperty("check_surfaces", m_check_surfaces);
-    declareProperty("check_surfaces_details", m_check_surfaces_details);
-    m_check_rpc_distToReadout = 0;
-    declareProperty("check_rpc_distToReadout", m_check_rpc_distToReadout);
-    m_check_blines = 0;
-    declareProperty("check_Blines", m_check_blines);
-
-    m_check_stgc = 0;
-    declareProperty("check_stgc", m_check_stgc);
-    m_check_mm = 0;
-    declareProperty("check_mm", m_check_mm);
-    m_check_mdt = 0;
-    declareProperty("check_mdt", m_check_mdt);
-    m_check_mdtrsmap = 0;
-    declareProperty("buildMdtRegionSelectorMap", m_check_mdtrsmap);
-    m_check_rpc = 0;
-    declareProperty("check_rpc", m_check_rpc);
-    m_check_rpcrsmap = 0;
-    declareProperty("buildRpcRegionSelectorMap", m_check_rpcrsmap);
-    m_check_tgc = 0;
-    declareProperty("check_tgc", m_check_tgc);
-    m_check_tgcrsmap = 0;
-    declareProperty("buildTgcRegionSelectorMap", m_check_tgcrsmap);
-    m_check_csc = 0;
-    declareProperty("check_csc", m_check_csc);
-    m_check_cscrsmap = 0;
-    declareProperty("buildCscRegionSelectorMap", m_check_cscrsmap);
-    m_check_parent = 0;
-    declareProperty("check_ParentStation", m_check_parent);
-
-    declareProperty("testMdtCache", m_testMdtCache = 0);
-    declareProperty("testRpcCache", m_testRpcCache = 0);
-    declareProperty("testTgcCache", m_testTgcCache = 0);
-    declareProperty("testCscCache", m_testCscCache = 0);
-
-    declareProperty("testMdtDetectorElementHash", m_testMdtDetectorElementHash = 0);
-    declareProperty("testRpcDetectorElementHash", m_testRpcDetectorElementHash = 0);
-    declareProperty("testTgcDetectorElementHash", m_testTgcDetectorElementHash = 0);
-    declareProperty("testCscDetectorElementHash", m_testCscDetectorElementHash = 0);
-
-    m_print_level = 0;
-    declareProperty("print_level", m_print_level);
-    m_mdtgood = 0;
-    declareProperty("print_mdt_good_hits", m_mdtgood);
-    m_rpcgood = 0;
-    declareProperty("print_rpc_good_hits", m_rpcgood);
-    m_tgcgood = 0;
-    declareProperty("print_tgc_good_hits", m_tgcgood);
+    
 }
 
 StatusCode MuonGMCheck::initialize() {
