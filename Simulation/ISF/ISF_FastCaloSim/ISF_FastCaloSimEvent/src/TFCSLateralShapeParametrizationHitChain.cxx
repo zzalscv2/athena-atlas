@@ -412,12 +412,12 @@ FCSReturnCode TFCSLateralShapeParametrizationHitChain::simulate(
               << cs << ")=" << sumEhit << " expected E=" << Elayer);
         }
         if (ihit >= 1000 * nhit && ihit >= 1000) {
-          ATH_MSG_WARNING("TFCSLateralShapeParametrizationHitChain::simulate():"
+          ATH_MSG_DEBUG("TFCSLateralShapeParametrizationHitChain::simulate():"
                           " Aborting hit chain, iterated "
                           << ihit << " times, expected " << nhit
                           << " times. Deposited E(" << cs << ")=" << sumEhit
                           << " expected E=" << Elayer << ", caused by:");
-          Print();
+          if (debug) Print();
           break;
         }
       } else {

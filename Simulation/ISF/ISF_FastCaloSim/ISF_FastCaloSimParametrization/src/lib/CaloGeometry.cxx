@@ -575,11 +575,15 @@ const CaloDetDescrElement* CaloGeometry::getFCalDDE(int sampling,float x,float y
   
   id = id << 44; 
   Identifier identify((unsigned long long)id);
-  
   const CaloDetDescrElement* foundcell=m_cells[identify];
-  if(distance) {
-    *distance=sqrt(pow(foundcell->x() - x,2) +  pow(foundcell->y() - y,2)  );
-  }
+
+  // Report the shortest distance in x or y to the face of the cell if outside the cell.
+  // If inside the cell this will be negative and be the shortest distance to a cell face.
+  float dist = 0;
+  if(!distance) distance=&dist;
+  float distanceX = abs(foundcell->x()-x) - foundcell->dx()/2;
+  float distanceY = abs(foundcell->y()-y) - foundcell->dy()/2;
+  *distance = max(distanceX,distanceY);
   
   return foundcell;
 }

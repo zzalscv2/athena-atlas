@@ -31,7 +31,14 @@ FCSReturnCode TFCSEnergyRenormalization::simulate(
 
   std::vector<float> scalefactor(CaloCell_ID_FCS::MaxSample, 1);
 
+  const std::map<int, float> approxLayerNoise{{0,150.0},{1,40.0},{2,80.0},{3,40.0},{4,150.0},{5,40.0},{6,80.0},{7,50.0},{8,400.0},{9,400.0},{10,400.0},{11,400.0},{12,300.0},{13,150.0},{14,40.0},{15,150.0},{16,40.0},{17,400.0},{18,300.0},{19,150.0},{20,40.0},{21,400.0},{22,400.0},{23,400.0}};
+
   for (int layer = 0; layer < CaloCell_ID_FCS::MaxSample; ++layer) {
+    //catch large amounts of energy not simulated as shower is outside the calorimeter
+    if (energies[layer]==0 && simulstate.E(layer)!=0){
+      if (simulstate.E(layer)>8.0*approxLayerNoise.at(layer) && layer!=5 && layer!=6 && layer!=7) ATH_MSG_INFO("TFCSEnergyRenormalization::simulate(): energy not simulated (out-of-calo) in layer "<<layer<<" expected: "<<simulstate.E(layer)<<" simulated: "<<energies[layer]);
+      if (simulstate.E(layer)>1500.0 && (layer==5 || layer==6 || layer==7)) ATH_MSG_INFO("TFCSEnergyRenormalization::simulate(): energy not simulated (out-of-calo) in layer "<<layer<<" expected: "<<simulstate.E(layer)<<" simulated: "<<energies[layer]);
+    }
     if (energies[layer] != 0)
       scalefactor[layer] = simulstate.E(layer) / energies[layer];
   }
