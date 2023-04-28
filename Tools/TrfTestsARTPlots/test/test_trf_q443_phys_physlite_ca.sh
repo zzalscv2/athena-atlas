@@ -5,6 +5,7 @@
 # art-include: master/Athena
 # art-athena-mt: 8
 # art-output: dcube*
+# art-output: hist_physlite_latest.root
 # art-html: dcube_physlite
 
 export ATHENA_CORE_NUMBER=8
@@ -62,7 +63,7 @@ echo "art-result: ${rc4} xAODHistSize"
 
 # dcube references
 echo "============ dcube references"
-dcubeRef="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrfTestsART/dcube/q443_ca/v4/hist_physlite_2402.root"
+dcubeRef="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrfTestsART/dcube/q443_ca/v5/hist_physlite_2403.root"
 dcubeXML="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrfTestsART/dcube/q443_ca/v4/dcube_config_hist_physlite_2402.xml"
 echo ${dcubeRef}
 echo ${dcubeXML}
