@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -27,7 +27,7 @@ namespace InDet {
   // ----------------------------------
   VertexPointEstimator::VertexPointEstimator(const std::string& type, const std::string& name, const IInterface* parent) :
     AthAlgTool(type, name, parent),
-    m_maxChi2(20.), m_returnOnError(true)
+    m_returnOnError(true)
   {
     declareInterface<VertexPointEstimator>(this);
     /// Cuts for selecting track pairs
@@ -72,7 +72,6 @@ namespace InDet {
     declareProperty("MaxTrkXYValue",          m_maxR);
     declareProperty("MinArcLength",           m_minArcLength);
     declareProperty("MaxArcLength",           m_maxArcLength);
-    declareProperty("MaxChi2OfVtxEstimation", m_maxChi2);
     declareProperty("MinDeltaR",              m_minDr);
     declareProperty("MaxDeltaR",              m_maxDr);
     declareProperty("MaxHl",                  m_maxHl);

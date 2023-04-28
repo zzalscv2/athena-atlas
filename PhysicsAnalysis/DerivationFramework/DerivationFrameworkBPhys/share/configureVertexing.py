@@ -25,8 +25,7 @@ class BPHYVertexTools:
         self.VtxPointEstimator = InDet__VertexPointEstimator(name             = derivation+"_VtxPointEstimator",
                                                     MinDeltaR              = [-10000.,-10000.,-10000.],
                                                     MaxDeltaR              = [10000.,10000.,10000.],
-                                                    MaxPhi                 = [10000., 10000., 10000.],
-                                                    MaxChi2OfVtxEstimation = 2000.)
+                                                    MaxPhi                 = [10000., 10000., 10000.])
         ToolSvc += self.VtxPointEstimator
         print((self.VtxPointEstimator))
 

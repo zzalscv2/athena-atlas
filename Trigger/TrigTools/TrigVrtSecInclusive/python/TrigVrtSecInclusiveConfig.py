@@ -109,8 +109,7 @@ def TrigVrtSecInclusiveCfg(flags, name, FirstPassTracksName, SecondPassTracksNam
         name = 'VertexPointEstimator_'+name,
         MinDeltaR = [-10000., -10000., -10000.],
         MaxDeltaR = [ 10000.,  10000.,  10000.],
-        MaxPhi    = [ 10000.,  10000.,  10000.],
-        MaxChi2OfVtxEstimation = 2000.)
+        MaxPhi    = [ 10000.,  10000.,  10000.])
 
     ToolSvc += VertexPointEstimator
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETCONVERSIONFINDERTOOLS_VERTEXPOINTESTIMATOR_H
@@ -85,7 +85,6 @@ namespace InDet {
     std::vector<double> m_maxDr;         /**maximum difference between helix centers*/
     std::vector<double> m_maxHl;         /**maximum ratio H/l */
     std::vector<double> m_maxPhi;        /**maximum DPhi at the estimated vertex position */
-    double m_maxChi2;                    /** max chi2 of the estimated vertex position*/
     bool m_returnOnError;
   };
   
