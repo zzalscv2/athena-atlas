@@ -216,6 +216,7 @@ class ItemDef:
         MenuItem('L1_EM20VH_2EM10VH_3EM8VH' ).setLogic( d.EM20VH & d.EM10VH.x(2) & d.EM8VH.x(3)    & physcond).setTriggerType( TT.calo )
 
         # PhaseI 2xEM and 3xEM
+        MenuItem('L1_2eEM12L').setLogic(d.eEM12L.x(2) & physcond).setTriggerType(TT.calo) #heavy ions, ATR-26333
         MenuItem('L1_2eEM18L').setLogic(d.eEM18L.x(2) & physcond).setTriggerType(TT.calo)
         MenuItem('L1_2eEM18M').setLogic(d.eEM18M.x(2) & physcond).setTriggerType(TT.calo)
         MenuItem('L1_2eEM24L').setLogic(d.eEM24L.x(2) & physcond).setTriggerType(TT.calo)
@@ -640,7 +641,9 @@ class ItemDef:
         MenuItem('L1_J400' ).setLogic( d.J400 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_J400_LAR' ).setLogic( d.J400 & physcond).setTriggerType(TT.lardigital) # ATR-22344
 
+        MenuItem('L1_jJ15p31ETA49'  ).setLogic( d.jJ1531ETA49  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jJ20'          ).setLogic( d.jJ20         & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_jJ20p31ETA49'  ).setLogic( d.jJ2031ETA49  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jJ30'          ).setLogic( d.jJ30         & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jJ30p0ETA25'   ).setLogic( d.jJ300ETA25   & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jJ40'          ).setLogic( d.jJ40         & physcond).setTriggerType(TT.calo)
@@ -680,6 +683,7 @@ class ItemDef:
         MenuItem('L1_jJ60_EMPTY'     ).setLogic( d.jJ60 & cosmiccond ).setTriggerType(TT.calo)
         MenuItem('L1_jJ60_FIRSTEMPTY').setLogic( d.jJ60 & firstempty ).setTriggerType(TT.calo)
 
+        MenuItem('L1_MU3V_jJ20'      ).setLogic( d.MU3V & d.jJ20    & physcond).setTriggerType(TT.calo) # added temporarily 
         MenuItem('L1_MU3V_jJ30'      ).setLogic( d.MU3V & d.jJ30    & physcond).setTriggerType(TT.calo) # added temporarily 
         MenuItem('L1_MU3V_jJ40'      ).setLogic( d.MU3V & d.jJ40    & physcond).setTriggerType(TT.calo)
         MenuItem('L1_MU5VF_jJ90'      ).setLogic( d.MU5VF & d.jJ90  & physcond).setTriggerType(TT.calo)
