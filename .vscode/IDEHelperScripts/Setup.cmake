@@ -2,12 +2,6 @@
 
 message( STATUS "Preparing IDE helpers" )
 
-# singularity settings
-set( ATLAS_SINGULARITY_IMAGE "" CACHE PATH
-   "Use singularity wrapper" )
-set( ATLAS_SINGULARITY_ARGS "" CACHE STRING
-   "Singularity weapper args" )
-
 # Common prefix
 set( ATLAS_IDE_PREFIX "${CMAKE_BINARY_DIR}/ide_" )
 
@@ -37,6 +31,14 @@ execute_process(
 configure_file( "${CMAKE_CURRENT_LIST_DIR}/flake8_wrapper.sh.in" "${ATLAS_IDE_PREFIX}flake8" @ONLY )
 
 # gdb wrappers
+set( ATLAS_IDE_ASETUP_CALL "asetup --restore" CACHE STRING
+   "asetup call for IDE helpers" )
+# singularity settings
+set( ATLAS_SINGULARITY_IMAGE "" CACHE PATH
+   "Use singularity wrapper" )
+set( ATLAS_SINGULARITY_ARGS "" CACHE STRING
+   "Singularity weapper args" )
+
 configure_file( "${CMAKE_CURRENT_LIST_DIR}/gdb_wrapper.sh.in" "${ATLAS_IDE_PREFIX}gdb_wrapper" @ONLY )
 if( ATLAS_SINGULARITY_IMAGE )
    configure_file( "${CMAKE_CURRENT_LIST_DIR}/gdb_runner_singularity.sh.in" "${ATLAS_IDE_PREFIX}gdb_runner" @ONLY )

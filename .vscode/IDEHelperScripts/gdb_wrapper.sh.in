@@ -10,7 +10,7 @@ source "${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh"
 echo
 binary_dir="@CMAKE_BINARY_DIR@"
 pushd "${binary_dir}" || exit
-asetup --restore
+@ATLAS_IDE_ASETUP_CALL@
 source "@ATLAS_PLATFORM@/setup.sh"
 popd || exit
 echo
