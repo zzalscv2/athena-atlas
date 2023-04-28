@@ -94,13 +94,10 @@ ActsTrk::MultiTrajectory<RWState>::addTrackState_impl(
     m_trackMeasurements->push_back(meas);
     state->setCalibrated(m_trackMeasurements->size() - 1);
   }
-
-  state->setProjector(kInvalid);
   if (ACTS_CHECK_BIT(mask, TrackStatePropMask::Calibrated)) {
     state->setCalibrated(addMeasurement());
     // TODO: in Acts there is m_projections collection
     // https://github.com/acts-project/acts/blob/main/Core/src/EventData/VectorMultiTrajectory.cpp#L83
-    state->setProjector(addParam());
   }
 
   state->setJacobian(kInvalid);
@@ -137,7 +134,7 @@ constexpr bool ActsTrk::MultiTrajectory<RWState>::has_impl(
     case "jacobian"_hash:
       return trackStates[istate]->jacobian() < kInvalid;
     case "projector"_hash:
-      return trackStates[istate]->projector() < kInvalid;
+      return trackStates[istate]->calibrated() < kInvalid;
     case "calibrated"_hash:
       return trackStates[istate]->calibrated() < kInvalid;
     case "calibratedCov"_hash:
@@ -206,7 +203,7 @@ const std::any ActsTrk::MultiTrajectory<RWState>::component_impl(
     case "jacobian"_hash:
       return trackStates[istate]->jacobianPtr();
     case "projector"_hash:
-      return trackStates[istate]->projectorPtr();
+      return trackMeasurements().at(trackStates[istate]->calibrated())->projectorPtr();
     case "calibrated"_hash: {
       return trackStates[istate]->calibratedPtr();
     }
@@ -250,7 +247,7 @@ std::any ActsTrk::MultiTrajectory<RWState>::component_impl(
     case "jacobian"_hash:
       return (*m_trackStates)[istate]->jacobianPtr();
     case "projector"_hash:
-      return (*m_trackStates)[istate]->projectorPtr();
+      return trackMeasurements().at((*m_trackStates)[istate]->calibrated())->projectorPtr();
     case "calibrated"_hash:
       return (*m_trackStates)[istate]->calibratedPtr();
     case "calibratedCov"_hash:

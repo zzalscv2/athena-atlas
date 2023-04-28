@@ -13,7 +13,6 @@ namespace xAOD {
     AUX_VARIABLE(filtered);
     AUX_VARIABLE(smoothed);
     AUX_VARIABLE(jacobian);
-    AUX_VARIABLE(projector);
     AUX_VARIABLE(calibrated);
     AUX_VARIABLE(measDim);
     AUX_VARIABLE(uncalibratedMeasurementLink);

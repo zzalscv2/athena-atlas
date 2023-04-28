@@ -753,5 +753,37 @@ BOOST_FIXTURE_TEST_CASE(TrackStateProxyShare, EmptyMTJ) {
   }
 }
 
+
+BOOST_FIXTURE_TEST_CASE(TrackStateProjector, EmptyMTJ) {
+
+  std::default_random_engine rng(12345);
+  TestTrackState pc(rng, 2u);
+
+  size_t ia = mtj->addTrackState(TrackStatePropMask::All);
+  auto ts = mtj->getTrackState(ia);
+  
+  fillTrackState(pc, TrackStatePropMask::All, ts);
+
+  // reset only the effective measurements
+  auto [measPar, measCov] = generateBoundParametersCovariance(rng);
+  ts.allocateCalibrated(eBoundSize);
+  ts.calibrated<eBoundSize>() = measPar;
+  ts.calibratedCovariance<eBoundSize>() = measCov;
+
+  // assert contents of original measurement (just to be safe)
+  BOOST_CHECK_EQUAL(ts.calibratedSize(), eBoundSize);
+  BOOST_CHECK_EQUAL(ts.effectiveCalibrated(), measPar);
+  BOOST_CHECK_EQUAL(ts.effectiveCalibratedCovariance(), measCov);
+
+  // Set and test projector
+  Acts::ActsMatrix<eBoundSize, 2> proj;
+  proj.setZero();
+  proj(Acts::eBoundLoc0, Acts::eBoundLoc0) = 1;
+  proj(Acts::eBoundLoc1, Acts::eBoundLoc1) = 1;
+  ts.setProjector(proj);
+
+  BOOST_CHECK_EQUAL(ts.effectiveProjector(), proj);
+}
+
 // TODO remaining tests
 BOOST_AUTO_TEST_SUITE_END()

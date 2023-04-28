@@ -23,7 +23,6 @@ namespace xAOD {
         std::vector<TrackStateIndexType> filtered;
         std::vector<TrackStateIndexType> smoothed;
         std::vector<TrackStateIndexType> jacobian;
-        std::vector<TrackStateIndexType> projector;
         std::vector<TrackStateIndexType> calibrated;
         std::vector<TrackStateIndexType> measDim;
         std::vector< ElementLink<xAOD::UncalibratedMeasurementContainer> > uncalibratedMeasurementLink;

@@ -18,6 +18,7 @@ namespace xAOD {
         std::vector<Storage> meas;
         std::vector<Storage> covMatrix;
         std::vector< ElementLink<xAOD::UncalibratedMeasurementContainer> > uncalibratedMeasurementLink;
+        std::vector<unsigned long long> projector;
     };
 }
 

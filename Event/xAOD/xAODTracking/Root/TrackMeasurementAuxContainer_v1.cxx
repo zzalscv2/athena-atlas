@@ -9,6 +9,6 @@ namespace xAOD {
     AUX_VARIABLE(meas);
     AUX_VARIABLE(covMatrix);
     AUX_VARIABLE(uncalibratedMeasurementLink);
-
+    AUX_VARIABLE(projector);
   }
 }
