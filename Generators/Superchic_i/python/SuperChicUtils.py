@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 
 import subprocess, os, shlex, re
@@ -139,13 +139,12 @@ class SuperChicConfig:
         conf+=fortDouble(self.az) + "                                   ! [az] : Ion atomic number \n"
         conf+=fortDouble(self.rz) + "                                 ! [rz] : Ion proton density - radius \n"
         conf+=fortDouble(self.dz) + "                                ! [dz] : Ion proton density - skin thickness \n"
-        conf+=fortBool(self.ionbreakup) + "                            ! [ionbreakup] \n"
-        conf+=fortStr(self.fAA) + "                                    ! [fAA] \n"
-        conf+=fortDouble(self.fracsigX) + "                            ! [fracsigX] : multiply sig_(gamA) by this factor (1d0 - default) \n"
-
         conf+=fortDouble(self.rn) + "                                  ! [rn] : Ion neutron density - radius \n"
         conf+=fortDouble(self.dn) + "                                  ! [dn] : Ion neutron density - skin thickness \n"
         conf+=fortStr(self.ionqcd) + "                               ! [ionqcd] : Coherent ('coh') or incoherent ('incoh') for QCD-induced processes \n"
+        conf+=fortBool(self.ionbreakup) + "                            ! [ionbreakup] \n"
+        conf+=fortStr(self.fAA) + "                                    ! [fAA] \n"
+        conf+=fortDouble(self.fracsigX) + "                            ! [fracsigX] : multiply sig_(gamA) by this factor (1d0 - default) \n"
         conf+="***********************************************************************************\n"
         conf+="*************Integration parameters************************************************\n"
         conf+="***********************************************************************************\n"
