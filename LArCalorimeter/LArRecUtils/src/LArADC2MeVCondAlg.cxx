@@ -203,7 +203,12 @@ StatusCode LArADC2MeVCondAlg::execute(const EventContext& ctx) const{
           // Some channels can be missing in some configurations, 
 	  //for example during the electronic calibration processing
           ATH_MSG_VERBOSE("No Ramp found for channel " << m_larOnlineID->channel_name(chid) << ", gain " << igain);
-	  ++nNoRamp;
+	  if (igain == 2 && m_larOnlineID->isEMBPS(chid)) {
+	    ATH_MSG_VERBOSE("Ignore missing ramp for barrel presampler channel in low gain");
+	  }
+	  else {
+	    ++nNoRamp;
+	  }
 	  continue;
 	}
       
