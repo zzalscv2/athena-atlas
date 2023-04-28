@@ -375,18 +375,12 @@ StatusCode PixelPrepDataToxAOD::execute()
       if (m_need_sihits) {
         const std::vector<SiHit> matched_hits = findAllHitsCompatibleWithCluster(prd, &siHits[prd->detectorElement()->identifyHash()], sdo_tracks);
         if (m_writeSiHits) {
-          if (!m_writeSDOs) {
-            ATH_MSG_WARNING("Si hit truth information requested, but SDO collection not available! (m_writeSiHits)");
-          }
           addSiHitInformation(xprd, prd, matched_hits); 
         }
 	    
         if (m_writeNNinformation) {
-          if (!m_writeSDOs) {
-            ATH_MSG_WARNING("Si hit truth information requested, but SDO collection not available! (m_writeNNinformation)");
-          }
           addNNTruthInfo(xprd, prd, matched_hits);
-	}
+        }
       }
     }
   }
