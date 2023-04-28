@@ -37,6 +37,7 @@ def TCAL1TileCellsMuonDecoratorCfg(flags, **kwargs):
     kwargs.setdefault('MinMuonPt', 10 * GeV)
     kwargs.setdefault('MaxAbsMuonEta', 1.7)
     kwargs.setdefault('IsoCone', 0.4)
+    kwargs.setdefault('MaxRelETrkInIsoCone', 100000)
 
     kwargs.setdefault('TrackTools', acc.popToolsAndMerge(TCAL1TrackToolsCfg(flags)) )
 
@@ -97,7 +98,7 @@ def TCAL1KernelCfg(flags, name='TCAL1Kernel', **kwargs):
     acc = ComponentAccumulator()
 
     prefix = kwargs.pop('Prefix', 'TCAL1_')
-    streamName = kwargs.pop('StreamName', 'OutputStreamDAOD_TCAL1')
+    streamName = kwargs.pop('StreamName', 'StreamDAOD_TCAL1')
 
     # Common augmentations
     triggerListsHelper = kwargs.pop('TriggerListsHelper', 'TriggerListsHelper')
@@ -127,7 +128,7 @@ def TCAL1Cfg(ConfigFlags):
     TCAL1TriggerListsHelper = TriggerListsHelper(ConfigFlags)
     
     acc = ComponentAccumulator()
-    acc.merge(TCAL1KernelCfg(ConfigFlags, name="TCAL1Kernel", StreamName="OutputStreamDAOD_TCAL1", Prefix=TCAL1Prefix,  TriggerListsHelper=TCAL1TriggerListsHelper))
+    acc.merge(TCAL1KernelCfg(ConfigFlags, name="TCAL1Kernel", StreamName="StreamDAOD_TCAL1", Prefix=TCAL1Prefix,  TriggerListsHelper=TCAL1TriggerListsHelper))
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
@@ -166,15 +167,6 @@ def TCAL1Cfg(ConfigFlags):
     if ConfigFlags.Trigger.EDMVersion == 3:
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
         AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(TCAL1SlimmingHelper)        
-        # Run 2 is added here temporarily to allow testing/comparison/debugging
-        from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
-        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = TCAL1SlimmingHelper, 
-                                               OutputContainerPrefix = "TrigMatch_", 
-                                               TriggerList = TCAL1TriggerListsHelper.Run3TriggerNamesTau)
-        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = TCAL1SlimmingHelper, 
-                                               OutputContainerPrefix = "TrigMatch_",
-                                               TriggerList = TCAL1TriggerListsHelper.Run3TriggerNamesNoTau)
-    
 
     TCAL1ItemList = TCAL1SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_TCAL1", ItemList=TCAL1ItemList, AcceptAlgs=["TCAL1Kernel"]))
