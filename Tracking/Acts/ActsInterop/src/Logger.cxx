@@ -3,6 +3,7 @@
 */
 
 #include "ActsInterop/Logger.h"
+#include "ActsInterop/LoggerUtils.h"
 
 #include "GaudiKernel/INamedInterface.h"
 #include "GaudiKernel/CommonMessaging.h"
@@ -17,30 +18,10 @@
 #include <iostream>
 #include <string>
 
-namespace {
-  static const std::array<MSG::Level, 6> athLevelVector{
-    MSG::VERBOSE, 
-    MSG::DEBUG,
-    MSG::INFO, 
-    MSG::WARNING, 
-    MSG::ERROR, 
-    MSG::FATAL
-  };
-
-  static const std::array<Acts::Logging::Level, 6> actsLevelVector{
-    Acts::Logging::Level::VERBOSE,
-    Acts::Logging::Level::DEBUG,
-    Acts::Logging::Level::INFO,
-    Acts::Logging::Level::WARNING,
-    Acts::Logging::Level::ERROR,
-    Acts::Logging::Level::FATAL
-  };
-}
-
 void
 ActsAthenaPrintPolicy::flush(const Acts::Logging::Level& lvl, const std::string& input)
 {
-  MSG::Level athLevel = athLevelVector[lvl];
+  MSG::Level athLevel = ActsTrk::athLevelVector(lvl);
   (*m_msg) << athLevel << input << endmsg;
 }
   
@@ -61,21 +42,21 @@ bool
 ActsAthenaFilterPolicy::doPrint(const Acts::Logging::Level& lvl) const 
 {
 
-  MSG::Level athLevel = athLevelVector[lvl];
+  MSG::Level athLevel = ActsTrk::athLevelVector(lvl);
   return m_msg->level() <= athLevel;
 }
 
 Acts::Logging::Level 
 ActsAthenaFilterPolicy::level() const 
 {
-  return actsLevelVector[m_msg->level()];
+  return ActsTrk::actsLevelVector(m_msg->level());
 }
 
 std::unique_ptr<Acts::Logging::OutputFilterPolicy> 
 ActsAthenaFilterPolicy::clone(Acts::Logging::Level level) const 
 {
   auto msg = std::make_shared<MsgStream>(*m_msg.get());
-  msg->setLevel(athLevelVector[level]);
+  msg->setLevel(ActsTrk::athLevelVector(level));
   return std::make_unique<ActsAthenaFilterPolicy>(msg);
 }
 
