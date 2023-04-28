@@ -103,12 +103,14 @@ namespace xAOD {
 
     /// Ex in 1 MeV scale
     int jFexMETRoI_v1::Ex() const {
-        return tobEx()*tobEtScale();
+        int hemisphere = fpgaNumber() == 0 ? 1 : -1;
+        return hemisphere*tobEx()*tobEtScale();
     }
 
     /// Ey in 1 MeV scale
     int jFexMETRoI_v1::Ey() const {
-        return tobEy()*tobEtScale();
+        int hemisphere = fpgaNumber() == 0 ? 1 : -1;
+        return hemisphere*tobEy()*tobEtScale();
     }
 
 
