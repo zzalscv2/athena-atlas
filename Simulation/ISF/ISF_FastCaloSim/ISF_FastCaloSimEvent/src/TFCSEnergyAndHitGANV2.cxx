@@ -142,6 +142,15 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(
   unsigned int energyBins = outputs.size();
   ATH_MSG_VERBOSE("energy voxels size = " << energyBins);
 
+  double totalEnergy = 0;
+  for (unsigned int i = 0; i < energyBins; ++i){
+    totalEnergy += outputs.at("out_" + std::to_string(i));
+  }
+  if (totalEnergy < 0){
+    ATH_MSG_WARNING("Energy from GAN is negative, skipping particle");
+    return false;   
+  }
+
   ATH_MSG_VERBOSE("Get binning");
 
   simulstate.set_E(0);
