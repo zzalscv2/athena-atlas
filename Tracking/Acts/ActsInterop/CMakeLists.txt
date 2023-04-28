@@ -34,3 +34,9 @@ atlas_add_test( Units
 atlas_add_test( TrackingComponents
    SCRIPT test/TrackingComponents.py )
    
+atlas_add_test( ActsLogger
+   SOURCES test/LoggerTest.cxx
+   LINK_LIBRARIES ActsInteropLib AthenaBaseComps TestTools 
+   POST_EXEC_SCRIPT nopost.sh )
+
+

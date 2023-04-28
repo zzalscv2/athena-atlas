@@ -40,8 +40,6 @@ class ActsAthenaFilterPolicy final : public Acts::Logging::OutputFilterPolicy {
 public:
   ActsAthenaFilterPolicy(std::shared_ptr<MsgStream> msg) : m_msg(msg) {}
 
-  //~AthenaFilterPolicy() = default;
-
   bool doPrint(const Acts::Logging::Level& lvl) const override;
 
   virtual 
