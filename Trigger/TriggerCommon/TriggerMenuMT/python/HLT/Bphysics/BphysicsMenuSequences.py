@@ -1,6 +1,7 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from ..Config.MenuComponents import MenuSequence, RecoFragmentsPool, algorithmCAToGlobalWrapper
+from ..Config.MenuComponents import MenuSequence, MenuSequenceCA, RecoFragmentsPool, algorithmCAToGlobalWrapper, SelectionCA, InEventRecoCA
+from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.CFElements import seqAND
 from TrigEDMConfig.TriggerEDMRun3 import recordable
 from AthenaCommon.Logging import logging
@@ -91,25 +92,20 @@ def dimuL2Sequence(flags):
 
 
 def dimuEFSequence(flags):
-    from DecisionHandling.DecisionHandlingConf import InputMakerForRoI, ViewCreatorPreviousROITool
-    from TrigBphysHypo.TrigBphysHypoConf import TrigBphysStreamerHypo
+    selAcc = SelectionCA('dimuSequence')
+
+    inputMakerAlg = CompFactory.InputMakerForRoI('IM_bphysStreamerDimuEF',
+        RoITool = CompFactory.ViewCreatorPreviousROITool(),
+        mergeUsingFeature = True)
+
+    reco = InEventRecoCA('bphysStreamerDimuEFReco', inputMaker=inputMakerAlg)
+    selAcc.mergeReco(reco)
+
+    hypoAlg = CompFactory.TrigBphysStreamerHypo('DimuEFStreamerHypoAlg', triggerLevel = 'EF')
+    selAcc.addHypoAlgo(hypoAlg)
+
     from TrigBphysHypo.TrigBphysStreamerHypoConfig import TrigBphysStreamerHypoToolFromDict
-
-    viewMaker = InputMakerForRoI(
-        name = 'IM_bphysStreamerDimuEF',
-        mergeUsingFeature = True,
-        RoITool = ViewCreatorPreviousROITool(),
-        RoIs = 'DimuRoIs')
-
-    sequence = seqAND('dimuSequence', [viewMaker])
-
-    hypo = TrigBphysStreamerHypo('DimuEFStreamerHypoAlg', triggerLevel = 'EF')
-
-    return MenuSequence(flags,
-        Sequence = sequence,
-        Maker = viewMaker,
-        Hypo = hypo,
-        HypoToolGen = TrigBphysStreamerHypoToolFromDict)
+    return MenuSequenceCA(flags, selAcc, HypoToolGen=TrigBphysStreamerHypoToolFromDict)
 
 
 def getNoL2CombChainNames():
