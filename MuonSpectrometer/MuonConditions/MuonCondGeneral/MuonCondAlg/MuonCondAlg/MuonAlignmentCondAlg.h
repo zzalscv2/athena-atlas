@@ -99,7 +99,7 @@ private:
     StatusCode loadMdtAlignAsBuilt(const std::string& folderName);
     StatusCode loadNswAlignAsBuilt(const std::string& mmFolderName, const std::string& sTgcFolderName);
 
-    void setALinesFromAscii(ALineMapContainer* writeALineCdo) const;
+    StatusCode setALinesFromAscii(ALineMapContainer* writeALineCdo) const;
     void setAsBuiltFromAscii(MdtAsBuiltMapContainer* writeCdo) const;
     void dumpALines(const std::string& folderName, ALineMapContainer* writeALineCdo);
     void dumpBLines(const std::string& folderName, BLineMapContainer* writeBLineCdo);
