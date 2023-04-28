@@ -263,21 +263,19 @@ uint32_t jFEXFormTOBs::formMetTOB(int METX, int METY, int Resolution ) {
     int sat = 0;
     int res = 0;
 
-    int metX = METX/Resolution;
-    int metY = METY/Resolution;
+    int metX = METX < 0 ? std::floor(1.0*METX/Resolution) : METX/Resolution;
+    int metY = METY < 0 ? std::floor(1.0*METY/Resolution) : METY/Resolution;
 
     //0x7fff is 15 bits (decimal value 32767), however as MET is a signed value (can be negative) only 14 bits are allowed (16383) the MSB is the sign
     if (std::abs(metX) > 0x3fff) {
         ATH_MSG_DEBUG("sumEtlow saturated: " << metX );
-        metX = 0x7fff;
-        sat=1;
+        metX = 0x3fff;
     }
 
     
     if (std::abs(metY) > 0x3fff) { //0x7fff is 15 bits (decimal value 32767), however as MET is a signed value (can be negative) only 14 bits are allowed (16383)
         ATH_MSG_DEBUG("sumEthigh saturated: " << metY );
-        metY = 0x7fff;
-        sat=1;
+        metY = 0x3fff;
     }
 
     //create basic tobword with 32 bits

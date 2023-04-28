@@ -67,7 +67,6 @@ void LVL1::jFEXmetAlgo::setup(int FPGA[FEXAlgoSpaceDefs::jFEX_algoSpace_height][
             m_FPGA[iphi].push_back(FPGA[iphi][ieta]);
         }
     }
-
 }
 
 //Setup for the forward region
@@ -101,7 +100,6 @@ void LVL1::jFEXmetAlgo::setup(int FPGA[FEXAlgoSpaceDefs::jFEX_algoSpace_height][
 void LVL1::jFEXmetAlgo::buildBarrelmet()
 {
     ATH_MSG_DEBUG("---------------- jFEXmetAlgo::buildBarrelmet ----------------");
-    //SG::ReadHandle<jTowerContainer> jTowerContainer(m_jTowerContainerKey);
 
     m_Totalmet_Xcoord=0;
     m_Totalmet_Ycoord=0;    
@@ -116,7 +114,7 @@ void LVL1::jFEXmetAlgo::buildBarrelmet()
             
         }
         const LVL1::jTower * tmpTower = m_jTowerContainer->findTower(m_FPGA[iphi][0]);
-        m_met_angle[iphi]=tmpTower->centrePhi();
+        m_met_angle[iphi]=tmpTower->centrephi_toPI();
     }
     
     buildMetXComponent();
@@ -127,7 +125,6 @@ void LVL1::jFEXmetAlgo::buildBarrelmet()
 void LVL1::jFEXmetAlgo::buildFWDmet()
 {
     ATH_MSG_DEBUG("---------------- jFEXmetAlgo::buildFWDmet ----------------");
-    //SG::ReadHandle<jTowerContainer> jTowerContainer(m_jTowerContainerKey);
     
     m_Totalmet_Xcoord=0;
     m_Totalmet_Ycoord=0;
@@ -144,7 +141,7 @@ void LVL1::jFEXmetAlgo::buildFWDmet()
             m_met[iphi]+=getTTowerET(m_FPGA[iphi][ieta]);
         }
         const LVL1::jTower * tmpTower = m_jTowerContainer->findTower(m_FPGA[iphi][0]);
-        m_met_angle[iphi]=tmpTower->centrePhi();
+        m_met_angle[iphi]=tmpTower->centrephi_toPI();
     }
     buildMetXComponent();
     buildMetYComponent();
@@ -160,7 +157,7 @@ void LVL1::jFEXmetAlgo::buildFWDmet()
             m_met[iphi]+=getTTowerET(m_FPGA_phi02[iphi][ieta]);
         }
         const LVL1::jTower * tmpTower = m_jTowerContainer->findTower(m_FPGA_phi02[iphi][0]);
-        m_met_angle[iphi]=tmpTower->centrePhi();
+        m_met_angle[iphi]=tmpTower->centrephi_toPI();
     }
     buildMetXComponent();
     buildMetYComponent();
@@ -176,7 +173,7 @@ void LVL1::jFEXmetAlgo::buildFWDmet()
             m_met[iphi]+=getTTowerET(m_FPGA_fcal[iphi][ieta]);
         }
         const LVL1::jTower * tmpTower = m_jTowerContainer->findTower(m_FPGA_fcal[iphi][0]);
-        m_met_angle[iphi]=M_PI/64 + tmpTower->phi()*(4*M_PI/32);
+        m_met_angle[iphi]=tmpTower->phi()*(M_PI/8) + M_PI/16;
     }
     buildMetXComponent();
     buildMetYComponent();
@@ -188,10 +185,10 @@ void LVL1::jFEXmetAlgo::buildMetXComponent()
     
     m_met_Xcoord.clear();
     m_met_Xcoord.resize(m_met.size(),0);
-    
     //computing the X and Y component of MET
     for(uint iphi=0;iphi<m_met.size();iphi++){
-        m_met_Xcoord[iphi]=m_met[iphi]*cos(m_met_angle[iphi]);
+        int cos = std::round(std::cos(m_met_angle[iphi]) * m_firmware_scale); 
+        m_met_Xcoord[iphi]= m_met[iphi]*cos;
     }
     
     //Summing all X coordinate
@@ -204,7 +201,7 @@ void LVL1::jFEXmetAlgo::buildMetXComponent()
 //return the X component of the Met
 int LVL1::jFEXmetAlgo::GetMetXComponent()
 {
-    return m_Totalmet_Xcoord;
+    return static_cast<int>(1.0*m_Totalmet_Xcoord/m_firmware_scale);
 }
 
 //build Met Y component for the central barrels
@@ -216,7 +213,8 @@ void LVL1::jFEXmetAlgo::buildMetYComponent()
     
     //computing the X and Y component of MET
     for(uint iphi=0;iphi<m_met.size();iphi++){
-        m_met_Ycoord[iphi]=m_met[iphi]*sin(m_met_angle[iphi]); 
+        int sin = std::round(std::sin(m_met_angle[iphi]) * m_firmware_scale) ; 
+        m_met_Ycoord[iphi]= m_met[iphi]*sin; 
     }
     
     //Summing all Y coordinate
@@ -229,7 +227,7 @@ void LVL1::jFEXmetAlgo::buildMetYComponent()
 //return the Y component of the Met
 int LVL1::jFEXmetAlgo::GetMetYComponent()
 {
-    return m_Totalmet_Ycoord;
+    return static_cast<int>(1.0*m_Totalmet_Ycoord/m_firmware_scale);;
 }
 
 //Gets the ET for the TT. This ET is EM + HAD
