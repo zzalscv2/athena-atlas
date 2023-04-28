@@ -11,7 +11,7 @@ def usage():
    print (" The first parameter is the run number of IoV start, the second parameter is the lumiblock number for IoV start")
    print (" The third and fourth parameter are the Run/lb for IoV end (if run is -1, uses open ended IoV)")
 
-if len(sys.argv)<5:
+if len(sys.argv)<6:
    usage()
    sys.exit(-1)
 
@@ -19,8 +19,10 @@ runSince = sys.argv[1]
 lbkSince = sys.argv[2]
 runUntil = sys.argv[3]
 lbkUntil = sys.argv[4]
+runTag   = sys.argv[5]
 
 print ("runUntil ", runUntil, lbkUntil)
+print ("tag ", runTag)
 
 import cppyy
 from PyCool import cool
@@ -44,7 +46,13 @@ print (" iovSince ", iovSince)
 print (" iovUntil ", iovUntil)
 
 #=== folder tag suffix 
-tag      = "CALOOflPedestalCellPedestal-UPD4-00"
+tag = ""
+if runTag == "UPD4":
+  tag      = "CALOOflPedestalCellPedestal-UPD4-00"
+elif runTag == "UPD1":
+  tag      = "CALOOflPedestalCellPedestal-UPD1-00"
+else:
+  print("expected 'UPD4' or 'BOTH'")
 #=== values for the comment channel
 author   = "gunal"
 comment  = "Updated pedestal shift values"
@@ -56,18 +64,21 @@ comment  = "Updated pedestal shift values"
 #==================================================
 #=== set shortcut
 g = cppyy.gbl
-cppyy.makeClass('std::vector<float>')
+#cppyy.makeClass('std::vector<float>') # This doesn't work in ROOT 6.22 anymore
+getattr(cppyy.gbl,'std::vector<float>')
+
 
 #=== get a logger
 log = CaloCondLogger.getLogger("CaloNoiseWriter")
 
 #=== (re-)create the database
-db = CaloCondTools.openDb('SQLITE', 'COMP200', 'UPDATE')
+db = CaloCondTools.openDb('SQLITE', 'CONDBR2', 'UPDATE')
 
 try:
     #=== creating folder specifications
     spec = cool.RecordSpecification()
     spec.extend( 'CaloCondBlob16M', cool.StorageType.Blob16M )
+    fspec = cool.FolderSpecification(cool.FolderVersioning.MULTI_VERSION, spec)
      
     #=== create the folder
     folderPath = CaloCondTools.getCaloPrefix()+"Ofl/Pedestal/CellPedestal"
@@ -78,7 +89,7 @@ try:
         folder = db.getFolder(folderPath)
     except Exception:
         log.warning("Folder %s not found, creating it...", folderPath)
-        folder = db.createFolder(folderPath, spec, desc, cool.FolderVersioning.MULTI_VERSION, True)
+        folder = db.createFolder(folderPath, fspec, desc, True)
         
     #==================================================
     #=== Create the CaloCondBlobFlt objects
