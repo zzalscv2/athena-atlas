@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -120,13 +120,6 @@ protected:
     "TrackSelectorTool",
     "InDet::TrackSelectorTool",
     "Tool for track Selection"
-  };
-
-  SG::ReadHandleKey<xAOD::TrackParticleContainer> m_TrkParticleCollectionKey{
-    this,
-    "TrackParticleCollection",
-    "",
-    "Name of the input track particle container"
   };
 
   bool passPreSelection(TrackPairsSelector::Cache& cache,
