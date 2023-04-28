@@ -74,6 +74,7 @@ if (NOT XAOD_STANDALONE)
     src/JetTagConditionalDecoratorAlg.cxx
     src/TruthDecoratorHelpers.cxx
     src/TrackLeptonDecoratorAlg.cxx
+    src/TruthParticleDecoratorAlg.cxx
     src/TrackTruthDecoratorAlg.cxx
     src/SoftElectronDecoratorAlg.cxx
     src/SoftElectronTruthDecoratorAlg.cxx

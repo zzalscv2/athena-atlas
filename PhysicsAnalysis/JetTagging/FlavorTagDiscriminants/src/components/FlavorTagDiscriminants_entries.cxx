@@ -17,6 +17,7 @@
 #include "FlavorTagDiscriminants/BTaggingBuilderAlg.h"
 #include "FlavorTagDiscriminants/PoorMansIpAugmenterAlg.h"
 #include "FlavorTagDiscriminants/TrackLeptonDecoratorAlg.h"
+#include "FlavorTagDiscriminants/TruthParticleDecoratorAlg.h"
 #include "FlavorTagDiscriminants/TrackTruthDecoratorAlg.h"
 #include "FlavorTagDiscriminants/SoftElectronDecoratorAlg.h"
 #include "FlavorTagDiscriminants/SoftElectronTruthDecoratorAlg.h"
@@ -39,6 +40,7 @@ DECLARE_COMPONENT(BTagTrackLinkCopyAlg)
 DECLARE_COMPONENT(BTaggingBuilderAlg)
 DECLARE_COMPONENT(PoorMansIpAugmenterAlg)
 DECLARE_COMPONENT(TrackLeptonDecoratorAlg)
+DECLARE_COMPONENT(TruthParticleDecoratorAlg)
 DECLARE_COMPONENT(TrackTruthDecoratorAlg)
 DECLARE_COMPONENT(SoftElectronDecoratorAlg)
 DECLARE_COMPONENT(SoftElectronTruthDecoratorAlg)
