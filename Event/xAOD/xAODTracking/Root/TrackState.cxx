@@ -25,7 +25,6 @@ namespace xAOD {
     DEFINE_API(TrackStateIndexType, filtered, setFiltered)
     DEFINE_API(TrackStateIndexType, smoothed, setSmoothed)
     DEFINE_API(TrackStateIndexType, jacobian, setJacobian)
-    DEFINE_API(TrackStateIndexType, projector, setProjector)
     DEFINE_API(TrackStateIndexType, calibrated, setCalibrated)
     DEFINE_API(TrackStateIndexType, measDim, setMeasDim)
     AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(TrackState_v1, ElementLink<xAOD::UncalibratedMeasurementContainer>, uncalibratedMeasurementLink, setUncalibratedMeasurementLink);

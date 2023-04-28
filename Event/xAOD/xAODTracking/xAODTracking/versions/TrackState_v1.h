@@ -151,19 +151,7 @@ namespace xAOD {
          * 
          * @return index, invalid if identical to max possible value of this type
          */
-        TrackStateIndexType projector() const; 
-        /**
-         * @brief Set the Projector index
-         * @see projector()
-         */        
-        void setProjector(TrackStateIndexType);
-
-        /**
-         * @brief pointers API needed by MTJ
-         */
-        const TrackStateIndexType* projectorPtr() const;
-        TrackStateIndexType* projectorPtr();
-
+        
         /**
          * @brief index in TrackMeasurementContainer corresponding to this TracksTate
          * Points to calibrated measurement

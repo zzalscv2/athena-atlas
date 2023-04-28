@@ -92,7 +92,19 @@ namespace xAOD {
         void setUncalibratedMeasurementLink( const ElementLink<UncalibratedMeasurementContainer>& link);
 
 
-        // TODO projectors
+        /**
+        The quantities measured by detector, are functions of the state vector, corrupted by a measurement noise. 
+        However the state vector is normally not observed directly. The projector is mapping from the  state 
+        vector to the mesured quantities. In our case the projector is linear, i.e. represented by a matrix of ‘ones’.
+        The projector matrix is coded by the bits of "unsigned long long" variable and the conversion to/from
+        matrix is done in Acts.
+
+         * Define projector access
+         **/
+        const unsigned long long& projector() const;
+        const unsigned long long* projectorPtr() const;
+        unsigned long long* projectorPtr();
+        void setProjector( const unsigned long long& m);
 
         /**
          * @brief expands sizes of internal vectors for the data storage
