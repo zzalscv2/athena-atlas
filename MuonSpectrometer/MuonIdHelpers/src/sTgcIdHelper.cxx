@@ -6,7 +6,10 @@
 
 /*******************************************************************************/
 // Constructor/Destructor
-sTgcIdHelper::sTgcIdHelper() : MuonIdHelper("sTgcIdHelper") {}
+sTgcIdHelper::sTgcIdHelper() : MuonIdHelper("sTgcIdHelper") {
+    m_module_hashes.fill(-1);
+    m_detectorElement_hashes.fill(-1);
+}
 /*******************************************************************************/
 // Initialize dictionary
 int sTgcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
@@ -236,53 +239,59 @@ int sTgcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     return (status);
 }  // end sTgcIdHelper::initialize_from_dictionary
 /*******************************************************************************/
+inline unsigned int sTgcIdHelper::moduleHashIdx(const Identifier& id) const{
+    /// Unfold the array [A][B][C] by
+    /// a * BxC + b * C + c
+    constexpr unsigned int C = s_phiDim;
+    constexpr unsigned int BxC = C*s_etaDim;    
+    const int stEta = stationEta(id);
+    return (stationName(id) - m_stationShift)*BxC + (stEta + s_etaDim/2 - (stEta>0))*C + (stationPhi(id) -1);
+}
+inline unsigned int sTgcIdHelper::detEleHashIdx(const Identifier& id) const{
+    return moduleHashIdx(id)  *s_mlDim +  (multilayer(id) -1);
+}
+
 int sTgcIdHelper::init_id_to_hashes() {
-    unsigned int hash_max = this->module_hash_max();
+    for (const Identifier& id : m_module_vec) m_stationShift = std::min(m_stationShift, 1u* stationName(id));
+    unsigned int hash_max = module_hash_max();
     for (unsigned int i = 0; i < hash_max; ++i) {
-        Identifier id = m_module_vec[i];
-        int station = this->stationName(id);
-        int eta = this->stationEta(id) + 10;  // for negative etas
-        int phi = this->stationPhi(id);
-        m_module_hashes[station][eta - 1][phi - 1] = i;
+        const Identifier& id = m_module_vec[i];
+        const unsigned idx = moduleHashIdx(id);
+        if (idx >= m_module_hashes.size() || m_module_hashes[idx] < hash_max){
+            ATH_MSG_FATAL("Failed to assign module hash to "<<show_to_string(id));
+            return 1;
+        }
+        m_module_hashes[idx] = i;
     }
 
-    hash_max = this->detectorElement_hash_max();
+    hash_max = detectorElement_hash_max();
     for (unsigned int i = 0; i < hash_max; ++i) {
-        Identifier id = m_detectorElement_vec[i];
-        int station = this->stationName(id);
-        int eta = this->stationEta(id) + 10;  // for negative eta
-        int phi = this->stationPhi(id);
-        int multilayer = this->multilayer(id);
-        m_detectorElement_hashes[station][eta - 1][phi - 1][multilayer - 1] = i;
+        const Identifier& id = m_detectorElement_vec[i];
+        const unsigned idx = detEleHashIdx(id);
+        if (idx >= m_detectorElement_hashes.size() || m_detectorElement_hashes[idx] < hash_max){
+            ATH_MSG_FATAL("Failed to assign detector hash to "<<show_to_string(id));
+            return 1;
+        }
+        m_detectorElement_hashes[idx] = i;
     }
-
     return 0;
-}  // end TgcIdHelper::init_id_to_hashes()
+}  // end sTgcIdHelper::init_id_to_hashes()
 /*******************************************************************************/
 int sTgcIdHelper::get_module_hash(const Identifier& id, IdentifierHash& hash_id) const {
-    // Identifier moduleId = elementID(id);
-    // IdContext context = module_context();
-    // return get_hash(moduleId,hash_id,&context);
-    int station = this->stationName(id);
-    int eta = this->stationEta(id) + 10;  // for negative etas
-    int phi = this->stationPhi(id);
-    hash_id = m_module_hashes[station][eta - 1][phi - 1];
+    const unsigned int idx = moduleHashIdx(id);
+    if (idx >= m_module_hashes.size()) return 1;
+    hash_id = m_module_hashes[idx];
     return 0;
-}  // end TgcIdHelper::get_module_hash
+}  // end sTgcIdHelper::get_module_hash
 /*******************************************************************************/
-// int sTgcIdHelper::get_detectorElement_hash(const Identifier& id, IdentifierHash& hash_id) const {
-//  return this->get_module_hash(id, hash_id);
-//}
-
 int sTgcIdHelper::get_detectorElement_hash(const Identifier& id, IdentifierHash& hash_id) const {
-    int station = this->stationName(id);
-    int eta = this->stationEta(id) + 10;  // for negative eta
-    int phi = this->stationPhi(id);
-    int multilayer = this->multilayer(id);
-    hash_id = m_detectorElement_hashes[station][eta - 1][phi - 1][multilayer - 1];
+    const unsigned int idx = detEleHashIdx(id);
+    if (idx >= m_detectorElement_hashes.size()) return 1;
+    hash_id = m_detectorElement_hashes[idx];
     return 0;
-    // return this->get_module_hash(id, hash_id);
+    // return get_module_hash(id, hash_id);
 }
+
 /*******************************************************************************/
 Identifier sTgcIdHelper::multilayerID(const Identifier& channelID) const {
     assert(is_stgc(channelID));
