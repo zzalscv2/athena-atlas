@@ -1,6 +1,7 @@
 #!/bin/sh
 
 # art-include: master/Athena
+# art-include: 23.0/Athena
 # art-description: DAOD building JETM11 mc21
 # art-type: grid
 # art-output: *.pool.root

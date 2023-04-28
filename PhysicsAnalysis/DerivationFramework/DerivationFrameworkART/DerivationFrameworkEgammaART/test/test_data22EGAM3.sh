@@ -1,6 +1,7 @@
 #!/bin/sh
 
 # art-include: master/Athena
+# art-include: 23.0/Athena
 # art-description: DAOD building EGAM3 data22
 # art-type: grid
 # art-output: *.pool.root

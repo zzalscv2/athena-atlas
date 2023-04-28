@@ -4,6 +4,7 @@
 # art-type: grid
 # art-input: mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.AOD.e8453_s3873_r13829
 # art-include: master/Athena
+# art-include: 23.0/Athena
 # art-input-nfiles: 1
 # art-output: DAOD_PHYSVAL.OUT.root
 # art-output: NTUP_PHYSVAL.root
