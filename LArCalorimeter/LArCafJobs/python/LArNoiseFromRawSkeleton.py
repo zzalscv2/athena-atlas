@@ -56,6 +56,9 @@ def fromRunArgs(runArgs):
 
     flags.Calo.Cell.doDeadCellCorr=True
 
+    # To respect --athenaopts 
+    flags.fillFromArgs()
+
     flags.lock()
     
     cfg=MainServicesCfg(flags)

@@ -95,6 +95,10 @@ def fromRunArgs(runArgs):
     log.info('**** Processing preExec')
     processPreExec(runArgs, flags)
 
+    # To respect --athenaopts 
+    log.info('**** Processing athenaopts')
+    flags.fillFromArgs()
+
     # Lock configuration flags
     log.info('**** Locking configuration flags')
     flags.lock()

@@ -127,6 +127,9 @@ def fromRunArgs(runArgs):
     # Pre-exec
     processPreExec(runArgs, flags)
 
+    # To respect --athenaopts 
+    flags.fillFromArgs()
+
     # Lock flags
     flags.lock()
 

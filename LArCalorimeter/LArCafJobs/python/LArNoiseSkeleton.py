@@ -47,6 +47,9 @@ def fromRunArgs(runArgs):
 
     flags.Trigger.doID=False
 
+    # To respect --athenaopts 
+    flags.fillFromArgs()
+
     flags.lock()
     
     cfg=MainServicesCfg(flags)

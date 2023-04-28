@@ -30,6 +30,10 @@ def fromRunArgs(runArgs):
     flags.Trigger.L1.doCalo=False
     flags.Trigger.L1.doTopo=False
 
+
+    # To respect --athenaopts 
+    flags.fillFromArgs()
+
     flags.lock()
     
     cfg=MainServicesCfg(flags)
