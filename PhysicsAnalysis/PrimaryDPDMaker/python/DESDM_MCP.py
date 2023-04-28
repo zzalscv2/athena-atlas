@@ -266,7 +266,7 @@ def DESDMCPOutputCfg(flags, **kwargs):
                   "HLT_xAOD__MuonContainer_eMuonEFInfo" ]
     for muon in xaod_muon:
         container_items+=["xAOD::MuonContainer#{muon}".format(muon = muon), 
-                          "xAOD::MuonAuxContainer#${muon}Aux.".format(muon = muon)]
+                          "xAOD::MuonAuxContainer#{muon}Aux.".format(muon = muon)]
     
     
     trackParticleAuxExclusions="-clusterAssociation.-trackParameterCovarianceMatrices.-parameterX.-parameterY.-parameterZ.-parameterPX.-parameterPY.-parameterPZ.-parameterPosition"

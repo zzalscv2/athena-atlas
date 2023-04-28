@@ -294,11 +294,11 @@ namespace HTXS {
     typedef std::vector<TLV> TLVs;
     
     template <class vec4>
-      TLV MakeTLV(vec4 const p) { return TLV(p.px(),p.py(),p.pz(),p.E()); }
+      TLV MakeTLV(vec4 const & p) { return TLV(p.px(),p.py(),p.pz(),p.E()); }
     
     template <class Vvec4>
       inline TLVs MakeTLVs(Vvec4 const &rivet_jets){ 
-      TLVs jets; for ( auto jet:rivet_jets ) jets.push_back(MakeTLV(jet)); 
+      TLVs jets; for ( const auto & jet:rivet_jets ) jets.push_back(MakeTLV(jet)); 
       return jets; 
     }
     
@@ -537,8 +537,8 @@ namespace Rivet {
     HTXS::Stage1_2_Fine::Category stage1_2_fine_cat_pTjet25GeV;
     /// Stage-1_2 STXS event classifcation, see: https://twiki.cern.ch/twiki/bin/view/LHCPhysics/LHCHXSWGFiducialAndSTXS#Stage_1_2
     HTXS::Stage1_2_Fine::Category stage1_2_fine_cat_pTjet30GeV;
-    /// Flag to distiguish the Z->vv and Z->l+l- decay modes
-    bool isZ2vvDecay;
+    /// Flag to distinguish the Z->vv and Z->l+l- decay modes
+    bool isZ2vvDecay=false;
     /// Error code: Whether classification was succesful or some error occured
     HTXS::ErrorCode errorCode;
   };

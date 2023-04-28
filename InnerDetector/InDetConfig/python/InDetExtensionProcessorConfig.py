@@ -79,7 +79,8 @@ def TrigInDetExtensionProcessorCfg(flags, name="InDetTrigMTExtensionProcessor", 
         from InDetConfig.InDetTrackScoringToolsConfig import (
             InDetTrigAmbiScoringToolCfg)
         InDetExtenScoringTool = acc.popToolsAndMerge(
-            InDetTrigAmbiScoringToolCfg(flags))
+            InDetTrigAmbiScoringToolCfg(flags,
+                                        name="TrigAmbiguityScoringTool"+flags.Tracking.ActiveConfig.input_name))
         acc.addPublicTool(InDetExtenScoringTool)
         kwargs.setdefault("ScoringTool", InDetExtenScoringTool)
 
@@ -100,5 +101,5 @@ def TrigInDetExtensionProcessorCfg(flags, name="InDetTrigMTExtensionProcessor", 
                       flags.Tracking.ActiveConfig.trkTracks_IDTrig)
 
     acc.addEventAlgo(CompFactory.InDet.InDetExtensionProcessor(
-        name + flags.Tracking.ActiveConfig.extension, **kwargs))
+        name + flags.Tracking.ActiveConfig.input_name, **kwargs))
     return acc

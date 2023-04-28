@@ -104,7 +104,9 @@ def InDetTRT_SeededScoringToolCfg(
 
 
 def InDetTrigAmbiScoringToolCfg(
-        flags, name='InDetTrigMT_AmbiguityScoringTool', **kwargs):
+        flags, 
+        name='TrigAmbiguityScoringTool', **kwargs):
+
     acc = ComponentAccumulator()
 
     if "Extrapolator" not in kwargs:
@@ -119,17 +121,23 @@ def InDetTrigAmbiScoringToolCfg(
         kwargs.setdefault("DriftCircleCutTool", acc.popToolsAndMerge(
             InDetTrigTRTDriftCircleCutToolCfg(flags)))
 
+    kwargs.setdefault("minPt", flags.Tracking.ActiveConfig.minPT)
     kwargs.setdefault("useAmbigFcn", True)
     kwargs.setdefault("useTRT_AmbigFcn", False)
     kwargs.setdefault("maxZImp", flags.Tracking.ActiveConfig.maxZImpact)
+    kwargs.setdefault("maxRPhiImp", flags.Tracking.ActiveConfig.maxRPhiImpact)
     kwargs.setdefault("maxEta", flags.Tracking.ActiveConfig.maxEta)
+    kwargs.setdefault("maxSCTHoles", flags.Tracking.ActiveConfig.maxSCTHoles)
+    kwargs.setdefault("maxSiHoles", flags.Tracking.ActiveConfig.maxSiHoles)
     kwargs.setdefault("usePixel", flags.Tracking.ActiveConfig.usePixel)
     kwargs.setdefault("useSCT", flags.Tracking.ActiveConfig.useSCT)
-    # TODO understand and set appropriately, however current setting is probably a correct one
     kwargs.setdefault("doEmCaloSeed", False)
+    kwargs.setdefault("EMROIPhiRZContainer", "")
+    kwargs.setdefault("minTRTonTrk", 0)
+    kwargs.setdefault("minTRTPrecisionFraction", 0)
 
     acc.setPrivateTools(CompFactory.InDet.InDetAmbiScoringTool(
-        name+flags.Tracking.ActiveConfig.name, **kwargs))
+        name=name+flags.Tracking.ActiveConfig.input_name, **kwargs))
     return acc
 
 

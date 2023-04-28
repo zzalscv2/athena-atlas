@@ -18,10 +18,10 @@ def CombinedTrackingPassFlagSets(flags):
     flags_set = []
 
     # Primary Pass
-    if flags.ITk.Tracking.useFTF:
+    if flags.Tracking.useITkFTF:
         flags = flags.cloneAndReplace("Tracking.ActiveConfig", 
                                       "Tracking.ITkFTFPass")
-    elif flags.ITk.Tracking.doFastTracking:
+    elif flags.Tracking.doITkFastTracking:
         flags = flags.cloneAndReplace("Tracking.ActiveConfig",
                                       "Tracking.ITkFastPass")
     else:
@@ -31,15 +31,16 @@ def CombinedTrackingPassFlagSets(flags):
 
     # LRT
     if flags.Tracking.doLargeD0:
-        flagsLRT = flags.cloneAndReplace("Tracking.ActiveConfig",
-                                         "Tracking.ITkLargeD0Pass")
-        if flags.ITk.Tracking.doFastTracking:
+        if flags.Tracking.doITkFastTracking:
             flagsLRT = flags.cloneAndReplace("Tracking.ActiveConfig",
                                              "Tracking.ITkLargeD0FastPass")
+        else:
+            flagsLRT = flags.cloneAndReplace("Tracking.ActiveConfig",
+                                             "Tracking.ITkLargeD0Pass")
         flags_set += [flagsLRT]
 
     # Photon conversion tracking reco
-    if flags.Detector.EnableCalo and flags.ITk.Tracking.doConversionFinding:
+    if flags.Detector.EnableCalo and flags.Tracking.doITkConversionFinding:
         flagsConv = flags.cloneAndReplace("Tracking.ActiveConfig",
                                           "Tracking.ITkConversionFindingPass")
         flags_set += [flagsConv]
@@ -139,7 +140,7 @@ def ITkTrackRecoCfg(flags):
         OutputCombinedTracks="CombinedITkTracks",
         AssociationMapName=(
             "PRDtoTrackMapCombinedITkTracks"
-            if not flags.ITk.Tracking.doFastTracking else "")))
+            if not flags.Tracking.doITkFastTracking else "")))
 
     if flags.Tracking.doTruth:
         from InDetConfig.ITkTrackTruthConfig import ITkTrackTruthCfg
@@ -165,10 +166,10 @@ def ITkTrackRecoCfg(flags):
         flags,
         ClusterSplitProbabilityName=(
             ITkClusterSplitProbabilityContainerName(flags)
-            if not flags.ITk.Tracking.doFastTracking else ""),
+            if not flags.Tracking.doITkFastTracking else ""),
         AssociationMapName=(
             "PRDtoTrackMapCombinedITkTracks"
-            if not flags.ITk.Tracking.doFastTracking else "")))
+            if not flags.Tracking.doITkFastTracking else "")))
 
     if flags.Tracking.doVertexFinding:
         from InDetConfig.InDetPriVxFinderConfig import primaryVertexFindingCfg

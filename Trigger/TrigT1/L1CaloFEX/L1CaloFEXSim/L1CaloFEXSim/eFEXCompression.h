@@ -13,6 +13,7 @@
  #define eFEXCompression_H
                                                                                 
 #include <array>
+#include <atomic>
 
 namespace LVL1 {
 
@@ -46,6 +47,8 @@ public:
   static unsigned int linearize(unsigned int code, int threshold = 0);
   /** Full sequence **/
   static unsigned int decode(int EtVal, int layer);
+
+  static std::atomic<bool> s_disableNoiseCuts;
  
 private: 
   /** Maximum ET value that can be encoded */

@@ -2,7 +2,7 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 if __name__ == "__main__":
-    from InDetConfig.ITkConfigFlags import TrackingComponent
+    from TrkConfig.TrkConfigFlags import TrackingComponent
     from ActsInterop.TrackingComponentConfigurer import TrackingComponentConfigurer
 
     request_collection = {
@@ -20,7 +20,7 @@ if __name__ == "__main__":
         print("=" * 40)
         print(mode)
         print("-" * 40)
-        flags.ITk.Tracking.recoChain = request
+        flags.Tracking.recoChain = request
         configuration = TrackingComponentConfigurer(flags)
         print(configuration)
         print("=" * 40)

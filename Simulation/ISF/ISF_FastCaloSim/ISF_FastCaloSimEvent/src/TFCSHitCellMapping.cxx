@@ -22,12 +22,21 @@ TFCSHitCellMapping::simulate_hit(Hit &hit, TFCSSimulationState &simulstate,
                                  const TFCSTruthState * /*truth*/,
                                  const TFCSExtrapolationState * /*extrapol*/) {
   int cs = calosample();
-  const CaloDetDescrElement *cellele = m_geo->getDDE(cs, hit.eta(), hit.phi());
+  float distance;
+  const CaloDetDescrElement* cellele=m_geo->getDDE(cs,hit.eta(),hit.phi(),&distance);
   ATH_MSG_DEBUG("HIT: cellele=" << cellele << " E=" << hit.E() << " cs=" << cs
                                 << " eta=" << hit.eta()
                                 << " phi=" << hit.phi());
-  if (cellele) {
-    simulstate.deposit(cellele, hit.E());
+  if(cellele) {
+    // If the distance is positive then we are using the nearest cell rather than are inside a cell
+    // If we are more than 0.005mm from the nearest cell we don't create a hit to avoid the build-up of energy in edge cells
+    // For FCSV2 another hit can be created but with a cutoff to avoid looping, 
+    // for FastCaloGAN the rest of the hits in the layer will be scaled up by the energy renormalization step.
+    if (distance<0.005){
+      simulstate.deposit(cellele,hit.E());
+    }else{
+      hit.setXYZE(hit.x(),hit.y(),hit.z(),0.0);
+    }
     return FCSSuccess;
   } else {
     ATH_MSG_ERROR(

@@ -98,13 +98,14 @@ def _precisionTrackingSeq(flags,chainDict):
     name='ElectronPrecisionTracking'
     selAcc=SelectionCA('ElectronPrecisionTracking')
 
+    roisKey = flags.Trigger.InDetTracking.Electron.roi
     precisionInDetReco = InViewRecoCA(name, 
                                         RoITool=CompFactory.ViewCreatorPreviousROITool(), # view maker args
                                         RequireParentView=True, 
-                                        InViewRoIs=flags.Trigger.InDetTracking.Electron.roi)
+                                        InViewRoIs=roisKey)
 
     from TrigInDetConfig.TrigInDetConfig import trigInDetPrecisionTrackingCfg
-    idTracking = trigInDetPrecisionTrackingCfg(flags, signatureName='Electron')
+    idTracking = trigInDetPrecisionTrackingCfg(flags, rois= roisKey, signatureName='Electron')
     precisionInDetReco.mergeReco(idTracking)
     selAcc.mergeReco(precisionInDetReco)
     hypoAlg = CompFactory.TrigStreamerHypoAlg('ElectronprecisionTrackingHypo')

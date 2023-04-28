@@ -555,6 +555,9 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
   //get muctpi fragment data in the form of a vector of timeslices
   const std::vector<LVL1::MuCTPIBits::Slice> &slices = theMuCTPI_Phase1_RDO->slices();
 
+  //count veto'd candidates, to be able to adjust the comparison between candidates and TOBs later
+  uint n_cand_veto;
+
   //https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TrigT1/TrigT1Result/src/MuCTPI_DataWord_Decoder.cxx
   //https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TrigT1/TrigT1Result/TrigT1Result/MuCTPI_DataWord_Decoder.h
 
@@ -627,8 +630,8 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
 	  {
 		  errorSummaryMUCTPI=2;
 		  fill(m_packageName, errorSummaryMUCTPI);
-		  errorSummaryPerLumiBlockMUCTPIX=2;
-		  errorSummaryPerLumiBlockMUCTPIY=currentLumiBlock;
+          errorSummaryPerLumiBlockMUCTPIY=2;
+          errorSummaryPerLumiBlockMUCTPIX=currentLumiBlock;
 		  fill(m_packageName, errorSummaryPerLumiBlockMUCTPIX, errorSummaryPerLumiBlockMUCTPIY);
 	  }
 
@@ -639,6 +642,8 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
 		  candCount = header_candCount;
 		  fill(m_packageName,candCount);
 	  }
+
+      n_cand_veto=0;
 
 	  for(uint iCand=0;iCand<slices[iSlice].cand.size();iCand++)
 	  {
@@ -660,6 +665,8 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
 		  float candEta = slices[iSlice].cand[iCand].eta;
 		  float candPhi = slices[iSlice].cand[iCand].phi;
 		  bool vetoFlag = slices[iSlice].cand[iCand].vetoFlag;
+          if(vetoFlag)
+              n_cand_veto++;
 		  
 		  if(slices[iSlice].cand[iCand].type==LVL1::MuCTPIBits::SubsysID::Barrel)
 		  {
@@ -949,9 +956,9 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
 	  if(header_tobCount != slices[iSlice].tob.size())
 	  {
 		  errorSummaryMUCTPI=3;
-		  fill(m_packageName, errorSummaryMUCTPI);
-		  errorSummaryPerLumiBlockMUCTPIX=3;
-		  errorSummaryPerLumiBlockMUCTPIY=currentLumiBlock;
+          fill(m_packageName, errorSummaryMUCTPI);
+          errorSummaryPerLumiBlockMUCTPIY=3;
+          errorSummaryPerLumiBlockMUCTPIX=currentLumiBlock;
 		  fill(m_packageName, errorSummaryPerLumiBlockMUCTPIX, errorSummaryPerLumiBlockMUCTPIY);
 	  }
 
@@ -971,8 +978,8 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
 		  {
 			  errorSummaryMUCTPI=1;
 			  fill(m_packageName, errorSummaryMUCTPI);
-			  errorSummaryPerLumiBlockMUCTPIX=1;
-			  errorSummaryPerLumiBlockMUCTPIY=currentLumiBlock;
+              errorSummaryPerLumiBlockMUCTPIY=1;
+              errorSummaryPerLumiBlockMUCTPIX=currentLumiBlock;
 			  fill(m_packageName, errorSummaryPerLumiBlockMUCTPIX, errorSummaryPerLumiBlockMUCTPIY);
 		  }
 	  }
@@ -1270,7 +1277,7 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
 			  }
 		  }//side C
 		  
-
+          bool found_match;//used at the end of every cand iteration, to notify in case TOB equivalent not found
 		  // We loop over the vector of tobs and check that every tob has its
 		  // counterpart in the candidates vector, which has been filled 
 		  // with non-vetoed candidates only.
@@ -1278,15 +1285,23 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
 		  // candidates. Once the vector of candidates is zero we stop the loop.
 		  for(uint j=0; j<slices[iSlice].cand.size(); ++j)
 		  {
+              //skip candidate if veto'd (if veto'd => there is no corresponding TOB)
+              if(slices[iSlice].cand[j].vetoFlag)
+                  continue;
+
+              found_match = false;
+
 			  if( slices[iSlice].tob[iTOB].side      == slices[iSlice].cand[j].side      &&
 			      slices[iSlice].tob[iTOB].subsystem == slices[iSlice].cand[j].subsystem &&
 				  slices[iSlice].tob[iTOB].sec       == slices[iSlice].cand[j].num       &&
 				  slices[iSlice].tob[iTOB].pt        == slices[iSlice].cand[j].mappedPt )
-			  {
+              {
+                  found_match = true;
+
 				  if( slices[iSlice].tob[iTOB].etaDecoded == slices[iSlice].cand[j].eta &&
 					  slices[iSlice].tob[iTOB].phiDecoded == slices[iSlice].cand[j].phi )
 				  {
-					  ATH_MSG_DEBUG("Found the correspondence tob/cand");
+                      ATH_MSG_DEBUG("Found the correspondence tob/cand");
 				  }
 				  else 
 				  {
@@ -1301,7 +1316,20 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
 					  fill(m_packageName, errorSummaryPerLumiBlockMUCTPIX, errorSummaryPerLumiBlockMUCTPIY);
 				  }
 			  }
-		  }
+
+              if(!found_match)
+              {
+                  ATH_MSG_WARNING("Didn't find TOB match for candidate:");
+                  slices[iSlice].cand[j].print();
+
+                  errorSummaryMUCTPI=5;
+                  fill(m_packageName, errorSummaryMUCTPI);
+                  errorSummaryPerLumiBlockMUCTPIX=currentLumiBlock;
+                  errorSummaryPerLumiBlockMUCTPIY=5;
+                  fill(m_packageName, errorSummaryPerLumiBlockMUCTPIX, errorSummaryPerLumiBlockMUCTPIY);
+              }
+
+          }//cand loop
 
 
 	  }//TOB for loop
@@ -1313,9 +1341,13 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
       ///if topo<=32, check if equal number of words
       ///todo: maybe should move this check in the RDO building actually...?
       if(slices[iSlice].tob.size()<=32) {
-		  if(slices[iSlice].cand.size()!=slices[iSlice].tob.size())
+          if(slices[iSlice].cand.size()-n_cand_veto!=slices[iSlice].tob.size())
 		  {
-			  ATH_MSG_DEBUG("MUCTPI DQ DEBUG: Cand & TOB #words not equal. LB="<<std::dec<<currentLumiBlock);
+              ATH_MSG_INFO("MUCTPI DQ INFO: Cand & TOB #words not equal. LB="
+                           <<std::dec<<currentLumiBlock
+                           <<". Cand.size="<<slices[iSlice].cand.size()
+                           <<" n_cand_veto="<<n_cand_veto
+                           <<" tob.size="<<slices[iSlice].tob.size());
 			  errorSummaryMUCTPI=4;
 			  fill(m_packageName, errorSummaryMUCTPI);
 			  errorSummaryPerLumiBlockMUCTPIY=4;
@@ -1331,12 +1363,18 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
 	  {
 		  errorSummaryMUCTPI = 2;
 		  fill(m_packageName,errorSummaryMUCTPI);
+          errorSummaryPerLumiBlockMUCTPIY=2;
+          errorSummaryPerLumiBlockMUCTPIX=currentLumiBlock;
+          fill(m_packageName, errorSummaryPerLumiBlockMUCTPIX, errorSummaryPerLumiBlockMUCTPIY);
 	  }
 
 	  if(slices[iSlice].nTOB != slices[iSlice].tob.size())
 	  {
 		  errorSummaryMUCTPI = 3;
 		  fill(m_packageName,errorSummaryMUCTPI);
+          errorSummaryPerLumiBlockMUCTPIY=3;
+          errorSummaryPerLumiBlockMUCTPIX=currentLumiBlock;
+          fill(m_packageName, errorSummaryPerLumiBlockMUCTPIX, errorSummaryPerLumiBlockMUCTPIY);
 	  }
 
 

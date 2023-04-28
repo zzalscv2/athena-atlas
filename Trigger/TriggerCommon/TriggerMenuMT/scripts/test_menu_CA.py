@@ -40,7 +40,6 @@ from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import generateMenuMT
 menu = generateMenuMT(flags)
 acc.merge(menu)
 
-acc.printConfig()
 with open(flags.Trigger.triggerMenuSetup+".pkl", "wb") as f:
     acc.store(f)
 AccumulatorDecorator.printStats()

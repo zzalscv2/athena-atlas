@@ -148,7 +148,7 @@ def ITkSiSpacePointsSeedMakerCfg(flags, name="ITkSpSeedsMaker", **kwargs):
         kwargs.setdefault("maxRadius3",
                           flags.Tracking.ActiveConfig.radMax)
 
-    if flags.ITk.Tracking.doFastTracking:
+    if flags.Tracking.doITkFastTracking:
         kwargs.setdefault("useFastTracking", True)
         kwargs.setdefault("maxSeedsForSpacePoint", 3)
 

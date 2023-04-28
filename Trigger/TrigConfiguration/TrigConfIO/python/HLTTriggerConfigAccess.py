@@ -1,23 +1,30 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from TrigConfIO.TriggerConfigAccessBase import TriggerConfigAccess, ConfigType
+
+from AthenaCommon.Logging import logging
+log = logging.getLogger('HLTTriggerConfigAccess.py')
 
 class HLTMenuAccess(TriggerConfigAccess):
     """
     this class provides access to the HLT menu
     the methods are self-explanatory for people with knowledge of the configuration
     """
-    def __init__(self, filename = None, jsonString=None, dbalias = None, smkey = None ):
+    def __init__(self, filename = None, jsonString = None, dbalias = None, smkey = None ):
         """
         accessor needs to be initialized with either a filename or the dbalias and smkey
         """
         super(HLTMenuAccess,self).__init__( ConfigType.HLTMENU, mainkey = "chains",
-                                            filename = filename, jsonString=jsonString, dbalias = dbalias, dbkey = smkey )
+                                            filename = filename, jsonString = jsonString, dbalias = dbalias, dbkey = smkey )
         self.loader.setQuery({
             2: "SELECT HMT.HTM_DATA FROM {schema}.SUPER_MASTER_TABLE SMT, {schema}.HLT_MENU HMT WHERE HMT.HTM_ID=SMT.SMT_HLT_MENU_ID AND SMT.SMT_ID={dbkey}", # for new db schema
             1: "SELECT HMT.HMT_MENU FROM {schema}.SUPER_MASTER_TABLE SMT, {schema}.HLT_MASTER_TABLE HMT WHERE HMT.HMT_ID=SMT.SMT_HLT_MASTER_TABLE_ID AND SMT.SMT_ID={dbkey}"  # for current db schema
         })
         self.load()
+        if smkey is not None:
+            log.info(f"Loaded HLT menu {self.name()} with {len(self)} chains from {dbalias} with smk {smkey}")
+        elif filename is not None:
+            log.info(f"Loaded HLT menu {self.name()} with {len(self)} chains from file {filename}")
 
     def chainNames(self):
         return self["chains"].keys()
@@ -51,17 +58,20 @@ class HLTPrescalesSetAccess(TriggerConfigAccess):
     this class provides access to the HLT prescales set
     the methods are self-explanatory for people with knowledge of the configuration
     """
-    def __init__(self, filename = None, jsonString=None, dbalias = None, hltpskey = None ):
+    def __init__(self, filename = None, jsonString = None, dbalias = None, hltpskey = None ):
         """
         accessor needs to be initialized with either a filename or the dbalias and hlpskey
         """
         super(HLTPrescalesSetAccess,self).__init__( ConfigType.HLTPS, mainkey = "prescales",
-                                                    jsonString=jsonString, filename = filename, dbalias = dbalias, dbkey = hltpskey )
+                                                    jsonString = jsonString, filename = filename, dbalias = dbalias, dbkey = hltpskey )
         self.loader.setQuery({
             1: "SELECT HPS_DATA FROM {schema}.HLT_PRESCALE_SET HPS WHERE HPS_ID={dbkey}" # for current and new db schema
         })
         self.load()
-
+        if hltpskey is not None:
+            log.info(f"Loaded HLT prescales {self.name()} (size {len(self)}) from {dbalias} with psk {hltpskey}")
+        elif filename is not None:
+            log.info(f"Loaded HLT prescales {self.name()} with {len(self)} chains from file {filename}")
 
     def prescales(self):
         return self["prescales"]
@@ -98,6 +108,10 @@ class HLTJobOptionsAccess(TriggerConfigAccess):
             1: "SELECT JO.JO_CONTENT FROM {schema}.SUPER_MASTER_TABLE SMT, {schema}.JO_MASTER_TABLE JO WHERE JO.JO_ID=SMT.SMT_JO_MASTER_TABLE_ID AND SMT.SMT_ID={dbkey}"  # for current db schema
         })
         self.load()
+        if smkey is not None:
+            log.info(f"Loaded HLT job options {self.name()} with {len(self)} algorithms from {dbalias} with smk {smkey}")
+        elif filename is not None:
+            log.info(f"Loaded HLT job options {self.name()} with {len(self)} chains from file {filename}")
 
     def algorithms(self):
         return self["properties"]
@@ -107,6 +121,11 @@ class HLTJobOptionsAccess(TriggerConfigAccess):
 
     def properties(self, algName):
         return self["properties"][algName]
+
+    def name(self):
+        # job options don't have a name
+        return "HLT JobOptions"
+
         
     def printSummary(self):
         print("Job options")
@@ -118,21 +137,25 @@ class HLTMonitoringAccess(TriggerConfigAccess):
     """
     this class provides access to the HLT monitoring json
     """
-    def __init__(self, filename = None, jsonString=None, dbalias = None, smkey = None ):
+    def __init__(self, filename = None, jsonString = None, dbalias = None, smkey = None, monikey = None):
         """
         accessor needs to be initialized with either a filename or the dbalias and hlpskey
         """
         super(HLTMonitoringAccess,self).__init__( ConfigType.HLTMON, mainkey = "signatures",
-                                                  jsonString = jsonString, filename = filename, dbalias = dbalias, dbkey = smkey )
+                                                  jsonString = jsonString, filename = filename, dbalias = dbalias, dbkey = smkey if smkey else monikey )
 
         self.loader.setQuery({
-            7: "SELECT SMT.SMT_HLT_MENU_ID FROM {schema}.SUPER_MASTER_TABLE SMT WHERE SMT.SMT_ID={dbkey}; SELECT HMG.HMG_DATA FROM {schema}.HLT_MONITORING_GROUPS HMG WHERE HMG.HMG_HLT_MENU_ID={dbkeyResult} AND HMG.HMG_IN_USE = 1" #v7 contains first implementation of monitoring groups)
-            # Equivalent single line implementation for offline cross-checking:
-            # "SELECT HMG_DATA FROM( SELECT * FROM (SELECT SMT.SMT_HLT_MENU_ID FROM {schema}.SUPER_MASTER_TABLE SMT WHERE SMT.SMT_ID={dbkey}) lhs JOIN (SELECT HMG.HMG_HLT_MENU_ID,HMG.HMG_DATA FROM {schema}.HLT_MONITORING_GROUPS HMG WHERE HMG.HMG_IN_USE = 1) rhs ON lhs.SMT_HLT_MENU_ID = rhs.HMG_HLT_MENU_ID);"
-        }) 
-
+            7: "SELECT HMG.HMG_DATA FROM {schema}.HLT_MONITORING_GROUPS HMG, {schema}.SUPER_MASTER_TABLE SMT WHERE HMG.HMG_IN_USE=1 AND SMT.SMT_HLT_MENU_ID = HMG.HMG_HLT_MENU_ID AND SMT.SMT_ID={dbkey} ORDER BY HMG.HMG_ID DESC"
+        } if smkey else {
+            7: "SELECT HMG.HMG_DATA FROM {schema}.HLT_MONITORING_GROUPS HMG WHERE HMG.HMG_ID = {dbkey}"
+        }
+        )
         self.load()
-
+        if smkey is not None:
+            log.info(f"Loaded HLT monitoring {self.name()} with {len(self)} signatures from {dbalias} with smk {smkey}")
+        elif filename is not None:
+            log.info(f"Loaded HLT monitoring {self.name()} with {len(self)} signatures from file {filename}")
+    
 
     def monitoringDict(self):
         """
@@ -178,8 +201,6 @@ class HLTMonitoringAccess(TriggerConfigAccess):
             r = re.compile(wildcard)
             chains = filter(r.search, chains)
         except re.error:
-            from AthenaCommon.Logging import logging
-            log = logging.getLogger( "HLTMonitoringAccess" )
             log.warning("Wildcard regex: {0} is not correct!".filter())
 
         # Create set first to ensure uniquness of elements

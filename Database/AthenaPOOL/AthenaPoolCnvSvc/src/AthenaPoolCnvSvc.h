@@ -201,6 +201,10 @@ private: // data
    int m_metadataClient=0;
 
 private: // properties
+   /// EnableChronoStat, enable ChronoStatSvc metric collection (not reliable in MT jobs)
+   /// default = true.
+   BooleanProperty m_enableChronoStat{this, "EnableChronoStat", true};
+
    /// UseDetailChronoStat, enable detailed output for time and size statistics for AthenaPOOL:
    /// default = false.
    BooleanProperty m_useDetailChronoStat{this,"UseDetailChronoStat",false};

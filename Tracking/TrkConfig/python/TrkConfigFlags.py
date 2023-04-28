@@ -18,6 +18,21 @@ class KalmanUpdatorType(FlagEnum):
     KalmanUpdatorAmg = 'KalmanUpdatorAmg'
 
 
+class PixelClusterSplittingType(FlagEnum):
+    NeuralNet = 'NeuralNet'
+    Truth = 'Truth'
+
+
+class TrackingComponent(FlagEnum):
+    AthenaChain = "AthenaChain"  # full Athena Chain (default)
+    ActsChain = "ActsChain"  # full Acts Chain 
+    # Validation options
+    ValidateActsClusters = "ValidateActsClusters"
+    ValidateActsSpacePoints = "ValidateActsSpacePoints" 
+    ValidateActsSeeds = "ValidateActsSeeds"
+    ValidateActsTracks = "ValidateActsTracks"
+
+
 def createTrackingConfigFlags():
     icf = AthConfigFlags()
 
@@ -58,19 +73,25 @@ def createTrackingConfigFlags():
     # Switch for running TIDE Ambi
     icf.addFlag("Tracking.doTIDE_Ambi", lambda prevFlags:
                 not (prevFlags.Beam.Type is BeamType.Cosmics))
+    # Use simple position and error estimate for on-track pixel cluster
+    icf.addFlag("Tracking.doPixelDigitalClustering", False)
     # Try to split pixel clusters
     icf.addFlag("Tracking.doPixelClusterSplitting",
                 lambda prevFlags: not (prevFlags.Beam.Type is BeamType.Cosmics))
     # choose splitter type: NeuralNet or AnalogClus
     icf.addFlag("Tracking.pixelClusterSplittingType", lambda prevFlags:
-                "NeuralNet" if prevFlags.GeoModel.Run <= LHCPeriod.Run3
-                else "Truth")
+                PixelClusterSplittingType.NeuralNet
+                if prevFlags.GeoModel.Run <= LHCPeriod.Run3
+                else PixelClusterSplittingType.Truth,
+                enum=PixelClusterSplittingType)
     # Cut value for splitting clusters into two parts
     icf.addFlag("Tracking.pixelClusterSplitProb1",
-                lambda prevFlags: (0.5 if prevFlags.GeoModel.Run is LHCPeriod.Run1 else 0.55))
+                lambda prevFlags: (
+                    0.5 if prevFlags.GeoModel.Run is LHCPeriod.Run1 else 0.55))
     # Cut value for splitting clusters into three parts
     icf.addFlag("Tracking.pixelClusterSplitProb2",
-                lambda prevFlags: (0.5 if prevFlags.GeoModel.Run is LHCPeriod.Run1 else 0.45))
+                lambda prevFlags: (
+                    0.5 if prevFlags.GeoModel.Run is LHCPeriod.Run1 else 0.45))
     # Skip ambiguity solver in hadronic ROI
     icf.addFlag("Tracking.doSkipAmbiROI", False)
 
@@ -236,6 +257,21 @@ def createTrackingConfigFlags():
     icf.addFlag("Tracking.doPseudoTracking", False)
     # Special pass using truth information for pattern recognition, removes assumed in-efficencies applied to PseudoTracking
     icf.addFlag("Tracking.doIdealPseudoTracking", False)
+
+    ####################################################################
+
+    # The following flags are only used in ITk configurations
+
+    # Turn running of ITk FastTracking on and off
+    icf.addFlag("Tracking.doITkFastTracking", False)
+    # Turn running of ConversionFinding second pass on and off
+    icf.addFlag("Tracking.doITkConversionFinding",True)
+    # Allows TrigFastTrackFinder to be run as an offline algorithm by replacing
+    # SiSPSeededTrackFinder
+    icf.addFlag("Tracking.useITkFTF", False)
+
+    # enable reco steps 
+    icf.addFlag("Tracking.recoChain", [TrackingComponent.AthenaChain])
 
     ####################################################################
 

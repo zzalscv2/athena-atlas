@@ -10,6 +10,7 @@ __author__  = 'Catrin Bernius'
 __version__=""
 __doc__="Decoding of chain name into a dictionary"
 
+from TriggerMenuMT.HLT.Menu.EventBuildingInfo import isRoIBasedPEB
 from TrigConfHLTUtils.HLTUtils import string2hash
 from AthenaCommon.Logging import logging
 import re
@@ -671,10 +672,6 @@ def dictFromChainName(flags, chainInfo):
     log.debug("Analysing chain with name: %s", chainName)
     chainDict = analyseChainName(chainName,  l1Thresholds, L1item)
     log.debug('ChainProperties: %s', chainDict)
-    
-    from TriggerMenuMT.HLT.CommonSequences.EventBuildingSequences import isRoIBasedPEB
-    # TODO: pass flags by argument instead of import, or find a way to determine PEB type without initialising a temporary PEB tool (which needs flags)
-    _isRoIBasedPEB = isRoIBasedPEB(flags, chainDict['eventBuildType'])
 
     for chainPart in chainDict['chainParts']:
         # fill the sigFolder and subSigs folder
@@ -716,7 +713,7 @@ def dictFromChainName(flags, chainInfo):
 
         if thisChainPartName in ['noalg']:
             # All streamers should be unseeded except RoI-based PEB streamers which need a real RoI for PEB
-            if 'FSNOSEED' not in thisL1 and not _isRoIBasedPEB:
+            if 'FSNOSEED' not in thisL1 and not isRoIBasedPEB(chainDict['eventBuildType']):
                 log.error("noalg chains should be seeded from FSNOSEED. Check %s seeded from %s (defined L1: %s),  signature %s",chainDict['chainName'],thisL1,l1Thresholds,thisSignature)
                 #incorrectL1=True
 

@@ -25,6 +25,12 @@ def signatureSpecificSettingOfFlags(flags,mode):
       flags.roadWidth =        75.
       
     flags.useNewParameterizationTRT = True
+    flags.minTRTonTrk          =9
+
+    #2023fix - it should read 2
+    flags.maxSiHoles           = 5
+    flags.maxSCTHoles          = 5
+    #end 
     
   else:                         #ITk specific settings can be done here while we rely on ConfigSettings
     flags.minPT = [flags.pTmin] #ITk flags have eta dependant settings
@@ -39,6 +45,8 @@ def signatureSpecificSettingOfFlags(flags,mode):
   if flags.isLRT:
     flags.nHolesGapMax        = 1
     flags.nWeightedClustersMin= 8
+    flags.maxSiHoles           = 2
+    flags.maxSCTHoles          = 2
     
   if flags.input_name=="cosmics":
     flags.nClustersMin        = 4
@@ -46,6 +54,7 @@ def signatureSpecificSettingOfFlags(flags,mode):
     flags.Xi2max              = 60.  if mode=="InDet" else [60.]
     flags.Xi2maxNoAdd         = 100. if mode=="InDet" else [100.]
     flags.nWeightedClustersMin= 8
+    flags.minTRTonTrk         = 20
 
   def collToRecordable(flags,name):
     ret = name
@@ -76,7 +85,7 @@ def signatureSpecificSettingOfFlags(flags,mode):
   flags.addFlag("tracks_IDTrig", 
                 collToRecordable(flags, "HLT_IDTrack_{}_IDTrig".format(flags.suffix if flags.input_name != "tauIso" else "Tau")))
 
-  flags.addFlag("refitROT", False) 
+  flags.addFlag("refitROT", True) 
   flags.addFlag("trtExtensionType", "xf") 
 
 

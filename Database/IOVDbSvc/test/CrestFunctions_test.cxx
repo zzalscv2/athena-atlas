@@ -36,7 +36,7 @@ static const bool dontUseRealDatabase=true;
 BOOST_AUTO_TEST_SUITE(CrestFunctionsTest)
   BOOST_AUTO_TEST_CASE(urlBase_test){
     auto baseUrl=urlBase();
-    BOOST_TEST(baseUrl == "http://crest-02.cern.ch:8080");
+    BOOST_TEST(baseUrl == "http://crest-02.cern.ch:9090");
   }
   
   BOOST_AUTO_TEST_CASE(extractHashFromJson_test){

@@ -93,9 +93,19 @@ def defineMenu():
         'L1_TE50_OVERLAY', 'L1_TE600p0ETA49_OVERLAY', 'L1_TE1500p0ETA49_OVERLAY', 'L1_TE3000p0ETA49_OVERLAY',
         'L1_TE3500p0ETA49_OVERLAY', 'L1_TE6500p0ETA49_OVERLAY', 'L1_TE8000p0ETA49_OVERLAY',
         
-         # new calo
+        # new calo
         'L1_gTE200',
         'L1_jTE200',
+        # additional jTE items for 2023 heavy ion runs
+        'L1_jTE600',
+        'L1_jTE1500',
+        'L1_jTE3000',
+        'L1_VjTE200',
+        'L1_VjTE600',
+
+        #L1 forward GAP
+        'L1_GAP_A', 'L1_GAP_C', 'L1_GAP_AANDC',
+
         #UPC - MU
         'L1_MU3V_VTE50', 'L1_MU5VF_VTE50', 'L1_2MU3V_VTE50',
         

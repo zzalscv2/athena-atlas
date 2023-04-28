@@ -1,17 +1,9 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
     
-def setupServicesCfg(flags):
-    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    result = MainServicesCfg(flags)
-    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
-    result.merge(MuonGeoModelCfg(flags))
-    from MuonConfig.MuonGeometryConfig import MuonIdHelperSvcCfg
-    result.merge(MuonIdHelperSvcCfg(flags))
-    
-    return result
 
 def NSWGeoPlottingAlgCfg(flags, name = "NSWGeoPlottingAlg"):
     from AthenaConfiguration.ComponentFactory import CompFactory
+    from MuonGeoModelTest.testGeoModel import setupServicesCfg
     result = setupServicesCfg(flags)   
     event_algo = CompFactory.NSWGeoPlottingAlg(name)
     result.addEventAlgo(event_algo, primary = True)

@@ -8,7 +8,7 @@ atlas_add_library( InDetSimData
                    src/InDetSimData.cxx
                    src/InDetSimDataCollection.cxx
                    PUBLIC_HEADERS InDetSimData
-                   LINK_LIBRARIES AthenaKernel Identifier GeneratorObjects )
+                   LINK_LIBRARIES AthenaKernel Identifier GeneratorObjects AthAllocators)
 
 atlas_add_dictionary( InDetSimDataDict
                       InDetSimData/InDetSimDataDict.h

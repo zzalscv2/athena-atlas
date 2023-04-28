@@ -269,7 +269,7 @@ namespace LVL1::MuCTPIBits {
 			  mappedPt = pt;
           }
       }
-	  void print() //this function has only debug purposes
+      void print() const//this function has only debug purposes
 	  {
 		  std::cout << "Muon word content (cand): ";
 		  std::cout << (side?"Side A, ":"Side C, ");

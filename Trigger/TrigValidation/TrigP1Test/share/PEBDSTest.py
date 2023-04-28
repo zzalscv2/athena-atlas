@@ -12,17 +12,19 @@ from TriggerMenuMT.HLT.Menu import Dev_pp_run3_v1, EventBuildingInfo, StreamInfo
 from TriggerMenuMT.HLT.Config.Utility.ChainDefInMenu import ChainProp
 from TriggerMenuMT.HLT.CommonSequences import EventBuildingSequences
 from TrigPartialEventBuilding.TrigPartialEventBuildingConfig import StaticPEBInfoWriterToolCfg, RoIPEBInfoWriterToolCfg
-from libpyeformat_helper import SubDetector
+from libpyeformat_helper import SubDetector, SourceIdentifier
 from AthenaConfiguration.AllConfigFlags import ConfigFlags
 from AthenaCommon.Include import include
 from AthenaCommon.Logging import logging
 log = logging.getLogger('dataScoutingTest')
 
-# Add new allowed event building identifiers
-EventBuildingInfo.PartialEventBuildingIdentifiers.append('TestPEBOne')
-EventBuildingInfo.PartialEventBuildingIdentifiers.append('TestPEBTwo')
-EventBuildingInfo.PartialEventBuildingIdentifiers.append('TestPEBThree')
-EventBuildingInfo.PartialEventBuildingIdentifiers.append('TestPEBFour')
+# Add new allowed event building identifiers                              : isRoIBasedPEB
+EventBuildingInfo._PartialEventBuildingIdentifiers |= {'TestPEBOne'       : False,
+                                                       'TestPEBTwo'       : False,
+                                                       'TestPEBThree'     : True,
+                                                       'TestPEBFour'      : True,
+                                                       'ElectronDSTest'   : False,
+                                                       'ElectronDSPEBTest': False}
 DataScoutingInfo.DataScoutingIdentifiers['ElectronDSTest'] = 3
 DataScoutingInfo.DataScoutingIdentifiers['ElectronDSPEBTest'] = 3
 DataScoutingInfo.TruncationThresholds[3] = 5*(1024**2) # 5 MB
@@ -65,74 +67,78 @@ def myMenu(menu_name):
 Dev_pp_run3_v1.setupMenu = myMenu
 
 # Override the pebInfoWriterTool function from EventBuildingSequences
-def myPebInfoWriterTool(flags, name, eventBuildType):
-    log.debug('Executing myPebInfoWriterTool')
-    tool = None
-    if 'TestPEBOne' in eventBuildType:
+def myPebInfoWriterToolCfg(flags, name, eventBuildType):
+    log.debug('Executing myPebInfoWriterToolCfg')
+
+    # Main CTP and HLT ROB:
+    HLT_ROB = SourceIdentifier(SubDetector.TDAQ_HLT, DataScoutingInfo.getFullHLTResultID())
+
+    acc = None
+    if 'TestPEBOne' == eventBuildType:
         # TestPEBOne is an example which saves a few detector ROBs
         # and the full HLT result (typically saved in physics streams)
-        tool = StaticPEBInfoWriterToolCfg(name)
-        tool.ROBList = [0x42002e, 0x420060, 0x420064] # a few example LAr ROBs
-        tool.addHLTResultToROBList() # add the main (full) HLT result to the list
-    elif 'TestPEBTwo' in eventBuildType:
+        acc = StaticPEBInfoWriterToolCfg(
+            flags, name,
+            ROBs = [0x42002e, 0x420060, 0x420064, # a few example LAr ROBs
+                    HLT_ROB] )
+
+    elif 'TestPEBTwo' == eventBuildType:
         # TestPEBTwo is an example which saves some detector data,
         # but no HLT result (not needed in detector calibration streams)
-        tool = StaticPEBInfoWriterToolCfg(name)
-        tool.SubDetList = [
-            int(SubDetector.MUON_RPC_BARREL_A_SIDE),
-            int(SubDetector.MUON_RPC_BARREL_C_SIDE)] # example: RPC side A and C
-    elif 'TestPEBThree' in eventBuildType:
+        acc = StaticPEBInfoWriterToolCfg(
+            flags, name,
+            subDets = [SubDetector.MUON_RPC_BARREL_A_SIDE,
+                       SubDetector.MUON_RPC_BARREL_C_SIDE] ) # example: RPC side A and C
+
+    elif 'TestPEBThree' == eventBuildType:
         # TestPEBThree is an example using RoIPEBInfoWriterTool which writes
         # all ROBs within a given RoI, and also the main (full) HLT result
-        tool = RoIPEBInfoWriterToolCfg(name)
-        tool.EtaEdge = 5.0
-        tool.EtaWidth = 0.1
-        tool.PhiWidth = 0.1
-        tool.MaxRoIs = 3
-        tool.addRegSelDets(flags, ['All'])
-        tool.ExtraROBs = []
-        tool.ExtraSubDets = []
-        tool.addHLTResultToROBList() # add the main (full) HLT result to the list
-    elif 'TestPEBFour' in eventBuildType:
+        acc = RoIPEBInfoWriterToolCfg(
+            flags, name,
+            EtaEdge = 5.0,
+            EtaWidth = 0.1,
+            PhiWidth = 0.1,
+            MaxRoIs = 3,
+            regSelDets = ['All'],
+            ROBs = [HLT_ROB] )
+
+    elif 'TestPEBFour' == eventBuildType:
         # TestPEBFour is similar to TestPEBThree, but saves only muon detector
         # ROBs within a larger RoI and no HLT result
-        tool = RoIPEBInfoWriterToolCfg(name)
-        tool.EtaWidth = 0.5
-        tool.PhiWidth = 0.5
-        tool.addRegSelDets(flags, ['MDT', 'CSC', 'RPC', 'TGC', 'MM', 'sTGC']) # all muon detectors
-        tool.ExtraROBs = []
-    elif 'ElectronDSTest' in eventBuildType:
+        acc = RoIPEBInfoWriterToolCfg(
+            flags, name,
+            EtaWidth = 0.5,
+            PhiWidth = 0.5,
+            regSelDets = ['MDT', 'CSC', 'RPC', 'TGC', 'MM', 'sTGC']) # all muon detectors
+
+    elif 'ElectronDSTest' == eventBuildType:
         # ElectronDSTest is an example of pure Data Scouting,
         # where only the special HLT result is saved and nothing else
-        tool = StaticPEBInfoWriterToolCfg(name)
-        moduleId = DataScoutingInfo.getDataScoutingResultID(eventBuildType)
-        tool.addHLTResultToROBList(moduleId)
-    elif 'ElectronDSPEBTest' in eventBuildType:
+        acc = StaticPEBInfoWriterToolCfg(
+            flags, name,
+            ROBs = [SourceIdentifier(SubDetector.TDAQ_HLT,
+                                     DataScoutingInfo.getDataScoutingResultID(eventBuildType))])
+
+    elif 'ElectronDSPEBTest' == eventBuildType:
         # ElectronDSPEBTest is an example of Data Scouting with PEB,
         # where a special HLT result and some detector data are saved
         # (ID + LAr data within an RoI)
-        tool = RoIPEBInfoWriterToolCfg(name)
-        moduleId = DataScoutingInfo.getDataScoutingResultID(eventBuildType)
-        tool.addHLTResultToROBList(moduleId)
-        tool.EtaWidth = 0.3
-        tool.PhiWidth = 0.3
-        tool.addRegSelDets(flags, ['Pixel', 'SCT', 'TRT', 'TTEM', 'TTHEC', 'FCALEM', 'FCALHAD'])
-        tool.ExtraROBs = []
-        tool.ExtraSubDets = []
+        acc = RoIPEBInfoWriterToolCfg(
+            flags, name,
+            ROBs = [SourceIdentifier(SubDetector.TDAQ_HLT,
+                                     DataScoutingInfo.getDataScoutingResultID(eventBuildType))],
+            EtaWidth = 0.3,
+            PhiWidth = 0.3,
+            regSelDets = ['Pixel', 'SCT', 'TRT', 'TTEM', 'TTHEC', 'FCALEM', 'FCALHAD'])
 
     # Name not matched
-    if not tool:
+    if acc is None:
         log.error('PEBInfoWriterTool configuration is missing for event building identifier \'%s\'', eventBuildType)
-        return None
 
-    # Add Data Scouting HLT result ROB
-    if eventBuildType in DataScoutingInfo.getAllDataScoutingResultIDs():
-        moduleId = DataScoutingInfo.getAllDataScoutingResultIDs()[eventBuildType]
-        tool.addHLTResultToROBList(moduleId)
+    return acc
 
-    return tool
 
-EventBuildingSequences.pebInfoWriterTool = myPebInfoWriterTool
+EventBuildingSequences.pebInfoWriterToolCfg = myPebInfoWriterToolCfg
 
 # Define streams and override StreamInfo
 myAllStreams = [

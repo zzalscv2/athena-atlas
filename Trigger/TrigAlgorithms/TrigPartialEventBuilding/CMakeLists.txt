@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name
 atlas_subdir( TrigPartialEventBuilding )
@@ -16,3 +16,8 @@ atlas_add_component( TrigPartialEventBuilding
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} --extend-select=ATL900,ATL901 )
+
+# Tests:
+atlas_add_test( TrigPartialEventBuildingConfig
+   SCRIPT python -m TrigPartialEventBuilding.TrigPartialEventBuildingConfig
+   POST_EXEC_SCRIPT noerror.sh )

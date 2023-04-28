@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRUTHRIVETTOOLS_HIGGSTEMPLATECROSSSECTIONS_H
@@ -45,7 +45,7 @@ namespace Rivet {
     /// @{
 
     /// follow a "propagating" particle and return its last instance
-    Particle getLastInstance(Particle ptcl) const {
+    Particle getLastInstance(const Particle & ptcl) const {
       if ( ptcl.genParticle()->end_vertex() ) {
         if ( !hasChild(ptcl.genParticle(),ptcl.pid()) ) return ptcl;
         else return getLastInstance(ptcl.children()[0]);
@@ -762,7 +762,7 @@ namespace Rivet {
      */
     
   private:
-    double m_sumw;
+    double m_sumw=0.0;
     HTXS::HiggsProdMode m_HiggsProdMode;
     mutable std::array<std::atomic<size_t>, HTXS::NUM_ERRORCODES> m_errorCount ATLAS_THREAD_SAFE {};
     Histo1DPtr m_hist_stage0;

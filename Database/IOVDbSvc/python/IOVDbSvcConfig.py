@@ -53,8 +53,9 @@ def IOVDbSvcCfg(flags, **kwargs):
     result.addService(CompFactory.IOVDbSvc(**kwargs), primary=True)
 
     # Set up POOLSvc with appropriate catalogs
-    from AthenaPoolCnvSvc.PoolCommonConfig import PoolSvcCfg
+    from AthenaPoolCnvSvc.PoolCommonConfig import PoolSvcCfg, AthenaPoolCnvSvcCfg
     result.merge(PoolSvcCfg(flags, withCatalogs=True))
+    result.merge(AthenaPoolCnvSvcCfg(flags))
     result.addService(CompFactory.CondSvc())
     result.addService(CompFactory.ProxyProviderSvc(ProviderNames=['IOVDbSvc']))
 
@@ -135,8 +136,6 @@ def addFolderList(flags, listOfFolderInfoTuple, extensible=False, db=None, modif
     result.getPrimary().Folders+=folders
     if loadFolders:
         result.getCondAlgo('CondInputLoader').Load += loadFolders
-        from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolCnvSvcCfg
-        result.merge(AthenaPoolCnvSvcCfg(flags))
 
     if flags.IOVDb.CleanerRingSize > 0:
         #HLT-jobs set IOVDb.CleanerRingSize to 0 to run without the cleaning-service, 

@@ -98,6 +98,15 @@ def FtagJetCollectionsCfg(cfgFlags, jetcols, pvCols=[]):
         acc.merge(
             RenameInputContainerEmPflowHacksCfg('tracklessAODVersion')
         )
+    
+    #Treating decoration of large-R jets as a special case
+    largeRJetCollection = 'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets'
+    if largeRJetCollection in jetcols:
+
+        nnFiles = GetTaggerTrainingMap(cfgFlags, largeRJetCollection)
+
+        acc.merge(BTagLargeRDecoration(cfgFlags, nnFiles, largeRJetCollection))
+        jetcols.remove(largeRJetCollection)
 
     for jetcol,pvCol in zip(jetcols, pvCols):
         acc.merge(getFtagComponent(
@@ -107,6 +116,42 @@ def FtagJetCollectionsCfg(cfgFlags, jetcols, pvCols=[]):
         ))
 
     return(acc)    
+
+def BTagLargeRDecoration(cfgFlags, nnFiles, jet_name='AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets'):
+
+    # Doesn't need to be configurable at the moment
+    trackContainer = 'GhostTrack'
+    primaryVertexContainer = 'PrimaryVertices'
+    variableRemapping = {'BTagTrackToJetAssociator': trackContainer}
+
+    acc = ComponentAccumulator()
+
+    acc.merge(BTagTrackAugmenterAlgCfg(
+        cfgFlags,
+        TrackCollection='InDetTrackParticles',
+        PrimaryVertexCollectionName=primaryVertexContainer,
+    ))
+
+    for nnFile in nnFiles:
+        # ugly string parsing to get the tagger name
+        tagger_name = nnFile.split('/')[-3]
+
+        acc.addEventAlgo(
+            CompFactory.FlavorTagDiscriminants.JetTagDecoratorAlg(
+                f'{jet_name}{tagger_name}JetTagAlg',
+                container=jet_name,
+                constituentContainer=trackContainer,
+                decorator=CompFactory.FlavorTagDiscriminants.GNNTool(
+                    tagger_name,
+                    nnFile=nnFile,
+                    variableRemapping=variableRemapping,
+                    trackLinkType='IPARTICLE'
+                ),
+            )
+        )
+
+    return acc
+
 
 
 

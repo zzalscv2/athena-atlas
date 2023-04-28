@@ -16,14 +16,17 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 def JetHitAssociationCfg(flags, name="JetHitAssociation", **kwargs):
 
     acc = ComponentAccumulator()
-   
+
     acc.merge(
         InDetPixelPrepDataToxAODCfg(
             flags,
-            ClusterSplitProbabilityName = ClusterSplitProbabilityContainerName(flags)
+            ClusterSplitProbabilityName=ClusterSplitProbabilityContainerName(
+                flags),
+            # see ATR-27293 for discussion on why this was disabled
+            WriteNNinformation=False
         )
     )
-    
+
     acc.merge(
         InDetSCT_PrepDataToxAODCfg(
             flags

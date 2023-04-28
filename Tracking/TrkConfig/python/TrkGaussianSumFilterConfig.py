@@ -53,7 +53,7 @@ def EMGSFTrackFitterCfg(flags, name="EMGSFTrackFitter", **kwargs):
     # i.e not refitting Measurements
     kwargs["ToolForROTCreation"] = None
     if not kwargs["RefitOnMeasurementBase"]:
-        from InDetConfig.TrackingCommonConfig import InDetRotCreatorCfg
+        from TrkConfig.TrkRIO_OnTrackCreatorConfig import InDetRotCreatorCfg
 
         kwargs["ToolForROTCreation"] = acc.popToolsAndMerge(
             InDetRotCreatorCfg(flags)
