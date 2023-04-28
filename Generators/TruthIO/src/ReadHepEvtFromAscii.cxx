@@ -1,6 +1,8 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
+#ifndef HEPMC3
+/// This class is only needed for HepMC2-based builds
 
 #include <set>
 
@@ -168,3 +170,4 @@ StatusCode ReadHepEvtFromAscii::finalize() {
   return StatusCode::SUCCESS;
 
 }
+#endif
