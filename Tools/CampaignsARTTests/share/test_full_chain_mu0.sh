@@ -63,10 +63,12 @@ run "RAWtoALL" Reco_tf.py \
   --multithreaded "True" \
   --postInclude "all:PyJobTransforms.UseFrontier" \
   --preInclude "all:Campaigns.PhaseIINoPileUp" \
-  --preExec "all:ConfigFlags.Acts.TrackingGeometry.MaterialSource='material-maps-ATLAS-P2-RUN4-01-01-00-ITk-HGTD.json'" \
   --inputHitsFile "HITS.pool.root" \
   --outputAODFile "AOD.pool.root" \
   --maxEvents ${number_of_events}
+
+#a missing Acts material map can be overriden by a statement like 
+#--preExec "all:ConfigFlags.Acts.TrackingGeometry.MaterialSource='material-maps-ATLAS-P2-RUN4-01-01-00-ITk-HGTD.json'" \
 
 checkstep "RAWtoALL"
 
