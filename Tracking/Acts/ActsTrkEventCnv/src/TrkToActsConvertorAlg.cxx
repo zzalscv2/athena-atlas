@@ -6,11 +6,20 @@ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 #include "Acts/EventData/VectorTrackContainer.hpp"
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "xAODTracking/TrackJacobianAuxContainer.h"
+#include "xAODTracking/TrackMeasurementAuxContainer.h"
+#include "xAODTracking/TrackParametersAuxContainer.h"
 #include "xAODTracking/TrackStateAuxContainer.h"
-#include "xAODTracking/TrackStateContainer.h"
+#include "ActsTrkEvent/MultiTrajectory.h"
 
 StatusCode ActsTrk::TrkToActsConvertorAlg::initialize() {
   ATH_CHECK(m_trackCollectionKeys.initialize());
+  ATH_CHECK(m_mtjKey.initialize());
+  ATH_CHECK(m_vectorTrackContainer.initialize());
+  ATH_CHECK(m_trackStatesKey.initialize());
+  ATH_CHECK(m_jacobiansKey.initialize());
+  ATH_CHECK(m_measurementsKey.initialize());
+  ATH_CHECK(m_parametersKey.initialize());
   ATH_CHECK(m_convertorTool.retrieve());
   return StatusCode::SUCCESS;
 }
@@ -22,40 +31,66 @@ StatusCode ActsTrk::TrkToActsConvertorAlg::execute(
         "Convertor Tool is not returning tracking geometry. Cannot proceed.");
     return StatusCode::SUCCESS;
   }
+  ATH_MSG_VERBOSE("create containers");
+
+  SG::WriteHandle<xAOD::TrackStateContainer> states(
+      m_trackStatesKey, ctx);
+  ATH_CHECK(states.record(std::make_unique<xAOD::TrackStateContainer>(),
+                        std::make_unique<xAOD::TrackStateAuxContainer>()));
+
+  SG::WriteHandle<xAOD::TrackJacobianContainer> jacobians(
+      m_jacobiansKey, ctx);
+  ATH_CHECK(jacobians.record(std::make_unique<xAOD::TrackJacobianContainer>(),
+                        std::make_unique<xAOD::TrackJacobianAuxContainer>()));
+
+  SG::WriteHandle<xAOD::TrackMeasurementContainer> measurements(
+      m_measurementsKey, ctx);
+  ATH_CHECK(measurements.record(std::make_unique<xAOD::TrackMeasurementContainer>(),
+                        std::make_unique<xAOD::TrackMeasurementAuxContainer>()));
+  
+  SG::WriteHandle<xAOD::TrackParametersContainer> parameters(
+      m_parametersKey, ctx);
+  ATH_CHECK(parameters.record(std::make_unique<xAOD::TrackParametersContainer>(),
+                        std::make_unique<xAOD::TrackParametersAuxContainer>()));
+  
+  ATH_MSG_VERBOSE("About to create multiTraj");
+  auto multiTraj = std::make_unique<MutableMultiTrajectory>(&(*states), &(*parameters), &(*jacobians), &(*measurements));
+  Acts::VectorTrackContainer vecTrk;
+  Acts::TrackContainer<Acts::VectorTrackContainer,
+                       ActsTrk::MultiTrajectory<ActsTrk::IsReadWrite>>
+      tc{vecTrk, *multiTraj};
+  // auto constMultiTraj = multiTraj->convertToReadOnly(); 
   Acts::GeometryContext tgContext = m_convertorTool->trackingGeometryTool()
-                                        ->getGeometryContext(ctx)
-                                        .context();
-  std::vector<ATLASSourceLink::ElementsType> elementCollection;
+                                            ->getGeometryContext(ctx)
+                                            .context();
 
-  // Not used yet, but will be used once I have proper track conversions
-  //   Acts::TrackContainer tc{Acts::VectorTrackContainer{},
-  //                           Acts::VectorMultiTrajectory{}};
-
+    
+  ATH_MSG_VERBOSE("Loop over track collections");
   for (auto handle : m_trackCollectionKeys.makeHandles(ctx)) {
-    // bool conversionSuccessful{false}; Commented out for the moment. Will be
-    // used soon.
-    ATH_MSG_VERBOSE("Trying to load " << handle.key());
     ATH_CHECK(handle.isValid());
-    ATH_MSG_VERBOSE("Got back " << handle->size());
-    for (auto trk : *handle) {
-      // Cannot yet convert tracks, so let's just call this to do *something*
-      std::vector<ATLASSourceLink> trackSourceLinks =
-          m_convertorTool->trkTrackToSourceLinks(tgContext, *trk,
-                                                elementCollection);
-    }
+    ATH_MSG_VERBOSE("Got back " << handle->size() << " tracks from "<< handle.key());
 
-    // Will be adding this back in once I have proper track conversions
-    // implemented
-    //
-    // if (conversionSuccessful) {
-    //   SG::WriteHandle<xAOD::TrackStateContainer> wh_xaodout(
-    //       handle.key() + "ActsStates", ctx);
-    //   // Write out the TrackStateContainer
-    //   ATH_CHECK(
-    //       wh_xaodout.record(std::make_unique<xAOD::TrackStateContainer>(),
-    //                         std::make_unique<xAOD::TrackStateAuxContainer>()));
-    // }
+    m_convertorTool->trkTrackCollectionToActsTrackContainer(
+          tc, *handle, tgContext);
+    ATH_MSG_VERBOSE("multiTraj has  " << multiTraj->size() << " states");
   }
 
+  // Let's dump some information for debugging (will be removed later)
+  ATH_MSG_VERBOSE("TrackStateContainer has  " << states->size() << " states");
+  ATH_MSG_VERBOSE("TrackParametersContainer has  " << parameters->size() << " parameters");
+
+  // Store the MultiTrajectory
+  SG::WriteHandle<ActsTrk::ConstMultiTrajectory> wh_mtj(m_mtjKey, ctx);
+  auto constMultiTraj = std::make_unique<ConstMultiTrajectory>(*multiTraj.get()); // No move ctor?
+  ATH_MSG_VERBOSE("Saving " << constMultiTraj->size() << " MT to "<< wh_mtj.key());
+  ATH_CHECK(wh_mtj.record(std::move(constMultiTraj)));
+
+  // Store the VectorTrackContainer
+  auto constVecTrackCont = std::make_unique<Acts::ConstVectorTrackContainer>(std::move(vecTrk)); 
+  SG::WriteHandle<Acts::ConstVectorTrackContainer> wh_vtc(m_vectorTrackContainer, ctx);
+  ATH_MSG_VERBOSE("Saving " << constVecTrackCont->size_impl() << " tracks to "<< wh_vtc.key());
+  ATH_CHECK(wh_vtc.record(std::move(constVecTrackCont)));
   return StatusCode::SUCCESS;
 }
+
+

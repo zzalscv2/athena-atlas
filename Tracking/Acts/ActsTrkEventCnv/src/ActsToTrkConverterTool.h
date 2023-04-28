@@ -5,6 +5,8 @@
 #ifndef ACTSTRKEVENTCNV_ActsToTrkConverterTool_H
 #define ACTSTRKEVENTCNV_ActsToTrkConverterTool_H
 
+#include <tuple>
+
 // ATHENA
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/IInterface.h"
@@ -12,12 +14,14 @@
 #include "Gaudi/Property.h"
 #include "GaudiKernel/EventContext.h"
 #include "TrkParameters/TrackParameters.h" //typedef, cannot fwd declare
-
+#include "xAODTracking/TrackJacobianContainer.h"
+#include "xAODTracking/TrackParametersContainer.h"
+#include "xAODTracking/TrackStateContainer.h"
+#include "xAODTracking/TrackMeasurementContainer.h"
 
 // PACKAGE
 #include "ActsTrkEventCnv/IActsToTrkConverterTool.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
-
 #include "Acts/EventData/TrackParameters.hpp"
 
 namespace ActsTrk {
@@ -81,6 +85,16 @@ public:
   virtual
   std::unique_ptr<const Trk::TrackParameters>
   actsTrackParametersToTrkParameters(const Acts::BoundTrackParameters &actsParameter, const Acts::GeometryContext& gctx) const override;
+
+  /** Convert TrackCollection to Acts track container. 
+   * @param states The track state container
+   * @param jacobians The track jacobian container
+   * @param measurements The track measurement container
+   * @param parameters The track parameters container
+  */
+  virtual 
+  void trkTrackCollectionToActsTrackContainer(Acts::TrackContainer<Acts::VectorTrackContainer,
+                       ActsTrk::MultiTrajectory<ActsTrk::IsReadWrite>> &tc, const TrackCollection& trackColl, const Acts::GeometryContext& gctx) const override;
 
   virtual
   const IActsTrackingGeometryTool*

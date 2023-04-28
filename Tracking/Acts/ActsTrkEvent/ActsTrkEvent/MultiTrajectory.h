@@ -404,4 +404,8 @@ struct Decoration {
 #include "AthenaKernel/CLASS_DEF.h"
 CLASS_DEF(ActsTrk::ConstMultiTrajectory, 237752966, 1)
 
+// These two lines shouldn't be here, but necessary until we have a proper solution
+#include "Acts/EventData/VectorTrackContainer.hpp"
+CLASS_DEF(Acts::ConstVectorTrackContainer, 1074811884, 1)
+
 #endif

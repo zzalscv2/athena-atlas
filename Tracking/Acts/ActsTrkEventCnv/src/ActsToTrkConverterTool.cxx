@@ -28,12 +28,15 @@
 // ACTS
 #include "Acts/Definitions/Units.hpp"
 #include "Acts/EventData/TrackParameters.hpp"
+#include "Acts/EventData/VectorTrackContainer.hpp"
 #include "Acts/EventData/detail/TransformationBoundToFree.hpp"
 #include "Acts/EventData/detail/TransformationFreeToBound.hpp"
 #include "Acts/Geometry/TrackingGeometry.hpp"
 #include "Acts/Propagator/CovarianceTransport.hpp"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 #include "Acts/Surfaces/Surface.hpp"
+#include "ActsTrkEvent/MultiTrajectory.h"
+#include "Acts/EventData/TrackStatePropMask.hpp"
 
 // STL
 #include <cmath>
@@ -404,6 +407,112 @@ ActsTrk::ActsToTrkConverterTool::actsTrackParametersToTrkParameters(
   throw std::domain_error("Surface type not found");
 }
 
+void ActsTrk::ActsToTrkConverterTool::trkTrackCollectionToActsTrackContainer(
+    Acts::TrackContainer<Acts::VectorTrackContainer,
+                         ActsTrk::MultiTrajectory<ActsTrk::IsReadWrite>> &tc,
+    const TrackCollection &trackColl,
+    const Acts::GeometryContext & /**gctx*/) const {
+  ATH_MSG_VERBOSE("Calling trkTrackCollectionToActsTrackContainer with "
+                  << trackColl.size() << " tracks.");
+
+  for (auto trk : trackColl) {
+    // Do conversions!
+    const DataVector<const Trk::TrackStateOnSurface> *trackStates =
+        trk->trackStateOnSurfaces();
+    if (!trackStates) {
+      ATH_MSG_WARNING("No track states on surfaces found for this track.");
+      continue;
+    }
+
+    auto track = tc.getTrack(tc.addTrack());
+    auto trackStateContainer = tc.trackStateContainer();
+
+    ATH_MSG_VERBOSE("Track has " << trackStates->size()
+                                 << " track states on surfaces.");
+
+    // loop over track states on surfaces, convert and add them to the ACTS
+    // container
+    bool first_tsos = true;  // We need to handle the first one differently
+    for (auto tsos : *trackStates) {
+
+      // Setup the mask
+      Acts::TrackStatePropMask mask = Acts::TrackStatePropMask::None;
+      if (tsos->measurementOnTrack()) {
+        mask |= Acts::TrackStatePropMask::Calibrated;
+      }
+      if (tsos->trackParameters()) {
+        mask |= Acts::TrackStatePropMask::Smoothed;
+      }
+
+      // Setup the index of the trackstate
+      auto index = Acts::MultiTrajectoryTraits::kInvalid;
+      if (!first_tsos) {
+        index = track.tipIndex();
+      }
+      auto actsTSOS = trackStateContainer.getTrackState(
+          trackStateContainer.addTrackState(mask, index));
+      ATH_MSG_VERBOSE("TipIndex: " << track.tipIndex()
+                                   << " TSOS index within trajectory: "
+                                   << actsTSOS.index());
+      track.tipIndex() = actsTSOS.index();
+
+      ATH_MSG_VERBOSE("TrackProxy has " << track.nTrackStates()
+                                 << " track states on surfaces.");
+      if (tsos->trackParameters()) {
+        ATH_MSG_VERBOSE("Converting track parameters.");
+        // TODO - work out whether we should set predicted, filtered, smoothed
+        const Acts::BoundTrackParameters parameters =
+            trkTrackParametersToActsParameters(*(tsos->trackParameters()));
+
+        if (first_tsos) {
+          // This is the first track state, so we need to set the track
+          // parameters
+          track.parameters() = parameters.parameters();
+          track.covariance() = *parameters.covariance();
+          track.setReferenceSurface(
+              parameters.referenceSurface().getSharedPtr());
+          first_tsos = false;
+        } else {
+          // Surfaces not yet implemented in MultiTrajectory.icc
+          // actsTSOS.setReferenceSurface(parameters.referenceSurface().getSharedPtr());
+          // Since we're converting final Trk::Tracks, let's assume they're
+          // smoothed
+          actsTSOS.smoothed() = parameters.parameters();
+          actsTSOS.smoothedCovariance() = *parameters.covariance();
+          // Not yet implemented in MultiTrajectory.icc
+          // actsTSOS.typeFlags() |= Acts::TrackStateFlag::ParameterFlag;
+        }
+      }
+      if (tsos->measurementOnTrack()) {
+        ATH_MSG_VERBOSE("Converting measurement.");
+        auto &measurement = *(tsos->measurementOnTrack());
+        // const Acts::Surface &surface =
+        //     trkSurfaceToActsSurface(measurement.associatedSurface());
+        //  Commented for the moment because Surfaces not yet implemented in
+        //  MultiTrajectory.icc
+
+        int dim = measurement.localParameters().dimension();
+        actsTSOS.allocateCalibrated(dim);
+        if (dim == 1) {
+          actsTSOS.calibrated<1>() = measurement.localParameters();
+          actsTSOS.calibratedCovariance<1>() = measurement.localCovariance();
+          ;
+        } else if (dim == 2) {
+          actsTSOS.calibrated<2>() = measurement.localParameters();
+          actsTSOS.calibratedCovariance<2>() = measurement.localCovariance();
+        } else {
+          throw std::domain_error("Cannot handle measurement dim>2");
+        }
+      }  // end if measurement
+    }    // end loop over track states
+
+    ATH_MSG_VERBOSE("TrackProxy has " << track.nTrackStates()
+                                 << " track states on surfaces.");
+  }
+  ATH_MSG_VERBOSE("Finished converting " << trackColl.size() << " tracks.");
+  ATH_MSG_VERBOSE("ACTS Track container has " << tc.size() << " tracks.");
+}
+
 // Local functions to check/debug Annulus bounds
 
 static void ActsTrk::ActsMeasurementCheck(
@@ -498,12 +607,11 @@ static void ActsTrk::ActsMeasurementCheck(
   }
 }
 
-void ActsTrk::ActsTrackParameterCheck(const Acts::BoundTrackParameters &actsParameter,
-                             const Acts::GeometryContext &gctx,
-                             const Acts::BoundSymMatrix &covpc,
-                             const Acts::BoundVector &targetPars,
-                             const Acts::BoundSymMatrix &targetCov,
-                             const Trk::PlaneSurface *planeSurface) {
+void ActsTrk::ActsTrackParameterCheck(
+    const Acts::BoundTrackParameters &actsParameter,
+    const Acts::GeometryContext &gctx, const Acts::BoundSymMatrix &covpc,
+    const Acts::BoundVector &targetPars, const Acts::BoundSymMatrix &targetCov,
+    const Trk::PlaneSurface *planeSurface) {
 
   std::cout << "ANNULUS PAR COV: ";
   std::cout << actsParameter.referenceSurface().geometryId();
