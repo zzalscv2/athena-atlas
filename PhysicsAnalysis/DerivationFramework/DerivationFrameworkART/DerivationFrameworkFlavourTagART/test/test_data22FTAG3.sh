@@ -1,7 +1,8 @@
 #!/bin/sh
 
 # art-include: master/Athena
-# art-description: DAOD building JETM6 FTAG2 data22
+# art-include: 23.0/Athena
+# art-description: DAOD building FTAG3 data22
 # art-type: grid
 # art-output: *.pool.root
 # art-output: checkFile*.txt
@@ -14,31 +15,19 @@ Derivation_tf.py \
 --CA True \
 --inputAODFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/data22/AOD/data22_13p6TeV.00431906.physics_Main.merge.AOD.r13928_p5279/1000events.AOD.30220215._001367.pool.root.1 \
 --outputDAODFile art.pool.root \
---formats JETM6 FTAG2 \
+--formats FTAG3 \
 --maxEvents -1 \
 
 echo "art-result: $? reco"
 
-checkFile.py DAOD_JETM6.art.pool.root > checkFile_JETM6.txt
+checkFile.py DAOD_FTAG3.art.pool.root > checkFile_FTAG3.txt
 
 echo "art-result: $?  checkfile"
 
-checkxAOD.py DAOD_JETM6.art.pool.root > checkxAOD_JETM6.txt
+checkxAOD.py DAOD_FTAG3.art.pool.root > checkxAOD_FTAG3.txt
 
 echo "art-result: $?  checkxAOD"
 
-checkIndexRefs.py DAOD_JETM6.art.pool.root > checkIndexRefs_JETM6.txt 2>&1
-
-echo "art-result: $?  checkIndexRefs"
-
-checkFile.py DAOD_FTAG2.art.pool.root > checkFile_FTAG2.txt
-
-echo "art-result: $?  checkfile"
-
-checkxAOD.py DAOD_FTAG2.art.pool.root > checkxAOD_FTAG2.txt
-
-echo "art-result: $?  checkxAOD"
-
-checkIndexRefs.py DAOD_FTAG2.art.pool.root > checkIndexRefs_FTAG2.txt 2>&1
+checkIndexRefs.py DAOD_FTAG3.art.pool.root > checkIndexRefs_FTAG3.txt 2>&1
 
 echo "art-result: $?  checkIndexRefs"
