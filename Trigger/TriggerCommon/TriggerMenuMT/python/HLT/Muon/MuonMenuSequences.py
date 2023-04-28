@@ -5,6 +5,7 @@
 from ..Config.MenuComponents import MenuSequence, MenuSequenceCA, RecoFragmentsPool, algorithmCAToGlobalWrapper, SelectionCA, InViewRecoCA, InEventRecoCA
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaCommon.CFElements import parOR, seqAND, seqOR
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -23,6 +24,7 @@ from TrigEDMConfig.TriggerEDMRun3 import recordable
 #-----------------------------------------------------#
 ### ************* Step1  ************* ###
 #-----------------------------------------------------#
+@AccumulatorCache
 def muFastAlgSequenceCfg(flags, is_probe_leg=False):
 
     selAccSA = SelectionCA('L2MuFastSel', isProbe=is_probe_leg)
@@ -403,6 +405,7 @@ def mul2mtCBOvlpRmSequence(flags, is_probe_leg=False):
 ######################
 ###  EFSA step ###
 ######################
+@AccumulatorCache
 def muEFSAAlgSequenceCfg(flags, is_probe_leg=False):
 
     selAccMS = SelectionCA('EFMuMSSel_RoI', isProbe=is_probe_leg)
@@ -630,6 +633,7 @@ def muEFCBLRTIDperfSequence(flags, is_probe_leg=False):
 ######################
 ### EF SA full scan ###
 ######################
+@AccumulatorCache
 def muEFSAFSAlgSequenceCfg(flags):
 
     selAccMS = SelectionCA('EFMuMSSel_FS')
