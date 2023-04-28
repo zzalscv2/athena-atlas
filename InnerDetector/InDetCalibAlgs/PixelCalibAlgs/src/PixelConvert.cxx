@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelCalibAlgs/PixelConvert.h"
@@ -154,7 +154,7 @@ namespace PixelConvert {
     std::istringstream s(onlineID);
     system = 2; // ID
     subSystem=1; // Pixel
-    char c1, c;
+    char c1{}, c{};
     s >> c1;
     switch (c1) {
     case 'D':
@@ -175,7 +175,7 @@ namespace PixelConvert {
       s >> c >> c;
       if ( c!='S' ) return 0;
       { 
-	int sect, insect;
+	int sect{}, insect{};
 	s >> sect;
 	if ( sect<=0 || sect>(NinDisk/NinSector)) return 0;
 	s >> c >> c;
@@ -202,7 +202,7 @@ namespace PixelConvert {
       s >> c >> c;
       if ( c!='B' ) return 0;
       {
-	int bist, stav;
+	int bist{}, stav{};
 	s >> bist >> c >> c >> stav;
 	if ( c!='S' || bist<=0 || bist>BSMax[layer] || stav<=0 || stav>2 ) 
 	  return 0;
@@ -248,7 +248,7 @@ namespace PixelConvert {
   }
 
   std::string OfflineID(const std::string& onlineID) {
-    int system, subSystem, endcap, layer, phi, eta;
+    int system{}, subSystem{}, endcap{}, layer{}, phi{}, eta{};
     if ( OfflineID(onlineID,system,subSystem,endcap,layer,phi,eta) )
       return PackOfflineID(system,subSystem,endcap,layer,phi,eta);
     else return Error;
@@ -274,14 +274,14 @@ namespace PixelConvert {
   }
 
   std::string OfflineID(int hashID) {
-    int system, subSystem, endcap, layer, phi, eta;
+    int system{}, subSystem{}, endcap{}, layer{}, phi{}, eta{};
     OfflineID(hashID,system,subSystem,endcap,layer,phi,eta);
     return PackOfflineID(system,subSystem,endcap,layer,phi,eta);
   }
 
   int HashID(const std::string& ID) {
-    int system, subSystem, endcap, layer, phi, eta;
-    int success;
+    int system{}, subSystem{}, endcap{}, layer{}, phi{}, eta{};
+    int success{};
     if ( ID.at(0)=='[' ) // already offline ID
       success=UnpackOfflineID(ID,system,subSystem,endcap,layer,phi,eta);
     else                 // probably it is online ID
@@ -315,7 +315,7 @@ namespace PixelConvert {
     std::string ID=OnlineID;
     std::string newID(Error);
     size_t pos=0;
-    char ch;
+    char ch{};
     std::replace(ID.begin(), ID.end(), '-', '_');
 
     if ( ID.at(0)=='L' ) {
@@ -367,8 +367,8 @@ namespace PixelConvert {
     std::replace(ID.begin(), ID.end(), '_', '-');
     if ( ID.at(0)=='L' ) return ID;
     std::istringstream in(DCSID);
-    int b,s,dum;
-    char c, c1, c2;
+    int b{},s{},dum{};
+    char c{}, c1{}, c2{};
     in >> c >> dum >> c >> c >> c1 >> b >> c >> c2 >> s;
     if ( c1!='B' || c2!='S' ) return newID; 
     int sector=b*2-3+s;
