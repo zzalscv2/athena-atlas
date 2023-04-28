@@ -1,120 +1,51 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-
-from AthenaCommon.CFElements import findAllAlgorithms
-
-from GaudiKernel.Configurable import WARNING
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from AthenaCommon.Configurable import ConfigurableCABehavior
-from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-# these files are sloppy with imports, see ATLASRECTS-6635
-with ConfigurableCABehavior():
-    from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg
-    from BTagging.BTagConfig import BTagAlgsCfg, GetTaggerTrainingMap
+from BTagging.BTagConfig import BTagAlgsCfg, GetTaggerTrainingMap
+from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg
 
-# for backward compatability
-def FtagJetCollection(jetcol, seq, pvCol='PrimaryVertices', OutputLevel=WARNING):
-    FtagJetCollections([jetcol], seq, [pvCol], OutputLevel)
 
-# this should be able to tag a few collections
-def FtagJetCollections(jetcols, seq, pvCols=[], OutputLevel=WARNING):
+def FtagJetCollectionsCfg(cfgFlags, jet_cols, pv_cols=None):
+    """
+    Return a component accumulator which runs tagging in derivations.
+    Configures several jet collections at once.
+    """
 
-    if len(pvCols) != len(jetcols):
-        if pvCols:
-            raise ValueError('PV collection length is not the same as Jets')
-        pvCols=['PrimaryVertices']*len(jetcols)
-
-    with ConfigurableCABehavior():
-
-        from AthenaConfiguration.AllConfigFlags import ConfigFlags as cfgFlags
-
-        acc = ComponentAccumulator()
-
-        # TODO: For some reason we can't use JetTagCalibCfg here, like
-        # we do in reconstruction, retagging, and trigger. It seems to
-        # break something in the database. Hopefully we'll rewrite the
-        # derivations in pure ComponentAccumulator code, which seems
-        # to support JetTagCalibCfg.
-        _setupCondDb(cfgFlags)
-
-        if 'AntiKt4EMTopoJets' in jetcols:
-            acc.merge(
-                RenameInputContainerEmTopoHacksCfg('oldAODVersion')
-            )
-
-        if 'AntiKt4EMPFlowJets' in jetcols and cfgFlags.BTagging.Trackless:
-            acc.merge(
-                RenameInputContainerEmPflowHacksCfg('tracklessAODVersion')
-            )
-
-        for jetcol,pvCol in zip(jetcols, pvCols):
-            acc.merge(getFtagComponent(
-                cfgFlags,
-                jetcol,
-                pvCol,
-            ))
-
-    # Unpack ComponentAccumulator configuration into the derivation
-    # sequence.
-    algs = findAllAlgorithms(acc.getSequence("AthAlgSeq"))
-    for alg in algs:
-        seq += conf2toConfigurable(alg)
-    acc.wasMerged()
-
-    # This part would merge JetTagCalibCfg, if we ever get it to
-    # work. Unfortunately calling this messes up the muon conditions
-    # algs.
-    #
-    # you can't use accumulator.wasMerged() here because the above
-    # code only merged the algorithms. Instead we rely on this hacky
-    # looking construct.
-    #
-    # acc._sequence = []
-    # appendCAtoAthena(acc)
-
-# Full component accumulator version of the above 
-def FtagJetCollectionsCfg(cfgFlags, jetcols, pvCols=[]):
-    """Config for flvaour tagging in DAODs"""
-
-    if len(pvCols) != len(jetcols):
-        if pvCols:
-            raise ValueError('PV collection length is not the same as Jets')
-        pvCols=['PrimaryVertices']*len(jetcols)
-
+    if pv_cols is None:
+        pv_cols = ['PrimaryVertices'] * len(jet_cols)
+    if len(pv_cols) != len(jet_cols):
+        raise ValueError('PV collection length is not the same as Jets')
 
     acc = ComponentAccumulator()
-
     from JetTagCalibration.JetTagCalibConfig import JetTagCalibCfg
     acc.merge(JetTagCalibCfg(cfgFlags))
 
-    if 'AntiKt4EMTopoJets' in jetcols:
+    if 'AntiKt4EMTopoJets' in jet_cols:
         acc.merge(
             RenameInputContainerEmTopoHacksCfg('oldAODVersion')
         )
 
-    if 'AntiKt4EMPFlowJets' in jetcols and cfgFlags.BTagging.Trackless:
+    if 'AntiKt4EMPFlowJets' in jet_cols and cfgFlags.BTagging.Trackless:
         acc.merge(
             RenameInputContainerEmPflowHacksCfg('tracklessAODVersion')
         )
 
-    for jetcol,pvCol in zip(jetcols, pvCols):
-        acc.merge(getFtagComponent(
-            cfgFlags,
-            jetcol,
-            pvCol,
-        ))
+    for jet_col, pv_col in zip(jet_cols, pv_cols):
+        acc.merge(
+            getFtagComponent(cfgFlags, jet_col, pv_col)
+        )
 
     return(acc)    
 
 
+def getFtagComponent(cfgFlags, jet_col, pv_col):
+    """
+    Return a component accumulator which runs tagging on a single jet collection.
+    """ 
 
-# this returns a component accumulator, which is merged across jet
-# collections in FtagJetCollections above
-def getFtagComponent(cfgFlags, jetcol, pvCol):
-
-    jetcol_name_without_Jets = jetcol.replace('Jets','')
+    jet_col_name_without_Jets = jet_col.replace('Jets','')
     track_collection = 'InDetTrackParticles'
     input_muons = 'Muons'
     if cfgFlags.BTagging.Pseudotrack:
@@ -125,7 +56,7 @@ def getFtagComponent(cfgFlags, jetcol, pvCol):
     acc.merge(BTagTrackAugmenterAlgCfg(
         cfgFlags,
         TrackCollection=track_collection,
-        PrimaryVertexCollectionName=pvCol,
+        PrimaryVertexCollectionName=pv_col,
     ))
 
     # decorate tracks with leptonID
@@ -134,22 +65,30 @@ def getFtagComponent(cfgFlags, jetcol, pvCol):
         trackContainer=track_collection,
     ))
 
+    # decorate detailed truth info
     if cfgFlags.Input.isMC:
-        from InDetTrackSystematicsTools.InDetTrackSystematicsToolsConfig import InDetTrackTruthOriginToolCfg
+        from InDetTrackSystematicsTools.InDetTrackSystematicsToolsConfig import (
+            InDetTrackTruthOriginToolCfg,
+        )
         trackTruthOriginTool = acc.popToolsAndMerge(InDetTrackTruthOriginToolCfg(cfgFlags))
 
+        acc.addEventAlgo(CompFactory.FlavorTagDiscriminants.TruthParticleDecoratorAlg(
+            'TruthParticleDecoratorAlg',
+            trackTruthOriginTool=trackTruthOriginTool
+        ))
         acc.addEventAlgo(CompFactory.FlavorTagDiscriminants.TrackTruthDecoratorAlg(
             'TrackTruthDecoratorAlg',
             trackContainer=track_collection,
             trackTruthOriginTool=trackTruthOriginTool
         ))
 
+    # schedule tagging algorithms
     acc.merge(BTagAlgsCfg(
         inputFlags=cfgFlags,
-        JetCollection=jetcol_name_without_Jets,
-        nnList=GetTaggerTrainingMap(cfgFlags, jetcol_name_without_Jets),
+        JetCollection=jet_col_name_without_Jets,
+        nnList=GetTaggerTrainingMap(cfgFlags, jet_col_name_without_Jets),
         trackCollection=track_collection,
-        primaryVertices=pvCol,
+        primaryVertices=pv_col,
         muons=input_muons,
         renameTrackJets=True,
         AddedJetSuffix='Jets',
@@ -160,8 +99,7 @@ def getFtagComponent(cfgFlags, jetcol, pvCol):
 
 # Valerio's magic hacks for emtopo
 def RenameInputContainerEmTopoHacksCfg(suffix):
-
-    acc=ComponentAccumulator()
+    acc = ComponentAccumulator()
 
     #Delete BTagging container read from input ESD
     AddressRemappingSvc, ProxyProviderSvc=CompFactory.getComps("AddressRemappingSvc","ProxyProviderSvc",)
@@ -181,9 +119,9 @@ def RenameInputContainerEmTopoHacksCfg(suffix):
     acc.addService(ProxyProviderSvc(ProviderNames = [ "AddressRemappingSvc" ]))
     return acc
 
+# Valerio's magic hacks for pflow
 def RenameInputContainerEmPflowHacksCfg(suffix):
-
-    acc=ComponentAccumulator()
+    acc = ComponentAccumulator()
 
     AddressRemappingSvc, ProxyProviderSvc=CompFactory.getComps("AddressRemappingSvc","ProxyProviderSvc",)
     AddressRemappingSvc = AddressRemappingSvc("AddressRemappingSvc")
@@ -201,42 +139,3 @@ def RenameInputContainerEmPflowHacksCfg(suffix):
     acc.addService(AddressRemappingSvc)
     acc.addService(ProxyProviderSvc(ProviderNames = [ "AddressRemappingSvc" ]))
     return acc
-
-
-# hack function to make the database work
-def _setupCondDb(cfgFlags):
-    """
-    TODO: replace this with JetTagCalibCfg
-    """
-    from AthenaCommon.AppMgr import athCondSeq
-    if not hasattr(athCondSeq,"JetTagCalibCondAlg"):
-        Aliases = cfgFlags.BTagging.calibrationChannelAliases
-        grades= cfgFlags.BTagging.Grades
-        RNNIPConfig = {'rnnip':''}
-
-        JetTagCalibCondAlg=CompFactory.Analysis.JetTagCalibCondAlg
-        jettagcalibcondalg = "JetTagCalibCondAlg"
-        readkeycalibpath = "/GLOBAL/BTagCalib/RUN12"
-        connSchema = "GLOBAL_OFL"
-        if not cfgFlags.Input.isMC:
-            readkeycalibpath = readkeycalibpath.replace(
-                "/GLOBAL/BTagCalib","/GLOBAL/Onl/BTagCalib")
-            connSchema = "GLOBAL"
-        histoskey = "JetTagCalibHistosKey"
-        from IOVDbSvc.CondDB import conddb
-
-        conddb.addFolder(
-            connSchema,
-            readkeycalibpath,
-            className='CondAttrListCollection')
-        JetTagCalib = JetTagCalibCondAlg(
-            jettagcalibcondalg,
-            ReadKeyCalibPath=readkeycalibpath,
-            HistosKey = histoskey,
-            taggers = cfgFlags.BTagging.taggerList,
-            channelAliases = Aliases,
-            IP2D_TrackGradePartitions = grades,
-            RNNIP_NetworkConfig = RNNIPConfig)
-
-        athCondSeq+=conf2toConfigurable( JetTagCalib, indent="  " )
-

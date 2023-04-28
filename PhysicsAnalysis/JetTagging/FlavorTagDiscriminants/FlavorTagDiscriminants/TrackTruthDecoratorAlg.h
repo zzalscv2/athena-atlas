@@ -11,9 +11,9 @@
 #include "StoreGate/WriteDecorHandleKey.h"
 #include "StoreGate/ReadDecorHandleKey.h"
 
-#include "xAODTracking/TrackParticleContainerFwd.h"
-#include "InDetTrackSystematicsTools/InDetTrackTruthOriginTool.h"
+#include "xAODTruth/TruthParticleContainerFwd.h"
 #include "xAODTruth/TruthEventContainer.h"
+#include "InDetTrackSystematicsTools/InDetTrackTruthOriginTool.h"
 
 
 namespace FlavorTagDiscriminants {
@@ -27,42 +27,41 @@ namespace FlavorTagDiscriminants {
     virtual StatusCode execute(const EventContext& ) const override;
 
   private:
-
     // Input Containers
     SG::ReadHandleKey< xAOD::TrackParticleContainer > m_TrackContainerKey {
       this,"trackContainer", "InDetTrackParticles",
         "Key for the input track collection"};
-    SG::ReadHandleKey< xAOD::TruthEventContainer > m_TruthEventsKey {
-      this,"truthEvents", "TruthEvents",
-        "Key for the input truth event collection"};
 
     // Decorators for tracks
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_origin_label {
-      this, "truthOriginLabel", "truthOriginLabel", 
+      this, "ftagTruthOriginLabel", "ftagTruthOriginLabel", 
         "Exclusive origin label of the track"};
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_type_label {
-      this, "truthTypeLabel", "truthTypeLabel", 
+      this, "ftagTruthTypeLabel", "ftagTruthTypeLabel", 
         "Exclusive truth type label of the track"};
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_vertex_index {
-      this, "truthVertexIndex", "truthVertexIndex", 
-        "Truth vertex index of the track"};
+      this, "ftagTruthVertexIndex", "ftagTruthVertexIndex", 
+        "ftagTruth vertex index of the track"};
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_barcode {
-      this, "barcode", "barcode", 
+      this, "ftagTruthBarcode", "ftagTruthBarcode", 
         "Barcode of linked truth particle"};
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_parent_barcode {
-      this, "parentBarcode", "parentBarcode", 
+      this, "ftagTruthParentBarcode", "ftagTruthParentBarcode", 
         "Barcode of parent of linked truth particle"};
 
-    // truth origin tool
+    // Truth origin tool
     ToolHandle<InDet::InDetTrackTruthOriginTool> m_trackTruthOriginTool {
       this, "trackTruthOriginTool", "InDet::InDetTrackTruthOriginTool", 
         "track truth origin tool"};
 
-    Gaudi::Property<float> m_truthVertexMergeDistance {
-      this, "truthVertexMergeDistance", 0.1, 
-        "Merge any truth vertices within this distance [mm]"};
-  };
+    // Accessors
+    template <typename T> using Acc = SG::AuxElement::ConstAccessor<T>;
+    Acc<int> m_acc_truthOriginLabel{"ftagTruthOriginLabel"};
+    Acc<int> m_acc_truthTypeLabel{"ftagTruthTypeLabel"};
+    Acc<int> m_acc_truthVertexIndex{"ftagTruthVertexIndex"};
+    Acc<int> m_acc_truthParentBarcode{"ftagTruthParentBarcode"};
 
+  };
 }
 
 #endif
