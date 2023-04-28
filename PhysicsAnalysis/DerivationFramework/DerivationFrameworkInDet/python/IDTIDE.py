@@ -22,6 +22,10 @@ def IDTIDEKernelCfg(flags, name='IDTIDEKernel', **kwargs):
     acc = ComponentAccumulator()
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
 
+    # Cut flow service
+    from EventBookkeeperTools.EventBookkeeperToolsConfig import CutFlowSvcCfg
+    acc.merge(CutFlowSvcCfg(flags))
+
     # Sequence for skimming kernel (if running on data) -> PrepDataToxAOD -> IDTIDE kernel
     # sequence to be used for algorithm which should run before the IDTIDEPresel
     # Disabled as currently blocks decoration of Z0 and thus crashes thinning
