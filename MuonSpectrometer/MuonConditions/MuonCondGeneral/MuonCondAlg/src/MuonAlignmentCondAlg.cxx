@@ -113,6 +113,8 @@ StatusCode MuonAlignmentCondAlg::loadParameters() {
 }
 
 StatusCode MuonAlignmentCondAlg::loadAlignABLines() {
+
+    StatusCode sc = StatusCode::SUCCESS;
     // =======================
     // Write ALine Cond Handle
     // =======================
@@ -153,6 +155,12 @@ StatusCode MuonAlignmentCondAlg::loadAlignABLines() {
             ATH_MSG_ERROR("A- and B-Lines parameters from DB folder <" << currentFolderName << "> failed to load");
             return StatusCode::FAILURE;
         }
+    }
+
+    // After all the folders have been processed, if the A-Lines are empty we are on MC
+    if (!m_aLinesFile.empty() && (int)writeALineCdo.get()->size() == 0) {
+      sc = setALinesFromAscii(writeALineCdo.get());
+      if (sc.isFailure()) return StatusCode::FAILURE;
     }
 
     if (writeALineHandle.record(rangeALineW, std::move(writeALineCdo)).isFailure()) {
@@ -604,7 +612,11 @@ StatusCode MuonAlignmentCondAlg::loadAlignABLines(const std::string& folderName,
                                  << nDecodedLines << "/" << nNewDecodedALines << "/" << nNewDecodedBLines);
 
     // set A-lines from ASCII file
-    if (!m_aLinesFile.empty() && (int)writeALineCdo->size() > 0) setALinesFromAscii(writeALineCdo);
+    StatusCode sc = StatusCode::SUCCESS;
+    if (!m_aLinesFile.empty() && (int)writeALineCdo->size() > 0) {
+      sc = setALinesFromAscii(writeALineCdo);
+      if (sc.isFailure()) return StatusCode::FAILURE;
+    }
 
     // dump A-lines to log file
     if (m_dumpALines && (int)writeALineCdo->size() > 0) dumpALines(folderName, writeALineCdo);
@@ -1109,45 +1121,119 @@ void MuonAlignmentCondAlg::dumpILines(const std::string& folderName, CscInternal
     }
 }
 
-void MuonAlignmentCondAlg::setALinesFromAscii(ALineMapContainer* writeALineCdo) const {
-    ATH_MSG_INFO(" Set alignment constants from text file " << m_aLinesFile);
+StatusCode MuonAlignmentCondAlg::setALinesFromAscii(ALineMapContainer* writeALineCdo) const {
+  ATH_MSG_INFO(" Set alignment constants from text file " << m_aLinesFile);
 
-    std::ifstream infile;
-    infile.open(m_aLinesFile);
+  std::string file_in = PathResolver::find_file(m_aLinesFile, "DATAPATH");
 
-    char line[512];
-    ATH_MSG_DEBUG("reading file");
+  std::ifstream infile;
+  if (!file_in.empty()) {
+    infile.open(file_in.c_str());
+  }
+  else {
+    ATH_MSG_ERROR("MuonAlignmentCondAlg::setALinesFromAscii Could not find Ascii file " << m_aLinesFile <<  " containing A lines");
+    return StatusCode::FAILURE;
+  }
+  if (infile.bad()) {
+    ATH_MSG_ERROR("MuonAlignmentCondAlg::setALinesFromAscii Could not open file " << file_in) ;
+    return StatusCode::FAILURE;
+  }
 
-    while (infile.getline(line, 512)) {
-        std::istringstream is(line);
+  char line[512];
+  ATH_MSG_DEBUG("reading file");
 
-        char AlineMarker[2];
-        std::string name;
-        int jff, jzz, obj;
-        float tras, traz, trat, rots, rotz, rott;
-        if (is >> AlineMarker >> name >> jff >> jzz >> obj >> tras >> traz >> trat >> rots >> rotz >> rott) {
-            ATH_MSG_DEBUG("SUCCESSFULY read line: " << line);
-        } else {
-            ATH_MSG_ERROR("ERROR reading line: " << line);
-        }
+  //If the ALine map is empty we are running on MC. This is for after the
+  //loop over all folders, where for MC we will have an empty map.
+  bool emptyALineMap = false;
+  if ((int)writeALineCdo->size() == 0) {emptyALineMap = true;}
 
-        if (AlineMarker[0] == '\0') {
-            ATH_MSG_DEBUG("read empty line!");
-        } else {
-            // loop through A-line container and find the correct one
-            std::string testStationType;
-            for (auto& [id, ALine] : *writeALineCdo) {
-                int testJff, testJzz, testJob;
-                ALine.getAmdbId(testStationType, testJff, testJzz, testJob);
-                if (testStationType == name && testJff == jff && testJzz == jzz) {
-                    // set parameter if you found it
-                    ALine.setParameters(tras, traz, trat, rots, rotz, rott);
-                    break;
-                }
-            }
-        }
+  while (infile.getline(line, 512)) {
+    std::istringstream is(line);
+
+    char AlineMarker[2];
+    std::string name;
+    int jff, jzz, obj;
+    float tras, traz, trat, rots, rotz, rott;
+    if (is >> AlineMarker >> name >> jff >> jzz >> obj >> tras >> traz >> trat >> rots >> rotz >> rott) {
+      ATH_MSG_DEBUG("SUCCESSFULLY read line: " << line);
+    } else {
+      ATH_MSG_ERROR("ERROR reading line: " << line);
     }
+
+    if (AlineMarker[0] == '\0') {
+      ATH_MSG_DEBUG("read empty line!");
+    } else {
+      if (!emptyALineMap) {
+
+	// loop through A-line container and find the correct one
+	std::string testStationType;
+	for (auto& [id, ALine] : *writeALineCdo) {
+	  int testJff, testJzz, testJob;
+	  ALine.getAmdbId(testStationType, testJff, testJzz, testJob);
+	  if (testStationType == name && testJff == jff && testJzz == jzz) {
+	    // set parameter if you found it
+	    ALine.setParameters(tras, traz, trat, rots, rotz, rott);
+	    break;
+	  }
+	}
+      } else { // Set A lines for MC
+
+	ALinePar newALine;
+	newALine.setAmdbId(name, jff, jzz, obj);
+	newALine.setParameters(tras, traz, trat, rots, rotz, rott);
+	newALine.isNew(true);
+
+	int stationName;
+	Identifier id;
+	if (name[0] == 'M') {
+	  // micromegas case
+	  stationName = m_idHelperSvc->mmIdHelper().stationNameIndex(name);
+	  id = m_idHelperSvc->mmIdHelper().elementID(stationName, jzz, jff);
+	  id = m_idHelperSvc->mmIdHelper().multilayerID(id, obj);
+	} else if (name[0] == 'S') {
+	  // sTGC case
+	  stationName = m_idHelperSvc->stgcIdHelper().stationNameIndex(name);
+	  id = m_idHelperSvc->stgcIdHelper().elementID(stationName, jzz, jff);
+	  id = m_idHelperSvc->stgcIdHelper().multilayerID(id, obj);
+	} else if (name[0] == 'T') {
+	  // tgc case
+	  int stPhi = MuonGM::stationPhiTGC(
+					    name, jff, jzz, m_geometryVersion);  // !!!!! The stationPhiTGC implementation in this package is NOT used !!!!!
+	  int stEta = 1;
+	  if (jzz < 0) stEta = -1;
+	  if (obj != 0) {
+	    // this should become the default now
+	    stEta = obj;
+	    if (jzz < 0) stEta = -stEta;
+	  }
+	  stationName = m_idHelperSvc->tgcIdHelper().stationNameIndex(name);
+	  id = m_idHelperSvc->tgcIdHelper().elementID(stationName, stEta, stPhi);
+	} else if (name.substr(0, 1) == "C") {
+	  // csc case
+	  if(!m_idHelperSvc->hasCSC()) continue; //skip if geometry doesn't include CSCs
+	  stationName = m_idHelperSvc->cscIdHelper().stationNameIndex(name);
+	  id = m_idHelperSvc->cscIdHelper().elementID(stationName, jzz, jff);
+	} else if (name.substr(0, 3) == "BML" && abs(jzz) == 7) {
+	  // rpc case
+	  stationName = m_idHelperSvc->rpcIdHelper().stationNameIndex(name);
+	  id = m_idHelperSvc->rpcIdHelper().elementID(stationName, jzz, jff, 1);
+	} else {
+	  stationName = m_idHelperSvc->mdtIdHelper().stationNameIndex(name);
+	  id = m_idHelperSvc->mdtIdHelper().elementID(stationName, jzz, jff);
+	}
+	  
+	ATH_MSG_VERBOSE("stationName  " << stationName);
+	ATH_MSG_VERBOSE("identifier being assigned is " << m_idHelperSvc->toString(id));
+
+	if (!writeALineCdo->insert_or_assign(id, std::move(newALine)).second) {
+	  ATH_MSG_WARNING("More than one (A-line) entry in file " << m_aLinesFile << " for  " <<  name << " at Jzz/Jff " << jzz << "/" << jff << " --- keep the latest one");
+	}
+      }
     }
+  }
+  
+  return StatusCode::SUCCESS; 
+}
 
 void MuonAlignmentCondAlg::setAsBuiltFromAscii(MdtAsBuiltMapContainer* writeCdo) const {
     ATH_MSG_INFO(" Set alignment constants from text file " << m_asBuiltFile);

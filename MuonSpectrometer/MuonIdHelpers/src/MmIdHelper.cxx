@@ -8,7 +8,10 @@
 
 /*******************************************************************************/
 // Constructor/Destructor
-MmIdHelper::MmIdHelper() : MuonIdHelper("MmIdHelper") {}
+MmIdHelper::MmIdHelper() : MuonIdHelper("MmIdHelper") {
+    m_module_hashes.fill(-1);
+    m_detectorElement_hashes.fill(-1);
+}
 /*******************************************************************************/
 // Initialize dictionary
 int MmIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
@@ -208,19 +211,6 @@ int MmIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     status = init_detectorElement_hashes();  // same as module hash
     status = init_id_to_hashes();
 
-    /*
-    //comment out this bit to test the identifiers
-
-    status = init_channel_hashes();
-    std::cout << " looping over identifiers " << std::endl;
-    const_id_iterator it = channel_begin();
-    const_id_iterator it_end =  channel_end();
-    for( ;it!=it_end;++it ){
-    if( !is_mm(*it) )  (*m_Log) << MSG::DEBUG << "BadStgc: not MM    " <<  print_to_string(*it) << endmsg;
-    if( !valid(*it) )  (*m_Log) << MSG::DEBUG << "BadStgc: not valid " <<  print_to_string(*it) << endmsg;
-    }
-    */
-
     // Setup hash tables for finding neighbors
     ATH_MSG_INFO("Initializing MicroMegas hash indices for finding neighbors ... ");
     status = init_neighbors();
@@ -229,48 +219,58 @@ int MmIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     return (status);
 }  // end MmIdHelper::initialize_from_dictionary
 /*******************************************************************************/
+
+inline unsigned int MmIdHelper::moduleHashIdx(const Identifier& id) const{
+    /// Unfold the array [A][B][C] by
+    /// a * BxC + b * C + c
+    constexpr unsigned int C = s_phiDim;
+    constexpr unsigned int BxC = C*s_etaDim;    
+    const int stEta = stationEta(id);
+    return (stationName(id) - m_stationShift)*BxC + (stEta + s_etaDim/2 - (stEta>0))*C + (stationPhi(id) -1);
+}
+inline unsigned int MmIdHelper::detEleHashIdx(const Identifier& id) const{
+    return moduleHashIdx(id)  *s_mlDim +  (multilayer(id) -1);
+}
+
 int MmIdHelper::init_id_to_hashes() {
-    unsigned int hash_max = this->module_hash_max();
+    for (const Identifier& id : m_module_vec) m_stationShift = std::min(m_stationShift, 1u* stationName(id));
+    unsigned int hash_max = module_hash_max();
     for (unsigned int i = 0; i < hash_max; ++i) {
-        Identifier id = m_module_vec[i];
-        int station = this->stationName(id);
-        int eta = this->stationEta(id) + 10;  // for negative etas
-        int phi = this->stationPhi(id);
-        m_module_hashes[station][eta - 1][phi - 1] = i;
+        const Identifier& id = m_module_vec[i];
+        const unsigned idx = moduleHashIdx(id);
+        if (idx >= m_module_hashes.size() || m_module_hashes[idx] < hash_max){
+            ATH_MSG_FATAL("Failed to assign module hash to "<<show_to_string(id));
+            return 1;
+        }
+        m_module_hashes[idx] = i;
     }
 
-    hash_max = this->detectorElement_hash_max();
+    hash_max = detectorElement_hash_max();
     for (unsigned int i = 0; i < hash_max; ++i) {
-        Identifier id = m_detectorElement_vec[i];
-        int station = this->stationName(id);
-        int eta = this->stationEta(id) + 10;  // for negative eta
-        int phi = this->stationPhi(id);
-        int multilayer = this->multilayer(id);
-        m_detectorElement_hashes[station][eta - 1][phi - 1][multilayer - 1] = i;
+        const Identifier& id = m_detectorElement_vec[i];
+        const unsigned idx = detEleHashIdx(id);
+        if (idx >= m_detectorElement_hashes.size() || m_detectorElement_hashes[idx] < hash_max){
+            ATH_MSG_FATAL("Failed to assign detector hash to "<<show_to_string(id));
+            return 1;
+        }
+        m_detectorElement_hashes[idx] = i;
     }
-
     return 0;
 }  // end MmIdHelper::init_id_to_hashes()
 /*******************************************************************************/
 int MmIdHelper::get_module_hash(const Identifier& id, IdentifierHash& hash_id) const {
-    // Identifier moduleId = elementID(id);
-    // IdContext context = module_context();
-    // return get_hash(moduleId,hash_id,&context);
-    int station = this->stationName(id);
-    int eta = this->stationEta(id) + 10;  // for negative etas
-    int phi = this->stationPhi(id);
-    hash_id = m_module_hashes[station][eta - 1][phi - 1];
+    const unsigned int idx = moduleHashIdx(id);
+    if (idx >= m_module_hashes.size()) return 1;
+    hash_id = m_module_hashes[idx];
     return 0;
 }  // end MmIdHelper::get_module_hash
 /*******************************************************************************/
 int MmIdHelper::get_detectorElement_hash(const Identifier& id, IdentifierHash& hash_id) const {
-    int station = this->stationName(id);
-    int eta = this->stationEta(id) + 10;  // for negative eta
-    int phi = this->stationPhi(id);
-    int multilayer = this->multilayer(id);
-    hash_id = m_detectorElement_hashes[station][eta - 1][phi - 1][multilayer - 1];
+    const unsigned int idx = detEleHashIdx(id);
+    if (idx >= m_detectorElement_hashes.size()) return 1;
+    hash_id = m_detectorElement_hashes[idx];
     return 0;
-    // return this->get_module_hash(id, hash_id);
+    // return get_module_hash(id, hash_id);
 }
 /*******************************************************************************/
 Identifier MmIdHelper::multilayerID(const Identifier& channelID) const {
@@ -297,7 +297,7 @@ Identifier MmIdHelper::multilayerID(const Identifier& moduleID, int multilayer, 
 }
 /*******************************************************************************/
 int MmIdHelper::getFirstPcbChnl(int stationEta, int pcb) const {
-	int pcbNb = abs(stationEta)==1 ? pcb : pcb-5;
+	int pcbNb = std::abs(stationEta)==1 ? pcb : pcb-5;
 	return (pcbNb-1)*1024+1;
 }
 Identifier MmIdHelper::pcbID(int stationName, int stationEta, int stationPhi, int multilayer, int gasGap, int pcb) const {

@@ -1126,7 +1126,7 @@ namespace Muon {
         }
         if (!cscPrdContainer || cscPrdContainer->size() == 0) return nullptr;
         IdentifierHash hash_id;
-        m_idHelperSvc->cscIdHelper().get_geo_module_hash(detElId, hash_id);
+        m_idHelperSvc->cscIdHelper().get_module_hash(detElId, hash_id);
 
         const auto* collptr = cscPrdContainer->indexFindPtr(hash_id);
         if (!collptr) {

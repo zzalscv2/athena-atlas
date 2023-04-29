@@ -56,11 +56,10 @@ def BPHY_TrkVKalVrtFitterCfg(flags, name="BPHY_TrkVKalVrtFitter", **kwargs):
     return acc
 
 def V0VKalVrtFitterCfg(flags, name="V0VKalVrtFitter", **kwargs):
-    acc = ComponentAccumulator()
-
     kwargs.setdefault("MakeExtendedVertex", True)
     kwargs.setdefault("IterationNumber",    30)
+    return BPHY_TrkVKalVrtFitterCfg(flags, name, **kwargs)
 
-    acc.setPrivateTools(acc.popToolsAndMerge(
-        BPHY_TrkVKalVrtFitterCfg(flags, name, **kwargs)))
-    return acc
+def JpsiV0VertexFitCfg(flags, name="JpsiV0VertexFit", **kwargs):
+    kwargs.setdefault("CascadeCnstPrecision", 1e-6)
+    return BPHY_TrkVKalVrtFitterCfg(flags, name, **kwargs)

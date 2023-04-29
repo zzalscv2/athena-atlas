@@ -23,8 +23,6 @@ namespace FlavorTagDiscriminants {
         };
         bool sort_particles(const xAOD::IParticle* particle_A, const xAOD::IParticle* particle_B);
         const xAOD::TruthVertex* get_truth_vertex(const xAOD::TruthParticle* truth );
-        const xAOD::TruthVertex* get_nearest_vertex(const xAOD::TruthVertex* search_vertex, 
-                                                const std::vector<const xAOD::TruthVertex*>& vertices);
         float get_distance(const xAOD::TruthVertex* vertex_A, const xAOD::TruthVertex* vertex_B);
         int get_truth_type(const xAOD::TruthParticle* truth_particle);
         const xAOD::TruthParticle* get_parent_hadron(const xAOD::TruthParticle* truth_particle);

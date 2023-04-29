@@ -59,7 +59,7 @@ def OverlayMainContentCfg(configFlags):
     acc.merge(EventInfoOverlayCfg(configFlags))
 
     # Add truth overlay (needed downstream)
-    if not configFlags.Overlay.FastChain and getEnabledDetectors(configFlags):
+    if not configFlags.Overlay.FastChain and (getEnabledDetectors(configFlags) or configFlags.Digitization.EnableTruth):
         acc.merge(CopyMcEventCollectionCfg(configFlags))
     if configFlags.Digitization.EnableTruth:
         acc.merge(CopyJetTruthInfoCfg(configFlags))

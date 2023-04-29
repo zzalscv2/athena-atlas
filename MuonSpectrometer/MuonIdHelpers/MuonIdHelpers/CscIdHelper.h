@@ -70,14 +70,6 @@ public:
     int get_module_hash(const Identifier& id, IdentifierHash& hash_id) const override;
     int get_detectorElement_hash(const Identifier& id, IdentifierHash& hash_id) const override;
 
-    // in some parts of athena (still) hashes which encode geometrical information for the CSCs are around,
-    // therefore, need those additional hash functions here (feel free to fix it in the future)
-    int get_geo_module_hash(const Identifier& id, IdentifierHash& hash_id) const;
-    int get_geo_detectorElement_hash(const Identifier& id, IdentifierHash& hash_id) const;
-    int get_geo_channel_hash(const Identifier&, IdentifierHash&) const;
-
-    int get_hash_fromGeoHash(const IdentifierHash& geoHash, IdentifierHash& realHash, const IdContext* context) const;
-
     ///////////// compact identifier stuff ends //////////////////////////////////////
 
     // Identifier builders
@@ -157,8 +149,27 @@ public:
 private:
     bool isStNameInTech(const std::string& stationName) const override;
     int init_id_to_hashes();
-    unsigned int m_module_hashes[60][3][8]{};
-    unsigned int m_detectorElement_hashes[60][3][8][2]{};
+    
+    // CSS / CSL
+    static constexpr unsigned int s_stDim = 2;
+    // -1, 1 eta dimension
+    static constexpr unsigned int s_etaDim = 2;
+    /// 8 phi stations
+    static constexpr unsigned int s_phiDim = 8;
+    /// 2 multi layer
+    static constexpr unsigned int s_mlDim = 2;
+
+    static constexpr unsigned int s_modHashDim = s_stDim * s_etaDim * s_phiDim;
+    static constexpr unsigned int s_detHashDim = s_modHashDim * s_mlDim;
+     
+    std::array<unsigned int, s_modHashDim> m_module_hashes{};
+    std::array<unsigned int, s_detHashDim> m_detectorElement_hashes{};
+    
+    unsigned int moduleHashIdx(const Identifier& id) const;
+    unsigned int detEleHashIdx(const Identifier& id) const;
+    /// Minimal station index found
+    unsigned int m_stationShift{std::numeric_limits<unsigned int>::max()};
+ 
 
     // compact id indices
     size_type m_CHAMBERLAYER_INDEX{0};
@@ -169,8 +180,6 @@ private:
     IdDictFieldImplementation m_lay_impl;
     IdDictFieldImplementation m_mea_impl;
     IdDictFieldImplementation m_str_impl;
-
-    int get_geo_hash_calc(const Identifier& compact_id, IdentifierHash& hash_id, const IdContext* context) const;
 
     // Private validation of levels
 

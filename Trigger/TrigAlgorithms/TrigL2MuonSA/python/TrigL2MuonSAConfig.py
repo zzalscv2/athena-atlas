@@ -7,6 +7,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
 
 # Get Rpc data decoder for MuFast data preparator
@@ -340,8 +341,8 @@ def AlignmentBarrelLUTSvcCfg( flags ):
 
     return acc, alignmentBarrelLUTSvc
 
-# In the future, above functions should be moved to TrigL2MuonSA package(?)
 
+@AccumulatorCache
 def l2MuFastAlgCfg( flags, roisKey, setup="", **kwargs ):
 
     acc = ComponentAccumulator()

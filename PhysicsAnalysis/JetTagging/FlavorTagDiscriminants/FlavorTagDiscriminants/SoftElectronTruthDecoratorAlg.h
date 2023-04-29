@@ -34,37 +34,41 @@ namespace FlavorTagDiscriminants {
     SG::ReadHandleKey< xAOD::ElectronContainer > m_ElectronContainerKey {
       this, "electronContainer", "Electrons",
         "Key for the input electron collection"};
-    SG::ReadHandleKey< xAOD::TruthEventContainer > m_TruthEventsKey {
-      this, "truthEvents", "TruthEvents",
-        "Key for the input truth event collection"};
 
     // Decorators for electrons
     SG::WriteDecorHandleKey< xAOD::ElectronContainer > m_dec_origin_label {
-      this, "ftag_truthOriginLabel", "ftag_truthOriginLabel", 
+      this, "ftagTruthOriginLabel", "ftagTruthOriginLabel", 
         "Exclusive origin label of the electron"};
     SG::WriteDecorHandleKey< xAOD::ElectronContainer > m_dec_type_label {
-      this, "ftag_truthTypeLabel", "ftag_truthTypeLabel", 
+      this, "ftagTruthTypeLabel", "ftagTruthTypeLabel", 
         "Exclusive truth type label of the electron"};
     SG::WriteDecorHandleKey< xAOD::ElectronContainer > m_dec_vertex_index {
-      this, "ftag_truthVertexIndex", "ftag_truthVertexIndex", 
+      this, "ftagTruthVertexIndex", "ftagTruthVertexIndex", 
         "Truth vertex index of the electron"};
+    SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_barcode {
+      this, "ftagTruthBarcode", "ftagTruthBarcode", 
+        "Barcode of linked truth particle"};
+    SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_parent_barcode {
+      this, "ftagTruthParentBarcode", "ftagTruthParentBarcode", 
+        "Barcode of parent of linked truth particle"};
 
     // truth origin tool
     ToolHandle<InDet::InDetTrackTruthOriginTool> m_trackTruthOriginTool {
       this, "trackTruthOriginTool", "InDet::InDetTrackTruthOriginTool", 
         "track truth origin tool"};
 
-    Gaudi::Property<float> m_truthVertexMergeDistance {
-      this, "truthVertexMergeDistance", 0.1, 
-        "Merge any truth vertices within this distance [mm]"};
-
-    // Electron types from 
+    // Electron types are defined in
     // PhysicsAnalysis/MCTruthClassifier/MCTruthClassifier/MCTruthClassifierDefs.h#L28
-    const std::set<int> m_valid_types{1, 2, 3, 4};    
+    const std::set<int> m_valid_types{1, 2, 3, 4};
 
-    SG::AuxElement::ConstAccessor<unsigned int> m_classifierParticleType{"classifierParticleType"};
-    SG::AuxElement::ConstAccessor<ElementLink<xAOD::TruthParticleContainer>> m_truthParticleLink{"truthParticleLink"};
-    
+    // Accessors
+    template <typename T> using Acc = SG::AuxElement::ConstAccessor<T>;
+    Acc<unsigned int> m_classifierParticleType{"classifierParticleType"};
+    Acc<ElementLink<xAOD::TruthParticleContainer>> m_truthParticleLink{"truthParticleLink"};
+    Acc<int> m_acc_truthOriginLabel{"ftagTruthOriginLabel"};
+    Acc<int> m_acc_truthTypeLabel{"ftagTruthTypeLabel"};
+    Acc<int> m_acc_truthVertexIndex{"ftagTruthVertexIndex"};
+    Acc<int> m_acc_truthParentBarcode{"ftagTruthParentBarcode"};
   };
 }
 

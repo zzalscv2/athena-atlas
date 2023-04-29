@@ -597,7 +597,7 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
       //decoded thresholds
       for(uint iThr=0;iThr<slices[iSlice].mlt.cnt.size();iThr++)
       {
-          bool thr = slices[iSlice].mlt.cnt[iThr] & 0x1;
+          bool thr = slices[iSlice].mlt.cnt[iThr];//this is a counter value [1-7], but only keeping whether it fired at all
           if(thr)
           {
               multThrX = iThr;

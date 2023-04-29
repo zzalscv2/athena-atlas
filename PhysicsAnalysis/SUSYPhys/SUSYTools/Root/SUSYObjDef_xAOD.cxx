@@ -410,12 +410,12 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
     m_pmgSHnjetWeighter(""),
     m_pmgSHnjetWeighterWZ(""),
     //
-    m_acc_eleIdBaseline(""),
-    m_acc_eleId(""),
-    m_acc_photonIdBaseline(""),
-    m_acc_photonId(""),
+    m_acc_eleIdBaseline("DFCommonElectronsLHLooseBL"),
+    m_acc_eleId("DFCommonElectronsLHTight"),
+    m_acc_photonIdBaseline("DFCommonPhotonsIsEMTight"),
+    m_acc_photonId("DFCommonPhotonsIsEMTight"),
     //
-    m_acc_jetClean("")
+    m_acc_jetClean("DFCommonJets_jetClean_LooseBad")
 {
   //General settings
   declareProperty( "DataSource", m_dataSource = Undefined );
