@@ -34,12 +34,12 @@ def FtagJetCollectionsCfg(cfgFlags, jet_cols, pv_cols=None):
     
     #Treating decoration of large-R jets as a special case
     largeRJetCollection = 'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets'
-    if largeRJetCollection in jetcols:
+    if largeRJetCollection in jet_cols:
 
         nnFiles = GetTaggerTrainingMap(cfgFlags, largeRJetCollection)
 
         acc.merge(BTagLargeRDecoration(cfgFlags, nnFiles, largeRJetCollection))
-        jetcols.remove(largeRJetCollection)
+        jet_cols.remove(largeRJetCollection)
 
     for jet_col, pv_col in zip(jet_cols, pv_cols):
         acc.merge(
