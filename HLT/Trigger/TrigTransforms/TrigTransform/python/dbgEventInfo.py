@@ -179,8 +179,10 @@ class dbgEventInfo:
             if statusLen > 1:
                 # Skip first event - already analyzed
                 for i in range(1, statusLen):
-                    #If the first event status element is repeated skip over the next
-                    if int(event.status()[0]) == int(event.status()[i]):              
+                    #To protect against the repetition of the first event status element
+                    #If the integer value of the current event status element is greater than the length of the onlineErrorCode list
+                    #then skip over this element to the next
+                    if int(event.status()[i]) >= len(self.onlineErrorCode):
                          continue 
                     statusList.append(self.onlineErrorCode[int(event.status()[i])])
             else:

@@ -62,8 +62,6 @@ namespace xAODMaker {
     /// Function executing the algorithm
     virtual StatusCode execute(const EventContext& ctx) const;
 
-    virtual StatusCode finalize();
-
   private:
   
     /// toggle on adding truth links
@@ -141,7 +139,8 @@ namespace xAODMaker {
     inline xAOD::TrackParticle* createParticle(
       xAOD::TrackParticleContainer& xaod,
       const TrackCollection& container,
-      const Trk::Track& tp);
+      const Trk::Track& tp,
+      const EventContext& ctx);
 
     }; // class TrackParticleCnvAlg
 

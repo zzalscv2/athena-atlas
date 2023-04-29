@@ -75,7 +75,7 @@ FastChain_tf.py \
     --digiSeedOffset2 '727' \
     --geometryVersion default:ATLAS-R2-2016-01-00-01 \
     --conditionsTag default:OFLCOND-MC16-SDR-RUN2-09 \
-    --preSimInclude 'Campaigns/MC20a.py,Campaigns/PileUpMC20a.py,Campaigns/MC16SimulationNoIoV.py' \
+    --preInclude 'Campaigns/MC20a.py,Campaigns/PileUpMC20a.py,Campaigns/MC16SimulationNoIoV.py' \
     --postInclude='PyJobTransforms/UseFrontier.py' \
     --postExec 'from IOVDbSvc.CondDB import conddb;conddb.addOverride("/TILE/OFL02/CALIB/SFR","TileOfl02CalibSfr-SIM-05")' \
     --athenaopts '"--config-only=ConfigCG.pkl"' \
@@ -107,7 +107,7 @@ FastChain_tf.py \
     --digiSeedOffset2 '727' \
     --geometryVersion default:ATLAS-R2-2016-01-00-01 \
     --conditionsTag default:OFLCOND-MC16-SDR-RUN2-09 \
-    --preSimInclude 'Campaigns/MC20a.py,Campaigns/PileUpMC20a.py,Campaigns/MC16SimulationNoIoV.py' \
+    --preInclude 'Campaigns/MC20a.py,Campaigns/PileUpMC20a.py,Campaigns/MC16SimulationNoIoV.py' \
     --postInclude='PyJobTransforms/UseFrontier.py' \
     --postExec 'from IOVDbSvc.CondDB import conddb;conddb.addOverride("/TILE/OFL02/CALIB/SFR","TileOfl02CalibSfr-SIM-05")' \
     --imf False

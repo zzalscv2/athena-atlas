@@ -235,16 +235,19 @@ def defineInputsMenu():
             # test thresholds
             ('jXEC100',1),
             ('jTE200',1), ('jTEC200',1), ('jTEFWD100',1), ('jTEFWDA100',1), ('jTEFWDC100',1),
+            # additional heavy ion jTE items
+            ('jTE600',1), ('jTE1500',1), ('jTE3000',1), 
+            ('jTEFWDA1',1), ('jTEFWDC1',1), ('jTEFWDA5',1), ('jTEFWDC5',1),
 
             # spare energy thresholds for commissioning
             ('jXESPARE1',1), ('jXESPARE2',1), ('jXESPARE3',1), ('jXESPARE4',1), ('jXESPARE5',1), ('jXESPARE6',1), ('jXESPARE7',1), ('jXESPARE8',1), ('jXESPARE9',1),
 
             # production
+            # decrement jXESPARE for additional heavy ion jTE thresholds
             ('jXESPARE10',1), ('jXESPARE11',1), ('jXESPARE12',1), ('jXESPARE13',1), 
             ('jXESPARE14',1),
             ('jXESPARE15',1), ('jXESPARE16',1), ('jXESPARE17',1), ('jXESPARE18',1), ('jXESPARE19',1),
-            ('jXESPARE20',1), ('jXESPARE21',1), ('jXESPARE22',1), ('jXESPARE23',1), ('jXESPARE24',1),
-            ('jXESPARE25',1), ('jXESPARE26',1), ('jXESPARE27',1), ('jXESPARE28',1),
+            ('jXESPARE20',1), ('jXESPARE21',1), 
 
         ]
     })

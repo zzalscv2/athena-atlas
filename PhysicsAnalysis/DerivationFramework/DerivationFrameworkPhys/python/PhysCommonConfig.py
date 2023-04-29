@@ -82,7 +82,7 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
     acc.merge(AddTauIDDecorationCfg(flags, TauContainerName="TauJets"))
     acc.merge(AddTauIDDecorationCfg(flags, TauContainerName="TauJets_MuonRM"))
 
-    FTagJetColl = ['AntiKt4EMPFlowJets','AntiKtVR30Rmax4Rmin02TrackJets']
+    FTagJetColl = ['AntiKt4EMPFlowJets','AntiKtVR30Rmax4Rmin02TrackJets', 'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets']
     if flags.GeoModel.Run >= LHCPeriod.Run4:
         FTagJetColl.append('AntiKt4EMTopoJets')
     acc.merge(FtagJetCollectionsCfg(flags,FTagJetColl))

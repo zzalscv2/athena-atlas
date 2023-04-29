@@ -104,8 +104,8 @@ namespace LVL1 {
       
     addET(et, cell);
     
-    //multi linear digitisation encoding
-    unsigned int outET = eFEXCompression::decode(std::round(m_et_float[cell]),layer);
+    //multi linear digitisation encoding ... except in tile (indicated by passing layer=5) .. just convert to 25 MeV steps
+    unsigned int outET = (layer==5) ? std::round(m_et_float[cell]/25) : eFEXCompression::decode(std::round(m_et_float[cell]),layer);
     m_et[cell] = outET;
   }
 

@@ -54,7 +54,7 @@ Trk::JacobianLocalToCurvilinear::JacobianLocalToCurvilinear( const Amg::Vector3D
    const Amg::Vector3D& h = bfield.normalized();
    Amg::Vector3D n(h.cross(curvUVT.curvT()));   // direction normal to track and magnetic field direction
    double alpha = n.mag();                    // | h x t | projection of track normal to magnetic field direction
-   n /= alpha;                                // normalization
+   if(alpha!=0.) n /= alpha;                                // normalization
    double B = bfield.mag();
     
    // -> Psi and pathlength related variables

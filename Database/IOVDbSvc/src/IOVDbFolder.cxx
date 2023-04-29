@@ -59,6 +59,8 @@
 #include <stdexcept>
 #include <fstream>
 
+#include "CrestApi/CrestApi.h"
+
 using namespace IOVDbNamespace;
 
 namespace{
@@ -71,7 +73,7 @@ IOVDbFolder::IOVDbFolder(IOVDbConn* conn,
                          const IOVDbParser& folderprop, MsgStream& msg,
                          IClassIDSvc* clidsvc, IIOVDbMetaDataTool* metadatatool,
                          const bool checklock, const bool outputToFile,
-                         const std::string & source):
+                         const std::string & source, const bool crestToFile):
   AthMessaging("IOVDbFolder"),
   p_clidSvc(clidsvc),
   p_metaDataTool(metadatatool),
@@ -80,6 +82,7 @@ IOVDbFolder::IOVDbFolder(IOVDbConn* conn,
   m_foldertype(AttrList),
   m_chansel(cool::ChannelSelection::all()),
   m_outputToFile{outputToFile},
+  m_crestToFile{crestToFile},
   m_source{source}
 {
   // set message same message level as our parent (IOVDbSvc)
@@ -296,6 +299,39 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
 		  << " " << iovHashVect[indIOV].first);
 
     std::string reply=getPayloadForHash(iovHashVect[indIOV].second);
+
+    if (m_crestToFile){
+     
+      unsigned long long sinceT =  iovHashVect[indIOV].first.first;
+
+      std::string crest_work_dir=std::filesystem::current_path();
+      crest_work_dir += "/crest_data";
+      bool crest_rewrite = true;
+      Crest::CrestClient crestFSClient = Crest::CrestClient(crest_rewrite, crest_work_dir);
+
+      nlohmann::json js =
+      {
+        {"name", completeTag}
+      };
+
+      try{
+        crestFSClient.createTag(js);
+        ATH_MSG_INFO("Tag " << completeTag << " saved to disk.");
+        ATH_MSG_INFO("CREST Dump dir = " << crest_work_dir);
+      }
+      catch (const std::exception& e) {
+        ATH_MSG_WARNING("Data saving for tag " << completeTag << " failed: " << e.what());
+      }
+
+      try{
+        crestFSClient.storePayloadDump(completeTag, sinceT, reply);
+        ATH_MSG_INFO("Data (payload and IOV) saved for tag " << completeTag << ".");
+      }
+      catch (const std::exception& e) {
+        ATH_MSG_WARNING("Data (payload and IOV) saving for tag " << completeTag<<" failed; " << e.what());
+      }
+    }
+
     if (reply.empty()){
       ATH_MSG_FATAL("Reading channel data from "<<m_foldername<<" failed.");
       return false;
@@ -999,6 +1035,49 @@ IOVDbFolder::preLoadFolder(ITagInfoMgr *tagInfoMgr , const unsigned int cacheRun
         const std::string & payloadSpec = payloadSpecificationForTag(crestTag);
         //determine foldertype from the description, the spec and the number of channels
         m_foldertype = IOVDbNamespace::determineFolderType(m_folderDescription, payloadSpec, m_channums);
+ 
+        if (m_crestToFile){
+          int n_size = m_channums.size();
+	  nlohmann::json chan_list = nlohmann::json::array();
+          for (int i = 0; i < n_size; i++) {
+
+            nlohmann::json elem;
+	    std::string key = std::to_string(m_channums[i]);
+            elem[key] = m_channames[i];
+            chan_list.push_back(elem);
+          }
+
+          char ch = ':';
+          int colsize = std::count(payloadSpec.begin(), payloadSpec.end(), ch);
+
+	  nlohmann::json tag_meta;
+          tag_meta["tagName"] = crestTag;
+          tag_meta["description"] = "";
+          tag_meta["chansize"] = n_size;
+          tag_meta["colsize"] = colsize;
+
+	  nlohmann::json tagInfo;
+          tagInfo["channel_list"] = chan_list;
+          tagInfo["node_description"] = m_folderDescription;
+          tagInfo["payload_spec"] = payloadSpec;
+
+          tag_meta["tagInfo"] = tagInfo;
+
+          std::string crest_work_dir=std::filesystem::current_path();
+          crest_work_dir += "/crest_data";
+          bool crest_rewrite = true;
+          Crest::CrestClient crestFSClient = Crest::CrestClient(crest_rewrite, crest_work_dir);
+
+          try{
+            crestFSClient.createTagMetaInfo(tag_meta);;
+            ATH_MSG_INFO("Tag meta info for " << crestTag << " saved to disk.");
+            ATH_MSG_INFO("CREST Dump dir = " << crest_work_dir);
+          }
+          catch (const std::exception& e) {
+            ATH_MSG_WARNING("Tag meta info saving for tag " << crestTag << " failed: " << e.what());
+          }
+	} // m_crestToFile
+
     } else {
       // data being read from COOL
       auto fldPtr=m_conn->getFolderPtr<cool::IFolderPtr>(m_foldername);

@@ -46,7 +46,6 @@ def MuonRecTrackParticleContainerCnvToolCfg(flags, name = "MuonRecTrackParticleC
 def TrackCollectionCnvToolCfg(flags, name="TrackCollectionCnvTool", **kwargs):
     if flags.Detector.GeometryITk:
         name = name.replace("InDet", "ITk")
-        from InDetConfig.ITkTrackRecoConfig import ITkTrackCollectionCnvToolCfg
         return ITkTrackCollectionCnvToolCfg(flags, name, **kwargs)
 
     result = ComponentAccumulator()
@@ -99,7 +98,6 @@ def TrackParticleCnvAlgCfg(flags, name="TrackParticleCnvAlg",
                            **kwargs):
     if flags.Detector.GeometryITk:
         name = name.replace("InDet", "ITk")
-        from InDetConfig.ITkTrackRecoConfig import ITkTrackParticleCnvAlgCfg
         return ITkTrackParticleCnvAlgCfg(flags, name,
                                          ClusterSplitProbabilityName,
                                          AssociationMapName,

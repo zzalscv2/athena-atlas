@@ -1,14 +1,10 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from TrigEDMConfig import DataScoutingInfo
 from AthenaCommon.Logging import logging
 log = logging.getLogger( __name__ )
 
 '''
 This file defines Event Building identifiers which can be used in chain names.
-To avoid circular dependency between TrigEDMConfig and Menu, the Data Scouting
-identifiers are moved to TrigEDMConfig.DataScoutingInfo. Nevertheless, Data
-Scouting is just a special case of Partial Event Building.
 
 When adding new identifiers, please follow the naming convention
     SomeNamePEBVariant for Partial Event Building (here) or
@@ -21,30 +17,38 @@ Possible examples:
 LArPEB, LumiPEB, RPCPEB, TrkPEB, PhysicsTLA
 '''
 
-
-# PEB identifiers
-PartialEventBuildingIdentifiers = [
-    'BeamSpotPEB',
-    'LArPEBCalib',
-    'MuonTrkPEB',
-    'IDCalibPEB',
-    'LArPEBHLT',
-    'LArPEB',
-    'LArPEBNoise',
-    'LATOMEPEB',
-    'SCTPEB',
-    'TilePEB',
-    'AlfaPEB',
-    'ZDCPEB',
-    'AFPPEB',
-    'LumiPEB',
-    'Lvl1CaloPEB',
-]
-
-
-def getAllPartialEventBuildingIdentifiers():
-    return PartialEventBuildingIdentifiers
+# Dictionary with PEB identifiers and if RoI-based PEB is used:
+_PartialEventBuildingIdentifiers = {
+    'BeamSpotPEB' : False,
+    'MuonTrkPEB' : True,
+    'IDCalibPEB' : True,
+    'LArPEB' : True,
+    'LArPEBCalib' : False,
+    'LArPEBHLT' : True,
+    'LArPEBNoise' : True,
+    'LATOMEPEB' : False,
+    'SCTPEB' : False,
+    'TilePEB' : False,
+    'AlfaPEB' : False,
+    'ZDCPEB' : False,
+    'AFPPEB' : False,
+    'LumiPEB' : False,
+    'Lvl1CaloPEB' : False,
+    # DataScouting identifiers from TrigEDMConfig.DataScoutingInfo:
+    'CostMonDS': False,
+    'PhysicsTLA': False,
+    'JetPEBPhysicsTLA' : True,
+}
 
 
 def getAllEventBuildingIdentifiers():
-    return PartialEventBuildingIdentifiers + DataScoutingInfo.getAllDataScoutingIdentifiers()
+    return _PartialEventBuildingIdentifiers.keys()
+
+
+def isRoIBasedPEB(eventBuildType):
+    """Helper function to determine if eventBuildType corresponds to RoI-based PEB"""
+    try:
+        return _PartialEventBuildingIdentifiers[eventBuildType]
+    except KeyError:
+        log.error("'%s' is not a known event building identifier", eventBuildType)
+        raise

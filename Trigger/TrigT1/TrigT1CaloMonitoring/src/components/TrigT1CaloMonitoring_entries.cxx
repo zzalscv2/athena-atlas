@@ -19,6 +19,7 @@
 #include "../JfexInputMonitorAlgorithm.h"
 
 #include "../EfexSimMonitorAlgorithm.h"
+#include "../L1IDFilterAlgorithm.h"
 
 // Run 3
 DECLARE_COMPONENT( CpmMonitorAlgorithm )
@@ -41,3 +42,5 @@ DECLARE_COMPONENT( GfexInputMonitorAlgorithm )
 DECLARE_COMPONENT( JfexInputMonitorAlgorithm )
 
 DECLARE_COMPONENT( EfexSimMonitorAlgorithm )
+
+DECLARE_COMPONENT( L1IDFilterAlgorithm )

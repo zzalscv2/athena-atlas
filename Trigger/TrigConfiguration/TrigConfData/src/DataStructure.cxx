@@ -253,6 +253,7 @@ TrigConf::DataStructure::getKeys() const
    if ( ! data().empty() &&
         ! data().front().first.empty() )
       {
+         keys.reserve(data().size());
          for( auto & entry : data() ) {
             keys.push_back(entry.first);
          }

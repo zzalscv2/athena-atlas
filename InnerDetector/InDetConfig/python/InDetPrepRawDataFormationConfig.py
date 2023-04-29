@@ -263,7 +263,7 @@ def TrigTRTRIOMakerCfg(flags, name="InDetTrigMTTRTDriftCircleMaker", **kwargs):
     kwargs.setdefault("RoIs", flags.Tracking.ActiveConfig.roi)
     
     acc.addEventAlgo(CompFactory.InDet.TRT_RIO_Maker(
-        name+"_"+flags.Tracking.ActiveConfig.name, **kwargs))
+        name+"_"+flags.Tracking.ActiveConfig.input_name, **kwargs))
     return acc
 
 def AthenaTrkClusterizationCfg(flags):

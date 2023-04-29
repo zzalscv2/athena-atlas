@@ -167,7 +167,6 @@ TrigConf::L1Menu::clear()
    m_algorithmsByOutput.clear(); 
 
    m_ctp.clear();
-
 }
 
 unsigned int 

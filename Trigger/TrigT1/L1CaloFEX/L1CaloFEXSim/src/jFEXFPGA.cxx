@@ -225,7 +225,16 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection) {
         jXE_tob->initialize(m_id,m_jfexid,jXE_tobword,thr_jXE.resolutionMeV(),0);
         m_Met_tobwords.push_back(std::move(jXE_tob));
         
-        jTE_tobword = m_IjFEXFormTOBsTool->formSumETTOB(m_jFEXsumETAlgoTool->getETlowerEta(bin_pos),m_jFEXsumETAlgoTool->getETupperEta(bin_pos),thr_jTE.resolutionMeV());
+        int  lowEt = m_jFEXsumETAlgoTool->getETlowerEta(bin_pos);
+        int highEt = m_jFEXsumETAlgoTool->getETupperEta(bin_pos);
+        
+        // NOTE: Foward FPGA in the C-side is already flipped, however we still need to flip the jFEX module 1 and 2 
+        if(m_jfexid == 1 || m_jfexid == 2){
+            lowEt  = m_jFEXsumETAlgoTool->getETupperEta(bin_pos);
+            highEt = m_jFEXsumETAlgoTool->getETlowerEta(bin_pos);
+        }
+        
+        jTE_tobword = m_IjFEXFormTOBsTool->formSumETTOB(lowEt,highEt,thr_jTE.resolutionMeV());
         jTE_tob->initialize(m_id,m_jfexid,jTE_tobword,thr_jTE.resolutionMeV(),0);
         m_sumET_tobwords.push_back(std::move(jTE_tob));
     }

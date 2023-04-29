@@ -64,7 +64,6 @@ protected:
         
         std::unordered_map<int,std::vector<int> > m_map_Etvalues;
         
-        
   };
 
 

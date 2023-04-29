@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from InDetConfig.ITkConfigFlags import TrackingComponent
+from TrkConfig.TrkConfigFlags import TrackingComponent
  
 class TrackingComponentConfigurer:
     __configuration_setters = {
@@ -14,7 +14,7 @@ class TrackingComponentConfigurer:
     
     def __init__(self,
                  flags):
-        configuration_requests = flags.ITk.Tracking.recoChain
+        configuration_requests = flags.Tracking.recoChain
         assert isinstance(configuration_requests, list)
     
         # Athena Algorithms

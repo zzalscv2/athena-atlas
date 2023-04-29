@@ -4,6 +4,7 @@
 #include "EfexSimMonitorAlgorithm.h"
 #include "eFEXTOBSimDataCompare.h"
 #include <set>
+#include "StoreGate/ReadDecorHandle.h"
 
 EfexSimMonitorAlgorithm::EfexSimMonitorAlgorithm( const std::string& name, ISvcLocator* pSvcLocator )
   : AthMonitorAlgorithm(name,pSvcLocator)
@@ -24,11 +25,63 @@ StatusCode EfexSimMonitorAlgorithm::initialize() {
   ATH_CHECK( m_eFexEmSimContainerKey.initialize() );
   ATH_CHECK( m_eFexTauContainerKey.initialize() );
   ATH_CHECK( m_eFexTauSimContainerKey.initialize() );
+  m_decorKey = "EventInfo.eTowerMakerFromEfexTowers_usedSecondary";
+  ATH_CHECK( m_decorKey.initialize() );
   
   return AthMonitorAlgorithm::initialize();
 }
 
 StatusCode EfexSimMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const {
+
+    // check flag that indicates if simulation was done with fexReadout (primary) or not (secondary)
+    SG::ReadDecorHandle<xAOD::EventInfo,bool> usedSecondaryDecor(m_decorKey,ctx);
+    auto fexReadout = Monitored::Scalar<unsigned int>("fexReadout", !(usedSecondaryDecor.isAvailable() && usedSecondaryDecor(*GetEventInfo(ctx))));
+    std::string groupSuffix = (fexReadout==0) ? "" : "2";
+
+    unsigned int nUnmatched_em = 0;
+    nUnmatched_em += fillHistos(m_eFexEmContainerKey,m_eFexEmSimContainerKey,groupSuffix,ctx); // match data to sim
+    nUnmatched_em += fillHistos(m_eFexEmSimContainerKey,m_eFexEmContainerKey,groupSuffix,ctx); // match sim to data
+    unsigned int nUnmatched_tau = 0;
+    nUnmatched_tau += fillHistos(m_eFexTauContainerKey,m_eFexTauSimContainerKey,groupSuffix,ctx); // match data to sim
+    nUnmatched_tau += fillHistos(m_eFexTauSimContainerKey,m_eFexTauContainerKey,groupSuffix,ctx); // match sim to data
+
+    if( (nUnmatched_em || nUnmatched_tau) && (m_maxDebugTreeEntries==-1 || m_treeEntries < m_maxDebugTreeEntries) ) {
+        // record all tobs to the debug tree .. one entry in the tree = 1 tobType for 1 event
+        auto evtNumber = Monitored::Scalar<ULong64_t>("EventNumber",GetEventInfo(ctx)->eventNumber());
+        auto lbn = Monitored::Scalar<ULong64_t>("LBN",GetEventInfo(ctx)->lumiBlock());
+        auto lbnString = Monitored::Scalar<std::string>("LBNString",std::to_string(lbn));
+        std::vector<float> detas{};std::vector<float> setas{};
+        std::vector<float> dphis{};std::vector<float> sphis{};
+        std::vector<unsigned int> dword0s{};std::vector<unsigned int> sword0s{};
+        auto dtobEtas = Monitored::Collection("dataEtas", detas);
+        auto dtobPhis = Monitored::Collection("dataPhis", dphis);
+        auto dtobWord0s = Monitored::Collection("dataWord0s", dword0s);
+        auto stobEtas = Monitored::Collection("simEtas", setas);
+        auto stobPhis = Monitored::Collection("simPhis", sphis);
+        auto stobWord0s = Monitored::Collection("simWord0s", sword0s);
+        auto nTOBs = Monitored::Scalar<int>("nTOBs");
+
+        auto tobType = Monitored::Scalar<unsigned int>("tobType",0);
+        auto tobAndReadoutType = Monitored::Scalar<unsigned int>("tobAndReadoutType",tobType+fexReadout*2);
+        if(nUnmatched_em) {
+            fillVectors(m_eFexEmContainerKey,ctx,detas,dphis,dword0s);
+            fillVectors(m_eFexEmSimContainerKey,ctx,setas,sphis,sword0s);
+            nTOBs = nUnmatched_em;
+            fill(m_packageName,lbn,lbnString,tobAndReadoutType,evtNumber,tobType,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,fexReadout,nTOBs);
+        }
+        if(nUnmatched_tau) {
+            tobType = 1;
+            tobAndReadoutType = tobType+fexReadout*2;
+            fillVectors(m_eFexTauContainerKey,ctx,detas,dphis,dword0s);
+            fillVectors(m_eFexTauSimContainerKey,ctx,setas,sphis,sword0s);
+            nTOBs = nUnmatched_tau;
+            fill(m_packageName,lbn,lbnString,tobAndReadoutType,evtNumber,tobType,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,fexReadout,nTOBs);
+        }
+
+
+    }
+    if(this->msgLevel(MSG::DEBUG)) return StatusCode::SUCCESS; // skip remaining code when debugging mismatches
+    // --- end of new monitoring - added April 2023 -- remainder may become obsoleted in future ---
 
   ATH_MSG_DEBUG("EfexSimMonitorAlgorithm::fillHistograms");
 
@@ -51,14 +104,14 @@ StatusCode EfexSimMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
 
   // Calculate where simulation agrees with data (EM)
   std::set<uint32_t> simEqDataEmWord0s;
-  LVL1::compareTOBs(eFexEmContainer,eFexEmSimContainer,simEqDataEmWord0s);
+  compareTOBs(eFexEmContainer,eFexEmSimContainer,simEqDataEmWord0s);
   unsigned int nEmSimEqDataTobs=simEqDataEmWord0s.size();
   ATH_MSG_DEBUG("EM TOB sim equal data: "<<nEmSimEqDataTobs);
 
   // Fill EM data-simulation histograms
   const xAOD::eFexEMRoIContainer* emDataContPtr = eFexEmContainer.cptr();
   // same number of data and EM TOBs
-  if (nEmTobs==nEmSimTobs) {     
+  if (nEmTobs==nEmSimTobs && nEmTobs!=0) {
     if (nEmSimEqDataTobs==nEmTobs) {     
       // simulation matches data fully
       ATH_CHECK(fillEmErrorHistos("simEqData",emDataContPtr,simEqDataEmWord0s));
@@ -97,15 +150,15 @@ StatusCode EfexSimMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
   ATH_MSG_DEBUG("Tau TOB: data: "<<nTauTobs<<" sim: "<<nTauSimTobs);
 
   // Calculate where simulation agrees with data (Taus)
-  std::set<uint32_t> simEqDataTauWord0s;
-  LVL1::compareTOBs(eFexTauContainer,eFexTauSimContainer,simEqDataTauWord0s);
+  std::set<uint32_t> simEqDataTauWord0s; // simulation words found in data
+  compareTOBs(eFexTauContainer,eFexTauSimContainer,simEqDataTauWord0s);
   unsigned int nTauSimEqDataTobs=simEqDataTauWord0s.size();
   ATH_MSG_DEBUG("Tau TOB sim equal data: "<<nTauSimEqDataTobs);
 
   // Fill tau data-simulation histograms
   const xAOD::eFexTauRoIContainer* tauDataContPtr = eFexTauContainer.cptr();
   // same number of data and tau TOBs
-  if (nTauTobs==nTauSimTobs) {     
+  if (nTauTobs==nTauSimTobs && nTauTobs!=0) {
     if (nTauSimEqDataTobs==nTauTobs) {     
       // simulation matches data fully
       ATH_CHECK(fillTauErrorHistos("simEqData",tauDataContPtr,simEqDataTauWord0s));

@@ -113,6 +113,13 @@ def PHYSCfg(ConfigFlags):
                                               "TauJets_MuonRM.dRmax.etOverPtLeadTrk",
                                               "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET.ex.ey",
                                               "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET_mht.ex.ey"]
+
+    # FTAG Xbb extra content
+    extraList = []
+    for tagger in ["GN2Xv00", "GN2XWithMassv00"]:
+        for score in ["phbb", "phcc", "ptop", "pqcd"]:
+            extraList.append(f"{tagger}_{score}")
+    PHYSSlimmingHelper.ExtraVariables += ["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets." + ".".join(extraList)]
  
     # Truth extra content
     if ConfigFlags.Input.isMC:

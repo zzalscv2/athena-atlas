@@ -887,6 +887,18 @@ class ItemDef:
         MenuItem('L1_jTEFWD100'  ).setLogic( d.jTEFWD100 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jTEFWDA100' ).setLogic( d.jTEFWDA100 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jTEFWDC100' ).setLogic( d.jTEFWDC100 & physcond).setTriggerType(TT.calo)
+        # additional jTE items for 2023 heavy ion runs
+        MenuItem('L1_jTE600'     ).setLogic( d.jTE600  & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_jTE1500'    ).setLogic( d.jTE1500 & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_jTE3000'    ).setLogic( d.jTE3000 & physcond).setTriggerType(TT.calo)
+        # additional VjTE items for 2023 heavy ion runs
+        MenuItem('L1_VjTE200'    ).setLogic( Not(d.jTE200)  & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_VjTE600'    ).setLogic( Not(d.jTE600)  & physcond).setTriggerType(TT.calo)
+        # additional L1_GAP items defined using jTEFWDA or JTEFWDC
+        # low boundary of L1_GAP is set to 1 GeV for now, should be checked/optimized
+        MenuItem('L1_GAP_A' ).setLogic( d.jTEFWDA1 & Not(d.jTEFWDA5) & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_GAP_C' ).setLogic( d.jTEFWDC1 & Not(d.jTEFWDC5) & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_GAP_AANDC' ).setLogic( d.jTEFWDA1 & d.jTEFWDC1 & Not(d.jTEFWDA5) & Not(d.jTEFWDC5) & physcond).setTriggerType(TT.calo)
 
         MenuItem('L1_XE10').setLogic( d.XE10 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_XE20').setLogic( d.XE20 & physcond).setTriggerType(TT.calo)

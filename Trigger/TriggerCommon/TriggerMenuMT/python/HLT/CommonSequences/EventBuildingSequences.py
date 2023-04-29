@@ -10,11 +10,14 @@ from TrigPartialEventBuilding.TrigPartialEventBuildingConf import PEBInfoWriterA
 from TrigPartialEventBuilding.TrigPartialEventBuildingConfig import StaticPEBInfoWriterToolCfg, RoIPEBInfoWriterToolCfg
 from HLTSeeding.HLTSeedingConfig import mapThresholdToL1DecisionCollection
 from libpyeformat_helper import SourceIdentifier, SubDetector
+from AthenaConfiguration.ComponentAccumulator import appendCAtoAthena, conf2toConfigurable
 from AthenaConfiguration.ComponentFactory import CompFactory, isComponentAccumulatorCfg
 from AthenaCommon.CFElements import seqAND, findAlgorithm
+from AthenaCommon.Configurable import ConfigurableCABehavior
 from .LATOMESourceIDs import LATOMESourceIDs
 from AthenaCommon.Logging import logging
 from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import NoCAmigration
+
 log = logging.getLogger(__name__)
 
 
@@ -30,7 +33,11 @@ def addEventBuildingSequence(flags, chain, eventBuildType, chainDict):
         return
 
     def pebInfoWriterToolGenerator(chainDict):
-        return pebInfoWriterTool(flags, chainDict['chainName'], eventBuildType)
+        with ConfigurableCABehavior():
+            cfg = pebInfoWriterToolCfg(flags, chainDict['chainName'], eventBuildType)
+        tool = conf2toConfigurable(cfg.popPrivateTools())
+        appendCAtoAthena(cfg)
+        return tool
 
     inputMaker = pebInputMaker(flags, chain, eventBuildType)
     seq = MenuSequence(flags,
@@ -57,168 +64,181 @@ def addEventBuildingSequence(flags, chain, eventBuildType, chainDict):
     chain.steps.append(step)
 
 
-def pebInfoWriterTool(flags, name, eventBuildType):
-    '''
-    Create PEBInfoWriterTool configuration for the eventBuildType
-    '''
-    tool = None
+def pebInfoWriterToolCfg(flags, name, eventBuildType):
+    """Create PEBInfoWriterTool configuration for the eventBuildType"""
+
+    # Main HLTResult ROB:
+    HLT_ROB = SourceIdentifier(SubDetector.TDAQ_HLT, DataScoutingInfo.getFullHLTResultID())
+
+    acc = None
     if 'BeamSpotPEB' == eventBuildType:
-        tool = StaticPEBInfoWriterToolCfg(name)
-        tool.addSubDets([
-            SubDetector.PIXEL_BARREL,
-            SubDetector.PIXEL_DISK_SIDE, # note different name in C++, ADHI-4753
-            SubDetector.PIXEL_B_LAYER,
-            SubDetector.PIXEL_IBL,
-            SubDetector.SCT_BARREL_A_SIDE,
-            SubDetector.SCT_BARREL_C_SIDE,
-            SubDetector.SCT_ENDCAP_A_SIDE,
-            SubDetector.SCT_ENDCAP_C_SIDE,
-            SubDetector.TDAQ_CTP
-        ])
+        acc = StaticPEBInfoWriterToolCfg(
+            flags, name,
+            subDets = [SubDetector.PIXEL_BARREL,
+                       SubDetector.PIXEL_DISK_SIDE, # note different name in C++, ADHI-4753
+                       SubDetector.PIXEL_B_LAYER,
+                       SubDetector.PIXEL_IBL,
+                       SubDetector.SCT_BARREL_A_SIDE,
+                       SubDetector.SCT_BARREL_C_SIDE,
+                       SubDetector.SCT_ENDCAP_A_SIDE,
+                       SubDetector.SCT_ENDCAP_C_SIDE,
+                       SubDetector.TDAQ_CTP] )
+
     elif 'MuonTrkPEB' == eventBuildType:
-        tool = RoIPEBInfoWriterToolCfg(name)
-        tool.addRegSelDets(flags, ['Pixel', 'SCT', 'TRT', 'MDT', 'RPC', 'TGC', 'CSC', 'MM', 'sTGC'])
-        tool.MaxRoIs = 99
-        tool.EtaWidth= 0.75#values from run2 check later
-        tool.PhiWidth= 0.75#values from run2 check later
-        tool.addHLTResultToROBList()  # add the main (full) HLT result to the output
-        tool.addSubDets([SubDetector.TDAQ_CTP]) # add full CTP data to the output
+        acc = RoIPEBInfoWriterToolCfg(
+            flags, name,
+            regSelDets = ['Pixel', 'SCT', 'TRT', 'MDT', 'RPC', 'TGC', 'CSC', 'MM', 'sTGC'],
+            MaxRoIs = 99,
+            EtaWidth = 0.75, # values from run2 check later
+            PhiWidth = 0.75, # values from run2 check later
+            subDets = [SubDetector.TDAQ_CTP], # add full CTP data to the output
+            ROBs = [HLT_ROB] )
+
     elif 'IDCalibPEB' == eventBuildType:
-        tool = RoIPEBInfoWriterToolCfg(name)
-        tool.addRegSelDets(flags, ['Pixel', 'SCT', 'TRT'])
-        tool.EtaWidth = 0.1
-        tool.PhiWidth = 0.1
-        tool.addSubDets([SubDetector.TDAQ_CTP]) # add full CTP data to the output
+        acc = RoIPEBInfoWriterToolCfg(
+            flags, name,
+            regSelDets = ['Pixel', 'SCT', 'TRT'],
+            EtaWidth = 0.1,
+            PhiWidth = 0.1,
+            subDets = [SubDetector.TDAQ_CTP] )
+
     elif 'LArPEBCalib' == eventBuildType:
-        tool = StaticPEBInfoWriterToolCfg(name)
-        tool.addSubDets([SubDetector.LAR_EM_BARREL_A_SIDE,
-                         SubDetector.LAR_EM_BARREL_C_SIDE,
-                         SubDetector.LAR_EM_ENDCAP_A_SIDE,
-                         SubDetector.LAR_EM_ENDCAP_C_SIDE,
-                         SubDetector.LAR_HAD_ENDCAP_A_SIDE,
-                         SubDetector.LAR_HAD_ENDCAP_C_SIDE,
-                         SubDetector.LAR_FCAL_A_SIDE,
-                         SubDetector.LAR_FCAL_C_SIDE,
-                         SubDetector.LAR_EM_BARREL_ENDCAP_A_SIDE,
-                         SubDetector.LAR_EM_BARREL_ENDCAP_C_SIDE,
-                         SubDetector.LAR_EM_HAD_ENDCAP_A_SIDE,
-                         SubDetector.LAR_EM_HAD_ENDCAP_C_SIDE,
-                         SubDetector.TDAQ_CTP
-        ])
-    elif 'LArPEBHLT' == eventBuildType:
-        tool = RoIPEBInfoWriterToolCfg(name)
-        tool.addRegSelDets(flags, ['Pixel', 'SCT', 'TRT', 'TTEM', 'TTHEC', 'FCALEM', 'FCALHAD'])
-        tool.MaxRoIs = 5
-        tool.addHLTResultToROBList()  # add the main (full) HLT result to the output
-        tool.addSubDets([SubDetector.TDAQ_CTP]) # add full CTP data to the output
-        tool.addROBs(LATOMESourceIDs) # add full-scan LATOME data
-    elif 'LArPEB' == eventBuildType:
-        tool = RoIPEBInfoWriterToolCfg(name)
-        tool.addRegSelDets(flags, ['Pixel', 'SCT', 'TRT', 'TTEM', 'TTHEC', 'FCALEM', 'FCALHAD'])
-        tool.MaxRoIs = 5
-        tool.addSubDets([SubDetector.TDAQ_CTP]) # add full CTP data to the output
-        tool.addROBs(LATOMESourceIDs) # add full-scan LATOME data
+        acc = StaticPEBInfoWriterToolCfg(
+            flags, name,
+            subDets = [SubDetector.LAR_EM_BARREL_A_SIDE,
+                       SubDetector.LAR_EM_BARREL_C_SIDE,
+                       SubDetector.LAR_EM_ENDCAP_A_SIDE,
+                       SubDetector.LAR_EM_ENDCAP_C_SIDE,
+                       SubDetector.LAR_HAD_ENDCAP_A_SIDE,
+                       SubDetector.LAR_HAD_ENDCAP_C_SIDE,
+                       SubDetector.LAR_FCAL_A_SIDE,
+                       SubDetector.LAR_FCAL_C_SIDE,
+                       SubDetector.LAR_EM_BARREL_ENDCAP_A_SIDE,
+                       SubDetector.LAR_EM_BARREL_ENDCAP_C_SIDE,
+                       SubDetector.LAR_EM_HAD_ENDCAP_A_SIDE,
+                       SubDetector.LAR_EM_HAD_ENDCAP_C_SIDE,
+                       SubDetector.TDAQ_CTP] )
+
+    elif eventBuildType in ('LArPEBHLT', 'LArPEB'):
+        acc = RoIPEBInfoWriterToolCfg(
+            flags, name,
+            regSelDets = ['Pixel', 'SCT', 'TRT', 'TTEM', 'TTHEC', 'FCALEM', 'FCALHAD'],
+            MaxRoIs = 5,
+            ROBs = [HLT_ROB] + LATOMESourceIDs, # add full-scan LATOME data
+            subDets = [SubDetector.TDAQ_CTP] )
+
     elif 'LATOMEPEB' == eventBuildType:
-        tool = StaticPEBInfoWriterToolCfg(name)
-        tool.addROBs(LATOMESourceIDs) # add full-scan LATOME data
-        tool.addSubDets([SubDetector.TDAQ_CTP]) # add full CTP data to the output
+        acc = StaticPEBInfoWriterToolCfg(
+            flags, name,
+            ROBs = LATOMESourceIDs, # add full-scan LATOME data
+            subDets = [SubDetector.TDAQ_CTP] )
+
     elif 'SCTPEB' == eventBuildType:
-        tool = StaticPEBInfoWriterToolCfg(name)
-        tool.addSubDets([SubDetector.SCT_BARREL_A_SIDE,
-                         SubDetector.SCT_BARREL_C_SIDE,
-                         SubDetector.SCT_ENDCAP_A_SIDE,
-                         SubDetector.SCT_ENDCAP_C_SIDE,
-                         SubDetector.TDAQ_CTP
-        ])
+        acc = StaticPEBInfoWriterToolCfg(
+            flags, name,
+            subDets = [SubDetector.SCT_BARREL_A_SIDE,
+                       SubDetector.SCT_BARREL_C_SIDE,
+                       SubDetector.SCT_ENDCAP_A_SIDE,
+                       SubDetector.SCT_ENDCAP_C_SIDE,
+                       SubDetector.TDAQ_CTP] )
+
     elif 'TilePEB' == eventBuildType:
-        tool = StaticPEBInfoWriterToolCfg(name)
-        tool.addSubDets([SubDetector.TILECAL_LASER_CRATE,
-                         SubDetector.TILECAL_BARREL_A_SIDE,
-                         SubDetector.TILECAL_BARREL_C_SIDE,
-                         SubDetector.TILECAL_EXT_A_SIDE,
-                         SubDetector.TILECAL_EXT_C_SIDE,
-                         SubDetector.TDAQ_CTP,
-                         SubDetector.TDAQ_CALO_PREPROC, # = 0x71
-                         SubDetector.TDAQ_CALO_CLUSTER_PROC_DAQ, # = 0x72
-                         SubDetector.TDAQ_CALO_CLUSTER_PROC_ROI, # = 0x73
-                         SubDetector.TDAQ_CALO_JET_PROC_DAQ, # = 0x74
-                         SubDetector.TDAQ_CALO_JET_PROC_ROI # = 0x75
-        ])
+        acc = StaticPEBInfoWriterToolCfg(
+            flags, name,
+            subDets = [SubDetector.TILECAL_LASER_CRATE,
+                       SubDetector.TILECAL_BARREL_A_SIDE,
+                       SubDetector.TILECAL_BARREL_C_SIDE,
+                       SubDetector.TILECAL_EXT_A_SIDE,
+                       SubDetector.TILECAL_EXT_C_SIDE,
+                       SubDetector.TDAQ_CTP,
+                       SubDetector.TDAQ_CALO_PREPROC, # = 0x71
+                       SubDetector.TDAQ_CALO_CLUSTER_PROC_DAQ, # = 0x72
+                       SubDetector.TDAQ_CALO_CLUSTER_PROC_ROI, # = 0x73
+                       SubDetector.TDAQ_CALO_JET_PROC_DAQ, # = 0x74
+                       SubDetector.TDAQ_CALO_JET_PROC_ROI # = 0x75
+                       ] )
+
     elif 'AlfaPEB' == eventBuildType:
-        tool = StaticPEBInfoWriterToolCfg(name)
-        tool.addSubDets([SubDetector.FORWARD_ALPHA,
-                         SubDetector.TDAQ_CTP
-        ])
+        acc = StaticPEBInfoWriterToolCfg(
+            flags, name,
+            subDets = [SubDetector.FORWARD_ALPHA,
+                       SubDetector.TDAQ_CTP] )
+
     elif 'LArPEBNoise' == eventBuildType:
-        tool = RoIPEBInfoWriterToolCfg(name)
-        tool.addRegSelDets(flags, ['Pixel', 'SCT', 'TRT', 'TTEM', 'TTHEC', 'FCALEM', 'FCALHAD'])
-        tool.MaxRoIs = 5
-        tool.addHLTResultToROBList()  # add the main (full) HLT result to the output
-        tool.addSubDets([SubDetector.TDAQ_CTP]) # add full CTP data to the output
-        tool.addROBs(LATOMESourceIDs) # add full-scan LATOME data
-        tool.addSubDets([
-            SubDetector.MUON_MMEGA_ENDCAP_A_SIDE,            
-            SubDetector.MUON_MMEGA_ENDCAP_C_SIDE,            
-            SubDetector.MUON_STGC_ENDCAP_A_SIDE,            
-            SubDetector.MUON_STGC_ENDCAP_C_SIDE            
-         ])
+        acc = RoIPEBInfoWriterToolCfg(
+            flags, name,
+            regSelDets = ['Pixel', 'SCT', 'TRT', 'TTEM', 'TTHEC', 'FCALEM', 'FCALHAD'],
+            MaxRoIs = 5,
+            ROBs = [HLT_ROB] + LATOMESourceIDs,
+            subDets = [SubDetector.MUON_MMEGA_ENDCAP_A_SIDE,
+                       SubDetector.MUON_MMEGA_ENDCAP_C_SIDE,
+                       SubDetector.MUON_STGC_ENDCAP_A_SIDE,
+                       SubDetector.MUON_STGC_ENDCAP_C_SIDE,
+                       SubDetector.TDAQ_CTP] )
+
     elif 'ZDCPEB' == eventBuildType:
-        tool = StaticPEBInfoWriterToolCfg(name)
-        tool.addSubDets([SubDetector.FORWARD_ZDC,
-                         SubDetector.TDAQ_CTP
-        ])
+        acc = StaticPEBInfoWriterToolCfg(
+            flags, name,
+            subDets = [SubDetector.FORWARD_ZDC,
+                       SubDetector.TDAQ_CTP] )
+
     elif 'AFPPEB' == eventBuildType:
-        tool = StaticPEBInfoWriterToolCfg(name)
-        tool.addSubDets([SubDetector.FORWARD_AFP,
-                         SubDetector.TDAQ_CTP
-        ])
+        acc = StaticPEBInfoWriterToolCfg(
+            flags, name,
+            subDets = [SubDetector.FORWARD_AFP,
+                       SubDetector.TDAQ_CTP] )
+
     elif 'LumiPEB' == eventBuildType:
-        tool = StaticPEBInfoWriterToolCfg(name)
-        tool.addHLTResultToROBList()  # add the main (full) HLT result to the output
-        tool.addSubDets([SubDetector.PIXEL_IBL,
-                         SubDetector.PIXEL_BARREL,
-                         SubDetector.PIXEL_DISK_SIDE,
-                         SubDetector.PIXEL_B_LAYER,
-                         SubDetector.SCT_BARREL_A_SIDE,
-                         SubDetector.SCT_BARREL_C_SIDE,
-                         SubDetector.SCT_ENDCAP_A_SIDE,
-                         SubDetector.SCT_ENDCAP_C_SIDE,
-                         SubDetector.PIXEL_DBM,
-                         SubDetector.TDAQ_CTP # add full CTP data to the output
-        ])
+        acc = StaticPEBInfoWriterToolCfg(
+            flags, name,
+            ROBs = [HLT_ROB],
+            subDets = [SubDetector.PIXEL_IBL,
+                       SubDetector.PIXEL_BARREL,
+                       SubDetector.PIXEL_DISK_SIDE,
+                       SubDetector.PIXEL_B_LAYER,
+                       SubDetector.SCT_BARREL_A_SIDE,
+                       SubDetector.SCT_BARREL_C_SIDE,
+                       SubDetector.SCT_ENDCAP_A_SIDE,
+                       SubDetector.SCT_ENDCAP_C_SIDE,
+                       SubDetector.PIXEL_DBM,
+                       SubDetector.TDAQ_CTP] )
+
     elif 'Lvl1CaloPEB' == eventBuildType:
-        tool = StaticPEBInfoWriterToolCfg(name)
-        tool.addHLTResultToROBList()
-        tool.MaxRoIs = 1
-        tool.addSubDets([SubDetector.TDAQ_CALO_PREPROC,
-                         SubDetector.TDAQ_CALO_CLUSTER_PROC_DAQ,
-                         SubDetector.TDAQ_CALO_CLUSTER_PROC_ROI,
-                         SubDetector.TDAQ_CALO_JET_PROC_DAQ,
-                         SubDetector.TDAQ_CALO_JET_PROC_ROI,
-                         SubDetector.TDAQ_CTP
-        ])
+        acc = StaticPEBInfoWriterToolCfg(
+            flags, name,
+            ROBs = [HLT_ROB],
+            MaxRoIs = 1,
+            subDets = [SubDetector.TDAQ_CALO_PREPROC,
+                       SubDetector.TDAQ_CALO_CLUSTER_PROC_DAQ,
+                       SubDetector.TDAQ_CALO_CLUSTER_PROC_ROI,
+                       SubDetector.TDAQ_CALO_JET_PROC_DAQ,
+                       SubDetector.TDAQ_CALO_JET_PROC_ROI,
+                       SubDetector.TDAQ_CTP] )
+
     elif 'JetPEBPhysicsTLA' == eventBuildType:
-        tool = RoIPEBInfoWriterToolCfg(name)
-        # Add subdetectors within a ROI for PEB
-        tool.addRegSelDets(flags,['Pixel', 'SCT', 'TRT', 'TTEM', 'TTHEC', 'FCALEM', 'FCALHAD', 'TILE'])
-        tool.EtaWidth = 0.6 # half-width (the RoI is between etaJet-EtaWidth and etaJet+EtaWidth) 
-        tool.PhiWidth = 0.6
-        tool.MaxRoIs = 3                                                                                              
-        moduleId = DataScoutingInfo.getDataScoutingResultID(eventBuildType)
-        tool.addHLTResultToROBList(moduleId)
+        acc = RoIPEBInfoWriterToolCfg(
+            flags, name,
+            # Add subdetectors within a ROI for PEB
+            regSelDets = ['Pixel', 'SCT', 'TRT', 'TTEM', 'TTHEC', 'FCALEM', 'FCALHAD', 'TILE'],
+            # DS HLT result
+            ROBs = [SourceIdentifier(SubDetector.TDAQ_HLT,
+                                     DataScoutingInfo.getDataScoutingResultID(eventBuildType))],
+            EtaWidth = 0.6, # half-width (the RoI is between etaJet-EtaWidth and etaJet+EtaWidth)
+            PhiWidth = 0.6,
+            MaxRoIs = 3 )
 
     elif eventBuildType in DataScoutingInfo.getAllDataScoutingIdentifiers():
         # Pure DataScouting configuration
-        tool = StaticPEBInfoWriterToolCfg(name)
-        moduleId = DataScoutingInfo.getDataScoutingResultID(eventBuildType)
-        tool.addHLTResultToROBList(moduleId)
+        acc = StaticPEBInfoWriterToolCfg(
+            flags, name,
+            ROBs = [SourceIdentifier(SubDetector.TDAQ_HLT,
+                                     DataScoutingInfo.getDataScoutingResultID(eventBuildType))] )
 
     # Name not matched
-    if not tool:
+    if acc is None:
         log.error('PEBInfoWriterTool configuration is missing for event building identifier \'%s\'', eventBuildType)
-        return None
 
-    return tool
+    return acc
 
 
 def pebInputMaker(flags, chain, eventBuildType):
@@ -226,14 +246,7 @@ def pebInputMaker(flags, chain, eventBuildType):
     isFullscan = (mapThresholdToL1DecisionCollection('FSNOSEED') in chain.L1decisions)
 
     # Check if we are configuring RoI-based PEB
-    _tmpTool = pebInfoWriterTool(flags, 'tmpTool_'+eventBuildType, eventBuildType)
-    _isRoIBasedPEB = isinstance(_tmpTool, CompFactory.RoIPEBInfoWriterTool)
-    _isStaticPEB = isinstance(_tmpTool, CompFactory.StaticPEBInfoWriterTool)
-    if not _isRoIBasedPEB and not _isStaticPEB:
-        raise RuntimeError('Cannot determine whether ' + eventBuildType +
-                           ' is static or RoI-based PEB from a tool of type ' + type(_tmpTool))
-    del _tmpTool
-
+    _isRoIBasedPEB = EventBuildingInfo.isRoIBasedPEB(eventBuildType)
     _isNoalg = (len(chain.steps) == 0)
 
     # Configure the InputMaker
@@ -243,7 +256,7 @@ def pebInputMaker(flags, chain, eventBuildType):
     maker.mergeUsingFeature = _isRoIBasedPEB and not _isNoalg
 
     # Configure the InputMaker RoI tool
-    if _isNoalg or _isStaticPEB:
+    if _isNoalg or not _isRoIBasedPEB:
         # Streamers or static PEB: use initial RoI
         maker.RoITool = CompFactory.ViewCreatorInitialROITool()
     elif isFullscan and _isRoIBasedPEB:
@@ -317,41 +330,47 @@ def alignEventBuildingSteps(chain_configs, chain_dicts):
             chainConfig.numberAllSteps()
 
 
-def isRoIBasedPEB(flags, eventBuildType):
-    '''Helper function to determine if eventBuildType corresponds to RoI-based PEB'''
-    if not eventBuildType:
-        return False
-    _tmpTool = pebInfoWriterTool(flags, 'tmpTool_'+eventBuildType, eventBuildType)
-    result = isinstance(_tmpTool, CompFactory.RoIPEBInfoWriterTool)
-    del _tmpTool
-    return result
-
-
 # Unit test
 if __name__ == "__main__":
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
-    flags.Input.Files = defaultTestFiles.RAW_RUN2
+    flags.Input.Files = defaultTestFiles.RAW_RUN3
     flags.lock()
+
+    # Ensure all DS identifiers have been added to the EB list:
+    assert( set(DataScoutingInfo.getAllDataScoutingIdentifiers()).issubset(
+        EventBuildingInfo.getAllEventBuildingIdentifiers()) )
+
     failures = 0
     for eb_identifier in EventBuildingInfo.getAllEventBuildingIdentifiers():
+        log.info('Checking %s event building identifier', eb_identifier)
         tool = None
         try:
-            tool = pebInfoWriterTool(flags, 'TestTool_'+eb_identifier, eb_identifier)
+            cfg = pebInfoWriterToolCfg(flags, 'TestTool_'+eb_identifier, eb_identifier)
+            tool = cfg.popPrivateTools()
         except Exception as ex:
             failures += 1
             log.error('Caught exception while configuring PEBInfoWriterTool for %s: %s', eb_identifier, ex)
             continue
+
+        cfg.wasMerged()
 
         if not tool:
             failures += 1
             log.error('No tool created for %s', eb_identifier)
             continue
 
-        if tool.getType() not in ['StaticPEBInfoWriterTool', 'RoIPEBInfoWriterTool']:
+        if not isinstance(tool, (CompFactory.StaticPEBInfoWriterTool, CompFactory.RoIPEBInfoWriterTool)):
             failures += 1
             log.error('Unexpected tool type for %s: %s', eb_identifier, tool.getType())
+            continue
+
+        isRoIBasedPEB = EventBuildingInfo.isRoIBasedPEB(eb_identifier)
+        if isinstance(tool, CompFactory.RoIPEBInfoWriterTool) != isRoIBasedPEB:
+            failures += 1
+            log.error('Tool type %s for %s but isRoIBasedPEB==%s',
+                      tool.getType(), eb_identifier, isRoIBasedPEB)
             continue
 
         robs = tool.ROBList if tool.getType() == 'StaticPEBInfoWriterTool' else tool.ExtraROBs

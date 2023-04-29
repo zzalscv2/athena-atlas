@@ -68,14 +68,14 @@ def EfexMonitoringHistConfig(inputFlags, eFexAlg):
     noCutGroup = helper.addGroup(EfexMonAlg, baseGroupName, mainDir)
     for containerKey in EfexMonAlg.eFexEMTobKeyList:
         tobTypeStr = "xTOB" if ('xRoI' in containerKey) else "TOB"
-        tobTypeStr += "Copy" if 'Copy' in containerKey else "" 
+        tobTypeStr += "copy" if 'Copy' in containerKey else ""
         simStr = "Sim" if ('Sim' in containerKey) else ""
         tobStr = tobTypeStr + simStr
         noCutGroup.defineHistogram(containerKey + '_nEMTOBs_nocut;h_nEmTOBs_nocut', title='Number of eFex EM '+tobStr+'s;EM '+tobStr+'s;Number of EM '+tobStr+'s',
                                 type='TH1I', path=trigPath+tobStr+'/', xbins=10,xmin=0,xmax=10)
     for containerKey in EfexMonAlg.eFexTauTobKeyList:
         tobTypeStr = "xTOB" if ('xRoI' in containerKey) else "TOB"
-        tobTypeStr += "Copy" if 'Copy' in containerKey else "" 
+        tobTypeStr += "copy" if 'Copy' in containerKey else ""
         simStr = "Sim" if ('Sim' in containerKey) else ""
         tobStr = tobTypeStr + simStr
         noCutGroup.defineHistogram(containerKey + '_nTauTOBs_nocut;h_nTauTOBs_nocut', title='Number of eFex Tau '+tobStr+'s;Tau '+tobStr+'s;Number of Tau '+tobStr+'s',
@@ -103,7 +103,7 @@ def EfexMonitoringHistConfig(inputFlags, eFexAlg):
             myGroup.defineHistogram('TOBPhi;h_TOBPhi', title='eFex '+tobStr+' EM Phi'+cut_title_addition,
                                     type='TH1F', path=trigPath+keyDirPathMap[containerKey]+cut_name+'/', xbins=64,xmin=-math.pi,xmax=math.pi)
 
-            myGroup.defineHistogram('TOBEta,TOBPhi;h_TOBEtaPhiMap', title='eFex '+tobStr+' EM Eta vs Phi'+cut_title_addition+';'+tobStr+' EM Eta;'+tobStr+' EM Phi',
+            myGroup.defineHistogram('TOBEta,TOBPhi;h_TOBEtaPhiMap', title='eFex '+tobStr+' EM Eta vs Phi'+cut_title_addition+';#eta;#phi',
                                     type='TH2F',path=trigPath+keyDirPathMap[containerKey]+cut_name+'/', xbins=50,xmin=-2.5,xmax=2.5,ybins=64,ymin=-math.pi,ymax=math.pi)
 
             myGroup.defineHistogram('TOBshelfNumber;h_TOBshelfNumber', title='eFex '+tobStr+' EM Shelf Number'+cut_title_addition,
@@ -156,7 +156,7 @@ def EfexMonitoringHistConfig(inputFlags, eFexAlg):
             myGroup.defineHistogram('tauTOBPhi;h_tauTOBPhi', title='eFex '+tobStr+' Tau Phi'+cut_title_addition,
                                     type='TH1F', path=trigPath+keyDirPathMap[containerKey]+cut_name+'/', xbins=100,xmin=-math.pi,xmax=math.pi)
 
-            myGroup.defineHistogram('tauTOBEta,tauTOBPhi;h_tauTOBEtaPhiMap', title='eFex '+tobStr+' Tau Eta vs Phi'+cut_title_addition+';'+tobStr+' Tau Eta;'+tobStr+' Tau Phi',
+            myGroup.defineHistogram('tauTOBEta,tauTOBPhi;h_tauTOBEtaPhiMap', title='eFex '+tobStr+' Tau Eta vs Phi'+cut_title_addition+';#eta;#phi',
                                     type='TH2F',path=trigPath+keyDirPathMap[containerKey]+cut_name+'/', xbins=50,xmin=-2.5,xmax=2.5,ybins=64,ymin=-math.pi,ymax=math.pi)
 
             myGroup.defineHistogram('tauTOBshelfNumber;h_tauTOBshelfNumber', title='eFex '+tobStr+' Tau Shelf Number'+cut_title_addition,

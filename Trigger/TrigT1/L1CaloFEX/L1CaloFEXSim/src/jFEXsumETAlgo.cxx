@@ -66,8 +66,6 @@ void LVL1::jFEXsumETAlgo::setup(int FPGA[FEXAlgoSpaceDefs::jFEX_algoSpace_height
             m_FPGA[iphi].push_back(FPGA[iphi][ieta]);
         }
     }
-
-
 }
 
 void LVL1::jFEXsumETAlgo::setup(int FPGA[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width]) {
@@ -146,7 +144,7 @@ int LVL1::jFEXsumETAlgo::getETlowerEta(uint bin)
     uint max = m_SumET.size() > (bin + 1) ? bin : m_SumET.size();
     m_SumlowEta = 0;
     for(uint ieta=0;ieta<max;ieta++){
-        m_SumlowEta+=m_SumET[ieta];
+        m_SumlowEta+=m_SumET.at(ieta);
     }
     return m_SumlowEta;
 }
@@ -158,7 +156,7 @@ int LVL1::jFEXsumETAlgo::getETupperEta(uint bin)
     uint min = m_SumET.size() > (bin + 1) ? bin : m_SumET.size();
     m_SumhighEta = 0;
     for(uint ieta=min;ieta<m_SumET.size();ieta++){
-        m_SumhighEta+=m_SumET[ieta];
+        m_SumhighEta+=m_SumET.at(ieta);
     }
     return m_SumhighEta;
 }

@@ -322,9 +322,8 @@ class ConfigSettings_electronLRT( _ConfigSettingsBase ):
       self._maxSCTHoles       = 1
       self._minSiClusters     = 8
       self._doEmCaloSeed      = False
-      self._minTRTonTrk       = 0
 
-
+      
 class ConfigSettings_muonLRT( _ConfigSettingsBase ):
    def __init__( self ):
       _ConfigSettingsBase.__init__(self)
@@ -354,7 +353,6 @@ class ConfigSettings_muonLRT( _ConfigSettingsBase ):
       self._maxSCTHoles       = 1
       self._minSiClusters     = 8
       self._doEmCaloSeed      = False
-      self._minTRTonTrk       = 0
 
 
 class ConfigSettings_tauLRT( _ConfigSettingsBase ):
@@ -386,8 +384,6 @@ class ConfigSettings_tauLRT( _ConfigSettingsBase ):
       self._maxSCTHoles       = 1
       self._minSiClusters     = 8
       self._doEmCaloSeed      = False
-      self._minTRTonTrk       = 0
-
 
 class ConfigSettings_bjetLRT( _ConfigSettingsBase ):
    def __init__( self ):
@@ -414,7 +410,6 @@ class ConfigSettings_bjetLRT( _ConfigSettingsBase ):
       self._maxSCTHoles       = 1
       self._minSiClusters     = 8
       self._doEmCaloSeed      = False
-      self._minTRTonTrk       = 0
 
 
 class ConfigSettings_fullScanLRT( _ConfigSettingsBase ):
@@ -449,7 +444,6 @@ class ConfigSettings_fullScanLRT( _ConfigSettingsBase ):
       self._maxSCTHoles       = 1
       self._minSiClusters     = 8
       self._doEmCaloSeed      = False
-      self._minTRTonTrk       = 0
 
 
 class ConfigSettings_DJetLRT( _ConfigSettingsBase ):
@@ -461,6 +455,7 @@ class ConfigSettings_DJetLRT( _ConfigSettingsBase ):
       self._doFullScan      = False
       self._etaHalfWidth    = 0.4
       self._phiHalfWidth    = 0.4
+      self._zedHalfWidth    = 225.
       self._doTRT           = False
       self._doSeedRedundancyCheck = True
       self._UsePixelSpacePoints   = False
@@ -484,7 +479,6 @@ class ConfigSettings_DJetLRT( _ConfigSettingsBase ):
       self._maxSCTHoles       = 1
       self._minSiClusters     = 8
       self._doEmCaloSeed      = False
-      self._minTRTonTrk       = 0
 
 
 
@@ -520,13 +514,12 @@ class ConfigSettings_DVtxLRT( _ConfigSettingsBase ):
       self._maxSCTHoles       = 1
       self._minSiClusters     = 8
       self._doEmCaloSeed      = False
-      self._minTRTonTrk       = 0
-
 
 
 ConfigSettingsInstances = {
    "electron"     : ConfigSettings_electron(),
    "Electron"     : ConfigSettings_electron(),
+   "photon"       : ConfigSettings_electron(),
 
     "muon"        : ConfigSettings_muon(),
     "muonIso"     : ConfigSettings_muonIso(),

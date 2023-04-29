@@ -24,6 +24,7 @@
 #include "CaloIdentifier/CaloCell_SuperCell_ID.h"
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "StoreGate/StoreGateSvc.h"
+#include "AthenaPoolUtilities/CondAttrListCollection.h"
 
 namespace LVL1 {
   
@@ -79,6 +80,11 @@ namespace LVL1 {
 
     // Key for input towers
     SG::ReadHandleKey<LVL1::eTowerContainer> m_eTowerContainerKey {this, "MyETowers", "eTowerContainer", "Input container for eTowers"};
+
+    // Key for reading dm corrections
+    SG::ReadCondHandleKey<CondAttrListCollection> m_dmCorrectionsKey{this,"DMCorrectionsKey","",
+                                                                 "Key to dead material corrections (AttrListCollection)"};
+    static thread_local bool s_dmCorrectionsLoaded;
 
   };
   

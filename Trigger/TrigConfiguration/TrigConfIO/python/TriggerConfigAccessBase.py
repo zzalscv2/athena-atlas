@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import os
 import json
@@ -136,7 +136,7 @@ class ConfigDBLoader(ConfigLoader):
         try:
             authFile = ConfigDBLoader.getResolvedFileName("authentication.xml", "CORAL_AUTH_PATH")
         except Exception as e:
-            log.warning("File authentication.xml is not available! Oracle connection cannot be established. Exception message is: {0}".format(e))
+            log.warning("File authentication.xml is not available! Oracle connection cannot be established. Exception message is: %s",e)
         else:
             for svc in filter(lambda s : s.startswith("oracle:"), listOfServices):
                 ap = ET.parse(authFile)
@@ -183,18 +183,18 @@ class ConfigDBLoader(ConfigLoader):
 
             versionTagPrefix = "Trigger-Run3-Schema-v"
             if not versionTag.startswith(versionTagPrefix):
-                raise RuntimeError( "Tag format error: Trigger schema version tag {0} does not start with {1}".format(versionTag, versionTagPrefix))   
+                raise RuntimeError( "Tag format error: Trigger schema version tag %s does not start with %s", versionTag, versionTagPrefix) 
 
             vstr = versionTag[len(versionTagPrefix)]
 
             if not vstr.isdigit():
-                raise RuntimeError( "Invalid argument when interpreting the version part {0} of schema tag {1} is {2}".format(vstr, versionTag, type(vstr))) 
+                raise RuntimeError( "Invalid argument when interpreting the version part %s of schema tag %s is %s", vstr, versionTag, type(vstr))
 
-            log.info("Found schema version {0}".format(vstr))
+            log.debug("Found schema version %s", vstr)
             return int(vstr)
 
         except Exception as e:
-            log.warning("Failed to read schema version: {0}".format(e))
+            log.warning("Failed to read schema version: %r", e)
 
     @staticmethod
     def getCoralQuery(session, queryStr):
@@ -204,7 +204,7 @@ class ConfigDBLoader(ConfigLoader):
         output = queryStr.split("SELECT")[1].split("FROM")[0]
         query.addToOutputList(output)
 
-        log.info("Conversion for Coral of query: {0}".format(queryStr))
+        log.debug("Conversion for Coral of query: %s", queryStr)
 
         for table in queryStr.split("FROM")[1].split("WHERE")[0].split(","):
             tableSplit = list(filter(None, table.split(" ")))
@@ -237,12 +237,12 @@ class ConfigDBLoader(ConfigLoader):
         svcconfig.setConnectionTimeOut(0)
 
         for credential in credentials:
-            log.info("Trying credentials {0}".format(credential))
+            log.debug("Trying credentials %s",credential)
 
             try: 
                 session = svc.connect(credential, coral.access_ReadOnly)
             except Exception as e:
-                log.warning("Failed to establish connection: {0}".format(e))
+                log.warning("Failed to establish connection: %s",e)
                 continue
 
             try:
@@ -255,17 +255,14 @@ class ConfigDBLoader(ConfigLoader):
                     svcconfig.setConnectionRetrialTimeOut(3600)
 
                 session.transaction().start(True) # readOnly
-                schema = ConfigDBLoader.getSchema(credential)
-                qdict = { "schema" : schema, "dbkey" : self.dbkey }
+                self.schema = ConfigDBLoader.getSchema(credential)
+                qdict = { "schema" : self.schema, "dbkey" : self.dbkey }
                 
                 # Choose query basen on schema
                 schemaVersion = ConfigDBLoader.readSchemaVersion(qdict, session)
                 qstr = self.getQueryDefinition(schemaVersion)
 
-                if "HLT_MONITORING_GROUPS" in qstr:
-                    query = ConfigDBLoader.readMonGroupKey(qstr, qdict, session)
-                else:
-                    query = ConfigDBLoader.getCoralQuery(session, qstr.format(**qdict))
+                query = ConfigDBLoader.getCoralQuery(session, qstr.format(**qdict))
 
                 cursor = query.execute()
 
@@ -280,53 +277,11 @@ class ConfigDBLoader(ConfigLoader):
                 self.confirmConfigType(config)
                 return config       
             except Exception as e:
-                log.warning("Failed to execute query: {0}".format(e))
-                ConfigDBLoader.readMaxTableKey(qstr, qdict, session)
-                session.transaction().commit()
+                log.warning("Failed to execute query: %s", qstr.format(**qdict))
+                log.warning("Exception message: %r", e)
 
+        log.error("Query failed on all sources")
         raise RuntimeError("Query failed")
-
-
-    @staticmethod
-    def readMaxTableKey(q, qdict, session):
-        ''' Read highest available key in table, based on the query'''
-        try:
-            # In the case of multiple queries (e.g. MonGroups) take only the former
-            q = q.split(";")[0]
-            # Create query - remove last condition for the key value and add it in begining as "SELECT MAX"
-            id_str = q.split("WHERE")[1].split("AND")[-1].split("=")[0]
-
-            q_formatted = "SELECT MAX(" + id_str + ") FROM " + q.split("FROM")[1].split("WHERE")[0]
-
-            query = ConfigDBLoader.getCoralQuery(session, q_formatted.format(**qdict))
-            cursor = query.execute()
-            cursor.next()
-
-            log.info("Highest available key in %s is %i", id_str, int(cursor.currentRow()[0].data()))
-        except Exception as e:
-            log.warning("Failed to read maximum available key: {0}".format(e))
-
-    @staticmethod
-    def readMonGroupKey(q, qdict1, session):
-        ''' Read highest available key in table, based on the query'''
-        try:
-            # First query is to find HLTMenuTableID
-            qStr1 = q.split(";")[0]
-            query1 = ConfigDBLoader.getCoralQuery(session, qStr1.format(**qdict1))
-            cursor1 = query1.execute()
-            cursor1.next()
-            dbkeyResult = int(cursor1.currentRow()[0].data())
-
-            # Second query is to use the found HLTMenuTableID and find the matching MonGroupKey
-            # The query is performed as part of load(), and is only built here
-            qdict2 = { "schema" : qdict1["schema"], "dbkeyResult" : dbkeyResult }
-            qStr2 = q.split(";")[1]
-            query2 = ConfigDBLoader.getCoralQuery(session, qStr2.format(**qdict2))
-            return query2
-
-        except Exception as e:
-            log.warning("Failed to read HLT menu to find MonGroup key: {0}".format(e))
-
 
     # proposed filename when writing config to file
     def getWriteFilename(self):
@@ -339,12 +294,12 @@ class TriggerConfigAccess(object):
     base class to hold the configuration (OrderedDict) 
     and provides basic functions to access and print
     """
-    def __init__(self, configType, mainkey, filename = None, jsonString=None, dbalias = None, dbkey = None):
-        self._getLoader(configType = configType, filename = filename, jsonString=jsonString, dbalias = dbalias, dbkey = dbkey)
+    def __init__(self, configType, mainkey, filename = None, jsonString = None, dbalias = None, dbkey = None):
+        self._getLoader(configType = configType, filename = filename, jsonString = jsonString, dbalias = dbalias, dbkey = dbkey)
         self._mainkey = mainkey
         self._config = None
 
-    def _getLoader(self, configType, filename = None, jsonString=None, dbalias = None, dbkey = None ):
+    def _getLoader(self, configType, filename = None, jsonString = None, dbalias = None, dbkey = None ):
         if filename:
             self.loader = ConfigFileLoader( configType, filename )
         elif dbalias and dbkey:
@@ -387,9 +342,10 @@ class TriggerConfigAccess(object):
         """ print summary info, should be overwritten by derived classes """
         log.info("Configuration name: {0}".format(self.name()))
         log.info("Configuration size: {0}".format(len(self)))
+
     def writeFile(self, filename = None):
         if filename is None:
             filename = self.loader.getWriteFilename()
         with open(filename, 'w') as fh:
             json.dump(self.config(), fh, indent = 4, separators=(',', ': '))
-            log.info("Wrote file {0}".format(filename))
+            log.info("Wrote file %s", filename)

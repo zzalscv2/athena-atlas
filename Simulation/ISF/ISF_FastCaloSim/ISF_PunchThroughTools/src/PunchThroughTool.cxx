@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -15,7 +15,7 @@
 
 
 // standard C libraries
-#include <math.h>
+#include <cmath>
 
 // Control
 #include "AthContainers/DataVector.h"
@@ -51,8 +51,6 @@
 //Amg
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
 
-const double ISF::PunchThroughTool::m_SQRT_0p5 = std::sqrt(0.5);
-const double ISF::PunchThroughTool::m_SQRT_2 = std::sqrt(2);
 
 /*=========================================================================
  *  DESCRIPTION OF FUNCTION:
@@ -729,7 +727,7 @@ ISF::ISFParticle *ISF::PunchThroughTool::getOneParticle(const ISF::ISFParticle &
 
 double ISF::PunchThroughTool::normal_cdf(double x) {
 
-    return  0.5 * TMath::Erfc(-x * m_SQRT_0p5);
+    return  0.5 * TMath::Erfc(-x * M_SQRT1_2);
 }
 
 std::vector<double> ISF::PunchThroughTool::dotProduct(const std::vector<std::vector<double>> &m, const std::vector<double> &v) 
@@ -743,7 +741,7 @@ std::vector<double> ISF::PunchThroughTool::dotProduct(const std::vector<std::vec
     return result;
 }
 
-std::vector<std::string> ISF::PunchThroughTool::str_to_list(const std::string str) const
+std::vector<std::string> ISF::PunchThroughTool::str_to_list(const std::string & str) const
 {
     std::vector<std::string> v;
     std::stringstream ss(str); 
@@ -1028,7 +1026,7 @@ double ISF::PunchThroughTool::interpolateEnergy(const double &energy, CLHEP::Hep
 
     ATH_MSG_DEBUG("[ punchthrough ] Shooting random number: "<< randomShoot);
 
-    double midPoint = *std::prev(upperEnergy)*m_SQRT_2;
+    double midPoint = *std::prev(upperEnergy)*M_SQRT2;
 
     if(energy <  midPoint){ //if energy smaller than mid point in log(energy)
 

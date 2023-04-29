@@ -70,7 +70,7 @@ def TriggerTowersInputCfg(flags):
         return LVL1CaloRun2ReadBSCfg(flags)
 
 
-def L1CaloFEXSimCfg(flags):
+def L1CaloFEXSimCfg(flags, eFexTowerInputs = [],deadMaterialCorrections=False):
     acc = ComponentAccumulator()
 
     # Configure SCell inputs
@@ -93,13 +93,31 @@ def L1CaloFEXSimCfg(flags):
     acc.merge(TriggerTowersInputCfg(flags))
 
     if flags.Trigger.L1.doeFex:
-        eFEXInputs = CompFactory.LVL1.eTowerMakerFromSuperCells('eTowerMakerFromSuperCells')
+        if eFexTowerInputs==[]:
+            # no input specified, so use the old eTowerMaker
+            eFEXInputs = CompFactory.LVL1.eTowerMakerFromSuperCells('eTowerMakerFromSuperCells',
+               eSuperCellTowerMapperTool = CompFactory.LVL1.eSuperCellTowerMapper('eSuperCellTowerMapper', SCell=sCellType))
+        else:
+            eFEXInputs = CompFactory.LVL1.eTowerMakerFromEfexTowers('eTowerMakerFromEfexTowers')
+            if 'L1_eFexEmulatedTowers' in eFexTowerInputs:
+                acc.addEventAlgo( CompFactory.LVL1.eFexTowerBuilder("eFexTowerBuilder") ) # builds the emulated towers to use as secondary input to eTowerMaker
+            eFEXInputs.InputTowers = eFexTowerInputs[0]
+            eFEXInputs.SecondaryInputTowers = eFexTowerInputs[1] if len(eFexTowerInputs) > 1 else ""
+
         eFEX = CompFactory.LVL1.eFEXDriver('eFEXDriver')
-        eFEXInputs.eSuperCellTowerMapperTool = CompFactory.LVL1.eSuperCellTowerMapper('eSuperCellTowerMapper', SCell=sCellType)
         eFEX.eFEXSysSimTool = CompFactory.LVL1.eFEXSysSim('eFEXSysSimTool')
         eFEX.eFEXSysSimTool.eFEXSimTool = CompFactory.LVL1.eFEXSim('eFEXSimTool')
         eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool = CompFactory.LVL1.eFEXFPGA('eFEXFPGATool')
-        eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool.eFEXegAlgoTool = CompFactory.LVL1.eFEXegAlgo('eFEXegAlgoTool',dmCorr=False)
+        eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool.eFEXegAlgoTool = CompFactory.LVL1.eFEXegAlgo('eFEXegAlgoTool',dmCorr=deadMaterialCorrections) # only dmCorrections in data for now
+
+        # load noise cuts and dm corrections when running on data
+        if not flags.Input.isMC:
+            from IOVDbSvc.IOVDbSvcConfig import addFolders#, addFoldersSplitOnline
+            acc.merge(addFolders(flags,"/TRIGGER/L1Calo/V1/Calibration/EfexNoiseCuts","TRIGGER_ONL",className="CondAttrListCollection"))
+            if len(eFexTowerInputs)>0: eFEXInputs.NoiseCutsKey = "/TRIGGER/L1Calo/V1/Calibration/EfexNoiseCuts"
+            acc.merge(addFolders(flags,"/TRIGGER/L1Calo/V1/Calibration/EfexEnergyCalib","TRIGGER_ONL",className="CondAttrListCollection")) # dmCorr from DB!
+            eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool.eFEXegAlgoTool.DMCorrectionsKey = "/TRIGGER/L1Calo/V1/Calibration/EfexEnergyCalib"
+
         acc.addEventAlgo(eFEXInputs)
         acc.addEventAlgo(eFEX)
 

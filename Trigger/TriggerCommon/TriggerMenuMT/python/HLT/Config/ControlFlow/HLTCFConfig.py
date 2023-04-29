@@ -386,9 +386,6 @@ def decisionTreeFromChains(flags, HLTNode, chains, allDicts, newJO):
     if flags.Trigger.generateMenuDiagnostics:
         all_DataFlow_to_dot(HLTNodeName, CFseq_list)
     
-    if isCAMenu():
-        acc.printConfig(withDetails = True, summariseProps = True) 
-
     # matrix display
     # uncomment for serious debugging
     # matrixDisplay( CFseq_list )

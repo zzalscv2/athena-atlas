@@ -24,116 +24,61 @@ def EfexInputMonitoringConfig(inputFlags):
     mainDir = 'L1Calo'
     trigPath = 'EfexInput/'
 
-    # See if the file contains xTOBs else use TOBs
-    #hasXtobs = True if "L1_eFexTower" in inputFlags.Input.Collections else False
-    #if not hasXtobs:
-    #    EfexInputMonAlg.eFexTowerContainer = "L1_eEMRoI"
-
-    #tobStr = "TOB"
 
     # add monitoring algorithm to group, with group name and main directory 
-    myGroup = helper.addGroup(EfexInputMonAlg, groupName , mainDir)
-    EmErrorGroup = helper.addGroup(EfexInputMonAlg, groupName+"_EmError", mainDir)
-    HadErrorGroup = helper.addGroup(EfexInputMonAlg, groupName+"_HadError", mainDir)
-    refCompareGroup = helper.addGroup(EfexInputMonAlg,groupName+"_RefCompare", mainDir)
+    eventsGroup = helper.addGroup(EfexInputMonAlg, groupName , mainDir)
+    eventsGroup.defineHistogram('NEfexTowers;fexTowers', title='Number of eFex towers;nEfexTowers;Events',
+                            type='TH1I', path=trigPath+"events/",xbins=1, xmin=0, xmax=1, xlabels=["0"],opt=['kCanRebin'])
+
+    fexTowerGroup = helper.addGroup(EfexInputMonAlg, groupName+"_fexTowers", mainDir)
+    slotLabels = ["PS","L1_1","L1_2","L1_3","L1_4","L2_1","L2_2","L2_3","L2_4","L3","Tile","HEC"]
+    for i in range(0,12): # one extra "slot" to separate hec and tile
+        fexTowerGroup.defineHistogram(f'TowerEtcount{i+1};slot-{slotLabels[i]}',title=f'{slotLabels[i]} fexCount;fexCount;fexTowers',
+                                        type='TH1F', path=trigPath+"fexTowers/fexCount", xbins=100,xmin=0,xmax=100.0)
+        caloCountGroup = helper.addGroup(EfexInputMonAlg, groupName+"_slot" + str(i) , mainDir)
+        caloCountGroup.defineHistogram('TowerEta,TowerPhi,RefTowerCount;slot-' + slotLabels[i], title=f'Average caloReadout Count (slot={slotLabels[i]});#eta;#phi;Average caloCount',
+                                  type='TProfile2D',path=trigPath+"caloCounts_avg/phi_vs_eta", xbins=50,xmin=-2.5,xmax=2.5,ybins=64,ymin=-math.pi,ymax=math.pi)
+        fexCountGroup = helper.addGroup(EfexInputMonAlg, groupName+"_fex_slot" + str(i) , mainDir)
+        fexCountGroup.defineHistogram('TowerEta,TowerCount;slot-' + slotLabels[i], title=f'fexReadout Count (slot={slotLabels[i]});#eta;fexCount;fexCounts',
+                                     type='TH2I',path=trigPath+"fexCounts/fexCount_vs_eta", xbins=50,xmin=-2.5,xmax=2.5,ybins=1024,ymin=-0.5,ymax=1023.5)
+        fexCountGroup.defineHistogram('TowerEta,TowerPhi;slot-' + slotLabels[i], title=f'fexReadout Sum of Counts ({slotLabels[i]});#eta;#phi;#Sum of counts',
+                                     weight = 'TowerCount',
+                                     type='TH2F',path=trigPath+"fexCounts_sum/phi_vs_eta/", xbins=50,xmin=-2.5,xmax=2.5,ybins=64,ymin=-math.pi,ymax=math.pi)
+    fexTowerGroup.defineHistogram('TowerEmstatus;em_status',title='em status bit;em_status;fexTowers',
+                                  type='TH1F', path=trigPath+"fexTowers/", xbins=10,xmin=0,xmax=2400.0)
+    fexTowerGroup.defineHistogram('TowerHadstatus;had_status',title='hadronic status bit;em_status;fexTowers',
+                                  type='TH1F', path=trigPath+"fexTowers/", xbins=10,xmin=0,xmax=2400.0)
+    fexTowerGroup.defineHistogram('TowerEta;eta', title='eFex Tower Eta;#eta;fexTowers',
+                            type='TH1F', path=trigPath+"fexTowers/", xbins=100,xmin=-3.0,xmax=3.0)
+    fexTowerGroup.defineHistogram('TowerPhi;phi', title='eFex Tower Phi;#phi;fexTowers',
+                            type='TH1F', path=trigPath+"fexTowers/", xbins=64,xmin=-math.pi,xmax=math.pi)
+    fexTowerGroup.defineHistogram('TowerEta,TowerPhi;phi_vs_eta', title='eFex Tower Eta vs Phi;#eta;#phi;fexTowers',
+                            type='TH2F',path=trigPath+"fexTowers/", xbins=50,xmin=-2.5,xmax=2.5,ybins=64,ymin=-math.pi,ymax=math.pi)
+
+    refCompareFracGroup = helper.addGroup(EfexInputMonAlg,groupName+"_RefCompareFrac", mainDir)
     refCompareTreeGroup = helper.addGroup(EfexInputMonAlg,groupName+"_RefCompareTree", mainDir)
 
-    # histograms of eFex tower variables
-    myGroup.defineHistogram('NEfexTowers;h_nEfexTowers', title='Number of eFex towers',
-                            type='TH1I', path=trigPath, xbins=500,xmin=0,xmax=10000)
-
-    myGroup.defineHistogram('TowerEta;h_TowerEta', title='eFex Tower Eta',
-                            type='TH1F', path=trigPath, xbins=100,xmin=-3.0,xmax=3.0)
-
-    myGroup.defineHistogram('TowerPhi;h_TowerPhi', title='eFex Tower Phi',
-                            type='TH1F', path=trigPath, xbins=64,xmin=-math.pi,xmax=math.pi)
-
-    myGroup.defineHistogram('TowerEta,TowerPhi;h_TowerEtaPhiMap', title='eFex Tower Eta vs Phi;#eta;#phi',
-                            type='TH2F',path=trigPath, xbins=60,xmin=-3.0,xmax=3.0,ybins=64,ymin=-math.pi,ymax=math.pi)
-
-    myGroup.defineHistogram('TowerEtcount1;h_TowerEtcount1', title='eFex Tower Et Count1 (pre-sampler)',
-                            type='TH1F', path=trigPath, xbins=100,xmin=0,xmax=100.0)
-
-    EmErrorGroup.defineHistogram('TowerEtcount1;h_TowerEtcount1_Error', title='eFex Tower Et Count1 (pre-sampler) Error',
-                                 type='TH1F', path=trigPath+'Error', xbins=100,xmin=0,xmax=100.0)
-
-    myGroup.defineHistogram('TowerEtcount2;h_TowerEtcount2', title='eFex Tower Et Count2 (Front layer)',
-                            type='TH1F', path=trigPath, xbins=100,xmin=0,xmax=100.0)
-
-    EmErrorGroup.defineHistogram('TowerEtcount2;h_TowerEtcount2_Error', title='eFex Tower Et Count2 (Front layer) Error',
-                            type='TH1F', path=trigPath+'Error', xbins=100,xmin=0,xmax=100.0)
-
-    myGroup.defineHistogram('TowerEtcount3;h_TowerEtcount3', title='eFex Tower Et Count3 (Front layer)',
-                            type='TH1F', path=trigPath, xbins=100,xmin=0,xmax=100.0)
-
-    EmErrorGroup.defineHistogram('TowerEtcount3;h_TowerEtcount3_Error', title='eFex Tower Et Count3 (Front layer) Error',
-                            type='TH1F', path=trigPath+'Error', xbins=100,xmin=0,xmax=100.0)
-
-    myGroup.defineHistogram('TowerEtcount4;h_TowerEtcount4', title='eFex Tower Et Count4 (Front layer)',
-                            type='TH1F', path=trigPath, xbins=100,xmin=0,xmax=100.0)
-
-    EmErrorGroup.defineHistogram('TowerEtcount4;h_TowerEtcount4_Error', title='eFex Tower Et Count4 (Front layer) Error',
-                            type='TH1F', path=trigPath+'Error', xbins=100,xmin=0,xmax=100.0)
-
-    myGroup.defineHistogram('TowerEtcount5;h_TowerEtcount5', title='eFex Tower Et Count5 (Front layer)',
-                            type='TH1F', path=trigPath, xbins=100,xmin=0,xmax=100.0)
-
-    EmErrorGroup.defineHistogram('TowerEtcount5;h_TowerEtcount5_Error', title='eFex Tower Et Count5 (Front layer) Error',
-                            type='TH1F', path=trigPath+'Error', xbins=100,xmin=0,xmax=100.0)
-
-    myGroup.defineHistogram('TowerEtcount6;h_TowerEtcount6', title='eFex Tower Et Count6 (Middle layer)',
-                            type='TH1F', path=trigPath, xbins=100,xmin=0,xmax=100.0)
-
-    EmErrorGroup.defineHistogram('TowerEtcount6;h_TowerEtcount6_Error', title='eFex Tower Et Count6 (Middle layer) Error',
-                            type='TH1F', path=trigPath+'Error', xbins=100,xmin=0,xmax=100.0)
-
-    myGroup.defineHistogram('TowerEtcount7;h_TowerEtcount7', title='eFex Tower Et Count7 (Middle layer)',
-                            type='TH1F', path=trigPath, xbins=100,xmin=0,xmax=100.0)
-
-    EmErrorGroup.defineHistogram('TowerEtcount7;h_TowerEtcount7_Error', title='eFex Tower Et Count7 (Middle layer) Error',
-                            type='TH1F', path=trigPath+'Error', xbins=100,xmin=0,xmax=100.0)
-
-    myGroup.defineHistogram('TowerEtcount8;h_TowerEtcount8', title='eFex Tower Et Count8 (Middle layer)',
-                            type='TH1F', path=trigPath, xbins=100,xmin=0,xmax=100.0)
-
-    EmErrorGroup.defineHistogram('TowerEtcount8;h_TowerEtcount8_Error', title='eFex Tower Et Count8 (Middle layer) Error',
-                            type='TH1F', path=trigPath+'Error', xbins=100,xmin=0,xmax=100.0)
-
-    myGroup.defineHistogram('TowerEtcount9;h_TowerEtcount9', title='eFex Tower Et Count9 (Middle layer)',
-                            type='TH1F', path=trigPath, xbins=100,xmin=0,xmax=100.0)
-
-    EmErrorGroup.defineHistogram('TowerEtcount9;h_TowerEtcount9_Error', title='eFex Tower Et Count9 (Middle layer) Error',
-                            type='TH1F', path=trigPath+'Error', xbins=100,xmin=0,xmax=100.0)
-
-    myGroup.defineHistogram('TowerEtcount10;h_TowerEtcount10', title='eFex Tower Et Count10 (Back layer)',
-                            type='TH1F', path=trigPath, xbins=100,xmin=0,xmax=100.0)
-
-    EmErrorGroup.defineHistogram('TowerEtcount10;h_TowerEtcount10_Error', title='eFex Tower Et Count10 (Back layer) Error',
-                            type='TH1F', path=trigPath+'Error', xbins=100,xmin=0,xmax=100.0)
-
-    myGroup.defineHistogram('TowerEtcount11;h_TowerEtcount11', title='eFex Tower Et Count11 (Hadronic layer)',
-                            type='TH1F', path=trigPath, xbins=100,xmin=0,xmax=100.0)
-
-    HadErrorGroup.defineHistogram('TowerEtcount11;h_TowerEtcount11_Error', title='eFex Tower Et Count11 (Hadronic layer) Error',
-                            type='TH1F', path=trigPath+'Error', xbins=100,xmin=0,xmax=100.0)
-
-    myGroup.defineHistogram('TowerModule;h_TowerModule', title='eFex Tower Module Number',
-                            type='TH1F', path=trigPath, xbins=24,xmin=0,xmax=24.0)
-
-    myGroup.defineHistogram('TowerFpga;h_TowerFpga', title='eFex Tower FPGA Number',
-                            type='TH1F', path=trigPath, xbins=4,xmin=0,xmax=4.0)
-
-    myGroup.defineHistogram('TowerEmstatus;h_TowerEmstatus', title='eFex tower EM status bit',
-                            type='TH1F', path=trigPath, xbins=10,xmin=0,xmax=2400.0)
-
-    myGroup.defineHistogram('TowerHadstatus;h_TowerHadstatus', title='eFex Tower Hadronic status bit',
-                            type='TH1F', path=trigPath, xbins=10,xmin=0,xmax=2400.0)
-
-    refCompareGroup.defineHistogram('TowerEta,TowerPhi;h_TowerMismatch',title="eFexTower mismatches to reference;#eta;#phi",type='TH2I',
-                            path=trigPath,xbins=60,xmin=-3,xmax=3,ybins=64,ymin=-math.pi,ymax=math.pi)
-    refCompareTreeGroup.defineTree('EventNumber,TowerId,TowerEta,TowerPhi,TowerEmstatus,TowerHadstatus,TowerSlot,TowerCount,RefTowerCount;mismatched',
-                                   "eventNumber/l:id/I:eta/F:phi/F:em_status/i:had_status/i:slot/i:count/I:ref_count/I",
-                                   title="mismatched",path=trigPath)
+    refCompareTreeGroup.defineHistogram('TowerEta,TowerPhi;phi_vs_eta',title="location of mismatches;#eta;#phi;mismatches",type='TH2I',
+                             path=trigPath+"mismatches/",xbins=50,xmin=-2.5,xmax=2.5,ybins=64,ymin=-math.pi,ymax=math.pi)
+    refCompareFracGroup.defineHistogram('TowerEta,TowerPhi,Weight;phi_vs_eta',title="fraction of matches;#eta;#phi;Fraction of matches",type='TProfile2D',
+                                    path=trigPath+"fexTowers_matchedFrac/",xbins=50,xmin=-2.5,xmax=2.5,ybins=64,ymin=-math.pi,ymax=math.pi)
+    refCompareTreeGroup.defineTree('EventNumber,TowerId,TowerEta,TowerPhi,TowerEmstatus,TowerHadstatus,TowerSlot,TowerCount,RefTowerCount,SlotSCID;mismatched',
+                                   "eventNumber/l:id/I:eta/F:phi/F:em_status/i:had_status/i:slot/I:count/I:ref_count/I:scid/string",
+                                   title="mismatched",path=trigPath+"mismatches/")
+    refCompareTreeGroup.defineHistogram('LBNString,TowerSlotSplitHad;slot_vs_lbn', path=trigPath+"mismatches/", type='TH2I',
+                            title='Mismatched counts;LB;Slot;Number of mismatches',
+                            xbins=1, xmin=0, xmax=1, xlabels=[""],
+                            ybins=12, ymin=-0.5, ymax=11.5, ylabels=slotLabels,
+                            opt=['kCanRebin'])
+    refCompareTreeGroup.defineHistogram('LBNString,SlotSCID;scid_vs_lbn', path=trigPath+"mismatches/", type='TH2I',
+                                        title='Mismatched counts;LB;SCID;mismatches',
+                                        xbins=1, xmin=0, xmax=1, xlabels=[""],
+                                        ybins=1, ymin=0, ymax=1, ylabels=[""],
+                                        opt=['kCanRebin'])
+    refCompareTreeGroup.defineHistogram('TowerCount,RefTowerCount;caloCount_vs_fexCount', path=trigPath+"mismatches/", type='TH2I',
+                                        title='Mismatched counts;Fex Readout;Calo Readout;mismatches',
+                                        xbins=60, xmin=-0.5, xmax=59.5,
+                                        ybins=60, ymin=-0.5, ymax=59.5)
 
     acc = helper.result()
     result.merge(acc)
