@@ -144,7 +144,8 @@ class AthConfigFlags(object):
         self._flagdict=dict()
         self._locked=False
         self._dynaflags = dict()
-        self._loaded    = set() # dynamic dlags that were loaded
+        self._loaded    = set()      # dynamic dlags that were loaded
+        self._categoryCache = set()  # cache for already found categories
         self._hash = None
         self._parser = None
         self._args = None # user args from parser
@@ -251,13 +252,21 @@ class AthConfigFlags(object):
                 self._loadDynaFlags( prefix )
 
     def hasCategory(self, name):
-        path = name+'.'
+        # We cache successfully found categories
+        if name in self._categoryCache:
+            return True
+
+        # If not found do search through all keys.
+        # TODO: could be improved by using a trie for _flagdict
         for f in self._flagdict.keys():
-            if f.startswith(path):
+            if f.startswith(name+'.'):
+                self._categoryCache.add(name)
                 return True
         for c in self._dynaflags.keys():
             if c.startswith(name):
+                self._categoryCache.add(name)
                 return True
+
         return False
 
     def hasFlag(self, name):
@@ -265,24 +274,20 @@ class AthConfigFlags(object):
 
     def _set(self,name,value):
         self._tryModify()
-        if name in self._flagdict:
+        try:
             self._flagdict[name].set(value)
-            return
-        errString="No flag with name \'{}\' found".format( name )
-        closestMatch=get_close_matches(name,self._flagdict.keys(),1)
-        if len(closestMatch)>0:
-            errString+=". Did you mean \'{}\'?".format(  closestMatch[0] )
-        raise KeyError(errString)
+        except KeyError:
+            closestMatch = get_close_matches(name,self._flagdict.keys(),1)
+            raise KeyError(f"No flag with name '{name}' found" +
+                           (f". Did you mean '{closestMatch[0]}'?" if closestMatch else ""))
 
     def _get(self,name):
-        if name in self._flagdict:
+        try:
             return self._flagdict[name].get(self)
-
-        errString="No flag with name \'{}\' found".format( name )
-        closestMatch=get_close_matches(name,self._flagdict.keys(),1)
-        if len(closestMatch)>0:
-            errString+=". Did you mean \'{}\'?".format( closestMatch[0] )
-        raise KeyError(errString)
+        except KeyError:
+            closestMatch = get_close_matches(name,self._flagdict.keys(),1)
+            raise KeyError(f"No flag with name '{name}' found" +
+                           (f". Did you mean '{closestMatch[0]}'?" if closestMatch else ""))
 
     def __call__(self,name):
         return self._get(name)

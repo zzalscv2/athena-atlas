@@ -10,23 +10,23 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 BPHYDerivationName = "BPHY10"
 streamName = "StreamDAOD_BPHY10"
 
-def BPHY10Cfg(ConfigFlags):
+def BPHY10Cfg(flags):
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
-    from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
+
     acc = ComponentAccumulator()
-    isSimulation = ConfigFlags.Input.isMC
+    isSimulation = flags.Input.isMC
     BPHY10_AugOriginalCounts = CompFactory.DerivationFramework.AugOriginalCounts(
                               name = "BPHY10_AugOriginalCounts",
                               VertexContainer = "PrimaryVertices",
                               TrackContainer = "InDetTrackParticles" )
-    V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(ConfigFlags, BPHYDerivationName))
-    vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(ConfigFlags, BPHYDerivationName))        # VKalVrt vertex fitter
+    V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(flags, BPHYDerivationName))
+    vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(flags, BPHYDerivationName))        # VKalVrt vertex fitter
     acc.addPublicTool(vkalvrt)
     acc.addPublicTool(V0Tools)
-    trackselect = acc.popToolsAndMerge(BPHY_InDetDetailedTrackSelectorToolCfg(ConfigFlags, BPHYDerivationName))
+    trackselect = acc.popToolsAndMerge(BPHY_InDetDetailedTrackSelectorToolCfg(flags, BPHYDerivationName))
     acc.addPublicTool(trackselect)
-    vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(ConfigFlags, BPHYDerivationName))
+    vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(flags, BPHYDerivationName))
     acc.addPublicTool(vpest)
     BPHY10JpsiFinder = CompFactory.Analysis.JpsiFinder(
                               name                        = "BPHY10JpsiFinder",
@@ -56,7 +56,7 @@ def BPHY10Cfg(ConfigFlags):
                               OutputVtxContainerName = "BPHY10JpsiCandidates",
                               PVContainerName        = "PrimaryVertices",
                               V0Tools                = V0Tools,
-                              PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+                              PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
                               RefPVContainerName     = "SHOULDNOTBEUSED",
                               DoVertexType = 1)
     BPHY10_Select_Jpsi2mumu = CompFactory.DerivationFramework.Select_onia2mumu(
@@ -100,7 +100,7 @@ def BPHY10Cfg(ConfigFlags):
 
     from InDetConfig.InDetV0FinderConfig import V0MainDecoratorCfg
     V0Decorator = acc.popToolsAndMerge(V0MainDecoratorCfg(
-        ConfigFlags,
+        flags,
         name = "BPHY10V0Decorator",
         V0Tools = V0Tools,
         V0ContainerName = BPHY10V0ContainerName,
@@ -115,7 +115,7 @@ def BPHY10Cfg(ConfigFlags):
                                     OutputVtxContainerName = "BPHY10BdJpsiKstCandidates",
                                     PVContainerName        = "PrimaryVertices",
                                     V0Tools                = V0Tools,
-                                    PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+                                    PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
                                     RefPVContainerName     = "BPHY10RefittedPrimaryVertices1",
                                     RefitPV                = True,
                                     MaxPVrefit             = 10000,
@@ -146,7 +146,7 @@ def BPHY10Cfg(ConfigFlags):
     from DerivationFrameworkBPhys.V0ToolConfig import BPHY_InDetV0FinderToolCfg
     BPHY10_Reco_V0Finder   = CompFactory.DerivationFramework.Reco_V0Finder(
                                   name                   = "BPHY10_Reco_V0Finder",
-                                  V0FinderTool           = acc.popToolsAndMerge(BPHY_InDetV0FinderToolCfg(ConfigFlags,BPHYDerivationName,
+                                  V0FinderTool           = acc.popToolsAndMerge(BPHY_InDetV0FinderToolCfg(flags,BPHYDerivationName,
                                        V0ContainerName = BPHY10V0ContainerName,
                                        KshortContainerName = BPHY10KshortContainerName,
                                        LambdaContainerName = BPHY10LambdaContainerName,
@@ -158,20 +158,17 @@ def BPHY10Cfg(ConfigFlags):
                                   LambdabarContainerName = BPHY10LambdabarContainerName,
                                   CheckVertexContainers  = ['BPHY10JpsiCandidates'])
 
-    JpsiV0VertexFit = CompFactory.Trk.TrkVKalVrtFitter(
-                                  name                 = "JpsiV0VertexFit",
-                                  Extrapolator         = acc.popToolsAndMerge(InDetExtrapolatorCfg(ConfigFlags)),
-                                  FirstMeasuredPoint   = False,
-                                  CascadeCnstPrecision = 1e-6,
-                                  MakeExtendedVertex   = True)
+    from TrkConfig.TrkVKalVrtFitterConfig import JpsiV0VertexFitCfg
+    JpsiV0VertexFit = acc.popToolsAndMerge(JpsiV0VertexFitCfg(flags))
     acc.addPublicTool(JpsiV0VertexFit)
+
     BPHY10JpsiKshort  = CompFactory.DerivationFramework.JpsiPlusV0Cascade(
                                   name                    = "BPHY10JpsiKshort",
                                   V0Tools                 = V0Tools,
                                   HypothesisName          = "Bd",
                                   TrkVertexFitterTool     = JpsiV0VertexFit,
                                   V0Hypothesis            = 310,
-                                  PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+                                  PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
                                   JpsiMassLowerCut        = 2800.,
                                   JpsiMassUpperCut        = 4000.,
                                   V0MassLowerCut          = 400.,
@@ -189,7 +186,7 @@ def BPHY10Cfg(ConfigFlags):
                                   V0Tools                 = V0Tools,
                                   HypothesisName          = "Lambda_b",
                                   TrkVertexFitterTool     = JpsiV0VertexFit,
-                                  PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+                                  PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
                                   V0Hypothesis            = 3122,
                                   JpsiMassLowerCut        = 2800.,
                                   JpsiMassUpperCut        = 4000.,
@@ -208,7 +205,7 @@ def BPHY10Cfg(ConfigFlags):
                                   HypothesisName          = "Lambda_bbar",
                                   V0Tools                 = V0Tools,
                                   TrkVertexFitterTool     = JpsiV0VertexFit,
-                                  PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+                                  PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
                                   V0Hypothesis            = -3122,
                                   JpsiMassLowerCut        = 2800.,
                                   JpsiMassUpperCut        = 4000.,
@@ -258,7 +255,7 @@ def BPHY10Cfg(ConfigFlags):
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
-    BPHY10SlimmingHelper = SlimmingHelper("BPHY10SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
+    BPHY10SlimmingHelper = SlimmingHelper("BPHY10SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, ConfigFlags = flags)
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
     AllVariables  = getDefaultAllVariables()
     StaticContent = []
@@ -321,7 +318,7 @@ def BPHY10Cfg(ConfigFlags):
     BPHY10SlimmingHelper.StaticContent = StaticContent
     BPHY10SlimmingHelper.SmartCollections = []
     BPHY10ItemList = BPHY10SlimmingHelper.GetItemList()
-    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_BPHY10", ItemList=BPHY10ItemList, AcceptAlgs=["BPHY10Kernel"]))
-    acc.merge(InfileMetaDataCfg(ConfigFlags, "DAOD_BPHY10", AcceptAlgs=["BPHY10Kernel"]))
+    acc.merge(OutputStreamCfg(flags, "DAOD_BPHY10", ItemList=BPHY10ItemList, AcceptAlgs=["BPHY10Kernel"]))
+    acc.merge(InfileMetaDataCfg(flags, "DAOD_BPHY10", AcceptAlgs=["BPHY10Kernel"]))
     acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True, printComponentsOnly=False)
     return acc

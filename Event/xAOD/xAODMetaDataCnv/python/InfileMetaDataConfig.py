@@ -68,8 +68,9 @@ def InfileMetaDataCfg(flags, streamName="", AcceptAlgs=[]):
         # Now, I think this needs the CutFlowSvc to be set up
         # For the time being this is done in the relevant skeleton, e.g. Derivations
         # These should be reconciled, i.e. move that here and configure via flags
-        from EventBookkeeperTools.EventBookkeeperToolsConfig import CutFlowOutputList
-        MetadataItemList += CutFlowOutputList(flags)
+        if "CutBookkeepers" in flags.Input.MetadataItems or streamName not in ["ESD", "AOD"]:
+            from EventBookkeeperTools.EventBookkeeperToolsConfig import CutFlowOutputList
+            MetadataItemList += CutFlowOutputList(flags)
 
         # Data specific MetaData components
         if not flags.Input.isMC:

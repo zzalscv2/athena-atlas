@@ -164,10 +164,11 @@ def defineInputsMenu():
             'jJ70p0ETA23', 'jJ80', 'jJ80p0ETA25', 'jJ85p0ETA21', 'jJ90', 'jJ125',
             'jJ140', 'jJ160', 'jJ180', 'jJ500',
 
+            'jJ15p31ETA49','jJ20p31ETA49',
             'jJ40p31ETA49', 'jJ50p31ETA49', 'jJ60p31ETA49', 'jJ90p31ETA49', 'jJ125p31ETA49',
 
             # jJ thresholds for production
-            'jJSPARE3', 'jJSPARE4', 'jJSPARE5', 'jJSPARE6',
+            'jJSPARE3', 'jJSPARE4',
 
             None, None,
 

@@ -270,8 +270,7 @@ if InDetFlags.doV0Finder():
                                                          MaxArcLength           = [800.,800.,800.],
                                                          MinDeltaR              = [-10000.,-10000.,-10000.],
                                                          MaxDeltaR              = [10000.,10000.,10000.],
-                                                         MaxPhi                 = [10000., 10000., 10000.],
-                                                         MaxChi2OfVtxEstimation = 2000.)
+                                                         MaxPhi                 = [10000., 10000., 10000.])
   ToolSvc += InDetV0VtxPointEstimator
   if (InDetFlags.doPrintConfigurables()):
     printfunc (InDetV0VtxPointEstimator)

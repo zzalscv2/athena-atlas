@@ -4,7 +4,9 @@
 
 #include "MuonIdHelpers/TgcIdHelper.h"
 
-TgcIdHelper::TgcIdHelper() : MuonIdHelper("TgcIdHelper") {}
+TgcIdHelper::TgcIdHelper() : MuonIdHelper("TgcIdHelper") {
+    m_module_hashes.fill(-1);
+}
 
 // Initialize dictionary
 int TgcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
@@ -204,31 +206,39 @@ int TgcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     return (status);
 }
 
+inline unsigned int TgcIdHelper::moduleHashIdx(const Identifier& id) const{
+    /// Unfold the array [A][B][C] by
+    /// a * BxC + b * C + c
+    constexpr unsigned int C = s_phiDim;
+    constexpr unsigned int BxC = C*s_etaDim;
+    const int stEta = stationEta(id);
+    return (stationName(id) - m_stationShift)*BxC + (stEta + s_etaDim/2 - (stEta>0))*C + (stationPhi(id) -1);
+}
 int TgcIdHelper::init_id_to_hashes() {
-    unsigned int hash_max = this->module_hash_max();
+    for (const Identifier& id : m_module_vec) m_stationShift = std::min(m_stationShift, 1u* stationName(id));
+    
+    unsigned int hash_max = module_hash_max();
     for (unsigned int i = 0; i < hash_max; ++i) {
-        Identifier id = m_module_vec[i];
-        int station = this->stationName(id);
-        int eta = this->stationEta(id) + 10;  // for negative etas
-        int phi = this->stationPhi(id);
-        m_module_hashes[station][eta - 1][phi - 1] = i;
+        const Identifier& id = m_module_vec[i];
+        const unsigned idx = moduleHashIdx(id);
+        if (idx >= m_module_hashes.size() || m_module_hashes[idx] < hash_max){
+            ATH_MSG_FATAL("Failed to assign module hash to "<<show_to_string(id));
+            return 1;
+        }
+        m_module_hashes[idx] = i;
     }
     return 0;
 }
 
 int TgcIdHelper::get_module_hash(const Identifier& id, IdentifierHash& hash_id) const {
-    // Identifier moduleId = elementID(id);
-    // IdContext context = module_context();
-    // return get_hash(moduleId,hash_id,&context);
-    int station = this->stationName(id);
-    int eta = this->stationEta(id) + 10;  // for negative etas
-    int phi = this->stationPhi(id);
-    hash_id = m_module_hashes[station][eta - 1][phi - 1];
+    const unsigned int idx = moduleHashIdx(id);
+    if (idx >= m_module_hashes.size()) return 1;
+    hash_id = m_module_hashes[idx];
     return 0;
 }
 
 int TgcIdHelper::get_detectorElement_hash(const Identifier& id, IdentifierHash& hash_id) const {
-    return this->get_module_hash(id, hash_id);
+    return get_module_hash(id, hash_id);
 }
 
 void TgcIdHelper::idChannels(const Identifier& id, std::vector<Identifier>& vect) const {

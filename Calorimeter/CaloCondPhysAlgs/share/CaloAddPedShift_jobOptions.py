@@ -17,10 +17,10 @@ if 'FileName' not in dir():
    FileName = "pedestal_shift.txt"
 
 if 'GlobalTag' not in dir():
-   GlobalTag =  'COMCOND-ES1PT-004-00'
+   GlobalTag = 'CONDBR2-ES1PA-2023-01' 
 
 if 'Geometry' not in dir():
-   Geometry = 'ATLAS-GEO-10-00-00'
+   Geometry = 'ATLAS-R2-2015-03-01-00'
 
 printfunc ("RunNumber ",RunNumber)
 printfunc ("LumiBlock ",LumiBlock)

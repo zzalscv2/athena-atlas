@@ -8,6 +8,7 @@
 from AthenaCommon.Logging import logging
 logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
+from ..Config.MenuComponents import menuSequenceCAToGlobalWrapper
 from ..Config.ChainConfigurationBase import ChainConfigurationBase
 from ..Muon.MuonChainConfiguration import MuonChainConfiguration
 from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
@@ -41,7 +42,10 @@ def dimuL2SequenceCfg(flags):
     return dimuL2Sequence(flags)
 
 def dimuEFSequenceCfg(flags):
-    return dimuEFSequence(flags)
+    if isComponentAccumulatorCfg():
+        return dimuEFSequence(flags)
+    else:
+        return menuSequenceCAToGlobalWrapper(dimuEFSequence, flags)
 
 def bmumuxSequenceCfg(flags):
     return bmumuxSequence(flags)

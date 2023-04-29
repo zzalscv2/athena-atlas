@@ -1,10 +1,14 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonIdHelpers/MdtIdHelper.h"
 
-MdtIdHelper::MdtIdHelper() : MuonIdHelper("MdtIdHelper") {}
+MdtIdHelper::MdtIdHelper() : MuonIdHelper("MdtIdHelper") {
+    //m_detectorElement_hashes
+    m_module_hashes.fill(-1);
+    m_detectorElement_hashes.fill(-1);
+}
 
 /// initialize dictionary
 int MdtIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
@@ -250,45 +254,51 @@ int MdtIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
 int MdtIdHelper::init_id_to_hashes() {
     unsigned int hash_max = this->module_hash_max();
     for (unsigned int i = 0; i < hash_max; ++i) {
-        Identifier id = m_module_vec[i];
-        int station = this->stationName(id);
-        int eta = this->stationEta(id) + 10;  // for negative etas
-        int phi = this->stationPhi(id);
-        m_module_hashes[station][eta - 1][phi - 1] = i;
+        const Identifier& id = m_module_vec[i];
+        const unsigned int idx = moduleHashIdx(id);
+        if (idx >= m_module_hashes.size() || m_module_hashes[idx] < hash_max){
+            ATH_MSG_FATAL("Failed to initialize module hash dict for "<<show_to_string(id)<<" index: "<<idx<<"/"<<m_module_hashes.size());
+            return 1;
+        }
+        m_module_hashes[idx] = i;
     }
 
     hash_max = this->detectorElement_hash_max();
     for (unsigned int i = 0; i < hash_max; ++i) {
-        Identifier id = m_detectorElement_vec[i];
-        int station = this->stationName(id);
-        int eta = this->stationEta(id) + 10;  // for negative eta
-        int phi = this->stationPhi(id);
-        int multilayer = this->multilayer(id);
-        m_detectorElement_hashes[station][eta - 1][phi - 1][multilayer - 1] = i;
+        const Identifier& id = m_detectorElement_vec[i];
+        const unsigned int idx = detEleHashIdx(id);
+        if (idx >= m_detectorElement_hashes.size() || m_detectorElement_hashes[idx] < hash_max){
+            ATH_MSG_FATAL("Failed to initialize detector element hash dict for "<<show_to_string(id));
+            return 1;
+        }
+        m_detectorElement_hashes[idx] = i;
     }
     return 0;
 }
-
+inline unsigned int MdtIdHelper::moduleHashIdx(const Identifier& id) const {
+    /// Unfold the array [A][B][C] by
+    /// a * BxC + b * C + c
+    constexpr unsigned int C = s_phiDim;
+    constexpr unsigned int BxC = C*s_etaDim;
+    /// Station eta ranges from -8 to 8
+    const int stEta = stationEta(id);
+    return stationName(id)*BxC + (stEta + (s_etaDim/2))*C + (stationPhi(id)-1); 
+    
+}
+inline unsigned int MdtIdHelper::detEleHashIdx(const Identifier& id) const {
+    return moduleHashIdx(id)  *s_mlDim +  (multilayer(id) -1);
+}
 int MdtIdHelper::get_module_hash(const Identifier& id, IdentifierHash& hash_id) const {
-    // Identifier moduleId = elementID(id);
-    // IdContext context = module_context();
-    // return get_hash(moduleId,hash_id,&context);
-    int station = this->stationName(id);
-    int eta = this->stationEta(id) + 10;  // for negative etas
-    int phi = this->stationPhi(id);
-    hash_id = m_module_hashes[station][eta - 1][phi - 1];
+    const unsigned int idx = moduleHashIdx(id);
+    if (idx >= m_module_hashes.size()) return -1;
+    hash_id = m_module_hashes[idx];
     return 0;
 }
 
 int MdtIdHelper::get_detectorElement_hash(const Identifier& id, IdentifierHash& hash_id) const {
-    // Identifier multilayerId = multilayerID(id);
-    // IdContext context = multilayer_context();
-    // return get_hash(multilayerId,hash_id,&context);
-    int station = this->stationName(id);
-    int eta = this->stationEta(id) + 10;  // for negative eta
-    int phi = this->stationPhi(id);
-    int multilayer = this->multilayer(id);
-    hash_id = m_detectorElement_hashes[station][eta - 1][phi - 1][multilayer - 1];
+    const unsigned int idx = detEleHashIdx(id);
+    if (idx >= m_detectorElement_hashes.size()) return -1;
+    hash_id = m_detectorElement_hashes[idx];    
     return 0;
 }
 
