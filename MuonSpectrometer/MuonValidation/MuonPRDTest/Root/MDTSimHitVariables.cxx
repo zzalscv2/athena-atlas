@@ -56,7 +56,7 @@ namespace MuonPRDTest {
 
             const Amg::Vector3D& localPosition = hit.localPosition();
             m_MDT_hitLocalPosition.push_back(localPosition);
-            m_MDT_hitGlobalPosition.push_back(mdtdet->localToGlobalCoords(localPosition, offid));
+            m_MDT_hitGlobalPosition.push_back(mdtdet->localToGlobalTransf(offid)*localPosition);
             m_MDT_detector_globalPosition.push_back(mdtdet->globalPosition());
             m_MDT_driftRadius.push_back(hit.driftRadius());
             m_MDT_particleEncoding.push_back(hit.particleEncoding());
