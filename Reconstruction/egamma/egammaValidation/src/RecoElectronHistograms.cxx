@@ -3,13 +3,9 @@
 */
 
 #include "RecoElectronHistograms.h"
-#include <typeinfo>
-
-#include "GaudiKernel/ServiceHandle.h"
-#include "AsgTools/AnaToolHandle.h"
+#include "AsgMessaging/Check.h"
 
 using namespace egammaMonitoring;
-
 
 StatusCode RecoElectronHistograms::initializePlots() {
   
@@ -17,9 +13,7 @@ StatusCode RecoElectronHistograms::initializePlots() {
 
   return StatusCode::SUCCESS;
 
-
 } 
-
 
 void RecoElectronHistograms::fill(const xAOD::Electron& elrec) {
 

@@ -1,16 +1,14 @@
 /*
-Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EGAMMAVALIDATION_BASICHISTOGRAMS_H
 #define EGAMMAVALIDATION_BASICHISTOGRAMS_H
 
-
 #include "xAODBase/IParticle.h"
 
 #include <map>
 #include <string>
-#include <utility>
 class ITHistSvc;
 class StatusCode;
 class TH1D;
@@ -23,10 +21,10 @@ namespace egammaMonitoring {
 
     IHistograms();
     IHistograms(std::string name,
-                   std::string title,
-                   std::string folder,
-                   ITHistSvc * &rootHistSvc
-    ) :
+		std::string title,
+		std::string folder,
+		ITHistSvc * &rootHistSvc
+		) :
       m_name(std::move(std::move(name))),
       m_title(std::move(std::move(title))),
       m_folder(std::move(std::move(folder))),
@@ -38,14 +36,13 @@ namespace egammaMonitoring {
     virtual void fill(const xAOD::IParticle&, float mu) = 0;
     virtual ~IHistograms(){};
 
-    std::map<std::string, TH1D* > histoMap;
+    std::map<std::string, TH1D*> histoMap;
 
   protected:
     std::string m_name;
     std::string m_title;
     std::string m_folder;
-    ITHistSvc*  m_rootHistSvc =  nullptr;
-
+    ITHistSvc*  m_rootHistSvc = nullptr;
 
   };
 

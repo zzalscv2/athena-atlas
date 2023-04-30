@@ -1,14 +1,12 @@
 /*
   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 */
-/*
-*/
 
 #ifndef EGAMMAVALIDATION_TRUTHELECTRONHISTOGRAMS_H
 #define EGAMMAVALIDATION_TRUTHELECTRONHISTOGRAMS_H
 
-#include "xAODTruth/TruthParticle.h" //typedef
-#include "xAODEgamma/Electron.h" //typedef
+#include "xAODTruth/TruthParticle.h"
+#include "xAODEgamma/Electron.h"
 #include "ParticleHistograms.h"
 
 class StatusCode;

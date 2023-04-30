@@ -5,30 +5,23 @@ Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
 #ifndef EGAMMAVALIDATION_EFFICIENCYPLOTS_H
 #define EGAMMAVALIDATION_EFFICIENCYPLOTS_H
 
-#include "TH1.h"
-#include "TMath.h"
-#include "GaudiKernel/ITHistSvc.h"
 #include "IHistograms.h"
-#include "ParticleHistograms.h"
 
+class ITHistSvc;
 
-#include <TROOT.h>
-#include <TStyle.h>
-
-namespace egammaMonitoring{
+namespace egammaMonitoring {
   
-  class EfficiencyPlot{
+  class EfficiencyPlot {
   public:
 
-    EfficiencyPlot(std::string name, std::string folder,  ITHistSvc * &rootHistSvc ) ;
-    ~EfficiencyPlot(){ };
-    StatusCode divide(IHistograms  *pass,  IHistograms *total);
+    EfficiencyPlot(std::string name, std::string folder, ITHistSvc * &rootHistSvc);
+    ~EfficiencyPlot() { };
+    StatusCode divide(IHistograms *pass, IHistograms *total);
 
-      
   private:
     std::string m_name;
     std::string m_folder;
-    ITHistSvc*  m_rootHistSvc = nullptr;
+    ITHistSvc* m_rootHistSvc = nullptr;
 
   };
   

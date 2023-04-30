@@ -5,26 +5,23 @@
 #ifndef EGAMMAVALIDATION_SHOWERSHAPESHISTOGRAMS_H
 #define EGAMMAVALIDATION_SHOWERSHAPESHISTOGRAMS_H
 
-#include <utility>
-#include "GaudiKernel/ITHistSvc.h"
+#include <map>
 #include "xAODEgamma/Egamma.h"
-#include "xAODEgamma/EgammaxAODHelpers.h"
 
-#include "EgammaAnalysisInterfaces/IAsgElectronLikelihoodTool.h"
-#include "TH1.h"
-#include "TH2.h"
+class TH1D;
+class TH2D;
+class ITHistSvc;
 
-namespace egammaMonitoring{
+namespace egammaMonitoring {
 
-  class ShowerShapesHistograms{
+  class ShowerShapesHistograms {
   public:
 
     // Histos
     ShowerShapesHistograms(std::string name,
-                   std::string title,
-                   std::string folder,
-                   ITHistSvc * &rootHistSvc
-    ) :
+			   std::string title,
+			   std::string folder,
+			   ITHistSvc * &rootHistSvc) :
       m_name(std::move(std::move(name))),
       m_title(std::move(std::move(title))),
       m_folder(std::move(std::move(folder))),
@@ -40,9 +37,8 @@ namespace egammaMonitoring{
     std::string m_name;
     std::string m_title;
     std::string m_folder;
-    ITHistSvc*  m_rootHistSvc =  nullptr;
+    ITHistSvc*  m_rootHistSvc = nullptr;
 
-    
   };
 
 }
