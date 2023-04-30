@@ -16,7 +16,7 @@ if "date" not in dir():
 if "TimeStamp" not in dir():
    try:
       ts=strptime(date+'/UTC','%Y-%m-%d:%H:%M:%S/%Z')
-      TimeStamp=int(timegm(ts))*1000000000L
+      TimeStamp=int(timegm(ts))*1000000000
    except ValueError:
       print("ERROR in time specification, use e.g. 2007-05-25:14:01:00")
 
@@ -28,7 +28,7 @@ if "addCells" not in dir():
    addCells=False
 
 if "GloablTag" not in dir():
-   GlobalTag = 'CONDBR2-BLKPA-2016-14'
+   GlobalTag = 'CONDBR2-BLKPA-2023-01'
 
 
 ###################################################################
@@ -59,7 +59,7 @@ globalflags.DatabaseInstance="CONDBR2"
 #import AthenaPoolCnvSvc.AthenaPool
 
 from AthenaCommon.GlobalFlags import jobproperties
-jobproperties.Global.DetDescrVersion='ATLAS-GEO-20-00-00'
+jobproperties.Global.DetDescrVersion='ATLAS-R2-2016-01-00-01'
 
 from AtlasGeoModel import SetGeometryVersion
 from AtlasGeoModel import GeoModelInit

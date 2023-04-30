@@ -2,6 +2,7 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
+#include <fstream>
 #include "LArHVCorrToSCHVCorr.h"
 #include "CaloDetDescr/ICaloSuperCellIDTool.h"
 #include "CaloIdentifier/CaloCell_SuperCell_ID.h"
@@ -11,7 +12,7 @@
 
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "CoralBase/Blob.h"
-
+#include "PathResolver/PathResolver.h"
 #include "AthenaKernel/errorcheck.h"
 #include "AthenaKernel/IOVInfiniteRange.h"
 
@@ -70,6 +71,29 @@ StatusCode LArHVCorrToSCHVCorr::stop()
   const unsigned hashMax=calosccellID->calo_cell_hash_max();
   ATH_MSG_INFO("SuperCell hash max: " << hashMax);
 
+  // get the HEC layer weights
+  std::string file = PathResolver::find_file (m_weightsName.value(), "JOBOPTSEARCHPATH");
+  ATH_MSG_INFO( "Reading file  " << file << " configured: " << m_weightsName.value() );
+  std::ifstream fin(file.c_str());
+  if (!fin.is_open()) {
+       ATH_MSG_ERROR( "Could not open input file " << file );
+       return StatusCode::FAILURE;
+  }
+  std::string line;
+  int ttbin;
+  float em0,em1,em2,em3,em4;
+  float had0,had1,had2,had3;
+  std::map<int,std::vector<float> > wmap;
+  while (std::getline(fin, line)){
+      int nread = sscanf(line.c_str(), "%d %f %f %f %f %f %f %f %f %f", 
+                                       &ttbin,&em0,&em1,&em2,&em3,&em4,&had0,&had1,&had2,&had3);
+      if(nread != 10) continue;
+      wmap[ttbin]=std::vector<float>{had0,had1,had2,had3};
+  }
+  // need also online ID helper
+  const LArHEC_ID* hecID = nullptr;
+  ATH_CHECK(detStore()->retrieve(hecID,"LArHEC_ID"));
+
   //Set up AttributeListCollection 
   coral::AttributeListSpecification* spec = new coral::AttributeListSpecification();
   spec->extend("HVScaleCorr", "blob");
@@ -94,12 +118,12 @@ StatusCode LArHVCorrToSCHVCorr::stop()
   }
   if(!m_outKey.empty()) vScale.resize(hashMax,(float)1.0);
    
-  unsigned nTileIds=0;
+  unsigned nFilledIds=0;
   unsigned nTotalIds=0;
   for (unsigned i=0; i < hashMax; ++i) {
     if(calosccellID->sub_calo(IdentifierHash(i)) > 2) continue; // not a LAr channel  
     const Identifier scId=calosccellID->cell_id(IdentifierHash(i));
-
+    nTotalIds += 1;
     const std::vector<Identifier> &cellIds=m_scidTool->superCellToOfflineID(scId);
     if (cellIds.empty()) {
       ATH_MSG_ERROR("Got empty vector of cell ids for super cell id 0x" 
@@ -107,10 +131,17 @@ StatusCode LArHVCorrToSCHVCorr::stop()
 		      return StatusCode::FAILURE;
     }
     float hvcorr=0.;
+    float weight=1.;
+    float wsum=0.;
     for(const Identifier cellId : cellIds) {
-        hvcorr += hvHdl->HVScaleCorr(cabling->createSignalChannelID(cellId));
+        if(hecID->is_lar_hec(cellId)) { // find a weight
+          weight = getWeight(hecID,cellId,wmap);
+        }
+        hvcorr += weight * hvHdl->HVScaleCorr(cabling->createSignalChannelID(cellId));
+        wsum += weight;
     }
-    hvcorr /= cellIds.size();
+    if(wsum>0.) hvcorr /= wsum;
+    nFilledIds += 1;
 
     // Important, blob is ordered by LAr online hash, but LArHVCorr by cell offline hash !!!!
     pHV[onlSCID->channel_Hash(cablingSC->createSignalChannelID(scId))]=hvcorr;
@@ -124,8 +155,7 @@ StatusCode LArHVCorrToSCHVCorr::stop()
   CHECK(detStore()->record(coll,m_folderName));
   coll->add(0,attrList);
 
-  ATH_MSG_INFO("Total number of SuperCells:" << nTotalIds << ", Tile:" << nTileIds 
-               << ", LAr: " << nTotalIds-nTileIds);
+  ATH_MSG_INFO("Total number of SuperCells:" << nTotalIds << ", filled:" << nFilledIds);
 
   if(!m_outKey.empty()) {
      SG::WriteCondHandle<LArHVCorr> writeHandle{m_outKey, ctx};
@@ -148,5 +178,23 @@ StatusCode LArHVCorrToSCHVCorr::stop()
    }   
   }
   return StatusCode::SUCCESS;
+}
+
+float LArHVCorrToSCHVCorr::getWeight(const LArHEC_ID *hecID, const Identifier &id, std::map<int,std::vector<float> > &wmap) {
+   int side = hecID->pos_neg(id);
+   int reg = hecID->region(id);
+   int eta = hecID->eta(id);
+   int ttbin=0;
+   switch(side){
+      case -2: if(reg==0) ttbin=-16-eta; else ttbin=-27-2*eta; if(ttbin==-33) ttbin=-32; break;
+      case 2: if(reg==0) ttbin=15+eta; else ttbin=25+2*eta;
+   }
+   if(ttbin!=0 && wmap.find(ttbin) != wmap.end()){
+          ATH_MSG_DEBUG("Found weight "<<wmap[ttbin][hecID->sampling(id)] <<" for "<<side<<" "<<reg<<" "<<eta);
+          return wmap[ttbin][hecID->sampling(id)];
+   } else {
+          ATH_MSG_DEBUG("Returning 1 for "<<side<<" "<<reg<<" "<<eta);
+      return 1.;
+   }
 }
 
