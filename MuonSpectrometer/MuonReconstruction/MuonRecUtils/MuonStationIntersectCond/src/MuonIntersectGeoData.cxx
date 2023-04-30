@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonStationIntersectCond/MuonIntersectGeoData.h"
@@ -24,7 +24,6 @@ namespace Muon {
             const MuonGM::MdtReadoutElement* mdt_ele = detMgr->getMdtReadoutElement(id_hash);
             // The Mdt intersectionGeometry relies on the first multi layer. We can skip the other layers
             if (!mdt_ele || mdt_ele->getMultilayer() != 1) continue;
-            const Identifier id = mdt_ele->identify();
             m_geometry[id_hash] = std::make_unique<Muon::MdtIntersectGeometry>(log, mdt_ele->identify(), idHelperSvc, detMgr, dbData);
         }    
     } 
