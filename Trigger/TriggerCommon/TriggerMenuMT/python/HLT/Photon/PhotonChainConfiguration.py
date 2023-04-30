@@ -153,8 +153,8 @@ class PhotonChainConfiguration(ChainConfigurationBase):
     # Configuration of steps
     # --------------------
     def getFastCalo(self, flags, is_probe_leg=False):
-        stepName = "PhotonFastCalo"
         doRinger = 'ringer' in self.chainPart['L2IDAlg']
+        stepName = "PhotonFastCalo"
         
         return self.getStep(flags,1,stepName,[ fastPhotonCaloSequenceCfg], doRinger = doRinger, is_probe_leg=is_probe_leg)
 
