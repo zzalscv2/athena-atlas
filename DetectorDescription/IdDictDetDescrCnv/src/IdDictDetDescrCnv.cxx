@@ -263,8 +263,8 @@ void IdDictDetDescrCnv::printDicts(const IdDictManager *dictMgr) {
     if (!dictMgr)
         return;
 
-    std::string tag = tag.empty() ? "<no tag>" : dictMgr->manager()->tag();
-    ATH_MSG_INFO("Using dictionary tag: " << tag);
+    std::string tag = dictMgr->manager()->tag();
+    ATH_MSG_INFO("Using dictionary tag: " << (tag.empty() ? "<no tag>" : tag));
 
     const IdDictMgr::dictionary_map &dm =
         dictMgr->manager()->get_dictionary_map();
