@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtRdoToPrepDataToolCore.h"
@@ -630,8 +630,8 @@ namespace Muon {
 
                         Amg::Vector3D gpos_centertube = twin_newPrepData->globalPosition();
                         const MdtReadoutElement* detEl = muDetMgr->getMdtReadoutElement(promptHit_channelId);
-                        Amg::Vector3D locpos_centertube(0., 0., zTwin);
-                        Amg::Vector3D gpos_twin = detEl->localToGlobalCoords(locpos_centertube, promptHit_channelId);
+                        Amg::Vector3D locpos_centertube = zTwin * Amg::Vector3D::UnitZ();
+                        const Amg::Vector3D gpos_twin = detEl->localToGlobalTransf(promptHit_channelId)*locpos_centertube;
 
                         ATH_MSG_DEBUG(" global pos center tube  x = " << gpos_centertube.x() << " y = " << gpos_centertube.y()
                                                                       << " z = " << gpos_centertube.z());
@@ -844,7 +844,7 @@ namespace Muon {
         } else {
             Identifier channelId = digit.identify();
             radius = 0.;
-            errRadius = muDetMgr->getMdtReadoutElement(channelId)->innerTubeRadius() / sqrt(12);  // 14.6/sqrt(12)
+            errRadius = muDetMgr->getMdtReadoutElement(channelId)->innerTubeRadius() / std::sqrt(12);  // 14.6/sqrt(12)
         }
         return MdtStatusDriftTime;
     }
@@ -878,10 +878,10 @@ namespace Muon {
             Amg::Vector3D position = descriptor->tubePos(channelId);
             double measured_perp = position.perp();
             if (descriptor->getStationS() != 0.) {
-                measured_perp = sqrt(measured_perp * measured_perp - descriptor->getStationS() * descriptor->getStationS());
+                measured_perp = std::sqrt(measured_perp * measured_perp - descriptor->getStationS() * descriptor->getStationS());
             }
-            double measured_x = measured_perp * cos(position.phi());
-            double measured_y = measured_perp * sin(position.phi());
+            double measured_x = measured_perp * std::cos(position.phi());
+            double measured_y = measured_perp * std::sin(position.phi());
             const Amg::Vector3D measured_position(measured_x, measured_y, position.z());
             MdtCalibHit calib_hit = MdtCalibHit(channelId, digit.tdc(), digit.adc(), measured_position, descriptor);
             calib_hit.setGlobalPointOfClosestApproach(measured_position);
@@ -909,11 +909,11 @@ namespace Muon {
             Amg::Vector3D second_position = second_descriptor->tubePos(second_channelId);
             double second_measured_perp = second_position.perp();
             if (second_descriptor->getStationS() != 0.) {
-                second_measured_perp =
-                    sqrt(second_measured_perp * second_measured_perp - second_descriptor->getStationS() * second_descriptor->getStationS());
+                second_measured_perp = std::sqrt(second_measured_perp * second_measured_perp - 
+                                                 second_descriptor->getStationS() * second_descriptor->getStationS());
             }
-            double second_measured_x = second_measured_perp * cos(second_position.phi());
-            double second_measured_y = second_measured_perp * sin(second_position.phi());
+            double second_measured_x = second_measured_perp * std::cos(second_position.phi());
+            double second_measured_y = second_measured_perp * std::sin(second_position.phi());
             const Amg::Vector3D second_measured_position(second_measured_x, second_measured_y, second_position.z());
             MdtCalibHit second_calib_hit =
                 MdtCalibHit(second_channelId, second_digit.tdc(), second_digit.adc(), second_measured_position, second_descriptor);
@@ -949,10 +949,10 @@ namespace Muon {
         else {
             Identifier channelId = digit.identify();
             radius = 0.;
-            errRadius = muDetMgr->getMdtReadoutElement(channelId)->innerTubeRadius() / sqrt(12);  // 14.6/sqrt(12)
+            const MuonGM::MdtReadoutElement* reElem = muDetMgr->getMdtReadoutElement(channelId); 
+            errRadius = reElem->innerTubeRadius() / std::sqrt(12);  // 14.6/sqrt(12)
             zTwin = 0.;
-            double tubelength = muDetMgr->getMdtReadoutElement(channelId)->getTubeLength(m_idHelperSvc->mdtIdHelper().tubeLayer(channelId),
-                                                                                         m_idHelperSvc->mdtIdHelper().tube(channelId));
+            double tubelength = reElem->tubeLength(channelId);
             errZTwin = tubelength / 2.;
         }
 
