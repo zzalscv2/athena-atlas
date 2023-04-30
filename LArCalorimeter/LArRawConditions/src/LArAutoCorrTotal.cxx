@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include "LArRawConditions/LArAutoCorrTotal.h"
 #include "LArIdentifier/LArOnlineID_Base.h"
@@ -38,6 +38,7 @@ LArAutoCorrTotal::computeAutoCorr(const std::vector<float>& terms,
   std::vector<double> vResult;
   int tsize = int(sqrt(terms.size()));
   int nsize_tot = (tsize - 1) * (tsize) / 2;
+  vResult.reserve(nsize_tot);
   for (int i1 = 0; i1 < tsize - 1; i1++) {
     for (int i2 = i1 + 1; i2 < tsize; i2++) {
 
@@ -58,7 +59,7 @@ LArAutoCorrTotal::autoCorrTotal(const IdentifierHash &hid, int gain,
                                 float Nminbias) const {
     //FIXME we should check if the vector<float> of index "hid" exists before trying to compute it!
     //but we already have resized the vector<vector<float>> to size channelHashMax in the ctor
-    
+
   return (this->computeAutoCorr(m_AutoCorrTotal[gain][hid], Nminbias));
 }
 
@@ -68,7 +69,7 @@ const std::vector<double> LArAutoCorrTotal::autoCorrTotal(const HWIdentifier &hw
 }
 
 const std::vector<double> LArAutoCorrTotal::autoCorrTotal(const Identifier &offid, int gain, float Nminbias) const {
-   const HWIdentifier hwid = m_cabling->createSignalChannelID(offid); 
+   const HWIdentifier hwid = m_cabling->createSignalChannelID(offid);
    return this->autoCorrTotal(hwid, gain, Nminbias);
 }
 
@@ -102,6 +103,6 @@ const std::vector<double> LArAutoCorrTotal::samplRMS(const HWIdentifier &hwid,
 const std::vector<double> LArAutoCorrTotal::samplRMS(const Identifier &offid,
                                                      int gain,
                                                      float Nminbias) const {
-  const HWIdentifier hwid = m_cabling->createSignalChannelID(offid); 
+  const HWIdentifier hwid = m_cabling->createSignalChannelID(offid);
   return this->samplRMS(hwid, gain, Nminbias);
 }
