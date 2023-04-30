@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -45,7 +45,7 @@
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "MuonSimEvent/MdtHitIdHelper.h"
 #include "TrkDetDescrUtils/GeometryStatics.h"
-
+#include "EventPrimitives/EventPrimitivesHelpers.h"
 // Pile-up
 
 // Truth
@@ -421,7 +421,7 @@ bool MdtDigitizationTool::handleMDTSimhit(const TimedHitPtr<MDTSimHit>& phit, CL
     // find the detector element associated to the hit
     const MuonGM::MdtReadoutElement* element = m_MuonGeoMgr->getMdtReadoutElement(DigitId);
 
-    if (nullptr == element) {
+    if (!element) {
         ATH_MSG_ERROR("MuonGeoManager does not return valid element for given id!");
         return false;
     } else {
@@ -445,18 +445,14 @@ bool MdtDigitizationTool::handleMDTSimhit(const TimedHitPtr<MDTSimHit>& phit, CL
     if (m_useWireSagGeom) {
         driftRadius = lpos.perp();
 
-        double maxSag = 0.;
-        double actualMaxSag = 0.;
-        // double localSag = 0.;
-        double driftTime = 0.;
         double projectiveSag = hit.driftRadius() - std::abs(driftRadius);
         if (m_useDeformations) projectiveSag = newSimhit.driftRadius() - std::abs(driftRadius);
 
         ATH_MSG_DEBUG(" Geometrical WIRESAGINFO "
                       << stationName << " " << stationEta << " " << stationPhi << " " << multilayer << " " << layer << " " << tube << " "
-                      << hit.localPosition().x() << " " << hit.localPosition().y() << " " << hit.localPosition().z() << " "
-                      << hit.driftRadius() << " " << element->tubeLength(DigitId) << " " << maxSag << " " << actualMaxSag << " " << localSag
-                      << " " << projectiveSag << " " << driftRadius << " " << driftTime << " " << saggingSign);
+                      << Amg::toString(hit.localPosition(), 3) << " "
+                      << hit.driftRadius() << " " << element->tubeLength(DigitId) << " " << " " << localSag
+                      << " " << projectiveSag << " " << driftRadius << " " << saggingSign);
     }
 
     // correctly set sign of drift radius
@@ -503,29 +499,26 @@ bool MdtDigitizationTool::handleMDTSimhit(const TimedHitPtr<MDTSimHit>& phit, CL
 
         // compute RT effect
         if (m_useWireSagRT && !element->barrel() && stationName != "EOS" && stationName != "EOL") {
-            Amg::Vector3D gpos = element->localToGlobalCoords(lpos, DigitId);
+            Amg::Vector3D gpos = element->localToGlobalTransf(DigitId)*lpos;
 
             // fit parameters for drift time difference vs impact radius for a wire 500 microns off axis
             // garfield calculation. details on http://dslevin.home.cern.ch/atlas/wiresag.ppt
             // Line below: old code
             // double param[4] = {-0.3025,0.58303,0.012177,0.0065818};
             // New code
-            static constexpr double param[6] = {-4.47741E-3, 1.75541E-2, -1.32913E-2, 2.57938E-3, -4.55015E-5, -1.70821E-7};
+            static constexpr std::array<double, 6> param{-4.47741E-3, 1.75541E-2, -1.32913E-2, 2.57938E-3, -4.55015E-5, -1.70821E-7};
 
             // get delta T, change in drift time for reference sag (default=100 microns) and scale by projective sag
-            double deltaT = 0;
+            double deltaT{0.};
             double dR = std::abs(driftRadius);
-            for (int i = 0; i < 6; ++i) { deltaT += param[i] * pow(dR, i); }
+            for (int i = 0; i < 6; ++i) { deltaT += param[i] * std::pow(dR, i); }
 
             // reference sag now set to 0.1 mm
             double referenceSag = 0.1;
 
             // Calculate angle at which track cross plane of sag.
             // Note that this assumes the track is coming from the center of the detector.
-            double gX = std::abs(gpos.x());
-            double gY = std::abs(gpos.y());
-            double gZ = std::abs(gpos.z());
-            double cosTheta = gZ / sqrt(gZ * gZ + gY * gY + gX * gX);
+            double cosTheta = std::abs(gpos.z()) / gpos.mag();
 
             // This calculates the sag seen by a track; if a particle passes parallel to the sag,
             // the shift in drift circle location will have no affect.
@@ -541,8 +534,8 @@ bool MdtDigitizationTool::handleMDTSimhit(const TimedHitPtr<MDTSimHit>& phit, CL
             driftTime += deltaT;  // update drift time
 
             ATH_MSG_DEBUG(" RT WIRESAGINFO " << stationName << " " << stationEta << " " << stationPhi << " " << multilayer << " " << layer
-                                             << " " << tube << " " << hit.localPosition().x() << " " << hit.localPosition().y() << " "
-                                             << hit.localPosition().z() << " " << driftRadius << " " << element->tubeLength(DigitId) / 1000.
+                                             << " " << tube << " " << Amg::toString(hit.localPosition(), 3) 
+                                             << " " << driftRadius << " " << element->tubeLength(DigitId) / 1000.
                                              << " " << cosTheta << " " << localSag << " " << projectiveSag << " " << deltaT << "   "
                                              << driftTimeOriginal << "    " << driftTime);
         }  // m_useWireSagRT
@@ -589,14 +582,12 @@ bool MdtDigitizationTool::handleMDTSimhit(const TimedHitPtr<MDTSimHit>& phit, CL
             // implement twin tubes digitizing either for all BOL (m_useAllBOLTwin = true) _OR_ only for two chambers really installed
             if ((m_useAllBOLTwin && stationName == "BOL") || BOL4X13) {
                 int twin_tube = 0;
-                Identifier twin_DigitId;
+                Identifier twin_DigitId{0};
                 double twin_sign_driftTime = 0.;
                 // twinpair is connected via a HV-jumper with a delay of ~6ns
-                double HV_delay = 6.;
-                double twin_tubeLength = 0.;
-                double twin_geo_pos_along_wire = 0.;
-                double twin_sign_pos_along_wire = 0.;
-                double twin_sign(-1.);
+                constexpr double HV_delay = 6.;
+                double twin_tubeLength{0.}, twin_geo_pos_along_wire{0.},
+                       twin_sign_pos_along_wire{0.}, twin_sign{-1.};
 
                 // twinpair is interconnected with one tube in between, so modulo 4 they are identical
                 if (tube % 4 == 1 || tube % 4 == 2)
@@ -606,7 +597,7 @@ bool MdtDigitizationTool::handleMDTSimhit(const TimedHitPtr<MDTSimHit>& phit, CL
                 // construct Atlas identifier from components for the twin
                 twin_DigitId = m_idHelperSvc->mdtIdHelper().channelID(stationName, stationEta, stationPhi, multilayer, layer, twin_tube);
                 // get twin tube length for propagation delay
-                twin_tubeLength = element->getTubeLength(layer, twin_tube);
+                twin_tubeLength = element->tubeLength(twin_DigitId);
 
                 // prop delay calculated with respect to the center of the tube
                 if (distRO < 0.) twin_sign = 1.;
@@ -697,8 +688,7 @@ bool MdtDigitizationTool::checkMDTSimHit(const MDTSimHit& hit) const {
     }
     //-MASKING OF DEAD/MISSING CHAMBERS
 
-    double tubeL(0.);
-    double tubeR(0.);
+    double tubeL{0.}, tubeR{0.};
 
     const MuonGM::MdtReadoutElement* element = m_MuonGeoMgr->getMdtReadoutElement(DigitId);
 
@@ -736,8 +726,7 @@ bool MdtDigitizationTool::checkMDTSimHit(const MDTSimHit& hit) const {
 
 bool MdtDigitizationTool::createDigits(Collections_t& collections, MuonSimDataCollection* sdoContainer,
                                        CLHEP::HepRandomEngine* rndmEngine) {
-    Identifier currentDigitId;
-    Identifier currentElementId;
+    Identifier currentDigitId{0}, currentElementId{0};
 
     double currentDeadTime = 0.;
     MdtDigitCollection* digitCollection = nullptr;
@@ -867,7 +856,7 @@ bool MdtDigitizationTool::createDigits(Collections_t& collections, MuonSimDataCo
             deposits.push_back(deposit);
             MuonSimData tempSDO(deposits, 0);
             const Amg::Vector3D& tempLocPos = (*(it->simhit))->localPosition();
-            Amg::Vector3D p = geo->localToGlobalCoords(tempLocPos, idDigit);
+            Amg::Vector3D p = geo->localToGlobalTransf(idDigit)*tempLocPos;
             tempSDO.setPosition(p);
             tempSDO.setTime(hitTime(phit));
             sdoContainer->insert(std::make_pair(idDigit, tempSDO));
@@ -948,15 +937,14 @@ bool MdtDigitizationTool::insideMaskWindow(double time) const {
 
 //+emulate deformations here
 MDTSimHit MdtDigitizationTool::applyDeformations(const MDTSimHit& hit, const MuonGM::MdtReadoutElement* element,
-                                                 const Identifier& DigitId) {
+                                                 const Identifier& DigitId) const {
     const int id = hit.MDTid();
 
     // make the deformation
-    Amg::Vector3D hitAtGlobalFrame = element->nodeform_localToGlobalCoords(hit.localPosition(), DigitId);
-    Amg::Vector3D hitDeformed = element->globalToLocalCoords(hitAtGlobalFrame, DigitId);
+    Amg::Vector3D hitAtGlobalFrame = element->nodeform_localToGlobalTransf(DigitId) * hit.localPosition();
+    Amg::Vector3D hitDeformed = element->globalToLocalTransf(DigitId) * hitAtGlobalFrame;
 
-    double driftRadius = std::hypot(hitDeformed.x() , hitDeformed.y());
-    MDTSimHit simhit2 = MDTSimHit(id, hit.globalTime(), driftRadius, hitDeformed, hit.trackNumber());
+    MDTSimHit simhit2{id, hit.globalTime(), hitDeformed.perp(), hitDeformed, hit.trackNumber()};
 
     return simhit2;
 }
@@ -972,8 +960,9 @@ MdtDigitizationTool::GeoCorOut MdtDigitizationTool::correctGeometricalWireSag(co
 
     //  calculate the position of the hit sagged wire frame
     // transform to global coords
-    Amg::Vector3D gpos = element->localToGlobalCoords(lpos, id);
-    Amg::Vector3D gdir = gToWireFrame.inverse() * ldir;
+    const Amg::Transform3D& transf{element->localToGlobalTransf(id)};
+    Amg::Vector3D gpos = transf*lpos;
+    Amg::Vector3D gdir = transf* ldir;
 
     // get wire surface
     const Trk::SaggedLineSurface& surface = element->surface(id);
@@ -986,7 +975,7 @@ MdtDigitizationTool::GeoCorOut MdtDigitizationTool::correctGeometricalWireSag(co
     double localSag = 0.0;
     if (m_useWireSagGeom) {
         // calculate local hit position in nominal wire frame
-        Amg::Vector2D lp;
+        Amg::Vector2D lp{Amg::Vector2D::Zero()};
         surface.globalToLocal(gpos, gpos, lp);
 
         // calculate sagged wire position
@@ -1000,10 +989,8 @@ MdtDigitizationTool::GeoCorOut MdtDigitizationTool::correctGeometricalWireSag(co
         // the origin.
         const Amg::Vector3D gSaggedSpot = wireSurface->center();
         Amg::Vector3D lSaggedSpot = gToWireFrame * gSaggedSpot;
-        double sagX = lSaggedSpot.x();
-        double sagY = lSaggedSpot.y();
-
-        localSag = std::hypot(sagX, sagY);
+        
+        localSag = lSaggedSpot.perp();
 
         // global to local sagged wire frame transform
         gToWireFrame = wireSurface->transform().inverse();
@@ -1021,19 +1008,19 @@ MdtDigitizationTool::GeoCorOut MdtDigitizationTool::correctGeometricalWireSag(co
         Amg::Vector3D saggedGPos = wireSurface->transform() * lpos;
 
         // recalculate tracking sign
-        Amg::Vector2D lpsag;
+        Amg::Vector2D lpsag{Amg::Vector2D::Zero()};
         wireSurface->globalToLocal(saggedGPos, gdir, lpsag);
         trackingSign = lpsag[Trk::locR] < 0 ? -1. : 1.;
 
     } else {
         // recalculate tracking sign
-        Amg::Vector2D lpsag;
+        Amg::Vector2D lpsag{Amg::Vector2D::Zero()};
         surface.globalToLocal(gpos, gdir, lpsag);
         trackingSign = lpsag[Trk::locR] < 0 ? -1. : 1.;
     }
 
     // local gravity vector
-    Amg::Vector3D gravityDir(-1. * Trk::s_yAxis);
+    Amg::Vector3D gravityDir =-1. * Amg::Vector3D::UnitY();
     Amg::Vector3D lgravDir = gToWireFrame * gravityDir;
 
     // Project gravity vector onto X-Y plane, so the z-components (along the wire)

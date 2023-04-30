@@ -146,7 +146,7 @@ private:
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
     const MdtHitIdHelper* m_muonHelper{};
 
-    MDTSimHit applyDeformations(const MDTSimHit&, const MuonGM::MdtReadoutElement*, const Identifier&);
+    MDTSimHit applyDeformations(const MDTSimHit&, const MuonGM::MdtReadoutElement*, const Identifier&) const;
 
     const MuonGM::MuonDetectorManager* m_MuonGeoMgr{};
 
