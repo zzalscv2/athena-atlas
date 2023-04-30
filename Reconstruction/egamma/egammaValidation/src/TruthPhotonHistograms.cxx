@@ -4,14 +4,19 @@
 
 #include "TruthPhotonHistograms.h"
 
-using namespace egammaMonitoring;
-
 #include "AsgTools/AnaToolHandle.h"
 #include "GaudiKernel/ITHistSvc.h"
 #include "xAODBase/IParticle.h"
 #include "xAODTruth/TruthParticle.h" 
+#include "xAODTruth/TruthVertex.h"
 #include "xAODTruth/xAODTruthHelpers.h"
-#include <cmath>
+#include "xAODEgamma/Photon.h"
+#include "xAODEgamma/EgammaTruthxAODHelpers.h"
+
+#include "TH1D.h"
+#include "TH2D.h"
+
+using namespace egammaMonitoring;
 
 StatusCode TruthPhotonHistograms::initializePlots() {
 

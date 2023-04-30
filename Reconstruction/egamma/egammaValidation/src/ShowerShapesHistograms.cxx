@@ -3,29 +3,34 @@
 */
 
 #include "ShowerShapesHistograms.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "AsgTools/AnaToolHandle.h"
-#include "xAODEgamma/ElectronxAODHelpers.h"
+
+#include "AsgMessaging/Check.h"
+#include "GaudiKernel/ITHistSvc.h"
+#include "xAODEgamma/EgammaxAODHelpers.h"
+#include "xAODCaloEvent/CaloCluster.h"
+
+#include "TH1D.h"
+#include "TH2D.h"
 
 using namespace egammaMonitoring;
 
 StatusCode ShowerShapesHistograms::initializePlots() {
   
-  histoMap["hadleak"] = (new TH1D(Form("%s_%s",m_name.c_str(),"hadleak"), ";E_{hadleak} ; Hadronic leakage Events" , 100, -0.07,  0.13  ));
-  histoMap["rhad"]    = (new TH1D(Form("%s_%s",m_name.c_str(),"rhad"), ";R_{had}; Events" , 100, -0.07,  0.13  ));
-  histoMap["reta"]    = (new TH1D(Form("%s_%s",m_name.c_str(),"reta"   ), ";R_{#eta}; R_{#eta} Events"                  , 355,  0.  ,  1.1005));
-  histoMap["rphi"]    = (new TH1D(Form("%s_%s",m_name.c_str(),"rphi"   ), ";R_{#phi}; R_{#phi} Events"                  , 355,  0.  ,  1.1005));
-  histoMap["weta2"]   = (new TH1D(Form("%s_%s",m_name.c_str(),"weta2"  ), ";W_{#etas2}; W_{#etas2} Events"              , 100,  0.  ,  0.03  ));
-  histoMap["eratio"]  = (new TH1D(Form("%s_%s",m_name.c_str(),"eratio" ), ";E_{ratio}; E_{ratio} Events"                , 100,  0.  ,  1.    ));
-  histoMap["deltae"]  = (new TH1D(Form("%s_%s",m_name.c_str(),"deltae" ), ";#DeltaE [GeV]; #DeltaE Events"              , 100,  0.  ,  0.1   ));
-  histoMap["f1"]      = (new TH1D(Form("%s_%s",m_name.c_str(),"f1"     ), ";f_{1}; f_{1} Events"                        , 100,  0.  ,  1.0   ));
-  histoMap["fside"]   = (new TH1D(Form("%s_%s",m_name.c_str(),"fside"  ), ";f_{side}; f_{side} Events"                  , 100,  0.  ,  2.0   ));
-  histoMap["wtots1"]  = (new TH1D(Form("%s_%s",m_name.c_str(),"wtots1" ), ";w_{s, tot}; w_{s, tot} Events"              , 100,  0.  , 10.    ));
-  histoMap["ws3"]     = (new TH1D(Form("%s_%s",m_name.c_str(),"ws3"    ), ";w_{s, 3}; w_{s, 3} Events"                  , 100,  0.  ,  1.    ));
-  histoMap["lateral"] = (new TH1D(Form("%s_%s",m_name.c_str(),"lateral"), ";Lateral of seed; Events", 50, 0, 1));
-  histoMap["second_R"] = (new TH1D(Form("%s_%s",m_name.c_str(),"second_R"), ";Second R; Events", 150,0. , 15000.));
-  histoMap["EMFrac"] = (new TH1D(Form("%s_%s",m_name.c_str(),"EMFrac"), ";EMFrac; Events", 50, 0, 1));
-  histo2DMap["lateral_second_R_2D"] = (new TH2D(Form("%s_%s",m_name.c_str(),"lateral_second_R_2D"), ";Lateral of seed; Second R", 50, 0, 1, 150,0.,15000.));
+  histoMap["hadleak"] = new TH1D(Form("%s_%s",m_name.c_str(),"hadleak"), ";E_{hadleak} ; Hadronic leakage Events" , 100, -0.07,  0.13  );
+  histoMap["rhad"]    = new TH1D(Form("%s_%s",m_name.c_str(),"rhad"), ";R_{had}; Events" , 100, -0.07,  0.13  );
+  histoMap["reta"]    = new TH1D(Form("%s_%s",m_name.c_str(),"reta"   ), ";R_{#eta}; R_{#eta} Events"                  , 355,  0.  ,  1.1005);
+  histoMap["rphi"]    = new TH1D(Form("%s_%s",m_name.c_str(),"rphi"   ), ";R_{#phi}; R_{#phi} Events"                  , 355,  0.  ,  1.1005);
+  histoMap["weta2"]   = new TH1D(Form("%s_%s",m_name.c_str(),"weta2"  ), ";W_{#etas2}; W_{#etas2} Events"              , 100,  0.  ,  0.03  );
+  histoMap["eratio"]  = new TH1D(Form("%s_%s",m_name.c_str(),"eratio" ), ";E_{ratio}; E_{ratio} Events"                , 100,  0.  ,  1.    );
+  histoMap["deltae"]  = new TH1D(Form("%s_%s",m_name.c_str(),"deltae" ), ";#DeltaE [GeV]; #DeltaE Events"              , 100,  0.  ,  0.1   );
+  histoMap["f1"]      = new TH1D(Form("%s_%s",m_name.c_str(),"f1"     ), ";f_{1}; f_{1} Events"                        , 100,  0.  ,  1.0   );
+  histoMap["fside"]   = new TH1D(Form("%s_%s",m_name.c_str(),"fside"  ), ";f_{side}; f_{side} Events"                  , 100,  0.  ,  2.0   );
+  histoMap["wtots1"]  = new TH1D(Form("%s_%s",m_name.c_str(),"wtots1" ), ";w_{s, tot}; w_{s, tot} Events"              , 100,  0.  , 10.    );
+  histoMap["ws3"]     = new TH1D(Form("%s_%s",m_name.c_str(),"ws3"    ), ";w_{s, 3}; w_{s, 3} Events"                  , 100,  0.  ,  1.    );
+  histoMap["lateral"] = new TH1D(Form("%s_%s",m_name.c_str(),"lateral"), ";Lateral of seed; Events", 50, 0, 1);
+  histoMap["second_R"] = new TH1D(Form("%s_%s",m_name.c_str(),"second_R"), ";Second R; Events", 150,0. , 15000.);
+  histoMap["EMFrac"] = new TH1D(Form("%s_%s",m_name.c_str(),"EMFrac"), ";EMFrac; Events", 50, 0, 1);
+  histo2DMap["lateral_second_R_2D"] = new TH2D(Form("%s_%s",m_name.c_str(),"lateral_second_R_2D"), ";Lateral of seed; Second R", 50, 0, 1, 150,0.,15000.);
 
   ATH_CHECK(m_rootHistSvc->regHist(m_folder+"lateral", histoMap["lateral"]));
   ATH_CHECK(m_rootHistSvc->regHist(m_folder+"second_R", histoMap["second_R"]));
