@@ -56,12 +56,11 @@ namespace InDet
 //first getting the cluster center  
   for(std::vector<const Trk::Track*>::const_iterator i = inb; i != ine; ++i)
   {
-   const Trk::TrackParameters * perigee(nullptr);
-   if(!reference) perigee = (*i)->perigeeParameters();
-   else perigee = m_extrapolator->extrapolateTrack(ctx,
-                                                   **i,perigeeSurface,
-                                                   Trk::anyDirection,true, 
-                                                   Trk::pion).release(); 
+   const Trk::TrackParameters * perigee =
+     m_extrapolator->extrapolateTrack(ctx,
+                                      **i,perigeeSurface,
+                                      Trk::anyDirection,true, 
+                                      Trk::pion).release(); 
    
    if(perigee)
    { 
@@ -81,16 +80,12 @@ namespace InDet
 //discarding outlying tracks
   for(std::vector<const Trk::Track*>::const_iterator i = inb; i != ine; ++i)
   {
-    const Trk::TrackParameters * measPerigee(nullptr);
-   if(!reference) measPerigee=(*i)->perigeeParameters();
-   else{
-     
      //here we want to make an extrapolation
-     measPerigee = m_extrapolator->extrapolateTrack(
+    const Trk::TrackParameters * measPerigee = 
+      m_extrapolator->extrapolateTrack(
        ctx, **i, perigeeSurface, Trk::anyDirection, true, Trk::pion).release();
-   }
 
-   if(measPerigee)
+    if(measPerigee)
      {
        double z0 = measPerigee->parameters()[Trk::z0];
        const AmgSymMatrix(5) * cov = measPerigee->covariance();
@@ -98,14 +93,14 @@ namespace InDet
        double sigma_z0 = Amg::error(*cov,Trk::z0);
     
 //if the track is closer than several standard deviations, keep it    
-    if(fabs(z_center-z0)< sigma_z0*m_zOffset) clusterSeed.push_back(*i); 
+       if(fabs(z_center-z0)< sigma_z0*m_zOffset) clusterSeed.push_back(*i); 
 
 //declare it an outlier otherwise
-    else outliers.push_back(*i);
-   }else{
-    outliers.push_back(*i);
-    msg(MSG::WARNING)  << "This track has no meas perigee. Regarded as outlyer" << endmsg;
-   }//end of meas perigee protection check
+       else outliers.push_back(*i);
+     }else{
+      outliers.push_back(*i);
+      msg(MSG::WARNING)  << "This track has no meas perigee. Regarded as outlyer" << endmsg;
+     }//end of meas perigee protection check
   }//end of selection loop over all the tracks  
   
   std::pair<std::vector<const Trk::Track*>,std::vector<const Trk::Track*> > result(clusterSeed, outliers);
@@ -135,15 +130,13 @@ namespace InDet
 //first getting the cluster center  
   for(std::vector<const Trk::TrackParticleBase*>::const_iterator i = inb; i != ine; ++i)
   {
-   const Trk::TrackParameters * perigee(nullptr);
-   if(!reference) perigee = &((*i)->definingParameters());
-   else
-     perigee = m_extrapolator->extrapolate(ctx,
-                                           (*i)->definingParameters(),
-                                           perigeeSurface,
-                                           Trk::anyDirection,
-                                           true,
-                                           Trk::pion).release();
+   const Trk::TrackParameters * perigee =
+     m_extrapolator->extrapolate(ctx,
+                                 (*i)->definingParameters(),
+                                 perigeeSurface,
+                                 Trk::anyDirection,
+                                 true,
+                                 Trk::pion).release();
 
    if(perigee)
    { 
@@ -164,15 +157,13 @@ namespace InDet
 
   for(std::vector<const Trk::TrackParticleBase*>::const_iterator i = inb; i != ine; ++i)
   {
-   const Trk::TrackParameters * measPerigee(nullptr);
-   if(!reference) measPerigee = &((*i)->definingParameters());
-   else
-     measPerigee = m_extrapolator->extrapolate(ctx,
-                                               (*i)->definingParameters(),
-                                               perigeeSurface,
-                                               Trk::anyDirection,
-                                               true,
-                                               Trk::pion).release();
+   const Trk::TrackParameters * measPerigee = 
+     m_extrapolator->extrapolate(ctx,
+                                 (*i)->definingParameters(),
+                                 perigeeSurface,
+                                 Trk::anyDirection,
+                                 true,
+                                 Trk::pion).release();
 
    if(nullptr!=measPerigee)
    {
