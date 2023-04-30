@@ -138,7 +138,7 @@ else:      rec.projectName = "data12_tilecomm"
 
 from IOVDbSvc.CondDB import conddb
 if MC:     conddb.setGlobalTag("OFLCOND-MC23-SDR-RUN3-01")
-elif RUN3: conddb.setGlobalTag("CONDBR2-BLKPA-2022-09")
+elif RUN3: conddb.setGlobalTag("CONDBR2-BLKPA-2023-01")
 elif RUN2: conddb.setGlobalTag("CONDBR2-BLKPA-2018-16")
 else:      conddb.setGlobalTag("COMCOND-BLKPA-RUN1-06")
 

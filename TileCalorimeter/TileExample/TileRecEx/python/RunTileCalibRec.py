@@ -199,7 +199,7 @@ if __name__=='__main__':
     # Set up the DB global conditions tag
     if flags.Input.Format is Format.BS:
         if args.run3:
-            condDbTag = 'CONDBR2-BLKPA-RUN2-09' if args.upd4 else 'CONDBR2-ES1PA-2022-01'
+            condDbTag = 'CONDBR2-BLKPA-2023-01' if args.upd4 else 'CONDBR2-ES1PA-2023-01'
             detDescrVersion = 'ATLAS-R3S-2021-03-01-00'
         elif args.run2:
             condDbTag = 'CONDBR2-BLKPA-2018-16' if args.upd4 else 'CONDBR2-ES1PA-2018-05'
