@@ -29,6 +29,13 @@ athenaCommonFlags.FilesInput = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-a
 
 from AthenaCommon.Include import include
 myfolder = folder  # 'folder' seems to be overwritten somewhere in the include
+# need also SGInputLoader now
+from AthenaCommon.AlgSequence import AlgSequence
+topSequence = AlgSequence()
+from SGComps.SGCompsConf import SGInputLoader
+from AthenaCommon.Constants import INFO
+topSequence += SGInputLoader(OutputLevel=INFO, ShowEventDump=False)
+
 include('TriggerJobOpts/runHLT_standalone.py')
 folder = myfolder
 

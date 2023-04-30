@@ -109,6 +109,7 @@ class  LArBadChannel {
   bool deadSCACell() const {if(m_isSC) return false; else return statusBad( LArBadChannelEnum::deadSCACellBit);}
   bool badFirstSample() const {if(m_isSC) return false; else return statusBad( LArBadChannelEnum::badFirstSampleBit);}
   bool unflaggedByLADIeS() const {if(m_isSC) return false; else return statusBad( LArBadChannelEnum::unflaggedByLADIeSBit);}
+  bool reflaggedByLADIeS() const {if(m_isSC) return false; else return statusBad( LArBadChannelEnum::reflaggedByLADIeSBit);}
 	
   bool reallyNoisy() const {return (highNoiseHG() || highNoiseMG() || highNoiseLG() ||
 				    unstableNoiseHG() || unstableNoiseMG() || unstableNoiseLG());}

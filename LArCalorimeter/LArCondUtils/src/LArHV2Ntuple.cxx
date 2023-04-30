@@ -58,11 +58,11 @@
   //__________________________________________________________________________
   StatusCode LArHV2Ntuple::initialize()
   {
-    ATH_MSG_INFO  ("LArHV2Ntuple initialize()" );
     ATH_CHECK( service("THistSvc",m_thistSvc) );
 
     ATH_CHECK( m_cablingKey.initialize() );
     ATH_CHECK( m_caloMgrKey.initialize() );
+    ATH_CHECK( detStore()->retrieve(m_caloId, "CaloCell_ID") );
 
   m_tree = new TTree("mytree","Calo Noise ntuple");
   m_tree->Branch("bec",&m_bec,"bec/I");
@@ -80,7 +80,6 @@
      m_tree->Branch("FT",&m_FT,"FT/I");
      m_tree->Branch("slot",&m_slot,"slot/I");
      m_tree->Branch("channel",&m_channel,"channel/I");
-     ATH_CHECK( detStore()->retrieve(m_caloId, "CaloCell_ID") );
      ATH_CHECK( detStore()->retrieve(m_onlId, "LArOnlineID") );
   }
 
@@ -106,7 +105,6 @@
       SG::ReadCondHandle<CondAttrListCollection> attrList (k, ctx);
       attrLists.push_back (*attrList);
     }
-    
     const LArHVManager *manager = nullptr;
     ATH_CHECK( detStore()->retrieve(manager) );
 
@@ -131,7 +129,6 @@
     const FCALHVManager& hvManager_FCAL=manager->getFCALHVManager();
     const FCALHVManager::FCALHVData hvdata_FCAL = hvManager_FCAL.getData (**hvCabling, attrLists);
 
-    ATH_MSG_DEBUG ( "LArHV2Ntuple execute()" );
     if(m_hvonlId_map.size()==0) {
       SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey, ctx};
       const LArOnOffIdMapping* cabling{*cablingHdl};
