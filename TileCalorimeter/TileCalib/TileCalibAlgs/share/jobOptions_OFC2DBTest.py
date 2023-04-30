@@ -106,7 +106,7 @@ from AtlasGeoModel import GeoModelInit
 #============================================================
 #--- check what is the latest tag using command CheckTagAssociation.py
 from IOVDbSvc.CondDB import conddb
-conddb.setGlobalTag("CONDBR2-BLKPA-2022-10")
+conddb.setGlobalTag("CONDBR2-BLKPA-2023-01")
 
 
 #============================================================
