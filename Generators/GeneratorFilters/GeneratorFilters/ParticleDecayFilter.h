@@ -3,7 +3,7 @@
 */
  
 #ifndef XAODPARTICLEDECAYFILTER_H
-#define XAOdPARTICLEDECAYFILTER_H
+#define XAODPARTICLEDECAYFILTER_H
 
 #include "GeneratorModules/GenFilter.h"
 #include "xAODTruth/TruthEventContainer.h"
