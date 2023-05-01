@@ -1,0 +1,74 @@
+/*
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+*/
+#ifndef MUONREADOUTGEOMETRYR4_MDTREADOUTELEMENT_ICC
+#define MUONREADOUTGEOMETRYR4_MDTREADOUTELEMENT_ICC
+
+namespace MuonGMR4 {
+inline int MdtReadoutElement::multilayer() const {
+    return m_stML;
+}
+inline unsigned int MdtReadoutElement::numLayers() const {
+    return m_pars.firstTubePos.size();
+}
+inline unsigned int MdtReadoutElement::numTubesInLay() const {
+    return m_pars.numTubesPerLay;
+}
+inline double MdtReadoutElement::innerTubeRadius() const {return m_pars.tubeInnerRad;}
+inline double MdtReadoutElement::tubeRadius() const {return innerTubeRadius() + m_pars.tubeWall;}
+inline double MdtReadoutElement::thickness() const {return 2.* m_pars.halfHeight;}
+    
+
+inline IdentifierHash MdtReadoutElement::measurementHash(const Identifier& measId) const {
+    if (idHelperSvc()->detElId(measId) != identify()) {
+        ATH_MSG_WARNING("The measurement "
+                        << idHelperSvc()->toString(measId)
+                        << " picks the wrong readout element "
+                        << idHelperSvc()->toStringDetEl(identify()));
+    }
+    IdentifierHash hash = measurementHash(m_idHelper.tubeLayer(measId), 
+                                         m_idHelper.tube(measId));
+    ATH_MSG_VERBOSE("Translate measurement identifier "
+                    << idHelperSvc()->toString(measId)
+                    << " to measurement hash " << static_cast<int>(hash));
+    return hash;
+}
+inline IdentifierHash MdtReadoutElement::layerHash(const Identifier& measId) const {
+    if (idHelperSvc()->detElId(measId) != identify()) {
+        ATH_MSG_WARNING("The measurement "
+                        << idHelperSvc()->toString(measId)
+                        << " picks the wrong readout element "
+                        << idHelperSvc()->toStringDetEl(identify()));
+    }
+    IdentifierHash hash = measurementHash(m_idHelper.tubeLayer(measId), 0);
+    ATH_MSG_VERBOSE("Translate measurement identifier "
+                    << idHelperSvc()->toString(measId)
+                    << " to layer hash hash " << static_cast<int>(hash));
+    return hash;
+}
+inline unsigned int MdtReadoutElement::tubeNumber(const IdentifierHash& hash) {
+    return (static_cast<unsigned int>(hash) >> 16);
+}
+/// Transforms the identifier hash into a layer number ranging from
+/// (0-numLayers()-1)
+inline unsigned int MdtReadoutElement::layerNumber(const IdentifierHash& hash) {
+    constexpr uint16_t layMask = (~0);
+    return static_cast<unsigned int>(hash) & layMask;
+}
+inline IdentifierHash MdtReadoutElement::measurementHash(unsigned int layer, unsigned int tube) {
+    return IdentifierHash{( (tube-1) << 16) | (layer-1)};
+}
+inline bool MdtReadoutElement::isBarrel() const { return m_isBarrel; }
+
+
+inline Amg::Vector3D MdtReadoutElement::globalTubePos(const ActsGeometryContext& ctx, 
+                                const Identifier& measId) const {
+    return globalTubePos(ctx, measurementHash(measId));
+}
+inline Amg::Vector3D MdtReadoutElement::readOutPos(const ActsGeometryContext& ctx,
+                                                   const Identifier& measId) const{
+    return readOutPos(ctx, measurementHash(measId));
+}
+   
+}  // namespace MuonGMR4
+#endif

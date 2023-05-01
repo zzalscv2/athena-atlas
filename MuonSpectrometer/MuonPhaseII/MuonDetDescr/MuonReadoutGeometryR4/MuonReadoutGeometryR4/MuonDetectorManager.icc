@@ -1,0 +1,32 @@
+/*
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+*/
+#ifndef MUONREADOUTGEOMETRY_MUONDETECTORMANAGER_ICC
+#define MUONREADOUTGEOMETRY_MUONDETECTORMANAGER_ICC
+
+#include <MuonReadoutGeometryR4/MdtReadoutElement.h>
+
+#define WRITE_GETTERS(ELE_TYPE, GETTER_FUNC, STORAGE_VEC, ATTR)          \
+    inline ATTR ELE_TYPE* MuonDetectorManager::GETTER_FUNC(              \
+        const Identifier& id) ATTR {                                     \
+        return GETTER_FUNC(buildHash(id));                               \
+    }                                                                    \
+    inline ATTR ELE_TYPE* MuonDetectorManager::GETTER_FUNC(              \
+        const IdentifierHash& hash) ATTR {                               \
+        const size_t idx = static_cast<unsigned int>(hash);              \
+        if (idx < STORAGE_VEC.size() && STORAGE_VEC[idx])                \
+            return STORAGE_VEC[idx].get();                               \
+        ATH_MSG_WARNING("Failed to retrieve " << #ELE_TYPE << " number " \
+                                              << idx);                   \
+        return nullptr;                                                  \
+    }
+#define ADD_DETECTOR(ELE_TYPE, STORAGE_VEC)               \
+    WRITE_GETTERS(ELE_TYPE, get##ELE_TYPE, STORAGE_VEC, ) \
+    WRITE_GETTERS(ELE_TYPE, get##ELE_TYPE, STORAGE_VEC, const)
+
+namespace MuonGMR4 {
+ADD_DETECTOR(MdtReadoutElement, m_mdtEles);
+}
+#undef ELEMENT_GETTERSETTER
+#undef ADD_DETECTOR
+#endif
