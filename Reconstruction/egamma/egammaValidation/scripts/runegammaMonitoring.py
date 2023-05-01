@@ -10,7 +10,7 @@ from argparse import ArgumentParser
 
 # Argument parsing
 parser = ArgumentParser("egammaMonitoring")
-parser.add_argument("-n", "--maxEvents", default=60000, type=int,
+parser.add_argument("-m", "--maxEvents", default=60000, type=int,
                     help="The number of events to run. -1 runs all events.")
 parser.add_argument("-p", "--particleType", default='electron', type=str,
                     help="The particle type. electron or gamma")

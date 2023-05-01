@@ -414,8 +414,7 @@ std::unique_ptr<MuonPrdPatternCollection> MuonCombinePatternTool::combineEtaPhiP
                         ATH_MSG_DEBUG(" pat range (" << std::setprecision(3) << std::setw(4) << phiMinPat << "," << std::setw(4)
                                                         << phiMaxPat << ")  " << m_idHelperSvc->toString(prd->identify()));
                         ATH_MSG_DEBUG(" ATL " << mdtDetEl->getActiveTubeLength(layer, tube) << " WL "
-                                               << mdtDetEl->getWireLength(layer, tube) << " GL "
-                                               << mdtDetEl->getGasLength(layer, tube) << " POSL " << tubeL);
+                                               << mdtDetEl->getWireLength(layer, tube) << " POSL " << tubeL);
                     }
                 }
             }  // eta pattern

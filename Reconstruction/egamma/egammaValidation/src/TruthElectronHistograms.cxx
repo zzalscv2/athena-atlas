@@ -3,13 +3,15 @@
 */
 
 #include "TruthElectronHistograms.h"
-#include <typeinfo>
-#include "GaudiKernel/ServiceHandle.h"
+
 #include "AsgTools/AnaToolHandle.h"
 #include "GaudiKernel/ITHistSvc.h"
 
-using namespace egammaMonitoring;
+#include "xAODTracking/TrackParticle.h"
 
+#include "TH1D.h"
+
+using namespace egammaMonitoring;
 
 StatusCode TruthElectronHistograms::initializePlots() {
   return initializePlots (false);
@@ -37,7 +39,6 @@ StatusCode TruthElectronHistograms::initializePlots(bool reducedHistSet) {
   m_reducedHistSet = reducedHistSet;
 
   return StatusCode::SUCCESS;
-
 
 } 
 

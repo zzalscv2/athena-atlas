@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -65,7 +65,6 @@ InDetAdaptiveMultiPriVxFinderTool::InDetAdaptiveMultiPriVxFinderTool(
   , m_maxIterations(100)
   , m_addSingleTrackVertices(false)
   , m_do3dSplitting(false)
-  , m_zBfieldApprox(0.60407)
   , m_maximumVertexContamination(0.5)
   , m_tracksMaxSignificance(5.)
   , m_useSeedConstraint(false)
@@ -92,7 +91,6 @@ InDetAdaptiveMultiPriVxFinderTool::InDetAdaptiveMultiPriVxFinderTool(
   //==2 for min bias compatibility estimation (in the future)
   declareProperty("maxIterations", m_maxIterations);
   declareProperty("do3dSplitting", m_do3dSplitting);
-  declareProperty("zBfieldApprox", m_zBfieldApprox);
   declareProperty("maximumVertexContamination", m_maximumVertexContamination);
 }
 

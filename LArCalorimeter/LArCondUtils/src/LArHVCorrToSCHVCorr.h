@@ -13,6 +13,7 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "LArCabling/LArOnOffIdMapping.h"
 #include "LArElecCalib/ILArHVScaleCorr.h"
+#include "CaloIdentifier/LArHEC_ID.h"
 #include "LArRecConditions/LArHVCorr.h"
 
 #include "GaudiKernel/ToolHandle.h"
@@ -43,8 +44,11 @@ class LArHVCorrToSCHVCorr
 
   StringProperty m_folderName{this, "OutputFolder", "/LAR/ElecCalibFlatSC/HVScaleCorr", "Output folder for CondAttrListCollection"};
 
+  StringProperty m_weightsName{this, "PhysicsWeights", "TrigT1CaloCalibUtils/HVcorrPhysicsWeights.txt", "File with layer weights"};
+
   ToolHandle<ICaloSuperCellIDTool> m_scidTool{this, "CaloSuperCellIDTool", "CaloSuperCellIDTool"};
 
+  float getWeight(const LArHEC_ID *hecID, const Identifier &id, std::map<int,std::vector<float> > &wmap);
 }; 
 
 #endif

@@ -2,14 +2,17 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-
 #include "EgammaMonitoring.h"
 
 #include "GaudiKernel/SystemOfUnits.h"
-#include "IHistograms.h"
+#include "GaudiKernel/ITHistSvc.h"
 
-#include <memory>
-
+#include "xAODEgamma/Egamma.h"
+#include "xAODEgamma/Electron.h"
+#include "xAODEgamma/Photon.h"
+#include "xAODTruth/TruthParticle.h"
+#include "xAODTruth/xAODTruthHelpers.h"
+#include "xAODEgamma/EgammaxAODHelpers.h"
 
 EgammaMonitoring::EgammaMonitoring(const std::string &name, ISvcLocator *pSvcLocator) :
   AthAlgorithm(name, pSvcLocator){
@@ -338,9 +341,6 @@ StatusCode EgammaMonitoring::initialize() {
     ATH_CHECK(InDetTracksTRTNotElectronhighpT->initializePlots());
     ATH_CHECK(InDetTracksTRTMatchPionhighpT->initializePlots());
     ATH_CHECK(InDetTracksTRTNotMatchedhighpT->initializePlots());
-
-
-
 
   } // gamma Hists
 
@@ -760,44 +760,48 @@ StatusCode EgammaMonitoring::execute() {
       return StatusCode::FAILURE;
     }
 
-    for(const auto *tp : *InDetTPs) {
+    for (const auto *tp : *InDetTPs) {
 
       InDetTracks->fill(*tp, mu);
-      if(matchedToElectron(*tp)) InDetTracksMatchElectron->fill(*tp, mu);
-      if(!matchedToElectron(*tp)) InDetTracksNotElectron->fill(*tp, mu);
-      if(matchedToPion(*tp)) InDetTracksMatchPion->fill(*tp, mu);
-      if(notMatchedToTruth(*tp)) InDetTracksNotMatched->fill(*tp, mu);
-
-      if(tp->pt() > 3000.){
+      if (matchedToElectron(*tp)) InDetTracksMatchElectron->fill(*tp, mu);
+      else {
+	InDetTracksNotElectron->fill(*tp, mu);
+	if (matchedToPion(*tp)) InDetTracksMatchPion->fill(*tp, mu);
+	else if (notMatchedToTruth(*tp)) InDetTracksNotMatched->fill(*tp, mu);
+      }
+      if (tp->pt() > 3000.){
         InDetTrackshighpT->fill(*tp, mu);
-        if (matchedToElectron(*tp)){
+        if (matchedToElectron(*tp)) {
           InDetTracksMatchElectronhighpT->fill(*tp, mu);
-        }
-        if (!matchedToElectron(*tp)){
+        } else {
           InDetTracksNotElectronhighpT->fill(*tp, mu);
-        }
-        if (matchedToPion(*tp)){
-          InDetTracksMatchPionhighpT->fill(*tp, mu);
-        }
-        if (notMatchedToTruth(*tp)){
-          InDetTracksNotMatchedhighpT->fill(*tp, mu);
-        }
+	  if (matchedToPion(*tp)){
+	    InDetTracksMatchPionhighpT->fill(*tp, mu);
+	  }
+	  else if (notMatchedToTruth(*tp)){
+	    InDetTracksNotMatchedhighpT->fill(*tp, mu);
+	  }
+	}
       }
 
-         if(xAOD::EgammaHelpers::numberOfSiHits(tp)==0) { //TRTSA tracks
-	   InDetTracksTRT->fill(*tp, mu);
-	   if(matchedToElectron(*tp)) InDetTracksTRTMatchElectron->fill(*tp, mu);
-	   if(!matchedToElectron(*tp)) InDetTracksTRTNotElectron->fill(*tp, mu);
-	   if(matchedToPion(*tp)) InDetTracksTRTMatchPion->fill(*tp, mu);
-	   if(notMatchedToTruth(*tp)) InDetTracksTRTNotMatched->fill(*tp, mu);
-	   if(tp->pt() > 3000.){
-	     InDetTracksTRThighpT->fill(*tp, mu);
-	     if(matchedToElectron(*tp)) InDetTracksTRTMatchElectronhighpT->fill(*tp, mu);
-	     if(!matchedToElectron(*tp)) InDetTracksTRTNotElectronhighpT->fill(*tp, mu);
-	     if(matchedToPion(*tp)) InDetTracksTRTMatchPionhighpT->fill(*tp, mu);
-	     if(notMatchedToTruth(*tp)) InDetTracksTRTNotMatchedhighpT->fill(*tp, mu);
-	   }
-	 }
+      if (xAOD::EgammaHelpers::numberOfSiHits(tp)==0) { //TRTSA tracks
+	InDetTracksTRT->fill(*tp, mu);
+	if (matchedToElectron(*tp)) InDetTracksTRTMatchElectron->fill(*tp, mu);
+	else {
+	  InDetTracksTRTNotElectron->fill(*tp, mu);
+	  if (matchedToPion(*tp)) InDetTracksTRTMatchPion->fill(*tp, mu);
+	  else if (notMatchedToTruth(*tp)) InDetTracksTRTNotMatched->fill(*tp, mu);
+	}
+	if (tp->pt() > 3000.){
+	  InDetTracksTRThighpT->fill(*tp, mu);
+	  if (matchedToElectron(*tp)) InDetTracksTRTMatchElectronhighpT->fill(*tp, mu);
+	  else {
+	    InDetTracksTRTNotElectronhighpT->fill(*tp, mu);
+	    if (matchedToPion(*tp)) InDetTracksTRTMatchPionhighpT->fill(*tp, mu);
+	    else if (notMatchedToTruth(*tp)) InDetTracksTRTNotMatchedhighpT->fill(*tp, mu);
+	  }
+	}
+      }
 
     }//loop over InDetTPs
 
@@ -826,6 +830,7 @@ StatusCode EgammaMonitoring::finalize() {
     ATH_CHECK(recoElectronMediumLHEfficiency.divide(truthRecoElectronMediumLH.get(), truthPromptElectronAll.get()));
     egammaMonitoring::EfficiencyPlot recoElectronTightLHEfficiency("recoElectronTightLHEfficiency", "/MONITORING/recoElectronTightLHEfficiency/", rootHistSvc );
     ATH_CHECK(recoElectronTightLHEfficiency.divide( truthRecoElectronTightLH.get(), truthPromptElectronAll.get()));
+
   }
 
   if ("gamma" == m_sampleType) {
@@ -924,21 +929,18 @@ StatusCode EgammaMonitoring::finalize() {
 
 
 bool EgammaMonitoring::matchedToElectron(const xAOD::TrackParticle& tp) {
-
   const xAOD::TruthParticle *truth = xAOD::TruthHelpers::getTruthParticle(tp);
   return truth && abs(truth->pdgId())==11;
 }
 
 
 bool EgammaMonitoring::matchedToPion(const xAOD::TrackParticle& tp) {
-
   const xAOD::TruthParticle *truth = xAOD::TruthHelpers::getTruthParticle(tp);
   return truth && abs(truth->pdgId())==211;
 }
 
 
 bool EgammaMonitoring::notMatchedToTruth(const xAOD::TrackParticle& tp) {
-
   const xAOD::TruthParticle *truth = xAOD::TruthHelpers::getTruthParticle(tp);
   return !truth;
 }

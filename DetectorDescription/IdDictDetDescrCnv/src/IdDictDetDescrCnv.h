@@ -40,7 +40,7 @@ class IdDictManager;
 
 class IdDictDetDescrCnv : public DetDescrConverter, public AthMessaging {
    public:
-    virtual long int repSvcType() const;
+    virtual long int repSvcType() const override;
     virtual StatusCode initialize() override;
     virtual StatusCode finalize() override;
     virtual StatusCode createObj(IOpaqueAddress *pAddr,

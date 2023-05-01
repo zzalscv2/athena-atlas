@@ -553,8 +553,8 @@ else:
     # Set Global tag for IOVDbSvc
     if not 'CondDbTag' in dir():
         if RUN3:
-            if 'UPD4' in dir() and UPD4: CondDbTag = 'CONDBR2-BLKPA-RUN2-09'
-            else:                        CondDbTag = 'CONDBR2-ES1PA-2022-01'
+            if 'UPD4' in dir() and UPD4: CondDbTag = 'CONDBR2-BLKPA-2023-01'
+            else:                        CondDbTag = 'CONDBR2-ES1PA-2023-01'
         elif RUN2:
             if 'UPD4' in dir() and UPD4: CondDbTag = 'CONDBR2-BLKPA-2018-16'
             else:                        CondDbTag = 'CONDBR2-ES1PA-2018-05'

@@ -123,7 +123,7 @@ StatusCode MuonPRD_MultiTruthMaker::buildPRD_Truth(SG::ReadHandleKey<PrepDataCon
 
 //================================================================
 template <class PRD_Container_Iterator, class SIMDATACOLLECTION>
-void MuonPRD_MultiTruthMaker::addPRDCollections(SG::WriteHandle<PRD_MultiTruthCollection> prdTruth,
+void MuonPRD_MultiTruthMaker::addPRDCollections(SG::WriteHandle<PRD_MultiTruthCollection>& prdTruth,
                                                 PRD_Container_Iterator collections_begin, PRD_Container_Iterator collections_end,
                                                 SG::ReadHandle<SIMDATACOLLECTION> simDataMap) {
     for (PRD_Container_Iterator colNext = collections_begin; colNext != collections_end; ++colNext) {
@@ -134,7 +134,7 @@ void MuonPRD_MultiTruthMaker::addPRDCollections(SG::WriteHandle<PRD_MultiTruthCo
 //================================================================
 // Adds PRDs in the range to prdTruth.
 template <class PRD_Collection_Iterator, class SIMDATACOLLECTION>
-void MuonPRD_MultiTruthMaker::addPRDRange(SG::WriteHandle<PRD_MultiTruthCollection> prdTruth, PRD_Collection_Iterator range_begin,
+void MuonPRD_MultiTruthMaker::addPRDRange(SG::WriteHandle<PRD_MultiTruthCollection>& prdTruth, PRD_Collection_Iterator range_begin,
                                           PRD_Collection_Iterator range_end, SG::ReadHandle<SIMDATACOLLECTION> simDataMap) {
     for (PRD_Collection_Iterator nextDatum = range_begin; nextDatum != range_end; nextDatum++) {
         addPrepRawDatum(prdTruth, *nextDatum, simDataMap);
@@ -143,7 +143,7 @@ void MuonPRD_MultiTruthMaker::addPRDRange(SG::WriteHandle<PRD_MultiTruthCollecti
 
 //================================================================
 template <class SIMDATACOLLECTION>
-void MuonPRD_MultiTruthMaker::addPrepRawDatum(SG::WriteHandle<PRD_MultiTruthCollection> prdTruth, const Trk::PrepRawData* prd,
+void MuonPRD_MultiTruthMaker::addPrepRawDatum(SG::WriteHandle<PRD_MultiTruthCollection>& prdTruth, const Trk::PrepRawData* prd,
                                               SG::ReadHandle<SIMDATACOLLECTION> simDataMap) {
     ATH_MSG_VERBOSE("addPrepRawDatum(): new PRD " << prd << ", id=" << prd->identify() << ", number of RDOs: " << prd->rdoList().size());
 

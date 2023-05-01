@@ -5,6 +5,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from TriggerMenuMT.HLT.Config.MenuComponents import algorithmCAToGlobalWrapper
 from TriggerMenuMT.HLT.CommonSequences.FullScanDefs import caloFSRoI
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
 ########################
 ## ALGORITHMS
@@ -67,6 +68,7 @@ def _algoHLTTopoClusterLC(flags, inputEDM="CellsClusters", algSuffix="") :
 #
 # fast calo algorithm (central or forward regions)
 #
+@AccumulatorCache
 def fastCaloRecoSequenceCfg(flags, inputEDM="", ClustersName="HLT_FastCaloEMClusters", RingerKey="HLT_FastCaloRinger", doForward=False, doAllEm=False, doAll=False):
 
     acc = ComponentAccumulator()
@@ -91,6 +93,15 @@ def fastCaloRecoSequenceCfg(flags, inputEDM="", ClustersName="HLT_FastCaloEMClus
                 from TrigT2CaloEgamma.TrigT2CaloEgammaConfig import t2CaloEgamma_AllCfg
                 acc.merge(t2CaloEgamma_AllCfg(flags, "L2CaloLayersFex",RoIs=inputEDM,ExtraInputs=extraInputs, ClustersName = ClustersName))
     return acc
+
+def fastCaloVDVCfg(name="fastCaloVDV",InViewRoIs="EMCaloRoIs") :
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    reco = ComponentAccumulator()
+    fastCaloVDV = CompFactory.AthViews.ViewDataVerifier(name)
+    fastCaloVDV.DataObjects = [( 'CaloBCIDAverage' , 'StoreGateSvc+CaloBCIDAverage' ),
+                           ( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s'%InViewRoIs  )]
+    reco.addEventAlgo(fastCaloVDV)
+    return reco
 
 ####################################
 ##### SEQUENCES
