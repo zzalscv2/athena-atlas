@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -73,7 +73,7 @@ def TCAL2Cfg(ConfigFlags):
     TCAL2Prefix = 'TCAL2_'
 
     acc = ComponentAccumulator()
-    acc.merge(TCAL2KernelCfg(ConfigFlags, name="TCAL2Kernel", StreamName = "OutputStreamDAOD_TCAL2", Prefix=TCAL2Prefix))
+    acc.merge(TCAL2KernelCfg(ConfigFlags, name="TCAL2Kernel", StreamName = "StreamDAOD_TCAL2", Prefix=TCAL2Prefix))
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
