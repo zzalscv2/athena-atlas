@@ -28,6 +28,10 @@ PowhegConfig.PDF = 260000
 PowhegConfig.mu_F = 1.0
 PowhegConfig.mu_R = 1.0
 
+#{"name":[nominal_value, changed_value, stage at which the value is changed]}
+parameterStageDict = { "fakevirt" : [0 , 1, 1]}
+PowhegConfig.set_parameter_stage( parameterStageDict )
+
 
 # --------------------------------------------------------------
 # possible decay modes for each z: e+ e-, mu+ mu-, ve ve~, vm vm~, d d~, s s~, u u~, c- c~, (d d~ / s s~), (u u~ / c c~)

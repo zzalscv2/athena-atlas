@@ -383,3 +383,11 @@ class PowhegControl(object):
             if not hasattr(self, key):
                 raise AttributeError("This POWHEG-BOX process has no option '{}'".format(key))
         object.__setattr__(self, key, value)
+
+
+    def set_parameter_stage(self, parameterStageDict = {}):
+        logger.info("Setting parameters for the stages : {0}".format(parameterStageDict))
+        
+        self.process.parameterStageDict = parameterStageDict
+
+    

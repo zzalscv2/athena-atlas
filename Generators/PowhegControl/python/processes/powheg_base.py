@@ -2,7 +2,7 @@
 
 from AthenaCommon import Logging
 from configurable import Configurable
-from ..utility import check_svn_revision
+from ..utility import check_svn_revision, FileParser
 import math
 import os
 import glob
@@ -200,6 +200,10 @@ class PowhegBase(Configurable):
         self.info_output = info_output
         self.error_output = error_output
 
+        ## Dictionary used to change parameters of the Powheg input.
+        ## The structure is: {"parameter" : [default_value, changed_value, parallelstage_to_changed_value]}
+        self.parameterStageDict = {}
+
     def add_algorithm(self, alg_or_process):
         """! Add an algorithm or external process to the sequence.
 
@@ -309,3 +313,23 @@ class PowhegBase(Configurable):
             logger.info("Integration grid files needed were not found locally. Event generation shall continue, starting by the integration step.")
             logger.info("Missing integration grid files with these patterns: {}".format(missing_patterns))
             logger.info("Integration grid files found locally (if any): {}".format(found_files))
+
+    def modify_parameter(self, stage = 0):
+
+        #skip modifying if dict is empty
+        if not bool(self.parameterStageDict):
+            return
+
+        logger.info("Modifying parameters for the stages : {0}".format(self.parameterStageDict))
+
+        ## The structure is: {"parameter" : [default_value, changed_value, parallelstage_to_changed_value]}
+        for key in self.parameterStageDict:
+            settingsList = self.parameterStageDict[key]
+            if abs(settingsList[2] - stage) <=1e-09:
+                self.set_parameter_in_config(key,settingsList[1])
+            else: 
+                self.set_parameter_in_config(key,settingsList[0])
+
+    def set_parameter_in_config(self, key, value):
+        FileParser("powheg.input").text_replace(key+".*", key+" {}".format(value))
+

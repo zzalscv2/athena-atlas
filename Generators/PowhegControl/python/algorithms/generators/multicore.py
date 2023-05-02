@@ -64,15 +64,21 @@ def __multicore_multistage(process, generation_fn):
     if process.stage_is_completed(1):
         logger.info("=> Skipping multi-core generation (V2/RES): stage 1 <=")
     else:
+        process.modify_parameter(stage = 1)
         __multicore_multistage_stage_1(generation_fn, process.itmx1)
     if process.stage_is_completed(2):
         logger.info("=> Skipping multi-core generation (V2/RES): stage 2 <=")
     else:
+        process.modify_parameter(stage = 2)
         __multicore_multistage_stage_2(generation_fn)
     if process.stage_is_completed(3):
+        
         logger.info("=> Skipping multi-core generation (V2/RES): stage 3 <=")
     else:
         __multicore_multistage_stage_3(generation_fn)
+        process.modify_parameter(stage = 3)
+
+    process.modify_parameter(stage = 4)
     __multicore_multistage_stage_4(generation_fn)
 
 @timed("multi-core generation (V2/RES): stage 1)")
