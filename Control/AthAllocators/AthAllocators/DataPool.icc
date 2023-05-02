@@ -95,6 +95,14 @@ void DataPool<VALUE, clear>::reserve(unsigned int size)
 
 
 DATAPOOL_T
+void DataPool<VALUE, clear>::prepareToAdd(unsigned int size)
+{
+  if (this->capacity() - this->allocated() < size) {
+    this->reserve(this->allocated() + size);
+  }
+}
+
+DATAPOOL_T
 unsigned int DataPool<VALUE, clear>::capacity()
 {
   return m_handle.stats().elts.total;
@@ -111,48 +119,29 @@ unsigned int DataPool<VALUE, clear>::allocated()
 /// begin iterators over pool
 DATAPOOL_T
 typename DataPool<VALUE, clear>::iterator DataPool<VALUE, clear>::begin()
-{ 
+{
   return iterator (m_handle.begin());
 }
 
 DATAPOOL_T
 typename DataPool<VALUE, clear>::const_iterator DataPool<VALUE, clear>::begin() const
-{ 
+{
   return const_Iterator (m_handle.begin());
 }
 
 //-----------------------------------------------------------
 /// the end() method will allow looping over only valid elements
-/// and not over ALL elements of the pool 
+/// and not over ALL elements of the pool
 
 DATAPOOL_T
 typename DataPool<VALUE, clear>::iterator DataPool<VALUE, clear>::end()
-{ 
+{
   return iterator (m_handle.end());
 }
 
 DATAPOOL_T
-typename DataPool<VALUE, clear>::const_iterator DataPool<VALUE, clear>::end() const { 
+typename DataPool<VALUE, clear>::const_iterator DataPool<VALUE, clear>::end() const {
   return const_iterator (m_handle.end());
-}
-
-//-----------------------------------------------------------
-/// obtain the next available element in pool by pointer
-/// return as void* to minimize misuse, client usage is:
-/// MyElement* m = new(pool->mem) MyElement(...); // pool is ptr
-DATAPOOL_T
-void* DataPool<VALUE, clear>::mem() {
-    pointer p = nextElementPtr();
-    return p;
-}
-
-/// can also say: 
-/// MyElement* m = new ((*pool)()) MyElement(...); // pool = pointer
-/// MyElement* m = new (pool()) MyElement(...); // pool = value
-
-DATAPOOL_T
-void* DataPool<VALUE, clear>::operator()() { 
-    return mem(); 
 }
 
 //-----------------------------------------------------------
@@ -172,6 +161,6 @@ typename DataPool<VALUE, clear>::pointer DataPool<VALUE, clear>::nextElementPtr(
 {
   return m_handle.allocate();
 }
-  
+
 
 #undef DATAPOOL_T

@@ -69,17 +69,11 @@ void McEventCollectionCnv_p6::persToTrans( const McEventCollection_p6* persObj,
   }
   HepMC::DataPool datapools;
   const unsigned int nVertices = persObj->m_genVertices.size();
-  if ( datapools.vtx.capacity() - datapools.vtx.allocated() < nVertices ) {
-    datapools.vtx.reserve( datapools.vtx.allocated() + nVertices );
-  }
+  datapools.vtx.prepareToAdd(nVertices);
   const unsigned int nParts = persObj->m_genParticles.size();
-  if ( datapools.part.capacity() - datapools.part.allocated() < nParts ) {
-    datapools.part.reserve( datapools.part.allocated() + nParts );
-  }
+  datapools.part.prepareToAdd(nParts);
   const unsigned int nEvts = persObj->m_genEvents.size();
-  if ( datapools.evt.capacity() - datapools.evt.allocated() < nEvts ) {
-    datapools.evt.reserve( datapools.evt.allocated() + nEvts );
-  }
+  datapools.part.prepareToAdd(nEvts);
 
   transObj->reserve( nEvts );
   for ( std::vector<GenEvent_p6>::const_iterator

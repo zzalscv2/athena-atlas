@@ -7,7 +7,7 @@ atlas_subdir( egammaValidation )
 atlas_add_component ( egammmaValidation
 	src/*.cxx 
 	src/components/*.cxx 
-	LINK_LIBRARIES AsgTools AthenaBaseComps EgammaAnalysisInterfacesLib GaudiKernel IsolationSelectionLib 
+	LINK_LIBRARIES AsgTools AthenaBaseComps AsgMessagingLib EgammaAnalysisInterfacesLib GaudiKernel IsolationSelectionLib
 	MCTruthClassifierLib PATCoreAcceptLib xAODBase xAODEgamma xAODEventInfo ElectronPhotonSelectorToolsLib
 	xAODTracking xAODTruth )
 

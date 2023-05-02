@@ -5,23 +5,24 @@ atlas_subdir( LArDigitization )
 
 # External dependencies:
 find_package( CLHEP )
+find_package( Boost COMPONENTS container)
 
 # Component(s) in the package:
 atlas_add_library( LArDigitizationLib
                    src/LArHitEMap.cxx
                    PUBLIC_HEADERS LArDigitization
                    LINK_LIBRARIES AthenaKernel CaloDetDescrLib
-                   LArCablingLib LArRawEvent
+                   LArCablingLib LArRawEvent 
                    PRIVATE_LINK_LIBRARIES AtlasHepMCLib
                    GaudiKernel GeneratorObjects Identifier LArIdentifier )
 
 
 atlas_add_component( LArDigitization
                      src/*.cxx src/components/*.cxx
-                     PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
+                     PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
                      PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
-                     LINK_LIBRARIES ${CLHEP_LIBRARIES} AthenaBaseComps
-                     AtlasHepMCLib CaloIdentifier EventInfoUtils
+                     LINK_LIBRARIES ${CLHEP_LIBRARIES} ${Boost_LIBRARIES} 
+                     AthenaBaseComps AtlasHepMCLib CaloIdentifier EventInfoUtils
                      GeneratorObjects Identifier LArDigitizationLib
                      LArElecCalib LArIdentifier LArRawConditions
                      LArRecConditions LArSimEvent PileUpToolsLib

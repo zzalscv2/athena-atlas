@@ -1,18 +1,17 @@
-
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EGAMMAVALIDATION_TRUTHPHOTONHISTOGRAMS_H
 #define EGAMMAVALIDATION_TRUTHPHOTONHISTOGRAMS_H
 
-//#include "xAODEgamma/Photon.h"
-//#include "xAODEgamma/PhotonContainer.h"
 #include "ParticleHistograms.h"
-#include "TH2D.h"
+#include <map>
+
 namespace xAOD{
   class IParticle;
 }
+class TH2D;
 
 namespace egammaMonitoring {
 

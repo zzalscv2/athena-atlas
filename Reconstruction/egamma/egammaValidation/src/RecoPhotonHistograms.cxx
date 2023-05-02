@@ -4,11 +4,15 @@
 
 #include "RecoPhotonHistograms.h"
 
-using namespace egammaMonitoring;
-
-#include "AsgTools/AnaToolHandle.h" //just to get ATH_CHECK? should be a better way!
+#include "AsgMessaging/Check.h"
 #include "GaudiKernel/ITHistSvc.h"
-#include <cmath>
+#include "xAODTruth/TruthParticle.h"
+#include "xAODTruth/TruthVertex.h"
+#include "xAODTruth/xAODTruthHelpers.h"
+
+#include "TH1D.h"
+
+using namespace egammaMonitoring;
 
 StatusCode RecoPhotonHistograms::initializePlots() {
 

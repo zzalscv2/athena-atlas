@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Algorithm producing truth info for PrepRawData, keeping all MC particles contributed to a PRD.
@@ -61,16 +61,16 @@ private:
                               const SG::WriteHandleKey<PRD_MultiTruthCollection>& outputKey);
 
     template <class PRD_Container_Iterator, class SIMDATACOLLECTION>
-    void addPRDCollections(SG::WriteHandle<PRD_MultiTruthCollection> prdTruth, PRD_Container_Iterator collections_begin,
+    void addPRDCollections(SG::WriteHandle<PRD_MultiTruthCollection>& prdTruth, PRD_Container_Iterator collections_begin,
                            PRD_Container_Iterator collections_end, SG::ReadHandle<SIMDATACOLLECTION> simDataMap);
 
     template <class PRD_Collection_Iterator, class SIMDATACOLLECTION>
-    void addPRDRange(SG::WriteHandle<PRD_MultiTruthCollection> prdTruth, PRD_Collection_Iterator range_begin,
+    void addPRDRange(SG::WriteHandle<PRD_MultiTruthCollection>& prdTruth, PRD_Collection_Iterator range_begin,
                      PRD_Collection_Iterator range_end, SG::ReadHandle<SIMDATACOLLECTION> simDataMap);
 
     // An analogue of this comes from a tool in InDet
     template <class SIMDATACOLLECTION>
-    void addPrepRawDatum(SG::WriteHandle<PRD_MultiTruthCollection> prdTruth, const Trk::PrepRawData *prd,
+    void addPrepRawDatum(SG::WriteHandle<PRD_MultiTruthCollection>& prdTruth, const Trk::PrepRawData *prd,
                          SG::ReadHandle<SIMDATACOLLECTION> simDataMap);
 };
 

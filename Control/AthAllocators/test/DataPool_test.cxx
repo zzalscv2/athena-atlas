@@ -86,7 +86,7 @@ void test_basic()
     k++;
   }
 
-	
+
   df->reset();						// reset DataPool
   DataPool<Fluff>::const_iterator iter3 = df->begin();
   DataPool<Fluff>::const_iterator iend3 = df->end();
@@ -103,28 +103,42 @@ void test_basic()
     f->setPar(j);
   }
 
-  assert(1500 == df->allocated());			// up by 2 automatically
-								 
+  assert(1500 == df->allocated());	// up by 2 automatically
+
   assert(2048 <= df->capacity());
 
-  // check that resizing to less than m_refCount doesn't work
+  // check that resizing to less than allocated
+  // doesn't change anything
   df->reserve(1000);
   assert(2048<=df->capacity());
   assert(1500==df->allocated());
 
-  // check that resizing to less than m_maxRefCount works
-  // changes related to m_maxRefCount are not visible in capacity() or allocated().
-  df->reserve(1600);			
+  // check that resizing to more than allocated
+  // changes things
+  df->reserve(3000);
+  assert(3000<=df->capacity());
+  assert(2048<df->capacity());
+  assert(1500==df->allocated());
 
+  // check that resizing back works
+  df->reserve(2048);
+  assert(3000>df->capacity());
   assert(2048<=df->capacity());
   assert(1500==df->allocated());
+
+  // check that prepareToAdd also works
+  df->prepareToAdd(1024);
+  assert(2500<=df->capacity());
+  assert(2048<df->capacity());
+  assert(1500==df->allocated());
+
 
   // this is test by cheating. We reset the data pool (objects are not deleted
   // we go to the memory location and check if all values are still ok.
   df->reset();
   for (int j = 0; j < 1500; j++)
   {
-    Fluff* f = static_cast<Fluff*>(df->mem());
+    Fluff* f =(df->nextElementPtr());
     assert(j == f->value());
   }
 

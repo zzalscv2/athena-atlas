@@ -5,28 +5,25 @@
 #ifndef EGAMMAVALIDATION_TRACKHISTOGRAMS_H
 #define EGAMMAVALIDATION_TRACKHISTOGRAMS_H
 
-#include <utility>
+#include <map>
 
-#include "xAODTracking/TrackParticle.h"
-#include "TProfile.h"
 #include "IHistograms.h"
 
-namespace egammaMonitoring{
+class IParticle;
+class TProfile;
+
+namespace egammaMonitoring {
 
   class TrackHistograms : public IHistograms {
   public:
 
     using IHistograms::IHistograms;
     
-//    std::map<std::string, TH1D* > histoMap;
-    std::map<std::string, TProfile* > profileMap;
+    std::map<std::string, TProfile*> profileMap;
 
     StatusCode initializePlots();
     void fill(const xAOD::IParticle& track, float mu);
     void fill(const xAOD::IParticle& track);
-
-  private:
-    static int getNumberOfHits(const xAOD::TrackParticle*, xAOD::SummaryType);
 
   };
 

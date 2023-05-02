@@ -1,25 +1,22 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
 */
-
-// LArHitContainerCnv_p2, used for T/P separation
-// author Ilija Vukotic
-
 
 #include "LArSimEvent/LArHit.h"
 #include "LArSimEvent/LArHitContainer.h"
-
 #include "Identifier/Identifier.h"
+
 #include "Identifier/IdentifierHash.h"
 #include "CaloIdentifier/CaloCell_ID.h"
 
 #include "AthenaPoolCnvSvc/Compressor.h"
-#include "AthAllocators/DataPool.h"
+
+// LArHitContainerCnv_p2, used for T/P separation
+// author Ilija Vukotic
 
 #include "LArSimEventTPCnv/LArHitContainerCnv_p2.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "GaudiKernel/ServiceHandle.h"
-
 #include <map>
 #include <stdexcept>
 
@@ -66,44 +63,48 @@ void LArHitContainerCnv_p2::transToPers(const LArHitContainer* transCont, LArHit
 		persCont->m_channelHash.push_back(pHash);
 		tempE.push_back( (float) (transCont->At(pos))->energy() );
 		tempT.push_back( (float) (transCont->At(pos))->time()   );
+//		if (!ev) std::cout<<"Writing Hash: "<<iter->first<<"\t E: "<< (float) (transCont->At(pos))->m_energy<<"\t T: "<< (float) (transCont->At(pos))->m_time<<std::endl;
+//		count++;
 		}			
+//	std::cout<<"ILIJA : "<<count<<std::endl;
 	
 	Compressor A; A.setNrBits(18);	
 	A.reduce(tempE,persCont->m_energy); // packs energy
 	Compressor B;
 	B.reduceToUS(tempT, persCont->m_time);	
 	persCont->m_name = transCont->Name(); //stores name
+	
+//	ev++;
 }
 
-void LArHitContainerCnv_p2::persToTrans(const LArHitContainer_p2* persCont,
-                                        LArHitContainer* transCont,
-                                        MsgStream& log) {
-  size_t cells = persCont->m_channelHash.size();
-  log << MSG::DEBUG << " ***  Reading LArHitContainer of size: " << cells << endmsg;
 
-  DataPool<LArHit> dataItems;
-  dataItems.reserve(cells);
 
-  transCont->Clear(AthHitVec::VIEW_ELEMENTS);
-  transCont->reserve(cells);
-  transCont->setName(persCont->name());
-
-  Compressor A;
-  std::vector<float> tempE;
-  tempE.reserve(cells);
-  std::vector<float> tempT;
-  tempT.reserve(cells);
-
-  A.expandFromUStoFloat(persCont->m_time, tempT);
-  A.expandToFloat(persCont->m_energy, tempE);
-
-  unsigned int sum = 0;
-  for (size_t i = 0; i < cells; ++i) {
-    sum += persCont->m_channelHash[i];
-    LArHit* trans = dataItems.nextElementPtr();
-    (*trans) = LArHit(m_cellIdHelper->cell_id(sum), tempE[i],
-                      tempE[i] != 0 ? (double)(tempT[i]) / tempE[i] : 0);
-    transCont->push_back(trans);
-  }
+void LArHitContainerCnv_p2::persToTrans(const LArHitContainer_p2* persCont, LArHitContainer* transCont, MsgStream &log) 
+{
+//	static int dog=0;
+	size_t cells=persCont->m_channelHash.size();
+	log << MSG::DEBUG  << " ***  Reading LArHitContainer of size: "<<cells<<endmsg;
+	transCont->clear();
+	transCont->reserve(cells);
+	transCont->setName(persCont->name() );
+	
+	
+	Compressor A;
+	std::vector<float> tempE;	tempE.reserve(cells);
+	std::vector<float> tempT;	tempT.reserve(cells);
+	
+	A.expandFromUStoFloat(persCont->m_time,tempT);
+	A.expandToFloat(persCont->m_energy,tempE);
+	unsigned int sum=0;
+	for (unsigned int i=0;i<cells;++i){
+		sum+= persCont->m_channelHash[i];
+		LArHit* trans=new LArHit
+                  (m_cellIdHelper->cell_id(sum),
+                   tempE[i],
+                   tempE[i] != 0 ? (double)(tempT[i])/tempE[i] : 0);
+//		if(!dog) std::cout<<"Reading hash: "<< sum <<"\t E: "<< (double)tempE[i]<<"\t T: "<<(tempT[i]) <<std::endl;
+		transCont->push_back(trans);
+		}
+//	dog++;
 }
-
+ 

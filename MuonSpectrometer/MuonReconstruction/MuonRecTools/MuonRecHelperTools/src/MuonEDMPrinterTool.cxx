@@ -382,7 +382,7 @@ MuonEDMPrinterTool::print(const MuonSegment& segment) const
              << std::setw(5) << segment.errorTime();
 
     if (mdtDetEl) {
-        double posAlongTube = std::abs(mdtDetEl->globalToLocalCoords(segment.globalPosition(), shortestTubeId).z());
+        double posAlongTube = std::abs((mdtDetEl->globalToLocalTransf(shortestTubeId)*segment.globalPosition()).z());
         double distFromEdge = posAlongTube - shortestTubeLen;
         if (distFromEdge < -100.)
             sout << " inside chamber";

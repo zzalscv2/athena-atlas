@@ -37,6 +37,7 @@
 #include "LArCabling/LArOnOffIdMapping.h"
 #include "LArRecConditions/LArBadChannelCont.h"
 #include "LArRecConditions/LArBadChannelMask.h"
+#include <boost/container/static_vector.hpp>
 
 // services
 #include "AthenaKernel/IAthRNGSvc.h"
@@ -65,13 +66,16 @@ public:
   virtual StatusCode execute(const EventContext& context) const;
 
 protected:
+  static constexpr int s_MaxNSamples = 8;
+  using staticVecDouble_t = boost::container::static_vector<double,s_MaxNSamples> ;
+  using staticVecFloat_t = boost::container::static_vector<float,s_MaxNSamples> ;
 
   // access to many conditions
   template<class T> const T* pointerFromKey(const EventContext& context, const SG::ReadCondHandleKey<T>& key) const;
 
   StatusCode MakeDigit(const EventContext& ctx, const Identifier & cellId,
                const HWIdentifier & ch_id,
-	       LArDigit*& DigitContainer, LArDigit*& DigitContainer_DigiHSTruth,
+               LArDigit*& DigitContainer, LArDigit*& DigitContainer_DigiHSTruth,
                const std::vector<std::pair<float,float> >* TimeE,
                const LArDigit * rndm_digit, CLHEP::HepRandomEngine * engine,
                const std::vector<std::pair<float,float> >* TimeE_DigiHSTruth = nullptr) const;
@@ -79,7 +83,7 @@ protected:
   
   StatusCode ConvertHits2Samples(const EventContext& ctx, const Identifier & cellId, HWIdentifier ch_id,
                    CaloGain::CaloGain igain,
-                   const std::vector<std::pair<float,float> >  *TimeE,  std::vector<double> &sampleList) const;
+                   const std::vector<std::pair<float,float> >  *TimeE,  staticVecDouble_t& sampleList) const;
 
   // Keys to many conditions
   SG::ReadCondHandleKey<ILArNoise>    m_noiseKey{this,"NoiseKey","LArNoiseSym","SG Key of ILArNoise object"};
