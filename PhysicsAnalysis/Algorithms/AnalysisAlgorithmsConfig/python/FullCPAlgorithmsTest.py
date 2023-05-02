@@ -171,31 +171,32 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
     if noPhysliteBroken :
         muonSequenceMedium.__delattr__ ('MuonSelectionAlg_medium')
     muonSequenceMedium.configure( inputName = input,
-                                  outputName = 'AnaMuonsMedium_%SYS%' )
+                                  outputName = 'AnaMuons_%SYS%' )
     algSeq += muonSequenceMedium
 
-    muonSequenceTight = makeMuonAnalysisSequence( dataType, deepCopyOutput = False, shallowViewOutput = False,
-                                                  workingPoint = 'Tight.Loose_VarRad', postfix = 'tight',
-                                                  enableCutflow=True, enableKinematicHistograms=True, ptSelectionOutput = True )
-    muonSequenceTight.removeStage ("calibration")
-    # FIX ME: the current version of the `MuonSelectionTool` doesn't work
-    # on the current version of PHYSLITE, and needs a new PHYSLITE production
-    # campaign
-    if noPhysliteBroken :
-        muonSequenceTight.__delattr__ ('MuonSelectionAlg_tight')
-    muonSequenceTight.configure( inputName = 'AnaMuonsMedium_%SYS%',
-                                 outputName = 'AnaMuons_%SYS%')
-    algSeq += muonSequenceTight
+    # TODO: MCP should restore this when the recommendations for Tight WP exist in R23
+    # muonSequenceTight = makeMuonAnalysisSequence( dataType, deepCopyOutput = False, shallowViewOutput = False,
+    #                                               workingPoint = 'Tight.Loose_VarRad', postfix = 'tight',
+    #                                               enableCutflow=True, enableKinematicHistograms=True, ptSelectionOutput = True )
+    # muonSequenceTight.removeStage ("calibration")
+    # # FIX ME: the current version of the `MuonSelectionTool` doesn't work
+    # # on the current version of PHYSLITE, and needs a new PHYSLITE production
+    # # campaign
+    # if noPhysliteBroken :
+    #     muonSequenceTight.__delattr__ ('MuonSelectionAlg_tight')
+    # muonSequenceTight.configure( inputName = 'AnaMuonsMedium_%SYS%',
+    #                              outputName = 'AnaMuons_%SYS%')
+    # algSeq += muonSequenceTight
+
     vars += [ 'OutMuons_NOSYS.eta -> mu_eta',
               'OutMuons_NOSYS.phi -> mu_phi',
               'OutMuons_%SYS%.pt  -> mu_pt_%SYS%',
               'OutMuons_NOSYS.charge -> mu_charge',
-              'OutMuons_%SYS%.baselineSelection_medium -> mu_select_medium_%SYS%',
-              'OutMuons_%SYS%.baselineSelection_tight  -> mu_select_tight_%SYS%', ]
+              'OutMuons_%SYS%.baselineSelection_medium -> mu_select_medium_%SYS%', ]
+              #'OutMuons_%SYS%.baselineSelection_tight  -> mu_select_tight_%SYS%', ]
     if dataType != 'data':
-        vars += [ 'OutMuons_%SYS%.muon_effSF_medium_%SYS% -> mu_effSF_medium_%SYS%',
-                  'OutMuons_%SYS%.muon_effSF_tight_%SYS% -> mu_effSF_tight_%SYS%', ]
-
+        vars += [ 'OutMuons_%SYS%.muon_effSF_medium_%SYS% -> mu_effSF_medium_%SYS%', ]
+                  #'OutMuons_%SYS%.muon_effSF_tight_%SYS% -> mu_effSF_tight_%SYS%', ]
 
     # Include, and then set up the electron analysis sequence:
     from EgammaAnalysisAlgorithms.ElectronAnalysisSequence import \
@@ -608,10 +609,11 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     configSeq.setOptionValue ('.quality', 'Medium')
     configSeq.setOptionValue ('.isolation', 'Loose_VarRad')
     configSeq.setOptionValue ('.isRun3Geo', run3Muons)
-    configSeq += makeConfig ('Muons.Selection', 'AnaMuons.tight')
-    configSeq.setOptionValue ('.quality', 'Tight')
-    configSeq.setOptionValue ('.isolation', 'Loose_VarRad')
-    configSeq.setOptionValue ('.isRun3Geo', run3Muons)
+    # TODO: MCP should restore this when the recommendations for Tight WP exist in R23
+    # configSeq += makeConfig ('Muons.Selection', 'AnaMuons.tight')
+    # configSeq.setOptionValue ('.quality', 'Tight')
+    # configSeq.setOptionValue ('.isolation', 'Loose_VarRad')
+    # configSeq.setOptionValue ('.isRun3Geo', run3Muons)
 
 
     # Include, and then set up the tau analysis algorithm sequence:
@@ -679,14 +681,18 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     # For an actual analysis that would just be `AnaMuons.medium`, but
     # since `tight` is a strict subset of `medium` it doesn't matter
     # if we do an "or" of the two.
-    configSeq.setOptionValue ('.muons', 'AnaMuons.medium||tight')
+    # TODO: MCP should restore this when the recommendations for Tight WP exist in R23
+    # configSeq.setOptionValue ('.muons', 'AnaMuons.medium||tight')
+    configSeq.setOptionValue ('.muons', 'AnaMuons.medium')
 
 
     # Include, and then set up the overlap analysis algorithm config:
     configSeq += makeConfig( 'OverlapRemoval', None )
     configSeq.setOptionValue ('.electrons',   'AnaElectrons.loose')
     configSeq.setOptionValue ('.photons',     'AnaPhotons.tight')
-    configSeq.setOptionValue ('.muons',       'AnaMuons.medium||tight')
+    # TODO: MCP should restore this when the recommendations for Tight WP exist in R23
+    # configSeq.setOptionValue ('.muons',       'AnaMuons.medium||tight')
+    configSeq.setOptionValue ('.muons',       'AnaMuons.medium')
     configSeq.setOptionValue ('.jets',        'AnaJets')
     configSeq.setOptionValue ('.taus',        'AnaTauJets.tight')
     configSeq.setOptionValue ('.inputLabel',  'preselectOR')
