@@ -57,29 +57,14 @@ namespace Overlay
       throw std::runtime_error("mergeCollections<SCT_RDORawData>() called by a wrong parent algorithm? Must be SCTOverlay.");
     }
 
-    // ----------------------------------------------------------------
-    // Useful reading:
-    //
-    // Real data are handled like this:
-    //
-    // https://svnweb.cern.ch/trac/atlasoff/browser/InnerDetector/InDetEventCnv/SCT_RawDataByteStreamCnv/trunk/src/SCT_RodDecoder.cxx?rev=332542
-    //
-    // Note that SCT3 is hardcoded (no chance to get SCT1 from real data).
-    // The SCT3 format is also the default in digitization:
-    //
-    // https://svnweb.cern.ch/trac/atlasoff/browser/InnerDetector/InDetDigitization/SCT_Digitization/trunk/src/SCT_Digitization.cxx?rev=355953
-
-    // So we'll just go with SCT3.
-    //
-    // The client code that consumes SCT RDOs:
-    //
-    // http://alxr.usatlas.bnl.gov/lxr/source/atlas/InnerDetector/InDetRecTools/SiClusterizationTool/src/SCT_ClusteringTool.cxx
-
     if (bkgCollection->identify() != signalCollection->identify()) {
       throw std::runtime_error("mergeCollections<SCT_RDO_Collection>(): collection Id mismatch");
     }
 
-    const Identifier idColl = parent->get_sct_id()->wafer_id(signalCollection->identifyHash());
+    outputCollection->reserve(
+        std::max(bkgCollection->size(), signalCollection->size()));
+    const Identifier idColl =
+        parent->get_sct_id()->wafer_id(signalCollection->identifyHash());
 
     // Strip hit timing information for Next, Current, Previous and Any BCs
     // Prepare one more strip to create the last one. The additional strip has no hits.
@@ -97,6 +82,7 @@ namespace Overlay
       }
       // Loop over all RDOs in the wafer
       for (; rdo!=rdoEnd; ++rdo) {
+        // Here  we'll just go with SCT3.
         const SCT3_RawData* rdo3 = dynamic_cast<const SCT3_RawData*>(*rdo);
         if (!rdo3) {
           std::ostringstream os;
