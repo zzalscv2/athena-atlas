@@ -21,7 +21,7 @@ if "__main__" == __name__:
         data = json.load(f)
         for event in data:
             print('Processing', event)
-            acts = data[event]['MultiTrajectories']['ConvertedMultiTrajectory']
+            acts = data[event]['TrackContainers']['ConvertedVectorTrackContainer']
             trk = data[event]['Tracks']['CombinedITkTracks']
             if (acts != trk):
                 # We might need to make this comparison more sophisticated

@@ -38,7 +38,6 @@ StatusCode DumpEventDataToJsonAlg::initialize() {
   ATH_CHECK(m_trackCollectionKeys.initialize(!m_trackCollectionKeys.empty()));
 
   // ACTS
-  ATH_CHECK(m_multiTrajectoryKeys.initialize());
   ATH_CHECK(m_vectorTrackContainerKeys.initialize());
   ATH_CHECK(m_trackStatesKeys.initialize());
   ATH_CHECK(m_jacobiansKeys.initialize());
@@ -124,7 +123,6 @@ StatusCode DumpEventDataToJsonAlg::execute() {
   ATH_CHECK(getAndFillArrayOfContainers(j, m_trackCollectionKeys, "Tracks"));
 
   // ACTS
-  auto mtHandles = m_multiTrajectoryKeys.makeHandles();
   auto vtcHandles = m_vectorTrackContainerKeys.makeHandles();
   auto tsHandles = m_trackStatesKeys.makeHandles();
   auto jHandles = m_jacobiansKeys.makeHandles();
@@ -132,9 +130,8 @@ StatusCode DumpEventDataToJsonAlg::execute() {
   auto pHandles = m_parametersKeys.makeHandles();
 
   unsigned int i = 0;
-  for (; i < mtHandles.size(); ++i) {
-    SG::ReadHandle<ActsTrk::ConstMultiTrajectory> handle = mtHandles[i];
-    ATH_MSG_VERBOSE("Trying to load " << handle.key() << " with " << handle->size() << " trajectories");
+  for ( ; i < vtcHandles.size(); ++i) {
+    SG::ReadHandle<Acts::ConstVectorTrackContainer> vtcHandle = vtcHandles[i];
     SG::ReadHandle<xAOD::TrackStateContainer> tsHandle = tsHandles[i];
     SG::ReadHandle<xAOD::TrackJacobianContainer> jHandle = jHandles[i];
     SG::ReadHandle<xAOD::TrackMeasurementContainer> mHandle = mHandles[i];
@@ -145,17 +142,17 @@ StatusCode DumpEventDataToJsonAlg::execute() {
     ATH_MSG_VERBOSE("TrackParametersContainer has "<< pHandle->size() << " elements");
 
     
-    SG::ReadHandle<Acts::ConstVectorTrackContainer> vtcHandle = vtcHandles[i];
     ATH_MSG_VERBOSE("Trying to load " << vtcHandle.key() << " with " << vtcHandle->size_impl() << " tracks");
 
-    const ActsTrk::ConstMultiTrajectory &multiTraj = *handle;
+    auto multiTraj = std::make_unique<ActsTrk::ConstMultiTrajectory>(&(*tsHandle), &(*pHandle), &(*jHandle), &(*mHandle));
+
     Acts::TrackContainer<Acts::ConstVectorTrackContainer,
                          ActsTrk::ConstMultiTrajectory, Acts::detail::ConstRefHolder>
-        tc{*vtcHandle, multiTraj};
-    ATH_MSG_VERBOSE("Found " << tc.size() << " tracks in " << handle.key());
+        tc{*vtcHandle, *multiTraj};
+    ATH_MSG_VERBOSE("Found " << tc.size() << " tracks in " << vtcHandle.key());
     for (auto track : tc) {
       nlohmann::json tmp = getData(track);
-      j["MultiTrajectories"][handle.key()].push_back(tmp);
+      j["TrackContainers"][vtcHandle.key()].push_back(tmp);
     }
   }
 
