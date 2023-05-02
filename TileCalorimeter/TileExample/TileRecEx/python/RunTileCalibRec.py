@@ -44,7 +44,6 @@ def getArgumentParser(flags):
     import argparse
     parser= argparse.ArgumentParser(parents=parserParents, add_help=False, fromfile_prefix_chars='@', epilog=epiLog, formatter_class=argparse.RawTextHelpFormatter)
 
-    parser.add_argument('-i', '--interactive', action='store_true', help='Interactive mode')
     parser.add_argument('--preExec', help='Code to execute before locking configs')
     parser.add_argument('--postExec', help='Code to execute after setup')
     parser.add_argument('--printDetailedConfig', action='store_true', help='Print detailed Athena configuration')
@@ -200,7 +199,7 @@ if __name__=='__main__':
     # Set up the DB global conditions tag
     if flags.Input.Format is Format.BS:
         if args.run3:
-            condDbTag = 'CONDBR2-BLKPA-RUN2-09' if args.upd4 else 'CONDBR2-ES1PA-2022-01'
+            condDbTag = 'CONDBR2-BLKPA-2023-01' if args.upd4 else 'CONDBR2-ES1PA-2023-01'
             detDescrVersion = 'ATLAS-R3S-2021-03-01-00'
         elif args.run2:
             condDbTag = 'CONDBR2-BLKPA-2018-16' if args.upd4 else 'CONDBR2-ES1PA-2018-05'
@@ -243,9 +242,6 @@ if __name__=='__main__':
     if args.preExec:
         log.info('Executing preExec: %s', args.preExec)
         exec(args.preExec)
-
-    if args.interactive:
-        os.environ['PYTHONINSPECT'] = '1'
 
     flags.lock()
 
@@ -294,7 +290,7 @@ if __name__=='__main__':
         from TileRecUtils.TileRawChannelMakerConfig import TileRawChannelMakerCfg
         cfg.merge( TileRawChannelMakerCfg(flags) )
         rawChMaker = cfg.getEventAlgo('TileRChMaker')
-        if args.threads > 1:
+        if args.threads and (args.threads > 1):
             rawChMaker.Cardinality = args.threads
         for builderTool in rawChMaker.TileRawChannelBuilder:
             builderTool.UseDSPCorrection = not biGainRun
@@ -440,6 +436,5 @@ if __name__=='__main__':
 
     cfg.printConfig(withDetails=args.printDetailedConfig)
 
-    if not args.interactive:
-        sc = cfg.run()
-        sys.exit(0 if sc.isSuccess() else 1)
+    sc = cfg.run()
+    sys.exit(0 if sc.isSuccess() else 1)

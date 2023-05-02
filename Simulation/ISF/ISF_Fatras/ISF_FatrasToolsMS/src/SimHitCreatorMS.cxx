@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SimHitCreatorMS.h"
@@ -363,7 +363,7 @@ bool iFatras::SimHitCreatorMS::createHit(const ISF::ISFParticle& isp,
        }
      }
      // local position from the mdt's 
-     const Amg::Vector3D  localPos = m_muonMgr->getMdtReadoutElement(id)->globalToLocalCoords(parm->position(),id);
+     const Amg::Vector3D  localPos = m_muonMgr->getMdtReadoutElement(id)->globalToLocalTransf(id) * parm->position();
      // drift radius
      double residual = m_measTool->residual(lay,parm,id);     
      if (std::abs(residual)<15.075) {
@@ -386,7 +386,7 @@ bool iFatras::SimHitCreatorMS::createHit(const ISF::ISFParticle& isp,
      }
   } else if (m_idHelperSvc->isRpc(id)) { 
     // local position from the rpc's
-    const Amg::Vector3D localPos = m_muonMgr->getRpcReadoutElement(id)->globalToLocalCoords(parm->position(),id);
+    const Amg::Vector3D localPos = m_muonMgr->getRpcReadoutElement(id)->globalToLocalTransf(id)*parm->position();
     int simId = m_rpcHitIdHelper->BuildRpcHitId(m_idHelperSvc->rpcIdHelper().stationNameString(m_idHelperSvc->rpcIdHelper().stationName(id)),
 						m_idHelperSvc->rpcIdHelper().stationPhi(id), m_idHelperSvc->rpcIdHelper().stationEta(id),
 						m_idHelperSvc->rpcIdHelper().doubletZ(id),   m_idHelperSvc->rpcIdHelper().doubletR(id),
@@ -406,7 +406,7 @@ bool iFatras::SimHitCreatorMS::createHit(const ISF::ISFParticle& isp,
     
     // take eta hits only
     // local position
-    const Amg::Vector3D localPos = Amg::Translation3D(-1.4, 0., 0.)*m_muonMgr->getTgcReadoutElement(id)->globalToLocalCoords(parm->position(),id);
+    const Amg::Vector3D localPos = Amg::Translation3D(-1.4, 0., 0.)*m_muonMgr->getTgcReadoutElement(id)->globalToLocalTransf(id)*parm->position();
     // local direction
     Amg::Vector3D localDir = m_muonMgr->getTgcReadoutElement(id)->globalToLocalTransf(id).rotation()*parm->momentum().normalized();
     
@@ -439,8 +439,9 @@ bool iFatras::SimHitCreatorMS::createHit(const ISF::ISFParticle& isp,
     
     Amg::Vector3D startPos(parm->position()-0.5*hitlength*dir);
     Amg::Vector3D endPos(parm->position()+0.5*hitlength*dir);
-    Amg::Vector3D hitStart = m_muonMgr->getCscReadoutElement(id)->globalToLocalCoords(startPos,id); 
-    Amg::Vector3D hitEnd   = m_muonMgr->getCscReadoutElement(id)->globalToLocalCoords(endPos,id); 
+    const Amg::Transform3D globalToLocTransf{m_muonMgr->getCscReadoutElement(id)->globalToLocalTransf(id)}; 
+    Amg::Vector3D hitStart = globalToLocTransf*startPos; 
+    Amg::Vector3D hitEnd   = globalToLocTransf*endPos; 
     
     // the lundcode (from CSCSensitiveDetector)
     int lundcode=0;

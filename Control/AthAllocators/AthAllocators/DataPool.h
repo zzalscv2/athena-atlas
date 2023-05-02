@@ -9,14 +9,19 @@
  *         allocation small object. This is typically used
  *         by container such as DataVector and DataList
  *
- * Traditionally, these objects were declared as static, even after that
- * was no longer needed due to the rewrite which based them on the Allocator
- * classes.  However, declaring @c DataPool instances as static will
+ * A DataPool instance, acts as handle to the pool for the declared type.
+ * In the typical DataVector usage each store has a collection of pools
+ * distinguished by type. So for the same active store the
+ * same pool is used.
+ *
+ * Declaring @c DataPool instances as static will
  * cause thread-safety problems, and thus should no longer be done.
  *
- * Be aware that a DataPool holds a lock on the underlying allocator.
- * Therefore, if you try to create two pool instances referencing
- * the same allocator (i.e, same type and same thread), you'll get a deadlock.
+ * Also be aware that a creating a DataPool object acquires a lock on the
+ * underlying thread-specific allocator.  If you're just using one at a time,
+ * there shouldn't be a problem. There is a  potential for deadlock if you have
+ * a block of code that creates two DataPool objects, and another code block
+ * that creates DataPool objects for the same types but in the opposite order.
  *
  * You can optionally provide (as a template argument) a function to be called
  * on an object when it is returned to the pool.  This can be used to reset
@@ -43,7 +48,7 @@ class DataPool
 private:
   typedef SG::ArenaPoolAllocator alloc_t;
   typedef SG::ArenaCachingHandle<VALUE, alloc_t> handle_t;
-  
+
 public:
   typedef typename handle_t::pointer pointer;
   typedef size_t size_type;
@@ -108,10 +113,10 @@ public:
 
   DataPool(const EventContext& ctx,
            size_type n = 0);
- 
+
   DataPool(SG::Arena* arena,
            size_type n = 0);
- 
+
   ///////////////////////////////////////////////////////
 
   /// release all elements in the pool.
@@ -119,8 +124,32 @@ public:
 
   /// free all memory in the pool.
   void erase();
-  
+
+  /**
+   * @brief Set the desired capacity
+   * @param size The desired capacity
+   *
+   * If @c size is greater than the total number of elements currently
+   * cached (allocated), then space for more will be allocated.
+   * This will be done in blocks. Therefore the allocator may allocate
+   * more elements than is requested.
+   *
+   * If @c size is smaller than the total number of elements currently
+   * cached, as many blocks as possible will be released back to the system.
+   */
   void reserve(unsigned int size);
+
+  /**
+   * @brief Prepare to add cached elements
+   * @param size Additional elements to add
+   *
+   *  If (current capacity - allocated elements)
+   *  is less than the requested elements
+   *  additional space will be allocated by
+   *  calling reserve (allocated + size).
+   *  Otherwise nothing will be done
+   */
+  void prepareToAdd(unsigned int size);
 
   /// return capacity of pool OK
   unsigned int capacity();
@@ -133,29 +162,15 @@ public:
   const_iterator begin() const;
 
   /// the end() method will allow looping over only valid elements
-  /// and not over ALL elements of the pool 
+  /// and not over ALL elements of the pool
   iterator end();
   const_iterator end() const;
- 
+
   /// obtain the next available element in pool by pointer
   /// pool is resized if its limit has been reached
-  /// This may be faster than calling the constructors with 
-  /// the following two methods. But one must be sure to 
-  /// completely reset each object since it has values set in the 
-  /// previous event.
-  pointer nextElementPtr(); 
-
-  /// obtain the next available element in pool by pointer
-  /// return as void* to minimize misuse, client usage is:
-  /// MyElement* m = new(pool->mem) MyElement(...); // pool is ptr
-  /// DANGEROUS --- do we need this???
-  void* mem();
-
-  /// can also say: 
-  /// MyElement* m = new ((*pool)()) MyElement(...); // pool = pointer
-  /// MyElement* m = new (pool()) MyElement(...); // pool = value
-  /// DANGEROUS --- do we need this???
-  void *operator ()();
+  /// One must be sure to completely reset each object
+  /// since it has values set in the previous event.
+  pointer nextElementPtr();
 
   /// typename of pool
   static const std::string& typeName();

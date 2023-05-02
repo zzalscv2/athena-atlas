@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -56,15 +56,15 @@ def HIJetRecCfg(flags):
     #START UE SUBTRACTION SEQUENCE
     associationName = "%s_DR8Assoc" % (clustersKey)
     #Modifiers for seed0
-    stdJetModifiers.update(
-        HIJetAssoc = JetModifier("HIJetDRAssociationTool","HIJetDRAssociation", ContainerKey=clustersKey, DeltaR=0.8, AssociationName=associationName),
-        HIJetMaxOverMean = JetModifier("HIJetMaxOverMeanTool","HIJetMaxOverMean", JetContainer = jetname2),
-        HIJetDiscrim = JetModifier("HIJetDiscriminatorTool","HIJetDiscriminator", MaxOverMeanCut = 4, MinimumETMaxCut=3000)
-    )
     # Copy unsubtracted jets: seed0
     jetDef_seed0 = jetdef2.clone()
     jetDef_seed0.suffix = jetdef2.suffix.replace("Unsubtracted", "seed0")
     jetname_seed0 = jetDef_seed0.fullname()
+    stdJetModifiers.update(
+        HIJetAssoc = JetModifier("HIJetDRAssociationTool","HIJetDRAssociation", ContainerKey=clustersKey, DeltaR=0.8, AssociationName=associationName),
+        HIJetMaxOverMean = JetModifier("HIJetMaxOverMeanTool","HIJetMaxOverMean", JetContainer = jetname_seed0),
+        HIJetDiscrim = JetModifier("HIJetDiscriminatorTool","HIJetDiscriminator", MaxOverMeanCut = 4, MinimumETMaxCut=3000)
+    )
     jetDef_seed0.modifiers=["HIJetAssoc", "HIJetMaxOverMean", "HIJetDiscrim", "Filter:5000"]
     jetDef_seed0 = solveDependencies(jetDef_seed0)
     #adding seed0 to CA

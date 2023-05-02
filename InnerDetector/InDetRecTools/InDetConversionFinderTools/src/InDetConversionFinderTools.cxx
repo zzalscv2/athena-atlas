@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -16,11 +16,6 @@
 #include "TrkMeasurementBase/MeasurementBase.h"
 #include "AthLinks/ElementLink.h"
 #include "TrkTrack/LinkToTrack.h"
-
-#include "xAODTracking/TrackParticle.h"
-#include "xAODTracking/Vertex.h"
-#include "xAODTracking/TrackParticleContainer.h"
-#include "xAODTracking/VertexContainer.h"
 
 #include <vector>
 #include <utility> 
@@ -100,9 +95,6 @@ InDetConversionFinderTools::InDetConversionFinderTools(const std::string& t,
       return StatusCode::FAILURE;
     }
     ATH_MSG_INFO("Retrieved tool " << m_trkSelector);
-
-    ATH_CHECK(m_TrkParticleCollectionKey.initialize(
-      !m_TrkParticleCollectionKey.key().empty()));
 
     ATH_MSG_INFO("Initialization successful");
     return StatusCode::SUCCESS;

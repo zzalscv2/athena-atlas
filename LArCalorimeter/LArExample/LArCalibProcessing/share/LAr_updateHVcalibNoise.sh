@@ -94,11 +94,11 @@ fi
 cat > getGlobalTag.py << _EOF4_
 import sys
 from PyCool import cool
-sys.path.append('/afs/cern.ch/user/a/atlcond/utils/python/')
-from AtlCoolBKLib import resolveAlias
+sys.path.append('/afs/cern.ch/user/a/atlcond/utils22/')
+from CondUtilsLib.AtlCoolBKLib import resolveAlias
 resolver=resolveAlias()
 currentGlobal=resolver.getCurrent().replace("*","ST")
-print currentGlobal
+print(currentGlobal)
 _EOF4_
 
 globalTag=`python getGlobalTag.py | awk '{print($1)}'`
@@ -187,11 +187,11 @@ echo " "
 cat > getGlobalTagES.py << _EOF5_
 import sys
 from PyCool import cool
-sys.path.append('/afs/cern.ch/user/a/atlcond/utils/python/')
-from AtlCoolBKLib import resolveAlias
+sys.path.append('/afs/cern.ch/user/a/atlcond/utils22/')
+from CondUtilsLib.AtlCoolBKLib import resolveAlias
 resolver=resolveAlias()
 currentGlobal=resolver.getCurrentES().replace("*","ST")
-print currentGlobal
+print(currentGlobal)
 _EOF5_
 
 globalTagES=`python getGlobalTagES.py | awk '{print($1)}'`
@@ -258,7 +258,7 @@ from CoolConvUtilities import AtlCoolTool
 toolNew = AtlCoolTool.AtlCoolTool("sqlite://;schema=larnoisesqlite.db;dbname=CONDBR2")
 toolNew.usetag("$fulltag")
 a=toolNew.more('/LAR/NoiseOfl/CellNoise')
-f = file('dumpDB.txt','w')
+f = open('dumpDB.txt','w')
 f.write(str(a))
 f.close()
 exit()

@@ -23,7 +23,7 @@ CscRawDataCnv_p3::transToPers(const CscRawData* trans, CscRawData_p3* pers, MsgS
       Identifier id;
       IdentifierHash geoHash;
       if (!m_idHelp->cscIdHelper().get_id(trans->hashId(), id, &context)) {
-          if (!m_idHelp->cscIdHelper().get_geo_channel_hash(id, geoHash)) pers->m_hashId  = geoHash;
+          if (!m_idHelp->cscIdHelper().get_channel_hash(id, geoHash)) pers->m_hashId  = geoHash;
       }
     } else {
       throw std::runtime_error(Form("File: %s, Line: %d\nCscRawDataCnv_p3::transToPers() - No MuonIdHelperSvc present (needed for channel hash conversion)", __FILE__, __LINE__));
@@ -38,17 +38,9 @@ CscRawDataCnv_p3::persToTrans(const CscRawData_p3* pers, CscRawData* trans, MsgS
                         pers->m_id,
                         pers->m_rpuID,
                         pers->m_width);
-   if (m_idHelp) {
-     // translate the persistent p3 (geometrical) hash into a positional hash (as expected by the transient data format)
-     IdentifierHash geoHash = pers->m_hashId;
-     IdentifierHash hash;
-     IdContext context = m_idHelp->cscIdHelper().channel_context();
-     if (!m_idHelp->cscIdHelper().get_hash_fromGeoHash(geoHash, hash, &context)) {
-      trans->setHashID(hash);
-    }
-   } else {
-      throw std::runtime_error(Form("File: %s, Line: %d\nCscRawDataCnv_p3::persToTrans() - No MuonIdHelperSvc present (needed for channel hash conversion)", __FILE__, __LINE__));
-   }
+   // translate the persistent p3 (geometrical) hash into a positional hash (as expected by the transient data format)
+   trans->setHashID(pers->m_hashId);
+    
    if (pers->m_isTimeComputed)
      trans->setTime (pers->m_time);
 }

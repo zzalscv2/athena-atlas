@@ -1,39 +1,26 @@
 /*
   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 */
-/*
- */
 
 #ifndef egammaValidation_EgammaMonitoring_H
 #define egammaValidation_EgammaMonitoring_H
 
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODTracking/TrackParticle.h"
-#include "xAODTracking/VertexContainer.h"
 
-#include "xAODEgamma/Egamma.h"
-#include "xAODEgamma/EgammaxAODHelpers.h"
-#include "xAODEgamma/Electron.h"
 #include "xAODEgamma/ElectronContainer.h"
-#include "xAODEgamma/Photon.h"
-#include "xAODEgamma/PhotonAuxContainer.h"
 #include "xAODEgamma/PhotonContainer.h"
-
-#include "xAODTruth/TruthParticle.h"
 #include "xAODTruth/TruthParticleContainer.h"
-#include "xAODTruth/TruthVertex.h"
-#include "xAODTruth/xAODTruthHelpers.h"
-#include "MCTruthClassifier/IMCTruthClassifier.h"
+#include "xAODTracking/TrackParticleContainer.h"
 
 #include "AsgTools/ToolHandle.h"
 #include "AthenaBaseComps/AthAlgorithm.h"
-#include "EgammaAnalysisInterfaces/IAsgElectronLikelihoodTool.h"
-#include "EgammaAnalysisInterfaces/IAsgPhotonIsEMSelector.h"
-#include "GaudiKernel/ITHistSvc.h"
-#include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/ReadHandleKey.h"
 
-#include "PATCore/AcceptData.h"
+#include "EgammaAnalysisInterfaces/IAsgElectronLikelihoodTool.h"
+#include "EgammaAnalysisInterfaces/IAsgPhotonIsEMSelector.h"
+#include "IsolationSelection/IIsolationSelectionTool.h"
+#include "MCTruthClassifier/IMCTruthClassifier.h"
 
 #include "ClusterHistograms.h"
 #include "EfficiencyPlot.h"
@@ -45,16 +32,13 @@
 #include "TruthElectronHistograms.h"
 #include "TruthPhotonHistograms.h"
 #include "WidthPlot.h"
-
 #include "IsolationHistograms.h"
-#include "IsolationSelection/IIsolationSelectionTool.h"
 
-#include "TFile.h"
-#include "TH1.h"
-
-#include <cmath>
+#include <memory>
 #include <string>
 #include <vector>
+
+class ITHistSvc;
 
 class EgammaMonitoring : public AthAlgorithm
 {
@@ -168,7 +152,6 @@ public:
 
   // Histos
   // General Info
-  TH1D* evtNmb = nullptr; //!
 
   EgammaMonitoring(const std::string& name, ISvcLocator* pSvcLocator);
   ~EgammaMonitoring(){};

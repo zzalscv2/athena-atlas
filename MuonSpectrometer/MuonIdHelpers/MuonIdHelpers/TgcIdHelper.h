@@ -141,8 +141,22 @@ private:
     bool isStNameInTech(const std::string& stationName) const override;
 
     int init_id_to_hashes();
-    unsigned int m_module_hashes[60][20][48]{};
+    
+    ///  T1F-> 41 ; T1E->42 , T2F -> 43, T2E->44, T3F->45, T3E->46, T4E->48
+    static constexpr unsigned int s_stDim = 8;
+    /// Except T2E all stations have 4 associated eta stations
+    static constexpr unsigned int s_etaDim = 10;
+    /// 48 phi stations
+    static constexpr unsigned int s_phiDim = 48;
+  
+    static constexpr unsigned int s_modHashDim = s_stDim * s_etaDim * s_phiDim;
 
+    unsigned int moduleHashIdx(const Identifier& id) const;
+    /// Minimal station index found
+    unsigned int m_stationShift{std::numeric_limits<unsigned int>::max()};
+   
+    std::array<unsigned int, s_modHashDim> m_module_hashes{};    
+    
     // compact id indices
     size_type m_GASGAP_INDEX{0};
     size_type m_ISSTRIP_INDEX{0};

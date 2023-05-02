@@ -42,12 +42,12 @@ def defineMenu():
         'L1_2EM20VH',
         # new calo
         #'L1_2eEM7', 'L1_2eEM9', 'L1_2eEM15',
-        'L1_2eEM18L',
+        'L1_2eEM12L', 'L1_2eEM18L',
 
         
         # combined mu - jet
         'L1_MU3V_J12','L1_MU3V_J15', 
-        'L1_MU3V_jJ30', 'L1_MU3V_jJ40',
+        'L1_MU3V_jJ20', 'L1_MU3V_jJ30', 'L1_MU3V_jJ40',
 
         'L1_TAU8', 'L1_TAU60', 'L1_TAU12IM', 'L1_TAU20IM',
         'L1_TAU8_EMPTY',
@@ -71,6 +71,7 @@ def defineMenu():
         'L1_jJ500', 'L1_jJ500_LAR',
         'L1_jJ20', 'L1_jJ30',
         'L1_jJ40', 'L1_jJ50', 'L1_jJ55', 'L1_jJ60', 'L1_jJ80', 'L1_jJ90',
+        'L1_jJ15p31ETA49', 'L1_jJ20p31ETA49',
         'L1_jJ40p31ETA49', 'L1_jJ50p31ETA49', 'L1_jJ60p31ETA49', 'L1_jJ90p31ETA49', 'L1_jJ125p31ETA49',
 
 

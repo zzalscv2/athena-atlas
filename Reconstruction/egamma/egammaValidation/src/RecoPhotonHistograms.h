@@ -5,7 +5,7 @@
 #ifndef EGAMMAVALIDATION_RECOPHOTONHISTOGRAMS_H
 #define EGAMMAVALIDATION_RECOPHOTONHISTOGRAMS_H
 
-#include "xAODEgamma/Photon.h" //typedef
+#include "xAODEgamma/Photon.h"
 #include "ParticleHistograms.h"
 class StatusCode;
 

@@ -203,7 +203,6 @@ def V0ToolCfg(flags, augmentationTools=None, tool_name_prefix="FTAG1", container
     
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import BPHY_V0ToolCfg, BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg, JpsiFinderCfg
-    from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
 
     V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(flags, tool_name_prefix))
     acc.addPublicTool(V0Tools)
@@ -284,13 +283,11 @@ def V0ToolCfg(flags, augmentationTools=None, tool_name_prefix="FTAG1", container
             LambdaContainerName    = LambdaContainerName,
             LambdabarContainerName = LambdabarContainerName,
             CheckVertexContainers  = [container_name_prefix+'JpsiCandidates'])
-    JpsiV0VertexFit = CompFactory.Trk.TrkVKalVrtFitter(
-            name                 = "JpsiV0VertexFit",
-            Extrapolator         = acc.popToolsAndMerge(InDetExtrapolatorCfg(flags)),
-            FirstMeasuredPoint   = False,
-            CascadeCnstPrecision = 1e-6,
-            MakeExtendedVertex   = True)
+
+    from TrkConfig.TrkVKalVrtFitterConfig import JpsiV0VertexFitCfg
+    JpsiV0VertexFit = acc.popToolsAndMerge(JpsiV0VertexFitCfg(flags))
     acc.addPublicTool(JpsiV0VertexFit)
+
     JpsiKshort  = CompFactory.DerivationFramework.JpsiPlusV0Cascade(
             name                    = tool_name_prefix+"JpsiKshort",
             V0Tools                 = V0Tools,

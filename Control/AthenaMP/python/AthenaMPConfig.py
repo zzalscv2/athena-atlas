@@ -40,6 +40,8 @@ def athenaMPRunArgsToFlags(runArgs, flags):
     if hasattr(runArgs, "parallelCompression"):
         flags.MP.UseParallelCompression = runArgs.parallelCompression
 
+    if hasattr(runArgs, "eventService"):
+        flags.MP.Strategy = "EventService"
 
 def AthenaMPCfg(flags):
 
@@ -154,11 +156,13 @@ def AthenaMPCfg(flags):
         mpevtloop.Tools += [ CompFactory.EvtRangeScatterer(ProcessorChannel = channelScatterer2Processor,
                                                            EventRangeChannel = event_range_channel,
                                                            DoCaching=flags.MP.EvtRangeScattererCaching) ]
-        mpevtloop.Tools += [ CompFactory.vtRangeProcessor(IsPileup=mpevtloop.IsPileup,
-                                                          Channel2Scatterer = channelScatterer2Processor,
-                                                          Channel2EvtSel = channelProcessor2EvtSel,
-                                                          Debug=debug_worker) ]
+        mpevtloop.Tools += [ CompFactory.EvtRangeProcessor(IsPileup=mpevtloop.IsPileup,
+                                                           Channel2Scatterer = channelScatterer2Processor,
+                                                           Channel2EvtSel = channelProcessor2EvtSel,
+                                                           Debug=debug_worker) ]
 
+        from AthenaServices.OutputStreamSequencerSvcConfig import OutputStreamSequencerSvcCfg
+        result.merge(OutputStreamSequencerSvcCfg(flags,incidentName="NextEventRange"))
     else:
         msg.warning("Unknown strategy %s. No MP tools will be configured", flags.MP.Strategy)
 

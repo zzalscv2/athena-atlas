@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 # Configuration of InDetConversionFinderTools package
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -73,7 +73,6 @@ def BPHY_VertexPointEstimatorCfg(flags, name="BPHY_VertexPointEstimator", **kwar
     kwargs.setdefault("MinDeltaR", [-10000.,-10000.,-10000.])
     kwargs.setdefault("MaxDeltaR", [10000.,10000.,10000.])
     kwargs.setdefault("MaxPhi",    [10000., 10000., 10000.])
-    kwargs.setdefault("MaxChi2OfVtxEstimation", 2000.) #NOTE MaxChi2OfVtxEstimation differs from tracking default
 
     acc.setPrivateTools(CompFactory.InDet.VertexPointEstimator(name, **kwargs))
     return acc
@@ -84,7 +83,6 @@ def V0VertexPointEstimatorCfg(flags, name="InDetV0VertexPointEstimator", **kwarg
     kwargs.setdefault("MaxTrkXYValue",     [ 400.,  400.,  400.])
     kwargs.setdefault("MinArcLength",      [-800., -800., -800.])
     kwargs.setdefault("MaxArcLength",      [ 800.,  800.,  800.])
-    kwargs.setdefault("MaxChi2OfVtxEstimation", 2000.)
     return BPHY_VertexPointEstimatorCfg(flags, name, **kwargs)
 
 def InDetConversionFinderToolsCfg(flags, name="ConversionFinderTool", **kwargs):
@@ -118,7 +116,6 @@ def InDetConversionFinderToolsCfg(flags, name="ConversionFinderTool", **kwargs):
         kwargs.setdefault("VertexFitterTool", acc.popToolsAndMerge(
             SecVx_TrkVKalVrtFitterCfg(flags)))
 
-    kwargs.setdefault("TrackParticleCollection", flags.Egamma.Keys.Output.GSFTrackParticles)
     kwargs.setdefault("IsConversion", True)
 
     kwargs.setdefault("MaxDistVtxHit",

@@ -65,8 +65,8 @@ def TrigEgammaFastCaloHypoAlgCfg(flags, name, CaloClusters):
 def createTrigEgammaFastCaloHypoAlg_noringer(flags, name, sequenceOut):
   
   # make the Hypo
-  from TrigEgammaHypo.TrigEgammaHypoConf import TrigEgammaFastCaloHypoAlg
-  theFastCaloHypo = TrigEgammaFastCaloHypoAlg(name)
+  from AthenaConfiguration.ComponentFactory import CompFactory
+  theFastCaloHypo = CompFactory.TrigEgammaFastCaloHypoAlg(name)
   theFastCaloHypo.CaloClusters = sequenceOut
 
   # Just for electrons
@@ -360,10 +360,11 @@ def createTrigEgammaFastCaloElectronSelectors(flags, ConfigFilePath=None):
           })
     
     selectors = []    
-    from RingerSelectorTools.RingerSelectorToolsConf import Ringer__AsgRingerSelectorTool
+    #from RingerSelectorTools.RingerSelectorToolsConf import Ringer__AsgRingerSelectorTool
+    from AthenaConfiguration.ComponentFactory import CompFactory
 
     for pidname , name in SelectorNames.items():
-      SelectorTool=Ringer__AsgRingerSelectorTool(name)
+      SelectorTool=CompFactory.Ringer.AsgRingerSelectorTool(name)
       SelectorTool.ConfigFiles = [ (ConfigFilePath+'/'+path) for path in ToolConfigFile[pidname] ]
       selectors.append(SelectorTool)
     return selectors
@@ -392,10 +393,11 @@ def createTrigEgammaFastCaloPhotonSelectors(flags, ConfigFilePath=None):
           })
     
     selectors = []    
-    from RingerSelectorTools.RingerSelectorToolsConf import Ringer__AsgRingerSelectorTool
+    #from RingerSelectorTools.RingerSelectorToolsConf import Ringer__AsgRingerSelectorTool
+    from AthenaConfiguration.ComponentFactory import CompFactory
 
     for pidname , name in SelectorNames.items():
-      SelectorTool=Ringer__AsgRingerSelectorTool(name)
+      SelectorTool=CompFactory.Ringer.AsgRingerSelectorTool(name)
       SelectorTool.UseTansigOutput = True # FIXME: Should be removed in the next round
       SelectorTool.ConfigFiles = [ (ConfigFilePath+'/'+path) for path in ToolConfigFile[pidname] ]
       selectors.append(SelectorTool)

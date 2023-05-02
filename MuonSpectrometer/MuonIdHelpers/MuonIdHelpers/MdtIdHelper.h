@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // ******************************************************************************
@@ -165,8 +165,19 @@ public:
 private:
     bool isStNameInTech(const std::string& stationName) const override;
     int init_id_to_hashes();
-    unsigned int m_module_hashes[60][20][8]{};
-    unsigned int m_detectorElement_hashes[60][20][8][3]{};
+    
+    static constexpr unsigned s_stDim = 55;
+    static constexpr unsigned s_etaDim = 16;
+    static constexpr unsigned s_phiDim = 8;
+    static constexpr unsigned s_mlDim = 2;    
+    static constexpr unsigned int s_modHash = s_stDim * s_etaDim * s_phiDim;
+    static constexpr unsigned int s_detDim = s_modHash * s_mlDim;
+    
+    unsigned int moduleHashIdx(const Identifier& id) const;
+    unsigned int detEleHashIdx(const Identifier& id) const;
+
+    std::array<unsigned int, s_modHash> m_module_hashes{};
+    std::array<unsigned int, s_detDim>  m_detectorElement_hashes{};
 
     // compact id indices
     size_type m_TUBELAYER_INDEX{0};

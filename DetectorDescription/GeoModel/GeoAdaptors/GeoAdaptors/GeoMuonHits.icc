@@ -45,6 +45,7 @@
 #include "MuonSimEvent/MM_SimIdToOfflineId.h"
 #include "MuonReadoutGeometry/sTgcReadoutElement.h"
 #include "MuonReadoutGeometry/MMReadoutElement.h"
+#include "GeoPrimitives/GeoPrimitivesHelpers.h"
 
 
 inline GeoMDTHit::GeoMDTHit (const MDTSimHit & h) {
@@ -76,21 +77,17 @@ inline Amg::Vector3D GeoMDTHit::getGlobalPosition() const {
   
   
     const MuonGM::MdtReadoutElement* mdtdet = mgr()->getMdtReadoutElement(offid);
-    if (mdtdet == NULL)
-    {
+    if (!mdtdet) {
         const MdtIdHelper* mdtID = mgr()->mdtIdHelper();
         std::cerr<<"MDT readout element not found for Id = "
                  <<mdtID->show_to_string(offid)<<std::endl;
-        return Amg::Vector3D(0,0,0);
+        return Amg::Vector3D::Zero();
     }
 
     // -------- Testing Sim to Offline ID conversion ---------
-  
 
-    Amg::Vector3D simHitPosLoc(m_hit->localPosition().x(), m_hit->localPosition().y(), m_hit->localPosition().z());
-    Amg::Vector3D simHitPos = mdtdet->localToGlobalCoords(simHitPosLoc , offid );
-    
-    return simHitPos;
+    return mdtdet->localToGlobalTransf(offid) * m_hit->localPosition();    
+  
 }
 
 inline GeoRPCHit::GeoRPCHit (const RPCSimHit & h) {
@@ -119,21 +116,13 @@ inline Amg::Vector3D GeoRPCHit::getGlobalPosition() const {
         std::cerr<<" Cannot build a valid Identifier; skip "<<std::endl;
 
     const MuonGM::RpcReadoutElement* rpcdet = mgr()->getRpcReadoutElement(offid);
-    if (rpcdet != NULL)
-    {
-      Amg::Vector3D xU;
-      Amg::Vector3D localHit(m_hit->localPosition().x(),m_hit->localPosition().y(),m_hit->localPosition().z());
-        xU = rpcdet->localToGlobalCoords(localHit,offid);
-
-        return xU;
+    if (rpcdet) {
+        return rpcdet->localToGlobalTransf(offid) * m_hit->localPosition();
     }
-    else
-    {
-        const RpcIdHelper* rpcID = mgr()->rpcIdHelper();
-        std::cerr<<"RPC readout element not found for Id = "
-                 <<rpcID->show_to_string(offid)<<std::endl;
-        return Amg::Vector3D(0,0,0);
-    }
+    std::cerr<<"RPC readout element not found for Id = "
+                <<rpcID->show_to_string(offid)<<std::endl;
+    return Amg::Vector3D::Zero();
+    
 
 }
 
@@ -160,21 +149,12 @@ inline Amg::Vector3D GeoTGCHit::getGlobalPosition() const {
         std::cerr<<" Cannot build a valid Identifier; skip "<<std::endl;
 
     const MuonGM::TgcReadoutElement* tgcdet = mgr()->getTgcReadoutElement(offid);
-    if (tgcdet != NULL)
-    {
-        Amg::Vector3D xU;
-        Amg::Vector3D localHit(m_hit->localPosition().x(),m_hit->localPosition().y(),m_hit->localPosition().z());
-        xU = tgcdet->localToGlobalCoords(localHit,offid);
-
-        return xU;
-    }
-    else
-    {
-        const TgcIdHelper* tgcID = mgr()->tgcIdHelper();
-        std::cerr<<"TGC readout element not found for Id = "
-                 <<tgcID->show_to_string(offid)<<std::endl;
-        return Amg::Vector3D(0,0,0);
-    }
+    if (tgcdet) {
+        return tgcdet->localToGlobalTransf(offid) * m_hit->localPosition();
+    }   
+    std::cerr<<"TGC readout element not found for Id = "
+              <<tgcID->show_to_string(offid)<<std::endl;
+    return Amg::Vector3D::Zero();    
 }
 
 inline GeoCSCHit::GeoCSCHit (const CSCSimHit & h) {
@@ -204,20 +184,13 @@ inline Amg::Vector3D GeoCSCHit::getGlobalPosition() const {
   
   
     const MuonGM::CscReadoutElement* cscdet = mgr()->getCscReadoutElement(offid);
-    if (cscdet == NULL)
-    {
+    if (!cscdet) {
         const CscIdHelper* cscID = mgr()->cscIdHelper();
         std::cerr<<"CSC readout element not found for Id = "
                  <<cscID->show_to_string(offid)<<std::endl;
-        return Amg::Vector3D(0,0,0);
+        return Amg::Vector3D::Zero();
     }
-
-    Amg::Vector3D xU;
-    Amg::Vector3D localHit(m_hit->getHitStart().x(),m_hit->getHitStart().y(),m_hit->getHitStart().z());
-    xU = cscdet->localToGlobalCoords(localHit,offid);
-
-    return xU;
-  
+    return cscdet->localToGlobalTransf(offid) * m_hit->getHitStart();
 }
 
 inline GeoMMHit::GeoMMHit (const MMSimHit & h) {
@@ -236,17 +209,13 @@ inline Amg::Vector3D GeoMMHit::getGlobalPosition() const {
   
   
     const MuonGM::MMReadoutElement* mmdet = mgr()->getMMReadoutElement(offid);
-    if (mmdet == NULL)
-    {
+    if (!mmdet) {
         const MmIdHelper* mmID = mgr()->mmIdHelper();
         std::cerr<<"MM readout element not found for Id = "
                  <<mmID->show_to_string(offid)<<std::endl;
-        return Amg::Vector3D(0,0,0);
+        return Amg::Vector3D::Zero();
     }
-
-    Amg::Vector3D xU(m_hit->globalPosition().x(),m_hit->globalPosition().y(),m_hit->globalPosition().z());
-
-    return xU;
+    return m_hit->globalPosition();
   
 }
 inline Amg::Vector3D GeoMMHit::getTrkGlobalPosition() const {
@@ -261,18 +230,13 @@ inline Amg::Vector3D GeoMMHit::getTrkGlobalPosition() const {
   
   
     const MuonGM::MMReadoutElement* mmdet = mgr()->getMMReadoutElement(offid);
-    if (mmdet == NULL)
-    {
+    if (!mmdet) {
         const MmIdHelper* mmID = mgr()->mmIdHelper();
         std::cerr<<"MM readout element not found for Id = "
                  <<mmID->show_to_string(offid)<<std::endl;
-        return Amg::Vector3D(0,0,0);
+        return Amg::Vector3D::Zero();
     }
-    Amg::Vector3D trkLocP = getTrkLocalPosition();
-    const Amg::Vector3D pp = (mmdet->surface(offid)).Trk::Surface::localToGlobal(Amg::Vector2D(trkLocP.x(),trkLocP.y()));
-    Amg::Vector3D trkGloP = Amg::Vector3D(pp.x(),pp.y(),pp.z());
-    return trkGloP;
-
+    return mmdet->transform(offid)*getTrkLocalPosition();
 }
 inline Amg::Vector3D GeoMMHit::getTrkLocalPosition() const {
 
@@ -287,8 +251,7 @@ inline Amg::Vector3D GeoMMHit::getTrkLocalPosition() const {
   
   
     const MuonGM::MMReadoutElement* mmdet = mgr()->getMMReadoutElement(offid);
-    if (mmdet == NULL)
-    {
+    if (!mmdet) {
         const MmIdHelper* mmID = mgr()->mmIdHelper();
         std::string err = "MM readout element not found for Id = " + 
           mmID->show_to_string(offid);
@@ -296,11 +259,9 @@ inline Amg::Vector3D GeoMMHit::getTrkLocalPosition() const {
     }
 
     Amg::Transform3D gToL = mmdet->absTransform().inverse();
-    Amg::Vector3D hpos(m_hit->globalPosition().x(),m_hit->globalPosition().y(),m_hit->globalPosition().z());
-    Amg::Vector3D locp = gToL*hpos;
+    Amg::Vector3D locp = gToL*m_hit->globalPosition();
     Amg::Vector3D localHit(0.,locp.y(),locp.z());
-    Amg::Vector3D trkLocHit=Amg::AngleAxis3D(90.*CLHEP::deg,Amg::Vector3D(0.,1.,0.))*localHit;
-
+    Amg::Vector3D trkLocHit= Amg::getRotateY3D(90.*CLHEP::deg)*localHit;
     return trkLocHit;
 }
 
@@ -320,17 +281,12 @@ inline Amg::Vector3D GeosTGCHit::getGlobalPosition() const {
   
   
     const MuonGM::sTgcReadoutElement* stgcdet = mgr()->getsTgcReadoutElement(offid);
-    if (stgcdet == NULL)
-    {
+    if (!stgcdet) {
         const sTgcIdHelper* stgcID = mgr()->stgcIdHelper();
         std::cerr<<"sTGC readout element not found for Id = "
                  <<stgcID->show_to_string(offid)<<std::endl;
-        return Amg::Vector3D(0,0,0);
+        return Amg::Vector3D::Zero();
     }
-
-    Amg::Vector3D xU(m_hit->globalPosition().x(),m_hit->globalPosition().y(),m_hit->globalPosition().z());
-
-    return xU;
-  
+    return m_hit->globalPosition();  
 }
 

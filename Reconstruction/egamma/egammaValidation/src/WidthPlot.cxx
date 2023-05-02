@@ -2,17 +2,12 @@
   Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <utility>
-
-
-
 #include "WidthPlot.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ToolHandle.h"
-#include "Gaudi/Property.h"
 #include "GaudiKernel/ITHistSvc.h"
-#include "AthenaBaseComps/AthAlgorithm.h"
 #include "AsgTools/AnaToolHandle.h"
+
+#include "TH1D.h"
+#include "TH2D.h"
 
 #include "TruthPhotonHistograms.h"
 #include "widthestimators.h"
@@ -24,14 +19,9 @@ namespace egammaMonitoring {
   WidthPlot::WidthPlot(std::string name, std::string folder, ITHistSvc * &rootHistSvc ) :
     m_name(std::move(name)),
     m_folder(std::move(folder)),
-    m_rootHistSvc(rootHistSvc) {
+    m_rootHistSvc(rootHistSvc) { }
 
-  }
-
-
-
-  StatusCode WidthPlot::fill( IHistograms *input) {
-
+  StatusCode WidthPlot::fill(IHistograms *input) {
 
     TruthPhotonHistograms *histograms = dynamic_cast<TruthPhotonHistograms*>(input);
 

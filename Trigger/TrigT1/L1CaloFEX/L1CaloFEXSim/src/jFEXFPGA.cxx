@@ -220,8 +220,8 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection) {
             m_jFEXmetAlgoTool->setup(m_jTowersIDs_Wide);
             m_jFEXmetAlgoTool->buildFWDmet();
         }
-        
-        jXE_tobword = m_IjFEXFormTOBsTool->formMetTOB(m_jFEXmetAlgoTool->GetMetXComponent(),m_jFEXmetAlgoTool->GetMetYComponent(),thr_jXE.resolutionMeV());
+        int hemisphere = m_id == 0 ? 1 : -1;
+        jXE_tobword = m_IjFEXFormTOBsTool->formMetTOB(hemisphere * m_jFEXmetAlgoTool->GetMetXComponent(), hemisphere * m_jFEXmetAlgoTool->GetMetYComponent(),thr_jXE.resolutionMeV());
         jXE_tob->initialize(m_id,m_jfexid,jXE_tobword,thr_jXE.resolutionMeV(),0);
         m_Met_tobwords.push_back(std::move(jXE_tob));
         
