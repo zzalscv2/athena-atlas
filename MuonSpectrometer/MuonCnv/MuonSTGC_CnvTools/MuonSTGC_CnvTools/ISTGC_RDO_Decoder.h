@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONSTGC_CNVTOOLS_ISTGC_RDO_DECODER_H
@@ -11,7 +11,6 @@ class sTgcDigit;
 class sTgcIdHelper;
 class Identifier;
 
-static const InterfaceID IID_ISTGC_RDO_Decoder("Muon::ISTGC_RDO_Decoder", 1, 0);  
 
 namespace Muon {
   class STGC_RawData;
@@ -22,19 +21,13 @@ namespace Muon {
     
     /** AlgTool InterfaceID
      */
-    static const InterfaceID& interfaceID( );
-    
+    DeclareInterfaceID(Muon::ISTGC_RDO_Decoder, 1, 0);
+
     virtual sTgcDigit * getDigit(const Muon::STGC_RawData * Rawdata) const = 0;
     
   };
   
 }
-
-inline const InterfaceID& Muon::ISTGC_RDO_Decoder::interfaceID()
-{
-  return IID_ISTGC_RDO_Decoder;
-}
-
 
 #endif
 
