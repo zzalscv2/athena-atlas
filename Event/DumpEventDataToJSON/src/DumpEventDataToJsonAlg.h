@@ -79,7 +79,6 @@ protected:
   SG::ReadHandleKeyArray<TrackCollection> m_trackCollectionKeys{this, "TrackCollectionKeys", {"CombinedInDetTracks", "CombinedMuonTracks", "MuonSpectrometerTracks"}, "Keys for Track Containers"};
   
   // ACTS TrackContainer keys
-  SG::ReadHandleKeyArray<ActsTrk::ConstMultiTrajectory> m_multiTrajectoryKeys{this, "MultiTrajectoryKeys", {"ConvertedMultiTrajectory"}, "Keys for ACTS MultiTrajectory Containers"};
   SG::ReadHandleKeyArray<Acts::ConstVectorTrackContainer> m_vectorTrackContainerKeys {this, "VectorTrackContainerKeys", {"ConvertedVectorTrackContainer"}, "Location of the converted VectorTrackContainer"};
   SG::ReadHandleKeyArray<xAOD::TrackStateContainer> m_trackStatesKeys {this, "TrackStatesLocation", {"ConvertedTrackStates"}, "Location of the converted TrackStates"}; 
   SG::ReadHandleKeyArray<xAOD::TrackJacobianContainer> m_jacobiansKeys {this, "TrackJacobiansLocation", {"ConvertedTrackJacobians"}, "Location of the converted TrackJacobians"};
