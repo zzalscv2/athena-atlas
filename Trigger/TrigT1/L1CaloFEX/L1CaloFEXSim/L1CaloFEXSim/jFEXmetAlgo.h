@@ -41,8 +41,8 @@ namespace LVL1 {
     virtual ~jFEXmetAlgo();
 
     virtual StatusCode safetyTest() override;
-    virtual void setup(int FPGA[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_thin_algoSpace_width]) override;
-    virtual void setup(int FPGA[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width]) override;
+    virtual void setup(int FPGA[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_thin_algoSpace_width], int hemisphere) override;
+    virtual void setup(int FPGA[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width], int hemisphere) override;
 
     virtual void buildBarrelmet()  override;
     virtual void buildFWDmet()  override;
@@ -64,8 +64,8 @@ protected:
         std::vector<float> m_met_angle;
         std::vector<int> m_met_Xcoord;
         std::vector<int> m_met_Ycoord;
-        int m_Totalmet_Xcoord;
-        int m_Totalmet_Ycoord;
+        int m_Totalmet_Xcoord = 0;
+        int m_Totalmet_Ycoord = 0;
         
         virtual void buildMetXComponent();
         virtual void buildMetYComponent();      
@@ -74,6 +74,8 @@ protected:
         static constexpr unsigned int m_firmware_scale = std::pow(2,9);  
         
         std::unordered_map<int,std::vector<int> > m_map_Etvalues;
+        
+        int m_hemisphere;
   };
 
 

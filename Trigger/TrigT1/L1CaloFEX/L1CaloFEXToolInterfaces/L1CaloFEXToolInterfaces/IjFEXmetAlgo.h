@@ -24,8 +24,8 @@ class IjFEXmetAlgo : virtual public IAlgTool {
         static const InterfaceID& interfaceID ( ) ;
         virtual StatusCode safetyTest() = 0;
         virtual StatusCode reset() =0;
-        virtual void setup(int FPGA[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_thin_algoSpace_width]) = 0;
-        virtual void setup(int FPGA[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width]) = 0;
+        virtual void setup(int FPGA[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_thin_algoSpace_width], int hemisphere) = 0;
+        virtual void setup(int FPGA[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width], int hemisphere) = 0;
         
         virtual void buildBarrelmet()  =0;
         virtual void buildFWDmet()  =0;
