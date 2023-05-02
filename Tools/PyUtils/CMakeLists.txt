@@ -1,9 +1,16 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( PyUtils )
 
 find_package( ROOT COMPONENTS Core PyROOT Tree MathCore Hist RIO pthread )
+
+# Define an interface library that can be used by other packages to declare a
+# depdendency. Only required in case code from this package is executed during the build.
+atlas_add_library( PyUtilsInterface
+   INTERFACE
+   NO_PUBLIC_HEADERS )
+add_dependencies( PyUtilsInterface PyUtilsPythonInstall )
 
 if( XAOD_STANDALONE )
     atlas_install_python_modules( python/MetaReader.py
@@ -87,4 +94,3 @@ else()
        install( FILES ${_pydot} DESTINATION . OPTIONAL )
     endif()
 endif()
-
