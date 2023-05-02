@@ -263,8 +263,8 @@ uint32_t jFEXFormTOBs::formMetTOB(int METX, int METY, int Resolution ) {
     int sat = 0;
     int res = 0;
 
-    int metX = METX < 0 ? std::floor(1.0*METX/Resolution) : METX/Resolution;
-    int metY = METY < 0 ? std::floor(1.0*METY/Resolution) : METY/Resolution;
+    int metX = std::floor(1.0*METX/Resolution);
+    int metY = std::floor(1.0*METY/Resolution);
 
     //0x7fff is 15 bits (decimal value 32767), however as MET is a signed value (can be negative) only 14 bits are allowed (16383) the MSB is the sign
     if (std::abs(metX) > 0x3fff) {

@@ -57,11 +57,13 @@ StatusCode LVL1::jFEXmetAlgo::reset() {
 }
 
 //Setup for the central region
-void LVL1::jFEXmetAlgo::setup(int FPGA[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_thin_algoSpace_width]) {
+void LVL1::jFEXmetAlgo::setup(int FPGA[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_thin_algoSpace_width], int hemisphere) {
 
     ATH_MSG_DEBUG("---------------- jFEXmetAlgo::setup ----------------");
+    
+    m_hemisphere = hemisphere;
+    
     m_FPGA.resize(FEXAlgoSpaceDefs::jFEX_algoSpace_height);
-
     for(int iphi=0;iphi<FEXAlgoSpaceDefs::jFEX_algoSpace_height;iphi++){
         for(int ieta=8;ieta<16;ieta++){
             m_FPGA[iphi].push_back(FPGA[iphi][ieta]);
@@ -70,9 +72,12 @@ void LVL1::jFEXmetAlgo::setup(int FPGA[FEXAlgoSpaceDefs::jFEX_algoSpace_height][
 }
 
 //Setup for the forward region
-void LVL1::jFEXmetAlgo::setup(int FPGA[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width]) {
+void LVL1::jFEXmetAlgo::setup(int FPGA[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width], int hemisphere) {
 
     ATH_MSG_DEBUG("---------------- jFEXmetAlgo::setup ----------------");
+    
+    m_hemisphere = hemisphere;
+    
     m_FPGA.resize(FEXAlgoSpaceDefs::jFEX_algoSpace_height);
     for(int iphi=0;iphi<FEXAlgoSpaceDefs::jFEX_algoSpace_height;iphi++){
         for(int ieta=8;ieta<17;ieta++){
@@ -187,7 +192,7 @@ void LVL1::jFEXmetAlgo::buildMetXComponent()
     m_met_Xcoord.resize(m_met.size(),0);
     //computing the X and Y component of MET
     for(uint iphi=0;iphi<m_met.size();iphi++){
-        int cos = std::round(std::cos(m_met_angle[iphi]) * m_firmware_scale); 
+        int cos = std::round(std::cos(m_met_angle[iphi]) * m_firmware_scale * m_hemisphere); 
         m_met_Xcoord[iphi]= m_met[iphi]*cos;
     }
     
@@ -201,7 +206,7 @@ void LVL1::jFEXmetAlgo::buildMetXComponent()
 //return the X component of the Met
 int LVL1::jFEXmetAlgo::GetMetXComponent()
 {
-    return static_cast<int>(1.0*m_Totalmet_Xcoord/m_firmware_scale);
+    return std::floor(1.0*m_Totalmet_Xcoord/m_firmware_scale);
 }
 
 //build Met Y component for the central barrels
@@ -213,7 +218,7 @@ void LVL1::jFEXmetAlgo::buildMetYComponent()
     
     //computing the X and Y component of MET
     for(uint iphi=0;iphi<m_met.size();iphi++){
-        int sin = std::round(std::sin(m_met_angle[iphi]) * m_firmware_scale) ; 
+        int sin = std::round(std::sin(m_met_angle[iphi]) * m_firmware_scale * m_hemisphere) ; 
         m_met_Ycoord[iphi]= m_met[iphi]*sin; 
     }
     
@@ -221,13 +226,12 @@ void LVL1::jFEXmetAlgo::buildMetYComponent()
     for(auto met_val : m_met_Ycoord){
         m_Totalmet_Ycoord += met_val;
     }
-    
 }
 
 //return the Y component of the Met
 int LVL1::jFEXmetAlgo::GetMetYComponent()
 {
-    return static_cast<int>(1.0*m_Totalmet_Ycoord/m_firmware_scale);;
+    return std::floor(1.0*m_Totalmet_Ycoord/m_firmware_scale);
 }
 
 //Gets the ET for the TT. This ET is EM + HAD
