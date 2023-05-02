@@ -301,6 +301,8 @@ void TRTOverlay::mergeCollections(TRT_RDO_Collection *bkgCollection,
   // Merge by copying ptrs from background and signal to output collection
   TRT_RDO_Collection::size_type ibkg = 0, isig = 0;
 
+  outputCollection->reserve(
+      std::max(bkgCollection->size(), signalCollection->size()));
   // Below we have swapElements.
   // Remember the elements of the signalCollection and bkgCollection
   // containers are owned by the DataPool.
@@ -308,7 +310,8 @@ void TRTOverlay::mergeCollections(TRT_RDO_Collection *bkgCollection,
   //
   // So
   // A) We can not delete them. dataPool will do that at the end of the event.
-  // B) We can push them back only to a View so outputCollection is a view collection
+  // B) We can push them back only to a View so outputCollection is a view
+  // collection
   // C) We pass nullptr so no need to get another item from the pool
 
   while ((ibkg < bkgCollection->size()) || (isig < signalCollection->size())) {
