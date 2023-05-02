@@ -208,6 +208,20 @@ def CscBytestreamDecodeCfg(flags, name="CscRawDataProvider"):
 
     return acc
 
+
+def sTgcRODDecoderCfg(flags, name = "sTgcROD_Decoder", **kwargs):
+    result = ComponentAccumulator()
+    ### Disable the NSW DSC data for the time being
+    if False and not flags.Muon.MuonTrigger and not flags.Input.isMC:
+        from MuonConfig.MuonCondAlgConfig import NswDcsDbAlgCfg
+        result.merge(NswDcsDbAlgCfg(flags))
+    else:
+        kwargs.setdefault("DcsKey", "")
+    # Setup the sTGC ROD decoder
+    STGCRodDecoder = CompFactory.Muon.STGC_ROD_Decoder(name = name, **kwargs)
+    result.setPrivateTools(STGCRodDecoder)
+    return result
+
 def sTgcBytestreamDecodeCfg(flags, name="MuonsTgcRawDataProvider"):
 
     acc = ComponentAccumulator()
@@ -218,18 +232,15 @@ def sTgcBytestreamDecodeCfg(flags, name="MuonsTgcRawDataProvider"):
 
     # Make sure muon geometry is configured
     from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
-    acc.merge(MuonGeoModelCfg(flags)) 
+    acc.merge(MuonGeoModelCfg(flags))
 
-    # Setup the sTGC ROD decoder
-    Muon__STGC_ROD_Decoder=CompFactory.Muon.STGC_ROD_Decoder
-    STGCRodDecoder = Muon__STGC_ROD_Decoder(name = "sTgcROD_Decoder")
 
 
     # Setup the RAW data provider tool
     keyName = flags.Overlay.BkgPrefix + "sTGCRDO" if flags.Common.isOverlay else "sTGCRDO"
     Muon__STGC_RawDataProviderToolMT=CompFactory.Muon.STGC_RawDataProviderToolMT
     MuonsTgcRawDataProviderTool = Muon__STGC_RawDataProviderToolMT(name    = "sTgcRawDataProviderTool",
-                                                                   Decoder = STGCRodDecoder,
+                                                                   Decoder = acc.popToolsAndMerge(sTgcRODDecoderCfg(flags)),
                                                                    RdoLocation = keyName,
                                                                    SkipDecoding=flags.Muon.MuonTrigger and flags.Muon.runCommissioningChain )
 
@@ -284,6 +295,22 @@ def sTgcPadTriggerBytestreamDecodeCfg(flags, name="MuonsTgcPadTriggerRawDataProv
 
     return acc
 
+def MmRDODDecoderCfg(flags, name="MmROD_Decoder", **kwargs):
+    result = ComponentAccumulator()
+    ### Disable the NSW DSC data for the time being
+    if not flags.Muon.MuonTrigger and not flags.Input.isMC:        
+        from MuonConfig.MuonCondAlgConfig import NswDcsDbAlgCfg
+        if False: result.merge(NswDcsDbAlgCfg(flags))
+        from MuonConfig.MuonCablingConfig import MicroMegaCablingCfg
+        result.merge(MicroMegaCablingCfg(flags))
+    else:
+        kwargs.setdefault("CablingMap", "")
+    
+    kwargs.setdefault("DcsKey", "")
+    
+    the_tool = CompFactory.Muon.MM_ROD_Decoder(name = name, **kwargs)
+    result.setPrivateTools(the_tool)
+    return result
 def MmBytestreamDecodeCfg(flags, name="MmRawDataProvider"):
     acc = ComponentAccumulator()
 
@@ -294,19 +321,11 @@ def MmBytestreamDecodeCfg(flags, name="MmRawDataProvider"):
     # Make sure muon geometry is configured
     from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
     acc.merge(MuonGeoModelCfg(flags)) 
-    from MuonConfig.MuonCablingConfig import MicroMegaCablingCfg
-    acc.merge(MicroMegaCablingCfg(flags))
-
-    # Setup the MM ROD decoder
-    Muon__MmROD_Decoder=CompFactory.Muon.MM_ROD_Decoder
-    MMRodDecoder = Muon__MmROD_Decoder(name="MmROD_Decoder")
-
-
+   
     # Setup the RAW data provider tool
-    #keyName = flags.Overlay.BkgPrefix + "MMRDO" if flags.Detector.OverlayMM else "MMRDO"
     keyName = flags.Overlay.BkgPrefix + "MMRDO" if flags.Common.isOverlay else "MMRDO"
     MuonMmRawDataProviderTool = CompFactory.Muon.MM_RawDataProviderToolMT(name  = "MM_RawDataProviderToolMT",
-                                                              Decoder = MMRodDecoder,
+                                                              Decoder = acc.popToolsAndMerge(MmRDODDecoderCfg(flags)),
                                                               RdoLocation = keyName,
                                                               SkipDecoding=flags.Muon.MuonTrigger and flags.Muon.runCommissioningChain)
 

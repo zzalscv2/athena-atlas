@@ -6,6 +6,7 @@
 #define MUONCONDDATA_NSWDCSDBDATA_H
 
 // STL includes
+#include <set>
 #include <vector>
 
 // Athena includes
@@ -60,44 +61,29 @@ public:
     std::vector<Identifier> getChannelIds(const DcsTechType tech, const std::string& side) const;
     /// Retrieves the calibration constant for a particular readout channel.
     const DcsConstants* getDataForChannel(const DcsTechType tech, const Identifier& channelId) const; 
+    
+    /// Returns whether the channel is alive, i.e. DCS state on, etc...
+    bool isGood(const Identifier& channelId, bool issTgcQ1OuterHv = false) const;
+    bool isGoodHv(const Identifier& channelId, bool issTgcQ1OuterHv = false) const;
 
+    
     // helper functions
     static DcsFsmState getFsmStateEnum(std::string fsmState);
     static std::string getFsmStateStrg(DcsFsmState fsmState);
  
 private:
     
-    int identToModuleIdx(const Identifier& chan_id) const;
-    // Copied from https://gitlab.cern.ch/atlas/athena/-/blob/master/MuonSpectrometer/MuonDetDescr/MuonReadoutGeometry/MuonReadoutGeometry/MuonDetectorManager.h
-    enum sTgcGMRanges {
-            NsTgStatEta = 6,      /// 3 x 2 sides (-3,-2,-1 and 1,2,3)
-            NsTgStEtaOffset = 3,  /// needed offest to map (-3,-2,-1,1,2,3) to (0,1,2,3,4,5)
-            NsTgStatPhi = 16,     // large and small sector together
-            NsTgcStatLay = 4,   // 4 wedges of stgcs
-            NsTgcChannelTypes =3, // Pads / Wires / Strips
-            NsTgChamberLayer = 2
-        };
-    enum mmGMRanges {
-            NMMcStatEta = 4,      /// 2 x 2 sides (-2,-1 and 1,2)
-            NMMcStEtaOffset = 2,  /// needed offest to map (-2,-1,1,2) to (0,1,2,3)
-            NMMcStatPhi = 16,     // large and small sector together
-            NMMcStatLay = 4, /// 4 wedges of micromegas
-            NMMcChamberLayer = 2
-        };
+    unsigned int identToModuleIdx(const Identifier& chan_id) const;
     
-    static constexpr int s_NumMaxSTgcElemets = NsTgStatEta * NsTgStatPhi * NsTgChamberLayer *NsTgcStatLay * NsTgcChannelTypes;
-    static constexpr int s_NumMaxMMElements = NMMcStatEta * NMMcStatPhi * NMMcChamberLayer *NMMcStatLay;
-
     // containers
     struct DcsModule{
         std::vector<std::unique_ptr<DcsConstants>> channels{};
         Identifier layer_id{0};
     };
-    using ChannelDcsMapMMG = std::array<DcsModule, s_NumMaxMMElements >;
-    using ChannelDcsMapSTG = std::array<DcsModule, s_NumMaxSTgcElemets>;
-    ChannelDcsMapMMG m_data_hv_mmg{};
-    ChannelDcsMapMMG m_data_hv_mmd{};
-    ChannelDcsMapSTG m_data_hv_stg{};
+    using ChannelDcsMap = std::vector<DcsModule>;
+    ChannelDcsMap m_data_hv_mmg{};
+    ChannelDcsMap m_data_hv_mmd{};
+    ChannelDcsMap m_data_hv_stg{};
 
     // ID helpers
     const MmIdHelper&   m_mmIdHelper;

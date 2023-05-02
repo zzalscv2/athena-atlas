@@ -112,7 +112,7 @@ StatusCode NswDcsTestAlg::retrieveData(const EventContext& ctx, const DcsDataTyp
         if (!m_logName.empty()){
             for (const Identifier& chan_id : channelIds) {
                 const NswDcsDbData::DcsConstants& thedata = *readCdo->getDataForChannel(tech, chan_id);
-                sstr<<m_idHelperSvc->toString(chan_id)<<" "<<thedata<<std::endl;
+                sstr<<m_idHelperSvc->toString(chan_id)<<" "<<thedata<<" "<<readCdo->isGood(chan_id)<<std::endl;
             }                   
         }
     }

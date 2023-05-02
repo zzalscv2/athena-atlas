@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CNVTOOLS_STGC_RAWDATAPROVIDERTOOLMT_H
@@ -46,9 +46,9 @@ namespace Muon
 
       StatusCode initRdoContainer(const EventContext&, STGC_RawDataContainer*&) const;
       std::vector<uint32_t>  m_allRobIds;
-      
-      // Key for the cache for the CSM containers; can be empty,
-      SG::UpdateHandleKey<STGC_RawDataCollection_Cache> m_rdoContainerCacheKey;
+  
+      SG::UpdateHandleKey<STGC_RawDataCollection_Cache> m_rdoContainerCacheKey{this, "sTgcContainerCacheKey", "" ,
+                                                                            "Optional external cache for the sTGC container"};
   };
 } // end of namespace
 

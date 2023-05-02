@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.DetFlags import DetFlags
 from AthenaCommon.AppMgr import ServiceMgr
@@ -90,6 +90,7 @@ def CscRawDataProviderTool(name = "CscRawDataProviderTool",**kwargs):
 #================================================================================
 
 def MmROD_Decoder(name="MmROD_Decoder",**kwargs):
+    kwargs.setdefault("DcsKey", "")
     return CfgMgr.Muon__MM_ROD_Decoder(name,**kwargs)
 
 def MmRawDataProviderTool(name="MmRawDataProviderTool",**kwargs):
@@ -106,6 +107,7 @@ def MmRawDataProviderTool(name="MmRawDataProviderTool",**kwargs):
 #================================================================================
 
 def sTgcROD_Decoder(name = "sTgcROD_Decoder",**kwargs):
+    kwargs.setdefault("DcsKey", "")
     return CfgMgr.Muon__STGC_ROD_Decoder(name,**kwargs)
 
 
