@@ -111,6 +111,10 @@ class AccumulatorDecorator:
             return hash(x)
         return None
 
+    def __get__(self, obj, objtype):
+        """Support instance methods."""
+        return functools.partial(self.__call__, obj)
+
     def __call__(self , *args , **kwargs):
         cacheHit = None
         try:
