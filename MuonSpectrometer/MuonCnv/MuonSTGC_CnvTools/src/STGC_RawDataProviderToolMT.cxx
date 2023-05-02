@@ -16,7 +16,6 @@ Muon::STGC_RawDataProviderToolMT::STGC_RawDataProviderToolMT(const std::string& 
 : STGC_RawDataProviderToolCore(t, n, p)
 {
   declareInterface<IMuonRawDataProviderTool>(this);
-  declareProperty("sTgcContainerCacheKey", m_rdoContainerCacheKey, "Optional external cache for the sTGC container");
 }
 
 
@@ -96,7 +95,7 @@ StatusCode Muon::STGC_RawDataProviderToolMT::convert(const std::vector<Identifie
   std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> vecRobf;
   m_robDataProvider->getROBData(m_allRobIds, vecRobf);
 
-  return convertIntoContainer(vecRobf, rdoIdhVect, *rdoContainer);
+  return convertIntoContainer(ctx, vecRobf, rdoIdhVect, *rdoContainer);
 }
 
 
@@ -115,7 +114,7 @@ StatusCode  Muon::STGC_RawDataProviderToolMT::convert(const EventContext& ctx) c
   // dummy hashID vector for the decoder (empty = unseeded mode)
   const std::vector<IdentifierHash> rdoIdhVect;
 
-  return convertIntoContainer(vecRobf, rdoIdhVect, *rdoContainer);
+  return convertIntoContainer(ctx, vecRobf, rdoIdhVect, *rdoContainer);
 }
 
 StatusCode Muon::STGC_RawDataProviderToolMT::convert(const std::vector<uint32_t>& robIds, const EventContext& ctx) const
@@ -132,7 +131,7 @@ StatusCode Muon::STGC_RawDataProviderToolMT::convert(const std::vector<uint32_t>
   // pass empty list of ID hashes, every ROB ID in list will be decoded
   const std::vector<IdentifierHash> hashIDList; 
 
-  return convertIntoContainer(vecRobf, hashIDList, *rdoContainer);
+  return convertIntoContainer(ctx, vecRobf, hashIDList, *rdoContainer);
 
 }
 

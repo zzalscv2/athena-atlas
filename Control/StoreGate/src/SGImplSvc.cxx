@@ -94,6 +94,7 @@ SGImplSvc::SGImplSvc(const string& name,ISvcLocator* svc)
     m_pIncSvc("IncidentSvc", name),
     m_DumpStore(false), 
     m_ActivateHistory(false),
+    m_DumpArena(false),
     m_pIOVSvc(0),
     m_storeLoaded(false),
     m_remap_impl (new SG::RemapImpl),
@@ -105,6 +106,7 @@ SGImplSvc::SGImplSvc(const string& name,ISvcLocator* svc)
   declareProperty("ProxyProviderSvc", m_pPPSHandle);
   declareProperty("Dump", m_DumpStore);
   declareProperty("ActivateHistory", m_ActivateHistory);
+  declareProperty("DumpArena", m_DumpArena);
   //StoreGateSvc properties
   declareProperty("IncidentSvc", m_pIncSvc);
   //add handler for Service base class property
@@ -274,6 +276,14 @@ string SGImplSvc::createKey(const CLID& id)
 // clear store
 StatusCode SGImplSvc::clearStore(bool forceRemove)
 {
+  {
+    if (m_DumpArena) {
+      std::ostringstream s;
+      m_arena.report(s);
+      info() << "Report for Arena: " << m_arena.name() << '\n'
+             << s.str() << endmsg;
+    }
+  }
   {
     lock_t lock (m_mutex);
     emptyTrash();

@@ -43,10 +43,13 @@ def signatureSpecificSettingOfFlags(flags,mode):
   flags.seedFilterLevel     = 0
   
   if flags.isLRT:
+    flags.minClusters         = 8
     flags.nHolesGapMax        = 1
     flags.nWeightedClustersMin= 8
-    flags.maxSiHoles           = 2
-    flags.maxSCTHoles          = 2
+    flags.maxSiHoles          = 2
+    flags.maxSCTHoles         = 1
+    flags.maxPixelHoles       = 1
+    flags.maxDoubleHoles      = 0
     
   if flags.input_name=="cosmics":
     flags.nClustersMin        = 4

@@ -1,0 +1,155 @@
+Size 1 Local Parameters
+------> d0
+Dimension 1
+ParameterKey 1
+Reduction Matrix 
+1
+0
+0
+0
+0
+Expansion Matrix 
+1 0 0 0 0
+AsVector: 1
+------> z0
+Dimension 1
+ParameterKey 2
+Reduction Matrix 
+0
+1
+0
+0
+0
+Expansion Matrix 
+0 1 0 0 0
+AsVector: 
+2
+------> phi0
+Dimension 1
+ParameterKey 4
+Reduction Matrix 
+0
+0
+1
+0
+0
+Expansion Matrix 
+0 0 1 0 0
+AsVector: 
+3
+------> theta
+Dimension 1
+ParameterKey 8
+Reduction Matrix 
+0
+0
+0
+1
+0
+Expansion Matrix 
+0 0 0 1 0
+AsVector: 
+4
+------> qOverP
+Dimension 1
+ParameterKey 16
+Reduction Matrix 
+0
+0
+0
+0
+1
+Expansion Matrix 
+0 0 0 0 1
+AsVector: 
+5
+Size 2 Local Parameters
+------> position
+Dimension 2
+ParameterKey 3
+Reduction Matrix 
+1 0
+0 1
+0 0
+0 0
+0 0
+Expansion Matrix 
+1 0 0 0 0
+0 1 0 0 0
+AsVector: 
+1
+2
+------> phi0, theta
+Dimension 2
+ParameterKey 12
+Reduction Matrix 
+0 0
+0 0
+1 0
+0 1
+0 0
+Expansion Matrix 
+0 0 1 0 0
+0 0 0 1 0
+AsVector: 
+3
+4
+From size 3 vector
+------> 3D
+Dimension 3
+ParameterKey 7
+Reduction Matrix 
+1 0 0
+0 1 0
+0 0 1
+0 0 0
+0 0 0
+Expansion Matrix 
+1 0 0 0 0
+0 1 0 0 0
+0 0 1 0 0
+AsVector: 
+1
+2
+3
+From size 4 vector
+------> 4D
+Dimension 4
+ParameterKey 15
+Reduction Matrix 
+1 0 0 0
+0 1 0 0
+0 0 1 0
+0 0 0 1
+0 0 0 0
+Expansion Matrix 
+1 0 0 0 0
+0 1 0 0 0
+0 0 1 0 0
+0 0 0 1 0
+AsVector: 
+1
+2
+3
+4
+------> 5D
+Dimension 5
+ParameterKey 31
+Reduction Matrix 
+1 0 0 0 0
+0 1 0 0 0
+0 0 1 0 0
+0 0 0 1 0
+0 0 0 0 1
+Expansion Matrix 
+1 0 0 0 0
+0 1 0 0 0
+0 0 1 0 0
+0 0 0 1 0
+0 0 0 0 1
+AsVector: 
+1
+2
+3
+4
+5

@@ -182,8 +182,8 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection) {
         uint32_t jTE_tobword = 0;
                       
                          
+        int hemisphere = m_id == 0 ? 1 : -1;
         
-
         if(m_jfexid > 0 && m_jfexid < 5) {
 
             //-----------------jFEXsumETAlgo-----------------
@@ -191,7 +191,7 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection) {
             m_jFEXsumETAlgoTool->buildBarrelSumET();
 
             //-----------------jFEXmetAlgo-----------------
-            m_jFEXmetAlgoTool->setup(m_jTowersIDs_Thin);
+            m_jFEXmetAlgoTool->setup(m_jTowersIDs_Thin, hemisphere);
             m_jFEXmetAlgoTool->buildBarrelmet();
         }
         else if(m_jfexid == 0 ) {
@@ -208,7 +208,7 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection) {
             m_jFEXsumETAlgoTool->buildFWDSumET();
 
             //-----------------jFEXmetAlgo-----------------
-            m_jFEXmetAlgoTool->setup(flipped_jTowersIDs);
+            m_jFEXmetAlgoTool->setup(flipped_jTowersIDs, hemisphere);
             m_jFEXmetAlgoTool->buildFWDmet();
         }
         else if(m_jfexid == 5) {
@@ -217,11 +217,11 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection) {
             m_jFEXsumETAlgoTool->buildFWDSumET();
 
             //-----------------jFEXmetAlgo-----------------
-            m_jFEXmetAlgoTool->setup(m_jTowersIDs_Wide);
+            m_jFEXmetAlgoTool->setup(m_jTowersIDs_Wide, hemisphere);
             m_jFEXmetAlgoTool->buildFWDmet();
         }
-        int hemisphere = m_id == 0 ? 1 : -1;
-        jXE_tobword = m_IjFEXFormTOBsTool->formMetTOB(hemisphere * m_jFEXmetAlgoTool->GetMetXComponent(), hemisphere * m_jFEXmetAlgoTool->GetMetYComponent(),thr_jXE.resolutionMeV());
+        
+        jXE_tobword = m_IjFEXFormTOBsTool->formMetTOB(m_jFEXmetAlgoTool->GetMetXComponent(), m_jFEXmetAlgoTool->GetMetYComponent(),thr_jXE.resolutionMeV());
         jXE_tob->initialize(m_id,m_jfexid,jXE_tobword,thr_jXE.resolutionMeV(),0);
         m_Met_tobwords.push_back(std::move(jXE_tob));
         

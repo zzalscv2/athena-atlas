@@ -177,7 +177,7 @@ namespace xAOD {
      /// Was the BDT algorithm run?
      if (tobVersion() != 1) return 0;
      /// If the object is not an xTOB this will return 0
-     return (word1() >> s_bdtScoreBit) & s_bdtScoreMask;
+     return (word0() >> s_bdtScoreBit) & s_bdtScoreMask;
    }
     
 
