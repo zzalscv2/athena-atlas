@@ -704,6 +704,7 @@ private:
   ServiceHandle<IIncidentSvc> m_pIncSvc; ///< property
   bool m_DumpStore; ///< Dump Property flag: triggers dump() at EndEvent 
   bool m_ActivateHistory; ///< Activate the history service
+  bool m_DumpArena; ///< DumpArena Property flag : trigger m_arena->report() at clearStore
 
   //  typedef std::list<std::string> StrList; 
   StringArrayProperty m_folderNameList; ///< FolderNameList Property
