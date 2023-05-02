@@ -50,7 +50,7 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
     /// Element initialization
     virtual StatusCode initElement() = 0;
     /// Cache the alignment
-    bool storeAlignment(ActsTrk::RawGeomAlignStore& store) const;
+    virtual bool storeAlignment(ActsTrk::RawGeomAlignStore& store) const override;
     /// Return the athena identifier.
     ///  The Identifier is identical with the first measurment channel in
     ///  readout element (E.g. Strip 1 in Layer 1 in the NSW)
