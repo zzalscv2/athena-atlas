@@ -154,7 +154,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
             alg.outOfValidityDeco = 'bad_eff' + postfix
             alg.efficiencyScaleFactorTool.WorkingPoint = self.quality
             if self.isRun3Geo:
-                alg.efficiencyScaleFactorTool.CalibrationRelease = '220817_Preliminary_r22run3'
+                alg.efficiencyScaleFactorTool.CalibrationRelease = '230309_Preliminary_r22run3'
             alg.muons = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
             config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'effSF' + postfix)
