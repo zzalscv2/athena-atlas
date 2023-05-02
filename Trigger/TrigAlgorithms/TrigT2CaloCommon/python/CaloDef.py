@@ -121,20 +121,6 @@ def fastCaloRecoFWDSequence(flags, InViewRoIs, ClustersName="HLT_FastCaloEMClust
     return (fastCaloInViewSequence, sequenceOut)
 
 
-
-def fastCaloEVCreator():
-    InViewRoIs="EMCaloRoIs"
-    fastCaloViewsMaker = CompFactory.EventViewCreatorAlgorithm( "IMfastCalo" )
-    fastCaloViewsMaker.ViewFallThrough = True
-    fastCaloViewsMaker.RoIsLink = "initialRoI"
-    fastCaloViewsMaker.RoITool = CompFactory.ViewCreatorInitialROITool()
-    fastCaloViewsMaker.InViewRoIs = InViewRoIs
-    fastCaloViewsMaker.Views = "EMCaloViews"
-    fastCaloViewsMaker.ViewNodeName = "fastCaloInViewSequence"
-    return (fastCaloViewsMaker, InViewRoIs)
-
-
-
 def fastCaloEVFWDCreator():
     #InViewRoIs="EMCaloRoIs"
     InViewRoIs = "FSJETMETCaloRoI"
@@ -147,30 +133,6 @@ def fastCaloEVFWDCreator():
     fastCaloViewsMaker.ViewNodeName = "fastCaloInViewSequence_FWD"
 
     return (fastCaloViewsMaker, InViewRoIs)
-
-
-def fastCalo_All_EVCreator():
-    InViewRoIs = "EMCaloRoIs"
-    fastCaloViewsMaker = CompFactory.EventViewCreatorAlgorithm( "IM_LArPS_All" )
-    fastCaloViewsMaker.ViewFallThrough = True
-    fastCaloViewsMaker.RoIsLink = "initialRoI"
-    fastCaloViewsMaker.RoITool = CompFactory.ViewCreatorInitialROITool()
-    fastCaloViewsMaker.InViewRoIs = InViewRoIs
-    fastCaloViewsMaker.Views = "LArPS_All_Views"
-
-    return (fastCaloViewsMaker, InViewRoIs)
-
-def fastCalo_AllEM_EVCreator():
-    InViewRoIs = "EMCaloRoIs"
-    fastCaloViewsMaker = CompFactory.EventViewCreatorAlgorithm( "IM_LArPS_AllEM" )
-    fastCaloViewsMaker.ViewFallThrough = True
-    fastCaloViewsMaker.RoIsLink = "initialRoI"
-    fastCaloViewsMaker.RoITool = CompFactory.ViewCreatorInitialROITool()
-    fastCaloViewsMaker.InViewRoIs = InViewRoIs
-    fastCaloViewsMaker.Views = "LArPS_AllEM_Views"
-
-    return (fastCaloViewsMaker, InViewRoIs)
-
 
 ##################################
 # cluster maker functions
