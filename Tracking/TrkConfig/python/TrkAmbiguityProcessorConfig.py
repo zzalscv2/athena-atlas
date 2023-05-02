@@ -177,7 +177,7 @@ def SimpleAmbiguityProcessorTool_Trig_Cfg(
     # kwargs.setdefault("RefitPrds", False)
     # #TODO clarify this setting False if flags.Tracking.ActiveConfig.name == 'cosmics' else True
     kwargs.setdefault("tryBremFit",
-                      flags.Tracking.ActiveConfig.name == 'electron' and
+                      flags.Tracking.ActiveConfig.input_name == 'electron' and
                       flags.Tracking.doBremRecovery)
     kwargs.setdefault("pTminBrem", 5*Units.GeV)
     kwargs.setdefault("MatEffects", 3)
@@ -210,7 +210,7 @@ def SimpleAmbiguityProcessorTool_Trig_Cfg(
         from InDetConfig.InDetAmbiTrackSelectionToolConfig import (
             InDetTrigAmbiTrackSelectionToolCfg)
         kwargs.setdefault("SelectionTool", acc.popToolsAndMerge(
-            InDetTrigAmbiTrackSelectionToolCfg(flags)))
+            InDetTrigAmbiTrackSelectionToolCfg(flags,DriftCircleCutTool=None)))
 
     acc.setPrivateTools(
         CompFactory.Trk.SimpleAmbiguityProcessorTool(name, **kwargs))
