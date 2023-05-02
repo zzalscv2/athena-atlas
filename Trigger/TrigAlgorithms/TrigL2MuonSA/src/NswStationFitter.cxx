@@ -16,6 +16,13 @@ namespace{
   constexpr double ZERO_LIMIT = 1.e-9;
 }
 
+static const double TanM1p5 = std::tan(-1.5/360.*2.*M_PI);
+static const double TanP1p5 = std::tan(1.5/360.*2.*M_PI);
+static const double CosM1p5 = std::cos(-1.5/360.*2.*M_PI);
+static const double CosP1p5 = std::cos(1.5/360.*2.*M_PI);
+static const double SinM1p5 = std::sin(-1.5/360.*2.*M_PI);
+static const double SinP1p5 = std::sin(1.5/360.*2.*M_PI);
+
 TrigL2MuonSA::NswStationFitter::NswStationFitter(const std::string& type,
              const std::string& name,
              const IInterface*  parent):
@@ -976,19 +983,19 @@ StatusCode TrigL2MuonSA::NswStationFitter::calcMergedHit(TrigL2MuonSA::TrackPatt
   double sinTiltAngleU = 0,
          sinTiltAngleV = 0;
   if(side_mm > ZERO_LIMIT){
-    tanTiltAngleU = tan( 1.5/360.*2.*M_PI),
-    tanTiltAngleV = tan(-1.5/360.*2.*M_PI);
-    cosTiltAngleU = cos( 1.5/360.*2.*M_PI),
-    cosTiltAngleV = cos(-1.5/360.*2.*M_PI);
-    sinTiltAngleU = sin( 1.5/360.*2.*M_PI),
-    sinTiltAngleV = sin(-1.5/360.*2.*M_PI);
+    tanTiltAngleU = TanM1p5,
+    tanTiltAngleV = TanP1p5;
+    cosTiltAngleU = CosM1p5,
+    cosTiltAngleV = CosP1p5;
+    sinTiltAngleU = SinM1p5,
+    sinTiltAngleV = SinP1p5;
   } else if(side_mm < -1.*ZERO_LIMIT){
-    tanTiltAngleU = tan(-1.5/360.*2.*M_PI),
-    tanTiltAngleV = tan(1.5/360.*2.*M_PI);
-    cosTiltAngleU = cos(-1.5/360.*2.*M_PI),
-    cosTiltAngleV = cos(1.5/360.*2.*M_PI);
-    sinTiltAngleU = sin(-1.5/360.*2.*M_PI),
-    sinTiltAngleV = sin(1.5/360.*2.*M_PI);
+    tanTiltAngleU = TanP1p5,
+    tanTiltAngleV = TanM1p5;
+    cosTiltAngleU = CosP1p5,
+    cosTiltAngleV = CosM1p5;
+    sinTiltAngleU = SinP1p5,
+    sinTiltAngleV = SinM1p5;
   } else {
     ATH_MSG_DEBUG("@@Merge@@ no U, V layer hits -> not consider tilt of U/V layers");
   }
