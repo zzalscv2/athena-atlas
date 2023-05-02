@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """
 MergeConfigs: merges han text configuration files, warning on name conflicts
 @author Peter Onyisi <ponyisi@hep.uchicago.edu>
 """
 
-from __future__ import print_function
 
 def list_directories(parent_dir, recurse=True):
     """
@@ -47,8 +46,9 @@ def merge_han_configs(template, parent_dir, out, options):
     @param out: output filename
     """
     import re
+    from PyUtils.Helpers import release_metadata
     
-    rematch = re.compile('(\S*)\s+(\S*)\s+{')
+    rematch = re.compile(r'(\S*)\s+(\S*)\s+{')
     # keywords we should worry about for name conflicts
     kwlist = set(['algorithm', 'compositeAlgorithm', 'reference', 'thresholds'])
     kwhash = {}
@@ -82,7 +82,7 @@ def merge_han_configs(template, parent_dir, out, options):
                 reclevel -= 1; reclist.pop(); kws.pop()
                 continue
             match = rematch.search(line)
-            if match == None:
+            if match is None:
                 continue
             kws.append(match.group(1)); reclevel += 1; reclist.append(match.group(2))
             if kws[-1] in kwlist:
@@ -105,7 +105,7 @@ def merge_han_configs(template, parent_dir, out, options):
     outobj = open(out, 'w')
     outobj.write('# ****************************\n')
     outobj.write('metadata GitInfo {\n')
-    outobj.write('  Hash = %s\n' % (os.environ.get('GIT_COMMIT_HASH', 'unknown')))
+    outobj.write('  Hash = %s\n' % release_metadata()['nightly release'])
     outobj.write('}\n')
     outobj.write('# ****************************\n\n')
     for f in files:
@@ -130,5 +130,5 @@ if __name__ == '__main__':
     options, args = parser.parse_args()
     
     if len(args) != 3:
-        usage()
+        parser.print_usage()
     merge_han_configs(sys.argv[1], sys.argv[2], sys.argv[3], options)
