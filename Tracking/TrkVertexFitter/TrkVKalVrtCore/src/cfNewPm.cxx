@@ -91,6 +91,7 @@ void cfnewpm(double *par, const double *xyzStart, double *xyzEnd, const double u
 /*   at new point with new mag.field */
 
     constB = myMagFld.getMagFld(xyzEnd,CONTROL) * myMagFld.getCnvCst() ;
+    if(std::abs(constB)<0.001)constB=0.001; //Protection against zero field
 
     dpar0[0] = 0.;
     dpar0[1] = 0.;

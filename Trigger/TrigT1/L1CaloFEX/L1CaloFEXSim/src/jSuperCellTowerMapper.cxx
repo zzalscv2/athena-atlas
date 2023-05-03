@@ -1090,7 +1090,7 @@ int jSuperCellTowerMapper::FindAndConnectTower(std::unique_ptr<jTowerContainer> 
         iJTower = FindTowerIDForSuperCell(towereta, towerphi) + towerID_Modifier;
         
         //Applying the SCell masking!
-        if( (prov >> 7 & 1) and m_apply_masking and ((ID.get_compact()>>32) != 906973184) ){
+        if( (prov >> 7 & 1) and m_apply_masking ){
             //if masked then Et = 0
             et = 0.0;
         }
