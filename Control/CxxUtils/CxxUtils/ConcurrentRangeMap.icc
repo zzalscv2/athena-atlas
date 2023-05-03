@@ -293,7 +293,7 @@ CONCURRENTRANGEMAP::emplace (const RANGE& range,
     // Check for overlap with the previous range.
     RANGE newRange = range;
     int flag = 0;
-    if (end) {
+    if (end > begin) {
       flag = m_compare.overlap (ctx, (end-1)->first, newRange);
     }
     if (flag < 0) {
