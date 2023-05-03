@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONHISTUTILS_MOMENTUMPULLPLOTS_H
@@ -12,7 +12,7 @@ namespace Muon{
 
 class MomentumPullPlots: public PlotBase {
   public:
-    MomentumPullPlots(PlotBase *pParent, std::string sDir) :
+    MomentumPullPlots(PlotBase *pParent, const std::string& sDir) :
       PlotBase(pParent, sDir){}
       void fill(const xAOD::Muon& mu, float weight=1.0);
 
