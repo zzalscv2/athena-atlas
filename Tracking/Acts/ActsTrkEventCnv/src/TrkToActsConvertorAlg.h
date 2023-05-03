@@ -36,7 +36,6 @@ class TrkToActsConvertorAlg : public AthReentrantAlgorithm {
       {"CombinedInDetTracks", "CombinedMuonTracks", "MuonSpectrometerTracks"},
       "Keys for Track Containers"};
   
-  SG::WriteHandleKey<ActsTrk::ConstMultiTrajectory> m_mtjKey {this, "MultiTrajectoryLocation", "ConvertedMultiTrajectory", "Location of the converted MultiTrajectory"};
   SG::WriteHandleKey<Acts::ConstVectorTrackContainer> m_vectorTrackContainer {this, "VectorTrackContainerLocation", "ConvertedVectorTrackContainer", "Location of the converted VectorTrackContainer"};
   SG::WriteHandleKey<xAOD::TrackStateContainer> m_trackStatesKey {this, "TrackStatesLocation", "ConvertedTrackStates", "Location of the converted TrackStates"}; 
   SG::WriteHandleKey<xAOD::TrackJacobianContainer> m_jacobiansKey {this, "TrackJacobiansLocation", "ConvertedTrackJacobians", "Location of the converted TrackJacobians"};

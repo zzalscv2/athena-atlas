@@ -14,7 +14,6 @@ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 StatusCode ActsTrk::TrkToActsConvertorAlg::initialize() {
   ATH_CHECK(m_trackCollectionKeys.initialize());
-  ATH_CHECK(m_mtjKey.initialize());
   ATH_CHECK(m_vectorTrackContainer.initialize());
   ATH_CHECK(m_trackStatesKey.initialize());
   ATH_CHECK(m_jacobiansKey.initialize());
@@ -78,12 +77,6 @@ StatusCode ActsTrk::TrkToActsConvertorAlg::execute(
   // Let's dump some information for debugging (will be removed later)
   ATH_MSG_VERBOSE("TrackStateContainer has  " << states->size() << " states");
   ATH_MSG_VERBOSE("TrackParametersContainer has  " << parameters->size() << " parameters");
-
-  // Store the MultiTrajectory
-  SG::WriteHandle<ActsTrk::ConstMultiTrajectory> wh_mtj(m_mtjKey, ctx);
-  auto constMultiTraj = std::make_unique<ConstMultiTrajectory>(*multiTraj.get()); // No move ctor?
-  ATH_MSG_VERBOSE("Saving " << constMultiTraj->size() << " MT to "<< wh_mtj.key());
-  ATH_CHECK(wh_mtj.record(std::move(constMultiTraj)));
 
   // Store the VectorTrackContainer
   auto constVecTrackCont = std::make_unique<Acts::ConstVectorTrackContainer>(std::move(vecTrk)); 
