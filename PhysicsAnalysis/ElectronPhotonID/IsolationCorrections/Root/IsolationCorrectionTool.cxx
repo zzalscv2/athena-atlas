@@ -22,7 +22,7 @@ namespace CP {
 
   IsolationCorrectionTool::IsolationCorrectionTool( const std::string &name )
     : asg::AsgMetadataTool(name), m_systDDonoff("PH_Iso_DDonoff") {
-    declareProperty("CorrFile",                    m_corr_file                      = "IsolationCorrections/v5/isolation_ptcorrections_rel20_2.root");
+    declareProperty("CorrFile",                    m_corr_file                      = "IsolationCorrections/v5/isolation_ptcorrections_rel20_2.root") ;
     declareProperty("CorrFile_ddshift",            m_corr_ddshift_file              = "IsolationCorrections/v3/isolation_ddcorrection_shift.root");
     declareProperty("CorrFile_ddsmearing",         m_corr_ddsmearing_file           = "IsolationCorrections/v1/isolation_ddcorrection_smearing.root", "a run I smearing for MC calo iso");
     declareProperty("ToolVer",                     m_tool_ver_str                   = "REL21");
@@ -33,12 +33,12 @@ namespace CP {
     declareProperty("Trouble_categories",          m_trouble_categories             = true);
     declareProperty("LogLogFitForLeakage",         m_useLogLogFit                   = false);
     declareProperty("ForcePartType",               m_forcePartType                  = false);
-    declareProperty("Apply_ddshifts",              m_apply_ddDefault                = true);
+    declareProperty("Apply_ddshifts",              m_apply_ddDefault                = false);
     declareProperty("Apply_SC_leakcorr",           m_apply_SC_leak_corr             = false);
     declareProperty("Apply_etaEDParPU_correction",     m_apply_etaEDParPU_corr      = false);
     declareProperty("Apply_etaEDPar_mc_correction",    m_apply_etaEDParPU_mc_corr   = false);
-    declareProperty("CorrFile_etaEDParPU_correction",  m_corr_etaEDParPU_file       = "IsolationCorrections/v4/zetas.root");
-    declareProperty("CorrFile_etaEDPar_mc_correction", m_corr_etaEDPar_mc_corr_file = "IsolationCorrections/v4/zetas_correction.root");
+    declareProperty("CorrFile_etaEDParPU_correction",  m_corr_etaEDParPU_file       = "IsolationCorrections/v6/zetas.root");
+    declareProperty("CorrFile_etaEDPar_mc_correction", m_corr_etaEDPar_mc_corr_file = "IsolationCorrections/v6/zetas_correction.root");
 
     m_isol_corr = new IsolationCorrection(name);
   }
@@ -76,11 +76,12 @@ namespace CP {
 
     CP::IsolationCorrection::Version tool_ver;
 
-    if      (m_tool_ver_str == "REL21")   tool_ver = CP::IsolationCorrection::REL21;
+    if      (m_tool_ver_str == "REL22")   tool_ver = CP::IsolationCorrection::REL22;
+    else if (m_tool_ver_str == "REL21")   tool_ver = CP::IsolationCorrection::REL21;
     else if (m_tool_ver_str == "REL20_2") tool_ver = CP::IsolationCorrection::REL20_2;
     else if (m_tool_ver_str == "REL17_2") tool_ver = CP::IsolationCorrection::REL17_2;
     else {
-      ATH_MSG_WARNING("Tool version not recognized: "<<m_tool_ver_str<<"\nAllowed versions: REL21, REL20_2, REL17_2");
+      ATH_MSG_WARNING("Tool version not recognized: "<<m_tool_ver_str<<"\nAllowed versions: REL22, REL21, REL20_2, REL17_2");
       return StatusCode::FAILURE;
     }
 
@@ -90,6 +91,10 @@ namespace CP {
     }
 
     if (TString(corrFileNameList[0]).Contains("isolation_ptcorrections_rel20_2.root") && !( m_tool_ver_str == "REL20_2" || m_tool_ver_str == "REL21" ) ){
+      ATH_MSG_WARNING("The specified correction file is not for "<<m_tool_ver_str<<" please use proper correction file");
+      return StatusCode::FAILURE;
+    }
+    if (TString(corrFileNameList[0]).Contains("isolation_ptcorrections_rel22_") &&  m_tool_ver_str != "REL22" ){
       ATH_MSG_WARNING("The specified correction file is not for "<<m_tool_ver_str<<" please use proper correction file");
       return StatusCode::FAILURE;
     }
@@ -233,6 +238,7 @@ namespace CP {
     }
 
     static const std::vector<xAOD::Iso::IsolationType> topoisolation_types = {xAOD::Iso::topoetcone20,
+									                                                            xAOD::Iso::topoetcone30,
 									                                                            xAOD::Iso::topoetcone40};
     for (auto type : topoisolation_types) {
       float oldleak = 0.;
