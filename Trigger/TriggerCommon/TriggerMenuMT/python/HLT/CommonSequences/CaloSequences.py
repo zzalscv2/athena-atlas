@@ -35,7 +35,6 @@ def fastCaloMenuSequenceCfg(flags, name, doRinger=True, is_probe_leg=False):
     reco = InViewRecoCA("EMCalo",InViewRoIs=InViewRoIs,isProbe=is_probe_leg)
     reco.mergeReco(fastCaloVDVCfg(InViewRoIs=InViewRoIs))
     robPrefetchAlg = ROBPrefetchingAlgCfg_Calo( flags, nameSuffix=InViewRoIs+'_probe' if is_probe_leg else InViewRoIs)
-    #reco.mergeReco(robPrefetchAlg)
     reco.mergeReco(fastCaloRecoSequenceCfg(flags, inputEDM=InViewRoIs,ClustersName=output))
     selAcc.mergeReco(reco, robPrefetchCA=robPrefetchAlg)
 
