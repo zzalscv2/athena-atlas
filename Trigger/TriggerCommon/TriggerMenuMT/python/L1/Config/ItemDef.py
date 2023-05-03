@@ -321,6 +321,30 @@ class ItemDef:
         MenuItem('L1_TE4_VTE200_EMPTY'   ).setLogic( d.TE4  & Not(d.TE200) & cosmiccond).setTriggerType( TT.calo )
         MenuItem('L1_TE5_VTE200_EMPTY'   ).setLogic( d.TE5  & Not(d.TE200) & cosmiccond).setTriggerType( TT.calo )
 
+        #HI phase-1
+        # additional L1_GAP items defined using jTEFWDA or JTEFWDC
+
+        GAPA = Not(d.jTEFWDA5)
+        GAPC = Not(d.jTEFWDC5)
+        GAPAC = Not(d.jTEFWDA5) & Not(d.jTEFWDC5)
+
+        MenuItem('L1_GAP_A').setLogic( GAPA & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_GAP_C').setLogic( GAPC & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_GAP_AANDC').setLogic( GAPAC  & physcond).setTriggerType(TT.calo)
+
+        MenuItem('L1_eEM1_VjTE200').setLogic( d.eEM1      & Not(d.jTE200) & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_2eEM1_VjTE200').setLogic( d.eEM1.x(2)      & Not(d.jTE200) & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_2eEM2_VjTE200').setLogic( d.eEM2.x(2)      & Not(d.jTE200) & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_2eEM1_VjTE200_GAP_AANDC').setLogic( d.eEM1.x(2)      & Not(d.jTE200) & GAPAC  & physcond).setTriggerType(TT.calo)
+
+        MenuItem('L1_VjTE200_GAP_A'         ).setLogic(  Not(d.jTE200) & GAPA  & physcond).setTriggerType( TT.calo )
+        MenuItem('L1_VjTE200_GAP_C'         ).setLogic(  Not(d.jTE200) & GAPC  & physcond).setTriggerType( TT.calo )
+        MenuItem('L1_jTE3_VjTE200_GAP_A'         ).setLogic( d.jTE3  & Not(d.jTE200) & GAPA  & physcond).setTriggerType( TT.calo )
+        MenuItem('L1_jTE3_VjTE200_GAP_C'         ).setLogic( d.jTE3  & Not(d.jTE200) & GAPC  & physcond).setTriggerType( TT.calo )
+        MenuItem('L1_jTE5_VjTE200'         ).setLogic( d.jTE5  & Not(d.jTE200) & physcond).setTriggerType( TT.calo )
+        MenuItem('L1_jTE5_VjTE200_GAP_A'         ).setLogic( d.jTE5  & Not(d.jTE200) & GAPA  & physcond).setTriggerType( TT.calo )
+        MenuItem('L1_jTE5_VjTE200_GAP_C'         ).setLogic( d.jTE5  & Not(d.jTE200) & GAPC  & physcond).setTriggerType( TT.calo )
+
         # NSW Monitoring
         MenuItem('L1_NSW_MONITOR').setLogic(d.NSWMon & physcond ).setTriggerType(TT.nsw)
 
@@ -419,6 +443,13 @@ class ItemDef:
         MenuItem('L1_2MU5VF_UNPAIRED_NONISO').setLogic(d.MU5VF.x(2) & unpaired_nonisocond).setTriggerType( TT.muon )
         MenuItem('L1_2MU5VF_EMPTY'          ).setLogic(d.MU5VF.x(2) & cosmiccond).setTriggerType( TT.muon )
         MenuItem('L1_2MU5VF_FIRSTEMPTY'     ).setLogic(d.MU5VF.x(2) & firstempty).setTriggerType( TT.muon )
+
+        # HI - phase-1
+        MenuItem('L1_MU3V_VjTE50'  ).setLogic( d.MU3V      & Not(d.jTE50) & physcond).setTriggerType(TT.muon)
+        MenuItem('L1_MU5VF_VjTE50').setLogic( d.MU5VF    & Not(d.jTE50) & physcond).setTriggerType(TT.muon)
+        MenuItem('L1_2MU3V_VjTE50').setLogic( d.MU3V.x(2) & Not(d.jTE50) & physcond).setTriggerType(TT.muon)
+        MenuItem('L1_MU3V_VjTE50_GAP_AANDC'  ).setLogic( d.MU3V      &  Not(d.jTE50) & GAPAC  & physcond).setTriggerType(TT.muon)
+        
 
         # EM and MU
         MenuItem('L1_EM7_MU8F'       ).setLogic( d.EM7        & d.MU8F     & physcond).setTriggerType(TT.muon)
@@ -892,17 +923,15 @@ class ItemDef:
         MenuItem('L1_jTEFWDA100' ).setLogic( d.jTEFWDA100 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jTEFWDC100' ).setLogic( d.jTEFWDC100 & physcond).setTriggerType(TT.calo)
         # additional jTE items for 2023 heavy ion runs
+        MenuItem('L1_jTE20'     ).setLogic( d.jTE20  & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_jTE50'     ).setLogic( d.jTE50  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jTE600'     ).setLogic( d.jTE600  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jTE1500'    ).setLogic( d.jTE1500 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jTE3000'    ).setLogic( d.jTE3000 & physcond).setTriggerType(TT.calo)
         # additional VjTE items for 2023 heavy ion runs
+        MenuItem('L1_VjTE50'    ).setLogic( Not(d.jTE50)  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_VjTE200'    ).setLogic( Not(d.jTE200)  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_VjTE600'    ).setLogic( Not(d.jTE600)  & physcond).setTriggerType(TT.calo)
-        # additional L1_GAP items defined using jTEFWDA or JTEFWDC
-        # low boundary of L1_GAP is set to 1 GeV for now, should be checked/optimized
-        MenuItem('L1_GAP_A' ).setLogic( d.jTEFWDA1 & Not(d.jTEFWDA5) & physcond).setTriggerType(TT.calo)
-        MenuItem('L1_GAP_C' ).setLogic( d.jTEFWDC1 & Not(d.jTEFWDC5) & physcond).setTriggerType(TT.calo)
-        MenuItem('L1_GAP_AANDC' ).setLogic( d.jTEFWDA1 & d.jTEFWDC1 & Not(d.jTEFWDA5) & Not(d.jTEFWDC5) & physcond).setTriggerType(TT.calo)
 
         MenuItem('L1_XE10').setLogic( d.XE10 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_XE20').setLogic( d.XE20 & physcond).setTriggerType(TT.calo)
@@ -1093,6 +1122,10 @@ class ItemDef:
         MenuItem('L1_MBTS_1_VTE70'    ).setLogic( MBTS_1  & Not(d.TE70) & physcond)
         MenuItem('L1_MBTS_1_VTE50'    ).setLogic( MBTS_1  & Not(d.TE50) & physcond)
         MenuItem('L1_MBTS_1_VTE200'   ).setLogic( MBTS_1  & Not(d.TE200) & physcond)
+        # phase-1
+        MenuItem('L1_MBTS_1_VjTE200'   ).setLogic( MBTS_1  & Not(d.jTE200) & physcond)
+        MenuItem('L1_MBTS_1_VjTE200_GAP_A'   ).setLogic( MBTS_1  & Not(d.jTE200) & GAPA & physcond)
+        MenuItem('L1_MBTS_1_VjTE200_GAP_C'   ).setLogic( MBTS_1  & Not(d.jTE200) & GAPC & physcond)
 
         MenuItem('L1_MBTS_2_VTE2'     ).setLogic( MBTS_2  & Not(d.TE2) & physcond)
         MenuItem('L1_MBTS_2_VTE3'     ).setLogic( MBTS_2  & Not(d.TE3) & physcond)
@@ -1443,6 +1476,10 @@ class ItemDef:
         MenuItem('L1_TRT_VTE200').setLogic(d.NIMTRT & Not(d.TE200) & physcond)
         MenuItem('L1_TRT_VTE50' ).setLogic(d.NIMTRT & Not(d.TE50)  & physcond)
         MenuItem('L1_TRT_VTE20' ).setLogic(d.NIMTRT & Not(d.TE20)  & physcond)
+
+        #TRT + Phase-1 Calo
+        MenuItem('L1_TRT_VjTE50' ).setLogic(d.NIMTRT & Not(d.jTE50)  & physcond)
+        MenuItem('L1_TRT_VjTE50_GAP_AANDC' ).setLogic(d.NIMTRT & Not(d.jTE50) & GAPAC  & physcond)
 
         # TGC
         MenuItem('L1_TGC_BURST').setLogic(d.NIMTGC & bgrp12cond ).setTriggerType(TT.nim)
