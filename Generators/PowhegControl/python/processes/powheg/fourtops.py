@@ -81,6 +81,7 @@ class fourtops(PowhegV2):
         self.add_keyword("compress_lhe")
         self.add_keyword("compress_upb")
         self.add_keyword("compute_rwgt")
+        self.add_keyword("correlations", 1)
         self.add_keyword("dampscfact", 1.0)
         self.add_keyword("decay_signature", "0")
         self.add_keyword("doublefsr")
