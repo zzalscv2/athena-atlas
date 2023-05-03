@@ -7,6 +7,8 @@
 #include <AthenaBaseComps/AthCheckMacros.h>
 #include <Acts/Surfaces/PlaneSurface.hpp>
 using namespace ActsTrk;
+
+namespace MuonGMR4 {
 std::ostream& operator<<(
     std::ostream& ostr,
     const MuonGMR4::MdtReadoutElement::parameterBook& pars) {
@@ -21,7 +23,6 @@ std::ostream& operator<<(
         ostr << " //    **** " << Amg::toString(tube) << std::endl;
     return ostr;
 }
-namespace MuonGMR4 {
 MdtReadoutElement::MdtReadoutElement(defineArgs&& args)
     : MuonReadoutElement(std::move(args)),
       m_pars{std::move(args)} {
