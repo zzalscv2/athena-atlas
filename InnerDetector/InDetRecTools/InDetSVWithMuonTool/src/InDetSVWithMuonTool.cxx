@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header include
@@ -44,9 +44,10 @@ InDetSVWithMuonTool::InDetSVWithMuonTool(const std::string& type,
     m_existIBL(true),
     m_RobustFit(5),
     m_Rbeampipe (0.),  //Correct values are filled     
-    m_RlayerB   (0.),  // in jobO or initialize()
+    m_RlayerB   (0.),  // in initialize()
     m_Rlayer1   (0.),
     m_Rlayer2   (0.),
+    m_Rlayer3   (0.),
     m_fitterSvc("Trk::TrkVKalVrtFitter/VertexFitterTool",this)
    {
     declareInterface<ISVWithMuonFinder>(this);
@@ -79,19 +80,7 @@ InDetSVWithMuonTool::InDetSVWithMuonTool(const std::string& type,
 
     declareProperty("RobustFit",  m_RobustFit, "Use vertex fit with RobustFit functional(VKalVrt) for common secondary vertex fit" );
 
-    declareProperty("Rbeampipe", m_Rbeampipe);
-    declareProperty("RlayerB",   m_RlayerB  );
-    declareProperty("Rlayer1",   m_Rlayer1  );
-    declareProperty("Rlayer2",   m_Rlayer2  );
-
-
     declareProperty("VertexFitterTool", m_fitterSvc);
-//
-    m_iflag=0;
-    m_massPi  = 139.5702 ;
-    m_massP   = 938.272  ;
-    m_massE   =   0.511  ;
-    m_massB   =5279.400  ;
 
    }
 
@@ -143,7 +132,6 @@ InDetSVWithMuonTool::InDetSVWithMuonTool(const std::string& type,
        ATH_CHECK( histSvc.retrieve() );
        m_h = std::make_unique<Hists>();
        ATH_CHECK( m_h->book (*histSvc) );
-       m_w_1 = 1.;
      }
 
 
