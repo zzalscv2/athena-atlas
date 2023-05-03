@@ -556,7 +556,7 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
   const std::vector<LVL1::MuCTPIBits::Slice> &slices = theMuCTPI_Phase1_RDO->slices();
 
   //count veto'd candidates, to be able to adjust the comparison between candidates and TOBs later
-  uint n_cand_veto;
+  uint n_cand_veto,n_cand_A,n_cand_C;
 
   //https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TrigT1/TrigT1Result/src/MuCTPI_DataWord_Decoder.cxx
   //https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TrigT1/TrigT1Result/TrigT1Result/MuCTPI_DataWord_Decoder.h
@@ -644,6 +644,8 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
 	  }
 
       n_cand_veto=0;
+      n_cand_A=0;
+      n_cand_C=0;
 
 	  for(uint iCand=0;iCand<slices[iSlice].cand.size();iCand++)
 	  {
@@ -665,6 +667,9 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
 		  float candEta = slices[iSlice].cand[iCand].eta;
 		  float candPhi = slices[iSlice].cand[iCand].phi;
 		  bool vetoFlag = slices[iSlice].cand[iCand].vetoFlag;
+          bool side     = slices[iSlice].cand[iCand].side;
+          if(side) n_cand_A++; else n_cand_C++;//only needed to make sure we have less than 16 cands/side for later check against TOB words
+
           if(vetoFlag)
               n_cand_veto++;
 		  
@@ -1305,9 +1310,15 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
 				  }
 				  else 
 				  {
-					  ATH_MSG_WARNING("(Eta,Phi) coordinates not matching between TOB word and Candidate word.  LB="<<std::dec<<currentLumiBlock);
-					  ATH_MSG_WARNING("TOB  (Eta,Phi): (" << slices[iSlice].tob[iTOB].etaDecoded << "," << slices[iSlice].tob[iTOB].phiDecoded << ")");
-					  ATH_MSG_WARNING("cand (Eta,Phi): (" << slices[iSlice].cand[j].eta << "," << slices[iSlice].cand[j].phi << ")");
+                      std::string type="B";
+                      if(slices[iSlice].tob[iTOB].subsystem==1) type="E";
+                      else if(slices[iSlice].tob[iTOB].subsystem==2) type="F";
+                      std::string side;
+                      if(slices[iSlice].tob[iTOB].side) side="A"; else side="C";
+                      ATH_MSG_WARNING("(Eta,Phi) coordinates not matching between TOB word and Candidate word.  LB="<<std::dec<<currentLumiBlock<<" BCID "<<currentBCID);
+                      ATH_MSG_WARNING("Sector: " << type << side << slices[iSlice].tob[iTOB].sec << " PT "<<slices[iSlice].tob[iTOB].pt);
+                      ATH_MSG_WARNING("TOB  (Eta,Phi): (" << slices[iSlice].tob[iTOB].etaDecoded << "," << slices[iSlice].tob[iTOB].phiDecoded << ")");
+                      ATH_MSG_WARNING("cand (Eta,Phi): (" << slices[iSlice].cand[j].eta << "," << slices[iSlice].cand[j].phi << ")");
 
 					  errorSummaryMUCTPI=5;
 					  fill(m_packageName, errorSummaryMUCTPI);
@@ -1317,17 +1328,21 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
 				  }
 			  }
 
-              if(!found_match)
-              {
-                  ATH_MSG_WARNING("Didn't find TOB match for candidate:");
-                  slices[iSlice].cand[j].print();
 
-                  errorSummaryMUCTPI=5;
-                  fill(m_packageName, errorSummaryMUCTPI);
-                  errorSummaryPerLumiBlockMUCTPIX=currentLumiBlock;
-                  errorSummaryPerLumiBlockMUCTPIY=5;
-                  fill(m_packageName, errorSummaryPerLumiBlockMUCTPIX, errorSummaryPerLumiBlockMUCTPIY);
-              }
+              //if didn't exceed 16 cand/side, then topo should match cand words and should always have a match
+              //(otherwise, there will be cand words without TOB word equivalent)
+              if(n_cand_A<=16 && n_cand_C<=16)
+                  if(!found_match)
+                  {
+                      ATH_MSG_WARNING("Didn't find TOB match for candidate:");
+                      slices[iSlice].cand[j].print();
+
+                      errorSummaryMUCTPI=5;
+                      fill(m_packageName, errorSummaryMUCTPI);
+                      errorSummaryPerLumiBlockMUCTPIX=currentLumiBlock;
+                      errorSummaryPerLumiBlockMUCTPIY=5;
+                      fill(m_packageName, errorSummaryPerLumiBlockMUCTPIX, errorSummaryPerLumiBlockMUCTPIY);
+                  }
 
           }//cand loop
 
@@ -1338,9 +1353,9 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* the
       //combined
       //-------------------------------------------------
 
-      ///if topo<=32, check if equal number of words
-      ///todo: maybe should move this check in the RDO building actually...?
-      if(slices[iSlice].tob.size()<=32) {
+      //if didn't exceed 16 cand/side, then topo should match cand words (otherwise, this check doesn't make sense)
+      if(n_cand_A<=16 && n_cand_C<=16)
+      {
           if(slices[iSlice].cand.size()-n_cand_veto!=slices[iSlice].tob.size())
 		  {
               ATH_MSG_INFO("MUCTPI DQ INFO: Cand & TOB #words not equal. LB="
