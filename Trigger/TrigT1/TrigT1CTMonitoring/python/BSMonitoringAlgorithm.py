@@ -575,7 +575,7 @@ def BSMonitoringConfig(inputFlags):
 
         #mult
         monPath="/MUCTPI/Mult"
-        myGroup.defineHistogram('multThrX',title='MLT thresholds total count;',type='TH1I',path=monPath,xbins=32,xmin=-0.5,xmax=31.5,opt='kAlwaysCreate')
+        myGroup.defineHistogram('multThrX;multThr',title='MLT thresholds total count;',type='TH1I',path=monPath,xbins=32,xmin=-0.5,xmax=31.5,opt='kAlwaysCreate')
         myGroup.defineHistogram('multThrVsLBX,multThrVsLBY;multThrVsLB', title='MLT thresholds total count - per LB', type='TH2F',path=monPath,xbins=2000,xmin=0,xmax=2000,ybins=32,ymin=-0.5,ymax=31.5,opt='kAlwaysCreate')
 
         myGroup.defineHistogram('multBitsX;multBits', title='MLT bits total count', path=monPath,xbins=64,xmin=-0.5,xmax=63.5,opt='kAlwaysCreate')

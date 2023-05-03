@@ -63,10 +63,12 @@ MUCTPISLTiming::execute( const std::string& name, const TObject& object, const d
 
   //Get Parameters and Thresholds
   double thresh=0.5;
+  double minstat=-1;
   int centralBin=4; // the middle of 7 bins;
 
   try {
-      thresh     = dqm_algorithms::tools::GetFirstFromMap("thresh", config.getParameters(), 0.5);
+      thresh  = dqm_algorithms::tools::GetFirstFromMap("thresh", config.getParameters(), 0.5);
+      minstat = dqm_algorithms::tools::GetFirstFromMap( "MinStat", config.getParameters(), -1);
   }
   catch ( dqm_core::Exception & ex ) {
     throw dqm_core::BadConfig( ERS_HERE, name, ex.what(), ex );
@@ -107,6 +109,12 @@ MUCTPISLTiming::execute( const std::string& name, const TObject& object, const d
   if(howmanybad>2)
       result->status_ = dqm_core::Result::Red;
 
+  Double_t stats[7];
+  hist->GetStats(stats);
+  //if not enough stats, reset the result (but keep this here, so can still see the tag for bad SL)
+  if(stats[0]<minstat)
+      result->status_ = dqm_core::Result::Undefined;
+
   // Return the result
   return result;
 }
@@ -117,7 +125,7 @@ MUCTPISLTiming::printDescription(std::ostream& out){
   std::string message;
   message += "\n";
   message += "Algorithm: \"" + m_name + "\"\n";
-  message += "Description: for each SL x-slice (set of y-bins for the same x value) check that the central y bin has at least X percent of the sum of value in the SL \n";
+  message += "Description: for each SL x-slice (set of y-bins for the same x value) check that the central y bin has at least 'thresh' percent(ratio) of the sum of values in the SL \n";
   out << message;
 }
 
