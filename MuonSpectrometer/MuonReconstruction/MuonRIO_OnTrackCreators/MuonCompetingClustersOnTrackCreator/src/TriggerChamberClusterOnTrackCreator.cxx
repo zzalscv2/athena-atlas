@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TriggerChamberClusterOnTrackCreator.h"
@@ -333,7 +333,7 @@ TriggerChamberClusterOnTrackCreator::makeOverallParameters(
       parameters	+= (**r).localParameters();
     }
     double norm			= 1.;
-    if(limitingRots.size()>0) norm /= static_cast<double>(limitingRots.size());
+    norm /= static_cast<double>(limitingRots.size());
     std::list<int>::iterator l	= limitingChannels.begin();
     int firstChannel   		= *l;
     double width		= static_cast<double>(1 + abs(*(++l) - firstChannel));
