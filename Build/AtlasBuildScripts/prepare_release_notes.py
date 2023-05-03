@@ -137,7 +137,7 @@ def sanitize_args(target_release, nightly_tag, keep_going=False):
     else:
         branch_rel = '.'.join([rel_match.group('ver'), rel_match.group('maj')])
         branch_nig = nig_match.group('branch')
-        if branch_rel != branch_nig and branch_rel not in ('22.0', 'master', 'main'):
+        if branch_rel not in (branch_nig,'22.0') and branch_nig not in ('main','master'):
             print("You are creating a tag for %s from a nightly from %s" %
                   (branch_rel, branch_nig))
             if not keep_going:
