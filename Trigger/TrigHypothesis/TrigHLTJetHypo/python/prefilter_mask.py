@@ -1,22 +1,11 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from TrigHLTJetHypo.RepeatedConditionParams import RepeatedConditionParams
 from TrigHLTJetHypo.ConditionDefaults import defaults
-
-from TrigHLTJetHypo.make_repeatedCondConfigurer import (
-    make_repeatedCondCfgFromParams,
-)
-
+from TrigHLTJetHypo.make_repeatedCondConfigurer import make_repeatedCondCfgFromParams
 from TrigHLTJetHypo.FastReductionAlgToolFactory import toolfactory
 
-from AthenaCommon.Logging import logging
-from AthenaCommon.Constants import DEBUG
-
 import re
-from copy import deepcopy
-
-logger = logging.getLogger( __name__)
-logger.setLevel(DEBUG)
 
 pattern = r'^MASK'\
     r'(?P<etalo>\d*)(?P<etatype>neta|ceta|peta>)(?P<etahi>\d*)XX'\
@@ -56,10 +45,10 @@ def prefilter_mask(pf_string):
     condargs = []
     
     vals = defaults(etatype, lo=etalo, hi=etahi)
-    condargs.append((etatype, deepcopy(vals)))
+    condargs.append((etatype, vals))
       
     vals = defaults(phitype, lo=philo, hi=phihi)
-    condargs.append((phitype, deepcopy(vals)))
+    condargs.append((phitype, vals))
 
     repcondarg = RepeatedConditionParams(tree_id=0,
                                          tree_pid=0,

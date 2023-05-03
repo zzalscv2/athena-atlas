@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from TrigHLTJetHypo.RepeatedConditionParams import RepeatedConditionParams
 from TrigHLTJetHypo.FilterParams import FilterParams
@@ -6,14 +6,8 @@ from TrigHLTJetHypo.HelperConfigToolParams import HelperConfigToolParams
 from TrigHLTJetHypo.ConditionDefaults import defaults
 from TrigHLTJetHypo.make_treevec import make_treevec
 
-from AthenaCommon.Logging import logging
-from AthenaCommon.Constants import DEBUG
-
 import re
-from copy import deepcopy
 
-logger = logging.getLogger( __name__)
-logger.setLevel(DEBUG)
 
 pattern_pt_threshold = r'^HT(?P<htlo>\d+)'\
     r'(XX(?P<ptlo>\d*)pt(?P<pthi>\d*))?'
@@ -51,17 +45,17 @@ def get_conditionfilter_args_from_matchdict(groupdict, threshold_var):
     vals = defaults(threshold_var,
                     groupdict[threshold_var+'lo'],
                     groupdict[threshold_var+'hi'])
-    condargs.append((threshold_var, deepcopy(vals)))
+    condargs.append((threshold_var, vals))
         
     vals = defaults('eta',
                     groupdict['etalo'],
                     groupdict['etahi'])
-    condargs.append(('eta', deepcopy(vals)))
+    condargs.append(('eta', vals))
 
     # optional
     if groupdict['jvtlo'] is not None:
         vals = defaults('jvt', groupdict['jvtlo'])
-        condargs.append(('jvt', deepcopy(vals)))
+        condargs.append(('jvt', vals))
 
     return condargs
 
@@ -86,7 +80,7 @@ def scenario_ht(scenario, chainPartInd):
                     groupdict['htlo'])
 
     # find the constructor arguments for each elemental condition
-    condargs.append(('ht', deepcopy(vals)))
+    condargs.append(('ht', vals))
     
     # treeVec is [0, 0] handle non-root nodes here
     repcondargs = [RepeatedConditionParams(tree_id = 1,
