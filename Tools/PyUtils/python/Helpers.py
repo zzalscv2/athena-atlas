@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # @author: Sebastien Binet <binet@cern.ch>
 # @date:   March 2007
@@ -9,12 +9,15 @@ import re
 import os
 import sys
 from functools import cache
-
-from AthenaCommon.Logging import log
 from tempfile import NamedTemporaryFile
+# !!!
+# Do not add any Athena dependencies at the module-level as some of the code here
+# is used during the build (see athena!62739).
+# !!!
 
 
 def ROOT6Setup(batch=False):
+   from AthenaCommon.Logging import log
    log.info('executing ROOT6Setup')
    import builtins as builtin_mod
    oldimporthook = builtin_mod.__import__

@@ -32,6 +32,7 @@ Muon::STGC_ROD_Decoder::STGC_ROD_Decoder(const std::string& t, const std::string
 StatusCode Muon::STGC_ROD_Decoder::initialize()
 {
   ATH_CHECK(detStore()->retrieve(m_stgcIdHelper, "STGCIDHELPER"));
+  ATH_CHECK(m_dscKey.initialize(!m_dscKey.empty()));
   return StatusCode::SUCCESS;
 }
 
@@ -42,15 +43,28 @@ StatusCode Muon::STGC_ROD_Decoder::initialize()
 // (only requested modules are decoded). This must be made here, because the 
 // trigger granularity is quadruplet, whereas ROB granularity is a whole sector 
 // (or wedge). Therefore, refined selection is needed with decoded information.
-StatusCode Muon::STGC_ROD_Decoder::fillCollection(const ROBFragment& robFrag, const std::vector<IdentifierHash>& rdoIdhVect, std::unordered_map<IdentifierHash, std::unique_ptr<STGC_RawDataCollection>>& rdo_map) const
+StatusCode Muon::STGC_ROD_Decoder::fillCollection(const EventContext& ctx,
+                                                  const ROBFragment& robFrag, 
+                                                  const std::vector<IdentifierHash>& rdoIdhVect, 
+                                                  std::unordered_map<IdentifierHash, std::unique_ptr<STGC_RawDataCollection>>& rdo_map) const
 {
 
   // check fragment for errors
   try {
     robFrag.check();
-  } catch (eformat::Issue &ex) {
+  } catch (const eformat::Issue &ex) {
     ATH_MSG_WARNING(ex.what());
     return StatusCode::SUCCESS;
+  }
+  
+  const NswDcsDbData* dcsData{nullptr};
+  if(!m_dscKey.empty()) {
+     SG::ReadCondHandle<NswDcsDbData> readCondHandle{m_dscKey, ctx};
+     if(!readCondHandle.isValid()){
+        ATH_MSG_ERROR("Cannot find the NSW DcsCondDataObj "<<m_dscKey.fullKey());
+        return StatusCode::FAILURE;
+     }
+     dcsData = readCondHandle.cptr();
   }
 
   // if the vector of hashes is not empty, then we are in seeded mode
@@ -83,10 +97,9 @@ StatusCode Muon::STGC_ROD_Decoder::fillCollection(const ROBFragment& robFrag, co
 
     // if we are in ROI-seeded mode, check if this hashID is requested
     if (seeded_mode && std::find(rdoIdhVect.begin(), rdoIdhVect.end(), module_hashID) == rdoIdhVect.end()) continue;
-
-    if (!rdo_map[module_hashID]) rdo_map[module_hashID] = std::make_unique<STGC_RawDataCollection>(module_hashID);
-    STGC_RawDataCollection* rdo = rdo_map[module_hashID].get();
-
+    std::unique_ptr<STGC_RawDataCollection>& rdo = rdo_map[module_hashID];
+    if (!rdo) rdo = std::make_unique<STGC_RawDataCollection>(module_hashID);
+  
     // loop on all channels of this elink to fill the collection
     const std::vector<Muon::nsw::VMMChannel *>& channels = elink->get_channels();
     for (auto channel : channels) {
@@ -94,8 +107,8 @@ StatusCode Muon::STGC_ROD_Decoder::fillCollection(const ROBFragment& robFrag, co
        unsigned int channel_type   = channel->channel_type();
        if (channel_number == 0) continue; // skip disconnected vmm channels
 
-       Identifier channel_ID = m_stgcIdHelper->channelID(module_ID, multi_layer, gas_gap, channel_type, channel_number); // not validating the IDs (too slow)
-
+       const Identifier channel_ID = m_stgcIdHelper->channelID(module_ID, multi_layer, gas_gap, channel_type, channel_number); // not validating the IDs (too slow)
+       if (dcsData && !dcsData->isGood(channel_ID)) continue;
        bool timeAndChargeInCounts = true; // always true for data from detector
        rdo->push_back(new STGC_RawData(channel_ID, channel->rel_bcid(), channel->tdo(), channel->pdo(), false,timeAndChargeInCounts)); // isDead = false (ok?)
     }

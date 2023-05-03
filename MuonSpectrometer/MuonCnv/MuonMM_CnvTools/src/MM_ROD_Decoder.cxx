@@ -31,6 +31,7 @@ StatusCode Muon::MM_ROD_Decoder::initialize()
 {
   ATH_CHECK(detStore()->retrieve(m_MmIdHelper, "MMIDHELPER"));
   ATH_CHECK(m_cablingKey.initialize(!m_cablingKey.empty()));
+  ATH_CHECK(m_dscKey.initialize(!m_dscKey.empty()));
   return StatusCode::SUCCESS;
 }
 
@@ -58,6 +59,15 @@ StatusCode Muon::MM_ROD_Decoder::fillCollection(const EventContext& ctx, const O
         return StatusCode::FAILURE;
       }
       mmCablingMap = readCondHandle.cptr();
+  }
+  const NswDcsDbData* dcsData{nullptr};
+  if(!m_dscKey.empty()) {
+     SG::ReadCondHandle<NswDcsDbData> readCondHandle{m_dscKey, ctx};
+     if(!readCondHandle.isValid()){
+        ATH_MSG_ERROR("Cannot find the NSW DcsCondDataObj "<<m_dscKey.fullKey());
+        return StatusCode::FAILURE;
+     }
+     dcsData = readCondHandle.cptr();
   }
  
 
@@ -101,7 +111,6 @@ StatusCode Muon::MM_ROD_Decoder::fillCollection(const EventContext& ctx, const O
        unsigned int channel_number = channel->channel_number();
        if (channel_number == 0) continue; // skip disconnected vmm channels
        Identifier channel_ID = m_MmIdHelper->channelID(module_ID, multi_layer, gas_gap, channel_number);  // not validating the IDs (too slow)
-       
        // now we have to check if for this channel there is a correction of the cabling needed
        if (mmCablingMap) {
           std::optional<Identifier> correctedChannelId = mmCablingMap->correctChannel(channel_ID, msgStream());
@@ -112,6 +121,8 @@ StatusCode Muon::MM_ROD_Decoder::fillCollection(const EventContext& ctx, const O
           channel_ID = (*correctedChannelId);
           channel_number = m_MmIdHelper->channel(channel_ID);
        }
+       if (dcsData && !dcsData->isGood(channel_ID)) continue;
+       
        rdo->push_back(new MM_RawData(channel_ID, channel_number, channel->tdo(), 
                                      channel->pdo(), channel->rel_bcid(), true));      
     }

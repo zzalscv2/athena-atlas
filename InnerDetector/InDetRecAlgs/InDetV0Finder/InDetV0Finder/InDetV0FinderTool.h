@@ -218,7 +218,7 @@ namespace InDet
                                                               "Lambda container name (same calling alg)" };
     Gaudi::Property<std::string>       m_lbKey { this, "LambdabarContainerName", "LambdabarCandidates", 
                                                               "Lambdabar container name (same calling alg)" };
-
+    Gaudi::Property<int>       m_maxPV { this, "MaxPV", 999999 };
   };
 
 }//end of namespace InDet
