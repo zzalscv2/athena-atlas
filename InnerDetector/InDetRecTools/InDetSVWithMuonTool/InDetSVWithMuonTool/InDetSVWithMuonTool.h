@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -106,15 +106,6 @@ namespace InDet {
       std::unique_ptr<Hists> m_h;
       Hists& getHists() const;
 
-      double m_w_1{};
-      long int m_iflag{};
-
-      SimpleProperty<int>    m_Robustness;
-      SimpleProperty<double> m_MassForConstraint;
-      std::vector<double>    m_MassInputParticles;
-
-
-
       long int m_CutSctHits{};
       long int m_CutPixelHits{};
       long int m_CutSiHits{};
@@ -144,15 +135,10 @@ namespace InDet {
       double m_Rlayer2{};
       double m_Rlayer3{};
 
-
       ToolHandle < Trk::IVertexFitter >       m_fitterSvc;
       Trk::TrkVKalVrtFitter*   m_fitSvc{};
  
-
-      double m_massPi {};
-      double m_massP {};
-      double m_massE{};
-      double m_massB{};
+      const double m_massPi = 139.5702;
 
 //
 //   Private technical functions

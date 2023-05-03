@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header include
@@ -17,9 +17,9 @@ namespace InDet{
 
 
   xAOD::Vertex* InDetSVWithMuonTool::MuonVrtSec(const std::vector<const xAOD::TrackParticle*>& InpTrk,
-                                            const xAOD::Vertex                           & PrimVrt,
-                                            const xAOD::TrackParticle                    * Muon,
-                                            std::vector<const xAOD::TrackParticle*>      & ListTracksNearMuon)
+						const xAOD::Vertex                           & PrimVrt,
+						const xAOD::TrackParticle                    * Muon,
+						std::vector<const xAOD::TrackParticle*>      & ListTracksNearMuon)
   const
   {
 
@@ -33,7 +33,7 @@ namespace InDet{
       TLorentzVector TrkJet = TotalMom(SelectedTracks);
       if(m_FillHist){
         Hists& h = getHists();
-        h.m_hb_nseltrk->Fill( (double)NTracks, m_w_1);
+        h.m_hb_nseltrk->Fill( (double)NTracks );
       }
       if( NTracks < 1 ) { return nullptr;}      // 0,1 selected track => nothing to do!
 
@@ -41,15 +41,11 @@ namespace InDet{
 
       if(m_FillHist){
         Hists& h = getHists();
-        h.m_hb_muonPt->Fill( Muon->pt(), m_w_1);
+        h.m_hb_muonPt->Fill( Muon->pt() );
       }
 
 //--------------------------------------------------------------------------------------------	 
 //                    Initial xAOD::TrackParticle list ready
-
-
-      std::vector<const xAOD::TrackParticle*>  TracksForFit;
-      std::vector<double> InpMass(NTracks,m_massPi);
 
       GetTrkWithMuonVrt(SelectedTracks, PrimVrt, Muon, ListTracksNearMuon);
       int nTracksNearMuon=ListTracksNearMuon.size();
@@ -94,9 +90,9 @@ namespace InDet{
 
      if(m_FillHist){
           Hists& h = getHists();
-          h.m_hb_r2dc->Fill( FitVertex.perp(), m_w_1);    
-          h.m_hb_totmass->Fill( Momentum.M(), m_w_1); 
-          h.m_hb_nvrt2->Fill( (double)nTracksNearMuon, m_w_1);
+          h.m_hb_r2dc->Fill( FitVertex.perp() );    
+          h.m_hb_totmass->Fill( Momentum.M() ); 
+          h.m_hb_nvrt2->Fill( (double)nTracksNearMuon );
       }
 
 //-------------------------------------------------------------------------------------
@@ -159,12 +155,12 @@ namespace InDet{
       long int           Charge;
       double             Chi2 = 0., FitProb=0.;
       Amg::Vector3D      tmpVertex;
-      std::vector<double> InpMass(NTracksVrt, m_massPi);
       std::vector<double> Chi2PerTrk(0);
 //
 // Initialisation of fit
 //
       std::unique_ptr<Trk::IVKalState> state = m_fitSvc->makeState();
+      std::vector<double> InpMass(NTracksVrt, m_massPi);
       m_fitSvc->setMassInputParticles( InpMass, *state );            // Use pions masses
       sc=VKalVrtFitFastBase(ListSecondTracks,FitVertex, *state);          /* Fast crude estimation */
       if(sc.isFailure() || FitVertex.perp() > m_Rlayer2*2. ) {    /* No initial estimation */ 
@@ -239,7 +235,6 @@ namespace InDet{
 //
       long int NTracks = (int) (SelectedTracks.size());
       std::vector<const xAOD::TrackParticle*>   TracksForFit(2,nullptr);
-      std::vector<double> InpMass(NTracks, m_massPi);
 
 //
 //  Impact parameters with sign calculations
@@ -248,19 +243,22 @@ namespace InDet{
       double SignifR,SignifZ;
       for (int i=0; i<NTracks; i++) {
          TrackSignif[i] = m_fitSvc->VKalGetImpact(SelectedTracks[i], PrimVrt.position(), 1, Impact, ImpactError);
-         if( sin(SelectedTracks[i]->phi() - Muon->phi())*Impact[0] < 0 )
-	                          { Impact[0] = -fabs(Impact[0]);}
-                              else{ Impact[0] =  fabs(Impact[0]);}
-         if(  (SelectedTracks[i]->p4().Theta() - Muon->p4().Theta())*Impact[1] < 0 )
-	                          { Impact[1] = -fabs(Impact[1]);}
-                              else{ Impact[1] =  fabs(Impact[1]);}
-         SignifR = Impact[0]/ sqrt(ImpactError[0]);
-         SignifZ = Impact[1]/ sqrt(ImpactError[2]);
+         if( sin(SelectedTracks[i]->phi() - Muon->phi())*Impact[0] < 0 ){
+           Impact[0] = -std::abs(Impact[0]);
+         }
+         else{ Impact[0] = std::abs(Impact[0]); }
+         if( (SelectedTracks[i]->p4().Theta() - Muon->p4().Theta())*Impact[1] < 0 ){
+           Impact[1] = -std::abs(Impact[1]);
+         }
+         else{ Impact[1] = std::abs(Impact[1]); }
+
+         SignifR = Impact[0]/ std::sqrt(ImpactError[0]);
+         SignifZ = Impact[1]/ std::sqrt(ImpactError[2]);
          if(m_FillHist){
             Hists& h = getHists();
-            h.m_hb_impactR->Fill( SignifR, m_w_1); 
-            h.m_hb_impactZ->Fill( SignifZ, m_w_1); 
-            h.m_hb_impact->Fill( TrackSignif[i], m_w_1);
+            h.m_hb_impactR->Fill( SignifR ); 
+            h.m_hb_impactZ->Fill( SignifZ ); 
+            h.m_hb_impact->Fill( TrackSignif[i] );
          }
       }
 
@@ -273,7 +271,6 @@ namespace InDet{
       for (int i=0; i<NTracks; i++) {
              if(TrackSignif[i] < m_TrkSigCut) continue;
              std::unique_ptr<Trk::IVKalState> state = m_fitSvc->makeState();
-             //m_fitSvc->setMassInputParticles( InpMass, *state );     // Use pion masses for fit
              TracksForFit[1]=SelectedTracks[i];
              sc=VKalVrtFitFastBase(TracksForFit,FitVertex,*state);              /* Fast crude estimation*/
              if( sc.isFailure() || FitVertex.perp() > m_Rlayer2*2. ) {   /* No initial estimation */ 
@@ -294,21 +291,19 @@ namespace InDet{
 	     if(mass_PiPi > 6000.)             continue;  // can't be from B decay
              if(m_FillHist){
                Hists& h = getHists();
-               h.m_hb_massPiPi->Fill( mass_PiPi, m_w_1);
+               h.m_hb_massPiPi->Fill( mass_PiPi );
              }
              Dist2D=FitVertex.perp(); 
 	     if(Dist2D    > 180. )             continue;  // can't be from B decay
              VrtVrtDist(PrimVrt, FitVertex, ErrorMatrix, Signif3D);
 //---
 	     vDist=FitVertex-PrimVrt.position();
-	     //coverity 118600 : The following assigned value is never used, before overwritten in next iteration
-       //MuonVrtDir = Muon->p4().Px()*vDist.x() + Muon->p4().Py()*vDist.y() + Muon->p4().Pz()*vDist.z();
 	     double vPos=(vDist.x()*Momentum.Px()+vDist.y()*Momentum.Py()+vDist.z()*Momentum.Pz())/Momentum.Rho();
 	     if(vPos<0.) continue;                                              /*  Vertex is too far behind primary one*/
              if(m_FillHist){
                 Hists& h = getHists();
-	        h.m_hb_r2d->Fill( Dist2D, m_w_1);
- 	        h.m_hb_signif3D->Fill( Signif3D, m_w_1);
+	        h.m_hb_r2d->Fill( Dist2D );
+ 	        h.m_hb_signif3D->Fill( Signif3D );
              }
 //
 //  Save track crossing muon
