@@ -102,7 +102,7 @@ namespace CP {
       - Etcone_value: value of uncorrected EtconeXX variable (ph_EtconeXX) *** in MeV!
       - isConversion: photons only: conversion flag (ph_isConv)
       - parttype: ELECTRON or PHOTON, enum defined below
-      - version: REL21, REL20_2, REL17_2, REL17 or REL16, enum defined below
+      - version: REL22, REL21, REL20_2, REL17_2, REL17 or REL16, enum defined below
     */
     float isolation_ptcorrection = 0;
     float energy = 0;
@@ -112,7 +112,7 @@ namespace CP {
       ATH_MSG_WARNING("The associated cluster of the object does not exist ! Maybe the thinning was too agressive... No leakage correction computed.");
       return 0.;
     }
-    if (m_tool_ver == REL21 || m_tool_ver == REL20_2)
+    if (m_tool_ver == REL22 || m_tool_ver == REL21 || m_tool_ver == REL20_2)
       energy = input.caloCluster()->energyBE(1) + input.caloCluster()->energyBE(2) + input.caloCluster()->energyBE(3);
     else
       energy = input.caloCluster()->e();
@@ -430,7 +430,7 @@ StatusCode IsolationCorrection::setupDD(const std::string& year) {
       set2011Corr(); // in fact, this is for etcone
       set2012Corr();
       setDDCorr();
-    } else if (m_tool_ver == REL20_2 || m_tool_ver == REL21)
+    } else if (m_tool_ver == REL20_2 || m_tool_ver == REL21 || m_tool_ver == REL22)
       set2015Corr();
   }
 
@@ -848,7 +848,7 @@ StatusCode IsolationCorrection::setupDD(const std::string& year) {
       FreeClear( m_graph_dd_cone40_photon_shift );
       FreeClear( m_graph_dd_cone40_photon_smearing );
 
-    } else if (m_tool_ver == REL20_2 || m_tool_ver == REL21) {
+    } else if (m_tool_ver == REL20_2 || m_tool_ver == REL21 || m_tool_ver == REL22) {
 
       //---- Rel 20_2 pT leakage correction file
 
@@ -1095,7 +1095,7 @@ StatusCode IsolationCorrection::setupDD(const std::string& year) {
     double correction_value = 0.;
     if (ver== REL17_2) {
       correction_value = GetPtCorrection_FromGraph(energy,etaS2,etaPointing,etaCluster,radius,isConversion,parttype);
-    } else if (m_tool_ver == REL20_2 || m_tool_ver == REL21){
+    } else if (m_tool_ver == REL20_2 || m_tool_ver == REL21 || m_tool_ver == REL22){
       correction_value = GetPtCorrection_FromGraph_2015(energy, etaS2, radius, convFlag_int, author, conv_radius, conv_ratio, parttype);
     }
 

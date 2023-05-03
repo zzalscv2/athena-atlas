@@ -30,7 +30,7 @@ class IsolationCorrection : public asg::AsgMessaging{
     StatusCode initialize();
 
     typedef enum { ELECTRON=0, PHOTON=1 } ParticleType;
-    typedef enum { REL17=1, REL17_2=2, REL20=6, REL20_2=7, REL21=8 } Version;
+    typedef enum { REL17_2=1, REL20_2=2, REL21=3, REL22=4 } Version;
 
     void SetCorrectionFile( const std::string& corr_file, const std::string& corr_ddshift_file, const std::string& corr_ddsmearing_file);
     void SetToolVer(CP::IsolationCorrection::Version);
