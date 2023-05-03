@@ -191,7 +191,13 @@ def TIDAMonitoring( flags=None, name=None, monlevel=None, mcTruth=False ) :
                               "HLT_tau.*idperf.*tracktwoMVA_.*:key=HLT_IDTrack_Tau_IDTrig:roi=HLT_Roi_TauIso",
                               "HLT_mu.*tau.*idperf.*:HLT_IDTrack_TauCore_FTF:roi=HLT_Roi_TauCore",
                               "HLT_mu.*tau.*idperf.*:HLT_IDTrack_TauIso_FTF:roi=HLT_Roi_TauIso",
-                              "HLT_mu.*tau.*idperf.*:HLT_IDTrack_Tau_IDTrig:roi=HLT_Roi_TauIso" ],  monlevel )
+                              "HLT_mu.*tau.*idperf.*:HLT_IDTrack_Tau_IDTrig:roi=HLT_Roi_TauIso",
+                              "HLT_mu.*tau.*idperf.*:HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon:extra=tau1_tag:te=0",
+                              "HLT_mu.*tau.*idperf.*:HLT_IDTrack_TauCore_FTF:roi=HLT_Roi_TauCore:extra=tau1_probe:te=1",
+                              "HLT_mu.*tau.*idperf.*:HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon:extra=tau0_tag:te=0",
+                              "HLT_mu.*tau.*idperf.*:HLT_IDTrack_TauIso_FTF:roi=HLT_Roi_TauIso:extra=tau0_probe:te=1",
+                              "HLT_mu.*tau.*idperf.*:HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon:extra=tau_tag:te=0",
+                              "HLT_mu.*tau.*idperf.*:HLT_IDTrack_Tau_IDTrig:roi=HLT_Roi_TauIso:extra=tau_probe:te=1" ],  monlevel )
 
         if len(chains)>0 : 
 
@@ -243,8 +249,9 @@ def TIDAMonitoring( flags=None, name=None, monlevel=None, mcTruth=False ) :
                             [ "HLT_j45_pf_ftf_preselj20_L1J15:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI:vtx=HLT_IDVertex_FS",
                               "HLT_j.*_ftf.*boffperf.*:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI:vtx=HLT_IDVertex_FS",
                               "HLT_j.*boffperf.*_ftf.*:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI:vtx=HLT_IDVertex_FS",
-                              "HLT_j.*.*boffperf.*:key=HLT_IDTrack_Bjet_FTF",
-                              "HLT_j.*.*boffperf.*:key=HLT_IDTrack_Bjet_IDTrig" ], monlevel )
+                              "HLT_j.*boffperf.*:key=HLT_IDTrack_JetSuper_FTF:HLT_Roi_JetSuper",
+                              "HLT_j.*boffperf.*:key=HLT_IDTrack_Bjet_FTF",
+                              "HLT_j.*boffperf.*:key=HLT_IDTrack_Bjet_IDTrig" ], monlevel )
 
         if len(chains)>0 : 
                         
