@@ -619,15 +619,6 @@ CONCURRENTRANGEMAP::trim (const std::vector<key_query_type>& keys,
 }
 
 
-// temporary --- remove this
-T_CONCURRENTRANGEMAP
-size_t
-CONCURRENTRANGEMAP::trim (const std::vector<key_query_type>& keys)
-{
-  return trim (keys, false);
-}
-
-
 /**
  * @brief Remove all entries in the container.
  *        Mostly for testing --- should not normally be used.
