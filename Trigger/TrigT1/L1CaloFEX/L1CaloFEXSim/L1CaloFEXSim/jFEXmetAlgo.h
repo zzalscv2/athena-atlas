@@ -71,7 +71,7 @@ protected:
         virtual void buildMetYComponent();      
         
         // To avoid using floats in the firmware.
-        static constexpr unsigned int m_firmware_scale = std::pow(2,9);  
+        static constexpr unsigned int m_firmware_scale = (1 << 9);
         
         std::unordered_map<int,std::vector<int> > m_map_Etvalues;
         
