@@ -7,9 +7,9 @@
 # art-include: master/Athena
 
 # Full chain with special flags
-# ATLAS-R3S-2021-03-01-00 and OFLCOND-MC21-SDR-RUN3-03
+# ATLAS-R3S-2021-03-01-00 and OFLCOND-MC21-SDR-RUN3-07
 Sim_tf.py --simulator 'FullG4MT'  \
---conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-03' \
+--conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
 --physicsList 'FTFP_BERT_ATL_VALIDATION' \
 --truthStrategy 'MC15aPlus' \
 --postInclude "all:PyJobTransforms/UseFrontier.py" "EVNTtoHITS:ISF_FastCaloSimParametrization/ISF_FastCaloSimParametrization_SimPostInclude_1mm.py" \
@@ -26,7 +26,7 @@ echo  "art-result: $? simulation"
 
 Reco_tf.py --inputHITSFile "Hits.pool.root" \
 --outputESDFile ESD.pool.root \
---conditionsTag "default:OFLCOND-MC21-SDR-RUN3-03" \
+--conditionsTag "default:OFLCOND-MC21-SDR-RUN3-07" \
 --geometryVersion 'default:ATLAS-R3S-2021-03-01-00' \
 --DataRunNumber='410000' \
 --postExec 'HITtoRDO:ToolSvc.LArPileUpTool.CrossTalk=False' 'all:CfgMgr.MessageSvc().setError+=["HepMcParticleLink"]' 'all:conddb.addOverride("/LAR/BadChannels/BadChannels", "LARBadChannelsBadChannels-MC-empty")' 'all:conddb.addOverride("/TILE/OFL02/STATUS/ADC", "TileOfl02StatusAdc-EmptyBCh")' 'RAWtoESD:StreamESD.ItemList+=["ISF_FCS_Parametrization::FCS_StepInfoCollection#MergedEventSteps","LArHitContainer#*","TileHitVector#*", "TrackRecordCollection#CaloEntryLayer", "TrackRecordCollection#MuonEntryLayer"]' \
